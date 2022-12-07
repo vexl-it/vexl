@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "strictNullChecks": true,
+    "paths": {
+      "testUtils": ["./src/testUtils"]
+    }
+  },
+  "extends": "expo/tsconfig.base"
+}

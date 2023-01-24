@@ -9,6 +9,7 @@ import StartScreen from './components/StartScreen'
 import I18nProvider from './utils/localization/I18nProvider'
 import ThemeProvider from './utils/ThemeProvider'
 import {useTheme} from '@emotion/react'
+import crypto from 'react-native-quick-crypto'
 
 void SplashScreen.preventAutoHideAsync()
 
@@ -23,9 +24,14 @@ function App(): JSX.Element {
       void SplashScreen.hideAsync()
     }
   }, [fontsLoaded])
+useEffect(() => {
+    const abc = crypto.createHash('sha1').update('abc').digest('hex')
+    console.log(abc)
+}, [])
 
   // Handled by splashscreen
   if (!fontsLoaded) return <></>
+
 
   return (
     <>

@@ -1,0 +1,18 @@
+{
+  "name": "@vexl-next/eslint-config",
+  "dependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.50.0",
+    "eslint-config-prettier": "^8.6.0",
+    "eslint-config-standard-with-typescript": "^34.0.0",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-n": "^15.6.1",
+    "eslint-plugin-promise": "^6.1.1",
+    "eslint-plugin-react": "^7.32.2"
+  },
+  "peerDependencies": {
+    "eslint": "^8.33.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.33.0"
+  }
+}

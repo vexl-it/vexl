@@ -1,0 +1,15 @@
+{
+  "name": "vexl-next",
+  "packageManager": "yarn@3.4.1",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "private": true,
+  "devDependencies": {
+    "@types/jest": "^29.4.0",
+    "@types/node": "^18.11.18",
+    "eslint": "^8.33.0",
+    "prettier": "^2.8.3"
+  }
+}

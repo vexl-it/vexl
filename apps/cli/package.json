@@ -1,0 +1,25 @@
+{
+  "name": "@vexl-next/vexl-cli",
+  "version": "0.0.1",
+  "description": "Vexl CLI",
+  "private": true,
+  "repository": "https://github.com/vexl-it/vexl-next/",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/cli.ts",
+    "dev": "ts-node ./src/cli.ts",
+    "test": "yarn jest",
+    "test:dev": "yarn jest --watch"
+  },
+  "devDependencies": {
+    "@vexl-next/ts-config": "workspace:*",
+    "ts-node": "^10.9.1"
+  },
+  "dependencies": {
+    "@vexl-next/cryptography": "workspace:*",
+    "axios": "^1.2.1",
+    "commander": "^9.4.1",
+    "dotenv": "^16.0.3",
+    "eckey-utils": "^0.7.13"
+  }
+}

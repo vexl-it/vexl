@@ -3,3 +3,15 @@
 
 # Intellij
 **/.idea
+
+# Yarn
+.yarn/*
+!.yarn/cache
+!.yarn/releases
+!.yarn/plugins
+!.yarn/sdks
+!.yarn/versions
+
+dist
+tsconfig.tsbuildinfo
+node_modules

@@ -1,3 +1,13 @@
+import type * as E from 'fp-ts/Either'
+
+export interface NoVersionInProvidedString {
+  _type: 'NoVersionInProvidedString'
+}
+
+export interface InvalidVersion {
+  type: 'InvalidVersion'
+}
+
 function getFormattedVersionNumber(version: number): string {
   let versionNumberString = (version - 1).toString(10)
   while (versionNumberString.length < 3) {

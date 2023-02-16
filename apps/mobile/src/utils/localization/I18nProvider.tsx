@@ -2,8 +2,9 @@ import React, {useMemo} from 'react'
 import type {I18n} from 'i18n-js'
 import i18n from './i18n'
 
+export type TFunction = I18n['t']
 interface TranslationContext {
-  t: I18n['t']
+  t: TFunction
 }
 
 const translationContext = React.createContext<TranslationContext>({

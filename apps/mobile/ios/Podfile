@@ -26,8 +26,8 @@ target 'vexlApp' do
 # @generated end expo-community-flipper-isprod
     :hermes_enabled => podfile_properties['expo.jsEngine'] == 'hermes',
     :fabric_enabled => flags[:fabric_enabled],
-# @generated begin expo-community-flipper-urn - expo prebuild (DO NOT MODIFY) sync-ef8b5f2619fdb57314e19a64e7d39f8d9646b0f6
-    :flipper_configuration => FlipperConfiguration.enabled,
+# @generated begin expo-community-flipper-urn - expo prebuild (DO NOT MODIFY) sync-c7cb57ad0548737963234cf3378d4b0e06dca78b
+    :flipper_configuration => FlipperConfiguration.enabled(["Debug", "Release"]),
 # @generated end expo-community-flipper-urn
     # An absolute path to your application root.
     :app_path => "#{Pod::Config.instance.installation_root}/..",

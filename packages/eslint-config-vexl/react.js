@@ -1,6 +1,11 @@
 module.exports = {
   root: true,
-  extends: ['plugin:react/recommended', 'standard-with-typescript', 'prettier', './index.js'],
+  extends: [
+    'plugin:react/recommended',
+    'standard-with-typescript',
+    'prettier',
+    './index.js',
+  ],
   plugins: ['react'],
   // 'overrides': [
   //   {
@@ -10,12 +15,13 @@ module.exports = {
   //     },
   //   },
   // ],
-  "settings": {
-    "react": {
-      "version": "detect"
-    }
+  'settings': {
+    'react': {
+      'version': 'detect',
+    },
   },
   rules: {
     'react/react-in-jsx-scope': 'off',
+    '@typescript-eslint/strict-boolean-expressions': 'off',
   },
 }

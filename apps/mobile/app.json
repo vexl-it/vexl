@@ -17,12 +17,13 @@
       "fallbackToCacheTimeout": 0,
       "url": "https://u.expo.dev/8a2b78bf-b758-42b9-947a-c6201cb7cc59"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "it.vexl.appstore"
+      "bundleIdentifier": "it.vexl.appstore",
+      "config": {
+        "usesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -44,7 +45,14 @@
       "policy": "sdkVersion"
     },
     "plugins": [
-      "expo-community-flipper"
+      "expo-community-flipper",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "The app accesses your photos to let you share them with your friends.",
+          "cameraPermission": "The app accesses your camera to let you take photos and videos."
+        }
+      ]
     ]
   }
 }

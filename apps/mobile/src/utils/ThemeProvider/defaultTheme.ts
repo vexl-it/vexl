@@ -19,6 +19,7 @@ export const theme = {
   text: {
     lightColorText: '#FFFFFF',
     darkColorText: '#000000',
+    grayOnBlack: '#AFAFAF',
   },
 }
 

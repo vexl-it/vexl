@@ -1,4 +1,4 @@
-package it.vexl.appstore.newarchitecture.modules;
+package it.vexl.stage.newarchitecture.modules;
 
 import com.facebook.jni.HybridData;
 import com.facebook.react.ReactPackage;

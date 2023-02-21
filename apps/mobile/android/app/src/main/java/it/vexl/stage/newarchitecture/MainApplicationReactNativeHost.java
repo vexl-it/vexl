@@ -1,4 +1,4 @@
-package it.vexl.appstore.newarchitecture;
+package it.vexl.stage.newarchitecture;
 
 import android.app.Application;
 import androidx.annotation.NonNull;
@@ -20,9 +20,9 @@ import com.facebook.react.fabric.EmptyReactNativeConfig;
 import com.facebook.react.fabric.FabricJSIModuleProvider;
 import com.facebook.react.fabric.ReactNativeConfig;
 import com.facebook.react.uimanager.ViewManagerRegistry;
-import it.vexl.appstore.BuildConfig;
-import it.vexl.appstore.newarchitecture.components.MainComponentsRegistry;
-import it.vexl.appstore.newarchitecture.modules.MainApplicationTurboModuleManagerDelegate;
+import it.vexl.stage.BuildConfig;
+import it.vexl.stage.newarchitecture.components.MainComponentsRegistry;
+import it.vexl.stage.newarchitecture.modules.MainApplicationTurboModuleManagerDelegate;
 import java.util.ArrayList;
 import java.util.List;
 

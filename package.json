@@ -6,8 +6,9 @@
     "apps/*"
   ],
   "scripts": {
-    "root:build": "turbo build",
-    "root:clean": "turbo clean"
+    "turbo:build": "turbo build",
+    "turbo:clean": "turbo clean",
+    "turbo:dev-packages": "turbo build-watch"
   },
   "private": true,
   "devDependencies": {

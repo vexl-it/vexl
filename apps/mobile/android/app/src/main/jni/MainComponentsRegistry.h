@@ -13,7 +13,7 @@ class MainComponentsRegistry
  public:
   // Adapt it to the package you used for your Java class.
   constexpr static auto kJavaDescriptor =
-      "Lit/vexl/appstore/newarchitecture/components/MainComponentsRegistry;";
+      "Lit/vexl/stage/newarchitecture/components/MainComponentsRegistry;";
 
   static void registerNatives();
 

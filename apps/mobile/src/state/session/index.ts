@@ -75,6 +75,8 @@ const sessionAtom: WritableAtom<
     }
 
     console.info('🔑 Logging in user')
+    // TODO we should show UI indication that we are saving the session and also show error if it fails
+
     set(sessionHolderAtom, {state: 'loggedIn', session: nextValue.value})
     void pipe(
       writeSessionToStorage(nextValue.value, {

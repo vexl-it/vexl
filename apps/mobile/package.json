@@ -10,7 +10,7 @@
     "web": "expo start --web",
     "test": "yarn test",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
-    "eas-build-post-install": "yarn root:build"
+    "eas-build-post-install": "yarn turbo:build"
   },
   "dependencies": {
     "@emotion/native": "^11.10.0",

@@ -25,7 +25,7 @@
       <dict>
         <key>CFBundleURLSchemes</key>
         <array>
-          <string>it.vexl.appstore</string>
+          <string>it.vexl.stage</string>
         </array>
       </dict>
       <dict>

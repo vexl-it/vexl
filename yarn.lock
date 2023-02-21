@@ -4157,20 +4157,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@vexl-next/vexl-cli@workspace:apps/cli":
-  version: 0.0.0-use.local
-  resolution: "@vexl-next/vexl-cli@workspace:apps/cli"
-  dependencies:
-    "@vexl-next/cryptography": "workspace:*"
-    "@vexl-next/ts-config": "workspace:*"
-    axios: ^1.2.1
-    commander: ^9.4.1
-    dotenv: ^16.0.3
-    eckey-utils: ^0.7.13
-    ts-node: ^10.9.1
-  languageName: unknown
-  linkType: soft
-
 "@xmldom/xmldom@npm:~0.7.0, @xmldom/xmldom@npm:~0.7.7":
   version: 0.7.9
   resolution: "@xmldom/xmldom@npm:0.7.9"
@@ -4701,17 +4687,6 @@ __metadata:
   version: 5.1.0
   resolution: "awesome-phonenumber@npm:5.1.0"
   checksum: 2372d74c9c91393e16f3c933ea5414e6910963a920cbb381a65637e860af0923473534f98d4f7645d1f0916116c23e62fc7afa0e1a2c32f4fa64bb36364f72bb
-  languageName: node
-  linkType: hard
-
-"axios@npm:^1.2.1":
-  version: 1.2.6
-  resolution: "axios@npm:1.2.6"
-  dependencies:
-    follow-redirects: ^1.15.0
-    form-data: ^4.0.0
-    proxy-from-env: ^1.1.0
-  checksum: cbd19be3e07d2fbb6a0b126e49880cecdd44c1f68496ae0e7d21e7dc1c31fd59703a8eec51c9fd69034344f519cc1cdc22c22153131063657c4cef50195f0c00
   languageName: node
   linkType: hard
 
@@ -5809,7 +5784,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"commander@npm:^9.4.0, commander@npm:^9.4.1":
+"commander@npm:^9.4.0":
   version: 9.5.0
   resolution: "commander@npm:9.5.0"
   checksum: c7a3e27aa59e913b54a1bafd366b88650bc41d6651f0cbe258d4ff09d43d6a7394232a4dadd0bf518b3e696fdf595db1028a0d82c785b88bd61f8a440cecfade
@@ -6568,7 +6543,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dotenv@npm:16.0.3, dotenv@npm:^16.0.3":
+"dotenv@npm:16.0.3":
   version: 16.0.3
   resolution: "dotenv@npm:16.0.3"
   checksum: afcf03f373d7a6d62c7e9afea6328e62851d627a4e73f2e12d0a8deae1cd375892004f3021883f8aec85932cd2834b091f568ced92b4774625b321db83b827f8
@@ -6655,13 +6630,6 @@ __metadata:
   bin:
     eas: bin/run
   checksum: e0c0fb1db2aa5bb56315d13c13ce9a49256a90ed4abe541449e74c7665b8f9b5502d50e016f5bbebedafd2bc397f099e5853a14ce773ac35d0ae136b9a801ac1
-  languageName: node
-  linkType: hard
-
-"eckey-utils@npm:^0.7.13":
-  version: 0.7.13
-  resolution: "eckey-utils@npm:0.7.13"
-  checksum: b231e44e9dfb6d8b03a28fe47bc9856f7098f7d6804ec74e32e7ea38acbc86238e8d6dc1a66bfdb1b32affee9054d1f81178248324d217397f42ca3e19b41c7a
   languageName: node
   linkType: hard
 
@@ -8048,16 +8016,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"follow-redirects@npm:^1.15.0":
-  version: 1.15.2
-  resolution: "follow-redirects@npm:1.15.2"
-  peerDependenciesMeta:
-    debug:
-      optional: true
-  checksum: faa66059b66358ba65c234c2f2a37fcec029dc22775f35d9ad6abac56003268baf41e55f9ee645957b32c7d9f62baf1f0b906e68267276f54ec4b4c597c2b190
-  languageName: node
-  linkType: hard
-
 "fontfaceobserver@npm:^2.1.0":
   version: 2.3.0
   resolution: "fontfaceobserver@npm:2.3.0"
@@ -8081,7 +8039,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"form-data@npm:4.0.0, form-data@npm:^4.0.0":
+"form-data@npm:4.0.0":
   version: 4.0.0
   resolution: "form-data@npm:4.0.0"
   dependencies:
@@ -13090,13 +13048,6 @@ __metadata:
     object-assign: ^4.1.1
     react-is: ^16.13.1
   checksum: c056d3f1c057cb7ff8344c645450e14f088a915d078dcda795041765047fa080d38e5d626560ccaac94a4e16e3aa15f3557c1a9a8d1174530955e992c675e459
-  languageName: node
-  linkType: hard
-
-"proxy-from-env@npm:^1.1.0":
-  version: 1.1.0
-  resolution: "proxy-from-env@npm:1.1.0"
-  checksum: ed7fcc2ba0a33404958e34d95d18638249a68c430e30fcb6c478497d72739ba64ce9810a24f53a7d921d0c065e5b78e3822759800698167256b04659366ca4d4
   languageName: node
   linkType: hard
 

@@ -10,7 +10,7 @@ import * as TE from 'fp-ts/TaskEither'
 import {useUserPublicApi} from '../../../api'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 
-export function useVerifyPhoneNumberAndCreateUser(): (
+export function useVerifyPhoneNumber(): (
   r: VerifyPhoneNumberRequest
 ) => TaskEither<string, VerifyPhoneNumberResponse> {
   const publicUser = useUserPublicApi()

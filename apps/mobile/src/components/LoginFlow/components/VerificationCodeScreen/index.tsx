@@ -10,7 +10,7 @@ import {useState} from 'react'
 import * as crypto from '@vexl-next/cryptography'
 import {
   useVerifyChallenge,
-  useVerifyPhoneNumberAndCreateUser,
+  useVerifyPhoneNumber,
 } from '../../api/verifyPhoneNumberAndCreateUser'
 import {pipe} from 'fp-ts/function'
 import * as TE from 'fp-ts/TaskEither'
@@ -59,7 +59,7 @@ function VerificationCodeScreen({
 }: Props): JSX.Element {
   const [userCode, setUserCode] = useState('')
   const [countdownFinished, setCountdownFinished] = useState(false)
-  const verifyPhoneNumber = useVerifyPhoneNumberAndCreateUser()
+  const verifyPhoneNumber = useVerifyPhoneNumber()
   const verifyChallenge = useVerifyChallenge()
   const {t} = useTranslation()
 

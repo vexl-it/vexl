@@ -15,7 +15,12 @@
       }
     },
     "preview": {
-      "distribution": "internal"
+      "distribution": "internal",
+      "developmentClient": false,
+      "android": {
+        "buildType": "apk",
+        "gradleCommand": ":app:assembleRelease"
+      }
     },
     "production": {}
   },

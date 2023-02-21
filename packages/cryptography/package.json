@@ -6,7 +6,8 @@
   "scripts": {
     "test": "yarn jest",
     "test:watch": "yarn jest --watch",
-    "build": "yarn tsc"
+    "build": "yarn tsc",
+    "clean": "rm -rf dist tsconfig.tsbuildinfo"
   },
   "dependencies": {
     "@craftzdog/react-native-buffer": "^6.0.5",

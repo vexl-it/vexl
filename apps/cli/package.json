@@ -5,7 +5,7 @@
   "private": true,
   "repository": "https://github.com/vexl-it/vexl-next/",
   "scripts": {
-    "build": "tsc",
+    "-:build": "tsc",
     "start": "node dist/cli.ts",
     "dev": "ts-node ./src/cli.ts",
     "test": "yarn jest",

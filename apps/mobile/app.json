@@ -11,7 +11,7 @@
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#FCCD6C"
     },
     "updates": {
       "fallbackToCacheTimeout": 0,
@@ -20,7 +20,7 @@
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "it.vexl.appstore",
+      "bundleIdentifier": "it.vexl.stage",
       "config": {
         "usesNonExemptEncryption": false
       }
@@ -31,7 +31,7 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
       },
-      "package": "it.vexl.appstore"
+      "package": "it.vexl.stage"
     },
     "web": {
       "favicon": "./assets/favicon.png"

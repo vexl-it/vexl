@@ -49,7 +49,7 @@ export default function readSessionFromStorage({
   | ParsingPrivateKeyError
   | JsonParseError
   | ZodParseError<Session>,
-  any
+  Session
 > {
   return pipe(
     getItemFromAsyncStorage(asyncStorageKey),

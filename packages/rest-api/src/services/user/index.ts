@@ -57,7 +57,6 @@ export function publicApi({
         ),
         TE.mapLeft((e) => {
           if (e._tag === 'BadStatusCodeError') {
-            // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
             if (e.response.data.code === '100110')
               return {_tag: 'InvalidPhoneNumber'} as InvalidPhoneNumber
             if (e.response.data.code === '100111')

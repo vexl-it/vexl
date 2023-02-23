@@ -1,7 +1,7 @@
 {
   "expo": {
-    "entryPoint": "src/main.tsx",
-    "name": "vexlApp",
+    "entryPoint": "src/main.ts",
+    "name": "Vexl (next)",
     "slug": "vexl",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -20,7 +20,7 @@
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "it.vexl.stage",
+      "bundleIdentifier": "it.vexl.next",
       "config": {
         "usesNonExemptEncryption": false
       }
@@ -31,7 +31,7 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
       },
-      "package": "it.vexl.stage"
+      "package": "it.vexl.next"
     },
     "web": {
       "favicon": "./assets/favicon.png"

@@ -3,13 +3,17 @@ import WhiteContainer from '../../../WhiteContainer'
 import styled from '@emotion/native'
 import AnonymizationCaption from '../AnonymizationCaption'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
-import * as E from 'fp-ts/Either'
+import * as TE from 'fp-ts/TaskEither'
 import * as O from 'fp-ts/Option'
 import {type NativeStackScreenProps} from '@react-navigation/native-stack'
 import {type LoginStackParamsList} from '../../index'
 import {useCallback, useState} from 'react'
 import {Alert, View} from 'react-native'
-import {getImageFromCamera, getImageFromGallery} from './utils'
+import {
+  getImageFromCameraAndTryToResolveThePermissionsAlongTheWay,
+  getImageFromGalleryAndTryToResolveThePermissionsAlongTheWay,
+  type ImagePickerError,
+} from './utils'
 import {pipe} from 'fp-ts/function'
 import {type UriString} from '@vexl-next/domain/dist/utility/UriString.brand'
 import Image from '../../../Image'
@@ -19,6 +23,12 @@ import {UserNameAndAvatar} from '@vexl-next/domain/dist/general/UserNameAndAvata
 import {fromImageUri} from '@vexl-next/domain/dist/utility/SvgStringOrImageUri.brand'
 import NextButtonPortal from '../NextButtonPortal'
 import {useSetHeaderState} from '../../state/headerStateAtom'
+import {
+  copyFileLocalDirectoryAndKeepName,
+  type FileSystemError,
+} from '../../../../utils/internalStorage'
+import {PathString} from '@vexl-next/domain/dist/utility/PathString.brand'
+import reportError from '../../../../utils/reportError'
 
 const WhiteContainerStyled = styled(WhiteContainer)``
 const AnonymizationCaptionStyled = styled(AnonymizationCaption)`
@@ -73,18 +83,18 @@ function PhotoScreen({
     O.none
   )
 
-  const translateErrors = useCallback(
-    (
-      errorType: 'PermissionsNotGranted' | 'UnknownError' | 'NothingSelected'
-    ): string => {
-      switch (errorType) {
-        case 'PermissionsNotGranted':
-          return t('loginFlow.photo.permissionsNotGranted')
-        case 'NothingSelected':
-          return t('loginFlow.photo.nothingSelected')
-        case 'UnknownError':
-          return t('common.unknownError')
+  const reportAndTranslateErrors = useCallback(
+    (error: FileSystemError | ImagePickerError): string => {
+      if (error._tag === 'imagePickerError') {
+        switch (error.reason) {
+          case 'PermissionsNotGranted':
+            return t('loginFlow.photo.permissionsNotGranted')
+          case 'NothingSelected':
+            return t('loginFlow.photo.nothingSelected')
+        }
       }
+      reportError('error', 'Unexpected error while picking image', error)
+      return t('common.unknownError') // how is it that linter needs this line
     },
     [t]
   )
@@ -94,29 +104,37 @@ function PhotoScreen({
       {
         text: t('loginFlow.photo.gallery'),
         onPress: () => {
-          void getImageFromGallery().then((result) => {
-            pipe(
-              result,
-              E.mapLeft(translateErrors),
-              E.fold(Alert.alert, (r) => {
-                setSelectedImageUri(O.some(r))
+          void pipe(
+            getImageFromGalleryAndTryToResolveThePermissionsAlongTheWay(),
+            TE.chainW((imageUri) =>
+              copyFileLocalDirectoryAndKeepName({
+                sourceUri: imageUri,
+                targetFolder: PathString.parse('/'),
               })
-            )
-          })
+            ),
+            TE.mapLeft(reportAndTranslateErrors),
+            TE.match(Alert.alert, (r) => {
+              setSelectedImageUri(O.some(r))
+            })
+          )()
         },
       },
       {
         text: t('loginFlow.photo.camera'),
         onPress: () => {
-          void getImageFromCamera().then((result) => {
-            pipe(
-              result,
-              E.mapLeft(translateErrors),
-              E.fold(Alert.alert, (v) => {
-                setSelectedImageUri(O.some(v))
+          void pipe(
+            getImageFromCameraAndTryToResolveThePermissionsAlongTheWay(),
+            TE.chainW((imageUri) =>
+              copyFileLocalDirectoryAndKeepName({
+                sourceUri: imageUri,
+                targetFolder: PathString.parse('/'),
               })
-            )
-          })
+            ),
+            TE.mapLeft(reportAndTranslateErrors),
+            TE.match(Alert.alert, (r) => {
+              setSelectedImageUri(O.some(r))
+            })
+          )()
         },
       },
       {

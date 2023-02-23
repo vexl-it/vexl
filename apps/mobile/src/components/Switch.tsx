@@ -10,7 +10,8 @@ export default function Switch(props: Props): JSX.Element {
   const theme = useTheme()
   return (
     <SwitchStyled
-      trackColor={{false: theme.colors.grey, true: theme.colors.main}}
+      trackColor={{false: '#262626', true: theme.colors.main}}
+      thumbColor={theme.colors.white}
       {...props}
     />
   )

@@ -2,6 +2,7 @@ module.exports = {
   root: true,
   extends: [
     'plugin:react/recommended',
+    'plugin:react-hooks/recommended',
     'standard-with-typescript',
     'prettier',
     './index.js',
@@ -21,6 +22,7 @@ module.exports = {
     },
   },
   rules: {
+    'react-hooks/exhaustive-deps': 'error',
     'react/react-in-jsx-scope': 'off',
     '@typescript-eslint/strict-boolean-expressions': 'off',
   },

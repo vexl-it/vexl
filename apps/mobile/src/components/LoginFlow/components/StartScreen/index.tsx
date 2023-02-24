@@ -9,7 +9,7 @@ import WhiteContainer from '../../../WhiteContainer'
 import Image from '../../../Image'
 import bigNameSvg from './images/bigNameSvg'
 import notepadSvg from './images/notepadSvg'
-import {useState} from 'react'
+import {useCallback, useState} from 'react'
 import NextButtonPortal from '../NextButtonPortal'
 import {useSetHeaderState} from '../../state/headerStateAtom'
 
@@ -62,7 +62,9 @@ function StartScreen({navigation}: Props): JSX.Element {
 
   const {t} = useTranslation()
 
-  useSetHeaderState(() => ({progressNumber: 1, showBackButton: true}), [])
+  useSetHeaderState(
+    useCallback(() => ({progressNumber: 1, showBackButton: true}), [])
+  )
 
   return (
     <RootContainer>

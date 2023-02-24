@@ -1,6 +1,6 @@
 import {atom, type ExtractAtomValue} from 'jotai'
 import {useSetAtom} from 'jotai'
-import {type DependencyList, useCallback} from 'react'
+import {useCallback} from 'react'
 import {useFocusEffect} from '@react-navigation/native'
 
 const headerStateAtom = atom<{
@@ -14,13 +14,12 @@ const headerStateAtom = atom<{
 export default headerStateAtom
 
 export function useSetHeaderState(
-  getState: () => ExtractAtomValue<typeof headerStateAtom>,
-  deps: DependencyList
+  getState: () => ExtractAtomValue<typeof headerStateAtom>
 ): void {
   const setHeaderState = useSetAtom(headerStateAtom)
   useFocusEffect(
     useCallback(() => {
       setHeaderState(getState())
-    }, deps)
+    }, [setHeaderState, getState])
   )
 }

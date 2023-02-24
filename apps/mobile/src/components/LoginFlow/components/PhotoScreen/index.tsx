@@ -73,11 +73,13 @@ function PhotoScreen({
 }: Props): JSX.Element {
   const {t} = useTranslation()
   useSetHeaderState(
-    () => ({
-      showBackButton: true,
-      progressNumber: 1,
-    }),
-    []
+    useCallback(
+      () => ({
+        showBackButton: true,
+        progressNumber: 1,
+      }),
+      []
+    )
   )
   const [selectedImageUri, setSelectedImageUri] = useState<O.Option<UriString>>(
     O.none
@@ -141,7 +143,7 @@ function PhotoScreen({
         text: t('common.cancel'),
       },
     ])
-  }, [t, setSelectedImageUri])
+  }, [t, reportAndTranslateErrors])
 
   return (
     <>

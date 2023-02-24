@@ -6,7 +6,7 @@ import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import AnonymizationCaption from '../AnonymizationCaption'
 import {type NativeStackScreenProps} from '@react-navigation/native-stack'
 import {type LoginStackParamsList} from '../../index'
-import {useState} from 'react'
+import {useCallback, useState} from 'react'
 import {UserName} from '@vexl-next/domain/dist/general/UserName.brand'
 import {Alert} from 'react-native'
 import NextButtonPortal from '../NextButtonPortal'
@@ -32,11 +32,13 @@ function NameScreen({navigation}: Props): JSX.Element {
   const [value, setValue] = useState('')
 
   useSetHeaderState(
-    () => ({
-      showBackButton: true,
-      progressNumber: 1,
-    }),
-    []
+    useCallback(
+      () => ({
+        showBackButton: true,
+        progressNumber: 1,
+      }),
+      []
+    )
   )
 
   return (

@@ -6,7 +6,7 @@ import WhiteContainer from '../../../WhiteContainer'
 import TextInput from '../../../Input'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import {parsePhoneNumber} from 'awesome-phonenumber'
-import {useState} from 'react'
+import {useCallback, useState} from 'react'
 import * as crypto from '@vexl-next/cryptography'
 import {useVerifyPhoneNumber} from '../../api/verifyPhoneNumber'
 import {pipe} from 'fp-ts/function'
@@ -61,11 +61,13 @@ function VerificationCodeScreen({
   const loadingOverlay = useShowLoadingOverlay()
 
   useSetHeaderState(
-    () => ({
-      showBackButton: true,
-      progressNumber: 2,
-    }),
-    []
+    useCallback(
+      () => ({
+        showBackButton: true,
+        progressNumber: 2,
+      }),
+      []
+    )
   )
 
   return (

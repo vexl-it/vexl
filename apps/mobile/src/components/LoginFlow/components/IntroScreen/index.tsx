@@ -1,7 +1,7 @@
 import ProgressJourney from '../../../ProgressJourney'
 import Text from '../../../Text'
 import styled from '@emotion/native'
-import {useState} from 'react'
+import {useCallback, useState} from 'react'
 import useContent from './useContent'
 import {type LoginStackParamsList} from '../../index'
 import {type NativeStackScreenProps} from '@react-navigation/native-stack'
@@ -33,7 +33,7 @@ type Props = NativeStackScreenProps<LoginStackParamsList, 'Intro'>
 function Intro({navigation}: Props): JSX.Element {
   const [page, setPage] = useState(0)
   const content = useContent()
-  useSetHeaderState(() => null, [])
+  useSetHeaderState(useCallback(() => null, []))
   return (
     <RootContainer>
       <ProgressJourney

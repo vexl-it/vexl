@@ -8,6 +8,7 @@ import illustrationSvg from './images/illustrationSvg'
 import Image from '../../../Image'
 import NextButtonPortal from '../NextButtonPortal'
 import {useSetHeaderState} from '../../state/headerStateAtom'
+import {useCallback} from 'react'
 
 const ImageStyled = styled(Image)`
   height: 100%;
@@ -28,7 +29,9 @@ type Props = NativeStackScreenProps<LoginStackParamsList, 'AnonymizationNotice'>
 function AnonymizationNoticeScreen({navigation}: Props): JSX.Element {
   const {t} = useTranslation()
 
-  useSetHeaderState(() => ({progressNumber: 1, showBackButton: true}), [])
+  useSetHeaderState(
+    useCallback(() => ({progressNumber: 1, showBackButton: true}), [])
+  )
 
   return (
     <>

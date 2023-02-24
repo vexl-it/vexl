@@ -4,7 +4,7 @@ import styled from '@emotion/native'
 import UserDataDisplay from './components/UserDataDisplay'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import AnonymizationCaption from '../AnonymizationCaption'
-import {useMemo, useState} from 'react'
+import {useCallback, useMemo, useState} from 'react'
 import randomNumber from '../../../../utils/randomNumber'
 import randomName from '../../../../utils/randomName'
 import {animated, useTransition} from '@react-spring/native'
@@ -47,11 +47,13 @@ function AnonymizationAnimationScreen({
   const [anonymized, setAnonymized] = useState(false)
 
   useSetHeaderState(
-    () => ({
-      showBackButton: true,
-      progressNumber: 1,
-    }),
-    []
+    useCallback(
+      () => ({
+        showBackButton: true,
+        progressNumber: 1,
+      }),
+      []
+    )
   )
 
   const anonymizedUserData = useMemo<UserNameAndAvatar>(

@@ -1,4 +1,5 @@
 import {useSetNextButton} from '../state/nextButtonAtom'
+import {useCallback} from 'react'
 
 interface Props {
   text: string | null
@@ -8,11 +9,13 @@ interface Props {
 
 function NextButtonPortal(props: Props): null {
   useSetNextButton(
-    () => ({
-      text: props.text ?? undefined,
-      onPress: !props.disabled ? props.onPress : undefined,
-    }),
-    [props]
+    useCallback(
+      () => ({
+        text: props.text ?? undefined,
+        onPress: !props.disabled ? props.onPress : undefined,
+      }),
+      [props]
+    )
   )
   return null
 }

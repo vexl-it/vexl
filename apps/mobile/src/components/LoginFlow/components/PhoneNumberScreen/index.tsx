@@ -12,7 +12,7 @@ import * as E from 'fp-ts/Either'
 import {Alert} from 'react-native'
 import {useShowLoadingOverlay} from '../../../LoadingOverlayProvider'
 import {useInitPhoneVerification} from '../../api/initPhoneVerification'
-import {useState} from 'react'
+import {useCallback, useState} from 'react'
 import NextButtonPortal from '../NextButtonPortal'
 import {useSetHeaderState} from '../../state/headerStateAtom'
 
@@ -43,11 +43,13 @@ function PhoneNumberScreen({
   const loadingOverlay = useShowLoadingOverlay()
   const initPhoneVerification = useInitPhoneVerification()
   useSetHeaderState(
-    () => ({
-      showBackButton: true,
-      progressNumber: 2,
-    }),
-    []
+    useCallback(
+      () => ({
+        showBackButton: true,
+        progressNumber: 2,
+      }),
+      []
+    )
   )
 
   return (

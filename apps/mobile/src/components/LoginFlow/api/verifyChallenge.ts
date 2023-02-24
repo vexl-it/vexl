@@ -1,45 +1,13 @@
-import {type TaskEither} from 'fp-ts/TaskEither'
 import {
   type VerifyChallengeRequest,
   type VerifyChallengeResponse,
-  type VerifyPhoneNumberRequest,
-  type VerifyPhoneNumberResponse,
 } from '@vexl-next/rest-api/dist/services/user/contracts'
-import {pipe} from 'fp-ts/function'
-import * as TE from 'fp-ts/TaskEither'
+import {type TaskEither} from 'fp-ts/TaskEither'
 import {useUserPublicApi} from '../../../api'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
-
-export function useVerifyPhoneNumber(): (
-  r: VerifyPhoneNumberRequest
-) => TaskEither<string, VerifyPhoneNumberResponse> {
-  const publicUser = useUserPublicApi()
-  const {t} = useTranslation()
-
-  return (r) =>
-    pipe(
-      publicUser.verifyPhoneNumber(r),
-      TE.mapLeft((l) => {
-        switch (l._tag) {
-          case 'VerificationNotFound':
-            return t('loginFlow.verificationCode.errors.verificationNotFound')
-          case 'UserAlreadyExists':
-            return t('loginFlow.verificationCode.errors.userAlreadyExists')
-          case 'ChallengeCouldNotBeGenerated':
-            return t(
-              'loginFlow.verificationCode.errors.challengeCouldNotBeGenerated'
-            )
-          case 'UnexpectedApiResponseError':
-            // TODO sentry
-            return t('common.unexpectedServerResponse')
-          case 'UnknownError':
-          case 'BadStatusCodeError':
-            // TODO sentry
-            return t('common.unknownError')
-        }
-      })
-    )
-}
+import {pipe} from 'fp-ts/function'
+import * as TE from 'fp-ts/TaskEither'
+import reportError from '../../../utils/reportError'
 
 export function useVerifyChallenge(): (
   r: VerifyChallengeRequest
@@ -61,16 +29,24 @@ export function useVerifyChallenge(): (
               'loginFlow.verificationCode.errors.challengeCouldNotBeGenerated'
             )
           case 'PublicKeyOrHashInvalid':
-            // todo sentry
+            reportError(
+              'error',
+              'Public key or hash invalid while verifying challenge',
+              l
+            )
             return t(
               'loginFlow.verificationCode.errors.challengeCouldNotBeGenerated'
             )
           case 'UnexpectedApiResponseError':
-            // TODO sentry
+            reportError(
+              'error',
+              'Unexpected api response while verifying challenge',
+              l
+            )
             return t('common.unexpectedServerResponse')
           case 'UnknownError':
           case 'BadStatusCodeError':
-            // TODO sentry
+            reportError('error', 'Bad status code while verifying challenge', l)
             return t('common.unknownError')
         }
       })

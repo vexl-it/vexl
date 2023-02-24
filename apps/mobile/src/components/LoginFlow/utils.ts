@@ -1,4 +1,5 @@
 import {KeyFormat, PrivateKey} from '@vexl-next/cryptography'
+import * as E from 'fp-ts/Either'
 import {z} from 'zod'
 
 const SerializedPrivateKey = z.string().brand<'SerializedPrivateKey'>()
@@ -9,8 +10,15 @@ export function serializePrivateKey(
   return SerializedPrivateKey.parse(privateKey.exportPrivateKey(KeyFormat.RAW))
 }
 
+export interface PrivateKeyDeserializationError {
+  _tag: 'PrivateKeyDeserializationError'
+  error: unknown
+}
 export function deserializePrivateKey(
   privateKey: SerializedPrivateKey
-): PrivateKey {
-  return PrivateKey.import({key: privateKey, type: KeyFormat.RAW})
+): E.Either<PrivateKeyDeserializationError, PrivateKey> {
+  return E.tryCatch(
+    () => PrivateKey.import({key: privateKey, type: KeyFormat.RAW}),
+    (e) => ({_tag: 'PrivateKeyDeserializationError', error: e})
+  )
 }

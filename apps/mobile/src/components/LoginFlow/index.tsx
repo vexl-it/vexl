@@ -13,7 +13,10 @@ import {
   StatusBar as RNStatusBar,
   View,
 } from 'react-native'
-import {type InitPhoneNumberVerificationResponse} from '@vexl-next/rest-api/dist/services/user/contracts'
+import {
+  type InitPhoneNumberVerificationResponse,
+  type VerifyPhoneNumberResponse,
+} from '@vexl-next/rest-api/dist/services/user/contracts'
 import {type E164PhoneNumber} from '@vexl-next/domain/dist/general/E164PhoneNumber.brand'
 import VerificationCodeScreen from './components/VerificationCodeScreen'
 import SuccessLoginScreen from './components/SuccessLoginScreen'
@@ -55,11 +58,8 @@ export type LoginStackParamsList = {
   Photo: {userName: UserName}
   Start: undefined
   SuccessLogin: {
-    readonly sessionCredentials: {
-      hash: string
-      signature: string
-      privateKey: SerializedPrivateKey
-    }
+    readonly verifyPhoneNumberResponse: VerifyPhoneNumberResponse
+    readonly privateKey: SerializedPrivateKey
     readonly realUserData: UserNameAndAvatar
     readonly anonymizedUserData: UserNameAndAvatar
     readonly phoneNumber: E164PhoneNumber

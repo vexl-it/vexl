@@ -7,6 +7,7 @@ import {useUserPublicApi} from '../../../api'
 import * as TE from 'fp-ts/TaskEither'
 import {type TaskEither} from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
+import reportError from '../../../utils/reportError'
 
 export function useInitPhoneVerification(): (
   request: InitPhoneNumberVerificationRequest
@@ -24,11 +25,19 @@ export function useInitPhoneVerification(): (
           case 'PreviousCodeNotExpired':
             return t('loginFlow.phoneNumber.errors.previousCodeNotExpired')
           case 'UnexpectedApiResponseError':
-            // TODO sentry
+            reportError(
+              'error',
+              'Unexpected api response while initializing phone verification',
+              l
+            )
             return t('common.unexpectedServerResponse')
           case 'UnknownError':
           case 'BadStatusCodeError':
-            // TODO sentry
+            reportError(
+              'error',
+              'Bad status code error while initializing phone verification',
+              l
+            )
             return t('common.unknownError')
         }
       })

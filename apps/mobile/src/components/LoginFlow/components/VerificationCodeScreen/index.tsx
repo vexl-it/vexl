@@ -8,21 +8,18 @@ import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import {parsePhoneNumber} from 'awesome-phonenumber'
 import {useState} from 'react'
 import * as crypto from '@vexl-next/cryptography'
-import {
-  useVerifyChallenge,
-  useVerifyPhoneNumber,
-} from '../../api/verifyPhoneNumberAndCreateUser'
+import {useVerifyPhoneNumber} from '../../api/verifyPhoneNumber'
 import {pipe} from 'fp-ts/function'
 import * as TE from 'fp-ts/TaskEither'
 import * as E from 'fp-ts/Either'
 import reportError from '../../../../utils/reportError'
-import {SessionCredentials} from '../../../../brands/SessionCredentials.brand'
 import {Alert, TouchableWithoutFeedback} from 'react-native'
 import {serializePrivateKey} from '../../utils'
 import NextButtonPortal from '../NextButtonPortal'
 import {useSetHeaderState} from '../../state/headerStateAtom'
 import Countdown from './components/Countdown'
 import {DateTime} from 'luxon'
+import {useShowLoadingOverlay} from '../../../LoadingOverlayProvider'
 
 const WhiteContainerStyled = styled(WhiteContainer)``
 const Title = styled(TitleText)`
@@ -60,8 +57,8 @@ function VerificationCodeScreen({
   const [userCode, setUserCode] = useState('')
   const [countdownFinished, setCountdownFinished] = useState(false)
   const verifyPhoneNumber = useVerifyPhoneNumber()
-  const verifyChallenge = useVerifyChallenge()
   const {t} = useTranslation()
+  const loadingOverlay = useShowLoadingOverlay()
 
   useSetHeaderState(
     () => ({
@@ -113,6 +110,7 @@ function VerificationCodeScreen({
       </WhiteContainerStyled>
       <NextButtonPortal
         onPress={() => {
+          loadingOverlay.show()
           void pipe(
             E.tryCatch(
               () => crypto.PrivateKey.generate(),
@@ -134,43 +132,22 @@ function VerificationCodeScreen({
                 userPublicKey: privateKey.exportPublicKey(),
               })
             ),
-            TE.bind(
-              'verifyChallengeResponse',
-              ({verifyPhoneNumberResponse, privateKey}) =>
-                verifyChallenge({
-                  userPublicKey: privateKey.exportPublicKey(),
-                  signature: crypto.ecdsa.ecdsaSign({
-                    challenge: verifyPhoneNumberResponse.challenge,
-                    privateKey,
-                  }),
+            TE.match(
+              (t) => {
+                loadingOverlay.hide()
+                Alert.alert(t)
+              },
+              ({privateKey, verifyPhoneNumberResponse}) => {
+                loadingOverlay.hide()
+                navigation.navigate('SuccessLogin', {
+                  verifyPhoneNumberResponse,
+                  privateKey: serializePrivateKey(privateKey),
+                  realUserData,
+                  anonymizedUserData,
+                  phoneNumber,
                 })
-            ),
-            TE.map(
-              ({
-                verifyPhoneNumberResponse,
-                privateKey,
-                verifyChallengeResponse,
-              }): SessionCredentials =>
-                SessionCredentials.parse({
-                  privateKey,
-                  hash: verifyChallengeResponse.hash,
-                  signature: verifyChallengeResponse.signature,
-                })
-            ),
-            TE.match(Alert.alert, (sessionCredentials) => {
-              navigation.navigate('SuccessLogin', {
-                sessionCredentials: {
-                  hash: sessionCredentials.hash,
-                  signature: sessionCredentials.signature,
-                  privateKey: serializePrivateKey(
-                    sessionCredentials.privateKey
-                  ),
-                },
-                realUserData,
-                anonymizedUserData,
-                phoneNumber,
-              })
-            })
+              }
+            )
           )()
         }}
         text={t('common.continue')}

@@ -1,4 +1,4 @@
-package it.vexl.stage;
+package it.vexl.next;
 
 import android.os.Build;
 import android.os.Bundle;

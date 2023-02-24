@@ -1,4 +1,4 @@
-package it.vexl.stage.newarchitecture.components;
+package it.vexl.next.newarchitecture.components;
 
 import com.facebook.jni.HybridData;
 import com.facebook.proguard.annotations.DoNotStrip;

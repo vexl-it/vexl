@@ -1,6 +1,5 @@
 {
   "expo": {
-    "entryPoint": "src/main.ts",
     "name": "Vexl (next)",
     "slug": "vexl",
     "version": "1.0.0",
@@ -28,20 +27,21 @@
     "android": {
       "softwareKeyboardLayoutMode": "resize",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#FFFFFF"
+        "foregroundImage": "./assets/android-front.png",
+        "backgroundImage": "./assets/android-back.png"
       },
-      "package": "it.vexl.next"
+      "package": "it.vexl.next",
+      "permissions": ["android.permission.RECORD_AUDIO"]
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "extra": {
       "eas": {
-        "projectId": "8a2b78bf-b758-42b9-947a-c6201cb7cc59"
+        "projectId": "dbcc5b47-6c4a-4faf-a345-e9cd8a680c32"
       }
     },
-    "owner": "kaladivo",
+    "owner": "vexlit",
     "runtimeVersion": {
       "policy": "sdkVersion"
     },

@@ -1,10 +1,8 @@
-import {type NativeStackScreenProps} from '@react-navigation/native-stack'
-import {type LoginStackParamsList} from '../../index'
 import styled from '@emotion/native'
 import UserDataDisplay from './components/UserDataDisplay'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
-import AnonymizationCaption from '../AnonymizationCaption'
-import {useCallback, useMemo, useState} from 'react'
+import AnonymizationCaption from '../../../AnonymizationCaption/AnonymizationCaption'
+import {useMemo, useState} from 'react'
 import randomNumber from '../../../../utils/randomNumber'
 import randomName from '../../../../utils/randomName'
 import {animated, useTransition} from '@react-spring/native'
@@ -12,8 +10,11 @@ import {getAvatarSvg} from '../../../AnonymousAvatar'
 import Text from '../../../Text'
 import {fromSvgString} from '@vexl-next/domain/dist/utility/SvgStringOrImageUri.brand'
 import {UserNameAndAvatar} from '@vexl-next/domain/dist/general/UserNameAndAvatar.brand'
-import NextButtonPortal from '../NextButtonPortal'
-import {useSetHeaderState} from '../../state/headerStateAtom'
+import {type LoginStackScreenProps} from '../../../../navigationTypes'
+import {
+  HeaderProxy,
+  NextButtonProxy,
+} from '../../../PageWithButtonAndProgressHeader'
 
 const ContentContainer = styled(animated.View)`
   flex: 1;
@@ -33,10 +34,8 @@ const ExplanationCaption = styled(Text)`
   text-align: center;
 `
 
-type Props = NativeStackScreenProps<
-  LoginStackParamsList,
-  'AnonymizationAnimation'
->
+type Props = LoginStackScreenProps<'AnonymizationAnimation'>
+
 function AnonymizationAnimationScreen({
   navigation,
   route: {
@@ -45,16 +44,6 @@ function AnonymizationAnimationScreen({
 }: Props): JSX.Element {
   const {t} = useTranslation()
   const [anonymized, setAnonymized] = useState(false)
-
-  useSetHeaderState(
-    useCallback(
-      () => ({
-        showBackButton: true,
-        progressNumber: 1,
-      }),
-      []
-    )
-  )
 
   const anonymizedUserData = useMemo<UserNameAndAvatar>(
     () =>
@@ -77,6 +66,7 @@ function AnonymizationAnimationScreen({
 
   return (
     <>
+      <HeaderProxy showBackButton={true} progressNumber={undefined} />
       {contentTransitions((style, showAnonymized) => {
         if (showAnonymized)
           return (
@@ -117,7 +107,7 @@ function AnonymizationAnimationScreen({
         )
       })}
       {!anonymized ? (
-        <NextButtonPortal
+        <NextButtonProxy
           onPress={() => {
             setAnonymized((v) => !v)
           }}
@@ -125,7 +115,7 @@ function AnonymizationAnimationScreen({
           text={t('loginFlow.anonymization.action')}
         />
       ) : (
-        <NextButtonPortal
+        <NextButtonProxy
           onPress={() => {
             navigation.navigate('PhoneNumber', {
               anonymizedUserData,

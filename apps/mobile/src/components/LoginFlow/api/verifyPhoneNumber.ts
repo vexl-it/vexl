@@ -37,7 +37,6 @@ export function useVerifyPhoneNumber(): (
             return t('common.unexpectedServerResponse')
           case 'UnknownError':
           case 'BadStatusCodeError':
-            // TODO sentry
             reportError(
               'error',
               'Unexpected error while verifying phone number',

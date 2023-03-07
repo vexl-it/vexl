@@ -5,6 +5,10 @@
       "outputs": ["dist/**"],
       "dependsOn": ["^build"]
     },
-    "clean": {}
+    "clean": {},
+    "build-watch": {
+      "outputs": ["dist/**"],
+      "dependsOn": ["^build-watch"]
+    }
   }
 }

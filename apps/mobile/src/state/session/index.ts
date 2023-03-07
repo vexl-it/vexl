@@ -8,6 +8,7 @@ import {type Session} from '../../brands/Session.brand'
 import readSessionFromStorage from './readSessionFromStorage'
 import writeSessionToStorage from './writeSessionToStorage'
 import * as O from 'fp-ts/Option'
+import {useFinishPostLoginFlow} from '../postLoginOnboarding'
 
 const SESSION_KEY = 'session'
 const SECRET_TOKEN_KEY = 'secretToken'
@@ -19,7 +20,9 @@ type SessionAtomValueType =
   | {readonly state: 'loggedIn'; readonly session: Session}
 
 // ----- atoms -----
-const sessionHolderAtom = atom({state: 'initial'} as SessionAtomValueType)
+export const sessionHolderAtom = atom({
+  state: 'initial',
+} as SessionAtomValueType)
 
 sessionHolderAtom.onMount = (setValue) => {
   void (async () => {
@@ -134,8 +137,10 @@ export function useIsSessionLoaded(): boolean {
 }
 
 export function useLogout(): () => void {
-  const set = useSetAtom(sessionAtom)
+  const setSession = useSetAtom(sessionAtom)
+  const setFinishedPostOnboarding = useFinishPostLoginFlow()
   return () => {
-    set(O.none)
+    setSession(O.none)
+    setFinishedPostOnboarding(false)
   }
 }

@@ -111,19 +111,19 @@ export function saveItemToSecretStorage(
 }
 
 export function saveItemToAsyncStorage(
-  key: string,
-  value: string
-): TE.TaskEither<ErrorWritingToStore, void> {
-  return pipe(
-    TE.tryCatch(
-      async () => {
-        await AsyncStorage.setItem(key, value)
-      },
-      (e) => {
-        return {_tag: 'errorWritingToStore', error: e} as const
-      }
+  key: string
+): (value: string) => TE.TaskEither<ErrorWritingToStore, void> {
+  return (value) =>
+    pipe(
+      TE.tryCatch(
+        async () => {
+          await AsyncStorage.setItem(key, value)
+        },
+        (e) => {
+          return {_tag: 'errorWritingToStore', error: e} as const
+        }
+      )
     )
-  )
 }
 
 export interface CryptoError {

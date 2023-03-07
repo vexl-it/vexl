@@ -44,9 +44,7 @@ export default function writeSessionToStorage(
         }),
         TE.chainEitherKW(fsStringifyJson),
         TE.chainW((json) => aesEncrypt(json, privateKeyRaw)),
-        TE.chainFirstW((toSave) =>
-          saveItemToAsyncStorage(asyncStorageKey, toSave)
-        )
+        TE.chainFirstW(saveItemToAsyncStorage(asyncStorageKey))
       )
     ),
     TE.map(() => undefined)

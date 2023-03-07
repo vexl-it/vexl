@@ -15,11 +15,13 @@ export const theme = {
     white: '#FFFFFF',
     grey: '#262626',
     darkBrown: '#322717',
+    black: '#000000',
   },
   text: {
     lightColorText: '#FFFFFF',
     darkColorText: '#000000',
     grayOnBlack: '#AFAFAF',
+    grayOnWhite: '#808080',
   },
 }
 

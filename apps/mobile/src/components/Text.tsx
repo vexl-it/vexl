@@ -1,7 +1,7 @@
 import {type TextProps} from 'react-native'
 import styled from '@emotion/native'
 
-type ColorStyle = 'white' | 'black' | 'grayOnBlack' | 'gray'
+type ColorStyle = 'white' | 'black' | 'grayOnBlack' | 'gray' | 'grayOnWhite'
 
 export interface Props extends TextProps {
   colorStyle?: ColorStyle | undefined
@@ -12,6 +12,7 @@ const TextStyled = styled.Text<Props>`
   color: ${(p) => {
     if (p.colorStyle === 'grayOnBlack' || p.colorStyle === 'gray')
       return p.theme.text.grayOnBlack
+    if (p.colorStyle === 'grayOnWhite') return p.theme.text.grayOnWhite
     return p.colorStyle ?? 'black'
   }};
   font-family: '${(p) => {

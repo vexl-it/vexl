@@ -1,7 +1,7 @@
-import {stringToSvgString} from '../../Image'
+import {stringToSvgStringRuntimeError} from '../../Image'
 
 const loaderSvg =
-  stringToSvgString(`<svg width="180" height="90" viewBox="0 0 180 90" fill="none" xmlns="http://www.w3.org/2000/svg">
+  stringToSvgStringRuntimeError(`<svg width="180" height="90" viewBox="0 0 180 90" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M106 61L74 29L106 29L106 61Z" fill="#ACD9B7"/>
 <path d="M74 29L106 61H74V29Z" fill="#88C797"/>
 <path d="M150 61C141.068 61 118 61 118 61C118 52.1634 125.24 45 134.172 45L150 45L150 61Z" fill="#FBA5EC"/>

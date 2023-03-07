@@ -1,6 +1,8 @@
 import {ServiceUrl} from './ServiceUrl.brand'
 import * as user from './services/user'
+import * as contact from './services/contact'
 
+import {PlatformName} from './PlatformName'
 import * as UserSessionCredentials from './UserSessionCredentials.brand'
 
 export interface CredentialHeaders {
@@ -9,14 +11,14 @@ export interface CredentialHeaders {
   signature: string
 }
 
-export {user}
+export {user, contact}
 
 export const ENV_PRESETS = {
   stageEnv: {
     userMs: ServiceUrl.parse('https://stage-user.vexl.it'),
-    contactMs: ServiceUrl.parse('https://stage-offer.vexl.it'),
+    contactMs: ServiceUrl.parse('https://stage-contact.vexl.it'),
     chatMs: ServiceUrl.parse('https://stage-chat.vexl.it'),
-    offerMs: ServiceUrl.parse('https://stage-contact.vexl.it'),
+    offerMs: ServiceUrl.parse('https://stage-offer2.vexl.it'),
   },
   prodEnv: {
     userMs: ServiceUrl.parse('https://user.vexl.it'),
@@ -27,3 +29,4 @@ export const ENV_PRESETS = {
 }
 
 export {UserSessionCredentials}
+export {PlatformName}

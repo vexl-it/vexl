@@ -1,6 +1,6 @@
-import {stringToSvgString} from '../../../../Image'
+import {stringToSvgStringRuntimeError} from '../../../../Image'
 
-const notepadSvg = stringToSvgString(
+const notepadSvg = stringToSvgStringRuntimeError(
   '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">\n' +
     '<path d="M9 12H15" stroke="#AFAFAF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>\n' +
     '<path d="M9 15H15" stroke="#AFAFAF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>\n' +

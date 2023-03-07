@@ -4,6 +4,7 @@ import React from 'react'
 import {useLogout, useSessionAssumeLoggedIn} from '../../state/session'
 import Button from '../Button'
 import Image from '../Image'
+import {useFinishPostLoginFlow} from '../../state/postLoginOnboarding'
 
 const RootContainer = styled.SafeAreaView`
   flex: 1;
@@ -18,6 +19,7 @@ const ToBeDoneText = styled(Text)`
 
 export default function InsideScreen(): JSX.Element {
   const session = useSessionAssumeLoggedIn()
+  const postLoginFlow = useFinishPostLoginFlow()
   console.log(session)
   const logout = useLogout()
   return (
@@ -32,6 +34,13 @@ export default function InsideScreen(): JSX.Element {
         }
       ></Image>
       <Button onPress={logout} variant={'secondary'} text={'logout'} />
+      <Button
+        onPress={() => {
+          postLoginFlow(false)
+        }}
+        variant={'secondary'}
+        text={'plf'}
+      />
     </RootContainer>
   )
 }

@@ -4,16 +4,18 @@ import {useCallback} from 'react'
 
 interface Props {
   onPress: () => void
-  variant: 'primary' | 'secondary'
+  variant: 'primary' | 'secondary' | 'black'
   text: string
   style?: StyleProp<ViewStyle>
 
   disabled?: boolean
+  size?: 'small' | 'normal'
 }
 
 interface StyledElementsProps {
-  variant: 'primary' | 'secondary'
+  variant: 'primary' | 'secondary' | 'black'
   disabled: boolean
+  size?: 'small' | 'normal'
 }
 
 const PressableStyled = styled(Pressable)<StyledElementsProps>`
@@ -27,6 +29,14 @@ const PressableStyled = styled(Pressable)<StyledElementsProps>`
     `
         background-color: ${props.theme.colors.main};;
     `}
+  
+  
+  ${(props) =>
+    props.variant === 'black' &&
+    `
+        background-color: ${props.theme.colors.black};;
+    `}
+  
 
   display: flex;
   align-items: center;
@@ -39,6 +49,14 @@ const PressableStyled = styled(Pressable)<StyledElementsProps>`
     `
     background-color: ${props.theme.colors.grey};
   `}
+
+  ${(props) =>
+    props.size === 'small' &&
+    `
+    height: 38px;
+    padding-left: 12px;
+    padding-right: 12px;
+   `}
 `
 
 const TextStyled = styled(Text)<StyledElementsProps>`
@@ -52,11 +70,22 @@ const TextStyled = styled(Text)<StyledElementsProps>`
     `
         color: ${props.theme.colors.darkBrown};
     `}
+  ${(props) =>
+    props.variant === 'black' &&
+    `
+        color: ${props.theme.colors.white};
+    `}
 
   font-size: 20px;
   font-weight: 600;
   line-height: 25px;
   font-family: '${(p) => p.theme.fonts.ttSatoshi600}';
+
+  ${(props) =>
+    props.size === 'small' &&
+    `
+    font-size: 16px;
+   `}
 
   ${(props) =>
     props.disabled &&
@@ -65,7 +94,14 @@ const TextStyled = styled(Text)<StyledElementsProps>`
   `}
 `
 
-function Button({variant, text, onPress, disabled, style}: Props): JSX.Element {
+function Button({
+  variant,
+  text,
+  onPress,
+  disabled,
+  style,
+  size,
+}: Props): JSX.Element {
   const onPressInner = useCallback(() => {
     if (!disabled) onPress()
   }, [disabled, onPress])
@@ -74,9 +110,10 @@ function Button({variant, text, onPress, disabled, style}: Props): JSX.Element {
       onPress={onPressInner}
       variant={variant}
       style={style}
+      size={size}
       disabled={!!disabled}
     >
-      <TextStyled disabled={!!disabled} variant={variant}>
+      <TextStyled size={size} disabled={!!disabled} variant={variant}>
         {text}
       </TextStyled>
     </PressableStyled>

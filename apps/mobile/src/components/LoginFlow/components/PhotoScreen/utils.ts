@@ -1,6 +1,5 @@
-// Todo branded type
 import * as E from 'fp-ts/Either'
-import type * as T from 'fp-ts/Task'
+import type * as TE from 'fp-ts/TaskEither'
 import * as ImagePicker from 'expo-image-picker'
 import {UriString} from '@vexl-next/domain/dist/utility/UriString.brand'
 import {pipe} from 'fp-ts/function'
@@ -12,8 +11,9 @@ export interface ImagePickerError {
   error?: unknown
 }
 
-export function getImageFromCameraAndTryToResolveThePermissionsAlongTheWay(): T.Task<
-  E.Either<ImagePickerError, UriString>
+export function getImageFromCameraAndTryToResolveThePermissionsAlongTheWay(): TE.TaskEither<
+  ImagePickerError,
+  UriString
 > {
   return async () => {
     try {
@@ -66,8 +66,9 @@ export function getImageFromCameraAndTryToResolveThePermissionsAlongTheWay(): T.
   }
 }
 
-export function getImageFromGalleryAndTryToResolveThePermissionsAlongTheWay(): T.Task<
-  E.Either<ImagePickerError, UriString>
+export function getImageFromGalleryAndTryToResolveThePermissionsAlongTheWay(): TE.TaskEither<
+  ImagePickerError,
+  UriString
 > {
   return async () => {
     try {

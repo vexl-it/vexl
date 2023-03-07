@@ -1,7 +1,7 @@
-import {stringToSvgString} from '../../../../Image'
+import {stringToSvgStringRuntimeError} from '../../../../Image'
 
 const illustrationSvg =
-  stringToSvgString(`<svg width="100%" height="100%" viewBox="0 0 257 257" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  stringToSvgStringRuntimeError(`<svg width="100%" height="100%" viewBox="0 0 257 257" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
 <path d="M47.7461 209.253L208.746 48.2529L208.746 209.253L47.7461 209.253Z" fill="black"/>
 <path opacity="0.7" d="M257 209L209 257L209 209L257 209Z" fill="black"/>
 <path d="M208.746 48.2527L47.7461 209.253L47.7461 48.2527L208.746 48.2527Z" fill="#333333"/>

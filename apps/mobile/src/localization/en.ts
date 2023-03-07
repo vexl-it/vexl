@@ -12,6 +12,7 @@ export default {
     'unexpectedServerResposne': 'Unexpected Server Response',
     'cryptoError': 'Unexpected cryptography error',
     'secondsShort': 's',
+    'ok': 'ok',
   },
   'loginFlow': {
     'anonymityNotice': 'Nobody will see this until you allow it. Even us.',
@@ -96,6 +97,40 @@ export default {
       'text':
         'Enabling notifications lets you know when others accept your offers or when messages arrive. Vexl app can’t be used without this permission.',
       'action': 'Allow permissions',
+    },
+  },
+  'postLoginFlow': {
+    'contactsExplanation': {
+      'title': 'Let’s find your friends now!',
+      'text':
+        'Vexl is using your real-world social network - your friends and their friends. The more contacts you add, the more offers you’ll see.',
+      'anonymizationCaption': 'Nobody can see your contacts. Even us.',
+    },
+    'importContactsButton': 'Import contacts',
+    'contactsList': {
+      'deselectAll': 'Deselect all',
+      'selectAll': 'Select all',
+      'addContact': 'Add contact {{number}} manually',
+      'inputPlaceholder': 'Search or Add number',
+      'nothingFound': {
+        'title': 'No contact found. ',
+        'text':
+          'To add phone number directly, type it into a search bar (with country code prefix).',
+      },
+      'toAddCustomContact':
+        'To add phone number directly type it into a search bar (with country code)',
+    },
+    'allowNotifications': {
+      'title': 'Allow notification permissions',
+      'text':
+        'Enabling notifications lets you know when others accept your offers or when messages arrive. Vexl app can’t be used without this permission.',
+      'action': 'Allow permissions',
+      'errors': {
+        'permissionDenied':
+          'Permissions not granted. You can allow them later in the system settings.',
+        'unknownError': 'Unknown error while requesting permissions',
+        'notAvailableOnEmulator': 'Notifications are not available on emulator',
+      },
     },
   },
 }

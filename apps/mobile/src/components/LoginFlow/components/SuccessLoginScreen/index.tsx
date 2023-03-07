@@ -1,5 +1,3 @@
-import {type NativeStackScreenProps} from '@react-navigation/native-stack'
-import {type LoginStackParamsList} from '../../index'
 import {useCallback, useEffect} from 'react'
 import {useSetSession} from '../../../../state/session'
 import reportError from '../../../../utils/reportError'
@@ -8,16 +6,21 @@ import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import {Session} from '../../../../brands/Session.brand'
 import {deserializePrivateKey} from '../../utils'
 import LoaderView from '../../../LoaderView'
-import NextButtonPortal from '../NextButtonPortal'
 import {pipe} from 'fp-ts/function'
 import * as E from 'fp-ts/Either'
 import * as TE from 'fp-ts/TaskEither'
 import {useVerifyChallenge} from '../../api/verifyChallenge'
 import * as crypto from '@vexl-next/cryptography'
 import {fsSafeParseE} from '../../../../utils/fsUtils'
-import {SessionCredentials} from '../../../../brands/SessionCredentials.brand'
+import {type LoginStackScreenProps} from '../../../../navigationTypes'
+import {
+  HeaderProxy,
+  NextButtonProxy,
+} from '../../../PageWithButtonAndProgressHeader'
+import {UserSessionCredentials} from '@vexl-next/rest-api/dist/UserSessionCredentials.brand'
+import {useCreateUserAtContactMs} from '../../api/createUserAtContactsMS'
 
-type Props = NativeStackScreenProps<LoginStackParamsList, 'SuccessLogin'>
+type Props = LoginStackScreenProps<'SuccessLogin'>
 
 const TARGET_TIME_MILLISECONDS = 3000
 
@@ -35,6 +38,7 @@ function SuccessLoginScreen({
 }: Props): JSX.Element {
   const setSession = useSetSession()
   const verifyChallenge = useVerifyChallenge()
+  const createUserAtContactMs = useCreateUserAtContactMs()
   const {t} = useTranslation()
 
   const finishLogin = useCallback(() => {
@@ -74,10 +78,10 @@ function SuccessLoginScreen({
       ),
       TE.chainW(({privateKey, signature, verifyChallengeResponse}) => {
         return pipe(
-          fsSafeParseE(SessionCredentials)({
+          fsSafeParseE(UserSessionCredentials)({
             privateKey,
             hash: verifyChallengeResponse.hash,
-            signature,
+            signature: verifyChallengeResponse.signature,
           }),
           E.chainW((sessionCredentials) =>
             fsSafeParseE(Session)({
@@ -95,12 +99,16 @@ function SuccessLoginScreen({
           TE.fromEither
         )
       }),
+      TE.bindTo('session'),
+      TE.bindW('_', ({session}) =>
+        createUserAtContactMs({firebaseToken: null}, session.sessionCredentials)
+      ),
       TE.match(
         (text) => {
           Alert.alert(text)
           navigation.goBack()
         },
-        (session) => {
+        ({session}) => {
           const leftToWait = TARGET_TIME_MILLISECONDS - (Date.now() - startedAt)
           if (leftToWait > 0)
             setTimeout(() => {
@@ -120,14 +128,16 @@ function SuccessLoginScreen({
     anonymizedUserData,
     navigation,
     setSession,
+    createUserAtContactMs,
   ])
 
   useEffect(finishLogin, [finishLogin])
 
   return (
     <>
+      <HeaderProxy showBackButton={false} progressNumber={2} hidden />
       <LoaderView text={t('loginFlow.verificationCode.success.title')} />
-      <NextButtonPortal text={null} disabled={true} />
+      <NextButtonProxy text={null} disabled={true} onPress={null} />
     </>
   )
 }

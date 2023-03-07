@@ -1,4 +1,4 @@
-import Axios, {type AxiosDefaults} from 'axios'
+import {type CreateAxiosDefaults} from 'axios'
 import urlJoin from 'url-join'
 import {type ServiceUrl} from '../../ServiceUrl.brand'
 import {
@@ -17,28 +17,24 @@ import {
   type VerifyPhoneNumberRequest,
   VerifyPhoneNumberResponse,
 } from './contracts'
-import {axiosCallWithValidation} from '../../utils'
+import {axiosCallWithValidation, createAxiosInstance} from '../../utils'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
-import {HEADER_CRYPTO_VERSION, HEADER_PLATFORM} from '../../constants'
+import {type PlatformName} from '../../PlatformName'
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function publicApi({
   url,
+  platform,
   axiosConfig,
 }: {
   url: ServiceUrl
-  axiosConfig?: Omit<AxiosDefaults, 'baseURL'>
+  platform: PlatformName
+  axiosConfig?: Omit<CreateAxiosDefaults, 'baseURL'>
 }) {
-  const axiosInstance = Axios.create({
+  const axiosInstance = createAxiosInstance(platform, {
     ...axiosConfig,
     baseURL: urlJoin(url, '/api/v1'),
-    headers: {
-      ...axiosConfig?.headers,
-      [HEADER_CRYPTO_VERSION]: '2',
-      // TODO platform
-      [HEADER_PLATFORM]: 'cli',
-    },
   })
 
   return {

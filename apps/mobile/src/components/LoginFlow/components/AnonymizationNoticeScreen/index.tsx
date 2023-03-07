@@ -2,13 +2,13 @@ import WhiteContainer from '../../../WhiteContainer'
 import styled from '@emotion/native'
 import Text, {TitleText} from '../../../Text'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
-import {type NativeStackScreenProps} from '@react-navigation/native-stack'
-import {type LoginStackParamsList} from '../../index'
 import illustrationSvg from './images/illustrationSvg'
 import Image from '../../../Image'
-import NextButtonPortal from '../NextButtonPortal'
-import {useSetHeaderState} from '../../state/headerStateAtom'
-import {useCallback} from 'react'
+import {type LoginStackScreenProps} from '../../../../navigationTypes'
+import {
+  HeaderProxy,
+  NextButtonProxy,
+} from '../../../PageWithButtonAndProgressHeader'
 
 const ImageStyled = styled(Image)`
   height: 100%;
@@ -24,17 +24,14 @@ const Title = styled(TitleText)`
 `
 const TextStyled = styled(Text)``
 
-type Props = NativeStackScreenProps<LoginStackParamsList, 'AnonymizationNotice'>
+type Props = LoginStackScreenProps<'AnonymizationNotice'>
 
 function AnonymizationNoticeScreen({navigation}: Props): JSX.Element {
   const {t} = useTranslation()
 
-  useSetHeaderState(
-    useCallback(() => ({progressNumber: 1, showBackButton: true}), [])
-  )
-
   return (
     <>
+      <HeaderProxy showBackButton={true} progressNumber={1} />
       <WhiteContainer>
         <ImageContainer>
           <ImageStyled source={illustrationSvg} />
@@ -46,7 +43,7 @@ function AnonymizationNoticeScreen({navigation}: Props): JSX.Element {
           {t('loginFlow.anonymizationNotice.text')}
         </TextStyled>
       </WhiteContainer>
-      <NextButtonPortal
+      <NextButtonProxy
         onPress={() => {
           navigation.navigate('Name')
         }}

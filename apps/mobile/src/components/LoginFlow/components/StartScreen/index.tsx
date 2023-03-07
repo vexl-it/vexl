@@ -1,6 +1,4 @@
 import styled from '@emotion/native'
-import {type NativeStackScreenProps} from '@react-navigation/native-stack'
-import {type LoginStackParamsList} from '../../index'
 import Text from '../../../Text'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import Switch from '../../../Switch'
@@ -9,9 +7,12 @@ import WhiteContainer from '../../../WhiteContainer'
 import Image from '../../../Image'
 import bigNameSvg from './images/bigNameSvg'
 import notepadSvg from './images/notepadSvg'
-import {useCallback, useState} from 'react'
-import NextButtonPortal from '../NextButtonPortal'
-import {useSetHeaderState} from '../../state/headerStateAtom'
+import {useState} from 'react'
+import {type LoginStackScreenProps} from '../../../../navigationTypes'
+import {
+  HeaderProxy,
+  NextButtonProxy,
+} from '../../../PageWithButtonAndProgressHeader'
 
 const RootContainer = styled.View`
   flex: 1;
@@ -55,19 +56,16 @@ const TOULink = styled(Text)``
 
 const TouSwitch = styled(Switch)``
 
-type Props = NativeStackScreenProps<LoginStackParamsList, 'Start'>
+type Props = LoginStackScreenProps<'Start'>
 
 function StartScreen({navigation}: Props): JSX.Element {
   const [touAgree, setTOUAgree] = useState(false)
 
   const {t} = useTranslation()
 
-  useSetHeaderState(
-    useCallback(() => ({progressNumber: 1, showBackButton: true}), [])
-  )
-
   return (
     <RootContainer>
+      <HeaderProxy showBackButton={true} progressNumber={undefined} />
       <WhiteContainerStyled>
         <LottieViewStyled
           loop={false}
@@ -89,7 +87,7 @@ function StartScreen({navigation}: Props): JSX.Element {
         </TOUText>
         <TouSwitch value={touAgree} onValueChange={setTOUAgree} />
       </TOUContainer>
-      <NextButtonPortal
+      <NextButtonProxy
         disabled={!touAgree}
         onPress={() => {
           navigation.navigate('AnonymizationNotice')

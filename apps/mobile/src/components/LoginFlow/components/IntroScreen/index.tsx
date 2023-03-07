@@ -1,13 +1,14 @@
 import ProgressJourney from '../../../ProgressJourney'
 import Text from '../../../Text'
 import styled from '@emotion/native'
-import {useCallback, useState} from 'react'
+import {useState} from 'react'
 import useContent from './useContent'
-import {type LoginStackParamsList} from '../../index'
-import {type NativeStackScreenProps} from '@react-navigation/native-stack'
 import LottieView from '../../../LottieView'
-import NextButtonPortal from '../NextButtonPortal'
-import {useSetHeaderState} from '../../state/headerStateAtom'
+import {type LoginStackScreenProps} from '../../../../navigationTypes'
+import {
+  HeaderProxy,
+  NextButtonProxy,
+} from '../../../PageWithButtonAndProgressHeader'
 
 const RootContainer = styled.View`
   flex: 1;
@@ -28,14 +29,14 @@ const TextContainer = styled.View`
   justify-content: flex-end;
 `
 
-type Props = NativeStackScreenProps<LoginStackParamsList, 'Intro'>
+type Props = LoginStackScreenProps<'Intro'>
 
 function Intro({navigation}: Props): JSX.Element {
   const [page, setPage] = useState(0)
   const content = useContent()
-  useSetHeaderState(useCallback(() => null, []))
   return (
     <RootContainer>
+      <HeaderProxy hidden showBackButton={false} progressNumber={1} />
       <ProgressJourney
         currentPage={page}
         numberOfPages={content.length}
@@ -52,7 +53,7 @@ function Intro({navigation}: Props): JSX.Element {
           <TextStyled colorStyle={'black'}>{content[page].title}</TextStyled>
         </TextContainer>
       </ProgressJourney>
-      <NextButtonPortal text={null} disabled={true} />
+      <NextButtonProxy text={null} disabled={true} onPress={null} />
     </RootContainer>
   )
 }

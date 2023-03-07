@@ -1,12 +1,10 @@
 import styled from '@emotion/native'
 import Text, {TitleText} from '../../../Text'
-import {type NativeStackScreenProps} from '@react-navigation/native-stack'
-import {type LoginStackParamsList} from '../../index'
 import WhiteContainer from '../../../WhiteContainer'
 import TextInput from '../../../Input'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import {parsePhoneNumber} from 'awesome-phonenumber'
-import {useCallback, useState} from 'react'
+import {useState} from 'react'
 import * as crypto from '@vexl-next/cryptography'
 import {useVerifyPhoneNumber} from '../../api/verifyPhoneNumber'
 import {pipe} from 'fp-ts/function'
@@ -15,11 +13,14 @@ import * as E from 'fp-ts/Either'
 import reportError from '../../../../utils/reportError'
 import {Alert, TouchableWithoutFeedback} from 'react-native'
 import {serializePrivateKey} from '../../utils'
-import NextButtonPortal from '../NextButtonPortal'
-import {useSetHeaderState} from '../../state/headerStateAtom'
 import Countdown from './components/Countdown'
 import {DateTime} from 'luxon'
 import {useShowLoadingOverlay} from '../../../LoadingOverlayProvider'
+import {type LoginStackScreenProps} from '../../../../navigationTypes'
+import {
+  HeaderProxy,
+  NextButtonProxy,
+} from '../../../PageWithButtonAndProgressHeader'
 
 const WhiteContainerStyled = styled(WhiteContainer)``
 const Title = styled(TitleText)`
@@ -41,7 +42,7 @@ const CountdownStyled = styled(Countdown)`
   font-size: 14px;
 `
 
-type Props = NativeStackScreenProps<LoginStackParamsList, 'VerificationCode'>
+type Props = LoginStackScreenProps<'VerificationCode'>
 
 function VerificationCodeScreen({
   navigation,
@@ -60,18 +61,9 @@ function VerificationCodeScreen({
   const {t} = useTranslation()
   const loadingOverlay = useShowLoadingOverlay()
 
-  useSetHeaderState(
-    useCallback(
-      () => ({
-        showBackButton: true,
-        progressNumber: 2,
-      }),
-      []
-    )
-  )
-
   return (
     <>
+      <HeaderProxy showBackButton={true} progressNumber={2} />
       <WhiteContainerStyled>
         <Title>{t('loginFlow.verificationCode.title')}</Title>
         <TextStyled colorStyle="gray">
@@ -110,7 +102,7 @@ function VerificationCodeScreen({
           </ResendText>
         )}
       </WhiteContainerStyled>
-      <NextButtonPortal
+      <NextButtonProxy
         onPress={() => {
           loadingOverlay.show()
           void pipe(

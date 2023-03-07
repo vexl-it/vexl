@@ -1,20 +1,21 @@
 import Text, {TitleText} from '../../../Text'
 import styled from '@emotion/native'
-import AnonymizationCaption from '../AnonymizationCaption'
+import AnonymizationCaption from '../../../AnonymizationCaption/AnonymizationCaption'
 import WhiteContainer from '../../../WhiteContainer'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import PhoneNumberInput from './components/PhoneNumberInput'
 import * as O from 'fp-ts/Option'
 import {type E164PhoneNumber} from '@vexl-next/domain/dist/general/E164PhoneNumber.brand'
-import {type NativeStackScreenProps} from '@react-navigation/native-stack'
-import {type LoginStackParamsList} from '../../index'
 import * as E from 'fp-ts/Either'
 import {Alert} from 'react-native'
 import {useShowLoadingOverlay} from '../../../LoadingOverlayProvider'
 import {useInitPhoneVerification} from '../../api/initPhoneVerification'
-import {useCallback, useState} from 'react'
-import NextButtonPortal from '../NextButtonPortal'
-import {useSetHeaderState} from '../../state/headerStateAtom'
+import {useState} from 'react'
+import {type LoginStackScreenProps} from '../../../../navigationTypes'
+import {
+  HeaderProxy,
+  NextButtonProxy,
+} from '../../../PageWithButtonAndProgressHeader'
 
 const WhiteContainerStyled = styled(WhiteContainer)``
 const TitleStyled = styled(TitleText)``
@@ -28,7 +29,7 @@ const InputStyled = styled(PhoneNumberInput)`
 `
 const AnonymizationCaptionStyled = styled(AnonymizationCaption)``
 
-type Props = NativeStackScreenProps<LoginStackParamsList, 'PhoneNumber'>
+type Props = LoginStackScreenProps<'PhoneNumber'>
 
 function PhoneNumberScreen({
   navigation,
@@ -42,18 +43,10 @@ function PhoneNumberScreen({
   )
   const loadingOverlay = useShowLoadingOverlay()
   const initPhoneVerification = useInitPhoneVerification()
-  useSetHeaderState(
-    useCallback(
-      () => ({
-        showBackButton: true,
-        progressNumber: 2,
-      }),
-      []
-    )
-  )
 
   return (
     <>
+      <HeaderProxy showBackButton={true} progressNumber={2} />
       <WhiteContainerStyled>
         <TitleStyled>{t('loginFlow.phoneNumber.title')}</TitleStyled>
         <TextStyled colorStyle={'gray'}>
@@ -62,7 +55,7 @@ function PhoneNumberScreen({
         <InputStyled onChange={setPhoneNumber} />
         <AnonymizationCaptionStyled fontSize={14} />
       </WhiteContainerStyled>
-      <NextButtonPortal
+      <NextButtonProxy
         disabled={phoneNumber._tag === 'None'}
         onPress={() => {
           if (phoneNumber._tag !== 'Some') return

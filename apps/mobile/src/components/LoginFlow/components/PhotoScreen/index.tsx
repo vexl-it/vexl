@@ -1,12 +1,10 @@
 import {TitleText} from '../../../Text'
 import WhiteContainer from '../../../WhiteContainer'
 import styled from '@emotion/native'
-import AnonymizationCaption from '../AnonymizationCaption'
+import AnonymizationCaption from '../../../AnonymizationCaption/AnonymizationCaption'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import * as TE from 'fp-ts/TaskEither'
 import * as O from 'fp-ts/Option'
-import {type NativeStackScreenProps} from '@react-navigation/native-stack'
-import {type LoginStackParamsList} from '../../index'
 import {useCallback, useState} from 'react'
 import {Alert, View} from 'react-native'
 import {
@@ -15,20 +13,23 @@ import {
   type ImagePickerError,
 } from './utils'
 import {pipe} from 'fp-ts/function'
-import {type UriString} from '@vexl-next/domain/dist/utility/UriString.brand'
 import Image from '../../../Image'
 import MiniCameraSvg from './images/miniCameraSvg'
 import selectIconSvg from './images/selectIconSvg'
 import {UserNameAndAvatar} from '@vexl-next/domain/dist/general/UserNameAndAvatar.brand'
 import {fromImageUri} from '@vexl-next/domain/dist/utility/SvgStringOrImageUri.brand'
-import NextButtonPortal from '../NextButtonPortal'
-import {useSetHeaderState} from '../../state/headerStateAtom'
 import {
   copyFileLocalDirectoryAndKeepName,
   type FileSystemError,
 } from '../../../../utils/internalStorage'
 import {PathString} from '@vexl-next/domain/dist/utility/PathString.brand'
 import reportError from '../../../../utils/reportError'
+import {type LoginStackScreenProps} from '../../../../navigationTypes'
+import {
+  HeaderProxy,
+  NextButtonProxy,
+} from '../../../PageWithButtonAndProgressHeader'
+import {type UriString} from '@vexl-next/domain/dist/utility/UriString.brand'
 
 const WhiteContainerStyled = styled(WhiteContainer)``
 const AnonymizationCaptionStyled = styled(AnonymizationCaption)`
@@ -63,7 +64,7 @@ const PickedImage = styled(Image)`
   border-radius: 30px;
 `
 
-type Props = NativeStackScreenProps<LoginStackParamsList, 'Photo'>
+type Props = LoginStackScreenProps<'Photo'>
 
 function PhotoScreen({
   navigation,
@@ -72,15 +73,6 @@ function PhotoScreen({
   },
 }: Props): JSX.Element {
   const {t} = useTranslation()
-  useSetHeaderState(
-    useCallback(
-      () => ({
-        showBackButton: true,
-        progressNumber: 1,
-      }),
-      []
-    )
-  )
   const [selectedImageUri, setSelectedImageUri] = useState<O.Option<UriString>>(
     O.none
   )
@@ -147,6 +139,7 @@ function PhotoScreen({
 
   return (
     <>
+      <HeaderProxy showBackButton progressNumber={1} />
       <WhiteContainerStyled>
         <Title>{t('loginFlow.photo.title', {name: userName})}</Title>
         <AnonymizationCaptionStyled />
@@ -165,7 +158,7 @@ function PhotoScreen({
           </ImagePressable>
         </ImageAreaContainer>
       </WhiteContainerStyled>
-      <NextButtonPortal
+      <NextButtonProxy
         disabled={selectedImageUri._tag === 'None'}
         onPress={() => {
           if (selectedImageUri._tag === 'Some')

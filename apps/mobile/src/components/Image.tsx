@@ -2,15 +2,18 @@ import {Image as RNImage, type ImageProps as RNImageProps} from 'react-native'
 import {SvgXml, type XmlProps} from 'react-native-svg'
 import {SvgString} from '@vexl-next/domain/dist/utility/SvgString.brand'
 
-// Todo proper branded type
-
 export function isSvgString(something: unknown): something is SvgString {
   return SvgString.safeParse(something).success
 }
 
-export function stringToSvgString(s: string): SvgString {
-  // todo should I handle errors?
-  return SvgString.parse({xml: s})
+export function stringToSvgStringRuntimeError(s: string): SvgString {
+  const parse = SvgString.safeParse({xml: s})
+  if (parse.success) {
+    return parse.data
+  }
+  throw Error(
+    `Trying to convert string to SvgString but string is not valid SvgString. String: ${s}`
+  )
 }
 
 type Props = RNImageProps | (Omit<XmlProps, 'xml'> & {source: SvgString})

@@ -3,14 +3,15 @@ import styled from '@emotion/native'
 import WhiteContainer from '../../../WhiteContainer'
 import TextInput from '../../../Input'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
-import AnonymizationCaption from '../AnonymizationCaption'
-import {type NativeStackScreenProps} from '@react-navigation/native-stack'
-import {type LoginStackParamsList} from '../../index'
-import {useCallback, useState} from 'react'
+import AnonymizationCaption from '../../../AnonymizationCaption/AnonymizationCaption'
+import {useState} from 'react'
 import {UserName} from '@vexl-next/domain/dist/general/UserName.brand'
 import {Alert} from 'react-native'
-import NextButtonPortal from '../NextButtonPortal'
-import {useSetHeaderState} from '../../state/headerStateAtom'
+import {type LoginStackScreenProps} from '../../../../navigationTypes'
+import {
+  HeaderProxy,
+  NextButtonProxy,
+} from '../../../PageWithButtonAndProgressHeader'
 
 const RootContainer = styled.View`
   flex: 1;
@@ -25,24 +26,15 @@ const TextInputStyled = styled(TextInput)`
   margin-bottom: 16px;
 `
 
-type Props = NativeStackScreenProps<LoginStackParamsList, 'Name'>
+type Props = LoginStackScreenProps<'Name'>
 
 function NameScreen({navigation}: Props): JSX.Element {
   const {t} = useTranslation()
   const [value, setValue] = useState('')
 
-  useSetHeaderState(
-    useCallback(
-      () => ({
-        showBackButton: true,
-        progressNumber: 1,
-      }),
-      []
-    )
-  )
-
   return (
     <RootContainer>
+      <HeaderProxy showBackButton={true} progressNumber={1} />
       <WhiteContainerStyled>
         <TitleStyled numberOfLines={2} adjustsFontSizeToFit>
           {t('loginFlow.name.prompt')}
@@ -56,7 +48,7 @@ function NameScreen({navigation}: Props): JSX.Element {
         />
         <AnonymizationCaption />
       </WhiteContainerStyled>
-      <NextButtonPortal
+      <NextButtonProxy
         disabled={!value.trim()}
         onPress={() => {
           const validation = UserName.safeParse(value.trim())

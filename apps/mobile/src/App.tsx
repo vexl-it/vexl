@@ -9,6 +9,7 @@ import {useTheme} from '@emotion/react'
 import RootNavigation from './components/RootNavigation'
 import LoadingOverlayProvider from './components/LoadingOverlayProvider'
 import {useIsSessionLoaded} from './state/session'
+import {SafeAreaProvider} from 'react-native-safe-area-context'
 
 void SplashScreen.preventAutoHideAsync()
 
@@ -28,22 +29,24 @@ function App(): JSX.Element {
 
   return (
     <I18nProvider>
-      <StatusBar style="light" />
-      <NavigationContainer
-        theme={{
-          ...DefaultTheme,
-          dark: true,
-          colors: {
-            ...DefaultTheme.colors,
-            background: theme.colors.backgroundBlack,
-            text: theme.text.lightColorText,
-          },
-        }}
-      >
-        <LoadingOverlayProvider>
-          <RootNavigation />
-        </LoadingOverlayProvider>
-      </NavigationContainer>
+      <SafeAreaProvider>
+        <StatusBar style="light" />
+        <NavigationContainer
+          theme={{
+            ...DefaultTheme,
+            dark: true,
+            colors: {
+              ...DefaultTheme.colors,
+              background: theme.colors.backgroundBlack,
+              text: theme.text.lightColorText,
+            },
+          }}
+        >
+          <LoadingOverlayProvider>
+            <RootNavigation />
+          </LoadingOverlayProvider>
+        </NavigationContainer>
+      </SafeAreaProvider>
     </I18nProvider>
   )
 }

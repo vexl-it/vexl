@@ -2,7 +2,7 @@ import {atom, useAtom, useAtomValue} from 'jotai'
 import {toE164PhoneNumber} from '@vexl-next/domain/dist/general/E164PhoneNumber.brand'
 import * as O from 'fp-ts/Option'
 import {type Option} from 'fp-ts/Option'
-import {fsSafeParseE} from '../../../utils/fsUtils'
+import {safeParse} from '../../../utils/fpUtils'
 import {pipe} from 'fp-ts/function'
 import {ContactNormalized} from '../brands/ContactNormalized.brand'
 
@@ -21,7 +21,7 @@ const searchTextAsCustomContact = atom((get) => {
     toE164PhoneNumber,
     O.chain((e164) =>
       O.fromEither(
-        fsSafeParseE(ContactNormalized)({
+        safeParse(ContactNormalized)({
           normalizedNumber: e164,
           numberToDisplay: searchText,
           name: searchText,

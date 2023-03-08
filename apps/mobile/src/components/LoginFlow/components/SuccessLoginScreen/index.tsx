@@ -11,7 +11,7 @@ import * as E from 'fp-ts/Either'
 import * as TE from 'fp-ts/TaskEither'
 import {useVerifyChallenge} from '../../api/verifyChallenge'
 import * as crypto from '@vexl-next/cryptography'
-import {fsSafeParseE} from '../../../../utils/fsUtils'
+import {safeParse} from '../../../../utils/fpUtils'
 import {type LoginStackScreenProps} from '../../../../navigationTypes'
 import {
   HeaderProxy,
@@ -78,13 +78,13 @@ function SuccessLoginScreen({
       ),
       TE.chainW(({privateKey, signature, verifyChallengeResponse}) => {
         return pipe(
-          fsSafeParseE(UserSessionCredentials)({
+          safeParse(UserSessionCredentials)({
             privateKey,
             hash: verifyChallengeResponse.hash,
             signature: verifyChallengeResponse.signature,
           }),
           E.chainW((sessionCredentials) =>
-            fsSafeParseE(Session)({
+            safeParse(Session)({
               version: 1,
               realUserData,
               anonymizedUserData,

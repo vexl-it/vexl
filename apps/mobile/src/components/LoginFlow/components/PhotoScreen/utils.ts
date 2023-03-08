@@ -3,7 +3,7 @@ import type * as TE from 'fp-ts/TaskEither'
 import * as ImagePicker from 'expo-image-picker'
 import {UriString} from '@vexl-next/domain/dist/utility/UriString.brand'
 import {pipe} from 'fp-ts/function'
-import {fsSafeParseE} from '../../../../utils/fsUtils'
+import {safeParse} from '../../../../utils/fpUtils'
 
 export interface ImagePickerError {
   _tag: 'imagePickerError'
@@ -53,7 +53,7 @@ export function getImageFromCameraAndTryToResolveThePermissionsAlongTheWay(): TE
         })
 
       return pipe(
-        fsSafeParseE(UriString)(selectedImage.uri),
+        safeParse(UriString)(selectedImage.uri),
         E.mapLeft((error) => ({
           _tag: 'imagePickerError',
           reason: 'UnknownError',
@@ -111,7 +111,7 @@ export function getImageFromGalleryAndTryToResolveThePermissionsAlongTheWay(): T
         })
 
       return pipe(
-        fsSafeParseE(UriString)(selectedImage.uri),
+        safeParse(UriString)(selectedImage.uri),
         E.mapLeft((error) => ({
           _tag: 'imagePickerError',
           reason: 'UnknownError',

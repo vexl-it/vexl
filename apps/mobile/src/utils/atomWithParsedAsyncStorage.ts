@@ -4,12 +4,12 @@ import {atom, type SetStateAction, type WritableAtom} from 'jotai'
 import {type z} from 'zod'
 import {pipe} from 'fp-ts/function'
 import {
-  fsParseJson,
-  fsSafeParseE,
-  fsStringifyJson,
+  parseJson,
+  safeParse,
+  stringifyToJson,
   getItemFromAsyncStorage,
   saveItemToAsyncStorage,
-} from './fsUtils'
+} from './fpUtils'
 import reportError from './reportError'
 
 export function atomWithParsedAsyncStorage<Value extends z.ZodType>(
@@ -29,8 +29,8 @@ export function atomWithParsedAsyncStorage<Value extends z.ZodType>(
   baseAtom.onMount = (setAtom) => {
     void pipe(
       getItemFromAsyncStorage(key),
-      TE.chainEitherKW(fsParseJson),
-      TE.chainEitherKW(fsSafeParseE(zodType)),
+      TE.chainEitherKW(parseJson),
+      TE.chainEitherKW(safeParse(zodType)),
       TE.match(
         (l) => {
           if (l._tag === 'storeEmpty') {
@@ -69,7 +69,7 @@ export function atomWithParsedAsyncStorage<Value extends z.ZodType>(
           : update
 
       void pipe(
-        fsStringifyJson(newValue),
+        stringifyToJson(newValue),
         TE.fromEither,
         TE.chainW(saveItemToAsyncStorage(key)),
         TE.match(

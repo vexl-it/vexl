@@ -5,11 +5,11 @@ import {
   aesEncrypt,
   type CryptoError,
   type ErrorWritingToStore,
-  fsStringifyJson,
+  stringifyToJson,
   type JsonStringifyError,
   saveItemToAsyncStorage,
   saveItemToSecretStorage,
-} from '../../utils/fsUtils'
+} from '../../utils/fpUtils'
 import {KeyFormat} from '@vexl-next/cryptography'
 
 // TODO refactor to ReaderTaskEither to remove sideeffects
@@ -28,9 +28,7 @@ export default function writeSessionToStorage(
         TE.right(
           session.sessionCredentials.privateKey.exportPrivateKey(KeyFormat.RAW)
         ),
-        TE.chainFirstW((privateKeyRaw) =>
-          saveItemToSecretStorage(secretStorageKey, privateKeyRaw)
-        )
+        TE.chainFirstW(saveItemToSecretStorage(secretStorageKey))
       )
     ),
     TE.bindW('jsonStringToSave', ({session, privateKeyRaw}) =>
@@ -42,7 +40,7 @@ export default function writeSessionToStorage(
             privateKey: undefined,
           },
         }),
-        TE.chainEitherKW(fsStringifyJson),
+        TE.chainEitherKW(stringifyToJson),
         TE.chainW((json) => aesEncrypt(json, privateKeyRaw)),
         TE.chainFirstW(saveItemToAsyncStorage(asyncStorageKey))
       )

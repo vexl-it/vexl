@@ -5,7 +5,7 @@ import * as FileSystem from 'expo-file-system'
 import {pipe} from 'fp-ts/function'
 import {PathString} from '@vexl-next/domain/dist/utility/PathString.brand'
 import urlJoin from 'url-join'
-import {fsSafeParseE} from './fsUtils'
+import {safeParse} from './fpUtils'
 
 export interface FileSystemError {
   _tag: 'fileSystemError'
@@ -24,7 +24,7 @@ function documentDirectoryOrLeft(): E.Either<FileSystemError, string> {
   })
 }
 
-function fsCopyFile({
+function copyFile({
   from,
   to,
 }: {
@@ -55,7 +55,7 @@ function filenameOrLeft(
   return pipe(
     splitPath.at(-1),
     E.right,
-    E.chainW(fsSafeParseE(PathString)),
+    E.chainW(safeParse(PathString)),
     E.mapLeft((e) => ({_tag: 'fileSystemError', error: e}))
   )
 }
@@ -72,10 +72,10 @@ export function copyFileToNewPath({
     E.map((documentDirectory) =>
       urlJoin(documentDirectory, localDirectoryFilePath)
     ),
-    E.chainW(fsSafeParseE(UriString)),
+    E.chainW(safeParse(UriString)),
     TE.fromEither,
     TE.chainW((fullPathToNewFile) =>
-      fsCopyFile({from: sourceUri, to: fullPathToNewFile})
+      copyFile({from: sourceUri, to: fullPathToNewFile})
     ),
     TE.mapLeft((e) => {
       if (e._tag === 'ParseError') {
@@ -99,7 +99,7 @@ export function copyFileLocalDirectoryAndKeepName({
   return pipe(
     filenameOrLeft(sourceUri),
     E.map((fileName) => urlJoin(targetFolder, fileName)),
-    E.chainW(fsSafeParseE(PathString)),
+    E.chainW(safeParse(PathString)),
     TE.fromEither,
     TE.chainW((fullPathToNewFile) =>
       copyFileToNewPath({sourceUri, localDirectoryFilePath: fullPathToNewFile})

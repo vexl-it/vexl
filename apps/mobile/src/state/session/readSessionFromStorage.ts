@@ -3,14 +3,14 @@ import {
   aesDecrypt,
   type CryptoError,
   type ErrorReadingFromStore,
-  fsParseJson,
-  fsSafeParseE,
+  parseJson,
+  safeParse,
   getItemFromAsyncStorage,
   getItemFromSecretStorage,
   type JsonParseError,
   type StoreEmpty,
   type ZodParseError,
-} from '../../utils/fsUtils'
+} from '../../utils/fpUtils'
 import * as TE from 'fp-ts/TaskEither'
 import {Session} from '../../brands/Session.brand'
 import * as crypto from '@vexl-next/cryptography'
@@ -69,7 +69,7 @@ export default function readSessionFromStorage({
       fsParseRawPrivateKey(secretToken)
     ),
     TE.bindW('decrypted', ({decryptedJson}) =>
-      TE.fromEither(fsParseJson(decryptedJson))
+      TE.fromEither(parseJson(decryptedJson))
     ),
     TE.map(({decrypted, privateKey}) => ({
       ...decrypted,
@@ -78,6 +78,6 @@ export default function readSessionFromStorage({
         privateKey,
       },
     })),
-    TE.chainEitherKW(fsSafeParseE(Session))
+    TE.chainEitherKW(safeParse(Session))
   )
 }

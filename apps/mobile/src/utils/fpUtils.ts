@@ -10,7 +10,7 @@ export interface JsonParseError {
   readonly _tag: 'jsonParseError'
   readonly error: unknown
 }
-export function fsParseJson(json: string): E.Either<JsonParseError, any> {
+export function parseJson(json: string): E.Either<JsonParseError, any> {
   return E.tryCatch(
     () => JSON.parse(json),
     (e) => ({_tag: 'jsonParseError', error: e})
@@ -22,7 +22,7 @@ export interface ZodParseError<T> {
   readonly error: ZodError<T>
 }
 
-export function fsSafeParseE<T extends z.ZodType>(
+export function safeParse<T extends z.ZodType>(
   zodType: T
 ): (a: unknown) => E.Either<ZodParseError<z.TypeOf<T>>, z.TypeOf<T>> {
   return flow(
@@ -94,20 +94,20 @@ export interface ErrorWritingToStore {
   readonly error: unknown
 }
 export function saveItemToSecretStorage(
-  key: string,
-  value: string
-): TE.TaskEither<ErrorWritingToStore, true> {
-  return pipe(
-    TE.tryCatch(
-      async () => {
-        await SecretStore.setItemAsync(key, value)
-        return true as const
-      },
-      (e) => {
-        return {_tag: 'errorWritingToStore', error: e} as const
-      }
+  key: string
+): (value: string) => TE.TaskEither<ErrorWritingToStore, true> {
+  return (value: string) =>
+    pipe(
+      TE.tryCatch(
+        async () => {
+          await SecretStore.setItemAsync(key, value)
+          return true as const
+        },
+        (e) => {
+          return {_tag: 'errorWritingToStore', error: e} as const
+        }
+      )
     )
-  )
 }
 
 export function saveItemToAsyncStorage(
@@ -156,7 +156,7 @@ export interface JsonStringifyError {
   readonly e: unknown
 }
 
-export function fsStringifyJson(
+export function stringifyToJson(
   data: unknown
 ): E.Either<JsonStringifyError, string> {
   return E.tryCatch(

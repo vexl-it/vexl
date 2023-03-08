@@ -82,7 +82,7 @@ export function aesGCMIgnoreTagEncrypt({
   const cipherKey = stretchedPass.subarray(0, 32)
   const iv = Buffer.concat([
     stretchedPass.subarray(32, 32 + 12),
-    Buffer.from([0, 0, 0, 1]),
+    Buffer.from([0, 0, 0, 2]),
   ])
 
   const cipher = crypto.createCipheriv('aes-256-ctr', cipherKey, iv)

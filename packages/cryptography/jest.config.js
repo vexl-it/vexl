@@ -1,7 +1,7 @@
 export default {
   preset: 'ts-jest',
   testEnvironment: 'node',
-  setupFiles: ['dotenv/config'],
+  // setupFiles: ['dotenv/config'],
   roots: ['./src'],
 
   transform: {'\\.[jt]s?$': ['ts-jest', {tsconfig: {allowJs: true}}]},

@@ -1,6 +1,7 @@
 import crypto from 'node:crypto'
 import {CYPHER_ALGORITHM, PBKDF2ITER, SALT} from '../constants'
 import {appendVersion, parseStringWithVersion} from '../versionWrapper'
+import {removeEmptyBytesAtTheEnd} from '../utils'
 
 export function aesGCMEncrypt({
   data,
@@ -90,7 +91,7 @@ export function aesGCMIgnoreTagEncrypt({
 
   const encrypted = Buffer.concat([cipher.update(data, 'utf8'), cipher.final()])
 
-  return appendVersion(`${encrypted.toString('base64')}`, 1)
+  return encrypted.toString('base64')
 }
 
 /**
@@ -99,34 +100,32 @@ export function aesGCMIgnoreTagEncrypt({
  * @param password
  */
 export function aesGCMIgnoreTagDecrypt({
-  data: dataWithVersion,
+  data,
   password,
 }: {
   data: string
   password: string
 }): string {
-  const data = dataWithVersion
   const stretchedPass = crypto.pbkdf2Sync(
     password,
     SALT,
     PBKDF2ITER,
-    32 + 12,
+    108,
     'sha1'
   )
-  const cipherKey = stretchedPass.subarray(0, 32)
 
-  const iv = Buffer.concat([
-    stretchedPass.subarray(32, 32 + 12),
-    Buffer.from([0, 0, 0, 2]),
-  ])
+  const decipher = crypto.createDecipheriv(
+    'aes-256-ctr',
+    stretchedPass.subarray(0, 32),
+    Buffer.concat([
+      stretchedPass.subarray(32, 32 + 12),
+      Buffer.from([0, 0, 0, 2]),
+    ])
+  )
 
-  const decipher = crypto.createDecipheriv('aes-256-ctr', cipherKey, iv)
-
-  const [encrypted] = data.split('.')
-
-  return `${decipher.update(encrypted, 'base64', 'utf8')}${decipher.final(
-    'utf8'
-  )}`
+  return removeEmptyBytesAtTheEnd(
+    Buffer.concat([decipher.update(data, 'base64'), decipher.final()])
+  ).toString('utf8')
 }
 
 export function aesCTREncrypt({

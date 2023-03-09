@@ -2,6 +2,7 @@ import {type PrivateKey, type PublicKey} from '../KeyHolder'
 import {CURVE, HMAC_ALGORITHM, PBKDF2ITER, SALT} from '../constants'
 import crypto from 'node:crypto'
 import pbkdf2 from './pbkdf2Promise'
+import {removeEmptyBytesAtTheEnd} from '../utils'
 
 function encodePart(data: Buffer): string {
   const base64 = data.toString('base64')
@@ -59,14 +60,6 @@ export async function eciesLegacyEncrypt({
   const epkPart = encodePart(epk)
 
   return `${cipherPart}${macPart}${epkPart}`
-}
-
-function removeEmptyBytesAtTheEnd(buffer: Buffer): Buffer {
-  let i = buffer.length - 1
-  while (i >= 0 && buffer[i] === 0) {
-    i--
-  }
-  return buffer.subarray(0, i + 1)
 }
 
 function getNextPart(

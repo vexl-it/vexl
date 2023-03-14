@@ -1,5 +1,3 @@
-import type * as E from 'fp-ts/Either'
-
 export interface NoVersionInProvidedString {
   _type: 'NoVersionInProvidedString'
 }

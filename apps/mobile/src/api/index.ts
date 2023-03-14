@@ -1,8 +1,16 @@
 import {atom, getDefaultStore, useAtomValue} from 'jotai'
-import {user, ENV_PRESETS, PlatformName, contact} from '@vexl-next/rest-api'
+import {
+  user,
+  ENV_PRESETS,
+  PlatformName,
+  contact,
+  offer,
+} from '@vexl-next/rest-api'
 import {Platform} from 'react-native'
 import {sessionHolderAtom} from '../state/session'
 import reportError from '../utils/reportError'
+import {type UserSessionCredentials} from '@vexl-next/rest-api/dist/UserSessionCredentials.brand'
+import {useMemo} from 'react'
 // import {ServiceUrl} from '@vexl-next/rest-api/dist/ServiceUrl.brand'
 
 export const platform = PlatformName.parse(
@@ -31,19 +39,29 @@ export function useUserPublicApi(): ReturnType<typeof user.publicApi> {
 
 export function usePrivateApiAssumeLoggedIn(): {
   contact: ReturnType<typeof contact.privateApi>
+  offer: ReturnType<typeof offer.privateApi>
 } {
-  return {
-    contact: contact.privateApi({
-      platform,
-      url: apiEnv.contactMs,
-      getUserSessionCredentials: () => {
-        const session = getDefaultStore().get(sessionHolderAtom)
-        if (session.state !== 'loggedIn') {
-          reportError('error', 'User is not in session.', {session})
-          throw new Error('User is not logged in')
-        }
-        return session.session.sessionCredentials
-      },
-    }),
-  }
+  return useMemo(() => {
+    function getUserSessionCredentials(): UserSessionCredentials {
+      const session = getDefaultStore().get(sessionHolderAtom)
+      if (session.state !== 'loggedIn') {
+        reportError('error', 'User is not in session.', {session})
+        throw new Error('User is not logged in')
+      }
+      return session.session.sessionCredentials
+    }
+
+    return {
+      contact: contact.privateApi({
+        platform,
+        url: apiEnv.contactMs,
+        getUserSessionCredentials,
+      }),
+      offer: offer.privateApi({
+        platform,
+        url: apiEnv.offerMs,
+        getUserSessionCredentials,
+      }),
+    }
+  }, [])
 }

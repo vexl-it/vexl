@@ -5,7 +5,7 @@ import {atomWithParsedAsyncStorage} from '../../../utils/atomWithParsedAsyncStor
 import * as O from 'fp-ts/Option'
 
 export const customContactsAtom = atomWithParsedAsyncStorage(
-  'selectedContacts1',
+  'customContacts',
   [],
   z.array(ContactNormalized)
 )

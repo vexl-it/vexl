@@ -103,6 +103,8 @@ PODS:
     - ExpoModulesCore
   - ExpoKeepAwake (11.0.1):
     - ExpoModulesCore
+  - ExpoLinearGradient (12.0.1):
+    - ExpoModulesCore
   - ExpoLocalization (14.0.0):
     - ExpoModulesCore
   - ExpoModulesCore (1.1.1):
@@ -429,6 +431,8 @@ PODS:
     - glog
   - react-native-flipper (0.176.1):
     - React-Core
+  - react-native-pager-view (6.0.1):
+    - React-Core
   - react-native-quick-base64 (2.0.5):
     - React-Core
   - react-native-quick-crypto (0.5.0):
@@ -541,6 +545,7 @@ DEPENDENCIES:
   - expo-dev-menu-interface (from `../node_modules/expo-dev-menu-interface/ios`)
   - ExpoImagePicker (from `../node_modules/expo-image-picker/ios`)
   - ExpoKeepAwake (from `../node_modules/expo-keep-awake/ios`)
+  - ExpoLinearGradient (from `../node_modules/expo-linear-gradient/ios`)
   - ExpoLocalization (from `../node_modules/expo-localization/ios`)
   - ExpoModulesCore (from `../node_modules/expo-modules-core`)
   - EXSecureStore (from `../node_modules/expo-secure-store/ios`)
@@ -594,6 +599,7 @@ DEPENDENCIES:
   - React-jsinspector (from `../node_modules/react-native/ReactCommon/jsinspector`)
   - React-logger (from `../node_modules/react-native/ReactCommon/logger`)
   - react-native-flipper (from `../node_modules/react-native-flipper`)
+  - react-native-pager-view (from `../node_modules/react-native-pager-view`)
   - react-native-quick-base64 (from `../node_modules/react-native-quick-base64`)
   - react-native-quick-crypto (from `../node_modules/react-native-quick-crypto`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
@@ -675,6 +681,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/expo-image-picker/ios"
   ExpoKeepAwake:
     :path: "../node_modules/expo-keep-awake/ios"
+  ExpoLinearGradient:
+    :path: "../node_modules/expo-linear-gradient/ios"
   ExpoLocalization:
     :path: "../node_modules/expo-localization/ios"
   ExpoModulesCore:
@@ -731,6 +739,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/logger"
   react-native-flipper:
     :path: "../node_modules/react-native-flipper"
+  react-native-pager-view:
+    :path: "../node_modules/react-native-pager-view"
   react-native-quick-base64:
     :path: "../node_modules/react-native-quick-base64"
   react-native-quick-crypto:
@@ -793,6 +803,7 @@ SPEC CHECKSUMS:
   expo-dev-menu-interface: 45581093393dacd51ce5e7f641cf9ed5064a2e3f
   ExpoImagePicker: ce37302446e70145bb413f0f74886441abdae022
   ExpoKeepAwake: 69b59d0a8d2b24de9f82759c39b3821fec030318
+  ExpoLinearGradient: b40c2133ad57ae105b1b12a319e314463c817f6b
   ExpoLocalization: e202d1e2a4950df17ac8d0889d65a1ffd7532d7e
   ExpoModulesCore: 485dff3a59b036a33b6050c0a5aea3cf1037fdd1
   EXSecureStore: daec0117c922a67c658cb229152a9e252e5c1750
@@ -834,6 +845,7 @@ SPEC CHECKSUMS:
   React-jsinspector: badd81696361249893a80477983e697aab3c1a34
   React-logger: fdda34dd285bdb0232e059b19d9606fa0ec3bb9c
   react-native-flipper: 7e4b1c3fe1a2eecbe7304e5ff6b89231b3ec61dc
+  react-native-pager-view: 3051346698a0ba0c4e13e40097cc11b00ee03cca
   react-native-quick-base64: e657e9197e61b60a9dec49807843052b830da254
   react-native-quick-crypto: a903ff39ac8fea78bb9d37cccc5cc0596afc9670
   react-native-safe-area-context: 99b24a0c5acd0d5dcac2b1a7f18c49ea317be99a

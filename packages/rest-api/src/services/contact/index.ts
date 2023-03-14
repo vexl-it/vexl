@@ -40,36 +40,34 @@ export function privateApi({
   )
 
   return {
-    createUser: function createUser(request: CreateUserRequest) {
+    createUser: (request: CreateUserRequest) => {
       return axiosCall(axiosInstance, {
         method: 'post',
         url: '/users',
         data: request,
       })
     },
-    refreshUser: function refreshUser(request: RefreshUserRequest) {
+    refreshUser: (request: RefreshUserRequest) => {
       return axiosCall(axiosInstance, {
         method: 'post',
         url: '/users/refresh',
         data: request,
       })
     },
-    updateFirebaseToken: function updateFirebaseToken(
-      request: UpdateFirebaseTokenRequest
-    ) {
+    updateFirebaseToken: (request: UpdateFirebaseTokenRequest) => {
       return axiosCall(axiosInstance, {
         method: 'put',
         url: '/users',
         data: request,
       })
     },
-    deleteUser: function deleteUser() {
+    deleteUser: () => {
       return axiosCall(axiosInstance, {
         method: 'delete',
         url: '/users/me',
       })
     },
-    importContacts: function importContacts(request: ImportContactsRequest) {
+    importContacts: (request: ImportContactsRequest) => {
       return pipe(
         axiosCallWithValidation(
           axiosInstance,
@@ -91,3 +89,5 @@ export function privateApi({
     },
   }
 }
+
+export type ContactPrivateApi = ReturnType<typeof privateApi>

@@ -8,19 +8,21 @@ const RootContainer = styled.View`
   align-items: center;
   justify-content: center;
 `
-const TopText = styled(Text)``
+const TopText = styled(Text)`
+  margin-bottom: 24px;
+`
 const ImageStyled = styled(Image)`
   width: 128px;
   height: 128px;
   border-radius: 32px;
-  margin: 24px 0 32px;
+  margin: 0 0 32px;
 `
 const Name = styled(TitleText)`
   font-size: 32px;
 `
 
 interface Props {
-  topText: string
+  topText?: string
   userNameAndAvatar: UserNameAndAvatar
 
   style?: StyleProp<ViewStyle>
@@ -33,9 +35,11 @@ function UserDataDisplay({
 }: Props): JSX.Element {
   return (
     <RootContainer style={style}>
-      <TopText fontWeight={600} colorStyle={'white'}>
-        {topText}
-      </TopText>
+      {topText && (
+        <TopText fontWeight={600} colorStyle={'white'}>
+          {topText}
+        </TopText>
+      )}
       {userNameAndAvatar.image.type === 'svgXml' ? (
         <ImageStyled source={userNameAndAvatar.image.svgXml} />
       ) : (

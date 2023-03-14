@@ -3071,6 +3071,23 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@react-navigation/bottom-tabs@npm:^6.5.7":
+  version: 6.5.7
+  resolution: "@react-navigation/bottom-tabs@npm:6.5.7"
+  dependencies:
+    "@react-navigation/elements": ^1.3.17
+    color: ^4.2.3
+    warn-once: ^0.1.0
+  peerDependencies:
+    "@react-navigation/native": ^6.0.0
+    react: "*"
+    react-native: "*"
+    react-native-safe-area-context: ">= 3.0.0"
+    react-native-screens: ">= 3.0.0"
+  checksum: 3b49e988ffc54287622899a481045cc98abb7b2c33fa8456b52957ef0da1e8c84f7c4f6fbe32c97e32321184dadce3c27778a387d75a5b19f29dd1877de121e7
+  languageName: node
+  linkType: hard
+
 "@react-navigation/core@npm:^6.4.6":
   version: 6.4.6
   resolution: "@react-navigation/core@npm:6.4.6"
@@ -3096,6 +3113,34 @@ __metadata:
     react-native: "*"
     react-native-safe-area-context: ">= 3.0.0"
   checksum: bf0856fb4dda63dcd21f3e6c9136fdf749e35a02e97741915d225f770348eea0ba8aea9875f653c984b12420cfb2a4a55cd5c0e4e033976d9e51be7ae27cf1a7
+  languageName: node
+  linkType: hard
+
+"@react-navigation/elements@npm:^1.3.17":
+  version: 1.3.17
+  resolution: "@react-navigation/elements@npm:1.3.17"
+  peerDependencies:
+    "@react-navigation/native": ^6.0.0
+    react: "*"
+    react-native: "*"
+    react-native-safe-area-context: ">= 3.0.0"
+  checksum: 19d329efcc144f48b88ad235f4195803712e2c72a5ec5f86340463978c58e6d6e931e3bd447509d0f2511810ee2b91e97378ecc5af974674fd8ddb5096be643e
+  languageName: node
+  linkType: hard
+
+"@react-navigation/material-top-tabs@npm:^6.6.2":
+  version: 6.6.2
+  resolution: "@react-navigation/material-top-tabs@npm:6.6.2"
+  dependencies:
+    color: ^4.2.3
+    warn-once: ^0.1.0
+  peerDependencies:
+    "@react-navigation/native": ^6.0.0
+    react: "*"
+    react-native: "*"
+    react-native-pager-view: ">= 4.0.0"
+    react-native-tab-view: ">= 3.0.0"
+  checksum: 674a46d486b071e84f4b96164b7e23b6a354816b940e96b9107ee89531a748318f52454292f84d1fc56106ff48d4d20576c6fc882631dbc0a63f714091ecee91
   languageName: node
   linkType: hard
 
@@ -3583,6 +3628,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/seed-random@npm:^2":
+  version: 2.2.1
+  resolution: "@types/seed-random@npm:2.2.1"
+  checksum: 06671b09de7ef5c538b2b58659544b4cfbce24fb0d2f99618efc59112526447c7e9a5a345c08712497548a0921b2e2a048a89f0fd3284a0b9ea193d38a1f3996
+  languageName: node
+  linkType: hard
+
 "@types/semver@npm:^7.3.12":
   version: 7.3.13
   resolution: "@types/semver@npm:7.3.13"
@@ -3857,6 +3909,8 @@ __metadata:
     "@emotion/native": ^11.10.0
     "@emotion/react": ^11.10.5
     "@react-native-async-storage/async-storage": ~1.17.3
+    "@react-navigation/bottom-tabs": ^6.5.7
+    "@react-navigation/material-top-tabs": ^6.6.2
     "@react-navigation/native": ^6.0.16
     "@react-navigation/native-stack": ^6.9.4
     "@react-spring/native": ^9.6.1
@@ -3870,6 +3924,7 @@ __metadata:
     "@types/luxon": ^3
     "@types/react": ~18.0.24
     "@types/react-native": ~0.70.6
+    "@types/seed-random": ^2
     "@typescript-eslint/eslint-plugin": ^5.50.0
     "@vexl-next/cryptography": "workspace:*"
     "@vexl-next/domain": "workspace:*"
@@ -3893,6 +3948,7 @@ __metadata:
     expo-device: ~5.0.0
     expo-font: ~11.0.1
     expo-image-picker: ~14.0.2
+    expo-linear-gradient: ~12.0.1
     expo-localization: ~14.0.0
     expo-notifications: ~0.17.0
     expo-secure-store: ~12.0.0
@@ -3905,20 +3961,23 @@ __metadata:
     jest-expo: ^47.0.1
     jotai: ^2.0.1
     lottie-react-native: 5.1.4
-    luxon: ^3.2.1
+    luxon: ^3.3.0
     prettier: 2.8.0
     react: 18.1.0
     react-native: 0.70.5
     react-native-flags: ^1.0.0
     react-native-flipper: ^0.176.0
     react-native-keyboard-aware-scroll-view: ^0.9.5
+    react-native-pager-view: 6.0.1
     react-native-phone-number-input: ^2.1.0
     react-native-quick-base64: ^2.0.5
     react-native-quick-crypto: ^0.5.0
     react-native-safe-area-context: 4.4.1
     react-native-screens: ~3.18.0
     react-native-svg: 13.4.0
+    react-native-tab-view: ^3.5.1
     react-test-renderer: ^18.2.0
+    seed-random: ^2.2.0
     ts-node: ^10.9.1
     typescript: ^4.6.3
     zod: ^3.20.6
@@ -5461,7 +5520,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"color-string@npm:^1.5.3":
+"color-string@npm:^1.5.3, color-string@npm:^1.9.0":
   version: 1.9.1
   resolution: "color-string@npm:1.9.1"
   dependencies:
@@ -5477,6 +5536,16 @@ __metadata:
   bin:
     color-support: bin.js
   checksum: 9b7356817670b9a13a26ca5af1c21615463b500783b739b7634a0c2047c16cef4b2865d7576875c31c3cddf9dd621fa19285e628f20198b233a5cfdda6d0793b
+  languageName: node
+  linkType: hard
+
+"color@npm:^4.2.3":
+  version: 4.2.3
+  resolution: "color@npm:4.2.3"
+  dependencies:
+    color-convert: ^2.0.1
+    color-string: ^1.9.0
+  checksum: 0579629c02c631b426780038da929cca8e8d80a40158b09811a0112a107c62e10e4aad719843b791b1e658ab4e800558f2e87ca4522c8b32349d497ecb6adeb4
   languageName: node
   linkType: hard
 
@@ -7205,6 +7274,15 @@ __metadata:
   peerDependencies:
     expo: "*"
   checksum: 1e642db9a3b83fc96e61b7d9451d8467ce7d734fe091dff4f3707fcd3cf83fc666b91a58759d6cefe5a7bf61cbd786d63630cab848ec09f59da38422321fd6be
+  languageName: node
+  linkType: hard
+
+"expo-linear-gradient@npm:~12.0.1":
+  version: 12.0.1
+  resolution: "expo-linear-gradient@npm:12.0.1"
+  peerDependencies:
+    expo: "*"
+  checksum: ef8115405a52cb78f8df8816e7e43f6b0632982d203734a2519dc5dc2712ca2a88bbc40ada401b53d9f160a142071bfa73da20f576917ea4a536883f8e0c507d
   languageName: node
   linkType: hard
 
@@ -10696,10 +10774,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"luxon@npm:^3.2.1":
-  version: 3.2.1
-  resolution: "luxon@npm:3.2.1"
-  checksum: 3fa3def2c5f5d3032b4c46220c4da8aeb467ac979888fc9d2557adcd22195f93516b4ad5909a75862bec8dc6ddc0953b0f38e6d2f4a8ab8450ddc531a83cf20d
+"luxon@npm:^3.3.0":
+  version: 3.3.0
+  resolution: "luxon@npm:3.3.0"
+  checksum: 50cf17a0dc155c3dcacbeae8c0b7e80db425e0ba97b9cbdf12a7fc142d841ff1ab1560919f033af46240ed44e2f70c49f76e3422524c7fc8bb8d81ca47c66187
   languageName: node
   linkType: hard
 
@@ -12847,6 +12925,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-native-pager-view@npm:6.0.1":
+  version: 6.0.1
+  resolution: "react-native-pager-view@npm:6.0.1"
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: 97b113aa96ab7ac06555d683417cac7678ab1ce28d54ecd2749ea499d0040c8066459d35637495c52a09c8324f16a2c0e3ff4afe18152f1ff9afe32561a9e996
+  languageName: node
+  linkType: hard
+
 "react-native-phone-number-input@npm:^2.1.0":
   version: 2.1.0
   resolution: "react-native-phone-number-input@npm:2.1.0"
@@ -12952,6 +13040,19 @@ __metadata:
     react: "*"
     react-native: "*"
   checksum: e630c057d6a0947c4d729538f643585a1fd9380975c1cf9adffad7647822b35219a9e1e60407f422b2b70592ed7f7e8766fab15df74f9cfce0b1c8a1c3544676
+  languageName: node
+  linkType: hard
+
+"react-native-tab-view@npm:^3.5.1":
+  version: 3.5.1
+  resolution: "react-native-tab-view@npm:3.5.1"
+  dependencies:
+    use-latest-callback: ^0.1.5
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+    react-native-pager-view: "*"
+  checksum: 22213e8bde3b0e16631d290a3da146789dcad461dbdc424cf6448c683a2d75c12abbae5aa329c83788123f6dd0865b451ba57848856483607327fb5fdad2fe12
   languageName: node
   linkType: hard
 
@@ -13643,6 +13744,13 @@ __metadata:
   dependencies:
     loose-envify: ^1.1.0
   checksum: d79192eeaa12abef860c195ea45d37cbf2bbf5f66e3c4dcd16f54a7da53b17788a70d109ee3d3dde1a0fd50e6a8fc171f4300356c5aee4fc0171de526bf35f8a
+  languageName: node
+  linkType: hard
+
+"seed-random@npm:^2.2.0":
+  version: 2.2.0
+  resolution: "seed-random@npm:2.2.0"
+  checksum: 74ddfb956021ce08726e127da5f30f2b3a133e0e8dab995a69893e5441bd17472856abd8242125a12d7b1773360dda7c80b6f54d39a2fc3de99734e079c646dc
   languageName: node
   linkType: hard
 

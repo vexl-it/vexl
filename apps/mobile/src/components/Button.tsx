@@ -1,24 +1,34 @@
-import {Pressable, type StyleProp, Text, type ViewStyle} from 'react-native'
+import {
+  type StyleProp,
+  Text,
+  TouchableOpacity,
+  type ViewStyle,
+} from 'react-native'
 import styled from '@emotion/native'
 import {useCallback} from 'react'
+import {type SvgString} from '@vexl-next/domain/dist/utility/SvgString.brand'
+import Image from './Image'
 
 interface Props {
   onPress: () => void
-  variant: 'primary' | 'secondary' | 'black'
-  text: string
+  variant: 'primary' | 'secondary' | 'black' | 'blackOnDark'
+  text?: string
   style?: StyleProp<ViewStyle>
 
   disabled?: boolean
   size?: 'small' | 'normal'
+  fontSize?: number
+  afterIcon?: SvgString
 }
 
 interface StyledElementsProps {
-  variant: 'primary' | 'secondary' | 'black'
+  variant: 'primary' | 'secondary' | 'black' | 'blackOnDark'
   disabled: boolean
   size?: 'small' | 'normal'
+  fontSize?: number
 }
 
-const PressableStyled = styled(Pressable)<StyledElementsProps>`
+const PressableStyled = styled(TouchableOpacity)<StyledElementsProps>`
   ${(props) =>
     props.variant === 'primary' &&
     `
@@ -35,10 +45,17 @@ const PressableStyled = styled(Pressable)<StyledElementsProps>`
     props.variant === 'black' &&
     `
         background-color: ${props.theme.colors.black};;
+    `}  
+  
+  ${(props) =>
+    props.variant === 'blackOnDark' &&
+    `
+        background-color: ${props.theme.colors.grey};;
     `}
   
 
   display: flex;
+  flex-direction: row;
   align-items: center;
   justify-content: center;
   height: 60px;
@@ -76,6 +93,13 @@ const TextStyled = styled(Text)<StyledElementsProps>`
         color: ${props.theme.colors.white};
     `}
 
+
+  ${(props) =>
+    props.variant === 'blackOnDark' &&
+    `
+        color: ${props.theme.colors.grayOnBlack};
+    `}
+
   font-size: 20px;
   font-weight: 600;
   line-height: 25px;
@@ -92,6 +116,16 @@ const TextStyled = styled(Text)<StyledElementsProps>`
     `
     color: #808080;
   `}
+  
+  ${(props) =>
+    props.fontSize &&
+    `
+    font-size: ${props.fontSize}px;
+  `}
+`
+
+const AfterIcon = styled(Image)`
+  margin-left: 4px;
 `
 
 function Button({
@@ -101,6 +135,8 @@ function Button({
   disabled,
   style,
   size,
+  fontSize,
+  afterIcon,
 }: Props): JSX.Element {
   const onPressInner = useCallback(() => {
     if (!disabled) onPress()
@@ -113,9 +149,17 @@ function Button({
       size={size}
       disabled={!!disabled}
     >
-      <TextStyled size={size} disabled={!!disabled} variant={variant}>
-        {text}
-      </TextStyled>
+      {text && (
+        <TextStyled
+          fontSize={fontSize}
+          size={size}
+          disabled={!!disabled}
+          variant={variant}
+        >
+          {text}
+        </TextStyled>
+      )}
+      {afterIcon && <AfterIcon source={afterIcon} />}
     </PressableStyled>
   )
 }

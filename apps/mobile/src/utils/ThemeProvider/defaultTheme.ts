@@ -14,12 +14,9 @@ export const theme = {
     main: '#FCCD6C',
     white: '#FFFFFF',
     grey: '#262626',
+    red: '#EE675E',
     darkBrown: '#322717',
     black: '#000000',
-  },
-  text: {
-    lightColorText: '#FFFFFF',
-    darkColorText: '#000000',
     grayOnBlack: '#AFAFAF',
     grayOnWhite: '#808080',
   },

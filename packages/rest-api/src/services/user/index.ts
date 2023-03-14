@@ -38,9 +38,7 @@ export function publicApi({
   })
 
   return {
-    initPhoneVerification: function initPhoneVerification(
-      request: InitPhoneNumberVerificationRequest
-    ) {
+    initPhoneVerification: (request: InitPhoneNumberVerificationRequest) => {
       return pipe(
         axiosCallWithValidation(
           axiosInstance,
@@ -63,9 +61,7 @@ export function publicApi({
       )
     },
 
-    verifyPhoneNumber: function verifyPhoneNumber(
-      request: VerifyPhoneNumberRequest
-    ) {
+    verifyPhoneNumber: (request: VerifyPhoneNumberRequest) => {
       return pipe(
         axiosCallWithValidation(
           axiosInstance,
@@ -92,7 +88,7 @@ export function publicApi({
       )
     },
 
-    verifyChallenge: function verifyChallenge(request: VerifyChallengeRequest) {
+    verifyChallenge: (request: VerifyChallengeRequest) => {
       return pipe(
         axiosCallWithValidation(
           axiosInstance,

@@ -7,6 +7,8 @@ import {
 import {type SerializedPrivateKey} from './components/LoginFlow/utils'
 import {type E164PhoneNumber} from '@vexl-next/domain/dist/general/E164PhoneNumber.brand'
 import {type NativeStackScreenProps} from '@react-navigation/native-stack'
+import {type BottomTabScreenProps} from '@react-navigation/bottom-tabs'
+import {type MaterialTopTabScreenProps} from '@react-navigation/material-top-tabs'
 import {
   type CompositeScreenProps,
   type NavigatorScreenParams,
@@ -20,7 +22,11 @@ export type RootStackParamsList = {
 
   InsideTabs: NavigatorScreenParams<InsideTabParamsList>
 
+  OfferDetail: {offerId: string}
+
   // TODO terms and conditions etc
+
+  TodoScreen: undefined
 }
 
 export type RootStackScreenProps<T extends keyof RootStackParamsList> =
@@ -84,9 +90,22 @@ export type InsideTabParamsList = {
 
 export type InsideTabScreenProps<T extends keyof InsideTabParamsList> =
   CompositeScreenProps<
-    NativeStackScreenProps<InsideTabParamsList, T>,
+    BottomTabScreenProps<InsideTabParamsList, T>,
     RootStackScreenProps<keyof RootStackParamsList>
   >
+
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type MarketplaceTabParamsList = {
+  Buy: {type: 'buy'}
+  Sell: {type: 'sell'}
+}
+
+export type MarketplaceTabScreenProps<
+  T extends keyof MarketplaceTabParamsList
+> = CompositeScreenProps<
+  MaterialTopTabScreenProps<MarketplaceTabParamsList, T>,
+  InsideTabScreenProps<keyof InsideTabParamsList>
+>
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace

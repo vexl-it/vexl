@@ -1,37 +1,50 @@
-import styled from '@emotion/native'
-import Text from '../../Text'
+import styled, {css} from '@emotion/native'
 import React from 'react'
 import {useLogout, useSessionAssumeLoggedIn} from '../../../state/session'
 import Button from '../../Button'
 import Image from '../../Image'
+import {useFinishPostLoginFlow} from '../../../state/postLoginOnboarding'
+import WhiteContainer from '../../WhiteContainer'
+import {ScrollView} from 'react-native'
+import DebugFetchOffers from './DebugFetchOffers'
+import Text from '../../Text'
 
-const RootContainer = styled.SafeAreaView`
+const RootContainer = styled(WhiteContainer)`
   flex: 1;
-  align-items: center;
-  justify-content: center;
 `
 
-const ToBeDoneText = styled(Text)`
-  font-family: '${(p) => p.theme.fonts.ttSatoshi600}';
-  font-size: 40px;
-`
-
-export default function InsideScreen(): JSX.Element {
+export default function DebugScreen(): JSX.Element {
   const session = useSessionAssumeLoggedIn()
-  console.log(session)
+  const postLoginFlow = useFinishPostLoginFlow()
   const logout = useLogout()
+
   return (
     <RootContainer>
-      <ToBeDoneText>Hello: {session.realUserData.userName}</ToBeDoneText>
-      <Image
-        style={{width: 128, height: 128}}
-        source={
-          session.realUserData.image.type === 'imageUri'
-            ? {uri: session.realUserData.image.imageUri}
-            : undefined
-        }
-      ></Image>
-      <Button onPress={logout} variant={'secondary'} text={'logout'} />
+      <ScrollView
+        style={css`
+          flex: 1;
+        `}
+      >
+        <Text>{session.phoneNumber}</Text>
+        <Image
+          style={{width: 128, height: 128}}
+          source={
+            session.realUserData.image.type === 'imageUri'
+              ? {uri: session.realUserData.image.imageUri}
+              : undefined
+          }
+        ></Image>
+        <Button onPress={logout} variant={'secondary'} text={'logout'} />
+        <Button
+          onPress={() => {
+            postLoginFlow(false)
+          }}
+          variant={'secondary'}
+          text={'plf'}
+        />
+
+        <DebugFetchOffers />
+      </ScrollView>
     </RootContainer>
   )
 }

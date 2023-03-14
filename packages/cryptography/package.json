@@ -8,7 +8,8 @@
     "test:watch": "yarn jest --watch",
     "build": "yarn tsc",
     "build-watch": "yarn tsc --watch",
-    "clean": "rm -rf dist tsconfig.tsbuildinfo"
+    "clean": "rm -rf dist tsconfig.tsbuildinfo",
+    "lint": "eslint src --ext .js,.jsx,.ts,.tsx"
   },
   "dependencies": {
     "@craftzdog/react-native-buffer": "^6.0.5",

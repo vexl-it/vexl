@@ -85,7 +85,7 @@ export function atomWithParsedAsyncStorage<Value extends z.ZodType>(
           }
         )
       )()
-      set(baseAtom, O.some(update))
+      set(baseAtom, O.some(newValue))
     }
   )
 }

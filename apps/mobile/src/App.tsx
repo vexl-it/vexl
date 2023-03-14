@@ -37,8 +37,9 @@ function App(): JSX.Element {
             dark: true,
             colors: {
               ...DefaultTheme.colors,
-              background: theme.colors.backgroundBlack,
-              text: theme.text.lightColorText,
+              primary: theme.colors.main,
+              background: 'transparent',
+              text: theme.colors.lightColorText,
             },
           }}
         >

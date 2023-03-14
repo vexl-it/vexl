@@ -1,46 +1,53 @@
-import styled from '@emotion/native'
-import Text from '../Text'
 import React from 'react'
-import {useLogout, useSessionAssumeLoggedIn} from '../../state/session'
-import Button from '../Button'
-import Image from '../Image'
-import {useFinishPostLoginFlow} from '../../state/postLoginOnboarding'
+import {createBottomTabNavigator} from '@react-navigation/bottom-tabs'
+import {type InsideTabParamsList} from '../../navigationTypes'
+import MarketplaceScreen from './components/MarketplaceScreen'
+import MessagesScreen from './components/MessagesScreen'
+import SettingsScreen from './components/SettingsScreen'
+import TabBar from './components/TabBar'
+import BitcoinPriceChart, {
+  CHART_HEIGHT_PX,
+} from './components/BitcoinPriceChart'
+import styled from '@emotion/native'
+import {LinearGradient} from 'expo-linear-gradient'
+import {CONTAINER_WITH_TOP_BORDER_RADIUS_TOP_PADDING} from './components/ContainerWithTopBorderRadius'
 
-const RootContainer = styled.SafeAreaView`
-  flex: 1;
-  align-items: center;
-  justify-content: center;
+const Tab = createBottomTabNavigator<InsideTabParamsList>()
+
+const BackgroundImageContainer = styled.View`
+  background-color: black;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: ${String(
+    CHART_HEIGHT_PX + CONTAINER_WITH_TOP_BORDER_RADIUS_TOP_PADDING
+  )}px;
 `
 
-const ToBeDoneText = styled(Text)`
-  font-family: '${(p) => p.theme.fonts.ttSatoshi600}';
-  font-size: 40px;
+const BackgroundImage = styled(LinearGradient)`
+  width: 100%;
+  height: 100%;
+  opacity: 0.2;
 `
 
 export default function InsideScreen(): JSX.Element {
-  const session = useSessionAssumeLoggedIn()
-  const postLoginFlow = useFinishPostLoginFlow()
-  console.log(session)
-  const logout = useLogout()
   return (
-    <RootContainer>
-      <ToBeDoneText>Hello: {session.realUserData.userName}</ToBeDoneText>
-      <Image
-        style={{width: 128, height: 128}}
-        source={
-          session.realUserData.image.type === 'imageUri'
-            ? {uri: session.realUserData.image.imageUri}
-            : undefined
-        }
-      ></Image>
-      <Button onPress={logout} variant={'secondary'} text={'logout'} />
-      <Button
-        onPress={() => {
-          postLoginFlow(false)
+    <>
+      <BackgroundImageContainer>
+        <BackgroundImage colors={['rgba(252, 205, 108, 0)', '#FCCD6C']} />
+      </BackgroundImageContainer>
+      <Tab.Navigator
+        screenOptions={{
+          header: () => <BitcoinPriceChart />,
         }}
-        variant={'secondary'}
-        text={'plf'}
-      />
-    </RootContainer>
+        tabBar={(props) => <TabBar {...props} />}
+        initialRouteName="Marketplace"
+      >
+        <Tab.Screen name="Marketplace" component={MarketplaceScreen} />
+        <Tab.Screen name="Messages" component={MessagesScreen} />
+        <Tab.Screen name="Settings" component={SettingsScreen} />
+      </Tab.Navigator>
+    </>
   )
 }

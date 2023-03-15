@@ -119,6 +119,8 @@ export function publicApi({
   }
 }
 
+export type UserPublicApi = ReturnType<typeof publicApi>
+
 // deleteUser: async function deleteUser(): AxiosPromise<void> {
 //   return await axiosInstance.delete('/user/me', {
 //     headers: getCredentialsHeaders(),

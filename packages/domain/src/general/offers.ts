@@ -1,9 +1,12 @@
 import {z} from 'zod'
 import {UriString} from '../utility/UriString.brand'
 import {UserNameAndAvatar} from './UserNameAndAvatar.brand'
+import {IdNumeric} from '../utility/IdNumeric'
+import {Uuid} from '../utility/Uuid.brand'
+import {KeyHolder} from '@vexl-next/cryptography'
 
-export const IdNumeric = z.number().int().positive()
-export type IdNumeric = z.TypeOf<typeof IdNumeric>
+export const OfferId = z.string().min(1).brand<'OfferId'>()
+export type OfferId = z.TypeOf<typeof OfferId>
 
 export const LocationState = z.enum(['ONLINE', 'IN_PERSON'])
 export type LocationState = z.TypeOf<typeof LocationState>
@@ -50,12 +53,13 @@ export const Location = z.object({
   latitude: z.string(),
   city: z.string(),
 })
+
 export type Location = z.TypeOf<typeof Location>
 
 export const OfferInfo = z.object({
   id: IdNumeric,
-  offerId: z.string(),
-  offerPublicKey: z.string(),
+  offerId: OfferId,
+  offerPublicKey: KeyHolder.PublicKeyPemBase64,
   offerDescription: z.string(),
   amountBottomLimit: z.number(),
   amountTopLimit: z.number(),
@@ -73,7 +77,7 @@ export const OfferInfo = z.object({
   activePriceCurrency: z.string().min(3).max(3),
   active: z.boolean(),
   commonFriends: z.array(CommonFriend),
-  groupUuids: z.array(z.string().uuid()),
+  groupUuids: z.array(Uuid),
   createdAt: z.string().datetime({offset: true}),
   modifiedAt: z.string().datetime({offset: true}),
 })
@@ -85,5 +89,4 @@ export const OfferFlags = z.object({
   isRequested: z.boolean(),
   realUserData: UserNameAndAvatar.optional(),
 })
-
 export type OfferFlags = z.TypeOf<typeof OfferFlags>

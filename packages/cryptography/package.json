@@ -9,13 +9,14 @@
     "build": "yarn tsc",
     "build-watch": "yarn tsc --watch",
     "clean": "rm -rf dist tsconfig.tsbuildinfo",
-    "lint": "eslint src --ext .js,.jsx,.ts,.tsx"
+    "lint": "eslint src --ext .js,.jsx,.ts,.tsx && tsc --noemit"
   },
   "dependencies": {
     "@craftzdog/react-native-buffer": "^6.0.5",
     "asn1.js": "^5.4.1",
     "fp-ts": "^2.13.1",
-    "react-native-get-random-values": "^1.8.0"
+    "react-native-get-random-values": "^1.8.0",
+    "zod": "^3.20.6"
   },
   "devDependencies": {
     "@vexl-next/eslint-config": "workspace:*",

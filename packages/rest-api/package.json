@@ -9,7 +9,7 @@
     "build": "yarn tsc",
     "build-watch": "yarn tsc --watch",
     "clean": "rm -rf dist tsconfig.tsbuildinfo",
-    "lint": "eslint src --ext .js,.jsx,.ts,.tsx"
+    "lint": "eslint src --ext .js,.jsx,.ts,.tsx && tsc --noemit"
   },
   "devDependencies": {
     "@vexl-next/eslint-config": "workspace:*",
@@ -22,7 +22,6 @@
     "typescript": "^4.9.4"
   },
   "dependencies": {
-    "@vexl-next/cryptography": "workspace:*",
     "@vexl-next/domain": "workspace:*",
     "axios": "^1.3.3",
     "url-join": "^5.0.0",

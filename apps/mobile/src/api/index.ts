@@ -5,12 +5,17 @@ import {
   PlatformName,
   contact,
   offer,
+  chat,
 } from '@vexl-next/rest-api'
 import {Platform} from 'react-native'
 import {sessionHolderAtom} from '../state/session'
 import reportError from '../utils/reportError'
 import {type UserSessionCredentials} from '@vexl-next/rest-api/dist/UserSessionCredentials.brand'
 import {useMemo} from 'react'
+import {type ContactPrivateApi} from '@vexl-next/rest-api/dist/services/contact'
+import {type OfferPrivateApi} from '@vexl-next/rest-api/dist/services/offer'
+import {type ChatPrivateApi} from '@vexl-next/rest-api/dist/services/chat'
+import {type UserPublicApi} from '@vexl-next/rest-api/dist/services/user'
 // import {ServiceUrl} from '@vexl-next/rest-api/dist/ServiceUrl.brand'
 
 export const platform = PlatformName.parse(
@@ -33,22 +38,32 @@ const _publicApiAtom = atom({
 
 export const publicApiAtom = atom((get) => get(_publicApiAtom))
 
-export function useUserPublicApi(): ReturnType<typeof user.publicApi> {
+export function useUserPublicApi(): UserPublicApi {
   return useAtomValue(publicApiAtom).user
 }
 
+const sessionCredentialsAtom = atom<UserSessionCredentials | null>((get) => {
+  const session = get(sessionHolderAtom)
+  if (session.state !== 'loggedIn') {
+    return null
+  }
+
+  return session.session.sessionCredentials
+})
+
 export function usePrivateApiAssumeLoggedIn(): {
-  contact: ReturnType<typeof contact.privateApi>
-  offer: ReturnType<typeof offer.privateApi>
+  contact: ContactPrivateApi
+  offer: OfferPrivateApi
+  chat: ChatPrivateApi
 } {
   return useMemo(() => {
     function getUserSessionCredentials(): UserSessionCredentials {
-      const session = getDefaultStore().get(sessionHolderAtom)
-      if (session.state !== 'loggedIn') {
+      const session = getDefaultStore().get(sessionCredentialsAtom)
+      if (!session) {
         reportError('error', 'User is not in session.', {session})
         throw new Error('User is not logged in')
       }
-      return session.session.sessionCredentials
+      return session
     }
 
     return {
@@ -60,6 +75,11 @@ export function usePrivateApiAssumeLoggedIn(): {
       offer: offer.privateApi({
         platform,
         url: apiEnv.offerMs,
+        getUserSessionCredentials,
+      }),
+      chat: chat.privateApi({
+        platform,
+        url: apiEnv.chatMs,
         getUserSessionCredentials,
       }),
     }

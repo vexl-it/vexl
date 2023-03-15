@@ -4,7 +4,7 @@ import {type GetUserSessionCredentials} from '../../UserSessionCredentials.brand
 import urlJoin from 'url-join'
 import {
   axiosCallWithValidation,
-  createAxiosInstanceWithAuth,
+  createAxiosInstanceWithAuthAndLogging,
   axiosCall,
 } from '../../utils'
 import {type PlatformName} from '../../PlatformName'
@@ -30,7 +30,7 @@ export function privateApi({
   getUserSessionCredentials: GetUserSessionCredentials
   axiosConfig?: Omit<CreateAxiosDefaults, 'baseURL'>
 }) {
-  const axiosInstance = createAxiosInstanceWithAuth(
+  const axiosInstance = createAxiosInstanceWithAuthAndLogging(
     getUserSessionCredentials,
     platform,
     {

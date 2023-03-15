@@ -3460,6 +3460,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/deep-equal@npm:^1.0.1":
+  version: 1.0.1
+  resolution: "@types/deep-equal@npm:1.0.1"
+  checksum: 689b5737dd0a37d173d9e1231c07f70a1a9a989087b757422e1d167ec3640fd7eb8a538bd6008b3df400c4c11ed07a6c2a92d9aafc1f98ffaa04731a9442c781
+  languageName: node
+  linkType: hard
+
 "@types/eslint@npm:^8":
   version: 8.4.10
   resolution: "@types/eslint@npm:8.4.10"
@@ -3646,6 +3653,13 @@ __metadata:
   version: 2.0.1
   resolution: "@types/stack-utils@npm:2.0.1"
   checksum: 205fdbe3326b7046d7eaf5e494d8084f2659086a266f3f9cf00bccc549c8e36e407f88168ad4383c8b07099957ad669f75f2532ed4bc70be2b037330f7bae019
+  languageName: node
+  linkType: hard
+
+"@types/uuid@npm:^9":
+  version: 9.0.1
+  resolution: "@types/uuid@npm:9.0.1"
+  checksum: c472b8a77cbeded4bc529220b8611afa39bd64677f507838f8083d8aac8033b1f88cb9ddaa2f8589e0dcd2317291d0f6e1379f82d5ceebd6f74f3b4825288e00
   languageName: node
   linkType: hard
 
@@ -3855,6 +3869,7 @@ __metadata:
     ts-jest: ^29.0.5
     ts-node: ^10.9.1
     typescript: ^4.9.4
+    zod: ^3.20.6
   languageName: unknown
   linkType: soft
 
@@ -3868,6 +3883,7 @@ __metadata:
     eslint: ^8.33.0
     fp-ts: ^2.13.1
     jest: ^29.4.1
+    js-base64: ^3.7.5
     match-sorter: ^6.3.1
     prettier: ^2.8.3
     ts-jest: ^29.0.5
@@ -3918,6 +3934,7 @@ __metadata:
     "@testing-library/react-native": ^11.5.0
     "@types/btoa": ^1
     "@types/country-data": ^0
+    "@types/deep-equal": ^1.0.1
     "@types/eslint": ^8
     "@types/i18n-js": ^3.8.3
     "@types/jest": ^29.2.4
@@ -3925,6 +3942,7 @@ __metadata:
     "@types/react": ~18.0.24
     "@types/react-native": ~0.70.6
     "@types/seed-random": ^2
+    "@types/uuid": ^9
     "@typescript-eslint/eslint-plugin": ^5.50.0
     "@vexl-next/cryptography": "workspace:*"
     "@vexl-next/domain": "workspace:*"
@@ -3934,6 +3952,7 @@ __metadata:
     "@vexl-next/ts-config": "workspace:*"
     awesome-phonenumber: ^5.1.0
     country-data: ^0.0.31
+    deep-equal: ^2.2.0
     eslint: ^8.33.0
     eslint-config-prettier: ^8.6.0
     eslint-config-standard-with-typescript: ^34.0.0
@@ -3960,14 +3979,17 @@ __metadata:
     jest: ^26.6.3
     jest-expo: ^47.0.1
     jotai: ^2.0.1
+    jotai-optics: ^0.3.0
     lottie-react-native: 5.1.4
     luxon: ^3.3.0
+    optics-ts: ^2.4.0
     prettier: 2.8.0
     react: 18.1.0
     react-native: 0.70.5
     react-native-flags: ^1.0.0
     react-native-flipper: ^0.176.0
     react-native-keyboard-aware-scroll-view: ^0.9.5
+    react-native-mmkv: ^2.6.3
     react-native-pager-view: 6.0.1
     react-native-phone-number-input: ^2.1.0
     react-native-quick-base64: ^2.0.5
@@ -3976,6 +3998,7 @@ __metadata:
     react-native-screens: ~3.18.0
     react-native-svg: 13.4.0
     react-native-tab-view: ^3.5.1
+    react-native-uuid: ^2.0.1
     react-test-renderer: ^18.2.0
     seed-random: ^2.2.0
     ts-node: ^10.9.1
@@ -3988,7 +4011,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@vexl-next/rest-api@workspace:packages/rest-api"
   dependencies:
-    "@vexl-next/cryptography": "workspace:*"
     "@vexl-next/domain": "workspace:*"
     "@vexl-next/eslint-config": "workspace:*"
     "@vexl-next/ts-config": "workspace:*"
@@ -6056,6 +6078,31 @@ __metadata:
   languageName: node
   linkType: hard
 
+"deep-equal@npm:^2.2.0":
+  version: 2.2.0
+  resolution: "deep-equal@npm:2.2.0"
+  dependencies:
+    call-bind: ^1.0.2
+    es-get-iterator: ^1.1.2
+    get-intrinsic: ^1.1.3
+    is-arguments: ^1.1.1
+    is-array-buffer: ^3.0.1
+    is-date-object: ^1.0.5
+    is-regex: ^1.1.4
+    is-shared-array-buffer: ^1.0.2
+    isarray: ^2.0.5
+    object-is: ^1.1.5
+    object-keys: ^1.1.1
+    object.assign: ^4.1.4
+    regexp.prototype.flags: ^1.4.3
+    side-channel: ^1.0.4
+    which-boxed-primitive: ^1.0.2
+    which-collection: ^1.0.1
+    which-typed-array: ^1.1.9
+  checksum: 46a34509d2766d6c6dc5aec4756089cf0cc137e46787e91f08f1ee0bb570d874f19f0493146907df0cf18aed4a7b4b50f6f62c899240a76c323f057528b122e3
+  languageName: node
+  linkType: hard
+
 "deep-extend@npm:^0.6.0":
   version: 0.6.0
   resolution: "deep-extend@npm:0.6.0"
@@ -6514,6 +6561,23 @@ __metadata:
     unbox-primitive: ^1.0.2
     which-typed-array: ^1.1.9
   checksum: 23ff60d42d17a55d150e7bcedbdb065d4077a8b98c436e0e2e1ef4dd532a6d78a56028673de0bd8ed464a43c46ba781c50d9af429b6a17e44dbd14c7d7fb7926
+  languageName: node
+  linkType: hard
+
+"es-get-iterator@npm:^1.1.2":
+  version: 1.1.3
+  resolution: "es-get-iterator@npm:1.1.3"
+  dependencies:
+    call-bind: ^1.0.2
+    get-intrinsic: ^1.1.3
+    has-symbols: ^1.0.3
+    is-arguments: ^1.1.1
+    is-map: ^2.0.2
+    is-set: ^2.0.2
+    is-string: ^1.0.7
+    isarray: ^2.0.5
+    stop-iteration-iterator: ^1.0.0
+  checksum: 8fa118da42667a01a7c7529f8a8cca514feeff243feec1ce0bb73baaa3514560bd09d2b3438873cf8a5aaec5d52da248131de153b28e2638a061b6e4df13267d
   languageName: node
   linkType: hard
 
@@ -8689,7 +8753,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"is-arguments@npm:^1.0.4":
+"is-arguments@npm:^1.0.4, is-arguments@npm:^1.1.1":
   version: 1.1.1
   resolution: "is-arguments@npm:1.1.1"
   dependencies:
@@ -8795,7 +8859,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"is-date-object@npm:^1.0.1":
+"is-date-object@npm:^1.0.1, is-date-object@npm:^1.0.5":
   version: 1.0.5
   resolution: "is-date-object@npm:1.0.5"
   dependencies:
@@ -8943,6 +9007,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"is-map@npm:^2.0.1, is-map@npm:^2.0.2":
+  version: 2.0.2
+  resolution: "is-map@npm:2.0.2"
+  checksum: ace3d0ecd667bbdefdb1852de601268f67f2db725624b1958f279316e13fecb8fa7df91fd60f690d7417b4ec180712f5a7ee967008e27c65cfd475cc84337728
+  languageName: node
+  linkType: hard
+
 "is-nan@npm:^1.2.1":
   version: 1.3.2
   resolution: "is-nan@npm:1.3.2"
@@ -9039,6 +9110,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"is-set@npm:^2.0.1, is-set@npm:^2.0.2":
+  version: 2.0.2
+  resolution: "is-set@npm:2.0.2"
+  checksum: b64343faf45e9387b97a6fd32be632ee7b269bd8183701f3b3f5b71a7cf00d04450ed8669d0bd08753e08b968beda96fca73a10fd0ff56a32603f64deba55a57
+  languageName: node
+  linkType: hard
+
 "is-shared-array-buffer@npm:^1.0.2":
   version: 1.0.2
   resolution: "is-shared-array-buffer@npm:1.0.2"
@@ -9116,12 +9194,29 @@ __metadata:
   languageName: node
   linkType: hard
 
+"is-weakmap@npm:^2.0.1":
+  version: 2.0.1
+  resolution: "is-weakmap@npm:2.0.1"
+  checksum: 1222bb7e90c32bdb949226e66d26cb7bce12e1e28e3e1b40bfa6b390ba3e08192a8664a703dff2a00a84825f4e022f9cd58c4599ff9981ab72b1d69479f4f7f6
+  languageName: node
+  linkType: hard
+
 "is-weakref@npm:^1.0.2":
   version: 1.0.2
   resolution: "is-weakref@npm:1.0.2"
   dependencies:
     call-bind: ^1.0.2
   checksum: 95bd9a57cdcb58c63b1c401c60a474b0f45b94719c30f548c891860f051bc2231575c290a6b420c6bc6e7ed99459d424c652bd5bf9a1d5259505dc35b4bf83de
+  languageName: node
+  linkType: hard
+
+"is-weakset@npm:^2.0.1":
+  version: 2.0.2
+  resolution: "is-weakset@npm:2.0.2"
+  dependencies:
+    call-bind: ^1.0.2
+    get-intrinsic: ^1.1.1
+  checksum: 5d8698d1fa599a0635d7ca85be9c26d547b317ed8fd83fc75f03efbe75d50001b5eececb1e9971de85fcde84f69ae6f8346bc92d20d55d46201d328e4c74a367
   languageName: node
   linkType: hard
 
@@ -9152,6 +9247,13 @@ __metadata:
   version: 1.0.0
   resolution: "isarray@npm:1.0.0"
   checksum: f032df8e02dce8ec565cf2eb605ea939bdccea528dbcf565cdf92bfa2da9110461159d86a537388ef1acef8815a330642d7885b29010e8f7eac967c9993b65ab
+  languageName: node
+  linkType: hard
+
+"isarray@npm:^2.0.5":
+  version: 2.0.5
+  resolution: "isarray@npm:2.0.5"
+  checksum: bd5bbe4104438c4196ba58a54650116007fa0262eccef13a4c55b2e09a5b36b59f1e75b9fcc49883dd9d4953892e6fc007eef9e9155648ceea036e184b0f930a
   languageName: node
   linkType: hard
 
@@ -10268,6 +10370,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"jotai-optics@npm:^0.3.0":
+  version: 0.3.0
+  resolution: "jotai-optics@npm:0.3.0"
+  peerDependencies:
+    jotai: ">=1.11.0"
+    optics-ts: "*"
+  checksum: 446fb07780ce8bc5e85862a1921d9621dc273a096ec8c3fec8d525612bc14964600ade28e4f272f7cf490918d3e362218141cd13cdae9def47be45c20f5dc544
+  languageName: node
+  linkType: hard
+
 "jotai@npm:^2.0.1":
   version: 2.0.1
   resolution: "jotai@npm:2.0.1"
@@ -10277,6 +10389,13 @@ __metadata:
     react:
       optional: true
   checksum: a04c601b4983e68526dd9170549ab062da7808ef950dabe9100124638e648cf32ce69291de153f18a3178cae52a2fe7e471a33ff59e9e2606b040fd83dff8948
+  languageName: node
+  linkType: hard
+
+"js-base64@npm:^3.7.5":
+  version: 3.7.5
+  resolution: "js-base64@npm:3.7.5"
+  checksum: 67a78c8b1c47b73f1c6fba1957e9fe6fd9dc78ac93ac46cc2e43472dcb9cf150d126fb0e593192e88e0497354fa634d17d255add7cc6ee3c7b4d29870faa8e18
   languageName: node
   linkType: hard
 
@@ -11928,7 +12047,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"object-is@npm:^1.0.1":
+"object-is@npm:^1.0.1, object-is@npm:^1.1.5":
   version: 1.1.5
   resolution: "object-is@npm:1.1.5"
   dependencies:
@@ -12087,6 +12206,13 @@ __metadata:
     is-docker: ^2.1.1
     is-wsl: ^2.2.0
   checksum: e9545bec64cdbf30a0c35c1bdc310344adf8428a117f7d8df3c0af0a0a24c513b304916a6d9b11db0190ff7225c2d578885080b761ed46a3d5f6f1eebb98b63c
+  languageName: node
+  linkType: hard
+
+"optics-ts@npm:^2.4.0":
+  version: 2.4.0
+  resolution: "optics-ts@npm:2.4.0"
+  checksum: 99f7af4ee4972152a1289eb472ac77f73d322fcd4ee4a7efdd56311343711ce40fc647565a51aff203ce83310c5c6bf7462a87c2bdd2e61d875da027e528dc7f
   languageName: node
   linkType: hard
 
@@ -12925,6 +13051,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-native-mmkv@npm:^2.6.3":
+  version: 2.7.0
+  resolution: "react-native-mmkv@npm:2.7.0"
+  peerDependencies:
+    react: "*"
+    react-native: ">=0.71.0"
+  checksum: 74f85b097fb96ecc6906f7b0fd83bf66462d874a3afc243b439a912579cf02dd83266e41da93a214a2986e4a28be42ea3c790f0936c0dbd08a4515395e2ad0de
+  languageName: node
+  linkType: hard
+
 "react-native-pager-view@npm:6.0.1":
   version: 6.0.1
   resolution: "react-native-pager-view@npm:6.0.1"
@@ -13053,6 +13189,13 @@ __metadata:
     react-native: "*"
     react-native-pager-view: "*"
   checksum: 22213e8bde3b0e16631d290a3da146789dcad461dbdc424cf6448c683a2d75c12abbae5aa329c83788123f6dd0865b451ba57848856483607327fb5fdad2fe12
+  languageName: node
+  linkType: hard
+
+"react-native-uuid@npm:^2.0.1":
+  version: 2.0.1
+  resolution: "react-native-uuid@npm:2.0.1"
+  checksum: 2fae6e2ee6cef108a31ae9d5be661a1947a86f4c6a812c7386b57d970861b364dc887bc4fe3225227aeea7925ccdc24d4478ff30193305abc283eb4a30ee2138
   languageName: node
   linkType: hard
 
@@ -14266,6 +14409,15 @@ __metadata:
   version: 1.5.0
   resolution: "statuses@npm:1.5.0"
   checksum: c469b9519de16a4bb19600205cffb39ee471a5f17b82589757ca7bd40a8d92ebb6ed9f98b5a540c5d302ccbc78f15dc03cc0280dd6e00df1335568a5d5758a5c
+  languageName: node
+  linkType: hard
+
+"stop-iteration-iterator@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "stop-iteration-iterator@npm:1.0.0"
+  dependencies:
+    internal-slot: ^1.0.4
+  checksum: d04173690b2efa40e24ab70e5e51a3ff31d56d699550cfad084104ab3381390daccb36652b25755e420245f3b0737de66c1879eaa2a8d4fc0a78f9bf892fcb42
   languageName: node
   linkType: hard
 
@@ -15658,6 +15810,18 @@ __metadata:
     is-string: ^1.0.5
     is-symbol: ^1.0.3
   checksum: 53ce774c7379071729533922adcca47220228405e1895f26673bbd71bdf7fb09bee38c1d6399395927c6289476b5ae0629863427fd151491b71c4b6cb04f3a5e
+  languageName: node
+  linkType: hard
+
+"which-collection@npm:^1.0.1":
+  version: 1.0.1
+  resolution: "which-collection@npm:1.0.1"
+  dependencies:
+    is-map: ^2.0.1
+    is-set: ^2.0.1
+    is-weakmap: ^2.0.1
+    is-weakset: ^2.0.1
+  checksum: c815bbd163107ef9cb84f135e6f34453eaf4cca994e7ba85ddb0d27cea724c623fae2a473ceccfd5549c53cc65a5d82692de418166df3f858e1e5dc60818581c
   languageName: node
   linkType: hard
 

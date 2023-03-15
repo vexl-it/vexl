@@ -2,7 +2,10 @@ import {type ServiceUrl} from '../../ServiceUrl.brand'
 import {type CreateAxiosDefaults} from 'axios'
 import {type GetUserSessionCredentials} from '../../UserSessionCredentials.brand'
 import urlJoin from 'url-join'
-import {createAxiosInstanceWithAuth, axiosCallWithValidation} from '../../utils'
+import {
+  createAxiosInstanceWithAuthAndLogging,
+  axiosCallWithValidation,
+} from '../../utils'
 import {type PlatformName} from '../../PlatformName'
 import {
   type GetOffersForMeCreatedOrModifiedAfterRequest,
@@ -22,7 +25,7 @@ export function privateApi({
   getUserSessionCredentials: GetUserSessionCredentials
   axiosConfig?: Omit<CreateAxiosDefaults, 'baseURL'>
 }) {
-  const axiosInstance = createAxiosInstanceWithAuth(
+  const axiosInstance = createAxiosInstanceWithAuthAndLogging(
     getUserSessionCredentials,
     platform,
     {

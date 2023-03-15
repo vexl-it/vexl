@@ -5,7 +5,7 @@ import * as TE from 'fp-ts/TaskEither'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import * as SecretStore from 'expo-secure-store'
 import * as crypto from '@vexl-next/cryptography'
-import {type PrivateKey} from '@vexl-next/cryptography'
+import {type KeyHolder} from '@vexl-next/cryptography'
 
 export interface JsonParseError {
   readonly _tag: 'jsonParseError'
@@ -21,6 +21,7 @@ export function parseJson(json: string): E.Either<JsonParseError, any> {
 export interface ZodParseError<T> {
   readonly _tag: 'ParseError'
   readonly error: ZodError<T>
+  readonly originalData: unknown
 }
 
 export function safeParse<T extends z.ZodType>(
@@ -34,6 +35,7 @@ export function safeParse<T extends z.ZodType>(
         return E.left<ZodParseError<T>>({
           _tag: 'ParseError',
           error: result.error,
+          originalData: JSON.stringify(v),
         })
       }
       return E.right(result.data)
@@ -143,23 +145,23 @@ export function aesDecrypt(
 }
 
 export function aesEncrypt(
-  data: string,
   password: string
-): TE.TaskEither<CryptoError, string> {
-  return TE.tryCatch(
-    async () => crypto.aes.aesCTREncrypt({data, password}),
-    (e) => ({_tag: 'cryptoError', e} as const)
-  )
+): (data: string) => TE.TaskEither<CryptoError, string> {
+  return (data: string) =>
+    TE.tryCatch(
+      async () => crypto.aes.aesCTREncrypt({data, password}),
+      (e) => ({_tag: 'cryptoError', e} as const)
+    )
 }
 
 export function aesGCMIgnoreTagDecrypt(
-  data: string,
   password: string
-): TE.TaskEither<CryptoError, string> {
-  return TE.tryCatch(
-    async () => crypto.aes.aesGCMIgnoreTagDecrypt({data, password}),
-    (e) => ({_tag: 'cryptoError', e} as const)
-  )
+): (data: string) => TE.TaskEither<CryptoError, string> {
+  return (data) =>
+    TE.tryCatch(
+      async () => crypto.aes.aesGCMIgnoreTagDecrypt({data, password}),
+      (e) => ({_tag: 'cryptoError', e} as const)
+    )
 }
 
 export function aesGCMIgnoreTagEncrypt(
@@ -172,17 +174,26 @@ export function aesGCMIgnoreTagEncrypt(
   )
 }
 
-export function eciesDecrypt({
-  data,
-  privateKey,
-}: {
-  data: string
-  privateKey: PrivateKey
-}): TE.TaskEither<CryptoError, string> {
-  return TE.tryCatch(
-    async () => await crypto.eciesLegacy.eciesLegacyDecrypt({data, privateKey}),
-    (e) => ({_tag: 'cryptoError', e} as const)
-  )
+export function eciesDecrypt(
+  privateKey: KeyHolder.PrivateKeyHolder
+): (data: string) => TE.TaskEither<CryptoError, string> {
+  return (data) =>
+    TE.tryCatch(
+      async () =>
+        await crypto.eciesLegacy.eciesLegacyDecrypt({data, privateKey}),
+      (e) => ({_tag: 'cryptoError', e} as const)
+    )
+}
+
+export function eciesEncrypt(
+  publicKey: KeyHolder.PublicKeyHolder
+): (data: string) => TE.TaskEither<CryptoError, string> {
+  return (data) =>
+    TE.tryCatch(
+      async () =>
+        await crypto.eciesLegacy.eciesLegacyEncrypt({data, publicKey}),
+      (e) => ({_tag: 'cryptoError', e} as const)
+    )
 }
 
 export interface JsonStringifyError {

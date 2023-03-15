@@ -1,8 +1,9 @@
 import {ecdsaSign, ecdsaVerify} from './ecdsa'
-import {KeyFormat, PrivateKey, PublicKey} from '../KeyHolder'
 import {stripVersion} from '../versionWrapper'
+import {generatePrivateKey, importPublicKey} from '../KeyHolder'
+import {PublicKeyPemBase64} from '../KeyHolder/brands'
 
-const privateKey = PrivateKey.generate()
+const privateKey = generatePrivateKey()
 
 it('Should successfully sign message and verify the message is signed', () => {
   const challenge = 'Random String'
@@ -22,9 +23,10 @@ it('Should successfully sign message and verify the message is signed', () => {
 })
 
 it('Should successfully verify message that was signed using openssl command', () => {
-  const publicKey = PublicKey.import({
-    key: 'LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUU0d0VBWUhLb1pJemowQ0FRWUZLNEVFQUNFRE9nQUVSZGtIN1hHM1VRaGZIR1RzQmJ5alVXRmU2SFNycmxZWQpYcm95b0cvdGszMDlxaEprbGtCcGN0eWV2OUJIQUE0VlVPWi9GSytpNzZFPQotLS0tLUVORCBQVUJMSUMgS0VZLS0tLS0=',
-    type: KeyFormat.PEM_BASE64,
+  const publicKey = importPublicKey({
+    publicKeyPemBase64: PublicKeyPemBase64.parse(
+      'LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUU0d0VBWUhLb1pJemowQ0FRWUZLNEVFQUNFRE9nQUVSZGtIN1hHM1VRaGZIR1RzQmJ5alVXRmU2SFNycmxZWQpYcm95b0cvdGszMDlxaEprbGtCcGN0eWV2OUJIQUE0VlVPWi9GSytpNzZFPQotLS0tLUVORCBQVUJMSUMgS0VZLS0tLS0='
+    ),
   })
 
   //    char privateKey[] = "LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1IZ0NBUUF3RUFZSEtvWkl6ajBDQVFZRks0RUVBQ0VFWVRCZkFnRUJCQndsOUhvMDd0VTZaUW1kSGhRV01OUUUKR1N3Tm9McldmMVVvaFhkY29Ud0RPZ0FFU0RGWnFSRzBRb291TFpsV09KTFBSVlJqYUxLQXJZdldDRG94ZnRyUAppSVdQNGh6RlRNVDlhZHg5R24vcWpsNlNXWlVFVXp0REdEZz0KLS0tLS1FTkQgUFJJVkFURSBLRVktLS0tLQo=";
@@ -45,8 +47,8 @@ it('Should successfully verify message that was signed using openssl command', (
 })
 
 it('Should not verify signature signed with different public key', () => {
-  const privateKey = PrivateKey.generate()
-  const privateKey2 = PrivateKey.generate()
+  const privateKey = generatePrivateKey()
+  const privateKey2 = generatePrivateKey()
   const challenge = 'Some message'
   const signature = ecdsaSign({
     challenge,

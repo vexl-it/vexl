@@ -9,6 +9,7 @@ import readSessionFromStorage from './readSessionFromStorage'
 import writeSessionToStorage from './writeSessionToStorage'
 import * as O from 'fp-ts/Option'
 import {useFinishPostLoginFlow} from '../postLoginOnboarding'
+import {storage} from '../../utils/fpMmkv'
 
 const SESSION_KEY = 'session'
 const SECRET_TOKEN_KEY = 'secretToken'
@@ -142,5 +143,6 @@ export function useLogout(): () => void {
   return () => {
     setSession(O.none)
     setFinishedPostOnboarding(false)
+    storage._storage.clearAll()
   }
 }

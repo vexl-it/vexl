@@ -1,4 +1,3 @@
-import {KeyFormat, PrivateKey} from '../KeyHolder'
 import {
   eciesCTRDecrypt,
   eciesCTREncrypt,
@@ -6,8 +5,10 @@ import {
   eciesGTMEncrypt,
 } from './ecies'
 import * as crypto from 'node:crypto'
+import {generatePrivateKey, importPrivateKey} from '../KeyHolder'
+import {PrivateKeyRaw} from '../KeyHolder/brands'
 
-const privateKey = PrivateKey.generate()
+const privateKey = generatePrivateKey()
 
 describe('ECIES GTM', () => {
   it('Should successfully encrypt and decrypt', async () => {
@@ -24,9 +25,10 @@ describe('ECIES GTM', () => {
   })
 
   it('Should decrypt a static message as expected', async () => {
-    const privateKey2 = PrivateKey.import({
-      key: '6HizupRO2bZAhj4UHOB3uQsatrDJll8t1LSnxg==',
-      type: KeyFormat.RAW,
+    const privateKey2 = importPrivateKey({
+      privateKeyRaw: PrivateKeyRaw.parse(
+        '6HizupRO2bZAhj4UHOB3uQsatrDJll8t1LSnxg=='
+      ),
     })
 
     const decrypted = await eciesGTMDecrypt({
@@ -104,9 +106,10 @@ describe('ECIES CTR', () => {
   })
 
   it('Should decrypt a static message as expected', async () => {
-    const privateKey2 = PrivateKey.import({
-      key: '6HizupRO2bZAhj4UHOB3uQsatrDJll8t1LSnxg==',
-      type: KeyFormat.RAW,
+    const privateKey2 = importPrivateKey({
+      privateKeyRaw: PrivateKeyRaw.parse(
+        '6HizupRO2bZAhj4UHOB3uQsatrDJll8t1LSnxg=='
+      ),
     })
 
     const decrypted = await eciesCTRDecrypt({

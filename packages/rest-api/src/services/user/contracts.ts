@@ -1,6 +1,7 @@
 import z from 'zod'
 import {type AxiosResponse} from 'axios'
 import {type E164PhoneNumber} from '@vexl-next/domain/dist/general/E164PhoneNumber.brand'
+import {PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
 
 export interface InvalidPhoneNumber {
   _tag: 'InvalidPhoneNumber'
@@ -55,7 +56,7 @@ export const VerifyPhoneNumberRequest = z.object({
   id: VerificationId,
   code: z.string().nonempty(),
   // TODO branded type for keys
-  userPublicKey: z.string().nonempty(),
+  userPublicKey: PublicKeyPemBase64,
 })
 export type VerifyPhoneNumberRequest = z.TypeOf<typeof VerifyPhoneNumberRequest>
 
@@ -68,7 +69,7 @@ export type VerifyPhoneNumberResponse = z.TypeOf<
 >
 
 export const VerifyChallengeRequest = z.object({
-  userPublicKey: z.string().nonempty(),
+  userPublicKey: PublicKeyPemBase64,
   signature: z.string().nonempty(),
 })
 export type VerifyChallengeRequest = z.TypeOf<typeof VerifyChallengeRequest>

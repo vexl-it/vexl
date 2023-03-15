@@ -2,6 +2,7 @@ import {ServiceUrl} from './ServiceUrl.brand'
 import * as user from './services/user'
 import * as contact from './services/contact'
 import * as offer from './services/offer'
+import * as chat from './services/chat'
 
 import {PlatformName} from './PlatformName'
 import * as UserSessionCredentials from './UserSessionCredentials.brand'
@@ -12,7 +13,7 @@ export interface CredentialHeaders {
   signature: string
 }
 
-export {user, contact, offer}
+export {user, contact, offer, chat}
 
 export const ENV_PRESETS = {
   stageEnv: {

@@ -1,4 +1,3 @@
-import {type OfferInfo} from '@vexl-next/domain/dist/general/OfferInfo'
 import {type Atom, atom, useAtomValue, useSetAtom} from 'jotai'
 import {DateTime} from 'luxon'
 import {useCallback, useMemo} from 'react'
@@ -11,6 +10,7 @@ import {pipe} from 'fp-ts/function'
 import {useSessionAssumeLoggedIn} from '../session'
 import {usePrivateApiAssumeLoggedIn} from '../../api'
 import * as TE from 'fp-ts/TaskEither'
+import {type OfferInfo} from '@vexl-next/domain/dist/general/offers'
 
 export interface OffersStateInitial {
   readonly state: 'initial'
@@ -60,7 +60,7 @@ export function useRefreshOffers(): () => void {
     console.log('💫 Refreshing offers')
     setOfferState((prev) => ({...prev, state: 'loading'}))
     void pipe(
-      fetchAndDecryptOffers(api.offer, session.sessionCredentials),
+      fetchAndDecryptOffers(api.offer, session.privateKey),
       TE.match(
         (left) => {
           console.log('😡 Error while refreshing offers', left.error)

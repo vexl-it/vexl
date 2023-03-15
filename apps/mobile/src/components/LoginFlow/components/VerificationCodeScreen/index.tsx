@@ -9,10 +9,7 @@ import * as crypto from '@vexl-next/cryptography'
 import {useVerifyPhoneNumber} from '../../api/verifyPhoneNumber'
 import {pipe} from 'fp-ts/function'
 import * as TE from 'fp-ts/TaskEither'
-import * as E from 'fp-ts/Either'
-import reportError from '../../../../utils/reportError'
 import {Alert, TouchableWithoutFeedback} from 'react-native'
-import {serializePrivateKey} from '../../utils'
 import Countdown from './components/Countdown'
 import {DateTime} from 'luxon'
 import {useShowLoadingOverlay} from '../../../LoadingOverlayProvider'
@@ -106,24 +103,14 @@ function VerificationCodeScreen({
         onPress={() => {
           loadingOverlay.show()
           void pipe(
-            E.tryCatch(
-              () => crypto.PrivateKey.generate(),
-              (e) => {
-                reportError(
-                  'error',
-                  '‼️ Error while generating private key',
-                  e as any
-                )
-                return t('common.cryptoError')
-              }
-            ),
-            TE.fromEither,
+            crypto.KeyHolder.generatePrivateKey(),
+            TE.right,
             TE.bindTo('privateKey'),
             TE.bind('verifyPhoneNumberResponse', ({privateKey}) =>
               verifyPhoneNumber({
                 code: userCode,
                 id: initPhoneVerificationResponse.verificationId,
-                userPublicKey: privateKey.exportPublicKey(),
+                userPublicKey: privateKey.publicKeyPemBase64,
               })
             ),
             TE.match(
@@ -135,7 +122,7 @@ function VerificationCodeScreen({
                 loadingOverlay.hide()
                 navigation.navigate('SuccessLogin', {
                   verifyPhoneNumberResponse,
-                  privateKey: serializePrivateKey(privateKey),
+                  privateKey,
                   realUserData,
                   anonymizedUserData,
                   phoneNumber,

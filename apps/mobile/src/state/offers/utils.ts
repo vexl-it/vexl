@@ -1,4 +1,3 @@
-import {type PrivateKey} from '@vexl-next/cryptography'
 import {type ServerOffer} from '@vexl-next/rest-api/dist/services/offer/contracts'
 import * as TE from 'fp-ts/TaskEither'
 import * as E from 'fp-ts/Either'
@@ -12,7 +11,8 @@ import {
   type ZodParseError,
 } from '../../utils/fpUtils'
 import {pipe} from 'fp-ts/function'
-import {OfferInfo} from '@vexl-next/domain/dist/general/OfferInfo'
+import {type KeyHolder} from '@vexl-next/cryptography'
+import {OfferInfo} from '@vexl-next/domain/dist/general/offers'
 
 export interface OfferParsingError {
   _tag: 'OfferParsingError'
@@ -69,7 +69,7 @@ function decryptedPayloadsToOffer({
 }
 
 export function decryptOffer(
-  privateKey: PrivateKey
+  privateKey: KeyHolder.PrivateKeyHolder
 ): (
   flow: ServerOffer
 ) => TE.TaskEither<
@@ -82,19 +82,15 @@ export function decryptOffer(
       TE.bindTo('serverOffer'),
       TE.bindW('privatePayload', ({serverOffer}) => {
         return pipe(
-          eciesDecrypt({
-            data: serverOffer.privatePayload,
-            privateKey,
-          }),
+          TE.right(serverOffer.privatePayload),
+          TE.chainW(eciesDecrypt(privateKey)),
           TE.chainEitherKW(parseJson)
         )
       }),
       TE.bindW('publicPayload', ({privatePayload, serverOffer}) => {
         return pipe(
-          aesGCMIgnoreTagDecrypt(
-            serverOffer.publicPayload.substring(1),
-            privatePayload.symmetricKey
-          ),
+          TE.right(serverOffer.publicPayload.substring(1)),
+          TE.chainW(aesGCMIgnoreTagDecrypt(privatePayload.symmetricKey)),
           TE.chainEitherKW(parseJson)
         )
       }),

@@ -1,10 +1,12 @@
-import {KeyFormat, PrivateKey} from '../KeyHolder'
 import {eciesLegacyDecrypt, eciesLegacyEncrypt} from './eciesLegacy'
+import {generatePrivateKey, importPrivateKey} from '../KeyHolder'
+import {PrivateKeyPemBase64} from '../KeyHolder/brands'
 
 it('Should decrypt message as expected', async () => {
-  const privateKey = PrivateKey.import({
-    key: 'LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1IZ0NBUUF3RUFZSEtvWkl6ajBDQVFZRks0RUVBQ0VFWVRCZkFnRUJCQnhJWTl5Q3prMU4vWXU3UFZlbVJWc1QKTStCYjFMODRWbDNUZ2QvMm9Ud0RPZ0FFWUFxNWc5RGxBZ1VSWHUvc3JKQnByRWNnYlp3cDBJL2xudjgvR2NQNApGeU92YkorQXZ1RzZjL1pXR0lldUVSVXpKVlZIZzVyVjRRND0KLS0tLS1FTkQgUFJJVkFURSBLRVktLS0tLQo=',
-    type: KeyFormat.PEM_BASE64,
+  const privateKey = importPrivateKey({
+    privateKeyPemBase64: PrivateKeyPemBase64.parse(
+      'LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1IZ0NBUUF3RUFZSEtvWkl6ajBDQVFZRks0RUVBQ0VFWVRCZkFnRUJCQnhJWTl5Q3prMU4vWXU3UFZlbVJWc1QKTStCYjFMODRWbDNUZ2QvMm9Ud0RPZ0FFWUFxNWc5RGxBZ1VSWHUvc3JKQnByRWNnYlp3cDBJL2xudjgvR2NQNApGeU92YkorQXZ1RzZjL1pXR0lldUVSVXpKVlZIZzVyVjRRND0KLS0tLS1FTkQgUFJJVkFURSBLRVktLS0tLQo='
+    ),
   })
 
   const cipher =
@@ -19,7 +21,7 @@ it('Should decrypt message as expected', async () => {
 })
 
 it('Should encrypt and decrypt message', async () => {
-  const keyOfReceiver = PrivateKey.generate()
+  const keyOfReceiver = generatePrivateKey()
 
   const message =
     'Test message that is really really long, Test message that is really really longTest message that is really really longTest message that is really really longTest message that is really really longTest message that is really really longTest message that is really really longTest message that is really really longTest message that is really really longTest message that is really really longTest message that is really really longTest message that is really really longTest message that is really really longTest message that is really really longTest message that is really really longTest message that is really really longTest message that is really really longTest message that is really really longTest message that is really really longTest message that is really really longTest message that is really really longTest message that is really really longTest message that is really really longTest message that is really really long'

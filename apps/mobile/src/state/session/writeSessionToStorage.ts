@@ -10,7 +10,6 @@ import {
   saveItemToAsyncStorage,
   saveItemToSecretStorage,
 } from '../../utils/fpUtils'
-import {KeyFormat} from '@vexl-next/cryptography'
 
 // TODO refactor to ReaderTaskEither to remove sideeffects
 export default function writeSessionToStorage(
@@ -23,26 +22,17 @@ export default function writeSessionToStorage(
   return pipe(
     TE.right(session),
     TE.bindTo('session'),
-    TE.bindW('privateKeyRaw', ({session}) =>
+    TE.chainW(({session}) =>
       pipe(
-        TE.right(
-          session.sessionCredentials.privateKey.exportPrivateKey(KeyFormat.RAW)
-        ),
-        TE.chainFirstW(saveItemToSecretStorage(secretStorageKey))
-      )
-    ),
-    TE.bindW('jsonStringToSave', ({session, privateKeyRaw}) =>
-      pipe(
-        TE.right({
-          ...session,
-          sessionCredentials: {
-            ...session.sessionCredentials,
-            privateKey: undefined,
-          },
-        }),
+        TE.right(session),
         TE.chainEitherKW(stringifyToJson),
-        TE.chainW((json) => aesEncrypt(json, privateKeyRaw)),
-        TE.chainFirstW(saveItemToAsyncStorage(asyncStorageKey))
+        TE.chainW(aesEncrypt(session.privateKey.privateKeyRaw)),
+        TE.chainFirstW(saveItemToAsyncStorage(asyncStorageKey)),
+        TE.chainFirstW(() =>
+          saveItemToSecretStorage(secretStorageKey)(
+            session.privateKey.privateKeyRaw
+          )
+        )
       )
     ),
     TE.map(() => undefined)

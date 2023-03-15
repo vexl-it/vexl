@@ -13,7 +13,7 @@ export const contactsToDisplayAtom = atom((get) => {
 
   const allContacts = [
     ...(O.isSome(contactsFromDevice) ? contactsFromDevice.value : []),
-    ...(O.isSome(customContacts) ? customContacts.value : []),
+    ...customContacts,
   ]
 
   const contacts = matchSorter(allContacts, searchText, {

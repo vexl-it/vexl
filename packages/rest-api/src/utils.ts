@@ -85,22 +85,68 @@ export function createAxiosInstance(
   })
 }
 
-export function createAxiosInstanceWithAuth(
+type LoggingFunction = (message?: any, ...optionalParams: any[]) => void
+
+export function createAxiosInstanceWithAuthAndLogging(
   getUserSessionCredentials: GetUserSessionCredentials,
   platform: PlatformName,
-  axiosConfig: CreateAxiosDefaults
+  axiosConfig: CreateAxiosDefaults,
+  loggingFunction: LoggingFunction | null = console.info
 ): AxiosInstance {
   const axiosInstance = createAxiosInstance(platform, axiosConfig)
 
+  if (loggingFunction) {
+    axiosInstance.interceptors.request.use((config) => {
+      loggingFunction(
+        `🌐 ⬆️ Sending request: ${
+          config.method?.toUpperCase() ?? '[unknown method]'
+        } "${config.baseURL ?? ''}${config.url ?? '[unknown url]'}"`,
+        {headers: config.headers, data: config.data}
+      )
+
+      return config
+    })
+    axiosInstance.interceptors.response.use(
+      (response) => {
+        loggingFunction(
+          `🌐 ✅  Response received: ${
+            response.config.method?.toUpperCase() ?? '[unknown method]'
+          } "${response.config.baseURL ?? ''}${
+            response.config.url ?? '[unknown url]'
+          }". Status: ${response.status}`,
+          {status: response.status, data: response.data}
+        )
+        return response
+      },
+      (error) => {
+        if (!isAxiosError(error)) {
+          loggingFunction(
+            '🌐 ‼️ Non axios when sending request or receiving response:',
+            error
+          )
+          return
+        }
+        loggingFunction(
+          `🌐 ‼️ Error response received ${
+            error.config?.method?.toUpperCase() ?? 'unknown method'
+          } "${error.config?.baseURL ?? ''}${
+            error.config?.url ?? '[unknown url]'
+          }".`,
+          {status: error.response?.status, data: error.response?.data}
+        )
+
+        return Promise.reject(error)
+      }
+    )
+  }
+
   axiosInstance.interceptors.request.use((config) => {
     const credentials = getUserSessionCredentials()
-    config.headers.set(
-      HEADER_PUBLIC_KEY,
-      credentials.privateKey.exportPublicKey()
-    )
+    config.headers.set(HEADER_PUBLIC_KEY, credentials.publicKey)
     config.headers.set(HEADER_SIGNATURE, credentials.signature)
     config.headers.set(HEADER_HASH, credentials.hash)
     return config
   })
+
   return axiosInstance
 }

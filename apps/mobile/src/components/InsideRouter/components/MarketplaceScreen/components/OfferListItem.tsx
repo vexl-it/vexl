@@ -1,7 +1,6 @@
 import styled from '@emotion/native'
 import Text from '../../../../Text'
 import Image from '../../../../Image'
-import {type OfferInfo} from '@vexl-next/domain/dist/general/OfferInfo'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import {bigNumberToString} from '../../../../../utils/bigNumberToString'
 import bankSvg from '../images/bankSvg'
@@ -12,6 +11,7 @@ import {AnonymousAvatarFromSeed} from '../../../../AnonymousAvatar'
 import randomName from '../../../../../utils/randomName'
 import {useNavigation} from '@react-navigation/native'
 import bubbleTipSvg from '../images/bubbleTipSvg'
+import {type OfferInfo} from '@vexl-next/domain/dist/general/offers'
 
 const RootContainer = styled.View`
   margin-top: 24px;

@@ -6,7 +6,8 @@ import {type RootStackParamsList} from '../../navigationTypes'
 import PostLoginFlow from '../PostLoginFlow'
 import {useHandlePostLoginFlowRedirect} from './utils'
 import TodoScreen from '../TodoScreen'
-import OfferDetailScreen from '../../OfferDetailScreen'
+import OfferDetailScreen from '../OfferDetailScreen'
+import ChatDetailScreen from '../ChatDetailScreen'
 
 const Stack = createNativeStackNavigator<RootStackParamsList>()
 
@@ -29,6 +30,7 @@ function RootNavigation(): JSX.Element {
           <Stack.Screen name={'TodoScreen'} component={TodoScreen} />
           <Stack.Screen name={'PostLoginFlow'} component={PostLoginFlow} />
           <Stack.Screen name={'OfferDetail'} component={OfferDetailScreen} />
+          <Stack.Screen name={'ChatDetail'} component={ChatDetailScreen} />
         </Stack.Group>
       )}
     </Stack.Navigator>

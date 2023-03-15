@@ -21,6 +21,7 @@ import coinsIconSvg from '../images/coinsIconSvg'
 import faceIdIconSvg from '../images/faceIdIconSvg'
 import contactIconSvg from '../images/contactIconSvg'
 import {useNavigation} from '@react-navigation/native'
+import {useLogout} from '../../../../../state/session'
 
 const RootContainer = styled.View`
   flex: 1;
@@ -87,6 +88,7 @@ function Item({
 function ButtonsSection(): JSX.Element {
   const {t} = useTranslation()
   const navigation = useNavigation()
+  const logout = useLogout()
 
   function todo(): void {
     Alert.alert('To be implemented')
@@ -208,7 +210,7 @@ function ButtonsSection(): JSX.Element {
           </ItemText>
         ),
         icon: trashIconSvg,
-        onPress: todo,
+        onPress: logout,
       },
     ],
   ]

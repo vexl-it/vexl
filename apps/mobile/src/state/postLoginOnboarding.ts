@@ -1,9 +1,8 @@
 import {useAtomValue, useSetAtom} from 'jotai'
-import type O from 'fp-ts/Option'
-import {atomWithParsedAsyncStorage} from '../utils/atomWithParsedAsyncStorage'
 import {z} from 'zod'
+import {atomWithParsedMmkvStorage} from '../utils/atomWithParsedMmkvStorage'
 
-export const postLoginFinishedAtom = atomWithParsedAsyncStorage(
+export const postLoginFinishedAtom = atomWithParsedMmkvStorage(
   'postLoginFinished1',
   false,
   z.boolean()
@@ -16,6 +15,6 @@ export function useFinishPostLoginFlow(): (f: boolean) => void {
   }
 }
 
-export function useIsPostLoginFinished(): O.Option<boolean> {
+export function useIsPostLoginFinished(): boolean {
   return useAtomValue(postLoginFinishedAtom)
 }

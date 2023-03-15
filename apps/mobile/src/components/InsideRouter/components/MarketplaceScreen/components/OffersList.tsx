@@ -1,9 +1,9 @@
-import {type OfferInfo} from '@vexl-next/domain/dist/general/OfferInfo'
 import {css} from '@emotion/native'
 import OfferListItem from './OfferListItem'
 import {FlatList, RefreshControl} from 'react-native'
 import OffersListButtons from './OffersListButtons'
 import {useTheme} from '@emotion/react'
+import {type OfferInfo} from '@vexl-next/domain/dist/general/offers'
 
 export interface Props {
   readonly offers: OfferInfo[]

@@ -7,11 +7,10 @@ import {useSearchTextAsCustomContact} from './state/searchBar'
 import AddContactRow from './components/AddContactRow'
 import NothingFound from './components/NothingFound'
 import {useContactsToDisplay} from './state/contactsToDisplay'
-import {useStore} from 'jotai'
 import {useImportContacts} from './api'
 import {useShowLoadingOverlay} from '../LoadingOverlayProvider'
 import {hmac} from '@vexl-next/cryptography'
-import {selectedContactsAtomOrEmptyArray} from './state/selectedContacts'
+import {useGetSelectedContacts} from './state/selectedContacts'
 import {pipe} from 'fp-ts/function'
 import {Alert} from 'react-native'
 import WhiteContainer from '../WhiteContainer'
@@ -36,14 +35,13 @@ function ContactsListSelect({
   const importContacts = useImportContacts()
   const loadingOverlay = useShowLoadingOverlay()
   const toDisplay = useContactsToDisplay()
-  const store = useStore()
+  const getSelectedContacts = useGetSelectedContacts()
 
   function onSubmit(): void {
     loadingOverlay.show()
-    const hashes = store
-      .get(selectedContactsAtomOrEmptyArray)
-      // TODO normalize data some more?
-      .map((one) => hmac.hmacSign({password: 'VexlVexl', data: one}))
+    const hashes = getSelectedContacts().map((one) =>
+      hmac.hmacSign({password: 'VexlVexl', data: one})
+    )
 
     void pipe(
       importContacts({contacts: hashes}),

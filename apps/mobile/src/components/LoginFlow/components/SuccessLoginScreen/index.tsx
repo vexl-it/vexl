@@ -4,7 +4,6 @@ import reportError from '../../../../utils/reportError'
 import {Alert} from 'react-native'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import {Session} from '../../../../brands/Session.brand'
-import {deserializePrivateKey} from '../../utils'
 import LoaderView from '../../../LoaderView'
 import {pipe} from 'fp-ts/function'
 import * as E from 'fp-ts/Either'
@@ -17,7 +16,6 @@ import {
   HeaderProxy,
   NextButtonProxy,
 } from '../../../PageWithButtonAndProgressHeader'
-import {UserSessionCredentials} from '@vexl-next/rest-api/dist/UserSessionCredentials.brand'
 import {useCreateUserAtContactMs} from '../../api/createUserAtContactsMS'
 
 type Props = LoginStackScreenProps<'SuccessLogin'>
@@ -29,7 +27,7 @@ function SuccessLoginScreen({
   route: {
     params: {
       verifyPhoneNumberResponse,
-      privateKey: serializedPrivateKey,
+      privateKey,
       phoneNumber,
       realUserData,
       anonymizedUserData,
@@ -45,15 +43,7 @@ function SuccessLoginScreen({
     const startedAt = Date.now()
 
     void pipe(
-      deserializePrivateKey(serializedPrivateKey),
-      E.mapLeft((error) => {
-        reportError(
-          'error',
-          'error while deserializing private key got from navigation',
-          error
-        )
-        return t('common.unknownError')
-      }),
+      E.right(privateKey),
       E.bindTo('privateKey'),
       E.bindW('signature', ({privateKey}) =>
         E.tryCatch(
@@ -72,26 +62,25 @@ function SuccessLoginScreen({
       TE.fromEither,
       TE.bindW('verifyChallengeResponse', ({privateKey, signature}) =>
         verifyChallenge({
-          userPublicKey: privateKey.exportPublicKey(),
+          userPublicKey: privateKey.publicKeyPemBase64,
           signature,
         })
       ),
       TE.chainW(({privateKey, signature, verifyChallengeResponse}) => {
         return pipe(
-          safeParse(UserSessionCredentials)({
+          E.right({
+            version: 1,
+            realUserData,
+            anonymizedUserData,
+            sessionCredentials: {
+              publicKey: privateKey.publicKeyPemBase64,
+              hash: verifyChallengeResponse.hash,
+              signature: verifyChallengeResponse.signature,
+            },
+            phoneNumber,
             privateKey,
-            hash: verifyChallengeResponse.hash,
-            signature: verifyChallengeResponse.signature,
           }),
-          E.chainW((sessionCredentials) =>
-            safeParse(Session)({
-              version: 1,
-              realUserData,
-              anonymizedUserData,
-              sessionCredentials,
-              phoneNumber,
-            })
-          ),
+          E.chainW(safeParse(Session)),
           E.mapLeft((error) => {
             reportError('error', 'Error while creating session', error)
             return t('common.unknownError')
@@ -100,9 +89,13 @@ function SuccessLoginScreen({
         )
       }),
       TE.bindTo('session'),
-      TE.bindW('_', ({session}) =>
-        createUserAtContactMs({firebaseToken: null}, session.sessionCredentials)
-      ),
+      TE.bindW('_', ({session}) => {
+        console.log('Session', session)
+        return createUserAtContactMs(
+          {firebaseToken: null},
+          session.sessionCredentials
+        )
+      }),
       TE.match(
         (text) => {
           Alert.alert(text)
@@ -119,7 +112,7 @@ function SuccessLoginScreen({
       )
     )()
   }, [
-    serializedPrivateKey,
+    privateKey,
     t,
     verifyPhoneNumberResponse.challenge,
     verifyChallenge,

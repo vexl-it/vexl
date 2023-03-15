@@ -4,7 +4,6 @@ import {
   type InitPhoneNumberVerificationResponse,
   type VerifyPhoneNumberResponse,
 } from '@vexl-next/rest-api/dist/services/user/contracts'
-import {type SerializedPrivateKey} from './components/LoginFlow/utils'
 import {type E164PhoneNumber} from '@vexl-next/domain/dist/general/E164PhoneNumber.brand'
 import {type NativeStackScreenProps} from '@react-navigation/native-stack'
 import {type BottomTabScreenProps} from '@react-navigation/bottom-tabs'
@@ -13,6 +12,9 @@ import {
   type CompositeScreenProps,
   type NavigatorScreenParams,
 } from '@react-navigation/native'
+import {type OfferId} from '@vexl-next/domain/dist/general/offers'
+import {type ChatId} from '@vexl-next/domain/dist/general/messaging'
+import {type KeyHolder} from '@vexl-next/cryptography'
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type RootStackParamsList = {
@@ -22,10 +24,11 @@ export type RootStackParamsList = {
 
   InsideTabs: NavigatorScreenParams<InsideTabParamsList>
 
-  OfferDetail: {offerId: string}
+  OfferDetail: {offerId: OfferId}
+
+  ChatDetail: {chatId: ChatId}
 
   // TODO terms and conditions etc
-
   TodoScreen: undefined
 }
 
@@ -48,7 +51,7 @@ export type LoginStackParamsList = {
   Start: undefined
   SuccessLogin: {
     readonly verifyPhoneNumberResponse: VerifyPhoneNumberResponse
-    readonly privateKey: SerializedPrivateKey
+    readonly privateKey: KeyHolder.PrivateKeyHolder
     readonly realUserData: UserNameAndAvatar
     readonly anonymizedUserData: UserNameAndAvatar
     readonly phoneNumber: E164PhoneNumber

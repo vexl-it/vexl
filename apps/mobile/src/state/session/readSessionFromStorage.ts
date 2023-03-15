@@ -3,18 +3,16 @@ import {
   aesDecrypt,
   type CryptoError,
   type ErrorReadingFromStore,
-  parseJson,
-  safeParse,
   getItemFromAsyncStorage,
   getItemFromSecretStorage,
   type JsonParseError,
+  parseJson,
+  safeParse,
   type StoreEmpty,
   type ZodParseError,
 } from '../../utils/fpUtils'
 import * as TE from 'fp-ts/TaskEither'
 import {Session} from '../../brands/Session.brand'
-import * as crypto from '@vexl-next/cryptography'
-import {KeyFormat, type PrivateKey} from '@vexl-next/cryptography'
 
 export interface ParsingPrivateKeyError {
   _tag: 'errorParsingPrivateKey'
@@ -25,16 +23,7 @@ export interface SecretStoreError {
   _tag: 'secretStoreError'
   error: unknown
 }
-function fsParseRawPrivateKey(
-  rawKey: string
-): TE.TaskEither<ParsingPrivateKeyError, PrivateKey> {
-  return TE.tryCatch(
-    async () => crypto.PrivateKey.import({key: rawKey, type: KeyFormat.RAW}),
-    (e) => {
-      return {_tag: 'errorParsingPrivateKey', error: e} as const
-    }
-  )
-}
+
 export default function readSessionFromStorage({
   asyncStorageKey,
   secretStorageKey,
@@ -62,22 +51,10 @@ export default function readSessionFromStorage({
         })
       )
     ),
-    TE.bindW('decryptedJson', ({encryptedSessionJson, secretToken}) =>
+    TE.chainW(({encryptedSessionJson, secretToken}) =>
       aesDecrypt(encryptedSessionJson, secretToken)
     ),
-    TE.bindW('privateKey', ({secretToken}) =>
-      fsParseRawPrivateKey(secretToken)
-    ),
-    TE.bindW('decrypted', ({decryptedJson}) =>
-      TE.fromEither(parseJson(decryptedJson))
-    ),
-    TE.map(({decrypted, privateKey}) => ({
-      ...decrypted,
-      sessionCredentials: {
-        ...decrypted?.sessionCredentials,
-        privateKey,
-      },
-    })),
+    TE.chainEitherKW(parseJson),
     TE.chainEitherKW(safeParse(Session))
   )
 }

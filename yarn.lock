@@ -3649,6 +3649,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/uuid@npm:^9":
+  version: 9.0.1
+  resolution: "@types/uuid@npm:9.0.1"
+  checksum: c472b8a77cbeded4bc529220b8611afa39bd64677f507838f8083d8aac8033b1f88cb9ddaa2f8589e0dcd2317291d0f6e1379f82d5ceebd6f74f3b4825288e00
+  languageName: node
+  linkType: hard
+
 "@types/yargs-parser@npm:*":
   version: 21.0.0
   resolution: "@types/yargs-parser@npm:21.0.0"
@@ -3868,6 +3875,7 @@ __metadata:
     eslint: ^8.33.0
     fp-ts: ^2.13.1
     jest: ^29.4.1
+    js-base64: ^3.7.5
     match-sorter: ^6.3.1
     prettier: ^2.8.3
     ts-jest: ^29.0.5
@@ -3925,6 +3933,7 @@ __metadata:
     "@types/react": ~18.0.24
     "@types/react-native": ~0.70.6
     "@types/seed-random": ^2
+    "@types/uuid": ^9
     "@typescript-eslint/eslint-plugin": ^5.50.0
     "@vexl-next/cryptography": "workspace:*"
     "@vexl-next/domain": "workspace:*"
@@ -3960,14 +3969,17 @@ __metadata:
     jest: ^26.6.3
     jest-expo: ^47.0.1
     jotai: ^2.0.1
+    jotai-optics: ^0.3.0
     lottie-react-native: 5.1.4
     luxon: ^3.3.0
+    optics-ts: ^2.4.0
     prettier: 2.8.0
     react: 18.1.0
     react-native: 0.70.5
     react-native-flags: ^1.0.0
     react-native-flipper: ^0.176.0
     react-native-keyboard-aware-scroll-view: ^0.9.5
+    react-native-mmkv: ^2.6.3
     react-native-pager-view: 6.0.1
     react-native-phone-number-input: ^2.1.0
     react-native-quick-base64: ^2.0.5
@@ -3980,6 +3992,7 @@ __metadata:
     seed-random: ^2.2.0
     ts-node: ^10.9.1
     typescript: ^4.6.3
+    uuid: ^9.0.0
     zod: ^3.20.6
   languageName: unknown
   linkType: soft
@@ -3988,7 +4001,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@vexl-next/rest-api@workspace:packages/rest-api"
   dependencies:
-    "@vexl-next/cryptography": "workspace:*"
     "@vexl-next/domain": "workspace:*"
     "@vexl-next/eslint-config": "workspace:*"
     "@vexl-next/ts-config": "workspace:*"
@@ -10268,6 +10280,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"jotai-optics@npm:^0.3.0":
+  version: 0.3.0
+  resolution: "jotai-optics@npm:0.3.0"
+  peerDependencies:
+    jotai: ">=1.11.0"
+    optics-ts: "*"
+  checksum: 446fb07780ce8bc5e85862a1921d9621dc273a096ec8c3fec8d525612bc14964600ade28e4f272f7cf490918d3e362218141cd13cdae9def47be45c20f5dc544
+  languageName: node
+  linkType: hard
+
 "jotai@npm:^2.0.1":
   version: 2.0.1
   resolution: "jotai@npm:2.0.1"
@@ -10277,6 +10299,13 @@ __metadata:
     react:
       optional: true
   checksum: a04c601b4983e68526dd9170549ab062da7808ef950dabe9100124638e648cf32ce69291de153f18a3178cae52a2fe7e471a33ff59e9e2606b040fd83dff8948
+  languageName: node
+  linkType: hard
+
+"js-base64@npm:^3.7.5":
+  version: 3.7.5
+  resolution: "js-base64@npm:3.7.5"
+  checksum: 67a78c8b1c47b73f1c6fba1957e9fe6fd9dc78ac93ac46cc2e43472dcb9cf150d126fb0e593192e88e0497354fa634d17d255add7cc6ee3c7b4d29870faa8e18
   languageName: node
   linkType: hard
 
@@ -12090,6 +12119,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"optics-ts@npm:^2.4.0":
+  version: 2.4.0
+  resolution: "optics-ts@npm:2.4.0"
+  checksum: 99f7af4ee4972152a1289eb472ac77f73d322fcd4ee4a7efdd56311343711ce40fc647565a51aff203ce83310c5c6bf7462a87c2bdd2e61d875da027e528dc7f
+  languageName: node
+  linkType: hard
+
 "optionator@npm:^0.8.1":
   version: 0.8.3
   resolution: "optionator@npm:0.8.3"
@@ -12922,6 +12958,16 @@ __metadata:
   peerDependencies:
     react-native: ">=0.48.4"
   checksum: 5eec2aedb886213dfed4c8428a443b565dce80ba9fcf5897171e4c8829d4dd64c5011ac004d93f29adfc83ad6f88c2838d1a5b45255dc4a49bd1c0a169245800
+  languageName: node
+  linkType: hard
+
+"react-native-mmkv@npm:^2.6.3":
+  version: 2.7.0
+  resolution: "react-native-mmkv@npm:2.7.0"
+  peerDependencies:
+    react: "*"
+    react-native: ">=0.71.0"
+  checksum: 74f85b097fb96ecc6906f7b0fd83bf66462d874a3afc243b439a912579cf02dd83266e41da93a214a2986e4a28be42ea3c790f0936c0dbd08a4515395e2ad0de
   languageName: node
   linkType: hard
 
@@ -15447,6 +15493,15 @@ __metadata:
   bin:
     uuid: dist/bin/uuid
   checksum: 5575a8a75c13120e2f10e6ddc801b2c7ed7d8f3c8ac22c7ed0c7b2ba6383ec0abda88c905085d630e251719e0777045ae3236f04c812184b7c765f63a70e58df
+  languageName: node
+  linkType: hard
+
+"uuid@npm:^9.0.0":
+  version: 9.0.0
+  resolution: "uuid@npm:9.0.0"
+  bin:
+    uuid: dist/bin/uuid
+  checksum: 8dd2c83c43ddc7e1c71e36b60aea40030a6505139af6bee0f382ebcd1a56f6cd3028f7f06ffb07f8cf6ced320b76aea275284b224b002b289f89fe89c389b028
   languageName: node
   linkType: hard
 

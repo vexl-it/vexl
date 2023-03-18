@@ -5,7 +5,7 @@ import * as TE from 'fp-ts/TaskEither'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import * as SecretStore from 'expo-secure-store'
 import * as crypto from '@vexl-next/cryptography'
-import {type PrivateKey} from '@vexl-next/cryptography'
+import {type PrivateKey, type PublicKey} from '@vexl-next/cryptography'
 
 export interface JsonParseError {
   readonly _tag: 'jsonParseError'
@@ -172,17 +172,26 @@ export function aesGCMIgnoreTagEncrypt(
   )
 }
 
-export function eciesDecrypt({
-  data,
-  privateKey,
-}: {
-  data: string
+export function eciesDecrypt(
   privateKey: PrivateKey
-}): TE.TaskEither<CryptoError, string> {
-  return TE.tryCatch(
-    async () => await crypto.eciesLegacy.eciesLegacyDecrypt({data, privateKey}),
-    (e) => ({_tag: 'cryptoError', e} as const)
-  )
+): (data: string) => TE.TaskEither<CryptoError, string> {
+  return (data) =>
+    TE.tryCatch(
+      async () =>
+        await crypto.eciesLegacy.eciesLegacyDecrypt({data, privateKey}),
+      (e) => ({_tag: 'cryptoError', e} as const)
+    )
+}
+
+export function eciesEncrypt(
+  publicKey: PublicKey
+): (data: string) => TE.TaskEither<CryptoError, string> {
+  return (data) =>
+    TE.tryCatch(
+      async () =>
+        await crypto.eciesLegacy.eciesLegacyEncrypt({data, publicKey}),
+      (e) => ({_tag: 'cryptoError', e} as const)
+    )
 }
 
 export interface JsonStringifyError {

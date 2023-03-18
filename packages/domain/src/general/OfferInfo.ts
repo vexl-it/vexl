@@ -1,9 +1,7 @@
 import {z} from 'zod'
 import {UriString} from '../utility/UriString.brand'
 import {UserNameAndAvatar} from './UserNameAndAvatar.brand'
-
-export const IdNumeric = z.number().int().positive()
-export type IdNumeric = z.TypeOf<typeof IdNumeric>
+import {IdNumeric} from '../utility/IdNumeric'
 
 export const LocationState = z.enum(['ONLINE', 'IN_PERSON'])
 export type LocationState = z.TypeOf<typeof LocationState>
@@ -50,11 +48,15 @@ export const Location = z.object({
   latitude: z.string(),
   city: z.string(),
 })
+
 export type Location = z.TypeOf<typeof Location>
+
+export const OfferId = z.string().min(1).brand<'OfferId'>()
+export type OfferId = z.TypeOf<typeof OfferId>
 
 export const OfferInfo = z.object({
   id: IdNumeric,
-  offerId: z.string(),
+  offerId: OfferId,
   offerPublicKey: z.string(),
   offerDescription: z.string(),
   amountBottomLimit: z.number(),

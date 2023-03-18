@@ -22,7 +22,6 @@
     "typescript": "^4.9.4"
   },
   "dependencies": {
-    "@vexl-next/cryptography": "workspace:*",
     "@vexl-next/domain": "workspace:*",
     "axios": "^1.3.3",
     "url-join": "^5.0.0",

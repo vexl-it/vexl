@@ -19,6 +19,7 @@ import {
 } from '../../../PageWithButtonAndProgressHeader'
 import {UserSessionCredentials} from '@vexl-next/rest-api/dist/UserSessionCredentials.brand'
 import {useCreateUserAtContactMs} from '../../api/createUserAtContactsMS'
+import {KeyFormat} from '@vexl-next/cryptography'
 
 type Props = LoginStackScreenProps<'SuccessLogin'>
 
@@ -79,7 +80,7 @@ function SuccessLoginScreen({
       TE.chainW(({privateKey, signature, verifyChallengeResponse}) => {
         return pipe(
           safeParse(UserSessionCredentials)({
-            privateKey,
+            publicKey: privateKey.exportPublicKey(KeyFormat.PEM_BASE64),
             hash: verifyChallengeResponse.hash,
             signature: verifyChallengeResponse.signature,
           }),
@@ -90,6 +91,7 @@ function SuccessLoginScreen({
               anonymizedUserData,
               sessionCredentials,
               phoneNumber,
+              privateKey,
             })
           ),
           E.mapLeft((error) => {

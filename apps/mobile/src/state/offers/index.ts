@@ -60,7 +60,7 @@ export function useRefreshOffers(): () => void {
     console.log('💫 Refreshing offers')
     setOfferState((prev) => ({...prev, state: 'loading'}))
     void pipe(
-      fetchAndDecryptOffers(api.offer, session.sessionCredentials),
+      fetchAndDecryptOffers(api.offer, session.privateKey),
       TE.match(
         (left) => {
           console.log('😡 Error while refreshing offers', left.error)

@@ -30,10 +30,8 @@ function decryptOffer(
       TE.bindTo('serverOffer'),
       TE.bindW('privatePayload', ({serverOffer}) => {
         return pipe(
-          eciesDecrypt({
-            data: serverOffer.privatePayload,
-            privateKey,
-          }),
+          serverOffer.privatePayload,
+          eciesDecrypt(privateKey),
           TE.chainEitherKW(parseJson)
         )
       }),
@@ -62,11 +60,7 @@ export default function DebugFetchOffers(): JSX.Element {
         console.log('Number of offers', r.offers.length)
         return r.offers
       }),
-      TE.chainW(
-        A.traverse(TE.taskEither)(
-          decryptOffer(session.sessionCredentials.privateKey)
-        )
-      ),
+      TE.chainW(A.traverse(TE.taskEither)(decryptOffer(session.privateKey))),
       TE.match(
         (l) => {
           console.error(l)
@@ -89,7 +83,7 @@ export default function DebugFetchOffers(): JSX.Element {
               {
                 privatePayload: one.privatePayload,
                 publicPayload: one.publicPayload,
-                zserverOffer: serverOffer,
+                serverOffer,
               },
               null,
               1

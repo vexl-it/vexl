@@ -94,10 +94,7 @@ export function createAxiosInstanceWithAuth(
 
   axiosInstance.interceptors.request.use((config) => {
     const credentials = getUserSessionCredentials()
-    config.headers.set(
-      HEADER_PUBLIC_KEY,
-      credentials.privateKey.exportPublicKey()
-    )
+    config.headers.set(HEADER_PUBLIC_KEY, credentials.publicKey)
     config.headers.set(HEADER_SIGNATURE, credentials.signature)
     config.headers.set(HEADER_HASH, credentials.hash)
     return config

@@ -12,7 +12,10 @@ import {
   type CompositeScreenProps,
   type NavigatorScreenParams,
 } from '@react-navigation/native'
-import {type OfferId} from '@vexl-next/domain/dist/general/offers'
+import {
+  type OfferId,
+  type OfferType,
+} from '@vexl-next/domain/dist/general/offers'
 import {type ChatId} from '@vexl-next/domain/dist/general/messaging'
 import {type KeyHolder} from '@vexl-next/cryptography'
 
@@ -22,7 +25,9 @@ export type RootStackParamsList = {
 
   PostLoginFlow: NavigatorScreenParams<PostLoginStackParamsList>
 
-  InsideTabs: NavigatorScreenParams<InsideTabParamsList>
+  HomeTabs: NavigatorScreenParams<HomeTabs>
+
+  CreateOffer: {type: OfferType}
 
   OfferDetail: {offerId: OfferId}
 
@@ -42,6 +47,7 @@ export type LoginStackParamsList = {
   }
   AnonymizationNotice: undefined
   Intro: undefined
+
   Name: undefined
   PhoneNumber: {
     readonly realUserData: UserNameAndAvatar
@@ -85,15 +91,15 @@ export type PostLoginFlowScreenProps<T extends keyof PostLoginStackParamsList> =
   >
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type InsideTabParamsList = {
+export type HomeTabs = {
   Marketplace: undefined
   Messages: undefined
   Settings: undefined
 }
 
-export type InsideTabScreenProps<T extends keyof InsideTabParamsList> =
+export type HomeTabsTabScreenProps<T extends keyof HomeTabs> =
   CompositeScreenProps<
-    BottomTabScreenProps<InsideTabParamsList, T>,
+    BottomTabScreenProps<HomeTabs, T>,
     RootStackScreenProps<keyof RootStackParamsList>
   >
 
@@ -107,7 +113,7 @@ export type MarketplaceTabScreenProps<
   T extends keyof MarketplaceTabParamsList
 > = CompositeScreenProps<
   MaterialTopTabScreenProps<MarketplaceTabParamsList, T>,
-  InsideTabScreenProps<keyof InsideTabParamsList>
+  HomeTabsTabScreenProps<keyof HomeTabs>
 >
 
 declare global {

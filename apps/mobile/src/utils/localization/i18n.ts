@@ -14,4 +14,3 @@ i18n.defaultLocale = 'en'
 i18n.enableFallback = true
 
 export default i18n
-export type Dictionary = typeof en

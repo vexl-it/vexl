@@ -3,7 +3,6 @@ import {IdNumeric} from '../utility/IdNumeric'
 import {UserNameAndAvatar} from './UserNameAndAvatar.brand'
 import {OfferId} from './offers'
 import {UserName} from './UserName.brand'
-import {Uuid} from '../utility/Uuid.brand'
 import {Base64String} from '../utility/Base64String.brand'
 import {UnixMilliseconds} from '../utility/UnixMilliseconds.brand'
 import {KeyHolder} from '@vexl-next/cryptography'
@@ -49,8 +48,11 @@ export const DeanonymizedUser = z.object({
 })
 export type DeanonymizedUser = z.TypeOf<typeof DeanonymizedUser>
 
+const ChatMessageUuid = z.string().uuid().brand<'ChatMessageUuid'>()
+export type ChatMessageUuid = z.TypeOf<typeof ChatMessageUuid>
+
 export const ChatMessageEncodedPayload = z.object({
-  uuid: Uuid,
+  uuid: ChatMessageUuid,
   text: z.string(),
   image: Base64String.optional(),
   time: UnixMilliseconds,

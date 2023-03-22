@@ -1,4 +1,4 @@
-import InsideScreen from '../InsideRouter'
+import HomeTabs from '../HomeTabs'
 import LoginFlow from '../LoginFlow'
 import {useIsUserLoggedIn} from '../../state/session'
 import {createNativeStackNavigator} from '@react-navigation/native-stack'
@@ -26,7 +26,7 @@ function RootNavigation(): JSX.Element {
         <Stack.Screen name={'LoginFlow'} component={LoginFlow} />
       ) : (
         <Stack.Group>
-          <Stack.Screen name={'InsideTabs'} component={InsideScreen} />
+          <Stack.Screen name={'HomeTabs'} component={HomeTabs} />
           <Stack.Screen name={'TodoScreen'} component={TodoScreen} />
           <Stack.Screen name={'PostLoginFlow'} component={PostLoginFlow} />
           <Stack.Screen name={'OfferDetail'} component={OfferDetailScreen} />

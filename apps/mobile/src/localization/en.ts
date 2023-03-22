@@ -179,7 +179,7 @@ export default {
     'isSelling': 'is selling',
     'isBuying': 'is buying',
     'directFriend': 'Direct friend',
-    'frendOfFriend': 'Friend of friend',
+    'friendOfFriend': 'Friend of friend',
     'buy': 'Buy',
     'sell': 'Sell',
     'filterOffers': 'Filter offers',

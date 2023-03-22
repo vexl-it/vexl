@@ -1,6 +1,6 @@
 import React from 'react'
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs'
-import {type InsideTabParamsList} from '../../navigationTypes'
+import {type HomeTabs} from '../../navigationTypes'
 import MarketplaceScreen from './components/MarketplaceScreen'
 import MessagesScreen from './components/MessagesScreen'
 import SettingsScreen from './components/SettingsScreen'
@@ -12,7 +12,7 @@ import styled from '@emotion/native'
 import {LinearGradient} from 'expo-linear-gradient'
 import {CONTAINER_WITH_TOP_BORDER_RADIUS_TOP_PADDING} from './components/ContainerWithTopBorderRadius'
 
-const Tab = createBottomTabNavigator<InsideTabParamsList>()
+const Tab = createBottomTabNavigator<HomeTabs>()
 
 const BackgroundImageContainer = styled.View`
   background-color: black;
@@ -31,7 +31,7 @@ const BackgroundImage = styled(LinearGradient)`
   opacity: 0.2;
 `
 
-export default function InsideScreen(): JSX.Element {
+function HomeTabs(): JSX.Element {
   return (
     <>
       <BackgroundImageContainer>
@@ -51,3 +51,5 @@ export default function InsideScreen(): JSX.Element {
     </>
   )
 }
+
+export default HomeTabs

@@ -22,7 +22,7 @@ export function useHandlePostLoginFlowRedirect(): void {
     } else if (isPostLoginFinished && isOnPostLoginFlow) {
       navigation.reset({
         index: 0,
-        routes: [{name: 'InsideTabs'}],
+        routes: [{name: 'HomeTabs'}],
       })
     }
   }, [navigation, isLoggedIn, isPostLoginFinished, isOnPostLoginFlow])

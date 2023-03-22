@@ -1,8 +1,8 @@
 import Text from '../../../Text'
 import ContainerWithTopBorderRadius from '../ContainerWithTopBorderRadius'
-import {type InsideTabScreenProps} from '../../../../navigationTypes'
+import {type HomeTabsTabScreenProps} from '../../../../navigationTypes'
 
-type Props = InsideTabScreenProps<'Messages'>
+type Props = HomeTabsTabScreenProps<'Messages'>
 function MessagesScreen({navigation}: Props): JSX.Element {
   return (
     <ContainerWithTopBorderRadius scrollView={true} withTopPadding>

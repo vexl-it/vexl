@@ -62,6 +62,12 @@ router.get('/suggest', async (ctx, next) => {
     return
   }
 
+  if (query.data.phrase.trim().length === 0) {
+    ctx.response.body = LocationResponse.safeParse({result: []})
+    await next()
+    return
+  }
+
   const results = await queryMaps(query.data)
   const toReturn = LocationResponse.safeParse({
     result: results.map((one) => ({userData: one})),

@@ -23,6 +23,7 @@ async function queryMaps({
         limit: count,
         text: phrase,
         language: lang,
+        type: 'city',
         apiKey: API_KEY,
       },
     }
@@ -33,7 +34,7 @@ async function queryMaps({
       const parsed = LocationData.safeParse({
         suggestFirstRow: properties.address_line1 ?? '',
         suggestSecondRow: properties.address_line2 ?? '',
-        municipality: properties.municipality ?? '',
+        municipality: properties.city ?? properties.municipality ?? '',
         region: properties.region ?? '',
         country: properties.country ?? '',
         latitude: properties.lat,

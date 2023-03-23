@@ -23,7 +23,7 @@ export type LocationResponse = z.TypeOf<typeof LocationResponse>
 
 export const SuggestQueryData = z.object({
   count: z.coerce.number().int().optional().default(10),
-  phrase: z.string().min(3),
+  phrase: z.string().min(1),
   lang: z.string().min(2),
 })
 export type SuggestQueryData = z.TypeOf<typeof SuggestQueryData>

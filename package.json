@@ -9,7 +9,8 @@
     "turbo:build": "turbo build",
     "turbo:clean": "turbo clean",
     "turbo:dev-packages": "turbo build-watch",
-    "turbo:lint": "turbo lint"
+    "turbo:lint": "turbo lint",
+    "location-service:build-docker-image": "./scripts/build-docker-image.sh"
   },
   "private": true,
   "devDependencies": {

@@ -8,10 +8,14 @@ type ColorStyle =
   | 'gray'
   | 'grayOnWhite'
   | 'red'
+  | 'goldOnYellow'
+
+type FontSize = 'heading2'
 
 export interface Props extends TextProps {
   colorStyle?: ColorStyle | undefined
   fontWeight?: 400 | 500 | 600 | 700
+  fontSize?: FontSize | undefined
 }
 
 const TextStyled = styled.Text<Props>`
@@ -20,6 +24,7 @@ const TextStyled = styled.Text<Props>`
       return p.theme.colors.grayOnBlack
     if (p.colorStyle === 'grayOnWhite') return p.theme.colors.grayOnWhite
     if (p.colorStyle === 'red') return p.theme.colors.red
+    if (p.colorStyle === 'goldOnYellow') return p.theme.colors.main
     return p.colorStyle ?? 'black'
   }};
   font-family: '${(p) => {

@@ -27,7 +27,9 @@ function OfferDetailScreen({
   return (
     <RootContainer>
       <ScrollView>
-        <Text colorStyle="white">{JSON.stringify(offer, null, 2)}</Text>
+        <Text fontSize="heading2" colorStyle="white">
+          {JSON.stringify(offer, null, 2)}
+        </Text>
       </ScrollView>
       <Button
         onPress={() => {

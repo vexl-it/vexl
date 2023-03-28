@@ -6,6 +6,17 @@ export const theme = {
     ttSatoshi600: 'TT Satoshi 600',
     ttSatoshi700: 'TT Satoshi 700',
   },
+  fontSizes: {
+    default: 18,
+    heading2: 32,
+  },
+  spacings: {
+    xs: 8,
+    small: 16,
+    medium: 24,
+    large: 32,
+    xl: 40,
+  },
   colors: {
     backgroundBlack: '#101010',
     backgroundWhite: '#FFFFFF',
@@ -22,5 +33,7 @@ export const theme = {
   },
 }
 
+export type Spacing = typeof theme.spacings
+export type Color = keyof typeof theme.colors
 export type Theme = typeof theme
 export default theme

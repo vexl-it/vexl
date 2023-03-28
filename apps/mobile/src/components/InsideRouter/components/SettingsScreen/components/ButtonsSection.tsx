@@ -142,10 +142,12 @@ function ButtonsSection(): JSX.Element {
       {
         text: t('settings.items.termsAndPrivacy'),
         icon: termsIconSvg,
-        onPress: todo,
+        onPress: () => {
+          navigation.navigate('TermsAndConditions')
+        },
       },
       {
-        text: t('settings.items.termsAndPrivacy'),
+        text: t('settings.items.faqs'),
         icon: questionIconSvg,
         onPress: todo,
       },

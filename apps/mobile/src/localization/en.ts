@@ -1,3 +1,6 @@
+import TosEn from './tos/en'
+import PPEn from './privacyPolicy/en'
+
 export default {
   'common': {
     'next': 'Next',
@@ -179,10 +182,19 @@ export default {
     'isSelling': 'is selling',
     'isBuying': 'is buying',
     'directFriend': 'Direct friend',
-    'frendOfFriend': 'Friend of friend',
+    'friendOfFriend': 'Friend of friend',
     'buy': 'Buy',
     'sell': 'Sell',
     'filterOffers': 'Filter offers',
     'myOffers': 'My offers',
+  },
+  'termsOfUse': {
+    'termsOfUse': 'Terms of Use',
+    'privacyPolicy': 'Privacy Policy',
+    'dontHaveTime':
+      'Don’t have a time to read all this? Take' +
+      ' a look on Frequently Asked Questions.',
+    'termsOfUseText': TosEn,
+    'privacyPolicyText': PPEn,
   },
 }

@@ -37,20 +37,20 @@ const PressableStyled = styled(TouchableOpacity)<StyledElementsProps>`
   ${(props) =>
     props.variant === 'secondary' &&
     `
-        background-color: ${props.theme.colors.main};;
+        background-color: ${props.theme.colors.main};
     `}
   
   
   ${(props) =>
     props.variant === 'black' &&
     `
-        background-color: ${props.theme.colors.black};;
+        background-color: ${props.theme.colors.black};
     `}  
   
   ${(props) =>
     props.variant === 'blackOnDark' &&
     `
-        background-color: ${props.theme.colors.grey};;
+        background-color: ${props.theme.colors.grey};
     `}
   
 

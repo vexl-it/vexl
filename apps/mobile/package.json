@@ -55,6 +55,7 @@
     "react-native-flags": "^1.0.0",
     "react-native-flipper": "^0.176.0",
     "react-native-keyboard-aware-scroll-view": "^0.9.5",
+    "react-native-markdown-display": "^7.0.0-alpha.2",
     "react-native-mmkv": "^2.6.3",
     "react-native-pager-view": "6.0.1",
     "react-native-phone-number-input": "^2.1.0",

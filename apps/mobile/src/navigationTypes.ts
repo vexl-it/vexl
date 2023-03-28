@@ -28,7 +28,10 @@ export type RootStackParamsList = {
 
   ChatDetail: {chatId: ChatId}
 
-  // TODO terms and conditions etc
+  TermsAndConditions: undefined
+
+  Faqs: undefined
+
   TodoScreen: undefined
 }
 

@@ -1,4 +1,6 @@
 import {z} from 'zod'
+import {PageRequest, PageResponse} from '../../Pagination.brand'
+import {PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
 export interface ImportListEmpty {
   _tag: 'ImportListEmpty'
 }
@@ -30,3 +32,35 @@ export const ImportContactsResponse = z.object({
   message: z.string(),
 })
 export type ImportContactsResponse = z.TypeOf<typeof ImportContactsResponse>
+
+export const ConnectionLevel = z.enum(['FIRST', 'SECOND', 'ALL'])
+export type ConnectionLevel = z.TypeOf<typeof ConnectionLevel>
+
+export const FetchMyContactsRequest = PageRequest.extend({
+  level: ConnectionLevel,
+})
+export type FetchMyContactsRequest = z.TypeOf<typeof FetchMyContactsRequest>
+
+export const FetchMyContactsResponse = PageResponse.extend({
+  items: z.array(z.object({publicKey: PublicKeyPemBase64})),
+})
+export type FetchMyContactsResponse = z.TypeOf<typeof FetchMyContactsResponse>
+
+export const FetchCommonConnectionsRequest = z.object({
+  publicKeys: z.array(PublicKeyPemBase64),
+})
+export type FetchCommonConnectionsRequest = z.TypeOf<
+  typeof FetchCommonConnectionsRequest
+>
+
+export const FetchCommonConnectionsResponse = z.object({
+  commonContacts: z.array(
+    z.object({
+      publicKey: PublicKeyPemBase64,
+      common: z.object({hashes: z.array(z.string())}),
+    })
+  ),
+})
+export type FetchCommonConnectionsResponse = z.TypeOf<
+  typeof FetchCommonConnectionsResponse
+>

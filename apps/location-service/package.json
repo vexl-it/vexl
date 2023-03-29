@@ -1,6 +1,5 @@
 {
   "name": "@vexl-next/location-service",
-  "packageManager": "yarn@3.3.1",
   "main": "dist/index.js",
   "type": "module",
   "scripts": {

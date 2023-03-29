@@ -1,12 +1,15 @@
 import {z} from 'zod'
+import {OfferType} from '@vexl-next/domain/dist/general/offers'
+import {PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
 
+export const OfferAdminId = z.string().brand<'OfferAdminId'>()
 export const ServerOffer = z.object({
   id: z
     .number()
     .int()
     .positive()
     .describe('ID of the offer. It should be used for ordering.'),
-  offerId: z.string().describe('265-bit Offer ID'),
+  offerId: z.string().describe('265-bit Offer ID'), // branded type
   publicPayload: z
     .string()
     .describe(
@@ -40,3 +43,19 @@ export const GetOffersForMeCreatedOrModifiedAfterResponse = z.object({
 export type GetOffersForMeCreatedOrModifiedAfterResponse = z.TypeOf<
   typeof GetOffersForMeCreatedOrModifiedAfterResponse
 >
+
+export const CreateNewOfferRequest = z.object({
+  offerType: OfferType,
+  payloadPublic: z.string(),
+  offerPrivateList: z.array(
+    z.object({
+      userPublicKey: PublicKeyPemBase64,
+      payloadPrivate: z.string(),
+    })
+  ),
+})
+export type CreateNewOfferRequest = z.TypeOf<typeof CreateNewOfferRequest>
+export const CreateNewOfferResponse = ServerOffer.extend({
+  adminId: OfferAdminId,
+})
+export type CreateNewOfferResponse = z.TypeOf<typeof CreateNewOfferResponse>

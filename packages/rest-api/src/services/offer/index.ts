@@ -8,6 +8,8 @@ import {
 } from '../../utils'
 import {type PlatformName} from '../../PlatformName'
 import {
+  type CreateNewOfferRequest,
+  CreateNewOfferResponse,
   type GetOffersForMeCreatedOrModifiedAfterRequest,
   GetOffersForMeCreatedOrModifiedAfterResponse,
   GetOffersForMeResponse,
@@ -56,6 +58,17 @@ export function privateApi({
           headers: request,
         },
         GetOffersForMeCreatedOrModifiedAfterResponse
+      )
+    },
+    createNewOffer: (request: CreateNewOfferRequest) => {
+      return axiosCallWithValidation(
+        axiosInstance,
+        {
+          method: 'post',
+          url: '/v2/offers',
+          data: request,
+        },
+        CreateNewOfferResponse
       )
     },
   }

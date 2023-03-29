@@ -14,6 +14,10 @@ import {
   type UpdateFirebaseTokenRequest,
   type ImportContactsRequest,
   ImportContactsResponse,
+  type FetchMyContactsRequest,
+  FetchMyContactsResponse,
+  FetchCommonConnectionsResponse,
+  type FetchCommonConnectionsRequest,
 } from './contracts'
 import {pipe} from 'fp-ts/function'
 import * as TE from 'fp-ts/TaskEither'
@@ -85,6 +89,36 @@ export function privateApi({
           }
           return e
         })
+      )
+    },
+    fetchMyContacts: (request: FetchMyContactsRequest) => {
+      return pipe(
+        axiosCallWithValidation(
+          axiosInstance,
+          {
+            method: 'get',
+            url: '/contacts/me',
+            params: {
+              level: request.level,
+              page: request.page,
+              limit: request.limit,
+            },
+          },
+          FetchMyContactsResponse
+        )
+      )
+    },
+    fetchCommonConnections: (request: FetchCommonConnectionsRequest) => {
+      return pipe(
+        axiosCallWithValidation(
+          axiosInstance,
+          {
+            method: 'post',
+            url: '/contacts/common',
+            data: request,
+          },
+          FetchCommonConnectionsResponse
+        )
       )
     },
   }

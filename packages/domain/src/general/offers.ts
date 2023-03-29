@@ -22,7 +22,8 @@ export type BtcNetwork = z.TypeOf<typeof BtcNetwork>
 
 export const OfferType = z.enum(['BUY', 'SELL'])
 export type OfferType = z.TypeOf<typeof OfferType>
-export const FriendLevel = z.enum(['FIRST_DEGREE', 'SECOND_DEGREE', 'GROUP'])
+
+export const FriendLevel = z.enum(['FIRST_DEGREE', 'SECOND_DEGREE', 'GROUP', 'NOT_SPECIFIED'])
 export type FriendLevel = z.TypeOf<typeof FriendLevel>
 
 export const ActivePriceState = z.enum([

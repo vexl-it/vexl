@@ -3,6 +3,7 @@ import Button from '../Button'
 import {type ReactNode} from 'react'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import WhiteContainer from '../WhiteContainer'
+import Spacer from '../Spacer'
 
 const RootContainer = styled.View`
   flex: 1;
@@ -15,10 +16,6 @@ const ButtonsContainer = styled.View`
 
 const WhiteContainerStyled = styled(WhiteContainer)`
   padding: 0;
-`
-
-const ButtonsSpacer = styled.View`
-  width: 8px;
 `
 
 const BreadcrumbsContainer = styled.View`
@@ -50,19 +47,21 @@ const StyledButton = styled(Button)`
 export interface Props {
   numberOfPages: number
   currentPage: number
-  onNext: (newPageNumber: number) => void
+  onPageChange: (newPageNumber: number) => void
   onFinish: () => void
   onSkip: () => void
   children: ReactNode
+  withBackButton?: boolean
 }
 
 function ProgressJourney({
   numberOfPages,
   currentPage,
-  onNext,
+  onPageChange,
   onFinish,
   onSkip,
   children,
+  withBackButton,
 }: Props): JSX.Element {
   const {t} = useTranslation()
 
@@ -81,24 +80,38 @@ function ProgressJourney({
         <ChildrenContainer>{children}</ChildrenContainer>
       </WhiteContainerStyled>
       <ButtonsContainer>
-        <StyledButton
-          onPress={currentPage === numberOfPages - 1 ? onFinish : onSkip}
-          variant={'secondary'}
-          text={t('common.skip')}
-        />
-        <ButtonsSpacer />
+        {withBackButton ? (
+          <StyledButton
+            onPress={
+              currentPage === 0
+                ? onFinish
+                : () => {
+                    onPageChange(currentPage - 1)
+                  }
+            }
+            variant={'primary'}
+            text={t(currentPage === 0 ? 'common.close' : 'common.back')}
+          />
+        ) : (
+          <StyledButton
+            onPress={currentPage === numberOfPages - 1 ? onFinish : onSkip}
+            variant={'primary'}
+            text={t('common.skip')}
+          />
+        )}
+        <Spacer x$={2} />
         {currentPage === numberOfPages - 1 ? (
           <StyledButton
             onPress={onFinish}
-            variant={'primary'}
-            text={t('common.finish')}
+            variant={'secondary'}
+            text={t(withBackButton ? 'common.done' : 'common.finish')}
           />
         ) : (
           <StyledButton
             onPress={() => {
-              onNext(currentPage + 1)
+              onPageChange(currentPage + 1)
             }}
-            variant={'primary'}
+            variant={'secondary'}
             text={t('common.next')}
           />
         )}

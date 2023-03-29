@@ -1,7 +1,11 @@
 import Text from '../../../../Text'
 
 function EmptyListPlaceholder(): JSX.Element {
-  return <Text colorStyle="white">No offers TODO</Text>
+  return (
+    <Text fontSize="default" colorStyle="white">
+      No offers TODO
+    </Text>
+  )
 }
 
 export default EmptyListPlaceholder

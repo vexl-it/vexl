@@ -17,6 +17,10 @@ function Tos(): JSX.Element {
   const scrollViewRef = useRef<ScrollView>(null)
   const [activeTab, setActiveTab] = useState<TabType>('termsOfUse')
 
+  const onFaqsPress = (): void => {
+    navigation.navigate('Faqs')
+  }
+
   useEffect(() => {
     if (scrollViewRef.current) {
       scrollViewRef.current.scrollTo({x: 0, y: 0, animated: false})
@@ -29,7 +33,7 @@ function Tos(): JSX.Element {
         onClosePress={navigation.goBack}
         text={t('termsOfUse.termsOfUse')}
       />
-      <FaqsRedirect onPress={() => {}} />
+      <FaqsRedirect onPress={onFaqsPress} />
       <Spacer y$={4} />
       <Tabs activeTab={activeTab} onTabPress={setActiveTab} />
       <Spacer y$={1} />

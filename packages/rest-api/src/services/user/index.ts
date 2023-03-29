@@ -17,7 +17,7 @@ import {
   type VerifyPhoneNumberRequest,
   VerifyPhoneNumberResponse,
 } from './contracts'
-import {axiosCallWithValidation, createAxiosInstance} from '../../utils'
+import {axiosCallWithValidation, createAxiosInstance, type LoggingFunction} from '../../utils'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {type PlatformName} from '../../PlatformName'
@@ -27,15 +27,21 @@ export function publicApi({
   url,
   platform,
   axiosConfig,
+  loggingFunction,
 }: {
   url: ServiceUrl
   platform: PlatformName
   axiosConfig?: Omit<CreateAxiosDefaults, 'baseURL'>
+  loggingFunction?: LoggingFunction | null
 }) {
-  const axiosInstance = createAxiosInstance(platform, {
-    ...axiosConfig,
-    baseURL: urlJoin(url, '/api/v1'),
-  })
+  const axiosInstance = createAxiosInstance(
+    platform,
+    {
+      ...axiosConfig,
+      baseURL: urlJoin(url, '/api/v1'),
+    },
+    loggingFunction
+  )
 
   return {
     initPhoneVerification: (request: InitPhoneNumberVerificationRequest) => {

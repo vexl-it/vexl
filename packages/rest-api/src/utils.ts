@@ -71,11 +71,62 @@ export function axiosCall(
   )
 }
 
+export type LoggingFunction = (message?: any, ...optionalParams: any[]) => void
+
+function addLoggingInterceptor(
+  axiosInstance: AxiosInstance,
+  loggingFunction: LoggingFunction
+): void {
+  axiosInstance.interceptors.request.use((config) => {
+    loggingFunction(
+      `🌐 ⬆️ Sending request: ${
+        config.method?.toUpperCase() ?? '[unknown method]'
+      } "${config.baseURL ?? ''}${config.url ?? '[unknown url]'}"`,
+      {headers: config.headers, data: config.data, params: config.params}
+    )
+
+    return config
+  })
+  axiosInstance.interceptors.response.use(
+    (response) => {
+      loggingFunction(
+        `🌐 ✅  Response received: ${
+          response.config.method?.toUpperCase() ?? '[unknown method]'
+        } "${response.config.baseURL ?? ''}${
+          response.config.url ?? '[unknown url]'
+        }". Status: ${response.status}`,
+        {status: response.status, data: response.data}
+      )
+      return response
+    },
+    (error) => {
+      if (!isAxiosError(error)) {
+        loggingFunction(
+          '🌐 ‼️ Non axios when sending request or receiving response:',
+          error
+        )
+        return
+      }
+      loggingFunction(
+        `🌐 ‼️ Error response received ${
+          error.config?.method?.toUpperCase() ?? 'unknown method'
+        } "${error.config?.baseURL ?? ''}${
+          error.config?.url ?? '[unknown url]'
+        }".`,
+        {status: error.response?.status, data: error.response?.data}
+      )
+
+      return Promise.reject(error)
+    }
+  )
+}
+
 export function createAxiosInstance(
   platform: PlatformName,
-  axiosConfig?: CreateAxiosDefaults
+  axiosConfig?: CreateAxiosDefaults,
+  loggingFunction: LoggingFunction | null = console.info
 ): AxiosInstance {
-  return Axios.create({
+  const axios = Axios.create({
     ...axiosConfig,
     headers: {
       ...axiosConfig?.headers,
@@ -83,9 +134,9 @@ export function createAxiosInstance(
       [HEADER_PLATFORM]: platform,
     },
   })
+  if (loggingFunction) addLoggingInterceptor(axios, loggingFunction)
+  return axios
 }
-
-type LoggingFunction = (message?: any, ...optionalParams: any[]) => void
 
 export function createAxiosInstanceWithAuthAndLogging(
   getUserSessionCredentials: GetUserSessionCredentials,
@@ -93,52 +144,11 @@ export function createAxiosInstanceWithAuthAndLogging(
   axiosConfig: CreateAxiosDefaults,
   loggingFunction: LoggingFunction | null = console.info
 ): AxiosInstance {
-  const axiosInstance = createAxiosInstance(platform, axiosConfig)
-
-  if (loggingFunction) {
-    axiosInstance.interceptors.request.use((config) => {
-      loggingFunction(
-        `🌐 ⬆️ Sending request: ${
-          config.method?.toUpperCase() ?? '[unknown method]'
-        } "${config.baseURL ?? ''}${config.url ?? '[unknown url]'}"`,
-        {headers: config.headers, data: config.data}
-      )
-
-      return config
-    })
-    axiosInstance.interceptors.response.use(
-      (response) => {
-        loggingFunction(
-          `🌐 ✅  Response received: ${
-            response.config.method?.toUpperCase() ?? '[unknown method]'
-          } "${response.config.baseURL ?? ''}${
-            response.config.url ?? '[unknown url]'
-          }". Status: ${response.status}`,
-          {status: response.status, data: response.data}
-        )
-        return response
-      },
-      (error) => {
-        if (!isAxiosError(error)) {
-          loggingFunction(
-            '🌐 ‼️ Non axios when sending request or receiving response:',
-            error
-          )
-          return
-        }
-        loggingFunction(
-          `🌐 ‼️ Error response received ${
-            error.config?.method?.toUpperCase() ?? 'unknown method'
-          } "${error.config?.baseURL ?? ''}${
-            error.config?.url ?? '[unknown url]'
-          }".`,
-          {status: error.response?.status, data: error.response?.data}
-        )
-
-        return Promise.reject(error)
-      }
-    )
-  }
+  const axiosInstance = createAxiosInstance(
+    platform,
+    axiosConfig,
+    loggingFunction
+  )
 
   axiosInstance.interceptors.request.use((config) => {
     const credentials = getUserSessionCredentials()

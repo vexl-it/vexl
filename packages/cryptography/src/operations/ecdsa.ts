@@ -1,5 +1,8 @@
 import crypto from 'node:crypto'
-import {type PrivateKeyHolder, type PublicKeyHolder} from '../KeyHolder/brands'
+import {
+  type PrivateKeyHolder,
+  type PublicKeyPemBase64,
+} from '../KeyHolder/brands'
 
 export function ecdsaSign({
   challenge,
@@ -15,9 +18,7 @@ export function ecdsaSign({
   const signature = sign.sign(
     Buffer.from(privateKey.privateKeyPemBase64, 'base64')
   )
-  const removedSignature = trimBase64Der(signature).toString('base64')
-
-  return removedSignature
+  return trimBase64Der(signature).toString('base64')
 }
 
 export function ecdsaVerify({
@@ -27,14 +28,14 @@ export function ecdsaVerify({
 }: {
   challenge: string
   signature: string
-  pubKey: PublicKeyHolder
+  pubKey: PublicKeyPemBase64
 }): boolean {
   const verify = crypto.createVerify('SHA256')
   verify.update(Buffer.from(challenge, 'utf8'))
   verify.end()
 
   return verify.verify(
-    Buffer.from(pubKey.publicKeyPemBase64, 'base64'),
+    Buffer.from(pubKey, 'base64'),
     trimBase64Der(Buffer.from(signature, 'base64'))
   )
 }

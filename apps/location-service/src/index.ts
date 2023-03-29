@@ -47,7 +47,8 @@ app.use(async (ctx, next) => {
   console.info(`--> Received request: ${ctx.request.method} ${ctx.request.url}`)
   await next()
   console.info(
-    `<-- Sending response: ${ctx.request.method} ${ctx.request.url} ${ctx.response.status}`
+    `<-- Sending response: ${ctx.request.method} ${ctx.request.url} ${ctx.response.status}`,
+    ctx.response.body.result.map((one: any) => one.userData)
   )
 })
 

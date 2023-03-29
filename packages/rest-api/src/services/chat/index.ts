@@ -3,10 +3,8 @@ import {type ServiceUrl} from '../../ServiceUrl.brand'
 import {type GetUserSessionCredentials} from '../../UserSessionCredentials.brand'
 import {type CreateAxiosDefaults} from 'axios'
 import urlJoin from 'url-join'
-import {
-  axiosCallWithValidation,
-  createAxiosInstanceWithAuthAndLogging,
-} from '../../utils'
+import * as TE from 'fp-ts/TaskEither'
+import {axiosCallWithValidation, createAxiosInstanceWithAuthAndLogging, type LoggingFunction} from '../../utils'
 import {
   type ApproveRequestRequest,
   ApproveRequestResponse,
@@ -21,6 +19,7 @@ import {
   type DeleteInboxesResponse,
   type DeleteInboxRequest,
   DeleteInboxResponse,
+  type DeletePulledMessagesRequest,
   DeletePulledMessagesResponse,
   type RequestApprovalRequest,
   RequestApprovalResponse,
@@ -33,6 +32,8 @@ import {
   type UpdateInboxRequest,
   UpdateInboxResponse,
 } from './contracts'
+import {pipe} from 'fp-ts/function'
+import {addChallengeToRequest} from './utils'
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function privateApi({
@@ -40,11 +41,13 @@ export function privateApi({
   url,
   getUserSessionCredentials,
   axiosConfig,
+  loggingFunction,
 }: {
   platform: PlatformName
   url: ServiceUrl
   getUserSessionCredentials: GetUserSessionCredentials
   axiosConfig?: Omit<CreateAxiosDefaults, 'baseURL'>
+  loggingFunction?: LoggingFunction | null
 }) {
   const axiosInstance = createAxiosInstanceWithAuthAndLogging(
     getUserSessionCredentials,
@@ -52,46 +55,74 @@ export function privateApi({
     {
       ...axiosConfig,
       baseURL: urlJoin(url, '/api/v1'),
-    }
+    },
+    loggingFunction
   )
+
+  const addChallenge = addChallengeToRequest(axiosInstance)
 
   return {
     // ----------------------
     // 👇 Inbox
     // ----------------------
     updateInbox(data: UpdateInboxRequest) {
-      return axiosCallWithValidation(
-        axiosInstance,
-        {method: 'put', url: '/inboxes', data},
-        UpdateInboxResponse
+      return pipe(
+        addChallenge(data),
+        TE.chainW((data) =>
+          axiosCallWithValidation(
+            axiosInstance,
+            {method: 'put', url: '/inboxes', data},
+            UpdateInboxResponse
+          )
+        )
       )
     },
     createInbox(data: CreateInboxRequest) {
-      return axiosCallWithValidation(
-        axiosInstance,
-        {method: 'post', url: '/inboxes', data},
-        CreateInboxResponse
+      return pipe(
+        addChallenge(data),
+        TE.chainW((data) =>
+          axiosCallWithValidation(
+            axiosInstance,
+            {method: 'post', url: '/inboxes', data},
+            CreateInboxResponse
+          )
+        )
       )
     },
     deleteInbox(data: DeleteInboxRequest) {
-      return axiosCallWithValidation(
-        axiosInstance,
-        {method: 'delete', url: '/inboxes', data},
-        DeleteInboxResponse
+      return pipe(
+        addChallenge(data),
+        TE.chainW((data) =>
+          axiosCallWithValidation(
+            axiosInstance,
+            {method: 'delete', url: '/inboxes', data},
+            DeleteInboxResponse
+          )
+        )
       )
     },
-    deletePulledMessages(data: DeletePulledMessagesResponse) {
-      return axiosCallWithValidation(
-        axiosInstance,
-        {method: 'delete', url: '/inboxes/messages', data},
-        DeletePulledMessagesResponse
+    deletePulledMessages(data: DeletePulledMessagesRequest) {
+      return pipe(
+        addChallenge(data),
+        TE.chainW((data) =>
+          axiosCallWithValidation(
+            axiosInstance,
+            {method: 'delete', url: '/inboxes/messages', data},
+            DeletePulledMessagesResponse
+          )
+        )
       )
     },
     blockInbox(data: BlockInboxRequest) {
-      return axiosCallWithValidation(
-        axiosInstance,
-        {method: 'put', url: '/inboxes/block', data},
-        BlockInboxResponse
+      return pipe(
+        addChallenge(data),
+        TE.chainW((data) =>
+          axiosCallWithValidation(
+            axiosInstance,
+            {method: 'put', url: '/inboxes/block', data},
+            BlockInboxResponse
+          )
+        )
       )
     },
     requestApproval(data: RequestApprovalRequest) {
@@ -102,10 +133,15 @@ export function privateApi({
       )
     },
     approveRequest(data: ApproveRequestRequest) {
-      return axiosCallWithValidation(
-        axiosInstance,
-        {method: 'post', url: '/inboxes/approval/confirm', data},
-        ApproveRequestResponse
+      return pipe(
+        addChallenge(data),
+        TE.chainW((data) =>
+          axiosCallWithValidation(
+            axiosInstance,
+            {method: 'post', url: '/inboxes/approval/confirm', data},
+            ApproveRequestResponse
+          )
+        )
       )
     },
     deleteInboxes(data: DeleteInboxesResponse) {
@@ -119,17 +155,31 @@ export function privateApi({
     // 👇 Message
     // ----------------------
     retrieveMessages(data: RetrieveMessagesRequest) {
-      return axiosCallWithValidation(
-        axiosInstance,
-        {method: 'put', url: '/inboxes/messages', data},
-        RetrieveMessagesResponse
+      return pipe(
+        addChallenge(data),
+        TE.chainW((data) =>
+          axiosCallWithValidation(
+            axiosInstance,
+            {method: 'put', url: '/inboxes/messages', data},
+            RetrieveMessagesResponse
+          )
+        )
       )
     },
     sendMessage(data: SendMessageRequest) {
-      return axiosCallWithValidation(
-        axiosInstance,
-        {method: 'post', url: '/inboxes/messages', data},
-        SendMessageResponse
+      return pipe(
+        addChallenge(data),
+        TE.map(({publicKey, ...data}) => ({
+          ...data,
+          senderPublicKey: publicKey,
+        })),
+        TE.chainW((data) =>
+          axiosCallWithValidation(
+            axiosInstance,
+            {method: 'post', url: '/inboxes/messages', data},
+            SendMessageResponse
+          )
+        )
       )
     },
     sendMessages(data: SendMessagesRequest) {

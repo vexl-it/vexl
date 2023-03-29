@@ -68,7 +68,7 @@
     "react-native-tab-view": "^3.5.1",
     "react-native-uuid": "^2.0.1",
     "seed-random": "^2.2.0",
-    "zod": "^3.20.6"
+    "zod": "^3.21.4"
   },
   "devDependencies": {
     "@babel/core": "^7.12.9",

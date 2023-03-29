@@ -12,7 +12,11 @@ import {
 } from '../../utils/fpUtils'
 import {pipe} from 'fp-ts/function'
 import {type KeyHolder} from '@vexl-next/cryptography'
-import {OfferInfo} from '@vexl-next/domain/dist/general/offers'
+import {
+  OfferInfo,
+  OfferPrivatePart,
+  OfferPublicPart,
+} from '@vexl-next/domain/dist/general/offers'
 
 export interface OfferParsingError {
   _tag: 'OfferParsingError'
@@ -25,8 +29,8 @@ function decryptedPayloadsToOffer({
   publicPayload,
 }: {
   serverOffer: ServerOffer
-  privatePayload: any
-  publicPayload: any
+  privatePayload: OfferPrivatePart
+  publicPayload: OfferPublicPart
 }): E.Either<ZodParseError<OfferInfo> | OfferParsingError, OfferInfo> {
   return pipe(
     E.tryCatch(
@@ -34,25 +38,8 @@ function decryptedPayloadsToOffer({
         return {
           id: serverOffer.id,
           offerId: serverOffer.offerId,
-          offerPublicKey: publicPayload.offerPublicKey,
-          offerDescription: publicPayload.offerDescription,
-          amountBottomLimit: Number(publicPayload.amountBottomLimit),
-          amountTopLimit: Number(publicPayload.amountTopLimit),
-          feeState: publicPayload.feeState,
-          feeAmount: Number(publicPayload.feeAmount),
-          locationState: publicPayload.locationState,
-          location: JSON.parse(publicPayload.location),
-          paymentMethod: publicPayload.paymentMethod,
-          btcNetwork: publicPayload.btcNetwork,
-          currency: publicPayload.currency,
-          friendLevel: privatePayload.friendLevel,
-          offerType: publicPayload.offerType,
-          activePriceState: publicPayload.activePriceState,
-          activePriceValue: Number(publicPayload.activePriceValue),
-          activePriceCurrency: publicPayload.activePriceCurrency,
-          active: publicPayload.active === 'true',
-          commonFriends: privatePayload.commonFriends,
-          groupUuids: publicPayload.groupUuids,
+          privatePart: privatePayload,
+          publicPart: publicPayload,
           createdAt: serverOffer.createdAt,
           modifiedAt: serverOffer.modifiedAt,
         }
@@ -68,12 +55,25 @@ function decryptedPayloadsToOffer({
   )
 }
 
+function decodeLocation(json: any): E.Either<JsonParseError, unknown> {
+  return pipe(
+    json,
+    E.right,
+    E.map((one) => one.location), // TODO this is array.
+    E.chainW(parseJson),
+    E.map((location) => ({...json, location}))
+  )
+}
+
 export function decryptOffer(
   privateKey: KeyHolder.PrivateKeyHolder
 ): (
   flow: ServerOffer
 ) => TE.TaskEither<
-  CryptoError | JsonParseError | ZodParseError<OfferInfo> | OfferParsingError,
+  | CryptoError
+  | JsonParseError
+  | ZodParseError<OfferInfo | OfferPrivatePart | OfferPublicPart>
+  | OfferParsingError,
   OfferInfo
 > {
   return (serverOffer: ServerOffer) =>
@@ -82,16 +82,19 @@ export function decryptOffer(
       TE.bindTo('serverOffer'),
       TE.bindW('privatePayload', ({serverOffer}) => {
         return pipe(
-          TE.right(serverOffer.privatePayload),
-          TE.chainW(eciesDecrypt(privateKey)),
-          TE.chainEitherKW(parseJson)
+          TE.right(serverOffer.privatePayload.substring(1)), // TODO check version
+          TE.chainW(eciesDecrypt(privateKey.privateKeyPemBase64)),
+          TE.chainEitherKW(parseJson),
+          TE.chainEitherKW(safeParse(OfferPrivatePart))
         )
       }),
       TE.bindW('publicPayload', ({privatePayload, serverOffer}) => {
         return pipe(
-          TE.right(serverOffer.publicPayload.substring(1)),
+          TE.right(serverOffer.publicPayload.substring(1)), // TODO check version
           TE.chainW(aesGCMIgnoreTagDecrypt(privatePayload.symmetricKey)),
-          TE.chainEitherKW(parseJson)
+          TE.chainEitherKW(parseJson),
+          TE.chainEitherKW(decodeLocation),
+          TE.chainEitherKW(safeParse(OfferPublicPart))
         )
       }),
       TE.chainEitherKW(decryptedPayloadsToOffer)

@@ -14,5 +14,5 @@ export interface BadStatusCodeError {
 
 export interface UnknownError {
   readonly _tag: 'UnknownError'
-  readonly error: any
+  readonly error: unknown
 }

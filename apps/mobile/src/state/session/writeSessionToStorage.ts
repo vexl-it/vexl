@@ -26,11 +26,11 @@ export default function writeSessionToStorage(
       pipe(
         TE.right(session),
         TE.chainEitherKW(stringifyToJson),
-        TE.chainW(aesEncrypt(session.privateKey.privateKeyRaw)),
+        TE.chainW(aesEncrypt(session.privateKey.privateKeyPemBase64)),
         TE.chainFirstW(saveItemToAsyncStorage(asyncStorageKey)),
         TE.chainFirstW(() =>
           saveItemToSecretStorage(secretStorageKey)(
-            session.privateKey.privateKeyRaw
+            session.privateKey.privateKeyPemBase64
           )
         )
       )

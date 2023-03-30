@@ -5,8 +5,9 @@ import {
   eciesGTMEncrypt,
 } from './ecies'
 import * as crypto from 'node:crypto'
-import {generatePrivateKey, importPrivateKey} from '../KeyHolder'
-import {PrivateKeyRaw} from '../KeyHolder/brands'
+import {generatePrivateKey, PrivateKeyPemBase64} from '../KeyHolder'
+import {privateRawToPem} from '../KeyHolder/keyUtils'
+import {normalizeCurveName} from '../KeyHolder/Curve.brand'
 
 const privateKey = generatePrivateKey()
 
@@ -15,21 +16,22 @@ describe('ECIES GTM', () => {
     const data = 'Some data'
     const encrypted = await eciesGTMEncrypt({
       data,
-      publicKey: privateKey,
+      publicKey: privateKey.publicKeyPemBase64,
     })
     const decrypted = await eciesGTMDecrypt({
       data: encrypted,
-      privateKey,
+      privateKey: privateKey.privateKeyPemBase64,
     })
     expect(decrypted).toEqual(data)
   })
 
   it('Should decrypt a static message as expected', async () => {
-    const privateKey2 = importPrivateKey({
-      privateKeyRaw: PrivateKeyRaw.parse(
-        '6HizupRO2bZAhj4UHOB3uQsatrDJll8t1LSnxg=='
-      ),
-    })
+    const privateKey2 = PrivateKeyPemBase64.parse(
+      privateRawToPem(
+        Buffer.from('6HizupRO2bZAhj4UHOB3uQsatrDJll8t1LSnxg==', 'base64'),
+        normalizeCurveName('secp224r1')
+      ).toString('base64')
+    )
 
     const decrypted = await eciesGTMDecrypt({
       privateKey: privateKey2,
@@ -42,7 +44,7 @@ describe('ECIES GTM', () => {
   it('Should fail when decrypting with bad key, epk, mac or security tag', async () => {
     const data = 'Some message'
     const encrypted = await eciesGTMEncrypt({
-      publicKey: privateKey,
+      publicKey: privateKey.publicKeyPemBase64,
       data,
     })
 
@@ -53,7 +55,7 @@ describe('ECIES GTM', () => {
 
     try {
       await eciesGTMDecrypt({
-        privateKey,
+        privateKey: privateKey.privateKeyPemBase64,
         data: [version, badEpk, mac, tag, payload].join('.'),
       })
       expect(true).toEqual(false)
@@ -63,7 +65,7 @@ describe('ECIES GTM', () => {
 
     try {
       await eciesGTMDecrypt({
-        privateKey,
+        privateKey: privateKey.privateKeyPemBase64,
         data: [version, epk, badMac, tag, payload].join('.'),
       })
       expect(true).toEqual(false)
@@ -73,7 +75,7 @@ describe('ECIES GTM', () => {
 
     try {
       await eciesGTMDecrypt({
-        privateKey,
+        privateKey: privateKey.privateKeyPemBase64,
         data: [version, epk, mac, badTag, payload].join('.'),
       })
       expect(true).toEqual(false)
@@ -84,7 +86,7 @@ describe('ECIES GTM', () => {
     // Check if it does not fail when decrypting with correct data
     expect(
       await eciesGTMDecrypt({
-        privateKey,
+        privateKey: privateKey.privateKeyPemBase64,
         data: [version, epk, mac, tag, payload].join('.'),
       })
     ).toEqual(data)
@@ -96,21 +98,22 @@ describe('ECIES CTR', () => {
     const data = 'Some data'
     const encrypted = await eciesCTREncrypt({
       data,
-      publicKey: privateKey,
+      publicKey: privateKey.publicKeyPemBase64,
     })
     const decrypted = await eciesCTRDecrypt({
       data: encrypted,
-      privateKey,
+      privateKey: privateKey.privateKeyPemBase64,
     })
     expect(decrypted).toEqual(data)
   })
 
   it('Should decrypt a static message as expected', async () => {
-    const privateKey2 = importPrivateKey({
-      privateKeyRaw: PrivateKeyRaw.parse(
-        '6HizupRO2bZAhj4UHOB3uQsatrDJll8t1LSnxg=='
-      ),
-    })
+    const privateKey2 = PrivateKeyPemBase64.parse(
+      privateRawToPem(
+        Buffer.from('6HizupRO2bZAhj4UHOB3uQsatrDJll8t1LSnxg==', 'base64'),
+        normalizeCurveName('secp224r1')
+      ).toString('base64')
+    )
 
     const decrypted = await eciesCTRDecrypt({
       privateKey: privateKey2,
@@ -123,7 +126,7 @@ describe('ECIES CTR', () => {
   it('Should fail when decrypting with bad key, epk, mac or security tag', async () => {
     const data = 'Some message'
     const encrypted = await eciesCTREncrypt({
-      publicKey: privateKey,
+      publicKey: privateKey.publicKeyPemBase64,
       data,
     })
 
@@ -133,7 +136,7 @@ describe('ECIES CTR', () => {
 
     try {
       await eciesCTRDecrypt({
-        privateKey,
+        privateKey: privateKey.privateKeyPemBase64,
         data: [version, badEpk, mac, payload].join('.'),
       })
       // Should not be here
@@ -143,7 +146,7 @@ describe('ECIES CTR', () => {
     }
     try {
       await eciesCTRDecrypt({
-        privateKey,
+        privateKey: privateKey.privateKeyPemBase64,
         data: [version, epk, badMac, payload].join('.'),
       })
       // Should not be here
@@ -153,7 +156,7 @@ describe('ECIES CTR', () => {
     }
     try {
       await eciesCTRDecrypt({
-        privateKey,
+        privateKey: privateKey.privateKeyPemBase64,
         data: [version, epk, mac, payload].join('.'),
       })
       // Should not be here
@@ -165,7 +168,7 @@ describe('ECIES CTR', () => {
     // Check if it does not fail when decrypting with correct data
     expect(
       await eciesCTRDecrypt({
-        privateKey,
+        privateKey: privateKey.privateKeyPemBase64,
         data: [version, epk, mac, payload].join('.'),
       })
     ).toEqual(data)

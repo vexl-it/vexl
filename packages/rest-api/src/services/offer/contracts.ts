@@ -1,15 +1,19 @@
 import {z} from 'zod'
-import {OfferType} from '@vexl-next/domain/dist/general/offers'
+import {OfferId, OfferType} from '@vexl-next/domain/dist/general/offers'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
+import {NoContentResponse} from '../../NoContentResponse.brand'
+import {UnixMilliseconds} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
 
 export const OfferAdminId = z.string().brand<'OfferAdminId'>()
+export type OfferAdminId = z.TypeOf<typeof OfferAdminId>
 export const ServerOffer = z.object({
   id: z
     .number()
     .int()
     .positive()
     .describe('ID of the offer. It should be used for ordering.'),
-  offerId: z.string().describe('265-bit Offer ID'), // branded type
+  offerId: OfferId,
+  expiration: UnixMilliseconds,
   publicPayload: z
     .string()
     .describe(
@@ -44,8 +48,38 @@ export type GetOffersForMeCreatedOrModifiedAfterResponse = z.TypeOf<
   typeof GetOffersForMeCreatedOrModifiedAfterResponse
 >
 
+const EncryptedPrivatePart = z.object({
+  userPublicKey: PublicKeyPemBase64,
+  payloadPrivate: z.string(),
+})
 export const CreateNewOfferRequest = z.object({
   offerType: OfferType,
+  payloadPublic: z.string(),
+  offerPrivateList: z.array(EncryptedPrivatePart),
+})
+export type CreateNewOfferRequest = z.TypeOf<typeof CreateNewOfferRequest>
+export const CreateNewOfferResponse = ServerOffer.extend({
+  adminId: OfferAdminId,
+})
+export type CreateNewOfferResponse = z.TypeOf<typeof CreateNewOfferResponse>
+
+export const RefreshOfferRequest = z.object({
+  adminIds: z.array(OfferAdminId),
+})
+export type RefreshOfferRequest = z.TypeOf<typeof RefreshOfferRequest>
+
+export const RefreshOfferResponse = NoContentResponse
+export type RefreshOfferResponse = z.TypeOf<typeof RefreshOfferResponse>
+
+export const DeleteOfferRequest = z.object({
+  adminIds: z.array(OfferAdminId),
+})
+export type DeleteOfferRequest = z.TypeOf<typeof DeleteOfferRequest>
+export const DeleteOfferResponse = NoContentResponse
+export type DeleteOfferResponse = z.TypeOf<typeof DeleteOfferResponse>
+
+export const UpdateOfferRequest = z.object({
+  adminId: OfferAdminId,
   payloadPublic: z.string(),
   offerPrivateList: z.array(
     z.object({
@@ -54,8 +88,18 @@ export const CreateNewOfferRequest = z.object({
     })
   ),
 })
-export type CreateNewOfferRequest = z.TypeOf<typeof CreateNewOfferRequest>
-export const CreateNewOfferResponse = ServerOffer.extend({
+export type UpdateOfferRequest = z.TypeOf<typeof UpdateOfferRequest>
+
+export const UpdateOfferResponse = ServerOffer
+export type UpdateOfferResponse = z.TypeOf<typeof UpdateOfferResponse>
+
+export const CreatePrivatePartRequest = z.object({
   adminId: OfferAdminId,
+  offerPrivateList: z.array(EncryptedPrivatePart),
 })
-export type CreateNewOfferResponse = z.TypeOf<typeof CreateNewOfferResponse>
+export type CreatePrivatePartRequest = z.TypeOf<typeof CreatePrivatePartRequest>
+
+export const CreatePrivatePartResponse = NoContentResponse
+export type CreatePrivatePartResponse = z.TypeOf<
+  typeof CreatePrivatePartResponse
+>

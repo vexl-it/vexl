@@ -10,5 +10,6 @@ esbuild
     format: 'cjs',
     loader: {'.ts': 'ts'},
     sourcemap: true,
+    minify: true,
   })
   .catch(() => process.exit(1))

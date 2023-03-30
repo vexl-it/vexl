@@ -4,6 +4,7 @@ import {UserNameAndAvatar} from './UserNameAndAvatar.brand'
 import {IdNumeric} from '../utility/IdNumeric'
 import {Uuid} from '../utility/Uuid.brand'
 import {KeyHolder} from '@vexl-next/cryptography'
+import {PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
 
 export const OfferId = z.string().min(1).brand<'OfferId'>()
 export type OfferId = z.TypeOf<typeof OfferId>
@@ -23,7 +24,12 @@ export type BtcNetwork = z.TypeOf<typeof BtcNetwork>
 export const OfferType = z.enum(['BUY', 'SELL'])
 export type OfferType = z.TypeOf<typeof OfferType>
 
-export const FriendLevel = z.enum(['FIRST_DEGREE', 'SECOND_DEGREE', 'GROUP', 'NOT_SPECIFIED'])
+export const FriendLevel = z.enum([
+  'FIRST_DEGREE',
+  'SECOND_DEGREE',
+  'GROUP',
+  'NOT_SPECIFIED',
+])
 export type FriendLevel = z.TypeOf<typeof FriendLevel>
 
 export const ActivePriceState = z.enum([
@@ -57,28 +63,39 @@ export const Location = z.object({
 
 export type Location = z.TypeOf<typeof Location>
 
-export const OfferInfo = z.object({
-  id: IdNumeric,
-  offerId: OfferId,
-  offerPublicKey: KeyHolder.PublicKeyPemBase64,
+export const OfferPrivatePart = z.object({
+  commonFriends: z.array(z.string()),
+  friendLevel: z.array(FriendLevel),
+  symmetricKey: z.string(),
+})
+export type OfferPrivatePart = z.TypeOf<typeof OfferPrivatePart>
+
+export const OfferPublicPart = z.object({
+  offerPublicKey: PublicKeyPemBase64,
+  location: z.array(Location), // TODO should be encrypted in string
   offerDescription: z.string(),
-  amountBottomLimit: z.number(),
-  amountTopLimit: z.number(),
+  amountBottomLimit: z.coerce.number(),
+  amountTopLimit: z.coerce.number(),
   feeState: FeeState,
-  feeAmount: z.number(),
+  feeAmount: z.coerce.number(),
   locationState: LocationState,
-  location: Location,
   paymentMethod: z.array(PaymentMethod),
   btcNetwork: z.array(BtcNetwork),
-  currency: z.string(),
-  friendLevel: z.array(FriendLevel),
+  currency: Currency,
   offerType: OfferType,
   activePriceState: ActivePriceState,
-  activePriceValue: z.number(),
-  activePriceCurrency: z.string().min(3).max(3),
-  active: z.boolean(),
-  commonFriends: z.array(CommonFriend),
+  activePriceValue: z.coerce.number(),
+  activePriceCurrency: Currency,
+  active: z.coerce.boolean(),
   groupUuids: z.array(Uuid),
+})
+export type OfferPublicPart = z.TypeOf<typeof OfferPublicPart>
+
+export const OfferInfo = z.object({
+  id: IdNumeric, // for ordering
+  offerId: OfferId,
+  privatePart: OfferPrivatePart,
+  publicPart: OfferPublicPart,
   createdAt: z.string().datetime({offset: true}),
   modifiedAt: z.string().datetime({offset: true}),
 })

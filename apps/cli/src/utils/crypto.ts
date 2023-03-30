@@ -1,7 +1,10 @@
 import * as crypto from '@vexl-next/cryptography'
 import * as E from 'fp-ts/Either'
 import * as TE from 'fp-ts/TaskEither'
-import {type PrivateKeyHolder} from '@vexl-next/cryptography/dist/KeyHolder'
+import {
+  type PrivateKeyHolder,
+  type PrivateKeyPemBase64,
+} from '@vexl-next/cryptography/dist/KeyHolder'
 import {type KeyHolder} from '@vexl-next/cryptography'
 
 export interface CryptoError {
@@ -29,23 +32,28 @@ export function ecdsaSign(
 }
 
 export function eciesDecrypt(
-  privateKey: KeyHolder.PrivateKeyHolder
+  privateKey: PrivateKeyPemBase64
 ): (data: string) => TE.TaskEither<CryptoError, string> {
   return (data) =>
     TE.tryCatch(
-      async () =>
-        await crypto.eciesLegacy.eciesLegacyDecrypt({data, privateKey}),
+      async () => {
+        console.log('decrypting', data)
+        return await crypto.eciesLegacy.eciesLegacyDecrypt({data, privateKey})
+      },
       (error) => ({type: 'cryptoError', error} as const)
     )
 }
 
 export function eciesEncrypt(
-  publicKey: KeyHolder.PublicKeyHolder
+  publicKey: KeyHolder.PublicKeyPemBase64
 ): (data: string) => TE.TaskEither<CryptoError, string> {
   return (data) =>
     TE.tryCatch(
       async () =>
-        await crypto.eciesLegacy.eciesLegacyEncrypt({data, publicKey}),
+        await crypto.eciesLegacy.eciesLegacyEncrypt({
+          data,
+          publicKey,
+        }),
       (error) => ({type: 'cryptoError', error} as const)
     )
 }
@@ -55,7 +63,10 @@ export function aesGCMIgnoreTagDecrypt(
 ): (data: string) => TE.TaskEither<CryptoError, string> {
   return (data) =>
     TE.tryCatch(
-      async () => crypto.aes.aesGCMIgnoreTagDecrypt({data, password}),
+      async () => {
+        console.log('decrypting', data)
+        return crypto.aes.aesGCMIgnoreTagDecrypt({data, password})
+      },
       (error) => ({type: 'cryptoError', error} as const)
     )
 }

@@ -107,49 +107,54 @@ function OfferListItem({offer}: Props): JSX.Element {
   return (
     <RootContainer>
       <WhiteSpaceContainer>
-        <Description fontWeight={400}>{offer.offerDescription}</Description>
+        <Description fontWeight={400}>
+          {offer.publicPart.offerDescription}
+        </Description>
         <InfoContainer>
           <InfoItemContainer>
             <PriceText>
               {t('offer.upTo')}{' '}
               <PriceBigger>
-                {bigNumberToString(offer.amountTopLimit)}
+                {bigNumberToString(offer.publicPart.amountTopLimit)}
               </PriceBigger>
             </PriceText>
             <InfoText>
-              {offer.locationState === 'ONLINE' && t('offer.onlineOnly')}
-              {offer.locationState === 'IN_PERSON' && t('offer.cashOnly')}
+              {offer.publicPart.locationState === 'ONLINE' &&
+                t('offer.onlineOnly')}
+              {offer.publicPart.locationState === 'IN_PERSON' &&
+                t('offer.cashOnly')}
             </InfoText>
           </InfoItemContainer>
           <InfoDivider />
-          {offer.feeState === 'WITH_FEE' && offer.feeAmount !== undefined && (
-            <>
-              <InfoItemContainer>
-                <PriceText>
-                  <PriceBigger>{offer.feeAmount} %</PriceBigger>
-                </PriceText>
-                <InfoText>{t('offer.forSeller')}</InfoText>
-              </InfoItemContainer>
-              <InfoDivider />
-            </>
-          )}
+          {offer.publicPart.feeState === 'WITH_FEE' &&
+            offer.publicPart.feeAmount !== undefined && (
+              <>
+                <InfoItemContainer>
+                  <PriceText>
+                    <PriceBigger>{offer.publicPart.feeAmount} %</PriceBigger>
+                  </PriceText>
+                  <InfoText>{t('offer.forSeller')}</InfoText>
+                </InfoItemContainer>
+                <InfoDivider />
+              </>
+            )}
           <InfoItemContainer>
             <InfoIcons>
-              {offer.paymentMethod.includes('CASH') && (
+              {offer.publicPart.paymentMethod.includes('CASH') && (
                 <PaymentIcon source={mapTagSvg} />
               )}
-              {offer.paymentMethod.includes('REVOLUT') && (
+              {offer.publicPart.paymentMethod.includes('REVOLUT') && (
                 <PaymentIcon source={revolutSvg} />
               )}
-              {offer.paymentMethod.includes('BANK') && (
+              {offer.publicPart.paymentMethod.includes('BANK') && (
                 <PaymentIcon source={bankSvg} />
               )}
             </InfoIcons>
             <InfoText>
-              {offer.paymentMethod
+              {offer.publicPart.paymentMethod
                 .map((method) => {
                   if (method === 'CASH') {
-                    return offer.location.city
+                    return offer.publicPart.location.city
                   }
                   if (method === 'REVOLUT') {
                     return t('offer.revolut')
@@ -172,13 +177,13 @@ function OfferListItem({offer}: Props): JSX.Element {
           <UnderBubbleUpperText>
             {randomName(offer.offerId)}{' '}
             <UnderBubbleUpperTextPink>
-              {offer.offerType === 'SELL'
+              {offer.publicPart.offerType === 'SELL'
                 ? t('offer.isSelling')
                 : t('offer.isBuying')}
             </UnderBubbleUpperTextPink>
           </UnderBubbleUpperText>
           <UnderBubbleLowerText>
-            {offer.friendLevel.includes('FIRST_DEGREE')
+            {offer.privatePart.friendLevel.includes('FIRST_DEGREE')
               ? t('offer.directFriend')
               : t('offer.friendOfFriend')}
           </UnderBubbleLowerText>

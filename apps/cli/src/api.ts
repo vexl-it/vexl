@@ -1,8 +1,10 @@
 import * as restApi from '@vexl-next/rest-api'
-import {ServiceUrl} from '@vexl-next/rest-api/dist/ServiceUrl.brand.js'
 import {ENV_PRESETS, PlatformName} from '@vexl-next/rest-api'
 import {type UserPublicApi} from '@vexl-next/rest-api/dist/services/user'
-import {type UserCredentials} from './utils/auth'
+import {parseAuthFile, type UserCredentials} from './utils/auth'
+import {type PathString} from '@vexl-next/domain/dist/utility/PathString.brand'
+import * as E from 'fp-ts/Either'
+import {pipe} from 'fp-ts/function'
 
 export function getPublicApi(): {
   user: UserPublicApi
@@ -13,6 +15,10 @@ export function getPublicApi(): {
       platform: PlatformName.parse('CLI'),
     }),
   }
+}
+
+export function getPrivateApiFromCredentialsFile(credentialsPath: PathString) {
+  return pipe(parseAuthFile(credentialsPath), E.map(getPrivateApi))
 }
 
 export function getPrivateApi(credentials: UserCredentials) {

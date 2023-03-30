@@ -175,7 +175,7 @@ export function aesGCMIgnoreTagEncrypt(
 }
 
 export function eciesDecrypt(
-  privateKey: KeyHolder.PrivateKeyHolder
+  privateKey: KeyHolder.PrivateKeyPemBase64
 ): (data: string) => TE.TaskEither<CryptoError, string> {
   return (data) =>
     TE.tryCatch(
@@ -186,7 +186,7 @@ export function eciesDecrypt(
 }
 
 export function eciesEncrypt(
-  publicKey: KeyHolder.PublicKeyHolder
+  publicKey: KeyHolder.PublicKeyPemBase64
 ): (data: string) => TE.TaskEither<CryptoError, string> {
   return (data) =>
     TE.tryCatch(

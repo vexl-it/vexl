@@ -15,6 +15,6 @@ For currently deployed version see the [vexl](https://github.com/vexl-it/vexl) r
 ```
 yarn
 yarn turbo:build
-cd app/mobile
+cd apps/mobile
 npx expo run:ios
 ```

@@ -63,7 +63,7 @@ export function privateApi({
         {
           method: 'get',
           url: '/v2/offers/me/modified',
-          headers: request,
+          params: request,
         },
         GetOffersForMeCreatedOrModifiedAfterResponse
       )
@@ -96,7 +96,7 @@ export function privateApi({
         {
           method: 'delete',
           url: '/v1/offers',
-          params: request,
+          params: {adminIds: request.adminIds.join(',')},
         },
         DeleteOfferResponse
       )

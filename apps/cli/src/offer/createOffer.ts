@@ -2,43 +2,19 @@ import {type PathString} from '@vexl-next/domain/dist/utility/PathString.brand'
 import {pipe} from 'fp-ts/function'
 import * as E from 'fp-ts/Either'
 import * as TE from 'fp-ts/TaskEither'
-import * as A from 'fp-ts/Array'
-import {parseJson, safeParse, stringifyToJson} from '../utils/parsing'
+import {parseJson, safeParse} from '../utils/parsing'
 import {readFile} from '../utils/fs'
 import {OfferPublicPart} from '@vexl-next/domain/dist/general/offers'
 import {getPrivateApi} from '../api'
 import {parseAuthFile} from '../utils/auth'
 import nodeCrypto from 'node:crypto'
-import {aesGCMIgnoreTagEncrypt} from '../utils/crypto'
 import {type ConnectionLevel} from '@vexl-next/rest-api/dist/services/contact/contracts'
 import {fetchContactsAndCreateEncryptedPrivateParts} from './utils/fetchContactsAndCreateEncryptedPrivateParts'
 import * as crypto from '@vexl-next/cryptography'
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
 import {type CreatedOffer, saveCreatedOfferToFile} from './CreatedOffer'
-
-function encryptPublicOffer({
-  offerPublicPart,
-  key,
-}: {
-  offerPublicPart: OfferPublicPart
-  key: string
-}) {
-  return pipe(
-    offerPublicPart.location,
-    A.map(stringifyToJson),
-    A.sequence(E.Applicative),
-    TE.fromEither,
-    TE.map((location) => ({...offerPublicPart, location})),
-
-    TE.chainEitherKW(stringifyToJson),
-    TE.map((a) => {
-      console.log('stringified', a)
-      return a
-    }),
-    TE.chainW(aesGCMIgnoreTagEncrypt(key)),
-    TE.map((encrypted) => `0${encrypted}`)
-  )
-}
+import encryptOfferPublicPart from './utils/encryptOfferPublicPart'
+import {decryptOffer} from './utils/decryptOffer'
 
 function readPublicPartFromFile({
   offerPublicKey,
@@ -88,7 +64,7 @@ export default async function createOffer({
       )
     ),
     TE.bindW('encryptedOffer', ({symmetricKey, offerPublicPart}) =>
-      encryptPublicOffer({offerPublicPart, key: symmetricKey})
+      encryptOfferPublicPart({offerPublicPart, symmetricKey})
     ),
     TE.bindW('userCredentials', () =>
       TE.fromEither(parseAuthFile(authFilePath))
@@ -100,7 +76,7 @@ export default async function createOffer({
       fetchContactsAndCreateEncryptedPrivateParts({
         symmetricKey,
         api: api.contact,
-        keypair: userCredentials.keypair,
+        ownerCredentials: userCredentials.keypair,
         connectionLevel,
       })
     ),
@@ -113,21 +89,24 @@ export default async function createOffer({
           offerType: offerPublicPart.offerType,
         })
     ),
+    TE.bind('decryptedServerOffer', ({createdOfferResponse, userCredentials}) =>
+      decryptOffer(userCredentials.keypair)(createdOfferResponse)
+    ),
     TE.map(
       ({
         createdOfferResponse,
         keypair,
         userCredentials,
         symmetricKey,
-        offerPublicPart,
+        decryptedServerOffer,
       }) =>
         ({
-          offerId: createdOfferResponse.offerId,
           adminId: createdOfferResponse.adminId,
           keypair,
           symmetricKey,
-          offerPublicPart,
+          connectionLevel,
           ownerCredentials: userCredentials,
+          offerInfo: decryptedServerOffer,
         } as CreatedOffer)
     ),
     TE.chainEitherKW(saveCreatedOfferToFile(outFilePath)),

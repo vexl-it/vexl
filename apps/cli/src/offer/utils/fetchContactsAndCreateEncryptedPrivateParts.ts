@@ -25,13 +25,13 @@ function constructPrivatePayloads({
   secondDegreeFriends,
   commonFriends,
   symmetricKey,
-  keypair,
+  ownerCredentials,
 }: {
   firstDegreeFriends: PublicKeyPemBase64[]
   secondDegreeFriends: PublicKeyPemBase64[]
   commonFriends: FetchCommonConnectionsResponse
   symmetricKey: string
-  keypair: PrivateKeyHolder
+  ownerCredentials: PrivateKeyHolder
 }): OfferPrivatePartToEncrypt[] {
   const friendLevel: Record<
     PublicKeyPemBase64,
@@ -53,7 +53,7 @@ function constructPrivatePayloads({
   }
 
   const currentUserCredentials = {
-    userPublicKey: keypair.publicKeyPemBase64,
+    userPublicKey: ownerCredentials.publicKeyPemBase64,
     payloadPrivate: {
       commonFriends: [],
       friendLevel: ['NOT_SPECIFIED'],
@@ -95,13 +95,7 @@ function fetchFriendsPublicKeys({
   )
 }
 
-function encryptPrivatePart({
-  privatePart,
-  symmetricKey,
-}: {
-  privatePart: OfferPrivatePartToEncrypt
-  symmetricKey: string
-}) {
+export function encryptPrivatePart(privatePart: OfferPrivatePartToEncrypt) {
   return pipe(
     TE.right(privatePart),
     TE.bindTo('privatePart'),
@@ -125,12 +119,12 @@ function fetchInfoAndCreatePrivateParts({
   connectionLevel,
   api,
   symmetricKey,
-  keypair,
+  ownerCredentials,
 }: {
   connectionLevel: ConnectionLevel
   api: ContactPrivateApi
   symmetricKey: string
-  keypair: PrivateKeyHolder
+  ownerCredentials: PrivateKeyHolder
 }): TE.TaskEither<any, OfferPrivatePartToEncrypt[]> {
   return pipe(
     fetchFriendsPublicKeys({lvl: connectionLevel, api}),
@@ -156,7 +150,7 @@ function fetchInfoAndCreatePrivateParts({
         secondDegreeFriends,
         commonFriends,
         symmetricKey,
-        keypair,
+        ownerCredentials,
       })
     )
   )
@@ -165,26 +159,21 @@ function fetchInfoAndCreatePrivateParts({
 export function fetchContactsAndCreateEncryptedPrivateParts({
   api,
   symmetricKey,
-  keypair,
+  ownerCredentials,
   connectionLevel,
 }: {
   connectionLevel: ConnectionLevel
   api: ContactPrivateApi
   symmetricKey: string
-  keypair: PrivateKeyHolder
+  ownerCredentials: PrivateKeyHolder
 }) {
   return pipe(
     fetchInfoAndCreatePrivateParts({
       connectionLevel,
       api,
       symmetricKey,
-      keypair,
+      ownerCredentials,
     }),
-    TE.chainW(
-      flow(
-        A.map((privatePart) => encryptPrivatePart({privatePart, symmetricKey})),
-        A.sequence(TE.ApplicativeSeq)
-      )
-    )
+    TE.chainW(flow(A.map(encryptPrivatePart), A.sequence(TE.ApplicativeSeq)))
   )
 }

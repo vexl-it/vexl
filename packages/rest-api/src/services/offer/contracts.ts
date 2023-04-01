@@ -3,6 +3,7 @@ import {OfferId, OfferType} from '@vexl-next/domain/dist/general/offers'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
 import {NoContentResponse} from '../../NoContentResponse.brand'
 import {UnixMilliseconds} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
+import {IsoDatetimeString} from '@vexl-next/domain/dist/utility/IsoDatetimeString.brand'
 
 export const OfferAdminId = z.string().brand<'OfferAdminId'>()
 export type OfferAdminId = z.TypeOf<typeof OfferAdminId>
@@ -24,8 +25,8 @@ export const ServerOffer = z.object({
     .describe(
       'Encrypted private payload. It should be encrypted by client with asymmetric encryption.'
     ),
-  createdAt: z.string().datetime({offset: true}),
-  modifiedAt: z.string().datetime({offset: true}),
+  createdAt: IsoDatetimeString,
+  modifiedAt: IsoDatetimeString,
 })
 export type ServerOffer = z.TypeOf<typeof ServerOffer>
 
@@ -35,7 +36,7 @@ export const GetOffersForMeResponse = z.object({
 export type GetOffersForMeResponse = z.TypeOf<typeof GetOffersForMeResponse>
 
 export const GetOffersForMeCreatedOrModifiedAfterRequest = z.object({
-  modifiedAt: z.string().datetime(),
+  modifiedAt: IsoDatetimeString,
 })
 export type GetOffersForMeCreatedOrModifiedAfterRequest = z.TypeOf<
   typeof GetOffersForMeCreatedOrModifiedAfterRequest

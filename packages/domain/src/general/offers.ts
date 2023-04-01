@@ -2,9 +2,8 @@ import {z} from 'zod'
 import {UriString} from '../utility/UriString.brand'
 import {UserNameAndAvatar} from './UserNameAndAvatar.brand'
 import {IdNumeric} from '../utility/IdNumeric'
-import {Uuid} from '../utility/Uuid.brand'
-import {KeyHolder} from '@vexl-next/cryptography'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
+import {IsoDatetimeString} from '../utility/IsoDatetimeString.brand'
 
 export const OfferId = z.string().min(1).brand<'OfferId'>()
 export type OfferId = z.TypeOf<typeof OfferId>
@@ -87,7 +86,7 @@ export const OfferPublicPart = z.object({
   activePriceValue: z.coerce.number(),
   activePriceCurrency: Currency,
   active: z.coerce.boolean(),
-  groupUuids: z.array(Uuid),
+  groupUuids: z.array(z.string()),
 })
 export type OfferPublicPart = z.TypeOf<typeof OfferPublicPart>
 
@@ -96,8 +95,8 @@ export const OfferInfo = z.object({
   offerId: OfferId,
   privatePart: OfferPrivatePart,
   publicPart: OfferPublicPart,
-  createdAt: z.string().datetime({offset: true}),
-  modifiedAt: z.string().datetime({offset: true}),
+  createdAt: IsoDatetimeString,
+  modifiedAt: IsoDatetimeString,
 })
 
 export type OfferInfo = z.TypeOf<typeof OfferInfo>

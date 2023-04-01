@@ -7,13 +7,14 @@ import {getPrivateApi} from '../api'
 import {decryptOffer} from './utils/decryptOffer'
 import {stringifyToJson} from '../utils/parsing'
 import {saveFile} from '../utils/fs'
+import {type IsoDatetimeString} from '@vexl-next/domain/dist/utility/IsoDatetimeString.brand'
 
 export async function getNewOffers({
   modifiedAt,
   credentialsFile,
   outFile,
 }: {
-  modifiedAt: string
+  modifiedAt: IsoDatetimeString
   credentialsFile: PathString
   outFile: PathString
 }) {
@@ -22,11 +23,11 @@ export async function getNewOffers({
     TE.fromEither,
     TE.bindTo('credentials'),
     TE.bindW('api', ({credentials}) => TE.right(getPrivateApi(credentials))),
-    TE.bindW('offers', ({api}) => api.offer.getOffersForMe()),
-    TE.map((data) => {
-      console.log('wtf', data.offers)
-      return data
-    }),
+    TE.bindW('offers', ({api}) =>
+      api.offer.getOffersForMeModifiedOrCreatedAfter({
+        modifiedAt,
+      })
+    ),
     TE.chainW(({api, offers, credentials}) =>
       pipe(
         offers.offers,

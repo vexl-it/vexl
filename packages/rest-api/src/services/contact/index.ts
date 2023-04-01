@@ -115,7 +115,7 @@ export function privateApi({
           {
             method: 'post',
             url: '/contacts/common',
-            data: request,
+            data: {publicKeys: request},
           },
           FetchCommonConnectionsResponse
         )

@@ -2,6 +2,7 @@ import z from 'zod'
 import {type AxiosResponse} from 'axios'
 import {type E164PhoneNumber} from '@vexl-next/domain/dist/general/E164PhoneNumber.brand'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
+import {IsoDatetimeString} from '@vexl-next/domain/dist/utility/IsoDatetimeString.brand'
 
 export interface InvalidPhoneNumber {
   _tag: 'InvalidPhoneNumber'
@@ -45,7 +46,7 @@ export type VerificationId = z.TypeOf<typeof VerificationId>
 
 export const InitPhoneNumberVerificationResponse = z.object({
   verificationId: VerificationId,
-  expirationAt: z.string().datetime({offset: true}),
+  expirationAt: IsoDatetimeString,
 })
 
 export type InitPhoneNumberVerificationResponse = z.TypeOf<

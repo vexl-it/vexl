@@ -50,3 +50,12 @@ export function stringifyToJson(
     (e) => ({_tag: 'jsonError', e} as const)
   )
 }
+
+export function stringifyToPrettyJson(
+  data: unknown
+): E.Either<JsonStringifyError, string> {
+  return E.tryCatch(
+    () => JSON.stringify(data, null, 2),
+    (e) => ({_tag: 'jsonError', e} as const)
+  )
+}

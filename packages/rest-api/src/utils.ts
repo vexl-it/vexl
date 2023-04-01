@@ -101,7 +101,7 @@ export function createAxiosInstanceWithAuthAndLogging(
         `🌐 ⬆️ Sending request: ${
           config.method?.toUpperCase() ?? '[unknown method]'
         } "${config.baseURL ?? ''}${config.url ?? '[unknown url]'}"`,
-        {headers: config.headers, data: config.data}
+        {headers: config.headers, data: config.data, params: config.params}
       )
 
       return config

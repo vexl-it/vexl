@@ -3,7 +3,11 @@ import {Command} from 'commander'
 import {E164PhoneNumber} from '@vexl-next/domain/dist/general/E164PhoneNumber.brand.js'
 import {PathString} from '@vexl-next/domain/dist/utility/PathString.brand.js'
 import login from './login/index.js'
-import {importContacts} from './contacts/index.js'
+import {
+  commonConnections,
+  getContacts,
+  importContacts,
+} from './contacts/index.js'
 import createOffer from './offer/createOffer'
 import {ConnectionLevel} from '@vexl-next/rest-api/dist/services/contact/contracts'
 import outputDummyOffer from './offer/outputDummyOffer'
@@ -11,8 +15,19 @@ import deleteOffer from './offer/deleteOffer'
 import {z} from 'zod'
 import {OfferAdminId} from '@vexl-next/rest-api/dist/services/offer/contracts'
 import {getNewOffers} from './offer/getNewOffers'
+import {IsoDatetimeString} from '@vexl-next/domain/dist/utility/IsoDatetimeString.brand'
+import updatePublicPart from './offer/updatePublicPart'
+import addPrivatePart from './offer/addPrivatePart'
+import {FriendLevel} from '@vexl-next/domain/dist/general/offers'
+import {PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
+import refreshOffer from './offer/refreshOffer'
 
 const program = new Command()
+
+// program.option('-v, --verbose', 'Enable verbose logging')
+// program.on('option:verbose', () => {
+//   setLogLevel(true)
+// })
 
 program
   .command('login')
@@ -27,8 +42,12 @@ program
       await login({phoneNumber, output})
     }
   )
-program
-  .command('import-contacts')
+
+const contactsSubcommand = program
+  .command('contact')
+  .description('Contacts utils.')
+contactsSubcommand
+  .command('import')
   .description('Import contacts')
   .argument(
     '<string>',
@@ -40,6 +59,43 @@ program
       await importContacts({
         contactsPath: PathString.parse(contactsPath),
         credentialsPath: PathString.parse(credentials),
+      })
+    }
+  )
+
+contactsSubcommand
+  .command('get')
+  .description('Get contacts')
+  .option('--level <string>', 'Friend level (FIRST or SECOND)')
+
+  .option('-c, --credentials <string>', 'Path to auth file')
+  .action(
+    async ({level, credentials}: {credentials: string; level: string}) => {
+      await getContacts({
+        credentialsPath: PathString.parse(credentials),
+        connectionLevel: ConnectionLevel.parse(level),
+      })
+    }
+  )
+
+contactsSubcommand
+  .command('common')
+  .description('Get common connections')
+  .option('--public-keys <string>', 'Public keys divided by comma')
+  .option('-c, --credentials <string>', 'Path to auth file')
+  .action(
+    async ({
+      publicKeys,
+      credentials,
+    }: {
+      credentials: string
+      publicKeys: string
+    }) => {
+      await commonConnections({
+        credentialsPath: PathString.parse(credentials),
+        publicKeys: publicKeys
+          .split(',')
+          .map((o) => PublicKeyPemBase64.parse(o)),
       })
     }
   )
@@ -101,44 +157,96 @@ offerSubcommand
   .description('Delete an offer')
   .option('-a, --adminId <string>', 'adminId of the offer')
   .option('-c, --credentials <string>', 'Path to auth file')
-  .action(async (adminId: string, {credentials}: {credentials: string}) => {
-    await deleteOffer({
-      adminIds: z.array(OfferAdminId).parse(adminId.split(',')),
-      credentialsFilePath: PathString.parse(credentials),
-    })
-  })
+  .action(
+    async ({adminId, credentials}: {credentials: string; adminId: string}) => {
+      await deleteOffer({
+        adminIds: z.array(OfferAdminId).parse(adminId.split(',')),
+        credentialsFilePath: PathString.parse(credentials),
+      })
+    }
+  )
 
 offerSubcommand
-  .command('update-public')
+  .command('update')
   .description('update public part of the offer')
-  .option('-i, --offer <string>', 'Path to the offer file')
-  .option('-c, --credentials <string>', 'Path to auth file')
+  .option(
+    '-i, --offer <string>',
+    'Path to the created offer file (created with `offer create` command)'
+  )
+  .option(
+    '-o, --output <string>',
+    'Output file path. Will save offer information into this file (like adminId, offerId and offerKey). Json formatted.'
+  )
+  .option(
+    '--update-private-parts',
+    'Update private parts of the offer as well. Will download all contacts from the server and reencrypt the offer again.'
+  )
+  .action(
+    async ({
+      offer,
+      output,
+      updatePrivateParts,
+    }: {
+      offer: string
+      output: string
+      updatePrivateParts: boolean
+    }) => {
+      await updatePublicPart({
+        offerFilePath: PathString.parse(offer),
+        outFilePath: PathString.parse(output),
+        updatePrivateParts,
+      })
+    }
+  )
 
 offerSubcommand
-  .command('create-private')
+  .command('add-private')
   .description('create private part of the offer.')
   .option(
-    '--symmetricKey <string>',
-    'Symmetric key used to encrypt public part of the offer'
+    '-i, --offer <string>',
+    'Path to the created offer file (created with `offer create` command)'
   )
   .option(
-    '--publicKey <string>',
-    'Public key of user for whom the private part is created'
-  )
-  .option(
-    '--friendLevels <string>',
+    '--friend-levels <string>',
     'Friend levels of whim the private part is created in relationship to me. Divided by comma.'
   )
-  .option('-c, --credentials <string>', 'Path to auth file')
-  .option('-a, --admin-id <string>', 'adminId of the offer')
+  .option(
+    '--contact-public-key <string>',
+    'Contact public key for whom the private part is created.'
+  )
+  .action(
+    async ({
+      offer,
+      friendLevels,
+      contactPublicKey,
+    }: {
+      offer: string
+      friendLevels: string
+      contactPublicKey: string
+    }) => {
+      await addPrivatePart({
+        createdOfferFilePath: PathString.parse(offer),
+        contactFriendLevel: friendLevels
+          .split(',')
+          .map((one) => FriendLevel.parse(one)),
+        contactPublicKey: PublicKeyPemBase64.parse(contactPublicKey),
+      })
+    }
+  )
 
 offerSubcommand
   .command('refresh')
   .description('Refresh an offer. Prevent server from removing it.')
-  .option('-a, --adminIds <string>', 'Admin ids divided by comma')
+  .option('-a, --adminId <string>', 'adminId of the offer')
   .option('-c, --credentials <string>', 'Path to auth file')
-  .action(async (adminId: string, {credentials}: {credentials: string}) => {})
-
+  .action(
+    async ({adminId, credentials}: {credentials: string; adminId: string}) => {
+      await refreshOffer({
+        adminIds: z.array(OfferAdminId).parse(adminId.split(',')),
+        credentialsFilePath: PathString.parse(credentials),
+      })
+    }
+  )
 offerSubcommand
   .command('get-new')
   .description('Get offers')
@@ -150,7 +258,7 @@ offerSubcommand
   .option(
     '-m, --modifiedAt <string>',
     'Get offers modified/created after this date. defaults to: 2000-04-09T09:42:53.000Z.',
-    '2000-04-09T09:42:53.000Z.'
+    '1970-01-01T00:00:00.000Z'
   )
   .action(
     async ({
@@ -165,24 +273,24 @@ offerSubcommand
       await getNewOffers({
         outFile: PathString.parse(output),
         credentialsFile: PathString.parse(credentials),
-        modifiedAt,
+        modifiedAt: IsoDatetimeString.parse(modifiedAt),
       })
     }
   )
 
-const messageSubcommand = program
-  .command('message')
-  .description('Messages utils. Run `help message` to see all subcommands.')
-
-messageSubcommand.command('create-inbox')
-
-messageSubcommand.command('request')
-
-messageSubcommand.command('respond-to-request')
-
-messageSubcommand.command('retrieve')
-
-messageSubcommand.command('remove-retrieved')
+// const messageSubcommand = program
+//   .command('message')
+//   .description('Messages utils. Run `help message` to see all subcommands.')
+//
+// messageSubcommand.command('create-inbox')
+//
+// messageSubcommand.command('request')
+//
+// messageSubcommand.command('respond-to-request')
+//
+// messageSubcommand.command('retrieve')
+//
+// messageSubcommand.command('remove-retrieved')
 
 if (process.argv[1] === __filename) {
   program
@@ -192,7 +300,7 @@ if (process.argv[1] === __filename) {
       process.exit(0)
     })
     .catch((e) => {
-      console.error('There was an error while running the command.', e)
+      console.log('There was an error while running the command.', e)
       process.exit(1)
     })
 }

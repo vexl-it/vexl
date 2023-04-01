@@ -28,3 +28,14 @@ export function parseAuthFile(
     E.mapLeft((error) => ({type: 'ParsingAuthFileError', error} as const))
   )
 }
+
+export function parseCredentialsJson(
+  credentialsJson: string
+): E.Either<ParsingAuthFileError, UserCredentials> {
+  return pipe(
+    credentialsJson,
+    parseJson,
+    E.chainW(safeParse(UserCredentials)),
+    E.mapLeft((error) => ({type: 'ParsingAuthFileError', error} as const))
+  )
+}

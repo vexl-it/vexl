@@ -37,7 +37,6 @@ export function eciesDecrypt(
   return (data) =>
     TE.tryCatch(
       async () => {
-        console.log('decrypting', data)
         return await crypto.eciesLegacy.eciesLegacyDecrypt({data, privateKey})
       },
       (error) => ({type: 'cryptoError', error} as const)
@@ -64,7 +63,6 @@ export function aesGCMIgnoreTagDecrypt(
   return (data) =>
     TE.tryCatch(
       async () => {
-        console.log('decrypting', data)
         return crypto.aes.aesGCMIgnoreTagDecrypt({data, password})
       },
       (error) => ({type: 'cryptoError', error} as const)

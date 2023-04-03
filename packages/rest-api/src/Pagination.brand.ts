@@ -14,3 +14,5 @@ export const PageResponse = z.object({
   itemsCount: z.number().int().min(0),
   itemsCountTotal: z.number().int().min(0),
 })
+
+export const MAX_PAGE_SIZE = 2147483647

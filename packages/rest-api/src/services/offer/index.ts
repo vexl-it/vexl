@@ -14,6 +14,8 @@ import {
   CreatePrivatePartResponse,
   type DeleteOfferRequest,
   DeleteOfferResponse,
+  GetOfferByIdsResponse,
+  type GetOffersByIdsRequest,
   type GetOffersForMeCreatedOrModifiedAfterRequest,
   GetOffersForMeCreatedOrModifiedAfterResponse,
   GetOffersForMeResponse,
@@ -45,6 +47,16 @@ export function privateApi({
   )
 
   return {
+    getOffersByIds: (request: GetOffersByIdsRequest) =>
+      axiosCallWithValidation(
+        axiosInstance,
+        {
+          method: 'get',
+          url: '/v2/offers',
+          params: {offerIds: request.ids.join(',')},
+        },
+        GetOfferByIdsResponse
+      ),
     getOffersForMe: () => {
       return axiosCallWithValidation(
         axiosInstance,

@@ -19,8 +19,21 @@ import {IsoDatetimeString} from '@vexl-next/domain/dist/utility/IsoDatetimeStrin
 import updatePublicPart from './offer/updatePublicPart'
 import addPrivatePart from './offer/addPrivatePart'
 import {FriendLevel} from '@vexl-next/domain/dist/general/offers'
-import {PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
+import {
+  generatePrivateKey,
+  importPrivateKey,
+  PrivateKeyPemBase64,
+  PublicKeyPemBase64,
+} from '@vexl-next/cryptography/dist/KeyHolder'
 import refreshOffer from './offer/refreshOffer'
+import createInbox from './messaging/createInbox'
+import deleteInbox from './messaging/deleteInbox'
+import requestMessaging from './messaging/requestMessaging'
+import pullMessages from './messaging/pullMessages'
+import {deletePulled} from './messaging/deletePulled'
+import {MessageTypes} from '@vexl-next/domain/dist/general/messaging'
+import sendMessage from './messaging/sendMessage'
+import {approveConfirm} from './messaging/aproveConfirm'
 
 const program = new Command()
 
@@ -53,7 +66,7 @@ contactsSubcommand
     '<string>',
     'File with phone numbers divided by newline (format +420XXXXXXXXX).'
   )
-  .option('-c, --credentials <string>', 'Path to auth file')
+  .requiredOption('-c, --credentials <string>', 'Path to auth file')
   .action(
     async (contactsPath: string, {credentials}: {credentials: string}) => {
       await importContacts({
@@ -66,9 +79,9 @@ contactsSubcommand
 contactsSubcommand
   .command('get')
   .description('Get contacts')
-  .option('--level <string>', 'Friend level (FIRST or SECOND)')
+  .requiredOption('--level <string>', 'Friend level (FIRST or SECOND)')
 
-  .option('-c, --credentials <string>', 'Path to auth file')
+  .requiredOption('-c, --credentials <string>', 'Path to auth file')
   .action(
     async ({level, credentials}: {credentials: string; level: string}) => {
       await getContacts({
@@ -81,8 +94,8 @@ contactsSubcommand
 contactsSubcommand
   .command('common')
   .description('Get common connections')
-  .option('--public-keys <string>', 'Public keys divided by comma')
-  .option('-c, --credentials <string>', 'Path to auth file')
+  .requiredOption('--public-keys <string>', 'Public keys divided by comma')
+  .requiredOption('-c, --credentials <string>', 'Path to auth file')
   .action(
     async ({
       publicKeys,
@@ -121,13 +134,13 @@ offerSubcommand
   .description(
     'Create a new offer and encrypt it for contacts fetched from server.'
   )
-  .option('-c, --credentials <string>', 'Path to auth file')
-  .option('--level <string>', 'Friend level (FIRST or SECOND)')
-  .option(
+  .requiredOption('-c, --credentials <string>', 'Path to auth file')
+  .requiredOption('--level <string>', 'Friend level (FIRST or SECOND)')
+  .requiredOption(
     '-i, --offer <string>',
     'Path to offer file (generate dummy with `offer dummy` command)'
   )
-  .option(
+  .requiredOption(
     '-o, --output <string>',
     'Output file path. Will save offer information into this file (like adminId, offerId and offerKey). Json formatted.'
   )
@@ -155,8 +168,8 @@ offerSubcommand
 offerSubcommand
   .command('delete')
   .description('Delete an offer')
-  .option('-a, --adminId <string>', 'adminId of the offer')
-  .option('-c, --credentials <string>', 'Path to auth file')
+  .requiredOption('-a, --adminId <string>', 'adminId of the offer')
+  .requiredOption('-c, --credentials <string>', 'Path to auth file')
   .action(
     async ({adminId, credentials}: {credentials: string; adminId: string}) => {
       await deleteOffer({
@@ -169,15 +182,15 @@ offerSubcommand
 offerSubcommand
   .command('update')
   .description('update public part of the offer')
-  .option(
+  .requiredOption(
     '-i, --offer <string>',
     'Path to the created offer file (created with `offer create` command)'
   )
-  .option(
+  .requiredOption(
     '-o, --output <string>',
     'Output file path. Will save offer information into this file (like adminId, offerId and offerKey). Json formatted.'
   )
-  .option(
+  .requiredOption(
     '--update-private-parts',
     'Update private parts of the offer as well. Will download all contacts from the server and reencrypt the offer again.'
   )
@@ -206,11 +219,11 @@ offerSubcommand
     '-i, --offer <string>',
     'Path to the created offer file (created with `offer create` command)'
   )
-  .option(
+  .requiredOption(
     '--friend-levels <string>',
     'Friend levels of whim the private part is created in relationship to me. Divided by comma.'
   )
-  .option(
+  .requiredOption(
     '--contact-public-key <string>',
     'Contact public key for whom the private part is created.'
   )
@@ -237,8 +250,8 @@ offerSubcommand
 offerSubcommand
   .command('refresh')
   .description('Refresh an offer. Prevent server from removing it.')
-  .option('-a, --adminId <string>', 'adminId of the offer')
-  .option('-c, --credentials <string>', 'Path to auth file')
+  .requiredOption('-a, --adminId <string>', 'adminId of the offer')
+  .requiredOption('-c, --credentials <string>', 'Path to auth file')
   .action(
     async ({adminId, credentials}: {credentials: string; adminId: string}) => {
       await refreshOffer({
@@ -250,12 +263,12 @@ offerSubcommand
 offerSubcommand
   .command('get-new')
   .description('Get offers')
-  .option(
+  .requiredOption(
     '-o, --output <string>',
     'Output file path. Will save fetched offers into this file. Json formatted'
   )
-  .option('-c, --credentials <string>', 'Path to auth file')
-  .option(
+  .requiredOption('-c, --credentials <string>', 'Path to auth file')
+  .requiredOption(
     '-m, --modifiedAt <string>',
     'Get offers modified/created after this date. defaults to: 2000-04-09T09:42:53.000Z.',
     '1970-01-01T00:00:00.000Z'
@@ -278,19 +291,186 @@ offerSubcommand
     }
   )
 
-// const messageSubcommand = program
-//   .command('message')
-//   .description('Messages utils. Run `help message` to see all subcommands.')
-//
-// messageSubcommand.command('create-inbox')
-//
-// messageSubcommand.command('request')
-//
-// messageSubcommand.command('respond-to-request')
-//
-// messageSubcommand.command('retrieve')
-//
-// messageSubcommand.command('remove-retrieved')
+const messageSubcommand = program
+  .command('message')
+  .description('Messages utils. Run `help message` to see all subcommands.')
+
+messageSubcommand
+  .command('create-inbox')
+  .description('Create inbox')
+  .requiredOption(
+    '-c, --credentials <string>',
+    'Path to auth file with user credentials'
+  )
+  .option(
+    '--private-key <string>',
+    'Inbox private key. If not specified, new one will be generated'
+  )
+  .requiredOption('-o, --output <string>', 'Output file path. Json formatted.')
+  .option('--notification-token <string>', 'Notification token', undefined)
+  .action(
+    async ({
+      credentials,
+      output,
+      notificationToken,
+      privateKey,
+    }: {
+      credentials: PathString
+      output: PathString
+      notificationToken?: string
+      privateKey: string
+    }) => {
+      const keypair = privateKey
+        ? importPrivateKey({
+            privateKeyPemBase64: PrivateKeyPemBase64.parse(privateKey),
+          })
+        : generatePrivateKey()
+
+      await createInbox({
+        credentialsFile: PathString.parse(credentials),
+        outFile: PathString.parse(output),
+        notificationToken,
+        keypair,
+      })
+    }
+  )
+
+messageSubcommand
+  .command('delete-inbox')
+  .description('Delete inbox and all its messages')
+  .requiredOption('-i, --inbox <string>', 'Path to inbox file')
+  .action(async ({inbox}: {inbox: string}) => {
+    await deleteInbox({
+      savedInboxFile: PathString.parse(inbox),
+    })
+  })
+
+messageSubcommand
+  .command('request')
+  .description("Send request to contact's inbox")
+  .requiredOption(
+    '-i, --inbox <string>',
+    'Path to inbox file - will be modified with send message'
+  )
+  .requiredOption(
+    '--to-public-key <string>',
+    'Public key to which the request will be sent'
+  )
+
+  .requiredOption('--text <string>', 'Text to send with the request')
+  .action(
+    async ({
+      inbox,
+      toPublicKey,
+      text,
+    }: {
+      inbox: string
+      toPublicKey: string
+      text: string
+    }) => {
+      await requestMessaging({
+        inboxFile: PathString.parse(inbox),
+        toPublicKey: PublicKeyPemBase64.parse(toPublicKey),
+        text,
+      })
+    }
+  )
+
+messageSubcommand
+  .command('respond-to-request')
+  .description('Respond to message request')
+  .requiredOption(
+    '-i, --inbox <string>',
+    'Path to inbox file - will be modified with send message'
+  )
+  .requiredOption(
+    '--to-public-key <string>',
+    'Public key to which the request will be sent'
+  )
+  .option('--deny', 'If included request will be denied', false)
+  .option('--text <string>', 'Text to send with approval', 'Approved')
+  .action(
+    async ({
+      inbox,
+      toPublicKey,
+      deny,
+      text,
+    }: {
+      inbox: string
+      toPublicKey: string
+      deny: boolean
+      text: string
+    }) => {
+      await approveConfirm({
+        text,
+        toPublicKey: PublicKeyPemBase64.parse(toPublicKey),
+        approve: !deny,
+        inboxFile: PathString.parse(inbox),
+      })
+    }
+  )
+
+messageSubcommand
+  .command('send-text')
+  .description('Send text message to another user')
+  .requiredOption('-i, --inbox <string>', 'Path to inbox file')
+  .requiredOption('--to-public-key <string>', 'Public key of the recipient')
+  .requiredOption('--text <string>', 'Text to send with the message')
+  .action(
+    async ({
+      inbox,
+      toPublicKey,
+      text,
+    }: {
+      inbox: string
+      toPublicKey: string
+      text: string
+    }) => {
+      await sendMessage({
+        text,
+        toPublicKey: PublicKeyPemBase64.parse(toPublicKey),
+        inboxFile: PathString.parse(inbox),
+      })
+    }
+  )
+
+messageSubcommand
+  .command('list-message-types')
+  .description('list message types')
+  .action(() => {
+    console.log(Object.keys(MessageTypes).join('\n'))
+  })
+
+messageSubcommand
+  .command('retrieve')
+  .description('Pull new messages for inbox')
+  .requiredOption(
+    '-i, --inbox <string>',
+    'Path to inbox file - will be modified with new messages'
+  )
+  .option('--delete-pulled', 'Delete pulled messages')
+  .action(
+    async ({
+      inbox,
+      deletePulled: shouldDeletePulled,
+    }: {
+      inbox: string
+      deletePulled: string
+    }) => {
+      await pullMessages({inboxFile: PathString.parse(inbox)})
+      if (shouldDeletePulled) {
+        await deletePulled({inboxFile: PathString.parse(inbox)})
+      }
+    }
+  )
+
+messageSubcommand
+  .command('delete-pulled')
+  .description('Delete already pulled messages from inbox')
+  .requiredOption('-i, --inbox <string>', 'Path to inbox file')
+  .action(async ({inbox}: {inbox: string}) => {
+    await deletePulled({inboxFile: PathString.parse(inbox)})
+  })
 
 if (process.argv[1] === __filename) {
   program

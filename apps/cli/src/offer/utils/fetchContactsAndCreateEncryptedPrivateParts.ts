@@ -3,7 +3,10 @@ import {
   type PublicKeyPemBase64,
 } from '@vexl-next/cryptography/dist/KeyHolder'
 import {keys} from '../../utils/objectKeys'
-import {type OfferPrivatePart} from '@vexl-next/domain/dist/general/offers'
+import {
+  type OfferPrivatePart,
+  type SymmetricKey,
+} from '@vexl-next/domain/dist/general/offers'
 import {
   type ConnectionLevel,
   type FetchCommonConnectionsResponse,
@@ -30,7 +33,7 @@ function constructPrivatePayloads({
   firstDegreeFriends: PublicKeyPemBase64[]
   secondDegreeFriends: PublicKeyPemBase64[]
   commonFriends: FetchCommonConnectionsResponse
-  symmetricKey: string
+  symmetricKey: SymmetricKey
   ownerCredentials: PrivateKeyHolder
 }): OfferPrivatePartToEncrypt[] {
   const friendLevel: Record<
@@ -123,7 +126,7 @@ function fetchInfoAndCreatePrivateParts({
 }: {
   connectionLevel: ConnectionLevel
   api: ContactPrivateApi
-  symmetricKey: string
+  symmetricKey: SymmetricKey
   ownerCredentials: PrivateKeyHolder
 }): TE.TaskEither<any, OfferPrivatePartToEncrypt[]> {
   return pipe(
@@ -164,7 +167,7 @@ export function fetchContactsAndCreateEncryptedPrivateParts({
 }: {
   connectionLevel: ConnectionLevel
   api: ContactPrivateApi
-  symmetricKey: string
+  symmetricKey: SymmetricKey
   ownerCredentials: PrivateKeyHolder
 }) {
   return pipe(

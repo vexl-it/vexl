@@ -5,3 +5,7 @@ export const UnixMilliseconds = z
   .positive()
   .brand<'UnixMilliseconds'>()
 export type UnixMilliseconds = z.TypeOf<typeof UnixMilliseconds>
+
+export function now(): UnixMilliseconds {
+  return UnixMilliseconds.parse(Date.now())
+}

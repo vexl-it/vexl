@@ -15,6 +15,7 @@ import {type PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
 import {type CreatedOffer, saveCreatedOfferToFile} from './CreatedOffer'
 import encryptOfferPublicPart from './utils/encryptOfferPublicPart'
 import {decryptOffer} from './utils/decryptOffer'
+import generateSymmetricKey from '@vexl-next/resources-utils/dist/offers/utils/generateSymmetricKey'
 
 function readPublicPartFromFile({
   offerPublicKey,
@@ -51,9 +52,7 @@ export default async function createOffer({
 }) {
   await pipe(
     TE.Do,
-    TE.bindW('symmetricKey', () =>
-      TE.right(nodeCrypto.randomBytes(32).toString('base64'))
-    ),
+    TE.bindW('symmetricKey', () => TE.fromEither(generateSymmetricKey())),
     TE.bindW('keypair', () => TE.right(crypto.KeyHolder.generatePrivateKey())),
     TE.bindW('offerPublicPart', ({keypair}) =>
       TE.fromEither(

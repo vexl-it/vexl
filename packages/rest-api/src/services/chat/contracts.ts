@@ -3,7 +3,10 @@ import {IdNumeric} from '@vexl-next/domain/dist/utility/IdNumeric'
 import {MessageType} from '@vexl-next/domain/dist/general/messaging'
 import {UnixMilliseconds} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
 import {NoContentResponse} from '../../NoContentResponse.brand'
-import {PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
+import {
+  PrivateKeyHolder,
+  PublicKeyPemBase64,
+} from '@vexl-next/cryptography/dist/KeyHolder'
 
 export const SignedChallenge = z.object({
   challenge: z.string(),
@@ -11,23 +14,23 @@ export const SignedChallenge = z.object({
 })
 export type SignedChallenge = z.TypeOf<typeof SignedChallenge>
 
-export const Message = z.object({
+export const ServerMessage = z.object({
   message: z.string(),
   senderPublicKey: PublicKeyPemBase64,
   messageType: MessageType,
 })
+export type ServerMessage = z.TypeOf<typeof ServerMessage>
 
-export const MessageWithId = Message.extend({
+export const ServerMessageWithId = ServerMessage.extend({
   id: IdNumeric,
 })
-export type MessageWithId = z.TypeOf<typeof MessageWithId>
+export type ServerMessageWithId = z.TypeOf<typeof ServerMessageWithId>
 
-const RequestBase = z.object({
-  publicKey: PublicKeyPemBase64,
-  signedChallenge: SignedChallenge,
+const RequestBaseWithChallenge = z.object({
+  keyPair: PrivateKeyHolder,
 })
 
-export const UpdateInboxRequest = RequestBase.extend({
+export const UpdateInboxRequest = RequestBaseWithChallenge.extend({
   token: z.string().optional(),
 })
 export type UpdateInboxRequest = z.TypeOf<typeof UpdateInboxRequest>
@@ -37,7 +40,7 @@ export const UpdateInboxResponse = z.object({
 })
 export type UpdateInboxResponse = z.TypeOf<typeof UpdateInboxResponse>
 
-export const CreateInboxRequest = RequestBase.extend({
+export const CreateInboxRequest = RequestBaseWithChallenge.extend({
   token: z.string().optional(),
 })
 export type CreateInboxRequest = z.TypeOf<typeof CreateInboxRequest>
@@ -45,13 +48,13 @@ export type CreateInboxRequest = z.TypeOf<typeof CreateInboxRequest>
 export const CreateInboxResponse = NoContentResponse
 export type CreateInboxResponse = z.TypeOf<typeof CreateInboxResponse>
 
-export const DeleteInboxRequest = RequestBase.extend({})
+export const DeleteInboxRequest = RequestBaseWithChallenge.extend({})
 export type DeleteInboxRequest = z.TypeOf<typeof DeleteInboxRequest>
 
 export const DeleteInboxResponse = NoContentResponse
 export type DeleteInboxResponse = z.TypeOf<typeof DeleteInboxResponse>
 
-export const DeletePulledMessagesRequest = RequestBase.extend({})
+export const DeletePulledMessagesRequest = RequestBaseWithChallenge.extend({})
 export type DeletePulledMessagesRequest = z.TypeOf<
   typeof DeletePulledMessagesRequest
 >
@@ -61,7 +64,7 @@ export type DeletePulledMessagesResponse = z.TypeOf<
   typeof DeletePulledMessagesResponse
 >
 
-export const BlockInboxRequest = RequestBase.extend({
+export const BlockInboxRequest = RequestBaseWithChallenge.extend({
   publicKeyToBlock: PublicKeyPemBase64,
   block: z.boolean(),
 })
@@ -76,17 +79,17 @@ export const RequestApprovalRequest = z.object({
 })
 export type RequestApprovalRequest = z.TypeOf<typeof RequestApprovalRequest>
 
-export const RequestApprovalResponse = MessageWithId.extend({})
+export const RequestApprovalResponse = ServerMessageWithId.extend({})
 export type RequestApprovalResponse = z.TypeOf<typeof RequestApprovalResponse>
 
-export const ApproveRequestRequest = RequestBase.extend({
+export const ApproveRequestRequest = RequestBaseWithChallenge.extend({
   publicKeyToConfirm: PublicKeyPemBase64,
   message: z.string(),
   approve: z.boolean(),
 })
 export type ApproveRequestRequest = z.TypeOf<typeof ApproveRequestRequest>
 
-export const ApproveRequestResponse = MessageWithId.extend({})
+export const ApproveRequestResponse = ServerMessageWithId.extend({})
 export type ApproveRequestResponse = z.TypeOf<typeof ApproveRequestResponse>
 
 export const DeleteInboxesRequest = z.object({
@@ -102,35 +105,45 @@ export type DeleteInboxesRequest = z.TypeOf<typeof DeleteInboxesRequest>
 export const DeleteInboxesResponse = NoContentResponse
 export type DeleteInboxesResponse = z.TypeOf<typeof DeleteInboxesResponse>
 
-export const RetrieveMessagesRequest = RequestBase.extend({})
+export const RetrieveMessagesRequest = RequestBaseWithChallenge.extend({})
 export type RetrieveMessagesRequest = z.TypeOf<typeof RetrieveMessagesRequest>
 
 export const RetrieveMessagesResponse = z.object({
-  messages: z.array(MessageWithId),
+  messages: z.array(ServerMessageWithId),
 })
 export type RetrieveMessagesResponse = z.TypeOf<typeof RetrieveMessagesResponse>
 
-export const SendMessageRequest = Message.extend({
+export const SendMessageRequest = z.object({
+  keyPair: PrivateKeyHolder,
   receiverPublicKey: PublicKeyPemBase64,
-  signedChallenge: SignedChallenge,
+  message: z.string(),
+  messageType: MessageType,
 })
 export type SendMessageRequest = z.TypeOf<typeof SendMessageRequest>
 
-export const SendMessageResponse = MessageWithId.extend({})
+export const SendMessageResponse = ServerMessageWithId.extend({})
 export type SendMessageResponse = z.TypeOf<typeof SendMessageResponse>
 
+export const MessageInBatch = z.object({
+  receiverPublicKey: PublicKeyPemBase64,
+  message: z.string(),
+  messageType: MessageType,
+})
+export type MessageInBatch = z.TypeOf<typeof MessageInBatch>
+
+export const InboxInBatch = z.object({
+  senderPublicKey: PublicKeyPemBase64,
+  messages: z.array(MessageInBatch),
+  signedChallenge: SignedChallenge,
+})
+export type InboxInBatch = z.TypeOf<typeof InboxInBatch>
+
 export const SendMessagesRequest = z.object({
-  data: z.array(
-    z.object({
-      senderPublicKey: PublicKeyPemBase64,
-      messages: z.array(Message),
-      signedChallenge: SignedChallenge,
-    })
-  ),
+  data: z.array(InboxInBatch),
 })
 export type SendMessagesRequest = z.TypeOf<typeof SendMessagesRequest>
 
-export const SendMessagesResponse = z.array(MessageWithId)
+export const SendMessagesResponse = z.array(ServerMessageWithId)
 export type SendMessagesResponse = z.TypeOf<typeof SendMessagesResponse>
 
 export const CreateChallengeRequest = z.object({

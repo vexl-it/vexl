@@ -26,6 +26,7 @@
   "dependencies": {
     "@vexl-next/cryptography": "workspace:*",
     "@vexl-next/domain": "workspace:*",
+    "@vexl-next/resources-utils": "workspace:*",
     "@vexl-next/rest-api": "workspace:*",
     "axios": "^1.2.1",
     "commander": "^9.4.1",

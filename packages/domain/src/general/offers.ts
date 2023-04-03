@@ -62,16 +62,19 @@ export const Location = z.object({
 
 export type Location = z.TypeOf<typeof Location>
 
+export const SymmetricKey = z.string().brand<'SymmetricKey'>()
+export type SymmetricKey = z.TypeOf<typeof SymmetricKey>
+
 export const OfferPrivatePart = z.object({
   commonFriends: z.array(z.string()),
   friendLevel: z.array(FriendLevel),
-  symmetricKey: z.string(),
+  symmetricKey: SymmetricKey,
 })
 export type OfferPrivatePart = z.TypeOf<typeof OfferPrivatePart>
 
 export const OfferPublicPart = z.object({
   offerPublicKey: PublicKeyPemBase64,
-  location: z.array(Location), // TODO should be encrypted in string
+  location: z.array(Location),
   offerDescription: z.string(),
   amountBottomLimit: z.coerce.number(),
   amountTopLimit: z.coerce.number(),
@@ -107,3 +110,13 @@ export const OfferFlags = z.object({
   realUserData: UserNameAndAvatar.optional(),
 })
 export type OfferFlags = z.TypeOf<typeof OfferFlags>
+
+export const PrivatePayloadEncrypted = z
+  .string()
+  .brand<'PublicPayloadEncrypted'>()
+export type PrivatePayloadEncrypted = z.TypeOf<typeof PrivatePayloadEncrypted>
+
+export const PublicPayloadEncrypted = z
+  .string()
+  .brand<'PublicPayloadEncrypted'>()
+export type PublicPayloadEncrypted = z.TypeOf<typeof PublicPayloadEncrypted>

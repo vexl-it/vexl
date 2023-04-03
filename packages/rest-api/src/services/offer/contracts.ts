@@ -1,5 +1,10 @@
 import {z} from 'zod'
-import {OfferId, OfferType} from '@vexl-next/domain/dist/general/offers'
+import {
+  OfferId,
+  OfferType,
+  PrivatePayloadEncrypted,
+  PublicPayloadEncrypted,
+} from '@vexl-next/domain/dist/general/offers'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
 import {NoContentResponse} from '../../NoContentResponse.brand'
 import {UnixMilliseconds} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
@@ -15,20 +20,18 @@ export const ServerOffer = z.object({
     .describe('ID of the offer. It should be used for ordering.'),
   offerId: OfferId,
   expiration: UnixMilliseconds,
-  publicPayload: z
-    .string()
-    .describe(
-      'Encrypted public payload. It should be encrypted by client with symmetric encryption.'
-    ),
-  privatePayload: z
-    .string()
-    .describe(
-      'Encrypted private payload. It should be encrypted by client with asymmetric encryption.'
-    ),
+  publicPayload: PublicPayloadEncrypted,
+  privatePayload: PrivatePayloadEncrypted,
   createdAt: IsoDatetimeString,
   modifiedAt: IsoDatetimeString,
 })
 export type ServerOffer = z.TypeOf<typeof ServerOffer>
+
+export const getOffersByIdsRequest = z.object({ids: z.array(OfferId)})
+export type GetOffersByIdsRequest = z.TypeOf<typeof getOffersByIdsRequest>
+
+export const GetOfferByIdsResponse = z.array(ServerOffer)
+export type GetOfferByIdsResponse = z.TypeOf<typeof GetOfferByIdsResponse>
 
 export const GetOffersForMeResponse = z.object({
   offers: z.array(ServerOffer),
@@ -49,14 +52,16 @@ export type GetOffersForMeCreatedOrModifiedAfterResponse = z.TypeOf<
   typeof GetOffersForMeCreatedOrModifiedAfterResponse
 >
 
-const EncryptedPrivatePart = z.object({
+export const ServerPrivatePart = z.object({
   userPublicKey: PublicKeyPemBase64,
-  payloadPrivate: z.string(),
+  payloadPrivate: PrivatePayloadEncrypted,
 })
+export type ServerPrivatePart = z.TypeOf<typeof ServerPrivatePart>
+
 export const CreateNewOfferRequest = z.object({
   offerType: OfferType,
-  payloadPublic: z.string(),
-  offerPrivateList: z.array(EncryptedPrivatePart),
+  payloadPublic: PublicPayloadEncrypted,
+  offerPrivateList: z.array(ServerPrivatePart),
 })
 export type CreateNewOfferRequest = z.TypeOf<typeof CreateNewOfferRequest>
 export const CreateNewOfferResponse = ServerOffer.extend({
@@ -81,11 +86,11 @@ export type DeleteOfferResponse = z.TypeOf<typeof DeleteOfferResponse>
 
 export const UpdateOfferRequest = z.object({
   adminId: OfferAdminId,
-  payloadPublic: z.string(),
+  payloadPublic: PublicPayloadEncrypted,
   offerPrivateList: z.array(
     z.object({
       userPublicKey: PublicKeyPemBase64,
-      payloadPrivate: z.string(),
+      payloadPrivate: PrivatePayloadEncrypted,
     })
   ),
 })
@@ -96,7 +101,7 @@ export type UpdateOfferResponse = z.TypeOf<typeof UpdateOfferResponse>
 
 export const CreatePrivatePartRequest = z.object({
   adminId: OfferAdminId,
-  offerPrivateList: z.array(EncryptedPrivatePart),
+  offerPrivateList: z.array(ServerPrivatePart),
 })
 export type CreatePrivatePartRequest = z.TypeOf<typeof CreatePrivatePartRequest>
 

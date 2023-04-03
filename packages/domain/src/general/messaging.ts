@@ -1,5 +1,4 @@
 import {z} from 'zod'
-import {IdNumeric} from '../utility/IdNumeric'
 import {UserNameAndAvatar} from './UserNameAndAvatar.brand'
 import {OfferId} from './offers'
 import {UserName} from './UserName.brand'
@@ -45,28 +44,39 @@ export type ChatUserIdentity = z.TypeOf<typeof ChatUserIdentity>
 
 export const DeanonymizedUser = z.object({
   name: UserName,
-  avatar: Base64String,
+  imageBase64: Base64String,
 })
 export type DeanonymizedUser = z.TypeOf<typeof DeanonymizedUser>
 
-export const ChatMessageEncodedPayload = z.object({
+//
+export const ChatMessagePayload = z.object({
   uuid: Uuid,
   text: z.string(),
   image: Base64String.optional(),
   time: UnixMilliseconds,
   deanonymizedUser: DeanonymizedUser.optional(),
 })
-export type ChatMessageEncodedPayload = z.TypeOf<
-  typeof ChatMessageEncodedPayload
->
+export type ChatMessagePayload = z.TypeOf<typeof ChatMessagePayload>
 
-export const ChatMessage = ChatMessageEncodedPayload.extend({
-  id: IdNumeric,
-  type: MessageType,
+export const MessageFlags = z.object({
   isMine: z.boolean(),
-  senderPublicKey: KeyHolder.PublicKeyPemBase64,
+})
+export type MessageFlags = z.TypeOf<typeof MessageFlags>
+
+export const ChatMessage = z.object({
+  uuid: Uuid,
+  text: z.string(),
+  time: UnixMilliseconds,
+  image: Base64String.optional(),
+  deanonymizedUser: DeanonymizedUser.optional(),
+  senderPublicKey: PublicKeyPemBase64,
+  messageType: MessageType,
+  sent: z.boolean(),
+  isMine: z.boolean(),
 })
 export type ChatMessage = z.TypeOf<typeof ChatMessage>
+
+//
 
 export const Inbox = z.object({
   privateKey: KeyHolder.PrivateKeyHolder,

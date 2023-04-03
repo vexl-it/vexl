@@ -5,7 +5,7 @@ import * as TE from 'fp-ts/TaskEither'
 import * as A from 'fp-ts/Array'
 import {getPrivateApi} from '../api'
 import {decryptOffer} from './utils/decryptOffer'
-import {stringifyToJson} from '../utils/parsing'
+import {stringifyToPrettyJson} from '../utils/parsing'
 import {saveFile} from '../utils/fs'
 import {type IsoDatetimeString} from '@vexl-next/domain/dist/utility/IsoDatetimeString.brand'
 
@@ -32,10 +32,10 @@ export async function getNewOffers({
       pipe(
         offers.offers,
         A.map(decryptOffer(credentials.keypair)),
-        A.sequence(TE.ApplicativeSeq)
+        A.sequence(TE.ApplicativePar)
       )
     ),
-    TE.chainEitherKW(stringifyToJson),
+    TE.chainEitherKW(stringifyToPrettyJson),
     TE.chainEitherKW(saveFile(outFile)),
     TE.match(
       (e) => {

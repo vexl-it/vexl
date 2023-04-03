@@ -4315,6 +4315,7 @@ __metadata:
     prettier: 2.8.0
     react: 18.1.0
     react-native: 0.70.5
+    react-native-crypto: "https://github.com/vexl-it/react-native-quick-crypto"
     react-native-flags: ^1.0.0
     react-native-flipper: ^0.176.0
     react-native-keyboard-aware-scroll-view: ^0.9.5
@@ -13853,6 +13854,24 @@ __metadata:
     react-native: "*"
     react-native-web: "*"
   checksum: e808169b45c5e8021462a6914f7c3fb28e84ae8d58097ed7b3418fee41efa2bc44012abc09ff3f3bd6ee14427b9efe1b0f8d8b3a19cc01325b2f2cd0137d5d00
+  languageName: node
+  linkType: hard
+
+"react-native-crypto@https://github.com/vexl-it/react-native-quick-crypto":
+  version: 0.5.0
+  resolution: "react-native-crypto@https://github.com/vexl-it/react-native-quick-crypto.git#commit=d7d0ca4e0d0eaee28a0df694c39df110459c1fb8"
+  dependencies:
+    "@craftzdog/react-native-buffer": ^6.0.4
+    "@types/node": ^17.0.31
+    crypto-browserify: ^3.12.0
+    events: ^3.3.0
+    react-native-quick-base64: ^2.0.2
+    stream-browserify: ^3.0.0
+    string_decoder: ^1.3.0
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: 6e96d2ee92efa4a91f219601c9d9f93e141f9a9588fbdd3579e1f000947b4fd209e8d419b2a577dc174cd3518920e84655bc91083918e4127da74d40ea57cb58
   languageName: node
   linkType: hard
 

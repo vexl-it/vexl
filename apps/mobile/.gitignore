@@ -71,3 +71,8 @@ web-build/
 dist/
 
 # @end expo-cli
+
+
+# expo - use expo prebuild to generate those folders
+./ios
+./android

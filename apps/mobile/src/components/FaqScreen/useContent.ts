@@ -1,15 +1,15 @@
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import faq1Svg from './images/faq1Svg'
-import {type BRAND} from 'zod'
 import faq4Svg from './images/faq4Svg'
 import faq3Svg from './images/faq3Svg'
 import faq5Svg from './images/faq5Svg'
 import faq6Svg from './images/faq6Svg'
 import anonymizationNoticeSvg from '../../images/anonymizationNoticeSvg'
 import notificationsSvg from '../../images/notificationsSvg'
+import {type SvgString} from '@vexl-next/domain/dist/utility/SvgString.brand'
 
 interface Props {
-  svg: {xml: string} & BRAND<'SvgString'>
+  svg: SvgString
   title: string
   text: string
 }

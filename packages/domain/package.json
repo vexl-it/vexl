@@ -22,6 +22,7 @@
     "typescript": "^4.9.4"
   },
   "dependencies": {
+    "@vexl-next/cryptography": "workspace:*",
     "awesome-phonenumber": "^5.1.0",
     "fp-ts": "^2.13.1",
     "js-base64": "^3.7.5",

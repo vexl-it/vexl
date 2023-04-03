@@ -9,6 +9,7 @@ export const theme = {
   fontSizes: {
     default: 18,
     heading2: 32,
+    heading3: 24,
   },
   spacings: {
     xs: 8,
@@ -33,7 +34,7 @@ export const theme = {
   },
 }
 
-export type Spacing = typeof theme.spacings
+export type FontSize = keyof typeof theme.fontSizes
 export type Color = keyof typeof theme.colors
 export type Theme = typeof theme
 export default theme

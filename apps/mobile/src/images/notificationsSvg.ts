@@ -1,4 +1,4 @@
-import {stringToSvgStringRuntimeError} from '../../Image'
+import {stringToSvgStringRuntimeError} from '../components/Image'
 
 const notificationsSvg = stringToSvgStringRuntimeError(`
 <svg width="184" height="189" viewBox="0 0 184 189" fill="none" xmlns="http://www.w3.org/2000/svg">

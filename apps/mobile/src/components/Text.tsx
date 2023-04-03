@@ -1,5 +1,6 @@
 import {type TextProps} from 'react-native'
 import styled from '@emotion/native'
+import {type FontSize} from '../utils/ThemeProvider/defaultTheme'
 
 type ColorStyle =
   | 'white'
@@ -9,8 +10,6 @@ type ColorStyle =
   | 'grayOnWhite'
   | 'red'
   | 'goldOnYellow'
-
-type FontSize = 'heading2'
 
 export interface Props extends TextProps {
   colorStyle?: ColorStyle | undefined

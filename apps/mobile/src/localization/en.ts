@@ -17,6 +17,9 @@ export default {
     'secondsShort': 's',
     'ok': 'ok',
     'request': 'Request',
+    'back': 'Back',
+    'close': 'Close',
+    'done': 'Done',
   },
   'loginFlow': {
     'anonymityNotice': 'Nobody will see this until you allow it. Even us.',
@@ -196,5 +199,34 @@ export default {
       ' a look on Frequently Asked Questions.',
     'termsOfUseText': TosEn,
     'privacyPolicyText': PPEn,
+  },
+  'faqs': {
+    'faqs': 'Frequently Asked Questions',
+    'whatIsVexl': 'What is Vexl?',
+    'vexlIsPlatform':
+      'Vexl is a platform where you can trade Bitcoin within your real world social network - your friends and friends of their friends - while staying completely anonymous - if you wish.',
+    'whoCanSeeMyContacts': 'Who can see my contacts?',
+    'peopleWhomYouAllowToSee':
+      "People whom you allow to see your identity can see the friends you have in common. That's it.",
+    'howCanIRemainAnonymous':
+      'How can I remain anonymous and still participate in Vexl? ',
+    'byDefaultYouParticipateInTheNetwork':
+      'By default, you participate in the network under your Vexl name and Vexl avatar that were given to you during the registration. You can only reveal your identity per a particular trade in our secure, end to end encrypted chat.',
+    'howCanIMakeSure':
+      'How can I make sure that the person I am talking to is the person I want to talk to?',
+    'oneChallenge':
+      'One challenge with truly anonymous communications systems like Vexl is that sometimes you do need to verify the identity of the person you’re talking to! In cases like these, it’s best to use a secure secondary channel of communication to confirm with the other person that you’re both who you say you are.',
+    'howCanIEnsure':
+      'How can I ensure that my communication and trades are private and encrypted? ',
+    'vexlIsOpensource':
+      'Vexl is open source - anyone can look for any backdoor or malicious intentions. Also, here you can look at the report from an independent Security Audit .',
+    'howCanYouEnsure': 'How can you ensure that my data is protected?',
+    'vexlIsDesigned':
+      'Vexl is designed to never collect or store any sensitive information. Vexl messages and other content cannot be accessed by us or other third parties because they are always end-to-end encrypted, private, and secure. Our Terms of Service and Privacy Policy are available below.',
+    'howDoIContactVexl': 'How do I contact Vexl?',
+    'youCanAlwaysReachOutToUs':
+      'You can always reach out to us via email: support@vexl.it. For a private comms, you can also send us an e2ee mail.  \n' +
+      '\n' +
+      'Or you can meet us during your next P2P trade! 😻',
   },
 }

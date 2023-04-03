@@ -22,7 +22,7 @@ const PressableStyled = styled(TouchableOpacity)<Pick<Props, 'buttonType'>>`
   align-items: center;
   justify-content: center;
   background-color: ${(p) =>
-    p.buttonType === 'dark' ? p.theme.colors.grey : p.theme.colors.grayOnWhite};
+    p.buttonType === 'dark' ? p.theme.colors.grey : '#E9E9E9'};
   border-radius: 13px;
   padding: ${(p) => String(p.theme.spacings.xs)}px;
 `

@@ -13,6 +13,8 @@ import {
   HeaderProxy,
   NextButtonProxy,
 } from '../../../PageWithButtonAndProgressHeader'
+import Button from '../../../Button'
+import Spacer from '../../../Spacer'
 
 const RootContainer = styled.View`
   flex: 1;
@@ -46,14 +48,17 @@ const TOUContainer = styled.View`
   align-items: center;
 `
 
+const TOUMessageContainer = styled.View`
+  flex-direction: row;
+  align-items: center;
+`
+
 const TOUIcon = styled(Image)``
 
 const TOUText = styled(Text)`
   font-size: 18px;
   font-weight: 500;
 `
-
-const TOULink = styled(Text)``
 
 const TouSwitch = styled(Switch)``
 
@@ -79,13 +84,21 @@ function StartScreen({navigation}: Props): JSX.Element {
         </Subtitle>
       </WhiteContainerStyled>
       <TOUContainer>
-        <TOUIcon source={notepadSvg} />
-        <TOUText fontWeight={500} colorStyle={'grayOnBlack'}>
-          {t('loginFlow.start.touLabel')}{' '}
-          <TOULink fontWeight={500} colorStyle={'white'}>
-            {t('loginFlow.start.termsOfUse')}
-          </TOULink>
-        </TOUText>
+        <TOUMessageContainer>
+          <TOUIcon source={notepadSvg} />
+          <Spacer x$={2} />
+          <TOUText fontWeight={500} colorStyle={'grayOnBlack'}>
+            {t('loginFlow.start.touLabel')}{' '}
+          </TOUText>
+          <Button
+            fontSize={18}
+            variant="link"
+            onPress={() => {
+              navigation.navigate('TermsAndConditions')
+            }}
+            text={t('loginFlow.start.termsOfUse')}
+          />
+        </TOUMessageContainer>
         <TouSwitch value={touAgree} onValueChange={setTOUAgree} />
       </TOUContainer>
       <NextButtonProxy

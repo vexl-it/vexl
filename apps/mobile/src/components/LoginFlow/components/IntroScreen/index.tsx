@@ -40,7 +40,7 @@ function Intro({navigation}: Props): JSX.Element {
       <ProgressJourney
         currentPage={page}
         numberOfPages={content.length}
-        onNext={setPage}
+        onPageChange={setPage}
         onFinish={() => {
           navigation.replace('Start')
         }}

@@ -149,9 +149,10 @@ function ButtonsSection(): JSX.Element {
       {
         text: t('settings.items.faqs'),
         icon: questionIconSvg,
-        onPress: todo,
+        onPress: () => {
+          navigation.navigate('Faqs')
+        },
       },
-      {text: t('settings.items.faqs'), icon: editIconSvg, onPress: todo},
       {
         text: t('settings.items.reportIssue'),
         icon: customerSupportIconSvg,

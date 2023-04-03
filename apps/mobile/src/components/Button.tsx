@@ -11,7 +11,7 @@ import Image from './Image'
 
 interface Props {
   onPress: () => void
-  variant: 'primary' | 'secondary' | 'black' | 'blackOnDark'
+  variant: 'primary' | 'secondary' | 'black' | 'blackOnDark' | 'link'
   text?: string
   style?: StyleProp<ViewStyle>
 
@@ -21,12 +21,8 @@ interface Props {
   afterIcon?: SvgString
 }
 
-interface StyledElementsProps {
-  variant: 'primary' | 'secondary' | 'black' | 'blackOnDark'
-  disabled: boolean
-  size?: 'small' | 'normal'
-  fontSize?: number
-}
+interface StyledElementsProps
+  extends Pick<Props, 'variant' | 'disabled' | 'size' | 'fontSize'> {}
 
 const PressableStyled = styled(TouchableOpacity)<StyledElementsProps>`
   ${(props) =>
@@ -53,6 +49,12 @@ const PressableStyled = styled(TouchableOpacity)<StyledElementsProps>`
         background-color: ${props.theme.colors.grey};
     `}
   
+  ${(props) =>
+    props.variant === 'link' &&
+    `
+        background-color: 'transparent';
+    `}
+  
 
   display: flex;
   flex-direction: row;
@@ -73,6 +75,12 @@ const PressableStyled = styled(TouchableOpacity)<StyledElementsProps>`
     height: 38px;
     padding-left: 12px;
     padding-right: 12px;
+   `}
+  
+  ${(props) =>
+    props.variant === 'link' &&
+    `
+    height: auto;
    `}
 `
 
@@ -98,6 +106,12 @@ const TextStyled = styled(Text)<StyledElementsProps>`
     props.variant === 'blackOnDark' &&
     `
         color: ${props.theme.colors.grayOnBlack};
+    `}
+
+  ${(props) =>
+    props.variant === 'link' &&
+    `
+        color: ${props.theme.colors.white};
     `}
 
   font-size: 20px;

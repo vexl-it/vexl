@@ -5,7 +5,7 @@ import {View} from 'react-native'
 
 const defaultProps: Omit<Props, 'children'> = {
   onSkip: () => undefined,
-  onNext: () => undefined,
+  onPageChange: () => undefined,
   onFinish: () => undefined,
   numberOfPages: 3,
   currentPage: 0,
@@ -36,13 +36,22 @@ test('renders the correct number of breadcrumbs', () => {
   })
 })
 
-test('onNext is called after next button is clicked', async () => {
-  const onNext = jest.fn()
-  renderElement({onNext})
+test('onPageChange is called after next button is clicked', async () => {
+  const onPageChange = jest.fn()
+  renderElement({onPageChange})
 
   const nextButton = screen.getByText('common.next')
   fireEvent.press(nextButton, {})
-  expect(onNext).toBeCalledWith(1)
+  expect(onPageChange).toBeCalledWith(1)
+})
+
+test('onPageChange is called after back button is clicked', async () => {
+  const onPageChange = jest.fn()
+  renderElement({onPageChange, withBackButton: true})
+
+  const backButton = screen.getByText('common.back')
+  fireEvent.press(backButton, {})
+  expect(onPageChange).toBeCalledWith(1)
 })
 
 test('onSkip is called after skip button is clicked', async () => {

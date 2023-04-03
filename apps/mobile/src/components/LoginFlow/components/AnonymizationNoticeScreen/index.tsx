@@ -2,7 +2,7 @@ import WhiteContainer from '../../../WhiteContainer'
 import styled from '@emotion/native'
 import Text, {TitleText} from '../../../Text'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
-import illustrationSvg from './images/illustrationSvg'
+import anonymizationNoticeSvg from '../../../../images/anonymizationNoticeSvg'
 import Image from '../../../Image'
 import {type LoginStackScreenProps} from '../../../../navigationTypes'
 import {
@@ -12,6 +12,7 @@ import {
 
 const ImageStyled = styled(Image)`
   height: 100%;
+  width: 100%;
 `
 const ImageContainer = styled.View`
   flex: 1;
@@ -34,7 +35,7 @@ function AnonymizationNoticeScreen({navigation}: Props): JSX.Element {
       <HeaderProxy showBackButton={true} progressNumber={1} />
       <WhiteContainer>
         <ImageContainer>
-          <ImageStyled source={illustrationSvg} />
+          <ImageStyled source={anonymizationNoticeSvg} />
         </ImageContainer>
         <Title adjustsFontSizeToFit numberOfLines={2}>
           {t('loginFlow.anonymizationNotice.title')}

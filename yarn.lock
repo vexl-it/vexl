@@ -4171,6 +4171,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@vexl-next/domain@workspace:packages/domain"
   dependencies:
+    "@vexl-next/cryptography": "workspace:*"
     "@vexl-next/eslint-config": "workspace:*"
     "@vexl-next/ts-config": "workspace:*"
     awesome-phonenumber: ^5.1.0

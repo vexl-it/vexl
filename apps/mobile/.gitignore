@@ -74,5 +74,5 @@ dist/
 
 
 # expo - use expo prebuild to generate those folders
-./ios
-./android
+/ios
+/android

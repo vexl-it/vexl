@@ -86,7 +86,6 @@ export function useTriggerOffersRefresh(): Task<void> {
             },
             (result) => result.offerIds
           ),
-          (a) => a,
           TE.fromTask
         )
       ),

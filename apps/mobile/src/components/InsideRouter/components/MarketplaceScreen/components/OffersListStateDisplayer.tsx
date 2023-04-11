@@ -6,7 +6,7 @@ import {ActivityIndicator, Alert} from 'react-native'
 import {useTheme} from '@emotion/react'
 import {
   useAreOffersLoading,
-  useGetOffersFiltered,
+  useFilteredOffers,
   useOffersLoadingError,
   useTriggerOffersRefresh,
 } from '../../../../../state/marketplace'
@@ -30,9 +30,7 @@ function OffersListStateDisplayer({
   const loading = useAreOffersLoading()
   const error = useOffersLoadingError()
   const refreshOffers = useTriggerOffersRefresh()
-  const offers = useGetOffersFiltered(
-    useMemo(() => ({offerType: type}), [type])
-  )
+  const offers = useFilteredOffers(useMemo(() => ({offerType: type}), [type]))
 
   useEffect(() => {
     if (error._tag === 'Some') {

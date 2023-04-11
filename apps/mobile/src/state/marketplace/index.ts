@@ -92,6 +92,7 @@ export function useTriggerOffersRefresh(): Task<void> {
       ),
       TE.matchW(
         (error) => {
+          reportError('error', 'Error fetching offers', error)
           store.set(loadingStateAtom, {state: 'error', error})
         },
         ({newOffers: decryptingResults, removedOffers}) => {
@@ -177,15 +178,15 @@ export function useOffersLoadingError(): Option.Option<ApiErrorFetchingOffers> {
     : Option.none
 }
 
-export function useGetOffers(): OneOfferInState[] {
+export function useOffers(): OneOfferInState[] {
   return useAtomValue(offersToSee)
 }
 
-export function useGetMyOffers(): OneOfferInState[] {
+export function useMyOffers(): OneOfferInState[] {
   return useAtomValue(myOffersAtom)
 }
 
-export function useGetSingleOffer(
+export function useSingleOffer(
   offerId: OfferId
 ): Option.Option<OneOfferInState> {
   const foundOffer = useAtomValue(
@@ -194,7 +195,7 @@ export function useGetSingleOffer(
   return Option.fromNullable(foundOffer)
 }
 
-export function useGetOffersFiltered(filter: OffersFilter): OneOfferInState[] {
+export function useFilteredOffers(filter: OffersFilter): OneOfferInState[] {
   return useAtomValue(useMemo(() => offersAtomWithFilter(filter), [filter]))
 }
 

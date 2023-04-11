@@ -4,7 +4,7 @@ import {Alert, ScrollView} from 'react-native'
 import Button from '../Button'
 import styled from '@emotion/native'
 import Spacer from '../Spacer'
-import {useGetSingleOffer} from '../../state/marketplace'
+import {useSingleOffer} from '../../state/marketplace'
 import * as O from 'fp-ts/Option'
 
 const RootContainer = styled.SafeAreaView`
@@ -22,7 +22,7 @@ function OfferDetailScreen({
   },
   navigation,
 }: Props): JSX.Element {
-  const offer = useGetSingleOffer(offerId)
+  const offer = useSingleOffer(offerId)
 
   if (O.isNone(offer))
     return <Text colorStyle="white">Offer does not exist</Text> // TODO 404 page

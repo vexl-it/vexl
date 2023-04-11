@@ -1,7 +1,7 @@
 export interface BasicError<NAME extends string> {
-  _tag: NAME
-  error: Error
-  cause?: unknown
+  readonly _tag: NAME
+  readonly error: Error
+  readonly cause?: unknown
 }
 
 export type UnknownError = BasicError<'unknownError'>

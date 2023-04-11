@@ -113,7 +113,7 @@ export type OfferFlags = z.TypeOf<typeof OfferFlags>
 
 export const PrivatePayloadEncrypted = z
   .string()
-  .brand<'PublicPayloadEncrypted'>()
+  .brand<'PrivatePayloadEncrypted'>()
 export type PrivatePayloadEncrypted = z.TypeOf<typeof PrivatePayloadEncrypted>
 
 export const PublicPayloadEncrypted = z

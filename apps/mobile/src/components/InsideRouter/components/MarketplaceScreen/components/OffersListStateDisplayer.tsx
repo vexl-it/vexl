@@ -1,17 +1,17 @@
-import {
-  useOfferState,
-  useOffersWithType,
-  useRefreshOffers,
-} from '../../../../../state/offers'
-import {useEffect} from 'react'
+import {useEffect, useMemo} from 'react'
 import ContainerWithTopBorderRadius from '../../ContainerWithTopBorderRadius'
-import Text from '../../../../Text'
-import OffersList from './OffersList'
 import {type MarketplaceTabScreenProps} from '../../../../../navigationTypes'
 import styled from '@emotion/native'
-import {ActivityIndicator} from 'react-native'
+import {ActivityIndicator, Alert} from 'react-native'
 import {useTheme} from '@emotion/react'
+import {
+  useAreOffersLoading,
+  useGetOffersFiltered,
+  useOffersLoadingError,
+  useTriggerOffersRefresh,
+} from '../../../../../state/marketplace'
 import EmptyListPlaceholder from './EmptyListPlaceholder'
+import OffersList from './OffersList'
 
 const LoadingContainer = styled.View`
   flex: 1;
@@ -20,21 +20,27 @@ const LoadingContainer = styled.View`
 `
 
 type Props = MarketplaceTabScreenProps<'Buy' | 'Sell'>
+
 function OffersListStateDisplayer({
   route: {
     params: {type},
   },
 }: Props): JSX.Element {
   const theme = useTheme()
-  const offersState = useOfferState()
-  const refreshOffers = useRefreshOffers()
-  const offers = useOffersWithType(type)
+  const loading = useAreOffersLoading()
+  const error = useOffersLoadingError()
+  const refreshOffers = useTriggerOffersRefresh()
+  const offers = useGetOffersFiltered(
+    useMemo(() => ({offerType: type}), [type])
+  )
 
   useEffect(() => {
-    refreshOffers()
-  }, [refreshOffers])
+    if (error._tag === 'Some') {
+      Alert.alert('error while refreshing offers')
+    }
+  }, [error])
 
-  if (offers === null) {
+  if (offers.length === 0 && loading) {
     return (
       <LoadingContainer>
         <ActivityIndicator color={theme.colors.main} size="large" />
@@ -42,9 +48,7 @@ function OffersListStateDisplayer({
     )
   }
 
-  if (!offers && offersState.state === 'fail') {
-    return <Text>Failed to load offers</Text> // TODO
-  }
+  // TODO handle errors
 
   return (
     <ContainerWithTopBorderRadius>
@@ -52,9 +56,10 @@ function OffersListStateDisplayer({
         <EmptyListPlaceholder />
       ) : (
         <OffersList
-          offers={offers ?? []}
+          offers={offers}
+          // eslint-disable-next-line @typescript-eslint/no-misused-promises
           onRefresh={refreshOffers}
-          refreshing={offersState.state === 'loading'}
+          refreshing={loading}
         />
       )}
     </ContainerWithTopBorderRadius>

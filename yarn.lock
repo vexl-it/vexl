@@ -4472,6 +4472,7 @@ __metadata:
     "@vexl-next/domain": "workspace:*"
     "@vexl-next/eslint-config": "workspace:*"
     "@vexl-next/fix-brorand-for-expo": "workspace:*"
+    "@vexl-next/resources-utils": "workspace:*"
     "@vexl-next/rest-api": "workspace:*"
     "@vexl-next/ts-config": "workspace:*"
     awesome-phonenumber: ^5.1.0

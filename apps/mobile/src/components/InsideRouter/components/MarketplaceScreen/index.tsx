@@ -7,12 +7,21 @@ import OffersListWithFilter from './components/OffersListStateDisplayer'
 import {css} from '@emotion/native'
 import {useTheme} from '@emotion/react'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
+import {OfferType} from '@vexl-next/domain/dist/general/offers'
+import {useTriggerOffersRefresh} from '../../../../state/marketplace'
+import {useEffect} from 'react'
 
 const Tab = createMaterialTopTabNavigator<MarketplaceTabParamsList>()
 
 function MarketplaceScreen(): JSX.Element {
   const theme = useTheme()
   const {t} = useTranslation()
+
+  const refreshOffers = useTriggerOffersRefresh()
+
+  useEffect(() => {
+    void refreshOffers()
+  }, [refreshOffers])
 
   return (
     <ContainerWithTopBorderRadius>
@@ -49,13 +58,13 @@ function MarketplaceScreen(): JSX.Element {
       >
         <Tab.Screen
           name="Sell"
-          initialParams={{type: 'sell'}}
+          initialParams={{type: OfferType.parse('SELL')}}
           component={OffersListWithFilter}
         />
         <Tab.Screen
           name="Buy"
           options={{tabBarLabel: t('offer.buy')}}
-          initialParams={{type: 'buy'}}
+          initialParams={{type: OfferType.parse('BUY')}}
           component={OffersListWithFilter}
         />
       </Tab.Navigator>

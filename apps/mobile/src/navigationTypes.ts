@@ -8,11 +8,8 @@ import {type E164PhoneNumber} from '@vexl-next/domain/dist/general/E164PhoneNumb
 import {type NativeStackScreenProps} from '@react-navigation/native-stack'
 import {type BottomTabScreenProps} from '@react-navigation/bottom-tabs'
 import {type MaterialTopTabScreenProps} from '@react-navigation/material-top-tabs'
-import {
-  type CompositeScreenProps,
-  type NavigatorScreenParams,
-} from '@react-navigation/native'
-import {type OfferId} from '@vexl-next/domain/dist/general/offers'
+import {type CompositeScreenProps, type NavigatorScreenParams} from '@react-navigation/native'
+import {type OfferId, type OfferType} from '@vexl-next/domain/dist/general/offers'
 import {type ChatId} from '@vexl-next/domain/dist/general/messaging'
 import {type KeyHolder} from '@vexl-next/cryptography'
 
@@ -102,8 +99,8 @@ export type InsideTabScreenProps<T extends keyof InsideTabParamsList> =
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type MarketplaceTabParamsList = {
-  Buy: {type: 'buy'}
-  Sell: {type: 'sell'}
+  Buy: {type: OfferType}
+  Sell: {type: OfferType}
 }
 
 export type MarketplaceTabScreenProps<

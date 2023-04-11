@@ -3,13 +3,14 @@ import OfferListItem from './OfferListItem'
 import {FlatList, RefreshControl} from 'react-native'
 import OffersListButtons from './OffersListButtons'
 import {useTheme} from '@emotion/react'
-import {type OfferInfo} from '@vexl-next/domain/dist/general/offers'
+import {type OneOfferInState} from '../../../../../state/marketplace/domain'
 
 export interface Props {
-  readonly offers: OfferInfo[]
+  readonly offers: OneOfferInState[]
   onRefresh: () => void
   refreshing: boolean
 }
+
 function OffersList({offers, onRefresh, refreshing}: Props): JSX.Element {
   const theme = useTheme()
   return (
@@ -29,7 +30,7 @@ function OffersList({offers, onRefresh, refreshing}: Props): JSX.Element {
         `}
         data={offers}
         renderItem={({item}) => <OfferListItem offer={item} />}
-        keyExtractor={(offer) => offer.offerId}
+        keyExtractor={(offer) => offer.offerInfo.offerId}
       />
     </>
   )

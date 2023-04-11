@@ -1,10 +1,11 @@
 import {type RootStackScreenProps} from '../../navigationTypes'
-import {useSingleOffer} from '../../state/offers'
 import Text from '../Text'
 import {Alert, ScrollView} from 'react-native'
 import Button from '../Button'
 import styled from '@emotion/native'
 import Spacer from '../Spacer'
+import {useGetSingleOffer} from '../../state/marketplace'
+import * as O from 'fp-ts/Option'
 
 const RootContainer = styled.SafeAreaView`
   background-color: black;
@@ -14,15 +15,17 @@ const RootContainer = styled.SafeAreaView`
 `
 
 type Props = RootStackScreenProps<'OfferDetail'>
+
 function OfferDetailScreen({
   route: {
     params: {offerId},
   },
   navigation,
 }: Props): JSX.Element {
-  const offer = useSingleOffer(offerId)
+  const offer = useGetSingleOffer(offerId)
 
-  if (!offer) return <Text colorStyle="white">Offer does not exist</Text> // TODO 404 page
+  if (O.isNone(offer))
+    return <Text colorStyle="white">Offer does not exist</Text> // TODO 404 page
 
   return (
     <RootContainer>

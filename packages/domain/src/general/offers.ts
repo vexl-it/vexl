@@ -106,8 +106,9 @@ export type OfferInfo = z.TypeOf<typeof OfferInfo>
 
 export const OfferFlags = z.object({
   isMine: z.boolean(),
-  isRequested: z.boolean(),
+  isRequested: z.boolean().default(false),
   realUserData: UserNameAndAvatar.optional(),
+  reported: z.boolean().default(false),
 })
 export type OfferFlags = z.TypeOf<typeof OfferFlags>
 

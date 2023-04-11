@@ -18,6 +18,10 @@ import {
   GetOffersForMeResponse,
   type RefreshOfferRequest,
   RefreshOfferResponse,
+  type RemovedOfferIdsRequest,
+  RemovedOfferIdsResponse,
+  type ReportOfferRequest,
+  ReportOfferResponse,
   type UpdateOfferRequest,
   UpdateOfferResponse,
 } from './contracts'
@@ -133,6 +137,28 @@ export function privateApi({
           data: request,
         },
         CreatePrivatePartResponse
+      )
+    },
+    getRemovedOffers: (request: RemovedOfferIdsRequest) => {
+      return axiosCallWithValidation(
+        axiosInstance,
+        {
+          method: 'post',
+          url: '/v1/offers/not-exist',
+          data: request,
+        },
+        RemovedOfferIdsResponse
+      )
+    },
+    reportOffer: (request: ReportOfferRequest) => {
+      return axiosCallWithValidation(
+        axiosInstance,
+        {
+          method: 'post',
+          url: '/v1/offers/report',
+          data: request,
+        },
+        ReportOfferResponse
       )
     },
   }

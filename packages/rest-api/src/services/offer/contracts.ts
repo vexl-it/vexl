@@ -84,15 +84,16 @@ export type DeleteOfferRequest = z.TypeOf<typeof DeleteOfferRequest>
 export const DeleteOfferResponse = NoContentResponse
 export type DeleteOfferResponse = z.TypeOf<typeof DeleteOfferResponse>
 
+export const OfferPrivateListItem = z.object({
+  userPublicKey: PublicKeyPemBase64,
+  payloadPrivate: PrivatePayloadEncrypted,
+})
+export type OfferPrivateListItem = z.TypeOf<typeof OfferPrivateListItem>
+
 export const UpdateOfferRequest = z.object({
   adminId: OfferAdminId,
   payloadPublic: PublicPayloadEncrypted,
-  offerPrivateList: z.array(
-    z.object({
-      userPublicKey: PublicKeyPemBase64,
-      payloadPrivate: PrivatePayloadEncrypted,
-    })
-  ),
+  offerPrivateList: z.array(OfferPrivateListItem),
 })
 export type UpdateOfferRequest = z.TypeOf<typeof UpdateOfferRequest>
 
@@ -109,3 +110,16 @@ export const CreatePrivatePartResponse = NoContentResponse
 export type CreatePrivatePartResponse = z.TypeOf<
   typeof CreatePrivatePartResponse
 >
+
+export const RemovedOfferIdsRequest = z.object({
+  offerIds: z.array(OfferId),
+})
+export type RemovedOfferIdsRequest = z.TypeOf<typeof RemovedOfferIdsRequest>
+export const RemovedOfferIdsResponse = RemovedOfferIdsRequest
+export type RemovedOfferIdsResponse = z.TypeOf<typeof RemovedOfferIdsResponse>
+
+export const ReportOfferRequest = z.object({
+  offerId: OfferId,
+})
+export type ReportOfferRequest = z.TypeOf<typeof ReportOfferRequest>
+export const ReportOfferResponse = NoContentResponse

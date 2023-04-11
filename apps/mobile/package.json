@@ -24,6 +24,7 @@
     "@vexl-next/cryptography": "workspace:*",
     "@vexl-next/domain": "workspace:*",
     "@vexl-next/fix-brorand-for-expo": "workspace:*",
+    "@vexl-next/resources-utils": "workspace:*",
     "@vexl-next/rest-api": "workspace:*",
     "awesome-phonenumber": "^5.1.0",
     "country-data": "^0.0.31",

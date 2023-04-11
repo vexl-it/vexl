@@ -11,7 +11,7 @@ import {AnonymousAvatarFromSeed} from '../../../../AnonymousAvatar'
 import randomName from '../../../../../utils/randomName'
 import {useNavigation} from '@react-navigation/native'
 import bubbleTipSvg from '../images/bubbleTipSvg'
-import {type OfferInfo} from '@vexl-next/domain/dist/general/offers'
+import {type OneOfferInState} from '../../../../../state/marketplace/domain'
 
 const RootContainer = styled.View`
   margin-top: 24px;
@@ -98,10 +98,10 @@ const RequestButton = styled(Button)`
 `
 
 interface Props {
-  readonly offer: OfferInfo
+  readonly offer: OneOfferInState
 }
 
-function OfferListItem({offer}: Props): JSX.Element {
+function OfferListItem({offer: {offerInfo: offer}}: Props): JSX.Element {
   const {t} = useTranslation()
   const navigation = useNavigation()
   return (

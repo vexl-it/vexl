@@ -6,3 +6,8 @@ export const IsoDatetimeString = z
   .brand<'IsoDatetimeString'>()
 
 export type IsoDatetimeString = z.TypeOf<typeof IsoDatetimeString>
+export const MINIMAL_DATE = IsoDatetimeString.parse('1970-01-01T00:00:00.000Z')
+
+export function isoNow(): IsoDatetimeString {
+  return IsoDatetimeString.parse(DateTime.now().toISO())
+}

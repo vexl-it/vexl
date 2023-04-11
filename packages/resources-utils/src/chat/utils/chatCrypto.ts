@@ -27,6 +27,7 @@ export function encryptMessage(
         image: message.image,
         deanonymizedUser: message.deanonymizedUser,
       }),
+      // TE.chainEitherKW(safeParse(ChatMessagePayload)),
       TE.chainEitherKW(safeParse(ChatMessagePayload)),
       TE.chainEitherKW(stringifyToJson),
       TE.chainW(eciesEncrypt(publicKey)),

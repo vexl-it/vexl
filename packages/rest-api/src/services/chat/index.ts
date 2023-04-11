@@ -4,10 +4,7 @@ import {type GetUserSessionCredentials} from '../../UserSessionCredentials.brand
 import {type CreateAxiosDefaults} from 'axios'
 import urlJoin from 'url-join'
 import * as TE from 'fp-ts/TaskEither'
-import {
-  axiosCallWithValidation,
-  createAxiosInstanceWithAuthAndLogging,
-} from '../../utils'
+import {axiosCallWithValidation, createAxiosInstanceWithAuthAndLogging, type LoggingFunction} from '../../utils'
 import {
   type ApproveRequestRequest,
   ApproveRequestResponse,
@@ -44,11 +41,13 @@ export function privateApi({
   url,
   getUserSessionCredentials,
   axiosConfig,
+  loggingFunction,
 }: {
   platform: PlatformName
   url: ServiceUrl
   getUserSessionCredentials: GetUserSessionCredentials
   axiosConfig?: Omit<CreateAxiosDefaults, 'baseURL'>
+  loggingFunction?: LoggingFunction | null
 }) {
   const axiosInstance = createAxiosInstanceWithAuthAndLogging(
     getUserSessionCredentials,
@@ -56,7 +55,8 @@ export function privateApi({
     {
       ...axiosConfig,
       baseURL: urlJoin(url, '/api/v1'),
-    }
+    },
+    loggingFunction
   )
 
   const addChallenge = addChallengeToRequest(axiosInstance)

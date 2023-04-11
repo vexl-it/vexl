@@ -1,121 +1,93 @@
-import {type PathString} from '@vexl-next/domain/dist/utility/PathString.brand'
 import {pipe} from 'fp-ts/function'
 import * as E from 'fp-ts/Either'
 import * as TE from 'fp-ts/TaskEither'
-import {parseJson, safeParse} from '../utils/parsing'
-import {readFile} from '../utils/fs'
 import {OfferPublicPart} from '@vexl-next/domain/dist/general/offers'
-import {getPrivateApi} from '../api'
-import {parseAuthFile} from '../utils/auth'
-import nodeCrypto from 'node:crypto'
+import {getPrivateApiFromCredentialsJsonString} from '../api'
 import {type ConnectionLevel} from '@vexl-next/rest-api/dist/services/contact/contracts'
-import {fetchContactsAndCreateEncryptedPrivateParts} from './utils/fetchContactsAndCreateEncryptedPrivateParts'
-import * as crypto from '@vexl-next/cryptography'
-import {type PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
-import {type CreatedOffer, saveCreatedOfferToFile} from './CreatedOffer'
-import encryptOfferPublicPart from './utils/encryptOfferPublicPart'
-import {decryptOffer} from './utils/decryptOffer'
-import generateSymmetricKey from '@vexl-next/resources-utils/dist/offers/utils/generateSymmetricKey'
+import {
+  generatePrivateKey,
+  type PublicKeyPemBase64,
+} from '@vexl-next/cryptography/dist/KeyHolder'
+import {
+  parseJson,
+  safeParse,
+  stringifyToPrettyJson,
+} from '@vexl-next/resources-utils/dist/utils/parsing'
+import {parseCredentialsJson} from '../utils/auth'
+import createNewOfferForMyContacts from '@vexl-next/resources-utils/dist/offers/createOfferHandleContacts'
 
-function readPublicPartFromFile({
-  offerPublicKey,
-  offerPayloadPath,
-}: {
-  offerPayloadPath: PathString
-  offerPublicKey: PublicKeyPemBase64
-}) {
-  return pipe(
-    readFile(offerPayloadPath),
-    E.chainW(parseJson),
-    // set proper public key
-    E.map(
-      (offer) =>
-        ({
-          ...offer,
-          offerPublicKey,
-        } as OfferPublicPart)
-    ),
-    E.chainW(safeParse(OfferPublicPart))
-  )
+function readPublicPartFromFile(offerPublicKey: PublicKeyPemBase64) {
+  return (json: string) =>
+    pipe(
+      json,
+      parseJson,
+      // set proper public key
+      E.map(
+        (offer) =>
+          ({
+            ...offer,
+            offerPublicKey,
+          } as OfferPublicPart)
+      ),
+      E.chainW(safeParse(OfferPublicPart))
+    )
 }
 
-export default async function createOffer({
+export default function createOffer({
   connectionLevel,
-  offerPayloadPath,
-  authFilePath,
-  outFilePath,
+  credentialsJson,
+  offerPayloadJson,
 }: {
+  credentialsJson: string
   connectionLevel: ConnectionLevel
-  offerPayloadPath: PathString
-  authFilePath: PathString
-  outFilePath: PathString
+  offerPayloadJson: string
 }) {
-  await pipe(
+  return pipe(
     TE.Do,
-    TE.bindW('symmetricKey', () => TE.fromEither(generateSymmetricKey())),
-    TE.bindW('keypair', () => TE.right(crypto.KeyHolder.generatePrivateKey())),
-    TE.bindW('offerPublicPart', ({keypair}) =>
-      TE.fromEither(
-        readPublicPartFromFile({
-          offerPayloadPath,
-          offerPublicKey: keypair.publicKeyPemBase64,
-        })
+    TE.bindW('credentials', () =>
+      TE.fromEither(parseCredentialsJson(credentialsJson))
+    ),
+    TE.bindW('api', () =>
+      pipe(
+        credentialsJson,
+        getPrivateApiFromCredentialsJsonString,
+        TE.fromEither
       )
     ),
-    TE.bindW('encryptedOffer', ({symmetricKey, offerPublicPart}) =>
-      encryptOfferPublicPart({offerPublicPart, symmetricKey})
+    TE.bindW('offerInboxCredentials', () => TE.right(generatePrivateKey())),
+    TE.chainFirstW(({api, offerInboxCredentials}) =>
+      api.chat.createInbox({keyPair: offerInboxCredentials})
     ),
-    TE.bindW('userCredentials', () =>
-      TE.fromEither(parseAuthFile(authFilePath))
-    ),
-    TE.bindW('api', ({userCredentials}) =>
-      TE.right(getPrivateApi(userCredentials))
-    ),
-    TE.bindW('privateParts', ({api, userCredentials, symmetricKey}) =>
-      fetchContactsAndCreateEncryptedPrivateParts({
-        symmetricKey,
-        api: api.contact,
-        ownerCredentials: userCredentials.keypair,
-        connectionLevel,
-      })
+    TE.bindW('offerPublicPart', ({offerInboxCredentials}) =>
+      pipe(
+        offerPayloadJson,
+        readPublicPartFromFile(offerInboxCredentials.publicKeyPemBase64),
+        TE.fromEither
+      )
     ),
     TE.bindW(
-      'createdOfferResponse',
-      ({api, privateParts, encryptedOffer, userCredentials, offerPublicPart}) =>
-        api.offer.createNewOffer({
-          offerPrivateList: privateParts,
-          payloadPublic: encryptedOffer,
-          offerType: offerPublicPart.offerType,
+      'createdOffer',
+      ({offerInboxCredentials, offerPublicPart, api, credentials}) =>
+        createNewOfferForMyContacts({
+          offerApi: api.offer,
+          ownerKeyPair: credentials.keypair,
+          connectionLevel,
+          contactApi: api.contact,
+          publicPart: offerPublicPart,
         })
-    ),
-    TE.bind('decryptedServerOffer', ({createdOfferResponse, userCredentials}) =>
-      decryptOffer(userCredentials.keypair)(createdOfferResponse)
     ),
     TE.map(
       ({
-        createdOfferResponse,
-        keypair,
-        userCredentials,
-        symmetricKey,
-        decryptedServerOffer,
-      }) =>
-        ({
-          adminId: createdOfferResponse.adminId,
-          keypair,
-          symmetricKey,
-          connectionLevel,
-          ownerCredentials: userCredentials,
-          offerInfo: decryptedServerOffer,
-        } as CreatedOffer)
+        credentials,
+        offerInboxCredentials,
+        offerPublicPart,
+        createdOffer,
+      }) => ({
+        ...createdOffer,
+        inboxKeyPair: offerInboxCredentials,
+        ownerCredentials: credentials,
+      })
     ),
-    TE.chainEitherKW(saveCreatedOfferToFile(outFilePath)),
-    TE.match(
-      (e) => {
-        console.error('Error while creating offer', e)
-      },
-      () => {
-        console.log(`Offer created. Result saved into ${outFilePath}`)
-      }
-    )
-  )()
+    TE.chainEitherKW(stringifyToPrettyJson)
+  )
 }

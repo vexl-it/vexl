@@ -2,7 +2,6 @@ import {type E164PhoneNumber} from '@vexl-next/domain/dist/general/E164PhoneNumb
 import {getPrivateApi, getPublicApi} from '../api'
 import * as crypto from '@vexl-next/cryptography'
 import {pipe} from 'fp-ts/function'
-import {type PathString} from '@vexl-next/domain/dist/utility/PathString.brand'
 import * as TE from 'fp-ts/TaskEither'
 import * as O from 'optics-ts'
 import {
@@ -10,26 +9,26 @@ import {
   type VerifyPhoneNumberResponse,
 } from '@vexl-next/rest-api/dist/services/user/contracts'
 import rl from '../utils/rl'
-import {ecdsaSign} from '../utils/crypto'
-import {safeParse, stringifyToJson} from '../utils/parsing'
 import {UserCredentials} from '../utils/auth'
-import {saveFile} from '../utils/fs'
+import {ecdsaSign} from '@vexl-next/resources-utils/dist/utils/crypto'
+import {
+  safeParse,
+  stringifyToPrettyJson,
+} from '@vexl-next/resources-utils/dist/utils/parsing'
 
 const verificationIdOptic =
   O.optic<InitPhoneNumberVerificationResponse>().prop('verificationId')
 const challengeOptic = O.optic<VerifyPhoneNumberResponse>().prop('challenge')
 
-async function login({
+function login({
   phoneNumber,
-  output,
 }: {
   phoneNumber: E164PhoneNumber
-  output: PathString
-}) {
+}): TE.TaskEither<unknown, string> {
   const {user} = getPublicApi()
   const keypair = crypto.KeyHolder.generatePrivateKey()
 
-  await pipe(
+  return pipe(
     TE.right({phoneNumber}),
     TE.chainW(user.initPhoneVerification),
     TE.map(O.get(verificationIdOptic)),
@@ -60,19 +59,8 @@ async function login({
     TE.chainFirstW((credentials) =>
       getPrivateApi(credentials).contact.createUser({firebaseToken: null})
     ),
-    TE.chainEitherKW(stringifyToJson),
-    TE.chainEitherKW(saveFile(output)),
-    TE.match(
-      (e) => {
-        console.error('Error while logging in', e)
-      },
-      () => {
-        console.log(
-          `User successfully logged in. Credentials saved to: ${output}`
-        )
-      }
-    )
-  )()
+    TE.chainEitherKW(stringifyToPrettyJson)
+  )
 }
 
 export default login

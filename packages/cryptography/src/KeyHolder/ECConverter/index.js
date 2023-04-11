@@ -612,7 +612,7 @@ ECKey.prototype.toJSON = function toJSON() {
     const bytes = lengths[this.curve]
     if (d.length < bytes) {
       const remaining = bytes - d.length
-      d = Buffer.concat([Buffer.from(remaining).fill(0), d])
+      d = Buffer.concat([Buffer.alloc(remaining, 0), d])
     }
     jwk.d = urlsafe(d)
   }

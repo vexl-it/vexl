@@ -24,6 +24,17 @@ function importPrivateKey({
   }
 }
 
+export function importKeyPair(
+  privateKey: PrivateKeyPemBase64
+): PrivateKeyHolder {
+  const publicKeyPemBase64 = publicPemFromPrivatePem(privateKey)
+
+  return {
+    privateKeyPemBase64: privateKey,
+    publicKeyPemBase64,
+  }
+}
+
 function generatePrivateKey(curve: Curve = defaultCurve): PrivateKeyHolder {
   const ecdh = crypto.createECDH(curve)
   ecdh.generateKeys()

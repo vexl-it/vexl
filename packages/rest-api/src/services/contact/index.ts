@@ -3,21 +3,22 @@ import {type CreateAxiosDefaults} from 'axios'
 import {type GetUserSessionCredentials} from '../../UserSessionCredentials.brand'
 import urlJoin from 'url-join'
 import {
+  axiosCall,
   axiosCallWithValidation,
   createAxiosInstanceWithAuthAndLogging,
-  axiosCall,
+  type LoggingFunction,
 } from '../../utils'
 import {type PlatformName} from '../../PlatformName'
 import {
   type CreateUserRequest,
-  type RefreshUserRequest,
-  type UpdateFirebaseTokenRequest,
-  type ImportContactsRequest,
-  ImportContactsResponse,
+  type FetchCommonConnectionsRequest,
+  FetchCommonConnectionsResponse,
   type FetchMyContactsRequest,
   FetchMyContactsResponse,
-  FetchCommonConnectionsResponse,
-  type FetchCommonConnectionsRequest,
+  type ImportContactsRequest,
+  ImportContactsResponse,
+  type RefreshUserRequest,
+  type UpdateFirebaseTokenRequest,
 } from './contracts'
 import {pipe} from 'fp-ts/function'
 import * as TE from 'fp-ts/TaskEither'
@@ -28,11 +29,13 @@ export function privateApi({
   url,
   getUserSessionCredentials,
   axiosConfig,
+  loggingFunction,
 }: {
   platform: PlatformName
   url: ServiceUrl
   getUserSessionCredentials: GetUserSessionCredentials
   axiosConfig?: Omit<CreateAxiosDefaults, 'baseURL'>
+  loggingFunction?: LoggingFunction | null
 }) {
   const axiosInstance = createAxiosInstanceWithAuthAndLogging(
     getUserSessionCredentials,
@@ -40,7 +43,8 @@ export function privateApi({
     {
       ...axiosConfig,
       baseURL: urlJoin(url, '/api/v1'),
-    }
+    },
+    loggingFunction
   )
 
   return {

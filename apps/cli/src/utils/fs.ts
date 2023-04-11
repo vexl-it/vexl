@@ -1,29 +1,24 @@
 import * as fs from 'node:fs'
 import * as E from 'fp-ts/Either'
 import {type PathString} from '@vexl-next/domain/dist/utility/PathString.brand'
+import {
+  type BasicError,
+  toBasicError,
+} from '@vexl-next/domain/dist/utility/errors'
 
-interface FsError {
-  readonly type: 'FsError'
-  error: unknown
-}
+type FsError = BasicError<'FsError'>
 
 export function saveFile(
   path: PathString
 ): (file: string) => E.Either<FsError, void> {
   return (file: string) =>
-    E.tryCatch(
-      () => {
-        fs.writeFileSync(path, file)
-      },
-      (error) => ({type: 'FsError', error})
-    )
+    E.tryCatch(() => {
+      fs.writeFileSync(path, file)
+    }, toBasicError('FsError'))
 }
 
 export function readFile(path: PathString): E.Either<FsError, string> {
-  return E.tryCatch(
-    () => {
-      return fs.readFileSync(path, 'utf8')
-    },
-    (error) => ({type: 'FsError', error})
-  )
+  return E.tryCatch(() => {
+    return fs.readFileSync(path, 'utf8')
+  }, toBasicError('FsError'))
 }

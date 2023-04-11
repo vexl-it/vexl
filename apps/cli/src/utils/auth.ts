@@ -1,10 +1,15 @@
 import {PrivateKeyHolder} from '@vexl-next/cryptography/dist/KeyHolder'
 import {z} from 'zod'
 import * as E from 'fp-ts/Either'
-import {type PathString} from '@vexl-next/domain/dist/utility/PathString.brand'
 import {pipe} from 'fp-ts/function'
-import {parseJson, safeParse} from './parsing'
-import {readFile} from './fs'
+import {
+  parseJson,
+  safeParse,
+} from '@vexl-next/resources-utils/dist/utils/parsing'
+import {
+  type BasicError,
+  toBasicError,
+} from '@vexl-next/domain/dist/utility/errors'
 
 export const UserCredentials = z.object({
   hash: z.string(),
@@ -14,28 +19,15 @@ export const UserCredentials = z.object({
 
 export type UserCredentials = z.TypeOf<typeof UserCredentials>
 
-interface ParsingAuthFileError {
-  type: 'ParsingAuthFileError'
-  error: unknown
-}
-export function parseAuthFile(
-  filePath: PathString
-): E.Either<ParsingAuthFileError, UserCredentials> {
-  return pipe(
-    readFile(filePath),
-    E.chainW(parseJson),
-    E.chainW(safeParse(UserCredentials)),
-    E.mapLeft((error) => ({type: 'ParsingAuthFileError', error} as const))
-  )
-}
+export type ParsingCredentialsError = BasicError<'ParsingCredentialsError'>
 
 export function parseCredentialsJson(
   credentialsJson: string
-): E.Either<ParsingAuthFileError, UserCredentials> {
+): E.Either<ParsingCredentialsError, UserCredentials> {
   return pipe(
     credentialsJson,
     parseJson,
     E.chainW(safeParse(UserCredentials)),
-    E.mapLeft((error) => ({type: 'ParsingAuthFileError', error} as const))
+    E.mapLeft(toBasicError('ParsingCredentialsError'))
   )
 }

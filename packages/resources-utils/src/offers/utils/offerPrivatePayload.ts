@@ -1,9 +1,9 @@
 import {
   type PrivateKeyHolder,
-  type PublicKeyPemBase64,
+  PublicKeyPemBase64,
 } from '@vexl-next/cryptography/dist/KeyHolder'
 import {
-  type OfferPrivatePart,
+  OfferPrivatePart,
   PrivatePayloadEncrypted,
   type SymmetricKey,
 } from '@vexl-next/domain/dist/general/offers'
@@ -11,8 +11,8 @@ import {keys} from '../../utils/keys'
 import * as E from 'fp-ts/Either'
 import {type BasicError, toError} from '@vexl-next/domain/dist/utility/errors'
 import fetchContactsForOffer, {
-  type ConnectionsInfoForOffer,
   type ApiErrorFetchingContactsForOffer,
+  type ConnectionsInfoForOffer,
 } from './fetchContactsForOffer'
 import {flow, pipe} from 'fp-ts/function'
 import * as TE from 'fp-ts/TaskEither'
@@ -24,11 +24,15 @@ import {type ContactPrivateApi} from '@vexl-next/rest-api/dist/services/contact'
 import * as A from 'fp-ts/Array'
 import * as T from 'fp-ts/Task'
 import flattenTaskOfEithers from '../../utils/flattenTaskOfEithers'
+import {z} from 'zod'
 
-export interface OfferPrivatePayloadToEncrypt {
-  toPublicKey: PublicKeyPemBase64
-  payloadPrivate: OfferPrivatePart
-}
+export const OfferPrivatePayloadToEncrypt = z.object({
+  toPublicKey: PublicKeyPemBase64,
+  payloadPrivate: OfferPrivatePart,
+})
+export type OfferPrivatePayloadToEncrypt = z.TypeOf<
+  typeof OfferPrivatePayloadToEncrypt
+>
 
 function privatePayloadForOwner({
   ownerCredentials,
@@ -49,6 +53,7 @@ function privatePayloadForOwner({
 
 export type ErrorConstructingPrivatePayloads =
   BasicError<'ErrorConstructingPrivatePayloads'>
+
 // TODO this function should be tested
 function constructPrivatePayloads({
   connectionsInfo: {

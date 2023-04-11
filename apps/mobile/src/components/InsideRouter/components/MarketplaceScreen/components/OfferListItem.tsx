@@ -154,7 +154,9 @@ function OfferListItem({offer}: Props): JSX.Element {
               {offer.publicPart.paymentMethod
                 .map((method) => {
                   if (method === 'CASH') {
-                    return offer.publicPart.location.city
+                    return offer.publicPart.location
+                      .map((one) => one.city)
+                      .join(', ')
                   }
                   if (method === 'REVOLUT') {
                     return t('offer.revolut')

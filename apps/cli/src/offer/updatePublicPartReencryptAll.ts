@@ -3,28 +3,26 @@ import * as E from 'fp-ts/Either'
 import * as TE from 'fp-ts/TaskEither'
 import {getPrivateApi} from '../api'
 import {type OfferAdminId} from '@vexl-next/rest-api/dist/services/offer/contracts'
-import {
-  OfferPublicPart,
-  type SymmetricKey,
-} from '@vexl-next/domain/dist/general/offers'
+import {OfferPublicPart} from '@vexl-next/domain/dist/general/offers'
 import {parseCredentialsJson} from '../utils/auth'
 import {
   parseJson,
   safeParse,
   stringifyToPrettyJson,
 } from '@vexl-next/resources-utils/dist/utils/parsing'
-import updateOffer from '@vexl-next/resources-utils/dist/offers/updateOffer'
+import {updateOfferReencryptForAll} from '@vexl-next/resources-utils/dist/offers/updateOffer'
+import {type ConnectionLevel} from '@vexl-next/rest-api/dist/services/contact/contracts'
 
-export default function updatePublicPart({
+export default function updatePublicPartReencryptAll({
   publicPayloadJson,
   ownerCredentialsJson,
-  symmetricKey,
   adminId,
+  connectionLevel,
 }: {
   adminId: OfferAdminId
   publicPayloadJson: string
-  symmetricKey: SymmetricKey
   ownerCredentialsJson: string
+  connectionLevel: ConnectionLevel
 }) {
   return pipe(
     E.of({}),
@@ -44,13 +42,13 @@ export default function updatePublicPart({
       )
     ),
     TE.chainW(({ownerCredentials, publicPayload, api}) =>
-      updateOffer({
+      updateOfferReencryptForAll({
         offerApi: api.offer,
         adminId,
         publicPayload,
-        symmetricKey,
-        ownerKeypair: ownerCredentials.keypair,
-        privatePayloads: [],
+        ownerKeyPair: ownerCredentials.keypair,
+        connectionLevel,
+        contactApi: api.contact,
       })
     ),
     TE.chainEitherKW(stringifyToPrettyJson)

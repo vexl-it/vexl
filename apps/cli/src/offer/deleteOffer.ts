@@ -1,27 +1,27 @@
-import {type OfferAdminId} from '@vexl-next/rest-api/dist/services/offer/contracts'
-import {type PathString} from '@vexl-next/domain/dist/utility/PathString.brand'
 import {pipe} from 'fp-ts/function'
 import * as TE from 'fp-ts/TaskEither'
-import {getPrivateApiFromCredentialsFile} from '../api'
+import {getPrivateApiFromCredentialsJsonString} from '../api'
+import {splitAndParse} from '../utils/splitAndParse'
+import {OfferAdminId} from '@vexl-next/rest-api/dist/services/offer/contracts'
 
-export default async function deleteOffer({
+export default function deleteOffer({
   adminIds,
-  credentialsFilePath,
+  credentialsJson,
 }: {
-  adminIds: OfferAdminId[]
-  credentialsFilePath: PathString
+  adminIds: string
+  credentialsJson: string
 }) {
-  await pipe(
-    getPrivateApiFromCredentialsFile(credentialsFilePath),
+  return pipe(
+    getPrivateApiFromCredentialsJsonString(credentialsJson),
     TE.fromEither,
-    TE.chainW((api) => api.offer.deleteOffer({adminIds})),
-    TE.match(
-      (error) => {
-        console.error('Error while deleting offers', error)
-      },
-      () => {
-        console.log('Offers deleted')
-      }
+    TE.chainW((api) =>
+      pipe(
+        adminIds,
+        splitAndParse(OfferAdminId, /[,\n]/),
+        TE.fromEither,
+        TE.map((adminIds) => ({adminIds})),
+        TE.chainW(api.offer.deleteOffer)
+      )
     )
-  )()
+  )
 }

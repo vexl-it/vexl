@@ -1,14 +1,10 @@
 import * as restApi from '@vexl-next/rest-api'
 import {ENV_PRESETS, PlatformName} from '@vexl-next/rest-api'
 import {type UserPublicApi} from '@vexl-next/rest-api/dist/services/user'
-import {
-  parseAuthFile,
-  parseCredentialsJson,
-  type UserCredentials,
-} from './utils/auth'
-import {type PathString} from '@vexl-next/domain/dist/utility/PathString.brand'
+import {parseCredentialsJson, type UserCredentials} from './utils/auth'
 import * as E from 'fp-ts/Either'
 import {pipe} from 'fp-ts/function'
+import {logDebug} from './utils/logging'
 
 export function getPublicApi(): {
   user: UserPublicApi
@@ -17,13 +13,14 @@ export function getPublicApi(): {
     user: restApi.user.publicApi({
       url: ENV_PRESETS.stageEnv.userMs,
       platform: PlatformName.parse('CLI'),
+      loggingFunction: logDebug,
     }),
   }
 }
 
-export function getPrivateApiFromCredentialsFile(credentialsPath: PathString) {
-  return pipe(parseAuthFile(credentialsPath), E.map(getPrivateApi))
-}
+// export function getPrivateApiFromCredentialsFile(credentialsPath: PathString) {
+//   return pipe(parseAuthFile(credentialsPath), E.map(getPrivateApi))
+// }
 
 export function getPrivateApiFromCredentialsJsonString(
   credentialsJsonString: string
@@ -45,18 +42,21 @@ export function getPrivateApi(credentials: UserCredentials) {
       platform: PlatformName.parse('CLI'),
       url: ENV_PRESETS.stageEnv.chatMs,
       getUserSessionCredentials,
+      loggingFunction: logDebug,
     }),
 
     contact: restApi.contact.privateApi({
       platform: PlatformName.parse('CLI'),
       url: ENV_PRESETS.stageEnv.contactMs,
       getUserSessionCredentials,
+      loggingFunction: logDebug,
     }),
 
     offer: restApi.offer.privateApi({
       platform: PlatformName.parse('CLI'),
       url: ENV_PRESETS.stageEnv.offerMs,
       getUserSessionCredentials,
+      loggingFunction: logDebug,
     }),
   }
 }

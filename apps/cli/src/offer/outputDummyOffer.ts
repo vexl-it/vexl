@@ -1,8 +1,6 @@
-import {type PathString} from '@vexl-next/domain/dist/utility/PathString.brand'
 import {pipe} from 'fp-ts/function'
 import * as E from 'fp-ts/Either'
-import {stringifyToJson} from '../utils/parsing'
-import {saveFile} from '../utils/fs'
+import {stringifyToPrettyJson} from '@vexl-next/resources-utils/dist/utils/parsing'
 
 const dummyOffer = {
   'active': 'true',
@@ -25,25 +23,10 @@ const dummyOffer = {
   ],
   'locationState': 'ONLINE',
   'offerDescription': 'test',
-  'offerPublicKey':
-    'LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUU0d0VBWUhLb1pJemowQ0FRWUZLNEVFQUNFRE9nQUV0UjBrbm1jL2lwek9ZVUpMYmU2a21Uak0xS1g2ZnNDOApXWE16cWFOZDBUank5ZysyRkRhSlIyT3VtQUZUS0tGUzdtcStyajdCc2owPQotLS0tLUVORCBQVUJMSUMgS0VZLS0tLS0K',
   'offerType': 'SELL',
   'paymentMethod': ['CASH'],
 }
 
-export default function outputDummyOffer({outFile}: {outFile: PathString}) {
-  pipe(
-    dummyOffer,
-    E.right,
-    E.chainW(stringifyToJson),
-    E.chainW(saveFile(outFile)),
-    E.match(
-      (e) => {
-        console.error('Error while saving dummy offer to file.', e)
-      },
-      () => {
-        console.log(`Saved to file: ${outFile}`)
-      }
-    )
-  )
+export default function getDummyOffer() {
+  return pipe(dummyOffer, E.right, E.chainW(stringifyToPrettyJson))
 }

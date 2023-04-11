@@ -21,7 +21,7 @@ function decodeBase64Url(string: string): Buffer {
   return Buffer.from(urlUnsafe, 'base64')
 }
 
-function base64pemKeToUtf8(
+function base64pemKeyToUtf8(
   key: PrivateKeyPemBase64 | PublicKeyPemBase64
 ): string {
   return Buffer.from(key, 'base64').toString('utf-8')
@@ -62,7 +62,7 @@ export function publicPemToRaw(publicKeyPem: PublicKeyPemBase64): {
   publicKey: Buffer
   curve: Curve
 } {
-  const key = new ECConverter(base64pemKeToUtf8(publicKeyPem), 'pem')
+  const key = new ECConverter(base64pemKeyToUtf8(publicKeyPem), 'pem')
   const json = key.toJSON()
   const curve = normalizeCurveName(json.crv)
 
@@ -83,7 +83,7 @@ export function privatePemToRaw(privPemPKC8: PrivateKeyPemBase64): {
   publicKey: Buffer
   curve: Curve
 } {
-  const key = new ECConverter(base64pemKeToUtf8(privPemPKC8), 'pem')
+  const key = new ECConverter(base64pemKeyToUtf8(privPemPKC8), 'pem')
 
   const json = key.toJSON()
   const curve = normalizeCurveName(json.crv)

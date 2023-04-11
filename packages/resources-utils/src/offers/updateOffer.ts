@@ -35,14 +35,14 @@ export default function updateOffer({
   adminId,
   publicPayload,
   symmetricKey,
-  ownerCredentials,
+  ownerKeypair,
   privatePayloads,
 }: {
   offerApi: OfferPrivateApi
   adminId: OfferAdminId
   publicPayload: OfferPublicPart
   symmetricKey: SymmetricKey
-  ownerCredentials: PrivateKeyHolder
+  ownerKeypair: PrivateKeyHolder
   privatePayloads: Array<{
     userPublicKey: PublicKeyPemBase64
     payloadPrivate: PrivatePayloadEncrypted
@@ -63,7 +63,7 @@ export default function updateOffer({
           payloadPublic: encryptedPayload,
           offerPrivateList: privatePayloads,
         }),
-        TE.chainW(decryptOffer(ownerCredentials)),
+        TE.chainW(decryptOffer(ownerKeypair)),
         TE.mapLeft(toError('ApiErrorUpdatingOffer'))
       )
     )
@@ -74,11 +74,12 @@ export interface UpdateOfferResult {
   encryptionErrors: PrivatePartEncryptionError[]
   offerInfo: OfferInfo
 }
+
 export function updateOfferReencryptForAll({
   offerApi,
   adminId,
   publicPayload,
-  ownerCredentials,
+  ownerKeyPair,
   contactApi,
   connectionLevel,
 }: {
@@ -86,7 +87,7 @@ export function updateOfferReencryptForAll({
   contactApi: ContactPrivateApi
   adminId: OfferAdminId
   publicPayload: OfferPublicPart
-  ownerCredentials: PrivateKeyHolder
+  ownerKeyPair: PrivateKeyHolder
   connectionLevel: ConnectionLevel
 }): TE.TaskEither<
   | ErrorGeneratingSymmetricKey
@@ -103,7 +104,7 @@ export function updateOfferReencryptForAll({
     TE.bindW('privatePayloads', ({symmetricKey}) =>
       fetchInfoAndGeneratePrivatePayloads({
         contactApi,
-        ownerCredentials,
+        ownerCredentials: ownerKeyPair,
         symmetricKey,
         connectionLevel,
       })
@@ -113,7 +114,7 @@ export function updateOfferReencryptForAll({
         updateOffer({
           privatePayloads: privatePayloads.privateParts,
           symmetricKey,
-          ownerCredentials,
+          ownerKeypair: ownerKeyPair,
           offerApi,
           adminId,
           publicPayload,

@@ -2,10 +2,7 @@ import {type ServiceUrl} from '../../ServiceUrl.brand'
 import {type CreateAxiosDefaults} from 'axios'
 import {type GetUserSessionCredentials} from '../../UserSessionCredentials.brand'
 import urlJoin from 'url-join'
-import {
-  createAxiosInstanceWithAuthAndLogging,
-  axiosCallWithValidation,
-} from '../../utils'
+import {axiosCallWithValidation, createAxiosInstanceWithAuthAndLogging, type LoggingFunction} from '../../utils'
 import {type PlatformName} from '../../PlatformName'
 import {
   type CreateNewOfferRequest,
@@ -31,11 +28,13 @@ export function privateApi({
   url,
   getUserSessionCredentials,
   axiosConfig,
+  loggingFunction,
 }: {
   platform: PlatformName
   url: ServiceUrl
   getUserSessionCredentials: GetUserSessionCredentials
   axiosConfig?: Omit<CreateAxiosDefaults, 'baseURL'>
+  loggingFunction?: LoggingFunction | null
 }) {
   const axiosInstance = createAxiosInstanceWithAuthAndLogging(
     getUserSessionCredentials,
@@ -43,7 +42,8 @@ export function privateApi({
     {
       ...axiosConfig,
       baseURL: urlJoin(url, '/api'),
-    }
+    },
+    loggingFunction
   )
 
   return {

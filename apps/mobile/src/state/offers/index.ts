@@ -102,12 +102,15 @@ export function useSingleOffer(offerId: string): OfferInfo | null {
 }
 
 const buyOffersAtom = atom(
-  (get) => get(offersAtom)?.filter((o) => o.offerType === 'BUY') ?? null
+  (get) =>
+    get(offersAtom)?.filter((o) => o.publicPart.offerType === 'BUY') ?? null
 )
 
 const sellOffersAtom = atom(
-  (get) => get(offersAtom)?.filter((o) => o.offerType === 'SELL') ?? null
+  (get) =>
+    get(offersAtom)?.filter((o) => o.publicPart.offerType === 'SELL') ?? null
 )
+
 export function useOffersWithType(type: 'sell' | 'buy'): OfferInfo[] | null {
   return useAtomValue(type === 'buy' ? buyOffersAtom : sellOffersAtom)
 }

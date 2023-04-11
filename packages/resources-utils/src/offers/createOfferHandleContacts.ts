@@ -6,6 +6,7 @@ import * as TE from 'fp-ts/TaskEither'
 import {
   type OfferInfo,
   type OfferPublicPart,
+  type SymmetricKey,
 } from '@vexl-next/domain/dist/general/offers'
 import {pipe} from 'fp-ts/function'
 import generateSymmetricKey, {
@@ -30,8 +31,10 @@ export type ApiErrorWhileCreatingOffer =
 export interface CreateOfferResult {
   encryptionErrors: PrivatePartEncryptionError[]
   adminId: OfferAdminId
+  symmetricKey: SymmetricKey
   offerInfo: OfferInfo
 }
+
 /**
  * Creates new offer for all contacts.
  * Does following tasks:
@@ -46,13 +49,13 @@ export default function createNewOfferForMyContacts({
   offerApi,
   contactApi,
   publicPart,
-  ownerCredentials,
+  ownerKeyPair,
   connectionLevel,
 }: {
   offerApi: OfferPrivateApi
   contactApi: ContactPrivateApi
   publicPart: OfferPublicPart
-  ownerCredentials: PrivateKeyHolder
+  ownerKeyPair: PrivateKeyHolder
   connectionLevel: ConnectionLevel
 }): TE.TaskEither<
   | ApiErrorFetchingContactsForOffer
@@ -73,7 +76,7 @@ export default function createNewOfferForMyContacts({
         symmetricKey,
         connectionLevel,
         contactApi,
-        ownerCredentials,
+        ownerCredentials: ownerKeyPair,
       })
     ),
     TE.bindW('response', ({privatePayloads, encryptedPublic}) =>
@@ -85,15 +88,16 @@ export default function createNewOfferForMyContacts({
         }),
         TE.bindTo('response'),
         TE.bindW('offerInfo', ({response}) =>
-          decryptOffer(ownerCredentials)(response)
+          decryptOffer(ownerKeyPair)(response)
         ),
         TE.mapLeft(toError('ApiErrorWhileCreatingOffer'))
       )
     ),
-    TE.map(({response, privatePayloads}) => ({
+    TE.map(({response, privatePayloads, symmetricKey}) => ({
       adminId: response.response.adminId,
       offerInfo: response.offerInfo,
       encryptionErrors: privatePayloads.errors,
+      symmetricKey,
     }))
   )
 }

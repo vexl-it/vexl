@@ -44,6 +44,7 @@ function decryptedPayloadsToOffer({
     E.chainW(safeParse(OfferInfo))
   )
 }
+
 function decodeLocation(json: any): E.Either<JsonParseError, unknown> {
   return pipe(
     json,

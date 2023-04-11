@@ -65,3 +65,23 @@ export function aesGCMIgnoreTagEncrypt(
       toError('CryptoError', 'Error while encrypting data')
     )
 }
+
+export function hmacSign(
+  password: string
+): (data: string) => E.Either<CryptoError, string> {
+  return (data) => {
+    return E.tryCatch(
+      () => crypto.hmac.hmacSign({data, password}),
+      toError('CryptoError', 'Error while signing data')
+    )
+  }
+}
+
+export function importKeyPair(
+  privateKey: PrivateKeyPemBase64
+): E.Either<CryptoError, PrivateKeyHolder> {
+  return E.tryCatch(
+    () => crypto.KeyHolder.importKeyPair(privateKey),
+    toError('CryptoError', 'Error while importing key pair')
+  )
+}

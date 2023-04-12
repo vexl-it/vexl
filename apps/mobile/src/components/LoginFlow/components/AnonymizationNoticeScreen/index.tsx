@@ -24,7 +24,7 @@ function AnonymizationNoticeScreen({navigation}: Props): JSX.Element {
         <Text
           ff="$heading"
           mb="$4"
-          fos="$3"
+          fos={24}
           adjustsFontSizeToFit
           numberOfLines={2}
         >

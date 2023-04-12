@@ -7,7 +7,7 @@ export default function Switch(props: Props): JSX.Element {
   const tokens = getTokens()
   return (
     <RnSwitch
-      trackColor={{false: '#262626', true: tokens.color.main.val}}
+      trackColor={{false: tokens.color.grey.val, true: tokens.color.main.val}}
       thumbColor={tokens.color.white.val}
       {...props}
     />

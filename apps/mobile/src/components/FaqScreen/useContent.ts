@@ -1,7 +1,7 @@
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import faq1Svg from './images/faq1Svg'
-import faq4Svg from './images/faq4Svg'
-import faq3Svg from './images/faq3Svg'
+import anonymousCounterpartSvg from '../images/anonymousCounterpartSvg'
+import stayAnonymousSvg from '../images/stayAnonymousSvg'
 import faq5Svg from './images/faq5Svg'
 import faq6Svg from './images/faq6Svg'
 import anonymizationNoticeSvg from '../../images/anonymizationNoticeSvg'
@@ -28,12 +28,12 @@ export default function useContent(): Props[] {
       text: t('faqs.peopleWhomYouAllowToSee'),
     },
     {
-      svg: faq3Svg,
+      svg: stayAnonymousSvg,
       title: t('faqs.howCanIRemainAnonymous'),
       text: t('faqs.byDefaultYouParticipateInTheNetwork'),
     },
     {
-      svg: faq4Svg,
+      svg: anonymousCounterpartSvg,
       title: t('faqs.howCanIMakeSure'),
       text: t('faqs.oneChallenge'),
     },

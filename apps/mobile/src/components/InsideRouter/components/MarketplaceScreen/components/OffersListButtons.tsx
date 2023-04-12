@@ -4,7 +4,11 @@ import downArrow from '../../../../../images/downArrow'
 import addIconSvg from '../../../../../images/addIconSvg'
 import {Stack, XStack} from 'tamagui'
 
-function OffersListButtons(): JSX.Element {
+interface Props {
+  onAddPress: () => void
+}
+
+function OffersListButtons({onAddPress}: Props): JSX.Element {
   const {t} = useTranslation()
   return (
     <XStack mt="$4" mx="$2" jc="space-between">
@@ -24,7 +28,7 @@ function OffersListButtons(): JSX.Element {
         />
         <Stack w="$2" />
         <Button
-          onPress={() => {}}
+          onPress={onAddPress}
           variant={'primary'}
           small
           afterIcon={addIconSvg}

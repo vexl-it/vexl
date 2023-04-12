@@ -3,14 +3,16 @@ import {useTranslation} from '../../utils/localization/I18nProvider'
 import Screen from '../Screen'
 import {useNavigation} from '@react-navigation/native'
 import FaqsRedirect from './components/FaqsRedirect'
-import Tabs, {type TabType} from './components/Tabs'
+import Tabs from '../Tabs'
 import {useEffect, useRef, useState} from 'react'
 import {ScrollView} from 'react-native'
 import Markdown from '../Markdown'
 import {Stack} from 'tamagui'
+import useContent, {type TabType} from './useContent'
 
 function Tos(): JSX.Element {
   const {t} = useTranslation()
+  const content = useContent()
   const navigation = useNavigation()
   const scrollViewRef = useRef<ScrollView>(null)
   const [activeTab, setActiveTab] = useState<TabType>('termsOfUse')
@@ -30,11 +32,10 @@ function Tos(): JSX.Element {
       <ScreenTitle
         onClosePress={navigation.goBack}
         text={t('termsOfUse.termsOfUse')}
-        variant="dark"
       />
       <FaqsRedirect onPress={onFaqsPress} />
       <Stack h={16} />
-      <Tabs activeTab={activeTab} onTabPress={setActiveTab} />
+      <Tabs activeTab={activeTab} tabs={content} onTabPress={setActiveTab} />
       <Stack h={4} />
       <ScrollView
         ref={scrollViewRef}

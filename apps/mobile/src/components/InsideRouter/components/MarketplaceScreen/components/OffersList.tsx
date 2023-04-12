@@ -1,6 +1,5 @@
 import OfferListItem from './OfferListItem'
 import {FlatList, RefreshControl} from 'react-native'
-import OffersListButtons from './OffersListButtons'
 import {type OneOfferInState} from '../../../../../state/marketplace/domain'
 import {getTokens} from 'tamagui'
 import usePixelsFromBottomWhereTabsEnd from '../../../utils'
@@ -17,7 +16,6 @@ function OffersList({offers, onRefresh, refreshing}: Props): JSX.Element {
 
   return (
     <>
-      <OffersListButtons />
       <FlatList
         contentContainerStyle={{
           marginLeft: tokens.space[2].val,

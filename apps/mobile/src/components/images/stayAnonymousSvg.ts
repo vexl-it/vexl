@@ -1,6 +1,6 @@
-import {stringToSvgStringRuntimeError} from '../../Image'
+import {stringToSvgStringRuntimeError} from '../Image'
 
-const faq3Svg =
+const stayAnonymousSvg =
   stringToSvgStringRuntimeError(`<svg viewBox="0 0 311 251" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g clip-path="url(#clip0_5149_19466)">
 <rect width="311" height="251" />
@@ -85,4 +85,4 @@ const faq3Svg =
 </svg>
 `)
 
-export default faq3Svg
+export default stayAnonymousSvg

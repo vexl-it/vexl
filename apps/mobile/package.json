@@ -14,6 +14,7 @@
     "fresh-start-android": "yarn install && yarn turbo:build && npx expo prebuild --clean -p android && npx expo run:android"
   },
   "dependencies": {
+    "@miblanchard/react-native-slider": "^2.3.1",
     "@notifee/react-native": "^7.7.1",
     "@react-native-async-storage/async-storage": "~1.17.3",
     "@react-native-firebase/app": "^17.4.2",
@@ -80,6 +81,7 @@
     "react-native-tab-view": "^3.5.1",
     "react-native-uuid": "^2.0.1",
     "react-native-web": "~0.18.9",
+    "react-navigation-heavy-screen": "^1.2.1",
     "seed-random": "^2.2.0",
     "tamagui": "^1.11.0",
     "zod": "^3.21.4"

@@ -32,6 +32,7 @@ function NameScreen({navigation}: Props): JSX.Element {
             onChangeText={(e) => {
               setValue(e)
             }}
+            style={{mx: '$-2'}}
           />
         </Stack>
         <AnonymizationCaption />

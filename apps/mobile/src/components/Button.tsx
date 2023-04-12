@@ -6,7 +6,7 @@ import {Stack, styled, Text} from 'tamagui'
 
 interface Props {
   onPress: () => void
-  variant: 'primary' | 'secondary' | 'black' | 'blackOnDark' | 'link'
+  variant: 'primary' | 'secondary' | 'black' | 'blackOnDark' | 'link' | 'hint'
   text?: string
   style?: StyleProp<ViewStyle>
 
@@ -41,6 +41,10 @@ const PressableStyled = styled(Stack, {
       link: {
         bg: 'transparent',
         h: 'auto',
+      },
+      hint: {
+        h: 48,
+        bc: '$pinkAccent2',
       },
     },
     disabled: {
@@ -87,6 +91,10 @@ const TextStyled = styled(Text, {
       },
       link: {
         col: '$white',
+      },
+      hint: {
+        col: '$pink',
+        fos: 14,
       },
     },
     disabled: {

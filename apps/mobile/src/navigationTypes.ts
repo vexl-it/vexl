@@ -27,6 +27,8 @@ export type RootStackParamsList = {
 
   InsideTabs: NavigatorScreenParams<InsideTabParamsList>
 
+  CreateOffer: undefined
+
   OfferDetail: {offerId: OfferId}
 
   ChatDetail: {chatId: ChatId}

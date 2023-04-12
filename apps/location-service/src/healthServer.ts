@@ -1,6 +1,6 @@
 import Koa from 'koa'
 
-const HEALTH_SERVER_PORT = process.env.PORT ?? 3001
+const HEALTH_SERVER_PORT = process.env.HEALTH_SERVER_PORT ?? 3001
 export default function startHealthServerIfPortIsSet(): void {
   const app = new Koa()
   app.use(async (ctx) => {

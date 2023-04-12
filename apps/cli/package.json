@@ -8,9 +8,11 @@
     "build": "yarn build:esbuild & yarn build:typecheck",
     "build:esbuild": "node esbuild.config.js",
     "build:typecheck": "tsc --noEmit",
-    "start": "node -r source-map-support/register dist/cli.js",
+    "start": "node dist/cli.js",
     "test": "yarn jest",
-    "test:dev": "yarn jest --watch"
+    "test:dev": "yarn jest --watch",
+    "clean": "rimraf ./dist",
+    "dev": "yarn build:esbuild && yarn start"
   },
   "devDependencies": {
     "@types/luxon": "^3",
@@ -20,6 +22,7 @@
     "esbuild": "^0.17.14",
     "eslint": "^8.33.0",
     "prettier": "^2.8.3",
+    "rimraf": "^4.4.0",
     "ts-node": "^10.9.1",
     "typescript": "^4.9.4"
   },

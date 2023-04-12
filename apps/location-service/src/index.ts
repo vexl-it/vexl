@@ -1,3 +1,4 @@
+import './sourcemapSupport'
 import Koa from 'koa'
 import Router from 'koa-router'
 import json from 'koa-json'

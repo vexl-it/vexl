@@ -2,6 +2,10 @@ import {LocationData, type SuggestQueryData} from './brands.js'
 import axios from 'axios'
 
 const API_KEY = process.env.API_KEY ?? ''
+if (!API_KEY) {
+  throw new Error('API_KEY env var not set!')
+}
+
 export async function querySuggest({
   phrase,
   count,

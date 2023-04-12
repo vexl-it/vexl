@@ -13,7 +13,6 @@ function checkIfFd3IsOpen() {
 export const fd3isOpen = checkIfFd3IsOpen()
 
 export function setLogLevel(verbose: boolean): void {
-  console.log('Setting verbose', {verbose})
   logVerbose = verbose
 }
 

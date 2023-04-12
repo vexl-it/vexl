@@ -1,13 +1,8 @@
-import {
-  type StyleProp,
-  Text,
-  TouchableOpacity,
-  type ViewStyle,
-} from 'react-native'
-import styled from '@emotion/native'
-import {useCallback} from 'react'
+import {type StyleProp, TouchableOpacity, type ViewStyle} from 'react-native'
+import {useCallback, useMemo} from 'react'
 import {type SvgString} from '@vexl-next/domain/dist/utility/SvgString.brand'
 import Image from './Image'
+import {Stack, styled, Text} from 'tamagui'
 
 interface Props {
   onPress: () => void
@@ -16,165 +11,155 @@ interface Props {
   style?: StyleProp<ViewStyle>
 
   disabled?: boolean
-  size?: 'small' | 'normal'
   fontSize?: number
   afterIcon?: SvgString
+  fullWidth?: boolean
+  fullSize?: boolean
+  small?: boolean
 }
 
-interface StyledElementsProps
-  extends Pick<Props, 'variant' | 'disabled' | 'size' | 'fontSize'> {}
+const PressableStyled = styled(Stack, {
+  fd: 'row',
+  ai: 'center',
+  jc: 'center',
+  br: '$5',
+  h: 60,
+  variants: {
+    variant: {
+      primary: {
+        bg: '$darkBrown',
+      },
+      secondary: {
+        bg: '$main',
+      },
+      black: {
+        bg: '$black',
+      },
+      blackOnDark: {
+        bg: '$grey',
+      },
+      link: {
+        bg: 'transparent',
+        h: 'auto',
+      },
+    },
+    disabled: {
+      true: {
+        bg: '$grey',
+      },
+    },
+    small: {
+      true: {
+        h: 38,
+        px: '$3',
+      },
+    },
+    fullWidth: {
+      true: {
+        width: '100%',
+      },
+    },
+    fullSize: {
+      true: {
+        flex: 1,
+      },
+    },
+  } as const,
+})
 
-const PressableStyled = styled(TouchableOpacity)<StyledElementsProps>`
-  ${(props) =>
-    props.variant === 'primary' &&
-    `
-        background-color: ${props.theme.colors.darkBrown};
-    `}
-  ${(props) =>
-    props.variant === 'secondary' &&
-    `
-        background-color: ${props.theme.colors.main};
-    `}
-  
-  
-  ${(props) =>
-    props.variant === 'black' &&
-    `
-        background-color: ${props.theme.colors.black};
-    `}  
-  
-  ${(props) =>
-    props.variant === 'blackOnDark' &&
-    `
-        background-color: ${props.theme.colors.grey};
-    `}
-  
-  ${(props) =>
-    props.variant === 'link' &&
-    `
-        background-color: 'transparent';
-    `}
-  
-
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  height: 60px;
-  border-radius: 13px;
-
-  ${(props) =>
-    props.disabled &&
-    `
-    background-color: ${props.theme.colors.grey};
-  `}
-
-  ${(props) =>
-    props.size === 'small' &&
-    `
-    height: 38px;
-    padding-left: 12px;
-    padding-right: 12px;
-   `}
-  
-  ${(props) =>
-    props.variant === 'link' &&
-    `
-    height: auto;
-   `}
-`
-
-const TextStyled = styled(Text)<StyledElementsProps>`
-  ${(props) =>
-    props.variant === 'primary' &&
-    `
-        color: ${props.theme.colors.main};
-    `}
-  ${(props) =>
-    props.variant === 'secondary' &&
-    `
-        color: ${props.theme.colors.darkBrown};
-    `}
-  ${(props) =>
-    props.variant === 'black' &&
-    `
-        color: ${props.theme.colors.white};
-    `}
-
-
-  ${(props) =>
-    props.variant === 'blackOnDark' &&
-    `
-        color: ${props.theme.colors.grayOnBlack};
-    `}
-
-  ${(props) =>
-    props.variant === 'link' &&
-    `
-        color: ${props.theme.colors.white};
-    `}
-
-  font-size: 20px;
-  font-weight: 600;
-  line-height: 25px;
-  font-family: '${(p) => p.theme.fonts.ttSatoshi600}';
-
-  ${(props) =>
-    props.size === 'small' &&
-    `
-    font-size: 16px;
-   `}
-
-  ${(props) =>
-    props.disabled &&
-    `
-    color: #808080;
-  `}
-  
-  ${(props) =>
-    props.fontSize &&
-    `
-    font-size: ${props.fontSize}px;
-  `}
-`
-
-const AfterIcon = styled(Image)`
-  margin-left: 4px;
-`
+const TextStyled = styled(Text, {
+  fow: '$6',
+  lh: 25,
+  fos: 20,
+  variants: {
+    variant: {
+      primary: {
+        col: '$main',
+      },
+      secondary: {
+        col: '$darkBrown',
+      },
+      black: {
+        col: '$white',
+      },
+      blackOnDark: {
+        col: '$greyOnBlack',
+      },
+      link: {
+        col: '$white',
+      },
+    },
+    disabled: {
+      true: {
+        col: '$greyOnWhite',
+      },
+    },
+    small: {
+      true: {
+        fos: 16,
+      },
+    },
+  },
+})
 
 function Button({
   variant,
   text,
   onPress,
-  disabled,
+  disabled = false,
   style,
-  size,
   fontSize,
   afterIcon,
+  fullWidth = false,
+  fullSize = false,
+  small = false,
 }: Props): JSX.Element {
   const onPressInner = useCallback(() => {
     if (!disabled) onPress()
   }, [disabled, onPress])
+  const touchableStyles: ViewStyle = useMemo(
+    () => ({
+      height: variant === 'link' ? 'auto' : small ? 38 : 60,
+      ...(fullWidth && {width: '100%'}),
+      ...(fullSize && {flex: 1}),
+    }),
+    [variant, fullSize, fullWidth, small]
+  )
+
   return (
-    <PressableStyled
+    // has to be wrapped in TouchableOpacity as tamagui does not support onPress action on
+    // wrapped TouchableOpacity in styled as of v 1.11.1
+    <TouchableOpacity
+      disabled={disabled}
       onPress={onPressInner}
-      variant={variant}
-      style={style}
-      size={size}
-      disabled={!!disabled}
+      style={touchableStyles}
     >
-      {text && (
-        <TextStyled
-          fontSize={fontSize}
-          size={size}
-          disabled={!!disabled}
-          variant={variant}
-        >
-          {text}
-        </TextStyled>
-      )}
-      {afterIcon && <AfterIcon source={afterIcon} />}
-    </PressableStyled>
+      <PressableStyled
+        variant={variant}
+        style={style}
+        small={small}
+        fullWidth={fullWidth}
+        fullSize={fullSize}
+        disabled={disabled}
+      >
+        {text && (
+          <TextStyled
+            fos={fontSize}
+            ff="$body600"
+            small={small}
+            variant={variant}
+            disabled={disabled}
+          >
+            {text}
+          </TextStyled>
+        )}
+        {afterIcon && (
+          <Stack ml="$1">
+            <Image source={afterIcon} />
+          </Stack>
+        )}
+      </PressableStyled>
+    </TouchableOpacity>
   )
 }
 

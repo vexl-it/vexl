@@ -1,11 +1,7 @@
-import styled from '@emotion/native'
-
-const Container = styled.View`
-  height: 16px;
-`
+import {Stack} from 'tamagui'
 
 function ListFooter(): JSX.Element {
-  return <Container />
+  return <Stack h={16} />
 }
 
 export default ListFooter

@@ -1,36 +1,23 @@
-import styled from '@emotion/native'
-import {TitleText} from '../Text'
 import closeSvg from '../TosScreen/images/closeSvg'
+import {Stack, Text} from 'tamagui'
 import IconButton from '../IconButton'
 
 interface Props {
   onClosePress: () => void
   text: string
+  variant: 'light' | 'dark'
 }
 
-const Container = styled.View`
-  flex-direction: row;
-  align-items: flex-start;
-  justify-content: space-between;
-  padding: ${(p) => String(p.theme.spacings.xs)}px;
-  margin-bottom: ${(p) => String(p.theme.spacings.xl)}px;
-`
-
-const TitleContainer = styled.View`
-  flex-shrink: 1;
-`
-
-const Title = styled(TitleText)`
-  font-size: 32px;
-`
-function ScreenTitle({onClosePress, text}: Props): JSX.Element {
+function ScreenTitle({onClosePress, text, variant}: Props): JSX.Element {
   return (
-    <Container>
-      <TitleContainer>
-        <Title colorStyle="gray">{text}</Title>
-      </TitleContainer>
-      <IconButton icon={closeSvg} onPress={onClosePress} />
-    </Container>
+    <Stack fd="row" ai="flex-start" jc="space-between" padding="$1" mb="$5">
+      <Stack fs={1}>
+        <Text color="$white" fontSize={32} ff="$heading">
+          {text}
+        </Text>
+      </Stack>
+      <IconButton variant={variant} icon={closeSvg} onPress={onClosePress} />
+    </Stack>
   )
 }
 

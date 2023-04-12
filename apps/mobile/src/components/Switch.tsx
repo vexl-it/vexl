@@ -1,17 +1,14 @@
 import {Switch as RnSwitch, type SwitchProps} from 'react-native'
-import styled from '@emotion/native'
-import {useTheme} from '@emotion/react'
+import {getTokens} from 'tamagui'
 
 interface Props extends Partial<SwitchProps> {}
 
-const SwitchStyled = styled(RnSwitch)``
-
 export default function Switch(props: Props): JSX.Element {
-  const theme = useTheme()
+  const tokens = getTokens()
   return (
-    <SwitchStyled
-      trackColor={{false: '#262626', true: theme.colors.main}}
-      thumbColor={theme.colors.white}
+    <RnSwitch
+      trackColor={{false: '#262626', true: tokens.color.main.val}}
+      thumbColor={tokens.color.white.val}
       {...props}
     />
   )

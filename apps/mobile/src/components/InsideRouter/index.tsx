@@ -8,35 +8,32 @@ import TabBar from './components/TabBar'
 import BitcoinPriceChart, {
   CHART_HEIGHT_PX,
 } from './components/BitcoinPriceChart'
-import styled from '@emotion/native'
 import {LinearGradient} from 'expo-linear-gradient'
 import {CONTAINER_WITH_TOP_BORDER_RADIUS_TOP_PADDING} from './components/ContainerWithTopBorderRadius'
+import {Stack, styled} from 'tamagui'
 
 const Tab = createBottomTabNavigator<InsideTabParamsList>()
 
-const BackgroundImageContainer = styled.View`
-  background-color: black;
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: ${String(
-    CHART_HEIGHT_PX + CONTAINER_WITH_TOP_BORDER_RADIUS_TOP_PADDING
-  )}px;
-`
-
-const BackgroundImage = styled(LinearGradient)`
-  width: 100%;
-  height: 100%;
-  opacity: 0.2;
-`
+const BackgroundImage = styled(LinearGradient, {
+  w: '100%',
+  h: '100%',
+  o: 0.2,
+  colors: ['rgba(252, 205, 108, 0)', '#FCCD6C'],
+})
 
 export default function InsideScreen(): JSX.Element {
   return (
     <>
-      <BackgroundImageContainer>
+      <Stack
+        bg="$black"
+        pos="absolute"
+        top={0}
+        left={0}
+        right={0}
+        h={CHART_HEIGHT_PX + CONTAINER_WITH_TOP_BORDER_RADIUS_TOP_PADDING}
+      >
         <BackgroundImage colors={['rgba(252, 205, 108, 0)', '#FCCD6C']} />
-      </BackgroundImageContainer>
+      </Stack>
       <Tab.Navigator
         screenOptions={{
           header: () => <BitcoinPriceChart />,

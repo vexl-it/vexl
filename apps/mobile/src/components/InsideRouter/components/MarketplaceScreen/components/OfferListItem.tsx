@@ -1,6 +1,4 @@
-import styled from '@emotion/native'
-import Text from '../../../../Text'
-import Image from '../../../../Image'
+import SvgImage from '../../../../Image'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import {bigNumberToString} from '../../../../../utils/bigNumberToString'
 import bankSvg from '../images/bankSvg'
@@ -12,90 +10,34 @@ import randomName from '../../../../../utils/randomName'
 import {useNavigation} from '@react-navigation/native'
 import bubbleTipSvg from '../images/bubbleTipSvg'
 import {type OneOfferInState} from '../../../../../state/marketplace/domain'
+import {Stack, styled, Text, XStack} from 'tamagui'
+import {type StyleProp, type ViewStyle} from 'react-native'
+import {useMemo} from 'react'
 
-const RootContainer = styled.View`
-  margin-top: 24px;
-`
+const InfoItemContainer = styled(Stack, {
+  f: 1,
+  ai: 'center',
+})
 
-const WhiteSpaceContainer = styled.View`
-  background-color: ${({theme}) => theme.colors.white};
-  padding: 16px;
-  border-radius: 13px;
-`
-const Description = styled(Text)`
-  font-size: 20px;
-  margin-bottom: 16px;
-  font-family: '${({theme}) => theme.fonts.ttSatoshi500}';
-`
+const InfoDivider = styled(Stack, {
+  bg: 'rgb(196, 196, 196)',
+  w: 1,
+  als: 'stretch',
+})
 
-const InfoContainer = styled.View`
-  flex-direction: row;
-`
-const InfoItemContainer = styled.View`
-  flex: 1;
-  align-items: center;
-`
-const InfoDivider = styled.View`
-  background-color: rgb(196, 196, 196);
-  width: 1px;
-  align-self: stretch;
-`
+const InfoText = styled(Text, {
+  col: '$greyOnWhite',
+  fos: 14,
+  ff: '$body500',
+})
 
-const InfoText = styled(Text)`
-  color: ${({theme}) => theme.colors.grayOnWhite};
-  font-size: 14px;
-  font-family: '${({theme}) => theme.fonts.ttSatoshi500}';
-`
+const PriceText = styled(InfoText, {
+  mb: '$2',
+})
 
-const PriceText = styled(InfoText)`
-  margin-bottom: 8px;
-`
-
-const PriceBigger = styled(InfoText)`
-  font-size: 20px;
-`
-const InfoIcons = styled.View`
-  flex-direction: row;
-  margin-bottom: 8px;
-`
-const PaymentIcon = styled(Image)`
-  margin: 0 2px;
-`
-
-const BubbleTipContainer = styled(Image)`
-  position: absolute;
-  bottom: -7px;
-  left: 43px;
-`
-const UnderBubbleContainer = styled.View`
-  margin-top: 8px;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-`
-const AvatarStyled = styled(AnonymousAvatarFromSeed)`
-  width: 48px;
-  height: 48px;
-`
-const UnderBubbleTextContainer = styled.View`
-  flex: 1;
-  margin-left: 8px;
-`
-const UnderBubbleUpperText = styled(Text)`
-  color: ${({theme}) => theme.colors.white};
-`
-const UnderBubbleUpperTextPink = styled(UnderBubbleUpperText)`
-  color: #fcc5f3;
-`
-
-const UnderBubbleLowerText = styled(Text)`
-  color: ${({theme}) => theme.colors.grayOnBlack};
-  font-size: 14px;
-`
-const RequestButton = styled(Button)`
-  align-self: stretch;
-  height: auto;
-`
+const PriceBigger = styled(InfoText, {
+  fos: 20,
+})
 
 interface Props {
   readonly offer: OneOfferInState
@@ -104,13 +46,20 @@ interface Props {
 function OfferListItem({offer: {offerInfo: offer}}: Props): JSX.Element {
   const {t} = useTranslation()
   const navigation = useNavigation()
+  const avatarStyles: StyleProp<ViewStyle> = useMemo(
+    () => ({
+      width: 48,
+      height: 48,
+    }),
+    []
+  )
   return (
-    <RootContainer>
-      <WhiteSpaceContainer>
-        <Description fontWeight={400}>
+    <Stack mt="$6">
+      <Stack bg="$white" p="$4" br="$5">
+        <Text fos={20} mb="$4" ff="body500">
           {offer.publicPart.offerDescription}
-        </Description>
-        <InfoContainer>
+        </Text>
+        <XStack>
           <InfoItemContainer>
             <PriceText>
               {t('offer.upTo')}{' '}
@@ -139,17 +88,23 @@ function OfferListItem({offer: {offerInfo: offer}}: Props): JSX.Element {
               </>
             )}
           <InfoItemContainer>
-            <InfoIcons>
+            <XStack mb="$2">
               {offer.publicPart.paymentMethod.includes('CASH') && (
-                <PaymentIcon source={mapTagSvg} />
+                <Stack mx="$1">
+                  <SvgImage source={mapTagSvg} />
+                </Stack>
               )}
               {offer.publicPart.paymentMethod.includes('REVOLUT') && (
-                <PaymentIcon source={revolutSvg} />
+                <Stack mx="$1">
+                  <SvgImage source={revolutSvg} />
+                </Stack>
               )}
               {offer.publicPart.paymentMethod.includes('BANK') && (
-                <PaymentIcon source={bankSvg} />
+                <Stack mx="$1">
+                  <SvgImage source={bankSvg} />
+                </Stack>
               )}
-            </InfoIcons>
+            </XStack>
             <InfoText>
               {offer.publicPart.paymentMethod
                 .map((method) => {
@@ -170,28 +125,31 @@ function OfferListItem({offer: {offerInfo: offer}}: Props): JSX.Element {
                 .join(', ')}
             </InfoText>
           </InfoItemContainer>
-        </InfoContainer>
-        <BubbleTipContainer source={bubbleTipSvg} />
-      </WhiteSpaceContainer>
-      <UnderBubbleContainer>
-        <AvatarStyled seed={offer.offerId} />
-        <UnderBubbleTextContainer>
-          <UnderBubbleUpperText>
+        </XStack>
+        position: absolute; bottom: -7px; left: 43px;
+        <Stack pos="absolute" b={-7} l={43}>
+          <SvgImage source={bubbleTipSvg} />
+        </Stack>
+      </Stack>
+      <XStack ai="center" jc="space-between" mt="$2">
+        <AnonymousAvatarFromSeed style={avatarStyles} seed={offer.offerId} />
+        <Stack f={1} ml="$2">
+          <Text col="$white">
             {randomName(offer.offerId)}{' '}
-            <UnderBubbleUpperTextPink>
+            <Text col="$pink">
               {offer.publicPart.offerType === 'SELL'
                 ? t('offer.isSelling')
                 : t('offer.isBuying')}
-            </UnderBubbleUpperTextPink>
-          </UnderBubbleUpperText>
-          <UnderBubbleLowerText>
-            {offer.privatePart.friendLevel.includes('FIRST_DEGREE')
-              ? t('offer.directFriend')
-              : t('offer.friendOfFriend')}
-          </UnderBubbleLowerText>
-        </UnderBubbleTextContainer>
-        <RequestButton
-          size="small"
+              <Text fos={14} col="$greyOnBlack">
+                {offer.privatePart.friendLevel.includes('FIRST_DEGREE')
+                  ? t('offer.directFriend')
+                  : t('offer.friendOfFriend')}
+              </Text>
+            </Text>
+          </Text>
+        </Stack>
+        <Button
+          small
           fontSize={14}
           text={t('common.request')}
           variant="secondary"
@@ -200,8 +158,8 @@ function OfferListItem({offer: {offerInfo: offer}}: Props): JSX.Element {
           }}
         />
         {/* Friend of friend info */}
-      </UnderBubbleContainer>
-    </RootContainer>
+      </XStack>
+    </Stack>
   )
 }
 

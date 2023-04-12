@@ -1,4 +1,3 @@
-import styled from '@emotion/native'
 import UserDataDisplay from './components/UserDataDisplay'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import AnonymizationCaption from '../../../AnonymizationCaption/AnonymizationCaption'
@@ -7,7 +6,6 @@ import randomNumber from '../../../../utils/randomNumber'
 import randomName from '../../../../utils/randomName'
 import {animated, useTransition} from '@react-spring/native'
 import {getAvatarSvg} from '../../../AnonymousAvatar'
-import Text from '../../../Text'
 import {fromSvgString} from '@vexl-next/domain/dist/utility/SvgStringOrImageUri.brand'
 import {UserNameAndAvatar} from '@vexl-next/domain/dist/general/UserNameAndAvatar.brand'
 import {type LoginStackScreenProps} from '../../../../navigationTypes'
@@ -15,29 +13,19 @@ import {
   HeaderProxy,
   NextButtonProxy,
 } from '../../../PageWithButtonAndProgressHeader'
+import {Stack, styled, Text} from 'tamagui'
 
-const RootContainer = styled.View`
-  background-color: ${({theme}) => theme.colors.backgroundBlack};
-  flex: 1;
-`
+const ContentContainer = styled(animated.View, {
+  f: 1,
+  ai: 'center',
+  jc: 'center',
+})
 
-const ContentContainer = styled(animated.View)`
-  flex: 1;
-  align-items: center;
-  justify-content: center;
-`
-const UserDataDisplayStyled = styled(UserDataDisplay)``
-
-const CaptionContainer = styled(animated.View)`
-  align-items: center;
-  margin: 0 12px 40px 12px;
-`
-const AnonymizationCaptionStyled = styled(AnonymizationCaption)``
-
-const ExplanationCaption = styled(Text)`
-  font-size: 16px;
-  text-align: center;
-`
+const CaptionContainer = styled(animated.View, {
+  ai: 'center',
+  mx: '$3',
+  mb: '$8',
+})
 
 type Props = LoginStackScreenProps<'AnonymizationAnimation'>
 
@@ -72,27 +60,27 @@ function AnonymizationAnimationScreen({
   return (
     <>
       <HeaderProxy showBackButton={true} progressNumber={undefined} />
-      <RootContainer>
+      <Stack f={1} bg="$backgroundBlack">
         {contentTransitions((style, showAnonymized) => {
           if (showAnonymized)
             return (
               <ContentContainer
                 style={{...style, transform: [{scale: style.scale}]}}
               >
-                <UserDataDisplayStyled
+                <UserDataDisplay
                   userNameAndAvatar={anonymizedUserData}
-                  topText={t('loginFlow.anonymization.beforeTitle')}
-                ></UserDataDisplayStyled>
+                  topText={t('loginFlow.anonymization.afterTitle')}
+                />
               </ContentContainer>
             )
           return (
             <ContentContainer
               style={{...style, transform: [{scale: style.scale}]}}
             >
-              <UserDataDisplayStyled
+              <UserDataDisplay
                 userNameAndAvatar={realUserData}
                 topText={t('loginFlow.anonymization.beforeTitle')}
-              ></UserDataDisplayStyled>
+              />
             </ContentContainer>
           )
         })}
@@ -101,14 +89,14 @@ function AnonymizationAnimationScreen({
           if (showAnonymized)
             return (
               <CaptionContainer style={{opacity: style.opacity}}>
-                <ExplanationCaption colorStyle="gray">
+                <Text ta="center" fos={16} col="$greyOnBlack">
                   {t('loginFlow.anonymization.afterDescription')}
-                </ExplanationCaption>
+                </Text>
               </CaptionContainer>
             )
           return (
             <CaptionContainer style={{opacity: style.opacity}}>
-              <AnonymizationCaptionStyled />
+              <AnonymizationCaption />
             </CaptionContainer>
           )
         })}
@@ -132,7 +120,7 @@ function AnonymizationAnimationScreen({
             text={t('common.continue')}
           />
         )}
-      </RootContainer>
+      </Stack>
     </>
   )
 }

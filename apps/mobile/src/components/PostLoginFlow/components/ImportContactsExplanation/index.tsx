@@ -1,7 +1,5 @@
 import WhiteContainer from '../../../WhiteContainer'
-import styled from '@emotion/native'
 import Image from '../../../Image'
-import Text, {TitleText} from '../../../Text'
 import AnonymizationCaption from '../../../AnonymizationCaption/AnonymizationCaption'
 import importContactsSvg from './image/importContactsSvg'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
@@ -10,28 +8,7 @@ import {
   NextButtonProxy,
 } from '../../../PageWithButtonAndProgressHeader'
 import {type PostLoginFlowScreenProps} from '../../../../navigationTypes'
-
-const ImageStyled = styled(Image)`
-  margin-bottom: 16px;
-`
-
-const WhiteContainerStyled = styled(WhiteContainer)`
-  justify-content: space-between;
-  align-items: center;
-`
-
-const TextContainerStyled = styled.View`
-  align-self: stretch;
-`
-
-const TitleStyled = styled(TitleText)`
-  margin-bottom: 12px;
-`
-const TextStyled = styled(Text)`
-  font-size: 16px;
-  margin-bottom: 24px;
-`
-const AnonymizationCaptionStyled = styled(AnonymizationCaption)``
+import {Stack, Text} from 'tamagui'
 
 type Props = PostLoginFlowScreenProps<'ImportContactsExplanation'>
 export default function ImportContactsExplanation({
@@ -40,27 +17,34 @@ export default function ImportContactsExplanation({
   const {t} = useTranslation()
 
   return (
-    <WhiteContainerStyled>
-      <HeaderProxy showBackButton={false} progressNumber={3} />
-      <ImageStyled source={importContactsSvg} />
-      <TextContainerStyled>
-        <TitleStyled>
-          {t('postLoginFlow.contactsExplanation.title')}
-        </TitleStyled>
-        <TextStyled colorStyle={'grayOnWhite'}>
-          {t('postLoginFlow.contactsExplanation.text')}
-        </TextStyled>
-        <AnonymizationCaptionStyled
-          text={t('postLoginFlow.contactsExplanation.anonymizationCaption')}
+    <WhiteContainer>
+      <Stack f={1} ai="center" jc="space-between">
+        <HeaderProxy showBackButton={false} progressNumber={3} />
+        <Stack mb="$4">
+          <Image source={importContactsSvg} />
+        </Stack>
+        <Stack jc="space-around">
+          <Stack>
+            <Text mb="$3" fos={24} ff="$heading">
+              {t('postLoginFlow.contactsExplanation.title')}
+            </Text>
+          </Stack>
+          <Text fos={16} ff="$body500" mb="$6" col="$greyOnWhite">
+            {t('postLoginFlow.contactsExplanation.text')}
+          </Text>
+          <AnonymizationCaption
+            fontSize={16}
+            text={t('postLoginFlow.contactsExplanation.anonymizationCaption')}
+          />
+        </Stack>
+        <NextButtonProxy
+          text={t('postLoginFlow.importContactsButton')}
+          onPress={() => {
+            navigation.push('ImportContacts')
+          }}
+          disabled={false}
         />
-      </TextContainerStyled>
-      <NextButtonProxy
-        text={t('postLoginFlow.importContactsButton')}
-        onPress={() => {
-          navigation.push('ImportContacts')
-        }}
-        disabled={false}
-      />
-    </WhiteContainerStyled>
+      </Stack>
+    </WhiteContainer>
   )
 }

@@ -1,48 +1,26 @@
-import styled from '@emotion/native'
 import Button from '../Button'
 import {type ReactNode} from 'react'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import WhiteContainer from '../WhiteContainer'
-import Spacer from '../Spacer'
+import {Stack, styled} from 'tamagui'
 
-const RootContainer = styled.View`
-  flex: 1;
-`
-
-const ButtonsContainer = styled.View`
-  flex-direction: row;
-  margin: 8px 0;
-`
-
-const WhiteContainerStyled = styled(WhiteContainer)`
-  padding: 0;
-`
-
-const BreadcrumbsContainer = styled.View`
-  flex-direction: row;
-  flex: 1;
-  flex-grow: 0;
-  margin: 12px 8px;
-`
-
-const BreadCrumb = styled.View`
-  height: 4px;
-  flex: 1;
-  background-color: #101010;
-  margin: 0 4px;
-  border-radius: 36px;
-  ${(props: {active: boolean}) =>
-    props.active ? `opacity: 1;` : `opacity: 0.2;`}
-`
-
-const ChildrenContainer = styled.View`
-  margin: 16px;
-  flex: 1;
-`
-
-const StyledButton = styled(Button)`
-  flex: 1;
-`
+const BreadCrumb = styled(Stack, {
+  h: 4,
+  f: 1,
+  bg: '$backgroundBlack',
+  mx: '$1',
+  br: '$11',
+  variants: {
+    active: {
+      true: {
+        opacity: 1,
+      },
+      false: {
+        opacity: 0.2,
+      },
+    },
+  } as const,
+})
 
 export interface Props {
   numberOfPages: number
@@ -66,9 +44,9 @@ function ProgressJourney({
   const {t} = useTranslation()
 
   return (
-    <RootContainer>
-      <WhiteContainerStyled>
-        <BreadcrumbsContainer>
+    <Stack f={1}>
+      <WhiteContainer noPadding>
+        <Stack f={1} fg={0} fd="row" mx="$2" my="$3">
           {Array.from({length: numberOfPages}).map((_, index) => (
             <BreadCrumb
               testID={'breadcrumb'}
@@ -76,12 +54,15 @@ function ProgressJourney({
               active={index <= currentPage}
             />
           ))}
-        </BreadcrumbsContainer>
-        <ChildrenContainer>{children}</ChildrenContainer>
-      </WhiteContainerStyled>
-      <ButtonsContainer>
+        </Stack>
+        <Stack f={1} m="$3">
+          {children}
+        </Stack>
+      </WhiteContainer>
+      <Stack fd="row" my="$2">
         {withBackButton ? (
-          <StyledButton
+          <Button
+            fullSize
             onPress={
               currentPage === 0
                 ? onFinish
@@ -93,21 +74,24 @@ function ProgressJourney({
             text={t(currentPage === 0 ? 'common.close' : 'common.back')}
           />
         ) : (
-          <StyledButton
+          <Button
+            fullSize
             onPress={currentPage === numberOfPages - 1 ? onFinish : onSkip}
             variant={'primary'}
             text={t('common.skip')}
           />
         )}
-        <Spacer x$={2} />
+        <Stack w="$1" />
         {currentPage === numberOfPages - 1 ? (
-          <StyledButton
+          <Button
+            fullSize
             onPress={onFinish}
             variant={'secondary'}
             text={t(withBackButton ? 'common.done' : 'common.finish')}
           />
         ) : (
-          <StyledButton
+          <Button
+            fullSize
             onPress={() => {
               onPageChange(currentPage + 1)
             }}
@@ -115,8 +99,8 @@ function ProgressJourney({
             text={t('common.next')}
           />
         )}
-      </ButtonsContainer>
-    </RootContainer>
+      </Stack>
+    </Stack>
   )
 }
 

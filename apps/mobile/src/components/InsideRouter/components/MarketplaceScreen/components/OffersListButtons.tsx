@@ -1,48 +1,36 @@
-import styled from '@emotion/native'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import Button from '../../../../Button'
 import downArrow from '../../../../../images/downArrow'
 import addIconSvg from '../../../../../images/addIconSvg'
-
-const RootContainer = styled.View`
-  margin: 16px 8px 0;
-  flex-direction: row;
-  justify-content: space-between;
-`
-const RightGroup = styled.View`
-  flex-direction: row;
-`
-const ButtonSpacer = styled.View`
-  width: 8px;
-`
+import {Stack, XStack} from 'tamagui'
 
 function OffersListButtons(): JSX.Element {
   const {t} = useTranslation()
   return (
-    <RootContainer>
+    <XStack mt="$4" mx="$2" jc="space-between">
       <Button
         onPress={() => {}}
         variant={'blackOnDark'}
-        size="small"
+        small
         text={t('offer.filterOffers')}
         afterIcon={downArrow}
       />
-      <RightGroup>
+      <XStack>
         <Button
           onPress={() => {}}
           variant={'primary'}
-          size={'small'}
+          small
           text={t('offer.myOffers')}
         />
-        <ButtonSpacer />
+        <Stack w="$2" />
         <Button
           onPress={() => {}}
           variant={'primary'}
-          size={'small'}
+          small
           afterIcon={addIconSvg}
         />
-      </RightGroup>
-    </RootContainer>
+      </XStack>
+    </XStack>
   )
 }
 

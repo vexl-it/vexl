@@ -1,11 +1,7 @@
-import styled from '@emotion/native'
 import Image from '../../Image'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import addSvg from '../image/addSvg'
-
-const RootContainer = styled.View``
-const TextStyled = styled.Text``
-const ImageStyled = styled(Image)``
+import {Stack, Text} from 'tamagui'
 
 function AddCustomContactCell({
   numberToAdd,
@@ -14,10 +10,10 @@ function AddCustomContactCell({
 }): JSX.Element {
   const {t} = useTranslation()
   return (
-    <RootContainer>
-      <ImageStyled source={addSvg} />
-      <TextStyled>{t('contactsList.addContact', {numberToAdd})}</TextStyled>
-    </RootContainer>
+    <Stack>
+      <Image source={addSvg} />
+      <Text>{t('contactsList.addContact', {numberToAdd})}</Text>
+    </Stack>
   )
 }
 

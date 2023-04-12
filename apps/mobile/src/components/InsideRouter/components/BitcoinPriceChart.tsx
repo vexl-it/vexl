@@ -1,23 +1,15 @@
-import styled from '@emotion/native'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
+import {Stack} from 'tamagui'
 
 export const CHART_HEIGHT_PX = 100
-
-const RootContainer = styled.View`
-  height: ${CHART_HEIGHT_PX.toString()}px;
-`
-
-const Content = styled.View`
-  flex: 1;
-`
 
 function BitcoinPriceChart(): JSX.Element {
   const insets = useSafeAreaInsets()
 
   return (
-    <RootContainer>
-      <Content style={{paddingTop: insets.top}} />
-    </RootContainer>
+    <Stack h={CHART_HEIGHT_PX}>
+      <Stack f={1} pt={insets.top} />
+    </Stack>
   )
 }
 

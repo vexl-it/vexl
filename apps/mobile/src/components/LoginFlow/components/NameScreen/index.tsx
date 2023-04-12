@@ -1,5 +1,3 @@
-import {TitleText} from '../../../Text'
-import styled from '@emotion/native'
 import WhiteContainer from '../../../WhiteContainer'
 import TextInput from '../../../Input'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
@@ -12,19 +10,7 @@ import {
   HeaderProxy,
   NextButtonProxy,
 } from '../../../PageWithButtonAndProgressHeader'
-
-const RootContainer = styled.View`
-  flex: 1;
-`
-
-const WhiteContainerStyled = styled(WhiteContainer)``
-
-const TitleStyled = styled(TitleText)``
-
-const TextInputStyled = styled(TextInput)`
-  margin-top: 16px;
-  margin-bottom: 16px;
-`
+import {Stack, Text} from 'tamagui'
 
 type Props = LoginStackScreenProps<'Name'>
 
@@ -33,21 +19,23 @@ function NameScreen({navigation}: Props): JSX.Element {
   const [value, setValue] = useState('')
 
   return (
-    <RootContainer>
+    <Stack f={1}>
       <HeaderProxy showBackButton={true} progressNumber={1} />
-      <WhiteContainerStyled>
-        <TitleStyled numberOfLines={2} adjustsFontSizeToFit>
+      <WhiteContainer>
+        <Text ff="$heading" fos={24} numberOfLines={2} adjustsFontSizeToFit>
           {t('loginFlow.name.prompt')}
-        </TitleStyled>
-        <TextInputStyled
-          value={value}
-          placeholder={t('loginFlow.name.placeholder')}
-          onChangeText={(e) => {
-            setValue(e)
-          }}
-        />
+        </Text>
+        <Stack my="$4">
+          <TextInput
+            value={value}
+            placeholder={t('loginFlow.name.placeholder')}
+            onChangeText={(e) => {
+              setValue(e)
+            }}
+          />
+        </Stack>
         <AnonymizationCaption />
-      </WhiteContainerStyled>
+      </WhiteContainer>
       <NextButtonProxy
         disabled={!value.trim()}
         onPress={() => {
@@ -58,9 +46,9 @@ function NameScreen({navigation}: Props): JSX.Element {
           }
           navigation.navigate('Photo', {userName: validation.data})
         }}
-        text={t('common.continue')}
+        text={t('common.save')}
       />
-    </RootContainer>
+    </Stack>
   )
 }
 

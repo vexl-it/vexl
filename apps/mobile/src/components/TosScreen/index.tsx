@@ -4,15 +4,13 @@ import Screen from '../Screen'
 import {useNavigation} from '@react-navigation/native'
 import FaqsRedirect from './components/FaqsRedirect'
 import Tabs, {type TabType} from './components/Tabs'
-import {useTheme} from '@emotion/react'
 import {useEffect, useRef, useState} from 'react'
 import {ScrollView} from 'react-native'
 import Markdown from '../Markdown'
-import Spacer from '../Spacer'
+import {Stack} from 'tamagui'
 
 function Tos(): JSX.Element {
   const {t} = useTranslation()
-  const theme = useTheme()
   const navigation = useNavigation()
   const scrollViewRef = useRef<ScrollView>(null)
   const [activeTab, setActiveTab] = useState<TabType>('termsOfUse')
@@ -28,15 +26,16 @@ function Tos(): JSX.Element {
   }, [activeTab])
 
   return (
-    <Screen customHorizontalPadding={theme.spacings.small}>
+    <Screen customHorizontalPadding={16}>
       <ScreenTitle
         onClosePress={navigation.goBack}
         text={t('termsOfUse.termsOfUse')}
+        variant="dark"
       />
       <FaqsRedirect onPress={onFaqsPress} />
-      <Spacer y$={4} />
+      <Stack h={16} />
       <Tabs activeTab={activeTab} onTabPress={setActiveTab} />
-      <Spacer y$={1} />
+      <Stack h={4} />
       <ScrollView
         ref={scrollViewRef}
         contentInsetAdjustmentBehavior="automatic"

@@ -1,14 +1,12 @@
-import {type StyleProp, type ViewStyle} from 'react-native'
-import styled from '@emotion/native'
+import {
+  type StyleProp,
+  TouchableWithoutFeedback,
+  type ViewStyle,
+} from 'react-native'
 import checkedSvg from './image/checkedSvg'
 import uncheckedSvg from './image/uncheckedSvg'
 import Image from '../Image'
-
-const Container = styled.TouchableWithoutFeedback``
-const CheckboxImage = styled(Image)`
-  width: 32px;
-  height: 32px;
-`
+import {Stack} from 'tamagui'
 
 interface Props {
   style?: StyleProp<ViewStyle>
@@ -18,13 +16,15 @@ interface Props {
 
 function Checkbox({style, value, onChange}: Props): JSX.Element {
   return (
-    <Container
+    <TouchableWithoutFeedback
       onPress={() => {
         onChange(!value)
       }}
     >
-      <CheckboxImage source={value ? checkedSvg : uncheckedSvg} style={style} />
-    </Container>
+      <Stack w={32} h={32}>
+        <Image source={value ? checkedSvg : uncheckedSvg} style={style} />
+      </Stack>
+    </TouchableWithoutFeedback>
   )
 }
 

@@ -1,53 +1,55 @@
-import {type TextInputProps} from 'react-native'
-import styled from '@emotion/native'
+import {TextInput as RNTextInput, type TextInputProps} from 'react-native'
 import {type SvgString} from '@vexl-next/domain/dist/utility/SvgString.brand'
 import Image from './Image'
+import {Stack, XStack, styled} from 'tamagui'
 
 interface StylingProps {
-  size?: 'normal' | 'small'
+  small?: boolean
 }
 
-const RootContainer = styled.View<StylingProps>`
-  background-color: #f2f2f2;
-  padding: 16px;
-  border-radius: 10px;
-  margin: 0 -16px;
-  flex-direction: row;
-  align-items: center;
+const RootContainer = styled(XStack, {
+  ai: 'center',
+  bg: '$greyAccent5',
+  p: '$4',
+  br: '$4',
+  mx: '$-4',
+  variants: {
+    small: {
+      true: {
+        p: '$2',
+      },
+    },
+  },
+})
 
-  ${(props) =>
-    props.size === 'small' &&
-    `
-    padding: 9px;
-  `}
-`
-const InputStyled = styled.TextInput<StylingProps>`
-  font-size: 18px;
-  font-family: '${(p) => p.theme.fonts.ttSatoshi500}';
-  flex: 1;
+const InputStyled = styled(RNTextInput, {
+  f: 1,
+  fos: 18,
+  ff: '$body500',
+  placeholderTextColor: '#848484',
+  variants: {
+    small: {
+      true: {
+        fos: 16,
+      },
+    },
+  },
+})
 
-  ${(props) =>
-    props.size === 'small' &&
-    `
-    font-size: 16px;
-  `}
-`
-
-const IconStyled = styled(Image)`
-  margin-right: 8px;
-`
-
-export interface Props extends TextInputProps {
+export interface Props extends TextInputProps, Pick<StylingProps, 'small'> {
   icon?: SvgString
-  size?: 'normal' | 'small'
 }
 
 function TextInput(props: Props): JSX.Element {
-  const {style, size, icon, ...restProps} = props
+  const {style, small, icon, ...restProps} = props
   return (
-    <RootContainer size={size} style={style}>
-      {icon && <IconStyled source={icon} />}
-      <InputStyled size={size} placeholderTextColor="#848484" {...restProps} />
+    <RootContainer small={small} style={style}>
+      {icon && (
+        <Stack mr="$2">
+          <Image source={icon} />
+        </Stack>
+      )}
+      <InputStyled small={small} {...restProps} />
     </RootContainer>
   )
 }

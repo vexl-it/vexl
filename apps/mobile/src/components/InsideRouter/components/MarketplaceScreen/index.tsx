@@ -4,18 +4,55 @@ import ContainerWithTopBorderRadius, {
 import {type MarketplaceTabParamsList} from '../../../../navigationTypes'
 import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs'
 import OffersListWithFilter from './components/OffersListStateDisplayer'
-import {css} from '@emotion/native'
-import {useTheme} from '@emotion/react'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import {OfferType} from '@vexl-next/domain/dist/general/offers'
 import {useTriggerOffersRefresh} from '../../../../state/marketplace'
-import {useEffect} from 'react'
+import {useEffect, useMemo} from 'react'
+import {type StyleProp, type ViewStyle} from 'react-native'
+import {getTokens} from 'tamagui'
 
 const Tab = createMaterialTopTabNavigator<MarketplaceTabParamsList>()
 
 function MarketplaceScreen(): JSX.Element {
-  const theme = useTheme()
   const {t} = useTranslation()
+  const tokens = getTokens()
+
+  const tabBarStyle: StyleProp<ViewStyle> = useMemo(
+    () => ({
+      marginTop: CONTAINER_WITH_TOP_BORDER_RADIUS_TOP_PADDING,
+      backgroundColor: tokens.color.black.val,
+      borderBottomColor: tokens.color.grey.val,
+      borderBottomWidth: 2,
+    }),
+    [tokens.color.black.val, tokens.color.grey.val]
+  )
+
+  const tabBarContentContainerStyle: StyleProp<ViewStyle> = useMemo(
+    () => ({
+      margin: 0,
+      padding: 0,
+    }),
+    []
+  )
+
+  const tabBarLabelStyle: StyleProp<ViewStyle> = useMemo(
+    () => ({
+      fontSize: 40,
+      lineHeight: 42, // if we
+      fontFamily: 'PPMonument',
+      textTransform: 'none',
+      margin: 0,
+    }),
+    []
+  )
+
+  const tabBarIndicatorStyle: StyleProp<ViewStyle> = useMemo(
+    () => ({
+      height: 2,
+      bottom: -2,
+    }),
+    []
+  )
 
   const refreshOffers = useTriggerOffersRefresh()
 
@@ -27,33 +64,12 @@ function MarketplaceScreen(): JSX.Element {
     <ContainerWithTopBorderRadius>
       <Tab.Navigator
         screenOptions={{
-          tabBarStyle: css`
-            margin-top: ${String(
-              CONTAINER_WITH_TOP_BORDER_RADIUS_TOP_PADDING
-            )}px;
-
-            background-color: ${theme.colors.black};
-            border-bottom-color: ${theme.colors.grey};
-            border-bottom-width: 2px;
-          `,
-          tabBarContentContainerStyle: css`
-            margin: 0;
-            padding: 0;
-          `,
-          tabBarLabelStyle: css`
-            font-size: 40px;
-            line-height: 42px; // if we
-            font-family: '${theme.fonts.ppMonument}';
-            text-transform: none;
-            margin: 0;
-          `,
-          tabBarActiveTintColor: theme.colors.main,
-          tabBarInactiveTintColor: theme.colors.grayOnBlack,
-          tabBarIndicatorStyle: css`
-            //background-color:,
-            height: 2px;
-            bottom: -2px;
-          `,
+          tabBarStyle,
+          tabBarContentContainerStyle,
+          tabBarLabelStyle,
+          tabBarActiveTintColor: tokens.color.main.val,
+          tabBarInactiveTintColor: tokens.color.greyOnBlack.val,
+          tabBarIndicatorStyle,
         }}
       >
         <Tab.Screen

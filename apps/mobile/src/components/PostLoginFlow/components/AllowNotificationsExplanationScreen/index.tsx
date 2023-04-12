@@ -2,10 +2,8 @@ import {
   HeaderProxy,
   NextButtonProxy,
 } from '../../../PageWithButtonAndProgressHeader'
-import styled from '@emotion/native'
 import WhiteContainer from '../../../WhiteContainer'
-import Image from '../../../Image'
-import Text, {TitleText} from '../../../Text'
+import SvgImage from '../../../Image'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import NotificationsSvg from '../../../../images/notificationsSvg'
 import {pipe} from 'fp-ts/function'
@@ -14,21 +12,7 @@ import {getNotificationToken} from '../../../../utils/notifications'
 import {Alert} from 'react-native'
 import {type PostLoginFlowScreenProps} from '../../../../navigationTypes'
 import {useFinishPostLoginFlow} from '../../../../state/postLoginOnboarding'
-
-const WhiteContainerStyled = styled(WhiteContainer)``
-const IllustrationContainer = styled.View`
-  flex: 1;
-  justify-content: center;
-  align-items: center;
-`
-const Illustration = styled(Image)``
-const TitleStyled = styled(TitleText)`
-  margin-top: 16px;
-`
-const TextStyled = styled(Text)`
-  font-size: 18px;
-  margin-top: 16px;
-`
+import {Stack, Text} from 'tamagui'
 
 type Props = PostLoginFlowScreenProps<'AllowNotificationsExplanation'>
 function AllowNotificationsExplanationScreen({navigation}: Props): JSX.Element {
@@ -94,15 +78,17 @@ function AllowNotificationsExplanationScreen({navigation}: Props): JSX.Element {
   return (
     <>
       <HeaderProxy showBackButton={true} progressNumber={3} />
-      <WhiteContainerStyled>
-        <IllustrationContainer>
-          <Illustration source={NotificationsSvg} />
-        </IllustrationContainer>
-        <TitleStyled>{t('postLoginFlow.allowNotifications.title')}</TitleStyled>
-        <TextStyled colorStyle="grayOnWhite" fontWeight={400}>
+      <WhiteContainer>
+        <Stack f={1} ai="center" jc="center">
+          <SvgImage source={NotificationsSvg} />
+        </Stack>
+        <Text fos={24} ff="$heading" mt="$4">
+          {t('postLoginFlow.allowNotifications.title')}
+        </Text>
+        <Text mt={16} fos={18} col="$greyOnWhite">
           {t('postLoginFlow.allowNotifications.text')}
-        </TextStyled>
-      </WhiteContainerStyled>
+        </Text>
+      </WhiteContainer>
       <NextButtonProxy
         text={t('postLoginFlow.allowNotifications.action')}
         onPress={allowNotifications}

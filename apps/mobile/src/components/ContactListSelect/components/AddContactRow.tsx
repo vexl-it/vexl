@@ -1,24 +1,11 @@
-import styled from '@emotion/native'
 import Image from '../../Image'
-import Text from '../../Text'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import addSvg from '../image/addSvg'
 import {useAddCustomContact} from '../state/customContacts'
 import {type ContactNormalized} from '../brands/ContactNormalized.brand'
 import {useToggleContactSelection} from '../state/selectedContacts'
-
-const RootContainer = styled.TouchableOpacity`
-  flex: 1;
-`
-const InnerContainer = styled.View`
-  align-items: center;
-  justify-content: center;
-  flex: 1;
-`
-const AddIcon = styled(Image)`
-  margin-bottom: 16px;
-`
-const TextStyled = styled(Text)``
+import {Stack, Text} from 'tamagui'
+import {TouchableOpacity} from 'react-native'
 
 function AddContactRow({contact}: {contact: ContactNormalized}): JSX.Element {
   const {t} = useTranslation()
@@ -26,21 +13,24 @@ function AddContactRow({contact}: {contact: ContactNormalized}): JSX.Element {
   const toggleContactSelection = useToggleContactSelection()
 
   return (
-    <RootContainer
+    <TouchableOpacity
+      style={{flex: 1}}
       onPress={() => {
         addCustomContact(contact)
         toggleContactSelection(true, contact.normalizedNumber)
       }}
     >
-      <InnerContainer>
-        <AddIcon source={addSvg} />
-        <TextStyled colorStyle="grayOnWhite">
+      <Stack f={1} ai="center" jc="center">
+        <Stack mb="$4">
+          <Image source={addSvg} />
+        </Stack>
+        <Text col="$greyOnWhite">
           {t('postLoginFlow.contactsList.addContact', {
             number: contact.numberToDisplay,
           })}
-        </TextStyled>
-      </InnerContainer>
-    </RootContainer>
+        </Text>
+      </Stack>
+    </TouchableOpacity>
   )
 }
 

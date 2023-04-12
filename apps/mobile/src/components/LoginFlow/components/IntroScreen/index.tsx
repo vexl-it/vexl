@@ -1,6 +1,4 @@
 import ProgressJourney from '../../../ProgressJourney'
-import Text from '../../../Text'
-import styled from '@emotion/native'
 import {useState} from 'react'
 import useContent from './useContent'
 import LottieView from '../../../LottieView'
@@ -9,25 +7,7 @@ import {
   HeaderProxy,
   NextButtonProxy,
 } from '../../../PageWithButtonAndProgressHeader'
-
-const RootContainer = styled.View`
-  flex: 1;
-`
-
-const TextStyled = styled(Text)`
-  font-size: 24px;
-  font-family: '${(p) => p.theme.fonts.ppMonument}';
-  max-width: 350px;
-`
-
-const LottieViewStyled = styled(LottieView)`
-  flex: 1;
-`
-
-const TextContainer = styled.View`
-  height: 150px;
-  justify-content: flex-end;
-`
+import {Stack, Text} from 'tamagui'
 
 type Props = LoginStackScreenProps<'Intro'>
 
@@ -35,7 +15,7 @@ function Intro({navigation}: Props): JSX.Element {
   const [page, setPage] = useState(0)
   const content = useContent()
   return (
-    <RootContainer>
+    <Stack f={1}>
       <HeaderProxy hidden showBackButton={false} progressNumber={1} />
       <ProgressJourney
         currentPage={page}
@@ -48,13 +28,17 @@ function Intro({navigation}: Props): JSX.Element {
           navigation.replace('Start')
         }}
       >
-        <LottieViewStyled loop={false} autoPlay source={content[page].lottie} />
-        <TextContainer>
-          <TextStyled colorStyle={'black'}>{content[page].title}</TextStyled>
-        </TextContainer>
+        <Stack f={1}>
+          <LottieView loop={false} autoPlay source={content[page].lottie} />
+        </Stack>
+        <Stack h={150} maw={350} jc="flex-end">
+          <Text color="$black" fontSize={24} ff="$heading">
+            {content[page].title}
+          </Text>
+        </Stack>
       </ProgressJourney>
       <NextButtonProxy text={null} disabled={true} onPress={null} />
-    </RootContainer>
+    </Stack>
   )
 }
 

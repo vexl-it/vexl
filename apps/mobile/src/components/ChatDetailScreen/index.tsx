@@ -1,16 +1,6 @@
 import {type RootStackScreenProps} from '../../navigationTypes'
-import Text from '../Text'
-import styled from '@emotion/native/dist/emotion-native.cjs'
-
-const RootContainer = styled.SafeAreaView`
-  background-color: black;
-  flex: 1;
-`
-
-const View = styled.ScrollView`
-  margin-left: 8px;
-  margin-right: 8px;
-`
+import Screen from '../Screen'
+import {ScrollView, Text} from 'tamagui'
 
 type Props = RootStackScreenProps<'ChatDetail'>
 
@@ -21,11 +11,11 @@ function ChatDetailScreen({
   },
 }: Props): JSX.Element {
   return (
-    <RootContainer>
-      <View>
+    <Screen>
+      <ScrollView mx="$2">
         <Text>ChatId: {chatId}</Text>
-      </View>
-    </RootContainer>
+      </ScrollView>
+    </Screen>
   )
 }
 

@@ -1,26 +1,15 @@
 import {useTranslation} from '../../../utils/localization/I18nProvider'
-import styled from '@emotion/native'
-import Text from '../../Text'
-
-const RootContainer = styled.View`
-  margin-top: 8px;
-  margin-bottom: 16px;
-`
-
-const TextStyled = styled(Text)`
-  font-size: 14px;
-  text-align: center;
-`
+import {Stack, Text} from 'tamagui'
 
 function ListHeader(): JSX.Element {
   const {t} = useTranslation()
 
   return (
-    <RootContainer>
-      <TextStyled colorStyle="grayOnWhite">
+    <Stack mt="$2" mb="$4">
+      <Text fos={14} ta="center" col="$greyOnWhite">
         {t('postLoginFlow.contactsList.toAddCustomContact')}
-      </TextStyled>
-    </RootContainer>
+      </Text>
+    </Stack>
   )
 }
 

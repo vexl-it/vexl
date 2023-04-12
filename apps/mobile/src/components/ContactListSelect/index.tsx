@@ -1,5 +1,4 @@
 import ContactsList from './components/ContactsList'
-import styled from '@emotion/native'
 import SearchBar from './components/SearchBar'
 import * as O from 'fp-ts/Option'
 import * as TE from 'fp-ts/TaskEither'
@@ -14,13 +13,7 @@ import {useGetSelectedContacts} from './state/selectedContacts'
 import {pipe} from 'fp-ts/function'
 import {Alert} from 'react-native'
 import WhiteContainer from '../WhiteContainer'
-
-const RootContainer = styled(WhiteContainer)`
-  flex: 1;
-  background-color: ${({theme}) => theme.colors.white};
-  padding-top: 0;
-  padding-bottom: 0;
-`
+import {Stack} from 'tamagui'
 
 interface Props {
   onContactsSubmitted: () => void
@@ -59,17 +52,19 @@ function ContactsListSelect({
   }
 
   return (
-    <RootContainer>
-      <SearchBar />
-      {toDisplay.length > 0 && <ContactsList contacts={toDisplay} />}
-      {toDisplay.length === 0 && !O.isSome(searchTextAsCustomContact) && (
-        <NothingFound />
-      )}
-      {toDisplay.length === 0 && O.isSome(searchTextAsCustomContact) && (
-        <AddContactRow contact={searchTextAsCustomContact.value} />
-      )}
-      {renderFooter({onSubmit})}
-    </RootContainer>
+    <WhiteContainer noPadding>
+      <Stack f={1} px="$4">
+        <SearchBar />
+        {toDisplay.length > 0 && <ContactsList contacts={toDisplay} />}
+        {toDisplay.length === 0 && !O.isSome(searchTextAsCustomContact) && (
+          <NothingFound />
+        )}
+        {toDisplay.length === 0 && O.isSome(searchTextAsCustomContact) && (
+          <AddContactRow contact={searchTextAsCustomContact.value} />
+        )}
+        {renderFooter({onSubmit})}
+      </Stack>
+    </WhiteContainer>
   )
 }
 

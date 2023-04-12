@@ -1,5 +1,3 @@
-import styled from '@emotion/native'
-import Text, {TitleText} from '../../../Text'
 import WhiteContainer from '../../../WhiteContainer'
 import TextInput from '../../../Input'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
@@ -18,26 +16,7 @@ import {
   HeaderProxy,
   NextButtonProxy,
 } from '../../../PageWithButtonAndProgressHeader'
-
-const WhiteContainerStyled = styled(WhiteContainer)``
-const Title = styled(TitleText)`
-  margin-bottom: 12px;
-`
-const TextStyled = styled(Text)`
-  font-size: 14px;
-`
-const InputStyled = styled(TextInput)`
-  margin-top: 24px;
-  margin-bottom: 24px;
-`
-const ResendText = styled(Text)`
-  text-align: center;
-  font-size: 14px;
-`
-
-const CountdownStyled = styled(Countdown)`
-  font-size: 14px;
-`
+import {Stack, Text} from 'tamagui'
 
 type Props = LoginStackScreenProps<'VerificationCode'>
 
@@ -61,32 +40,40 @@ function VerificationCodeScreen({
   return (
     <>
       <HeaderProxy showBackButton={true} progressNumber={2} />
-      <WhiteContainerStyled>
-        <Title>{t('loginFlow.verificationCode.title')}</Title>
-        <TextStyled colorStyle="gray">
+      <WhiteContainer>
+        <Stack mb="$3">
+          <Text ff="$heading" fos={24}>
+            {t('loginFlow.verificationCode.title')}
+          </Text>
+        </Stack>
+        <Text ff="$body500" fos={14} col="$greyOnWhite">
           {t('loginFlow.verificationCode.text')}{' '}
-          <TextStyled>
+          <Text ff="$body500" fos={14} col="$grey">
             {parsePhoneNumber(phoneNumber).number?.international}
-          </TextStyled>
-        </TextStyled>
-        <InputStyled
-          keyboardType="number-pad"
-          value={userCode}
-          onChangeText={(v) => {
-            setUserCode(v.substring(0, 6))
-          }}
-          placeholder={t('loginFlow.verificationCode.inputPlaceholder')}
-        />
+          </Text>
+        </Text>
+        <Stack my="$6">
+          <TextInput
+            keyboardType="number-pad"
+            value={userCode}
+            onChangeText={(v) => {
+              setUserCode(v.substring(0, 6))
+            }}
+            placeholder={t('loginFlow.verificationCode.inputPlaceholder')}
+          />
+        </Stack>
         {countdownFinished ? (
           <TouchableWithoutFeedback onPress={navigation.goBack}>
-            <ResendText>{t('loginFlow.verificationCode.retry')}</ResendText>
+            <Text ff="$body500" col="$greyOnWhite" fos={14} ta="center">
+              {t('loginFlow.verificationCode.retry')}
+            </Text>
           </TouchableWithoutFeedback>
         ) : (
-          <ResendText colorStyle="gray">
+          <Text ff="$body500" col="$greyOnWhite" fos={14} ta="center">
             <>
               {t('loginFlow.verificationCode.retryCountdown')}{' '}
-              <CountdownStyled
-                colorStyle={'gray'}
+              <Countdown
+                col="$greyOnWhite"
                 countUntil={DateTime.fromISO(
                   initPhoneVerificationResponse.expirationAt
                 )}
@@ -96,9 +83,9 @@ function VerificationCodeScreen({
               />
               {t('common.secondsShort')}
             </>
-          </ResendText>
+          </Text>
         )}
-      </WhiteContainerStyled>
+      </WhiteContainer>
       <NextButtonProxy
         onPress={() => {
           loadingOverlay.show()

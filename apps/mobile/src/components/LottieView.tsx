@@ -1,27 +1,24 @@
 import RNLottieView, {type AnimatedLottieViewProps} from 'lottie-react-native'
-import styled, {css} from '@emotion/native'
-
-const RootContainer = styled.View`
-  align-items: center;
-  justify-content: center;
-  display: flex;
-`
+import {Stack} from 'tamagui'
+import {useMemo} from 'react'
+import {type StyleProp, type ViewStyle} from 'react-native'
 
 interface Props extends AnimatedLottieViewProps {}
 
 function LottieView(props: Props): JSX.Element {
   const {style, ...restProps} = props
+  const lottieViewStyles: StyleProp<ViewStyle> = useMemo(
+    () => ({
+      width: '100%',
+      height: '100%',
+    }),
+    []
+  )
 
   return (
-    <RootContainer style={style}>
-      <RNLottieView
-        style={css`
-          width: 100%;
-          height: 100%;
-        `}
-        {...restProps}
-      />
-    </RootContainer>
+    <Stack ai="center" jc="center" style={style}>
+      <RNLottieView style={lottieViewStyles} {...restProps} />
+    </Stack>
   )
 }
 

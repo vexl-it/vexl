@@ -1,38 +1,44 @@
 import MarkdownDisplay from 'react-native-markdown-display'
-import {css} from '@emotion/native'
-import {useTheme} from '@emotion/react'
+import {StyleSheet} from 'react-native'
 
 interface Props {
   children: string
 }
 
+const styles = StyleSheet.create({
+  strong: {
+    fontSize: 16,
+    color: '#fff',
+    fontFamily: 'TTSatoshi600',
+  },
+  body: {
+    color: '#ababab',
+    fontSize: 16,
+    fontFamily: 'TTSatoshi500',
+    // textAlign: 'left',
+  },
+  heading2: {
+    color: '#ffffff',
+    fontSize: 18,
+    fontFamily: 'TTSatoshi600',
+    marginTop: 40,
+  },
+  heading3: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontFamily: 'TTSatoshi600',
+  },
+})
+
 function Markdown({children}: Props): JSX.Element {
-  const theme = useTheme()
+  const {strong, body, heading2, heading3} = styles
   return (
     <MarkdownDisplay
       style={{
-        strong: css`
-          font-size: 16px;
-          color: ${theme.colors.white};
-          font-family: '${theme.fonts.ttSatoshi600}';
-        `,
-        body: css`
-          color: #ababab;
-          font-size: 16px;
-          font-family: '${theme.fonts.ttSatoshi500}';
-          text-align: left;
-        `,
-        heading2: css`
-          color: #ffffff;
-          font-size: 18px;
-          font-family: '${theme.fonts.ttSatoshi600}';
-          margin-top: 40px;
-        `,
-        heading3: css`
-          color: #ffffff;
-          font-size: 16px;
-          font-family: '${theme.fonts.ttSatoshi600}';
-        `,
+        strong,
+        body,
+        heading2,
+        heading3,
       }}
     >
       {children}

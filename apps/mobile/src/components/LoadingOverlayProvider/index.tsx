@@ -1,19 +1,18 @@
-import styled from '@emotion/native'
 import {type ReactNode, useMemo} from 'react'
 import {atom, useAtomValue, useSetAtom} from 'jotai'
-import {useTheme} from '@emotion/react'
+import {ActivityIndicator} from 'react-native'
+import {getTokens, Stack, styled} from 'tamagui'
 
-const RootContainer = styled.View`
-  position: absolute;
-  background-color: rgba(0, 0, 0, 0.5);
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  align-items: center;
-  justify-content: center;
-`
-const ActivityIndicator = styled.ActivityIndicator``
+const RootContainer = styled(Stack, {
+  pos: 'absolute',
+  t: 0,
+  l: 0,
+  r: 0,
+  b: 0,
+  ai: 'center',
+  jc: 'center',
+  bg: 'rgba(0, 0, 0, 0.5)',
+})
 
 interface Props {
   children: ReactNode
@@ -23,13 +22,13 @@ const isDisplayedAtom = atom(false)
 
 function LoadingOverlayProvider({children}: Props): JSX.Element {
   const isDisplayed = useAtomValue(isDisplayedAtom)
-  const theme = useTheme()
+  const tokens = getTokens()
   return (
     <>
       {children}
       {isDisplayed && (
         <RootContainer>
-          <ActivityIndicator size="large" color={theme.colors.main} />
+          <ActivityIndicator size="large" color={tokens.color.main.val} />
         </RootContainer>
       )}
     </>

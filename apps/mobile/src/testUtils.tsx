@@ -10,9 +10,9 @@ const AllTheProviders: FC<{children: React.ReactNode}> = ({children}) => {
 }
 
 // @ts-ignore
-const customRender  = (
-    ui: ReactElement,
-    options?: Omit<RenderOptions, 'wrapper'>,
+const customRender = (
+  ui: ReactElement,
+  options?: Omit<RenderOptions, 'wrapper'>
 ) => render(ui, {wrapper: AllTheProviders, ...options})
 
 export * from '@testing-library/react-native'

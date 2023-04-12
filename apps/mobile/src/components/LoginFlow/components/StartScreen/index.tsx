@@ -1,5 +1,3 @@
-import styled from '@emotion/native'
-import Text from '../../../Text'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import Switch from '../../../Switch'
 import LottieView from '../../../LottieView'
@@ -14,53 +12,7 @@ import {
   NextButtonProxy,
 } from '../../../PageWithButtonAndProgressHeader'
 import Button from '../../../Button'
-import Spacer from '../../../Spacer'
-
-const RootContainer = styled.View`
-  flex: 1;
-  background-color: ${({theme}) => theme.colors.backgroundBlack};
-`
-
-const WhiteContainerStyled = styled(WhiteContainer)`
-  align-items: center;
-  padding: 50px 40px;
-`
-const LottieViewStyled = styled(LottieView)`
-  flex: 1;
-`
-
-const BigName = styled(Image)`
-  width: 200px;
-  margin-bottom: 20px;
-`
-
-const Subtitle = styled(Text)`
-  font-size: 18px;
-`
-
-const TOUContainer = styled.View`
-  background-color: #131313;
-  flex-direction: row;
-  justify-content: space-between;
-  border-radius: 13px;
-  padding: 30px;
-  margin: 12px 0;
-  align-items: center;
-`
-
-const TOUMessageContainer = styled.View`
-  flex-direction: row;
-  align-items: center;
-`
-
-const TOUIcon = styled(Image)``
-
-const TOUText = styled(Text)`
-  font-size: 18px;
-  font-weight: 500;
-`
-
-const TouSwitch = styled(Switch)``
+import {Stack, Text} from 'tamagui'
 
 type Props = LoginStackScreenProps<'Start'>
 
@@ -70,26 +22,41 @@ function StartScreen({navigation}: Props): JSX.Element {
   const {t} = useTranslation()
 
   return (
-    <RootContainer>
+    <Stack f={1} bg="$darkColorText">
       <HeaderProxy showBackButton={true} progressNumber={undefined} />
-      <WhiteContainerStyled>
-        <LottieViewStyled
-          loop={false}
-          autoPlay
-          source={require('./lottie/vexl_get_started.json')}
-        />
-        <BigName width={211} height={66} source={bigNameSvg} />
-        <Subtitle fontWeight={500} colorStyle={'grayOnBlack'}>
-          {t('loginFlow.start.subtitle')}
-        </Subtitle>
-      </WhiteContainerStyled>
-      <TOUContainer>
-        <TOUMessageContainer>
-          <TOUIcon source={notepadSvg} />
-          <Spacer x$={2} />
-          <TOUText fontWeight={500} colorStyle={'grayOnBlack'}>
+      <WhiteContainer>
+        <Stack f={1} ai="center">
+          <Stack f={1}>
+            <LottieView
+              loop={false}
+              autoPlay
+              source={require('./lottie/vexl_get_started.json')}
+            />
+          </Stack>
+          <Stack mb="$5">
+            <Image width={211} height={66} source={bigNameSvg} />
+          </Stack>
+          <Text fos={18} ff="$body500" col="$greyOnBlack">
+            {t('loginFlow.start.subtitle')}
+          </Text>
+        </Stack>
+      </WhiteContainer>
+      <Stack
+        fd="row"
+        ai="center"
+        jc="space-between"
+        py="$4"
+        px="$5"
+        br="$5"
+        my="$3"
+        bg="$backgroundBlack"
+      >
+        <Stack fd="row" ai="center">
+          <Image source={notepadSvg} />
+          <Stack w="$2" />
+          <Text fos={18} ff="$body500" col="$greyOnBlack">
             {t('loginFlow.start.touLabel')}{' '}
-          </TOUText>
+          </Text>
           <Button
             fontSize={18}
             variant="link"
@@ -98,9 +65,9 @@ function StartScreen({navigation}: Props): JSX.Element {
             }}
             text={t('loginFlow.start.termsOfUse')}
           />
-        </TOUMessageContainer>
-        <TouSwitch value={touAgree} onValueChange={setTOUAgree} />
-      </TOUContainer>
+        </Stack>
+        <Switch value={touAgree} onValueChange={setTOUAgree} />
+      </Stack>
       <NextButtonProxy
         disabled={!touAgree}
         onPress={() => {
@@ -108,7 +75,7 @@ function StartScreen({navigation}: Props): JSX.Element {
         }}
         text={t('common.continue')}
       />
-    </RootContainer>
+    </Stack>
   )
 }
 

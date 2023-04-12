@@ -1,6 +1,4 @@
 import WhiteContainer from '../../../WhiteContainer'
-import styled from '@emotion/native'
-import Text, {TitleText} from '../../../Text'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import anonymizationNoticeSvg from '../../../../images/anonymizationNoticeSvg'
 import Image from '../../../Image'
@@ -9,21 +7,7 @@ import {
   HeaderProxy,
   NextButtonProxy,
 } from '../../../PageWithButtonAndProgressHeader'
-
-const ImageStyled = styled(Image)`
-  height: 100%;
-  width: 100%;
-`
-const ImageContainer = styled.View`
-  flex: 1;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 24px;
-`
-const Title = styled(TitleText)`
-  margin-bottom: 16px;
-`
-const TextStyled = styled(Text)``
+import {Stack, Text} from 'tamagui'
 
 type Props = LoginStackScreenProps<'AnonymizationNotice'>
 
@@ -34,15 +18,21 @@ function AnonymizationNoticeScreen({navigation}: Props): JSX.Element {
     <>
       <HeaderProxy showBackButton={true} progressNumber={1} />
       <WhiteContainer>
-        <ImageContainer>
-          <ImageStyled source={anonymizationNoticeSvg} />
-        </ImageContainer>
-        <Title adjustsFontSizeToFit numberOfLines={2}>
+        <Stack f={1} ai="center" jc="center" mb="$6">
+          <Image source={anonymizationNoticeSvg} />
+        </Stack>
+        <Text
+          ff="$heading"
+          mb="$4"
+          fos={24}
+          adjustsFontSizeToFit
+          numberOfLines={2}
+        >
           {t('loginFlow.anonymizationNotice.title')}
-        </Title>
-        <TextStyled colorStyle="gray">
+        </Text>
+        <Text col="$greyOnWhite" ff="$body500" fos={16}>
           {t('loginFlow.anonymizationNotice.text')}
-        </TextStyled>
+        </Text>
       </WhiteContainer>
       <NextButtonProxy
         onPress={() => {

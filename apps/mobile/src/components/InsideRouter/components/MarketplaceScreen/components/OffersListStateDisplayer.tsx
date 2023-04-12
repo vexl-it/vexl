@@ -1,9 +1,8 @@
 import {useEffect, useMemo} from 'react'
 import ContainerWithTopBorderRadius from '../../ContainerWithTopBorderRadius'
+import OffersList from './OffersList'
 import {type MarketplaceTabScreenProps} from '../../../../../navigationTypes'
-import styled from '@emotion/native'
 import {ActivityIndicator, Alert} from 'react-native'
-import {useTheme} from '@emotion/react'
 import {
   useAreOffersLoading,
   useFilteredOffers,
@@ -11,13 +10,7 @@ import {
   useTriggerOffersRefresh,
 } from '../../../../../state/marketplace'
 import EmptyListPlaceholder from './EmptyListPlaceholder'
-import OffersList from './OffersList'
-
-const LoadingContainer = styled.View`
-  flex: 1;
-  padding-top: 20px;
-  align-items: center;
-`
+import {getTokens, Stack} from 'tamagui'
 
 type Props = MarketplaceTabScreenProps<'Buy' | 'Sell'>
 
@@ -26,7 +19,7 @@ function OffersListStateDisplayer({
     params: {type},
   },
 }: Props): JSX.Element {
-  const theme = useTheme()
+  const tokens = getTokens()
   const loading = useAreOffersLoading()
   const error = useOffersLoadingError()
   const refreshOffers = useTriggerOffersRefresh()
@@ -40,9 +33,9 @@ function OffersListStateDisplayer({
 
   if (offers.length === 0 && loading) {
     return (
-      <LoadingContainer>
-        <ActivityIndicator color={theme.colors.main} size="large" />
-      </LoadingContainer>
+      <Stack f={1} ai="center" pt="$5">
+        <ActivityIndicator color={tokens.color.main.val} size="large" />
+      </Stack>
     )
   }
 

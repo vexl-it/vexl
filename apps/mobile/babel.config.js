@@ -1,3 +1,5 @@
+process.env.TAMAGUI_TARGET = 'native'
+
 module.exports = function (api) {
   api.cache(true)
   return {
@@ -18,6 +20,21 @@ module.exports = function (api) {
           },
         },
       ],
+      [
+        '@tamagui/babel-plugin',
+        {
+          components: ['tamagui'],
+          config: './src/utils/ThemeProvider/tamagui.config.ts',
+          logTimings: true,
+        },
+      ],
+      [
+        'transform-inline-environment-variables',
+        {
+          include: 'TAMAGUI_TARGET',
+        },
+      ],
+      'react-native-reanimated/plugin',
     ],
   }
 }

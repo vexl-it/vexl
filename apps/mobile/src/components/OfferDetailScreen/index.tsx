@@ -1,18 +1,10 @@
 import {type RootStackScreenProps} from '../../navigationTypes'
-import Text from '../Text'
 import {Alert, ScrollView} from 'react-native'
 import Button from '../Button'
-import styled from '@emotion/native'
-import Spacer from '../Spacer'
 import {useSingleOffer} from '../../state/marketplace'
 import * as O from 'fp-ts/Option'
-
-const RootContainer = styled.SafeAreaView`
-  background-color: black;
-  align-items: stretch;
-  justify-content: center;
-  flex: 1;
-`
+import {Stack, Text} from 'tamagui'
+import Screen from '../Screen'
 
 type Props = RootStackScreenProps<'OfferDetail'>
 
@@ -25,12 +17,12 @@ function OfferDetailScreen({
   const offer = useSingleOffer(offerId)
 
   if (O.isNone(offer))
-    return <Text colorStyle="white">Offer does not exist</Text> // TODO 404 page
+    return <Text col="$white">Offer does not exist</Text> // TODO 404 page
 
   return (
-    <RootContainer>
+    <Screen>
       <ScrollView>
-        <Text fontSize="heading2" colorStyle="white">
+        <Text fos={32} ff="$heading" col="$white">
           {JSON.stringify(offer, null, 2)}
         </Text>
       </ScrollView>
@@ -71,9 +63,9 @@ function OfferDetailScreen({
         text="sendRequest"
         variant="secondary"
       />
-      <Spacer y$={4} />
+      <Stack h={16} />
       <Button onPress={navigation.goBack} text="back" variant="primary" />
-    </RootContainer>
+    </Screen>
   )
 }
 

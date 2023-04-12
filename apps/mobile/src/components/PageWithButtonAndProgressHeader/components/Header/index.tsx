@@ -1,37 +1,29 @@
-import styled from '@emotion/native'
-import Image from '../../../Image'
 import backButtonSvg from './img/backButtonSvg'
 import {useAtomValue} from 'jotai'
 import headerStateAtom from '../../state/headerStateAtom'
+import {Stack, styled, XStack} from 'tamagui'
+import IconButton from '../../../IconButton'
 
-const RootContainer = styled.View`
-  flex-direction: row;
-  justify-content: space-between;
-  margin: 8px;
-  align-items: center;
-`
+const BackButtonFiller = styled(Stack, {
+  h: 40,
+  w: 40,
+})
 
-const BackButton = styled.TouchableOpacity``
-const BackButtonFiller = styled.View`
-  width: 40px;
-  height: 40px;
-`
-const BackImage = styled(Image)`
-  width: 40px;
-  height: 40px;
-`
-const ProgressContainer = styled.View`
-  flex-direction: row;
-`
-const ProgressBar = styled.View<{highlighted: boolean}>`
-  background-color: ${(p) => (p.highlighted ? '#FFFFFF' : '#4C4C4C')};
-  width: 24px;
-  height: 4px;
-  border-radius: 1px;
-`
-const ProgressBarSpacer = styled.View`
-  width: 4px;
-`
+const ProgressBar = styled(Stack, {
+  w: 24,
+  h: 4,
+  br: '$1',
+  variants: {
+    highlighted: {
+      true: {
+        bg: '$white',
+      },
+      false: {
+        bg: '$greyAccent1',
+      },
+    },
+  },
+})
 
 function Header(): JSX.Element | null {
   const headerOptions = useAtomValue(headerStateAtom)
@@ -39,28 +31,28 @@ function Header(): JSX.Element | null {
   if (headerOptions.hidden) return null
 
   return (
-    <RootContainer>
+    <XStack jc="space-between" ai="center" mx="$2" pb="$4">
       {headerOptions.showBackButton ? (
-        <BackButton
+        <IconButton
+          icon={backButtonSvg}
+          variant="dark"
           onPress={() => {
             headerOptions.goBack()
           }}
-        >
-          <BackImage source={backButtonSvg} />
-        </BackButton>
+        />
       ) : (
         <BackButtonFiller />
       )}
       {headerOptions.progressNumber !== undefined && (
-        <ProgressContainer>
+        <XStack>
           <ProgressBar highlighted={(headerOptions.progressNumber ?? 0) >= 1} />
-          <ProgressBarSpacer />
+          <Stack w={4} />
           <ProgressBar highlighted={(headerOptions.progressNumber ?? 0) >= 2} />
-          <ProgressBarSpacer />
+          <Stack w={4} />
           <ProgressBar highlighted={(headerOptions.progressNumber ?? 0) >= 3} />
-        </ProgressContainer>
+        </XStack>
       )}
-    </RootContainer>
+    </XStack>
   )
 }
 

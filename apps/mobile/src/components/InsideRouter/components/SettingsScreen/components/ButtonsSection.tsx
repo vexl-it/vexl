@@ -1,10 +1,8 @@
-import styled from '@emotion/native'
-import Text from '../../../../Text'
-import Image from '../../../../Image'
+import SvgImage from '../../../../Image'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import {type SvgString} from '@vexl-next/domain/dist/utility/SvgString.brand'
 import profileIconSvg from '../../../images/profileIconSvg'
-import {Alert, Linking, Platform} from 'react-native'
+import {Alert, Linking, Platform, TouchableWithoutFeedback} from 'react-native'
 import imageIconSvg from '../images/imageIconSvg'
 import {Fragment} from 'react'
 import editIconSvg from '../images/editIconSvg'
@@ -22,43 +20,11 @@ import faceIdIconSvg from '../images/faceIdIconSvg'
 import contactIconSvg from '../images/contactIconSvg'
 import {useNavigation} from '@react-navigation/native'
 import {useLogout} from '../../../../../state/session'
+import {Stack, styled, Text, XStack, getTokens} from 'tamagui'
 
-const RootContainer = styled.View`
-  flex: 1;
-  margin: 32px 8px 0 8px;
-`
-
-const ButtonsGroupContainer = styled.View`
-  background-color: #131313;
-  border-radius: 10px;
-`
-
-const ItemTouchable = styled.TouchableWithoutFeedback``
-const ItemInnerContainer = styled.View`
-  flex-direction: row;
-  height: 66px;
-  margin-left: 33px;
-  margin-right: 33px;
-  align-items: center;
-`
-const ItemIcon = styled(Image)`
-  width: 24px;
-  height: 24px;
-  stroke: ${({theme}) => theme.colors.grayOnBlack};
-  margin-right: 18px;
-`
-const ItemText = styled(Text)`
-  font-size: 18px;
-`
-const GroupDivider = styled.View`
-  height: 16px;
-`
-const ItemDivider = styled.View`
-  height: 2px;
-  background-color: ${({theme}) => theme.colors.grey};
-  align-self: stretch;
-  margin-left: 32px;
-`
+const ItemText = styled(Text, {
+  fos: 18,
+})
 
 function Item({
   text,
@@ -69,19 +35,22 @@ function Item({
   icon: SvgString
   onPress: () => void
 }): JSX.Element {
+  const tokens = getTokens()
   return (
-    <ItemTouchable onPress={onPress}>
-      <ItemInnerContainer>
-        <ItemIcon source={icon} />
+    <TouchableWithoutFeedback onPress={onPress}>
+      <XStack ai="center" h={66} mx="$7">
+        <Stack w={24} h={24} mr="$4">
+          <SvgImage stroke={tokens.color.greyOnBlack.val} source={icon} />
+        </Stack>
         {typeof text === 'string' ? (
-          <ItemText fontWeight={500} colorStyle={'white'}>
+          <ItemText ff="$body500" col="$white">
             {text}
           </ItemText>
         ) : (
           text
         )}
-      </ItemInnerContainer>
-    </ItemTouchable>
+      </XStack>
+    </TouchableWithoutFeedback>
   )
 }
 
@@ -170,9 +139,9 @@ function ButtonsSection(): JSX.Element {
     [
       {
         text: (
-          <ItemText fontWeight={500} colorStyle={'grayOnBlack'}>
+          <ItemText ff="$body500" col="$greyOnBlack">
             {t('settings.items.followUsOn')}{' '}
-            <ItemText fontWeight={500} colorStyle={'white'}>
+            <ItemText ff="$body500" col="$white">
               {t('settings.items.twitter')}
             </ItemText>
           </ItemText>
@@ -182,9 +151,9 @@ function ButtonsSection(): JSX.Element {
       },
       {
         text: (
-          <ItemText fontWeight={500} colorStyle={'grayOnBlack'}>
+          <ItemText ff="$body500" col="$greyOnBlack">
             {t('settings.items.readMoreOn')}{' '}
-            <ItemText fontWeight={500} colorStyle={'white'}>
+            <ItemText ff="$body500" col="$white">
               {t('settings.items.medium')}
             </ItemText>
           </ItemText>
@@ -194,9 +163,9 @@ function ButtonsSection(): JSX.Element {
       },
       {
         text: (
-          <ItemText fontWeight={500} colorStyle={'grayOnBlack'}>
+          <ItemText ff="$body500" col="$greyOnBlack">
             {t('settings.items.learnMoreOn')}{' '}
-            <ItemText fontWeight={500} colorStyle={'white'}>
+            <ItemText ff="$body500" col="$white">
               {t('settings.items.website')}
             </ItemText>
           </ItemText>
@@ -208,7 +177,7 @@ function ButtonsSection(): JSX.Element {
     [
       {
         text: (
-          <ItemText fontWeight={500} colorStyle={'red'}>
+          <ItemText ff="$body500" col="$red">
             {t('settings.items.deleteAccount')}
           </ItemText>
         ),
@@ -219,23 +188,23 @@ function ButtonsSection(): JSX.Element {
   ]
 
   return (
-    <>
-      <RootContainer>
-        {data.map((group, groupIndex) => (
-          <Fragment key={groupIndex}>
-            <ButtonsGroupContainer>
-              {group.map((item, itemIndex) => (
-                <Fragment key={itemIndex}>
-                  <Item {...item} />
-                  {itemIndex !== group.length - 1 && <ItemDivider />}
-                </Fragment>
-              ))}
-            </ButtonsGroupContainer>
-            {groupIndex !== data.length - 1 && <GroupDivider />}
-          </Fragment>
-        ))}
-      </RootContainer>
-    </>
+    <Stack f={1} mt="$7" mx="$2">
+      {data.map((group, groupIndex) => (
+        <Fragment key={groupIndex}>
+          <Stack br="$4" bg="$blackAccent1">
+            {group.map((item, itemIndex) => (
+              <Fragment key={itemIndex}>
+                <Item {...item} />
+                {itemIndex !== group.length - 1 && (
+                  <Stack h={2} bg="$grey" als="stretch" ml="$7" />
+                )}
+              </Fragment>
+            ))}
+          </Stack>
+          {groupIndex !== data.length - 1 && <Stack h={16} />}
+        </Fragment>
+      ))}
+    </Stack>
   )
 }
 

@@ -1,10 +1,23 @@
-import {css} from '@emotion/native'
-import {ScrollView, type StyleProp, View, type ViewStyle} from 'react-native'
+import {type StyleProp, type ViewStyle} from 'react-native'
 import {type ReactNode} from 'react'
-import {useTheme} from '@emotion/react'
 import usePixelsFromBottomWhereTabsEnd from '../utils'
+import {ScrollView, Stack, styled} from 'tamagui'
 
 export const CONTAINER_WITH_TOP_BORDER_RADIUS_TOP_PADDING = 24
+
+const StyledStack = styled(Stack, {
+  f: 1,
+  bg: '$black',
+  btlr: '$7',
+  btrr: '$7',
+  variants: {
+    withTopPadding: {
+      true: {
+        pt: '$6',
+      },
+    },
+  },
+})
 
 interface Props {
   style?: StyleProp<ViewStyle>
@@ -19,41 +32,23 @@ function ContainerWithTopBorderRadius({
   scrollView,
   withTopPadding,
 }: Props): JSX.Element {
-  const theme = useTheme()
   const tabBarEndsAt = usePixelsFromBottomWhereTabsEnd()
-
-  const styleToUse = [
-    css`
-      background-color: ${theme.colors.black};
-      border-top-left-radius: 20px;
-      border-top-right-radius: 20px;
-      ${withTopPadding &&
-      `padding-top: ${CONTAINER_WITH_TOP_BORDER_RADIUS_TOP_PADDING}px;`}
-      flex: 1;
-    `,
-    style,
-  ]
 
   if (scrollView) {
     return (
       <ScrollView
-        style={css`
-          background-color: ${theme.colors.black};
-          flex: 1;
-        `}
-        contentContainerStyle={[
-          styleToUse,
-          css`
-            flex: none;
-            padding-bottom: ${String(tabBarEndsAt + 20)}px;
-          `,
-        ]}
+        fullscreen
+        bg="$black"
+        btlr="$7"
+        btrr="$7"
+        pt={withTopPadding ? '$6' : '$0'}
+        contentContainerStyle={{paddingBottom: tabBarEndsAt + 25}}
       >
         {children}
       </ScrollView>
     )
   }
-  return <View style={styleToUse}>{children}</View>
+  return <StyledStack withTopPadding={withTopPadding}>{children}</StyledStack>
 }
 
 export default ContainerWithTopBorderRadius

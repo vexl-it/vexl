@@ -1,25 +1,7 @@
 import {type StyleProp, type ViewStyle} from 'react-native'
-import styled from '@emotion/native'
-import Text, {TitleText} from '../../../../Text'
-import Image from '../../../../Image'
+import SvgImage from '../../../../Image'
 import {type UserNameAndAvatar} from '@vexl-next/domain/dist/general/UserNameAndAvatar.brand'
-
-const RootContainer = styled.View`
-  align-items: center;
-  justify-content: center;
-`
-const TopText = styled(Text)`
-  margin-bottom: 24px;
-`
-const ImageStyled = styled(Image)`
-  width: 128px;
-  height: 128px;
-  border-radius: 32px;
-  margin: 0 0 32px;
-`
-const Name = styled(TitleText)`
-  font-size: 32px;
-`
+import {Image, Stack, Text} from 'tamagui'
 
 interface Props {
   topText?: string
@@ -34,19 +16,31 @@ function UserDataDisplay({
   style,
 }: Props): JSX.Element {
   return (
-    <RootContainer style={style}>
+    <Stack ai="center" jc="center" style={style}>
       {topText && (
-        <TopText fontWeight={600} colorStyle={'white'}>
-          {topText}
-        </TopText>
+        <Stack mb="$6">
+          <Text fos={18} ff="$body600" color="$white">
+            {topText}
+          </Text>
+        </Stack>
       )}
       {userNameAndAvatar.image.type === 'svgXml' ? (
-        <ImageStyled source={userNameAndAvatar.image.svgXml} />
+        <Stack w={128} h={128} mb="$7">
+          <SvgImage source={userNameAndAvatar.image.svgXml} />
+        </Stack>
       ) : (
-        <ImageStyled source={{uri: userNameAndAvatar.image.imageUri}} />
+        <Image
+          width={128}
+          height={128}
+          br="$10"
+          mb="$7"
+          src={{uri: userNameAndAvatar.image.imageUri}}
+        />
       )}
-      <Name colorStyle={'white'}>{userNameAndAvatar.userName}</Name>
-    </RootContainer>
+      <Text ff="$heading" fos={32} col="$white">
+        {userNameAndAvatar.userName}
+      </Text>
+    </Stack>
   )
 }
 

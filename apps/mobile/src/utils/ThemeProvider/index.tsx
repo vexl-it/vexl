@@ -1,11 +1,10 @@
 import React from 'react'
-import {ThemeProvider as EmotionThemeProvider} from '@emotion/react'
-import defaultTheme from './defaultTheme'
+import {TamaguiProvider} from 'tamagui'
+
+import config from './tamagui.config'
 
 function ThemeProvider({children}: {children: React.ReactNode}): JSX.Element {
-  return (
-    <EmotionThemeProvider theme={defaultTheme}>{children}</EmotionThemeProvider>
-  )
+  return <TamaguiProvider config={config}>{children}</TamaguiProvider>
 }
 
 export default ThemeProvider

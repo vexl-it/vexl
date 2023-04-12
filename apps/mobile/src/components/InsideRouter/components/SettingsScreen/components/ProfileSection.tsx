@@ -1,64 +1,35 @@
-import styled from '@emotion/native'
-import Text from '../../../../Text'
 import {useSessionAssumeLoggedIn} from '../../../../../state/session'
 import UserDataDisplay from '../../../../LoginFlow/components/AnonymizationAnimationScreen/components/UserDataDisplay'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
-import Image from '../../../../Image'
+import SvgImage from '../../../../Image'
 import QRIconSVG from '../images/QRIconSVG'
 import {Alert, TouchableWithoutFeedback} from 'react-native'
 import reachIconSVG from '../images/reachIconSVG'
+import {Stack, styled, Text, XStack} from 'tamagui'
 
-const RootContainer = styled.View`
-  align-items: center;
-  margin-left: 16px;
-  margin-right: 16px;
-`
-
-const TopRow = styled.View`
-  flex-direction: row;
-  justify-content: space-between;
-  align-self: stretch;
-  margin-bottom: 32px;
-`
-
-const GrayBackContainer = styled.View`
-  flex-direction: row;
-  height: 40px;
-  border-radius: 10px;
-  background-color: ${({theme}) => theme.colors.grey};
-  padding-left: 8px;
-  padding-right: 8px;
-  display: flex;
-  align-items: center;
-`
-
-const SvgIcon = styled(Image)`
-  width: 24px;
-  height: 24px;
-`
-
-const ReachText = styled(Text)`
-  margin-left: 8px;
-  font-size: 16px;
-`
-
-const PhoneNumber = styled(Text)`
-  margin-top: 8px;
-  text-align: center;
-`
+const GrayBackContainer = styled(XStack, {
+  ai: 'center',
+  h: 40,
+  br: '$4',
+  bg: '$grey',
+  pl: '$2',
+  pr: '$2',
+})
 
 function ProfileSection(): JSX.Element {
   const {t} = useTranslation()
   const session = useSessionAssumeLoggedIn()
 
   return (
-    <RootContainer>
-      <TopRow>
+    <Stack ai="center" ml="$4" mr="$4">
+      <XStack jc="space-between" als="stretch" mb="$7">
         <GrayBackContainer>
-          <SvgIcon source={reachIconSVG} />
-          <ReachText colorStyle="grayOnBlack">
+          <Stack w={24} h={24}>
+            <SvgImage source={reachIconSVG} />
+          </Stack>
+          <Text fos={16} ml="$2" col="$greyOnBlack">
             {t('settings.yourReach', {number: 1000})}
-          </ReachText>
+          </Text>
         </GrayBackContainer>
         <TouchableWithoutFeedback
           onPress={() => {
@@ -66,13 +37,17 @@ function ProfileSection(): JSX.Element {
           }}
         >
           <GrayBackContainer>
-            <SvgIcon source={QRIconSVG} />
+            <Stack w={24} h={24}>
+              <SvgImage source={QRIconSVG} />
+            </Stack>
           </GrayBackContainer>
         </TouchableWithoutFeedback>
-      </TopRow>
+      </XStack>
       <UserDataDisplay userNameAndAvatar={session.realUserData} />
-      <PhoneNumber colorStyle="grayOnBlack">{session.phoneNumber}</PhoneNumber>
-    </RootContainer>
+      <Text ta="center" mt="$2" col="$greyOnBlack">
+        {session.phoneNumber}
+      </Text>
+    </Stack>
   )
 }
 

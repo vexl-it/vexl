@@ -1,23 +1,18 @@
 import PhoneInput from 'react-native-phone-number-input'
-import {type StyleProp, View, type ViewStyle} from 'react-native'
-import {css} from '@emotion/native'
-import {useTheme} from '@emotion/react'
-import {useCallback, useRef} from 'react'
+import {useCallback, useMemo, useRef} from 'react'
 import type * as O from 'fp-ts/Option'
 import {
   toE164PhoneNumber,
   type E164PhoneNumber,
 } from '@vexl-next/domain/dist/general/E164PhoneNumber.brand'
+import {XStack} from 'tamagui'
+import {type StyleProp, type ViewStyle} from 'react-native'
 
 interface Props {
   onChange: (e164: O.Option<E164PhoneNumber>) => void
-  style?: StyleProp<ViewStyle>
 }
 
-export default function PhoneNumberInput({
-  onChange,
-  style,
-}: Props): JSX.Element {
+export default function PhoneNumberInput({onChange}: Props): JSX.Element {
   const ref = useRef<PhoneInput>(null)
 
   const handleChangeFormatted = useCallback(
@@ -27,21 +22,65 @@ export default function PhoneNumberInput({
     [onChange]
   )
 
-  const theme = useTheme()
+  const containerStyle: StyleProp<ViewStyle> = useMemo(
+    () => ({
+      margin: 0,
+      padding: 0,
+      backgroundColor: 'transparent',
+    }),
+    []
+  )
+  const codeTextStyle: StyleProp<ViewStyle> = useMemo(
+    () => ({
+      margin: 0,
+      fontSize: 18,
+      fontFamily: 'TTSatoshi500',
+      alignItems: 'center',
+      paddingHorizontal: 8,
+    }),
+    []
+  )
+  const textContainerStyle: StyleProp<ViewStyle> = useMemo(
+    () => ({
+      backgroundColor: 'transparent',
+      padding: 0,
+      margin: 0,
+    }),
+    []
+  )
+  const textInputStyle: StyleProp<ViewStyle> = useMemo(
+    () => ({
+      margin: 0,
+      fontSize: 18,
+      fontFamily: 'TTSatoshi500',
+      alignItems: 'center',
+      padding: 0,
+    }),
+    []
+  )
+  const countryPickerButtonStyle: StyleProp<ViewStyle> = useMemo(
+    () => ({
+      backgroundColor: '#e3e3e3',
+      borderRadius: 10,
+      margin: 0,
+      padding: 0,
+      alignItems: 'center',
+      justifyContent: 'center',
+      width: 60,
+    }),
+    []
+  )
+  const flagButtonStyle: StyleProp<ViewStyle> = useMemo(
+    () => ({
+      margin: 0,
+      padding: 0,
+      transform: [{scale: 0.8}],
+    }),
+    []
+  )
+
   return (
-    <View
-      style={[
-        css`
-          margin: 0;
-          background-color: #f2f2f2;
-          flex-direction: row;
-          padding: 12px;
-          border-radius: 10px;
-          margin: 0 -16px;
-        `,
-        style,
-      ]}
-    >
+    <XStack bg="$greyAccent5" px="$3" br="$4" mx="$-4">
       <PhoneInput
         ref={ref}
         placeholder={' '}
@@ -51,46 +90,13 @@ export default function PhoneNumberInput({
           preferredCountries: ['CZ', 'SK'],
           translation: 'common',
         }}
-        containerStyle={css`
-          margin: 0;
-          padding: 0;
-          background-color: transparent;
-        `}
-        codeTextStyle={css`
-          margin: 0;
-          font-size: 18px;
-          font-family: '${theme.fonts.ttSatoshi500}';
-          align-items: center;
-          padding: 0 8px 0 8px;
-        `}
-        textContainerStyle={css`
-          background-color: transparent;
-          padding: 0;
-          margin: 0;
-        `}
-        textInputStyle={css`
-          margin: 0;
-          font-size: 18px;
-          font-family: '${theme.fonts.ttSatoshi500}';
-          align-items: center;
-          padding: 0;
-        `}
-        countryPickerButtonStyle={css`
-          background-color: #e3e3e3;
-          border-radius: 10px;
-          margin: 0;
-          padding: 0;
-          //background-color: transparent;
-          align-items: center;
-          justify-content: center;
-          width: 60px;
-        `}
-        flagButtonStyle={css`
-          margin: 0;
-          padding: 0;
-          transform: scale(0.8);
-        `}
+        containerStyle={containerStyle}
+        codeTextStyle={codeTextStyle}
+        textContainerStyle={textContainerStyle}
+        textInputStyle={textInputStyle}
+        countryPickerButtonStyle={countryPickerButtonStyle}
+        flagButtonStyle={flagButtonStyle}
       />
-    </View>
+    </XStack>
   )
 }

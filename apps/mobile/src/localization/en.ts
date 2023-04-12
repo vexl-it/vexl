@@ -54,7 +54,7 @@ export default {
     },
     'anonymization': {
       'beforeTitle': 'This is your identity',
-      'afterTitle': 'Identity anonymized',
+      'afterTitle': 'Identity anonymized!',
       'action': 'Anonymize',
       'afterDescription':
         'This is how other users will see you until you reveal your real identity.',

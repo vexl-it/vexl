@@ -1,8 +1,8 @@
-import Text from '../../../../Text'
+import {Text} from 'tamagui'
 
 function EmptyListPlaceholder(): JSX.Element {
   return (
-    <Text fontSize="default" colorStyle="white">
+    <Text fontSize={14} col="$white">
       No offers TODO
     </Text>
   )

@@ -1,5 +1,4 @@
 import {type ReactNode, useCallback} from 'react'
-import styled from '@emotion/native'
 import KeyboardAvoidingView from '../KeyboardAvoidingView'
 import {StatusBar as RNStatusBar, View} from 'react-native'
 import Header from './components/Header'
@@ -10,16 +9,8 @@ import {
 } from './state/nextButtonStateAtom'
 import {type HeaderState, useSetHeaderState} from './state/headerStateAtom'
 import {useNavigation} from '@react-navigation/native'
-
-const RootContainer = styled.SafeAreaView`
-  background-color: ${(p) => p.theme.colors.backgroundBlack};
-  flex: 1;
-`
-
-const InnerContainer = styled.View`
-  flex: 1;
-  padding: 0 8px 8px;
-`
+import {Stack} from 'tamagui'
+import Screen from '../Screen'
 
 function PageWithButtonAndProgressHeader({
   children,
@@ -28,14 +19,14 @@ function PageWithButtonAndProgressHeader({
 }): JSX.Element {
   return (
     <KeyboardAvoidingView>
-      <RootContainer>
+      <Screen>
         <View style={{height: RNStatusBar.currentHeight ?? 0}} />
-        <InnerContainer>
+        <Stack f={1} px="$2" pb="$2">
           <Header />
           {children}
           <NextButton />
-        </InnerContainer>
-      </RootContainer>
+        </Stack>
+      </Screen>
     </KeyboardAvoidingView>
   )
 }

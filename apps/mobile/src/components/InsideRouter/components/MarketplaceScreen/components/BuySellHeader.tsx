@@ -1,30 +1,25 @@
-import styled from '@emotion/native'
-import {TitleText} from '../../../../Text'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
-
-const RootContainer = styled.View``
-const TitleContainer = styled.TouchableWithoutFeedback``
-const Title = styled(TitleText)<{active: boolean}>`
-  color: ${({active, theme}) =>
-    active ? theme.colors.grayOnWhite : theme.colors.main};
-  font-size: 40px; // TODO resize on screen size
-`
-const BottomLine = styled.View``
+import {Stack, Text} from 'tamagui'
+import {TouchableWithoutFeedback} from 'react-native'
 
 function BuySellHeader(): JSX.Element {
   const {t} = useTranslation()
 
   return (
-    <RootContainer>
-      <TitleContainer>
-        <Title active={false}>{t('offer.sell')}</Title>
-        <BottomLine />
-      </TitleContainer>
-      <TitleContainer>
-        <Title active={true}>{t('offer.buy')}</Title>
-        <BottomLine />
-      </TitleContainer>
-    </RootContainer>
+    <Stack>
+      <TouchableWithoutFeedback>
+        <Text fos={40} ff="$heading" col="$main">
+          {t('offer.sell')}
+        </Text>
+        <Stack />
+      </TouchableWithoutFeedback>
+      <TouchableWithoutFeedback>
+        <Text fos={40} ff="$heading" col="$greyOnWhite">
+          {t('offer.buy')}
+        </Text>
+        <Stack />
+      </TouchableWithoutFeedback>
+    </Stack>
   )
 }
 

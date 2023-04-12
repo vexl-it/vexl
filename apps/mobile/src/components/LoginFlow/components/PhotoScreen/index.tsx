@@ -1,19 +1,17 @@
-import {TitleText} from '../../../Text'
 import WhiteContainer from '../../../WhiteContainer'
-import styled from '@emotion/native'
 import AnonymizationCaption from '../../../AnonymizationCaption/AnonymizationCaption'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import * as TE from 'fp-ts/TaskEither'
 import * as O from 'fp-ts/Option'
 import {useCallback, useState} from 'react'
-import {Alert, View} from 'react-native'
+import {Alert, TouchableWithoutFeedback, View} from 'react-native'
 import {
   getImageFromCameraAndTryToResolveThePermissionsAlongTheWay,
   getImageFromGalleryAndTryToResolveThePermissionsAlongTheWay,
   type ImagePickerError,
 } from './utils'
 import {pipe} from 'fp-ts/function'
-import Image from '../../../Image'
+import SvgImage from '../../../Image'
 import MiniCameraSvg from './images/miniCameraSvg'
 import selectIconSvg from './images/selectIconSvg'
 import {UserNameAndAvatar} from '@vexl-next/domain/dist/general/UserNameAndAvatar.brand'
@@ -30,39 +28,7 @@ import {
   NextButtonProxy,
 } from '../../../PageWithButtonAndProgressHeader'
 import {type UriString} from '@vexl-next/domain/dist/utility/UriString.brand'
-
-const WhiteContainerStyled = styled(WhiteContainer)``
-const AnonymizationCaptionStyled = styled(AnonymizationCaption)`
-  margin-top: 16px;
-`
-const Title = styled(TitleText)``
-
-const ImageAreaContainer = styled.View`
-  flex: 1;
-  align-items: center;
-  justify-content: center;
-`
-const ImagePressable = styled.TouchableWithoutFeedback``
-const NotPickedImage = styled(Image)`
-  width: 128px;
-  height: 128px;
-`
-const PickedImageContainer = styled.View`
-  position: relative;
-`
-const MiniCameraStyled = styled(Image)`
-  position: absolute;
-  top: -16px;
-  right: -16px;
-  width: 32px;
-  height: 32px;
-  z-index: 2;
-`
-const PickedImage = styled(Image)`
-  width: 128px;
-  height: 128px;
-  border-radius: 30px;
-`
+import {Image, Stack, Text} from 'tamagui'
 
 type Props = LoginStackScreenProps<'Photo'>
 
@@ -140,24 +106,46 @@ function PhotoScreen({
   return (
     <>
       <HeaderProxy showBackButton progressNumber={1} />
-      <WhiteContainerStyled>
-        <Title>{t('loginFlow.photo.title', {name: userName})}</Title>
-        <AnonymizationCaptionStyled />
-        <ImageAreaContainer>
-          <ImagePressable onPress={selectImage}>
+      <WhiteContainer>
+        <Stack maw="70%">
+          <Text ff="$heading" fos={24}>
+            {t('loginFlow.photo.title', {name: userName})}
+          </Text>
+        </Stack>
+        <Stack mt="$4">
+          <AnonymizationCaption />
+        </Stack>
+        <Stack f={1} ai="center" jc="center">
+          <TouchableWithoutFeedback onPress={selectImage}>
             {selectedImageUri._tag === 'Some' ? (
               <View>
-                <PickedImageContainer>
-                  <PickedImage source={{uri: selectedImageUri.value}} />
-                  <MiniCameraStyled source={MiniCameraSvg} />
-                </PickedImageContainer>
+                <Stack>
+                  <Image
+                    height={128}
+                    width={128}
+                    br="$10"
+                    src={{uri: selectedImageUri.value}}
+                  />
+                  <Stack
+                    pos="absolute"
+                    t="$-4"
+                    r="$-4"
+                    width={32}
+                    h={32}
+                    zi="$1"
+                  >
+                    <SvgImage source={MiniCameraSvg} />
+                  </Stack>
+                </Stack>
               </View>
             ) : (
-              <NotPickedImage source={selectIconSvg} />
+              <Stack w={128} h={128}>
+                <SvgImage source={selectIconSvg} />
+              </Stack>
             )}
-          </ImagePressable>
-        </ImageAreaContainer>
-      </WhiteContainerStyled>
+          </TouchableWithoutFeedback>
+        </Stack>
+      </WhiteContainer>
       <NextButtonProxy
         disabled={selectedImageUri._tag === 'None'}
         onPress={() => {

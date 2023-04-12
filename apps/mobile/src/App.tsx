@@ -5,11 +5,11 @@ import {useEffect} from 'react'
 import useLoadFonts from './utils/useLoadFonts'
 import I18nProvider from './utils/localization/I18nProvider'
 import ThemeProvider from './utils/ThemeProvider'
-import {useTheme} from '@emotion/react'
 import RootNavigation from './components/RootNavigation'
 import LoadingOverlayProvider from './components/LoadingOverlayProvider'
 import {useIsSessionLoaded} from './state/session'
 import {SafeAreaProvider} from 'react-native-safe-area-context'
+import {useTheme} from 'tamagui'
 
 void SplashScreen.preventAutoHideAsync()
 
@@ -33,13 +33,12 @@ function App(): JSX.Element {
         <StatusBar style="light" />
         <NavigationContainer
           theme={{
-            ...DefaultTheme,
             dark: true,
             colors: {
               ...DefaultTheme.colors,
-              primary: theme.colors.main,
+              primary: theme.background?.val,
               background: 'transparent',
-              text: theme.colors.lightColorText,
+              text: theme.color?.val,
             },
           }}
         >

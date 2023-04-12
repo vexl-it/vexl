@@ -1,27 +1,10 @@
-import styled from '@emotion/native'
 import magnifyingGlass from '../image/magnifyingGlass'
 import Button from '../../Button'
 import TextInput from '../../Input'
 import {useSearchText} from '../state/searchBar'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {useSelectAll} from '../state/selectedContacts'
-
-const RootContainer = styled.View`
-  flex-direction: row;
-  margin-top: 16px;
-`
-const SelectAllButton = styled(Button)`
-  height: auto;
-`
-
-const InputContainer = styled.View`
-  flex: 1;
-`
-
-const InputStyled = styled(TextInput)`
-  margin-left: 0;
-  margin-right: 16px;
-`
+import {Stack, XStack} from 'tamagui'
 
 function SearchBar(): JSX.Element {
   const [searchText, setSearchText] = useSearchText()
@@ -29,30 +12,33 @@ function SearchBar(): JSX.Element {
   const [allSelected, toggleSelectAll] = useSelectAll()
 
   return (
-    <RootContainer>
-      <InputContainer>
-        <InputStyled
+    <XStack mt="$4">
+      <Stack f={3} pl="$4" pr="$6">
+        <TextInput
           placeholder={t('postLoginFlow.contactsList.inputPlaceholder')}
           value={searchText}
           onChangeText={setSearchText}
           icon={magnifyingGlass}
-          size="small"
+          small
         />
-      </InputContainer>
-      <SelectAllButton
-        onPress={() => {
-          toggleSelectAll(!allSelected)
-        }}
-        disabled={false}
-        variant="black"
-        size="small"
-        text={t(
-          allSelected
-            ? 'postLoginFlow.contactsList.deselectAll'
-            : 'postLoginFlow.contactsList.selectAll'
-        )}
-      />
-    </RootContainer>
+      </Stack>
+      <Stack f={2}>
+        <Button
+          onPress={() => {
+            toggleSelectAll(!allSelected)
+          }}
+          disabled={false}
+          variant="black"
+          small
+          fullSize
+          text={t(
+            allSelected
+              ? 'postLoginFlow.contactsList.deselectAll'
+              : 'postLoginFlow.contactsList.selectAll'
+          )}
+        />
+      </Stack>
+    </XStack>
   )
 }
 

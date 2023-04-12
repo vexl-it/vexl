@@ -1,5 +1,3 @@
-import Text, {TitleText} from '../../../Text'
-import styled from '@emotion/native'
 import AnonymizationCaption from '../../../AnonymizationCaption/AnonymizationCaption'
 import WhiteContainer from '../../../WhiteContainer'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
@@ -16,18 +14,7 @@ import {
   HeaderProxy,
   NextButtonProxy,
 } from '../../../PageWithButtonAndProgressHeader'
-
-const WhiteContainerStyled = styled(WhiteContainer)``
-const TitleStyled = styled(TitleText)``
-const TextStyled = styled(Text)`
-  margin-top: 12px;
-  font-size: 14px;
-`
-const InputStyled = styled(PhoneNumberInput)`
-  margin-top: 18px;
-  margin-bottom: 16px;
-`
-const AnonymizationCaptionStyled = styled(AnonymizationCaption)``
+import {Stack, Text} from 'tamagui'
 
 type Props = LoginStackScreenProps<'PhoneNumber'>
 
@@ -47,14 +34,20 @@ function PhoneNumberScreen({
   return (
     <>
       <HeaderProxy showBackButton={true} progressNumber={2} />
-      <WhiteContainerStyled>
-        <TitleStyled>{t('loginFlow.phoneNumber.title')}</TitleStyled>
-        <TextStyled colorStyle={'gray'}>
-          {t('loginFlow.phoneNumber.text')}
-        </TextStyled>
-        <InputStyled onChange={setPhoneNumber} />
-        <AnonymizationCaptionStyled fontSize={14} />
-      </WhiteContainerStyled>
+      <WhiteContainer>
+        <Text fos={24} ff="$heading">
+          {t('loginFlow.phoneNumber.title')}
+        </Text>
+        <Stack mt="$3">
+          <Text fos={14} col="$greyOnWhite">
+            {t('loginFlow.phoneNumber.text')}
+          </Text>
+        </Stack>
+        <Stack my="$4">
+          <PhoneNumberInput onChange={setPhoneNumber} />
+        </Stack>
+        <AnonymizationCaption />
+      </WhiteContainer>
       <NextButtonProxy
         disabled={phoneNumber._tag === 'None'}
         onPress={() => {

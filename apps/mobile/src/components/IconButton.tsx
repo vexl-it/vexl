@@ -1,52 +1,69 @@
 import {type SvgString} from '@vexl-next/domain/dist/utility/SvgString.brand'
 import Image from './Image'
 import {type StyleProp, TouchableOpacity, type ViewStyle} from 'react-native'
-import {useCallback} from 'react'
-import styled from '@emotion/native'
-import {useTheme} from '@emotion/react'
-import {type Color} from '../utils/ThemeProvider/defaultTheme'
-
-type IconButtonType = 'dark' | 'light'
+import {useCallback, useMemo} from 'react'
+import {getTokens, Stack, styled} from 'tamagui'
 
 interface Props {
-  buttonType?: IconButtonType
   disabled?: boolean
   icon: SvgString
-  iconColor?: Color
   onPress: () => void
   style?: StyleProp<ViewStyle>
+  variant?: 'dark' | 'light'
 }
 
-const PressableStyled = styled(TouchableOpacity)<Pick<Props, 'buttonType'>>`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: ${(p) =>
-    p.buttonType === 'dark' ? p.theme.colors.grey : '#E9E9E9'};
-  border-radius: 13px;
-  padding: ${(p) => String(p.theme.spacings.xs)}px;
-`
+const PressableStyled = styled(Stack, {
+  dsp: 'flex',
+  ai: 'center',
+  jc: 'center',
+  br: '$5',
+  p: '$3',
+  variants: {
+    variant: {
+      dark: {
+        bg: '$grey',
+      },
+      light: {
+        bg: '$greyAccent4',
+      },
+    },
+  },
+})
+
+const touchableStyles: ViewStyle = {
+  height: 40,
+  width: 40,
+}
+
 function IconButton({
-  buttonType = 'dark',
+  variant = 'dark',
   disabled,
   icon,
-  iconColor = 'white',
   onPress,
   style,
 }: Props): JSX.Element {
-  const theme = useTheme()
   const onPressInner = useCallback(() => {
     if (!disabled) onPress()
   }, [disabled, onPress])
+  const tokens = getTokens()
+
   return (
-    <PressableStyled
-      buttonType={buttonType}
+    // has to be wrapped in TouchableOpacity as tamagui does not support onPress action on
+    // wrapped TouchableOpacity in styled as of v 1.11.1
+    <TouchableOpacity
+      disabled={disabled}
       onPress={onPressInner}
-      style={style}
-      disabled={!!disabled}
+      style={touchableStyles}
     >
-      <Image stroke={theme.colors[iconColor]} source={icon} />
-    </PressableStyled>
+      <PressableStyled variant={variant} style={style} disabled={disabled}>
+        <Image
+          stroke={
+            variant === 'dark' ? tokens.color.white.val : tokens.color.grey.val
+          }
+          source={icon}
+        />
+      </PressableStyled>
+    </TouchableOpacity>
   )
 }
 

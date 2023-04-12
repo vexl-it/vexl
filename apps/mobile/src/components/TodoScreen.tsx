@@ -1,16 +1,11 @@
-import styled from '@emotion/native'
-import Text from './Text'
 import Button from './Button'
 import {useNavigation} from '@react-navigation/native'
-
-const RootContainer = styled.SafeAreaView`
-  flex: 1;
-`
+import {Stack, Text} from 'tamagui'
 
 function TodoScreen(): JSX.Element {
   const navigation = useNavigation()
   return (
-    <RootContainer>
+    <Stack f={1}>
       <Text>To be done</Text>
       <Button
         variant="secondary"
@@ -19,7 +14,7 @@ function TodoScreen(): JSX.Element {
           navigation.goBack()
         }}
       ></Button>
-    </RootContainer>
+    </Stack>
   )
 }
 

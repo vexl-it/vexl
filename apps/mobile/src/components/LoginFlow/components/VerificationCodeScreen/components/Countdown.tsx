@@ -1,6 +1,7 @@
 import type Luxon from 'luxon'
 import {useEffect, useState} from 'react'
-import Text, {type Props as TextProps} from '../../../../Text'
+import {Text, type TextProps} from 'tamagui'
+
 interface Props extends TextProps {
   countUntil: Luxon.DateTime
   onFinished: () => void
@@ -26,7 +27,11 @@ function Countdown({countUntil, onFinished, ...props}: Props): JSX.Element {
     }
   }, [setSecLeft, countUntil, onFinished])
 
-  return <Text {...props}>{secLeft}</Text>
+  return (
+    <Text ff="$body500" {...props}>
+      {secLeft}
+    </Text>
+  )
 }
 
 export default Countdown

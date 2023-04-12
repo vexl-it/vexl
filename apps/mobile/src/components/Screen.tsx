@@ -1,55 +1,31 @@
-import styled from '@emotion/native'
-import {
-  type EdgeInsets,
-  useSafeAreaInsets,
-} from 'react-native-safe-area-context'
-import {type Color} from '../utils/ThemeProvider/defaultTheme'
+import {useSafeAreaInsets} from 'react-native-safe-area-context'
+import {Stack} from 'tamagui'
 
 interface Props {
-  backgroundColor?: Color
+  backgroundColor?: string
   children: JSX.Element | JSX.Element[]
   customHorizontalPadding?: number
   customVerticalPadding?: number
 }
 
-interface ContainerProps
-  extends Required<
-    Pick<
-      Props,
-      'backgroundColor' | 'customHorizontalPadding' | 'customVerticalPadding'
-    >
-  > {
-  insets: EdgeInsets
-}
-
-const Container = styled.View<ContainerProps>`
-  flex: 1;
-  padding-top: ${(p) =>
-    String(Math.max(p.insets.top, p.customVerticalPadding))}px;
-  padding-bottom: ${(p) =>
-    String(Math.max(p.insets.bottom, p.customVerticalPadding))}px;
-  padding-right: ${(p) =>
-    String(Math.max(p.insets.right, p.customHorizontalPadding))}px;
-  padding-left: ${(p) =>
-    String(Math.max(p.insets.left, p.customHorizontalPadding))}px;
-  background-color: ${(p) => p.theme.colors[p.backgroundColor]};
-`
 function Screen({
-  backgroundColor = 'black',
+  backgroundColor = '$black',
   children,
   customHorizontalPadding = 0,
   customVerticalPadding = 0,
 }: Props): JSX.Element {
   const insets = useSafeAreaInsets()
   return (
-    <Container
-      backgroundColor={backgroundColor}
-      customHorizontalPadding={customHorizontalPadding}
-      customVerticalPadding={customVerticalPadding}
-      insets={insets}
+    <Stack
+      f={1}
+      bg={backgroundColor}
+      pr={Math.max(insets.right, customHorizontalPadding)}
+      pl={Math.max(insets.left, customHorizontalPadding)}
+      pt={Math.max(insets.top, customVerticalPadding)}
+      pb={Math.max(insets.bottom, customVerticalPadding)}
     >
       {children}
-    </Container>
+    </Stack>
   )
 }
 

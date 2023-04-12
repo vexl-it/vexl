@@ -1,51 +1,14 @@
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {type BottomTabBarProps} from '@react-navigation/bottom-tabs'
-import styled from '@emotion/native'
 import Image from '../../Image'
 import marketplaceIconSvg from '../images/marketplaceIconSvg'
 import messagesIconSvg from '../images/messagesIconSvg'
 import profileIconSvg from '../images/profileIconSvg'
 import {type SvgString} from '@vexl-next/domain/dist/utility/SvgString.brand'
+import {getTokens, Stack, XStack} from 'tamagui'
+import {TouchableWithoutFeedback} from 'react-native'
 
 export const TAB_BAR_HEIGHT_PX = 72
-
-const ContainerContainer = styled.View`
-  position: absolute;
-  left: 18px;
-  right: 18px;
-  height: ${TAB_BAR_HEIGHT_PX.toString()}px;
-  align-items: center;
-  justify-content: center;
-`
-
-const BlackBackgroundContainer = styled.View`
-  background-color: ${(p) => p.theme.colors.black};
-  border-radius: 20px;
-  flex-direction: row;
-  align-items: center;
-  padding: 10px;
-  max-width: 338px;
-  flex: 1;
-`
-
-const IconTouchable = styled.TouchableWithoutFeedback`
-  flex: 1;
-`
-
-const IconContainer = styled.View<{active: boolean}>`
-  background-color: ${(p) => (p.active ? '#322916' : 'transparent')};
-  height: 52px;
-  flex: 1;
-  border-radius: 16px;
-  align-items: center;
-  justify-content: center;
-`
-const IconImage = styled(Image)<{active: boolean}>`
-  width: 24px;
-  height: 24px;
-  stroke: ${(p) =>
-    p.active ? p.theme.colors.main : p.theme.colors.grayOnWhite};
-`
 
 function getIconForRouteName(routeName: string): SvgString {
   switch (routeName) {
@@ -66,6 +29,7 @@ function TabBar({
   navigation,
 }: BottomTabBarProps): JSX.Element {
   const insets = useSafeAreaInsets()
+  const tokens = getTokens()
 
   function onPress({key, name}: {key: string; name: string}): void {
     const event = navigation.emit({
@@ -80,32 +44,52 @@ function TabBar({
   }
 
   return (
-    <ContainerContainer
-      style={{
-        bottom: insets.bottom,
-      }}
+    <Stack
+      pos="absolute"
+      ai="center"
+      jc="center"
+      l="$4"
+      r="$4"
+      b={insets.bottom}
+      h={TAB_BAR_HEIGHT_PX}
     >
-      <BlackBackgroundContainer>
+      <XStack f={1} ai="center" br="$7" p="$3" maw={338} bg="$black">
         {state.routes.map((route, index) => {
           const iconSource = getIconForRouteName(route.name)
 
           const isFocused = state.index === index
 
           return (
-            <IconTouchable
+            <TouchableWithoutFeedback
               onPress={() => {
                 onPress(route)
               }}
               key={route.name}
             >
-              <IconContainer active={isFocused}>
-                <IconImage active={isFocused} source={iconSource} />
-              </IconContainer>
-            </IconTouchable>
+              <Stack
+                f={1}
+                h={52}
+                ai="center"
+                jc="center"
+                br="$6"
+                bg={isFocused ? '$darkBrown' : 'transparent'}
+              >
+                <Stack w={24} h={24}>
+                  <Image
+                    stroke={
+                      isFocused
+                        ? tokens.color.main.val
+                        : tokens.color.greyOnWhite.val
+                    }
+                    source={iconSource}
+                  />
+                </Stack>
+              </Stack>
+            </TouchableWithoutFeedback>
           )
         })}
-      </BlackBackgroundContainer>
-    </ContainerContainer>
+      </XStack>
+    </Stack>
   )
 }
 

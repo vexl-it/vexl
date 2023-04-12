@@ -30,6 +30,11 @@ const PressableStyled = styled(Stack, {
   },
 })
 
+const touchableStyles: ViewStyle = {
+  height: 40,
+  width: 40,
+}
+
 function IconButton({
   variant = 'dark',
   disabled,
@@ -41,13 +46,7 @@ function IconButton({
     if (!disabled) onPress()
   }, [disabled, onPress])
   const tokens = getTokens()
-  const touchableStyles: ViewStyle = useMemo(
-    () => ({
-      height: 40,
-      width: 40,
-    }),
-    []
-  )
+
   return (
     // has to be wrapped in TouchableOpacity as tamagui does not support onPress action on
     // wrapped TouchableOpacity in styled as of v 1.11.1
@@ -56,12 +55,7 @@ function IconButton({
       onPress={onPressInner}
       style={touchableStyles}
     >
-      <PressableStyled
-        variant={variant}
-        onPress={onPressInner}
-        style={style}
-        disabled={disabled}
-      >
+      <PressableStyled variant={variant} style={style} disabled={disabled}>
         <Image
           stroke={
             variant === 'dark' ? tokens.color.white.val : tokens.color.grey.val

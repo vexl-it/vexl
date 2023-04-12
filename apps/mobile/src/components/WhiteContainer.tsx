@@ -1,15 +1,6 @@
-import {type ViewStyle, type StyleProp} from 'react-native'
-import {type ReactNode} from 'react'
 import {Stack, styled} from 'tamagui'
 
-interface Props {
-  centered?: boolean
-  noPadding?: boolean
-  style?: StyleProp<ViewStyle>
-  children: ReactNode
-}
-
-const WhiteContainerStyled = styled(Stack, {
+const WhiteContainer = styled(Stack, {
   f: 1,
   br: '$5',
   bg: '$white',
@@ -24,16 +15,5 @@ const WhiteContainerStyled = styled(Stack, {
     },
   } as const,
 })
-function WhiteContainer({
-  noPadding = false,
-  style,
-  children,
-}: Props): JSX.Element {
-  return (
-    <WhiteContainerStyled noPadding={noPadding} style={style}>
-      {children}
-    </WhiteContainerStyled>
-  )
-}
 
 export default WhiteContainer

@@ -85,3 +85,10 @@ export function importKeyPair(
     toError('CryptoError', 'Error while importing key pair')
   )
 }
+
+export function generateKeyPair(): E.Either<CryptoError, PrivateKeyHolder> {
+  return E.tryCatch(
+    () => crypto.KeyHolder.generatePrivateKey(),
+    toError('CryptoError', 'Error while generating new key pair')
+  )
+}

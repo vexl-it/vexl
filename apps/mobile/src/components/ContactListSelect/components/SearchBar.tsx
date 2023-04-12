@@ -1,4 +1,4 @@
-import magnifyingGlass from '../image/magnifyingGlass'
+import magnifyingGlass from '../../images/magnifyingGlass'
 import Button from '../../Button'
 import TextInput from '../../Input'
 import {useSearchText} from '../state/searchBar'
@@ -13,7 +13,7 @@ function SearchBar(): JSX.Element {
 
   return (
     <XStack mt="$4">
-      <Stack f={3} pl="$4" pr="$6">
+      <Stack f={5} pr="$2">
         <TextInput
           placeholder={t('postLoginFlow.contactsList.inputPlaceholder')}
           value={searchText}
@@ -22,7 +22,7 @@ function SearchBar(): JSX.Element {
           small
         />
       </Stack>
-      <Stack f={2}>
+      <Stack f={3}>
         <Button
           onPress={() => {
             toggleSelectAll(!allSelected)

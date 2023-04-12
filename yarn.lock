@@ -3633,6 +3633,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@miblanchard/react-native-slider@npm:^2.3.1":
+  version: 2.3.1
+  resolution: "@miblanchard/react-native-slider@npm:2.3.1"
+  peerDependencies:
+    react: ">=16.8"
+    react-native: ">=0.59"
+  checksum: 0f66becdd3ef9dc238b6c816b143fc36927d140ff453e46033451a5799177a30f864f91d5d307b7424b49d07e3dac3ca2517e16777c1b34fd99d140cc56e16bc
+  languageName: node
+  linkType: hard
+
 "@nodelib/fs.scandir@npm:2.1.5":
   version: 2.1.5
   resolution: "@nodelib/fs.scandir@npm:2.1.5"
@@ -6676,6 +6686,7 @@ __metadata:
   resolution: "@vexl-next/mobile-app@workspace:apps/mobile"
   dependencies:
     "@babel/core": ^7.12.9
+    "@miblanchard/react-native-slider": ^2.3.1
     "@notifee/react-native": ^7.7.1
     "@react-native-async-storage/async-storage": ~1.17.3
     "@react-native-firebase/app": ^17.4.2
@@ -6768,6 +6779,7 @@ __metadata:
     react-native-tab-view: ^3.5.1
     react-native-uuid: ^2.0.1
     react-native-web: ~0.18.9
+    react-navigation-heavy-screen: ^1.2.1
     react-test-renderer: ^18.2.0
     seed-random: ^2.2.0
     tamagui: ^1.11.0
@@ -11813,7 +11825,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"hoist-non-react-statics@npm:^3.3.0":
+"hoist-non-react-statics@npm:^3.3.0, hoist-non-react-statics@npm:^3.3.2":
   version: 3.3.2
   resolution: "hoist-non-react-statics@npm:3.3.2"
   dependencies:
@@ -17040,6 +17052,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-native-animatable@npm:^1.3.3":
+  version: 1.3.3
+  resolution: "react-native-animatable@npm:1.3.3"
+  dependencies:
+    prop-types: ^15.7.2
+  checksum: eb35821de36ae4eb00f97d99fc22ed79bd017248092ff1299f9d46a7ab946de16d2e6d6bfbf4cab5ef77d0d3bf47684aec761a7670ec7d36aae8d77ab8ddd171
+  languageName: node
+  linkType: hard
+
 "react-native-codegen@npm:^0.71.5":
   version: 0.71.5
   resolution: "react-native-codegen@npm:0.71.5"
@@ -17400,6 +17421,19 @@ __metadata:
   bin:
     react-native: cli.js
   checksum: aadbd9b57dd9b10a41b60337ea1a4103e2fb2320784bf148100e807bd0a77929bdb310ea68d054165cd3c00647a3d020eecb0efb864cc7a93733b2d580e1e675
+  languageName: node
+  linkType: hard
+
+"react-navigation-heavy-screen@npm:^1.2.1":
+  version: 1.2.1
+  resolution: "react-navigation-heavy-screen@npm:1.2.1"
+  dependencies:
+    hoist-non-react-statics: ^3.3.2
+    react-native-animatable: ^1.3.3
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: 361ba7b27337bb7e87d71742b6959b5499c314a59c3aafffa324d8f4ceab62c847a3d6a9fd685b14789a40dd4590c107aad64e981659b772018dbf865e41ffcf
   languageName: node
   linkType: hard
 

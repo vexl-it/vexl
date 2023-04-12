@@ -22,6 +22,9 @@ export type BtcNetwork = z.TypeOf<typeof BtcNetwork>
 export const OfferType = z.enum(['BUY', 'SELL'])
 export type OfferType = z.TypeOf<typeof OfferType>
 
+export const Currency = z.enum(['CZK', 'EUR', 'USD'])
+export type Currency = z.TypeOf<typeof Currency>
+
 export const FriendLevel = z.enum([
   'FIRST_DEGREE',
   'SECOND_DEGREE',
@@ -50,8 +53,6 @@ export const CommonFriend = z.object({
   contact: BaseContact.optional(),
 })
 export type CommonFriend = z.TypeOf<typeof CommonFriend>
-export const Currency = z.string().min(3).max(3)
-export type Currency = z.TypeOf<typeof Currency>
 
 export const Location = z.object({
   longitude: z.string(),

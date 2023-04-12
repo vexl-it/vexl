@@ -230,6 +230,121 @@ export default {
       '\n' +
       'Or you can meet us during your next P2P trade! 😻',
   },
+  'createOffer': {
+    'myNewOffer': 'My new offer',
+    'iWantTo': 'I want to',
+    'sellBitcoin': 'Sell Bitcoin',
+    'buyBitcoin': 'Buy Bitcoin',
+    'currency': 'Currency',
+    'czk': 'CZK',
+    'eur': 'EUR',
+    'usd': 'USD',
+    'amountOfTransaction': {
+      'amountOfTransaction': 'Amount of transaction',
+      'eurSymbol': '€',
+      'dollarSymbol': '$',
+      'czkSymbol': 'Kč',
+    },
+    'premiumOrDiscount': {
+      'premiumOrDiscount': 'Premium or discount',
+      'youBuyForTheActualMarketPrice':
+        'You buy for the actual market price. Play with the slider to sell faster or earn more.',
+      'theOptimalPositionForMostPeople':
+        'The optimal position for most people. You buy slightly faster, but a bit overpriced',
+      'youBuyReallyFast':
+        'You buy really fast, but so much above the market price',
+      'youBuyPrettyCheap':
+        'You buy pretty cheap, but it can take slightly longer to find a seller',
+      'youBuyVeryCheaply':
+        'You buy very cheaply, but it can take a while to find seller',
+      'buyFaster': 'Buy faster',
+      'buyCheaply': 'Buy cheaply',
+      'youSellForTheActualMarketPrice':
+        'You sell for the actual market price. Play with the slider to sell faster or earn more.',
+      'youEarnBitMore': 'You earn a bit more, but it can take slightly longer.',
+      'youWantToEarnFortune':
+        'You want to earn a fortune, but it can take years to find a seller.',
+      'youSellSlightlyFaster':
+        'You sell slightly faster, but a bit below market price',
+      'youSellMuchFaster': 'You sell much faster, but far below market price',
+      'youBuyBtcFor': 'You buy BTC for',
+      'youSellBtcFor': 'You sell BTC for',
+      'marketPrice': 'market price',
+      'sellFaster': 'Sell faster',
+      'earnMore': 'Earn more',
+      'premiumOrDiscountExplained': 'Premium or discount explained',
+      'influenceImpactOfYourSellOffer':
+        'Influence the impact of your offer. Sell faster by adding a discount, or earn more by adding a premium to the Bitcoin market price.',
+      'influenceImpactOfYourBuyOffer':
+        'Influence the impact of your offer. Buy cheaply by adding a discount, or buy faster by adding a premium to the Bitcoin market price.',
+      'playWithItAndSee':
+        'Play with it and see how it affects the interest of others.',
+    },
+    'buyCheaperByUsingDiscount':
+      'Buy cheaper by using discount or buy faster by adding a premium to the bitcoin market price',
+    'sellFasterWithDiscount':
+      'Sell faster with a discount or earn more by adding a premium to the bitcoin market price.',
+    'location': {
+      'location': 'Location',
+      'meetingInPerson':
+        'Meeting in person is safer. What to watch out for online?',
+      'checkItOut': 'Check it out',
+      'addCityOrDistrict': 'Add city, or district',
+      'whatToWatchOutForOnline': 'What to watch out for online?',
+      'moneySentByRandomPerson':
+        'Money sent by a random person can be of criminal origin and traceable.',
+      'neverSendCrypto': 'Never send cryptocurrency before receiving payment.',
+      'alwaysVerifyTheName':
+        'Always verify the name of the account holder you received the payment from with the declared identity of the counterparty.',
+      'forwardTheAddress':
+        'Forward the address in a secure manner and be sure to verify it through another secure channel.',
+    },
+    'inPerson': 'In person',
+    'online': 'Online',
+    'paymentMethod': {
+      'paymentMethod': 'Payment method',
+      'cash': 'Cash',
+      'bank': 'Bank',
+      'revolut': 'Revolut',
+    },
+    'network': {
+      'network': 'Network',
+      'lightning': 'Lightning',
+      'theBestOption':
+        'The best option for really small amounts. Usually much faster.',
+      'onChain': 'On chain',
+      'theBestFor':
+        'The best for fairly huge amounts. It takes time sometimes.',
+    },
+    'description': {
+      'description': 'Description',
+      'writeWhyPeopleShouldTake': 'Write why people should take your offer.',
+    },
+    'friendLevel': {
+      'friendLevel': 'Friend level',
+      'firstDegree': '1st degree',
+      'secondDegree': '2nd degree',
+      'reachVexlers': 'Reach {{count}} vexlers',
+    },
+    'publishOffer': 'Publish offer',
+    'gotIt': 'Got it',
+    'errorCreatingOffer': 'Error while creating offer',
+    'errorSearchingForAvailableLocation':
+      'Error when searching for available locations',
+    'offerEncryption': {
+      'encryptingYourOffer': 'Encrypting your offer ...',
+      'dontShutDownTheApp':
+        'Don’t shut down the app while encrypting. It can take several minutes.',
+      'forVexlers': 'for {{count}} vexlers',
+      'doneOfferPoster': 'Done! Offer posted.',
+      'yourFriendsAndFriendsOfFriends':
+        'Your friends and friends of their friends can now see your offer.',
+      'anonymouslyDeliveredToVexlers':
+        'Anonymously delivered to {{count}} vexlers',
+    },
+    'errorLocationNotFilled': 'Please fill in offer location',
+    'errorDescriptionNotFilled': 'Please fill in offer description',
+  },
   'notifications': {
     'permissionsNotGranted': {
       title: 'Permissions for notifications were not granted',

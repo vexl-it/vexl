@@ -1,6 +1,6 @@
-import {stringToSvgStringRuntimeError} from '../../Image'
+import {stringToSvgStringRuntimeError} from '../Image'
 
-const faq4Svg =
+const anonymousCounterpartSvg =
   stringToSvgStringRuntimeError(`<svg viewBox="0 0 311 175" fill="none" xmlns="http://www.w3.org/2000/svg">
 <rect width="311" height="175" />
 <path d="M77.2832 72.9603C77.2832 47.0764 77.2832 34.1344 85.3243 26.0933C93.3654 18.0522 106.307 18.0522 132.191 18.0522H234V91.2054C234 117.089 234 130.031 225.959 138.072C217.918 146.113 204.976 146.113 179.092 146.113H155.642H117.085C109.811 146.113 106.174 146.113 102.885 147.437C99.5965 148.761 96.9734 151.28 91.7273 156.319L77.2832 170.193V72.9603Z" fill="#EDF8F0"/>
@@ -32,4 +32,4 @@ const faq4Svg =
 
 `)
 
-export default faq4Svg
+export default anonymousCounterpartSvg

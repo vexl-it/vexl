@@ -11,6 +11,8 @@ import {
 } from '../../../../../state/marketplace'
 import EmptyListPlaceholder from './EmptyListPlaceholder'
 import {getTokens, Stack} from 'tamagui'
+import OffersListButtons from './OffersListButtons'
+import {useNavigation} from '@react-navigation/native'
 
 type Props = MarketplaceTabScreenProps<'Buy' | 'Sell'>
 
@@ -19,6 +21,7 @@ function OffersListStateDisplayer({
     params: {type},
   },
 }: Props): JSX.Element {
+  const navigation = useNavigation()
   const tokens = getTokens()
   const loading = useAreOffersLoading()
   const error = useOffersLoadingError()
@@ -43,6 +46,11 @@ function OffersListStateDisplayer({
 
   return (
     <ContainerWithTopBorderRadius>
+      <OffersListButtons
+        onAddPress={() => {
+          navigation.navigate('CreateOffer')
+        }}
+      />
       {offers.length === 0 ? (
         <EmptyListPlaceholder />
       ) : (

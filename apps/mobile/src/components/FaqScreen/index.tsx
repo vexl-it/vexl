@@ -7,7 +7,7 @@ import useContent from './useContent'
 import SvgImage from '../Image'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import IconButton from '../IconButton'
-import closeSvg from '../TosScreen/images/closeSvg'
+import closeSvg from '../images/closeSvg'
 import {Stack, Text, XStack} from 'tamagui'
 
 function FaqsScreen(): JSX.Element {

@@ -13,6 +13,5 @@ RUN yarn build
 FROM node:19-alpine as runner
 
 COPY --from=builder /app/apps/location-service/dist dist
-COPY --from=builder /app/apps/location-service/package.json package.json
 
-CMD ["yarn", "start"]
+CMD ["node", "dist/index.js"]

@@ -3,16 +3,13 @@ import {
   type PublicKeyPemBase64,
 } from '@vexl-next/cryptography/dist/KeyHolder'
 import {type ChatPrivateApi} from '@vexl-next/rest-api/dist/services/chat'
-import generateUuid from '../utils/generateUuid'
-import {
-  type ChatMessage,
-  MessageTypes,
-} from '@vexl-next/domain/dist/general/messaging'
+import {type ChatMessage} from '@vexl-next/domain/dist/general/messaging'
 import {now} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
 import {flow, pipe} from 'fp-ts/function'
 import * as TE from 'fp-ts/TaskEither'
 import {encryptMessage, type ErrorEncryptingMessage} from './utils/chatCrypto'
 import {type BasicError, toError} from '@vexl-next/domain/dist/utility/errors'
+import {generateUuid} from '@vexl-next/domain/dist/utility/Uuid.brand'
 
 function createRequestChatMessage({
   text,
@@ -23,12 +20,10 @@ function createRequestChatMessage({
 }): ChatMessage {
   return {
     uuid: generateUuid(),
-    messageType: MessageTypes.REQUEST_MESSAGING,
+    messageType: 'REQUEST_MESSAGING',
     text,
-    isMine: true,
     time: now(),
     senderPublicKey,
-    sent: false,
   }
 }
 
@@ -64,7 +59,6 @@ export function sendMessagingRequest({
           )
         )
       )
-    ),
-    TE.map((message) => ({...message, sent: true}))
+    )
   )
 }

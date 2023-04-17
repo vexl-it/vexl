@@ -1,10 +1,11 @@
 import {type RootStackScreenProps} from '../../navigationTypes'
-import {Alert, ScrollView} from 'react-native'
+import {ScrollView} from 'react-native'
 import Button from '../Button'
-import {useSingleOffer} from '../../state/marketplace'
+import {useRequestOffer, useSingleOffer} from '../../state/marketplace'
 import * as O from 'fp-ts/Option'
 import {Stack, Text} from 'tamagui'
 import Screen from '../Screen'
+import {useChatForOffer} from '../../state/chat/hooks/useChatForOffer'
 
 type Props = RootStackScreenProps<'OfferDetail'>
 
@@ -15,9 +16,13 @@ function OfferDetailScreen({
   navigation,
 }: Props): JSX.Element {
   const offer = useSingleOffer(offerId)
+  const requestOffer = useRequestOffer()
 
-  if (O.isNone(offer))
-    return <Text col="$white">Offer does not exist</Text> // TODO 404 page
+  if (O.isNone(offer)) return <Text col="$white">Offer does not exist</Text> // TODO 404 page
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const chatForOffer = useChatForOffer({
+    offerPublicKey: offer.value.offerInfo.publicPart.offerPublicKey,
+  })
 
   return (
     <Screen>
@@ -27,8 +32,16 @@ function OfferDetailScreen({
         </Text>
       </ScrollView>
       <Button
+        disabled={false}
         onPress={() => {
-          Alert.alert('TODO')
+          if (chatForOffer) {
+            navigation.navigate('ChatDetail', {chatId: chatForOffer.id})
+            return
+          }
+          void requestOffer({
+            offer: offer.value.offerInfo,
+            text: 'Test sending request',
+          })().then(console.log)
           // loadingOverlay.show()
           // void pipe(
           //   TE.right(userSession.privateKey),
@@ -60,7 +73,7 @@ function OfferDetailScreen({
           //   )
           // )()
         }}
-        text="sendRequest"
+        text={chatForOffer ? 'Go to chat' : 'request'}
         variant="secondary"
       />
       <Stack h={16} />

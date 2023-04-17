@@ -1,6 +1,5 @@
 import {z} from 'zod'
 import {UriString} from '../utility/UriString.brand'
-import {UserNameAndAvatar} from './UserNameAndAvatar.brand'
 import {IdNumeric} from '../utility/IdNumeric'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
 import {IsoDatetimeString} from '../utility/IsoDatetimeString.brand'
@@ -106,8 +105,6 @@ export type OfferInfo = z.TypeOf<typeof OfferInfo>
 
 export const OfferFlags = z.object({
   isMine: z.boolean(),
-  isRequested: z.boolean().default(false),
-  realUserData: UserNameAndAvatar.optional(),
   reported: z.boolean().default(false),
 })
 export type OfferFlags = z.TypeOf<typeof OfferFlags>

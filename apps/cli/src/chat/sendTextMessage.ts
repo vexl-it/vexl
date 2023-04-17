@@ -11,11 +11,10 @@ import {
   safeParse,
   stringifyToPrettyJson,
 } from '@vexl-next/resources-utils/dist/utils/parsing'
-import {MessageTypes} from '@vexl-next/domain/dist/general/messaging'
 import sendMessage from '@vexl-next/resources-utils/dist/chat/sendMessage'
 import {now} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
-import generateUuid from '@vexl-next/resources-utils/dist/utils/generateUuid'
 import {parseCredentialsJson} from '../utils/auth'
+import {generateUuid} from '@vexl-next/domain/dist/utility/Uuid.brand'
 
 export default function sendTextMessage({
   userCredentialsJson,
@@ -46,12 +45,10 @@ export default function sendTextMessage({
       sendMessage({
         message: {
           text: message,
-          messageType: MessageTypes.MESSAGE,
+          messageType: 'MESSAGE',
           time: now(),
           senderPublicKey: inboxKeyPair.publicKeyPemBase64,
-          sent: false,
           uuid: generateUuid(),
-          isMine: true,
         },
         api: api.chat,
         senderKeypair: inboxKeyPair,

@@ -1,5 +1,6 @@
 import {
   type OfferId,
+  type OfferInfo,
   type OfferPublicPart,
   type SymmetricKey,
 } from '@vexl-next/domain/dist/general/offers'
@@ -8,6 +9,7 @@ import {
   lastUpdatedAtAtom,
   loadingStateAtom,
   myOffersAtom,
+  offerFlagsAtom,
   offersAtom,
   offersAtomWithFilter,
   offersIdsAtom,
@@ -51,11 +53,17 @@ import {
   type OfferPrivateListItem,
 } from '@vexl-next/rest-api/dist/services/offer/contracts'
 import {type ErrorDecryptingOffer} from '@vexl-next/resources-utils/dist/offers/decryptOffer'
-import {toBasicError} from '@vexl-next/domain/dist/utility/errors'
+import {
+  type BasicError,
+  toBasicError,
+} from '@vexl-next/domain/dist/utility/errors'
 import * as O from 'optics-ts'
 import {useCallback, useMemo} from 'react'
 import deduplicate from '../../utils/deduplicate'
 import notEmpty from '../../utils/notEmpty'
+import useSendMessagingRequest from '../chat/hooks/useSendRequest'
+import {type ApiErrorRequestMessaging} from '@vexl-next/resources-utils/dist/chat/sendMessagingRequest'
+import {type ErrorEncryptingMessage} from '@vexl-next/resources-utils/dist/chat/utils/chatCrypto'
 
 export function useTriggerOffersRefresh(): Task<void> {
   const api = usePrivateApiAssumeLoggedIn()
@@ -146,7 +154,6 @@ export function useTriggerOffersRefresh(): Task<void> {
                   flags: {
                     isMine: false,
                     reported: false,
-                    isRequested: false,
                   },
                 }
               }
@@ -236,7 +243,6 @@ export function useCreateOffer(): (args: {
             adminId: r.adminId,
             flags: {
               isMine: true,
-              isRequested: false,
               reported: false,
             },
             offerInfo: r.offerInfo,
@@ -305,7 +311,6 @@ export function useUpdateOffer(): (args: {
             adminId,
             flags: {
               isMine: true,
-              isRequested: false,
               reported: false,
             },
             offerInfo: r,
@@ -358,7 +363,6 @@ export function useUpdateOfferReencrypt(): (args: {
             adminId,
             flags: {
               isMine: true,
-              isRequested: false,
               reported: false,
             },
             offerInfo: r.offerInfo,
@@ -398,5 +402,36 @@ export function useDeleteOffer(): (
       )
     },
     [api, store]
+  )
+}
+
+export type ErrorOfferAlreadyRequested =
+  BasicError<'ErrorOfferAlreadyRequested'>
+
+export function useRequestOffer(): (a: {
+  offer: OfferInfo
+  text: string
+}) => TE.TaskEither<
+  | ErrorOfferAlreadyRequested
+  | ApiErrorRequestMessaging
+  | ErrorEncryptingMessage,
+  {success: true}
+> {
+  const store = useStore()
+  const sendRequest = useSendMessagingRequest()
+
+  return useCallback(
+    ({offer, text}: {offer: OfferInfo; text: string}) =>
+      pipe(
+        sendRequest({text, originOffer: offer}),
+        TE.match(E.left, () => {
+          store.set(offerFlagsAtom(offer.offerId), (old) => ({
+            ...old,
+            isRequested: true,
+          }))
+          return E.right({success: true})
+        })
+      ),
+    [store, sendRequest]
   )
 }

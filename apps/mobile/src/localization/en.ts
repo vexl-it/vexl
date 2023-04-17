@@ -20,6 +20,7 @@ export default {
     'back': 'Back',
     'close': 'Close',
     'done': 'Done',
+    'errorCreatingInbox': 'Error creating user inbox.',
   },
   'loginFlow': {
     'anonymityNotice': 'Nobody will see this until you allow it. Even us.',

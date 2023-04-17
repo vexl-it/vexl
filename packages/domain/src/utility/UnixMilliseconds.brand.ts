@@ -1,11 +1,16 @@
 import {z} from 'zod'
+
 export const UnixMilliseconds = z
   .number()
   .int()
-  .positive()
+  .min(0)
   .brand<'UnixMilliseconds'>()
 export type UnixMilliseconds = z.TypeOf<typeof UnixMilliseconds>
 
 export function now(): UnixMilliseconds {
   return UnixMilliseconds.parse(Date.now())
+}
+
+export function unixMillisecondsNow(): UnixMilliseconds {
+  return now()
 }

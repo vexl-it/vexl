@@ -52,7 +52,6 @@ export function decryptMessage(
         time: payload.time,
         text: payload.text,
         isMine: false,
-        sent: true,
         messageType: message.messageType,
         image: payload.image,
         deanonymizedUser: payload.deanonymizedUser,

@@ -7,9 +7,11 @@ import {IsoDatetimeString} from '@vexl-next/domain/dist/utility/IsoDatetimeStrin
 export interface InvalidPhoneNumber {
   _tag: 'InvalidPhoneNumber'
 }
+
 export interface PreviousCodeNotExpired {
   _tag: 'PreviousCodeNotExpired'
 }
+
 export interface UserAlreadyExists {
   _tag: 'UserAlreadyExists'
 }
@@ -37,11 +39,8 @@ export interface PublicKeyOrHashInvalid {
 export interface InitPhoneNumberVerificationRequest {
   phoneNumber: E164PhoneNumber
 }
-export const VerificationId = z
-  .number()
-  .int()
-  .positive()
-  .brand<'VerificationId'>()
+
+export const VerificationId = z.number().int().min(0).brand<'VerificationId'>()
 export type VerificationId = z.TypeOf<typeof VerificationId>
 
 export const InitPhoneNumberVerificationResponse = z.object({

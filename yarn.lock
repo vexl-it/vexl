@@ -2820,15 +2820,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@jest/create-cache-key-function@npm:^29.0.3":
-  version: 29.4.1
-  resolution: "@jest/create-cache-key-function@npm:29.4.1"
-  dependencies:
-    "@jest/types": ^29.4.1
-  checksum: cbd2718f63457c476fc7ecd21129b9aa35f58820678d49e5b163d6c85d866071f581968acc93d28e32734a91e5a7bfb99d617120a53d48cfa0e30ad2fbb76799
-  languageName: node
-  linkType: hard
-
 "@jest/environment@npm:^26.6.2":
   version: 26.6.2
   resolution: "@jest/environment@npm:26.6.2"
@@ -3382,7 +3373,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-native-community/cli-doctor@npm:^9.2.1":
+"@react-native-community/cli-doctor@npm:^9.3.0":
   version: 9.3.0
   resolution: "@react-native-community/cli-doctor@npm:9.3.0"
   dependencies:
@@ -3406,7 +3397,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-native-community/cli-hermes@npm:^9.2.1":
+"@react-native-community/cli-hermes@npm:^9.3.1":
   version: 9.3.1
   resolution: "@react-native-community/cli-hermes@npm:9.3.1"
   dependencies:
@@ -3419,22 +3410,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-native-community/cli-platform-android@npm:9.2.1":
-  version: 9.2.1
-  resolution: "@react-native-community/cli-platform-android@npm:9.2.1"
-  dependencies:
-    "@react-native-community/cli-tools": ^9.2.1
-    chalk: ^4.1.2
-    execa: ^1.0.0
-    fs-extra: ^8.1.0
-    glob: ^7.1.3
-    logkitty: ^0.7.1
-    slash: ^3.0.0
-  checksum: b62618bde64b23adc9c123d0a83f03788a5d2c451262cc4afb15f4cbb779e5f7c26111871df740c39ddf6010f0dc57f4df4274ea3bfcb5d1c261eb0959ee40b9
-  languageName: node
-  linkType: hard
-
-"@react-native-community/cli-platform-android@npm:^9.3.1":
+"@react-native-community/cli-platform-android@npm:9.3.1, @react-native-community/cli-platform-android@npm:^9.3.1":
   version: 9.3.1
   resolution: "@react-native-community/cli-platform-android@npm:9.3.1"
   dependencies:
@@ -3449,20 +3425,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-native-community/cli-platform-ios@npm:9.2.1":
-  version: 9.2.1
-  resolution: "@react-native-community/cli-platform-ios@npm:9.2.1"
-  dependencies:
-    "@react-native-community/cli-tools": ^9.2.1
-    chalk: ^4.1.2
-    execa: ^1.0.0
-    glob: ^7.1.3
-    ora: ^5.4.1
-  checksum: 7e7fc71d5dcc872059846d7405bd4fc615fecfff36a431512fd3a5e1f772e946b82f33c2d08f3a0d2ee0ba9a4fa152153efa72ae6c71a1caf7ff412fc59531df
-  languageName: node
-  linkType: hard
-
-"@react-native-community/cli-platform-ios@npm:^9.3.0":
+"@react-native-community/cli-platform-ios@npm:9.3.0, @react-native-community/cli-platform-ios@npm:^9.3.0":
   version: 9.3.0
   resolution: "@react-native-community/cli-platform-ios@npm:9.3.0"
   dependencies:
@@ -3536,15 +3499,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-native-community/cli@npm:9.2.1":
-  version: 9.2.1
-  resolution: "@react-native-community/cli@npm:9.2.1"
+"@react-native-community/cli@npm:9.3.2":
+  version: 9.3.2
+  resolution: "@react-native-community/cli@npm:9.3.2"
   dependencies:
     "@react-native-community/cli-clean": ^9.2.1
     "@react-native-community/cli-config": ^9.2.1
     "@react-native-community/cli-debugger-ui": ^9.0.0
-    "@react-native-community/cli-doctor": ^9.2.1
-    "@react-native-community/cli-hermes": ^9.2.1
+    "@react-native-community/cli-doctor": ^9.3.0
+    "@react-native-community/cli-hermes": ^9.3.1
     "@react-native-community/cli-plugin-metro": ^9.2.1
     "@react-native-community/cli-server-api": ^9.2.1
     "@react-native-community/cli-tools": ^9.2.1
@@ -3559,7 +3522,7 @@ __metadata:
     semver: ^6.3.0
   bin:
     react-native: build/bin.js
-  checksum: 9dfe8d258e9f36d339b8e9ebe22d276003b00a035d20ff4a3328ce3b923cd090e94f6a53aaab9869c9c29d46e5aa12317bae3f806890880a7f0235a01825e5e3
+  checksum: 474711ebfad0834e34026889004bc823b79817fc50fb9b614e987755b7073e251643d1078884d3b49f195c83b18bc32b0e608c512e3928fb0dec8dd6be42e180
   languageName: node
   linkType: hard
 
@@ -6219,7 +6182,7 @@ __metadata:
     eslint-plugin-n: ^15.6.1
     eslint-plugin-promise: ^6.1.1
     eslint-plugin-react: ^7.32.2
-    expo: ~47.0.12
+    expo: ~47.0.14
     expo-community-flipper: ^47.0.0
     expo-contacts: ~11.0.1
     expo-dev-client: ~2.0.1
@@ -6234,6 +6197,7 @@ __metadata:
     expo-status-bar: ~1.4.2
     expo-updates: ~0.15.6
     fp-ts: ^2.13.1
+    group-items: ^2.2.1
     i18n-js: ^4.2.0
     jest: ^26.6.3
     jest-expo: ^47.0.1
@@ -6245,13 +6209,14 @@ __metadata:
     prettier: 2.8.0
     react: 18.1.0
     react-dom: 18.1.0
-    react-native: 0.70.5
+    react-native: 0.70.8
     react-native-crypto: "https://github.com/vexl-it/react-native-quick-crypto"
     react-native-flags: ^1.0.0
     react-native-flipper: ^0.176.0
     react-native-keyboard-aware-scroll-view: ^0.9.5
     react-native-markdown-display: ^7.0.0-alpha.2
     react-native-mmkv: ^2.6.3
+    react-native-mmkv-flipper-plugin: ^1.0.0
     react-native-pager-view: 6.0.1
     react-native-phone-number-input: ^2.1.0
     react-native-quick-base64: ^2.0.5
@@ -8498,6 +8463,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"deep-eql@npm:^4.0.0":
+  version: 4.1.3
+  resolution: "deep-eql@npm:4.1.3"
+  dependencies:
+    type-detect: ^4.0.0
+  checksum: 7f6d30cb41c713973dc07eaadded848b2ab0b835e518a88b91bea72f34e08c4c71d167a722a6f302d3a6108f05afd8e6d7650689a84d5d29ec7fe6220420397f
+  languageName: node
+  linkType: hard
+
 "deep-equal@npm:^2.2.0":
   version: 2.2.0
   resolution: "deep-equal@npm:2.2.0"
@@ -10109,9 +10083,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo@npm:~47.0.12":
-  version: 47.0.13
-  resolution: "expo@npm:47.0.13"
+"expo@npm:~47.0.14":
+  version: 47.0.14
+  resolution: "expo@npm:47.0.14"
   dependencies:
     "@babel/runtime": ^7.14.0
     "@expo/cli": 0.4.11
@@ -10141,7 +10115,7 @@ __metadata:
       optional: true
   bin:
     expo: bin/cli.js
-  checksum: 8972f8e94777f73cc0063c18bb97a96accab32006686ff8e3f836cc3b9447e101da20fb2468533faabf9ac9b99dcdb6abe8aed5a6dbdf51b0bfd8bbdcf7ea07d
+  checksum: be9e76703bc841449d2ac2719abb4a99e7a5a9937b8461b5ecf80146fe471dba56ef4bcd8258eb5800527c73ed68071f5a20c0a9a35751c21af51faf10c3c393
   languageName: node
   linkType: hard
 
@@ -10933,6 +10907,15 @@ __metadata:
   version: 15.8.0
   resolution: "graphql@npm:15.8.0"
   checksum: 423325271db8858428641b9aca01699283d1fe5b40ef6d4ac622569ecca927019fce8196208b91dd1d8eb8114f00263fe661d241d0eb40c10e5bfd650f86ec5e
+  languageName: node
+  linkType: hard
+
+"group-items@npm:^2.2.1":
+  version: 2.2.1
+  resolution: "group-items@npm:2.2.1"
+  dependencies:
+    deep-eql: ^4.0.0
+  checksum: 74e0bdfd38e56c84538077dd4adfe5b5426326723b687eaec8d76f202fec13ef2f361c04da48f67865e1c61d3c705c5f5fb43fbfb59690ba88cc72a5a8efdb70
   languageName: node
   linkType: hard
 
@@ -15776,7 +15759,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"promise@npm:^8.0.3":
+"promise@npm:^8.3.0":
   version: 8.3.0
   resolution: "promise@npm:8.3.0"
   dependencies:
@@ -16176,6 +16159,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-native-mmkv-flipper-plugin@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "react-native-mmkv-flipper-plugin@npm:1.0.0"
+  peerDependencies:
+    react-native-flipper: ">=0.99.0"
+    react-native-mmkv: ">=1.4.0"
+  checksum: aebd430a8831809de76e61e92ae4e5435dd47d81896859fdaee78db6603b2f2fab0919992705eb2fe26942172921f9f7374cedca1df1edeabdf2e284337d614d
+  languageName: node
+  linkType: hard
+
 "react-native-mmkv@npm:^2.6.3":
   version: 2.7.0
   resolution: "react-native-mmkv@npm:2.7.0"
@@ -16391,14 +16384,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native@npm:0.70.5":
-  version: 0.70.5
-  resolution: "react-native@npm:0.70.5"
+"react-native@npm:0.70.8":
+  version: 0.70.8
+  resolution: "react-native@npm:0.70.8"
   dependencies:
-    "@jest/create-cache-key-function": ^29.0.3
-    "@react-native-community/cli": 9.2.1
-    "@react-native-community/cli-platform-android": 9.2.1
-    "@react-native-community/cli-platform-ios": 9.2.1
+    "@jest/create-cache-key-function": ^27.0.1
+    "@react-native-community/cli": 9.3.2
+    "@react-native-community/cli-platform-android": 9.3.1
+    "@react-native-community/cli-platform-ios": 9.3.0
     "@react-native/assets": 1.0.0
     "@react-native/normalize-color": 2.0.0
     "@react-native/polyfills": 2.0.0
@@ -16415,7 +16408,7 @@ __metadata:
     mkdirp: ^0.5.1
     nullthrows: ^1.1.1
     pretty-format: ^26.5.2
-    promise: ^8.0.3
+    promise: ^8.3.0
     react-devtools-core: 4.24.0
     react-native-codegen: ^0.70.6
     react-native-gradle-plugin: ^0.70.3
@@ -16431,7 +16424,7 @@ __metadata:
     react: 18.1.0
   bin:
     react-native: cli.js
-  checksum: 5aca6e1dba32c450078117c874e368efa7e291fbf37263a30935e395475343ad78f87d4e41d12742cc16d9fcaebd5175a631962fc5d620daa312079782d0a66c
+  checksum: 6cd9d8a187ff71a992c90e49c0be1b0351dce5234d198b2e5999686ab3f1cfc30a2485b3e577329c066943888ee06bc546c3c69f3eae9e721c28280e2eaf12f6
   languageName: node
   linkType: hard
 
@@ -18592,7 +18585,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"type-detect@npm:4.0.8":
+"type-detect@npm:4.0.8, type-detect@npm:^4.0.0":
   version: 4.0.8
   resolution: "type-detect@npm:4.0.8"
   checksum: 62b5628bff67c0eb0b66afa371bd73e230399a8d2ad30d852716efcc4656a7516904570cd8631a49a3ce57c10225adf5d0cbdcb47f6b0255fe6557c453925a15

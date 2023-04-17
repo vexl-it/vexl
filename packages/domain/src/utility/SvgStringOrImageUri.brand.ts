@@ -31,6 +31,13 @@ export function fromImageUri(imageUri: UriString): SvgStringOrImageUri {
   })
 }
 
+export function fromBase64Uri(base64: string): SvgStringOrImageUri {
+  return SvgStringOrImageUri.parse({
+    type: 'imageUri',
+    imageUri: base64,
+  })
+}
+
 export function fromSvgString(svgString: SvgString): SvgStringOrImageUri {
   return SvgStringOrImageUri.parse({
     type: 'svgXml',

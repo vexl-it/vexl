@@ -89,13 +89,14 @@ function SuccessLoginScreen({
         )
       }),
       TE.bindTo('session'),
-      TE.bindW('_', ({session}) => {
-        console.log('Session', session)
-        return createUserAtContactMs(
-          {firebaseToken: null},
-          session.sessionCredentials
+      TE.chainFirstW(({session}) =>
+        pipe(
+          createUserAtContactMs(
+            {firebaseToken: null},
+            session.sessionCredentials
+          )
         )
-      }),
+      ),
       TE.match(
         (text) => {
           Alert.alert(text)

@@ -77,4 +77,11 @@ export function singleOfferAtom(offerId: OfferId) {
   )
 }
 
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+export function offerFlagsAtom(offerId: OfferId) {
+  return focusAtom(offersAtom, (optic) =>
+    optic.find((offer) => offer.offerInfo.offerId === offerId).prop('flags')
+  )
+}
+
 export const loadingStateAtom = atom<LoadingState>({state: 'initial'})

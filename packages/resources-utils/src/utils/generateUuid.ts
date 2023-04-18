@@ -1,5 +1,11 @@
-import crypto from 'node:crypto'
-import {Uuid} from '@vexl-next/domain/dist/utility/Uuid.brand'
+import {
+  type Uuid,
+  generateUuid as generateUuidFromDomain,
+} from '@vexl-next/domain/dist/utility/Uuid.brand'
+
+/**
+ * @deprecated Use {@link generateUuidFromDomain} instead
+ */
 export default function generateUuid(): Uuid {
-  return Uuid.parse(crypto.randomUUID())
+  return generateUuidFromDomain()
 }

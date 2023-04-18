@@ -56,7 +56,7 @@ function OfferListItem({offer: {offerInfo: offer}}: Props): JSX.Element {
   return (
     <Stack mt="$6">
       <Stack bg="$white" p="$4" br="$5">
-        <Text fos={20} mb="$4" ff="body500">
+        <Text fos={20} mb="$4" ff="$body500">
           {offer.publicPart.offerDescription}
         </Text>
         <XStack>
@@ -126,7 +126,6 @@ function OfferListItem({offer: {offerInfo: offer}}: Props): JSX.Element {
             </InfoText>
           </InfoItemContainer>
         </XStack>
-        position: absolute; bottom: -7px; left: 43px;
         <Stack pos="absolute" b={-7} l={43}>
           <SvgImage source={bubbleTipSvg} />
         </Stack>

@@ -6,7 +6,7 @@ import {KeyHolder} from '@vexl-next/cryptography'
 
 export const Session = z
   .object({
-    version: z.number().int().positive(),
+    version: z.number().int().min(0),
     realUserData: UserNameAndAvatar,
     anonymizedUserData: UserNameAndAvatar,
     phoneNumber: E164PhoneNumber,

@@ -16,7 +16,7 @@ export const ServerOffer = z.object({
   id: z
     .number()
     .int()
-    .positive()
+    .min(0)
     .describe('ID of the offer. It should be used for ordering.'),
   offerId: OfferId,
   expiration: UnixMilliseconds,

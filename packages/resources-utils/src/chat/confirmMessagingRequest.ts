@@ -2,10 +2,7 @@ import {
   type PrivateKeyHolder,
   type PublicKeyPemBase64,
 } from '@vexl-next/cryptography/dist/KeyHolder'
-import {
-  type ChatMessage,
-  MessageTypes,
-} from '@vexl-next/domain/dist/general/messaging'
+import {type ChatMessage} from '@vexl-next/domain/dist/general/messaging'
 import {now} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
 import * as TE from 'fp-ts/TaskEither'
 import generateUuid from '../utils/generateUuid'
@@ -25,14 +22,10 @@ function createApproveChatMessage({
 }): ChatMessage {
   return {
     uuid: generateUuid(),
-    messageType: approve
-      ? MessageTypes.APPROVE_MESSAGING
-      : MessageTypes.DISAPPROVE_MESSAGING,
+    messageType: approve ? 'APPROVE_MESSAGING' : 'DISAPPROVE_MESSAGING',
     text,
-    isMine: true,
     time: now(),
     senderPublicKey,
-    sent: false,
   }
 }
 
@@ -77,7 +70,6 @@ export default function confirmMessagingRequest({
           )
         )
       )
-    ),
-    TE.map((message) => ({...message, sent: true}))
+    )
   )
 }

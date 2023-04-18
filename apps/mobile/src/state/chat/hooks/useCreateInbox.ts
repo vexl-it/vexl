@@ -33,7 +33,10 @@ function focusOneInbox(privateKey: PrivateKeyPemBase64) {
 
 export default function useCreateInbox(): (
   inbox: Inbox
-) => TE.TaskEither<ApiErrorCreatingInbox | ErrorInboxAlreadyExists, ChatState> {
+) => TE.TaskEither<
+  ApiErrorCreatingInbox | ErrorInboxAlreadyExists,
+  InboxInState
+> {
   const api = usePrivateApiAssumeLoggedIn()
   const store = useStore()
 
@@ -61,10 +64,11 @@ export default function useCreateInbox(): (
         TE.mapLeft(toBasicError('ApiErrorCreatingInbox')),
         TE.map(() => {
           const newInbox: InboxInState = {inbox, chats: []}
-          return store.set(
+          store.set(
             messagingStateAtom,
             O.set(focusAddInbox(messagingStateOptic))(newInbox)
           )
+          return newInbox
         })
       )
     },

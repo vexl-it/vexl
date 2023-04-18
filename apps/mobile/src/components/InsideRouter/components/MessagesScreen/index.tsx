@@ -1,7 +1,7 @@
 import ContainerWithTopBorderRadius from '../ContainerWithTopBorderRadius'
 import {type InsideTabScreenProps} from '../../../../navigationTypes'
 import {Stack, Text} from 'tamagui'
-import {useOrderedChats} from '../../../../state/chat/hooks/useChats'
+import {useChatsToDisplayInList} from '../../../../state/chat/hooks/useChats'
 import {TouchableWithoutFeedback} from 'react-native'
 import useFetchMessages from '../../../../state/chat/hooks/useFetchNewMessages'
 import {useEffect} from 'react'
@@ -9,7 +9,7 @@ import {useEffect} from 'react'
 type Props = InsideTabScreenProps<'Messages'>
 
 function MessagesScreen({navigation}: Props): JSX.Element {
-  const chats = useOrderedChats()
+  const chats = useChatsToDisplayInList()
   const fetchNewMessages = useFetchMessages()
 
   useEffect(() => {

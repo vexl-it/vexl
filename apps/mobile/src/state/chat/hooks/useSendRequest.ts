@@ -8,7 +8,7 @@ import {ChatId, type Inbox} from '@vexl-next/domain/dist/general/messaging'
 import * as O from 'optics-ts'
 import {
   type ChatMessageWithState,
-  type ChatState,
+  type MessagingState,
   type ChatWithMessages,
 } from '../domain'
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
@@ -43,7 +43,7 @@ function createNewChat({
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function focusInbox(publicKey: PublicKeyPemBase64) {
-  return O.optic<ChatState>().find(
+  return O.optic<MessagingState>().find(
     (o) => o.inbox.privateKey.publicKeyPemBase64 === publicKey
   )
 }

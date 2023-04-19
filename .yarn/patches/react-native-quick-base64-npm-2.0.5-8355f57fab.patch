@@ -1,0 +1,25 @@
+diff --git a/ios/QuickBase64.h b/ios/QuickBase64.h
+index 20a7c03bfbfef8877521319c2da693e9fc504065..39e185daef9264919afce5fce99ad0df8c41d79a 100644
+--- a/ios/QuickBase64.h
++++ b/ios/QuickBase64.h
+@@ -1,6 +1,6 @@
+ #import <React/RCTBridgeModule.h>
+ #import <React/RCTEventEmitter.h>
+-#import "react-native-quick-base64.h"
++#import "../cpp/react-native-quick-base64.h"
+ 
+ @interface QuickBase64 : NSObject <RCTBridgeModule>
+ 
+diff --git a/ios/QuickBase64.mm b/ios/QuickBase64.mm
+index c3fc9c21d21909476c5b3c0e3e28539dc456aeee..49f5fefb280773039adaf729a6131a6cd3b10347 100644
+--- a/ios/QuickBase64.mm
++++ b/ios/QuickBase64.mm
+@@ -1,7 +1,7 @@
+ #import "QuickBase64.h"
+ #import <React/RCTBridge+Private.h>
+ #import <React/RCTUtils.h>
+-#import "react-native-quick-base64.h"
++#import "../cpp/react-native-quick-base64.h"
+ 
+ @implementation QuickBase64
+ 

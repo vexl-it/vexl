@@ -3,18 +3,21 @@ import {type InsideTabScreenProps} from '../../../../navigationTypes'
 import {Stack, Text} from 'tamagui'
 import {useChatsToDisplayInList} from '../../../../state/chat/hooks/useChats'
 import {TouchableWithoutFeedback} from 'react-native'
-import useFetchMessages from '../../../../state/chat/hooks/useFetchNewMessages'
-import {useEffect} from 'react'
+import useFetchMessagesForAllInboxes from '../../../../state/chat/hooks/useFetchNewMessages'
+import {useCallback} from 'react'
+import {useAppState} from '../../../../utils/useAppState'
 
 type Props = InsideTabScreenProps<'Messages'>
 
 function MessagesScreen({navigation}: Props): JSX.Element {
   const chats = useChatsToDisplayInList()
-  const fetchNewMessages = useFetchMessages()
+  const fetchNewMessages = useFetchMessagesForAllInboxes()
 
-  useEffect(() => {
-    void fetchNewMessages()
-  }, [fetchNewMessages])
+  useAppState(
+    useCallback(() => {
+      void fetchNewMessages()()
+    }, [fetchNewMessages])
+  )
 
   return (
     <ContainerWithTopBorderRadius scrollView={true} withTopPadding>

@@ -7,7 +7,7 @@ import Input from '../Input'
 import Button from '../Button'
 import useSendMessage from '../../state/chat/hooks/useSendMessage'
 import {now} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
-import useFetchMessages from '../../state/chat/hooks/useFetchNewMessages'
+import useFetchMessagesForAllInboxes from '../../state/chat/hooks/useFetchNewMessages'
 import useDeleteChat from '../../state/chat/hooks/useDeleteChat'
 import {generateUuid} from '@vexl-next/domain/dist/utility/Uuid.brand'
 
@@ -22,7 +22,7 @@ function ChatDetailScreen({
   const chat = useSingleChat(chatId)
   const [text, setText] = useState('')
   const sendMessage = useSendMessage()
-  const pullMessages = useFetchMessages()
+  const pullMessages = useFetchMessagesForAllInboxes()
   const deleteChat = useDeleteChat()
 
   if (!chat) {
@@ -81,7 +81,7 @@ function ChatDetailScreen({
         />
         <Button
           onPress={() => {
-            void pullMessages()
+            void pullMessages()()
           }}
           small
           variant="primary"

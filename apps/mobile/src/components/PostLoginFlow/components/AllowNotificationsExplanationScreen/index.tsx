@@ -8,7 +8,6 @@ import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import NotificationsSvg from '../../../../images/notificationsSvg'
 import {pipe} from 'fp-ts/function'
 import * as TE from 'fp-ts/TaskEither'
-import {getNotificationToken} from '../../../../utils/notifications'
 import {Alert} from 'react-native'
 import {type PostLoginFlowScreenProps} from '../../../../navigationTypes'
 import {useFinishPostLoginFlow} from '../../../../state/postLoginOnboarding'
@@ -16,6 +15,7 @@ import {Stack, Text} from 'tamagui'
 import useCreateInbox from '../../../../state/chat/hooks/useCreateInbox'
 import {useSessionAssumeLoggedIn} from '../../../../state/session'
 import reportError from '../../../../utils/reportError'
+import {requestNotificationPermissions} from '../../../../utils/notifications'
 
 type Props = PostLoginFlowScreenProps<'AllowNotificationsExplanation'>
 
@@ -46,54 +46,15 @@ function AllowNotificationsExplanationScreen({navigation}: Props): JSX.Element {
     )()
   }
 
-  function allowNotifications(): void {
+  function requestPermissions(): void {
     void pipe(
-      getNotificationToken({shouldAskForPermissions: true}),
+      requestNotificationPermissions(),
       TE.match(
-        (l) => {
-          switch (l._tag) {
-            case 'notificationPermissionDenied':
-              Alert.alert(
-                t('postLoginFlow.allowNotifications.errors.permissionDenied'),
-                undefined,
-                [
-                  {
-                    text: t('common.ok'),
-                    onPress: onFinished,
-                  },
-                ]
-              )
-              break
-            case 'notificationsNotAvailableOnEmulator':
-              Alert.alert(
-                t(
-                  'postLoginFlow.allowNotifications.errors.notAvailableOnEmulator'
-                ),
-                undefined,
-                [
-                  {
-                    text: t('common.ok'),
-                    onPress: onFinished,
-                  },
-                ]
-              )
-              break
-            default:
-              Alert.alert(
-                t('postLoginFlow.allowNotifications.errors.unknownError'),
-                undefined,
-                [
-                  {
-                    text: t('common.ok'),
-                    onPress: onFinished,
-                  },
-                ]
-              )
-          }
+        () => {
+          onFinished()
         },
-        (token) => {
-          // TODO update stuff with token
-          finishPostLoginFlow(true)
+        () => {
+          onFinished()
         }
       )
     )()
@@ -115,7 +76,7 @@ function AllowNotificationsExplanationScreen({navigation}: Props): JSX.Element {
       </WhiteContainer>
       <NextButtonProxy
         text={t('postLoginFlow.allowNotifications.action')}
-        onPress={allowNotifications}
+        onPress={requestPermissions}
         disabled={false}
       />
     </>

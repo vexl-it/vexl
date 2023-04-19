@@ -1,11 +1,7 @@
 import {pipe} from 'fp-ts/function'
 import * as A from 'fp-ts/Array'
 import {type ChatPrivateApi} from '@vexl-next/rest-api/dist/services/chat'
-import {
-  type ChatMessageWithState,
-  type ChatState,
-  type InboxInState,
-} from '../domain'
+import {type ChatMessageWithState, type InboxInState} from '../domain'
 import * as TE from 'fp-ts/TaskEither'
 import retrieveMessages, {
   type ApiErrorRetrievingMessages,
@@ -15,8 +11,11 @@ import * as T from 'fp-ts/Task'
 import {usePrivateApiAssumeLoggedIn} from '../../../api'
 import {useStore} from 'jotai'
 import {useCallback} from 'react'
-import {messagingStateAtom} from '../atom'
-import {type PrivateKeyHolder} from '@vexl-next/cryptography/dist/KeyHolder'
+import {inboxAtom, messagingStateAtom} from '../atom'
+import {
+  type PrivateKeyHolder,
+  type PublicKeyPemBase64,
+} from '@vexl-next/cryptography/dist/KeyHolder'
 import addMessagesToChats from '../utils/addMessagesToChats'
 import createNewChatsFromMessages from '../utils/createNewChatsFromFirstMessages'
 import {group} from 'group-items'
@@ -43,15 +42,14 @@ function splitMessagesArrayToNewChatsAndExistingChats({
     .asObject()
 }
 
-// TODO handle non text messages
 function refreshInbox(
   api: ChatPrivateApi
 ): (
-  inbox: InboxInState
+  getInbox: () => InboxInState
 ) => TE.TaskEither<ApiErrorRetrievingMessages, InboxInState> {
-  return (inbox: InboxInState) =>
+  return (getInbox) =>
     pipe(
-      retrieveMessages({api, inboxKeypair: inbox.inbox.privateKey}),
+      retrieveMessages({api, inboxKeypair: getInbox().inbox.privateKey}),
       TE.map((one) => {
         if (one.errors.length > 0) {
           reportError('error', 'Error decrypting messages', one.errors)
@@ -68,13 +66,14 @@ function refreshInbox(
       ),
       TE.map((newMessages) =>
         splitMessagesArrayToNewChatsAndExistingChats({
-          inbox,
+          inbox: getInbox(),
           messages: newMessages,
         })
       ),
       TE.map(({messageInNewChat, messageInExistingChat}) => {
+        const inbox = getInbox()
         return {
-          ...inbox,
+          ...getInbox(),
           chats: [
             ...createNewChatsFromMessages(inbox.inbox)(messageInNewChat || []),
             ...addMessagesToChats(inbox.chats)(messageInExistingChat || []),
@@ -102,58 +101,69 @@ function deletePulledMessagesReportLeft({
   )
 }
 
-export default function useFetchMessages(): T.Task<ChatState> {
+export function useFetchAndStoreMessagesForInbox(): (
+  key: PublicKeyPemBase64
+) => T.Task<InboxInState | undefined> {
   const api = usePrivateApiAssumeLoggedIn()
   const store = useStore()
 
   return useCallback(
-    async () =>
-      await pipe(
+    (inboxKey: PublicKeyPemBase64) => {
+      const inbox = store.get(inboxAtom(inboxKey))
+
+      if (!inbox) {
+        reportError(
+          'error',
+          `Trying to refresh inbox with public key: ${inboxKey}, but inbox does not exist.`,
+          new Error('Inbox does not exist')
+        )
+        return T.of(undefined)
+      }
+
+      return pipe(
+        refreshInbox(api.chat)(() => store.get(inboxAtom(inboxKey)) ?? inbox),
+        TE.match(
+          (error) => {
+            reportError('error', 'Api Error fetching messages for inbox', error)
+            return inbox
+          },
+          (i) => {
+            return i
+          }
+        ),
+        T.map((inbox) => {
+          store.set(inboxAtom(inbox.inbox.privateKey.publicKeyPemBase64), inbox)
+          return inbox
+        }),
+        T.chainFirst(() =>
+          deletePulledMessagesReportLeft({
+            api: api.chat,
+            keyPair: inbox.inbox.privateKey,
+          })
+        )
+      )
+    },
+    [api.chat, store]
+  )
+}
+
+export default function useFetchMessagesForAllInboxes(): () => T.Task<'done'> {
+  const store = useStore()
+  const fetchAndStoreMessagesForInbox = useFetchAndStoreMessagesForInbox()
+
+  return useCallback(
+    () =>
+      pipe(
         store.get(messagingStateAtom),
-        A.map((inbox) =>
-          pipe(
-            refreshInbox(api.chat)(inbox),
-            TE.match(
-              (error) => {
-                reportError(
-                  'error',
-                  'Api Error fetching messages for inbox',
-                  error
-                )
-                // todo Should this be displayed to the user?
-                return inbox
-              },
-              (i) => {
-                return i
-              }
-            ),
-            T.chainFirst(() =>
-              deletePulledMessagesReportLeft({
-                api: api.chat,
-                keyPair: inbox.inbox.privateKey,
-              })
-            )
-          )
+        A.map(
+          async (inbox) =>
+            await fetchAndStoreMessagesForInbox(
+              inbox.inbox.privateKey.publicKeyPemBase64
+            )()
         ),
-        T.sequenceSeqArray,
-        T.map((updatedInboxes) =>
-          pipe(
-            store.get(messagingStateAtom),
-            A.map(
-              (oldInbox) =>
-                updatedInboxes.find(
-                  (newInbox) =>
-                    newInbox.inbox.privateKey.publicKeyPemBase64 ===
-                    oldInbox.inbox.privateKey.publicKeyPemBase64
-                ) ?? oldInbox
-            )
-          )
-        ),
-        T.chainFirst((newInboxes) => {
-          store.set(messagingStateAtom, newInboxes)
-          return T.of(undefined)
-        })
-      )(),
-    [api, store]
+        A.sequence(T.ApplicativeSeq),
+        T.map(() => 'done' as const)
+      ),
+    [fetchAndStoreMessagesForInbox, store]
   )
 }

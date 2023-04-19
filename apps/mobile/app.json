@@ -16,7 +16,9 @@
       "fallbackToCacheTimeout": 0,
       "url": "https://u.expo.dev/8a2b78bf-b758-42b9-947a-c6201cb7cc59"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "it.vexl.next",
@@ -31,7 +33,9 @@
         "backgroundImage": "./assets/android-back.png"
       },
       "package": "it.vexl.next",
-      "permissions": ["android.permission.RECORD_AUDIO"]
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -46,7 +50,6 @@
       "policy": "sdkVersion"
     },
     "plugins": [
-      "expo-community-flipper",
       [
         "expo-image-picker",
         {
@@ -60,7 +63,14 @@
           "contactsPermission": "Allow $(PRODUCT_NAME) to access your contacts."
         }
       ],
-      ["./expo-plugins/fix-rn-codegen.js"]
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "flipper": true
+          }
+        }
+      ]
     ]
   }
 }

@@ -1,5 +1,6 @@
 import {registerRootComponent} from 'expo'
 import App from './src/App'
+import {setupBackgroundMessaging} from './src/utils/notifications/backgroundHandler'
 
 // polyfill Array.at() function
 if (![].at) {
@@ -9,4 +10,13 @@ if (![].at) {
   }
 }
 
-registerRootComponent(App)
+setupBackgroundMessaging()
+
+// eslint-disable-next-line react/prop-types
+function HeadlessCheck({isHeadless}) {
+  if (isHeadless) return null
+
+  return <App />
+}
+
+registerRootComponent(HeadlessCheck)

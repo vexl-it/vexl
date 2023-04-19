@@ -38,5 +38,5 @@ export const InboxInState = z.object({
 })
 export type InboxInState = z.TypeOf<typeof InboxInState>
 
-export const ChatState = z.array(InboxInState)
-export type ChatState = z.TypeOf<typeof ChatState>
+export const MessagingState = z.array(InboxInState)
+export type MessagingState = z.TypeOf<typeof MessagingState>

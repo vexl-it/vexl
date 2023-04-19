@@ -2,7 +2,7 @@ import {type Inbox} from '@vexl-next/domain/dist/general/messaging'
 import * as TE from 'fp-ts/TaskEither'
 import {
   type ApiErrorCreatingInbox,
-  type ChatState,
+  type MessagingState,
   type ErrorInboxAlreadyExists,
   type InboxInState,
 } from '../domain'
@@ -14,20 +14,16 @@ import {messagingStateAtom} from '../atom'
 import {toBasicError} from '@vexl-next/domain/dist/utility/errors'
 import {pipe} from 'fp-ts/function'
 import {type PrivateKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
-
-function getNotificationToken(): string | undefined {
-  // TODO implement this
-  return undefined
-}
+import {getNotificationToken} from '../../../utils/notifications'
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-function focusAddInbox(optic: O.OpticFor<ChatState>) {
+function focusAddInbox(optic: O.OpticFor<MessagingState>) {
   return optic.appendTo()
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function focusOneInbox(privateKey: PrivateKeyPemBase64) {
-  return (optic: O.OpticFor<ChatState>) =>
+  return (optic: O.OpticFor<MessagingState>) =>
     optic.find((one) => one.inbox.privateKey.privateKeyPemBase64 === privateKey)
 }
 
@@ -42,9 +38,7 @@ export default function useCreateInbox(): (
 
   return useCallback(
     (inbox) => {
-      const token = getNotificationToken()
-
-      const messagingStateOptic = O.optic<ChatState>()
+      const messagingStateOptic = O.optic<MessagingState>()
       const oneInboxPrism = focusOneInbox(inbox.privateKey.privateKeyPemBase64)(
         messagingStateOptic
       )
@@ -58,10 +52,16 @@ export default function useCreateInbox(): (
 
       return pipe(
         TE.Do,
-        TE.chainW(() =>
-          api.chat.createInbox({token, keyPair: inbox.privateKey})
+        TE.chainTaskK(getNotificationToken),
+        TE.chainW((token) =>
+          pipe(
+            api.chat.createInbox({
+              token: token ?? undefined,
+              keyPair: inbox.privateKey,
+            }),
+            TE.mapLeft(toBasicError('ApiErrorCreatingInbox'))
+          )
         ),
-        TE.mapLeft(toBasicError('ApiErrorCreatingInbox')),
         TE.map(() => {
           const newInbox: InboxInState = {inbox, chats: []}
           store.set(

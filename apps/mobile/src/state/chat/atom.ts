@@ -1,5 +1,5 @@
 import {atomWithParsedMmkvStorage} from '../../utils/atomWithParsedMmkvStorage'
-import {ChatState, type ChatWithMessages} from './domain'
+import {MessagingState, type ChatWithMessages} from './domain'
 import {focusAtom} from 'jotai-optics'
 import {atom} from 'jotai'
 import * as O from 'optics-ts'
@@ -10,14 +10,25 @@ import {
 } from '@vexl-next/cryptography/dist/KeyHolder'
 
 export const messagingStateAtom = atomWithParsedMmkvStorage(
-  'chatState',
+  'messagingState',
   [],
-  ChatState
+  MessagingState
 )
 
 export const chatsListAtom = focusAtom(messagingStateAtom, (optic) =>
   optic.elems().prop('chats').elems()
 )
+
+export const inboxesAtom = focusAtom(messagingStateAtom, (optic) =>
+  optic.elems().prop('inbox')
+)
+
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+export function inboxAtom(publicKey: PublicKeyPemBase64) {
+  return focusAtom(messagingStateAtom, (optic) =>
+    optic.find((one) => one.inbox.privateKey.publicKeyPemBase64 === publicKey)
+  )
+}
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function chatForPublicKeyAtom({

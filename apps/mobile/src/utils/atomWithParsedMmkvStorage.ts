@@ -60,7 +60,7 @@ export function atomWithParsedMmkvStorage<Value extends z.ZodType>(
   defaultValue: SetStateAction<z.TypeOf<Value>>,
   zodType: Value
 ): AtomWithParsedMmkvStorage<Value> {
-  return pipe(
+  const mmkvAtom = pipe(
     storage.getVerified(key, zodType),
     E.getOrElse((l) => {
       if (l._tag !== 'ValueNotSet') {
@@ -75,4 +75,8 @@ export function atomWithParsedMmkvStorage<Value extends z.ZodType>(
     atom,
     toShadowStorageAtom(key)
   )
+  
+  // TODO register listener
+
+  return mmkvAtom
 }

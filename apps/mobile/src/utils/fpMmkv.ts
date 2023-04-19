@@ -10,7 +10,6 @@ import {
 } from './fpUtils'
 import {MMKV} from 'react-native-mmkv'
 import {pipe} from 'fp-ts/function'
-import {initializeMMKVFlipper} from 'react-native-mmkv-flipper-plugin'
 
 export interface ReadingFromStoreError {
   readonly _tag: 'ReadingFromStoreError'
@@ -111,8 +110,4 @@ export const storage = createFpMMKV(new MMKV())
 
 export function clearStorage(): void {
   storage._storage.clearAll()
-}
-
-if (__DEV__) {
-  initializeMMKVFlipper({default: storage._storage})
 }

@@ -68,7 +68,7 @@ const PressableStyled = styled(Stack, {
 })
 
 const TextStyled = styled(Text, {
-  fow: '$6',
+  ff: '$body600',
   lh: 25,
   fos: 20,
   variants: {

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>183980003892-asckmvia6j23j1q0fmlmiplit2mklihh.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.183980003892-asckmvia6j23j1q0fmlmiplit2mklihh</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>183980003892-57uakqnoh4c8t9qjpgvhevagk7ce5tj6.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyBrLmGZI0iZbt4Uxli2xStcyQaabPn0AXE</string>
+	<key>GCM_SENDER_ID</key>
+	<string>183980003892</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>it.vexl.next</string>
+	<key>PROJECT_ID</key>
+	<string>tidal-horizon-358313</string>
+	<key>STORAGE_BUCKET</key>
+	<string>tidal-horizon-358313.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:183980003892:ios:9abd406d247bfd2fe53061</string>
+</dict>
+</plist>

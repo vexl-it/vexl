@@ -1,0 +1,325 @@
+{
+  "project_info": {
+    "project_number": "183980003892",
+    "project_id": "tidal-horizon-358313",
+    "storage_bucket": "tidal-horizon-358313.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:183980003892:android:f0597b23d62048a3e53061",
+        "android_client_info": {
+          "package_name": "it.vexl"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "183980003892-aqm9hgp2md0v6gc751gvh3vkna08katr.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "it.vexl",
+            "certificate_hash": "f3dad49e21a7aed2e875dfca08ab39552094f1d0"
+          }
+        },
+        {
+          "client_id": "183980003892-cg0rmahnlf8rqahm2go7ul16u3ntd30t.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "it.vexl",
+            "certificate_hash": "0c387557325eaeb423970e3683a8ebde1103e6a3"
+          }
+        },
+        {
+          "client_id": "183980003892-lvapoh98nsm1e1jktknpcdp44hprffis.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAO8_9nMtcwquu8z2oD1kjZE4iXVk2n-JM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "183980003892-lvapoh98nsm1e1jktknpcdp44hprffis.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "183980003892-3kjp1rj1a71fqv0jtsthg7sf0191kmqh.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "it.vexl.debug",
+                "app_store_id": "1639849421"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:183980003892:android:2b273352c4766506e53061",
+        "android_client_info": {
+          "package_name": "it.vexl.debug"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "183980003892-57uakqnoh4c8t9qjpgvhevagk7ce5tj6.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "it.vexl.debug",
+            "certificate_hash": "60cbef07983061759039252aa52552cbb09ebc1a"
+          }
+        },
+        {
+          "client_id": "183980003892-lvapoh98nsm1e1jktknpcdp44hprffis.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAO8_9nMtcwquu8z2oD1kjZE4iXVk2n-JM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "183980003892-lvapoh98nsm1e1jktknpcdp44hprffis.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "183980003892-3kjp1rj1a71fqv0jtsthg7sf0191kmqh.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "it.vexl.debug",
+                "app_store_id": "1639849421"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:183980003892:android:54aa90979c8e52f5e53061",
+        "android_client_info": {
+          "package_name": "it.vexl.dev"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "183980003892-j98ljp12s8a7qodri1umnipjdln16je5.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "it.vexl.dev",
+            "certificate_hash": "f3dad49e21a7aed2e875dfca08ab39552094f1d0"
+          }
+        },
+        {
+          "client_id": "183980003892-lvapoh98nsm1e1jktknpcdp44hprffis.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAO8_9nMtcwquu8z2oD1kjZE4iXVk2n-JM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "183980003892-lvapoh98nsm1e1jktknpcdp44hprffis.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "183980003892-3kjp1rj1a71fqv0jtsthg7sf0191kmqh.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "it.vexl.debug",
+                "app_store_id": "1639849421"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:183980003892:android:bed9dd53599a16d3e53061",
+        "android_client_info": {
+          "package_name": "it.vexl.dev.debug"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "183980003892-9ngdgohm0lhcripeu3ad272nri6d4sup.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "it.vexl.dev.debug",
+            "certificate_hash": "60cbef07983061759039252aa52552cbb09ebc1a"
+          }
+        },
+        {
+          "client_id": "183980003892-lvapoh98nsm1e1jktknpcdp44hprffis.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAO8_9nMtcwquu8z2oD1kjZE4iXVk2n-JM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "183980003892-lvapoh98nsm1e1jktknpcdp44hprffis.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "183980003892-3kjp1rj1a71fqv0jtsthg7sf0191kmqh.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "it.vexl.debug",
+                "app_store_id": "1639849421"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:183980003892:android:f82201deb41bb88ae53061",
+        "android_client_info": {
+          "package_name": "it.vexl.next"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "183980003892-lvapoh98nsm1e1jktknpcdp44hprffis.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAO8_9nMtcwquu8z2oD1kjZE4iXVk2n-JM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "183980003892-lvapoh98nsm1e1jktknpcdp44hprffis.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "183980003892-3kjp1rj1a71fqv0jtsthg7sf0191kmqh.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "it.vexl.debug",
+                "app_store_id": "1639849421"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:183980003892:android:ae25dfaafb163d24e53061",
+        "android_client_info": {
+          "package_name": "it.vexl.staging"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "183980003892-l0i300fuoeftrjhklsnn03vd4qk4cknl.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "it.vexl.staging",
+            "certificate_hash": "f3dad49e21a7aed2e875dfca08ab39552094f1d0"
+          }
+        },
+        {
+          "client_id": "183980003892-lvapoh98nsm1e1jktknpcdp44hprffis.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAO8_9nMtcwquu8z2oD1kjZE4iXVk2n-JM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "183980003892-lvapoh98nsm1e1jktknpcdp44hprffis.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "183980003892-3kjp1rj1a71fqv0jtsthg7sf0191kmqh.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "it.vexl.debug",
+                "app_store_id": "1639849421"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:183980003892:android:0634ae82393eb679e53061",
+        "android_client_info": {
+          "package_name": "it.vexl.staging.debug"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "183980003892-r84p6hpqhto6386ptmhf2vl555au2tse.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "it.vexl.staging.debug",
+            "certificate_hash": "60cbef07983061759039252aa52552cbb09ebc1a"
+          }
+        },
+        {
+          "client_id": "183980003892-lvapoh98nsm1e1jktknpcdp44hprffis.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAO8_9nMtcwquu8z2oD1kjZE4iXVk2n-JM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "183980003892-lvapoh98nsm1e1jktknpcdp44hprffis.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "183980003892-3kjp1rj1a71fqv0jtsthg7sf0191kmqh.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "it.vexl.debug",
+                "app_store_id": "1639849421"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

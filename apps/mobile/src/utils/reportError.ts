@@ -9,6 +9,7 @@ function getConsoleLvl(
 
   return console.debug
 }
+
 function reportError(
   lvl: LogLvl,
   message: string,
@@ -16,7 +17,9 @@ function reportError(
   ...args: any[]
 ): void
 function reportError(lvl: LogLvl, message: string, ...args: any[]): void {
-  // todo crashlytics
+  if (!__DEV__) {
+    // toDO crashlitics
+  }
   getConsoleLvl(lvl)(message, ...args)
 }
 

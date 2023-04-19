@@ -41,7 +41,7 @@ function OfferDetailScreen({
           void requestOffer({
             offer: offer.value.offerInfo,
             text: 'Test sending request',
-          })().then(console.log)
+          })()
           // loadingOverlay.show()
           // void pipe(
           //   TE.right(userSession.privateKey),

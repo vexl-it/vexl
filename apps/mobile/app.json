@@ -24,7 +24,14 @@
       "bundleIdentifier": "it.vexl.next",
       "config": {
         "usesNonExemptEncryption": false
-      }
+      },
+      "infoPlist": {
+        "UIBackgroundModes": [
+          "fetch",
+          "remote-notification"
+        ]
+      },
+      "googleServicesFile": "./creds/GoogleService-Info.plist"
     },
     "android": {
       "softwareKeyboardLayoutMode": "resize",
@@ -35,7 +42,8 @@
       "package": "it.vexl.next",
       "permissions": [
         "android.permission.RECORD_AUDIO"
-      ]
+      ],
+      "googleServicesFile": "./creds/google-services.json"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -67,10 +75,15 @@
         "expo-build-properties",
         {
           "ios": {
-            "flipper": true
+            "useFrameworks": "static"
           }
         }
-      ]
+      ],
+      "@react-native-firebase/app",
+      [
+        "./expo-plugins/disable-firebase-analytics.js"
+      ],
+      "@notifee/react-native"
     ]
   }
 }

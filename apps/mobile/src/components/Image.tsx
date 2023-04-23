@@ -24,7 +24,7 @@ export default function Image({source, ...props}: Props): JSX.Element {
     return <SvgXml {...xmlProps} xml={source.xml} />
   }
   const imageProps = props as RNImageProps
-  return <RNImage source={source} {...imageProps} />
+  return <RNImage {...imageProps} source={source} />
 }
 
 export type ImageProps = Props

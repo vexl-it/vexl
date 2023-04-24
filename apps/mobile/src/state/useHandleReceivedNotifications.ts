@@ -6,6 +6,7 @@ import {pipe} from 'fp-ts/function'
 import * as TE from 'fp-ts/TaskEither'
 import {safeParse} from '../utils/fpUtils'
 import reportError from '../utils/reportError'
+import {showUINotification} from '../utils/notifications'
 
 const NOTIFICATION_TYPES = [
   'MESSAGE',
@@ -25,6 +26,7 @@ export function useHandleReceivedNotifications(): void {
   useEffect(() => {
     return messaging().onMessage(async (remoteMessage) => {
       console.info('📳 Received notification', remoteMessage)
+      await showUINotification(remoteMessage)
 
       const data = remoteMessage.data
       if (!data) {
@@ -35,7 +37,7 @@ export function useHandleReceivedNotifications(): void {
       }
 
       if (NOTIFICATION_TYPES.includes(data.type)) {
-        console.info('📳 refreshing inbox')
+        console.info('📳 Refreshing inbox')
         void pipe(
           data.inbox,
           safeParse(PublicKeyPemBase64),

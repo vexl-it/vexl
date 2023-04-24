@@ -30,7 +30,7 @@ function MessagesScreen({navigation}: Props): JSX.Element {
         >
           <Stack>
             <Text col="$white">
-              message: {chat.messages.at(0)?.message.text}
+              message: {chat.messages.at(-1)?.message.text}
             </Text>
           </Stack>
         </TouchableWithoutFeedback>

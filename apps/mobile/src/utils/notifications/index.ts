@@ -10,14 +10,20 @@ import NotificationSetting from 'react-native-open-notification'
 import messaging, {
   type FirebaseMessagingTypes,
 } from '@react-native-firebase/messaging'
-import {type BasicError} from '@vexl-next/domain/dist/utility/errors'
+import {
+  type BasicError,
+  toBasicError,
+} from '@vexl-next/domain/dist/utility/errors'
+import {useTranslation} from '../localization/I18nProvider'
 
 type UnknownErrorNotifications = BasicError<'UnknownErrorNotifications'>
 
-export function requestNotificationPermissions(): TE.TaskEither<
+export function useRequestNotificationPermissions(): TE.TaskEither<
   UnknownErrorNotifications,
   'granted' | 'deniedWithoutAction' | 'deniedOpenedSettings'
 > {
+  const {t} = useTranslation()
+
   return async () =>
     await new Promise((resolve) => {
       notifee
@@ -30,18 +36,18 @@ export function requestNotificationPermissions(): TE.TaskEither<
 
           Alert.alert(
             // TODO translate
-            'Notifications not granted',
-            'You can enable them in the settings',
+            t('notifications.permissionsNotGranted.title'),
+            t('notifications.permissionsNotGranted.message'),
             [
               {
-                text: 'Open settings',
+                text: t('common.cancel'),
                 onPress: () => {
                   NotificationSetting.open()
                   resolve(E.right('deniedOpenedSettings' as const))
                 },
               },
               {
-                'text': 'Cancel',
+                text: t('notifications.permissionsNotGranted.openSettings'),
                 style: 'cancel',
                 onPress: () => {
                   resolve(E.right('deniedWithoutAction' as const))
@@ -77,21 +83,18 @@ export interface NotificationsEnabledSettings {
 }
 
 export function areNotificationsEnabled(): TE.TaskEither<
-  any,
+  UnknownErrorNotifications,
   NotificationsEnabledSettings
 > {
-  return TE.tryCatch(
-    async () => {
-      const settings = await notifee.getNotificationSettings()
+  return TE.tryCatch(async () => {
+    const settings = await notifee.getNotificationSettings()
 
-      return {
-        notifications:
-          settings.authorizationStatus === AuthorizationStatus.AUTHORIZED,
-        backgroundTasks: true, // TODO how to find this out on IOS?
-      }
-    },
-    () => 'error'
-  )
+    return {
+      notifications:
+        settings.authorizationStatus === AuthorizationStatus.AUTHORIZED,
+      backgroundTasks: true, // TODO how to find this out on IOS?
+    }
+  }, toBasicError('UnknownErrorNotifications'))
 }
 
 export async function showUINotification(

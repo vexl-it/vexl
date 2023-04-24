@@ -230,4 +230,11 @@ export default {
       '\n' +
       'Or you can meet us during your next P2P trade! 😻',
   },
+  'notifications': {
+    'permissionsNotGranted': {
+      title: 'Permissions for notifications were not granted',
+      message: 'You can enable them in the settings',
+      openSettings: 'Open settings',
+    },
+  },
 }

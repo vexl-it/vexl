@@ -8,7 +8,7 @@ import {safeParse} from '../utils/fpUtils'
 import reportError from '../utils/reportError'
 import {showUINotification} from '../utils/notifications'
 
-const NOTIFICATION_TYPES = [
+const CHAT_NOTIFICATION_TYPES = [
   'MESSAGE',
   'REQUEST_REVEAL',
   'APPROVE_REVEAL',
@@ -36,7 +36,7 @@ export function useHandleReceivedNotifications(): void {
         return
       }
 
-      if (NOTIFICATION_TYPES.includes(data.type)) {
+      if (CHAT_NOTIFICATION_TYPES.includes(data.type)) {
         console.info('📳 Refreshing inbox')
         void pipe(
           data.inbox,

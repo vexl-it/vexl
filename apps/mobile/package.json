@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start:clean": "watchman watch-del '/Users/davidnovak/workspace/work/vexl/vexl-next' ; watchman watch-project '/Users/davidnovak/workspace/work/vexl/vexl-next'; expo start -c --dev-client",
     "start": "expo start --dev-client",
     "android": "expo run:android",
     "ios": "expo run:ios",
@@ -11,8 +10,8 @@
     "test": "yarn jest",
     "lint": "eslint src --ext .js,.jsx,.ts,.tsx && tsc --noemit",
     "eas-build-post-install": "yarn turbo:build",
-    "fresh-start-ios": "yarn install && npx expo prebuild --clean -p ios && npx expo run:ios",
-    "fresh-start-android": "yarn install && npx expo prebuild --clean -p android && npx expo run:android"
+    "fresh-start-ios": "yarn install && yarn turbo:build && npx expo prebuild --clean -p ios && npx expo run:ios",
+    "fresh-start-android": "yarn install && yarn turbo:build && npx expo prebuild --clean -p android && npx expo run:android"
   },
   "dependencies": {
     "@notifee/react-native": "^7.7.1",

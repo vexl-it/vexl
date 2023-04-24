@@ -4,8 +4,11 @@ import * as E from 'fp-ts/lib/Either'
 import type * as T from 'fp-ts/lib/Task'
 import {Alert} from 'react-native'
 import NotificationSetting from 'react-native-open-notification'
-import messaging from '@react-native-firebase/messaging'
+import messaging, {
+  FirebaseMessagingTypes,
+} from '@react-native-firebase/messaging'
 import {type BasicError} from '@vexl-next/domain/dist/utility/errors'
+import RemoteMessage = FirebaseMessagingTypes.RemoteMessage
 
 type UnknownErrorNotifications = BasicError<'UnknownErrorNotifications'>
 
@@ -87,4 +90,19 @@ export function areNotificationsEnabled(): TE.TaskEither<
     },
     () => 'error'
   )
+}
+
+export async function showUINotification(
+  remoteMessage: RemoteMessage
+): Promise<void> {
+  if (!remoteMessage.data && !remoteMessage.notification) return
+
+  const {title, body} = remoteMessage.notification ?? remoteMessage.data ?? {}
+
+  if (title && body)
+    await notifee.displayNotification({title, body, data: remoteMessage.data})
+}
+
+export async function deactivateToken(): Promise<void> {
+  await messaging().deleteToken()
 }

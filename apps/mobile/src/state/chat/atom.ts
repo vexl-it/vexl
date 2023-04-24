@@ -50,7 +50,7 @@ export function chatForPublicKeyAtom({
 
 export const chatsToDisplayAtom = atom((get) =>
   get(chatsListAtom).filter((oneChat) => {
-    const lastMessage = oneChat.messages[0]
+    const lastMessage = oneChat.messages.at(-1)
     return (
       lastMessage &&
       lastMessage.message.messageType !== 'REQUEST_MESSAGING' &&
@@ -62,8 +62,9 @@ export const chatsToDisplayAtom = atom((get) =>
 
 export const blockedChatsAtom = atom((get) =>
   get(chatsListAtom).filter((oneChat) => {
-    const lastMessage = oneChat.messages[0]
+    const lastMessage = oneChat.messages.at(-1)
     return (
+      lastMessage &&
       lastMessage.message.messageType === 'BLOCK_CHAT' &&
       lastMessage.state === 'sent'
     )
@@ -72,7 +73,7 @@ export const blockedChatsAtom = atom((get) =>
 
 export const receivedChatRequests = atom((get) =>
   get(chatsListAtom).filter((oneChat) => {
-    const lastMessage = oneChat.messages[0]
+    const lastMessage = oneChat.messages.at(-1)
     return (
       lastMessage &&
       lastMessage.message.messageType === 'REQUEST_MESSAGING' &&
@@ -83,7 +84,7 @@ export const receivedChatRequests = atom((get) =>
 
 export const sentChatRequests = atom((get) =>
   get(chatsListAtom).filter((oneChat) => {
-    const lastMessage = oneChat.messages[0]
+    const lastMessage = oneChat.messages.at(-1)
     return (
       lastMessage &&
       lastMessage.message.messageType === 'REQUEST_MESSAGING' &&

@@ -22,14 +22,15 @@ const Stack = createNativeStackNavigator<RootStackParamsList>()
 function LoggedInHookGroup(): null {
   useRefreshNotificationTokenOnResumeAssumeLoggedIn()
   useHandleReceivedNotifications()
+
+  useHandleNotificationsPermissionsRedirect()
+  useHandlePostLoginFlowRedirect()
+
   return null
 }
 
 function RootNavigation(): JSX.Element {
   const isLoggedIn = useIsUserLoggedIn()
-
-  useHandlePostLoginFlowRedirect()
-  useHandleNotificationsPermissionsRedirect()
 
   return (
     <>

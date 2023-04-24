@@ -15,7 +15,7 @@ import {Stack, Text} from 'tamagui'
 import useCreateInbox from '../../../../state/chat/hooks/useCreateInbox'
 import {useSessionAssumeLoggedIn} from '../../../../state/session'
 import reportError from '../../../../utils/reportError'
-import {requestNotificationPermissions} from '../../../../utils/notifications'
+import {useRequestNotificationPermissions} from '../../../../utils/notifications'
 
 type Props = PostLoginFlowScreenProps<'AllowNotificationsExplanation'>
 
@@ -24,6 +24,7 @@ function AllowNotificationsExplanationScreen({navigation}: Props): JSX.Element {
   const createInbox = useCreateInbox()
   const finishPostLoginFlow = useFinishPostLoginFlow()
   const session = useSessionAssumeLoggedIn()
+  const requestNotificationPermissions = useRequestNotificationPermissions()
 
   function onFinished(): void {
     // TODO display loading
@@ -48,7 +49,7 @@ function AllowNotificationsExplanationScreen({navigation}: Props): JSX.Element {
 
   function requestPermissions(): void {
     void pipe(
-      requestNotificationPermissions(),
+      requestNotificationPermissions,
       TE.match(
         () => {
           onFinished()

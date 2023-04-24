@@ -2,13 +2,14 @@ import {Text} from 'tamagui'
 import WhiteContainer from '../WhiteContainer'
 import {type RootStackScreenProps} from '../../navigationTypes'
 import Button from '../Button'
-import {requestNotificationPermissions} from '../../utils/notifications'
+import {useRequestNotificationPermissions} from '../../utils/notifications'
 
 type Props = RootStackScreenProps<'NotificationPermissionsMissing'>
 
 export function NotificationPermissionsScreen({
   navigation,
 }: Props): JSX.Element {
+  const requestNotificationPermissions = useRequestNotificationPermissions()
   return (
     <WhiteContainer>
       <Text mt={16} fos={18} col="$black">
@@ -18,7 +19,7 @@ export function NotificationPermissionsScreen({
 
       <Button
         onPress={() => {
-          void requestNotificationPermissions()()
+          void requestNotificationPermissions()
         }}
         variant={'secondary'}
         text={'grant us the permissions'}

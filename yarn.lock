@@ -6718,7 +6718,6 @@ __metadata:
     burnt: ^0.10.0
     country-data: ^0.0.31
     deep-equal: ^2.2.0
-    dotenv: ^16.0.3
     eslint: ^8.33.0
     eslint-config-prettier: ^8.6.0
     eslint-config-standard-with-typescript: ^34.0.0

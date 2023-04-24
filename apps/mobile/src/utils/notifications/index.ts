@@ -1,14 +1,16 @@
-import notifee, {AuthorizationStatus} from '@notifee/react-native'
+import notifee, {
+  AndroidImportance,
+  AuthorizationStatus,
+} from '@notifee/react-native'
 import * as TE from 'fp-ts/lib/TaskEither'
 import * as E from 'fp-ts/lib/Either'
 import type * as T from 'fp-ts/lib/Task'
 import {Alert} from 'react-native'
 import NotificationSetting from 'react-native-open-notification'
 import messaging, {
-  FirebaseMessagingTypes,
+  type FirebaseMessagingTypes,
 } from '@react-native-firebase/messaging'
 import {type BasicError} from '@vexl-next/domain/dist/utility/errors'
-import RemoteMessage = FirebaseMessagingTypes.RemoteMessage
 
 type UnknownErrorNotifications = BasicError<'UnknownErrorNotifications'>
 
@@ -93,14 +95,25 @@ export function areNotificationsEnabled(): TE.TaskEither<
 }
 
 export async function showUINotification(
-  remoteMessage: RemoteMessage
+  remoteMessage: FirebaseMessagingTypes.RemoteMessage
 ): Promise<void> {
   if (!remoteMessage.data && !remoteMessage.notification) return
 
   const {title, body} = remoteMessage.notification ?? remoteMessage.data ?? {}
 
+  const channelId = await notifee.createChannel({
+    id: 'general',
+    name: 'General notifications.',
+    importance: AndroidImportance.DEFAULT,
+  })
+
   if (title && body)
-    await notifee.displayNotification({title, body, data: remoteMessage.data})
+    await notifee.displayNotification({
+      title,
+      body,
+      data: remoteMessage.data,
+      android: {channelId},
+    })
 }
 
 export async function deactivateToken(): Promise<void> {

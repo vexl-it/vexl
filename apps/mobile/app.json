@@ -80,10 +80,9 @@
         }
       ],
       "@react-native-firebase/app",
-      [
-        "./expo-plugins/disable-firebase-analytics.js"
-      ],
-      "@notifee/react-native"
+      "@notifee/react-native",
+      "./expo-plugins/disable-firebase-analytics.js",
+      "./expo-plugins/setup-headless-background-message-processing-ios.js"
     ]
   }
 }

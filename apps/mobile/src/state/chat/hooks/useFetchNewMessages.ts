@@ -9,9 +9,8 @@ import retrieveMessages, {
 import reportError from '../../../utils/reportError'
 import * as T from 'fp-ts/Task'
 import {usePrivateApiAssumeLoggedIn} from '../../../api'
-import {useStore} from 'jotai'
+import {type SetStateAction, useStore, type WritableAtom} from 'jotai'
 import {useCallback} from 'react'
-import {inboxAtom, messagingStateAtom} from '../atom'
 import {
   type PrivateKeyHolder,
   type PublicKeyPemBase64,
@@ -19,6 +18,20 @@ import {
 import addMessagesToChats from '../utils/addMessagesToChats'
 import createNewChatsFromMessages from '../utils/createNewChatsFromFirstMessages'
 import {group} from 'group-items'
+import {focusAtom} from 'jotai-optics'
+import messagingStateAtom from '../atoms/messagingStateAtom'
+
+export function createInboxAtom(
+  publicKey: PublicKeyPemBase64
+): WritableAtom<
+  InboxInState | undefined,
+  [SetStateAction<InboxInState>],
+  void
+> {
+  return focusAtom(messagingStateAtom, (optic) =>
+    optic.find((one) => one.inbox.privateKey.publicKeyPemBase64 === publicKey)
+  )
+}
 
 function splitMessagesArrayToNewChatsAndExistingChats({
   inbox,
@@ -34,7 +47,8 @@ function splitMessagesArrayToNewChatsAndExistingChats({
     .by((oneMessage) =>
       inbox.chats.some(
         (oneChat) =>
-          oneMessage.message.senderPublicKey === oneChat.otherSide.publicKey
+          oneMessage.message.senderPublicKey ===
+          oneChat.chat.otherSide.publicKey
       )
         ? 'messageInExistingChat'
         : 'messageInNewChat'
@@ -109,7 +123,7 @@ export function useFetchAndStoreMessagesForInbox(): (
 
   return useCallback(
     (inboxKey: PublicKeyPemBase64) => {
-      const inbox = store.get(inboxAtom(inboxKey))
+      const inbox = store.get(createInboxAtom(inboxKey))
 
       if (!inbox) {
         reportError(
@@ -121,7 +135,9 @@ export function useFetchAndStoreMessagesForInbox(): (
       }
 
       return pipe(
-        refreshInbox(api.chat)(() => store.get(inboxAtom(inboxKey)) ?? inbox),
+        refreshInbox(api.chat)(
+          () => store.get(createInboxAtom(inboxKey)) ?? inbox
+        ),
         TE.match(
           (error) => {
             reportError('error', 'Api Error fetching messages for inbox', error)
@@ -132,7 +148,10 @@ export function useFetchAndStoreMessagesForInbox(): (
           }
         ),
         T.map((inbox) => {
-          store.set(inboxAtom(inbox.inbox.privateKey.publicKeyPemBase64), inbox)
+          store.set(
+            createInboxAtom(inbox.inbox.privateKey.publicKeyPemBase64),
+            inbox
+          )
           return inbox
         }),
         T.chainFirst(() =>
@@ -161,6 +180,7 @@ export default function useFetchMessagesForAllInboxes(): () => T.Task<'done'> {
               inbox.inbox.privateKey.publicKeyPemBase64
             )()
         ),
+        // @ts-expect-error bad typings?
         A.sequence(T.ApplicativeSeq),
         T.map(() => 'done' as const)
       ),

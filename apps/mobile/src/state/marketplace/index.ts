@@ -10,6 +10,7 @@ import {
   loadingStateAtom,
   myOffersAtom,
   offerFlagsAtom,
+  offerForChatOriginAtom,
   offersAtom,
   offersAtomWithFilter,
   offersIdsAtom,
@@ -64,6 +65,7 @@ import notEmpty from '../../utils/notEmpty'
 import useSendMessagingRequest from '../chat/hooks/useSendRequest'
 import {type ApiErrorRequestMessaging} from '@vexl-next/resources-utils/dist/chat/sendMessagingRequest'
 import {type ErrorEncryptingMessage} from '@vexl-next/resources-utils/dist/chat/utils/chatCrypto'
+import {type ChatOrigin} from '@vexl-next/domain/dist/general/messaging'
 
 export function useTriggerOffersRefresh(): Task<void> {
   const api = usePrivateApiAssumeLoggedIn()
@@ -162,7 +164,9 @@ export function useTriggerOffersRefresh(): Task<void> {
             A.filter(notEmpty),
             A.filter((one) => !removedOffers.includes(one.offerInfo.offerId)),
             (offers) => ({offers, lastUpdatedAt: updateStartedAt}),
-            (value) => store.set(offersStateAtom, value)
+            (value) => {
+              store.set(offersStateAtom, value)
+            }
           )
         }
       )
@@ -433,5 +437,13 @@ export function useRequestOffer(): (a: {
         })
       ),
     [store, sendRequest]
+  )
+}
+
+export function useOfferForChatOrigin(
+  chatOrigin: ChatOrigin
+): OneOfferInState | undefined {
+  return useAtomValue(
+    useMemo(() => offerForChatOriginAtom(chatOrigin), [chatOrigin])
   )
 }

@@ -3,12 +3,17 @@ import {useMemo} from 'react'
 import {E164PhoneNumber} from '@vexl-next/domain/dist/general/E164PhoneNumber.brand'
 import {contactsToDisplayAtom} from './contactsToDisplay'
 import {z} from 'zod'
-import {atomWithParsedMmkvStorage} from '../../../utils/atomWithParsedMmkvStorage'
+import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
+import {focusAtom} from 'jotai-optics'
 
-export const selectedContactsAtom = atomWithParsedMmkvStorage(
+export const selectedContactsStorageAtom = atomWithParsedMmkvStorage(
   'selectedContacts',
-  [],
-  z.array(E164PhoneNumber)
+  {selectedContacts: []},
+  z.object({selectedContacts: z.array(E164PhoneNumber)})
+)
+export const selectedContactsAtom = focusAtom(
+  selectedContactsStorageAtom,
+  (o) => o.prop('selectedContacts')
 )
 
 export function useGetSelectedContacts(): () => E164PhoneNumber[] {

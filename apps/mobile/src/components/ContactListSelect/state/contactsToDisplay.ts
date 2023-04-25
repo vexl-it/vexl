@@ -8,7 +8,7 @@ import {matchSorter} from 'match-sorter'
 
 export const contactsToDisplayAtom = atom((get) => {
   const contactsFromDevice = get(contactsFromDeviceAtom)
-  const customContacts = get(customContactsAtom)
+  const customContacts = get(customContactsAtom).customContacts
   const searchText = get(searchTextAtom)
 
   const allContacts = [

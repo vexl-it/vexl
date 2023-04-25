@@ -12,7 +12,7 @@ function AddCustomContactCell({
   return (
     <Stack>
       <Image source={addSvg} />
-      <Text>{t('contactsList.addContact', {numberToAdd})}</Text>
+      <Text>{t('postLoginFlow.contactsList.addContact', {numberToAdd})}</Text>
     </Stack>
   )
 }

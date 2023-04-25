@@ -4,7 +4,7 @@ import {type SvgString} from '@vexl-next/domain/dist/utility/SvgString.brand'
 import profileIconSvg from '../../../images/profileIconSvg'
 import {Alert, Linking, Platform, TouchableWithoutFeedback} from 'react-native'
 import imageIconSvg from '../images/imageIconSvg'
-import {Fragment} from 'react'
+import {Fragment, useMemo} from 'react'
 import editIconSvg from '../images/editIconSvg'
 import trashIconSvg from '../images/trashIconSvg'
 import webIconSvg from '../images/webIconSvg'
@@ -71,121 +71,134 @@ function ButtonsSection(): JSX.Element {
 
   const data: Array<
     Array<{icon: SvgString; text: string | JSX.Element; onPress: () => void}>
-  > = [
-    [{text: t('settings.items.myOffers'), icon: profileIconSvg, onPress: todo}],
-    [
-      {
-        text: t('settings.items.changeProfilePicture'),
-        icon: imageIconSvg,
-        onPress: todo,
-      },
-      {text: t('settings.items.editName'), icon: editIconSvg, onPress: todo},
-    ],
-    [
-      {
-        text: t('settings.items.contactsImported'),
-        icon: contactIconSvg,
-        onPress: () => {
-          navigation.navigate('PostLoginFlow', {
-            screen: 'ImportContacts',
-          })
+  > = useMemo(
+    () => [
+      [
+        {
+          text: t('settings.items.myOffers'),
+          icon: profileIconSvg,
+          onPress: todo,
         },
-      },
-    ],
-    [
-      {
-        text: `${t('settings.items.setPin')} ${
-          Platform.OS === 'ios' ? ` / ${t('settings.items.faceId')}` : ''
-        }`,
-        icon: faceIdIconSvg,
-        onPress: todo,
-      },
-      {text: t('settings.items.czechCrown'), icon: coinsIconSvg, onPress: todo},
-      {
-        text: t('settings.items.allowScreenshots'),
-        icon: imageIconSvg,
-        onPress: todo,
-      },
-    ],
-    [
-      {
-        text: t('settings.items.termsAndPrivacy'),
-        icon: termsIconSvg,
-        onPress: () => {
-          navigation.navigate('TermsAndConditions')
+      ],
+      [
+        {
+          text: t('settings.items.changeProfilePicture'),
+          icon: imageIconSvg,
+          onPress: todo,
         },
-      },
-      {
-        text: t('settings.items.faqs'),
-        icon: questionIconSvg,
-        onPress: () => {
-          navigation.navigate('Faqs')
+        {text: t('settings.items.editName'), icon: editIconSvg, onPress: todo},
+      ],
+      [
+        {
+          text: t('settings.items.contactsImported'),
+          icon: contactIconSvg,
+          onPress: () => {
+            navigation.navigate('PostLoginFlow', {
+              screen: 'ImportContacts',
+            })
+          },
         },
-      },
-      {
-        text: t('settings.items.reportIssue'),
-        icon: customerSupportIconSvg,
-        onPress: todo,
-      },
-      {text: t('settings.items.inAppLogs'), icon: cpuIconSvg, onPress: todo},
-    ],
-    [
-      {
-        text: t('settings.items.requestKnownData'),
-        icon: dataIconSvg,
-        onPress: todo,
-      },
-    ],
-    [
-      {
-        text: (
-          <ItemText ff="$body500" col="$greyOnBlack">
-            {t('settings.items.followUsOn')}{' '}
-            <ItemText ff="$body500" col="$white">
-              {t('settings.items.twitter')}
+      ],
+      [
+        {
+          text: `${t('settings.items.setPin')} ${
+            Platform.OS === 'ios' ? ` / ${t('settings.items.faceId')}` : ''
+          }`,
+          icon: faceIdIconSvg,
+          onPress: todo,
+        },
+        {
+          text: t('settings.items.czechCrown'),
+          icon: coinsIconSvg,
+          onPress: todo,
+        },
+        {
+          text: t('settings.items.allowScreenshots'),
+          icon: imageIconSvg,
+          onPress: todo,
+        },
+      ],
+      [
+        {
+          text: t('settings.items.termsAndPrivacy'),
+          icon: termsIconSvg,
+          onPress: () => {
+            navigation.navigate('TermsAndConditions')
+          },
+        },
+        {
+          text: t('settings.items.faqs'),
+          icon: questionIconSvg,
+          onPress: () => {
+            navigation.navigate('Faqs')
+          },
+        },
+        {
+          text: t('settings.items.reportIssue'),
+          icon: customerSupportIconSvg,
+          onPress: todo,
+        },
+        {text: t('settings.items.inAppLogs'), icon: cpuIconSvg, onPress: todo},
+      ],
+      [
+        {
+          text: t('settings.items.requestKnownData'),
+          icon: dataIconSvg,
+          onPress: todo,
+        },
+      ],
+      [
+        {
+          text: (
+            <ItemText ff="$body500" col="$greyOnBlack">
+              {t('settings.items.followUsOn')}{' '}
+              <ItemText ff="$body500" col="$white">
+                {t('settings.items.twitter')}
+              </ItemText>
             </ItemText>
-          </ItemText>
-        ),
-        icon: twitterIconSvg,
-        onPress: openUrl(t('settings.items.twitterUrl')),
-      },
-      {
-        text: (
-          <ItemText ff="$body500" col="$greyOnBlack">
-            {t('settings.items.readMoreOn')}{' '}
-            <ItemText ff="$body500" col="$white">
-              {t('settings.items.medium')}
+          ),
+          icon: twitterIconSvg,
+          onPress: openUrl(t('settings.items.twitterUrl')),
+        },
+        {
+          text: (
+            <ItemText ff="$body500" col="$greyOnBlack">
+              {t('settings.items.readMoreOn')}{' '}
+              <ItemText ff="$body500" col="$white">
+                {t('settings.items.medium')}
+              </ItemText>
             </ItemText>
-          </ItemText>
-        ),
-        icon: mediumIconSvg,
-        onPress: openUrl(t('settings.items.mediumUrl')),
-      },
-      {
-        text: (
-          <ItemText ff="$body500" col="$greyOnBlack">
-            {t('settings.items.learnMoreOn')}{' '}
-            <ItemText ff="$body500" col="$white">
-              {t('settings.items.website')}
+          ),
+          icon: mediumIconSvg,
+          onPress: openUrl(t('settings.items.mediumUrl')),
+        },
+        {
+          text: (
+            <ItemText ff="$body500" col="$greyOnBlack">
+              {t('settings.items.learnMoreOn')}{' '}
+              <ItemText ff="$body500" col="$white">
+                {t('settings.items.website')}
+              </ItemText>
             </ItemText>
-          </ItemText>
-        ),
-        icon: webIconSvg,
-        onPress: openUrl(`${t('settings.items.websiteUrl')}`),
-      },
+          ),
+          icon: webIconSvg,
+          onPress: openUrl(`${t('settings.items.websiteUrl')}`),
+        },
+      ],
+      [
+        {
+          text: (
+            <ItemText ff="$body500" col="$red">
+              {t('settings.items.deleteAccount')}
+            </ItemText>
+          ),
+          icon: trashIconSvg,
+          onPress: logout,
+        },
+      ],
     ],
-    [
-      {
-        text: (
-          <ItemText ff="$body500" col="$red">
-            {t('settings.items.deleteAccount')}
-          </ItemText>
-        ),
-        icon: trashIconSvg,
-        onPress: logout,
-      },
-    ],
-  ]
+    [logout, navigation, t]
+  )
 
   return (
     <Stack f={1} mt="$7" mx="$2">

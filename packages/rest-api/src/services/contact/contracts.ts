@@ -1,6 +1,15 @@
 import {z} from 'zod'
 import {PageRequest, PageResponse} from '../../Pagination.brand'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
+
+export interface InboxDoesNotExist {
+  _tag: 'inboxDoesNotExist'
+}
+
+export interface NotPermittedToSendMessageToTargetInbox {
+  _tag: 'notPermittedToSendMessageToTargetInbox'
+}
+
 export interface ImportListEmpty {
   _tag: 'ImportListEmpty'
 }

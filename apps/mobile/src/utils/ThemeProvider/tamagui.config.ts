@@ -17,6 +17,7 @@ const color = {
   greyAccent5: '#f2f2f2',
   redAccent1: '#351614',
   red: '#EE675E',
+  darkRed: '#351614',
   darkBrown: '#322717',
   black: '#000000',
   blackAccent1: '#131313',
@@ -25,10 +26,12 @@ const color = {
   pinkAccent1: '#322930',
   pinkAccent2: '#4C3B49',
   pink: '#fcc5f3',
+  pastelGreen: '#ACD9B7',
 }
 
 const space = {
   '-4': -16,
+  '-3': -12,
   '-2': -8,
   0: 0,
   1: 4,

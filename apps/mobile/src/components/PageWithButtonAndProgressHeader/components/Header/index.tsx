@@ -1,4 +1,4 @@
-import backButtonSvg from './img/backButtonSvg'
+import backButtonSvg from '../../../../images/backButtonSvg'
 import {useAtomValue} from 'jotai'
 import headerStateAtom from '../../state/headerStateAtom'
 import {Stack, styled, XStack} from 'tamagui'
@@ -36,9 +36,7 @@ function Header(): JSX.Element | null {
         <IconButton
           icon={backButtonSvg}
           variant="dark"
-          onPress={() => {
-            headerOptions.goBack()
-          }}
+          onPress={headerOptions.goBack}
         />
       ) : (
         <BackButtonFiller />

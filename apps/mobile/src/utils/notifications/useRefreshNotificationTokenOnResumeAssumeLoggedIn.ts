@@ -9,10 +9,15 @@ import * as TE from 'fp-ts/lib/TaskEither'
 import * as A from 'fp-ts/lib/Array'
 import * as T from 'fp-ts/lib/Task'
 import reportError from '../reportError'
-import {inboxesAtom} from '../../state/chat/atom'
 import messaging from '@react-native-firebase/messaging'
+import {focusAtom} from 'jotai-optics'
+import messagingStateAtom from '../../state/chat/atoms/messagingStateAtom'
 
 const NOTIFICATION_TOKEN_CACHE_KEY = 'notificationToken'
+
+export const inboxesAtom = focusAtom(messagingStateAtom, (optic) =>
+  optic.elems().prop('inbox')
+)
 
 export function useRefreshNotificationTokenOnResumeAssumeLoggedIn(): void {
   const store = useStore()
@@ -71,6 +76,7 @@ export function useRefreshNotificationTokenOnResumeAssumeLoggedIn(): void {
             )
           )
         ),
+        // @ts-expect-error todo fix
         A.sequence(T.ApplicativePar),
         // eslint-disable-next-line array-callback-return
         T.map(() => {

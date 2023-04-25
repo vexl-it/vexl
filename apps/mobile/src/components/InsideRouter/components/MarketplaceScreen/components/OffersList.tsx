@@ -3,6 +3,7 @@ import {FlatList, RefreshControl} from 'react-native'
 import {type OneOfferInState} from '../../../../../state/marketplace/domain'
 import {getTokens} from 'tamagui'
 import usePixelsFromBottomWhereTabsEnd from '../../../utils'
+import {useMemo} from 'react'
 
 export interface Props {
   readonly offers: OneOfferInState[]
@@ -10,28 +11,38 @@ export interface Props {
   refreshing: boolean
 }
 
+function keyExtractor(offer: OneOfferInState): string {
+  return offer.offerInfo.offerId
+}
+
+function renderItem({item}: {item: OneOfferInState}): JSX.Element {
+  return <OfferListItem offer={item} />
+}
+
 function OffersList({offers, onRefresh, refreshing}: Props): JSX.Element {
-  const tokens = getTokens()
   const bottomOffset = usePixelsFromBottomWhereTabsEnd()
 
   return (
     <>
       <FlatList
-        contentContainerStyle={{
-          marginLeft: tokens.space[2].val,
-          marginRight: tokens.space[2].val,
-          paddingBottom: bottomOffset + Number(tokens.space[5].val),
-        }}
+        contentContainerStyle={useMemo(
+          () => ({
+            marginLeft: getTokens().space[2].val,
+            marginRight: getTokens().space[2].val,
+            paddingBottom: bottomOffset + Number(getTokens().space[5].val),
+          }),
+          [bottomOffset]
+        )}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor={tokens.color.main.val}
+            tintColor={getTokens().color.main.val}
           />
         }
         data={offers}
-        renderItem={({item}) => <OfferListItem offer={item} />}
-        keyExtractor={(offer) => offer.offerInfo.offerId}
+        renderItem={renderItem}
+        keyExtractor={keyExtractor}
       />
     </>
   )

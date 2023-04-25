@@ -76,3 +76,6 @@ dist/
 # expo - use expo prebuild to generate those folders
 /ios
 /android
+
+/credentials/*
+/credentials.json

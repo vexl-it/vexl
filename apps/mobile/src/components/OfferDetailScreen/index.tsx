@@ -35,7 +35,10 @@ function OfferDetailScreen({
         disabled={false}
         onPress={() => {
           if (chatForOffer) {
-            navigation.navigate('ChatDetail', {chatId: chatForOffer.id})
+            navigation.navigate('ChatDetail', {
+              chatId: chatForOffer.id,
+              inboxKey: chatForOffer.inbox.privateKey.publicKeyPemBase64,
+            })
             return
           }
           void requestOffer({

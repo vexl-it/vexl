@@ -8,14 +8,16 @@
     "test:watch": "yarn jest --watch",
     "build": "yarn tsc",
     "build-watch": "yarn tsc --watch",
-    "clean": "rm -rf dist tsconfig.tsbuildinfo",
+    "clean": "rimraf dist tsconfig.tsbuildinfo",
     "lint": "eslint src --ext .js,.jsx,.ts,.tsx && tsc --noemit"
   },
   "dependencies": {
     "@craftzdog/react-native-buffer": "^6.0.5",
+    "@noble/secp256k1": "^2.0.0",
     "asn1.js": "^5.4.1",
     "fp-ts": "^2.13.1",
     "react-native-get-random-values": "^1.8.0",
+    "rimraf": "^4.4.0",
     "zod": "^3.21.4"
   },
   "devDependencies": {

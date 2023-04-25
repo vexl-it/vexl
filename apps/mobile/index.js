@@ -1,3 +1,4 @@
+import './src/utils/wdyr'
 import {registerRootComponent} from 'expo'
 import App from './src/App'
 import {setupBackgroundMessaging} from './src/utils/notifications/backgroundHandler'

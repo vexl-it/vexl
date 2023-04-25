@@ -1,11 +1,16 @@
 import {useAtomValue, useSetAtom} from 'jotai'
 import {z} from 'zod'
-import {atomWithParsedMmkvStorage} from '../utils/atomWithParsedMmkvStorage'
+import {atomWithParsedMmkvStorage} from '../utils/atomUtils/atomWithParsedMmkvStorage'
+import {focusAtom} from 'jotai-optics'
 
-export const postLoginFinishedAtom = atomWithParsedMmkvStorage(
+export const postLoginFinishedStorageAtom = atomWithParsedMmkvStorage(
   'postLoginFinished1',
-  false,
-  z.boolean()
+  {postLoginFinished: false},
+  z.object({postLoginFinished: z.boolean()})
+)
+export const postLoginFinishedAtom = focusAtom(
+  postLoginFinishedStorageAtom,
+  (o) => o.prop('postLoginFinished')
 )
 
 export function useFinishPostLoginFlow(): (f: boolean) => void {

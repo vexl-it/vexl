@@ -1,5 +1,5 @@
 import {type Atom, atom} from 'jotai'
-import {atomWithParsedMmkvStorage} from '../../utils/atomWithParsedMmkvStorage'
+import {atomWithParsedMmkvStorage} from '../../utils/atomUtils/atomWithParsedMmkvStorage'
 import {focusAtom} from 'jotai-optics'
 import {
   type LoadingState,
@@ -10,6 +10,7 @@ import {
 import {type OfferId} from '@vexl-next/domain/dist/general/offers'
 import {MINIMAL_DATE} from '@vexl-next/domain/dist/utility/IsoDatetimeString.brand'
 import {areIncluded} from './utils'
+import {type ChatOrigin} from '@vexl-next/domain/dist/general/messaging'
 
 export const offersStateAtom = atomWithParsedMmkvStorage(
   'offers',
@@ -85,3 +86,11 @@ export function offerFlagsAtom(offerId: OfferId) {
 }
 
 export const loadingStateAtom = atom<LoadingState>({state: 'initial'})
+
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+export function offerForChatOriginAtom(chatOrigin: ChatOrigin) {
+  return atom((get) => {
+    if (chatOrigin.type === 'unknown') return undefined
+    return get(singleOfferAtom(chatOrigin.offerId))
+  })
+}

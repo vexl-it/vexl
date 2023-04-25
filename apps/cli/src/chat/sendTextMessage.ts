@@ -15,6 +15,7 @@ import sendMessage from '@vexl-next/resources-utils/dist/chat/sendMessage'
 import {now} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
 import {parseCredentialsJson} from '../utils/auth'
 import {generateUuid} from '@vexl-next/domain/dist/utility/Uuid.brand'
+import {generateChatMessageId} from '@vexl-next/domain/dist/general/messaging'
 
 export default function sendTextMessage({
   userCredentialsJson,
@@ -48,7 +49,7 @@ export default function sendTextMessage({
           messageType: 'MESSAGE',
           time: now(),
           senderPublicKey: inboxKeyPair.publicKeyPemBase64,
-          uuid: generateUuid(),
+          uuid: generateChatMessageId(),
         },
         api: api.chat,
         senderKeypair: inboxKeyPair,

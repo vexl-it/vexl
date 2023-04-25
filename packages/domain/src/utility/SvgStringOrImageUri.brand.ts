@@ -2,26 +2,24 @@ import {UriString} from './UriString.brand'
 import {SvgString} from './SvgString.brand'
 import {z} from 'zod'
 
-export const SvgStringOrImageUri = z
-  .custom<
-    | {
-        type: 'imageUri'
-        imageUri: UriString
-      }
-    | {
-        type: 'svgXml'
-        svgXml: SvgString
-      }
-  >((value: any) => {
-    if (!value) return
-    if (value.type === 'imageUri') {
-      return UriString.safeParse(value.imageUri)
-    } else if (value.type === 'svgXml') {
-      return SvgString.safeParse(value.xvgXml)
+export const SvgStringOrImageUri = z.custom<
+  | {
+      type: 'imageUri'
+      imageUri: UriString
     }
-    return false
-  })
-  .brand<'SvgStringOrImageUri'>()
+  | {
+      type: 'svgXml'
+      svgXml: SvgString
+    }
+>((value: any) => {
+  if (!value) return
+  if (value.type === 'imageUri') {
+    return UriString.safeParse(value.imageUri)
+  } else if (value.type === 'svgXml') {
+    return SvgString.safeParse(value.xvgXml)
+  }
+  return false
+})
 export type SvgStringOrImageUri = z.TypeOf<typeof SvgStringOrImageUri>
 
 export function fromImageUri(imageUri: UriString): SvgStringOrImageUri {

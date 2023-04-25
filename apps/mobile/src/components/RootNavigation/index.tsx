@@ -17,6 +17,7 @@ import CreateOfferScreen from '../CreateOfferScreen'
 import {NotificationPermissionsScreen} from '../NotificationPermissionsScreen'
 import {useRefreshNotificationTokenOnResumeAssumeLoggedIn} from '../../utils/notifications/useRefreshNotificationTokenOnResumeAssumeLoggedIn'
 import {useHandleReceivedNotifications} from '../../state/useHandleReceivedNotifications'
+import DebugScreen from '../DebugScreen'
 
 const Stack = createNativeStackNavigator<RootStackParamsList>()
 
@@ -59,6 +60,7 @@ function RootNavigation(): JSX.Element {
         )}
         <Stack.Screen name={'TermsAndConditions'} component={TosScreen} />
         <Stack.Screen name={'Faqs'} component={FaqsScreen} />
+        <Stack.Screen name={'DebugScreen'} component={DebugScreen} />
       </Stack.Navigator>
       {isLoggedIn && <LoggedInHookGroup />}
     </>

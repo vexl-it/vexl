@@ -15,12 +15,17 @@ import {
   Text,
 } from 'tamagui'
 import closeSvg from './images/closeSvg'
-import {type Ref, useRef} from 'react'
+import {
+  forwardRef,
+  type ReactNode,
+  type Ref,
+  useImperativeHandle,
+  useRef,
+} from 'react'
 
 const RootContainer = styled(XStack, {
   ai: 'center',
   p: '$4',
-  br: '$4',
   variants: {
     small: {
       true: {
@@ -99,23 +104,42 @@ export interface Props extends Omit<TextInputProps, 'style'> {
   style?: XStackProps
   textColor?: ColorTokens
   variant?: 'greyOnWhite' | 'greyOnBlack' | 'transparentOnGrey'
+  rightElement?: ReactNode
+  borderRadius?: string
+  multiline?: boolean
 }
 
-function TextInput({
-  style,
-  small,
-  icon,
-  leftText,
-  rightText,
-  showClearButton,
-  textColor,
-  variant = 'greyOnWhite',
-  ...restProps
-}: Props): JSX.Element {
+function TextInput(
+  {
+    style,
+    small,
+    icon,
+    leftText,
+    rightText,
+    showClearButton,
+    textColor,
+    variant = 'greyOnWhite',
+    rightElement,
+    borderRadius,
+    multiline,
+    ...restProps
+  }: Props,
+  ref: Ref<RNTextInput>
+): JSX.Element {
   const tokens = getTokens()
   const inputRef: Ref<RNTextInput> = useRef(null)
+  useImperativeHandle<RNTextInput | null, RNTextInput | null>(
+    ref,
+    () => inputRef.current
+  )
+
   return (
-    <RootContainer variant={variant} small={small} {...style}>
+    <RootContainer
+      variant={variant}
+      small={small}
+      borderRadius={borderRadius ?? '$4'}
+      {...style}
+    >
       {icon && (
         <Stack mr="$2">
           <Stack w={small ? 14 : 20} h={small ? 14 : 20}>
@@ -136,6 +160,7 @@ function TextInput({
         </StyledText>
       )}
       <InputStyled
+        multiline={multiline}
         ref={inputRef}
         placeholderTextColor={tokens.color.greyAccent2.val}
         selectionColor={
@@ -164,8 +189,9 @@ function TextInput({
           {rightText}
         </StyledText>
       )}
+      {rightElement ?? null}
     </RootContainer>
   )
 }
 
-export default TextInput
+export default forwardRef<RNTextInput, Props>(TextInput)

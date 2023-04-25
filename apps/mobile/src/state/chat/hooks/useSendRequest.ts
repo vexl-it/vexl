@@ -4,7 +4,11 @@ import {type OfferInfo} from '@vexl-next/domain/dist/general/offers'
 import {useSessionAssumeLoggedIn} from '../../session'
 import {usePrivateApiAssumeLoggedIn} from '../../../api'
 import {useStore} from 'jotai'
-import {ChatId, type Inbox} from '@vexl-next/domain/dist/general/messaging'
+import {
+  type ChatId,
+  generateChatId,
+  type Inbox,
+} from '@vexl-next/domain/dist/general/messaging'
 import * as O from 'optics-ts'
 import {
   type ChatMessageWithState,
@@ -12,14 +16,13 @@ import {
   type ChatWithMessages,
 } from '../domain'
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
-import {messagingStateAtom} from '../atom'
-import {generateUuid} from '@vexl-next/domain/dist/utility/Uuid.brand'
 import {useCallback} from 'react'
 import {type ErrorEncryptingMessage} from '@vexl-next/resources-utils/dist/chat/utils/chatCrypto'
 import {
   type ApiErrorRequestMessaging,
   sendMessagingRequest,
 } from '@vexl-next/resources-utils/dist/chat/sendMessagingRequest'
+import messagingStateAtom from '../atoms/messagingStateAtom'
 
 function createNewChat({
   inbox,
@@ -31,13 +34,16 @@ function createNewChat({
   offerInfo: OfferInfo
 }): ChatWithMessages {
   return {
-    id: ChatId.parse(generateUuid()),
-    inbox,
-    messages: [initialMessage],
-    origin: {type: 'theirOffer', offerId: offerInfo.offerId},
-    otherSide: {
-      publicKey: offerInfo.publicPart.offerPublicKey,
+    chat: {
+      id: generateChatId(),
+      inbox,
+      origin: {type: 'theirOffer', offerId: offerInfo.offerId},
+      otherSide: {
+        publicKey: offerInfo.publicPart.offerPublicKey,
+      },
+      isUnread: false,
     },
+    messages: [initialMessage],
   }
 }
 
@@ -79,11 +85,11 @@ export default function useSendMessagingRequest(): (a: {
         ),
         TE.map((chat) => {
           store.set(messagingStateAtom, (old) =>
-            O.set(focusPrependChat(chat.inbox.privateKey.publicKeyPemBase64))(
-              chat
-            )(old)
+            O.set(
+              focusPrependChat(chat.chat.inbox.privateKey.publicKeyPemBase64)
+            )(chat)(old)
           )
-          return chat.id
+          return chat.chat.id
         })
       )
     },

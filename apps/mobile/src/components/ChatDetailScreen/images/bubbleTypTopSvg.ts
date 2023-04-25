@@ -1,0 +1,9 @@
+import {stringToSvgStringRuntimeError} from '../../Image'
+
+const bubbleTypTopSvg =
+  stringToSvgStringRuntimeError(`<svg width='22' height='10' viewBox='0 0 22 10' fill='none' xmlns='http://www.w3.org/2000/svg'>
+<path d='M22 9C22 9.55228 21.5523 10 21 10L1 10C0.447716 10 3.91797e-08 9.55183 8.7462e-08 8.99955C1.35701e-07 8.44776 0.447313 8 0.999104 8C1.40037 8 1.78573 7.84308 2.07286 7.56277L7.85596 1.91689C8.03609 1.74103 8.12616 1.65311 8.20673 1.58246C9.7158 0.259366 11.9717 0.259366 13.4808 1.58247C13.5613 1.65311 13.6514 1.74104 13.8315 1.91689L19.5285 7.47869C19.8709 7.81291 20.3303 8 20.8088 8L21 8C21.5523 8 22 8.44772 22 9Z' fill='white'/>
+</svg>
+`)
+
+export default bubbleTypTopSvg

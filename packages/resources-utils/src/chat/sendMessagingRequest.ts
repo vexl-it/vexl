@@ -3,13 +3,15 @@ import {
   type PublicKeyPemBase64,
 } from '@vexl-next/cryptography/dist/KeyHolder'
 import {type ChatPrivateApi} from '@vexl-next/rest-api/dist/services/chat'
-import {type ChatMessage} from '@vexl-next/domain/dist/general/messaging'
+import {
+  type ChatMessage,
+  generateChatMessageId,
+} from '@vexl-next/domain/dist/general/messaging'
 import {now} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
 import {flow, pipe} from 'fp-ts/function'
 import * as TE from 'fp-ts/TaskEither'
 import {encryptMessage, type ErrorEncryptingMessage} from './utils/chatCrypto'
 import {type BasicError, toError} from '@vexl-next/domain/dist/utility/errors'
-import {generateUuid} from '@vexl-next/domain/dist/utility/Uuid.brand'
 
 function createRequestChatMessage({
   text,
@@ -19,7 +21,7 @@ function createRequestChatMessage({
   senderPublicKey: PublicKeyPemBase64
 }): ChatMessage {
   return {
-    uuid: generateUuid(),
+    uuid: generateChatMessageId(),
     messageType: 'REQUEST_MESSAGING',
     text,
     time: now(),
@@ -43,6 +45,8 @@ export function sendMessagingRequest({
   ApiErrorRequestMessaging | ErrorEncryptingMessage,
   ChatMessage
 > {
+  console.log(`Encrypting message to ${toPublicKey}`)
+
   return pipe(
     createRequestChatMessage({
       text,

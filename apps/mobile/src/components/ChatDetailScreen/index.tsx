@@ -1,109 +1,42 @@
 import {type RootStackScreenProps} from '../../navigationTypes'
-import Screen from '../Screen'
-import {ScrollView, Stack, Text} from 'tamagui'
-import useSingleChat from '../../state/chat/hooks/useSingleChat'
-import {useState} from 'react'
-import Input from '../Input'
-import Button from '../Button'
-import useSendMessage from '../../state/chat/hooks/useSendMessage'
-import {now} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
-import useFetchMessagesForAllInboxes from '../../state/chat/hooks/useFetchNewMessages'
-import useDeleteChat from '../../state/chat/hooks/useDeleteChat'
-import {generateUuid} from '@vexl-next/domain/dist/utility/Uuid.brand'
+import {ScopeProvider} from 'jotai-molecules'
+import {ChatScope, dummyChatWithMessages} from './atoms'
+import {useAtomValue} from 'jotai'
+import {useMemo} from 'react'
+import focusChatWithMessagesAtom from '../../state/chat/atoms/focusChatWithMessagesAtom'
+import MessagesListOrApprovalPreview from './components/MessagesListOrApprovalPreview'
+import valueOrDefaultAtom from '../../utils/atomUtils/valueOrDefaultAtom'
+import hasNonNullableValueAtom from '../../utils/atomUtils/hasNonNullableValueAtom'
+import AreYouSureDialog from '../AreYouSureDialog'
 
 type Props = RootStackScreenProps<'ChatDetail'>
 
-function ChatDetailScreen({
+export default function ChatDetailScreen({
   navigation,
   route: {
-    params: {chatId},
+    params: {chatId, inboxKey},
   },
 }: Props): JSX.Element {
-  const chat = useSingleChat(chatId)
-  const [text, setText] = useState('')
-  const sendMessage = useSendMessage()
-  const pullMessages = useFetchMessagesForAllInboxes()
-  const deleteChat = useDeleteChat()
+  const {nonNullChatWithMessagesAtom, chatExistsAtom} = useMemo(() => {
+    const chatWithMessagesAtom = focusChatWithMessagesAtom({chatId, inboxKey})
 
-  if (!chat) {
-    return <Text col="$white">Not exist</Text>
-  }
+    const nonNullChatWithMessagesAtom = valueOrDefaultAtom({
+      nullableAtom: chatWithMessagesAtom,
+      dummyValue: dummyChatWithMessages,
+    })
+    const chatExistsAtom = hasNonNullableValueAtom(chatWithMessagesAtom)
 
-  const {inbox} = chat
+    return {nonNullChatWithMessagesAtom, chatExistsAtom}
+  }, [chatId, inboxKey])
+
+  const chatExists = useAtomValue(chatExistsAtom)
+
+  if (!chatExists) return <></>
 
   return (
-    <Screen>
-      <ScrollView mx="$2">
-        <Text col="$white">ChatId: {chatId}</Text>
-
-        <Text fos={30} col="$white">
-          Messages:{' '}
-        </Text>
-        {chat.messages.map((message) => (
-          <Stack
-            key={message.message.uuid}
-            alignSelf={message.state === 'received' ? 'flex-start' : 'flex-end'}
-          >
-            <Text
-              col={
-                message.state === 'sending'
-                  ? '$greyOnBlack'
-                  : message.state === 'sendingError'
-                  ? '$red'
-                  : '$white'
-              }
-            >
-              {message.message.text}
-            </Text>
-          </Stack>
-        ))}
-        <Input value={text} onChangeText={setText} />
-        <Stack h="$2" />
-        <Button
-          disabled={text.trim() === ''}
-          onPress={() => {
-            const textToSend = text
-            setText('')
-            void sendMessage({
-              chat,
-              message: {
-                text: textToSend,
-                messageType: 'MESSAGE',
-                uuid: generateUuid(),
-                senderPublicKey: inbox.privateKey.publicKeyPemBase64,
-                time: now(),
-              },
-            })()
-          }}
-          variant={'primary'}
-          text={'submit'}
-          small
-        />
-        <Button
-          onPress={() => {
-            void pullMessages()()
-          }}
-          small
-          variant="primary"
-          text="refresh"
-        />
-        <Button
-          onPress={() => {
-            navigation.goBack()
-          }}
-          variant="primary"
-          text={'back'}
-        />
-        <Button
-          onPress={() => {
-            void deleteChat({chatInfo: chat, text: 'deleting you bro'})()
-          }}
-          variant="primary"
-          text={'delete this shit'}
-        />
-      </ScrollView>
-    </Screen>
+    <ScopeProvider scope={ChatScope} value={nonNullChatWithMessagesAtom}>
+      <MessagesListOrApprovalPreview />
+      <AreYouSureDialog />
+    </ScopeProvider>
   )
 }
-
-export default ChatDetailScreen

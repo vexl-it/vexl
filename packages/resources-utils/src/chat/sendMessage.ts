@@ -7,10 +7,13 @@ import {pipe} from 'fp-ts/function'
 import {type ChatMessage} from '@vexl-next/domain/dist/general/messaging'
 import * as TE from 'fp-ts/TaskEither'
 import {encryptMessage, type ErrorEncryptingMessage} from './utils/chatCrypto'
-import {type BasicError, toError} from '@vexl-next/domain/dist/utility/errors'
 import {type ServerMessage} from '@vexl-next/rest-api/dist/services/chat/contracts'
+import {type ExtractLeftTE} from '../utils/ExtractLeft'
 
-export type ApiErrorSendMessage = BasicError<'ApiErrorSendMessage'>
+export type SendMessageApiErrors = ExtractLeftTE<
+  ReturnType<ChatPrivateApi['sendMessage']>
+>
+
 export default function sendMessage({
   api,
   receiverPublicKey,
@@ -21,7 +24,10 @@ export default function sendMessage({
   receiverPublicKey: PublicKeyPemBase64
   message: ChatMessage
   senderKeypair: PrivateKeyHolder
-}): TE.TaskEither<ErrorEncryptingMessage | ApiErrorSendMessage, ServerMessage> {
+}): TE.TaskEither<
+  ErrorEncryptingMessage | SendMessageApiErrors,
+  ServerMessage
+> {
   return pipe(
     message,
     encryptMessage(receiverPublicKey),
@@ -32,8 +38,7 @@ export default function sendMessage({
           messageType: message.messageType,
           receiverPublicKey,
           keyPair: senderKeypair,
-        }),
-        TE.mapLeft(toError('ApiErrorSendMessage'))
+        })
       )
     )
   )

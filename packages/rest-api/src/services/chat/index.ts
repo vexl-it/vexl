@@ -4,7 +4,11 @@ import {type GetUserSessionCredentials} from '../../UserSessionCredentials.brand
 import {type CreateAxiosDefaults} from 'axios'
 import urlJoin from 'url-join'
 import * as TE from 'fp-ts/TaskEither'
-import {axiosCallWithValidation, createAxiosInstanceWithAuthAndLogging, type LoggingFunction} from '../../utils'
+import {
+  axiosCallWithValidation,
+  createAxiosInstanceWithAuthAndLogging,
+  type LoggingFunction,
+} from '../../utils'
 import {
   type ApproveRequestRequest,
   ApproveRequestResponse,
@@ -34,6 +38,10 @@ import {
 } from './contracts'
 import {pipe} from 'fp-ts/function'
 import {addChallengeToRequest} from './utils'
+import {
+  type InboxDoesNotExist,
+  type NotPermittedToSendMessageToTargetInbox,
+} from '../contact/contracts'
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function privateApi({
@@ -179,7 +187,20 @@ export function privateApi({
             {method: 'post', url: '/inboxes/messages', data},
             SendMessageResponse
           )
-        )
+        ),
+        TE.mapLeft((e) => {
+          if (e._tag === 'BadStatusCodeError') {
+            if (e.response.data.code === '100101') {
+              return {_tag: 'inboxDoesNotExist'} as InboxDoesNotExist
+            }
+            if (e.response.data.code === '100102') {
+              return {
+                _tag: 'notPermittedToSendMessageToTargetInbox',
+              } as NotPermittedToSendMessageToTargetInbox
+            }
+          }
+          return e
+        })
       )
     },
     sendMessages(data: SendMessagesRequest) {

@@ -18,6 +18,8 @@ export const MessageType = z.enum([
   'DISAPPROVE_MESSAGING',
   'DELETE_CHAT',
   'BLOCK_CHAT',
+  'OFFER_DELETED',
+  'INBOX_DELETED',
 ])
 export type MessageType = z.TypeOf<typeof MessageType>
 
@@ -33,9 +35,12 @@ export const DeanonymizedUser = z.object({
 })
 export type DeanonymizedUser = z.TypeOf<typeof DeanonymizedUser>
 
+export const ChatMessageId = z.string().uuid().brand<'ChatMessageId'>()
+export type ChatMessageId = z.TypeOf<typeof ChatMessageId>
+
 //
 export const ChatMessagePayload = z.object({
-  uuid: Uuid,
+  uuid: ChatMessageId,
   text: z.string(),
   image: Base64String.optional(),
   time: UnixMilliseconds,
@@ -43,8 +48,12 @@ export const ChatMessagePayload = z.object({
 })
 export type ChatMessagePayload = z.TypeOf<typeof ChatMessagePayload>
 
+export function generateChatMessageId(): ChatMessageId {
+  return ChatMessageId.parse(generateUuid())
+}
+
 export const ChatMessage = z.object({
-  uuid: Uuid,
+  uuid: ChatMessageId, // TODo change
   text: z.string(),
   time: UnixMilliseconds,
   image: Base64String.optional(),
@@ -86,5 +95,6 @@ export const Chat = z.object({
   inbox: Inbox,
   origin: ChatOrigin,
   otherSide: ChatUserIdentity,
+  isUnread: z.boolean().default(true),
 })
 export type Chat = z.TypeOf<typeof Chat>

@@ -20,6 +20,7 @@ function reportError(lvl: LogLvl, message: string, ...args: any[]): void {
   if (!__DEV__) {
     // toDO crashlitics
   }
+  getConsoleLvl(lvl)('‼️ there was an error reported. See hermes logs')
   getConsoleLvl(lvl)(message, ...args)
 }
 

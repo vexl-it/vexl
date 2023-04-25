@@ -1,0 +1,12 @@
+import {stringToSvgStringRuntimeError} from '../../Image'
+
+const friendsSvg =
+  stringToSvgStringRuntimeError(`<svg viewBox='0 0 15 15' fill='none' xmlns='http://www.w3.org/2000/svg'>
+<path d='M4.8125 9.25C6.38306 9.25 7.65625 7.97681 7.65625 6.40625C7.65625 4.83569 6.38306 3.5625 4.8125 3.5625C3.24194 3.5625 1.96875 4.83569 1.96875 6.40625C1.96875 7.97681 3.24194 9.25 4.8125 9.25Z' stroke='#AFAFAF' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/>
+<path d='M9.49908 3.6681C9.89022 3.5579 10.3004 3.5328 10.7021 3.59448C11.1037 3.65616 11.4875 3.8032 11.8276 4.0257C12.1676 4.24819 12.456 4.54097 12.6734 4.88431C12.8907 5.22765 13.032 5.61359 13.0877 6.01613C13.1433 6.41866 13.112 6.82845 12.996 7.21789C12.8799 7.60733 12.6818 7.96737 12.4148 8.27377C12.1479 8.58017 11.8184 8.82582 11.4486 8.99416C11.0787 9.1625 10.6771 9.24963 10.2707 9.24967' stroke='#AFAFAF' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/>
+<path d='M0.874756 11.2951C1.31889 10.6634 1.90851 10.1478 2.59383 9.79181C3.27915 9.43586 4.04005 9.25003 4.8123 9.25C5.58455 9.24997 6.34547 9.43575 7.03081 9.79165C7.71616 10.1475 8.30582 10.6631 8.75 11.2948' stroke='#AFAFAF' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/>
+<path d='M10.2707 9.25C11.043 9.24944 11.8041 9.43499 12.4895 9.79093C13.1749 10.1469 13.7644 10.6627 14.2082 11.2948' stroke='#AFAFAF' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/>
+</svg>
+`)
+
+export default friendsSvg

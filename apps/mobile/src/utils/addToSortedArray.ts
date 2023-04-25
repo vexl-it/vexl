@@ -1,21 +1,24 @@
 export default function addToSortedArray<T>(
-  array: T[],
+  inputArray: T[],
   compare: (a: T, b: T) => number,
   equals?: (a: T, b: T) => boolean
 ): (item: T) => T[] {
   return (item) => {
+    const array = [...inputArray]
+
+    if (equals) {
+      const indexOfDuplicate = array.findIndex((i) => equals(i, item))
+      if (indexOfDuplicate !== -1) array.splice(indexOfDuplicate, 1)
+    }
+
     const index = array.findIndex((i) => compare(i, item) >= 0)
 
     if (index === -1) {
-      return [...array, item]
-    }
-    
-    if (equals?.(array[index], item)) {
-      const toReturn = [...array]
-      toReturn[index] = item
-      return toReturn
+      array.push(item)
+    } else {
+      array[index] = item
     }
 
-    return [...array.slice(0, index), item, ...array.slice(index)]
+    return array
   }
 }

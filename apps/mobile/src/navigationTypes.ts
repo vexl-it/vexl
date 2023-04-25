@@ -18,6 +18,7 @@ import {
 } from '@vexl-next/domain/dist/general/offers'
 import {type ChatId} from '@vexl-next/domain/dist/general/messaging'
 import {type KeyHolder} from '@vexl-next/cryptography'
+import {type PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type RootStackParamsList = {
@@ -31,7 +32,7 @@ export type RootStackParamsList = {
 
   OfferDetail: {offerId: OfferId}
 
-  ChatDetail: {chatId: ChatId}
+  ChatDetail: {chatId: ChatId; inboxKey: PublicKeyPemBase64}
 
   NotificationPermissionsMissing: undefined
 
@@ -40,6 +41,8 @@ export type RootStackParamsList = {
   Faqs: undefined
 
   TodoScreen: undefined
+
+  DebugScreen: undefined
 }
 
 export type RootStackScreenProps<T extends keyof RootStackParamsList> =

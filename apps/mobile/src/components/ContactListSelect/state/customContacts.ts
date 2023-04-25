@@ -1,12 +1,12 @@
 import {z} from 'zod'
 import {useSetAtom} from 'jotai'
 import {ContactNormalized} from '../brands/ContactNormalized.brand'
-import {atomWithParsedMmkvStorage} from '../../../utils/atomWithParsedMmkvStorage'
+import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
 
 export const customContactsAtom = atomWithParsedMmkvStorage(
   'customContacts',
-  [],
-  z.array(ContactNormalized)
+  {customContacts: []},
+  z.object({customContacts: z.array(ContactNormalized)})
 )
 
 export function useAddCustomContact(): (
@@ -15,6 +15,8 @@ export function useAddCustomContact(): (
   const setCustomContacts = useSetAtom(customContactsAtom)
 
   return (contact: ContactNormalized) => {
-    setCustomContacts((old) => [contact, ...old])
+    setCustomContacts((old) => ({
+      customContacts: [contact, ...old.customContacts],
+    }))
   }
 }

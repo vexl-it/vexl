@@ -13,5 +13,13 @@ i18n.locale = getLocales()[0].languageTag
 i18n.defaultLocale = 'en'
 i18n.enableFallback = true
 
+type PathInto<T extends Record<string, any>> = keyof {
+  [K in keyof T as T[K] extends string
+    ? K
+    : T[K] extends Record<string, any>
+    ? `${K & string}.${PathInto<T[K]> & string}`
+    : never]: any
+}
+
+export type LocaleKeys = PathInto<typeof en>
 export default i18n
-export type Dictionary = typeof en

@@ -8,30 +8,29 @@ import * as O from 'optics-ts'
 import {type UserNameAndAvatar} from '@vexl-next/domain/dist/general/UserNameAndAvatar.brand'
 import {fromBase64Uri} from '@vexl-next/domain/dist/utility/SvgStringOrImageUri.brand'
 import {UserName} from '@vexl-next/domain/dist/general/UserName.brand'
-import {UnixMilliseconds} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
 import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
 
-function processDeleteChatMessage(
-  deleteChatMessage?: ChatMessageWithState
-): (chat: ChatWithMessages) => ChatWithMessages {
-  return (chat) => {
-    if (deleteChatMessage?.message.messageType !== 'DELETE_CHAT') return chat
+// function processDeleteChatMessageIfAny(
+//   deleteChatMessage?: ChatMessageWithState
+// ): (chat: ChatWithMessages) => ChatWithMessages {
+//   return (chat) => {
+//     if (deleteChatMessage?.message.messageType !== 'DELETE_CHAT') return chat
+//
+//     const indexOfDeleteMessage = chat.messages.findIndex(
+//       (message) => message.message.uuid === deleteChatMessage.message.uuid
+//     )
+//
+//     return {
+//       ...chat,
+//       messages:
+//         indexOfDeleteMessage !== -1
+//           ? chat.messages.slice(indexOfDeleteMessage)
+//           : chat.messages,
+//     }
+//   }
+// }
 
-    const indexOfDeleteMessage = chat.messages.findIndex(
-      (message) => message.message.uuid === deleteChatMessage.message.uuid
-    )
-
-    return {
-      ...chat,
-      messages:
-        indexOfDeleteMessage !== -1
-          ? chat.messages.slice(indexOfDeleteMessage)
-          : chat.messages,
-    }
-  }
-}
-
-function processIdentityRevealMessage(
+function processIdentityRevealMessageIfAny(
   identityRevealMessage?: ChatMessageWithState
 ): (chat: ChatWithMessages) => ChatWithMessages {
   return (chat) => {
@@ -56,6 +55,7 @@ function processIdentityRevealMessage(
 }
 
 const realLifeInfoOptic = O.optic<ChatWithMessages>()
+  .prop('chat')
   .prop('otherSide')
   .prop('realLifeInfo')
 
@@ -66,47 +66,59 @@ export default function addMessagesToChats(
     pipe(
       chats,
       A.map((oneChat) => {
-        const messages = toAdd
-          .filter(
-            (oneMessage) =>
-              oneMessage.message.senderPublicKey === oneChat.otherSide.publicKey
-          )
-          .reduce(
-            (originalList, newMessage) =>
-              addToSortedArray(
-                originalList,
-                compareMessages,
-                areMessagesEqual
-              )(newMessage),
-            oneChat.messages
-          )
+        const messagesToAddToThisChat = toAdd.filter(
+          (oneMessage) =>
+            oneMessage.message.senderPublicKey ===
+            oneChat.chat.otherSide.publicKey
+        )
 
-        const messagesByType = group(toAdd.sort(compareMessages))
+        if (messagesToAddToThisChat.length === 0) return oneChat
+
+        const messages = messagesToAddToThisChat.reduce(
+          (originalList, newMessage) =>
+            addToSortedArray(
+              originalList,
+              compareMessages,
+              areMessagesEqual
+            )(newMessage),
+          oneChat.messages
+        )
+
+        const messagesByType = group(
+          messagesToAddToThisChat.sort(compareMessages)
+        )
           .by((message) => message.message.messageType)
           .asMap()
 
+        // TODO saving of deanoymization
+
         const deleteTypeMessage = messagesByType.get('DELETE_CHAT')?.at(-1)
-        const identityRevealMessage = messagesByType
-          .get('APPROVE_REVEAL')
-          ?.at(-1)
+        // const identityRevealMessage = messagesByType
+        //   .get('APPROVE_REVEAL')
+        //   ?.at(-1)
 
-        const deleteTypeMessageTime =
-          deleteTypeMessage?.message.time ?? UnixMilliseconds.parse(0)
-        const identityRevealMessageTime =
-          identityRevealMessage?.message.time ?? UnixMilliseconds.parse(0)
+        // const deleteTypeMessageTime =
+        //   deleteTypeMessage?.message.time ?? UnixMilliseconds.parse(0)
+        // const identityRevealMessageTime =
+        //   identityRevealMessage?.message.time ?? UnixMilliseconds.parse(0)
 
-        if (deleteTypeMessageTime < identityRevealMessageTime) {
-          return pipe(
-            {...oneChat, messages},
-            processDeleteChatMessage(deleteTypeMessage),
-            processIdentityRevealMessage(identityRevealMessage)
-          )
-        } else {
-          return pipe(
-            {...oneChat, messages},
-            processDeleteChatMessage(deleteTypeMessage)
-          )
-        }
+        // if (deleteTypeMessageTime < identityRevealMessageTime) {
+        //   return pipe(
+        //     {...oneChat, messages, isUnread: true},
+        //     processDeleteChatMessageIfAny(deleteTypeMessage),
+        //     processIdentityRevealMessageIfAny(identityRevealMessage)
+        //   )
+        // } else {
+        //   return pipe(
+        //     {...oneChat, messages, isUnread: true},
+        //     processDeleteChatMessageIfAny(deleteTypeMessage)
+        //   )
+        // }
+
+        return pipe(
+          {...oneChat, messages, chat: {...oneChat.chat, isUnread: true}},
+          processIdentityRevealMessageIfAny(deleteTypeMessage)
+        )
       })
     )
 }

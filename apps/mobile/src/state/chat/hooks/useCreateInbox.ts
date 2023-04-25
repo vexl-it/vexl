@@ -10,11 +10,11 @@ import {usePrivateApiAssumeLoggedIn} from '../../../api'
 import {useStore} from 'jotai'
 import {useCallback} from 'react'
 import * as O from 'optics-ts'
-import {messagingStateAtom} from '../atom'
 import {toBasicError} from '@vexl-next/domain/dist/utility/errors'
 import {pipe} from 'fp-ts/function'
 import {type PrivateKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
 import {getNotificationToken} from '../../../utils/notifications'
+import messagingStateAtom from '../atoms/messagingStateAtom'
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function focusAddInbox(optic: O.OpticFor<MessagingState>) {

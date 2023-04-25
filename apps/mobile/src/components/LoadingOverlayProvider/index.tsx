@@ -18,10 +18,10 @@ interface Props {
   children: ReactNode
 }
 
-const isDisplayedAtom = atom(false)
+export const loadingOverlayDisplayedAtom = atom(false)
 
 function LoadingOverlayProvider({children}: Props): JSX.Element {
-  const isDisplayed = useAtomValue(isDisplayedAtom)
+  const isDisplayed = useAtomValue(loadingOverlayDisplayedAtom)
   const tokens = getTokens()
   return (
     <>
@@ -42,7 +42,7 @@ export function useShowLoadingOverlay(): {
   hide: () => void
   setDisplayed: (value: boolean) => void
 } {
-  const setDisplayed = useSetAtom(isDisplayedAtom)
+  const setDisplayed = useSetAtom(loadingOverlayDisplayedAtom)
   return useMemo(
     () => ({
       show: () => {

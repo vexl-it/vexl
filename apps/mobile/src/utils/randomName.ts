@@ -36,7 +36,7 @@ const sils = [
 export default function randomName(seedString?: string): UserName {
   const getRandom = seedString ? seed(seedString) : Math.random
 
-  const lowercase = ['', '', '']
+  const lowercase = ['', '', '', '']
     .map(() => sils[Math.floor(getRandom() * (sils.length - 1))])
     .join('')
   return UserName.parse(lowercase.charAt(0).toUpperCase() + lowercase.slice(1))

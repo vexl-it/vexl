@@ -3,7 +3,6 @@ import {DefaultTheme, NavigationContainer} from '@react-navigation/native'
 import * as SplashScreen from 'expo-splash-screen'
 import {useEffect} from 'react'
 import useLoadFonts from './utils/useLoadFonts'
-import I18nProvider from './utils/localization/I18nProvider'
 import ThemeProvider from './utils/ThemeProvider'
 import RootNavigation from './components/RootNavigation'
 import LoadingOverlayProvider from './components/LoadingOverlayProvider'
@@ -28,26 +27,25 @@ function App(): JSX.Element {
   if (!fontsLoaded) return <></>
 
   return (
-    <I18nProvider>
-      <SafeAreaProvider>
-        <StatusBar style="light" />
-        <NavigationContainer
-          theme={{
-            dark: true,
-            colors: {
-              ...DefaultTheme.colors,
-              primary: theme.background?.val,
-              background: 'transparent',
-              text: theme.color?.val,
-            },
-          }}
-        >
-          <LoadingOverlayProvider>
-            <RootNavigation />
-          </LoadingOverlayProvider>
-        </NavigationContainer>
-      </SafeAreaProvider>
-    </I18nProvider>
+    <SafeAreaProvider>
+      <StatusBar style="light" />
+      <NavigationContainer
+        theme={{
+          dark: true,
+          colors: {
+            ...DefaultTheme.colors,
+            primary: theme.background?.val,
+            background: 'transparent',
+            text: theme.color?.val,
+          },
+        }}
+      >
+        <LoadingOverlayProvider>
+          <RootNavigation />
+        </LoadingOverlayProvider>
+        {/* <AreYouSureDialog /> */}
+      </NavigationContainer>
+    </SafeAreaProvider>
   )
 }
 

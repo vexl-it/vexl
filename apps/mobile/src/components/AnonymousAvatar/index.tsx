@@ -8,6 +8,7 @@ interface Props {
   avatarIndex: number
   style?: StyleProp<ViewStyle>
 }
+
 function AnonymousAvatar({avatarIndex, style}: Props): JSX.Element {
   return <Image source={avatarsSvg[avatarIndex]} style={style}></Image>
 }

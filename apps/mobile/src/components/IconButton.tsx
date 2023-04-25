@@ -9,14 +9,14 @@ interface Props {
   icon: SvgString
   onPress: () => void
   style?: StyleProp<ViewStyle>
-  variant?: 'dark' | 'light'
+  variant?: 'dark' | 'light' | 'primary' | 'negative' | 'secondary'
+  oval?: boolean
 }
 
 const PressableStyled = styled(Stack, {
   dsp: 'flex',
   ai: 'center',
   jc: 'center',
-  br: '$5',
   p: '$3',
   variants: {
     variant: {
@@ -25,6 +25,23 @@ const PressableStyled = styled(Stack, {
       },
       light: {
         bg: '$greyAccent4',
+      },
+      primary: {
+        bg: '$darkBrown',
+      },
+      secondary: {
+        bg: '$main',
+      },
+      negative: {
+        bg: '$darkRed',
+      },
+    },
+    oval: {
+      true: {
+        br: 20,
+      },
+      false: {
+        'br': '$5',
       },
     },
   },
@@ -41,6 +58,7 @@ function IconButton({
   icon,
   onPress,
   style,
+  oval,
 }: Props): JSX.Element {
   const onPressInner = useCallback(() => {
     if (!disabled) onPress()
@@ -55,10 +73,25 @@ function IconButton({
       onPress={onPressInner}
       style={touchableStyles}
     >
-      <PressableStyled variant={variant} style={style} disabled={disabled}>
+      <PressableStyled
+        oval={!!oval}
+        variant={variant}
+        style={[style, touchableStyles]}
+        disabled={disabled}
+      >
         <Image
+          width={20}
+          height={20}
           stroke={
-            variant === 'dark' ? tokens.color.white.val : tokens.color.grey.val
+            variant === 'dark'
+              ? tokens.color.white.val
+              : variant === 'primary'
+              ? tokens.color.main.val
+              : variant === 'negative'
+              ? tokens.color.red.val
+              : variant === 'secondary'
+              ? 'none'
+              : tokens.color.grey.val
           }
           source={icon}
         />

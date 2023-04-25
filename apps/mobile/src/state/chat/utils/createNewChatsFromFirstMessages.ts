@@ -14,13 +14,16 @@ export default function createNewChatsFromFirstMessages(
       messages,
       A.map(
         (oneMessage): ChatWithMessages => ({
-          inbox,
+          chat: {
+            inbox,
+            origin: inbox.offerId
+              ? {type: 'myOffer', offerId: inbox.offerId}
+              : {type: 'unknown'},
+            otherSide: {publicKey: oneMessage.message.senderPublicKey},
+            id: generateChatId(),
+            isUnread: true,
+          },
           messages: [oneMessage],
-          origin: inbox.offerId
-            ? {type: 'myOffer', offerId: inbox.offerId}
-            : {type: 'unknown'},
-          otherSide: {publicKey: oneMessage.message.senderPublicKey},
-          id: generateChatId(),
         })
       )
     )

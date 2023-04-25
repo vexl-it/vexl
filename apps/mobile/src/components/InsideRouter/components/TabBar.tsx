@@ -7,6 +7,8 @@ import profileIconSvg from '../images/profileIconSvg'
 import {type SvgString} from '@vexl-next/domain/dist/utility/SvgString.brand'
 import {getTokens, Stack, XStack} from 'tamagui'
 import {TouchableWithoutFeedback} from 'react-native'
+import {useAtomValue} from 'jotai'
+import areThereUnreadMessagesAtom from '../../../state/chat/atoms/areThereUnreadMessagesAtom'
 
 export const TAB_BAR_HEIGHT_PX = 72
 
@@ -23,13 +25,10 @@ function getIconForRouteName(routeName: string): SvgString {
   }
 }
 
-function TabBar({
-  state,
-  descriptors,
-  navigation,
-}: BottomTabBarProps): JSX.Element {
+function TabBar({state, navigation}: BottomTabBarProps): JSX.Element {
   const insets = useSafeAreaInsets()
   const tokens = getTokens()
+  const areThereNewMessages = useAtomValue(areThereUnreadMessagesAtom)
 
   function onPress({key, name}: {key: string; name: string}): void {
     const event = navigation.emit({
@@ -58,6 +57,8 @@ function TabBar({
           const iconSource = getIconForRouteName(route.name)
 
           const isFocused = state.index === index
+          const newMessageIndicator =
+            route.name === 'Messages' && areThereNewMessages
 
           return (
             <TouchableWithoutFeedback
@@ -74,6 +75,17 @@ function TabBar({
                 br="$6"
                 bg={isFocused ? '$darkBrown' : 'transparent'}
               >
+                {newMessageIndicator && (
+                  <Stack
+                    backgroundColor={'$main'}
+                    w={16}
+                    h={16}
+                    br={8}
+                    position={'absolute'}
+                    top={'$2'}
+                    right={'$2'}
+                  />
+                )}
                 <Stack w={24} h={24}>
                   <Image
                     stroke={

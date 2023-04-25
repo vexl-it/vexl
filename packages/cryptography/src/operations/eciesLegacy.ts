@@ -21,6 +21,8 @@ export async function eciesLegacyEncrypt({
   const ecdh = crypto.createECDH(curve)
   ecdh.generateKeys()
 
+  // todo use @noble/secp256k1 when possible
+
   const epk = ecdh.getPublicKey()
   const sharedSecret = ecdh.computeSecret(publicKeyRawBuffer)
 

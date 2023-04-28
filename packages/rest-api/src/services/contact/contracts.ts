@@ -1,6 +1,7 @@
 import {z} from 'zod'
 import {PageRequest, PageResponse} from '../../Pagination.brand'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
+import {ConnectionLevel} from '@vexl-next/domain/dist/general/offers'
 
 export interface InboxDoesNotExist {
   _tag: 'inboxDoesNotExist'
@@ -46,13 +47,12 @@ export const ImportContactsResponse = z.object({
 })
 export type ImportContactsResponse = z.TypeOf<typeof ImportContactsResponse>
 
-export const ConnectionLevel = z.enum(['FIRST', 'SECOND', 'ALL'])
-export type ConnectionLevel = z.TypeOf<typeof ConnectionLevel>
-
 export const FetchMyContactsRequest = PageRequest.extend({
   level: ConnectionLevel,
 })
 export type FetchMyContactsRequest = z.TypeOf<typeof FetchMyContactsRequest>
+
+export {ConnectionLevel}
 
 export const FetchMyContactsResponse = PageResponse.extend({
   items: z.array(z.object({publicKey: PublicKeyPemBase64})),

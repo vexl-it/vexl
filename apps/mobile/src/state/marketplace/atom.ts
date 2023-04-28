@@ -11,6 +11,7 @@ import {type OfferId} from '@vexl-next/domain/dist/general/offers'
 import {MINIMAL_DATE} from '@vexl-next/domain/dist/utility/IsoDatetimeString.brand'
 import {areIncluded} from './utils'
 import {type ChatOrigin} from '@vexl-next/domain/dist/general/messaging'
+import {type FocusAtomType} from '../../utils/atomUtils/FocusAtomType'
 
 export const offersStateAtom = atomWithParsedMmkvStorage(
   'offers',
@@ -25,7 +26,7 @@ export const offersAtom = focusAtom(offersStateAtom, (optic) =>
 )
 
 export const offersToSee = focusAtom(offersAtom, (optic) =>
-  optic.filter((o) => !o.flags.isMine && !o.flags.reported)
+  optic.filter((o) => !o.ownershipInfo && !o.flags.reported)
 )
 
 export const offersIdsAtom = focusAtom(offersAtom, (optic) =>
@@ -37,7 +38,11 @@ export const lastUpdatedAtAtom = focusAtom(offersStateAtom, (optic) =>
 )
 
 export const myOffersAtom = focusAtom(offersAtom, (optic) =>
-  optic.filter((offer) => offer.flags.isMine)
+  optic.filter((offer) => !!offer.ownershipInfo?.adminId)
+)
+
+export const myActiveOffersAtom = focusAtom(myOffersAtom, (optic) =>
+  optic.filter((myOffer) => myOffer.offerInfo.publicPart.active)
 )
 
 export function offersAtomWithFilter(
@@ -71,8 +76,9 @@ export function offersAtomWithFilter(
   )
 }
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export function singleOfferAtom(offerId: OfferId) {
+export function singleOfferAtom(
+  offerId: OfferId | undefined
+): FocusAtomType<OneOfferInState | undefined> {
   return focusAtom(offersAtom, (optic) =>
     optic.find((offer) => offer.offerInfo.offerId === offerId)
   )

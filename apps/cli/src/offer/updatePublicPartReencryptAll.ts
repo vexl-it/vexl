@@ -3,7 +3,10 @@ import * as E from 'fp-ts/Either'
 import * as TE from 'fp-ts/TaskEither'
 import {getPrivateApi} from '../api'
 import {type OfferAdminId} from '@vexl-next/rest-api/dist/services/offer/contracts'
-import {OfferPublicPart} from '@vexl-next/domain/dist/general/offers'
+import {
+  type IntendedConnectionLevel,
+  OfferPublicPart,
+} from '@vexl-next/domain/dist/general/offers'
 import {parseCredentialsJson} from '../utils/auth'
 import {
   parseJson,
@@ -11,18 +14,17 @@ import {
   stringifyToPrettyJson,
 } from '@vexl-next/resources-utils/dist/utils/parsing'
 import {updateOfferReencryptForAll} from '@vexl-next/resources-utils/dist/offers/updateOffer'
-import {type ConnectionLevel} from '@vexl-next/rest-api/dist/services/contact/contracts'
 
 export default function updatePublicPartReencryptAll({
   publicPayloadJson,
   ownerCredentialsJson,
   adminId,
-  connectionLevel,
+  intendedConnectionLevel,
 }: {
   adminId: OfferAdminId
   publicPayloadJson: string
   ownerCredentialsJson: string
-  connectionLevel: ConnectionLevel
+  intendedConnectionLevel: IntendedConnectionLevel
 }) {
   return pipe(
     E.of({}),
@@ -47,7 +49,7 @@ export default function updatePublicPartReencryptAll({
         adminId,
         publicPayload,
         ownerKeyPair: ownerCredentials.keypair,
-        connectionLevel,
+        intendedConnectionLevel,
         contactApi: api.contact,
       })
     ),

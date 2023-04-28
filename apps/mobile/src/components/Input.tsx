@@ -26,11 +26,14 @@ import {
 
 const RootContainer = styled(XStack, {
   ai: 'center',
-  p: '$4',
+  br: '$4',
   variants: {
-    small: {
-      true: {
+    size: {
+      small: {
         p: '$2',
+      },
+      medium: {
+        p: '$4',
       },
     },
     variant: {
@@ -50,12 +53,14 @@ const RootContainer = styled(XStack, {
 
 const InputStyled = styled(RNTextInput, {
   f: 1,
-  fos: 18,
   ff: '$body500',
   variants: {
-    small: {
-      true: {
+    size: {
+      small: {
         fos: 16,
+      },
+      medium: {
+        fos: 18,
       },
     },
     variant: {
@@ -93,6 +98,13 @@ const StyledText = styled(Text, {
         color: '$greyOnBlack',
       },
     },
+    textColor: {
+      '...color': (color) => {
+        return {
+          color,
+        }
+      },
+    },
   } as const,
 })
 
@@ -100,10 +112,12 @@ export interface Props extends Omit<TextInputProps, 'style'> {
   icon?: SvgString
   leftText?: string
   rightText?: string
-  small?: boolean
+  size?: 'small' | 'medium'
   showClearButton?: boolean
   style?: XStackProps
   textColor?: ColorTokens
+  leftTextColor?: ColorTokens
+  rightTextColor?: ColorTokens
   variant?: 'greyOnWhite' | 'greyOnBlack' | 'transparentOnGrey'
   rightElement?: ReactNode
   borderRadius?: ComponentProps<typeof RootContainer>['borderRadius']
@@ -111,24 +125,24 @@ export interface Props extends Omit<TextInputProps, 'style'> {
   multiline?: ComponentProps<typeof InputStyled>['multiline']
 }
 
-function TextInput(
-  {
-    style,
-    small,
-    icon,
-    leftText,
-    rightText,
-    showClearButton,
-    textColor,
-    variant = 'greyOnWhite',
-    rightElement,
-    borderRadius,
-    multiline,
-    numberOfLines,
-    ...restProps
-  }: Props,
-  ref: Ref<RNTextInput>
-): JSX.Element {
+function TextInput({
+  style,
+  size = 'medium',
+  icon,
+  leftText,
+  rightText,
+  showClearButton,
+  leftTextColor = '$greyOnBlack',
+  rightTextColor = '$greyOnBlack',
+  textColor,
+  variant = 'greyOnWhite',
+                     rightElement,
+                     borderRadius,
+                     multiline,
+                     numberOfLines,
+  ...restProps
+}: Props,
+                   ref: Ref<RNTextInput>): JSX.Element {
   const tokens = getTokens()
   const inputRef: Ref<RNTextInput> = useRef(null)
   useImperativeHandle<RNTextInput | null, RNTextInput | null>(
@@ -137,15 +151,10 @@ function TextInput(
   )
 
   return (
-    <RootContainer
-      variant={variant}
-      small={small}
-      borderRadius={borderRadius ?? '$4'}
-      {...style}
-    >
+    <RootContainer variant={variant} size={size} borderRadius={borderRadius ?? '$4'} {...style}>
       {icon && (
         <Stack mr="$2">
-          <Stack w={small ? 14 : 20} h={small ? 14 : 20}>
+          <Stack w={size === 'small' ? 14 : 20} h={size === 'small' ? 14 : 20}>
             <Image
               stroke={
                 variant === 'greyOnBlack'
@@ -158,7 +167,7 @@ function TextInput(
         </Stack>
       )}
       {leftText && (
-        <StyledText mr="$2" variant={variant}>
+        <StyledText mr="$2" variant={variant} textColor={leftTextColor}>
           {leftText}
         </StyledText>
       )}
@@ -175,7 +184,7 @@ function TextInput(
             ? tokens.color.greyOnBlack.val
             : tokens.color.darkColorText.val
         }
-        small={small}
+        size={size}
         variant={variant}
         textColor={textColor}
         {...restProps}
@@ -190,7 +199,7 @@ function TextInput(
         </TouchableOpacity>
       )}
       {rightText && (
-        <StyledText ml="$2" variant={variant}>
+        <StyledText ml="$2" variant={variant} textColor={rightTextColor}>
           {rightText}
         </StyledText>
       )}

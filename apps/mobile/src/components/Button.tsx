@@ -21,9 +21,10 @@ interface Props {
   disabled?: boolean
   fontSize?: number
   afterIcon?: SvgString
+  beforeIcon?: SvgString
   fullWidth?: boolean
   fullSize?: boolean
-  small?: boolean
+  size?: 'small' | 'medium' | 'large'
   adjustTextToFitOneLine?: boolean
 }
 
@@ -32,7 +33,6 @@ const PressableStyled = styled(Stack, {
   ai: 'center',
   jc: 'center',
   br: '$5',
-  h: 60,
   variants: {
     variant: {
       primary: {
@@ -52,7 +52,6 @@ const PressableStyled = styled(Stack, {
         h: 'auto',
       },
       hint: {
-        h: 48,
         bc: '$pinkAccent2',
       },
       redDark: {
@@ -67,10 +66,17 @@ const PressableStyled = styled(Stack, {
         bg: '$grey',
       },
     },
-    small: {
-      true: {
+    size: {
+      small: {
         h: 38,
         px: '$3',
+      },
+      medium: {
+        h: 48,
+        px: '$4',
+      },
+      large: {
+        h: 60,
       },
     },
     fullWidth: {
@@ -88,8 +94,6 @@ const PressableStyled = styled(Stack, {
 
 const TextStyled = styled(Text, {
   ff: '$body600',
-  lh: 25,
-  fos: 20,
   variants: {
     variant: {
       primary: {
@@ -123,9 +127,16 @@ const TextStyled = styled(Text, {
         col: '$greyOnWhite',
       },
     },
-    small: {
-      true: {
+    size: {
+      small: {
         fos: 14,
+      },
+      medium: {
+        fos: 16,
+      },
+      large: {
+        fos: 20,
+        lh: 25,
       },
     },
   },
@@ -139,21 +150,29 @@ function Button({
   style,
   fontSize,
   afterIcon,
+  beforeIcon,
   fullWidth = false,
   fullSize = false,
-  small = false,
   adjustTextToFitOneLine = false,
+  size = 'large',
 }: Props): JSX.Element {
   const onPressInner = useCallback(() => {
     if (!disabled) onPress()
   }, [disabled, onPress])
   const touchableStyles: ViewStyle = useMemo(
     () => ({
-      height: variant === 'link' ? 'auto' : small ? 38 : 60,
+      height:
+        variant === 'link'
+          ? 'auto'
+          : size === 'small'
+          ? 38
+          : size === 'medium'
+          ? 48
+          : 60,
       ...(fullWidth && {width: '100%'}),
       ...(fullSize && {flex: 1}),
     }),
-    [variant, fullSize, fullWidth, small]
+    [variant, fullSize, fullWidth, size]
   )
 
   return (
@@ -167,17 +186,22 @@ function Button({
       <PressableStyled
         variant={variant}
         style={style}
-        small={small}
+        size={size}
         fullWidth={fullWidth}
         fullSize={fullSize}
         disabled={disabled}
       >
+        {beforeIcon && (
+          <Stack mr="$2">
+            <Image source={beforeIcon} />
+          </Stack>
+        )}
         {text && (
           <TextStyled
             numberOfLines={adjustTextToFitOneLine ? 1 : undefined}
             adjustsFontSizeToFit={adjustTextToFitOneLine}
             ff="$body600"
-            small={small}
+            size={size}
             variant={variant}
             disabled={disabled}
           >

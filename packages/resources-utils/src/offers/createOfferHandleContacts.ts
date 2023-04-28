@@ -1,9 +1,9 @@
 import {type OfferPrivateApi} from '@vexl-next/rest-api/dist/services/offer'
 import {type ContactPrivateApi} from '@vexl-next/rest-api/dist/services/contact'
 import {type PrivateKeyHolder} from '@vexl-next/cryptography/dist/KeyHolder'
-import {type ConnectionLevel} from '@vexl-next/rest-api/dist/services/contact/contracts'
 import * as TE from 'fp-ts/TaskEither'
 import {
+  type IntendedConnectionLevel,
   type OfferInfo,
   type OfferPublicPart,
   type SymmetricKey,
@@ -39,7 +39,7 @@ export interface CreateOfferResult {
 /**
  * Creates new offer for all contacts.
  * Does following tasks:
- * 1. Fetches contacts from the server, based on connectionLevel param
+ * 1. Fetches contacts from the server, based on intendedConnectionLevel param
  * 2. Fetches common contacts for each contact
  * 3. Creates and encrypts Private parts for each contact
  * 4. Creates and encrypts Public part
@@ -51,13 +51,13 @@ export default function createNewOfferForMyContacts({
   contactApi,
   publicPart,
   ownerKeyPair,
-  connectionLevel,
+  intendedConnectionLevel,
 }: {
   offerApi: OfferPrivateApi
   contactApi: ContactPrivateApi
   publicPart: OfferPublicPart
   ownerKeyPair: PrivateKeyHolder
-  connectionLevel: ConnectionLevel
+  intendedConnectionLevel: IntendedConnectionLevel
 }): TE.TaskEither<
   | ApiErrorFetchingContactsForOffer
   | ErrorConstructingPrivatePayloads
@@ -76,7 +76,7 @@ export default function createNewOfferForMyContacts({
     TE.bindW('privatePayloads', ({symmetricKey}) =>
       fetchInfoAndGeneratePrivatePayloads({
         symmetricKey,
-        connectionLevel,
+        intendedConnectionLevel,
         contactApi,
         ownerCredentials: ownerKeyPair,
       })

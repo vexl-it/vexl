@@ -32,7 +32,7 @@ function AllowNotificationsExplanationScreen({navigation}: Props): JSX.Element {
     // TODO display loading
     // TODO what if this fails? Use will be stuck on this screen.
     void pipe(
-      createInbox({privateKey: session.privateKey}),
+      createInbox({inbox: {privateKey: session.privateKey}}),
       TE.match(
         (e) => {
           if (e._tag === 'ErrorInboxAlreadyExists') {

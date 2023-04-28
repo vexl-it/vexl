@@ -19,7 +19,7 @@ function SearchBar(): JSX.Element {
           value={searchText}
           onChangeText={setSearchText}
           icon={magnifyingGlass}
-          small
+          size={'small'}
         />
       </Stack>
       <Stack f={3}>
@@ -29,7 +29,7 @@ function SearchBar(): JSX.Element {
           }}
           disabled={false}
           variant="black"
-          small
+          size={'small'}
           adjustTextToFitOneLine
           fullSize
           text={t(allSelected ? 'common.deselectAll' : 'common.selectAll')}

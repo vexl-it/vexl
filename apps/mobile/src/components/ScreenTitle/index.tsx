@@ -1,18 +1,15 @@
-import closeSvg from '../images/closeSvg'
 import {Stack, Text, XStack, YStack, type YStackProps} from 'tamagui'
-import IconButton from '../IconButton'
+import {type ReactNode} from 'react'
 
 interface Props extends YStackProps {
-  onClosePress: () => void
+  children: ReactNode
   text: string
   withBottomBorder?: boolean
-  additionalButton?: JSX.Element
 }
 
 function ScreenTitle({
-  onClosePress,
+  children,
   text,
-  additionalButton,
   withBottomBorder = false,
   ...props
 }: Props): JSX.Element {
@@ -24,10 +21,7 @@ function ScreenTitle({
             {text}
           </Text>
         </Stack>
-        <XStack space={'$2'}>
-          {additionalButton ?? null}
-          <IconButton variant="dark" icon={closeSvg} onPress={onClosePress} />
-        </XStack>
+        <XStack space={'$2'}>{children}</XStack>
       </XStack>
       {withBottomBorder && <Stack h={0.5} mx="$-4" bg="$grey" />}
     </YStack>

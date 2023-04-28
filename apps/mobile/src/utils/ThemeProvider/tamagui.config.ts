@@ -9,6 +9,7 @@ const color = {
   darkColorText: '#000000',
   main: '#FCCD6C',
   white: '#FFFFFF',
+  green: '#ACD9B7',
   grey: '#262626',
   greyAccent1: '#4C4C4C',
   greyAccent2: '#848484',

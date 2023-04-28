@@ -18,7 +18,7 @@ function OfferListItem({offer}: Props): JSX.Element {
       <OfferWithBubbleTip
         button={
           <Button
-            small
+            size={'small'}
             fontSize={14}
             text={t('common.request')}
             variant="secondary"

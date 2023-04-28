@@ -16,7 +16,7 @@ function EmptyListPlaceholder(): JSX.Element {
       <Button
         text={t('offer.emptyAction')}
         variant={'primary'}
-        small={true}
+        size={'small'}
         onPress={() => {
           navigation.navigate('CreateOffer')
         }}

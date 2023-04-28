@@ -96,7 +96,7 @@ sessionHolderAtom.onMount = (setValue) => {
   })()
 }
 
-const sessionAtom: WritableAtom<
+export const sessionAtom: WritableAtom<
   SessionAtomValueType,
   [nextValue: O.Option<Session>],
   void

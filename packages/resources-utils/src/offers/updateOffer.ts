@@ -1,6 +1,7 @@
 import {type OfferPrivateApi} from '@vexl-next/rest-api/dist/services/offer'
 import {type OfferAdminId} from '@vexl-next/rest-api/dist/services/offer/contracts'
 import {
+  type IntendedConnectionLevel,
   type OfferInfo,
   type OfferPublicPart,
   type PrivatePayloadEncrypted,
@@ -25,7 +26,6 @@ import {type ContactPrivateApi} from '@vexl-next/rest-api/dist/services/contact'
 import generateSymmetricKey, {
   type ErrorGeneratingSymmetricKey,
 } from './utils/generateSymmetricKey'
-import {type ConnectionLevel} from '@vexl-next/rest-api/dist/services/contact/contracts'
 import {type ApiErrorFetchingContactsForOffer} from './utils/fetchContactsForOffer'
 import {type ExtractLeftTE} from '../utils/ExtractLeft'
 
@@ -82,14 +82,14 @@ export function updateOfferReencryptForAll({
   publicPayload,
   ownerKeyPair,
   contactApi,
-  connectionLevel,
+  intendedConnectionLevel,
 }: {
   offerApi: OfferPrivateApi
   contactApi: ContactPrivateApi
   adminId: OfferAdminId
   publicPayload: OfferPublicPart
   ownerKeyPair: PrivateKeyHolder
-  connectionLevel: ConnectionLevel
+  intendedConnectionLevel: IntendedConnectionLevel
 }): TE.TaskEither<
   | ErrorGeneratingSymmetricKey
   | ErrorEncryptingPublicPart
@@ -107,7 +107,7 @@ export function updateOfferReencryptForAll({
         contactApi,
         ownerCredentials: ownerKeyPair,
         symmetricKey,
-        connectionLevel,
+        intendedConnectionLevel,
       })
     ),
     TE.bindW('response', ({symmetricKey, privatePayloads}) =>

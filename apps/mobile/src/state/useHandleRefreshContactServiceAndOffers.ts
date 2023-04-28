@@ -107,7 +107,7 @@ export function useRefreshOffers(): void {
 
         void pipe(
           store.get(myOffersAtom),
-          A.map((offer) => offer.adminId),
+          A.map((offer) => offer.ownershipInfo?.adminId),
           A.filter(notEmpty),
           (o) => {
             console.info(`🦋 Refreshing ${o.length} offers`)

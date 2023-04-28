@@ -6,31 +6,32 @@ import {Stack, XStack} from 'tamagui'
 
 interface Props {
   onAddPress: () => void
+  onMyOffersPress: () => void
 }
 
-function OffersListButtons({onAddPress}: Props): JSX.Element {
+function OffersListButtons({onAddPress, onMyOffersPress}: Props): JSX.Element {
   const {t} = useTranslation()
   return (
     <XStack mt="$4" mx="$2" jc="space-between">
       <Button
         onPress={() => {}}
         variant={'blackOnDark'}
-        small
+        size={'small'}
         text={t('offer.filterOffers')}
         afterIcon={downArrow}
       />
       <XStack>
         <Button
-          onPress={() => {}}
+          onPress={onMyOffersPress}
           variant={'primary'}
-          small
+          size={'small'}
           text={t('offer.myOffers')}
         />
         <Stack w="$2" />
         <Button
           onPress={onAddPress}
           variant={'primary'}
-          small
+          size={'small'}
           afterIcon={addIconSvg}
         />
       </XStack>

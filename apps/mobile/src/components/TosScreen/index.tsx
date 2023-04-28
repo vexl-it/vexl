@@ -1,7 +1,6 @@
 import ScreenTitle from '../ScreenTitle'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import Screen from '../Screen'
-import {useNavigation} from '@react-navigation/native'
 import FaqsRedirect from './components/FaqsRedirect'
 import Tabs from '../Tabs'
 import {useEffect, useRef, useState} from 'react'
@@ -9,11 +8,15 @@ import {ScrollView} from 'react-native'
 import Markdown from '../Markdown'
 import {Stack} from 'tamagui'
 import useContent, {type TabType} from './useContent'
+import closeSvg from '../images/closeSvg'
+import IconButton from '../IconButton'
+import {type RootStackScreenProps} from '../../navigationTypes'
 
-function Tos(): JSX.Element {
+type Props = RootStackScreenProps<'TermsAndConditions'>
+
+function TosScreen({navigation}: Props): JSX.Element {
   const {t} = useTranslation()
   const content = useContent()
-  const navigation = useNavigation()
   const scrollViewRef = useRef<ScrollView>(null)
   const [activeTab, setActiveTab] = useState<TabType>('termsOfUse')
 
@@ -29,10 +32,13 @@ function Tos(): JSX.Element {
 
   return (
     <Screen customHorizontalPadding={16}>
-      <ScreenTitle
-        onClosePress={navigation.goBack}
-        text={t('termsOfUse.termsOfUse')}
-      />
+      <ScreenTitle text={t('termsOfUse.termsOfUse')}>
+        <IconButton
+          variant="dark"
+          icon={closeSvg}
+          onPress={navigation.goBack}
+        />
+      </ScreenTitle>
       <FaqsRedirect onPress={onFaqsPress} />
       <Stack h={16} />
       <Tabs activeTab={activeTab} tabs={content} onTabPress={setActiveTab} />
@@ -51,4 +57,4 @@ function Tos(): JSX.Element {
   )
 }
 
-export default Tos
+export default TosScreen

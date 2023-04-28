@@ -24,7 +24,7 @@ function OtherSideNamePhotoAndInfo({mode}: Props): JSX.Element {
   const otherSideData = useAtomValue(otherSideDataAtom)
   const otherSideLeft = useAtomValue(otherSideLeftAtom)
   const canSendMessages = useAtomValue(canSendMessagesAtom)
-  
+
   return (
     <Stack
       height={mode === 'photoTop' ? PHOTO_AND_INFO_PHOTO_TOP_HEIGHT : 40}
@@ -51,7 +51,9 @@ function OtherSideNamePhotoAndInfo({mode}: Props): JSX.Element {
             offer
               ? {
                   offerType: offer.offerInfo.publicPart.offerType,
-                  offerDirection: offer.adminId ? 'myOffer' : 'theirOffer',
+                  offerDirection: offer.ownershipInfo?.adminId
+                    ? 'myOffer'
+                    : 'theirOffer',
                 }
               : undefined
           }

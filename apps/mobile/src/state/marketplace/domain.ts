@@ -3,6 +3,7 @@ import {
   BtcNetwork,
   Currency,
   FriendLevel,
+  IntendedConnectionLevel,
   Location,
   OfferFlags,
   OfferInfo,
@@ -22,7 +23,12 @@ export type ApiErrorDeletingOffer = BasicError<'ApiErrorDeletingOffer'>
 export const OneOfferInState = z.object({
   offerInfo: OfferInfo,
   flags: OfferFlags,
-  adminId: OfferAdminId.optional(),
+  ownershipInfo: z
+    .object({
+      adminId: OfferAdminId,
+      intendedConnectionLevel: IntendedConnectionLevel,
+    })
+    .optional(),
 })
 export type OneOfferInState = z.TypeOf<typeof OneOfferInState>
 

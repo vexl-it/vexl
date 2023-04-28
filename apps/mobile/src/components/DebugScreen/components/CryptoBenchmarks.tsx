@@ -70,7 +70,7 @@ export default function CryptoBenchmarks(): JSX.Element {
         }}
         variant={'secondary'}
         text={'Run benchmark'}
-        small
+        size={'small'}
       />
       <Button
         // eslint-disable-next-line @typescript-eslint/no-misused-promises
@@ -81,14 +81,14 @@ export default function CryptoBenchmarks(): JSX.Element {
         }}
         variant={'secondary'}
         text={'Run tests'}
-        small
+        size={'small'}
       />
       <Button
         onPress={() => {
           setEcdhComputeSecretImplementation(defaultImplementation)
         }}
         variant="primary"
-        small
+        size={'small'}
         text="set pure JS implementation"
       />
       <Button
@@ -96,7 +96,7 @@ export default function CryptoBenchmarks(): JSX.Element {
           setEcdhComputeSecretImplementation(createDummyImplementation(10))
         }}
         variant="primary"
-        small
+        size={'small'}
         text="set 10ms implementation"
       />
       <Button
@@ -104,7 +104,7 @@ export default function CryptoBenchmarks(): JSX.Element {
           setEcdhComputeSecretImplementation(createDummyImplementation(0))
         }}
         variant="primary"
-        small
+        size={'small'}
         text="set instant implementation"
       />
       <Button
@@ -112,7 +112,7 @@ export default function CryptoBenchmarks(): JSX.Element {
           setEcdhComputeSecretImplementation(computeSharedSecret)
         }}
         variant="primary"
-        small
+        size={'small'}
         text="set android native implementation"
       />
     </YStack>

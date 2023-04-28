@@ -104,8 +104,13 @@ export const OfferInfo = z.object({
 
 export type OfferInfo = z.TypeOf<typeof OfferInfo>
 
+export const ConnectionLevel = z.enum(['FIRST', 'SECOND', 'ALL'])
+export type ConnectionLevel = z.TypeOf<typeof ConnectionLevel>
+
+export const IntendedConnectionLevel = z.enum(['FIRST', 'ALL'])
+export type IntendedConnectionLevel = z.TypeOf<typeof IntendedConnectionLevel>
+
 export const OfferFlags = z.object({
-  isMine: z.boolean(),
   reported: z.boolean().default(false),
 })
 export type OfferFlags = z.TypeOf<typeof OfferFlags>

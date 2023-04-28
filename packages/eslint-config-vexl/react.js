@@ -25,5 +25,6 @@ module.exports = {
     'react-hooks/exhaustive-deps': 'error',
     'react/react-in-jsx-scope': 'off',
     '@typescript-eslint/strict-boolean-expressions': 'off',
+    'array-callback-return': 'off',
   },
 }

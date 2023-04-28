@@ -2,6 +2,7 @@ import * as E from 'fp-ts/Either'
 import {flow, pipe} from 'fp-ts/function'
 import {type z, type ZodError} from 'zod'
 import * as TE from 'fp-ts/TaskEither'
+import type * as T from 'fp-ts/Task'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import * as SecretStore from 'expo-secure-store'
 import * as crypto from '@vexl-next/cryptography'
@@ -208,4 +209,13 @@ export function stringifyToJson(
     () => JSON.stringify(data),
     (e) => ({_tag: 'jsonError', e} as const)
   )
+}
+
+export function delayInPipeT<V>(milis: number): (val: V) => T.Task<V> {
+  return (val) => async () =>
+    await new Promise((resolve) =>
+      setTimeout(() => {
+        resolve(val)
+      }, milis)
+    )
 }

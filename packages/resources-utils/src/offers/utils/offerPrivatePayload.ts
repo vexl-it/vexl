@@ -3,6 +3,7 @@ import {
   PublicKeyPemBase64,
 } from '@vexl-next/cryptography/dist/KeyHolder'
 import {
+  type IntendedConnectionLevel,
   OfferPrivatePart,
   PrivatePayloadEncrypted,
   type SymmetricKey,
@@ -19,7 +20,6 @@ import * as TE from 'fp-ts/TaskEither'
 import {safeParse, stringifyToJson} from '../../utils/parsing'
 import {eciesEncrypt} from '../../utils/crypto'
 import {type ServerPrivatePart} from '@vexl-next/rest-api/dist/services/offer/contracts'
-import {type ConnectionLevel} from '@vexl-next/rest-api/dist/services/contact/contracts'
 import {type ContactPrivateApi} from '@vexl-next/rest-api/dist/services/contact'
 import * as A from 'fp-ts/Array'
 import * as T from 'fp-ts/Task'
@@ -123,12 +123,12 @@ export function encryptPrivatePart(
 
 export function fetchInfoAndGeneratePrivatePayloads({
   contactApi,
-  connectionLevel,
+  intendedConnectionLevel,
   symmetricKey,
   ownerCredentials,
 }: {
   contactApi: ContactPrivateApi
-  connectionLevel: ConnectionLevel
+  intendedConnectionLevel: IntendedConnectionLevel
   symmetricKey: SymmetricKey
   ownerCredentials: PrivateKeyHolder
 }): TE.TaskEither<
@@ -136,7 +136,7 @@ export function fetchInfoAndGeneratePrivatePayloads({
   {errors: PrivatePartEncryptionError[]; privateParts: ServerPrivatePart[]}
 > {
   return pipe(
-    fetchContactsForOffer({contactApi, connectionLevel}),
+    fetchContactsForOffer({contactApi, intendedConnectionLevel}),
     TE.chainW((connectionsInfo) =>
       TE.fromEither(constructPrivatePayloads({connectionsInfo, symmetricKey}))
     ),

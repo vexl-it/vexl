@@ -6,9 +6,8 @@ import {
   type ErrorInboxAlreadyExists,
   type InboxInState,
 } from '../domain'
-import {usePrivateApiAssumeLoggedIn} from '../../../api'
-import {useStore} from 'jotai'
-import {useCallback} from 'react'
+import {privateApiAtom} from '../../../api'
+import {atom, useSetAtom} from 'jotai'
 import * as O from 'optics-ts'
 import {toBasicError} from '@vexl-next/domain/dist/utility/errors'
 import {pipe} from 'fp-ts/function'
@@ -27,51 +26,51 @@ function focusOneInbox(privateKey: PrivateKeyPemBase64) {
     optic.find((one) => one.inbox.privateKey.privateKeyPemBase64 === privateKey)
 }
 
-export default function useCreateInbox(): (
+export const createInboxAtom = atom<
+  null,
+  [{inbox: Inbox}],
+  TE.TaskEither<ApiErrorCreatingInbox | ErrorInboxAlreadyExists, InboxInState>
+>(null, (get, set, params) => {
+  const api = get(privateApiAtom)
+  const {inbox} = params
+  const messagingStateOptic = O.optic<MessagingState>()
+  const oneInboxPrism = focusOneInbox(inbox.privateKey.privateKeyPemBase64)(
+    messagingStateOptic
+  )
+
+  if (O.preview(oneInboxPrism)(get(messagingStateAtom)))
+    return TE.left(
+      toBasicError('ErrorInboxAlreadyExists')(new Error('Inbox already exists'))
+    )
+
+  return pipe(
+    TE.Do,
+    TE.chainTaskK(getNotificationToken),
+    TE.chainW((token) =>
+      pipe(
+        api.chat.createInbox({
+          token: token ?? undefined,
+          keyPair: inbox.privateKey,
+        }),
+        TE.mapLeft(toBasicError('ApiErrorCreatingInbox'))
+      )
+    ),
+    TE.map(() => {
+      const newInbox: InboxInState = {inbox, chats: []}
+      set(
+        messagingStateAtom,
+        O.set(focusAddInbox(messagingStateOptic))(newInbox)
+      )
+      return newInbox
+    })
+  )
+})
+
+export default function useCreateInbox(): (a: {
   inbox: Inbox
-) => TE.TaskEither<
+}) => TE.TaskEither<
   ApiErrorCreatingInbox | ErrorInboxAlreadyExists,
   InboxInState
 > {
-  const api = usePrivateApiAssumeLoggedIn()
-  const store = useStore()
-
-  return useCallback(
-    (inbox) => {
-      const messagingStateOptic = O.optic<MessagingState>()
-      const oneInboxPrism = focusOneInbox(inbox.privateKey.privateKeyPemBase64)(
-        messagingStateOptic
-      )
-
-      if (O.preview(oneInboxPrism)(store.get(messagingStateAtom)))
-        return TE.left(
-          toBasicError('ErrorInboxAlreadyExists')(
-            new Error('Inbox already exists')
-          )
-        )
-
-      return pipe(
-        TE.Do,
-        TE.chainTaskK(getNotificationToken),
-        TE.chainW((token) =>
-          pipe(
-            api.chat.createInbox({
-              token: token ?? undefined,
-              keyPair: inbox.privateKey,
-            }),
-            TE.mapLeft(toBasicError('ApiErrorCreatingInbox'))
-          )
-        ),
-        TE.map(() => {
-          const newInbox: InboxInState = {inbox, chats: []}
-          store.set(
-            messagingStateAtom,
-            O.set(focusAddInbox(messagingStateOptic))(newInbox)
-          )
-          return newInbox
-        })
-      )
-    },
-    [api, store]
-  )
+  return useSetAtom(createInboxAtom)
 }

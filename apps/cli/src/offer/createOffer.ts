@@ -1,9 +1,11 @@
 import {pipe} from 'fp-ts/function'
 import * as E from 'fp-ts/Either'
 import * as TE from 'fp-ts/TaskEither'
-import {OfferPublicPart} from '@vexl-next/domain/dist/general/offers'
+import {
+  type IntendedConnectionLevel,
+  OfferPublicPart,
+} from '@vexl-next/domain/dist/general/offers'
 import {getPrivateApiFromCredentialsJsonString} from '../api'
-import {type ConnectionLevel} from '@vexl-next/rest-api/dist/services/contact/contracts'
 import {
   generatePrivateKey,
   type PublicKeyPemBase64,
@@ -34,12 +36,12 @@ function readPublicPartFromFile(offerPublicKey: PublicKeyPemBase64) {
 }
 
 export default function createOffer({
-  connectionLevel,
+  intendedConnectionLevel,
   credentialsJson,
   offerPayloadJson,
 }: {
   credentialsJson: string
-  connectionLevel: ConnectionLevel
+  intendedConnectionLevel: IntendedConnectionLevel
   offerPayloadJson: string
 }) {
   return pipe(
@@ -71,7 +73,7 @@ export default function createOffer({
         createNewOfferForMyContacts({
           offerApi: api.offer,
           ownerKeyPair: credentials.keypair,
-          connectionLevel,
+          intendedConnectionLevel,
           contactApi: api.contact,
           publicPart: offerPublicPart,
         })

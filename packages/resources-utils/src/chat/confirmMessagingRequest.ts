@@ -2,16 +2,17 @@ import {
   type PrivateKeyHolder,
   type PublicKeyPemBase64,
 } from '@vexl-next/cryptography/dist/KeyHolder'
-import {
-  type ChatMessage,
-  generateChatMessageId,
-} from '@vexl-next/domain/dist/general/messaging'
+
 import {now} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
 import * as TE from 'fp-ts/TaskEither'
 import {type ChatPrivateApi} from '@vexl-next/rest-api/dist/services/chat'
 import {flow, pipe} from 'fp-ts/function'
 import {encryptMessage, type ErrorEncryptingMessage} from './utils/chatCrypto'
 import {type ExtractLeftTE} from '../utils/ExtractLeft'
+import {
+  type ChatMessage,
+  generateChatMessageId,
+} from '@vexl-next/domain/dist/general/messaging'
 
 function createApproveChatMessage({
   text,

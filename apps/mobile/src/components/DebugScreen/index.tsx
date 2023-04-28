@@ -49,7 +49,7 @@ function DebugScreen({navigation}: Props): JSX.Element {
             <Spacer />
             <Button
               variant={'primary'}
-              small
+              size={'small'}
               text={'Clear offers state'}
               onPress={() => {
                 store.set(offersStateAtom, {
@@ -61,7 +61,7 @@ function DebugScreen({navigation}: Props): JSX.Element {
             />
             <Button
               variant={'primary'}
-              small
+              size={'small'}
               text={'Clear messaging state'}
               onPress={() => {
                 const userInbox: Inbox = {privateKey: session.privateKey}
@@ -72,7 +72,7 @@ function DebugScreen({navigation}: Props): JSX.Element {
             />
             <Button
               variant={'primary'}
-              small
+              size={'small'}
               text={'Refresh chat state'}
               onPress={() => {
                 void refreshMessaging()().then(() => {
@@ -82,7 +82,7 @@ function DebugScreen({navigation}: Props): JSX.Element {
             />
             <Button
               variant={'primary'}
-              small
+              size={'small'}
               text={'Refresh messages state'}
               onPress={() => {
                 void refreshMessaging()().then(() => {
@@ -92,7 +92,7 @@ function DebugScreen({navigation}: Props): JSX.Element {
             />
             <Button
               variant={'primary'}
-              small
+              size={'small'}
               text={'Refresh offers state'}
               onPress={() => {
                 void refreshOffers().then(() => {
@@ -103,7 +103,7 @@ function DebugScreen({navigation}: Props): JSX.Element {
 
             <Button
               variant={'primary'}
-              small
+              size={'small'}
               text={'Reconstruct user inbox'}
               onPress={() => {
                 store.set(messagingStateAtom, (old) => [
@@ -124,7 +124,7 @@ function DebugScreen({navigation}: Props): JSX.Element {
 
             <Button
               variant={'primary'}
-              small
+              size={'small'}
               text={'Print offer and chat state into console'}
               onPress={() => {
                 const offers = store.get(offersStateAtom)

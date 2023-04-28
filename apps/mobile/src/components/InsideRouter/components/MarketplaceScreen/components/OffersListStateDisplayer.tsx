@@ -1,6 +1,6 @@
 import {useMemo} from 'react'
 import ContainerWithTopBorderRadius from '../../ContainerWithTopBorderRadius'
-import OffersList from './OffersList'
+import OffersList from '../../../../OffersList'
 import {type MarketplaceTabScreenProps} from '../../../../../navigationTypes'
 import {ActivityIndicator} from 'react-native'
 import {
@@ -49,6 +49,9 @@ function OffersListStateDisplayer({
       <OffersListButtons
         onAddPress={() => {
           navigation.navigate('CreateOffer')
+        }}
+        onMyOffersPress={() => {
+          navigation.navigate('MyOffers')
         }}
       />
       {offers.length === 0 ? (

@@ -48,7 +48,7 @@ function QuickActionBannerUi({
       </YStack>
       <Button
         onPress={onButtonPress}
-        small
+        size={'small'}
         variant="secondary"
         text={buttonText}
       />

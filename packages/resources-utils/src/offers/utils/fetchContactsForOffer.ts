@@ -7,6 +7,7 @@ import * as TE from 'fp-ts/TaskEither'
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
 import {pipe} from 'fp-ts/function'
 import {type ExtractLeftTE} from '../../utils/ExtractLeft'
+import {type IntendedConnectionLevel} from '@vexl-next/domain/dist/general/offers'
 
 function fetchFriendsPublicKeys({
   lvl,
@@ -40,18 +41,18 @@ export type ApiErrorFetchingContactsForOffer = ExtractLeftTE<
 
 export default function fetchContactsForOffer({
   contactApi,
-  connectionLevel,
+  intendedConnectionLevel,
 }: {
   contactApi: ContactPrivateApi
-  connectionLevel: ConnectionLevel
+  intendedConnectionLevel: IntendedConnectionLevel
 }): TE.TaskEither<ApiErrorFetchingContactsForOffer, ConnectionsInfoForOffer> {
   return pipe(
     TE.Do,
     TE.bindW('firstDegreeConnections', () =>
-      fetchFriendsPublicKeys({lvl: connectionLevel, api: contactApi})
+      fetchFriendsPublicKeys({lvl: intendedConnectionLevel, api: contactApi})
     ),
     TE.bindW('secondDegreeConnections', () =>
-      connectionLevel === 'FIRST'
+      intendedConnectionLevel === 'FIRST'
         ? TE.right([])
         : fetchFriendsPublicKeys({lvl: 'SECOND', api: contactApi})
     ),

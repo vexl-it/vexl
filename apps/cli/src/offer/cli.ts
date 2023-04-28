@@ -5,11 +5,13 @@ import getDummyOffer from './outputDummyOffer'
 import matchAndOutputResultOrError from '../utils/matchAndOutputResultOrError'
 import createOffer from './createOffer'
 import {z} from 'zod'
-import {ConnectionLevel} from '@vexl-next/rest-api/dist/services/contact/contracts'
 import {safeParse} from '@vexl-next/resources-utils/dist/utils/parsing'
 import deleteOffer from './deleteOffer'
 import {OfferAdminId} from '@vexl-next/rest-api/dist/services/offer/contracts'
-import {SymmetricKey} from '@vexl-next/domain/dist/general/offers'
+import {
+  IntendedConnectionLevel,
+  SymmetricKey,
+} from '@vexl-next/domain/dist/general/offers'
 import updatePublicPart from './updatePublicPart'
 import refreshOffer from './refreshOffer'
 import updatePublicPartReencryptAll from './updatePublicPartReencryptAll'
@@ -20,7 +22,7 @@ import {getNewOffers} from './getNewOffers'
 const CreateOfferArgs = z.object({
   credentialsJson: z.string(),
   offerPayloadJson: z.string(),
-  connectionLevel: ConnectionLevel,
+  intendedConnectionLevel: IntendedConnectionLevel,
 })
 
 const DeleteOfferArgs = z.object({
@@ -48,7 +50,7 @@ const UpdatePublicPartReencryptArgs = z.object({
   ownerCredentialsJson: z.string(),
   adminId: OfferAdminId,
   publicPayloadJson: z.string(),
-  connectionLevel: ConnectionLevel,
+  intendedConnectionLevel: IntendedConnectionLevel,
 })
 
 const UpdatePublicPartArgs = z.object({
@@ -101,7 +103,7 @@ export function addOfferCommands(command: Command): Command {
           safeParse(CreateOfferArgs)({
             credentialsJson: credentials,
             offerPayloadJson: offer,
-            connectionLevel: level,
+            intendedConnectionLevel: level,
           }),
           TE.fromEither,
           TE.chainW(createOffer),
@@ -177,7 +179,7 @@ export function addOfferCommands(command: Command): Command {
         safeParse(UpdatePublicPartReencryptArgs)({
           ownerCredentialsJson: credentials,
           adminId,
-          connectionLevel: level,
+          intendedConnectionLevel: level,
           publicPayloadJson: offerJson,
         }),
         TE.fromEither,

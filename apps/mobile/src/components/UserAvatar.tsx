@@ -2,12 +2,18 @@ import {type SvgStringOrImageUri} from '@vexl-next/domain/dist/utility/SvgString
 import Image from './Image'
 import {
   Canvas,
+  Group,
+  Image as SkiaImage,
   ImageSVG,
   Skia,
   BackdropFilter,
   ColorMatrix,
+  rect,
+  rrect,
+  useImage,
 } from '@shopify/react-native-skia'
 import {Grayscale} from 'react-native-color-matrix-image-filters'
+import {useMemo} from 'react'
 
 interface Props {
   userImage: SvgStringOrImageUri
@@ -22,6 +28,13 @@ const BLACK_AND_WHITE = [
 
 // TODO move grayScale images to a separate component
 function UserAvatar({userImage, grayScale, width, height}: Props): JSX.Element {
+  const image = useImage(
+    userImage.type === 'imageUri' ? userImage.imageUri : null
+  )
+  const roundedRect = useMemo(
+    () => rrect(rect(0, 0, width, height), 12, 12),
+    [height, width]
+  )
   if (userImage.type === 'svgXml') {
     if (grayScale) {
       const svg = Skia.SVG.MakeFromString(userImage.svgXml.xml)
@@ -41,12 +54,36 @@ function UserAvatar({userImage, grayScale, width, height}: Props): JSX.Element {
     if (grayScale) {
       return (
         <Grayscale>
-          <Image style={{width, height}} source={{uri: userImage.imageUri}} />
+          <Canvas style={{width, height}}>
+            {image && (
+              <SkiaImage
+                fit={'cover'}
+                x={0}
+                y={0}
+                width={width}
+                height={height}
+                image={image}
+              />
+            )}
+          </Canvas>
         </Grayscale>
       )
     } else {
       return (
-        <Image style={{width, height}} source={{uri: userImage.imageUri}} />
+        <Canvas style={{width, height}}>
+          <Group clip={roundedRect}>
+            {image && (
+              <SkiaImage
+                fit={'cover'}
+                x={0}
+                y={0}
+                width={width}
+                height={height}
+                image={image}
+              />
+            )}
+          </Group>
+        </Canvas>
       )
     }
   }

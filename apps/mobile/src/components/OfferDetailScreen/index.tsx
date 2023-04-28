@@ -37,7 +37,7 @@ function OfferDetailScreen({
             {t('offer.offerNotFound')}
           </Text>
           <Button
-            small
+            size={'small'}
             fullWidth
             variant={'primary'}
             onPress={safeGoBack}

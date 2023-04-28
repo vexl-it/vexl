@@ -1,10 +1,11 @@
 import {
+  type IntendedConnectionLevel,
   type OfferId,
   type OfferInfo,
   type OfferPublicPart,
   type SymmetricKey,
 } from '@vexl-next/domain/dist/general/offers'
-import {useAtomValue, useSetAtom, useStore} from 'jotai'
+import {atom, useAtomValue, useSetAtom, useStore} from 'jotai'
 import {
   lastUpdatedAtAtom,
   loadingStateAtom,
@@ -21,13 +22,12 @@ import {
 import * as Option from 'fp-ts/Option'
 import {
   type ApiErrorDeletingOffer,
-  type ApiErrorReportingOffer,
   type OffersFilter,
   type OneOfferInState,
 } from './domain'
-import {usePrivateApiAssumeLoggedIn} from '../../api'
+import {privateApiAtom, usePrivateApiAssumeLoggedIn} from '../../api'
 import {pipe} from 'fp-ts/function'
-import {useSessionAssumeLoggedIn} from '../session'
+import {dummySession, sessionAtom, useSessionAssumeLoggedIn} from '../session'
 import getNewOffersAndDecrypt, {
   type ApiErrorFetchingOffers,
 } from '@vexl-next/resources-utils/dist/offers/getNewOffersAndDecrypt'
@@ -40,7 +40,6 @@ import {type Task} from 'fp-ts/Task'
 import createNewOfferForMyContacts, {
   type ApiErrorWhileCreatingOffer,
 } from '@vexl-next/resources-utils/dist/offers/createOfferHandleContacts'
-import {type ConnectionLevel} from '@vexl-next/rest-api/dist/services/contact/contracts'
 import {type ApiErrorFetchingContactsForOffer} from '@vexl-next/resources-utils/dist/offers/utils/fetchContactsForOffer'
 import {type ErrorConstructingPrivatePayloads} from '@vexl-next/resources-utils/dist/offers/utils/offerPrivatePayload'
 import {type ErrorGeneratingSymmetricKey} from '@vexl-next/resources-utils/dist/offers/utils/generateSymmetricKey'
@@ -58,7 +57,6 @@ import {
   type BasicError,
   toBasicError,
 } from '@vexl-next/domain/dist/utility/errors'
-import * as O from 'optics-ts'
 import {useCallback, useMemo} from 'react'
 import deduplicate from '../../utils/deduplicate'
 import notEmpty from '../../utils/notEmpty'
@@ -157,7 +155,6 @@ export function useTriggerOffersRefresh(): Task<void> {
                 return {
                   offerInfo: fetchedOffer,
                   flags: {
-                    isMine: false,
                     reported: false,
                   },
                 }
@@ -200,7 +197,7 @@ export function useMyOffers(): OneOfferInState[] {
 }
 
 export function useSingleOffer(
-  offerId: OfferId
+  offerId: OfferId | undefined
 ): Option.Option<OneOfferInState> {
   const foundOffer = useAtomValue(
     useMemo(() => singleOfferAtom(offerId), [offerId])
@@ -212,128 +209,122 @@ export function useFilteredOffers(filter: OffersFilter): OneOfferInState[] {
   return useAtomValue(useMemo(() => offersAtomWithFilter(filter), [filter]))
 }
 
-export function useCreateOffer(): (args: {
-  payloadPublic: OfferPublicPart
-  connectionLevel: ConnectionLevel
-}) => TE.TaskEither<
-  | ApiErrorFetchingContactsForOffer
-  | ErrorConstructingPrivatePayloads
-  | ApiErrorWhileCreatingOffer
-  | ErrorGeneratingSymmetricKey
-  | ErrorEncryptingPublicPart
-  | ErrorDecryptingOffer,
-  OneOfferInState
-> {
-  const api = usePrivateApiAssumeLoggedIn()
-  const session = useSessionAssumeLoggedIn()
-  const setOffers = useSetAtom(offersAtom)
+export const createOfferAtom = atom<
+  null,
+  [
+    {
+      payloadPublic: OfferPublicPart
+      intendedConnectionLevel: IntendedConnectionLevel
+    }
+  ],
+  TE.TaskEither<
+    | ApiErrorFetchingContactsForOffer
+    | ErrorConstructingPrivatePayloads
+    | ApiErrorWhileCreatingOffer
+    | ErrorGeneratingSymmetricKey
+    | ErrorEncryptingPublicPart
+    | ErrorDecryptingOffer,
+    OneOfferInState
+  >
+>(null, (get, set, params) => {
+  const api = get(privateApiAtom)
+  const session = get(sessionAtom)
+  const {payloadPublic, intendedConnectionLevel} = params
+  return pipe(
+    createNewOfferForMyContacts({
+      offerApi: api.offer,
+      publicPart: payloadPublic,
+      contactApi: api.contact,
+      intendedConnectionLevel,
+      ownerKeyPair:
+        session.state === 'loggedIn'
+          ? session.session.privateKey
+          : dummySession.privateKey,
+    }),
+    TE.map((r) => {
+      if (r.encryptionErrors.length > 0) {
+        reportError('error', 'Error while encrypting offer', r.encryptionErrors)
+      }
 
-  return useCallback(
-    ({payloadPublic, connectionLevel}) =>
-      pipe(
-        createNewOfferForMyContacts({
-          offerApi: api.offer,
-          publicPart: payloadPublic,
-          contactApi: api.contact,
-          connectionLevel,
-          ownerKeyPair: session.privateKey,
-        }),
-        TE.map((r) => {
-          if (r.encryptionErrors.length > 0) {
-            reportError(
-              'error',
-              'Error while encrypting offer',
-              r.encryptionErrors
-            )
-          }
-
-          const createdOffer: OneOfferInState = {
-            adminId: r.adminId,
-            flags: {
-              isMine: true,
-              reported: false,
-            },
-            offerInfo: r.offerInfo,
-          }
-          setOffers((oldState) => [...oldState, createdOffer])
-          return createdOffer
-        })
-      ),
-    [api, session, setOffers]
+      const createdOffer: OneOfferInState = {
+        ownershipInfo: {
+          adminId: r.adminId,
+          intendedConnectionLevel,
+        },
+        flags: {
+          reported: false,
+        },
+        offerInfo: r.offerInfo,
+      }
+      set(offersAtom, (oldState) => [...oldState, createdOffer])
+      return createdOffer
+    })
   )
-}
+})
 
-const reportedOptic = O.optic<OneOfferInState>().prop('flags').prop('reported')
+export const updateOfferAtom = atom<
+  null,
+  [
+    {
+      payloadPublic: OfferPublicPart
+      symmetricKey: SymmetricKey
+      adminId: OfferAdminId
+      privatePayloads: OfferPrivateListItem[]
+      intendedConnectionLevel: IntendedConnectionLevel
+    }
+  ],
+  TE.TaskEither<
+    ApiErrorUpdatingOffer | ErrorEncryptingPublicPart | ErrorDecryptingOffer,
+    OneOfferInState
+  >
+>(null, (get, set, params) => {
+  const api = get(privateApiAtom)
+  const session = get(sessionAtom)
+  const {
+    payloadPublic,
+    symmetricKey,
+    adminId,
+    privatePayloads,
+    intendedConnectionLevel,
+  } = params
 
-export function useReportOffer(): (
-  offerId: OfferId
-) => TE.TaskEither<ApiErrorReportingOffer, {success: true}> {
-  const api = usePrivateApiAssumeLoggedIn()
-  const store = useStore()
-
-  return useCallback(
-    (offerId) =>
-      pipe(
-        api.offer.reportOffer({offerId}),
-        TE.matchW(
-          (error) => {
-            reportError('error', 'Error while reporting offer', error)
-            return E.left(toBasicError('ApiErrorReportingOffer')(error))
-          },
-          () => {
-            store.set(singleOfferAtom(offerId), O.set(reportedOptic)(true))
-            return E.right({success: true} as const)
-          }
-        )
-      ),
-    [api, store]
-  )
-}
-
-export function useUpdateOffer(): (args: {
-  payloadPublic: OfferPublicPart
-  symmetricKey: SymmetricKey
-  adminId: OfferAdminId
-  privatePayloads: OfferPrivateListItem[]
-}) => TE.TaskEither<
-  ApiErrorUpdatingOffer | ErrorEncryptingPublicPart | ErrorDecryptingOffer,
-  OneOfferInState
-> {
-  const api = usePrivateApiAssumeLoggedIn()
-  const session = useSessionAssumeLoggedIn()
-  const setOffers = useSetAtom(offersAtom)
-
-  return useCallback(
-    ({payloadPublic, adminId, symmetricKey, privatePayloads}) =>
-      pipe(
-        updateOffer({
-          offerApi: api.offer,
+  return pipe(
+    updateOffer({
+      offerApi: api.offer,
+      adminId,
+      publicPayload: payloadPublic,
+      symmetricKey,
+      ownerKeypair:
+        session.state === 'loggedIn'
+          ? session.session.privateKey
+          : dummySession.privateKey,
+      privatePayloads,
+    }),
+    TE.map((r) => {
+      const createdOffer: OneOfferInState = {
+        flags: {
+          reported: false,
+        },
+        ownershipInfo: {
           adminId,
-          publicPayload: payloadPublic,
-          symmetricKey,
-          ownerKeypair: session.privateKey,
-          privatePayloads,
-        }),
-        TE.map((r) => {
-          const createdOffer: OneOfferInState = {
-            adminId,
-            flags: {
-              isMine: true,
-              reported: false,
-            },
-            offerInfo: r,
-          }
-          setOffers((oldState) => [...oldState, createdOffer])
-          return createdOffer
-        })
-      ),
-    [api, session, setOffers]
+          intendedConnectionLevel,
+        },
+        offerInfo: r,
+      }
+      set(offersAtom, (oldState) => [
+        ...oldState.filter(
+          (offer) => offer.offerInfo.offerId !== createdOffer.offerInfo.offerId
+        ),
+        createdOffer,
+      ])
+      return createdOffer
+    })
   )
-}
+})
 
 export function useUpdateOfferReencrypt(): (args: {
   payloadPublic: OfferPublicPart
-  connectionLevel: ConnectionLevel
+  intendedConnectionLevel: IntendedConnectionLevel
   adminId: OfferAdminId
 }) => TE.TaskEither<
   | ErrorGeneratingSymmetricKey
@@ -349,13 +340,13 @@ export function useUpdateOfferReencrypt(): (args: {
   const setOffers = useSetAtom(offersAtom)
 
   return useCallback(
-    ({payloadPublic, connectionLevel, adminId}) =>
+    ({payloadPublic, intendedConnectionLevel, adminId}) =>
       pipe(
         updateOfferReencryptForAll({
           offerApi: api.offer,
           adminId,
           contactApi: api.contact,
-          connectionLevel,
+          intendedConnectionLevel,
           ownerKeyPair: session.privateKey,
           publicPayload: payloadPublic,
         }),
@@ -368,9 +359,11 @@ export function useUpdateOfferReencrypt(): (args: {
             )
           }
           const createdOffer: OneOfferInState = {
-            adminId,
+            ownershipInfo: {
+              intendedConnectionLevel,
+              adminId,
+            },
             flags: {
-              isMine: true,
               reported: false,
             },
             offerInfo: r.offerInfo,
@@ -402,7 +395,11 @@ export function useDeleteOffer(): (
           () => {
             store.set(
               offersAtom,
-              offers.filter((o) => !o.adminId || !adminIds.includes(o.adminId))
+              offers.filter(
+                (o) =>
+                  !o.ownershipInfo?.adminId ||
+                  !adminIds.includes(o.ownershipInfo?.adminId)
+              )
             )
             return E.right({success: true})
           }

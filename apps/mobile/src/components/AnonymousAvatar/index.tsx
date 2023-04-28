@@ -22,7 +22,6 @@ export function getAvatarSvg(avatarIndex: number): SvgString {
 
 export function AnonymousAvatarFromSeed({
   seed,
-  style,
   width,
   height,
   grayScale,

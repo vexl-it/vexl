@@ -29,7 +29,7 @@ const OfferPublicPartToEncrypt = z.object({
   activePriceState: z.string(),
   activePriceValue: z.coerce.string(),
   activePriceCurrency: z.string(),
-  active: z.coerce.string(),
+  active: z.coerce.boolean(),
   groupUuids: z.array(z.string()),
 })
 

@@ -10,10 +10,11 @@ import Button from '../../Button'
 import IconButton from '../../IconButton'
 import flagSvg from '../images/flagSvg'
 import {useReportOfferHandleUI, useSubmitRequestHandleUI} from '../api'
-import {useState} from 'react'
+import React, {useState} from 'react'
 import {useChatForOffer} from '../../../state/chat/hooks/useChatForOffer'
 import {useNavigation} from '@react-navigation/native'
 import InfoSquare from '../../InfoSquare'
+import closeSvg from '../../images/closeSvg'
 
 function OfferInfo({offer}: {offer: OneOfferInState}): JSX.Element {
   const goBack = useSafeGoBack()
@@ -28,19 +29,16 @@ function OfferInfo({offer}: {offer: OneOfferInState}): JSX.Element {
 
   return (
     <Stack f={1} mx={'$2'} my={'$4'}>
-      <ScreenTitle
-        additionalButton={
-          <IconButton
-            variant={'dark'}
-            icon={flagSvg}
-            onPress={() => {
-              void reportOffer(offer.offerInfo.offerId)()
-            }}
-          />
-        }
-        onClosePress={goBack}
-        text={t('offer.title')}
-      />
+      <ScreenTitle text={t('offer.title')}>
+        <IconButton
+          variant={'dark'}
+          icon={flagSvg}
+          onPress={() => {
+            void reportOffer(offer.offerInfo.offerId)()
+          }}
+        />
+        <IconButton variant="dark" icon={closeSvg} onPress={goBack} />
+      </ScreenTitle>
       <ScrollView>
         <YStack space={'$4'}>
           <OfferWithBubbleTip negative={!!chatForOffer} offer={offer} />

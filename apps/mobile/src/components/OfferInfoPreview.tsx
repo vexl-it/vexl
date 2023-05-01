@@ -32,11 +32,22 @@ const PriceBigger = styled(InfoText, {
   fos: 20,
 })
 
-function OfferInfoPreview({offer}: {offer: OfferInfo}): JSX.Element {
+function OfferInfoPreview({
+  offer,
+  negative,
+}: {
+  offer: OfferInfo
+  negative?: boolean
+}): JSX.Element {
   const {t} = useTranslation()
   return (
     <>
-      <Text fos={20} mb="$4" ff="$body500">
+      <Text
+        fos={20}
+        mb="$4"
+        color={negative ? '$greyOnBlack' : '$black'}
+        ff="$body500"
+      >
         {offer.publicPart.offerDescription}
       </Text>
       <XStack>

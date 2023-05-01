@@ -3,6 +3,7 @@ import Image from '../Image'
 import avatarsSvg from './images/avatarsSvg'
 import {type SvgString} from '@vexl-next/domain/dist/utility/SvgString.brand'
 import {randomNumberFromSeed} from '../../utils/randomNumber'
+import UserAvatar from '../UserAvatar'
 
 interface Props {
   avatarIndex: number
@@ -22,12 +23,25 @@ export function getAvatarSvg(avatarIndex: number): SvgString {
 export function AnonymousAvatarFromSeed({
   seed,
   style,
+  width,
+  height,
+  grayScale,
 }: {
   seed: string
   style?: StyleProp<ViewStyle>
+  height: number
+  width: number
+  grayScale: boolean
 }): JSX.Element {
-  const avatarIndex = randomNumberFromSeed(0, avatarsSvg.length - 1, seed)
+  const avatar =
+    avatarsSvg[randomNumberFromSeed(0, avatarsSvg.length - 1, seed)]
+
   return (
-    <AnonymousAvatar style={style} avatarIndex={avatarIndex}></AnonymousAvatar>
+    <UserAvatar
+      userImage={{type: 'svgXml', svgXml: avatar}}
+      width={width}
+      height={height}
+      grayScale={grayScale}
+    />
   )
 }

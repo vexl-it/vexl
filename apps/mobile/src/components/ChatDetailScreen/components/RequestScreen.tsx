@@ -1,6 +1,6 @@
 import {Stack, YStack} from 'tamagui'
 import ChatRequestPreview from './ChatRequestPreview'
-import InfoRectangle from './InfoRectangle'
+import InfoSquare from '../../InfoSquare'
 import AccepDeclineButtons from './AccepDeclineButtons'
 import {ScrollView} from 'react-native'
 import ChatHeader from './ChatHeader'
@@ -37,21 +37,21 @@ function RequestScreen(): JSX.Element {
       <Stack mx="$4" mb={'$4'}>
         {!wasDenied &&
           (requestedByMe ? (
-            <InfoRectangle>
+            <InfoSquare>
               {t('messages.wellLetYouKnowOnceUserAccepts')}
-            </InfoRectangle>
+            </InfoSquare>
           ) : (
             <AccepDeclineButtons />
           ))}
         {wasDenied &&
           (requestedByMe ? (
-            <InfoRectangle negative>
+            <InfoSquare negative>
               {t('messages.deniedByMe', {name: randomName(chat.id)})}
-            </InfoRectangle>
+            </InfoSquare>
           ) : (
-            <InfoRectangle negative>
+            <InfoSquare negative>
               {t('messages.deniedByThem', {name: randomName(chat.id)})}
-            </InfoRectangle>
+            </InfoSquare>
           ))}
       </Stack>
     </>

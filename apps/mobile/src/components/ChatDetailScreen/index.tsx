@@ -7,7 +7,6 @@ import focusChatWithMessagesAtom from '../../state/chat/atoms/focusChatWithMessa
 import MessagesListOrApprovalPreview from './components/MessagesListOrApprovalPreview'
 import valueOrDefaultAtom from '../../utils/atomUtils/valueOrDefaultAtom'
 import hasNonNullableValueAtom from '../../utils/atomUtils/hasNonNullableValueAtom'
-import AreYouSureDialog from '../AreYouSureDialog'
 
 type Props = RootStackScreenProps<'ChatDetail'>
 
@@ -36,7 +35,6 @@ export default function ChatDetailScreen({
   return (
     <ScopeProvider scope={ChatScope} value={nonNullChatWithMessagesAtom}>
       <MessagesListOrApprovalPreview />
-      <AreYouSureDialog />
     </ScopeProvider>
   )
 }

@@ -9,7 +9,9 @@ import {pipe} from 'fp-ts/function'
 import {axiosCallWithValidation} from '../../utils'
 import {CreateChallengeResponse, type SignedChallenge} from './contracts'
 import * as TE from 'fp-ts/TaskEither'
-import {type ExtractLeftTE} from '@vexl-next/resources-utils/dist/utils/ExtractLeft'
+
+export type ExtractLeftTE<T extends TE.TaskEither<any, any>> =
+  T extends TE.TaskEither<infer L, unknown> ? L : never
 
 export type ErrorGeneratingChallenge = ExtractLeftTE<
   ReturnType<ReturnType<typeof generateChallenge>>

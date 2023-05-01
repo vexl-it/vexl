@@ -6,11 +6,13 @@ interface Props extends YStackProps {
   onClosePress: () => void
   text: string
   withBottomBorder?: boolean
+  additionalButton?: JSX.Element
 }
 
 function ScreenTitle({
   onClosePress,
   text,
+  additionalButton,
   withBottomBorder = false,
   ...props
 }: Props): JSX.Element {
@@ -22,7 +24,10 @@ function ScreenTitle({
             {text}
           </Text>
         </Stack>
-        <IconButton variant="dark" icon={closeSvg} onPress={onClosePress} />
+        <XStack space={'$2'}>
+          {additionalButton ?? null}
+          <IconButton variant="dark" icon={closeSvg} onPress={onClosePress} />
+        </XStack>
       </XStack>
       {withBottomBorder && <Stack h={0.5} mx="$-4" bg="$grey" />}
     </YStack>

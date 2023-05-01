@@ -106,6 +106,7 @@ export interface Props extends Omit<TextInputProps, 'style'> {
   variant?: 'greyOnWhite' | 'greyOnBlack' | 'transparentOnGrey'
   rightElement?: ReactNode
   borderRadius?: string
+  numberOfLines?: number
   multiline?: boolean
 }
 
@@ -122,6 +123,7 @@ function TextInput(
     rightElement,
     borderRadius,
     multiline,
+    numberOfLines,
     ...restProps
   }: Props,
   ref: Ref<RNTextInput>
@@ -162,6 +164,8 @@ function TextInput(
       <InputStyled
         multiline={multiline}
         ref={inputRef}
+        textAlignVertical={numberOfLines ? 'top' : 'center'}
+        numberOfLines={numberOfLines}
         placeholderTextColor={tokens.color.greyAccent2.val}
         selectionColor={
           variant === 'greyOnBlack'

@@ -1,8 +1,8 @@
 import {getTokens, Stack, Text, XStack} from 'tamagui'
-import Image from '../../Image'
-import infoSvg from '../images/infoSvg'
+import Image from './Image'
+import infoSvg from './ChatDetailScreen/images/infoSvg'
 
-function InfoRectangle({
+function InfoSquare({
   children,
   negative,
 }: {
@@ -26,9 +26,11 @@ function InfoRectangle({
           source={infoSvg}
         />
       </Stack>
-      <Text color={negative ? '$red' : '$white'}>{children}</Text>
+      <Text flex={1} color={negative ? '$red' : '$white'}>
+        {children}
+      </Text>
     </XStack>
   )
 }
 
-export default InfoRectangle
+export default InfoSquare

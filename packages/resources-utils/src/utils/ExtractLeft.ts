@@ -10,3 +10,5 @@ export type ExtractLeftE<T extends E.Either<any, any>> = T extends E.Either<
 >
   ? L
   : never
+
+export default {}

@@ -9,6 +9,7 @@ import LoadingOverlayProvider from './components/LoadingOverlayProvider'
 import {useIsSessionLoaded} from './state/session'
 import {SafeAreaProvider} from 'react-native-safe-area-context'
 import {useTheme} from 'tamagui'
+import AreYouSureDialog from './components/AreYouSureDialog'
 
 void SplashScreen.preventAutoHideAsync()
 
@@ -43,7 +44,7 @@ function App(): JSX.Element {
         <LoadingOverlayProvider>
           <RootNavigation />
         </LoadingOverlayProvider>
-        {/* <AreYouSureDialog /> */}
+        <AreYouSureDialog />
       </NavigationContainer>
     </SafeAreaProvider>
   )

@@ -76,6 +76,8 @@ export function useTriggerOffersRefresh(): Task<void> {
     const updateStartedAt = isoNow()
     const offerIds = store.get(offersIdsAtom)
 
+    console.log('🦋 Refreshing offers...')
+
     await pipe(
       getNewOffersAndDecrypt({
         offersApi: api.offer,

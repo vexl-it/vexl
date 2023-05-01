@@ -10,6 +10,7 @@ import {useMolecule} from 'jotai-molecules'
 import {chatMolecule} from '../atoms'
 import {useSetAtom} from 'jotai'
 import binSvg from '../images/binSvg'
+import {enableHiddenFeatures} from '../../../utils/environment'
 
 type ButtonType =
   | 'back'
@@ -51,7 +52,7 @@ function Button({type}: {type: ButtonType}): JSX.Element | null {
       />
     )
 
-  if (type === 'identityReveal')
+  if (type === 'identityReveal' && enableHiddenFeatures)
     return (
       <IconButton
         icon={identityIconSvg}

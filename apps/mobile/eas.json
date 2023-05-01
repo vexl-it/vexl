@@ -32,6 +32,10 @@
     "production": {
       "android": {
         "image": "ubuntu-18.04-jdk-11-ndk-r19c"
+      },
+      "env": {
+        "ENABLE_HIDDEN_FEATURES": "true",
+        "API_PRESET": "prodEnv"
       }
     }
   },

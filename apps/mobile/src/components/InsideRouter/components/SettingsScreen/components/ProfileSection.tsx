@@ -6,6 +6,7 @@ import QRIconSVG from '../images/QRIconSVG'
 import {Alert, TouchableWithoutFeedback} from 'react-native'
 import reachIconSVG from '../images/reachIconSVG'
 import {Stack, styled, Text, XStack} from 'tamagui'
+import {enableHiddenFeatures} from '../../../../../utils/environment'
 
 const GrayBackContainer = styled(XStack, {
   ai: 'center',
@@ -31,17 +32,21 @@ function ProfileSection(): JSX.Element {
             {t('settings.yourReach', {number: 1000})}
           </Text>
         </GrayBackContainer>
-        <TouchableWithoutFeedback
-          onPress={() => {
-            Alert.alert('todo')
-          }}
-        >
-          <GrayBackContainer>
-            <Stack w={24} h={24}>
-              <SvgImage source={QRIconSVG} />
-            </Stack>
-          </GrayBackContainer>
-        </TouchableWithoutFeedback>
+        {enableHiddenFeatures ? (
+          <TouchableWithoutFeedback
+            onPress={() => {
+              Alert.alert('todo')
+            }}
+          >
+            <GrayBackContainer>
+              <Stack w={24} h={24}>
+                <SvgImage source={QRIconSVG} />
+              </Stack>
+            </GrayBackContainer>
+          </TouchableWithoutFeedback>
+        ) : (
+          <Stack></Stack>
+        )}
       </XStack>
       <UserDataDisplay userNameAndAvatar={session.realUserData} />
       <Text ta="center" mt="$2" col="$greyOnBlack">

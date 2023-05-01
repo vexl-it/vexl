@@ -4319,9 +4319,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@shopify/react-native-skia@npm:0.1.172":
-  version: 0.1.172
-  resolution: "@shopify/react-native-skia@npm:0.1.172"
+"@shopify/react-native-skia@npm:0.1.183":
+  version: 0.1.183
+  resolution: "@shopify/react-native-skia@npm:0.1.183"
   dependencies:
     "@types/pixelmatch": ^5.2.4
     "@types/pngjs": ^6.0.1
@@ -4340,7 +4340,7 @@ __metadata:
       optional: true
   bin:
     setup-skia-web: scripts/setup-canvaskit.js
-  checksum: 469526c9c8b884bc9abda9e456e96f61dadd4883b52bcaf9f6ee0a52cac3f669b3a1167c0c1abc3573ac2422b90352d99914458050975406631d1d9f33e12787
+  checksum: b3bd23946f12e7f1c134f2bebef4701045f78b2e1b278d2ad0b2d5e834d763cd59c2069263b147b127f15a4bb1a39473bab5edaf9707b2bfa56ec9d10cf2ebf9
   languageName: node
   linkType: hard
 
@@ -6813,7 +6813,7 @@ __metadata:
     "@react-navigation/native-stack": ^6.9.4
     "@react-spring/native": ^9.6.1
     "@shopify/flash-list": 1.4.0
-    "@shopify/react-native-skia": 0.1.172
+    "@shopify/react-native-skia": 0.1.183
     "@tamagui/animations-reanimated": ^1.10.1
     "@tamagui/babel-plugin": ^1.10.0
     "@tamagui/config": ^1.10.0

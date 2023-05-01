@@ -52,19 +52,21 @@ function ContactsListSelect({
   }
 
   return (
-    <WhiteContainer noPadding>
-      <Stack f={1} px="$4">
-        <SearchBar />
-        {toDisplay.length > 0 && <ContactsList contacts={toDisplay} />}
-        {toDisplay.length === 0 && !O.isSome(searchTextAsCustomContact) && (
-          <NothingFound />
-        )}
-        {toDisplay.length === 0 && O.isSome(searchTextAsCustomContact) && (
-          <AddContactRow contact={searchTextAsCustomContact.value} />
-        )}
-        {renderFooter({onSubmit})}
-      </Stack>
-    </WhiteContainer>
+    <>
+      <WhiteContainer noPadding>
+        <Stack f={1} px="$4">
+          <SearchBar />
+          {toDisplay.length > 0 && <ContactsList contacts={toDisplay} />}
+          {toDisplay.length === 0 && !O.isSome(searchTextAsCustomContact) && (
+            <NothingFound />
+          )}
+          {toDisplay.length === 0 && O.isSome(searchTextAsCustomContact) && (
+            <AddContactRow contact={searchTextAsCustomContact.value} />
+          )}
+        </Stack>
+      </WhiteContainer>
+      {renderFooter({onSubmit})}
+    </>
   )
 }
 

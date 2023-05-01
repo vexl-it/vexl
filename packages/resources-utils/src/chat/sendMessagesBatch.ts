@@ -20,11 +20,13 @@ import {
   generateSignedChallengeBatch,
 } from './utils/generateSignedChallengesBatch'
 import {type BasicError, toError} from '@vexl-next/domain/dist/utility/errors'
+import {type ExtractLeftTE} from '../utils/ExtractLeft'
 
 interface MessageInInbox {
   readonly message: ChatMessage
   readonly receiverPublicKey: PublicKeyPemBase64
 }
+
 interface Inbox {
   readonly messages: MessageInInbox[]
   readonly inboxKeypair: PrivateKeyHolder
@@ -64,6 +66,7 @@ function findChallengeForPublicKey(
 
 export type ErrorNoChallengeForPublicKey =
   BasicError<'ErrorNoChallengeForPublicKey'>
+
 function createInboxInBatch(
   generatedChallenges: Array<{
     challenge: SignedChallenge
@@ -97,8 +100,9 @@ function createInboxInBatch(
     )
 }
 
-export type ApiErrorSendingMessagesBatch =
-  BasicError<'ApiErrorSendingMessagesBatch'>
+export type ApiErrorSendingMessagesBatch = ExtractLeftTE<
+  ReturnType<ChatPrivateApi['sendMessages']>
+>
 
 export default function sendMessagesBatch({
   api,
@@ -127,11 +131,6 @@ export default function sendMessagesBatch({
         A.sequence(TE.ApplicativePar)
       )
     ),
-    TE.chainW((toSend) =>
-      pipe(
-        api.sendMessages({data: toSend}),
-        TE.mapLeft(toError('ApiErrorSendingMessagesBatch'))
-      )
-    )
+    TE.chainW((toSend) => pipe(api.sendMessages({data: toSend})))
   )
 }

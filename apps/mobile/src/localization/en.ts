@@ -13,6 +13,13 @@ export default {
     'cancel': 'Cancel',
     'unknownError': 'Unknown Error',
     'unexpectedServerResponse': 'Unexpected Server Response',
+    'networkErrors': {
+      'errNetwork':
+        'Network error has occurred. Are you connected to the internet?',
+      'errCanceled': 'Request was canceled',
+      'etimedout': 'Request timed out',
+      'econnaborted': 'Connection aborted',
+    },
     'cryptoError': 'Unexpected cryptography error',
     'secondsShort': 's',
     'ok': 'ok',
@@ -400,7 +407,8 @@ export default {
     'askToReveal': 'Ask to reveal identity',
     'blockUser': 'Block user',
     'sending': 'sending...',
-    'errorSending': 'Error sending. Tap to resend.',
+    'unknownErrorWhileSending': 'Unknown error while sending message',
+    'tapToResent': 'Tap to resend.',
     'deniedByMe': 'You denied messaging request request with {{name}}.',
     'deniedByThem': '{{name}} denied your messaging request.',
     'requestMessageWasDeleted': 'Request message was deleted',

@@ -3,12 +3,13 @@ import {FlatList, RefreshControl} from 'react-native'
 import {type OneOfferInState} from '../../../../../state/marketplace/domain'
 import {getTokens} from 'tamagui'
 import usePixelsFromBottomWhereTabsEnd from '../../../utils'
-import {useMemo} from 'react'
+import {type ComponentProps, useMemo} from 'react'
 
 export interface Props {
   readonly offers: OneOfferInState[]
   onRefresh: () => void
   refreshing: boolean
+  ListComponent?: ComponentProps<typeof FlatList>['ListHeaderComponent']
 }
 
 function keyExtractor(offer: OneOfferInState): string {
@@ -19,16 +20,20 @@ function renderItem({item}: {item: OneOfferInState}): JSX.Element {
   return <OfferListItem offer={item} />
 }
 
-function OffersList({offers, onRefresh, refreshing}: Props): JSX.Element {
+function OffersList({
+  offers,
+  onRefresh,
+  refreshing,
+  ListComponent,
+}: Props): JSX.Element {
   const bottomOffset = usePixelsFromBottomWhereTabsEnd()
 
   return (
     <>
       <FlatList
+        ListHeaderComponent={ListComponent}
         contentContainerStyle={useMemo(
           () => ({
-            marginLeft: getTokens().space[2].val,
-            marginRight: getTokens().space[2].val,
             paddingBottom: bottomOffset + Number(getTokens().space[5].val),
           }),
           [bottomOffset]

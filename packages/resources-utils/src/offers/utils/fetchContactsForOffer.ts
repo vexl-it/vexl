@@ -4,14 +4,9 @@ import {
 } from '@vexl-next/rest-api/dist/services/contact/contracts'
 import {type ContactPrivateApi} from '@vexl-next/rest-api/dist/services/contact'
 import * as TE from 'fp-ts/TaskEither'
-import {
-  type BadStatusCodeError,
-  type UnexpectedApiResponseError,
-  type UnknownError,
-} from '@vexl-next/rest-api/dist/Errors'
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
 import {pipe} from 'fp-ts/function'
-import {type BasicError, toError} from '@vexl-next/domain/dist/utility/errors'
+import {type ExtractLeftTE} from '../../utils/ExtractLeft'
 
 function fetchFriendsPublicKeys({
   lvl,
@@ -20,7 +15,7 @@ function fetchFriendsPublicKeys({
   lvl: ConnectionLevel
   api: ContactPrivateApi
 }): TE.TaskEither<
-  UnknownError | BadStatusCodeError | UnexpectedApiResponseError,
+  ExtractLeftTE<ReturnType<ContactPrivateApi['fetchMyContacts']>>,
   PublicKeyPemBase64[]
 > {
   return pipe(
@@ -39,8 +34,9 @@ export interface ConnectionsInfoForOffer {
   commonFriends: FetchCommonConnectionsResponse
 }
 
-export type ApiErrorFetchingContactsForOffer =
-  BasicError<'ApiErrorFetchingContactsForOffer'>
+export type ApiErrorFetchingContactsForOffer = ExtractLeftTE<
+  ReturnType<ContactPrivateApi['fetchMyContacts' | 'fetchCommonConnections']>
+>
 
 export default function fetchContactsForOffer({
   contactApi,
@@ -70,7 +66,6 @@ export default function fetchContactsForOffer({
             ])
           ),
         })
-    ),
-    TE.mapLeft(toError('ApiErrorFetchingContactsForOffer'))
+    )
   )
 }

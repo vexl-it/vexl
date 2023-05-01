@@ -10,10 +10,12 @@ import {
   type PrivatePartEncryptionError,
 } from './utils/offerPrivatePayload'
 import flattenTaskOfEithers from '../utils/flattenTaskOfEithers'
-import {type BasicError, toError} from '@vexl-next/domain/dist/utility/errors'
+import {type ExtractLeftTE} from '../utils/ExtractLeft'
 
-export type ApiErrorAddingPrivateParts =
-  BasicError<'ApiErrorAddingPrivateParts'>
+export type ApiErrorAddingPrivateParts = ExtractLeftTE<
+  ReturnType<OfferPrivateApi['createPrivatePart']>
+>
+
 export function addPrivatePartsToOffer({
   adminId,
   privateParts,
@@ -32,7 +34,6 @@ export function addPrivatePartsToOffer({
     TE.chainFirstW(({rights}) =>
       api.createPrivatePart({offerPrivateList: rights, adminId})
     ),
-    TE.map(({lefts}) => lefts),
-    TE.mapLeft(toError('ApiErrorAddingPrivateParts'))
+    TE.map(({lefts}) => lefts)
   )
 }

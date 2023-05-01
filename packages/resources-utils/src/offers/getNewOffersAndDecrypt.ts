@@ -8,9 +8,11 @@ import * as A from 'fp-ts/Array'
 import * as T from 'fp-ts/Task'
 import {type IsoDatetimeString} from '@vexl-next/domain/dist/utility/IsoDatetimeString.brand'
 import {type OfferInfo} from '@vexl-next/domain/dist/general/offers'
-import {type BasicError, toError} from '@vexl-next/domain/dist/utility/errors'
+import {type ExtractLeftTE} from '../utils/ExtractLeft'
 
-export type ApiErrorFetchingOffers = BasicError<'ApiErrorFetchingOffers'>
+export type ApiErrorFetchingOffers = ExtractLeftTE<
+  ReturnType<OfferPrivateApi['getOffersForMeModifiedOrCreatedAfter']>
+>
 
 /**
  * Downloads new offers from the server and decrypts them with provided keypair
@@ -38,7 +40,6 @@ export default function getNewOffersAndDecrypt({
 > {
   return pipe(
     offersApi.getOffersForMeModifiedOrCreatedAfter({modifiedAt}),
-    TE.mapLeft(toError('ApiErrorFetchingOffers')),
     TE.map(({offers}) => offers),
     TE.chainW((offers) =>
       pipe(

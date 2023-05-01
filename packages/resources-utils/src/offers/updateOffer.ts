@@ -11,7 +11,6 @@ import * as TE from 'fp-ts/TaskEither'
 import encryptOfferPublicPayload, {
   type ErrorEncryptingPublicPart,
 } from './utils/encryptOfferPublicPayload'
-import {type BasicError, toError} from '@vexl-next/domain/dist/utility/errors'
 import {
   type PrivateKeyHolder,
   type PublicKeyPemBase64,
@@ -28,8 +27,11 @@ import generateSymmetricKey, {
 } from './utils/generateSymmetricKey'
 import {type ConnectionLevel} from '@vexl-next/rest-api/dist/services/contact/contracts'
 import {type ApiErrorFetchingContactsForOffer} from './utils/fetchContactsForOffer'
+import {type ExtractLeftTE} from '../utils/ExtractLeft'
 
-export type ApiErrorUpdatingOffer = BasicError<'ApiErrorUpdatingOffer'>
+export type ApiErrorUpdatingOffer = ExtractLeftTE<
+  ReturnType<OfferPrivateApi['updateOffer']>
+>
 export default function updateOffer({
   offerApi,
   adminId,
@@ -48,7 +50,7 @@ export default function updateOffer({
     payloadPrivate: PrivatePayloadEncrypted
   }>
 }): TE.TaskEither<
-  ApiErrorUpdatingOffer | ErrorEncryptingPublicPart,
+  ApiErrorUpdatingOffer | ErrorEncryptingPublicPart | ErrorDecryptingOffer,
   OfferInfo
 > {
   return pipe(
@@ -63,8 +65,7 @@ export default function updateOffer({
           payloadPublic: encryptedPayload,
           offerPrivateList: privatePayloads,
         }),
-        TE.chainW(decryptOffer(ownerKeypair)),
-        TE.mapLeft(toError('ApiErrorUpdatingOffer'))
+        TE.chainW(decryptOffer(ownerKeypair))
       )
     )
   )

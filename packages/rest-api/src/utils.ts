@@ -1,7 +1,7 @@
 import Axios, {
+  AxiosError,
   type AxiosInstance,
   type AxiosRequestConfig,
-  type AxiosResponse,
   type CreateAxiosDefaults,
   isAxiosError,
 } from 'axios'
@@ -9,6 +9,7 @@ import * as TE from 'fp-ts/TaskEither'
 import type z from 'zod'
 import {
   type BadStatusCodeError,
+  type NetworkError,
   type UnexpectedApiResponseError,
   type UnknownError,
 } from './Errors'
@@ -28,7 +29,7 @@ export function axiosCallWithValidation<T extends z.ZodType>(
   config: AxiosRequestConfig,
   responseValidation: T
 ): TE.TaskEither<
-  UnknownError | BadStatusCodeError | UnexpectedApiResponseError,
+  UnknownError | BadStatusCodeError | UnexpectedApiResponseError | NetworkError,
   z.output<T>
 > {
   return pipe(
@@ -49,11 +50,11 @@ export function axiosCall(
   axiosInstance: AxiosInstance,
   config: AxiosRequestConfig
 ): TE.TaskEither<
-  UnknownError | BadStatusCodeError | UnexpectedApiResponseError,
+  UnknownError | BadStatusCodeError | UnexpectedApiResponseError | NetworkError,
   void
 > {
   return pipe(
-    TE.tryCatch<BadStatusCodeError | UnknownError, AxiosResponse>(
+    TE.tryCatch(
       async () => await axiosInstance.request(config),
       (error) => {
         if (isAxiosError(error)) {
@@ -61,10 +62,24 @@ export function axiosCall(
             return {
               _tag: 'BadStatusCodeError',
               response: error.response,
-            }
+            } as BadStatusCodeError
+          }
+          if (
+            [
+              AxiosError.ERR_NETWORK,
+              AxiosError.ERR_CANCELED,
+              AxiosError.ETIMEDOUT,
+              AxiosError.ECONNABORTED,
+            ].includes(error.code ?? '')
+          ) {
+            return {
+              _tag: 'NetworkError',
+              code: error.code,
+              error,
+            } as NetworkError
           }
         }
-        return {_tag: 'UnknownError', error}
+        return {_tag: 'UnknownError', error} as UnknownError
       }
     ),
     TE.map((x) => x.data)

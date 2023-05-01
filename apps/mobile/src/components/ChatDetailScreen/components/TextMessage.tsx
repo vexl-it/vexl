@@ -7,6 +7,7 @@ import {Pressable} from 'react-native'
 import {useMolecule} from 'jotai-molecules'
 import {chatMolecule} from '../atoms'
 import {unixMillisecondsNow} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
+import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 
 function TextMessage({
   messageAtom,
@@ -54,19 +55,30 @@ function TextMessage({
           {message.message.text}
         </Text>
       </Stack>
-      {isLatest && (
+      {message.state === 'sendingError' && (
         <Pressable onPress={onPressResend}>
           <Text
+            textAlign={isMine ? 'right' : 'left'}
             mt="$1"
             mb="$2"
             color={message.state === 'sendingError' ? '$red' : '$greyOnBlack'}
           >
-            {message.state === 'sending' && t('messages.sending')}
-            {message.state === 'sendingError' && t('messages.errorSending')}
-            {(message.state === 'sent' || message.state === 'received') &&
-              chatTime(time)}
+            {toCommonErrorMessage(message.error, t) ?? t('common.unknownError')}{' '}
+            {t('messages.tapToResent')}
           </Text>
         </Pressable>
+      )}
+      {isLatest && (
+        <Text
+          textAlign={isMine ? 'right' : 'left'}
+          mt="$1"
+          mb="$2"
+          color={message.state === 'sendingError' ? '$red' : '$greyOnBlack'}
+        >
+          {message.state === 'sending' && t('messages.sending')}
+          {(message.state === 'sent' || message.state === 'received') &&
+            chatTime(time)}
+        </Text>
       )}
     </Stack>
   )

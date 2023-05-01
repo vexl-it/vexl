@@ -8,6 +8,7 @@ import * as TE from 'fp-ts/TaskEither'
 import {type TaskEither} from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import reportError from '../../../utils/reportError'
+import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 
 export function useInitPhoneVerification(): (
   request: InitPhoneNumberVerificationRequest
@@ -31,6 +32,8 @@ export function useInitPhoneVerification(): (
               l
             )
             return t('common.unexpectedServerResponse')
+          case 'NetworkError':
+            return toCommonErrorMessage(l, t) ?? t('common.unknownError')
           case 'UnknownError':
           case 'BadStatusCodeError':
             reportError(

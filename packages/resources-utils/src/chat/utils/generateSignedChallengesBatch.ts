@@ -10,6 +10,7 @@ import {
 } from '@vexl-next/cryptography/dist/KeyHolder'
 import {ecdsaSign} from '../../utils/crypto'
 import * as O from 'fp-ts/Option'
+import {type ExtractLeftTE} from '../../utils/ExtractLeft'
 
 function selectKeyPair(
   keyPairs: PrivateKeyHolder[]
@@ -24,12 +25,16 @@ function selectKeyPair(
 
 export type ErrorGeneratingSignedChallengeBatch =
   BasicError<'ErrorGeneratingSignedChallengeBatch'>
+export type ApiErrorsGeneratingChallengeBatch = ExtractLeftTE<
+  ReturnType<ChatPrivateApi['createChallengeBatch']>
+>
+
 export function generateSignedChallengeBatch(
   chatApi: ChatPrivateApi
 ): (
   keyPairs: PrivateKeyHolder[]
 ) => TE.TaskEither<
-  ErrorGeneratingSignedChallengeBatch,
+  ErrorGeneratingSignedChallengeBatch | ApiErrorsGeneratingChallengeBatch,
   Array<{publicKey: PublicKeyPemBase64; challenge: SignedChallenge}>
 > {
   return (keyPairs) =>
@@ -62,9 +67,9 @@ export function generateSignedChallengeBatch(
               }))
             )
           ),
-          A.sequence(TE.ApplicativePar)
+          A.sequence(TE.ApplicativePar),
+          TE.mapLeft(toError('ErrorGeneratingSignedChallengeBatch'))
         )
-      ),
-      TE.mapLeft(toError('ErrorGeneratingSignedChallengeBatch'))
+      )
     )
 }

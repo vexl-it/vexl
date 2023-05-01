@@ -10,10 +10,11 @@ import * as TE from 'fp-ts/TaskEither'
 import * as T from 'fp-ts/Task'
 import type * as E from 'fp-ts/Either'
 import decryptOffer, {type ErrorDecryptingOffer} from './decryptOffer'
-import {type BasicError, toError} from '@vexl-next/domain/dist/utility/errors'
+import {type ExtractLeftTE} from '../utils/ExtractLeft'
 
-export type ApiErrorWhileFetchingOffers =
-  BasicError<'ApiErrorWhileFetchingOffers'>
+export type ApiErrorWhileFetchingOffers = ExtractLeftTE<
+  ReturnType<OfferPrivateApi['getOffersByIds']>
+>
 
 export default function getOffersByIdsAndDecrypt({
   ids,
@@ -29,7 +30,6 @@ export default function getOffersByIdsAndDecrypt({
 > {
   return pipe(
     offerApi.getOffersByIds({ids}),
-    TE.mapLeft(toError('ApiErrorWhileFetchingOffers')),
     TE.chainW(
       flow(
         A.map(decryptOffer(keyPair)),

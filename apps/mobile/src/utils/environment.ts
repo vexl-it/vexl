@@ -2,6 +2,8 @@ import Constants from 'expo-constants'
 
 // export const enableHiddenFeatures =
 //   Constants.expoConfig?.extra?.enableHiddenFeatures === true
-export const enableHiddenFeatures = false
-export const apiPreset = String(Constants.expoConfig?.extra?.apiPreset)
+
+export const enableHiddenFeatures =
+  Constants.expoConfig?.extra?.enableHiddenFeatures
+export const apiPreset = Constants.expoConfig?.extra?.apiPreset ?? 'stageEnv'
 export const version = String(Constants.expoConfig?.extra?.version ?? 'local')

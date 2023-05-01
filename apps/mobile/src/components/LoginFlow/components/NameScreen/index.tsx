@@ -1,4 +1,4 @@
-import WhiteContainer from '../../../WhiteContainer'
+import {WhiteContainerWithScroll} from '../../../WhiteContainer'
 import TextInput from '../../../Input'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import AnonymizationCaption from '../../../AnonymizationCaption/AnonymizationCaption'
@@ -21,22 +21,21 @@ function NameScreen({navigation}: Props): JSX.Element {
   return (
     <Stack f={1}>
       <HeaderProxy showBackButton={true} progressNumber={1} />
-      <WhiteContainer>
+      <WhiteContainerWithScroll>
         <Text ff="$heading" fos={24} numberOfLines={2} adjustsFontSizeToFit>
           {t('loginFlow.name.prompt')}
         </Text>
-        <Stack my="$4">
+        <Stack my="$4" mx={'$-4'}>
           <TextInput
             value={value}
             placeholder={t('loginFlow.name.placeholder')}
             onChangeText={(e) => {
               setValue(e)
             }}
-            style={{mx: '$-2'}}
           />
         </Stack>
         <AnonymizationCaption />
-      </WhiteContainer>
+      </WhiteContainerWithScroll>
       <NextButtonProxy
         disabled={!value.trim()}
         onPress={() => {

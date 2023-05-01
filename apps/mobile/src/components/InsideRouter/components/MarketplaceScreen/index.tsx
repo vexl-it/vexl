@@ -7,9 +7,10 @@ import OffersListWithFilter from './components/OffersListStateDisplayer'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import {OfferType} from '@vexl-next/domain/dist/general/offers'
 import {useTriggerOffersRefresh} from '../../../../state/marketplace'
-import {useEffect, useMemo} from 'react'
+import {useCallback, useMemo} from 'react'
 import {type StyleProp, type ViewStyle} from 'react-native'
 import {getTokens} from 'tamagui'
+import {useAppState} from '../../../../utils/useAppState'
 
 const Tab = createMaterialTopTabNavigator<MarketplaceTabParamsList>()
 
@@ -56,9 +57,14 @@ function MarketplaceScreen(): JSX.Element {
 
   const refreshOffers = useTriggerOffersRefresh()
 
-  useEffect(() => {
-    void refreshOffers()
-  }, [refreshOffers])
+  useAppState(
+    useCallback(
+      (state) => {
+        if (state === 'active') void refreshOffers()
+      },
+      [refreshOffers]
+    )
+  )
 
   return (
     <ContainerWithTopBorderRadius>

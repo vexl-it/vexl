@@ -24,6 +24,7 @@ interface Props {
   fullWidth?: boolean
   fullSize?: boolean
   small?: boolean
+  adjustTextToFitOneLine?: boolean
 }
 
 const PressableStyled = styled(Stack, {
@@ -141,6 +142,7 @@ function Button({
   fullWidth = false,
   fullSize = false,
   small = false,
+  adjustTextToFitOneLine = false,
 }: Props): JSX.Element {
   const onPressInner = useCallback(() => {
     if (!disabled) onPress()
@@ -172,6 +174,8 @@ function Button({
       >
         {text && (
           <TextStyled
+            numberOfLines={adjustTextToFitOneLine ? 1 : undefined}
+            adjustsFontSizeToFit={adjustTextToFitOneLine}
             ff="$body600"
             small={small}
             variant={variant}

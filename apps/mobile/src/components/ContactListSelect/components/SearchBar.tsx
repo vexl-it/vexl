@@ -30,12 +30,9 @@ function SearchBar(): JSX.Element {
           disabled={false}
           variant="black"
           small
+          adjustTextToFitOneLine
           fullSize
-          text={t(
-            allSelected
-              ? 'postLoginFlow.contactsList.deselectAll'
-              : 'postLoginFlow.contactsList.selectAll'
-          )}
+          text={t(allSelected ? 'common.selectAll' : 'common.deselectAll')}
         />
       </Stack>
     </XStack>

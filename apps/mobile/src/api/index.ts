@@ -8,8 +8,7 @@ import {
   user,
 } from '@vexl-next/rest-api'
 import {Platform} from 'react-native'
-import {sessionHolderAtom} from '../state/session'
-import reportError from '../utils/reportError'
+import {dummySession, sessionHolderAtom} from '../state/session'
 import {type UserSessionCredentials} from '@vexl-next/rest-api/dist/UserSessionCredentials.brand'
 import {type ContactPrivateApi} from '@vexl-next/rest-api/dist/services/contact'
 import {type OfferPrivateApi} from '@vexl-next/rest-api/dist/services/offer'
@@ -41,10 +40,13 @@ export function useUserPublicApi(): UserPublicApi {
   return useAtomValue(publicApiAtom).user
 }
 
-const sessionCredentialsAtom = atom<UserSessionCredentials | null>((get) => {
+const sessionCredentialsAtom = atom<UserSessionCredentials>((get) => {
   const session = get(sessionHolderAtom)
   if (session.state !== 'loggedIn') {
-    return null
+    console.warn(
+      '👀 User is not logged in. Using dummy session. But user should be logged out.'
+    )
+    return dummySession.sessionCredentials
   }
 
   return session.session.sessionCredentials
@@ -53,10 +55,6 @@ const sessionCredentialsAtom = atom<UserSessionCredentials | null>((get) => {
 export const privateApiAtom = atom((get) => {
   function getUserSessionCredentials(): UserSessionCredentials {
     const session = get(sessionCredentialsAtom)
-    if (!session) {
-      reportError('error', 'User is not in session.', {session})
-      throw new Error('User is not logged in')
-    }
     return session
   }
 

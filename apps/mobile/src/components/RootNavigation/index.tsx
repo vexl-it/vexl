@@ -19,6 +19,7 @@ import {useRefreshNotificationTokenOnResumeAssumeLoggedIn} from '../../utils/not
 import {useHandleReceivedNotifications} from '../../state/useHandleReceivedNotifications'
 import DebugScreen from '../DebugScreen'
 import SetContactsScreen from '../SetContactsScreen'
+import useHandleRefreshContactServiceAndOffers from '../../state/useHandleRefreshContactServiceAndOffers'
 
 const Stack = createNativeStackNavigator<RootStackParamsList>()
 
@@ -28,6 +29,7 @@ function LoggedInHookGroup(): null {
 
   useHandleNotificationsPermissionsRedirect()
   useHandlePostLoginFlowRedirect()
+  useHandleRefreshContactServiceAndOffers()
 
   return null
 }

@@ -19,6 +19,7 @@ import {
   ImportContactsResponse,
   type RefreshUserRequest,
   type UpdateFirebaseTokenRequest,
+  type UserNotFoundError,
 } from './contracts'
 import {pipe} from 'fp-ts/function'
 import * as TE from 'fp-ts/TaskEither'
@@ -56,11 +57,22 @@ export function privateApi({
       })
     },
     refreshUser: (request: RefreshUserRequest) => {
-      return axiosCall(axiosInstance, {
-        method: 'post',
-        url: '/users/refresh',
-        data: request,
-      })
+      return pipe(
+        axiosCall(axiosInstance, {
+          method: 'post',
+          url: '/users/refresh',
+          data: request,
+        }),
+        TE.mapLeft((e): typeof e | UserNotFoundError => {
+          if (
+            e._tag === 'BadStatusCodeError' &&
+            e.response.data.code === '100101'
+          ) {
+            return {_tag: 'UserNotFoundError'}
+          }
+          return e
+        })
+      )
     },
     updateFirebaseToken: (request: UpdateFirebaseTokenRequest) => {
       return axiosCall(axiosInstance, {

@@ -14,6 +14,10 @@ export interface ImportListEmpty {
   _tag: 'ImportListEmpty'
 }
 
+export interface UserNotFoundError {
+  _tag: 'UserNotFoundError'
+}
+
 export const CreateUserRequest = z.object({
   firebaseToken: z.string().nullable(),
 })

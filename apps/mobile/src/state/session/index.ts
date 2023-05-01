@@ -4,12 +4,47 @@ import * as SecretStorage from 'expo-secure-store'
 import * as TE from 'fp-ts/TaskEither'
 import reportError from '../../utils/reportError'
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import {type Session} from '../../brands/Session.brand'
+import {Session} from '../../brands/Session.brand'
 import readSessionFromStorage from './readSessionFromStorage'
 import writeSessionToStorage from './writeSessionToStorage'
 import * as O from 'fp-ts/Option'
 import {useFinishPostLoginFlow} from '../postLoginOnboarding'
 import {clearStorage} from '../../utils/fpMmkv'
+import {useCallback} from 'react'
+import {KeyHolder} from '@vexl-next/cryptography'
+import {UriString} from '@vexl-next/domain/dist/utility/UriString.brand'
+import {UserName} from '@vexl-next/domain/dist/general/UserName.brand'
+import {E164PhoneNumber} from '@vexl-next/domain/dist/general/E164PhoneNumber.brand'
+
+const dummyPrivKey = KeyHolder.generatePrivateKey()
+export const dummySession: Session = Session.parse({
+  privateKey: dummyPrivKey,
+  sessionCredentials: {
+    hash: '',
+    publicKey: dummyPrivKey.publicKeyPemBase64,
+    signature: 'dummysign',
+  },
+  anonymizedUserData: {
+    image: {
+      type: 'imageUri',
+      imageUri: UriString.parse(
+        'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAAD5Ip3+AAAADUlEQVQIHWM4c+bMfwAIMANkxSThkAAAAABJRU5ErkJggg=='
+      ),
+    },
+    userName: UserName.parse('Logout please'),
+  },
+  realUserData: {
+    image: {
+      type: 'imageUri',
+      imageUri: UriString.parse(
+        'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAAD5Ip3+AAAADUlEQVQIHWM4c+bMfwAIMANkxSThkAAAAABJRU5ErkJggg=='
+      ),
+    },
+    userName: UserName.parse('Logout please'),
+  },
+  phoneNumber: E164PhoneNumber.parse('+420733733733'),
+  version: 0,
+})
 
 const SESSION_KEY = 'session'
 const SECRET_TOKEN_KEY = 'secretToken'
@@ -123,10 +158,8 @@ export function useSessionAssumeLoggedIn(): Session {
   if (value.state === 'loggedIn') {
     return value.session
   }
-  // TODO find a better way to handle this. Should we logout the user?
-  throw new Error(
-    'useSessionAssumeLoggedIn() was called but user was not logged in.'
-  )
+
+  return dummySession
 }
 
 export function useIsUserLoggedIn(): boolean {
@@ -137,12 +170,17 @@ export function useIsSessionLoaded(): boolean {
   return useAtomValue(sessionLoadedAtom)
 }
 
-export function useLogout(): () => void {
+export function useLogout(): (delay?: number) => void {
   const setSession = useSetAtom(sessionAtom)
   const setFinishedPostOnboarding = useFinishPostLoginFlow()
-  return () => {
-    setSession(O.none)
-    setFinishedPostOnboarding(false)
-    clearStorage()
-  }
+  return useCallback(
+    (delay: number = 0) => {
+      setTimeout(() => {
+        setSession(O.none)
+        setFinishedPostOnboarding(false)
+        clearStorage()
+      }, delay)
+    },
+    [setSession, setFinishedPostOnboarding]
+  )
 }

@@ -39,7 +39,11 @@
     },
     "production": {
       "android": {
+        "credentialsSource": "remote",
         "image": "ubuntu-18.04-jdk-11-ndk-r19c"
+      },
+      "ios": {
+        "credentialsSource": "remote"
       },
       "env": {
         "ENV_PRESET": "prod"

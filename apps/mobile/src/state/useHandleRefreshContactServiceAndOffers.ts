@@ -27,7 +27,7 @@ export function useRefreshUserOnContactService(): void {
             (e) => {
               if (e._tag === 'UserNotFoundError') {
                 console.warn('🦋 🚨 User to refresh not found. Logging out')
-                logout(2000)
+                logout()
               } else if (e._tag === 'NetworkError') {
                 console.warn(
                   '🦋 Network error refreshing user. Not logging out.',
@@ -64,7 +64,7 @@ export function useRefreshUserOnContactService(): void {
                     'Bad status code while error refreshing user. Not logging out.',
                     e
                   )
-                  logout(2000)
+                  logout()
                 } else {
                   console.warn('🦋 🚨 Bad status code while refreshing user')
                   reportError(

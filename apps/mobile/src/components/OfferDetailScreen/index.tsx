@@ -1,11 +1,12 @@
 import {type RootStackScreenProps} from '../../navigationTypes'
-import {ScrollView} from 'react-native'
-import Button from '../Button'
-import {useRequestOffer, useSingleOffer} from '../../state/marketplace'
-import * as O from 'fp-ts/Option'
-import {Stack, Text} from 'tamagui'
 import Screen from '../Screen'
-import {useChatForOffer} from '../../state/chat/hooks/useChatForOffer'
+import useSafeGoBack from '../../utils/useSafeGoBack'
+import {useTranslation} from '../../utils/localization/I18nProvider'
+import {useSingleOffer} from '../../state/marketplace'
+import {Text, YStack} from 'tamagui'
+import OfferInfo from './components/OfferInfo'
+import {isSome} from 'fp-ts/Option'
+import Button from '../Button'
 
 type Props = RootStackScreenProps<'OfferDetail'>
 
@@ -15,72 +16,35 @@ function OfferDetailScreen({
   },
   navigation,
 }: Props): JSX.Element {
-  const offer = useSingleOffer(offerId)
-  const requestOffer = useRequestOffer()
+  const safeGoBack = useSafeGoBack()
+  const {t} = useTranslation()
 
-  if (O.isNone(offer)) return <Text col="$white">Offer does not exist</Text> // TODO 404 page
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const chatForOffer = useChatForOffer({
-    offerPublicKey: offer.value.offerInfo.publicPart.offerPublicKey,
-  })
+  const offer = useSingleOffer(offerId)
 
   return (
     <Screen>
-      <ScrollView>
-        <Text fos={32} ff="$heading" col="$white">
-          {JSON.stringify(offer, null, 2)}
-        </Text>
-      </ScrollView>
-      <Button
-        disabled={false}
-        onPress={() => {
-          if (chatForOffer) {
-            navigation.navigate('ChatDetail', {
-              chatId: chatForOffer.id,
-              inboxKey: chatForOffer.inbox.privateKey.publicKeyPemBase64,
-            })
-            return
-          }
-          void requestOffer({
-            offer: offer.value.offerInfo,
-            text: 'Test sending request',
-          })()
-          // loadingOverlay.show()
-          // void pipe(
-          //   TE.right(userSession.privateKey),
-          //   TE.chainW((privateKey) => createInbox(privateKey, offer.offerId)),
-          //   TE.chainW((inbox) =>
-          //     createChatAndSendRequest({
-          //       toPublicKey: PublicKey.import({
-          //         key: offer?.offerPublicKey,
-          //         type: KeyFormat.PEM_BASE64,
-          //       }),
-          //       chatOrigin: ChatOrigin.parse({
-          //         type: 'theirOffer',
-          //         offerPublicKey: offer?.offerPublicKey,
-          //       }),
-          //       inbox,
-          //       text: 'Hello, this should be filled by the user',
-          //     })
-          //   ),
-          //   TE.match(
-          //     (e) => {
-          //       console.log(e)
-          //       loadingOverlay.hide()
-          //       Alert.alert('There was an error')
-          //     },
-          //     (chat) => {
-          //       loadingOverlay.hide()
-          //       navigation.navigate('ChatDetail', {chatId: chat.id})
-          //     }
-          //   )
-          // )()
-        }}
-        text={chatForOffer ? 'Go to chat' : 'request'}
-        variant="secondary"
-      />
-      <Stack h={16} />
-      <Button onPress={navigation.goBack} text="back" variant="primary" />
+      {isSome(offer) ? (
+        <OfferInfo offer={offer.value} />
+      ) : (
+        <YStack
+          f={1}
+          p="$2"
+          space="$5"
+          alignItems="center"
+          justifyContent="center"
+        >
+          <Text color="$white" fs={20} ff={'$body600'} textAlign={'center'}>
+            {t('offer.offerNotFound')}
+          </Text>
+          <Button
+            small
+            fullWidth
+            variant={'primary'}
+            onPress={safeGoBack}
+            text={t('common.back')}
+          ></Button>
+        </YStack>
+      )}
     </Screen>
   )
 }

@@ -44,8 +44,6 @@ function OffersListStateDisplayer({
     )
   }
 
-  // TODO handle errors
-
   return (
     <ContainerWithTopBorderRadius>
       <OffersListButtons

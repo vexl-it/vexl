@@ -9,6 +9,7 @@ import {type Chat} from '@vexl-next/domain/dist/general/messaging'
 import {focusAtom} from 'jotai-optics'
 import {type FocusAtomType} from '../../../utils/atomUtils/FocusAtomType'
 import messagingStateAtom from '../atoms/messagingStateAtom'
+import {selectAtom} from 'jotai/utils'
 
 export function chatForPublicKeyAtom({
   inboxPrivateKey,
@@ -42,6 +43,28 @@ export function useChatForOffer({
           inboxPrivateKey: session.privateKey.privateKeyPemBase64,
           otherSidePublicKey: offerPublicKey,
         }),
+      [session, offerPublicKey]
+    )
+  )
+}
+
+export function useChatForOfferExists({
+  offerPublicKey,
+}: {
+  offerPublicKey: PublicKeyPemBase64
+}): boolean {
+  const session = useSessionAssumeLoggedIn()
+
+  return useAtomValue(
+    useMemo(
+      () =>
+        selectAtom(
+          chatForPublicKeyAtom({
+            inboxPrivateKey: session.privateKey.privateKeyPemBase64,
+            otherSidePublicKey: offerPublicKey,
+          }),
+          (chat) => !!chat
+        ),
       [session, offerPublicKey]
     )
   )

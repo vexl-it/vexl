@@ -26,6 +26,7 @@ export default {
     'ok': 'ok',
     'request': 'Request',
     'back': 'Back',
+    'goBack': 'Go back',
     'close': 'Close',
     'done': 'Done',
     'errorCreatingInbox': 'Error creating user inbox.',
@@ -189,6 +190,7 @@ export default {
     'version': 'Vexl App version: {{version}}',
   },
   'offer': {
+    title: 'Offer',
     'cashOnly': 'Cash only',
     'onlineOnly': 'Online only',
     'upTo': 'Up to',
@@ -205,6 +207,21 @@ export default {
     'filterOffers': 'Filter offers',
     'myOffers': 'My offers',
     'numberOfCommon': '{{number}} common',
+    'offerNotFound':
+      'Offer not found. It might have been deleted by the author',
+    'inputPlaceholder': 'e.g. let’s trade my friend...',
+    'sendRequest': 'Send Request',
+    'report': {
+      'areYouSureTitle': 'Report offer?',
+      'areYouSureText':
+        'Do you really want to report this offer? You will never be able to undo this action. Choose wisely.',
+      'yes': 'Yes, report',
+    },
+    'goToChat': 'Go to chat',
+    'requestAlreadySent':
+      "Request for trading was sent. We'll let you know once it's accepted.",
+    'listEmpty': 'Marketplace empty yet',
+    'emptyAction': 'Add new offer',
   },
   'termsOfUse': {
     'termsOfUse': 'Terms of Use',

@@ -1,5 +1,5 @@
 import AnonymizationCaption from '../../../AnonymizationCaption/AnonymizationCaption'
-import WhiteContainer from '../../../WhiteContainer'
+import {WhiteContainerWithScroll} from '../../../WhiteContainer'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import PhoneNumberInput from './components/PhoneNumberInput'
 import * as O from 'fp-ts/Option'
@@ -34,8 +34,8 @@ function PhoneNumberScreen({
   return (
     <>
       <HeaderProxy showBackButton={true} progressNumber={2} />
-      <WhiteContainer>
-        <Text fos={24} ff="$heading">
+      <WhiteContainerWithScroll>
+        <Text numberOfLines={2} adjustsFontSizeToFit fos={24} ff="$heading">
           {t('loginFlow.phoneNumber.title')}
         </Text>
         <Stack mt="$3">
@@ -47,7 +47,7 @@ function PhoneNumberScreen({
           <PhoneNumberInput onChange={setPhoneNumber} />
         </Stack>
         <AnonymizationCaption />
-      </WhiteContainer>
+      </WhiteContainerWithScroll>
       <NextButtonProxy
         disabled={phoneNumber._tag === 'None'}
         onPress={() => {

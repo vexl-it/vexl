@@ -10,6 +10,7 @@ export default {
     'save': 'Save',
     'search': 'Search',
     'deselectAll': 'Deselect All',
+    'selectAll': 'Deselect All',
     'cancel': 'Cancel',
     'unknownError': 'Unknown Error',
     'unexpectedServerResponse': 'Unexpected Server Response',

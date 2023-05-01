@@ -6,7 +6,15 @@ function NothingFound(): JSX.Element {
 
   return (
     <Stack f={1} ai="center" jc="center">
-      <Text fos={24} ff="$heading" col="$greyOnWhite">
+      <Text
+        numberOfLines={1}
+        adjustsFontSizeToFit
+        textAlign={'center'}
+        fos={24}
+        ff="$heading"
+        col="$greyOnWhite"
+        mb={'$1'}
+      >
         {t('postLoginFlow.contactsList.nothingFound.title')}
       </Text>
       <Text fos={14} ta="center" col="$greyOnWhite">

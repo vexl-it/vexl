@@ -1,4 +1,4 @@
-import WhiteContainer from '../../../WhiteContainer'
+import {WhiteContainerWithScroll} from '../../../WhiteContainer'
 import TextInput from '../../../Input'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import {parsePhoneNumber} from 'awesome-phonenumber'
@@ -40,9 +40,15 @@ function VerificationCodeScreen({
   return (
     <>
       <HeaderProxy showBackButton={true} progressNumber={2} />
-      <WhiteContainer>
+      <WhiteContainerWithScroll>
         <Stack mb="$3">
-          <Text ff="$heading" fos={24}>
+          <Text
+            numberOfLines={2}
+            adjustsFontSizeToFit
+            flex={1}
+            ff="$heading"
+            fos={24}
+          >
             {t('loginFlow.verificationCode.title')}
           </Text>
         </Stack>
@@ -85,7 +91,7 @@ function VerificationCodeScreen({
             </>
           </Text>
         )}
-      </WhiteContainer>
+      </WhiteContainerWithScroll>
       <NextButtonProxy
         onPress={() => {
           loadingOverlay.show()

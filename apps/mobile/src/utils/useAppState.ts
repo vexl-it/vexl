@@ -1,12 +1,12 @@
 import {AppState, type AppStateStatus} from 'react-native'
 import {useEffect} from 'react'
 
-export function useAppState(callback: (state: AppStateStatus) => void): void {
+export function useAppState(
+  callback: (state: AppStateStatus) => void,
+  runCallbackOnInit: boolean = true
+): void {
   useEffect(() => {
-    if (AppState.currentState === 'active') {
-      // eslint-disable-next-line n/no-callback-literal
-      callback('active')
-    }
+    if (runCallbackOnInit) callback(AppState.currentState)
     return AppState.addEventListener('change', callback).remove
-  }, [callback])
+  }, [callback, runCallbackOnInit])
 }

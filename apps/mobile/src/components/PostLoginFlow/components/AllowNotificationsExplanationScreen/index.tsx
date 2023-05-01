@@ -2,7 +2,7 @@ import {
   HeaderProxy,
   NextButtonProxy,
 } from '../../../PageWithButtonAndProgressHeader'
-import WhiteContainer from '../../../WhiteContainer'
+import {WhiteContainerWithScroll} from '../../../WhiteContainer'
 import SvgImage from '../../../Image'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import NotificationsSvg from '../../../../images/notificationsSvg'
@@ -64,17 +64,23 @@ function AllowNotificationsExplanationScreen({navigation}: Props): JSX.Element {
   return (
     <>
       <HeaderProxy showBackButton={true} progressNumber={3} />
-      <WhiteContainer>
-        <Stack f={1} ai="center" jc="center">
+      <WhiteContainerWithScroll>
+        <Stack mb={'$3'} f={1} ai="center" jc="center">
           <SvgImage source={NotificationsSvg} />
         </Stack>
-        <Text fos={24} ff="$heading" mt="$4">
+        <Text
+          adjustsFontSizeToFit
+          numberOfLines={2}
+          fos={24}
+          ff="$heading"
+          mt="$4"
+        >
           {t('postLoginFlow.allowNotifications.title')}
         </Text>
         <Text mt={16} fos={18} col="$greyOnWhite">
           {t('postLoginFlow.allowNotifications.text')}
         </Text>
-      </WhiteContainer>
+      </WhiteContainerWithScroll>
       <NextButtonProxy
         text={t('postLoginFlow.allowNotifications.action')}
         onPress={requestPermissions}

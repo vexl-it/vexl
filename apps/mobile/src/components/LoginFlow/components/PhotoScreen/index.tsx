@@ -108,7 +108,7 @@ function PhotoScreen({
       <HeaderProxy showBackButton progressNumber={1} />
       <WhiteContainer>
         <Stack maw="70%">
-          <Text ff="$heading" fos={24}>
+          <Text numberOfLines={2} adjustsFontSizeToFit ff="$heading" fos={24}>
             {t('loginFlow.photo.title', {name: userName})}
           </Text>
         </Stack>

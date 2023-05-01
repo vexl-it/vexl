@@ -1,4 +1,4 @@
-import WhiteContainer from '../../../WhiteContainer'
+import {WhiteContainerWithScroll} from '../../../WhiteContainer'
 import Image from '../../../Image'
 import AnonymizationCaption from '../../../AnonymizationCaption/AnonymizationCaption'
 import importContactsSvg from './image/importContactsSvg'
@@ -17,13 +17,13 @@ export default function ImportContactsExplanation({
   const {t} = useTranslation()
 
   return (
-    <WhiteContainer>
+    <WhiteContainerWithScroll>
       <Stack f={1} ai="center" jc="space-between">
         <HeaderProxy showBackButton={false} progressNumber={3} />
         <Stack mb="$4">
           <Image source={importContactsSvg} />
         </Stack>
-        <Stack jc="space-around">
+        <Stack flexShrink={0} jc="space-around">
           <Stack>
             <Text mb="$3" fos={24} ff="$heading">
               {t('postLoginFlow.contactsExplanation.title')}
@@ -45,6 +45,6 @@ export default function ImportContactsExplanation({
           disabled={false}
         />
       </Stack>
-    </WhiteContainer>
+    </WhiteContainerWithScroll>
   )
 }

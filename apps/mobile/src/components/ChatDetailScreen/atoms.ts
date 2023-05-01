@@ -22,6 +22,7 @@ import focusOtherSideLeftAtom from '../../state/chat/atoms/focusOtherSideLeftAto
 import {askAreYouSureActionAtom} from '../AreYouSureDialog'
 import {deleteChatStep1Svg} from './images/deleteChatSvg'
 import {translationAtom} from '../../utils/localization/I18nProvider'
+import {toCommonErrorMessage} from '../../utils/useCommonErrorMessages'
 
 type ChatUIMode = 'approval' | 'messages'
 
@@ -101,9 +102,10 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
         (e) => {
           set(loadingOverlayDisplayedAtom, false)
 
-          if (e._tag !== 'UserDeclinedError') {
-            Alert.alert('Error', 'Error deleting chat')
+          if (e._tag === 'UserDeclinedError') {
+            return false
           }
+          Alert.alert(toCommonErrorMessage(e, t) ?? t('common.unknownError'))
           return false
         },
         () => {
@@ -152,9 +154,11 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
       TE.match(
         (e) => {
           set(loadingOverlayDisplayedAtom, false)
-          if (e._tag !== 'UserDeclinedError') {
+          if (e._tag === 'UserDeclinedError') {
             Alert.alert('Error', 'Error deleting chat')
           }
+
+          Alert.alert(toCommonErrorMessage(e, t) ?? t('common.unknownError'))
           return false
         },
         () => {

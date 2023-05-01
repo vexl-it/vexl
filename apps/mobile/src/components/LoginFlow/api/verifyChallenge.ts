@@ -8,6 +8,7 @@ import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {pipe} from 'fp-ts/function'
 import * as TE from 'fp-ts/TaskEither'
 import reportError from '../../../utils/reportError'
+import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 
 export function useVerifyChallenge(): (
   r: VerifyChallengeRequest
@@ -44,6 +45,8 @@ export function useVerifyChallenge(): (
               l
             )
             return t('common.unexpectedServerResponse')
+          case 'NetworkError':
+            return toCommonErrorMessage(l, t) ?? t('common.unknownError')
           case 'UnknownError':
           case 'BadStatusCodeError':
             reportError('error', 'Bad status code while verifying challenge', l)

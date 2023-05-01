@@ -88,10 +88,10 @@ export function useTriggerOffersRefresh(): Task<void> {
           offerIds.length > 0
             ? api.offer.getRemovedOffers({offerIds})
             : TE.right({offerIds: [] as OfferId[]}),
-          TE.mapLeft(toBasicError('ApiErrorFetchingRemovedOffers')),
           TE.matchW(
             (error) => {
-              reportError('error', 'Error fetching removed offers', error)
+              if (error._tag !== 'NetworkError')
+                reportError('error', 'Error fetching removed offers', error)
               return [] as OfferId[]
             },
             (result) => result.offerIds
@@ -101,7 +101,8 @@ export function useTriggerOffersRefresh(): Task<void> {
       ),
       TE.matchW(
         (error) => {
-          reportError('error', 'Error fetching offers', error)
+          if (error._tag !== 'NetworkError')
+            reportError('error', 'Error fetching offers', error)
           store.set(loadingStateAtom, {state: 'error', error})
         },
         ({newOffers: decryptingResults, removedOffers}) => {
@@ -217,7 +218,8 @@ export function useCreateOffer(): (args: {
   | ErrorConstructingPrivatePayloads
   | ApiErrorWhileCreatingOffer
   | ErrorGeneratingSymmetricKey
-  | ErrorEncryptingPublicPart,
+  | ErrorEncryptingPublicPart
+  | ErrorDecryptingOffer,
   OneOfferInState
 > {
   const api = usePrivateApiAssumeLoggedIn()
@@ -292,7 +294,7 @@ export function useUpdateOffer(): (args: {
   adminId: OfferAdminId
   privatePayloads: OfferPrivateListItem[]
 }) => TE.TaskEither<
-  ApiErrorUpdatingOffer | ErrorEncryptingPublicPart,
+  ApiErrorUpdatingOffer | ErrorEncryptingPublicPart | ErrorDecryptingOffer,
   OneOfferInState
 > {
   const api = usePrivateApiAssumeLoggedIn()

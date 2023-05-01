@@ -52,10 +52,19 @@ export default function deleteChatActionAtom(
             message: messageToSend,
           })
         : TE.right({}),
-      TE.matchW((e) => {
-        // TODO network errors should be propagated. But 404 and 400 errors should result in removal
-        return E.right({}) as E.Either<any, any>
-      }, E.right),
+      TE.matchW(
+        (e): E.Either<typeof e, null> => {
+          if (
+            e._tag === 'inboxDoesNotExist' ||
+            e._tag === 'notPermittedToSendMessageToTargetInbox'
+          ) {
+            return E.right(null)
+          }
+
+          return E.left(e)
+        },
+        () => E.right(null)
+      ),
       TE.map((): ChatMessageWithState => {
         const successMessage = {
           message: messageToSend,

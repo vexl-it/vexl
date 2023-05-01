@@ -17,16 +17,17 @@ import {
   fetchInfoAndGeneratePrivatePayloads,
   type PrivatePartEncryptionError,
 } from './utils/offerPrivatePayload'
-import {type BasicError, toError} from '@vexl-next/domain/dist/utility/errors'
 import {type OfferAdminId} from '@vexl-next/rest-api/dist/services/offer/contracts'
 import encryptOfferPublicPayload, {
   type ErrorEncryptingPublicPart,
 } from './utils/encryptOfferPublicPayload'
-import decryptOffer from './decryptOffer'
+import decryptOffer, {type ErrorDecryptingOffer} from './decryptOffer'
 import {type ApiErrorFetchingContactsForOffer} from './utils/fetchContactsForOffer'
+import {type ExtractLeftTE} from '../utils/ExtractLeft'
 
-export type ApiErrorWhileCreatingOffer =
-  BasicError<'ApiErrorWhileCreatingOffer'>
+export type ApiErrorWhileCreatingOffer = ExtractLeftTE<
+  ReturnType<OfferPrivateApi['createNewOffer']>
+>
 
 export interface CreateOfferResult {
   encryptionErrors: PrivatePartEncryptionError[]
@@ -62,6 +63,7 @@ export default function createNewOfferForMyContacts({
   | ErrorConstructingPrivatePayloads
   | ApiErrorWhileCreatingOffer
   | ErrorGeneratingSymmetricKey
+  | ErrorDecryptingOffer
   | ErrorEncryptingPublicPart,
   CreateOfferResult
 > {
@@ -89,8 +91,7 @@ export default function createNewOfferForMyContacts({
         TE.bindTo('response'),
         TE.bindW('offerInfo', ({response}) =>
           decryptOffer(ownerKeyPair)(response)
-        ),
-        TE.mapLeft(toError('ApiErrorWhileCreatingOffer'))
+        )
       )
     ),
     TE.map(({response, privatePayloads, symmetricKey}) => ({

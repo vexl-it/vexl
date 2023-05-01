@@ -11,7 +11,7 @@ import * as TE from 'fp-ts/TaskEither'
 import {type ChatPrivateApi} from '@vexl-next/rest-api/dist/services/chat'
 import {flow, pipe} from 'fp-ts/function'
 import {encryptMessage, type ErrorEncryptingMessage} from './utils/chatCrypto'
-import {type BasicError, toError} from '@vexl-next/domain/dist/utility/errors'
+import {type ExtractLeftTE} from '../utils/ExtractLeft'
 
 function createApproveChatMessage({
   text,
@@ -31,8 +31,9 @@ function createApproveChatMessage({
   }
 }
 
-export type ApiConfirmMessagingRequest =
-  BasicError<'ApiConfirmMessagingRequest'>
+export type ApiConfirmMessagingRequest = ExtractLeftTE<
+  ReturnType<ChatPrivateApi['approveRequest']>
+>
 
 export default function confirmMessagingRequest({
   text,
@@ -67,8 +68,7 @@ export default function confirmMessagingRequest({
               approve,
               keyPair: fromKeypair,
               publicKeyToConfirm: toPublicKey,
-            }),
-            TE.mapLeft(toError('ApiConfirmMessagingRequest'))
+            })
           )
         )
       )

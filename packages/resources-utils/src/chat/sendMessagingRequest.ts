@@ -11,7 +11,7 @@ import {now} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
 import {flow, pipe} from 'fp-ts/function'
 import * as TE from 'fp-ts/TaskEither'
 import {encryptMessage, type ErrorEncryptingMessage} from './utils/chatCrypto'
-import {type BasicError, toError} from '@vexl-next/domain/dist/utility/errors'
+import {type ExtractLeftTE} from '../utils/ExtractLeft'
 
 function createRequestChatMessage({
   text,
@@ -29,7 +29,9 @@ function createRequestChatMessage({
   }
 }
 
-export type ApiErrorRequestMessaging = BasicError<'ApiErrorRequestMessaging'>
+export type ApiErrorRequestMessaging = ExtractLeftTE<
+  ReturnType<ChatPrivateApi['requestApproval']>
+>
 
 export function sendMessagingRequest({
   text,
@@ -57,10 +59,7 @@ export function sendMessagingRequest({
       flow(
         encryptMessage(toPublicKey),
         TE.chainW((message) =>
-          pipe(
-            api.requestApproval({message, publicKey: toPublicKey}),
-            TE.mapLeft(toError('ApiErrorRequestMessaging'))
-          )
+          pipe(api.requestApproval({message, publicKey: toPublicKey}))
         )
       )
     )

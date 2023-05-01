@@ -17,6 +17,8 @@ import Input from '../../../Input'
 import magnifyingGlass from '../../../images/magnifyingGlass'
 import LocationCell from './LocationCell'
 import {type Location} from '@vexl-next/domain/dist/general/offers'
+import {toCommonErrorMessage} from '../../../../utils/useCommonErrorMessages'
+
 interface Props {
   locationAtom: WritableAtom<Location[], [SetStateAction<Location[]>], void>
   onClosePress: () => void
@@ -42,6 +44,14 @@ function LocationSearch({
       getLocationSuggestions({phrase: debouncedSearchValue, lang: 'cs'}),
       TE.match(
         (e) => {
+          if (e._tag === 'NetworkError') {
+            Alert.alert(
+              toCommonErrorMessage(e, t) ??
+                t('createOffer.errorSearchingForAvailableLocation')
+            )
+            return
+          }
+
           Alert.alert(t('createOffer.errorSearchingForAvailableLocation'))
           reportError(
             'error',

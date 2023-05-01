@@ -5,6 +5,7 @@ import {pipe} from 'fp-ts/function'
 import {type UserSessionCredentials} from '@vexl-next/rest-api/dist/UserSessionCredentials.brand'
 import {contact} from '@vexl-next/rest-api'
 import {apiEnv, platform} from '../../../api'
+import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 
 export function useCreateUserAtContactMs(): (
   request: CreateUserRequest,
@@ -25,11 +26,12 @@ export function useCreateUserAtContactMs(): (
         switch (l._tag) {
           case 'UnexpectedApiResponseError':
             return t('common.unexpectedServerResponse')
+          case 'NetworkError':
+            return toCommonErrorMessage(l, t) ?? t('common.unknownError')
           case 'UnknownError':
           case 'BadStatusCodeError':
             return t('common.unknownError')
         }
-        return t('common.unknownError')
       })
     )
   }

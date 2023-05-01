@@ -3,22 +3,26 @@ import {
   type PublicKeyPemBase64,
 } from '@vexl-next/cryptography/dist/KeyHolder'
 import * as E from 'fp-ts/Either'
-import {toError} from 'fp-ts/Either'
 import * as crypto from '@vexl-next/cryptography'
 import {type AxiosInstance} from 'axios'
 import {pipe} from 'fp-ts/function'
 import {axiosCallWithValidation} from '../../utils'
 import {CreateChallengeResponse, type SignedChallenge} from './contracts'
 import * as TE from 'fp-ts/TaskEither'
+import {type ExtractLeftTE} from '@vexl-next/resources-utils/dist/utils/ExtractLeft'
 
-export interface ErrorGeneratingChallenge {
-  readonly _tag: 'ErrorGeneratingChallenge'
+export type ErrorGeneratingChallenge = ExtractLeftTE<
+  ReturnType<ReturnType<typeof generateChallenge>>
+>
+
+export interface ErrorSigningChallenge {
+  readonly _tag: 'ErrorSigningChallenge'
   readonly error: unknown
 }
 
 export function ecdsaSign(
   privateKey: PrivateKeyHolder
-): (challenge: string) => E.Either<Error, string> {
+): (challenge: string) => E.Either<ErrorSigningChallenge, string> {
   return (challenge: string) =>
     E.tryCatch(
       () =>
@@ -26,7 +30,7 @@ export function ecdsaSign(
           privateKey,
           challenge,
         }),
-      toError
+      (e) => ({_tag: 'ErrorSigningChallenge', error: e} as const)
     )
 }
 
@@ -45,7 +49,7 @@ function generateChallenge({axiosInstance}: {axiosInstance: AxiosInstance}) {
 export function addChallengeToRequest<T extends {keyPair: PrivateKeyHolder}>(
   axiosInstance: AxiosInstance
 ): (data: T) => TE.TaskEither<
-  ErrorGeneratingChallenge,
+  ErrorGeneratingChallenge | ErrorSigningChallenge,
   Omit<T, 'keyPair'> & {
     publicKey: PublicKeyPemBase64
     signedChallenge: SignedChallenge
@@ -63,7 +67,6 @@ export function addChallengeToRequest<T extends {keyPair: PrivateKeyHolder}>(
         ...data,
         publicKey: keyPair.publicKeyPemBase64,
         signedChallenge,
-      })),
-      TE.mapLeft((e) => ({_tag: 'ErrorGeneratingChallenge', error: e} as const))
+      }))
     )
 }

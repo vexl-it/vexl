@@ -5,12 +5,13 @@ import * as TE from 'fp-ts/TaskEither'
 import * as A from 'fp-ts/Array'
 import * as T from 'fp-ts/Task'
 import {decryptMessage, type ErrorDecryptingMessage} from './utils/chatCrypto'
-import {type BasicError, toError} from '@vexl-next/domain/dist/utility/errors'
 import {type ChatMessage} from '@vexl-next/domain/dist/general/messaging'
 import flattenTaskOfEithers from '../utils/flattenTaskOfEithers'
+import {type ExtractLeftTE} from '../utils/ExtractLeft'
 
-export type ApiErrorRetrievingMessages =
-  BasicError<'ApiErrorRetrievingMessages'>
+export type ApiErrorRetrievingMessages = ExtractLeftTE<
+  ReturnType<ChatPrivateApi['retrieveMessages']>
+>
 export default function retrieveMessages({
   api,
   inboxKeypair,
@@ -23,7 +24,6 @@ export default function retrieveMessages({
 > {
   return pipe(
     api.retrieveMessages({keyPair: inboxKeypair}),
-    TE.mapLeft(toError('ApiErrorRetrievingMessages')),
     TE.map((r) => r.messages),
     TE.chainTaskK(
       flow(

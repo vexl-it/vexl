@@ -11,17 +11,19 @@ import {unixMillisecondsNow} from '@vexl-next/domain/dist/utility/UnixMillisecon
 import {pipe} from 'fp-ts/function'
 import {type FocusAtomType} from '../../../utils/atomUtils/FocusAtomType'
 import {type ErrorEncryptingMessage} from '@vexl-next/resources-utils/dist/chat/utils/chatCrypto'
-import sendMessage, {
-  type SendMessageApiErrors,
-} from '@vexl-next/resources-utils/dist/chat/sendMessage'
+import sendMessage from '@vexl-next/resources-utils/dist/chat/sendMessage'
 import {privateApiAtom} from '../../../api'
+import {type ExtractLeftTE} from '@vexl-next/resources-utils/dist/utils/ExtractLeft'
+import {type ChatPrivateApi} from '@vexl-next/rest-api/dist/services/chat'
 
 export default function blockChatActionAtom(
   chatWithMessagesAtom: FocusAtomType<ChatWithMessages>
 ): ActionAtomType<
   [{text: string}],
   TE.TaskEither<
-    ErrorEncryptingMessage | SendMessageApiErrors,
+    | ErrorEncryptingMessage
+    | ExtractLeftTE<ReturnType<ChatPrivateApi['blockInbox']>>
+    | ExtractLeftTE<ReturnType<typeof sendMessage>>,
     ChatMessageWithState
   >
 > {
@@ -44,10 +46,19 @@ export default function blockChatActionAtom(
         receiverPublicKey: chat.otherSide.publicKey,
         message: messageToSend,
       }),
-      TE.matchW(() => {
-        // TODO check for network errors
-        return E.right({}) as E.Either<any, any>
-      }, E.right),
+      TE.matchW(
+        (e): E.Either<typeof e, null> => {
+          if (
+            e._tag === 'inboxDoesNotExist' ||
+            e._tag === 'notPermittedToSendMessageToTargetInbox'
+          ) {
+            return E.right(null)
+          }
+
+          return E.left(e)
+        },
+        () => E.right(null)
+      ),
       TE.chainW(() =>
         api.chat.blockInbox({
           block: true,

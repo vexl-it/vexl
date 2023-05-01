@@ -26,7 +26,7 @@ function OfferListItem({offer: {offerInfo: offer}}: Props): JSX.Element {
     []
   )
   return (
-    <Stack mt="$6">
+    <Stack mt="$6" mx="$2">
       <Stack bg="$white" p="$4" br="$5">
         <OfferInfoPreview offer={offer} />
         <Stack pos="absolute" b={-7} l={43}>

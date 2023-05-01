@@ -6,6 +6,7 @@ import {
 import {pipe} from 'fp-ts/function'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import {usePrivateApiAssumeLoggedIn} from '../../api'
+import {toCommonErrorMessage} from '../../utils/useCommonErrorMessages'
 
 export function useImportContacts(): (
   r: ImportContactsRequest
@@ -17,7 +18,9 @@ export function useImportContacts(): (
     return pipe(
       privateApi.contact.importContacts(request),
       TE.mapLeft((e) => {
-        console.warn(e)
+        if (e._tag === 'NetworkError') {
+          return toCommonErrorMessage(e, t) ?? t('common.unknownError')
+        }
         return t('common.unknownError')
       })
     )

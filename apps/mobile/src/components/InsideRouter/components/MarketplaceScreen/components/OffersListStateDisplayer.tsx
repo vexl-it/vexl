@@ -1,8 +1,8 @@
-import {useEffect, useMemo} from 'react'
+import {useMemo} from 'react'
 import ContainerWithTopBorderRadius from '../../ContainerWithTopBorderRadius'
 import OffersList from './OffersList'
 import {type MarketplaceTabScreenProps} from '../../../../../navigationTypes'
-import {ActivityIndicator, Alert} from 'react-native'
+import {ActivityIndicator} from 'react-native'
 import {
   useAreOffersLoading,
   useFilteredOffers,
@@ -13,6 +13,8 @@ import EmptyListPlaceholder from './EmptyListPlaceholder'
 import {getTokens, Stack} from 'tamagui'
 import OffersListButtons from './OffersListButtons'
 import {useNavigation} from '@react-navigation/native'
+import ErrorListHeader from '../../../../ErrorListHeader'
+import {isNone} from 'fp-ts/Option'
 
 type Props = MarketplaceTabScreenProps<'Buy' | 'Sell'>
 
@@ -28,10 +30,10 @@ function OffersListStateDisplayer({
   const refreshOffers = useTriggerOffersRefresh()
   const offers = useFilteredOffers(useMemo(() => ({offerType: type}), [type]))
 
-  useEffect(() => {
-    if (error._tag === 'Some') {
-      Alert.alert('error while refreshing offers')
-    }
+  const renderListHeader = useMemo(() => {
+    if (isNone(error)) return null
+
+    return <ErrorListHeader mt={'$6'} error={error.value} />
   }, [error])
 
   if (offers.length === 0 && loading) {
@@ -55,6 +57,7 @@ function OffersListStateDisplayer({
         <EmptyListPlaceholder />
       ) : (
         <OffersList
+          ListComponent={renderListHeader}
           offers={offers}
           // eslint-disable-next-line @typescript-eslint/no-misused-promises
           onRefresh={refreshOffers}

@@ -8,6 +8,7 @@ import {pipe} from 'fp-ts/function'
 import {useUserPublicApi} from '../../../api'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import reportError from '../../../utils/reportError'
+import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 
 export function useVerifyPhoneNumber(): (
   r: VerifyPhoneNumberRequest
@@ -35,6 +36,8 @@ export function useVerifyPhoneNumber(): (
               l
             )
             return t('common.unexpectedServerResponse')
+          case 'NetworkError':
+            return toCommonErrorMessage(l, t) ?? t('common.unknownError')
           case 'UnknownError':
           case 'BadStatusCodeError':
             reportError(

@@ -23,6 +23,7 @@ import reportError from '../../utils/reportError'
 import CreateOfferContent from './components/CreateOfferContent'
 import useCreateInbox from '../../state/chat/hooks/useCreateInbox'
 import KeyboardAvoidingView from '../KeyboardAvoidingView'
+import {toCommonErrorMessage} from '../../utils/useCommonErrorMessages'
 
 function CreateOfferScreen(): JSX.Element {
   const {t} = useTranslation()
@@ -100,8 +101,14 @@ function CreateOfferScreen(): JSX.Element {
       ),
       TE.match(
         (e) => {
-          Alert.alert(t('createOffer.errorCreatingOffer'))
+          if (e._tag === 'NetworkError') {
+            Alert.alert(
+              toCommonErrorMessage(e, t) ??
+                t('createOffer.errorSearchingForAvailableLocation')
+            )
+          } else Alert.alert(t('createOffer.errorCreatingOffer'))
           setLoading(false)
+          setEncryptingOffer(false)
         },
         () => {
           setLoading(false)

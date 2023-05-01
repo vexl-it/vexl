@@ -8,7 +8,20 @@ import {
 import {type BasicError} from '@vexl-next/domain/dist/utility/errors'
 import {type ErrorEncryptingMessage} from '@vexl-next/resources-utils/dist/chat/utils/chatCrypto'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
-import {type SendMessageApiErrors} from '@vexl-next/resources-utils/dist/chat/sendMessage'
+import {
+  type BadStatusCodeError,
+  type NetworkError,
+  type UnexpectedApiResponseError,
+  type UnknownError,
+} from '@vexl-next/rest-api/dist/Errors'
+import {
+  type ErrorGeneratingChallenge,
+  type ErrorSigningChallenge,
+} from '@vexl-next/rest-api/dist/services/chat/utils'
+import {
+  type InboxDoesNotExist,
+  type NotPermittedToSendMessageToTargetInbox,
+} from '@vexl-next/rest-api/dist/services/contact/contracts'
 
 export type ApiErrorCreatingInbox = BasicError<'ApiErrorCreatingInbox'>
 export type ErrorInboxAlreadyExists = BasicError<'ErrorInboxAlreadyExists'>
@@ -19,12 +32,17 @@ export const ChatMessageWithState = z.discriminatedUnion('state', [
   z.object({
     state: z.literal('sendingError'),
     message: ChatMessage,
-    error: z.custom<ErrorEncryptingMessage | SendMessageApiErrors>(
-      (one) =>
-        (one as any)._tag === 'ErrorEncryptingMessage' ||
-        (one as any)._tag === 'inboxDoesNotExist' ||
-        (one as any)._tag === 'notPermittedToSendMessageToTargetInbox'
-    ),
+    error: z.custom<
+      | ErrorEncryptingMessage
+      | UnexpectedApiResponseError
+      | BadStatusCodeError
+      | UnknownError
+      | NetworkError
+      | ErrorGeneratingChallenge
+      | ErrorSigningChallenge
+      | InboxDoesNotExist
+      | NotPermittedToSendMessageToTargetInbox
+    >((one) => !!(one as any)._tag),
   }),
   z.object({state: z.literal('sent'), message: ChatMessage}),
 ])

@@ -1,11 +1,29 @@
 const VERSION_CODE = 2
-const VERSION = '0.0.1'
+const VERSION = '1.0.1'
+const ENV_PRESET = process.env.ENV_PRESET ?? 'stage'
+
+const extra =
+  ENV_PRESET === 'stage'
+    ? {
+        enableHiddenFeatures: true,
+        apiPreset: process.env.apiPreset ?? 'stageEnv',
+        version: `${VERSION} (${VERSION_CODE})`,
+        packageName: 'it.vexl.nextstage',
+        appName: 'Vexl Next (stage)',
+      }
+    : {
+        enableHiddenFeatures: false,
+        apiPreset: process.env.apiPreset ?? 'prodEnv',
+        version: `${VERSION} (${VERSION_CODE})`,
+        packageName: 'it.vexl.next',
+        appName: 'Vexl Next',
+      }
 
 export default {
   'expo': {
     'name': 'Vexl next',
     'slug': 'vexl',
-    'version': VERSION,
+    'version': '1.0.3',
     'orientation': 'portrait',
     'icon': './assets/icon.png',
     'userInterfaceStyle': 'light',
@@ -21,9 +39,9 @@ export default {
     },
     'assetBundlePatterns': ['**/*'],
     'ios': {
-      buildNumber: VERSION_CODE,
+      buildNumber: String(VERSION_CODE),
       'supportsTablet': false,
-      'bundleIdentifier': 'it.vexl.next',
+      'bundleIdentifier': extra.packageName,
       'config': {
         'usesNonExemptEncryption': false,
       },
@@ -33,14 +51,13 @@ export default {
       'googleServicesFile': './creds/GoogleService-Info.plist',
     },
     'android': {
-      buildNumber: VERSION_CODE,
+      versionCode: VERSION_CODE,
       'softwareKeyboardLayoutMode': 'resize',
       'adaptiveIcon': {
         'foregroundImage': './assets/android-front.png',
         'backgroundImage': './assets/android-back.png',
       },
-      'package': 'it.vexl.next',
-      'permissions': ['android.permission.RECORD_AUDIO'],
+      'package': extra.packageName,
       'googleServicesFile': './creds/google-services.json',
     },
     'web': {
@@ -86,9 +103,5 @@ export default {
       './expo-plugins/setup-headless-background-message-processing-ios.js',
     ],
   },
-  'extra': {
-    enableHiddenFeatures: process.env.ENABLE_HIDDEN_FEATURES === 'true',
-    apiPreset: process.env.apiPreset ?? 'stageEnv',
-    version: `${VERSION} (${VERSION_CODE})`,
-  },
+  extra,
 }

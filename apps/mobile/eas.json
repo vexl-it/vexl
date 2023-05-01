@@ -29,13 +29,20 @@
         "image": "ubuntu-18.04-jdk-11-ndk-r19c"
       }
     },
+    "stage": {
+      "android": {
+        "image": "ubuntu-18.04-jdk-11-ndk-r19c"
+      },
+      "env": {
+        "ENV_PRESET": "stage"
+      }
+    },
     "production": {
       "android": {
         "image": "ubuntu-18.04-jdk-11-ndk-r19c"
       },
       "env": {
-        "ENABLE_HIDDEN_FEATURES": "true",
-        "API_PRESET": "prodEnv"
+        "ENV_PRESET": "prod"
       }
     }
   },

@@ -3,6 +3,7 @@ import {
   chat,
   contact,
   ENV_PRESETS,
+  type EnvPreset,
   offer,
   PlatformName,
   user,
@@ -14,12 +15,22 @@ import {type ContactPrivateApi} from '@vexl-next/rest-api/dist/services/contact'
 import {type OfferPrivateApi} from '@vexl-next/rest-api/dist/services/offer'
 import {type ChatPrivateApi} from '@vexl-next/rest-api/dist/services/chat'
 import {type UserPublicApi} from '@vexl-next/rest-api/dist/services/user'
+import {apiPreset} from '../utils/environment'
 // import {ServiceUrl} from '@vexl-next/rest-api/dist/ServiceUrl.brand'
 
 export const platform = PlatformName.parse(
   Platform.OS === 'ios' ? 'IOS' : 'ANDROID'
 )
-export const apiEnv = ENV_PRESETS.stageEnv
+
+function getApiPreset(): EnvPreset {
+  if (apiPreset === 'prodEnv') {
+    return ENV_PRESETS.prodEnv
+  }
+
+  return ENV_PRESETS.stageEnv
+}
+
+export const apiEnv = getApiPreset()
 // export const apiEnv = {
 //   userMs: ServiceUrl.parse('http://localhost:8000'),
 //   contactMs: ServiceUrl.parse('http://localhost:8003'),

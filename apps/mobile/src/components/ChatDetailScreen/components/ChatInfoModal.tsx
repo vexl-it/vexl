@@ -14,6 +14,7 @@ import WarningSvg from '../images/warningSvg'
 import useSafeGoBack from '../../../utils/useSafeGoBack'
 import {SlideInDown, SlideOutDown} from 'react-native-reanimated'
 import {ScrollView} from 'react-native'
+import {enableHiddenFeatures} from '../../../utils/environment'
 
 function ChatInfoModal(): JSX.Element | null {
   const {
@@ -47,7 +48,7 @@ function ChatInfoModal(): JSX.Element | null {
           <Stack mt="$7"></Stack>
           <ButtonStack
             buttons={[
-              ...(canSendMessages
+              ...(canSendMessages && enableHiddenFeatures
                 ? [
                     {
                       icon: IdentityIconSvg,

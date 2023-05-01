@@ -12,6 +12,8 @@ import useFetchMessagesForAllInboxes from '../../state/chat/hooks/useFetchNewMes
 import {useTriggerOffersRefresh} from '../../state/marketplace'
 import {type Inbox} from '@vexl-next/domain/dist/general/messaging'
 import messagingStateAtom from '../../state/chat/atoms/messagingStateAtom'
+import {enableHiddenFeatures} from '../../utils/environment'
+import {apiEnv} from '../../api'
 
 type Props = RootStackScreenProps<'DebugScreen'>
 
@@ -37,6 +39,11 @@ function DebugScreen({navigation}: Props): JSX.Element {
             <Text fos={20} ff="$heading">
               Debug screen
             </Text>
+            <Text>
+              enableHiddenFeatures: {enableHiddenFeatures ? 'true' : 'false'}
+            </Text>
+            <Text>apiEnv: {JSON.stringify(apiEnv, null, 2)}</Text>
+
             <Spacer />
             <Button
               variant={'primary'}

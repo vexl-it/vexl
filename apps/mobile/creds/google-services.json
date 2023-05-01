@@ -232,6 +232,43 @@
     },
     {
       "client_info": {
+        "mobilesdk_app_id": "1:183980003892:android:32257a455e5f3c38e53061",
+        "android_client_info": {
+          "package_name": "it.vexl.nextstage"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "183980003892-lvapoh98nsm1e1jktknpcdp44hprffis.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAO8_9nMtcwquu8z2oD1kjZE4iXVk2n-JM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "183980003892-lvapoh98nsm1e1jktknpcdp44hprffis.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "183980003892-3kjp1rj1a71fqv0jtsthg7sf0191kmqh.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "it.vexl.debug",
+                "app_store_id": "1639849421"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:183980003892:android:ae25dfaafb163d24e53061",
         "android_client_info": {
           "package_name": "it.vexl.staging"

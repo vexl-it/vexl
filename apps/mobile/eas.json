@@ -52,6 +52,9 @@
         "track": "internal",
         "changesNotSentForReview": true,
         "serviceAccountKeyPath": "certs/android/service-account.json"
+      },
+      "ios": {
+        "bundleIdentifier": "it.vexl.next"
       }
     }
   }

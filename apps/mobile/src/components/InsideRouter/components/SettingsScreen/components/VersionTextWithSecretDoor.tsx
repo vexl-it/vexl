@@ -7,6 +7,7 @@ import {
   unixMillisecondsNow,
 } from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
 import {useNavigation} from '@react-navigation/native'
+import {version} from '../../../../../utils/environment'
 
 const TOUCH_DELAY_MS = 500
 
@@ -44,7 +45,7 @@ function VersionTextWithSecretDoor({
       }}
     >
       <Text ta={'center'} fos={14} col={'$greyOnBlack'}>
-        {t('settings.version', {version: 'local'})}
+        {t('settings.version', {version})}
       </Text>
     </Pressable>
   )

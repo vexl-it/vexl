@@ -18,6 +18,7 @@ import {NotificationPermissionsScreen} from '../NotificationPermissionsScreen'
 import {useRefreshNotificationTokenOnResumeAssumeLoggedIn} from '../../utils/notifications/useRefreshNotificationTokenOnResumeAssumeLoggedIn'
 import {useHandleReceivedNotifications} from '../../state/useHandleReceivedNotifications'
 import DebugScreen from '../DebugScreen'
+import SetContactsScreen from '../SetContactsScreen'
 
 const Stack = createNativeStackNavigator<RootStackParamsList>()
 
@@ -52,6 +53,7 @@ function RootNavigation(): JSX.Element {
             <Stack.Screen name={'OfferDetail'} component={OfferDetailScreen} />
             <Stack.Screen name={'CreateOffer'} component={CreateOfferScreen} />
             <Stack.Screen name={'ChatDetail'} component={ChatDetailScreen} />
+            <Stack.Screen name={'SetContacts'} component={SetContactsScreen} />
             <Stack.Screen
               name={'NotificationPermissionsMissing'}
               component={NotificationPermissionsScreen}

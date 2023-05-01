@@ -20,6 +20,7 @@ export default {
       'etimedout': 'Request timed out',
       'econnaborted': 'Connection aborted',
     },
+    'submit': 'Submit',
     'cryptoError': 'Unexpected cryptography error',
     'secondsShort': 's',
     'ok': 'ok',
@@ -360,9 +361,9 @@ export default {
   },
   'notifications': {
     'permissionsNotGranted': {
-      title: 'Permissions for notifications were not granted',
-      message: 'You can enable them in the settings',
-      openSettings: 'Open settings',
+      'title': 'Permissions for notifications were not granted',
+      'message': 'You can enable them in the settings',
+      'openSettings': 'Open settings',
     },
   },
   'messages': {

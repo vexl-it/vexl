@@ -93,9 +93,7 @@ function ButtonsSection(): JSX.Element {
           text: t('settings.items.contactsImported'),
           icon: contactIconSvg,
           onPress: () => {
-            navigation.navigate('PostLoginFlow', {
-              screen: 'ImportContacts',
-            })
+            navigation.navigate('SetContacts')
           },
         },
       ],

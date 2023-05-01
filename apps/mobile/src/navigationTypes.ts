@@ -42,6 +42,8 @@ export type RootStackParamsList = {
 
   TodoScreen: undefined
 
+  SetContacts: undefined
+
   DebugScreen: undefined
 }
 

@@ -170,17 +170,10 @@ export function useIsSessionLoaded(): boolean {
   return useAtomValue(sessionLoadedAtom)
 }
 
-export function useLogout(): (delay?: number) => void {
+export function useLogout(): () => void {
   const setSession = useSetAtom(sessionAtom)
-  const setFinishedPostOnboarding = useFinishPostLoginFlow()
-  return useCallback(
-    (delay: number = 0) => {
-      setTimeout(() => {
-        setSession(O.none)
-        setFinishedPostOnboarding(false)
-        clearStorage()
-      }, delay)
-    },
-    [setSession, setFinishedPostOnboarding]
-  )
+  return useCallback(() => {
+    setSession(O.none)
+    clearStorage()
+  }, [setSession])
 }

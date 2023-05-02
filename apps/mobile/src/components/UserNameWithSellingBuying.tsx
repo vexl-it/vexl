@@ -8,6 +8,28 @@ const AfterNameBasicText = styled(Text, {
   ff: '$body600',
 })
 
+function getOtherSideIsBuyingOrSelling({
+  offerType,
+  offerDirection,
+}: {
+  offerType: 'BUY' | 'SELL'
+  offerDirection: 'theirOffer' | 'myOffer'
+}): 'isSelling' | 'isBuying' {
+  if (offerDirection === 'myOffer') {
+    if (offerType === 'SELL') {
+      return 'isBuying'
+    } else {
+      return 'isSelling'
+    }
+  } else {
+    if (offerType === 'SELL') {
+      return 'isSelling'
+    } else {
+      return 'isBuying'
+    }
+  }
+}
+
 function AfterNameText({
   offerType,
   offerDirection,
@@ -17,35 +39,17 @@ function AfterNameText({
 }): JSX.Element {
   const {t} = useTranslation()
 
-  if (offerDirection === 'myOffer') {
-    if (offerType === 'SELL') {
-      return (
-        <AfterNameBasicText color="$pink">
-          {t('messages.isBuying')}
-        </AfterNameBasicText>
-      )
-    } else {
-      return (
-        <AfterNameBasicText color="$pastelGreen">
-          {t('messages.isSelling')}
-        </AfterNameBasicText>
-      )
-    }
-  } else {
-    if (offerType === 'BUY') {
-      return (
-        <AfterNameBasicText color="$pink">
-          {t('messages.isSelling')}
-        </AfterNameBasicText>
-      )
-    } else {
-      return (
-        <AfterNameBasicText color="$pastelGreen">
-          {t('messages.isBuying')}
-        </AfterNameBasicText>
-      )
-    }
-  }
+  const buyingOrSelling = getOtherSideIsBuyingOrSelling({
+    offerType,
+    offerDirection,
+  })
+  const color = buyingOrSelling === 'isBuying' ? '$pink' : '$pastelGreen'
+
+  return (
+    <AfterNameBasicText color={color}>
+      {t(`messages.${buyingOrSelling}`)}
+    </AfterNameBasicText>
+  )
 }
 
 function UserNameWithSellingBuying({

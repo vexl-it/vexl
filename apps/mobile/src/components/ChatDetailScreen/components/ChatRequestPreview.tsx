@@ -51,7 +51,9 @@ function ChatRequestPreview(): JSX.Element {
           backgroundColor="$greyAccent5"
         >
           <Text fontFamily={'$body600'} mb="$2" fos={14} col={'$greyOnWhite'}>
-            {chat ? t('messages.yourOffer') : t('messages.theirOffer')}
+            {chat.origin.type === 'myOffer'
+              ? t('messages.yourOffer')
+              : t('messages.theirOffer')}
           </Text>
           {offer && <OfferInfoPreview offer={offer.offerInfo} />}
         </Stack>

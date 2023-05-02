@@ -7,8 +7,6 @@ import Screen from '../Screen'
 import {useCallback} from 'react'
 import {Stack} from 'tamagui'
 
-// type Props = RootStackScreenProps<'SetContacts'>
-
 function SetContactsScreen(): JSX.Element {
   const goBack = useSafeGoBack()
   const {t} = useTranslation()

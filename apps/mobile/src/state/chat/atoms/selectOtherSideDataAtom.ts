@@ -12,11 +12,14 @@ export default function selectOtherSideDataAtom(
   return selectAtom(chatAtom, (chat) => {
     if (chat.otherSide.realLifeInfo) return chat.otherSide.realLifeInfo
 
+    const seed =
+      chat.origin.type === 'theirOffer' ? chat.origin.offerId : chat.id
+
     const image =
-      avatarsSvg[randomNumberFromSeed(0, avatarsSvg.length - 1, chat.id)]
+      avatarsSvg[randomNumberFromSeed(0, avatarsSvg.length - 1, seed)]
 
     return {
-      userName: randomName(chat.id),
+      userName: randomName(seed),
       image: {type: 'svgXml', svgXml: image},
     } as UserNameAndAvatar
   })

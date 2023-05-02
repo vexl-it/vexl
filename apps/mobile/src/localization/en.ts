@@ -10,7 +10,7 @@ export default {
     'save': 'Save',
     'search': 'Search',
     'deselectAll': 'Deselect All',
-    'selectAll': 'Deselect All',
+    'selectAll': 'Select All',
     'cancel': 'Cancel',
     'unknownError': 'Unknown Error',
     'unexpectedServerResponse': 'Unexpected Server Response',
@@ -130,8 +130,6 @@ export default {
     },
     'importContactsButton': 'Import contacts',
     'contactsList': {
-      'deselectAll': 'Deselect all',
-      'selectAll': 'Select all',
       'addContact': 'Add contact {{number}} manually',
       'inputPlaceholder': 'Search or Add number',
       'nothingFound': {

@@ -1,4 +1,4 @@
-import {Stack, Text, XStack} from 'tamagui'
+import {Stack, XStack} from 'tamagui'
 import OfferInfoPreview from './OfferInfoPreview'
 import SvgImage from './Image'
 import bubbleTipSvg, {
@@ -7,20 +7,20 @@ import bubbleTipSvg, {
 import {AnonymousAvatarFromSeed} from './AnonymousAvatar'
 import randomName from '../utils/randomName'
 import {type StyleProp, type ViewStyle} from 'react-native'
-import {useMemo} from 'react'
+import {type ReactNode, useMemo} from 'react'
 import {type OneOfferInState} from '../state/marketplace/domain'
-import {useTranslation} from '../utils/localization/I18nProvider'
+import UserNameWithSellingBuying from './UserNameWithSellingBuying'
+import ContactTypeAndCommonNumber from './ContactTypeAndCommonNumber'
 
 export default function OfferWithBubbleTip({
-  offer: {offerInfo: offer},
+  offer: {offerInfo: offer, adminId},
   button,
   negative,
 }: {
   offer: OneOfferInState
-  button?: React.ReactNode
+  button?: ReactNode
   negative?: boolean
 }): JSX.Element {
-  const {t} = useTranslation()
   const avatarStyles: StyleProp<ViewStyle> = useMemo(
     () => ({
       width: 48,
@@ -46,23 +46,17 @@ export default function OfferWithBubbleTip({
           seed={offer.offerId}
         />
         <Stack f={1} ml="$2">
-          <Text ff={'$body600'} col={'$white'}>
-            {randomName(offer.offerId)}{' '}
-            <Text ff={'$body600'} col={negative ? '$greyOnBlack' : '$pink'}>
-              {offer.publicPart.offerType === 'SELL'
-                ? t('offer.isSelling')
-                : t('offer.isBuying')}
-            </Text>
-          </Text>
-          <Text ff={'$body500'} fos={14} col="$greyOnBlack">
-            {offer.privatePart.friendLevel.includes('FIRST_DEGREE')
-              ? t('offer.directFriend')
-              : t('offer.friendOfFriend')}
-            {' • '}
-            {t('offer.numberOfCommon', {
-              number: offer.privatePart.commonFriends.length,
-            })}
-          </Text>
+          <UserNameWithSellingBuying
+            offerInfo={{
+              offerType: offer.publicPart.offerType,
+              offerDirection: adminId ? 'myOffer' : 'theirOffer',
+            }}
+            userName={randomName(offer.offerId)}
+          />
+          <ContactTypeAndCommonNumber
+            friendLevel={offer.privatePart.friendLevel ?? []}
+            numberOfCommonFriends={offer.privatePart.commonFriends.length}
+          />
         </Stack>
         {button && button}
         {/* Friend of friend info */}

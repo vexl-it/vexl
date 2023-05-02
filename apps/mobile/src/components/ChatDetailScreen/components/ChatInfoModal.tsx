@@ -42,10 +42,9 @@ function ChatInfoModal(): JSX.Element | null {
     >
       <YStack px={'$4'} backgroundColor="$black" f={1}>
         <ScrollView>
-          <Stack mt={'$4'}>
+          <Stack mt={'$4'} mb={'$7'}>
             <ChatRequestPreview />
           </Stack>
-          <Stack mt="$7"></Stack>
           <ButtonStack
             buttons={[
               ...(canSendMessages && enableHiddenFeatures

@@ -32,7 +32,7 @@ function SearchBar(): JSX.Element {
           small
           adjustTextToFitOneLine
           fullSize
-          text={t(allSelected ? 'common.selectAll' : 'common.deselectAll')}
+          text={t(allSelected ? 'common.deselectAll' : 'common.selectAll')}
         />
       </Stack>
     </XStack>

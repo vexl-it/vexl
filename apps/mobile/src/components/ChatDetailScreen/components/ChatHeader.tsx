@@ -11,6 +11,7 @@ import {chatMolecule} from '../atoms'
 import {useSetAtom} from 'jotai'
 import binSvg from '../images/binSvg'
 import {enableHiddenFeatures} from '../../../utils/environment'
+import useResetNavigationToMessagingScreen from '../../../utils/useResetNavigationToMessagingScreen'
 
 type ButtonType =
   | 'back'
@@ -28,6 +29,7 @@ function Button({type}: {type: ButtonType}): JSX.Element | null {
     blockChatWithUiFeedbackAtom,
   } = useMolecule(chatMolecule)
   const setModal = useSetAtom(showModalAtom)
+  const resetNavigationToMessagingScreen = useResetNavigationToMessagingScreen()
 
   const blockChat = useSetAtom(blockChatWithUiFeedbackAtom)
   const deleteChat = useSetAtom(deleteChatWithUiFeedbackAtom)
@@ -70,7 +72,7 @@ function Button({type}: {type: ButtonType}): JSX.Element | null {
         variant={'negative'}
         onPress={() => {
           void blockChat().then((success) => {
-            if (success) safeGoBack()
+            if (success) resetNavigationToMessagingScreen()
           })
         }}
       />
@@ -83,7 +85,7 @@ function Button({type}: {type: ButtonType}): JSX.Element | null {
         variant={'negative'}
         onPress={() => {
           void deleteChat().then((success) => {
-            if (success) safeGoBack()
+            if (success) resetNavigationToMessagingScreen()
           })
         }}
       />

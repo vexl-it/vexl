@@ -24,9 +24,7 @@ function OtherSideNamePhotoAndInfo({mode}: Props): JSX.Element {
   const otherSideData = useAtomValue(otherSideDataAtom)
   const otherSideLeft = useAtomValue(otherSideLeftAtom)
   const canSendMessages = useAtomValue(canSendMessagesAtom)
-
-  console.log(JSON.stringify(offer?.offerInfo.privatePart.friendLevel, null, 2))
- 
+  
   return (
     <Stack
       height={mode === 'photoTop' ? PHOTO_AND_INFO_PHOTO_TOP_HEIGHT : 40}

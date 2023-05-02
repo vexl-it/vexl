@@ -11,10 +11,10 @@ import {useTranslation} from '../../../utils/localization/I18nProvider'
 import ButtonStack from './ButtonStack'
 import BlockIconSvg from '../../../images/blockIconSvg'
 import WarningSvg from '../images/warningSvg'
-import useSafeGoBack from '../../../utils/useSafeGoBack'
 import {SlideInDown, SlideOutDown} from 'react-native-reanimated'
 import {ScrollView} from 'react-native'
 import {enableHiddenFeatures} from '../../../utils/environment'
+import useResetNavigationToMessagingScreen from '../../../utils/useResetNavigationToMessagingScreen'
 
 function ChatInfoModal(): JSX.Element | null {
   const {
@@ -26,7 +26,7 @@ function ChatInfoModal(): JSX.Element | null {
   const showModal = useAtomValue(showModalAtom)
   const {top} = useSafeAreaInsets()
   const {t} = useTranslation()
-  const goBack = useSafeGoBack()
+  const resetNavigationToMessagingScreen = useResetNavigationToMessagingScreen()
 
   const deleteChat = useSetAtom(deleteChatWithUiFeedbackAtom)
   const blockChat = useSetAtom(blockChatWithUiFeedbackAtom)
@@ -63,7 +63,7 @@ function ChatInfoModal(): JSX.Element | null {
                 text: t('messages.deleteChat'),
                 onPress: () => {
                   void deleteChat().then((success) => {
-                    if (success) goBack()
+                    if (success) resetNavigationToMessagingScreen()
                   })
                 },
               },
@@ -73,7 +73,7 @@ function ChatInfoModal(): JSX.Element | null {
                 text: t('messages.blockUser'),
                 onPress: () => {
                   void blockChat().then((success) => {
-                    if (success) goBack()
+                    if (success) resetNavigationToMessagingScreen()
                   })
                 },
               },

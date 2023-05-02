@@ -4,8 +4,8 @@ import {useAtomValue, useSetAtom} from 'jotai'
 import {Text, XStack, YStack} from 'tamagui'
 import Button from '../../Button'
 import UserAvatar from '../../UserAvatar'
-import useSafeGoBack from '../../../utils/useSafeGoBack'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
+import useResetNavigationToMessagingScreen from '../../../utils/useResetNavigationToMessagingScreen'
 
 function QuickActionBannerUi({
   leftElement,
@@ -56,8 +56,8 @@ function QuickActionBannerUi({
 }
 
 function QuickActionBanner(): JSX.Element | null {
-  const safeGoBack = useSafeGoBack()
   const {t} = useTranslation()
+  const resetNavigationToMessagingScreen = useResetNavigationToMessagingScreen()
 
   const {lastMessageAtom, otherSideDataAtom, deleteChatWithUiFeedbackAtom} =
     useMolecule(chatMolecule)
@@ -87,7 +87,7 @@ function QuickActionBanner(): JSX.Element | null {
         }
         onButtonPress={() => {
           void deleteChat().then((result) => {
-            if (result) safeGoBack()
+            if (result) resetNavigationToMessagingScreen()
           })
         }}
       />
@@ -112,7 +112,7 @@ function QuickActionBanner(): JSX.Element | null {
         }
         onButtonPress={() => {
           void deleteChat().then((result) => {
-            if (result) safeGoBack()
+            if (result) resetNavigationToMessagingScreen()
           })
         }}
       />
@@ -138,7 +138,7 @@ function QuickActionBanner(): JSX.Element | null {
         }
         onButtonPress={() => {
           void deleteChat().then((result) => {
-            if (result) safeGoBack()
+            if (result) resetNavigationToMessagingScreen()
           })
         }}
       />
@@ -164,7 +164,7 @@ function QuickActionBanner(): JSX.Element | null {
         }
         onButtonPress={() => {
           void deleteChat().then((result) => {
-            if (result) safeGoBack()
+            if (result) resetNavigationToMessagingScreen()
           })
         }}
       />

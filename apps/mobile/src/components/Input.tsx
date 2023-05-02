@@ -16,6 +16,7 @@ import {
 } from 'tamagui'
 import closeSvg from './images/closeSvg'
 import {
+  type ComponentProps,
   forwardRef,
   type ReactNode,
   type Ref,
@@ -105,9 +106,9 @@ export interface Props extends Omit<TextInputProps, 'style'> {
   textColor?: ColorTokens
   variant?: 'greyOnWhite' | 'greyOnBlack' | 'transparentOnGrey'
   rightElement?: ReactNode
-  borderRadius?: string
-  numberOfLines?: number
-  multiline?: boolean
+  borderRadius?: ComponentProps<typeof RootContainer>['borderRadius']
+  numberOfLines?: ComponentProps<typeof InputStyled>['numberOfLines']
+  multiline?: ComponentProps<typeof InputStyled>['multiline']
 }
 
 function TextInput(

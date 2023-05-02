@@ -2,7 +2,22 @@ import {type Atom, useAtomValue} from 'jotai'
 import {type ChatMessageWithState} from '../../../../../state/chat/domain'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import React from 'react'
-import {Text} from 'tamagui'
+import {styled, Text} from 'tamagui'
+
+const BaseText = styled(Text, {
+  color: '$greyOnBlack',
+  fs: 14,
+  variants: {
+    unread: {
+      true: {
+        ff: '$body600',
+      },
+      false: {
+        ff: '$body',
+      },
+    },
+  },
+})
 
 function MessagePreview({
   lastMessageAtom,
@@ -21,101 +36,95 @@ function MessagePreview({
 
   const direction = state === 'received' ? 'incoming' : 'outgoing'
 
-  const baseProps = {
-    color: '$greyOnBlack',
-    ff: unread ? '$body600' : '$body',
-    fs: 14,
-  } as const
-
   if (message.messageType === 'APPROVE_MESSAGING') {
     return (
-      <Text {...baseProps} color={'$pastelGreen'}>
+      <BaseText unread={unread} color={'$pastelGreen'}>
         {t(`messages.messagePreviews.${direction}.APPROVE_MESSAGING`, {
           them: name,
         })}
-      </Text>
+      </BaseText>
     )
   } else if (message.messageType === 'DISAPPROVE_MESSAGING') {
     return (
-      <Text {...baseProps} color="$red">
+      <BaseText unread={unread} color="$red">
         {t(`messages.messagePreviews.${direction}.DISAPPROVE_MESSAGING`, {
           them: name,
         })}
-      </Text>
+      </BaseText>
     )
   } else if (message.messageType === 'APPROVE_REVEAL') {
     return (
-      <Text {...baseProps} color="$green">
+      <BaseText unread={unread} color="$green">
         {t(`messages.messagePreviews.${direction}.APPROVE_REVEAL`, {
           them: name,
         })}
-      </Text>
+      </BaseText>
     )
   } else if (message.messageType === 'REQUEST_MESSAGING') {
     return (
-      <Text {...baseProps} color="$main">
+      <BaseText unread={unread} color="$main">
         {t(`messages.messagePreviews.${direction}.REQUEST_MESSAGING`, {
           them: name,
         })}
-      </Text>
+      </BaseText>
     )
   } else if (message.messageType === 'BLOCK_CHAT') {
     return (
-      <Text {...baseProps} color="$red">
+      <BaseText unread={unread} color="$red">
         {t(`messages.messagePreviews.${direction}.BLOCK_CHAT`, {them: name})}
-      </Text>
+      </BaseText>
     )
   } else if (message.messageType === 'DELETE_CHAT') {
     return (
-      <Text {...baseProps} color="$red">
+      <BaseText unread={unread} color="$red">
         {t(`messages.messagePreviews.${direction}.DELETE_CHAT`, {them: name})}
-      </Text>
+      </BaseText>
     )
   } else if (message.messageType === 'DISAPPROVE_REVEAL') {
     return (
-      <Text {...baseProps} color="$red">
+      <BaseText unread={unread} color="$red">
         {t(`messages.messagePreviews.${direction}.DISAPPROVE_REVEAL`, {
           them: name,
         })}
-      </Text>
+      </BaseText>
     )
   } else if (message.messageType === 'REQUEST_REVEAL') {
     return (
-      <Text {...baseProps}>
+      <BaseText unread={unread}>
         {t(`messages.messagePreviews.${direction}.REQUEST_REVEAL`, {
           them: name,
         })}
-      </Text>
+      </BaseText>
     )
   } else if (message.messageType === 'MESSAGE') {
     return (
-      <Text {...baseProps}>
+      <BaseText unread={unread}>
         {t(`messages.messagePreviews.${direction}.MESSAGE`, {
           message: message.text,
           them: name,
         })}
-      </Text>
+      </BaseText>
     )
   } else if (message.messageType === 'INBOX_DELETED') {
     return (
-      <Text {...baseProps} color={'$red'}>
+      <BaseText unread={unread} color={'$red'}>
         {t(`messages.messagePreviews.${direction}.INBOX_DELETED`, {
           message: message.text,
           them: name,
         })}
-      </Text>
+      </BaseText>
     )
   } else if (message.messageType === 'OFFER_DELETED') {
     return (
-      <Text {...baseProps}>
+      <BaseText unread={unread}>
         {t(`messages.messagePreviews.${direction}.OFFER_DELETED`, {
           message: message.text,
           them: name,
         })}
-      </Text>
+      </BaseText>
     )
   } else {
-    return <Text {...baseProps}>{message.text}</Text>
+    return <BaseText unread={unread}>{message.text}</BaseText>
   }
 }
 

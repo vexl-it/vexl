@@ -32,11 +32,15 @@ function ChatRequestPreview(): JSX.Element {
         px="$6"
         space="$4"
       >
-        {/* todo what if removed? */}
-        <Text fos={20} color="$black" fontFamily="$body500">
-          {requestMessage?.message.text ??
-            t('messages.requestMessageWasDeleted')}
-        </Text>
+        {requestMessage?.message.text ? (
+          <Text fos={20} color="$black" fontFamily="$body500">
+            {requestMessage?.message.text}
+          </Text>
+        ) : (
+          <Text fos={20} color="$greyOnWhite" fontFamily="$body500">
+            {t('messages.requestMessageWasDeleted')}
+          </Text>
+        )}
 
         {/* TODO friends */}
         <Stack
@@ -46,11 +50,10 @@ function ChatRequestPreview(): JSX.Element {
           py={'$4'}
           backgroundColor="$greyAccent5"
         >
-          <Text fontFamily={'$body600'} mb="$2" fos={14} col={'#808080'}>
+          <Text fontFamily={'$body600'} mb="$2" fos={14} col={'$greyOnWhite'}>
             {chat ? t('messages.yourOffer') : t('messages.theirOffer')}
           </Text>
           {offer && <OfferInfoPreview offer={offer.offerInfo} />}
-          {/* TODO no offer */}
         </Stack>
       </YStack>
     </Stack>

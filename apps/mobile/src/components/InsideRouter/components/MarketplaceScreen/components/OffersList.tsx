@@ -9,7 +9,7 @@ export interface Props {
   readonly offers: OneOfferInState[]
   onRefresh: () => void
   refreshing: boolean
-  ListComponent?: ComponentProps<typeof FlatList>['ListHeaderComponent']
+  ListHeaderComponent?: ComponentProps<typeof FlatList>['ListHeaderComponent']
 }
 
 function keyExtractor(offer: OneOfferInState): string {
@@ -24,14 +24,14 @@ function OffersList({
   offers,
   onRefresh,
   refreshing,
-  ListComponent,
+  ListHeaderComponent,
 }: Props): JSX.Element {
   const bottomOffset = usePixelsFromBottomWhereTabsEnd()
 
   return (
     <>
       <FlatList
-        ListHeaderComponent={ListComponent}
+        ListHeaderComponent={ListHeaderComponent}
         contentContainerStyle={useMemo(
           () => ({
             paddingBottom: bottomOffset + Number(getTokens().space[5].val),

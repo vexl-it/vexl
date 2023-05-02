@@ -3,7 +3,6 @@ import {type ChatMessageWithState} from '../../../../../state/chat/domain'
 import {TouchableOpacity} from 'react-native'
 import React, {useMemo} from 'react'
 import {useNavigation} from '@react-navigation/native'
-import ChatDisplayName from '../../../../ChatDisplayName'
 import {type Atom, useAtomValue} from 'jotai'
 import {selectAtom} from 'jotai/utils'
 import MessagePreview from './LastMessagePreview'
@@ -11,6 +10,8 @@ import LastMessageDateView from './LastMessageDateView'
 import {type Chat} from '@vexl-next/domain/dist/general/messaging'
 import selectOtherSideDataAtom from '../../../../../state/chat/atoms/selectOtherSideDataAtom'
 import UserAvatar from '../../../../UserAvatar'
+import UserNameWithSellingBuying from '../../../../UserNameWithSellingBuying'
+import {useOfferForChatOrigin} from '../../../../../state/marketplace'
 
 export interface ChatListData {
   chat: Chat
@@ -54,6 +55,7 @@ function ChatListItem({dataAtom}: {dataAtom: Atom<ChatListData>}): JSX.Element {
   const isUnread = useAtomValue(isUnreadAtom)
   const {userName, image: userAvatar} = useAtomValue(otherSideInfoAtom)
   const isAvatarGray = useAtomValue(isAvatarGrayAtom)
+  const offer = useOfferForChatOrigin(chatInfo.origin)
 
   return (
     <TouchableOpacity
@@ -76,7 +78,18 @@ function ChatListItem({dataAtom}: {dataAtom: Atom<ChatListData>}): JSX.Element {
           </Stack>
           <YStack jc={'space-between'} alignSelf="stretch" f={1} py="$1">
             <XStack jc="space-between">
-              <ChatDisplayName chatAtom={chatInfoAtom} />
+              <UserNameWithSellingBuying
+                userName={userName}
+                center={false}
+                offerInfo={
+                  chatInfo.origin.type !== 'unknown' && offer
+                    ? {
+                        offerType: offer.offerInfo.publicPart.offerType,
+                        offerDirection: chatInfo.origin.type,
+                      }
+                    : undefined
+                }
+              />
               {isUnread && (
                 <Stack
                   w={'$4'}

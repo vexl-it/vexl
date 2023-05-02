@@ -155,7 +155,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
         (e) => {
           set(loadingOverlayDisplayedAtom, false)
           if (e._tag === 'UserDeclinedError') {
-            Alert.alert('Error', 'Error deleting chat')
+            return false
           }
 
           Alert.alert(toCommonErrorMessage(e, t) ?? t('common.unknownError'))

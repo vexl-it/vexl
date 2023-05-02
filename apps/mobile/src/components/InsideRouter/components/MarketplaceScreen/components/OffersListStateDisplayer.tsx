@@ -55,7 +55,7 @@ function OffersListStateDisplayer({
         <EmptyListPlaceholder />
       ) : (
         <OffersList
-          ListComponent={renderListHeader}
+          ListHeaderComponent={renderListHeader}
           offers={offers}
           // eslint-disable-next-line @typescript-eslint/no-misused-promises
           onRefresh={refreshOffers}

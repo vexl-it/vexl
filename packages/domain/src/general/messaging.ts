@@ -53,7 +53,7 @@ export function generateChatMessageId(): ChatMessageId {
 }
 
 export const ChatMessage = z.object({
-  uuid: ChatMessageId, // TODo change
+  uuid: ChatMessageId,
   text: z.string(),
   time: UnixMilliseconds,
   image: Base64String.optional(),

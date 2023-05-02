@@ -9,6 +9,7 @@ import {useSetAtom} from 'jotai'
 import acceptMessagingRequestAtom from '../../../state/chat/atoms/acceptMessagingRequestAtom'
 import {useMolecule} from 'jotai-molecules'
 import {chatMolecule} from '../atoms'
+import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 
 function AccepDeclineButtons({
   onDone = () => {},
@@ -31,9 +32,8 @@ function AccepDeclineButtons({
         }),
         TE.match(
           (e) => {
-            console.log(e)
             loadingOverlay.hide()
-            Alert.alert('Error. TODO') // TODO error handling
+            Alert.alert(toCommonErrorMessage(e, t) ?? t('common.unknownError'))
           },
           () => {
             loadingOverlay.hide()

@@ -25,10 +25,8 @@ export default function MessagesListOrApprovalPreview(): JSX.Element {
     }, [refreshMessages, store, chatAtom])
   )
 
-  let toRender = <></>
-  // TODO handle no messages
-  if (chatUiMode === 'approval') toRender = <RequestScreen />
-  else toRender = <MessagesScreen />
+  const toRender =
+    chatUiMode === 'approval' ? <RequestScreen /> : <MessagesScreen />
 
   return (
     <KeyboardAvoidingView>

@@ -1,12 +1,10 @@
-import {Stack, Text, XStack, YStack} from 'tamagui'
-import ChatDisplayName from '../../ChatDisplayName'
-import {useTranslation} from '../../../utils/localization/I18nProvider'
-import friendsSvg from '../images/friendsSvg'
-import Image from '../../Image'
+import {Stack, YStack} from 'tamagui'
 import {useAtomValue} from 'jotai'
 import {useMolecule} from 'jotai-molecules'
 import {chatMolecule} from '../atoms'
 import UserAvatar from '../../UserAvatar'
+import UserNameWithSellingBuying from '../../UserNameWithSellingBuying'
+import ContactTypeAndCommonNumber from '../../ContactTypeAndCommonNumber'
 
 interface Props {
   mode: 'photoTop' | 'photoLeft'
@@ -16,19 +14,19 @@ export const PHOTO_AND_INFO_PHOTO_TOP_HEIGHT = 81 + 16
 
 function OtherSideNamePhotoAndInfo({mode}: Props): JSX.Element {
   const {
-    chatAtom,
     offerForChatAtom,
     otherSideDataAtom,
     otherSideLeftAtom,
     canSendMessagesAtom,
   } = useMolecule(chatMolecule)
-  const {t} = useTranslation()
 
   const offer = useAtomValue(offerForChatAtom)
   const otherSideData = useAtomValue(otherSideDataAtom)
   const otherSideLeft = useAtomValue(otherSideLeftAtom)
   const canSendMessages = useAtomValue(canSendMessagesAtom)
 
+  console.log(JSON.stringify(offer?.offerInfo.privatePart.friendLevel, null, 2))
+ 
   return (
     <Stack
       height={mode === 'photoTop' ? PHOTO_AND_INFO_PHOTO_TOP_HEIGHT : 40}
@@ -48,33 +46,25 @@ function OtherSideNamePhotoAndInfo({mode}: Props): JSX.Element {
         />
       </Stack>
       <YStack>
-        <ChatDisplayName chatAtom={chatAtom} center={mode === 'photoTop'} />
-        <XStack
-          space="$1"
-          justifyContent={mode === 'photoTop' ? 'center' : 'flex-start'}
-          alignItems={'center'}
-        >
-          <Text color="$greyOnBlack">
-            {offer?.offerInfo.privatePart?.friendLevel?.includes(
-              'SECOND_DEGREE'
-            ) ? (
-              <Text>{t('offer.friendOfFriend')}</Text>
-            ) : (
-              offer?.offerInfo.privatePart?.friendLevel?.includes(
-                'FIRST_DEGREE'
-              ) && <Text>{t('offer.directFriend')}</Text>
-            )}
-          </Text>
-          <Text color="$greyOnBlack">•</Text>
-          <Stack w={14} h={14}>
-            <Image source={friendsSvg} />
-          </Stack>
-          <Text color={'$greyOnBlack'}>
-            {t('offer.numberOfCommon', {
-              number: offer?.offerInfo.privatePart?.commonFriends?.length ?? 0,
-            })}
-          </Text>
-        </XStack>
+        <UserNameWithSellingBuying
+          userName={otherSideData.userName}
+          center={mode === 'photoTop'}
+          offerInfo={
+            offer
+              ? {
+                  offerType: offer.offerInfo.publicPart.offerType,
+                  offerDirection: offer.adminId ? 'myOffer' : 'theirOffer',
+                }
+              : undefined
+          }
+        />
+        <ContactTypeAndCommonNumber
+          friendLevel={offer?.offerInfo.privatePart.friendLevel ?? []}
+          numberOfCommonFriends={
+            offer?.offerInfo.privatePart.commonFriends.length ?? 0
+          }
+          center={mode === 'photoTop'}
+        />
       </YStack>
     </Stack>
   )

@@ -1,0 +1,14 @@
+diff --git a/ios/ImagePickerPermissionRequesters.swift b/ios/ImagePickerPermissionRequesters.swift
+index 3cc81e0f8a4d1804ef42c5ee632527597f890950..ae0db1900d70f627ab50d7a75edd152e48151b9d 100644
+--- a/ios/ImagePickerPermissionRequesters.swift
++++ b/ios/ImagePickerPermissionRequesters.swift
+@@ -18,8 +18,7 @@ public class CameraPermissionRequester: NSObject, EXPermissionsRequester {
+     var systemStatus: AVAuthorizationStatus
+     var status: EXPermissionStatus
+     let cameraUsageDescription = Bundle.main.object(forInfoDictionaryKey: "NSCameraUsageDescription")
+-    let microphoneUsageDescription = Bundle.main.object(forInfoDictionaryKey: "NSMicrophoneUsageDescription")
+-    if cameraUsageDescription == nil || microphoneUsageDescription == nil {
++    if cameraUsageDescription == nil {
+       EXFatal(EXErrorWithMessage("""
+       This app is missing either 'NSCameraUsageDescription' or 'NSMicrophoneUsageDescription', so audio/video services will fail. \
+       Ensure both of these keys exist in app's Info.plist.

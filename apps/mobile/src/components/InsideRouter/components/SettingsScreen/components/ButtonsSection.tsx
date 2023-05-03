@@ -248,7 +248,7 @@ function ButtonsSection(): JSX.Element {
           },
         ],
       ].filter(notEmpty),
-    [logout, navigation, t]
+    [deleteAccountWithAreYouSure, navigation, t]
   )
 
   return (

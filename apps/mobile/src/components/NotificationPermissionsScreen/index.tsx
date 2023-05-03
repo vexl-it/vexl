@@ -24,7 +24,7 @@ export function NotificationPermissionsScreen({
           void requestNotificationPermissions()
         }}
         variant={'secondary'}
-        text={'grant us the permissions'}
+        text={'Allow permissions'}
       />
       <Button
         onPress={navigation.goBack}

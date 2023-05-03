@@ -27,9 +27,7 @@ export function NotificationPermissionsScreen({
         text={'grant us the permissions'}
       />
       <Button
-        onPress={() => {
-          navigation.goBack()
-        }}
+        onPress={navigation.goBack}
         variant={'primary'}
         text={'Go back'}
       />

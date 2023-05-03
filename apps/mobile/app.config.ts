@@ -1,32 +1,41 @@
-const VERSION_CODE = 3
-const VERSION = '1.0.4'
+const VERSION_CODE = 7
+const VERSION = '1.0.6'
 const ENV_PRESET = process.env.ENV_PRESET
 
-const extra =
-  ENV_PRESET === 'stage'
-    ? {
-        enableHiddenFeatures: true,
-        apiPreset: 'stageEnv',
-        version: `${VERSION} (${VERSION_CODE})`,
-        packageName: 'it.vexl.next',
-        appName: 'Vexl Next (stage)',
-        googleServicesInfoPlistFile: './creds/GoogleService-stage-Info.plist',
-      }
-    : {
-        enableHiddenFeatures: false,
-        apiPreset: 'prodEnv',
-        version: `${VERSION} (${VERSION_CODE})`,
-        packageName: 'it.vexl.next',
-        appName: 'Vexl Next',
-        googleServicesInfoPlistFile: './creds/GoogleService-Info.plist',
-      }
+const presets = {
+  stage: {
+    enableHiddenFeatures: true,
+    apiPreset: 'stageEnv',
+    version: `${VERSION} (${VERSION_CODE})`,
+    packageName: 'it.vexl.nextstaging',
+    appName: 'Vexl Next (stage)',
+    googleServicesInfoPlistFile: './creds/GoogleService-stage-Info.plist',
+    foregroundImage: './assets/android-front.png',
+    backgroundImage: './assets/android-back-stage.png',
+    icon: './assets/icon-stage.png',
+  },
+  prod: {
+    enableHiddenFeatures: false,
+    apiPreset: 'prodEnv',
+    version: `${VERSION} (${VERSION_CODE})`,
+    packageName: 'it.vexl.next',
+    appName: 'Vexl Next',
+    googleServicesInfoPlistFile: './creds/GoogleService-Info.plist',
+    foregroundImage: './assets/android-front.png',
+    backgroundImage: './assets/android-back.png',
+    icon: './assets/icon.png',
+  },
+}
+
+// @ts-expect-error there is fallback there.
+const extra = presets[String(ENV_PRESET)] ?? presets.stage
 
 export default {
-  'name': 'Vexl next',
+  'name': extra.appName,
   'slug': 'vexl',
   'version': VERSION,
   'orientation': 'portrait',
-  'icon': './assets/icon.png',
+  'icon': extra.icon,
   'userInterfaceStyle': 'light',
   'jsEngine': 'hermes',
   'splash': {
@@ -55,8 +64,8 @@ export default {
     versionCode: VERSION_CODE,
     'softwareKeyboardLayoutMode': 'resize',
     'adaptiveIcon': {
-      'foregroundImage': './assets/android-front.png',
-      'backgroundImage': './assets/android-back.png',
+      'foregroundImage': extra.foregroundImage,
+      'backgroundImage': extra.backgroundImage,
     },
     'package': extra.packageName,
     'googleServicesFile': './creds/google-services.json',

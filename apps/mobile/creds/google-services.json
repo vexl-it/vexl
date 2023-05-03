@@ -202,6 +202,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "183980003892-lu8qmqnsfd7j2um6j1jdmd3qm9slmahi.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "it.vexl.next",
+            "certificate_hash": "57af35233b2b9474ae6e0e2a6d80da629d9c0571"
+          }
+        },
+        {
           "client_id": "183980003892-lvapoh98nsm1e1jktknpcdp44hprffis.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -232,9 +240,9 @@
     },
     {
       "client_info": {
-        "mobilesdk_app_id": "1:183980003892:android:32257a455e5f3c38e53061",
+        "mobilesdk_app_id": "1:183980003892:android:7de27927654f29f8e53061",
         "android_client_info": {
-          "package_name": "it.vexl.nextstage"
+          "package_name": "it.vexl.nextstaging"
         }
       },
       "oauth_client": [

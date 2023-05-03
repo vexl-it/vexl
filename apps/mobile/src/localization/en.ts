@@ -115,12 +115,6 @@ export default {
       'anonymityNotice': 'Nobody can see your contacts. Even us.',
       'action': 'Import contacts',
     },
-    'permissions': {
-      'title': 'Allow notification permissions',
-      'text':
-        'Enabling notifications lets you know when others accept your offers or when messages arrive. Vexl app can’t be used without this permission.',
-      'action': 'Allow permissions',
-    },
   },
   'postLoginFlow': {
     'contactsExplanation': {
@@ -144,8 +138,9 @@ export default {
     'allowNotifications': {
       'title': 'Allow notification permissions',
       'text':
-        'Enabling notifications lets you know when others accept your offers or when messages arrive. Vexl app can’t be used without this permission.',
-      'action': 'Allow permissions',
+        'Enabling notifications lets you know when others accept your offers or when messages arrive.',
+      'action': 'Allow',
+      'cancel': 'Skip',
       'errors': {
         'permissionDenied':
           'Permissions not granted. You can allow them later in the system settings.',

@@ -1,7 +1,7 @@
 import Button from '../../Button'
 import {useAtomValue} from 'jotai'
 import nextButtonStateAtom from '../state/nextButtonStateAtom'
-import {Stack} from 'tamagui'
+import {XStack} from 'tamagui'
 
 function defaultPress(): void {}
 
@@ -11,14 +11,25 @@ function NextButton(): JSX.Element | null {
   if (!nextButtonState.text) return null
 
   return (
-    <Stack mt="$4">
+    <XStack mt="$2" space={'$2'}>
+      {nextButtonState.secondButton && (
+        <Button
+          fullSize
+          adjustTextToFitOneLine
+          variant="primary"
+          onPress={nextButtonState.secondButton.onPress}
+          text={nextButtonState.secondButton.text}
+        />
+      )}
       <Button
+        fullSize
+        adjustTextToFitOneLine
         disabled={nextButtonState.disabled || !nextButtonState.onPress}
         onPress={nextButtonState.onPress ?? defaultPress}
         variant="secondary"
         text={nextButtonState.text}
       />
-    </Stack>
+    </XStack>
   )
 }
 

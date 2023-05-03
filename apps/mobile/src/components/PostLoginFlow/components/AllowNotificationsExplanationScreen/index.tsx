@@ -93,6 +93,10 @@ function AllowNotificationsExplanationScreen({navigation}: Props): JSX.Element {
         text={t('postLoginFlow.allowNotifications.action')}
         onPress={requestPermissions}
         disabled={false}
+        secondButton={{
+          text: t('postLoginFlow.allowNotifications.cancel'),
+          onPress: onFinished,
+        }}
       />
     </>
   )

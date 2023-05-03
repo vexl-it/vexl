@@ -77,7 +77,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
             title: t('messages.deleteChatQuestion'),
             description: t('messages.deleteChatExplanation1'),
             negativeButtonText: t('common.back'),
-            positiveButtonText: t('messages.yesDelete'),
+            positiveButtonText: t('common.yesDelete'),
           },
           {
             image: {

@@ -77,8 +77,9 @@ export function useHandleNotificationsPermissionsRedirect(): void {
       [
         isLoggedIn,
         isOnPostLoginFlow,
-        navigation,
+        isPostLoginFinished,
         isOnNotificationPermissionsMissing,
+        navigation,
       ]
     )
   )

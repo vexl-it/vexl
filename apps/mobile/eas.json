@@ -1,37 +1,16 @@
 {
   "cli": {
-    "version": ">=3.7.0"
+    "version": ">=3.7.0",
+    "promptToConfigurePushNotifications": false
   },
   "build": {
-    "development": {
-      "developmentClient": true,
-      "distribution": "internal",
+    "staging": {
       "android": {
-        "image": "ubuntu-18.04-jdk-11-ndk-r19c"
-      }
-    },
-    "development-simulator": {
-      "developmentClient": true,
-      "distribution": "internal",
-      "ios": {
-        "simulator": true
+        "image": "ubuntu-18.04-jdk-11-ndk-r19c",
+        "credentialsSource": "remote"
       },
-      "android": {
-        "image": "ubuntu-18.04-jdk-11-ndk-r19c"
-      }
-    },
-    "preview": {
-      "distribution": "internal",
-      "developmentClient": false,
-      "android": {
-        "buildType": "apk",
-        "gradleCommand": ":app:assembleRelease",
-        "image": "ubuntu-18.04-jdk-11-ndk-r19c"
-      }
-    },
-    "stage": {
-      "android": {
-        "image": "ubuntu-18.04-jdk-11-ndk-r19c"
+      "ios": {
+        "credentialsSource": "remote"
       },
       "env": {
         "ENV_PRESET": "stage"
@@ -39,8 +18,8 @@
     },
     "production": {
       "android": {
-        "credentialsSource": "remote",
-        "image": "ubuntu-18.04-jdk-11-ndk-r19c"
+        "image": "ubuntu-18.04-jdk-11-ndk-r19c",
+        "credentialsSource": "remote"
       },
       "ios": {
         "credentialsSource": "remote"
@@ -51,6 +30,18 @@
     }
   },
   "submit": {
+    "staging": {
+      "android": {
+        "track": "internal",
+        "changesNotSentForReview": true,
+        "serviceAccountKeyPath": "credentials/google.json"
+      },
+      "ios": {
+        "bundleIdentifier": "it.vexl.nextstaging",
+        "ascAppId": "6448746479",
+        "appleTeamId": "KQNTW88PVA"
+      }
+    },
     "production": {
       "android": {
         "track": "internal",
@@ -58,7 +49,9 @@
         "serviceAccountKeyPath": "certs/android/service-account.json"
       },
       "ios": {
-        "bundleIdentifier": "it.vexl.next"
+        "bundleIdentifier": "it.vexl.next",
+        "ascAppId": "6448051657",
+        "appleTeamId": "KQNTW88PVA"
       }
     }
   }

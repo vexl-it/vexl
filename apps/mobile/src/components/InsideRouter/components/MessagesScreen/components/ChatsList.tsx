@@ -26,9 +26,18 @@ const chatIdsAtom = selectAtom(messagingStateAtom, (inboxes): ChatListData[] =>
       const lastMessageIsMeBlockingChat =
         lastMessage.message.messageType === 'BLOCK_CHAT' &&
         lastMessage.state === 'sent'
+      const myRequestPending =
+        lastMessage.message.messageType === 'REQUEST_MESSAGING' &&
+        lastMessage.state === 'sent' &&
+        one.messages.length === 1
 
-      if (lastMessageIsMeDeletingChat || lastMessageIsMeBlockingChat)
+      if (
+        lastMessageIsMeDeletingChat ||
+        lastMessageIsMeBlockingChat ||
+        myRequestPending
+      )
         return null
+
       return {chat: one.chat, lastMessage}
     })
     .filter(notEmpty)

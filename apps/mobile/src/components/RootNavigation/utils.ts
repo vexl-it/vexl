@@ -33,6 +33,7 @@ export function useHandlePostLoginFlowRedirect(): void {
 export function useHandleNotificationsPermissionsRedirect(): void {
   const navigation = useNavigation()
   const isLoggedIn = useIsUserLoggedIn()
+  const isPostLoginFinished = useIsPostLoginFinished()
 
   const isOnPostLoginFlow = useNavigationState(
     useCallback((state) => state?.routes.at(0)?.name === 'PostLoginFlow', [])
@@ -56,7 +57,7 @@ export function useHandleNotificationsPermissionsRedirect(): void {
             if (result._tag === 'Left') {
               return
             }
-            if (isOnPostLoginFlow) return
+            if (isOnPostLoginFlow || !isPostLoginFinished) return
 
             if (
               !isOnNotificationPermissionsMissing &&

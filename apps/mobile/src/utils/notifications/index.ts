@@ -42,15 +42,15 @@ export function useRequestNotificationPermissions(): TE.TaskEither<
               {
                 text: t('common.cancel'),
                 onPress: () => {
-                  NotificationSetting.open()
-                  resolve(E.right('deniedOpenedSettings' as const))
+                  resolve(E.right('deniedWithoutAction' as const))
                 },
               },
               {
                 text: t('notifications.permissionsNotGranted.openSettings'),
                 style: 'cancel',
                 onPress: () => {
-                  resolve(E.right('deniedWithoutAction' as const))
+                  NotificationSetting.open()
+                  resolve(E.right('deniedOpenedSettings' as const))
                 },
               },
             ]

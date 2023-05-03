@@ -13,8 +13,10 @@ export function NotificationPermissionsScreen({
   return (
     <WhiteContainer>
       <Text mt={16} fos={18} col="$black">
-        Notifications not allowed. Here we will explain why you should have
-        notifications on.
+        Enable notifications for a seamless social experience, as you will
+        instantly receive chat messages. Without notifications enabled your
+        offers will not be automatically encrypted for new users in your
+        contacts.
       </Text>
 
       <Button

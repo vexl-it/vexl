@@ -7,7 +7,13 @@ export interface NextButtonState {
   text: string | null
   onPress: (() => void) | null
   disabled: boolean
+
+  secondButton?: {
+    text: string
+    onPress: () => void
+  }
 }
+
 const nextButtonStateAtom = atom<NextButtonState>({
   text: null,
   onPress: () => {},

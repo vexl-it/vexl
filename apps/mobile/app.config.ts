@@ -1,5 +1,5 @@
-const VERSION_CODE = 7
-const VERSION = '1.0.6'
+const VERSION_CODE = 8
+const VERSION = '0.0.1'
 const ENV_PRESET = process.env.ENV_PRESET
 
 const presets = {

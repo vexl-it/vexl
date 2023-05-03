@@ -6861,7 +6861,7 @@ __metadata:
     expo-dev-client: ~2.2.1
     expo-device: ~5.2.1
     expo-font: ~11.1.1
-    expo-image-picker: ~14.1.1
+    expo-image-picker: 14.1.1
     expo-linear-gradient: ~12.1.2
     expo-localization: ~14.1.1
     expo-secure-store: ~12.1.1
@@ -10682,7 +10682,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo-image-picker@npm:~14.1.1":
+"expo-image-picker@npm:14.1.1":
   version: 14.1.1
   resolution: "expo-image-picker@npm:14.1.1"
   dependencies:
@@ -10690,6 +10690,17 @@ __metadata:
   peerDependencies:
     expo: "*"
   checksum: 6e6e8a9c9bd32af9a4b09f4ff271182bb00c4abc733348911a46a0515c3ea1d0f8263b18d2b18b0d394ad44f3c8cc5fd8066d3748fade109b04c7031fbec9b07
+  languageName: node
+  linkType: hard
+
+"expo-image-picker@patch:expo-image-picker@npm%3A14.1.1#./.yarn/patches/expo-image-picker-npm-14.1.1-c6baa99e3c.patch::locator=vexl-next%40workspace%3A.":
+  version: 14.1.1
+  resolution: "expo-image-picker@patch:expo-image-picker@npm%3A14.1.1#./.yarn/patches/expo-image-picker-npm-14.1.1-c6baa99e3c.patch::version=14.1.1&hash=fb1b80&locator=vexl-next%40workspace%3A."
+  dependencies:
+    expo-image-loader: ~4.1.0
+  peerDependencies:
+    expo: "*"
+  checksum: 5a8a080644b654f473abe3c7ad1ec18584781b0422f0629fec3859b339ec03648347875726b124a682ccc6c854efe759e53300f78cdb1c96e8a7baae9e732e53
   languageName: node
   linkType: hard
 

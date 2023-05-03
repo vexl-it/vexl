@@ -73,15 +73,17 @@ export default {
       'expo-image-picker',
       {
         'photosPermission':
-          'The app accesses your photos to let you share them with your friends.',
+          'Vexl wants to access your camera in order to select a photo for your avatar.',
         'cameraPermission':
-          'The app accesses your camera to let you take photos and videos.',
+          'Vexl wants to access your camera in order to take a photo for your avatar.',
+        'microphonePermission': false,
       },
     ],
     [
       'expo-contacts',
       {
-        'contactsPermission': 'Allow $(PRODUCT_NAME) to access your contacts.',
+        'contactsPermission':
+          'Vexl needs access to your contacts to make your offers visible for them in a secure way.',
       },
     ],
     [

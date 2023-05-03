@@ -6,6 +6,7 @@ import Button from '../../Button'
 import UserAvatar from '../../UserAvatar'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import useResetNavigationToMessagingScreen from '../../../utils/useResetNavigationToMessagingScreen'
+import {Keyboard} from 'react-native'
 
 function QuickActionBannerUi({
   leftElement,
@@ -86,6 +87,7 @@ function QuickActionBanner(): JSX.Element | null {
           />
         }
         onButtonPress={() => {
+          Keyboard.dismiss()
           void deleteChat().then((result) => {
             if (result) resetNavigationToMessagingScreen()
           })

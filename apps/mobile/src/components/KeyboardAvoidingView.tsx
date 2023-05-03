@@ -1,6 +1,6 @@
 import {
-  Platform,
   KeyboardAvoidingView as RNKeyboardAvoidingView,
+  Platform,
   View,
 } from 'react-native'
 import {type ReactNode} from 'react'

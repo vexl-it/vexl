@@ -7,6 +7,7 @@ import focusChatWithMessagesAtom from '../../state/chat/atoms/focusChatWithMessa
 import MessagesListOrApprovalPreview from './components/MessagesListOrApprovalPreview'
 import valueOrDefaultAtom from '../../utils/atomUtils/valueOrDefaultAtom'
 import hasNonNullableValueAtom from '../../utils/atomUtils/hasNonNullableValueAtom'
+import KeyboardAvoidingView from '../KeyboardAvoidingView'
 
 type Props = RootStackScreenProps<'ChatDetail'>
 
@@ -33,8 +34,10 @@ export default function ChatDetailScreen({
   if (!chatExists) return <></>
 
   return (
-    <ScopeProvider scope={ChatScope} value={nonNullChatWithMessagesAtom}>
-      <MessagesListOrApprovalPreview />
-    </ScopeProvider>
+    <KeyboardAvoidingView>
+      <ScopeProvider scope={ChatScope} value={nonNullChatWithMessagesAtom}>
+        <MessagesListOrApprovalPreview />
+      </ScopeProvider>
+    </KeyboardAvoidingView>
   )
 }

@@ -2,7 +2,7 @@ import {
   HeaderProxy,
   NextButtonProxy,
 } from '../../../PageWithButtonAndProgressHeader'
-import {WhiteContainerWithScroll} from '../../../WhiteContainer'
+import WhiteContainer from '../../../WhiteContainer'
 import SvgImage from '../../../Image'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import NotificationsSvg from '../../../../images/notificationsSvg'
@@ -16,6 +16,7 @@ import useCreateInbox from '../../../../state/chat/hooks/useCreateInbox'
 import {useSessionAssumeLoggedIn} from '../../../../state/session'
 import reportError from '../../../../utils/reportError'
 import {useRequestNotificationPermissions} from '../../../../utils/notifications'
+import {useShowLoadingOverlay} from '../../../LoadingOverlayProvider'
 
 type Props = PostLoginFlowScreenProps<'AllowNotificationsExplanation'>
 
@@ -25,6 +26,7 @@ function AllowNotificationsExplanationScreen({navigation}: Props): JSX.Element {
   const finishPostLoginFlow = useFinishPostLoginFlow()
   const session = useSessionAssumeLoggedIn()
   const requestNotificationPermissions = useRequestNotificationPermissions()
+  const loadingOverlay = useShowLoadingOverlay()
 
   function onFinished(): void {
     // TODO display loading
@@ -48,13 +50,16 @@ function AllowNotificationsExplanationScreen({navigation}: Props): JSX.Element {
   }
 
   function requestPermissions(): void {
+    loadingOverlay.show()
     void pipe(
       requestNotificationPermissions,
       TE.match(
         () => {
+          loadingOverlay.hide()
           onFinished()
         },
         () => {
+          loadingOverlay.hide()
           onFinished()
         }
       )
@@ -64,9 +69,12 @@ function AllowNotificationsExplanationScreen({navigation}: Props): JSX.Element {
   return (
     <>
       <HeaderProxy showBackButton={true} progressNumber={3} />
-      <WhiteContainerWithScroll>
+      <WhiteContainer>
         <Stack mb={'$3'} f={1} ai="center" jc="center">
-          <SvgImage source={NotificationsSvg} />
+          <SvgImage
+            style={{height: '100%', flex: 1}}
+            source={NotificationsSvg}
+          />
         </Stack>
         <Text
           adjustsFontSizeToFit
@@ -80,7 +88,7 @@ function AllowNotificationsExplanationScreen({navigation}: Props): JSX.Element {
         <Text mt={16} fos={18} col="$greyOnWhite">
           {t('postLoginFlow.allowNotifications.text')}
         </Text>
-      </WhiteContainerWithScroll>
+      </WhiteContainer>
       <NextButtonProxy
         text={t('postLoginFlow.allowNotifications.action')}
         onPress={requestPermissions}

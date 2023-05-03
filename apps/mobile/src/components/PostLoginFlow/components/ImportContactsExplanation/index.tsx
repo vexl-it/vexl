@@ -1,7 +1,5 @@
-import {WhiteContainerWithScroll} from '../../../WhiteContainer'
-import Image from '../../../Image'
+import WhiteContainer from '../../../WhiteContainer'
 import AnonymizationCaption from '../../../AnonymizationCaption/AnonymizationCaption'
-import importContactsSvg from './image/importContactsSvg'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import {
   HeaderProxy,
@@ -9,6 +7,7 @@ import {
 } from '../../../PageWithButtonAndProgressHeader'
 import {type PostLoginFlowScreenProps} from '../../../../navigationTypes'
 import {Stack, Text} from 'tamagui'
+import {Image} from 'react-native'
 
 type Props = PostLoginFlowScreenProps<'ImportContactsExplanation'>
 export default function ImportContactsExplanation({
@@ -17,13 +16,17 @@ export default function ImportContactsExplanation({
   const {t} = useTranslation()
 
   return (
-    <WhiteContainerWithScroll>
-      <Stack f={1} ai="center" jc="space-between">
+    <WhiteContainer>
+      <Stack f={1} jc="space-between">
         <HeaderProxy showBackButton={false} progressNumber={3} />
-        <Stack mb="$4">
-          <Image source={importContactsSvg} />
+        <Stack ai={'center'} flex={1} mb="$4">
+          <Image
+            style={{height: '100%'}}
+            resizeMode={'contain'}
+            source={require('./image/importContacts.png')}
+          />
         </Stack>
-        <Stack flexShrink={0} jc="space-around">
+        <Stack jc="space-around">
           <Stack>
             <Text mb="$3" fos={24} ff="$heading">
               {t('postLoginFlow.contactsExplanation.title')}
@@ -45,6 +48,6 @@ export default function ImportContactsExplanation({
           disabled={false}
         />
       </Stack>
-    </WhiteContainerWithScroll>
+    </WhiteContainer>
   )
 }

@@ -4,7 +4,7 @@ import {type SvgString} from '@vexl-next/domain/dist/utility/SvgString.brand'
 import profileIconSvg from '../../../images/profileIconSvg'
 import {Alert, Linking, Platform, TouchableWithoutFeedback} from 'react-native'
 import imageIconSvg from '../images/imageIconSvg'
-import {Fragment, useMemo} from 'react'
+import {Fragment, useCallback, useMemo} from 'react'
 import editIconSvg from '../images/editIconSvg'
 import trashIconSvg from '../images/trashIconSvg'
 import webIconSvg from '../images/webIconSvg'
@@ -20,9 +20,13 @@ import faceIdIconSvg from '../images/faceIdIconSvg'
 import contactIconSvg from '../images/contactIconSvg'
 import {useNavigation} from '@react-navigation/native'
 import {useLogout} from '../../../../../state/session'
-import {Stack, styled, Text, XStack, getTokens} from 'tamagui'
+import {getTokens, Stack, styled, Text, XStack} from 'tamagui'
 import {enableHiddenFeatures} from '../../../../../utils/environment'
 import notEmpty from '../../../../../utils/notEmpty'
+import {useSetAtom} from 'jotai'
+import * as TE from 'fp-ts/TaskEither'
+import {askAreYouSureActionAtom} from '../../../../AreYouSureDialog'
+import {pipe} from 'fp-ts/function'
 
 const ItemText = styled(Text, {
   fos: 18,
@@ -60,6 +64,7 @@ function ButtonsSection(): JSX.Element {
   const {t} = useTranslation()
   const navigation = useNavigation()
   const logout = useLogout()
+  const showAreYouSure = useSetAtom(askAreYouSureActionAtom)
 
   function todo(): void {
     Alert.alert('To be implemented')
@@ -70,6 +75,29 @@ function ButtonsSection(): JSX.Element {
       void Linking.openURL(url)
     }
   }
+
+  const deleteAccountWithAreYouSure = useCallback(async () => {
+    return await pipe(
+      showAreYouSure({
+        variant: 'danger',
+        steps: [
+          {
+            title: t('settings.logoutDialog.title'),
+            description: t('settings.logoutDialog.description'),
+            positiveButtonText: t('common.yesDelete'),
+            negativeButtonText: t('common.nope'),
+          },
+          {
+            title: t('settings.logoutDialog.title2'),
+            description: t('settings.logoutDialog.description'),
+            positiveButtonText: t('common.yesDelete'),
+            negativeButtonText: t('common.nope'),
+          },
+        ],
+      }),
+      TE.map(logout)
+    )()
+  }, [showAreYouSure, t, logout])
 
   const data: Array<
     Array<{icon: SvgString; text: string | JSX.Element; onPress: () => void}>
@@ -216,7 +244,7 @@ function ButtonsSection(): JSX.Element {
               </ItemText>
             ),
             icon: trashIconSvg,
-            onPress: logout,
+            onPress: deleteAccountWithAreYouSure,
           },
         ],
       ].filter(notEmpty),

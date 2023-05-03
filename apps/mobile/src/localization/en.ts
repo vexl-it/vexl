@@ -35,6 +35,7 @@ export default {
     'decline': 'Decline',
     'youSure': 'You sure?',
     'nope': 'Nope',
+    'yesDelete': 'Yes, delete',
   },
   'loginFlow': {
     'anonymityNotice': 'Nobody will see this until you allow it. Even us.',
@@ -187,6 +188,12 @@ export default {
     'support':
       'If you like Vexl, support it’s improvement by sending some Bitcoins as donation!',
     'version': 'Vexl App version: {{version}}',
+    'logoutDialog': {
+      'title': 'Delete account?',
+      'title2': 'You sure?',
+      'description':
+        'Do you really want to delete your account? You will never be able to undo this action.',
+    },
   },
   'offer': {
     title: 'Offer',
@@ -436,7 +443,6 @@ export default {
     'deleteChatQuestion': 'Delete chat?',
     'blockForewerQuestion': 'Block forever?',
     'yesBlock': 'Yes, block',
-    'yesDelete': 'Yes, delete',
     'deleteChatExplanation1':
       'Are you done trading? Closing chat means that your conversation will be permanently deleted.',
     'deleteChatExplanation2':

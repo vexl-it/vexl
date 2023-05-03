@@ -1,8 +1,6 @@
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import Switch from '../../../Switch'
-import LottieView from '../../../LottieView'
 import WhiteContainer from '../../../WhiteContainer'
-import Image from '../../../Image'
 import bigNameSvg from './images/bigNameSvg'
 import notepadSvg from './images/notepadSvg'
 import {useState} from 'react'
@@ -12,6 +10,8 @@ import {
   NextButtonProxy,
 } from '../../../PageWithButtonAndProgressHeader'
 import Button from '../../../Button'
+import SVGImage from '../../../Image'
+import {Image} from 'react-native'
 import {Stack, Text} from 'tamagui'
 
 type Props = LoginStackScreenProps<'Start'>
@@ -27,14 +27,14 @@ function StartScreen({navigation}: Props): JSX.Element {
       <WhiteContainer>
         <Stack f={1} ai="center">
           <Stack f={1}>
-            <LottieView
-              loop={false}
-              autoPlay
-              source={require('./lottie/vexl_get_started.json')}
+            <Image
+              style={{flex: 1}}
+              resizeMode={'contain'}
+              source={require('./images/logo.png')}
             />
           </Stack>
           <Stack mb="$5">
-            <Image width={211} height={66} source={bigNameSvg} />
+            <SVGImage width={211} height={66} source={bigNameSvg} />
           </Stack>
           <Text fos={18} ff="$body500" col="$greyOnBlack">
             {t('loginFlow.start.subtitle')}
@@ -52,7 +52,7 @@ function StartScreen({navigation}: Props): JSX.Element {
         bg="$backgroundBlack"
       >
         <Stack fd="row" ai="center">
-          <Image source={notepadSvg} />
+          <SVGImage source={notepadSvg} />
           <Stack w="$2" />
           <Text fos={18} ff="$body500" col="$greyOnBlack">
             {t('loginFlow.start.touLabel')}{' '}

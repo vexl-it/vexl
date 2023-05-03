@@ -6,7 +6,6 @@ import MessagesScreen from './MessagesScreen'
 import Screen from '../../Screen'
 import ChatInfoModal from './ChatInfoModal'
 import MarkAsReadWhenRendered from './MarkAsReadWhenRendered'
-import KeyboardAvoidingView from '../../KeyboardAvoidingView'
 import {useFetchAndStoreMessagesForInbox} from '../../../state/chat/hooks/useFetchNewMessages'
 import {useAppState} from '../../../utils/useAppState'
 import {useCallback} from 'react'
@@ -29,10 +28,10 @@ export default function MessagesListOrApprovalPreview(): JSX.Element {
     chatUiMode === 'approval' ? <RequestScreen /> : <MessagesScreen />
 
   return (
-    <KeyboardAvoidingView>
+    <>
       <MarkAsReadWhenRendered chatAtom={chatAtom} />
       <Screen>{toRender}</Screen>
       <ChatInfoModal />
-    </KeyboardAvoidingView>
+    </>
   )
 }

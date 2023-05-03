@@ -5,13 +5,14 @@ import blockIconSvg from '../../../images/blockIconSvg'
 import backButtonSvg from '../../../images/backButtonSvg'
 import identityIconSvg from '../images/identityIconSvg'
 import useSafeGoBack from '../../../utils/useSafeGoBack'
-import {TouchableOpacity} from 'react-native'
+import {Keyboard, TouchableOpacity} from 'react-native'
 import {useMolecule} from 'jotai-molecules'
 import {chatMolecule} from '../atoms'
 import {useSetAtom} from 'jotai'
 import binSvg from '../images/binSvg'
 import {enableHiddenFeatures} from '../../../utils/environment'
 import useResetNavigationToMessagingScreen from '../../../utils/useResetNavigationToMessagingScreen'
+import {useCallback} from 'react'
 
 type ButtonType =
   | 'back'
@@ -49,6 +50,7 @@ function Button({type}: {type: ButtonType}): JSX.Element | null {
         icon={backButtonSvg}
         variant={'primary'}
         onPress={() => {
+          Keyboard.dismiss()
           setModal(false)
         }}
       />
@@ -71,6 +73,7 @@ function Button({type}: {type: ButtonType}): JSX.Element | null {
         icon={blockIconSvg}
         variant={'negative'}
         onPress={() => {
+          Keyboard.dismiss()
           void blockChat().then((success) => {
             if (success) resetNavigationToMessagingScreen()
           })
@@ -84,6 +87,7 @@ function Button({type}: {type: ButtonType}): JSX.Element | null {
         icon={binSvg}
         variant={'negative'}
         onPress={() => {
+          Keyboard.dismiss()
           void deleteChat().then((success) => {
             if (success) resetNavigationToMessagingScreen()
           })
@@ -106,12 +110,16 @@ function ChatHeader({
   rightButton: ButtonType
   onPressMiddle?: () => void
 }): JSX.Element {
+  const handleMiddlePress = useCallback(() => {
+    Keyboard.dismiss()
+    onPressMiddle()
+  }, [onPressMiddle])
   return (
     <XStack mx={'$4'} mt={'$4'}>
       <Button type={leftButton} />
 
       <Stack f={1} mx={mode === 'photoLeft' ? '$2' : 0}>
-        <TouchableOpacity onPress={onPressMiddle}>
+        <TouchableOpacity onPress={handleMiddlePress}>
           <OtherSideNamePhotoAndInfo mode={mode} />
         </TouchableOpacity>
       </Stack>

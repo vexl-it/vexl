@@ -69,6 +69,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     right: 0,
     position: 'absolute',
+    backgroundColor: 'rgba(0, 0, 0, 0.75)',
   },
   bounce: {flex: 1, zIndex: 2},
   flip: {transform: [{scaleY: -1}]},
@@ -100,14 +101,7 @@ function AreYouSureDialog(): JSX.Element | null {
   if (!step) return null
 
   return (
-    <Stack
-      position={'absolute'}
-      t={0}
-      l={0}
-      r={0}
-      b={0}
-      bc="rgba(0, 0, 0, 0.75)"
-    >
+    <Stack position={'absolute'} t={0} l={0} r={0} b={0} bc="">
       <Animated.View
         entering={FadeIn}
         exiting={FadeOut}

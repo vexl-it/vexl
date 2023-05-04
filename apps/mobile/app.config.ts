@@ -1,4 +1,4 @@
-const VERSION_CODE = 8
+const VERSION_CODE = 10
 const VERSION = '0.0.1'
 const ENV_PRESET = process.env.ENV_PRESET
 

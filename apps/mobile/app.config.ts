@@ -92,7 +92,7 @@ export default {
       'expo-contacts',
       {
         'contactsPermission':
-          'Vexl needs access to your contacts to make your offers visible for them in a secure way.',
+          'Vexl needs access to your contacts to make your offers visible for them in a secure way. Phone number of contacts you select will be encrypted and uploaded to the server.',
       },
     ],
     [

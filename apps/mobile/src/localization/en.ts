@@ -120,7 +120,7 @@ export default {
     'contactsExplanation': {
       'title': 'Let’s find your friends now!',
       'text':
-        'Vexl is using your real-world social network - your friends and their friends. The more contacts you add, the more offers you’ll see.',
+        'Vexl is using your real-world social network - your friends and their friends. The more contacts you add, the more offers you’ll see.',
       'anonymizationCaption': 'Nobody can see your contacts. Even us.',
     },
     'importContactsButton': 'Import contacts',

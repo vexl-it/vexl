@@ -4,6 +4,7 @@ import pbkdf2 from './pbkdf2Promise'
 import {removeEmptyBytesAtTheEnd} from '../utils'
 import {privatePemToRaw, publicPemToRaw} from '../KeyHolder/keyUtils'
 import {type PrivateKeyPemBase64, type PublicKeyPemBase64} from '../KeyHolder'
+import {getECDHComputeSecretFunction} from '../implementations/ecdhComputeSecret'
 
 function encodePart(data: Buffer): string {
   const base64 = data.toString('base64')
@@ -18,13 +19,12 @@ export async function eciesLegacyEncrypt({
   data: string
 }): Promise<string> {
   const {publicKey: publicKeyRawBuffer, curve} = publicPemToRaw(publicKey)
-  const ecdh = crypto.createECDH(curve)
-  ecdh.generateKeys()
 
-  // todo use @noble/secp256k1 when possible
-
-  const epk = ecdh.getPublicKey()
-  const sharedSecret = ecdh.computeSecret(publicKeyRawBuffer)
+  const {publicKey: epk, secret: sharedSecret} =
+    await getECDHComputeSecretFunction()({
+      publicKeyToComputeSecretTo: publicKeyRawBuffer,
+      curve,
+    })
 
   const stretchedPass = await pbkdf2(
     sharedSecret,
@@ -100,10 +100,11 @@ export async function eciesLegacyDecrypt({
 
   const {privateKey: privateKeyRawBuffer, curve} = privatePemToRaw(privateKey)
 
-  const ecdh = crypto.createECDH(curve)
-  ecdh.setPrivateKey(privateKeyRawBuffer)
-
-  const sharedSecret = ecdh.computeSecret(epkPart.part, 'base64')
+  const {secret: sharedSecret} = await getECDHComputeSecretFunction()({
+    publicKeyToComputeSecretTo: Buffer.from(epkPart.part, 'base64'),
+    curve,
+    privateKeyRaw: privateKeyRawBuffer,
+  })
 
   const mac = crypto
     .createHmac(

@@ -1,5 +1,5 @@
 import WhiteContainer from '../WhiteContainer'
-import {ScrollView, Spacer, styled, Text, YStack} from 'tamagui'
+import {Spacer, Text, YStack} from 'tamagui'
 import {type RootStackScreenProps} from '../../navigationTypes'
 import Screen from '../Screen'
 import Button from '../Button'
@@ -7,22 +7,23 @@ import {useStore} from 'jotai'
 import {offersStateAtom} from '../../state/marketplace/atom'
 import {MINIMAL_DATE} from '@vexl-next/domain/dist/utility/IsoDatetimeString.brand'
 import {useSessionAssumeLoggedIn} from '../../state/session'
-import {Alert} from 'react-native'
+import {Alert, ScrollView} from 'react-native'
 import useFetchMessagesForAllInboxes from '../../state/chat/hooks/useFetchNewMessages'
 import {useTriggerOffersRefresh} from '../../state/marketplace'
 import {type Inbox} from '@vexl-next/domain/dist/general/messaging'
 import messagingStateAtom from '../../state/chat/atoms/messagingStateAtom'
 import {enableHiddenFeatures} from '../../utils/environment'
 import {apiEnv} from '../../api'
+import CryptoBenchmarks from './components/CryptoBenchmarks'
 
 type Props = RootStackScreenProps<'DebugScreen'>
 
-const ContentScroll = styled(ScrollView, {
-  marginBottom: '$2',
-  contentContainerStyle: {
-    flex: 1,
-  },
-})
+// const ContentScroll = styled(ScrollView, {
+//   marginBottom: '$2',
+//   contentContainerStyle: {
+//     flex: 1,
+//   },
+// })
 
 function DebugScreen({navigation}: Props): JSX.Element {
   const store = useStore()
@@ -34,11 +35,12 @@ function DebugScreen({navigation}: Props): JSX.Element {
   return (
     <Screen>
       <WhiteContainer>
-        <ContentScroll>
+        <ScrollView>
           <YStack space="$2">
             <Text fos={20} ff="$heading">
               Debug screen
             </Text>
+            <CryptoBenchmarks />
             <Text>
               enableHiddenFeatures: {enableHiddenFeatures ? 'true' : 'false'}
             </Text>
@@ -131,7 +133,7 @@ function DebugScreen({navigation}: Props): JSX.Element {
               }}
             />
           </YStack>
-        </ContentScroll>
+        </ScrollView>
         <Button variant="secondary" text="back" onPress={navigation.goBack} />
       </WhiteContainer>
     </Screen>

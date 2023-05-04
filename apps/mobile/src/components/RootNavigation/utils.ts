@@ -35,22 +35,15 @@ export function useHandleNotificationsPermissionsRedirect(): void {
   const isLoggedIn = useIsUserLoggedIn()
   const isPostLoginFinished = useIsPostLoginFinished()
 
-  const isOnPostLoginFlow = useNavigationState(
-    useCallback((state) => state?.routes.at(0)?.name === 'PostLoginFlow', [])
-  )
-
-  const isOnNotificationPermissionsMissing = useNavigationState(
-    useCallback(
-      (state) =>
-        state?.routes.at(-1)?.name === 'NotificationPermissionsMissing',
-      []
-    )
-  )
-
   useAppState(
     useCallback(
       (status) => {
         if (!isLoggedIn) return
+        const isOnNotificationPermissionsMissing =
+          navigation.getState()?.routes.at(-1)?.name ===
+          'NotificationPermissionsMissing'
+        const isOnPostLoginFlow =
+          navigation.getState()?.routes.at(0)?.name === 'PostLoginFlow'
 
         if (status === 'active')
           void areNotificationsEnabled()().then((result) => {
@@ -74,13 +67,7 @@ export function useHandleNotificationsPermissionsRedirect(): void {
             }
           })
       },
-      [
-        isLoggedIn,
-        isOnPostLoginFlow,
-        isPostLoginFinished,
-        isOnNotificationPermissionsMissing,
-        navigation,
-      ]
+      [isLoggedIn, isPostLoginFinished, navigation]
     )
   )
 }

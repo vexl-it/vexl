@@ -2,6 +2,12 @@ import './src/utils/wdyr'
 import {registerRootComponent} from 'expo'
 import App from './src/App'
 import {setupBackgroundMessaging} from './src/utils/notifications/backgroundHandler'
+import {
+  defaultImplementation,
+  setEcdhComputeSecretImplementation,
+} from '@vexl-next/cryptography/dist/implementations/ecdhComputeSecret'
+import {Platform} from 'react-native'
+import {computeSharedSecret} from '@vexl-next/react-native-ecdh-platform-native-utils/src'
 
 // polyfill Array.at() function
 if (![].at) {
@@ -10,6 +16,10 @@ if (![].at) {
     return this.slice(pos)[0]
   }
 }
+
+setEcdhComputeSecretImplementation(
+  Platform.OS === 'ios' ? defaultImplementation : computeSharedSecret
+)
 
 setupBackgroundMessaging()
 

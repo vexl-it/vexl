@@ -101,7 +101,7 @@ function AreYouSureDialog(): JSX.Element | null {
   if (!step) return null
 
   return (
-    <Stack position={'absolute'} t={0} l={0} r={0} b={0} bc="">
+    <Stack position={'absolute'} t={0} l={0} r={0} b={0}>
       <Animated.View
         entering={FadeIn}
         exiting={FadeOut}

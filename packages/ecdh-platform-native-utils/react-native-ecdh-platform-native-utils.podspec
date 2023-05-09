@@ -6,10 +6,10 @@ folly_compiler_flags = '-DFOLLY_NO_CONFIG -DFOLLY_MOBILE=1 -DFOLLY_USE_LIBCPP=1 
 Pod::Spec.new do |s|
   s.name         = "react-native-ecdh-platform-native-utils"
   s.version      = package["version"]
-  s.summary      = package["description"]
-  s.homepage     = package["homepage"]
-  s.license      = package["license"]
-  s.authors      = package["author"]
+  s.summary      = "react-native-ecdh-platform-native-utils"
+  s.homepage     = "http://vexl.it"
+  s.license      = "GNU3"
+  s.authors      = ""
 
   s.platforms    = { :ios => "11.0" }
   s.source       = { :git => "https://github.com/kaladivo/react-native-ecdh-platform-native-utils.git", :tag => "#{s.version}" }

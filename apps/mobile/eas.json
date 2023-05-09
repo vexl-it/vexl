@@ -45,8 +45,7 @@
     "production": {
       "android": {
         "track": "internal",
-        "changesNotSentForReview": true,
-        "serviceAccountKeyPath": "certs/android/service-account.json"
+        "changesNotSentForReview": true
       },
       "ios": {
         "bundleIdentifier": "it.vexl.next",

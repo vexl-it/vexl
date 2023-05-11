@@ -1,4 +1,4 @@
-const VERSION_CODE = 11
+const VERSION_CODE = 12
 const VERSION = '0.0.1'
 const ENV_PRESET = process.env.ENV_PRESET
 
@@ -21,9 +21,9 @@ const presets = {
     packageName: 'it.vexl.next',
     appName: 'Vexl Next',
     googleServicesInfoPlistFile: './creds/GoogleService-Info.plist',
-    foregroundImage: './assets/android-front.png',
-    backgroundImage: './assets/android-back.png',
-    icon: './assets/icon.png',
+    foregroundImage: './assets/android-front-next.png',
+    backgroundImage: './assets/android-back-next.png',
+    icon: './assets/icon-next.png',
   },
 }
 
@@ -41,7 +41,7 @@ export default {
   'splash': {
     'image': './assets/splash.png',
     'resizeMode': 'contain',
-    'backgroundColor': '#FCCD6C',
+    'backgroundColor': '#ACD9B7',
   },
   'updates': {
     'fallbackToCacheTimeout': 0,

@@ -57,6 +57,7 @@ export function useReportOfferHandleUI(): (
   const loadingOverlay = useShowLoadingOverlay()
 
   return useCallback(
+    /// todo set reported flag
     (offerId: OfferId) => {
       return pipe(
         store.set(askAreYouSureActionAtom, {

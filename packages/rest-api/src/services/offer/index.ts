@@ -2,7 +2,11 @@ import {type ServiceUrl} from '../../ServiceUrl.brand'
 import {type CreateAxiosDefaults} from 'axios'
 import {type GetUserSessionCredentials} from '../../UserSessionCredentials.brand'
 import urlJoin from 'url-join'
-import {axiosCallWithValidation, createAxiosInstanceWithAuthAndLogging, type LoggingFunction} from '../../utils'
+import {
+  axiosCallWithValidation,
+  createAxiosInstanceWithAuthAndLogging,
+  type LoggingFunction,
+} from '../../utils'
 import {type PlatformName} from '../../PlatformName'
 import {
   type CreateNewOfferRequest,
@@ -11,6 +15,8 @@ import {
   CreatePrivatePartResponse,
   type DeleteOfferRequest,
   DeleteOfferResponse,
+  type DeletePrivatePartRequest,
+  DeletePrivatePartResponse,
   GetOfferByIdsResponse,
   type GetOffersByIdsRequest,
   type GetOffersForMeCreatedOrModifiedAfterRequest,
@@ -137,6 +143,17 @@ export function privateApi({
           data: request,
         },
         CreatePrivatePartResponse
+      )
+    },
+    deletePrivatePart: (request: DeletePrivatePartRequest) => {
+      return axiosCallWithValidation(
+        axiosInstance,
+        {
+          method: 'delete',
+          url: '/v1/offers/private-part',
+          data: request,
+        },
+        DeletePrivatePartResponse
       )
     },
     getRemovedOffers: (request: RemovedOfferIdsRequest) => {

@@ -14,7 +14,6 @@ import {
 } from '@vexl-next/domain/dist/general/offers'
 import updatePublicPart from './updatePublicPart'
 import refreshOffer from './refreshOffer'
-import updatePublicPartReencryptAll from './updatePublicPartReencryptAll'
 import addPrivatePart from './addPrivatePart'
 import {IsoDatetimeString} from '@vexl-next/domain/dist/utility/IsoDatetimeString.brand'
 import {getNewOffers} from './getNewOffers'
@@ -46,12 +45,12 @@ const AddPrivatePartArgs = z.object({
   privatePartsJson: z.string(),
 })
 
-const UpdatePublicPartReencryptArgs = z.object({
-  ownerCredentialsJson: z.string(),
-  adminId: OfferAdminId,
-  publicPayloadJson: z.string(),
-  intendedConnectionLevel: IntendedConnectionLevel,
-})
+// const UpdatePublicPartReencryptArgs = z.object({
+//   ownerCredentialsJson: z.string(),
+//   adminId: OfferAdminId,
+//   publicPayloadJson: z.string(),
+//   intendedConnectionLevel: IntendedConnectionLevel,
+// })
 
 const UpdatePublicPartArgs = z.object({
   ownerCredentialsJson: z.string(),
@@ -162,31 +161,31 @@ export function addOfferCommands(command: Command): Command {
       )()
     })
 
-  offerSubcommand
-    .command('update-reencrypt')
-    .description(
-      'update public part of the offer and re encrypt it for all contacts'
-    )
-    .requiredOption('-c, --credentials <string>', 'Path to auth file.')
-    .requiredOption('--adminId <string>', 'Admin Id of the offer.')
-    .requiredOption('--level <string>', 'Friend level (FIRST or SECOND)')
-    .argument(
-      '<string>',
-      'Offer json (generate dummy with `offer dummy` command)'
-    )
-    .action(async (offerJson, {credentials, adminId, level}) => {
-      await pipe(
-        safeParse(UpdatePublicPartReencryptArgs)({
-          ownerCredentialsJson: credentials,
-          adminId,
-          intendedConnectionLevel: level,
-          publicPayloadJson: offerJson,
-        }),
-        TE.fromEither,
-        TE.chainW(updatePublicPartReencryptAll),
-        matchAndOutputResultOrError
-      )()
-    })
+  // offerSubcommand
+  //   .command('update-reencrypt')
+  //   .description(
+  //     'update public part of the offer and re encrypt it for all contacts'
+  //   )
+  //   .requiredOption('-c, --credentials <string>', 'Path to auth file.')
+  //   .requiredOption('--adminId <string>', 'Admin Id of the offer.')
+  //   .requiredOption('--level <string>', 'Friend level (FIRST or SECOND)')
+  //   .argument(
+  //     '<string>',
+  //     'Offer json (generate dummy with `offer dummy` command)'
+  //   )
+  //   .action(async (offerJson, {credentials, adminId, level}) => {
+  //     await pipe(
+  //       safeParse(UpdatePublicPartReencryptArgs)({
+  //         ownerCredentialsJson: credentials,
+  //         adminId,
+  //         intendedConnectionLevel: level,
+  //         publicPayloadJson: offerJson,
+  //       }),
+  //       TE.fromEither,
+  //       TE.chainW(updatePublicPartReencryptAll),
+  //       matchAndOutputResultOrError
+  //     )()
+  //   })
 
   offerSubcommand
     .command('add-private')

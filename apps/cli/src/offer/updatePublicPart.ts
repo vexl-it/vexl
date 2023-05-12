@@ -50,7 +50,6 @@ export default function updatePublicPart({
         publicPayload,
         symmetricKey,
         ownerKeypair: ownerCredentials.keypair,
-        privatePayloads: [],
       })
     ),
     TE.chainEitherKW(stringifyToPrettyJson)

@@ -5,7 +5,7 @@ import {
   type OfferPublicPart,
   type SymmetricKey,
 } from '@vexl-next/domain/dist/general/offers'
-import {atom, useAtomValue, useSetAtom, useStore} from 'jotai'
+import {atom, useAtomValue, useStore} from 'jotai'
 import {
   lastUpdatedAtAtom,
   loadingStateAtom,
@@ -28,9 +28,6 @@ import {
 import {privateApiAtom, usePrivateApiAssumeLoggedIn} from '../../api'
 import {pipe} from 'fp-ts/function'
 import {dummySession, sessionAtom, useSessionAssumeLoggedIn} from '../session'
-import getNewOffersAndDecrypt, {
-  type ApiErrorFetchingOffers,
-} from '@vexl-next/resources-utils/dist/offers/getNewOffersAndDecrypt'
 import {isoNow} from '@vexl-next/domain/dist/utility/IsoDatetimeString.brand'
 import * as TE from 'fp-ts/TaskEither'
 import * as E from 'fp-ts/Either'
@@ -41,17 +38,12 @@ import createNewOfferForMyContacts, {
   type ApiErrorWhileCreatingOffer,
 } from '@vexl-next/resources-utils/dist/offers/createOfferHandleContacts'
 import {type ApiErrorFetchingContactsForOffer} from '@vexl-next/resources-utils/dist/offers/utils/fetchContactsForOffer'
-import {type ErrorConstructingPrivatePayloads} from '@vexl-next/resources-utils/dist/offers/utils/offerPrivatePayload'
 import {type ErrorGeneratingSymmetricKey} from '@vexl-next/resources-utils/dist/offers/utils/generateSymmetricKey'
 import {type ErrorEncryptingPublicPart} from '@vexl-next/resources-utils/dist/offers/utils/encryptOfferPublicPayload'
 import updateOffer, {
   type ApiErrorUpdatingOffer,
-  updateOfferReencryptForAll,
 } from '@vexl-next/resources-utils/dist/offers/updateOffer'
-import {
-  type OfferAdminId,
-  type OfferPrivateListItem,
-} from '@vexl-next/rest-api/dist/services/offer/contracts'
+import {type OfferAdminId} from '@vexl-next/rest-api/dist/services/offer/contracts'
 import {type ErrorDecryptingOffer} from '@vexl-next/resources-utils/dist/offers/decryptOffer'
 import {
   type BasicError,
@@ -64,6 +56,11 @@ import useSendMessagingRequest from '../chat/hooks/useSendRequest'
 import {type ApiErrorRequestMessaging} from '@vexl-next/resources-utils/dist/chat/sendMessagingRequest'
 import {type ErrorEncryptingMessage} from '@vexl-next/resources-utils/dist/chat/utils/chatCrypto'
 import {type ChatOrigin} from '@vexl-next/domain/dist/general/messaging'
+import {upsertOfferToConnectionsActionAtom} from '../connections/atom/offerToConnectionsAtom'
+import getNewOffersAndDecrypt, {
+  type ApiErrorFetchingOffers,
+} from '@vexl-next/resources-utils/dist/offers/getNewOffersAndDecrypt'
+import {type ErrorConstructingPrivatePayloads} from '@vexl-next/resources-utils/dist/offers/utils/constructPrivatePayloads'
 
 export function useTriggerOffersRefresh(): Task<void> {
   const api = usePrivateApiAssumeLoggedIn()
@@ -74,7 +71,7 @@ export function useTriggerOffersRefresh(): Task<void> {
     const updateStartedAt = isoNow()
     const offerIds = store.get(offersIdsAtom)
 
-    console.log('🦋 Refreshing offers...')
+    console.log('🦋 Refreshing offers')
 
     await pipe(
       getNewOffersAndDecrypt({
@@ -257,6 +254,17 @@ export const createOfferAtom = atom<
         offerInfo: r.offerInfo,
       }
       set(offersAtom, (oldState) => [...oldState, createdOffer])
+      set(upsertOfferToConnectionsActionAtom, {
+        connections: {
+          firstLevel: r.encryptedFor.firstDegreeConnections,
+          secondLevel:
+            intendedConnectionLevel === 'ALL'
+              ? r.encryptedFor.secondDegreeConnections
+              : undefined,
+        },
+        adminId: r.adminId,
+        symmetricKey: r.symmetricKey,
+      })
       return createdOffer
     })
   )
@@ -269,7 +277,6 @@ export const updateOfferAtom = atom<
       payloadPublic: OfferPublicPart
       symmetricKey: SymmetricKey
       adminId: OfferAdminId
-      privatePayloads: OfferPrivateListItem[]
       intendedConnectionLevel: IntendedConnectionLevel
     }
   ],
@@ -280,13 +287,7 @@ export const updateOfferAtom = atom<
 >(null, (get, set, params) => {
   const api = get(privateApiAtom)
   const session = get(sessionAtom)
-  const {
-    payloadPublic,
-    symmetricKey,
-    adminId,
-    privatePayloads,
-    intendedConnectionLevel,
-  } = params
+  const {payloadPublic, symmetricKey, adminId, intendedConnectionLevel} = params
 
   return pipe(
     updateOffer({
@@ -298,7 +299,6 @@ export const updateOfferAtom = atom<
         session.state === 'loggedIn'
           ? session.session.privateKey
           : dummySession.privateKey,
-      privatePayloads,
     }),
     TE.map((r) => {
       const createdOffer: OneOfferInState = {
@@ -321,60 +321,6 @@ export const updateOfferAtom = atom<
     })
   )
 })
-
-export function useUpdateOfferReencrypt(): (args: {
-  payloadPublic: OfferPublicPart
-  intendedConnectionLevel: IntendedConnectionLevel
-  adminId: OfferAdminId
-}) => TE.TaskEither<
-  | ErrorGeneratingSymmetricKey
-  | ErrorEncryptingPublicPart
-  | ApiErrorUpdatingOffer
-  | ErrorConstructingPrivatePayloads
-  | ErrorDecryptingOffer
-  | ApiErrorFetchingContactsForOffer,
-  OneOfferInState
-> {
-  const api = usePrivateApiAssumeLoggedIn()
-  const session = useSessionAssumeLoggedIn()
-  const setOffers = useSetAtom(offersAtom)
-
-  return useCallback(
-    ({payloadPublic, intendedConnectionLevel, adminId}) =>
-      pipe(
-        updateOfferReencryptForAll({
-          offerApi: api.offer,
-          adminId,
-          contactApi: api.contact,
-          intendedConnectionLevel,
-          ownerKeyPair: session.privateKey,
-          publicPayload: payloadPublic,
-        }),
-        TE.map((r) => {
-          if (r.encryptionErrors.length > 0) {
-            reportError(
-              'error',
-              'Error while encrypting offer',
-              r.encryptionErrors
-            )
-          }
-          const createdOffer: OneOfferInState = {
-            ownershipInfo: {
-              intendedConnectionLevel,
-              adminId,
-            },
-            flags: {
-              reported: false,
-            },
-            offerInfo: r.offerInfo,
-          }
-          setOffers((oldState) => [...oldState, createdOffer])
-          return createdOffer
-        })
-      ),
-    [api, session, setOffers]
-  )
-}
 
 export function useDeleteOffer(): (
   adminIds: OfferAdminId[]

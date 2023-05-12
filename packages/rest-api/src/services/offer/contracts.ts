@@ -111,6 +111,17 @@ export type CreatePrivatePartResponse = z.TypeOf<
   typeof CreatePrivatePartResponse
 >
 
+export const DeletePrivatePartRequest = z.object({
+  adminIds: z.array(OfferAdminId),
+  publicKeys: z.array(PublicKeyPemBase64),
+})
+export type DeletePrivatePartRequest = z.TypeOf<typeof DeletePrivatePartRequest>
+
+export const DeletePrivatePartResponse = NoContentResponse
+export type DeletePrivatePartResponse = z.TypeOf<
+  typeof CreatePrivatePartResponse
+>
+
 export const RemovedOfferIdsRequest = z.object({
   offerIds: z.array(OfferId),
 })

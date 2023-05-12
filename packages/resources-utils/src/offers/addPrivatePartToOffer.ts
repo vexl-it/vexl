@@ -6,11 +6,11 @@ import * as TE from 'fp-ts/TaskEither'
 import * as T from 'fp-ts/Task'
 import {
   encryptPrivatePart,
-  type OfferPrivatePayloadToEncrypt,
   type PrivatePartEncryptionError,
 } from './utils/offerPrivatePayload'
 import flattenTaskOfEithers from '../utils/flattenTaskOfEithers'
 import {type ExtractLeftTE} from '../utils/ExtractLeft'
+import {type OfferPrivatePayloadToEncrypt} from './utils/constructPrivatePayloads'
 
 export type ApiErrorAddingPrivateParts = ExtractLeftTE<
   ReturnType<OfferPrivateApi['createPrivatePart']>

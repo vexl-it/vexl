@@ -5,11 +5,11 @@ import {type OfferAdminId} from '@vexl-next/rest-api/dist/services/offer/contrac
 import {parseCredentialsJson} from '../utils/auth'
 import {addPrivatePartsToOffer} from '@vexl-next/resources-utils/dist/offers/addPrivatePartToOffer'
 import {z} from 'zod'
-import {OfferPrivatePayloadToEncrypt} from '@vexl-next/resources-utils/dist/offers/utils/offerPrivatePayload'
 import {
   safeParse,
   stringifyToPrettyJson,
 } from '@vexl-next/resources-utils/dist/utils/parsing'
+import {OfferPrivatePayloadToEncrypt} from '@vexl-next/resources-utils/dist/offers/utils/constructPrivatePayloads'
 
 const PrivateParts = z.array(OfferPrivatePayloadToEncrypt)
 

@@ -13,7 +13,6 @@ import generateSymmetricKey, {
   type ErrorGeneratingSymmetricKey,
 } from './utils/generateSymmetricKey'
 import {
-  type ErrorConstructingPrivatePayloads,
   fetchInfoAndGeneratePrivatePayloads,
   type PrivatePartEncryptionError,
 } from './utils/offerPrivatePayload'
@@ -22,8 +21,12 @@ import encryptOfferPublicPayload, {
   type ErrorEncryptingPublicPart,
 } from './utils/encryptOfferPublicPayload'
 import decryptOffer, {type ErrorDecryptingOffer} from './decryptOffer'
-import {type ApiErrorFetchingContactsForOffer} from './utils/fetchContactsForOffer'
+import {
+  type ApiErrorFetchingContactsForOffer,
+  type ConnectionsInfoForOffer,
+} from './utils/fetchContactsForOffer'
 import {type ExtractLeftTE} from '../utils/ExtractLeft'
+import {type ErrorConstructingPrivatePayloads} from './utils/constructPrivatePayloads'
 
 export type ApiErrorWhileCreatingOffer = ExtractLeftTE<
   ReturnType<OfferPrivateApi['createNewOffer']>
@@ -34,18 +37,9 @@ export interface CreateOfferResult {
   adminId: OfferAdminId
   symmetricKey: SymmetricKey
   offerInfo: OfferInfo
+  encryptedFor: ConnectionsInfoForOffer
 }
 
-/**
- * Creates new offer for all contacts.
- * Does following tasks:
- * 1. Fetches contacts from the server, based on intendedConnectionLevel param
- * 2. Fetches common contacts for each contact
- * 3. Creates and encrypts Private parts for each contact
- * 4. Creates and encrypts Public part
- *
- * @Returns // TODO
- */
 export default function createNewOfferForMyContacts({
   offerApi,
   contactApi,
@@ -99,6 +93,7 @@ export default function createNewOfferForMyContacts({
       offerInfo: response.offerInfo,
       encryptionErrors: privatePayloads.errors,
       symmetricKey,
+      encryptedFor: privatePayloads.connections,
     }))
   )
 }

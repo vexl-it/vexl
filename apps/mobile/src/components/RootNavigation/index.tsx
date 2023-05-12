@@ -22,6 +22,7 @@ import SetContactsScreen from '../SetContactsScreen'
 import useHandleRefreshContactServiceAndOffers from '../../state/useHandleRefreshContactServiceAndOffers'
 import MyOffersScreen from '../MyOffersScreen'
 import EditOfferScreen from '../OfferScreen/components/EditOfferScreen'
+import {useSyncConnections} from '../../state/connections'
 
 const Stack = createNativeStackNavigator<RootStackParamsList>()
 
@@ -32,6 +33,7 @@ function LoggedInHookGroup(): null {
   useHandleNotificationsPermissionsRedirect()
   useHandlePostLoginFlowRedirect()
   useHandleRefreshContactServiceAndOffers()
+  useSyncConnections()
 
   return null
 }

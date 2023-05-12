@@ -3,7 +3,7 @@ import {Spacer, Text, YStack} from 'tamagui'
 import {type RootStackScreenProps} from '../../navigationTypes'
 import Screen from '../Screen'
 import Button from '../Button'
-import {useStore} from 'jotai'
+import {useSetAtom, useStore} from 'jotai'
 import {offersStateAtom} from '../../state/marketplace/atom'
 import {MINIMAL_DATE} from '@vexl-next/domain/dist/utility/IsoDatetimeString.brand'
 import {useSessionAssumeLoggedIn} from '../../state/session'
@@ -15,6 +15,7 @@ import messagingStateAtom from '../../state/chat/atoms/messagingStateAtom'
 import {enableHiddenFeatures} from '../../utils/environment'
 import {apiEnv} from '../../api'
 import CryptoBenchmarks from './components/CryptoBenchmarks'
+import {updateAllOffersConnectionsActionAtom} from '../../state/connections/atom/offerToConnectionsAtom'
 
 type Props = RootStackScreenProps<'DebugScreen'>
 
@@ -31,6 +32,7 @@ function DebugScreen({navigation}: Props): JSX.Element {
 
   const refreshMessaging = useFetchMessagesForAllInboxes()
   const refreshOffers = useTriggerOffersRefresh()
+  const updateConnections = useSetAtom(updateAllOffersConnectionsActionAtom)
 
   return (
     <Screen>
@@ -130,6 +132,15 @@ function DebugScreen({navigation}: Props): JSX.Element {
                 const offers = store.get(offersStateAtom)
                 const messagingState = store.get(messagingStateAtom)
                 console.log({offers, messagingState})
+              }}
+            />
+
+            <Button
+              variant={'primary'}
+              size={'small'}
+              text={'Update all offers connections'}
+              onPress={() => {
+                void updateConnections()()
               }}
             />
           </YStack>

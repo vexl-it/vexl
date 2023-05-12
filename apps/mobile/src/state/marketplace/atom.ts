@@ -7,7 +7,10 @@ import {
   OffersState,
   type OneOfferInState,
 } from './domain'
-import {type OfferId} from '@vexl-next/domain/dist/general/offers'
+import {
+  type OfferFlags,
+  type OfferId,
+} from '@vexl-next/domain/dist/general/offers'
 import {MINIMAL_DATE} from '@vexl-next/domain/dist/utility/IsoDatetimeString.brand'
 import {areIncluded} from './utils'
 import {type ChatOrigin} from '@vexl-next/domain/dist/general/messaging'
@@ -84,8 +87,9 @@ export function singleOfferAtom(
   )
 }
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export function offerFlagsAtom(offerId: OfferId) {
+export function offerFlagsAtom(
+  offerId: OfferId
+): FocusAtomType<OfferFlags | undefined> {
   return focusAtom(offersAtom, (optic) =>
     optic.find((offer) => offer.offerInfo.offerId === offerId).prop('flags')
   )

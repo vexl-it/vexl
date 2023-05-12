@@ -255,7 +255,6 @@ export const offerFormStateMolecule = molecule((getMolecule, getScope) => {
           active: !offer.offerInfo.publicPart.active,
         },
         adminId: offer.ownershipInfo?.adminId ?? ('' as OfferAdminId),
-        privatePayloads: [],
         symmetricKey: offer.offerInfo.privatePart.symmetricKey,
         intendedConnectionLevel: offer.ownershipInfo
           ? offer.ownershipInfo.intendedConnectionLevel
@@ -311,7 +310,6 @@ export const offerFormStateMolecule = molecule((getMolecule, getScope) => {
           offerDescription: offerDescription.trim(),
         },
         adminId: offer.ownershipInfo?.adminId ?? ('' as OfferAdminId),
-        privatePayloads: [],
         symmetricKey: offer.offerInfo.privatePart.symmetricKey,
         intendedConnectionLevel,
       }),
@@ -322,7 +320,7 @@ export const offerFormStateMolecule = molecule((getMolecule, getScope) => {
           )
           return false
         },
-        (offer) => {
+        () => {
           set(loadingAtom, false)
           return true
         }

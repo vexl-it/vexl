@@ -57,6 +57,7 @@ const zIndex = {
 }
 
 const radius = {
+  0: 0,
   1: 4,
   2: 6,
   3: 8,

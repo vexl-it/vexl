@@ -6,6 +6,7 @@ export default {
     'next': 'Next',
     'skip': 'Skip',
     'finish': 'Finish',
+    'confirm': 'Confirm',
     'continue': 'Continue',
     'save': 'Save',
     'search': 'Search',
@@ -262,7 +263,7 @@ export default {
       '\n' +
       'Or you can meet us during your next P2P trade! 😻',
   },
-  'createOffer': {
+  'offerForm': {
     'myNewOffer': 'My new offer',
     'iWantTo': 'I want to',
     'sellBitcoin': 'Sell Bitcoin',
@@ -276,6 +277,8 @@ export default {
       'eurSymbol': '€',
       'dollarSymbol': '$',
       'czkSymbol': 'Kč',
+      'pleaseSelectCurrencyFirst': 'Please select currency first',
+      'pleaseSelectLocationFirst': 'Please select location first',
     },
     'premiumOrDiscount': {
       'premiumOrDiscount': 'Premium or discount',
@@ -397,6 +400,8 @@ export default {
     'editOffer': 'Edit offer',
     'myOffer': 'My Offer',
     'offerAdded': 'Added {{date}}',
+    'sortedByNewest': 'Sorted by newest',
+    'sortedByOldest': 'Sorted by oldest',
   },
   'editOffer': {
     'editOffer': 'Edit offer',
@@ -410,6 +415,17 @@ export default {
     'youCanCheckYourOffer': 'You can check your offer in your offers section',
     'errorEditingOffer': 'Error while editing offer',
     'errorOfferNotFound': 'Offer not found!',
+  },
+  'filterOffers': {
+    'filterResults': 'Filter results',
+    'sorting': 'Sorting',
+    'lowestFeeFirst': 'Lowest fee first',
+    'highestFee': 'Highest fee',
+    'newestOffer': 'Newest offer',
+    'oldestOffer': 'Oldest offer',
+    'lowestAmount': 'Lowest amount',
+    'highestAmount': 'Highest amount',
+    'selectSortingMethod': 'Select sorting method',
   },
   'messages': {
     'yourOffer': 'Your offer',

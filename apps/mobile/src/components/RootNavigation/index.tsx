@@ -13,7 +13,7 @@ import OfferDetailScreen from '../OfferDetailScreen'
 import ChatDetailScreen from '../ChatDetailScreen'
 import TosScreen from '../TosScreen'
 import FaqsScreen from '../FaqScreen'
-import CreateOfferScreen from '../OfferScreen/components/CreateOfferScreen'
+import CreateOfferScreen from '../ModifyOffer/components/CreateOfferScreen'
 import {NotificationPermissionsScreen} from '../NotificationPermissionsScreen'
 import {useRefreshNotificationTokenOnResumeAssumeLoggedIn} from '../../utils/notifications/useRefreshNotificationTokenOnResumeAssumeLoggedIn'
 import {useHandleReceivedNotifications} from '../../state/useHandleReceivedNotifications'
@@ -21,8 +21,9 @@ import DebugScreen from '../DebugScreen'
 import SetContactsScreen from '../SetContactsScreen'
 import useHandleRefreshContactServiceAndOffers from '../../state/useHandleRefreshContactServiceAndOffers'
 import MyOffersScreen from '../MyOffersScreen'
-import EditOfferScreen from '../OfferScreen/components/EditOfferScreen'
 import {useSyncConnections} from '../../state/connections'
+import EditOfferScreen from '../ModifyOffer/components/EditOfferScreen'
+import FilterOffersScreen from '../FilterOffersScreen'
 
 const Stack = createNativeStackNavigator<RootStackParamsList>()
 
@@ -59,6 +60,10 @@ function RootNavigation(): JSX.Element {
             <Stack.Screen name={'OfferDetail'} component={OfferDetailScreen} />
             <Stack.Screen name={'CreateOffer'} component={CreateOfferScreen} />
             <Stack.Screen name={'EditOffer'} component={EditOfferScreen} />
+            <Stack.Screen
+              name={'FilterOffers'}
+              component={FilterOffersScreen}
+            />
             <Stack.Screen name={'MyOffers'} component={MyOffersScreen} />
             <Stack.Screen name={'ChatDetail'} component={ChatDetailScreen} />
             <Stack.Screen name={'SetContacts'} component={SetContactsScreen} />

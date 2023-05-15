@@ -15,7 +15,7 @@ function ScreenTitle({
 }: Props): JSX.Element {
   return (
     <YStack {...props}>
-      <XStack fd="row" ai="flex-start" jc="space-between" padding="$1" mb="$5">
+      <XStack fd="row" ai="flex-start" jc="space-between" mb="$5">
         <Stack fs={1} maw="70%">
           <Text color="$white" fontSize={32} ff="$heading">
             {text}

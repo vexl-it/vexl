@@ -7,7 +7,7 @@ export interface TabProps<T> {
 }
 
 interface Props<T> {
-  activeTab: T
+  activeTab: T | undefined
   onTabPress: (_: T) => void
   tabs: Array<TabProps<T>>
 }

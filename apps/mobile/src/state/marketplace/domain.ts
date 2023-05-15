@@ -5,10 +5,12 @@ import {
   FriendLevel,
   IntendedConnectionLevel,
   Location,
+  LocationState,
   OfferFlags,
   OfferInfo,
   OfferType,
   PaymentMethod,
+  Sort,
 } from '@vexl-next/domain/dist/general/offers'
 import {OfferAdminId} from '@vexl-next/rest-api/dist/services/offer/contracts'
 import {type ApiErrorFetchingOffers} from '@vexl-next/resources-utils/dist/offers/getNewOffersAndDecrypt'
@@ -62,11 +64,16 @@ export type LoadingState =
   | InProgressLoadingState
 
 export const OffersFilter = z.object({
+  sort: Sort.optional(),
   currency: Currency.optional(),
   location: z.array(Location).optional(),
+  locationState: LocationState.optional(),
   paymentMethod: z.array(PaymentMethod).optional(),
   btcNetwork: z.array(BtcNetwork).optional(),
   friendLevel: z.array(FriendLevel).optional(),
   offerType: OfferType.optional(),
+  amountBottomLimit: z.coerce.number().optional(),
+  amountTopLimit: z.coerce.number().optional(),
 })
+
 export type OffersFilter = z.TypeOf<typeof OffersFilter>

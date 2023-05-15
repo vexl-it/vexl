@@ -1,20 +1,7 @@
-import {useMemo} from 'react'
-import ContainerWithTopBorderRadius from '../../ContainerWithTopBorderRadius'
-import OffersList from '../../../../OffersList'
 import {type MarketplaceTabScreenProps} from '../../../../../navigationTypes'
-import {ActivityIndicator} from 'react-native'
-import {
-  useAreOffersLoading,
-  useFilteredOffers,
-  useOffersLoadingError,
-  useTriggerOffersRefresh,
-} from '../../../../../state/marketplace'
-import EmptyListPlaceholder from './EmptyListPlaceholder'
-import {getTokens, Stack} from 'tamagui'
-import OffersListButtons from './OffersListButtons'
 import {useNavigation} from '@react-navigation/native'
-import ErrorListHeader from '../../../../ErrorListHeader'
-import {isNone} from 'fp-ts/Option'
+import OffersListStateDisplayerContent from './OffersListStateDisplayerContent'
+import FilterOffersScopeProvider from '../../../../FilterOffersScopeProvider'
 
 type Props = MarketplaceTabScreenProps<'Buy' | 'Sell'>
 
@@ -24,48 +11,22 @@ function OffersListStateDisplayer({
   },
 }: Props): JSX.Element {
   const navigation = useNavigation()
-  const tokens = getTokens()
-  const loading = useAreOffersLoading()
-  const error = useOffersLoadingError()
-  const refreshOffers = useTriggerOffersRefresh()
-  const offers = useFilteredOffers(useMemo(() => ({offerType: type}), [type]))
-
-  const renderListHeader = useMemo(() => {
-    if (isNone(error)) return null
-
-    return <ErrorListHeader mt={'$6'} error={error.value} />
-  }, [error])
-
-  if (offers.length === 0 && loading) {
-    return (
-      <Stack f={1} ai="center" pt="$5">
-        <ActivityIndicator color={tokens.color.main.val} size="large" />
-      </Stack>
-    )
-  }
 
   return (
-    <ContainerWithTopBorderRadius>
-      <OffersListButtons
-        onAddPress={() => {
+    <FilterOffersScopeProvider type={type}>
+      <OffersListStateDisplayerContent
+        type={type}
+        navigateToCreateOffer={() => {
           navigation.navigate('CreateOffer')
         }}
-        onMyOffersPress={() => {
+        navigateToFilterOffers={() => {
+          navigation.navigate('FilterOffers', {type})
+        }}
+        navigateToMyOffers={() => {
           navigation.navigate('MyOffers')
         }}
       />
-      {offers.length === 0 ? (
-        <EmptyListPlaceholder />
-      ) : (
-        <OffersList
-          ListHeaderComponent={renderListHeader}
-          offers={offers}
-          // eslint-disable-next-line @typescript-eslint/no-misused-promises
-          onRefresh={refreshOffers}
-          refreshing={loading}
-        />
-      )}
-    </ContainerWithTopBorderRadius>
+    </FilterOffersScopeProvider>
   )
 }
 

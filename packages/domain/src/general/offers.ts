@@ -4,6 +4,16 @@ import {IdNumeric} from '../utility/IdNumeric'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
 import {IsoDatetimeString} from '../utility/IsoDatetimeString.brand'
 
+export const Sort = z.enum([
+  'LOWEST_FEE_FIRST',
+  'HIGHEST_FEE',
+  'NEWEST_OFFER',
+  'OLDEST_OFFER',
+  'LOWEST_AMOUNT',
+  'HIGHEST_AMOUNT',
+])
+export type Sort = z.TypeOf<typeof Sort>
+
 export const OfferId = z.string().min(1).brand<'OfferId'>()
 export type OfferId = z.TypeOf<typeof OfferId>
 

@@ -10,6 +10,7 @@ import {
 import {
   type OfferFlags,
   type OfferId,
+  type Sort,
 } from '@vexl-next/domain/dist/general/offers'
 import {MINIMAL_DATE} from '@vexl-next/domain/dist/utility/IsoDatetimeString.brand'
 import {areIncluded} from './utils'
@@ -48,10 +49,74 @@ export const myActiveOffersAtom = focusAtom(myOffersAtom, (optic) =>
   optic.filter((myOffer) => myOffer.offerInfo.publicPart.active)
 )
 
+export const myOffersSortingOptionAtom = atom<Sort>('NEWEST_OFFER')
+
+export function sortOffers(
+  offersAtom: Atom<OneOfferInState[]>,
+  sort: Sort
+): Atom<OneOfferInState[]> {
+  return atom((get) => {
+    const offersFiltered = get(offersAtom)
+    if (sort === 'LOWEST_FEE_FIRST')
+      return offersFiltered.sort(function (
+        a: OneOfferInState,
+        b: OneOfferInState
+      ) {
+        return (
+          a.offerInfo.publicPart.feeAmount - b.offerInfo.publicPart.feeAmount
+        )
+      })
+    if (sort === 'HIGHEST_FEE')
+      return offersFiltered.sort(function (
+        a: OneOfferInState,
+        b: OneOfferInState
+      ) {
+        return (
+          b.offerInfo.publicPart.feeAmount - a.offerInfo.publicPart.feeAmount
+        )
+      })
+    if (sort === 'NEWEST_OFFER')
+      return offersFiltered.sort(function (
+        a: OneOfferInState,
+        b: OneOfferInState
+      ) {
+        return b.offerInfo.id - a.offerInfo.id
+      })
+    if (sort === 'OLDEST_OFFER')
+      return offersFiltered.sort(function (
+        a: OneOfferInState,
+        b: OneOfferInState
+      ) {
+        return a.offerInfo.id - b.offerInfo.id
+      })
+    if (sort === 'LOWEST_AMOUNT')
+      return offersFiltered.sort(function (
+        a: OneOfferInState,
+        b: OneOfferInState
+      ) {
+        return (
+          a.offerInfo.publicPart.amountTopLimit -
+          b.offerInfo.publicPart.amountTopLimit
+        )
+      })
+    if (sort === 'HIGHEST_AMOUNT')
+      return offersFiltered.sort(function (
+        a: OneOfferInState,
+        b: OneOfferInState
+      ) {
+        return (
+          b.offerInfo.publicPart.amountTopLimit -
+          a.offerInfo.publicPart.amountTopLimit
+        )
+      })
+    return []
+  })
+}
+
 export function offersAtomWithFilter(
   filter: OffersFilter
 ): Atom<OneOfferInState[]> {
-  return focusAtom(offersToSee, (optic) =>
+  const offersFilteredAtom = focusAtom(offersToSee, (optic) =>
     optic.filter(
       (offer) =>
         (!filter.currency ||
@@ -74,9 +139,15 @@ export function offersAtomWithFilter(
             offer.offerInfo.privatePart.friendLevel
           )) &&
         (!filter.offerType ||
-          offer.offerInfo.publicPart.offerType === filter.offerType)
+          offer.offerInfo.publicPart.offerType === filter.offerType) &&
+        (!filter.amountBottomLimit ||
+          offer.offerInfo.publicPart.amountBottomLimit >=
+            filter.amountBottomLimit) &&
+        (!filter.amountTopLimit ||
+          offer.offerInfo.publicPart.amountTopLimit <= filter.amountTopLimit)
     )
   )
+  return sortOffers(offersFilteredAtom, filter.sort ?? 'LOWEST_FEE_FIRST')
 }
 
 export function singleOfferAtom(

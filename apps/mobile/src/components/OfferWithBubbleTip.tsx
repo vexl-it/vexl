@@ -20,12 +20,10 @@ export default function OfferWithBubbleTip({
   offer: {offerInfo: offer, ownershipInfo},
   button,
   negative,
-  ofMyOffers = false,
 }: {
   offer: OneOfferInState
   button?: ReactNode
   negative?: boolean
-  ofMyOffers?: boolean
 }): JSX.Element {
   const {t} = useTranslation()
   const session = useSessionAssumeLoggedIn()
@@ -46,7 +44,7 @@ export default function OfferWithBubbleTip({
         </Stack>
       </Stack>
       <XStack ai="center" jc="space-between" mt="$2">
-        {ofMyOffers ? (
+        {ownershipInfo ? (
           <>
             <UserAvatar
               width={48}

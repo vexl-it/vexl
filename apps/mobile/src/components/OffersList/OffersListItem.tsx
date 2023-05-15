@@ -22,7 +22,6 @@ function OffersListItem({offer}: Props): JSX.Element {
   return (
     <Stack mt={'$6'}>
       <OfferWithBubbleTip
-        ofMyOffers
         button={
           <Button
             size={'medium'}

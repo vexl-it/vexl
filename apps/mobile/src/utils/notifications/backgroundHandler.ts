@@ -2,7 +2,10 @@ import messaging, {
   type FirebaseMessagingTypes,
 } from '@react-native-firebase/messaging'
 import reportError from '../reportError'
-import {showUINotification} from './index'
+import {showUINotificationFromRemoteMessage} from './index'
+import {getDefaultStore} from 'jotai'
+import {updateAllOffersConnectionsActionAtom} from '../../state/connections/atom/offerToConnectionsAtom'
+import {NEW_CONNECTION} from './notificationTypes'
 
 export async function processBackgroundMessage(
   remoteMessage: FirebaseMessagingTypes.RemoteMessage
@@ -13,7 +16,14 @@ export async function processBackgroundMessage(
     console.info(
       '📳 Notification does not include payload, for system to display UI notification. Calling `showUINotification` function.'
     )
-    await showUINotification(remoteMessage)
+    await showUINotificationFromRemoteMessage(remoteMessage)
+  }
+
+  if (remoteMessage.data?.type === NEW_CONNECTION) {
+    console.info(
+      '📳 Received notification about new user. Checking and updating offers accordingly.'
+    )
+    await getDefaultStore().set(updateAllOffersConnectionsActionAtom)()
   }
 }
 

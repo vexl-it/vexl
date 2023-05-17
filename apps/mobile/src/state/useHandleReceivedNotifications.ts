@@ -6,32 +6,29 @@ import {pipe} from 'fp-ts/function'
 import * as TE from 'fp-ts/TaskEither'
 import {safeParse} from '../utils/fpUtils'
 import reportError from '../utils/reportError'
-import {showUINotification} from '../utils/notifications'
-
-const CHAT_NOTIFICATION_TYPES = [
-  'MESSAGE',
-  'REQUEST_REVEAL',
-  'APPROVE_REVEAL',
-  'DISAPPROVE_REVEAL',
-  'REQUEST_MESSAGING',
-  'APPROVE_MESSAGING',
-  'DISAPPROVE_MESSAGING',
-  'DELETE_CHAT',
-  'BLOCK_CHAT',
-]
+import {showUINotificationFromRemoteMessage} from '../utils/notifications'
+import {
+  CHAT_NOTIFICATION_TYPES,
+  NEW_CONNECTION,
+} from '../utils/notifications/notificationTypes'
+import {useSetAtom} from 'jotai'
+import {updateAllOffersConnectionsActionAtom} from './connections/atom/offerToConnectionsAtom'
 
 export function useHandleReceivedNotifications(): void {
   const fetchMessagesForInbox = useFetchAndStoreMessagesForInbox()
+  const updateOffersConnections = useSetAtom(
+    updateAllOffersConnectionsActionAtom
+  )
 
   useEffect(() => {
     return messaging().onMessage(async (remoteMessage) => {
       console.info('📳 Received notification', remoteMessage)
-      await showUINotification(remoteMessage)
+      await showUINotificationFromRemoteMessage(remoteMessage)
 
       const data = remoteMessage.data
       if (!data) {
         console.info(
-          '. Nothing to process. 📳 Notification does not include any data'
+          '📳 Nothing to process. Notification does not include any data'
         )
         return
       }
@@ -55,7 +52,15 @@ export function useHandleReceivedNotifications(): void {
         return
       }
 
+      if (data.type === NEW_CONNECTION) {
+        console.info(
+          '📳 Received notification about new user. Checking and updating offers accordingly.'
+        )
+        await updateOffersConnections()()
+        return
+      }
+
       reportError('warn', 'Unknown notification type', data.type)
     })
-  }, [fetchMessagesForInbox])
+  }, [fetchMessagesForInbox, updateOffersConnections])
 }

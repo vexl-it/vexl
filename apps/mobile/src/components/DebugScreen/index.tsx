@@ -8,6 +8,7 @@ import {offersStateAtom} from '../../state/marketplace/atom'
 import {MINIMAL_DATE} from '@vexl-next/domain/dist/utility/IsoDatetimeString.brand'
 import {useSessionAssumeLoggedIn} from '../../state/session'
 import {Alert, ScrollView} from 'react-native'
+import Clipboard from '@react-native-clipboard/clipboard'
 import useFetchMessagesForAllInboxes from '../../state/chat/hooks/useFetchNewMessages'
 import {useTriggerOffersRefresh} from '../../state/marketplace'
 import {type Inbox} from '@vexl-next/domain/dist/general/messaging'
@@ -16,6 +17,8 @@ import {enableHiddenFeatures} from '../../utils/environment'
 import {apiEnv} from '../../api'
 import CryptoBenchmarks from './components/CryptoBenchmarks'
 import {updateAllOffersConnectionsActionAtom} from '../../state/connections/atom/offerToConnectionsAtom'
+import messaging from '@react-native-firebase/messaging'
+import Preferences from './components/Preferences'
 
 type Props = RootStackScreenProps<'DebugScreen'>
 
@@ -143,7 +146,19 @@ function DebugScreen({navigation}: Props): JSX.Element {
                 void updateConnections()()
               }}
             />
+            <Button
+              variant={'primary'}
+              size={'small'}
+              text={'Copy notification token'}
+              // eslint-disable-next-line @typescript-eslint/no-misused-promises
+              onPress={async () => {
+                Clipboard.setString(
+                  (await messaging().getToken()) || 'No token'
+                )
+              }}
+            />
           </YStack>
+          <Preferences />
         </ScrollView>
         <Button variant="secondary" text="back" onPress={navigation.goBack} />
       </WhiteContainer>

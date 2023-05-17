@@ -4925,6 +4925,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@react-native-clipboard/clipboard@npm:^1.11.2":
+  version: 1.11.2
+  resolution: "@react-native-clipboard/clipboard@npm:1.11.2"
+  peerDependencies:
+    react: ">=16.0"
+    react-native: ">=0.57.0"
+  checksum: a797ae8156451f58e75fd495e36396444e28b9859e35dd657720e4eb8859330ffe73341135db95ce2144c1ffb82de74587e494203217cbf255ff16f91b95db1e
+  languageName: node
+  linkType: hard
+
 "@react-native-community/cli-clean@npm:^10.1.1":
   version: 10.1.1
   resolution: "@react-native-community/cli-clean@npm:10.1.1"
@@ -8119,6 +8129,7 @@ __metadata:
     "@miblanchard/react-native-slider": ^2.3.1
     "@notifee/react-native": ^7.7.1
     "@react-native-async-storage/async-storage": ~1.17.3
+    "@react-native-clipboard/clipboard": ^1.11.2
     "@react-native-firebase/app": ^17.4.2
     "@react-native-firebase/messaging": ^17.4.2
     "@react-navigation/bottom-tabs": ^6.5.7

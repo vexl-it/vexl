@@ -13,6 +13,7 @@ import updatePrivateParts from '@vexl-next/resources-utils/dist/offers/updatePri
 import * as TE from 'fp-ts/TaskEither'
 import reportError from '../../../utils/reportError'
 import connectionStateAtom from './connectionStateAtom'
+import {showDebugNotificationIfEnabled} from '../../../utils/notifications'
 
 const offerToConnectionsAtom = atomWithParsedMmkvStorage(
   'offer-to-connections',
@@ -69,9 +70,6 @@ export const updateAllOffersConnectionsActionAtom = atom(
     return pipe(
       get(offerToConnectionsAtomsAtom),
       A.map((oneOfferAtom) => {
-        const endSingleOfferMeasure = startMeasure(
-          'One offer connections update'
-        )
         const oneOffer = get(oneOfferAtom)
         return pipe(
           updatePrivateParts({
@@ -119,14 +117,23 @@ export const updateAllOffersConnectionsActionAtom = atom(
             }
           ),
           T.map((res) => {
-            endSingleOfferMeasure()
             return res
           })
         )
       }),
       T.sequenceArray,
       T.map((res) => {
-        endUpdateOfferConnectionsMeasure()
+        const timePretty = endUpdateOfferConnectionsMeasure()
+
+        void showDebugNotificationIfEnabled({
+          title: 'Offer connections updated.',
+          body: `Total offers updated: ${res.length}. Success:  ${
+            res.filter((one) => one.success).length
+          }. Error: ${
+            res.filter((one) => !one.success).length
+          }. Took: ${timePretty} sec`,
+        })
+
         return res
       })
     )

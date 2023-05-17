@@ -15,6 +15,8 @@ import {
   toBasicError,
 } from '@vexl-next/domain/dist/utility/errors'
 import {useTranslation} from '../localization/I18nProvider'
+import {getDefaultStore} from 'jotai'
+import {preferencesAtom} from '../preferences'
 
 type UnknownErrorNotifications = BasicError<'UnknownErrorNotifications'>
 
@@ -97,7 +99,7 @@ export function areNotificationsEnabled(): TE.TaskEither<
   }, toBasicError('UnknownErrorNotifications'))
 }
 
-export async function showUINotification(
+export async function showUINotificationFromRemoteMessage(
   remoteMessage: FirebaseMessagingTypes.RemoteMessage
 ): Promise<void> {
   if (!remoteMessage.data && !remoteMessage.notification) return
@@ -119,6 +121,47 @@ export async function showUINotification(
     })
 }
 
+export async function showUINotification({
+  title,
+  body,
+}: {
+  title: string
+  body: string
+}): Promise<void> {
+  const channelId = await notifee.createChannel({
+    id: 'general',
+    name: 'General notifications',
+    importance: AndroidImportance.DEFAULT,
+  })
+
+  await notifee.displayNotification({
+    title,
+    body,
+    android: {channelId},
+  })
+}
+
 export async function deactivateToken(): Promise<void> {
   await messaging().deleteToken()
+}
+
+export async function showDebugNotificationIfEnabled({
+  title,
+  body,
+}: {
+  title: string
+  body: string
+}): Promise<void> {
+  if (!getDefaultStore().get(preferencesAtom).showDebugNotifications) return
+  const channelId = await notifee.createChannel({
+    id: 'test',
+    name: 'Testing notifications',
+    importance: AndroidImportance.HIGH,
+  })
+
+  await notifee.displayNotification({
+    title,
+    body,
+    android: {channelId},
+  })
 }

@@ -19,31 +19,39 @@ async function main(): Promise<void> {
 
   console.log(`Sending notification to: ${token}.`)
 
-  //
+  // //
+  // await getMessaging().send({
+  //   token,
+  //   data: {
+  //     type: 'TEST',
+  //   },
+  //   android: {
+  //     priority: 'high',
+  //   },
+  //   apns: {
+  //     payload: {
+  //       aps: {
+  //         'content-available': true,
+  //       },
+  //     },
+  //     headers: {
+  //       'apns-push-type': 'background',
+  //       'apns-priority': '5',
+  //       'apns-topic': 'it.vexl.next', // your app bundle identifier
+  //     },
+  //   },
+  // })
+
   await getMessaging().send({
     token,
-    notification: {
-      title: 'You have got a message',
-      body: 'Someone has sent you a chat message',
-    },
     data: {
-      title: 'Vexl is still here',
-      body: 'alright',
-      customNotif: 'true',
-    },
-    android: {
-      priority: 'high',
+      type: 'NEW_APP_USER',
     },
     apns: {
       payload: {
         aps: {
           'content-available': true,
         },
-      },
-      headers: {
-        'apns-push-type': 'background',
-        'apns-priority': '5',
-        'apns-topic': 'it.vexl.next', // your app bundle identifier
       },
     },
   })

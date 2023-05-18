@@ -60,12 +60,19 @@ function QuickActionBanner(): JSX.Element | null {
   const {t} = useTranslation()
   const resetNavigationToMessagingScreen = useResetNavigationToMessagingScreen()
 
-  const {lastMessageAtom, otherSideDataAtom, deleteChatWithUiFeedbackAtom} =
-    useMolecule(chatMolecule)
+  const {
+    lastMessageAtom,
+    otherSideDataAtom,
+    deleteChatWithUiFeedbackAtom,
+    identityRevealStatusAtom,
+    revealIdentityWithUiFeedbackAtom,
+  } = useMolecule(chatMolecule)
 
   const lastMessage = useAtomValue(lastMessageAtom)
   const otherSideData = useAtomValue(otherSideDataAtom)
+  const identityRevealStatus = useAtomValue(identityRevealStatusAtom)
   const deleteChat = useSetAtom(deleteChatWithUiFeedbackAtom)
+  const revealIdentity = useSetAtom(revealIdentityWithUiFeedbackAtom)
 
   if (!lastMessage || lastMessage.state === 'sent') return null
 
@@ -168,6 +175,22 @@ function QuickActionBanner(): JSX.Element | null {
           void deleteChat().then((result) => {
             if (result) resetNavigationToMessagingScreen()
           })
+        }}
+      />
+    )
+  }
+  if (identityRevealStatus === 'theyAsked') {
+    return (
+      <QuickActionBannerUi
+        topText={t('messages.identityRevealRequest')}
+        bottomText={t('messages.tapToReveal')}
+        headingType={'boldTop'}
+        buttonText={t('common.more')}
+        leftElement={
+          <UserAvatar width={48} height={48} userImage={otherSideData.image} />
+        }
+        onButtonPress={() => {
+          void revealIdentity('RESPOND_REVEAL')
         }}
       />
     )

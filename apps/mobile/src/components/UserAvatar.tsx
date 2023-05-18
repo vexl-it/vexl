@@ -1,18 +1,17 @@
 import {type SvgStringOrImageUri} from '@vexl-next/domain/dist/utility/SvgStringOrImageUri.brand'
 import Image from './Image'
 import {
+  BackdropFilter,
   Canvas,
+  ColorMatrix,
   Group,
   Image as SkiaImage,
   ImageSVG,
-  Skia,
-  BackdropFilter,
-  ColorMatrix,
   rect,
   rrect,
+  Skia,
   useImage,
 } from '@shopify/react-native-skia'
-import {Grayscale} from 'react-native-color-matrix-image-filters'
 import {useMemo} from 'react'
 
 interface Props {
@@ -51,41 +50,25 @@ function UserAvatar({userImage, grayScale, width, height}: Props): JSX.Element {
       return <Image width={width} height={height} source={userImage.svgXml} />
     }
   } else {
-    if (grayScale) {
-      return (
-        <Grayscale>
-          <Canvas style={{width, height}}>
-            {image && (
-              <SkiaImage
-                fit={'cover'}
-                x={0}
-                y={0}
-                width={width}
-                height={height}
-                image={image}
-              />
-            )}
-          </Canvas>
-        </Grayscale>
-      )
-    } else {
-      return (
-        <Canvas style={{width, height}}>
-          <Group clip={roundedRect}>
-            {image && (
-              <SkiaImage
-                fit={'cover'}
-                x={0}
-                y={0}
-                width={width}
-                height={height}
-                image={image}
-              />
-            )}
-          </Group>
-        </Canvas>
-      )
-    }
+    return (
+      <Canvas style={{width, height}}>
+        <Group clip={roundedRect}>
+          {image && (
+            <SkiaImage
+              fit={'cover'}
+              x={0}
+              y={0}
+              width={width}
+              height={height}
+              image={image}
+            />
+          )}
+        </Group>
+        {grayScale && (
+          <BackdropFilter filter={<ColorMatrix matrix={BLACK_AND_WHITE} />} />
+        )}
+      </Canvas>
+    )
   }
 }
 

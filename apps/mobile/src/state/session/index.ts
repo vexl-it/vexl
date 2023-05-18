@@ -145,6 +145,12 @@ const sessionLoadedAtom = atom((get) => {
   return state === 'loggedIn' || state === 'loggedOut'
 })
 
+export const sessionDataOrDummy = atom((get) => {
+  const session = get(sessionAtom)
+  if (session.state === 'loggedIn') return session.session
+  return dummySession
+})
+
 // --------- hooks ---------
 export function useSetSession(): (newSession: Session) => void {
   const set = useSetAtom(sessionAtom)

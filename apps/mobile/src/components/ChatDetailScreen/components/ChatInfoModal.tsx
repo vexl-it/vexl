@@ -1,5 +1,5 @@
 import {Stack, YStack} from 'tamagui'
-import {useAtomValue, useSetAtom} from 'jotai'
+import {useAtom, useAtomValue, useSetAtom} from 'jotai'
 import {useMolecule} from 'jotai-molecules'
 import {chatMolecule} from '../atoms'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
@@ -13,7 +13,6 @@ import BlockIconSvg from '../../../images/blockIconSvg'
 import WarningSvg from '../images/warningSvg'
 import {SlideInDown, SlideOutDown} from 'react-native-reanimated'
 import {ScrollView} from 'react-native'
-import {enableHiddenFeatures} from '../../../utils/environment'
 import useResetNavigationToMessagingScreen from '../../../utils/useResetNavigationToMessagingScreen'
 
 function ChatInfoModal(): JSX.Element | null {
@@ -22,15 +21,19 @@ function ChatInfoModal(): JSX.Element | null {
     deleteChatWithUiFeedbackAtom,
     blockChatWithUiFeedbackAtom,
     canSendMessagesAtom,
+    revealIdentityWithUiFeedbackAtom,
+    identityRevealStatusAtom,
   } = useMolecule(chatMolecule)
-  const showModal = useAtomValue(showModalAtom)
+  const [showModal, setShowModal] = useAtom(showModalAtom)
   const {top} = useSafeAreaInsets()
   const {t} = useTranslation()
   const resetNavigationToMessagingScreen = useResetNavigationToMessagingScreen()
 
   const deleteChat = useSetAtom(deleteChatWithUiFeedbackAtom)
   const blockChat = useSetAtom(blockChatWithUiFeedbackAtom)
+  const requestReveal = useSetAtom(revealIdentityWithUiFeedbackAtom)
   const canSendMessages = useAtomValue(canSendMessagesAtom)
+  const identityRevealStatus = useAtomValue(identityRevealStatusAtom)
 
   if (!showModal) return null
 
@@ -47,13 +50,17 @@ function ChatInfoModal(): JSX.Element | null {
           </Stack>
           <ButtonStack
             buttons={[
-              ...(canSendMessages && enableHiddenFeatures
+              ...(canSendMessages && identityRevealStatus === 'notStarted'
                 ? [
                     {
                       icon: IdentityIconSvg,
                       isNegative: false,
                       text: t('messages.askToReveal'),
-                      onPress: () => undefined, // TODO
+                      onPress: () => {
+                        void requestReveal('REQUEST_REVEAL').then((success) => {
+                          if (success) setShowModal(false)
+                        })
+                      },
                     },
                   ]
                 : []),

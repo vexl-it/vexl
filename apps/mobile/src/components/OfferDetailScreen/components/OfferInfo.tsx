@@ -41,7 +41,7 @@ function OfferInfo({offer}: {offer: OneOfferInState}): JSX.Element {
       </ScreenTitle>
       <ScrollView>
         <YStack space={'$4'}>
-          <OfferWithBubbleTip negative={!!chatForOffer} offer={offer} />
+          <OfferWithBubbleTip offer={offer} />
           {!chatForOffer ? (
             <TextInput
               value={text}

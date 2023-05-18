@@ -22,6 +22,7 @@ import {
   type InboxDoesNotExist,
   type NotPermittedToSendMessageToTargetInbox,
 } from '@vexl-next/rest-api/dist/services/contact/contracts'
+import {type ReadingFileError} from './utils/replaceImageFileUriWithBase64'
 
 export type ApiErrorCreatingInbox = BasicError<'ApiErrorCreatingInbox'>
 export type ErrorInboxAlreadyExists = BasicError<'ErrorInboxAlreadyExists'>
@@ -42,6 +43,7 @@ export const ChatMessageWithState = z.discriminatedUnion('state', [
       | ErrorSigningChallenge
       | InboxDoesNotExist
       | NotPermittedToSendMessageToTargetInbox
+      | ReadingFileError
     >((one) => !!(one as any)._tag),
   }),
   z.object({state: z.literal('sent'), message: ChatMessage}),

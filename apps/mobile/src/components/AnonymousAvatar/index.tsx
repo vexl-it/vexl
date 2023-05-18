@@ -27,7 +27,6 @@ export function AnonymousAvatarFromSeed({
   grayScale,
 }: {
   seed: string
-  style?: StyleProp<ViewStyle>
   height: number
   width: number
   grayScale: boolean

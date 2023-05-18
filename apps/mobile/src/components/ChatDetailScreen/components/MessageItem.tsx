@@ -10,6 +10,7 @@ import TextMessage from './TextMessage'
 import {Stack, Text} from 'tamagui'
 import Image from '../../Image'
 import BlockIconSvg from '../../../images/blockIconSvg'
+import IdentityRevealMessageItem from './IdentityRevealMessageItem'
 
 function MessageItem({
   itemAtom,
@@ -20,7 +21,6 @@ function MessageItem({
   const {otherSideDataAtom} = useMolecule(chatMolecule)
   const {t} = useTranslation()
   const {userName, image} = useAtomValue(otherSideDataAtom)
-
   if (
     item.type === 'message' &&
     item.message.message.messageType === 'APPROVE_MESSAGING'
@@ -45,7 +45,7 @@ function MessageItem({
               backgroundColor={'$darkRed'}
               alignItems="center"
               justifyContent={'center'}
-              borderRadius={12}
+              borderRadius={'$7'}
             >
               <Image width={35} height={35} source={BlockIconSvg} />
             </Stack>
@@ -93,6 +93,20 @@ function MessageItem({
           }
         />
       )
+
+    if (
+      item.message.message.messageType === 'REQUEST_REVEAL' ||
+      item.message.message.messageType === 'APPROVE_REVEAL' ||
+      item.message.message.messageType === 'DISAPPROVE_REVEAL'
+    ) {
+      return (
+        <IdentityRevealMessageItem
+          message={item.message}
+          isLatest={item.isLatest}
+          direction={direction}
+        />
+      )
+    }
 
     return <TextMessage messageAtom={itemAtom} />
   }

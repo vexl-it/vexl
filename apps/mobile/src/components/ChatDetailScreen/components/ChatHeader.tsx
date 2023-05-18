@@ -8,9 +8,8 @@ import useSafeGoBack from '../../../utils/useSafeGoBack'
 import {Keyboard, TouchableOpacity} from 'react-native'
 import {useMolecule} from 'jotai-molecules'
 import {chatMolecule} from '../atoms'
-import {useSetAtom} from 'jotai'
+import {useAtomValue, useSetAtom} from 'jotai'
 import binSvg from '../images/binSvg'
-import {enableHiddenFeatures} from '../../../utils/environment'
 import useResetNavigationToMessagingScreen from '../../../utils/useResetNavigationToMessagingScreen'
 import {useCallback} from 'react'
 
@@ -28,12 +27,16 @@ function Button({type}: {type: ButtonType}): JSX.Element | null {
     showModalAtom,
     deleteChatWithUiFeedbackAtom,
     blockChatWithUiFeedbackAtom,
+    identityRevealStatusAtom,
+    revealIdentityWithUiFeedbackAtom,
   } = useMolecule(chatMolecule)
   const setModal = useSetAtom(showModalAtom)
   const resetNavigationToMessagingScreen = useResetNavigationToMessagingScreen()
+  const identityRevealStatus = useAtomValue(identityRevealStatusAtom)
 
   const blockChat = useSetAtom(blockChatWithUiFeedbackAtom)
   const deleteChat = useSetAtom(deleteChatWithUiFeedbackAtom)
+  const revealIdentity = useSetAtom(revealIdentityWithUiFeedbackAtom)
 
   if (type === 'back')
     return (
@@ -56,13 +59,13 @@ function Button({type}: {type: ButtonType}): JSX.Element | null {
       />
     )
 
-  if (type === 'identityReveal' && enableHiddenFeatures)
+  if (type === 'identityReveal' && identityRevealStatus === 'notStarted')
     return (
       <IconButton
         icon={identityIconSvg}
         variant={'primary'}
         onPress={() => {
-          console.log('todo')
+          void revealIdentity('REQUEST_REVEAL')
         }}
       />
     )

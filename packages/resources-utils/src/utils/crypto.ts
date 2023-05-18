@@ -7,6 +7,7 @@ import {
 } from '@vexl-next/cryptography/dist/KeyHolder'
 import {type KeyHolder} from '@vexl-next/cryptography'
 import {type BasicError, toError} from '@vexl-next/domain/dist/utility/errors'
+import {createHash} from 'crypto'
 
 export type CryptoError = BasicError<'CryptoError'>
 
@@ -91,4 +92,13 @@ export function generateKeyPair(): E.Either<CryptoError, PrivateKeyHolder> {
     () => crypto.KeyHolder.generatePrivateKey(),
     toError('CryptoError', 'Error while generating new key pair')
   )
+}
+
+export function hashMD5(payload: string): E.Either<CryptoError, string> {
+  return E.tryCatch(() => {
+    return createHash('md5')
+      .update(payload, 'utf-8')
+      .digest()
+      .toString('base64')
+  }, toError('CryptoError', 'error while creating hash'))
 }

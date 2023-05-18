@@ -37,6 +37,9 @@ export default {
     'youSure': 'You sure?',
     'nope': 'Nope',
     'yesDelete': 'Yes, delete',
+    'more': 'More',
+    'yes': 'Yes',
+    'no': 'No',
   },
   'loginFlow': {
     'anonymityNotice': 'Nobody will see this until you allow it. Even us.',
@@ -492,5 +495,22 @@ export default {
     'chatEmpty': 'No chats yet',
     'chatEmptyExplanation': 'Start a conversation by requesting an offer',
     'seeOffers': 'See offers',
+    'identityRevealRequestModal': {
+      title: 'Send reveal identity request?',
+      text: 'By sending request you agree with revealing of your own identity too.',
+      send: 'Send request',
+    },
+    'identityRevealRespondModal': {
+      title: 'Do you want to reveal identity?',
+      text: 'If you reveal your identity, you will see identity of your counterparty too.',
+    },
+    'identityAlreadyRequested':
+      'Identity request was already sent in the conversation',
+    'identityRevealRequest': 'Identity reveal request',
+    'tapToReveal': 'Tap to reveal or decline',
+    'letsRevealIdentities': 'Lets reveal identities',
+    'reveal': 'Reveal',
+    'themDeclined': '{{name}} declined',
+    'youDeclined': 'You have declined',
   },
 }

@@ -2,13 +2,30 @@ import * as E from 'fp-ts/Either'
 import type * as TE from 'fp-ts/TaskEither'
 import * as ImagePicker from 'expo-image-picker'
 import {UriString} from '@vexl-next/domain/dist/utility/UriString.brand'
+import * as FileSystem from 'expo-file-system'
 import {pipe} from 'fp-ts/function'
 import {safeParse} from '../../../../utils/fpUtils'
+import urlJoin from 'url-join'
 
 export interface ImagePickerError {
   _tag: 'imagePickerError'
   reason: 'PermissionsNotGranted' | 'UnknownError' | 'NothingSelected'
   error?: unknown
+}
+
+async function moveImageToDocumentDirectory(
+  imagePath: string
+): Promise<string> {
+  const documentDir = FileSystem.documentDirectory
+  if (!documentDir) throw new Error('document dir not found')
+
+  const path = urlJoin(
+    documentDir,
+    `profilePicture.${imagePath.split('.').at(-1) ?? 'jpeg'}`
+  )
+
+  await FileSystem.copyAsync({from: imagePath, to: path})
+  return path
 }
 
 export function getImageFromCameraAndTryToResolveThePermissionsAlongTheWay(): TE.TaskEither<
@@ -53,7 +70,9 @@ export function getImageFromCameraAndTryToResolveThePermissionsAlongTheWay(): TE
         })
 
       return pipe(
-        safeParse(UriString)(selectedImage.uri),
+        safeParse(UriString)(
+          await moveImageToDocumentDirectory(selectedImage.uri)
+        ),
         E.mapLeft((error) => ({
           _tag: 'imagePickerError',
           reason: 'UnknownError',
@@ -111,7 +130,9 @@ export function getImageFromGalleryAndTryToResolveThePermissionsAlongTheWay(): T
         })
 
       return pipe(
-        safeParse(UriString)(selectedImage.uri),
+        safeParse(UriString)(
+          await moveImageToDocumentDirectory(selectedImage.uri)
+        ),
         E.mapLeft((error) => ({
           _tag: 'imagePickerError',
           reason: 'UnknownError',

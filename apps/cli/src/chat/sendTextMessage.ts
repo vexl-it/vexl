@@ -14,7 +14,6 @@ import {
 import sendMessage from '@vexl-next/resources-utils/dist/chat/sendMessage'
 import {now} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
 import {parseCredentialsJson} from '../utils/auth'
-import {generateUuid} from '@vexl-next/domain/dist/utility/Uuid.brand'
 import {generateChatMessageId} from '@vexl-next/domain/dist/general/messaging'
 
 export default function sendTextMessage({

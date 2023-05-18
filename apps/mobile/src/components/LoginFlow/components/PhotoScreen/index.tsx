@@ -16,11 +16,7 @@ import MiniCameraSvg from './images/miniCameraSvg'
 import selectIconSvg from './images/selectIconSvg'
 import {UserNameAndAvatar} from '@vexl-next/domain/dist/general/UserNameAndAvatar.brand'
 import {fromImageUri} from '@vexl-next/domain/dist/utility/SvgStringOrImageUri.brand'
-import {
-  copyFileLocalDirectoryAndKeepName,
-  type FileSystemError,
-} from '../../../../utils/internalStorage'
-import {PathString} from '@vexl-next/domain/dist/utility/PathString.brand'
+import {type FileSystemError} from '../../../../utils/internalStorage'
 import reportError from '../../../../utils/reportError'
 import {type LoginStackScreenProps} from '../../../../navigationTypes'
 import {
@@ -66,12 +62,6 @@ function PhotoScreen({
         onPress: () => {
           void pipe(
             getImageFromGalleryAndTryToResolveThePermissionsAlongTheWay(),
-            TE.chainW((imageUri) =>
-              copyFileLocalDirectoryAndKeepName({
-                sourceUri: imageUri,
-                targetFolder: PathString.parse('/'),
-              })
-            ),
             TE.mapLeft(reportAndTranslateErrors),
             TE.match(Alert.alert, (r) => {
               setSelectedImageUri(O.some(r))
@@ -84,12 +74,6 @@ function PhotoScreen({
         onPress: () => {
           void pipe(
             getImageFromCameraAndTryToResolveThePermissionsAlongTheWay(),
-            TE.chainW((imageUri) =>
-              copyFileLocalDirectoryAndKeepName({
-                sourceUri: imageUri,
-                targetFolder: PathString.parse('/'),
-              })
-            ),
             TE.mapLeft(reportAndTranslateErrors),
             TE.match(Alert.alert, (r) => {
               setSelectedImageUri(O.some(r))

@@ -1,4 +1,4 @@
-import {pipe} from 'fp-ts/function'
+import {flow, pipe} from 'fp-ts/function'
 import * as A from 'fp-ts/Array'
 import {type ChatPrivateApi} from '@vexl-next/rest-api/dist/services/chat'
 import {type ChatMessageWithState, type InboxInState} from '../domain'
@@ -20,6 +20,7 @@ import createNewChatsFromMessages from '../utils/createNewChatsFromFirstMessages
 import {group} from 'group-items'
 import {focusAtom} from 'jotai-optics'
 import messagingStateAtom from '../atoms/messagingStateAtom'
+import replaceBase64UriWithImageFileUri from '../utils/replaceBase64UriWithImageFileUri'
 
 export function createInboxAtom(
   publicKey: PublicKeyPemBase64
@@ -37,8 +38,8 @@ function splitMessagesArrayToNewChatsAndExistingChats({
   inbox,
   messages,
 }: {
-  inbox: InboxInState
-  messages: ChatMessageWithState[]
+  readonly inbox: InboxInState
+  readonly messages: readonly ChatMessageWithState[]
 }): {
   messageInNewChat: ChatMessageWithState[]
   messageInExistingChat: ChatMessageWithState[]
@@ -76,6 +77,19 @@ function refreshInbox(
             state: 'received',
             message: oneMessage,
           })
+        )
+      ),
+      TE.chainW(
+        flow(
+          A.map((oneMessage): T.Task<ChatMessageWithState> => {
+            if (!oneMessage.message.image) return T.of(oneMessage)
+            return replaceBase64UriWithImageFileUri(
+              oneMessage,
+              getInbox().inbox.privateKey.publicKeyPemBase64
+            )
+          }),
+          T.sequenceArray,
+          TE.fromTask
         )
       ),
       TE.map((newMessages) =>

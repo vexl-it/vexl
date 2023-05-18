@@ -13,6 +13,7 @@ import {focusWasDeniedAtom} from '../../state/chat/atoms/focusDenyRequestMessage
 import deleteChatActionAtom from '../../state/chat/atoms/deleteChatActionAtom'
 import blockChatActionAtom from '../../state/chat/atoms/blockChatActionAtom'
 import * as TE from 'fp-ts/TaskEither'
+import * as E from 'fp-ts/Either'
 import {pipe} from 'fp-ts/function'
 import {loadingOverlayDisplayedAtom} from '../LoadingOverlayProvider'
 import {Alert} from 'react-native'
@@ -23,6 +24,10 @@ import {askAreYouSureActionAtom} from '../AreYouSureDialog'
 import {deleteChatStep1Svg} from './images/deleteChatSvg'
 import {translationAtom} from '../../utils/localization/I18nProvider'
 import {toCommonErrorMessage} from '../../utils/useCommonErrorMessages'
+import revealIdentityActionAtom, {
+  type RevealMessageType,
+} from '../../state/chat/atoms/revealIdentityActionAtom'
+import reportError from '../../utils/reportError'
 
 type ChatUIMode = 'approval' | 'messages'
 
@@ -168,7 +173,6 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
       )
     )()
   })
-
   const lastMessageAtom = selectAtom(messagesAtom, (o) => o.at(-1))
 
   const chatUiModeAtom = atom<ChatUIMode>((get) => {
@@ -193,6 +197,104 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     )
   })
 
+  const revealIdentityAtom = revealIdentityActionAtom(chatWithMessagesAtom)
+
+  const revealIdentityWithUiFeedbackAtom = atom(
+    null,
+    async (get, set, type: 'REQUEST_REVEAL' | 'RESPOND_REVEAL') => {
+      const {t} = get(translationAtom)
+
+      const modalContent = (() => {
+        if (type === 'REQUEST_REVEAL') {
+          return {
+            title: t('messages.identityRevealRequestModal.title'),
+            description: t('messages.identityRevealRequestModal.text'),
+            negativeButtonText: t('common.back'),
+            positiveButtonText: t('messages.identityRevealRequestModal.send'),
+          }
+        }
+        return {
+          title: t('messages.identityRevealRespondModal.title'),
+          description: t('messages.identityRevealRespondModal.text'),
+          negativeButtonText: t('common.no'),
+          positiveButtonText: t('common.yes'),
+        }
+      })()
+
+      return await pipe(
+        set(askAreYouSureActionAtom, {
+          steps: [modalContent],
+          variant: 'info',
+        }),
+        TE.map((val) => {
+          set(loadingOverlayDisplayedAtom, true)
+          return val
+        }),
+        TE.match(
+          (e) => {
+            if (e._tag === 'UserDeclinedError' && type === 'RESPOND_REVEAL') {
+              return E.right('DISAPPROVE_REVEAL' as RevealMessageType)
+            }
+            return E.left(e)
+          },
+          (r) =>
+            E.right(
+              type === 'RESPOND_REVEAL'
+                ? ('APPROVE_REVEAL' as RevealMessageType)
+                : ('REQUEST_REVEAL' as RevealMessageType)
+            )
+        ),
+        TE.chainW((type) => set(revealIdentityAtom, {type})),
+        TE.match(
+          (e) => {
+            set(loadingOverlayDisplayedAtom, false)
+            if (e._tag === 'UserDeclinedError') {
+              return false
+            }
+            if (e._tag === 'IdentityRequestAlreadySentError') {
+              Alert.alert(t('messages.identityAlreadyRequested'))
+              return false
+            }
+            if (e._tag !== 'NetworkError')
+              reportError('error', 'Error sending identityReveal', e)
+            Alert.alert(toCommonErrorMessage(e, t) ?? t('common.unknownError'))
+            return false
+          },
+          () => {
+            set(loadingOverlayDisplayedAtom, false)
+            return true
+          }
+        )
+      )()
+    }
+  )
+
+  const identityRevealStatusAtom = selectAtom(
+    chatWithMessagesAtom,
+    ({
+      messages,
+    }): 'shared' | 'denied' | 'iAsked' | 'theyAsked' | 'notStarted' => {
+      const response = messages.find(
+        (one) =>
+          one.message.messageType === 'DISAPPROVE_REVEAL' ||
+          one.message.messageType === 'APPROVE_REVEAL'
+      )
+      if (response)
+        return response.message.messageType === 'APPROVE_REVEAL'
+          ? 'shared'
+          : 'denied' // no need to search further
+
+      const requestMessage = messages.find(
+        (one) => one.message.messageType === 'REQUEST_REVEAL'
+      )
+
+      if (requestMessage)
+        return requestMessage.state === 'received' ? 'theyAsked' : 'iAsked'
+
+      return 'notStarted'
+    }
+  )
+
   return {
     showModalAtom: atom<boolean>(false),
     chatAtom,
@@ -207,6 +309,8 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     wasDeniedAtom: focusWasDeniedAtom(chatWithMessagesAtom),
     otherSideDataAtom: selectOtherSideDataAtom(chatAtom),
     otherSideLeftAtom: focusOtherSideLeftAtom(chatWithMessagesAtom),
+    identityRevealStatusAtom,
+    revealIdentityWithUiFeedbackAtom,
     deleteChatWithUiFeedbackAtom,
     blockChatWithUiFeedbackAtom,
     messagesListAtomAtoms,

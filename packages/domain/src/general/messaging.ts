@@ -3,10 +3,11 @@ import {UserNameAndAvatar} from './UserNameAndAvatar.brand'
 import {OfferId} from './offers'
 import {UserName} from './UserName.brand'
 import {generateUuid, Uuid} from '../utility/Uuid.brand'
-import {Base64String} from '../utility/Base64String.brand'
 import {UnixMilliseconds} from '../utility/UnixMilliseconds.brand'
 import {KeyHolder} from '@vexl-next/cryptography'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
+import {UriString} from '../utility/UriString.brand'
+import {Base64String} from '../utility/Base64String.brand'
 
 export const MessageType = z.enum([
   'MESSAGE',
@@ -31,7 +32,7 @@ export type ChatUserIdentity = z.TypeOf<typeof ChatUserIdentity>
 
 export const DeanonymizedUser = z.object({
   name: UserName,
-  imageBase64: Base64String,
+  partialPhoneNumber: z.string().optional(),
 })
 export type DeanonymizedUser = z.TypeOf<typeof DeanonymizedUser>
 
@@ -42,9 +43,15 @@ export type ChatMessageId = z.TypeOf<typeof ChatMessageId>
 export const ChatMessagePayload = z.object({
   uuid: ChatMessageId,
   text: z.string(),
-  image: Base64String.optional(),
+  image: UriString.optional(),
   time: UnixMilliseconds,
-  deanonymizedUser: DeanonymizedUser.optional(),
+  deanonymizedUser: z
+    .object({
+      name: UserName,
+      imageBase64: Base64String,
+      partialPhoneNumber: z.string().optional(),
+    })
+    .optional(),
 })
 export type ChatMessagePayload = z.TypeOf<typeof ChatMessagePayload>
 
@@ -56,7 +63,7 @@ export const ChatMessage = z.object({
   uuid: ChatMessageId,
   text: z.string(),
   time: UnixMilliseconds,
-  image: Base64String.optional(),
+  image: UriString.optional(),
   deanonymizedUser: DeanonymizedUser.optional(),
   senderPublicKey: PublicKeyPemBase64,
   messageType: MessageType,

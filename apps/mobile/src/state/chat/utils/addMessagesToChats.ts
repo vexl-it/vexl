@@ -3,11 +3,8 @@ import * as A from 'fp-ts/Array'
 import addToSortedArray from '../../../utils/addToSortedArray'
 import compareMessages from './compareMessages'
 import areMessagesEqual from './areMessagesEqual'
-import {group} from 'group-items'
 import * as O from 'optics-ts'
-import {type UserNameAndAvatar} from '@vexl-next/domain/dist/general/UserNameAndAvatar.brand'
-import {fromBase64Uri} from '@vexl-next/domain/dist/utility/SvgStringOrImageUri.brand'
-import {UserName} from '@vexl-next/domain/dist/general/UserName.brand'
+import {type UserNameAndUriAvatar} from '@vexl-next/domain/dist/general/UserNameAndAvatar.brand'
 import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
 
 // function processDeleteChatMessageIfAny(
@@ -35,20 +32,14 @@ function processIdentityRevealMessageIfAny(
 ): (chat: ChatWithMessages) => ChatWithMessages {
   return (chat) => {
     if (
-      !identityRevealMessage?.message.deanonymizedUser ||
-      identityRevealMessage?.message.messageType !== 'APPROVE_REVEAL'
+      !identityRevealMessage?.message.deanonymizedUser?.name ||
+      !identityRevealMessage?.message.image
     )
       return chat
 
-    const userName = UserName.safeParse(
-      identityRevealMessage.message.deanonymizedUser.name
-    )
-
-    const realLifeInfo: UserNameAndAvatar = {
-      userName: userName.success ? userName.data : UserName.parse('[unknown]'),
-      image: fromBase64Uri(
-        identityRevealMessage.message.deanonymizedUser.imageBase64
-      ),
+    const realLifeInfo: UserNameAndUriAvatar = {
+      userName: identityRevealMessage.message.deanonymizedUser.name,
+      image: {type: 'imageUri', imageUri: identityRevealMessage.message.image},
     }
     return O.set(realLifeInfoOptic)(realLifeInfo)(chat)
   }
@@ -84,18 +75,13 @@ export default function addMessagesToChats(
           oneChat.messages
         )
 
-        const messagesByType = group(
-          messagesToAddToThisChat.sort(compareMessages)
-        )
-          .by((message) => message.message.messageType)
-          .asMap()
-
-        // TODO saving of deanoymization
-
-        const deleteTypeMessage = messagesByType.get('DELETE_CHAT')?.at(-1)
-        // const identityRevealMessage = messagesByType
-        //   .get('APPROVE_REVEAL')
-        //   ?.at(-1)
+        const identityRevealMessage = messagesToAddToThisChat
+          .filter((one) =>
+            ['APPROVE_REVEAL', 'REQUEST_REVEAL'].includes(
+              one.message.messageType
+            )
+          )
+          ?.at(-1)
 
         // const deleteTypeMessageTime =
         //   deleteTypeMessage?.message.time ?? UnixMilliseconds.parse(0)
@@ -117,7 +103,7 @@ export default function addMessagesToChats(
 
         return pipe(
           {...oneChat, messages, chat: {...oneChat.chat, isUnread: true}},
-          processIdentityRevealMessageIfAny(deleteTypeMessage)
+          processIdentityRevealMessageIfAny(identityRevealMessage)
         )
       })
     )

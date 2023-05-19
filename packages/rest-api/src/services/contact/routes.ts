@@ -1,0 +1,7 @@
+export const createUser = '/api/v1/users'
+export const refreshUser = '/api/v1/users/refresh'
+export const updateFirebaseToken = '/api/v1/user'
+export const deleteUser = '/api/v1/users/me'
+export const replaceContacts = '/api/v1/contacts/import/replace'
+export const fetchMyContacts = '/api/v1/contacts/me'
+export const fetchCommonConnections = '/api/v1/contacts/common'

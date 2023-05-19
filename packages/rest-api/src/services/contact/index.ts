@@ -23,6 +23,15 @@ import {
 } from './contracts'
 import {pipe} from 'fp-ts/function'
 import * as TE from 'fp-ts/TaskEither'
+import {
+  createUser,
+  deleteUser,
+  replaceContacts,
+  refreshUser,
+  updateFirebaseToken,
+  fetchMyContacts,
+  fetchCommonConnections,
+} from './routes'
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function privateApi({
@@ -43,7 +52,6 @@ export function privateApi({
     platform,
     {
       ...axiosConfig,
-      baseURL: urlJoin(url, '/api/v1'),
     },
     loggingFunction
   )
@@ -52,7 +60,7 @@ export function privateApi({
     createUser: (request: CreateUserRequest) => {
       return axiosCall(axiosInstance, {
         method: 'post',
-        url: '/users',
+        url: createUser,
         data: request,
       })
     },
@@ -60,7 +68,7 @@ export function privateApi({
       return pipe(
         axiosCall(axiosInstance, {
           method: 'post',
-          url: '/users/refresh',
+          url: refreshUser,
           data: request,
         }),
         TE.mapLeft((e): typeof e | UserNotFoundError => {
@@ -77,14 +85,14 @@ export function privateApi({
     updateFirebaseToken: (request: UpdateFirebaseTokenRequest) => {
       return axiosCall(axiosInstance, {
         method: 'put',
-        url: '/users',
+        url: updateFirebaseToken,
         data: request,
       })
     },
     deleteUser: () => {
       return axiosCall(axiosInstance, {
         method: 'delete',
-        url: '/users/me',
+        url: deleteUser,
       })
     },
     importContacts: (request: ImportContactsRequest) => {
@@ -93,7 +101,7 @@ export function privateApi({
           axiosInstance,
           {
             method: 'post',
-            url: '/contacts/import/replace',
+            url: replaceContacts,
             data: request,
           },
           ImportContactsResponse
@@ -113,7 +121,7 @@ export function privateApi({
           axiosInstance,
           {
             method: 'get',
-            url: '/contacts/me',
+            url: fetchMyContacts,
             params: {
               level: request.level,
               page: request.page,
@@ -130,7 +138,7 @@ export function privateApi({
           axiosInstance,
           {
             method: 'post',
-            url: '/contacts/common',
+            url: fetchCommonConnections,
             data: request,
           },
           FetchCommonConnectionsResponse

@@ -39,7 +39,7 @@ export function createOfferDummyPublicPart(): OfferPublicPart {
     feeAmount: 0,
     locationState: 'IN_PERSON',
     paymentMethod: ['CASH'],
-    btcNetwork: ['LIGHTING'],
+    btcNetwork: ['ON_CHAIN'],
     currency: 'CZK',
     offerType: 'SELL',
     activePriceState: 'NONE',
@@ -53,7 +53,7 @@ export function createOfferDummyPublicPart(): OfferPublicPart {
 export const dummyOffer: OneOfferInState = {
   ownershipInfo: {
     adminId: OfferAdminId.parse('offerAdminId'),
-    intendedConnectionLevel: 'FIRST',
+    intendedConnectionLevel: 'ALL',
   },
   flags: {
     reported: false,

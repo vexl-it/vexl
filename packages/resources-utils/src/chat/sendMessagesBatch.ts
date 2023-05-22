@@ -22,12 +22,12 @@ import {
 import {type BasicError, toError} from '@vexl-next/domain/dist/utility/errors'
 import {type ExtractLeftTE} from '../utils/ExtractLeft'
 
-interface MessageInInbox {
+export interface MessageInInbox {
   readonly message: ChatMessage
   readonly receiverPublicKey: PublicKeyPemBase64
 }
 
-interface Inbox {
+export interface Inbox {
   readonly messages: MessageInInbox[]
   readonly inboxKeypair: PrivateKeyHolder
 }

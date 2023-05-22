@@ -18,6 +18,7 @@ import {
   offersStateAtom,
   offersToSee,
   singleOfferAtom,
+  singleOfferByAdminIdAtom,
 } from './atom'
 import * as Option from 'fp-ts/Option'
 import {
@@ -55,12 +56,24 @@ import notEmpty from '../../utils/notEmpty'
 import useSendMessagingRequest from '../chat/hooks/useSendRequest'
 import {type ApiErrorRequestMessaging} from '@vexl-next/resources-utils/dist/chat/sendMessagingRequest'
 import {type ErrorEncryptingMessage} from '@vexl-next/resources-utils/dist/chat/utils/chatCrypto'
-import {type ChatOrigin} from '@vexl-next/domain/dist/general/messaging'
+import {
+  type ChatOrigin,
+  generateChatMessageId,
+} from '@vexl-next/domain/dist/general/messaging'
 import {upsertOfferToConnectionsActionAtom} from '../connections/atom/offerToConnectionsAtom'
 import getNewOffersAndDecrypt, {
   type ApiErrorFetchingOffers,
 } from '@vexl-next/resources-utils/dist/offers/getNewOffersAndDecrypt'
 import {type ErrorConstructingPrivatePayloads} from '@vexl-next/resources-utils/dist/offers/utils/constructPrivatePayloads'
+import sendMessagesBatch, {
+  type ApiErrorSendingMessagesBatch,
+  type ErrorNoChallengeForPublicKey,
+  type Inbox,
+} from '@vexl-next/resources-utils/dist/chat/sendMessagesBatch'
+import {unixMillisecondsNow} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
+import {type ErrorGeneratingSignedChallengeBatch} from '@vexl-next/resources-utils/dist/chat/utils/generateSignedChallengesBatch'
+import {type ServerMessageWithId} from '@vexl-next/rest-api/dist/services/chat/contracts'
+import {chatsForMyOfferAtom} from '../chat/atoms/chatsForMyOfferAtom'
 
 export function useTriggerOffersRefresh(): Task<void> {
   const api = usePrivateApiAssumeLoggedIn()
@@ -319,6 +332,87 @@ export const updateOfferAtom = atom<
       ])
       return createdOffer
     })
+  )
+})
+
+export const deleteAllChatsForOfferAtom = atom<
+  null,
+  [{adminId: OfferAdminId}],
+  TE.TaskEither<
+    | ErrorGeneratingSignedChallengeBatch
+    | ErrorEncryptingMessage
+    | ErrorNoChallengeForPublicKey
+    | ApiErrorSendingMessagesBatch,
+    ServerMessageWithId[]
+  >
+>(null, (get, set, params) => {
+  const {adminId} = params
+  const api = get(privateApiAtom)
+  const myOffer = get(singleOfferByAdminIdAtom(adminId))
+  const chats = get(
+    chatsForMyOfferAtom({
+      offerPublicKey: myOffer?.offerInfo.publicPart.offerPublicKey,
+    })
+  )
+  return pipe(
+    chats ?? [],
+    A.map(
+      (one): Inbox => ({
+        inboxKeypair: one.inbox.privateKey,
+        messages: [
+          {
+            receiverPublicKey: one.otherSide.publicKey,
+            message: {
+              uuid: generateChatMessageId(),
+              time: unixMillisecondsNow(),
+              text: 'Offer deleted',
+              messageType: 'OFFER_DELETED',
+              senderPublicKey: one.inbox.privateKey.publicKeyPemBase64,
+            },
+          },
+        ],
+      })
+    ),
+    (inboxes) => sendMessagesBatch({api: api.chat, inboxes})
+  )
+})
+
+export const deleteOffersAtom = atom<
+  null,
+  [{adminIds: OfferAdminId[]}],
+  TE.TaskEither<any, {success: true}>
+>(null, (get, set, params) => {
+  const {adminIds} = params
+  const api = get(privateApiAtom)
+  const offers = get(offersAtom)
+
+  return pipe(
+    TE.Do,
+    TE.chainFirstW(() => pipe(api.offer.deleteOffer({adminIds}))),
+    TE.chainFirstTaskK(() =>
+      pipe(
+        adminIds,
+        A.map((adminId) => set(deleteAllChatsForOfferAtom, {adminId})),
+        A.sequence(TE.ApplicativePar)
+      )
+    ),
+    TE.match(
+      (left) => {
+        reportError('error', 'Error while deleting offers', left)
+        return E.left(left)
+      },
+      () => {
+        set(
+          offersAtom,
+          offers.filter(
+            (o) =>
+              !o.ownershipInfo?.adminId ||
+              !adminIds.includes(o.ownershipInfo?.adminId)
+          )
+        )
+        return E.right({success: true})
+      }
+    )
   )
 })
 

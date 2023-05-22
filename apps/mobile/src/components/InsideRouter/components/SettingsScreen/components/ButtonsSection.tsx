@@ -23,10 +23,12 @@ import {useLogout} from '../../../../../state/session'
 import {getTokens, Stack, styled, Text, XStack} from 'tamagui'
 import {enableHiddenFeatures} from '../../../../../utils/environment'
 import notEmpty from '../../../../../utils/notEmpty'
-import {useSetAtom} from 'jotai'
+import {useSetAtom, useStore} from 'jotai'
 import * as TE from 'fp-ts/TaskEither'
 import {askAreYouSureActionAtom} from '../../../../AreYouSureDialog'
 import {pipe} from 'fp-ts/function'
+import {deleteOffersAtom} from '../../../../../state/marketplace'
+import {myOffersAtom} from '../../../../../state/marketplace/atom'
 
 const ItemText = styled(Text, {
   fos: 18,
@@ -64,7 +66,9 @@ function ButtonsSection(): JSX.Element {
   const {t} = useTranslation()
   const navigation = useNavigation()
   const logout = useLogout()
+  const store = useStore()
   const showAreYouSure = useSetAtom(askAreYouSureActionAtom)
+  const deleteMyOffers = useSetAtom(deleteOffersAtom)
 
   function todo(): void {
     Alert.alert('To be implemented')
@@ -95,9 +99,17 @@ function ButtonsSection(): JSX.Element {
           },
         ],
       }),
+      TE.chainW(() =>
+        deleteMyOffers({
+          adminIds: store
+            .get(myOffersAtom)
+            .map((offer) => offer.ownershipInfo?.adminId)
+            .filter(notEmpty),
+        })
+      ),
       TE.map(logout)
     )()
-  }, [showAreYouSure, t, logout])
+  }, [showAreYouSure, t, logout, deleteMyOffers, store])
 
   const data: Array<
     Array<{icon: SvgString; text: string | JSX.Element; onPress: () => void}>

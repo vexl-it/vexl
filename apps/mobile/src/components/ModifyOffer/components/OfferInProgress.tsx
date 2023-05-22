@@ -20,8 +20,8 @@ function OfferInProgress({
   visible,
 }: Props): JSX.Element {
   const {bottom} = useSafeAreaInsets()
-  const {createOfferLoaderTitleAtom} = useMolecule(offerFormMolecule)
-  const loaderTitle = useAtomValue(createOfferLoaderTitleAtom)
+  const {modifyOfferLoaderTitleAtom} = useMolecule(offerFormMolecule)
+  const loaderTitle = useAtomValue(modifyOfferLoaderTitleAtom)
 
   return (
     <Modal animationType="fade" transparent visible={visible}>

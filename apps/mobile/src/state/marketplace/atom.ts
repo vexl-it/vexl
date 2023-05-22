@@ -16,6 +16,7 @@ import {MINIMAL_DATE} from '@vexl-next/domain/dist/utility/IsoDatetimeString.bra
 import {areIncluded} from './utils'
 import {type ChatOrigin} from '@vexl-next/domain/dist/general/messaging'
 import {type FocusAtomType} from '../../utils/atomUtils/FocusAtomType'
+import {type OfferAdminId} from '@vexl-next/rest-api/dist/services/offer/contracts'
 
 export const offersStateAtom = atomWithParsedMmkvStorage(
   'offers',
@@ -155,6 +156,14 @@ export function singleOfferAtom(
 ): FocusAtomType<OneOfferInState | undefined> {
   return focusAtom(offersAtom, (optic) =>
     optic.find((offer) => offer.offerInfo.offerId === offerId)
+  )
+}
+
+export function singleOfferByAdminIdAtom(
+  adminId: OfferAdminId | undefined
+): FocusAtomType<OneOfferInState | undefined> {
+  return focusAtom(offersAtom, (optic) =>
+    optic.find((offer) => offer.ownershipInfo?.adminId === adminId)
   )
 }
 

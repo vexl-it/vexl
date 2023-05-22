@@ -3,19 +3,20 @@ import Button from '../../Button'
 import React from 'react'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import useContent from '../useContent'
-import {ScrollView, StyleSheet} from 'react-native'
+import {ActivityIndicator, Modal, ScrollView, StyleSheet} from 'react-native'
 import ScreenTitle from '../../ScreenTitle'
 import IconButton from '../../IconButton'
 import pauseSvg from '../images/pauseSvg'
 import playSvg from '../images/playSvg'
 import closeSvg from '../../images/closeSvg'
-import {useAtomValue, useSetAtom} from 'jotai'
+import {useAtom, useAtomValue, useSetAtom} from 'jotai'
 import OfferInProgress from './OfferInProgress'
 import {useMolecule} from 'jotai-molecules'
 import {pipe} from 'fp-ts/function'
 import * as T from 'fp-ts/Task'
 import OfferForm from '../../OfferForm'
 import {offerFormMolecule} from '../atoms/offerFormStateAtoms'
+import trashSvg from '../images/trashSvg'
 
 const styles = StyleSheet.create({
   contentStyles: {
@@ -25,10 +26,10 @@ const styles = StyleSheet.create({
 })
 
 interface Props {
-  navigateToMyOffers: () => void
+  navigateBack: () => void
 }
 
-function EditOfferContent({navigateToMyOffers}: Props): JSX.Element {
+function EditOfferContent({navigateBack}: Props): JSX.Element {
   const {t} = useTranslation()
   const {
     loadingAtom,
@@ -36,12 +37,16 @@ function EditOfferContent({navigateToMyOffers}: Props): JSX.Element {
     toggleOfferActiveAtom,
     editOfferAtom,
     offerActiveAtom,
+    deleteOfferActionAtom,
+    deletingOfferAtom,
   } = useMolecule(offerFormMolecule)
   const offerActive = useAtomValue(offerActiveAtom)
   const loading = useAtomValue(loadingAtom)
   const editingOffer = useAtomValue(editingOfferAtom)
   const toggleOfferActivePress = useSetAtom(toggleOfferActiveAtom)
   const editOffer = useSetAtom(editOfferAtom)
+  const deleteOffer = useSetAtom(deleteOfferActionAtom)
+  const [deletingOffer, setDeletingOffer] = useAtom(deletingOfferAtom)
 
   const content = useContent()
 
@@ -53,6 +58,21 @@ function EditOfferContent({navigateToMyOffers}: Props): JSX.Element {
             <XStack space={'$2'} mb={'$4'}>
               <IconButton
                 variant="dark"
+                icon={trashSvg}
+                onPress={() => {
+                  void pipe(
+                    deleteOffer(),
+                    T.map((success) => {
+                      if (success) {
+                        navigateBack()
+                      }
+                      setDeletingOffer(false)
+                    })
+                  )()
+                }}
+              />
+              <IconButton
+                variant="dark"
                 icon={offerActive ? pauseSvg : playSvg}
                 onPress={() => {
                   void toggleOfferActivePress()()
@@ -62,7 +82,7 @@ function EditOfferContent({navigateToMyOffers}: Props): JSX.Element {
                 variant="dark"
                 icon={closeSvg}
                 onPress={() => {
-                  navigateToMyOffers()
+                  navigateBack()
                 }}
               />
             </XStack>
@@ -93,7 +113,7 @@ function EditOfferContent({navigateToMyOffers}: Props): JSX.Element {
               editOffer(),
               T.map((success) => {
                 if (success) {
-                  navigateToMyOffers()
+                  navigateBack()
                 }
               })
             )()
@@ -116,6 +136,16 @@ function EditOfferContent({navigateToMyOffers}: Props): JSX.Element {
           }
           visible={editingOffer}
         />
+      )}
+      {deletingOffer && (
+        <Modal animationType="fade" transparent visible={deletingOffer}>
+          <Stack f={1} ai={'center'} jc={'center'} bc={'$black'} gap={'$4'}>
+            <ActivityIndicator size={'large'} />
+            <Text ff={'$body600'} fos={18} col={'$white'}>
+              {t('editOffer.deletingYourOffer')}
+            </Text>
+          </Stack>
+        </Modal>
       )}
     </>
   )

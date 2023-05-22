@@ -1,10 +1,10 @@
 import {XStack} from 'tamagui'
 import FriendLevelCell from './components/FriendLevelCell'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
-import firstDegreeFriendsSvg from './images/firstDegreeFriendsSvg'
-import secondDegreeFriendsSvg from './images/secondDegreeFriendsSvg'
 import {type Atom, useAtom} from 'jotai'
 import {type IntendedConnectionLevel} from '@vexl-next/domain/dist/general/offers'
+import firstDegreeFriendsSvg from '../../../images/firstDegreeFriendsSvg'
+import secondDegreeFriendsSvg from '../../../images/secondDegreeFriendsSvg'
 
 interface Props {
   intendedConnectionLevelAtom: Atom<IntendedConnectionLevel | undefined>

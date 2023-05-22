@@ -1,11 +1,11 @@
 import {Stack, Text} from 'tamagui'
 import SvgImage from '../../../../Image'
-import checkmarkSvg from '../images/checkmarkSvg'
 import {type SvgString} from '@vexl-next/domain/dist/utility/SvgString.brand'
 import {TouchableOpacity} from 'react-native'
 import {useSessionAssumeLoggedIn} from '../../../../../state/session'
 import UserAvatar from '../../../../UserAvatar'
 import {type IntendedConnectionLevel} from '@vexl-next/domain/dist/general/offers'
+import checkmarkInCircleSvg from '../../../../images/checkmarkInCircleSvg'
 
 interface FriendLevelCellContentProps {
   image: SvgString
@@ -44,7 +44,7 @@ function FriendLevelCell({
         >
           {selected && (
             <Stack pos="absolute" left={8} top={8}>
-              <SvgImage source={checkmarkSvg} />
+              <SvgImage source={checkmarkInCircleSvg} />
             </Stack>
           )}
           <SvgImage source={image} />

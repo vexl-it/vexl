@@ -3,7 +3,7 @@ import ScreenTitle from '../ScreenTitle'
 import IconButton from '../IconButton'
 import refreshSvg from '../images/refreshSvg'
 import closeSvg from '../images/closeSvg'
-import OfferForm from '../OfferForm'
+import FilterForm from '../OfferForm'
 import {Stack} from 'tamagui'
 import Button from '../Button'
 import React, {useCallback} from 'react'
@@ -44,7 +44,7 @@ function FilterOffersContent({navigateBack}: Props): JSX.Element {
           />
           <IconButton variant="dark" icon={closeSvg} onPress={navigateBack} />
         </ScreenTitle>
-        <OfferForm content={content} />
+        <FilterForm content={content} />
       </ScrollView>
       <Stack px="$4" py="$4" bc="transparent">
         <Button

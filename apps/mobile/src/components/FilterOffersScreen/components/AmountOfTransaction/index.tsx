@@ -1,7 +1,6 @@
 import {getTokens, Stack, Text, XStack} from 'tamagui'
 import {useCallback, useEffect, useMemo, useState} from 'react'
 import SvgImage from '../../../Image'
-import dashSvg from './images/dashSvg'
 import {
   type NativeSyntheticEvent,
   type TextInputChangeEventData,
@@ -12,6 +11,7 @@ import {type Currency} from '@vexl-next/domain/dist/general/offers'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import infoSvg from '../../../images/infoSvg'
 import Slider from '../../../Slider'
+import dashSvg from '../../../images/dashSvg'
 
 const SLIDER_STEP_USD_EUR = 100
 const SLIDER_STEP_CZK = 1000

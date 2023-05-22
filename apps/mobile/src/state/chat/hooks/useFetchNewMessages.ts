@@ -195,7 +195,7 @@ export default function useFetchMessagesForAllInboxes(): () => T.Task<'done'> {
             )()
         ),
         // @ts-expect-error bad typings?
-        A.sequence(T.ApplicativeSeq),
+        T.sequenceArray,
         T.map(() => 'done' as const)
       ),
     [fetchAndStoreMessagesForInbox, store]

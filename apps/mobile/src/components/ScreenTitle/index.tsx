@@ -16,7 +16,7 @@ function ScreenTitle({
   return (
     <YStack {...props}>
       <XStack fd="row" ai="flex-start" jc="space-between" mb="$5">
-        <Stack fs={1} maw="70%">
+        <Stack fs={1} maw="60%">
           <Text color="$white" fontSize={32} ff="$heading">
             {text}
           </Text>

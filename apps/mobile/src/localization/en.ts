@@ -418,6 +418,8 @@ export default {
     'youCanCheckYourOffer': 'You can check your offer in your offers section',
     'errorEditingOffer': 'Error while editing offer',
     'errorOfferNotFound': 'Offer not found!',
+    'deletingYourOffer': 'Deleting your offer ...',
+    'offerDeleted': 'Offer deleted',
   },
   'filterOffers': {
     'filterResults': 'Filter results',

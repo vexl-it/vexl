@@ -17,7 +17,11 @@ import * as TE from 'fp-ts/TaskEither'
 import * as T from 'fp-ts/Task'
 import {Alert} from 'react-native'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
-import {createOfferAtom, updateOfferAtom} from '../../../state/marketplace'
+import {
+  createOfferAtom,
+  deleteOffersAtom,
+  updateOfferAtom,
+} from '../../../state/marketplace'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 import numberOfFriendsAtom from './numberOfFriendsAtom'
 import * as E from 'fp-ts/Either'
@@ -181,6 +185,7 @@ export const offerFormMolecule = molecule((getMolecule, getScope) => {
   const loadingAtom = atom<boolean>(false)
   const editingOfferAtom = atom<boolean>(false)
   const encryptingOfferAtom = atom<boolean>(false)
+  const deletingOfferAtom = atom<boolean>(false)
 
   const createOfferActionAtom = atom(null, (get, set): T.Task<boolean> => {
     const {t} = get(translationAtom)
@@ -244,14 +249,39 @@ export const offerFormMolecule = molecule((getMolecule, getScope) => {
         }
       ),
       T.chain(delayInPipeT(3000)),
-      T.map((v) => {
+      T.map((result) => {
         set(encryptingOfferAtom, false)
-        return v
+        return result
       })
     )
   })
 
-  const createOfferLoaderTitleAtom = atom((get) => {
+  const deleteOfferActionAtom = atom<null, [], T.Task<boolean>>(
+    null,
+    (get, set) => {
+      const {t} = get(translationAtom)
+
+      set(deletingOfferAtom, true)
+      return pipe(
+        set(deleteOffersAtom, {
+          adminIds: [offer.ownershipInfo?.adminId ?? ('' as OfferAdminId)],
+        }),
+        TE.match(
+          (e) => {
+            Alert.alert(
+              toCommonErrorMessage(e, t) ?? t('offerForm.errorCreatingOffer')
+            )
+            return false
+          },
+          (result) => {
+            return result.success
+          }
+        )
+      )
+    }
+  )
+
+  const modifyOfferLoaderTitleAtom = atom((get) => {
     const {t} = get(translationAtom)
     const numberOfFriends = get(numberOfFriendsAtom)
     const intendedConnectionLevel = get(intendedConnectionLevelAtom)
@@ -381,11 +411,13 @@ export const offerFormMolecule = molecule((getMolecule, getScope) => {
   })
 
   return {
+    deleteOfferActionAtom,
     intendedConnectionLevelAtom,
-    createOfferLoaderTitleAtom,
+    modifyOfferLoaderTitleAtom,
     loadingAtom,
     editingOfferAtom,
     encryptingOfferAtom,
+    deletingOfferAtom,
     toggleOfferActiveAtom,
     editOfferAtom,
     createOfferActionAtom,

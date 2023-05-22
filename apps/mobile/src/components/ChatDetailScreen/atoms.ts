@@ -237,7 +237,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
             }
             return E.left(e)
           },
-          (r) =>
+          () =>
             E.right(
               type === 'RESPOND_REVEAL'
                 ? ('APPROVE_REVEAL' as RevealMessageType)

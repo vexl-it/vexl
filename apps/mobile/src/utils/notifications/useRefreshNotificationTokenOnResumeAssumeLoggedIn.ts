@@ -76,8 +76,7 @@ export function useRefreshNotificationTokenOnResumeAssumeLoggedIn(): void {
             )
           )
         ),
-        // @ts-expect-error todo fix
-        A.sequence(T.ApplicativePar),
+        T.sequenceArray,
         T.map(() => {
           console.info('📳 Finished updating firebase token of inboxes')
         })

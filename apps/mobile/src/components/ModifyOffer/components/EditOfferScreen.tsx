@@ -33,8 +33,8 @@ function EditOfferScreen({
             offerFormScopeValue={offer.offerInfo.publicPart}
           >
             <EditOfferContent
-              navigateToMyOffers={() => {
-                navigation.navigate('MyOffers')
+              navigateBack={() => {
+                navigation.goBack()
               }}
             />
           </ModifyOfferScopeProvider>

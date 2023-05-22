@@ -4,8 +4,6 @@ import {
   translationAtom,
   useTranslation,
 } from '../../../../utils/localization/I18nProvider'
-import firstDegreeFriendsSvg from './images/firstDegreeFriendsSvg'
-import secondDegreeFriendsSvg from './images/secondDegreeFriendsSvg'
 import {type Atom, useAtom, useAtomValue} from 'jotai'
 import {type IntendedConnectionLevel} from '@vexl-next/domain/dist/general/offers'
 import {atom} from 'jotai'
@@ -14,6 +12,8 @@ import {pipe} from 'fp-ts/function'
 import * as E from 'fp-ts/Either'
 import {Alert} from 'react-native'
 import {toCommonErrorMessage} from '../../../../utils/useCommonErrorMessages'
+import firstDegreeFriendsSvg from '../../../images/firstDegreeFriendsSvg'
+import secondDegreeFriendsSvg from '../../../images/secondDegreeFriendsSvg'
 
 const friendLevelSubtitleAtom = atom((get) => {
   const {t} = get(translationAtom)

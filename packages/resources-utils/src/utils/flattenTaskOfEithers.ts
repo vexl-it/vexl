@@ -1,10 +1,10 @@
 import * as T from 'fp-ts/Task'
 import * as E from 'fp-ts/Either'
 import {flow, pipe} from 'fp-ts/function'
-import * as A from 'fp-ts/Array'
+import * as A from 'fp-ts/ReadonlyArray'
 
 export default function flattenTaskOfEithers<L, R>(
-  taskOfEithers: T.Task<Array<E.Either<L, R>>>
+  taskOfEithers: T.Task<ReadonlyArray<E.Either<L, R>>>
 ): T.Task<{lefts: L[]; rights: R[]}> {
   return pipe(
     taskOfEithers,

@@ -26,9 +26,42 @@ import {loadingOverlayDisplayedAtom} from '../LoadingOverlayProvider'
 import {importedContactsAtom} from '../../state/contacts'
 import notEmpty from '../../utils/notEmpty'
 import {updateAllOffersConnectionsActionAtom} from '../../state/connections/atom/offerToConnectionsAtom'
-import {deduplicateBy} from '../../utils/deduplicate'
 
 export const ContactsSelectScope = createScope<ContactNormalized[]>([])
+
+function combineContactsFromDeviceWithImportedContacts({
+  contactsFromDevice,
+  importedContacts,
+}: {
+  contactsFromDevice: ContactNormalized[]
+  importedContacts: ContactNormalized[]
+}): ContactNormalized[] {
+  const toReturn = [...contactsFromDevice]
+
+  for (const oneContact of importedContacts) {
+    if (!oneContact.fromContactList) {
+      // If contact is not from contact list add it. We should display it.
+      toReturn.push(oneContact)
+      continue
+    }
+
+    if (
+      !contactsFromDevice.some(
+        (oneFromDevice) =>
+          oneFromDevice.normalizedNumber === oneContact.normalizedNumber
+      )
+    ) {
+      // Those contacts were imported but are not in contact list anymore
+      toReturn.push({
+        ...oneContact,
+        fromContactList: false,
+        imageUri: undefined,
+      })
+    }
+  }
+
+  return toReturn
+}
 
 export const contactSelectMolecule = molecule((getMolecule, getScope) => {
   const searchTextAtom = atom('')
@@ -38,16 +71,17 @@ export const contactSelectMolecule = molecule((getMolecule, getScope) => {
     new Set(importedContacts.map((one) => one.normalizedNumber))
   )
 
-  const customContactsAtom = atom(
-    importedContacts.filter((one) => !one.fromContactList)
+  const newlyAddedCustomContactsAtom = atom<ContactNormalized[]>([])
+
+  const combinedContacts = atom((get) =>
+    combineContactsFromDeviceWithImportedContacts({
+      contactsFromDevice: get(contactsFromDeviceAtom),
+      importedContacts,
+    })
   )
 
   const allContactsAtom = atom((get) => {
-    const contactsFromDevice = get(contactsFromDeviceAtom)
-    return deduplicateBy(
-      [...contactsFromDevice, ...importedContacts],
-      (one) => one.normalizedNumber
-    )
+    return [...get(combinedContacts), ...get(newlyAddedCustomContactsAtom)]
   })
 
   const contactsToDisplayAtom = atom((get) => {
@@ -127,7 +161,7 @@ export const contactSelectMolecule = molecule((getMolecule, getScope) => {
   const addAndSelectContactAtom = atom(
     null,
     (get, set, contact: ContactNormalized) => {
-      set(customContactsAtom, (val) => [...val, contact])
+      set(newlyAddedCustomContactsAtom, (val) => [...val, contact])
       set(selectedNumbersAtom, (val) => {
         const newVal = new Set(val)
         newVal.add(contact.normalizedNumber)
@@ -190,7 +224,6 @@ export const contactSelectMolecule = molecule((getMolecule, getScope) => {
     contactsToDisplayAtom,
     contactsToDisplayAtomsAtom,
     searchTextAtom,
-    customContactsAtom,
     createSelectContactAtom,
     searchTextAsCustomContactAtom,
     addAndSelectContactAtom,

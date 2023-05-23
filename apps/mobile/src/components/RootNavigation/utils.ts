@@ -4,6 +4,7 @@ import {useIsPostLoginFinished} from '../../state/postLoginOnboarding'
 import {useCallback, useEffect} from 'react'
 import {areNotificationsEnabled} from '../../utils/notifications'
 import {useAppState} from '../../utils/useAppState'
+import useSafeGoBack from '../../utils/useSafeGoBack'
 
 export function useHandlePostLoginFlowRedirect(): void {
   const isLoggedIn = useIsUserLoggedIn()
@@ -31,6 +32,7 @@ export function useHandlePostLoginFlowRedirect(): void {
 }
 
 export function useHandleNotificationsPermissionsRedirect(): void {
+  const safeGoBack = useSafeGoBack()
   const navigation = useNavigation()
   const isLoggedIn = useIsUserLoggedIn()
   const isPostLoginFinished = useIsPostLoginFinished()
@@ -61,13 +63,11 @@ export function useHandleNotificationsPermissionsRedirect(): void {
               isOnNotificationPermissionsMissing &&
               result.right.notifications
             ) {
-              navigation.canGoBack()
-                ? navigation.goBack()
-                : navigation.navigate('InsideTabs', {screen: 'Marketplace'})
+              safeGoBack()
             }
           })
       },
-      [isLoggedIn, isPostLoginFinished, navigation]
+      [isLoggedIn, isPostLoginFinished, navigation, safeGoBack]
     )
   )
 }

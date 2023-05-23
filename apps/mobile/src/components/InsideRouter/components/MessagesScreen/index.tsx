@@ -1,5 +1,4 @@
 import ContainerWithTopBorderRadius from '../ContainerWithTopBorderRadius'
-import {type InsideTabScreenProps} from '../../../../navigationTypes'
 import {Stack, Text} from 'tamagui'
 import useFetchMessagesForAllInboxes from '../../../../state/chat/hooks/useFetchNewMessages'
 import {useCallback} from 'react'
@@ -7,9 +6,7 @@ import {useAppState} from '../../../../utils/useAppState'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import ChatsList from './components/ChatsList'
 
-type Props = InsideTabScreenProps<'Messages'>
-
-function MessagesScreen({navigation}: Props): JSX.Element {
+function MessagesScreen(): JSX.Element {
   const {t} = useTranslation()
   const fetchNewMessages = useFetchMessagesForAllInboxes()
 
@@ -25,7 +22,7 @@ function MessagesScreen({navigation}: Props): JSX.Element {
   return (
     <ContainerWithTopBorderRadius withTopPadding>
       <Stack mx={'$4'} f={1}>
-        <Text ff="$heading" color="$white" fos={32}>
+        <Text ff={'$heading'} color={'$white'} fos={32}>
           {t('messages.listTitle')}
         </Text>
         <ChatsList />

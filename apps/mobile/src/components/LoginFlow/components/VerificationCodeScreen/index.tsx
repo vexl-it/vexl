@@ -17,6 +17,7 @@ import {
   NextButtonProxy,
 } from '../../../PageWithButtonAndProgressHeader'
 import {Stack, Text} from 'tamagui'
+import useSafeGoBack from '../../../../utils/useSafeGoBack'
 
 type Props = LoginStackScreenProps<'VerificationCode'>
 
@@ -31,6 +32,7 @@ function VerificationCodeScreen({
     },
   },
 }: Props): JSX.Element {
+  const safeGoBack = useSafeGoBack()
   const [userCode, setUserCode] = useState('')
   const [countdownFinished, setCountdownFinished] = useState(false)
   const verifyPhoneNumber = useVerifyPhoneNumber()
@@ -69,7 +71,7 @@ function VerificationCodeScreen({
           />
         </Stack>
         {countdownFinished ? (
-          <TouchableWithoutFeedback onPress={navigation.goBack}>
+          <TouchableWithoutFeedback onPress={safeGoBack}>
             <Text ff="$body500" col="$greyOnWhite" fos={14} ta="center">
               {t('loginFlow.verificationCode.retry')}
             </Text>

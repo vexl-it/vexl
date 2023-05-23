@@ -420,6 +420,7 @@ export default {
     'errorOfferNotFound': 'Offer not found!',
     'deletingYourOffer': 'Deleting your offer ...',
     'offerDeleted': 'Offer deleted',
+    'errorDeletingOffer': 'Error while deleting offer',
   },
   'filterOffers': {
     'filterResults': 'Filter results',

@@ -1,22 +1,17 @@
 import Screen from '../../Screen'
 import React from 'react'
 import KeyboardAvoidingView from '../../KeyboardAvoidingView'
-import {type RootStackScreenProps} from '../../../navigationTypes'
 import CreateOfferContent from './CreateOfferContent'
 import ModifyOfferScopeProvider from './ModifyOfferScopeProvider'
+import useSafeGoBack from '../../../utils/useSafeGoBack'
 
-type Props = RootStackScreenProps<'CreateOffer'>
-
-function CreateOfferScreen({navigation}: Props): JSX.Element {
+function CreateOfferScreen(): JSX.Element {
+  const safeGoBack = useSafeGoBack()
   return (
     <Screen customHorizontalPadding={0} customVerticalPadding={32}>
       <KeyboardAvoidingView>
         <ModifyOfferScopeProvider>
-          <CreateOfferContent
-            navigateBack={() => {
-              navigation.goBack()
-            }}
-          />
+          <CreateOfferContent navigateBack={safeGoBack} />
         </ModifyOfferScopeProvider>
       </KeyboardAvoidingView>
     </Screen>

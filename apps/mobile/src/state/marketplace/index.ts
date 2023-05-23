@@ -60,7 +60,9 @@ import {
   type ChatOrigin,
   generateChatMessageId,
 } from '@vexl-next/domain/dist/general/messaging'
-import {upsertOfferToConnectionsActionAtom} from '../connections/atom/offerToConnectionsAtom'
+import offerToConnectionsAtom, {
+  upsertOfferToConnectionsActionAtom,
+} from '../connections/atom/offerToConnectionsAtom'
 import getNewOffersAndDecrypt, {
   type ApiErrorFetchingOffers,
 } from '@vexl-next/resources-utils/dist/offers/getNewOffersAndDecrypt'
@@ -397,6 +399,20 @@ export const deleteOffersAtom = atom<
         adminIds,
         A.map((adminId) => set(deleteAllChatsForOfferAtom, {adminId})),
         A.sequence(TE.ApplicativePar)
+      )
+    ),
+    TE.map(() =>
+      pipe(
+        adminIds,
+        A.map((adminId) => {
+          set(offerToConnectionsAtom, (previousValue) => ({
+            offerToConnections: [
+              ...previousValue.offerToConnections.filter(
+                (one) => one.adminId !== adminId
+              ),
+            ],
+          }))
+        })
       )
     ),
     TE.match(

@@ -2,17 +2,17 @@ import {useState} from 'react'
 import Screen from '../Screen'
 import {HeaderProxy} from '../PageWithButtonAndProgressHeader'
 import ProgressJourney from '../ProgressJourney'
-import {useNavigation} from '@react-navigation/native'
 import useContent from './useContent'
 import SvgImage from '../Image'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import IconButton from '../IconButton'
 import closeSvg from '../images/closeSvg'
 import {Stack, Text, XStack} from 'tamagui'
+import useSafeGoBack from '../../utils/useSafeGoBack'
 
 function FaqsScreen(): JSX.Element {
   const {t} = useTranslation()
-  const navigation = useNavigation()
+  const safeGoBack = useSafeGoBack()
   const content = useContent()
   const [page, setPage] = useState<number>(0)
   return (
@@ -22,23 +22,13 @@ function FaqsScreen(): JSX.Element {
         currentPage={page}
         numberOfPages={content.length}
         onPageChange={setPage}
-        onFinish={() => {
-          navigation.goBack()
-        }}
-        onSkip={() => {
-          navigation.goBack()
-        }}
+        onFinish={safeGoBack}
+        onSkip={safeGoBack}
         withBackButton
       >
         <XStack ai="center" jc="space-between">
           <Text ff="$body600">{t('faqs.faqs')}</Text>
-          <IconButton
-            variant="light"
-            icon={closeSvg}
-            onPress={() => {
-              navigation.goBack()
-            }}
-          />
+          <IconButton variant="light" icon={closeSvg} onPress={safeGoBack} />
         </XStack>
         <Stack f={1} ai="center" jc="center" w="100%" h="100%">
           <SvgImage source={content[page].svg} />

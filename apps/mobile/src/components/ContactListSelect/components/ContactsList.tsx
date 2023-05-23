@@ -4,9 +4,19 @@ import ContactItem from './ContactItem'
 import ListHeader from './ListHeader'
 import ListFooter from './ListFooter'
 import {Stack} from 'tamagui'
+import {type Atom} from 'jotai'
+import atomKeyExtractor from '../../../utils/atomUtils/atomKeyExtractor'
 
 interface Props {
-  contacts: ContactNormalized[]
+  contacts: Array<Atom<ContactNormalized>>
+}
+
+function renderItem({item}: {item: Atom<ContactNormalized>}): JSX.Element {
+  return <ContactItem contactAtom={item} />
+}
+
+function ItemSeparatorComponent(): JSX.Element {
+  return <Stack h={16} />
 }
 
 function ContactsList({contacts}: Props): JSX.Element {
@@ -19,22 +29,9 @@ function ContactsList({contacts}: Props): JSX.Element {
           ListHeaderComponent={ListHeader}
           ListFooterComponent={ListFooter}
           data={contacts}
-          ItemSeparatorComponent={() => <Stack h={16} />}
-          keyExtractor={(item) =>
-            `${item.normalizedNumber}-${item.numberToDisplay}-${
-              item.name
-            }-${item.fromContactList.toString()}`
-          }
-          renderItem={({item}) => {
-            return (
-              <ContactItem
-                numberToDisplay={item.numberToDisplay}
-                normalizedNumber={item.normalizedNumber}
-                name={item.name}
-                imageUri={item.imageUri}
-              />
-            )
-          }}
+          ItemSeparatorComponent={ItemSeparatorComponent}
+          keyExtractor={atomKeyExtractor}
+          renderItem={renderItem}
         />
       </Stack>
     </Stack>

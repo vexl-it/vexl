@@ -1,15 +1,18 @@
 import magnifyingGlass from '../../images/magnifyingGlass'
 import Button from '../../Button'
 import TextInput from '../../Input'
-import {useSearchText} from '../state/searchBar'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
-import {useSelectAll} from '../state/selectedContacts'
 import {Stack, XStack} from 'tamagui'
+import {useMolecule} from 'jotai-molecules'
+import {contactSelectMolecule} from '../atom'
+import {useAtom} from 'jotai'
 
 function SearchBar(): JSX.Element {
-  const [searchText, setSearchText] = useSearchText()
   const {t} = useTranslation()
-  const [allSelected, toggleSelectAll] = useSelectAll()
+
+  const {selectAllAtom, searchTextAtom} = useMolecule(contactSelectMolecule)
+  const [searchText, setSearchText] = useAtom(searchTextAtom)
+  const [allSelected, setAllSelected] = useAtom(selectAllAtom)
 
   return (
     <XStack mt="$4">
@@ -25,7 +28,7 @@ function SearchBar(): JSX.Element {
       <Stack f={3}>
         <Button
           onPress={() => {
-            toggleSelectAll(!allSelected)
+            setAllSelected((prev) => !prev)
           }}
           disabled={false}
           variant="black"

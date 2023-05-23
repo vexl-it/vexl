@@ -17,13 +17,13 @@ import {
   NextButtonProxy,
 } from '../../../PageWithButtonAndProgressHeader'
 import {useCreateUserAtContactMs} from '../../api/createUserAtContactsMS'
+import useSafeGoBack from '../../../../utils/useSafeGoBack'
 
 type Props = LoginStackScreenProps<'SuccessLogin'>
 
 const TARGET_TIME_MILLISECONDS = 3000
 
 function SuccessLoginScreen({
-  navigation,
   route: {
     params: {
       verifyPhoneNumberResponse,
@@ -38,6 +38,7 @@ function SuccessLoginScreen({
   const verifyChallenge = useVerifyChallenge()
   const createUserAtContactMs = useCreateUserAtContactMs()
   const {t} = useTranslation()
+  const safeGoBack = useSafeGoBack()
 
   const finishLogin = useCallback(() => {
     const startedAt = Date.now()
@@ -100,7 +101,7 @@ function SuccessLoginScreen({
       TE.match(
         (text) => {
           Alert.alert(text)
-          navigation.goBack()
+          safeGoBack()
         },
         ({session}) => {
           const leftToWait = TARGET_TIME_MILLISECONDS - (Date.now() - startedAt)
@@ -114,15 +115,15 @@ function SuccessLoginScreen({
     )()
   }, [
     privateKey,
-    t,
     verifyPhoneNumberResponse.challenge,
+    t,
     verifyChallenge,
-    phoneNumber,
     realUserData,
     anonymizedUserData,
-    navigation,
-    setSession,
+    phoneNumber,
     createUserAtContactMs,
+    safeGoBack,
+    setSession,
   ])
 
   useEffect(finishLogin, [finishLogin])

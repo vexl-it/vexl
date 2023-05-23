@@ -11,11 +11,13 @@ import useContent, {type TabType} from './useContent'
 import closeSvg from '../images/closeSvg'
 import IconButton from '../IconButton'
 import {type RootStackScreenProps} from '../../navigationTypes'
+import useSafeGoBack from '../../utils/useSafeGoBack'
 
 type Props = RootStackScreenProps<'TermsAndConditions'>
 
 function TosScreen({navigation}: Props): JSX.Element {
   const {t} = useTranslation()
+  const safeGoBack = useSafeGoBack()
   const content = useContent()
   const scrollViewRef = useRef<ScrollView>(null)
   const [activeTab, setActiveTab] = useState<TabType>('termsOfUse')
@@ -33,11 +35,7 @@ function TosScreen({navigation}: Props): JSX.Element {
   return (
     <Screen customHorizontalPadding={16}>
       <ScreenTitle text={t('termsOfUse.termsOfUse')}>
-        <IconButton
-          variant="dark"
-          icon={closeSvg}
-          onPress={navigation.goBack}
-        />
+        <IconButton variant="dark" icon={closeSvg} onPress={safeGoBack} />
       </ScreenTitle>
       <FaqsRedirect onPress={onFaqsPress} />
       <Stack h={16} />

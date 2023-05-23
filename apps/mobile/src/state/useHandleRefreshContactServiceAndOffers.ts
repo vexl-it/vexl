@@ -1,7 +1,6 @@
 import {useAppState} from '../utils/useAppState'
 import {useCallback} from 'react'
 import {usePrivateApiAssumeLoggedIn} from '../api'
-import {useLogout} from './session'
 import {pipe} from 'fp-ts/function'
 import * as TE from 'fp-ts/TaskEither'
 import {useStore} from 'jotai'
@@ -10,6 +9,7 @@ import * as A from 'fp-ts/Array'
 import {isNonEmpty} from 'fp-ts/Array'
 import {myOffersAtom} from './marketplace/atom'
 import notEmpty from '../utils/notEmpty'
+import {useLogout} from './useLogout'
 
 export function useRefreshUserOnContactService(): void {
   const api = usePrivateApiAssumeLoggedIn()
@@ -127,7 +127,7 @@ export function useRefreshOffers(): void {
                 reportError('warn', 'Error while refreshing offers', l)
               }
             },
-            (r) => {
+            () => {
               console.info(`🦋 Offers refreshed`)
             }
           )

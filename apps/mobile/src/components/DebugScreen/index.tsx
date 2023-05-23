@@ -1,6 +1,5 @@
 import WhiteContainer from '../WhiteContainer'
 import {Spacer, Text, YStack} from 'tamagui'
-import {type RootStackScreenProps} from '../../navigationTypes'
 import Screen from '../Screen'
 import Button from '../Button'
 import {useSetAtom, useStore} from 'jotai'
@@ -16,11 +15,12 @@ import messagingStateAtom from '../../state/chat/atoms/messagingStateAtom'
 import {enableHiddenFeatures} from '../../utils/environment'
 import {apiEnv} from '../../api'
 import CryptoBenchmarks from './components/CryptoBenchmarks'
-import {updateAllOffersConnectionsActionAtom} from '../../state/connections/atom/offerToConnectionsAtom'
+import offerToConnectionsAtom, {
+  updateAllOffersConnectionsActionAtom,
+} from '../../state/connections/atom/offerToConnectionsAtom'
 import messaging from '@react-native-firebase/messaging'
 import Preferences from './components/Preferences'
-
-type Props = RootStackScreenProps<'DebugScreen'>
+import useSafeGoBack from '../../utils/useSafeGoBack'
 
 // const ContentScroll = styled(ScrollView, {
 //   marginBottom: '$2',
@@ -29,7 +29,8 @@ type Props = RootStackScreenProps<'DebugScreen'>
 //   },
 // })
 
-function DebugScreen({navigation}: Props): JSX.Element {
+function DebugScreen(): JSX.Element {
+  const safeGoBack = useSafeGoBack()
   const store = useStore()
   const session = useSessionAssumeLoggedIn()
 
@@ -134,7 +135,8 @@ function DebugScreen({navigation}: Props): JSX.Element {
               onPress={() => {
                 const offers = store.get(offersStateAtom)
                 const messagingState = store.get(messagingStateAtom)
-                console.log({offers, messagingState})
+                const connectionState = store.get(offerToConnectionsAtom)
+                console.log({offers, messagingState, connectionState})
               }}
             />
 
@@ -160,7 +162,7 @@ function DebugScreen({navigation}: Props): JSX.Element {
           </YStack>
           <Preferences />
         </ScrollView>
-        <Button variant="secondary" text="back" onPress={navigation.goBack} />
+        <Button variant="secondary" text="back" onPress={safeGoBack} />
       </WhiteContainer>
     </Screen>
   )

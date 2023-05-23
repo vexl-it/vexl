@@ -1,19 +1,14 @@
 import Button from './Button'
 import {useNavigation} from '@react-navigation/native'
 import {Stack, Text} from 'tamagui'
+import useSafeGoBack from '../utils/useSafeGoBack'
 
 function TodoScreen(): JSX.Element {
-  const navigation = useNavigation()
+  const safeGoBack = useSafeGoBack()
   return (
     <Stack f={1}>
       <Text>To be done</Text>
-      <Button
-        variant="secondary"
-        text="Go back"
-        onPress={() => {
-          navigation.goBack()
-        }}
-      ></Button>
+      <Button variant="secondary" text="Go back" onPress={safeGoBack}></Button>
     </Stack>
   )
 }

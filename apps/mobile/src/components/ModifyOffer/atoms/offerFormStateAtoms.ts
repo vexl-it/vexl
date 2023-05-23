@@ -31,6 +31,7 @@ import {delayInPipeT} from '../../../utils/fpUtils'
 import {generateUuid, Uuid} from '@vexl-next/domain/dist/utility/Uuid.brand'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
 import {focusAtom} from 'jotai-optics'
+import notEmpty from '../../../utils/notEmpty'
 import {type OfferEncryptionProgress} from '@vexl-next/resources-utils/dist/offers/OfferEncryptionProgress'
 
 export function createOfferDummyPublicPart(): OfferPublicPart {
@@ -291,12 +292,12 @@ export const offerFormMolecule = molecule((getMolecule, getScope) => {
       set(deletingOfferAtom, true)
       return pipe(
         set(deleteOffersAtom, {
-          adminIds: [offer.ownershipInfo?.adminId ?? ('' as OfferAdminId)],
+          adminIds: [offer.ownershipInfo?.adminId].filter(notEmpty),
         }),
         TE.match(
           (e) => {
             Alert.alert(
-              toCommonErrorMessage(e, t) ?? t('offerForm.errorCreatingOffer')
+              toCommonErrorMessage(e, t) ?? t('editOffer.errorDeletingOffer')
             )
             return false
           },

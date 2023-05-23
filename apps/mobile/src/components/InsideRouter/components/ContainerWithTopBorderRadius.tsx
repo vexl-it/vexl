@@ -1,4 +1,3 @@
-import {type StyleProp, type ViewStyle} from 'react-native'
 import {type ReactNode} from 'react'
 import usePixelsFromBottomWhereTabsEnd from '../utils'
 import {ScrollView, Stack, styled} from 'tamagui'
@@ -20,14 +19,12 @@ const StyledStack = styled(Stack, {
 })
 
 interface Props {
-  style?: StyleProp<ViewStyle>
   children: ReactNode
   scrollView?: boolean
   withTopPadding?: boolean
 }
 
 function ContainerWithTopBorderRadius({
-  style,
   children,
   scrollView,
   withTopPadding,

@@ -11,6 +11,7 @@ import {singleOfferAtom} from '../../../state/marketplace/atom'
 import {useAtomValue} from 'jotai'
 import {Text} from 'tamagui'
 import ModifyOfferScopeProvider from './ModifyOfferScopeProvider'
+import useSafeGoBack from '../../../utils/useSafeGoBack'
 
 type Props = RootStackScreenProps<'EditOffer'>
 
@@ -21,6 +22,7 @@ function EditOfferScreen({
   navigation,
 }: Props): JSX.Element {
   const {t} = useTranslation()
+  const safeGoBack = useSafeGoBack()
 
   const offer = useAtomValue(useMemo(() => singleOfferAtom(offerId), [offerId]))
 
@@ -32,11 +34,7 @@ function EditOfferScreen({
             modifyOfferScopeValue={offer}
             offerFormScopeValue={offer.offerInfo.publicPart}
           >
-            <EditOfferContent
-              navigateBack={() => {
-                navigation.goBack()
-              }}
-            />
+            <EditOfferContent navigateBack={safeGoBack} />
           </ModifyOfferScopeProvider>
         ) : (
           <>

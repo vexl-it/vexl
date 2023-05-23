@@ -1,14 +1,11 @@
 import {Text} from 'tamagui'
 import WhiteContainer from '../WhiteContainer'
-import {type RootStackScreenProps} from '../../navigationTypes'
 import Button from '../Button'
 import {useRequestNotificationPermissions} from '../../utils/notifications'
+import useSafeGoBack from '../../utils/useSafeGoBack'
 
-type Props = RootStackScreenProps<'NotificationPermissionsMissing'>
-
-export function NotificationPermissionsScreen({
-  navigation,
-}: Props): JSX.Element {
+export function NotificationPermissionsScreen(): JSX.Element {
+  const safeGoBack = useSafeGoBack()
   const requestNotificationPermissions = useRequestNotificationPermissions()
   return (
     <WhiteContainer>
@@ -26,11 +23,7 @@ export function NotificationPermissionsScreen({
         variant={'secondary'}
         text={'Allow permissions'}
       />
-      <Button
-        onPress={navigation.goBack}
-        variant={'primary'}
-        text={'Go back'}
-      />
+      <Button onPress={safeGoBack} variant={'primary'} text={'Go back'} />
     </WhiteContainer>
   )
 }

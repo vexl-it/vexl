@@ -107,7 +107,3 @@ function createFpMMKV(storage: MMKV): FpMMKV {
 }
 
 export const storage = createFpMMKV(new MMKV())
-
-export function clearStorage(): void {
-  storage._storage.clearAll()
-}

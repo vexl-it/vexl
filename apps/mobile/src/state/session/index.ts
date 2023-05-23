@@ -8,13 +8,13 @@ import {Session} from '../../brands/Session.brand'
 import readSessionFromStorage from './readSessionFromStorage'
 import writeSessionToStorage from './writeSessionToStorage'
 import * as O from 'fp-ts/Option'
-import {clearStorage} from '../../utils/fpMmkv'
 import {useCallback} from 'react'
 import {KeyHolder} from '@vexl-next/cryptography'
 import {UriString} from '@vexl-next/domain/dist/utility/UriString.brand'
 import {UserName} from '@vexl-next/domain/dist/general/UserName.brand'
 import {E164PhoneNumber} from '@vexl-next/domain/dist/general/E164PhoneNumber.brand'
 import messaging from '@react-native-firebase/messaging'
+import clearMmkvStorageAndEmptyAtoms from '../../utils/clearMmkvStorageAndEmptyAtoms'
 
 const dummyPrivKey = KeyHolder.generatePrivateKey()
 export const dummySession: Session = Session.parse({
@@ -180,7 +180,7 @@ export function useLogout(): () => void {
   const setSession = useSetAtom(sessionAtom)
   return useCallback(() => {
     setSession(O.none)
-    clearStorage()
+    clearMmkvStorageAndEmptyAtoms()
     void messaging().deleteToken()
   }, [setSession])
 }

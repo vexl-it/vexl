@@ -5,7 +5,7 @@ import {ContactNormalizedWithHash} from './domain'
 import {type Atom} from 'jotai'
 import {selectAtom} from 'jotai/utils'
 
-const importedContactsStorageAtom = atomWithParsedMmkvStorage(
+export const importedContactsStorageAtom = atomWithParsedMmkvStorage(
   'importedContacts',
   {importedContacts: []},
   z.object({importedContacts: z.array(ContactNormalizedWithHash)})

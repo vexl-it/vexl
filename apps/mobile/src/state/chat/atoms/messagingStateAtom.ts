@@ -3,7 +3,7 @@ import {z} from 'zod'
 import {MessagingState} from '../domain'
 import {focusAtom} from 'jotai-optics'
 
-const messagingStateAtomStorageAtom = atomWithParsedMmkvStorage(
+export const messagingStateAtomStorageAtom = atomWithParsedMmkvStorage(
   'messagingState',
   {messagingState: []},
   z.object({messagingState: MessagingState}),

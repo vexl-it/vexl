@@ -129,7 +129,5 @@ export function atomWithParsedMmkvStorage<Value extends z.ZodObject<any>>(
     return listener.remove
   }
 
-  // TODO register listener
-
   return mmkvAtom
 }

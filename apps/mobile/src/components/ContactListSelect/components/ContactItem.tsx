@@ -1,29 +1,16 @@
-import Checkbox from '../../Checkbox'
-import {
-  useIsContactSelected,
-  useToggleContactSelection,
-} from '../state/selectedContacts'
 import SvgImage from '../../Image'
-import {type UriString} from '@vexl-next/domain/dist/utility/UriString.brand'
-import {type E164PhoneNumber} from '@vexl-next/domain/dist/general/E164PhoneNumber.brand'
 import picturePlaceholderSvg from '../image/picturePlaceholderSvg'
 import {Image, Stack, Text} from 'tamagui'
+import {type Atom, useAtomValue} from 'jotai'
+import {type ContactNormalized} from '../../../state/contacts/domain'
+import IsSelectedCheckbox from './IsSelectedCheckbox'
 
 interface Props {
-  imageUri?: UriString
-  numberToDisplay: string
-  normalizedNumber: E164PhoneNumber
-  name: string
+  contactAtom: Atom<ContactNormalized>
 }
 
-function ContactItem({
-  imageUri,
-  numberToDisplay,
-  normalizedNumber,
-  name,
-}: Props): JSX.Element {
-  const isSelected = useIsContactSelected(normalizedNumber)
-  const toggleContactSelection = useToggleContactSelection()
+function ContactItem({contactAtom}: Props): JSX.Element {
+  const {imageUri, numberToDisplay, name} = useAtomValue(contactAtom)
 
   return (
     <Stack fd="row" ai="center">
@@ -46,12 +33,7 @@ function ContactItem({
           {numberToDisplay}
         </Text>
       </Stack>
-      <Checkbox
-        value={isSelected}
-        onChange={(v) => {
-          toggleContactSelection(v, normalizedNumber)
-        }}
-      />
+      <IsSelectedCheckbox contactAtom={contactAtom} />
     </Stack>
   )
 }

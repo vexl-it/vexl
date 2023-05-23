@@ -1,19 +1,15 @@
 import ContactsList from './components/ContactsList'
 import SearchBar from './components/SearchBar'
 import * as O from 'fp-ts/Option'
-import * as TE from 'fp-ts/TaskEither'
-import {useSearchTextAsCustomContact} from './state/searchBar'
 import AddContactRow from './components/AddContactRow'
 import NothingFound from './components/NothingFound'
-import {useContactsToDisplay} from './state/contactsToDisplay'
-import {useImportContacts} from './api'
-import {useShowLoadingOverlay} from '../LoadingOverlayProvider'
-import {hmac} from '@vexl-next/cryptography'
-import {useGetSelectedContacts} from './state/selectedContacts'
-import {pipe} from 'fp-ts/function'
-import {Alert} from 'react-native'
 import WhiteContainer from '../WhiteContainer'
 import {Stack} from 'tamagui'
+import {useAtomValue, useSetAtom, useStore} from 'jotai'
+import {importedContactsAtom} from '../../state/contacts'
+import {useMemo} from 'react'
+import {contactSelectMolecule, ContactsSelectScope} from './atom'
+import {ScopeProvider, useMolecule} from 'jotai-molecules'
 
 interface Props {
   onContactsSubmitted: () => void
@@ -24,32 +20,14 @@ function ContactsListSelect({
   onContactsSubmitted,
   renderFooter,
 }: Props): JSX.Element {
-  const searchTextAsCustomContact = useSearchTextAsCustomContact()
-  const importContacts = useImportContacts()
-  const loadingOverlay = useShowLoadingOverlay()
-  const toDisplay = useContactsToDisplay()
-  const getSelectedContacts = useGetSelectedContacts()
-
-  function onSubmit(): void {
-    loadingOverlay.show()
-    const hashes = getSelectedContacts().map((one) =>
-      hmac.hmacSign({password: 'VexlVexl', data: one})
-    )
-
-    void pipe(
-      importContacts({contacts: hashes}),
-      TE.match(
-        (e) => {
-          Alert.alert(e)
-          loadingOverlay.hide()
-        },
-        () => {
-          loadingOverlay.hide()
-          onContactsSubmitted()
-        }
-      )
-    )()
-  }
+  const {
+    searchTextAsCustomContactAtom,
+    contactsToDisplayAtomsAtom,
+    submitActionAtom,
+  } = useMolecule(contactSelectMolecule)
+  const customContactToAdd = useAtomValue(searchTextAsCustomContactAtom)
+  const toDisplay = useAtomValue(contactsToDisplayAtomsAtom)
+  const submit = useSetAtom(submitActionAtom)
 
   return (
     <>
@@ -57,15 +35,21 @@ function ContactsListSelect({
         <Stack f={1} px="$4">
           <SearchBar />
           {toDisplay.length > 0 && <ContactsList contacts={toDisplay} />}
-          {toDisplay.length === 0 && !O.isSome(searchTextAsCustomContact) && (
+          {toDisplay.length === 0 && !O.isSome(customContactToAdd) && (
             <NothingFound />
           )}
-          {toDisplay.length === 0 && O.isSome(searchTextAsCustomContact) && (
-            <AddContactRow contact={searchTextAsCustomContact.value} />
+          {toDisplay.length === 0 && O.isSome(customContactToAdd) && (
+            <AddContactRow contact={customContactToAdd.value} />
           )}
         </Stack>
       </WhiteContainer>
-      {renderFooter({onSubmit})}
+      {renderFooter({
+        onSubmit: () => {
+          void submit()().then((success) => {
+            if (success) onContactsSubmitted()
+          })
+        },
+      })}
     </>
   )
 }
@@ -73,5 +57,15 @@ function ContactsListSelect({
 export default function ContactListSelectWithProvider(
   props: Props
 ): JSX.Element {
-  return <ContactsListSelect {...props} />
+  const store = useStore()
+  const importedContacts = useMemo(
+    () => store.get(importedContactsAtom),
+    [store]
+  )
+
+  return (
+    <ScopeProvider scope={ContactsSelectScope} value={importedContacts}>
+      <ContactsListSelect {...props} />
+    </ScopeProvider>
+  )
 }

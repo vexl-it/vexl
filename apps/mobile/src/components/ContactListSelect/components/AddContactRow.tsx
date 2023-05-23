@@ -1,23 +1,23 @@
 import Image from '../../Image'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import addSvg from '../image/addSvg'
-import {useAddCustomContact} from '../state/customContacts'
 import {type ContactNormalized} from '../brands/ContactNormalized.brand'
-import {useToggleContactSelection} from '../state/selectedContacts'
 import {Stack, Text} from 'tamagui'
 import {TouchableOpacity} from 'react-native'
+import {useMolecule} from 'jotai-molecules'
+import {contactSelectMolecule} from '../atom'
+import {useSetAtom} from 'jotai'
 
 function AddContactRow({contact}: {contact: ContactNormalized}): JSX.Element {
   const {t} = useTranslation()
-  const addCustomContact = useAddCustomContact()
-  const toggleContactSelection = useToggleContactSelection()
+  const {addAndSelectContactAtom} = useMolecule(contactSelectMolecule)
+  const addAndSelectContact = useSetAtom(addAndSelectContactAtom)
 
   return (
     <TouchableOpacity
       style={{flex: 1}}
       onPress={() => {
-        addCustomContact(contact)
-        toggleContactSelection(true, contact.normalizedNumber)
+        addAndSelectContact(contact)
       }}
     >
       <Stack f={1} ai="center" jc="center">

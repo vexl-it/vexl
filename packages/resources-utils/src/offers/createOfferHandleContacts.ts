@@ -27,6 +27,7 @@ import {
 } from './utils/fetchContactsForOffer'
 import {type ExtractLeftTE} from '../utils/ExtractLeft'
 import {type ErrorConstructingPrivatePayloads} from './utils/constructPrivatePayloads'
+import {type OfferEncryptionProgress} from './OfferEncryptionProgress'
 
 export type ApiErrorWhileCreatingOffer = ExtractLeftTE<
   ReturnType<OfferPrivateApi['createNewOffer']>
@@ -46,12 +47,14 @@ export default function createNewOfferForMyContacts({
   publicPart,
   ownerKeyPair,
   intendedConnectionLevel,
+  onProgress,
 }: {
   offerApi: OfferPrivateApi
   contactApi: ContactPrivateApi
   publicPart: OfferPublicPart
   ownerKeyPair: PrivateKeyHolder
   intendedConnectionLevel: IntendedConnectionLevel
+  onProgress?: (status: OfferEncryptionProgress) => void
 }): TE.TaskEither<
   | ApiErrorFetchingContactsForOffer
   | ErrorConstructingPrivatePayloads
@@ -64,19 +67,25 @@ export default function createNewOfferForMyContacts({
   return pipe(
     TE.Do,
     TE.bindW('symmetricKey', () => TE.fromEither(generateSymmetricKey())),
-    TE.bindW('encryptedPublic', ({symmetricKey}) =>
-      encryptOfferPublicPayload({offerPublicPart: publicPart, symmetricKey})
-    ),
+    TE.bindW('encryptedPublic', ({symmetricKey}) => {
+      if (onProgress) onProgress({type: 'CONSTRUCTING_PUBLIC_PAYLOAD'})
+      return encryptOfferPublicPayload({
+        offerPublicPart: publicPart,
+        symmetricKey,
+      })
+    }),
     TE.bindW('privatePayloads', ({symmetricKey}) =>
       fetchInfoAndGeneratePrivatePayloads({
         symmetricKey,
         intendedConnectionLevel,
         contactApi,
         ownerCredentials: ownerKeyPair,
+        onProgress,
       })
     ),
-    TE.bindW('response', ({privatePayloads, encryptedPublic}) =>
-      pipe(
+    TE.bindW('response', ({privatePayloads, encryptedPublic}) => {
+      if (onProgress) onProgress({type: 'SENDING_OFFER_TO_NETWORK'})
+      return pipe(
         offerApi.createNewOffer({
           offerPrivateList: privatePayloads.privateParts,
           payloadPublic: encryptedPublic,
@@ -87,13 +96,17 @@ export default function createNewOfferForMyContacts({
           decryptOffer(ownerKeyPair)(response)
         )
       )
-    ),
+    }),
     TE.map(({response, privatePayloads, symmetricKey}) => ({
       adminId: response.response.adminId,
       offerInfo: response.offerInfo,
       encryptionErrors: privatePayloads.errors,
       symmetricKey,
       encryptedFor: privatePayloads.connections,
-    }))
+    })),
+    TE.map((v) => {
+      if (onProgress) onProgress({type: 'DONE'})
+      return v
+    })
   )
 }

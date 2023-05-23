@@ -25,6 +25,7 @@ import constructPrivatePayloads, {
   type ErrorConstructingPrivatePayloads,
   type OfferPrivatePayloadToEncrypt,
 } from './constructPrivatePayloads'
+import {type OfferEncryptionProgress} from '../OfferEncryptionProgress'
 
 function privatePayloadForOwner({
   ownerCredentials,
@@ -79,11 +80,13 @@ export function fetchInfoAndGeneratePrivatePayloads({
   intendedConnectionLevel,
   symmetricKey,
   ownerCredentials,
+  onProgress,
 }: {
   contactApi: ContactPrivateApi
   intendedConnectionLevel: IntendedConnectionLevel
   symmetricKey: SymmetricKey
   ownerCredentials: PrivateKeyHolder
+  onProgress?: (state: OfferEncryptionProgress) => void
 }): TE.TaskEither<
   ApiErrorFetchingContactsForOffer | ErrorConstructingPrivatePayloads,
   {
@@ -94,10 +97,12 @@ export function fetchInfoAndGeneratePrivatePayloads({
 > {
   return pipe(
     TE.Do,
-    TE.chainW(() =>
-      fetchContactsForOffer({contactApi, intendedConnectionLevel})
-    ),
+    TE.chainW(() => {
+      if (onProgress) onProgress({type: 'FETCHING_CONTACTS'})
+      return fetchContactsForOffer({contactApi, intendedConnectionLevel})
+    }),
     TE.chainW((connectionsInfo) => {
+      if (onProgress) onProgress({type: 'CONSTRUCTING_PRIVATE_PAYLOADS'})
       return pipe(
         TE.Do,
         TE.chainW(() =>
@@ -109,10 +114,25 @@ export function fetchInfoAndGeneratePrivatePayloads({
           ...privatePayloads,
           privatePayloadForOwner({ownerCredentials, symmetricKey}),
         ]),
-        TE.chainTaskK(
-          flow(
-            A.map(encryptPrivatePart),
-            A.sequence(T.ApplicativePar),
+        TE.chainTaskK((privateParts) =>
+          pipe(
+            privateParts,
+            A.mapWithIndex((i, one) =>
+              pipe(
+                TE.Do,
+                TE.map((v) => {
+                  if (onProgress)
+                    onProgress({
+                      type: 'ENCRYPTING_PRIVATE_PAYLOADS',
+                      currentlyProcessingIndex: i,
+                      totalToEncrypt: privateParts.length,
+                    })
+                  return v
+                }),
+                TE.chainW(() => encryptPrivatePart(one))
+              )
+            ),
+            A.sequence(T.ApplicativeSeq),
             flattenTaskOfEithers,
             T.map(({lefts, rights}) => ({
               errors: lefts,

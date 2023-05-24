@@ -37,8 +37,9 @@ export function generateSignedChallengeBatch(
   ErrorGeneratingSignedChallengeBatch | ApiErrorsGeneratingChallengeBatch,
   Array<{publicKey: PublicKeyPemBase64; challenge: SignedChallenge}>
 > {
-  return (keyPairs) =>
-    pipe(
+  return (keyPairs) => {
+    if (keyPairs.length === 0) return TE.right([])
+    return pipe(
       chatApi.createChallengeBatch({
         publicKeys: keyPairs.map((k) => k.publicKeyPemBase64),
       }),
@@ -72,4 +73,5 @@ export function generateSignedChallengeBatch(
         )
       )
     )
+  }
 }

@@ -85,6 +85,11 @@ export const privateApiAtom = atom((get) => {
       url: apiEnv.chatMs,
       getUserSessionCredentials,
     }),
+    user: user.privateApi({
+      platform,
+      url: apiEnv.userMs,
+      getUserSessionCredentials,
+    }),
   }
 })
 

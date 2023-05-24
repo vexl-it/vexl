@@ -134,3 +134,6 @@ export const ReportOfferRequest = z.object({
 })
 export type ReportOfferRequest = z.TypeOf<typeof ReportOfferRequest>
 export const ReportOfferResponse = NoContentResponse
+
+export const DeleteUserResponse = NoContentResponse
+export type DeleteUserResponse = z.TypeOf<typeof DeleteUserResponse>

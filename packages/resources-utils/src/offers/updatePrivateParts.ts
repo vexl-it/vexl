@@ -27,12 +27,12 @@ export default function updatePrivateParts({
   api,
 }: {
   currentConnections: {
-    firstLevel: PublicKeyPemBase64[]
-    secondLevel?: PublicKeyPemBase64[]
+    readonly firstLevel: readonly PublicKeyPemBase64[]
+    readonly secondLevel?: readonly PublicKeyPemBase64[]
   }
   targetConnections: {
-    readonly firstLevel: PublicKeyPemBase64[]
-    readonly secondLevel: PublicKeyPemBase64[]
+    readonly firstLevel: readonly PublicKeyPemBase64[]
+    readonly secondLevel: readonly PublicKeyPemBase64[]
   }
   commonFriends: FetchCommonConnectionsResponse
   adminId: OfferAdminId
@@ -72,6 +72,16 @@ export default function updatePrivateParts({
       )
     : undefined
 
+  console.info(
+    `Updating connections of one offer. Number of removedConnections: ${
+      removedConnections.length
+    }. Number of newFirstLevelConnections: ${
+      newFirstLevelConnections.length
+    }. Number of newSecondLevelConnections: ${
+      newSecondLevelConnections?.length ?? 'undefined'
+    }.`
+  )
+
   return pipe(
     constructPrivatePayloads({
       connectionsInfo: {
@@ -109,12 +119,26 @@ export default function updatePrivateParts({
           })
         : (TE.right('ok') as TE.TaskEither<never, any>)
     }),
-    TE.map(({encryptionErrors}) => ({
-      encryptionErrors,
-      newConnections: {
-        firstLevel: newFirstLevelConnections,
-        secondLevel: newSecondLevelConnections,
-      },
-    }))
+    TE.map(({encryptionErrors}) => {
+      const pubKeysThatFailedEncryptTo = encryptionErrors.map(
+        (one) => one.toPublicKey
+      )
+
+      return {
+        encryptionErrors,
+        newConnections: {
+          firstLevel: subtractArrays(
+            newFirstLevelConnections,
+            pubKeysThatFailedEncryptTo
+          ),
+          secondLevel: newSecondLevelConnections
+            ? subtractArrays(
+                newSecondLevelConnections,
+                pubKeysThatFailedEncryptTo
+              )
+            : undefined,
+        },
+      }
+    })
   )
 }

@@ -17,6 +17,7 @@ import {sequenceS} from 'fp-ts/Apply'
 import deduplicate from '../../../utils/deduplicate'
 import reportError from '../../../utils/reportError'
 import {atom} from 'jotai'
+import {selectAtom} from 'jotai/utils'
 
 const connectionStateAtom = atomWithParsedMmkvStorage(
   'connectionsState',
@@ -82,5 +83,15 @@ export const syncConnectionsActionAtom = atom(
         }
       )
     )
+  }
+)
+
+export const reachNumberAtom = selectAtom(
+  connectionStateAtom,
+  (connectionState) => {
+    return deduplicate([
+      ...connectionState.firstLevel,
+      ...connectionState.secondLevel,
+    ]).length
   }
 )

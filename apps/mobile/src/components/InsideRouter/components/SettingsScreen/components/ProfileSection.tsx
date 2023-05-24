@@ -7,6 +7,8 @@ import {Alert, TouchableWithoutFeedback} from 'react-native'
 import reachIconSVG from '../images/reachIconSVG'
 import {Stack, styled, Text, XStack} from 'tamagui'
 import {enableHiddenFeatures} from '../../../../../utils/environment'
+import {useAtomValue} from 'jotai'
+import {reachNumberAtom} from '../../../../../state/connections/atom/connectionStateAtom'
 
 const GrayBackContainer = styled(XStack, {
   ai: 'center',
@@ -20,6 +22,7 @@ const GrayBackContainer = styled(XStack, {
 function ProfileSection(): JSX.Element {
   const {t} = useTranslation()
   const session = useSessionAssumeLoggedIn()
+  const reachNumber = useAtomValue(reachNumberAtom)
 
   return (
     <Stack ai="center" ml="$4" mr="$4">
@@ -29,7 +32,7 @@ function ProfileSection(): JSX.Element {
             <SvgImage source={reachIconSVG} />
           </Stack>
           <Text fos={16} ml="$2" col="$greyOnBlack">
-            {t('settings.yourReach', {number: 1000})}
+            {t('settings.yourReach', {number: reachNumber})}
           </Text>
         </GrayBackContainer>
         {enableHiddenFeatures ? (

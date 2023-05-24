@@ -4,7 +4,7 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {useMolecule} from 'jotai-molecules'
 import {useAtomValue} from 'jotai'
 import {offerFormMolecule} from '../atoms/offerFormStateAtoms'
-import CreateOfferProgress from '../../CreateOfferProgress'
+import CreateOfferProgress from './CreateOfferProgress'
 
 interface Props {
   loading: boolean
@@ -12,8 +12,6 @@ interface Props {
   subtitle?: string
   title: string
   visible: boolean
-  currentlyProcessingIndex?: number
-  totalToEncrypt?: number
 }
 
 function OfferInProgress({
@@ -21,8 +19,6 @@ function OfferInProgress({
   subtitle,
   title,
   visible,
-  currentlyProcessingIndex,
-  totalToEncrypt,
 }: Props): JSX.Element {
   const {bottom} = useSafeAreaInsets()
   const {modifyOfferLoaderTitleAtom} = useMolecule(offerFormMolecule)
@@ -36,8 +32,6 @@ function OfferInProgress({
             {title}
           </Text>
           <CreateOfferProgress
-            total={totalToEncrypt ?? 0}
-            totalDone={currentlyProcessingIndex ?? 0}
             leftText={
               loading ? loaderTitle.loadingText : loaderTitle.notLoadingText
             }

@@ -5,26 +5,24 @@ import {getTokens} from 'tamagui'
 import React, {type ComponentProps, useMemo} from 'react'
 import usePixelsFromBottomWhereTabsEnd from '../InsideRouter/utils'
 import {FlashList} from '@shopify/flash-list'
+import {type Atom} from 'jotai'
+import atomKeyExtractor from '../../utils/atomUtils/atomKeyExtractor'
 
 export interface Props {
-  readonly offers: OneOfferInState[]
+  readonly offersAtoms: Array<Atom<OneOfferInState>>
   onRefresh?: () => void
   refreshing?: boolean
   ListHeaderComponent?: ComponentProps<typeof FlatList>['ListHeaderComponent']
 }
 
-function keyExtractor(offer: OneOfferInState): string {
-  return offer.offerInfo.offerId
-}
-
-function renderItem({item}: {item: OneOfferInState}): JSX.Element {
-  return <OffersListItem offer={item} />
+function renderItem({item}: {item: Atom<OneOfferInState>}): JSX.Element {
+  return <OffersListItem offerAtom={item} />
 }
 
 function OffersList({
   onRefresh,
   refreshing,
-  offers,
+  offersAtoms,
   ListHeaderComponent,
 }: Props): JSX.Element {
   const bottomOffset = usePixelsFromBottomWhereTabsEnd()
@@ -40,11 +38,11 @@ function OffersList({
         }),
         [bottomOffset]
       )}
-      data={offers}
+      data={offersAtoms}
       onRefresh={onRefresh}
       refreshing={refreshing}
       renderItem={renderItem}
-      keyExtractor={keyExtractor}
+      keyExtractor={atomKeyExtractor}
     />
   )
 }

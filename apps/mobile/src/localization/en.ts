@@ -40,6 +40,7 @@ export default {
     'more': 'More',
     'yes': 'Yes',
     'no': 'No',
+    'myOffers': 'My offers',
   },
   'loginFlow': {
     'anonymityNotice': 'Nobody will see this until you allow it. Even us.',
@@ -156,7 +157,6 @@ export default {
   'settings': {
     'yourReach': 'Your reach: {{number}} vexlers',
     'items': {
-      'myOffers': 'My offers',
       'changeProfilePicture': 'Change profile picture',
       'editName': 'Edit name',
       'contactsImported': 'Contacts imported',
@@ -210,7 +210,6 @@ export default {
     'buy': 'Buy',
     'sell': 'Sell',
     'filterOffers': 'Filter offers',
-    'myOffers': 'My offers',
     'numberOfCommon': '{{number}} common',
     'offerNotFound':
       'Offer not found. It might have been deleted by the author',
@@ -395,7 +394,6 @@ export default {
     },
   },
   'myOffers': {
-    'myOffers': 'My offers',
     'addNewOffer': 'Add new offer',
     'activeOffers': '{{count}} active offers',
     'filterOffers': 'Filter offers',

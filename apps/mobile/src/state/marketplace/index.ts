@@ -13,19 +13,14 @@ import {
   offerFlagsAtom,
   offerForChatOriginAtom,
   offersAtom,
-  offersAtomWithFilter,
   offersIdsAtom,
   offersStateAtom,
-  offersToSee,
+  offersToSeeInMarketplace,
   singleOfferAtom,
   singleOfferByAdminIdAtom,
 } from './atom'
 import * as Option from 'fp-ts/Option'
-import {
-  type ApiErrorDeletingOffer,
-  type OffersFilter,
-  type OneOfferInState,
-} from './domain'
+import {type ApiErrorDeletingOffer, type OneOfferInState} from './domain'
 import {privateApiAtom, usePrivateApiAssumeLoggedIn} from '../../api'
 import {pipe} from 'fp-ts/function'
 import {dummySession, sessionAtom, useSessionAssumeLoggedIn} from '../session'
@@ -202,7 +197,7 @@ export function useOffersLoadingError(): Option.Option<ApiErrorFetchingOffers> {
 }
 
 export function useOffers(): OneOfferInState[] {
-  return useAtomValue(offersToSee)
+  return useAtomValue(offersToSeeInMarketplace)
 }
 
 export function useMyOffers(): OneOfferInState[] {
@@ -216,10 +211,6 @@ export function useSingleOffer(
     useMemo(() => singleOfferAtom(offerId), [offerId])
   )
   return Option.fromNullable(foundOffer)
-}
-
-export function useFilteredOffers(filter: OffersFilter): OneOfferInState[] {
-  return useAtomValue(useMemo(() => offersAtomWithFilter(filter), [filter]))
 }
 
 export const createOfferAtom = atom<

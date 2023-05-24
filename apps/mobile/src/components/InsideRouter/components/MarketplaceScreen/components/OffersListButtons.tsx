@@ -35,7 +35,7 @@ function OffersListButtons({
           onPress={onMyOffersPress}
           variant={'primary'}
           size={'small'}
-          text={t('offer.myOffers')}
+          text={t('common.myOffers')}
         />
         <Stack w="$2" />
         <Button

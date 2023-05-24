@@ -1,67 +1,35 @@
 import Screen from '../Screen'
 import ScreenTitle from '../ScreenTitle'
 import {type RootStackScreenProps} from '../../navigationTypes'
-import {
-  translationAtom,
-  useTranslation,
-} from '../../utils/localization/I18nProvider'
+import {useTranslation} from '../../utils/localization/I18nProvider'
 import Button from '../Button'
 import plusSvg from './images/plusSvg'
 import {Text, XStack} from 'tamagui'
-import {useAtomValue, atom, useAtom} from 'jotai'
+import {useAtomValue} from 'jotai'
 import OffersList from '../OffersList'
 import IconButton from '../IconButton'
 import closeSvg from '../images/closeSvg'
 import {
   myActiveOffersAtom,
-  myOffersAtom,
-  myOffersSortingOptionAtom,
-  sortOffers,
+  myOffersSortedAtomsAtom,
 } from '../../state/marketplace/atom'
 import {selectAtom} from 'jotai/utils'
-import Dropdown, {type RowProps} from '../Dropdown'
-import {type Sort} from '@vexl-next/domain/dist/general/offers'
-import React, {useMemo} from 'react'
+import React from 'react'
+import MyOffersSortingDropdown from './components/MyOffersSortingDropdown'
 
 type Props = RootStackScreenProps<'MyOffers'>
 
 const myActiveOffers = selectAtom(myActiveOffersAtom, (offers) => offers.length)
 
-const myOffersSortingOptionsAtom = atom<Array<RowProps<Sort>>>((get) => {
-  const {t} = get(translationAtom)
-
-  return [
-    {
-      title: t('myOffers.sortedByNewest'),
-      type: 'NEWEST_OFFER',
-    },
-    {
-      title: t('myOffers.sortedByOldest'),
-      type: 'OLDEST_OFFER',
-    },
-  ]
-})
-
 function MyOffersScreen({navigation}: Props): JSX.Element {
   const {t} = useTranslation()
 
-  const [myOffersSortingOption, setMyOffersSortingOption] = useAtom(
-    myOffersSortingOptionAtom
-  )
-  const mySortedOffers = [
-    ...useAtomValue(
-      useMemo(
-        () => sortOffers(myOffersAtom, myOffersSortingOption),
-        [myOffersSortingOption]
-      )
-    ),
-  ]
-  const myOffersSortingOptions = useAtomValue(myOffersSortingOptionsAtom)
+  const myOffersSortedAtoms = useAtomValue(myOffersSortedAtomsAtom)
   const activeOffersCount = useAtomValue(myActiveOffers)
 
   return (
     <Screen>
-      <ScreenTitle text={t('myOffers.myOffers')} withBottomBorder>
+      <ScreenTitle text={t('common.myOffers')} withBottomBorder>
         <IconButton
           variant="dark"
           icon={closeSvg}
@@ -80,12 +48,7 @@ function MyOffersScreen({navigation}: Props): JSX.Element {
         <Text ff={'$body600'} fos={18} col={'$white'}>
           {t('myOffers.activeOffers', {count: activeOffersCount})}
         </Text>
-        <Dropdown
-          size={'small'}
-          activeRowType={myOffersSortingOption}
-          setActiveRowType={setMyOffersSortingOption}
-          rows={myOffersSortingOptions}
-        />
+        <MyOffersSortingDropdown />
       </XStack>
       <Button
         beforeIcon={plusSvg}
@@ -96,7 +59,7 @@ function MyOffersScreen({navigation}: Props): JSX.Element {
         text={t('myOffers.addNewOffer')}
         variant={'secondary'}
       />
-      <OffersList offers={mySortedOffers} />
+      <OffersList offersAtoms={myOffersSortedAtoms} />
     </Screen>
   )
 }

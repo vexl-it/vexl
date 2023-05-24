@@ -5,14 +5,16 @@ import {type OneOfferInState} from '../../state/marketplace/domain'
 import {Stack} from 'tamagui'
 import OfferWithBubbleTip from '../OfferWithBubbleTip'
 import {useMemo} from 'react'
+import {type Atom, useAtomValue} from 'jotai'
 
 interface Props {
-  readonly offer: OneOfferInState
+  readonly offerAtom: Atom<OneOfferInState>
 }
 
-function OffersListItem({offer}: Props): JSX.Element {
+function OffersListItem({offerAtom}: Props): JSX.Element {
   const {t} = useTranslation()
   const navigation = useNavigation()
+  const offer = useAtomValue(offerAtom)
 
   const isMine = useMemo(
     () => !!offer.ownershipInfo?.adminId,

@@ -19,7 +19,7 @@ import {Alert} from 'react-native'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
 import {
   createOfferAtom,
-  deleteOffersAtom,
+  deleteOffersActionAtom,
   updateOfferAtom,
 } from '../../../state/marketplace'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
@@ -291,7 +291,7 @@ export const offerFormMolecule = molecule((getMolecule, getScope) => {
 
       set(deletingOfferAtom, true)
       return pipe(
-        set(deleteOffersAtom, {
+        set(deleteOffersActionAtom, {
           adminIds: [offer.ownershipInfo?.adminId].filter(notEmpty),
         }),
         TE.match(

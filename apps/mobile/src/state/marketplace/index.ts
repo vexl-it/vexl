@@ -20,7 +20,7 @@ import {
   singleOfferByAdminIdAtom,
 } from './atom'
 import * as Option from 'fp-ts/Option'
-import {type ApiErrorDeletingOffer, type OneOfferInState} from './domain'
+import {type OffersFilter, type ApiErrorDeletingOffer, type OneOfferInState} from './domain'
 import {privateApiAtom, usePrivateApiAssumeLoggedIn} from '../../api'
 import {pipe} from 'fp-ts/function'
 import {dummySession, sessionAtom, useSessionAssumeLoggedIn} from '../session'
@@ -41,10 +41,7 @@ import updateOffer, {
 } from '@vexl-next/resources-utils/dist/offers/updateOffer'
 import {type OfferAdminId} from '@vexl-next/rest-api/dist/services/offer/contracts'
 import {type ErrorDecryptingOffer} from '@vexl-next/resources-utils/dist/offers/decryptOffer'
-import {
-  type BasicError,
-  toBasicError,
-} from '@vexl-next/domain/dist/utility/errors'
+import {type BasicError} from '@vexl-next/domain/dist/utility/errors'
 import {useCallback, useMemo} from 'react'
 import deduplicate from '../../utils/deduplicate'
 import notEmpty from '../../utils/notEmpty'
@@ -373,7 +370,7 @@ export const deleteAllChatsForOfferAtom = atom<
   )
 })
 
-export const deleteOffersAtom = atom<
+export const deleteOffersActionAtom = atom<
   null,
   [{adminIds: OfferAdminId[]}],
   TE.TaskEither<any, {success: true}>
@@ -385,6 +382,7 @@ export const deleteOffersAtom = atom<
   return pipe(
     TE.Do,
     TE.chainFirstW(() => pipe(api.offer.deleteOffer({adminIds}))),
+    // TODO do we want to delete all chats?
     TE.chainFirstTaskK(() =>
       pipe(
         adminIds,
@@ -425,40 +423,6 @@ export const deleteOffersAtom = atom<
     )
   )
 })
-
-export function useDeleteOffer(): (
-  adminIds: OfferAdminId[]
-) => TE.TaskEither<ApiErrorDeletingOffer, {success: true}> {
-  const api = usePrivateApiAssumeLoggedIn()
-  const store = useStore()
-
-  return useCallback(
-    (adminIds) => {
-      const offers = store.get(offersAtom)
-      return pipe(
-        api.offer.deleteOffer({adminIds}),
-        TE.matchW(
-          (left) => {
-            reportError('error', 'Error while deleting offers', left)
-            return E.left(toBasicError('ApiErrorDeletingOffer')(left))
-          },
-          () => {
-            store.set(
-              offersAtom,
-              offers.filter(
-                (o) =>
-                  !o.ownershipInfo?.adminId ||
-                  !adminIds.includes(o.ownershipInfo?.adminId)
-              )
-            )
-            return E.right({success: true})
-          }
-        )
-      )
-    },
-    [api, store]
-  )
-}
 
 export type ErrorOfferAlreadyRequested =
   BasicError<'ErrorOfferAlreadyRequested'>

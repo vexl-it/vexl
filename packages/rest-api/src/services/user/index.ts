@@ -17,10 +17,17 @@ import {
   type VerifyPhoneNumberRequest,
   VerifyPhoneNumberResponse,
 } from './contracts'
-import {axiosCallWithValidation, createAxiosInstance, type LoggingFunction} from '../../utils'
+import {
+  axiosCall,
+  axiosCallWithValidation,
+  createAxiosInstance,
+  createAxiosInstanceWithAuthAndLogging,
+  type LoggingFunction,
+} from '../../utils'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {type PlatformName} from '../../PlatformName'
+import {type GetUserSessionCredentials} from '../../UserSessionCredentials.brand'
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function publicApi({
@@ -127,11 +134,38 @@ export function publicApi({
 
 export type UserPublicApi = ReturnType<typeof publicApi>
 
-// deleteUser: async function deleteUser(): AxiosPromise<void> {
-//   return await axiosInstance.delete('/user/me', {
-//     headers: getCredentialsHeaders(),
-//   })
-// }
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+export function privateApi({
+  platform,
+  url,
+  getUserSessionCredentials,
+  axiosConfig,
+  loggingFunction,
+}: {
+  platform: PlatformName
+  url: ServiceUrl
+  getUserSessionCredentials: GetUserSessionCredentials
+  axiosConfig?: Omit<CreateAxiosDefaults, 'baseURL'>
+  loggingFunction?: LoggingFunction | null
+}) {
+  const axiosInstance = createAxiosInstanceWithAuthAndLogging(
+    getUserSessionCredentials,
+    platform,
+    {
+      ...axiosConfig,
+      baseURL: urlJoin(url, '/api/v1'),
+    },
+    loggingFunction
+  )
+
+  return {
+    deleteUser: () =>
+      axiosCall(axiosInstance, {method: 'delete', url: '/user/me'}),
+  }
+}
+
+export type UserPrivateApi = ReturnType<typeof privateApi>
+
 // export async function exportData(): AxiosPromise<ExportDataResponse> {
 //   return authAxiosInstance.get('/export/me', {
 //     headers: getCredentialsHeaders(),

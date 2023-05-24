@@ -20,7 +20,8 @@ import {
   CreateChallengesResponse,
   type CreateInboxRequest,
   CreateInboxResponse,
-  type DeleteInboxesResponse,
+  type DeleteInboxesRequest,
+  DeleteInboxesResponse,
   type DeleteInboxRequest,
   DeleteInboxResponse,
   type DeletePulledMessagesRequest,
@@ -152,11 +153,11 @@ export function privateApi({
         )
       )
     },
-    deleteInboxes(data: DeleteInboxesResponse) {
+    deleteInboxes(data: DeleteInboxesRequest) {
       return axiosCallWithValidation(
         axiosInstance,
         {method: 'delete', url: '/inboxes/batch', data},
-        DeleteInboxResponse
+        DeleteInboxesResponse
       )
     },
     // ----------------------

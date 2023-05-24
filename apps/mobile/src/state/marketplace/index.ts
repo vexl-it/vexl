@@ -74,6 +74,7 @@ import {unixMillisecondsNow} from '@vexl-next/domain/dist/utility/UnixMillisecon
 import {type ErrorGeneratingSignedChallengeBatch} from '@vexl-next/resources-utils/dist/chat/utils/generateSignedChallengesBatch'
 import {type ServerMessageWithId} from '@vexl-next/rest-api/dist/services/chat/contracts'
 import {chatsForMyOfferAtom} from '../chat/atoms/chatsForMyOfferAtom'
+import {type OfferEncryptionProgress} from '@vexl-next/resources-utils/dist/offers/OfferEncryptionProgress'
 
 export function useTriggerOffersRefresh(): Task<void> {
   const api = usePrivateApiAssumeLoggedIn()
@@ -225,6 +226,7 @@ export const createOfferAtom = atom<
     {
       payloadPublic: OfferPublicPart
       intendedConnectionLevel: IntendedConnectionLevel
+      onProgress?: (status: OfferEncryptionProgress) => void
     }
   ],
   TE.TaskEither<
@@ -239,7 +241,7 @@ export const createOfferAtom = atom<
 >(null, (get, set, params) => {
   const api = get(privateApiAtom)
   const session = get(sessionAtom)
-  const {payloadPublic, intendedConnectionLevel} = params
+  const {payloadPublic, intendedConnectionLevel, onProgress} = params
   return pipe(
     createNewOfferForMyContacts({
       offerApi: api.offer,
@@ -250,6 +252,7 @@ export const createOfferAtom = atom<
         session.state === 'loggedIn'
           ? session.session.privateKey
           : dummySession.privateKey,
+      onProgress,
     }),
     TE.map((r) => {
       if (r.encryptionErrors.length > 0) {

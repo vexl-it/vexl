@@ -515,4 +515,7 @@ export default {
     'themDeclined': '{{name}} declined',
     'youDeclined': 'You have declined',
   },
+  'progressBar': {
+    'itemsDone': '{{percentDone}}% done',
+  },
 }

@@ -31,6 +31,7 @@ import {delayInPipeT} from '../../../utils/fpUtils'
 import {generateUuid, Uuid} from '@vexl-next/domain/dist/utility/Uuid.brand'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
 import {focusAtom} from 'jotai-optics'
+import {type OfferEncryptionProgress} from '@vexl-next/resources-utils/dist/offers/OfferEncryptionProgress'
 
 export function createOfferDummyPublicPart(): OfferPublicPart {
   return {
@@ -186,6 +187,9 @@ export const offerFormMolecule = molecule((getMolecule, getScope) => {
   const editingOfferAtom = atom<boolean>(false)
   const encryptingOfferAtom = atom<boolean>(false)
   const deletingOfferAtom = atom<boolean>(false)
+  const createOfferProgressAtom = atom<OfferEncryptionProgress | undefined>(
+    undefined
+  )
 
   const createOfferActionAtom = atom(null, (get, set): T.Task<boolean> => {
     const {t} = get(translationAtom)
@@ -224,6 +228,9 @@ export const offerFormMolecule = molecule((getMolecule, getScope) => {
             ...restOfPublicPart,
           },
           intendedConnectionLevel,
+          onProgress: (status) => {
+            set(createOfferProgressAtom, status)
+          },
         })
       ),
       TE.chainFirstW(({key, createdOffer}) =>
@@ -438,5 +445,6 @@ export const offerFormMolecule = molecule((getMolecule, getScope) => {
     amountTopLimitUsdEurAtom,
     amountTopLimitCzkAtom,
     updateLocationStatePaymentMethodAtom,
+    createOfferProgressAtom,
   }
 })

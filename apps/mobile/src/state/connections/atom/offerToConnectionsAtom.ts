@@ -71,17 +71,31 @@ export const updateAllOffersConnectionsActionAtom = atom(
       get(offerToConnectionsAtomsAtom),
       A.map((oneOfferAtom) => {
         const oneOffer = get(oneOfferAtom)
+        let endOneOfferUpdateMeasure: () => void = () => {}
         return pipe(
-          updatePrivateParts({
-            currentConnections: oneOffer.connections,
-            targetConnections: {
-              firstLevel: connectionState.firstLevel,
-              secondLevel: connectionState.secondLevel,
-            },
-            adminId: oneOffer.adminId,
-            symmetricKey: oneOffer.symmetricKey,
-            commonFriends: connectionState.commonFriends,
-            api: api.offer,
+          TE.Do,
+          TE.chainW(() => {
+            endOneOfferUpdateMeasure = startMeasure(
+              "Update one offer's connections"
+            )
+            return TE.Do
+          }),
+          TE.chainW(() =>
+            updatePrivateParts({
+              currentConnections: oneOffer.connections,
+              targetConnections: {
+                firstLevel: connectionState.firstLevel,
+                secondLevel: connectionState.secondLevel,
+              },
+              adminId: oneOffer.adminId,
+              symmetricKey: oneOffer.symmetricKey,
+              commonFriends: connectionState.commonFriends,
+              api: api.offer,
+            })
+          ),
+          TE.map((v) => {
+            endOneOfferUpdateMeasure()
+            return v
           }),
           TE.match(
             (error) => {
@@ -102,13 +116,24 @@ export const updateAllOffersConnectionsActionAtom = atom(
               if (encryptionErrors.length > 0) {
                 reportError(
                   'error',
-                  'Error while encrypting offer',
+                  'Error while encrypting new connections for offer',
                   encryptionErrors
                 )
               }
               set(oneOfferAtom, (val) => ({
                 ...val,
-                connections: newConnections,
+                connections: {
+                  firstLevel: [
+                    ...val.connections.firstLevel,
+                    ...newConnections.firstLevel,
+                  ],
+                  secondLevel: val.connections.secondLevel
+                    ? [
+                        ...val.connections.secondLevel,
+                        ...(newConnections.secondLevel ?? []),
+                      ]
+                    : [],
+                },
               }))
               return {
                 adminId: oneOffer.adminId,
@@ -121,7 +146,7 @@ export const updateAllOffersConnectionsActionAtom = atom(
           })
         )
       }),
-      T.sequenceArray,
+      T.sequenceSeqArray,
       T.map((res) => {
         const timePretty = endUpdateOfferConnectionsMeasure()
 

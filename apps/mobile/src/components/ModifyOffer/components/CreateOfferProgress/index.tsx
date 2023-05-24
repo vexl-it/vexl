@@ -21,8 +21,8 @@ function CreateOfferProgress({leftText}: Props): JSX.Element {
       return 0
 
     return Math.round(
-      (offerProgress.percentage.current /
-        (offerProgress.percentage.total - 1)) *
+      ((offerProgress.percentage.current + 1) /
+        offerProgress.percentage.total) *
         100
     )
   }, [offerProgress])

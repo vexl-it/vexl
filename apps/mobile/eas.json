@@ -16,6 +16,16 @@
         "ENV_PRESET": "stage"
       }
     },
+    "stagingApk": {
+      "android": {
+        "image": "ubuntu-18.04-jdk-11-ndk-r19c",
+        "credentialsSource": "remote",
+        "buildType": "apk"
+      },
+      "env": {
+        "ENV_PRESET": "stage"
+      }
+    },
     "production": {
       "android": {
         "image": "ubuntu-18.04-jdk-11-ndk-r19c",
@@ -23,6 +33,16 @@
       },
       "ios": {
         "credentialsSource": "remote"
+      },
+      "env": {
+        "ENV_PRESET": "prod"
+      }
+    },
+    "productionApk": {
+      "android": {
+        "image": "ubuntu-18.04-jdk-11-ndk-r19c",
+        "credentialsSource": "remote",
+        "buildType": "apk"
       },
       "env": {
         "ENV_PRESET": "prod"

@@ -14,7 +14,6 @@ function OfferDetailScreen({
   route: {
     params: {offerId},
   },
-  navigation,
 }: Props): JSX.Element {
   const safeGoBack = useSafeGoBack()
   const {t} = useTranslation()

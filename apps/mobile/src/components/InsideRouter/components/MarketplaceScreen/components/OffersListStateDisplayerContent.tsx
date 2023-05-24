@@ -9,13 +9,14 @@ import EmptyListPlaceholder from './EmptyListPlaceholder'
 import OffersList from '../../../../OffersList'
 import {
   useAreOffersLoading,
-  useFilteredOffers,
   useOffersLoadingError,
   useTriggerOffersRefresh,
 } from '../../../../../state/marketplace'
 import {useMolecule} from 'jotai-molecules'
 import {filterOffersMolecule} from '../../../../FilterOffersScreen/atom'
 import {useAtomValue} from 'jotai'
+import {offersAtomWithFilter} from '../../../../../state/marketplace/atom'
+import {splitAtom} from 'jotai/utils'
 
 interface Props {
   type: 'BUY' | 'SELL'
@@ -43,7 +44,12 @@ function OffersListStateDisplayerContent({
     [type]
   )
 
-  const offers = useFilteredOffers(filter ?? basicFilter)
+  const offersAtoms = useAtomValue(
+    useMemo(
+      () => splitAtom(offersAtomWithFilter(filter ?? basicFilter)),
+      [filter, basicFilter]
+    )
+  )
 
   const renderListHeader = useMemo(() => {
     if (isNone(error)) return null
@@ -51,7 +57,7 @@ function OffersListStateDisplayerContent({
     return <ErrorListHeader mt={'$6'} error={error.value} />
   }, [error])
 
-  if (offers.length === 0 && loading) {
+  if (offersAtoms.length === 0 && loading) {
     return (
       <Stack f={1} ai="center" pt="$5">
         <ActivityIndicator color={tokens.color.main.val} size="large" />
@@ -66,12 +72,12 @@ function OffersListStateDisplayerContent({
         onFilterOffersPress={navigateToFilterOffers}
         onMyOffersPress={navigateToMyOffers}
       />
-      {offers.length === 0 ? (
+      {offersAtoms.length === 0 ? (
         <EmptyListPlaceholder />
       ) : (
         <OffersList
           ListHeaderComponent={renderListHeader}
-          offers={offers}
+          offersAtoms={offersAtoms}
           // eslint-disable-next-line @typescript-eslint/no-misused-promises
           onRefresh={refreshOffers}
           refreshing={loading}

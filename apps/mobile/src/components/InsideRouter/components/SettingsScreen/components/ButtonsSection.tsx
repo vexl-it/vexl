@@ -107,7 +107,7 @@ function ButtonsSection(): JSX.Element {
         enableHiddenFeatures
           ? [
               {
-                text: t('settings.items.myOffers'),
+                text: t('common.myOffers'),
                 icon: profileIconSvg,
                 onPress: todo,
               },

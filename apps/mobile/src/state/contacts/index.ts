@@ -15,6 +15,11 @@ export const importedContactsAtom = focusAtom(
   (o) => o.prop('importedContacts')
 )
 
+export const importedContactsHashesAtom = selectAtom(
+  importedContactsAtom,
+  (o) => o.map((one) => one.hash)
+)
+
 export function createHashesToImportedContactsAtom(
   hashes: readonly string[]
 ): Atom<ContactNormalizedWithHash[]> {

@@ -15,6 +15,7 @@ import {toCommonErrorMessage} from '../../utils/useCommonErrorMessages'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 import {useRequestOffer} from '../../state/marketplace'
 import {useShowLoadingOverlay} from '../LoadingOverlayProvider'
+import {createSingleOfferReportedFlagAtom} from '../../state/marketplace/atom'
 
 export function useSubmitRequestHandleUI(): (
   text: string,
@@ -57,8 +58,9 @@ export function useReportOfferHandleUI(): (
   const loadingOverlay = useShowLoadingOverlay()
 
   return useCallback(
-    /// todo set reported flag
     (offerId: OfferId) => {
+      const reportedFlagAtom = createSingleOfferReportedFlagAtom(offerId)
+
       return pipe(
         store.set(askAreYouSureActionAtom, {
           variant: 'danger',
@@ -89,6 +91,7 @@ export function useReportOfferHandleUI(): (
             return false
           },
           () => {
+            store.set(reportedFlagAtom, true)
             safeGoBack()
             loadingOverlay.hide()
             return true

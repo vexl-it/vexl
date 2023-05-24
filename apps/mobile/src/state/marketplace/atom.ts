@@ -1,4 +1,4 @@
-import {type Atom, atom} from 'jotai'
+import {type Atom, atom, type SetStateAction, type WritableAtom} from 'jotai'
 import {atomWithParsedMmkvStorage} from '../../utils/atomUtils/atomWithParsedMmkvStorage'
 import {focusAtom} from 'jotai-optics'
 import {
@@ -13,10 +13,13 @@ import {
   type Sort,
 } from '@vexl-next/domain/dist/general/offers'
 import {MINIMAL_DATE} from '@vexl-next/domain/dist/utility/IsoDatetimeString.brand'
-import {areIncluded} from './utils'
+import areIncluded from './utils/areIncluded'
 import {type ChatOrigin} from '@vexl-next/domain/dist/general/messaging'
 import {type FocusAtomType} from '../../utils/atomUtils/FocusAtomType'
 import {type OfferAdminId} from '@vexl-next/rest-api/dist/services/offer/contracts'
+import {selectAtom, splitAtom} from 'jotai/utils'
+import {importedContactsHashesAtom} from '../contacts'
+import sortOffers from './utils/sortOffers'
 
 export const offersStateAtom = atomWithParsedMmkvStorage(
   'offers',
@@ -30,9 +33,20 @@ export const offersAtom = focusAtom(offersStateAtom, (optic) =>
   optic.prop('offers')
 )
 
-export const offersToSee = focusAtom(offersAtom, (optic) =>
-  optic.filter((o) => !o.ownershipInfo && !o.flags.reported)
-)
+export const offersToSeeInMarketplace = atom((get) => {
+  const importedContactsHashes = get(importedContactsHashesAtom)
+  return get(offersAtom).filter(
+    (oneOffer) =>
+      // Not mine offers
+      !oneOffer.ownershipInfo &&
+      // Not reported offers
+      !oneOffer.flags.reported &&
+      // Offers that has at least one common contact
+      oneOffer.offerInfo.privatePart.commonFriends.some((one) =>
+        importedContactsHashes.includes(one)
+      )
+  )
+})
 
 export const offersIdsAtom = focusAtom(offersAtom, (optic) =>
   optic.elems().prop('offerInfo').prop('offerId')
@@ -46,79 +60,26 @@ export const myOffersAtom = focusAtom(offersAtom, (optic) =>
   optic.filter((offer) => !!offer.ownershipInfo?.adminId)
 )
 
+export const myOffersSortedAtom = atom((get) => {
+  const sortingOptions = get(selectedMyOffersSortingOptionAtom)
+  const myOffers = get(myOffersAtom)
+
+  return sortOffers(myOffers, sortingOptions)
+})
+
+export const myOffersSortedAtomsAtom = splitAtom(myOffersSortedAtom)
+
 export const myActiveOffersAtom = focusAtom(myOffersAtom, (optic) =>
   optic.filter((myOffer) => myOffer.offerInfo.publicPart.active)
 )
 
-export const myOffersSortingOptionAtom = atom<Sort>('NEWEST_OFFER')
-
-export function sortOffers(
-  offersAtom: Atom<OneOfferInState[]>,
-  sort: Sort
-): Atom<OneOfferInState[]> {
-  return atom((get) => {
-    const offersFiltered = get(offersAtom)
-    if (sort === 'LOWEST_FEE_FIRST')
-      return offersFiltered.sort(function (
-        a: OneOfferInState,
-        b: OneOfferInState
-      ) {
-        return (
-          a.offerInfo.publicPart.feeAmount - b.offerInfo.publicPart.feeAmount
-        )
-      })
-    if (sort === 'HIGHEST_FEE')
-      return offersFiltered.sort(function (
-        a: OneOfferInState,
-        b: OneOfferInState
-      ) {
-        return (
-          b.offerInfo.publicPart.feeAmount - a.offerInfo.publicPart.feeAmount
-        )
-      })
-    if (sort === 'NEWEST_OFFER')
-      return offersFiltered.sort(function (
-        a: OneOfferInState,
-        b: OneOfferInState
-      ) {
-        return b.offerInfo.id - a.offerInfo.id
-      })
-    if (sort === 'OLDEST_OFFER')
-      return offersFiltered.sort(function (
-        a: OneOfferInState,
-        b: OneOfferInState
-      ) {
-        return a.offerInfo.id - b.offerInfo.id
-      })
-    if (sort === 'LOWEST_AMOUNT')
-      return offersFiltered.sort(function (
-        a: OneOfferInState,
-        b: OneOfferInState
-      ) {
-        return (
-          a.offerInfo.publicPart.amountTopLimit -
-          b.offerInfo.publicPart.amountTopLimit
-        )
-      })
-    if (sort === 'HIGHEST_AMOUNT')
-      return offersFiltered.sort(function (
-        a: OneOfferInState,
-        b: OneOfferInState
-      ) {
-        return (
-          b.offerInfo.publicPart.amountTopLimit -
-          a.offerInfo.publicPart.amountTopLimit
-        )
-      })
-    return []
-  })
-}
+export const selectedMyOffersSortingOptionAtom = atom<Sort>('NEWEST_OFFER')
 
 export function offersAtomWithFilter(
   filter: OffersFilter
 ): Atom<OneOfferInState[]> {
-  const offersFilteredAtom = focusAtom(offersToSee, (optic) =>
-    optic.filter(
+  return selectAtom(offersToSeeInMarketplace, (offers) => {
+    const filtered = offers.filter(
       (offer) =>
         (!filter.currency ||
           filter.currency.includes(offer.offerInfo.publicPart.currency)) &&
@@ -147,8 +108,8 @@ export function offersAtomWithFilter(
         (!filter.amountTopLimit ||
           offer.offerInfo.publicPart.amountTopLimit <= filter.amountTopLimit)
     )
-  )
-  return sortOffers(offersFilteredAtom, filter.sort ?? 'LOWEST_FEE_FIRST')
+    return sortOffers(filtered, filter.sort ?? 'LOWEST_FEE_FIRST')
+  })
 }
 
 export function singleOfferAtom(
@@ -156,6 +117,14 @@ export function singleOfferAtom(
 ): FocusAtomType<OneOfferInState | undefined> {
   return focusAtom(offersAtom, (optic) =>
     optic.find((offer) => offer.offerInfo.offerId === offerId)
+  )
+}
+
+export function createSingleOfferReportedFlagAtom(
+  offerId: OfferId | undefined
+): WritableAtom<boolean | undefined, [SetStateAction<boolean>], void> {
+  return focusAtom(singleOfferAtom(offerId), (optic) =>
+    optic.optional().prop('flags').prop('reported')
   )
 }
 

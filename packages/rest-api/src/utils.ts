@@ -24,6 +24,8 @@ import {
 import {type GetUserSessionCredentials} from './UserSessionCredentials.brand'
 import {type PlatformName} from './PlatformName'
 
+const DEFAULT_TIMEOUT_MS = 15_000
+
 export function axiosCallWithValidation<T extends z.ZodType>(
   axiosInstance: AxiosInstance,
   config: AxiosRequestConfig,
@@ -142,6 +144,7 @@ export function createAxiosInstance(
   loggingFunction: LoggingFunction | null = console.info
 ): AxiosInstance {
   const axios = Axios.create({
+    timeout: DEFAULT_TIMEOUT_MS,
     ...axiosConfig,
     headers: {
       ...axiosConfig?.headers,

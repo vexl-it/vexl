@@ -55,6 +55,14 @@ export function createOfferDummyPublicPart(): OfferPublicPart {
   }
 }
 
+export interface OfferProgressState {
+  currentState: OfferEncryptionProgress['type']
+  percentage?: {
+    total: number
+    current: number
+  }
+}
+
 export const dummyOffer: OneOfferInState = {
   ownershipInfo: {
     adminId: OfferAdminId.parse('offerAdminId'),
@@ -187,7 +195,7 @@ export const offerFormMolecule = molecule((getMolecule, getScope) => {
   const editingOfferAtom = atom<boolean>(false)
   const encryptingOfferAtom = atom<boolean>(false)
   const deletingOfferAtom = atom<boolean>(false)
-  const createOfferProgressAtom = atom<OfferEncryptionProgress | undefined>(
+  const createOfferProgressAtom = atom<OfferProgressState | undefined>(
     undefined
   )
 
@@ -229,7 +237,19 @@ export const offerFormMolecule = molecule((getMolecule, getScope) => {
           },
           intendedConnectionLevel,
           onProgress: (status) => {
-            set(createOfferProgressAtom, status)
+            if (status.type === 'ENCRYPTING_PRIVATE_PAYLOADS')
+              set(createOfferProgressAtom, {
+                currentState: status.type,
+                percentage: {
+                  total: status.totalToEncrypt,
+                  current: status.currentlyProcessingIndex,
+                },
+              })
+            else
+              set(createOfferProgressAtom, (old) => ({
+                ...(old ?? {percentage: undefined}),
+                currentState: status.type,
+              }))
           },
         })
       ),

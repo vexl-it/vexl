@@ -30,16 +30,11 @@ function CreateOfferContent({navigateBack}: Props): JSX.Element {
   const {t} = useTranslation()
   const content = useContent()
 
-  const {
-    createOfferActionAtom,
-    encryptingOfferAtom,
-    loadingAtom,
-    createOfferProgressAtom,
-  } = useMolecule(offerFormMolecule)
+  const {createOfferActionAtom, encryptingOfferAtom, loadingAtom} =
+    useMolecule(offerFormMolecule)
   const loading = useAtomValue(loadingAtom)
   const encryptingOffer = useAtomValue(encryptingOfferAtom)
   const createOffer = useSetAtom(createOfferActionAtom)
-  const createOfferProgress = useAtomValue(createOfferProgressAtom)
 
   return (
     <>
@@ -79,22 +74,6 @@ function CreateOfferContent({navigateBack}: Props): JSX.Element {
           }
           loading={loading}
           visible={encryptingOffer}
-          totalToEncrypt={
-            createOfferProgress?.type === 'ENCRYPTING_PRIVATE_PAYLOADS'
-              ? createOfferProgress.totalToEncrypt
-              : createOfferProgress?.type === 'SENDING_OFFER_TO_NETWORK' ||
-                createOfferProgress?.type === 'DONE'
-              ? 100
-              : 0
-          }
-          currentlyProcessingIndex={
-            createOfferProgress?.type === 'ENCRYPTING_PRIVATE_PAYLOADS'
-              ? createOfferProgress.currentlyProcessingIndex
-              : createOfferProgress?.type === 'SENDING_OFFER_TO_NETWORK' ||
-                createOfferProgress?.type === 'DONE'
-              ? 100
-              : 0
-          }
         />
       )}
     </>

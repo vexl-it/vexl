@@ -1,27 +1,36 @@
-import {Stack, Text, XStack, YStack, type YStackProps} from 'tamagui'
+import {
+  type ColorTokens,
+  Stack,
+  Text,
+  XStack,
+  YStack,
+  type YStackProps,
+} from 'tamagui'
 import {type ReactNode} from 'react'
 
 interface Props extends YStackProps {
-  children: ReactNode
+  children?: ReactNode
   text: string
+  textColor?: ColorTokens
   withBottomBorder?: boolean
 }
 
 function ScreenTitle({
   children,
   text,
+  textColor,
   withBottomBorder = false,
   ...props
 }: Props): JSX.Element {
   return (
-    <YStack {...props}>
+    <YStack bc={'transparent'} {...props}>
       <XStack fd="row" ai="flex-start" jc="space-between" mb="$5">
         <Stack fs={1} maw="60%">
-          <Text color="$white" fontSize={32} ff="$heading">
+          <Text col={textColor ?? '$white'} fontSize={32} ff="$heading">
             {text}
           </Text>
         </Stack>
-        <XStack space={'$2'}>{children}</XStack>
+        {children && <XStack space={'$2'}>{children}</XStack>}
       </XStack>
       {withBottomBorder && <Stack h={0.5} mx="$-4" bg="$grey" />}
     </YStack>

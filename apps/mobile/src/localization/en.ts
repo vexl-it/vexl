@@ -9,6 +9,7 @@ export default {
     'confirm': 'Confirm',
     'continue': 'Continue',
     'save': 'Save',
+    'gotIt': 'Got it',
     'search': 'Search',
     'deselectAll': 'Deselect All',
     'selectAll': 'Select All',
@@ -367,7 +368,6 @@ export default {
       'reachVexlers': 'Reach {{count}} vexlers',
     },
     'publishOffer': 'Publish offer',
-    'gotIt': 'Got it',
     'errorCreatingOffer': 'Error while creating offer',
     'errorSearchingForAvailableLocation':
       'Error when searching for available locations',
@@ -521,5 +521,9 @@ export default {
     'CONSTRUCTING_PUBLIC_PAYLOAD': 'Constructing and encrypting public payload',
     'SENDING_OFFER_TO_NETWORK': 'Uploading offer',
     'DONE': 'Done',
+  },
+  'commonFriends': {
+    'commonFriends': 'Common friends',
+    'commonFriendsCount': '{{commonFriendsCount}} common friends',
   },
 }

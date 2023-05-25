@@ -11,7 +11,7 @@ import {useMolecule} from 'jotai-molecules'
 import {chatMolecule} from '../atoms'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 
-function AccepDeclineButtons({
+function AcceptDeclineButtons({
   onDone = () => {},
 }: {
   onDone?: (accept: boolean) => void
@@ -62,4 +62,4 @@ function AccepDeclineButtons({
   )
 }
 
-export default AccepDeclineButtons
+export default AcceptDeclineButtons

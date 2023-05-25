@@ -1,4 +1,4 @@
-import {stringToSvgStringRuntimeError} from '../../Image'
+import {stringToSvgStringRuntimeError} from '../Image'
 
 const picturePlaceholderSvg =
   stringToSvgStringRuntimeError(`<svg viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">

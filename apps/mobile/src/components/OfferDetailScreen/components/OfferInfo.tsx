@@ -15,6 +15,8 @@ import {useChatForOffer} from '../../../state/chat/hooks/useChatForOffer'
 import {useNavigation} from '@react-navigation/native'
 import InfoSquare from '../../InfoSquare'
 import closeSvg from '../../images/closeSvg'
+import identityIconSvg from '../../images/identityIconSvg'
+import CommonFriends from '../../CommonFriends'
 
 function OfferInfo({offer}: {offer: OneOfferInState}): JSX.Element {
   const goBack = useSafeGoBack()
@@ -42,6 +44,10 @@ function OfferInfo({offer}: {offer: OneOfferInState}): JSX.Element {
       <ScrollView>
         <YStack space={'$4'}>
           <OfferWithBubbleTip offer={offer} />
+          <CommonFriends
+            variant={'dark'}
+            contactsHashes={offer.offerInfo.privatePart.commonFriends}
+          />
           {!chatForOffer ? (
             <TextInput
               value={text}
@@ -77,6 +83,7 @@ function OfferInfo({offer}: {offer: OneOfferInState}): JSX.Element {
             void submitRequest(text, offer.offerInfo)()
           }}
           variant={'secondary'}
+          beforeIcon={identityIconSvg}
           text={t('offer.sendRequest')}
         />
       )}

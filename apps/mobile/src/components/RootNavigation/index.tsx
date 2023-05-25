@@ -24,6 +24,7 @@ import MyOffersScreen from '../MyOffersScreen'
 import {useSyncConnections} from '../../state/connections'
 import EditOfferScreen from '../ModifyOffer/components/EditOfferScreen'
 import FilterOffersScreen from '../FilterOffersScreen'
+import CommonFriendsScreen from '../CommonFriendsScreen'
 
 const Stack = createNativeStackNavigator<RootStackParamsList>()
 
@@ -67,6 +68,10 @@ function RootNavigation(): JSX.Element {
             <Stack.Screen name={'MyOffers'} component={MyOffersScreen} />
             <Stack.Screen name={'ChatDetail'} component={ChatDetailScreen} />
             <Stack.Screen name={'SetContacts'} component={SetContactsScreen} />
+            <Stack.Screen
+              name={'CommonFriends'}
+              component={CommonFriendsScreen}
+            />
             <Stack.Screen
               name={'NotificationPermissionsMissing'}
               component={NotificationPermissionsScreen}

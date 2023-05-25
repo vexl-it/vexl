@@ -18,12 +18,14 @@ function OtherSideNamePhotoAndInfo({mode}: Props): JSX.Element {
     otherSideDataAtom,
     otherSideLeftAtom,
     canSendMessagesAtom,
+    commonConnectionsCountAtom,
   } = useMolecule(chatMolecule)
 
   const offer = useAtomValue(offerForChatAtom)
   const otherSideData = useAtomValue(otherSideDataAtom)
   const otherSideLeft = useAtomValue(otherSideLeftAtom)
   const canSendMessages = useAtomValue(canSendMessagesAtom)
+  const commonConnectionsCount = useAtomValue(commonConnectionsCountAtom)
 
   return (
     <Stack
@@ -60,9 +62,7 @@ function OtherSideNamePhotoAndInfo({mode}: Props): JSX.Element {
         />
         <ContactTypeAndCommonNumber
           friendLevel={offer?.offerInfo.privatePart.friendLevel ?? []}
-          numberOfCommonFriends={
-            offer?.offerInfo.privatePart.commonFriends.length ?? 0
-          }
+          numberOfCommonFriends={commonConnectionsCount}
           center={mode === 'photoTop'}
         />
       </YStack>

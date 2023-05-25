@@ -20,7 +20,7 @@ export const importedContactsHashesAtom = selectAtom(
   (o) => o.map((one) => one.hash)
 )
 
-export function createHashesToImportedContactsAtom(
+export function selectImportedContactsWithHashes(
   hashes: readonly string[]
 ): Atom<ContactNormalizedWithHash[]> {
   return selectAtom(importedContactsAtom, (importedContacts) => {

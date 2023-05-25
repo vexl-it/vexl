@@ -46,6 +46,7 @@ export type RootStackParamsList = {
   TodoScreen: undefined
 
   SetContacts: undefined
+  CommonFriends: {contactsHashes: readonly string[]}
 
   DebugScreen: undefined
 }

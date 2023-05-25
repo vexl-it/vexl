@@ -28,6 +28,7 @@ import revealIdentityActionAtom, {
   type RevealMessageType,
 } from '../../state/chat/atoms/revealIdentityActionAtom'
 import reportError from '../../utils/reportError'
+import connectionStateAtom from '../../state/connections/atom/connectionStateAtom'
 
 type ChatUIMode = 'approval' | 'messages'
 
@@ -68,6 +69,22 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
   const deleteChatAtom = deleteChatActionAtom(chatWithMessagesAtom)
 
   const nameAtom = selectAtom(chatAtom, (o) => randomName(o.id))
+
+  const commonConnectionsHashesAtom = atom((get) => {
+    const offer = get(offerForChatAtom)
+    const chat = get(chatAtom)
+    const connectionState = get(connectionStateAtom)
+    return offer?.ownershipInfo
+      ? connectionState.commonFriends.commonContacts.find(
+          (contact) => contact.publicKey === chat.otherSide.publicKey
+        )?.common.hashes ?? []
+      : offer?.offerInfo.privatePart.commonFriends ?? []
+  })
+
+  const commonConnectionsCountAtom = selectAtom(
+    commonConnectionsHashesAtom,
+    (connections) => connections.length
+  )
 
   const deleteChatWithUiFeedbackAtom = atom(null, async (get, set) => {
     const {t} = get(translationAtom)
@@ -300,6 +317,8 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     chatAtom,
     nameAtom,
     chatWithMessagesAtom,
+    commonConnectionsHashesAtom,
+    commonConnectionsCountAtom,
     messagesAtom,
     messageAtomAtoms,
     offerForChatAtom,

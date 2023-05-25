@@ -51,7 +51,7 @@ function Help({children, image, onClose, title, visible}: Props): JSX.Element {
           <Button
             onPress={onClose}
             variant="secondary"
-            text={t('offerForm.gotIt')}
+            text={t('common.gotIt')}
           />
         </Stack>
       </Screen>

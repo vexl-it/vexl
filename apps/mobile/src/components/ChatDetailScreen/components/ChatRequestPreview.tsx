@@ -6,13 +6,19 @@ import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {useMolecule} from 'jotai-molecules'
 import {chatMolecule} from '../atoms'
 import {useAtomValue} from 'jotai'
+import CommonFriends from '../../CommonFriends'
 
 function ChatRequestPreview(): JSX.Element {
-  const {offerForChatAtom, chatAtom, requestMessageAtom} =
-    useMolecule(chatMolecule)
+  const {
+    offerForChatAtom,
+    chatAtom,
+    requestMessageAtom,
+    commonConnectionsHashesAtom,
+  } = useMolecule(chatMolecule)
 
   const chat = useAtomValue(chatAtom)
   const offer = useAtomValue(offerForChatAtom)
+  const commonConnectionsHashes = useAtomValue(commonConnectionsHashesAtom)
 
   const requestMessage = useAtomValue(requestMessageAtom)
 
@@ -41,8 +47,15 @@ function ChatRequestPreview(): JSX.Element {
             {t('messages.requestMessageWasDeleted')}
           </Text>
         )}
-
-        {/* TODO friends */}
+        {commonConnectionsHashes && commonConnectionsHashes.length > 0 && (
+          <Stack mx={'$-4'}>
+            <CommonFriends
+              hideCommonFriendsCount
+              contactsHashes={commonConnectionsHashes}
+              variant={'light'}
+            />
+          </Stack>
+        )}
         <Stack
           borderRadius={'$true'}
           mx={'$-4'}

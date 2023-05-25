@@ -1,7 +1,7 @@
 import {Stack, YStack} from 'tamagui'
 import ChatRequestPreview from './ChatRequestPreview'
 import InfoSquare from '../../InfoSquare'
-import AccepDeclineButtons from './AccepDeclineButtons'
+import AcceptDeclineButtons from './AcceptDeclineButtons'
 import {ScrollView} from 'react-native'
 import ChatHeader from './ChatHeader'
 import {useMolecule} from 'jotai-molecules'
@@ -41,7 +41,7 @@ function RequestScreen(): JSX.Element {
               {t('messages.wellLetYouKnowOnceUserAccepts')}
             </InfoSquare>
           ) : (
-            <AccepDeclineButtons />
+            <AcceptDeclineButtons />
           ))}
         {wasDenied &&
           (requestedByMe ? (

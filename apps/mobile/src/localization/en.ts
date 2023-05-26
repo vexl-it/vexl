@@ -202,7 +202,7 @@ export default {
     },
   },
   'offer': {
-    title: 'Offer',
+    'title': 'Offer',
     'cashOnly': 'Cash only',
     'onlineOnly': 'Online only',
     'upTo': 'Up to',
@@ -268,9 +268,7 @@ export default {
       'Vexl is designed to never collect or store any sensitive information. Vexl messages and other content cannot be accessed by us or other third parties because they are always end-to-end encrypted, private, and secure. Our Terms of Service and Privacy Policy are available below.',
     'howDoIContactVexl': 'How do I contact Vexl?',
     'youCanAlwaysReachOutToUs':
-      'You can always reach out to us via email: support@vexl.it. For a private comms, you can also send us an e2ee mail.  \n' +
-      '\n' +
-      'Or you can meet us during your next P2P trade! 😻',
+      'You can always reach out to us via email: support@vexl.it. For a private comms, you can also send us an e2ee mail. Or you can meet us during your next P2P trade! 😻',
   },
   'offerForm': {
     'myNewOffer': 'My new offer',
@@ -380,7 +378,7 @@ export default {
     'offerEncryption': {
       'encryptingYourOffer': 'Encrypting your offer ...',
       'dontShutDownTheApp':
-        'Don’t shut down the app while encrypting. It can take several minutes.',
+        'Don’t shut down the app while encrypting. It can take several minutes.',
       'forVexlers': 'for {{count}} vexlers',
       'doneOfferPoster': 'Done! Offer posted.',
       'yourFriendsAndFriendsOfFriends':
@@ -503,13 +501,15 @@ export default {
     'chatEmptyExplanation': 'Start a conversation by requesting an offer',
     'seeOffers': 'See offers',
     'identityRevealRequestModal': {
-      title: 'Send reveal identity request?',
-      text: 'By sending request you agree with revealing of your own identity too.',
-      send: 'Send request',
+      'title': 'Send reveal identity request?',
+      'text':
+        'By sending request you agree with revealing of your own identity too.',
+      'send': 'Send request',
     },
     'identityRevealRespondModal': {
-      title: 'Do you want to reveal identity?',
-      text: 'If you reveal your identity, you will see identity of your counterparty too.',
+      'title': 'Do you want to reveal identity?',
+      'text':
+        'If you reveal your identity, you will see identity of your counterparty too.',
     },
     'identityAlreadyRequested':
       'Identity request was already sent in the conversation',

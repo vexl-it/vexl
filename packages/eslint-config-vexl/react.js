@@ -26,5 +26,6 @@ module.exports = {
     'react/react-in-jsx-scope': 'off',
     '@typescript-eslint/strict-boolean-expressions': 'off',
     'array-callback-return': 'off',
+    '@typescript-eslint/promise-function-async': 'off',
   },
 }

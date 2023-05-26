@@ -2,7 +2,7 @@ import {selectAtom} from 'jotai/utils'
 import {focusAtom} from 'jotai-optics'
 import messagingStateAtom from './messagingStateAtom'
 
-export const chatsListAtom = focusAtom(messagingStateAtom, (optic) =>
+const chatsListAtom = focusAtom(messagingStateAtom, (optic) =>
   optic.elems().prop('chats').elems().prop('chat')
 )
 

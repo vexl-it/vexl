@@ -4,13 +4,16 @@ import {inboxesAtom} from '../../../utils/notifications/useRefreshNotificationTo
 import {pipe} from 'fp-ts/function'
 import * as TE from 'fp-ts/TaskEither'
 import {generateSignedChallengeBatch} from '@vexl-next/resources-utils/dist/chat/utils/generateSignedChallengesBatch'
+import allChatsAtom from './allChatsAtom'
+import sendMessageToChatsInBatchActionAtom from './sendMessageToChatsInBatchActionAtom'
+import messagingStateAtom from './messagingStateAtom'
 
 const deleteAllInboxesActionAtom = atom(null, (get, set) => {
   const api = get(privateApiAtom)
   const inboxes = get(inboxesAtom)
+  const chats = get(allChatsAtom).flat()
 
-  return pipe(
-    // TODO send user deleted to all chats
+  const sendDeleteInboxRequest = pipe(
     inboxes.map((one) => one.privateKey),
     generateSignedChallengeBatch(api.chat),
     TE.chainW((challenges) =>
@@ -24,6 +27,32 @@ const deleteAllInboxesActionAtom = atom(null, (get, set) => {
         })),
       })
     )
+  )
+  const sendMessageInBatch = set(sendMessageToChatsInBatchActionAtom, {
+    chats,
+    isTerminationMessage: true,
+    messageData: {
+      text: 'Inbox deleted',
+      messageType: 'INBOX_DELETED',
+    },
+  })
+
+  return pipe(
+    TE.Do,
+    TE.chainFirstTaskK(() =>
+      pipe(
+        sendMessageInBatch,
+        TE.match(
+          () => {},
+          () => {}
+        )
+      )
+    ),
+    TE.chainW(() => sendDeleteInboxRequest),
+    TE.map((r) => {
+      set(messagingStateAtom, [])
+      return r
+    })
   )
 })
 

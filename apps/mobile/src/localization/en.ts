@@ -42,6 +42,11 @@ export default {
     'yes': 'Yes',
     'no': 'No',
     'myOffers': 'My offers',
+    'errorOpeningLink': {
+      'message': 'Error opening link',
+      'text': 'Copy to clipboard instead?',
+      'copy': 'Copy and close',
+    },
   },
   'loginFlow': {
     'anonymityNotice': 'Nobody will see this until you allow it. Even us.',
@@ -182,6 +187,7 @@ export default {
       'website': 'Vexl.it',
       'websiteUrl': 'https://vexl.it',
       'deleteAccount': 'Delete account',
+      'supportEmail': 'support@vexl.it',
     },
     'noLogoutExplanation':
       "Can't find logout? There's no such thing.\nBut you can delete account.",
@@ -525,5 +531,10 @@ export default {
   'commonFriends': {
     'commonFriends': 'Common friends',
     'commonFriendsCount': '{{commonFriendsCount}} common friends',
+  },
+  'reportIssue': {
+    'somethingWentWrong': 'Something went wrong?',
+    'feelFreeToGetInTouch': 'Feel free to get in touch with our support.',
+    'openInApp': 'Open in e-mail',
   },
 }

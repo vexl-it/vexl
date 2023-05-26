@@ -1,6 +1,6 @@
 import {type ChatMessageWithState} from '../../state/chat/domain'
 import {DateTime} from 'luxon'
-import i18n from '../../utils/localization/i18n'
+import {i18n} from '../../utils/localization/I18nProvider'
 
 export type MessagesListItem =
   | {

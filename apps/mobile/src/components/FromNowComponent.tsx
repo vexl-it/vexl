@@ -1,8 +1,8 @@
 import {type DateTime} from 'luxon'
-import i18n from '../utils/localization/i18n'
 import {useEffect, useState} from 'react'
 import {useNavigation} from '@react-navigation/native'
 import {
+  i18n,
   type TFunction,
   useTranslation,
 } from '../utils/localization/I18nProvider'

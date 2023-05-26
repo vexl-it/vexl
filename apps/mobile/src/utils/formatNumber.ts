@@ -1,4 +1,4 @@
-import i18n from './localization/i18n'
+import {i18n} from './localization/I18nProvider'
 
 export default function formatNumber(
   number: number | undefined

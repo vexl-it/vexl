@@ -8,7 +8,6 @@ import {
 } from '@vexl-next/cryptography/dist/implementations/ecdhComputeSecret'
 import {Platform} from 'react-native'
 import {computeSharedSecret} from '@vexl-next/react-native-ecdh-platform-native-utils/src'
-import {showUINotification} from './src/utils/notifications'
 
 // polyfill Array.at() function
 if (![].at) {

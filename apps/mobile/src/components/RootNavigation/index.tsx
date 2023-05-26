@@ -25,12 +25,14 @@ import {useSyncConnections} from '../../state/connections'
 import EditOfferScreen from '../ModifyOffer/components/EditOfferScreen'
 import FilterOffersScreen from '../FilterOffersScreen'
 import CommonFriendsScreen from '../CommonFriendsScreen'
+import useHandleNotificationOpen from '../../state/useHandleNotificationOpen'
 
 const Stack = createNativeStackNavigator<RootStackParamsList>()
 
 function LoggedInHookGroup(): null {
   useRefreshNotificationTokenOnResumeAssumeLoggedIn()
   useHandleReceivedNotifications()
+  useHandleNotificationOpen()
 
   useHandleNotificationsPermissionsRedirect()
   useHandlePostLoginFlowRedirect()

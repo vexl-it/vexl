@@ -5,22 +5,20 @@ import {
   type OfferPublicPart,
   type SymmetricKey,
 } from '@vexl-next/domain/dist/general/offers'
-import {atom, useAtomValue, useStore} from 'jotai'
+import {atom, type ExtractAtomResult, useAtomValue, useStore} from 'jotai'
 import {
   lastUpdatedAtAtom,
   loadingStateAtom,
-  myOffersAtom,
   offerFlagsAtom,
   offerForChatOriginAtom,
   offersAtom,
   offersIdsAtom,
   offersStateAtom,
-  offersToSeeInMarketplace,
   singleOfferAtom,
   singleOfferByAdminIdAtom,
 } from './atom'
 import * as Option from 'fp-ts/Option'
-import {type OffersFilter, type ApiErrorDeletingOffer, type OneOfferInState} from './domain'
+import {type OneOfferInState} from './domain'
 import {privateApiAtom, usePrivateApiAssumeLoggedIn} from '../../api'
 import {pipe} from 'fp-ts/function'
 import {dummySession, sessionAtom, useSessionAssumeLoggedIn} from '../session'
@@ -28,8 +26,8 @@ import {isoNow} from '@vexl-next/domain/dist/utility/IsoDatetimeString.brand'
 import * as TE from 'fp-ts/TaskEither'
 import * as E from 'fp-ts/Either'
 import * as A from 'fp-ts/Array'
-import reportError from '../../utils/reportError'
 import {type Task} from 'fp-ts/Task'
+import reportError from '../../utils/reportError'
 import createNewOfferForMyContacts, {
   type ApiErrorWhileCreatingOffer,
 } from '@vexl-next/resources-utils/dist/offers/createOfferHandleContacts'
@@ -48,27 +46,21 @@ import notEmpty from '../../utils/notEmpty'
 import useSendMessagingRequest from '../chat/hooks/useSendRequest'
 import {type ApiErrorRequestMessaging} from '@vexl-next/resources-utils/dist/chat/sendMessagingRequest'
 import {type ErrorEncryptingMessage} from '@vexl-next/resources-utils/dist/chat/utils/chatCrypto'
-import {
-  type ChatOrigin,
-  generateChatMessageId,
-} from '@vexl-next/domain/dist/general/messaging'
+import {type ChatOrigin} from '@vexl-next/domain/dist/general/messaging'
 import offerToConnectionsAtom, {
   upsertOfferToConnectionsActionAtom,
 } from '../connections/atom/offerToConnectionsAtom'
 import getNewOffersAndDecrypt, {
   type ApiErrorFetchingOffers,
 } from '@vexl-next/resources-utils/dist/offers/getNewOffersAndDecrypt'
-import {type ErrorConstructingPrivatePayloads} from '@vexl-next/resources-utils/dist/offers/utils/constructPrivatePayloads'
-import sendMessagesBatch, {
-  type ApiErrorSendingMessagesBatch,
-  type ErrorNoChallengeForPublicKey,
-  type Inbox,
-} from '@vexl-next/resources-utils/dist/chat/sendMessagesBatch'
-import {unixMillisecondsNow} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
-import {type ErrorGeneratingSignedChallengeBatch} from '@vexl-next/resources-utils/dist/chat/utils/generateSignedChallengesBatch'
-import {type ServerMessageWithId} from '@vexl-next/rest-api/dist/services/chat/contracts'
+import {
+  type ErrorConstructingPrivatePayloads,
+} from '@vexl-next/resources-utils/dist/offers/utils/constructPrivatePayloads'
 import {chatsForMyOfferAtom} from '../chat/atoms/chatsForMyOfferAtom'
 import {type OfferEncryptionProgress} from '@vexl-next/resources-utils/dist/offers/OfferEncryptionProgress'
+import sendMessageToChatsInBatchActionAtom from '../chat/atoms/sendMessageToChatsInBatchActionAtom'
+import {type ExtractLeftTE} from '@vexl-next/rest-api/dist/services/chat/utils'
+import {type OfferPrivateApi} from '@vexl-next/rest-api/dist/services/offer'
 
 export function useTriggerOffersRefresh(): Task<void> {
   const api = usePrivateApiAssumeLoggedIn()
@@ -99,10 +91,10 @@ export function useTriggerOffersRefresh(): Task<void> {
                 reportError('error', 'Error fetching removed offers', error)
               return [] as OfferId[]
             },
-            (result) => result.offerIds
+            (result) => result.offerIds,
           ),
-          TE.fromTask
-        )
+          TE.fromTask,
+        ),
       ),
       TE.matchW(
         (error) => {
@@ -121,14 +113,14 @@ export function useTriggerOffersRefresh(): Task<void> {
               },
               (error) => {
                 reportError('error', 'Error while decrypting offer', error)
-              }
-            )
+              },
+            ),
           )
 
           const fetchedOffers = pipe(
             decryptingResults,
             A.filter(E.isRight),
-            A.map((one) => one.right)
+            A.map((one) => one.right),
           )
 
           const allOffersIds = deduplicate([
@@ -141,10 +133,10 @@ export function useTriggerOffersRefresh(): Task<void> {
             allOffersIds,
             A.map((offerId): OneOfferInState | null => {
               const fetchedOffer = fetchedOffers.find(
-                (fetchedOffer) => offerId === fetchedOffer.offerId
+                (fetchedOffer) => offerId === fetchedOffer.offerId,
               )
               const oldOffer = oldOffers.find(
-                (one) => one.offerInfo.offerId === offerId
+                (one) => one.offerInfo.offerId === offerId,
               )
 
               if (oldOffer && fetchedOffer) {
@@ -171,10 +163,10 @@ export function useTriggerOffersRefresh(): Task<void> {
             (offers) => ({offers, lastUpdatedAt: updateStartedAt}),
             (value) => {
               store.set(offersStateAtom, value)
-            }
+            },
           )
-        }
-      )
+        },
+      ),
     )()
   }, [api, session, store])
 }
@@ -193,19 +185,11 @@ export function useOffersLoadingError(): Option.Option<ApiErrorFetchingOffers> {
     : Option.none
 }
 
-export function useOffers(): OneOfferInState[] {
-  return useAtomValue(offersToSeeInMarketplace)
-}
-
-export function useMyOffers(): OneOfferInState[] {
-  return useAtomValue(myOffersAtom)
-}
-
 export function useSingleOffer(
-  offerId: OfferId | undefined
+  offerId: OfferId | undefined,
 ): Option.Option<OneOfferInState> {
   const foundOffer = useAtomValue(
-    useMemo(() => singleOfferAtom(offerId), [offerId])
+    useMemo(() => singleOfferAtom(offerId), [offerId]),
   )
   return Option.fromNullable(foundOffer)
 }
@@ -272,7 +256,7 @@ export const createOfferAtom = atom<
         symmetricKey: r.symmetricKey,
       })
       return createdOffer
-    })
+    }),
   )
 })
 
@@ -319,90 +303,76 @@ export const updateOfferAtom = atom<
       }
       set(offersAtom, (oldState) => [
         ...oldState.filter(
-          (offer) => offer.offerInfo.offerId !== createdOffer.offerInfo.offerId
+          (offer) => offer.offerInfo.offerId !== createdOffer.offerInfo.offerId,
         ),
         createdOffer,
       ])
       return createdOffer
-    })
+    }),
   )
 })
 
-export const deleteAllChatsForOfferAtom = atom<
+export const sendOfferDeletedToAllOfferChatsActionAtom = atom(
   null,
-  [{adminId: OfferAdminId}],
-  TE.TaskEither<
-    | ErrorGeneratingSignedChallengeBatch
-    | ErrorEncryptingMessage
-    | ErrorNoChallengeForPublicKey
-    | ApiErrorSendingMessagesBatch,
-    ServerMessageWithId[]
-  >
->(null, (get, set, params) => {
-  const {adminId} = params
-  const api = get(privateApiAtom)
-  const myOffer = get(singleOfferByAdminIdAtom(adminId))
-  const chats = get(
-    chatsForMyOfferAtom({
-      offerPublicKey: myOffer?.offerInfo.publicPart.offerPublicKey,
-    })
-  )
-  return pipe(
-    chats ?? [],
-    A.map(
-      (one): Inbox => ({
-        inboxKeypair: one.inbox.privateKey,
-        messages: [
-          {
-            receiverPublicKey: one.otherSide.publicKey,
-            message: {
-              uuid: generateChatMessageId(),
-              time: unixMillisecondsNow(),
-              text: 'Offer deleted',
-              messageType: 'OFFER_DELETED',
-              senderPublicKey: one.inbox.privateKey.publicKeyPemBase64,
-            },
-          },
-        ],
-      })
-    ),
-    (inboxes) => sendMessagesBatch({api: api.chat, inboxes})
-  )
-})
+  (
+    get,
+    set,
+    params: {
+      adminId: OfferAdminId
+    },
+  ): TE.TaskEither<
+    ExtractLeftTE<
+      ExtractAtomResult<typeof sendMessageToChatsInBatchActionAtom>
+    >,
+    boolean
+  > => {
+    const {adminId} = params
+    const myOffer = get(singleOfferByAdminIdAtom(adminId))
+    const chats = get(
+      chatsForMyOfferAtom({
+        offerPublicKey: myOffer?.offerInfo.publicPart.offerPublicKey,
+      }),
+    )
+
+    const messageToSend = {
+      text: 'Offer deleted',
+      messageType: 'OFFER_DELETED',
+    } as const
+
+    return pipe(
+      set(sendMessageToChatsInBatchActionAtom, {
+        chats: chats ?? [],
+        isTerminationMessage: true,
+        messageData: messageToSend,
+      }),
+    )
+  },
+)
 
 export const deleteOffersActionAtom = atom<
   null,
   [{adminIds: OfferAdminId[]}],
-  TE.TaskEither<any, {success: true}>
+  TE.TaskEither<ExtractLeftTE<ReturnType<OfferPrivateApi['deleteOffer']>>, {success: true}>
 >(null, (get, set, params) => {
-  const {adminIds} = params
+  const {adminIds: adminIdsToDelete} = params
   const api = get(privateApiAtom)
   const offers = get(offersAtom)
 
   return pipe(
     TE.Do,
-    TE.chainFirstW(() => pipe(api.offer.deleteOffer({adminIds}))),
-    // TODO do we want to delete all chats?
+    TE.chainFirstW(() => api.offer.deleteOffer({adminIds: adminIdsToDelete})),
     TE.chainFirstTaskK(() =>
       pipe(
-        adminIds,
-        A.map((adminId) => set(deleteAllChatsForOfferAtom, {adminId})),
-        A.sequence(TE.ApplicativePar)
-      )
-    ),
-    TE.map(() =>
-      pipe(
-        adminIds,
-        A.map((adminId) => {
-          set(offerToConnectionsAtom, (previousValue) => ({
-            offerToConnections: [
-              ...previousValue.offerToConnections.filter(
-                (one) => one.adminId !== adminId
-              ),
-            ],
-          }))
-        })
-      )
+        adminIdsToDelete,
+        A.map((adminId) =>
+          set(sendOfferDeletedToAllOfferChatsActionAtom, {adminId}),
+        ),
+        TE.sequenceSeqArray,
+        TE.match(
+          () => false,
+          () => true,
+        ),
+      ),
     ),
     TE.match(
       (left) => {
@@ -410,17 +380,25 @@ export const deleteOffersActionAtom = atom<
         return E.left(left)
       },
       () => {
+        // Delete offer to connections
+        set(offerToConnectionsAtom, (prev) => ({
+          offerToConnections: prev.offerToConnections.filter(
+            (one) => !adminIdsToDelete.includes(one.adminId),
+          ),
+        }))
+
+        // Delete offers
         set(
           offersAtom,
           offers.filter(
             (o) =>
               !o.ownershipInfo?.adminId ||
-              !adminIds.includes(o.ownershipInfo?.adminId)
-          )
+              !adminIdsToDelete.includes(o.ownershipInfo?.adminId),
+          ),
         )
-        return E.right({success: true})
-      }
-    )
+        return E.right({success: true} as const)
+      },
+    ),
   )
 })
 
@@ -449,16 +427,16 @@ export function useRequestOffer(): (a: {
             isRequested: true,
           }))
           return E.right({success: true})
-        })
+        }),
       ),
-    [store, sendRequest]
+    [store, sendRequest],
   )
 }
 
 export function useOfferForChatOrigin(
-  chatOrigin: ChatOrigin
+  chatOrigin: ChatOrigin,
 ): OneOfferInState | undefined {
   return useAtomValue(
-    useMemo(() => offerForChatOriginAtom(chatOrigin), [chatOrigin])
+    useMemo(() => offerForChatOriginAtom(chatOrigin), [chatOrigin]),
   )
 }

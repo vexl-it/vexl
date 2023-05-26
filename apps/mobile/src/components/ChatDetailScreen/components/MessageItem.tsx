@@ -94,6 +94,51 @@ function MessageItem({
         />
       )
 
+    if (item.message.message.messageType === 'OFFER_DELETED')
+      return (
+        <BigIconMessage
+          isLatest={item.isLatest}
+          smallerText={t(
+            `messages.messagePreviews.${direction}.OFFER_DELETED`,
+            {
+              them: userName,
+            }
+          )}
+          icon={
+            <Stack
+              width={80}
+              height={80}
+              backgroundColor={'$darkRed'}
+              alignItems="center"
+              justifyContent={'center'}
+              borderRadius={'$7'}
+            >
+              <Image width={35} height={35} source={BlockIconSvg} />
+            </Stack>
+          }
+        />
+      )
+    if (item.message.message.messageType === 'INBOX_DELETED')
+      return (
+        <BigIconMessage
+          isLatest={item.isLatest}
+          smallerText={t(
+            `messages.messagePreviews.${direction}.INBOX_DELETED`,
+            {
+              them: userName,
+            }
+          )}
+          icon={
+            <UserAvatar
+              height={80}
+              width={80}
+              userImage={image}
+              grayScale={true}
+            />
+          }
+        />
+      )
+
     if (
       item.message.message.messageType === 'REQUEST_REVEAL' ||
       item.message.message.messageType === 'APPROVE_REVEAL' ||

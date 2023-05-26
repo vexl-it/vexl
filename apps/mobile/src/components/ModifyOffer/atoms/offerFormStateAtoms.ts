@@ -289,7 +289,6 @@ export const offerFormMolecule = molecule((getMolecule, getScope) => {
     (get, set) => {
       const {t} = get(translationAtom)
 
-      set(deletingOfferAtom, true)
       return pipe(
         set(deleteOffersActionAtom, {
           adminIds: [offer.ownershipInfo?.adminId].filter(notEmpty),

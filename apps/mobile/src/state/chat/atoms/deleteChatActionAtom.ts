@@ -15,6 +15,7 @@ import sendMessage, {
   type SendMessageApiErrors,
 } from '@vexl-next/resources-utils/dist/chat/sendMessage'
 import {privateApiAtom} from '../../../api'
+import shouldSendTerminationMessageToChat from '../utils/shouldSendTerminationMessageToChat'
 
 export default function deleteChatActionAtom(
   chatWithMessagesAtom: FocusAtomType<ChatWithMessages>
@@ -26,14 +27,12 @@ export default function deleteChatActionAtom(
   >
 > {
   return atom(null, (get, set, {text}) => {
-    const {chat, messages} = get(chatWithMessagesAtom)
+    const chatWithMessages = get(chatWithMessagesAtom)
+    const {chat} = chatWithMessages
     const api = get(privateApiAtom)
 
-    const shouldSendMessage = ![
-      'DELETE_CHAT', // Other user has deleted the chat as a last message. We don't want to send them another notification
-      'BLOCK_CHAT', // Other user has blocked us. There is no point of sending them a message. It will fail
-      'REQUEST_MESSAGING', // We have not yet received permission for messaging. Messaging will fail
-    ].includes(messages.at(-1)?.message.messageType ?? '')
+    const shouldSendMessage =
+      shouldSendTerminationMessageToChat(chatWithMessages)
 
     const messageToSend: ChatMessage = {
       text,

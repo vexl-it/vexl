@@ -60,6 +60,7 @@ function EditOfferContent({navigateBack}: Props): JSX.Element {
                 variant="dark"
                 icon={trashSvg}
                 onPress={() => {
+                  setDeletingOffer(true)
                   void pipe(
                     deleteOffer(),
                     T.map((success) => {

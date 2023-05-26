@@ -2,7 +2,7 @@ import SvgImage from '../../../../Image'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import {type SvgString} from '@vexl-next/domain/dist/utility/SvgString.brand'
 import profileIconSvg from '../../../images/profileIconSvg'
-import {Alert, Linking, Platform, TouchableWithoutFeedback} from 'react-native'
+import {Alert, Platform, TouchableWithoutFeedback} from 'react-native'
 import imageIconSvg from '../images/imageIconSvg'
 import {Fragment, useCallback, useMemo} from 'react'
 import editIconSvg from '../images/editIconSvg'
@@ -27,6 +27,9 @@ import * as TE from 'fp-ts/TaskEither'
 import {askAreYouSureActionAtom} from '../../../../AreYouSureDialog'
 import {pipe} from 'fp-ts/function'
 import {useLogout} from '../../../../../state/useLogout'
+import ReportIssue from './ReportIssue'
+import {reportIssueDialogVisibleAtom} from '../atoms'
+import openUrl from '../../../../../utils/openUrl'
 
 const ItemText = styled(Text, {
   fos: 18,
@@ -65,15 +68,10 @@ function ButtonsSection(): JSX.Element {
   const navigation = useNavigation()
   const logout = useLogout()
   const showAreYouSure = useSetAtom(askAreYouSureActionAtom)
+  const setReportIssueDialogVisible = useSetAtom(reportIssueDialogVisibleAtom)
 
   function todo(): void {
     Alert.alert('To be implemented')
-  }
-
-  function openUrl(url: string): () => void {
-    return () => {
-      void Linking.openURL(url)
-    }
   }
 
   const deleteAccountWithAreYouSure = useCallback(async () => {
@@ -174,13 +172,13 @@ function ButtonsSection(): JSX.Element {
               navigation.navigate('Faqs')
             },
           },
-          enableHiddenFeatures
-            ? {
-                text: t('settings.items.reportIssue'),
-                icon: customerSupportIconSvg,
-                onPress: todo,
-              }
-            : null,
+          {
+            text: t('settings.items.reportIssue'),
+            icon: customerSupportIconSvg,
+            onPress: () => {
+              setReportIssueDialogVisible(true)
+            },
+          },
           enableHiddenFeatures
             ? {
                 text: t('settings.items.inAppLogs'),
@@ -248,7 +246,7 @@ function ButtonsSection(): JSX.Element {
           },
         ],
       ].filter(notEmpty),
-    [deleteAccountWithAreYouSure, navigation, t]
+    [deleteAccountWithAreYouSure, navigation, setReportIssueDialogVisible, t]
   )
 
   return (
@@ -268,6 +266,7 @@ function ButtonsSection(): JSX.Element {
           {groupIndex !== data.length - 1 && <Stack h={16} />}
         </Fragment>
       ))}
+      <ReportIssue />
     </Stack>
   )
 }

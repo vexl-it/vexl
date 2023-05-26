@@ -48,6 +48,52 @@ export function axiosCallWithValidation<T extends z.ZodType>(
   )
 }
 
+function stripSensitiveHeaders(headers: any): unknown {
+  if (!headers) return headers
+
+  const {
+    [HEADER_HASH]: h,
+    [HEADER_PUBLIC_KEY]: pk,
+    [HEADER_SIGNATURE]: sig,
+    ...rest
+  } = headers
+  return {
+    rest,
+    [HEADER_HASH]: h != null ? '[stripped]' : undefined,
+    [HEADER_PUBLIC_KEY]: pk != null ? '[stripped]' : undefined,
+    [HEADER_SIGNATURE]: sig != null ? '[stripped]' : undefined,
+  }
+}
+
+function stripSensitiveHeadersFromRequest(request?: any): unknown {
+  if (!request?.headers) return request
+
+  const headers = stripSensitiveHeaders(request.headers)
+
+  return {
+    ...request,
+    headers,
+  }
+}
+
+function stripSensitiveHeadersFromResponse(response?: any): unknown {
+  if (!response?.request) return response
+
+  return {
+    ...response,
+    request: stripSensitiveHeadersFromRequest(response.request),
+  }
+}
+
+function stripSensitiveHeadersFromError(error?: AxiosError): unknown {
+  if (!error) return error
+  return {
+    ...error,
+    request: stripSensitiveHeadersFromRequest(error?.request),
+    response: stripSensitiveHeadersFromResponse(error?.response),
+  }
+}
+
 export function axiosCall(
   axiosInstance: AxiosInstance,
   config: AxiosRequestConfig
@@ -63,7 +109,7 @@ export function axiosCall(
           if (error.response != null) {
             return {
               _tag: 'BadStatusCodeError',
-              response: error.response,
+              response: stripSensitiveHeadersFromResponse(error.response),
             } as BadStatusCodeError
           }
           if (
@@ -77,11 +123,14 @@ export function axiosCall(
             return {
               _tag: 'NetworkError',
               code: error.code,
-              error,
+              error: stripSensitiveHeadersFromError(error),
             } as NetworkError
           }
         }
-        return {_tag: 'UnknownError', error} as UnknownError
+        return {
+          _tag: 'UnknownError',
+          error,
+        } as UnknownError
       }
     ),
     TE.map((x) => x.data)
@@ -99,7 +148,11 @@ function addLoggingInterceptor(
       `🌐 ⬆️ Sending request: ${
         config.method?.toUpperCase() ?? '[unknown method]'
       } "${config.baseURL ?? ''}${config.url ?? '[unknown url]'}"`,
-      {headers: config.headers, data: config.data, params: config.params}
+      {
+        headers: stripSensitiveHeaders(config.headers),
+        data: config.data,
+        params: config.params,
+      }
     )
 
     return config

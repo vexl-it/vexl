@@ -48,6 +48,8 @@ export type RootStackParamsList = {
   SetContacts: undefined
   CommonFriends: {contactsHashes: readonly string[]}
 
+  AppLogs: undefined
+
   DebugScreen: undefined
 }
 

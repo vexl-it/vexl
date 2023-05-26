@@ -537,4 +537,13 @@ export default {
     'feelFreeToGetInTouch': 'Feel free to get in touch with our support.',
     'openInApp': 'Open in e-mail',
   },
+  'AppLogs': {
+    'title': 'In app logs',
+    'warning':
+      'Enabling app logs may cause app to be slower and will require more storage space.',
+    'copyLogs': 'Copy logs',
+    'clear': 'Clear logs',
+    'export': 'Export logs',
+    'errorExporting': 'Error exporting logs',
+  },
 }

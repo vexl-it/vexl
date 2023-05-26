@@ -1,4 +1,5 @@
-import './src/utils/wdyr'
+// import './src/utils/wdyr'
+import './src/components/AppLogsScreen/setupAppLogs' // setup logs as the first thing
 import {registerRootComponent} from 'expo'
 import App from './src/App'
 import {setupBackgroundMessaging} from './src/utils/notifications/backgroundHandler'

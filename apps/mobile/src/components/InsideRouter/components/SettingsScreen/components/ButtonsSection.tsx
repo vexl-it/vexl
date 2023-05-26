@@ -179,13 +179,13 @@ function ButtonsSection(): JSX.Element {
               setReportIssueDialogVisible(true)
             },
           },
-          enableHiddenFeatures
-            ? {
-                text: t('settings.items.inAppLogs'),
-                icon: cpuIconSvg,
-                onPress: todo,
-              }
-            : null,
+          {
+            text: t('settings.items.inAppLogs'),
+            icon: cpuIconSvg,
+            onPress: () => {
+              navigation.navigate('AppLogs')
+            },
+          },
         ].filter(notEmpty),
         enableHiddenFeatures
           ? [

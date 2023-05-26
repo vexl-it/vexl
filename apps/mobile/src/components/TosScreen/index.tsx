@@ -46,9 +46,9 @@ function TosScreen({navigation}: Props): JSX.Element {
         contentInsetAdjustmentBehavior="automatic"
       >
         {activeTab === 'termsOfUse' ? (
-          <Markdown>{t('termsOfUse.termsOfUseText')}</Markdown>
+          <Markdown>{t('termsOfUseMD')}</Markdown>
         ) : (
-          <Markdown>{t('termsOfUse.privacyPolicyText')}</Markdown>
+          <Markdown>{t('privacyPolicyMD')}</Markdown>
         )}
       </ScrollView>
     </Screen>

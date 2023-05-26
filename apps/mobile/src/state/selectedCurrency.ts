@@ -2,7 +2,7 @@ import {atomWithParsedMmkvStorage} from '../utils/atomUtils/atomWithParsedMmkvSt
 import {Currency} from '@vexl-next/domain/src/general/offers'
 import {z} from 'zod'
 import {focusAtom} from 'jotai-optics'
-import i18n from '../utils/localization/i18n'
+import {i18n} from '../utils/localization/I18nProvider'
 
 const euLocales = [
   'at', // Austria

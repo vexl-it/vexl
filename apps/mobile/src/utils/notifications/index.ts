@@ -117,7 +117,7 @@ export async function showUINotificationFromRemoteMessage(
       title,
       body,
       data: remoteMessage.data,
-      android: {channelId},
+      android: {channelId, pressAction: {id: 'default'}},
     })
 }
 

@@ -10,8 +10,7 @@ import {PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
 import {safeParse} from '../utils/fpUtils'
 import selectChatByInboxKeyAndSenderKey from './chat/atoms/selectChatByInboxKeyAndSenderKey'
 import reportError from '../utils/reportError'
-import {type NavigationState} from 'react-native-tab-view'
-import {type ChatId} from '@vexl-next/domain/dist/general/messaging'
+import {isOnMessagesList, isOnSpecificChat} from '../utils/navigation'
 
 const lastNotificationIdHandledAtom = atom<string | undefined>(undefined)
 
@@ -19,35 +18,6 @@ const MessageNotificationPayload = z.object({
   inbox: PublicKeyPemBase64,
   sender: PublicKeyPemBase64,
 })
-
-// TODO how to type this properly?
-function getActiveRoute(route: NavigationState<any>): any {
-  if (
-    !route.routes ||
-    route.routes.length === 0 ||
-    route.index >= route.routes.length
-  ) {
-    return route
-  }
-
-  const childActiveRoute = route.routes[route.index] as NavigationState<any>
-  return getActiveRoute(childActiveRoute)
-}
-
-function isOnSpecificChat(
-  state: NavigationState<any>,
-  chatId: ChatId
-): boolean {
-  const activeRoute = getActiveRoute(state)
-  return (
-    activeRoute.name === 'ChatDetail' && activeRoute.params?.chatId === chatId
-  )
-}
-
-function isOnMessagesList(state: NavigationState<any>): boolean {
-  const activeRoute = getActiveRoute(state)
-  return activeRoute.name === 'Messages'
-}
 
 function useReactOnNotificationOpen(): (notification: Notification) => void {
   const store = useStore()

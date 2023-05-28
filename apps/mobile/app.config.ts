@@ -6,6 +6,7 @@ const presets = {
   stage: {
     enableHiddenFeatures: true,
     apiPreset: 'stageEnv',
+    versionCode: VERSION_CODE,
     version: `${VERSION} (${VERSION_CODE})`,
     packageName: 'it.vexl.nextstaging',
     appName: 'Vexl Next (stage)',
@@ -17,6 +18,7 @@ const presets = {
   prod: {
     enableHiddenFeatures: false,
     apiPreset: 'prodEnv',
+    versionCode: VERSION_CODE,
     version: `${VERSION} (${VERSION_CODE})`,
     packageName: 'it.vexl.next',
     appName: 'Vexl Next',
@@ -57,6 +59,7 @@ export default {
     },
     'infoPlist': {
       'UIBackgroundModes': ['fetch', 'remote-notification'],
+      'LSApplicationQueriesSchemes': ['itms-apps'],
     },
     'googleServicesFile': extra.googleServicesInfoPlistFile,
   },

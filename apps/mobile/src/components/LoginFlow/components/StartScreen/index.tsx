@@ -1,7 +1,7 @@
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import Switch from '../../../Switch'
 import WhiteContainer from '../../../WhiteContainer'
-import bigNameSvg from './images/bigNameSvg'
+import bigNameSvg from '../../../../images/bigNameSvg'
 import notepadSvg from './images/notepadSvg'
 import {useState} from 'react'
 import {type LoginStackScreenProps} from '../../../../navigationTypes'
@@ -30,7 +30,7 @@ function StartScreen({navigation}: Props): JSX.Element {
             <Image
               style={{flex: 1}}
               resizeMode={'contain'}
-              source={require('./images/logo.png')}
+              source={require('../../../../images/logo.png')}
             />
           </Stack>
           <Stack mb="$5">

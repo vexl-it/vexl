@@ -1,4 +1,4 @@
-import {stringToSvgStringRuntimeError} from '../../../../Image'
+import {stringToSvgStringRuntimeError} from '../components/Image'
 
 const bigNameSvg =
   stringToSvgStringRuntimeError(`<svg width='211' height='66' viewBox='0 0 211 66' fill='none' xmlns='http://www.w3.org/2000/svg'>

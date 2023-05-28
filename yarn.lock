@@ -5202,6 +5202,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@react-native-firebase/remote-config@npm:^17.5.0":
+  version: 17.5.0
+  resolution: "@react-native-firebase/remote-config@npm:17.5.0"
+  peerDependencies:
+    "@react-native-firebase/analytics": 17.5.0
+    "@react-native-firebase/app": 17.5.0
+  checksum: d502460ffb2b331fbd1043587f511975d1f50c15d573226722c69fc8bb40bb573345836b7f03c2665c0da5dbfe635ea773b41374436e8ade9278317272c2896b
+  languageName: node
+  linkType: hard
+
 "@react-native-masked-view/masked-view@npm:^0.2.9":
   version: 0.2.9
   resolution: "@react-native-masked-view/masked-view@npm:0.2.9"
@@ -8170,6 +8180,7 @@ __metadata:
     "@react-native-firebase/app": ^17.4.2
     "@react-native-firebase/crashlytics": ^17.5.0
     "@react-native-firebase/messaging": ^17.4.2
+    "@react-native-firebase/remote-config": ^17.5.0
     "@react-native-masked-view/masked-view": ^0.2.9
     "@react-navigation/bottom-tabs": ^6.5.7
     "@react-navigation/material-top-tabs": ^6.6.2

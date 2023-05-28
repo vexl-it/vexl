@@ -10,6 +10,8 @@ import {useIsSessionLoaded} from './state/session'
 import {SafeAreaProvider} from 'react-native-safe-area-context'
 import {useTheme} from 'tamagui'
 import AreYouSureDialog from './components/AreYouSureDialog'
+import MaintenanceAndForceUpdateCheck from './components/MaintenanceAndForceUpdateCheck'
+import useSetupRemoteConfig from './components/MaintenanceAndForceUpdateCheck/useSetupRemoteConfig'
 
 void SplashScreen.preventAutoHideAsync()
 
@@ -17,12 +19,13 @@ function App(): JSX.Element {
   const [fontsLoaded] = useLoadFonts()
   const theme = useTheme()
   const sessionLoaded = useIsSessionLoaded()
+  const remoteConfigSetup = useSetupRemoteConfig()
 
   useEffect(() => {
-    if (fontsLoaded && sessionLoaded) {
+    if (fontsLoaded && sessionLoaded && remoteConfigSetup) {
       void SplashScreen.hideAsync()
     }
-  }, [fontsLoaded, sessionLoaded])
+  }, [fontsLoaded, sessionLoaded, remoteConfigSetup])
 
   // Handled by splashscreen
   if (!fontsLoaded) return <></>
@@ -42,7 +45,9 @@ function App(): JSX.Element {
         }}
       >
         <LoadingOverlayProvider>
-          <RootNavigation />
+          <MaintenanceAndForceUpdateCheck>
+            <RootNavigation />
+          </MaintenanceAndForceUpdateCheck>
         </LoadingOverlayProvider>
         <AreYouSureDialog />
       </NavigationContainer>

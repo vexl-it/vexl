@@ -537,6 +537,15 @@ export default {
     'feelFreeToGetInTouch': 'Feel free to get in touch with our support.',
     'openInApp': 'Open in e-mail',
   },
+  'MaintenanceScreen': {
+    'title': 'Marketplace maintenance',
+    'text': 'Vexl app is in maintenance. Come back later, please.',
+  },
+  'ForceUpdateScreen': {
+    'title': 'New version available',
+    'text': 'Download the latest version of Vexl for proper app functionality.',
+    'action': 'Update now',
+  },
   'AppLogs': {
     'title': 'In app logs',
     'warning':

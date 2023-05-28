@@ -3,6 +3,8 @@ import urlJoin from 'url-join'
 import {type ServiceUrl} from '../../ServiceUrl.brand'
 import {
   type ChallengeCouldNotBeGenerated,
+  type GetCryptocurrencyDetailsRequest,
+  GetCryptocurrencyDetailsResponse,
   type InitPhoneNumberVerificationRequest,
   InitPhoneNumberVerificationResponse,
   type InvalidPhoneNumber,
@@ -167,6 +169,26 @@ export function privateApi({
   return {
     deleteUser: () =>
       axiosCall(axiosInstance, {method: 'delete', url: '/user/me'}),
+
+    getCryptocurrencyDetails: (request: GetCryptocurrencyDetailsRequest) => {
+      return pipe(
+        axiosCallWithValidation(
+          axiosInstance,
+          {
+            method: 'get',
+            url: `/cryptocurrencies/${request.coin}`,
+          },
+          GetCryptocurrencyDetailsResponse
+        ),
+        TE.mapLeft((e) => {
+          if (e._tag === 'BadStatusCodeError') {
+            if (e.response.data.code === '101101')
+              return {_tag: 'RequestCouldNotBeProcessedError'} as const
+          }
+          return e
+        })
+      )
+    },
   }
 }
 

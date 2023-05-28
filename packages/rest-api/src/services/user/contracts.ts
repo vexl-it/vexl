@@ -36,6 +36,10 @@ export interface PublicKeyOrHashInvalid {
   _tag: 'PublicKeyOrHashInvalid'
 }
 
+export interface RequestCouldNotBeProcessedError {
+  _tag: 'RequestCouldNotBeProcessedError'
+}
+
 export interface InitPhoneNumberVerificationRequest {
   phoneNumber: E164PhoneNumber
 }
@@ -90,3 +94,27 @@ export interface InvalidPhoneNumberResponse {
   _tag: 'InvalidPhoneNumberResponse'
   response: AxiosResponse
 }
+
+export const GetCryptocurrencyDetailsRequest = z.object({
+  coin: z.literal('bitcoin').default('bitcoin'),
+})
+export type GetCryptocurrencyDetailsRequest = z.TypeOf<
+  typeof GetCryptocurrencyDetailsRequest
+>
+
+export const GetCryptocurrencyDetailsResponse = z.object({
+  priceUsd: z.number(),
+  priceCzk: z.number(),
+  priceEur: z.number(),
+  priceChangePercentage24h: z.number(),
+  priceChangePercentage7d: z.number(),
+  priceChangePercentage14d: z.number(),
+  priceChangePercentage30d: z.number(),
+  priceChangePercentage60d: z.number(),
+  priceChangePercentage200d: z.number(),
+  priceChangePercentage1y: z.number(),
+  lastUpdated: IsoDatetimeString,
+})
+export type GetCryptocurrencyDetailsResponse = z.TypeOf<
+  typeof GetCryptocurrencyDetailsResponse
+>

@@ -9,15 +9,15 @@ export default function useContent(): Array<TabProps<Currency>> {
   return useMemo(
     () => [
       {
-        title: t('offerForm.czk'),
+        title: t('common.czk'),
         type: 'CZK',
       },
       {
-        title: t('offerForm.eur'),
+        title: t('common.eur'),
         type: 'EUR',
       },
       {
-        title: t('offerForm.usd'),
+        title: t('common.usd'),
         type: 'USD',
       },
     ],

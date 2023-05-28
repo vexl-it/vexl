@@ -47,6 +47,9 @@ export default {
       'text': 'Copy to clipboard instead?',
       'copy': 'Copy and close',
     },
+    'czk': 'CZK',
+    'eur': 'EUR',
+    'usd': 'USD',
   },
   'loginFlow': {
     'anonymityNotice': 'Nobody will see this until you allow it. Even us.',
@@ -276,9 +279,6 @@ export default {
     'sellBitcoin': 'Sell Bitcoin',
     'buyBitcoin': 'Buy Bitcoin',
     'currency': 'Currency',
-    'czk': 'CZK',
-    'eur': 'EUR',
-    'usd': 'USD',
     'amountOfTransaction': {
       'amountOfTransaction': 'Amount of transaction',
       'eurSymbol': '€',
@@ -559,5 +559,8 @@ export default {
       'text':
         'We can try to strip private keys and personal information from logs before exporting them. Always make sure to verify by yourself.',
     },
+  },
+  'btcPriceChart': {
+    'requestCouldNotBeProcessed': 'Request to obtain current BTC price failed',
   },
 }

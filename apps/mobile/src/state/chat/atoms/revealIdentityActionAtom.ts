@@ -1,7 +1,7 @@
 import {type FocusAtomType} from '../../../utils/atomUtils/FocusAtomType'
 import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
 import {atom} from 'jotai'
-import {sessionDataOrDummy} from '../../session'
+import {sessionDataOrDummyAtom} from '../../session'
 import {type E164PhoneNumber} from '@vexl-next/domain/dist/general/E164PhoneNumber.brand'
 import {
   type ChatMessage,
@@ -75,7 +75,7 @@ export default function revealIdentityActionAtom(
       const {
         realUserData: {userName, image},
         phoneNumber,
-      } = get(sessionDataOrDummy)
+      } = get(sessionDataOrDummyAtom)
       const api = get(privateApiAtom)
 
       const anonymizedPhoneNumber = anonymizePhoneNumber(phoneNumber)

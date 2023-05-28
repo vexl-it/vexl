@@ -73,7 +73,9 @@ function OffersListStateDisplayerContent({
         onMyOffersPress={navigateToMyOffers}
       />
       {offersAtoms.length === 0 ? (
-        <EmptyListPlaceholder />
+        <Stack pos={'absolute'} t={0} b={0} l={0} r={0} zIndex={-1}>
+          <EmptyListPlaceholder />
+        </Stack>
       ) : (
         <OffersList
           ListHeaderComponent={renderListHeader}

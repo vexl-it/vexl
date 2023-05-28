@@ -237,6 +237,8 @@ export default {
     'requestAlreadySent':
       "Request for trading was sent. We'll let you know once it's accepted.",
     'listEmpty': 'Marketplace empty yet',
+    'createOfferAndReachVexlers':
+      'You reach {{reachNumber}} vexlers.\nAdd more contacts to increase the number of offers you see.',
     'emptyAction': 'Add new offer',
   },
   'termsOfUse': {

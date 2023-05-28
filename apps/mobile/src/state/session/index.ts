@@ -17,7 +17,7 @@ import {replaceAll} from '../../utils/replaceAll'
 
 // duplicated code but we can not remove cyclic dependency otherwise
 // --------------
-export default function removeSensitiveData(string: string): string {
+function removeSensitiveData(string: string): string {
   const session = getDefaultStore().get(sessionDataOrDummyAtom)
   const toReplace = [
     session.sessionCredentials.signature,
@@ -30,7 +30,7 @@ export default function removeSensitiveData(string: string): string {
   return replaceAll(string, toReplace, '[[stripped]]')
 }
 
-export function toJsonWithRemovedSensitiveData(object: any): string {
+function toJsonWithRemovedSensitiveData(object: any): string {
   try {
     const jsonString = JSON.stringify(object)
     return removeSensitiveData(jsonString)

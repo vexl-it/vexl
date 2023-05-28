@@ -137,15 +137,15 @@ function ButtonsSection(): JSX.Element {
   > = useMemo(
     () =>
       [
-        enableHiddenFeatures
-          ? [
-              {
-                text: t('common.myOffers'),
-                icon: profileIconSvg,
-                onPress: todo,
-              },
-            ]
-          : null,
+        [
+          {
+            text: t('common.myOffers'),
+            icon: profileIconSvg,
+            onPress: () => {
+              navigation.navigate('MyOffers')
+            },
+          },
+        ],
         enableHiddenFeatures
           ? [
               {

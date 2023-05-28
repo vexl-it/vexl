@@ -16,6 +16,7 @@ import {
 import {selectAtom} from 'jotai/utils'
 import React from 'react'
 import MyOffersSortingDropdown from './components/MyOffersSortingDropdown'
+import useSafeGoBack from '../../utils/useSafeGoBack'
 
 type Props = RootStackScreenProps<'MyOffers'>
 
@@ -23,21 +24,16 @@ const myActiveOffers = selectAtom(myActiveOffersAtom, (offers) => offers.length)
 
 function MyOffersScreen({navigation}: Props): JSX.Element {
   const {t} = useTranslation()
+  const safeGoBack = useSafeGoBack()
   const tokens = getTokens()
 
   const myOffersSortedAtoms = useAtomValue(myOffersSortedAtomsAtom)
   const activeOffersCount = useAtomValue(myActiveOffers)
 
   return (
-    <Screen customHorizontalPadding={tokens.space[4].val}>
+    <Screen customHorizontalPadding={tokens.space[2].val}>
       <ScreenTitle text={t('common.myOffers')} withBottomBorder>
-        <IconButton
-          variant="dark"
-          icon={closeSvg}
-          onPress={() => {
-            navigation.navigate('InsideTabs', {screen: 'Marketplace'})
-          }}
-        />
+        <IconButton variant="dark" icon={closeSvg} onPress={safeGoBack} />
       </ScreenTitle>
       <XStack
         pos={'relative'}

@@ -21,6 +21,7 @@ import offerToConnectionsAtom, {
 import messaging from '@react-native-firebase/messaging'
 import Preferences from './components/Preferences'
 import useSafeGoBack from '../../utils/useSafeGoBack'
+import reportError from '../../utils/reportError'
 
 // const ContentScroll = styled(ScrollView, {
 //   marginBottom: '$2',
@@ -53,6 +54,27 @@ function DebugScreen(): JSX.Element {
             <Text>apiEnv: {JSON.stringify(apiEnv, null, 2)}</Text>
 
             <Spacer />
+            <Button
+              variant={'primary'}
+              size={'small'}
+              text={'Simulate non fatal error'}
+              onPress={() => {
+                reportError(
+                  'error',
+                  // Private key should be stripped
+                  `Simulated non fatal error ${session.privateKey.privateKeyPemBase64}`,
+                  new Error('Simulated non fatal error')
+                )
+              }}
+            />
+            <Button
+              variant={'primary'}
+              size={'small'}
+              text={'Simulate fatal error'}
+              onPress={() => {
+                throw new Error(`Simulated fatal error`)
+              }}
+            />
             <Button
               variant={'primary'}
               size={'small'}

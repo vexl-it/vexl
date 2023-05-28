@@ -1,3 +1,8 @@
+import crashlytics from '@react-native-firebase/crashlytics'
+import removeSensitiveData, {
+  toJsonWithRemovedSensitiveData,
+} from './removeSensitiveData'
+
 export type LogLvl = 'info' | 'warn' | 'error'
 
 function getConsoleLvl(
@@ -18,7 +23,8 @@ function reportError(
 ): void
 function reportError(lvl: LogLvl, message: string, ...args: any[]): void {
   if (!__DEV__) {
-    // toDO crashlitics
+    crashlytics().log(toJsonWithRemovedSensitiveData({lvl, message, args}))
+    crashlytics().recordError(new Error(removeSensitiveData(message)))
   }
   getConsoleLvl(lvl)('‼️ there was an error reported. See hermes logs')
   getConsoleLvl(lvl)(message, ...args)

@@ -104,6 +104,7 @@ export default {
       },
     ],
     '@react-native-firebase/app',
+    '@react-native-firebase/crashlytics',
     '@notifee/react-native',
     './expo-plugins/disable-firebase-analytics.js',
     './expo-plugins/setup-headless-background-message-processing-ios.js',

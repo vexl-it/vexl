@@ -2,7 +2,6 @@ import {atom, useAtomValue, useSetAtom, type WritableAtom} from 'jotai'
 import {pipe} from 'fp-ts/function'
 import * as SecretStorage from 'expo-secure-store'
 import * as TE from 'fp-ts/TaskEither'
-import reportError from '../../utils/reportError'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import {Session} from '../../brands/Session.brand'
 import readSessionFromStorage from './readSessionFromStorage'
@@ -12,6 +11,50 @@ import {KeyHolder} from '@vexl-next/cryptography'
 import {UriString} from '@vexl-next/domain/dist/utility/UriString.brand'
 import {UserName} from '@vexl-next/domain/dist/general/UserName.brand'
 import {E164PhoneNumber} from '@vexl-next/domain/dist/general/E164PhoneNumber.brand'
+import crashlytics from '@react-native-firebase/crashlytics'
+import {getDefaultStore} from 'jotai'
+import {replaceAll} from '../../utils/replaceAll'
+
+// duplicated code but we can not remove cyclic dependency otherwise
+// --------------
+export default function removeSensitiveData(string: string): string {
+  const session = getDefaultStore().get(sessionDataOrDummyAtom)
+  const toReplace = [
+    session.sessionCredentials.signature,
+    session.sessionCredentials.hash,
+    session.sessionCredentials.publicKey,
+    session.phoneNumber,
+    session.realUserData.userName,
+    session.privateKey.privateKeyPemBase64,
+  ]
+  return replaceAll(string, toReplace, '[[stripped]]')
+}
+
+export function toJsonWithRemovedSensitiveData(object: any): string {
+  try {
+    const jsonString = JSON.stringify(object)
+    return removeSensitiveData(jsonString)
+  } catch (e) {
+    crashlytics().recordError(
+      new Error('Error stringify-ing object for crashlytics', {cause: e})
+    )
+    return '[[Error stringify-ing object]]'
+  }
+}
+
+function reportError(message: string, errorData: unknown): void {
+  // We can not use reportError method because of circular require
+  if (!__DEV__) {
+    crashlytics().log(message)
+    crashlytics().log(toJsonWithRemovedSensitiveData(errorData))
+    crashlytics().recordError(
+      new Error('error while reading data from secure storage')
+    )
+  }
+  console.error(message, errorData)
+}
+
+// -------------- end of duplicated code
 
 const dummyPrivKey = KeyHolder.generatePrivateKey()
 export const dummySession: Session = Session.parse({
@@ -69,12 +112,8 @@ sessionHolderAtom.onMount = (setValue) => {
       TE.match(
         (left) => {
           if (left._tag !== 'storeEmpty') {
-            const error =
-              left._tag === 'errorReadingFromStore' ? left.error : null
             reportError(
-              'error',
               '‼️ Error while reading user data from secure storage.',
-              error,
               left
             )
           }
@@ -121,7 +160,6 @@ export const sessionAtom: WritableAtom<
       }),
       TE.mapLeft((error) => {
         reportError(
-          'error',
           '‼️ Error while writing user data to secure storage.',
           error
         )
@@ -142,7 +180,7 @@ const sessionLoadedAtom = atom((get) => {
   return state === 'loggedIn' || state === 'loggedOut'
 })
 
-export const sessionDataOrDummy = atom((get) => {
+export const sessionDataOrDummyAtom = atom((get) => {
   const session = get(sessionAtom)
   if (session.state === 'loggedIn') return session.session
   return dummySession

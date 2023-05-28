@@ -545,5 +545,10 @@ export default {
     'clear': 'Clear logs',
     'export': 'Export logs',
     'errorExporting': 'Error exporting logs',
+    'anonymizeAlert': {
+      'title': 'Would you like to anonymize logs?',
+      'text':
+        'We can try to strip private keys and personal information from logs before exporting them. Always make sure to verify by yourself.',
+    },
   },
 }

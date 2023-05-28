@@ -8,26 +8,34 @@ import {
 } from '@vexl-next/domain/dist/utility/errors'
 import {readLogsRaw} from './storage'
 import {version} from '../../../utils/environment'
+import removeSensitiveData from '../../../utils/removeSensitiveData'
 
 type LogsShareError = BasicError<'LogsShareError'>
 
-export default function saveLogsToDirectoryAndShare(): TE.TaskEither<
-  LogsShareError,
-  true
-> {
+export default function saveLogsToDirectoryAndShare(
+  anonymize: boolean
+): TE.TaskEither<LogsShareError, true> {
   return TE.tryCatch(
     async () => {
       if (!FileSystem.documentDirectory) throw new Error('oj')
       const logsUri = joinUrl(
         FileSystem.documentDirectory,
-        `vexl${version}-logs.txt`
+        `vexl${version.replace(/ /g, '_')}-logs.txt`
       )
 
       if ((await FileSystem.getInfoAsync(logsUri)).exists) {
         await FileSystem.deleteAsync(logsUri)
       }
 
-      await FileSystem.writeAsStringAsync(logsUri, readLogsRaw(), {
+      const logsToExport = (() => {
+        const logs = readLogsRaw()
+        if (anonymize) {
+          return removeSensitiveData(logs)
+        }
+        return logs
+      })()
+
+      await FileSystem.writeAsStringAsync(logsUri, logsToExport, {
         encoding: 'utf8',
       })
 
@@ -35,7 +43,6 @@ export default function saveLogsToDirectoryAndShare(): TE.TaskEither<
       return true as const
     },
     (e) => {
-      console.log(e)
       return toBasicError('LogsShareError')(e)
     }
   )

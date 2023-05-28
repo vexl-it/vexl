@@ -29,13 +29,12 @@ export function useRefreshNotificationTokenOnResumeAssumeLoggedIn(): void {
       const newToken = await getNotificationToken()()
       if (oldToken === newToken) {
         console.info(
-          '📳 Notification token has not changed since the last refresh:',
-          newToken
+          '📳 Notification token has not changed since the last refresh:'
         )
         return
       }
 
-      console.info('📳 Refreshing notification token', newToken)
+      console.info('📳 Refreshing notification token')
       if (newToken) storage._storage.set(NOTIFICATION_TOKEN_CACHE_KEY, newToken)
       else storage._storage.delete(NOTIFICATION_TOKEN_CACHE_KEY)
 

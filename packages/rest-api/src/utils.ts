@@ -58,7 +58,7 @@ function stripSensitiveHeaders(headers: any): unknown {
     ...rest
   } = headers
   return {
-    rest,
+    ...rest,
     [HEADER_HASH]: h != null ? '[stripped]' : undefined,
     [HEADER_PUBLIC_KEY]: pk != null ? '[stripped]' : undefined,
     [HEADER_SIGNATURE]: sig != null ? '[stripped]' : undefined,

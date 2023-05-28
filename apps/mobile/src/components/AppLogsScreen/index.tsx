@@ -16,62 +16,92 @@ import {useSetAtom} from 'jotai'
 import {loadingOverlayDisplayedAtom} from '../LoadingOverlayProvider'
 import {Alert} from 'react-native'
 import {setupAppLogs} from './utils/setupAppLogs'
+import IconButton from '../IconButton'
+import closeSvg from '../images/closeSvg'
+import useSafeGoBack from '../../utils/useSafeGoBack'
 
 function AppLogsScreen(): JSX.Element {
   const {t} = useTranslation()
   const [enabled, setEnabled] = useState(getCustomLoggingEnabled())
   const setLoading = useSetAtom(loadingOverlayDisplayedAtom)
+  const safeGoBack = useSafeGoBack()
 
   const exportLogs = useCallback(() => {
-    setLoading(true)
-    saveLogsToDirectoryAndShare()()
-      .catch(() => {
-        Alert.alert(t('AppLogs.errorExporting'))
-      })
-      .finally(() => {
-        setLoading(false)
-      })
+    Alert.alert(
+      t('AppLogs.anonymizeAlert.title'),
+      t('AppLogs.anonymizeAlert.text'),
+      [
+        {
+          text: t('common.no'),
+          onPress: () => {
+            setLoading(true)
+            saveLogsToDirectoryAndShare(false)()
+              .catch(() => {
+                Alert.alert(t('AppLogs.errorExporting'))
+              })
+              .finally(() => {
+                setLoading(false)
+              })
+          },
+        },
+        {
+          text: t('common.yes'),
+          onPress: () => {
+            setLoading(true)
+            saveLogsToDirectoryAndShare(true)()
+              .catch(() => {
+                Alert.alert(t('AppLogs.errorExporting'))
+              })
+              .finally(() => {
+                setLoading(false)
+              })
+          },
+        },
+      ]
+    )
   }, [setLoading, t])
 
   return (
     <Screen>
-      <Stack mx="$2" f={1}>
+      <Stack mx="$2" my="$4" f={1}>
         <ScreenTitle text={t('AppLogs.title')}>
-          <Switch
-            value={enabled}
-            onValueChange={(enabled) => {
-              setEnabled(enabled)
-              setCustomLoggingEnabled(enabled)
-              setupAppLogs()
-            }}
-          />
+          <>
+            <Switch
+              value={enabled}
+              onValueChange={(enabled) => {
+                setEnabled(enabled)
+                setCustomLoggingEnabled(enabled)
+                setupAppLogs()
+              }}
+            />
+            <IconButton icon={closeSvg} onPress={safeGoBack} />
+          </>
         </ScreenTitle>
-        <Text mb="$3" ff={'$body600'} color="white">
+        <Text mb="$3" ff={'$body600'} color="$white">
           {t('AppLogs.warning')}
         </Text>
 
-        <Stack f={1} my={2}>
+        <Stack f={1} my="$1">
           <LogsList />
         </Stack>
-      </Stack>
-      <XStack>
-        <Button
-          fullSize
-          size={'small'}
-          variant={'primary'}
-          onPress={clearLogs}
-          text={t('AppLogs.clear')}
-        />
+        <XStack space="$2">
+          <Button
+            fullSize
+            size={'small'}
+            variant={'primary'}
+            onPress={clearLogs}
+            text={t('AppLogs.clear')}
+          />
 
-        <Button
-          fullSize
-          size={'small'}
-          variant={'secondary'}
-          // eslint-disable-next-line @typescript-eslint/no-misused-promises
-          onPress={exportLogs}
-          text={t('AppLogs.export')}
-        />
-      </XStack>
+          <Button
+            fullSize
+            size={'small'}
+            variant={'secondary'}
+            onPress={exportLogs}
+            text={t('AppLogs.export')}
+          />
+        </XStack>
+      </Stack>
     </Screen>
   )
 }

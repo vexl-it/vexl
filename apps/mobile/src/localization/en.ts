@@ -563,4 +563,10 @@ export default {
   'btcPriceChart': {
     'requestCouldNotBeProcessed': 'Request to obtain current BTC price failed',
   },
+  'currency': {
+    'currency': 'Currency',
+    'czechCrown': 'Czech crown',
+    'euro': 'Euro',
+    'unitedStatesDollar': 'United states dollar',
+  },
 }

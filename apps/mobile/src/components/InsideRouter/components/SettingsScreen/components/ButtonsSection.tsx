@@ -22,27 +22,53 @@ import {useNavigation} from '@react-navigation/native'
 import {getTokens, Stack, styled, Text, XStack} from 'tamagui'
 import {enableHiddenFeatures} from '../../../../../utils/environment'
 import notEmpty from '../../../../../utils/notEmpty'
-import {useSetAtom} from 'jotai'
+import {type PrimitiveAtom, useAtomValue, useSetAtom} from 'jotai'
 import * as TE from 'fp-ts/TaskEither'
 import {askAreYouSureActionAtom} from '../../../../AreYouSureDialog'
 import {pipe} from 'fp-ts/function'
 import {useLogout} from '../../../../../state/useLogout'
 import ReportIssue from './ReportIssue'
-import {reportIssueDialogVisibleAtom} from '../atoms'
+import {
+  changeCurrencyDialogVisibleAtom,
+  reportIssueDialogVisibleAtom,
+} from '../atoms'
 import openUrl from '../../../../../utils/openUrl'
+import ChangeCurrency from './ChangeCurrency'
+import {type Currency} from '@vexl-next/domain/src/general/offers'
+import {selectedCurrencyAtom} from '../../../../../state/selectedCurrency'
 
 const ItemText = styled(Text, {
   fos: 18,
 })
 
+function SelectedCurrencyTitle({
+  currencyAtom,
+}: {
+  currencyAtom: PrimitiveAtom<Currency>
+}): JSX.Element {
+  const {t} = useTranslation()
+  const selectedCurrency = useAtomValue(currencyAtom)
+  return (
+    <ItemText ff="$body500" col="$white">
+      {selectedCurrency === 'USD'
+        ? t('currency.unitedStatesDollar')
+        : selectedCurrency === 'EUR'
+        ? t('currency.euro')
+        : t('currency.czechCrown')}
+    </ItemText>
+  )
+}
+
 function Item({
   text,
   icon,
   onPress,
+  children,
 }: {
   text: string | JSX.Element
   icon: SvgString
   onPress: () => void
+  children?: React.ReactNode
 }): JSX.Element {
   const tokens = getTokens()
   return (
@@ -51,13 +77,14 @@ function Item({
         <Stack w={24} h={24} mr="$4">
           <SvgImage stroke={tokens.color.greyOnBlack.val} source={icon} />
         </Stack>
-        {typeof text === 'string' ? (
-          <ItemText ff="$body500" col="$white">
-            {text}
-          </ItemText>
-        ) : (
-          text
-        )}
+        {children ??
+          (typeof text === 'string' ? (
+            <ItemText ff="$body500" col="$white">
+              {text}
+            </ItemText>
+          ) : (
+            text
+          ))}
       </XStack>
     </TouchableWithoutFeedback>
   )
@@ -69,6 +96,9 @@ function ButtonsSection(): JSX.Element {
   const logout = useLogout()
   const showAreYouSure = useSetAtom(askAreYouSureActionAtom)
   const setReportIssueDialogVisible = useSetAtom(reportIssueDialogVisibleAtom)
+  const setChangeCurrencyDialogVisible = useSetAtom(
+    changeCurrencyDialogVisibleAtom
+  )
 
   function todo(): void {
     Alert.alert('To be implemented')
@@ -98,7 +128,12 @@ function ButtonsSection(): JSX.Element {
   }, [showAreYouSure, t, logout])
 
   const data: Array<
-    Array<{icon: SvgString; text: string | JSX.Element; onPress: () => void}>
+    Array<{
+      icon: SvgString
+      text: string | JSX.Element
+      onPress: () => void
+      children?: React.ReactNode
+    } | null>
   > = useMemo(
     () =>
       [
@@ -134,9 +169,9 @@ function ButtonsSection(): JSX.Element {
             },
           },
         ],
-        enableHiddenFeatures
-          ? [
-              {
+        [
+          enableHiddenFeatures
+            ? {
                 text: `${t('settings.items.setPin')} ${
                   Platform.OS === 'ios'
                     ? ` / ${t('settings.items.faceId')}`
@@ -144,19 +179,26 @@ function ButtonsSection(): JSX.Element {
                 }`,
                 icon: faceIdIconSvg,
                 onPress: todo,
-              },
-              {
-                text: t('settings.items.czechCrown'),
-                icon: coinsIconSvg,
-                onPress: todo,
-              },
-              {
+              }
+            : null,
+          {
+            text: t('settings.items.czechCrown'),
+            icon: coinsIconSvg,
+            onPress: () => {
+              setChangeCurrencyDialogVisible(true)
+            },
+            children: (
+              <SelectedCurrencyTitle currencyAtom={selectedCurrencyAtom} />
+            ),
+          },
+          enableHiddenFeatures
+            ? {
                 text: t('settings.items.allowScreenshots'),
                 icon: imageIconSvg,
                 onPress: todo,
-              },
-            ]
-          : null,
+              }
+            : null,
+        ],
         [
           {
             text: t('settings.items.termsAndPrivacy'),
@@ -246,7 +288,13 @@ function ButtonsSection(): JSX.Element {
           },
         ],
       ].filter(notEmpty),
-    [deleteAccountWithAreYouSure, navigation, setReportIssueDialogVisible, t]
+    [
+      deleteAccountWithAreYouSure,
+      navigation,
+      setChangeCurrencyDialogVisible,
+      setReportIssueDialogVisible,
+      t,
+    ]
   )
 
   return (
@@ -256,7 +304,7 @@ function ButtonsSection(): JSX.Element {
           <Stack br="$4" bg="$blackAccent1">
             {group.map((item, itemIndex) => (
               <Fragment key={itemIndex}>
-                <Item {...item} />
+                {item && <Item {...item} />}
                 {itemIndex !== group.length - 1 && (
                   <Stack h={2} bg="$grey" als="stretch" ml="$7" />
                 )}
@@ -267,6 +315,7 @@ function ButtonsSection(): JSX.Element {
         </Fragment>
       ))}
       <ReportIssue />
+      <ChangeCurrency />
     </Stack>
   )
 }

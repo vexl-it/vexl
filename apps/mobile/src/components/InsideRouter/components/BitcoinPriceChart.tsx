@@ -9,6 +9,7 @@ import {btcPriceAtom, refreshBtcPriceActionAtom} from '../atoms'
 import {useFocusEffect} from '@react-navigation/native'
 import {useCallback, useMemo} from 'react'
 import formatNumber from '../../../utils/formatNumber'
+import {selectedCurrencyAtom} from '../../../state/selectedCurrency'
 
 export const CHART_HEIGHT_PX = 120
 
@@ -17,9 +18,22 @@ function BitcoinPriceChart(): JSX.Element {
   const insets = useSafeAreaInsets()
   const refreshBtcPrice = useSetAtom(refreshBtcPriceActionAtom)
   const btcPrice = useAtomValue(btcPriceAtom)
+  const selectedCurrency = useAtomValue(selectedCurrencyAtom)
   const btcPriceValue = useMemo(
-    () => formatNumber(btcPrice?.priceUsd),
-    [btcPrice]
+    () =>
+      formatNumber(
+        selectedCurrency === 'USD'
+          ? btcPrice?.priceUsd
+          : selectedCurrency === 'EUR'
+          ? btcPrice?.priceEur
+          : btcPrice?.priceCzk
+      ),
+    [
+      btcPrice?.priceCzk,
+      btcPrice?.priceEur,
+      btcPrice?.priceUsd,
+      selectedCurrency,
+    ]
   )
 
   useFocusEffect(
@@ -43,7 +57,11 @@ function BitcoinPriceChart(): JSX.Element {
               {btcPriceValue ?? '- '}
             </Text>
             <Text fos={12} ff={'$body700'} col={'$yellowAccent1'}>
-              {t('common.usd')}
+              {selectedCurrency === 'USD'
+                ? t('common.usd')
+                : selectedCurrency === 'EUR'
+                ? t('common.eur')
+                : t('common.czk')}
             </Text>
           </XStack>
         </TouchableOpacity>

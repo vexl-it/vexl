@@ -6,6 +6,7 @@ import {Stack} from 'tamagui'
 import OfferWithBubbleTip from '../OfferWithBubbleTip'
 import {useMemo} from 'react'
 import {type Atom, useAtomValue} from 'jotai'
+import {useChatForOffer} from '../../state/chat/hooks/useChatForOffer'
 
 interface Props {
   readonly offerAtom: Atom<OneOfferInState>
@@ -21,14 +22,27 @@ function OffersListItem({offerAtom}: Props): JSX.Element {
     [offer.ownershipInfo?.adminId]
   )
 
+  // TODO make this more performant
+  const chatForOffer = useChatForOffer({
+    offerPublicKey: offer.offerInfo.publicPart.offerPublicKey,
+  })
+
   return (
     <Stack mt={'$6'}>
       <OfferWithBubbleTip
         button={
           <Button
             size={'medium'}
-            text={isMine ? t('myOffers.editOffer') : t('common.request')}
-            variant={isMine ? 'primary' : 'secondary'}
+            text={
+              isMine
+                ? t('myOffers.editOffer')
+                : chatForOffer
+                ? t('common.requested')
+                : t('common.request')
+            }
+            variant={
+              isMine ? 'primary' : chatForOffer ? 'primary' : 'secondary'
+            }
             onPress={() => {
               navigation.navigate(isMine ? 'EditOffer' : 'OfferDetail', {
                 offerId: offer.offerInfo.offerId,

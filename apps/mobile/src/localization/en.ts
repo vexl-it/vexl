@@ -41,15 +41,15 @@ export default {
     'more': 'More',
     'yes': 'Yes',
     'no': 'No',
+    'czk': 'CZK',
+    'usd': 'USD',
+    'eur': 'EUR',
     'myOffers': 'My offers',
     'errorOpeningLink': {
       'message': 'Error opening link',
       'text': 'Copy to clipboard instead?',
       'copy': 'Copy and close',
     },
-    'czk': 'CZK',
-    'eur': 'EUR',
-    'usd': 'USD',
     'nice': 'Nice',
     'success': 'Success!',
   },
@@ -64,15 +64,17 @@ export default {
       'subtitle': 'Welcome! Ready to get started?',
       'touLabel': 'I agree to',
       'termsOfUse': 'Terms of use',
+      'termsOfUseText': TosEn,
+      'privacyPolicyText': PPEn,
     },
     'anonymizationNotice': {
-      'title': 'Your identity will be anonymized',
+      'title': 'Your identity will be anonymized.',
       'text':
         'Nobody will see your real name and profile picture until you reveal it for particular trade. Even us. Let’s set up your true identity first.',
     },
     'name': {
       'prompt': 'What do your friends call you?',
-      'placeholder': 'Full name or nickname',
+      'placeholder': 'Name or nickname',
       'nameValidationError':
         'Name should be at least 1 characters long and maximum 50 characters long',
     },
@@ -85,7 +87,7 @@ export default {
       'nothingSelected': 'No image was selected',
     },
     'anonymization': {
-      'beforeTitle': 'This is your identity',
+      'beforeTitle': 'This is your private profile',
       'afterTitle': 'Identity anonymized!',
       'action': 'Anonymize',
       'afterDescription':
@@ -97,14 +99,13 @@ export default {
       'text':
         'In order to connect you with the Vexl community, enter your phone number',
       'errors': {
-        'invalidPhoneNumber':
-          'Invalid phone number. Please try a different one',
+        'invalidPhoneNumber': 'Invalid phone number. Please try again.',
         'previousCodeNotExpired':
           'Verification for this phone number is already in progress. Please wait until it expires',
       },
     },
     'verificationCode': {
-      'title': 'We just sent you the code',
+      'title': 'We just sent you the verification code',
       'text': 'Enter it bellow to verify',
       'inputPlaceholder': 'Your verification code',
       'retryCountdown': 'Didn’t receive a code? Resend in',
@@ -120,7 +121,7 @@ export default {
         'PublicKeyOrHashInvalid': 'Public key or hash invalid. Try again later',
       },
       'success': {
-        'title': 'Phone verified.\nLet’s setup your profile.',
+        'title': 'Phone number verified.\nLet’s setup your profile.',
         'errorWhileParsingSessionForInternalState': 'Error while saving user',
       },
     },
@@ -170,7 +171,7 @@ export default {
     'items': {
       'changeProfilePicture': 'Change profile picture',
       'editName': 'Edit name',
-      'contactsImported': 'Contacts imported',
+      'contactsImported': 'Contacts management',
       'xFriends': '{{number}} friends',
       'setPin': 'Set PIN',
       'faceId': 'Face ID',
@@ -214,7 +215,7 @@ export default {
     'forSeller': 'For seller',
     'forBuyer': 'For buyer',
     'bank': 'Bank',
-    'revolut': 'Revolut',
+    'revolut': 'Online payment',
     'isSelling': 'is selling',
     'isBuying': 'is buying',
     'directFriend': 'Direct friend',
@@ -237,18 +238,15 @@ export default {
     'requestAlreadySent':
       "Request for trading was sent. We'll let you know once it's accepted.",
     'listEmpty': 'Marketplace empty yet',
+    'emptyAction': 'Add new offer',
     'createOfferAndReachVexlers':
       'You reach {{reachNumber}} vexlers.\nAdd more contacts to increase the number of offers you see.',
-    'emptyAction': 'Add new offer',
   },
   'termsOfUse': {
     'termsOfUse': 'Terms of Use',
     'privacyPolicy': 'Privacy Policy',
     'dontHaveTime':
-      'Don’t have a time to read all this? Take' +
-      ' a look on Frequently Asked Questions.',
-    'termsOfUseText': TosEn,
-    'privacyPolicyText': PPEn,
+      'Don’t have a time to read all this? Take a look on Frequently Asked Questions.',
   },
   'faqs': {
     'faqs': 'Frequently Asked Questions',
@@ -278,16 +276,13 @@ export default {
       'You can always reach out to us via email: support@vexl.it. For a private comms, you can also send us an e2ee mail. Or you can meet us during your next P2P trade! 😻',
   },
   'offerForm': {
-    'myNewOffer': 'My new offer',
+    'myNewOffer': 'New offer',
     'iWantTo': 'I want to',
     'sellBitcoin': 'Sell Bitcoin',
     'buyBitcoin': 'Buy Bitcoin',
     'currency': 'Currency',
-    'czk': 'CZK',
-    'eur': 'EUR',
-    'usd': 'USD',
     'amountOfTransaction': {
-      'amountOfTransaction': 'Amount of transaction',
+      'amountOfTransaction': 'Amount',
       'eurSymbol': '€',
       'dollarSymbol': '$',
       'czkSymbol': 'Kč',
@@ -344,7 +339,7 @@ export default {
       'whatToWatchOutForOnline': 'What to watch out for online?',
       'moneySentByRandomPerson':
         'Money sent by a random person can be of criminal origin and traceable.',
-      'neverSendCrypto': 'Never send cryptocurrency before receiving payment.',
+      'neverSendCrypto': 'Never send bitcoin before receiving payment.',
       'alwaysVerifyTheName':
         'Always verify the name of the account holder you received the payment from with the declared identity of the counterparty.',
       'forwardTheAddress':
@@ -356,13 +351,13 @@ export default {
       'paymentMethod': 'Payment method',
       'cash': 'Cash',
       'bank': 'Bank',
-      'revolut': 'Revolut',
+      'revolut': 'Online payment',
     },
     'network': {
       'network': 'Network',
       'lightning': 'Lightning',
       'theBestOption':
-        'The best option for really small amounts. Usually much faster.',
+        'The best option for really small amounts. Usually super fast.',
       'onChain': 'On chain',
       'theBestFor':
         'The best for fairly huge amounts. It takes time sometimes.',
@@ -403,6 +398,7 @@ export default {
       'message': 'You can enable them in the settings',
       'openSettings': 'Open settings',
     },
+    'errorWhileOpening': 'Error while opening notification',
   },
   'myOffers': {
     'addNewOffer': 'Add new offer',
@@ -434,7 +430,7 @@ export default {
   'filterOffers': {
     'filterResults': 'Filter results',
     'sorting': 'Sorting',
-    'lowestFeeFirst': 'Lowest fee first',
+    'lowestFeeFirst': 'Lowest fee ',
     'highestFee': 'Highest fee',
     'newestOffer': 'Newest offer',
     'oldestOffer': 'Oldest offer',
@@ -522,7 +518,7 @@ export default {
       'Identity request was already sent in the conversation',
     'identityRevealRequest': 'Identity reveal request',
     'tapToReveal': 'Tap to reveal or decline',
-    'letsRevealIdentities': 'Lets reveal identities',
+    'letsRevealIdentities': "Let's reveal identities!",
     'reveal': 'Reveal',
     'themDeclined': '{{name}} declined',
     'youDeclined': 'You have declined',
@@ -540,9 +536,20 @@ export default {
     'commonFriendsCount': '{{commonFriendsCount}} common friends',
   },
   'reportIssue': {
-    'somethingWentWrong': 'Something went wrong?',
-    'feelFreeToGetInTouch': 'Feel free to get in touch with our support.',
-    'openInApp': 'Open in e-mail',
+    'openInEmail': 'Open in e-mail',
+  },
+  'AppLogs': {
+    'title': 'In app logs',
+    'clear': 'Clear logs',
+    'export': 'Export logs',
+    'errorExporting': 'Error exporting logs',
+    'warning':
+      'Enabling app logs may cause app to be slower and will require more storage space.',
+  },
+  'anonymizeAlert': {
+    'title': 'Would you like to anonymize logs?',
+    'text':
+      'We can try to strip private keys and personal information from logs before exporting them. Always make sure to verify by yourself.',
   },
   'MaintenanceScreen': {
     'title': 'Marketplace maintenance',
@@ -553,20 +560,6 @@ export default {
     'text': 'Download the latest version of Vexl for proper app functionality.',
     'action': 'Update now',
   },
-  'AppLogs': {
-    'title': 'In app logs',
-    'warning':
-      'Enabling app logs may cause app to be slower and will require more storage space.',
-    'copyLogs': 'Copy logs',
-    'clear': 'Clear logs',
-    'export': 'Export logs',
-    'errorExporting': 'Error exporting logs',
-    'anonymizeAlert': {
-      'title': 'Would you like to anonymize logs?',
-      'text':
-        'We can try to strip private keys and personal information from logs before exporting them. Always make sure to verify by yourself.',
-    },
-  },
   'btcPriceChart': {
     'requestCouldNotBeProcessed': 'Request to obtain current BTC price failed',
   },
@@ -574,17 +567,17 @@ export default {
     'currency': 'Currency',
     'czechCrown': 'Czech crown',
     'euro': 'Euro',
-    'unitedStatesDollar': 'United states dollar',
+    'unitedStatesDollar': 'USD',
   },
   'deepLinks': {
-    'importContact': {
+    'importContacts': {
       'alert': {
         'title': 'Import contact',
         'text':
           'Do you want to import {{contactName}} with number {{contactNumber}}?',
       },
       'successAlert': {
-        'title': 'Contact imported.',
+        'title': 'Contact imported',
       },
     },
   },

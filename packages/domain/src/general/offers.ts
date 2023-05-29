@@ -98,7 +98,7 @@ export const OfferPublicPart = z.object({
   activePriceState: ActivePriceState,
   activePriceValue: z.coerce.number(),
   activePriceCurrency: Currency,
-  active: z.coerce.boolean(),
+  active: z.boolean(),
   groupUuids: z.array(z.string()),
 })
 export type OfferPublicPart = z.TypeOf<typeof OfferPublicPart>

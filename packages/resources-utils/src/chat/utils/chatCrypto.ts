@@ -85,8 +85,7 @@ export function decryptMessage(
           payload.deanonymizedUser?.imageBase64
         ) {
           return pipe(
-            // TODO check if png works every time.
-            `data:image/png;base64,${payload.deanonymizedUser.imageBase64}`,
+            `data:image/jpg;base64,${payload.deanonymizedUser.imageBase64}`,
             safeParse(UriString),
             E.fold(
               () => undefined,
@@ -101,9 +100,9 @@ export function decryptMessage(
         return {
           uuid: payload.uuid,
           time: payload.time,
-          text: payload.text,
+          text: payload.text ?? '-',
           messageType: message.messageType,
-          image: messageImage,
+          image: payload.image ?? messageImage,
           deanonymizedUser: payload.deanonymizedUser
             ? {
                 name: payload.deanonymizedUser.name,

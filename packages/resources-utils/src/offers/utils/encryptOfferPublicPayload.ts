@@ -12,6 +12,7 @@ import {
   type SymmetricKey,
 } from '@vexl-next/domain/dist/general/offers'
 import {type BasicError, toError} from '@vexl-next/domain/dist/utility/errors'
+import {booleanToString} from '../../utils/booleanString'
 
 const OfferPublicPartToEncrypt = z.object({
   offerPublicKey: PublicKeyPemBase64,
@@ -29,7 +30,7 @@ const OfferPublicPartToEncrypt = z.object({
   activePriceState: z.string(),
   activePriceValue: z.coerce.string(),
   activePriceCurrency: z.string(),
-  active: z.coerce.boolean(),
+  active: z.enum(['true', 'false']),
   groupUuids: z.array(z.string()),
 })
 
@@ -40,7 +41,11 @@ function offerPublicPartToJsonString(
     publicPart.location,
     A.map(stringifyToJson),
     A.sequence(E.Applicative),
-    E.map((location) => ({...publicPart, location})),
+    E.map((location) => ({
+      ...publicPart,
+      active: booleanToString(publicPart.active),
+      location,
+    })),
     E.chainW(safeParse(OfferPublicPartToEncrypt)),
     E.chainW(stringifyToJson)
   )

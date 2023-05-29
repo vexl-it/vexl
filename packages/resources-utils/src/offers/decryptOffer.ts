@@ -17,6 +17,7 @@ import {
 } from '../utils/parsing'
 import * as E from 'fp-ts/Either'
 import * as A from 'fp-ts/Array'
+import {stringToBoolean} from '../utils/booleanString'
 
 export interface ErrorDecryptingOffer
   extends BasicError<'ErrorDecryptingOffer'> {
@@ -77,6 +78,7 @@ export default function decryptOffer(
           TE.right(serverOffer.publicPayload.substring(1)),
           TE.chainW(aesGCMIgnoreTagDecrypt(privatePayload.symmetricKey)),
           TE.chainEitherKW(parseJson),
+          TE.map((one) => ({...one, active: stringToBoolean(one.active)})),
           TE.chainEitherKW(decodeLocation),
           TE.chainEitherKW(safeParse(OfferPublicPart))
         )

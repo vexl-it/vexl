@@ -28,6 +28,7 @@ export default {
     'secondsShort': 's',
     'ok': 'ok',
     'request': 'Request',
+    'requested': 'Requested',
     'back': 'Back',
     'goBack': 'Go back',
     'close': 'Close',

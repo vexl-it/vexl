@@ -15,6 +15,7 @@ import {
 } from './Errors'
 import {pipe} from 'fp-ts/function'
 import {
+  HEADER_CLIENT_VERSION,
   HEADER_CRYPTO_VERSION,
   HEADER_HASH,
   HEADER_PLATFORM,
@@ -193,6 +194,7 @@ function addLoggingInterceptor(
 
 export function createAxiosInstance(
   platform: PlatformName,
+  clientVersion: number,
   axiosConfig?: CreateAxiosDefaults,
   loggingFunction: LoggingFunction | null = console.info
 ): AxiosInstance {
@@ -203,6 +205,7 @@ export function createAxiosInstance(
       ...axiosConfig?.headers,
       [HEADER_CRYPTO_VERSION]: '2',
       [HEADER_PLATFORM]: platform,
+      [HEADER_CLIENT_VERSION]: clientVersion.toString(),
     },
   })
   if (loggingFunction) addLoggingInterceptor(axios, loggingFunction)
@@ -212,11 +215,13 @@ export function createAxiosInstance(
 export function createAxiosInstanceWithAuthAndLogging(
   getUserSessionCredentials: GetUserSessionCredentials,
   platform: PlatformName,
+  clientVersion: number,
   axiosConfig: CreateAxiosDefaults,
   loggingFunction: LoggingFunction | null = console.info
 ): AxiosInstance {
   const axiosInstance = createAxiosInstance(
     platform,
+    clientVersion,
     axiosConfig,
     loggingFunction
   )

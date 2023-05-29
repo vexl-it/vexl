@@ -64,7 +64,7 @@ export const ChatMessagePayload = z.object({
   deanonymizedUser: z
     .object({
       name: UserName,
-      imageBase64: Base64String,
+      imageBase64: Base64String.optional(),
       partialPhoneNumber: z.string().optional(),
     })
     .optional(),

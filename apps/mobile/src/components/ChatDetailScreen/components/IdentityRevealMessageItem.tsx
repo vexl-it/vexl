@@ -34,7 +34,6 @@ function IdentityRevealMessageItem({
 
   if (
     message.message.messageType === 'REQUEST_REVEAL' &&
-    message.message.image &&
     (identityRevealStatus === 'iAsked' ||
       identityRevealStatus === 'theyAsked' ||
       message.state === 'received')
@@ -54,7 +53,9 @@ function IdentityRevealMessageItem({
             : undefined
         }
         icon={
-          direction === 'incoming' && identityRevealStatus === 'shared' ? (
+          direction === 'incoming' &&
+          identityRevealStatus === 'shared' &&
+          message.message.image ? (
             <Image
               height={80}
               width={80}
@@ -71,7 +72,6 @@ function IdentityRevealMessageItem({
 
   if (
     message.message.messageType === 'APPROVE_REVEAL' &&
-    message.message.image &&
     message.state === 'received'
   ) {
     return (
@@ -81,7 +81,7 @@ function IdentityRevealMessageItem({
         biggerText={message.message.deanonymizedUser?.name ?? ''}
         bottomText={message.message.deanonymizedUser?.partialPhoneNumber}
         icon={
-          direction === 'incoming' ? (
+          direction === 'incoming' && message.message.image ? (
             <Image
               height={80}
               width={80}

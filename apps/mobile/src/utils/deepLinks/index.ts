@@ -32,10 +32,10 @@ const handleImportDeepContactActionAtom = atom(
           steps: [
             {
               title: get(translationAtom).t(
-                'deepLinks.importContact.alert.title'
+                'deepLinks.importContacts.alert.title'
               ),
               description: get(translationAtom).t(
-                'deepLinks.importContact.alert.text',
+                'deepLinks.importContacts.alert.text',
                 {
                   contactName: contact.name,
                   contactNumber: contact.numberToDisplay,
@@ -63,7 +63,7 @@ const handleImportDeepContactActionAtom = atom(
             {
               title: get(translationAtom).t('common.success'),
               description: get(translationAtom).t(
-                'deepLinks.importContact.successAlert.title'
+                'deepLinks.importContacts.successAlert.title'
               ),
               positiveButtonText: get(translationAtom).t('common.nice'),
             },

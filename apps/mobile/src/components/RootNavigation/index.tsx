@@ -27,6 +27,7 @@ import FilterOffersScreen from '../FilterOffersScreen'
 import CommonFriendsScreen from '../CommonFriendsScreen'
 import AppLogsScreen from '../AppLogsScreen'
 import useHandleNotificationOpen from '../../state/useHandleNotificationOpen'
+import {useHandleDeepLink} from '../../utils/deepLinks'
 
 const Stack = createNativeStackNavigator<RootStackParamsList>()
 
@@ -39,6 +40,7 @@ function LoggedInHookGroup(): null {
   useHandlePostLoginFlowRedirect()
   useHandleRefreshContactServiceAndOffers()
   useSyncConnections()
+  useHandleDeepLink()
 
   return null
 }

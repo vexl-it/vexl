@@ -16,7 +16,6 @@ import * as E from 'fp-ts/Either'
 import * as T from 'fp-ts/Task'
 import {safeParse} from '../../utils/fpUtils'
 import {splitAtom} from 'jotai/utils'
-import {hmacSign} from '@vexl-next/resources-utils/dist/utils/crypto'
 import {privateApiAtom} from '../../api'
 import {Alert} from 'react-native'
 import {toCommonErrorMessage} from '../../utils/useCommonErrorMessages'
@@ -26,6 +25,7 @@ import {loadingOverlayDisplayedAtom} from '../LoadingOverlayProvider'
 import {importedContactsAtom} from '../../state/contacts'
 import notEmpty from '../../utils/notEmpty'
 import {updateAllOffersConnectionsActionAtom} from '../../state/connections/atom/offerToConnectionsAtom'
+import {hashPhoneNumber} from '../../state/contacts/utils'
 
 export const ContactsSelectScope = createScope<ContactNormalized[]>([])
 
@@ -188,7 +188,7 @@ export const contactSelectMolecule = molecule((getMolecule, getScope) => {
       A.filter(notEmpty),
       A.map((oneContact) => {
         return pipe(
-          hmacSign('VexlVexl')(oneContact.normalizedNumber),
+          hashPhoneNumber(oneContact.normalizedNumber),
           E.map((hash): ContactNormalizedWithHash => ({...oneContact, hash}))
         )
       }),

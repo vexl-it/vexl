@@ -1,5 +1,5 @@
-const VERSION_CODE = 14
-const VERSION = '0.0.1'
+const VERSION_CODE = 20
+const VERSION = '1.0.6'
 const ENV_PRESET = process.env.ENV_PRESET
 
 const presets = {
@@ -60,8 +60,10 @@ export default {
     'infoPlist': {
       'UIBackgroundModes': ['fetch', 'remote-notification'],
       'LSApplicationQueriesSchemes': ['itms-apps'],
+      'FirebaseDynamicLinksCustomDomains': ['https://link.vexl.it'],
     },
     'googleServicesFile': extra.googleServicesInfoPlistFile,
+    'associatedDomains': ['applinks:link.vexl.it'],
   },
   'android': {
     versionCode: VERSION_CODE,
@@ -108,6 +110,7 @@ export default {
     ],
     '@react-native-firebase/app',
     '@react-native-firebase/crashlytics',
+    '@react-native-firebase/dynamic-links',
     '@notifee/react-native',
     './expo-plugins/disable-firebase-analytics.js',
     './expo-plugins/setup-headless-background-message-processing-ios.js',

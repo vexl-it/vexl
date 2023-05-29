@@ -19,3 +19,13 @@ export const ContactNormalizedWithHash = ContactNormalized.extend({
 export type ContactNormalizedWithHash = z.TypeOf<
   typeof ContactNormalizedWithHash
 >
+
+export const ImportContactFromLinkPayload = z.object({
+  name: z.string(),
+  label: z.string(),
+  numberToDisplay: z.string(),
+  imageUri: UriString.optional(),
+})
+export type ImportContactFromLinkPayload = z.TypeOf<
+  typeof ImportContactFromLinkPayload
+>

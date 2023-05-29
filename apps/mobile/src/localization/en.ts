@@ -50,6 +50,8 @@ export default {
     'czk': 'CZK',
     'eur': 'EUR',
     'usd': 'USD',
+    'nice': 'Nice',
+    'success': 'Success!',
   },
   'loginFlow': {
     'anonymityNotice': 'Nobody will see this until you allow it. Even us.',
@@ -279,6 +281,9 @@ export default {
     'sellBitcoin': 'Sell Bitcoin',
     'buyBitcoin': 'Buy Bitcoin',
     'currency': 'Currency',
+    'czk': 'CZK',
+    'eur': 'EUR',
+    'usd': 'USD',
     'amountOfTransaction': {
       'amountOfTransaction': 'Amount of transaction',
       'eurSymbol': '€',
@@ -568,5 +573,17 @@ export default {
     'czechCrown': 'Czech crown',
     'euro': 'Euro',
     'unitedStatesDollar': 'United states dollar',
+  },
+  'deepLinks': {
+    'importContact': {
+      'alert': {
+        'title': 'Import contact',
+        'text':
+          'Do you want to import {{contactName}} with number {{contactNumber}}?',
+      },
+      'successAlert': {
+        'title': 'Contact imported.',
+      },
+    },
   },
 }

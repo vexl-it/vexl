@@ -22,8 +22,8 @@ import {ImageUniversal, type ImageUniversalSourcePropType} from './Image'
 interface Step {
   image?: ImageUniversalSourcePropType
   title: string
-  description: string
-  negativeButtonText: string
+  description?: string
+  negativeButtonText?: string
   positiveButtonText: string
 }
 
@@ -132,22 +132,26 @@ function AreYouSureDialog(): JSX.Element | null {
                 <Text fontFamily={'$heading'} fontSize={32} color={'$black'}>
                   {step.title}
                 </Text>
-                <Text fontSize={18} color={'$greyOnWhite'}>
-                  {step.description}
-                </Text>
+                {step.description && (
+                  <Text fontSize={18} color={'$greyOnWhite'}>
+                    {step.description}
+                  </Text>
+                )}
               </Stack>
             </View>
           </ScrollView>
           <XStack space="$2" m="$2" height={60}>
-            <Button
-              fullSize
-              variant={state.variant === 'danger' ? 'redDark' : 'primary'}
-              onPress={() => {
-                state?.onDismiss()
-                setState(null)
-              }}
-              text={step.negativeButtonText}
-            />
+            {step.negativeButtonText && (
+              <Button
+                fullSize
+                variant={state.variant === 'danger' ? 'redDark' : 'primary'}
+                onPress={() => {
+                  state?.onDismiss()
+                  setState(null)
+                }}
+                text={step.negativeButtonText}
+              />
+            )}
             <Button
               fullSize
               onPress={() => {

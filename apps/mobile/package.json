@@ -21,6 +21,7 @@
     "@react-native-clipboard/clipboard": "^1.11.2",
     "@react-native-firebase/app": "^17.4.2",
     "@react-native-firebase/crashlytics": "^17.5.0",
+    "@react-native-firebase/dynamic-links": "^17.5.0",
     "@react-native-firebase/messaging": "^17.4.2",
     "@react-native-firebase/remote-config": "^17.5.0",
     "@react-native-masked-view/masked-view": "^0.2.9",
@@ -96,6 +97,7 @@
     "react-navigation-heavy-screen": "^1.2.1",
     "seed-random": "^2.2.0",
     "tamagui": "^1.11.0",
+    "url-parse": "^1.5.10",
     "zod": "^3.21.4"
   },
   "devDependencies": {
@@ -114,6 +116,7 @@
     "@types/react-dom": "^18",
     "@types/react-native": "~0.70.6",
     "@types/seed-random": "^2",
+    "@types/url-parse": "^1",
     "@types/uuid": "^9",
     "@typescript-eslint/eslint-plugin": "^5.50.0",
     "@vexl-next/eslint-config": "workspace:*",

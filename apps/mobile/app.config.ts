@@ -1,5 +1,5 @@
-const VERSION_CODE = 20
-const VERSION = '1.0.6'
+const VERSION_CODE = 24
+const VERSION = '1.0.7'
 const ENV_PRESET = process.env.ENV_PRESET
 
 const presets = {
@@ -9,11 +9,12 @@ const presets = {
     versionCode: VERSION_CODE,
     version: `${VERSION} (${VERSION_CODE})`,
     packageName: 'it.vexl.nextstaging',
-    appName: 'Vexl Next (stage)',
+    appName: 'Vexl 2.0 (stage)',
     googleServicesInfoPlistFile: './creds/GoogleService-stage-Info.plist',
     foregroundImage: './assets/android-front.png',
     backgroundImage: './assets/android-back-stage.png',
     icon: './assets/icon-stage.png',
+    hmacPassword: 'VexlVexl',
   },
   prod: {
     enableHiddenFeatures: false,
@@ -21,11 +22,13 @@ const presets = {
     versionCode: VERSION_CODE,
     version: `${VERSION} (${VERSION_CODE})`,
     packageName: 'it.vexl.next',
-    appName: 'Vexl Next',
+    appName: 'Vexl 2.0',
     googleServicesInfoPlistFile: './creds/GoogleService-Info.plist',
     foregroundImage: './assets/android-front-next.png',
-    backgroundImage: './assets/android-back-next.png',
+    backgroundImage: './assets/android-back.png',
     icon: './assets/icon-next.png',
+    hmacPassword:
+      '9cf02ca3b233f17160e71b0db098f95396e73f27ef672dda482a6566d8e29484',
   },
 }
 
@@ -43,7 +46,7 @@ export default {
   'splash': {
     'image': './assets/splash.png',
     'resizeMode': 'contain',
-    'backgroundColor': '#ACD9B7',
+    'backgroundColor': '#FCCD6C',
   },
   'updates': {
     'fallbackToCacheTimeout': 0,

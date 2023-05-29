@@ -53,10 +53,10 @@ function BitcoinPriceChart(): JSX.Element {
           }}
         >
           <XStack>
-            <Text fos={28} ff={'$heading'} col={'$yellowAccent1'}>
+            <Text fos={28} ff={'$heading'} color={'$yellowAccent1'}>
               {btcPriceValue ?? '- '}
             </Text>
-            <Text fos={12} ff={'$body700'} col={'$yellowAccent1'}>
+            <Text fos={12} ff={'$body700'} color={'$yellowAccent1'}>
               {selectedCurrency === 'USD'
                 ? t('common.usd')
                 : selectedCurrency === 'EUR'

@@ -9,6 +9,7 @@ import * as TE from 'fp-ts/TaskEither'
 import {encryptMessage, type ErrorEncryptingMessage} from './utils/chatCrypto'
 import {type ServerMessage} from '@vexl-next/rest-api/dist/services/chat/contracts'
 import {type ExtractLeftTE} from '../utils/ExtractLeft'
+import mapMessageTypeToBackwardCompatibleMessageType from './utils/mapMessageTypeToBackwardCompatibleMessageType'
 
 export type SendMessageApiErrors = ExtractLeftTE<
   ReturnType<ChatPrivateApi['sendMessage']>
@@ -35,7 +36,9 @@ export default function sendMessage({
       pipe(
         api.sendMessage({
           message: encrypted,
-          messageType: message.messageType,
+          messageType: mapMessageTypeToBackwardCompatibleMessageType(
+            message.messageType
+          ),
           receiverPublicKey,
           keyPair: senderKeypair,
         })

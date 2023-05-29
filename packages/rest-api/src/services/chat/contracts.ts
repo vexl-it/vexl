@@ -1,6 +1,9 @@
 import {z} from 'zod'
 import {IdNumeric} from '@vexl-next/domain/dist/utility/IdNumeric'
-import {MessageType} from '@vexl-next/domain/dist/general/messaging'
+import {
+  MessageType,
+  MessageTypeBackwardCompatible,
+} from '@vexl-next/domain/dist/general/messaging'
 import {UnixMilliseconds} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
 import {NoContentResponse} from '../../NoContentResponse.brand'
 import {
@@ -117,7 +120,7 @@ export const SendMessageRequest = z.object({
   keyPair: PrivateKeyHolder,
   receiverPublicKey: PublicKeyPemBase64,
   message: z.string(),
-  messageType: MessageType,
+  messageType: MessageTypeBackwardCompatible,
 })
 export type SendMessageRequest = z.TypeOf<typeof SendMessageRequest>
 
@@ -127,7 +130,7 @@ export type SendMessageResponse = z.TypeOf<typeof SendMessageResponse>
 export const MessageInBatch = z.object({
   receiverPublicKey: PublicKeyPemBase64,
   message: z.string(),
-  messageType: MessageType,
+  messageType: MessageTypeBackwardCompatible,
 })
 export type MessageInBatch = z.TypeOf<typeof MessageInBatch>
 

@@ -6,6 +6,7 @@ import {type UserSessionCredentials} from '@vexl-next/rest-api/dist/UserSessionC
 import {contact} from '@vexl-next/rest-api'
 import {apiEnv, platform} from '../../../api'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
+import {versionCode} from '../../../utils/environment'
 
 export function useCreateUserAtContactMs(): (
   request: CreateUserRequest,
@@ -16,6 +17,7 @@ export function useCreateUserAtContactMs(): (
   return (request: CreateUserRequest, credentials: UserSessionCredentials) => {
     const contactApi = contact.privateApi({
       platform,
+      clientVersion: versionCode,
       url: apiEnv.contactMs,
       getUserSessionCredentials: () => credentials,
     })

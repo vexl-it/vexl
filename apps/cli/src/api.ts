@@ -54,6 +54,7 @@ export function getPublicApi(): {
   return {
     user: restApi.user.publicApi({
       url: ENV_PRESET.userMs,
+      clientVersion: 0,
       platform: PlatformName.parse('CLI'),
       loggingFunction: logDebug,
     }),
@@ -82,6 +83,7 @@ export function getPrivateApi(credentials: UserCredentials) {
   return {
     chat: restApi.chat.privateApi({
       platform: PlatformName.parse('CLI'),
+      clientVersion: 0,
       url: ENV_PRESET.chatMs,
       getUserSessionCredentials,
       loggingFunction: logDebug,
@@ -89,6 +91,7 @@ export function getPrivateApi(credentials: UserCredentials) {
 
     contact: restApi.contact.privateApi({
       platform: PlatformName.parse('CLI'),
+      clientVersion: 0,
       url: ENV_PRESET.contactMs,
       getUserSessionCredentials,
       loggingFunction: logDebug,
@@ -96,6 +99,7 @@ export function getPrivateApi(credentials: UserCredentials) {
 
     offer: restApi.offer.privateApi({
       platform: PlatformName.parse('CLI'),
+      clientVersion: 0,
       url: ENV_PRESET.offerMs,
       getUserSessionCredentials,
       loggingFunction: logDebug,

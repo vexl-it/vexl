@@ -33,16 +33,19 @@ import {type GetUserSessionCredentials} from '../../UserSessionCredentials.brand
 export function publicApi({
   url,
   platform,
+  clientVersion,
   axiosConfig,
   loggingFunction,
 }: {
   url: ServiceUrl
   platform: PlatformName
+  clientVersion: number
   axiosConfig?: Omit<CreateAxiosDefaults, 'baseURL'>
   loggingFunction?: LoggingFunction | null
 }) {
   const axiosInstance = createAxiosInstance(
     platform,
+    clientVersion,
     {
       ...axiosConfig,
       baseURL: urlJoin(url, '/api/v1'),
@@ -137,12 +140,14 @@ export type UserPublicApi = ReturnType<typeof publicApi>
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function privateApi({
   platform,
+  clientVersion,
   url,
   getUserSessionCredentials,
   axiosConfig,
   loggingFunction,
 }: {
   platform: PlatformName
+  clientVersion: number
   url: ServiceUrl
   getUserSessionCredentials: GetUserSessionCredentials
   axiosConfig?: Omit<CreateAxiosDefaults, 'baseURL'>
@@ -151,6 +156,7 @@ export function privateApi({
   const axiosInstance = createAxiosInstanceWithAuthAndLogging(
     getUserSessionCredentials,
     platform,
+    clientVersion,
     {
       ...axiosConfig,
       baseURL: urlJoin(url, '/api/v1'),

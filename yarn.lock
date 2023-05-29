@@ -5193,6 +5193,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@react-native-firebase/dynamic-links@npm:^17.5.0":
+  version: 17.5.0
+  resolution: "@react-native-firebase/dynamic-links@npm:17.5.0"
+  peerDependencies:
+    "@react-native-firebase/app": 17.5.0
+    expo: ">=47.0.0"
+  peerDependenciesMeta:
+    expo:
+      optional: true
+  checksum: 823230dfc774c6cfc621dd899116e53450e3204d3cdd56fd134d29105e73a8c91ea4e6cbbb9c3b0acf5435beef280b83c1d0609248f5e73c11bd07319b9a8670
+  languageName: node
+  linkType: hard
+
 "@react-native-firebase/messaging@npm:^17.4.2":
   version: 17.4.2
   resolution: "@react-native-firebase/messaging@npm:17.4.2"
@@ -7708,6 +7721,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/url-parse@npm:^1":
+  version: 1.4.8
+  resolution: "@types/url-parse@npm:1.4.8"
+  checksum: 44a5e96ed4b579c43750f3578bfa9165f97a359c3b2a85ee126e9c16db964f6ea105e152afd3d1adbd15850a8b812043215f3820112177bb4255a60b432dbd85
+  languageName: node
+  linkType: hard
+
 "@types/uuid@npm:^9":
   version: 9.0.1
   resolution: "@types/uuid@npm:9.0.1"
@@ -8179,6 +8199,7 @@ __metadata:
     "@react-native-clipboard/clipboard": ^1.11.2
     "@react-native-firebase/app": ^17.4.2
     "@react-native-firebase/crashlytics": ^17.5.0
+    "@react-native-firebase/dynamic-links": ^17.5.0
     "@react-native-firebase/messaging": ^17.4.2
     "@react-native-firebase/remote-config": ^17.5.0
     "@react-native-masked-view/masked-view": ^0.2.9
@@ -8208,6 +8229,7 @@ __metadata:
     "@types/react-dom": ^18
     "@types/react-native": ~0.70.6
     "@types/seed-random": ^2
+    "@types/url-parse": ^1
     "@types/uuid": ^9
     "@typescript-eslint/eslint-plugin": ^5.50.0
     "@vexl-next/cryptography": "workspace:*"
@@ -8284,6 +8306,7 @@ __metadata:
     tamagui: ^1.11.0
     ts-node: ^10.9.1
     typescript: ^4.6.3
+    url-parse: ^1.5.10
     zod: ^3.21.4
   languageName: unknown
   linkType: soft
@@ -25058,7 +25081,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"url-parse@npm:^1.5.9":
+"url-parse@npm:^1.5.10, url-parse@npm:^1.5.9":
   version: 1.5.10
   resolution: "url-parse@npm:1.5.10"
   dependencies:

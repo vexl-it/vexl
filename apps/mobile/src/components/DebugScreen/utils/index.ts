@@ -7,12 +7,14 @@ import {
   eciesLegacyDecrypt,
   eciesLegacyEncrypt,
 } from '@vexl-next/cryptography/dist/operations/eciesLegacy'
-import {aes, ecdsa, eciesLegacy, hmac} from '@vexl-next/cryptography'
+import {aes, ecdsa, eciesLegacy} from '@vexl-next/cryptography'
+import {E164PhoneNumber} from '@vexl-next/domain/dist/general/E164PhoneNumber.brand'
+import {hashPhoneNumber} from '../../../state/contacts/utils'
 
 const dummyPrivatePart = `"privatePart": {"commonFriends": [MEEe3tRp7bx+hRA7osU/x+hhMVy6PiAfBR3Gu2r+MEEe3tRp7bx+hRA7osU/x+hhMVy6PiAfBR3Gu2r+MEEe3tRp7bx+hRA7osU/x+hhMVy6PiAfBR3Gu2r+MEEe3tRp7bx+hRA7osU/x+hhMVy6PiAfBR3Gu2r+MEEe3tRp7bx+hRA7osU/x+hhMVy6PiAfBR3Gu2r+MEEe3tRp7bx+hRA7osU/x+hhMVy6PiAfBR3Gu2r+MEEe3tRp7bx+hRA7osU/x+hhMVy6PiAfBR3Gu2r+MEEe3tRp7bx+hRA7osU/x+hhMVy6PiAfBR3Gu2r+],"friendLevel": ["NOT_SPECIFIED"],"symmetricKey": "MEEe3tRp7bx+hRA7osU/x+hhMVy6PiAfBR3Gu2r+RG0="},`
 const dummyPublicPart = `"publicPart": {"offerPublicKey": "LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUZZd0VBWUhLb1pJemowQ0FRWUZLNEVFQUFvRFFnQUVUTlhndG9GMVRBNVVrVWZ4YWFBbHp4cDBRSFlwZS8yVApFSk1nQXR0d0tabnZBZFBUVUNXdCtweGhpWGUzNDNlbjNndHI5OHZoS1pZSGc4VGRQT3JHMEE9PQotLS0tLUVORCBQVUJMSUMgS0VZLS0tLS0K",      "location": [        {          "longitude": "14.4212535000000006135678631835617125034332275390625",          "latitude": "50.0874653999999992493030731566250324249267578125",          "city": "Prague"        }      ],      "offerDescription": "test",      "amountBottomLimit": 0,      "amountTopLimit": 250000,      "feeState": "WITHOUT_FEE",      "feeAmount": 1,      "locationState": "ONLINE",      "paymentMethod": [        "CASH"      ],      "btcNetwork": [        "LIGHTING"      ],      "currency": "CZK",      "offerType": "SELL",      "activePriceState": "NONE",      "activePriceValue": 0,      "activePriceCurrency": "CZK",      "active": true,      "groupUuids": []    },`
 const dummySymetricKey = 'MEEe3tRp7bx+hRA7osU/x+hhMVy6PiAfBR3Gu2r+RG0='
-const dummyPhoneNumber = '+420733333333'
+const dummyPhoneNumber = E164PhoneNumber.parse('+420733333333')
 
 export const NUMBER_OF_GENERATIONS = 100
 
@@ -160,7 +162,7 @@ export async function* runBenchmark() {
   yield `HMAC signing dummy phone number ${NUMBER_OF_GENERATIONS} times`
   nowMs = Date.now()
   for (let i = 0; i < NUMBER_OF_GENERATIONS; i++) {
-    hmac.hmacSign({data: dummyPhoneNumber, password: 'VexlVexl'})
+    hashPhoneNumber(dummyPhoneNumber)
   }
   yield `Took ${msToString(Date.now() - nowMs)}`
 

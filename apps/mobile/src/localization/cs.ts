@@ -111,7 +111,7 @@ export default {
           'Veřejný klíč nebo hash je neplatný. Zkuste to znovu později',
       },
       'success': {
-        'title': 'Telefon ověřen. [nwln] Nastavíme váš profil.',
+        'title': 'Telefon ověřen.\n Nastavíme váš profil.',
         'errorWhileParsingSessionForInternalState':
           'Chyba při ukládání uživatele',
       },

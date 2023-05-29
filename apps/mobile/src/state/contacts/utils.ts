@@ -4,9 +4,10 @@ import {
   type CryptoError,
   hmacSign,
 } from '@vexl-next/resources-utils/dist/utils/crypto'
+import {hmacPassword} from '../../utils/environment'
 
 export function hashPhoneNumber(
   normalizedPhoneNumber: E164PhoneNumber
 ): E.Either<CryptoError, string> {
-  return hmacSign('VexlVexl')(normalizedPhoneNumber)
+  return hmacSign(hmacPassword)(normalizedPhoneNumber)
 }

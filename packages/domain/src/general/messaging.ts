@@ -42,7 +42,7 @@ export type ChatMessageId = z.TypeOf<typeof ChatMessageId>
 //
 export const ChatMessagePayload = z.object({
   uuid: ChatMessageId,
-  text: z.string(),
+  text: z.string().optional(),
   image: UriString.optional(),
   time: UnixMilliseconds,
   deanonymizedUser: z

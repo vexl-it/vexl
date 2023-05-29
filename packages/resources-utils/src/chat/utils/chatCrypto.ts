@@ -55,6 +55,7 @@ export function encryptMessage(
         text: message.text,
         uuid: message.uuid,
         image: message.image,
+        messageType: message.messageType,
         deanonymizedUser,
       }),
       TE.chainEitherKW(safeParse(ChatMessagePayload)),
@@ -101,7 +102,7 @@ export function decryptMessage(
           uuid: payload.uuid,
           time: payload.time,
           text: payload.text ?? '-',
-          messageType: message.messageType,
+          messageType: payload.messageType ?? message.messageType,
           image: payload.image ?? messageImage,
           deanonymizedUser: payload.deanonymizedUser
             ? {

@@ -21,6 +21,7 @@ import {
 } from './utils/generateSignedChallengesBatch'
 import {type BasicError, toError} from '@vexl-next/domain/dist/utility/errors'
 import {type ExtractLeftTE} from '../utils/ExtractLeft'
+import mapMessageTypeToBackwardCompatibleMessageType from './utils/mapMessageTypeToBackwardCompatibleMessageType'
 
 export interface MessageInInbox {
   readonly message: ChatMessage
@@ -44,7 +45,9 @@ function createMessageInBatch({
     encryptMessage(receiverPublicKey),
     TE.map((encrypted) => ({
       message: encrypted,
-      messageType: message.messageType,
+      messageType: mapMessageTypeToBackwardCompatibleMessageType(
+        message.messageType
+      ),
       receiverPublicKey,
     }))
   )

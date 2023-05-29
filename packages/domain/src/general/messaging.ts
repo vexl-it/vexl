@@ -24,6 +24,21 @@ export const MessageType = z.enum([
 ])
 export type MessageType = z.TypeOf<typeof MessageType>
 
+export const MessageTypeBackwardCompatible = z.enum([
+  'MESSAGE',
+  'REQUEST_REVEAL',
+  'APPROVE_REVEAL',
+  'DISAPPROVE_REVEAL',
+  'REQUEST_MESSAGING',
+  'APPROVE_MESSAGING',
+  'DISAPPROVE_MESSAGING',
+  'DELETE_CHAT',
+  'BLOCK_CHAT',
+])
+export type MessageTypeBackwardCompatible = z.TypeOf<
+  typeof MessageTypeBackwardCompatible
+>
+
 export const ChatUserIdentity = z.object({
   publicKey: PublicKeyPemBase64,
   realLifeInfo: UserNameAndAvatar.optional(),
@@ -45,6 +60,7 @@ export const ChatMessagePayload = z.object({
   text: z.string().optional(),
   image: UriString.optional(),
   time: UnixMilliseconds,
+  messageType: MessageType.optional(),
   deanonymizedUser: z
     .object({
       name: UserName,

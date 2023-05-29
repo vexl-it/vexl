@@ -2,10 +2,10 @@ import {Stack, styled, Text, XStack} from 'tamagui'
 import {bigNumberToString} from '../utils/bigNumberToString'
 import SvgImage from './Image'
 import mapTagSvg from './InsideRouter/components/MarketplaceScreen/images/mapTagSvg'
-import revolutSvg from './InsideRouter/components/MarketplaceScreen/images/revolutSvg'
 import bankSvg from './InsideRouter/components/MarketplaceScreen/images/bankSvg'
 import {type OfferInfo} from '@vexl-next/domain/dist/general/offers'
 import {useTranslation} from '../utils/localization/I18nProvider'
+import onlineTransferSvg from './InsideRouter/components/MarketplaceScreen/images/onlineTransferSvg'
 
 const InfoItemContainer = styled(Stack, {
   f: 1,
@@ -87,7 +87,7 @@ function OfferInfoPreview({
             )}
             {offer.publicPart.paymentMethod.includes('REVOLUT') && (
               <Stack mx="$1">
-                <SvgImage source={revolutSvg} />
+                <SvgImage height={25} width={25} source={onlineTransferSvg} />
               </Stack>
             )}
             {offer.publicPart.paymentMethod.includes('BANK') && (

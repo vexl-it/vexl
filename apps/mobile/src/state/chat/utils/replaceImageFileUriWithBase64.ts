@@ -1,5 +1,6 @@
 import * as FileSystem from 'expo-file-system'
 import * as TE from 'fp-ts/TaskEither'
+import * as E from 'fp-ts/Either'
 import {
   type BasicError,
   toBasicError,
@@ -10,6 +11,7 @@ import {UriString} from '@vexl-next/domain/dist/utility/UriString.brand'
 import ImageResizer from '@bam.tech/react-native-image-resizer'
 import joinUrl from 'url-join'
 import {Platform} from 'react-native'
+import reportError from '../../../utils/reportError'
 
 export type ReadingFileError = BasicError<'ReadingFileError'>
 
@@ -58,8 +60,10 @@ function readAsBase64({
   }, toBasicError('ReadingFileError'))
 }
 
-function setImage(source: ChatMessage): (image: UriString) => ChatMessage {
-  return (image: UriString) => ({
+function setImage(
+  source: ChatMessage
+): (image: UriString | undefined) => ChatMessage {
+  return (image: UriString | undefined) => ({
     ...source,
     image,
   })
@@ -71,5 +75,19 @@ export default function replaceImageFileUriWithBase64(
   const image = message.image
   if (!image) return TE.right(message)
 
-  return pipe(readAsBase64({path: image}), TE.map(setImage(message)))
+  return pipe(
+    readAsBase64({path: image}),
+    TE.matchW(
+      (e) => {
+        reportError(
+          'error',
+          'Error while reading image for identity reveal as file as base64',
+          e
+        )
+        return E.right(undefined)
+      },
+      (v) => E.right(v)
+    ),
+    TE.map(setImage(message))
+  )
 }

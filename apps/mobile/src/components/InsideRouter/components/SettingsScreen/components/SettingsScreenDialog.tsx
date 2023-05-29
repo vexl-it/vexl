@@ -33,7 +33,7 @@ function SettingsScreenDialog({
   return (
     <Modal animationType="fade" transparent visible={visible}>
       <Stack f={1} jc={'flex-end'} pb={bottom} bc={'rgba(0,0,0,0.6)'} px={'$2'}>
-        <Stack py={'$7'} px={'$4'} backgroundColor={'$white'} br={'$4'}>
+        <Stack py={'$4'} px={'$4'} backgroundColor={'$white'} br={'$4'}>
           <Stack jc="flex-end">
             <Text
               my={'$4'}

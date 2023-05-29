@@ -9,6 +9,7 @@ import {offersStateAtom} from '../state/marketplace/atom'
 import {MINIMAL_DATE} from '@vexl-next/domain/dist/utility/IsoDatetimeString.brand'
 import {type OneOfferInState} from '../state/marketplace/domain'
 import {postLoginFinishedStorageAtom} from '../state/postLoginOnboarding'
+import {selectedCurrencyStorageAtom} from '../state/selectedCurrency'
 import {preferencesAtom} from './preferences'
 
 export default function clearMmkvStorageAndEmptyAtoms(): void {
@@ -33,6 +34,9 @@ export default function clearMmkvStorageAndEmptyAtoms(): void {
   })
   getDefaultStore().set(postLoginFinishedStorageAtom, {
     postLoginFinished: false,
+  })
+  getDefaultStore().set(selectedCurrencyStorageAtom, {
+    currency: 'USD',
   })
   getDefaultStore().set(preferencesAtom, {
     showDebugNotifications: false,

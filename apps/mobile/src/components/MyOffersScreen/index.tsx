@@ -4,7 +4,7 @@ import {type RootStackScreenProps} from '../../navigationTypes'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import Button from '../Button'
 import plusSvg from './images/plusSvg'
-import {Text, XStack} from 'tamagui'
+import {getTokens, Text, XStack} from 'tamagui'
 import {useAtomValue} from 'jotai'
 import OffersList from '../OffersList'
 import IconButton from '../IconButton'
@@ -23,12 +23,13 @@ const myActiveOffers = selectAtom(myActiveOffersAtom, (offers) => offers.length)
 
 function MyOffersScreen({navigation}: Props): JSX.Element {
   const {t} = useTranslation()
+  const tokens = getTokens()
 
   const myOffersSortedAtoms = useAtomValue(myOffersSortedAtomsAtom)
   const activeOffersCount = useAtomValue(myActiveOffers)
 
   return (
-    <Screen>
+    <Screen customHorizontalPadding={tokens.space[4].val}>
       <ScreenTitle text={t('common.myOffers')} withBottomBorder>
         <IconButton
           variant="dark"

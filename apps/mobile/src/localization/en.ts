@@ -18,7 +18,7 @@ export default {
     'unexpectedServerResponse': 'Unexpected Server Response',
     'networkErrors': {
       'errNetwork':
-        'Network error has occurred. Are you connected to the internet?',
+        'A network error has occurred. Are you connected to the internet?',
       'errCanceled': 'Request was canceled',
       'etimedout': 'Request timed out',
       'econnaborted': 'Connection aborted',
@@ -28,7 +28,6 @@ export default {
     'secondsShort': 's',
     'ok': 'ok',
     'request': 'Request',
-    'requested': 'Requested',
     'back': 'Back',
     'goBack': 'Go back',
     'close': 'Close',
@@ -36,7 +35,7 @@ export default {
     'errorCreatingInbox': 'Error creating user inbox.',
     'accept': 'Accept',
     'decline': 'Decline',
-    'youSure': 'You sure?',
+    'youSure': 'Are you sure?',
     'nope': 'Nope',
     'yesDelete': 'Yes, delete',
     'more': 'More',
@@ -53,9 +52,10 @@ export default {
     },
     'nice': 'Nice',
     'success': 'Success!',
+    'requested': 'Requested',
   },
   'loginFlow': {
-    'anonymityNotice': 'Nobody will see this until you allow it. Even us.',
+    'anonymityNotice': 'Nobody will see this until you allow it. Not even us.',
     'intro': {
       'title1': 'Import your contacs anonymously.',
       'title2': 'See their buy & sell offers.',
@@ -69,7 +69,7 @@ export default {
     'anonymizationNotice': {
       'title': 'Your identity will be anonymized.',
       'text':
-        'Nobody will see your real name and profile picture until you reveal it for particular trade. Even us. Let’s set up your true identity first.',
+        'Nobody will see your real name and profile picture until you reveal it for particular trade. Not even us. Let’s set up your true identity first.',
     },
     'name': {
       'prompt': 'What do your friends call you?',
@@ -125,19 +125,19 @@ export default {
       },
     },
     'importContacts': {
-      'title': 'Let’s find your friends now!',
+      'title': 'Now, let’s find your friends!',
       'text':
         'Vexl is using your real-world social network - your friends and their friends. The more contacts you add, the more offers you’ll see.',
-      'anonymityNotice': 'Nobody can see your contacts. Even us.',
+      'anonymityNotice': 'Nobody can see your contacts. Not even us.',
       'action': 'Import contacts',
     },
   },
   'postLoginFlow': {
     'contactsExplanation': {
-      'title': 'Let’s find your friends now!',
+      'title': 'Now, let’s find your friends!',
       'text':
         'Vexl is using your real-world social network - your friends and their friends. The more contacts you add, the more offers you’ll see.',
-      'anonymizationCaption': 'Nobody can see your contacts. Even us.',
+      'anonymizationCaption': 'Nobody can see your contacts. Not even us.',
     },
     'importContactsButton': 'Import contacts',
     'contactsList': {
@@ -176,7 +176,8 @@ export default {
       'faceId': 'Face ID',
       'czechCrown': 'Czech crown',
       'allowScreenshots': 'Allow Screenshots',
-      'allowScreenshotsDescription': 'Refuse users to snap the chat',
+      'allowScreenshotsDescription':
+        'Prevent users from taking screenshots of the chat',
       'termsAndPrivacy': 'Terms and Privacy',
       'faqs': 'FAQs',
       'reportIssue': 'Report issue',
@@ -203,7 +204,7 @@ export default {
       'title': 'Delete account?',
       'title2': 'You sure?',
       'description':
-        'Do you really want to delete your account? You will never be able to undo this action.',
+        'Are you sure you want to delete your account? This action cannot be undone',
     },
   },
   'offer': {
@@ -230,13 +231,13 @@ export default {
     'report': {
       'areYouSureTitle': 'Report offer?',
       'areYouSureText':
-        'Do you really want to report this offer? You will never be able to undo this action. Choose wisely.',
+        'Are you certain about reporting this offer? Once reported, it cannot be undone. Choose wisely.',
       'yes': 'Yes, report',
     },
     'goToChat': 'Go to chat',
     'requestAlreadySent':
-      "Request for trading was sent. We'll let you know once it's accepted.",
-    'listEmpty': 'Marketplace empty yet',
+      "You've requested a trade. We'll notify you once it's accepted.",
+    'listEmpty': 'No offers yet',
     'emptyAction': 'Add new offer',
     'createOfferAndReachVexlers':
       'You reach {{reachNumber}} vexlers.\nAdd more contacts to increase the number of offers you see.',
@@ -256,7 +257,7 @@ export default {
       'Vexl is a platform where you can trade Bitcoin within your real world social network - your friends and friends of their friends - while staying completely anonymous - if you wish.',
     'whoCanSeeMyContacts': 'Who can see my contacts?',
     'peopleWhomYouAllowToSee':
-      "People whom you allow to see your identity can see the friends you have in common. That's it.",
+      "People whom you allow to see your identity can see the friends you have in common and that's all.",
     'howCanIRemainAnonymous':
       'How can I remain anonymous and still participate in Vexl? ',
     'byDefaultYouParticipateInTheNetwork':
@@ -268,7 +269,7 @@ export default {
     'howCanIEnsure':
       'How can I ensure that my communication and trades are private and encrypted? ',
     'vexlIsOpensource':
-      'Vexl is open source - anyone can look for any backdoor or malicious intentions. Also, here you can look at the report from an independent Security Audit .',
+      'Vexl is open source - anyone can look for any backdoor or malicious intent. Also, here you can look at the report from an independent Security Audit .',
     'howCanYouEnsure': 'How can you ensure that my data is protected?',
     'vexlIsDesigned':
       'Vexl is designed to never collect or store any sensitive information. Vexl messages and other content cannot be accessed by us or other third parties because they are always end-to-end encrypted, private, and secure. Our Terms of Service and Privacy Policy are available below.',
@@ -296,19 +297,18 @@ export default {
         'You buy for the actual market price. Play with the slider to sell faster or earn more.',
       'theOptimalPositionForMostPeople':
         'The optimal position for most people. You buy slightly faster, but a bit overpriced',
-      'youBuyReallyFast':
-        'You buy really fast, but so much above the market price',
+      'youBuyReallyFast': 'You buy quickly, but at much above the market price',
       'youBuyPrettyCheap':
         'You buy pretty cheap, but it can take slightly longer to find a seller',
       'youBuyVeryCheaply':
         'You buy very cheaply, but it can take a while to find seller',
-      'buyFaster': 'Buy faster',
+      'buyFaster': 'Buy quickly',
       'buyCheaply': 'Buy cheaply',
       'youSellForTheActualMarketPrice':
         'You sell for the actual market price. Play with the slider to sell faster or earn more.',
       'youEarnBitMore': 'You earn a bit more, but it can take slightly longer.',
       'youWantToEarnFortune':
-        'You want to earn a fortune, but it can take years to find a seller.',
+        'You want to earn a fortune, but it can take years to find a buyer.',
       'youSellSlightlyFaster':
         'You sell slightly faster, but a bit below market price',
       'youSellMuchFaster': 'You sell much faster, but far below market price',
@@ -321,14 +321,14 @@ export default {
       'influenceImpactOfYourSellOffer':
         'Influence the impact of your offer. Sell faster by adding a discount, or earn more by adding a premium to the Bitcoin market price.',
       'influenceImpactOfYourBuyOffer':
-        'Influence the impact of your offer. Buy cheaply by adding a discount, or buy faster by adding a premium to the Bitcoin market price.',
+        'Influence the impact of your offer. Buy cheaply by adding a discount, or buy faster by adding a premium to the bitcoin market price.',
       'playWithItAndSee':
         'Play with it and see how it affects the interest of others.',
       'plus': '+',
       'minus': '-',
     },
     'buyCheaperByUsingDiscount':
-      'Buy cheaper by using discount or buy faster by adding a premium to the bitcoin market price',
+      'Buy cheaper by using a discount or buy faster by adding a premium to the bitcoin market price',
     'sellFasterWithDiscount':
       'Sell faster with a discount or earn more by adding a premium to the bitcoin market price.',
     'location': {
@@ -360,12 +360,11 @@ export default {
       'theBestOption':
         'The best option for really small amounts. Usually super fast.',
       'onChain': 'On chain',
-      'theBestFor':
-        'The best for fairly huge amounts. It takes time sometimes.',
+      'theBestFor': 'The best for larger amounts. Slower.',
     },
     'description': {
       'description': 'Description',
-      'writeWhyPeopleShouldTake': 'Write why people should take your offer.',
+      'writeWhyPeopleShouldTake': 'Write why people should accept your offer.',
     },
     'friendLevel': {
       'friendLevel': 'Friend level',
@@ -405,7 +404,7 @@ export default {
     'addNewOffer': 'Add new offer',
     'activeOffers': '{{count}} active offers',
     'filterOffers': 'Filter offers',
-    'errorWhileFetchingYourOffers': 'Error while fetching your offers',
+    'errorWhileFetchingYourOffers': 'Error while fetching offers',
     'editOffer': 'Edit offer',
     'myOffer': 'My Offer',
     'offerAdded': 'Added {{date}}',
@@ -496,7 +495,7 @@ export default {
     'deleteChatExplanation1':
       'Are you done trading? Closing chat means that your conversation will be permanently deleted.',
     'deleteChatExplanation2':
-      'This is definitive step, please confirm this action once again to make it real.',
+      'This is definitive step, please confirm this action once again to delete the chat.',
     'blockChatExplanation1':
       'Do you really want to block this user? You will never be able to undo this action. Choose wisely.',
     'blockChatExplanation2':
@@ -557,7 +556,7 @@ export default {
   },
   'MaintenanceScreen': {
     'title': 'Marketplace maintenance',
-    'text': 'Vexl app is in maintenance. Come back later, please.',
+    'text': 'Vexl app is performing maintenance. Come back later, please.',
   },
   'ForceUpdateScreen': {
     'title': 'New version available',

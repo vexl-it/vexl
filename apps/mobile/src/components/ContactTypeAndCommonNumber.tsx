@@ -22,11 +22,11 @@ function ContactTypeAndCommonNumber({
       alignItems={'center'}
     >
       <Text color="$greyOnBlack">
-        {friendLevel.includes('SECOND_DEGREE') ? (
-          <Text>{t('offer.friendOfFriend')}</Text>
+        {friendLevel.includes('FIRST_DEGREE') ? (
+          <Text>{t('offer.directFriend')}</Text>
         ) : (
-          friendLevel.includes('FIRST_DEGREE') && (
-            <Text>{t('offer.directFriend')}</Text>
+          friendLevel.includes('SECOND_DEGREE') && (
+            <Text>{t('offer.friendOfFriend')}</Text>
           )
         )}
       </Text>

@@ -28,7 +28,10 @@ import revealIdentityActionAtom, {
   type RevealMessageType,
 } from '../../state/chat/atoms/revealIdentityActionAtom'
 import reportError from '../../utils/reportError'
-import connectionStateAtom from '../../state/connections/atom/connectionStateAtom'
+import connectionStateAtom, {
+  createFriendLevelInfoAtom,
+} from '../../state/connections/atom/connectionStateAtom'
+import {type FriendLevel} from '@vexl-next/domain/dist/general/offers'
 
 type ChatUIMode = 'approval' | 'messages'
 
@@ -312,6 +315,21 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     }
   )
 
+  const friendLevelOfOtherSidePublicKeyAtom = atom((get) => {
+    return get(createFriendLevelInfoAtom(get(chatAtom).otherSide.publicKey))
+  })
+
+  const friendLevelInfoAtom = atom<FriendLevel[]>((get) => {
+    const originOffer = get(offerForChatAtom)
+
+    if (originOffer?.ownershipInfo?.adminId) {
+      // if this is my offer, we can look up user from connection state. The public
+      // key of the user is public key to his contact
+      return get(friendLevelOfOtherSidePublicKeyAtom)
+    }
+    return originOffer?.offerInfo.privatePart?.friendLevel ?? []
+  })
+
   return {
     showModalAtom: atom<boolean>(false),
     chatAtom,
@@ -335,5 +353,6 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     messagesListAtomAtoms,
     lastMessageAtom,
     canSendMessagesAtom,
+    friendLevelInfoAtom,
   }
 })

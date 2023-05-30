@@ -65,8 +65,6 @@ export default {
       'subtitle': 'Welcome! Ready to get started?',
       'touLabel': 'I agree to',
       'termsOfUse': 'Terms of use',
-      'termsOfUseText': TosEn,
-      'privacyPolicyText': PPEn,
     },
     'anonymizationNotice': {
       'title': 'Your identity will be anonymized.',
@@ -248,6 +246,8 @@ export default {
     'privacyPolicy': 'Privacy Policy',
     'dontHaveTime':
       'Don’t have a time to read all this? Take a look on Frequently Asked Questions.',
+    'termsOfUseText': TosEn,
+    'privacyPolicyText': PPEn,
   },
   'faqs': {
     'faqs': 'Frequently Asked Questions',

@@ -16,7 +16,7 @@ import {privateApiAtom} from '../../../api'
 import {sequenceS} from 'fp-ts/Apply'
 import deduplicate from '../../../utils/deduplicate'
 import reportError from '../../../utils/reportError'
-import {atom} from 'jotai'
+import {type Atom, atom} from 'jotai'
 import {selectAtom} from 'jotai/utils'
 
 const connectionStateAtom = atomWithParsedMmkvStorage(
@@ -95,3 +95,18 @@ export const reachNumberAtom = selectAtom(
     ]).length
   }
 )
+
+export function createFriendLevelInfoAtom(
+  publicKey: PublicKeyPemBase64
+): Atom<Array<'FIRST_DEGREE' | 'SECOND_DEGREE'>> {
+  return atom((get) => {
+    const isFirst = get(connectionStateAtom).firstLevel.includes(publicKey)
+    const isSecond = get(connectionStateAtom).firstLevel.includes(publicKey)
+
+    const toReturn: Array<'FIRST_DEGREE' | 'SECOND_DEGREE'> = []
+    if (isFirst) toReturn.push('FIRST_DEGREE' as const)
+    if (isSecond) toReturn.push('SECOND_DEGREE' as const)
+
+    return toReturn
+  })
+}

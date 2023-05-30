@@ -31,7 +31,7 @@ function OtherSideNamePhotoAndInfo({mode}: Props): JSX.Element {
 
   return (
     <Stack
-      height={mode === 'photoTop' ? PHOTO_AND_INFO_PHOTO_TOP_HEIGHT : 40}
+      height={mode === 'photoTop' ? PHOTO_AND_INFO_PHOTO_TOP_HEIGHT : 'auto'}
       fd={mode === 'photoLeft' ? 'row' : 'column'}
       alignItems={mode === 'photoTop' ? 'center' : 'flex-start'}
     >
@@ -47,7 +47,7 @@ function OtherSideNamePhotoAndInfo({mode}: Props): JSX.Element {
           height={40}
         />
       </Stack>
-      <YStack>
+      <YStack f={1}>
         <UserNameWithSellingBuying
           userName={otherSideData.userName}
           center={mode === 'photoTop'}

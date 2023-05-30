@@ -1,14 +1,13 @@
 import {getLocales} from 'expo-localization'
 import {I18n} from 'i18n-js'
-// import cs from '../../localization/cs'
+import cs from '../../localization/cs'
 import en from '../../localization/en'
-// import sk from '../../localization/sk'
+import sk from '../../localization/sk'
+import {enableHiddenFeatures} from '../environment'
 
-const i18n = new I18n({
-  en,
-  // cs,
-  // sk,
-})
+const translations = enableHiddenFeatures ? {en, cs, sk} : {en}
+
+const i18n = new I18n(translations)
 
 i18n.locale = getLocales()[0].languageTag
 

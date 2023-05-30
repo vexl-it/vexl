@@ -22,6 +22,7 @@ const InfoText = styled(Text, {
   col: '$greyOnWhite',
   fos: 14,
   ff: '$body500',
+  textAlign: 'center',
 })
 
 const PriceText = styled(InfoText, {

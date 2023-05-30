@@ -114,6 +114,7 @@ export interface Props extends Omit<TextInputProps, 'style'> {
   rightText?: string
   size?: 'small' | 'medium'
   showClearButton?: boolean
+  onClearPress?: () => void
   style?: XStackProps
   textColor?: ColorTokens
   leftTextColor?: ColorTokens
@@ -125,24 +126,27 @@ export interface Props extends Omit<TextInputProps, 'style'> {
   multiline?: ComponentProps<typeof InputStyled>['multiline']
 }
 
-function TextInput({
-  style,
-  size = 'medium',
-  icon,
-  leftText,
-  rightText,
-  showClearButton,
-  leftTextColor = '$greyOnBlack',
-  rightTextColor = '$greyOnBlack',
-  textColor,
-  variant = 'greyOnWhite',
-                     rightElement,
-                     borderRadius,
-                     multiline,
-                     numberOfLines,
-  ...restProps
-}: Props,
-                   ref: Ref<RNTextInput>): JSX.Element {
+function TextInput(
+  {
+    style,
+    size = 'medium',
+    icon,
+    leftText,
+    rightText,
+    showClearButton,
+    onClearPress,
+    leftTextColor = '$greyOnBlack',
+    rightTextColor = '$greyOnBlack',
+    textColor,
+    variant = 'greyOnWhite',
+    rightElement,
+    borderRadius,
+    multiline,
+    numberOfLines,
+    ...restProps
+  }: Props,
+  ref: Ref<RNTextInput>
+): JSX.Element {
   const tokens = getTokens()
   const inputRef: Ref<RNTextInput> = useRef(null)
   useImperativeHandle<RNTextInput | null, RNTextInput | null>(
@@ -151,7 +155,12 @@ function TextInput({
   )
 
   return (
-    <RootContainer variant={variant} size={size} borderRadius={borderRadius ?? '$4'} {...style}>
+    <RootContainer
+      variant={variant}
+      size={size}
+      borderRadius={borderRadius ?? '$4'}
+      {...style}
+    >
       {icon && (
         <Stack mr="$2">
           <Stack w={size === 'small' ? 14 : 20} h={size === 'small' ? 14 : 20}>
@@ -193,6 +202,7 @@ function TextInput({
         <TouchableOpacity
           onPress={() => {
             inputRef.current?.clear()
+            onClearPress?.()
           }}
         >
           <Image stroke={tokens.color.greyOnBlack.val} source={closeSvg} />

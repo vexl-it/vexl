@@ -538,6 +538,9 @@ export default {
   },
   'reportIssue': {
     'openInEmail': 'Open in e-mail',
+    'somethingWentWrong': 'Something went wrong?',
+    'feelFreeToGetInTouch': 'Feel free to get in touch with our support.',
+    'openInApp': 'Open in e-mail',
   },
   'AppLogs': {
     'title': 'In app logs',
@@ -546,11 +549,11 @@ export default {
     'errorExporting': 'Error exporting logs',
     'warning':
       'Enabling app logs may cause app to be slower and will require more storage space.',
-  },
-  'anonymizeAlert': {
-    'title': 'Would you like to anonymize logs?',
-    'text':
-      'We can try to strip private keys and personal information from logs before exporting them. Always make sure to verify by yourself.',
+    'anonymizeAlert': {
+      'title': 'Would you like to anonymize logs?',
+      'text':
+        'We can try to strip private keys and personal information from logs before exporting them. Always make sure to verify by yourself.',
+    },
   },
   'MaintenanceScreen': {
     'title': 'Marketplace maintenance',

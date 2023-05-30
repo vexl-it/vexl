@@ -1,8 +1,6 @@
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {Stack, Text, XStack} from 'tamagui'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
-import Image from '../../Image'
-import chartSvg from '../images/chartSvg'
 import {TouchableOpacity} from 'react-native'
 import {useAtomValue, useSetAtom} from 'jotai'
 import {btcPriceAtom, refreshBtcPriceActionAtom} from '../atoms'
@@ -46,7 +44,7 @@ function BitcoinPriceChart(): JSX.Element {
     <Stack h={CHART_HEIGHT_PX}>
       <Stack f={1} pt={insets.top} />
       <XStack jc={'space-between'} alignItems={'center'} px={'$6'} py={'$2'}>
-        <Image source={chartSvg} />
+        <Stack />
         <TouchableOpacity
           onPress={() => {
             void refreshBtcPrice()()

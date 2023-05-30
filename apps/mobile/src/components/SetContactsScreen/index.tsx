@@ -8,6 +8,7 @@ import {useCallback} from 'react'
 import {Stack} from 'tamagui'
 import IconButton from '../IconButton'
 import closeSvg from '../images/closeSvg'
+import KeyboardAvoidingView from '../KeyboardAvoidingView'
 
 function SetContactsScreen(): JSX.Element {
   const goBack = useSafeGoBack()
@@ -32,15 +33,17 @@ function SetContactsScreen(): JSX.Element {
   return (
     <>
       <Screen>
-        <ScreenTitle p={'$2'} text={t('loginFlow.importContacts.action')}>
-          <IconButton variant="dark" icon={closeSvg} onPress={goBack} />
-        </ScreenTitle>
-        <Stack f={1} mx={'$2'}>
-          <ContactsListSelect
-            onContactsSubmitted={goBack}
-            renderFooter={renderButton}
-          />
-        </Stack>
+        <KeyboardAvoidingView>
+          <ScreenTitle p={'$2'} text={t('loginFlow.importContacts.action')}>
+            <IconButton variant="dark" icon={closeSvg} onPress={goBack} />
+          </ScreenTitle>
+          <Stack f={1} mx={'$2'}>
+            <ContactsListSelect
+              onContactsSubmitted={goBack}
+              renderFooter={renderButton}
+            />
+          </Stack>
+        </KeyboardAvoidingView>
       </Screen>
     </>
   )

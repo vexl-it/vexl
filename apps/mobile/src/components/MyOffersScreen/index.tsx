@@ -4,7 +4,7 @@ import {type RootStackScreenProps} from '../../navigationTypes'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import Button from '../Button'
 import plusSvg from './images/plusSvg'
-import {getTokens, Text, XStack} from 'tamagui'
+import {getTokens, Stack, Text, XStack} from 'tamagui'
 import {useAtomValue} from 'jotai'
 import OffersList from '../OffersList'
 import IconButton from '../IconButton'
@@ -42,9 +42,17 @@ function MyOffersScreen({navigation}: Props): JSX.Element {
         ai={'center'}
         jc={'space-between'}
       >
-        <Text ff={'$body600'} fos={18} col={'$white'}>
-          {t('myOffers.activeOffers', {count: activeOffersCount})}
-        </Text>
+        <Stack f={1}>
+          <Text
+            adjustsFontSizeToFit
+            numberOfLines={1}
+            ff={'$body600'}
+            fos={18}
+            col={'$white'}
+          >
+            {t('myOffers.activeOffers', {count: activeOffersCount})}
+          </Text>
+        </Stack>
         <MyOffersSortingDropdown />
       </XStack>
       <Button

@@ -107,7 +107,7 @@ function Dropdown<T>({
   )
 
   return (
-    <Stack>
+    <Stack f={1}>
       <TouchableWithoutFeedback
         onPress={() => {
           setIsOpen(!isOpen)

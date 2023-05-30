@@ -8,7 +8,7 @@ import useSafeGoBack from '../../../utils/useSafeGoBack'
 function CreateOfferScreen(): JSX.Element {
   const safeGoBack = useSafeGoBack()
   return (
-    <Screen customHorizontalPadding={0} customVerticalPadding={32}>
+    <Screen>
       <KeyboardAvoidingView>
         <ModifyOfferScopeProvider>
           <CreateOfferContent navigateBack={safeGoBack} />

@@ -9,7 +9,7 @@ import {useCallback, useMemo} from 'react'
 import formatNumber from '../../../utils/formatNumber'
 import {selectedCurrencyAtom} from '../../../state/selectedCurrency'
 
-export const CHART_HEIGHT_PX = 120
+export const CHART_HEIGHT_PX = 100
 
 function BitcoinPriceChart(): JSX.Element {
   const {t} = useTranslation()
@@ -69,5 +69,3 @@ function BitcoinPriceChart(): JSX.Element {
 }
 
 export default BitcoinPriceChart
-
-// linear-gradient(180deg, #FCCD6C 0%, rgba(252, 205, 108, 0) 100%);

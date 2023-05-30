@@ -1,5 +1,5 @@
 import Button from './Button'
-import {Stack} from 'tamagui'
+import {XStack} from 'tamagui'
 
 export interface TabProps<T> {
   title: string
@@ -14,7 +14,7 @@ interface Props<T> {
 
 function Tabs<T>({activeTab, onTabPress, tabs}: Props<T>): JSX.Element {
   return (
-    <Stack fd="row" ai="center" br="$4" bg="$grey" p="$1">
+    <XStack ai="center" br="$4" bg="$grey" p="$1">
       {tabs.map((tab) => (
         <Button
           key={tab.title}
@@ -26,7 +26,7 @@ function Tabs<T>({activeTab, onTabPress, tabs}: Props<T>): JSX.Element {
           }}
         />
       ))}
-    </Stack>
+    </XStack>
   )
 }
 

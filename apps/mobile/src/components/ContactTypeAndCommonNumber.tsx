@@ -17,6 +17,7 @@ function ContactTypeAndCommonNumber({
   const {t} = useTranslation()
   return (
     <XStack
+      flexWrap={'wrap'}
       space="$1"
       justifyContent={center ? 'center' : 'flex-start'}
       alignItems={'center'}

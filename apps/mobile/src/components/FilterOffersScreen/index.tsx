@@ -14,7 +14,7 @@ function FilterOffersScreen({
 }: Props): JSX.Element {
   const safeGoBack = useSafeGoBack()
   return (
-    <Screen customHorizontalPadding={0} customVerticalPadding={32}>
+    <Screen>
       <FilterOffersScopeProvider type={type}>
         <FilterOffersContent navigateBack={safeGoBack} />
       </FilterOffersScopeProvider>

@@ -9,13 +9,14 @@ import {OfferType} from '@vexl-next/domain/dist/general/offers'
 import {useTriggerOffersRefresh} from '../../../../state/marketplace'
 import {useCallback, useMemo} from 'react'
 import {type StyleProp, type ViewStyle} from 'react-native'
-import {getTokens} from 'tamagui'
+import {getTokens, useMedia} from 'tamagui'
 import {useAppState} from '../../../../utils/useAppState'
 
 const Tab = createMaterialTopTabNavigator<MarketplaceTabParamsList>()
 
 function MarketplaceScreen(): JSX.Element {
   const {t} = useTranslation()
+  const media = useMedia()
   const tokens = getTokens()
 
   const tabBarStyle: StyleProp<ViewStyle> = useMemo(
@@ -38,13 +39,12 @@ function MarketplaceScreen(): JSX.Element {
 
   const tabBarLabelStyle: StyleProp<ViewStyle> = useMemo(
     () => ({
-      fontSize: 40,
-      lineHeight: 42, // if we
+      fontSize: media.sm ? 30 : 40,
       fontFamily: 'PPMonument',
       textTransform: 'none',
       margin: 0,
     }),
-    []
+    [media]
   )
 
   const tabBarIndicatorStyle: StyleProp<ViewStyle> = useMemo(
@@ -80,6 +80,7 @@ function MarketplaceScreen(): JSX.Element {
       >
         <Tab.Screen
           name="Sell"
+          options={{tabBarLabel: t('offer.sell')}}
           initialParams={{type: OfferType.parse('SELL')}}
           component={OffersListWithFilter}
         />

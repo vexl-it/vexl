@@ -79,9 +79,11 @@ function Item({
         </Stack>
         {children ??
           (typeof text === 'string' ? (
-            <ItemText ff="$body500" col="$white">
-              {text}
-            </ItemText>
+            <Stack f={1}>
+              <ItemText ff="$body500" col="$white">
+                {text}
+              </ItemText>
+            </Stack>
           ) : (
             text
           ))}

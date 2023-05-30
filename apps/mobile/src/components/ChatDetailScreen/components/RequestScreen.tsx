@@ -46,11 +46,11 @@ function RequestScreen(): JSX.Element {
         {wasDenied &&
           (requestedByMe ? (
             <InfoSquare negative>
-              {t('messages.deniedByMe', {name: randomName(chat.id)})}
+              {t('messages.deniedByThem', {name: randomName(chat.id)})}
             </InfoSquare>
           ) : (
             <InfoSquare negative>
-              {t('messages.deniedByThem', {name: randomName(chat.id)})}
+              {t('messages.deniedByMe', {name: randomName(chat.id)})}
             </InfoSquare>
           ))}
       </Stack>

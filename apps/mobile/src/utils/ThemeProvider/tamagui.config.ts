@@ -1,6 +1,7 @@
 import {createFont, createTamagui, createTokens} from 'tamagui'
 import {createAnimations} from '@tamagui/animations-reanimated'
 import {shorthands} from '@tamagui/shorthands'
+import {createMedia} from '@tamagui/react-native-media-driver'
 
 const color = {
   backgroundBlack: '#101010',
@@ -148,6 +149,11 @@ const animations: any = createAnimations({
   },
 })
 
+const media = createMedia({
+  sm: {maxWidth: 380},
+  md: {minWidth: 380 + 1, maxWidth: 390},
+})
+
 export const tokens = createTokens({
   space,
   color,
@@ -173,6 +179,7 @@ const appConfig = createTamagui({
   },
   tokens,
   shorthands,
+  media,
 })
 
 export type AppConfig = typeof appConfig

@@ -78,12 +78,21 @@ function PremiumOrDiscountDetail({
               <IconButton variant="dark" icon={closeSvg} onPress={onClose} />
             </ScreenTitle>
             <XStack ai={'center'} jc={'space-between'} py={'$4'}>
-              <Text mr="$4" fos={18} ff="$body600" col="$white">
-                {offerType === 'BUY'
-                  ? t('offerForm.premiumOrDiscount.youBuyBtcFor')
-                  : t('offerForm.premiumOrDiscount.youSellBtcFor')}
-              </Text>
-              <Stack f={1}>
+              <Stack f={2}>
+                <Text
+                  numberOfLines={2}
+                  adjustsFontSizeToFit
+                  mr="$4"
+                  fos={18}
+                  ff="$body600"
+                  col="$white"
+                >
+                  {offerType === 'BUY'
+                    ? t('offerForm.premiumOrDiscount.youBuyBtcFor')
+                    : t('offerForm.premiumOrDiscount.youSellBtcFor')}
+                </Text>
+              </Stack>
+              <Stack f={3}>
                 <Input
                   value={inputValue}
                   onChangeText={onInputValueChange}

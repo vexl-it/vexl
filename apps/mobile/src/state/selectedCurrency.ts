@@ -34,8 +34,6 @@ function getLocale(): string {
   }
 }
 
-console.log(`Locale: ${getLocale()}`)
-
 const defaultCurrency =
   getLocale() === 'cs' ? 'CZK' : euLocales.includes(getLocale()) ? 'EUR' : 'USD'
 

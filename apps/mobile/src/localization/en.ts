@@ -170,7 +170,7 @@ export default {
     'items': {
       'changeProfilePicture': 'Change profile picture',
       'editName': 'Edit name',
-      'contactsImported': 'Contacts management',
+      'contactsImported': 'Contacts imported',
       'xFriends': '{{number}} friends',
       'setPin': 'Set PIN',
       'faceId': 'Face ID',

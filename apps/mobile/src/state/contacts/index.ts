@@ -28,6 +28,11 @@ export const importedContactsAtom = focusAtom(
   (o) => o.prop('importedContacts')
 )
 
+export const importedContactsCountAtom = selectAtom(
+  importedContactsAtom,
+  (contacts) => contacts.length
+)
+
 export const importedContactsHashesAtom = selectAtom(
   importedContactsAtom,
   (o) => o.map((one) => one.hash)

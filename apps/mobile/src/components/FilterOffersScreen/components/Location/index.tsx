@@ -69,23 +69,25 @@ function LocationComponent({
       />
       {locationState === 'IN_PERSON' && (
         <YStack space="$2">
-          <TouchableWithoutFeedback
-            onPress={() => {
-              setLocationSearchVisible(true)
-            }}
-          >
-            <XStack ai="center" p="$5" bc="$grey" br="$5">
-              <Stack h={24} w={24}>
-                <SvgImage
-                  stroke={tokens.color.white.val}
-                  source={magnifyingGlass}
-                />
-              </Stack>
-              <Text ml="$4" ff="$body600" fos={18} col="$greyOnBlack">
-                {t('offerForm.location.addCityOrDistrict')}
-              </Text>
-            </XStack>
-          </TouchableWithoutFeedback>
+          {(!location || (location && location.length < 1)) && (
+            <TouchableWithoutFeedback
+              onPress={() => {
+                setLocationSearchVisible(true)
+              }}
+            >
+              <XStack ai="center" p="$5" bc="$grey" br="$5">
+                <Stack h={24} w={24}>
+                  <SvgImage
+                    stroke={tokens.color.white.val}
+                    source={magnifyingGlass}
+                  />
+                </Stack>
+                <Text ml="$4" ff="$body600" fos={18} col="$greyOnBlack">
+                  {t('offerForm.location.addCityOrDistrict')}
+                </Text>
+              </XStack>
+            </TouchableWithoutFeedback>
+          )}
           {location?.map((loc) => (
             <XStack
               key={loc.latitude}

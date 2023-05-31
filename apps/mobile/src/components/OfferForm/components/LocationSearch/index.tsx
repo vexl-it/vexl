@@ -115,11 +115,10 @@ function LocationSearch({
         />
         <ScrollView>
           {locationResults?.result.map((result) => {
-            const {latitude, suggestFirstRow, suggestSecondRow} =
-              result.userData
+            const {suggestFirstRow, suggestSecondRow} = result.userData
             return (
               <LocationCell
-                key={latitude}
+                key={`${suggestFirstRow}${suggestSecondRow}`}
                 city={suggestFirstRow}
                 country={suggestSecondRow}
                 onPress={() => {

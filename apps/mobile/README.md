@@ -17,6 +17,18 @@ This repository contains code for the Vexl mobile app. The app is built using Re
 1. Make sure you have packages installed by running `yarn install`.
 2. Run `yarn test` to run unit tests.
 
+## How to run E2E tests
+### Android
+```
+npx detox build --configuration android.emu.debug
+npx detox test --configuration android.emu.debug
+```
+### iOS
+```
+npx detox build --configuration ios.sim.debug
+npx detox test --configuration ios.sim.debug
+```
+
 ## TODO to finish the setup of the repository: 
 
 - [x] Linter and prettier

@@ -6,6 +6,7 @@ import * as FileSystem from 'expo-file-system'
 import {pipe} from 'fp-ts/function'
 import {safeParse} from '../../../../utils/fpUtils'
 import urlJoin from 'url-join'
+import {generateUuid} from '@vexl-next/domain/dist/utility/Uuid.brand'
 
 export interface ImagePickerError {
   _tag: 'imagePickerError'
@@ -21,7 +22,7 @@ async function moveImageToDocumentDirectory(
 
   const path = urlJoin(
     documentDir,
-    `profilePicture.${imagePath.split('.').at(-1) ?? 'jpeg'}`
+    `profilePicture-${generateUuid()}-.${imagePath.split('.').at(-1) ?? 'jpeg'}`
   )
 
   await FileSystem.copyAsync({from: imagePath, to: path})

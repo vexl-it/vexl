@@ -12,7 +12,7 @@ import {
 import Button from '../../../Button'
 import SVGImage from '../../../Image'
 import {Image} from 'react-native'
-import {Stack, Text} from 'tamagui'
+import {Stack, Text, XStack} from 'tamagui'
 
 type Props = LoginStackScreenProps<'Start'>
 
@@ -51,7 +51,7 @@ function StartScreen({navigation}: Props): JSX.Element {
         my="$3"
         bg="$backgroundBlack"
       >
-        <Stack fd="row" ai="center">
+        <XStack ai="center">
           <SVGImage source={notepadSvg} />
           <Stack w="$2" />
           <Text fos={18} ff="$body500" col="$greyOnBlack">
@@ -65,7 +65,7 @@ function StartScreen({navigation}: Props): JSX.Element {
             }}
             text={t('loginFlow.start.termsOfUse')}
           />
-        </Stack>
+        </XStack>
         <Switch value={touAgree} onValueChange={setTOUAgree} />
       </Stack>
       <NextButtonProxy

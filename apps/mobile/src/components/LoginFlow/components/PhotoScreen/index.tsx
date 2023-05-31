@@ -24,7 +24,7 @@ import {
   NextButtonProxy,
 } from '../../../PageWithButtonAndProgressHeader'
 import {type UriString} from '@vexl-next/domain/dist/utility/UriString.brand'
-import {Image, Stack, Text} from 'tamagui'
+import {Image, Stack, Text, useMedia} from 'tamagui'
 
 type Props = LoginStackScreenProps<'Photo'>
 
@@ -35,10 +35,10 @@ function PhotoScreen({
   },
 }: Props): JSX.Element {
   const {t} = useTranslation()
+  const media = useMedia()
   const [selectedImageUri, setSelectedImageUri] = useState<O.Option<UriString>>(
     O.none
   )
-
   const reportAndTranslateErrors = useCallback(
     (error: FileSystemError | ImagePickerError): string => {
       if (error._tag === 'imagePickerError') {
@@ -92,7 +92,12 @@ function PhotoScreen({
       <HeaderProxy showBackButton progressNumber={1} />
       <WhiteContainer>
         <Stack maw="70%">
-          <Text numberOfLines={2} adjustsFontSizeToFit ff="$heading" fos={24}>
+          <Text
+            numberOfLines={media.sm ? 2 : undefined}
+            adjustsFontSizeToFit={media.sm}
+            ff="$heading"
+            fos={24}
+          >
             {t('loginFlow.photo.title', {name: userName})}
           </Text>
         </Stack>

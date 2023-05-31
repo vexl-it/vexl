@@ -22,7 +22,7 @@ import {useNavigation} from '@react-navigation/native'
 import {getTokens, Stack, styled, Text, XStack} from 'tamagui'
 import {enableHiddenFeatures} from '../../../../../utils/environment'
 import notEmpty from '../../../../../utils/notEmpty'
-import {type PrimitiveAtom, useAtomValue, useSetAtom} from 'jotai'
+import {useSetAtom} from 'jotai'
 import * as TE from 'fp-ts/TaskEither'
 import {askAreYouSureActionAtom} from '../../../../AreYouSureDialog'
 import {pipe} from 'fp-ts/function'
@@ -34,30 +34,17 @@ import {
 } from '../atoms'
 import openUrl from '../../../../../utils/openUrl'
 import ChangeCurrency from './ChangeCurrency'
-import {type Currency} from '@vexl-next/domain/src/general/offers'
-import {selectedCurrencyAtom} from '../../../../../state/selectedCurrency'
+import ContactsImportedTitle from './ContactsImportedTitle'
+import SelectedCurrencyTitle from './SelectedCurrencyTitle'
 
-const ItemText = styled(Text, {
+export const ItemText = styled(Text, {
   fos: 18,
 })
 
-function SelectedCurrencyTitle({
-  currencyAtom,
-}: {
-  currencyAtom: PrimitiveAtom<Currency>
-}): JSX.Element {
-  const {t} = useTranslation()
-  const selectedCurrency = useAtomValue(currencyAtom)
-  return (
-    <ItemText ff="$body500" col="$white">
-      {selectedCurrency === 'USD'
-        ? t('currency.unitedStatesDollar')
-        : selectedCurrency === 'EUR'
-        ? t('currency.euro')
-        : t('currency.czechCrown')}
-    </ItemText>
-  )
-}
+export const SubtitleText = styled(Text, {
+  fos: 12,
+  col: '$greyOnBlack',
+})
 
 function Item({
   text,
@@ -169,6 +156,7 @@ function ButtonsSection(): JSX.Element {
             onPress: () => {
               navigation.navigate('SetContacts')
             },
+            children: <ContactsImportedTitle />,
           },
         ],
         [
@@ -189,9 +177,7 @@ function ButtonsSection(): JSX.Element {
             onPress: () => {
               setChangeCurrencyDialogVisible(true)
             },
-            children: (
-              <SelectedCurrencyTitle currencyAtom={selectedCurrencyAtom} />
-            ),
+            children: <SelectedCurrencyTitle />,
           },
           enableHiddenFeatures
             ? {

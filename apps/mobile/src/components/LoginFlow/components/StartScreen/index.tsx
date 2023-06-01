@@ -41,8 +41,7 @@ function StartScreen({navigation}: Props): JSX.Element {
           </Text>
         </Stack>
       </WhiteContainer>
-      <Stack
-        fd="row"
+      <XStack
         ai="center"
         jc="space-between"
         py="$4"
@@ -51,23 +50,25 @@ function StartScreen({navigation}: Props): JSX.Element {
         my="$3"
         bg="$backgroundBlack"
       >
-        <XStack ai="center">
+        <XStack ai="center" fw={'wrap'}>
           <SVGImage source={notepadSvg} />
           <Stack w="$2" />
           <Text fos={18} ff="$body500" col="$greyOnBlack">
             {t('loginFlow.start.touLabel')}{' '}
           </Text>
-          <Button
-            fontSize={18}
-            variant="link"
-            onPress={() => {
-              navigation.navigate('TermsAndConditions')
-            }}
-            text={t('loginFlow.start.termsOfUse')}
-          />
+          <XStack ai={'center'} space={'$2'}>
+            <Button
+              fontSize={18}
+              variant="link"
+              onPress={() => {
+                navigation.navigate('TermsAndConditions')
+              }}
+              text={t('loginFlow.start.termsOfUse')}
+            />
+            <Switch value={touAgree} onValueChange={setTOUAgree} />
+          </XStack>
         </XStack>
-        <Switch value={touAgree} onValueChange={setTOUAgree} />
-      </Stack>
+      </XStack>
       <NextButtonProxy
         disabled={!touAgree}
         onPress={() => {

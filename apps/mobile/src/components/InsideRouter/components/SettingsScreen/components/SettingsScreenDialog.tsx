@@ -14,7 +14,7 @@ interface Props {
   }
   children?: React.ReactNode
   onClose: () => void
-  title: string
+  title?: string
   subtitle?: string
   visible: boolean
 }
@@ -35,15 +35,17 @@ function SettingsScreenDialog({
       <Stack f={1} jc={'flex-end'} pb={bottom} bc={'rgba(0,0,0,0.6)'} px={'$2'}>
         <Stack py={'$4'} px={'$4'} backgroundColor={'$white'} br={'$4'}>
           <Stack jc="flex-end">
-            <Text
-              my={'$4'}
-              ff={'$heading'}
-              fos={28}
-              numberOfLines={2}
-              adjustsFontSizeToFit
-            >
-              {title}
-            </Text>
+            {title && (
+              <Text
+                my={'$4'}
+                ff={'$heading'}
+                fos={28}
+                numberOfLines={2}
+                adjustsFontSizeToFit
+              >
+                {title}
+              </Text>
+            )}
             {subtitle && (
               <Text fos={18} ff={'$body500'} col={'$greyOnWhite'}>
                 {subtitle}

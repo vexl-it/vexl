@@ -584,4 +584,7 @@ export default {
       },
     },
   },
+  'qrCode': {
+    'joinVexl': 'Join vexl',
+  },
 }

@@ -85,6 +85,7 @@
     "react-native-open-notification": "^0.1.4",
     "react-native-pager-view": "6.1.2",
     "react-native-phone-number-input": "^2.1.0",
+    "react-native-qrcode-svg": "^6.2.0",
     "react-native-quick-base64": "^2.0.5",
     "react-native-quick-crypto": "^0.6.1",
     "react-native-reanimated": "~2.14.4",

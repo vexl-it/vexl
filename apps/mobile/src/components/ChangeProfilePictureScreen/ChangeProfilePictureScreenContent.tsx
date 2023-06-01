@@ -17,9 +17,10 @@ function ChangeProfilePictureScreenContent(): JSX.Element {
   const {didImageUriChangeAtom, selectedImageUriAtom, selectImageActionAtom} =
     useMolecule(changeProfilePictureMolecule)
   const selectedImageUri = useAtomValue(selectedImageUriAtom)
-  const setUserImageUriInState = useSetAtom(userImageAtom)
   const selectImage = useSetAtom(selectImageActionAtom)
   const didImageUriChange = useAtomValue(didImageUriChangeAtom)
+
+  const setUserImageUriInState = useSetAtom(userImageAtom)
 
   return (
     <>

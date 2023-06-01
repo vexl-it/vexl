@@ -1,24 +1,81 @@
 import Screen from '../Screen'
-import * as O from 'fp-ts/Option'
-import {useAtomValue} from 'jotai'
+import {useAtomValue, useSetAtom} from 'jotai'
 import {userImageAtom} from '../../state/session'
-import ChangeProfilePictureScreenContent from './ChangeProfilePictureScreenContent'
-import {getTokens} from 'tamagui'
-import ChangeProfilePictureScopeProvider from '../ChangeProfilePictureScope/Provider'
+import {getTokens, Stack, XStack} from 'tamagui'
+import {useFocusEffect} from '@react-navigation/native'
+import {useCallback} from 'react'
+import {useMolecule} from 'jotai-molecules'
+import {changeProfilePictureMolecule} from '../ChangeProfilePictureScope'
+import ScreenTitle from '../ScreenTitle'
+import IconButton from '../IconButton'
+import closeSvg from '../images/closeSvg'
+import SelectProfilePicture from '../SelectProfilePicture'
+import Button from '../Button'
+import useSafeGoBack from '../../utils/useSafeGoBack'
+import {useTranslation} from '../../utils/localization/I18nProvider'
 
 function ChangeProfilePictureScreen(): JSX.Element {
+  const {t} = useTranslation()
   const tokens = getTokens()
-  const userImage = useAtomValue(userImageAtom)
+  const safeGoBack = useSafeGoBack()
+  const {
+    didImageUriChangeAtom,
+    selectedImageUriAtom,
+    selectImageActionAtom,
+    syncImageActionAtom,
+  } = useMolecule(changeProfilePictureMolecule)
+  const syncImageWithSessionUri = useSetAtom(syncImageActionAtom)
+  const selectedImageUri = useAtomValue(selectedImageUriAtom)
+  const selectImage = useSetAtom(selectImageActionAtom)
+  const didImageUriChange = useAtomValue(didImageUriChangeAtom)
+
+  const setUserImageUriInState = useSetAtom(userImageAtom)
+
+  useFocusEffect(
+    useCallback(() => {
+      syncImageWithSessionUri()
+    }, [syncImageWithSessionUri])
+  )
 
   return (
     <Screen customHorizontalPadding={tokens.space[2].val}>
-      <ChangeProfilePictureScopeProvider
-        changeProfilePictureScopeValue={
-          userImage ? O.some(userImage.imageUri) : O.none
-        }
-      >
-        <ChangeProfilePictureScreenContent />
-      </ChangeProfilePictureScopeProvider>
+      <ScreenTitle text={t('changeProfilePicture.changeProfilePicture')}>
+        <IconButton icon={closeSvg} onPress={safeGoBack} />
+      </ScreenTitle>
+      <Stack f={1} ai={'center'} jc={'center'}>
+        <SelectProfilePicture />
+      </Stack>
+      {didImageUriChange ? (
+        <XStack space={'$2'}>
+          <Button
+            fullSize
+            onPress={safeGoBack}
+            variant={'primary'}
+            text={t('common.cancel')}
+          />
+          <Button
+            fullSize
+            onPress={() => {
+              if (selectedImageUri._tag === 'Some') {
+                setUserImageUriInState({
+                  imageUri: selectedImageUri.value,
+                  type: 'imageUri',
+                })
+                safeGoBack()
+              }
+            }}
+            variant={'secondary'}
+            text={t('common.confirm')}
+          />
+        </XStack>
+      ) : (
+        <Button
+          fullWidth
+          onPress={selectImage}
+          variant={'secondary'}
+          text={t('changeProfilePicture.uploadNewPhoto')}
+        />
+      )}
     </Screen>
   )
 }

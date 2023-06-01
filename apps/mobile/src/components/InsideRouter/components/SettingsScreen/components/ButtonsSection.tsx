@@ -130,20 +130,22 @@ function ButtonsSection(): JSX.Element {
             },
           },
         ],
-        enableHiddenFeatures
-          ? [
-              {
-                text: t('settings.items.changeProfilePicture'),
-                icon: imageIconSvg,
-                onPress: todo,
-              },
-              {
-                text: t('settings.items.editName'),
-                icon: editIconSvg,
-                onPress: todo,
-              },
-            ]
-          : null,
+        [
+          {
+            text: t('settings.items.changeProfilePicture'),
+            icon: imageIconSvg,
+            onPress: () => {
+              navigation.navigate('ChangeProfilePicture')
+            },
+          },
+          {
+            text: t('settings.items.editName'),
+            icon: editIconSvg,
+            onPress: () => {
+              navigation.navigate('EditName')
+            },
+          },
+        ],
         [
           {
             text: t('settings.items.contactsImported'),

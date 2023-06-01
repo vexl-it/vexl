@@ -30,10 +30,7 @@ function EditOfferScreen({
     <Screen customHorizontalPadding={0} customVerticalPadding={32}>
       <KeyboardAvoidingView>
         {offer ? (
-          <ModifyOfferScopeProvider
-            modifyOfferScopeValue={offer}
-            offerFormScopeValue={offer.offerInfo.publicPart}
-          >
+          <ModifyOfferScopeProvider modifyOfferScopeValue={offer}>
             <EditOfferContent navigateBack={safeGoBack} />
           </ModifyOfferScopeProvider>
         ) : (

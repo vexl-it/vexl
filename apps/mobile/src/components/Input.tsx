@@ -14,7 +14,6 @@ import {
   type ColorTokens,
   Text,
 } from 'tamagui'
-import closeSvg from './images/closeSvg'
 import {
   type ComponentProps,
   forwardRef,
@@ -23,6 +22,7 @@ import {
   useImperativeHandle,
   useRef,
 } from 'react'
+import clearInputSvg from './images/clearInputSvg'
 
 const RootContainer = styled(XStack, {
   ai: 'center',
@@ -205,7 +205,7 @@ function TextInput(
             onClearPress?.()
           }}
         >
-          <Image stroke={tokens.color.greyOnBlack.val} source={closeSvg} />
+          <Image source={clearInputSvg} />
         </TouchableOpacity>
       )}
       {rightText && (

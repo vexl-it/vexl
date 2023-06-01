@@ -71,7 +71,10 @@ function SuccessLoginScreen({
         return pipe(
           E.right({
             version: 1,
-            realUserData,
+            realUserData:
+              realUserData.image.type === 'svgXml'
+                ? {userName: realUserData.userName}
+                : realUserData,
             anonymizedUserData,
             sessionCredentials: {
               publicKey: privateKey.publicKeyPemBase64,

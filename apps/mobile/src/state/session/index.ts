@@ -83,12 +83,6 @@ export const dummySession: Session = Session.parse({
     userName: UserName.parse('Logout please'),
   },
   realUserData: {
-    image: {
-      type: 'imageUri',
-      imageUri: UriString.parse(
-        'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAAD5Ip3+AAAADUlEQVQIHWM4c+bMfwAIMANkxSThkAAAAABJRU5ErkJggg=='
-      ),
-    },
     userName: UserName.parse('Logout please'),
   },
   phoneNumber: E164PhoneNumber.parse('+420733733733'),

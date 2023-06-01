@@ -28,6 +28,8 @@ import CommonFriendsScreen from '../CommonFriendsScreen'
 import AppLogsScreen from '../AppLogsScreen'
 import useHandleNotificationOpen from '../../state/useHandleNotificationOpen'
 import {useHandleDeepLink} from '../../utils/deepLinks'
+import EditNameScreen from '../EditNameScreen'
+import ChangeProfilePictureScreen from '../ChangeProfilePictureScreen/ChangeProfilePictureScreen'
 
 const Stack = createNativeStackNavigator<RootStackParamsList>()
 
@@ -81,6 +83,11 @@ function RootNavigation(): JSX.Element {
             <Stack.Screen
               name={'NotificationPermissionsMissing'}
               component={NotificationPermissionsScreen}
+            />
+            <Stack.Screen name={'EditName'} component={EditNameScreen} />
+            <Stack.Screen
+              name={'ChangeProfilePicture'}
+              component={ChangeProfilePictureScreen}
             />
           </Stack.Group>
         )}

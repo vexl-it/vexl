@@ -1,4 +1,10 @@
-import {atom, useAtomValue, useSetAtom, type WritableAtom} from 'jotai'
+import {
+  atom,
+  type SetStateAction,
+  useAtomValue,
+  useSetAtom,
+  type WritableAtom,
+} from 'jotai'
 import {pipe} from 'fp-ts/function'
 import * as SecretStorage from 'expo-secure-store'
 import * as TE from 'fp-ts/TaskEither'
@@ -14,6 +20,8 @@ import {E164PhoneNumber} from '@vexl-next/domain/dist/general/E164PhoneNumber.br
 import crashlytics from '@react-native-firebase/crashlytics'
 import {getDefaultStore} from 'jotai'
 import {replaceAll} from '../../utils/replaceAll'
+import {focusAtom} from 'jotai-optics'
+import getValueFromSetStateActionOfAtom from '../../utils/atomUtils/getValueFromSetStateActionOfAtom'
 import {type UserNameAndAvatar} from '@vexl-next/domain/dist/general/UserNameAndAvatar.brand'
 
 // duplicated code but we can not remove cyclic dependency otherwise
@@ -181,10 +189,29 @@ const sessionLoadedAtom = atom((get) => {
   return state === 'loggedIn' || state === 'loggedOut'
 })
 
-export const sessionDataOrDummyAtom = atom((get) => {
-  const session = get(sessionAtom)
-  if (session.state === 'loggedIn') return session.session
-  return dummySession
+export const sessionDataOrDummyAtom = atom(
+  (get) => {
+    const session = get(sessionAtom)
+    if (session.state === 'loggedIn') return session.session
+    return dummySession
+  },
+  (get, set, action: SetStateAction<Session>) => {
+    const currentSession = get(sessionAtom)
+    if (currentSession.state !== 'loggedIn') return
+    const newValue: Session = getValueFromSetStateActionOfAtom(action)(
+      () => currentSession.session
+    )
+
+    set(sessionAtom, O.some(newValue))
+  }
+)
+
+export const userNameAtom = focusAtom(sessionDataOrDummyAtom, (o) => {
+  return o.prop('realUserData').prop('userName')
+})
+
+export const userImageAtom = focusAtom(sessionDataOrDummyAtom, (o) => {
+  return o.prop('realUserData').prop('image')
 })
 
 export const userDataAtom = atom<UserNameAndAvatar>((get) => {

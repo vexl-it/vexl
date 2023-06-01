@@ -43,6 +43,9 @@ export type RootStackParamsList = {
 
   Faqs: undefined
 
+  EditName: undefined
+  ChangeProfilePicture: undefined
+
   TodoScreen: undefined
 
   SetContacts: undefined

@@ -591,4 +591,12 @@ export default {
   'qrCode': {
     'joinVexl': 'Join vexl',
   },
+  'editName': {
+    'editName': 'Edit name',
+    'errorUserNameNotValid': 'User name is not valid',
+  },
+  'changeProfilePicture': {
+    'changeProfilePicture': 'Change profile picture',
+    'uploadNewPhoto': 'Upload new photo',
+  },
 }

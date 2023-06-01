@@ -2,11 +2,25 @@ import Button from '../../Button'
 import {useAtomValue} from 'jotai'
 import nextButtonStateAtom from '../state/nextButtonStateAtom'
 import {XStack} from 'tamagui'
+import {useCallback} from 'react'
+import {dismissKeyboardAndResolveOnLayoutUpdate} from '../../../utils/dismissKeyboardPromise'
 
-function defaultPress(): void {}
+function emptyPress(): void {}
 
 function NextButton(): JSX.Element | null {
   const nextButtonState = useAtomValue(nextButtonStateAtom)
+
+  const onPrimaryButtonPress = useCallback(() => {
+    void dismissKeyboardAndResolveOnLayoutUpdate().then(
+      nextButtonState.onPress ?? emptyPress
+    )
+  }, [nextButtonState.onPress])
+
+  const onSecondButtonPress = useCallback(() => {
+    void dismissKeyboardAndResolveOnLayoutUpdate().then(
+      nextButtonState.secondButton?.onPress ?? emptyPress
+    )
+  }, [nextButtonState.secondButton?.onPress])
 
   if (!nextButtonState.text) return null
 
@@ -17,7 +31,7 @@ function NextButton(): JSX.Element | null {
           fullSize
           adjustTextToFitOneLine
           variant="primary"
-          onPress={nextButtonState.secondButton.onPress}
+          onPress={onSecondButtonPress}
           text={nextButtonState.secondButton.text}
         />
       )}
@@ -25,7 +39,7 @@ function NextButton(): JSX.Element | null {
         fullSize
         adjustTextToFitOneLine
         disabled={nextButtonState.disabled || !nextButtonState.onPress}
-        onPress={nextButtonState.onPress ?? defaultPress}
+        onPress={onPrimaryButtonPress}
         variant="secondary"
         text={nextButtonState.text}
       />

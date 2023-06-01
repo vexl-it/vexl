@@ -37,13 +37,8 @@ import ChangeCurrency from './ChangeCurrency'
 import ContactsImportedTitle from './ContactsImportedTitle'
 import SelectedCurrencyTitle from './SelectedCurrencyTitle'
 
-export const ItemText = styled(Text, {
+const ItemText = styled(Text, {
   fos: 18,
-})
-
-export const SubtitleText = styled(Text, {
-  fos: 12,
-  col: '$greyOnBlack',
 })
 
 function Item({

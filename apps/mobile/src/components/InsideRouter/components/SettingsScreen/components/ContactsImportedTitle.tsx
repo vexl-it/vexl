@@ -1,8 +1,16 @@
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import {useAtomValue} from 'jotai'
-import {YStack} from 'tamagui'
-import {ItemText, SubtitleText} from './ButtonsSection'
+import {styled, Text, YStack} from 'tamagui'
 import {importedContactsCountAtom} from '../../../../../state/contacts'
+
+const ItemText = styled(Text, {
+  fos: 18,
+})
+
+const SubtitleText = styled(Text, {
+  fos: 12,
+  col: '$greyOnBlack',
+})
 
 function ContactsImportedTitle(): JSX.Element {
   const {t} = useTranslation()

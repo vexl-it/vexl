@@ -3,12 +3,13 @@ import UserDataDisplay from '../../../../LoginFlow/components/AnonymizationAnima
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import SvgImage from '../../../../Image'
 import QRIconSVG from '../images/QRIconSVG'
-import {Alert, TouchableWithoutFeedback} from 'react-native'
+import {TouchableOpacity} from 'react-native'
 import reachIconSVG from '../images/reachIconSVG'
 import {Stack, styled, Text, XStack} from 'tamagui'
-import {enableHiddenFeatures} from '../../../../../utils/environment'
-import {useAtomValue} from 'jotai'
+import {useAtomValue, useSetAtom} from 'jotai'
 import {reachNumberAtom} from '../../../../../state/connections/atom/connectionStateAtom'
+import {qrCodeDialogVisibleAtom} from '../atoms'
+import QrCode from './QrCode'
 
 const GrayBackContainer = styled(XStack, {
   ai: 'center',
@@ -23,6 +24,7 @@ function ProfileSection(): JSX.Element {
   const {t} = useTranslation()
   const session = useSessionAssumeLoggedIn()
   const reachNumber = useAtomValue(reachNumberAtom)
+  const setQrCodeDialogVisible = useSetAtom(qrCodeDialogVisibleAtom)
 
   return (
     <Stack ai="center" ml="$4" mr="$4">
@@ -35,26 +37,23 @@ function ProfileSection(): JSX.Element {
             {t('settings.yourReach', {number: reachNumber})}
           </Text>
         </GrayBackContainer>
-        {enableHiddenFeatures ? (
-          <TouchableWithoutFeedback
-            onPress={() => {
-              Alert.alert('todo')
-            }}
-          >
-            <GrayBackContainer>
-              <Stack w={24} h={24}>
-                <SvgImage source={QRIconSVG} />
-              </Stack>
-            </GrayBackContainer>
-          </TouchableWithoutFeedback>
-        ) : (
-          <Stack></Stack>
-        )}
+        <TouchableOpacity
+          onPress={() => {
+            setQrCodeDialogVisible(true)
+          }}
+        >
+          <GrayBackContainer>
+            <Stack w={24} h={24}>
+              <SvgImage source={QRIconSVG} />
+            </Stack>
+          </GrayBackContainer>
+        </TouchableOpacity>
       </XStack>
       <UserDataDisplay userNameAndAvatar={session.realUserData} />
       <Text ta="center" mt="$2" col="$greyOnBlack">
         {session.phoneNumber}
       </Text>
+      <QrCode />
     </Stack>
   )
 }

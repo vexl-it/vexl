@@ -34,8 +34,7 @@ function IdentityRevealMessageItem({
 
   if (
     message.message.messageType === 'REQUEST_REVEAL' &&
-    (identityRevealStatus === 'iAsked' ||
-      identityRevealStatus === 'theyAsked' ||
+    ((identityRevealStatus !== 'denied' && identityRevealStatus !== 'shared') ||
       message.state === 'received')
   ) {
     return (

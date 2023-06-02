@@ -113,7 +113,7 @@ export default function CryptoBenchmarks(): JSX.Element {
         }}
         variant="primary"
         size={'small'}
-        text="set android native implementation"
+        text="set platform native implementation"
       />
     </YStack>
   )

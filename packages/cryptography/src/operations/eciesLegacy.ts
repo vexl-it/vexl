@@ -106,6 +106,13 @@ export async function eciesLegacyDecrypt({
     privateKeyRaw: privateKeyRawBuffer,
   })
 
+  console.log(`
+    let sharedSecret = "${sharedSecret.toString('base64')}"
+    let epk = "${epkPart.part}"
+    let privateKeyRawBuffer = "${privateKeyRawBuffer.toString('base64')}"
+    let curve = "${curve}"
+  `)
+
   const mac = crypto
     .createHmac(
       HMAC_ALGORITHM,

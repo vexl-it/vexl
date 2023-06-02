@@ -1,10 +1,10 @@
-import {NativeModules, Platform} from 'react-native'
+import {NativeModules} from 'react-native'
 
 const LINKING_ERROR = `The package 'react-native-ecdh-platform-native-utils' doesn't seem to be linked. Make sure:
   Platform.select({ios: "- You have run 'pod install'\n", default: ''})
   - You rebuilt the app after installing the package\n'
   - You are not using Expo Go\n`
- 
+
 const EcdhPlatformNativeUtils = NativeModules.EcdhPlatformNativeUtils
   ? NativeModules.EcdhPlatformNativeUtils
   : new Proxy(
@@ -25,10 +25,6 @@ export async function computeSharedSecret({
   privateKeyRaw?: Buffer
   curve: string
 }): Promise<{publicKey: Buffer; secret: Buffer}> {
-  if (Platform.OS === 'ios') {
-    throw new Error('Ecdh compute secret is not supported on iOS yet')
-  }
-
   const result = await EcdhPlatformNativeUtils.computeSharedSecret(
     publicKeyToComputeSecretTo.toString('base64'),
     privateKeyRaw?.toString('base64') ?? null,

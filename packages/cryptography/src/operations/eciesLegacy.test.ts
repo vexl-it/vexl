@@ -5,7 +5,9 @@ import {
   PublicKeyPemBase64,
 } from '../KeyHolder'
 import {PrivateKeyPemBase64} from '../KeyHolder/brands'
-import {Curve} from '../KeyHolder/Curve.brand'
+import {Curve, curves} from '../KeyHolder/Curve.brand'
+import {privatePemToRaw} from '../KeyHolder/keyUtils'
+import crypto from 'node:crypto'
 
 it('Should decrypt message as expected', async () => {
   const privateKey = importPrivateKey({
@@ -63,6 +65,65 @@ it('Should encrypt and decrypt message with secp256k1 key', async () => {
     data: message,
   })
   expect(
-    await eciesLegacyDecrypt({privateKey: key.privateKeyPemBase64, data: cipher})
+    await eciesLegacyDecrypt({
+      privateKey: key.privateKeyPemBase64,
+      data: cipher,
+    })
   ).toEqual(message)
+})
+
+it('aha', () => {
+  const keyPair1 = {
+    privateKey: Buffer.from(
+      'DmuxAqe2H4Ntyuc9Vex/Zbl4+w5/sdPWBBlmJqU+pjs=',
+      'base64'
+    ),
+    publicKey: Buffer.from(
+      'BJFhZuJHZhcN9GY4nqj5c1ZDZzihSfHi8uXoEebCI5IjV7/K3LnimYcu/X/r6tRzhQgOMVUJ67zDrNvb62W/r60=',
+      'base64'
+    ),
+  }
+
+  const keyPair2 = {
+    privateKey: Buffer.from(
+      'iUfaS6XxDCOS65sGqeunCQJR4045pTA3H4cCcYqfLpg',
+      'base64'
+    ),
+    publicKey: Buffer.from(
+      'BJPPEL/HhVR4Yv8qyKT/1A8rcRhmP8aXBKCikXeShNhjWWWKjDuKt9zco7Flt9l14uJW1lt2kCIjb8e64wDW5Sg=',
+      'base64'
+    ),
+  }
+
+  const ecdh1 = crypto.createECDH('secp256k1')
+  ecdh1.setPrivateKey(keyPair1.privateKey)
+  const sharedSecret1 = ecdh1.computeSecret(keyPair2.publicKey)
+
+  const ecdh2 = crypto.createECDH('secp256k1')
+  ecdh2.setPrivateKey(keyPair2.privateKey)
+  const sharedSecret2 = ecdh2.computeSecret(keyPair1.publicKey)
+
+  // sharedSecret1 and sharedSecret2 are the same
+})
+
+function testRun(curve: Curve) {
+  const ecdh1 = crypto.createECDH(curve)
+  ecdh1.generateKeys()
+
+  const ecdh2 = crypto.createECDH(curve)
+  ecdh2.generateKeys()
+  const sharedSecret = ecdh2.computeSecret(ecdh1.getPublicKey())
+
+  return {
+    curve,
+    sharedSecret: sharedSecret.toString('base64'),
+    sharedSecretLength: sharedSecret.length,
+    otherSidePublicKey: ecdh1.getPublicKey('base64'),
+    myPrivateKey: ecdh2.getPrivateKey('base64'),
+  }
+}
+
+it('aha2', () => {
+  console.log(testRun(Curve.parse('secp256k1')))
+  console.log(testRun(curves.secp224r1))
 })

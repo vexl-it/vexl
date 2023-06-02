@@ -30,6 +30,7 @@ function OffersListItem({offerAtom}: Props): JSX.Element {
   return (
     <Stack mt={'$6'}>
       <OfferWithBubbleTip
+        negative={!!chatForOffer}
         button={
           <Button
             size={'medium'}

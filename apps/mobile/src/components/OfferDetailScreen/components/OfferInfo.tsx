@@ -43,7 +43,7 @@ function OfferInfo({offer}: {offer: OneOfferInState}): JSX.Element {
       </ScreenTitle>
       <ScrollView>
         <YStack space={'$4'}>
-          <OfferWithBubbleTip offer={offer} />
+          <OfferWithBubbleTip negative={!!chatForOffer} offer={offer} />
           <CommonFriends
             variant={'dark'}
             contactsHashes={offer.offerInfo.privatePart.commonFriends}

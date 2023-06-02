@@ -525,7 +525,7 @@ export default {
   },
   'progressBar': {
     'ENCRYPTING_PRIVATE_PAYLOADS': '{{percentDone}}% done',
-    'FETCHING_CONTACTS': 'Fetching your contacts from server',
+    'FETCHING_CONTACTS': '',
     'CONSTRUCTING_PRIVATE_PAYLOADS': 'Constructing private payloads',
     'CONSTRUCTING_PUBLIC_PAYLOAD': 'Constructing and encrypting public payload',
     'SENDING_OFFER_TO_NETWORK': 'Uploading offer',

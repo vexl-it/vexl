@@ -517,7 +517,7 @@ export default {
   },
   'progressBar': {
     'ENCRYPTING_PRIVATE_PAYLOADS': '{{percentDone}}% hotovo',
-    'FETCHING_CONTACTS': 'Získání kontaktů ze serveru',
+    'FETCHING_CONTACTS': '',
     'CONSTRUCTING_PRIVATE_PAYLOADS': 'Sestavení soukromého užitečného zatížení',
     'CONSTRUCTING_PUBLIC_PAYLOAD':
       'Sestavení a zašifrování veřejného užitečného zatížení',

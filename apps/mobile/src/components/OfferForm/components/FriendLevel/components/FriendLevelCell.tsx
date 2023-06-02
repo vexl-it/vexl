@@ -2,10 +2,11 @@ import {Stack, Text} from 'tamagui'
 import SvgImage from '../../../../Image'
 import {type SvgString} from '@vexl-next/domain/dist/utility/SvgString.brand'
 import {TouchableOpacity} from 'react-native'
-import {useSessionAssumeLoggedIn} from '../../../../../state/session'
+import {userDataAtom} from '../../../../../state/session'
 import UserAvatar from '../../../../UserAvatar'
 import {type IntendedConnectionLevel} from '@vexl-next/domain/dist/general/offers'
 import checkmarkInCircleSvg from '../../../../images/checkmarkInCircleSvg'
+import {useAtomValue} from 'jotai'
 
 interface FriendLevelCellContentProps {
   image: SvgString
@@ -13,6 +14,7 @@ interface FriendLevelCellContentProps {
   subtitle?: string
   type: IntendedConnectionLevel
 }
+
 interface Props extends FriendLevelCellContentProps {
   selected: boolean
   onPress: (_: IntendedConnectionLevel) => void
@@ -26,7 +28,7 @@ function FriendLevelCell({
   title,
   type,
 }: Props): JSX.Element {
-  const session = useSessionAssumeLoggedIn()
+  const userData = useAtomValue(userDataAtom)
   return (
     <TouchableOpacity
       onPress={() => {
@@ -52,7 +54,7 @@ function FriendLevelCell({
             <UserAvatar
               height={type === 'FIRST' ? 50 : 25}
               width={type === 'FIRST' ? 50 : 25}
-              userImage={session.realUserData.image}
+              userImage={userData.image}
             />
           </Stack>
         </Stack>

@@ -3,9 +3,8 @@ import * as A from 'fp-ts/Array'
 import addToSortedArray from '../../../utils/addToSortedArray'
 import compareMessages from './compareMessages'
 import areMessagesEqual from './areMessagesEqual'
-import * as O from 'optics-ts'
-import {type UserNameAndUriAvatar} from '@vexl-next/domain/dist/general/UserNameAndAvatar.brand'
 import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
+import processIdentityRevealMessageIfAny from './processIdentityRevealMessageIfAny'
 
 // function processDeleteChatMessageIfAny(
 //   deleteChatMessage?: ChatMessageWithState
@@ -26,29 +25,6 @@ import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
 //     }
 //   }
 // }
-
-function processIdentityRevealMessageIfAny(
-  identityRevealMessage?: ChatMessageWithState
-): (chat: ChatWithMessages) => ChatWithMessages {
-  return (chat) => {
-    if (
-      !identityRevealMessage?.message.deanonymizedUser?.name ||
-      !identityRevealMessage?.message.image
-    )
-      return chat
-
-    const realLifeInfo: UserNameAndUriAvatar = {
-      userName: identityRevealMessage.message.deanonymizedUser.name,
-      image: {type: 'imageUri', imageUri: identityRevealMessage.message.image},
-    }
-    return O.set(realLifeInfoOptic)(realLifeInfo)(chat)
-  }
-}
-
-const realLifeInfoOptic = O.optic<ChatWithMessages>()
-  .prop('chat')
-  .prop('otherSide')
-  .prop('realLifeInfo')
 
 export default function addMessagesToChats(
   chats: ChatWithMessages[]
@@ -76,11 +52,7 @@ export default function addMessagesToChats(
         )
 
         const identityRevealMessage = messagesToAddToThisChat
-          .filter((one) =>
-            ['APPROVE_REVEAL', 'REQUEST_REVEAL'].includes(
-              one.message.messageType
-            )
-          )
+          .filter((one) => ['APPROVE_REVEAL'].includes(one.message.messageType))
           ?.at(-1)
 
         // const deleteTypeMessageTime =

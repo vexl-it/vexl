@@ -28,11 +28,7 @@ function ChatListItem({dataAtom}: {dataAtom: Atom<ChatListData>}): JSX.Element {
     otherSideInfoAtom,
     isAvatarGrayAtom,
   } = useMemo(() => {
-    const chatInfoAtom = selectAtom(
-      dataAtom,
-      (data) => data.chat,
-      (a, b) => a.id === b.id
-    )
+    const chatInfoAtom = selectAtom(dataAtom, (data) => data.chat)
     const lastMessageAtom = selectAtom(dataAtom, (data) => data.lastMessage)
     const isUnreadAtom = selectAtom(dataAtom, (data) => data.chat.isUnread)
     const otherSideInfoAtom = selectOtherSideDataAtom(chatInfoAtom)

@@ -14,6 +14,7 @@ import {E164PhoneNumber} from '@vexl-next/domain/dist/general/E164PhoneNumber.br
 import crashlytics from '@react-native-firebase/crashlytics'
 import {getDefaultStore} from 'jotai'
 import {replaceAll} from '../../utils/replaceAll'
+import {type UserNameAndAvatar} from '@vexl-next/domain/dist/general/UserNameAndAvatar.brand'
 
 // duplicated code but we can not remove cyclic dependency otherwise
 // --------------
@@ -184,6 +185,14 @@ export const sessionDataOrDummyAtom = atom((get) => {
   const session = get(sessionAtom)
   if (session.state === 'loggedIn') return session.session
   return dummySession
+})
+
+export const userDataAtom = atom<UserNameAndAvatar>((get) => {
+  const session = get(sessionDataOrDummyAtom)
+  return {
+    userName: session.realUserData.userName,
+    image: session.realUserData.image ?? session.anonymizedUserData.image,
+  }
 })
 
 // --------- hooks ---------

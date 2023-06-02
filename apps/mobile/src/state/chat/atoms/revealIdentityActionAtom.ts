@@ -20,6 +20,8 @@ import sendMessage, {
 } from '@vexl-next/resources-utils/dist/chat/sendMessage'
 import {type BasicError} from '@vexl-next/domain/dist/utility/errors'
 import {type ErrorEncryptingMessage} from '@vexl-next/resources-utils/dist/chat/utils/chatCrypto'
+import processIdentityRevealMessageIfAny from '../utils/processIdentityRevealMessageIfAny'
+import removeFile from '../../../utils/removeFile'
 
 function anonymizePhoneNumber(phoneNumber: E164PhoneNumber): string {
   const first3 = phoneNumber.slice(0, 4)
@@ -84,7 +86,7 @@ export default function revealIdentityActionAtom(
         type !== 'DISAPPROVE_REVEAL'
           ? {
               text: `Identity reveal ${type}`,
-              image: image.imageUri,
+              image: image?.imageUri,
               deanonymizedUser: {
                 name: userName,
                 partialPhoneNumber: anonymizedPhoneNumber,
@@ -112,7 +114,31 @@ export default function revealIdentityActionAtom(
             message,
           })
         ),
-        TE.map((): ChatMessageWithState => {
+
+        TE.map((message): ChatMessageWithState => {
+          if (
+            ['APPROVE_REVEAL', 'DISAPPROVE_REVEAL'].includes(
+              message.messageType
+            )
+          ) {
+            const identityRevealMessage = get(
+              chatWithMessagesAtom
+            ).messages.find(
+              (one) => one.message.messageType === 'REQUEST_REVEAL'
+            )
+            if (message.messageType === 'APPROVE_REVEAL')
+              set(
+                chatWithMessagesAtom,
+                processIdentityRevealMessageIfAny(identityRevealMessage)
+              )
+            else if (
+              message.messageType === 'DISAPPROVE_REVEAL' &&
+              identityRevealMessage?.message.image
+            ) {
+              void removeFile(identityRevealMessage.message.image)()
+            }
+          }
+
           const successMessage: ChatMessageWithState = {
             message: messageWithFileUri,
             state: 'sent',

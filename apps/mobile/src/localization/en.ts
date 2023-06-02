@@ -235,8 +235,12 @@ export default {
       'yes': 'Yes, report',
     },
     'goToChat': 'Go to chat',
-    'requestAlreadySent':
-      "You've requested a trade. We'll notify you once it's accepted.",
+    'requestStatus': {
+      'accepted': 'Your request was accepted.',
+      'denied': 'Your request was declined.',
+      'requested':
+        "You've requested a trade. We'll notify you once it's accepted.",
+    },
     'listEmpty': 'No offers yet',
     'emptyAction': 'Add new offer',
     'createOfferAndReachVexlers':

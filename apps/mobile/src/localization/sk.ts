@@ -520,7 +520,7 @@ export default {
   },
   'progressBar': {
     'ENCRYPTING_PRIVATE_PAYLOADS': '{{percentDone}}% hotovo',
-    'FETCHING_CONTACTS': 'Získanie vašich kontaktov zo servera',
+    'FETCHING_CONTACTS': '',
     'CONSTRUCTING_PRIVATE_PAYLOADS': 'Konštruovanie súkromného nákladu',
     'CONSTRUCTING_PUBLIC_PAYLOAD':
       'Konštruovanie a šifrovanie verejného užitočného zaťaženia',

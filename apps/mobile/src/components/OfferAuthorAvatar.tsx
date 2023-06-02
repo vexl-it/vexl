@@ -7,8 +7,9 @@ import {useChatForOffer} from '../state/chat/hooks/useChatForOffer'
 import {type OneOfferInState} from '../state/marketplace/domain'
 import UserAvatar from './UserAvatar'
 import {DateTime} from 'luxon'
-import {useSessionAssumeLoggedIn} from '../state/session'
+import {userDataAtom} from '../state/session'
 import {useTranslation} from '../utils/localization/I18nProvider'
+import {useAtomValue} from 'jotai'
 
 function OfferAuthorAvatar({
   offer: {offerInfo, ownershipInfo},
@@ -20,18 +21,14 @@ function OfferAuthorAvatar({
   const chatForOffer = useChatForOffer({
     offerPublicKey: offerInfo.publicPart.offerPublicKey,
   })
-  const session = useSessionAssumeLoggedIn()
+  const userData = useAtomValue(userDataAtom)
   const {t} = useTranslation()
 
   return (
     <>
       {ownershipInfo ? (
         <>
-          <UserAvatar
-            width={48}
-            height={48}
-            userImage={session.realUserData.image}
-          />
+          <UserAvatar width={48} height={48} userImage={userData.image} />
           <Stack f={1} ml={'$2'}>
             <Text fos={16} ff={'$body600'} col={'$white'}>
               {t('myOffers.myOffer')}

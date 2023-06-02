@@ -10,8 +10,6 @@ export default function selectOtherSideDataAtom(
   chatAtom: Atom<Chat>
 ): Atom<UserNameAndAvatar> {
   return selectAtom(chatAtom, (chat) => {
-    if (chat.otherSide.realLifeInfo) return chat.otherSide.realLifeInfo
-
     const seed =
       chat.origin.type === 'theirOffer' ? chat.origin.offerId : chat.id
 
@@ -19,8 +17,11 @@ export default function selectOtherSideDataAtom(
       avatarsSvg[randomNumberFromSeed(0, avatarsSvg.length - 1, seed)]
 
     return {
-      userName: randomName(seed),
-      image: {type: 'svgXml', svgXml: image},
+      userName: chat.otherSide.realLifeInfo?.userName ?? randomName(seed),
+      image: chat.otherSide.realLifeInfo?.image ?? {
+        type: 'svgXml',
+        svgXml: image,
+      },
     } as UserNameAndAvatar
   })
 }

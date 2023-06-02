@@ -5,10 +5,12 @@ import {UriString} from '../utility/UriString.brand'
 
 export const UserNameAndUriAvatar = z.object({
   userName: UserName,
-  image: z.object({
-    type: z.literal('imageUri'),
-    imageUri: UriString,
-  }),
+  image: z
+    .object({
+      type: z.literal('imageUri'),
+      imageUri: UriString,
+    })
+    .optional(),
 })
 export type UserNameAndUriAvatar = z.TypeOf<typeof UserNameAndUriAvatar>
 

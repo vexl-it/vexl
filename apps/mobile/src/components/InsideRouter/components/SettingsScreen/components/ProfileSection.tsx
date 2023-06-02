@@ -49,7 +49,12 @@ function ProfileSection(): JSX.Element {
           </GrayBackContainer>
         </TouchableOpacity>
       </XStack>
-      <UserDataDisplay userNameAndAvatar={session.realUserData} />
+      <UserDataDisplay
+        userNameAndAvatar={{
+          userName: session.realUserData.userName,
+          image: session.realUserData.image ?? session.anonymizedUserData.image,
+        }}
+      />
       <Text ta="center" mt="$2" col="$greyOnBlack">
         {session.phoneNumber}
       </Text>

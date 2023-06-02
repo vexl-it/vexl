@@ -65,7 +65,10 @@ function OfferAuthorAvatar({
                 offerType: offerInfo.publicPart.offerType,
                 offerDirection: ownershipInfo ? 'myOffer' : 'theirOffer',
               }}
-              userName={randomName(offerInfo.offerId)}
+              userName={
+                chatForOffer?.otherSide?.realLifeInfo?.userName ??
+                randomName(offerInfo.offerId)
+              }
             />
             <ContactTypeAndCommonNumber
               friendLevel={offerInfo.privatePart.friendLevel ?? []}

@@ -38,6 +38,8 @@ export const offersToSeeInMarketplaceAtom = atom((get) => {
   const importedContactsHashes = get(importedContactsHashesAtom)
   return get(offersAtom).filter(
     (oneOffer) =>
+      // only active offers
+      oneOffer.offerInfo.publicPart.active &&
       // Not mine offers
       !oneOffer.ownershipInfo &&
       // Not reported offers

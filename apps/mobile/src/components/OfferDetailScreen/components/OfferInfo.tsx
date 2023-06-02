@@ -10,13 +10,15 @@ import Button from '../../Button'
 import IconButton from '../../IconButton'
 import flagSvg from '../images/flagSvg'
 import {useReportOfferHandleUI, useSubmitRequestHandleUI} from '../api'
-import React, {useState} from 'react'
+import React, {useMemo, useState} from 'react'
 import {useChatForOffer} from '../../../state/chat/hooks/useChatForOffer'
 import {useNavigation} from '@react-navigation/native'
 import InfoSquare from '../../InfoSquare'
 import closeSvg from '../../images/closeSvg'
 import identityIconSvg from '../../images/identityIconSvg'
 import CommonFriends from '../../CommonFriends'
+import {atom, useAtomValue} from 'jotai'
+import createChatStatusAtom from '../../../state/chat/atoms/createChatStatusAtom'
 
 function OfferInfo({offer}: {offer: OneOfferInState}): JSX.Element {
   const goBack = useSafeGoBack()
@@ -28,6 +30,15 @@ function OfferInfo({offer}: {offer: OneOfferInState}): JSX.Element {
   const chatForOffer = useChatForOffer({
     offerPublicKey: offer.offerInfo.publicPart.offerPublicKey,
   })
+  const requestStatus = useAtomValue(
+    useMemo(() => {
+      if (!chatForOffer) return atom(() => null)
+      return createChatStatusAtom(
+        chatForOffer.id,
+        chatForOffer.inbox.privateKey.publicKeyPemBase64
+      )
+    }, [chatForOffer])
+  )
 
   return (
     <Stack f={1} mx={'$2'} my={'$4'}>
@@ -59,7 +70,9 @@ function OfferInfo({offer}: {offer: OneOfferInState}): JSX.Element {
               placeholderTextColor={getTokens().color.greyOnBlack.val}
             />
           ) : (
-            <InfoSquare>{t('offer.requestAlreadySent')}</InfoSquare>
+            <InfoSquare>
+              {t(`offer.requestStatus.${requestStatus ?? 'requested'}`)}
+            </InfoSquare>
           )}
         </YStack>
       </ScrollView>

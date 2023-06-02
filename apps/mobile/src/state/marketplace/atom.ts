@@ -17,9 +17,10 @@ import areIncluded from './utils/areIncluded'
 import {type ChatOrigin} from '@vexl-next/domain/dist/general/messaging'
 import {type FocusAtomType} from '../../utils/atomUtils/FocusAtomType'
 import {type OfferAdminId} from '@vexl-next/rest-api/dist/services/offer/contracts'
-import {selectAtom, splitAtom} from 'jotai/utils'
+import {splitAtom} from 'jotai/utils'
 import {importedContactsHashesAtom} from '../contacts'
 import sortOffers from './utils/sortOffers'
+import idsOfRequestedOffersAtom from '../chat/atoms/idsOfRequestedOffersAtom'
 
 export const offersStateAtom = atomWithParsedMmkvStorage(
   'offers',
@@ -33,7 +34,7 @@ export const offersAtom = focusAtom(offersStateAtom, (optic) =>
   optic.prop('offers')
 )
 
-export const offersToSeeInMarketplace = atom((get) => {
+export const offersToSeeInMarketplaceAtom = atom((get) => {
   const importedContactsHashes = get(importedContactsHashesAtom)
   return get(offersAtom).filter(
     (oneOffer) =>
@@ -63,8 +64,9 @@ export const myOffersAtom = focusAtom(offersAtom, (optic) =>
 export const myOffersSortedAtom = atom((get) => {
   const sortingOptions = get(selectedMyOffersSortingOptionAtom)
   const myOffers = get(myOffersAtom)
+  const idsOfRequestedOffers = get(idsOfRequestedOffersAtom)
 
-  return sortOffers(myOffers, sortingOptions)
+  return sortOffers(myOffers, sortingOptions, idsOfRequestedOffers)
 })
 
 export const myOffersSortedAtomsAtom = splitAtom(myOffersSortedAtom)
@@ -78,8 +80,11 @@ export const selectedMyOffersSortingOptionAtom = atom<Sort>('NEWEST_OFFER')
 export function offersAtomWithFilter(
   filter: OffersFilter
 ): Atom<OneOfferInState[]> {
-  return selectAtom(offersToSeeInMarketplace, (offers) => {
-    const filtered = offers.filter(
+  return atom((get) => {
+    const offersToSeeInMarketplace = get(offersToSeeInMarketplaceAtom)
+    const idsOfRequestedOffers = get(idsOfRequestedOffersAtom)
+
+    const filtered = offersToSeeInMarketplace.filter(
       (offer) =>
         (!filter.currency ||
           filter.currency.includes(offer.offerInfo.publicPart.currency)) &&
@@ -108,7 +113,11 @@ export function offersAtomWithFilter(
         (!filter.amountTopLimit ||
           offer.offerInfo.publicPart.amountTopLimit <= filter.amountTopLimit)
     )
-    return sortOffers(filtered, filter.sort ?? 'LOWEST_FEE_FIRST')
+    return sortOffers(
+      filtered,
+      filter.sort ?? 'LOWEST_FEE_FIRST',
+      idsOfRequestedOffers
+    )
   })
 }
 

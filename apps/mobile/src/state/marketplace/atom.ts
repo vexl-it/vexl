@@ -21,6 +21,7 @@ import {splitAtom} from 'jotai/utils'
 import {importedContactsHashesAtom} from '../contacts'
 import sortOffers from './utils/sortOffers'
 import idsOfRequestedOffersAtom from '../chat/atoms/idsOfRequestedOffersAtom'
+import isSomeIn30KmRange from './utils/isIn30KmRadius'
 
 export const offersStateAtom = atomWithParsedMmkvStorage(
   'offers',
@@ -91,7 +92,9 @@ export function offersAtomWithFilter(
         (!filter.currency ||
           filter.currency.includes(offer.offerInfo.publicPart.currency)) &&
         (!filter.location ||
-          areIncluded(filter.location, offer.offerInfo.publicPart.location)) &&
+          filter.location.every((one) =>
+            isSomeIn30KmRange(one, offer.offerInfo.publicPart.location)
+          )) &&
         (!filter.paymentMethod ||
           areIncluded(
             filter.paymentMethod,

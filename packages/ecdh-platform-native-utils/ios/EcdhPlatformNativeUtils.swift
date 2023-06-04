@@ -1,19 +1,24 @@
-
+import SwiftECC
+import BigInt
 
 let domain256k1 = Domain.instance(curve: .EC256k1)
 let domain224r1 = Domain.instance(curve: .EC224r1)
 
-func base64ToPrivateKey(x: String, domain: Domain) throws -> ECPrivateKey? {
+enum CryptoError: Error {
+    case cryptoError(String)
+}
+
+func base64ToPrivateKey(x: String, domain: Domain) throws -> ECPrivateKey {
     if let data = Data(base64Encoded: x) {
         let bytes = [UInt8](data)
         let bInt = BInt(magnitude: bytes)
         return try ECPrivateKey(domain: domain, s: bInt)
     }
 
-    return nil
+    throw CryptoError.cryptoError("Unable to decode data while converting base64ToPrivateKey")
 }
 
-func base64ToPublicKey(x: String, domain: Domain) throws -> ECPublicKey? {
+func base64ToPublicKey(x: String, domain: Domain) throws -> ECPublicKey {
     if let data = Data(base64Encoded: x) {
         let bytes = [UInt8](data)
         let withoutPrefix = bytes.dropFirst()
@@ -26,7 +31,8 @@ func base64ToPublicKey(x: String, domain: Domain) throws -> ECPublicKey? {
 
         return try ECPublicKey(domain: domain, w: Point(BInt(magnitude: x), BInt(magnitude: y)))
     }
-    return nil
+
+    throw CryptoError.cryptoError("Unable to decode data while converting base64ToPublicKey")
 }
 
 func publicKeyToBase64(key: ECPublicKey) -> String {
@@ -49,7 +55,10 @@ class EcdhPlatformNativeUtils: NSObject {
     @objc(computeSharedSecret:withPrivateKeyRaw:withCurve:withResolver:withRejecter:)
     func computeSharedSecret(publicKeyToComputeSecretTo: String, privateKeyRaw: String?, curve: String, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) -> Void {
 
+
         do {
+            let startT = DispatchTime.now()
+
             let domain: Domain
             let sharedSecretLength: Int
 
@@ -61,7 +70,7 @@ class EcdhPlatformNativeUtils: NSObject {
                 domain = domain256k1
                 sharedSecretLength = 32
             } else {
-                reject("Error", "Unknown curve: " + curve)
+                reject("Error", "Unknown curve: " + curve, nil)
                 return
             }
 
@@ -75,16 +84,32 @@ class EcdhPlatformNativeUtils: NSObject {
                 keyPair = domain.makeKeyPair()
             }
 
+            let privateKeyT = DispatchTime.now()
+
             let publicKey = try base64ToPublicKey(x: publicKeyToComputeSecretTo, domain: domain)
+
+            let publicKeyT = DispatchTime.now()
+
             let sharedSecret = try keyPair.1.keyAgreement(pubKey: publicKey, length: sharedSecretLength)
+
+            let justSecretT = DispatchTime.now()
             let sharedSecretBase64 = Data(sharedSecret).base64EncodedString()
+            let sharedSecretBase64T = DispatchTime.now()
+
 
             let publicKeyFromKeyPair = publicKeyToBase64(key: keyPair.0)
 
-            let result: [String: String] = ["sharedSecret": sharedSecretBase64, "publicKey": publicKey]
+            let result: [String: String] = [
+            "sharedSecret": sharedSecretBase64,
+            "publicKey": publicKeyFromKeyPair,
+            "privateKeyT": String(Double(privateKeyT.uptimeNanoseconds - startT.uptimeNanoseconds) / 1_000_000_000),
+            "publicKeyT": String(Double(publicKeyT.uptimeNanoseconds - privateKeyT.uptimeNanoseconds) / 1_000_000_000),
+            "justSecretT": String(Double(justSecretT.uptimeNanoseconds - publicKeyT.uptimeNanoseconds) / 1_000_000_000),
+            "sharedSecretBase64T": String(Double(sharedSecretBase64T.uptimeNanoseconds - justSecretT.uptimeNanoseconds) / 1_000_000_000),
+            ]
             resolve(result)
-        } catch {
-            reject("Error", "Crypto error")
+        } catch let error {
+            reject("Error", "Crypto error", error)
         }
     }
 

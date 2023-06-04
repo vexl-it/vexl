@@ -11,7 +11,7 @@ Pod::Spec.new do |s|
   s.license      = "GNU3"
   s.authors      = ""
 
-  s.platforms    = { :ios => "11.0" }
+  s.platforms    = { :ios => "13.0" }
   s.source       = { :git => "https://github.com/kaladivo/react-native-ecdh-platform-native-utils.git", :tag => "#{s.version}" }
 
   s.source_files = "ios/**/*.{h,m,mm,swift}"
@@ -32,4 +32,7 @@ Pod::Spec.new do |s|
     s.dependency "RCTTypeSafety"
     s.dependency "ReactCommon/turbomodule/core"
   end
+    s.dependency "BigInt"
+    s.dependency "ASN1"
+    s.dependency "SwiftECC"
 end

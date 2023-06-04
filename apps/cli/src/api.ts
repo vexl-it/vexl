@@ -10,7 +10,8 @@ import {
   safeParse,
 } from '@vexl-next/resources-utils/dist/utils/parsing'
 
-let ENV_PRESET = ENV_PRESETS.stageEnv
+let ENV_PRESET = ENV_PRESETS.prodEnv
+const clientVersion = 30
 
 if (process.env.API_ENV_PRESET_KEY && process.env.API_ENV) {
   console.error(
@@ -54,7 +55,7 @@ export function getPublicApi(): {
   return {
     user: restApi.user.publicApi({
       url: ENV_PRESET.userMs,
-      clientVersion: 0,
+      clientVersion,
       platform: PlatformName.parse('CLI'),
       loggingFunction: logDebug,
     }),
@@ -83,7 +84,7 @@ export function getPrivateApi(credentials: UserCredentials) {
   return {
     chat: restApi.chat.privateApi({
       platform: PlatformName.parse('CLI'),
-      clientVersion: 0,
+      clientVersion,
       url: ENV_PRESET.chatMs,
       getUserSessionCredentials,
       loggingFunction: logDebug,
@@ -91,7 +92,7 @@ export function getPrivateApi(credentials: UserCredentials) {
 
     contact: restApi.contact.privateApi({
       platform: PlatformName.parse('CLI'),
-      clientVersion: 0,
+      clientVersion,
       url: ENV_PRESET.contactMs,
       getUserSessionCredentials,
       loggingFunction: logDebug,
@@ -99,7 +100,7 @@ export function getPrivateApi(credentials: UserCredentials) {
 
     offer: restApi.offer.privateApi({
       platform: PlatformName.parse('CLI'),
-      clientVersion: 0,
+      clientVersion,
       url: ENV_PRESET.offerMs,
       getUserSessionCredentials,
       loggingFunction: logDebug,

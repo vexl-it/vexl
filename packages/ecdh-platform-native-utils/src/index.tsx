@@ -25,10 +25,16 @@ export async function computeSharedSecret({
   privateKeyRaw?: Buffer
   curve: string
 }): Promise<{publicKey: Buffer; secret: Buffer}> {
+  const now = Date.now()
   const result = await EcdhPlatformNativeUtils.computeSharedSecret(
     publicKeyToComputeSecretTo.toString('base64'),
     privateKeyRaw?.toString('base64') ?? null,
     curve
+  )
+  console.log(
+    'took',
+    String((Date.now() - now) / 1000),
+    JSON.stringify(result, null, 2)
   )
 
   return {

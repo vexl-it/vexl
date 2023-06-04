@@ -16,7 +16,7 @@ const dummyPublicPart = `"publicPart": {"offerPublicKey": "LS0tLS1CRUdJTiBQVUJMS
 const dummySymetricKey = 'MEEe3tRp7bx+hRA7osU/x+hhMVy6PiAfBR3Gu2r+RG0='
 const dummyPhoneNumber = E164PhoneNumber.parse('+420733333333')
 
-export const NUMBER_OF_GENERATIONS = 100
+export const NUMBER_OF_GENERATIONS = 10
 
 const numberFormatIntl = new Intl.NumberFormat('cs', {})
 
@@ -100,71 +100,76 @@ export async function* runTests() {
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export async function* runBenchmark() {
-  const keypair1 = generatePrivateKey()
+  try {
+    const keypair1 = generatePrivateKey()
 
-  const encryptedPrivateParts = []
-  // ECIES
+    const encryptedPrivateParts = []
+    // ECIES
 
-  const startedAt = Date.now()
-  let nowMs = Date.now()
-  yield `ECIES encrypting dummy private parts ${NUMBER_OF_GENERATIONS} times`
-  for (let i = 0; i < NUMBER_OF_GENERATIONS; i++) {
-    const one = await eciesLegacy.eciesLegacyEncrypt({
-      publicKey: keypair1.publicKeyPemBase64,
-      data: dummyPrivatePart,
-    })
-    encryptedPrivateParts.push(one)
+    const startedAt = Date.now()
+    let nowMs = Date.now()
+    yield `ECIES encrypting dummy private parts ${NUMBER_OF_GENERATIONS} times`
+    for (let i = 0; i < NUMBER_OF_GENERATIONS; i++) {
+      const one = await eciesLegacy.eciesLegacyEncrypt({
+        publicKey: keypair1.publicKeyPemBase64,
+        data: dummyPrivatePart,
+      })
+      encryptedPrivateParts.push(one)
+    }
+    yield `Took ${msToString(Date.now() - nowMs)}`
+
+    nowMs = Date.now()
+    yield `ECIES decrypting dummy private parts ${NUMBER_OF_GENERATIONS} times`
+    for (let i = 0; i < encryptedPrivateParts.length; i++) {
+      await eciesLegacy.eciesLegacyDecrypt({
+        privateKey: keypair1.privateKeyPemBase64,
+        data: encryptedPrivateParts[i],
+      })
+    }
+    yield `Took ${msToString(Date.now() - nowMs)}`
+
+    nowMs = Date.now()
+    const encryptedPublicParts = []
+    yield `AES encrypting dummy public parts ${NUMBER_OF_GENERATIONS} times`
+    for (let i = 0; i < NUMBER_OF_GENERATIONS; i++) {
+      const data = aes.aesGCMIgnoreTagEncrypt({
+        data: dummyPublicPart,
+        password: dummySymetricKey,
+      })
+      encryptedPublicParts.push(data)
+    }
+    yield `Took ${msToString(Date.now() - nowMs)}`
+
+    nowMs = Date.now()
+    yield `AES decrypting dummy public parts ${NUMBER_OF_GENERATIONS} times`
+    for (let i = 0; i < encryptedPublicParts.length; i++) {
+      aes.aesGCMIgnoreTagDecrypt({
+        data: encryptedPublicParts[i],
+        password: dummySymetricKey,
+      })
+    }
+    yield `Took ${msToString(Date.now() - nowMs)}`
+
+    nowMs = Date.now()
+    yield `ECDSA signing dummy phone number ${NUMBER_OF_GENERATIONS} times`
+    for (let i = 0; i < NUMBER_OF_GENERATIONS; i++) {
+      ecdsa.ecdsaSign({
+        privateKey: keypair1,
+        challenge: dummySymetricKey,
+      })
+    }
+    yield `Took ${msToString(Date.now() - nowMs)}`
+
+    yield `HMAC signing dummy phone number ${NUMBER_OF_GENERATIONS} times`
+    nowMs = Date.now()
+    for (let i = 0; i < NUMBER_OF_GENERATIONS; i++) {
+      hashPhoneNumber(dummyPhoneNumber)
+    }
+    yield `Took ${msToString(Date.now() - nowMs)}`
+
+    yield `Done in ${msToString(Date.now() - startedAt)}!`
+  } catch (e) {
+    console.error(e)
+    yield `🚨  Benchmark failed`
   }
-  yield `Took ${msToString(Date.now() - nowMs)}`
-
-  nowMs = Date.now()
-  yield `ECIES decrypting dummy private parts ${NUMBER_OF_GENERATIONS} times`
-  for (let i = 0; i < encryptedPrivateParts.length; i++) {
-    await eciesLegacy.eciesLegacyDecrypt({
-      privateKey: keypair1.privateKeyPemBase64,
-      data: encryptedPrivateParts[i],
-    })
-  }
-  yield `Took ${msToString(Date.now() - nowMs)}`
-
-  nowMs = Date.now()
-  const encryptedPublicParts = []
-  yield `AES encrypting dummy public parts ${NUMBER_OF_GENERATIONS} times`
-  for (let i = 0; i < NUMBER_OF_GENERATIONS; i++) {
-    const data = aes.aesGCMIgnoreTagEncrypt({
-      data: dummyPublicPart,
-      password: dummySymetricKey,
-    })
-    encryptedPublicParts.push(data)
-  }
-  yield `Took ${msToString(Date.now() - nowMs)}`
-
-  nowMs = Date.now()
-  yield `AES decrypting dummy public parts ${NUMBER_OF_GENERATIONS} times`
-  for (let i = 0; i < encryptedPublicParts.length; i++) {
-    aes.aesGCMIgnoreTagDecrypt({
-      data: encryptedPublicParts[i],
-      password: dummySymetricKey,
-    })
-  }
-  yield `Took ${msToString(Date.now() - nowMs)}`
-
-  nowMs = Date.now()
-  yield `ECDSA signing dummy phone number ${NUMBER_OF_GENERATIONS} times`
-  for (let i = 0; i < NUMBER_OF_GENERATIONS; i++) {
-    ecdsa.ecdsaSign({
-      privateKey: keypair1,
-      challenge: dummySymetricKey,
-    })
-  }
-  yield `Took ${msToString(Date.now() - nowMs)}`
-
-  yield `HMAC signing dummy phone number ${NUMBER_OF_GENERATIONS} times`
-  nowMs = Date.now()
-  for (let i = 0; i < NUMBER_OF_GENERATIONS; i++) {
-    hashPhoneNumber(dummyPhoneNumber)
-  }
-  yield `Took ${msToString(Date.now() - nowMs)}`
-
-  yield `Done in ${msToString(Date.now() - startedAt)}!`
 }

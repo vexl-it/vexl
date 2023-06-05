@@ -7,6 +7,8 @@ import OfferWithBubbleTip from '../OfferWithBubbleTip'
 import {useMemo} from 'react'
 import {type Atom, useAtomValue} from 'jotai'
 import {useChatForOffer} from '../../state/chat/hooks/useChatForOffer'
+import {atom} from 'jotai'
+import createChatStatusAtom from '../../state/chat/atoms/createChatStatusAtom'
 
 interface Props {
   readonly offerAtom: Atom<OneOfferInState>
@@ -27,6 +29,16 @@ function OffersListItem({offerAtom}: Props): JSX.Element {
     offerPublicKey: offer.offerInfo.publicPart.offerPublicKey,
   })
 
+  const requestStatus = useAtomValue(
+    useMemo(() => {
+      if (!chatForOffer) return atom(() => null)
+      return createChatStatusAtom(
+        chatForOffer.id,
+        chatForOffer.inbox.privateKey.publicKeyPemBase64
+      )
+    }, [chatForOffer])
+  )
+
   return (
     <Stack mt={'$6'}>
       <OfferWithBubbleTip
@@ -37,12 +49,20 @@ function OffersListItem({offerAtom}: Props): JSX.Element {
             text={
               isMine
                 ? t('myOffers.editOffer')
-                : chatForOffer
+                : requestStatus === 'denied'
+                ? t('common.declined')
+                : requestStatus === 'requested'
                 ? t('common.requested')
                 : t('common.request')
             }
             variant={
-              isMine ? 'primary' : chatForOffer ? 'primary' : 'secondary'
+              isMine
+                ? 'primary'
+                : requestStatus === 'requested'
+                ? 'primary'
+                : requestStatus === 'denied'
+                ? 'redDark'
+                : 'secondary'
             }
             onPress={() => {
               navigation.navigate(isMine ? 'EditOffer' : 'OfferDetail', {

@@ -3,10 +3,11 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 46;
+	objectVersion = 52;
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3382F3752A2DC62D0002C8A4 /* SwiftECC in Frameworks */ = {isa = PBXBuildFile; productRef = 3382F3742A2DC62D0002C8A4 /* SwiftECC */; };
 		F4FF95D7245B92E800C19C63 /* EcdhPlatformNativeUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4FF95D6245B92E800C19C63 /* EcdhPlatformNativeUtils.swift */; };
 /* End PBXBuildFile section */
 
@@ -24,9 +25,7 @@
 
 /* Begin PBXFileReference section */
 		134814201AA4EA6300B7C361 /* libEcdhPlatformNativeUtils.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libEcdhPlatformNativeUtils.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		335687622A2A123A006AADB6 /* ASN1 */ = {isa = PBXFileReference; lastKnownFileType = folder; path = ASN1; sourceTree = "<group>"; };
-		335687642A2A123A006AADB6 /* BigInt */ = {isa = PBXFileReference; lastKnownFileType = folder; path = BigInt; sourceTree = "<group>"; };
-		335687652A2A124B006AADB6 /* SwiftECC */ = {isa = PBXFileReference; lastKnownFileType = folder; path = SwiftECC; sourceTree = "<group>"; };
+		3382F36F2A2DBE4F0002C8A4 /* MyPlayground.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = MyPlayground.playground; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		B3E7B5891CC2AC0600A0062D /* EcdhPlatformNativeUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EcdhPlatformNativeUtils.m; sourceTree = "<group>"; };
 		F4FF95D5245B92E700C19C63 /* EcdhPlatformNativeUtils-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "EcdhPlatformNativeUtils-Bridging-Header.h"; sourceTree = "<group>"; };
 		F4FF95D6245B92E800C19C63 /* EcdhPlatformNativeUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EcdhPlatformNativeUtils.swift; sourceTree = "<group>"; };
@@ -37,6 +36,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3382F3752A2DC62D0002C8A4 /* SwiftECC in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -61,9 +61,7 @@
 		58B511D21A9E6C8500147676 = {
 			isa = PBXGroup;
 			children = (
-				335687652A2A124B006AADB6 /* SwiftECC */,
-				335687642A2A123A006AADB6 /* BigInt */,
-				335687622A2A123A006AADB6 /* ASN1 */,
+				3382F36F2A2DBE4F0002C8A4 /* MyPlayground.playground */,
 				33898F4E2A29D16B0010F5B5 /* Packages */,
 				F4FF95D6245B92E800C19C63 /* EcdhPlatformNativeUtils.swift */,
 				B3E7B5891CC2AC0600A0062D /* EcdhPlatformNativeUtils.m */,
@@ -89,6 +87,7 @@
 			);
 			name = EcdhPlatformNativeUtils;
 			packageProductDependencies = (
+				3382F3742A2DC62D0002C8A4 /* SwiftECC */,
 			);
 			productName = RCTDataManager;
 			productReference = 134814201AA4EA6300B7C361 /* libEcdhPlatformNativeUtils.a */;
@@ -118,6 +117,7 @@
 			);
 			mainGroup = 58B511D21A9E6C8500147676;
 			packageReferences = (
+				3382F3732A2DC62D0002C8A4 /* XCRemoteSwiftPackageReference "SwiftECC" */,
 			);
 			productRefGroup = 58B511D21A9E6C8500147676;
 			projectDirPath = "";
@@ -294,6 +294,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		3382F3732A2DC62D0002C8A4 /* XCRemoteSwiftPackageReference "SwiftECC" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/kaladivo/SwiftECC";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		3382F3742A2DC62D0002C8A4 /* SwiftECC */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3382F3732A2DC62D0002C8A4 /* XCRemoteSwiftPackageReference "SwiftECC" */;
+			productName = SwiftECC;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 58B511D31A9E6C8500147676 /* Project object */;
 }

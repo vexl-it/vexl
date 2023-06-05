@@ -23,7 +23,9 @@ export async function processBackgroundMessage(
     console.info(
       '📳 Received notification about new user. Checking and updating offers accordingly.'
     )
-    await getDefaultStore().set(updateAllOffersConnectionsActionAtom)()
+    await getDefaultStore().set(updateAllOffersConnectionsActionAtom, {
+      isInBackground: true,
+    })()
   }
 }
 

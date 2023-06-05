@@ -96,7 +96,7 @@ export function useHandleReceivedNotifications(): void {
         console.info(
           '📳 Received notification about new user. Checking and updating offers accordingly.'
         )
-        await updateOffersConnections()()
+        await updateOffersConnections({isInBackground: false})()
         return
       }
 

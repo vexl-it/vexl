@@ -167,7 +167,7 @@ function DebugScreen(): JSX.Element {
               size={'small'}
               text={'Update all offers connections'}
               onPress={() => {
-                void updateConnections()()
+                void updateConnections({isInBackground: false})()
               }}
             />
             <Button

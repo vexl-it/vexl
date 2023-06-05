@@ -17,6 +17,13 @@ import flattenTaskOfEithers from '../utils/flattenTaskOfEithers'
 import {type OfferPrivateApi} from '@vexl-next/rest-api/dist/services/offer'
 import {type ExtractLeftTE} from '../utils/ExtractLeft'
 import {deduplicate, subtractArrays} from '../utils/array'
+import {type UnixMilliseconds} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
+import * as E from 'fp-ts/Either'
+
+export interface TimeLimitReachedError {
+  readonly _tag: 'TimeLimitReachedError'
+  readonly toPublicKey: PublicKeyPemBase64
+}
 
 export default function updatePrivateParts({
   currentConnections,
@@ -24,6 +31,7 @@ export default function updatePrivateParts({
   commonFriends,
   adminId,
   symmetricKey,
+  stopProcessingAfter,
   api,
 }: {
   currentConnections: {
@@ -37,6 +45,7 @@ export default function updatePrivateParts({
   commonFriends: FetchCommonConnectionsResponse
   adminId: OfferAdminId
   symmetricKey: SymmetricKey
+  stopProcessingAfter?: UnixMilliseconds
   api: OfferPrivateApi
 }): TE.TaskEither<
   | ErrorConstructingPrivatePayloads
@@ -44,6 +53,7 @@ export default function updatePrivateParts({
   | ExtractLeftTE<ReturnType<OfferPrivateApi['deletePrivatePart']>>,
   {
     encryptionErrors: PrivatePartEncryptionError[]
+    timeLimitReachedErrors: TimeLimitReachedError[]
     newConnections: {
       firstLevel: PublicKeyPemBase64[]
       secondLevel?: PublicKeyPemBase64[]
@@ -94,11 +104,31 @@ export default function updatePrivateParts({
     TE.fromEither,
     TE.chainTaskK(
       flow(
-        A.map(encryptPrivatePart),
-        A.sequence(T.ApplicativePar),
+        A.map(
+          flow(
+            TE.right,
+            TE.chainFirstEitherK((one) => {
+              if (!stopProcessingAfter || Date.now() < stopProcessingAfter)
+                return E.right('ok')
+              return E.left({
+                _tag: 'TimeLimitReachedError',
+                toPublicKey: one.toPublicKey,
+              } as const)
+            }),
+            TE.chainW(encryptPrivatePart)
+          )
+        ),
+        A.sequence(T.ApplicativeSeq),
         flattenTaskOfEithers,
         T.map(({lefts, rights}) => ({
-          encryptionErrors: lefts,
+          timeLimitReachedErrors: lefts.filter(
+            (one): one is TimeLimitReachedError =>
+              one._tag === 'TimeLimitReachedError'
+          ),
+          encryptionErrors: lefts.filter(
+            (one): one is PrivatePartEncryptionError =>
+              one._tag === 'PrivatePartEncryptionError'
+          ),
           privateParts: rights,
         }))
       )
@@ -119,13 +149,15 @@ export default function updatePrivateParts({
           })
         : (TE.right('ok') as TE.TaskEither<never, any>)
     }),
-    TE.map(({encryptionErrors}) => {
-      const pubKeysThatFailedEncryptTo = encryptionErrors.map(
-        (one) => one.toPublicKey
-      )
+    TE.map(({encryptionErrors, timeLimitReachedErrors}) => {
+      const pubKeysThatFailedEncryptTo = [
+        ...encryptionErrors,
+        ...timeLimitReachedErrors,
+      ].map((one) => one.toPublicKey)
 
       return {
         encryptionErrors,
+        timeLimitReachedErrors,
         newConnections: {
           firstLevel: subtractArrays(
             newFirstLevelConnections,

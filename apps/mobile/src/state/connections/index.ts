@@ -14,7 +14,10 @@ export function useSyncConnections(): void {
     useCallback(
       (state) => {
         if (state !== 'active') return
-        void pipe(syncConnections(), T.chain(updateOffers))()
+        void pipe(
+          syncConnections(),
+          T.chain(() => updateOffers({isInBackground: false}))
+        )()
       },
       [syncConnections, updateOffers]
     )

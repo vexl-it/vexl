@@ -208,7 +208,9 @@ export const contactSelectMolecule = molecule((getMolecule, getScope) => {
         },
         (importedContacts) => {
           set(importedContactsAtom, [...importedContacts])
-          void set(updateAllOffersConnectionsActionAtom)()
+          void set(updateAllOffersConnectionsActionAtom, {
+            isInBackground: false,
+          })()
           return true
         }
       ),

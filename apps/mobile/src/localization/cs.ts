@@ -1,7 +1,8 @@
 import TosEn from './tos/en'
 import PPEn from './privacyPolicy/en'
+import type en from './en'
 
-export default {
+const cs: typeof en = {
   'common': {
     'next': 'Další',
     'skip': 'Přeskočit',
@@ -10,7 +11,7 @@ export default {
     'continue': 'Pokračovat',
     'save': 'Uložit',
     'gotIt': 'Mám to',
-    'search': 'Hledat na',
+    'search': 'Hledat',
     'deselectAll': 'Zrušit výběr všeho',
     'selectAll': 'Vybrat vše',
     'cancel': 'Zrušit',
@@ -34,102 +35,114 @@ export default {
     'errorCreatingInbox': 'Chyba při vytváření uživatelské schránky.',
     'accept': 'Přijmout',
     'decline': 'Odmítnout',
-    'youSure': 'Jste si jisti?',
+    'youSure': 'Určitě?',
     'nope': 'Ne',
-    'yesDelete': 'Ano, vymažte',
+    'yesDelete': 'Ano, vymazat',
     'more': 'Více na',
     'yes': 'Ano',
     'no': 'Ne',
+    'czk': 'CZK',
+    'usd': 'USD',
+    'eur': 'EUR',
     'myOffers': 'Moje nabídky',
+    'errorOpeningLink': {
+      'message': 'Chyba při otvírání linku.',
+      'text': 'Zkopírovat do schránky?',
+      'copy': 'Zkopírovat a zavřít',
+    },
+    'nice': 'Dobře',
+    'success': 'Povedlo se',
+    'requested': 'Požádáno',
+    'now': 'Teď',
+    'declined': 'Zamítnuto',
   },
   'loginFlow': {
-    'anonymityNotice': 'Dokud to nepovolíte, nikdo to neuvidí. Dokonce ani my.',
+    'anonymityNotice': 'Bez tvého svolení jej nikdo neuvidí. Ani my.',
     'intro': {
-      'title1': 'Importujte své kontakty anonymně.',
-      'title2': 'Prohlédněte si jejich nabídky nákupu a prodeje.',
-      'title3':
-        'Vyžádejte si identitu těch, které se vám líbí, a obchodujte s nimi.',
+      'title1': 'Anonymně se spoj se svými kontakty.',
+      'title2': 'Podívej se na jejich nabídky.',
+      'title3': 'Začněte chatovat, odhalte své identity a obchodujte.',
     },
     'start': {
-      'subtitle': 'Vítejte! Jste připraveni začít?',
+      'subtitle': 'Vítej! Chceš začít vexlovat?',
       'touLabel': 'Souhlasím s',
-      'termsOfUse': 'Podmínky používání',
+      'termsOfUse': 'podmínkami',
     },
     'anonymizationNotice': {
-      'title': 'Vaše identita bude anonymizována',
+      'title': 'Tvoje identita bude anonymizována.',
       'text':
-        'Nikdo neuvidí vaše skutečné jméno a profilový obrázek, dokud je neodhalíte pro konkrétní obchod. Dokonce i my. Nejprve nastavíme vaši skutečnou identitu.',
+        'Nikdo neuvidí tvoje skutečné jméno a profilový obrázek, dokud je neodhalíš pro konkrétní obchod. Dokonce i my. Nejprve nastavíme tvoji skutečnou identitu.',
     },
     'name': {
-      'prompt': 'Jak vám říkají vaši přátelé?',
-      'placeholder': 'Celým jménem nebo přezdívkou',
+      'prompt': 'Jak ti říkají kamarádi?',
+      'placeholder': 'Jméno nebo přezdívka',
       'nameValidationError':
         'Jméno by mělo mít alespoň 1 znak a maximálně 50 znaků.',
     },
     'photo': {
-      'title': 'Ahoj {{name}}! Jak vypadáš?',
-      'selectSource': 'Vyberte zdroj svého obrázku',
+      'title': 'Ahoj {{name}}! Vyber si svoji profilovou fotku.',
+      'selectSource': 'Vyber si, odkud chceš obrázek nahrát',
       'camera': 'Fotoaparát',
       'gallery': 'Galerie',
       'permissionsNotGranted': 'Oprávnění nebyla udělena.',
       'nothingSelected': 'Nebyl vybrán žádný obrázek',
     },
     'anonymization': {
-      'beforeTitle': 'Toto je vaše identita',
+      'beforeTitle': 'Tohle je tvůj soukromej profil',
       'afterTitle': 'Identita anonymizována!',
       'action': 'Anonymizovat',
       'afterDescription':
-        'Takto vás budou vidět ostatní uživatelé, dokud neodhalíte svou skutečnou identitu.',
+        'Takto tě uvidí ostatní uživatelé, než jim odhalíš svůj soukromý profil.',
     },
     'phoneNumber': {
-      'title': 'Jaké je vaše telefonní číslo?',
+      'title': 'Jaké je tvoje telefonní číslo?',
       'placeholder': 'Telefonní číslo',
       'text':
-        'Abychom vás mohli spojit s komunitou Vexl, zadejte své telefonní číslo.',
+        'Abychom vás mohli spojit s komunitou Vexl, musíte zadat své telefonní číslo.',
       'errors': {
-        'invalidPhoneNumber':
-          'Neplatné telefonní číslo. Zkuste prosím zadat jiné',
+        'invalidPhoneNumber': 'Neplatné telefonní číslo. Zkus to prosím znovu.',
         'previousCodeNotExpired':
-          'Ověřování tohoto telefonního čísla již probíhá. Počkejte prosím, dokud nevyprší jeho platnost',
+          'Ověřování tohoto telefonního čísla již probíhá. Počkej prosím, dokud nevyprší jeho platnost.',
       },
     },
     'verificationCode': {
-      'title': 'Právě jsme vám zaslali kód',
-      'text': 'Pro ověření jej zadejte níže',
-      'inputPlaceholder': 'Váš ověřovací kód',
-      'retryCountdown': 'Neobdrželi jste kód? Pošlete jej znovu',
-      'retry': 'Neobdrželi jste kód? Klepněte na pro opětovné odeslání',
+      'title': 'Právě jsme ti zaslali verifikační kód',
+      'text': 'Pro ověření jej zadej níže',
+      'inputPlaceholder': 'Ověřovací kód',
+      'retryCountdown': 'Neobdržel jsi kód? Zkus ho poslat znova.',
+      'retry': 'Neobdržel jsi kód? Zkus ho poslat znova.',
       'errors': {
         'userAlreadyExists': 'Uživatel s tímto telefonním číslem již existuje',
         'challengeCouldNotBeGenerated':
           'Výzvu se nepodařilo vygenerovat. Zkuste to znovu později',
         'verificationNotFound': 'Chybný ověřovací kód.',
-        'UserNotFound': 'Uživatel nebyl nalezen. Zkuste kód odeslat znovu.',
+        'UserNotFound': 'Uživatel nebyl nalezen. Zkus kód odeslat znovu.',
         'SignatureCouldNotBeGenerated':
-          'Podpis se nepodařilo vygenerovat. Zkuste to znovu později',
+          'Podpis se nepodařilo vygenerovat. Zkus to znovu později',
         'PublicKeyOrHashInvalid':
-          'Veřejný klíč nebo hash je neplatný. Zkuste to znovu později',
+          'Veřejný klíč nebo hash je neplatný. Zkus to znovu později.',
       },
       'success': {
-        'title': 'Telefon ověřen.\n Nastavíme váš profil.',
+        'title': 'Tvé číslo bylo ověřeno. [nwln] Čas nastavit tvůj profil.',
         'errorWhileParsingSessionForInternalState':
           'Chyba při ukládání uživatele',
       },
     },
     'importContacts': {
-      'title': 'Pojďme nyní najít vaše přátele!',
+      'title': 'Pojďme nyní najít tvoje přátele!',
       'text':
-        'Vexl používá vaši reálnou sociální síť - vaše přátele a jejich přátele. Čím více kontaktů přidáte, tím více nabídek uvidíte.',
+        'Vexl používá tvojí reálnou sociální síť - tvoje přátele a jejich přátele. Čím více kontaktů přidáš, tím více nabídek uvidíš.',
       'anonymityNotice': 'Vaše kontakty nemůže nikdo vidět. Dokonce ani my.',
       'action': 'Import kontaktů',
     },
   },
   'postLoginFlow': {
     'contactsExplanation': {
-      'title': 'Pojďme nyní najít vaše přátele!',
+      'title': 'Pojďme nyní najít tvoje přátele!',
       'text':
-        'Vexl využívá vaši reálnou sociální síť - vaše přátele a jejich přátele. Čím více kontaktů přidáte, tím více nabídek uvidíte.',
-      'anonymizationCaption': 'Vaše kontakty nikdo nevidí. Dokonce ani my.',
+        'Vexl používá tvojí reálnou sociální síť - tvoje přátele a jejich přátele. Čím více kontaktů přidáte, tím více nabídek uvidíte.',
+      'anonymizationCaption':
+        'Tvé kontakty neuvidí nikdo další. Dokonce ani my.',
     },
     'importContactsButton': 'Import kontaktů',
     'contactsList': {
@@ -138,62 +151,63 @@ export default {
       'nothingFound': {
         'title': 'Nebyl nalezen žádný kontakt.',
         'text':
-          'Chcete-li přidat telefonní číslo přímo, zadejte jej do vyhledávacího řádku (s předčíslím země).',
+          'Chceš-li přidat telefonní číslo napřímo, zadej ho do vyhledávacího řádku (s předčíslím země).',
       },
       'toAddCustomContact':
-        'Chcete-li přidat telefonní číslo přímo, zadejte jej do vyhledávacího řádku (s předvolbou země).',
+        'Chceš-li přidat telefonní číslo napřímo, zadej ho do vyhledávacího řádku (s předčíslím země).',
     },
     'allowNotifications': {
-      'title': 'Povolit oprávnění k oznámení',
+      'title': 'Povolit notifikace',
       'text':
-        'Povolením oznámení se dozvíte, když ostatní přijmou vaše nabídky nebo když vám přijdou zprávy.',
+        'Díky notifikacím se dozvíš, když ostatní přijmou tvé nabídky nebo když ti přijdou nové zprávy.',
       'action': 'Povolit',
       'cancel': 'Přeskočit',
       'errors': {
         'permissionDenied':
-          'Oprávnění není povoleno. Můžete je povolit později v nastavení systému.',
+          'Notifikace nebyli povoleny. Můžeš je povolit později v nastavení systému.',
         'unknownError': 'Neznámá chyba při žádosti o oprávnění',
         'notAvailableOnEmulator': 'Oznámení nejsou v emulátoru k dispozici',
       },
     },
   },
   'settings': {
-    'yourReach': 'Váš dosah: {{number}} vexlerů',
+    'yourReach': 'Tvůj dosah: {{number}} vexlákov',
     'items': {
-      'changeProfilePicture': 'Změna profilového obrázku',
+      'changeProfilePicture': 'Změnit profilový obrázek',
       'editName': 'Upravit jméno',
-      'contactsImported': 'Importované kontakty',
+      'contactsImported': 'Správa kontaktů',
       'xFriends': '{{number}} přátel',
       'setPin': 'Nastavit PIN',
-      'faceId': 'ID obličeje',
+      'faceId': 'Face ID',
       'czechCrown': 'Česká koruna',
-      'allowScreenshots': 'Povolit snímky obrazovky',
+      'allowScreenshots': 'Povolit screenshoty',
       'allowScreenshotsDescription':
-        'Odmítnout uživatelům pořizovat snímky chatu',
+        'Zakázat uživatelům pořizovat snímky chatu',
       'termsAndPrivacy': 'Podmínky a ochrana osobních údajů',
-      'faqs': 'Nejčastější dotazy',
+      'faqs': 'Podmínky použití a Ochrana soukromí',
       'reportIssue': 'Nahlásit problém',
-      'inAppLogs': 'Záznamy v aplikaci',
-      'requestKnownData': 'Vyžádání známých údajů',
-      'followUsOn': 'Sledujte nás na',
+      'inAppLogs': 'Aplikační logy',
+      'requestKnownData': 'Vyžádání údajů',
+      'followUsOn': 'Sleduj nás na',
       'twitter': 'Twitter',
       'twitterUrl': 'https://twitter.com/vexl',
-      'readMoreOn': 'Přečtěte si více na',
-      'medium': 'Médium',
+      'readMoreOn': 'Přečti si více na',
+      'medium': 'Medium',
       'mediumUrl': 'https://blog.vexl.it',
       'learnMoreOn': 'Další informace na',
       'website': 'Vexl.it',
       'websiteUrl': 'https://vexl.it',
       'deleteAccount': 'Smazat účet',
+      'supportEmail': 'support@vexl.it',
     },
     'noLogoutExplanation':
-      'Nemůžete najít odhlášení? Nic takového neexistuje. [nwln] Ale účet můžete smazat.',
+      'Chceš se odhlásit? Taková možnost ve Vexlu není - můžeš ale smazat účet.',
     'support':
-      'Pokud se vám Vexl líbí, podpořte jeho vylepšování zasláním nějakých bitcoinů jako daru!',
+      'Pokud se ti Vexl líbí, budeme rádi za tvůj příspěvek v tvrdé měně.',
     'version': 'Verze aplikace Vexl: Vxl: {{version}}',
     'logoutDialog': {
       'title': 'Smazat účet?',
-      'title2': 'Jste si jistí?',
+      'title2': 'jsi si jistý ?',
       'description':
         'Opravdu chcete smazat svůj účet? Tuto akci již nikdy nebudete moci vrátit zpět.',
     },
@@ -206,7 +220,7 @@ export default {
     'forSeller': 'Pro prodávajícího',
     'forBuyer': 'Pro kupujícího',
     'bank': 'Banka',
-    'revolut': 'Revolut',
+    'revolut': 'Online platby',
     'isSelling': 'prodává',
     'isBuying': 'kupuje',
     'directFriend': 'Přímý přítel',
@@ -216,19 +230,25 @@ export default {
     'filterOffers': 'Filtrovat nabídky',
     'numberOfCommon': '{{number}} společné',
     'offerNotFound': 'Nabídka nebyla nalezena. Možná byla smazána autorem',
-    'inputPlaceholder': 'Např. pojďme vyměnit mého přítele...',
-    'sendRequest': 'Odeslat požadavek',
+    'inputPlaceholder': 'např. Pojď zavexlit, kámo!',
+    'sendRequest': 'Odeslat žádost',
     'report': {
       'areYouSureTitle': 'Nahlásit nabídku?',
       'areYouSureText':
-        'Opravdu chcete tuto nabídku nahlásit? Tuto akci již nikdy nebudete moci vrátit zpět. Rozhodujte se moudře.',
+        'Skutečně chceš nahlásit tuhle nabídku? Tahle akce je nevratná.',
       'yes': 'Ano, nahlásit',
     },
     'goToChat': 'Přejděte na chat',
-    'requestAlreadySent':
-      'Byla odeslána žádost o obchodování. Dáme vám vědět, jakmile bude přijata.',
-    'listEmpty': 'Tržiště je zatím prázdné',
+    'requestStatus': {
+      'requested':
+        'Byla odeslána žádost o obchodování. Dáme vám vědět, jakmile bude přijata.',
+      'accepted': 'Žádost o obchodování byla přijata.',
+      'denied': 'Žádost o obchodování byla zamítnuta.',
+    },
+    'listEmpty': 'Tvůj marketplace se právě zahřívá. Vrať se za pár minut!',
     'emptyAction': 'Přidat novou nabídku',
+    'createOfferAndReachVexlers':
+      'Tvůj dosah je {{reachNumber}} vexláků.\nNaimportuj víc kontaktů abys viděl nabídky',
   },
   'termsOfUse': {
     'termsOfUse': 'Podmínky používání',
@@ -242,102 +262,98 @@ export default {
     'faqs': 'Často kladené otázky',
     'whatIsVexl': 'Co je to Vexl?',
     'vexlIsPlatform':
-      'Vexl je platforma, kde můžete obchodovat s bitcoiny v rámci své reálné sociální sítě - svých přátel a přátel jejich přátel - a přitom zůstat zcela anonymní - pokud si to přejete.',
+      'Vexl je platforma kde můžeš domlouvat směnu bitcoinu v rámci své reálné sociální sítě - se svými přáteli a přáteli jejich přátel - a přitom zůstat zcela anonymní, pokud si to přeješ.',
     'whoCanSeeMyContacts': 'Kdo může vidět mé kontakty?',
     'peopleWhomYouAllowToSee':
-      'Lidé, kterým dovolíte vidět vaši identitu, mohou vidět vaše společné přátele. To je vše.',
+      'Lidé, kterým dovolíš vidět tvou identitu, mohou vidět tvé společné přátele. To je vše.',
     'howCanIRemainAnonymous':
-      'Jak mohu zůstat v anonymitě a přesto se účastnit Vexl?',
+      'Jak mohu zůstat anonymní a přitom být součástí Vexlu?',
     'byDefaultYouParticipateInTheNetwork':
-      'Ve výchozím nastavení se sítě účastníte pod svým jménem Vexl a avatarem Vexl, které vám byly přiděleny při registraci. Svou identitu můžete odhalit pouze na konkrétní obchod v našem zabezpečeném, end-to-end šifrovaném chatu.',
+      'Ostatní účastníci sítě tě uvidí pod tvým Vexl jménem a avatarem, které ti byly přiděleny při registraci. Svou identitu můžeš odhalit pouze pro konkrétní obchod v našem zabezpečeném, end-to-end šifrovaném chatu.',
     'howCanIMakeSure':
       'Jak se mohu ujistit, že osoba, se kterou mluvím, je ta, se kterou chci mluvit?',
     'oneChallenge':
-      'Jedním z problémů skutečně anonymních komunikačních systémů, jako je Vexl, je, že někdy je třeba ověřit totožnost osoby, se kterou hovoříte! V takových případech je nejlepší použít zabezpečený sekundární komunikační kanál, abyste si s druhou osobou potvrdili, že jste oba tím, za koho se vydáváte.',
+      'Jedním z úskalí skutečně anonymních komunikačních systémů, jako je Vexl, je to, že někdy musíte ověřit totožnost osoby, se kterou komunikujete! V takových případech je nejlepší použít zabezpečený sekundární komunikační kanál, aby jsi si s druhou osobou potvrdil, že jste oba ti, za které se vydáváte.',
     'howCanIEnsure':
-      'Jak mohu zajistit, aby moje komunikace a obchody byly soukromé a šifrované?',
+      'Jak se mohu ujistit, že moje komunikace a obchody jsou soukromé a šifrované?',
     'vexlIsOpensource':
-      'Vexl je otevřený zdrojový kód - kdokoli může hledat jakákoli zadní vrátka nebo nekalé úmysly. Také se zde můžete podívat na zprávu z nezávislého bezpečnostního auditu .',
-    'howCanYouEnsure': 'Jak můžete zajistit ochranu mých dat?',
+      'Vexl má otevřený zdrojový kód - kdokoli v něm může hledat zadní vrátka nebo škodlivé úmysly. Můžeš se taky podívat na zprávu z nezávislého bezpečnostního auditu.',
+    'howCanYouEnsure': 'Jak můžete zajistit ochranu mých údajů?',
     'vexlIsDesigned':
-      'Vexl je navržen tak, aby nikdy neshromažďoval ani neukládal žádné citlivé informace. Ke zprávám Vexl a dalšímu obsahu nemáme přístup my ani jiné třetí strany, protože jsou vždy end-to-end šifrované, soukromé a zabezpečené. Naše podmínky poskytování služeb a zásady ochrany osobních údajů jsou k dispozici níže.',
-    'howDoIContactVexl': 'Jak mohu kontaktovat společnost Vexl?',
+      'Vexl je navržen tak, aby nikdy neshromažďoval ani neukládal žádné citlivé informace. Ke zprávám a dalšímu obsahu nemáme my ani jiné třetí strany přístup, protože jsou vždy šifrovány end-to-end. Naše podmínky poskytování služeb a zásady ochrany osobních údajů jsou k dispozici níže.',
+    'howDoIContactVexl': 'Jak mohu kontaktovat Vexl ?',
     'youCanAlwaysReachOutToUs':
-      'Vždy se na nás můžete obrátit prostřednictvím e-mailu: support@vexl.it. Pro soukromou komunikaci nám můžete také poslat e-mail e2ee. Nebo se s námi můžete setkat během svého příštího P2P obchodu! 😻',
+      'Vždy se na nás můžeš obrátit prostřednictvím e-mailu: support@vexl.it. Nebo se s námi můžeš setkat během svého příštího P2P obchodu! 😻',
   },
   'offerForm': {
-    'myNewOffer': 'Moje nová nabídka',
+    'myNewOffer': 'Nová nabídka',
     'iWantTo': 'Chci',
     'sellBitcoin': 'Prodat bitcoin',
     'buyBitcoin': 'Koupit Bitcoin',
     'currency': 'Měna',
-    'czk': 'CZK',
-    'eur': 'EUR',
-    'usd': 'USD',
     'amountOfTransaction': {
-      'amountOfTransaction': 'Částka transakce',
+      'amountOfTransaction': 'Částka',
       'eurSymbol': '€',
       'dollarSymbol': '$',
       'czkSymbol': 'Kč',
-      'pleaseSelectCurrencyFirst': 'Vyberte prosím nejprve měnu',
-      'pleaseSelectLocationFirst': 'Vyberte prosím nejprve místo',
+      'pleaseSelectCurrencyFirst': 'Nejdřív si vyber měnu',
+      'pleaseSelectLocationFirst': 'Nejdřív si vyber místo',
     },
     'premiumOrDiscount': {
-      'premiumOrDiscount': 'Prémie nebo sleva',
+      'premiumOrDiscount': 'Premium nebo sleva',
       'youBuyForTheActualMarketPrice':
-        'Kupujete za skutečnou tržní cenu. Pohrajte si s posuvníkem a prodávejte rychleji nebo vydělejte více.',
+        'Kupuješ za skutečnou tržní cenu. Pohni s posuvníkem a prodávej rychleji nebo vydělej více.',
       'theOptimalPositionForMostPeople':
-        'Optimální pozice pro většinu lidí. Nakupujete o něco rychleji, ale za trochu vyšší cenu',
-      'youBuyReallyFast':
-        'Nakupujete opravdu rychle, ale o tolik nad tržní cenu',
+        'Optimální pozice pro většinu lidí. Nakupuješ o něco rychleji, ale za trochu vyšší cenu',
+      'youBuyReallyFast': 'Nakupuješ opravdu rychle, ale hodně nad tržní cenou',
       'youBuyPrettyCheap':
-        'Nakupujete poměrně levně, ale může trvat o něco déle, než najdete prodávajícího',
+        'Nakupuješ poměrně levně, ale může trvat o něco déle, než najdeš prodávajícího',
       'youBuyVeryCheaply':
-        'Nakupujete velmi levně, ale může chvíli trvat, než najdete prodávajícího',
-      'buyFaster': 'Nakupujete rychleji',
-      'buyCheaply': 'Nakupujete levně',
+        'Nakupuješ velmi levně, ale může chvíli trvat, než najdeš prodávajícího',
+      'buyFaster': 'Nakupuješ rychleji',
+      'buyCheaply': 'Nakupuješ levně',
       'youSellForTheActualMarketPrice':
-        'Prodáváte za skutečnou tržní cenu. Pohrajte si s posuvníkem a prodávejte rychleji nebo vydělávejte více.',
-      'youEarnBitMore': 'Vyděláte o něco více, ale může to trvat o něco déle.',
+        'Prodáváš za skutečnou tržní cenu. Pohni s posuvníkem a prodávej rychleji nebo vydělávej více.',
+      'youEarnBitMore': 'Vyděláš o něco více, ale může to trvat o něco déle.',
       'youWantToEarnFortune':
-        'Chcete vydělat majlant, ale může trvat roky, než najdete prodejce.',
+        'Chceš vydělat majlant, ale může trvat roky, než najdeš kupce.',
       'youSellSlightlyFaster':
-        'Prodáváte o něco rychleji, ale trochu pod tržní cenou.',
+        'Prodáváš o něco rychleji, ale trochu pod tržní cenou.',
       'youSellMuchFaster':
-        'Prodáváte mnohem rychleji, ale hluboko pod tržní cenou',
+        'Prodáváš mnohem rychleji, ale hluboko pod tržní cenou',
       'youBuyBtcFor': 'Kupujete BTC za',
       'youSellBtcFor': 'Prodáváte BTC za',
       'marketPrice': 'tržní cenu',
-      'sellFaster': 'Prodáváte rychleji',
-      'earnMore': 'Vyděláte více',
-      'premiumOrDiscountExplained': 'Vysvětlení prémie nebo slevy',
+      'sellFaster': 'Prodáváš rychleji',
+      'earnMore': 'Vyděláš více',
+      'premiumOrDiscountExplained': 'Vysvětlení prémia a slevy',
       'influenceImpactOfYourSellOffer':
-        'Ovlivněte dopad své nabídky. Prodejte rychleji přidáním slevy nebo vydělejte více přidáním prémie k tržní ceně bitcoinu.',
+        'Ovlivni dopad své nabídky. Prodávej rychleji přidáním slevy nebo vydělávej více přidáním bonusu k tržní ceně bitcoinu.',
       'influenceImpactOfYourBuyOffer':
-        'Ovlivněte dopad své nabídky. Nakupujte levněji přidáním slevy nebo nakupujte rychleji přidáním prémie k tržní ceně bitcoinu.',
+        'Ovlivni dopad své nabídky. Nakupuj rychleji přidáním slevy nebo nakupuj více přidáním bonusu k tržní ceně bitcoinu.',
       'playWithItAndSee':
-        'Pohrajte si s tím a zjistěte, jak to ovlivní zájem ostatních.',
+        'Pohni posuvníkem a zjisti, jak to ovlivní zájem ostatních.',
       'plus': '+',
       'minus': '-',
     },
     'buyCheaperByUsingDiscount':
-      'Nakupte levněji použitím slevy nebo nakupte rychleji přidáním prémie k tržní ceně bitcoinu.',
+      'Nakup levněji použitím slevy nebo nakup rychleji přidáním prémia k tržní ceně bitcoinu.',
     'sellFasterWithDiscount':
-      'Prodávejte rychleji pomocí slevy nebo vydělejte více přidáním prémie k tržní ceně bitcoinu.',
+      'Prodávej rychleji pomocí slevy nebo vydělej více přidáním prémia k tržní ceně bitcoinu.',
     'location': {
-      'location': 'Umístění',
+      'location': 'Lokalita',
       'meetingInPerson':
-        'Osobní setkání je bezpečnější. Na co si dát pozor online?',
-      'checkItOut': 'Podívejte se na to',
+        'Osobní setkání je bezpečnější. Na co si dát pozor u online obchodů?',
+      'checkItOut': 'Podívej se na to',
       'addCityOrDistrict': 'Přidejte město nebo okres',
       'whatToWatchOutForOnline': 'Na co si dát pozor online?',
       'moneySentByRandomPerson':
-        'Peníze zaslané náhodnou osobou mohou mít kriminální původ a mohou být dohledatelné.',
-      'neverSendCrypto': 'Nikdy neposílejte kryptoměnu před obdržením platby.',
+        'Peníze zaslané náhodnou osobou mohou mít kriminální původ a mohou být vystopovatelné.',
+      'neverSendCrypto': 'Nikdy neposílejte bitcoin před obdržením platby.',
       'alwaysVerifyTheName':
-        'Vždy si ověřte jméno majitele účtu, od kterého jste platbu obdrželi, s deklarovanou identitou protistrany.',
+        'Vždy si ověř jméno majitele účtu, od kterého jsi platbu obdržel, jestli sedí s deklarovanou identitou protistrany.',
       'forwardTheAddress':
-        'Adresu předejte bezpečným způsobem a nezapomeňte ji ověřit jiným bezpečným kanálem.',
+        'Adresu předej bezpečným způsobem a nezapomeň ji ověřit jiným bezpečným kanálem.',
     },
     'inPerson': 'Osobně',
     'online': 'Online',
@@ -345,15 +361,15 @@ export default {
       'paymentMethod': 'Způsob platby',
       'cash': 'V hotovosti',
       'bank': 'Banka',
-      'revolut': 'Revolut',
+      'revolut': 'Online platby',
     },
     'network': {
       'network': 'Síť',
-      'lightning': 'Blesk',
+      'lightning': 'Lightning',
       'theBestOption':
-        'Nejlepší volba pro opravdu malé částky. Obvykle mnohem rychlejší.',
-      'onChain': 'V řetězci',
-      'theBestFor': 'Nejlepší pro poměrně velké částky. Někdy to trvá déle.',
+        'Nejlepší volba pro opravdu malé částky. Obvykle super rychlá.',
+      'onChain': 'On chain',
+      'theBestFor': 'Lepší pro poměrně velké částky. Může to trvat déle.',
     },
     'description': {
       'description': 'Popis',
@@ -364,8 +380,8 @@ export default {
       'friendLevel': 'Úroveň přítele',
       'firstDegree': '1. stupeň',
       'secondDegree': '2. stupeň',
-      'noVexlers': 'Žádné vexláky',
-      'reachVexlers': 'Dosáhnout {{count}} vexláků',
+      'noVexlers': 'Žádní vexláci',
+      'reachVexlers': 'Dosah: {{count}} vexláků',
     },
     'publishOffer': 'Zveřejnit nabídku',
     'errorCreatingOffer': 'Chyba při vytváření nabídky',
@@ -375,23 +391,25 @@ export default {
       'encryptingYourOffer': 'Šifrování nabídky ...',
       'dontShutDownTheApp':
         'Během šifrování nevypínejte aplikaci. Může to trvat několik minut.',
-      'forVexlers': 'pro {{count}} veksláky',
+      'forVexlers': 'pro {{count}} vexláků',
       'doneOfferPoster': 'Hotovo! Nabídka odeslána.',
       'yourFriendsAndFriendsOfFriends':
-        'Vaši přátelé a přátelé jejich přátel nyní mohou vidět vaši nabídku.',
+        'Tví přátelé a přátelé jejich přátel nyní mohou vidět tvoji nabídku.',
       'anonymouslyDeliveredToVexlers':
-        'Anonymně doručeno pro {{count}} vexlers',
+        'Anonymně doručeno pro {{count}} vexláků',
     },
-    'noVexlersFoundForYourOffer': 'Pro vaši nabídku nebyl nalezen žádný vexler',
-    'errorLocationNotFilled': 'Vyplňte prosím umístění nabídky',
-    'errorDescriptionNotFilled': 'Vyplňte prosím popis nabídky',
+    'noVexlersFoundForYourOffer':
+      'Pro tvoji nabídku nebyl nalezen žádný vexlák',
+    'errorLocationNotFilled': 'Vyplň prosím lokalitu.',
+    'errorDescriptionNotFilled': 'Vyplň prosím popis nabídky.',
   },
   'notifications': {
     'permissionsNotGranted': {
-      'title': 'Oprávnění pro oznámení nebyla udělena',
-      'message': 'Můžete je povolit v nastavení',
+      'title': 'Notifikace nebyly povoleny.',
+      'message': 'Můžeš je povolit v nastavení',
       'openSettings': 'Otevřít nastavení',
     },
+    'errorWhileOpening': 'Došlo k chybě při otevírání notifikace.',
   },
   'myOffers': {
     'addNewOffer': 'Přidat novou nabídku',
@@ -411,19 +429,20 @@ export default {
     'saveChanges': 'Uložit změny',
     'offerUnableToChangeOfferActivation': 'Nelze změnit aktivaci nabídky',
     'editingYourOffer': 'Úprava nabídky ...',
-    'pleaseWait': 'Počkejte prosím',
-    'offerEditSuccess': 'Úspěšná editace nabídky',
-    'youCanCheckYourOffer': 'Svou nabídku můžete zkontrolovat v sekci Nabídky',
+    'pleaseWait': 'Počkej prosím',
+    'offerEditSuccess': 'Editace proběhla úspěšně',
+    'youCanCheckYourOffer':
+      'Svou nabídku můžeš zkontrolovat v sekci Moje nabídky',
     'errorEditingOffer': 'Chyba při úpravě nabídky',
     'errorOfferNotFound': 'Nabídka nebyla nalezena!',
-    'deletingYourOffer': 'Odstranění vaší nabídky ...',
+    'deletingYourOffer': 'Odstranění tvojí nabídky ...',
     'offerDeleted': 'Nabídka smazána',
     'errorDeletingOffer': 'Chyba při mazání nabídky',
   },
   'filterOffers': {
     'filterResults': 'Filtrování výsledků',
     'sorting': 'Třídění',
-    'lowestFeeFirst': 'Nejnižší poplatek jako první',
+    'lowestFeeFirst': 'Nejnižší poplatek',
     'highestFee': 'Nejvyšší poplatek',
     'newestOffer': 'Nejnovější nabídka',
     'oldestOffer': 'Nejstarší nabídka',
@@ -432,52 +451,52 @@ export default {
     'selectSortingMethod': 'Zvolte způsob řazení',
   },
   'messages': {
-    'yourOffer': 'Vaše nabídka',
-    'theirOffer': 'Jejich nabídka',
+    'yourOffer': 'Tvoje nabídka',
+    'theirOffer': 'Nabídka protistrany',
     'listTitle': 'Chaty',
     'isBuying': 'kupuje',
     'isSelling': 'prodává',
     'thisWillBeYourFirstInteraction':
-      'Toto bude vaše první interakce s touto nabídkou.',
+      'Toto bude tvoje první interakce s touto nabídkou.',
     'wellLetYouKnowOnceUserAccepts':
-      'Žádost byla odeslána. Dáme vám vědět, jakmile druhá strana odpoví.',
+      'Žádost byla odeslána. Dáme ti vědět, jakmile druhá strana odpoví.',
     'messagePreviews': {
       'incoming': {
         'MESSAGE': '{{them}}: {{message}}',
         'REQUEST_REVEAL': '{{them}} požádal o odhalení identity',
         'APPROVE_REVEAL': 'Identita odhalena',
-        'DISAPPROVE_REVEAL': 'Odmítl odhalení identity',
-        'REQUEST_MESSAGING': 'Reagoval na vaši nabídku',
-        'APPROVE_MESSAGING': 'Schválené zasílání zpráv',
-        'DISAPPROVE_MESSAGING': 'Odmítl žádost o zasílání zpráv',
+        'DISAPPROVE_REVEAL': 'Odhalení identity zamítnuto',
+        'REQUEST_MESSAGING': 'Reagoval na tvoji nabídku',
+        'APPROVE_MESSAGING': 'Žádost o zprávu schválena',
+        'DISAPPROVE_MESSAGING': 'Žádost o zprávu zamítnuta',
         'DELETE_CHAT': '{{them}} opustil chat',
-        'BLOCK_CHAT': '{{them}} Zablokoval vás',
-        'OFFER_DELETED': '{{them}} smazal svou nabídku',
-        'INBOX_DELETED': '{{them}} smazal svou doručenou poštu',
+        'BLOCK_CHAT': '{{them}} tě zablokoval.',
+        'OFFER_DELETED': '{{them}} smazal svou nabídku.',
+        'INBOX_DELETED': '{{them}} smazal chat.',
       },
       'outgoing': {
         'MESSAGE': 'Já: {{message}}',
         'REQUEST_REVEAL': 'Požádali jste o odhalení identity',
         'APPROVE_REVEAL': 'Identita odhalena',
         'DISAPPROVE_REVEAL': 'Odhalení identity odmítnuto',
-        'REQUEST_MESSAGING': 'Žádost byla odeslána',
+        'REQUEST_MESSAGING': 'Žádost odeslána',
         'APPROVE_MESSAGING': 'Schválili jste zasílání zpráv',
-        'DISAPPROVE_MESSAGING': 'Odmítli jste žádost o zasílání zpráv',
-        'DELETE_CHAT': 'Opustili jste chat',
+        'DISAPPROVE_MESSAGING': 'Odmítnul jsi žádost o zprávu.',
+        'DELETE_CHAT': 'Opustil jsi chat',
         'BLOCK_CHAT': 'Uživatel byl zablokován',
-        'OFFER_DELETED': 'Smazali jste nabídku',
-        'INBOX_DELETED': 'Smazali jste tuto schránku',
+        'OFFER_DELETED': 'Smazal jsi nabídku',
+        'INBOX_DELETED': 'Smazal jsi chat.',
       },
     },
-    'deleteChat': 'Smazat chat',
-    'askToReveal': 'Požádat o odhalení totožnosti',
+    'deleteChat': 'Odstránit chat',
+    'askToReveal': 'Požádat o odhalení identity',
     'blockUser': 'Zablokovat uživatele',
     'sending': 'zasílání...',
     'unknownErrorWhileSending': 'Neznámá chyba při odesílání zprávy',
     'tapToResent': 'Klepněte na pro opětovné odeslání.',
     'deniedByMe': 'Odmítli jste žádost o zaslání zprávy s {{name}}.',
-    'deniedByThem': '{{name}} odmítl vaši žádost o zasílání zpráv.',
-    'requestMessageWasDeleted': 'Zpráva s požadavkem byla smazána',
+    'deniedByThem': '{{name}} odmítl vaši žádost o zprávu.',
+    'requestMessageWasDeleted': 'Žádost byla smazána.',
     'typeSomething': 'Zadejte něco ...',
     'offerDeleted': 'Nabídka smazána',
     'leaveToo': 'Odejít také?',
@@ -487,30 +506,30 @@ export default {
     'yesBlock': 'Ano, zablokovat',
     'deleteChatExplanation1':
       'Skončili jste s obchodováním? Ukončení chatu znamená, že vaše konverzace bude trvale smazána.',
-    'deleteChatExplanation2':
-      'Jedná se o definitivní krok, potvrďte prosím tuto akci ještě jednou, aby byla skutečná.',
+    'deleteChatExplanation2': 'Tento krok je nevratný.',
     'blockChatExplanation1':
-      'Opravdu chcete tohoto uživatele zablokovat? Tuto akci již nikdy nebudete moci vzít zpět. Rozhodujte se moudře.',
+      'Opravdu chceš uživatele zablokovat? Tento krok nejde vrátit zpět. Dobře si to rozmysli.',
     'blockChatExplanation2':
-      'Opravdu chcete tohoto uživatele zablokovat? Tuto akci již nikdy nebudete moci vzít zpět. Rozhodněte se moudře.',
+      'Opravdu chceš uživatele zablokovat? Tento krok nejde vrátit zpět. Dobře si to rozmysli.',
     'chatEmpty': 'Zatím žádné chaty',
-    'chatEmptyExplanation': 'Začněte konverzaci vyžádáním nabídky',
+    'chatEmptyExplanation': 'Začni konverzaci odesláním žádosti na nabídku.',
     'seeOffers': 'Podívejte se na nabídky',
     'identityRevealRequestModal': {
       'title': 'Poslat žádost o odhalení identity?',
-      'text': 'Odesláním požadavku souhlasíte s odhalením i své identity.',
+      'text':
+        'Odesláním žádosti o odhalení identity souhlasíš i s odhalením své identity.',
       'send': 'Odeslat žádost',
     },
     'identityRevealRespondModal': {
-      'title': 'Chcete odhalit identitu?',
+      'title': 'Chceš odhalit identitu? ',
       'text':
-        'Pokud odhalíte svou identitu, zobrazí se také identita protistrany.',
+        'Pokud odhalíš svou identitu, zobrazí se také identita protistrany.',
     },
     'identityAlreadyRequested':
-      'V konverzaci již byl odeslán požadavek na zjištění totožnosti',
+      'V konverzaci již byl odeslán požadavek na zjištění identity',
     'identityRevealRequest': 'Žádost o odhalení identity',
-    'tapToReveal': 'Klepněte na možnost odhalit nebo odmítnout',
-    'letsRevealIdentities': 'Umožňuje odhalit identitu',
+    'tapToReveal': 'Klikni pro odhalení identity nebo zamítnutí',
+    'letsRevealIdentities': 'Pojďme si odhalit identity!',
     'reveal': 'Odhalit',
     'themDeclined': '{{name}} odmítl',
     'youDeclined': 'Odmítli jste',
@@ -521,11 +540,70 @@ export default {
     'CONSTRUCTING_PRIVATE_PAYLOADS': 'Sestavení soukromého užitečného zatížení',
     'CONSTRUCTING_PUBLIC_PAYLOAD':
       'Sestavení a zašifrování veřejného užitečného zatížení',
-    'SENDING_OFFER_TO_NETWORK': 'Nahrání nabídky',
+    'SENDING_OFFER_TO_NETWORK': 'Odesílaní nabídky',
     'DONE': 'Hotovo',
   },
   'commonFriends': {
     'commonFriends': 'Společní přátelé',
     'commonFriendsCount': '{{commonFriendsCount}} společní přátelé',
   },
+  'reportIssue': {
+    'openInEmail': 'Otevřít v emailu.',
+    'somethingWentWrong': 'Something went wrong?',
+    'feelFreeToGetInTouch': 'Feel free to get in touch with our support.',
+  },
+  'AppLogs': {
+    'title': 'Aplikáční logy',
+    'clear': 'Vymazat logy',
+    'export': 'Exportovat logy',
+    'errorExporting': 'Došlo k chybě u exportování logů.',
+    'warning':
+      'Zapnutí logování může negativně ovlivnit rychlost aplikace a zabere více místa na zařízení',
+    'anonymizeAlert': {
+      'text': '',
+      'title': '',
+    },
+  },
+  'MaintenanceScreen': {
+    'title': 'Údržba marketplace',
+    'text': 'Aplikace Vexl je v údržbě. Vraťte se prosím později.',
+  },
+  'ForceUpdateScreen': {
+    'title': 'Je dostupná nová verze aplikace!',
+    'text': 'Nainstaluj si nejnovši verzi aplikace.',
+    'action': 'Aktualizovat',
+  },
+  'btcPriceChart': {
+    'requestCouldNotBeProcessed': ':D',
+  },
+  'currency': {
+    'currency': 'Měna',
+    'czechCrown': 'Česká koruna',
+    'euro': 'Euro',
+    'unitedStatesDollar': 'USD',
+  },
+  'deepLinks': {
+    'importContacts': {
+      'alert': {
+        'title': 'Import kontaktu',
+        'text': 'Chcete importovat {{contactName}} s číslem {{contactNumber}}?',
+      },
+      'successAlert': {
+        'title': 'Kontakt přidán',
+      },
+    },
+  },
+  'qrCode': {
+    'joinVexl': 'Připoj se na Vexl',
+  },
+  'editName': {
+    'editName': 'Upravit jméno',
+    'errorUserNameNotValid': 'Jméno není v pořádku',
+  },
+  'changeProfilePicture': {
+    'changeProfilePicture': 'Změnit profilový obrázek',
+    'uploadNewPhoto': 'Vybrat obrázek',
+  },
 }
+
+export default cs

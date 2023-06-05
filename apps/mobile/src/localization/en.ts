@@ -53,6 +53,7 @@ export default {
     'nice': 'Nice',
     'success': 'Success!',
     'requested': 'Requested',
+    'now': 'Now',
     'declined': 'Declined',
   },
   'loginFlow': {
@@ -171,7 +172,7 @@ export default {
     'items': {
       'changeProfilePicture': 'Change profile picture',
       'editName': 'Edit name',
-      'contactsImported': 'Contacts imported',
+      'contactsImported': 'Contacts management',
       'xFriends': '{{number}} friends',
       'setPin': 'Set PIN',
       'faceId': 'Face ID',
@@ -197,9 +198,9 @@ export default {
       'supportEmail': 'support@vexl.it',
     },
     'noLogoutExplanation':
-      "Can't find logout? There's no such thing.\nBut you can delete account.",
+      "Can't find logout? There's no such thing.\nBut you can delete your account.",
     'support':
-      'If you like Vexl, support it’s improvement by sending some Bitcoins as donation!',
+      'If you like Vexl, support it’s improvement by sending some bitcoin as donation!',
     'version': 'Vexl App version: {{version}}',
     'logoutDialog': {
       'title': 'Delete account?',
@@ -237,12 +238,13 @@ export default {
     },
     'goToChat': 'Go to chat',
     'requestStatus': {
-      'accepted': 'Your request was accepted.',
-      'denied': 'Your request was declined.',
       'requested':
         "You've requested a trade. We'll notify you once it's accepted.",
+      'accepted': 'Your request was accepted.',
+      'denied': 'Your request was declined.',
     },
-    'listEmpty': 'No offers yet',
+    'listEmpty':
+      'Your marketplace is just warming up. Come back in a couple of minutes! ',
     'emptyAction': 'Add new offer',
     'createOfferAndReachVexlers':
       'You reach {{reachNumber}} vexlers.\nAdd more contacts to increase the number of offers you see.',
@@ -460,8 +462,8 @@ export default {
         'APPROVE_REVEAL': 'Identity revealed',
         'DISAPPROVE_REVEAL': 'Declined identity reveal',
         'REQUEST_MESSAGING': 'Reacted to your offer',
-        'APPROVE_MESSAGING': 'Approved messaging',
-        'DISAPPROVE_MESSAGING': 'Declined messaging request',
+        'APPROVE_MESSAGING': 'Request was accepted',
+        'DISAPPROVE_MESSAGING': 'Request was declined',
         'DELETE_CHAT': '{{them}} left the chat',
         'BLOCK_CHAT': '{{them}} Has blocked you',
         'OFFER_DELETED': '{{them}} has deleted his offer',
@@ -544,7 +546,6 @@ export default {
     'openInEmail': 'Open in e-mail',
     'somethingWentWrong': 'Something went wrong?',
     'feelFreeToGetInTouch': 'Feel free to get in touch with our support.',
-    'openInApp': 'Open in e-mail',
   },
   'AppLogs': {
     'title': 'In app logs',

@@ -22,7 +22,7 @@ function ReportIssue(): JSX.Element {
         text: t('common.gotIt'),
       }}
       primaryButton={{
-        text: t('reportIssue.openInApp'),
+        text: t('reportIssue.openInEmail'),
         onPress: () => {
           openUrl(`mailto:${supportEmail}`, t('settings.items.supportEmail'))()
           return true

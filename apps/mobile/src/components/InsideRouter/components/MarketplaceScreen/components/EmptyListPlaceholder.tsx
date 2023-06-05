@@ -1,4 +1,4 @@
-import {Text, YStack} from 'tamagui'
+import {getTokens, Text, YStack} from 'tamagui'
 import Button from '../../../../Button'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import {useNavigation} from '@react-navigation/native'
@@ -6,8 +6,10 @@ import Image from '../../../../Image'
 import emptyMarketplaceAnonymousAvatarSvg from '../images/emptyMarketplaceAnonymousAvatarSvg'
 import {useAtomValue} from 'jotai'
 import {reachNumberAtom} from '../../../../../state/connections/atom/connectionStateAtom'
+import {ActivityIndicator} from 'react-native'
 
 function EmptyListPlaceholder(): JSX.Element {
+  const tokens = getTokens()
   const navigation = useNavigation()
   const {t} = useTranslation()
   const reachNumber = useAtomValue(reachNumberAtom)
@@ -15,6 +17,7 @@ function EmptyListPlaceholder(): JSX.Element {
   return (
     <YStack f={1} ai={'center'} jc={'center'} py="$4" space="$4">
       <Image source={emptyMarketplaceAnonymousAvatarSvg} />
+      <ActivityIndicator color={tokens.color.main.val} />
       <YStack>
         <Text
           textAlign={'center'}

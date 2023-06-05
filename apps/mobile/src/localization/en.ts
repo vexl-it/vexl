@@ -53,6 +53,7 @@ export default {
     'nice': 'Nice',
     'success': 'Success!',
     'requested': 'Requested',
+    'declined': 'Declined',
   },
   'loginFlow': {
     'anonymityNotice': 'Nobody will see this until you allow it. Not even us.',

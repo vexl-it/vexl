@@ -12,6 +12,8 @@ interface Props {
   svg: SvgString
   title: string
   text: string
+  width?: string
+  height?: string
 }
 export default function useContent(): Props[] {
   const {t} = useTranslation()
@@ -51,6 +53,8 @@ export default function useContent(): Props[] {
       svg: notificationsSvg,
       title: t('faqs.howDoIContactVexl'),
       text: t('faqs.youCanAlwaysReachOutToUs'),
+      width: '70%',
+      height: '70%',
     },
   ]
 }

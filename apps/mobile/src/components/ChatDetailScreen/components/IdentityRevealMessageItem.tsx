@@ -4,7 +4,7 @@ import UserAvatar from '../../UserAvatar'
 import React from 'react'
 import {type ChatMessageWithState} from '../../../state/chat/domain'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
-import {useAtomValue} from 'jotai/index'
+import {useAtomValue} from 'jotai'
 import SvgImage from '../../Image'
 import {useMolecule} from 'jotai-molecules'
 import {chatMolecule} from '../atoms'
@@ -36,7 +36,7 @@ function IdentityRevealMessageItem({
     message.message.messageType === 'REQUEST_REVEAL' &&
     (identityRevealStatus === 'iAsked' ||
       identityRevealStatus === 'theyAsked' ||
-      message.state === 'received')
+      (identityRevealStatus === 'shared' && message.state === 'received'))
   ) {
     if (identityRevealStatus === 'shared') {
       return (

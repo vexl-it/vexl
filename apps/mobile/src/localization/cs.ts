@@ -558,6 +558,7 @@ const cs: typeof en = {
     'openInEmail': 'Otevřít v emailu.',
     'somethingWentWrong': 'Something went wrong?',
     'feelFreeToGetInTouch': 'Feel free to get in touch with our support.',
+    'predefinedBody': 'Ahoj! Chtěl bych nahlásit chybu...',
   },
   'AppLogs': {
     'title': 'Aplikáční logy',

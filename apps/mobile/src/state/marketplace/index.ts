@@ -21,12 +21,7 @@ import * as Option from 'fp-ts/Option'
 import {type OneOfferInState} from './domain'
 import {privateApiAtom, usePrivateApiAssumeLoggedIn} from '../../api'
 import {pipe} from 'fp-ts/function'
-import {
-  dummySession,
-  sessionAtom,
-  sessionDataOrDummyAtom,
-  useSessionAssumeLoggedIn,
-} from '../session'
+import {sessionDataOrDummyAtom, useSessionAssumeLoggedIn} from '../session'
 import {isoNow} from '@vexl-next/domain/dist/utility/IsoDatetimeString.brand'
 import * as TE from 'fp-ts/TaskEither'
 import * as E from 'fp-ts/Either'
@@ -235,18 +230,16 @@ export const createOfferAtom = atom<
   >
 >(null, (get, set, params) => {
   const api = get(privateApiAtom)
-  const session = get(sessionAtom)
+  const session = get(sessionDataOrDummyAtom)
   const {payloadPublic, intendedConnectionLevel, onProgress} = params
   return pipe(
     createNewOfferForMyContacts({
       offerApi: api.offer,
       publicPart: payloadPublic,
+      countryPrefix: getCountryPrefix(session.phoneNumber),
       contactApi: api.contact,
       intendedConnectionLevel,
-      ownerKeyPair:
-        session.state === 'loggedIn'
-          ? session.session.privateKey
-          : dummySession.privateKey,
+      ownerKeyPair: session.privateKey,
       onProgress,
     }),
     TE.map((r) => {
@@ -309,7 +302,6 @@ export const updateOfferAtom = atom<
       adminId,
       publicPayload: payloadPublic,
       symmetricKey,
-      countryPrefix: getCountryPrefix(session.phoneNumber),
       ownerKeypair: session.privateKey,
     }),
     TE.map((r) => {

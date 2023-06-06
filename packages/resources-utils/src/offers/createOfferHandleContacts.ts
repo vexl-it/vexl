@@ -31,6 +31,7 @@ import {
 import {type ExtractLeftTE} from '../utils/ExtractLeft'
 import {type ErrorConstructingPrivatePayloads} from './utils/constructPrivatePayloads'
 import {type OfferEncryptionProgress} from './OfferEncryptionProgress'
+import {type CountryPrefix} from '@vexl-next/domain/dist/general/CountryPrefix.brand'
 
 export type ApiErrorWhileCreatingOffer = ExtractLeftTE<
   ReturnType<OfferPrivateApi['createNewOffer']>
@@ -49,6 +50,7 @@ export default function createNewOfferForMyContacts({
   contactApi,
   publicPart,
   ownerKeyPair,
+  countryPrefix,
   intendedConnectionLevel,
   onProgress,
 }: {
@@ -56,6 +58,7 @@ export default function createNewOfferForMyContacts({
   contactApi: ContactPrivateApi
   publicPart: OfferPublicPart
   ownerKeyPair: PrivateKeyHolder
+  countryPrefix: CountryPrefix
   intendedConnectionLevel: IntendedConnectionLevel
   onProgress?: (status: OfferEncryptionProgress) => void
 }): TE.TaskEither<
@@ -92,6 +95,7 @@ export default function createNewOfferForMyContacts({
       return pipe(
         offerApi.createNewOffer({
           offerPrivateList: privatePayloads.privateParts,
+          countryPrefix,
           payloadPublic: encryptedPublic,
           offerType: publicPart.offerType,
         }),

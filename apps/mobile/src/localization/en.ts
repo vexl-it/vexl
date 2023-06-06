@@ -526,6 +526,11 @@ export default {
     'identityAlreadyRequested':
       'Identity request was already sent in the conversation',
     'identityRevealRequest': 'Identity reveal request',
+    'identityRevealed': 'Identity revealed',
+    'identitySend': {
+      'title': 'Reveal identity request sent',
+      'subtitle': 'Waiting for response...',
+    },
     'tapToReveal': 'Tap to reveal or decline',
     'letsRevealIdentities': "Let's reveal identities!",
     'reveal': 'Reveal',

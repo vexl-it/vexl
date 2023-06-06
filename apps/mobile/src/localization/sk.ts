@@ -464,6 +464,10 @@ const sk: typeof en = {
       'Toto bude tvoja prvá interakcia s touto ponukou.',
     'wellLetYouKnowOnceUserAccepts':
       'Žiadosť odoslaná. Dáme ti vedieť, keď druhá strana odpovie.',
+    'identitySend': {
+      'title': 'Poslali jste žádost o odhalení identity',
+      'subtitle': 'Čekám na odpověď...',
+    },
     'messagePreviews': {
       'incoming': {
         'MESSAGE': '{{them}}: {{message}}',
@@ -532,6 +536,7 @@ const sk: typeof en = {
     'identityAlreadyRequested':
       'V konverzácii už bola odoslaná žiadosť o zistenie identity',
     'identityRevealRequest': 'Žiadosť o odhalenie identity',
+    'identityRevealed': 'Identita odhalena',
     'tapToReveal': 'Klikni pre odhalenie identity alebo zamietnutie',
     'letsRevealIdentities': 'Poďme si odhaliť identity!',
     'reveal': 'Odhaliť',
@@ -540,7 +545,7 @@ const sk: typeof en = {
   },
   'progressBar': {
     'ENCRYPTING_PRIVATE_PAYLOADS': '{{percentDone}}% hotovo',
-    'FETCHING_CONTACTS': '🚨',
+    'FETCHING_CONTACTS': '',
     'CONSTRUCTING_PRIVATE_PAYLOADS': 'Konštruovanie súkromného nákladu',
     'CONSTRUCTING_PUBLIC_PAYLOAD':
       'Konštruovanie a šifrovanie verejného užitočného zaťaženia',

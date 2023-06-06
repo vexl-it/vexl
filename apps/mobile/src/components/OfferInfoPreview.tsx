@@ -51,12 +51,6 @@ function OfferInfoPreview({
     [negative]
   )
 
-  console.log(
-    `OfferTitle: ${
-      offer.publicPart.offerDescription
-    } and hash: ${JSON.stringify(offer.privatePart.commonFriends, null, 2)}`
-  )
-
   return (
     <>
       {offer.privatePart.commonFriends.includes(BTC_PRAGUE_FRIEND) ||

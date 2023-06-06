@@ -17,6 +17,7 @@ import {
 } from '@vexl-next/resources-utils/dist/utils/parsing'
 import {parseCredentialsJson} from '../utils/auth'
 import createNewOfferForMyContacts from '@vexl-next/resources-utils/dist/offers/createOfferHandleContacts'
+import {CountryPrefix} from '@vexl-next/domain/dist/general/CountryPrefix.brand'
 
 function readPublicPartFromFile(offerPublicKey: PublicKeyPemBase64) {
   return (json: string) =>
@@ -74,6 +75,7 @@ export default function createOffer({
           offerApi: api.offer,
           ownerKeyPair: credentials.keypair,
           intendedConnectionLevel,
+          countryPrefix: CountryPrefix.parse(420),
           contactApi: api.contact,
           publicPart: offerPublicPart,
         })

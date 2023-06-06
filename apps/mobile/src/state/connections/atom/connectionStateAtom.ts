@@ -101,7 +101,7 @@ export function createFriendLevelInfoAtom(
 ): Atom<Array<'FIRST_DEGREE' | 'SECOND_DEGREE'>> {
   return atom((get) => {
     const isFirst = get(connectionStateAtom).firstLevel.includes(publicKey)
-    const isSecond = get(connectionStateAtom).firstLevel.includes(publicKey)
+    const isSecond = get(connectionStateAtom).secondLevel.includes(publicKey)
 
     const toReturn: Array<'FIRST_DEGREE' | 'SECOND_DEGREE'> = []
     if (isFirst) toReturn.push('FIRST_DEGREE' as const)

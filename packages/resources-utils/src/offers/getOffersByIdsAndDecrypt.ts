@@ -9,7 +9,10 @@ import * as A from 'fp-ts/Array'
 import * as TE from 'fp-ts/TaskEither'
 import * as T from 'fp-ts/Task'
 import type * as E from 'fp-ts/Either'
-import decryptOffer, {type ErrorDecryptingOffer} from './decryptOffer'
+import decryptOffer, {
+  type ErrorDecryptingOffer,
+  type NonCompatibleOfferVersionError,
+} from './decryptOffer'
 import {type ExtractLeftTE} from '../utils/ExtractLeft'
 
 export type ApiErrorWhileFetchingOffers = ExtractLeftTE<
@@ -26,7 +29,9 @@ export default function getOffersByIdsAndDecrypt({
   keyPair: PrivateKeyHolder
 }): TE.TaskEither<
   ApiErrorWhileFetchingOffers,
-  Array<E.Either<ErrorDecryptingOffer, OfferInfo>>
+  Array<
+    E.Either<ErrorDecryptingOffer | NonCompatibleOfferVersionError, OfferInfo>
+  >
 > {
   return pipe(
     offerApi.getOffersByIds({ids}),

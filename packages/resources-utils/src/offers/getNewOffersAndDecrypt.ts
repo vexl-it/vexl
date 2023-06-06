@@ -2,7 +2,10 @@ import {type OfferPrivateApi} from '@vexl-next/rest-api/dist/services/offer'
 import {type PrivateKeyHolder} from '@vexl-next/cryptography/dist/KeyHolder'
 import * as TE from 'fp-ts/TaskEither'
 import type * as E from 'fp-ts/Either'
-import decryptOffer, {type ErrorDecryptingOffer} from './decryptOffer'
+import decryptOffer, {
+  type ErrorDecryptingOffer,
+  type NonCompatibleOfferVersionError,
+} from './decryptOffer'
 import {pipe} from 'fp-ts/function'
 import * as A from 'fp-ts/Array'
 import * as T from 'fp-ts/Task'
@@ -36,7 +39,9 @@ export default function getNewOffersAndDecrypt({
   modifiedAt: IsoDatetimeString
 }): TE.TaskEither<
   ApiErrorFetchingOffers,
-  Array<E.Either<ErrorDecryptingOffer, OfferInfo>>
+  Array<
+    E.Either<ErrorDecryptingOffer | NonCompatibleOfferVersionError, OfferInfo>
+  >
 > {
   return pipe(
     offersApi.getOffersForMeModifiedOrCreatedAfter({modifiedAt}),

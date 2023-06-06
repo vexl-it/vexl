@@ -28,16 +28,17 @@ export function encryptMessage(
       if (
         (message.messageType === 'REQUEST_REVEAL' ||
           message.messageType === 'APPROVE_REVEAL') &&
-        message.image &&
         message.deanonymizedUser
       ) {
         const {name, partialPhoneNumber} = message.deanonymizedUser
 
+        if (!message.image) return message.deanonymizedUser
+
         return pipe(
-          message.image.replace(/data:image\/.*;base64,/, ''),
+          message.image?.replace(/data:image\/.*;base64,/, ''),
           safeParse(Base64String),
           E.match(
-            () => undefined,
+            () => message.deanonymizedUser,
             (image) => ({
               name,
               partialPhoneNumber,
@@ -80,6 +81,8 @@ export function decryptMessage(
       TE.chainEitherKW(safeParse(ChatMessagePayload)),
       TE.bindTo('payload'),
       TE.bindW('messageImage', ({payload}) => {
+        if (payload.image) return TE.right(payload.image)
+
         if (
           (message.messageType === 'APPROVE_REVEAL' ||
             message.messageType === 'REQUEST_REVEAL') &&
@@ -95,7 +98,7 @@ export function decryptMessage(
             TE.right
           )
         }
-        return TE.right(payload.image)
+        return TE.right(undefined)
       }),
       TE.map(({payload, messageImage}): ChatMessage => {
         return {

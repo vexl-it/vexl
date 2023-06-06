@@ -17,6 +17,7 @@ import {
 import {useTranslation} from '../localization/I18nProvider'
 import {getDefaultStore} from 'jotai'
 import {preferencesAtom} from '../preferences'
+import {CHAT_NOTIFICATION_TYPES} from './notificationTypes'
 
 type UnknownErrorNotifications = BasicError<'UnknownErrorNotifications'>
 
@@ -99,6 +100,22 @@ export function areNotificationsEnabled(): TE.TaskEither<
   }, toBasicError('UnknownErrorNotifications'))
 }
 
+async function getChannelForMessages(): Promise<string> {
+  return await notifee.createChannel({
+    id: 'Chat',
+    name: 'Chat notifications.',
+    importance: AndroidImportance.HIGH,
+  })
+}
+
+async function getDefaultChannel(): Promise<string> {
+  return await notifee.createChannel({
+    id: 'Chat',
+    name: 'Chat notifications.',
+    importance: AndroidImportance.HIGH,
+  })
+}
+
 export async function showUINotificationFromRemoteMessage(
   remoteMessage: FirebaseMessagingTypes.RemoteMessage
 ): Promise<void> {
@@ -106,11 +123,11 @@ export async function showUINotificationFromRemoteMessage(
 
   const {title, body} = remoteMessage.notification ?? remoteMessage.data ?? {}
 
-  const channelId = await notifee.createChannel({
-    id: 'general',
-    name: 'General notifications.',
-    importance: AndroidImportance.DEFAULT,
-  })
+  const channelId =
+    remoteMessage?.data?.type &&
+    CHAT_NOTIFICATION_TYPES.includes(remoteMessage.data.type)
+      ? await getChannelForMessages()
+      : await getDefaultChannel()
 
   if (title && body)
     await notifee.displayNotification({

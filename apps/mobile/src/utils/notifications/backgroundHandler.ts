@@ -10,26 +10,34 @@ import {NEW_CONNECTION} from './notificationTypes'
 export async function processBackgroundMessage(
   remoteMessage: FirebaseMessagingTypes.RemoteMessage
 ): Promise<void> {
-  console.info('📳 Background notification received', remoteMessage)
+  try {
+    console.info('📳 Background notification received', remoteMessage)
 
-  if (!remoteMessage.notification) {
-    console.info(
-      '📳 Notification does not include payload, for system to display UI notification. Calling `showUINotification` function.'
-    )
-    await showUINotificationFromRemoteMessage(remoteMessage)
-  }
+    if (!remoteMessage.notification) {
+      console.info(
+        '📳 Notification does not include payload, for system to display UI notification. Calling `showUINotification` function.'
+      )
+      await showUINotificationFromRemoteMessage(remoteMessage)
+    }
 
-  if (remoteMessage.data?.type === NEW_CONNECTION) {
-    console.info(
-      '📳 Received notification about new user. Checking and updating offers accordingly.'
+    if (remoteMessage.data?.type === NEW_CONNECTION) {
+      console.info(
+        '📳 Received notification about new user. Checking and updating offers accordingly.'
+      )
+      await getDefaultStore().set(updateAllOffersConnectionsActionAtom, {
+        isInBackground: true,
+      })()
+    }
+  } catch (error) {
+    reportError(
+      'error',
+      'Error while processing background notification',
+      error
     )
-    await getDefaultStore().set(updateAllOffersConnectionsActionAtom, {
-      isInBackground: true,
-    })()
   }
 }
 
-export function setupBackgroundMessaging(): void {
+function setupBackgroundMessaging(): void {
   try {
     messaging().setBackgroundMessageHandler(processBackgroundMessage)
     console.log('📳 Registered background message handler')
@@ -41,3 +49,5 @@ export function setupBackgroundMessaging(): void {
     )
   }
 }
+
+setupBackgroundMessaging()

@@ -553,6 +553,7 @@ export default {
     'openInEmail': 'Open in e-mail',
     'somethingWentWrong': 'Something went wrong?',
     'feelFreeToGetInTouch': 'Feel free to get in touch with our support.',
+    'predefinedBody': 'Hi! I am reporting an issue...',
   },
   'AppLogs': {
     'title': 'In app logs',

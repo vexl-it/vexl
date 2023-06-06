@@ -560,6 +560,7 @@ const sk: typeof en = {
     'openInEmail': 'Otvoriť v emaili.',
     'somethingWentWrong': 'Niečo sa pokazilo',
     'feelFreeToGetInTouch': 'Kontaktujte našu podporu.',
+    'predefinedBody': 'Ahoj! Chcel by som nahlásiť chybu...',
   },
   'AppLogs': {
     'title': 'Aplikačné logy',

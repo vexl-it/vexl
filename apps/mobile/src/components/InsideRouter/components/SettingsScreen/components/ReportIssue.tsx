@@ -6,6 +6,8 @@ import emailIconSvg from '../images/emailIconSvg'
 import {getTokens, Stack, Text, XStack} from 'tamagui'
 import {reportIssueDialogVisibleAtom} from '../atoms'
 import openUrl from '../../../../../utils/openUrl'
+import {Platform} from 'react-native'
+import {version} from '../../../../../utils/environment'
 
 function ReportIssue(): JSX.Element {
   const {t} = useTranslation()
@@ -15,6 +17,9 @@ function ReportIssue(): JSX.Element {
   )
 
   const supportEmail = t('settings.items.supportEmail')
+  const emailBody = `${t('reportIssue.predefinedBody')}\n${
+    Platform.OS
+  }-${version}-${Platform.Version}\n\n`
 
   return (
     <SettingsScreenDialog
@@ -24,7 +29,10 @@ function ReportIssue(): JSX.Element {
       primaryButton={{
         text: t('reportIssue.openInEmail'),
         onPress: () => {
-          openUrl(`mailto:${supportEmail}`, t('settings.items.supportEmail'))()
+          openUrl(
+            `mailto:${supportEmail}?body=${emailBody}`,
+            t('settings.items.supportEmail')
+          )()
           return true
         },
       }}

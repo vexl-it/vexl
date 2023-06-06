@@ -9,6 +9,7 @@ import {PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
 import {NoContentResponse} from '../../NoContentResponse.brand'
 import {UnixMilliseconds} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
 import {IsoDatetimeString} from '@vexl-next/domain/dist/utility/IsoDatetimeString.brand'
+import {CountryPrefix} from '@vexl-next/domain/dist/general/CountryPrefix.brand'
 
 export const OfferAdminId = z.string().brand<'OfferAdminId'>()
 export type OfferAdminId = z.TypeOf<typeof OfferAdminId>
@@ -92,6 +93,7 @@ export type OfferPrivateListItem = z.TypeOf<typeof OfferPrivateListItem>
 
 export const UpdateOfferRequest = z.object({
   adminId: OfferAdminId,
+  countryPrefix: CountryPrefix,
   payloadPublic: PublicPayloadEncrypted,
   offerPrivateList: z.array(OfferPrivateListItem),
 })

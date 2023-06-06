@@ -14,6 +14,7 @@ import {
   stringifyToPrettyJson,
 } from '@vexl-next/resources-utils/dist/utils/parsing'
 import updateOffer from '@vexl-next/resources-utils/dist/offers/updateOffer'
+import {CountryPrefix} from '@vexl-next/domain/dist/general/CountryPrefix.brand'
 
 export default function updatePublicPart({
   publicPayloadJson,
@@ -47,6 +48,7 @@ export default function updatePublicPart({
       updateOffer({
         offerApi: api.offer,
         adminId,
+        countryPrefix: CountryPrefix.parse(420),
         publicPayload,
         symmetricKey,
         ownerKeypair: ownerCredentials.keypair,

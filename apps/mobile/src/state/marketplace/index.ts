@@ -21,7 +21,12 @@ import * as Option from 'fp-ts/Option'
 import {type OneOfferInState} from './domain'
 import {privateApiAtom, usePrivateApiAssumeLoggedIn} from '../../api'
 import {pipe} from 'fp-ts/function'
-import {dummySession, sessionAtom, useSessionAssumeLoggedIn} from '../session'
+import {
+  dummySession,
+  sessionAtom,
+  sessionDataOrDummyAtom,
+  useSessionAssumeLoggedIn,
+} from '../session'
 import {isoNow} from '@vexl-next/domain/dist/utility/IsoDatetimeString.brand'
 import * as TE from 'fp-ts/TaskEither'
 import * as E from 'fp-ts/Either'
@@ -62,6 +67,7 @@ import {type OfferEncryptionProgress} from '@vexl-next/resources-utils/dist/offe
 import sendMessageToChatsInBatchActionAtom from '../chat/atoms/sendMessageToChatsInBatchActionAtom'
 import {type ExtractLeftTE} from '@vexl-next/rest-api/dist/services/chat/utils'
 import {type OfferPrivateApi} from '@vexl-next/rest-api/dist/services/offer'
+import getCountryPrefix from '../../utils/getCountryCode'
 
 export function useTriggerOffersRefresh(): Task<void> {
   const api = usePrivateApiAssumeLoggedIn()
@@ -294,7 +300,7 @@ export const updateOfferAtom = atom<
   >
 >(null, (get, set, params) => {
   const api = get(privateApiAtom)
-  const session = get(sessionAtom)
+  const session = get(sessionDataOrDummyAtom)
   const {payloadPublic, symmetricKey, adminId, intendedConnectionLevel} = params
 
   return pipe(
@@ -303,10 +309,8 @@ export const updateOfferAtom = atom<
       adminId,
       publicPayload: payloadPublic,
       symmetricKey,
-      ownerKeypair:
-        session.state === 'loggedIn'
-          ? session.session.privateKey
-          : dummySession.privateKey,
+      countryPrefix: getCountryPrefix(session.phoneNumber),
+      ownerKeypair: session.privateKey,
     }),
     TE.map((r) => {
       const createdOffer: OneOfferInState = {

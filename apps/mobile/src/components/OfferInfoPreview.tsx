@@ -6,6 +6,11 @@ import bankSvg from './InsideRouter/components/MarketplaceScreen/images/bankSvg'
 import {type OfferInfo} from '@vexl-next/domain/dist/general/offers'
 import {useTranslation} from '../utils/localization/I18nProvider'
 import onlineTransferSvg from './InsideRouter/components/MarketplaceScreen/images/onlineTransferSvg'
+import getBtcPragueLogoSvg from './InsideRouter/components/MarketplaceScreen/images/btcPragueLogoSvg'
+import {useMemo} from 'react'
+
+const BTC_PRAGUE_FRIEND = '8o5OvkfRga/xBYbfb0e0MJZIjy4g7xGVimCdNLrydGs='
+const BTC_PRAGUE_FRIEND_STAGE = '9c6r0q7LCn1oqES2pfqQDVQH91fY8ZHYcJKbJYOU7hE='
 
 const InfoItemContainer = styled(Stack, {
   f: 1,
@@ -41,16 +46,37 @@ function OfferInfoPreview({
   negative?: boolean
 }): JSX.Element {
   const {t} = useTranslation()
+  const btcPragueLogoSvg = useMemo(
+    () => getBtcPragueLogoSvg({darkBackground: negative}),
+    [negative]
+  )
+
+  console.log(
+    `OfferTitle: ${
+      offer.publicPart.offerDescription
+    } and hash: ${JSON.stringify(offer.privatePart.commonFriends, null, 2)}`
+  )
+
   return (
     <>
-      <Text
-        fos={20}
-        mb="$4"
-        color={negative ? '$greyOnBlack' : '$black'}
-        ff="$body500"
-      >
-        {offer.publicPart.offerDescription}
-      </Text>
+      {offer.privatePart.commonFriends.includes(BTC_PRAGUE_FRIEND) ||
+        (offer.privatePart.commonFriends.includes(BTC_PRAGUE_FRIEND_STAGE) && (
+          <Stack alignSelf={'flex-end'}>
+            <SvgImage width={60} height={20} source={btcPragueLogoSvg} />
+          </Stack>
+        ))}
+      <XStack ai={'flex-start'} jc={'space-between'}>
+        <Stack>
+          <Text
+            fos={20}
+            mb="$4"
+            color={negative ? '$greyOnBlack' : '$black'}
+            ff="$body500"
+          >
+            {offer.publicPart.offerDescription}
+          </Text>
+        </Stack>
+      </XStack>
       <XStack>
         <InfoItemContainer>
           <PriceText>

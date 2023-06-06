@@ -9,10 +9,10 @@ import {
   toBasicError,
 } from '@vexl-next/domain/dist/utility/errors'
 import Animated, {
-  BounceIn,
-  BounceOut,
   FadeIn,
   FadeOut,
+  SlideInDown,
+  SlideOutDown,
 } from 'react-native-reanimated'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {useFocusEffect} from '@react-navigation/native'
@@ -109,8 +109,8 @@ function AreYouSureDialog(): JSX.Element | null {
       ></Animated.View>
       <Animated.View
         style={styles.bounce}
-        entering={BounceIn}
-        exiting={BounceOut}
+        entering={SlideInDown}
+        exiting={SlideOutDown}
       >
         <YStack
           pt={insets.top}

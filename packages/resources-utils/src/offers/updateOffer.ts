@@ -16,6 +16,7 @@ import decryptOffer, {
   type NonCompatibleOfferVersionError,
 } from './decryptOffer'
 import {type ExtractLeftTE} from '../utils/ExtractLeft'
+import {type CountryPrefix} from '@vexl-next/domain/dist/general/CountryPrefix.brand'
 
 export type ApiErrorUpdatingOffer = ExtractLeftTE<
   ReturnType<OfferPrivateApi['updateOffer']>
@@ -24,12 +25,14 @@ export default function updateOffer({
   offerApi,
   adminId,
   publicPayload,
+  countryPrefix,
   symmetricKey,
   ownerKeypair,
 }: {
   offerApi: OfferPrivateApi
   adminId: OfferAdminId
   publicPayload: OfferPublicPart
+  countryPrefix: CountryPrefix
   symmetricKey: SymmetricKey
   ownerKeypair: PrivateKeyHolder
 }): TE.TaskEither<
@@ -48,6 +51,7 @@ export default function updateOffer({
       pipe(
         offerApi.updateOffer({
           adminId,
+          countryPrefix,
           payloadPublic: encryptedPayload,
           offerPrivateList: [],
         }),

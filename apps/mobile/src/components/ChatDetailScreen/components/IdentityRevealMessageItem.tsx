@@ -38,6 +38,29 @@ function IdentityRevealMessageItem({
       identityRevealStatus === 'theyAsked' ||
       message.state === 'received')
   ) {
+    if (identityRevealStatus === 'shared') {
+      return (
+        <BigIconMessage
+          isLatest={isLatest}
+          smallerText={t('messages.identityRevealed')}
+          biggerText={message.message.deanonymizedUser?.name ?? ''}
+          bottomText={message.message.deanonymizedUser?.partialPhoneNumber}
+          icon={
+            direction === 'incoming' && message.message.image ? (
+              <Image
+                height={80}
+                width={80}
+                borderRadius={'$8'}
+                src={{uri: message.message.image}}
+              />
+            ) : (
+              <UserAvatar height={80} width={80} userImage={image} />
+            )
+          }
+        />
+      )
+    }
+
     return (
       <BigIconMessage
         isLatest={isLatest}
@@ -55,7 +78,7 @@ function IdentityRevealMessageItem({
     return (
       <BigIconMessage
         isLatest={isLatest}
-        smallerText={t('messages.identityRevealRequest')}
+        smallerText={t('messages.identityRevealed')}
         biggerText={message.message.deanonymizedUser?.name ?? ''}
         bottomText={message.message.deanonymizedUser?.partialPhoneNumber}
         icon={

@@ -1,36 +1,36 @@
 import {atom, type SetStateAction, type WritableAtom} from 'jotai'
 import {createScope, molecule} from 'jotai-molecules'
 import {generateChatId} from '@vexl-next/domain/dist/general/messaging'
-import {offerForChatOriginAtom} from '../../state/marketplace/atom'
+import {offerForChatOriginAtom} from '../../../state/marketplace/atom'
 import {selectAtom, splitAtom} from 'jotai/utils'
 import {generatePrivateKey} from '@vexl-next/cryptography/dist/KeyHolder'
-import sendMessageActionAtom from '../../state/chat/atoms/sendMessageActionAtom'
-import {type ChatWithMessages} from '../../state/chat/domain'
-import {messagesToListData} from './utils'
-import focusRequestMessageAtom from '../../state/chat/atoms/focusRequestMessageAtom'
+import sendMessageActionAtom from '../../../state/chat/atoms/sendMessageActionAtom'
+import {type ChatWithMessages} from '../../../state/chat/domain'
+import {messagesToListData} from '../utils'
+import focusRequestMessageAtom from '../../../state/chat/atoms/focusRequestMessageAtom'
 import {focusAtom} from 'jotai-optics'
-import {focusWasDeniedAtom} from '../../state/chat/atoms/focusDenyRequestMessageAtom'
-import deleteChatActionAtom from '../../state/chat/atoms/deleteChatActionAtom'
-import blockChatActionAtom from '../../state/chat/atoms/blockChatActionAtom'
+import {focusWasDeniedAtom} from '../../../state/chat/atoms/focusDenyRequestMessageAtom'
+import deleteChatActionAtom from '../../../state/chat/atoms/deleteChatActionAtom'
+import blockChatActionAtom from '../../../state/chat/atoms/blockChatActionAtom'
 import * as TE from 'fp-ts/TaskEither'
 import * as E from 'fp-ts/Either'
 import {pipe} from 'fp-ts/function'
-import {loadingOverlayDisplayedAtom} from '../LoadingOverlayProvider'
+import {loadingOverlayDisplayedAtom} from '../../LoadingOverlayProvider'
 import {Alert} from 'react-native'
-import randomName from '../../utils/randomName'
-import selectOtherSideDataAtom from '../../state/chat/atoms/selectOtherSideDataAtom'
-import focusOtherSideLeftAtom from '../../state/chat/atoms/focusOtherSideLeftAtom'
-import {askAreYouSureActionAtom} from '../AreYouSureDialog'
-import {deleteChatStep1Svg} from './images/deleteChatSvg'
-import {translationAtom} from '../../utils/localization/I18nProvider'
-import {toCommonErrorMessage} from '../../utils/useCommonErrorMessages'
+import randomName from '../../../utils/randomName'
+import selectOtherSideDataAtom from '../../../state/chat/atoms/selectOtherSideDataAtom'
+import focusOtherSideLeftAtom from '../../../state/chat/atoms/focusOtherSideLeftAtom'
+import {askAreYouSureActionAtom} from '../../AreYouSureDialog'
+import {deleteChatStep1Svg} from '../images/deleteChatSvg'
+import {translationAtom} from '../../../utils/localization/I18nProvider'
+import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 import revealIdentityActionAtom, {
   type RevealMessageType,
-} from '../../state/chat/atoms/revealIdentityActionAtom'
-import reportError from '../../utils/reportError'
+} from '../../../state/chat/atoms/revealIdentityActionAtom'
+import reportError from '../../../utils/reportError'
 import connectionStateAtom, {
   createFriendLevelInfoAtom,
-} from '../../state/connections/atom/connectionStateAtom'
+} from '../../../state/connections/atom/connectionStateAtom'
 import {type FriendLevel} from '@vexl-next/domain/dist/general/offers'
 
 type ChatUIMode = 'approval' | 'messages'
@@ -151,7 +151,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
           {
             image: {
               type: 'requiredImage',
-              image: require('./images/blockChat1.png'),
+              image: require('../images/blockChat1.png'),
             },
             title: t('messages.blockForewerQuestion'),
             description: t('messages.blockChatExplanation1'),
@@ -161,7 +161,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
           {
             image: {
               type: 'requiredImage',
-              image: require('./images/blockChat1.png'),
+              image: require('../images/blockChat1.png'),
             },
             title: t('common.youSure'),
             description: t('messages.blockChatExplanation2'),

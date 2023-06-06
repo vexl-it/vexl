@@ -462,6 +462,10 @@ const cs: typeof en = {
       'Toto bude tvoje první interakce s touto nabídkou.',
     'wellLetYouKnowOnceUserAccepts':
       'Žádost byla odeslána. Dáme ti vědět, jakmile druhá strana odpoví.',
+    'identitySend': {
+      'title': 'Poslali jste žádost o odhalení identity',
+      'subtitle': 'Čekám na odpověď...',
+    },
     'messagePreviews': {
       'incoming': {
         'MESSAGE': '{{them}}: {{message}}',
@@ -530,6 +534,7 @@ const cs: typeof en = {
     'identityAlreadyRequested':
       'V konverzaci již byl odeslán požadavek na zjištění identity',
     'identityRevealRequest': 'Žádost o odhalení identity',
+    'identityRevealed': 'Identita odhalena',
     'tapToReveal': 'Klikni pro odhalení identity nebo zamítnutí',
     'letsRevealIdentities': 'Pojďme si odhalit identity!',
     'reveal': 'Odhalit',

@@ -7,6 +7,7 @@ import UserAvatar from '../../UserAvatar'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import useResetNavigationToMessagingScreen from '../../../utils/useResetNavigationToMessagingScreen'
 import {Keyboard} from 'react-native'
+import {useHideActionForMessage} from '../atoms/createHideActionForMessageMmkvAtom'
 
 function QuickActionBannerUi({
   leftElement,
@@ -74,9 +75,14 @@ function QuickActionBanner(): JSX.Element | null {
   const deleteChat = useSetAtom(deleteChatWithUiFeedbackAtom)
   const revealIdentity = useSetAtom(revealIdentityWithUiFeedbackAtom)
 
-  if (!lastMessage || lastMessage.state === 'sent') return null
+  const [isHidden, hide] = useHideActionForMessage(lastMessage?.message.uuid)
 
-  if (lastMessage.message.messageType === 'DELETE_CHAT') {
+  if (!lastMessage || isHidden) return null
+
+  if (
+    lastMessage.message.messageType === 'DELETE_CHAT' &&
+    lastMessage.state === 'received'
+  ) {
     return (
       <QuickActionBannerUi
         topText={t('messages.messagePreviews.incoming.DELETE_CHAT', {
@@ -102,7 +108,10 @@ function QuickActionBanner(): JSX.Element | null {
       />
     )
   }
-  if (lastMessage.message.messageType === 'BLOCK_CHAT') {
+  if (
+    lastMessage.message.messageType === 'BLOCK_CHAT' &&
+    lastMessage.state === 'received'
+  ) {
     return (
       <QuickActionBannerUi
         topText={t('messages.messagePreviews.incoming.BLOCK_CHAT', {
@@ -128,7 +137,10 @@ function QuickActionBanner(): JSX.Element | null {
     )
   }
 
-  if (lastMessage.message.messageType === 'INBOX_DELETED') {
+  if (
+    lastMessage.message.messageType === 'INBOX_DELETED' &&
+    lastMessage.state === 'received'
+  ) {
     return (
       <QuickActionBannerUi
         topText={t('messages.messagePreviews.incoming.INBOX_DELETED', {
@@ -154,7 +166,10 @@ function QuickActionBanner(): JSX.Element | null {
     )
   }
 
-  if (lastMessage.message.messageType === 'OFFER_DELETED') {
+  if (
+    lastMessage.message.messageType === 'OFFER_DELETED' &&
+    lastMessage.state === 'received'
+  ) {
     return (
       <QuickActionBannerUi
         topText={t('messages.messagePreviews.incoming.OFFER_DELETED', {
@@ -191,6 +206,23 @@ function QuickActionBanner(): JSX.Element | null {
         }
         onButtonPress={() => {
           void revealIdentity('RESPOND_REVEAL')
+        }}
+      />
+    )
+  }
+
+  if (identityRevealStatus === 'iAsked') {
+    return (
+      <QuickActionBannerUi
+        topText={t('messages.identitySend.title')}
+        bottomText={t('messages.identitySend.subtitle')}
+        headingType={'boldTop'}
+        buttonText={t('common.ok')}
+        leftElement={
+          <UserAvatar width={48} height={48} userImage={otherSideData.image} />
+        }
+        onButtonPress={() => {
+          hide()
         }}
       />
     )

@@ -213,6 +213,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     return !(
       (lastMessage?.state === 'received' &&
         lastMessage.message.messageType === 'INBOX_DELETED') ||
+      lastMessage?.message.messageType === 'DELETE_CHAT' ||
       lastMessage?.message.messageType === 'BLOCK_CHAT'
     )
   })

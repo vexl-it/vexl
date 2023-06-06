@@ -437,9 +437,11 @@ const sk: typeof en = {
       'Svoju ponuku si môžeš skontrolovať v časti Moje ponuky',
     'errorEditingOffer': 'Chyba pri úprave ponuky',
     'errorOfferNotFound': 'Ponuka nebola nájdená!',
-    'deletingYourOffer': 'Odstránenie tvojej ponuky ...',
     'offerDeleted': 'Ponuka odstránená',
     'errorDeletingOffer': 'Chyba pri odstraňovaní ponuky',
+    'deleteOffer': 'Zmazať ponuku?',
+    'deleteOfferDescription':
+      'Naozaj chcete vymazať svoju ponuku? Túto akciu nie je možné vrátiť späť.',
   },
   'filterOffers': {
     'filterResults': 'Filtrovanie výsledkov',

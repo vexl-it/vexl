@@ -1,15 +1,15 @@
 import {Stack, Text, XStack} from 'tamagui'
 import Button from '../../Button'
-import React from 'react'
+import React, {useCallback} from 'react'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import useContent from '../useContent'
-import {ActivityIndicator, Modal, ScrollView, StyleSheet} from 'react-native'
+import {ScrollView, StyleSheet} from 'react-native'
 import ScreenTitle from '../../ScreenTitle'
 import IconButton from '../../IconButton'
 import pauseSvg from '../images/pauseSvg'
 import playSvg from '../images/playSvg'
 import closeSvg from '../../images/closeSvg'
-import {useAtom, useAtomValue, useSetAtom} from 'jotai'
+import {useAtomValue, useSetAtom} from 'jotai'
 import OfferInProgress from './OfferInProgress'
 import {useMolecule} from 'jotai-molecules'
 import {pipe} from 'fp-ts/function'
@@ -17,6 +17,9 @@ import * as T from 'fp-ts/Task'
 import OfferForm from '../../OfferForm'
 import {offerFormMolecule} from '../atoms/offerFormStateAtoms'
 import trashSvg from '../images/trashSvg'
+import {askAreYouSureActionAtom} from '../../AreYouSureDialog'
+import * as TE from 'fp-ts/TaskEither'
+import {useShowLoadingOverlay} from '../../LoadingOverlayProvider'
 
 const styles = StyleSheet.create({
   contentStyles: {
@@ -38,7 +41,6 @@ function EditOfferContent({navigateBack}: Props): JSX.Element {
     editOfferAtom,
     offerActiveAtom,
     deleteOfferActionAtom,
-    deletingOfferAtom,
   } = useMolecule(offerFormMolecule)
   const offerActive = useAtomValue(offerActiveAtom)
   const loading = useAtomValue(loadingAtom)
@@ -46,9 +48,41 @@ function EditOfferContent({navigateBack}: Props): JSX.Element {
   const toggleOfferActivePress = useSetAtom(toggleOfferActiveAtom)
   const editOffer = useSetAtom(editOfferAtom)
   const deleteOffer = useSetAtom(deleteOfferActionAtom)
-  const [deletingOffer, setDeletingOffer] = useAtom(deletingOfferAtom)
+  const showAreYouSure = useSetAtom(askAreYouSureActionAtom)
+  const loadingOverlay = useShowLoadingOverlay()
 
   const content = useContent()
+
+  const deleteOfferWithAreYouSure = useCallback(async () => {
+    await pipe(
+      showAreYouSure({
+        variant: 'danger',
+        steps: [
+          {
+            title: t('editOffer.deleteOffer'),
+            description: t('editOffer.deleteOfferDescription'),
+            positiveButtonText: t('common.yesDelete'),
+            negativeButtonText: t('common.nope'),
+          },
+        ],
+      }),
+      TE.match(
+        () => {},
+        () => {
+          loadingOverlay.show()
+          void pipe(
+            deleteOffer(),
+            T.map((success) => {
+              loadingOverlay.hide()
+              if (success) {
+                navigateBack()
+              }
+            })
+          )()
+        }
+      )
+    )()
+  }, [deleteOffer, loadingOverlay, navigateBack, showAreYouSure, t])
 
   return (
     <>
@@ -60,16 +94,7 @@ function EditOfferContent({navigateBack}: Props): JSX.Element {
                 variant="dark"
                 icon={trashSvg}
                 onPress={() => {
-                  setDeletingOffer(true)
-                  void pipe(
-                    deleteOffer(),
-                    T.map((success) => {
-                      if (success) {
-                        navigateBack()
-                      }
-                      setDeletingOffer(false)
-                    })
-                  )()
+                  void deleteOfferWithAreYouSure()
                 }}
               />
               <IconButton
@@ -137,16 +162,6 @@ function EditOfferContent({navigateBack}: Props): JSX.Element {
           }
           visible={editingOffer}
         />
-      )}
-      {deletingOffer && (
-        <Modal animationType="fade" transparent visible={deletingOffer}>
-          <Stack f={1} ai={'center'} jc={'center'} bc={'$black'} gap={'$4'}>
-            <ActivityIndicator size={'large'} />
-            <Text ff={'$body600'} fos={18} col={'$white'}>
-              {t('editOffer.deletingYourOffer')}
-            </Text>
-          </Stack>
-        </Modal>
       )}
     </>
   )

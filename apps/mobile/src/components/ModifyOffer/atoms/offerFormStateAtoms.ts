@@ -195,7 +195,6 @@ export const offerFormMolecule = molecule((getMolecule, getScope) => {
   const loadingAtom = atom<boolean>(false)
   const editingOfferAtom = atom<boolean>(false)
   const encryptingOfferAtom = atom<boolean>(false)
-  const deletingOfferAtom = atom<boolean>(false)
   const createOfferProgressAtom = atom<OfferProgressState | undefined>(
     undefined
   )
@@ -444,7 +443,6 @@ export const offerFormMolecule = molecule((getMolecule, getScope) => {
     loadingAtom,
     editingOfferAtom,
     encryptingOfferAtom,
-    deletingOfferAtom,
     toggleOfferActiveAtom,
     editOfferAtom,
     createOfferActionAtom,

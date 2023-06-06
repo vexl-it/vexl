@@ -430,9 +430,11 @@ export default {
     'youCanCheckYourOffer': 'You can check your offer in your offers section',
     'errorEditingOffer': 'Error while editing offer',
     'errorOfferNotFound': 'Offer not found!',
-    'deletingYourOffer': 'Deleting your offer ...',
     'offerDeleted': 'Offer deleted',
     'errorDeletingOffer': 'Error while deleting offer',
+    'deleteOffer': 'Delete offer?',
+    'deleteOfferDescription':
+      'Are you sure you want to delete this offer? This action cannot be undone',
   },
   'filterOffers': {
     'filterResults': 'Filter results',

@@ -38,7 +38,10 @@ import updateOffer, {
   type ApiErrorUpdatingOffer,
 } from '@vexl-next/resources-utils/dist/offers/updateOffer'
 import {type OfferAdminId} from '@vexl-next/rest-api/dist/services/offer/contracts'
-import {type ErrorDecryptingOffer} from '@vexl-next/resources-utils/dist/offers/decryptOffer'
+import {
+  type ErrorDecryptingOffer,
+  type NonCompatibleOfferVersionError,
+} from '@vexl-next/resources-utils/dist/offers/decryptOffer'
 import {type BasicError} from '@vexl-next/domain/dist/utility/errors'
 import {useCallback, useMemo} from 'react'
 import deduplicate from '../../utils/deduplicate'
@@ -110,7 +113,20 @@ export function useTriggerOffersRefresh(): Task<void> {
                 // Is ok, all offers decrypted ok
               },
               (error) => {
-                reportError('error', 'Error while decrypting offer', error)
+                const criticalErrors = error.filter(
+                  (one) => one._tag !== 'NonCompatibleOfferVersionError'
+                )
+                if (criticalErrors.length > 0)
+                  reportError('error', 'Error while decrypting offers', error)
+
+                const nonCompatibleErrors = error.filter(
+                  (one) => one._tag === 'NonCompatibleOfferVersionError'
+                )
+                if (nonCompatibleErrors.length > 0) {
+                  console.info(
+                    `Skipping ${nonCompatibleErrors.length} offers because they are not compatible.`
+                  )
+                }
               }
             )
           )
@@ -207,6 +223,7 @@ export const createOfferAtom = atom<
     | ApiErrorWhileCreatingOffer
     | ErrorGeneratingSymmetricKey
     | ErrorEncryptingPublicPart
+    | NonCompatibleOfferVersionError
     | ErrorDecryptingOffer,
     OneOfferInState
   >
@@ -269,7 +286,10 @@ export const updateOfferAtom = atom<
     }
   ],
   TE.TaskEither<
-    ApiErrorUpdatingOffer | ErrorEncryptingPublicPart | ErrorDecryptingOffer,
+    | ApiErrorUpdatingOffer
+    | ErrorEncryptingPublicPart
+    | ErrorDecryptingOffer
+    | NonCompatibleOfferVersionError,
     OneOfferInState
   >
 >(null, (get, set, params) => {

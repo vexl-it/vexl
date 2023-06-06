@@ -11,7 +11,10 @@ import encryptOfferPublicPayload, {
   type ErrorEncryptingPublicPart,
 } from './utils/encryptOfferPublicPayload'
 import {type PrivateKeyHolder} from '@vexl-next/cryptography/dist/KeyHolder'
-import decryptOffer, {type ErrorDecryptingOffer} from './decryptOffer'
+import decryptOffer, {
+  type ErrorDecryptingOffer,
+  type NonCompatibleOfferVersionError,
+} from './decryptOffer'
 import {type ExtractLeftTE} from '../utils/ExtractLeft'
 
 export type ApiErrorUpdatingOffer = ExtractLeftTE<
@@ -30,7 +33,10 @@ export default function updateOffer({
   symmetricKey: SymmetricKey
   ownerKeypair: PrivateKeyHolder
 }): TE.TaskEither<
-  ApiErrorUpdatingOffer | ErrorEncryptingPublicPart | ErrorDecryptingOffer,
+  | ApiErrorUpdatingOffer
+  | ErrorEncryptingPublicPart
+  | ErrorDecryptingOffer
+  | NonCompatibleOfferVersionError,
   OfferInfo
 > {
   return pipe(

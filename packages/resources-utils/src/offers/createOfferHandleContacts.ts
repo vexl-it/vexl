@@ -20,7 +20,10 @@ import {type OfferAdminId} from '@vexl-next/rest-api/dist/services/offer/contrac
 import encryptOfferPublicPayload, {
   type ErrorEncryptingPublicPart,
 } from './utils/encryptOfferPublicPayload'
-import decryptOffer, {type ErrorDecryptingOffer} from './decryptOffer'
+import decryptOffer, {
+  type ErrorDecryptingOffer,
+  type NonCompatibleOfferVersionError,
+} from './decryptOffer'
 import {
   type ApiErrorFetchingContactsForOffer,
   type ConnectionsInfoForOffer,
@@ -61,7 +64,8 @@ export default function createNewOfferForMyContacts({
   | ApiErrorWhileCreatingOffer
   | ErrorGeneratingSymmetricKey
   | ErrorDecryptingOffer
-  | ErrorEncryptingPublicPart,
+  | ErrorEncryptingPublicPart
+  | NonCompatibleOfferVersionError,
   CreateOfferResult
 > {
   return pipe(

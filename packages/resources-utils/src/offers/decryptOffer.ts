@@ -24,6 +24,10 @@ export interface ErrorDecryptingOffer
   serverOffer: ServerOffer
 }
 
+export interface NonCompatibleOfferVersionError {
+  _tag: 'NonCompatibleOfferVersionError'
+}
+
 function decryptedPayloadsToOffer({
   serverOffer,
   privatePayload,
@@ -60,9 +64,21 @@ export default function decryptOffer(
   privateKey: KeyHolder.PrivateKeyHolder
 ): (
   serverOffer: ServerOffer
-) => TE.TaskEither<ErrorDecryptingOffer, OfferInfo> {
-  return (serverOffer: ServerOffer) =>
-    pipe(
+) => TE.TaskEither<
+  ErrorDecryptingOffer | NonCompatibleOfferVersionError,
+  OfferInfo
+> {
+  return (serverOffer: ServerOffer) => {
+    if (
+      serverOffer.publicPayload.at(0) !== '0' ||
+      serverOffer.privatePayload.at(0) !== '0'
+    ) {
+      return TE.left({
+        _tag: 'NonCompatibleOfferVersionError',
+      })
+    }
+
+    return pipe(
       TE.right(serverOffer),
       TE.bindTo('serverOffer'),
       TE.bindW('privatePayload', ({serverOffer}) => {
@@ -92,4 +108,5 @@ export default function decryptOffer(
         serverOffer,
       }))
     )
+  }
 }

@@ -435,9 +435,11 @@ const cs: typeof en = {
       'Svou nabídku můžeš zkontrolovat v sekci Moje nabídky',
     'errorEditingOffer': 'Chyba při úpravě nabídky',
     'errorOfferNotFound': 'Nabídka nebyla nalezena!',
-    'deletingYourOffer': 'Odstranění tvojí nabídky ...',
     'offerDeleted': 'Nabídka smazána',
     'errorDeletingOffer': 'Chyba při mazání nabídky',
+    'deleteOffer': 'Smazat nabídku?',
+    'deleteOfferDescription':
+      'Opravdu chcete smazat nabídku? Tuto akci již nikdy nebudete moci vrátit zpět.',
   },
   'filterOffers': {
     'filterResults': 'Filtrování výsledků',

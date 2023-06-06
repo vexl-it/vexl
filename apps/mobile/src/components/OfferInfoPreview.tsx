@@ -53,12 +53,12 @@ function OfferInfoPreview({
 
   return (
     <>
-      {offer.privatePart.commonFriends.includes(BTC_PRAGUE_FRIEND) ||
-        (offer.privatePart.commonFriends.includes(BTC_PRAGUE_FRIEND_STAGE) && (
-          <Stack alignSelf={'flex-end'}>
-            <SvgImage width={60} height={20} source={btcPragueLogoSvg} />
-          </Stack>
-        ))}
+      {(offer.privatePart.commonFriends.includes(BTC_PRAGUE_FRIEND) ||
+        offer.privatePart.commonFriends.includes(BTC_PRAGUE_FRIEND_STAGE)) && (
+        <Stack alignSelf={'flex-end'}>
+          <SvgImage width={60} height={20} source={btcPragueLogoSvg} />
+        </Stack>
+      )}
       <XStack ai={'flex-start'} jc={'space-between'}>
         <Stack>
           <Text

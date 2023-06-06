@@ -12,6 +12,7 @@ import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import infoSvg from '../../../images/infoSvg'
 import Slider from '../../../Slider'
 import dashSvg from '../../../images/dashSvg'
+import {DateTime} from 'luxon'
 
 const SLIDER_STEP_USD_EUR = 100
 const SLIDER_STEP_CZK = 1000
@@ -46,6 +47,8 @@ function AmountOfTransaction({
   const [amountBottomLimit, setAmountBottomLimit] = useAtom(
     amountBottomLimitAtom
   )
+  const [, setDate] = useState(DateTime.now())
+  const [forceRerender, setForceRerender] = useState(false)
 
   const currency = useAtomValue(currencyAtom)
   const SLIDER_STEP = useMemo(
@@ -103,8 +106,14 @@ function AmountOfTransaction({
     e: NativeSyntheticEvent<TextInputChangeEventData>,
     inputType: InputType
   ): void => {
-    if (inputType === 'min') setBottomLimit(inputMin)
-    if (inputType === 'max') setTopLimit(inputMax)
+    if (inputType === 'min') {
+      setBottomLimit(inputMin)
+      setForceRerender(!forceRerender)
+    }
+    if (inputType === 'max') {
+      setTopLimit(inputMax)
+      setForceRerender(!forceRerender)
+    }
   }
 
   // this useEffect needs to be defined exactly this way as slider component needs to rerender once more
@@ -114,6 +123,12 @@ function AmountOfTransaction({
     setInputMax(amountTopLimit ?? SLIDER_MAX_VALUE)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currency])
+
+  // need this to add rerender after setting value for slider through Input, as slider UI did not
+  // rerender correctly before
+  useEffect(() => {
+    setDate(DateTime.now())
+  }, [forceRerender])
 
   return currency &&
     amountBottomLimit !== undefined &&

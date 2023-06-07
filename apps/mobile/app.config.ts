@@ -1,5 +1,5 @@
-const VERSION_CODE = 33
-const VERSION = '1.0.7'
+const VERSION_CODE = 35
+const VERSION = '1.1.0'
 const ENV_PRESET = process.env.ENV_PRESET
 
 const presets = {
@@ -63,13 +63,16 @@ export default {
     'infoPlist': {
       'UIBackgroundModes': ['fetch', 'remote-notification'],
       'LSApplicationQueriesSchemes': ['itms-apps'],
-      'FirebaseDynamicLinksCustomDomains': ['https://link.vexl.it'],
+      'FirebaseDynamicLinksCustomDomains': [
+        'https://link.vexl.it',
+        'https://nextlink.vexl.it',
+      ],
     },
     'googleServicesFile': extra.googleServicesInfoPlistFile,
-    'associatedDomains': ['applinks:link.vexl.it'],
+    'associatedDomains': ['applinks:link.vexl.it', 'applinks:nextlink.vexl.it'],
   },
   'android': {
-    versionCode: VERSION_CODE,
+    'versionCode': VERSION_CODE,
     'softwareKeyboardLayoutMode': 'resize',
     'adaptiveIcon': {
       'foregroundImage': extra.foregroundImage,
@@ -77,6 +80,30 @@ export default {
     },
     'package': extra.packageName,
     'googleServicesFile': './creds/google-services.json',
+    'intentFilters': [
+      {
+        'action': 'VIEW',
+        'autoVerify': true,
+        'data': [
+          {
+            'scheme': 'https',
+            'host': 'vexl.it',
+            'pathPrefix': '/',
+          },
+          {
+            'scheme': 'https',
+            'host': 'link.vexl.it',
+            'pathPrefix': '/',
+          },
+          {
+            'scheme': 'https',
+            'host': 'nextlink.vexl.it',
+            'pathPrefix': '/',
+          },
+        ],
+        category: ['BROWSABLE', 'DEFAULT'],
+      },
+    ],
   },
   'web': {
     'favicon': './assets/favicon.png',

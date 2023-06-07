@@ -10,13 +10,13 @@ import {
 import {atom, type Atom} from 'jotai'
 import {selectAtom} from 'jotai/utils'
 import {pipe} from 'fp-ts/function'
-import {toE164PhoneNumber} from '@vexl-next/domain/dist/general/E164PhoneNumber.brand'
 import {hashPhoneNumber} from './utils'
 import {type BasicError} from '@vexl-next/domain/dist/utility/errors'
 import {privateApiAtom} from '../../api'
 import {type ExtractLeftTE} from '@vexl-next/rest-api/dist/services/chat/utils'
 import {type ContactPrivateApi} from '@vexl-next/rest-api/dist/services/contact'
 import {type CryptoError} from '@vexl-next/resources-utils/dist/utils/crypto'
+import toE164PhoneNumberWithDefaultCountryCode from '../../utils/toE164PhoneNumberWithDefaultCountryCode'
 
 export const importedContactsStorageAtom = atomWithParsedMmkvStorage(
   'importedContacts',
@@ -61,7 +61,7 @@ export const importContactFromLinkActionAtom = atom(
   > =>
     pipe(
       importedContact.numberToDisplay,
-      toE164PhoneNumber,
+      toE164PhoneNumberWithDefaultCountryCode,
       E.fromOption(
         () =>
           ({

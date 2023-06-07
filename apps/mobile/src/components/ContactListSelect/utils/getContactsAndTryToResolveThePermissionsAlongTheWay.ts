@@ -2,9 +2,9 @@ import type * as TE from 'fp-ts/TaskEither'
 import * as E from 'fp-ts/Either'
 import * as O from 'fp-ts/Option'
 import * as Contacts from 'expo-contacts'
-import {toE164PhoneNumber} from '@vexl-next/domain/dist/general/E164PhoneNumber.brand'
 import {ContactNormalized} from '../brands/ContactNormalized.brand'
 import {SortTypes} from 'expo-contacts'
+import toE164PhoneNumberWithDefaultCountryCode from '../../../utils/toE164PhoneNumberWithDefaultCountryCode'
 
 export interface PermissionsNotGranted {
   readonly _tag: 'PermissionsNotGranted'
@@ -25,7 +25,10 @@ function normalizeContactPhoneNumbersOrNone(
 
   const normalizedWithNulls = phoneNumbers.map(
     ({label, number, countryCode}) => {
-      const normalizedNumber = toE164PhoneNumber(number ?? '', countryCode)
+      const normalizedNumber = toE164PhoneNumberWithDefaultCountryCode(
+        number ?? '',
+        countryCode
+      )
 
       if (O.isNone(normalizedNumber) || !number) {
         return null
@@ -68,6 +71,7 @@ export default function getContactsAndTryToResolveThePermissionsAlongTheWay(): T
       const contacts = await Contacts.getContactsAsync({
         sort: SortTypes.UserDefault,
       })
+
       return E.right(
         contacts.data.map(normalizeContactPhoneNumbersOrNone).flat()
       )

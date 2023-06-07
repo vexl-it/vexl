@@ -23,6 +23,7 @@ import {replaceAll} from '../../utils/replaceAll'
 import {focusAtom} from 'jotai-optics'
 import getValueFromSetStateActionOfAtom from '../../utils/atomUtils/getValueFromSetStateActionOfAtom'
 import {type UserNameAndAvatar} from '@vexl-next/domain/dist/general/UserNameAndAvatar.brand'
+import {parsePhoneNumber} from 'awesome-phonenumber'
 
 // duplicated code but we can not remove cyclic dependency otherwise
 // --------------
@@ -214,6 +215,13 @@ export const userDataAtom = atom<UserNameAndAvatar>((get) => {
     userName: session.realUserData.userName,
     image: session.realUserData.image ?? session.anonymizedUserData.image,
   }
+})
+
+export const countryCodeAtom = atom<string>((get) => {
+  return (
+    parsePhoneNumber(get(sessionDataOrDummyAtom).phoneNumber)?.regionCode ??
+    'cs'
+  )
 })
 
 // --------- hooks ---------

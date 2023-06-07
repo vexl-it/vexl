@@ -22,6 +22,7 @@ import messaging from '@react-native-firebase/messaging'
 import Preferences from './components/Preferences'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 import reportError from '../../utils/reportError'
+import {importedContactsAtom} from '../../state/contacts'
 
 // const ContentScroll = styled(ScrollView, {
 //   marginBottom: '$2',
@@ -54,6 +55,15 @@ function DebugScreen(): JSX.Element {
             <Text>apiEnv: {JSON.stringify(apiEnv, null, 2)}</Text>
 
             <Spacer />
+            <Button
+              variant={'primary'}
+              size={'small'}
+              text={'Print contacts'}
+              onPress={() => {
+                const contacts = store.get(importedContactsAtom)
+                console.log('Contacts: ', JSON.stringify(contacts, null, 2))
+              }}
+            />
             <Button
               variant={'primary'}
               size={'small'}

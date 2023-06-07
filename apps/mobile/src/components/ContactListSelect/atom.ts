@@ -6,7 +6,6 @@ import {
 import {type Atom, atom, type SetStateAction, type WritableAtom} from 'jotai'
 import {matchSorter} from 'match-sorter'
 import {contactsFromDeviceAtom} from './state/contactsFromDeviceAtom'
-import {toE164PhoneNumber} from '@vexl-next/domain/dist/general/E164PhoneNumber.brand'
 import getValueFromSetStateActionOfAtom from '../../utils/atomUtils/getValueFromSetStateActionOfAtom'
 import {pipe} from 'fp-ts/function'
 import * as O from 'fp-ts/Option'
@@ -26,6 +25,7 @@ import {importedContactsAtom} from '../../state/contacts'
 import notEmpty from '../../utils/notEmpty'
 import {updateAllOffersConnectionsActionAtom} from '../../state/connections/atom/offerToConnectionsAtom'
 import {hashPhoneNumber} from '../../state/contacts/utils'
+import toE164PhoneNumberWithDefaultCountryCode from '../../utils/toE164PhoneNumberWithDefaultCountryCode'
 
 export const ContactsSelectScope = createScope<ContactNormalized[]>([])
 
@@ -144,7 +144,7 @@ export const contactSelectMolecule = molecule((getMolecule, getScope) => {
 
     return pipe(
       searchText,
-      toE164PhoneNumber,
+      toE164PhoneNumberWithDefaultCountryCode,
       O.chain((e164) =>
         O.fromEither(
           safeParse(ContactNormalized)({

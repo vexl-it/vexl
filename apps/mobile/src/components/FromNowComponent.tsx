@@ -16,7 +16,7 @@ function whenShouldIUpdateNext(difNowSec: number): number | null {
 }
 
 function getTimeToShow(date: DateTime, t: TFunction): string {
-  if (date.diffNow().as('seconds') < 60) {
+  if (Math.abs(date.diffNow(['seconds']).seconds) < 60) {
     return t('common.now')
   }
   return date.toRelative({style: 'narrow', locale: i18n.locale}) ?? ''

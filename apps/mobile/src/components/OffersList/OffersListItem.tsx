@@ -4,7 +4,7 @@ import {useNavigation} from '@react-navigation/native'
 import {type OneOfferInState} from '../../state/marketplace/domain'
 import {Stack} from 'tamagui'
 import OfferWithBubbleTip from '../OfferWithBubbleTip'
-import {useMemo} from 'react'
+import {useCallback, useMemo} from 'react'
 import {type Atom, useAtomValue} from 'jotai'
 import {useChatForOffer} from '../../state/chat/hooks/useChatForOffer'
 import {atom} from 'jotai'
@@ -39,9 +39,16 @@ function OffersListItem({offerAtom}: Props): JSX.Element {
     }, [chatForOffer])
   )
 
+  const navigateToOffer = useCallback(() => {
+    navigation.navigate(isMine ? 'EditOffer' : 'OfferDetail', {
+      offerId: offer.offerInfo.offerId,
+    })
+  }, [isMine, navigation, offer.offerInfo.offerId])
+
   return (
     <Stack mt={'$6'}>
       <OfferWithBubbleTip
+        onInfoRectPress={navigateToOffer}
         negative={!!chatForOffer}
         button={
           <Button
@@ -64,11 +71,7 @@ function OffersListItem({offerAtom}: Props): JSX.Element {
                 ? 'redDark'
                 : 'secondary'
             }
-            onPress={() => {
-              navigation.navigate(isMine ? 'EditOffer' : 'OfferDetail', {
-                offerId: offer.offerInfo.offerId,
-              })
-            }}
+            onPress={navigateToOffer}
           />
         }
         offer={offer}

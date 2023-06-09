@@ -1,4 +1,4 @@
-import {getTokens, Stack, Text, XStack} from 'tamagui'
+import {getTokens, Stack, Text, useDebounce, XStack} from 'tamagui'
 import {useCallback, useEffect, useMemo, useState} from 'react'
 import SvgImage from '../../../Image'
 import {
@@ -47,6 +47,9 @@ function AmountOfTransaction({
   const [amountBottomLimit, setAmountBottomLimit] = useAtom(
     amountBottomLimitAtom
   )
+  const debouncedTopLimit = useDebounce(setAmountTopLimit, 500)
+  const debouncedBottomLimit = useDebounce(setAmountBottomLimit, 500)
+
   const [, setDate] = useState(DateTime.now())
   const [forceRerender, setForceRerender] = useState(false)
 
@@ -98,8 +101,14 @@ function AmountOfTransaction({
       Math.max(value, amountBottomLimitUsdEurCzk),
       SLIDER_MAX_VALUE
     )
-    if (inputType === 'min') setInputMin(Number(clampedValue))
-    if (inputType === 'max') setInputMax(Number(clampedValue))
+    if (inputType === 'min') {
+      debouncedBottomLimit(Number(clampedValue))
+      setInputMin(Number(clampedValue))
+    }
+    if (inputType === 'max') {
+      debouncedTopLimit(Number(clampedValue))
+      setInputMax(Number(clampedValue))
+    }
   }
 
   const handleInputBlur = (

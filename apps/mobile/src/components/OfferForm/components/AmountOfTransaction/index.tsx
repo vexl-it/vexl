@@ -98,22 +98,15 @@ function AmountOfTransaction({
       Math.max(value, amountBottomLimitUsdEurCzk),
       SLIDER_MAX_VALUE
     )
-    if (inputType === 'min') setInputMin(Number(clampedValue))
-    if (inputType === 'max') setInputMax(Number(clampedValue))
-  }
-
-  const handleInputBlur = (
-    e: NativeSyntheticEvent<TextInputChangeEventData>,
-    inputType: InputType
-  ): void => {
     if (inputType === 'min') {
-      setBottomLimit(inputMin)
-      setForceRerender(!forceRerender)
+      setBottomLimit(clampedValue)
+      setInputMin(Number(clampedValue))
     }
     if (inputType === 'max') {
-      setTopLimit(inputMax)
-      setForceRerender(!forceRerender)
+      setTopLimit(clampedValue)
+      setInputMax(Number(clampedValue))
     }
+    setForceRerender((v) => !v)
   }
 
   // this useEffect needs to be defined exactly this way as slider component needs to rerender once more
@@ -137,9 +130,6 @@ function AmountOfTransaction({
       <XStack ai="center" mb="$2" justifyContent="space-around">
         <LimitInput
           currencyAtom={currencyAtom}
-          onBlur={(value) => {
-            handleInputBlur(value, 'min')
-          }}
           onChangeText={(value) => {
             handleInputTextChange(value, 'min')
           }}
@@ -150,9 +140,6 @@ function AmountOfTransaction({
         </Stack>
         <LimitInput
           currencyAtom={currencyAtom}
-          onBlur={(value) => {
-            handleInputBlur(value, 'max')
-          }}
           onChangeText={(value) => {
             handleInputTextChange(value, 'max')
           }}

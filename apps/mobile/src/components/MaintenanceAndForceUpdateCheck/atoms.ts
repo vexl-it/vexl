@@ -2,6 +2,7 @@ import {atom} from 'jotai'
 import {
   DEFAULT_REMOTE_CONFIG,
   MaintenanceConfig,
+  NextForceUpdateType,
   type RemoteConfig,
 } from './domain'
 import remoteConfig from '@react-native-firebase/remote-config'
@@ -20,7 +21,22 @@ remoteConfigAtom.onMount = (set) => {
   // Refetching happens automatically every 12 hours or so.
   function refreshConfig(): void {
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    const next__force_update = remoteConfig().getNumber('next__force_update')
+    const next__force_update = pipe(
+      remoteConfig().getNumber('next__force_update'),
+      safeParse(NextForceUpdateType),
+      E.match(
+        (e) => {
+          reportError(
+            'error',
+            'Error while reading next__maintenance from remote config',
+            e
+          )
+          return DEFAULT_REMOTE_CONFIG.next__force_update
+        },
+        (v) => v
+      )
+    )
+
     // eslint-disable-next-line @typescript-eslint/naming-convention
     const next__maintenance = pipe(
       remoteConfig().getString('next__maintenance'),

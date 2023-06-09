@@ -48,6 +48,7 @@ function TextMessage({
     >
       <Stack br={'$6'} backgroundColor={isMine ? '$main' : '$grey'} p={'$4'}>
         <Text
+          selectable
           fos={16}
           fontFamily={'$body500'}
           color={isMine ? '$black' : '$white'}
@@ -58,6 +59,7 @@ function TextMessage({
       {message.state === 'sendingError' && (
         <Pressable onPress={onPressResend}>
           <Text
+            selectable
             textAlign={isMine ? 'right' : 'left'}
             mt="$1"
             mb="$2"
@@ -70,6 +72,7 @@ function TextMessage({
       )}
       {isLatest && (
         <Text
+          selectable
           textAlign={isMine ? 'right' : 'left'}
           mt="$1"
           mb="$2"

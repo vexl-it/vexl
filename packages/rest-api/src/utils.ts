@@ -25,7 +25,7 @@ import {
 import {type GetUserSessionCredentials} from './UserSessionCredentials.brand'
 import {type PlatformName} from './PlatformName'
 
-const DEFAULT_TIMEOUT_MS = 15_000
+const DEFAULT_TIMEOUT_MS = 60_000 // Up timeout to 1 minute
 
 export function axiosCallWithValidation<T extends z.ZodType>(
   axiosInstance: AxiosInstance,

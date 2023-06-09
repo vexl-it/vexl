@@ -27,7 +27,7 @@ remoteConfigAtom.onMount = (set) => {
       E.match(
         (e) => {
           reportError(
-            'error',
+            'warn',
             'Error while reading next__maintenance from remote config',
             e
           )
@@ -45,7 +45,7 @@ remoteConfigAtom.onMount = (set) => {
       E.match(
         (e) => {
           reportError(
-            'error',
+            'warn',
             'Error while reading next__maintenance from remote config',
             e
           )

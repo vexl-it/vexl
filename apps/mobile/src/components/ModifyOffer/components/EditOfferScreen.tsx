@@ -2,16 +2,29 @@ import {type RootStackScreenProps} from '../../../navigationTypes'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import Screen from '../../Screen'
 import KeyboardAvoidingView from '../../KeyboardAvoidingView'
-import ScreenTitle from '../../ScreenTitle'
-import EditOfferContent from './EditOfferContent'
-import IconButton from '../../IconButton'
-import closeSvg from '../../images/closeSvg'
-import React, {useMemo} from 'react'
+import React, {useCallback, useMemo} from 'react'
 import {singleOfferAtom} from '../../../state/marketplace/atom'
-import {useAtomValue} from 'jotai'
-import {Text} from 'tamagui'
-import ModifyOfferScopeProvider from './ModifyOfferScopeProvider'
+import {useAtomValue, useSetAtom} from 'jotai'
+import {Stack, Text} from 'tamagui'
 import useSafeGoBack from '../../../utils/useSafeGoBack'
+import {ScrollView, StyleSheet} from 'react-native'
+import OfferForm from '../../OfferForm'
+import Button from '../../Button'
+import {pipe} from 'fp-ts/function'
+import * as T from 'fp-ts/Task'
+import OfferInProgress from './OfferInProgress'
+import {useFocusEffect} from '@react-navigation/native'
+import {useMolecule} from 'jotai-molecules'
+import {offerFormMolecule} from '../atoms/offerFormStateAtoms'
+import useContent from '../useContent'
+import EditOfferHeader from './EditOfferHeader'
+
+const styles = StyleSheet.create({
+  contentStyles: {
+    paddingHorizontal: 16,
+    paddingBottom: 16,
+  },
+})
 
 type Props = RootStackScreenProps<'EditOffer'>
 
@@ -19,34 +32,57 @@ function EditOfferScreen({
   route: {
     params: {offerId},
   },
-  navigation,
 }: Props): JSX.Element {
   const {t} = useTranslation()
   const safeGoBack = useSafeGoBack()
+  const content = useContent()
 
+  const {offerAtom, editOfferAtom} = useMolecule(offerFormMolecule)
+  const editOffer = useSetAtom(editOfferAtom)
+  const setOffer = useSetAtom(offerAtom)
   const offer = useAtomValue(useMemo(() => singleOfferAtom(offerId), [offerId]))
+
+  useFocusEffect(
+    useCallback(() => {
+      if (offer) setOffer(offer)
+    }, [offer, setOffer])
+  )
 
   return (
     <Screen customHorizontalPadding={0} customVerticalPadding={32}>
       <KeyboardAvoidingView>
-        {offer ? (
-          <ModifyOfferScopeProvider modifyOfferScopeValue={offer}>
-            <EditOfferContent navigateBack={safeGoBack} />
-          </ModifyOfferScopeProvider>
-        ) : (
-          <>
-            <ScreenTitle text={t('editOffer.editOffer')}>
-              <IconButton
-                variant="dark"
-                icon={closeSvg}
-                onPress={() => {
-                  navigation.navigate('MyOffers')
-                }}
-              />
-            </ScreenTitle>
-            <Text>{t('editOffer.errorOfferNotFound')}</Text>
-          </>
-        )}
+        <>
+          <ScrollView contentContainerStyle={styles.contentStyles}>
+            <EditOfferHeader offer={offer} />
+            {offer ? (
+              <OfferForm content={content} />
+            ) : (
+              <Text>{t('editOffer.errorOfferNotFound')}</Text>
+            )}
+          </ScrollView>
+          <Stack px="$4" py="$4" bc="transparent">
+            <Button
+              text={t('editOffer.saveChanges')}
+              onPress={() => {
+                void pipe(
+                  editOffer(),
+                  T.map((success) => {
+                    if (success) {
+                      safeGoBack()
+                    }
+                  })
+                )()
+              }}
+              variant="secondary"
+            />
+          </Stack>
+          <OfferInProgress
+            loadingTitle={t('editOffer.editingYourOffer')}
+            loadingDoneTitle={t('editOffer.offerEditSuccess')}
+            loadingSubtitle={t('editOffer.pleaseWait')}
+            loadingDoneSubtitle={t('editOffer.youCanCheckYourOffer')}
+          />
+        </>
       </KeyboardAvoidingView>
     </Screen>
   )

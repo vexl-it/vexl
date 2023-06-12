@@ -7,38 +7,40 @@ import {offerFormMolecule} from '../atoms/offerFormStateAtoms'
 import CreateOfferProgress from './CreateOfferProgress'
 
 interface Props {
-  loading: boolean
-  loaderTitle?: string
-  subtitle?: string
-  title: string
-  visible: boolean
+  loadingTitle: string
+  loadingDoneTitle: string
+  loadingSubtitle: string
+  loadingDoneSubtitle: string
 }
 
 function OfferInProgress({
-  loading,
-  subtitle,
-  title,
-  visible,
+  loadingTitle,
+  loadingDoneTitle,
+  loadingSubtitle,
+  loadingDoneSubtitle,
 }: Props): JSX.Element {
   const {bottom} = useSafeAreaInsets()
-  const {modifyOfferLoaderTitleAtom} = useMolecule(offerFormMolecule)
+  const {encryptingOfferAtom, modifyOfferLoaderTitleAtom, loadingAtom} =
+    useMolecule(offerFormMolecule)
+  const encryptingOffer = useAtomValue(encryptingOfferAtom)
   const loaderTitle = useAtomValue(modifyOfferLoaderTitleAtom)
+  const loading = useAtomValue(loadingAtom)
 
   return (
-    <Modal animationType="fade" transparent visible={visible}>
+    <Modal animationType="fade" transparent visible={encryptingOffer}>
       <Stack f={1} pb={bottom} jc="flex-end" bc={'rgba(0,0,0,0.6)'}>
         <Stack mb={bottom} p="$4" backgroundColor="$white" br="$4">
           <Text pb="$4" fos={32} ff="$heading">
-            {title}
+            {loading ? loadingTitle : loadingDoneTitle}
           </Text>
           <CreateOfferProgress
             leftText={
-              loading ? loaderTitle.loadingText : loaderTitle.notLoadingText
+              loading ? loaderTitle?.loadingText : loaderTitle?.notLoadingText
             }
           />
-          {subtitle && (
+          {loadingSubtitle && loadingDoneSubtitle && (
             <Text pt="$4" fos={18} col="$greyOnWhite">
-              {subtitle}
+              {loading ? loadingSubtitle : loadingDoneSubtitle}
             </Text>
           )}
         </Stack>

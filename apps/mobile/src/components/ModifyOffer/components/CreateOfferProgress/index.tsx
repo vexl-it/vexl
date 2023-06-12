@@ -13,7 +13,8 @@ interface Props {
 
 function CreateOfferProgress({leftText}: Props): JSX.Element {
   const {t} = useTranslation()
-  const {createOfferProgressAtom} = useMolecule(offerFormMolecule)
+  const {createOfferProgressAtom, loadingAtom} = useMolecule(offerFormMolecule)
+  const loading = useAtomValue(loadingAtom)
   const offerProgress = useAtomValue(createOfferProgressAtom)
 
   const percentDone = useMemo(() => {
@@ -31,9 +32,9 @@ function CreateOfferProgress({leftText}: Props): JSX.Element {
     <YStack gap={'$2'}>
       {offerProgress?.percentage ? (
         <ProgressBar percentDone={percentDone} />
-      ) : (
+      ) : loading ? (
         <ActivityIndicator />
-      )}
+      ) : null}
       <XStack fd={'row'} ai={'center'} jc={'space-between'}>
         <Text fos={14} ff={'$body500'} col={'$black'}>
           {leftText}

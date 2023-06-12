@@ -1,10 +1,6 @@
 import {getTokens, Stack, Text, XStack} from 'tamagui'
 import {useCallback, useEffect, useMemo, useState} from 'react'
 import SvgImage from '../../../Image'
-import {
-  type NativeSyntheticEvent,
-  type TextInputChangeEventData,
-} from 'react-native'
 import {type Atom, type PrimitiveAtom, useAtom, useAtomValue} from 'jotai'
 import LimitInput from './components/LimitInput'
 import {type Currency} from '@vexl-next/domain/dist/general/offers'

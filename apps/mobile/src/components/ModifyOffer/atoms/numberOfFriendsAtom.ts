@@ -11,19 +11,20 @@ import {sequenceS} from 'fp-ts/Apply'
 
 const numberOfFriendsStorageAtom = atom<
   E.Either<
-    | {_tag: 'initial'}
+    | {_tag: 'friendsNotLoaded'}
     | ExtractLeftTE<ReturnType<ContactPrivateApi['fetchMyContacts']>>,
     {
       firstLevelFriendsCount: number
       secondLevelFriendsCount: number
     }
   >
->(E.left({_tag: 'initial'} as const))
+>(E.left({_tag: 'friendsNotLoaded'} as const))
 
 const numberOfFriendsAtom = atom(
   (get) => get(numberOfFriendsStorageAtom),
   (get, set) => {
     const api = get(privateApiAtom)
+
     void pipe(
       sequenceS(TE.ApplicativeSeq)({
         firstLevel: api.contact.fetchMyContacts({

@@ -22,7 +22,7 @@ const friendLevelSubtitleAtom = atom((get) => {
     numberOfFriends,
     E.match(
       (e) => {
-        if (e._tag !== 'initial') {
+        if (e._tag !== 'friendsNotLoaded') {
           Alert.alert(toCommonErrorMessage(e, t) ?? t('common.unknownError'))
         }
         return {

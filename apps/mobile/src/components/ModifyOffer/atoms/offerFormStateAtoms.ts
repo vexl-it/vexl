@@ -1,13 +1,12 @@
 import {atom} from 'jotai'
 import {
   type Currency,
-  type IntendedConnectionLevel,
   type LocationState,
   OfferId,
   type OfferPublicPart,
   SymmetricKey,
 } from '@vexl-next/domain/dist/general/offers'
-import {createScope, molecule} from 'jotai-molecules'
+import {molecule} from 'jotai-molecules'
 import {type OneOfferInState} from '../../../state/marketplace/domain'
 import {OfferAdminId} from '@vexl-next/rest-api/dist/services/offer/contracts'
 import {IdNumeric} from '@vexl-next/domain/dist/utility/IdNumeric'
@@ -86,18 +85,12 @@ export const dummyOffer: OneOfferInState = {
   },
 }
 
-export const OfferFormScope = createScope<OneOfferInState | 'newOfferCreation'>(
-  dummyOffer
-)
+export const offerFormMolecule = molecule(() => {
+  const offerAtom = atom<OneOfferInState>(dummyOffer)
 
-export const offerFormMolecule = molecule((getMolecule, getScope) => {
-  const offer = (() => {
-    const scope = getScope(OfferFormScope)
-    if (scope === 'newOfferCreation') return dummyOffer
-    return scope
-  })()
-
-  const offerFormAtom = atom(offer.offerInfo.publicPart)
+  const offerFormAtom = focusAtom(offerAtom, (optic) =>
+    optic.prop('offerInfo').prop('publicPart')
+  )
 
   const currencyAtom = focusAtom(offerFormAtom, (optic) =>
     optic.prop('currency')
@@ -186,14 +179,17 @@ export const offerFormMolecule = molecule((getMolecule, getScope) => {
     optic.prop('active')
   )
 
-  const intendedConnectionLevelAtom = atom<IntendedConnectionLevel>(
-    offer.ownershipInfo?.adminId
-      ? offer.ownershipInfo?.intendedConnectionLevel
-      : 'FIRST'
+  const intendedConnectionLevelAtom = focusAtom(
+    offerAtom,
+    (optic) =>
+      optic
+        .optional()
+        .prop('ownershipInfo')
+        .optional()
+        .prop('intendedConnectionLevel') ?? 'FIRST'
   )
 
   const loadingAtom = atom<boolean>(false)
-  const editingOfferAtom = atom<boolean>(false)
   const encryptingOfferAtom = atom<boolean>(false)
   const createOfferProgressAtom = atom<OfferProgressState | undefined>(
     undefined
@@ -235,7 +231,7 @@ export const offerFormMolecule = molecule((getMolecule, getScope) => {
             offerDescription: offerDescription.trim(),
             ...restOfPublicPart,
           },
-          intendedConnectionLevel,
+          intendedConnectionLevel: intendedConnectionLevel ?? 'FIRST',
           onProgress: (status) => {
             if (status.type === 'ENCRYPTING_PRIVATE_PAYLOADS')
               set(createOfferProgressAtom, {
@@ -263,11 +259,11 @@ export const offerFormMolecule = molecule((getMolecule, getScope) => {
       ),
       TE.matchW(
         (e) => {
+          set(loadingAtom, false)
+          set(encryptingOfferAtom, false)
           Alert.alert(
             toCommonErrorMessage(e, t) ?? t('offerForm.errorCreatingOffer')
           )
-          set(loadingAtom, false)
-          set(encryptingOfferAtom, false)
           return false
         },
         () => {
@@ -287,6 +283,7 @@ export const offerFormMolecule = molecule((getMolecule, getScope) => {
     null,
     (get, set) => {
       const {t} = get(translationAtom)
+      const offer = get(offerAtom)
 
       return pipe(
         set(deleteOffersActionAtom, {
@@ -316,7 +313,10 @@ export const offerFormMolecule = molecule((getMolecule, getScope) => {
       numberOfFriends,
       E.match(
         (e) => {
-          Alert.alert(toCommonErrorMessage(e, t) ?? t('common.unknownError'))
+          if (e._tag !== 'friendsNotLoaded') {
+            Alert.alert(toCommonErrorMessage(e, t) ?? t('common.unknownError'))
+          }
+
           return {
             loadingText: t('offerForm.noVexlersFoundForYourOffer'),
             notLoadingText: t('offerForm.noVexlersFoundForYourOffer'),
@@ -347,9 +347,10 @@ export const offerFormMolecule = molecule((getMolecule, getScope) => {
 
   const toggleOfferActiveAtom = atom(null, (get, set) => {
     const {t} = get(translationAtom)
+    const offer = get(offerAtom)
 
     set(loadingAtom, true)
-    set(editingOfferAtom, true)
+    set(encryptingOfferAtom, true)
 
     return pipe(
       set(updateOfferAtom, {
@@ -365,6 +366,8 @@ export const offerFormMolecule = molecule((getMolecule, getScope) => {
       }),
       TE.match(
         (e) => {
+          set(loadingAtom, false)
+          set(encryptingOfferAtom, false)
           Alert.alert(
             toCommonErrorMessage(e, t) ??
               t('editOffer.offerUnableToChangeOfferActivation')
@@ -378,7 +381,7 @@ export const offerFormMolecule = molecule((getMolecule, getScope) => {
       ),
       T.chain(delayInPipeT(2000)),
       T.map((v) => {
-        set(editingOfferAtom, false)
+        set(encryptingOfferAtom, false)
         return v
       })
     )
@@ -386,6 +389,7 @@ export const offerFormMolecule = molecule((getMolecule, getScope) => {
 
   const editOfferAtom = atom(null, (get, set) => {
     const {t} = get(translationAtom)
+    const offer = get(offerAtom)
 
     const {locationState, location, offerDescription, ...restOfPublicPart} =
       get(offerFormAtom)
@@ -402,7 +406,7 @@ export const offerFormMolecule = molecule((getMolecule, getScope) => {
     }
 
     set(loadingAtom, true)
-    set(editingOfferAtom, true)
+    set(encryptingOfferAtom, true)
 
     return pipe(
       set(updateOfferAtom, {
@@ -414,10 +418,12 @@ export const offerFormMolecule = molecule((getMolecule, getScope) => {
         },
         adminId: offer.ownershipInfo?.adminId ?? ('' as OfferAdminId),
         symmetricKey: offer.offerInfo.privatePart.symmetricKey,
-        intendedConnectionLevel,
+        intendedConnectionLevel: intendedConnectionLevel ?? 'FIRST',
       }),
       TE.match(
         (e) => {
+          set(loadingAtom, false)
+          set(encryptingOfferAtom, false)
           Alert.alert(
             toCommonErrorMessage(e, t) ?? t('editOffer.errorEditingOffer')
           )
@@ -430,18 +436,19 @@ export const offerFormMolecule = molecule((getMolecule, getScope) => {
       ),
       T.chain(delayInPipeT(2000)),
       T.map((v) => {
-        set(editingOfferAtom, false)
+        set(encryptingOfferAtom, false)
         return v
       })
     )
   })
 
   return {
+    offerAtom,
+    offerFormAtom,
     deleteOfferActionAtom,
     intendedConnectionLevelAtom,
     modifyOfferLoaderTitleAtom,
     loadingAtom,
-    editingOfferAtom,
     encryptingOfferAtom,
     toggleOfferActiveAtom,
     editOfferAtom,

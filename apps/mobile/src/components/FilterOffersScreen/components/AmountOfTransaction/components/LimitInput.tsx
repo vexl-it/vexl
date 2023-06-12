@@ -14,10 +14,10 @@ function LimitInput({currencyAtom, ...props}: Props): JSX.Element {
   const currencySymbol = useMemo(
     () =>
       currency === 'USD'
-        ? t('offerForm.amountOfTransaction.dollarSymbol')
+        ? t('common.dollarSymbol')
         : currency === 'EUR'
-        ? t('offerForm.amountOfTransaction.eurSymbol')
-        : t('offerForm.amountOfTransaction.czkSymbol'),
+        ? t('common.eurSymbol')
+        : t('common.czkSymbol'),
     [currency, t]
   )
   return (

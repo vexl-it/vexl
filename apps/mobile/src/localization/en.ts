@@ -55,11 +55,14 @@ export default {
     'requested': 'Requested',
     'now': 'Now',
     'declined': 'Declined',
+    'eurSymbol': '€',
+    'dollarSymbol': '$',
+    'czkSymbol': 'Kč',
   },
   'loginFlow': {
     'anonymityNotice': 'Nobody will see this until you allow it. Not even us.',
     'intro': {
-      'title1': 'Import your contacs anonymously.',
+      'title1': 'Import your contacts anonymously.',
       'title2': 'See their buy & sell offers.',
       'title3': 'Request identity for the ones you like and trade.',
     },
@@ -292,9 +295,6 @@ export default {
     'currency': 'Currency',
     'amountOfTransaction': {
       'amountOfTransaction': 'Amount',
-      'eurSymbol': '€',
-      'dollarSymbol': '$',
-      'czkSymbol': 'Kč',
       'pleaseSelectCurrencyFirst': 'Please select currency first',
       'pleaseSelectLocationFirst': 'Please select location first',
     },

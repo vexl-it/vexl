@@ -55,6 +55,9 @@ const cs: typeof en = {
     'requested': 'Požádáno',
     'now': 'Teď',
     'declined': 'Zamítnuto',
+    'eurSymbol': '€',
+    'dollarSymbol': '$',
+    'czkSymbol': 'Kč',
   },
   'loginFlow': {
     'anonymityNotice': 'Bez tvého svolení jej nikdo neuvidí. Ani my.',
@@ -293,9 +296,6 @@ const cs: typeof en = {
     'currency': 'Měna',
     'amountOfTransaction': {
       'amountOfTransaction': 'Částka',
-      'eurSymbol': '€',
-      'dollarSymbol': '$',
-      'czkSymbol': 'Kč',
       'pleaseSelectCurrencyFirst': 'Nejdřív si vyber měnu',
       'pleaseSelectLocationFirst': 'Nejdřív si vyber místo',
     },

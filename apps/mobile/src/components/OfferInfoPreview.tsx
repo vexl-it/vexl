@@ -51,6 +51,21 @@ function OfferInfoPreview({
     [negative]
   )
 
+  const offerAmount = useMemo(() => {
+    if (offer.publicPart.currency === 'CZK')
+      return `${bigNumberToString(offer.publicPart.amountTopLimit)} ${t(
+        'common.czkSymbol'
+      )}`
+    if (offer.publicPart.currency === 'EUR')
+      return `${t('common.eurSymbol')}${bigNumberToString(
+        offer.publicPart.amountTopLimit
+      )}`
+    if (offer.publicPart.currency === 'USD')
+      return `${t('common.dollarSymbol')}${bigNumberToString(
+        offer.publicPart.amountTopLimit
+      )}`
+  }, [offer.publicPart.amountTopLimit, offer.publicPart.currency, t])
+
   return (
     <>
       {(offer.privatePart.commonFriends.includes(BTC_PRAGUE_FRIEND) ||
@@ -74,10 +89,7 @@ function OfferInfoPreview({
       <XStack>
         <InfoItemContainer>
           <PriceText>
-            {t('offer.upTo')}{' '}
-            <PriceBigger>
-              {bigNumberToString(offer.publicPart.amountTopLimit)}
-            </PriceBigger>
+            {t('offer.upTo')} <PriceBigger>{offerAmount}</PriceBigger>
           </PriceText>
           <InfoText>
             {offer.publicPart.locationState === 'ONLINE' &&

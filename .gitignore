@@ -4,6 +4,9 @@
 # Intellij
 **/.idea
 
+# VSCode
+.vscode/
+
 # Yarn
 .yarn/*
 !.yarn/cache

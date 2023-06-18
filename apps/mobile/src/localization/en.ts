@@ -58,6 +58,7 @@ export default {
     'eurSymbol': '€',
     'dollarSymbol': '$',
     'czkSymbol': 'Kč',
+    'reset': 'Reset',
   },
   'loginFlow': {
     'anonymityNotice': 'Nobody will see this until you allow it. Not even us.',
@@ -228,6 +229,7 @@ export default {
     'buy': 'Buy',
     'sell': 'Sell',
     'filterOffers': 'Filter offers',
+    'filterActive': 'Filter active',
     'numberOfCommon': '{{number}} common',
     'offerNotFound':
       'Offer not found. It might have been deleted by the author',

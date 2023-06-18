@@ -58,6 +58,7 @@ const cs: typeof en = {
     'eurSymbol': '€',
     'dollarSymbol': '$',
     'czkSymbol': 'Kč',
+    'reset': 'Reset',
   },
   'loginFlow': {
     'anonymityNotice': 'Bez tvého svolení jej nikdo neuvidí. Ani my.',
@@ -231,6 +232,7 @@ const cs: typeof en = {
     'buy': 'Koupit',
     'sell': 'Prodej',
     'filterOffers': 'Filtrovat nabídky',
+    'filterActive': 'Filtr aktivní',
     'numberOfCommon': '{{number}} společné',
     'offerNotFound': 'Nabídka nebyla nalezena. Možná byla smazána autorem',
     'inputPlaceholder': 'např. Pojď zavexlit, kámo!',

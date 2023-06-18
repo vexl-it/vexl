@@ -12,30 +12,28 @@ import Network from './components/Network'
 import networkSvg from '../images/networkSvg'
 import FriendLevel from './components/FriendLevel'
 import friendLevelSvg from '../images/friendLevelSvg'
-import {useMolecule} from 'jotai-molecules'
-import {filterOffersMolecule} from './atom'
 import Currency from './components/Currency'
 import {type SectionProps} from '../Section'
 import coinsSvg from '../images/coinsSvg'
+import {
+  amountBottomLimitAtom,
+  amountBottomLimitUsdEurCzkAtom,
+  amountTopLimitCzkAtom,
+  amountTopLimitUsdEurAtom,
+  amountTopLimitAtom,
+  currencyAtom,
+  locationAtom,
+  sortingAtom,
+  updateCurrencyLimitsAtom,
+  locationStateAtom,
+  updateLocationStatePaymentMethodAtom,
+  paymentMethodAtom,
+  btcNetworkAtom,
+  intendedConnectionLevelAtom,
+} from './atom'
 
 export default function useContent(): SectionProps[] {
   const {t} = useTranslation()
-  const {
-    amountTopLimitAtom,
-    amountBottomLimitAtom,
-    amountBottomLimitUsdEurCzkAtom,
-    amountTopLimitCzkAtom,
-    amountTopLimitUsdEurAtom,
-    btcNetworkAtom,
-    currencyAtom,
-    intendedConnectionLevelAtom,
-    locationAtom,
-    locationStateAtom,
-    paymentMethodAtom,
-    updateCurrencyLimitsAtom,
-    sortingAtom,
-    updateLocationStatePaymentMethodAtom,
-  } = useMolecule(filterOffersMolecule)
 
   return useMemo(
     () => [
@@ -106,22 +104,6 @@ export default function useContent(): SectionProps[] {
         ),
       },
     ],
-    [
-      amountBottomLimitAtom,
-      amountBottomLimitUsdEurCzkAtom,
-      amountTopLimitAtom,
-      amountTopLimitCzkAtom,
-      amountTopLimitUsdEurAtom,
-      btcNetworkAtom,
-      currencyAtom,
-      intendedConnectionLevelAtom,
-      locationAtom,
-      locationStateAtom,
-      paymentMethodAtom,
-      sortingAtom,
-      t,
-      updateCurrencyLimitsAtom,
-      updateLocationStatePaymentMethodAtom,
-    ]
+    [t]
   )
 }

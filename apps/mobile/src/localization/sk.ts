@@ -58,6 +58,7 @@ const sk: typeof en = {
     'eurSymbol': '€',
     'dollarSymbol': '$',
     'czkSymbol': 'Kč',
+    'reset': 'Reset',
   },
   'loginFlow': {
     'anonymityNotice': 'Kým to nepovolíte, nikto to neuvidí. Dokonca ani my.',
@@ -230,6 +231,7 @@ const sk: typeof en = {
     'buy': 'Kúpiť',
     'sell': 'Predaj',
     'filterOffers': 'Filtrovanie ponúk',
+    'filterActive': 'Filter aktívny',
     'numberOfCommon': '{{number}} spoločné',
     'offerNotFound': 'Ponuka nebola nájdená. Autor ju možno vymazal',
     'inputPlaceholder': 'napr. Poď zavexlovať, kamoško!',

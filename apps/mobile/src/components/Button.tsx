@@ -2,12 +2,12 @@ import {type StyleProp, TouchableOpacity, type ViewStyle} from 'react-native'
 import {useCallback, useMemo} from 'react'
 import {type SvgString} from '@vexl-next/domain/dist/utility/SvgString.brand'
 import Image from './Image'
-import {Stack, styled, Text} from 'tamagui'
+import {getTokens, Stack, styled, Text} from 'tamagui'
 
 interface Props {
   onPress: () => void
   variant:
-           | 'primary'
+    | 'primary'
     | 'secondary'
     | 'black'
     | 'blackOnDark'
@@ -148,7 +148,6 @@ function Button({
   onPress,
   disabled = false,
   style,
-  fontSize,
   afterIcon,
   beforeIcon,
   fullWidth = false,
@@ -156,6 +155,7 @@ function Button({
   adjustTextToFitOneLine = false,
   size = 'large',
 }: Props): JSX.Element {
+  const tokens = getTokens()
   const onPressInner = useCallback(() => {
     if (!disabled) onPress()
   }, [disabled, onPress])
@@ -175,6 +175,25 @@ function Button({
     [variant, fullSize, fullWidth, size]
   )
 
+  const buttonIconColor = useMemo(() => {
+    if (variant === 'primary') return tokens.color.main.val
+    if (variant === 'secondary') return tokens.color.darkBrown.val
+    if (variant === 'black' || variant === 'redLight')
+      return tokens.color.white.val
+    if (variant === 'blackOnDark') return tokens.color.greyOnBlack.val
+    if (variant === 'link') return tokens.color.white.val
+    if (variant === 'hint') return tokens.color.pink.val
+    if (variant === 'redDark') return tokens.color.red.val
+  }, [
+    tokens.color.darkBrown.val,
+    tokens.color.greyOnBlack.val,
+    tokens.color.main.val,
+    tokens.color.pink.val,
+    tokens.color.red.val,
+    tokens.color.white.val,
+    variant,
+  ])
+
   return (
     // has to be wrapped in TouchableOpacity as tamagui does not support onPress action on
     // wrapped TouchableOpacity in styled as of v 1.11.1
@@ -193,7 +212,7 @@ function Button({
       >
         {beforeIcon && (
           <Stack mr="$2">
-            <Image source={beforeIcon} />
+            <Image stroke={buttonIconColor} source={beforeIcon} />
           </Stack>
         )}
         {text && (
@@ -210,7 +229,7 @@ function Button({
         )}
         {afterIcon && (
           <Stack ml="$1">
-            <Image source={afterIcon} />
+            <Image stroke={buttonIconColor} source={afterIcon} />
           </Stack>
         )}
       </PressableStyled>

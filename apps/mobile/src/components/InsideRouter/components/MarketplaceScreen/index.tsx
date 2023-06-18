@@ -11,6 +11,8 @@ import {useCallback, useMemo} from 'react'
 import {type StyleProp, type ViewStyle} from 'react-native'
 import {getTokens, useMedia} from 'tamagui'
 import {useAppState} from '../../../../utils/useAppState'
+import {useSetAtom} from 'jotai'
+import {setOffersFilterAtom} from '../../../FilterOffersScreen/atom'
 
 const Tab = createMaterialTopTabNavigator<MarketplaceTabParamsList>()
 
@@ -18,6 +20,7 @@ function MarketplaceScreen(): JSX.Element {
   const {t} = useTranslation()
   const media = useMedia()
   const tokens = getTokens()
+  const setOffersFilter = useSetAtom(setOffersFilterAtom)
 
   const tabBarStyle: StyleProp<ViewStyle> = useMemo(
     () => ({
@@ -60,9 +63,10 @@ function MarketplaceScreen(): JSX.Element {
   useAppState(
     useCallback(
       (state) => {
+        if (state === 'active') setOffersFilter()
         if (state === 'active') void refreshOffers()
       },
-      [refreshOffers]
+      [refreshOffers, setOffersFilter]
     )
   )
 

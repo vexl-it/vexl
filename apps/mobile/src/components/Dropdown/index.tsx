@@ -141,7 +141,7 @@ function Dropdown<T>({
               height={size === 'small' ? 16 : 24}
               width={size === 'small' ? 16 : 24}
               stroke={
-                size === 'small'
+                size === 'small' || !activeRow
                   ? tokens.color.greyOnBlack.val
                   : tokens.color.main.val
               }

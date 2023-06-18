@@ -12,11 +12,10 @@ import {
   useOffersLoadingError,
   useTriggerOffersRefresh,
 } from '../../../../../state/marketplace'
-import {useMolecule} from 'jotai-molecules'
-import {filterOffersMolecule} from '../../../../FilterOffersScreen/atom'
 import {useAtomValue} from 'jotai'
 import {offersAtomWithFilter} from '../../../../../state/marketplace/atom'
 import {splitAtom} from 'jotai/utils'
+import {offersFilterAtom} from '../../../../FilterOffersScreen/atom'
 
 interface Props {
   type: 'BUY' | 'SELL'
@@ -35,8 +34,7 @@ function OffersListStateDisplayerContent({
   const loading = useAreOffersLoading()
   const error = useOffersLoadingError()
   const refreshOffers = useTriggerOffersRefresh()
-  const {filterAtom} = useMolecule(filterOffersMolecule)
-  const filter = useAtomValue(filterAtom)
+  const filter = useAtomValue(offersFilterAtom)
   const basicFilter = useMemo(
     () => ({
       offerType: type,
@@ -46,7 +44,7 @@ function OffersListStateDisplayerContent({
 
   const offersAtoms = useAtomValue(
     useMemo(
-      () => splitAtom(offersAtomWithFilter(filter ?? basicFilter)),
+      () => splitAtom(offersAtomWithFilter({...filter, ...basicFilter})),
       [filter, basicFilter]
     )
   )

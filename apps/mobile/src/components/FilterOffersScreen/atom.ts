@@ -1,4 +1,3 @@
-import {createScope, molecule} from 'jotai-molecules'
 import {atom} from 'jotai'
 import {type OffersFilter} from '../../state/marketplace/domain'
 import {
@@ -8,56 +7,54 @@ import {
   type Sort,
 } from '@vexl-next/domain/dist/general/offers'
 import {focusAtom} from 'jotai-optics'
+import {
+  offersFilterFromStorageAtom,
+  offersFilterInitialState,
+} from '../../state/offersFilter'
 
-const offersFilterInitialState: OffersFilter = {
-  sort: undefined,
-  friendLevel: undefined,
-  currency: undefined,
-  location: undefined,
-  locationState: undefined,
-  paymentMethod: undefined,
-  btcNetwork: undefined,
-  amountBottomLimit: undefined,
-  amountTopLimit: undefined,
-}
+export const sortingAtom = atom<Sort | undefined>(undefined)
 
-export const offersFilterInitialStateSell: OffersFilter = {
-  ...offersFilterInitialState,
-  offerType: 'SELL',
-}
-export const offersFilterInitialStateBuy: OffersFilter = {
-  ...offersFilterInitialState,
-  offerType: 'BUY',
-}
+export const offersFilterAtom = atom<OffersFilter>(offersFilterInitialState)
 
-export const FilterOffersScope = createScope<OffersFilter>(
-  offersFilterInitialStateSell
+export const setOffersFilterAtom = atom(null, (get, set) => {
+  const filter = get(offersFilterFromStorageAtom)
+  set(offersFilterAtom, filter)
+})
+
+const isFilterActiveAtom = atom<boolean>(false)
+
+export const filterActiveAtom = atom(
+  (get) => get(isFilterActiveAtom),
+  (get, set) => {
+    const offersFilterFromStorage = get(offersFilterFromStorageAtom)
+
+    set(
+      isFilterActiveAtom,
+      JSON.stringify(offersFilterFromStorage) !==
+        JSON.stringify(offersFilterInitialState)
+    )
+  }
 )
 
-export const filterOffersMolecule = molecule((getMolecule, getScope) => {
-  const filterScope = getScope(FilterOffersScope)
-  const filterScopeAtom = atom(filterScope)
+export const currencyAtom = focusAtom(offersFilterAtom, (optic) =>
+  optic.prop('currency')
+)
 
-  const sortingAtom = atom<Sort | undefined>(undefined)
+export const updateCurrencyLimitsAtom = atom<
+  null,
+  [
+    {
+      currency: Currency | undefined
+    }
+  ],
+  boolean
+>(null, (get, set, params) => {
+  const {currency} = params
+  const currencyFromAtom = get(currencyAtom)
 
-  const offerTypeAtom = focusAtom(filterScopeAtom, (optic) =>
-    optic.prop('offerType')
-  )
-
-  const currencyAtom = focusAtom(filterScopeAtom, (optic) =>
-    optic.prop('currency')
-  )
-
-  const updateCurrencyLimitsAtom = atom<
-    null,
-    [
-      {
-        currency: Currency | undefined
-      }
-    ],
-    boolean
-  >(null, (get, set, params) => {
-    const {currency} = params
+  if (currency === currencyFromAtom) {
+    set(currencyAtom, undefined)
+  } else {
     set(currencyAtom, currency)
     set(amountBottomLimitAtom, get(amountBottomLimitUsdEurCzkAtom))
     set(
@@ -66,115 +63,94 @@ export const filterOffersMolecule = molecule((getMolecule, getScope) => {
         ? get(amountTopLimitCzkAtom)
         : get(amountTopLimitUsdEurAtom)
     )
-    return true
-  })
+  }
+  return true
+})
 
-  const updateLocationStatePaymentMethodAtom = atom<
-    null,
-    [
-      {
-        locationState: LocationState
-      }
-    ],
-    boolean
-  >(null, (get, set, params) => {
-    const {locationState} = params
+export const updateLocationStatePaymentMethodAtom = atom<
+  null,
+  [
+    {
+      locationState: LocationState
+    }
+  ],
+  boolean
+>(null, (get, set, params) => {
+  const {locationState} = params
+  const locationStateFromAtom = get(locationStateAtom)
+
+  if (locationState === locationStateFromAtom) {
+    set(locationStateAtom, undefined)
+  } else {
     set(locationStateAtom, locationState)
     set(
       paymentMethodAtom,
       locationState === 'ONLINE' ? ['BANK', 'REVOLUT'] : ['CASH']
     )
     set(locationAtom, [])
-    return true
-  })
+  }
 
-  const locationStateAtom = focusAtom(filterScopeAtom, (optic) =>
-    optic.prop('locationState')
-  )
+  return true
+})
 
-  const locationAtom = focusAtom(filterScopeAtom, (optic) =>
-    optic.prop('location')
-  )
+export const locationStateAtom = focusAtom(offersFilterAtom, (optic) =>
+  optic.prop('locationState')
+)
 
-  const btcNetworkAtom = focusAtom(filterScopeAtom, (optic) =>
-    optic.prop('btcNetwork')
-  )
+export const locationAtom = focusAtom(offersFilterAtom, (optic) =>
+  optic.prop('location')
+)
 
-  const paymentMethodAtom = focusAtom(filterScopeAtom, (optic) =>
-    optic.prop('paymentMethod')
-  )
+export const btcNetworkAtom = focusAtom(offersFilterAtom, (optic) =>
+  optic.prop('btcNetwork')
+)
 
-  const amountBottomLimitAtom = focusAtom(filterScopeAtom, (optic) =>
-    optic.prop('amountBottomLimit')
-  )
+export const paymentMethodAtom = focusAtom(offersFilterAtom, (optic) =>
+  optic.prop('paymentMethod')
+)
 
-  const amountTopLimitAtom = focusAtom(filterScopeAtom, (optic) =>
-    optic.prop('amountTopLimit')
-  )
+export const amountBottomLimitAtom = focusAtom(offersFilterAtom, (optic) =>
+  optic.prop('amountBottomLimit')
+)
 
-  const amountBottomLimitUsdEurCzkAtom = atom<number>(0)
-  const amountTopLimitUsdEurAtom = atom<number>(10000)
-  const amountTopLimitCzkAtom = atom<number>(250000)
+export const amountTopLimitAtom = focusAtom(offersFilterAtom, (optic) =>
+  optic.prop('amountTopLimit')
+)
 
-  const friendLevelAtom = focusAtom(filterScopeAtom, (optic) =>
-    optic.prop('friendLevel')
-  )
+export const amountBottomLimitUsdEurCzkAtom = atom<number>(0)
+export const amountTopLimitUsdEurAtom = atom<number>(10000)
+export const amountTopLimitCzkAtom = atom<number>(250000)
 
-  const intendedConnectionLevelAtom = atom<IntendedConnectionLevel | undefined>(
-    undefined
-  )
-
-  const filterAtom = atom<OffersFilter | undefined>(undefined)
-
-  const setFilterAtom = atom(null, (get, set) => {
-    const offersFilter = get(filterScopeAtom)
-    const intendedConnectionLevel = get(intendedConnectionLevelAtom)
-    const sorting = get(sortingAtom)
-
-    set(filterAtom, {
-      sort: sorting,
-      offerType: offersFilter.offerType,
-      currency: offersFilter.currency,
-      location: offersFilter.location,
-      locationState: offersFilter.locationState,
-      paymentMethod: offersFilter.paymentMethod,
-      btcNetwork: offersFilter.btcNetwork,
-      friendLevel: !intendedConnectionLevel
-        ? undefined
-        : intendedConnectionLevel === 'FIRST'
+export const intendedConnectionLevelAtom = atom<IntendedConnectionLevel>('ALL')
+export const saveFilterActionAtom = atom(null, (get, set) => {
+  const offersFilter = get(offersFilterAtom)
+  const intendedConnectionLevel = get(intendedConnectionLevelAtom)
+  const sorting = get(sortingAtom)
+  const newFilterValue: OffersFilter = {
+    sort: sorting,
+    offerType: offersFilter.offerType,
+    currency: offersFilter.currency,
+    location: offersFilter.location,
+    locationState: offersFilter.locationState,
+    paymentMethod: offersFilter.paymentMethod,
+    btcNetwork: offersFilter.btcNetwork,
+    friendLevel:
+      intendedConnectionLevel === 'FIRST'
         ? ['FIRST_DEGREE']
         : ['SECOND_DEGREE'],
-      amountBottomLimit: offersFilter.amountBottomLimit,
-      amountTopLimit: offersFilter.amountTopLimit,
-    })
-  })
-
-  const resetFilterAtom = atom(null, (get, set) => {
-    set(sortingAtom, undefined)
-    set(filterAtom, undefined)
-    set(intendedConnectionLevelAtom, undefined)
-    set(filterScopeAtom, offersFilterInitialState)
-  })
-
-  return {
-    filterAtom,
-    offerTypeAtom,
-    locationStateAtom,
-    locationAtom,
-    paymentMethodAtom,
-    amountBottomLimitAtom,
-    amountTopLimitAtom,
-    amountBottomLimitUsdEurCzkAtom,
-    amountTopLimitUsdEurAtom,
-    amountTopLimitCzkAtom,
-    btcNetworkAtom,
-    friendLevelAtom,
-    sortingAtom,
-    currencyAtom,
-    updateCurrencyLimitsAtom,
-    intendedConnectionLevelAtom,
-    resetFilterAtom,
-    updateLocationStatePaymentMethodAtom,
-    setFilterAtom,
+    amountBottomLimit: offersFilter.amountBottomLimit,
+    amountTopLimit: offersFilter.amountTopLimit,
   }
+
+  set(offersFilterFromStorageAtom, newFilterValue)
+  set(
+    isFilterActiveAtom,
+    JSON.stringify(newFilterValue) !== JSON.stringify(offersFilterInitialState)
+  )
+})
+
+export const resetFilterAtom = atom(null, (get, set) => {
+  set(sortingAtom, undefined)
+  set(intendedConnectionLevelAtom, 'ALL')
+  set(offersFilterAtom, offersFilterInitialState)
 })

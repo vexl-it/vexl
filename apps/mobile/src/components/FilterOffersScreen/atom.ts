@@ -13,12 +13,18 @@ import {
 } from '../../state/offersFilter'
 
 export const sortingAtom = atom<Sort | undefined>(undefined)
+export const intendedConnectionLevelAtom = atom<IntendedConnectionLevel>('ALL')
 
 export const offersFilterAtom = atom<OffersFilter>(offersFilterInitialState)
 
 export const setOffersFilterAtom = atom(null, (get, set) => {
   const filter = get(offersFilterFromStorageAtom)
   set(offersFilterAtom, filter)
+  set(sortingAtom, filter.sort)
+  set(
+    intendedConnectionLevelAtom,
+    filter.friendLevel?.includes('SECOND_DEGREE') ? 'ALL' : 'FIRST'
+  )
 })
 
 const isFilterActiveAtom = atom<boolean>(false)
@@ -120,8 +126,6 @@ export const amountTopLimitAtom = focusAtom(offersFilterAtom, (optic) =>
 export const amountBottomLimitUsdEurCzkAtom = atom<number>(0)
 export const amountTopLimitUsdEurAtom = atom<number>(10000)
 export const amountTopLimitCzkAtom = atom<number>(250000)
-
-export const intendedConnectionLevelAtom = atom<IntendedConnectionLevel>('ALL')
 export const saveFilterActionAtom = atom(null, (get, set) => {
   const offersFilter = get(offersFilterAtom)
   const intendedConnectionLevel = get(intendedConnectionLevelAtom)

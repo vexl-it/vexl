@@ -1,13 +1,12 @@
 import {Stack, XStack} from 'tamagui'
 import OfferInfoPreview from './OfferInfoPreview'
 import SvgImage from './Image'
-import bubbleTipSvg, {
-  bubbleTipSvgNegative,
-} from './InsideRouter/components/MarketplaceScreen/images/bubbleTipSvg'
+
 import {type ReactNode, useCallback} from 'react'
 import {type OneOfferInState} from '../state/marketplace/domain'
 import OfferAuthorAvatar from './OfferAuthorAvatar'
 import {TouchableWithoutFeedback} from 'react-native'
+import bubbleTipSvg, {bubbleTipSvgNegative} from './images/bubbleTipSvg'
 
 export default function OfferWithBubbleTip({
   offer,

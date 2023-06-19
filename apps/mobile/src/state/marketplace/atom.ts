@@ -1,6 +1,7 @@
 import {type Atom, atom, type SetStateAction, type WritableAtom} from 'jotai'
 import {atomWithParsedMmkvStorage} from '../../utils/atomUtils/atomWithParsedMmkvStorage'
 import {focusAtom} from 'jotai-optics'
+import {z} from 'zod'
 import {
   type LoadingState,
   type OffersFilter,
@@ -22,6 +23,23 @@ import {importedContactsHashesAtom} from '../contacts'
 import sortOffers from './utils/sortOffers'
 import idsOfRequestedOffersAtom from '../chat/atoms/idsOfRequestedOffersAtom'
 import isSomeIn30KmRange from './utils/isIn30KmRadius'
+
+export const addMoreContactsSuggestionVisibleAtom = atom<boolean>(true)
+export const resetFilterSuggestionVisibleAtom = atom<boolean>(true)
+
+export const createOfferSuggestionVisibleStorageAtom =
+  atomWithParsedMmkvStorage(
+    'createOfferSuggestionVisible',
+    {
+      visible: true,
+    },
+    z.object({visible: z.boolean().default(true)})
+  )
+
+export const createOfferSuggestionVisibleAtom = focusAtom(
+  createOfferSuggestionVisibleStorageAtom,
+  (o) => o.prop('visible')
+)
 
 export const offersStateAtom = atomWithParsedMmkvStorage(
   'offers',

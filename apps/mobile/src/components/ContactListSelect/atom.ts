@@ -21,11 +21,15 @@ import {toCommonErrorMessage} from '../../utils/useCommonErrorMessages'
 import {translationAtom} from '../../utils/localization/I18nProvider'
 import reportError from '../../utils/reportError'
 import {loadingOverlayDisplayedAtom} from '../LoadingOverlayProvider'
-import {importedContactsAtom} from '../../state/contacts'
+import {
+  importedContactsAtom,
+  lastImportOfContactsAtom,
+} from '../../state/contacts'
 import notEmpty from '../../utils/notEmpty'
 import {updateAllOffersConnectionsActionAtom} from '../../state/connections/atom/offerToConnectionsAtom'
 import {hashPhoneNumber} from '../../state/contacts/utils'
 import toE164PhoneNumberWithDefaultCountryCode from '../../utils/toE164PhoneNumberWithDefaultCountryCode'
+import {IsoDatetimeString} from '@vexl-next/domain/dist/utility/IsoDatetimeString.brand'
 
 export const ContactsSelectScope = createScope<ContactNormalized[]>([])
 
@@ -208,6 +212,10 @@ export const contactSelectMolecule = molecule((getMolecule, getScope) => {
         },
         (importedContacts) => {
           set(importedContactsAtom, [...importedContacts])
+          set(
+            lastImportOfContactsAtom,
+            IsoDatetimeString.parse(new Date().toISOString())
+          )
           void set(updateAllOffersConnectionsActionAtom, {
             isInBackground: false,
           })()

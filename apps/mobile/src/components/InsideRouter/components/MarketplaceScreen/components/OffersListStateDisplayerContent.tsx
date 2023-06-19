@@ -59,7 +59,7 @@ function OffersListStateDisplayerContent({
 
   if (offersAtoms.length === 0 && loading) {
     return (
-      <Stack f={1} ai="center" pt="$5">
+      <Stack f={1} ai={'center'} jc={'center'} pt="$5">
         <ActivityIndicator color={tokens.color.main.val} size="large" />
       </Stack>
     )
@@ -68,6 +68,7 @@ function OffersListStateDisplayerContent({
   return (
     <ContainerWithTopBorderRadius>
       <OffersListButtons
+        marketplaceEmpty={offersAtoms.length === 0}
         onAddPress={navigateToCreateOffer}
         onFilterOffersPress={navigateToFilterOffers}
         onMyOffersPress={navigateToMyOffers}
@@ -78,9 +79,7 @@ function OffersListStateDisplayerContent({
         </Text>
       </Stack>
       {offersAtoms.length === 0 ? (
-        <Stack pos={'absolute'} t={0} b={0} l={0} r={0} zIndex={-1}>
-          <EmptyListPlaceholder />
-        </Stack>
+        <EmptyListPlaceholder />
       ) : (
         <OffersList
           ListHeaderComponent={renderListHeader}

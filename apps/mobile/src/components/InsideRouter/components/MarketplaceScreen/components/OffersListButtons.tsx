@@ -3,23 +3,32 @@ import Button from '../../../../Button'
 import addIconSvg from '../../../../../images/addIconSvg'
 import {Stack, XStack} from 'tamagui'
 import FilterButton from './FilterButton'
+import {useAtomValue} from 'jotai'
+import {filterActiveAtom} from '../../../../FilterOffersScreen/atom'
 
 interface Props {
+  marketplaceEmpty: boolean
   onAddPress: () => void
   onFilterOffersPress: () => void
   onMyOffersPress: () => void
 }
 
 function OffersListButtons({
+  marketplaceEmpty,
   onAddPress,
   onFilterOffersPress,
   onMyOffersPress,
 }: Props): JSX.Element {
   const {t} = useTranslation()
+  const filterActive = useAtomValue(filterActiveAtom)
 
   return (
     <XStack mt="$4" mx="$2" jc="space-between">
-      <FilterButton onFilterOffersPress={onFilterOffersPress} />
+      {!marketplaceEmpty || filterActive ? (
+        <FilterButton onFilterOffersPress={onFilterOffersPress} />
+      ) : (
+        <Stack />
+      )}
       <XStack>
         <Button
           onPress={onMyOffersPress}

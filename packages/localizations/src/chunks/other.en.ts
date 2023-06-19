@@ -255,7 +255,17 @@ const otherEn =
       "createOfferAndReachVexlers":
         "You reach {{reachNumber}} vexlers.\nAdd more contacts to increase the number of offers you see.",
       "filterActive": "Filter active",
-      "totalOffers": "Total: {{count}} offers"
+      "totalOffers": "Total: {{count}} offers",
+      "notImportedAnyContacts":
+        "You have not imported any contacts. Import contacts to see offers from your network",
+      "socialNetworkTooSmall":
+        "You imported only few contacts so you might not see any offers",
+      "noOffersToMatchFilter":
+        "There are no offers to match your filter criteria",
+      "offersAreLoadingAndShouldBeReady":
+        "Offers are loading and should be ready for you in {{minutes}} minutes",
+      "marketplaceEmpty": "Marketplace empty, yet",
+      "resetFilter": "Reset filter"
     },
     "termsOfUse": {
       "termsOfUse": "Terms of Use",
@@ -474,9 +484,9 @@ const otherEn =
           "APPROVE_MESSAGING": "Request was accepted",
           "DISAPPROVE_MESSAGING": "Request was declined",
           "DELETE_CHAT": "{{them}} left the chat",
-          "BLOCK_CHAT": "{{them}} Has blocked you",
-          "OFFER_DELETED": "{{them}} has deleted his offer",
-          "INBOX_DELETED": "{{them}} has deleted their inbox"
+          "BLOCK_CHAT": "{{them}} has blocked you",
+          "OFFER_DELETED": "{{them}} has deleted the offer",
+          "INBOX_DELETED": "{{them}} has deleted the chat."
         },
         "outgoing": {
           "MESSAGE": "Me: {{message}}",
@@ -618,6 +628,16 @@ const otherEn =
     "changeProfilePicture": {
       "changeProfilePicture": "Change profile picture",
       "uploadNewPhoto": "Upload new photo"
+    },
+    "suggestion": {
+      "vexl": "Vexl",
+      "suggests": "suggests",
+      "yourAppGuide": "Your app guide",
+      "addMoreContacts": "Add more contacts",
+      "noOffersFromOthersYet":
+        "🤔 No offers from others, yet? Try to add more contacts, and wait ✌️",
+      "createYourFirstOffer":
+        "👋 Create your first offer to buy or sell Bitcoin."
     }
   }
 /* JSON ends */

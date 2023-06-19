@@ -17,15 +17,24 @@ import {type ExtractLeftTE} from '@vexl-next/rest-api/dist/services/chat/utils'
 import {type ContactPrivateApi} from '@vexl-next/rest-api/dist/services/contact'
 import {type CryptoError} from '@vexl-next/resources-utils/dist/utils/crypto'
 import toE164PhoneNumberWithDefaultCountryCode from '../../utils/toE164PhoneNumberWithDefaultCountryCode'
+import {IsoDatetimeString} from '@vexl-next/domain/dist/utility/IsoDatetimeString.brand'
 
 export const importedContactsStorageAtom = atomWithParsedMmkvStorage(
   'importedContacts',
-  {importedContacts: []},
-  z.object({importedContacts: z.array(ContactNormalizedWithHash)})
+  {importedContacts: [], lastImport: undefined},
+  z.object({
+    importedContacts: z.array(ContactNormalizedWithHash),
+    lastImport: IsoDatetimeString.optional(),
+  })
 )
 export const importedContactsAtom = focusAtom(
   importedContactsStorageAtom,
   (o) => o.prop('importedContacts')
+)
+
+export const lastImportOfContactsAtom = focusAtom(
+  importedContactsStorageAtom,
+  (o) => o.prop('lastImport')
 )
 
 export const importedContactsCountAtom = selectAtom(
@@ -96,6 +105,10 @@ export const importContactFromLinkActionAtom = atom(
       }),
       TE.map((newContact) => {
         set(importedContactsAtom, (prev) => [...prev, newContact])
+        set(
+          lastImportOfContactsAtom,
+          IsoDatetimeString.parse(new Date().toISOString())
+        )
         return 'ok' as const
       })
     )

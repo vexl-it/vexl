@@ -255,7 +255,17 @@ const otherSk: typeof en =
       "createOfferAndReachVexlers":
         "Tvoj dosah je {{reachNumber}} vexlákov.\nNaimportuj viac kontaktov, aby si videl viac ponúk",
       "filterActive": "Filter aktívny",
-      "totalOffers": "Celkovo: {{count}} ponúk"
+      "totalOffers": "Celkovo: {{count}} ponúk",
+      "notImportedAnyContacts":
+        "Nemáš importované žiadne kontakty. Import kontaktov ti umožní zobraziť ponuky z tvojej siete.",
+      "socialNetworkTooSmall":
+        "Z dôvodu importovania malého množstva kontaktov je možné, že nebudeš vidieť žiadne ponuky.",
+      "noOffersToMatchFilter":
+        "Nemáš žiadne ponuky, ktoré zodpovedajú zadaným filtrovacím kritériám.",
+      "offersAreLoadingAndShouldBeReady":
+        "Ponuky sa načítajú a mali by byť dostupné za {{minutes}} minút.",
+      "marketplaceEmpty": "Marketplace je zatiaľ prázdny",
+      "resetFilter": "Resetovať filter"
     },
     "termsOfUse": {
       "termsOfUse": "Podmienky používania",
@@ -620,6 +630,16 @@ const otherSk: typeof en =
     "changeProfilePicture": {
       "changeProfilePicture": "Zmeniť profilový obrázok",
       "uploadNewPhoto": "Vybrať obrázok"
+    },
+    "suggestion": {
+      "vexl": "Vexl",
+      "suggests": "odporúča",
+      "yourAppGuide": "Tvoj sprievodca aplikáciou",
+      "addMoreContacts": "Pridať víac kontaktov",
+      "noOffersFromOthersYet":
+        "🤔 Žiadne ponuky od ostatných? Zkús pridať ďalšie kontakty a počkaj. ✌️",
+      "createYourFirstOffer":
+        "👋 Vytvor svoju prvú ponuku na nákup alebo predaj Bitcoinu."
     }
   }
 /* JSON ends */

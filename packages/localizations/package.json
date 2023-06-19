@@ -12,7 +12,7 @@
     "clean": "rimraf dist tsconfig.tsbuildinfo utilsDist",
     "lint": "eslint --config src/.eslintrc.cjs src --ext .js,.jsx,.ts,.tsx && tsc --project src/tsconfig.json --noEmit",
     "utils:run": "node esbuild.config.js && node utilsDist/index.cjs && yarn utils:format-translations",
-    "utils:format-translations": "prettier --write ./src/*.ts && eslint src/*.ts --fix"
+    "utils:format-translations": "prettier --write ./src/**/*.ts && eslint src/**/*.ts --fix"
   },
   "devDependencies": {
     "@types/luxon": "^3",

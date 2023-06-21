@@ -18220,6 +18220,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"just-truncate@npm:^2.2.0":
+  version: 2.2.0
+  resolution: "just-truncate@npm:2.2.0"
+  checksum: c319c4ddf1c0494c23a1dc88717e0cfcb5bf23f86bb2afa16ab5217fa86b7b64974cfcd4fc6ba769c637e293aa36fbd0a41171c7e8524f8ca0b0920292ebcd7d
+  languageName: node
+  linkType: hard
+
 "jwa@npm:^1.4.1":
   version: 1.4.1
   resolution: "jwa@npm:1.4.1"
@@ -25637,6 +25644,7 @@ __metadata:
     "@types/jest": ^29.4.0
     "@types/node": ^18.11.18
     eslint: ^8.33.0
+    just-truncate: ^2.2.0
     prettier: ^2.8.3
     turbo: latest
   languageName: unknown

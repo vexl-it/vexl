@@ -58,7 +58,8 @@ const otherCs: typeof en =
       "requested": "Požádáno",
       "now": "Teď",
       "declined": "Zamítnuto",
-      "reset": "Reset"
+      "reset": "Reset",
+      "you": "Vy"
     },
     "loginFlow": {
       "anonymityNotice": "Bez tvého svolení jej nikdo neuvidí. Ani my.",
@@ -256,7 +257,7 @@ const otherCs: typeof en =
       "createOfferAndReachVexlers":
         "Tvůj dosah je {{reachNumber}} vexláků.\nNaimportuj víc kontaktů abys viděl nabídky",
       "filterActive": "Filtr aktivní",
-      "totalOffers": "Celkově: {{count}} nabídek",
+      "totalOffers": "Celkově: {{totalCount}} nabídek",
       "notImportedAnyContacts":
         "Nemáš importované žádné kontakty. Import kontaktů ti umožní zobrazit nabídky z tvé sítě.",
       "socialNetworkTooSmall":
@@ -266,7 +267,9 @@ const otherCs: typeof en =
       "offersAreLoadingAndShouldBeReady":
         "Nabídky se načítají a měly by být dostupné za {{minutes}} minut.",
       "marketplaceEmpty": "Marketplace je zatím prázdný",
-      "resetFilter": "Resetovat filtr"
+      "resetFilter": "Resetovat filtr",
+      "totalFilteredOffers":
+        "Filtrováno: {{count}} nabídek (z celkového počtu {{totalCount}})"
     },
     "termsOfUse": {
       "termsOfUse": "Podmínky používání",

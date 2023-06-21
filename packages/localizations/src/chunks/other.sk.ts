@@ -58,7 +58,8 @@ const otherSk: typeof en =
       "requested": "Požiadané",
       "now": "Teraz",
       "declined": "Zamietnuté",
-      "reset": "Reset"
+      "reset": "Reset",
+      "you": "Vy"
     },
     "loginFlow": {
       "anonymityNotice": "Kým to nepovolíte, nikto to neuvidí. Dokonca ani my.",
@@ -255,7 +256,7 @@ const otherSk: typeof en =
       "createOfferAndReachVexlers":
         "Tvoj dosah je {{reachNumber}} vexlákov.\nNaimportuj viac kontaktov, aby si videl viac ponúk",
       "filterActive": "Filter aktívny",
-      "totalOffers": "Celkovo: {{count}} ponúk",
+      "totalOffers": "Celkovo: {{totalCount}} ponúk",
       "notImportedAnyContacts":
         "Nemáš importované žiadne kontakty. Import kontaktov ti umožní zobraziť ponuky z tvojej siete.",
       "socialNetworkTooSmall":
@@ -265,7 +266,9 @@ const otherSk: typeof en =
       "offersAreLoadingAndShouldBeReady":
         "Ponuky sa načítajú a mali by byť dostupné za {{minutes}} minút.",
       "marketplaceEmpty": "Marketplace je zatiaľ prázdny",
-      "resetFilter": "Resetovať filter"
+      "resetFilter": "Resetovať filter",
+      "totalFilteredOffers":
+        "Filtrovaných: {{count}} ponúk (z celkového počtu {{totalCount}})"
     },
     "termsOfUse": {
       "termsOfUse": "Podmienky používania",

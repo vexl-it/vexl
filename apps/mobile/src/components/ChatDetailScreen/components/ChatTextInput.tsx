@@ -1,13 +1,14 @@
 import TextInput from '../../Input'
 import IconButton from '../../IconButton'
 import sendSvg from '../images/sendSvg'
-import {getTokens} from 'tamagui'
+import {getTokens, Stack, Text, XStack, YStack} from 'tamagui'
 import {StyleSheet} from 'react-native'
-import {useCallback, useState} from 'react'
+import React, {useCallback, useState} from 'react'
 import Animated, {useAnimatedStyle, withSpring} from 'react-native-reanimated'
 import {useMolecule} from 'jotai-molecules'
 import {chatMolecule} from '../atoms'
-import {useSetAtom} from 'jotai'
+import truncate from 'just-truncate'
+import {useAtom, useAtomValue, useSetAtom} from 'jotai'
 import {
   type ChatMessage,
   generateChatMessageId,
@@ -15,6 +16,8 @@ import {
 import {unixMillisecondsNow} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
 import {useSessionAssumeLoggedIn} from '../../../state/session'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
+import CancelSvg from '../images/cancelSvg'
+import Image from '../../Image'
 
 const styles = StyleSheet.create({
   textInput: {
@@ -27,7 +30,10 @@ const styles = StyleSheet.create({
 
 function ChatTextInput(): JSX.Element | null {
   const [value, setValue] = useState('')
-  const {sendMessageAtom} = useMolecule(chatMolecule)
+  const {sendMessageAtom, replyToMessageAtom, otherSideDataAtom} =
+    useMolecule(chatMolecule)
+  const [replyToMessage, setReplyToMessage] = useAtom(replyToMessageAtom)
+  const otherSideData = useAtomValue(otherSideDataAtom)
   const sendMessage = useSetAtom(sendMessageAtom)
   const session = useSessionAssumeLoggedIn()
   const {t} = useTranslation()
@@ -43,35 +49,70 @@ function ChatTextInput(): JSX.Element | null {
       text: value,
       time: unixMillisecondsNow(),
       uuid: generateChatMessageId(),
+      repliedTo: replyToMessage
+        ? {
+            text: truncate(replyToMessage.message.text, 100, '...'),
+            messageAuthor: replyToMessage.state === 'received' ? 'them' : 'me',
+          }
+        : undefined,
       messageType: 'MESSAGE',
       senderPublicKey: session.privateKey.publicKeyPemBase64,
     }
     setValue('')
+    setReplyToMessage(null)
     void sendMessage(message)()
-  }, [session, value, sendMessage])
+  }, [session, value, sendMessage, replyToMessage, setReplyToMessage])
 
   return (
-    <TextInput
-      multiline
-      value={value}
-      onChangeText={setValue}
-      style={styles.textInput}
-      textColor={'$white'}
-      variant={'greyOnBlack'}
-      borderRadius={'$8'}
-      placeholder={t('messages.typeSomething')}
-      placeholderTextColor={getTokens().color.greyOnBlack.val}
-      rightElement={
-        <Animated.View style={animatedStyle}>
-          <IconButton
-            oval
-            variant="secondary"
-            icon={sendSvg}
-            onPress={sendText}
+    <Stack backgroundColor="$grey" borderRadius="$8">
+      {replyToMessage && (
+        <XStack
+          borderRadius="$5"
+          margin="$3"
+          padding="$3"
+          backgroundColor="$yellowAccent2"
+          justifyContent={'space-between'}
+        >
+          <YStack f={1}>
+            <Text fontSize={12} color="$main">
+              {replyToMessage.state === 'received'
+                ? otherSideData.userName
+                : t('common.you')}
+            </Text>
+            <Text marginTop="$1" color="$main">
+              {truncate(replyToMessage.message.text, 100, '...')}
+            </Text>
+          </YStack>
+          <Image
+            source={CancelSvg}
+            onPress={() => {
+              setReplyToMessage(null)
+            }}
           />
-        </Animated.View>
-      }
-    />
+        </XStack>
+      )}
+      <TextInput
+        multiline
+        value={value}
+        onChangeText={setValue}
+        style={styles.textInput}
+        textColor={'$white'}
+        variant={'greyOnBlack'}
+        borderRadius={'$8'}
+        placeholder={t('messages.typeSomething')}
+        placeholderTextColor={getTokens().color.greyOnBlack.val}
+        rightElement={
+          <Animated.View style={animatedStyle}>
+            <IconButton
+              oval
+              variant="secondary"
+              icon={sendSvg}
+              onPress={sendText}
+            />
+          </Animated.View>
+        }
+      />
+    </Stack>
   )
 }
 

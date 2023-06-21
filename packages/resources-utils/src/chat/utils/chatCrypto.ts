@@ -56,6 +56,7 @@ export function encryptMessage(
         text: message.text,
         uuid: message.uuid,
         image: message.image,
+        repliedTo: message.repliedTo,
         messageType: message.messageType,
         deanonymizedUser,
       }),
@@ -104,6 +105,7 @@ export function decryptMessage(
         return {
           uuid: payload.uuid,
           time: payload.time,
+          repliedTo: payload.repliedTo,
           text: payload.text ?? '-',
           messageType: payload.messageType ?? message.messageType,
           image: payload.image ?? messageImage,

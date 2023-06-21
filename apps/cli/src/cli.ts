@@ -10,10 +10,10 @@ import {addChatCommands} from './chat/cli'
 const program = new Command()
 
 program.description(
-  `Welcome to Vexl CLI tool. 
+  `Welcome to Vexl CLI tool.
 See subcommands for more info.
-This tool connects to staging environment by default. 
-To change environments, use the API_ENV_PRESET_KEY=(prodEnv|stageEnv) environment variable. Or setup your own by setting API_ENV to a json: with following structure: 
+This tool connects to staging environment by default.
+To change environments, use the API_ENV_PRESET_KEY=(prodEnv|stageEnv) environment variable. Or setup your own by setting API_ENV to a json: with following structure:
 {
 "userMs": "ServiceUrl",
 "contactMs": "ServiceUrl",

@@ -4,7 +4,7 @@ const LINKING_ERROR = `The package 'react-native-ecdh-platform-native-utils' doe
   Platform.select({ios: "- You have run 'pod install'\n", default: ''})
   - You rebuilt the app after installing the package\n'
   - You are not using Expo Go\n`
- 
+
 const EcdhPlatformNativeUtils = NativeModules.EcdhPlatformNativeUtils
   ? NativeModules.EcdhPlatformNativeUtils
   : new Proxy(

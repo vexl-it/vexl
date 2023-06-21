@@ -17,7 +17,7 @@ module.exports = function withDisabledFirebaseAnalytics(config) {
 function withAnalyticsDisabledInAndroidManifest(config) {
   return withAndroidManifest(config, (config) => {
     config.modResults = addItemToAndroidManifest(config, config.modResults)
-    
+
     return config
   })
 }

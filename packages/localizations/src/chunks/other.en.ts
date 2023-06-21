@@ -255,7 +255,7 @@ const otherEn =
       "createOfferAndReachVexlers":
         "You reach {{reachNumber}} vexlers.\nAdd more contacts to increase the number of offers you see.",
       "filterActive": "Filter active",
-      "totalOffers": "Total: {{count}} offers",
+      "totalOffers": "Total: {{totalCount}} offers",
       "notImportedAnyContacts":
         "You have not imported any contacts. Import contacts to see offers from your network",
       "socialNetworkTooSmall":
@@ -265,7 +265,9 @@ const otherEn =
       "offersAreLoadingAndShouldBeReady":
         "Offers are loading and should be ready for you in {{minutes}} minutes",
       "marketplaceEmpty": "Marketplace empty, yet",
-      "resetFilter": "Reset filter"
+      "resetFilter": "Reset filter",
+      "totalFilteredOffers":
+        "Filtered: {{count}} offers (out of total {{totalCount}})"
     },
     "termsOfUse": {
       "termsOfUse": "Terms of Use",

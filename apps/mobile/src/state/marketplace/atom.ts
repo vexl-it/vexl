@@ -18,7 +18,7 @@ import areIncluded from './utils/areIncluded'
 import {type ChatOrigin} from '@vexl-next/domain/dist/general/messaging'
 import {type FocusAtomType} from '../../utils/atomUtils/FocusAtomType'
 import {type OfferAdminId} from '@vexl-next/rest-api/dist/services/offer/contracts'
-import {splitAtom} from 'jotai/utils'
+import {selectAtom, splitAtom} from 'jotai/utils'
 import {importedContactsHashesAtom} from '../contacts'
 import sortOffers from './utils/sortOffers'
 import idsOfRequestedOffersAtom from '../chat/atoms/idsOfRequestedOffersAtom'
@@ -52,6 +52,8 @@ export const offersStateAtom = atomWithParsedMmkvStorage(
 export const offersAtom = focusAtom(offersStateAtom, (optic) =>
   optic.prop('offers')
 )
+
+export const offersCountAtom = selectAtom(offersAtom, (offers) => offers.length)
 
 export const offersToSeeInMarketplaceAtom = atom((get) => {
   const importedContactsHashes = get(importedContactsHashesAtom)

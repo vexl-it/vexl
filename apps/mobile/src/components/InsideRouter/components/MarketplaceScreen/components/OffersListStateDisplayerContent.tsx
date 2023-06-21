@@ -1,7 +1,7 @@
 import {useMemo} from 'react'
 import {isNone} from 'fp-ts/Option'
 import ErrorListHeader from '../../../../ErrorListHeader'
-import {getTokens, Stack, Text} from 'tamagui'
+import {getTokens, Stack} from 'tamagui'
 import {ActivityIndicator} from 'react-native'
 import ContainerWithTopBorderRadius from '../../ContainerWithTopBorderRadius'
 import OffersListButtons from './OffersListButtons'
@@ -16,7 +16,7 @@ import {useAtomValue} from 'jotai'
 import {offersAtomWithFilter} from '../../../../../state/marketplace/atom'
 import {splitAtom} from 'jotai/utils'
 import {offersFilterAtom} from '../../../../FilterOffersScreen/atom'
-import {useTranslation} from '../../../../../utils/localization/I18nProvider'
+import TotalOffersCount from './TotalOffersCount'
 
 interface Props {
   type: 'BUY' | 'SELL'
@@ -31,7 +31,6 @@ function OffersListStateDisplayerContent({
   navigateToMyOffers,
   type,
 }: Props): JSX.Element {
-  const {t} = useTranslation()
   const tokens = getTokens()
   const loading = useAreOffersLoading()
   const error = useOffersLoadingError()
@@ -52,10 +51,11 @@ function OffersListStateDisplayerContent({
   )
 
   const renderListHeader = useMemo(() => {
-    if (isNone(error)) return null
+    if (isNone(error))
+      return <TotalOffersCount filteredOffersCount={offersAtoms.length} />
 
     return <ErrorListHeader mt={'$6'} error={error.value} />
-  }, [error])
+  }, [error, offersAtoms.length])
 
   if (offersAtoms.length === 0 && loading) {
     return (
@@ -73,11 +73,6 @@ function OffersListStateDisplayerContent({
         onFilterOffersPress={navigateToFilterOffers}
         onMyOffersPress={navigateToMyOffers}
       />
-      <Stack als={'flex-end'} my={'$2'} mx="$2">
-        <Text ff={'$body600'} color={'$main'}>
-          {t('offer.totalOffers', {count: offersAtoms.length})}
-        </Text>
-      </Stack>
       {offersAtoms.length === 0 ? (
         <EmptyListPlaceholder />
       ) : (

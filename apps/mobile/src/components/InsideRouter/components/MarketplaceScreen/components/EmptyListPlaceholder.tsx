@@ -121,6 +121,7 @@ function EmptyListPlaceholder(): JSX.Element {
   if (filterActive) {
     return resetFilterSuggestionVisible ? (
       <MarketplaceSuggestion
+        mt={'$4'}
         buttonText={t('offer.resetFilter')}
         onButtonPress={resetFilterAndSaveIt}
         onClosePress={() => {

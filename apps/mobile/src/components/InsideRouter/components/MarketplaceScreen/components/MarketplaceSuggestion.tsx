@@ -1,4 +1,4 @@
-import {getTokens, Stack, Text, XStack} from 'tamagui'
+import {getTokens, Stack, Text, XStack, YStack, type YStackProps} from 'tamagui'
 import closeSvg from '../../../../images/closeSvg'
 import {TouchableOpacity} from 'react-native'
 import Image from '../../../../Image'
@@ -8,7 +8,7 @@ import Button from '../../../../Button'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import vexlerAvatarSvg from '../images/vexlerAvatarSvg'
 
-interface Props {
+interface Props extends YStackProps {
   buttonText: string
   onButtonPress: () => void
   onClosePress: () => void
@@ -20,12 +20,13 @@ function MarketplaceSuggestion({
   onButtonPress,
   onClosePress,
   text,
+  ...props
 }: Props): JSX.Element {
   const tokens = getTokens()
   const {t} = useTranslation()
 
   return (
-    <Stack px="$2">
+    <YStack px="$2" {...props}>
       <Stack mb={'$2'}>
         <Stack
           pos={'relative'}
@@ -88,7 +89,7 @@ function MarketplaceSuggestion({
           variant={'secondary'}
         />
       </XStack>
-    </Stack>
+    </YStack>
   )
 }
 

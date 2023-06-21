@@ -5,7 +5,10 @@ import {offerForChatOriginAtom} from '../../../state/marketplace/atom'
 import {selectAtom, splitAtom} from 'jotai/utils'
 import {generatePrivateKey} from '@vexl-next/cryptography/dist/KeyHolder'
 import sendMessageActionAtom from '../../../state/chat/atoms/sendMessageActionAtom'
-import {type ChatWithMessages} from '../../../state/chat/domain'
+import {
+  type ChatMessageWithState,
+  type ChatWithMessages,
+} from '../../../state/chat/domain'
 import {messagesToListData} from '../utils'
 import focusRequestMessageAtom from '../../../state/chat/atoms/focusRequestMessageAtom'
 import {focusAtom} from 'jotai-optics'
@@ -331,6 +334,9 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     return originOffer?.offerInfo.privatePart?.friendLevel ?? []
   })
 
+  const replyToMessageAtom = atom<ChatMessageWithState | null>(null)
+  const messageOptionsExtendedAtom = atom<ChatMessageWithState | null>(null)
+
   return {
     showModalAtom: atom<boolean>(false),
     chatAtom,
@@ -355,5 +361,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     lastMessageAtom,
     canSendMessagesAtom,
     friendLevelInfoAtom,
+    replyToMessageAtom,
+    messageOptionsExtendedAtom,
   }
 })

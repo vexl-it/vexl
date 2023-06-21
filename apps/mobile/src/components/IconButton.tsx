@@ -9,7 +9,7 @@ interface Props {
   icon: SvgString
   onPress: () => void
   style?: StyleProp<ViewStyle>
-  variant?: 'dark' | 'light' | 'primary' | 'negative' | 'secondary'
+  variant?: 'dark' | 'light' | 'primary' | 'negative' | 'secondary' | 'plain'
   oval?: boolean
 }
 
@@ -34,6 +34,9 @@ const PressableStyled = styled(Stack, {
       },
       negative: {
         bg: '$darkRed',
+      },
+      plain: {
+        bg: 'transparent',
       },
     },
     oval: {

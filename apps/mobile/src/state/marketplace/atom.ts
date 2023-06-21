@@ -64,10 +64,11 @@ export const offersToSeeInMarketplaceAtom = atom((get) => {
       !oneOffer.ownershipInfo &&
       // Not reported offers
       !oneOffer.flags.reported &&
-      // Offers that has at least one common contact
-      oneOffer.offerInfo.privatePart.commonFriends.some((one) =>
+      // Offers that has at least one common contact or are first degree
+      (oneOffer.offerInfo.privatePart.commonFriends.some((one) =>
         importedContactsHashes.includes(one)
-      )
+      ) ||
+        oneOffer.offerInfo.privatePart.friendLevel.includes('FIRST_DEGREE'))
   )
 })
 

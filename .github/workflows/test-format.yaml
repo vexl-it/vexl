@@ -1,0 +1,16 @@
+name: "[Test] format code"
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  editorconfig:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: editorconfig-checker/action-editorconfig-checker@main
+      # for some reason the rules for "*.pbxproj" are not reflected
+      # let's skip the file completely for now
+      - run: editorconfig-checker --exclude "project.pbxproj"

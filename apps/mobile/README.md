@@ -17,7 +17,7 @@ This repository contains code for the Vexl mobile app. The app is built using Re
 1. Make sure you have packages installed by running `yarn install`.
 2. Run `yarn test` to run unit tests.
 
-## TODO to finish the setup of the repository: 
+## TODO to finish the setup of the repository:
 
 - [x] Linter and prettier
 - [x] Tests with Jest

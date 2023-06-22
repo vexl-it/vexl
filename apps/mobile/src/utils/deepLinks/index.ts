@@ -31,6 +31,7 @@ const handleImportDeepContactActionAtom = atom(
         set(askAreYouSureActionAtom, {
           steps: [
             {
+              type: 'StepWithText',
               title: get(translationAtom).t(
                 'deepLinks.importContacts.alert.title'
               ),
@@ -61,6 +62,7 @@ const handleImportDeepContactActionAtom = atom(
         set(askAreYouSureActionAtom, {
           steps: [
             {
+              type: 'StepWithText',
               title: get(translationAtom).t('common.success'),
               description: get(translationAtom).t(
                 'deepLinks.importContacts.successAlert.title'

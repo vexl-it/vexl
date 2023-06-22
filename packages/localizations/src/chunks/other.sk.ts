@@ -242,7 +242,10 @@ const otherSk: typeof en =
         "areYouSureTitle": "Nahlásiť ponuku?",
         "areYouSureText":
           "Skutočne chcete nahlásiť túto ponuku? Táto akcia je nevratná.",
-        "yes": "Áno, nahlásiť"
+        "yes": "Áno, nahlásiť",
+        "thankYou": "Ďakujeme!",
+        "inappropriateContentWasReported":
+          "Nevhodný obsah bol anonymne nahlásený."
       },
       "goToChat": "Prejdite do chatu",
       "requestStatus": {

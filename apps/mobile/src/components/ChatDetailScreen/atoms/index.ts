@@ -98,6 +98,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
       set(askAreYouSureActionAtom, {
         steps: [
           {
+            type: 'StepWithText',
             image: {
               type: 'svgXml',
               svgXml: deleteChatStep1Svg,
@@ -108,6 +109,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
             positiveButtonText: t('common.yesDelete'),
           },
           {
+            type: 'StepWithText',
             image: {
               type: 'svgXml',
               svgXml: deleteChatStep1Svg,
@@ -152,6 +154,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
       set(askAreYouSureActionAtom, {
         steps: [
           {
+            type: 'StepWithText',
             image: {
               type: 'requiredImage',
               image: require('../images/blockChat1.png'),
@@ -162,6 +165,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
             positiveButtonText: t('messages.yesBlock'),
           },
           {
+            type: 'StepWithText',
             image: {
               type: 'requiredImage',
               image: require('../images/blockChat1.png'),
@@ -247,7 +251,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
 
       return await pipe(
         set(askAreYouSureActionAtom, {
-          steps: [modalContent],
+          steps: [{...modalContent, type: 'StepWithText'}],
           variant: 'info',
         }),
         TE.map((val) => {

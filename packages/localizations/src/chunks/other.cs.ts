@@ -243,7 +243,10 @@ const otherCs: typeof en =
         "areYouSureTitle": "Nahlásit nabídku?",
         "areYouSureText":
           "Skutečně chceš nahlásit tuhle nabídku? Tahle akce je nevratná.",
-        "yes": "Ano, nahlásit"
+        "yes": "Ano, nahlásit",
+        "thankYou": "Děkujeme!",
+        "inappropriateContentWasReported":
+          "Nevhodný obsah byl anonymně nahlášen."
       },
       "goToChat": "Přejděte na chat",
       "requestStatus": {

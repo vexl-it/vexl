@@ -58,7 +58,8 @@ const otherCs: typeof en =
       "requested": "Požádáno",
       "now": "Teď",
       "declined": "Zamítnuto",
-      "reset": "Reset"
+      "reset": "Reset",
+      "you": "Vy"
     },
     "loginFlow": {
       "anonymityNotice": "Bez tvého svolení jej nikdo neuvidí. Ani my.",
@@ -242,7 +243,10 @@ const otherCs: typeof en =
         "areYouSureTitle": "Nahlásit nabídku?",
         "areYouSureText":
           "Skutečně chceš nahlásit tuhle nabídku? Tahle akce je nevratná.",
-        "yes": "Ano, nahlásit"
+        "yes": "Ano, nahlásit",
+        "thankYou": "Děkujeme!",
+        "inappropriateContentWasReported":
+          "Nevhodný obsah byl anonymně nahlášen."
       },
       "goToChat": "Přejděte na chat",
       "requestStatus": {

@@ -54,11 +54,18 @@ export type DeanonymizedUser = z.TypeOf<typeof DeanonymizedUser>
 export const ChatMessageId = z.string().uuid().brand<'ChatMessageId'>()
 export type ChatMessageId = z.TypeOf<typeof ChatMessageId>
 
+export const RepliedToData = z.object({
+  text: z.string(),
+  messageAuthor: z.enum(['me', 'them']),
+})
+export type RepliedToData = z.TypeOf<typeof RepliedToData>
+
 //
 export const ChatMessagePayload = z.object({
   uuid: ChatMessageId,
   text: z.string().optional(),
   image: UriString.optional(),
+  repliedTo: RepliedToData.optional(),
   time: UnixMilliseconds,
   messageType: MessageType.optional(),
   deanonymizedUser: z
@@ -80,6 +87,7 @@ export const ChatMessage = z.object({
   text: z.string(),
   time: UnixMilliseconds,
   image: UriString.optional(),
+  repliedTo: RepliedToData.optional(),
   deanonymizedUser: DeanonymizedUser.optional(),
   senderPublicKey: PublicKeyPemBase64,
   messageType: MessageType,

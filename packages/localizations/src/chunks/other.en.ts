@@ -57,7 +57,8 @@ const otherEn =
       "requested": "Requested",
       "now": "Now",
       "declined": "Declined",
-      "reset": "Reset"
+      "reset": "Reset",
+      "you": "You"
     },
     "loginFlow": {
       "anonymityNotice":
@@ -240,7 +241,10 @@ const otherEn =
         "areYouSureTitle": "Report offer?",
         "areYouSureText":
           "Are you certain about reporting this offer? Once reported, it cannot be undone. Choose wisely.",
-        "yes": "Yes, report"
+        "yes": "Yes, report",
+        "thankYou": "Thank you!",
+        "inappropriateContentWasReported":
+          "Inappropriate content was anonymously reported."
       },
       "goToChat": "Go to chat",
       "requestStatus": {

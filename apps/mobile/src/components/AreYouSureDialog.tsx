@@ -19,13 +19,23 @@ import {useFocusEffect} from '@react-navigation/native'
 import React from 'react'
 import {ImageUniversal, type ImageUniversalSourcePropType} from './Image'
 
-interface Step {
+interface StepWithText {
+  type: 'StepWithText'
   image?: ImageUniversalSourcePropType
   title: string
   description?: string
   negativeButtonText?: string
   positiveButtonText: string
 }
+
+interface StepWithChildren {
+  type: 'StepWithChildren'
+  negativeButtonText?: string
+  positiveButtonText: string
+  children: React.ReactNode
+}
+
+type Step = StepWithText | StepWithChildren
 
 interface AreYouSureDialogState {
   variant: 'danger' | 'info'
@@ -123,19 +133,29 @@ function AreYouSureDialog(): JSX.Element | null {
           <ScrollView style={styles.flip}>
             <View style={styles.flip}>
               <Stack px={'$4'} br={'$4'} mx={'$2'} py="$5" bc={'$white'}>
-                {step.image && (
-                  <ImageUniversal
-                    style={{maxWidth: '100%'}}
-                    source={step.image}
-                  />
-                )}
-                <Text fontFamily={'$heading'} fontSize={32} color={'$black'}>
-                  {step.title}
-                </Text>
-                {step.description && (
-                  <Text fontSize={18} color={'$greyOnWhite'}>
-                    {step.description}
-                  </Text>
+                {step.type === 'StepWithText' ? (
+                  <>
+                    {step.image && (
+                      <ImageUniversal
+                        style={{maxWidth: '100%'}}
+                        source={step.image}
+                      />
+                    )}
+                    <Text
+                      fontFamily={'$heading'}
+                      fontSize={32}
+                      color={'$black'}
+                    >
+                      {step.title}
+                    </Text>
+                    {step.description && (
+                      <Text fontSize={18} color={'$greyOnWhite'}>
+                        {step.description}
+                      </Text>
+                    )}
+                  </>
+                ) : (
+                  step.children
                 )}
               </Stack>
             </View>

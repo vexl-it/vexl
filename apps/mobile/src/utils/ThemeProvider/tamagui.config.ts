@@ -30,6 +30,7 @@ const color = {
   pink: '#fcc5f3',
   pastelGreen: '#ACD9B7',
   yellowAccent1: '#957A44',
+  yellowAccent2: '#4C3D20',
 }
 
 const space = {

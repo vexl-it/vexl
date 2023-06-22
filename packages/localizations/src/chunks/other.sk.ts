@@ -58,7 +58,8 @@ const otherSk: typeof en =
       "requested": "Požiadané",
       "now": "Teraz",
       "declined": "Zamietnuté",
-      "reset": "Reset"
+      "reset": "Reset",
+      "you": "Vy"
     },
     "loginFlow": {
       "anonymityNotice": "Kým to nepovolíte, nikto to neuvidí. Dokonca ani my.",
@@ -241,7 +242,10 @@ const otherSk: typeof en =
         "areYouSureTitle": "Nahlásiť ponuku?",
         "areYouSureText":
           "Skutočne chcete nahlásiť túto ponuku? Táto akcia je nevratná.",
-        "yes": "Áno, nahlásiť"
+        "yes": "Áno, nahlásiť",
+        "thankYou": "Ďakujeme!",
+        "inappropriateContentWasReported":
+          "Nevhodný obsah bol anonymne nahlásený."
       },
       "goToChat": "Prejdite do chatu",
       "requestStatus": {

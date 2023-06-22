@@ -94,12 +94,14 @@ function ButtonsSection(): JSX.Element {
         variant: 'danger',
         steps: [
           {
+            type: 'StepWithText',
             title: t('settings.logoutDialog.title'),
             description: t('settings.logoutDialog.description'),
             positiveButtonText: t('common.yesDelete'),
             negativeButtonText: t('common.nope'),
           },
           {
+            type: 'StepWithText',
             title: t('settings.logoutDialog.title2'),
             description: t('settings.logoutDialog.description'),
             positiveButtonText: t('common.yesDelete'),

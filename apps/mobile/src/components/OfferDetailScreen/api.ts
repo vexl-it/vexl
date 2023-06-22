@@ -16,6 +16,8 @@ import useSafeGoBack from '../../utils/useSafeGoBack'
 import {useRequestOffer} from '../../state/marketplace'
 import {useShowLoadingOverlay} from '../LoadingOverlayProvider'
 import {createSingleOfferReportedFlagAtom} from '../../state/marketplace/atom'
+import reportOfferSvg from './images/reportOfferSvg'
+import offerReportedSvg from './images/offerReportedSvg'
 
 export function useSubmitRequestHandleUI(): (
   text: string,
@@ -66,6 +68,8 @@ export function useReportOfferHandleUI(): (
           variant: 'danger',
           steps: [
             {
+              type: 'StepWithText',
+              image: {type: 'svgXml', svgXml: reportOfferSvg},
               title: t('offer.report.areYouSureTitle'),
               description: t('offer.report.areYouSureText'),
               positiveButtonText: t('offer.report.yes'),
@@ -79,19 +83,35 @@ export function useReportOfferHandleUI(): (
             offerId,
           })
         }),
+        TE.mapLeft((e) => {
+          if (e._tag !== 'UserDeclinedError') {
+            Alert.alert(toCommonErrorMessage(e, t) ?? t('common.unknownError'))
+          }
+          loadingOverlay.hide()
+          return false
+        }),
+        TE.map(() => {
+          store.set(reportedFlagAtom, true)
+        }),
+        TE.chainFirstW(() => {
+          return store.set(askAreYouSureActionAtom, {
+            variant: 'info',
+            steps: [
+              {
+                type: 'StepWithText',
+                image: {type: 'svgXml', svgXml: offerReportedSvg},
+                title: t('offer.report.thankYou'),
+                description: t('offer.report.inappropriateContentWasReported'),
+                positiveButtonText: t('common.continue'),
+              },
+            ],
+          })
+        }),
         TE.match(
-          (e) => {
-            if (e._tag !== 'UserDeclinedError') {
-              Alert.alert(
-                toCommonErrorMessage(e, t) ?? t('common.unknownError')
-              )
-            }
-
-            loadingOverlay.hide()
+          () => {
             return false
           },
           () => {
-            store.set(reportedFlagAtom, true)
             safeGoBack()
             loadingOverlay.hide()
             return true

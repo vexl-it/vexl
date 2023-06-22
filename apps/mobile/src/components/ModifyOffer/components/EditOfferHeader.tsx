@@ -39,6 +39,7 @@ function EditOfferHeader({offer}: Props): JSX.Element {
         variant: 'danger',
         steps: [
           {
+            type: 'StepWithText',
             title: t('editOffer.deleteOffer'),
             description: t('editOffer.deleteOfferDescription'),
             positiveButtonText: t('common.yesDelete'),

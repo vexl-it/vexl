@@ -52,10 +52,15 @@ function OffersListStateDisplayerContent({
 
   const renderListHeader = useMemo(() => {
     if (isNone(error))
-      return <TotalOffersCount filteredOffersCount={offersAtoms.length} />
+      return (
+        <TotalOffersCount
+          filteredOffersCount={offersAtoms.length}
+          offerType={type}
+        />
+      )
 
     return <ErrorListHeader mt={'$6'} error={error.value} />
-  }, [error, offersAtoms.length])
+  }, [error, offersAtoms.length, type])
 
   if (offersAtoms.length === 0 && loading) {
     return (

@@ -53,8 +53,6 @@ export const offersAtom = focusAtom(offersStateAtom, (optic) =>
   optic.prop('offers')
 )
 
-export const offersCountAtom = selectAtom(offersAtom, (offers) => offers.length)
-
 export const offersToSeeInMarketplaceAtom = atom((get) => {
   const importedContactsHashes = get(importedContactsHashesAtom)
   return get(offersAtom).filter(
@@ -71,6 +69,20 @@ export const offersToSeeInMarketplaceAtom = atom((get) => {
       )
   )
 })
+
+export const buyOffersToSeeInMarketplaceCountAtom = selectAtom(
+  offersToSeeInMarketplaceAtom,
+  (offers) =>
+    offers.filter((offer) => offer.offerInfo.publicPart.offerType === 'BUY')
+      .length
+)
+
+export const sellOffersToSeeInMarketplaceCountAtom = selectAtom(
+  offersToSeeInMarketplaceAtom,
+  (offers) =>
+    offers.filter((offer) => offer.offerInfo.publicPart.offerType === 'SELL')
+      .length
+)
 
 export const offersIdsAtom = focusAtom(offersAtom, (optic) =>
   optic.elems().prop('offerInfo').prop('offerId')

@@ -43,7 +43,7 @@ export default function useContent(): SectionProps[] {
         children: <Sorting sortingAtom={sortingAtom} />,
       },
       {
-        title: t('offerForm.currency'),
+        title: t('common.currency'),
         image: coinsSvg,
         children: (
           <Currency

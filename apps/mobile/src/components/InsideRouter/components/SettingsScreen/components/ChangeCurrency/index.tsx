@@ -68,7 +68,7 @@ function ChangeCurrency(): JSX.Element {
       onClose={() => {
         setChangeCurrencyDialogVisible(false)
       }}
-      title={t('currency.currency')}
+      title={t('common.currency')}
       visible={changeCurrencyDialogVisible}
     >
       <YStack space={'$6'}>

@@ -51,7 +51,7 @@ export default function useContent(): SectionProps[] {
         children: <OfferType offerTypeAtom={offerTypeAtom} />,
       },
       {
-        title: t('offerForm.currency'),
+        title: t('common.currency'),
         image: coinsSvg,
         children: (
           <Currency

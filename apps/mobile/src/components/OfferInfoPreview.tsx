@@ -52,19 +52,8 @@ function OfferInfoPreview({
   )
 
   const offerAmount = useMemo(() => {
-    if (offer.publicPart.currency === 'CZK')
-      return `${bigNumberToString(offer.publicPart.amountTopLimit)} ${t(
-        'common.czkSymbol'
-      )}`
-    if (offer.publicPart.currency === 'EUR')
-      return `${t('common.eurSymbol')}${bigNumberToString(
-        offer.publicPart.amountTopLimit
-      )}`
-    if (offer.publicPart.currency === 'USD')
-      return `${t('common.dollarSymbol')}${bigNumberToString(
-        offer.publicPart.amountTopLimit
-      )}`
-  }, [offer.publicPart.amountTopLimit, offer.publicPart.currency, t])
+    return `${bigNumberToString(offer.publicPart.amountTopLimit)} ${offer.publicPart.currency}`
+  }, [offer.publicPart.amountTopLimit, offer.publicPart.currency])
 
   return (
     <>

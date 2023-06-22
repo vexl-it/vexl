@@ -171,7 +171,7 @@ function ButtonsSection(): JSX.Element {
               }
             : null,
           {
-            text: t('settings.items.czechCrown'),
+            text: 'CZK',
             icon: coinsIconSvg,
             onPress: () => {
               setChangeCurrencyDialogVisible(true)

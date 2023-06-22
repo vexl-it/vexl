@@ -41,13 +41,7 @@ const otherSk: typeof en =
       "more": "Viac na",
       "yes": "Áno",
       "no": "Nie",
-      "czk": "CZK",
-      "usd": "USD",
-      "eur": "EUR",
       "myOffers": "Moje ponuky",
-      "eurSymbol": "€",
-      "dollarSymbol": "$",
-      "czkSymbol": "Kč",
       "errorOpeningLink": {
         "message": "Chyba pri otváraní linku.",
         "text": "Skopírovať do schránky?",
@@ -60,7 +54,8 @@ const otherSk: typeof en =
       "declined": "Zamietnuté",
       "reset": "Reset",
       "you": "Vy",
-      "allow": "Povoliť"
+      "allow": "Povoliť",
+      "currency": "Mena"
     },
     "loginFlow": {
       "anonymityNotice": "Kým to nepovolíte, nikto to neuvidí. Dokonca ani my.",
@@ -189,7 +184,6 @@ const otherSk: typeof en =
         "xFriends": "{{number}} priateľov",
         "setPin": "Nastaviť PIN",
         "faceId": "Face ID",
-        "czechCrown": "Česká koruna",
         "allowScreenshots": "Povoliť screenshoty",
         "allowScreenshotsDescription": "Zákazať užívateľom screenshoty chatu",
         "termsAndPrivacy": "Podmienky a ochrana osobných údajov",
@@ -314,7 +308,6 @@ const otherSk: typeof en =
       "iWantTo": "Chcem",
       "sellBitcoin": "Predať Bitcoin",
       "buyBitcoin": "Kúpiť Bitcoin",
-      "currency": "Mena",
       "amountOfTransaction": {
         "amountOfTransaction": "Čiastka",
         "pleaseSelectCurrencyFirst": "Najskôr si vyber menu",
@@ -611,12 +604,6 @@ const otherSk: typeof en =
     "btcPriceChart": {
       "requestCouldNotBeProcessed":
         "Request to obtain current BTC price failed"
-    },
-    "currency": {
-      "currency": "Mena",
-      "czechCrown": "Česká koruna",
-      "euro": "Euro",
-      "unitedStatesDollar": "USD"
     },
     "deepLinks": {
       "importContacts": {

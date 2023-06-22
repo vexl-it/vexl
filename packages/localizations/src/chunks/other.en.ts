@@ -40,13 +40,7 @@ const otherEn =
       "more": "More",
       "yes": "Yes",
       "no": "No",
-      "czk": "CZK",
-      "usd": "USD",
-      "eur": "EUR",
       "myOffers": "My offers",
-      "eurSymbol": "€",
-      "dollarSymbol": "$",
-      "czkSymbol": "Kč",
       "errorOpeningLink": {
         "message": "Error opening link",
         "text": "Copy to clipboard instead?",
@@ -59,7 +53,8 @@ const otherEn =
       "declined": "Declined",
       "reset": "Reset",
       "you": "You",
-      "allow": "Allow"
+      "allow": "Allow",
+      "currency": "Currency"
     },
     "loginFlow": {
       "anonymityNotice":
@@ -186,7 +181,6 @@ const otherEn =
         "xFriends": "{{number}} friends",
         "setPin": "Set PIN",
         "faceId": "Face ID",
-        "czechCrown": "Czech crown",
         "allowScreenshots": "Allow Screenshots",
         "allowScreenshotsDescription":
           "Prevent users from taking screenshots of the chat",
@@ -314,7 +308,6 @@ const otherEn =
       "iWantTo": "I want to",
       "sellBitcoin": "Sell Bitcoin",
       "buyBitcoin": "Buy Bitcoin",
-      "currency": "Currency",
       "amountOfTransaction": {
         "amountOfTransaction": "Amount",
         "pleaseSelectCurrencyFirst": "Please select currency first",
@@ -609,12 +602,6 @@ const otherEn =
     "btcPriceChart": {
       "requestCouldNotBeProcessed":
         "Request to obtain current BTC price failed"
-    },
-    "currency": {
-      "currency": "Currency",
-      "czechCrown": "Czech crown",
-      "euro": "Euro",
-      "unitedStatesDollar": "USD"
     },
     "deepLinks": {
       "importContacts": {

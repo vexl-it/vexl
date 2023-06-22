@@ -92,8 +92,9 @@ export function useReportOfferHandleUI(): (
         }),
         TE.map(() => {
           store.set(reportedFlagAtom, true)
+          loadingOverlay.hide()
         }),
-        TE.chainFirstW(() => {
+        TE.chainFirstTaskK(() => {
           return store.set(askAreYouSureActionAtom, {
             variant: 'info',
             steps: [
@@ -113,7 +114,6 @@ export function useReportOfferHandleUI(): (
           },
           () => {
             safeGoBack()
-            loadingOverlay.hide()
             return true
           }
         )

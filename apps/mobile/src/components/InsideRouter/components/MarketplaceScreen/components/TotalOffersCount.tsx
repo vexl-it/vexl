@@ -2,16 +2,24 @@ import {useAtomValue} from 'jotai'
 import {filterActiveAtom} from '../../../../FilterOffersScreen/atom'
 import {Stack, Text} from 'tamagui'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
-import {offersCountAtom} from '../../../../../state/marketplace/atom'
+import {
+  buyOffersToSeeInMarketplaceCountAtom,
+  sellOffersToSeeInMarketplaceCountAtom,
+} from '../../../../../state/marketplace/atom'
 
 interface Props {
   filteredOffersCount: number
+  offerType: 'BUY' | 'SELL'
 }
 
-function TotalOffersCount({filteredOffersCount}: Props): JSX.Element {
+function TotalOffersCount({
+  filteredOffersCount,
+  offerType,
+}: Props): JSX.Element {
   const {t} = useTranslation()
   const filterActive = useAtomValue(filterActiveAtom)
-  const offersCount = useAtomValue(offersCountAtom)
+  const buyOffersCount = useAtomValue(buyOffersToSeeInMarketplaceCountAtom)
+  const sellOffersCount = useAtomValue(sellOffersToSeeInMarketplaceCountAtom)
 
   return (
     <Stack als={'flex-start'} my={'$2'} mx="$2">
@@ -19,9 +27,13 @@ function TotalOffersCount({filteredOffersCount}: Props): JSX.Element {
         {filterActive
           ? t('offer.totalFilteredOffers', {
               count: filteredOffersCount,
-              totalCount: offersCount,
+              totalCount:
+                offerType === 'BUY' ? buyOffersCount : sellOffersCount,
             })
-          : t('offer.totalOffers', {totalCount: offersCount})}
+          : t('offer.totalOffers', {
+              totalCount:
+                offerType === 'BUY' ? buyOffersCount : sellOffersCount,
+            })}
       </Text>
     </Stack>
   )

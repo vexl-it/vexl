@@ -56,11 +56,10 @@ const otherCs: typeof en =
       "you": "Vy",
       "allow": "Povolit",
       "currency": "Měna",
-      "whatDoesThisMean": "Co znamená '{{term}}'?",
+      "whatDoesThisMean": "Co to znamená?",
       "learnMore": "Dovědet se víc",
       "unableToShareImage": "Unable to share the image",
-      "requestAgain": "Request again",
-      "seeDetail": "See detail"
+      "requestAgain": "Request again"
     },
     "loginFlow": {
       "anonymityNotice": "Bez tvého svolení jej nikdo neuvidí. Ani my.",
@@ -235,7 +234,7 @@ const otherCs: typeof en =
       "directFriend": "Přímý přítel",
       "friendOfFriend": "Přítel přítele",
       "buy": "Koupit",
-      "sell": "Prodat",
+      "sell": "Prodej",
       "filterOffers": "Filtrovat nabídky",
       "numberOfCommon": "{{number}} společné",
       "offerNotFound": "Nabídka nebyla nalezena. Možná byla smazána autorem",
@@ -261,8 +260,7 @@ const otherCs: typeof en =
         "deleted":
           "You have already interacted with this offer before, but you have deleted the chat",
         "otherSideLeft":
-          "You have already interacted with this offer before, but other side has left the chat.",
-        "leaved": "You have already interacted with this offer before"
+          "You have already interacted with this offer before, but other side has left the chat."
       },
       "listEmpty": "Tvůj marketplace se právě zahřívá. Vrať se za pár minut!",
       "emptyAction": "Přidat novou nabídku",
@@ -608,18 +606,6 @@ const otherCs: typeof en =
         "title": "Offer was removed",
         "text":
           "Unable to send response. Author has removed the offer. Do you want to delete the chat?"
-      },
-      "offerWasReported": "Offer was reported",
-      "unableToSelectImageToSend": {
-        "title": "Unable to select image",
-        "missingPermissions":
-          "Vexl does not have permissions for sending images. Enable them in the settings."
-      },
-      "imageToSend": "Image to send: ",
-      "actionBanner": {
-        "requestPending": "Request pending",
-        "bottomText": "Previous communication is displayed here",
-        "buttonText": "Respond"
       }
     },
     "progressBar": {

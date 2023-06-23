@@ -61,8 +61,7 @@ const otherIt: typeof en =
       "whatDoesThisMean": "Cosa significa?",
       "learnMore": "Per saperne di più",
       "unableToShareImage": "Unable to share the image",
-      "requestAgain": "Request again",
-      "seeDetail": "See detail"
+      "requestAgain": "Request again"
     },
     "loginFlow": {
       "anonymityNotice":
@@ -270,8 +269,7 @@ const otherIt: typeof en =
         "deleted":
           "You have already interacted with this offer before, but you have deleted the chat",
         "otherSideLeft":
-          "You have already interacted with this offer before, but other side has left the chat.",
-        "leaved": "Vous avez déjà interagi avec cette offre auparavant"
+          "You have already interacted with this offer before, but other side has left the chat."
       },
       "listEmpty":
         "Il mercato è in fase di riscaldamento. Torna tra un paio di minuti!",
@@ -629,18 +627,6 @@ const otherIt: typeof en =
         "title": "Offer was removed",
         "text":
           "Unable to send response. Author has removed the offer. Do you want to delete the chat?"
-      },
-      "offerWasReported": "Offer was reported",
-      "unableToSelectImageToSend": {
-        "title": "Unable to select image",
-        "missingPermissions":
-          "Vexl does not have permissions for sending images. Enable them in the settings."
-      },
-      "imageToSend": "Image to send: ",
-      "actionBanner": {
-        "requestPending": "Request pending",
-        "bottomText": "Previous communication is displayed here",
-        "buttonText": "Respond"
       }
     },
     "progressBar": {

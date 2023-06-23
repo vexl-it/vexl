@@ -15,6 +15,7 @@ function OfferDetailScreen({
   route: {
     params: {offerId},
   },
+  navigation,
 }: Props): JSX.Element {
   const safeGoBack = useSafeGoBack()
   const {t} = useTranslation()
@@ -25,7 +26,7 @@ function OfferDetailScreen({
     <Screen>
       <KeyboardAvoidingView>
         {isSome(offer) ? (
-          <OfferInfo offer={offer.value} />
+          <OfferInfo navigation={navigation} offer={offer.value} />
         ) : (
           <YStack
             f={1}

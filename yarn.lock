@@ -5812,13 +5812,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@streamparser/json@npm:^0.0.15":
-  version: 0.0.15
-  resolution: "@streamparser/json@npm:0.0.15"
-  checksum: db98e67ba7fd500b25c56d2a22a942310307c41a95281b68f6627802173b24a76025b98563968ed84490e5401cb2ccb53d331de9245e8410777b45bb917c5c1d
-  languageName: node
-  linkType: hard
-
 "@szmarczak/http-timer@npm:^5.0.1":
   version: 5.0.1
   resolution: "@szmarczak/http-timer@npm:5.0.1"

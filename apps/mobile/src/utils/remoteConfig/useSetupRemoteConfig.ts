@@ -13,6 +13,8 @@ export default function useSetupRemoteConfig(): boolean {
           from: DEFAULT_REMOTE_CONFIG.next__maintenance.from,
           to: DEFAULT_REMOTE_CONFIG.next__maintenance.to,
         }),
+        next__offer_rerequest_limit_days:
+          DEFAULT_REMOTE_CONFIG.next__offer_rerequest_limit_days,
       })
       await remoteConfig().fetchAndActivate()
 

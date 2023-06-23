@@ -8,6 +8,7 @@ import {useTranslation} from '../../../utils/localization/I18nProvider'
 import useResetNavigationToMessagingScreen from '../../../utils/useResetNavigationToMessagingScreen'
 import {Keyboard} from 'react-native'
 import {useHideActionForMessage} from '../atoms/createHideActionForMessageMmkvAtom'
+import {useCallback} from 'react'
 
 function QuickActionBannerUi({
   leftElement,
@@ -17,7 +18,7 @@ function QuickActionBannerUi({
   bottomText,
   buttonText,
 }: {
-  leftElement: React.ReactNode
+  leftElement?: React.ReactNode
   headingType: 'boldTop' | 'boldBottom'
   onButtonPress: () => void
   topText: string
@@ -36,7 +37,7 @@ function QuickActionBannerUi({
       ai={'center'}
       jc={'space-between'}
     >
-      {leftElement}
+      {leftElement && leftElement}
       <YStack flex={1}>
         <Text {...(headingType === 'boldTop' ? headingStyle : subtitleStyle)}>
           {topText}
@@ -67,6 +68,8 @@ function QuickActionBanner(): JSX.Element | null {
     deleteChatWithUiFeedbackAtom,
     identityRevealStatusAtom,
     revealIdentityWithUiFeedbackAtom,
+    requestStateAtom,
+    forceShowHistoryAtom,
   } = useMolecule(chatMolecule)
 
   const lastMessage = useAtomValue(lastMessageAtom)
@@ -74,10 +77,29 @@ function QuickActionBanner(): JSX.Element | null {
   const identityRevealStatus = useAtomValue(identityRevealStatusAtom)
   const deleteChat = useSetAtom(deleteChatWithUiFeedbackAtom)
   const revealIdentity = useSetAtom(revealIdentityWithUiFeedbackAtom)
+  const requestState = useAtomValue(requestStateAtom)
+  const setShowHistory = useSetAtom(forceShowHistoryAtom)
+
+  const onBackToRequestPressed = useCallback(() => {
+    setShowHistory(false)
+  }, [setShowHistory])
 
   const [isHidden, hide] = useHideActionForMessage(lastMessage?.message.uuid)
 
   if (!lastMessage || isHidden) return null
+
+  if (requestState === 'requested') {
+    return (
+      <QuickActionBannerUi
+        leftElement={<></>}
+        headingType={'boldTop'}
+        onButtonPress={onBackToRequestPressed}
+        topText={t('messages.actionBanner.requestPending')}
+        bottomText={t('messages.actionBanner.bottomText')}
+        buttonText={t('messages.actionBanner.buttonText')}
+      />
+    )
+  }
 
   if (
     lastMessage.message.messageType === 'DELETE_CHAT' &&

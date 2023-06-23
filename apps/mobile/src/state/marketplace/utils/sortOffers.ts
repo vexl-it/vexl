@@ -1,24 +1,13 @@
 import {type OneOfferInState} from '../domain'
-import {type OfferId, type Sort} from '@vexl-next/domain/dist/general/offers'
+import {type Sort} from '@vexl-next/domain/dist/general/offers'
 
 export default function sortOffers(
   offers: OneOfferInState[],
-  sort: Sort,
-  requestedOffersIds: OfferId[]
+  sort: Sort
 ): OneOfferInState[] {
   const toReturn = [...offers]
 
   toReturn.sort((a, b) => {
-    const offerARequested = !requestedOffersIds.includes(a.offerInfo.offerId)
-    const offerBRequested = !requestedOffersIds.includes(b.offerInfo.offerId)
-    if (
-      (!offerARequested && offerBRequested) ||
-      (!offerBRequested && offerARequested)
-    ) {
-      if (offerARequested) return -1
-      if (offerBRequested) return 1
-    }
-
     if (sort === 'LOWEST_FEE_FIRST')
       return a.offerInfo.publicPart.feeAmount - b.offerInfo.publicPart.feeAmount
     if (sort === 'HIGHEST_FEE')

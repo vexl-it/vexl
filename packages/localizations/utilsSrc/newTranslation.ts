@@ -47,7 +47,6 @@ export default async function newTranslation(): Promise<void> {
   const en = readFileSync('out/en', 'utf-8').split('\n')
 
   const de = readFileAndReplaceTemplate('out/de', en)
-
   const fr = readFileAndReplaceTemplate('out/fr', en)
   const it = readFileAndReplaceTemplate('out/it', en)
   const pt = readFileAndReplaceTemplate('out/pt', en)

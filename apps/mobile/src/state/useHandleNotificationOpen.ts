@@ -8,7 +8,7 @@ import {z} from 'zod'
 import * as E from 'fp-ts/Either'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
 import {safeParse} from '../utils/fpUtils'
-import selectChatByInboxKeyAndSenderKey from './chat/atoms/selectChatByInboxKeyAndSenderKey'
+import focusChatByInboxKeyAndSenderKey from './chat/atoms/focusChatByInboxKeyAndSenderKey'
 import reportError from '../utils/reportError'
 import {isOnMessagesList, isOnSpecificChat} from '../utils/navigation'
 
@@ -34,7 +34,7 @@ function useReactOnNotificationOpen(): (notification: Notification) => void {
           safeParse(MessageNotificationPayload),
           E.chainNullableK({_tag: 'chatNotFound'})((payload) =>
             store.get(
-              selectChatByInboxKeyAndSenderKey({
+              focusChatByInboxKeyAndSenderKey({
                 inboxKey: payload.inbox,
                 senderKey: payload.sender,
               })

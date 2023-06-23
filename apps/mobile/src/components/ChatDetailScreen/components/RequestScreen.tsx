@@ -6,19 +6,59 @@ import {ScrollView} from 'react-native'
 import ChatHeader from './ChatHeader'
 import {useMolecule} from 'jotai-molecules'
 import {chatMolecule} from '../atoms'
-import {useAtomValue} from 'jotai'
+import {useAtomValue, useSetAtom} from 'jotai'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import randomName from '../../../utils/randomName'
+import Button from '../../Button'
+import useSafeGoBack from '../../../utils/useSafeGoBack'
+import {useCallback, useState} from 'react'
+import RerequestButtonOrMessage from './RerequestButtonOrMessage'
+import OfferRequestTextInput from '../../OfferRequestTextInput'
 
 function RequestScreen(): JSX.Element {
-  const {offerForChatAtom, requestMessageAtom, wasDeniedAtom, chatAtom} =
-    useMolecule(chatMolecule)
+  const {
+    offerForChatAtom,
+    requestMessageAtom,
+    wasDeniedAtom,
+    chatAtom,
+    wasCancelledAtom,
+    deleteChatWithUiFeedbackAtom,
+    forceShowHistoryAtom,
+    requestStateAtom,
+    hasPreviousCommunicationAtom,
+    canBeRerequestedAtom,
+    rerequestOfferActionAtom,
+  } = useMolecule(chatMolecule)
   const offer = useAtomValue(offerForChatAtom)
   const chat = useAtomValue(chatAtom)
   const {t} = useTranslation()
 
+  const requestState = useAtomValue(requestStateAtom)
   const requestMessage = useAtomValue(requestMessageAtom)
   const wasDenied = useAtomValue(wasDeniedAtom)
+  const wasCancelled = useAtomValue(wasCancelledAtom)
+  const deleteChat = useSetAtom(deleteChatWithUiFeedbackAtom)
+  const safeGoBack = useSafeGoBack()
+  const setForceShowHistory = useSetAtom(forceShowHistoryAtom)
+  const hasPreviousCommunication = useAtomValue(hasPreviousCommunicationAtom)
+  const canBeRerequested = useAtomValue(canBeRerequestedAtom)
+  const rerequestOffer = useSetAtom(rerequestOfferActionAtom)
+
+  const [text, setText] = useState('')
+
+  const onRerequestPressed = useCallback(() => {
+    if (!canBeRerequested || !text.trim()) return
+
+    void rerequestOffer({text})?.then((success) => {
+      if (success) setText('')
+    })
+  }, [canBeRerequested, text, rerequestOffer])
+
+  const onHistoryPress = useCallback(() => {
+    setForceShowHistory((v) => !v)
+  }, [setForceShowHistory])
+
+  const requestIsClosed = wasDenied || wasCancelled
 
   const requestedByMe = requestMessage?.state === 'sent'
 
@@ -27,32 +67,79 @@ function RequestScreen(): JSX.Element {
       <ChatHeader
         mode={'photoTop'}
         leftButton={'back'}
-        rightButton={wasDenied ? 'deleteChat' : requestedByMe ? null : 'block'}
+        rightButton={
+          requestIsClosed ? 'deleteChat' : requestedByMe ? null : 'block'
+        }
       />
       <ScrollView bounces={false}>
         <YStack space="$6" f={1} mx={'$4'} my={'$6'}>
           {offer && <ChatRequestPreview />}
+
+          <YStack space="$2">
+            {hasPreviousCommunication && (
+              <InfoSquare onPress={onHistoryPress}>
+                {t('messages.showFullChatHistory')}
+              </InfoSquare>
+            )}
+            {requestState === 'requested' && requestedByMe && (
+              <InfoSquare>
+                {t('messages.wellLetYouKnowOnceUserAccepts')}
+              </InfoSquare>
+            )}
+            {canBeRerequested.canBeRerequested && (
+              <OfferRequestTextInput text={text} onChange={setText} />
+            )}
+          </YStack>
         </YStack>
       </ScrollView>
       <Stack mx="$4" mb={'$4'}>
-        {!wasDenied &&
+        {requestState === 'requested' &&
           (requestedByMe ? (
-            <InfoSquare>
-              {t('messages.wellLetYouKnowOnceUserAccepts')}
-            </InfoSquare>
+            <YStack space="$2">
+              <RerequestButtonOrMessage
+                onRerequestPressed={onRerequestPressed}
+                rerequestButtonDisabled={!text.trim()}
+              />
+            </YStack>
           ) : (
             <AcceptDeclineButtons />
           ))}
-        {wasDenied &&
-          (requestedByMe ? (
+        {requestState === 'cancelled' && (
+          <Stack space="$2">
             <InfoSquare negative>
-              {t('messages.deniedByThem', {name: randomName(chat.id)})}
+              {t('messages.messagePreviews.incoming.CANCEL_REQUEST_MESSAGING', {
+                name: randomName(chat.id),
+              })}
             </InfoSquare>
-          ) : (
+            <RerequestButtonOrMessage
+              onRerequestPressed={onRerequestPressed}
+              rerequestButtonDisabled={!text.trim()}
+            />
+            <Button
+              text={t('messages.deleteChat')}
+              variant="primary"
+              onPress={() => {
+                void deleteChat().then((success) => {
+                  if (success) safeGoBack()
+                })
+              }}
+            />
+          </Stack>
+        )}
+        {requestState === 'denied' && (
+          <YStack space="$2">
             <InfoSquare negative>
-              {t('messages.deniedByMe', {name: randomName(chat.id)})}
+              {t(
+                requestedByMe ? 'messages.deniedByThem' : 'messages.deniedByMe',
+                {name: randomName(chat.id)}
+              )}
             </InfoSquare>
-          ))}
+            <RerequestButtonOrMessage
+              onRerequestPressed={onRerequestPressed}
+              rerequestButtonDisabled={!text.trim()}
+            />
+          </YStack>
+        )}
       </Stack>
     </>
   )

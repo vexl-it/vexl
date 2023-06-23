@@ -14,6 +14,8 @@ import {
   ApproveRequestResponse,
   type BlockInboxRequest,
   BlockInboxResponse,
+  type CancelApprovalRequest,
+  CancelApprovalResponse,
   type CreateChallengeRequest,
   CreateChallengeResponse,
   type CreateChallengesRequest,
@@ -26,8 +28,13 @@ import {
   DeleteInboxResponse,
   type DeletePulledMessagesRequest,
   DeletePulledMessagesResponse,
+  type LeaveChatRequest,
+  LeaveChatResponse,
+  type RequestAlreadyApprovedError,
   type RequestApprovalRequest,
   RequestApprovalResponse,
+  type RequestCancelledError,
+  type RequestNotFoundError,
   type RetrieveMessagesRequest,
   RetrieveMessagesResponse,
   type SendMessageRequest,
@@ -144,6 +151,30 @@ export function privateApi({
         RequestApprovalResponse
       )
     },
+    cancelRequestApproval(data: CancelApprovalRequest) {
+      return pipe(
+        axiosCallWithValidation(
+          axiosInstance,
+          {method: 'post', url: '/inboxes/approval/cancel', data},
+          CancelApprovalResponse
+        ),
+        TE.mapLeft((e) => {
+          if (e._tag === 'BadStatusCodeError') {
+            if (e.response.data.code === '100104') {
+              return {
+                _tag: 'RequestNotFoundError',
+              } as RequestNotFoundError
+            }
+            if (e.response.data.code === '100153') {
+              return {
+                _tag: 'RequestAlreadyApprovedError',
+              } as RequestAlreadyApprovedError
+            }
+          }
+          return e
+        })
+      )
+    },
     approveRequest(data: ApproveRequestRequest) {
       return pipe(
         addChallenge(data),
@@ -153,7 +184,25 @@ export function privateApi({
             {method: 'post', url: '/inboxes/approval/confirm', data},
             ApproveRequestResponse
           )
-        )
+        ),
+        TE.mapLeft((e) => {
+          if (e._tag === 'BadStatusCodeError') {
+            if (e.response.data.code === '100106') {
+              return {_tag: 'RequestCancelledError'} as RequestCancelledError
+            }
+            if (e.response.data.code === '100104') {
+              return {
+                _tag: 'RequestNotFoundError',
+              } as RequestNotFoundError
+            }
+            if (e.response.data.code === '100153') {
+              return {
+                _tag: 'RequestAlreadyApprovedError',
+              } as RequestAlreadyApprovedError
+            }
+          }
+          return e
+        })
       )
     },
     deleteInboxes(data: DeleteInboxesRequest) {
@@ -161,6 +210,35 @@ export function privateApi({
         axiosInstance,
         {method: 'delete', url: '/inboxes/batch', data},
         DeleteInboxesResponse
+      )
+    },
+    leaveChat(data: LeaveChatRequest) {
+      return pipe(
+        addChallenge(data),
+        TE.map(({publicKey, ...data}) => ({
+          ...data,
+          senderPublicKey: publicKey,
+        })),
+        TE.chainW((data) =>
+          axiosCallWithValidation(
+            axiosInstance,
+            {method: 'post', url: '/inboxes/leave-chat', data},
+            LeaveChatResponse
+          )
+        ),
+        TE.mapLeft((e) => {
+          if (e._tag === 'BadStatusCodeError') {
+            if (e.response.data.code === '100104') {
+              return {
+                _tag: 'notPermittedToSendMessageToTargetInbox',
+              } as NotPermittedToSendMessageToTargetInbox
+            }
+            if (e.response.data.code === '100101') {
+              return {_tag: 'inboxDoesNotExist'} as InboxDoesNotExist
+            }
+          }
+          return e
+        })
       )
     },
     // ----------------------

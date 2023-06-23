@@ -10,6 +10,7 @@ export default function shouldSendTerminationMessageToChat({
       'BLOCK_CHAT', // Other user has blocked us. There is no point of sending them a message. It will fail
       'REQUEST_MESSAGING', // We have not yet received permission for messaging. Messaging will fail
       'INBOX_DELETED', // Inbox has been deleted. Messaging will fail
+      'CANCEL_REQUEST_MESSAGING', // Inbox has been deleted. Messaging will fail
     ].includes(messages.at(-1)?.message.messageType ?? '')
   )
 }

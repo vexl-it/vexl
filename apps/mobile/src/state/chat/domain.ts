@@ -70,3 +70,14 @@ export const ChatIds = z.object({
   inboxKey: PublicKeyPemBase64,
 })
 export type ChatIds = z.TypeOf<typeof ChatIds>
+
+export const RequestState = z.enum([
+  'initial',
+  'requested',
+  'denied',
+  'cancelled',
+  'accepted',
+  'deleted',
+  'otherSideLeft',
+])
+export type RequestState = z.TypeOf<typeof RequestState>

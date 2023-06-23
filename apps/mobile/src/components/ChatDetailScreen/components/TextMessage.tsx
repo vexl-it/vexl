@@ -26,6 +26,7 @@ import replyToSvg from '../images/replyToSvg'
 import getValueFromSetStateActionOfAtom from '../../../utils/atomUtils/getValueFromSetStateActionOfAtom'
 import copySvg from '../images/copySvg'
 import IconButton from '../../IconButton'
+import {type ChatMessage} from '@vexl-next/domain/dist/general/messaging'
 
 const style = StyleSheet.create({
   textInputStyle: {
@@ -85,6 +86,39 @@ function useIsExtended(messageItem: MessagesListItem): {
       setIsExtended()
     }, [setIsExtended]),
   }
+}
+
+type messageTypesWithItalicPrefix =
+  | 'REQUEST_MESSAGING'
+  | 'CANCEL_REQUEST_MESSAGING'
+  | 'DISAPPROVE_MESSAGING'
+  | 'APPROVE_MESSAGING'
+
+function shouldHaveItalicPrefix(
+  messageType: string
+): messageType is messageTypesWithItalicPrefix {
+  return [
+    'REQUEST_MESSAGING',
+    'CANCEL_REQUEST_MESSAGING',
+    'DISAPPROVE_MESSAGING',
+    'APPROVE_MESSAGING',
+  ].includes(messageType)
+}
+
+function TextMessageAccent({message}: {message: ChatMessage}): JSX.Element {
+  const {t} = useTranslation()
+
+  if (shouldHaveItalicPrefix(message.messageType)) {
+    return (
+      <Text fontStyle={'italic'}>
+        {t(`messages.textMessageTypes.${message.messageType}`, {
+          message: message.text,
+        })}
+      </Text>
+    )
+  }
+
+  return <>{message.text}</>
 }
 
 function TextMessage({
@@ -194,7 +228,7 @@ function TextMessage({
                   spellCheck={false}
                   style={textInputStyle}
                 >
-                  {message.message.text}
+                  <TextMessageAccent message={message.message} />
                 </TextInput>
               ) : (
                 <Text
@@ -203,7 +237,7 @@ function TextMessage({
                   fontFamily={'$body500'}
                   color={isMine ? '$black' : '$white'}
                 >
-                  {message.message.text}
+                  <TextMessageAccent message={message.message} />
                 </Text>
               )}
             </Stack>

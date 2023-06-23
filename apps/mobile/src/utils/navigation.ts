@@ -5,6 +5,29 @@ import {pipe} from 'fp-ts/function'
 import {safeParse} from './fpUtils'
 import * as O from 'fp-ts/Option'
 import reportError from './reportError'
+import {createNavigationContainerRef} from '@react-navigation/native'
+
+export const navigationRef = createNavigationContainerRef()
+
+export function safeNavigateBackOutsideReact():
+  | 'notReady'
+  | 'wentBack'
+  | 'wentHome' {
+  if (!navigationRef.isReady()) {
+    console.warn(
+      'Trying to navigate back outside of react tree, but navigation ref is not ready yet.'
+    )
+    return 'notReady'
+  }
+
+  if (navigationRef.canGoBack()) {
+    navigationRef.goBack()
+    return 'wentBack'
+  } else {
+    navigationRef.navigate('InsideTabs', {screen: 'Marketplace'})
+    return 'wentHome'
+  }
+}
 
 function getActiveRoute(route: NavigationState<any>): any | null {
   if (!route) return null

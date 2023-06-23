@@ -33,7 +33,15 @@ function AcceptDeclineButtons({
         TE.match(
           (e) => {
             loadingOverlay.hide()
-            Alert.alert(toCommonErrorMessage(e, t) ?? t('common.unknownError'))
+            if (e._tag === 'RequestCancelledError') {
+              Alert.alert(t('offer.requestWasCancelledByOtherSide'))
+            } else if (e._tag === 'RequestNotFoundError') {
+              Alert.alert(t('offer.requestNotFound'))
+            } else {
+              Alert.alert(
+                toCommonErrorMessage(e, t) ?? t('common.unknownError')
+              )
+            }
           },
           () => {
             loadingOverlay.hide()

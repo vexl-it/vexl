@@ -40,6 +40,7 @@ export default function clearMmkvStorageAndEmptyAtoms(): void {
   })
   getDefaultStore().set(preferencesAtom, {
     showDebugNotifications: false,
+    disableOfferRerequestLimit: false,
   })
 
   storage._storage.clearAll()

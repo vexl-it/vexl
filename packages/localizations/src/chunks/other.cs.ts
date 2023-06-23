@@ -59,7 +59,8 @@ const otherCs: typeof en =
       "whatDoesThisMean": "Co znamená '{{term}}'?",
       "learnMore": "Dovědet se víc",
       "unableToShareImage": "Unable to share the image",
-      "requestAgain": "Request again"
+      "requestAgain": "Request again",
+      "seeDetail": "See detail"
     },
     "loginFlow": {
       "anonymityNotice": "Bez tvého svolení jej nikdo neuvidí. Ani my.",
@@ -608,7 +609,18 @@ const otherCs: typeof en =
         "text":
           "Unable to send response. Author has removed the offer. Do you want to delete the chat?"
       },
-      "offerWasReported": "Offer was reported"
+      "offerWasReported": "Offer was reported",
+      "unableToSelectImageToSend": {
+        "title": "Unable to select image",
+        "missingPermissions":
+          "Vexl does not have permissions for sending images. Enable them in the settings."
+      },
+      "imageToSend": "Image to send: ",
+      "actionBanner": {
+        "requestPending": "Request pending",
+        "bottomText": "Previous communication is displayed here",
+        "buttonText": "Respond"
+      }
     },
     "progressBar": {
       "ENCRYPTING_PRIVATE_PAYLOADS": "{{percentDone}}% hotovo",

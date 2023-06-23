@@ -1,111 +1,89 @@
 import {type OneOfferInState} from '../../../state/marketplace/domain'
-import {getTokens, Stack, YStack} from 'tamagui'
+import {Stack, YStack} from 'tamagui'
 import OfferWithBubbleTip from '../../OfferWithBubbleTip'
 import ScreenTitle from '../../ScreenTitle'
 import useSafeGoBack from '../../../utils/useSafeGoBack'
-import {
-  translationAtom,
-  useTranslation,
-} from '../../../utils/localization/I18nProvider'
-import * as TE from 'fp-ts/TaskEither'
-import {ScrollView, StyleSheet} from 'react-native'
-import TextInput from '../../Input'
-import Button from '../../Button'
+import {useTranslation} from '../../../utils/localization/I18nProvider'
+import {ScrollView} from 'react-native'
 import IconButton from '../../IconButton'
 import flagSvg from '../images/flagSvg'
-import {useReportOfferHandleUI, useSubmitRequestHandleUI} from '../api'
-import React, {useMemo, useState} from 'react'
-import {useChatForOffer} from '../../../state/chat/hooks/useChatForOffer'
-import {useNavigation} from '@react-navigation/native'
+import {useReportOfferHandleUI} from '../api'
+import {useChatWithMessagesForOffer} from '../../../state/chat/hooks/useChatForOffer'
+import React, {useCallback, useMemo, useState} from 'react'
 import InfoSquare from '../../InfoSquare'
 import closeSvg from '../../images/closeSvg'
-import identityIconSvg from '../../images/identityIconSvg'
 import CommonFriends from '../../CommonFriends'
-import {atom, useAtomValue, useSetAtom} from 'jotai'
-import createChatStatusAtom from '../../../state/chat/atoms/createChatStatusAtom'
+import {useAtomValue, useSetAtom} from 'jotai'
 import Info from '../../Info'
-import {askAreYouSureActionAtom} from '../../AreYouSureDialog'
+import {type RequestState} from '../../../state/chat/domain'
+import {
+  canChatBeRequested,
+  getRequestState,
+} from '../../../state/chat/utils/offerStates'
+import showCommonFriendsExplanationUIActionAtom from '../atoms'
+import identityIconSvg from '../../images/identityIconSvg'
+import Button from '../../Button'
 import {pipe} from 'fp-ts/function'
+import * as TO from 'fp-ts/TaskOption'
+import {sendRequestHandleUIActionAtom} from '../../../state/chat/atoms/sendRequestActionAtom'
+import OfferRequestTextInput from '../../OfferRequestTextInput'
+import {offerRerequestLimitDaysAtom} from '../../../utils/remoteConfig/atoms'
+import {type RootStackScreenProps} from '../../../navigationTypes'
+import RerequestInfo from './RerequestInfo'
 
-const style = StyleSheet.create({
-  textInput: {
-    minHeight: 130,
-    alignItems: 'flex-start',
-  },
-})
-
-const showCommonFriendsExplanationUIActionAtom = atom(
-  null,
-  async (get, set, params: {offer: OneOfferInState}) => {
-    const {t} = get(translationAtom)
-    const {offer} = params
-
-    const modalContent = (() => {
-      if (offer.offerInfo.privatePart.friendLevel.includes('FIRST_DEGREE')) {
-        if (offer.offerInfo.privatePart.commonFriends.length === 0) {
-          return {
-            title: t('offer.offerFromDirectFriend'),
-            description: `${t('offer.youSeeThisOfferBecause')} ${t(
-              'offer.beCautiousWeCannotVerify'
-            )}`,
-            positiveButtonText: t('common.gotIt'),
-          }
-        }
-        return {
-          title: t('offer.offerFromDirectFriend'),
-          description: `${t('offer.youSeeThisOfferBecause')} ${t(
-            'offer.dontForgetToVerifyTheIdentity'
-          )}`,
-          positiveButtonText: t('common.gotIt'),
-        }
-      }
-      return {
-        title: t('offer.offerFromFriendOfFriend'),
-        description: t('offer.noDirectConnection'),
-        positiveButtonText: t('common.gotIt'),
-      }
-    })()
-
-    return await pipe(
-      set(askAreYouSureActionAtom, {
-        steps: [{...modalContent, type: 'StepWithText'}],
-        variant: 'info',
-      }),
-      TE.match(
-        () => {
-          return false
-        },
-        () => {
-          return true
-        }
-      )
-    )()
-  }
-)
-
-function OfferInfo({offer}: {offer: OneOfferInState}): JSX.Element {
+function OfferInfo({
+  offer,
+  navigation,
+}: {
+  offer: OneOfferInState
+  navigation: RootStackScreenProps<'OfferDetail'>['navigation']
+}): JSX.Element {
   const goBack = useSafeGoBack()
-  const navigation = useNavigation()
   const {t} = useTranslation()
   const reportOffer = useReportOfferHandleUI()
-  const submitRequest = useSubmitRequestHandleUI()
+  const submitRequest = useSetAtom(sendRequestHandleUIActionAtom)
   const [text, setText] = useState('')
-  const chatForOffer = useChatForOffer({
+  const offerRerequestLimitDays = useAtomValue(offerRerequestLimitDaysAtom)
+  const chatForOffer = useChatWithMessagesForOffer({
     offerPublicKey: offer.offerInfo.publicPart.offerPublicKey,
   })
 
   const showCommonFriendsExplanationUIAction = useSetAtom(
     showCommonFriendsExplanationUIActionAtom
   )
-  const requestStatus = useAtomValue(
-    useMemo(() => {
-      if (!chatForOffer) return atom(() => null)
-      return createChatStatusAtom(
-        chatForOffer.id,
-        chatForOffer.inbox.privateKey.publicKeyPemBase64
-      )
-    }, [chatForOffer])
+
+  const requestState: RequestState = useMemo(
+    () => (chatForOffer ? getRequestState(chatForOffer) : 'initial'),
+    [chatForOffer]
   )
+  const requestPossibleInfo = useMemo(() => {
+    if (!chatForOffer)
+      return {
+        canBeRerequested: true,
+      } as const
+
+    return canChatBeRequested(chatForOffer, offerRerequestLimitDays)
+  }, [chatForOffer, offerRerequestLimitDays])
+
+  const onWhatDoesThisMeanPressed = useCallback(() => {
+    void showCommonFriendsExplanationUIAction({offer})
+  }, [showCommonFriendsExplanationUIAction, offer])
+
+  const onRequestPressed = useCallback(() => {
+    if (!text.trim()) return
+    void pipe(
+      submitRequest({text, originOffer: offer.offerInfo}),
+      TO.map((chat) => {
+        navigation.replace('ChatDetail', {
+          chatId: chat.id,
+          inboxKey: chat.inbox.privateKey.publicKeyPemBase64,
+        })
+      })
+    )()
+  }, [navigation, offer.offerInfo, submitRequest, text])
+
+  const showRequestButton =
+    !chatForOffer || requestPossibleInfo.canBeRerequested
 
   return (
     <Stack f={1} mx={'$2'} my={'$4'}>
@@ -122,8 +100,11 @@ function OfferInfo({offer}: {offer: OneOfferInState}): JSX.Element {
         <IconButton variant="dark" icon={closeSvg} onPress={goBack} />
       </ScreenTitle>
       <ScrollView>
-        <YStack space={'$4'}>
-          <OfferWithBubbleTip negative={!!chatForOffer} offer={offer} />
+        <YStack space={'$2'} mb="$2">
+          <OfferWithBubbleTip
+            negative={!requestPossibleInfo.canBeRerequested}
+            offer={offer}
+          />
           <CommonFriends
             variant={'dark'}
             contactsHashes={offer.offerInfo.privatePart.commonFriends}
@@ -131,51 +112,42 @@ function OfferInfo({offer}: {offer: OneOfferInState}): JSX.Element {
           <Info
             text={t('common.whatDoesThisMean')}
             actionButtonText={t('common.learnMore')}
-            onActionPress={() => {
-              void showCommonFriendsExplanationUIAction({offer})
-            }}
+            onActionPress={onWhatDoesThisMeanPressed}
           />
-          {!chatForOffer ? (
-            <TextInput
-              style={style.textInput}
-              value={text}
-              onChangeText={setText}
-              multiline
-              numberOfLines={5}
-              variant={'greyOnBlack'}
-              placeholder={t('offer.inputPlaceholder')}
-              placeholderTextColor={getTokens().color.greyOnBlack.val}
-            />
-          ) : (
-            <InfoSquare>
-              {t(`offer.requestStatus.${requestStatus ?? 'requested'}`)}
-            </InfoSquare>
+          <InfoSquare>{t(`offer.requestStatus.${requestState}`)}</InfoSquare>
+          {showRequestButton && (
+            <OfferRequestTextInput text={text} onChange={setText} />
           )}
         </YStack>
       </ScrollView>
-      {chatForOffer ? (
-        <Button
-          onPress={() => {
-            if (!chatForOffer) return
-            navigation.navigate('ChatDetail', {
-              chatId: chatForOffer.id,
-              inboxKey: chatForOffer.inbox.privateKey.publicKeyPemBase64,
-            })
-          }}
-          variant={'primary'}
-          text={t('offer.goToChat')}
-        />
-      ) : (
+
+      {showRequestButton ? (
         <Button
           disabled={!text.trim()}
-          onPress={() => {
-            if (!text.trim()) return
-            void submitRequest(text, offer.offerInfo)()
-          }}
+          onPress={onRequestPressed}
           variant={'secondary'}
           beforeIcon={identityIconSvg}
           text={t('offer.sendRequest')}
         />
+      ) : (
+        <>
+          {requestState === 'cancelled' || requestState === 'deleted' ? (
+            <RerequestInfo chat={chatForOffer} />
+          ) : (
+            <Button
+              onPress={() => {
+                if (!chatForOffer) return
+                navigation.navigate('ChatDetail', {
+                  chatId: chatForOffer.chat.id,
+                  inboxKey:
+                    chatForOffer.chat.inbox.privateKey.publicKeyPemBase64,
+                })
+              }}
+              variant="primary"
+              text={t('offer.goToChat')}
+            />
+          )}
+        </>
       )}
     </Stack>
   )

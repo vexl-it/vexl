@@ -1,7 +1,6 @@
 import {
   type IntendedConnectionLevel,
   type OfferId,
-  type OfferInfo,
   type OfferPublicPart,
   type SymmetricKey,
 } from '@vexl-next/domain/dist/general/offers'
@@ -9,7 +8,6 @@ import {atom, type ExtractAtomResult, useAtomValue, useStore} from 'jotai'
 import {
   lastUpdatedAtAtom,
   loadingStateAtom,
-  offerFlagsAtom,
   offerForChatOriginAtom,
   offersAtom,
   offersIdsAtom,
@@ -42,13 +40,9 @@ import {
   type ErrorDecryptingOffer,
   type NonCompatibleOfferVersionError,
 } from '@vexl-next/resources-utils/dist/offers/decryptOffer'
-import {type BasicError} from '@vexl-next/domain/dist/utility/errors'
 import {useCallback, useMemo} from 'react'
 import deduplicate from '../../utils/deduplicate'
 import notEmpty from '../../utils/notEmpty'
-import useSendMessagingRequest from '../chat/hooks/useSendRequest'
-import {type ApiErrorRequestMessaging} from '@vexl-next/resources-utils/dist/chat/sendMessagingRequest'
-import {type ErrorEncryptingMessage} from '@vexl-next/resources-utils/dist/chat/utils/chatCrypto'
 import {type ChatOrigin} from '@vexl-next/domain/dist/general/messaging'
 import offerToConnectionsAtom, {
   upsertOfferToConnectionsActionAtom,
@@ -418,37 +412,6 @@ export const deleteOffersActionAtom = atom<
     )
   )
 })
-
-export type ErrorOfferAlreadyRequested =
-  BasicError<'ErrorOfferAlreadyRequested'>
-
-export function useRequestOffer(): (a: {
-  offer: OfferInfo
-  text: string
-}) => TE.TaskEither<
-  | ErrorOfferAlreadyRequested
-  | ApiErrorRequestMessaging
-  | ErrorEncryptingMessage,
-  {success: true}
-> {
-  const store = useStore()
-  const sendRequest = useSendMessagingRequest()
-
-  return useCallback(
-    ({offer, text}: {offer: OfferInfo; text: string}) =>
-      pipe(
-        sendRequest({text, originOffer: offer}),
-        TE.match(E.left, () => {
-          store.set(offerFlagsAtom(offer.offerId), (old) => ({
-            ...old,
-            isRequested: true,
-          }))
-          return E.right({success: true})
-        })
-      ),
-    [store, sendRequest]
-  )
-}
 
 export function useOfferForChatOrigin(
   chatOrigin: ChatOrigin

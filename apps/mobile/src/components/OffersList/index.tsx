@@ -27,17 +27,19 @@ function OffersList({
 }: Props): JSX.Element {
   const bottomOffset = usePixelsFromBottomWhereTabsEnd()
 
+  const contentContainerStyle = useMemo(
+    () => ({
+      paddingHorizontal: getTokens().space[2].val,
+      paddingBottom: bottomOffset + Number(getTokens().space[5].val),
+    }),
+    [bottomOffset]
+  )
+
   return (
     <FlashList
       ListHeaderComponent={ListHeaderComponent}
       estimatedItemSize={151}
-      contentContainerStyle={useMemo(
-        () => ({
-          paddingHorizontal: getTokens().space[2].val,
-          paddingBottom: bottomOffset + Number(getTokens().space[5].val),
-        }),
-        [bottomOffset]
-      )}
+      contentContainerStyle={contentContainerStyle}
       data={offersAtoms}
       onRefresh={onRefresh}
       refreshing={refreshing}

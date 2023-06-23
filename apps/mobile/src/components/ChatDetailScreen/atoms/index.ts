@@ -36,6 +36,12 @@ import connectionStateAtom, {
 } from '../../../state/connections/atom/connectionStateAtom'
 import {type FriendLevel} from '@vexl-next/domain/dist/general/offers'
 import {type UriString} from '@vexl-next/domain/dist/utility/UriString.brand'
+import createIsCancelledAtom from '../../../state/chat/atoms/createIsCancelledAtom'
+import {createRequestStateAtom} from '../../../state/chat/atoms/createRequestStateAtom'
+import createCanChatBeRerequestedAtom from '../../../state/chat/atoms/createCanBeRerequestedAtom'
+import {sendRequestHandleUIActionAtom} from '../../../state/chat/atoms/sendRequestActionAtom'
+import cancelRequestActionAtomHandleUI from '../../../state/chat/atoms/cancelRequestActionAtomHandleUI'
+import {safeNavigateBackOutsideReact} from '../../../utils/navigation'
 
 type ChatUIMode = 'approval' | 'messages'
 
@@ -93,59 +99,64 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     (connections) => connections.length
   )
 
-  const deleteChatWithUiFeedbackAtom = atom(null, async (get, set) => {
-    const {t} = get(translationAtom)
-    return await pipe(
-      set(askAreYouSureActionAtom, {
-        steps: [
-          {
-            type: 'StepWithText',
-            image: {
-              type: 'svgXml',
-              svgXml: deleteChatStep1Svg,
-            },
-            title: t('messages.deleteChatQuestion'),
-            description: t('messages.deleteChatExplanation1'),
-            negativeButtonText: t('common.back'),
-            positiveButtonText: t('common.yesDelete'),
-          },
-          {
-            type: 'StepWithText',
-            image: {
-              type: 'svgXml',
-              svgXml: deleteChatStep1Svg,
-            },
-            title: t('common.youSure'),
-            description: t('messages.deleteChatExplanation2'),
-            negativeButtonText: t('common.nope'),
-            positiveButtonText: t('messages.deleteChat'),
-          },
-        ],
-        variant: 'info',
-      }),
-      TE.map((val) => {
-        set(loadingOverlayDisplayedAtom, true)
-        return val
-      }),
-      TE.chainW(() => set(deleteChatAtom, {text: 'deleting chat'})),
-      // TODO handle all error cases. Mainly network errors. On error with server, we should remove anyway
-      TE.match(
-        (e) => {
-          set(loadingOverlayDisplayedAtom, false)
+  const deleteChatWithUiFeedbackAtom = atom(
+    null,
+    async (get, set, {skipAsk}: {skipAsk: boolean} = {skipAsk: false}) => {
+      const {t} = get(translationAtom)
+      return await pipe(
+        skipAsk
+          ? TE.right(true)
+          : set(askAreYouSureActionAtom, {
+              steps: [
+                {
+                  type: 'StepWithText',
+                  image: {
+                    type: 'svgXml',
+                    svgXml: deleteChatStep1Svg,
+                  },
+                  title: t('messages.deleteChatQuestion'),
+                  description: t('messages.deleteChatExplanation1'),
+                  negativeButtonText: t('common.back'),
+                  positiveButtonText: t('common.yesDelete'),
+                },
+                {
+                  type: 'StepWithText',
+                  image: {
+                    type: 'svgXml',
+                    svgXml: deleteChatStep1Svg,
+                  },
+                  title: t('common.youSure'),
+                  description: t('messages.deleteChatExplanation2'),
+                  negativeButtonText: t('common.nope'),
+                  positiveButtonText: t('messages.deleteChat'),
+                },
+              ],
+              variant: 'info',
+            }),
+        TE.map((val) => {
+          set(loadingOverlayDisplayedAtom, true)
+          return val
+        }),
+        TE.chainW(() => set(deleteChatAtom, {text: 'deleting chat'})),
+        // TODO handle all error cases. Mainly network errors. On error with server, we should remove anyway
+        TE.match(
+          (e) => {
+            set(loadingOverlayDisplayedAtom, false)
 
-          if (e._tag === 'UserDeclinedError') {
+            if (e._tag === 'UserDeclinedError') {
+              return false
+            }
+            Alert.alert(toCommonErrorMessage(e, t) ?? t('common.unknownError'))
             return false
+          },
+          () => {
+            set(loadingOverlayDisplayedAtom, false)
+            return true
           }
-          Alert.alert(toCommonErrorMessage(e, t) ?? t('common.unknownError'))
-          return false
-        },
-        () => {
-          set(loadingOverlayDisplayedAtom, false)
-          return true
-        }
-      )
-    )()
-  })
+        )
+      )()
+    }
+  )
 
   const blockChatAtom = blockChatActionAtom(chatWithMessagesAtom)
   const blockChatWithUiFeedbackAtom = atom(null, async (get, set) => {
@@ -203,12 +214,28 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
   })
   const lastMessageAtom = selectAtom(messagesAtom, (o) => o.at(-1))
 
+  const forceShowHistoryAtom = atom(false)
+
   const chatUiModeAtom = atom<ChatUIMode>((get) => {
+    const forceShowHistory = get(forceShowHistoryAtom)
+    if (forceShowHistory) return 'messages'
+
     const messages = get(messagesAtom)
-    if (messages.at(-1)?.message.messageType === 'REQUEST_MESSAGING')
-      return 'approval'
+
+    const lastMessage = messages.at(-1)
+
     if (
-      messages.some((one) => one.message.messageType === 'DISAPPROVE_MESSAGING')
+      [
+        'CANCEL_REQUEST_MESSAGING',
+        'REQUEST_MESSAGING',
+        'DISAPPROVE_MESSAGING',
+      ].includes(lastMessage?.message.messageType ?? '')
+    )
+      return 'approval'
+
+    if (
+      lastMessage?.message.messageType === 'DELETE_CHAT' &&
+      lastMessage.state === 'sent'
     )
       return 'approval'
 
@@ -222,6 +249,9 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
       (lastMessage?.state === 'received' &&
         lastMessage.message.messageType === 'INBOX_DELETED') ||
       lastMessage?.message.messageType === 'DELETE_CHAT' ||
+      lastMessage?.message.messageType === 'REQUEST_MESSAGING' ||
+      lastMessage?.message.messageType === 'CANCEL_REQUEST_MESSAGING' ||
+      lastMessage?.message.messageType === 'DISAPPROVE_MESSAGING' ||
       lastMessage?.message.messageType === 'BLOCK_CHAT'
     )
   })
@@ -349,6 +379,75 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     (offer) => !offer?.ownershipInfo && !offer?.flags.reported
   )
 
+  const showOfferDeletedWithOptionToDeleteActionAtom = atom(
+    null,
+    (get, set) => {
+      const t = get(translationAtom).t
+      Alert.alert(
+        t('messages.unableToRespondOfferRemoved.title'),
+        t('messages.unableToRespondOfferRemoved.text'),
+        [
+          {
+            text: t('common.back'),
+            style: 'cancel',
+          },
+          {
+            text: t('messages.deleteChat'),
+            onPress: () => {
+              void set(deleteChatWithUiFeedbackAtom, {skipAsk: true}).then(
+                (success) => {
+                  if (success) {
+                    safeNavigateBackOutsideReact()
+                  }
+                }
+              )
+            },
+          },
+        ]
+      )
+    }
+  )
+
+  const rerequestOfferActionAtom = atom(
+    null,
+    (get, set, {text}: {text: string}) => {
+      const offer = get(offerForChatAtom)?.offerInfo
+      if (!offer) {
+        set(showOfferDeletedWithOptionToDeleteActionAtom)
+        return
+      }
+
+      return set(sendRequestHandleUIActionAtom, {text, originOffer: offer})()
+    }
+  )
+
+  const hasPreviousCommunicationAtom = selectAtom(messagesAtom, (messages) => {
+    return (
+      messages.filter((one) => one.message.messageType === 'REQUEST_MESSAGING')
+        .length > 1 ||
+      messages.at(-1)?.message.messageType !== 'REQUEST_MESSAGING'
+    )
+  })
+
+  const cancelRequestActionAtom = atom(null, (get, set) => {
+    const offerInfo = get(offerForChatAtom)?.offerInfo
+    if (!offerInfo) {
+      set(showOfferDeletedWithOptionToDeleteActionAtom)
+      return
+    }
+
+    return pipe(
+      set(cancelRequestActionAtomHandleUI, {
+        text: '',
+        originOffer: offerInfo,
+      }),
+      TE.match(
+        () => false,
+        () => true
+      )
+    )()
+  })
+
   return {
     showModalAtom: atom<boolean>(false),
     chatAtom,
@@ -363,6 +462,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     sendMessageAtom: sendMessageActionAtom(chatWithMessagesAtom),
     requestMessageAtom: focusRequestMessageAtom(chatWithMessagesAtom),
     wasDeniedAtom: focusWasDeniedAtom(chatWithMessagesAtom),
+    wasCancelledAtom: createIsCancelledAtom(chatWithMessagesAtom),
     otherSideDataAtom: selectOtherSideDataAtom(chatAtom),
     otherSideLeftAtom: focusOtherSideLeftAtom(chatWithMessagesAtom),
     identityRevealStatusAtom,
@@ -377,5 +477,11 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     messageOptionsExtendedAtom,
     theirOfferAndNotReportedAtom,
     openedImageUriAtom,
+    forceShowHistoryAtom,
+    requestStateAtom: createRequestStateAtom(chatWithMessagesAtom),
+    canBeRerequestedAtom: createCanChatBeRerequestedAtom(chatWithMessagesAtom),
+    rerequestOfferActionAtom,
+    hasPreviousCommunicationAtom,
+    cancelRequestActionAtom,
   }
 })

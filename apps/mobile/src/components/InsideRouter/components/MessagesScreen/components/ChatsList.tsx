@@ -26,8 +26,15 @@ const chatIdsAtom = selectAtom(messagingStateAtom, (inboxes): ChatListData[] =>
       const lastMessageIsMeBlockingChat =
         lastMessage.message.messageType === 'BLOCK_CHAT' &&
         lastMessage.state === 'sent'
+      const lastMessageIsMeCancellingRequest =
+        lastMessage.message.messageType === 'CANCEL_REQUEST_MESSAGING' &&
+        lastMessage.state === 'sent'
 
-      if (lastMessageIsMeDeletingChat || lastMessageIsMeBlockingChat)
+      if (
+        lastMessageIsMeDeletingChat ||
+        lastMessageIsMeBlockingChat ||
+        lastMessageIsMeCancellingRequest
+      )
         return null
 
       return {chat: one.chat, lastMessage}

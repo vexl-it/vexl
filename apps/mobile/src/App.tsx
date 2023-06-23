@@ -11,8 +11,9 @@ import {SafeAreaProvider} from 'react-native-safe-area-context'
 import {useTheme} from 'tamagui'
 import AreYouSureDialog from './components/AreYouSureDialog'
 import MaintenanceAndForceUpdateCheck from './components/MaintenanceAndForceUpdateCheck'
-import useSetupRemoteConfig from './components/MaintenanceAndForceUpdateCheck/useSetupRemoteConfig'
+import useSetupRemoteConfig from './utils/remoteConfig/useSetupRemoteConfig'
 import 'react-native-gesture-handler'
+import {navigationRef} from './utils/navigation'
 
 void SplashScreen.preventAutoHideAsync()
 
@@ -35,6 +36,7 @@ function App(): JSX.Element {
     <SafeAreaProvider>
       <StatusBar style="light" />
       <NavigationContainer
+        ref={navigationRef}
         theme={{
           dark: true,
           colors: {

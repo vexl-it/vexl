@@ -21,8 +21,8 @@ import {type OfferAdminId} from '@vexl-next/rest-api/dist/services/offer/contrac
 import {selectAtom, splitAtom} from 'jotai/utils'
 import {importedContactsHashesAtom} from '../contacts'
 import sortOffers from './utils/sortOffers'
-import idsOfRequestedOffersAtom from '../chat/atoms/idsOfRequestedOffersAtom'
 import isSomeIn30KmRange from './utils/isIn30KmRadius'
+import {type PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
 
 export const addMoreContactsSuggestionVisibleAtom = atom<boolean>(true)
 export const resetFilterSuggestionVisibleAtom = atom<boolean>(true)
@@ -101,9 +101,8 @@ export const myOffersAtom = focusAtom(offersAtom, (optic) =>
 export const myOffersSortedAtom = atom((get) => {
   const sortingOptions = get(selectedMyOffersSortingOptionAtom)
   const myOffers = get(myOffersAtom)
-  const idsOfRequestedOffers = get(idsOfRequestedOffersAtom)
 
-  return sortOffers(myOffers, sortingOptions, idsOfRequestedOffers)
+  return sortOffers(myOffers, sortingOptions)
 })
 
 export const myOffersSortedAtomsAtom = splitAtom(myOffersSortedAtom)
@@ -119,7 +118,6 @@ export function offersAtomWithFilter(
 ): Atom<OneOfferInState[]> {
   return atom((get) => {
     const offersToSeeInMarketplace = get(offersToSeeInMarketplaceAtom)
-    const idsOfRequestedOffers = get(idsOfRequestedOffersAtom)
 
     const filtered = offersToSeeInMarketplace.filter(
       (offer) =>
@@ -156,11 +154,7 @@ export function offersAtomWithFilter(
           offer.offerInfo.publicPart.amountTopLimit <= filter.amountTopLimit)
     )
 
-    return sortOffers(
-      filtered,
-      filter.sort ?? 'NEWEST_OFFER',
-      idsOfRequestedOffers
-    )
+    return sortOffers(filtered, filter.sort ?? 'NEWEST_OFFER')
   })
 }
 
@@ -175,8 +169,22 @@ export function singleOfferAtom(
 export function createSingleOfferReportedFlagAtom(
   offerId: OfferId | undefined
 ): WritableAtom<boolean | undefined, [SetStateAction<boolean>], void> {
-  return focusAtom(singleOfferAtom(offerId), (optic) =>
+  return createSingleOfferReportedFlagFromAtomAtom(singleOfferAtom(offerId))
+}
+
+export function createSingleOfferReportedFlagFromAtomAtom(
+  offerAtom: FocusAtomType<OneOfferInState | undefined>
+): WritableAtom<boolean | undefined, [SetStateAction<boolean>], void> {
+  return focusAtom(offerAtom, (optic) =>
     optic.optional().prop('flags').prop('reported')
+  )
+}
+
+export function focusOfferByPublicKeyAtom(
+  publicKey: PublicKeyPemBase64
+): FocusAtomType<OneOfferInState | undefined> {
+  return focusAtom(offersAtom, (optic) =>
+    optic.find((one) => one.offerInfo.publicPart.offerPublicKey === publicKey)
   )
 }
 

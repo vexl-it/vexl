@@ -1,5 +1,6 @@
 import {flow, pipe} from 'fp-ts/function'
 import * as A from 'fp-ts/Array'
+import * as E from 'fp-ts/Either'
 import {type ChatPrivateApi} from '@vexl-next/rest-api/dist/services/chat'
 import {type ChatMessageWithState, type InboxInState} from '../domain'
 import * as TE from 'fp-ts/TaskEither'
@@ -21,6 +22,10 @@ import {group} from 'group-items'
 import {focusAtom} from 'jotai-optics'
 import messagingStateAtom from '../atoms/messagingStateAtom'
 import replaceBase64UriWithImageFileUri from '../utils/replaceBase64UriWithImageFileUri'
+import {
+  createSingleOfferReportedFlagFromAtomAtom,
+  focusOfferByPublicKeyAtom,
+} from '../../marketplace/atom'
 
 export function createInboxAtom(
   publicKey: PublicKeyPemBase64
@@ -61,7 +66,10 @@ function refreshInbox(
   api: ChatPrivateApi
 ): (
   getInbox: () => InboxInState
-) => TE.TaskEither<ApiErrorRetrievingMessages, InboxInState> {
+) => TE.TaskEither<
+  ApiErrorRetrievingMessages,
+  {updatedInbox: InboxInState; newMessages: readonly ChatMessageWithState[]}
+> {
   return (getInbox) =>
     pipe(
       retrieveMessages({api, inboxKeypair: getInbox().inbox.privateKey}),
@@ -69,8 +77,16 @@ function refreshInbox(
         if (one.errors.length > 0) {
           reportError('error', 'Error decrypting messages', one.errors)
         }
+
+        console.log(
+          `Processing messages: ${JSON.stringify(one.messages, null, 2)}`
+        )
         return one.messages
       }),
+      TE.filterOrElseW(
+        (messages) => messages.length > 0,
+        () => 'noMessages' as const
+      ),
       TE.map((newMessages) =>
         newMessages.map(
           (oneMessage): ChatMessageWithState => ({
@@ -92,22 +108,39 @@ function refreshInbox(
           TE.fromTask
         )
       ),
-      TE.map((newMessages) =>
-        splitMessagesArrayToNewChatsAndExistingChats({
-          inbox: getInbox(),
-          messages: newMessages,
-        })
+      TE.bindTo('newMessages'),
+      TE.bindW('updatedInbox', ({newMessages}) =>
+        pipe(
+          TE.right(newMessages),
+          TE.map((newMessages) =>
+            splitMessagesArrayToNewChatsAndExistingChats({
+              inbox: getInbox(),
+              messages: newMessages,
+            })
+          ),
+          TE.map(({messageInNewChat, messageInExistingChat}) => {
+            const inbox = getInbox()
+            return {
+              ...getInbox(),
+              chats: [
+                ...createNewChatsFromMessages(inbox.inbox)(
+                  messageInNewChat || []
+                ),
+                ...addMessagesToChats(inbox.chats)(messageInExistingChat || []),
+              ],
+            }
+          })
+        )
       ),
-      TE.map(({messageInNewChat, messageInExistingChat}) => {
-        const inbox = getInbox()
-        return {
-          ...getInbox(),
-          chats: [
-            ...createNewChatsFromMessages(inbox.inbox)(messageInNewChat || []),
-            ...addMessagesToChats(inbox.chats)(messageInExistingChat || []),
-          ],
-        }
-      })
+      TE.match(
+        (e) => {
+          if (e === 'noMessages') {
+            return E.right({updatedInbox: getInbox(), newMessages: []})
+          }
+          return E.left(e)
+        },
+        (right) => E.right(right)
+      )
     )
 }
 
@@ -157,17 +190,28 @@ export function useFetchAndStoreMessagesForInbox(): (
             reportError('error', 'Api Error fetching messages for inbox', error)
             return inbox
           },
-          (i) => {
-            return i
+          ({newMessages, updatedInbox}) => {
+            store.set(
+              createInboxAtom(inbox.inbox.privateKey.publicKeyPemBase64),
+              updatedInbox
+            )
+
+            newMessages
+              .filter((one) => one.message.messageType === 'BLOCK_CHAT')
+              .map((oneBlockMessage) => {
+                store.set(
+                  createSingleOfferReportedFlagFromAtomAtom(
+                    focusOfferByPublicKeyAtom(
+                      oneBlockMessage.message.senderPublicKey
+                    )
+                  ),
+                  true
+                )
+              })
+
+            return updatedInbox
           }
         ),
-        T.map((inbox) => {
-          store.set(
-            createInboxAtom(inbox.inbox.privateKey.publicKeyPemBase64),
-            inbox
-          )
-          return inbox
-        }),
         T.chainFirst(() =>
           deletePulledMessagesReportLeft({
             api: api.chat,

@@ -7,16 +7,6 @@ import {styled, Text} from 'tamagui'
 const BaseText = styled(Text, {
   color: '$greyOnBlack',
   fs: 14,
-  variants: {
-    unread: {
-      true: {
-        ff: '$body600',
-      },
-      false: {
-        ff: '$body',
-      },
-    },
-  },
 })
 
 function MessagePreview({
@@ -38,7 +28,7 @@ function MessagePreview({
 
   if (message.messageType === 'APPROVE_MESSAGING') {
     return (
-      <BaseText unread={unread} color={'$pastelGreen'}>
+      <BaseText color={'$pastelGreen'}>
         {t(`messages.messagePreviews.${direction}.APPROVE_MESSAGING`, {
           them: name,
         })}
@@ -46,7 +36,7 @@ function MessagePreview({
     )
   } else if (message.messageType === 'DISAPPROVE_MESSAGING') {
     return (
-      <BaseText unread={unread} color="$red">
+      <BaseText color="$red">
         {t(`messages.messagePreviews.${direction}.DISAPPROVE_MESSAGING`, {
           them: name,
         })}
@@ -54,7 +44,7 @@ function MessagePreview({
     )
   } else if (message.messageType === 'APPROVE_REVEAL') {
     return (
-      <BaseText unread={unread} color="$green">
+      <BaseText color="$green">
         {t(`messages.messagePreviews.${direction}.APPROVE_REVEAL`, {
           them: name,
         })}
@@ -62,7 +52,7 @@ function MessagePreview({
     )
   } else if (message.messageType === 'REQUEST_MESSAGING') {
     return (
-      <BaseText unread={unread} color="$main">
+      <BaseText color="$main">
         {t(`messages.messagePreviews.${direction}.REQUEST_MESSAGING`, {
           them: name,
         })}
@@ -70,27 +60,35 @@ function MessagePreview({
     )
   } else if (message.messageType === 'BLOCK_CHAT') {
     return (
-      <BaseText unread={unread} color="$red">
+      <BaseText color="$red">
         {t(`messages.messagePreviews.${direction}.BLOCK_CHAT`, {them: name})}
       </BaseText>
     )
   } else if (message.messageType === 'DELETE_CHAT') {
     return (
-      <BaseText unread={unread} color="$red">
+      <BaseText color="$red">
         {t(`messages.messagePreviews.${direction}.DELETE_CHAT`, {them: name})}
       </BaseText>
     )
   } else if (message.messageType === 'DISAPPROVE_REVEAL') {
     return (
-      <BaseText unread={unread} color="$red">
+      <BaseText color="$red">
         {t(`messages.messagePreviews.${direction}.DISAPPROVE_REVEAL`, {
+          them: name,
+        })}
+      </BaseText>
+    )
+  } else if (message.messageType === 'CANCEL_REQUEST_MESSAGING') {
+    return (
+      <BaseText color="$red">
+        {t(`messages.messagePreviews.${direction}.CANCEL_REQUEST_MESSAGING`, {
           them: name,
         })}
       </BaseText>
     )
   } else if (message.messageType === 'REQUEST_REVEAL') {
     return (
-      <BaseText unread={unread}>
+      <BaseText>
         {t(`messages.messagePreviews.${direction}.REQUEST_REVEAL`, {
           them: name,
         })}
@@ -98,7 +96,7 @@ function MessagePreview({
     )
   } else if (message.messageType === 'MESSAGE') {
     return (
-      <BaseText unread={unread}>
+      <BaseText ff={unread ? '$body600' : '$body'}>
         {t(`messages.messagePreviews.${direction}.MESSAGE`, {
           message: message.text,
           them: name,
@@ -107,7 +105,7 @@ function MessagePreview({
     )
   } else if (message.messageType === 'INBOX_DELETED') {
     return (
-      <BaseText unread={unread} color={'$red'}>
+      <BaseText color={'$red'}>
         {t(`messages.messagePreviews.${direction}.INBOX_DELETED`, {
           message: message.text,
           them: name,
@@ -116,7 +114,7 @@ function MessagePreview({
     )
   } else if (message.messageType === 'OFFER_DELETED') {
     return (
-      <BaseText unread={unread}>
+      <BaseText>
         {t(`messages.messagePreviews.${direction}.OFFER_DELETED`, {
           message: message.text,
           them: name,
@@ -124,7 +122,7 @@ function MessagePreview({
       </BaseText>
     )
   } else {
-    return <BaseText unread={unread}>{message.text}</BaseText>
+    return <BaseText>{message.text}</BaseText>
   }
 }
 

@@ -21,11 +21,6 @@ function MessageItem({
   const {otherSideDataAtom} = useMolecule(chatMolecule)
   const {t} = useTranslation()
   const {userName, image} = useAtomValue(otherSideDataAtom)
-  if (
-    item.type === 'message' &&
-    item.message.message.messageType === 'APPROVE_MESSAGING'
-  )
-    return null
 
   if (item.type === 'message') {
     if (

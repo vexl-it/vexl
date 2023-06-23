@@ -7,8 +7,6 @@ export default function mapMessageTypeToBackwardCompatibleMessageType(
   messageType: MessageType
 ): MessageTypeBackwardCompatible {
   switch (messageType) {
-    case 'MESSAGE':
-      return 'MESSAGE'
     case 'REQUEST_MESSAGING':
       return 'REQUEST_MESSAGING'
     case 'APPROVE_MESSAGING':

@@ -11,11 +11,10 @@ import {unixMillisecondsNow} from '@vexl-next/domain/dist/utility/UnixMillisecon
 import {pipe} from 'fp-ts/function'
 import {type FocusAtomType} from '../../../utils/atomUtils/FocusAtomType'
 import {type ErrorEncryptingMessage} from '@vexl-next/resources-utils/dist/chat/utils/chatCrypto'
-import sendMessage, {
-  type SendMessageApiErrors,
-} from '@vexl-next/resources-utils/dist/chat/sendMessage'
+import {type SendMessageApiErrors} from '@vexl-next/resources-utils/dist/chat/sendMessage'
 import {privateApiAtom} from '../../../api'
 import shouldSendTerminationMessageToChat from '../utils/shouldSendTerminationMessageToChat'
+import sendLeaveChat from '@vexl-next/resources-utils/dist/chat/sendLeaveChat'
 
 export default function deleteChatActionAtom(
   chatWithMessagesAtom: FocusAtomType<ChatWithMessages>
@@ -44,7 +43,7 @@ export default function deleteChatActionAtom(
 
     return pipe(
       shouldSendMessage
-        ? sendMessage({
+        ? sendLeaveChat({
             api: api.chat,
             senderKeypair: chat.inbox.privateKey,
             receiverPublicKey: chat.otherSide.publicKey,

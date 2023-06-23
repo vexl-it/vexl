@@ -15,6 +15,7 @@ import sendMessage from '@vexl-next/resources-utils/dist/chat/sendMessage'
 import {privateApiAtom} from '../../../api'
 import {type ExtractLeftTE} from '@vexl-next/resources-utils/dist/utils/ExtractLeft'
 import {type ChatPrivateApi} from '@vexl-next/rest-api/dist/services/chat'
+import {createSingleOfferReportedFlagAtom} from '../../marketplace/atom'
 
 export default function blockChatActionAtom(
   chatWithMessagesAtom: FocusAtomType<ChatWithMessages>
@@ -76,6 +77,11 @@ export default function blockChatActionAtom(
           ...old,
           messages: [successMessage],
         }))
+
+        if (chat.origin.type === 'theirOffer') {
+          set(createSingleOfferReportedFlagAtom(chat.origin.offerId), true)
+        }
+
         return successMessage
       })
     )

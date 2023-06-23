@@ -11,6 +11,18 @@ import {
   PublicKeyPemBase64,
 } from '@vexl-next/cryptography/dist/KeyHolder'
 
+export interface RequestCancelledError {
+  readonly _tag: 'RequestCancelledError'
+}
+
+export interface RequestNotFoundError {
+  readonly _tag: 'RequestNotFoundError'
+}
+
+export interface RequestAlreadyApprovedError {
+  readonly _tag: 'RequestAlreadyApprovedError'
+}
+
 export const SignedChallenge = z.object({
   challenge: z.string(),
   signature: z.string(),
@@ -85,6 +97,15 @@ export type RequestApprovalRequest = z.TypeOf<typeof RequestApprovalRequest>
 export const RequestApprovalResponse = ServerMessageWithId.extend({})
 export type RequestApprovalResponse = z.TypeOf<typeof RequestApprovalResponse>
 
+export const CancelApprovalRequest = z.object({
+  publicKey: PublicKeyPemBase64,
+  message: z.string(),
+})
+export type CancelApprovalRequest = z.TypeOf<typeof CancelApprovalRequest>
+
+export const CancelApprovalResponse = ServerMessageWithId.extend({})
+export type CancelApprovalResponse = z.TypeOf<typeof CancelApprovalResponse>
+
 export const ApproveRequestRequest = RequestBaseWithChallenge.extend({
   publicKeyToConfirm: PublicKeyPemBase64,
   message: z.string(),
@@ -126,6 +147,16 @@ export type SendMessageRequest = z.TypeOf<typeof SendMessageRequest>
 
 export const SendMessageResponse = ServerMessageWithId.extend({})
 export type SendMessageResponse = z.TypeOf<typeof SendMessageResponse>
+
+export const LeaveChatRequest = z.object({
+  keyPair: PrivateKeyHolder,
+  receiverPublicKey: PublicKeyPemBase64,
+  message: z.string(),
+})
+export type LeaveChatRequest = z.TypeOf<typeof LeaveChatRequest>
+
+export const LeaveChatResponse = ServerMessageWithId.extend({})
+export type LeaveChatResponse = z.TypeOf<typeof LeaveChatResponse>
 
 export const MessageInBatch = z.object({
   receiverPublicKey: PublicKeyPemBase64,

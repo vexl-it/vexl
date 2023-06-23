@@ -59,7 +59,8 @@ const otherSk: typeof en =
       "whatDoesThisMean": "Čo znamená '{{term}}'?",
       "learnMore": "Dozvedieť sa viac",
       "unableToShareImage": "Unable to share the image",
-      "requestAgain": "Request again"
+      "requestAgain": "Request again",
+      "seeDetail": "See detail"
     },
     "loginFlow": {
       "anonymityNotice": "Kým to nepovolíte, nikto to neuvidí. Dokonca ani my.",
@@ -237,7 +238,7 @@ const otherSk: typeof en =
       "filterOffers": "Filtrovanie ponúk",
       "numberOfCommon": "{{number}} spoločné",
       "offerNotFound": "Ponuka nebola nájdená. Autor ju možno vymazal",
-      "inputPlaceholder": "napr. Poď zavexlovať, kamoško!",
+      "inputPlaceholder": "Tu napíš správu...",
       "sendRequest": "Odoslať žiadosť",
       "report": {
         "areYouSureTitle": "Nahlásiť ponuku?",
@@ -611,7 +612,18 @@ const otherSk: typeof en =
         "text":
           "Unable to send response. Author has removed the offer. Do you want to delete the chat?"
       },
-      "offerWasReported": "Offer was reported"
+      "offerWasReported": "Offer was reported",
+      "unableToSelectImageToSend": {
+        "title": "Unable to select image",
+        "missingPermissions":
+          "Vexl does not have permissions for sending images. Enable them in the settings."
+      },
+      "imageToSend": "Image to send: ",
+      "actionBanner": {
+        "requestPending": "Request pending",
+        "bottomText": "Previous communication is displayed here",
+        "buttonText": "Respond"
+      }
     },
     "progressBar": {
       "ENCRYPTING_PRIVATE_PAYLOADS": "{{percentDone}}% hotovo",

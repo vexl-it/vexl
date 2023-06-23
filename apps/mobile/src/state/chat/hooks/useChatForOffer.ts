@@ -10,6 +10,7 @@ import {focusAtom} from 'jotai-optics'
 import {type FocusAtomType} from '../../../utils/atomUtils/FocusAtomType'
 import messagingStateAtom from '../atoms/messagingStateAtom'
 import {selectAtom} from 'jotai/utils'
+import {type ChatWithMessages} from '../domain'
 
 export function chatForPublicKeyAtom({
   inboxPrivateKey,
@@ -45,6 +46,30 @@ export function useChatForOffer({
         }),
       [session, offerPublicKey]
     )
+  )
+}
+
+export function useChatWithMessagesForOffer({
+  offerPublicKey,
+}: {
+  offerPublicKey: PublicKeyPemBase64
+}): ChatWithMessages | undefined {
+  const session = useSessionAssumeLoggedIn()
+
+  return useAtomValue(
+    useMemo(() => {
+      const inboxPrivateKey = session.privateKey.privateKeyPemBase64
+
+      return focusAtom(messagingStateAtom, (optic) =>
+        optic
+          .find(
+            (one) =>
+              one.inbox.privateKey.privateKeyPemBase64 === inboxPrivateKey
+          )
+          .prop('chats')
+          .find((one) => one.chat.otherSide.publicKey === offerPublicKey)
+      )
+    }, [session, offerPublicKey])
   )
 }
 

@@ -3,6 +3,6 @@ import {Preferences} from './domain'
 
 export const preferencesAtom = atomWithParsedMmkvStorage(
   'preferences',
-  {showDebugNotifications: false},
+  {showDebugNotifications: false, disableOfferRerequestLimit: false},
   Preferences
 )

@@ -8,7 +8,7 @@ import useSafeGoBack from '../../../utils/useSafeGoBack'
 import {Keyboard, TouchableOpacity} from 'react-native'
 import {useMolecule} from 'jotai-molecules'
 import {chatMolecule} from '../atoms'
-import {useAtomValue, useSetAtom} from 'jotai'
+import {useAtom, useAtomValue, useSetAtom} from 'jotai'
 import binSvg from '../images/binSvg'
 import useResetNavigationToMessagingScreen from '../../../utils/useResetNavigationToMessagingScreen'
 import {useCallback} from 'react'
@@ -29,6 +29,7 @@ function Button({type}: {type: ButtonType}): JSX.Element | null {
     blockChatWithUiFeedbackAtom,
     identityRevealStatusAtom,
     revealIdentityWithUiFeedbackAtom,
+    forceShowHistoryAtom,
   } = useMolecule(chatMolecule)
   const setModal = useSetAtom(showModalAtom)
   const resetNavigationToMessagingScreen = useResetNavigationToMessagingScreen()
@@ -38,12 +39,22 @@ function Button({type}: {type: ButtonType}): JSX.Element | null {
   const deleteChat = useSetAtom(deleteChatWithUiFeedbackAtom)
   const revealIdentity = useSetAtom(revealIdentityWithUiFeedbackAtom)
 
+  const [forceShowHistory, setForceShowHistory] = useAtom(forceShowHistoryAtom)
+
+  const onGoBackPressed = useCallback(() => {
+    if (forceShowHistory) {
+      setForceShowHistory(false)
+    } else {
+      safeGoBack()
+    }
+  }, [forceShowHistory, safeGoBack, setForceShowHistory])
+
   if (type === 'back')
     return (
       <IconButton
         icon={backButtonSvg}
         variant={'primary'}
-        onPress={safeGoBack}
+        onPress={onGoBackPressed}
       />
     )
 

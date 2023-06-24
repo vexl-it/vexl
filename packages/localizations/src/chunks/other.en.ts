@@ -58,7 +58,8 @@ const otherEn =
       "now": "Now",
       "declined": "Declined",
       "reset": "Reset",
-      "you": "You"
+      "you": "You",
+      "allow": "Allow"
     },
     "loginFlow": {
       "anonymityNotice":
@@ -171,7 +172,9 @@ const otherEn =
           "unknownError": "Unknown error while requesting permissions",
           "notAvailableOnEmulator":
             "Notifications are not available on emulator"
-        }
+        },
+        "vexlCantBeUsedWithoutNotifications":
+          "Vexl app can’t be used without this permission."
       }
     },
     "settings": {
@@ -558,7 +561,8 @@ const otherEn =
       "letsRevealIdentities": "Let's reveal identities!",
       "reveal": "Reveal",
       "themDeclined": "{{name}} declined",
-      "youDeclined": "You have declined"
+      "youDeclined": "You have declined",
+      "reportOffer": "Report offer"
     },
     "progressBar": {
       "ENCRYPTING_PRIVATE_PAYLOADS": "{{percentDone}}% done",

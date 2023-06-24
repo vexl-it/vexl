@@ -59,7 +59,8 @@ const otherSk: typeof en =
       "now": "Teraz",
       "declined": "Zamietnuté",
       "reset": "Reset",
-      "you": "Vy"
+      "you": "Vy",
+      "allow": "Povoliť"
     },
     "loginFlow": {
       "anonymityNotice": "Kým to nepovolíte, nikto to neuvidí. Dokonca ani my.",
@@ -174,7 +175,9 @@ const otherSk: typeof en =
             "Notifikácie neboli povolené. Môžeš ich povoliť pozdejšie v nastavení systému.",
           "unknownError": "Neznáma chyba pri vyžiadaní oprávnení",
           "notAvailableOnEmulator": "Oznámenia nie sú v emulátore k dispozícii"
-        }
+        },
+        "vexlCantBeUsedWithoutNotifications":
+          "Aplikáciu Vexl nie je možné používať bez notifikácií."
       }
     },
     "settings": {
@@ -561,7 +564,8 @@ const otherSk: typeof en =
       "letsRevealIdentities": "Poďme si odhaliť identity!",
       "reveal": "Odhaliť",
       "themDeclined": "{{name}} odmietol",
-      "youDeclined": "Odmietli ste"
+      "youDeclined": "Odmietli ste",
+      "reportOffer": "Nahlásiť ponuku"
     },
     "progressBar": {
       "ENCRYPTING_PRIVATE_PAYLOADS": "{{percentDone}}% hotovo",

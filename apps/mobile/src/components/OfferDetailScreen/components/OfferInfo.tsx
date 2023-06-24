@@ -43,13 +43,15 @@ function OfferInfo({offer}: {offer: OneOfferInState}): JSX.Element {
   return (
     <Stack f={1} mx={'$2'} my={'$4'}>
       <ScreenTitle text={t('offer.title')}>
-        <IconButton
-          variant={'dark'}
-          icon={flagSvg}
-          onPress={() => {
-            void reportOffer(offer.offerInfo.offerId)()
-          }}
-        />
+        {!offer.flags.reported && (
+          <IconButton
+            variant={'dark'}
+            icon={flagSvg}
+            onPress={() => {
+              void reportOffer(offer.offerInfo.offerId)()
+            }}
+          />
+        )}
         <IconButton variant="dark" icon={closeSvg} onPress={goBack} />
       </ScreenTitle>
       <ScrollView>

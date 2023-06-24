@@ -1,4 +1,4 @@
-import {Stack, Text, YStack} from 'tamagui'
+import {getTokens, Stack, Text, XStack, YStack} from 'tamagui'
 import Image from '../../Image'
 import bubbleTypTopSvg from '../images/bubbleTypTopSvg'
 import OfferInfoPreview from '../../OfferInfoPreview'
@@ -7,8 +7,10 @@ import {useMolecule} from 'jotai-molecules'
 import {chatMolecule} from '../atoms'
 import {useAtomValue} from 'jotai'
 import CommonFriends from '../../CommonFriends'
+import flagSvg from '../../OfferDetailScreen/images/flagSvg'
 
 function ChatRequestPreview(): JSX.Element {
+  const tokens = getTokens()
   const {
     offerForChatAtom,
     chatAtom,
@@ -46,6 +48,21 @@ function ChatRequestPreview(): JSX.Element {
           <Text fos={20} color="$greyOnWhite" fontFamily="$body500">
             {t('messages.requestMessageWasDeleted')}
           </Text>
+        )}
+        {offer?.flags.reported && (
+          <XStack
+            borderRadius={'$true'}
+            mx={'$-4'}
+            px={'$4'}
+            py={'$4'}
+            bg={'$darkRed'}
+            space={'$2'}
+          >
+            <Image source={flagSvg} stroke={tokens.color.red.val} />
+            <Text fos={16} col={'$red'}>
+              Offer was reported
+            </Text>
+          </XStack>
         )}
         {commonConnectionsHashes && commonConnectionsHashes.length > 0 && (
           <Stack mx={'$-4'}>

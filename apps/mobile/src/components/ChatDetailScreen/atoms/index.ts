@@ -341,6 +341,11 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
   const replyToMessageAtom = atom<ChatMessageWithState | null>(null)
   const messageOptionsExtendedAtom = atom<ChatMessageWithState | null>(null)
 
+  const theirOfferAndNotReportedAtom = selectAtom(
+    offerForChatAtom,
+    (offer) => !offer?.ownershipInfo && !offer?.flags.reported
+  )
+
   return {
     showModalAtom: atom<boolean>(false),
     chatAtom,
@@ -367,5 +372,6 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     friendLevelInfoAtom,
     replyToMessageAtom,
     messageOptionsExtendedAtom,
+    theirOfferAndNotReportedAtom,
   }
 })

@@ -14,9 +14,13 @@ import WarningSvg from '../images/warningSvg'
 import {SlideInDown, SlideOutDown} from 'react-native-reanimated'
 import {ScrollView} from 'react-native'
 import useResetNavigationToMessagingScreen from '../../../utils/useResetNavigationToMessagingScreen'
+import flagSvg from '../../OfferDetailScreen/images/flagSvg'
+import {useReportOfferHandleUI} from '../../OfferDetailScreen/api'
 
 function ChatInfoModal(): JSX.Element | null {
   const {
+    offerForChatAtom,
+    theirOfferAndNotReportedAtom,
     showModalAtom,
     deleteChatWithUiFeedbackAtom,
     blockChatWithUiFeedbackAtom,
@@ -28,12 +32,15 @@ function ChatInfoModal(): JSX.Element | null {
   const {top} = useSafeAreaInsets()
   const {t} = useTranslation()
   const resetNavigationToMessagingScreen = useResetNavigationToMessagingScreen()
+  const reportOffer = useReportOfferHandleUI()
 
   const deleteChat = useSetAtom(deleteChatWithUiFeedbackAtom)
   const blockChat = useSetAtom(blockChatWithUiFeedbackAtom)
   const requestReveal = useSetAtom(revealIdentityWithUiFeedbackAtom)
   const canSendMessages = useAtomValue(canSendMessagesAtom)
   const identityRevealStatus = useAtomValue(identityRevealStatusAtom)
+  const offerForChat = useAtomValue(offerForChatAtom)
+  const theirOfferAndNotReported = useAtomValue(theirOfferAndNotReportedAtom)
 
   if (!showModal) return null
 
@@ -60,6 +67,18 @@ function ChatInfoModal(): JSX.Element | null {
                         void requestReveal('REQUEST_REVEAL').then((success) => {
                           if (success) setShowModal(false)
                         })
+                      },
+                    },
+                  ]
+                : []),
+              ...(theirOfferAndNotReported && offerForChat
+                ? [
+                    {
+                      icon: flagSvg,
+                      isNegative: false,
+                      text: t('messages.reportOffer'),
+                      onPress: () => {
+                        void reportOffer(offerForChat.offerInfo.offerId)()
                       },
                     },
                   ]

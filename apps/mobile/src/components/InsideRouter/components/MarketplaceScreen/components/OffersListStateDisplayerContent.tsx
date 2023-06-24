@@ -15,8 +15,8 @@ import {
 import {useAtomValue} from 'jotai'
 import {offersAtomWithFilter} from '../../../../../state/marketplace/atom'
 import {splitAtom} from 'jotai/utils'
-import {offersFilterAtom} from '../../../../FilterOffersScreen/atom'
 import TotalOffersCount from './TotalOffersCount'
+import {offersFilterFromStorageAtom} from '../../../../../state/offersFilter'
 
 interface Props {
   type: 'BUY' | 'SELL'
@@ -35,7 +35,7 @@ function OffersListStateDisplayerContent({
   const loading = useAreOffersLoading()
   const error = useOffersLoadingError()
   const refreshOffers = useTriggerOffersRefresh()
-  const filter = useAtomValue(offersFilterAtom)
+  const filter = useAtomValue(offersFilterFromStorageAtom)
   const basicFilter = useMemo(
     () => ({
       offerType: type,

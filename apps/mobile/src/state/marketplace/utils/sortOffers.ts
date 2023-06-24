@@ -35,7 +35,8 @@ export default function sortOffers(
         b.offerInfo.publicPart.amountTopLimit -
         a.offerInfo.publicPart.amountTopLimit
       )
-    return a.offerInfo.id - b.offerInfo.id
+    // default ordering: NEWEST_OFFER
+    return b.offerInfo.id - a.offerInfo.id
   })
   return toReturn // fallback. Let's return original array in case of invalid sort
 }

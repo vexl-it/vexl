@@ -30,7 +30,9 @@ function MyOffersSortingDropdown(): JSX.Element {
     <Dropdown
       size={'small'}
       activeRowType={myOffersSortingOption}
-      setActiveRowType={setMyOffersSortingOption}
+      setActiveRowType={(rowType) => {
+        setMyOffersSortingOption(rowType ?? 'NEWEST_OFFER')
+      }}
       rows={myOffersSortingOptions}
     />
   )

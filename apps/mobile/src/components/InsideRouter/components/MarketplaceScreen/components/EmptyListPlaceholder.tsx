@@ -17,7 +17,7 @@ import {
   resetFilterSuggestionVisibleAtom,
 } from '../../../../../state/marketplace/atom'
 import {
-  filterActiveAtom,
+  isFilterActiveAtom,
   resetFilterAtom,
   saveFilterActionAtom,
 } from '../../../../FilterOffersScreen/atom'
@@ -63,7 +63,7 @@ function EmptyListPlaceholder(): JSX.Element {
   const {t} = useTranslation()
   const refreshOffers = useTriggerOffersRefresh()
   const importedContactsCount = useAtomValue(importedContactsCountAtom)
-  const filterActive = useAtomValue(filterActiveAtom)
+  const filterActive = useAtomValue(isFilterActiveAtom)
   const reachNumber = useAtomValue(reachNumberAtom)
   const lastImportOfContacts = useAtomValue(lastImportOfContactsAtom)
   const saveFilter = useSetAtom(saveFilterActionAtom)

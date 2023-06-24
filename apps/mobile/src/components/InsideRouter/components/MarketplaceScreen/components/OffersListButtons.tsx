@@ -4,7 +4,7 @@ import addIconSvg from '../../../../../images/addIconSvg'
 import {Stack, XStack} from 'tamagui'
 import FilterButton from './FilterButton'
 import {useAtomValue} from 'jotai'
-import {filterActiveAtom} from '../../../../FilterOffersScreen/atom'
+import {isFilterActiveAtom} from '../../../../FilterOffersScreen/atom'
 
 interface Props {
   marketplaceEmpty: boolean
@@ -20,7 +20,7 @@ function OffersListButtons({
   onMyOffersPress,
 }: Props): JSX.Element {
   const {t} = useTranslation()
-  const filterActive = useAtomValue(filterActiveAtom)
+  const filterActive = useAtomValue(isFilterActiveAtom)
 
   return (
     <XStack mt="$4" mx="$2" jc="space-between">

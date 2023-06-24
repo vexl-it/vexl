@@ -15,32 +15,31 @@ import {
 export const sortingAtom = atom<Sort | undefined>(undefined)
 export const intendedConnectionLevelAtom = atom<IntendedConnectionLevel>('ALL')
 
+export const isFilterActiveAtom = atom<boolean>(false)
+
+export const isFilterActiveActionAtom = atom(null, (get, set) => {
+  const offersFilterFromStorage = get(offersFilterFromStorageAtom)
+
+  set(
+    isFilterActiveAtom,
+    JSON.stringify(offersFilterFromStorage) !==
+      JSON.stringify(offersFilterInitialState)
+  )
+})
+
 export const offersFilterAtom = atom<OffersFilter>(offersFilterInitialState)
 
 export const setOffersFilterAtom = atom(null, (get, set) => {
   const filter = get(offersFilterFromStorageAtom)
+
   set(offersFilterAtom, filter)
   set(sortingAtom, filter.sort)
   set(
     intendedConnectionLevelAtom,
     filter.friendLevel?.includes('SECOND_DEGREE') ? 'ALL' : 'FIRST'
   )
+  set(isFilterActiveActionAtom)
 })
-
-const isFilterActiveAtom = atom<boolean>(false)
-
-export const filterActiveAtom = atom(
-  (get) => get(isFilterActiveAtom),
-  (get, set) => {
-    const offersFilterFromStorage = get(offersFilterFromStorageAtom)
-
-    set(
-      isFilterActiveAtom,
-      JSON.stringify(offersFilterFromStorage) !==
-        JSON.stringify(offersFilterInitialState)
-    )
-  }
-)
 
 export const currencyAtom = focusAtom(offersFilterAtom, (optic) =>
   optic.prop('currency')
@@ -60,6 +59,8 @@ export const updateCurrencyLimitsAtom = atom<
 
   if (currency === currencyFromAtom) {
     set(currencyAtom, undefined)
+    set(amountBottomLimitAtom, undefined)
+    set(amountTopLimitAtom, undefined)
   } else {
     set(currencyAtom, currency)
     set(amountBottomLimitAtom, get(amountBottomLimitUsdEurCzkAtom))
@@ -87,6 +88,8 @@ export const updateLocationStatePaymentMethodAtom = atom<
 
   if (locationState === locationStateFromAtom) {
     set(locationStateAtom, undefined)
+    set(paymentMethodAtom, undefined)
+    set(locationAtom, undefined)
   } else {
     set(locationStateAtom, locationState)
     set(
@@ -141,7 +144,7 @@ export const saveFilterActionAtom = atom(null, (get, set) => {
     friendLevel:
       intendedConnectionLevel === 'FIRST'
         ? ['FIRST_DEGREE']
-        : ['SECOND_DEGREE'],
+        : ['FIRST_DEGREE', 'SECOND_DEGREE'],
     amountBottomLimit: offersFilter.amountBottomLimit,
     amountTopLimit: offersFilter.amountTopLimit,
   }

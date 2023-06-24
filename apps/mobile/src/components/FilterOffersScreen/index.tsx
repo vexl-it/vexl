@@ -31,6 +31,7 @@ function FilterOffersScreen(): JSX.Element {
   const saveFilter = useSetAtom(saveFilterActionAtom)
   const resetFilter = useSetAtom(resetFilterAtom)
   const setOffersFilter = useSetAtom(setOffersFilterAtom)
+
   const resetOfferForm = useCallback(() => {
     resetFilter()
   }, [resetFilter])

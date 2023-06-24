@@ -55,6 +55,7 @@ export const offersAtom = focusAtom(offersStateAtom, (optic) =>
 
 export const offersToSeeInMarketplaceAtom = atom((get) => {
   const importedContactsHashes = get(importedContactsHashesAtom)
+
   return get(offersAtom).filter(
     (oneOffer) =>
       // only active offers
@@ -138,10 +139,13 @@ export function offersAtomWithFilter(
             offer.offerInfo.publicPart.btcNetwork
           )) &&
         (!filter.friendLevel ||
-          areIncluded(
-            filter.friendLevel,
-            offer.offerInfo.privatePart.friendLevel
-          )) &&
+          (filter.friendLevel.includes('FIRST_DEGREE') &&
+          !filter.friendLevel.includes('SECOND_DEGREE')
+            ? areIncluded(
+                offer.offerInfo.privatePart.friendLevel,
+                filter.friendLevel
+              )
+            : true)) &&
         (!filter.offerType ||
           offer.offerInfo.publicPart.offerType === filter.offerType) &&
         (!filter.amountBottomLimit ||
@@ -150,9 +154,10 @@ export function offersAtomWithFilter(
         (!filter.amountTopLimit ||
           offer.offerInfo.publicPart.amountTopLimit <= filter.amountTopLimit)
     )
+
     return sortOffers(
       filtered,
-      filter.sort ?? 'LOWEST_FEE_FIRST',
+      filter.sort ?? 'NEWEST_OFFER',
       idsOfRequestedOffers
     )
   })

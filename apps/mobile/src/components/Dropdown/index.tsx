@@ -1,6 +1,6 @@
 import {useCallback, useMemo, useState} from 'react'
 import {TouchableOpacity, TouchableWithoutFeedback} from 'react-native'
-import {getTokens, Stack, styled, Text} from 'tamagui'
+import {getTokens, Stack, styled, Text, XStack} from 'tamagui'
 import Image from '../Image'
 import chevronDownSvg from './images/chevronDownSvg'
 import Animated, {
@@ -8,6 +8,7 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated'
+import clearInputSvg from '../images/clearInputSvg'
 
 type Size = 'small' | 'large'
 
@@ -19,7 +20,7 @@ export interface RowProps<T> {
 interface Props<T> {
   activeRowType: T | undefined
   placeholder?: string
-  setActiveRowType: (rowType: T) => void
+  setActiveRowType: (rowType: T | undefined) => void
   rows: Array<RowProps<T>>
   size: Size
 }
@@ -136,18 +137,34 @@ function Dropdown<T>({
           >
             {activeRow?.title ?? placeholder}
           </Text>
-          <Animated.View style={animatedStyle}>
-            <Image
-              height={size === 'small' ? 16 : 24}
-              width={size === 'small' ? 16 : 24}
-              stroke={
-                size === 'small' || !activeRow
-                  ? tokens.color.greyOnBlack.val
-                  : tokens.color.main.val
-              }
-              source={chevronDownSvg}
-            />
-          </Animated.View>
+          <XStack>
+            {activeRow && size === 'large' && (
+              <Stack mr={'$2'}>
+                <TouchableOpacity
+                  onPress={() => {
+                    setActiveRowType(undefined)
+                  }}
+                >
+                  <Image
+                    stroke={tokens.color.main.val}
+                    source={clearInputSvg}
+                  />
+                </TouchableOpacity>
+              </Stack>
+            )}
+            <Animated.View style={animatedStyle}>
+              <Image
+                height={size === 'small' ? 16 : 24}
+                width={size === 'small' ? 16 : 24}
+                stroke={
+                  size === 'small' || !activeRow
+                    ? tokens.color.greyOnBlack.val
+                    : tokens.color.main.val
+                }
+                source={chevronDownSvg}
+              />
+            </Animated.View>
+          </XStack>
         </Stack>
       </TouchableWithoutFeedback>
       {isOpen && (

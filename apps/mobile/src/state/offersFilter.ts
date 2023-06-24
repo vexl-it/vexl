@@ -5,7 +5,7 @@ import {focusAtom} from 'jotai-optics'
 
 export const offersFilterInitialState: OffersFilter = {
   sort: undefined,
-  friendLevel: ['SECOND_DEGREE'],
+  friendLevel: ['FIRST_DEGREE', 'SECOND_DEGREE'],
   currency: undefined,
   location: undefined,
   locationState: undefined,

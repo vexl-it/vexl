@@ -1,5 +1,5 @@
 import {useAtomValue} from 'jotai'
-import {filterActiveAtom} from '../../../../FilterOffersScreen/atom'
+import {isFilterActiveAtom} from '../../../../FilterOffersScreen/atom'
 import {Stack, Text} from 'tamagui'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import {
@@ -17,7 +17,7 @@ function TotalOffersCount({
   offerType,
 }: Props): JSX.Element {
   const {t} = useTranslation()
-  const filterActive = useAtomValue(filterActiveAtom)
+  const filterActive = useAtomValue(isFilterActiveAtom)
   const buyOffersCount = useAtomValue(buyOffersToSeeInMarketplaceCountAtom)
   const sellOffersCount = useAtomValue(sellOffersToSeeInMarketplaceCountAtom)
 

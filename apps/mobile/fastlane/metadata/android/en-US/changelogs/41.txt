@@ -1,0 +1,3 @@
+- total count of offers on the top of marketplace board
+- filter is saved and persisted after app is closed and opened again, filter is the same for both Sell and Buy tab
+- small bugfixes for creating and editing offers

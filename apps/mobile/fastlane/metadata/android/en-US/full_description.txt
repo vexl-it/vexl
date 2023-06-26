@@ -1,0 +1,4 @@
+We are introducing a new Vexl App that will enable us to continue improving Vexl more quickly and reliably. You can keep using the old one, but we recommend migrating to Vexl Next, as the previous one will soon be deprecated.
+Drawing on feedback we have collected since the launch of Vexl, our goal with the new Vexl app is to address the most pressing issues, primarily concerning performance and UI. Additionally, users can look forward to a variety of new features that will enrich their experience while using the app.
+
+Vexl users interact not only with their primal social network (based on mobile phone contacts) but also with the second degree social network - contacts of contacts, friends of friends. This way it aims to delegate trust and reputation from the real world directly to the Vexl app and at the same time use it as an incentive for their good behavior on the marketplace.

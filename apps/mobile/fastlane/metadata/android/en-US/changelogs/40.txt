@@ -1,0 +1,3 @@
+- White rectangle in offers list is now clickable
+- Fixed bug with updating offer
+- Fixed error thrown while creating offer

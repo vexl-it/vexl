@@ -11,21 +11,20 @@ import {
   offersFilterFromStorageAtom,
   offersFilterInitialState,
 } from '../../state/offersFilter'
+import {selectAtom} from 'jotai/utils'
 
 export const sortingAtom = atom<Sort | undefined>(undefined)
 export const intendedConnectionLevelAtom = atom<IntendedConnectionLevel>('ALL')
 
-export const isFilterActiveAtom = atom<boolean>(false)
-
-export const isFilterActiveActionAtom = atom(null, (get, set) => {
-  const offersFilterFromStorage = get(offersFilterFromStorageAtom)
-
-  set(
-    isFilterActiveAtom,
-    JSON.stringify(offersFilterFromStorage) !==
+export const isFilterActiveAtom = selectAtom(
+  offersFilterFromStorageAtom,
+  (offersFilterFromStorage) => {
+    return (
+      JSON.stringify(offersFilterFromStorage) !==
       JSON.stringify(offersFilterInitialState)
-  )
-})
+    )
+  }
+)
 
 export const offersFilterAtom = atom<OffersFilter>(offersFilterInitialState)
 
@@ -38,7 +37,6 @@ export const setOffersFilterAtom = atom(null, (get, set) => {
     intendedConnectionLevelAtom,
     filter.friendLevel?.includes('SECOND_DEGREE') ? 'ALL' : 'FIRST'
   )
-  set(isFilterActiveActionAtom)
 })
 
 export const currencyAtom = focusAtom(offersFilterAtom, (optic) =>
@@ -150,10 +148,6 @@ export const saveFilterActionAtom = atom(null, (get, set) => {
   }
 
   set(offersFilterFromStorageAtom, newFilterValue)
-  set(
-    isFilterActiveAtom,
-    JSON.stringify(newFilterValue) !== JSON.stringify(offersFilterInitialState)
-  )
 })
 
 export const resetFilterAtom = atom(null, (get, set) => {

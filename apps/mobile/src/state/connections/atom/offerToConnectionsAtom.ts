@@ -187,7 +187,7 @@ export const updateAllOffersConnectionsActionAtom = atom(
                         ...val.connections.secondLevel,
                         ...(newConnections.secondLevel ?? []),
                       ]
-                    : [],
+                    : undefined,
                 },
               }))
               return {

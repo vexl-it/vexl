@@ -142,8 +142,8 @@ export function offersAtomWithFilter(
           (filter.friendLevel.includes('FIRST_DEGREE') &&
           !filter.friendLevel.includes('SECOND_DEGREE')
             ? areIncluded(
-                offer.offerInfo.privatePart.friendLevel,
-                filter.friendLevel
+                filter.friendLevel,
+                offer.offerInfo.privatePart.friendLevel
               )
             : true)) &&
         (!filter.offerType ||

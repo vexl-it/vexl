@@ -54,6 +54,7 @@ export default function updatePrivateParts({
   {
     encryptionErrors: PrivatePartEncryptionError[]
     timeLimitReachedErrors: TimeLimitReachedError[]
+    removedConnections: PublicKeyPemBase64[]
     newConnections: {
       firstLevel: PublicKeyPemBase64[]
       secondLevel?: PublicKeyPemBase64[]
@@ -158,6 +159,7 @@ export default function updatePrivateParts({
       return {
         encryptionErrors,
         timeLimitReachedErrors,
+        removedConnections: deduplicate(removedConnections),
         newConnections: {
           firstLevel: subtractArrays(
             newFirstLevelConnections,

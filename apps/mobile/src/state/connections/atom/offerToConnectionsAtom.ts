@@ -19,6 +19,8 @@ import {
   UnixMilliseconds,
   unixMillisecondsNow,
 } from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
+import {singleOfferByAdminIdAtom} from '../../marketplace/atom'
+import {subtractArrays} from '@vexl-next/resources-utils/dist/utils/array'
 
 const BACKGROUND_TIME_LIMIT_MS = 25_000
 
@@ -87,7 +89,11 @@ export const updateAllOffersConnectionsActionAtom = atom(
     return pipe(
       offerToConnectionsAtoms,
       A.mapWithIndex((i, oneOfferAtom) => {
-        const oneOffer = get(oneOfferAtom)
+        const oneOfferConections = get(oneOfferAtom)
+        const intendedConnectionLevel =
+          get(singleOfferByAdminIdAtom(oneOfferConections.adminId))
+            ?.ownershipInfo?.intendedConnectionLevel ?? 'ALL'
+
         let endOneOfferUpdateMeasure: () => void = () => {}
         return pipe(
           TE.Do,
@@ -107,13 +113,16 @@ export const updateAllOffersConnectionsActionAtom = atom(
           }),
           TE.chainW(() =>
             updatePrivateParts({
-              currentConnections: oneOffer.connections,
+              currentConnections: oneOfferConections.connections,
               targetConnections: {
                 firstLevel: connectionState.firstLevel,
-                secondLevel: connectionState.secondLevel,
+                secondLevel:
+                  intendedConnectionLevel === 'ALL'
+                    ? connectionState.secondLevel
+                    : [],
               },
-              adminId: oneOffer.adminId,
-              symmetricKey: oneOffer.symmetricKey,
+              adminId: oneOfferConections.adminId,
+              symmetricKey: oneOfferConections.symmetricKey,
               commonFriends: connectionState.commonFriends,
               stopProcessingAfter,
               api: api.offer,
@@ -134,7 +143,7 @@ export const updateAllOffersConnectionsActionAtom = atom(
                   error
                 )
                 return {
-                  adminId: oneOffer.adminId,
+                  adminId: oneOfferConections.adminId,
                   success: false,
                 }
               }
@@ -147,11 +156,16 @@ export const updateAllOffersConnectionsActionAtom = atom(
               }
               reportError('warn', 'Unable to update offer connections', error)
               return {
-                adminId: oneOffer.adminId,
+                adminId: oneOfferConections.adminId,
                 success: false,
               }
             },
-            ({encryptionErrors, newConnections, timeLimitReachedErrors}) => {
+            ({
+              encryptionErrors,
+              newConnections,
+              timeLimitReachedErrors,
+              removedConnections,
+            }) => {
               if (encryptionErrors.length > 0) {
                 reportError(
                   'error',
@@ -178,20 +192,27 @@ export const updateAllOffersConnectionsActionAtom = atom(
               set(oneOfferAtom, (val) => ({
                 ...val,
                 connections: {
-                  firstLevel: [
-                    ...val.connections.firstLevel,
-                    ...newConnections.firstLevel,
-                  ],
-                  secondLevel: val.connections.secondLevel
-                    ? [
-                        ...val.connections.secondLevel,
-                        ...(newConnections.secondLevel ?? []),
-                      ]
-                    : undefined,
+                  firstLevel: subtractArrays(
+                    [
+                      ...val.connections.firstLevel,
+                      ...newConnections.firstLevel,
+                    ],
+                    removedConnections
+                  ),
+                  secondLevel:
+                    intendedConnectionLevel === 'ALL'
+                      ? subtractArrays(
+                          [
+                            ...(val.connections.secondLevel ?? []),
+                            ...(newConnections.secondLevel ?? []),
+                          ],
+                          removedConnections
+                        )
+                      : undefined,
                 },
               }))
               return {
-                adminId: oneOffer.adminId,
+                adminId: oneOfferConections.adminId,
                 success: true,
               }
             }

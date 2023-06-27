@@ -54,7 +54,9 @@ const otherEn =
       "reset": "Reset",
       "you": "You",
       "allow": "Allow",
-      "currency": "Currency"
+      "currency": "Currency",
+      "whatDoesThisMean": "What does this mean?",
+      "learnMore": "Learn more"
     },
     "loginFlow": {
       "anonymityNotice":
@@ -268,7 +270,17 @@ const otherEn =
       "marketplaceEmpty": "Marketplace empty, yet",
       "resetFilter": "Reset filter",
       "totalFilteredOffers":
-        "Filtered: {{count}} offers (out of total {{totalCount}})"
+        "Filtered: {{count}} offers (out of total {{totalCount}})",
+      "offerFromDirectFriend": "Offer from a direct friend",
+      "offerFromFriendOfFriend": "Offer from a friend of a friend",
+      "youSeeThisOfferBecause":
+        "You see this offer because the counterparty has your phone number saved in their contact list.",
+      "beCautiousWeCannotVerify":
+        "Be cautious, we cannot verify if you really know each other in the real life.",
+      "dontForgetToVerifyTheIdentity":
+        "Don't forget to verify their identity with a common contact.",
+      "noDirectConnection":
+        "This is a contact with whom you have no direct connection."
     },
     "termsOfUse": {
       "termsOfUse": "Terms of Use",

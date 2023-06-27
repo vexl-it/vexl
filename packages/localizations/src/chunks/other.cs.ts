@@ -55,7 +55,9 @@ const otherCs: typeof en =
       "reset": "Reset",
       "you": "Vy",
       "allow": "Povolit",
-      "currency": "Měna"
+      "currency": "Měna",
+      "whatDoesThisMean": "Co to znamená?",
+      "learnMore": "Dovědet se víc"
     },
     "loginFlow": {
       "anonymityNotice": "Bez tvého svolení jej nikdo neuvidí. Ani my.",
@@ -269,7 +271,16 @@ const otherCs: typeof en =
       "marketplaceEmpty": "Marketplace je zatím prázdný",
       "resetFilter": "Resetovat filtr",
       "totalFilteredOffers":
-        "Filtrováno: {{count}} nabídek (z celkového počtu {{totalCount}})"
+        "Filtrováno: {{count}} nabídek (z celkového počtu {{totalCount}})",
+      "offerFromDirectFriend": "Nabídka od přímého přítele",
+      "offerFromFriendOfFriend": "Nabídka od přítele jedného z tvých kontaktů",
+      "youSeeThisOfferBecause":
+        "Vidíš tuto nabídku, protože druhá strana má tvoje telefonní číslo uloženo ve svém seznamu kontaktů.",
+      "beCautiousWeCannotVerify":
+        "Buď opatrný, nemůžeme ověřit, zda se opravdu znáte.",
+      "dontForgetToVerifyTheIdentity":
+        "Nezapomeň si ověřit identitu protistrany prostřednictvím společného přítele.",
+      "noDirectConnection": "Pravděpodobně se s touto osobou navzájem neznáte."
     },
     "termsOfUse": {
       "termsOfUse": "Podmínky používání",

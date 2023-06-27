@@ -42,6 +42,7 @@ function CommonFriends({
 
   return (
     <TouchableOpacity
+      disabled={commonFriends.length === 0}
       onPress={() => {
         navigation.navigate('CommonFriends', {contactsHashes})
       }}
@@ -101,16 +102,18 @@ function CommonFriends({
             </ScrollView>
           )}
         </Stack>
-        <Stack ai={'flex-end'} jc={'center'}>
-          <Image
-            stroke={
-              variant === 'light'
-                ? tokens.color.black.val
-                : tokens.color.greyOnBlack.val
-            }
-            source={chevronRightSvg}
-          />
-        </Stack>
+        {commonFriends.length !== 0 && (
+          <Stack ai={'flex-end'} jc={'center'}>
+            <Image
+              stroke={
+                variant === 'light'
+                  ? tokens.color.black.val
+                  : tokens.color.greyOnBlack.val
+              }
+              source={chevronRightSvg}
+            />
+          </Stack>
+        )}
       </XStack>
     </TouchableOpacity>
   )

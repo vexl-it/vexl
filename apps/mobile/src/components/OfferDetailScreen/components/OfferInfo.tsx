@@ -3,7 +3,11 @@ import {getTokens, Stack, YStack} from 'tamagui'
 import OfferWithBubbleTip from '../../OfferWithBubbleTip'
 import ScreenTitle from '../../ScreenTitle'
 import useSafeGoBack from '../../../utils/useSafeGoBack'
-import {useTranslation} from '../../../utils/localization/I18nProvider'
+import {
+  translationAtom,
+  useTranslation,
+} from '../../../utils/localization/I18nProvider'
+import * as TE from 'fp-ts/TaskEither'
 import {ScrollView} from 'react-native'
 import TextInput from '../../Input'
 import Button from '../../Button'
@@ -17,8 +21,60 @@ import InfoSquare from '../../InfoSquare'
 import closeSvg from '../../images/closeSvg'
 import identityIconSvg from '../../images/identityIconSvg'
 import CommonFriends from '../../CommonFriends'
-import {atom, useAtomValue} from 'jotai'
+import {atom, useAtomValue, useSetAtom} from 'jotai'
 import createChatStatusAtom from '../../../state/chat/atoms/createChatStatusAtom'
+import Info from '../../Info'
+import {askAreYouSureActionAtom} from '../../AreYouSureDialog'
+import {pipe} from 'fp-ts/function'
+
+const showCommonFriendsExplanationUIActionAtom = atom(
+  null,
+  async (get, set, params: {offer: OneOfferInState}) => {
+    const {t} = get(translationAtom)
+    const {offer} = params
+
+    const modalContent = (() => {
+      if (offer.offerInfo.privatePart.friendLevel.includes('FIRST_DEGREE')) {
+        if (offer.offerInfo.privatePart.commonFriends.length === 0) {
+          return {
+            title: t('offer.offerFromDirectFriend'),
+            description: `${t('offer.youSeeThisOfferBecause')} ${t(
+              'offer.beCautiousWeCannotVerify'
+            )}`,
+            positiveButtonText: t('common.gotIt'),
+          }
+        }
+        return {
+          title: t('offer.offerFromDirectFriend'),
+          description: `${t('offer.youSeeThisOfferBecause')} ${t(
+            'offer.dontForgetToVerifyTheIdentity'
+          )}`,
+          positiveButtonText: t('common.gotIt'),
+        }
+      }
+      return {
+        title: t('offer.offerFromFriendOfFriend'),
+        description: t('offer.noDirectConnection'),
+        positiveButtonText: t('common.gotIt'),
+      }
+    })()
+
+    return await pipe(
+      set(askAreYouSureActionAtom, {
+        steps: [{...modalContent, type: 'StepWithText'}],
+        variant: 'info',
+      }),
+      TE.match(
+        () => {
+          return false
+        },
+        () => {
+          return true
+        }
+      )
+    )()
+  }
+)
 
 function OfferInfo({offer}: {offer: OneOfferInState}): JSX.Element {
   const goBack = useSafeGoBack()
@@ -30,6 +86,10 @@ function OfferInfo({offer}: {offer: OneOfferInState}): JSX.Element {
   const chatForOffer = useChatForOffer({
     offerPublicKey: offer.offerInfo.publicPart.offerPublicKey,
   })
+
+  const showCommonFriendsExplanationUIAction = useSetAtom(
+    showCommonFriendsExplanationUIActionAtom
+  )
   const requestStatus = useAtomValue(
     useMemo(() => {
       if (!chatForOffer) return atom(() => null)
@@ -60,6 +120,13 @@ function OfferInfo({offer}: {offer: OneOfferInState}): JSX.Element {
           <CommonFriends
             variant={'dark'}
             contactsHashes={offer.offerInfo.privatePart.commonFriends}
+          />
+          <Info
+            text={t('common.whatDoesThisMean')}
+            actionButtonText={t('common.learnMore')}
+            onActionPress={() => {
+              void showCommonFriendsExplanationUIAction({offer})
+            }}
           />
           {!chatForOffer ? (
             <TextInput

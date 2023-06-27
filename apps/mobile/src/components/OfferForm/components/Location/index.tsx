@@ -6,7 +6,6 @@ import SvgImage from '../../../Image'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import {TouchableOpacity, TouchableWithoutFeedback} from 'react-native'
 import closeSvg from '../../../images/closeSvg'
-import Button from '../../../Button'
 import magnifyingGlass from '../../../images/magnifyingGlass'
 import Help from '../Help'
 import anonymousCounterpartSvg from '../../../images/anonymousCounterpartSvg'
@@ -22,7 +21,7 @@ import {
   type LocationState,
 } from '@vexl-next/domain/dist/general/offers'
 import LocationSearch from '../LocationSearch'
-import infoSvg from '../../../images/infoSvg'
+import Info from '../../../Info'
 
 interface Props {
   locationAtom: PrimitiveAtom<Location[]>
@@ -52,7 +51,6 @@ function LocationComponent({
   const updateLocationStatePaymentMethod = useSetAtom(
     updateLocationStatePaymentMethodAtom
   )
-  const [onlineMessageHidden, setOnlineMessageHidden] = useState<boolean>(false)
   const [helpVisible, setHelpVisible] = useState<boolean>(false)
   const [locationSearchVisible, setLocationSearchVisible] =
     useState<boolean>(false)
@@ -117,32 +115,14 @@ function LocationComponent({
           ))}
         </YStack>
       )}
-      {locationState === 'ONLINE' && !onlineMessageHidden && (
-        <Stack jc="center" p="$4" bc="$pinkAccent1" br="$4">
-          <XStack justifyContent="space-evenly" mb="$4">
-            <SvgImage fill={tokens.color.pink.val} source={infoSvg} />
-            <Stack fs={1} px="$2">
-              <Text fos={14} col="$pink">
-                {t('offerForm.location.meetingInPerson')}
-              </Text>
-            </Stack>
-            <TouchableOpacity
-              onPress={() => {
-                setOnlineMessageHidden(true)
-              }}
-            >
-              <SvgImage stroke={tokens.color.pink.val} source={closeSvg} />
-            </TouchableOpacity>
-          </XStack>
-          <Button
-            text={t('offerForm.location.checkItOut')}
-            onPress={() => {
-              setHelpVisible(true)
-            }}
-            variant="hint"
-            size="medium"
-          />
-        </Stack>
+      {locationState === 'ONLINE' && (
+        <Info
+          actionButtonText={t('offerForm.location.checkItOut')}
+          text={t('offerForm.location.meetingInPerson')}
+          onActionPress={() => {
+            setHelpVisible(true)
+          }}
+        />
       )}
       {locationSearchVisible && (
         <LocationSearch

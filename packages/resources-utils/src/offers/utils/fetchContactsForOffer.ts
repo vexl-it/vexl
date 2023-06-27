@@ -49,12 +49,12 @@ export default function fetchContactsForOffer({
   return pipe(
     TE.Do,
     TE.bindW('firstDegreeConnections', () =>
-      fetchFriendsPublicKeys({lvl: intendedConnectionLevel, api: contactApi})
+      fetchFriendsPublicKeys({lvl: 'FIRST', api: contactApi})
     ),
     TE.bindW('secondDegreeConnections', () =>
       intendedConnectionLevel === 'FIRST'
         ? TE.right([])
-        : fetchFriendsPublicKeys({lvl: 'ALL', api: contactApi})
+        : fetchFriendsPublicKeys({lvl: 'SECOND', api: contactApi})
     ),
     TE.bindW(
       'commonFriends',

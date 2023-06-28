@@ -8,7 +8,7 @@ import {
   useTranslation,
 } from '../../../utils/localization/I18nProvider'
 import * as TE from 'fp-ts/TaskEither'
-import {ScrollView} from 'react-native'
+import {ScrollView, StyleSheet} from 'react-native'
 import TextInput from '../../Input'
 import Button from '../../Button'
 import IconButton from '../../IconButton'
@@ -26,6 +26,13 @@ import createChatStatusAtom from '../../../state/chat/atoms/createChatStatusAtom
 import Info from '../../Info'
 import {askAreYouSureActionAtom} from '../../AreYouSureDialog'
 import {pipe} from 'fp-ts/function'
+
+const style = StyleSheet.create({
+  textInput: {
+    minHeight: 130,
+    alignItems: 'flex-start',
+  },
+})
 
 const showCommonFriendsExplanationUIActionAtom = atom(
   null,
@@ -130,6 +137,7 @@ function OfferInfo({offer}: {offer: OneOfferInState}): JSX.Element {
           />
           {!chatForOffer ? (
             <TextInput
+              style={style.textInput}
               value={text}
               onChangeText={setText}
               multiline

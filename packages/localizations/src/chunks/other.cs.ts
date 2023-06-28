@@ -236,7 +236,7 @@ const otherCs: typeof en =
       "filterOffers": "Filtrovat nabídky",
       "numberOfCommon": "{{number}} společné",
       "offerNotFound": "Nabídka nebyla nalezena. Možná byla smazána autorem",
-      "inputPlaceholder": "např. Pojď zavexlit, kámo!",
+      "inputPlaceholder": "Tady napiš zprávu...",
       "sendRequest": "Odeslat žádost",
       "report": {
         "areYouSureTitle": "Nahlásit nabídku?",

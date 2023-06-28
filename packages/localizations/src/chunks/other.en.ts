@@ -234,7 +234,7 @@ const otherEn =
       "numberOfCommon": "{{number}} common",
       "offerNotFound":
         "Offer not found. It might have been deleted by the author",
-      "inputPlaceholder": "e.g. let’s trade my friend...",
+      "inputPlaceholder": "Let’s write a message here...",
       "sendRequest": "Send Request",
       "report": {
         "areYouSureTitle": "Report offer?",

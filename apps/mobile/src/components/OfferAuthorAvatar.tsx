@@ -9,7 +9,7 @@ import UserAvatar from './UserAvatar'
 import {DateTime} from 'luxon'
 import {userDataAtom} from '../state/session'
 import {useTranslation} from '../utils/localization/I18nProvider'
-import {useAtomValue, useStore} from 'jotai'
+import {useAtomValue} from 'jotai'
 import {useMemo} from 'react'
 import {selectImportedContactsWithHashes} from '../state/contacts'
 
@@ -23,15 +23,14 @@ function OfferAuthorAvatar({
   const chatForOffer = useChatForOffer({
     offerPublicKey: offerInfo.publicPart.offerPublicKey,
   })
-  const store = useStore()
   const userData = useAtomValue(userDataAtom)
   const {t} = useTranslation()
-  const commonFriends = useMemo(
-    () =>
-      store.get(
-        selectImportedContactsWithHashes(offerInfo.privatePart.commonFriends)
-      ),
-    [offerInfo.privatePart.commonFriends, store]
+  const commonFriends = useAtomValue(
+    useMemo(
+      () =>
+        selectImportedContactsWithHashes(offerInfo.privatePart.commonFriends),
+      [offerInfo.privatePart.commonFriends]
+    )
   )
 
   return (

@@ -126,11 +126,7 @@ function TextMessage({
           space={'$2'}
           alignItems={'center'}
         >
-          <TouchableWithoutFeedback
-            style={{flex: 1}}
-            onPress={hideExtended}
-            onLongPress={toggleExtended}
-          >
+          <TouchableWithoutFeedback style={{flex: 1}} onPress={toggleExtended}>
             <Stack
               maxWidth={'80%'}
               br={'$6'}

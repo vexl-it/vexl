@@ -31,8 +31,12 @@ const style = StyleSheet.create({
   textInputStyle: {
     fontSize: 16,
     fontFamily: 'TTSatoshi500',
+    margin: 0,
+    padding: 0,
   },
 })
+
+const textInputHitSlop = {top: 15, bottom: 15, left: 10, right: 10}
 
 function useIsExtended(messageItem: MessagesListItem): {
   isExtended: boolean
@@ -98,6 +102,20 @@ function TextMessage({
   const {isExtended, hideExtended, toggleExtended} = useIsExtended(messageItem)
   const setReplyToMessage = useSetAtom(replyToMessageAtom)
   const otherSideData = useAtomValue(otherSideDataAtom)
+
+  const textInputStyle = useMemo(
+    () => [
+      style.textInputStyle,
+      {
+        color:
+          messageItem.type === 'message' &&
+          messageItem.message.state !== 'received'
+            ? tokens.color.black.val
+            : tokens.color.white.val,
+      },
+    ],
+    [messageItem, tokens.color.black.val, tokens.color.white.val]
+  )
 
   const onPressResend = useCallback(() => {
     if (
@@ -169,18 +187,15 @@ function TextMessage({
                 <TextInput
                   caretHidden
                   multiline
-                  hitSlop={{top: 15, bottom: 15, left: 10, right: 10}}
+                  autoCorrect={false}
+                  autoComplete={'off'}
+                  hitSlop={textInputHitSlop}
                   showSoftInputOnFocus={false}
-                  value={message.message.text}
-                  style={[
-                    style.textInputStyle,
-                    {
-                      color: isMine
-                        ? tokens.color.black.val
-                        : tokens.color.white.val,
-                    },
-                  ]}
-                />
+                  spellCheck={false}
+                  style={textInputStyle}
+                >
+                  {message.message.text}
+                </TextInput>
               ) : (
                 <Text
                   selectable

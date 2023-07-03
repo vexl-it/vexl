@@ -1,6 +1,12 @@
-import {Stack, Text, XStack, YStack} from 'tamagui'
+import {getTokens, Stack, Text, XStack, YStack} from 'tamagui'
 import Clipboard from '@react-native-clipboard/clipboard'
 import React, {useCallback, useMemo} from 'react'
+import {
+  TextInput,
+  Pressable,
+  TouchableWithoutFeedback,
+  StyleSheet,
+} from 'react-native'
 import Animated, {FadeIn, FadeOut} from 'react-native-reanimated'
 import {
   atom,
@@ -12,7 +18,6 @@ import {
 } from 'jotai'
 import {chatTime, type MessagesListItem} from '../utils'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
-import {Pressable, TouchableWithoutFeedback} from 'react-native'
 import {useMolecule} from 'jotai-molecules'
 import {chatMolecule} from '../atoms'
 import {unixMillisecondsNow} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
@@ -21,6 +26,13 @@ import replyToSvg from '../images/replyToSvg'
 import getValueFromSetStateActionOfAtom from '../../../utils/atomUtils/getValueFromSetStateActionOfAtom'
 import copySvg from '../images/copySvg'
 import IconButton from '../../IconButton'
+
+const style = StyleSheet.create({
+  textInputStyle: {
+    fontSize: 16,
+    fontFamily: 'TTSatoshi500',
+  },
+})
 
 function useIsExtended(messageItem: MessagesListItem): {
   isExtended: boolean
@@ -76,6 +88,7 @@ function TextMessage({
 }: {
   messageAtom: Atom<MessagesListItem>
 }): JSX.Element | null {
+  const tokens = getTokens()
   const messageItem = useAtomValue(messageAtom)
   const {sendMessageAtom, replyToMessageAtom, otherSideDataAtom} =
     useMolecule(chatMolecule)
@@ -152,14 +165,32 @@ function TextMessage({
                   </Text>
                 </YStack>
               )}
-              <Text
-                selectable
-                fos={16}
-                fontFamily={'$body500'}
-                color={isMine ? '$black' : '$white'}
-              >
-                {message.message.text}
-              </Text>
+              {isExtended ? (
+                <TextInput
+                  caretHidden
+                  multiline
+                  hitSlop={{top: 15, bottom: 15, left: 10, right: 10}}
+                  showSoftInputOnFocus={false}
+                  value={message.message.text}
+                  style={[
+                    style.textInputStyle,
+                    {
+                      color: isMine
+                        ? tokens.color.black.val
+                        : tokens.color.white.val,
+                    },
+                  ]}
+                />
+              ) : (
+                <Text
+                  selectable
+                  fos={16}
+                  fontFamily={'$body500'}
+                  color={isMine ? '$black' : '$white'}
+                >
+                  {message.message.text}
+                </Text>
+              )}
             </Stack>
           </TouchableWithoutFeedback>
           {isExtended && (

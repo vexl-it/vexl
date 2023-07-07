@@ -58,7 +58,8 @@ const otherSp: typeof en =
       "allow": "Permitir",
       "currency": "Moneda",
       "whatDoesThisMean": "¿Qué significa?",
-      "learnMore": "Más información"
+      "learnMore": "Más información",
+      "unableToShareImage": "Unable to share the image"
     },
     "loginFlow": {
       "anonymityNotice":

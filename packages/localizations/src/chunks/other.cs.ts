@@ -57,7 +57,8 @@ const otherCs: typeof en =
       "allow": "Povolit",
       "currency": "Měna",
       "whatDoesThisMean": "Co to znamená?",
-      "learnMore": "Dovědet se víc"
+      "learnMore": "Dovědet se víc",
+      "unableToShareImage": "Unable to share the image"
     },
     "loginFlow": {
       "anonymityNotice": "Bez tvého svolení jej nikdo neuvidí. Ani my.",

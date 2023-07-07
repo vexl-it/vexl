@@ -59,7 +59,8 @@ const otherIt: typeof en =
       "allow": "Consenti",
       "currency": "Valuta",
       "whatDoesThisMean": "Cosa significa?",
-      "learnMore": "Per saperne di più"
+      "learnMore": "Per saperne di più",
+      "unableToShareImage": "Unable to share the image"
     },
     "loginFlow": {
       "anonymityNotice":

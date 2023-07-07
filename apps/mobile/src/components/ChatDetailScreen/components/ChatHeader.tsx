@@ -140,7 +140,7 @@ function ChatHeader({
     onPressMiddle()
   }, [onPressMiddle])
   return (
-    <XStack mx={'$4'} mt={'$4'}>
+    <XStack mx={'$4'} mt={'$4'} jc={'space-between'}>
       <Button type={leftButton} />
       {theirOfferAndNotReported && <Button type={null} />}
 
@@ -151,7 +151,7 @@ function ChatHeader({
       </Stack>
 
       {theirOfferAndNotReported && <Button type={'reportOffer'} />}
-      <Button type={rightButton} />
+      {rightButton && <Button type={rightButton} />}
     </XStack>
   )
 }

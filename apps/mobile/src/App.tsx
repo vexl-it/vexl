@@ -12,6 +12,7 @@ import {useTheme} from 'tamagui'
 import AreYouSureDialog from './components/AreYouSureDialog'
 import MaintenanceAndForceUpdateCheck from './components/MaintenanceAndForceUpdateCheck'
 import useSetupRemoteConfig from './components/MaintenanceAndForceUpdateCheck/useSetupRemoteConfig'
+import 'react-native-gesture-handler'
 
 void SplashScreen.preventAutoHideAsync()
 

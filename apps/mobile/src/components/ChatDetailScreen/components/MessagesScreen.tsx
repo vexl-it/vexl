@@ -9,6 +9,7 @@ import QuickActionBanner from './QuickActionBanner'
 import {useAppState} from '../../../utils/useAppState'
 import {useCallback} from 'react'
 import useFetchMessagesForAllInboxes from '../../../state/chat/hooks/useFetchNewMessages'
+import ImageZoomOverlay from './ImageZoomOverlay'
 
 function MessagesScreen(): JSX.Element {
   const {showModalAtom, canSendMessagesAtom} = useMolecule(chatMolecule)
@@ -49,6 +50,7 @@ function MessagesScreen(): JSX.Element {
           <ChatTextInput />
         </Stack>
       )}
+      <ImageZoomOverlay />
     </>
   )
 }

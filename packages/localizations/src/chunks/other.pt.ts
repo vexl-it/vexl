@@ -57,7 +57,8 @@ const otherPt: typeof en =
       "allow": "Permitir",
       "currency": "Moeda",
       "whatDoesThisMean": "O que é que isto significa?",
-      "learnMore": "Saiba mais"
+      "learnMore": "Saiba mais",
+      "unableToShareImage": "Unable to share the image"
     },
     "loginFlow": {
       "anonymityNotice": "Ninguém verá isto até que o autorize. Nem mesmo nós.",

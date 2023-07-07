@@ -59,7 +59,8 @@ const otherFr: typeof en =
       "allow": "Autoriser",
       "currency": "Monnaie",
       "whatDoesThisMean": "Qu'est-ce que cela signifie ?",
-      "learnMore": "En savoir plus"
+      "learnMore": "En savoir plus",
+      "unableToShareImage": "Unable to share the image"
     },
     "loginFlow": {
       "anonymityNotice":

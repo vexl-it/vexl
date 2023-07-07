@@ -5,6 +5,7 @@ import {chatMolecule} from '../atoms'
 import UserAvatar from '../../UserAvatar'
 import UserNameWithSellingBuying from '../../UserNameWithSellingBuying'
 import ContactTypeAndCommonNumber from '../../ContactTypeAndCommonNumber'
+import UserAvatarTouchableWrapper from './UserAvatarTouchableWrapper'
 
 interface Props {
   mode: 'photoTop' | 'photoLeft'
@@ -40,12 +41,20 @@ function OtherSideNamePhotoAndInfo({mode}: Props): JSX.Element {
         h={40}
         {...(mode === 'photoTop' ? {marginBottom: '$1'} : {marginRight: '$2'})}
       >
-        <UserAvatar
-          grayScale={otherSideLeft || !canSendMessages}
-          userImage={otherSideData.image}
-          width={40}
-          height={40}
-        />
+        <UserAvatarTouchableWrapper
+          userImageUri={
+            otherSideData.image.type === 'imageUri'
+              ? otherSideData.image.imageUri
+              : undefined
+          }
+        >
+          <UserAvatar
+            grayScale={otherSideLeft || !canSendMessages}
+            userImage={otherSideData.image}
+            width={40}
+            height={40}
+          />
+        </UserAvatarTouchableWrapper>
       </Stack>
       <YStack f={1}>
         <UserNameWithSellingBuying

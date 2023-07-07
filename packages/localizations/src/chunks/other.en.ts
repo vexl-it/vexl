@@ -56,7 +56,8 @@ const otherEn =
       "allow": "Allow",
       "currency": "Currency",
       "whatDoesThisMean": "What does this mean?",
-      "learnMore": "Learn more"
+      "learnMore": "Learn more",
+      "unableToShareImage": "Unable to share the image"
     },
     "loginFlow": {
       "anonymityNotice":

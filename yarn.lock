@@ -2527,6 +2527,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@egjs/hammerjs@npm:^2.0.17":
+  version: 2.0.17
+  resolution: "@egjs/hammerjs@npm:2.0.17"
+  dependencies:
+    "@types/hammerjs": ^2.0.36
+  checksum: 8945137cec5837edd70af3f2e0ea621543eb0aa3b667e6269ec6485350f4d120c2434b37c7c30b1cf42a65275dd61c1f24626749c616696d3956ac0c008c4766
+  languageName: node
+  linkType: hard
+
 "@esbuild/android-arm64@npm:0.17.15":
   version: 0.17.15
   resolution: "@esbuild/android-arm64@npm:0.17.15"
@@ -4749,6 +4758,18 @@ __metadata:
     "@streamparser/json": ^0.0.15
     lodash.get: ^4.4.2
   checksum: 73532b97fd70be4206460f16e552646d96c8ef3b145111be569c2041b99d2616d8a29e5ecc9b8d0ca5ecd1eedf65da5a0508b3093593169b9ebbc31136c5e28a
+  languageName: node
+  linkType: hard
+
+"@likashefqet/react-native-image-zoom@npm:^1.3.0":
+  version: 1.3.0
+  resolution: "@likashefqet/react-native-image-zoom@npm:1.3.0"
+  peerDependencies:
+    react: ">=16.x.x"
+    react-native: ">=0.62.x"
+    react-native-gesture-handler: ">=2.x.x"
+    react-native-reanimated: ">=2.x.x"
+  checksum: 150d670279135eaee1b4bfb2f461954b653e9c16cabc0c161a2f17bfceb3d5edf16e0e44205b75f7c7f039dcc3e182863565a5232bdf8418e53ef937f2aa6607
   languageName: node
   linkType: hard
 
@@ -7522,6 +7543,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/hammerjs@npm:^2.0.36":
+  version: 2.0.41
+  resolution: "@types/hammerjs@npm:2.0.41"
+  checksum: d16fbd688fc9b18cc270abe8dea8d4c50ef7bd8375e593d92c233d299387933a6b003c8db69819344833052458bc5f9ef1b472001277a49f095928d184356006
+  languageName: node
+  linkType: hard
+
 "@types/hoist-non-react-statics@npm:^3.3.1":
   version: 3.3.1
   resolution: "@types/hoist-non-react-statics@npm:3.3.1"
@@ -8427,6 +8455,7 @@ __metadata:
     "@babel/core": ^7.12.9
     "@babel/preset-react": ^7.18.6
     "@bam.tech/react-native-image-resizer": ^3.0.5
+    "@likashefqet/react-native-image-zoom": ^1.3.0
     "@miblanchard/react-native-slider": ^2.3.1
     "@notifee/react-native": ^7.7.1
     "@react-native-async-storage/async-storage": ~1.17.3
@@ -8521,6 +8550,7 @@ __metadata:
     react-native: 0.71.8
     react-native-color-matrix-image-filters: ^6.0.3
     react-native-flags: ^1.0.0
+    react-native-gesture-handler: ~2.9.0
     react-native-keyboard-aware-scroll-view: ^0.9.5
     react-native-markdown-display: ^7.0.0-alpha.2
     react-native-mmkv: ^2.8.0
@@ -21898,6 +21928,22 @@ __metadata:
   version: 1.0.0
   resolution: "react-native-flags@npm:1.0.0"
   checksum: c6d36aa9307714b7b22fe1546c65a009ca815f00c78be943fbffce4b8303a47b416bdd830d1e4a5deb4d283b2c208319524c07acbed5661043afc9464f2291a0
+  languageName: node
+  linkType: hard
+
+"react-native-gesture-handler@npm:~2.9.0":
+  version: 2.9.0
+  resolution: "react-native-gesture-handler@npm:2.9.0"
+  dependencies:
+    "@egjs/hammerjs": ^2.0.17
+    hoist-non-react-statics: ^3.3.0
+    invariant: ^2.2.4
+    lodash: ^4.17.21
+    prop-types: ^15.7.2
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: 6bfdd9d23486193424dcfb0073dd821a216c2783dde746d73a3441e920602343f09efa10261c6f09fcbcb645d029a95305c86f61997053c01ad89751c8c6d236
   languageName: node
   linkType: hard
 

@@ -35,6 +35,7 @@ import connectionStateAtom, {
   createFriendLevelInfoAtom,
 } from '../../../state/connections/atom/connectionStateAtom'
 import {type FriendLevel} from '@vexl-next/domain/dist/general/offers'
+import {type UriString} from '@vexl-next/domain/dist/utility/UriString.brand'
 
 type ChatUIMode = 'approval' | 'messages'
 
@@ -227,6 +228,8 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
 
   const revealIdentityAtom = revealIdentityActionAtom(chatWithMessagesAtom)
 
+  const openedImageUriAtom = atom<UriString | undefined>(undefined)
+
   const revealIdentityWithUiFeedbackAtom = atom(
     null,
     async (get, set, type: 'REQUEST_REVEAL' | 'RESPOND_REVEAL') => {
@@ -373,5 +376,6 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     replyToMessageAtom,
     messageOptionsExtendedAtom,
     theirOfferAndNotReportedAtom,
+    openedImageUriAtom,
   }
 })

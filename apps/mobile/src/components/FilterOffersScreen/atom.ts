@@ -1,7 +1,7 @@
 import {atom} from 'jotai'
 import {type OffersFilter} from '../../state/marketplace/domain'
 import {
-  type Currency,
+  type CurrencyCode,
   type IntendedConnectionLevel,
   type LocationState,
   type Sort,
@@ -47,7 +47,7 @@ export const updateCurrencyLimitsAtom = atom<
   null,
   [
     {
-      currency: Currency | undefined
+      currency: CurrencyCode | undefined
     }
   ],
   boolean

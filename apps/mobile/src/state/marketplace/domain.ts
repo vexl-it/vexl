@@ -1,7 +1,7 @@
 import {z} from 'zod'
 import {
   BtcNetwork,
-  Currency,
+  CurrencyCode,
   FriendLevel,
   IntendedConnectionLevel,
   Location,
@@ -65,7 +65,7 @@ export type LoadingState =
 
 export const OffersFilter = z.object({
   sort: Sort.optional(),
-  currency: Currency.optional(),
+  currency: CurrencyCode.optional(),
   location: z.array(Location).optional(),
   locationState: LocationState.optional(),
   paymentMethod: z.array(PaymentMethod).optional(),

@@ -3,7 +3,7 @@ import {useCallback, useEffect, useMemo, useState} from 'react'
 import SvgImage from '../../../Image'
 import {type Atom, type PrimitiveAtom, useAtom, useAtomValue} from 'jotai'
 import LimitInput from './components/LimitInput'
-import {type Currency} from '@vexl-next/domain/dist/general/offers'
+import {type CurrencyCode} from '@vexl-next/domain/dist/general/offers'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import infoSvg from '../../../images/infoSvg'
 import Slider from '../../../Slider'
@@ -18,7 +18,7 @@ export type InputType = 'min' | 'max'
 interface Props {
   amountTopLimitAtom: PrimitiveAtom<number | undefined>
   amountBottomLimitAtom: PrimitiveAtom<number | undefined>
-  currencyAtom: PrimitiveAtom<Currency | undefined>
+  currencyAtom: PrimitiveAtom<CurrencyCode | undefined>
   amountTopLimitCzkAtom: Atom<number>
   amountTopLimitUsdEurAtom: Atom<number>
   amountBottomLimitUsdEurCzkAtom: Atom<number>

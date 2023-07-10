@@ -1,8 +1,8 @@
-import {type Currency} from '@vexl-next/domain/dist/general/offers'
+import {type CurrencyCode} from '@vexl-next/domain/dist/general/offers'
 import {type TabProps} from '../../../Tabs'
 import {useMemo} from 'react'
 
-export default function useContent(): Array<TabProps<Currency>> {
+export default function useContent(): Array<TabProps<CurrencyCode>> {
   return useMemo(
     () => [
       {

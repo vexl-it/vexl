@@ -4,15 +4,15 @@ import {changeCurrencyDialogVisibleAtom} from '../../atoms'
 import SettingsScreenDialog from '../SettingsScreenDialog'
 import {Text, XStack, YStack} from 'tamagui'
 import RadioButton from '../../../../../RadioButton'
-import {type Currency} from '@vexl-next/domain/src/general/offers'
+import {type CurrencyCode} from '@vexl-next/domain/src/general/offers'
 import useContent from './useContent'
 import {selectedCurrencyAtom} from '../../../../../../state/selectedCurrency'
 import {useState} from 'react'
 
 interface CurrencyItemProps {
   active: boolean
-  currency: Currency
-  onButtonPress: (_: Currency) => void
+  currency: CurrencyCode
+  onButtonPress: (_: CurrencyCode) => void
   title: string
 }
 
@@ -48,7 +48,7 @@ function ChangeCurrency(): JSX.Element {
   const content = useContent()
   const [storedSelectedCurrency, storeSelectedCurrency] =
     useAtom(selectedCurrencyAtom)
-  const [selectedCurrency, setSelectedCurrency] = useState<Currency>(
+  const [selectedCurrency, setSelectedCurrency] = useState<CurrencyCode>(
     storedSelectedCurrency
   )
 

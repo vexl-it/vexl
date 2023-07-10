@@ -3,6 +3,7 @@ import {UriString} from '../utility/UriString.brand'
 import {IdNumeric} from '../utility/IdNumeric'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
 import {IsoDatetimeString} from '../utility/IsoDatetimeString.brand'
+import {CurrencyCode} from './currency.brand'
 
 export const Sort = z.enum([
   'LOWEST_FEE_FIRST',
@@ -32,8 +33,7 @@ export type BtcNetwork = z.TypeOf<typeof BtcNetwork>
 export const OfferType = z.enum(['BUY', 'SELL'])
 export type OfferType = z.TypeOf<typeof OfferType>
 
-export const Currency = z.enum(['CZK', 'EUR', 'USD'])
-export type Currency = z.TypeOf<typeof Currency>
+export {CurrencyCode}
 
 export const FriendLevel = z.enum([
   'FIRST_DEGREE',
@@ -93,11 +93,11 @@ export const OfferPublicPart = z.object({
   locationState: LocationState,
   paymentMethod: z.array(PaymentMethod),
   btcNetwork: z.array(BtcNetwork),
-  currency: Currency,
+  currency: CurrencyCode,
   offerType: OfferType,
   activePriceState: ActivePriceState,
   activePriceValue: z.coerce.number(),
-  activePriceCurrency: Currency,
+  activePriceCurrency: CurrencyCode,
   active: z.boolean(),
   groupUuids: z.array(z.string()),
 })

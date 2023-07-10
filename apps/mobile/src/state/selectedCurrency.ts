@@ -1,5 +1,5 @@
 import {atomWithParsedMmkvStorage} from '../utils/atomUtils/atomWithParsedMmkvStorage'
-import {Currency} from '@vexl-next/domain/src/general/offers'
+import {CurrencyCode} from '@vexl-next/domain/src/general/offers'
 import {z} from 'zod'
 import {focusAtom} from 'jotai-optics'
 import {i18n} from '../utils/localization/I18nProvider'
@@ -42,7 +42,7 @@ export const selectedCurrencyStorageAtom = atomWithParsedMmkvStorage(
   {
     currency: defaultCurrency,
   },
-  z.object({currency: Currency})
+  z.object({currency: CurrencyCode})
 )
 
 export const selectedCurrencyAtom = focusAtom(

@@ -1,5 +1,5 @@
 import {Stack, styled, Text, XStack} from 'tamagui'
-import {bigNumberToString} from '../utils/bigNumberToString'
+import {formatCurrencyAmount} from '../utils/localization/currency'
 import SvgImage from './Image'
 import mapTagSvg from './InsideRouter/components/MarketplaceScreen/images/mapTagSvg'
 import bankSvg from './InsideRouter/components/MarketplaceScreen/images/bankSvg'
@@ -52,9 +52,7 @@ function OfferInfoPreview({
   )
 
   const offerAmount = useMemo(() => {
-    return `${bigNumberToString(offer.publicPart.amountTopLimit)} ${
-      offer.publicPart.currency
-    }`
+    return formatCurrencyAmount(offer.publicPart.currency, offer.publicPart.amountTopLimit)
   }, [offer.publicPart.amountTopLimit, offer.publicPart.currency])
 
   return (

@@ -6,15 +6,15 @@ import {
   useSetAtom,
   type WritableAtom,
 } from 'jotai'
-import {type Currency} from '@vexl-next/domain/src/general/offers'
+import {type CurrencyCode} from '@vexl-next/domain/src/general/offers'
 
 interface Props {
-  currencyAtom: PrimitiveAtom<Currency>
+  currencyAtom: PrimitiveAtom<CurrencyCode>
   updateCurrencyLimitsAtom: WritableAtom<
     null,
     [
       {
-        currency: Currency
+        currency: CurrencyCode
       }
     ],
     boolean

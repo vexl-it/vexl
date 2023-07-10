@@ -1,6 +1,6 @@
 import {atom} from 'jotai'
 import {
-  type Currency,
+  type CurrencyCode,
   type LocationState,
   OfferId,
   type OfferPublicPart,
@@ -108,7 +108,7 @@ export const offerFormMolecule = molecule(() => {
   const amountTopLimitUsdEurAtom = atom<number>(10000)
   const amountTopLimitCzkAtom = atom<number>(250000)
 
-  const updateCurrencyLimitsAtom = atom<null, [{currency: Currency}], boolean>(
+  const updateCurrencyLimitsAtom = atom<null, [{currency: CurrencyCode}], boolean>(
     null,
     (get, set, params) => {
       const {currency} = params

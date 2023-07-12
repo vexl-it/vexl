@@ -23,6 +23,7 @@ import Preferences from './components/Preferences'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 import reportError from '../../utils/reportError'
 import {importedContactsAtom} from '../../state/contacts'
+import LanguagePicker from './components/LanguagePicker'
 
 // const ContentScroll = styled(ScrollView, {
 //   marginBottom: '$2',
@@ -53,7 +54,8 @@ function DebugScreen(): JSX.Element {
               enableHiddenFeatures: {enableHiddenFeatures ? 'true' : 'false'}
             </Text>
             <Text>apiEnv: {JSON.stringify(apiEnv, null, 2)}</Text>
-
+            <Spacer />
+            <LanguagePicker />
             <Spacer />
             <Button
               variant={'primary'}

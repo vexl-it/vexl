@@ -11,7 +11,8 @@
     "turbo:dev-packages": "turbo build-watch",
     "turbo:lint": "turbo lint",
     "location-service:build-docker-image": "./scripts/build-docker-image.sh",
-    "utils:sync-translations": "yarn workspace @vexl-next/localizations utils:run && yarn workspace @vexl-next/localizations build"
+    "utils:sync-translations": "yarn workspace @vexl-next/localizations utils:sync && yarn workspace @vexl-next/localizations build",
+    "utils:add-translation": "yarn workspace @vexl-next/localizations utils:add && yarn workspace @vexl-next/localizations build"
   },
   "private": true,
   "devDependencies": {

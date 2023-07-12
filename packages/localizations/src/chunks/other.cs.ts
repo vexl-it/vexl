@@ -236,7 +236,7 @@ const otherCs: typeof en =
       "filterOffers": "Filtrovat nabídky",
       "numberOfCommon": "{{number}} společné",
       "offerNotFound": "Nabídka nebyla nalezena. Možná byla smazána autorem",
-      "inputPlaceholder": "Tady napiš zprávu...",
+      "inputPlaceholder": "Sem napiš zprávu...",
       "sendRequest": "Odeslat žádost",
       "report": {
         "areYouSureTitle": "Nahlásit nabídku?",
@@ -252,7 +252,10 @@ const otherCs: typeof en =
         "requested":
           "Byla odeslána žádost o obchodování. Dáme vám vědět, jakmile bude přijata.",
         "accepted": "Your request was accepted.",
-        "denied": "Your request was declined."
+        "denied": "Your request was declined.",
+        "initial": "This will be your first interaction with this offer.",
+        "cancelled": "You have cancelled trade request for this offer.",
+        "leaved": "You have already interacted with this offer before"
       },
       "listEmpty": "Tvůj marketplace se právě zahřívá. Vrať se za pár minut!",
       "emptyAction": "Přidat novou nabídku",
@@ -280,7 +283,15 @@ const otherCs: typeof en =
         "Buď opatrný, nemůžeme ověřit, zda se opravdu znáte.",
       "dontForgetToVerifyTheIdentity":
         "Nezapomeň si ověřit identitu protistrany prostřednictvím společného přítele.",
-      "noDirectConnection": "Pravděpodobně se s touto osobou navzájem neznáte."
+      "noDirectConnection": "Pravděpodobně se s touto osobou navzájem neznáte.",
+      "rerequestTomorrow": "You can sent another request tomorrow",
+      "rerequestDays": "You can sent another request in {{days}} days",
+      "rerequest": "Odeslat žádost znova",
+      "cancelRequest": "Zrušit žádost",
+      "requestWasCancelledByOtherSide":
+        "Žádost nelze přijmout, protože jí druhá strana zrušila.",
+      "requestNotFound":
+        "Žádost nelze přijmout, protože druhá strana odstranila svůj účet."
     },
     "termsOfUse": {
       "termsOfUse": "Podmínky používání",
@@ -502,7 +513,8 @@ const otherCs: typeof en =
           "DELETE_CHAT": "{{them}} opustil chat",
           "BLOCK_CHAT": "{{them}} tě zablokoval.",
           "OFFER_DELETED": "{{them}} smazal svou nabídku.",
-          "INBOX_DELETED": "{{them}} smazal chat."
+          "INBOX_DELETED": "{{them}} smazal chat.",
+          "CANCEL_REQUEST_MESSAGING": "Zrušil žádost o zprávu"
         },
         "outgoing": {
           "MESSAGE": "Já: {{message}}",
@@ -515,7 +527,8 @@ const otherCs: typeof en =
           "DELETE_CHAT": "Opustil jsi chat",
           "BLOCK_CHAT": "Uživatel byl zablokován",
           "OFFER_DELETED": "Smazal jsi nabídku",
-          "INBOX_DELETED": "Smazal jsi chat."
+          "INBOX_DELETED": "Smazal jsi chat.",
+          "CANCEL_REQUEST_MESSAGING": "Žádost o zprávu zrušena"
         }
       },
       "deleteChat": "Odstránit chat",
@@ -568,7 +581,20 @@ const otherCs: typeof en =
       "reveal": "Odhalit",
       "themDeclined": "{{name}} odmítl",
       "youDeclined": "Odmítli jste",
-      "reportOffer": "Nahlásit nabídku"
+      "reportOffer": "Nahlásit nabídku",
+      "ended": "Ukončeno",
+      "textMessageTypes": {
+        "REQUEST_MESSAGING": "Request sent: {{message}}",
+        "CANCEL_REQUEST_MESSAGING": "Request cancelled",
+        "DISAPPROVE_MESSAGING": "Request denied",
+        "APPROVE_MESSAGING": "Request approved"
+      },
+      "youHaveAlreadyTalked":
+        "S tímto uživatelem už jste si psali. Klepnutím zobrazíte historii.",
+      "requestPendingActionBar": {
+        "top": "Chat is waiting for your approval",
+        "bottom": "Above is communication you had with the user so far"
+      }
     },
     "progressBar": {
       "ENCRYPTING_PRIVATE_PAYLOADS": "{{percentDone}}% hotovo",

@@ -5,6 +5,11 @@ const translationFilePaths = {
   en: path.resolve(__dirname, '../src/chunks/other.en.ts'),
   cs: path.resolve(__dirname, '../src/chunks/other.cs.ts'),
   sk: path.resolve(__dirname, '../src/chunks/other.sk.ts'),
+  de: path.resolve(__dirname, '../src/chunks/other.de.ts'),
+  fr: path.resolve(__dirname, '../src/chunks/other.fr.ts'),
+  it: path.resolve(__dirname, '../src/chunks/other.it.ts'),
+  pt: path.resolve(__dirname, '../src/chunks/other.pt.ts'),
+  sp: path.resolve(__dirname, '../src/chunks/other.sp.ts'),
 }
 
 function getContent(str: string): string {

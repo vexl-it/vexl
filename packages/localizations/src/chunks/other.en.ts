@@ -234,7 +234,7 @@ const otherEn =
       "numberOfCommon": "{{number}} common",
       "offerNotFound":
         "Offer not found. It might have been deleted by the author",
-      "inputPlaceholder": "Let’s write a message here...",
+      "inputPlaceholder": "Type your message here...",
       "sendRequest": "Send Request",
       "report": {
         "areYouSureTitle": "Report offer?",
@@ -250,7 +250,10 @@ const otherEn =
         "requested":
           "You've requested a trade. We'll notify you once it's accepted.",
         "accepted": "Your request was accepted.",
-        "denied": "Your request was declined."
+        "denied": "Your request was declined.",
+        "initial": "This will be your first interaction with this offer.",
+        "cancelled": "You have cancelled trade request for this offer.",
+        "leaved": "You have already interacted with this offer before"
       },
       "listEmpty":
         "Your marketplace is just warming up. Come back in a couple of minutes! ",
@@ -280,7 +283,15 @@ const otherEn =
       "dontForgetToVerifyTheIdentity":
         "Don't forget to verify their identity with a common contact.",
       "noDirectConnection":
-        "This is a contact with whom you have no direct connection."
+        "This is a contact with whom you have no direct connection.",
+      "rerequestTomorrow": "You can sent another request tomorrow",
+      "rerequestDays": "You can sent another request in {{days}} days",
+      "rerequest": "Send request again",
+      "cancelRequest": "Cancel request",
+      "requestWasCancelledByOtherSide":
+        "Unable to approve. Other side has cancelled the request",
+      "requestNotFound":
+        "Unable to approve. Other side has deleted their account"
     },
     "termsOfUse": {
       "termsOfUse": "Terms of Use",
@@ -500,7 +511,8 @@ const otherEn =
           "DELETE_CHAT": "{{them}} left the chat",
           "BLOCK_CHAT": "{{them}} has blocked you",
           "OFFER_DELETED": "{{them}} has deleted the offer",
-          "INBOX_DELETED": "{{them}} has deleted the chat."
+          "INBOX_DELETED": "{{them}} has deleted the chat.",
+          "CANCEL_REQUEST_MESSAGING": "Request was cancelled"
         },
         "outgoing": {
           "MESSAGE": "Me: {{message}}",
@@ -513,7 +525,8 @@ const otherEn =
           "DELETE_CHAT": "You have left the chat",
           "BLOCK_CHAT": "User has been blocked",
           "OFFER_DELETED": "You have deleted your offer",
-          "INBOX_DELETED": "You have deleted this inbox"
+          "INBOX_DELETED": "You have deleted this inbox",
+          "CANCEL_REQUEST_MESSAGING": "You have cancelled messaging request"
         }
       },
       "deleteChat": "Delete Chat",
@@ -567,7 +580,20 @@ const otherEn =
       "reveal": "Reveal",
       "themDeclined": "{{name}} declined",
       "youDeclined": "You have declined",
-      "reportOffer": "Report offer"
+      "reportOffer": "Report offer",
+      "ended": "Ended",
+      "textMessageTypes": {
+        "REQUEST_MESSAGING": "Request sent: {{message}}",
+        "CANCEL_REQUEST_MESSAGING": "Request cancelled",
+        "DISAPPROVE_MESSAGING": "Request denied",
+        "APPROVE_MESSAGING": "Request approved"
+      },
+      "youHaveAlreadyTalked":
+        "You have a message history with this user. Press to see more",
+      "requestPendingActionBar": {
+        "top": "Chat is waiting for your approval",
+        "bottom": "Above is communication you had with the user so far"
+      }
     },
     "progressBar": {
       "ENCRYPTING_PRIVATE_PAYLOADS": "{{percentDone}}% done",

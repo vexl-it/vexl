@@ -237,7 +237,7 @@ const otherSk: typeof en =
       "filterOffers": "Filtrovanie ponúk",
       "numberOfCommon": "{{number}} spoločné",
       "offerNotFound": "Ponuka nebola nájdená. Autor ju možno vymazal",
-      "inputPlaceholder": "Tu napíš správu...",
+      "inputPlaceholder": "napr. Poď zavexlovať, kamoško!",
       "sendRequest": "Odoslať žiadosť",
       "report": {
         "areYouSureTitle": "Nahlásiť ponuku?",

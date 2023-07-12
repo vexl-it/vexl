@@ -4734,6 +4734,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@json2csv/formatters@npm:^7.0.1":
+  version: 7.0.1
+  resolution: "@json2csv/formatters@npm:7.0.1"
+  checksum: a9f2b2cfe8b3e3c68a0fc0484b75ec2d3d8b4d2040bef93ed242c286beb9109d5f1f6d3e314f3420477023601296bc6739185c1b8e8e3c77e2624a4391b361a2
+  languageName: node
+  linkType: hard
+
+"@json2csv/plainjs@npm:^7.0.1":
+  version: 7.0.1
+  resolution: "@json2csv/plainjs@npm:7.0.1"
+  dependencies:
+    "@json2csv/formatters": ^7.0.1
+    "@streamparser/json": ^0.0.15
+    lodash.get: ^4.4.2
+  checksum: 73532b97fd70be4206460f16e552646d96c8ef3b145111be569c2041b99d2616d8a29e5ecc9b8d0ca5ecd1eedf65da5a0508b3093593169b9ebbc31136c5e28a
+  languageName: node
+  linkType: hard
+
 "@miblanchard/react-native-slider@npm:^2.3.1":
   version: 2.3.1
   resolution: "@miblanchard/react-native-slider@npm:2.3.1"
@@ -5412,6 +5430,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@react-native-picker/picker@npm:^2.4.10":
+  version: 2.4.10
+  resolution: "@react-native-picker/picker@npm:2.4.10"
+  peerDependencies:
+    react: ">=16"
+    react-native: ">=0.57"
+  checksum: 905631e60ffb1aa3f6b378dc03cf2b6736487258f21d74145181185f225937b870ba1cec9f3e6deed1615ecb05e7cfd6b7b33082f169b811eed57ca6c64980d5
+  languageName: node
+  linkType: hard
+
 "@react-native/assets@npm:1.0.0":
   version: 1.0.0
   resolution: "@react-native/assets@npm:1.0.0"
@@ -5753,6 +5781,13 @@ __metadata:
   dependencies:
     "@sinonjs/commons": ^1.7.0
   checksum: 7d3aef54e17c1073101cb64d953157c19d62a40e261a30923fa1ee337b049c5f29cc47b1f0c477880f42b5659848ba9ab897607ac8ea4acd5c30ddcfac57fca6
+  languageName: node
+  linkType: hard
+
+"@streamparser/json@npm:^0.0.15":
+  version: 0.0.15
+  resolution: "@streamparser/json@npm:0.0.15"
+  checksum: db98e67ba7fd500b25c56d2a22a942310307c41a95281b68f6627802173b24a76025b98563968ed84490e5401cb2ccb53d331de9245e8410777b45bb917c5c1d
   languageName: node
   linkType: hard
 
@@ -8337,6 +8372,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@vexl-next/localizations@workspace:packages/localizations"
   dependencies:
+    "@json2csv/plainjs": ^7.0.1
     "@types/luxon": ^3
     "@vexl-next/eslint-config": "workspace:*"
     "@vexl-next/ts-config": "workspace:*"
@@ -8401,6 +8437,7 @@ __metadata:
     "@react-native-firebase/messaging": ^17.4.2
     "@react-native-firebase/remote-config": ^17.5.0
     "@react-native-masked-view/masked-view": ^0.2.9
+    "@react-native-picker/picker": ^2.4.10
     "@react-navigation/bottom-tabs": ^6.5.7
     "@react-navigation/material-top-tabs": ^6.6.2
     "@react-navigation/native": ^6.0.16
@@ -18593,6 +18630,13 @@ __metadata:
   version: 4.1.2
   resolution: "lodash.escaperegexp@npm:4.1.2"
   checksum: 6d99452b1cfd6073175a9b741a9b09ece159eac463f86f02ea3bee2e2092923fce812c8d2bf446309cc52d1d61bf9af51c8118b0d7421388e6cead7bd3798f0f
+  languageName: node
+  linkType: hard
+
+"lodash.get@npm:^4.4.2":
+  version: 4.4.2
+  resolution: "lodash.get@npm:4.4.2"
+  checksum: e403047ddb03181c9d0e92df9556570e2b67e0f0a930fcbbbd779370972368f5568e914f913e93f3b08f6d492abc71e14d4e9b7a18916c31fa04bd2306efe545
   languageName: node
   linkType: hard
 

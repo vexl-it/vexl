@@ -251,7 +251,10 @@ const otherSk: typeof en =
         "requested":
           "Bola odoslaná žiadosť o obchodovanie. Po jej prijatí vám dáme vedieť.",
         "accepted": "Your request was accepted.",
-        "denied": "Your request was declined."
+        "denied": "Your request was declined.",
+        "initial": "This will be your first interaction with this offer.",
+        "cancelled": "You have cancelled trade request for this offer.",
+        "leaved": "You have already interacted with this offer before"
       },
       "listEmpty": "Tvoj marketplace sa práve zahrieva. Vráť sa o pár minút!",
       "emptyAction": "Pridať novú ponuku",
@@ -281,7 +284,15 @@ const otherSk: typeof en =
       "dontForgetToVerifyTheIdentity":
         "Nezabudni si overiť identitu protistrany prostredníctvom spoločného priateľa.",
       "noDirectConnection":
-        "S týmto človekom sa pravdepodobne osobne nepoznáte."
+        "S týmto človekom sa pravdepodobne osobne nepoznáte.",
+      "rerequestTomorrow": "You can sent another request tomorrow",
+      "rerequestDays": "You can sent another request in {{days}} days",
+      "rerequest": "Poslať požiadavku znova",
+      "cancelRequest": "Zruš požiadavku",
+      "requestWasCancelledByOtherSide":
+        "Požiadavku nemožno prijať, pretože jej druhá strana zrušila.",
+      "requestNotFound":
+        "Požiadavku nemožno prijať, pretože druhá strana zrušila svoj účet."
     },
     "termsOfUse": {
       "termsOfUse": "Podmienky používania",
@@ -505,7 +516,8 @@ const otherSk: typeof en =
           "DELETE_CHAT": "{{them}} opustil chat",
           "BLOCK_CHAT": "{{them}} ťa zablokoval.",
           "OFFER_DELETED": "{{them}} vymazal svoju ponuku.",
-          "INBOX_DELETED": "{{them}} vymazal chat."
+          "INBOX_DELETED": "{{them}} vymazal chat.",
+          "CANCEL_REQUEST_MESSAGING": "Zrušil žiadosť o správu"
         },
         "outgoing": {
           "MESSAGE": "Ja: {{message}}",
@@ -518,7 +530,8 @@ const otherSk: typeof en =
           "DELETE_CHAT": "Opustil si chat",
           "BLOCK_CHAT": "Používateľ bol zablokovaný",
           "OFFER_DELETED": "Vymazal si svoju ponuku.",
-          "INBOX_DELETED": "Vymazal si chat."
+          "INBOX_DELETED": "Vymazal si chat.",
+          "CANCEL_REQUEST_MESSAGING": "Žiadosť o správu zrušená"
         }
       },
       "deleteChat": "Odstrániť chat",
@@ -571,7 +584,20 @@ const otherSk: typeof en =
       "reveal": "Odhaliť",
       "themDeclined": "{{name}} odmietol",
       "youDeclined": "Odmietli ste",
-      "reportOffer": "Nahlásiť ponuku"
+      "reportOffer": "Nahlásiť ponuku",
+      "ended": " ukončené",
+      "textMessageTypes": {
+        "REQUEST_MESSAGING": "Request sent: {{message}}",
+        "CANCEL_REQUEST_MESSAGING": "Request cancelled",
+        "DISAPPROVE_MESSAGING": "Request denied",
+        "APPROVE_MESSAGING": "Request approved"
+      },
+      "youHaveAlreadyTalked":
+        "S tímto uživatelem už jste si psali. Klepnutím zobrazíte historii.",
+      "requestPendingActionBar": {
+        "top": "Chat is waiting for your approval",
+        "bottom": "Above is communication you had with the user so far"
+      }
     },
     "progressBar": {
       "ENCRYPTING_PRIVATE_PAYLOADS": "{{percentDone}}% hotovo",

@@ -12,8 +12,6 @@ import {useAtomValue, useSetAtom} from 'jotai'
 import binSvg from '../images/binSvg'
 import useResetNavigationToMessagingScreen from '../../../utils/useResetNavigationToMessagingScreen'
 import {useCallback} from 'react'
-import flagSvg from '../../OfferDetailScreen/images/flagSvg'
-import {useReportOfferHandleUI} from '../../OfferDetailScreen/api'
 
 type ButtonType =
   | 'back'
@@ -21,13 +19,11 @@ type ButtonType =
   | 'block'
   | 'closeModal'
   | 'deleteChat'
-  | 'reportOffer'
   | null
 
 function Button({type}: {type: ButtonType}): JSX.Element | null {
   const safeGoBack = useSafeGoBack()
   const {
-    offerForChatAtom,
     showModalAtom,
     deleteChatWithUiFeedbackAtom,
     blockChatWithUiFeedbackAtom,
@@ -37,12 +33,10 @@ function Button({type}: {type: ButtonType}): JSX.Element | null {
   const setModal = useSetAtom(showModalAtom)
   const resetNavigationToMessagingScreen = useResetNavigationToMessagingScreen()
   const identityRevealStatus = useAtomValue(identityRevealStatusAtom)
-  const reportOffer = useReportOfferHandleUI()
 
   const blockChat = useSetAtom(blockChatWithUiFeedbackAtom)
   const deleteChat = useSetAtom(deleteChatWithUiFeedbackAtom)
   const revealIdentity = useSetAtom(revealIdentityWithUiFeedbackAtom)
-  const offerForChat = useAtomValue(offerForChatAtom)
 
   if (type === 'back')
     return (
@@ -90,19 +84,6 @@ function Button({type}: {type: ButtonType}): JSX.Element | null {
       />
     )
 
-  if (type === 'reportOffer' && offerForChat)
-    return (
-      <Stack mr={'$2'}>
-        <IconButton
-          icon={flagSvg}
-          variant={'dark'}
-          onPress={() => {
-            void reportOffer(offerForChat.offerInfo.offerId)()
-          }}
-        />
-      </Stack>
-    )
-
   if (type === 'deleteChat') {
     return (
       <IconButton
@@ -132,17 +113,13 @@ function ChatHeader({
   rightButton: ButtonType
   onPressMiddle?: () => void
 }): JSX.Element {
-  const {theirOfferAndNotReportedAtom} = useMolecule(chatMolecule)
-  const theirOfferAndNotReported = useAtomValue(theirOfferAndNotReportedAtom)
-
   const handleMiddlePress = useCallback(() => {
     Keyboard.dismiss()
     onPressMiddle()
   }, [onPressMiddle])
   return (
-    <XStack mx={'$4'} mt={'$4'} jc={'space-between'}>
+    <XStack mx={'$4'} mt={'$4'}>
       <Button type={leftButton} />
-      {theirOfferAndNotReported && <Button type={null} />}
 
       <Stack f={1} mx={mode === 'photoLeft' ? '$2' : 0}>
         <TouchableOpacity onPress={handleMiddlePress}>
@@ -150,8 +127,7 @@ function ChatHeader({
         </TouchableOpacity>
       </Stack>
 
-      {theirOfferAndNotReported && <Button type={'reportOffer'} />}
-      {rightButton && <Button type={rightButton} />}
+      <Button type={rightButton} />
     </XStack>
   )
 }

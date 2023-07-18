@@ -56,9 +56,10 @@ const otherSk: typeof en =
       "you": "Vy",
       "allow": "Povoliť",
       "currency": "Mena",
-      "whatDoesThisMean": "Čo to znamená?",
+      "whatDoesThisMean": "Čo znamená '{{term}}'?",
       "learnMore": "Dozvedieť sa viac",
-      "unableToShareImage": "Unable to share the image"
+      "unableToShareImage": "Unable to share the image",
+      "requestAgain": "Request again"
     },
     "loginFlow": {
       "anonymityNotice": "Kým to nepovolíte, nikto to neuvidí. Dokonca ani my.",
@@ -232,7 +233,7 @@ const otherSk: typeof en =
       "directFriend": "Priamy priateľ",
       "friendOfFriend": "Priateľ priateľa",
       "buy": "Kúpiť",
-      "sell": "Predaj",
+      "sell": "Predať",
       "filterOffers": "Filtrovanie ponúk",
       "numberOfCommon": "{{number}} spoločné",
       "offerNotFound": "Ponuka nebola nájdená. Autor ju možno vymazal",
@@ -255,6 +256,10 @@ const otherSk: typeof en =
         "denied": "Your request was declined.",
         "initial": "This will be your first interaction with this offer.",
         "cancelled": "You have cancelled trade request for this offer.",
+        "deleted":
+          "You have already interacted with this offer before, but you have deleted the chat",
+        "otherSideLeft":
+          "You have already interacted with this offer before, but other side has left the chat.",
         "leaved": "You have already interacted with this offer before"
       },
       "listEmpty": "Tvoj marketplace sa práve zahrieva. Vráť sa o pár minút!",
@@ -598,6 +603,13 @@ const otherSk: typeof en =
       "requestPendingActionBar": {
         "top": "Chat is waiting for your approval",
         "bottom": "Above is communication you had with the user so far"
+      },
+      "showFullChatHistory":
+        "You have some previous communication with this user. Tap to see full chat history.",
+      "unableToRespondOfferRemoved": {
+        "title": "Offer was removed",
+        "text":
+          "Unable to send response. Author has removed the offer. Do you want to delete the chat?"
       },
       "offerWasReported": "Offer was reported"
     },

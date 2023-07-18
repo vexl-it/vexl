@@ -55,9 +55,10 @@ const otherEn =
       "you": "You",
       "allow": "Allow",
       "currency": "Currency",
-      "whatDoesThisMean": "What does this mean?",
+      "whatDoesThisMean": "What does '{{term}}' mean?",
       "learnMore": "Learn more",
-      "unableToShareImage": "Unable to share the image"
+      "unableToShareImage": "Unable to share the image",
+      "requestAgain": "Request again"
     },
     "loginFlow": {
       "anonymityNotice":
@@ -111,7 +112,7 @@ const otherEn =
       },
       "verificationCode": {
         "title": "We just sent you the verification code",
-        "text": "Enter it bellow to verify",
+        "text": "Enter it below to verify",
         "inputPlaceholder": "Your verification code",
         "retryCountdown": "Didn’t receive a code? Resend in",
         "retry": "Didn’t receive a code? Tap to resend",
@@ -254,6 +255,10 @@ const otherEn =
         "denied": "Your request was declined.",
         "initial": "This will be your first interaction with this offer.",
         "cancelled": "You have cancelled trade request for this offer.",
+        "deleted":
+          "You have already interacted with this offer before, but you have deleted the chat",
+        "otherSideLeft":
+          "You have already interacted with this offer before, but other side has left the chat.",
         "leaved": "You have already interacted with this offer before"
       },
       "listEmpty":
@@ -499,7 +504,7 @@ const otherEn =
       "thisWillBeYourFirstInteraction":
         "This will be your first interaction with this offer.",
       "wellLetYouKnowOnceUserAccepts":
-        "Request sent. We will let you know once other side has responded.",
+        "Your request is pending. We will let you know once other side has responded.",
       "messagePreviews": {
         "incoming": {
           "MESSAGE": "{{them}}: {{message}}",
@@ -594,6 +599,13 @@ const otherEn =
       "requestPendingActionBar": {
         "top": "Chat is waiting for your approval",
         "bottom": "Above is communication you had with the user so far"
+      },
+      "showFullChatHistory":
+        "You have some previous communication with this user. Tap to see full chat history.",
+      "unableToRespondOfferRemoved": {
+        "title": "Offer was removed",
+        "text":
+          "Unable to send response. Author has removed the offer. Do you want to delete the chat?"
       },
       "offerWasReported": "Offer was reported"
     },

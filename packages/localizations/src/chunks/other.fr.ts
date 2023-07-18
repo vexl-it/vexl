@@ -60,7 +60,8 @@ const otherFr: typeof en =
       "currency": "Monnaie",
       "whatDoesThisMean": "Qu'est-ce que cela signifie ?",
       "learnMore": "En savoir plus",
-      "unableToShareImage": "Unable to share the image"
+      "unableToShareImage": "Unable to share the image",
+      "requestAgain": "Request again"
     },
     "loginFlow": {
       "anonymityNotice":
@@ -262,7 +263,11 @@ const otherFr: typeof en =
         "denied": "Votre demande a été refusée.",
         "initial": "Il s'agit de votre première interaction avec cette offre.",
         "cancelled": "Vous avez annulé une demande d'échange pour cette offre.",
-        "leaved": "Vous avez déjà interagi avec cette offre auparavant"
+        "deleted":
+          "You have already interacted with this offer before, but you have deleted the chat",
+        "otherSideLeft":
+          "You have already interacted with this offer before, but other side has left the chat.",
+        "leaved": "Avete già interagito con questa offerta in precedenza"
       },
       "listEmpty":
         "Votre place de marché est en train de chauffer. Revenez dans quelques minutes !",
@@ -614,6 +619,13 @@ const otherFr: typeof en =
         "top": "Le chat attend votre approbation",
         "bottom":
           "Ci-dessus, la communication que vous avez eue avec l'utilisateur jusqu'à présent."
+      },
+      "showFullChatHistory":
+        "You have some previous communication with this user. Tap to see full chat history.",
+      "unableToRespondOfferRemoved": {
+        "title": "Offer was removed",
+        "text":
+          "Unable to send response. Author has removed the offer. Do you want to delete the chat?"
       },
       "offerWasReported": "Offer was reported"
     },

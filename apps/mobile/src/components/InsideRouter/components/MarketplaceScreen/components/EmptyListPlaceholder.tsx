@@ -102,7 +102,9 @@ function EmptyListPlaceholder(): JSX.Element {
   useEffect(() => {
     if (reachNumber >= REACH_NUMBER_THRESHOLD && lastImportOfContacts) {
       const interval = setInterval(() => {
-        setMinutesTillOffersAreLoaded(minutesTillOffersAreLoaded - 1)
+        if (minutesTillOffersAreLoaded > 1) {
+          setMinutesTillOffersAreLoaded(minutesTillOffersAreLoaded - 1)
+        }
         void refreshOffers()
       }, 60000)
 

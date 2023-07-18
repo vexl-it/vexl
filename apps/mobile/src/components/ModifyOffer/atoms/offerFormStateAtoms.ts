@@ -112,6 +112,9 @@ export const offerFormMolecule = molecule(() => {
     null,
     (get, set, params) => {
       const {currency} = params
+      const currencyFromAtom = get(currencyAtom)
+      if (currencyFromAtom === currency) return false
+
       set(currencyAtom, currency)
       set(amountBottomLimitAtom, get(amountBottomLimitUsdEurCzkAtom))
       set(

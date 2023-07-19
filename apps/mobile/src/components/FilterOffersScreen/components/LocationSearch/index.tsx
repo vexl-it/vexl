@@ -58,7 +58,10 @@ function LocationSearch({
           )
         },
         (locations) => {
-          setLocationResults(locations)
+          const locationWithMunicipality = locations.result.filter(
+            (location) => location.userData.municipality !== ''
+          )
+          setLocationResults({result: locationWithMunicipality})
         }
       )
     )()

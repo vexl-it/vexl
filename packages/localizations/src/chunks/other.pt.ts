@@ -607,7 +607,8 @@ const otherPt: typeof en =
         "top": "O chat está à espera da sua aprovação",
         "bottom":
           "Acima está a comunicação que teve com o utilizador até ao momento"
-      }
+      },
+      "offerWasReported": "Offer was reported"
     },
     "progressBar": {
       "ENCRYPTING_PRIVATE_PAYLOADS": "{{percentDone}} Concluído",

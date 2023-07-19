@@ -60,7 +60,7 @@ function ChatRequestPreview(): JSX.Element {
           >
             <Image source={flagSvg} stroke={tokens.color.red.val} />
             <Text fos={16} col={'$red'}>
-              Offer was reported
+              {t('messages.offerWasReported')}
             </Text>
           </XStack>
         )}

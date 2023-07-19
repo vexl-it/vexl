@@ -595,7 +595,8 @@ const otherCs: typeof en =
       "requestPendingActionBar": {
         "top": "Chat is waiting for your approval",
         "bottom": "Above is communication you had with the user so far"
-      }
+      },
+      "offerWasReported": "Offer was reported"
     },
     "progressBar": {
       "ENCRYPTING_PRIVATE_PAYLOADS": "{{percentDone}}% hotovo",

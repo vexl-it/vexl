@@ -614,7 +614,8 @@ const otherFr: typeof en =
         "top": "Le chat attend votre approbation",
         "bottom":
           "Ci-dessus, la communication que vous avez eue avec l'utilisateur jusqu'à présent."
-      }
+      },
+      "offerWasReported": "Offer was reported"
     },
     "progressBar": {
       "ENCRYPTING_PRIVATE_PAYLOADS": "{{percentDone}}% fait",

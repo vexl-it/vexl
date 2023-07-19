@@ -57,25 +57,31 @@ function EditOfferScreen({
             {offer ? (
               <OfferForm content={content} />
             ) : (
-              <Text>{t('editOffer.errorOfferNotFound')}</Text>
+              <Stack f={1} ai={'center'}>
+                <Text ff={'$heading'} fos={16} col={'$white'}>
+                  {t('editOffer.errorOfferNotFound')}
+                </Text>
+              </Stack>
             )}
           </ScrollView>
-          <Stack px="$4" py="$4" bc="transparent">
-            <Button
-              text={t('editOffer.saveChanges')}
-              onPress={() => {
-                void pipe(
-                  editOffer(),
-                  T.map((success) => {
-                    if (success) {
-                      safeGoBack()
-                    }
-                  })
-                )()
-              }}
-              variant="secondary"
-            />
-          </Stack>
+          {offer && (
+            <Stack px="$4" py="$4" bc="transparent">
+              <Button
+                text={t('editOffer.saveChanges')}
+                onPress={() => {
+                  void pipe(
+                    editOffer(),
+                    T.map((success) => {
+                      if (success) {
+                        safeGoBack()
+                      }
+                    })
+                  )()
+                }}
+                variant="secondary"
+              />
+            </Stack>
+          )}
           <OfferInProgress
             loadingTitle={t('editOffer.editingYourOffer')}
             loadingDoneTitle={t('editOffer.offerEditSuccess')}

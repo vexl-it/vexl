@@ -608,7 +608,8 @@ const otherSp: typeof en =
         "top": "El chat está esperando tu aprobación",
         "bottom":
           "Arriba está la comunicación que has tenido con el usuario hasta ahora"
-      }
+      },
+      "offerWasReported": "Offer was reported"
     },
     "progressBar": {
       "ENCRYPTING_PRIVATE_PAYLOADS": "{{percentDone}} Hecho",

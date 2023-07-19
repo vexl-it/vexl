@@ -621,7 +621,8 @@ const otherDe: typeof en =
         "top": "Der Chat wartet auf Ihre Zustimmung",
         "bottom":
           "Oben ist die Kommunikation, die Sie bisher mit dem Benutzer hatten"
-      }
+      },
+      "offerWasReported": "Offer was reported"
     },
     "progressBar": {
       "ENCRYPTING_PRIVATE_PAYLOADS": "{{percentDone}}% erledigt",

@@ -27,7 +27,7 @@ function CommonFriendsListItem({friend}: Props): JSX.Element {
           {friend.name}
         </Text>
         <Text ff={'$body600'} col={'$greyOnBlack'} fos={14}>
-          {friend.numberToDisplay}
+          {friend.normalizedNumber}
         </Text>
       </Stack>
     </Stack>

@@ -10,7 +10,7 @@ interface Props {
 }
 
 function ContactItem({contactAtom}: Props): JSX.Element {
-  const {imageUri, numberToDisplay, name} = useAtomValue(contactAtom)
+  const {imageUri, normalizedNumber, name} = useAtomValue(contactAtom)
 
   return (
     <Stack fd="row" ai="center">
@@ -30,7 +30,7 @@ function ContactItem({contactAtom}: Props): JSX.Element {
           {name}
         </Text>
         <Text ff={'$body600'} col={'$greyOnBlack'} fos={14}>
-          {numberToDisplay}
+          {normalizedNumber}
         </Text>
       </Stack>
       <IsSelectedCheckbox contactAtom={contactAtom} />

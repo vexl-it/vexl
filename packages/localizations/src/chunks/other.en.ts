@@ -55,7 +55,7 @@ const otherEn =
       "you": "You",
       "allow": "Allow",
       "currency": "Currency",
-      "whatDoesThisMean": "What does this mean?",
+      "whatDoesThisMean": "What does '{{term}}' mean?",
       "learnMore": "Learn more",
       "unableToShareImage": "Unable to share the image",
       "requestAgain": "Request again",
@@ -113,7 +113,7 @@ const otherEn =
       },
       "verificationCode": {
         "title": "We just sent you the verification code",
-        "text": "Enter it bellow to verify",
+        "text": "Enter it below to verify",
         "inputPlaceholder": "Your verification code",
         "retryCountdown": "Didn’t receive a code? Resend in",
         "retry": "Didn’t receive a code? Tap to resend",

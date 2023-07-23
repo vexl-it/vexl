@@ -85,6 +85,12 @@ function OfferInfo({
   const showRequestButton =
     !chatForOffer || requestPossibleInfo.canBeRerequested
 
+  const friendLevel = (() => {
+    if (offer.offerInfo.privatePart.friendLevel.includes('FIRST_DEGREE'))
+      return t('offer.directFriend')
+    return t('offer.friendOfFriend')
+  })()
+
   return (
     <Stack f={1} mx={'$2'} my={'$4'}>
       <ScreenTitle text={t('offer.title')}>
@@ -110,7 +116,7 @@ function OfferInfo({
             contactsHashes={offer.offerInfo.privatePart.commonFriends}
           />
           <Info
-            text={t('common.whatDoesThisMean')}
+            text={t('common.whatDoesThisMean', {term: friendLevel})}
             actionButtonText={t('common.learnMore')}
             onActionPress={onWhatDoesThisMeanPressed}
           />

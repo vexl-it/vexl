@@ -56,7 +56,7 @@ const otherSk: typeof en =
       "you": "Vy",
       "allow": "Povoliť",
       "currency": "Mena",
-      "whatDoesThisMean": "Čo to znamená?",
+      "whatDoesThisMean": "Čo znamená '{{term}}'?",
       "learnMore": "Dozvedieť sa viac",
       "unableToShareImage": "Unable to share the image",
       "requestAgain": "Request again",

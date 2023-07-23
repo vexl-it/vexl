@@ -56,7 +56,7 @@ const otherCs: typeof en =
       "you": "Vy",
       "allow": "Povolit",
       "currency": "Měna",
-      "whatDoesThisMean": "Co to znamená?",
+      "whatDoesThisMean": "Co znamená '{{term}}'?",
       "learnMore": "Dovědet se víc",
       "unableToShareImage": "Unable to share the image",
       "requestAgain": "Request again",

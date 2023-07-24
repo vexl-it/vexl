@@ -59,7 +59,8 @@ const otherSk: typeof en =
       "whatDoesThisMean": "Čo to znamená?",
       "learnMore": "Dozvedieť sa viac",
       "unableToShareImage": "Unable to share the image",
-      "requestAgain": "Request again"
+      "requestAgain": "Request again",
+      "seeDetail": "See detail"
     },
     "loginFlow": {
       "anonymityNotice": "Kým to nepovolíte, nikto to neuvidí. Dokonca ani my.",

@@ -59,7 +59,8 @@ const otherCs: typeof en =
       "whatDoesThisMean": "Co to znamená?",
       "learnMore": "Dovědet se víc",
       "unableToShareImage": "Unable to share the image",
-      "requestAgain": "Request again"
+      "requestAgain": "Request again",
+      "seeDetail": "See detail"
     },
     "loginFlow": {
       "anonymityNotice": "Bez tvého svolení jej nikdo neuvidí. Ani my.",

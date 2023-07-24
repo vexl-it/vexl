@@ -59,7 +59,8 @@ const otherPt: typeof en =
       "whatDoesThisMean": "O que é que isto significa?",
       "learnMore": "Saiba mais",
       "unableToShareImage": "Unable to share the image",
-      "requestAgain": "Request again"
+      "requestAgain": "Request again",
+      "seeDetail": "See detail"
     },
     "loginFlow": {
       "anonymityNotice": "Ninguém verá isto até que o autorize. Nem mesmo nós.",

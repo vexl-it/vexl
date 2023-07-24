@@ -61,7 +61,8 @@ const otherIt: typeof en =
       "whatDoesThisMean": "Cosa significa?",
       "learnMore": "Per saperne di più",
       "unableToShareImage": "Unable to share the image",
-      "requestAgain": "Request again"
+      "requestAgain": "Request again",
+      "seeDetail": "See detail"
     },
     "loginFlow": {
       "anonymityNotice":

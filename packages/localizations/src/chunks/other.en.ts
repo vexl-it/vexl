@@ -58,7 +58,8 @@ const otherEn =
       "whatDoesThisMean": "What does this mean?",
       "learnMore": "Learn more",
       "unableToShareImage": "Unable to share the image",
-      "requestAgain": "Request again"
+      "requestAgain": "Request again",
+      "seeDetail": "See detail"
     },
     "loginFlow": {
       "anonymityNotice":

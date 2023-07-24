@@ -60,7 +60,8 @@ const otherSp: typeof en =
       "whatDoesThisMean": "¿Qué significa?",
       "learnMore": "Más información",
       "unableToShareImage": "Unable to share the image",
-      "requestAgain": "Request again"
+      "requestAgain": "Request again",
+      "seeDetail": "See detail"
     },
     "loginFlow": {
       "anonymityNotice":

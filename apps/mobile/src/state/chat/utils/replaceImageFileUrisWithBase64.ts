@@ -1,6 +1,6 @@
 import * as FileSystem from 'expo-file-system'
 import * as TE from 'fp-ts/TaskEither'
-import * as E from 'fp-ts/Either'
+import * as T from 'fp-ts/Task'
 import {
   type BasicError,
   toBasicError,
@@ -17,8 +17,10 @@ export type ReadingFileError = BasicError<'ReadingFileError'>
 
 function readAsBase64({
   path,
+  imageWidthOrHeightLimit,
 }: {
-  path: string
+  imageWidthOrHeightLimit: number
+  path: UriString
 }): TE.TaskEither<ReadingFileError, UriString> {
   return TE.tryCatch(async () => {
     const cacheDir = FileSystem.cacheDirectory
@@ -36,8 +38,8 @@ function readAsBase64({
 
     const resizeResponse = await ImageResizer.createResizedImage(
       fromPath,
-      512,
-      512,
+      imageWidthOrHeightLimit,
+      imageWidthOrHeightLimit,
       'JPEG',
       85,
       0,
@@ -62,32 +64,66 @@ function readAsBase64({
 
 function setImage(
   source: ChatMessage
-): (image: UriString | undefined) => ChatMessage {
-  return (image: UriString | undefined) => ({
+): (args: {
+  image: UriString | undefined
+  replyToImage: UriString | undefined
+}) => ChatMessage {
+  return ({image, replyToImage}) => ({
     ...source,
     image,
+    repliedTo: source.repliedTo
+      ? {
+          ...source.repliedTo,
+          image: replyToImage,
+        }
+      : undefined,
   })
 }
 
-export default function replaceImageFileUriWithBase64(
+export default function replaceImageFileUrisWithBase64(
   message: ChatMessage
-): TE.TaskEither<ReadingFileError, ChatMessage> {
+): T.Task<ChatMessage> {
   const image = message.image
-  if (!image) return TE.right(message)
+  const replyImage = message.repliedTo?.image
 
   return pipe(
-    readAsBase64({path: image}),
-    TE.matchW(
-      (e) => {
-        reportError(
-          'error',
-          'Error while reading image for identity reveal as file as base64',
-          e
+    T.Do,
+    T.bind('image', () => {
+      if (!image) return T.of(undefined)
+
+      return pipe(
+        readAsBase64({path: image, imageWidthOrHeightLimit: 512}),
+        TE.match(
+          (e) => {
+            reportError(
+              'error',
+              'Error while reading image as file as base64',
+              e
+            )
+            return undefined
+          },
+          (v) => v
         )
-        return E.right(undefined)
-      },
-      (v) => E.right(v)
-    ),
-    TE.map(setImage(message))
+      )
+    }),
+    T.bind('replyToImage', () => {
+      if (!replyImage) return T.of(undefined)
+
+      return pipe(
+        readAsBase64({path: replyImage, imageWidthOrHeightLimit: 256}),
+        TE.match(
+          (e) => {
+            reportError(
+              'error',
+              'Error while reading replyToImage as file as base64',
+              e
+            )
+            return undefined
+          },
+          (v) => v
+        )
+      )
+    }),
+    T.map(setImage(message))
   )
 }

@@ -13,7 +13,7 @@ import sendMessage from '@vexl-next/resources-utils/dist/chat/sendMessage'
 import {type FocusAtomType} from '../../../utils/atomUtils/FocusAtomType'
 import {type ActionAtomType} from '../../../utils/atomUtils/ActionAtomType'
 import {now} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
-import replaceImageFileUriWithBase64 from '../utils/replaceImageFileUriWithBase64'
+import replaceImageFileUrisWithBase64 from '../utils/replaceImageFileUrisWithBase64'
 
 type SendMessageAtom = ActionAtomType<
   [ChatMessage],
@@ -40,7 +40,7 @@ export default function sendMessageActionAtom(
     return pipe(
       TE.Do,
       T.delay(2000), // TODO check for value maybe try `InteractionManager.runAfterTransaction`?
-      TE.chainW(() => replaceImageFileUriWithBase64(message)),
+      TE.chainTaskK(() => replaceImageFileUrisWithBase64(message)),
       TE.chainW((m) =>
         sendMessage({
           message: m,

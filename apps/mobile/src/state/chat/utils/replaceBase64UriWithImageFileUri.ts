@@ -15,8 +15,8 @@ import {safeParse} from '../../../utils/fpUtils'
 import reportError from '../../../utils/reportError'
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
 import {
-  hashMD5,
   type CryptoError,
+  hashMD5,
 } from '@vexl-next/resources-utils/dist/utils/crypto'
 
 const IMAGES_DIRECTORY = 'chat-images'
@@ -88,6 +88,8 @@ function writeAsStringAsync({
   }, toBasicError('WritingFileError'))
 }
 
+export type GettingImageSizeError = BasicError<'GettingImageSizeError'>
+
 function saveBase64ImageToStorage(
   base64: UriString,
   inboxPublicKey: PublicKeyPemBase64
@@ -129,16 +131,25 @@ function saveBase64ImageToStorage(
   )
 }
 
-function replaceImage(
+function replaceImages(
   source: ChatMessageWithState
-): (image: UriString) => ChatMessageWithState {
-  return (image: UriString) => {
+): (args: {
+  image: UriString | undefined
+  replyToImage: UriString | undefined
+}) => ChatMessageWithState {
+  return ({image, replyToImage}) => {
     if (!source.message.deanonymizedUser) return source
     return {
       ...source,
       message: {
         ...source.message,
         image,
+        replyTo: source.message.repliedTo
+          ? {
+              ...source.message.repliedTo,
+              image: replyToImage,
+            }
+          : undefined,
       },
     }
   }
@@ -149,22 +160,46 @@ export default function replaceBase64UriWithImageFileUri(
   inboxPublicKey: PublicKeyPemBase64
 ): T.Task<ChatMessageWithState> {
   const image = message.message.image
-
-  if (!image) return T.of(message)
+  const replyToImage = message.message?.repliedTo?.image
 
   return pipe(
-    saveBase64ImageToStorage(image, inboxPublicKey),
-    TE.map(replaceImage(message)),
-    TE.match(
-      (e) => {
-        reportError(
-          'error',
-          'Error while processing message with identity reveal',
-          e
-        )
-        return message
-      },
-      (one) => one
-    )
+    T.Do,
+    T.bind('image', () =>
+      image
+        ? pipe(
+            saveBase64ImageToStorage(image, inboxPublicKey),
+            TE.match(
+              (e) => {
+                reportError(
+                  'error',
+                  'Error while processing message with identity reveal',
+                  e
+                )
+                return undefined
+              },
+              (one) => one
+            )
+          )
+        : T.of(undefined)
+    ),
+    T.bind('replyToImage', () =>
+      replyToImage
+        ? pipe(
+            saveBase64ImageToStorage(replyToImage, inboxPublicKey),
+            TE.match(
+              (e) => {
+                reportError(
+                  'error',
+                  'Error while processing message with identity reveal',
+                  e
+                )
+                return undefined
+              },
+              (one) => one
+            )
+          )
+        : T.of(undefined)
+    ),
+    T.map(replaceImages(message))
   )
 }

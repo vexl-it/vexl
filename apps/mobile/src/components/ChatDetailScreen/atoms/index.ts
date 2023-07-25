@@ -1,4 +1,9 @@
-import {atom, type SetStateAction, type WritableAtom} from 'jotai'
+import {
+  atom,
+  type PrimitiveAtom,
+  type SetStateAction,
+  type WritableAtom,
+} from 'jotai'
 import {createScope, molecule} from 'jotai-molecules'
 import {generateChatId} from '@vexl-next/domain/dist/general/messaging'
 import {offerForChatOriginAtom} from '../../../state/marketplace/atom'
@@ -42,6 +47,8 @@ import createCanChatBeRerequestedAtom from '../../../state/chat/atoms/createCanB
 import {sendRequestHandleUIActionAtom} from '../../../state/chat/atoms/sendRequestActionAtom'
 import cancelRequestActionAtomHandleUI from '../../../state/chat/atoms/cancelRequestActionAtomHandleUI'
 import {safeNavigateBackOutsideReact} from '../../../utils/navigation'
+import {type SelectedImage} from '../../../utils/imagePickers'
+import getValueFromSetStateActionOfAtom from '../../../utils/atomUtils/getValueFromSetStateActionOfAtom'
 
 type ChatUIMode = 'approval' | 'messages'
 
@@ -55,6 +62,10 @@ export const dummyChatWithMessages: ChatWithMessages = {
   },
   messages: [],
 }
+
+export type ExtraToSend =
+  | {type: 'image'; image: SelectedImage}
+  | {type: 'reply'; message: ChatMessageWithState}
 
 export const ChatScope = createScope<
   WritableAtom<ChatWithMessages, [SetStateAction<ChatWithMessages>], void>
@@ -371,7 +382,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     return originOffer?.offerInfo.privatePart?.friendLevel ?? []
   })
 
-  const replyToMessageAtom = atom<ChatMessageWithState | null>(null)
+  // const replyToMessageAtom = atom<ChatMessageWithState | null>(null)
   const messageOptionsExtendedAtom = atom<ChatMessageWithState | null>(null)
 
   const theirOfferAndNotReportedAtom = selectAtom(
@@ -462,6 +473,53 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     )()
   })
 
+  const selectedExtraToSendAtom = atom<ExtraToSend | undefined>(undefined)
+  const selectedImageAtom: PrimitiveAtom<SelectedImage | undefined> = atom(
+    (get) => {
+      const extra = get(selectedExtraToSendAtom)
+      if (extra?.type === 'image') return extra.image
+      return undefined
+    },
+    (
+      get,
+      set,
+      imageSetStateAction: SetStateAction<SelectedImage | undefined>
+    ) => {
+      const newValue = getValueFromSetStateActionOfAtom(imageSetStateAction)(
+        () => get(selectedImageAtom)
+      )
+      set(
+        selectedExtraToSendAtom,
+        newValue ? {type: 'image', image: newValue} : undefined
+      )
+    }
+  )
+  const replyToMessageAtom: PrimitiveAtom<ChatMessageWithState | undefined> =
+    atom(
+      (get) => {
+        const extra = get(selectedExtraToSendAtom)
+        if (extra?.type === 'reply') return extra.message
+        return undefined
+      },
+      (
+        get,
+        set,
+        messageSetStateAction: SetStateAction<ChatMessageWithState | undefined>
+      ) => {
+        const newValue = getValueFromSetStateActionOfAtom(
+          messageSetStateAction
+        )(() => get(replyToMessageAtom))
+        set(
+          selectedExtraToSendAtom,
+          newValue ? {type: 'reply', message: newValue} : undefined
+        )
+      }
+    )
+
+  const clearExtraToSendActionAtom = atom(null, (get, set) => {
+    set(selectedExtraToSendAtom, undefined)
+  })
+
   return {
     showModalAtom: atom<boolean>(false),
     chatAtom,
@@ -497,5 +555,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     rerequestOfferActionAtom,
     hasPreviousCommunicationAtom,
     cancelRequestActionAtom,
+    selectedImageAtom,
+    clearExtraToSendActionAtom,
   }
 })

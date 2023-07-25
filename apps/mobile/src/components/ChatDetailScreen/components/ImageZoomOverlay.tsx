@@ -1,10 +1,4 @@
-import {
-  Alert,
-  BackHandler,
-  Modal,
-  Platform,
-  useWindowDimensions,
-} from 'react-native'
+import {Alert, Modal, Platform, useWindowDimensions} from 'react-native'
 import {useAtom} from 'jotai'
 import {Stack, XStack} from 'tamagui'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
@@ -12,7 +6,6 @@ import IconButton from '../../IconButton'
 import closeSvg from '../../images/closeSvg'
 import {ImageZoom} from '@likashefqet/react-native-image-zoom'
 import {gestureHandlerRootHOC} from 'react-native-gesture-handler'
-import {useFocusEffect} from '@react-navigation/native'
 import React, {useCallback} from 'react'
 import {useMolecule} from 'jotai-molecules'
 import * as Sharing from 'expo-sharing'
@@ -94,22 +87,18 @@ function ImageZoomOverlay(): JSX.Element {
   const {openedImageUriAtom} = useMolecule(chatMolecule)
   const [openedImageUri, setOpenedImageUri] = useAtom(openedImageUriAtom)
 
-  useFocusEffect(
-    React.useCallback(() => {
-      const onBackButtonPressed = (): boolean => {
-        setOpenedImageUri(undefined)
-        return true
-      }
-
-      return BackHandler.addEventListener(
-        'hardwareBackPress',
-        onBackButtonPressed
-      ).remove
-    }, [setOpenedImageUri])
-  )
+  const onDismiss = useCallback(() => {
+    setOpenedImageUri(undefined)
+  }, [setOpenedImageUri])
 
   return (
-    <Modal transparent animationType="fade" visible={!!openedImageUri}>
+    <Modal
+      onDismiss={onDismiss}
+      onRequestClose={onDismiss}
+      transparent
+      animationType="fade"
+      visible={!!openedImageUri}
+    >
       <ZoomedImage />
     </Modal>
   )

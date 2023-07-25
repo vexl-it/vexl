@@ -10,9 +10,9 @@ import {
 import {unixMillisecondsNow} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
 import {type ActionAtomType} from '../../../utils/atomUtils/ActionAtomType'
 import * as TE from 'fp-ts/TaskEither'
-import replaceImageFileUriWithBase64, {
+import replaceImageFileUrisWithBase64, {
   type ReadingFileError,
-} from '../utils/replaceImageFileUriWithBase64'
+} from '../utils/replaceImageFileUrisWithBase64'
 import {pipe} from 'fp-ts/function'
 import {privateApiAtom} from '../../../api'
 import sendMessage, {
@@ -105,7 +105,8 @@ export default function revealIdentityActionAtom(
             }
 
       return pipe(
-        replaceImageFileUriWithBase64(messageWithFileUri),
+        replaceImageFileUrisWithBase64(messageWithFileUri),
+        TE.fromTask,
         TE.chainW((message) =>
           sendMessage({
             api: api.chat,

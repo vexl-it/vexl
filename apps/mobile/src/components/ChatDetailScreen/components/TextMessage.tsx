@@ -2,10 +2,11 @@ import {getTokens, Stack, Text, XStack, YStack} from 'tamagui'
 import Clipboard from '@react-native-clipboard/clipboard'
 import React, {useCallback, useMemo} from 'react'
 import {
-  TextInput,
+  Image,
   Pressable,
-  TouchableWithoutFeedback,
   StyleSheet,
+  TextInput,
+  TouchableWithoutFeedback,
 } from 'react-native'
 import Animated, {FadeIn, FadeOut} from 'react-native-reanimated'
 import {
@@ -34,6 +35,14 @@ const style = StyleSheet.create({
     fontFamily: 'TTSatoshi500',
     margin: 0,
     padding: 0,
+  },
+  image: {
+    width: '100%',
+    height: 300,
+  },
+  replyImage: {
+    width: '100%',
+    height: 50,
   },
 })
 
@@ -128,14 +137,19 @@ function TextMessage({
 }): JSX.Element | null {
   const tokens = getTokens()
   const messageItem = useAtomValue(messageAtom)
-  const {sendMessageAtom, replyToMessageAtom, otherSideDataAtom} =
-    useMolecule(chatMolecule)
+  const {
+    sendMessageAtom,
+    replyToMessageAtom,
+    otherSideDataAtom,
+    openedImageUriAtom,
+  } = useMolecule(chatMolecule)
   const sendMessage = useSetAtom(sendMessageAtom)
   const {t} = useTranslation()
 
   const {isExtended, hideExtended, toggleExtended} = useIsExtended(messageItem)
   const setReplyToMessage = useSetAtom(replyToMessageAtom)
   const otherSideData = useAtomValue(otherSideDataAtom)
+  const openImage = useSetAtom(openedImageUriAtom)
 
   const textInputStyle = useMemo(
     () => [
@@ -175,6 +189,11 @@ function TextMessage({
     hideExtended()
   }, [messageItem, hideExtended])
 
+  const onImagePressed = useCallback(() => {
+    if (messageItem.type !== 'message') return
+    openImage(messageItem.message.message.image)
+  }, [messageItem, openImage])
+
   if (messageItem.type !== 'message') return null
   const {message, isLatest, time} = messageItem
 
@@ -193,6 +212,7 @@ function TextMessage({
         >
           <TouchableWithoutFeedback style={{flex: 1}} onPress={toggleExtended}>
             <Stack
+              width={message.message.image ? '80%' : undefined}
               maxWidth={'80%'}
               br={'$6'}
               backgroundColor={isMine ? '$main' : '$grey'}
@@ -204,6 +224,13 @@ function TextMessage({
                   padding="$3"
                   backgroundColor="$yellowAccent2"
                 >
+                  {message.message.repliedTo.image && (
+                    <Image
+                      style={style.replyImage}
+                      resizeMode={'contain'}
+                      source={{uri: message.message.repliedTo.image}}
+                    />
+                  )}
                   <Text fontSize={12} color="$main">
                     {(message.state === 'received' &&
                       message.message.repliedTo.messageAuthor === 'them') ||
@@ -215,6 +242,21 @@ function TextMessage({
                   <Text marginTop="$1" color="$main">
                     {message.message.repliedTo.text}
                   </Text>
+                </YStack>
+              )}
+              {message.message.image && (
+                <YStack
+                  borderRadius="$5"
+                  padding="$3"
+                  backgroundColor="$yellowAccent2"
+                >
+                  <TouchableWithoutFeedback onPress={onImagePressed}>
+                    <Image
+                      style={style.image}
+                      resizeMode={'contain'}
+                      source={{uri: message.message.image}}
+                    />
+                  </TouchableWithoutFeedback>
                 </YStack>
               )}
               {isExtended ? (

@@ -58,10 +58,17 @@ export type ChatMessageId = z.TypeOf<typeof ChatMessageId>
 export const RepliedToData = z.object({
   text: z.string(),
   messageAuthor: z.enum(['me', 'them']),
+  image: UriString.optional(),
 })
 export type RepliedToData = z.TypeOf<typeof RepliedToData>
 
-//
+export const RepliedToDataPayload = z.object({
+  text: z.string(),
+  messageAuthor: z.enum(['me', 'them']),
+  image: Base64String.optional(),
+})
+export type RepliedToDataPayload = z.TypeOf<typeof RepliedToDataPayload>
+
 export const ChatMessagePayload = z.object({
   uuid: ChatMessageId,
   text: z.string().optional(),

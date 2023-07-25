@@ -22,7 +22,7 @@ import {
   type InboxDoesNotExist,
   type NotPermittedToSendMessageToTargetInbox,
 } from '@vexl-next/rest-api/dist/services/contact/contracts'
-import {type ReadingFileError} from './utils/replaceImageFileUriWithBase64'
+import {type ReadingFileError} from './utils/replaceImageFileUrisWithBase64'
 
 export type ApiErrorCreatingInbox = BasicError<'ApiErrorCreatingInbox'>
 export type ErrorInboxAlreadyExists = BasicError<'ErrorInboxAlreadyExists'>

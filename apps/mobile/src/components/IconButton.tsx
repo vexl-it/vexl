@@ -1,10 +1,13 @@
 import {type SvgString} from '@vexl-next/domain/dist/utility/SvgString.brand'
 import Image from './Image'
 import {type StyleProp, TouchableOpacity, type ViewStyle} from 'react-native'
-import {useCallback} from 'react'
+import {useCallback, useMemo} from 'react'
 import {getTokens, Stack, styled} from 'tamagui'
 
 interface Props {
+  width?: number
+  height?: number
+  borderRadius?: number
   disabled?: boolean
   icon: SvgString
   onPress: () => void
@@ -14,7 +17,6 @@ interface Props {
 }
 
 const PressableStyled = styled(Stack, {
-  dsp: 'flex',
   ai: 'center',
   jc: 'center',
   p: '$3',
@@ -50,16 +52,14 @@ const PressableStyled = styled(Stack, {
   },
 })
 
-const touchableStyles: ViewStyle = {
-  height: 40,
-  width: 40,
-}
-
 function IconButton({
   variant = 'dark',
   disabled,
   icon,
   onPress,
+  borderRadius,
+  width,
+  height,
   style,
   oval,
 }: Props): JSX.Element {
@@ -67,6 +67,11 @@ function IconButton({
     if (!disabled) onPress()
   }, [disabled, onPress])
   const tokens = getTokens()
+
+  const touchableStyles = useMemo(
+    () => ({width: width ?? 40, height: height ?? 40}),
+    [width, height]
+  )
 
   return (
     // has to be wrapped in TouchableOpacity as tamagui does not support onPress action on
@@ -78,6 +83,7 @@ function IconButton({
     >
       <PressableStyled
         oval={!!oval}
+        borderRadius={borderRadius}
         variant={variant}
         style={[style, touchableStyles]}
         disabled={disabled}

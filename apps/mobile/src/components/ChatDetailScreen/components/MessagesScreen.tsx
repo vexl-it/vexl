@@ -6,26 +6,12 @@ import ChatTextInput from './ChatTextInput'
 import {Stack} from 'tamagui'
 import MessagesList from './MessagesList'
 import QuickActionBanner from './QuickActionBanner'
-import {useAppState} from '../../../utils/useAppState'
-import {useCallback} from 'react'
-import useFetchMessagesForAllInboxes from '../../../state/chat/hooks/useFetchNewMessages'
 import ImageZoomOverlay from './ImageZoomOverlay'
 
 function MessagesScreen(): JSX.Element {
   const {showModalAtom, canSendMessagesAtom} = useMolecule(chatMolecule)
   const [showModal, setShowModal] = useAtom(showModalAtom)
   const canSendMessages = useAtomValue(canSendMessagesAtom)
-  const refreshMessages = useFetchMessagesForAllInboxes()
-
-  useAppState(
-    useCallback(
-      (state) => {
-        if (state !== 'active') return
-        void refreshMessages()()
-      },
-      [refreshMessages]
-    )
-  )
 
   return (
     <>

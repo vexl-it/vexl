@@ -52,7 +52,9 @@ function OfferInfoPreview({
   )
 
   const offerAmount = useMemo(() => {
-    return `${bigNumberToString(offer.publicPart.amountTopLimit)} ${offer.publicPart.currency}`
+    return `${bigNumberToString(offer.publicPart.amountTopLimit)} ${
+      offer.publicPart.currency
+    }`
   }, [offer.publicPart.amountTopLimit, offer.publicPart.currency])
 
   return (
@@ -89,13 +91,20 @@ function OfferInfoPreview({
         </InfoItemContainer>
         <InfoDivider />
         {offer.publicPart.feeState === 'WITH_FEE' &&
-          offer.publicPart.feeAmount !== undefined && (
+          offer.publicPart.feeAmount !== undefined &&
+          offer.publicPart.feeAmount !== 0 && (
             <>
               <InfoItemContainer>
                 <PriceText>
-                  <PriceBigger>{offer.publicPart.feeAmount} %</PriceBigger>
+                  <PriceBigger>
+                    {Math.abs(offer.publicPart.feeAmount)} %
+                  </PriceBigger>
                 </PriceText>
-                <InfoText>{t('offer.forSeller')}</InfoText>
+                <InfoText>
+                  {offer.publicPart.feeAmount > 0
+                    ? t('offer.forSeller')
+                    : t('offer.forBuyer')}
+                </InfoText>
               </InfoItemContainer>
               <InfoDivider />
             </>

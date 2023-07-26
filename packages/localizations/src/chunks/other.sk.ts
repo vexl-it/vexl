@@ -234,7 +234,7 @@ const otherSk: typeof en =
       "directFriend": "Priamy priateľ",
       "friendOfFriend": "Priateľ priateľa",
       "buy": "Kúpiť",
-      "sell": "Predaj",
+      "sell": "Predať",
       "filterOffers": "Filtrovanie ponúk",
       "numberOfCommon": "{{number}} spoločné",
       "offerNotFound": "Ponuka nebola nájdená. Autor ju možno vymazal",
@@ -260,7 +260,8 @@ const otherSk: typeof en =
         "deleted":
           "You have already interacted with this offer before, but you have deleted the chat",
         "otherSideLeft":
-          "You have already interacted with this offer before, but other side has left the chat."
+          "You have already interacted with this offer before, but other side has left the chat.",
+        "leaved": "You have already interacted with this offer before"
       },
       "listEmpty": "Tvoj marketplace sa práve zahrieva. Vráť sa o pár minút!",
       "emptyAction": "Pridať novú ponuku",
@@ -610,6 +611,18 @@ const otherSk: typeof en =
         "title": "Offer was removed",
         "text":
           "Unable to send response. Author has removed the offer. Do you want to delete the chat?"
+      },
+      "offerWasReported": "Offer was reported",
+      "unableToSelectImageToSend": {
+        "title": "Unable to select image",
+        "missingPermissions":
+          "Vexl does not have permissions for sending images. Enable them in the settings."
+      },
+      "imageToSend": "Image to send: ",
+      "actionBanner": {
+        "requestPending": "Request pending",
+        "bottomText": "Previous communication is displayed here",
+        "buttonText": "Respond"
       }
     },
     "progressBar": {

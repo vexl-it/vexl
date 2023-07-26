@@ -263,7 +263,8 @@ const otherPt: typeof en =
         "deleted":
           "You have already interacted with this offer before, but you have deleted the chat",
         "otherSideLeft":
-          "You have already interacted with this offer before, but other side has left the chat."
+          "You have already interacted with this offer before, but other side has left the chat.",
+        "leaved": "Ya has interactuado antes con esta oferta"
       },
       "listEmpty":
         "O seu mercado está a aquecer. Volte dentro de alguns minutos!",
@@ -619,6 +620,18 @@ const otherPt: typeof en =
         "title": "Offer was removed",
         "text":
           "Unable to send response. Author has removed the offer. Do you want to delete the chat?"
+      },
+      "offerWasReported": "Offer was reported",
+      "unableToSelectImageToSend": {
+        "title": "Unable to select image",
+        "missingPermissions":
+          "Vexl does not have permissions for sending images. Enable them in the settings."
+      },
+      "imageToSend": "Image to send: ",
+      "actionBanner": {
+        "requestPending": "Request pending",
+        "bottomText": "Previous communication is displayed here",
+        "buttonText": "Respond"
       }
     },
     "progressBar": {

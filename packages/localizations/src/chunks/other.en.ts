@@ -59,7 +59,7 @@ const otherEn =
       "learnMore": "Learn more",
       "unableToShareImage": "Unable to share the image",
       "requestAgain": "Request again",
-      "seeDetail": "See detail"
+      "seeDetail": "See details"
     },
     "loginFlow": {
       "anonymityNotice":
@@ -150,7 +150,7 @@ const otherEn =
       },
       "importContactsButton": "Import contacts",
       "contactsList": {
-        "addContact": "Add contact {{number}} manually",
+        "addContactManually": "Add contact {{number}} manually",
         "inputPlaceholder": "Search or Add number",
         "nothingFound": {
           "title": "No contact found. ",
@@ -158,7 +158,8 @@ const otherEn =
             "To add phone number directly, type it into a search bar (with country code prefix)."
         },
         "toAddCustomContact":
-          "To add phone number directly type it into a search bar (with country code)"
+          "To add phone number directly type it into a search bar (with country code)",
+        "addContact": "Add contact {{number}} manually"
       },
       "allowNotifications": {
         "title": "Allow notification permissions",
@@ -230,7 +231,7 @@ const otherEn =
       "isSelling": "is selling",
       "isBuying": "is buying",
       "directFriend": "Direct friend",
-      "friendOfFriend": "Friend of friend",
+      "friendOfFriend": "Friend of a friend",
       "buy": "Buy",
       "sell": "Sell",
       "filterOffers": "Filter offers",
@@ -238,7 +239,7 @@ const otherEn =
       "offerNotFound":
         "Offer not found. It might have been deleted by the author",
       "inputPlaceholder": "Type your message here...",
-      "sendRequest": "Send Request",
+      "sendRequest": "Send request",
       "report": {
         "areYouSureTitle": "Report offer?",
         "areYouSureText":
@@ -255,12 +256,13 @@ const otherEn =
         "accepted": "Your request was accepted.",
         "denied": "Your request was declined.",
         "initial": "This will be your first interaction with this offer.",
-        "cancelled": "You have cancelled trade request for this offer.",
+        "cancelled":
+          "You previously cancelled the trade request for this offer.",
         "deleted":
-          "You have already interacted with this offer before, but you have deleted the chat",
+          "You have already interacted with this offer before, but you deleted the chat.",
         "otherSideLeft":
-          "You have already interacted with this offer before, but other side has left the chat.",
-        "leaved": "You have already interacted with this offer before"
+          "You have already interacted with this offer before, but the counterparty left the chat.",
+        "leaved": "You have already interacted with this offer before."
       },
       "listEmpty":
         "Your marketplace is just warming up. Come back in a couple of minutes! ",
@@ -291,14 +293,14 @@ const otherEn =
         "Don't forget to verify their identity with a common contact.",
       "noDirectConnection":
         "This is a contact with whom you have no direct connection.",
-      "rerequestTomorrow": "You can sent another request tomorrow",
-      "rerequestDays": "You can sent another request in {{days}} days",
+      "rerequestTomorrow": "You can send another request tomorrow.",
+      "rerequestDays": "You can send another request in {{days}} days.",
       "rerequest": "Send request again",
       "cancelRequest": "Cancel request",
       "requestWasCancelledByOtherSide":
-        "Unable to approve. Other side has cancelled the request",
+        "Unable to approve. Other side has cancelled the request.",
       "requestNotFound":
-        "Unable to approve. Other side has deleted their account"
+        "Unable to approve. Other side has deleted their account."
     },
     "termsOfUse": {
       "termsOfUse": "Terms of Use",
@@ -505,7 +507,7 @@ const otherEn =
       "thisWillBeYourFirstInteraction":
         "This will be your first interaction with this offer.",
       "wellLetYouKnowOnceUserAccepts":
-        "Your request is pending. We will let you know once other side has responded.",
+        "Your request is pending. We will let you know once the other side has responded.",
       "messagePreviews": {
         "incoming": {
           "MESSAGE": "{{them}}: {{message}}",
@@ -526,7 +528,7 @@ const otherEn =
           "REQUEST_REVEAL": "You have requested identity reveal",
           "APPROVE_REVEAL": "Identity revealed",
           "DISAPPROVE_REVEAL": "Identity reveal declined",
-          "REQUEST_MESSAGING": "Request sent",
+          "REQUEST_MESSAGING": "Your request  was sent",
           "APPROVE_MESSAGING": "You have approved messaging",
           "DISAPPROVE_MESSAGING": "You have declined messaging request",
           "DELETE_CHAT": "You have left the chat",
@@ -555,7 +557,7 @@ const otherEn =
       "deleteChatExplanation1":
         "Are you done trading? Closing chat means that your conversation will be permanently deleted.",
       "deleteChatExplanation2":
-        "This is definitive step, please confirm this action once again to delete the chat.",
+        "This is irreversible. Do you want to delete this chat?",
       "blockChatExplanation1":
         "Do you really want to block this user? You will never be able to undo this action. Choose wisely.",
       "blockChatExplanation2":
@@ -590,10 +592,11 @@ const otherEn =
       "reportOffer": "Report offer",
       "ended": "Ended",
       "textMessageTypes": {
-        "REQUEST_MESSAGING": "Request sent: {{message}}",
+        "REQUEST_MESSAGING": "Your request: {{message}}",
         "CANCEL_REQUEST_MESSAGING": "Request cancelled",
         "DISAPPROVE_MESSAGING": "Request denied",
-        "APPROVE_MESSAGING": "Request approved"
+        "APPROVE_MESSAGING":
+          "Request approved, you can now discuss the details."
       },
       "youHaveAlreadyTalked":
         "You have a message history with this user. Press to see more",
@@ -602,22 +605,22 @@ const otherEn =
         "bottom": "Above is communication you had with the user so far"
       },
       "showFullChatHistory":
-        "You have some previous communication with this user. Tap to see full chat history.",
+        "You have already interacted with this offer. Tap to see chat history.",
       "unableToRespondOfferRemoved": {
         "title": "Offer was removed",
         "text":
-          "Unable to send response. Author has removed the offer. Do you want to delete the chat?"
+          "Unable to send response. Offer has been deleted. Do you want to leave the chat?"
       },
       "offerWasReported": "Offer was reported",
       "unableToSelectImageToSend": {
         "title": "Unable to select image",
         "missingPermissions":
-          "Vexl does not have permissions for sending images. Enable them in the settings."
+          "Vexl needs permission to access your images. Enable them in the settings."
       },
       "imageToSend": "Image to send: ",
       "actionBanner": {
         "requestPending": "Request pending",
-        "bottomText": "Previous communication is displayed here",
+        "bottomText": "Previous communication is displayed above",
         "buttonText": "Respond"
       }
     },

@@ -61,7 +61,7 @@ const otherDe: typeof en =
       "learnMore": "Mehr erfahren",
       "unableToShareImage": "Unable to share the image",
       "requestAgain": "Request again",
-      "seeDetail": "See detail"
+      "seeDetail": "See details"
     },
     "loginFlow": {
       "anonymityNotice":
@@ -161,7 +161,7 @@ const otherDe: typeof en =
       },
       "importContactsButton": "Kontakte importieren",
       "contactsList": {
-        "addContact": "Kontakt {{number}} manuell hinzufügen",
+        "addContactManually": "Kontakt {{number}} manuell hinzufügen",
         "inputPlaceholder": "Nummer suchen oder hinzufügen",
         "nothingFound": {
           "title": "Kein Kontakt gefunden.",
@@ -169,7 +169,8 @@ const otherDe: typeof en =
             "Um die Telefonnummer direkt hinzuzufügen, geben Sie sie in die Suchleiste ein (mit Ländervorwahl)."
         },
         "toAddCustomContact":
-          "Um die Telefonnummer direkt hinzuzufügen, geben Sie sie in die Suchleiste ein (mit Ländervorwahl)"
+          "Um die Telefonnummer direkt hinzuzufügen, geben Sie sie in die Suchleiste ein (mit Ländervorwahl)",
+        "addContact": "Kontakt {{number}} manuell hinzufügen"
       },
       "allowNotifications": {
         "title": "Benachrichtigungsberechtigungen zulassen",
@@ -270,9 +271,9 @@ const otherDe: typeof en =
         "cancelled":
           "Sie haben eine Handelsanfrage für dieses Angebot storniert.",
         "deleted":
-          "You have already interacted with this offer before, but you have deleted the chat",
+          "You have already interacted with this offer before, but you deleted the chat.",
         "otherSideLeft":
-          "You have already interacted with this offer before, but other side has left the chat.",
+          "You have already interacted with this offer before, but the counterparty left the chat.",
         "leaved": "Sie haben schon einmal mit diesem Angebot interagiert"
       },
       "listEmpty":
@@ -629,22 +630,22 @@ const otherDe: typeof en =
           "Oben ist die Kommunikation, die Sie bisher mit dem Benutzer hatten"
       },
       "showFullChatHistory":
-        "You have some previous communication with this user. Tap to see full chat history.",
+        "You have already interacted with this offer. Tap to see chat history.",
       "unableToRespondOfferRemoved": {
         "title": "Offer was removed",
         "text":
-          "Unable to send response. Author has removed the offer. Do you want to delete the chat?"
+          "Unable to send response. Offer has been deleted. Do you want to leave the chat?"
       },
       "offerWasReported": "Offer was reported",
       "unableToSelectImageToSend": {
         "title": "Unable to select image",
         "missingPermissions":
-          "Vexl does not have permissions for sending images. Enable them in the settings."
+          "Vexl needs permission to access your images. Enable them in the settings."
       },
       "imageToSend": "Image to send: ",
       "actionBanner": {
         "requestPending": "Request pending",
-        "bottomText": "Previous communication is displayed here",
+        "bottomText": "Previous communication is displayed above",
         "buttonText": "Respond"
       }
     },

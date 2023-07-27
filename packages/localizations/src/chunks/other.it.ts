@@ -62,7 +62,7 @@ const otherIt: typeof en =
       "learnMore": "Per saperne di più",
       "unableToShareImage": "Unable to share the image",
       "requestAgain": "Request again",
-      "seeDetail": "See detail"
+      "seeDetail": "See details"
     },
     "loginFlow": {
       "anonymityNotice":
@@ -159,7 +159,7 @@ const otherIt: typeof en =
       },
       "importContactsButton": "Importazione di contatti",
       "contactsList": {
-        "addContact": "Aggiungi un contatto {{number}} manualmente",
+        "addContactManually": "Aggiungi un contatto {{number}} manualmente",
         "inputPlaceholder": "Cerca o aggiungi un numero",
         "nothingFound": {
           "title": "Nessun contatto trovato.",
@@ -167,7 +167,8 @@ const otherIt: typeof en =
             "Per aggiungere direttamente il numero di telefono, digitarlo nella barra di ricerca (con il prefisso del Paese)."
         },
         "toAddCustomContact":
-          "Per aggiungere direttamente il numero di telefono, digitarlo nella barra di ricerca (con il prefisso del paese)."
+          "Per aggiungere direttamente il numero di telefono, digitarlo nella barra di ricerca (con il prefisso del paese).",
+        "addContact": "Ajouter un contact {{number}} manuellement"
       },
       "allowNotifications": {
         "title": "Consentire i permessi di notifica",
@@ -268,7 +269,7 @@ const otherIt: typeof en =
         "cancelled":
           "Avete annullato la richiesta di scambio per questa offerta.",
         "deleted":
-          "You have already interacted with this offer before, but you have deleted the chat",
+          "You have already interacted with this offer before, but you deleted the chat.",
         "otherSideLeft":
           "You have already interacted with this offer before, but other side has left the chat.",
         "leaved": "Vous avez déjà interagi avec cette offre auparavant"
@@ -624,22 +625,22 @@ const otherIt: typeof en =
           "Qui sopra sono riportate le comunicazioni che avete avuto con l'utente fino ad ora"
       },
       "showFullChatHistory":
-        "You have some previous communication with this user. Tap to see full chat history.",
+        "You have already interacted with this offer. Tap to see chat history.",
       "unableToRespondOfferRemoved": {
         "title": "Offer was removed",
         "text":
-          "Unable to send response. Author has removed the offer. Do you want to delete the chat?"
+          "Unable to send response. Offer has been deleted. Do you want to leave the chat?"
       },
       "offerWasReported": "Offer was reported",
       "unableToSelectImageToSend": {
         "title": "Unable to select image",
         "missingPermissions":
-          "Vexl does not have permissions for sending images. Enable them in the settings."
+          "Vexl needs permission to access your images. Enable them in the settings."
       },
       "imageToSend": "Image to send: ",
       "actionBanner": {
         "requestPending": "Request pending",
-        "bottomText": "Previous communication is displayed here",
+        "bottomText": "Previous communication is displayed above",
         "buttonText": "Respond"
       }
     },

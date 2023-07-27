@@ -60,7 +60,7 @@ const otherCs: typeof en =
       "learnMore": "Dovědet se víc",
       "unableToShareImage": "Unable to share the image",
       "requestAgain": "Request again",
-      "seeDetail": "See detail"
+      "seeDetail": "See details"
     },
     "loginFlow": {
       "anonymityNotice": "Bez tvého svolení jej nikdo neuvidí. Ani my.",
@@ -154,7 +154,7 @@ const otherCs: typeof en =
       },
       "importContactsButton": "Import kontaktů",
       "contactsList": {
-        "addContact": "Ruční přidání kontaktu {{number}}",
+        "addContactManually": "Ruční přidání kontaktu {{number}}",
         "inputPlaceholder": "Vyhledávání nebo přidání čísla",
         "nothingFound": {
           "title": "Nebyl nalezen žádný kontakt.",
@@ -162,7 +162,8 @@ const otherCs: typeof en =
             "Chceš-li přidat telefonní číslo napřímo, zadej ho do vyhledávacího řádku (s předčíslím země)."
         },
         "toAddCustomContact":
-          "Chceš-li přidat telefonní číslo napřímo, zadej ho do vyhledávacího řádku (s předčíslím země)."
+          "Chceš-li přidat telefonní číslo napřímo, zadej ho do vyhledávacího řádku (s předčíslím země).",
+        "addContact": "Ruční přidání kontaktu {{number}}"
       },
       "allowNotifications": {
         "title": "Povolit notifikace",
@@ -257,12 +258,13 @@ const otherCs: typeof en =
         "accepted": "Your request was accepted.",
         "denied": "Your request was declined.",
         "initial": "This will be your first interaction with this offer.",
-        "cancelled": "You have cancelled trade request for this offer.",
+        "cancelled":
+          "You previously cancelled the trade request for this offer.",
         "deleted":
-          "You have already interacted with this offer before, but you have deleted the chat",
+          "You have already interacted with this offer before, but you deleted the chat.",
         "otherSideLeft":
-          "You have already interacted with this offer before, but other side has left the chat.",
-        "leaved": "You have already interacted with this offer before"
+          "You have already interacted with this offer before, but the counterparty left the chat.",
+        "leaved": "You have already interacted with this offer before."
       },
       "listEmpty": "Tvůj marketplace se právě zahřívá. Vrať se za pár minut!",
       "emptyAction": "Přidat novou nabídku",
@@ -291,8 +293,8 @@ const otherCs: typeof en =
       "dontForgetToVerifyTheIdentity":
         "Nezapomeň si ověřit identitu protistrany prostřednictvím společného přítele.",
       "noDirectConnection": "Pravděpodobně se s touto osobou navzájem neznáte.",
-      "rerequestTomorrow": "You can sent another request tomorrow",
-      "rerequestDays": "You can sent another request in {{days}} days",
+      "rerequestTomorrow": "You can send another request tomorrow.",
+      "rerequestDays": "You can send another request in {{days}} days.",
       "rerequest": "Odeslat žádost znova",
       "cancelRequest": "Zrušit žádost",
       "requestWasCancelledByOtherSide":
@@ -556,7 +558,8 @@ const otherCs: typeof en =
       "yesBlock": "Ano, zablokovat",
       "deleteChatExplanation1":
         "Skončili jste s obchodováním? Ukončení chatu znamená, že vaše konverzace bude trvale smazána.",
-      "deleteChatExplanation2": "Tento krok je nevratný.",
+      "deleteChatExplanation2":
+        "Tenhle krok je nevratný. Chceš tenhle chat zmazať?",
       "blockChatExplanation1":
         "Opravdu chceš uživatele zablokovat? Tento krok nejde vrátit zpět. Dobře si to rozmysli.",
       "blockChatExplanation2":
@@ -591,10 +594,11 @@ const otherCs: typeof en =
       "reportOffer": "Nahlásit nabídku",
       "ended": "Ukončeno",
       "textMessageTypes": {
-        "REQUEST_MESSAGING": "Request sent: {{message}}",
+        "REQUEST_MESSAGING": "Your request: {{message}}",
         "CANCEL_REQUEST_MESSAGING": "Request cancelled",
         "DISAPPROVE_MESSAGING": "Request denied",
-        "APPROVE_MESSAGING": "Request approved"
+        "APPROVE_MESSAGING":
+          "Request approved, you can now discuss the details."
       },
       "youHaveAlreadyTalked":
         "S tímto uživatelem už jste si psali. Klepnutím zobrazíte historii.",
@@ -603,22 +607,22 @@ const otherCs: typeof en =
         "bottom": "Above is communication you had with the user so far"
       },
       "showFullChatHistory":
-        "You have some previous communication with this user. Tap to see full chat history.",
+        "You have already interacted with this offer. Tap to see chat history.",
       "unableToRespondOfferRemoved": {
         "title": "Offer was removed",
         "text":
-          "Unable to send response. Author has removed the offer. Do you want to delete the chat?"
+          "Unable to send response. Offer has been deleted. Do you want to leave the chat?"
       },
       "offerWasReported": "Offer was reported",
       "unableToSelectImageToSend": {
         "title": "Unable to select image",
         "missingPermissions":
-          "Vexl does not have permissions for sending images. Enable them in the settings."
+          "Vexl needs permission to access your images. Enable them in the settings."
       },
       "imageToSend": "Image to send: ",
       "actionBanner": {
         "requestPending": "Request pending",
-        "bottomText": "Previous communication is displayed here",
+        "bottomText": "Previous communication is displayed above",
         "buttonText": "Respond"
       }
     },

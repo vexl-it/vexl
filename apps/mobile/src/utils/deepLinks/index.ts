@@ -27,33 +27,41 @@ const handleImportDeepContactActionAtom = atom(
       parseJson(contactJsonString),
       E.chainW(safeParse(ImportContactFromLinkPayload)),
       TE.fromEither,
-      TE.chainFirstW((contact) =>
-        set(askAreYouSureActionAtom, {
-          steps: [
-            {
-              type: 'StepWithText',
-              title: get(translationAtom).t(
-                'deepLinks.importContacts.alert.title'
-              ),
-              description: get(translationAtom).t(
-                'deepLinks.importContacts.alert.text',
-                {
-                  contactName: contact.name,
-                  contactNumber: contact.numberToDisplay,
-                }
-              ),
-              positiveButtonText: get(translationAtom).t('common.yes'),
-              negativeButtonText: get(translationAtom).t('common.no'),
-            },
-          ],
-          variant: 'info',
-        })
+      TE.bindTo('contact'),
+      TE.bindW('setName', ({contact}) =>
+        pipe(
+          set(askAreYouSureActionAtom, {
+            steps: [
+              {
+                type: 'StepWithText',
+                title: get(translationAtom).t(
+                  'deepLinks.importContacts.alert.title'
+                ),
+                description: get(translationAtom).t(
+                  'deepLinks.importContacts.alert.text',
+                  {
+                    contactName: contact.name,
+                    contactNumber: contact.numberToDisplay,
+                  }
+                ),
+                positiveButtonText: get(translationAtom).t('common.yes'),
+                negativeButtonText: get(translationAtom).t('common.no'),
+              },
+            ],
+            variant: 'info',
+          }),
+          TE.map((result) =>
+            result[0].type === 'inputResult' ? result[0].value : contact.name
+          )
+        )
       ),
       TE.map((r) => {
         set(loadingOverlayDisplayedAtom, true)
         return r
       }),
-      TE.chainW((payload) => set(importContactFromLinkActionAtom, payload)),
+      TE.chainW(({contact, setName}) =>
+        set(importContactFromLinkActionAtom, {...contact, name: setName})
+      ),
       TE.map((r) => {
         set(loadingOverlayDisplayedAtom, false)
         return r

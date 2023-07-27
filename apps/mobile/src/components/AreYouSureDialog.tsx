@@ -35,42 +35,66 @@ interface StepWithChildren {
   children: React.ReactNode
 }
 
-type Step = StepWithText | StepWithChildren
+interface StepWithInput {
+  type: 'StepWithChildren'
+  negativeButtonText?: string
+  positiveButtonText: string
+  inputProps: any // props of input
+}
+
+type Step = StepWithText | StepWithChildren | StepWithInput
+
+type AreYouSureDialogAtomStepResult =
+  | {
+      type: 'noResult'
+    }
+  | {
+      type: 'inputResult'
+      value: string
+    }
 
 interface AreYouSureDialogState {
   variant: 'danger' | 'info'
   steps: Step[]
+  stepResults: AreYouSureDialogAtomStepResult[],
   currentStep: number
-  onPass: () => void
+  onPass: (results: AreYouSureDialogAtomStepResult[]) => void
   onDismiss: () => void
 }
 
 const areYouSureDialogAtom = atom<AreYouSureDialogState | null>(null)
 
 type UserDeclinedError = BasicError<'UserDeclinedError'>
-export const askAreYouSureActionAtom: WritableAtom<
+
+type AskAreYouSureActionAtom = WritableAtom<
   null,
   [Omit<AreYouSureDialogState, 'onPass' | 'onDismiss' | 'currentStep'>],
-  TE.TaskEither<UserDeclinedError, true>
+  TE.TaskEither<UserDeclinedError, AreYouSureDialogAtomStepResult[]>
   // eslint-disable-next-line @typescript-eslint/promise-function-async
-> = atom(null, (get, set, state) => {
-  // eslint-disable-next-line @typescript-eslint/promise-function-async
-  return () =>
-    new Promise((resolve) => {
-      set(areYouSureDialogAtom, {
-        ...state,
-        currentStep: 0,
-        onPass: () => {
-          resolve(E.right(true))
-        },
-        onDismiss: () => {
-          resolve(
-            E.left(toBasicError('UserDeclinedError')(new Error('Declined')))
-          )
-        },
+>
+
+export const askAreYouSureActionAtom: AskAreYouSureActionAtom = atom(
+  null,
+  (get, set, state) => {
+    // eslint-disable-next-line @typescript-eslint/promise-function-async
+    return () =>
+      new Promise((resolve) => {
+        set(areYouSureDialogAtom, {
+          ...state,
+          currentStep: 0,
+          stepResults: state.steps.map(() => ({type: 'noResult'} as const),
+          onPass: (result) => {
+            resolve(E.right(result))
+          },
+          onDismiss: () => {
+            resolve(
+              E.left(toBasicError('UserDeclinedError')(new Error('Declined')))
+            )
+          },
+        })
       })
-    })
-})
+  }
+)
 
 const styles = StyleSheet.create({
   backdrop: {
@@ -177,7 +201,7 @@ function AreYouSureDialog(): JSX.Element | null {
               onPress={() => {
                 if (!state) return
                 if (state.currentStep >= state.steps.length - 1) {
-                  state.onPass()
+                  state.onPass(state.stepResults)
                   setState(null)
                 } else {
                   setState({...state, currentStep: state.currentStep + 1})

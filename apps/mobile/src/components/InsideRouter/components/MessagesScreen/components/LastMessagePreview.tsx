@@ -7,6 +7,7 @@ import {styled, Text} from 'tamagui'
 const BaseText = styled(Text, {
   color: '$greyOnBlack',
   fs: 14,
+  ff: '$body600',
 })
 
 function MessagePreview({

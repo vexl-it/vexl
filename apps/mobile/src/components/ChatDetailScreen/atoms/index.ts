@@ -105,7 +105,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
       const {t} = get(translationAtom)
       return await pipe(
         skipAsk
-          ? TE.right(true)
+          ? TE.right([{type: 'noResult'}])
           : set(askAreYouSureActionAtom, {
               steps: [
                 {

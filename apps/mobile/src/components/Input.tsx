@@ -163,7 +163,7 @@ function TextInput(
     >
       {icon && (
         <Stack mr="$2">
-          <Stack w={size === 'small' ? 14 : 20} h={size === 'small' ? 14 : 20}>
+          <Stack w={size === 'small' ? 14 : 24} h={size === 'small' ? 14 : 24}>
             <Image
               stroke={
                 variant === 'greyOnBlack'

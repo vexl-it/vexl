@@ -17,57 +17,66 @@ import {askAreYouSureActionAtom} from '../../components/AreYouSureDialog'
 import {importContactFromLinkActionAtom} from '../../state/contacts'
 import {loadingOverlayDisplayedAtom} from '../../components/LoadingOverlayProvider'
 import {toCommonErrorMessage} from '../useCommonErrorMessages'
+import userSvg from '../../components/images/userSvg'
 
 type DynamicLink = FirebaseDynamicLinksTypes.DynamicLink
 
 const handleImportDeepContactActionAtom = atom(
   null,
-  (get, set, contactJsonString: string) =>
-    pipe(
+  (get, set, contactJsonString: string) => {
+    const {t} = get(translationAtom)
+    return pipe(
       parseJson(contactJsonString),
       E.chainW(safeParse(ImportContactFromLinkPayload)),
       TE.fromEither,
-      TE.chainFirstW((contact) =>
-        set(askAreYouSureActionAtom, {
-          steps: [
-            {
-              type: 'StepWithText',
-              title: get(translationAtom).t(
-                'deepLinks.importContacts.alert.title'
-              ),
-              description: get(translationAtom).t(
-                'deepLinks.importContacts.alert.text',
-                {
-                  contactName: contact.name,
-                  contactNumber: contact.numberToDisplay,
-                }
-              ),
-              positiveButtonText: get(translationAtom).t('common.yes'),
-              negativeButtonText: get(translationAtom).t('common.no'),
-            },
-          ],
-          variant: 'info',
-        })
+      TE.bindTo('contact'),
+      TE.bindW('customName', ({contact}) =>
+        pipe(
+          set(askAreYouSureActionAtom, {
+            steps: [
+              {
+                title: t('postLoginFlow.contactsList.addContact'),
+                description: t('postLoginFlow.contactsList.addThisPhoneNumber'),
+                subtitle: contact.numberToDisplay,
+                negativeButtonText: t('common.notNow'),
+                positiveButtonText: t('postLoginFlow.contactsList.addContact'),
+                type: 'StepWithInput',
+                textInputProps: {
+                  autoCorrect: false,
+                  placeholder: t('postLoginFlow.contactsList.addContactName'),
+                  variant: 'greyOnWhite',
+                  icon: userSvg,
+                },
+              },
+            ],
+            variant: 'info',
+          }),
+          TE.map((result) =>
+            result[0].type === 'inputResult' ? result[0].value : contact.name
+          )
+        )
       ),
       TE.map((r) => {
         set(loadingOverlayDisplayedAtom, true)
         return r
       }),
-      TE.chainW((payload) => set(importContactFromLinkActionAtom, payload)),
+      TE.bindW('importContactResult', ({contact, customName}) =>
+        set(importContactFromLinkActionAtom, {...contact, name: customName})
+      ),
       TE.map((r) => {
         set(loadingOverlayDisplayedAtom, false)
         return r
       }),
-      TE.chainFirstW(() =>
+      TE.chainFirstW(({customName}) =>
         set(askAreYouSureActionAtom, {
           steps: [
             {
               type: 'StepWithText',
-              title: get(translationAtom).t('common.success'),
-              description: get(translationAtom).t(
-                'deepLinks.importContacts.successAlert.title'
-              ),
-              positiveButtonText: get(translationAtom).t('common.nice'),
+              title: t('postLoginFlow.contactsList.contactAdded'),
+              description: t('postLoginFlow.contactsList.youHaveAddedContact', {
+                contactName: customName,
+              }),
+              positiveButtonText: t('common.niceWithExclamationMark'),
             },
           ],
           variant: 'info',
@@ -94,6 +103,7 @@ const handleImportDeepContactActionAtom = atom(
         }
       )
     )
+  }
 )
 
 export function useHandleDeepLink(): void {
@@ -123,7 +133,6 @@ export function useHandleDeepLink(): void {
       .getInitialLink()
       .then((link) => {
         if (link) {
-          console.log('In getInitialLink')
           onLinkReceived(link)
         }
       })
@@ -133,7 +142,6 @@ export function useHandleDeepLink(): void {
       })
     return dynamicLinks().onLink((link) => {
       if (link) {
-        console.log('In onLink')
         onLinkReceived(link)
       }
     })

@@ -59,7 +59,9 @@ const otherEn =
       "learnMore": "Learn more",
       "unableToShareImage": "Unable to share the image",
       "requestAgain": "Request again",
-      "seeDetail": "See details"
+      "seeDetail": "See details",
+      "notNow": "Not now",
+      "niceWithExclamationMark": "Nice!"
     },
     "loginFlow": {
       "anonymityNotice":
@@ -158,8 +160,14 @@ const otherEn =
             "To add phone number, type it into the search bar (with country code prefix)."
         },
         "toAddCustomContact":
-          "Enabling notifications allows you to find out when others accept your request or when you get a new message. ",
-        "addContact": "Add contact {{number}} manually"
+          "To add phone number directly type it into a search bar (with country code)",
+        "addContact": "Add contact",
+        "addThisPhoneNumber":
+          "Would you like to add this phone number to your Vexl contacts?",
+        "addContactName": "Add contact name",
+        "contactAdded": "Contact added.",
+        "youHaveAddedContact":
+          "You have added {{contactName}} to your Vexl contacts."
       },
       "allowNotifications": {
         "title": "Enable notifications",

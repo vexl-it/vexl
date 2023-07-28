@@ -14,6 +14,8 @@ import {Stack, Text} from 'tamagui'
 
 type Props = LoginStackScreenProps<'Name'>
 
+const USERNAME_MAX_LENGTH = 25
+
 function NameScreen({navigation}: Props): JSX.Element {
   const {t} = useTranslation()
   const [value, setValue] = useState('')
@@ -27,6 +29,7 @@ function NameScreen({navigation}: Props): JSX.Element {
         </Text>
         <Stack my="$4" mx={'$-4'}>
           <TextInput
+            maxLength={USERNAME_MAX_LENGTH}
             value={value}
             placeholder={t('loginFlow.name.placeholder')}
             onChangeText={(e) => {

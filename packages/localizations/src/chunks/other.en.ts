@@ -18,7 +18,7 @@ const otherEn =
       "networkErrors": {
         "errNetwork":
           "A network error has occurred. Are you connected to the internet?",
-        "errCanceled": "Request was canceled",
+        "errCanceled": "Request was cancelled",
         "etimedout": "Request timed out",
         "econnaborted": "Connection aborted"
       },
@@ -83,14 +83,14 @@ const otherEn =
         "prompt": "What do your friends call you?",
         "placeholder": "Name or nickname",
         "nameValidationError":
-          "Name should be at least 1 characters long and maximum 50 characters long"
+          "Your name should be long enough to beat a goldfish's memory, but short enough to fit in a fortune cookie – let's say somewhere between 1 and 25 characters."
       },
       "photo": {
         "title": "Hey {{name}}! What do you look like?",
         "selectSource": "Select the source of your image",
         "camera": "Camera",
         "gallery": "Gallery",
-        "permissionsNotGranted": "Permissions not granted.",
+        "permissionsNotGranted": "Permission denied.",
         "nothingSelected": "No image was selected"
       },
       "anonymization": {
@@ -108,7 +108,7 @@ const otherEn =
         "errors": {
           "invalidPhoneNumber": "Invalid phone number. Please try again.",
           "previousCodeNotExpired":
-            "Verification for this phone number is already in progress. Please wait until it expires"
+            "Verification for this phone number is already in progress. Please wait until it expires."
         }
       },
       "verificationCode": {
@@ -121,7 +121,7 @@ const otherEn =
           "userAlreadyExists": "User with this phone number already exists",
           "challengeCouldNotBeGenerated":
             "Challenge could not be generated. Try again later",
-          "verificationNotFound": "Verification code wrong.",
+          "verificationNotFound": "Invalid notification code.",
           "UserNotFound": "User not found. Try to resend the code.",
           "SignatureCouldNotBeGenerated":
             "Signature could not be generated. Try again later",
@@ -155,21 +155,21 @@ const otherEn =
         "nothingFound": {
           "title": "No contact found. ",
           "text":
-            "To add phone number directly, type it into a search bar (with country code prefix)."
+            "To add phone number, type it into the search bar (with country code prefix)."
         },
         "toAddCustomContact":
-          "To add phone number directly type it into a search bar (with country code)",
+          "Enabling notifications allows you to find out when others accept your request or when you get a new message. ",
         "addContact": "Add contact {{number}} manually"
       },
       "allowNotifications": {
-        "title": "Allow notification permissions",
+        "title": "Enable notifications",
         "text":
-          "Enabling notifications lets you know when others accept your offers or when messages arrive.",
+          "Enabling notifications allows you to find out when others accept your request or you receive a message.",
         "action": "Allow",
         "cancel": "Skip",
         "errors": {
           "permissionDenied":
-            "Permissions not granted. You can allow them later in the system settings.",
+            "Permission not granted. You can change this in the system settings later.",
           "unknownError": "Unknown error while requesting permissions",
           "notAvailableOnEmulator":
             "Notifications are not available on emulator"
@@ -259,9 +259,9 @@ const otherEn =
         "cancelled":
           "You previously cancelled the trade request for this offer.",
         "deleted":
-          "You have already interacted with this offer before, but you deleted the chat.",
+          "You have already interacted with this user regarding this offer, but you deleted the chat.",
         "otherSideLeft":
-          "You have already interacted with this offer before, but the counterparty left the chat.",
+          "You have already interacted with this offer, but the counterparty left the chat.",
         "leaved": "You have already interacted with this offer before."
       },
       "listEmpty":
@@ -272,14 +272,14 @@ const otherEn =
       "filterActive": "Filter active",
       "totalOffers": "Total: {{totalCount}} offers",
       "notImportedAnyContacts":
-        "You have not imported any contacts. Import contacts to see offers from your network",
+        "You have not imported any contacts. Import contacts to see offers from your network!",
       "socialNetworkTooSmall":
-        "You imported only few contacts so you might not see any offers",
+        "You imported only a few contacts so you might not see any offers.",
       "noOffersToMatchFilter":
-        "There are no offers to match your filter criteria",
+        "There are no offers to match your filter criteria. Try adjusting your filters for more results.",
       "offersAreLoadingAndShouldBeReady":
         "Offers are loading and should be ready for you in {{minutes}} minutes",
-      "marketplaceEmpty": "Marketplace empty, yet",
+      "marketplaceEmpty": "Marketplace empty yet",
       "resetFilter": "Reset filter",
       "totalFilteredOffers":
         "Filtered: {{count}} offers (out of total {{totalCount}})",
@@ -505,7 +505,7 @@ const otherEn =
       "isBuying": "is buying",
       "isSelling": "is selling",
       "thisWillBeYourFirstInteraction":
-        "This will be your first interaction with this offer.",
+        "This will be your first interaction with this user regarding this offer.",
       "wellLetYouKnowOnceUserAccepts":
         "Your request is pending. We will let you know once the other side has responded.",
       "messagePreviews": {
@@ -526,19 +526,19 @@ const otherEn =
         "outgoing": {
           "MESSAGE": "Me: {{message}}",
           "REQUEST_REVEAL": "You have requested identity reveal",
-          "APPROVE_REVEAL": "Identity revealed",
-          "DISAPPROVE_REVEAL": "Identity reveal declined",
-          "REQUEST_MESSAGING": "Your request  was sent",
+          "APPROVE_REVEAL": "Identity was revealed",
+          "DISAPPROVE_REVEAL": "Identity reveal was declined",
+          "REQUEST_MESSAGING": "Your request was sent",
           "APPROVE_MESSAGING": "You have approved messaging",
           "DISAPPROVE_MESSAGING": "You have declined messaging request",
           "DELETE_CHAT": "You have left the chat",
           "BLOCK_CHAT": "User has been blocked",
           "OFFER_DELETED": "You have deleted your offer",
           "INBOX_DELETED": "You have deleted this inbox",
-          "CANCEL_REQUEST_MESSAGING": "You have cancelled messaging request"
+          "CANCEL_REQUEST_MESSAGING": "You have cancelled the request."
         }
       },
-      "deleteChat": "Delete Chat",
+      "deleteChat": "Delete chat",
       "askToReveal": "Ask to reveal identity",
       "blockUser": "Block user",
       "sending": "sending...",
@@ -566,9 +566,9 @@ const otherEn =
       "chatEmptyExplanation": "Start a conversation by requesting an offer",
       "seeOffers": "See offers",
       "identityRevealRequestModal": {
-        "title": "Send reveal identity request?",
+        "title": "Send a request to reveal identities?",
         "text":
-          "By sending request you agree with revealing of your own identity too.",
+          "By sending a request you agree to reveal your own identity too.",
         "send": "Send request"
       },
       "identityRevealRespondModal": {
@@ -578,10 +578,10 @@ const otherEn =
       },
       "identityAlreadyRequested":
         "Identity request was already sent in the conversation",
-      "identityRevealRequest": "Identity reveal request",
+      "identityRevealRequest": "Identity requested",
       "identityRevealed": "Identity revealed",
       "identitySend": {
-        "title": "Reveal identity request sent",
+        "title": "Identity request sent",
         "subtitle": "waiting for response"
       },
       "tapToReveal": "Tap to reveal or decline",
@@ -593,8 +593,8 @@ const otherEn =
       "ended": "Ended",
       "textMessageTypes": {
         "REQUEST_MESSAGING": "Your request: {{message}}",
-        "CANCEL_REQUEST_MESSAGING": "Request cancelled",
-        "DISAPPROVE_MESSAGING": "Request denied",
+        "CANCEL_REQUEST_MESSAGING": "This request was cancelled.",
+        "DISAPPROVE_MESSAGING": "This request was denied.",
         "APPROVE_MESSAGING":
           "Request approved, you can now discuss the details."
       },
@@ -605,7 +605,7 @@ const otherEn =
         "bottom": "Above is communication you had with the user so far"
       },
       "showFullChatHistory":
-        "You have already interacted with this offer. Tap to see chat history.",
+        "You have already interacted with this user regarding this offer. Tap to see chat history.",
       "unableToRespondOfferRemoved": {
         "title": "Offer was removed",
         "text":
@@ -699,7 +699,7 @@ const otherEn =
       "yourAppGuide": "Your app guide",
       "addMoreContacts": "Add more contacts",
       "noOffersFromOthersYet":
-        "🤔 No offers from others, yet? Try to add more contacts, and wait ✌️",
+        "🤔 No offers from others yet? Try to add more contacts, and wait ✌️",
       "createYourFirstOffer":
         "👋 Create your first offer to buy or sell Bitcoin."
     }

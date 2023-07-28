@@ -83,7 +83,7 @@ const otherPt: typeof en =
         "prompt": "O que é que os seus amigos lhe chamam?",
         "placeholder": "Nome ou alcunha",
         "nameValidationError":
-          "O nome deve ter, no mínimo, 1 carácter e, no máximo, 50 caracteres"
+          "O nome deve ter, no mínimo, 1 carácter e, no máximo, 25 caracteres"
       },
       "photo": {
         "title": "Olá {{name}}! Qual é o teu aspeto?",
@@ -262,9 +262,9 @@ const otherPt: typeof en =
         "initial": "Esta será a sua primeira interação com esta oferta.",
         "cancelled": "Cancelou o pedido de troca para esta oferta.",
         "deleted":
-          "You have already interacted with this offer before, but you deleted the chat.",
+          "You have already interacted with this offer, but you deleted the chat.",
         "otherSideLeft":
-          "You have already interacted with this offer before, but the counterparty left the chat.",
+          "You have already interacted with this offer, but the counterparty left the chat.",
         "leaved": "Ya has interactuado antes con esta oferta"
       },
       "listEmpty":

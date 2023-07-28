@@ -86,7 +86,7 @@ const otherIt: typeof en =
         "prompt": "Come ti chiamano i tuoi amici?",
         "placeholder": "Nome o soprannome",
         "nameValidationError":
-          "Il nome deve essere lungo almeno 1 carattere e al massimo 50."
+          "Il nome deve essere lungo almeno 1 carattere e al massimo 25."
       },
       "photo": {
         "title": "Ehi {{name}}! Che aspetto hai?",
@@ -269,9 +269,9 @@ const otherIt: typeof en =
         "cancelled":
           "Avete annullato la richiesta di scambio per questa offerta.",
         "deleted":
-          "You have already interacted with this offer before, but you deleted the chat.",
+          "You have already interacted with this offer, but you deleted the chat.",
         "otherSideLeft":
-          "You have already interacted with this offer before, but other side has left the chat.",
+          "You have already interacted with this offer, but the counterparty left the chat.",
         "leaved": "Vous avez déjà interagi avec cette offre auparavant"
       },
       "listEmpty":

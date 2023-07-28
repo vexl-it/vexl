@@ -261,9 +261,9 @@ const otherCs: typeof en =
         "cancelled":
           "You previously cancelled the trade request for this offer.",
         "deleted":
-          "You have already interacted with this offer before, but you deleted the chat.",
+          "You have already interacted with this offer, but you deleted the chat.",
         "otherSideLeft":
-          "You have already interacted with this offer before, but the counterparty left the chat.",
+          "You have already interacted with this offer, but the counterparty left the chat.",
         "leaved": "You have already interacted with this offer before."
       },
       "listEmpty": "Tvůj marketplace se právě zahřívá. Vrať se za pár minut!",
@@ -595,8 +595,8 @@ const otherCs: typeof en =
       "ended": "Ukončeno",
       "textMessageTypes": {
         "REQUEST_MESSAGING": "Your request: {{message}}",
-        "CANCEL_REQUEST_MESSAGING": "Request cancelled",
-        "DISAPPROVE_MESSAGING": "Request denied",
+        "CANCEL_REQUEST_MESSAGING": "This request was cancelled.",
+        "DISAPPROVE_MESSAGING": "This request was denied.",
         "APPROVE_MESSAGING":
           "Request approved, you can now discuss the details."
       },

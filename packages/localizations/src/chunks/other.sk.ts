@@ -83,7 +83,7 @@ const otherSk: typeof en =
         "prompt": "Ako ti vravia kamaráti?",
         "placeholder": "Meno alebo prezývka",
         "nameValidationError":
-          "Meno by malo mať aspoň 1 znak a maximálne 50 znakov"
+          "Meno by malo mať aspoň 1 znak a maximálne 25 znakov"
       },
       "photo": {
         "title": "Ahoj {{name}}! Vyber si svoju profilovú fotku.",
@@ -260,9 +260,9 @@ const otherSk: typeof en =
         "cancelled":
           "You previously cancelled the trade request for this offer.",
         "deleted":
-          "You have already interacted with this offer before, but you deleted the chat.",
+          "You have already interacted with this offer, but you deleted the chat.",
         "otherSideLeft":
-          "You have already interacted with this offer before, but the counterparty left the chat.",
+          "You have already interacted with this offer, but the counterparty left the chat.",
         "leaved": "You have already interacted with this offer before."
       },
       "listEmpty": "Tvoj marketplace sa práve zahrieva. Vráť sa o pár minút!",
@@ -585,7 +585,7 @@ const otherSk: typeof en =
       "identityRevealRequest": "Žiadosť o odhalenie identity",
       "identityRevealed": "Identity revealed",
       "identitySend": {
-        "title": "Reveal identity request sent",
+        "title": "Identity request sent",
         "subtitle": "waiting for response"
       },
       "tapToReveal": "Klikni pre odhalenie identity alebo zamietnutie",
@@ -597,8 +597,8 @@ const otherSk: typeof en =
       "ended": " ukončené",
       "textMessageTypes": {
         "REQUEST_MESSAGING": "Your request: {{message}}",
-        "CANCEL_REQUEST_MESSAGING": "Request cancelled",
-        "DISAPPROVE_MESSAGING": "Request denied",
+        "CANCEL_REQUEST_MESSAGING": "This request was cancelled.",
+        "DISAPPROVE_MESSAGING": "This request was denied.",
         "APPROVE_MESSAGING":
           "Request approved, you can now discuss the details."
       },

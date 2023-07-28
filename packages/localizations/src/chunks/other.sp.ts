@@ -85,7 +85,7 @@ const otherSp: typeof en =
         "prompt": "¿Cómo te llaman tus amigos?",
         "placeholder": "Nombre o apodo",
         "nameValidationError":
-          "El nombre debe tener al menos 1 carácter y un máximo de 50 caracteres"
+          "El nombre debe tener al menos 1 carácter y un máximo de 25 caracteres"
       },
       "photo": {
         "title": "Hola {{name}} ¿Qué aspecto tienes?",
@@ -268,9 +268,9 @@ const otherSp: typeof en =
         "cancelled":
           "Has cancelado la solicitud de intercambio de esta oferta.",
         "deleted":
-          "You have already interacted with this offer before, but you deleted the chat.",
+          "You have already interacted with this offer, but you deleted the chat.",
         "otherSideLeft":
-          "You have already interacted with this offer before, but the counterparty left the chat.",
+          "You have already interacted with this offer, but the counterparty left the chat.",
         "leaved": "Já interagiu com esta oferta anteriormente"
       },
       "listEmpty": "Tu mercado se está calentando. Vuelve en unos minutos.",

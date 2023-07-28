@@ -86,7 +86,7 @@ const otherDe: typeof en =
         "prompt": "Wie werden Sie von Ihren Freunden genannt?",
         "placeholder": "Name oder Spitzname",
         "nameValidationError":
-          "Der Name sollte mindestens 1 Zeichen und maximal 50 Zeichen lang sein"
+          "Der Name sollte mindestens 1 Zeichen und maximal 25 Zeichen lang sein"
       },
       "photo": {
         "title": "Hallo {{name}}! Wie siehst du aus?",
@@ -271,9 +271,9 @@ const otherDe: typeof en =
         "cancelled":
           "Sie haben eine Handelsanfrage für dieses Angebot storniert.",
         "deleted":
-          "You have already interacted with this offer before, but you deleted the chat.",
+          "You have already interacted with this offer, but you deleted the chat.",
         "otherSideLeft":
-          "You have already interacted with this offer before, but the counterparty left the chat.",
+          "You have already interacted with this offer, but the counterparty left the chat.",
         "leaved": "Sie haben schon einmal mit diesem Angebot interagiert"
       },
       "listEmpty":

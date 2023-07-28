@@ -62,7 +62,9 @@ const otherIt: typeof en =
       "learnMore": "Per saperne di più",
       "unableToShareImage": "Unable to share the image",
       "requestAgain": "Request again",
-      "seeDetail": "See details"
+      "seeDetail": "See details",
+      "notNow": "Not now",
+      "niceWithExclamationMark": "Nice!"
     },
     "loginFlow": {
       "anonymityNotice":
@@ -168,7 +170,13 @@ const otherIt: typeof en =
         },
         "toAddCustomContact":
           "Per aggiungere direttamente il numero di telefono, digitarlo nella barra di ricerca (con il prefisso del paese).",
-        "addContact": "Ajouter un contact {{number}} manuellement"
+        "addContact": "Add contact",
+        "addThisPhoneNumber":
+          "Would you like to add this phone number to your Vexl contacts?",
+        "addContactName": "Add contact name",
+        "contactAdded": "Contact added.",
+        "youHaveAddedContact":
+          "You have added {{contactName}} to your Vexl contacts."
       },
       "allowNotifications": {
         "title": "Consentire i permessi di notifica",

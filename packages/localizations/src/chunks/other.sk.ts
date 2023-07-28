@@ -60,7 +60,9 @@ const otherSk: typeof en =
       "learnMore": "Dozvedieť sa viac",
       "unableToShareImage": "Unable to share the image",
       "requestAgain": "Request again",
-      "seeDetail": "See details"
+      "seeDetail": "See details",
+      "notNow": "Not now",
+      "niceWithExclamationMark": "Nice!"
     },
     "loginFlow": {
       "anonymityNotice": "Kým to nepovolíte, nikto to neuvidí. Dokonca ani my.",
@@ -163,7 +165,13 @@ const otherSk: typeof en =
         },
         "toAddCustomContact":
           "Ak chceš pridať telefónne číslo napriamo, zadaj ho do vyhľadávacieho riadku (s predvoľbou krajiny).",
-        "addContact": "Manuálne pridanie kontaktu {{number}}"
+        "addContact": "Add contact",
+        "addThisPhoneNumber":
+          "Would you like to add this phone number to your Vexl contacts?",
+        "addContactName": "Add contact name",
+        "contactAdded": "Contact added.",
+        "youHaveAddedContact":
+          "You have added {{contactName}} to your Vexl contacts."
       },
       "allowNotifications": {
         "title": "Povoliť notifikácie",

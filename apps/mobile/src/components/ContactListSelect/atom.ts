@@ -30,6 +30,8 @@ import {updateAllOffersConnectionsActionAtom} from '../../state/connections/atom
 import {hashPhoneNumber} from '../../state/contacts/utils'
 import toE164PhoneNumberWithDefaultCountryCode from '../../utils/toE164PhoneNumberWithDefaultCountryCode'
 import {IsoDatetimeString} from '@vexl-next/domain/dist/utility/IsoDatetimeString.brand'
+import {askAreYouSureActionAtom} from '../AreYouSureDialog'
+import userSvg from '../images/userSvg'
 
 export const ContactsSelectScope = createScope<ContactNormalized[]>([])
 
@@ -162,16 +164,74 @@ export const contactSelectMolecule = molecule((getMolecule, getScope) => {
     )
   })
 
-  const addAndSelectContactAtom = atom(
+  const addAndSelectContactWithUiFeedbackAtom = atom(
     null,
-    (get, set, contact: ContactNormalized) => {
-      set(newlyAddedCustomContactsAtom, (val) => [...val, contact])
-      set(selectedNumbersAtom, (val) => {
-        const newVal = new Set(val)
-        newVal.add(contact.normalizedNumber)
-        return newVal
-      })
-      set(searchTextAtom, '')
+    async (get, set, contact: ContactNormalized) => {
+      const {t} = get(translationAtom)
+
+      await pipe(
+        set(askAreYouSureActionAtom, {
+          variant: 'info',
+          steps: [
+            {
+              title: t('postLoginFlow.contactsList.addContact'),
+              description: t('postLoginFlow.contactsList.addThisPhoneNumber'),
+              subtitle: contact.normalizedNumber,
+              negativeButtonText: t('common.notNow'),
+              positiveButtonText: t('postLoginFlow.contactsList.addContact'),
+              type: 'StepWithInput',
+              textInputProps: {
+                autoCorrect: false,
+                placeholder: t('postLoginFlow.contactsList.addContactName'),
+                variant: 'greyOnWhite',
+                icon: userSvg,
+              },
+            },
+          ],
+        }),
+        TE.map((result) =>
+          result[0].type === 'inputResult' ? result[0].value : contact.name
+        ),
+        (a) => a,
+        TE.map((customName) => {
+          set(newlyAddedCustomContactsAtom, (val) => [
+            ...val,
+            {...contact, name: customName},
+          ])
+          set(selectedNumbersAtom, (val) => {
+            const newVal = new Set(val)
+            newVal.add(contact.normalizedNumber)
+            return newVal
+          })
+          set(searchTextAtom, '')
+
+          return customName
+        }),
+        TE.chainFirstW((customName) =>
+          set(askAreYouSureActionAtom, {
+            steps: [
+              {
+                type: 'StepWithText',
+                title: t('postLoginFlow.contactsList.contactAdded'),
+                description: t(
+                  'postLoginFlow.contactsList.youHaveAddedContact',
+                  {contactName: customName}
+                ),
+                positiveButtonText: t('common.niceWithExclamationMark'),
+              },
+            ],
+            variant: 'info',
+          })
+        ),
+        TE.match(
+          () => {
+            // ignore that user closed dialog
+          },
+          () => {
+            // Everything OK
+          }
+        )
+      )()
     }
   )
 
@@ -236,7 +296,7 @@ export const contactSelectMolecule = molecule((getMolecule, getScope) => {
     searchTextAtom,
     createSelectContactAtom,
     searchTextAsCustomContactAtom,
-    addAndSelectContactAtom,
+    addAndSelectContactWithUiFeedbackAtom,
     submitActionAtom,
   }
 })

@@ -10,14 +10,16 @@ import {useSetAtom} from 'jotai'
 
 function AddContactRow({contact}: {contact: ContactNormalized}): JSX.Element {
   const {t} = useTranslation()
-  const {addAndSelectContactAtom} = useMolecule(contactSelectMolecule)
-  const addAndSelectContact = useSetAtom(addAndSelectContactAtom)
+  const {addAndSelectContactWithUiFeedbackAtom} = useMolecule(
+    contactSelectMolecule
+  )
+  const addAndSelectContact = useSetAtom(addAndSelectContactWithUiFeedbackAtom)
 
   return (
     <TouchableOpacity
       style={{flex: 1}}
       onPress={() => {
-        addAndSelectContact(contact)
+        void addAndSelectContact(contact)
       }}
     >
       <Stack f={1} ai="center" jc="center">
@@ -25,7 +27,7 @@ function AddContactRow({contact}: {contact: ContactNormalized}): JSX.Element {
           <Image source={addSvg} />
         </Stack>
         <Text col="$greyOnWhite">
-          {t('postLoginFlow.contactsList.addContact', {
+          {t('postLoginFlow.contactsList.addContactManually', {
             number: contact.numberToDisplay,
           })}
         </Text>

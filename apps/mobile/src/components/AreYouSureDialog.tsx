@@ -18,6 +18,7 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {useFocusEffect} from '@react-navigation/native'
 import React from 'react'
 import {ImageUniversal, type ImageUniversalSourcePropType} from './Image'
+import Input, {type Props as VexlTextInputProps} from './Input'
 
 interface StepWithText {
   type: 'StepWithText'
@@ -35,13 +36,33 @@ interface StepWithChildren {
   children: React.ReactNode
 }
 
-type Step = StepWithText | StepWithChildren
+interface StepWithInput {
+  type: 'StepWithInput'
+  negativeButtonText?: string
+  positiveButtonText: string
+  title: string
+  description?: string
+  subtitle?: string
+  textInputProps: VexlTextInputProps
+}
+
+type Step = StepWithText | StepWithChildren | StepWithInput
+
+type AreYouSureDialogAtomStepResult =
+  | {
+      type: 'noResult'
+    }
+  | {
+      type: 'inputResult'
+      value: string
+    }
 
 interface AreYouSureDialogState {
   variant: 'danger' | 'info'
   steps: Step[]
+  stepResults: AreYouSureDialogAtomStepResult[]
   currentStep: number
-  onPass: () => void
+  onPass: (result: AreYouSureDialogAtomStepResult[]) => void
   onDismiss: () => void
 }
 
@@ -50,8 +71,13 @@ const areYouSureDialogAtom = atom<AreYouSureDialogState | null>(null)
 type UserDeclinedError = BasicError<'UserDeclinedError'>
 export const askAreYouSureActionAtom: WritableAtom<
   null,
-  [Omit<AreYouSureDialogState, 'onPass' | 'onDismiss' | 'currentStep'>],
-  TE.TaskEither<UserDeclinedError, true>
+  [
+    Omit<
+      AreYouSureDialogState,
+      'onPass' | 'onDismiss' | 'currentStep' | 'stepResults'
+    >
+  ],
+  TE.TaskEither<UserDeclinedError, AreYouSureDialogAtomStepResult[]>
   // eslint-disable-next-line @typescript-eslint/promise-function-async
 > = atom(null, (get, set, state) => {
   // eslint-disable-next-line @typescript-eslint/promise-function-async
@@ -60,8 +86,9 @@ export const askAreYouSureActionAtom: WritableAtom<
       set(areYouSureDialogAtom, {
         ...state,
         currentStep: 0,
-        onPass: () => {
-          resolve(E.right(true))
+        stepResults: state.steps.map(() => ({type: 'noResult'} as const)),
+        onPass: (result) => {
+          resolve(E.right(result))
         },
         onDismiss: () => {
           resolve(
@@ -116,7 +143,7 @@ function AreYouSureDialog(): JSX.Element | null {
         entering={FadeIn}
         exiting={FadeOut}
         style={styles.backdrop}
-      ></Animated.View>
+      />
       <Animated.View
         style={styles.bounce}
         entering={SlideInDown}
@@ -154,6 +181,32 @@ function AreYouSureDialog(): JSX.Element | null {
                       </Text>
                     )}
                   </>
+                ) : step.type === 'StepWithInput' ? (
+                  <Stack space={'$4'}>
+                    <Text fos={28} col={'$black'} ff={'$heading'}>
+                      {step.title}
+                    </Text>
+                    <Text fos={18} col={'$greyOnWhite'} ff={'$body500'}>
+                      {step.description}
+                    </Text>
+                    <Text fos={18} col={'$black'} ff={'$heading'}>
+                      {step.subtitle}
+                    </Text>
+                    <Input
+                      value={
+                        state.stepResults[0].type === 'inputResult'
+                          ? state.stepResults[0].value
+                          : undefined
+                      }
+                      onChangeText={(value) => {
+                        setState({
+                          ...state,
+                          stepResults: [{type: 'inputResult', value}],
+                        })
+                      }}
+                      {...step.textInputProps}
+                    />
+                  </Stack>
                 ) : (
                   step.children
                 )}
@@ -177,7 +230,7 @@ function AreYouSureDialog(): JSX.Element | null {
               onPress={() => {
                 if (!state) return
                 if (state.currentStep >= state.steps.length - 1) {
-                  state.onPass()
+                  state.onPass(state.stepResults)
                   setState(null)
                 } else {
                   setState({...state, currentStep: state.currentStep + 1})

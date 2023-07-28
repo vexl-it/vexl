@@ -1,5 +1,5 @@
 import {useTranslation} from '../../utils/localization/I18nProvider'
-import userSvg from './images/userSvg'
+import userSvg from '../images/userSvg'
 import {useMemo} from 'react'
 import Currency from '../OfferForm/components/Currency'
 import OfferType from '../OfferForm/components/OfferType'

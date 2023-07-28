@@ -421,13 +421,27 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     }
   )
 
-  const hasPreviousCommunicationAtom = selectAtom(messagesAtom, (messages) => {
-    return (
-      messages.filter((one) => one.message.messageType === 'REQUEST_MESSAGING')
-        .length > 1 ||
-      messages.at(-1)?.message.messageType !== 'REQUEST_MESSAGING'
-    )
-  })
+  const hasPreviousCommunicationAtom = selectAtom(
+    messagesAtom,
+    (
+      messages
+    ):
+      | 'firstInteraction'
+      | 'anotherInteractionWithHistory'
+      | 'interactionAfterDelete' => {
+      if (messages.length === 0) return 'firstInteraction'
+
+      const hasOnlyOneRequest =
+        messages.filter(
+          (one) => one.message.messageType === 'REQUEST_MESSAGING'
+        ).length === 1
+      const wasDeleted = messages.at(0)?.message.messageType === 'DELETE_CHAT'
+
+      if (hasOnlyOneRequest)
+        return wasDeleted ? 'interactionAfterDelete' : 'firstInteraction'
+      return 'anotherInteractionWithHistory'
+    }
+  )
 
   const cancelRequestActionAtom = atom(null, (get, set) => {
     const offerInfo = get(offerForChatAtom)?.offerInfo

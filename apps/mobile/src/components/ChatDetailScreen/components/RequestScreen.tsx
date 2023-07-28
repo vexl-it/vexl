@@ -76,11 +76,20 @@ function RequestScreen(): JSX.Element {
           {offer && <ChatRequestPreview />}
 
           <YStack space="$2">
-            {hasPreviousCommunication && (
+            {hasPreviousCommunication === 'anotherInteractionWithHistory' && (
               <InfoSquare onPress={onHistoryPress}>
                 {t('messages.showFullChatHistory')}
               </InfoSquare>
             )}
+            {hasPreviousCommunication === 'interactionAfterDelete' && (
+              <InfoSquare>{t('offer.requestStatus.deleted')}</InfoSquare>
+            )}
+            {hasPreviousCommunication === 'firstInteraction' &&
+              requestedByMe && (
+                <InfoSquare>
+                  {t('messages.thisWillBeYourFirstInteraction')}
+                </InfoSquare>
+              )}
             {requestState === 'requested' && requestedByMe && (
               <InfoSquare>
                 {t('messages.wellLetYouKnowOnceUserAccepts')}

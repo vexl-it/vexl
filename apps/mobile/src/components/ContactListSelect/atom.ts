@@ -35,6 +35,8 @@ import userSvg from '../images/userSvg'
 
 export const ContactsSelectScope = createScope<ContactNormalized[]>([])
 
+export const newlyAddedCustomContactsAtom = atom<ContactNormalized[]>([])
+
 function combineContactsFromDeviceWithImportedContacts({
   contactsFromDevice,
   importedContacts,
@@ -76,8 +78,6 @@ export const contactSelectMolecule = molecule((getMolecule, getScope) => {
   const selectedNumbersAtom = atom(
     new Set(importedContacts.map((one) => one.normalizedNumber))
   )
-
-  const newlyAddedCustomContactsAtom = atom<ContactNormalized[]>([])
 
   const combinedContacts = atom((get) =>
     combineContactsFromDeviceWithImportedContacts({
@@ -272,6 +272,7 @@ export const contactSelectMolecule = molecule((getMolecule, getScope) => {
         },
         (importedContacts) => {
           set(importedContactsAtom, [...importedContacts])
+          set(newlyAddedCustomContactsAtom, [])
           set(
             lastImportOfContactsAtom,
             IsoDatetimeString.parse(new Date().toISOString())

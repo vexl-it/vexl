@@ -4,15 +4,18 @@ import Button from '../Button'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import ScreenTitle from '../ScreenTitle'
 import Screen from '../Screen'
-import {useCallback} from 'react'
+import {useCallback, useEffect} from 'react'
 import {Stack} from 'tamagui'
 import IconButton from '../IconButton'
 import closeSvg from '../images/closeSvg'
 import KeyboardAvoidingView from '../KeyboardAvoidingView'
+import {newlyAddedCustomContactsAtom} from '../ContactListSelect/atom'
+import {useSetAtom} from 'jotai'
 
 function SetContactsScreen(): JSX.Element {
   const goBack = useSafeGoBack()
   const {t} = useTranslation()
+  const setNewlyAddedCustomContacts = useSetAtom(newlyAddedCustomContactsAtom)
 
   const renderButton = useCallback(
     ({onSubmit}: {onSubmit: () => void}) => {
@@ -29,6 +32,12 @@ function SetContactsScreen(): JSX.Element {
     },
     [t]
   )
+
+  useEffect(() => {
+    return () => {
+      setNewlyAddedCustomContacts([])
+    }
+  }, [setNewlyAddedCustomContacts])
 
   return (
     <>

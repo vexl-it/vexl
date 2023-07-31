@@ -78,9 +78,6 @@ function refreshInbox(
           reportError('error', 'Error decrypting messages', one.errors)
         }
 
-        console.log(
-          `Processing messages: ${JSON.stringify(one.messages, null, 2)}`
-        )
         return one.messages
       }),
       TE.filterOrElseW(

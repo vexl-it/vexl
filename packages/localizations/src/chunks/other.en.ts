@@ -529,7 +529,8 @@ const otherEn =
           "BLOCK_CHAT": "{{them}} has blocked you",
           "OFFER_DELETED": "{{them}} has deleted the offer",
           "INBOX_DELETED": "{{them}} has deleted the chat.",
-          "CANCEL_REQUEST_MESSAGING": "Request was cancelled"
+          "CANCEL_REQUEST_MESSAGING": "Request was cancelled",
+          "ONLY_IMAGE": "{{them}} sent an image"
         },
         "outgoing": {
           "MESSAGE": "Me: {{message}}",
@@ -543,7 +544,8 @@ const otherEn =
           "BLOCK_CHAT": "User has been blocked",
           "OFFER_DELETED": "You have deleted your offer",
           "INBOX_DELETED": "You have deleted this inbox",
-          "CANCEL_REQUEST_MESSAGING": "You have cancelled the request."
+          "CANCEL_REQUEST_MESSAGING": "You have cancelled the request.",
+          "ONLY_IMAGE": "You have sent an image"
         }
       },
       "deleteChat": "Delete chat",

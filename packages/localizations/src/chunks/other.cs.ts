@@ -531,7 +531,8 @@ const otherCs: typeof en =
           "BLOCK_CHAT": "{{them}} tě zablokoval.",
           "OFFER_DELETED": "{{them}} smazal svou nabídku.",
           "INBOX_DELETED": "{{them}} smazal chat.",
-          "CANCEL_REQUEST_MESSAGING": "Zrušil žádost o zprávu"
+          "CANCEL_REQUEST_MESSAGING": "Zrušil žádost o zprávu",
+          "ONLY_IMAGE": "{{them}} sent an image"
         },
         "outgoing": {
           "MESSAGE": "Já: {{message}}",
@@ -545,7 +546,8 @@ const otherCs: typeof en =
           "BLOCK_CHAT": "Uživatel byl zablokován",
           "OFFER_DELETED": "Smazal jsi nabídku",
           "INBOX_DELETED": "Smazal jsi chat.",
-          "CANCEL_REQUEST_MESSAGING": "Žádost o zprávu zrušena"
+          "CANCEL_REQUEST_MESSAGING": "Žádost o zprávu zrušena",
+          "ONLY_IMAGE": "You have sent an image"
         }
       },
       "deleteChat": "Odstránit chat",

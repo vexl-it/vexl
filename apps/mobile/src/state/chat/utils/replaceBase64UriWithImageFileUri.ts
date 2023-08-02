@@ -18,8 +18,7 @@ import {
   type CryptoError,
   hashMD5,
 } from '@vexl-next/resources-utils/dist/utils/crypto'
-
-const IMAGES_DIRECTORY = 'chat-images'
+import {IMAGES_DIRECTORY} from '../../../utils/fsDirectories'
 
 type NoDocumentDirectoryError = BasicError<'NoDocumentDirectoryError'>
 type CreatingDirectoryError = BasicError<'CreatingDirectoryError'>
@@ -92,7 +91,8 @@ export type GettingImageSizeError = BasicError<'GettingImageSizeError'>
 
 function saveBase64ImageToStorage(
   base64: UriString,
-  inboxPublicKey: PublicKeyPemBase64
+  myPublicKey: PublicKeyPemBase64,
+  otherSidePublicKey: PublicKeyPemBase64
 ): TE.TaskEither<
   | NoDocumentDirectoryError
   | ProcessingBase64Error
@@ -109,9 +109,9 @@ function saveBase64ImageToStorage(
     E.bindW('fileName', ({content: {suffix}}) =>
       E.right(`${generateUuid()}.${suffix}`)
     ),
-    E.bindW('inboxPath', () => hashMD5(inboxPublicKey)),
-    E.bindW('directoryPath', ({documentDir, inboxPath}) =>
-      E.right(urlJoin(documentDir, IMAGES_DIRECTORY, inboxPath))
+    E.bindW('chatPath', () => hashMD5(`${myPublicKey}${otherSidePublicKey}`)),
+    E.bindW('directoryPath', ({documentDir, chatPath}) =>
+      E.right(urlJoin(documentDir, IMAGES_DIRECTORY, chatPath))
     ),
     E.bindW('filePath', ({directoryPath, fileName}) => {
       return pipe(
@@ -157,7 +157,8 @@ function replaceImages(
 
 export default function replaceBase64UriWithImageFileUri(
   message: ChatMessageWithState,
-  inboxPublicKey: PublicKeyPemBase64
+  inboxPublicKey: PublicKeyPemBase64,
+  otherSidePublicKey: PublicKeyPemBase64
 ): T.Task<ChatMessageWithState> {
   const image = message.message.image
   const replyToImage = message.message?.repliedTo?.image
@@ -167,7 +168,7 @@ export default function replaceBase64UriWithImageFileUri(
     T.bind('image', () =>
       image
         ? pipe(
-            saveBase64ImageToStorage(image, inboxPublicKey),
+            saveBase64ImageToStorage(image, inboxPublicKey, otherSidePublicKey),
             TE.match(
               (e) => {
                 reportError(
@@ -185,7 +186,11 @@ export default function replaceBase64UriWithImageFileUri(
     T.bind('replyToImage', () =>
       replyToImage
         ? pipe(
-            saveBase64ImageToStorage(replyToImage, inboxPublicKey),
+            saveBase64ImageToStorage(
+              replyToImage,
+              inboxPublicKey,
+              otherSidePublicKey
+            ),
             TE.match(
               (e) => {
                 reportError(

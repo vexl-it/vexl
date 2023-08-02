@@ -11,6 +11,7 @@ import {privateApiAtom} from '../api'
 import deleteAllInboxesActionAtom from './chat/atoms/deleteAllInboxesActionAtom'
 import reportError from '../utils/reportError'
 import {loadingOverlayDisplayedAtom} from '../components/LoadingOverlayProvider'
+import {deleteAllFiles} from '../utils/fsDirectories'
 
 async function failSilently<T>(promise: Promise<T>): Promise<
   | {success: true; result: T}
@@ -50,6 +51,9 @@ export const logoutActionAtom = atom(null, async (get, set) => {
 
     // Local storage
     clearMmkvStorageAndEmptyAtoms()
+
+    // files
+    await failSilently(deleteAllFiles())
 
     // firebase token
     await failSilently(messaging().deleteToken())

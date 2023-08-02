@@ -171,11 +171,7 @@ export default function replaceBase64UriWithImageFileUri(
             saveBase64ImageToStorage(image, inboxPublicKey, otherSidePublicKey),
             TE.match(
               (e) => {
-                reportError(
-                  'error',
-                  'Error while processing message with identity reveal',
-                  e
-                )
+                reportError('error', 'Error while processing message image', e)
                 return undefined
               },
               (one) => one
@@ -195,7 +191,7 @@ export default function replaceBase64UriWithImageFileUri(
               (e) => {
                 reportError(
                   'error',
-                  'Error while processing message with identity reveal',
+                  'Error while processing message replyToImage',
                   e
                 )
                 return undefined

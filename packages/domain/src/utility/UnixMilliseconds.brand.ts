@@ -14,3 +14,9 @@ export function now(): UnixMilliseconds {
 export function unixMillisecondsNow(): UnixMilliseconds {
   return now()
 }
+
+export function unixMilliseconds(): UnixMilliseconds {
+  return now()
+}
+
+export const UnixMilliseconds0 = UnixMilliseconds.parse(0)

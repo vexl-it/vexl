@@ -11,7 +11,7 @@ import reportError from '../../../utils/reportError'
 import * as T from 'fp-ts/Task'
 import {usePrivateApiAssumeLoggedIn} from '../../../api'
 import {type SetStateAction, useStore, type WritableAtom} from 'jotai'
-import {useCallback} from 'react'
+import {useCallback, useRef} from 'react'
 import {
   type PrivateKeyHolder,
   type PublicKeyPemBase64,
@@ -26,6 +26,11 @@ import {
   createSingleOfferReportedFlagFromAtomAtom,
   focusOfferByPublicKeyAtom,
 } from '../../marketplace/atom'
+import {
+  type UnixMilliseconds,
+  UnixMilliseconds0,
+  unixMillisecondsNow,
+} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
 
 export function createInboxAtom(
   publicKey: PublicKeyPemBase64
@@ -178,6 +183,9 @@ export function useFetchAndStoreMessagesForInbox(): (
         )
         return T.of(undefined)
       }
+      console.info(
+        `Refreshing inbox ${inbox.inbox.privateKey.publicKeyPemBase64}`
+      )
 
       return pipe(
         refreshInbox(api.chat)(
@@ -225,21 +233,26 @@ export function useFetchAndStoreMessagesForInbox(): (
 export default function useFetchMessagesForAllInboxes(): () => T.Task<'done'> {
   const store = useStore()
   const fetchAndStoreMessagesForInbox = useFetchAndStoreMessagesForInbox()
+  const lastRefreshRef = useRef<UnixMilliseconds>(UnixMilliseconds0)
 
-  return useCallback(
-    () =>
-      pipe(
-        store.get(messagingStateAtom),
-        A.map(
-          async (inbox) =>
-            await fetchAndStoreMessagesForInbox(
-              inbox.inbox.privateKey.publicKeyPemBase64
-            )()
-        ),
-        // @ts-expect-error bad typings?
-        A.sequence(T.ApplicativeSeq),
-        T.map(() => 'done' as const)
+  return useCallback(() => {
+    if (unixMillisecondsNow() - lastRefreshRef.current < 120)
+      return T.of('done')
+
+    lastRefreshRef.current = unixMillisecondsNow()
+    console.log('Refreshing all inboxes')
+
+    return pipe(
+      store.get(messagingStateAtom),
+      A.map(
+        async (inbox) =>
+          await fetchAndStoreMessagesForInbox(
+            inbox.inbox.privateKey.publicKeyPemBase64
+          )()
       ),
-    [fetchAndStoreMessagesForInbox, store]
-  )
+      // @ts-expect-error bad typings?
+      A.sequence(T.ApplicativeSeq),
+      T.map(() => 'done' as const)
+    )
+  }, [fetchAndStoreMessagesForInbox, store])
 }

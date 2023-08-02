@@ -25,6 +25,7 @@ import reportError from '../../utils/reportError'
 import {importedContactsAtom} from '../../state/contacts'
 import LanguagePicker from './components/LanguagePicker'
 import RemoteConfigView from './components/RemoteConfigView'
+import FilesInDocuments from './components/FilesInDocuments'
 
 // const ContentScroll = styled(ScrollView, {
 //   marginBottom: '$2',
@@ -60,6 +61,7 @@ function DebugScreen(): JSX.Element {
             <Spacer />
             <LanguagePicker />
             <Spacer />
+            <FilesInDocuments />
             <Button
               variant={'primary'}
               size={'small'}

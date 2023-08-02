@@ -98,7 +98,8 @@ function refreshInbox(
             if (!oneMessage.message.image) return T.of(oneMessage)
             return replaceBase64UriWithImageFileUri(
               oneMessage,
-              getInbox().inbox.privateKey.publicKeyPemBase64
+              getInbox().inbox.privateKey.publicKeyPemBase64,
+              oneMessage.message.senderPublicKey
             )
           }),
           T.sequenceArray,

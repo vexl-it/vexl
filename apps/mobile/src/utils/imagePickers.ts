@@ -8,6 +8,7 @@ import {safeParse} from './fpUtils'
 import urlJoin from 'url-join'
 import {generateUuid} from '@vexl-next/domain/dist/utility/Uuid.brand'
 import {z} from 'zod'
+import {PROFILE_PICTURE_DIRECTORY} from './fsDirectories'
 
 export const SelectedImage = z.object({
   width: z.number().brand<'imageHeight'>(),
@@ -107,7 +108,7 @@ export function getImageFromCameraAndTryToResolveThePermissionsAlongTheWay({
         moveImageToInternalDirectory({
           imagePath: UriString.parse(selectedImage.uri),
           mode: saveTo,
-          prefix: 'profilePicture',
+          prefix: PROFILE_PICTURE_DIRECTORY,
         }),
         TE.chainEitherKW((uri) => {
           return safeParse(SelectedImage)({
@@ -184,7 +185,7 @@ export function getImageFromGalleryAndTryToResolveThePermissionsAlongTheWay({
         moveImageToInternalDirectory({
           imagePath: UriString.parse(selectedImage.uri),
           mode: saveTo,
-          prefix: 'profilePicture',
+          prefix: PROFILE_PICTURE_DIRECTORY,
         }),
         TE.chainEitherKW((uri) => {
           return safeParse(SelectedImage)({

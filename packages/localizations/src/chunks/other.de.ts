@@ -172,7 +172,7 @@ const otherDe: typeof en =
         },
         "toAddCustomContact":
           "Um die Telefonnummer direkt hinzuzufügen, geben Sie sie in die Suchleiste ein (mit Ländervorwahl)",
-        "addContact": "Add contact",
+        "addContact": "Kontakt {{number}} manuell hinzufügen",
         "addThisPhoneNumber":
           "Would you like to add this phone number to your Vexl contacts?",
         "addContactName": "Add contact name",

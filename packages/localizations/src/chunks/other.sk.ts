@@ -165,7 +165,7 @@ const otherSk: typeof en =
         },
         "toAddCustomContact":
           "Ak chceš pridať telefónne číslo napriamo, zadaj ho do vyhľadávacieho riadku (s predvoľbou krajiny).",
-        "addContact": "Add contact",
+        "addContact": "Manuálne pridanie kontaktu {{number}}",
         "addThisPhoneNumber":
           "Would you like to add this phone number to your Vexl contacts?",
         "addContactName": "Add contact name",

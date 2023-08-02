@@ -169,7 +169,7 @@ const otherFr: typeof en =
         },
         "toAddCustomContact":
           "Pour ajouter un numéro de téléphone directement, tapez-le dans la barre de recherche (avec le préfixe du pays).",
-        "addContact": "Add contact",
+        "addContact": "Aggiungi un contatto {{number}} manualmente",
         "addThisPhoneNumber":
           "Would you like to add this phone number to your Vexl contacts?",
         "addContactName": "Add contact name",

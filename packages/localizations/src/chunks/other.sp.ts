@@ -170,7 +170,7 @@ const otherSp: typeof en =
         },
         "toAddCustomContact":
           "Para añadir un número de teléfono directamente, escríbalo en la barra de búsqueda (con el prefijo del país).",
-        "addContact": "Add contact",
+        "addContact": "Adicionar contacto {{number}} manualmente",
         "addThisPhoneNumber":
           "Would you like to add this phone number to your Vexl contacts?",
         "addContactName": "Add contact name",

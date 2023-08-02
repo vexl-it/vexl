@@ -165,7 +165,7 @@ const otherCs: typeof en =
         },
         "toAddCustomContact":
           "Chceš-li přidat telefonní číslo napřímo, zadej ho do vyhledávacího řádku (s předčíslím země).",
-        "addContact": "Add contact",
+        "addContact": "Ruční přidání kontaktu {{number}}",
         "addThisPhoneNumber":
           "Would you like to add this phone number to your Vexl contacts?",
         "addContactName": "Add contact name",

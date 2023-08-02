@@ -96,6 +96,16 @@ function MessagePreview({
       </BaseText>
     )
   } else if (message.messageType === 'MESSAGE') {
+    if (message.text.trim() === '' && message.image !== undefined) {
+      return (
+        <BaseText fontStyle={'italic'}>
+          {t(`messages.messagePreviews.${direction}.ONLY_IMAGE`, {
+            message: message.text,
+            them: name,
+          })}
+        </BaseText>
+      )
+    }
     return (
       <BaseText ff={unread ? '$body600' : '$body'}>
         {t(`messages.messagePreviews.${direction}.MESSAGE`, {

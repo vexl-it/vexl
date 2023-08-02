@@ -540,7 +540,8 @@ const otherSp: typeof en =
           "BLOCK_CHAT": "{{them}} te ha bloqueado",
           "OFFER_DELETED": "{{them}} ha eliminado la oferta",
           "INBOX_DELETED": "{{them}} ha borrado el chat.",
-          "CANCEL_REQUEST_MESSAGING": "Solicitud cancelada"
+          "CANCEL_REQUEST_MESSAGING": "Solicitud cancelada",
+          "ONLY_IMAGE": "{{them}} sent an image"
         },
         "outgoing": {
           "MESSAGE": "Yo: {{message}}",
@@ -554,7 +555,8 @@ const otherSp: typeof en =
           "BLOCK_CHAT": "Usuario bloqueado",
           "OFFER_DELETED": "Has eliminado tu oferta",
           "INBOX_DELETED": "Has borrado esta bandeja de entrada",
-          "CANCEL_REQUEST_MESSAGING": "Ha cancelado la solicitud de mensajería"
+          "CANCEL_REQUEST_MESSAGING": "Ha cancelado la solicitud de mensajería",
+          "ONLY_IMAGE": "You have sent an image"
         }
       },
       "deleteChat": "Borrar chat",

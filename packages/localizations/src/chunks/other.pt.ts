@@ -539,7 +539,8 @@ const otherPt: typeof en =
           "BLOCK_CHAT": "{{them}} bloqueou-o",
           "OFFER_DELETED": "{{them}} Eliminou a oferta",
           "INBOX_DELETED": "{{them}} Apagou a conversa.",
-          "CANCEL_REQUEST_MESSAGING": "O pedido foi cancelado"
+          "CANCEL_REQUEST_MESSAGING": "O pedido foi cancelado",
+          "ONLY_IMAGE": "{{them}} sent an image"
         },
         "outgoing": {
           "MESSAGE": "Eu: {{message}}",
@@ -553,7 +554,8 @@ const otherPt: typeof en =
           "BLOCK_CHAT": "O utilizador foi bloqueado",
           "OFFER_DELETED": "Apagou a sua oferta",
           "INBOX_DELETED": "Apagou esta caixa de entrada",
-          "CANCEL_REQUEST_MESSAGING": "Cancelou o pedido de envio de mensagens"
+          "CANCEL_REQUEST_MESSAGING": "Cancelou o pedido de envio de mensagens",
+          "ONLY_IMAGE": "You have sent an image"
         }
       },
       "deleteChat": "Apagar chat",

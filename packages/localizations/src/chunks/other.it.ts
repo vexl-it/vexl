@@ -544,7 +544,8 @@ const otherIt: typeof en =
           "BLOCK_CHAT": "{{them}} ti ha bloccato",
           "OFFER_DELETED": "{{them}} ha cancellato l'offerta",
           "INBOX_DELETED": "{{them}} Ha cancellato la chat.",
-          "CANCEL_REQUEST_MESSAGING": "La richiesta è stata annullata"
+          "CANCEL_REQUEST_MESSAGING": "La richiesta è stata annullata",
+          "ONLY_IMAGE": "{{them}} sent an image"
         },
         "outgoing": {
           "MESSAGE": "Io: {{message}}",
@@ -559,7 +560,8 @@ const otherIt: typeof en =
           "OFFER_DELETED": "Hai cancellato la tua offerta",
           "INBOX_DELETED": "Hai cancellato questa casella di posta",
           "CANCEL_REQUEST_MESSAGING":
-            "La richiesta di messaggistica è stata annullata"
+            "La richiesta di messaggistica è stata annullata",
+          "ONLY_IMAGE": "You have sent an image"
         }
       },
       "deleteChat": "Cancellare la chat",

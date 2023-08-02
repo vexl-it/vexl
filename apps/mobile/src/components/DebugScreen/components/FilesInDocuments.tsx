@@ -1,9 +1,9 @@
 import {useEffect, useState} from 'react'
 import {Stack, Text} from 'tamagui'
 import {
-  readDirectoryAsync,
-  getInfoAsync,
   documentDirectory,
+  getInfoAsync,
+  readDirectoryAsync,
 } from 'expo-file-system'
 import urlJoin from 'url-join'
 
@@ -34,7 +34,7 @@ function FilesInDocuments(): JSX.Element {
         if (!documentDirectory) throw new Error('No document directory')
         setFiles(await getFileOrDirectory(urlJoin(documentDirectory)))
       } catch (e) {
-        setFiles(`Error reading files ${e}`)
+        setFiles(`Error reading files ${String(e)}`)
       }
     })()
   }, [setFiles])

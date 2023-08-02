@@ -160,8 +160,8 @@ const otherEn =
             "To add phone number, type it into the search bar (with country code prefix)."
         },
         "toAddCustomContact":
-          "To add phone number directly type it into a search bar (with country code)",
-        "addContact": "Add contact",
+          "Enabling notifications allows you to find out when others accept your request or when you get a new message. ",
+        "addContact": "Add contact {{number}} manually",
         "addThisPhoneNumber":
           "Would you like to add this phone number to your Vexl contacts?",
         "addContactName": "Add contact name",

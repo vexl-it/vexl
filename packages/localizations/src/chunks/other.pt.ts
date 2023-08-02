@@ -166,7 +166,7 @@ const otherPt: typeof en =
         },
         "toAddCustomContact":
           "Para adicionar diretamente o número de telefone, escreva-o numa barra de pesquisa (com o indicativo do país)",
-        "addContact": "Add contact",
+        "addContact": "Añadir contacto {{number}} manualmente",
         "addThisPhoneNumber":
           "Would you like to add this phone number to your Vexl contacts?",
         "addContactName": "Add contact name",

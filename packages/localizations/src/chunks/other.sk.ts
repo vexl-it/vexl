@@ -636,6 +636,12 @@ const otherSk: typeof en =
         "requestPending": "Request pending",
         "bottomText": "Previous communication is displayed above",
         "buttonText": "Respond"
+      },
+      "cancelRequestDialog": {
+        "title": "Are you sure?",
+        "description":
+          "If you cancel the messaging request other side will be unable to accept it",
+        "yes": "Yes, cancel"
       }
     },
     "progressBar": {

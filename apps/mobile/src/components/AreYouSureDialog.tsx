@@ -68,7 +68,7 @@ interface AreYouSureDialogState {
 
 const areYouSureDialogAtom = atom<AreYouSureDialogState | null>(null)
 
-type UserDeclinedError = BasicError<'UserDeclinedError'>
+export type UserDeclinedError = BasicError<'UserDeclinedError'>
 export const askAreYouSureActionAtom: WritableAtom<
   null,
   [

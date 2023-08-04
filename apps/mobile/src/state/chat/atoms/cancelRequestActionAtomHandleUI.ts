@@ -21,6 +21,10 @@ import {Alert} from 'react-native'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 import {pipe} from 'fp-ts/function'
 import {type OfferInfo} from '@vexl-next/domain/dist/general/offers'
+import {
+  askAreYouSureActionAtom,
+  type UserDeclinedError,
+} from '../../../components/AreYouSureDialog'
 
 type ChatNotFoundError = BasicError<'ChatNotFoundError'>
 type CancelRequestApprovalErrors = ExtractLeftTE<
@@ -34,7 +38,10 @@ const cancelRequestActionAtomHandleUI = atom(
     set,
     {text, originOffer}: {text: string; originOffer: OfferInfo}
   ): TE.TaskEither<
-    ErrorEncryptingMessage | ChatNotFoundError | CancelRequestApprovalErrors,
+    | ErrorEncryptingMessage
+    | ChatNotFoundError
+    | CancelRequestApprovalErrors
+    | UserDeclinedError,
     ChatMessageWithState
   > => {
     const session = get(sessionDataOrDummyAtom)
@@ -62,14 +69,31 @@ const cancelRequestActionAtomHandleUI = atom(
       senderPublicKey: chat.inbox.privateKey.publicKeyPemBase64,
     }
 
-    set(loadingOverlayDisplayedAtom, true)
-
     return pipe(
-      sendCancelMessagingRequest({
-        api: api.chat,
-        text,
-        fromKeypair: chat.inbox.privateKey,
-        toPublicKey: chat.otherSide.publicKey,
+      TE.Do,
+      TE.chainW(() =>
+        set(askAreYouSureActionAtom, {
+          steps: [
+            {
+              type: 'StepWithText',
+              title: t('messages.cancelRequestDialog.title'),
+              description: t('messages.cancelRequestDialog.description'),
+              negativeButtonText: t('common.back'),
+              positiveButtonText: t('messages.cancelRequestDialog.yes'),
+            },
+          ],
+          variant: 'info',
+        })
+      ),
+      TE.chainW(() => {
+        set(loadingOverlayDisplayedAtom, true)
+
+        return sendCancelMessagingRequest({
+          api: api.chat,
+          text,
+          fromKeypair: chat.inbox.privateKey,
+          toPublicKey: chat.otherSide.publicKey,
+        })
       }),
       TE.map((): ChatMessageWithState => {
         const successMessage = {
@@ -83,6 +107,9 @@ const cancelRequestActionAtomHandleUI = atom(
         return successMessage
       }),
       TE.mapLeft((error) => {
+        if (error._tag === 'UserDeclinedError') {
+          return error
+        }
         Alert.alert(toCommonErrorMessage(error, t) ?? t('common.unknownError'))
         return error
       }),

@@ -20,6 +20,7 @@ import CancelSvg from '../images/cancelSvg'
 import Image from '../../Image'
 import SendImageButton from './SendImageButton'
 import UriImageWithSizeLimits from '../../UriImageWithSizeLimits'
+import {preferencesAtom} from '../../../utils/preferences'
 
 const textInputInitialHeight = getTokens().space[10].val
 
@@ -49,6 +50,8 @@ function ChatTextInput(): JSX.Element | null {
   const clearExtraToSend = useSetAtom(clearExtraToSendActionAtom)
   const session = useSessionAssumeLoggedIn()
   const {t} = useTranslation()
+
+  const preferences = useAtomValue(preferencesAtom)
 
   const animatedStyle = useAnimatedStyle(() => {
     return {opacity: withSpring(value || selectedImage ? 1 : 0)}
@@ -101,7 +104,7 @@ function ChatTextInput(): JSX.Element | null {
 
   return (
     <XStack space="$2" alignItems="center">
-      <SendImageButton />
+      {preferences.allowSendingImages && <SendImageButton />}
       <Stack f={1} backgroundColor="$grey" borderRadius="$8">
         {replyToMessage && (
           <XStack

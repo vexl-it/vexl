@@ -9,9 +9,9 @@ import retrieveMessages, {
 } from '@vexl-next/resources-utils/dist/chat/retrieveMessages'
 import reportError from '../../../utils/reportError'
 import * as T from 'fp-ts/Task'
-import {usePrivateApiAssumeLoggedIn} from '../../../api'
-import {type SetStateAction, useStore, type WritableAtom} from 'jotai'
-import {useCallback, useRef} from 'react'
+import {privateApiAtom, usePrivateApiAssumeLoggedIn} from '../../../api'
+import {atom, type SetStateAction, useStore, type WritableAtom} from 'jotai'
+import {useCallback} from 'react'
 import {
   type PrivateKeyHolder,
   type PublicKeyPemBase64,
@@ -125,12 +125,11 @@ function refreshInbox(
             const inbox = getInbox()
             return {
               ...getInbox(),
-              chats: [
-                ...createNewChatsFromMessages(inbox.inbox)(
-                  messageInNewChat || []
-                ),
-                ...addMessagesToChats(inbox.chats)(messageInExistingChat || []),
-              ],
+              chats: messageInNewChat
+                ? createNewChatsFromMessages(inbox.inbox)(
+                    messageInNewChat || []
+                  )
+                : addMessagesToChats(inbox.chats)(messageInExistingChat || []),
             }
           })
         )
@@ -230,29 +229,84 @@ export function useFetchAndStoreMessagesForInbox(): (
   )
 }
 
-export default function useFetchMessagesForAllInboxes(): () => T.Task<'done'> {
-  const store = useStore()
-  const fetchAndStoreMessagesForInbox = useFetchAndStoreMessagesForInbox()
-  const lastRefreshRef = useRef<UnixMilliseconds>(UnixMilliseconds0)
+export const fetchAndStoreMessagesForInboxAtom = atom<
+  null,
+  [{key: PublicKeyPemBase64}],
+  T.Task<InboxInState | undefined>
+>(null, (get, set, params) => {
+  const {key} = params
+  const api = get(privateApiAtom)
+  const inbox = get(createInboxAtom(key))
 
-  return useCallback(() => {
-    if (unixMillisecondsNow() - lastRefreshRef.current < 120)
-      return T.of('done')
-
-    lastRefreshRef.current = unixMillisecondsNow()
-    console.log('Refreshing all inboxes')
-
-    return pipe(
-      store.get(messagingStateAtom),
-      A.map(
-        async (inbox) =>
-          await fetchAndStoreMessagesForInbox(
-            inbox.inbox.privateKey.publicKeyPemBase64
-          )()
-      ),
-      // @ts-expect-error bad typings?
-      A.sequence(T.ApplicativeSeq),
-      T.map(() => 'done' as const)
+  if (!inbox) {
+    reportError(
+      'error',
+      `Trying to refresh inbox with public key: ${key}, but inbox does not exist.`,
+      new Error('Inbox does not exist')
     )
-  }, [fetchAndStoreMessagesForInbox, store])
-}
+    return T.of(undefined)
+  }
+
+  return pipe(
+    refreshInbox(api.chat)(() => get(createInboxAtom(key)) ?? inbox),
+    TE.match(
+      (error) => {
+        reportError('error', 'Api Error fetching messages for inbox', error)
+        return inbox
+      },
+      ({newMessages, updatedInbox}) => {
+        set(
+          createInboxAtom(inbox.inbox.privateKey.publicKeyPemBase64),
+          updatedInbox
+        )
+
+        newMessages
+          .filter((one) => one.message.messageType === 'BLOCK_CHAT')
+          .map((oneBlockMessage) => {
+            set(
+              createSingleOfferReportedFlagFromAtomAtom(
+                focusOfferByPublicKeyAtom(
+                  oneBlockMessage.message.senderPublicKey
+                )
+              ),
+              true
+            )
+          })
+
+        return updatedInbox
+      }
+    ),
+    T.chainFirst(() =>
+      deletePulledMessagesReportLeft({
+        api: api.chat,
+        keyPair: inbox.inbox.privateKey,
+      })
+    )
+  )
+})
+
+const lastRefreshAtom = atom<UnixMilliseconds>(UnixMilliseconds0)
+
+const fetchMessagesForAllInboxesAtom = atom(null, (get, set) => {
+  const lastRefresh = get(lastRefreshAtom)
+
+  if (unixMillisecondsNow() - lastRefresh < 120) return T.of('done')
+
+  set(lastRefreshAtom, unixMillisecondsNow())
+  console.log('Refreshing all inboxes')
+
+  return pipe(
+    get(messagingStateAtom),
+    A.map(
+      async (inbox) =>
+        await set(fetchAndStoreMessagesForInboxAtom, {
+          key: inbox.inbox.privateKey.publicKeyPemBase64,
+        })()
+    ),
+    // @ts-expect-error bad typings?
+    A.sequence(T.ApplicativeSeq),
+    T.map(() => 'done' as const)
+  )
+})
+
+export default fetchMessagesForAllInboxesAtom

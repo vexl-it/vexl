@@ -5,15 +5,18 @@ import {
 import {pipe} from 'fp-ts/function'
 import * as A from 'fp-ts/Array'
 import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
+import notifee from '@notifee/react-native'
 
 export default function createNewChatsFromFirstMessages(
   inbox: Inbox
 ): (messages: ChatMessageWithState[]) => ChatWithMessages[] {
+  void notifee.incrementBadgeCount()
+
   return (messages) =>
     pipe(
       messages,
-      A.map(
-        (oneMessage): ChatWithMessages => ({
+      A.map((oneMessage): ChatWithMessages => {
+        return {
           chat: {
             inbox,
             origin: inbox.offerId
@@ -24,7 +27,7 @@ export default function createNewChatsFromFirstMessages(
             isUnread: true,
           },
           messages: [oneMessage],
-        })
-      )
+        }
+      })
     )
 }

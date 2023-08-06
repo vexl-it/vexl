@@ -2,6 +2,7 @@ import {type PrimitiveAtom, useAtom} from 'jotai'
 import {type Chat} from '@vexl-next/domain/dist/general/messaging'
 import {useIsFocused} from '@react-navigation/native'
 import {useEffect, useMemo} from 'react'
+import notifee from '@notifee/react-native'
 import focusIsUnReadAtom from '../../../state/chat/atoms/focusIsUnReadAtom'
 
 export default function MarkAsReadWhenRendered({
@@ -17,6 +18,7 @@ export default function MarkAsReadWhenRendered({
   useEffect(() => {
     if (isUnread && isFocused) {
       setIsUnread(false)
+      void notifee.decrementBadgeCount()
     }
   }, [isUnread, setIsUnread, isFocused])
 

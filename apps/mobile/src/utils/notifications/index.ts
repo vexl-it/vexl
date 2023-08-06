@@ -38,7 +38,6 @@ export function useRequestNotificationPermissions(): TE.TaskEither<
           }
 
           Alert.alert(
-            // TODO translate
             t('notifications.permissionsNotGranted.title'),
             t('notifications.permissionsNotGranted.message'),
             [
@@ -129,13 +128,14 @@ export async function showUINotificationFromRemoteMessage(
       ? await getChannelForMessages()
       : await getDefaultChannel()
 
-  if (title && body)
+  if (title && body) {
     await notifee.displayNotification({
       title,
       body,
       data: remoteMessage.data,
       android: {channelId, pressAction: {id: 'default'}},
     })
+  }
 }
 
 export async function showUINotification({

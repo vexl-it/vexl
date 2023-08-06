@@ -1,19 +1,21 @@
 import ContainerWithTopBorderRadius from '../ContainerWithTopBorderRadius'
 import {Stack, Text} from 'tamagui'
-import useFetchMessagesForAllInboxes from '../../../../state/chat/hooks/useFetchNewMessages'
 import {useCallback} from 'react'
 import {useAppState} from '../../../../utils/useAppState'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import ChatsList from './components/ChatsList'
+import {useSetAtom} from 'jotai'
+import fetchMessagesForAllInboxesAtom from '../../../../state/chat/hooks/useFetchNewMessages'
+import {pipe} from 'fp-ts/function'
 
 function MessagesScreen(): JSX.Element {
   const {t} = useTranslation()
-  const fetchNewMessages = useFetchMessagesForAllInboxes()
+  const fetchNewMessages = useSetAtom(fetchMessagesForAllInboxesAtom)
 
   useAppState(
     useCallback(
       (state) => {
-        if (state === 'active') void fetchNewMessages()()
+        if (state === 'active') void pipe(fetchNewMessages())()
       },
       [fetchNewMessages]
     )

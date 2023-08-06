@@ -1,6 +1,6 @@
 import {useEffect} from 'react'
 import messaging from '@react-native-firebase/messaging'
-import {useFetchAndStoreMessagesForInbox} from './chat/hooks/useFetchNewMessages'
+import {fetchAndStoreMessagesForInboxAtom} from './chat/hooks/useFetchNewMessages'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
 import {pipe} from 'fp-ts/function'
 import * as TE from 'fp-ts/TaskEither'
@@ -20,9 +20,9 @@ import focusChatWithMessagesAtom from './chat/atoms/focusChatWithMessagesAtom'
 import {AppState} from 'react-native'
 
 export function useHandleReceivedNotifications(): void {
-  const fetchMessagesForInbox = useFetchAndStoreMessagesForInbox()
   const navigation = useNavigation()
   const store = useStore()
+  const fetchMessagesForInbox = useSetAtom(fetchAndStoreMessagesForInboxAtom)
   const updateOffersConnections = useSetAtom(
     updateAllOffersConnectionsActionAtom
   )
@@ -77,7 +77,7 @@ export function useHandleReceivedNotifications(): void {
           data.inbox,
           safeParse(PublicKeyPemBase64),
           TE.fromEither,
-          TE.chainTaskK((inbox) => fetchMessagesForInbox(inbox)),
+          TE.chainTaskK((inbox) => fetchMessagesForInbox({key: inbox})),
           TE.match(
             (e) => {
               reportError('error', 'Error processing messaging notification', e)

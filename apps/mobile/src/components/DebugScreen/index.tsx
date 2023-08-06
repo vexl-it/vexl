@@ -8,7 +8,6 @@ import {MINIMAL_DATE} from '@vexl-next/domain/dist/utility/IsoDatetimeString.bra
 import {useSessionAssumeLoggedIn} from '../../state/session'
 import {Alert, ScrollView} from 'react-native'
 import Clipboard from '@react-native-clipboard/clipboard'
-import useFetchMessagesForAllInboxes from '../../state/chat/hooks/useFetchNewMessages'
 import {useTriggerOffersRefresh} from '../../state/marketplace'
 import {type Inbox} from '@vexl-next/domain/dist/general/messaging'
 import messagingStateAtom from '../../state/chat/atoms/messagingStateAtom'
@@ -25,6 +24,9 @@ import reportError from '../../utils/reportError'
 import {importedContactsAtom} from '../../state/contacts'
 import LanguagePicker from './components/LanguagePicker'
 import RemoteConfigView from './components/RemoteConfigView'
+import fetchMessagesForAllInboxesAtom from '../../state/chat/hooks/useFetchNewMessages'
+import {pipe} from 'fp-ts/function'
+import * as T from 'fp-ts/Task'
 import FilesInDocuments from './components/FilesInDocuments'
 
 // const ContentScroll = styled(ScrollView, {
@@ -39,7 +41,7 @@ function DebugScreen(): JSX.Element {
   const store = useStore()
   const session = useSessionAssumeLoggedIn()
 
-  const refreshMessaging = useFetchMessagesForAllInboxes()
+  const refreshMessaging = useSetAtom(fetchMessagesForAllInboxesAtom)
   const refreshOffers = useTriggerOffersRefresh()
   const updateConnections = useSetAtom(updateAllOffersConnectionsActionAtom)
 
@@ -120,9 +122,14 @@ function DebugScreen(): JSX.Element {
               size={'small'}
               text={'Refresh chat state'}
               onPress={() => {
-                void refreshMessaging()().then(() => {
-                  Alert.alert('done')
-                })
+                void pipe(
+                  refreshMessaging(),
+                  T.map((result) => {
+                    if (result === 'done') {
+                      Alert.alert('done')
+                    }
+                  })
+                )()
               }}
             />
             <Button
@@ -130,9 +137,14 @@ function DebugScreen(): JSX.Element {
               size={'small'}
               text={'Refresh messages state'}
               onPress={() => {
-                void refreshMessaging()().then(() => {
-                  Alert.alert('done')
-                })
+                void pipe(
+                  refreshMessaging(),
+                  T.map((result) => {
+                    if (result === 'done') {
+                      Alert.alert('done')
+                    }
+                  })
+                )()
               }}
             />
             <Button

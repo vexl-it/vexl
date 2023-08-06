@@ -11,6 +11,7 @@ import {privateApiAtom} from '../api'
 import deleteAllInboxesActionAtom from './chat/atoms/deleteAllInboxesActionAtom'
 import reportError from '../utils/reportError'
 import {loadingOverlayDisplayedAtom} from '../components/LoadingOverlayProvider'
+import notifee from '@notifee/react-native'
 import {deleteAllFiles} from '../utils/fsDirectories'
 
 async function failSilently<T>(promise: Promise<T>): Promise<
@@ -45,6 +46,9 @@ export const logoutActionAtom = atom(null, async (get, set) => {
 
     // User service
     await failSilently(get(privateApiAtom).user.deleteUser()())
+
+    // Notification badge
+    await failSilently(notifee.setBadgeCount(0))
 
     // session
     set(sessionAtom, O.none)

@@ -309,7 +309,8 @@ const otherSk: typeof en =
       "requestWasCancelledByOtherSide":
         "Požiadavku nemožno prijať, pretože jej druhá strana zrušila.",
       "requestNotFound":
-        "Požiadavku nemožno prijať, pretože druhá strana zrušila svoj účet."
+        "Požiadavku nemožno prijať, pretože druhá strana zrušila svoj účet.",
+      "otherSideAccountDeleted": "Other side has deleted their account"
     },
     "termsOfUse": {
       "termsOfUse": "Podmienky používania",

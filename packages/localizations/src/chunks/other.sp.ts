@@ -316,7 +316,8 @@ const otherSp: typeof en =
       "requestWasCancelledByOtherSide":
         "No se puede aprobar. La otra parte ha cancelado la solicitud",
       "requestNotFound":
-        "No se puede aprobar. La otra parte ha eliminado su cuenta"
+        "No se puede aprobar. La otra parte ha eliminado su cuenta",
+      "otherSideAccountDeleted": "Other side has deleted their account"
     },
     "termsOfUse": {
       "termsOfUse": "Condiciones de uso",

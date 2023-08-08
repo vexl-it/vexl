@@ -25,6 +25,8 @@ import {
   askAreYouSureActionAtom,
   type UserDeclinedError,
 } from '../../../components/AreYouSureDialog'
+import addMessageToChat from '../utils/addMessageToChat'
+import createAccountDeletedMessage from '../utils/createAccountDeletedMessage'
 
 type ChatNotFoundError = BasicError<'ChatNotFoundError'>
 type CancelRequestApprovalErrors = ExtractLeftTE<
@@ -108,6 +110,19 @@ const cancelRequestActionAtomHandleUI = atom(
       }),
       TE.mapLeft((error) => {
         if (error._tag === 'UserDeclinedError') {
+          return error
+        }
+        if (error._tag === 'OtherSideAccountDeleted') {
+          set(
+            chatAtom,
+            addMessageToChat(
+              createAccountDeletedMessage({
+                senderPublicKey: chat.inbox.privateKey.publicKeyPemBase64,
+              })
+            )
+          )
+          Alert.alert(t('offer.otherSideAccountDeleted'))
+
           return error
         }
         Alert.alert(toCommonErrorMessage(error, t) ?? t('common.unknownError'))

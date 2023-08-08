@@ -30,6 +30,7 @@ import {
   DeletePulledMessagesResponse,
   type LeaveChatRequest,
   LeaveChatResponse,
+  type OtherSideAccountDeleted,
   type RequestAlreadyApprovedError,
   type RequestApprovalRequest,
   RequestApprovalResponse,
@@ -170,6 +171,11 @@ export function privateApi({
                 _tag: 'RequestAlreadyApprovedError',
               } as RequestAlreadyApprovedError
             }
+            if (e.response.data.code === '100101') {
+              return {
+                _tag: 'OtherSideAccountDeleted',
+              } as OtherSideAccountDeleted
+            }
           }
           return e
         })
@@ -199,6 +205,11 @@ export function privateApi({
               return {
                 _tag: 'RequestAlreadyApprovedError',
               } as RequestAlreadyApprovedError
+            }
+            if (e.response.data.code === '100101') {
+              return {
+                _tag: 'OtherSideAccountDeleted',
+              } as OtherSideAccountDeleted
             }
           }
           return e

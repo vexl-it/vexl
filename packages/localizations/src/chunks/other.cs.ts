@@ -308,7 +308,8 @@ const otherCs: typeof en =
       "requestWasCancelledByOtherSide":
         "Žádost nelze přijmout, protože jí druhá strana zrušila.",
       "requestNotFound":
-        "Žádost nelze přijmout, protože druhá strana odstranila svůj účet."
+        "Žádost nelze přijmout, protože druhá strana odstranila svůj účet.",
+      "otherSideAccountDeleted": "Other side has deleted their account"
     },
     "termsOfUse": {
       "termsOfUse": "Podmínky používání",

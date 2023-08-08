@@ -7,9 +7,7 @@ import * as E from 'fp-ts/lib/Either'
 import type * as T from 'fp-ts/lib/Task'
 import {Alert} from 'react-native'
 import NotificationSetting from 'react-native-open-notification'
-import messaging, {
-  type FirebaseMessagingTypes,
-} from '@react-native-firebase/messaging'
+import messaging from '@react-native-firebase/messaging'
 import {
   type BasicError,
   toBasicError,
@@ -17,7 +15,6 @@ import {
 import {useTranslation} from '../localization/I18nProvider'
 import {getDefaultStore} from 'jotai'
 import {preferencesAtom} from '../preferences'
-import {CHAT_NOTIFICATION_TYPES} from './notificationTypes'
 
 type UnknownErrorNotifications = BasicError<'UnknownErrorNotifications'>
 
@@ -97,65 +94,6 @@ export function areNotificationsEnabled(): TE.TaskEither<
       backgroundTasks: true, // TODO how to find this out on IOS?
     }
   }, toBasicError('UnknownErrorNotifications'))
-}
-
-async function getChannelForMessages(): Promise<string> {
-  return await notifee.createChannel({
-    id: 'Chat',
-    name: 'Chat notifications.',
-    importance: AndroidImportance.HIGH,
-  })
-}
-
-async function getDefaultChannel(): Promise<string> {
-  return await notifee.createChannel({
-    id: 'Chat',
-    name: 'Chat notifications.',
-    importance: AndroidImportance.HIGH,
-  })
-}
-
-export async function showUINotificationFromRemoteMessage(
-  remoteMessage: FirebaseMessagingTypes.RemoteMessage
-): Promise<void> {
-  if (!remoteMessage.data && !remoteMessage.notification) return
-
-  const {title, body} = remoteMessage.notification ?? remoteMessage.data ?? {}
-
-  const channelId =
-    remoteMessage?.data?.type &&
-    CHAT_NOTIFICATION_TYPES.includes(remoteMessage.data.type)
-      ? await getChannelForMessages()
-      : await getDefaultChannel()
-
-  if (title && body) {
-    await notifee.displayNotification({
-      title,
-      body,
-      data: remoteMessage.data,
-      android: {channelId, pressAction: {id: 'default'}},
-    })
-  }
-}
-
-export async function showUINotification({
-  title,
-  body,
-}: {
-  title: string
-  body: string
-}): Promise<void> {
-  const channelId = await notifee.createChannel({
-    id: 'general',
-    name: 'General notifications',
-    importance: AndroidImportance.DEFAULT,
-  })
-
-  await notifee.displayNotification({
-    title,
-    body,
-    android: {channelId},
-  })
 }
 
 export async function deactivateToken(): Promise<void> {

@@ -7,7 +7,7 @@ import * as TE from 'fp-ts/TaskEither'
 import * as O from 'fp-ts/Option'
 import {safeParse} from '../utils/fpUtils'
 import reportError from '../utils/reportError'
-import {showUINotificationFromRemoteMessage} from '../utils/notifications'
+import {showUINotificationFromRemoteMessage} from '../utils/notifications/showUINotificationFromRemoteMessage'
 import {
   CHAT_NOTIFICATION_TYPES,
   NEW_CONNECTION,
@@ -39,7 +39,7 @@ export function useHandleReceivedNotifications(): void {
         return
       }
 
-      if (CHAT_NOTIFICATION_TYPES.includes(data.type)) {
+      if ((CHAT_NOTIFICATION_TYPES as string[]).includes(data.type)) {
         console.info('📳 Refreshing inbox')
 
         pipe(

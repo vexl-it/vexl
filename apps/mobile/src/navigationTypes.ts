@@ -49,7 +49,10 @@ export type RootStackParamsList = {
   TodoScreen: undefined
 
   SetContacts: undefined
+
   CommonFriends: {contactsHashes: readonly string[]}
+
+  NotificationSettings: undefined
 
   AppLogs: undefined
 

@@ -42,6 +42,15 @@ export default function clearMmkvStorageAndEmptyAtoms(): void {
     showDebugNotifications: false,
     disableOfferRerequestLimit: false,
     allowSendingImages: false,
+    notificationPreferences: {
+      marketing: true,
+      chat: true,
+      inactivityWarnings: true,
+      marketplace: true,
+      newOfferInMarketplace: true,
+      newPhoneContacts: true,
+      offer: true,
+    },
   })
 
   storage._storage.clearAll()

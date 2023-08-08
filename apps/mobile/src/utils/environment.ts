@@ -11,3 +11,7 @@ export const versionCode = Number(Constants.expoConfig?.extra?.versionCode ?? 0)
 export const hmacPassword = String(
   Constants.expoConfig?.extra?.hmacPassword ?? 'VexlVexl'
 )
+
+export const packageName = String(
+  Constants.expoConfig?.extra?.packageName ?? 'it.vexl.next'
+)

@@ -30,6 +30,7 @@ import useHandleNotificationOpen from '../../state/useHandleNotificationOpen'
 import {useHandleDeepLink} from '../../utils/deepLinks'
 import EditNameScreen from '../EditNameScreen'
 import ChangeProfilePictureScreen from '../ChangeProfilePictureScreen/ChangeProfilePictureScreen'
+import NotificationSettingsScreen from '../NotificationSettingsScreen'
 
 const Stack = createNativeStackNavigator<RootStackParamsList>()
 
@@ -91,6 +92,10 @@ function RootNavigation(): JSX.Element {
             />
           </Stack.Group>
         )}
+        <Stack.Screen
+          name={'NotificationSettings'}
+          component={NotificationSettingsScreen}
+        />
         <Stack.Screen name={'TermsAndConditions'} component={TosScreen} />
         <Stack.Screen name={'Faqs'} component={FaqsScreen} />
         <Stack.Screen name={'DebugScreen'} component={DebugScreen} />

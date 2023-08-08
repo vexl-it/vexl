@@ -485,7 +485,81 @@ const otherDe: typeof en =
         "message": "Du kannst sie in den Einstellungen aktivieren",
         "openSettings": "Einstellungen öffnen"
       },
-      "errorWhileOpening": "Fehler beim Öffnen der Benachrichtigung"
+      "errorWhileOpening": "Fehler beim Öffnen der Benachrichtigung",
+      "MESSAGE": {
+        "title": "New message",
+        "body": "You have received a new message."
+      },
+      "REQUEST_REVEAL": {
+        "title": "Identity request received",
+        "body": "You have been requested to reveal your identity."
+      },
+      "APPROVE_REVEAL": {
+        "title": "Identity revealed!",
+        "body": "Your request to reveal identities was approved."
+      },
+      "DISAPPROVE_REVEAL": {
+        "title": "Identity request denied",
+        "body": "Your request to reveal identities was denied."
+      },
+      "REQUEST_MESSAGING": {
+        "title": "New request!",
+        "body": "You have received a new request."
+      },
+      "APPROVE_MESSAGING": {
+        "title": "Request approved!",
+        "body": "Your request was approved."
+      },
+      "DISAPPROVE_MESSAGING": {
+        "title": "Request denied",
+        "body": "Your request was denied."
+      },
+      "DELETE_CHAT": {
+        "title": "Chat deleted",
+        "body": "One of your chats has been deleted."
+      },
+      "BLOCK_CHAT": {
+        "title": "You've been blocked",
+        "body": "Someone just blocked you."
+      },
+      "INACTIVITY_REMINDER": {
+        "title": "Login to prevent deactivation of your offers.",
+        "body":
+          "You have not logged in for a long time. Login to prevent deactivation of your offers."
+      },
+      "preferences": {
+        "marketing": {
+          "title": "Marketing notification",
+          "body": "Notification about new features etc..."
+        },
+        "chat": {
+          "title": "Chat notifications",
+          "body":
+            "Notifications about new chat messages, requests, identity reveals etc..."
+        },
+        "inactivityWarnings": {
+          "title": "Inactivity warnings",
+          "body":
+            "We will let you know when your offers are about to be deactivated due to innactivity"
+        },
+        "marketplace": {
+          "title": "marketplace",
+          "body": "marketplace"
+        },
+        "newOfferInMarketplace": {
+          "title": "newOfferInMarketplace",
+          "body": "newOfferInMarketplace"
+        },
+        "newPhoneContacts": {
+          "title": "newPhoneContacts",
+          "body": "newPhoneContacts"
+        },
+        "offer": {
+          "title": "offer",
+          "body": "offer"
+        },
+        "screenTitle": "Notifications Settings"
+      }
     },
     "myOffers": {
       "addNewOffer": "Neues Angebot hinzufügen",

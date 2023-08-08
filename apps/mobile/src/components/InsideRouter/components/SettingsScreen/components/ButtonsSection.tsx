@@ -36,6 +36,7 @@ import openUrl from '../../../../../utils/openUrl'
 import ChangeCurrency from './ChangeCurrency'
 import ContactsImportedTitle from './ContactsImportedTitle'
 import SelectedCurrencyTitle from './SelectedCurrencyTitle'
+import notificationsIconSvg from '../images/notificationsIconSvg'
 
 const ItemText = styled(Text, {
   fos: 18,
@@ -192,6 +193,13 @@ function ButtonsSection(): JSX.Element {
             icon: termsIconSvg,
             onPress: () => {
               navigation.navigate('TermsAndConditions')
+            },
+          },
+          {
+            text: t('notifications.preferences.screenTitle'),
+            icon: notificationsIconSvg,
+            onPress: () => {
+              navigation.navigate('NotificationSettings')
             },
           },
           {

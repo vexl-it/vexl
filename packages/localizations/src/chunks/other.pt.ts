@@ -311,7 +311,8 @@ const otherPt: typeof en =
       "requestWasCancelledByOtherSide":
         "Não é possível aprovar. A outra parte cancelou o pedido",
       "requestNotFound":
-        "Não é possível aprovar. A outra parte eliminou a sua conta"
+        "Não é possível aprovar. A outra parte eliminou a sua conta",
+      "otherSideAccountDeleted": "Other side has deleted their account"
     },
     "termsOfUse": {
       "termsOfUse": "Termos de utilização",

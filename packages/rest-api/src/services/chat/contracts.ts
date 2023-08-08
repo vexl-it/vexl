@@ -23,6 +23,10 @@ export interface RequestAlreadyApprovedError {
   readonly _tag: 'RequestAlreadyApprovedError'
 }
 
+export interface OtherSideAccountDeleted {
+  readonly _tag: 'OtherSideAccountDeleted'
+}
+
 export const SignedChallenge = z.object({
   challenge: z.string(),
   signature: z.string(),

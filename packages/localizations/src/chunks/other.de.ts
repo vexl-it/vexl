@@ -321,7 +321,8 @@ const otherDe: typeof en =
       "requestWasCancelledByOtherSide":
         "Kann nicht genehmigt werden. Die andere Seite hat die Anfrage storniert",
       "requestNotFound":
-        "Kann nicht genehmigt werden. Die Gegenseite hat ihr Konto gelöscht"
+        "Kann nicht genehmigt werden. Die Gegenseite hat ihr Konto gelöscht",
+      "otherSideAccountDeleted": "Other side has deleted their account"
     },
     "termsOfUse": {
       "termsOfUse": "Nutzungsbedingungen",

@@ -316,7 +316,8 @@ const otherFr: typeof en =
       "requestWasCancelledByOtherSide":
         "Impossible d'approuver. L'autre partie a annulé la demande",
       "requestNotFound":
-        "Impossible d'approuver. L'autre partie a supprimé son compte"
+        "Impossible d'approuver. L'autre partie a supprimé son compte",
+      "otherSideAccountDeleted": "Other side has deleted their account"
     },
     "termsOfUse": {
       "termsOfUse": "Conditions d'utilisation",

@@ -308,7 +308,8 @@ const otherEn =
       "requestWasCancelledByOtherSide":
         "Unable to approve. Other side has cancelled the request.",
       "requestNotFound":
-        "Unable to approve. Other side has deleted their account."
+        "Unable to approve. Other side has deleted their account.",
+      "otherSideAccountDeleted": "Other side has deleted their account"
     },
     "termsOfUse": {
       "termsOfUse": "Terms of Use",

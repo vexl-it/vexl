@@ -263,8 +263,6 @@ function TextMessage({
                 <TextInput
                   caretHidden
                   multiline
-                  autoCorrect={false}
-                  autoComplete={'off'}
                   hitSlop={textInputHitSlop}
                   showSoftInputOnFocus={false}
                   spellCheck={false}

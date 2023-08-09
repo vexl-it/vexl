@@ -38,10 +38,13 @@ export const CurrencyCode = z.enum([
 
 export const CurrencyInfo = z.object({
   code: CurrencyCode,
-  flag: z.string().brand<'currencyFlag'>(),
-  name: z.string().brand<'currencyName'>(),
-  symbol: z.string().brand<'currencySymbol'>(),
+  flag: z.string().brand<'CurrencyFlag'>(),
+  name: z.string().brand<'CurrencyName'>(),
+  symbol: z.string().brand<'CurrencySymbol'>(),
+  maxAmount: z.number(),
   position: z.enum(['before', 'after']),
+  countryCode: z.array(z.number()),
 })
+
 export type CurrencyCode = z.TypeOf<typeof CurrencyCode>
 export type CurrencyInfo = z.TypeOf<typeof CurrencyInfo>

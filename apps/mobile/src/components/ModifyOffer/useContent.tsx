@@ -26,9 +26,6 @@ export default function useContent(): SectionProps[] {
   const {
     amountTopLimitAtom,
     amountBottomLimitAtom,
-    amountBottomLimitUsdEurCzkAtom,
-    amountTopLimitCzkAtom,
-    amountTopLimitUsdEurAtom,
     btcNetworkAtom,
     currencyAtom,
     feeAmountAtom,
@@ -67,9 +64,6 @@ export default function useContent(): SectionProps[] {
           <AmountOfTransaction
             amountTopLimitAtom={amountTopLimitAtom}
             amountBottomLimitAtom={amountBottomLimitAtom}
-            amountBottomLimitUsdEurCzkAtom={amountBottomLimitUsdEurCzkAtom}
-            amountTopLimitCzkAtom={amountTopLimitCzkAtom}
-            amountTopLimitUsdEurAtom={amountTopLimitUsdEurAtom}
             currencyAtom={currencyAtom}
           />
         ),
@@ -134,10 +128,7 @@ export default function useContent(): SectionProps[] {
     ],
     [
       amountBottomLimitAtom,
-      amountBottomLimitUsdEurCzkAtom,
       amountTopLimitAtom,
-      amountTopLimitCzkAtom,
-      amountTopLimitUsdEurAtom,
       btcNetworkAtom,
       currencyAtom,
       feeAmountAtom,

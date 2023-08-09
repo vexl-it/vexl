@@ -104,7 +104,6 @@ function LocationSearch({
         </ScreenTitle>
         <Input
           autoFocus
-          autoCorrect={false}
           value={inputValue}
           onChangeText={setInputValue}
           textColor="$greyOnBlack"

@@ -62,7 +62,8 @@ const otherCs: typeof en =
       "requestAgain": "Request again",
       "seeDetail": "See details",
       "notNow": "Not now",
-      "niceWithExclamationMark": "Nice!"
+      "niceWithExclamationMark": "Nice!",
+      "nothingFound": "Nic nenalezeno"
     },
     "loginFlow": {
       "anonymityNotice": "Bez tvého svolení jej nikdo neuvidí. Ani my.",
@@ -459,7 +460,9 @@ const otherCs: typeof en =
       "noVexlersFoundForYourOffer":
         "Pro tvoji nabídku nebyl nalezen žádný vexlák",
       "errorLocationNotFilled": "Vyplň prosím lokalitu.",
-      "errorDescriptionNotFilled": "Vyplň prosím popis nabídky."
+      "errorDescriptionNotFilled": "Vyplň prosím popis nabídky.",
+      "selectCurrency": "Výběr měny",
+      "currencyYouWouldLikeToUse": "Měna, kterou chceš použít při obchodování."
     },
     "notifications": {
       "permissionsNotGranted": {

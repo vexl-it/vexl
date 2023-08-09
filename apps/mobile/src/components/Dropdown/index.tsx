@@ -2,7 +2,7 @@ import {useCallback, useMemo, useState} from 'react'
 import {TouchableOpacity, TouchableWithoutFeedback} from 'react-native'
 import {getTokens, Stack, styled, Text, XStack} from 'tamagui'
 import Image from '../Image'
-import chevronDownSvg from './images/chevronDownSvg'
+import chevronDownSvg from '../../images/chevronDownSvg'
 import Animated, {
   useAnimatedStyle,
   useSharedValue,

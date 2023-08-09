@@ -62,7 +62,8 @@ const otherSk: typeof en =
       "requestAgain": "Request again",
       "seeDetail": "See details",
       "notNow": "Not now",
-      "niceWithExclamationMark": "Nice!"
+      "niceWithExclamationMark": "Nice!",
+      "nothingFound": "Nič nenájdené"
     },
     "loginFlow": {
       "anonymityNotice": "Kým to nepovolíš, nikto to neuvidí. Dokonca ani my.",
@@ -461,7 +462,9 @@ const otherSk: typeof en =
       "noVexlersFoundForYourOffer":
         "Pre tvoju ponuku neboli nájdení žiadni vexláci",
       "errorLocationNotFilled": "Vyplň prosím lokalitu.",
-      "errorDescriptionNotFilled": "Vyplň prosím popis nabídky."
+      "errorDescriptionNotFilled": "Vyplň prosím popis nabídky.",
+      "selectCurrency": "Výber meny",
+      "currencyYouWouldLikeToUse": "Mena, ktorú chceš použiť pri obchodovaní."
     },
     "notifications": {
       "permissionsNotGranted": {

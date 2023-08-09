@@ -1,4 +1,4 @@
-import {atom} from 'jotai'
+import {atom, getDefaultStore} from 'jotai'
 import {
   type CurrencyCode,
   type LocationState,
@@ -32,24 +32,37 @@ import {PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
 import {focusAtom} from 'jotai-optics'
 import notEmpty from '../../../utils/notEmpty'
 import {type OfferEncryptionProgress} from '@vexl-next/resources-utils/dist/offers/OfferEncryptionProgress'
+import {currencies} from '../../../utils/localization/currency'
+import {sessionDataOrDummyAtom} from '../../../state/session'
+import {parsePhoneNumber} from 'awesome-phonenumber'
 
 export function createOfferDummyPublicPart(): OfferPublicPart {
+  const userPhoneNumber = getDefaultStore().get(
+    sessionDataOrDummyAtom
+  ).phoneNumber
+  const parsedPhoneNumber = parsePhoneNumber(userPhoneNumber)
+  const defaultCurrency = Object.values(currencies).find((currency) =>
+    parsedPhoneNumber.countryCode
+      ? currency.countryCode.includes(parsedPhoneNumber.countryCode)
+      : currencies.USD
+  )
+
   return {
     offerPublicKey: PublicKeyPemBase64.parse('offerPublicKey'),
     location: [],
     offerDescription: '',
     amountBottomLimit: 0,
-    amountTopLimit: 250000,
+    amountTopLimit: defaultCurrency?.maxAmount ?? currencies.USD.maxAmount,
     feeState: 'WITHOUT_FEE',
     feeAmount: 0,
     locationState: 'IN_PERSON',
     paymentMethod: ['CASH'],
     btcNetwork: ['ON_CHAIN'],
-    currency: 'CZK',
+    currency: defaultCurrency?.code ?? currencies.USD.code,
     offerType: 'SELL',
     activePriceState: 'NONE',
     activePriceValue: 0,
-    activePriceCurrency: 'CZK',
+    activePriceCurrency: defaultCurrency?.code ?? currencies.USD.code,
     active: true,
     groupUuids: [],
   }
@@ -104,28 +117,20 @@ export const offerFormMolecule = molecule(() => {
     optic.prop('amountTopLimit')
   )
 
-  const amountBottomLimitUsdEurCzkAtom = atom<number>(0)
-  const amountTopLimitUsdEurAtom = atom<number>(10000)
-  const amountTopLimitCzkAtom = atom<number>(250000)
-
-  const updateCurrencyLimitsAtom = atom<null, [{currency: CurrencyCode}], boolean>(
+  const updateCurrencyLimitsAtom = atom<
     null,
-    (get, set, params) => {
-      const {currency} = params
-      const currencyFromAtom = get(currencyAtom)
-      if (currencyFromAtom === currency) return false
+    [{currency: CurrencyCode}],
+    boolean
+  >(null, (get, set, params) => {
+    const {currency} = params
+    const currencyFromAtom = get(currencyAtom)
+    if (currencyFromAtom === currency) return false
 
-      set(currencyAtom, currency)
-      set(amountBottomLimitAtom, get(amountBottomLimitUsdEurCzkAtom))
-      set(
-        amountTopLimitAtom,
-        currency === 'CZK'
-          ? get(amountTopLimitCzkAtom)
-          : get(amountTopLimitUsdEurAtom)
-      )
-      return true
-    }
-  )
+    set(currencyAtom, currency)
+    set(amountBottomLimitAtom, 0)
+    set(amountTopLimitAtom, currencies[currency].maxAmount)
+    return true
+  })
 
   const updateLocationStatePaymentMethodAtom = atom<
     null,
@@ -469,9 +474,6 @@ export const offerFormMolecule = molecule(() => {
     offerDescriptionAtom,
     offerActiveAtom,
     updateCurrencyLimitsAtom,
-    amountBottomLimitUsdEurCzkAtom,
-    amountTopLimitUsdEurAtom,
-    amountTopLimitCzkAtom,
     updateLocationStatePaymentMethodAtom,
     createOfferProgressAtom,
   }

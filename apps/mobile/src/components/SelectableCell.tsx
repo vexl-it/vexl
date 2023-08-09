@@ -1,4 +1,4 @@
-import {Stack, Text, XStack} from 'tamagui'
+import {getTokens, Stack, Text, XStack} from 'tamagui'
 import Image from './Image'
 import {TouchableOpacity} from 'react-native'
 import checkmarkSvg from './images/checkmarkSvg'
@@ -21,6 +21,8 @@ function SelectableCell<T>({
   onPress,
   subtitle,
 }: Props<T>): JSX.Element {
+  const tokens = getTokens()
+
   return (
     <TouchableOpacity
       onPress={() => {
@@ -34,7 +36,11 @@ function SelectableCell<T>({
         bg={selected ? '$darkBrown' : '$grey'}
       >
         <XStack>
-          {selected ? <Image source={checkmarkSvg} /> : <Stack w={17} />}
+          {selected ? (
+            <Image source={checkmarkSvg} stroke={tokens.color.main.val} />
+          ) : (
+            <Stack w={17} />
+          )}
           <Stack fs={1} ml="$2">
             <Text
               ff="$body700"

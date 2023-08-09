@@ -61,7 +61,8 @@ const otherEn =
       "requestAgain": "Request again",
       "seeDetail": "See details",
       "notNow": "Not now",
-      "niceWithExclamationMark": "Nice!"
+      "niceWithExclamationMark": "Nice!",
+      "nothingFound": "Nothing found"
     },
     "loginFlow": {
       "anonymityNotice":
@@ -457,7 +458,10 @@ const otherEn =
       },
       "noVexlersFoundForYourOffer": "No vexlers found for your offer",
       "errorLocationNotFilled": "Please fill in offer location",
-      "errorDescriptionNotFilled": "Please fill in offer description"
+      "errorDescriptionNotFilled": "Please fill in offer description",
+      "selectCurrency": "Select currency",
+      "currencyYouWouldLikeToUse":
+        "The currency you would like to use in your trade."
     },
     "notifications": {
       "permissionsNotGranted": {

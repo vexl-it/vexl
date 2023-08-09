@@ -17,9 +17,6 @@ import {type SectionProps} from '../Section'
 import coinsSvg from '../images/coinsSvg'
 import {
   amountBottomLimitAtom,
-  amountBottomLimitUsdEurCzkAtom,
-  amountTopLimitCzkAtom,
-  amountTopLimitUsdEurAtom,
   amountTopLimitAtom,
   currencyAtom,
   locationAtom,
@@ -59,9 +56,6 @@ export default function useContent(): SectionProps[] {
           <AmountOfTransaction
             amountTopLimitAtom={amountTopLimitAtom}
             amountBottomLimitAtom={amountBottomLimitAtom}
-            amountBottomLimitUsdEurCzkAtom={amountBottomLimitUsdEurCzkAtom}
-            amountTopLimitCzkAtom={amountTopLimitCzkAtom}
-            amountTopLimitUsdEurAtom={amountTopLimitUsdEurAtom}
             currencyAtom={currencyAtom}
           />
         ),

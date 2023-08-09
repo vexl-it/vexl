@@ -63,7 +63,8 @@ const otherSp: typeof en =
       "requestAgain": "Request again",
       "seeDetail": "See details",
       "notNow": "Not now",
-      "niceWithExclamationMark": "Nice!"
+      "niceWithExclamationMark": "Nice!",
+      "nothingFound": "Nothing found"
     },
     "loginFlow": {
       "anonymityNotice":
@@ -466,7 +467,10 @@ const otherSp: typeof en =
       "noVexlersFoundForYourOffer":
         "No se han encontrado vexlers para tu oferta",
       "errorLocationNotFilled": "Por favor, rellena la ubicación de la oferta",
-      "errorDescriptionNotFilled": "Rellena la descripción de la oferta"
+      "errorDescriptionNotFilled": "Rellena la descripción de la oferta",
+      "selectCurrency": "Select currency",
+      "currencyYouWouldLikeToUse":
+        "The currency you would like to use in your trade."
     },
     "notifications": {
       "permissionsNotGranted": {

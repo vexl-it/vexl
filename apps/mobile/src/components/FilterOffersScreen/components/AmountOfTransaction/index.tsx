@@ -1,7 +1,7 @@
 import {getTokens, Stack, Text, XStack} from 'tamagui'
 import {useCallback, useEffect, useMemo, useState} from 'react'
 import SvgImage from '../../../Image'
-import {type Atom, type PrimitiveAtom, useAtom, useAtomValue} from 'jotai'
+import {type PrimitiveAtom, useAtom, useAtomValue} from 'jotai'
 import LimitInput from './components/LimitInput'
 import {type CurrencyCode} from '@vexl-next/domain/dist/general/offers'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
@@ -9,9 +9,13 @@ import infoSvg from '../../../images/infoSvg'
 import Slider from '../../../Slider'
 import dashSvg from '../../../images/dashSvg'
 import {DateTime} from 'luxon'
+import {currencies} from '../../../../utils/localization/currency'
 
-const SLIDER_STEP_USD_EUR = 100
-const SLIDER_STEP_CZK = 1000
+const SLIDER_MIN_VALUE = 0
+const INPUT_MIN_VALUE = 0
+const SLIDER_STEP_SMALL = 100
+const SLIDER_STEP_MEDIUM = 1000
+const SLIDER_STEP_LARGE = 1000
 
 export type InputType = 'min' | 'max'
 
@@ -19,26 +23,16 @@ interface Props {
   amountTopLimitAtom: PrimitiveAtom<number | undefined>
   amountBottomLimitAtom: PrimitiveAtom<number | undefined>
   currencyAtom: PrimitiveAtom<CurrencyCode | undefined>
-  amountTopLimitCzkAtom: Atom<number>
-  amountTopLimitUsdEurAtom: Atom<number>
-  amountBottomLimitUsdEurCzkAtom: Atom<number>
 }
 
 function AmountOfTransaction({
   amountTopLimitAtom,
-  amountTopLimitUsdEurAtom,
-  amountTopLimitCzkAtom,
   amountBottomLimitAtom,
-  amountBottomLimitUsdEurCzkAtom,
   currencyAtom,
 }: Props): JSX.Element {
   const {t} = useTranslation()
   const tokens = getTokens()
-  const amountTopLimitCzk = useAtomValue(amountTopLimitCzkAtom)
-  const amountTopLimitUsdEur = useAtomValue(amountTopLimitUsdEurAtom)
-  const amountBottomLimitUsdEurCzk = useAtomValue(
-    amountBottomLimitUsdEurCzkAtom
-  )
+
   const [amountTopLimit, setAmountTopLimit] = useAtom(amountTopLimitAtom)
   const [amountBottomLimit, setAmountBottomLimit] = useAtom(
     amountBottomLimitAtom
@@ -48,19 +42,22 @@ function AmountOfTransaction({
 
   const currency = useAtomValue(currencyAtom)
   const SLIDER_STEP = useMemo(
-    () => (currency === 'CZK' ? SLIDER_STEP_CZK : SLIDER_STEP_USD_EUR),
+    () =>
+      currency && currencies[currency].maxAmount <= 25000
+        ? SLIDER_STEP_SMALL
+        : currency && currencies[currency].maxAmount <= 250000
+        ? SLIDER_STEP_MEDIUM
+        : SLIDER_STEP_LARGE,
     [currency]
   )
   const SLIDER_MAX_VALUE = useMemo(
-    () => (currency === 'CZK' ? amountTopLimitCzk : amountTopLimitUsdEur),
-    [amountTopLimitCzk, amountTopLimitUsdEur, currency]
+    () => (currency ? currencies[currency].maxAmount : 0),
+    [currency]
   )
-  const [inputMin, setInputMin] = useState<number>(
-    amountBottomLimit ?? amountBottomLimitUsdEurCzk
+  const [inputMin, setInputMin] = useState<number | undefined>(
+    amountBottomLimit
   )
-  const [inputMax, setInputMax] = useState<number>(
-    amountTopLimit ?? SLIDER_MAX_VALUE
-  )
+  const [inputMax, setInputMax] = useState<number | undefined>(amountTopLimit)
 
   const setBottomLimit = useCallback(
     (bottomLimit: number): void => {
@@ -91,7 +88,7 @@ function AmountOfTransaction({
     const numericString = text.replace(/[^0-9]/g, '')
     const value = Number(numericString)
     const clampedValue = Math.min(
-      Math.max(value, amountBottomLimitUsdEurCzk),
+      Math.max(value, INPUT_MIN_VALUE),
       SLIDER_MAX_VALUE
     )
     if (inputType === 'min') {
@@ -108,7 +105,7 @@ function AmountOfTransaction({
   // this useEffect needs to be defined exactly this way as slider component needs to rerender once more
   // each time currency changes otherwise there will be bugs in UI if it relies on atom values only
   useEffect(() => {
-    setInputMin(amountBottomLimit ?? amountBottomLimitUsdEurCzk)
+    setInputMin(amountBottomLimit)
     setInputMax(amountTopLimit ?? SLIDER_MAX_VALUE)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currency])
@@ -145,7 +142,7 @@ function AmountOfTransaction({
       <Stack bc="$grey" px="$2" py="$6" br="$4">
         <Slider
           maximumValue={SLIDER_MAX_VALUE}
-          minimumValue={amountBottomLimitUsdEurCzk}
+          minimumValue={SLIDER_MIN_VALUE}
           step={SLIDER_STEP}
           value={[amountBottomLimit, amountTopLimit]}
           onValueChange={onSliderValueChange}

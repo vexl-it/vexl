@@ -12,6 +12,7 @@ import {
   offersFilterInitialState,
 } from '../../state/offersFilter'
 import {selectAtom} from 'jotai/utils'
+import {currencies} from '../../utils/localization/currency'
 
 export const sortingAtom = atom<Sort | undefined>(undefined)
 export const intendedConnectionLevelAtom = atom<IntendedConnectionLevel>('ALL')
@@ -53,22 +54,11 @@ export const updateCurrencyLimitsAtom = atom<
   boolean
 >(null, (get, set, params) => {
   const {currency} = params
-  const currencyFromAtom = get(currencyAtom)
 
-  if (currency === currencyFromAtom) {
-    set(currencyAtom, undefined)
-    set(amountBottomLimitAtom, undefined)
-    set(amountTopLimitAtom, undefined)
-  } else {
-    set(currencyAtom, currency)
-    set(amountBottomLimitAtom, get(amountBottomLimitUsdEurCzkAtom))
-    set(
-      amountTopLimitAtom,
-      currency === 'CZK'
-        ? get(amountTopLimitCzkAtom)
-        : get(amountTopLimitUsdEurAtom)
-    )
-  }
+  set(currencyAtom, currency)
+  set(amountBottomLimitAtom, 0)
+  set(amountTopLimitAtom, currency ? currencies[currency].maxAmount : 0)
+
   return true
 })
 
@@ -124,9 +114,6 @@ export const amountTopLimitAtom = focusAtom(offersFilterAtom, (optic) =>
   optic.prop('amountTopLimit')
 )
 
-export const amountBottomLimitUsdEurCzkAtom = atom<number>(0)
-export const amountTopLimitUsdEurAtom = atom<number>(10000)
-export const amountTopLimitCzkAtom = atom<number>(250000)
 export const saveFilterActionAtom = atom(null, (get, set) => {
   const offersFilter = get(offersFilterAtom)
   const intendedConnectionLevel = get(intendedConnectionLevelAtom)

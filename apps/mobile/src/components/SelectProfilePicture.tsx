@@ -1,4 +1,4 @@
-import {TouchableWithoutFeedback, View} from 'react-native'
+import {TouchableWithoutFeedback, useWindowDimensions, View} from 'react-native'
 import {Image, Stack} from 'tamagui'
 import SvgImage from './Image'
 import MiniCameraSvg from './LoginFlow/components/PhotoScreen/images/miniCameraSvg'
@@ -13,6 +13,7 @@ function SelectProfilePicture(): JSX.Element {
   )
   const selectImage = useSetAtom(selectImageActionAtom)
   const selectedImageUri = useAtomValue(selectedImageUriAtom)
+  const {width} = useWindowDimensions()
 
   return (
     <TouchableWithoutFeedback onPress={selectImage}>
@@ -20,8 +21,8 @@ function SelectProfilePicture(): JSX.Element {
         <View>
           <Stack>
             <Image
-              height={128}
-              width={128}
+              height={width / 2}
+              width={width / 2}
               br="$10"
               src={{
                 uri: selectedImageUri.value,

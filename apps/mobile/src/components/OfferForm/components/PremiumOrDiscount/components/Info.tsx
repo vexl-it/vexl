@@ -42,28 +42,34 @@ function Info({
   }, [sliderThreshold, feeAmount, tokens.color])
 
   const message = useMemo(() => {
-    const absSliderValue = Math.abs(feeAmount)
+    const absFeeAmount = Math.abs(feeAmount)
     const halfThreshold = sliderThreshold / 2
 
     if (offerType === 'BUY') {
       if (feeAmount === 0) {
         return t('offerForm.premiumOrDiscount.youBuyForTheActualMarketPrice')
-      } else if (absSliderValue < halfThreshold) {
-        return t('offerForm.premiumOrDiscount.theOptimalPositionForMostPeople')
-      } else if (feeAmount > halfThreshold) {
+      } else if (feeAmount > 0) {
+        if (feeAmount <= halfThreshold)
+          return t(
+            'offerForm.premiumOrDiscount.theOptimalPositionForMostPeople'
+          )
         return t('offerForm.premiumOrDiscount.youBuyReallyFast')
       } else {
-        return t('offerForm.premiumOrDiscount.youBuyPrettyCheap')
+        if (absFeeAmount <= halfThreshold)
+          return t('offerForm.premiumOrDiscount.youBuyPrettyCheap')
+        return t('offerForm.premiumOrDiscount.youBuyVeryCheaply')
       }
     } else {
       if (feeAmount === 0) {
         return t('offerForm.premiumOrDiscount.youSellForTheActualMarketPrice')
-      } else if (feeAmount > 0 && feeAmount <= halfThreshold) {
-        return t('offerForm.premiumOrDiscount.youEarnBitMore')
-      } else if (feeAmount > halfThreshold) {
-        return t('offerForm.premiumOrDiscount.youWantToEarnFortune')
+      } else if (feeAmount > 0) {
+        if (feeAmount <= halfThreshold)
+          return t('offerForm.premiumOrDiscount.youEarnBitMore')
+        return t('offerForm.premiumOrDiscount.youEarnSoMuchMore')
       } else {
-        return t('offerForm.premiumOrDiscount.youSellSlightlyFaster')
+        if (absFeeAmount <= halfThreshold)
+          return t('offerForm.premiumOrDiscount.youSellSlightlyFaster')
+        return t('offerForm.premiumOrDiscount.youSellMuchFaster')
       }
     }
   }, [offerType, sliderThreshold, feeAmount, t])

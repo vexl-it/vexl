@@ -12,7 +12,7 @@ import {
 import LogsList from './components/LogsList'
 import Button from '../Button'
 import saveLogsToDirectoryAndShare from './utils/saveLogsToDirectory'
-import {useSetAtom} from 'jotai'
+import {useSetAtom, useAtomValue} from 'jotai'
 import {loadingOverlayDisplayedAtom} from '../LoadingOverlayProvider'
 import {Alert} from 'react-native'
 import {setupAppLogs} from './utils/setupAppLogs'
@@ -20,12 +20,14 @@ import IconButton from '../IconButton'
 import closeSvg from '../images/closeSvg'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 import showErrorAlert from '../../utils/showErrorAlert'
+import { appLogAtomsAtom } from './atoms'
 
 function AppLogsScreen(): JSX.Element {
   const {t} = useTranslation()
   const [enabled, setEnabled] = useState(getCustomLoggingEnabled())
   const setLoading = useSetAtom(loadingOverlayDisplayedAtom)
   const safeGoBack = useSafeGoBack()
+  const logsAtoms = useAtomValue(appLogAtomsAtom)
 
   const exportLogs = useCallback(() => {
     Alert.alert(
@@ -80,6 +82,7 @@ function AppLogsScreen(): JSX.Element {
                 setCustomLoggingEnabled(enabled)
                 setupAppLogs()
               }}
+              style={{marginRight: 5}}
             />
             <IconButton icon={closeSvg} onPress={safeGoBack} />
           </>
@@ -98,6 +101,7 @@ function AppLogsScreen(): JSX.Element {
             variant={'primary'}
             onPress={clearLogs}
             text={t('AppLogs.clear')}
+            disabled={logsAtoms.length === 0}
           />
 
           <Button
@@ -106,6 +110,7 @@ function AppLogsScreen(): JSX.Element {
             variant={'secondary'}
             onPress={exportLogs}
             text={t('AppLogs.export')}
+            disabled={logsAtoms.length === 0}
           />
         </XStack>
       </Stack>

@@ -205,7 +205,7 @@ function TextInput(
             onClearPress?.()
           }}
         >
-          <Image stroke={tokens.color.grey.val} source={clearInputSvg} />
+          <Image height={22} stroke={tokens.color.grey.val} source={clearInputSvg} />
         </TouchableOpacity>
       )}
       {rightText && (

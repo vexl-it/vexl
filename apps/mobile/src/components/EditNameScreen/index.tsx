@@ -34,7 +34,7 @@ function EditNameScreen(): JSX.Element {
             textColor={'$white'}
             value={name}
             onChangeText={setName}
-            showClearButton
+            showClearButton={!!name}
             onClearPress={() => {
               setName('')
             }}

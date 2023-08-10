@@ -113,7 +113,10 @@ function LocationSearch({
           icon={magnifyingGlass}
           variant="greyOnBlack"
           placeholder={t('offerForm.location.addCityOrDistrict')}
-          showClearButton
+          showClearButton={!!inputValue}
+          onClearPress={() => {
+              setInputValue('')
+            }}
         />
         <ScrollView>
           {locationResults?.result.map((result) => {

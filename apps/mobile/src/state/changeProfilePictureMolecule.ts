@@ -115,6 +115,7 @@ export const changeProfilePictureMolecule = molecule(() => {
         },
         {
           text: t('common.cancel'),
+          style: 'cancel',
         },
       ])
 

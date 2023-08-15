@@ -1,4 +1,4 @@
-import {Stack, Text, YStack} from 'tamagui'
+import {Text, YStack} from 'tamagui'
 import Button from '../../../../Button'
 import {DateTime} from 'luxon'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
@@ -25,6 +25,8 @@ import EmptyMarketplaceSuggestions from './EmptyMarketplaceSuggestions'
 import MarketplaceSuggestion from './MarketplaceSuggestion'
 import {useEffect, useMemo, useState} from 'react'
 import {useTriggerOffersRefresh} from '../../../../../state/marketplace'
+import {ScrollView} from 'react-native'
+import usePixelsFromBottomWhereTabsEnd from '../../../utils'
 
 // time in minutes
 const TIME_SINCE_CONTACTS_IMPORT_THRESHOLD = 60
@@ -42,8 +44,10 @@ function EmptyListWrapper({
   children,
   onButtonPress,
 }: EmptyListWrapperProps): JSX.Element {
+  const tabBarEndsAt = usePixelsFromBottomWhereTabsEnd()
+
   return (
-    <Stack pos={'absolute'} t={0} b={0} l={0} r={0} zIndex={-1}>
+    <ScrollView contentContainerStyle={{paddingBottom: tabBarEndsAt + 25}}>
       <YStack f={1} ai={'center'} jc={'center'} py="$4" space="$4">
         <Image source={emptyMarketplaceAnonymousAvatarSvg} />
         {children}
@@ -54,7 +58,7 @@ function EmptyListWrapper({
           onPress={onButtonPress}
         />
       </YStack>
-    </Stack>
+    </ScrollView>
   )
 }
 
@@ -141,6 +145,8 @@ function EmptyListPlaceholder(): JSX.Element {
           col={'$greyOnWhite'}
           fos={20}
           ff={'$body600'}
+          adjustsFontSizeToFit
+          numberOfLines={4}
         >
           {t('offer.noOffersToMatchFilter')}
         </Text>

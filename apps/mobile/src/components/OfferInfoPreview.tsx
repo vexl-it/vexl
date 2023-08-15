@@ -75,7 +75,7 @@ function OfferInfoPreview({
           </Text>
         </Stack>
       </XStack>
-      <XStack>
+      <XStack space={'$1'}>
         <InfoItemContainer>
           <PriceText>
             {t('offer.upTo')} <PriceBigger>{offerAmount}</PriceBigger>

@@ -14,7 +14,7 @@ interface Props<T> {
 
 function Tabs<T>({activeTab, onTabPress, tabs}: Props<T>): JSX.Element {
   return (
-    <XStack ai="center" br="$4" bg="$grey" p="$1">
+    <XStack ai="center" br="$4" bg="$grey" p="$1" space={'$1'}>
       {tabs.map((tab) => (
         <Button
           key={tab.title}

@@ -8,10 +8,12 @@ import {
 import {useAtom} from 'jotai'
 import {useNavigation} from '@react-navigation/native'
 import {YStack} from 'tamagui'
+import usePixelsFromBottomWhereTabsEnd from '../../../utils'
 
 function EmptyMarketplaceSuggestions(): JSX.Element {
   const {t} = useTranslation()
   const navigation = useNavigation()
+  const tabBarEndsAt = usePixelsFromBottomWhereTabsEnd()
   const [createOfferSuggestionVisible, setCreateOfferSuggestionVisible] =
     useAtom(createOfferSuggestionVisibleAtom)
   const [
@@ -20,7 +22,7 @@ function EmptyMarketplaceSuggestions(): JSX.Element {
   ] = useAtom(addMoreContactsSuggestionVisibleAtom)
 
   return (
-    <ScrollView>
+    <ScrollView contentContainerStyle={{paddingBottom: tabBarEndsAt + 25}}>
       <YStack mt={'$4'} space={'$4'}>
         {createOfferSuggestionVisible && (
           <MarketplaceSuggestion

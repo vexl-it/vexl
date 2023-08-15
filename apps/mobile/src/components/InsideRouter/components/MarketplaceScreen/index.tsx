@@ -84,7 +84,9 @@ function MarketplaceScreen(): JSX.Element {
       >
         <Tab.Screen
           name="Sell"
-          options={{tabBarLabel: t('offer.sell')}}
+          options={{
+            tabBarLabel: t('offer.sell'),
+          }}
           initialParams={{type: OfferType.parse('SELL')}}
           component={OffersListWithFilter}
         />

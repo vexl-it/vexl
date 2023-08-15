@@ -53,7 +53,7 @@ function PremiumOrDiscount({
   return (
     <YStack>
       <XStack ai="center" jc="space-between" py="$4">
-        <XStack ai="center">
+        <XStack f={1} ai="center" mr={'$1'}>
           <Stack mr="$2">
             <SvgImage
               stroke={
@@ -64,13 +64,16 @@ function PremiumOrDiscount({
               source={percentageSvg}
             />
           </Stack>
-          <Text
-            ff="$body700"
-            col={feeState === 'WITH_FEE' ? '$white' : '$greyOnWhite'}
-            fos={24}
-          >
-            {t('offerForm.premiumOrDiscount.premiumOrDiscount')}
-          </Text>
+          <Stack>
+            <Text
+              numberOfLines={2}
+              ff="$body700"
+              col={feeState === 'WITH_FEE' ? '$white' : '$greyOnWhite'}
+              fos={24}
+            >
+              {t('offerForm.premiumOrDiscount.premiumOrDiscount')}
+            </Text>
+          </Stack>
         </XStack>
         <Switch
           value={feeState === 'WITH_FEE'}
@@ -84,8 +87,8 @@ function PremiumOrDiscount({
       </Text>
       {feeState === 'WITH_FEE' && (
         <YStack space="$2">
-          <XStack ai="center" jc="space-between">
-            <Text mr="$4" fos={18} ff="$body600" col="$white">
+          <XStack f={1} ai="center" jc="space-between">
+            <Text maxWidth={'50%'} mr="$4" fos={18} ff="$body600" col="$white">
               {offerType === 'BUY'
                 ? t('offerForm.premiumOrDiscount.youBuyBtcFor')
                 : t('offerForm.premiumOrDiscount.youSellBtcFor')}

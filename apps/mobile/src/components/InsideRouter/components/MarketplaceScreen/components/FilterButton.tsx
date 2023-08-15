@@ -19,6 +19,7 @@ function FilterButton({onFilterOffersPress}: Props): JSX.Element {
       size={'small'}
       text={t(isFilterActive ? 'offer.filterActive' : 'offer.filterOffers')}
       afterIcon={downArrow}
+      numberOfLines={2}
     />
   )
 }

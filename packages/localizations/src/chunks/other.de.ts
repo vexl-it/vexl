@@ -227,7 +227,7 @@ const otherDe: typeof en =
         "supportEmail": "support@vexl.it"
       },
       "noLogoutExplanation":
-        "Du kannst die Abmeldung nicht finden? So etwas gibt es nicht. Das gibt es nicht. Aber du kannst dein Konto löschen.",
+        "Du kannst die Abmeldung nicht finden? So etwas gibt es nicht. Aber du kannst dein Konto löschen.",
       "support":
         "Wenn du Vexl magst, unterstütze deine Verbesserung, indem du ein paar Bitcoin als Spende schickst!",
       "version": "Vexl App Version: {{version}}",
@@ -394,7 +394,7 @@ const otherDe: typeof en =
         "youSellBtcFor": "Du verkaufst BTC für",
         "marketPrice": "Marktpreis",
         "sellFaster": "Schneller verkaufen",
-        "earnMore": "Sie verdienst mehr",
+        "earnMore": "Du verdienst mehr",
         "premiumOrDiscountExplained": "Aufschlag oder Abschlag erklärt",
         "influenceImpactOfYourSellOffer":
           "Beeinfluss die Wirkung deines Angebots. Verkauf schneller, indem du einen Rabatt gewährst, oder verdien mehr, indem du eine Prämie auf den Bitcoin-Marktpreis aufschlagst.",

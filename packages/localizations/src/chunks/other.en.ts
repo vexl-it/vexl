@@ -161,7 +161,7 @@ const otherEn =
         },
         "toAddCustomContact":
           "Enabling notifications allows you to find out when others accept your request or when you get a new message. ",
-        "addContact": "Add contact {{number}} manually",
+        "addContact": "Add contact",
         "addThisPhoneNumber":
           "Would you like to add this phone number to your Vexl contacts?",
         "addContactName": "Add contact name",
@@ -357,15 +357,15 @@ const otherEn =
       "premiumOrDiscount": {
         "premiumOrDiscount": "Premium or discount",
         "youBuyForTheActualMarketPrice":
-          "You buy for the actual market price. Play with the slider to sell faster or earn more.",
+          "You buy for the actual market price. Play with the slider to buy cheaply or faster.",
         "theOptimalPositionForMostPeople":
-          "The optimal position for most people. You buy slightly faster, but a bit overpriced",
+          "The optimal position for most people. You buy slightly faster, but a bit overpriced.",
         "youBuyReallyFast":
-          "You buy quickly, but at much above the market price",
+          "You buy quickly, but so much above the market price.",
         "youBuyPrettyCheap":
-          "You buy pretty cheap, but it can take slightly longer to find a seller",
+          "You buy pretty cheap, but it can take slightly longer to find a seller.",
         "youBuyVeryCheaply":
-          "You buy very cheaply, but it can take a while to find seller",
+          "You buy very cheaply, but it can take a while to find seller.",
         "buyFaster": "Buy quickly",
         "buyCheaply": "Buy cheaply",
         "youSellForTheActualMarketPrice":
@@ -390,7 +390,8 @@ const otherEn =
         "playWithItAndSee":
           "Play with it and see how it affects the interest of others.",
         "plus": "+",
-        "minus": "-"
+        "minus": "-",
+        "youEarnSoMuchMore": "You earn so much more, but it can take a while."
       },
       "buyCheaperByUsingDiscount":
         "Buy cheaper by using a discount or buy faster by adding a premium to the bitcoin market price",

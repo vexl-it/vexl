@@ -53,7 +53,7 @@ const otherSk: typeof en =
       "now": "Teraz",
       "declined": "Zamietnuté",
       "reset": "Reset",
-      "you": "Vy",
+      "you": "Ty",
       "allow": "Povoliť",
       "currency": "Mena",
       "whatDoesThisMean": "Čo znamená '{{term}}'?",
@@ -65,7 +65,7 @@ const otherSk: typeof en =
       "niceWithExclamationMark": "Nice!"
     },
     "loginFlow": {
-      "anonymityNotice": "Kým to nepovolíte, nikto to neuvidí. Dokonca ani my.",
+      "anonymityNotice": "Kým to nepovolíš, nikto to neuvidí. Dokonca ani my.",
       "intro": {
         "title1": "Anonymne se spoj so svojimi kontaktami.",
         "title2": "Pozri sa na ich ponuky.",
@@ -106,7 +106,7 @@ const otherSk: typeof en =
         "title": "Aké je tvoje telefónne číslo?",
         "placeholder": "Telefónne číslo",
         "text":
-          "Aby sme vás mohli spojiť s komunitou Vexl, musíte zadať svoje telefónne číslo.",
+          "Aby sme ťa mohli spojiť s komunitou Vexl, musíš zadať svoje telefónne číslo.",
         "errors": {
           "invalidPhoneNumber":
             "Neplatné telefónne číslo. Skús to prosím znovu.",
@@ -142,7 +142,8 @@ const otherSk: typeof en =
         "title": "Poďme nájsť tvojich priateľov!",
         "text":
           "Vexl používa tvoju reálnu sociálnu sieť - tvojich priateľov a ich priateľov. Čím viac kontaktov pridáš, tým viac ponúk uvidíš.",
-        "anonymityNotice": "Nikto nemôže vidieť vaše kontakty. Dokonca ani my.",
+        "anonymityNotice":
+          "Tvoje kontakty neuvidí nikto ďalší. Dokonca ani my.",
         "action": "Import kontaktov"
       }
     },
@@ -165,7 +166,7 @@ const otherSk: typeof en =
         },
         "toAddCustomContact":
           "Ak chceš pridať telefónne číslo napriamo, zadaj ho do vyhľadávacieho riadku (s predvoľbou krajiny).",
-        "addContact": "Manuálne pridanie kontaktu {{number}}",
+        "addContact": "Pridanie kontaktu",
         "addThisPhoneNumber":
           "Would you like to add this phone number to your Vexl contacts?",
         "addContactName": "Add contact name",
@@ -358,15 +359,15 @@ const otherSk: typeof en =
       "premiumOrDiscount": {
         "premiumOrDiscount": "Premium alebo zľava",
         "youBuyForTheActualMarketPrice":
-          "Kupuješ za skutočnú trhovú cenu. Pohni s posuvníkom, aby ste predával rýchlejšie alebo zarobil viac.",
+          "Kupuješ za skutočnú trhovú cenu. Pohni s posuvníkom, aby si nakúpil rýchlejšie alebo lacnejšie.",
         "theOptimalPositionForMostPeople":
-          "Optimálna pozícia pre väčšinu ľudí. Nakupuješ o niečo rýchlejšie, ale za trochu vyššiu cenu",
+          "Optimálna pozícia pre väčšinu ľudí. Nakupuješ o niečo rýchlejšie, ale za trochu vyššiu cenu.",
         "youBuyReallyFast":
-          "Nakupujete naozaj rýchlo, ale o hodne nad trhovú cenu",
+          "Nakupuješ naozaj rýchlo, ale vysoko nad trhovou cenou.",
         "youBuyPrettyCheap":
-          "Kupuješ pomerne lacno, ale môže trvať o niečo dlhšie, kým nájdeš predávajúceho",
+          "Kupuješ pomerne lacno, ale môže trvať o niečo dlhšie, kým nájdeš predávajúceho.",
         "youBuyVeryCheaply":
-          "Nakupuješ veľmi lacno, ale môže chvíľu trvať, kým nájdeš predávajúceho",
+          "Nakupuješ veľmi lacno, ale môže chvíľu trvať, kým nájdeš predávajúceho.",
         "buyFaster": "Nakupuješ rýchlejšie",
         "buyCheaply": "Nakupuješ lacno",
         "youSellForTheActualMarketPrice":
@@ -392,7 +393,8 @@ const otherSk: typeof en =
         "playWithItAndSee":
           "Pohni posuvníkom a zisti, ako to ovplyvní záujem ostatných.",
         "plus": "+",
-        "minus": "-"
+        "minus": "-",
+        "youEarnSoMuchMore": "Zarobíš omnoho viac, ale môže to chvíľu trvať."
       },
       "buyCheaperByUsingDiscount":
         "Nakúp lacnejšie použitím zľavy alebo nakúp rýchlejšie pridaním prémia k trhovej cene bitcoinu",

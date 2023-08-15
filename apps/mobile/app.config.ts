@@ -10,7 +10,7 @@ const presets = {
     version: `${VERSION} (${VERSION_CODE})`,
     packageName: 'it.vexl.nextstaging',
     appName: 'Vexl 2.0 (stage)',
-    googleServicesInfoPlistFile: './creds/GoogleService-stage-Info.plist',
+    googleServicesInfoPlistFile: './creds/GoogleService-stage-info.plist',
     foregroundImage: './assets/android-front.png',
     backgroundImage: './assets/android-back-stage.png',
     icon: './assets/icon-stage.png',

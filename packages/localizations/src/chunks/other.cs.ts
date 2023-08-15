@@ -53,7 +53,7 @@ const otherCs: typeof en =
       "now": "Teď",
       "declined": "Zamítnuto",
       "reset": "Reset",
-      "you": "Vy",
+      "you": "Ty",
       "allow": "Povolit",
       "currency": "Měna",
       "whatDoesThisMean": "Co znamená '{{term}}'?",
@@ -106,7 +106,7 @@ const otherCs: typeof en =
         "title": "Jaké je tvoje telefonní číslo?",
         "placeholder": "Telefonní číslo",
         "text":
-          "Abychom vás mohli spojit s komunitou Vexl, musíte zadat své telefonní číslo.",
+          "Abychom tě mohli spojit s komunitou Vexl, musíš zadat své telefonní číslo.",
         "errors": {
           "invalidPhoneNumber":
             "Neplatné telefonní číslo. Zkus to prosím znovu.",
@@ -142,7 +142,7 @@ const otherCs: typeof en =
         "title": "Pojďme nyní najít tvoje přátele!",
         "text":
           "Vexl používá tvojí reálnou sociální síť - tvoje přátele a jejich přátele. Čím více kontaktů přidáš, tím více nabídek uvidíš.",
-        "anonymityNotice": "Vaše kontakty nemůže nikdo vidět. Dokonce ani my.",
+        "anonymityNotice": "Tvé kontakty neuvidí nikdo další. Dokonce ani my.",
         "action": "Import kontaktů"
       }
     },
@@ -357,15 +357,15 @@ const otherCs: typeof en =
       "premiumOrDiscount": {
         "premiumOrDiscount": "Premium nebo sleva",
         "youBuyForTheActualMarketPrice":
-          "Kupuješ za skutečnou tržní cenu. Pohni s posuvníkem a prodávej rychleji nebo vydělej více.",
+          "Kupuješ za skutečnou tržní cenu. Pohni s posuvníkem a nakup levněji nebo rychleji.",
         "theOptimalPositionForMostPeople":
-          "Optimální pozice pro většinu lidí. Nakupuješ o něco rychleji, ale za trochu vyšší cenu",
+          "Optimální pozice pro většinu lidí. Nakupuješ o něco rychleji, ale za trochu vyšší cenu.",
         "youBuyReallyFast":
-          "Nakupuješ opravdu rychle, ale hodně nad tržní cenou",
+          "Nakupuješ opravdu rychle, ale hodně nad tržní cenou.",
         "youBuyPrettyCheap":
-          "Nakupuješ poměrně levně, ale může trvat o něco déle, než najdeš prodávajícího",
+          "Nakupuješ poměrně levně, ale může trvat o něco déle, než najdeš prodávajícího.",
         "youBuyVeryCheaply":
-          "Nakupuješ velmi levně, ale může chvíli trvat, než najdeš prodávajícího",
+          "Nakupuješ velmi levně, ale může chvíli trvat, než najdeš prodávajícího.",
         "buyFaster": "Nakupuješ rychleji",
         "buyCheaply": "Nakupuješ levně",
         "youSellForTheActualMarketPrice":
@@ -390,7 +390,9 @@ const otherCs: typeof en =
         "playWithItAndSee":
           "Pohni posuvníkem a zjisti, jak to ovlivní zájem ostatních.",
         "plus": "+",
-        "minus": "-"
+        "minus": "-",
+        "youEarnSoMuchMore":
+          "Vyděláš mnohem více, ale může to trvat o něco déle."
       },
       "buyCheaperByUsingDiscount":
         "Nakup levněji použitím slevy nebo nakup rychleji přidáním prémia k tržní ceně bitcoinu.",

@@ -170,7 +170,7 @@ const otherIt: typeof en =
         },
         "toAddCustomContact":
           "Per aggiungere direttamente il numero di telefono, digitarlo nella barra di ricerca (con il prefisso del paese).",
-        "addContact": "Ajouter un contact {{number}} manuellement",
+        "addContact": "Ajouter un contact",
         "addThisPhoneNumber":
           "Would you like to add this phone number to your Vexl contacts?",
         "addContactName": "Add contact name",
@@ -402,7 +402,8 @@ const otherIt: typeof en =
         "playWithItAndSee":
           "Giocate e vedete come influisce sull'interesse degli altri.",
         "plus": "+",
-        "minus": "-"
+        "minus": "-",
+        "youEarnSoMuchMore": "You earn so much more, but it can take a while."
       },
       "buyCheaperByUsingDiscount":
         "Acquistate più a buon mercato utilizzando uno sconto o acquistate più velocemente aggiungendo un premio al prezzo di mercato del bitcoin.",

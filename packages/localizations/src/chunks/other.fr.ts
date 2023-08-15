@@ -60,8 +60,8 @@ const otherFr: typeof en =
       "currency": "Monnaie",
       "whatDoesThisMean": "Qu'est-ce que cela signifie ?",
       "learnMore": "En savoir plus",
-      "unableToShareImage": "Unable to share the image",
-      "requestAgain": "Request again",
+      "unableToShareImage": "Impossible de partage l'image",
+      "requestAgain": "Réitérer la demande",
       "seeDetail": "See details",
       "notNow": "Not now",
       "niceWithExclamationMark": "Nice!"
@@ -82,13 +82,12 @@ const otherFr: typeof en =
       "anonymizationNotice": {
         "title": "Votre identité sera anonymisée.",
         "text":
-          "Personne ne verra votre vrai nom et votre photo de profil jusqu'à ce que vous les révéliez pour un échange particulier. Pas même nous. Commençons par définir votre véritable identité."
+          "Personne ne verra votre vrai nom et votre photo de profil jusqu'à ce que vous les révéliez vous mêmes lors d'une transaction précise. Pas même nous. Commençons par définir votre véritable identité."
       },
       "name": {
         "prompt": "Comment vos amis vous appellent-ils ?",
         "placeholder": "Nom ou surnom",
-        "nameValidationError":
-          "Le nom doit comporter au moins 1 caractère et au maximum 25 caractères."
+        "nameValidationError": "Le nom doit comporter entre 1 et 50 caractères"
       },
       "photo": {
         "title": "Salut {{name}} ! À quoi ressemblez-vous ?",
@@ -121,7 +120,7 @@ const otherFr: typeof en =
         "title": "Nous venons de vous envoyer le code de vérification",
         "text": "Saisissez-le ci-dessous pour vérifier",
         "inputPlaceholder": "Votre code de vérification",
-        "retryCountdown": "Vous n'avez pas reçu de code ? Renvoyez-le",
+        "retryCountdown": "Vous n'avez pas reçu de code ? Envoyer à nouveau",
         "retry": "Vous n'avez pas reçu de code ? Tapez pour renvoyer",
         "errors": {
           "userAlreadyExists":
@@ -143,7 +142,7 @@ const otherFr: typeof en =
         }
       },
       "importContacts": {
-        "title": "Maintenant, retrouvons nos amis !",
+        "title": "Maintenant, trouvons vos amis !",
         "text":
           "Vexl utilise votre réseau social réel - vos amis et leurs amis. Plus vous ajoutez de contacts, plus vous recevrez d'offres.",
         "anonymityNotice": "Personne ne peut voir vos contacts. Même pas nous.",
@@ -154,7 +153,7 @@ const otherFr: typeof en =
       "contactsExplanation": {
         "title": "Maintenant, trouvons vos amis !",
         "text":
-          "Vexl utilise votre réseau social réel - vos amis et leurs amis. Plus vous ajoutez de contacts, plus vous recevrez d'offres.",
+          "Vexl utilise votre sphère sociale réèlle - vos amis et leurs amis. Plus vous ajoutez de contacts, plus vous recevrez d'offres.",
         "anonymizationCaption":
           "Personne ne peut voir vos contacts. Même pas nous."
       },
@@ -169,7 +168,7 @@ const otherFr: typeof en =
         },
         "toAddCustomContact":
           "Pour ajouter un numéro de téléphone directement, tapez-le dans la barre de recherche (avec le préfixe du pays).",
-        "addContact": "Aggiungi un contatto {{number}} manualmente",
+        "addContact": "Aggiungi un contatto",
         "addThisPhoneNumber":
           "Would you like to add this phone number to your Vexl contacts?",
         "addContactName": "Add contact name",
@@ -197,12 +196,12 @@ const otherFr: typeof en =
     "settings": {
       "yourReach": "Votre portée : {{number}} vexlers",
       "items": {
-        "changeProfilePicture": "Modifier l'image de profil",
+        "changeProfilePicture": "Modifier la photo de profil",
         "editName": "Modifier le nom",
         "contactsImported": "Gestion des contacts",
         "xFriends": "{{number}} amis",
         "setPin": "Définir le code PIN",
-        "faceId": "Identifier le visage",
+        "faceId": "Reconnaissance faciale",
         "allowScreenshots": "Autoriser les captures d'écran",
         "allowScreenshotsDescription":
           "Empêcher les utilisateurs de prendre des captures d'écran de la discussion.",
@@ -226,13 +225,13 @@ const otherFr: typeof en =
       "noLogoutExplanation":
         "Vous ne trouvez pas la déconnexion ? Cela n'existe pas.\nMais vous pouvez supprimer votre compte.",
       "support":
-        "Si vous aimez Vexl, soutenez son amélioration en envoyant quelques bitcoins en guise de don !",
+        "Si vous aimez Vexl, soutenez son développement en envoyant quelques bitcoins en guise de don !",
       "version": "Version de l'application Vexl : {{version}}",
       "logoutDialog": {
         "title": "Supprimer le compte ?",
         "title2": "Vous êtes sûr ?",
         "description":
-          "Êtes-vous sûr de vouloir supprimer votre compte ? Cette action ne peut être annulée"
+          "Êtes-vous sûr de vouloir supprimer votre compte ? Cette action ne peut pas être annulée"
       }
     },
     "offer": {
@@ -254,12 +253,12 @@ const otherFr: typeof en =
       "numberOfCommon": "{{number}} commun",
       "offerNotFound":
         "Offre non trouvée. Elle a peut-être été supprimée par l'auteur",
-      "inputPlaceholder": "par exemple, échangeons mon ami...",
+      "inputPlaceholder": "Tape ton message ici...",
       "sendRequest": "Envoyer une demande",
       "report": {
         "areYouSureTitle": "Signaler l'offre ?",
         "areYouSureText":
-          "Êtes-vous certain de vouloir signaler cette offre ? Une fois signalée, elle ne peut être annulée. Choisissez judicieusement.",
+          "Êtes-vous certain de vouloir signaler cette offre ? Une fois signalée, vous ne pourrez pas revenir en arrière. Choisissez judicieusement.",
         "yes": "Oui, signaler",
         "thankYou": "Remerciez-nous !",
         "inappropriateContentWasReported":
@@ -268,15 +267,16 @@ const otherFr: typeof en =
       "goToChat": "Aller au chat",
       "requestStatus": {
         "requested":
-          "Vous avez demandé un échange. Nous vous informerons dès qu'il sera accepté.",
+          "Vous avez sollicité une transaction. Nous vous informerons dès que votre demande sera acceptée.",
         "accepted": "Votre demande a été acceptée.",
         "denied": "Votre demande a été refusée.",
         "initial": "Il s'agit de votre première interaction avec cette offre.",
-        "cancelled": "Vous avez annulé une demande d'échange pour cette offre.",
+        "cancelled":
+          "Vous avez annulé une demande de transaction pour cette offre.",
         "deleted":
-          "You have already interacted with this offer, but you deleted the chat.",
+          "Vous avez déjà interagi avec cette offre auparavant mais vous avez supprimé la conversation",
         "otherSideLeft":
-          "You have already interacted with this offer, but the counterparty left the chat.",
+          "Vous avez déjà interagi avec cette offre auparavant mais l'autre partie a quitté le chat",
         "leaved": "Avete già interagito con questa offerta in precedenza"
       },
       "listEmpty":
@@ -299,18 +299,18 @@ const otherFr: typeof en =
       "totalFilteredOffers":
         "Filtré : Offres {{count}} (sur un total de {{totalCount}})",
       "offerFromDirectFriend": "Offre d'un ami direct",
-      "offerFromFriendOfFriend": "Offre d'un ami d'un ami",
+      "offerFromFriendOfFriend": "Offre d'un ami d'ami",
       "youSeeThisOfferBecause":
-        "Vous voyez cette offre parce que la contrepartie a enregistré votre numéro de téléphone dans sa liste de contacts.",
+        "Vous voyez cette offre parce que l'autre partie a enregistré votre numéro de téléphone dans sa liste de contacts.",
       "beCautiousWeCannotVerify":
         "Soyez prudent, nous ne pouvons pas vérifier si vous vous connaissez vraiment dans la vie réelle.",
       "dontForgetToVerifyTheIdentity":
         "N'oubliez pas de vérifier son identité auprès d'un contact commun.",
       "noDirectConnection":
         "Il s'agit d'un contact avec lequel vous n'avez pas de lien direct.",
-      "rerequestTomorrow": "Vous pouvez envoyer une autre demande demain",
+      "rerequestTomorrow": "Vous pourrez envoyer une nouvelle demande demain",
       "rerequestDays":
-        "Vous pouvez envoyer une autre demande dans {{days}} jours",
+        "Vous pourrez envoyer une nouvelle demande dans {{days}} jours",
       "rerequest": "Envoyer une nouvelle demande",
       "cancelRequest": "Annuler la demande",
       "requestWasCancelledByOtherSide":
@@ -323,20 +323,20 @@ const otherFr: typeof en =
       "termsOfUse": "Conditions d'utilisation",
       "privacyPolicy": "Politique de confidentialité",
       "dontHaveTime":
-        "Vous n'avez pas le temps de lire tout cela ? Jetez un coup d'œil à la Foire aux questions."
+        "Vous n'avez pas le temps de tout lire ? Jetez un coup d'œil à la Foire aux questions !"
     },
     "faqs": {
       "faqs": "Foire aux questions",
       "whatIsVexl": "Qu'est-ce que Vexl ?",
       "vexlIsPlatform":
-        "Vexl est une plateforme qui vous permet d'échanger des bitcoins au sein de votre réseau social réel - vos amis et les amis de leurs amis - tout en restant complètement anonyme - si vous le souhaitez.",
+        "Vexl est une plateforme qui vous permet d'échanger des bitcoins au sein de votre sphère sociale réelle - vos amis et les amis de leurs amis - tout en restant complètement anonyme, si vous le souhaitez.",
       "whoCanSeeMyContacts": "Qui peut voir mes contacts ?",
       "peopleWhomYouAllowToSee":
         "Les personnes que vous autorisez à voir votre identité peuvent voir les amis que vous avez en commun et c'est tout.",
       "howCanIRemainAnonymous":
         "Comment rester anonyme tout en participant à Vexl ?",
       "byDefaultYouParticipateInTheNetwork":
-        "Par défaut, vous participez au réseau sous le nom et l'avatar Vexl qui vous ont été attribués lors de votre inscription. Vous ne pouvez révéler votre identité que pour un échange particulier dans notre chat sécurisé et crypté de bout en bout.",
+        "Par défaut, vous participez au réseau sous le nom et l'avatar Vexl qui vous ont été attribués lors de votre inscription. Vous ne pouvez révéler votre identité que pour un échange précis au sein de notre chat sécurisé et crypté de bout en bout.",
       "howCanIMakeSure":
         "Comment puis-je m'assurer que la personne à qui je parle est bien celle à qui je veux parler ?",
       "oneChallenge":
@@ -351,7 +351,7 @@ const otherFr: typeof en =
         "Vexl est conçu pour ne jamais collecter ou stocker d'informations sensibles. Les messages et autres contenus de Vexl ne sont accessibles ni par nous ni par des tiers, car ils sont toujours cryptés de bout en bout, privés et sécurisés. Nos conditions d'utilisation et notre politique de confidentialité sont disponibles ci-dessous.",
       "howDoIContactVexl": "Comment puis-je contacter Vexl ?",
       "youCanAlwaysReachOutToUs":
-        "Vous pouvez toujours nous contacter par e-mail : support@vexl.it. Pour une communication privée, vous pouvez également nous envoyer un courrier électronique. Vous pouvez également nous rencontrer lors de votre prochain échange P2P ! 😻"
+        "Vous pouvez toujours nous contacter par e-mail : support@vexl.it. Pour une communication privée, vous pouvez également nous envoyer un message E2EE. Vous pouvez également nous rencontrer lors de votre prochain échange P2P ! 😻"
     },
     "offerForm": {
       "myNewOffer": "Nouvelle offre",
@@ -368,7 +368,7 @@ const otherFr: typeof en =
         "youBuyForTheActualMarketPrice":
           "Vous achetez au prix réel du marché. Jouez avec le curseur pour vendre plus vite ou gagner plus.",
         "theOptimalPositionForMostPeople":
-          "C'est la position optimale pour la plupart des gens. Vous achetez un peu plus vite, mais à un prix un peu trop élevé.",
+          "C'est la position optimale pour la plupart des gens. Vous achetez un peu plus vite, mais à un prix un peu plus élevé que celui du marché.",
         "youBuyReallyFast":
           "Vous achetez rapidement, mais à un prix nettement supérieur à celui du marché.",
         "youBuyPrettyCheap":
@@ -400,7 +400,8 @@ const otherFr: typeof en =
         "playWithItAndSee":
           "Jouez avec et voyez comment cela affecte l'intérêt des autres.",
         "plus": "+",
-        "minus": "-"
+        "minus": "-",
+        "youEarnSoMuchMore": "You earn so much more, but it can take a while."
       },
       "buyCheaperByUsingDiscount":
         "Achetez moins cher en utilisant une remise ou achetez plus rapidement en ajoutant une prime au prix du marché du bitcoin.",
@@ -414,7 +415,7 @@ const otherFr: typeof en =
         "addCityOrDistrict": "Ajouter une ville ou un quartier",
         "whatToWatchOutForOnline": "De quoi faut-il se méfier en ligne ?",
         "moneySentByRandomPerson":
-          "L'argent envoyé par une personne inconnue peut être d'origine criminelle et traçable.",
+          "L'argent envoyé par une personne inconnue peut être d'origine criminelle et peut être traçable.",
         "neverSendCrypto":
           "N'envoyez jamais de bitcoins avant d'avoir reçu un paiement.",
         "alwaysVerifyTheName":
@@ -467,7 +468,7 @@ const otherFr: typeof en =
           "Livraison anonyme à {{count}} vexlers"
       },
       "noVexlersFoundForYourOffer":
-        "Aucune personne n'a été trouvée pour votre offre",
+        "Aucun vexler n'a été trouvée pour votre offre.",
       "errorLocationNotFilled": "Veuillez indiquer le lieu de l'offre",
       "errorDescriptionNotFilled": "Veuillez remplir la description de l'offre"
     },
@@ -551,7 +552,7 @@ const otherFr: typeof en =
         },
         "outgoing": {
           "MESSAGE": "Moi : {{message}}",
-          "REQUEST_REVEAL": "Vous avez demandé la révélation de votre identité",
+          "REQUEST_REVEAL": "Vous avez demandé la révélation d'identité",
           "APPROVE_REVEAL": "Identité révélée",
           "DISAPPROVE_REVEAL": "Révélation d'identité refusée",
           "REQUEST_MESSAGING": "Demande envoyée",
@@ -588,9 +589,9 @@ const otherFr: typeof en =
       "deleteChatExplanation2":
         "Il s'agit d'une étape définitive, veuillez confirmer cette action une nouvelle fois pour supprimer le chat.",
       "blockChatExplanation1":
-        "Voulez-vous vraiment bloquer cet utilisateur ? Vous ne pourrez jamais annuler cette action. Faites un choix judicieux.",
+        "Voulez-vous vraiment bloquer cet utilisateur ? Vous ne pourrez jamais annuler cette action. Choisissez judicieusement.",
       "blockChatExplanation2":
-        "Voulez-vous vraiment bloquer cet utilisateur ? Vous ne pourrez jamais annuler cette action. Faites un choix judicieux.",
+        "Voulez-vous vraiment bloquer cet utilisateur ? Vous ne pourrez jamais annuler cette action. Choisissez judicieusement.",
       "chatEmpty": "Pas encore de chat",
       "chatEmptyExplanation": "Entamer une conversation en demandant une offre",
       "seeOffers": "Voir les offres",
@@ -616,7 +617,7 @@ const otherFr: typeof en =
       "tapToReveal": "Tapez pour révéler ou refuser",
       "letsRevealIdentities": "Révélons les identités !",
       "reveal": "Révéler",
-      "themDeclined": "{{name}} refusé",
+      "themDeclined": "{{name}} a refusé",
       "youDeclined": "Vous avez refusé",
       "reportOffer": "Signaler une offre",
       "ended": "Terminé",
@@ -627,18 +628,18 @@ const otherFr: typeof en =
         "APPROVE_MESSAGING": "Demande approuvée"
       },
       "youHaveAlreadyTalked":
-        "Vous avez un historique de messages avec cet utilisateur. Appuyez sur pour en savoir plus",
+        "Vous avez un historique de conversation avec cet utilisateur. Appuyez sur pour en savoir plus",
       "requestPendingActionBar": {
         "top": "Le chat attend votre approbation",
         "bottom":
           "Ci-dessus, la communication que vous avez eue avec l'utilisateur jusqu'à présent."
       },
       "showFullChatHistory":
-        "You have already interacted with this offer. Tap to see chat history.",
+        "Vous avez d'anciennes conversations avec cet utilisateur. Cliquez pour afficher l'historique du chat l'historique complet.",
       "unableToRespondOfferRemoved": {
-        "title": "Offer was removed",
+        "title": "L'offre a été retirée",
         "text":
-          "Unable to send response. Offer has been deleted. Do you want to leave the chat?"
+          "Impossible d'envoyer une réponse. L'auteur a retiré son offre. Voulez-vous supprimer le chat ?"
       },
       "offerWasReported": "Offer was reported",
       "unableToSelectImageToSend": {
@@ -673,7 +674,7 @@ const otherFr: typeof en =
       "commonFriendsCount": "{{commonFriendsCount}} Amis communs"
     },
     "reportIssue": {
-      "openInEmail": "Ouvrir dans l'e-mail",
+      "openInEmail": "Ouvrir dans un e-mail",
       "somethingWentWrong": "Un problème s'est produit",
       "feelFreeToGetInTouch":
         "N'hésitez pas à contacter notre service d'assistance.",
@@ -700,7 +701,7 @@ const otherFr: typeof en =
     "ForceUpdateScreen": {
       "title": "Nouvelle version disponible",
       "text":
-        "Téléchargez la dernière version de Vexl pour que l'application fonctionne correctement.",
+        "Téléchargez la dernière version de Vexl afin que l'application fonctionne correctement.",
       "action": "Mise à jour en cours"
     },
     "btcPriceChart": {
@@ -727,7 +728,7 @@ const otherFr: typeof en =
       "errorUserNameNotValid": "Le nom d'utilisateur n'est pas valide"
     },
     "changeProfilePicture": {
-      "changeProfilePicture": "Modifier l'image de profil",
+      "changeProfilePicture": "Modifier la photo de profil",
       "uploadNewPhoto": "Télécharger une nouvelle photo"
     },
     "suggestion": {

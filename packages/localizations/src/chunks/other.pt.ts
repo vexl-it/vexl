@@ -166,7 +166,7 @@ const otherPt: typeof en =
         },
         "toAddCustomContact":
           "Para adicionar diretamente o número de telefone, escreva-o numa barra de pesquisa (com o indicativo do país)",
-        "addContact": "Añadir contacto {{number}} manualmente",
+        "addContact": "Añadir contacto",
         "addThisPhoneNumber":
           "Would you like to add this phone number to your Vexl contacts?",
         "addContactName": "Add contact name",
@@ -305,7 +305,7 @@ const otherPt: typeof en =
       "noDirectConnection":
         "Este é um contacto com o qual não tem qualquer ligação direta.",
       "rerequestTomorrow": "Pode enviar outro pedido amanhã",
-      "rerequestDays": "Pode enviar outro pedido dentro de {{days}} dias",
+      "rerequestDays": "You can send another request in {{days}} days.",
       "rerequest": "Enviar pedido novamente",
       "cancelRequest": "Cancelar pedido",
       "requestWasCancelledByOtherSide":
@@ -396,7 +396,8 @@ const otherPt: typeof en =
         "playWithItAndSee":
           "Jogue com isso e veja como afecta o interesse dos outros.",
         "plus": "+",
-        "minus": "-"
+        "minus": "-",
+        "youEarnSoMuchMore": "You earn so much more, but it can take a while."
       },
       "buyCheaperByUsingDiscount":
         "Comprar mais barato com um desconto ou comprar mais depressa adicionando um prémio ao preço de mercado da bitcoin",

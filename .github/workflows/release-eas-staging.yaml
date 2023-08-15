@@ -19,3 +19,4 @@ jobs:
         run: yarn install --frozen-lockfile
       - name: Build on EAS
         run: eas build --platform all --profile staging --auto-submit --non-interactive
+        working-directory: apps/mobile

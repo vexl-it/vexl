@@ -30,10 +30,13 @@ function BuySellSlider({
       extremeValue={Math.abs(sliderValue) > sliderThreshold / 2}
       zeroValue={sliderValue === 0}
     >
-      <XStack jc="space-between" mb="$4">
+      <XStack f={1} jc="space-between" mb="$4">
         <SliderText
           extremeValue={sliderValue < -sliderThreshold / 2}
           zeroValue={sliderValue >= 0}
+          numberOfLines={2}
+          adjustsFontSizeToFit
+          maxWidth={'50%'}
         >
           {offerType === 'BUY'
             ? t('offerForm.premiumOrDiscount.buyCheaply')
@@ -42,6 +45,9 @@ function BuySellSlider({
         <SliderText
           extremeValue={sliderValue > sliderThreshold / 2}
           zeroValue={sliderValue <= 0}
+          numberOfLines={2}
+          adjustsFontSizeToFit
+          maxWidth={'50%'}
         >
           {offerType === 'BUY'
             ? t('offerForm.premiumOrDiscount.buyFaster')

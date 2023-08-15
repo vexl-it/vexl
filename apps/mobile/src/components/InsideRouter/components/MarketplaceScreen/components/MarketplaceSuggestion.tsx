@@ -82,12 +82,15 @@ function MarketplaceSuggestion({
             </Text>
           </Stack>
         </XStack>
-        <Button
-          size={'medium'}
-          text={buttonText}
-          onPress={onButtonPress}
-          variant={'secondary'}
-        />
+        <Stack maxWidth={'70%'}>
+          <Button
+            numberOfLines={2}
+            size={'medium'}
+            text={buttonText}
+            onPress={onButtonPress}
+            variant={'secondary'}
+          />
+        </Stack>
       </XStack>
     </YStack>
   )

@@ -209,7 +209,12 @@ function TextInput(
         </TouchableOpacity>
       )}
       {rightText && (
-        <StyledText ml="$2" variant={variant} textColor={rightTextColor}>
+        <StyledText
+          adjustsFontSizeToFit
+          ml="$2"
+          variant={variant}
+          textColor={rightTextColor}
+        >
           {rightText}
         </StyledText>
       )}

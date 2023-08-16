@@ -9,9 +9,11 @@ import QuickActionBanner from './QuickActionBanner'
 import ImageZoomOverlay from './ImageZoomOverlay'
 
 function MessagesScreen(): JSX.Element {
-  const {showModalAtom, canSendMessagesAtom} = useMolecule(chatMolecule)
+  const {showModalAtom, canSendMessagesAtom, identityRevealStatusAtom} =
+    useMolecule(chatMolecule)
   const [showModal, setShowModal] = useAtom(showModalAtom)
   const canSendMessages = useAtomValue(canSendMessagesAtom)
+  const identityRevealStatus = useAtomValue(identityRevealStatusAtom)
 
   return (
     <>
@@ -19,7 +21,13 @@ function MessagesScreen(): JSX.Element {
         mode={showModal ? 'photoTop' : 'photoLeft'}
         leftButton={showModal ? 'closeModal' : 'back'}
         rightButton={
-          showModal ? 'block' : canSendMessages ? 'identityReveal' : null
+          showModal
+            ? 'block'
+            : !canSendMessages
+            ? null
+            : identityRevealStatus === 'shared'
+            ? 'contactReveal'
+            : 'identityReveal'
         }
         onPressMiddle={() => {
           setShowModal((v) => !v)

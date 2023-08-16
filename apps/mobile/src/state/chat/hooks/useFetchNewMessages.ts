@@ -182,9 +182,6 @@ export function useFetchAndStoreMessagesForInbox(): (
         )
         return T.of(undefined)
       }
-      console.info(
-        `Refreshing inbox ${inbox.inbox.privateKey.publicKeyPemBase64}`
-      )
 
       return pipe(
         refreshInbox(api.chat)(

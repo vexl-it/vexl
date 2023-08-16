@@ -2,7 +2,6 @@ import {type FocusAtomType} from '../../../utils/atomUtils/FocusAtomType'
 import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
 import {atom} from 'jotai'
 import {sessionDataOrDummyAtom} from '../../session'
-import {type E164PhoneNumber} from '@vexl-next/domain/dist/general/E164PhoneNumber.brand'
 import {
   type ChatMessage,
   generateChatMessageId,
@@ -22,13 +21,7 @@ import {type BasicError} from '@vexl-next/domain/dist/utility/errors'
 import {type ErrorEncryptingMessage} from '@vexl-next/resources-utils/dist/chat/utils/chatCrypto'
 import processIdentityRevealMessageIfAny from '../utils/processIdentityRevealMessageIfAny'
 import removeFile from '../../../utils/removeFile'
-
-function anonymizePhoneNumber(phoneNumber: E164PhoneNumber): string {
-  const first3 = phoneNumber.slice(0, 4)
-  const last3 = phoneNumber.slice(-3)
-  const numberOfStars = phoneNumber.length - 7
-  return `${first3} ${new Array(numberOfStars).fill('*').join('')} ${last3}`
-}
+import anonymizePhoneNumber from '../utils/anonymizePhoneNumber'
 
 export type IdentityRequestAlreadySentError =
   BasicError<'IdentityRequestAlreadySentError'>
@@ -37,6 +30,7 @@ export type RevealMessageType =
   | 'REQUEST_REVEAL'
   | 'APPROVE_REVEAL'
   | 'DISAPPROVE_REVEAL'
+
 export default function revealIdentityActionAtom(
   chatWithMessagesAtom: FocusAtomType<ChatWithMessages>
 ): ActionAtomType<

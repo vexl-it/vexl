@@ -27,7 +27,9 @@ export function encryptMessage(
       | undefined => {
       if (
         (message.messageType === 'REQUEST_REVEAL' ||
-          message.messageType === 'APPROVE_REVEAL') &&
+          message.messageType === 'APPROVE_REVEAL' ||
+          message.messageType === 'REQUEST_CONTACT_REVEAL' ||
+          message.messageType === 'APPROVE_CONTACT_REVEAL') &&
         message.deanonymizedUser
       ) {
         const {name, partialPhoneNumber} = message.deanonymizedUser
@@ -47,6 +49,7 @@ export function encryptMessage(
           )
         )
       }
+
       return undefined
     })()
 
@@ -113,6 +116,7 @@ export function decryptMessage(
             ? {
                 name: payload.deanonymizedUser.name,
                 partialPhoneNumber: payload.deanonymizedUser.partialPhoneNumber,
+                fullPhoneNumber: payload.deanonymizedUser.fullPhoneNumber,
               }
             : undefined,
           senderPublicKey: message.senderPublicKey,

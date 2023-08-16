@@ -35,6 +35,7 @@ export default function writeSessionToStorage(
         )
       )
     ),
+
     TE.map(() => undefined)
   )
 }

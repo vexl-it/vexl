@@ -174,15 +174,15 @@ export const contactSelectMolecule = molecule((getMolecule, getScope) => {
           variant: 'info',
           steps: [
             {
-              title: t('postLoginFlow.contactsList.addContact'),
-              description: t('postLoginFlow.contactsList.addThisPhoneNumber'),
+              title: t('addContactDialog.addContact'),
+              description: t('addContactDialog.addThisPhoneNumber'),
               subtitle: contact.normalizedNumber,
               negativeButtonText: t('common.notNow'),
-              positiveButtonText: t('postLoginFlow.contactsList.addContact'),
+              positiveButtonText: t('addContactDialog.addContact'),
               type: 'StepWithInput',
               textInputProps: {
                 autoCorrect: false,
-                placeholder: t('postLoginFlow.contactsList.addContactName'),
+                placeholder: t('addContactDialog.addContactName'),
                 variant: 'greyOnWhite',
                 icon: userSvg,
               },
@@ -192,7 +192,6 @@ export const contactSelectMolecule = molecule((getMolecule, getScope) => {
         TE.map((result) =>
           result[0].type === 'inputResult' ? result[0].value : contact.name
         ),
-        (a) => a,
         TE.map((customName) => {
           set(newlyAddedCustomContactsAtom, (val) => [
             ...val,
@@ -212,11 +211,10 @@ export const contactSelectMolecule = molecule((getMolecule, getScope) => {
             steps: [
               {
                 type: 'StepWithText',
-                title: t('postLoginFlow.contactsList.contactAdded'),
-                description: t(
-                  'postLoginFlow.contactsList.youHaveAddedContact',
-                  {contactName: customName}
-                ),
+                title: t('addContactDialog.contactAdded'),
+                description: t('addContactDialog.youHaveAddedContact', {
+                  contactName: customName,
+                }),
                 positiveButtonText: t('common.niceWithExclamationMark'),
               },
             ],

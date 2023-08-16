@@ -22,6 +22,9 @@ export const MessageType = z.enum([
   'BLOCK_CHAT',
   'OFFER_DELETED',
   'INBOX_DELETED',
+  'APPROVE_CONTACT_REVEAL',
+  'DISAPPROVE_CONTACT_REVEAL',
+  'REQUEST_CONTACT_REVEAL',
 ])
 export type MessageType = z.TypeOf<typeof MessageType>
 
@@ -49,6 +52,7 @@ export type ChatUserIdentity = z.TypeOf<typeof ChatUserIdentity>
 export const DeanonymizedUser = z.object({
   name: UserName,
   partialPhoneNumber: z.string().optional(),
+  fullPhoneNumber: z.string().optional(),
 })
 export type DeanonymizedUser = z.TypeOf<typeof DeanonymizedUser>
 
@@ -81,6 +85,7 @@ export const ChatMessagePayload = z.object({
       name: UserName,
       imageBase64: Base64String.optional(),
       partialPhoneNumber: z.string().optional(),
+      fullPhoneNumber: z.string().optional(),
     })
     .optional(),
 })

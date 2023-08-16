@@ -1,5 +1,5 @@
 import IconButton from '../../IconButton'
-import {Stack, XStack} from 'tamagui'
+import {getTokens, Stack, XStack} from 'tamagui'
 import OtherSideNamePhotoAndInfo from './OtherSideNamePhotoAndInfo'
 import blockIconSvg from '../../../images/blockIconSvg'
 import backButtonSvg from '../../../images/backButtonSvg'
@@ -12,16 +12,19 @@ import {useAtom, useAtomValue, useSetAtom} from 'jotai'
 import binSvg from '../images/binSvg'
 import useResetNavigationToMessagingScreen from '../../../utils/useResetNavigationToMessagingScreen'
 import {useCallback} from 'react'
+import phoneSvg from '../images/phoneSvg'
 
 type ButtonType =
   | 'back'
   | 'identityReveal'
+  | 'contactReveal'
   | 'block'
   | 'closeModal'
   | 'deleteChat'
   | null
 
 function Button({type}: {type: ButtonType}): JSX.Element | null {
+  const tokens = getTokens()
   const safeGoBack = useSafeGoBack()
   const {
     showModalAtom,
@@ -29,15 +32,19 @@ function Button({type}: {type: ButtonType}): JSX.Element | null {
     blockChatWithUiFeedbackAtom,
     identityRevealStatusAtom,
     revealIdentityWithUiFeedbackAtom,
+    revealContactWithUiFeedbackAtom,
     forceShowHistoryAtom,
+    contactRevealStatusAtom,
   } = useMolecule(chatMolecule)
   const setModal = useSetAtom(showModalAtom)
   const resetNavigationToMessagingScreen = useResetNavigationToMessagingScreen()
   const identityRevealStatus = useAtomValue(identityRevealStatusAtom)
+  const contactRevealStatus = useAtomValue(contactRevealStatusAtom)
 
   const blockChat = useSetAtom(blockChatWithUiFeedbackAtom)
   const deleteChat = useSetAtom(deleteChatWithUiFeedbackAtom)
   const revealIdentity = useSetAtom(revealIdentityWithUiFeedbackAtom)
+  const revealContact = useSetAtom(revealContactWithUiFeedbackAtom)
 
   const [forceShowHistory, setForceShowHistory] = useAtom(forceShowHistoryAtom)
 
@@ -77,6 +84,22 @@ function Button({type}: {type: ButtonType}): JSX.Element | null {
         variant={'primary'}
         onPress={() => {
           void revealIdentity('REQUEST_REVEAL')
+        }}
+      />
+    )
+
+  if (
+    type === 'contactReveal' &&
+    identityRevealStatus === 'shared' &&
+    contactRevealStatus === 'notStarted'
+  )
+    return (
+      <IconButton
+        icon={phoneSvg}
+        iconFill={tokens.color.main.val}
+        variant={'primary'}
+        onPress={() => {
+          void revealContact('REQUEST_REVEAL')
         }}
       />
     )

@@ -1,6 +1,11 @@
 import {type SvgString} from '@vexl-next/domain/dist/utility/SvgString.brand'
 import Image from './Image'
-import {type StyleProp, TouchableOpacity, type ViewStyle} from 'react-native'
+import {
+  type ColorValue,
+  type StyleProp,
+  TouchableOpacity,
+  type ViewStyle,
+} from 'react-native'
 import {useCallback, useMemo} from 'react'
 import {getTokens, Stack, styled} from 'tamagui'
 
@@ -10,6 +15,7 @@ interface Props {
   borderRadius?: number
   disabled?: boolean
   icon: SvgString
+  iconFill?: ColorValue
   onPress: () => void
   style?: StyleProp<ViewStyle>
   variant?: 'dark' | 'light' | 'primary' | 'negative' | 'secondary' | 'plain'
@@ -56,6 +62,7 @@ function IconButton({
   variant = 'dark',
   disabled,
   icon,
+  iconFill,
   onPress,
   borderRadius,
   width,
@@ -92,16 +99,19 @@ function IconButton({
           width={20}
           height={20}
           stroke={
-            variant === 'dark'
-              ? tokens.color.white.val
-              : variant === 'primary'
-              ? tokens.color.main.val
-              : variant === 'negative'
-              ? tokens.color.red.val
-              : variant === 'secondary'
-              ? 'none'
-              : tokens.color.grey.val
+            !iconFill
+              ? variant === 'dark'
+                ? tokens.color.white.val
+                : variant === 'primary'
+                ? tokens.color.main.val
+                : variant === 'negative'
+                ? tokens.color.red.val
+                : variant === 'secondary'
+                ? 'none'
+                : tokens.color.grey.val
+              : 'none'
           }
+          fill={iconFill}
           source={icon}
         />
       </PressableStyled>

@@ -1,7 +1,7 @@
 import {useMolecule} from 'jotai-molecules'
 import {chatMolecule} from '../atoms'
 import {useAtomValue, useSetAtom} from 'jotai'
-import {Text, XStack, YStack} from 'tamagui'
+import {getTokens, Text, XStack, YStack} from 'tamagui'
 import Button from '../../Button'
 import UserAvatar from '../../UserAvatar'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
@@ -9,6 +9,11 @@ import useResetNavigationToMessagingScreen from '../../../utils/useResetNavigati
 import {Keyboard} from 'react-native'
 import {useHideActionForMessage} from '../atoms/createHideActionForMessageMmkvAtom'
 import {useCallback} from 'react'
+import {type SvgString} from '@vexl-next/domain/dist/utility/SvgString.brand'
+import IconButton from '../../IconButton'
+import phoneSvg from '../images/phoneSvg'
+import {E164PhoneNumber} from '@vexl-next/domain/dist/general/E164PhoneNumber.brand'
+import {addContactWithUiFeedbackAtom} from '../../../state/contacts/atom/addContactWithUiFeedbackAtom'
 
 function QuickActionBannerUi({
   leftElement,
@@ -17,14 +22,17 @@ function QuickActionBannerUi({
   topText,
   bottomText,
   buttonText,
+  icon,
 }: {
   leftElement?: React.ReactNode
   headingType: 'boldTop' | 'boldBottom'
   onButtonPress: () => void
   topText: string
   bottomText: string
-  buttonText: string
+  buttonText?: string
+  icon?: SvgString
 }): JSX.Element {
+  const tokens = getTokens()
   const headingStyle = {ff: '$body600', fos: 16}
   const subtitleStyle = {ff: '$body500', color: '$greyOnWhite'}
 
@@ -48,12 +56,23 @@ function QuickActionBannerUi({
           {bottomText}
         </Text>
       </YStack>
-      <Button
-        onPress={onButtonPress}
-        size={'small'}
-        variant="secondary"
-        text={buttonText}
-      />
+      {icon ? (
+        <IconButton
+          height={40}
+          width={40}
+          variant={'secondary'}
+          icon={icon}
+          iconFill={tokens.color.black.val}
+          onPress={onButtonPress}
+        />
+      ) : (
+        <Button
+          onPress={onButtonPress}
+          size={'small'}
+          variant="secondary"
+          text={buttonText}
+        />
+      )}
     </XStack>
   )
 }
@@ -67,18 +86,27 @@ function QuickActionBanner(): JSX.Element | null {
     otherSideDataAtom,
     deleteChatWithUiFeedbackAtom,
     identityRevealStatusAtom,
+    contactRevealStatusAtom,
     revealIdentityWithUiFeedbackAtom,
+    revealContactWithUiFeedbackAtom,
     requestStateAtom,
     forceShowHistoryAtom,
+    receivedContactRevealRequestMessageAtom,
   } = useMolecule(chatMolecule)
 
   const lastMessage = useAtomValue(lastMessageAtom)
   const otherSideData = useAtomValue(otherSideDataAtom)
   const identityRevealStatus = useAtomValue(identityRevealStatusAtom)
+  const contactRevealStatus = useAtomValue(contactRevealStatusAtom)
   const deleteChat = useSetAtom(deleteChatWithUiFeedbackAtom)
   const revealIdentity = useSetAtom(revealIdentityWithUiFeedbackAtom)
+  const revealContact = useSetAtom(revealContactWithUiFeedbackAtom)
   const requestState = useAtomValue(requestStateAtom)
   const setShowHistory = useSetAtom(forceShowHistoryAtom)
+  const addRevealedContact = useSetAtom(addContactWithUiFeedbackAtom)
+  const receivedContactRevealRequestMessage = useAtomValue(
+    receivedContactRevealRequestMessageAtom
+  )
 
   const onBackToRequestPressed = useCallback(() => {
     setShowHistory(false)
@@ -216,6 +244,7 @@ function QuickActionBanner(): JSX.Element | null {
       />
     )
   }
+
   if (identityRevealStatus === 'theyAsked') {
     return (
       <QuickActionBannerUi
@@ -245,6 +274,110 @@ function QuickActionBanner(): JSX.Element | null {
         }
         onButtonPress={() => {
           hide()
+        }}
+      />
+    )
+  }
+
+  if (contactRevealStatus === 'iAsked') {
+    return (
+      <QuickActionBannerUi
+        topText={t('messages.contactRevealSent.title')}
+        bottomText={t('messages.contactRevealSent.subtitle')}
+        headingType={'boldTop'}
+        buttonText={t('common.ok')}
+        leftElement={
+          <UserAvatar width={48} height={48} userImage={otherSideData.image} />
+        }
+        onButtonPress={() => {
+          hide()
+        }}
+      />
+    )
+  }
+
+  if (contactRevealStatus === 'theyAsked') {
+    return (
+      <QuickActionBannerUi
+        topText={t('messages.contactRevealRequest')}
+        bottomText={t('messages.tapToReveal')}
+        headingType={'boldTop'}
+        buttonText={t('common.more')}
+        leftElement={
+          <UserAvatar width={48} height={48} userImage={otherSideData.image} />
+        }
+        onButtonPress={() => {
+          void revealContact('RESPOND_REVEAL')
+        }}
+      />
+    )
+  }
+
+  if (
+    contactRevealStatus === 'shared' &&
+    lastMessage.message.messageType === 'APPROVE_CONTACT_REVEAL' &&
+    lastMessage.state === 'received'
+  ) {
+    return (
+      <QuickActionBannerUi
+        topText={t('messages.addUserToYourContacts', {
+          name: lastMessage.message.deanonymizedUser?.name,
+        })}
+        bottomText={t('messages.tapToAddToYourVexlContacts')}
+        headingType={'boldTop'}
+        icon={phoneSvg}
+        leftElement={
+          <UserAvatar width={48} height={48} userImage={otherSideData.image} />
+        }
+        onButtonPress={() => {
+          const fullPhoneNumber =
+            lastMessage.message.deanonymizedUser?.fullPhoneNumber
+
+          if (fullPhoneNumber) {
+            void addRevealedContact({
+              name: fullPhoneNumber,
+              normalizedNumber: E164PhoneNumber.parse(fullPhoneNumber),
+              fromContactList: false,
+              numberToDisplay: fullPhoneNumber,
+            })
+            hide()
+          }
+        }}
+      />
+    )
+  }
+
+  if (
+    contactRevealStatus === 'shared' &&
+    lastMessage.message.messageType === 'APPROVE_CONTACT_REVEAL' &&
+    lastMessage.state === 'sent'
+  ) {
+    return (
+      <QuickActionBannerUi
+        topText={t('messages.addUserToYourContacts', {
+          name: receivedContactRevealRequestMessage?.message.deanonymizedUser
+            ?.name,
+        })}
+        bottomText={t('messages.tapToAddToYourVexlContacts')}
+        headingType={'boldTop'}
+        icon={phoneSvg}
+        leftElement={
+          <UserAvatar width={48} height={48} userImage={otherSideData.image} />
+        }
+        onButtonPress={() => {
+          const fullPhoneNumber =
+            receivedContactRevealRequestMessage?.message.deanonymizedUser
+              ?.fullPhoneNumber
+
+          if (fullPhoneNumber) {
+            void addRevealedContact({
+              name: fullPhoneNumber,
+              normalizedNumber: E164PhoneNumber.parse(fullPhoneNumber),
+              fromContactList: false,
+              numberToDisplay: fullPhoneNumber,
+            })
+            hide()
+          }
         }}
       />
     )

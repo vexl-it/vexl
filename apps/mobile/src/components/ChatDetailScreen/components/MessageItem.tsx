@@ -11,6 +11,7 @@ import {Stack, Text} from 'tamagui'
 import Image from '../../Image'
 import BlockIconSvg from '../../../images/blockIconSvg'
 import IdentityRevealMessageItem from './IdentityRevealMessageItem'
+import ContactRevealMessageItem from './ContactRevealMessageItem'
 
 function MessageItem({
   itemAtom,
@@ -141,6 +142,20 @@ function MessageItem({
     ) {
       return (
         <IdentityRevealMessageItem
+          message={item.message}
+          isLatest={item.isLatest}
+          direction={direction}
+        />
+      )
+    }
+
+    if (
+      item.message.message.messageType === 'REQUEST_CONTACT_REVEAL' ||
+      item.message.message.messageType === 'APPROVE_CONTACT_REVEAL' ||
+      item.message.message.messageType === 'DISAPPROVE_CONTACT_REVEAL'
+    ) {
+      return (
+        <ContactRevealMessageItem
           message={item.message}
           isLatest={item.isLatest}
           direction={direction}

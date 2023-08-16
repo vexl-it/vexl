@@ -63,7 +63,10 @@ const otherCs: typeof en =
       "seeDetail": "See details",
       "notNow": "Not now",
       "niceWithExclamationMark": "Nice!",
-      "nothingFound": "Nic nenalezeno"
+      "nothingFound": "Nic nenalezeno",
+      "sendRequest": "Send request",
+      "change": "Change",
+      "errorWhileReadingQrCode": "Error while reading QR code"
     },
     "loginFlow": {
       "anonymityNotice": "Bez tvého svolení jej nikdo neuvidí. Ani my.",
@@ -544,6 +547,28 @@ const otherCs: typeof en =
           "body": "offer"
         },
         "screenTitle": "Notifications Settings"
+      },
+      "REQUEST_CONTACT_REVEAL": {
+        "title": "Phone number reveal request received",
+        "body": "You have been requested to reveal your phone number."
+      },
+      "APPROVE_CONTACT_REVEAL": {
+        "title": "Phone number revealed!",
+        "body": "Your request to reveal phone numbers was approved."
+      },
+      "DISAPPROVE_CONTACT_REVEAL": {
+        "title": "Phone number reveal request denied",
+        "body": "Your request to reveal phone numbers was denied."
+      },
+      "NEW_OFFERS_IN_MARKETPLACE": {
+        "title": "New offers in marketplace",
+        "body":
+          "There are new offers in marketplace. Open the app to view them."
+      },
+      "NEW_CONTACTS_ON_DEVICE": {
+        "title": "Your contacts are not synced all the way",
+        "body":
+          "You have new contacts on device that you have not synced. Exapand your network and sync them all!"
       }
     },
     "myOffers": {
@@ -612,7 +637,10 @@ const otherCs: typeof en =
           "OFFER_DELETED": "{{them}} smazal svou nabídku.",
           "INBOX_DELETED": "{{them}} smazal chat.",
           "CANCEL_REQUEST_MESSAGING": "Zrušil žádost o zprávu",
-          "ONLY_IMAGE": "{{them}} sent an image"
+          "ONLY_IMAGE": "{{them}} sent an image",
+          "REQUEST_CONTACT_REVEAL": "{{them}} requested phone number reveal",
+          "APPROVE_CONTACT_REVEAL": "Phone number revealed",
+          "DISAPPROVE_CONTACT_REVEAL": "Declined phone number reveal"
         },
         "outgoing": {
           "MESSAGE": "Já: {{message}}",
@@ -627,7 +655,10 @@ const otherCs: typeof en =
           "OFFER_DELETED": "Smazal jsi nabídku",
           "INBOX_DELETED": "Smazal jsi chat.",
           "CANCEL_REQUEST_MESSAGING": "Žádost o zprávu zrušena",
-          "ONLY_IMAGE": "You have sent an image"
+          "ONLY_IMAGE": "You have sent an image",
+          "REQUEST_CONTACT_REVEAL": "You have requested phone number reveal",
+          "APPROVE_CONTACT_REVEAL": "Phone number was revealed",
+          "DISAPPROVE_CONTACT_REVEAL": "Phone number reveal was declined"
         }
       },
       "deleteChat": "Odstránit chat",
@@ -720,7 +751,32 @@ const otherCs: typeof en =
         "description":
           "If you cancel the messaging request other side will be unable to accept it",
         "yes": "Yes, cancel"
-      }
+      },
+      "contactRevealRespondModal": {
+        "title": "Do you want to reveal your number?",
+        "text":
+          "Approving this request will reveal your phone number and add buyer to your contacts."
+      },
+      "contactRevealRequestModal": {
+        "title": "Send phone number request.",
+        "text":
+          "By sending request you agree with revealing of your number too."
+      },
+      "contactAlreadyRequested":
+        "Contact request was already sent in the conversation",
+      "contactRevealRequest": "Phone number reveal request",
+      "contactRevealSent": {
+        "title": "Phone number reveal request sent",
+        "subtitle": "Waiting for response"
+      },
+      "letsExchangeContacts": "Let’s exchange contacts!",
+      "phoneNumberRevealed": "Phone number revealed!",
+      "phoneNumberReveal": "Phone number reveal.",
+      "phoneNumberRevealDeclined": "Phone number reveal declined.",
+      "contactIsAlreadyInYourContactList":
+        "Contact is already in your contact list.",
+      "addUserToYourContacts": "Add {{name}} to your contacts?",
+      "tapToAddToYourVexlContacts": "Tap to add to your Vexl contacts."
     },
     "progressBar": {
       "ENCRYPTING_PRIVATE_PAYLOADS": "{{percentDone}}% hotovo",
@@ -799,7 +855,24 @@ const otherCs: typeof en =
         "🤔 Žádné nabídky od ostatních? Zkus přidat další kontakty a vyčkej. ✌️",
       "createYourFirstOffer":
         "👋 Vytvoř svou první nabídku na nákup nebo prodej Bitcoinu."
-    }
+    },
+    "addContactDialog": {
+      "addContact": "Ruční přidání kontaktu {{number}}",
+      "addThisPhoneNumber":
+        "Would you like to add this phone number to your Vexl contacts?",
+      "addContactName": "Add contact name",
+      "contactAdded": "Contact added.",
+      "youHaveAddedContact":
+        "You have added {{contactName}} to your Vexl contacts.",
+      "contactAlreadyInContactList": "Contact is already in your contact list.",
+      "wouldYouLikeToChangeTheName":
+        "Would you like to change the name for {{name}} with this phone number?",
+      "keepCurrent": "Keep current",
+      "contactUpdated": "Contact updated",
+      "youHaveSuccessfullyUpdatedContact":
+        "You have successfully updated your Vexl contacts."
+    },
+    "": "You have added {{contactName}} to your Vexl contacts."
   }
 /* JSON ends */
 

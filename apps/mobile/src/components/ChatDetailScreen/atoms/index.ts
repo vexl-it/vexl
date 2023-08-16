@@ -49,6 +49,9 @@ import cancelRequestActionAtomHandleUI from '../../../state/chat/atoms/cancelReq
 import {safeNavigateBackOutsideReact} from '../../../utils/navigation'
 import {type SelectedImage} from '../../../utils/imagePickers'
 import getValueFromSetStateActionOfAtom from '../../../utils/atomUtils/getValueFromSetStateActionOfAtom'
+import revealContactActionAtom, {
+  type RevealContactMessageType,
+} from '../../../state/chat/atoms/revealContactActionAtom'
 
 type ChatUIMode = 'approval' | 'messages'
 
@@ -224,6 +227,15 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     )()
   })
   const lastMessageAtom = selectAtom(messagesAtom, (o) => o.at(-1))
+  const receivedContactRevealRequestMessageAtom = selectAtom(
+    messagesAtom,
+    (messages) =>
+      messages.find(
+        (message) =>
+          message.message.messageType === 'REQUEST_CONTACT_REVEAL' &&
+          message.state === 'received'
+      )
+  )
 
   const forceShowHistoryAtom = atom(false)
 
@@ -268,6 +280,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
   })
 
   const revealIdentityAtom = revealIdentityActionAtom(chatWithMessagesAtom)
+  const revealContactAtom = revealContactActionAtom(chatWithMessagesAtom)
 
   const openedImageUriAtom = atom<UriString | undefined>(undefined)
 
@@ -341,6 +354,79 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     }
   )
 
+  const revealContactWithUiFeedbackAtom = atom(
+    null,
+    async (get, set, type: 'REQUEST_REVEAL' | 'RESPOND_REVEAL') => {
+      const {t} = get(translationAtom)
+
+      const modalContent = (() => {
+        if (type === 'REQUEST_REVEAL') {
+          return {
+            title: t('messages.contactRevealRequestModal.title'),
+            description: t('messages.contactRevealRequestModal.text'),
+            negativeButtonText: t('common.back'),
+            positiveButtonText: t('common.sendRequest'),
+          }
+        }
+        return {
+          title: t('messages.contactRevealRespondModal.title'),
+          description: t('messages.contactRevealRespondModal.text'),
+          negativeButtonText: t('common.no'),
+          positiveButtonText: t('common.yes'),
+        }
+      })()
+
+      return await pipe(
+        set(askAreYouSureActionAtom, {
+          steps: [{...modalContent, type: 'StepWithText'}],
+          variant: 'info',
+        }),
+        TE.map((val) => {
+          set(loadingOverlayDisplayedAtom, true)
+          return val
+        }),
+        TE.match(
+          (e) => {
+            if (e._tag === 'UserDeclinedError' && type === 'RESPOND_REVEAL') {
+              return E.right(
+                'DISAPPROVE_CONTACT_REVEAL' as RevealContactMessageType
+              )
+            }
+            return E.left(e)
+          },
+          () =>
+            E.right(
+              type === 'RESPOND_REVEAL'
+                ? ('APPROVE_CONTACT_REVEAL' as RevealContactMessageType)
+                : ('REQUEST_CONTACT_REVEAL' as RevealContactMessageType)
+            )
+        ),
+        TE.chainW((type) => set(revealContactAtom, {type})),
+        TE.match(
+          (e) => {
+            set(loadingOverlayDisplayedAtom, false)
+
+            if (e._tag === 'UserDeclinedError') {
+              return false
+            }
+            if (e._tag === 'ContactRevealRequestAlreadySentError') {
+              Alert.alert(t('messages.contactAlreadyRequested'))
+              return false
+            }
+            if (e._tag !== 'NetworkError')
+              reportError('error', 'Error sending contact reveal', e)
+            Alert.alert(toCommonErrorMessage(e, t) ?? t('common.unknownError'))
+            return false
+          },
+          () => {
+            set(loadingOverlayDisplayedAtom, false)
+            return true
+          }
+        )
+      )()
+    }
+  )
+
   const identityRevealStatusAtom = selectAtom(
     chatWithMessagesAtom,
     ({
@@ -358,6 +444,32 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
 
       const requestMessage = messages.find(
         (one) => one.message.messageType === 'REQUEST_REVEAL'
+      )
+
+      if (requestMessage)
+        return requestMessage.state === 'received' ? 'theyAsked' : 'iAsked'
+
+      return 'notStarted'
+    }
+  )
+
+  const contactRevealStatusAtom = selectAtom(
+    chatWithMessagesAtom,
+    ({
+      messages,
+    }): 'shared' | 'denied' | 'iAsked' | 'theyAsked' | 'notStarted' => {
+      const response = messages.find(
+        (one) =>
+          one.message.messageType === 'DISAPPROVE_CONTACT_REVEAL' ||
+          one.message.messageType === 'APPROVE_CONTACT_REVEAL'
+      )
+      if (response)
+        return response.message.messageType === 'APPROVE_CONTACT_REVEAL'
+          ? 'shared'
+          : 'denied' // no need to search further
+
+      const requestMessage = messages.find(
+        (one) => one.message.messageType === 'REQUEST_CONTACT_REVEAL'
       )
 
       if (requestMessage)
@@ -538,7 +650,9 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     otherSideDataAtom: selectOtherSideDataAtom(chatAtom),
     otherSideLeftAtom: focusOtherSideLeftAtom(chatWithMessagesAtom),
     identityRevealStatusAtom,
+    contactRevealStatusAtom,
     revealIdentityWithUiFeedbackAtom,
+    revealContactWithUiFeedbackAtom,
     deleteChatWithUiFeedbackAtom,
     blockChatWithUiFeedbackAtom,
     messagesListAtomAtoms,
@@ -557,5 +671,6 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     cancelRequestActionAtom,
     selectedImageAtom,
     clearExtraToSendActionAtom,
+    receivedContactRevealRequestMessageAtom,
   }
 })

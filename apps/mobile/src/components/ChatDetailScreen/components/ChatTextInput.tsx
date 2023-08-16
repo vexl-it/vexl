@@ -35,6 +35,7 @@ const styles = StyleSheet.create({
 const responseImagePreviewLimits = {width: 200, height: 100}
 
 function ChatTextInput(): JSX.Element | null {
+  const tokens = getTokens()
   const [value, setValue] = useState('')
   const {
     sendMessageAtom,
@@ -172,8 +173,9 @@ function ChatTextInput(): JSX.Element | null {
               <Animated.View style={animatedStyle}>
                 <IconButton
                   oval
-                  variant="secondary"
+                  variant={'secondary'}
                   icon={sendSvg}
+                  iconFill={tokens.color.black.val}
                   onPress={sendText}
                 />
               </Animated.View>

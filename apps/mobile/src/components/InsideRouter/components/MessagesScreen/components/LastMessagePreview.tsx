@@ -132,6 +132,30 @@ function MessagePreview({
         })}
       </BaseText>
     )
+  } else if (message.messageType === 'REQUEST_CONTACT_REVEAL') {
+    return (
+      <BaseText>
+        {t(`messages.messagePreviews.${direction}.REQUEST_CONTACT_REVEAL`, {
+          them: name,
+        })}
+      </BaseText>
+    )
+  } else if (message.messageType === 'APPROVE_CONTACT_REVEAL') {
+    return (
+      <BaseText>
+        {t(`messages.messagePreviews.${direction}.APPROVE_CONTACT_REVEAL`, {
+          them: name,
+        })}
+      </BaseText>
+    )
+  } else if (message.messageType === 'DISAPPROVE_CONTACT_REVEAL') {
+    return (
+      <BaseText>
+        {t(`messages.messagePreviews.${direction}.DISAPPROVE_CONTACT_REVEAL`, {
+          them: name,
+        })}
+      </BaseText>
+    )
   } else {
     return <BaseText>{message.text}</BaseText>
   }

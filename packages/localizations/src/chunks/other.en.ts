@@ -62,7 +62,10 @@ const otherEn =
       "seeDetail": "See details",
       "notNow": "Not now",
       "niceWithExclamationMark": "Nice!",
-      "nothingFound": "Nothing found"
+      "nothingFound": "Nothing found",
+      "sendRequest": "Send request",
+      "change": "Change",
+      "errorWhileReadingQrCode": "Error while reading QR code"
     },
     "loginFlow": {
       "anonymityNotice":
@@ -543,6 +546,28 @@ const otherEn =
           "body": "offer"
         },
         "screenTitle": "Notifications Settings"
+      },
+      "REQUEST_CONTACT_REVEAL": {
+        "title": "Phone number reveal request received",
+        "body": "You have been requested to reveal your phone number."
+      },
+      "APPROVE_CONTACT_REVEAL": {
+        "title": "Phone number revealed!",
+        "body": "Your request to reveal phone numbers was approved."
+      },
+      "DISAPPROVE_CONTACT_REVEAL": {
+        "title": "Phone number reveal request denied",
+        "body": "Your request to reveal phone numbers was denied."
+      },
+      "NEW_OFFERS_IN_MARKETPLACE": {
+        "title": "New offers in marketplace",
+        "body":
+          "There are new offers in marketplace. Open the app to view them."
+      },
+      "NEW_CONTACTS_ON_DEVICE": {
+        "title": "Your contacts are not synced all the way",
+        "body":
+          "You have new contacts on device that you have not synced. Exapand your network and sync them all!"
       }
     },
     "myOffers": {
@@ -610,7 +635,10 @@ const otherEn =
           "OFFER_DELETED": "{{them}} has deleted the offer",
           "INBOX_DELETED": "{{them}} has deleted the chat.",
           "CANCEL_REQUEST_MESSAGING": "Request was cancelled",
-          "ONLY_IMAGE": "{{them}} sent an image"
+          "ONLY_IMAGE": "{{them}} sent an image",
+          "REQUEST_CONTACT_REVEAL": "{{them}} requested phone number reveal",
+          "APPROVE_CONTACT_REVEAL": "Phone number revealed",
+          "DISAPPROVE_CONTACT_REVEAL": "Declined phone number reveal"
         },
         "outgoing": {
           "MESSAGE": "Me: {{message}}",
@@ -625,7 +653,10 @@ const otherEn =
           "OFFER_DELETED": "You have deleted your offer",
           "INBOX_DELETED": "You have deleted this inbox",
           "CANCEL_REQUEST_MESSAGING": "You have cancelled the request.",
-          "ONLY_IMAGE": "You have sent an image"
+          "ONLY_IMAGE": "You have sent an image",
+          "REQUEST_CONTACT_REVEAL": "You have requested phone number reveal",
+          "APPROVE_CONTACT_REVEAL": "Phone number was revealed",
+          "DISAPPROVE_CONTACT_REVEAL": "Phone number reveal was declined"
         }
       },
       "deleteChat": "Delete chat",
@@ -718,7 +749,31 @@ const otherEn =
         "description":
           "If you cancel the messaging request other side will be unable to accept it",
         "yes": "Yes, cancel"
-      }
+      },
+      "contactRevealRespondModal": {
+        "title": "Do you want to reveal your number?",
+        "text": "Approving this request will reveal your phone number."
+      },
+      "contactRevealRequestModal": {
+        "title": "Send phone number request.",
+        "text":
+          "By sending request you agree with revealing of your number too."
+      },
+      "contactAlreadyRequested":
+        "Contact request was already sent in the conversation",
+      "contactRevealRequest": "Phone number reveal request",
+      "contactRevealSent": {
+        "title": "Phone number reveal request sent",
+        "subtitle": "Waiting for response"
+      },
+      "letsExchangeContacts": "Let’s exchange contacts!",
+      "phoneNumberRevealed": "Phone number revealed!",
+      "phoneNumberReveal": "Phone number reveal.",
+      "phoneNumberRevealDeclined": "Phone number reveal declined.",
+      "contactIsAlreadyInYourContactList":
+        "Contact is already in your contact list.",
+      "addUserToYourContacts": "Add {{name}} to your contacts?",
+      "tapToAddToYourVexlContacts": "Tap to add to your Vexl contacts."
     },
     "progressBar": {
       "ENCRYPTING_PRIVATE_PAYLOADS": "{{percentDone}}% done",
@@ -798,7 +853,24 @@ const otherEn =
         "🤔 No offers from others yet? Try to add more contacts, and wait ✌️",
       "createYourFirstOffer":
         "👋 Create your first offer to buy or sell Bitcoin."
-    }
+    },
+    "addContactDialog": {
+      "addContact": "Add contact",
+      "addThisPhoneNumber":
+        "Would you like to add this phone number to your Vexl contacts?",
+      "addContactName": "Add contact name",
+      "contactAdded": "Contact added.",
+      "youHaveAddedContact":
+        "You have added {{contactName}} to your Vexl contacts.",
+      "contactAlreadyInContactList": "Contact is already in your contact list.",
+      "wouldYouLikeToChangeTheName":
+        "Would you like to change the name for {{name}} with this phone number?",
+      "keepCurrent": "Keep current",
+      "contactUpdated": "Contact updated",
+      "youHaveSuccessfullyUpdatedContact":
+        "You have successfully updated your Vexl contacts."
+    },
+    "": ""
   }
 /* JSON ends */
 

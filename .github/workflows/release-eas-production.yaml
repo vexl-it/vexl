@@ -17,6 +17,11 @@ jobs:
           token: ${{ secrets.EXPO_TOKEN }}
       - name: Install dependencies
         run: yarn install --frozen-lockfile
+      - name: Decode Google Service Account key
+        env:
+          GOOGLE_SERVICE_ACCOUNT: ${{ secrets.GOOGLE_SERVICE_ACCOUNT }}
+        run: |
+          mkdir apps/mobile/credentials && echo $GOOGLE_SERVICE_ACCOUNT > apps/mobile/credentials/google.json
       - name: Build on EAS
         run: eas build --platform all --profile production --auto-submit --non-interactive
         working-directory: apps/mobile

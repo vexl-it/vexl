@@ -12,6 +12,8 @@ const notificationPreferencesToShow = [
   'marketing',
   'chat',
   'inactivityWarnings',
+  'newPhoneContacts',
+  'newOfferInMarketplace',
 ] as const
 
 function NotificationSettingsScreen(): JSX.Element {

@@ -175,7 +175,7 @@ export const sessionAtom: WritableAtom<
   }
 )
 
-const userLoggedInAtom = atom((get) => {
+export const userLoggedInAtom = atom((get) => {
   return get(sessionAtom).state === 'loggedIn'
 })
 

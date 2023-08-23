@@ -8548,6 +8548,7 @@ __metadata:
     react: 18.2.0
     react-dom: 18.2.0
     react-native: 0.71.8
+    react-native-background-fetch: ^4.2.1
     react-native-color-matrix-image-filters: ^6.0.3
     react-native-flags: ^1.0.0
     react-native-gesture-handler: ~2.9.0
@@ -21834,6 +21835,13 @@ __metadata:
   dependencies:
     prop-types: ^15.7.2
   checksum: eb35821de36ae4eb00f97d99fc22ed79bd017248092ff1299f9d46a7ab946de16d2e6d6bfbf4cab5ef77d0d3bf47684aec761a7670ec7d36aae8d77ab8ddd171
+  languageName: node
+  linkType: hard
+
+"react-native-background-fetch@npm:^4.2.1":
+  version: 4.2.1
+  resolution: "react-native-background-fetch@npm:4.2.1"
+  checksum: 3c541ee9da0d3fd10da0fc5b36d5ceca82ef620c7e4c48e3c25703eb27fc8e850ce966a89403d2f35259e671e692bdfb17fcafe184081c65f4bbf99954c65d3a
   languageName: node
   linkType: hard
 

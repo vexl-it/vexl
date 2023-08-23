@@ -878,7 +878,8 @@ const otherSk: typeof en =
       "contactUpdated": "Kontakt aktualizovaný",
       "youHaveSuccessfullyUpdatedContact":
         "Vexl kontakty boli úspešne aktualizované."
-    }
+    },
+    "": ""
   }
 /* JSON ends */
 

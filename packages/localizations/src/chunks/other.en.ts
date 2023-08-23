@@ -551,15 +551,15 @@ const otherEn =
       },
       "REQUEST_CONTACT_REVEAL": {
         "title": "Phone number requested",
-        "body": "You have been requested to reveal your phone number."
+        "body": "You have been requested to share your phone number."
       },
       "APPROVE_CONTACT_REVEAL": {
-        "title": "Phone number revealed!",
-        "body": "Your request to reveal phone numbers was approved."
+        "title": "Phone number shared!",
+        "body": "Your request to exchange phone numbers was approved."
       },
       "DISAPPROVE_CONTACT_REVEAL": {
         "title": "Request denied!",
-        "body": "Your request to reveal phone numbers was denied."
+        "body": "Your request to exchange phone numbers was denied."
       },
       "NEW_OFFERS_IN_MARKETPLACE": {
         "title": "New offers in marketplace",
@@ -641,7 +641,7 @@ const otherEn =
           "REQUEST_CONTACT_REVEAL": "{{them}} has requested your phone number.",
           "APPROVE_CONTACT_REVEAL": "Phone number revealed",
           "DISAPPROVE_CONTACT_REVEAL":
-            "Request to reveal phone number was declined."
+            "Request to share phone number was declined."
         },
         "outgoing": {
           "MESSAGE": "Me: {{message}}",
@@ -658,9 +658,9 @@ const otherEn =
           "CANCEL_REQUEST_MESSAGING": "You have cancelled the request.",
           "ONLY_IMAGE": "You have sent an image",
           "REQUEST_CONTACT_REVEAL": "You've have requested their phone number",
-          "APPROVE_CONTACT_REVEAL": "Phone number was revealed",
+          "APPROVE_CONTACT_REVEAL": "Phone number was shared",
           "DISAPPROVE_CONTACT_REVEAL":
-            "They declined to reveal their phone number"
+            "They declined to share their phone number"
         }
       },
       "deleteChat": "Delete chat",
@@ -755,7 +755,7 @@ const otherEn =
         "yes": "Yes, cancel"
       },
       "contactRevealRespondModal": {
-        "title": "Are you sure you want to reveal your phone number?",
+        "title": "Are you sure you want to share your phone number?",
         "text": "This will reveal your phone number to the counterparty."
       },
       "contactRevealRequestModal": {
@@ -764,15 +764,15 @@ const otherEn =
           "By requesting a phone number, you agree to share yours as well."
       },
       "contactAlreadyRequested": "A phone number request was already sent.",
-      "contactRevealRequest": "Request to reveal phone number",
+      "contactRevealRequest": "Request to share phone number",
       "contactRevealSent": {
-        "title": "Request to reveal phone number sent",
+        "title": "Request to share phone number sent",
         "subtitle": "Waiting for response"
       },
       "letsExchangeContacts": "Let’s exchange contacts!",
-      "phoneNumberRevealed": "Phone number revealed!",
+      "phoneNumberRevealed": "Phone numbers shared!",
       "phoneNumberReveal": "Phone number reveal",
-      "phoneNumberRevealDeclined": "They declined to reveal their phone number",
+      "phoneNumberRevealDeclined": "They declined to share their phone number",
       "contactIsAlreadyInYourContactList":
         "Contact is already in your contact list.",
       "addUserToYourContacts": "Add {{name}} to your contacts?",
@@ -872,7 +872,8 @@ const otherEn =
       "contactUpdated": "Contact updated",
       "youHaveSuccessfullyUpdatedContact":
         "You have successfully updated your Vexl contacts."
-    }
+    },
+    "": ""
   }
 /* JSON ends */
 

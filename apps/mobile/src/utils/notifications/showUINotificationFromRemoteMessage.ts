@@ -18,7 +18,7 @@ async function getChannelForMessages(): Promise<string> {
   })
 }
 
-async function getDefaultChannel(): Promise<string> {
+export async function getDefaultChannel(): Promise<string> {
   return await notifee.createChannel({
     id: 'Chat',
     name: 'Chat notifications.',
@@ -62,6 +62,7 @@ export async function showUINotificationFromRemoteMessage(
     await notifee.displayNotification({
       title: t(`notifications.${type}.title`),
       body: t(`notifications.${type}.body`),
+      data: remoteMessage.data,
       android: {channelId: await getChannelForMessages()},
     })
   } else if (type === INACTIVITY_REMINDER) {
@@ -74,6 +75,7 @@ export async function showUINotificationFromRemoteMessage(
     await notifee.displayNotification({
       title: t(`notifications.INACTIVITY_REMINDER.title`),
       body: t(`notifications.INACTIVITY_REMINDER.body`),
+      data: remoteMessage.data,
       android: {channelId: await getDefaultChannel()},
     })
   }

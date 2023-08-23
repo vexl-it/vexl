@@ -11,6 +11,10 @@ import {safeParse} from '../utils/fpUtils'
 import focusChatByInboxKeyAndSenderKey from './chat/atoms/focusChatByInboxKeyAndSenderKey'
 import reportError from '../utils/reportError'
 import {isOnMessagesList, isOnSpecificChat} from '../utils/navigation'
+import {
+  NEW_OFFERS_IN_MARKETPLACE,
+  NEW_CONTACTS_TO_SYNC,
+} from '../utils/notifications/notificationTypes'
 
 const lastNotificationIdHandledAtom = atom<string | undefined>(undefined)
 
@@ -28,7 +32,11 @@ function useReactOnNotificationOpen(): (notification: Notification) => void {
       if (store.get(lastNotificationIdHandledAtom) === notification.id) return
       store.set(lastNotificationIdHandledAtom, notification.id)
 
-      if (notification.data?.inbox && notification.data?.sender) {
+      if (notification.data?.type === NEW_OFFERS_IN_MARKETPLACE) {
+        navigation.navigate('InsideTabs', {screen: 'Marketplace'})
+      } else if (notification.data?.type === NEW_CONTACTS_TO_SYNC) {
+        navigation.navigate('SetContacts')
+      } else if (notification.data?.inbox && notification.data?.sender) {
         pipe(
           notification.data,
           safeParse(MessageNotificationPayload),

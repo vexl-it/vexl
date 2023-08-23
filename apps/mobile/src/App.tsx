@@ -14,7 +14,10 @@ import MaintenanceAndForceUpdateCheck from './components/MaintenanceAndForceUpda
 import useSetupRemoteConfig from './utils/remoteConfig/useSetupRemoteConfig'
 import 'react-native-gesture-handler'
 import {navigationRef} from './utils/navigation'
+import {BackgroundTaskComponentManager} from './utils/backgroundTasks'
 import BadgeCountManager from './components/BadgeCountManager'
+import {useAppState} from './utils/useAppState'
+import {setLastTimeAppWasRunningToNow} from './utils/lastTimeAppWasRunning'
 
 void SplashScreen.preventAutoHideAsync()
 
@@ -29,6 +32,8 @@ function App(): JSX.Element {
       void SplashScreen.hideAsync()
     }
   }, [fontsLoaded, sessionLoaded, remoteConfigSetup])
+
+  useAppState(setLastTimeAppWasRunningToNow, true)
 
   // Handled by splashscreen
   if (!fontsLoaded) return <></>
@@ -55,6 +60,7 @@ function App(): JSX.Element {
           </MaintenanceAndForceUpdateCheck>
         </LoadingOverlayProvider>
         <AreYouSureDialog />
+        <BackgroundTaskComponentManager />
       </NavigationContainer>
     </SafeAreaProvider>
   )

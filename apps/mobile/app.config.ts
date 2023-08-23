@@ -61,12 +61,13 @@ export default {
       'usesNonExemptEncryption': false,
     },
     'infoPlist': {
-      'UIBackgroundModes': ['fetch', 'remote-notification'],
+      'UIBackgroundModes': ['fetch', 'remote-notification', 'processing'],
       'LSApplicationQueriesSchemes': ['itms-apps'],
       'FirebaseDynamicLinksCustomDomains': [
         'https://link.vexl.it',
         'https://nextlink.vexl.it',
       ],
+      'BGTaskSchedulerPermittedIdentifiers': ['com.transistorsoft.fetch'],
     },
     'googleServicesFile': extra.googleServicesInfoPlistFile,
     'associatedDomains': ['applinks:link.vexl.it', 'applinks:nextlink.vexl.it'],
@@ -144,6 +145,7 @@ export default {
     '@notifee/react-native',
     './expo-plugins/disable-firebase-analytics.js',
     './expo-plugins/setup-headless-background-message-processing-ios.js',
+    'react-native-background-fetch',
   ],
 
   'extra': {

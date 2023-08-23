@@ -80,6 +80,7 @@
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-native": "0.71.8",
+    "react-native-background-fetch": "^4.2.1",
     "react-native-color-matrix-image-filters": "^6.0.3",
     "react-native-flags": "^1.0.0",
     "react-native-gesture-handler": "~2.9.0",

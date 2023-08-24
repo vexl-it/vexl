@@ -4,7 +4,7 @@ import {
   type OfferPublicPart,
   type SymmetricKey,
 } from '@vexl-next/domain/dist/general/offers'
-import {atom, type ExtractAtomResult, useAtomValue, useStore} from 'jotai'
+import {atom, type ExtractAtomResult, useAtomValue} from 'jotai'
 import {
   lastUpdatedAtAtom,
   loadingStateAtom,
@@ -17,14 +17,13 @@ import {
 } from './atom'
 import * as Option from 'fp-ts/Option'
 import {type OneOfferInState} from './domain'
-import {privateApiAtom, usePrivateApiAssumeLoggedIn} from '../../api'
+import {privateApiAtom} from '../../api'
 import {pipe} from 'fp-ts/function'
-import {sessionDataOrDummyAtom, useSessionAssumeLoggedIn} from '../session'
+import {sessionDataOrDummyAtom} from '../session'
 import {isoNow} from '@vexl-next/domain/dist/utility/IsoDatetimeString.brand'
 import * as TE from 'fp-ts/TaskEither'
 import * as E from 'fp-ts/Either'
 import * as A from 'fp-ts/Array'
-import {type Task} from 'fp-ts/Task'
 import reportError from '../../utils/reportError'
 import createNewOfferForMyContacts, {
   type ApiErrorWhileCreatingOffer,
@@ -40,7 +39,7 @@ import {
   type ErrorDecryptingOffer,
   type NonCompatibleOfferVersionError,
 } from '@vexl-next/resources-utils/dist/offers/decryptOffer'
-import {useCallback, useMemo} from 'react'
+import {useMemo} from 'react'
 import deduplicate from '../../utils/deduplicate'
 import notEmpty from '../../utils/notEmpty'
 import {type ChatOrigin} from '@vexl-next/domain/dist/general/messaging'
@@ -58,127 +57,124 @@ import {type ExtractLeftTE} from '@vexl-next/rest-api/dist/services/chat/utils'
 import {type OfferPrivateApi} from '@vexl-next/rest-api/dist/services/offer'
 import getCountryPrefix from '../../utils/getCountryCode'
 
-export function useTriggerOffersRefresh(): Task<void> {
-  const api = usePrivateApiAssumeLoggedIn()
-  const session = useSessionAssumeLoggedIn()
-  const store = useStore()
+export const triggerOffersRefreshAtom = atom(null, async (get, set) => {
+  const api = get(privateApiAtom)
+  const session = get(sessionDataOrDummyAtom)
 
-  return useCallback(async () => {
-    const updateStartedAt = isoNow()
-    const offerIds = store.get(offersIdsAtom)
+  const updateStartedAt = isoNow()
+  const offerIds = get(offersIdsAtom)
 
-    console.log('🦋 Refreshing offers')
+  console.log('🦋 Refreshing offers')
 
-    await pipe(
-      getNewOffersAndDecrypt({
-        offersApi: api.offer,
-        modifiedAt: store.get(lastUpdatedAtAtom),
-        keyPair: session.privateKey,
-      }),
-      TE.bindTo('newOffers'),
-      TE.bindW('removedOffers', () =>
+  await pipe(
+    getNewOffersAndDecrypt({
+      offersApi: api.offer,
+      modifiedAt: get(lastUpdatedAtAtom),
+      keyPair: session.privateKey,
+    }),
+    TE.bindTo('newOffers'),
+    TE.bindW('removedOffers', () =>
+      pipe(
+        offerIds.length > 0
+          ? api.offer.getRemovedOffers({offerIds})
+          : TE.right({offerIds: [] as OfferId[]}),
+        TE.matchW(
+          (error) => {
+            if (error._tag !== 'NetworkError')
+              reportError('error', 'Error fetching removed offers', error)
+            return [] as OfferId[]
+          },
+          (result) => result.offerIds
+        ),
+        TE.fromTask
+      )
+    ),
+    TE.matchW(
+      (error) => {
+        if (error._tag !== 'NetworkError')
+          reportError('error', 'Error fetching offers', error)
+        set(loadingStateAtom, {state: 'error', error})
+      },
+      ({newOffers: decryptingResults, removedOffers}) => {
         pipe(
-          offerIds.length > 0
-            ? api.offer.getRemovedOffers({offerIds})
-            : TE.right({offerIds: [] as OfferId[]}),
-          TE.matchW(
-            (error) => {
-              if (error._tag !== 'NetworkError')
-                reportError('error', 'Error fetching removed offers', error)
-              return [] as OfferId[]
+          decryptingResults,
+          A.filter(E.isLeft),
+          A.map((one) => one.left),
+          A.match(
+            () => {
+              // Is ok, all offers decrypted ok
             },
-            (result) => result.offerIds
-          ),
-          TE.fromTask
-        )
-      ),
-      TE.matchW(
-        (error) => {
-          if (error._tag !== 'NetworkError')
-            reportError('error', 'Error fetching offers', error)
-          store.set(loadingStateAtom, {state: 'error', error})
-        },
-        ({newOffers: decryptingResults, removedOffers}) => {
-          pipe(
-            decryptingResults,
-            A.filter(E.isLeft),
-            A.map((one) => one.left),
-            A.match(
-              () => {
-                // Is ok, all offers decrypted ok
-              },
-              (error) => {
-                const criticalErrors = error.filter(
-                  (one) => one._tag !== 'NonCompatibleOfferVersionError'
-                )
-                if (criticalErrors.length > 0)
-                  reportError('error', 'Error while decrypting offers', error)
-
-                const nonCompatibleErrors = error.filter(
-                  (one) => one._tag === 'NonCompatibleOfferVersionError'
-                )
-                if (nonCompatibleErrors.length > 0) {
-                  console.info(
-                    `Skipping ${nonCompatibleErrors.length} offers because they are not compatible.`
-                  )
-                }
-              }
-            )
-          )
-
-          const fetchedOffers = pipe(
-            decryptingResults,
-            A.filter(E.isRight),
-            A.map((one) => one.right)
-          )
-
-          const allOffersIds = deduplicate([
-            ...store.get(offersIdsAtom),
-            ...fetchedOffers.map((one) => one.offerId),
-          ])
-          const oldOffers = store.get(offersAtom)
-
-          pipe(
-            allOffersIds,
-            A.map((offerId): OneOfferInState | null => {
-              const fetchedOffer = fetchedOffers.find(
-                (fetchedOffer) => offerId === fetchedOffer.offerId
+            (error) => {
+              const criticalErrors = error.filter(
+                (one) => one._tag !== 'NonCompatibleOfferVersionError'
               )
-              const oldOffer = oldOffers.find(
-                (one) => one.offerInfo.offerId === offerId
-              )
+              if (criticalErrors.length > 0)
+                reportError('error', 'Error while decrypting offers', error)
 
-              if (oldOffer && fetchedOffer) {
-                return {
-                  ...oldOffer,
-                  offerInfo: fetchedOffer,
-                }
+              const nonCompatibleErrors = error.filter(
+                (one) => one._tag === 'NonCompatibleOfferVersionError'
+              )
+              if (nonCompatibleErrors.length > 0) {
+                console.info(
+                  `Skipping ${nonCompatibleErrors.length} offers because they are not compatible.`
+                )
               }
-              if (oldOffer) {
-                return oldOffer
-              }
-              if (fetchedOffer) {
-                return {
-                  offerInfo: fetchedOffer,
-                  flags: {
-                    reported: false,
-                  },
-                }
-              }
-              return null
-            }),
-            A.filter(notEmpty),
-            A.filter((one) => !removedOffers.includes(one.offerInfo.offerId)),
-            (offers) => ({offers, lastUpdatedAt: updateStartedAt}),
-            (value) => {
-              store.set(offersStateAtom, value)
             }
           )
-        }
-      )
-    )()
-  }, [api, session, store])
-}
+        )
+
+        const fetchedOffers = pipe(
+          decryptingResults,
+          A.filter(E.isRight),
+          A.map((one) => one.right)
+        )
+
+        const allOffersIds = deduplicate([
+          ...get(offersIdsAtom),
+          ...fetchedOffers.map((one) => one.offerId),
+        ])
+        const oldOffers = get(offersAtom)
+
+        pipe(
+          allOffersIds,
+          A.map((offerId): OneOfferInState | null => {
+            const fetchedOffer = fetchedOffers.find(
+              (fetchedOffer) => offerId === fetchedOffer.offerId
+            )
+            const oldOffer = oldOffers.find(
+              (one) => one.offerInfo.offerId === offerId
+            )
+
+            if (oldOffer && fetchedOffer) {
+              return {
+                ...oldOffer,
+                offerInfo: fetchedOffer,
+              }
+            }
+            if (oldOffer) {
+              return oldOffer
+            }
+            if (fetchedOffer) {
+              return {
+                offerInfo: fetchedOffer,
+                flags: {
+                  reported: false,
+                },
+              }
+            }
+            return null
+          }),
+          A.filter(notEmpty),
+          A.filter((one) => !removedOffers.includes(one.offerInfo.offerId)),
+          (offers) => ({offers, lastUpdatedAt: updateStartedAt}),
+          (value) => {
+            set(offersStateAtom, value)
+          }
+        )
+      }
+    )
+  )()
+})
 
 export function useAreOffersLoading(): boolean {
   const offerState = useAtomValue(loadingStateAtom)

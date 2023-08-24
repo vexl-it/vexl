@@ -6,7 +6,7 @@ import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs
 import OffersListWithFilter from './components/OffersListStateDisplayer'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import {OfferType} from '@vexl-next/domain/dist/general/offers'
-import {useTriggerOffersRefresh} from '../../../../state/marketplace'
+import {triggerOffersRefreshAtom} from '../../../../state/marketplace'
 import {useCallback, useMemo} from 'react'
 import {type StyleProp, type ViewStyle} from 'react-native'
 import {getTokens, useMedia} from 'tamagui'
@@ -58,7 +58,7 @@ function MarketplaceScreen(): JSX.Element {
     []
   )
 
-  const refreshOffers = useTriggerOffersRefresh()
+  const refreshOffers = useSetAtom(triggerOffersRefreshAtom)
 
   useAppState(
     useCallback(

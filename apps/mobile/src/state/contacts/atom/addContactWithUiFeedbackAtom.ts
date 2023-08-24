@@ -15,6 +15,7 @@ import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 import {importedContactsAtom, lastImportOfContactsAtom} from '../index'
 import {type E164PhoneNumber} from '@vexl-next/domain/dist/general/E164PhoneNumber.brand'
 import {IsoDatetimeString} from '@vexl-next/domain/dist/utility/IsoDatetimeString.brand'
+import {syncConnectionsActionAtom} from '../../connections/atom/connectionStateAtom'
 
 const showCreateOrEditDialogAtom = atom(
   null,
@@ -149,6 +150,8 @@ const importContact = atom(null, (get, set, newContact: ContactNormalized) => {
         lastImportOfContactsAtom,
         IsoDatetimeString.parse(new Date().toISOString())
       )
+
+      void set(syncConnectionsActionAtom)()
       void set(updateAllOffersConnectionsActionAtom, {
         isInBackground: false,
       })()

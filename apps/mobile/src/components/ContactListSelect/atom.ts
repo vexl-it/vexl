@@ -32,6 +32,7 @@ import toE164PhoneNumberWithDefaultCountryCode from '../../utils/toE164PhoneNumb
 import {IsoDatetimeString} from '@vexl-next/domain/dist/utility/IsoDatetimeString.brand'
 import {askAreYouSureActionAtom} from '../AreYouSureDialog'
 import userSvg from '../images/userSvg'
+import {syncConnectionsActionAtom} from '../../state/connections/atom/connectionStateAtom'
 
 export const ContactsSelectScope = createScope<ContactNormalized[]>([])
 
@@ -275,6 +276,8 @@ export const contactSelectMolecule = molecule((getMolecule, getScope) => {
             lastImportOfContactsAtom,
             IsoDatetimeString.parse(new Date().toISOString())
           )
+
+          void set(syncConnectionsActionAtom)()
           void set(updateAllOffersConnectionsActionAtom, {
             isInBackground: false,
           })()

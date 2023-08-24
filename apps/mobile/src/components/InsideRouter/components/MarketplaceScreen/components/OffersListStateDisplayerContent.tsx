@@ -8,11 +8,11 @@ import OffersListButtons from './OffersListButtons'
 import EmptyListPlaceholder from './EmptyListPlaceholder'
 import OffersList from '../../../../OffersList'
 import {
+  triggerOffersRefreshAtom,
   useAreOffersLoading,
   useOffersLoadingError,
-  useTriggerOffersRefresh,
 } from '../../../../../state/marketplace'
-import {useAtomValue} from 'jotai'
+import {useAtomValue, useSetAtom} from 'jotai'
 import {offersAtomWithFilter} from '../../../../../state/marketplace/atom'
 import {splitAtom} from 'jotai/utils'
 import TotalOffersCount from './TotalOffersCount'
@@ -34,7 +34,7 @@ function OffersListStateDisplayerContent({
   const tokens = getTokens()
   const loading = useAreOffersLoading()
   const error = useOffersLoadingError()
-  const refreshOffers = useTriggerOffersRefresh()
+  const refreshOffers = useSetAtom(triggerOffersRefreshAtom)
   const filter = useAtomValue(offersFilterFromStorageAtom)
   const basicFilter = useMemo(
     () => ({

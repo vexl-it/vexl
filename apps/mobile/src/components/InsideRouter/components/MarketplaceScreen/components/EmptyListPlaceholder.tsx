@@ -24,7 +24,7 @@ import {
 import EmptyMarketplaceSuggestions from './EmptyMarketplaceSuggestions'
 import MarketplaceSuggestion from './MarketplaceSuggestion'
 import {useEffect, useMemo, useState} from 'react'
-import {useTriggerOffersRefresh} from '../../../../../state/marketplace'
+import {triggerOffersRefreshAtom} from '../../../../../state/marketplace'
 import {ScrollView} from 'react-native'
 import usePixelsFromBottomWhereTabsEnd from '../../../utils'
 
@@ -65,7 +65,7 @@ function EmptyListWrapper({
 function EmptyListPlaceholder(): JSX.Element {
   const navigation = useNavigation()
   const {t} = useTranslation()
-  const refreshOffers = useTriggerOffersRefresh()
+  const refreshOffers = useSetAtom(triggerOffersRefreshAtom)
   const importedContactsCount = useAtomValue(importedContactsCountAtom)
   const filterActive = useAtomValue(isFilterActiveAtom)
   const reachNumber = useAtomValue(reachNumberAtom)

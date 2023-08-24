@@ -8,7 +8,7 @@ import {MINIMAL_DATE} from '@vexl-next/domain/dist/utility/IsoDatetimeString.bra
 import {useSessionAssumeLoggedIn} from '../../state/session'
 import {Alert, ScrollView} from 'react-native'
 import Clipboard from '@react-native-clipboard/clipboard'
-import {useTriggerOffersRefresh} from '../../state/marketplace'
+import {triggerOffersRefreshAtom} from '../../state/marketplace'
 import {type Inbox} from '@vexl-next/domain/dist/general/messaging'
 import messagingStateAtom from '../../state/chat/atoms/messagingStateAtom'
 import {enableHiddenFeatures} from '../../utils/environment'
@@ -42,7 +42,7 @@ function DebugScreen(): JSX.Element {
   const session = useSessionAssumeLoggedIn()
 
   const refreshMessaging = useSetAtom(fetchMessagesForAllInboxesAtom)
-  const refreshOffers = useTriggerOffersRefresh()
+  const refreshOffers = useSetAtom(triggerOffersRefreshAtom)
   const updateConnections = useSetAtom(updateAllOffersConnectionsActionAtom)
 
   return (

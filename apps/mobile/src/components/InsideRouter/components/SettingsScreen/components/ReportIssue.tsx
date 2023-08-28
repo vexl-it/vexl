@@ -17,9 +17,11 @@ function ReportIssue(): JSX.Element {
   )
 
   const supportEmail = t('settings.items.supportEmail')
-  const emailBody = `${t('reportIssue.predefinedBody')}\n${
-    Platform.OS
-  }-${version}-${Platform.Version}\n\n`
+  const emailBody = encodeURIComponent(
+    `${t('reportIssue.predefinedBody')}\n\n${Platform.OS}-${version}-${
+      Platform.Version
+    }\n\n`
+  )
 
   return (
     <SettingsScreenDialog
@@ -47,7 +49,12 @@ function ReportIssue(): JSX.Element {
         ai={'center'}
         gap={'$3'}
         mt={'$6'}
-        onPress={openUrl(`mailto:${supportEmail}`)}
+        onPress={() => {
+          openUrl(
+            `mailto:${supportEmail}?body=${emailBody}`,
+            t('settings.items.supportEmail')
+          )()
+        }}
       >
         <Stack
           ai={'center'}

@@ -11,6 +11,10 @@ import {UnixMilliseconds} from '@vexl-next/domain/dist/utility/UnixMilliseconds.
 import {IsoDatetimeString} from '@vexl-next/domain/dist/utility/IsoDatetimeString.brand'
 import {CountryPrefix} from '@vexl-next/domain/dist/general/CountryPrefix.brand'
 
+export interface ReportOfferLimitReachedError {
+  readonly _tag: 'ReportOfferLimitReachedError'
+}
+
 export const OfferAdminId = z.string().brand<'OfferAdminId'>()
 export type OfferAdminId = z.TypeOf<typeof OfferAdminId>
 export const ServerOffer = z.object({

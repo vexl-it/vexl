@@ -261,7 +261,9 @@ const otherCs: typeof en =
         "yes": "Ano, nahlásit",
         "thankYou": "Děkujeme!",
         "inappropriateContentWasReported":
-          "Nevhodný obsah byl anonymně nahlášen."
+          "Nevhodný obsah byl anonymně nahlášen.",
+        "reportLimitReached":
+          "You have reached report limit. Try again in 24 hours."
       },
       "goToChat": "Přejděte na chat",
       "requestStatus": {
@@ -871,8 +873,7 @@ const otherCs: typeof en =
       "contactUpdated": "Contact updated",
       "youHaveSuccessfullyUpdatedContact":
         "You have successfully updated your Vexl contacts."
-    },
-    "": "You have added {{contactName}} to your Vexl contacts."
+    }
   }
 /* JSON ends */
 

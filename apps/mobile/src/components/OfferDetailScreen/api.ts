@@ -49,7 +49,9 @@ export function useReportOfferHandleUI(): (
           })
         }),
         TE.mapLeft((e) => {
-          if (e._tag !== 'UserDeclinedError') {
+          if (e._tag === 'ReportOfferLimitReachedError') {
+            Alert.alert(t('offer.report.reportLimitReached'))
+          } else if (e._tag !== 'UserDeclinedError') {
             Alert.alert(toCommonErrorMessage(e, t) ?? t('common.unknownError'))
           }
           loadingOverlay.hide()

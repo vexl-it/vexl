@@ -261,7 +261,9 @@ const otherSk: typeof en =
         "yes": "Áno, nahlásiť",
         "thankYou": "Ďakujeme!",
         "inappropriateContentWasReported":
-          "Nevhodný obsah bol anonymne nahlásený."
+          "Nevhodný obsah bol anonymne nahlásený.",
+        "reportLimitReached":
+          "You have reached report limit. Try again in 24 hours."
       },
       "goToChat": "Prejdite do chatu",
       "requestStatus": {
@@ -872,8 +874,7 @@ const otherSk: typeof en =
       "contactUpdated": "Contact updated",
       "youHaveSuccessfullyUpdatedContact":
         "You have successfully updated your Vexl contacts."
-    },
-    "": ""
+    }
   }
 /* JSON ends */
 

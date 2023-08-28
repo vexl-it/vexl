@@ -264,7 +264,9 @@ const otherPt: typeof en =
         "yes": "Sim, comunicar",
         "thankYou": "Obrigado!",
         "inappropriateContentWasReported":
-          "O conteúdo inadequado foi comunicado anonimamente."
+          "O conteúdo inadequado foi comunicado anonimamente.",
+        "reportLimitReached":
+          "You have reached report limit. Try again in 24 hours."
       },
       "goToChat": "Ir para o chat",
       "requestStatus": {
@@ -881,8 +883,7 @@ const otherPt: typeof en =
       "contactUpdated": "Contact updated",
       "youHaveSuccessfullyUpdatedContact":
         "You have successfully updated your Vexl contacts."
-    },
-    "": ""
+    }
   }
 /* JSON ends */
 

@@ -23,7 +23,9 @@ async function failSilently<T>(promise: Promise<T>): Promise<
 > {
   return await promise
     .then((result) => ({success: true as const, result}))
-    .catch((e) => ({success: false as const, error: e as unknown}))
+    .catch((e) => {
+      return {success: false as const, error: e as unknown}
+    })
 }
 
 export const logoutActionAtom = atom(null, async (get, set) => {

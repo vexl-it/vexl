@@ -15,6 +15,7 @@ import {
   getImageFromGalleryAndTryToResolveThePermissionsAlongTheWay,
   type ImagePickerError,
 } from '../../utils/imagePickers'
+import showErrorAlert from '../../utils/showErrorAlert'
 
 export const changeProfilePictureMolecule = molecule(() => {
   const reportAndTranslateErrorsAtom = atom<
@@ -74,11 +75,18 @@ export const changeProfilePictureMolecule = molecule(() => {
                 saveTo: 'documents',
                 aspect: [1, 1],
               }),
-              TE.mapLeft((e) => set(reportAndTranslateErrorsAtom, {error: e})),
-              TE.match(Alert.alert, (r) => {
-                set(selectedImageUriAtom, O.some(r.uri))
-                set(didImageUriChangeAtom, true)
-              })
+              TE.match(
+                (e) => {
+                  showErrorAlert({
+                    title: set(reportAndTranslateErrorsAtom, {error: e}),
+                    error: e,
+                  })
+                },
+                (r) => {
+                  set(selectedImageUriAtom, O.some(r.uri))
+                  set(didImageUriChangeAtom, true)
+                }
+              )
             )()
           },
         },
@@ -90,11 +98,18 @@ export const changeProfilePictureMolecule = molecule(() => {
                 saveTo: 'documents',
                 aspect: [1, 1],
               }),
-              TE.mapLeft((e) => set(reportAndTranslateErrorsAtom, {error: e})),
-              TE.match(Alert.alert, (r) => {
-                set(selectedImageUriAtom, O.some(r.uri))
-                set(didImageUriChangeAtom, true)
-              })
+              TE.match(
+                (e) => {
+                  showErrorAlert({
+                    title: set(reportAndTranslateErrorsAtom, {error: e}),
+                    error: e,
+                  })
+                },
+                (r) => {
+                  set(selectedImageUriAtom, O.some(r.uri))
+                  set(didImageUriChangeAtom, true)
+                }
+              )
             )()
           },
         },

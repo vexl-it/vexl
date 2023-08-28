@@ -6,11 +6,11 @@ import {pipe} from 'fp-ts/function'
 import {sendMessagingRequest} from '@vexl-next/resources-utils/dist/chat/sendMessagingRequest'
 import * as TE from 'fp-ts/TaskEither'
 import upsertChatForTheirOfferActionAtom from './upsertChatForTheirOfferActionAtom'
-import {Alert} from 'react-native'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 import * as O from 'fp-ts/Option'
 import {loadingOverlayDisplayedAtom} from '../../../components/LoadingOverlayProvider'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
+import showErrorAlert from '../../../utils/showErrorAlert'
 
 const sendRequestActionAtom = atom(
   null,
@@ -46,7 +46,10 @@ export const sendRequestHandleUIActionAtom = atom(
       set(sendRequestActionAtom, {text, originOffer}),
       TE.match(
         (e) => {
-          Alert.alert(toCommonErrorMessage(e, t) ?? t('common.unknownError'))
+          showErrorAlert({
+            title: toCommonErrorMessage(e, t) ?? t('common.unknownError'),
+            error: e,
+          })
           // TODO handle request sent
           set(loadingOverlayDisplayedAtom, false)
           return O.none

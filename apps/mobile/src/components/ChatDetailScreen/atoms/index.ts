@@ -52,6 +52,7 @@ import getValueFromSetStateActionOfAtom from '../../../utils/atomUtils/getValueF
 import revealContactActionAtom, {
   type RevealContactMessageType,
 } from '../../../state/chat/atoms/revealContactActionAtom'
+import showErrorAlert from '../../../utils/showErrorAlert'
 
 type ChatUIMode = 'approval' | 'messages'
 
@@ -160,7 +161,10 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
             if (e._tag === 'UserDeclinedError') {
               return false
             }
-            Alert.alert(toCommonErrorMessage(e, t) ?? t('common.unknownError'))
+            showErrorAlert({
+              title: toCommonErrorMessage(e, t) ?? t('common.unknownError'),
+              error: e,
+            })
             return false
           },
           () => {
@@ -216,7 +220,10 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
             return false
           }
 
-          Alert.alert(toCommonErrorMessage(e, t) ?? t('common.unknownError'))
+          showErrorAlert({
+            title: toCommonErrorMessage(e, t) ?? t('common.unknownError'),
+            error: e,
+          })
           return false
         },
         () => {
@@ -337,12 +344,19 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
               return false
             }
             if (e._tag === 'IdentityRequestAlreadySentError') {
-              Alert.alert(t('messages.identityAlreadyRequested'))
+              showErrorAlert({
+                title: t('messages.identityAlreadyRequested'),
+                error: e,
+              })
+
               return false
             }
             if (e._tag !== 'NetworkError')
               reportError('error', 'Error sending identityReveal', e)
-            Alert.alert(toCommonErrorMessage(e, t) ?? t('common.unknownError'))
+            showErrorAlert({
+              title: toCommonErrorMessage(e, t) ?? t('common.unknownError'),
+              error: e,
+            })
             return false
           },
           () => {
@@ -410,12 +424,18 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
               return false
             }
             if (e._tag === 'ContactRevealRequestAlreadySentError') {
-              Alert.alert(t('messages.contactAlreadyRequested'))
+              showErrorAlert({
+                title: t('messages.contactAlreadyRequested'),
+                error: e,
+              })
               return false
             }
             if (e._tag !== 'NetworkError')
               reportError('error', 'Error sending contact reveal', e)
-            Alert.alert(toCommonErrorMessage(e, t) ?? t('common.unknownError'))
+            showErrorAlert({
+              title: toCommonErrorMessage(e, t) ?? t('common.unknownError'),
+              error: e,
+            })
             return false
           },
           () => {

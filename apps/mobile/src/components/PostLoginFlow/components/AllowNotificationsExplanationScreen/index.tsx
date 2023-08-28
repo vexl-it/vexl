@@ -8,7 +8,6 @@ import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import NotificationsSvg from '../../../../images/notificationsSvg'
 import {pipe} from 'fp-ts/function'
 import * as TE from 'fp-ts/TaskEither'
-import {Alert} from 'react-native'
 import {type PostLoginFlowScreenProps} from '../../../../navigationTypes'
 import {useFinishPostLoginFlow} from '../../../../state/postLoginOnboarding'
 import {Stack, Text} from 'tamagui'
@@ -17,6 +16,7 @@ import {useSessionAssumeLoggedIn} from '../../../../state/session'
 import reportError from '../../../../utils/reportError'
 import {useRequestNotificationPermissions} from '../../../../utils/notifications'
 import {useShowLoadingOverlay} from '../../../LoadingOverlayProvider'
+import showErrorAlert from '../../../../utils/showErrorAlert'
 
 type Props = PostLoginFlowScreenProps<'AllowNotificationsExplanation'>
 
@@ -40,7 +40,10 @@ function AllowNotificationsExplanationScreen({navigation}: Props): JSX.Element {
             return
           }
           reportError('error', 'Error creating inbox', e)
-          Alert.alert(t('common.errorCreatingInbox'))
+          showErrorAlert({
+            title: t('common.errorCreatingInbox'),
+            error: e,
+          })
         },
         () => {
           finishPostLoginFlow(true)

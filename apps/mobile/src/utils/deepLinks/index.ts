@@ -3,7 +3,6 @@ import dynamicLinks, {
   type FirebaseDynamicLinksTypes,
 } from '@react-native-firebase/dynamic-links'
 import reportError from '../reportError'
-import {Alert} from 'react-native'
 import {translationAtom, useTranslation} from '../localization/I18nProvider'
 import parse from 'url-parse'
 import {LINK_TYPE_IMPORT_CONTACT} from './domain'
@@ -14,6 +13,7 @@ import {parseJson, safeParse} from '../fpUtils'
 import {ImportContactFromLinkPayload} from '../../state/contacts/domain'
 import {E164PhoneNumber} from '@vexl-next/domain/dist/general/E164PhoneNumber.brand'
 import {addContactWithUiFeedbackAtom} from '../../state/contacts/atom/addContactWithUiFeedbackAtom'
+import showErrorAlert from '../showErrorAlert'
 
 type DynamicLink = FirebaseDynamicLinksTypes.DynamicLink
 
@@ -32,7 +32,10 @@ const handleImportDeepContactActionAtom = atom(
             'Error while parsing phone number from QR code',
             e
           )
-          Alert.alert(t('common.errorWhileReadingQrCode'))
+          showErrorAlert({
+            title: t('common.errorWhileReadingQrCode'),
+            error: e,
+          })
         },
         (contact) =>
           set(addContactWithUiFeedbackAtom, {
@@ -78,7 +81,10 @@ export function useHandleDeepLink(): void {
       })
       .catch((err) => {
         reportError('warn', 'Error while opening deep link', err)
-        Alert.alert(t('common.errorOpeningLink.message'))
+        showErrorAlert({
+          title: t('common.errorOpeningLink.message'),
+          error: err,
+        })
       })
     return dynamicLinks().onLink((link) => {
       if (link) {

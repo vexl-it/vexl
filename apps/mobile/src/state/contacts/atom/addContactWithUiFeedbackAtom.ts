@@ -10,12 +10,12 @@ import {hashPhoneNumber} from '../utils'
 import * as E from 'fp-ts/Either'
 import {loadingOverlayDisplayedAtom} from '../../../components/LoadingOverlayProvider'
 import {updateAllOffersConnectionsActionAtom} from '../../connections/atom/offerToConnectionsAtom'
-import {Alert} from 'react-native'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 import {importedContactsAtom, lastImportOfContactsAtom} from '../index'
 import {type E164PhoneNumber} from '@vexl-next/domain/dist/general/E164PhoneNumber.brand'
 import {IsoDatetimeString} from '@vexl-next/domain/dist/utility/IsoDatetimeString.brand'
 import {syncConnectionsActionAtom} from '../../connections/atom/connectionStateAtom'
+import showErrorAlert from '../../../utils/showErrorAlert'
 
 const showCreateOrEditDialogAtom = atom(
   null,
@@ -202,10 +202,12 @@ const createContact = atom(null, (get, set, newContact: ContactNormalized) => {
           return
         }
 
-        Alert.alert(
-          toCommonErrorMessage(e, get(translationAtom).t) ??
-            get(translationAtom).t('common.unknownError')
-        )
+        showErrorAlert({
+          title:
+            toCommonErrorMessage(e, get(translationAtom).t) ??
+            t('common.unknownError'),
+          error: e,
+        })
       },
       () => {
         // everything OK

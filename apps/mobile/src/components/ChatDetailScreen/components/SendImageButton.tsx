@@ -10,6 +10,7 @@ import {pipe} from 'fp-ts/function'
 import {getImageFromGalleryAndTryToResolveThePermissionsAlongTheWay} from '../../../utils/imagePickers'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {Alert} from 'react-native'
+import showErrorAlert from '../../../utils/showErrorAlert'
 
 function SendImageButton(): JSX.Element {
   const {selectedImageAtom} = useMolecule(chatMolecule)
@@ -27,12 +28,18 @@ function SendImageButton(): JSX.Element {
           setSelectedImage(uri)
         }),
         TE.mapLeft((e) => {
-          Alert.alert(
-            t('messages.unableToSelectImageToSend.title'),
-            e.reason === 'PermissionsNotGranted'
-              ? t('messages.unableToSelectImageToSend.missingPermissions')
-              : t('common.unknownError')
-          )
+          if (e.reason === 'PermissionsNotGranted') {
+            Alert.alert(
+              t('messages.unableToSelectImageToSend.title'),
+              t('messages.unableToSelectImageToSend.missingPermissions')
+            )
+          } else {
+            showErrorAlert({
+              title: t('messages.unableToSelectImageToSend.title'),
+              subtitle: t('common.unknownError'),
+              error: e,
+            })
+          }
         })
       ),
     [setSelectedImage, t]

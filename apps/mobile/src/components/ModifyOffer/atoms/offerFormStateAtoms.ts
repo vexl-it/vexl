@@ -35,6 +35,7 @@ import {type OfferEncryptionProgress} from '@vexl-next/resources-utils/dist/offe
 import {currencies} from '../../../utils/localization/currency'
 import {sessionDataOrDummyAtom} from '../../../state/session'
 import {parsePhoneNumber} from 'awesome-phonenumber'
+import showErrorAlert from '../../../utils/showErrorAlert'
 
 export function createOfferDummyPublicPart(): OfferPublicPart {
   const userPhoneNumber = getDefaultStore().get(
@@ -269,9 +270,11 @@ export const offerFormMolecule = molecule(() => {
         (e) => {
           set(loadingAtom, false)
           set(encryptingOfferAtom, false)
-          Alert.alert(
-            toCommonErrorMessage(e, t) ?? t('offerForm.errorCreatingOffer')
-          )
+          showErrorAlert({
+            title:
+              toCommonErrorMessage(e, t) ?? t('offerForm.errorCreatingOffer'),
+            error: e,
+          })
           return false
         },
         () => {
@@ -299,9 +302,11 @@ export const offerFormMolecule = molecule(() => {
         }),
         TE.match(
           (e) => {
-            Alert.alert(
-              toCommonErrorMessage(e, t) ?? t('editOffer.errorDeletingOffer')
-            )
+            showErrorAlert({
+              title:
+                toCommonErrorMessage(e, t) ?? t('editOffer.errorDeletingOffer'),
+              error: e,
+            })
             return false
           },
           (result) => {
@@ -322,7 +327,10 @@ export const offerFormMolecule = molecule(() => {
       E.match(
         (e) => {
           if (e._tag !== 'friendsNotLoaded') {
-            Alert.alert(toCommonErrorMessage(e, t) ?? t('common.unknownError'))
+            showErrorAlert({
+              title: toCommonErrorMessage(e, t) ?? t('common.unknownError'),
+              error: e,
+            })
           }
 
           return {
@@ -376,10 +384,12 @@ export const offerFormMolecule = molecule(() => {
         (e) => {
           set(loadingAtom, false)
           set(encryptingOfferAtom, false)
-          Alert.alert(
-            toCommonErrorMessage(e, t) ??
-              t('editOffer.offerUnableToChangeOfferActivation')
-          )
+          showErrorAlert({
+            title:
+              toCommonErrorMessage(e, t) ??
+              t('editOffer.offerUnableToChangeOfferActivation'),
+            error: e,
+          })
           return false
         },
         () => {
@@ -432,9 +442,11 @@ export const offerFormMolecule = molecule(() => {
         (e) => {
           set(loadingAtom, false)
           set(encryptingOfferAtom, false)
-          Alert.alert(
-            toCommonErrorMessage(e, t) ?? t('editOffer.errorEditingOffer')
-          )
+          showErrorAlert({
+            title:
+              toCommonErrorMessage(e, t) ?? t('editOffer.errorEditingOffer'),
+            error: e,
+          })
           return false
         },
         () => {

@@ -27,6 +27,7 @@ import {
 } from '../../../components/AreYouSureDialog'
 import addMessageToChat from '../utils/addMessageToChat'
 import createAccountDeletedMessage from '../utils/createAccountDeletedMessage'
+import showErrorAlert from '../../../utils/showErrorAlert'
 
 type ChatNotFoundError = BasicError<'ChatNotFoundError'>
 type CancelRequestApprovalErrors = ExtractLeftTE<
@@ -125,7 +126,11 @@ const cancelRequestActionAtomHandleUI = atom(
 
           return error
         }
-        Alert.alert(toCommonErrorMessage(error, t) ?? t('common.unknownError'))
+
+        showErrorAlert({
+          title: toCommonErrorMessage(error, t) ?? t('common.unknownError'),
+          error,
+        })
         return error
       }),
       T.map((result) => {

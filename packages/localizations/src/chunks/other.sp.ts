@@ -67,7 +67,8 @@ const otherSp: typeof en =
       "nothingFound": "Nothing found",
       "sendRequest": "Send request",
       "change": "Change",
-      "errorWhileReadingQrCode": "Error while reading QR code"
+      "errorWhileReadingQrCode": "Error while reading QR code",
+      "copyErrorToClipboard": "Copy error to clipboard"
     },
     "loginFlow": {
       "anonymityNotice":

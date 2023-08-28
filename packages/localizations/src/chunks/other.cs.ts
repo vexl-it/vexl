@@ -66,7 +66,8 @@ const otherCs: typeof en =
       "nothingFound": "Nic nenalezeno",
       "sendRequest": "Send request",
       "change": "Change",
-      "errorWhileReadingQrCode": "Error while reading QR code"
+      "errorWhileReadingQrCode": "Error while reading QR code",
+      "copyErrorToClipboard": "Copy error to clipboard"
     },
     "loginFlow": {
       "anonymityNotice": "Bez tvého svolení jej nikdo neuvidí. Ani my.",

@@ -1,4 +1,4 @@
-import {Alert, Modal, Platform, useWindowDimensions} from 'react-native'
+import {Modal, Platform, useWindowDimensions} from 'react-native'
 import {useAtom} from 'jotai'
 import {Stack, XStack} from 'tamagui'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
@@ -13,6 +13,7 @@ import {chatMolecule} from '../atoms'
 import shareIosSvg from '../images/shareIosSvg'
 import shareAndroidSvg from '../images/shareAndroidSvg'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
+import showErrorAlert from '../../../utils/showErrorAlert'
 
 const ZoomedImage = gestureHandlerRootHOC(() => {
   const {t} = useTranslation()
@@ -27,7 +28,10 @@ const ZoomedImage = gestureHandlerRootHOC(() => {
         await Sharing.shareAsync(openedImageUri)
       }
     } catch (err) {
-      Alert.alert(t('common.unableToShareImage'))
+      showErrorAlert({
+        title: t('common.unableToShareImage'),
+        error: err,
+      })
     }
   }, [openedImageUri, t])
 

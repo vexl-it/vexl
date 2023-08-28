@@ -10,6 +10,7 @@ import acceptMessagingRequestAtom from '../../../state/chat/atoms/acceptMessagin
 import {useMolecule} from 'jotai-molecules'
 import {chatMolecule} from '../atoms'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
+import showErrorAlert from '../../../utils/showErrorAlert'
 
 function AcceptDeclineButtons({
   onDone = () => {},
@@ -40,9 +41,10 @@ function AcceptDeclineButtons({
             } else if (e._tag === 'OtherSideAccountDeleted') {
               Alert.alert(t('offer.otherSideAccountDeleted'))
             } else {
-              Alert.alert(
-                toCommonErrorMessage(e, t) ?? t('common.unknownError')
-              )
+              showErrorAlert({
+                title: toCommonErrorMessage(e, t) ?? t('common.unknownError'),
+                error: e,
+              })
             }
           },
           () => {

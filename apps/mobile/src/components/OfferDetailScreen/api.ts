@@ -7,13 +7,14 @@ import {useStore} from 'jotai'
 import {askAreYouSureActionAtom} from '../AreYouSureDialog'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import {type OfferId} from '@vexl-next/domain/dist/general/offers'
-import {Alert} from 'react-native'
 import {toCommonErrorMessage} from '../../utils/useCommonErrorMessages'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 import {useShowLoadingOverlay} from '../LoadingOverlayProvider'
 import {createSingleOfferReportedFlagAtom} from '../../state/marketplace/atom'
 import reportOfferSvg from './images/reportOfferSvg'
 import offerReportedSvg from './images/offerReportedSvg'
+import showErrorAlert from '../../utils/showErrorAlert'
+import {Alert} from 'react-native'
 
 export function useReportOfferHandleUI(): (
   offerId: OfferId
@@ -52,7 +53,10 @@ export function useReportOfferHandleUI(): (
           if (e._tag === 'ReportOfferLimitReachedError') {
             Alert.alert(t('offer.report.reportLimitReached'))
           } else if (e._tag !== 'UserDeclinedError') {
-            Alert.alert(toCommonErrorMessage(e, t) ?? t('common.unknownError'))
+            showErrorAlert({
+              title: toCommonErrorMessage(e, t) ?? t('common.unknownError'),
+              error: e,
+            })
           }
           loadingOverlay.hide()
           return false

@@ -4,16 +4,15 @@ import {
   translationAtom,
   useTranslation,
 } from '../../../../utils/localization/I18nProvider'
-import {type Atom, useAtom, useAtomValue} from 'jotai'
+import {type Atom, atom, useAtom, useAtomValue} from 'jotai'
 import {type IntendedConnectionLevel} from '@vexl-next/domain/dist/general/offers'
-import {atom} from 'jotai'
 import numberOfFriendsAtom from '../../../ModifyOffer/atoms/numberOfFriendsAtom'
 import {pipe} from 'fp-ts/function'
 import * as E from 'fp-ts/Either'
-import {Alert} from 'react-native'
 import {toCommonErrorMessage} from '../../../../utils/useCommonErrorMessages'
 import firstDegreeFriendsSvg from '../../../images/firstDegreeFriendsSvg'
 import secondDegreeFriendsSvg from '../../../images/secondDegreeFriendsSvg'
+import showErrorAlert from '../../../../utils/showErrorAlert'
 
 const friendLevelSubtitleAtom = atom((get) => {
   const {t} = get(translationAtom)
@@ -23,7 +22,10 @@ const friendLevelSubtitleAtom = atom((get) => {
     E.match(
       (e) => {
         if (e._tag !== 'friendsNotLoaded') {
-          Alert.alert(toCommonErrorMessage(e, t) ?? t('common.unknownError'))
+          showErrorAlert({
+            title: toCommonErrorMessage(e, t) ?? t('common.unknownError'),
+            error: e,
+          })
         }
         return {
           firstFriendLevelText: t('offerForm.friendLevel.noVexlers'),

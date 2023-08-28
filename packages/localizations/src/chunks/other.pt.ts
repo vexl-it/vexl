@@ -66,7 +66,8 @@ const otherPt: typeof en =
       "nothingFound": "Nothing found",
       "sendRequest": "Send request",
       "change": "Change",
-      "errorWhileReadingQrCode": "Error while reading QR code"
+      "errorWhileReadingQrCode": "Error while reading QR code",
+      "copyErrorToClipboard": "Copy error to clipboard"
     },
     "loginFlow": {
       "anonymityNotice": "Ninguém verá isto até que o autorize. Nem mesmo nós.",

@@ -8,7 +8,7 @@ import {
 } from '@vexl-next/rest-api/dist/services/location/contracts'
 import {pipe} from 'fp-ts/function'
 import * as TE from 'fp-ts/TaskEither'
-import {Alert, Modal, ScrollView} from 'react-native'
+import {Modal, ScrollView} from 'react-native'
 import reportError from '../../../../utils/reportError'
 import Screen from '../../../Screen'
 import ScreenTitle from '../../../ScreenTitle'
@@ -20,6 +20,7 @@ import closeSvg from '../../../images/closeSvg'
 import {toCommonErrorMessage} from '../../../../utils/useCommonErrorMessages'
 import {useGetLocationSuggestions} from '../../../ModifyOffer/api'
 import {type Location} from '@vexl-next/domain/dist/general/offers'
+import showErrorAlert from '../../../../utils/showErrorAlert'
 
 interface Props {
   locationAtom: PrimitiveAtom<Location[]>
@@ -47,10 +48,12 @@ function LocationSearch({
       getLocationSuggestions({phrase: debouncedSearchValue, lang: 'cs'}),
       TE.match(
         (e) => {
-          Alert.alert(
-            toCommonErrorMessage(e, t) ??
-              t('offerForm.errorSearchingForAvailableLocation')
-          )
+          showErrorAlert({
+            title:
+              toCommonErrorMessage(e, t) ??
+              t('offerForm.errorSearchingForAvailableLocation'),
+            error: e,
+          })
           reportError(
             'error',
             'Error when getting user location to create offer',

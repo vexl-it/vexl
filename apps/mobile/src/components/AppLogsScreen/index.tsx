@@ -19,6 +19,7 @@ import {setupAppLogs} from './utils/setupAppLogs'
 import IconButton from '../IconButton'
 import closeSvg from '../images/closeSvg'
 import useSafeGoBack from '../../utils/useSafeGoBack'
+import showErrorAlert from '../../utils/showErrorAlert'
 
 function AppLogsScreen(): JSX.Element {
   const {t} = useTranslation()
@@ -36,8 +37,11 @@ function AppLogsScreen(): JSX.Element {
           onPress: () => {
             setLoading(true)
             saveLogsToDirectoryAndShare(false)()
-              .catch(() => {
-                Alert.alert(t('AppLogs.errorExporting'))
+              .catch((e) => {
+                showErrorAlert({
+                  title: t('AppLogs.errorExporting'),
+                  error: e,
+                })
               })
               .finally(() => {
                 setLoading(false)
@@ -49,8 +53,11 @@ function AppLogsScreen(): JSX.Element {
           onPress: () => {
             setLoading(true)
             saveLogsToDirectoryAndShare(true)()
-              .catch(() => {
-                Alert.alert(t('AppLogs.errorExporting'))
+              .catch((e) => {
+                showErrorAlert({
+                  title: t('AppLogs.errorExporting'),
+                  error: e,
+                })
               })
               .finally(() => {
                 setLoading(false)

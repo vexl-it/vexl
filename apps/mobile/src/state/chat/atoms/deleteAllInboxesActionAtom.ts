@@ -16,7 +16,7 @@ const deleteAllInboxesActionAtom = atom(null, (get, set) => {
   const sendDeleteInboxRequest = pipe(
     inboxes.map((one) => one.privateKey),
     generateSignedChallengeBatch(api.chat),
-    TE.chainW((challenges) =>
+    TE.chainFirstW((challenges) =>
       api.chat.deleteInboxes({
         dataForRemoval: challenges.map((one) => ({
           publicKey: one.publicKey,
@@ -28,6 +28,7 @@ const deleteAllInboxesActionAtom = atom(null, (get, set) => {
       })
     )
   )
+
   const sendMessageInBatch = set(sendMessageToChatsInBatchActionAtom, {
     chats,
     isTerminationMessage: true,

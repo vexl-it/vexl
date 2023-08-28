@@ -259,7 +259,9 @@ const otherEn =
         "yes": "Yes, report",
         "thankYou": "Thank you!",
         "inappropriateContentWasReported":
-          "Inappropriate content was anonymously reported."
+          "Inappropriate content was anonymously reported.",
+        "reportLimitReached":
+          "You have reached report limit. Try again in 24 hours."
       },
       "goToChat": "Go to chat",
       "requestStatus": {
@@ -869,8 +871,7 @@ const otherEn =
       "contactUpdated": "Contact updated",
       "youHaveSuccessfullyUpdatedContact":
         "You have successfully updated your Vexl contacts."
-    },
-    "": ""
+    }
   }
 /* JSON ends */
 

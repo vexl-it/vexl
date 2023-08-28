@@ -26,11 +26,14 @@ import {
   RefreshOfferResponse,
   type RemovedOfferIdsRequest,
   RemovedOfferIdsResponse,
+  type ReportOfferLimitReachedError,
   type ReportOfferRequest,
   ReportOfferResponse,
   type UpdateOfferRequest,
   UpdateOfferResponse,
 } from './contracts'
+import {pipe} from 'fp-ts/function'
+import * as TE from 'fp-ts/TaskEither'
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function privateApi({
@@ -171,14 +174,26 @@ export function privateApi({
       )
     },
     reportOffer: (request: ReportOfferRequest) => {
-      return axiosCallWithValidation(
-        axiosInstance,
-        {
-          method: 'post',
-          url: '/v1/offers/report',
-          data: request,
-        },
-        ReportOfferResponse
+      return pipe(
+        axiosCallWithValidation(
+          axiosInstance,
+          {
+            method: 'post',
+            url: '/v1/offers/report',
+            data: request,
+          },
+          ReportOfferResponse
+        ),
+        TE.mapLeft((e) => {
+          if (e._tag === 'BadStatusCodeError') {
+            if (e.response.data.code === '100108') {
+              return {
+                _tag: 'ReportOfferLimitReachedError',
+              } as ReportOfferLimitReachedError
+            }
+          }
+          return e
+        })
       )
     },
   }

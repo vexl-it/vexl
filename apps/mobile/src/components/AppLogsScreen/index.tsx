@@ -21,13 +21,15 @@ import closeSvg from '../images/closeSvg'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 import showErrorAlert from '../../utils/showErrorAlert'
 import { appLogAtomsAtom } from './atoms'
+import { selectAtom } from 'jotai/utils'
 
 function AppLogsScreen(): JSX.Element {
   const {t} = useTranslation()
   const [enabled, setEnabled] = useState(getCustomLoggingEnabled())
   const setLoading = useSetAtom(loadingOverlayDisplayedAtom)
   const safeGoBack = useSafeGoBack()
-  const logsAtoms = useAtomValue(appLogAtomsAtom)
+  const appLogsEmptyAtom = selectAtom(appLogAtomsAtom, logs => logs.length === 0)
+  const isAppLogsEmpty = useAtomValue(appLogsEmptyAtom)
 
   const exportLogs = useCallback(() => {
     Alert.alert(
@@ -101,7 +103,7 @@ function AppLogsScreen(): JSX.Element {
             variant={'primary'}
             onPress={clearLogs}
             text={t('AppLogs.clear')}
-            disabled={logsAtoms.length === 0}
+            disabled={isAppLogsEmpty}
           />
 
           <Button
@@ -110,7 +112,7 @@ function AppLogsScreen(): JSX.Element {
             variant={'secondary'}
             onPress={exportLogs}
             text={t('AppLogs.export')}
-            disabled={logsAtoms.length === 0}
+            disabled={isAppLogsEmpty}
           />
         </XStack>
       </Stack>

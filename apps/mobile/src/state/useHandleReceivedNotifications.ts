@@ -1,6 +1,6 @@
 import {useEffect} from 'react'
 import messaging from '@react-native-firebase/messaging'
-import {fetchAndStoreMessagesForInboxAtom} from './chat/hooks/useFetchNewMessages'
+import {fetchAndStoreMessagesForInboxAtom} from './chat/atoms/fetchNewMessagesActionAtom'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
 import {pipe} from 'fp-ts/function'
 import * as TE from 'fp-ts/TaskEither'

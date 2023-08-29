@@ -9,9 +9,9 @@ export default function focusRequestMessageAtom(
     chatAtom,
     ({messages}) => {
       return (
-        messages.find(
-          (one) => one.message.messageType === 'REQUEST_MESSAGING'
-        ) ?? null
+        messages
+          .filter((one) => one.message.messageType === 'REQUEST_MESSAGING')
+          .at(-1) ?? null
       )
     },
     (a, b) =>

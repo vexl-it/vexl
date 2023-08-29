@@ -9,9 +9,8 @@ import retrieveMessages, {
 } from '@vexl-next/resources-utils/dist/chat/retrieveMessages'
 import reportError from '../../../utils/reportError'
 import * as T from 'fp-ts/Task'
-import {privateApiAtom, usePrivateApiAssumeLoggedIn} from '../../../api'
-import {atom, type SetStateAction, useStore, type WritableAtom} from 'jotai'
-import {useCallback} from 'react'
+import {privateApiAtom} from '../../../api'
+import {atom, type SetStateAction, type WritableAtom} from 'jotai'
 import {
   type PrivateKeyHolder,
   type PublicKeyPemBase64,
@@ -31,8 +30,10 @@ import {
   UnixMilliseconds0,
   unixMillisecondsNow,
 } from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
+import notifee from '@notifee/react-native'
+import {unreadChatsCountAtom} from './unreadChatsCountAtom'
 
-export function createInboxAtom(
+function createInboxAtom(
   publicKey: PublicKeyPemBase64
 ): WritableAtom<
   InboxInState | undefined,
@@ -51,8 +52,8 @@ function splitMessagesArrayToNewChatsAndExistingChats({
   readonly inbox: InboxInState
   readonly messages: readonly ChatMessageWithState[]
 }): {
-  messageInNewChat: ChatMessageWithState[]
-  messageInExistingChat: ChatMessageWithState[]
+  messagesInNewChat: ChatMessageWithState[] | undefined
+  messagesInExistingChat: ChatMessageWithState[] | undefined
 } {
   return group(messages)
     .by((oneMessage) =>
@@ -61,8 +62,8 @@ function splitMessagesArrayToNewChatsAndExistingChats({
           oneMessage.message.senderPublicKey ===
           oneChat.chat.otherSide.publicKey
       )
-        ? 'messageInExistingChat'
-        : 'messageInNewChat'
+        ? 'messagesInExistingChat'
+        : 'messagesInNewChat'
     )
     .asObject()
 }
@@ -121,15 +122,18 @@ function refreshInbox(
               messages: newMessages,
             })
           ),
-          TE.map(({messageInNewChat, messageInExistingChat}) => {
+          TE.map(({messagesInNewChat, messagesInExistingChat}) => {
             const inbox = getInbox()
             return {
               ...getInbox(),
-              chats: messageInNewChat
-                ? createNewChatsFromMessages(inbox.inbox)(
-                    messageInNewChat || []
-                  )
-                : addMessagesToChats(inbox.chats)(messageInExistingChat || []),
+              chats: [
+                ...createNewChatsFromMessages(inbox.inbox)(
+                  messagesInNewChat ?? []
+                ),
+                ...addMessagesToChats(inbox.chats)(
+                  messagesInExistingChat ?? []
+                ),
+              ],
             }
           })
         )
@@ -161,71 +165,6 @@ function deletePulledMessagesReportLeft({
       },
       () => {}
     )
-  )
-}
-
-export function useFetchAndStoreMessagesForInbox(): (
-  key: PublicKeyPemBase64
-) => T.Task<InboxInState | undefined> {
-  const api = usePrivateApiAssumeLoggedIn()
-  const store = useStore()
-
-  return useCallback(
-    (inboxKey: PublicKeyPemBase64) => {
-      const inbox = store.get(createInboxAtom(inboxKey))
-
-      if (!inbox) {
-        reportError(
-          'error',
-          `Trying to refresh inbox with public key: ${inboxKey}, but inbox does not exist.`,
-          new Error('Inbox does not exist')
-        )
-        return T.of(undefined)
-      }
-      console.info(
-        `Refreshing inbox ${inbox.inbox.privateKey.publicKeyPemBase64}`
-      )
-
-      return pipe(
-        refreshInbox(api.chat)(
-          () => store.get(createInboxAtom(inboxKey)) ?? inbox
-        ),
-        TE.match(
-          (error) => {
-            reportError('error', 'Api Error fetching messages for inbox', error)
-            return inbox
-          },
-          ({newMessages, updatedInbox}) => {
-            store.set(
-              createInboxAtom(inbox.inbox.privateKey.publicKeyPemBase64),
-              updatedInbox
-            )
-
-            newMessages
-              .filter((one) => one.message.messageType === 'BLOCK_CHAT')
-              .map((oneBlockMessage) => {
-                store.set(
-                  createSingleOfferReportedFlagFromAtomAtom(
-                    focusOfferByPublicKeyAtom(
-                      oneBlockMessage.message.senderPublicKey
-                    )
-                  ),
-                  true
-                )
-              })
-
-            return updatedInbox
-          }
-        ),
-        T.chainFirst(() =>
-          deletePulledMessagesReportLeft({
-            api: api.chat,
-            keyPair: inbox.inbox.privateKey,
-          })
-        )
-      )
-    },
-    [api.chat, store]
   )
 }
 
@@ -272,6 +211,10 @@ export const fetchAndStoreMessagesForInboxAtom = atom<
               true
             )
           })
+
+        notifee.setBadgeCount(get(unreadChatsCountAtom)).catch((e) => {
+          reportError('warn', 'Unable to set badge count', e)
+        })
 
         return updatedInbox
       }

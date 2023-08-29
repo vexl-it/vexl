@@ -14,6 +14,7 @@ import MaintenanceAndForceUpdateCheck from './components/MaintenanceAndForceUpda
 import useSetupRemoteConfig from './utils/remoteConfig/useSetupRemoteConfig'
 import 'react-native-gesture-handler'
 import {navigationRef} from './utils/navigation'
+import BadgeCountManager from './components/BadgeCountManager'
 
 void SplashScreen.preventAutoHideAsync()
 
@@ -35,6 +36,7 @@ function App(): JSX.Element {
   return (
     <SafeAreaProvider>
       <StatusBar style="light" />
+      <BadgeCountManager />
       <NavigationContainer
         ref={navigationRef}
         theme={{

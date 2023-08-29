@@ -8,7 +8,7 @@ import ChatInfoModal from './ChatInfoModal'
 import MarkAsReadWhenRendered from './MarkAsReadWhenRendered'
 import {useAppState} from '../../../utils/useAppState'
 import {useCallback} from 'react'
-import {fetchAndStoreMessagesForInboxAtom} from '../../../state/chat/hooks/useFetchNewMessages'
+import {fetchAndStoreMessagesForInboxAtom} from '../../../state/chat/atoms/fetchNewMessagesActionAtom'
 
 export default function MessagesListOrApprovalPreview(): JSX.Element {
   const {chatUiModeAtom, chatAtom} = useMolecule(chatMolecule)

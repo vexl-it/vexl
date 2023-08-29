@@ -5,7 +5,7 @@ import {useAppState} from '../../../../utils/useAppState'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import ChatsList from './components/ChatsList'
 import {useSetAtom} from 'jotai'
-import fetchMessagesForAllInboxesAtom from '../../../../state/chat/hooks/useFetchNewMessages'
+import fetchMessagesForAllInboxesAtom from '../../../../state/chat/atoms/fetchNewMessagesActionAtom'
 import {pipe} from 'fp-ts/function'
 
 function MessagesScreen(): JSX.Element {

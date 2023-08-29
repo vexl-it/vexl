@@ -9,7 +9,7 @@ import {pipe} from 'fp-ts/function'
 import {safeParse} from '../fpUtils'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
 import * as TE from 'fp-ts/TaskEither'
-import {fetchAndStoreMessagesForInboxAtom} from '../../state/chat/hooks/useFetchNewMessages'
+import {fetchAndStoreMessagesForInboxAtom} from '../../state/chat/atoms/fetchNewMessagesActionAtom'
 import {showUINotificationFromRemoteMessage} from './showUINotificationFromRemoteMessage'
 
 export async function processBackgroundMessage(

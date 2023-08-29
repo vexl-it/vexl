@@ -9,8 +9,10 @@ import {pipe} from 'fp-ts/function'
 import {safeParse} from '../fpUtils'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
 import * as TE from 'fp-ts/TaskEither'
-import {fetchAndStoreMessagesForInboxAtom} from '../../state/chat/hooks/useFetchNewMessages'
-import {showUINotificationFromRemoteMessage} from './showUINotificationFromRemoteMessage'
+import {fetchAndStoreMessagesForInboxAtom} from '../../state/chat/atoms/fetchNewMessagesActionAtom'
+import {showUINotificationFromRemoteMessage} from './index'
+import notifee from '@notifee/react-native'
+import {unreadChatsCountAtom} from '../../state/chat/atoms/unreadChatsCountAtom'
 
 export async function processBackgroundMessage(
   remoteMessage: FirebaseMessagingTypes.RemoteMessage
@@ -49,6 +51,12 @@ export async function processBackgroundMessage(
           },
           () => {
             console.info('📳 Inbox refreshed successfully')
+
+            notifee
+              .setBadgeCount(getDefaultStore().get(unreadChatsCountAtom))
+              .catch((e) => {
+                reportError('warn', 'Unable to set badge count', e)
+              })
           }
         )
       )()

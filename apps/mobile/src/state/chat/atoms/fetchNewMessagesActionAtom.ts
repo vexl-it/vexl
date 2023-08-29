@@ -30,8 +30,6 @@ import {
   UnixMilliseconds0,
   unixMillisecondsNow,
 } from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
-import notifee from '@notifee/react-native'
-import {unreadChatsCountAtom} from './unreadChatsCountAtom'
 
 function createInboxAtom(
   publicKey: PublicKeyPemBase64
@@ -211,10 +209,6 @@ export const fetchAndStoreMessagesForInboxAtom = atom<
               true
             )
           })
-
-        notifee.setBadgeCount(get(unreadChatsCountAtom)).catch((e) => {
-          reportError('warn', 'Unable to set badge count', e)
-        })
 
         return updatedInbox
       }

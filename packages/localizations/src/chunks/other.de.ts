@@ -182,7 +182,7 @@ const otherDe: typeof en =
         "addContactName": "Add contact name",
         "contactAdded": "Contact added.",
         "youHaveAddedContact":
-          "Du hast {{contactName}} deinen Vexl-Kontakten hinzugefügt."
+          "You have added {{contactName}} to your Vexl contacts."
       },
       "allowNotifications": {
         "title": "Benachrichtigungen aktivieren",
@@ -273,7 +273,7 @@ const otherDe: typeof en =
         "inappropriateContentWasReported":
           "Unangemessener Inhalt wurde anonym gemeldet.",
         "reportLimitReached":
-          "You have reached report limit. Try again in 24 hours."
+          "You have reached the maximum number of reports for today. Try again in 24 hours."
       },
       "goToChat": "Zum Chat gehen",
       "requestStatus": {
@@ -526,7 +526,7 @@ const otherDe: typeof en =
       },
       "BLOCK_CHAT": {
         "title": "You've been blocked",
-        "body": "Someone just blocked you."
+        "body": "Someone has just blocked you."
       },
       "INACTIVITY_REMINDER": {
         "title": "Login to prevent deactivation of your offers.",
@@ -567,7 +567,7 @@ const otherDe: typeof en =
         "screenTitle": "Notifications Settings"
       },
       "REQUEST_CONTACT_REVEAL": {
-        "title": "Phone number reveal request received",
+        "title": "Phone number requested",
         "body": "You have been requested to reveal your phone number."
       },
       "APPROVE_CONTACT_REVEAL": {
@@ -575,7 +575,7 @@ const otherDe: typeof en =
         "body": "Your request to reveal phone numbers was approved."
       },
       "DISAPPROVE_CONTACT_REVEAL": {
-        "title": "Phone number reveal request denied",
+        "title": "Request denied!",
         "body": "Your request to reveal phone numbers was denied."
       },
       "NEW_OFFERS_IN_MARKETPLACE": {
@@ -777,19 +777,18 @@ const otherDe: typeof en =
         "yes": "Yes, cancel"
       },
       "contactRevealRespondModal": {
-        "title": "Do you want to reveal your number?",
-        "text": "Approving this request will reveal your phone number."
+        "title": "Are you sure you want to reveal your phone number?",
+        "text": "This will reveal your phone number to the counterparty."
       },
       "contactRevealRequestModal": {
-        "title": "Send phone number request.",
+        "title": "Request phone number",
         "text":
-          "By sending request you agree with revealing of your number too."
+          "By requesting a phone number, you agree to share yours as well."
       },
-      "contactAlreadyRequested":
-        "Contact request was already sent in the conversation",
-      "contactRevealRequest": "Phone number reveal request",
+      "contactAlreadyRequested": "A phone number request was already sent.",
+      "contactRevealRequest": "Request to reveal phone",
       "contactRevealSent": {
-        "title": "Phone number reveal request sent",
+        "title": "Request to reveal phone number sent",
         "subtitle": "Waiting for response"
       },
       "letsExchangeContacts": "Let’s exchange contacts!",
@@ -890,7 +889,7 @@ const otherDe: typeof en =
         "Du hast {{contactName}} deinen Vexl-Kontakten hinzugefügt.",
       "contactAlreadyInContactList": "Contact is already in your contact list.",
       "wouldYouLikeToChangeTheName":
-        "Would you like to change the name for {{name}} with this phone number?",
+        "Would you like to change the name for {{name}} for this phone number?",
       "keepCurrent": "Keep current",
       "contactUpdated": "Contact updated",
       "youHaveSuccessfullyUpdatedContact":

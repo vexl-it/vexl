@@ -20,15 +20,13 @@ import IconButton from '../IconButton'
 import closeSvg from '../images/closeSvg'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 import showErrorAlert from '../../utils/showErrorAlert'
-import { appLogAtomsAtom } from './atoms'
-import { selectAtom } from 'jotai/utils'
+import { appLogsEmptyAtom } from './atoms'
 
 function AppLogsScreen(): JSX.Element {
   const {t} = useTranslation()
   const [enabled, setEnabled] = useState(getCustomLoggingEnabled())
   const setLoading = useSetAtom(loadingOverlayDisplayedAtom)
   const safeGoBack = useSafeGoBack()
-  const appLogsEmptyAtom = selectAtom(appLogAtomsAtom, logs => logs.length === 0)
   const isAppLogsEmpty = useAtomValue(appLogsEmptyAtom)
 
   const exportLogs = useCallback(() => {

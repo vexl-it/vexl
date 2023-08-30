@@ -2,6 +2,7 @@ import {type StyleProp, type ViewStyle} from 'react-native'
 import SvgImage from '../../../../Image'
 import {type UserNameAndAvatar} from '@vexl-next/domain/dist/general/UserNameAndAvatar.brand'
 import {Image, Stack, Text} from 'tamagui'
+import resolveLocalUri from '../../../../../utils/resolveLocalUri'
 
 interface Props {
   topText?: string
@@ -34,7 +35,7 @@ function UserDataDisplay({
           height={128}
           br="$10"
           mb="$7"
-          src={{uri: userNameAndAvatar.image.imageUri}}
+          src={{uri: resolveLocalUri(userNameAndAvatar.image.imageUri)}}
         />
       )}
       <Text ff="$heading" fos={32} col="$white">

@@ -2,6 +2,7 @@ import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
 import {type UserNameAndAvatar} from '@vexl-next/domain/dist/general/UserNameAndAvatar.brand'
 import avatarsSvg from '../../../components/AnonymousAvatar/images/avatarsSvg'
 import {randomNumberFromSeed} from '../../../utils/randomNumber'
+import resolveLocalUri from '../../../utils/resolveLocalUri'
 
 function setRealLifeInfo(
   realLifeInfo: UserNameAndAvatar
@@ -29,7 +30,7 @@ export default function processIdentityRevealMessageIfAny(
       image: identityRevealMessage.message.image
         ? {
             type: 'imageUri',
-            imageUri: identityRevealMessage.message.image,
+            imageUri: resolveLocalUri(identityRevealMessage.message.image),
           }
         : {
             type: 'svgXml',

@@ -13,6 +13,7 @@ import {
   useImage,
 } from '@shopify/react-native-skia'
 import {useMemo} from 'react'
+import resolveLocalUri from '../utils/resolveLocalUri'
 
 interface Props {
   userImage: SvgStringOrImageUri
@@ -28,7 +29,7 @@ const BLACK_AND_WHITE = [
 // TODO move grayScale images to a separate component
 function UserAvatar({userImage, grayScale, width, height}: Props): JSX.Element {
   const image = useImage(
-    userImage.type === 'imageUri' ? userImage.imageUri : null
+    userImage.type === 'imageUri' ? resolveLocalUri(userImage.imageUri) : null
   )
   const roundedRect = useMemo(
     () => rrect(rect(0, 0, width, height), 12, 12),

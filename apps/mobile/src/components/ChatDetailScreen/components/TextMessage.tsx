@@ -28,6 +28,7 @@ import getValueFromSetStateActionOfAtom from '../../../utils/atomUtils/getValueF
 import copySvg from '../images/copySvg'
 import IconButton from '../../IconButton'
 import {type ChatMessage} from '@vexl-next/domain/dist/general/messaging'
+import resolveLocalUri from '../../../utils/resolveLocalUri'
 
 const style = StyleSheet.create({
   textInputStyle: {
@@ -228,7 +229,9 @@ function TextMessage({
                     <Image
                       style={style.replyImage}
                       resizeMode={'contain'}
-                      source={{uri: message.message.repliedTo.image}}
+                      source={{
+                        uri: resolveLocalUri(message.message.repliedTo.image),
+                      }}
                     />
                   )}
                   <Text fontSize={12} color="$main">
@@ -254,7 +257,7 @@ function TextMessage({
                     <Image
                       style={style.image}
                       resizeMode={'contain'}
-                      source={{uri: message.message.image}}
+                      source={{uri: resolveLocalUri(message.message.image)}}
                     />
                   </TouchableWithoutFeedback>
                 </YStack>

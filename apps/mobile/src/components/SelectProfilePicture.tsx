@@ -5,7 +5,7 @@ import MiniCameraSvg from './LoginFlow/components/PhotoScreen/images/miniCameraS
 import selectIconSvg from './LoginFlow/components/PhotoScreen/images/selectIconSvg'
 import {useAtomValue, useSetAtom} from 'jotai'
 import {useMolecule} from 'jotai-molecules'
-import {changeProfilePictureMolecule} from './ChangeProfilePictureScope'
+import {changeProfilePictureMolecule} from '../state/changeProfilePictureMolecule'
 
 function SelectProfilePicture(): JSX.Element {
   const {selectedImageUriAtom, selectImageActionAtom} = useMolecule(

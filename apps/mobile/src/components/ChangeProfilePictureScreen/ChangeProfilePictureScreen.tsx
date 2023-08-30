@@ -5,7 +5,6 @@ import {getTokens, Stack, XStack} from 'tamagui'
 import {useFocusEffect} from '@react-navigation/native'
 import {useCallback} from 'react'
 import {useMolecule} from 'jotai-molecules'
-import {changeProfilePictureMolecule} from '../ChangeProfilePictureScope'
 import ScreenTitle from '../ScreenTitle'
 import IconButton from '../IconButton'
 import closeSvg from '../images/closeSvg'
@@ -13,6 +12,7 @@ import SelectProfilePicture from '../SelectProfilePicture'
 import Button from '../Button'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 import {useTranslation} from '../../utils/localization/I18nProvider'
+import {changeProfilePictureMolecule} from '../../state/changeProfilePictureMolecule'
 
 function ChangeProfilePictureScreen(): JSX.Element {
   const {t} = useTranslation()

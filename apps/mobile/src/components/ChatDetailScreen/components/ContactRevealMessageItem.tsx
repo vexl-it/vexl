@@ -12,6 +12,7 @@ import React from 'react'
 import blockPhoneNumberRevealSvg from '../../../images/blockPhoneNumberRevealSvg'
 import {E164PhoneNumber} from '@vexl-next/domain/dist/general/E164PhoneNumber.brand'
 import {addContactWithUiFeedbackAtom} from '../../../state/contacts/atom/addContactWithUiFeedbackAtom'
+import resolveLocalUri from '../../../utils/resolveLocalUri'
 
 function RevealedContactMessageItem({
   direction,
@@ -47,12 +48,14 @@ function RevealedContactMessageItem({
       }}
       icon={
         direction === 'incoming' && image.type === 'imageUri' ? (
-          <UserAvatarTouchableWrapper userImageUri={image.imageUri}>
+          <UserAvatarTouchableWrapper
+            userImageUri={resolveLocalUri(image.imageUri)}
+          >
             <Image
               height={80}
               width={80}
               borderRadius={'$8'}
-              src={{uri: image.imageUri}}
+              src={{uri: resolveLocalUri(image.imageUri)}}
             />
           </UserAvatarTouchableWrapper>
         ) : (

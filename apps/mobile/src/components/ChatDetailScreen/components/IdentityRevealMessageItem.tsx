@@ -10,6 +10,7 @@ import {useMolecule} from 'jotai-molecules'
 import {chatMolecule} from '../atoms'
 import BlockIconSvg from '../../../images/blockIconSvg'
 import UserAvatarTouchableWrapper from './UserAvatarTouchableWrapper'
+import resolveLocalUri from '../../../utils/resolveLocalUri'
 
 function IdentityRevealMessageItem({
   message,
@@ -48,12 +49,14 @@ function IdentityRevealMessageItem({
           bottomText={message.message.deanonymizedUser?.partialPhoneNumber}
           icon={
             direction === 'incoming' && message.message.image ? (
-              <UserAvatarTouchableWrapper userImageUri={message.message.image}>
+              <UserAvatarTouchableWrapper
+                userImageUri={resolveLocalUri(message.message.image)}
+              >
                 <Image
                   height={80}
                   width={80}
                   borderRadius={'$8'}
-                  src={{uri: message.message.image}}
+                  src={{uri: resolveLocalUri(message.message.image)}}
                 />
               </UserAvatarTouchableWrapper>
             ) : (

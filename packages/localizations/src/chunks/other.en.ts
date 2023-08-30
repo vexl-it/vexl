@@ -165,7 +165,7 @@ const otherEn =
             "To add phone number, type it into the search bar (with country code prefix)."
         },
         "toAddCustomContact":
-          "Enabling notifications allows you to find out when others accept your request or when you get a new message. ",
+          "To add phone number, type it into the search bar (with country code prefix).",
         "addContact": "Add contact",
         "addThisPhoneNumber":
           "Would you like to add this phone number to your Vexl contacts?",
@@ -205,7 +205,7 @@ const otherEn =
           "Prevent users from taking screenshots of the chat",
         "termsAndPrivacy": "Terms and Privacy",
         "faqs": "FAQs",
-        "reportIssue": "Report issue",
+        "reportIssue": "Contact support",
         "inAppLogs": "In-app logs",
         "requestKnownData": "Request known data",
         "followUsOn": "Follow us on",
@@ -262,7 +262,7 @@ const otherEn =
         "inappropriateContentWasReported":
           "Inappropriate content was anonymously reported.",
         "reportLimitReached":
-          "You have reached report limit. Try again in 24 hours."
+          "You have reached the maximum number of reports for today. Try again in 24 hours."
       },
       "goToChat": "Go to chat",
       "requestStatus": {
@@ -510,27 +510,26 @@ const otherEn =
       },
       "BLOCK_CHAT": {
         "title": "You've been blocked",
-        "body": "Someone just blocked you."
+        "body": "Someone has just blocked you."
       },
       "INACTIVITY_REMINDER": {
-        "title": "Login to prevent deactivation of your offers.",
+        "title": "Long time no see!",
         "body":
-          "You have not logged in for a long time. Login to prevent deactivation of your offers."
+          "It's been a while since you've opened the app. Open the app now to keep your offers active."
       },
       "preferences": {
         "marketing": {
-          "title": "Marketing notification",
-          "body": "Notification about new features etc..."
+          "title": "Marketing notifications",
+          "body": "Receive notifications about new features!"
         },
         "chat": {
           "title": "Chat notifications",
-          "body":
-            "Notifications about new chat messages, requests, identity reveals etc..."
+          "body": "Receive notifications about new requests and messages."
         },
         "inactivityWarnings": {
           "title": "Inactivity warnings",
           "body":
-            "We will let you know when your offers are about to be deactivated due to innactivity"
+            "We will let you know when your offers are about to be deactivated due to innactivity."
         },
         "marketplace": {
           "title": "marketplace",
@@ -551,7 +550,7 @@ const otherEn =
         "screenTitle": "Notifications Settings"
       },
       "REQUEST_CONTACT_REVEAL": {
-        "title": "Phone number reveal request received",
+        "title": "Phone number requested",
         "body": "You have been requested to reveal your phone number."
       },
       "APPROVE_CONTACT_REVEAL": {
@@ -559,7 +558,7 @@ const otherEn =
         "body": "Your request to reveal phone numbers was approved."
       },
       "DISAPPROVE_CONTACT_REVEAL": {
-        "title": "Phone number reveal request denied",
+        "title": "Request denied!",
         "body": "Your request to reveal phone numbers was denied."
       },
       "NEW_OFFERS_IN_MARKETPLACE": {
@@ -639,9 +638,10 @@ const otherEn =
           "INBOX_DELETED": "{{them}} has deleted the chat.",
           "CANCEL_REQUEST_MESSAGING": "Request was cancelled",
           "ONLY_IMAGE": "{{them}} sent an image",
-          "REQUEST_CONTACT_REVEAL": "{{them}} requested phone number reveal",
+          "REQUEST_CONTACT_REVEAL": "{{them}} has requested your phone number.",
           "APPROVE_CONTACT_REVEAL": "Phone number revealed",
-          "DISAPPROVE_CONTACT_REVEAL": "Declined phone number reveal"
+          "DISAPPROVE_CONTACT_REVEAL":
+            "Request to reveal phone number was declined."
         },
         "outgoing": {
           "MESSAGE": "Me: {{message}}",
@@ -657,9 +657,10 @@ const otherEn =
           "INBOX_DELETED": "You have deleted this inbox",
           "CANCEL_REQUEST_MESSAGING": "You have cancelled the request.",
           "ONLY_IMAGE": "You have sent an image",
-          "REQUEST_CONTACT_REVEAL": "You have requested phone number reveal",
+          "REQUEST_CONTACT_REVEAL": "You've have requested their phone number",
           "APPROVE_CONTACT_REVEAL": "Phone number was revealed",
-          "DISAPPROVE_CONTACT_REVEAL": "Phone number reveal was declined"
+          "DISAPPROVE_CONTACT_REVEAL":
+            "They declined to reveal their phone number"
         }
       },
       "deleteChat": "Delete chat",
@@ -696,9 +697,9 @@ const otherEn =
         "send": "Send request"
       },
       "identityRevealRespondModal": {
-        "title": "Do you want to reveal identity?",
+        "title": "Do you want to reveal your identity?",
         "text":
-          "If you reveal your identity, you will see identity of your counterparty too."
+          "If you reveal your identity, you will see the identity of your counterparty too."
       },
       "identityAlreadyRequested":
         "Identity request was already sent in the conversation",
@@ -754,25 +755,24 @@ const otherEn =
         "yes": "Yes, cancel"
       },
       "contactRevealRespondModal": {
-        "title": "Do you want to reveal your number?",
-        "text": "Approving this request will reveal your phone number."
+        "title": "Are you sure you want to reveal your phone number?",
+        "text": "This will reveal your phone number to the counterparty."
       },
       "contactRevealRequestModal": {
-        "title": "Send phone number request.",
+        "title": "Request phone number",
         "text":
-          "By sending request you agree with revealing of your number too."
+          "By requesting a phone number, you agree to share yours as well."
       },
-      "contactAlreadyRequested":
-        "Contact request was already sent in the conversation",
-      "contactRevealRequest": "Phone number reveal request",
+      "contactAlreadyRequested": "A phone number request was already sent.",
+      "contactRevealRequest": "Request to reveal phone number",
       "contactRevealSent": {
-        "title": "Phone number reveal request sent",
+        "title": "Request to reveal phone number sent",
         "subtitle": "Waiting for response"
       },
       "letsExchangeContacts": "Let’s exchange contacts!",
       "phoneNumberRevealed": "Phone number revealed!",
-      "phoneNumberReveal": "Phone number reveal.",
-      "phoneNumberRevealDeclined": "Phone number reveal declined.",
+      "phoneNumberReveal": "Phone number reveal",
+      "phoneNumberRevealDeclined": "They declined to reveal their phone number",
       "contactIsAlreadyInYourContactList":
         "Contact is already in your contact list.",
       "addUserToYourContacts": "Add {{name}} to your contacts?",
@@ -867,7 +867,7 @@ const otherEn =
         "You have added {{contactName}} to your Vexl contacts.",
       "contactAlreadyInContactList": "Contact is already in your contact list.",
       "wouldYouLikeToChangeTheName":
-        "Would you like to change the name for {{name}} with this phone number?",
+        "Would you like to change the name for {{name}} for this phone number?",
       "keepCurrent": "Keep current",
       "contactUpdated": "Contact updated",
       "youHaveSuccessfullyUpdatedContact":

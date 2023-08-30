@@ -12,6 +12,7 @@ import ImageResizer from '@bam.tech/react-native-image-resizer'
 import joinUrl from 'url-join'
 import {Platform} from 'react-native'
 import reportError from '../../../utils/reportError'
+import resolveLocalUri from '../../../utils/resolveLocalUri'
 
 export type ReadingFileError = BasicError<'ReadingFileError'>
 
@@ -27,7 +28,7 @@ function readAsBase64({
     if (!cacheDir) throw new Error('No cacheDir')
 
     const fromPath = (() => {
-      if (Platform.OS === 'ios') return path
+      if (Platform.OS === 'ios') return resolveLocalUri(path)
       else return path.replace('file://', '')
     })()
 

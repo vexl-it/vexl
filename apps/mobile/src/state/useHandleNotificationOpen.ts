@@ -56,8 +56,6 @@ function useReactOnNotificationOpen(): (notification: Notification) => void {
               }
             },
             (payload) => {
-              void notifee.decrementBadgeCount()
-
               if (isOnSpecificChat(navigation.getState(), payload.chat.id))
                 return 'ok'
               navigation.navigate('ChatDetail', {

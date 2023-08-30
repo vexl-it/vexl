@@ -8,17 +8,8 @@ const chatsListAtom = focusAtom(messagingStateAtom, (optic) =>
 )
 
 export const unreadChatsCountAtom = atom(
-  (get) => get(chatsListAtom).filter((chat) => chat.isUnread).length,
-  (get) => {
-    const chats = get(chatsListAtom)
-
-    return chats.filter((chat) => chat.isUnread).length
-  }
+  (get) => get(chatsListAtom).filter((chat) => chat.isUnread).length
 )
-
-unreadChatsCountAtom.onMount = (setAtom) => {
-  setAtom()
-}
 
 export const areThereUnreadMessagesAtom = selectAtom(chatsListAtom, (chats) =>
   chats.some((one) => one.isUnread)

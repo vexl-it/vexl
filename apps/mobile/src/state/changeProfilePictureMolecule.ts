@@ -1,21 +1,21 @@
 import {molecule} from 'jotai-molecules'
-import * as O from 'fp-ts/Option'
-import {type UriString} from '@vexl-next/domain/dist/utility/UriString.brand'
 import {atom, type PrimitiveAtom} from 'jotai'
-import {type FileSystemError} from '../../utils/internalStorage'
-import {translationAtom} from '../../utils/localization/I18nProvider'
-import reportError from '../../utils/reportError'
-import {Alert} from 'react-native'
-import {pipe} from 'fp-ts/function'
-import * as TE from 'fp-ts/TaskEither'
-import {userImageAtom} from '../../state/session'
-import getValueFromSetStateActionOfAtom from '../../utils/atomUtils/getValueFromSetStateActionOfAtom'
+import {type FileSystemError} from '../utils/internalStorage'
 import {
   getImageFromCameraAndTryToResolveThePermissionsAlongTheWay,
   getImageFromGalleryAndTryToResolveThePermissionsAlongTheWay,
   type ImagePickerError,
-} from '../../utils/imagePickers'
-import showErrorAlert from '../../utils/showErrorAlert'
+} from '../utils/imagePickers'
+import {translationAtom} from '../utils/localization/I18nProvider'
+import reportError from '../utils/reportError'
+import * as O from 'fp-ts/Option'
+import {type UriString} from '@vexl-next/domain/dist/utility/UriString.brand'
+import {userImageAtom} from './session'
+import getValueFromSetStateActionOfAtom from '../utils/atomUtils/getValueFromSetStateActionOfAtom'
+import {Alert} from 'react-native'
+import {pipe} from 'fp-ts/function'
+import * as TE from 'fp-ts/TaskEither'
+import showErrorAlert from '../utils/showErrorAlert'
 
 export const changeProfilePictureMolecule = molecule(() => {
   const reportAndTranslateErrorsAtom = atom<

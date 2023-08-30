@@ -5,7 +5,6 @@ import compareMessages from './compareMessages'
 import areMessagesEqual from './areMessagesEqual'
 import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
 import processIdentityRevealMessageIfAny from './processIdentityRevealMessageIfAny'
-import notifee from '@notifee/react-native'
 
 // function processDeleteChatMessageIfAny(
 //   deleteChatMessage?: ChatMessageWithState
@@ -73,10 +72,6 @@ export default function addMessagesToChats(
         //     processDeleteChatMessageIfAny(deleteTypeMessage)
         //   )
         // }
-
-        if (!oneChat.chat.isUnread) {
-          void notifee.incrementBadgeCount()
-        }
 
         return pipe(
           {...oneChat, messages, chat: {...oneChat.chat, isUnread: true}},

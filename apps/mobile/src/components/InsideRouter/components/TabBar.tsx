@@ -8,12 +8,7 @@ import {type SvgString} from '@vexl-next/domain/dist/utility/SvgString.brand'
 import {getTokens, Stack, XStack} from 'tamagui'
 import {TouchableWithoutFeedback} from 'react-native'
 import {useAtomValue} from 'jotai'
-import {
-  areThereUnreadMessagesAtom,
-  unreadChatsCountAtom,
-} from '../../../state/chat/atoms/unreadChatsCountAtom'
-import {useEffect} from 'react'
-import notifee from '@notifee/react-native'
+import {areThereUnreadMessagesAtom} from '../../../state/chat/atoms/unreadChatsCountAtom'
 
 export const TAB_BAR_HEIGHT_PX = 72
 
@@ -33,7 +28,6 @@ function getIconForRouteName(routeName: string): SvgString {
 function TabBar({state, navigation}: BottomTabBarProps): JSX.Element {
   const insets = useSafeAreaInsets()
   const tokens = getTokens()
-  const unreadChatsCount = useAtomValue(unreadChatsCountAtom)
   const areThereUnreadMessages = useAtomValue(areThereUnreadMessagesAtom)
 
   function onPress({key, name}: {key: string; name: string}): void {
@@ -47,10 +41,6 @@ function TabBar({state, navigation}: BottomTabBarProps): JSX.Element {
       navigation.navigate(name)
     }
   }
-
-  useEffect(() => {
-    void notifee.setBadgeCount(unreadChatsCount)
-  }, [unreadChatsCount])
 
   return (
     <Stack

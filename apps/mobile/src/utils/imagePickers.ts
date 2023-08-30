@@ -30,26 +30,35 @@ export interface ImagePickerError {
 export function moveImageToInternalDirectory({
   imagePath,
   mode,
-  prefix,
+  directory,
 }: {
   imagePath: UriString
   mode: 'cache' | 'documents'
-  prefix?: string
+  directory?: string
 }): TE.TaskEither<ImagePickerError, UriString> {
   return TE.tryCatch(
     async (): Promise<UriString> => {
-      const documentDir =
+      const rootDirectory =
         mode === 'cache'
           ? FileSystem.cacheDirectory
           : FileSystem.documentDirectory
-      if (!documentDir) throw new Error('document dir not found')
+      if (!rootDirectory) throw new Error('document dir not found')
+
+      const parentDirectory = directory
+        ? urlJoin(rootDirectory, directory)
+        : rootDirectory
+
+      const dirInfo = await FileSystem.getInfoAsync(parentDirectory)
+      if (!dirInfo.exists) {
+        await FileSystem.makeDirectoryAsync(parentDirectory, {
+          intermediates: true,
+        })
+      }
 
       const path = UriString.parse(
         urlJoin(
-          documentDir,
-          `${prefix ?? 'image'}-${generateUuid()}-.${
-            imagePath.split('.').at(-1) ?? 'jpeg'
-          }`
+          parentDirectory,
+          `${generateUuid()}.${imagePath.split('.').at(-1) ?? 'jpeg'}`
         )
       )
 
@@ -108,7 +117,7 @@ export function getImageFromCameraAndTryToResolveThePermissionsAlongTheWay({
         moveImageToInternalDirectory({
           imagePath: UriString.parse(selectedImage.uri),
           mode: saveTo,
-          prefix: PROFILE_PICTURE_DIRECTORY,
+          directory: PROFILE_PICTURE_DIRECTORY,
         }),
         TE.chainEitherKW((uri) => {
           return safeParse(SelectedImage)({
@@ -185,7 +194,7 @@ export function getImageFromGalleryAndTryToResolveThePermissionsAlongTheWay({
         moveImageToInternalDirectory({
           imagePath: UriString.parse(selectedImage.uri),
           mode: saveTo,
-          prefix: PROFILE_PICTURE_DIRECTORY,
+          directory: PROFILE_PICTURE_DIRECTORY,
         }),
         TE.chainEitherKW((uri) => {
           return safeParse(SelectedImage)({

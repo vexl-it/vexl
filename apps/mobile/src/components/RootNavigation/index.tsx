@@ -31,6 +31,7 @@ import {useHandleDeepLink} from '../../utils/deepLinks'
 import EditNameScreen from '../EditNameScreen'
 import ChangeProfilePictureScreen from '../ChangeProfilePictureScreen/ChangeProfilePictureScreen'
 import NotificationSettingsScreen from '../NotificationSettingsScreen'
+import {useSetContactsAfterLastSubmitForCurrentUsers} from '../../state/contacts/hooks/useSetContactsAfterLastSubmitForCurrentUsers'
 
 const Stack = createNativeStackNavigator<RootStackParamsList>()
 
@@ -44,6 +45,7 @@ function LoggedInHookGroup(): null {
   useHandleRefreshContactServiceAndOffers()
   useSyncConnections()
   useHandleDeepLink()
+  useSetContactsAfterLastSubmitForCurrentUsers()
 
   return null
 }

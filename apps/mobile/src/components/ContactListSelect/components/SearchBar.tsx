@@ -15,30 +15,32 @@ function SearchBar(): JSX.Element {
   const [allSelected, setAllSelected] = useAtom(selectAllAtom)
 
   return (
-    <XStack mt="$4">
-      <Stack f={5} pr="$2">
-        <TextInput
-          placeholder={t('postLoginFlow.contactsList.inputPlaceholder')}
-          value={searchText}
-          onChangeText={setSearchText}
-          icon={magnifyingGlass}
-          size={'small'}
-        />
-      </Stack>
-      <Stack f={3}>
-        <Button
-          onPress={() => {
-            setAllSelected((prev) => !prev)
-          }}
-          disabled={false}
-          variant="black"
-          size={'small'}
-          adjustTextToFitOneLine
-          fullSize
-          text={t(allSelected ? 'common.deselectAll' : 'common.selectAll')}
-        />
-      </Stack>
-    </XStack>
+    <Stack>
+      <XStack mt={'$4'} mb={'$2'}>
+        <Stack f={5} pr="$2">
+          <TextInput
+            placeholder={t('postLoginFlow.contactsList.inputPlaceholder')}
+            value={searchText}
+            onChangeText={setSearchText}
+            icon={magnifyingGlass}
+            size={'small'}
+          />
+        </Stack>
+        <Stack f={3}>
+          <Button
+            onPress={() => {
+              setAllSelected((prev) => !prev)
+            }}
+            disabled={false}
+            variant="black"
+            size={'small'}
+            adjustTextToFitOneLine
+            fullSize
+            text={t(allSelected ? 'common.deselectAll' : 'common.selectAll')}
+          />
+        </Stack>
+      </XStack>
+    </Stack>
   )
 }
 

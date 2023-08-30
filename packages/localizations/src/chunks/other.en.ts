@@ -172,7 +172,10 @@ const otherEn =
         "addContactName": "Add contact name",
         "contactAdded": "Contact added.",
         "youHaveAddedContact":
-          "You have added {{contactName}} to your Vexl contacts."
+          "You have added {{contactName}} to your Vexl contacts.",
+        "submitted": "Submitted",
+        "new": "New",
+        "nonSubmitted": "Non-submitted"
       },
       "allowNotifications": {
         "title": "Enable notifications",
@@ -855,7 +858,9 @@ const otherEn =
       "noOffersFromOthersYet":
         "🤔 No offers from others yet? Try to add more contacts, and wait ✌️",
       "createYourFirstOffer":
-        "👋 Create your first offer to buy or sell Bitcoin."
+        "👋 Create your first offer to buy or sell Bitcoin.",
+      "importNewlyAddedContacts":
+        "👋 Looks like you've got some new contacts. Want to import them now?"
     },
     "addContactDialog": {
       "addContact": "Add contact",

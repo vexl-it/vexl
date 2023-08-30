@@ -1,10 +1,21 @@
 import {atomWithParsedMmkvStorage} from '../../utils/atomUtils/atomWithParsedMmkvStorage'
 import {z} from 'zod'
 import {focusAtom} from 'jotai-optics'
-import {ContactNormalizedWithHash} from './domain'
+import {ContactNormalized, ContactNormalizedWithHash} from './domain'
 import {type Atom} from 'jotai'
 import {selectAtom} from 'jotai/utils'
 import {IsoDatetimeString} from '@vexl-next/domain/dist/utility/IsoDatetimeString.brand'
+
+export const contactsAfterLastSubmitStorageAtom = atomWithParsedMmkvStorage(
+  'contactsAfterLastSubmit',
+  {contactsAfterLastSubmit: []},
+  z.object({contactsAfterLastSubmit: z.array(ContactNormalized)})
+)
+
+export const contactsAfterLastSubmitAtom = focusAtom(
+  contactsAfterLastSubmitStorageAtom,
+  (o) => o.prop('contactsAfterLastSubmit')
+)
 
 export const importedContactsStorageAtom = atomWithParsedMmkvStorage(
   'importedContacts',
@@ -14,6 +25,7 @@ export const importedContactsStorageAtom = atomWithParsedMmkvStorage(
     lastImport: IsoDatetimeString.optional(),
   })
 )
+
 export const importedContactsAtom = focusAtom(
   importedContactsStorageAtom,
   (o) => o.prop('importedContacts')
@@ -40,4 +52,38 @@ export function selectImportedContactsWithHashes(
   return selectAtom(importedContactsAtom, (importedContacts) => {
     return importedContacts.filter((one) => hashes.includes(one.hash))
   })
+}
+
+export function combineContactsFromDeviceWithImportedContacts({
+  contactsFromDevice,
+  importedContacts,
+}: {
+  contactsFromDevice: ContactNormalized[]
+  importedContacts: ContactNormalized[]
+}): ContactNormalized[] {
+  const toReturn = [...contactsFromDevice]
+
+  for (const oneContact of importedContacts) {
+    if (!oneContact.fromContactList) {
+      // If contact is not from contact list add it. We should display it.
+      toReturn.push(oneContact)
+      continue
+    }
+
+    if (
+      !contactsFromDevice.some(
+        (oneFromDevice) =>
+          oneFromDevice.normalizedNumber === oneContact.normalizedNumber
+      )
+    ) {
+      // Those contacts were imported but are not in contact list anymore
+      toReturn.push({
+        ...oneContact,
+        fromContactList: false,
+        imageUri: undefined,
+      })
+    }
+  }
+
+  return toReturn
 }

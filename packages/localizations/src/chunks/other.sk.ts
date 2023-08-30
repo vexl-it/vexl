@@ -177,7 +177,10 @@ const otherSk: typeof en =
         "addContactName": "Pridať meno",
         "contactAdded": "Kontakt bol pridaný.",
         "youHaveAddedContact":
-          "{{contactName}} bol pridaný k tvojim Vexl kontaktom."
+          "{{contactName}} bol pridaný k tvojim Vexl kontaktom.",
+        "submitted": "Submitted",
+        "new": "New",
+        "nonSubmitted": "Non-submitted"
       },
       "allowNotifications": {
         "title": "Povoliť notifikácie",
@@ -860,7 +863,9 @@ const otherSk: typeof en =
       "noOffersFromOthersYet":
         "🤔 Žiadne ponuky od ostatných? Zkús pridať ďalšie kontakty a počkaj. ✌️",
       "createYourFirstOffer":
-        "👋 Vytvor svoju prvú ponuku na nákup alebo predaj Bitcoinu."
+        "👋 Vytvor svoju prvú ponuku na nákup alebo predaj Bitcoinu.",
+      "importNewlyAddedContacts":
+        "👋 Looks like you've got some new contacts. Want to import them now?"
     },
     "addContactDialog": {
       "addContact": "Pridanie kontaktu",

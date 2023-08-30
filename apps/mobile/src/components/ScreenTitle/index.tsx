@@ -43,7 +43,11 @@ function ScreenTitle({
           </Text>
         </Stack>
         {showCloseButton && <IconButton icon={closeSvg} onPress={safeGoBack} />}
-        {children && <XStack space={'$2'}>{children}</XStack>}
+        {children && (
+          <XStack ai={'center'} space={'$2'}>
+            {children}
+          </XStack>
+        )}
       </XStack>
       {withBottomBorder && <Stack h={0.5} mx="$-4" bg="$grey" />}
     </YStack>

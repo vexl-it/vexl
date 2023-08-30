@@ -215,7 +215,12 @@ function Button({
       >
         {beforeIcon && (
           <Stack mr="$2">
-            <Image stroke={buttonIconColor} source={beforeIcon} />
+            <Image
+              height={18}
+              width={18}
+              stroke={buttonIconColor}
+              source={beforeIcon}
+            />
           </Stack>
         )}
         {text && (
@@ -232,7 +237,12 @@ function Button({
         )}
         {afterIcon && (
           <Stack ml="$1">
-            <Image stroke={buttonIconColor} source={afterIcon} />
+            <Image
+              height={18}
+              width={18}
+              stroke={buttonIconColor}
+              source={afterIcon}
+            />
           </Stack>
         )}
       </PressableStyled>

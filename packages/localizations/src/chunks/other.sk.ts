@@ -63,11 +63,11 @@ const otherSk: typeof en =
       "seeDetail": "See details",
       "notNow": "Not now",
       "niceWithExclamationMark": "Nice!",
-      "nothingFound": "Nič nenájdené",
-      "sendRequest": "Send request",
-      "change": "Change",
+      "nothingFound": "Nič sme nenašli.",
+      "sendRequest": "Odoslať žiadosť",
+      "change": "Zmeniť",
       "errorWhileReadingQrCode": "Error while reading QR code",
-      "copyErrorToClipboard": "Copy error to clipboard"
+      "copyErrorToClipboard": "Skopírovať chybu do schránky"
     },
     "loginFlow": {
       "anonymityNotice": "Kým to nepovolíš, nikto to neuvidí. Dokonca ani my.",
@@ -171,13 +171,13 @@ const otherSk: typeof en =
         },
         "toAddCustomContact":
           "Ak chceš pridať telefónne číslo napriamo, zadaj ho do vyhľadávacieho riadku (s predvoľbou krajiny).",
-        "addContact": "Pridanie kontaktu",
+        "addContact": "Pridať kontakt",
         "addThisPhoneNumber":
-          "Would you like to add this phone number to your Vexl contacts?",
-        "addContactName": "Add contact name",
-        "contactAdded": "Contact added.",
+          "Chceš pridať toto číslo medzi tvoje Vexl kontakty?",
+        "addContactName": "Pridať meno",
+        "contactAdded": "Kontakt bol pridaný.",
         "youHaveAddedContact":
-          "You have added {{contactName}} to your Vexl contacts."
+          "{{contactName}} bol pridaný k tvojim Vexl kontaktom."
       },
       "allowNotifications": {
         "title": "Povoliť notifikácie",
@@ -208,7 +208,7 @@ const otherSk: typeof en =
         "allowScreenshotsDescription": "Zákazať užívateľom screenshoty chatu",
         "termsAndPrivacy": "Podmienky a ochrana osobných údajov",
         "faqs": "Podmienky použitia a Ochrana súkromia",
-        "reportIssue": "Nahlásiť problém",
+        "reportIssue": "Kontaktovať podporu",
         "inAppLogs": "Logy aplikácie",
         "requestKnownData": "Vyžiadanie údajov",
         "followUsOn": "Sleduj nás na",
@@ -264,7 +264,7 @@ const otherSk: typeof en =
         "inappropriateContentWasReported":
           "Nevhodný obsah bol anonymne nahlásený.",
         "reportLimitReached":
-          "You have reached report limit. Try again in 24 hours."
+          "Pre dnešok bol dosiahnutý maximálny počet hlásení. Skús to znova za 24 hodín."
       },
       "goToChat": "Prejdite do chatu",
       "requestStatus": {
@@ -318,7 +318,7 @@ const otherSk: typeof en =
         "Požiadavku nemožno prijať, pretože jej druhá strana zrušila.",
       "requestNotFound":
         "Požiadavku nemožno prijať, pretože druhá strana zrušila svoj účet.",
-      "otherSideAccountDeleted": "Other side has deleted their account"
+      "otherSideAccountDeleted": "Protistrana zmazala účet"
     },
     "termsOfUse": {
       "termsOfUse": "Podmienky používania",
@@ -480,60 +480,59 @@ const otherSk: typeof en =
       },
       "errorWhileOpening": "Došlo k chybe pri otváraní notifikácie.",
       "MESSAGE": {
-        "title": "New message",
-        "body": "You have received a new message."
+        "title": "Nová správa",
+        "body": "Dostal si novú správu."
       },
       "REQUEST_REVEAL": {
-        "title": "Identity request received",
-        "body": "You have been requested to reveal your identity."
+        "title": "Žiadosť o odhalenie identity",
+        "body": "Bol si požiadaný odhaliť svoju identitu."
       },
       "APPROVE_REVEAL": {
-        "title": "Identity revealed!",
-        "body": "Your request to reveal identities was approved."
+        "title": "Identita odhalená!",
+        "body": "Tvoja žiadosť o odhalenie identity bola schválená."
       },
       "DISAPPROVE_REVEAL": {
-        "title": "Identity request denied",
-        "body": "Your request to reveal identities was denied."
+        "title": "Žiadosť zamietnutá!",
+        "body": "Tvoja žiadosť o odhalenie identity bola zamietnutá."
       },
       "REQUEST_MESSAGING": {
-        "title": "New request!",
-        "body": "You have received a new request."
+        "title": "Nová žiadosť!",
+        "body": "Máš novú žiadosť."
       },
       "APPROVE_MESSAGING": {
-        "title": "Request approved!",
-        "body": "Your request was approved."
+        "title": "Schválená žiadosť!",
+        "body": "Tvoja žiadosť bola schválená."
       },
       "DISAPPROVE_MESSAGING": {
-        "title": "Request denied",
-        "body": "Your request was denied."
+        "title": "Zamietnutá žiadosť",
+        "body": "Tvoja žiadosť bola zamietnutá-"
       },
       "DELETE_CHAT": {
-        "title": "Chat deleted",
-        "body": "One of your chats has been deleted."
+        "title": "Zmazaný chat",
+        "body": "Jeden z tvojich chatov bol vymazaný."
       },
       "BLOCK_CHAT": {
-        "title": "You've been blocked",
-        "body": "Someone just blocked you."
+        "title": "Bol si zablokovaný!",
+        "body": "Niekto ťa práve zablokoval."
       },
       "INACTIVITY_REMINDER": {
-        "title": "Login to prevent deactivation of your offers.",
+        "title": "Dlho sme o tebe nepočuli!",
         "body":
-          "You have not logged in for a long time. Login to prevent deactivation of your offers."
+          "Od poslednej návštevy appky už ubehlo hodne času. Otvor Vexl, aby tvoje ponuky ostali aktívne!"
       },
       "preferences": {
         "marketing": {
-          "title": "Marketing notification",
-          "body": "Notification about new features etc..."
+          "title": "Marketingové notifikácie",
+          "body": "Dostávaj novinky o nových funkciách!"
         },
         "chat": {
-          "title": "Chat notifications",
-          "body":
-            "Notifications about new chat messages, requests, identity reveals etc..."
+          "title": "Notifikácie o chate",
+          "body": "Dostávaj notifikácie na nové žiadosti a správy."
         },
         "inactivityWarnings": {
-          "title": "Inactivity warnings",
+          "title": "Varovanie o neaktivite",
           "body":
-            "We will let you know when your offers are about to be deactivated due to innactivity"
+            "Dáme ti vedieť, keď by mali byť tvoje ponuky vymazané kvôli neaktivite."
         },
         "marketplace": {
           "title": "marketplace",
@@ -551,19 +550,19 @@ const otherSk: typeof en =
           "title": "offer",
           "body": "offer"
         },
-        "screenTitle": "Notifications Settings"
+        "screenTitle": "Nastavenie notifikácií"
       },
       "REQUEST_CONTACT_REVEAL": {
-        "title": "Phone number reveal request received",
-        "body": "You have been requested to reveal your phone number."
+        "title": "Žiadosť o telefónne číslo",
+        "body": "Bolo požiadané o výmenu telefónneho čísla."
       },
       "APPROVE_CONTACT_REVEAL": {
-        "title": "Phone number revealed!",
-        "body": "Your request to reveal phone numbers was approved."
+        "title": "Telefónne číslo odhalené!",
+        "body": "Tvoja žiadosť o odhalenie telefónneho čísla bola schválená."
       },
       "DISAPPROVE_CONTACT_REVEAL": {
-        "title": "Phone number reveal request denied",
-        "body": "Your request to reveal phone numbers was denied."
+        "title": "Žiadosť zamietnutá!",
+        "body": "Tvoja žiadosť o odhalenie telefónneho čísla bola zamietnutá."
       },
       "NEW_OFFERS_IN_MARKETPLACE": {
         "title": "New offers in marketplace",
@@ -644,9 +643,11 @@ const otherSk: typeof en =
           "INBOX_DELETED": "{{them}} vymazal chat.",
           "CANCEL_REQUEST_MESSAGING": "Zrušil žiadosť o správu",
           "ONLY_IMAGE": "{{them}} sent an image",
-          "REQUEST_CONTACT_REVEAL": "{{them}} requested phone number reveal",
-          "APPROVE_CONTACT_REVEAL": "Phone number revealed",
-          "DISAPPROVE_CONTACT_REVEAL": "Declined phone number reveal"
+          "REQUEST_CONTACT_REVEAL":
+            "{{them}} chce odhaliť tvoje telefónne číslo.",
+          "APPROVE_CONTACT_REVEAL": "Telefónne číslo odhalené",
+          "DISAPPROVE_CONTACT_REVEAL":
+            "Žiadosť o telefónne číslo bola zamietnutá."
         },
         "outgoing": {
           "MESSAGE": "Ja: {{message}}",
@@ -662,9 +663,11 @@ const otherSk: typeof en =
           "INBOX_DELETED": "Vymazal si chat.",
           "CANCEL_REQUEST_MESSAGING": "Žiadosť o správu zrušená",
           "ONLY_IMAGE": "You have sent an image",
-          "REQUEST_CONTACT_REVEAL": "You have requested phone number reveal",
-          "APPROVE_CONTACT_REVEAL": "Phone number was revealed",
-          "DISAPPROVE_CONTACT_REVEAL": "Phone number reveal was declined"
+          "REQUEST_CONTACT_REVEAL":
+            "Tvoja žiadosť o telefónne číslo bola odoslaná.",
+          "APPROVE_CONTACT_REVEAL": "Telefónne číslo bolo odhalené",
+          "DISAPPROVE_CONTACT_REVEAL":
+            "Žiadosť o telefónne číslo bola zamietnutá."
         }
       },
       "deleteChat": "Odstrániť chat",
@@ -752,35 +755,34 @@ const otherSk: typeof en =
         "buttonText": "Respond"
       },
       "cancelRequestDialog": {
-        "title": "Are you sure?",
+        "title": "Si si istý?",
         "description":
           "If you cancel the messaging request other side will be unable to accept it",
-        "yes": "Yes, cancel"
+        "yes": "Áno, zrušiť"
       },
       "contactRevealRespondModal": {
-        "title": "Do you want to reveal your number?",
-        "text": "Approving this request will reveal your phone number."
+        "title": "Určite chceš odhaliť svoje telefónne číslo? ",
+        "text": "Táto akcia odhalí protistrane tvoje telefónne číslo."
       },
       "contactRevealRequestModal": {
-        "title": "Send phone number request.",
-        "text":
-          "By sending request you agree with revealing of your number too."
+        "title": "Požiadaj o telefónne číslo",
+        "text": "Odoslaním žiadosti súhlasíš s odhalením svojho čísla."
       },
-      "contactAlreadyRequested":
-        "Contact request was already sent in the conversation",
-      "contactRevealRequest": "Phone number reveal request",
+      "contactAlreadyRequested": "Žiadosť o telefónne číslo už bola odoslaná.",
+      "contactRevealRequest": "Žiadosť o odhalenie čísla",
       "contactRevealSent": {
-        "title": "Phone number reveal request sent",
-        "subtitle": "Waiting for response"
+        "title": "Žiadosť o odhalenie čísla bola odoslaná",
+        "subtitle": "Čakanie na odpoveď"
       },
-      "letsExchangeContacts": "Let’s exchange contacts!",
-      "phoneNumberRevealed": "Phone number revealed!",
-      "phoneNumberReveal": "Phone number reveal.",
-      "phoneNumberRevealDeclined": "Phone number reveal declined.",
+      "letsExchangeContacts": "Vymeňme si kontakty!",
+      "phoneNumberRevealed": "Telefónne číslo bolo odhalené! ",
+      "phoneNumberReveal": "Odhalenie telefónneho čísla",
+      "phoneNumberRevealDeclined":
+        "Odhalenie telefónneho čísla bolo zamietnuté.",
       "contactIsAlreadyInYourContactList":
-        "Contact is already in your contact list.",
-      "addUserToYourContacts": "Add {{name}} to your contacts?",
-      "tapToAddToYourVexlContacts": "Tap to add to your Vexl contacts."
+        "Kontakt už bol uložený do telefónneho zoznamu.",
+      "addUserToYourContacts": "Pridať {{name}} do kontaktov?",
+      "tapToAddToYourVexlContacts": "Pridať do Vexl kontaktov."
     },
     "progressBar": {
       "ENCRYPTING_PRIVATE_PAYLOADS": "{{percentDone}}% hotovo",
@@ -868,13 +870,14 @@ const otherSk: typeof en =
       "contactAdded": "Contact added.",
       "youHaveAddedContact":
         "You have added {{contactName}} to your Vexl contacts.",
-      "contactAlreadyInContactList": "Contact is already in your contact list.",
+      "contactAlreadyInContactList":
+        "Kontakt už bol uložený do telefónneho zoznamu.",
       "wouldYouLikeToChangeTheName":
-        "Would you like to change the name for {{name}} with this phone number?",
-      "keepCurrent": "Keep current",
-      "contactUpdated": "Contact updated",
+        "Chceš pre toto číslo zmeniť meno na {{name}}?",
+      "keepCurrent": "Ponechať",
+      "contactUpdated": "Kontakt aktualizovaný",
       "youHaveSuccessfullyUpdatedContact":
-        "You have successfully updated your Vexl contacts."
+        "Vexl kontakty boli úspešne aktualizované."
     }
   }
 /* JSON ends */

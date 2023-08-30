@@ -177,7 +177,10 @@ const otherPt: typeof en =
         "addContactName": "Add contact name",
         "contactAdded": "Contact added.",
         "youHaveAddedContact":
-          "You have added {{contactName}} to your Vexl contacts."
+          "You have added {{contactName}} to your Vexl contacts.",
+        "submitted": "Submitted",
+        "new": "New",
+        "nonSubmitted": "Non-submitted"
       },
       "allowNotifications": {
         "title": "Permitir permissões de notificação",
@@ -866,7 +869,9 @@ const otherPt: typeof en =
       "noOffersFromOthersYet":
         "🤔 Ainda não há ofertas de outros? Tente adicionar mais contactos e aguarde ✌️",
       "createYourFirstOffer":
-        "Cria a tua primeira oferta para comprar ou vender Bitcoin."
+        "Cria a tua primeira oferta para comprar ou vender Bitcoin.",
+      "importNewlyAddedContacts":
+        "👋 Looks like you've got some new contacts. Want to import them now?"
     },
     "addContactDialog": {
       "addContact": "Añadir contacto",

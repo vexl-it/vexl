@@ -48,6 +48,7 @@ function SetContactsScreen(): JSX.Element {
           </ScreenTitle>
           <Stack f={1} mx={'$2'}>
             <ContactsListSelect
+              showFilter
               onContactsSubmitted={goBack}
               renderFooter={renderButton}
             />

@@ -10,15 +10,18 @@ import {importedContactsAtom} from '../../state/contacts'
 import {useMemo} from 'react'
 import {contactSelectMolecule, ContactsSelectScope} from './atom'
 import {ScopeProvider, useMolecule} from 'jotai-molecules'
+import ContactsFilter from './components/ContactsFilter'
 
 interface Props {
   onContactsSubmitted: () => void
   renderFooter: (args: {onSubmit: () => void}) => JSX.Element
+  showFilter?: boolean
 }
 
 function ContactsListSelect({
   onContactsSubmitted,
   renderFooter,
+  showFilter,
 }: Props): JSX.Element {
   const {
     searchTextAsCustomContactAtom,
@@ -34,6 +37,7 @@ function ContactsListSelect({
       <WhiteContainer noPadding>
         <Stack f={1} px="$4">
           <SearchBar />
+          {showFilter && <ContactsFilter />}
           {toDisplay.length > 0 && <ContactsList contacts={toDisplay} />}
           {toDisplay.length === 0 && !O.isSome(customContactToAdd) && (
             <NothingFound />

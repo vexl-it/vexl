@@ -4,7 +4,10 @@ import {messagingStateAtomStorageAtom} from '../state/chat/atoms/messagingStateA
 import connectionStateAtom from '../state/connections/atom/connectionStateAtom'
 import {UnixMilliseconds} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
 import offerToConnectionsAtom from '../state/connections/atom/offerToConnectionsAtom'
-import {importedContactsStorageAtom} from '../state/contacts'
+import {
+  deviceContactsOnLastAppLaunchStorageAtom,
+  importedContactsStorageAtom,
+} from '../state/contacts'
 import {offersStateAtom} from '../state/marketplace/atom'
 import {MINIMAL_DATE} from '@vexl-next/domain/dist/utility/IsoDatetimeString.brand'
 import {type OneOfferInState} from '../state/marketplace/domain'
@@ -27,6 +30,9 @@ export default function clearMmkvStorageAndEmptyAtoms(): void {
   })
   getDefaultStore().set(importedContactsStorageAtom, {
     importedContacts: [],
+  })
+  getDefaultStore().set(deviceContactsOnLastAppLaunchStorageAtom, {
+    deviceContactsOnLastAppLaunch: [],
   })
   getDefaultStore().set(offersStateAtom, {
     lastUpdatedAt: MINIMAL_DATE,

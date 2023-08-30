@@ -17,6 +17,7 @@ import {offersAtomWithFilter} from '../../../../../state/marketplace/atom'
 import {splitAtom} from 'jotai/utils'
 import TotalOffersCount from './TotalOffersCount'
 import {offersFilterFromStorageAtom} from '../../../../../state/offersFilter'
+import ImportNewContactsSuggestion from './ImportNewContactsSuggestion'
 
 interface Props {
   type: 'BUY' | 'SELL'
@@ -53,10 +54,13 @@ function OffersListStateDisplayerContent({
   const renderListHeader = useMemo(() => {
     if (isNone(error))
       return (
-        <TotalOffersCount
-          filteredOffersCount={offersAtoms.length}
-          offerType={type}
-        />
+        <Stack>
+          <TotalOffersCount
+            filteredOffersCount={offersAtoms.length}
+            offerType={type}
+          />
+          <ImportNewContactsSuggestion />
+        </Stack>
       )
 
     return <ErrorListHeader mt={'$6'} error={error.value} />

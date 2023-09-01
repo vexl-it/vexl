@@ -59,7 +59,7 @@ function OffersListStateDisplayerContent({
             filteredOffersCount={offersAtoms.length}
             offerType={type}
           />
-          <ImportNewContactsSuggestion />
+          <ImportNewContactsSuggestion px={'$0'} />
         </Stack>
       )
 

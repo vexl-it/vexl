@@ -860,7 +860,8 @@ const otherEn =
       "createYourFirstOffer":
         "👋 Create your first offer to buy or sell Bitcoin.",
       "importNewlyAddedContacts":
-        "👋 Looks like you've got some new contacts. Want to import them now?"
+        "👋 Looks like you've got some new contacts. Want to import them now?",
+      "importNow": "Import now"
     },
     "addContactDialog": {
       "addContact": "Add contact",

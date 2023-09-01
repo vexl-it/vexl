@@ -5,14 +5,18 @@ import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {Stack, XStack} from 'tamagui'
 import {useMolecule} from 'jotai-molecules'
 import {contactSelectMolecule} from '../atom'
-import {useAtom} from 'jotai'
+import {useAtom, useAtomValue} from 'jotai'
 
 function SearchBar(): JSX.Element {
   const {t} = useTranslation()
 
-  const {selectAllAtom, searchTextAtom} = useMolecule(contactSelectMolecule)
+  const {areThereAnyContactsToDisplayAtom, selectAllAtom, searchTextAtom} =
+    useMolecule(contactSelectMolecule)
   const [searchText, setSearchText] = useAtom(searchTextAtom)
   const [allSelected, setAllSelected] = useAtom(selectAllAtom)
+  const areThereAnyContactsToDisplay = useAtomValue(
+    areThereAnyContactsToDisplayAtom
+  )
 
   return (
     <Stack>
@@ -31,12 +35,16 @@ function SearchBar(): JSX.Element {
             onPress={() => {
               setAllSelected((prev) => !prev)
             }}
-            disabled={false}
+            disabled={!areThereAnyContactsToDisplay}
             variant="black"
             size={'small'}
             adjustTextToFitOneLine
             fullSize
-            text={t(allSelected ? 'common.deselectAll' : 'common.selectAll')}
+            text={t(
+              allSelected && areThereAnyContactsToDisplay
+                ? 'common.deselectAll'
+                : 'common.selectAll'
+            )}
           />
         </Stack>
       </XStack>

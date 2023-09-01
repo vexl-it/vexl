@@ -1,7 +1,7 @@
 import {atom} from 'jotai'
 import {
   combineContactsFromDeviceWithImportedContacts,
-  contactsAfterLastSubmitAtom,
+  combinedContactsAfterLastSubmitAtom,
   importedContactsAtom,
 } from '../index'
 import {contactsFromDeviceAtom} from './contactsFromDeviceAtom'
@@ -9,7 +9,7 @@ import {contactsFromDeviceAtom} from './contactsFromDeviceAtom'
 const resolveAllContactsAsSeenAtom = atom(null, (get, set) => {
   const importedContacts = get(importedContactsAtom)
   set(
-    contactsAfterLastSubmitAtom,
+    combinedContactsAfterLastSubmitAtom,
     combineContactsFromDeviceWithImportedContacts({
       contactsFromDevice: get(contactsFromDeviceAtom),
       importedContacts,

@@ -9,6 +9,7 @@ import {useAtom} from 'jotai'
 import {useNavigation} from '@react-navigation/native'
 import {YStack} from 'tamagui'
 import usePixelsFromBottomWhereTabsEnd from '../../../utils'
+import ImportNewContactsSuggestion from './ImportNewContactsSuggestion'
 
 function EmptyMarketplaceSuggestions(): JSX.Element {
   const {t} = useTranslation()
@@ -48,6 +49,7 @@ function EmptyMarketplaceSuggestions(): JSX.Element {
             text={t('suggestion.noOffersFromOthersYet')}
           />
         )}
+        <ImportNewContactsSuggestion />
       </YStack>
     </ScrollView>
   )

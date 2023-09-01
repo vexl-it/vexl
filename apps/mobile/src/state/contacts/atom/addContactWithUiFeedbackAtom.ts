@@ -9,12 +9,9 @@ import {privateApiAtom} from '../../../api'
 import {hashPhoneNumber} from '../utils'
 import * as E from 'fp-ts/Either'
 import {loadingOverlayDisplayedAtom} from '../../../components/LoadingOverlayProvider'
-import {updateAllOffersConnectionsActionAtom} from '../../connections/atom/offerToConnectionsAtom'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
-import {importedContactsAtom, lastImportOfContactsAtom} from '../index'
+import {importedContactsAtom} from '../index'
 import {type E164PhoneNumber} from '@vexl-next/domain/dist/general/E164PhoneNumber.brand'
-import {IsoDatetimeString} from '@vexl-next/domain/dist/utility/IsoDatetimeString.brand'
-import {syncConnectionsActionAtom} from '../../connections/atom/connectionStateAtom'
 import showErrorAlert from '../../../utils/showErrorAlert'
 
 const showCreateOrEditDialogAtom = atom(
@@ -145,18 +142,7 @@ const importContact = atom(null, (get, set, newContact: ContactNormalized) => {
       contactApi.importContacts({contacts: [contact.hash]})
     ),
     TE.map((importedContact) => {
-      set(importedContactsAtom, (prev) => [...prev, importedContact])
-      set(
-        lastImportOfContactsAtom,
-        IsoDatetimeString.parse(new Date().toISOString())
-      )
-
-      void set(syncConnectionsActionAtom)()
-      void set(updateAllOffersConnectionsActionAtom, {
-        isInBackground: false,
-      })()
       set(loadingOverlayDisplayedAtom, false)
-
       return importedContact
     }),
     TE.mapLeft((e) => e)

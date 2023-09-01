@@ -865,7 +865,8 @@ const otherSk: typeof en =
       "createYourFirstOffer":
         "👋 Vytvor svoju prvú ponuku na nákup alebo predaj Bitcoinu.",
       "importNewlyAddedContacts":
-        "👋 Looks like you've got some new contacts. Want to import them now?"
+        "👋 Looks like you've got some new contacts. Want to import them now?",
+      "importNow": "Import now"
     },
     "addContactDialog": {
       "addContact": "Pridanie kontaktu",

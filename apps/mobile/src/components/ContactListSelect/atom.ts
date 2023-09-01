@@ -22,6 +22,7 @@ import {translationAtom} from '../../utils/localization/I18nProvider'
 import reportError from '../../utils/reportError'
 import {loadingOverlayDisplayedAtom} from '../LoadingOverlayProvider'
 import {
+  combinedContactsAfterLastSubmitAtom,
   importedContactsAtom,
   lastImportOfContactsAtom,
 } from '../../state/contacts'
@@ -33,16 +34,12 @@ import {IsoDatetimeString} from '@vexl-next/domain/dist/utility/IsoDatetimeStrin
 import {askAreYouSureActionAtom} from '../AreYouSureDialog'
 import userSvg from '../images/userSvg'
 import {syncConnectionsActionAtom} from '../../state/connections/atom/connectionStateAtom'
+import deduplicate from '../../utils/deduplicate'
 import newlyAddedContactsToPhoneContactListAtom from '../../state/contacts/atom/newlyAddedContactsToPhoneContactListAtom'
 
 export const ContactsSelectScope = createScope<ContactNormalized[]>([])
 
 export const newlyAddedCustomContactsAtom = atom<ContactNormalized[]>([])
-
-export const showSubmittedContactsAtom = atom<boolean>(false)
-export const showNonSubmittedContactsAtom = atom<boolean>(false)
-
-export const showNewContactsAtom = atom<boolean>(false)
 
 function combineContactsFromDeviceWithImportedContacts({
   contactsFromDevice,
@@ -82,12 +79,15 @@ export const contactSelectMolecule = molecule((getMolecule, getScope) => {
   const searchTextAtom = atom('')
   const importedContacts = getScope(ContactsSelectScope)
 
+  const showSubmittedContactsAtom = atom<boolean>(false)
+  const showNonSubmittedContactsAtom = atom<boolean>(false)
+  const showNewContactsAtom = atom<boolean>(false)
+
   const selectedNumbersAtom = atom(
     new Set(importedContacts.map((one) => one.normalizedNumber))
   )
 
   const combinedContactsAtom = atom((get) => {
-    console.log(`REFRESHED`)
     return combineContactsFromDeviceWithImportedContacts({
       contactsFromDevice: get(contactsFromDeviceAtom),
       importedContacts,
@@ -102,33 +102,64 @@ export const contactSelectMolecule = molecule((getMolecule, getScope) => {
     const showSubmittedContacts = get(showSubmittedContactsAtom)
     const showNonSubmittedContacts = get(showNonSubmittedContactsAtom)
     const showNewContacts = get(showNewContactsAtom)
-    const newContacts = get(newlyAddedContactsToPhoneContactListAtom)
+    const newlyAddedCustomContacts = get(newlyAddedCustomContactsAtom)
+    const combinedContactsAfterLastSubmit = get(
+      combinedContactsAfterLastSubmitAtom
+    )
     const searchText = get(searchTextAtom)
     const allContacts = get(allContactsAtom)
 
-    const filtered = allContacts.filter(
-      (contact) =>
-        (!showNewContacts || newContacts.includes(contact)) &&
-        (!showSubmittedContacts ||
-          importedContacts
-            .map((importedContact) => importedContact.normalizedNumber)
-            .includes(contact.normalizedNumber)) &&
-        (!showNonSubmittedContacts ||
-          !importedContacts
-            .map((importedContact) => importedContact.normalizedNumber)
-            .includes(contact.normalizedNumber)) &&
-        !newContacts.includes(contact)
-    )
+    const filtered = [
+      ...(showNewContacts
+        ? allContacts.filter(
+            (contact) =>
+              !combinedContactsAfterLastSubmit
+                .map((lastSubmitContact) => lastSubmitContact.normalizedNumber)
+                .includes(contact.normalizedNumber) &&
+              !newlyAddedCustomContacts
+                .map(
+                  (newlyAddedCustomContact) =>
+                    newlyAddedCustomContact.normalizedNumber
+                )
+                .includes(contact.normalizedNumber)
+          )
+        : []),
+      ...(showSubmittedContacts ? importedContacts : []),
+      ...(showNonSubmittedContacts
+        ? [
+            ...allContacts.filter(
+              (contact) =>
+                !importedContacts
+                  .map((importedContact) => importedContact.normalizedNumber)
+                  .includes(contact.normalizedNumber) &&
+                combinedContactsAfterLastSubmit
+                  .map(
+                    (lastSubmitContact) => lastSubmitContact.normalizedNumber
+                  )
+                  .includes(contact.normalizedNumber)
+            ),
+            ...newlyAddedCustomContacts,
+          ]
+        : []),
+    ]
 
-    // console.log(
-    //   `imported contacts: ${JSON.stringify(importedContacts, null, 2)}`
-    // )
+    const contactsToShow =
+      showNewContacts || showSubmittedContacts || showNonSubmittedContacts
+        ? filtered
+        : allContacts
 
-    return matchSorter(filtered, searchText, {
+    return matchSorter(contactsToShow, searchText, {
       keys: ['name', 'numberToDisplay'],
     })
   })
+
   const contactsToDisplayAtomsAtom = splitAtom(contactsToDisplayAtom)
+
+  const areThereAnyContactsToDisplayAtom = atom((get) => {
+    const contactsToDisplayAtom = get(contactsToDisplayAtomsAtom)
+
+    return contactsToDisplayAtom.length !== 0
+  })
 
   const selectAllAtom = atom(
     (get) => {
@@ -153,6 +184,14 @@ export const contactSelectMolecule = molecule((getMolecule, getScope) => {
       })
     }
   )
+
+  function createIsNewContactAtom(
+    contactAtom: Atom<ContactNormalized>
+  ): Atom<boolean> {
+    return atom((get) =>
+      get(newlyAddedContactsToPhoneContactListAtom).includes(get(contactAtom))
+    )
+  }
 
   function createSelectContactAtom(
     contactAtom: Atom<ContactNormalized>
@@ -300,8 +339,23 @@ export const contactSelectMolecule = molecule((getMolecule, getScope) => {
         },
         (importedContacts) => {
           set(importedContactsAtom, [...importedContacts])
-          // set(contactsAfterLastSubmitAtom, get(combinedContactsAtom))
-          // set(newlyAddedCustomContactsAtom, [])
+
+          const convertedToContactsNormalized: ContactNormalized[] =
+            importedContacts.map((contact) => {
+              const {hash, ...restProps} = contact
+              return restProps
+            })
+
+          // need to save also custom contacts added through app
+          // with deduplicating we extract them from returned imported contacts
+          set(
+            combinedContactsAfterLastSubmitAtom,
+            deduplicate([
+              ...get(combinedContactsAtom),
+              ...convertedToContactsNormalized,
+            ])
+          )
+          set(newlyAddedCustomContactsAtom, [])
           set(
             lastImportOfContactsAtom,
             IsoDatetimeString.parse(new Date().toISOString())
@@ -327,8 +381,13 @@ export const contactSelectMolecule = molecule((getMolecule, getScope) => {
     contactsToDisplayAtomsAtom,
     searchTextAtom,
     createSelectContactAtom,
+    createIsNewContactAtom,
     searchTextAsCustomContactAtom,
     addAndSelectContactWithUiFeedbackAtom,
     submitActionAtom,
+    showSubmittedContactsAtom,
+    showNonSubmittedContactsAtom,
+    showNewContactsAtom,
+    areThereAnyContactsToDisplayAtom,
   }
 })

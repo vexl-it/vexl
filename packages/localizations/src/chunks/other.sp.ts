@@ -872,7 +872,8 @@ const otherSp: typeof en =
       "createYourFirstOffer":
         "👋 Crea tu primera oferta para comprar o vender Bitcoin.",
       "importNewlyAddedContacts":
-        "👋 Looks like you've got some new contacts. Want to import them now?"
+        "👋 Looks like you've got some new contacts. Want to import them now?",
+      "importNow": "Import now"
     },
     "addContactDialog": {
       "addContact": "Adicionar contacto",

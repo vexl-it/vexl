@@ -4,34 +4,20 @@ import {type Atom, useAtomValue} from 'jotai'
 import {type ContactNormalized} from '../../../state/contacts/domain'
 import IsSelectedCheckbox from './IsSelectedCheckbox'
 import picturePlaceholderSvg from '../../images/picturePlaceholderSvg'
-import newlyAddedContactsToPhoneContactListAtom from '../../../state/contacts/atom/newlyAddedContactsToPhoneContactListAtom'
+import IsNewIndicator from './IsNewIndicator'
 
 interface Props {
   contactAtom: Atom<ContactNormalized>
 }
 
 function ContactItem({contactAtom}: Props): JSX.Element {
-  const newlyAddedContactsToPhoneContactList = useAtomValue(
-    newlyAddedContactsToPhoneContactListAtom
-  )
   const contact = useAtomValue(contactAtom)
   const {imageUri, normalizedNumber, name} = contact
 
   return (
     <XStack ai="center">
       <Stack>
-        {newlyAddedContactsToPhoneContactList.includes(contact) && (
-          <Stack
-            pos={'absolute'}
-            r={-7}
-            t={-7}
-            w={15}
-            h={15}
-            br={15}
-            zi="$10"
-            bc={'$main'}
-          />
-        )}
+        <IsNewIndicator contactAtom={contactAtom} />
         {imageUri ? (
           <Image
             width={50}

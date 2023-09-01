@@ -861,7 +861,8 @@ const otherCs: typeof en =
       "createYourFirstOffer":
         "👋 Vytvoř svou první nabídku na nákup nebo prodej Bitcoinu.",
       "importNewlyAddedContacts":
-        "👋 Looks like you've got some new contacts. Want to import them now?"
+        "👋 Looks like you've got some new contacts. Want to import them now?",
+      "importNow": "Import now"
     },
     "addContactDialog": {
       "addContact": "Ruční přidání kontaktu {{number}}",

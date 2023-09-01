@@ -879,7 +879,8 @@ const otherFr: typeof en =
       "createYourFirstOffer":
         "👋 Créez votre première offre d'achat ou de vente de bitcoins.",
       "importNewlyAddedContacts":
-        "👋 Looks like you've got some new contacts. Want to import them now?"
+        "👋 Looks like you've got some new contacts. Want to import them now?",
+      "importNow": "Import now"
     },
     "addContactDialog": {
       "addContact": "Aggiungi un contatto",

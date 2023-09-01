@@ -1,12 +1,12 @@
 import MarketplaceSuggestion from './MarketplaceSuggestion'
-import {showNewContactsOnlyAtom} from '../../../../ContactListSelect/atom'
 import {useAtomValue, useSetAtom} from 'jotai'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import {useNavigation} from '@react-navigation/native'
 import newlyAddedContactsToPhoneContactListAtom from '../../../../../state/contacts/atom/newlyAddedContactsToPhoneContactListAtom'
 import resolveAllContactsAsSeenAtom from '../../../../../state/contacts/atom/resolveAllContactsAsSeenAtom'
+import {type YStackProps} from 'tamagui'
 
-function ImportNewContactsSuggestion(): JSX.Element | null {
+function ImportNewContactsSuggestion(props: YStackProps): JSX.Element | null {
   const {t} = useTranslation()
   const navigation = useNavigation()
 
@@ -14,20 +14,18 @@ function ImportNewContactsSuggestion(): JSX.Element | null {
     newlyAddedContactsToPhoneContactListAtom
   )
   const resolveAllContactsAsSeen = useSetAtom(resolveAllContactsAsSeenAtom)
-  const setShowNewContactsOnly = useSetAtom(showNewContactsOnlyAtom)
 
   return newlyAddedContactsToPhoneContactList.length > 0 ? (
     <MarketplaceSuggestion
-      px={'$0'}
-      buttonText={t('suggestion.addMoreContacts')}
+      buttonText={t('suggestion.importNow')}
       onButtonPress={() => {
-        setShowNewContactsOnly(true)
         navigation.navigate('SetContacts')
       }}
       onClosePress={() => {
         resolveAllContactsAsSeen()
       }}
       text={t('suggestion.importNewlyAddedContacts')}
+      {...props}
     />
   ) : null
 }

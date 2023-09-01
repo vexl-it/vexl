@@ -5,7 +5,7 @@ import connectionStateAtom from '../state/connections/atom/connectionStateAtom'
 import {UnixMilliseconds} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
 import offerToConnectionsAtom from '../state/connections/atom/offerToConnectionsAtom'
 import {
-  deviceContactsOnLastAppLaunchStorageAtom,
+  combinedContactsAfterLastSubmitStorageAtom,
   importedContactsStorageAtom,
 } from '../state/contacts'
 import {offersStateAtom} from '../state/marketplace/atom'
@@ -31,8 +31,8 @@ export default function clearMmkvStorageAndEmptyAtoms(): void {
   getDefaultStore().set(importedContactsStorageAtom, {
     importedContacts: [],
   })
-  getDefaultStore().set(deviceContactsOnLastAppLaunchStorageAtom, {
-    deviceContactsOnLastAppLaunch: [],
+  getDefaultStore().set(combinedContactsAfterLastSubmitStorageAtom, {
+    combinedContactsAfterLastSubmit: [],
   })
   getDefaultStore().set(offersStateAtom, {
     lastUpdatedAt: MINIMAL_DATE,

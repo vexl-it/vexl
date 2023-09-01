@@ -6,15 +6,16 @@ import {type Atom} from 'jotai'
 import {selectAtom} from 'jotai/utils'
 import {IsoDatetimeString} from '@vexl-next/domain/dist/utility/IsoDatetimeString.brand'
 
-export const contactsAfterLastSubmitStorageAtom = atomWithParsedMmkvStorage(
-  'contactsAfterLastSubmit',
-  {contactsAfterLastSubmit: []},
-  z.object({contactsAfterLastSubmit: z.array(ContactNormalized)})
-)
+export const combinedContactsAfterLastSubmitStorageAtom =
+  atomWithParsedMmkvStorage(
+    'combinedContactsAfterLastSubmit',
+    {combinedContactsAfterLastSubmit: []},
+    z.object({combinedContactsAfterLastSubmit: z.array(ContactNormalized)})
+  )
 
-export const contactsAfterLastSubmitAtom = focusAtom(
-  contactsAfterLastSubmitStorageAtom,
-  (o) => o.prop('contactsAfterLastSubmit')
+export const combinedContactsAfterLastSubmitAtom = focusAtom(
+  combinedContactsAfterLastSubmitStorageAtom,
+  (o) => o.prop('combinedContactsAfterLastSubmit')
 )
 
 export const importedContactsStorageAtom = atomWithParsedMmkvStorage(

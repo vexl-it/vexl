@@ -10,7 +10,7 @@ export async function querySuggest({
   phrase,
   count,
   lang,
-}: SuggestQueryData): Promise<SuggestQueryData[]> {
+}: SuggestQueryData): Promise<LocationData[]> {
   const {data} = await axios.get(
     'https://api.geoapify.com/v1/geocode/autocomplete',
     {

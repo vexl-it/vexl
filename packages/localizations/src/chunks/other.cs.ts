@@ -874,7 +874,8 @@ const otherCs: typeof en =
       "contactUpdated": "Kontakt aktualizován",
       "youHaveSuccessfullyUpdatedContact":
         "Vexl kontakty byly úspěšně aktualizovány."
-    }
+    },
+    "": "You have added {{contactName}} to your Vexl contacts."
   }
 /* JSON ends */
 

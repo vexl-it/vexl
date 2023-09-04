@@ -891,7 +891,8 @@ const otherFr: typeof en =
       "contactUpdated": "Contact updated",
       "youHaveSuccessfullyUpdatedContact":
         "You have successfully updated your Vexl contacts."
-    }
+    },
+    "": ""
   }
 /* JSON ends */
 

@@ -10,7 +10,7 @@
     "turbo:clean": "turbo clean",
     "turbo:dev-packages": "turbo build-watch",
     "turbo:lint": "turbo lint",
-    "location-service:build-docker-image": "./scripts/build-docker-image.sh",
+    "location-service:build-docker-image": "./scripts/build-image-location-service.sh",
     "utils:sync-translations": "yarn workspace @vexl-next/localizations utils:sync && yarn workspace @vexl-next/localizations build",
     "utils:add-translation": "yarn workspace @vexl-next/localizations utils:add && yarn workspace @vexl-next/localizations build"
   },

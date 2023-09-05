@@ -8,7 +8,14 @@ import {selectAtom} from 'jotai/utils'
 
 // SETUP I18n
 export const i18n = new I18n(
-  enableHiddenFeatures ? translations : {en: translations.en}
+  enableHiddenFeatures
+    ? translations
+    : {
+        en: translations.en,
+        cs: translations.cs,
+        sk: translations.sk,
+        de: translations.de,
+      }
 )
 i18n.locale = getLocales()[0].languageTag
 i18n.defaultLocale = 'en'

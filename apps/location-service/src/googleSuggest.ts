@@ -5,6 +5,8 @@ import {LocationData, type SuggestQueryData} from './brands'
 const GOOGLE_PLACES_API_KEY = String(process.env.GOOGLE_PLACES_API_KEY ?? '')
 if (!GOOGLE_PLACES_API_KEY)
   throw new Error('No GOOGLE_PLACES_API_KEY env var set!')
+const ALLOWED_TYPES = ['locality', 'sublocality', 'political', 'neighborhood']
+const BLOCKED_TYPES = ['country', 'colloquial_area']
 
 interface GooglePlacesResponse {
   results: Array<{
@@ -16,6 +18,7 @@ interface GooglePlacesResponse {
         lng: number
       }
     }
+    types: string[]
   }>
 }
 
@@ -36,13 +39,17 @@ export async function querySuggest({
       params: {
         query: phrase,
         key: GOOGLE_PLACES_API_KEY,
-        type: 'locality',
         language: lang,
       },
     }
   )
 
   return results
+    .filter(
+      (one) =>
+        one.types.some((one) => ALLOWED_TYPES.includes(one)) &&
+        !one.types.some((one) => BLOCKED_TYPES.includes(one))
+    )
     .map((one) =>
       LocationData.safeParse({
         suggestFirstRow: one.name,

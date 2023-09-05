@@ -13,7 +13,7 @@ export default async function redisMiddleware(
   ctx: Context,
   next: Next
 ): Promise<void> {
-  const cacheKey = `${REDIS_PREFIX}cache1:${ctx.url}`
+  const cacheKey = `${REDIS_PREFIX}cache2:${ctx.url}`
 
   const cachedResponse = await redis.get(cacheKey).catch((error) => {
     console.error(

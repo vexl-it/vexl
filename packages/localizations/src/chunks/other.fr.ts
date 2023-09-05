@@ -829,7 +829,8 @@ const otherFr: typeof en =
         "title": "Souhaitez-vous rendre les journaux anonymes ?",
         "text":
           "Nous pouvons essayer de supprimer les clés privées et les informations personnelles des journaux avant de les exporter. Toutefois, nous vous conseillons de toujours vérifier par vous mêmes que les informations ont bien été anonymisées."
-      }
+      },
+      "noLogs": "No logs"
     },
     "MaintenanceScreen": {
       "title": "Maintenance de la place de marché",

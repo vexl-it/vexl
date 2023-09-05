@@ -821,7 +821,8 @@ const otherPt: typeof en =
         "title": "Gostaria de tornar os registos anónimos?",
         "text":
           "Podemos tentar retirar as chaves privadas e as informações pessoais dos registos antes de os exportar. Certifique-se sempre de que verifica por si próprio."
-      }
+      },
+      "noLogs": "No logs"
     },
     "MaintenanceScreen": {
       "title": "Manutenção do mercado",

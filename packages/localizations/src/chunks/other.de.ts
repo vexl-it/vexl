@@ -833,7 +833,8 @@ const otherDe: typeof en =
         "title": "Möchtest du die Protokolle anonymisieren?",
         "text":
           "Wir können versuchen, private Schlüssel und persönliche Informationen aus den Protokollen zu entfernen, bevor sie exportiert werden. Vergewisse dich aber immer selbst."
-      }
+      },
+      "noLogs": "No logs"
     },
     "MaintenanceScreen": {
       "title": "Marketplace-Wartung",

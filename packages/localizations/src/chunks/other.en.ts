@@ -811,7 +811,8 @@ const otherEn =
         "title": "Would you like to anonymize logs?",
         "text":
           "We can try to strip private keys and personal information from logs before exporting them. Always make sure to verify by yourself."
-      }
+      },
+      "noLogs": "No logs"
     },
     "MaintenanceScreen": {
       "title": "Marketplace maintenance",

@@ -2,22 +2,18 @@ import {type Atom, atom, type SetStateAction, type WritableAtom} from 'jotai'
 import {atomWithParsedMmkvStorage} from '../../utils/atomUtils/atomWithParsedMmkvStorage'
 import {focusAtom} from 'jotai-optics'
 import {z} from 'zod'
+import {type LoadingState, type OffersFilter, OffersState} from './domain'
 import {
-  type LoadingState,
-  type OffersFilter,
-  OffersState,
-  type OneOfferInState,
-} from './domain'
-import {
+  type OfferAdminId,
   type OfferFlags,
   type OfferId,
+  type OneOfferInState,
   type Sort,
 } from '@vexl-next/domain/dist/general/offers'
 import {MINIMAL_DATE} from '@vexl-next/domain/dist/utility/IsoDatetimeString.brand'
 import areIncluded from './utils/areIncluded'
 import {type ChatOrigin} from '@vexl-next/domain/dist/general/messaging'
 import {type FocusAtomType} from '../../utils/atomUtils/FocusAtomType'
-import {type OfferAdminId} from '@vexl-next/rest-api/dist/services/offer/contracts'
 import {selectAtom, splitAtom} from 'jotai/utils'
 import {importedContactsHashesAtom} from '../contacts'
 import sortOffers from './utils/sortOffers'
@@ -210,6 +206,16 @@ export const loadingStateAtom = atom<LoadingState>({state: 'initial'})
 export function offerForChatOriginAtom(chatOrigin: ChatOrigin) {
   return atom((get) => {
     if (chatOrigin.type === 'unknown') return undefined
+
+    if (chatOrigin.offer) return chatOrigin.offer
     return get(singleOfferAtom(chatOrigin.offerId))
   })
+}
+
+export function focusOfferByOfferId(
+  offerId?: OfferId
+): FocusAtomType<OneOfferInState | undefined> {
+  return focusAtom(offersAtom, (o) =>
+    o.find((offer) => offer.offerInfo.offerId === offerId)
+  )
 }

@@ -4,11 +4,12 @@ import {
   type LocationState,
   OfferId,
   type OfferPublicPart,
+  type OneOfferInState,
   SymmetricKey,
 } from '@vexl-next/domain/dist/general/offers'
 import {molecule} from 'jotai-molecules'
-import {type OneOfferInState} from '../../../state/marketplace/domain'
-import {OfferAdminId} from '@vexl-next/rest-api/dist/services/offer/contracts'
+import {OfferAdminId} from '@vexl-next/domain/dist/general/offers'
+
 import {IdNumeric} from '@vexl-next/domain/dist/utility/IdNumeric'
 import {IsoDatetimeString} from '@vexl-next/domain/dist/utility/IsoDatetimeString.brand'
 import {pipe} from 'fp-ts/function'

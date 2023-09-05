@@ -10,10 +10,10 @@ import {
 } from '../state/contacts'
 import {offersStateAtom} from '../state/marketplace/atom'
 import {MINIMAL_DATE} from '@vexl-next/domain/dist/utility/IsoDatetimeString.brand'
-import {type OneOfferInState} from '../state/marketplace/domain'
 import {postLoginFinishedStorageAtom} from '../state/postLoginOnboarding'
 import {selectedCurrencyStorageAtom} from '../state/selectedCurrency'
 import {preferencesAtom} from './preferences'
+import {type OneOfferInState} from '@vexl-next/domain/dist/general/offers'
 
 export default function clearMmkvStorageAndEmptyAtoms(): void {
   // TODO:#110 find a better way how to clear the state

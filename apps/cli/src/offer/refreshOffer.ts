@@ -1,4 +1,5 @@
-import {OfferAdminId} from '@vexl-next/rest-api/dist/services/offer/contracts'
+import {OfferAdminId} from '@vexl-next/domain/dist/general/offers'
+
 import {pipe} from 'fp-ts/function'
 import * as TE from 'fp-ts/TaskEither'
 import {getPrivateApiFromCredentialsJsonString} from '../api'

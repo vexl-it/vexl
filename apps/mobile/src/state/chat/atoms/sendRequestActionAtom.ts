@@ -1,5 +1,5 @@
 import {atom} from 'jotai'
-import {type OfferInfo} from '@vexl-next/domain/dist/general/offers'
+import {type OneOfferInState} from '@vexl-next/domain/dist/general/offers'
 import {privateApiAtom} from '../../../api'
 import {sessionDataOrDummyAtom} from '../../session'
 import {pipe} from 'fp-ts/function'
@@ -14,7 +14,11 @@ import showErrorAlert from '../../../utils/showErrorAlert'
 
 const sendRequestActionAtom = atom(
   null,
-  (get, set, {text, originOffer}: {text: string; originOffer: OfferInfo}) => {
+  (
+    get,
+    set,
+    {text, originOffer}: {text: string; originOffer: OneOfferInState}
+  ) => {
     const api = get(privateApiAtom)
     const session = get(sessionDataOrDummyAtom)
 
@@ -23,13 +27,13 @@ const sendRequestActionAtom = atom(
         text,
         api: api.chat,
         fromKeypair: session.privateKey,
-        toPublicKey: originOffer.publicPart.offerPublicKey,
+        toPublicKey: originOffer.offerInfo.publicPart.offerPublicKey,
       }),
       TE.map((message) =>
         set(upsertChatForTheirOfferActionAtom, {
           inbox: {privateKey: session.privateKey},
           initialMessage: {state: 'sent', message},
-          offerInfo: originOffer,
+          offer: originOffer,
         })
       )
     )
@@ -38,7 +42,11 @@ const sendRequestActionAtom = atom(
 
 export const sendRequestHandleUIActionAtom = atom(
   null,
-  (get, set, {text, originOffer}: {text: string; originOffer: OfferInfo}) => {
+  (
+    get,
+    set,
+    {text, originOffer}: {text: string; originOffer: OneOfferInState}
+  ) => {
     const {t} = get(translationAtom)
 
     set(loadingOverlayDisplayedAtom, true)

@@ -1,4 +1,3 @@
-import {type OneOfferInState} from '../../../state/marketplace/domain'
 import {Stack, YStack} from 'tamagui'
 import OfferWithBubbleTip from '../../OfferWithBubbleTip'
 import ScreenTitle from '../../ScreenTitle'
@@ -30,6 +29,7 @@ import OfferRequestTextInput from '../../OfferRequestTextInput'
 import {offerRerequestLimitDaysAtom} from '../../../utils/remoteConfig/atoms'
 import {type RootStackScreenProps} from '../../../navigationTypes'
 import RerequestInfo from './RerequestInfo'
+import {type OneOfferInState} from '@vexl-next/domain/dist/general/offers'
 
 function OfferInfo({
   offer,
@@ -72,7 +72,7 @@ function OfferInfo({
   const onRequestPressed = useCallback(() => {
     if (!text.trim()) return
     void pipe(
-      submitRequest({text, originOffer: offer.offerInfo}),
+      submitRequest({text, originOffer: offer}),
       TO.map((chat) => {
         navigation.replace('ChatDetail', {
           chatId: chat.id,
@@ -80,7 +80,7 @@ function OfferInfo({
         })
       })
     )()
-  }, [navigation, offer.offerInfo, submitRequest, text])
+  }, [navigation, offer, submitRequest, text])
 
   const showRequestButton =
     !chatForOffer || requestPossibleInfo.canBeRerequested

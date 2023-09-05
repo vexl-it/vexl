@@ -4,6 +4,7 @@ import {
   OfferType,
   PrivatePayloadEncrypted,
   PublicPayloadEncrypted,
+  OfferAdminId,
 } from '@vexl-next/domain/dist/general/offers'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
 import {NoContentResponse} from '../../NoContentResponse.brand'
@@ -15,8 +16,6 @@ export interface ReportOfferLimitReachedError {
   readonly _tag: 'ReportOfferLimitReachedError'
 }
 
-export const OfferAdminId = z.string().brand<'OfferAdminId'>()
-export type OfferAdminId = z.TypeOf<typeof OfferAdminId>
 export const ServerOffer = z.object({
   id: z
     .number()

@@ -4,7 +4,6 @@ import UserNameWithSellingBuying from './UserNameWithSellingBuying'
 import randomName from '../utils/randomName'
 import ContactTypeAndCommonNumber from './ContactTypeAndCommonNumber'
 import {useChatForOffer} from '../state/chat/hooks/useChatForOffer'
-import {type OneOfferInState} from '../state/marketplace/domain'
 import UserAvatar from './UserAvatar'
 import {DateTime} from 'luxon'
 import {userDataAtom} from '../state/session'
@@ -12,6 +11,7 @@ import {useTranslation} from '../utils/localization/I18nProvider'
 import {useAtomValue} from 'jotai'
 import {useMemo} from 'react'
 import {selectImportedContactsWithHashes} from '../state/contacts'
+import {type OneOfferInState} from '@vexl-next/domain/dist/general/offers'
 
 function OfferAuthorAvatar({
   offer: {offerInfo, ownershipInfo},

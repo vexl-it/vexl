@@ -829,7 +829,8 @@ const otherIt: typeof en =
         "title": "Si desidera anonimizzare i registri?",
         "text":
           "Possiamo provare a eliminare le chiavi private e le informazioni personali dai registri prima di esportarli. Assicurarsi sempre di verificare personalmente."
-      }
+      },
+      "noLogs": "No logs"
     },
     "MaintenanceScreen": {
       "title": "Manutenzione del mercato",

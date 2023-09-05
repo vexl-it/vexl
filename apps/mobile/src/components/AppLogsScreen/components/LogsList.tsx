@@ -4,6 +4,7 @@ import {FlashList} from '@shopify/flash-list'
 import {type Atom, useAtomValue} from 'jotai'
 import atomKeyExtractor from '../../../utils/atomUtils/atomKeyExtractor'
 import {appLogAtomsAtom} from '../atoms'
+import {useTranslation} from '../../../utils/localization/I18nProvider'
 
 const logTextStyle = {
   marginBottom: getTokens().space[2].val,
@@ -25,8 +26,10 @@ function renderLogItem({item}: {item: Atom<string>}): JSX.Element {
 
 function LogsList(): JSX.Element {
   const logsAtoms = useAtomValue(appLogAtomsAtom)
+  const {t} = useTranslation()
 
-  if (logsAtoms.length === 0) return <Text color="white">No logs</Text>
+  if (logsAtoms.length === 0)
+    return <Text color="white">{t('AppLogs.noLogs')}</Text>
 
   return (
     <FlashList

@@ -822,7 +822,8 @@ const otherSp: typeof en =
         "title": "¿Quieres anonimizar los registros?",
         "text":
           "Podemos intentar eliminar las claves privadas y la información personal de los registros antes de exportarlos. Asegúrate siempre de verificarlo por ti mismo."
-      }
+      },
+      "noLogs": "No logs"
     },
     "MaintenanceScreen": {
       "title": "Mantenimiento del mercado",

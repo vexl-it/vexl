@@ -2,7 +2,6 @@ import ScreenTitle from '../../ScreenTitle'
 import {Stack, Text, XStack} from 'tamagui'
 import IconButton from '../../IconButton'
 import trashSvg from '../images/trashSvg'
-import pauseSvg from '../images/pauseSvg'
 import playSvg from '../images/playSvg'
 import closeSvg from '../../images/closeSvg'
 import React, {useCallback} from 'react'
@@ -16,6 +15,7 @@ import {useMolecule} from 'jotai-molecules'
 import {offerFormMolecule} from '../atoms/offerFormStateAtoms'
 import useSafeGoBack from '../../../utils/useSafeGoBack'
 import {type OneOfferInState} from '../../../state/marketplace/domain'
+import pauseSvg from '../../../images/pauseSvg'
 
 interface Props {
   offer: OneOfferInState | undefined

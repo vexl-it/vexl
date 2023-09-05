@@ -1,4 +1,4 @@
-import {Stack, styled, Text, XStack} from 'tamagui'
+import {getTokens, Stack, styled, Text, XStack} from 'tamagui'
 import {formatCurrencyAmount} from '../utils/localization/currency'
 import SvgImage from './Image'
 import mapTagSvg from './InsideRouter/components/MarketplaceScreen/images/mapTagSvg'
@@ -8,6 +8,7 @@ import {useTranslation} from '../utils/localization/I18nProvider'
 import onlineTransferSvg from './InsideRouter/components/MarketplaceScreen/images/onlineTransferSvg'
 import getBtcPragueLogoSvg from './InsideRouter/components/MarketplaceScreen/images/btcPragueLogoSvg'
 import {useMemo} from 'react'
+import pauseSvg from '../images/pauseSvg'
 
 const BTC_PRAGUE_FRIEND = '8o5OvkfRga/xBYbfb0e0MJZIjy4g7xGVimCdNLrydGs='
 const BTC_PRAGUE_FRIEND_STAGE = '9c6r0q7LCn1oqES2pfqQDVQH91fY8ZHYcJKbJYOU7hE='
@@ -52,7 +53,10 @@ function OfferInfoPreview({
   )
 
   const offerAmount = useMemo(() => {
-    return formatCurrencyAmount(offer.publicPart.currency, offer.publicPart.amountTopLimit)
+    return formatCurrencyAmount(
+      offer.publicPart.currency,
+      offer.publicPart.amountTopLimit
+    )
   }, [offer.publicPart.amountTopLimit, offer.publicPart.currency])
 
   return (
@@ -64,16 +68,22 @@ function OfferInfoPreview({
         </Stack>
       )}
       <XStack ai={'flex-start'} jc={'space-between'}>
-        <Stack>
+        <XStack mb={'$4'}>
           <Text
+            flex={1}
             fos={20}
-            mb="$4"
             color={negative ? '$greyOnBlack' : '$black'}
             ff="$body500"
           >
             {offer.publicPart.offerDescription}
           </Text>
-        </Stack>
+          {!offer.publicPart.active && (
+            <SvgImage
+              stroke={getTokens().color.$greyOnBlack.val}
+              source={pauseSvg}
+            />
+          )}
+        </XStack>
       </XStack>
       <XStack space={'$1'}>
         <InfoItemContainer>

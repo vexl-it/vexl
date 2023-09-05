@@ -18,6 +18,9 @@ import {useMolecule} from 'jotai-molecules'
 import {offerFormMolecule} from '../atoms/offerFormStateAtoms'
 import useContent from '../useContent'
 import EditOfferHeader from './EditOfferHeader'
+import userSvg from '../../images/userSvg'
+import Section from '../../Section'
+import OfferType from '../../OfferForm/components/OfferType'
 
 const styles = StyleSheet.create({
   contentStyles: {
@@ -37,7 +40,8 @@ function EditOfferScreen({
   const safeGoBack = useSafeGoBack()
   const content = useContent()
 
-  const {offerAtom, editOfferAtom} = useMolecule(offerFormMolecule)
+  const {offerAtom, editOfferAtom, offerTypeAtom} =
+    useMolecule(offerFormMolecule)
   const editOffer = useSetAtom(editOfferAtom)
   const setOffer = useSetAtom(offerAtom)
   const offer = useAtomValue(useMemo(() => singleOfferAtom(offerId), [offerId]))
@@ -55,7 +59,12 @@ function EditOfferScreen({
           <ScrollView contentContainerStyle={styles.contentStyles}>
             <EditOfferHeader offer={offer} />
             {offer ? (
-              <OfferForm content={content} />
+              <>
+                <Section image={userSvg}>
+                  <OfferType offerTypeAtom={offerTypeAtom} />
+                </Section>
+                <OfferForm content={content} />
+              </>
             ) : (
               <Stack f={1} ai={'center'}>
                 <Text ff={'$heading'} fos={16} col={'$white'}>

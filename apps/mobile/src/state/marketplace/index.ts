@@ -1,7 +1,9 @@
 import {
   type IntendedConnectionLevel,
+  type OfferAdminId,
   type OfferId,
   type OfferPublicPart,
+  type OneOfferInState,
   type SymmetricKey,
 } from '@vexl-next/domain/dist/general/offers'
 import {atom, type ExtractAtomResult, useAtomValue} from 'jotai'
@@ -16,7 +18,6 @@ import {
   singleOfferByAdminIdAtom,
 } from './atom'
 import * as Option from 'fp-ts/Option'
-import {type OneOfferInState} from './domain'
 import {privateApiAtom} from '../../api'
 import {pipe} from 'fp-ts/function'
 import {sessionDataOrDummyAtom} from '../session'
@@ -34,7 +35,6 @@ import {type ErrorEncryptingPublicPart} from '@vexl-next/resources-utils/dist/of
 import updateOffer, {
   type ApiErrorUpdatingOffer,
 } from '@vexl-next/resources-utils/dist/offers/updateOffer'
-import {type OfferAdminId} from '@vexl-next/rest-api/dist/services/offer/contracts'
 import {
   type ErrorDecryptingOffer,
   type NonCompatibleOfferVersionError,

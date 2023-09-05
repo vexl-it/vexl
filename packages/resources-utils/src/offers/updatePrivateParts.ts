@@ -1,6 +1,8 @@
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
-import {type OfferAdminId} from '@vexl-next/rest-api/dist/services/offer/contracts'
-import {type SymmetricKey} from '@vexl-next/domain/dist/general/offers'
+import {
+  type OfferAdminId,
+  type SymmetricKey,
+} from '@vexl-next/domain/dist/general/offers'
 import {flow, pipe} from 'fp-ts/function'
 import constructPrivatePayloads, {
   type ErrorConstructingPrivatePayloads,

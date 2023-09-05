@@ -8,10 +8,15 @@ import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
 import {group} from 'group-items'
 import {keys} from '@vexl-next/resources-utils/dist/utils/keys'
 import notEmpty from '../../../utils/notEmpty'
+import {type OneOfferInState} from '@vexl-next/domain/dist/general/offers'
 
-export default function createNewChatsFromFirstMessages(
+export default function createNewChatsFromFirstMessages({
+  inbox,
+  inboxOffer,
+}: {
   inbox: Inbox
-): (messages: ChatMessageWithState[]) => ChatWithMessages[] {
+  inboxOffer?: OneOfferInState
+}): (messages: ChatMessageWithState[]) => ChatWithMessages[] {
   return (messages) => {
     const messagesBySender = group(messages)
       .by((oneMessage) => oneMessage.message.senderPublicKey)
@@ -26,7 +31,7 @@ export default function createNewChatsFromFirstMessages(
           chat: {
             inbox,
             origin: inbox.offerId
-              ? {type: 'myOffer', offerId: inbox.offerId}
+              ? {type: 'myOffer', offerId: inbox.offerId, offer: inboxOffer}
               : {type: 'unknown'},
             otherSide: {publicKey: senderPublicKey},
             id: generateChatId(),

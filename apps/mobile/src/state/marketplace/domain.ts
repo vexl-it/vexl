@@ -3,16 +3,13 @@ import {
   BtcNetwork,
   CurrencyCode,
   FriendLevel,
-  IntendedConnectionLevel,
   Location,
   LocationState,
-  OfferFlags,
-  OfferInfo,
   OfferType,
+  OneOfferInState,
   PaymentMethod,
   Sort,
 } from '@vexl-next/domain/dist/general/offers'
-import {OfferAdminId} from '@vexl-next/rest-api/dist/services/offer/contracts'
 import {type ApiErrorFetchingOffers} from '@vexl-next/resources-utils/dist/offers/getNewOffersAndDecrypt'
 import {IsoDatetimeString} from '@vexl-next/domain/dist/utility/IsoDatetimeString.brand'
 import {type BasicError} from '@vexl-next/domain/dist/utility/errors'
@@ -22,17 +19,6 @@ export type ApiErrorFetchingRemovedOffers =
 
 export type ApiErrorReportingOffer = BasicError<'ApiErrorReportingOffer'>
 export type ApiErrorDeletingOffer = BasicError<'ApiErrorDeletingOffer'>
-export const OneOfferInState = z.object({
-  offerInfo: OfferInfo,
-  flags: OfferFlags,
-  ownershipInfo: z
-    .object({
-      adminId: OfferAdminId,
-      intendedConnectionLevel: IntendedConnectionLevel,
-    })
-    .optional(),
-})
-export type OneOfferInState = z.TypeOf<typeof OneOfferInState>
 
 export const OffersState = z.object({
   lastUpdatedAt: IsoDatetimeString,

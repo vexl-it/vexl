@@ -7,11 +7,11 @@ import createOffer from './createOffer'
 import {z} from 'zod'
 import {safeParse} from '@vexl-next/resources-utils/dist/utils/parsing'
 import deleteOffer from './deleteOffer'
-import {OfferAdminId} from '@vexl-next/rest-api/dist/services/offer/contracts'
-import {
+import {OfferAdminId,
   IntendedConnectionLevel,
   SymmetricKey,
 } from '@vexl-next/domain/dist/general/offers'
+
 import updatePublicPart from './updatePublicPart'
 import refreshOffer from './refreshOffer'
 import addPrivatePart from './addPrivatePart'

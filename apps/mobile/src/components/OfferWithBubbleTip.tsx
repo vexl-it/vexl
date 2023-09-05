@@ -3,10 +3,10 @@ import OfferInfoPreview from './OfferInfoPreview'
 import SvgImage from './Image'
 
 import {type ReactNode, useCallback} from 'react'
-import {type OneOfferInState} from '../state/marketplace/domain'
 import OfferAuthorAvatar from './OfferAuthorAvatar'
 import {TouchableWithoutFeedback} from 'react-native'
 import bubbleTipSvg, {bubbleTipSvgNegative} from './images/bubbleTipSvg'
+import {type OneOfferInState} from '@vexl-next/domain/dist/general/offers'
 
 export default function OfferWithBubbleTip({
   offer,

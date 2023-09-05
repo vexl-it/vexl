@@ -554,7 +554,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
   const rerequestOfferActionAtom = atom(
     null,
     (get, set, {text}: {text: string}) => {
-      const offer = get(offerForChatAtom)?.offerInfo
+      const offer = get(offerForChatAtom)
       if (!offer) {
         set(showOfferDeletedWithOptionToDeleteActionAtom)
         return

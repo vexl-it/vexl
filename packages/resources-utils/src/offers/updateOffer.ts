@@ -1,6 +1,6 @@
 import {type OfferPrivateApi} from '@vexl-next/rest-api/dist/services/offer'
-import {type OfferAdminId} from '@vexl-next/rest-api/dist/services/offer/contracts'
 import {
+  type OfferAdminId,
   type OfferInfo,
   type OfferPublicPart,
   type SymmetricKey,

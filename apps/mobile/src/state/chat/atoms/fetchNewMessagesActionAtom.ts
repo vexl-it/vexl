@@ -23,6 +23,7 @@ import messagingStateAtom from '../atoms/messagingStateAtom'
 import replaceBase64UriWithImageFileUri from '../utils/replaceBase64UriWithImageFileUri'
 import {
   createSingleOfferReportedFlagFromAtomAtom,
+  focusOfferByOfferId,
   focusOfferByPublicKeyAtom,
 } from '../../marketplace/atom'
 import {
@@ -30,6 +31,7 @@ import {
   UnixMilliseconds0,
   unixMillisecondsNow,
 } from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
+import {type OneOfferInState} from '@vexl-next/domain/dist/general/offers'
 
 function createInboxAtom(
   publicKey: PublicKeyPemBase64
@@ -69,12 +71,13 @@ function splitMessagesArrayToNewChatsAndExistingChats({
 function refreshInbox(
   api: ChatPrivateApi
 ): (
-  getInbox: () => InboxInState
+  getInbox: () => InboxInState,
+  inboxOffer?: OneOfferInState
 ) => TE.TaskEither<
   ApiErrorRetrievingMessages,
   {updatedInbox: InboxInState; newMessages: readonly ChatMessageWithState[]}
 > {
-  return (getInbox) =>
+  return (getInbox, inboxOffer) =>
     pipe(
       retrieveMessages({api, inboxKeypair: getInbox().inbox.privateKey}),
       TE.map((one) => {
@@ -125,9 +128,10 @@ function refreshInbox(
             return {
               ...getInbox(),
               chats: [
-                ...createNewChatsFromMessages(inbox.inbox)(
-                  messagesInNewChat ?? []
-                ),
+                ...createNewChatsFromMessages({
+                  inbox: inbox.inbox,
+                  inboxOffer,
+                })(messagesInNewChat ?? []),
                 ...addMessagesToChats(inbox.chats)(
                   messagesInExistingChat ?? []
                 ),
@@ -185,7 +189,10 @@ export const fetchAndStoreMessagesForInboxAtom = atom<
   }
 
   return pipe(
-    refreshInbox(api.chat)(() => get(createInboxAtom(key)) ?? inbox),
+    refreshInbox(api.chat)(
+      () => get(createInboxAtom(key)) ?? inbox,
+      get(focusOfferByOfferId(inbox.inbox.offerId))
+    ),
     TE.match(
       (error) => {
         reportError('error', 'Api Error fetching messages for inbox', error)

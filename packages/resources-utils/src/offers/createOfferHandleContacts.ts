@@ -4,6 +4,7 @@ import {type PrivateKeyHolder} from '@vexl-next/cryptography/dist/KeyHolder'
 import * as TE from 'fp-ts/TaskEither'
 import {
   type IntendedConnectionLevel,
+  type OfferAdminId,
   type OfferInfo,
   type OfferPublicPart,
   type SymmetricKey,
@@ -16,7 +17,6 @@ import {
   fetchInfoAndGeneratePrivatePayloads,
   type PrivatePartEncryptionError,
 } from './utils/offerPrivatePayload'
-import {type OfferAdminId} from '@vexl-next/rest-api/dist/services/offer/contracts'
 import encryptOfferPublicPayload, {
   type ErrorEncryptingPublicPart,
 } from './utils/encryptOfferPublicPayload'

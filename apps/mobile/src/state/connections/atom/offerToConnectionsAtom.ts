@@ -4,7 +4,6 @@ import {splitAtom} from 'jotai/utils'
 import {focusAtom} from 'jotai-optics'
 import {atom} from 'jotai'
 import * as T from 'fp-ts/Task'
-import {type OfferAdminId} from '@vexl-next/rest-api/dist/services/offer/contracts'
 import {privateApiAtom} from '../../../api'
 import {startMeasure} from '../../../utils/reportTime'
 import {pipe} from 'fp-ts/function'
@@ -21,6 +20,7 @@ import {
 } from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
 import {singleOfferByAdminIdAtom} from '../../marketplace/atom'
 import {subtractArrays} from '@vexl-next/resources-utils/dist/utils/array'
+import {type OfferAdminId} from '@vexl-next/domain/dist/general/offers'
 
 const BACKGROUND_TIME_LIMIT_MS = 25_000
 

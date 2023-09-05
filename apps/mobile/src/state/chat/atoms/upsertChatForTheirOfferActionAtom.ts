@@ -8,7 +8,7 @@ import {
   type ChatWithMessages,
   type MessagingState,
 } from '../domain'
-import {type OfferInfo} from '@vexl-next/domain/dist/general/offers'
+import {type OneOfferInState} from '@vexl-next/domain/dist/general/offers'
 import focusChatForTheirOfferAtom from './focusChatForTheirOfferAtom'
 import messagingStateAtom from './messagingStateAtom'
 import * as O from 'optics-ts'
@@ -17,19 +17,19 @@ import {type PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
 function createNewChat({
   inbox,
   initialMessage,
-  offerInfo,
+  offer,
 }: {
   inbox: Inbox
   initialMessage: ChatMessageWithState
-  offerInfo: OfferInfo
+  offer: OneOfferInState
 }): ChatWithMessages {
   return {
     chat: {
       id: generateChatId(),
       inbox,
-      origin: {type: 'theirOffer', offerId: offerInfo.offerId},
+      origin: {type: 'theirOffer', offerId: offer.offerInfo.offerId, offer},
       otherSide: {
-        publicKey: offerInfo.publicPart.offerPublicKey,
+        publicKey: offer.offerInfo.publicPart.offerPublicKey,
       },
       isUnread: false,
     },
@@ -53,14 +53,17 @@ const upsertChatForTheirOfferActionAtom = atom(
     {
       inbox,
       initialMessage,
-      offerInfo,
+      offer,
     }: {
       inbox: Inbox
       initialMessage: ChatMessageWithState
-      offerInfo: OfferInfo
+      offer: OneOfferInState
     }
   ) => {
-    const existingChatAtom = focusChatForTheirOfferAtom({inbox, offerInfo})
+    const existingChatAtom = focusChatForTheirOfferAtom({
+      inbox,
+      offerInfo: offer.offerInfo,
+    })
     const existingChat = get(existingChatAtom)
     if (existingChat) {
       set(existingChatAtom, (prev) => ({
@@ -69,7 +72,7 @@ const upsertChatForTheirOfferActionAtom = atom(
       }))
       return existingChat.chat
     } else {
-      const newChat = createNewChat({inbox, initialMessage, offerInfo})
+      const newChat = createNewChat({inbox, initialMessage, offer})
       set(messagingStateAtom, (old) =>
         O.set(
           focusPrependChatToInbox(

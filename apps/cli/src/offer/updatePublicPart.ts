@@ -2,8 +2,8 @@ import {pipe} from 'fp-ts/function'
 import * as E from 'fp-ts/Either'
 import * as TE from 'fp-ts/TaskEither'
 import {getPrivateApi} from '../api'
-import {type OfferAdminId} from '@vexl-next/rest-api/dist/services/offer/contracts'
 import {
+  type OfferAdminId,
   OfferPublicPart,
   type SymmetricKey,
 } from '@vexl-next/domain/dist/general/offers'

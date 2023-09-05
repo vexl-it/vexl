@@ -2,7 +2,7 @@ import {pipe} from 'fp-ts/function'
 import * as TE from 'fp-ts/TaskEither'
 import {getPrivateApiFromCredentialsJsonString} from '../api'
 import {splitAndParse} from '../utils/splitAndParse'
-import {OfferAdminId} from '@vexl-next/rest-api/dist/services/offer/contracts'
+import {OfferAdminId} from '@vexl-next/domain/dist/general/offers'
 
 export default function deleteOffer({
   adminIds,

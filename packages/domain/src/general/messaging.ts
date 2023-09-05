@@ -1,6 +1,6 @@
 import {z} from 'zod'
 import {UserNameAndAvatar} from './UserNameAndAvatar.brand'
-import {OfferId} from './offers'
+import {OfferId, OneOfferInState} from './offers'
 import {UserName} from './UserName.brand'
 import {generateUuid, Uuid} from '../utility/Uuid.brand'
 import {UnixMilliseconds} from '../utility/UnixMilliseconds.brand'
@@ -118,10 +118,12 @@ export const ChatOrigin = z.discriminatedUnion('type', [
   z.object({
     type: z.literal('myOffer'),
     offerId: OfferId,
+    offer: OneOfferInState.optional(),
   }),
   z.object({
     type: z.literal('theirOffer'),
     offerId: OfferId,
+    offer: OneOfferInState.optional(),
   }),
   z.object({type: z.literal('unknown')}),
 ])

@@ -18,6 +18,8 @@ export type Sort = z.TypeOf<typeof Sort>
 export const OfferId = z.string().min(1).brand<'OfferId'>()
 export type OfferId = z.TypeOf<typeof OfferId>
 
+export const OfferAdminId = z.string().brand<'OfferAdminId'>()
+export type OfferAdminId = z.TypeOf<typeof OfferAdminId>
 export const LocationState = z.enum(['ONLINE', 'IN_PERSON'])
 export type LocationState = z.TypeOf<typeof LocationState>
 
@@ -134,3 +136,15 @@ export const PublicPayloadEncrypted = z
   .string()
   .brand<'PublicPayloadEncrypted'>()
 export type PublicPayloadEncrypted = z.TypeOf<typeof PublicPayloadEncrypted>
+
+export const OneOfferInState = z.object({
+  offerInfo: OfferInfo,
+  flags: OfferFlags,
+  ownershipInfo: z
+    .object({
+      adminId: OfferAdminId,
+      intendedConnectionLevel: IntendedConnectionLevel,
+    })
+    .optional(),
+})
+export type OneOfferInState = z.TypeOf<typeof OneOfferInState>

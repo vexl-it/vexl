@@ -15,6 +15,7 @@ export const Preferences = z.object({
   disableOfferRerequestLimit: z.boolean().default(false),
   allowSendingImages: z.boolean().default(false),
   notificationPreferences: NotificationPreferences,
+  enableNewOffersNotificationDevMode: z.boolean().default(false),
 })
 
 export type Preferences = z.infer<typeof Preferences>

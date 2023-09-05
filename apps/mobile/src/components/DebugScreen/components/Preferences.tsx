@@ -7,6 +7,7 @@ const preferencesToEdit = [
   'showDebugNotifications',
   'disableOfferRerequestLimit',
   'allowSendingImages',
+  'enableNewOffersNotificationDevMode',
 ] as const
 
 function Preferences(): JSX.Element {

@@ -1,7 +1,7 @@
 import reportError from '../reportError'
 import {getDefaultStore} from 'jotai'
 import {userLoggedInAtom} from '../../state/session'
-import {notificationPreferencesAtom} from '../preferences'
+import {notificationPreferencesAtom, preferencesAtom} from '../preferences'
 import * as E from 'fp-ts/Either'
 import {pipe} from 'fp-ts/function'
 import {offersAtomWithFilter} from '../../state/marketplace/atom'
@@ -22,14 +22,28 @@ import {safeParse} from '../fpUtils'
 import {getLastTimeAppWasRunning} from '../lastTimeAppWasRunning'
 
 const LAST_NEW_OFFERS_NOTIFICATION_KEY = 'lastNewOffersNotification'
+const INTERVALS = {
+  checkAfterInactivity: 1000 * 60 * 60 * 24 * 7, // 1 week
+  minimalNotificationInterval: 1000 * 60 * 60 * 24 * 7, // 1 week
+} as const
+
+const INTERVALS_DEBUG = {
+  // 5 hours
+  checkAfterInactivity: 1000 * 60 * 60 * 5,
+  minimalNotificationInterval: 1000 * 60 * 60 * 12,
+} as const
+
+function getIntervalValues(): typeof INTERVALS {
+  return getDefaultStore().get(preferencesAtom)
+    .enableNewOffersNotificationDevMode
+    ? INTERVALS_DEBUG
+    : INTERVALS
+}
 
 export function setLastNewOffersNotificationIssuedNow(): void {
   const now = unixMillisecondsNow()
   storage.set(LAST_NEW_OFFERS_NOTIFICATION_KEY)(now.toString())
 }
-
-const CHECK_INTERVAL_TIME_MILLIS = 1000 * 60 * 60 * 24 * 7 // 1 week
-const NOTIFICATION_MINIMAL_INTERVAL_MILLIS = 1000 * 60 * 60 * 24 * 7 // 1 WEEK
 
 export function getLastNewOffersNotificationIssuedAt(): UnixMilliseconds {
   return pipe(
@@ -42,7 +56,7 @@ export function getLastNewOffersNotificationIssuedAt(): UnixMilliseconds {
 async function displayNotification(t: TFunction): Promise<void> {
   if (
     getLastNewOffersNotificationIssuedAt() +
-      NOTIFICATION_MINIMAL_INTERVAL_MILLIS >
+      getIntervalValues().minimalNotificationInterval >
     unixMillisecondsNow()
   ) {
     return // do not display notification if it was displayed recently
@@ -67,7 +81,7 @@ export default async function checkForNewOffers(): Promise<void> {
     const {t} = store.get(translationAtom)
     // check if user is logged in & preferences
     if (
-      getLastTimeAppWasRunning() + CHECK_INTERVAL_TIME_MILLIS >
+      getLastTimeAppWasRunning() + getIntervalValues().checkAfterInactivity >
         unixMillisecondsNow() ||
       !store.get(userLoggedInAtom) ||
       !store.get(notificationPreferencesAtom).newOfferInMarketplace

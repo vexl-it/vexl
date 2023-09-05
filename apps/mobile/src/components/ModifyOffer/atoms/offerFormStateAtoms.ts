@@ -1,9 +1,10 @@
-import {atom, getDefaultStore} from 'jotai'
+import {atom, getDefaultStore, type SetStateAction} from 'jotai'
 import {
   type CurrencyCode,
   type LocationState,
   OfferId,
   type OfferPublicPart,
+  type OfferType,
   type OneOfferInState,
   SymmetricKey,
 } from '@vexl-next/domain/dist/general/offers'
@@ -37,6 +38,7 @@ import {currencies} from '../../../utils/localization/currency'
 import {sessionDataOrDummyAtom} from '../../../state/session'
 import {parsePhoneNumber} from 'awesome-phonenumber'
 import showErrorAlert from '../../../utils/showErrorAlert'
+import getValueFromSetStateActionOfAtom from '../../../utils/atomUtils/getValueFromSetStateActionOfAtom'
 
 export function createOfferDummyPublicPart(): OfferPublicPart {
   const userPhoneNumber = getDefaultStore().get(
@@ -102,7 +104,11 @@ export const dummyOffer: OneOfferInState = {
 
 export const offerFormMolecule = molecule(() => {
   const offerAtom = atom<OneOfferInState>(dummyOffer)
+  const nullableOfferTypeAtom = atom<OfferType | undefined>(undefined)
 
+  const showAllFieldsAtom = atom<boolean>(
+    (get) => get(nullableOfferTypeAtom) !== undefined
+  )
   const offerFormAtom = focusAtom(offerAtom, (optic) =>
     optic.prop('offerInfo').prop('publicPart')
   )
@@ -153,7 +159,18 @@ export const offerFormMolecule = molecule(() => {
     return true
   })
 
-  const offerTypeAtom = focusAtom(offerFormAtom, (optic) =>
+  const offerTypeAtom = atom(
+    (get) => get(nullableOfferTypeAtom),
+    (get, set, update: SetStateAction<OfferType | undefined>) => {
+      const value = getValueFromSetStateActionOfAtom(update)(() =>
+        get(nullableOfferTypeAtom)
+      )
+      set(nullableOfferTypeAtom, value)
+      if (value) set(offerFormAtom, (val) => ({...val, offerType: value}))
+    }
+  )
+
+  const offerTypeOrDummyValueAtom = focusAtom(offerFormAtom, (optic) =>
     optic.prop('offerType')
   )
 
@@ -463,8 +480,14 @@ export const offerFormMolecule = molecule(() => {
     )
   })
 
+  const resetOfferFormActionAtom = atom(null, (get, set) => {
+    set(offerAtom, dummyOffer)
+    set(nullableOfferTypeAtom, undefined)
+  })
+
   return {
     offerAtom,
+    showAllFieldsAtom,
     offerFormAtom,
     deleteOfferActionAtom,
     intendedConnectionLevelAtom,
@@ -489,5 +512,7 @@ export const offerFormMolecule = molecule(() => {
     updateCurrencyLimitsAtom,
     updateLocationStatePaymentMethodAtom,
     createOfferProgressAtom,
+    resetOfferFormActionAtom,
+    offerTypeOrDummyValueAtom,
   }
 })

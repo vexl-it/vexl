@@ -15,9 +15,12 @@ import OfferInProgress from './OfferInProgress'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import useContent from '../useContent'
 import {useMolecule} from 'jotai-molecules'
-import {dummyOffer, offerFormMolecule} from '../atoms/offerFormStateAtoms'
-import {useSetAtom} from 'jotai'
+import {offerFormMolecule} from '../atoms/offerFormStateAtoms'
+import {useAtomValue, useSetAtom} from 'jotai'
 import {useFocusEffect} from '@react-navigation/native'
+import userSvg from '../../images/userSvg'
+import Section from '../../Section'
+import OfferType from '../../OfferForm/components/OfferType'
 
 const styles = StyleSheet.create({
   contentStyles: {
@@ -31,14 +34,20 @@ function CreateOfferScreen(): JSX.Element {
   const {t} = useTranslation()
   const content = useContent()
 
-  const {createOfferActionAtom, offerAtom} = useMolecule(offerFormMolecule)
+  const {
+    createOfferActionAtom,
+    resetOfferFormActionAtom,
+    offerTypeAtom,
+    showAllFieldsAtom,
+  } = useMolecule(offerFormMolecule)
+  const showAllFields = useAtomValue(showAllFieldsAtom)
   const createOffer = useSetAtom(createOfferActionAtom)
-  const setOffer = useSetAtom(offerAtom)
+  const resetForm = useSetAtom(resetOfferFormActionAtom)
 
   useFocusEffect(
     useCallback(() => {
-      setOffer(dummyOffer)
-    }, [setOffer])
+      resetForm()
+    }, [resetForm])
   )
 
   return (
@@ -49,7 +58,10 @@ function CreateOfferScreen(): JSX.Element {
             <ScreenTitle text={t('offerForm.myNewOffer')} withBottomBorder>
               <IconButton variant="dark" icon={closeSvg} onPress={safeGoBack} />
             </ScreenTitle>
-            <OfferForm content={content} />
+            <Section title={t('offerForm.iWantTo')} image={userSvg}>
+              <OfferType offerTypeAtom={offerTypeAtom} />
+            </Section>
+            {showAllFields && <OfferForm content={content} />}
           </ScrollView>
           <Stack px="$4" py="$4" bc="transparent">
             <Button

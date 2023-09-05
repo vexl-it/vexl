@@ -4,7 +4,7 @@ import {type PrimitiveAtom, useAtom} from 'jotai'
 import {type OfferType} from '@vexl-next/domain/dist/general/offers'
 
 interface Props {
-  offerTypeAtom: PrimitiveAtom<OfferType>
+  offerTypeAtom: PrimitiveAtom<OfferType | undefined>
 }
 
 function OfferTypeSection({offerTypeAtom}: Props): JSX.Element {

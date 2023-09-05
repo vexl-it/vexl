@@ -1,8 +1,6 @@
 import {useTranslation} from '../../utils/localization/I18nProvider'
-import userSvg from '../images/userSvg'
 import {useMemo} from 'react'
 import Currency from '../OfferForm/components/Currency'
-import OfferType from '../OfferForm/components/OfferType'
 import amountOfTransactionSvg from '../images/amountOfTransactionSvg'
 import AmountOfTransaction from '../OfferForm/components/AmountOfTransaction'
 import locationSvg from '../images/locationSvg'
@@ -31,7 +29,7 @@ export default function useContent(): SectionProps[] {
     feeAmountAtom,
     feeStateAtom,
     offerDescriptionAtom,
-    offerTypeAtom,
+    offerTypeOrDummyValueAtom,
     intendedConnectionLevelAtom,
     locationAtom,
     locationStateAtom,
@@ -42,11 +40,6 @@ export default function useContent(): SectionProps[] {
 
   return useMemo(
     () => [
-      {
-        title: t('offerForm.iWantTo'),
-        image: userSvg,
-        children: <OfferType offerTypeAtom={offerTypeAtom} />,
-      },
       {
         title: t('common.currency'),
         image: coinsSvg,
@@ -73,7 +66,7 @@ export default function useContent(): SectionProps[] {
         customSection: true,
         children: (
           <PremiumOrDiscount
-            offerTypeAtom={offerTypeAtom}
+            offerTypeAtom={offerTypeOrDummyValueAtom}
             feeAmountAtom={feeAmountAtom}
             feeStateAtom={feeStateAtom}
           />
@@ -137,7 +130,7 @@ export default function useContent(): SectionProps[] {
       locationAtom,
       locationStateAtom,
       offerDescriptionAtom,
-      offerTypeAtom,
+      offerTypeOrDummyValueAtom,
       paymentMethodAtom,
       t,
       updateCurrencyLimitsAtom,

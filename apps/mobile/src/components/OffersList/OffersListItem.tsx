@@ -166,7 +166,7 @@ function OffersListItem({offerAtom}: Props): JSX.Element {
     <Stack mt={'$6'}>
       <OfferWithBubbleTip
         onInfoRectPress={content.onPress}
-        negative={!content.actionableUI}
+        negative={!content.actionableUI || !offer.offerInfo.publicPart.active}
         button={
           <Button
             size={'medium'}

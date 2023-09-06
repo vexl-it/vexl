@@ -1,99 +1,81 @@
-import {useTranslation} from '../../../../utils/localization/I18nProvider'
-import {type PrimitiveAtom, useAtom} from 'jotai'
-import React, {useCallback, useEffect, useRef, useState} from 'react'
-import {useDebounceValue} from 'tamagui'
+import {i18nAtom, useTranslation} from '../../../../utils/localization/I18nProvider'
 import {
-  type GetLocationSuggestionsResponse as GetLocationSuggestionsResponseType,
-  type LocationData,
-} from '@vexl-next/rest-api/dist/services/location/contracts'
-import {pipe} from 'fp-ts/function'
-import * as TE from 'fp-ts/TaskEither'
-import {Modal, Platform, ScrollView, type TextInput} from 'react-native'
-import reportError from '../../../../utils/reportError'
+  type PrimitiveAtom,
+  type WritableAtom,
+  type Atom,
+  useAtomValue,
+  useSetAtom,
+} from 'jotai'
+import React, {useEffect, useRef, useState} from 'react'
+import {useDebounceValue} from 'tamagui'
+import {Modal, Platform, type TextInput} from 'react-native'
+import {type LocationSuggestion} from '@vexl-next/rest-api/dist/services/location/contracts'
 import Screen from '../../../Screen'
 import ScreenTitle from '../../../ScreenTitle'
 import Input from '../../../Input'
 import magnifyingGlass from '../../../images/magnifyingGlass'
-import LocationCell from './LocationCell'
 import IconButton from '../../../IconButton'
 import closeSvg from '../../../images/closeSvg'
-import {toCommonErrorMessage} from '../../../../utils/useCommonErrorMessages'
-import {useGetLocationSuggestions} from '../../../ModifyOffer/api'
-import {type Location} from '@vexl-next/domain/dist/general/offers'
-import showErrorAlert from '../../../../utils/showErrorAlert'
+import LocationsList from './LocationsList'
 
 interface Props {
-  locationAtom: PrimitiveAtom<Location[]>
+  setOfferLocationActionAtom: WritableAtom<
+    null,
+    [locationSuggestionAtom: Atom<LocationSuggestion>],
+    void
+  >
+  updateAndRefreshLocationSuggestionsActionAtom: WritableAtom<
+    null,
+    [request: {phrase: string; lang: string}],
+    Promise<void>
+  >
+  locationSuggestionsAtom: PrimitiveAtom<LocationSuggestion[]>
+  locationSuggestionsAtomsAtom: Atom<Array<Atom<LocationSuggestion>>>
   onClosePress: () => void
   visible: boolean
 }
 
 function LocationSearch({
-  locationAtom,
+  setOfferLocationActionAtom,
+  updateAndRefreshLocationSuggestionsActionAtom,
+  locationSuggestionsAtom,
+  locationSuggestionsAtomsAtom,
   onClosePress,
   visible,
 }: Props): JSX.Element {
-  const getLocationSuggestions = useGetLocationSuggestions()
   const {t} = useTranslation()
+  const i18n = useAtomValue(i18nAtom)
   const inputRef = useRef<TextInput>(null)
   const [inputValue, setInputValue] = useState<string>('')
   const debouncedSearchValue = useDebounceValue(inputValue, 1000)
-  const [locationResults, setLocationResults] = useState<
-    GetLocationSuggestionsResponseType | undefined
-  >()
+  const updateAndRefreshLocationSuggestions = useSetAtom(
+    updateAndRefreshLocationSuggestionsActionAtom
+  )
+  const setLocationSuggestions = useSetAtom(locationSuggestionsAtom)
+  const locationSuggestionsAtoms = useAtomValue(locationSuggestionsAtomsAtom)
 
-  const [location, setLocation] = useAtom(locationAtom)
-
-  const searchLocation = useCallback(() => {
-    void pipe(
-      getLocationSuggestions({phrase: debouncedSearchValue, lang: 'cs'}),
-      TE.match(
-        (e) => {
-          showErrorAlert({
-            title:
-              toCommonErrorMessage(e, t) ??
-              t('offerForm.errorSearchingForAvailableLocation'),
-            error: e,
-          })
-          reportError(
-            'error',
-            'Error when getting user location to create offer',
-            e
-          )
-        },
-        (locations) => {
-          const locationWithMunicipality = locations.result.filter(
-            (location) => location.userData.municipality !== ''
-          )
-          setLocationResults({result: locationWithMunicipality})
-        }
-      )
-    )()
-  }, [t, debouncedSearchValue, getLocationSuggestions])
-
-  const onLocationCellPress = (selectedLocation: LocationData): void => {
-    if (
-      !location?.some(
-        (offerLocation) => offerLocation.city === selectedLocation.municipality
-      )
-    ) {
-      setLocation([
-        ...(location ?? []),
-        {
-          latitude: String(selectedLocation.latitude),
-          longitude: String(selectedLocation.longitude),
-          city: selectedLocation.municipality,
-        },
-      ])
-    }
-    onClosePress()
+  function onInputValueChange(value: string): void {
+    if (value === '') setLocationSuggestions([])
+    setInputValue(value)
   }
 
   useEffect(() => {
     if (debouncedSearchValue.length > 0) {
-      searchLocation()
+      void updateAndRefreshLocationSuggestions({
+        phrase: debouncedSearchValue,
+        lang: i18n.locale,
+      })
     }
-  }, [debouncedSearchValue, searchLocation])
+
+    return () => {
+      setLocationSuggestions([])
+    }
+  }, [
+    debouncedSearchValue,
+    updateAndRefreshLocationSuggestions,
+    i18n.locale,
+    setLocationSuggestions,
+  ])
 
   return (
     <Modal
@@ -118,32 +100,23 @@ function LocationSearch({
           ref={inputRef}
           autoFocus={Platform.OS === 'ios'}
           value={inputValue}
-          onChangeText={setInputValue}
+          onChangeText={onInputValueChange}
           textColor="$greyOnBlack"
           icon={magnifyingGlass}
           variant="greyOnBlack"
           placeholder={t('offerForm.location.addCityOrDistrict')}
           showClearButton={!!inputValue}
           onClearPress={() => {
-            setLocationResults(undefined)
             setInputValue('')
+            setLocationSuggestions([])
           }}
         />
-        <ScrollView>
-          {locationResults?.result.map((result) => {
-            const {suggestFirstRow, suggestSecondRow} = result.userData
-            return (
-              <LocationCell
-                key={`${suggestFirstRow}${suggestSecondRow}`}
-                city={suggestFirstRow}
-                country={suggestSecondRow}
-                onPress={() => {
-                  onLocationCellPress(result.userData)
-                }}
-              />
-            )
-          })}
-        </ScrollView>
+        <LocationsList
+          setOfferLocationActionAtom={setOfferLocationActionAtom}
+          locationSuggestionsAtom={locationSuggestionsAtom}
+          locationSuggestionsAtoms={locationSuggestionsAtoms}
+          onClose={onClosePress}
+        />
       </Screen>
     </Modal>
   )

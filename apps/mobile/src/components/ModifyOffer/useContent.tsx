@@ -36,6 +36,10 @@ export default function useContent(): SectionProps[] {
     paymentMethodAtom,
     updateCurrencyLimitsAtom,
     updateLocationStatePaymentMethodAtom,
+    locationSuggestionsAtom,
+    locationSuggestionsAtomsAtom,
+    updateAndRefreshLocationSuggestionsActionAtom,
+    setOfferLocationActionAtom,
   } = useMolecule(offerFormMolecule)
 
   return useMemo(
@@ -77,6 +81,12 @@ export default function useContent(): SectionProps[] {
         image: locationSvg,
         children: (
           <Location
+            setOfferLocationActionAtom={setOfferLocationActionAtom}
+            locationSuggestionsAtom={locationSuggestionsAtom}
+            locationSuggestionsAtomsAtom={locationSuggestionsAtomsAtom}
+            updateAndRefreshLocationSuggestionsActionAtom={
+              updateAndRefreshLocationSuggestionsActionAtom
+            }
             locationAtom={locationAtom}
             locationStateAtom={locationStateAtom}
             updateLocationStatePaymentMethodAtom={
@@ -126,12 +136,16 @@ export default function useContent(): SectionProps[] {
       currencyAtom,
       feeAmountAtom,
       feeStateAtom,
+      updateAndRefreshLocationSuggestionsActionAtom,
       intendedConnectionLevelAtom,
       locationAtom,
       locationStateAtom,
+      locationSuggestionsAtom,
+      locationSuggestionsAtomsAtom,
       offerDescriptionAtom,
       offerTypeOrDummyValueAtom,
       paymentMethodAtom,
+      setOfferLocationActionAtom,
       t,
       updateCurrencyLimitsAtom,
       updateLocationStatePaymentMethodAtom,

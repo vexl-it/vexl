@@ -9,7 +9,6 @@ import {
   HeaderProxy,
   NextButtonProxy,
 } from '../../../PageWithButtonAndProgressHeader'
-import Button from '../../../Button'
 import SVGImage from '../../../Image'
 import {Image} from 'react-native'
 import {Stack, Text, XStack} from 'tamagui'
@@ -42,29 +41,31 @@ function StartScreen({navigation}: Props): JSX.Element {
         </Stack>
       </WhiteContainer>
       <XStack
-        ai="center"
-        jc="space-between"
-        py="$4"
-        px="$5"
-        br="$5"
-        my="$3"
-        bg="$backgroundBlack"
+        ai={'center'}
+        py={'$4'}
+        px={'$5'}
+        br={'$5'}
+        my={'$3'}
+        bc={'$backgroundBlack'}
       >
-        <XStack ai="center" fw={'wrap'}>
+        <XStack ai={'center'} space={'$2'}>
           <SVGImage source={notepadSvg} />
-          <Stack w="$2" />
-          <Text fos={18} ff="$body500" col="$greyOnBlack">
-            {t('loginFlow.start.touLabel')}{' '}
-          </Text>
-          <XStack ai={'center'} space={'$2'}>
-            <Button
-              fontSize={18}
-              variant="link"
-              onPress={() => {
-                navigation.navigate('TermsAndConditions')
-              }}
-              text={t('loginFlow.start.termsOfUse')}
-            />
+          <XStack f={1} ai={'center'} jc={'space-between'}>
+            <XStack fs={1} ai={'center'} fw={'wrap'}>
+              <Text fos={18} ff="$body500" col="$greyOnBlack">
+                {t('loginFlow.start.touLabel')}{' '}
+              </Text>
+              <Text
+                fontSize={18}
+                ff={'$body600'}
+                col={'$white'}
+                onPress={() => {
+                  navigation.navigate('TermsAndConditions')
+                }}
+              >
+                {t('loginFlow.start.termsOfUse')}
+              </Text>
+            </XStack>
             <Switch value={touAgree} onValueChange={setTOUAgree} />
           </XStack>
         </XStack>

@@ -1,4 +1,4 @@
-import {atom, getDefaultStore, type SetStateAction} from 'jotai'
+import {atom, getDefaultStore, type Atom, type SetStateAction} from 'jotai'
 import {
   type CurrencyCode,
   type LocationState,
@@ -38,6 +38,12 @@ import {currencies} from '../../../utils/localization/currency'
 import {sessionDataOrDummyAtom} from '../../../state/session'
 import {parsePhoneNumber} from 'awesome-phonenumber'
 import showErrorAlert from '../../../utils/showErrorAlert'
+import {
+  type GetLocationSuggestionsRequest,
+  type LocationSuggestion,
+} from '@vexl-next/rest-api/dist/services/location/contracts'
+import {splitAtom} from 'jotai/utils'
+import {fetchLocationSuggestionsAtom} from '../../../state/location/atoms/fetchLocationSuggestionsAtom'
 import getValueFromSetStateActionOfAtom from '../../../utils/atomUtils/getValueFromSetStateActionOfAtom'
 
 export function createOfferDummyPublicPart(): OfferPublicPart {
@@ -214,6 +220,46 @@ export const offerFormMolecule = molecule(() => {
         .prop('ownershipInfo')
         .optional()
         .prop('intendedConnectionLevel') ?? 'FIRST'
+  )
+
+  const locationSuggestionsAtom = atom<LocationSuggestion[]>([])
+
+  const locationSuggestionsAtomsAtom = splitAtom(locationSuggestionsAtom)
+
+  const updateAndRefreshLocationSuggestionsActionAtom = atom(
+    null,
+    (get, set, request: GetLocationSuggestionsRequest) => {
+      return pipe(
+        set(fetchLocationSuggestionsAtom, request),
+        T.map((result) => {
+          set(locationSuggestionsAtom, result.result)
+        })
+      )()
+    }
+  )
+
+  const setOfferLocationActionAtom = atom(
+    null,
+    (get, set, locationSuggestionAtom: Atom<LocationSuggestion>) => {
+      const location = get(locationAtom)
+      const locationSuggestion = get(locationSuggestionAtom)
+
+      if (
+        !location?.some(
+          (offerLocation) =>
+            offerLocation.city === locationSuggestion.userData.suggestFirstRow
+        )
+      ) {
+        set(locationAtom, [
+          ...(location ?? []),
+          {
+            latitude: String(locationSuggestion.userData.latitude),
+            longitude: String(locationSuggestion.userData.longitude),
+            city: locationSuggestion.userData.suggestFirstRow,
+          },
+        ])
+      }
+    }
   )
 
   const loadingAtom = atom<boolean>(false)
@@ -512,6 +558,10 @@ export const offerFormMolecule = molecule(() => {
     updateCurrencyLimitsAtom,
     updateLocationStatePaymentMethodAtom,
     createOfferProgressAtom,
+    locationSuggestionsAtom,
+    locationSuggestionsAtomsAtom,
+    updateAndRefreshLocationSuggestionsActionAtom,
+    setOfferLocationActionAtom,
     resetOfferFormActionAtom,
     offerTypeOrDummyValueAtom,
   }

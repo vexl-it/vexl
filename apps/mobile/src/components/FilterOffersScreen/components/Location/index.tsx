@@ -113,7 +113,6 @@ function LocationComponent({
       )}
       {locationSearchVisible && (
         <LocationSearch
-          locationAtom={locationAtom}
           onClosePress={() => {
             setLocationSearchVisible(false)
           }}

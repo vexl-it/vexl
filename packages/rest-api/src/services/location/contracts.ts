@@ -19,11 +19,14 @@ export const LocationData = z.object({
 })
 export type LocationData = z.TypeOf<typeof LocationData>
 
-export const LocationSuggestions = z.object({
+export const LocationSuggestion = z.object({
   userData: LocationData,
 })
+
+export type LocationSuggestion = z.TypeOf<typeof LocationSuggestion>
+
 export const GetLocationSuggestionsResponse = z.object({
-  result: z.array(LocationSuggestions),
+  result: z.array(LocationSuggestion),
 })
 export type GetLocationSuggestionsResponse = z.TypeOf<
   typeof GetLocationSuggestionsResponse

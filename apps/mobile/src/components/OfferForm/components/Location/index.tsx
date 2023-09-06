@@ -15,6 +15,7 @@ import {
   useAtomValue,
   useSetAtom,
   type WritableAtom,
+  type Atom,
 } from 'jotai'
 import {
   type Location,
@@ -22,8 +23,21 @@ import {
 } from '@vexl-next/domain/dist/general/offers'
 import LocationSearch from '../LocationSearch'
 import Info from '../../../Info'
+import {type LocationSuggestion} from '@vexl-next/rest-api/dist/services/location/contracts'
 
 interface Props {
+  setOfferLocationActionAtom: WritableAtom<
+    null,
+    [locationSuggestionAtom: Atom<LocationSuggestion>],
+    void
+  >
+  updateAndRefreshLocationSuggestionsActionAtom: WritableAtom<
+    null,
+    [request: {phrase: string; lang: string}],
+    Promise<void>
+  >
+  locationSuggestionsAtom: PrimitiveAtom<LocationSuggestion[]>
+  locationSuggestionsAtomsAtom: Atom<Array<Atom<LocationSuggestion>>>
   locationAtom: PrimitiveAtom<Location[]>
   locationStateAtom: PrimitiveAtom<LocationState>
   updateLocationStatePaymentMethodAtom: WritableAtom<
@@ -38,6 +52,10 @@ interface Props {
 }
 
 function LocationComponent({
+  setOfferLocationActionAtom,
+  locationSuggestionsAtomsAtom,
+  locationSuggestionsAtom,
+  updateAndRefreshLocationSuggestionsActionAtom,
   locationAtom,
   locationStateAtom,
   updateLocationStatePaymentMethodAtom,
@@ -126,7 +144,12 @@ function LocationComponent({
       )}
       {locationSearchVisible && (
         <LocationSearch
-          locationAtom={locationAtom}
+          setOfferLocationActionAtom={setOfferLocationActionAtom}
+          updateAndRefreshLocationSuggestionsActionAtom={
+            updateAndRefreshLocationSuggestionsActionAtom
+          }
+          locationSuggestionsAtomsAtom={locationSuggestionsAtomsAtom}
+          locationSuggestionsAtom={locationSuggestionsAtom}
           onClosePress={() => {
             setLocationSearchVisible(false)
           }}

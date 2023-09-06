@@ -1,4 +1,4 @@
-import {atom} from 'jotai'
+import {atom, type Atom} from 'jotai'
 import {type OffersFilter} from '../../state/marketplace/domain'
 import {
   type CurrencyCode,
@@ -11,8 +11,15 @@ import {
   offersFilterFromStorageAtom,
   offersFilterInitialState,
 } from '../../state/offersFilter'
-import {selectAtom} from 'jotai/utils'
+import {selectAtom, splitAtom} from 'jotai/utils'
 import {currencies} from '../../utils/localization/currency'
+import {
+  type GetLocationSuggestionsRequest,
+  type LocationSuggestion,
+} from '@vexl-next/rest-api/dist/services/location/contracts'
+import {pipe} from 'fp-ts/function'
+import * as T from 'fp-ts/Task'
+import {fetchLocationSuggestionsAtom} from '../../state/location/atoms/fetchLocationSuggestionsAtom'
 
 export const sortingAtom = atom<Sort | undefined>(undefined)
 export const intendedConnectionLevelAtom = atom<IntendedConnectionLevel>('ALL')
@@ -112,6 +119,46 @@ export const amountBottomLimitAtom = focusAtom(offersFilterAtom, (optic) =>
 
 export const amountTopLimitAtom = focusAtom(offersFilterAtom, (optic) =>
   optic.prop('amountTopLimit')
+)
+
+export const locationSuggestionsAtom = atom<LocationSuggestion[]>([])
+
+export const locationSuggestionsAtomsAtom = splitAtom(locationSuggestionsAtom)
+
+export const updateAndRefreshLocationSuggestionsActionAtom = atom(
+  null,
+  (get, set, request: GetLocationSuggestionsRequest) => {
+    return pipe(
+      set(fetchLocationSuggestionsAtom, request),
+      T.map((result) => {
+        set(locationSuggestionsAtom, result.result)
+      })
+    )()
+  }
+)
+
+export const setOfferLocationActionAtom = atom(
+  null,
+  (get, set, locationSuggestionAtom: Atom<LocationSuggestion>) => {
+    const location = get(locationAtom)
+    const locationSuggestion = get(locationSuggestionAtom)
+
+    if (
+      !location?.some(
+        (offerLocation) =>
+          offerLocation.city === locationSuggestion.userData.suggestFirstRow
+      )
+    ) {
+      set(locationAtom, [
+        ...(location ?? []),
+        {
+          latitude: String(locationSuggestion.userData.latitude),
+          longitude: String(locationSuggestion.userData.longitude),
+          city: locationSuggestion.userData.suggestFirstRow,
+        },
+      ])
+    }
+  }
 )
 
 export const saveFilterActionAtom = atom(null, (get, set) => {

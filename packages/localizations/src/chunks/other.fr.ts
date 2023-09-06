@@ -69,7 +69,8 @@ const otherFr: typeof en =
       "sendRequest": "Send request",
       "change": "Change",
       "errorWhileReadingQrCode": "Error while reading QR code",
-      "copyErrorToClipboard": "Copy error to clipboard"
+      "copyErrorToClipboard": "Copy error to clipboard",
+      "me": "Me"
     },
     "loginFlow": {
       "anonymityNotice":

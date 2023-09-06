@@ -67,7 +67,8 @@ const otherSk: typeof en =
       "sendRequest": "Odoslať žiadosť",
       "change": "Zmeniť",
       "errorWhileReadingQrCode": "Error while reading QR code",
-      "copyErrorToClipboard": "Skopírovať chybu do schránky"
+      "copyErrorToClipboard": "Skopírovať chybu do schránky",
+      "me": "Me"
     },
     "loginFlow": {
       "anonymityNotice": "Kým to nepovolíš, nikto to neuvidí. Dokonca ani my.",

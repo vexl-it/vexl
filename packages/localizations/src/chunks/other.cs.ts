@@ -67,7 +67,8 @@ const otherCs: typeof en =
       "sendRequest": "Odeslat požadavek",
       "change": "Změnit",
       "errorWhileReadingQrCode": "Error while reading QR code",
-      "copyErrorToClipboard": "Zkopírovat chybu do schránky"
+      "copyErrorToClipboard": "Zkopírovat chybu do schránky",
+      "me": "Me"
     },
     "loginFlow": {
       "anonymityNotice": "Bez tvého svolení jej nikdo neuvidí. Ani my.",

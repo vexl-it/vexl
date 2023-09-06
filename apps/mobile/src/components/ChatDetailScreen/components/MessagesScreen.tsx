@@ -7,6 +7,7 @@ import {Stack} from 'tamagui'
 import MessagesList from './MessagesList'
 import QuickActionBanner from './QuickActionBanner'
 import ImageZoomOverlay from './ImageZoomOverlay'
+import StickyHeader from './StickyHeader'
 
 function MessagesScreen(): JSX.Element {
   const {showModalAtom, canSendMessagesAtom, identityRevealStatusAtom} =
@@ -33,6 +34,7 @@ function MessagesScreen(): JSX.Element {
           setShowModal((v) => !v)
         }}
       />
+      <StickyHeader />
       <Stack f={1}>
         <MessagesList />
       </Stack>

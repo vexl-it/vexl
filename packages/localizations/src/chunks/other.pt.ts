@@ -67,7 +67,8 @@ const otherPt: typeof en =
       "sendRequest": "Send request",
       "change": "Change",
       "errorWhileReadingQrCode": "Error while reading QR code",
-      "copyErrorToClipboard": "Copy error to clipboard"
+      "copyErrorToClipboard": "Copy error to clipboard",
+      "me": "Me"
     },
     "loginFlow": {
       "anonymityNotice": "Ninguém verá isto até que o autorize. Nem mesmo nós.",

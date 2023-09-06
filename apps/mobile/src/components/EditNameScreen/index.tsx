@@ -30,6 +30,7 @@ function EditNameScreen(): JSX.Element {
         </ScreenTitle>
         <Stack f={1}>
           <Input
+            autoFocus
             variant={'greyOnBlack'}
             textColor={'$white'}
             value={name}

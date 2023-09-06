@@ -1,6 +1,6 @@
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import {type PrimitiveAtom, useAtom} from 'jotai'
-import React, {useCallback, useEffect, useState} from 'react'
+import React, {useCallback, useEffect, useRef, useState} from 'react'
 import {useDebounceValue} from 'tamagui'
 import {
   type GetLocationSuggestionsResponse as GetLocationSuggestionsResponseType,
@@ -8,7 +8,7 @@ import {
 } from '@vexl-next/rest-api/dist/services/location/contracts'
 import {pipe} from 'fp-ts/function'
 import * as TE from 'fp-ts/TaskEither'
-import {Modal, ScrollView} from 'react-native'
+import {Modal, Platform, ScrollView, type TextInput} from 'react-native'
 import reportError from '../../../../utils/reportError'
 import Screen from '../../../Screen'
 import ScreenTitle from '../../../ScreenTitle'
@@ -35,6 +35,7 @@ function LocationSearch({
 }: Props): JSX.Element {
   const getLocationSuggestions = useGetLocationSuggestions()
   const {t} = useTranslation()
+  const inputRef = useRef<TextInput>(null)
   const [inputValue, setInputValue] = useState<string>('')
   const debouncedSearchValue = useDebounceValue(inputValue, 1000)
   const [locationResults, setLocationResults] = useState<
@@ -100,13 +101,22 @@ function LocationSearch({
       transparent
       visible={visible}
       onRequestClose={onClosePress}
+      onShow={() => {
+        if (Platform.OS === 'android') {
+          setTimeout(() => {
+            inputRef.current?.blur()
+            inputRef.current?.focus()
+          }, 100)
+        }
+      }}
     >
       <Screen customHorizontalPadding={16}>
         <ScreenTitle text={''}>
           <IconButton variant="dark" icon={closeSvg} onPress={onClosePress} />
         </ScreenTitle>
         <Input
-          autoFocus
+          ref={inputRef}
+          autoFocus={Platform.OS === 'ios'}
           value={inputValue}
           onChangeText={setInputValue}
           textColor="$greyOnBlack"

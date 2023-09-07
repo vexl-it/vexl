@@ -320,7 +320,9 @@ const otherEn =
         "Unable to approve. Other side has cancelled the request.",
       "requestNotFound":
         "Unable to approve. Other side has deleted their account.",
-      "otherSideAccountDeleted": "Other side has deleted their account"
+      "otherSideAccountDeleted": "Other side has deleted their account",
+      "createOfferNudge":
+        "Expand your reach within the social network and be the first one to create an offer for this criteria."
     },
     "termsOfUse": {
       "termsOfUse": "Terms of Use",

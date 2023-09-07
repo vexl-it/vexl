@@ -148,8 +148,16 @@ function EmptyListPlaceholder(): JSX.Element {
           adjustsFontSizeToFit
           numberOfLines={4}
         >
-          {t('offer.noOffersToMatchFilter')}
+          {t('offer.createOfferNudge')}
         </Text>
+        <Button
+          text={t('myOffers.addNewOffer')}
+          variant={'secondary'}
+          size={'small'}
+          onPress={() => {
+            navigation.navigate('CreateOffer')
+          }}
+        />
       </EmptyListWrapper>
     )
   }

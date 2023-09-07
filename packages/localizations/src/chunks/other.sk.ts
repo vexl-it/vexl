@@ -322,7 +322,9 @@ const otherSk: typeof en =
         "Požiadavku nemožno prijať, pretože jej druhá strana zrušila.",
       "requestNotFound":
         "Požiadavku nemožno prijať, pretože druhá strana zrušila svoj účet.",
-      "otherSideAccountDeleted": "Protistrana zmazala účet"
+      "otherSideAccountDeleted": "Protistrana zmazala účet",
+      "createOfferNudge":
+        "Expand your reach within the social network and be the first one to create an offer for this criteria."
     },
     "termsOfUse": {
       "termsOfUse": "Podmienky používania",

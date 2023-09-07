@@ -328,7 +328,9 @@ const otherFr: typeof en =
         "Impossible d'approuver. L'autre partie a annulé la demande",
       "requestNotFound":
         "Impossible d'approuver. L'autre partie a supprimé son compte",
-      "otherSideAccountDeleted": "Other side has deleted their account"
+      "otherSideAccountDeleted": "Other side has deleted their account",
+      "createOfferNudge":
+        "Expand your reach within the social network and be the first one to create an offer for this criteria."
     },
     "termsOfUse": {
       "termsOfUse": "Conditions d'utilisation",

@@ -323,7 +323,9 @@ const otherPt: typeof en =
         "Não é possível aprovar. A outra parte cancelou o pedido",
       "requestNotFound":
         "Não é possível aprovar. A outra parte eliminou a sua conta",
-      "otherSideAccountDeleted": "Other side has deleted their account"
+      "otherSideAccountDeleted": "Other side has deleted their account",
+      "createOfferNudge":
+        "Expand your reach within the social network and be the first one to create an offer for this criteria."
     },
     "termsOfUse": {
       "termsOfUse": "Termos de utilização",

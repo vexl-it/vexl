@@ -618,7 +618,8 @@ const otherCs: typeof en =
       "highestAmount": "Nejvyšší částka",
       "selectSortingMethod": "Zvolte způsob řazení",
       "searchByText": "Search by text",
-      "noTextFilter": "No text filter selected"
+      "noTextFilter": "No text filter selected",
+      "chooseCurrency": "Choose currency"
     },
     "messages": {
       "yourOffer": "Tvoje nabídka",

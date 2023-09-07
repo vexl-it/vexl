@@ -65,11 +65,11 @@ const otherDe: typeof en =
       "notNow": "Not now",
       "niceWithExclamationMark": "Nice!",
       "nothingFound": "Nichts gefunden",
-      "sendRequest": "Send request",
-      "change": "Change",
-      "errorWhileReadingQrCode": "Error while reading QR code",
-      "copyErrorToClipboard": "Copy error to clipboard",
-      "me": "Me"
+      "sendRequest": "Anfrage senden",
+      "change": "Ändern",
+      "errorWhileReadingQrCode": "Fehler beim Lesen des QR-Codes",
+      "copyErrorToClipboard": "Fehler in die Zwischenablage kopieren",
+      "me": "Ich"
     },
     "loginFlow": {
       "anonymityNotice":
@@ -180,13 +180,13 @@ const otherDe: typeof en =
         "addContact": "Kontakt hinzufügen",
         "addThisPhoneNumber":
           "Möchtest du diese Telefonnummer deinen Vexl-Kontakten hinzufügen?",
-        "addContactName": "Add contact name",
-        "contactAdded": "Contact added.",
+        "addContactName": "Kontaktname hinzufügen",
+        "contactAdded": "Kontaktname hinzugefügt",
         "youHaveAddedContact":
           "You have added {{contactName}} to your Vexl contacts.",
-        "submitted": "Submitted",
-        "new": "New",
-        "nonSubmitted": "Non-submitted"
+        "submitted": "Eingereichte",
+        "new": "Neue",
+        "nonSubmitted": "Nicht eingereichte"
       },
       "allowNotifications": {
         "title": "Benachrichtigungen aktivieren",
@@ -277,7 +277,7 @@ const otherDe: typeof en =
         "inappropriateContentWasReported":
           "Unangemessener Inhalt wurde anonym gemeldet.",
         "reportLimitReached":
-          "You have reached the maximum number of reports for today. Try again in 24 hours."
+          "Du hast die maximale Anzahl von Meldungen für heute erreicht. Versuche es in 24 Stunden erneut."
       },
       "goToChat": "Zum Chat gehen",
       "requestStatus": {
@@ -297,7 +297,7 @@ const otherDe: typeof en =
       "listEmpty":
         "Dein Marktplatz wird gerade aufgewärmt. Kom in ein paar Minuten wieder!",
       "emptyAction": "Neues Angebot hinzufügen",
-      "createOfferAndReachVexlers": "Du erreichst {{reachNumber}} vexlers.\n",
+      "createOfferAndReachVexlers": "Du erreichst {{reachNumber}} vexlers.",
       "filterActive": "Filter aktiv",
       "totalOffers": "Insgesamt: {{totalCount}} Angebote",
       "notImportedAnyContacts":
@@ -514,43 +514,43 @@ const otherDe: typeof en =
       },
       "REQUEST_MESSAGING": {
         "title": "Neue Anfrage!",
-        "body": "You have received a new request."
+        "body": "Du hast eine neue Anfrage erhalten."
       },
       "APPROVE_MESSAGING": {
-        "title": "Request approved!",
-        "body": "Your request was approved."
+        "title": "Antrag genehmigt!",
+        "body": "Dein Antrag war genehmigt!"
       },
       "DISAPPROVE_MESSAGING": {
-        "title": "Request denied",
-        "body": "Your request was denied."
+        "title": "Antrag abgelehnt",
+        "body": "Dein Antrag war abgelehnt"
       },
       "DELETE_CHAT": {
-        "title": "Chat deleted",
-        "body": "One of your chats has been deleted."
+        "title": "Chat gelöscht",
+        "body": "Einer deiner Chats wurde gelöscht."
       },
       "BLOCK_CHAT": {
-        "title": "You've been blocked",
-        "body": "Someone has just blocked you."
+        "title": "Du bist blockiert worden",
+        "body": "Jemand hat dich gerade blockiert."
       },
       "INACTIVITY_REMINDER": {
-        "title": "Login to prevent deactivation of your offers.",
+        "title": "Lange nicht mehr gesehen!",
         "body":
-          "You have not logged in for a long time. Login to prevent deactivation of your offers."
+          "Du hast dich lange Zeit nicht angemelden. Logg dich ein, um die Deaktivierung deiner Angebote zu verhindern."
       },
       "preferences": {
         "marketing": {
-          "title": "Marketing notification",
-          "body": "Notification about new features etc..."
+          "title": "Marketing Benachrichtigungen",
+          "body": "Benachrichtigung über neue Funktionen usw..."
         },
         "chat": {
-          "title": "Chat notifications",
+          "title": "Chat Benachrichtigungen",
           "body":
-            "Notifications about new chat messages, requests, identity reveals etc..."
+            "Benachrichtigungen über neue Anfragen und Nachrichten erhalten."
         },
         "inactivityWarnings": {
-          "title": "Inactivity warnings",
+          "title": "Inaktivitätswarnungen",
           "body":
-            "We will let you know when your offers are about to be deactivated due to innactivity"
+            "Wir werden dich benachrichtigen, wenn deine Angebote aufgrund von Inaktivität deaktiviert werden sollen."
         },
         "marketplace": {
           "title": "marketplace",
@@ -568,29 +568,29 @@ const otherDe: typeof en =
           "title": "offer",
           "body": "offer"
         },
-        "screenTitle": "Notifications Settings"
+        "screenTitle": "Einstellungen für Benachrichtigungen"
       },
       "REQUEST_CONTACT_REVEAL": {
-        "title": "Phone number requested",
-        "body": "You have been requested to reveal your phone number."
+        "title": "Antrag auf Weitergabe der Telefonnummer",
+        "body": "Du bist aufgefordert worden, deine Telefonnummer mitzuteilen."
       },
       "APPROVE_CONTACT_REVEAL": {
-        "title": "Phone number revealed!",
-        "body": "Your request to reveal phone numbers was approved."
+        "title": "Telefonnummer enthült!",
+        "body": "Dein Antrag auf Austausch von Telefonnummern wurde genehmigt."
       },
       "DISAPPROVE_CONTACT_REVEAL": {
-        "title": "Request denied!",
-        "body": "Your request to reveal phone numbers was denied."
+        "title": "Antrag abgelehnt!",
+        "body": "Dein Antrag auf Austausch von Telefonnummern wurde abgelehnt."
       },
       "NEW_OFFERS_IN_MARKETPLACE": {
-        "title": "New offers in marketplace",
+        "title": "Neue Angebote auf dem Marktplatz",
         "body":
-          "There are new offers in marketplace. Open the app to view them."
+          "Neue Angebote auf dem Marktplatz. Öffne die App, um sie zu sehen."
       },
       "NEW_CONTACTS_ON_DEVICE": {
-        "title": "Your contacts are not synced all the way",
+        "title": "Deine Kontakte sind nicht synchronisiert",
         "body":
-          "You have new contacts on device that you have not synced. Exapand your network and sync them all!"
+          "Du hast neue Kontakte, die du nicht synchronisiert hast. Erweiter dein Netzwerk und synchronisiere Sie sie alle!"
       }
     },
     "myOffers": {
@@ -635,8 +635,9 @@ const otherDe: typeof en =
       "lowestAmount": "Niedrigster Betrag",
       "highestAmount": "Höchster Betrag",
       "selectSortingMethod": "Sortiermethode wählen",
-      "searchByText": "Search by text",
-      "noTextFilter": "No text filter selected"
+      "searchByText": "Suche nach text",
+      "noTextFilter": "Kein Textfilter ausgewählt",
+      "chooseCurrency": "Währung auswählen"
     },
     "messages": {
       "yourOffer": "Dein Angebot",
@@ -663,9 +664,10 @@ const otherDe: typeof en =
           "INBOX_DELETED": "{{them}} hat den Chat gelöscht.",
           "CANCEL_REQUEST_MESSAGING": "Anfrage wurde storniert",
           "ONLY_IMAGE": "{{them}} hat ein Bild gesendet",
-          "REQUEST_CONTACT_REVEAL": "{{them}} requested phone number reveal",
-          "APPROVE_CONTACT_REVEAL": "Phone number revealed",
-          "DISAPPROVE_CONTACT_REVEAL": "Declined phone number reveal"
+          "REQUEST_CONTACT_REVEAL":
+            "{{them}} angeforderte Telefonnummer aufdecken",
+          "APPROVE_CONTACT_REVEAL": "Telefonnummer aufgedeckt",
+          "DISAPPROVE_CONTACT_REVEAL": "Telefonnummer aufdecken abgelehnt"
         },
         "outgoing": {
           "MESSAGE": "Ich: {{message}}",
@@ -683,9 +685,9 @@ const otherDe: typeof en =
           "CANCEL_REQUEST_MESSAGING":
             "Du hast den Antrag auf Nachrichtenübermittlung storniert.",
           "ONLY_IMAGE": "Du hast ein Bild gesendet",
-          "REQUEST_CONTACT_REVEAL": "You have requested phone number reveal",
-          "APPROVE_CONTACT_REVEAL": "Phone number was revealed",
-          "DISAPPROVE_CONTACT_REVEAL": "Phone number reveal was declined"
+          "REQUEST_CONTACT_REVEAL": "Du hast eine Telefonnummer beantragt.",
+          "APPROVE_CONTACT_REVEAL": "Telefonnummer wurde weitergegeben.",
+          "DISAPPROVE_CONTACT_REVEAL": "Telefonnummer aufdecken abgelehnt"
         }
       },
       "deleteChat": "Chat löschen",
@@ -748,7 +750,8 @@ const otherDe: typeof en =
         "REQUEST_MESSAGING": "Anfrage gesendet: {{message}}",
         "CANCEL_REQUEST_MESSAGING": "Anfrage abgebrochen",
         "DISAPPROVE_MESSAGING": "Anfrage abgelehnt",
-        "APPROVE_MESSAGING": "Antrag genehmigt"
+        "APPROVE_MESSAGING":
+          "Antrag genehmigt, du kannst jetzt die Einzelheiten besprechen."
       },
       "youHaveAlreadyTalked":
         "Du hast einen Nachrichtenverlauf mit diesem Benutzer. Drücke, um mehr zu sehen.",
@@ -783,28 +786,32 @@ const otherDe: typeof en =
         "yes": "Ja, abbrechen"
       },
       "contactRevealRespondModal": {
-        "title": "Are you sure you want to reveal your phone number?",
-        "text": "This will reveal your phone number to the counterparty."
+        "title":
+          "Bist du sicher, dass du deine Telefonnummer weitergeben willst?",
+        "text": "Es wird der Gegenpartei deine Telefonnummer weitergeben."
       },
       "contactRevealRequestModal": {
-        "title": "Request phone number",
+        "title": "Rufnummernanforderung senden.",
         "text":
-          "By requesting a phone number, you agree to share yours as well."
+          "Wenn du eine Telefonnummer anforderst, erklärst du dich damit einverstanden, auch deine Telefonnummer weiterzugeben."
       },
-      "contactAlreadyRequested": "A phone number request was already sent.",
-      "contactRevealRequest": "Request to reveal phone",
+      "contactAlreadyRequested":
+        "Eine Telefonnummer wurde bereits angefordert.",
+      "contactRevealRequest": "Antrag auf Weitergabe der Telefonnummer",
       "contactRevealSent": {
-        "title": "Request to reveal phone number sent",
-        "subtitle": "Waiting for response"
+        "title": "Antrag auf Weitergabe der Telefonnummer gesendet",
+        "subtitle": "Warten auf Antwort"
       },
-      "letsExchangeContacts": "Let’s exchange contacts!",
-      "phoneNumberRevealed": "Phone number revealed!",
-      "phoneNumberReveal": "Phone number reveal.",
-      "phoneNumberRevealDeclined": "Phone number reveal declined.",
+      "letsExchangeContacts": "Tauschen wir Kontakte aus!",
+      "phoneNumberRevealed": "Telefonnummer enthüllt!",
+      "phoneNumberReveal": "Telefonnummer enthüllen",
+      "phoneNumberRevealDeclined":
+        "Sie haben abnehmen ihre Telefonnummer weiterzugeben",
       "contactIsAlreadyInYourContactList":
-        "Contact is already in your contact list.",
-      "addUserToYourContacts": "Add {{name}} to your contacts?",
-      "tapToAddToYourVexlContacts": "Tap to add to your Vexl contacts."
+        "Der Kontakt befindet sich bereits in deiner Kontaktliste.",
+      "addUserToYourContacts": "Füge {{Name}} zu deinen Kontakten hinzu?",
+      "tapToAddToYourVexlContacts":
+        "Tipp auf, um sie zu deinen Vexl-Kontakten hinzuzufügen."
     },
     "progressBar": {
       "ENCRYPTING_PRIVATE_PAYLOADS": "{{percentDone}}% erledigt",
@@ -837,7 +844,7 @@ const otherDe: typeof en =
         "text":
           "Wir können versuchen, private Schlüssel und persönliche Informationen aus den Protokollen zu entfernen, bevor sie exportiert werden. Vergewisse dich aber immer selbst."
       },
-      "noLogs": "No logs"
+      "noLogs": "Keine Logs"
     },
     "MaintenanceScreen": {
       "title": "Marketplace-Wartung",
@@ -886,8 +893,8 @@ const otherDe: typeof en =
       "createYourFirstOffer":
         "👋 Erstelle dein erstes Angebot zum Kauf oder Verkauf von Bitcoin.",
       "importNewlyAddedContacts":
-        "👋 Looks like you've got some new contacts. Want to import them now?",
-      "importNow": "Import now"
+        "👋 Sieht aus, du hast ein paar neue Kontakte. Willst du sie jetzt importieren?",
+      "importNow": "Jetzt importieren"
     },
     "addContactDialog": {
       "addContact": "Kontakt hinzufügen",
@@ -897,13 +904,14 @@ const otherDe: typeof en =
       "contactAdded": "Kontakt hinzugefügt.",
       "youHaveAddedContact":
         "Du hast {{contactName}} deinen Vexl-Kontakten hinzugefügt.",
-      "contactAlreadyInContactList": "Contact is already in your contact list.",
+      "contactAlreadyInContactList":
+        "Der Kontakt befindet sich bereits in deiner Kontaktliste.",
       "wouldYouLikeToChangeTheName":
-        "Would you like to change the name for {{name}} for this phone number?",
-      "keepCurrent": "Keep current",
-      "contactUpdated": "Contact updated",
+        "Möchtest du den Namen {{Name}} für diese Rufnummer ändern?",
+      "keepCurrent": "Aktuell halten",
+      "contactUpdated": "Kontakt aktualisiert",
       "youHaveSuccessfullyUpdatedContact":
-        "You have successfully updated your Vexl contacts."
+        "Du hast deine Vexl-Kontakte erfolgreich aktualisiert."
     },
     "": ""
   }

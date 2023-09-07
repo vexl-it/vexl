@@ -629,7 +629,8 @@ const otherSp: typeof en =
       "highestAmount": "Importe más alto",
       "selectSortingMethod": "Seleccione el método de clasificación",
       "searchByText": "Search by text",
-      "noTextFilter": "No text filter selected"
+      "noTextFilter": "No text filter selected",
+      "chooseCurrency": "Choose currency"
     },
     "messages": {
       "yourOffer": "Su oferta",

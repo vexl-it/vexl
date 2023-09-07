@@ -617,7 +617,8 @@ const otherEn =
       "highestAmount": "Highest amount",
       "selectSortingMethod": "Select sorting method",
       "searchByText": "Search by text",
-      "noTextFilter": "No text filter selected"
+      "noTextFilter": "No text filter selected",
+      "chooseCurrency": "Choose currency"
     },
     "messages": {
       "yourOffer": "Your offer",
@@ -663,7 +664,7 @@ const otherEn =
           "INBOX_DELETED": "You have deleted this inbox",
           "CANCEL_REQUEST_MESSAGING": "You have cancelled the request.",
           "ONLY_IMAGE": "You have sent an image",
-          "REQUEST_CONTACT_REVEAL": "You've have requested their phone number",
+          "REQUEST_CONTACT_REVEAL": "You've requested their phone number",
           "APPROVE_CONTACT_REVEAL": "Phone number was shared",
           "DISAPPROVE_CONTACT_REVEAL":
             "They declined to share their phone number"

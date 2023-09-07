@@ -628,7 +628,8 @@ const otherPt: typeof en =
       "highestAmount": "Montante mais elevado",
       "selectSortingMethod": "Selecionar método de ordenação",
       "searchByText": "Search by text",
-      "noTextFilter": "No text filter selected"
+      "noTextFilter": "No text filter selected",
+      "chooseCurrency": "Choose currency"
     },
     "messages": {
       "yourOffer": "A sua oferta",

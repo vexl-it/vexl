@@ -633,7 +633,8 @@ const otherIt: typeof en =
       "highestAmount": "Importo più alto",
       "selectSortingMethod": "Selezionare il metodo di ordinamento",
       "searchByText": "Search by text",
-      "noTextFilter": "No text filter selected"
+      "noTextFilter": "No text filter selected",
+      "chooseCurrency": "Choose currency"
     },
     "messages": {
       "yourOffer": "La tua offerta",

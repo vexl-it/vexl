@@ -634,7 +634,8 @@ const otherFr: typeof en =
       "highestAmount": "Montant le plus élevé",
       "selectSortingMethod": "Sélectionner la méthode de tri",
       "searchByText": "Search by text",
-      "noTextFilter": "No text filter selected"
+      "noTextFilter": "No text filter selected",
+      "chooseCurrency": "Choose currency"
     },
     "messages": {
       "yourOffer": "Votre offre",

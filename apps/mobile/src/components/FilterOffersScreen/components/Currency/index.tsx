@@ -13,6 +13,7 @@ import Image from '../../../Image'
 import chevronDownSvg from '../../../../images/chevronDownSvg'
 import CurrencySelect from '../../../CurrencySelect'
 import clearInputSvg from '../../../images/clearInputSvg'
+import {useTranslation} from '../../../../utils/localization/I18nProvider'
 
 interface Props {
   currencyAtom: PrimitiveAtom<CurrencyCode | undefined>
@@ -31,6 +32,7 @@ function CurrencyComponent({
   currencyAtom,
   updateCurrencyLimitsAtom,
 }: Props): JSX.Element {
+  const {t} = useTranslation()
   const tokens = getTokens()
   const currency = useAtomValue(currencyAtom)
   const updateCurrencyLimits = useSetAtom(updateCurrencyLimitsAtom)
@@ -68,7 +70,7 @@ function CurrencyComponent({
           ) : (
             <Stack>
               <Text ff={'$body'} fos={18} col={'$greyOnBlack'}>
-                Choose currency
+                {t('filterOffers.chooseCurrency')}
               </Text>
             </Stack>
           )}

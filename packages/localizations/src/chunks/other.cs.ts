@@ -319,7 +319,9 @@ const otherCs: typeof en =
         "Žádost nelze přijmout, protože jí druhá strana zrušila.",
       "requestNotFound":
         "Žádost nelze přijmout, protože druhá strana odstranila svůj účet.",
-      "otherSideAccountDeleted": "Other side has deleted their account"
+      "otherSideAccountDeleted": "Other side has deleted their account",
+      "createOfferNudge":
+        "Expand your reach within the social network and be the first one to create an offer for this criteria."
     },
     "termsOfUse": {
       "termsOfUse": "Podmínky používání",

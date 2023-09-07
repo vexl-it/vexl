@@ -330,7 +330,9 @@ const otherIt: typeof en =
         "Impossibile approvare. L'altra parte ha annullato la richiesta",
       "requestNotFound":
         "Impossibile approvare. L'altra parte ha cancellato il proprio account",
-      "otherSideAccountDeleted": "l'altra parte ha eliminato il suo contatto"
+      "otherSideAccountDeleted": "l'altra parte ha eliminato il suo contatto",
+      "createOfferNudge":
+        "Expand your reach within the social network and be the first one to create an offer for this criteria."
     },
     "termsOfUse": {
       "termsOfUse": "Condizioni d'uso",

@@ -331,7 +331,9 @@ const otherDe: typeof en =
         "Kann nicht genehmigt werden. Die Gegenseite hat die Anfrage storniert",
       "requestNotFound":
         "Kann nicht genehmigt werden. Die Gegenseite hat ihr Konto gelöscht",
-      "otherSideAccountDeleted": "Other side has deleted their account"
+      "otherSideAccountDeleted": "Other side has deleted their account",
+      "createOfferNudge":
+        "Expand your reach within the social network and be the first one to create an offer for this criteria."
     },
     "termsOfUse": {
       "termsOfUse": "AGB",

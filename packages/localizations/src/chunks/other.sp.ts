@@ -328,7 +328,9 @@ const otherSp: typeof en =
         "No se puede aprobar. La otra parte ha cancelado la solicitud",
       "requestNotFound":
         "No se puede aprobar. La otra parte ha eliminado su cuenta",
-      "otherSideAccountDeleted": "Other side has deleted their account"
+      "otherSideAccountDeleted": "Other side has deleted their account",
+      "createOfferNudge":
+        "Expand your reach within the social network and be the first one to create an offer for this criteria."
     },
     "termsOfUse": {
       "termsOfUse": "Condiciones de uso",

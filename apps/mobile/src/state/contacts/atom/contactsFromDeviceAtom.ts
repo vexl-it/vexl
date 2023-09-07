@@ -3,14 +3,35 @@ import {pipe} from 'fp-ts/function'
 import * as TE from 'fp-ts/TaskEither'
 import {atom} from 'jotai'
 import getContactsAndTryToResolveThePermissionsAlongTheWay from '../utils'
+import {selectAtom} from 'jotai/utils'
 
-export const contactsFromDeviceAtom = atom<ContactNormalized[]>([])
+const contactsFromDeviceWithLoadingProgressAtom = atom<
+  | {loading: true}
+  | {
+      loading: false
+      contacts: ContactNormalized[]
+    }
+>({loading: true})
 
-contactsFromDeviceAtom.onMount = (setAtom) => {
+export const contactsFromDeviceAtom = selectAtom(
+  contactsFromDeviceWithLoadingProgressAtom,
+  (s) => (s.loading ? [] : s.contacts)
+)
+export const contactsLoadingAtom = selectAtom(
+  contactsFromDeviceWithLoadingProgressAtom,
+  (s) => s.loading
+)
+
+contactsFromDeviceWithLoadingProgressAtom.onMount = (setAtom) => {
   void pipe(
     getContactsAndTryToResolveThePermissionsAlongTheWay(),
-    TE.match(() => {
-      setAtom([])
-    }, setAtom)
+    TE.match(
+      () => {
+        setAtom({loading: false, contacts: []})
+      },
+      (contacts) => {
+        setAtom({contacts, loading: false})
+      }
+    )
   )()
 }

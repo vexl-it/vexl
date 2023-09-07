@@ -4,13 +4,15 @@ import * as O from 'fp-ts/Option'
 import AddContactRow from './components/AddContactRow'
 import NothingFound from './components/NothingFound'
 import WhiteContainer from '../WhiteContainer'
-import {Stack} from 'tamagui'
+import {getTokens, Stack} from 'tamagui'
 import {useAtomValue, useSetAtom, useStore} from 'jotai'
 import {importedContactsAtom} from '../../state/contacts'
 import {useMemo} from 'react'
 import {contactSelectMolecule, ContactsSelectScope} from './atom'
 import {ScopeProvider, useMolecule} from 'jotai-molecules'
 import ContactsFilter from './components/ContactsFilter'
+import {ActivityIndicator} from 'react-native'
+import {contactsLoadingAtom} from '../../state/contacts/atom/contactsFromDeviceAtom'
 
 interface Props {
   onContactsSubmitted: () => void
@@ -30,7 +32,17 @@ function ContactsListSelect({
   } = useMolecule(contactSelectMolecule)
   const customContactToAdd = useAtomValue(searchTextAsCustomContactAtom)
   const toDisplay = useAtomValue(contactsToDisplayAtomsAtom)
+  const loading = useAtomValue(contactsLoadingAtom)
   const submit = useSetAtom(submitActionAtom)
+
+  if (loading)
+    return (
+      <WhiteContainer>
+        <Stack alignItems={'center'} justifyContent={'center'} flex={1}>
+          <ActivityIndicator size="large" color={getTokens().color.main.val} />
+        </Stack>
+      </WhiteContainer>
+    )
 
   return (
     <>

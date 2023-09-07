@@ -1,7 +1,8 @@
-import {atom, getDefaultStore, type Atom, type SetStateAction} from 'jotai'
+import {atom, type Atom, getDefaultStore, type SetStateAction} from 'jotai'
 import {
   type CurrencyCode,
   type LocationState,
+  OfferAdminId,
   OfferId,
   type OfferPublicPart,
   type OfferType,
@@ -9,7 +10,6 @@ import {
   SymmetricKey,
 } from '@vexl-next/domain/dist/general/offers'
 import {molecule} from 'jotai-molecules'
-import {OfferAdminId} from '@vexl-next/domain/dist/general/offers'
 
 import {IdNumeric} from '@vexl-next/domain/dist/utility/IdNumeric'
 import {IsoDatetimeString} from '@vexl-next/domain/dist/utility/IsoDatetimeString.brand'

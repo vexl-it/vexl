@@ -123,15 +123,6 @@ function MessagePreview({
         })}
       </BaseText>
     )
-  } else if (message.messageType === 'OFFER_DELETED') {
-    return (
-      <BaseText>
-        {t(`messages.messagePreviews.${direction}.OFFER_DELETED`, {
-          message: message.text,
-          them: name,
-        })}
-      </BaseText>
-    )
   } else if (message.messageType === 'REQUEST_CONTACT_REVEAL') {
     return (
       <BaseText>

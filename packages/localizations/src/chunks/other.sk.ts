@@ -622,7 +622,8 @@ const otherSk: typeof en =
       "highestAmount": "Najvyššia suma",
       "selectSortingMethod": "Vyberte spôsob triedenia",
       "searchByText": "Search by text",
-      "noTextFilter": "No text filter selected"
+      "noTextFilter": "No text filter selected",
+      "chooseCurrency": "Choose currency"
     },
     "messages": {
       "yourOffer": "Tvoja ponuka",

@@ -5,11 +5,14 @@ import {
   NextButtonProxy,
 } from '../../../PageWithButtonAndProgressHeader'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
+import {useAtomValue} from 'jotai'
+import {contactsLoadingAtom} from '../../../../state/contacts/atom/contactsFromDeviceAtom'
 
 type Props = PostLoginFlowScreenProps<'ImportContacts'>
 
 function ContactsListScreen({navigation}: Props): JSX.Element {
   const {t} = useTranslation()
+  const contactsLoading = useAtomValue(contactsLoadingAtom)
   return (
     <>
       <HeaderProxy showBackButton={true} progressNumber={3} />
@@ -22,7 +25,7 @@ function ContactsListScreen({navigation}: Props): JSX.Element {
             <NextButtonProxy
               text={t('postLoginFlow.importContactsButton')}
               onPress={onSubmit}
-              disabled={false}
+              disabled={contactsLoading}
             />
           )
         }}

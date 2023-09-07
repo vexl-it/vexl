@@ -107,7 +107,7 @@ function IconButton({
                 : variant === 'negative'
                 ? tokens.color.red.val
                 : variant === 'secondary'
-                ? 'none'
+                ? tokens.color.darkBrown.val
                 : tokens.color.grey.val
               : 'none'
           }

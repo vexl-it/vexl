@@ -47,6 +47,15 @@ export const setOffersFilterAtom = atom(null, (get, set) => {
   )
 })
 
+export const focusTextFilterAtom = atom(
+  (get) => get(offersFilterAtom).text,
+  (get, set, value: string | undefined) => {
+    set(offersFilterAtom, (o) => ({...o, text: value}))
+    set(offersFilterFromStorageAtom, (o) => ({...o, text: value}))
+  }
+)
+export const isTextFilterActiveAtom = selectAtom(focusTextFilterAtom, Boolean)
+
 export const currencyAtom = focusAtom(offersFilterAtom, (optic) =>
   optic.prop('currency')
 )
@@ -179,6 +188,7 @@ export const saveFilterActionAtom = atom(null, (get, set) => {
         : ['FIRST_DEGREE', 'SECOND_DEGREE'],
     amountBottomLimit: offersFilter.amountBottomLimit,
     amountTopLimit: offersFilter.amountTopLimit,
+    text: offersFilter.text,
   }
 
   set(offersFilterFromStorageAtom, newFilterValue)

@@ -615,7 +615,9 @@ const otherEn =
       "oldestOffer": "Oldest offer",
       "lowestAmount": "Lowest amount",
       "highestAmount": "Highest amount",
-      "selectSortingMethod": "Select sorting method"
+      "selectSortingMethod": "Select sorting method",
+      "searchByText": "Search by text",
+      "noTextFilter": "No text filter selected"
     },
     "messages": {
       "yourOffer": "Your offer",

@@ -632,7 +632,9 @@ const otherFr: typeof en =
       "oldestOffer": "Offre la plus ancienne",
       "lowestAmount": "Montant le plus bas",
       "highestAmount": "Montant le plus élevé",
-      "selectSortingMethod": "Sélectionner la méthode de tri"
+      "selectSortingMethod": "Sélectionner la méthode de tri",
+      "searchByText": "Search by text",
+      "noTextFilter": "No text filter selected"
     },
     "messages": {
       "yourOffer": "Votre offre",

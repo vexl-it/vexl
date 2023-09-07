@@ -60,6 +60,7 @@ export const OffersFilter = z.object({
   offerType: OfferType.optional(),
   amountBottomLimit: z.coerce.number().optional(),
   amountTopLimit: z.coerce.number().optional(),
+  text: z.string().optional(),
 })
 
 export type OffersFilter = z.TypeOf<typeof OffersFilter>

@@ -631,7 +631,9 @@ const otherIt: typeof en =
       "oldestOffer": "Offerta più vecchia",
       "lowestAmount": "Importo più basso",
       "highestAmount": "Importo più alto",
-      "selectSortingMethod": "Selezionare il metodo di ordinamento"
+      "selectSortingMethod": "Selezionare il metodo di ordinamento",
+      "searchByText": "Search by text",
+      "noTextFilter": "No text filter selected"
     },
     "messages": {
       "yourOffer": "La tua offerta",

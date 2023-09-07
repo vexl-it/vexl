@@ -59,12 +59,12 @@ const otherDe: typeof en =
       "currency": "Währung",
       "whatDoesThisMean": "Was bedeutet das?",
       "learnMore": "Mehr erfahren",
-      "unableToShareImage": "Unable to share the image",
-      "requestAgain": "Request again",
+      "unableToShareImage": "Das Bild kann nicht geteilt werden.",
+      "requestAgain": "Wiederholen die Anfrage",
       "seeDetail": "Details anzeigen",
       "notNow": "Not now",
       "niceWithExclamationMark": "Nice!",
-      "nothingFound": "Nothing found",
+      "nothingFound": "Nichts gefunden",
       "sendRequest": "Send request",
       "change": "Change",
       "errorWhileReadingQrCode": "Error while reading QR code",
@@ -485,9 +485,9 @@ const otherDe: typeof en =
       "errorLocationNotFilled": "Bitte gebe den Ort des Angebots an",
       "errorDescriptionNotFilled":
         "Bitte gebe eine Beschreibung des Angebots ein",
-      "selectCurrency": "Select currency",
+      "selectCurrency": "Währung auswählen",
       "currencyYouWouldLikeToUse":
-        "The currency you would like to use in your trade."
+        "Die Währung, die du für deinen Handel verwenden möchtest."
     },
     "notifications": {
       "permissionsNotGranted": {
@@ -497,23 +497,23 @@ const otherDe: typeof en =
       },
       "errorWhileOpening": "Fehler beim Öffnen der Benachrichtigung",
       "MESSAGE": {
-        "title": "New message",
-        "body": "You have received a new message."
+        "title": "Neue Nachricht",
+        "body": "Du hast eine neue Nachricht erhalten."
       },
       "REQUEST_REVEAL": {
-        "title": "Identity request received",
-        "body": "You have been requested to reveal your identity."
+        "title": "Identitätsanfrage erhalten",
+        "body": "Du bist aufgefordert worden, deine Identität preiszugeben."
       },
       "APPROVE_REVEAL": {
-        "title": "Identity revealed!",
-        "body": "Your request to reveal identities was approved."
+        "title": "Identität aufgedeckt!",
+        "body": "Dein Antrag auf Preisgeben der Identität wurde genehmigt."
       },
       "DISAPPROVE_REVEAL": {
-        "title": "Identity request denied",
-        "body": "Your request to reveal identities was denied."
+        "title": "Antrag auf Preisgeben der Identität abgelehnt",
+        "body": "Dein Antrag auf Preisgeben der Identität abgelehnt"
       },
       "REQUEST_MESSAGING": {
-        "title": "New request!",
+        "title": "Neue Anfrage!",
         "body": "You have received a new request."
       },
       "APPROVE_MESSAGING": {
@@ -634,7 +634,9 @@ const otherDe: typeof en =
       "oldestOffer": "Ältestes Angebot",
       "lowestAmount": "Niedrigster Betrag",
       "highestAmount": "Höchster Betrag",
-      "selectSortingMethod": "Sortiermethode wählen"
+      "selectSortingMethod": "Sortiermethode wählen",
+      "searchByText": "Search by text",
+      "noTextFilter": "No text filter selected"
     },
     "messages": {
       "yourOffer": "Dein Angebot",
@@ -660,7 +662,7 @@ const otherDe: typeof en =
           "OFFER_DELETED": "{{them}} hat das Angebot gelöscht",
           "INBOX_DELETED": "{{them}} hat den Chat gelöscht.",
           "CANCEL_REQUEST_MESSAGING": "Anfrage wurde storniert",
-          "ONLY_IMAGE": "{{them}} sent an image",
+          "ONLY_IMAGE": "{{them}} hat ein Bild gesendet",
           "REQUEST_CONTACT_REVEAL": "{{them}} requested phone number reveal",
           "APPROVE_CONTACT_REVEAL": "Phone number revealed",
           "DISAPPROVE_CONTACT_REVEAL": "Declined phone number reveal"
@@ -772,13 +774,13 @@ const otherDe: typeof en =
       "actionBanner": {
         "requestPending": "Anfrage ausstehend.",
         "bottomText": "Die vorherige Kommunikation wird oben angezeigt.",
-        "buttonText": "Respond"
+        "buttonText": "Antworten"
       },
       "cancelRequestDialog": {
         "title": "Bist du sicher?",
         "description":
           "If you cancel the messaging request other side will be unable to accept it",
-        "yes": "Yes, cancel"
+        "yes": "Ja, abbrechen"
       },
       "contactRevealRespondModal": {
         "title": "Are you sure you want to reveal your phone number?",
@@ -891,8 +893,8 @@ const otherDe: typeof en =
       "addContact": "Kontakt hinzufügen",
       "addThisPhoneNumber":
         "Möchtest du diese Telefonnummer deinen Vexl-Kontakten hinzufügen?",
-      "addContactName": "Add contact name",
-      "contactAdded": "Contact added.",
+      "addContactName": "Kontaktname hinzufügen",
+      "contactAdded": "Kontakt hinzugefügt.",
       "youHaveAddedContact":
         "Du hast {{contactName}} deinen Vexl-Kontakten hinzugefügt.",
       "contactAlreadyInContactList": "Contact is already in your contact list.",

@@ -63,8 +63,10 @@ function MarketplaceScreen(): JSX.Element {
   useAppState(
     useCallback(
       (state) => {
-        if (state === 'active') setOffersFilter()
-        if (state === 'active') void refreshOffers()
+        if (state === 'active') {
+          setOffersFilter()
+          void refreshOffers()
+        }
       },
       [refreshOffers, setOffersFilter]
     )

@@ -620,7 +620,9 @@ const otherSk: typeof en =
       "oldestOffer": "Najstaršia ponuka",
       "lowestAmount": "Najnižšia suma",
       "highestAmount": "Najvyššia suma",
-      "selectSortingMethod": "Vyberte spôsob triedenia"
+      "selectSortingMethod": "Vyberte spôsob triedenia",
+      "searchByText": "Search by text",
+      "noTextFilter": "No text filter selected"
     },
     "messages": {
       "yourOffer": "Tvoja ponuka",

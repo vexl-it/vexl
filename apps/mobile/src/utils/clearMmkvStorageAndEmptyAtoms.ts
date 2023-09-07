@@ -14,6 +14,7 @@ import {postLoginFinishedStorageAtom} from '../state/postLoginOnboarding'
 import {selectedCurrencyStorageAtom} from '../state/selectedCurrency'
 import {preferencesAtom} from './preferences'
 import {type OneOfferInState} from '@vexl-next/domain/dist/general/offers'
+import {previousSearchesAtom} from '../components/SearchOffersScreen/atoms/previousSearchesAtom'
 
 export default function clearMmkvStorageAndEmptyAtoms(): void {
   // TODO:#110 find a better way how to clear the state
@@ -59,6 +60,8 @@ export default function clearMmkvStorageAndEmptyAtoms(): void {
     },
     enableNewOffersNotificationDevMode: false,
   })
+
+  getDefaultStore().set(previousSearchesAtom, [])
 
   storage._storage.clearAll()
 }

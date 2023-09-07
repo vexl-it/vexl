@@ -626,7 +626,9 @@ const otherPt: typeof en =
       "oldestOffer": "Oferta mais antiga",
       "lowestAmount": "Montante mais baixo",
       "highestAmount": "Montante mais elevado",
-      "selectSortingMethod": "Selecionar método de ordenação"
+      "selectSortingMethod": "Selecionar método de ordenação",
+      "searchByText": "Search by text",
+      "noTextFilter": "No text filter selected"
     },
     "messages": {
       "yourOffer": "A sua oferta",

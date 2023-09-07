@@ -17,9 +17,6 @@ function OffersListStateDisplayer({
       navigateToCreateOffer={() => {
         navigation.navigate('CreateOffer')
       }}
-      navigateToFilterOffers={() => {
-        navigation.navigate('FilterOffers')
-      }}
       navigateToMyOffers={() => {
         navigation.navigate('MyOffers')
       }}

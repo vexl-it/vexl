@@ -6,7 +6,6 @@ import Button from '../../Button'
 import UserAvatar from '../../UserAvatar'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import useResetNavigationToMessagingScreen from '../../../utils/useResetNavigationToMessagingScreen'
-import {Keyboard} from 'react-native'
 import {useHideActionForMessage} from '../atoms/createHideActionForMessageMmkvAtom'
 import {useCallback} from 'react'
 import {type SvgString} from '@vexl-next/domain/dist/utility/SvgString.brand'
@@ -130,35 +129,6 @@ function QuickActionBanner(): JSX.Element | null {
   }
 
   if (
-    lastMessage.message.messageType === 'DELETE_CHAT' &&
-    lastMessage.state === 'received'
-  ) {
-    return (
-      <QuickActionBannerUi
-        topText={t('messages.messagePreviews.incoming.DELETE_CHAT', {
-          them: otherSideData.userName,
-        })}
-        bottomText={t('messages.leaveToo')}
-        headingType={'boldBottom'}
-        buttonText={t('messages.deleteChat')}
-        leftElement={
-          <UserAvatar
-            width={48}
-            height={48}
-            grayScale
-            userImage={otherSideData.image}
-          />
-        }
-        onButtonPress={() => {
-          Keyboard.dismiss()
-          void deleteChat().then((result) => {
-            if (result) resetNavigationToMessagingScreen()
-          })
-        }}
-      />
-    )
-  }
-  if (
     lastMessage.message.messageType === 'BLOCK_CHAT' &&
     lastMessage.state === 'received'
   ) {
@@ -194,35 +164,6 @@ function QuickActionBanner(): JSX.Element | null {
     return (
       <QuickActionBannerUi
         topText={t('messages.messagePreviews.incoming.INBOX_DELETED', {
-          them: otherSideData.userName,
-        })}
-        bottomText={t('messages.leaveChat')}
-        headingType={'boldBottom'}
-        buttonText={t('messages.deleteChat')}
-        leftElement={
-          <UserAvatar
-            width={48}
-            height={48}
-            grayScale
-            userImage={otherSideData.image}
-          />
-        }
-        onButtonPress={() => {
-          void deleteChat().then((result) => {
-            if (result) resetNavigationToMessagingScreen()
-          })
-        }}
-      />
-    )
-  }
-
-  if (
-    lastMessage.message.messageType === 'OFFER_DELETED' &&
-    lastMessage.state === 'received'
-  ) {
-    return (
-      <QuickActionBannerUi
-        topText={t('messages.messagePreviews.incoming.OFFER_DELETED', {
           them: otherSideData.userName,
         })}
         bottomText={t('messages.leaveChat')}

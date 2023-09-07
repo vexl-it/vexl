@@ -6,7 +6,7 @@ import {
   type OneOfferInState,
   type SymmetricKey,
 } from '@vexl-next/domain/dist/general/offers'
-import {atom, type ExtractAtomResult, useAtomValue} from 'jotai'
+import {atom, useAtomValue} from 'jotai'
 import {
   lastUpdatedAtAtom,
   loadingStateAtom,
@@ -15,7 +15,6 @@ import {
   offersIdsAtom,
   offersStateAtom,
   singleOfferAtom,
-  singleOfferByAdminIdAtom,
 } from './atom'
 import * as Option from 'fp-ts/Option'
 import {privateApiAtom} from '../../api'
@@ -50,9 +49,7 @@ import getNewOffersAndDecrypt, {
   type ApiErrorFetchingOffers,
 } from '@vexl-next/resources-utils/dist/offers/getNewOffersAndDecrypt'
 import {type ErrorConstructingPrivatePayloads} from '@vexl-next/resources-utils/dist/offers/utils/constructPrivatePayloads'
-import {chatsForMyOfferAtom} from '../chat/atoms/chatsForMyOfferAtom'
 import {type OfferEncryptionProgress} from '@vexl-next/resources-utils/dist/offers/OfferEncryptionProgress'
-import sendMessageToChatsInBatchActionAtom from '../chat/atoms/sendMessageToChatsInBatchActionAtom'
 import {type ExtractLeftTE} from '@vexl-next/rest-api/dist/services/chat/utils'
 import {type OfferPrivateApi} from '@vexl-next/rest-api/dist/services/offer'
 import getCountryPrefix from '../../utils/getCountryCode'
@@ -316,43 +313,6 @@ export const updateOfferAtom = atom<
   )
 })
 
-export const sendOfferDeletedToAllOfferChatsActionAtom = atom(
-  null,
-  (
-    get,
-    set,
-    params: {
-      adminId: OfferAdminId
-    }
-  ): TE.TaskEither<
-    ExtractLeftTE<
-      ExtractAtomResult<typeof sendMessageToChatsInBatchActionAtom>
-    >,
-    boolean
-  > => {
-    const {adminId} = params
-    const myOffer = get(singleOfferByAdminIdAtom(adminId))
-    const chats = get(
-      chatsForMyOfferAtom({
-        offerPublicKey: myOffer?.offerInfo.publicPart.offerPublicKey,
-      })
-    )
-
-    const messageToSend = {
-      text: 'Offer deleted',
-      messageType: 'OFFER_DELETED',
-    } as const
-
-    return pipe(
-      set(sendMessageToChatsInBatchActionAtom, {
-        chats: chats ?? [],
-        isTerminationMessage: true,
-        messageData: messageToSend,
-      })
-    )
-  }
-)
-
 export const deleteOffersActionAtom = atom<
   null,
   [{adminIds: OfferAdminId[]}],
@@ -368,19 +328,6 @@ export const deleteOffersActionAtom = atom<
   return pipe(
     TE.Do,
     TE.chainFirstW(() => api.offer.deleteOffer({adminIds: adminIdsToDelete})),
-    TE.chainFirstTaskK(() =>
-      pipe(
-        adminIdsToDelete,
-        A.map((adminId) =>
-          set(sendOfferDeletedToAllOfferChatsActionAtom, {adminId})
-        ),
-        TE.sequenceSeqArray,
-        TE.match(
-          () => false,
-          () => true
-        )
-      )
-    ),
     TE.match(
       (left) => {
         reportError('error', 'Error while deleting offers', left)

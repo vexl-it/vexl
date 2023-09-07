@@ -90,30 +90,6 @@ function MessageItem({
         />
       )
 
-    if (item.message.message.messageType === 'OFFER_DELETED')
-      return (
-        <BigIconMessage
-          isLatest={item.isLatest}
-          smallerText={t(
-            `messages.messagePreviews.${direction}.OFFER_DELETED`,
-            {
-              them: userName,
-            }
-          )}
-          icon={
-            <Stack
-              width={80}
-              height={80}
-              backgroundColor={'$darkRed'}
-              alignItems="center"
-              justifyContent={'center'}
-              borderRadius={'$7'}
-            >
-              <Image width={35} height={35} source={BlockIconSvg} />
-            </Stack>
-          }
-        />
-      )
     if (item.message.message.messageType === 'INBOX_DELETED')
       return (
         <BigIconMessage

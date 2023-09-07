@@ -32,6 +32,7 @@ import EditNameScreen from '../EditNameScreen'
 import ChangeProfilePictureScreen from '../ChangeProfilePictureScreen/ChangeProfilePictureScreen'
 import NotificationSettingsScreen from '../NotificationSettingsScreen'
 import {useSetCombinedContactsAfterLastSubmitForCurrentUsers} from '../../state/contacts/hooks/useSetCombinedContactsAfterLastSubmitForCurrentUsers'
+import SearchOffersScreen from '../SearchOffersScreen'
 
 const Stack = createNativeStackNavigator<RootStackParamsList>()
 
@@ -74,6 +75,10 @@ function RootNavigation(): JSX.Element {
             <Stack.Screen
               name={'FilterOffers'}
               component={FilterOffersScreen}
+            />
+            <Stack.Screen
+              name={'SearchOffers'}
+              component={SearchOffersScreen}
             />
             <Stack.Screen name={'MyOffers'} component={MyOffersScreen} />
             <Stack.Screen name={'AppLogs'} component={AppLogsScreen} />

@@ -13,6 +13,7 @@ export const offersFilterInitialState: OffersFilter = {
   btcNetwork: undefined,
   amountBottomLimit: undefined,
   amountTopLimit: undefined,
+  text: undefined,
 }
 
 export const offersFilterStorageAtom = atomWithParsedMmkvStorage(

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useCallback} from 'react'
 import {Stack} from 'tamagui'
 import {
   type CurrencyCode,
@@ -24,53 +24,34 @@ interface Props {
   >
 }
 
-function renderItem(
-  currencyAtom: Atom<CurrencyInfo>,
-  selectedCurrencyCodeAtom: Atom<CurrencyCode | undefined>,
-  onItemPress: () => void,
-  updateCurrencyLimitsAtom: WritableAtom<
-    null,
-    [
-      {
-        currency: CurrencyCode
-      }
-    ],
-    boolean
-  >
-): JSX.Element {
-  return (
-    <CurrencySelectListItem
-      currencyAtom={currencyAtom}
-      selectedCurrencyCodeAtom={selectedCurrencyCodeAtom}
-      onItemPress={onItemPress}
-      updateCurrencyLimitsAtom={updateCurrencyLimitsAtom}
-    />
-  )
-}
-
 function ItemSeparatorComponent(): JSX.Element {
   return <Stack h={2} bc={'$greyAccent1'} />
 }
+
 function CurrenciesList({
   currencies,
   selectedCurrencyCodeAtom,
   onItemPress,
   updateCurrencyLimitsAtom,
 }: Props): JSX.Element {
+  const renderItem = useCallback(
+    ({item: currencyAtom}: {item: Atom<CurrencyInfo>}): JSX.Element => (
+      <CurrencySelectListItem
+        currencyAtom={currencyAtom}
+        selectedCurrencyCodeAtom={selectedCurrencyCodeAtom}
+        onItemPress={onItemPress}
+        updateCurrencyLimitsAtom={updateCurrencyLimitsAtom}
+      />
+    ),
+    [onItemPress, selectedCurrencyCodeAtom, updateCurrencyLimitsAtom]
+  )
   return (
     <FlatList
       showsHorizontalScrollIndicator={false}
       showsVerticalScrollIndicator={false}
       data={currencies}
       ItemSeparatorComponent={ItemSeparatorComponent}
-      renderItem={({item: currencyAtom}) =>
-        renderItem(
-          currencyAtom,
-          selectedCurrencyCodeAtom,
-          onItemPress,
-          updateCurrencyLimitsAtom
-        )
-      }
+      renderItem={renderItem}
       keyExtractor={atomKeyExtractor}
     />
   )

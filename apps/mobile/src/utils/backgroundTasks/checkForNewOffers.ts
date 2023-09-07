@@ -4,7 +4,7 @@ import {userLoggedInAtom} from '../../state/session'
 import {notificationPreferencesAtom, preferencesAtom} from '../preferences'
 import * as E from 'fp-ts/Either'
 import {pipe} from 'fp-ts/function'
-import {offersAtomWithFilter} from '../../state/marketplace/atom'
+import {createFilteredOffersAtom} from '../../state/marketplace/atom'
 import notifee from '@notifee/react-native'
 import {type TFunction, translationAtom} from '../localization/I18nProvider'
 import {getDefaultChannel} from '../notifications/showUINotificationFromRemoteMessage'
@@ -89,12 +89,12 @@ export default async function checkForNewOffers(): Promise<void> {
       return
 
     const previousOffersIds = store
-      .get(offersAtomWithFilter(store.get(offersFilterFromStorageAtom)))
+      .get(createFilteredOffersAtom(store.get(offersFilterFromStorageAtom)))
       .map((one) => one.offerInfo.offerId)
 
     await store.set(triggerOffersRefreshAtom)
     const updatedOffersIds = store
-      .get(offersAtomWithFilter(store.get(offersFilterFromStorageAtom)))
+      .get(createFilteredOffersAtom(store.get(offersFilterFromStorageAtom)))
       .map((one) => one.offerInfo.offerId)
 
     if (difference(updatedOffersIds, previousOffersIds).length > 0) {

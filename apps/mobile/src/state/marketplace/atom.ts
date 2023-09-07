@@ -15,10 +15,12 @@ import areIncluded from './utils/areIncluded'
 import {type ChatOrigin} from '@vexl-next/domain/dist/general/messaging'
 import {type FocusAtomType} from '../../utils/atomUtils/FocusAtomType'
 import {selectAtom, splitAtom} from 'jotai/utils'
-import {importedContactsHashesAtom} from '../contacts'
+import {importedContactsAtom, importedContactsHashesAtom} from '../contacts'
 import sortOffers from './utils/sortOffers'
 import isSomeIn30KmRange from './utils/isIn30KmRadius'
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
+import filterOffersByText from './utils/filterOffersByText'
+import {focusTextFilterAtom} from '../../components/FilterOffersScreen/atom'
 
 export const addMoreContactsSuggestionVisibleAtom = atom<boolean>(true)
 export const resetFilterSuggestionVisibleAtom = atom<boolean>(true)
@@ -109,11 +111,12 @@ export const myActiveOffersAtom = focusAtom(myOffersAtom, (optic) =>
 
 export const selectedMyOffersSortingOptionAtom = atom<Sort>('NEWEST_OFFER')
 
-export function offersAtomWithFilter(
+export function createFilteredOffersAtom(
   filter: OffersFilter
 ): Atom<OneOfferInState[]> {
   return atom((get) => {
     const offersToSeeInMarketplace = get(offersToSeeInMarketplaceAtom)
+    const textFilter = get(focusTextFilterAtom)
 
     const filtered = offersToSeeInMarketplace.filter(
       (offer) =>
@@ -150,7 +153,16 @@ export function offersAtomWithFilter(
           offer.offerInfo.publicPart.amountTopLimit <= filter.amountTopLimit)
     )
 
-    return sortOffers(filtered, filter.sort ?? 'NEWEST_OFFER')
+    // This could be rewritten with pipe, i know, i know...
+    const filteredByText = textFilter
+      ? filterOffersByText({
+          text: textFilter,
+          offers: filtered,
+          importedContacts: get(importedContactsAtom),
+        })
+      : filtered
+
+    return sortOffers(filteredByText, filter.sort ?? 'NEWEST_OFFER')
   })
 }
 

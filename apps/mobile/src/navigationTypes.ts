@@ -31,6 +31,7 @@ export type RootStackParamsList = {
   CreateOffer: undefined
   EditOffer: {offerId: OfferId}
   FilterOffers: undefined
+  SearchOffers: undefined
   MyOffers: undefined
 
   OfferDetail: {offerId: OfferId}

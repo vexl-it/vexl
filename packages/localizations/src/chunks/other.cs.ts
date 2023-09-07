@@ -616,7 +616,9 @@ const otherCs: typeof en =
       "oldestOffer": "Nejstarší nabídka",
       "lowestAmount": "Nejnižší částka",
       "highestAmount": "Nejvyšší částka",
-      "selectSortingMethod": "Zvolte způsob řazení"
+      "selectSortingMethod": "Zvolte způsob řazení",
+      "searchByText": "Search by text",
+      "noTextFilter": "No text filter selected"
     },
     "messages": {
       "yourOffer": "Tvoje nabídka",

@@ -13,7 +13,7 @@ import {
   useOffersLoadingError,
 } from '../../../../../state/marketplace'
 import {useAtomValue, useSetAtom} from 'jotai'
-import {offersAtomWithFilter} from '../../../../../state/marketplace/atom'
+import {createFilteredOffersAtom} from '../../../../../state/marketplace/atom'
 import {splitAtom} from 'jotai/utils'
 import TotalOffersCount from './TotalOffersCount'
 import {offersFilterFromStorageAtom} from '../../../../../state/offersFilter'
@@ -22,13 +22,11 @@ import ImportNewContactsSuggestion from './ImportNewContactsSuggestion'
 interface Props {
   type: 'BUY' | 'SELL'
   navigateToCreateOffer: () => void
-  navigateToFilterOffers: () => void
   navigateToMyOffers: () => void
 }
 
 function OffersListStateDisplayerContent({
   navigateToCreateOffer,
-  navigateToFilterOffers,
   navigateToMyOffers,
   type,
 }: Props): JSX.Element {
@@ -46,7 +44,7 @@ function OffersListStateDisplayerContent({
 
   const offersAtoms = useAtomValue(
     useMemo(
-      () => splitAtom(offersAtomWithFilter({...filter, ...basicFilter})),
+      () => splitAtom(createFilteredOffersAtom({...filter, ...basicFilter})),
       [filter, basicFilter]
     )
   )
@@ -79,7 +77,6 @@ function OffersListStateDisplayerContent({
       <OffersListButtons
         marketplaceEmpty={offersAtoms.length === 0}
         onAddPress={navigateToCreateOffer}
-        onFilterOffersPress={navigateToFilterOffers}
         onMyOffersPress={navigateToMyOffers}
       />
       {offersAtoms.length === 0 ? (

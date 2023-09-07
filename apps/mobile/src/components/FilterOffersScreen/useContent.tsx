@@ -28,12 +28,19 @@ import {
   btcNetworkAtom,
   intendedConnectionLevelAtom,
 } from './atom'
+import TextFilter from './components/TextFilter'
+import magnifyingGlass from '../images/magnifyingGlass'
 
 export default function useContent(): SectionProps[] {
   const {t} = useTranslation()
 
   return useMemo(
     () => [
+      {
+        title: t('filterOffers.searchByText'),
+        image: magnifyingGlass,
+        children: <TextFilter />,
+      },
       {
         title: t('filterOffers.sorting'),
         image: sortingSvg,

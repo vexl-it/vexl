@@ -26,7 +26,12 @@ function Section({
           <XStack ai="center">
             {image && (
               <Stack mr="$2">
-                <SvgImage stroke={tokens.color.white.val} source={image} />
+                <SvgImage
+                  width={24}
+                  height={24}
+                  stroke={tokens.color.white.val}
+                  source={image}
+                />
               </Stack>
             )}
             <Text ff="$body700" color="$white" fos={24}>

@@ -627,7 +627,9 @@ const otherSp: typeof en =
       "oldestOffer": "Oferta más antigua",
       "lowestAmount": "Importe más bajo",
       "highestAmount": "Importe más alto",
-      "selectSortingMethod": "Seleccione el método de clasificación"
+      "selectSortingMethod": "Seleccione el método de clasificación",
+      "searchByText": "Search by text",
+      "noTextFilter": "No text filter selected"
     },
     "messages": {
       "yourOffer": "Su oferta",

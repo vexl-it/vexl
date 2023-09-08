@@ -7,6 +7,7 @@ export interface SectionProps {
   customSection?: boolean
   children?: ReactNode
   image?: SvgString
+  imageFill?: string
   mandatory?: boolean
   title?: string
 }
@@ -15,6 +16,7 @@ function Section({
   children,
   customSection,
   image,
+  imageFill,
   mandatory,
   title,
 }: SectionProps): JSX.Element {
@@ -30,6 +32,7 @@ function Section({
                   width={24}
                   height={24}
                   stroke={tokens.color.white.val}
+                  fill={imageFill ?? 'none'}
                   source={image}
                 />
               </Stack>

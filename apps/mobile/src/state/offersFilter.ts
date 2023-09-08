@@ -11,6 +11,7 @@ export const offersFilterInitialState: OffersFilter = {
   locationState: undefined,
   paymentMethod: undefined,
   btcNetwork: undefined,
+  spokenLanguages: [],
   amountBottomLimit: undefined,
   amountTopLimit: undefined,
   text: undefined,

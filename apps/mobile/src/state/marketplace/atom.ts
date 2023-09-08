@@ -150,7 +150,11 @@ export function createFilteredOffersAtom(
           offer.offerInfo.publicPart.amountBottomLimit >=
             filter.amountBottomLimit) &&
         (!filter.amountTopLimit ||
-          offer.offerInfo.publicPart.amountTopLimit <= filter.amountTopLimit)
+          offer.offerInfo.publicPart.amountTopLimit <= filter.amountTopLimit) &&
+        (filter.spokenLanguages.length === 0 ||
+          filter.spokenLanguages.some((item) =>
+            offer.offerInfo.publicPart.spokenLanguages.includes(item)
+          ))
     )
 
     // This could be rewritten with pipe, i know, i know...

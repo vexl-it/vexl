@@ -324,7 +324,8 @@ const otherSk: typeof en =
         "Požiadavku nemožno prijať, pretože druhá strana zrušila svoj účet.",
       "otherSideAccountDeleted": "Protistrana zmazala účet",
       "createOfferNudge":
-        "Expand your reach within the social network and be the first one to create an offer for this criteria."
+        "Expand your reach within the social network and be the first one to create an offer for this criteria.",
+      "offerAuthorSpeaks": "{{name}} speaks {{spokenLanguages}}"
     },
     "termsOfUse": {
       "termsOfUse": "Podmienky používania",
@@ -476,7 +477,20 @@ const otherSk: typeof en =
       "errorLocationNotFilled": "Vyplň prosím lokalitu.",
       "errorDescriptionNotFilled": "Vyplň prosím popis nabídky.",
       "selectCurrency": "Výber meny",
-      "currencyYouWouldLikeToUse": "Mena, ktorú chceš použiť pri obchodovaní."
+      "currencyYouWouldLikeToUse": "Mena, ktorú chceš použiť pri obchodovaní.",
+      "spokenLanguages": {
+        "indicatePreferredLanguage": "Indicate preferred language",
+        "ENG": "English",
+        "DEU": "German",
+        "CZE": "Czech",
+        "SVK": "Slovak",
+        "PRT": "Portuguese",
+        "FRA": "French",
+        "ITA": "Italian",
+        "ESP": "Spanish",
+        "language": "Language",
+        "preferredLanguages": "Preferred languages"
+      }
     },
     "notifications": {
       "permissionsNotGranted": {

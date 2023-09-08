@@ -9,6 +9,7 @@ import onlineTransferSvg from './InsideRouter/components/MarketplaceScreen/image
 import getBtcPragueLogoSvg from './InsideRouter/components/MarketplaceScreen/images/btcPragueLogoSvg'
 import {useMemo} from 'react'
 import pauseSvg from '../images/pauseSvg'
+import spokenLanguagesSvg from './images/spokenLanguagesSvg'
 
 const BTC_PRAGUE_FRIEND = '8o5OvkfRga/xBYbfb0e0MJZIjy4g7xGVimCdNLrydGs='
 const BTC_PRAGUE_FRIEND_STAGE = '9c6r0q7LCn1oqES2pfqQDVQH91fY8ZHYcJKbJYOU7hE='
@@ -40,13 +41,16 @@ const PriceBigger = styled(InfoText, {
 })
 
 function OfferInfoPreview({
+  hideSpokenLanguages,
   offer,
   negative,
 }: {
+  hideSpokenLanguages?: boolean
   offer: OfferInfo
   negative?: boolean
 }): JSX.Element {
   const {t} = useTranslation()
+  const tokens = getTokens()
   const btcPragueLogoSvg = useMemo(
     () => getBtcPragueLogoSvg({darkBackground: negative}),
     [negative]
@@ -117,6 +121,24 @@ function OfferInfoPreview({
               <InfoDivider />
             </>
           )}
+        {!hideSpokenLanguages &&
+          offer.publicPart.spokenLanguages.length > 0 && (
+            <InfoItemContainer>
+              <Stack mb={'$2'}>
+                <SvgImage
+                  height={24}
+                  width={24}
+                  fill={tokens.color.greyOnWhite.val}
+                  source={spokenLanguagesSvg}
+                />
+              </Stack>
+              <InfoText>
+                {offer.publicPart.spokenLanguages?.join(', ')}
+              </InfoText>
+            </InfoItemContainer>
+          )}
+        {!hideSpokenLanguages &&
+          offer.publicPart.spokenLanguages.length > 0 && <InfoDivider />}
         <InfoItemContainer>
           <XStack mb="$2">
             {offer.publicPart.paymentMethod.includes('CASH') && (

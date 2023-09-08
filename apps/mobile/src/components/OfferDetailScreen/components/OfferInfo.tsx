@@ -30,6 +30,7 @@ import {offerRerequestLimitDaysAtom} from '../../../utils/remoteConfig/atoms'
 import {type RootStackScreenProps} from '../../../navigationTypes'
 import RerequestInfo from './RerequestInfo'
 import {type OneOfferInState} from '@vexl-next/domain/dist/general/offers'
+import randomName from '../../../utils/randomName'
 
 function OfferInfo({
   offer,
@@ -50,6 +51,14 @@ function OfferInfo({
 
   const showCommonFriendsExplanationUIAction = useSetAtom(
     showCommonFriendsExplanationUIActionAtom
+  )
+
+  const spokenLanguagesText = useMemo(
+    () =>
+      offer.offerInfo.publicPart.spokenLanguages
+        ?.map((lang) => t(`offerForm.spokenLanguages.${lang}`))
+        .join(', '),
+    [offer.offerInfo.publicPart.spokenLanguages, t]
   )
 
   const requestState: RequestState = useMemo(
@@ -108,6 +117,7 @@ function OfferInfo({
       <ScrollView>
         <YStack space={'$2'} mb="$2">
           <OfferWithBubbleTip
+            hideSpokenLanguages
             negative={!requestPossibleInfo.canBeRerequested}
             offer={offer}
           />
@@ -120,6 +130,16 @@ function OfferInfo({
             actionButtonText={t('common.learnMore')}
             onActionPress={onWhatDoesThisMeanPressed}
           />
+          {offer.offerInfo.publicPart.spokenLanguages.length > 0 && (
+            <InfoSquare>
+              {t('offer.offerAuthorSpeaks', {
+                name:
+                  chatForOffer?.chat.otherSide?.realLifeInfo?.userName ??
+                  randomName(offer.offerInfo.offerId),
+                spokenLanguages: spokenLanguagesText,
+              })}
+            </InfoSquare>
+          )}
           <InfoSquare>{t(`offer.requestStatus.${requestState}`)}</InfoSquare>
           {showRequestButton && (
             <OfferRequestTextInput text={text} onChange={setText} />

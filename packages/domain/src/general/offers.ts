@@ -35,6 +35,18 @@ export type BtcNetwork = z.TypeOf<typeof BtcNetwork>
 export const OfferType = z.enum(['BUY', 'SELL'])
 export type OfferType = z.TypeOf<typeof OfferType>
 
+export const SpokenLanguage = z.enum([
+  'ENG',
+  'DEU',
+  'CZE',
+  'SVK',
+  'PRT',
+  'FRA',
+  'ITA',
+  'ESP',
+])
+export type SpokenLanguage = z.TypeOf<typeof SpokenLanguage>
+
 export {CurrencyCode}
 
 export const FriendLevel = z.enum([
@@ -96,6 +108,7 @@ export const OfferPublicPart = z.object({
   paymentMethod: z.array(PaymentMethod),
   btcNetwork: z.array(BtcNetwork),
   currency: CurrencyCode,
+  spokenLanguages: z.array(SpokenLanguage).default([]),
   offerType: OfferType,
   activePriceState: ActivePriceState,
   activePriceValue: z.coerce.number(),
@@ -104,6 +117,17 @@ export const OfferPublicPart = z.object({
   groupUuids: z.array(z.string()),
 })
 export type OfferPublicPart = z.TypeOf<typeof OfferPublicPart>
+
+export const spokenLanguagesOptions: SpokenLanguage[] = [
+  'ENG',
+  'DEU',
+  'ESP',
+  'FRA',
+  'ITA',
+  'CZE',
+  'SVK',
+  'PRT',
+]
 
 export const OfferInfo = z.object({
   id: IdNumeric, // for ordering

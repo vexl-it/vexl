@@ -330,7 +330,8 @@ const otherFr: typeof en =
         "Impossible d'approuver. L'autre partie a supprimé son compte",
       "otherSideAccountDeleted": "Other side has deleted their account",
       "createOfferNudge":
-        "Expand your reach within the social network and be the first one to create an offer for this criteria."
+        "Expand your reach within the social network and be the first one to create an offer for this criteria.",
+      "offerAuthorSpeaks": "{{name}} speaks {{spokenLanguages}}"
     },
     "termsOfUse": {
       "termsOfUse": "Conditions d'utilisation",
@@ -486,7 +487,20 @@ const otherFr: typeof en =
       "errorDescriptionNotFilled": "Veuillez remplir la description de l'offre",
       "selectCurrency": "Select currency",
       "currencyYouWouldLikeToUse":
-        "The currency you would like to use in your trade."
+        "The currency you would like to use in your trade.",
+      "spokenLanguages": {
+        "indicatePreferredLanguage": "Indicate preferred language",
+        "ENG": "English",
+        "DEU": "German",
+        "CZE": "Czech",
+        "SVK": "Slovak",
+        "PRT": "Portuguese",
+        "FRA": "French",
+        "ITA": "Italian",
+        "ESP": "Spanish",
+        "language": "Language",
+        "preferredLanguages": "Preferred languages"
+      }
     },
     "notifications": {
       "permissionsNotGranted": {

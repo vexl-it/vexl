@@ -325,7 +325,8 @@ const otherPt: typeof en =
         "Não é possível aprovar. A outra parte eliminou a sua conta",
       "otherSideAccountDeleted": "Other side has deleted their account",
       "createOfferNudge":
-        "Expand your reach within the social network and be the first one to create an offer for this criteria."
+        "Expand your reach within the social network and be the first one to create an offer for this criteria.",
+      "offerAuthorSpeaks": "{{name}} speaks {{spokenLanguages}}"
     },
     "termsOfUse": {
       "termsOfUse": "Termos de utilização",
@@ -481,7 +482,20 @@ const otherPt: typeof en =
       "errorDescriptionNotFilled": "Por favor, preencha a descrição da oferta",
       "selectCurrency": "Select currency",
       "currencyYouWouldLikeToUse":
-        "The currency you would like to use in your trade."
+        "The currency you would like to use in your trade.",
+      "spokenLanguages": {
+        "indicatePreferredLanguage": "Indicate preferred language",
+        "ENG": "English",
+        "DEU": "German",
+        "CZE": "Czech",
+        "SVK": "Slovak",
+        "PRT": "Portuguese",
+        "FRA": "French",
+        "ITA": "Italian",
+        "ESP": "Spanish",
+        "language": "Language",
+        "preferredLanguages": "Preferred languages"
+      }
     },
     "notifications": {
       "permissionsNotGranted": {

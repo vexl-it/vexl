@@ -25,6 +25,7 @@ function OfferForm({content}: Props): JSX.Element {
           key={item.title}
           customSection={item.customSection}
           image={item.image}
+          imageFill={item.imageFill}
           title={item.title}
           mandatory={item.mandatory}
         >

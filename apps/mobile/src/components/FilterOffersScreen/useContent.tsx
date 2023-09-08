@@ -30,9 +30,13 @@ import {
 } from './atom'
 import TextFilter from './components/TextFilter'
 import magnifyingGlass from '../images/magnifyingGlass'
+import spokenLanguagesSvg from '../images/spokenLanguagesSvg'
+import {getTokens} from 'tamagui'
+import SpokenLanguages from './components/SpokenLanguages'
 
 export default function useContent(): SectionProps[] {
   const {t} = useTranslation()
+  const tokens = getTokens()
 
   return useMemo(
     () => [
@@ -81,6 +85,12 @@ export default function useContent(): SectionProps[] {
         ),
       },
       {
+        title: t('offerForm.spokenLanguages.language'),
+        image: spokenLanguagesSvg,
+        imageFill: tokens.color.white.val,
+        children: <SpokenLanguages />,
+      },
+      {
         title: t('offerForm.paymentMethod.paymentMethod'),
         image: paymentMethodSvg,
         children: (
@@ -105,6 +115,6 @@ export default function useContent(): SectionProps[] {
         ),
       },
     ],
-    [t]
+    [t, tokens.color.white.val]
   )
 }

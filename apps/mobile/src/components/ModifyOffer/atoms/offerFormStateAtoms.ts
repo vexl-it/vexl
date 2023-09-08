@@ -1,4 +1,10 @@
-import {atom, type Atom, getDefaultStore, type SetStateAction} from 'jotai'
+import {
+  atom,
+  type Atom,
+  getDefaultStore,
+  type SetStateAction,
+  type WritableAtom,
+} from 'jotai'
 import {
   type CurrencyCode,
   type LocationState,
@@ -7,6 +13,7 @@ import {
   type OfferPublicPart,
   type OfferType,
   type OneOfferInState,
+  type SpokenLanguage,
   SymmetricKey,
 } from '@vexl-next/domain/dist/general/offers'
 import {molecule} from 'jotai-molecules'
@@ -45,6 +52,7 @@ import {
 import {splitAtom} from 'jotai/utils'
 import {fetchLocationSuggestionsAtom} from '../../../state/location/atoms/fetchLocationSuggestionsAtom'
 import getValueFromSetStateActionOfAtom from '../../../utils/atomUtils/getValueFromSetStateActionOfAtom'
+import getDefaultSpokenLanguage from '../../../utils/localization/getDefaultSpokenLanguage'
 
 export function createOfferDummyPublicPart(): OfferPublicPart {
   const userPhoneNumber = getDefaultStore().get(
@@ -70,6 +78,7 @@ export function createOfferDummyPublicPart(): OfferPublicPart {
     btcNetwork: ['ON_CHAIN'],
     currency: defaultCurrency?.code ?? currencies.USD.code,
     offerType: 'SELL',
+    spokenLanguages: getDefaultSpokenLanguage(),
     activePriceState: 'NONE',
     activePriceValue: 0,
     activePriceCurrency: defaultCurrency?.code ?? currencies.USD.code,
@@ -151,7 +160,7 @@ export const offerFormMolecule = molecule(() => {
     [
       {
         locationState: LocationState
-      }
+      },
     ],
     boolean
   >(null, (get, set, params) => {
@@ -179,6 +188,12 @@ export const offerFormMolecule = molecule(() => {
   const offerTypeOrDummyValueAtom = focusAtom(offerFormAtom, (optic) =>
     optic.prop('offerType')
   )
+
+  const spokenLanguagesAtom = focusAtom(offerFormAtom, (optic) =>
+    optic.prop('spokenLanguages')
+  )
+
+  const spokenLanguagesAtomsAtom = splitAtom(spokenLanguagesAtom)
 
   const feeAmountAtom = focusAtom(offerFormAtom, (optic) =>
     optic.prop('feeAmount')
@@ -225,6 +240,65 @@ export const offerFormMolecule = molecule(() => {
   const locationSuggestionsAtom = atom<LocationSuggestion[]>([])
 
   const locationSuggestionsAtomsAtom = splitAtom(locationSuggestionsAtom)
+
+  const selectedSpokenLanguagesAtom = atom<SpokenLanguage[]>(
+    getDefaultSpokenLanguage()
+  )
+
+  const removeSpokenLanguageActionAtom = atom(
+    null,
+    (get, set, spokenLanguage: SpokenLanguage) => {
+      const spokenLanguages = get(spokenLanguagesAtom)
+      const selectedSpokenLanguages = get(selectedSpokenLanguagesAtom)
+
+      if (selectedSpokenLanguages.length > 1) {
+        set(
+          spokenLanguagesAtom,
+          spokenLanguages.filter((language) => language !== spokenLanguage)
+        )
+        set(
+          selectedSpokenLanguagesAtom,
+          selectedSpokenLanguages.filter(
+            (language) => language !== spokenLanguage
+          )
+        )
+      }
+    }
+  )
+
+  function createIsThisLanguageSelectedAtom(
+    spokenLanguage: SpokenLanguage
+  ): WritableAtom<boolean, [SetStateAction<boolean>], void> {
+    return atom(
+      (get) => get(selectedSpokenLanguagesAtom).includes(spokenLanguage),
+      (get, set, isSelected: SetStateAction<boolean>) => {
+        const selectedSpokenLanguages = get(selectedSpokenLanguagesAtom)
+        const selected = getValueFromSetStateActionOfAtom(isSelected)(() =>
+          get(selectedSpokenLanguagesAtom).includes(spokenLanguage)
+        )
+
+        if (selected) {
+          set(selectedSpokenLanguagesAtom, [
+            ...selectedSpokenLanguages,
+            spokenLanguage,
+          ])
+        } else if (selectedSpokenLanguages.length > 1) {
+          set(
+            selectedSpokenLanguagesAtom,
+            selectedSpokenLanguages.filter((lang) => lang !== spokenLanguage)
+          )
+        }
+      }
+    )
+  }
+
+  const resetSelectedSpokenLanguagesActionAtom = atom(null, (get, set) => {
+    set(selectedSpokenLanguagesAtom, get(spokenLanguagesAtom))
+  })
+
+  const saveSelectedSpokenLanguagesActionAtom = atom(null, (get, set) => {
+    set(spokenLanguagesAtom, get(selectedSpokenLanguagesAtom))
+  })
 
   const updateAndRefreshLocationSuggestionsActionAtom = atom(
     null,
@@ -564,5 +638,12 @@ export const offerFormMolecule = molecule(() => {
     setOfferLocationActionAtom,
     resetOfferFormActionAtom,
     offerTypeOrDummyValueAtom,
+    spokenLanguagesAtom,
+    spokenLanguagesAtomsAtom,
+    removeSpokenLanguageActionAtom,
+    createIsThisLanguageSelectedAtom,
+    selectedSpokenLanguagesAtom,
+    resetSelectedSpokenLanguagesActionAtom,
+    saveSelectedSpokenLanguagesActionAtom,
   }
 })

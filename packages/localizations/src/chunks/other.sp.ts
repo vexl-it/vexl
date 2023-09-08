@@ -330,7 +330,8 @@ const otherSp: typeof en =
         "No se puede aprobar. La otra parte ha eliminado su cuenta",
       "otherSideAccountDeleted": "Other side has deleted their account",
       "createOfferNudge":
-        "Expand your reach within the social network and be the first one to create an offer for this criteria."
+        "Expand your reach within the social network and be the first one to create an offer for this criteria.",
+      "offerAuthorSpeaks": "{{name}} speaks {{spokenLanguages}}"
     },
     "termsOfUse": {
       "termsOfUse": "Condiciones de uso",
@@ -482,7 +483,20 @@ const otherSp: typeof en =
       "errorDescriptionNotFilled": "Rellena la descripción de la oferta",
       "selectCurrency": "Select currency",
       "currencyYouWouldLikeToUse":
-        "The currency you would like to use in your trade."
+        "The currency you would like to use in your trade.",
+      "spokenLanguages": {
+        "indicatePreferredLanguage": "Indicate preferred language",
+        "ENG": "English",
+        "DEU": "German",
+        "CZE": "Czech",
+        "SVK": "Slovak",
+        "PRT": "Portuguese",
+        "FRA": "French",
+        "ITA": "Italian",
+        "ESP": "Spanish",
+        "language": "Language",
+        "preferredLanguages": "Preferred languages"
+      }
     },
     "notifications": {
       "permissionsNotGranted": {

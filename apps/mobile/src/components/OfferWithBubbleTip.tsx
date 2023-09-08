@@ -13,11 +13,13 @@ export default function OfferWithBubbleTip({
   button,
   negative,
   onInfoRectPress,
+  hideSpokenLanguages,
 }: {
   offer: OneOfferInState
   button?: ReactNode
   negative?: boolean
   onInfoRectPress?: () => void
+  hideSpokenLanguages?: boolean
 }): JSX.Element {
   const onPress = useCallback(() => {
     if (onInfoRectPress) onInfoRectPress()
@@ -27,7 +29,11 @@ export default function OfferWithBubbleTip({
     <Stack>
       <TouchableWithoutFeedback onPress={onPress}>
         <Stack bg={negative ? '$grey' : '$white'} p="$4" br="$5">
-          <OfferInfoPreview negative={negative} offer={offer.offerInfo} />
+          <OfferInfoPreview
+            hideSpokenLanguages={hideSpokenLanguages}
+            negative={negative}
+            offer={offer.offerInfo}
+          />
           <Stack pos="absolute" b={-7} l={43}>
             <SvgImage source={negative ? bubbleTipSvgNegative : bubbleTipSvg} />
           </Stack>

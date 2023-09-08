@@ -321,7 +321,8 @@ const otherCs: typeof en =
         "Žádost nelze přijmout, protože druhá strana odstranila svůj účet.",
       "otherSideAccountDeleted": "Other side has deleted their account",
       "createOfferNudge":
-        "Expand your reach within the social network and be the first one to create an offer for this criteria."
+        "Expand your reach within the social network and be the first one to create an offer for this criteria.",
+      "offerAuthorSpeaks": "{{name}} speaks {{spokenLanguages}}"
     },
     "termsOfUse": {
       "termsOfUse": "Podmínky používání",
@@ -473,7 +474,20 @@ const otherCs: typeof en =
       "errorLocationNotFilled": "Vyplň prosím lokalitu.",
       "errorDescriptionNotFilled": "Vyplň prosím popis nabídky.",
       "selectCurrency": "Výběr měny",
-      "currencyYouWouldLikeToUse": "Měna, kterou chceš použít při obchodování."
+      "currencyYouWouldLikeToUse": "Měna, kterou chceš použít při obchodování.",
+      "spokenLanguages": {
+        "indicatePreferredLanguage": "Indicate preferred language",
+        "ENG": "English",
+        "DEU": "German",
+        "CZE": "Czech",
+        "SVK": "Slovak",
+        "PRT": "Portuguese",
+        "FRA": "French",
+        "ITA": "Italian",
+        "ESP": "Spanish",
+        "language": "Language",
+        "preferredLanguages": "Preferred languages"
+      }
     },
     "notifications": {
       "permissionsNotGranted": {

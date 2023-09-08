@@ -9,6 +9,7 @@ import {
   OneOfferInState,
   PaymentMethod,
   Sort,
+  SpokenLanguage,
 } from '@vexl-next/domain/dist/general/offers'
 import {type ApiErrorFetchingOffers} from '@vexl-next/resources-utils/dist/offers/getNewOffersAndDecrypt'
 import {IsoDatetimeString} from '@vexl-next/domain/dist/utility/IsoDatetimeString.brand'
@@ -60,6 +61,7 @@ export const OffersFilter = z.object({
   offerType: OfferType.optional(),
   amountBottomLimit: z.coerce.number().optional(),
   amountTopLimit: z.coerce.number().optional(),
+  spokenLanguages: z.array(SpokenLanguage),
   text: z.string().optional(),
 })
 

@@ -27,6 +27,7 @@ const OfferPublicPartToEncrypt = z.object({
   btcNetwork: z.array(z.string()),
   currency: z.string(),
   offerType: z.string(),
+  spokenLanguages: z.array(z.string()).optional(),
   activePriceState: z.string(),
   activePriceValue: z.coerce.string(),
   activePriceCurrency: z.string(),

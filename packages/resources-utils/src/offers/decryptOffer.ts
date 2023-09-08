@@ -94,7 +94,10 @@ export default function decryptOffer(
           TE.right(serverOffer.publicPayload.substring(1)),
           TE.chainW(aesGCMIgnoreTagDecrypt(privatePayload.symmetricKey)),
           TE.chainEitherKW(parseJson),
-          TE.map((one) => ({...one, active: stringToBoolean(one.active)})),
+          TE.map((one) => ({
+            ...one,
+            active: stringToBoolean(one.active),
+          })),
           TE.chainEitherKW(decodeLocation),
           TE.chainEitherKW(safeParse(OfferPublicPart))
         )

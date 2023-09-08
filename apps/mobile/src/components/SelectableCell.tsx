@@ -12,6 +12,7 @@ export interface Props<T> extends SelectableCellContentProps<T> {
   fullWidth?: boolean
   selected: boolean
   onPress: (_: T) => void
+  size?: 'small' | 'large'
 }
 function SelectableCell<T>({
   fullWidth = true,
@@ -20,6 +21,7 @@ function SelectableCell<T>({
   type,
   onPress,
   subtitle,
+  size = 'large',
 }: Props<T>): JSX.Element {
   const tokens = getTokens()
 
@@ -32,19 +34,24 @@ function SelectableCell<T>({
       <Stack
         als={fullWidth ? 'auto' : 'flex-start'}
         br="$4"
-        p="$4"
+        p={size === 'large' ? '$4' : '$3'}
         bg={selected ? '$darkBrown' : '$grey'}
       >
         <XStack>
           {selected ? (
-            <Image source={checkmarkSvg} stroke={tokens.color.main.val} />
+            <Image
+              width={size === 'large' ? 24 : 16}
+              height={size === 'large' ? 24 : 16}
+              source={checkmarkSvg}
+              stroke={tokens.color.main.val}
+            />
           ) : (
             <Stack w={17} />
           )}
           <Stack fs={1} ml="$2">
             <Text
-              ff="$body700"
-              fos={18}
+              ff={size === 'large' ? '$body700' : '$body600'}
+              fos={size === 'large' ? 18 : 14}
               col={selected ? '$main' : '$greyOnBlack'}
             >
               {title}

@@ -57,7 +57,12 @@ function CurrencySelectListItem({
           </XStack>
         </Stack>
         {selectedCurrencyCode === currency.code && (
-          <Image source={checkmarkSvg} stroke={tokens.color.$greyAccent5.val} />
+          <Image
+            height={24}
+            width={24}
+            source={checkmarkSvg}
+            stroke={tokens.color.$greyAccent5.val}
+          />
         )}
       </XStack>
     </TouchableOpacity>

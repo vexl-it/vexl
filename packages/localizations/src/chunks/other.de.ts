@@ -333,7 +333,8 @@ const otherDe: typeof en =
         "Kann nicht genehmigt werden. Die Gegenseite hat ihr Konto gelöscht",
       "otherSideAccountDeleted": "Other side has deleted their account",
       "createOfferNudge":
-        "Expand your reach within the social network and be the first one to create an offer for this criteria."
+        "Expand your reach within the social network and be the first one to create an offer for this criteria.",
+      "offerAuthorSpeaks": "{{name}} speaks {{spokenLanguages}}"
     },
     "termsOfUse": {
       "termsOfUse": "AGB",
@@ -489,7 +490,20 @@ const otherDe: typeof en =
         "Bitte gebe eine Beschreibung des Angebots ein",
       "selectCurrency": "Währung auswählen",
       "currencyYouWouldLikeToUse":
-        "Die Währung, die du für deinen Handel verwenden möchtest."
+        "Die Währung, die du für deinen Handel verwenden möchtest.",
+      "spokenLanguages": {
+        "indicatePreferredLanguage": "Indicate preferred language",
+        "ENG": "English",
+        "DEU": "German",
+        "CZE": "Czech",
+        "SVK": "Slovak",
+        "PRT": "Portuguese",
+        "FRA": "French",
+        "ITA": "Italian",
+        "ESP": "Spanish",
+        "language": "Language",
+        "preferredLanguages": "Preferred languages"
+      }
     },
     "notifications": {
       "permissionsNotGranted": {

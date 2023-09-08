@@ -1,10 +1,11 @@
-import {atom, type Atom} from 'jotai'
+import {atom, type Atom, type SetStateAction, type WritableAtom} from 'jotai'
 import {type OffersFilter} from '../../state/marketplace/domain'
 import {
   type CurrencyCode,
   type IntendedConnectionLevel,
   type LocationState,
   type Sort,
+  type SpokenLanguage,
 } from '@vexl-next/domain/dist/general/offers'
 import {focusAtom} from 'jotai-optics'
 import {
@@ -20,6 +21,7 @@ import {
 import {pipe} from 'fp-ts/function'
 import * as T from 'fp-ts/Task'
 import {fetchLocationSuggestionsAtom} from '../../state/location/atoms/fetchLocationSuggestionsAtom'
+import getValueFromSetStateActionOfAtom from '../../utils/atomUtils/getValueFromSetStateActionOfAtom'
 
 export const sortingAtom = atom<Sort | undefined>(undefined)
 export const intendedConnectionLevelAtom = atom<IntendedConnectionLevel>('ALL')
@@ -65,7 +67,7 @@ export const updateCurrencyLimitsAtom = atom<
   [
     {
       currency: CurrencyCode | undefined
-    }
+    },
   ],
   boolean
 >(null, (get, set, params) => {
@@ -83,7 +85,7 @@ export const updateLocationStatePaymentMethodAtom = atom<
   [
     {
       locationState: LocationState
-    }
+    },
   ],
   boolean
 >(null, (get, set, params) => {
@@ -105,6 +107,12 @@ export const updateLocationStatePaymentMethodAtom = atom<
 
   return true
 })
+
+const spokenLanguagesAtom = focusAtom(offersFilterAtom, (optic) =>
+  optic.prop('spokenLanguages')
+)
+
+export const spokenLanguagesAtomsAtom = splitAtom(spokenLanguagesAtom)
 
 export const locationStateAtom = focusAtom(offersFilterAtom, (optic) =>
   optic.prop('locationState')
@@ -129,6 +137,62 @@ export const amountBottomLimitAtom = focusAtom(offersFilterAtom, (optic) =>
 export const amountTopLimitAtom = focusAtom(offersFilterAtom, (optic) =>
   optic.prop('amountTopLimit')
 )
+
+export const selectedSpokenLanguagesAtom = atom<SpokenLanguage[]>([])
+
+export const removeSpokenLanguageActionAtom = atom(
+  null,
+  (get, set, spokenLanguage: SpokenLanguage) => {
+    const spokenLanguages = get(spokenLanguagesAtom)
+    const selectedSpokenLanguages = get(selectedSpokenLanguagesAtom)
+
+    set(
+      spokenLanguagesAtom,
+      spokenLanguages.filter((language) => language !== spokenLanguage)
+    )
+    set(
+      selectedSpokenLanguagesAtom,
+      selectedSpokenLanguages.filter((language) => language !== spokenLanguage)
+    )
+  }
+)
+
+export function createIsThisLanguageSelectedAtom(
+  spokenLanguage: SpokenLanguage
+): WritableAtom<boolean, [SetStateAction<boolean>], void> {
+  return atom(
+    (get) => get(selectedSpokenLanguagesAtom).includes(spokenLanguage),
+    (get, set, isSelected: SetStateAction<boolean>) => {
+      const selectedSpokenLanguages = get(selectedSpokenLanguagesAtom)
+      const selected = getValueFromSetStateActionOfAtom(isSelected)(() =>
+        get(selectedSpokenLanguagesAtom).includes(spokenLanguage)
+      )
+
+      if (selected) {
+        set(selectedSpokenLanguagesAtom, [
+          ...selectedSpokenLanguages,
+          spokenLanguage,
+        ])
+      } else {
+        set(
+          selectedSpokenLanguagesAtom,
+          selectedSpokenLanguages.filter((lang) => lang !== spokenLanguage)
+        )
+      }
+    }
+  )
+}
+
+export const resetSpokenLanguagesToInitialStateActionAtom = atom(
+  null,
+  (get, set) => {
+    set(selectedSpokenLanguagesAtom, get(spokenLanguagesAtom))
+  }
+)
+
+export const saveSelectedSpokenLanguagesActionAtom = atom(null, (get, set) => {
+  set(spokenLanguagesAtom, get(selectedSpokenLanguagesAtom))
+})
 
 export const locationSuggestionsAtom = atom<LocationSuggestion[]>([])
 
@@ -186,6 +250,7 @@ export const saveFilterActionAtom = atom(null, (get, set) => {
       intendedConnectionLevel === 'FIRST'
         ? ['FIRST_DEGREE']
         : ['FIRST_DEGREE', 'SECOND_DEGREE'],
+    spokenLanguages: offersFilter.spokenLanguages,
     amountBottomLimit: offersFilter.amountBottomLimit,
     amountTopLimit: offersFilter.amountTopLimit,
     text: offersFilter.text,

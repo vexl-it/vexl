@@ -18,9 +18,13 @@ import {useMolecule} from 'jotai-molecules'
 import {offerFormMolecule} from './atoms/offerFormStateAtoms'
 import {type SectionProps} from '../Section'
 import coinsSvg from '../images/coinsSvg'
+import spokenLanguagesSvg from '../images/spokenLanguagesSvg'
+import SpokenLanguages from '../OfferForm/components/SpokenLanguages'
+import {getTokens} from 'tamagui'
 
 export default function useContent(): SectionProps[] {
   const {t} = useTranslation()
+  const tokens = getTokens()
   const {
     amountTopLimitAtom,
     amountBottomLimitAtom,
@@ -40,6 +44,11 @@ export default function useContent(): SectionProps[] {
     locationSuggestionsAtomsAtom,
     updateAndRefreshLocationSuggestionsActionAtom,
     setOfferLocationActionAtom,
+    spokenLanguagesAtomsAtom,
+    removeSpokenLanguageActionAtom,
+    createIsThisLanguageSelectedAtom,
+    resetSelectedSpokenLanguagesActionAtom,
+    saveSelectedSpokenLanguagesActionAtom,
   } = useMolecule(offerFormMolecule)
 
   return useMemo(
@@ -97,6 +106,25 @@ export default function useContent(): SectionProps[] {
         mandatory: true,
       },
       {
+        title: t('offerForm.spokenLanguages.language'),
+        image: spokenLanguagesSvg,
+        imageFill: tokens.color.white.val,
+        children: (
+          <SpokenLanguages
+            createIsThisLanguageSelectedAtom={createIsThisLanguageSelectedAtom}
+            spokenLanguagesAtomsAtom={spokenLanguagesAtomsAtom}
+            removeSpokenLanguageActionAtom={removeSpokenLanguageActionAtom}
+            resetSelectedSpokenLanguagesActionAtom={
+              resetSelectedSpokenLanguagesActionAtom
+            }
+            saveSelectedSpokenLanguagesActionAtom={
+              saveSelectedSpokenLanguagesActionAtom
+            }
+          />
+        ),
+        mandatory: true,
+      },
+      {
         title: t('offerForm.paymentMethod.paymentMethod'),
         image: paymentMethodSvg,
         children: (
@@ -130,25 +158,31 @@ export default function useContent(): SectionProps[] {
       },
     ],
     [
-      amountBottomLimitAtom,
-      amountTopLimitAtom,
-      btcNetworkAtom,
+      t,
       currencyAtom,
+      updateCurrencyLimitsAtom,
+      amountTopLimitAtom,
+      amountBottomLimitAtom,
+      offerTypeOrDummyValueAtom,
       feeAmountAtom,
       feeStateAtom,
-      updateAndRefreshLocationSuggestionsActionAtom,
-      intendedConnectionLevelAtom,
-      locationAtom,
-      locationStateAtom,
+      setOfferLocationActionAtom,
       locationSuggestionsAtom,
       locationSuggestionsAtomsAtom,
-      offerDescriptionAtom,
-      offerTypeOrDummyValueAtom,
-      paymentMethodAtom,
-      setOfferLocationActionAtom,
-      t,
-      updateCurrencyLimitsAtom,
+      updateAndRefreshLocationSuggestionsActionAtom,
+      locationAtom,
+      locationStateAtom,
       updateLocationStatePaymentMethodAtom,
+      tokens.color.white.val,
+      createIsThisLanguageSelectedAtom,
+      spokenLanguagesAtomsAtom,
+      removeSpokenLanguageActionAtom,
+      resetSelectedSpokenLanguagesActionAtom,
+      saveSelectedSpokenLanguagesActionAtom,
+      paymentMethodAtom,
+      btcNetworkAtom,
+      offerDescriptionAtom,
+      intendedConnectionLevelAtom,
     ]
   )
 }

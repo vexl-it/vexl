@@ -6,6 +6,7 @@ import Button from '../../Button'
 import UserAvatar from '../../UserAvatar'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import useResetNavigationToMessagingScreen from '../../../utils/useResetNavigationToMessagingScreen'
+import {Keyboard} from 'react-native'
 import {useHideActionForMessage} from '../atoms/createHideActionForMessageMmkvAtom'
 import {useCallback} from 'react'
 import {type SvgString} from '@vexl-next/domain/dist/utility/SvgString.brand'
@@ -124,6 +125,36 @@ function QuickActionBanner(): JSX.Element | null {
         topText={t('messages.actionBanner.requestPending')}
         bottomText={t('messages.actionBanner.bottomText')}
         buttonText={t('messages.actionBanner.buttonText')}
+      />
+    )
+  }
+
+  if (
+    lastMessage.message.messageType === 'DELETE_CHAT' &&
+    lastMessage.state === 'received'
+  ) {
+    return (
+      <QuickActionBannerUi
+        topText={t('messages.messagePreviews.incoming.DELETE_CHAT', {
+          them: otherSideData.userName,
+        })}
+        bottomText={t('messages.leaveToo')}
+        headingType={'boldBottom'}
+        buttonText={t('messages.deleteChat')}
+        leftElement={
+          <UserAvatar
+            width={48}
+            height={48}
+            grayScale
+            userImage={otherSideData.image}
+          />
+        }
+        onButtonPress={() => {
+          Keyboard.dismiss()
+          void deleteChat().then((result) => {
+            if (result) resetNavigationToMessagingScreen()
+          })
+        }}
       />
     )
   }

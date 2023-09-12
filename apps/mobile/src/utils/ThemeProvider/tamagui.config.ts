@@ -150,9 +150,15 @@ const animations: any = createAnimations({
   },
 })
 
+const breakpoints = {
+  sm: 400,
+  md: 500,
+}
+
 const media = createMedia({
-  sm: {maxWidth: 380},
-  md: {minWidth: 380 + 1, maxWidth: 390},
+  sm: {maxWidth: breakpoints.sm},
+  md: {minWidth: breakpoints.sm + 1, maxWidth: breakpoints.md},
+  lg: {minWidth: breakpoints.md + 1},
 })
 
 export const tokens = createTokens({

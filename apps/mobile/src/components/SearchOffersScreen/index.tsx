@@ -9,16 +9,18 @@ import {useSetAtom, useStore} from 'jotai'
 import SearchSuggestions from './components/SearchSuggestions'
 import Button from '../Button'
 import {useTranslation} from '../../utils/localization/I18nProvider'
-import {clearSearchActionAtom} from './atoms/submitSearchActionAtom'
+import submitSearchActionAtom, {
+  clearSearchActionAtom,
+} from './atoms/submitSearchActionAtom'
 import {searchTextAtom} from './atoms/searchTextAtom'
 import {useFocusEffect} from '@react-navigation/native'
 import {focusTextFilterAtom} from '../FilterOffersScreen/atom'
+import magnifyingGlass from '../images/magnifyingGlass'
 
 function SearchOffersScreen(): JSX.Element {
-  const {t} = useTranslation()
   const safeGoBack = useSafeGoBack()
   const setSearchText = useSetAtom(searchTextAtom)
-  const clearSearch = useSetAtom(clearSearchActionAtom)
+  const submitSearch = useSetAtom(submitSearchActionAtom)
   const store = useStore()
 
   useFocusEffect(
@@ -38,12 +40,12 @@ function SearchOffersScreen(): JSX.Element {
             onPress={safeGoBack}
           />
           <SearchInput />
-          <Button
-            onPress={clearSearch}
-            size={'large'}
-            variant={'primary'}
-            text={t('common.reset')}
-          />
+          <IconButton
+            height={60}
+            onPress={submitSearch}
+            variant={'secondary'}
+            icon={magnifyingGlass}
+          ></IconButton>
         </XStack>
         <SearchSuggestions />
       </YStack>

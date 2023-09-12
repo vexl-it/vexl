@@ -9,7 +9,10 @@ const submitSearchActionAtom = atom(
   (get, set, text: string | undefined = undefined) => {
     const filledText = text ?? get(searchTextAtom).trim()
 
-    if (!filledText) return
+    if (!filledText) {
+      set(clearSearchActionAtom)
+      return
+    }
     set(addToPreviousSearchesActionAtom, filledText)
     set(focusTextFilterAtom, filledText)
     safeNavigateBackOutsideReact()

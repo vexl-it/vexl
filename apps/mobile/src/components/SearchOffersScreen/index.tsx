@@ -7,11 +7,7 @@ import {XStack, YStack} from 'tamagui'
 import SearchInput from './components/SearchInput'
 import {useSetAtom, useStore} from 'jotai'
 import SearchSuggestions from './components/SearchSuggestions'
-import Button from '../Button'
-import {useTranslation} from '../../utils/localization/I18nProvider'
-import submitSearchActionAtom, {
-  clearSearchActionAtom,
-} from './atoms/submitSearchActionAtom'
+import submitSearchActionAtom from './atoms/submitSearchActionAtom'
 import {searchTextAtom} from './atoms/searchTextAtom'
 import {useFocusEffect} from '@react-navigation/native'
 import {focusTextFilterAtom} from '../FilterOffersScreen/atom'

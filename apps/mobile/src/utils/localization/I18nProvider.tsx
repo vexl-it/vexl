@@ -12,8 +12,6 @@ export const i18n = new I18n(
     ? translations
     : {
         en: translations.en,
-        cs: translations.cs,
-        sk: translations.sk,
         de: translations.de,
       }
 )

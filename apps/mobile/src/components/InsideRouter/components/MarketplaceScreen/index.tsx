@@ -24,7 +24,7 @@ const tabsFontSizes: Record<string, {sm: number; md: number; lg: number}> = {
     md: 40,
     lg: 40,
   },
-  de: {sm: 20, md: 25, lg: 30},
+  de: {sm: 20, md: 20, lg: 25},
 }
 
 function MarketplaceScreen(): JSX.Element {

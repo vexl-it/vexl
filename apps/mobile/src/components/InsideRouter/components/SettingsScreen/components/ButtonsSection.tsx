@@ -196,34 +196,6 @@ function ButtonsSection(): JSX.Element {
               },
             ],
         [
-          enableHiddenFeatures
-            ? {
-                text: `${t('settings.items.setPin')} ${
-                  Platform.OS === 'ios'
-                    ? ` / ${t('settings.items.faceId')}`
-                    : ''
-                }`,
-                icon: faceIdIconSvg,
-                onPress: todo,
-              }
-            : null,
-          {
-            text: 'CZK',
-            icon: coinsIconSvg,
-            onPress: () => {
-              setChangeCurrencyDialogVisible(true)
-            },
-            children: <SelectedCurrencyTitle />,
-          },
-          enableHiddenFeatures
-            ? {
-                text: t('settings.items.allowScreenshots'),
-                icon: imageIconSvg,
-                onPress: todo,
-              }
-            : null,
-        ],
-        [
           {
             text: t('settings.items.termsAndPrivacy'),
             icon: termsIconSvg,

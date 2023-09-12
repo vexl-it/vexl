@@ -4,59 +4,75 @@ import ContainerWithTopBorderRadius, {
 import {type MarketplaceTabParamsList} from '../../../../navigationTypes'
 import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs'
 import OffersListWithFilter from './components/OffersListStateDisplayer'
-import {useTranslation} from '../../../../utils/localization/I18nProvider'
+import {
+  i18nAtom,
+  useTranslation,
+} from '../../../../utils/localization/I18nProvider'
 import {OfferType} from '@vexl-next/domain/dist/general/offers'
 import {triggerOffersRefreshAtom} from '../../../../state/marketplace'
 import {useCallback, useMemo} from 'react'
-import {type StyleProp, type ViewStyle} from 'react-native'
 import {getTokens, useMedia} from 'tamagui'
 import {useAppState} from '../../../../utils/useAppState'
-import {useSetAtom} from 'jotai'
+import {useAtomValue, useSetAtom} from 'jotai'
 import {setOffersFilterAtom} from '../../../FilterOffersScreen/atom'
 
 const Tab = createMaterialTopTabNavigator<MarketplaceTabParamsList>()
+
+const tabsFontSizes: Record<string, {sm: number; md: number; lg: number}> = {
+  default: {
+    sm: 30,
+    md: 40,
+    lg: 40,
+  },
+  de: {sm: 20, md: 25, lg: 30},
+}
 
 function MarketplaceScreen(): JSX.Element {
   const {t} = useTranslation()
   const media = useMedia()
   const tokens = getTokens()
   const setOffersFilter = useSetAtom(setOffersFilterAtom)
+  const i18n = useAtomValue(i18nAtom)
 
-  const tabBarStyle: StyleProp<ViewStyle> = useMemo(
-    () => ({
-      marginTop: CONTAINER_WITH_TOP_BORDER_RADIUS_TOP_PADDING,
-      backgroundColor: tokens.color.black.val,
-      borderBottomColor: tokens.color.grey.val,
-      borderBottomWidth: 2,
-    }),
-    [tokens.color.black.val, tokens.color.grey.val]
-  )
+  const {
+    tabBarStyle,
+    tabBarContentContainerStyle,
+    tabBarLabelStyle,
+    tabBarIndicatorStyle,
+  } = useMemo(() => {
+    const tabLabelFontSize = (() => {
+      const sizesForLangauge =
+        tabsFontSizes[i18n.locale.split('-').at(0) ?? 'default'] ??
+        tabsFontSizes.default
 
-  const tabBarContentContainerStyle: StyleProp<ViewStyle> = useMemo(
-    () => ({
-      margin: 0,
-      padding: 0,
-    }),
-    []
-  )
+      if (media.sm) return sizesForLangauge.sm
+      if (media.md) return sizesForLangauge.md
+      if (media.lg) return sizesForLangauge.lg
+    })()
 
-  const tabBarLabelStyle: StyleProp<ViewStyle> = useMemo(
-    () => ({
-      fontSize: media.sm ? 30 : 40,
-      fontFamily: 'PPMonument',
-      textTransform: 'none',
-      margin: 0,
-    }),
-    [media]
-  )
-
-  const tabBarIndicatorStyle: StyleProp<ViewStyle> = useMemo(
-    () => ({
-      height: 2,
-      bottom: -2,
-    }),
-    []
-  )
+    return {
+      tabBarStyle: {
+        marginTop: CONTAINER_WITH_TOP_BORDER_RADIUS_TOP_PADDING,
+        backgroundColor: tokens.color.black.val,
+        borderBottomColor: tokens.color.grey.val,
+        borderBottomWidth: 2,
+      },
+      tabBarContentContainerStyle: {
+        margin: 0,
+        padding: 0,
+      },
+      tabBarLabelStyle: {
+        fontSize: tabLabelFontSize,
+        fontFamily: 'PPMonument',
+        textTransform: 'none',
+        margin: 0,
+      },
+      tabBarIndicatorStyle: {
+        height: 2,
+        bottom: -2,
+      },
+    } as const
+  }, [tokens.color.black.val, tokens.color.grey.val, media, i18n])
 
   const refreshOffers = useSetAtom(triggerOffersRefreshAtom)
 

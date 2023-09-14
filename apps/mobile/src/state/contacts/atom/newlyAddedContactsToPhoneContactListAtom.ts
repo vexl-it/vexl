@@ -1,27 +1,16 @@
 import {atom} from 'jotai'
-import {
-  combineContactsFromDeviceWithImportedContacts,
-  combinedContactsAfterLastSubmitAtom,
-  importedContactsAtom,
-} from '../index'
+import {combinedContactsAfterLastSubmitAtom} from '../index'
 import {contactsFromDeviceAtom} from './contactsFromDeviceAtom'
 
 const newlyAddedContactsToPhoneContactListAtom = atom((get) => {
-  const importedContacts = get(importedContactsAtom)
-  const combinedContactsAfterLastSubmit = get(
-    combinedContactsAfterLastSubmitAtom
-  )
-  const combinedContacts = combineContactsFromDeviceWithImportedContacts({
-    contactsFromDevice: get(contactsFromDeviceAtom),
-    importedContacts,
-  })
+  const contactsAfterLastSubmitAtom = get(combinedContactsAfterLastSubmitAtom)
+  const contactsFromDevice = get(contactsFromDeviceAtom)
 
-  return combinedContacts.filter(
-    (combinedContact) =>
-      !combinedContactsAfterLastSubmit.find(
-        (lastSubmitContact) =>
-          lastSubmitContact.normalizedNumber ===
-          combinedContact.normalizedNumber
+  return contactsFromDevice.filter(
+    (oneFromDevice) =>
+      !contactsAfterLastSubmitAtom.some(
+        (oneLastSeen) =>
+          oneLastSeen.normalizedNumber === oneFromDevice.normalizedNumber
       )
   )
 })

@@ -34,7 +34,7 @@ import {IsoDatetimeString} from '@vexl-next/domain/dist/utility/IsoDatetimeStrin
 import {askAreYouSureActionAtom} from '../AreYouSureDialog'
 import userSvg from '../images/userSvg'
 import {syncConnectionsActionAtom} from '../../state/connections/atom/connectionStateAtom'
-import deduplicate from '../../utils/deduplicate'
+import {deduplicateBy} from '../../utils/deduplicate'
 import newlyAddedContactsToPhoneContactListAtom from '../../state/contacts/atom/newlyAddedContactsToPhoneContactListAtom'
 
 export const ContactsSelectScope = createScope<ContactNormalized[]>([])
@@ -350,10 +350,10 @@ export const contactSelectMolecule = molecule((getMolecule, getScope) => {
           // with deduplicating we extract them from returned imported contacts
           set(
             combinedContactsAfterLastSubmitAtom,
-            deduplicate([
-              ...get(combinedContactsAtom),
-              ...convertedToContactsNormalized,
-            ])
+            deduplicateBy(
+              [...get(combinedContactsAtom), ...convertedToContactsNormalized],
+              (one) => one.normalizedNumber
+            )
           )
           set(newlyAddedCustomContactsAtom, [])
           set(

@@ -50,7 +50,7 @@ export default {
   },
   'updates': {
     'fallbackToCacheTimeout': 0,
-    'url': 'https://u.expo.dev/8a2b78bf-b758-42b9-947a-c6201cb7cc59',
+    'url': 'https://u.expo.dev/dbcc5b47-6c4a-4faf-a345-e9cd8a680c32',
   },
   'assetBundlePatterns': ['**/*'],
   'ios': {

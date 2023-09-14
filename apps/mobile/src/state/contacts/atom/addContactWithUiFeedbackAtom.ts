@@ -10,7 +10,7 @@ import {hashPhoneNumber} from '../utils'
 import * as E from 'fp-ts/Either'
 import {loadingOverlayDisplayedAtom} from '../../../components/LoadingOverlayProvider'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
-import {importedContactsAtom} from '../index'
+import {importedContactsAtom, importedContactsHashesAtom} from '../index'
 import {type E164PhoneNumber} from '@vexl-next/domain/dist/general/E164PhoneNumber.brand'
 import showErrorAlert from '../../../utils/showErrorAlert'
 
@@ -122,32 +122,37 @@ const editExistingContact = atom(
   }
 )
 
-const importContact = atom(null, (get, set, newContact: ContactNormalized) => {
-  const contactApi = get(privateApiAtom).contact
+const importContactActionAtom = atom(
+  null,
+  (get, set, newContact: ContactNormalized) => {
+    const contactApi = get(privateApiAtom).contact
 
-  return pipe(
-    hashPhoneNumber(newContact.normalizedNumber),
-    E.map(
-      (hash): ContactNormalizedWithHash => ({
-        ...newContact,
-        hash,
-      })
-    ),
-    TE.fromEither,
-    TE.map((v) => {
-      set(loadingOverlayDisplayedAtom, true)
-      return v
-    }),
-    TE.chainFirstW((contact) =>
-      contactApi.importContacts({contacts: [contact.hash]})
-    ),
-    TE.map((importedContact) => {
-      set(loadingOverlayDisplayedAtom, false)
-      return importedContact
-    }),
-    TE.mapLeft((e) => e)
-  )
-})
+    return pipe(
+      hashPhoneNumber(newContact.normalizedNumber),
+      E.map(
+        (hash): ContactNormalizedWithHash => ({
+          ...newContact,
+          hash,
+        })
+      ),
+      TE.fromEither,
+      TE.map((v) => {
+        set(loadingOverlayDisplayedAtom, true)
+        return v
+      }),
+      TE.chainFirstW((contact) =>
+        contactApi.importContacts({
+          contacts: [contact.hash, ...get(importedContactsHashesAtom)],
+        })
+      ),
+      TE.map((importedContact) => {
+        set(loadingOverlayDisplayedAtom, false)
+        return importedContact
+      }),
+      TE.mapLeft((e) => e)
+    )
+  }
+)
 
 const createContact = atom(null, (get, set, newContact: ContactNormalized) => {
   const {t} = get(translationAtom)
@@ -164,7 +169,7 @@ const createContact = atom(null, (get, set, newContact: ContactNormalized) => {
     ),
     TE.bindTo('customName'),
     TE.bindW('importedContact', ({customName}) =>
-      set(importContact, {...newContact, name: customName})
+      set(importContactActionAtom, {...newContact, name: customName})
     ),
     TE.chainFirstW(({customName}) =>
       set(askAreYouSureActionAtom, {

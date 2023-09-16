@@ -1,7 +1,7 @@
 import {type OneOfferInState} from '@vexl-next/domain/dist/general/offers'
 import {type ContactNormalizedWithHash} from '../../contacts/domain'
-import {matchSorter} from 'match-sorter'
 
+const DIVIDER = ' ## '
 export default function filterOffersByText({
   text,
   offers,
@@ -13,6 +13,8 @@ export default function filterOffersByText({
 }): OneOfferInState[] {
   // TODO - better search. This is just a placeholder
 
+  const wordsToSearchFor = text.toUpperCase().trim().split(' ').filter(Boolean)
+
   const offersWithSearchableString = offers.map((offer) => ({
     offer,
     searchableString: [
@@ -21,17 +23,23 @@ export default function filterOffersByText({
         .map((hash) =>
           importedContacts
             .filter((one) => one.hash === hash)
-            .map((o) => [o.name, o.normalizedNumber].join(' '))
-            .join(' ')
+            .map((o) => [o.name, o.normalizedNumber].join(DIVIDER))
+            .join(DIVIDER)
         )
-        .join(' '),
+        .join(DIVIDER),
       offer.offerInfo.publicPart.location
         ?.map((one) => one.city ?? '')
-        .join(' '),
-    ].join(' '),
+        .join(DIVIDER),
+    ]
+      .join(DIVIDER)
+      .toUpperCase(),
   }))
 
-  return matchSorter(offersWithSearchableString, text, {
-    keys: ['searchableString'],
-  }).map((one) => one.offer)
+  return offersWithSearchableString
+    .filter((oneOffer) =>
+      wordsToSearchFor.every((oneWordToSearchFor) =>
+        oneOffer.searchableString.includes(oneWordToSearchFor)
+      )
+    )
+    .map((one) => one.offer)
 }

@@ -1,14 +1,20 @@
 import {Image, Stack, Text} from 'tamagui'
-import React from 'react'
+import React, {useCallback} from 'react'
 import {type ContactNormalizedWithHash} from '../../../state/contacts/domain'
 import SvgImage from '../../Image'
 import picturePlaceholderSvg from '../../images/picturePlaceholderSvg'
+import Button from '../../Button'
+import openUrl from '../../../utils/openUrl'
 
 interface Props {
   friend: ContactNormalizedWithHash
 }
 
 function CommonFriendsListItem({friend}: Props): JSX.Element {
+  const dialFriend = useCallback(() => {
+    openUrl(`tel:${friend.normalizedNumber}`)()
+  }, [friend])
+
   return (
     <Stack fd="row" ai="center">
       {friend.imageUri ? (
@@ -30,6 +36,12 @@ function CommonFriendsListItem({friend}: Props): JSX.Element {
           {friend.normalizedNumber}
         </Text>
       </Stack>
+      <Button
+        onPress={dialFriend}
+        variant="secondary"
+        text={'Call'}
+        size={'small'}
+      />
     </Stack>
   )
 }

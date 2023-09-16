@@ -4,18 +4,24 @@
   "extends": "@vexl-next/ts-config/base.json",
   "compilerOptions": {
     "jsx": "react-native",
-    "lib": ["DOM", "ESNext"],
+    "lib": [
+      "DOM",
+      "ESNext"
+    ],
     "moduleResolution": "node",
     "noEmit": true,
     "resolveJsonModule": true,
     "target": "ESNext",
     "strictNullChecks": true,
     "paths": {
-      "testUtils": ["./src/testUtils"]
+      "testUtils": [
+        "./src/testUtils"
+      ]
     },
     "composite": false,
     "declaration": false,
-    "declarationMap": false
+    "declarationMap": false,
+    "allowSyntheticDefaultImports": true
   },
   "exclude": [
     "node_modules",

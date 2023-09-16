@@ -29,7 +29,6 @@ import copySvg from '../images/copySvg'
 import IconButton from '../../IconButton'
 import {type ChatMessage} from '@vexl-next/domain/dist/general/messaging'
 import resolveLocalUri from '../../../utils/resolveLocalUri'
-import {playSmartUndCreamySound} from '../../../utils/easterEggs/smartUndCreamy'
 
 const style = StyleSheet.create({
   textInputStyle: {
@@ -153,16 +152,6 @@ function TextMessage({
   const otherSideData = useAtomValue(otherSideDataAtom)
   const openImage = useSetAtom(openedImageUriAtom)
 
-  const onBubblePressed = useCallback(() => {
-    toggleExtended()
-    if (
-      messageItem?.type === 'message' &&
-      messageItem.message.message?.text.includes('🍦')
-    ) {
-      void playSmartUndCreamySound()
-    }
-  }, [toggleExtended, messageItem])
-
   const textInputStyle = useMemo(
     () => [
       style.textInputStyle,
@@ -222,7 +211,7 @@ function TextMessage({
           space={'$2'}
           alignItems={'center'}
         >
-          <TouchableWithoutFeedback style={{flex: 1}} onPress={onBubblePressed}>
+          <TouchableWithoutFeedback style={{flex: 1}} onPress={toggleExtended}>
             <Stack
               width={message.message.image ? '80%' : undefined}
               maxWidth={'80%'}

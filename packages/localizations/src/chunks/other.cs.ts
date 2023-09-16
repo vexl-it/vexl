@@ -731,7 +731,7 @@ const otherCs: typeof en =
       "reportOffer": "Nahlásit nabídku",
       "ended": "Ukončeno",
       "textMessageTypes": {
-        "REQUEST_MESSAGING": "Your request: {{message}}",
+        "REQUEST_MESSAGING": "Reakce na tvou nabídku: {{message}}",
         "CANCEL_REQUEST_MESSAGING": "This request was cancelled.",
         "DISAPPROVE_MESSAGING": "This request was denied.",
         "APPROVE_MESSAGING":

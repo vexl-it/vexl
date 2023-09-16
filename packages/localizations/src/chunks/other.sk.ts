@@ -734,7 +734,7 @@ const otherSk: typeof en =
       "reportOffer": "Nahlásiť ponuku",
       "ended": " ukončené",
       "textMessageTypes": {
-        "REQUEST_MESSAGING": "Your request: {{message}}",
+        "REQUEST_MESSAGING": "Reakcia na tvoju ponuku: {{message}}",
         "CANCEL_REQUEST_MESSAGING": "This request was cancelled.",
         "DISAPPROVE_MESSAGING": "This request was denied.",
         "APPROVE_MESSAGING":

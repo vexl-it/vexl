@@ -728,7 +728,7 @@ const otherEn =
       "reportOffer": "Report offer",
       "ended": "Ended",
       "textMessageTypes": {
-        "REQUEST_MESSAGING": "Your request: {{message}}",
+        "REQUEST_MESSAGING": "Reacts to your request: {{message}}",
         "CANCEL_REQUEST_MESSAGING": "This request was cancelled.",
         "DISAPPROVE_MESSAGING": "This request was denied.",
         "APPROVE_MESSAGING":

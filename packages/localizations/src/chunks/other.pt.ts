@@ -596,7 +596,9 @@ const otherPt: typeof en =
       "myOffer": "A minha oferta",
       "offerAdded": "Adicionado {{date}}",
       "sortedByNewest": "Ordenado por mais recente",
-      "sortedByOldest": "Ordenado pelo mais antigo"
+      "sortedByOldest": "Ordenado pelo mais antigo",
+      "offerToSell": "Offer to sell",
+      "offerToBuy": "Offer to buy"
     },
     "editOffer": {
       "editOffer": "Editar oferta",

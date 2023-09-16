@@ -44,12 +44,16 @@ function EditOfferScreen({
     useMolecule(offerFormMolecule)
   const editOffer = useSetAtom(editOfferAtom)
   const setOffer = useSetAtom(offerAtom)
+  const setOfferType = useSetAtom(offerTypeAtom)
   const offer = useAtomValue(useMemo(() => singleOfferAtom(offerId), [offerId]))
 
   useFocusEffect(
     useCallback(() => {
-      if (offer) setOffer(offer)
-    }, [offer, setOffer])
+      if (offer) {
+        setOffer(offer)
+        setOfferType(offer.offerInfo.publicPart.offerType)
+      }
+    }, [offer, setOffer, setOfferType])
   )
 
   return (

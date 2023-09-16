@@ -40,7 +40,9 @@ function OfferAuthorAvatar({
           <UserAvatar width={48} height={48} userImage={userData.image} />
           <Stack f={1} ml={'$2'}>
             <Text fos={16} ff={'$body600'} col={'$white'}>
-              {t('myOffers.myOffer')}
+              {offerInfo.publicPart.offerType === 'BUY'
+                ? t('myOffers.offerToBuy')
+                : t('myOffers.offerToSell')}
             </Text>
             <Text fos={12} ff={'$body500'} col={'$greyOnBlack'}>
               {t('myOffers.offerAdded', {

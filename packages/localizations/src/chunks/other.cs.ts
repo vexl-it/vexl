@@ -587,7 +587,9 @@ const otherCs: typeof en =
       "myOffer": "Moje nabídka",
       "offerAdded": "Přidáno {{date}}",
       "sortedByNewest": "Seřazeno podle nejnovějších",
-      "sortedByOldest": "Seřazeno podle nejstaršího"
+      "sortedByOldest": "Seřazeno podle nejstaršího",
+      "offerToSell": "Offer to sell",
+      "offerToBuy": "Offer to buy"
     },
     "editOffer": {
       "editOffer": "Upravit nabídku",

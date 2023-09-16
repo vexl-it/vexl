@@ -602,7 +602,9 @@ const otherFr: typeof en =
       "myOffer": "Mon offre",
       "offerAdded": "Ajouté {{date}}",
       "sortedByNewest": "Classé par le plus récent",
-      "sortedByOldest": "Classé par le plus ancien"
+      "sortedByOldest": "Classé par le plus ancien",
+      "offerToSell": "Offer to sell",
+      "offerToBuy": "Offer to buy"
     },
     "editOffer": {
       "editOffer": "Modifier l'offre",

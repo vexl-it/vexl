@@ -587,7 +587,9 @@ const otherEn =
       "myOffer": "My Offer",
       "offerAdded": "Added {{date}}",
       "sortedByNewest": "Sorted by newest",
-      "sortedByOldest": "Sorted by oldest"
+      "sortedByOldest": "Sorted by oldest",
+      "offerToSell": "Offer to sell",
+      "offerToBuy": "Offer to buy"
     },
     "editOffer": {
       "editOffer": "Edit offer",

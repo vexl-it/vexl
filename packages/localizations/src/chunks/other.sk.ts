@@ -590,7 +590,9 @@ const otherSk: typeof en =
       "myOffer": "Moja ponuka",
       "offerAdded": "Pridané {{date}}",
       "sortedByNewest": "Zoradené podľa najnovších",
-      "sortedByOldest": "Zoradené podľa najstarších"
+      "sortedByOldest": "Zoradené podľa najstarších",
+      "offerToSell": "Offer to sell",
+      "offerToBuy": "Offer to buy"
     },
     "editOffer": {
       "editOffer": "Upraviť ponuku",

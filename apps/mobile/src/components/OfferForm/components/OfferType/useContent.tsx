@@ -9,11 +9,11 @@ export default function useContent(): Array<TabProps<OfferType>> {
   return useMemo(
     () => [
       {
-        title: t('offerForm.sellBitcoin'),
+        title: t('offerForm.sellHoney'),
         type: 'SELL',
       },
       {
-        title: t('offerForm.buyBitcoin'),
+        title: t('offerForm.buyHoney'),
         type: 'BUY',
       },
     ],

@@ -362,8 +362,8 @@ const otherCs: typeof en =
     "offerForm": {
       "myNewOffer": "Nová nabídka",
       "iWantTo": "Chci",
-      "sellBitcoin": "Prodat bitcoin",
-      "buyBitcoin": "Koupit Bitcoin",
+      "sellHoney": "Prodat Bitcoin",
+      "buyHoney": "Koupit Bitcoin",
       "amountOfTransaction": {
         "amountOfTransaction": "Částka",
         "pleaseSelectCurrencyFirst": "Nejdřív si vyber měnu",
@@ -392,8 +392,8 @@ const otherCs: typeof en =
           "Prodáváš o něco rychleji, ale trochu pod tržní cenou.",
         "youSellMuchFaster":
           "Prodáváš mnohem rychleji, ale hluboko pod tržní cenou",
-        "youBuyBtcFor": "Kupujete BTC za",
-        "youSellBtcFor": "Prodáváte BTC za",
+        "youBuyHoneyFor": "Kupujete BTC za",
+        "youSellHoneyFor": "Prodáváte BTC za",
         "marketPrice": "tržní cenu",
         "sellFaster": "Prodáváš rychleji",
         "earnMore": "Vyděláš více",
@@ -422,7 +422,7 @@ const otherCs: typeof en =
         "whatToWatchOutForOnline": "Na co si dát pozor online?",
         "moneySentByRandomPerson":
           "Peníze zaslané náhodnou osobou mohou mít kriminální původ a mohou být vystopovatelné.",
-        "neverSendCrypto": "Nikdy neposílejte bitcoin před obdržením platby.",
+        "neverSendHoneyFirst": "Nikdy neposílejte bitcoin před obdržením platby.",
         "alwaysVerifyTheName":
           "Vždy si ověř jméno majitele účtu, od kterého jsi platbu obdržel, jestli sedí s deklarovanou identitou protistrany.",
         "forwardTheAddress":
@@ -851,7 +851,7 @@ const otherCs: typeof en =
       "text": "Nainstaluj si nejnovši verzi aplikace.",
       "action": "Aktualizovat"
     },
-    "btcPriceChart": {
+    "honeyPriceChart": {
       "requestCouldNotBeProcessed": ":D"
     },
     "deepLinks": {

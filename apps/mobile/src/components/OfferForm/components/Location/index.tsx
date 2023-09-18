@@ -170,7 +170,7 @@ function LocationComponent({
               {t('offerForm.location.moneySentByRandomPerson')}
             </Text>
             <Text fos={18} color="$greyOnWhite">
-              {t('offerForm.location.neverSendCrypto')}
+              {t('offerForm.location.neverSendHoneyFirst')}
             </Text>
             <Text fos={18} color="$greyOnWhite">
               {t('offerForm.location.alwaysVerifyTheName')}

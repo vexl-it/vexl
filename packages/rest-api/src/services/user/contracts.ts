@@ -95,14 +95,14 @@ export interface InvalidPhoneNumberResponse {
   response: AxiosResponse
 }
 
-export const GetCryptocurrencyDetailsRequest = z.object({
-  coin: z.literal('bitcoin').default('bitcoin'),
+export const GetHoneyDetailsRequest = z.object({
+  coin: z.string().optional().default('bitcoin'),
 })
-export type GetCryptocurrencyDetailsRequest = z.TypeOf<
-  typeof GetCryptocurrencyDetailsRequest
+export type GetHoneyDetailsRequest = z.TypeOf<
+  typeof GetHoneyDetailsRequest
 >
 
-export const GetCryptocurrencyDetailsResponse = z.object({
+export const GetHoneyDetailsResponse = z.object({
   priceUsd: z.number(),
   priceCzk: z.number(),
   priceEur: z.number(),
@@ -115,6 +115,6 @@ export const GetCryptocurrencyDetailsResponse = z.object({
   priceChangePercentage1y: z.number(),
   lastUpdated: IsoDatetimeString,
 })
-export type GetCryptocurrencyDetailsResponse = z.TypeOf<
-  typeof GetCryptocurrencyDetailsResponse
+export type GetHoneyDetailsResponse = z.TypeOf<
+  typeof GetHoneyDetailsResponse
 >

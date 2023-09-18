@@ -363,8 +363,8 @@ const otherEn =
     "offerForm": {
       "myNewOffer": "New offer",
       "iWantTo": "I want to",
-      "sellBitcoin": "Sell Bitcoin",
-      "buyBitcoin": "Buy Bitcoin",
+      "sellHoney": "Sell Bitcoin",
+      "buyHoney": "Buy Bitcoin",
       "amountOfTransaction": {
         "amountOfTransaction": "Amount",
         "pleaseSelectCurrencyFirst": "Please select currency first",
@@ -393,8 +393,8 @@ const otherEn =
         "youSellSlightlyFaster":
           "You sell slightly faster, but a bit below market price",
         "youSellMuchFaster": "You sell much faster, but far below market price",
-        "youBuyBtcFor": "You buy BTC for",
-        "youSellBtcFor": "You sell BTC for",
+        "youBuyHoneyFor": "You buy BTC for",
+        "youSellHoneyFor": "You sell BTC for",
         "marketPrice": "market price",
         "sellFaster": "Sell faster",
         "earnMore": "Earn more",
@@ -422,7 +422,7 @@ const otherEn =
         "whatToWatchOutForOnline": "What to watch out for online?",
         "moneySentByRandomPerson":
           "Money sent by a random person can be of criminal origin and traceable.",
-        "neverSendCrypto": "Never send bitcoin before receiving payment.",
+        "neverSendHoneyFirst": "Never send bitcoin before receiving payment.",
         "alwaysVerifyTheName":
           "Always verify the name of the account holder you received the payment from with the declared identity of the counterparty.",
         "forwardTheAddress":
@@ -849,7 +849,7 @@ const otherEn =
         "Download the latest version of Vexl for proper app functionality.",
       "action": "Update now"
     },
-    "btcPriceChart": {
+    "honeyPriceChart": {
       "requestCouldNotBeProcessed":
         "Request to obtain current BTC price failed"
     },

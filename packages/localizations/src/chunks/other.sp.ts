@@ -371,8 +371,8 @@ const otherSp: typeof en =
     "offerForm": {
       "myNewOffer": "Nueva oferta",
       "iWantTo": "Quiero",
-      "sellBitcoin": "Vender Bitcoin",
-      "buyBitcoin": "Comprar Bitcoin",
+      "sellHoney": "Vender Bitcoin",
+      "buyHoney": "Comprar Bitcoin",
       "amountOfTransaction": {
         "amountOfTransaction": "Cantidad",
         "pleaseSelectCurrencyFirst": "Seleccione primero la moneda",
@@ -401,8 +401,8 @@ const otherSp: typeof en =
           "Vendes un poco más rápido, pero un poco por debajo del precio de mercado.",
         "youSellMuchFaster":
           "Vendes mucho más rápido, pero muy por debajo del precio de mercado",
-        "youBuyBtcFor": "Compras BTC por",
-        "youSellBtcFor": "Usted vende BTC por",
+        "youBuyHoneyFor": "Compras BTC por",
+        "youSellHoneyFor": "Usted vende BTC por",
         "marketPrice": "precio de mercado",
         "sellFaster": "Vende más rápido",
         "earnMore": "Gana más",
@@ -430,7 +430,7 @@ const otherSp: typeof en =
         "whatToWatchOutForOnline": "¿Qué hay que tener en cuenta en Internet?",
         "moneySentByRandomPerson":
           "El dinero enviado por una persona cualquiera puede ser de origen delictivo y rastreable.",
-        "neverSendCrypto": "Nunca envíes bitcoin antes de recibir el pago.",
+        "neverSendHoneyFirst": "Nunca envíes bitcoin antes de recibir el pago.",
         "alwaysVerifyTheName":
           "Verifique siempre el nombre del titular de la cuenta de la que ha recibido el pago con la identidad declarada de la contraparte.",
         "forwardTheAddress":
@@ -861,7 +861,7 @@ const otherSp: typeof en =
         "Descarga la última versión de Vexl para que la aplicación funcione correctamente.",
       "action": "Actualizar ahora"
     },
-    "btcPriceChart": {
+    "honeyPriceChart": {
       "requestCouldNotBeProcessed":
         "La solicitud para obtener el precio actual de BTC falló"
     },

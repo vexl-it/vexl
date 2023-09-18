@@ -90,8 +90,8 @@ function PremiumOrDiscount({
           <XStack f={1} ai="center" jc="space-between">
             <Text maxWidth={'50%'} mr="$4" fos={18} ff="$body600" col="$white">
               {offerType === 'BUY'
-                ? t('offerForm.premiumOrDiscount.youBuyBtcFor')
-                : t('offerForm.premiumOrDiscount.youSellBtcFor')}
+                ? t('offerForm.premiumOrDiscount.youBuyHoneyFor')
+                : t('offerForm.premiumOrDiscount.youSellHoneyFor')}
             </Text>
             <TouchableOpacity
               style={{flex: 1}}

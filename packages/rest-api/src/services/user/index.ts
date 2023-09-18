@@ -3,8 +3,8 @@ import urlJoin from 'url-join'
 import {type ServiceUrl} from '../../ServiceUrl.brand'
 import {
   type ChallengeCouldNotBeGenerated,
-  type GetCryptocurrencyDetailsRequest,
-  GetCryptocurrencyDetailsResponse,
+  type GetHoneyDetailsRequest,
+  GetHoneyDetailsResponse,
   type InitPhoneNumberVerificationRequest,
   InitPhoneNumberVerificationResponse,
   type InvalidPhoneNumber,
@@ -170,7 +170,7 @@ export function privateApi({
     deleteUser: () =>
       axiosCall(axiosInstance, {method: 'delete', url: '/user/me'}),
 
-    getCryptocurrencyDetails: (request: GetCryptocurrencyDetailsRequest) => {
+    getHoneyDetails: (request: GetHoneyDetailsRequest) => {
       return pipe(
         axiosCallWithValidation(
           axiosInstance,
@@ -178,7 +178,7 @@ export function privateApi({
             method: 'get',
             url: `/cryptocurrencies/${request.coin}`,
           },
-          GetCryptocurrencyDetailsResponse
+          GetHoneyDetailsResponse
         ),
         TE.mapLeft((e) => {
           if (e._tag === 'BadStatusCodeError') {

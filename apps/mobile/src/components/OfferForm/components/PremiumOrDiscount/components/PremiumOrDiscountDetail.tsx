@@ -88,8 +88,8 @@ function PremiumOrDiscountDetail({
                   col="$white"
                 >
                   {offerType === 'BUY'
-                    ? t('offerForm.premiumOrDiscount.youBuyBtcFor')
-                    : t('offerForm.premiumOrDiscount.youSellBtcFor')}
+                    ? t('offerForm.premiumOrDiscount.youBuyHoneyFor')
+                    : t('offerForm.premiumOrDiscount.youSellHoneyFor')}
                 </Text>
               </Stack>
               <Stack f={3}>

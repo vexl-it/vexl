@@ -2,7 +2,7 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {Stack, Text, XStack} from 'tamagui'
 import {TouchableOpacity} from 'react-native'
 import {useAtomValue, useSetAtom} from 'jotai'
-import {btcPriceAtom, refreshBtcPriceActionAtom} from '../atoms'
+import {honeyPriceAtom, refreshHoneyPriceActionAtom} from '../atoms'
 import {useFocusEffect} from '@react-navigation/native'
 import {useCallback, useMemo} from 'react'
 import formatNumber from '../../../utils/formatNumber'
@@ -10,32 +10,32 @@ import {selectedCurrencyAtom} from '../../../state/selectedCurrency'
 
 export const CHART_HEIGHT_PX = 100
 
-function BitcoinPriceChart(): JSX.Element {
+function HoneyPriceChart(): JSX.Element {
   const insets = useSafeAreaInsets()
-  const refreshBtcPrice = useSetAtom(refreshBtcPriceActionAtom)
-  const btcPrice = useAtomValue(btcPriceAtom)
+  const refreshHoneyPrice = useSetAtom(refreshHoneyPriceActionAtom)
+  const honeyPrice = useAtomValue(honeyPriceAtom)
   const selectedCurrency = useAtomValue(selectedCurrencyAtom)
-  const btcPriceValue = useMemo(
+  const honeyPriceValue = useMemo(
     () =>
       formatNumber(
         selectedCurrency === 'USD'
-          ? btcPrice?.priceUsd
+          ? honeyPrice?.priceUsd
           : selectedCurrency === 'EUR'
-          ? btcPrice?.priceEur
-          : btcPrice?.priceCzk
+          ? honeyPrice?.priceEur
+          : honeyPrice?.priceCzk
       ),
     [
-      btcPrice?.priceCzk,
-      btcPrice?.priceEur,
-      btcPrice?.priceUsd,
+      honeyPrice?.priceCzk,
+      honeyPrice?.priceEur,
+      honeyPrice?.priceUsd,
       selectedCurrency,
     ]
   )
 
   useFocusEffect(
     useCallback(() => {
-      void refreshBtcPrice()()
-    }, [refreshBtcPrice])
+      void refreshHoneyPrice()()
+    }, [refreshHoneyPrice])
   )
 
   return (
@@ -45,12 +45,12 @@ function BitcoinPriceChart(): JSX.Element {
         <Stack />
         <TouchableOpacity
           onPress={() => {
-            void refreshBtcPrice()()
+            void refreshHoneyPrice()()
           }}
         >
           <XStack>
             <Text fos={28} ff={'$heading'} color={'$yellowAccent1'}>
-              {btcPriceValue ?? '- '}
+              {honeyPriceValue ?? '- '}
             </Text>
             <Text fos={12} ff={'$body700'} color={'$yellowAccent1'}>
               {selectedCurrency}
@@ -62,4 +62,4 @@ function BitcoinPriceChart(): JSX.Element {
   )
 }
 
-export default BitcoinPriceChart
+export default HoneyPriceChart

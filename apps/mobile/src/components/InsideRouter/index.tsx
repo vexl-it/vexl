@@ -5,9 +5,9 @@ import MarketplaceScreen from './components/MarketplaceScreen'
 import MessagesScreen from './components/MessagesScreen'
 import SettingsScreen from './components/SettingsScreen'
 import TabBar from './components/TabBar'
-import BitcoinPriceChart, {
+import HoneyPriceChart, {
   CHART_HEIGHT_PX,
-} from './components/BitcoinPriceChart'
+} from './components/HoneyPriceChart'
 import {LinearGradient} from 'expo-linear-gradient'
 import {CONTAINER_WITH_TOP_BORDER_RADIUS_TOP_PADDING} from './components/ContainerWithTopBorderRadius'
 import {Stack, styled} from 'tamagui'
@@ -36,7 +36,7 @@ export default function InsideScreen(): JSX.Element {
       </Stack>
       <Tab.Navigator
         screenOptions={{
-          header: () => <BitcoinPriceChart />,
+          header: () => <HoneyPriceChart />,
         }}
         tabBar={(props) => <TabBar {...props} />}
         initialRouteName="Marketplace"

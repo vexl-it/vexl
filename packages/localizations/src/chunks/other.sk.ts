@@ -365,8 +365,8 @@ const otherSk: typeof en =
     "offerForm": {
       "myNewOffer": "Nová ponuka",
       "iWantTo": "Chcem",
-      "sellBitcoin": "Predať Bitcoin",
-      "buyBitcoin": "Kúpiť Bitcoin",
+      "sellHoney": "Predať Bitcoin",
+      "buyHoney": "Kúpiť Bitcoin",
       "amountOfTransaction": {
         "amountOfTransaction": "Čiastka",
         "pleaseSelectCurrencyFirst": "Najskôr si vyber menu",
@@ -396,8 +396,8 @@ const otherSk: typeof en =
           "Predávaš o niečo rýchlejšie, ale trochu pod trhovou cenou",
         "youSellMuchFaster":
           "Predávaš oveľa rýchlejšie, ale hlboko pod trhovou cenou",
-        "youBuyBtcFor": "Kupujete BTC za",
-        "youSellBtcFor": "Predávate BTC za",
+        "youBuyHoneyFor": "Kupujete BTC za",
+        "youSellHoneyFor": "Predávate BTC za",
         "marketPrice": "trhovú cenu",
         "sellFaster": "Predávaš rýchlejšie",
         "earnMore": "Zarobíš viac",
@@ -425,7 +425,7 @@ const otherSk: typeof en =
         "whatToWatchOutForOnline": "Na čo si dať pozor online?",
         "moneySentByRandomPerson":
           "Peniaze poslané náhodnou osobou môžu mať kriminálny pôvod a dajú sa vystopovať.",
-        "neverSendCrypto": "Nikdy neposielajte bitcoin pred prijatím platby.",
+        "neverSendHoneyFirst": "Nikdy neposielajte bitcoin pred prijatím platby.",
         "alwaysVerifyTheName":
           "Vždy si over meno majiteľa účtu, od ktorého si platbu prijal, či sedí s deklarovanou identitou protistrany.",
         "forwardTheAddress":
@@ -854,7 +854,7 @@ const otherSk: typeof en =
       "text": "Nainštaluj si najnovšiu verziu aplikácie.",
       "action": "Aktualizovať"
     },
-    "btcPriceChart": {
+    "honeyPriceChart": {
       "requestCouldNotBeProcessed":
         "Request to obtain current BTC price failed"
     },

@@ -1,8 +1,11 @@
 module.exports = {
   root: true,
-  extends: ['@vexl-next/eslint-config'],
+  extends: ["@vexl-next/eslint-config"],
   parserOptions: {
     tsconfigRootDir: __dirname,
-    project: ['./tsconfig.json'],
+    project: ["./tsconfig.json"],
+  },
+  rules: {
+    "@typescript-eslint/restrict-plus-operands": "off",
   },
 }

@@ -28,7 +28,7 @@ function Countdown({countUntil, onFinished, ...props}: Props): JSX.Element {
   }, [setSecLeft, countUntil, onFinished])
 
   return (
-    <Text ff="$body500" {...props}>
+    <Text col="$black" ff="$body500" {...props}>
       {secLeft}
     </Text>
   )

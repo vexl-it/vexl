@@ -115,12 +115,18 @@ function shouldHaveItalicPrefix(
   ].includes(messageType)
 }
 
-function TextMessageAccent({message}: {message: ChatMessage}): JSX.Element {
+function TextMessageAccent({
+  message,
+  isMine,
+}: {
+  message: ChatMessage
+  isMine: boolean
+}): JSX.Element {
   const {t} = useTranslation()
 
   if (shouldHaveItalicPrefix(message.messageType)) {
     return (
-      <Text fontStyle={'italic'}>
+      <Text color={isMine ? '$black' : '$white'} fontStyle={'italic'}>
         {t(`messages.textMessageTypes.${message.messageType}`, {
           message: message.text,
         })}
@@ -271,7 +277,10 @@ function TextMessage({
                   spellCheck={false}
                   style={textInputStyle}
                 >
-                  <TextMessageAccent message={message.message} />
+                  <TextMessageAccent
+                    isMine={isMine}
+                    message={message.message}
+                  />
                 </TextInput>
               ) : (
                 <Text
@@ -280,7 +289,10 @@ function TextMessage({
                   fontFamily={'$body500'}
                   color={isMine ? '$black' : '$white'}
                 >
-                  <TextMessageAccent message={message.message} />
+                  <TextMessageAccent
+                    isMine={isMine}
+                    message={message.message}
+                  />
                 </Text>
               )}
             </Stack>

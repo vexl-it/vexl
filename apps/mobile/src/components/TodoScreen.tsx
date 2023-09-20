@@ -7,7 +7,7 @@ function TodoScreen(): JSX.Element {
   const safeGoBack = useSafeGoBack()
   return (
     <Stack f={1}>
-      <Text>To be done</Text>
+      <Text col="$black">To be done</Text>
       <Button variant="secondary" text="Go back" onPress={safeGoBack}></Button>
     </Stack>
   )

@@ -15,12 +15,12 @@ interface Props {
   shown?: boolean
   children: ReactNode
   entering?:
-             | BaseAnimationBuilder
+    | BaseAnimationBuilder
     | typeof BaseAnimationBuilder
     | EntryExitAnimationFunction
     | Keyframe
   exiting?:
-            | BaseAnimationBuilder
+    | BaseAnimationBuilder
     | typeof BaseAnimationBuilder
     | EntryExitAnimationFunction
     | Keyframe
@@ -47,8 +47,8 @@ function AnimatedModal({
   if (shown === false) return null
   return (
     <Animated.View
-      entering={entering ?? SlideInDown}
-      exiting={exiting ?? SlideOutDown}
+      entering={entering ? SlideInDown : undefined}
+      exiting={exiting ? SlideOutDown : undefined}
       style={[styles.root, {top: topMargin}]}
     >
       <Stack pb={bottomInset} f={1}>

@@ -80,6 +80,7 @@ function AllowNotificationsExplanationScreen({navigation}: Props): JSX.Element {
           />
         </Stack>
         <Text
+          col="$black"
           adjustsFontSizeToFit
           numberOfLines={2}
           fos={24}

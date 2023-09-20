@@ -24,7 +24,13 @@ function NameScreen({navigation}: Props): JSX.Element {
     <Stack f={1}>
       <HeaderProxy showBackButton={true} progressNumber={1} />
       <WhiteContainerWithScroll>
-        <Text ff="$heading" fos={24} numberOfLines={2} adjustsFontSizeToFit>
+        <Text
+          col="$black"
+          ff="$heading"
+          fos={24}
+          numberOfLines={2}
+          adjustsFontSizeToFit
+        >
           {t('loginFlow.name.prompt')}
         </Text>
         <Stack my="$4" mx={'$-4'}>

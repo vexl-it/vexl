@@ -35,7 +35,7 @@ function UserDataDisplay({
           height={128}
           br="$10"
           mb="$7"
-          src={{uri: resolveLocalUri(userNameAndAvatar.image.imageUri)}}
+          source={{uri: resolveLocalUri(userNameAndAvatar.image.imageUri)}}
         />
       )}
       <Text ff="$heading" fos={32} col="$white">

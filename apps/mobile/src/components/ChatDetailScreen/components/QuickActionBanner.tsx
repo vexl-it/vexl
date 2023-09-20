@@ -33,8 +33,8 @@ function QuickActionBannerUi({
   icon?: SvgString
 }): JSX.Element {
   const tokens = getTokens()
-  const headingStyle = {ff: '$body600', fos: 16}
-  const subtitleStyle = {ff: '$body500', color: '$greyOnWhite'}
+  const headingStyle = {ff: '$body600', fos: 16, color: '$black'} as const
+  const subtitleStyle = {ff: '$body500', color: '$greyOnWhite'} as const
 
   return (
     <XStack

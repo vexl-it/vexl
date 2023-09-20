@@ -55,7 +55,7 @@ function RevealedContactMessageItem({
               height={80}
               width={80}
               borderRadius={'$8'}
-              src={{uri: resolveLocalUri(image.imageUri)}}
+              source={{uri: resolveLocalUri(image.imageUri)}}
             />
           </UserAvatarTouchableWrapper>
         ) : (

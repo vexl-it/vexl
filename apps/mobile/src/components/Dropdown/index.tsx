@@ -55,7 +55,7 @@ const StyledRow = styled(Stack, {
       },
     },
   },
-})
+} as const)
 
 function DropdownCell({
   title,

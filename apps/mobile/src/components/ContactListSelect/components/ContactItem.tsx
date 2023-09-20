@@ -24,14 +24,14 @@ function ContactItem({contactAtom}: Props): JSX.Element {
             height={50}
             br="$5"
             resizeMode={'cover'}
-            src={{uri: imageUri}}
+            source={{uri: imageUri}}
           />
         ) : (
           <SvgImage width={50} height={50} source={picturePlaceholderSvg} />
         )}
       </Stack>
       <Stack f={1} ml="$4" jc="space-between">
-        <Text ff={'$body500'} fs={18} mb={'$1'}>
+        <Text ff={'$body500'} fs={18} mb={'$1'} color={'$black'}>
           {name}
         </Text>
         <Text ff={'$body600'} col={'$greyOnBlack'} fos={14}>

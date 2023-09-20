@@ -37,6 +37,7 @@ function SettingsScreenDialog({
           <Stack jc="flex-end">
             {title && (
               <Text
+                col="$black"
                 my={'$4'}
                 ff={'$heading'}
                 fos={28}

@@ -56,7 +56,7 @@ const PressableStyled = styled(Stack, {
       },
     },
   },
-})
+} as const)
 
 function IconButton({
   variant = 'dark',

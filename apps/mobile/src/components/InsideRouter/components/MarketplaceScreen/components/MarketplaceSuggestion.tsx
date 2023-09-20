@@ -41,7 +41,7 @@ function MarketplaceSuggestion({
               <Image stroke={tokens.color.greyOnWhite.val} source={closeSvg} />
             </TouchableOpacity>
           </Stack>
-          <Text fos={20} ff={'$body500'}>
+          <Text col="$black" fos={20} ff={'$body500'}>
             {text}
           </Text>
         </Stack>

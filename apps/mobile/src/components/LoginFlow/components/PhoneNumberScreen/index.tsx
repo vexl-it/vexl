@@ -35,7 +35,13 @@ function PhoneNumberScreen({
     <>
       <HeaderProxy showBackButton={true} progressNumber={2} />
       <WhiteContainerWithScroll>
-        <Text numberOfLines={2} adjustsFontSizeToFit fos={24} ff="$heading">
+        <Text
+          col="$black"
+          numberOfLines={2}
+          adjustsFontSizeToFit
+          fos={24}
+          ff="$heading"
+        >
           {t('loginFlow.phoneNumber.title')}
         </Text>
         <Stack mt="$3">

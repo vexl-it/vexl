@@ -13,7 +13,7 @@ function CommonFriendCell({imageUri, name}: Props): JSX.Element {
   return (
     <XStack ai={'center'} mr={'$3'}>
       {imageUri ? (
-        <Image br={`$2`} width={30} height={30} src={{uri: imageUri}} />
+        <Image br={`$2`} width={30} height={30} source={{uri: imageUri}} />
       ) : (
         <SvgImage
           height={30}

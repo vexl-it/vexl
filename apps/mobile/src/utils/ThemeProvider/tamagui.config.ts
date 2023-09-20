@@ -1,5 +1,5 @@
 import {createFont, createTamagui, createTokens} from 'tamagui'
-import {createAnimations} from '@tamagui/animations-reanimated'
+import {createAnimations} from '@tamagui/animations-moti'
 import {shorthands} from '@tamagui/shorthands'
 import {createMedia} from '@tamagui/react-native-media-driver'
 
@@ -31,7 +31,7 @@ const color = {
   pastelGreen: '#ACD9B7',
   yellowAccent1: '#957A44',
   yellowAccent2: '#4C3D20',
-}
+} as const
 
 const space = {
   '-4': -16,
@@ -174,6 +174,7 @@ const appConfig = createTamagui({
   fonts: {
     heading: headingFont,
     body: bodyFont400,
+    body400: bodyFont400,
     body500: bodyFont500,
     body600: bodyFont600,
     body700: bodyFont700,

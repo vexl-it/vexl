@@ -25,7 +25,7 @@ function CommonFriendsListItem({friend}: Props): JSX.Element {
           height={50}
           br="$5"
           resizeMode={'cover'}
-          src={{uri: friend.imageUri}}
+          source={{uri: friend.imageUri}}
         />
       ) : (
         <SvgImage width={50} height={50} source={picturePlaceholderSvg} />

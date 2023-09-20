@@ -45,7 +45,7 @@ function LocationCell({
       <XStack ai="flex-start" pt="$4">
         <SvgImage source={locationSvg} />
         <Stack f={1} ml="$4" bbw={1} bbc="$grey" pb="$4">
-          <Text pb="$1" col="$white" fos={18} ff="$body400">
+          <Text pb="$1" col="$white" fos={18} fontFamily="$body400">
             {suggestFirstRow}
           </Text>
           <Text col="$greyOnBlack" fos={14} ff="$body400">

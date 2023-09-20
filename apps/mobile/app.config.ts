@@ -114,6 +114,7 @@ export default {
     'policy': 'sdkVersion',
   },
   'plugins': [
+    'expo-localization',
     [
       'expo-image-picker',
       {
@@ -137,12 +138,25 @@ export default {
         'ios': {
           'useFrameworks': 'static',
         },
+        'android': {
+          // Notifee workaround: https://github.com/invertase/notifee/issues/808
+          'extraMavenRepos': [
+            '../../node_modules/@notifee/react-native/android/libs',
+          ],
+          'packagingOptions': {
+            'pickFirst': [
+              'lib/x86/libcrypto.so',
+              'lib/x86_64/libcrypto.so',
+              'lib/armeabi-v7a/libcrypto.so',
+              'lib/arm64-v8a/libcrypto.so',
+            ],
+          },
+        },
       },
     ],
     '@react-native-firebase/app',
     '@react-native-firebase/crashlytics',
     '@react-native-firebase/dynamic-links',
-    '@notifee/react-native',
     './expo-plugins/disable-firebase-analytics.js',
     './expo-plugins/setup-headless-background-message-processing-ios.js',
     'react-native-background-fetch',

@@ -56,7 +56,7 @@ function IdentityRevealMessageItem({
                   height={80}
                   width={80}
                   borderRadius={'$8'}
-                  src={{uri: resolveLocalUri(message.message.image)}}
+                  source={{uri: resolveLocalUri(message.message.image)}}
                 />
               </UserAvatarTouchableWrapper>
             ) : (
@@ -94,7 +94,7 @@ function IdentityRevealMessageItem({
                 height={80}
                 width={80}
                 borderRadius={'$8'}
-                src={{uri: message.message.image}}
+                source={{uri: message.message.image}}
               />
             </UserAvatarTouchableWrapper>
           ) : (

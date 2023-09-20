@@ -170,7 +170,7 @@ function addLoggingInterceptor(
       )
       return response
     },
-    (error) => {
+    async (error) => {
       if (!isAxiosError(error)) {
         loggingFunction(
           '🌐 ‼️ Non axios when sending request or receiving response:',
@@ -187,7 +187,7 @@ function addLoggingInterceptor(
         {status: error.response?.status, data: error.response?.data}
       )
 
-      return Promise.reject(error)
+      return await Promise.reject(error)
     }
   )
 }

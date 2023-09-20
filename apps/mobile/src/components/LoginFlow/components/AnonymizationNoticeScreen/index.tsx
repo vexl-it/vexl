@@ -22,6 +22,7 @@ function AnonymizationNoticeScreen({navigation}: Props): JSX.Element {
           <Image source={anonymizationNoticeSvg} />
         </Stack>
         <Text
+          col="$black"
           ff="$heading"
           mb="$4"
           fos={24}

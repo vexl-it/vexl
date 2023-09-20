@@ -45,6 +45,7 @@ function VerificationCodeScreen({
       <WhiteContainerWithScroll>
         <Stack mb="$3">
           <Text
+            col="$black"
             numberOfLines={2}
             adjustsFontSizeToFit
             flex={1}

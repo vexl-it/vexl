@@ -49,6 +49,7 @@ function PhotoScreen({
       <WhiteContainer>
         <Stack maw="70%">
           <Text
+            col="$black"
             numberOfLines={media.sm ? 2 : undefined}
             adjustsFontSizeToFit={media.sm}
             ff="$heading"

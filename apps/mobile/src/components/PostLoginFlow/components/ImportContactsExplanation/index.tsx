@@ -28,7 +28,7 @@ export default function ImportContactsExplanation({
         </Stack>
         <Stack jc="space-around">
           <Stack>
-            <Text mb="$3" fos={24} ff="$heading">
+            <Text col="$black" mb="$3" fos={24} ff="$heading">
               {t('postLoginFlow.contactsExplanation.title')}
             </Text>
           </Stack>

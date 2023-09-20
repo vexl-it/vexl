@@ -27,7 +27,9 @@ function FaqsScreen(): JSX.Element {
         withBackButton
       >
         <XStack ai="center" jc="space-between">
-          <Text ff="$body600">{t('faqs.faqs')}</Text>
+          <Text col="$black" ff="$body600">
+            {t('faqs.faqs')}
+          </Text>
           <IconButton variant="light" icon={closeSvg} onPress={safeGoBack} />
         </XStack>
         <Stack f={1} ai="center" jc="center" w="100%" h="100%">

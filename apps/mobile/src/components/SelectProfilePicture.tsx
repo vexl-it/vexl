@@ -24,7 +24,7 @@ function SelectProfilePicture(): JSX.Element {
               height={width / 2}
               width={width / 2}
               br="$10"
-              src={{
+              source={{
                 uri: selectedImageUri.value,
               }}
             />

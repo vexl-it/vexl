@@ -13,7 +13,11 @@ function UserAvatar({avatar, ...props}: Props): JSX.Element {
       <SvgImage source={avatar.svgXml} />
     </Stack>
   ) : (
-    <Image br="$2" src={{uri: resolveLocalUri(avatar.imageUri)}} {...props} />
+    <Image
+      {...props}
+      br="$2"
+      source={{uri: resolveLocalUri(avatar.imageUri)}}
+    />
   )
 }
 

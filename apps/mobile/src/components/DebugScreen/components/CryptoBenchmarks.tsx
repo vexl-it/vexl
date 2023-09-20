@@ -60,7 +60,7 @@ export default function CryptoBenchmarks(): JSX.Element {
         For each crypto operation, we run {NUMBER_OF_GENERATIONS} iterations and
         measure the time
       </Text>
-      <Text>{text}</Text>
+      <Text col={'$black'}>{text}</Text>
       <Button
         // eslint-disable-next-line @typescript-eslint/no-misused-promises
         onPress={async () => {

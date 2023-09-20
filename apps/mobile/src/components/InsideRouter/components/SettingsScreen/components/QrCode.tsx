@@ -30,7 +30,7 @@ function QrCode(): JSX.Element {
             logo={require('../images/app_logo.png')}
           />
         </Stack>
-        <Text fos={28} ff={'$heading'}>
+        <Text col="$black" fos={28} ff={'$heading'}>
           {t('qrCode.joinVexl')}
         </Text>
       </YStack>

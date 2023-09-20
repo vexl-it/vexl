@@ -30,7 +30,7 @@ function UriImageWithSizeLimits({uri, limits}: Props): JSX.Element {
       width={dimensions.width}
       height={dimensions.height}
       resizeMode={'contain'}
-      src={{uri}}
+      source={{uri}}
     />
   )
 }

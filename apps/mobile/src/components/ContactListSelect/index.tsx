@@ -18,6 +18,7 @@ interface Props {
   onContactsSubmitted: () => void
   renderFooter: (args: {onSubmit: () => void}) => JSX.Element
   showFilter?: boolean
+  showNewByDefault: boolean
 }
 
 function ContactsListSelect({
@@ -80,7 +81,17 @@ export default function ContactListSelectWithProvider(
   )
 
   return (
-    <ScopeProvider scope={ContactsSelectScope} value={importedContacts}>
+    <ScopeProvider
+      scope={ContactsSelectScope}
+      value={{
+        importedContacts,
+        initialFilters: {
+          showNew: props.showNewByDefault,
+          showNonSubmitted: false,
+          showSubmitted: false,
+        },
+      }}
+    >
       <ContactsListSelect {...props} />
     </ScopeProvider>
   )

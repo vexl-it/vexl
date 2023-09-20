@@ -35,7 +35,7 @@ function useReactOnNotificationOpen(): (notification: Notification) => void {
       if (notification.data?.type === NEW_OFFERS_IN_MARKETPLACE) {
         navigation.navigate('InsideTabs', {screen: 'Marketplace'})
       } else if (notification.data?.type === NEW_CONTACTS_TO_SYNC) {
-        navigation.navigate('SetContacts')
+        navigation.navigate('SetContacts', {})
       } else if (notification.data?.inbox && notification.data?.sender) {
         pipe(
           notification.data,

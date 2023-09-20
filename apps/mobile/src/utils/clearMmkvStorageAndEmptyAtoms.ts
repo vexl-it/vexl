@@ -33,7 +33,7 @@ export default function clearMmkvStorageAndEmptyAtoms(): void {
     importedContacts: [],
   })
   getDefaultStore().set(combinedContactsAfterLastSubmitStorageAtom, {
-    combinedContactsAfterLastSubmit: [],
+    combinedContactsAfterLastSubmit: null,
   })
   getDefaultStore().set(offersStateAtom, {
     lastUpdatedAt: MINIMAL_DATE,

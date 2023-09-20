@@ -17,6 +17,7 @@ function ContactsListScreen({navigation}: Props): JSX.Element {
     <>
       <HeaderProxy showBackButton={true} progressNumber={3} />
       <ContactsListSelect
+        showNewByDefault={false}
         onContactsSubmitted={() => {
           navigation.push('AllowNotificationsExplanation')
         }}

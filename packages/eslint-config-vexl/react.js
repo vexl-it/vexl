@@ -28,5 +28,6 @@ module.exports = {
     'array-callback-return': 'off',
     '@typescript-eslint/promise-function-async': 'off',
     '@typescript-eslint/key-spacing': 'off',
+    'react/prop-types': 'off',
   },
 }

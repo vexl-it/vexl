@@ -11,8 +11,15 @@ import closeSvg from '../images/closeSvg'
 import KeyboardAvoidingView from '../KeyboardAvoidingView'
 import {newlyAddedCustomContactsAtom} from '../ContactListSelect/atom'
 import {useSetAtom} from 'jotai'
+import {type RootStackScreenProps} from '../../navigationTypes'
 
-function SetContactsScreen(): JSX.Element {
+type Props = RootStackScreenProps<'SetContacts'>
+
+function SetContactsScreen({
+  route: {
+    params: {showNew},
+  },
+}: Props): JSX.Element {
   const goBack = useSafeGoBack()
   const {t} = useTranslation()
   const setNewlyAddedCustomContacts = useSetAtom(newlyAddedCustomContactsAtom)
@@ -49,6 +56,7 @@ function SetContactsScreen(): JSX.Element {
           <Stack f={1} mx={'$2'}>
             <ContactsListSelect
               showFilter
+              showNewByDefault={showNew ?? false}
               onContactsSubmitted={goBack}
               renderFooter={renderButton}
             />

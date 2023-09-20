@@ -4,6 +4,8 @@ import {contactsFromDeviceAtom} from './contactsFromDeviceAtom'
 
 const newlyAddedContactsToPhoneContactListAtom = atom((get) => {
   const contactsAfterLastSubmitAtom = get(combinedContactsAfterLastSubmitAtom)
+  if (contactsAfterLastSubmitAtom === null) return []
+
   const contactsFromDevice = get(contactsFromDeviceAtom)
 
   return contactsFromDevice.filter(

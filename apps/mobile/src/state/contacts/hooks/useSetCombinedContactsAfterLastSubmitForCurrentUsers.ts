@@ -18,7 +18,7 @@ export function useSetCombinedContactsAfterLastSubmitForCurrentUsers(): void {
     useCallback(
       (state) => {
         if (state !== 'active') return
-        if (combinedContactsAfterLastSubmit.length === 0) {
+        if (combinedContactsAfterLastSubmit === null) {
           const combinedContacts =
             combineContactsFromDeviceWithImportedContacts({
               contactsFromDevice,
@@ -28,7 +28,7 @@ export function useSetCombinedContactsAfterLastSubmitForCurrentUsers(): void {
         }
       },
       [
-        combinedContactsAfterLastSubmit.length,
+        combinedContactsAfterLastSubmit,
         contactsFromDevice,
         importedContacts,
         setCombinedContactsAfterLastSubmit,

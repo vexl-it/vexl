@@ -37,7 +37,21 @@ import {syncConnectionsActionAtom} from '../../state/connections/atom/connection
 import {deduplicateBy} from '../../utils/deduplicate'
 import newlyAddedContactsToPhoneContactListAtom from '../../state/contacts/atom/newlyAddedContactsToPhoneContactListAtom'
 
-export const ContactsSelectScope = createScope<ContactNormalized[]>([])
+export const ContactsSelectScope = createScope<{
+  importedContacts: ContactNormalized[]
+  initialFilters: {
+    showSubmitted: boolean
+    showNonSubmitted: boolean
+    showNew: boolean
+  }
+}>({
+  importedContacts: [],
+  initialFilters: {
+    showSubmitted: false,
+    showNonSubmitted: false,
+    showNew: false,
+  },
+})
 
 export const newlyAddedCustomContactsAtom = atom<ContactNormalized[]>([])
 
@@ -77,11 +91,13 @@ function combineContactsFromDeviceWithImportedContacts({
 
 export const contactSelectMolecule = molecule((getMolecule, getScope) => {
   const searchTextAtom = atom('')
-  const importedContacts = getScope(ContactsSelectScope)
+  const {importedContacts, initialFilters} = getScope(ContactsSelectScope)
 
-  const showSubmittedContactsAtom = atom<boolean>(false)
-  const showNonSubmittedContactsAtom = atom<boolean>(false)
-  const showNewContactsAtom = atom<boolean>(false)
+  const showSubmittedContactsAtom = atom<boolean>(initialFilters.showSubmitted)
+  const showNonSubmittedContactsAtom = atom<boolean>(
+    initialFilters.showNonSubmitted
+  )
+  const showNewContactsAtom = atom<boolean>(initialFilters.showNew)
 
   const selectedNumbersAtom = atom(
     new Set(importedContacts.map((one) => one.normalizedNumber))
@@ -103,9 +119,8 @@ export const contactSelectMolecule = molecule((getMolecule, getScope) => {
     const showNonSubmittedContacts = get(showNonSubmittedContactsAtom)
     const showNewContacts = get(showNewContactsAtom)
     const newlyAddedCustomContacts = get(newlyAddedCustomContactsAtom)
-    const combinedContactsAfterLastSubmit = get(
-      combinedContactsAfterLastSubmitAtom
-    )
+    const combinedContactsAfterLastSubmit =
+      get(combinedContactsAfterLastSubmitAtom) ?? []
     const searchText = get(searchTextAtom)
     const allContacts = get(allContactsAtom)
 

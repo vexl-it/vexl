@@ -9,8 +9,10 @@ import {IsoDatetimeString} from '@vexl-next/domain/dist/utility/IsoDatetimeStrin
 export const combinedContactsAfterLastSubmitStorageAtom =
   atomWithParsedMmkvStorage(
     'combinedContactsAfterLastSubmit',
-    {combinedContactsAfterLastSubmit: []},
-    z.object({combinedContactsAfterLastSubmit: z.array(ContactNormalized)})
+    {combinedContactsAfterLastSubmit: null},
+    z.object({
+      combinedContactsAfterLastSubmit: z.array(ContactNormalized).nullable(),
+    })
   )
 
 export const combinedContactsAfterLastSubmitAtom = focusAtom(

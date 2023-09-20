@@ -169,7 +169,7 @@ function EmptyListPlaceholder(): JSX.Element {
       <EmptyListWrapper
         buttonText={t('suggestion.addMoreContacts')}
         onButtonPress={() => {
-          navigation.navigate('SetContacts')
+          navigation.navigate('SetContacts', {})
         }}
       >
         <Text

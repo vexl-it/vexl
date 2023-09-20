@@ -19,7 +19,7 @@ function ImportNewContactsSuggestion(props: YStackProps): JSX.Element | null {
     <MarketplaceSuggestion
       buttonText={t('suggestion.importNow')}
       onButtonPress={() => {
-        navigation.navigate('SetContacts')
+        navigation.navigate('SetContacts', {showNew: true})
       }}
       onClosePress={() => {
         resolveAllContactsAsSeen()

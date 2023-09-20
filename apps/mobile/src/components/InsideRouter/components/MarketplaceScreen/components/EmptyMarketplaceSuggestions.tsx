@@ -41,7 +41,7 @@ function EmptyMarketplaceSuggestions(): JSX.Element {
           <MarketplaceSuggestion
             buttonText={t('suggestion.addMoreContacts')}
             onButtonPress={() => {
-              navigation.navigate('SetContacts')
+              navigation.navigate('SetContacts', {})
             }}
             onClosePress={() => {
               setAddMoreContactsSuggestionVisible(false)

@@ -114,6 +114,7 @@ export default {
     'policy': 'sdkVersion',
   },
   'plugins': [
+    'expo-localization',
     [
       'expo-image-picker',
       {

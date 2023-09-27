@@ -810,7 +810,8 @@ const otherSp: typeof en =
     },
     "commonFriends": {
       "commonFriends": "Amigos comunes",
-      "commonFriendsCount": "{{commonFriendsCount}} amigos comunes"
+      "commonFriendsCount": "{{commonFriendsCount}} amigos comunes",
+      "call": "Call"
     },
     "reportIssue": {
       "openInEmail": "Abrir en e-mail",

@@ -5,12 +5,14 @@ import SvgImage from '../../Image'
 import picturePlaceholderSvg from '../../images/picturePlaceholderSvg'
 import Button from '../../Button'
 import openUrl from '../../../utils/openUrl'
+import {useTranslation} from '../../../utils/localization/I18nProvider'
 
 interface Props {
   friend: ContactNormalizedWithHash
 }
 
 function CommonFriendsListItem({friend}: Props): JSX.Element {
+  const {t} = useTranslation()
   const dialFriend = useCallback(() => {
     openUrl(`tel:${friend.normalizedNumber}`)()
   }, [friend])
@@ -39,7 +41,7 @@ function CommonFriendsListItem({friend}: Props): JSX.Element {
       <Button
         onPress={dialFriend}
         variant="secondary"
-        text={'Call'}
+        text={t('commonFriends.call')}
         size={'small'}
       />
     </Stack>

@@ -828,7 +828,8 @@ const otherDe: typeof en =
     },
     "commonFriends": {
       "commonFriends": "Gemeinsame Freunde",
-      "commonFriendsCount": "{{commonFriendsCount}} gemeinsame Freunde"
+      "commonFriendsCount": "{{commonFriendsCount}} gemeinsame Freunde",
+      "call": "Call"
     },
     "reportIssue": {
       "openInEmail": "In E-Mail öffnen",

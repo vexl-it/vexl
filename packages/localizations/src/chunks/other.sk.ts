@@ -806,7 +806,8 @@ const otherSk: typeof en =
     },
     "commonFriends": {
       "commonFriends": "Spoloční priatelia",
-      "commonFriendsCount": "{{commonFriendsCount}} spoločných priateľov"
+      "commonFriendsCount": "{{commonFriendsCount}} spoločných priateľov",
+      "call": "Call"
     },
     "reportIssue": {
       "openInEmail": "Otvoriť v emaili.",

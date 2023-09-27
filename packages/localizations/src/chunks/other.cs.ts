@@ -803,7 +803,8 @@ const otherCs: typeof en =
     },
     "commonFriends": {
       "commonFriends": "Společní přátelé",
-      "commonFriendsCount": "{{commonFriendsCount}} společní přátelé"
+      "commonFriendsCount": "{{commonFriendsCount}} společní přátelé",
+      "call": "Call"
     },
     "reportIssue": {
       "openInEmail": "Otevřít v emailu.",

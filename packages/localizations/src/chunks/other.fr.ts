@@ -817,7 +817,8 @@ const otherFr: typeof en =
     },
     "commonFriends": {
       "commonFriends": "Amis communs",
-      "commonFriendsCount": "{{commonFriendsCount}} Amis communs"
+      "commonFriendsCount": "{{commonFriendsCount}} Amis communs",
+      "call": "Call"
     },
     "reportIssue": {
       "openInEmail": "Ouvrir dans un e-mail",

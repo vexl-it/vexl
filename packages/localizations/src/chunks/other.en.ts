@@ -800,7 +800,8 @@ const otherEn =
     },
     "commonFriends": {
       "commonFriends": "Common friends",
-      "commonFriendsCount": "{{commonFriendsCount}} common friends"
+      "commonFriendsCount": "{{commonFriendsCount}} common friends",
+      "call": "Call"
     },
     "reportIssue": {
       "openInEmail": "Open in e-mail",

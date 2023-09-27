@@ -1,10 +1,13 @@
-import {Stack, Text, XStack, YStack} from 'tamagui'
+import {getTokens, Stack, Text, XStack, YStack} from 'tamagui'
 import {useMolecule} from 'jotai-molecules'
 import {chatMolecule} from '../atoms'
-import {useAtomValue} from 'jotai'
+import {useAtom, useAtomValue} from 'jotai'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {useMemo} from 'react'
 import {formatCurrencyAmount} from '../../../utils/localization/currency'
+import SvgImage from '../../Image'
+import closeSvg from '../../images/closeSvg'
+import {TouchableWithoutFeedback} from 'react-native'
 
 function Bullet(): JSX.Element {
   return <Stack bg={'$greyOnWhite'} w={'$1'} h={'$1'} br={'$1'} mx="$2" />
@@ -12,9 +15,11 @@ function Bullet(): JSX.Element {
 
 function StickyHeader(): JSX.Element | null {
   const {t} = useTranslation()
-  const {offerForChatAtom, otherSideDataAtom} = useMolecule(chatMolecule)
+  const {offerForChatAtom, otherSideDataAtom, showInfoBarAtom} =
+    useMolecule(chatMolecule)
   const offer = useAtomValue(offerForChatAtom)
   const otherSideData = useAtomValue(otherSideDataAtom)
+  const [showInfoBar, setShowInfoBar] = useAtom(showInfoBarAtom)
 
   const offerAmount = useMemo(() => {
     if (!offer) return null
@@ -41,9 +46,10 @@ function StickyHeader(): JSX.Element | null {
     return result.join(', ')
   }, [offer, t])
 
-  if (!offer) return null
+  if (!offer || !showInfoBar) return null
   return (
-    <YStack
+    <XStack
+      justifyContent="space-between"
       py={'$2'}
       px={'$4'}
       mt={'$4'}
@@ -51,30 +57,49 @@ function StickyHeader(): JSX.Element | null {
       borderTopWidth={1}
       borderBottomWidth={1}
     >
-      <Text color="$white" fontFamily="$body500" fos={16} numberOfLines={1}>
-        {offer.ownershipInfo?.adminId ? t('common.me') : otherSideData.userName}
-        : {offer.offerInfo.publicPart.offerDescription}
-      </Text>
-      <XStack alignItems={'center'}>
-        <Text fontFamily="$body500" fos={14} color={'$greyOnWhite'}>
-          {t('offer.upTo')}: {offerAmount}
+      <YStack f={1}>
+        <Text color="$white" fontFamily="$body500" fos={16} numberOfLines={1}>
+          <Text color={'$main'}>
+            {offer.ownershipInfo?.adminId
+              ? t('common.me')
+              : otherSideData.userName}
+            :{' '}
+          </Text>
+          {offer.offerInfo.publicPart.offerDescription}
         </Text>
-        <Bullet />
-        <Text fontFamily="$body500" fos={14} color={'$greyOnWhite'}>
-          {paymentMethodsText}
-        </Text>
-        {offer.offerInfo.publicPart.paymentMethod.includes('CASH') && (
-          <>
-            <Bullet />
-            <Text fontFamily="$body500" fos={14} color={'$greyOnWhite'}>
-              {offer.offerInfo.publicPart.location
-                .map((one) => one.city)
-                .join(', ')}
-            </Text>
-          </>
-        )}
-      </XStack>
-    </YStack>
+        <XStack alignItems={'center'}>
+          <Text fontFamily="$body500" fos={14} color={'$greyOnWhite'}>
+            {t('offer.upTo')}: {offerAmount}
+          </Text>
+          <Bullet />
+          <Text fontFamily="$body500" fos={14} color={'$greyOnWhite'}>
+            {paymentMethodsText}
+          </Text>
+          {offer.offerInfo.publicPart.paymentMethod.includes('CASH') && (
+            <>
+              <Bullet />
+              <Text fontFamily="$body500" fos={14} color={'$greyOnWhite'}>
+                {offer.offerInfo.publicPart.location
+                  .map((one) => one.city)
+                  .join(', ')}
+              </Text>
+            </>
+          )}
+        </XStack>
+      </YStack>
+      <Stack>
+        <TouchableWithoutFeedback
+          onPress={() => {
+            setShowInfoBar(false)
+          }}
+        >
+          <SvgImage
+            stroke={getTokens().color.greyOnWhite.val}
+            source={closeSvg}
+          />
+        </TouchableWithoutFeedback>
+      </Stack>
+    </XStack>
   )
 }
 

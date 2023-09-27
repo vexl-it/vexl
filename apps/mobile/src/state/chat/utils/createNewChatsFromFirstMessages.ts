@@ -36,6 +36,7 @@ export default function createNewChatsFromFirstMessages({
             otherSide: {publicKey: senderPublicKey},
             id: generateChatId(),
             isUnread: true,
+            showInfoBar: true,
           },
           messages: [...messages],
         }

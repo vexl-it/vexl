@@ -53,7 +53,7 @@ function ChatInfoModal(): JSX.Element | null {
       <YStack px={'$4'} backgroundColor="$black" f={1}>
         <ScrollView>
           <Stack mt={'$4'} mb={'$7'}>
-            <ChatRequestPreview />
+            <ChatRequestPreview mode="offerFirst" />
           </Stack>
           <ButtonStack
             buttons={[

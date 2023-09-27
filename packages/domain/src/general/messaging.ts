@@ -142,5 +142,6 @@ export const Chat = z.object({
   origin: ChatOrigin,
   otherSide: ChatUserIdentity,
   isUnread: z.boolean().default(true),
+  showInfoBar: z.boolean().default(true),
 })
 export type Chat = z.TypeOf<typeof Chat>

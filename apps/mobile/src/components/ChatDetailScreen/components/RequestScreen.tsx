@@ -73,7 +73,9 @@ function RequestScreen(): JSX.Element {
       />
       <ScrollView bounces={false}>
         <YStack space="$6" f={1} mx={'$4'} my={'$6'}>
-          {offer && <ChatRequestPreview />}
+          {offer && (
+            <ChatRequestPreview showRequestMessage mode={'commonFirst'} />
+          )}
 
           <YStack space="$2">
             {hasPreviousCommunication === 'anotherInteractionWithHistory' && (

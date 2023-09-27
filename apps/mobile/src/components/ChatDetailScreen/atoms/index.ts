@@ -63,6 +63,7 @@ export const dummyChatWithMessages: ChatWithMessages = {
     otherSide: {publicKey: generatePrivateKey().publicKeyPemBase64},
     origin: {type: 'unknown'},
     isUnread: false,
+    showInfoBar: true,
   },
   messages: [],
 }
@@ -652,6 +653,8 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     set(selectedExtraToSendAtom, undefined)
   })
 
+  const showInfoBarAtom = focusAtom(chatAtom, (o) => o.prop('showInfoBar'))
+
   return {
     showModalAtom: atom<boolean>(false),
     chatAtom,
@@ -692,5 +695,6 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     selectedImageAtom,
     clearExtraToSendActionAtom,
     receivedContactRevealRequestMessageAtom,
+    showInfoBarAtom,
   }
 })

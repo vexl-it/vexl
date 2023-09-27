@@ -32,6 +32,7 @@ function createNewChat({
         publicKey: offer.offerInfo.publicPart.offerPublicKey,
       },
       isUnread: false,
+      showInfoBar: true,
     },
     messages: [initialMessage],
   }

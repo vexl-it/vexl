@@ -43,7 +43,6 @@ function ContactsListSelect({
 
   useOnFocusAndAppState(
     useCallback(() => {
-      console.log('triggering')
       triggerContactsReload()
     }, [triggerContactsReload])
   )

@@ -57,7 +57,7 @@ export default "## 1. Kdo shromažďuje mé osobní údaje?\n" +
   "- technologická bezpečnostní opatření, včetně firewallů, šifrování a antivirového softwaru;\n" +
   "- opatření fyzického zabezpečení, jako jsou bezpečnostní průkazy zaměstnanců pro přístup do našich prostor.\n" +
   "Bez Vaší pomoci a zodpovědného chování nejsme schopni zaručit bezpečnost Vašich osobních údajů. Proto Vás žádáme, abyste nám pomohli zajistit bezpečnost Vašich údajů tím, že budete udržovat svůj kód PIN v tajnosti (pokud je nastaven) a své zařízení v bezpečí dodržováním běžných bezpečnostních standardů.\n" +
-  "## 9. Jaká mám práva v souvislosti s ochranou osobních údajů?**\n" +
+  "## 9. Jaká mám práva v souvislosti s ochranou osobních údajů?\n" +
   "Ve vztahu k osobním údajům máte zejména následující práva:\n" +
   "- právo kdykoli odvolat svůj souhlas se zpracováním Vašich osobních údajů;\n" +
   "- právo na opravu nebo doplnění Vašich osobních údajů;\n" +
@@ -74,6 +74,6 @@ export default "## 1. Kdo shromažďuje mé osobní údaje?\n" +
   "Pokud máte jakékoli dotazy týkající se těchto Zásad ochrany osobních údajů, neváhejte nás kontaktovat pomocí níže uvedených kontaktních údajů:\n" +
   "Adresa: Vexl s.r.o, Kundratka 2359/17a, Praha\n" +
   "Emailová adresa: [support@vexl.it](mailto:support@vexl.it)\n" +
-  "## 11. Od kdy jsou tyto Zásady ochrany osobních údajů účinné?**\n" +
+  "## 11. Od kdy jsou tyto Zásady ochrany osobních údajů účinné?\n" +
   "Tyto Zásady ochrany osobních údajů nabývají účinnosti dne 11. 7. 2022.\n" +
   "Vyhrazujeme si právo tyto Zásady ochrany osobních údajů kdykoli změnit a aktualizovat. V případě jakýchkoliv změn nebo dodatků Vás před dalším používáním služby Vexl požádáme o opětovný souhlas s jejich obsahem.\n"

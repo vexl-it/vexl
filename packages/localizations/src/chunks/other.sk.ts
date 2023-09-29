@@ -331,7 +331,9 @@ const otherSk: typeof en =
       "termsOfUse": "Podmienky používania",
       "privacyPolicy": "Zásady ochrany osobných údajov",
       "dontHaveTime":
-        "Nemáte čas to všetko čítať? Pozrite sa na často kladené otázky."
+        "Nemáte čas to všetko čítať? Pozrite sa na často kladené otázky.",
+      "cautiousNoticeAboutMachineTranslation":
+        "Nasledujúci text prešiel strojovým prekladom, aby ste sa dostali k pôvodnej anglickej verzii, pokračujte na webovú stránku."
     },
     "faqs": {
       "faqs": "Často kladené otázky",

@@ -329,7 +329,9 @@ const otherEn =
       "termsOfUse": "Terms of Use",
       "privacyPolicy": "Privacy Policy",
       "dontHaveTime":
-        "Don’t have a time to read all this? Take a look on Frequently Asked Questions."
+        "Don’t have a time to read all this? Take a look on Frequently Asked Questions.",
+      "cautiousNoticeAboutMachineTranslation":
+        "Cautious Notice: The following text has undergone machine translation for your convenience, to access the original English version, proceed to the web."
     },
     "faqs": {
       "faqs": "Frequently Asked Questions",

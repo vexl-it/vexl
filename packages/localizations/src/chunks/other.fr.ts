@@ -337,7 +337,9 @@ const otherFr: typeof en =
       "termsOfUse": "Conditions d'utilisation",
       "privacyPolicy": "Politique de confidentialité",
       "dontHaveTime":
-        "Vous n'avez pas le temps de tout lire ? Jetez un coup d'œil à la Foire aux questions !"
+        "Vous n'avez pas le temps de tout lire ? Jetez un coup d'œil à la Foire aux questions !",
+      "cautiousNoticeAboutMachineTranslation":
+        "Cautious Notice: The following text has undergone machine translation for your convenience, to access the original English version, proceed to the web."
     },
     "faqs": {
       "faqs": "Foire aux questions",

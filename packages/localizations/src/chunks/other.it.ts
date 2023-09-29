@@ -339,7 +339,9 @@ const otherIt: typeof en =
       "termsOfUse": "Condizioni d'uso",
       "privacyPolicy": "Informativa sulla privacy",
       "dontHaveTime":
-        "Non avete tempo per leggere tutto questo? Date un'occhiata alle Domande frequenti."
+        "Non avete tempo per leggere tutto questo? Date un'occhiata alle Domande frequenti.",
+      "cautiousNoticeAboutMachineTranslation":
+        "Cautious Notice: The following text has undergone machine translation for your convenience, to access the original English version, proceed to the web."
     },
     "faqs": {
       "faqs": "Domande frequenti",

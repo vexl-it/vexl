@@ -111,7 +111,7 @@ function IconButton({
                 : tokens.color.grey.val
               : 'none'
           }
-          fill={iconFill}
+          fill={iconFill ?? 'none'}
           source={icon}
         />
       </PressableStyled>

@@ -1,79 +1,79 @@
-export default "## 1. Who collects my personal data?\n" +
-  "We are a commercial company called **Vexl s.r.o.**, with its registered office at Kundratka 2359/17a, Libeň, 180 00 Prague 8, Czech Republic, Id. No. 172 70 642, and we are registered in the commercial register kept by the Commercial court in Prague under file No. 369216.\n" +
-  "We are the company responsible for operation and development of Vexl – a service (including the application) that allows users looking to buy or sell Bitcoin to connect with each other to discuss their offers and agree upon trades (**“Vexl”**).\n" +
-  "## 2. Why should I read this document?\n" +
-  "You may have heard about Regulation (EU) 2016/679 of the European Parliament and of the Council of 27 April 2016 (”Regulation”) more commonly known as GDPR.\n" +
-  "Under the Article 13 and 14 of the Regulation, we must provide our users and other data subjects with information on the collection, handling, protection and processing of their personal data.\n" +
-  "Therefore, in this Privacy Policy you may learn more about these topics regarding the personal data that we collect when you use Vexl.\n" +
-  "## 3. What personal data is processed?\n" +
-  "**Onboarding and using Vexl**\n" +
-  "We may process the following categories of personal data provided during the onboarding procedure and subsequent use of Vexl:\n" +
-  "- your name (as provided by you);\n" +
-  "- your phone number (as provided by you);\n" +
-  "- your avatar (either uploaded picture or picture taken by a built-in camera of your device);\n" +
-  "- your public key linked to your user account;\n" +
-  "- contact details of your friends imported from your phone (in a form of phone number);\n" +
-  "- your contact details (provided by other users of Vexl as part of their onboarding procedure) in a form of your phone number;\n" +
-  "- graph of your 1st and 2nd degree contacts (as explained in Vexl Terms of Service);\n" +
-  "- certain information about offers to purchase or sale Bitcoin published via Vexl;\n" +
-  "- any communication with other users of Vexl.\n" +
-  "**Please note, that (except for your public key) we cannot actually access any of the above data as it is always encrypted by you using public keys of specific users of Vexl (recipients of your offers, the users you are talking to via chat function etc.). Such data may only be decrypted using associated private keys stored locally on devices of respective users.**\n" +
-  "Also note, that some of the above data are stored locally on the devices of the respective users and are stored on our servers only for a limited period of time necessary to transmit it to other users of Vexl (etc. communication via chat function). So even if we could decrypt such data in theory, which we actually cannot, the data are still out of our reach.\n" +
-  "In any case, if any such information is actually considered personal data, we may, as a data controller, from time to time process such personal data (even if in an encrypted form unreadable to us).\n" +
-  "**Support and reporting procedures**\n" +
-  "We may provide our users support services regarding Vexl. To be able to provide you with any support services we may have to use data obtained from you during the course of support procedure (such as your contact information etc.).\n" +
-  "We allow users to report unlawful content. To be able to assess any reports we may have to use any data obtained from you during the course of the reporting procedure (such as your contact information etc.).\n" +
-  "If any of such information is considered as personal data, we will, as a data controller, collect, store and/or process such personal data.\n" +
-  "## 4. Why is my personal data processed?\n" +
-  "We process your personal data only so we can provide you Vexl services including any support services and reporting procedures regarding Vexl.\n" +
-  "We will also process your personal data to perform any of our obligations under the Vexl Terms of Service and any applicable law and to protect our own rights thereunder.\n" +
-  "It is also in our legitimate interest to process such personal data to establish, exercise or defend any related legal claims, since otherwise we could not exercise our legal rights and such use of personal data is foreseeable by data subjects and represents little to no restriction of data subject interests, rights and freedoms.\n" +
-  "To comply with legal requirements, we must mention that we process such personal data mainly pursuant to the Article 6 (1) (b) and (f) of the Regulation.\n" +
-  "## 5. For how long is my personal data processed?\n" +
-  "We process your personal data only for the time necessary to meet the purposes of its processing specified above, or for the time consented by you, or for the time that is either necessary to comply with our obligations under the applicable law or set forth by the applicable law or in accordance therewith. We comply with the mandatory rules for data archiving.\n" +
-  "To be specific:\n" +
-  "We process your name, your avatar, your phone number, your public key and a graph of your 1st and 2nd degree contacts for as long as your user account exists. Please note, that except for your public key, we cannot actually access any of the above data as it is always encrypted with public keys of the specific users of Vexl.\n" +
-  "Information about your offers is stored and processed only for the duration of the offer (set by you when placing the offer). Please note, that this information is also encrypted with specific public keys of the users that are allowed to see the offer and cannot be decrypted by us, even if transmitted via our servers.\n" +
-  "Information provided when chatting with other users via chat function are processed only for the duration of the chat. Please note, that this information is also encrypted with specific public keys of the other party to the chat and cannot be decrypted by us, even if transmitted via our servers.\n" +
-  "The data obtained during the support and reporting procedures will be processed until the procedure is completed and for a period of time when you are allowed under the statute of limitations to initiate any court proceedings in relation to the above procedures.\n" +
-  "## 6. Who will have access to my personal data?\n" +
-  "We take care of your personal data security and so we choose the partners to whom we entrust your personal data very carefully.\n" +
-  "All our partners must be able to provide sufficient security of your personal data to prevent unauthorized or accidental access thereto or other abuse thereof and all our partners must undertake a confidentiality obligation and must not use your personal data for any purpose other than the purpose for which the data were made available to them.\n" +
-  "The recipients that may have access to your personal data are:\n" +
-  "- technological services providers including providers of data storage solutions;\n" +
-  "- persons who provide our services with security and integrity and who regularly test such security and integrity;\n" +
-  "- providers of accounting, legal and administrative services;\n" +
-  "- our staff.\n" +
-  "Our aim is and always will be to ensure your personal data is as anonymous as possible and unavailable to all third parties. However, under certain specifically defined conditions we will be under some circumstances required, in accordance with the applicable law, to transfer certain personal data to public authorities.\n" +
-  "## 7. Do you transfer the personal data outside the EU/EEA?\n" +
-  "When collecting, storing and processing personal data we sometimes may use personal data processors such as Twilio, which under some circumstances transmit your personal data to third countries. In such an event we always make sure such transmission is compliant with the Regulation.\n" +
-  "In particular, we specify that the personal data may be transmitted to the United States of America and in such event the transmission is compliant with the Standard Contractual Clauses (SCCs) mechanism.\n" +
-  "For an in-depth overview, you can find Twilio's guidelines [here](https://www.twilio.com/guidelines).\n" +
-  "## 8. How is my personal data protected?\n" +
-  "All your personal data is secured by standard procedures and technologies. We provide data protection against unauthorized or accidental access, alteration, destruction, loss, unauthorized transmission or any other unauthorized processing, as well as against any other abuse of records containing the personal data.\n" +
-  "The standard procedures and technologies may include, but are not limited to, the following:\n" +
-  "- education and training of relevant staff to ensure they are aware of our privacy obligations when handling personal data;\n" +
-  "- administrative and technical rules to restrict access to personal data on a ‘need to know’ basis;\n" +
-  "- technological security measures, including firewalls, encryption and anti-virus software;\n" +
-  "- physical security measures, such as staff security passes to access our premises.\n" +
-  "We are not able to guarantee the security of your personal data without your help and responsible behavior. Therefore, we ask you to help us ensure the security of your data by keeping your PIN private (if set up), and your device secure by following common security standards.\n" +
-  "## 9. What are my rights in relation to personal data protection?\n" +
-  "In relation to the personal data you shall have in particular the following rights:\n" +
-  "- a right to withdraw your consent at any time;\n" +
-  "- a right to correct or make additions to the personal data;\n" +
-  "- a right to request restrictions to processing of your personal data;\n" +
-  "- a right to object or complain against processing of your personal data under certain circumstances;\n" +
-  "- a right to request transfer of your personal data;\n" +
-  "- a right to access your personal data;\n" +
-  "- a right to be informed of the personal data security breach under certain circumstances;\n" +
-  "- a right to request deletion of your personal data (a right to be „forgotten“) under certain circumstances; and\n" +
-  "- other rights set forth in Act of the Czech republic No. 110/2019 Coll., on personal data processing (Personal Data Protection Act) and the Regulation.\n" +
-  "You have a right to object, on grounds relating to your particular situation, at any time to processing your personal data which is based on Article 6(1)(f) of Regulation (it means that we have legitimate interest to process such personal data). You have also a right to object to processing your personal data for direct marketing purposes.\n" +
-  "Additionally, you have a right to contact the Office for Personal Data Protection with a request for remedial measures in case of any violation of the obligations set forth in the Regulation at the following address: Office for Personal Data Protection, Pplk. Sochorova 27, 170 00 Prague 7, Czech Republic, phone number +420 234 665 111 (central telephone exchange).\n" +
-  "## 10. How can I contact you?\n" +
-  "If you have any questions regarding this Privacy Policy, please do not hesitate to contact us using the contact details below:\n" +
-  "Address: Vexl s.r.o, Kundratka 2359/17a, Prague, Czech republic\n" +
-  "Email address: [support@vexl.it](mailto:support@vexl.it)\n" +
-  "## 11. When is this Privacy Policy effective?\n" +
-  "This Privacy Policy comes into effect on 11. 7. 2022.\n" +
-  "We reserve the right to amend and update this Privacy Policy at any time. In the event of any changes or amendments, we will ask you to agree with this Privacy Policy again before further use of Vexl.\n"
+export default "## 1. Chi raccoglie i miei dati personali?\n" +
+  "Siamo una società commerciale denominata **Vexl s.r.o.**, con sede legale in Kundratka 2359/17a, Libeň, 180 00 Praga 8, Repubblica Ceca, Id. N. 172 70 642, e siamo iscritti nel registro delle imprese tenuto dal tribunale commerciale di Praga con il numero di fascicolo 369216.\n" +
+  "Siamo la società responsabile del funzionamento e dello sviluppo di Vexl - un servizio (compresa l'applicazione) che consente agli utenti che cercano di acquistare o vendere Bitcoin di connettersi tra loro per discutere le loro offerte e concordare gli scambi (**”Vexl”**).\n" +
+  "## 2. Perché dovrei leggere questo documento?\n" +
+  "Forse avrà sentito parlare del Regolamento (UE) 2016/679 del Parlamento europeo e del Consiglio del 27 aprile 2016 (”Regolamento”) più comunemente noto come GDPR.\n" +
+  "Ai sensi degli articoli 13 e 14 del Regolamento, dobbiamo fornire ai nostri utenti e agli altri interessati informazioni sulla raccolta, il trattamento, la protezione e l'elaborazione dei loro dati personali.\n" +
+  "Pertanto, nella presente Informativa sulla privacy è possibile saperne di più su questi argomenti relativi ai dati personali che raccogliamo quando si utilizza Vexl.\n" +
+  "## 3. Quali dati personali vengono trattati?\n" +
+  "**Inserimento e utilizzo di Vexl***n" +
+  "Possiamo trattare le seguenti categorie di dati personali forniti durante la procedura di onboarding e il successivo utilizzo di Vexl:\n " +
+  "- il vostro nome (fornito dall'utente);\n" +
+  "- il tuo numero di telefono (fornito dall'utente);\n" +
+  "- il vostro avatar (immagine caricata o scattata dalla fotocamera del vostro dispositivo);\n" +
+  "- la vostra chiave pubblica collegata al vostro account utente;\n " +
+  "- i dati di contatto dei tuoi amici importati dal tuo telefono (sotto forma di numero di telefono);\n" +
+  "- i vostri dati di contatto (forniti da altri utenti di Vexl come parte della loro procedura di onboarding) sotto forma di numero di telefono;\n" +
+  "- grafico dei tuoi contatti di 1° e 2° grado (come spiegato nei Termini di servizio di Vexl);\n" +
+  "- alcune informazioni sulle offerte di acquisto o vendita di Bitcoin pubblicate tramite Vexl;\n" +
+  "- qualsiasi comunicazione con altri utenti di Vexl;\n" +
+  "**Si prega di notare che (ad eccezione della vostra chiave pubblica) non possiamo accedere a nessuno dei dati di cui sopra, in quanto sono sempre criptati da voi utilizzando le chiavi pubbliche di specifici utenti di Vexl (i destinatari delle vostre offerte, gli utenti con cui state parlando tramite la funzione di chat, ecc.) Tali dati possono essere decifrati solo utilizzando le relative chiavi private memorizzate localmente sui dispositivi dei rispettivi utenti.**\n" +
+  "Si noti inoltre che alcuni dei dati di cui sopra sono memorizzati localmente sui dispositivi dei rispettivi utenti e sono memorizzati sui nostri server solo per un periodo di tempo limitato necessario per trasmetterli ad altri utenti di Vexl (ecc. comunicazione tramite la funzione chat). Quindi, anche se in teoria potessimo decriptare tali dati, cosa che in realtà non è possibile, i dati sono comunque fuori dalla nostra portata.\n" +
+  "In ogni caso, se tali informazioni sono effettivamente considerate dati personali, possiamo, in qualità di responsabili del trattamento, di volta in volta trattare tali dati personali (anche se in forma criptata e per noi illeggibile).\n " +
+  "**Procedure di assistenza e segnalazione**\n" +
+  "Possiamo fornire ai nostri utenti servizi di supporto relativi a Vexl. Per potervi fornire qualsiasi servizio di assistenza potremmo dover utilizzare i dati da voi ottenuti nel corso della procedura di assistenza (come le vostre informazioni di contatto, ecc.).\n" +
+  "Consentiamo agli utenti di segnalare contenuti illegali. Per poter valutare le segnalazioni, potremmo dover utilizzare i dati ottenuti dall'utente nel corso della procedura di segnalazione (come le sue informazioni di contatto, ecc.)..\n" +
+  "Se una di queste informazioni è considerata un dato personale, noi, in qualità di responsabili del trattamento, raccogliamo, conserviamo e/o trattiamo tali dati personali.\n" +
+  "## 4. Perché vengono trattati i miei dati personali?\n" +
+  "Trattiamo i suoi dati personali solo per poterle fornire i servizi Vexl, compresi i servizi di assistenza e le procedure di segnalazione relative a Vexl.\n" +
+  "Tratteremo inoltre i dati personali dell'utente per adempiere a uno qualsiasi degli obblighi previsti dai Termini di servizio di Vexl e da qualsiasi legge applicabile e per tutelare i nostri diritti in materia.\n " +
+  "È anche nel nostro legittimo interesse trattare tali dati personali per stabilire, esercitare o difendere qualsiasi rivendicazione legale correlata, poiché altrimenti non potremmo esercitare i nostri diritti legali e tale uso dei dati personali è prevedibile da parte degli interessati e rappresenta una limitazione minima o nulla degli interessi, dei diritti e delle libertà degli interessati.\n" +
+  "Per ottemperare ai requisiti di legge, dobbiamo menzionare che trattiamo tali dati personali principalmente ai sensi dell'articolo 6 (1) (b) e (f) del Regolamento.\n" +
+  "## 5. Per quanto tempo vengono trattati i miei dati personali?\n" +
+  "Trattiamo i vostri dati personali solo per il tempo necessario a soddisfare le finalità del trattamento sopra specificate, o per il tempo da voi acconsentito, o per il tempo che è necessario per adempiere ai nostri obblighi ai sensi della legge applicabile o stabilito dalla legge applicabile o in conformità con essa. Rispettiamo le norme obbligatorie per l'archiviazione dei dati.\n" +
+  "Per essere specifici:\n" +
+  "Trattiamo il tuo nome, il tuo avatar, il tuo numero di telefono, la tua chiave pubblica e un grafico dei tuoi contatti di primo e secondo grado per tutto il tempo in cui esiste il tuo account utente. Si prega di notare che, ad eccezione della vostra chiave pubblica, non possiamo accedere a nessuno dei dati di cui sopra, in quanto sono sempre criptati con le chiavi pubbliche degli utenti specifici di Vexl.\n" +
+  "Le informazioni sulle vostre offerte vengono memorizzate ed elaborate solo per la durata dell'offerta (stabilita da voi al momento dell'inserimento dell'offerta). Si prega di notare che queste informazioni sono anche criptate con chiavi pubbliche specifiche degli utenti che sono autorizzati a vedere l'offerta e non possono essere decifrate da noi, anche se trasmesse attraverso i nostri server.\n" +
+  "Le informazioni fornite quando si chatta con altri utenti tramite la funzione di chat vengono elaborate solo per la durata della chat. Si prega di notare che queste informazioni sono anche criptate con chiavi pubbliche specifiche dell'altra parte della chat e non possono essere decifrate da noi, anche se trasmesse attraverso i nostri server.\n" +
+  "I dati ottenuti durante le procedure di assistenza e segnalazione saranno trattati fino al completamento della procedura e per un periodo di tempo in cui vi è consentito, in base alla prescrizione, di avviare eventuali procedimenti giudiziari in relazione alle suddette procedure.\n" +
+  "## 6. Chi avrà accesso ai miei dati personali?\n" +
+  "Ci preoccupiamo della sicurezza dei vostri dati personali e per questo scegliamo con molta attenzione i partner a cui affidare i vostri dati personali.\n" +
+  "Tutti i nostri partner devono essere in grado di garantire una sicurezza sufficiente dei vostri dati personali per impedirne l'accesso non autorizzato o accidentale o altri abusi e tutti i nostri partner devono assumersi l'obbligo di riservatezza e non devono utilizzare i vostri dati personali per scopi diversi da quelli per i quali i dati sono stati messi a loro disposizione.\n" +
+  "I destinatari che possono avere accesso ai vostri dati personali sono:\n" +
+  "- fornitori di servizi tecnologici, compresi i fornitori di soluzioni di archiviazione dati;\n" +
+  "- persone che forniscono i nostri servizi con sicurezza e integrità e che verificano regolarmente tale sicurezza e integrità;\n" +
+  "- fornitori di servizi contabili, legali e amministrativi;\n" +
+  "- il nostro personale.\n" +
+  "Il nostro obiettivo è e sarà sempre quello di garantire che i vostri dati personali siano il più possibile anonimi e non accessibili a terzi. Tuttavia, in determinate condizioni specificamente definite, in alcune circostanze saremo tenuti, in conformità alla legge applicabile, a trasferire alcuni dati personali alle autorità pubbliche.\n" +
+  "## 7. Trasferite i dati personali al di fuori dell'UE/SEE?\n" +
+  "Per la raccolta, la conservazione e l'elaborazione dei dati personali possiamo talvolta avvalerci di elaboratori di dati personali come Twilio, che in alcune circostanze trasmettono i vostri dati personali a paesi terzi. In tal caso, ci assicuriamo sempre che tale trasmissione sia conforme al Regolamento.\n" +
+  "In particolare, specifichiamo che i dati personali possono essere trasmessi agli Stati Uniti d'America e in tal caso la trasmissione è conforme al meccanismo delle Clausole Contrattuali Standard (SCC).\n" +
+  "Per una panoramica approfondita, è possibile consultare le linee guida di Twilio [qui] (https://www.twilio.com/guidelines).\n" +
+  "## 8. Come vengono protetti i miei dati personali?\n" +
+  "Tutti i vostri dati personali sono protetti da procedure e tecnologie standard. Garantiamo la protezione dei dati contro l'accesso non autorizzato o accidentale, l'alterazione, la distruzione, la perdita, la trasmissione non autorizzata o qualsiasi altro trattamento non autorizzato, nonché contro qualsiasi altro abuso dei registri contenenti i dati personali.\n" +
+  "Le procedure e le tecnologie standard possono includere, ma non solo, quanto segue:\n" +
+  "- l'istruzione e la formazione del personale interessato per garantire che sia consapevole dei nostri obblighi in materia di privacy nel trattamento dei dati personali;\n" +
+  '- regole amministrative e tecniche per limitare l\'accesso ai dati personali sulla base della "necessità di sapere".;\n' +
+  "- misure di sicurezza tecnologica, tra cui firewall, crittografia e software antivirus;\n" +
+  "- misure di sicurezza fisica, come i pass di sicurezza del personale per accedere ai nostri locali.\n" +
+  "Non siamo in grado di garantire la sicurezza dei vostri dati personali senza il vostro aiuto e il vostro comportamento responsabile. Pertanto, vi chiediamo di aiutarci a garantire la sicurezza dei vostri dati mantenendo il vostro PIN privato (se impostato) e il vostro dispositivo sicuro seguendo i comuni standard di sicurezza.\n" +
+  "## 9. Quali sono i miei diritti in materia di protezione dei dati personali?\n" +
+  "In relazione ai dati personali avrete in particolare i seguenti diritti:\n" +
+  "- il diritto di revocare il consenso in qualsiasi momento;\n" +
+  "- diritto di rettificare o integrare i dati personali;\n" +
+  "- il diritto di richiedere la limitazione del trattamento dei vostri dati personali;\n" +
+  "- il diritto di opporsi o di presentare reclamo contro il trattamento dei vostri dati personali in determinate circostanze;\n" +
+  "- il diritto di richiedere il trasferimento dei propri dati personali;\n" +
+  "- diritto di accesso ai propri dati personali;\n" +
+  "- il diritto di essere informati della violazione della sicurezza dei dati personali in determinate circostanze;\n" +
+  "- il diritto di richiedere la cancellazione dei propri dati personali (diritto all'oblio) in determinate circostanze; e\n" +
+  "- altri diritti previsti dalla Legge della Repubblica Ceca n. 110/2019 Coll. sul trattamento dei dati personali (Legge sulla protezione dei dati personali) e dal Regolamento.\n" +
+  "Avete il diritto di opporvi in qualsiasi momento, per motivi legati alla vostra situazione particolare, al trattamento dei vostri dati personali basato sull'articolo 6, paragrafo 1, lettera f), del regolamento (significa che abbiamo un interesse legittimo a trattare tali dati personali). Avete anche il diritto di opporvi al trattamento dei vostri dati personali per finalità di marketing diretto.\n" +
+  "Inoltre, avete il diritto di contattare l'Ufficio per la protezione dei dati personali con una richiesta di misure correttive in caso di violazione degli obblighi previsti dal regolamento al seguente indirizzo: Ufficio per la protezione dei dati personali, Pplk. Sochorova 27, 170 00 Praga 7, Repubblica Ceca, numero di telefono +420 234 665 111 (centralino telefonico).\n" +
+  "## 10. Come posso contattarvi?\n" +
+  "In caso di domande relative alla presente Informativa sulla privacy, non esitate a contattarci utilizzando i dati di contatto riportati di seguito:\n" +
+  "Indirizzo: Vexl s.r.o, Kundratka 2359/17a, Praga, Repubblica Ceca\n" +
+  "Indirizzo e-mail: [support@vexl.it](mailto:support@vexl.it)\n" +
+  "## 11. Quando entrerà in vigore la presente Informativa sulla privacy?\n" +
+  "La presente Informativa sulla privacy entra in vigore l'11. 7. 2022.\n" +
+  "Ci riserviamo il diritto di modificare e aggiornare la presente Informativa sulla privacy in qualsiasi momento. In caso di modifiche o cambiamenti, vi chiederemo di accettare nuovamente la presente Informativa sulla privacy prima di utilizzare ulteriormente Vexl.\n"

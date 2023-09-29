@@ -337,7 +337,9 @@ const otherSp: typeof en =
       "termsOfUse": "Condiciones de uso",
       "privacyPolicy": "Política de privacidad",
       "dontHaveTime":
-        "¿No tienes tiempo para leer todo esto? Eche un vistazo a Preguntas frecuentes."
+        "¿No tienes tiempo para leer todo esto? Eche un vistazo a Preguntas frecuentes.",
+      "cautiousNoticeAboutMachineTranslation":
+        "Cautious Notice: The following text has undergone machine translation for your convenience, to access the original English version, proceed to the web."
     },
     "faqs": {
       "faqs": "Preguntas frecuentes",

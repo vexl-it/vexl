@@ -340,7 +340,9 @@ const otherDe: typeof en =
       "termsOfUse": "AGB",
       "privacyPolicy": "DSGVO",
       "dontHaveTime":
-        "Du hast keine Zeit, dies alles zu lesen? Werfe einen Blick auf Häufig gestellte Fragen."
+        "Du hast keine Zeit, dies alles zu lesen? Werfe einen Blick auf Häufig gestellte Fragen.",
+      "cautiousNoticeAboutMachineTranslation":
+        "Der folgende Text wurde maschinell übersetzt, um Ihnen die Originalversion auf Englisch zugänglich zu machen, gehen Sie bitte zur Website"
     },
     "faqs": {
       "faqs": "Häufig gestellte Fragen",

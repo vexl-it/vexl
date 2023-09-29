@@ -1,4 +1,4 @@
-import {atom} from 'jotai/index'
+import {atom} from 'jotai'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
 import {askAreYouSureActionAtom} from '../../../components/AreYouSureDialog'
 import userSvg from '../../../components/images/userSvg'
@@ -60,6 +60,7 @@ const showCreateOrEditDialogAtom = atom(
                 : t('addContactDialog.addContactName'),
             variant: 'greyOnWhite',
             icon: userSvg,
+            defaultValue: contactName,
           },
         },
       ],
@@ -167,6 +168,7 @@ const createContact = atom(null, (get, set, newContact: ContactNormalized) => {
     set(showCreateOrEditDialogAtom, {
       type: 'create',
       contactNumber: newContact.normalizedNumber,
+      contactName: newContact.name,
     }),
     TE.map((dialogActionResult) =>
       dialogActionResult[0].type === 'inputResult'

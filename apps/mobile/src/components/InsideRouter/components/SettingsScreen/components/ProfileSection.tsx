@@ -8,8 +8,10 @@ import reachIconSVG from '../images/reachIconSVG'
 import {Stack, styled, Text, XStack} from 'tamagui'
 import {useAtomValue, useSetAtom} from 'jotai'
 import {reachNumberAtom} from '../../../../../state/connections/atom/connectionStateAtom'
-import {qrCodeDialogVisibleAtom} from '../atoms'
+import {qrCodeDialogVisibleAtom, qrScannerDialogVisibleAtom} from '../atoms'
 import QrCode from './QrCode'
+import cameraSvg from '../../../images/cameraSvg'
+import QrScanner from './QrScanner'
 
 const GrayBackContainer = styled(XStack, {
   ai: 'center',
@@ -25,6 +27,7 @@ function ProfileSection(): JSX.Element {
   const session = useSessionAssumeLoggedIn()
   const reachNumber = useAtomValue(reachNumberAtom)
   const setQrCodeDialogVisible = useSetAtom(qrCodeDialogVisibleAtom)
+  const setQrScannerDialogVisible = useSetAtom(qrScannerDialogVisibleAtom)
 
   return (
     <Stack ai="center" ml="$4" mr="$4">
@@ -37,17 +40,30 @@ function ProfileSection(): JSX.Element {
             {t('settings.yourReach', {number: reachNumber})}
           </Text>
         </GrayBackContainer>
-        <TouchableOpacity
-          onPress={() => {
-            setQrCodeDialogVisible(true)
-          }}
-        >
-          <GrayBackContainer>
-            <Stack w={24} h={24}>
-              <SvgImage source={QRIconSVG} />
-            </Stack>
-          </GrayBackContainer>
-        </TouchableOpacity>
+        <XStack space="$2">
+          <TouchableOpacity
+            onPress={() => {
+              setQrCodeDialogVisible(true)
+            }}
+          >
+            <GrayBackContainer>
+              <Stack w={24} h={24}>
+                <SvgImage source={QRIconSVG} />
+              </Stack>
+            </GrayBackContainer>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => {
+              setQrScannerDialogVisible(true)
+            }}
+          >
+            <GrayBackContainer>
+              <Stack w={24} h={24}>
+                <SvgImage source={cameraSvg} />
+              </Stack>
+            </GrayBackContainer>
+          </TouchableOpacity>
+        </XStack>
       </XStack>
       <UserDataDisplay
         userNameAndAvatar={{
@@ -59,6 +75,7 @@ function ProfileSection(): JSX.Element {
         {session.phoneNumber}
       </Text>
       <QrCode />
+      <QrScanner />
     </Stack>
   )
 }

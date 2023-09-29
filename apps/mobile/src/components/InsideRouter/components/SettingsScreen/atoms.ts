@@ -5,6 +5,7 @@ import {type ImportContactFromLinkPayload} from '../../../../state/contacts/doma
 export const reportIssueDialogVisibleAtom = atom<boolean>(false)
 export const changeCurrencyDialogVisibleAtom = atom<boolean>(false)
 export const qrCodeDialogVisibleAtom = atom<boolean>(false)
+export const qrScannerDialogVisibleAtom = atom<boolean>(false)
 
 export const encodedUserDetailsUriAtom = atom<string>((get) => {
   const session = get(sessionDataOrDummyAtom)

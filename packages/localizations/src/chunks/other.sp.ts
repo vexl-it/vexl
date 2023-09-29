@@ -915,7 +915,16 @@ const otherSp: typeof en =
       "youHaveSuccessfullyUpdatedContact":
         "You have successfully updated your Vexl contacts."
     },
-    "": ""
+    "": "",
+    "qrScanner": {
+      "title": "Scan other user's qrcode",
+      "invalidQrCodeScanned": "Invalid qrcode scanned",
+      "missingCameraPermissions": "Missing camera permissions",
+      "grantPermissions": "Grant permissions",
+      "grantPermissionsInSettings":
+        "Unable to ask for permissions. To use QR scanner open settings and allow Vexl to use camera.",
+      "openSettings": "Open settings"
+    }
   }
 /* JSON ends */
 

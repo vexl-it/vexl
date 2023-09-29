@@ -4,7 +4,11 @@ import messaging, {
 import reportError from '../reportError'
 import {getDefaultStore} from 'jotai'
 import {updateAllOffersConnectionsActionAtom} from '../../state/connections/atom/offerToConnectionsAtom'
-import {CHAT_NOTIFICATION_TYPES, NEW_CONNECTION} from './notificationTypes'
+import {
+  CHAT_NOTIFICATION_TYPES,
+  NEW_CONNECTION,
+  NEW_CONTENT,
+} from './notificationTypes'
 import {pipe} from 'fp-ts/function'
 import {safeParse} from '../fpUtils'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
@@ -13,6 +17,7 @@ import {fetchAndStoreMessagesForInboxAtom} from '../../state/chat/atoms/fetchNew
 import {showUINotificationFromRemoteMessage} from './showUINotificationFromRemoteMessage'
 import notifee from '@notifee/react-native'
 import {unreadChatsCountAtom} from '../../state/chat/atoms/unreadChatsCountAtom'
+import checkForNewOffers from './checkForNewOffers'
 
 export async function processBackgroundMessage(
   remoteMessage: FirebaseMessagingTypes.RemoteMessage
@@ -65,6 +70,13 @@ export async function processBackgroundMessage(
       await getDefaultStore().set(updateAllOffersConnectionsActionAtom, {
         isInBackground: true,
       })()
+    }
+
+    if (remoteMessage.data?.type === NEW_CONTENT) {
+      console.info(
+        '📳 Received notification about new content. Triggering check'
+      )
+      void checkForNewOffers()
     }
   } catch (error) {
     reportError(

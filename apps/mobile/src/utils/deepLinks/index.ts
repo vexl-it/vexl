@@ -17,7 +17,7 @@ import showErrorAlert from '../showErrorAlert'
 
 type DynamicLink = FirebaseDynamicLinksTypes.DynamicLink
 
-const handleImportDeepContactActionAtom = atom(
+export const handleImportDeepContactActionAtom = atom(
   null,
   (get, set, contactJsonString: string) => {
     const {t} = get(translationAtom)
@@ -36,14 +36,17 @@ const handleImportDeepContactActionAtom = atom(
             title: t('common.errorWhileReadingQrCode'),
             error: e,
           })
+          return false
         },
-        (contact) =>
-          set(addContactWithUiFeedbackAtom, {
-            name: contact.numberToDisplay,
+        (contact) => {
+          void set(addContactWithUiFeedbackAtom, {
+            name: contact.name,
             normalizedNumber: E164PhoneNumber.parse(contact.numberToDisplay),
             fromContactList: false,
             numberToDisplay: contact.numberToDisplay,
           })
+          return true
+        }
       )
     )
   }

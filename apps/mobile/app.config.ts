@@ -114,6 +114,13 @@ export default {
     'policy': 'sdkVersion',
   },
   'plugins': [
+    [
+      'expo-barcode-scanner',
+      {
+        'cameraPermission':
+          'Vexl needs access to your camera to add contact via scanning qrcode',
+      },
+    ],
     'expo-localization',
     [
       'expo-image-picker',

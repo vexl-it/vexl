@@ -45,6 +45,7 @@ interface StepWithInput {
   description?: string
   subtitle?: string
   textInputProps: VexlTextInputProps
+  defaultValue?: string
 }
 
 type Step = StepWithText | StepWithChildren | StepWithInput
@@ -76,18 +77,23 @@ export const askAreYouSureActionAtom: WritableAtom<
     Omit<
       AreYouSureDialogState,
       'onPass' | 'onDismiss' | 'currentStep' | 'stepResults'
-    >
+    >,
   ],
   TE.TaskEither<UserDeclinedError, AreYouSureDialogAtomStepResult[]>
-  // eslint-disable-next-line @typescript-eslint/promise-function-async
 > = atom(null, (get, set, state) => {
-  // eslint-disable-next-line @typescript-eslint/promise-function-async
   return () =>
     new Promise((resolve) => {
       set(areYouSureDialogAtom, {
         ...state,
         currentStep: 0,
-        stepResults: state.steps.map(() => ({type: 'noResult'} as const)),
+        stepResults: state.steps.map((step) =>
+          step.type === 'StepWithInput' && step.defaultValue
+            ? ({
+                type: 'inputResult',
+                value: step.defaultValue,
+              } as const)
+            : ({type: 'noResult'} as const)
+        ),
         onPass: (result) => {
           resolve(E.right(result))
         },
@@ -137,6 +143,8 @@ function AreYouSureDialog(): JSX.Element | null {
   const step = state?.steps[state.currentStep]
 
   if (!step) return null
+
+  const stepResult = state.stepResults[state.currentStep]
 
   return (
     <Stack position={'absolute'} t={0} l={0} r={0} b={0}>
@@ -196,14 +204,20 @@ function AreYouSureDialog(): JSX.Element | null {
                       </Text>
                       <Input
                         value={
-                          state.stepResults[0].type === 'inputResult'
-                            ? state.stepResults[0].value
-                            : undefined
+                          stepResult.type === 'inputResult'
+                            ? stepResult.value
+                            : ''
                         }
                         onChangeText={(value) => {
+                          if (!state?.stepResults) return
+
                           setState({
                             ...state,
-                            stepResults: [{type: 'inputResult', value}],
+                            stepResults: [
+                              ...state.stepResults.slice(0, state.currentStep),
+                              {type: 'inputResult', value},
+                              ...state.stepResults.slice(state.currentStep + 1),
+                            ],
                           })
                         }}
                         {...step.textInputProps}

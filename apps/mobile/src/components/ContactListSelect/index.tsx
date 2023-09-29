@@ -7,12 +7,16 @@ import WhiteContainer from '../WhiteContainer'
 import {getTokens, Stack} from 'tamagui'
 import {useAtomValue, useSetAtom, useStore} from 'jotai'
 import {importedContactsAtom} from '../../state/contacts'
-import {useMemo} from 'react'
+import {useCallback, useMemo} from 'react'
 import {contactSelectMolecule, ContactsSelectScope} from './atom'
 import {ScopeProvider, useMolecule} from 'jotai-molecules'
 import ContactsFilter from './components/ContactsFilter'
 import {ActivityIndicator} from 'react-native'
-import {contactsLoadingAtom} from '../../state/contacts/atom/contactsFromDeviceAtom'
+import {
+  contactsLoadingAtom,
+  triggerContactsReloadAtom,
+} from '../../state/contacts/atom/contactsFromDeviceAtom'
+import {useOnFocusAndAppState} from './utils'
 
 interface Props {
   onContactsSubmitted: () => void
@@ -35,6 +39,14 @@ function ContactsListSelect({
   const toDisplay = useAtomValue(contactsToDisplayAtomsAtom)
   const loading = useAtomValue(contactsLoadingAtom)
   const submit = useSetAtom(submitActionAtom)
+  const triggerContactsReload = useSetAtom(triggerContactsReloadAtom)
+
+  useOnFocusAndAppState(
+    useCallback(() => {
+      console.log('triggering')
+      triggerContactsReload()
+    }, [triggerContactsReload])
+  )
 
   if (loading)
     return (

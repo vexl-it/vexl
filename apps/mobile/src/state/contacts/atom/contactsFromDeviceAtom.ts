@@ -22,16 +22,22 @@ export const contactsLoadingAtom = selectAtom(
   (s) => s.loading
 )
 
-contactsFromDeviceWithLoadingProgressAtom.onMount = (setAtom) => {
+export const triggerContactsReloadAtom = atom(null, (get, set) => {
   void pipe(
     getContactsAndTryToResolveThePermissionsAlongTheWay(),
     TE.match(
       () => {
-        setAtom({loading: false, contacts: []})
+        set(contactsFromDeviceWithLoadingProgressAtom, {
+          loading: false,
+          contacts: [],
+        })
       },
       (contacts) => {
-        setAtom({contacts, loading: false})
+        set(contactsFromDeviceWithLoadingProgressAtom, {
+          contacts,
+          loading: false,
+        })
       }
     )
   )()
-}
+})

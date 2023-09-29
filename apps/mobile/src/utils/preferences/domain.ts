@@ -16,6 +16,7 @@ export const Preferences = z.object({
   allowSendingImages: z.boolean().default(false),
   notificationPreferences: NotificationPreferences,
   enableNewOffersNotificationDevMode: z.boolean().default(false),
+  showFriendLevelBanner: z.boolean().default(true),
 })
 
 export type Preferences = z.infer<typeof Preferences>

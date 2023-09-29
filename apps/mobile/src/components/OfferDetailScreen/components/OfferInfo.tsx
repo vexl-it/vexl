@@ -31,6 +31,7 @@ import {type RootStackScreenProps} from '../../../navigationTypes'
 import RerequestInfo from './RerequestInfo'
 import {type OneOfferInState} from '@vexl-next/domain/dist/general/offers'
 import randomName from '../../../utils/randomName'
+import {friendLevelBannerPreferenceAtom} from '../../../utils/preferences'
 
 function OfferInfo({
   offer,
@@ -126,6 +127,7 @@ function OfferInfo({
             contactsHashes={offer.offerInfo.privatePart.commonFriends}
           />
           <Info
+            visibleStateAtom={friendLevelBannerPreferenceAtom}
             text={t('common.whatDoesThisMean', {term: friendLevel})}
             actionButtonText={t('common.learnMore')}
             onActionPress={onWhatDoesThisMeanPressed}

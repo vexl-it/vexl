@@ -4,21 +4,28 @@ import infoSvg from './images/infoSvg'
 import {TouchableOpacity} from 'react-native'
 import closeSvg from './images/closeSvg'
 import Button from './Button'
-import {useState} from 'react'
+import {useMemo} from 'react'
+import {atom, type PrimitiveAtom, useAtom} from 'jotai'
 
 interface Props {
   actionButtonText: string
   text: string
   onActionPress: () => void
+  visibleStateAtom?: PrimitiveAtom<boolean>
 }
 
 function Info({
   actionButtonText,
   text,
   onActionPress,
+  visibleStateAtom: nullableVisibleStateAtom,
 }: Props): JSX.Element | null {
   const tokens = getTokens()
-  const [isVisible, setIsVisible] = useState<boolean>(true)
+
+  const visibleStateAtom = useMemo(() => {
+    return nullableVisibleStateAtom ?? atom(true)
+  }, [nullableVisibleStateAtom])
+  const [isVisible, setIsVisible] = useAtom(visibleStateAtom)
 
   if (!isVisible) return null
 

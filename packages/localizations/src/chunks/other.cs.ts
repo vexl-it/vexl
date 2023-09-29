@@ -328,7 +328,9 @@ const otherCs: typeof en =
       "termsOfUse": "Podmínky používání",
       "privacyPolicy": "Zásady ochrany osobních údajů",
       "dontHaveTime":
-        "Nemáte čas to všechno číst? Podívejte se na často kladené otázky."
+        "Nemáte čas to všechno číst? Podívejte se na často kladené otázky.",
+      "cautiousNoticeAboutMachineTranslation":
+        "Následující text prošel strojovým překladem, abyste se dostali k původní anglické verzi, pokračujte na webovou stránku."
     },
     "faqs": {
       "faqs": "Často kladené otázky",

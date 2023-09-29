@@ -11,6 +11,7 @@ interface Props {
   actionButtonText: string
   text: string
   onActionPress: () => void
+  hideCloseButton?: boolean
   visibleStateAtom?: PrimitiveAtom<boolean>
 }
 
@@ -18,6 +19,7 @@ function Info({
   actionButtonText,
   text,
   onActionPress,
+  hideCloseButton,
   visibleStateAtom: nullableVisibleStateAtom,
 }: Props): JSX.Element | null {
   const tokens = getTokens()
@@ -32,21 +34,23 @@ function Info({
   return (
     <Stack jc={'center'} p={'$4'} bc={'$pinkAccent1'} br={'$4'}>
       <XStack ai={'center'} justifyContent={'space-between'} mb={'$4'}>
-        <XStack f={1} space={'$2'} ai={'center'}>
+        <XStack f={1} space={'$2'} ai={'center'} mr={'$1'}>
           <SvgImage fill={tokens.color.pink.val} source={infoSvg} />
           <Stack fs={1}>
-            <Text fos={14} col={'$pink'}>
+            <Text fos={14} col={'$pink'} textAlign={'justify'}>
               {text}
             </Text>
           </Stack>
         </XStack>
-        <TouchableOpacity
-          onPress={() => {
-            setIsVisible(false)
-          }}
-        >
-          <SvgImage stroke={tokens.color.pink.val} source={closeSvg} />
-        </TouchableOpacity>
+        {!hideCloseButton && (
+          <TouchableOpacity
+            onPress={() => {
+              setIsVisible(false)
+            }}
+          >
+            <SvgImage stroke={tokens.color.pink.val} source={closeSvg} />
+          </TouchableOpacity>
+        )}
       </XStack>
       <Button
         text={actionButtonText}

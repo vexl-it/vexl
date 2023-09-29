@@ -14,7 +14,6 @@ import MaintenanceAndForceUpdateCheck from './components/MaintenanceAndForceUpda
 import useSetupRemoteConfig from './utils/remoteConfig/useSetupRemoteConfig'
 import 'react-native-gesture-handler'
 import {navigationRef} from './utils/navigation'
-import {BackgroundTaskComponentManager} from './utils/backgroundTasks'
 import BadgeCountManager from './components/BadgeCountManager'
 import {useAppState} from './utils/useAppState'
 import {setLastTimeAppWasRunningToNow} from './utils/lastTimeAppWasRunning'
@@ -60,7 +59,6 @@ function App(): JSX.Element {
           </MaintenanceAndForceUpdateCheck>
         </LoadingOverlayProvider>
         <AreYouSureDialog />
-        <BackgroundTaskComponentManager />
       </NavigationContainer>
     </SafeAreaProvider>
   )

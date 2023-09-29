@@ -2,7 +2,7 @@ import {Text, YStack} from 'tamagui'
 import Button from '../../../../Button'
 import {DateTime} from 'luxon'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
-import {useNavigation} from '@react-navigation/native'
+import {useFocusEffect, useNavigation} from '@react-navigation/native'
 import Image from '../../../../Image'
 import emptyMarketplaceAnonymousAvatarSvg from '../images/emptyMarketplaceAnonymousAvatarSvg'
 import {useAtom, useAtomValue, useSetAtom} from 'jotai'
@@ -23,7 +23,7 @@ import {
 } from '../../../../FilterOffersScreen/atom'
 import EmptyMarketplaceSuggestions from './EmptyMarketplaceSuggestions'
 import MarketplaceSuggestion from './MarketplaceSuggestion'
-import {useEffect, useMemo, useState} from 'react'
+import {useCallback, useMemo, useState} from 'react'
 import {triggerOffersRefreshAtom} from '../../../../../state/marketplace'
 import {ScrollView} from 'react-native'
 import usePixelsFromBottomWhereTabsEnd from '../../../utils'
@@ -103,26 +103,27 @@ function EmptyListPlaceholder(): JSX.Element {
     setResetFilterSuggestionVisible(true)
   }
 
-  useEffect(() => {
-    if (reachNumber >= REACH_NUMBER_THRESHOLD && lastImportOfContacts) {
-      const interval = setInterval(() => {
-        if (minutesTillOffersAreLoaded > 1) {
-          setMinutesTillOffersAreLoaded(minutesTillOffersAreLoaded - 1)
-        }
-        void refreshOffers()
-      }, 60000)
+  useFocusEffect(
+    useCallback(() => {
+      if (reachNumber >= REACH_NUMBER_THRESHOLD && lastImportOfContacts) {
+        const interval = setInterval(() => {
+          if (minutesTillOffersAreLoaded > 1) {
+            setMinutesTillOffersAreLoaded(minutesTillOffersAreLoaded - 1)
+          }
+          void refreshOffers()
+        }, 60000)
 
-      return () => {
-        clearInterval(interval)
+        return () => {
+          clearInterval(interval)
+        }
       }
-    }
-  }, [
-    lastImportOfContacts,
-    minutesTillOffersAreLoaded,
-    reachNumber,
-    refreshOffers,
-    timeDifferenceSinceLastImport,
-  ])
+    }, [
+      lastImportOfContacts,
+      minutesTillOffersAreLoaded,
+      reachNumber,
+      refreshOffers,
+    ])
+  )
 
   if (filterActive) {
     return resetFilterSuggestionVisible ? (

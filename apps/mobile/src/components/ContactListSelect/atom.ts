@@ -22,6 +22,7 @@ import {translationAtom} from '../../utils/localization/I18nProvider'
 import reportError from '../../utils/reportError'
 import {loadingOverlayDisplayedAtom} from '../LoadingOverlayProvider'
 import {
+  combineContactsFromDeviceWithImportedContacts,
   combinedContactsAfterLastSubmitAtom,
   importedContactsAtom,
   lastImportOfContactsAtom,
@@ -54,40 +55,6 @@ export const ContactsSelectScope = createScope<{
 })
 
 export const newlyAddedCustomContactsAtom = atom<ContactNormalized[]>([])
-
-function combineContactsFromDeviceWithImportedContacts({
-  contactsFromDevice,
-  importedContacts,
-}: {
-  contactsFromDevice: ContactNormalized[]
-  importedContacts: ContactNormalized[]
-}): ContactNormalized[] {
-  const toReturn = [...contactsFromDevice]
-
-  for (const oneContact of importedContacts) {
-    if (!oneContact.fromContactList) {
-      // If contact is not from contact list add it. We should display it.
-      toReturn.push(oneContact)
-      continue
-    }
-
-    if (
-      !contactsFromDevice.some(
-        (oneFromDevice) =>
-          oneFromDevice.normalizedNumber === oneContact.normalizedNumber
-      )
-    ) {
-      // Those contacts were imported but are not in contact list anymore
-      toReturn.push({
-        ...oneContact,
-        fromContactList: false,
-        imageUri: undefined,
-      })
-    }
-  }
-
-  return toReturn
-}
 
 export const contactSelectMolecule = molecule((getMolecule, getScope) => {
   const searchTextAtom = atom('')
@@ -124,44 +91,54 @@ export const contactSelectMolecule = molecule((getMolecule, getScope) => {
     const searchText = get(searchTextAtom)
     const allContacts = get(allContactsAtom)
 
-    const filtered = [
-      ...(showNewContacts
-        ? allContacts.filter(
-            (contact) =>
-              !combinedContactsAfterLastSubmit
-                .map((lastSubmitContact) => lastSubmitContact.normalizedNumber)
-                .includes(contact.normalizedNumber) &&
-              !newlyAddedCustomContacts
-                .map(
-                  (newlyAddedCustomContact) =>
-                    newlyAddedCustomContact.normalizedNumber
-                )
-                .includes(contact.normalizedNumber)
-          )
-        : []),
-      ...(showSubmittedContacts ? importedContacts : []),
-      ...(showNonSubmittedContacts
-        ? [
-            ...allContacts.filter(
-              (contact) =>
-                !importedContacts
-                  .map((importedContact) => importedContact.normalizedNumber)
-                  .includes(contact.normalizedNumber) &&
-                combinedContactsAfterLastSubmit
-                  .map(
-                    (lastSubmitContact) => lastSubmitContact.normalizedNumber
-                  )
-                  .includes(contact.normalizedNumber)
-            ),
-            ...newlyAddedCustomContacts,
-          ]
-        : []),
-    ]
-
-    const contactsToShow =
+    const filterActive =
       showNewContacts || showSubmittedContacts || showNonSubmittedContacts
-        ? filtered
-        : allContacts
+
+    const contactsToShow = deduplicateBy(
+      (() => {
+        if (!filterActive) return allContacts
+
+        return [
+          ...(showNewContacts
+            ? allContacts.filter(
+                (contact) =>
+                  !combinedContactsAfterLastSubmit
+                    .map(
+                      (lastSubmitContact) => lastSubmitContact.normalizedNumber
+                    )
+                    .includes(contact.normalizedNumber) &&
+                  !newlyAddedCustomContacts
+                    .map(
+                      (newlyAddedCustomContact) =>
+                        newlyAddedCustomContact.normalizedNumber
+                    )
+                    .includes(contact.normalizedNumber)
+              )
+            : []),
+          ...(showSubmittedContacts ? importedContacts : []),
+          ...(showNonSubmittedContacts
+            ? [
+                ...allContacts.filter(
+                  (contact) =>
+                    !importedContacts
+                      .map(
+                        (importedContact) => importedContact.normalizedNumber
+                      )
+                      .includes(contact.normalizedNumber) &&
+                    combinedContactsAfterLastSubmit
+                      .map(
+                        (lastSubmitContact) =>
+                          lastSubmitContact.normalizedNumber
+                      )
+                      .includes(contact.normalizedNumber)
+                ),
+                ...newlyAddedCustomContacts,
+              ]
+            : []),
+        ]
+      })(),
+      (one) => one.normalizedNumber
+    )
 
     return matchSorter(contactsToShow, searchText, {
       keys: ['name', 'numberToDisplay'],

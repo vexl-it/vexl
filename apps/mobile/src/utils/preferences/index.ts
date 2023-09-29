@@ -18,10 +18,15 @@ export const preferencesAtom = atomWithParsedMmkvStorage(
       offer: true,
     },
     enableNewOffersNotificationDevMode: false,
+    showFriendLevelBanner: true,
   },
   Preferences
 )
 
 export const notificationPreferencesAtom = focusAtom(preferencesAtom, (o) =>
   o.prop('notificationPreferences')
+)
+
+export const friendLevelBannerPreferenceAtom = focusAtom(preferencesAtom, (p) =>
+  p.prop('showFriendLevelBanner')
 )

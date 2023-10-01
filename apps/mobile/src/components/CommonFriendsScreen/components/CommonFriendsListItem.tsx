@@ -31,7 +31,7 @@ function CommonFriendsListItem({friend}: Props): JSX.Element {
         <SvgImage width={50} height={50} source={picturePlaceholderSvg} />
       )}
       <Stack f={1} ml="$4" jc="space-between">
-        <Text ff={'$body500'} fs={18} mb={'$2'}>
+        <Text ff={'$body500'} fs={18} mb={'$2'} col="$black">
           {friend.name}
         </Text>
         <Text ff={'$body600'} col={'$greyOnBlack'} fos={14}>

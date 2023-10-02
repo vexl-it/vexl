@@ -5,14 +5,15 @@ import {I18n} from 'i18n-js'
 import {enableHiddenFeatures} from '../environment'
 import {getLocales} from 'expo-localization'
 import {selectAtom} from 'jotai/utils'
+import replaceBitcoinWithHoney from './replaceBitcoinWithHoney'
 
 // SETUP I18n
 export const i18n = new I18n(
   enableHiddenFeatures
     ? translations
     : {
-        en: translations.en,
-        de: translations.de,
+        en: replaceBitcoinWithHoney(translations.en),
+        de: replaceBitcoinWithHoney(translations.de),
       }
 )
 i18n.locale = getLocales()[0].languageTag

@@ -38,14 +38,14 @@ interface Props {
   >
   locationSuggestionsAtom: PrimitiveAtom<LocationSuggestion[]>
   locationSuggestionsAtomsAtom: Atom<Array<Atom<LocationSuggestion>>>
-  locationAtom: PrimitiveAtom<Location[]>
-  locationStateAtom: PrimitiveAtom<LocationState>
+  locationAtom: PrimitiveAtom<Location[] | undefined>
+  locationStateAtom: PrimitiveAtom<LocationState | undefined>
   updateLocationStatePaymentMethodAtom: WritableAtom<
     null,
     [
       {
         locationState: LocationState
-      }
+      },
     ],
     boolean
   >

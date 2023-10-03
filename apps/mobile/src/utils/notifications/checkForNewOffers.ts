@@ -9,7 +9,7 @@ import notifee from '@notifee/react-native'
 import {type TFunction, translationAtom} from '../localization/I18nProvider'
 import {getDefaultChannel} from './showUINotificationFromRemoteMessage'
 import {NEW_OFFERS_IN_MARKETPLACE} from './notificationTypes'
-import {offersFilterFromStorageAtom} from '../../state/offersFilter'
+import {offersFilterFromStorageAtom} from '../../state/marketplace/filterAtoms'
 import {triggerOffersRefreshAtom} from '../../state/marketplace'
 import {difference} from 'set-operations'
 import {

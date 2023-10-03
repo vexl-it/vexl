@@ -1,6 +1,6 @@
 import {useAtomValue} from 'jotai'
-import {isFilterActiveAtom} from '../../../../FilterOffersScreen/atom'
 import {Stack, Text} from 'tamagui'
+import {isFilterActiveAtom} from '../../../../../state/marketplace/filterAtoms'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import {
   buyOffersToSeeInMarketplaceCountAtom,

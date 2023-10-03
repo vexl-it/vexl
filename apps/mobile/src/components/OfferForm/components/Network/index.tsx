@@ -5,7 +5,7 @@ import {YStack} from 'tamagui'
 import SelectableCell from '../../../SelectableCell'
 
 interface Props {
-  btcNetworkAtom: PrimitiveAtom<BtcNetwork[]>
+  btcNetworkAtom: PrimitiveAtom<BtcNetwork[] | undefined>
 }
 
 function Network({btcNetworkAtom}: Props): JSX.Element {

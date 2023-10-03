@@ -2,17 +2,21 @@ import {
   atom,
   type Atom,
   getDefaultStore,
+  type PrimitiveAtom,
   type SetStateAction,
   type WritableAtom,
 } from 'jotai'
 import {
+  type BtcNetwork,
   type CurrencyCode,
+  type Location,
   type LocationState,
   OfferAdminId,
   OfferId,
   type OfferPublicPart,
   type OfferType,
   type OneOfferInState,
+  type PaymentMethod,
   type SpokenLanguage,
   SymmetricKey,
 } from '@vexl-next/domain/dist/general/offers'
@@ -53,6 +57,24 @@ import {splitAtom} from 'jotai/utils'
 import {fetchLocationSuggestionsAtom} from '../../../state/location/atoms/fetchLocationSuggestionsAtom'
 import getValueFromSetStateActionOfAtom from '../../../utils/atomUtils/getValueFromSetStateActionOfAtom'
 import getDefaultSpokenLanguage from '../../../utils/localization/getDefaultSpokenLanguage'
+
+function getAtomWithNullableValueHandling<T, S>(
+  nullableAtom: PrimitiveAtom<T | undefined>,
+  atomToSet: PrimitiveAtom<S>,
+  propertyToSetInAtom: keyof S
+): PrimitiveAtom<T | undefined> {
+  return atom(
+    (get) => get(nullableAtom),
+    (get, set, update: SetStateAction<T | undefined>) => {
+      const value = getValueFromSetStateActionOfAtom(update)(() =>
+        get(nullableAtom)
+      )
+      set(nullableAtom, value)
+      if (value)
+        set(atomToSet, (val) => ({...val, [propertyToSetInAtom]: value}))
+    }
+  )
+}
 
 export function createOfferDummyPublicPart(): OfferPublicPart {
   const userPhoneNumber = getDefaultStore().get(
@@ -120,32 +142,60 @@ export const dummyOffer: OneOfferInState = {
 export const offerFormMolecule = molecule(() => {
   const offerAtom = atom<OneOfferInState>(dummyOffer)
   const nullableOfferTypeAtom = atom<OfferType | undefined>(undefined)
+  const nullableCurrencyAtom = atom<CurrencyCode | undefined>(
+    dummyOffer.offerInfo.publicPart.currency
+  )
+  const nullableAmountTopLimitAtom = atom<number | undefined>(
+    dummyOffer.offerInfo.publicPart.amountTopLimit
+  )
+  const nullableAmountBottomLimitAtom = atom<number | undefined>(
+    dummyOffer.offerInfo.publicPart.amountBottomLimit
+  )
+  const nullableBtcNetworkAtom = atom<BtcNetwork[] | undefined>(
+    dummyOffer.offerInfo.publicPart.btcNetwork
+  )
+  const nullablePaymentMethodAtom = atom<PaymentMethod[] | undefined>(
+    dummyOffer.offerInfo.publicPart.paymentMethod
+  )
+  const nullableLocationStateAtom = atom<LocationState | undefined>(
+    dummyOffer.offerInfo.publicPart.locationState
+  )
+  const nullableLocationAtom = atom<Location[] | undefined>(
+    dummyOffer.offerInfo.publicPart.location
+  )
 
   const showAllFieldsAtom = atom<boolean>(
     (get) => get(nullableOfferTypeAtom) !== undefined
   )
+
   const offerFormAtom = focusAtom(offerAtom, (optic) =>
     optic.prop('offerInfo').prop('publicPart')
   )
 
-  const currencyAtom = focusAtom(offerFormAtom, (optic) =>
-    optic.prop('currency')
+  const currencyAtom = getAtomWithNullableValueHandling(
+    nullableCurrencyAtom,
+    offerFormAtom,
+    'currency'
   )
 
-  const amountBottomLimitAtom = focusAtom(offerFormAtom, (optic) =>
-    optic.prop('amountBottomLimit')
+  const amountBottomLimitAtom = getAtomWithNullableValueHandling(
+    nullableAmountBottomLimitAtom,
+    offerFormAtom,
+    'amountBottomLimit'
   )
 
-  const amountTopLimitAtom = focusAtom(offerFormAtom, (optic) =>
-    optic.prop('amountTopLimit')
+  const amountTopLimitAtom = getAtomWithNullableValueHandling(
+    nullableAmountTopLimitAtom,
+    offerFormAtom,
+    'amountTopLimit'
   )
 
   const updateCurrencyLimitsAtom = atom<
     null,
-    [{currency: CurrencyCode}],
+    [{currency: CurrencyCode | undefined}],
     boolean
   >(null, (get, set, params) => {
-    const {currency} = params
+    const {currency = 'USD'} = params
     const currencyFromAtom = get(currencyAtom)
     if (currencyFromAtom === currency) return false
 
@@ -174,15 +224,10 @@ export const offerFormMolecule = molecule(() => {
     return true
   })
 
-  const offerTypeAtom = atom(
-    (get) => get(nullableOfferTypeAtom),
-    (get, set, update: SetStateAction<OfferType | undefined>) => {
-      const value = getValueFromSetStateActionOfAtom(update)(() =>
-        get(nullableOfferTypeAtom)
-      )
-      set(nullableOfferTypeAtom, value)
-      if (value) set(offerFormAtom, (val) => ({...val, offerType: value}))
-    }
+  const offerTypeAtom = getAtomWithNullableValueHandling(
+    nullableOfferTypeAtom,
+    offerFormAtom,
+    'offerType'
   )
 
   const offerTypeOrDummyValueAtom = focusAtom(offerFormAtom, (optic) =>
@@ -203,20 +248,28 @@ export const offerFormMolecule = molecule(() => {
     optic.prop('feeState')
   )
 
-  const locationStateAtom = focusAtom(offerFormAtom, (optic) =>
-    optic.prop('locationState')
+  const locationStateAtom = getAtomWithNullableValueHandling(
+    nullableLocationStateAtom,
+    offerFormAtom,
+    'locationState'
   )
 
-  const locationAtom = focusAtom(offerFormAtom, (optic) =>
-    optic.prop('location')
+  const locationAtom = getAtomWithNullableValueHandling(
+    nullableLocationAtom,
+    offerFormAtom,
+    'location'
   )
 
-  const btcNetworkAtom = focusAtom(offerFormAtom, (optic) =>
-    optic.prop('btcNetwork')
+  const btcNetworkAtom = getAtomWithNullableValueHandling(
+    nullableBtcNetworkAtom,
+    offerFormAtom,
+    'btcNetwork'
   )
 
-  const paymentMethodAtom = focusAtom(offerFormAtom, (optic) =>
-    optic.prop('paymentMethod')
+  const paymentMethodAtom = getAtomWithNullableValueHandling(
+    nullablePaymentMethodAtom,
+    offerFormAtom,
+    'paymentMethod'
   )
 
   const offerDescriptionAtom = focusAtom(offerFormAtom, (optic) =>
@@ -351,6 +404,7 @@ export const offerFormMolecule = molecule(() => {
       offerPublicKey,
       ...restOfPublicPart
     } = get(offerFormAtom)
+
     const intendedConnectionLevel = get(intendedConnectionLevelAtom)
 
     if (locationState === 'IN_PERSON' && location.length === 0) {
@@ -603,6 +657,25 @@ export const offerFormMolecule = molecule(() => {
   const resetOfferFormActionAtom = atom(null, (get, set) => {
     set(offerAtom, dummyOffer)
     set(nullableOfferTypeAtom, undefined)
+    set(nullableCurrencyAtom, dummyOffer.offerInfo.publicPart.currency)
+    set(
+      nullableAmountTopLimitAtom,
+      dummyOffer.offerInfo.publicPart.amountTopLimit
+    )
+    set(
+      nullableAmountBottomLimitAtom,
+      dummyOffer.offerInfo.publicPart.amountBottomLimit
+    )
+    set(nullableBtcNetworkAtom, dummyOffer.offerInfo.publicPart.btcNetwork)
+    set(
+      nullablePaymentMethodAtom,
+      dummyOffer.offerInfo.publicPart.paymentMethod
+    )
+    set(
+      nullableLocationStateAtom,
+      dummyOffer.offerInfo.publicPart.locationState
+    )
+    set(nullableLocationAtom, dummyOffer.offerInfo.publicPart.location)
   })
 
   return {

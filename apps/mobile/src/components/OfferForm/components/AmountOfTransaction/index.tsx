@@ -20,9 +20,9 @@ const SLIDER_STEP_LARGE = 1000
 export type InputType = 'min' | 'max'
 
 interface Props {
-  amountTopLimitAtom: PrimitiveAtom<number>
-  amountBottomLimitAtom: PrimitiveAtom<number>
-  currencyAtom: PrimitiveAtom<CurrencyCode>
+  amountTopLimitAtom: PrimitiveAtom<number | undefined>
+  amountBottomLimitAtom: PrimitiveAtom<number | undefined>
+  currencyAtom: PrimitiveAtom<CurrencyCode | undefined>
 }
 
 function AmountOfTransaction({
@@ -43,19 +43,21 @@ function AmountOfTransaction({
   const currency = useAtomValue(currencyAtom)
   const SLIDER_STEP = useMemo(
     () =>
-      currencies[currency].maxAmount <= 25000
+      currency && currencies[currency].maxAmount <= 25000
         ? SLIDER_STEP_SMALL
-        : currencies[currency].maxAmount <= 250000
+        : currency && currencies[currency].maxAmount <= 250000
         ? SLIDER_STEP_MEDIUM
         : SLIDER_STEP_LARGE,
     [currency]
   )
   const SLIDER_MAX_VALUE = useMemo(
-    () => currencies[currency].maxAmount,
+    () => (currency ? currencies[currency].maxAmount : 0),
     [currency]
   )
-  const [inputMin, setInputMin] = useState<number>(amountBottomLimit)
-  const [inputMax, setInputMax] = useState<number>(amountTopLimit)
+  const [inputMin, setInputMin] = useState<number | undefined>(
+    amountBottomLimit
+  )
+  const [inputMax, setInputMax] = useState<number | undefined>(amountTopLimit)
 
   const setBottomLimit = useCallback(
     (bottomLimit: number): void => {

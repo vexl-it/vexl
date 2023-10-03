@@ -1,65 +1,65 @@
-import {atom, type Atom, type SetStateAction, type WritableAtom} from 'jotai'
-import {type OffersFilter} from '../../state/marketplace/domain'
+import {type Atom, atom, type SetStateAction, type WritableAtom} from 'jotai'
+import {type CurrencyCode} from '@vexl-next/domain/dist/general/currency.brand'
+import {currencies} from '../../utils/localization/currency'
 import {
-  type CurrencyCode,
+  type BtcNetwork,
   type IntendedConnectionLevel,
+  type Location,
   type LocationState,
+  type PaymentMethod,
   type Sort,
   type SpokenLanguage,
 } from '@vexl-next/domain/dist/general/offers'
-import {focusAtom} from 'jotai-optics'
-import {
-  offersFilterFromStorageAtom,
-  offersFilterInitialState,
-} from '../../state/offersFilter'
-import {selectAtom, splitAtom} from 'jotai/utils'
-import {currencies} from '../../utils/localization/currency'
+import {splitAtom} from 'jotai/utils'
+import getValueFromSetStateActionOfAtom from '../../utils/atomUtils/getValueFromSetStateActionOfAtom'
 import {
   type GetLocationSuggestionsRequest,
   type LocationSuggestion,
 } from '@vexl-next/rest-api/dist/services/location/contracts'
 import {pipe} from 'fp-ts/function'
-import * as T from 'fp-ts/Task'
 import {fetchLocationSuggestionsAtom} from '../../state/location/atoms/fetchLocationSuggestionsAtom'
-import getValueFromSetStateActionOfAtom from '../../utils/atomUtils/getValueFromSetStateActionOfAtom'
+import * as T from 'fp-ts/Task'
+import {type OffersFilter} from '../../state/marketplace/domain'
+import {
+  offersFilterFromStorageAtom,
+  offersFilterInitialState,
+} from '../../state/marketplace/filterAtoms'
+
+export const currencyAtom = atom<CurrencyCode | undefined>(
+  offersFilterInitialState.currency
+)
+
+const spokenLanguagesAtom = atom<SpokenLanguage[]>(
+  offersFilterInitialState.spokenLanguages
+)
+export const spokenLanguagesAtomsAtom = splitAtom(spokenLanguagesAtom)
 
 export const sortingAtom = atom<Sort | undefined>(undefined)
+
 export const intendedConnectionLevelAtom = atom<IntendedConnectionLevel>('ALL')
 
-export const isFilterActiveAtom = selectAtom(
-  offersFilterFromStorageAtom,
-  (offersFilterFromStorage) => {
-    return (
-      JSON.stringify(offersFilterFromStorage) !==
-      JSON.stringify(offersFilterInitialState)
-    )
-  }
+export const locationStateAtom = atom<LocationState | undefined>(
+  offersFilterInitialState.locationState
 )
 
-export const offersFilterAtom = atom<OffersFilter>(offersFilterInitialState)
-
-export const setOffersFilterAtom = atom(null, (get, set) => {
-  const filter = get(offersFilterFromStorageAtom)
-
-  set(offersFilterAtom, filter)
-  set(sortingAtom, filter.sort)
-  set(
-    intendedConnectionLevelAtom,
-    filter.friendLevel?.includes('SECOND_DEGREE') ? 'ALL' : 'FIRST'
-  )
-})
-
-export const focusTextFilterAtom = atom(
-  (get) => get(offersFilterAtom).text,
-  (get, set, value: string | undefined) => {
-    set(offersFilterAtom, (o) => ({...o, text: value}))
-    set(offersFilterFromStorageAtom, (o) => ({...o, text: value}))
-  }
+export const locationAtom = atom<Location[] | undefined>(
+  offersFilterInitialState.location
 )
-export const isTextFilterActiveAtom = selectAtom(focusTextFilterAtom, Boolean)
 
-export const currencyAtom = focusAtom(offersFilterAtom, (optic) =>
-  optic.prop('currency')
+export const btcNetworkAtom = atom<BtcNetwork[] | undefined>(
+  offersFilterInitialState.btcNetwork
+)
+
+export const paymentMethodAtom = atom<PaymentMethod[] | undefined>(
+  offersFilterInitialState.paymentMethod
+)
+
+export const amountBottomLimitAtom = atom<number | undefined>(
+  offersFilterInitialState.amountBottomLimit
+)
+
+export const amountTopLimitAtom = atom<number | undefined>(
+  offersFilterInitialState.amountTopLimit
 )
 
 export const updateCurrencyLimitsAtom = atom<
@@ -107,36 +107,6 @@ export const updateLocationStatePaymentMethodAtom = atom<
 
   return true
 })
-
-const spokenLanguagesAtom = focusAtom(offersFilterAtom, (optic) =>
-  optic.prop('spokenLanguages')
-)
-
-export const spokenLanguagesAtomsAtom = splitAtom(spokenLanguagesAtom)
-
-export const locationStateAtom = focusAtom(offersFilterAtom, (optic) =>
-  optic.prop('locationState')
-)
-
-export const locationAtom = focusAtom(offersFilterAtom, (optic) =>
-  optic.prop('location')
-)
-
-export const btcNetworkAtom = focusAtom(offersFilterAtom, (optic) =>
-  optic.prop('btcNetwork')
-)
-
-export const paymentMethodAtom = focusAtom(offersFilterAtom, (optic) =>
-  optic.prop('paymentMethod')
-)
-
-export const amountBottomLimitAtom = focusAtom(offersFilterAtom, (optic) =>
-  optic.prop('amountBottomLimit')
-)
-
-export const amountTopLimitAtom = focusAtom(offersFilterAtom, (optic) =>
-  optic.prop('amountTopLimit')
-)
 
 export const selectedSpokenLanguagesAtom = atom<SpokenLanguage[]>([])
 
@@ -210,6 +180,10 @@ export const updateAndRefreshLocationSuggestionsActionAtom = atom(
   }
 )
 
+export const focusTextFilterAtom = atom<string | undefined>(
+  offersFilterInitialState.text
+)
+
 export const setOfferLocationActionAtom = atom(
   null,
   (get, set, locationSuggestionAtom: Atom<LocationSuggestion>) => {
@@ -234,33 +208,56 @@ export const setOfferLocationActionAtom = atom(
   }
 )
 
+const setAllFilterAtomsActionAtom = atom(
+  null,
+  (get, set, filterValue: OffersFilter) => {
+    set(focusTextFilterAtom, filterValue.text)
+    set(sortingAtom, filterValue.sort)
+    set(currencyAtom, filterValue.currency)
+    set(locationAtom, filterValue.location)
+    set(locationStateAtom, filterValue.locationState)
+    set(paymentMethodAtom, filterValue.paymentMethod)
+    set(btcNetworkAtom, filterValue.btcNetwork)
+    set(amountBottomLimitAtom, filterValue.amountBottomLimit)
+    set(amountTopLimitAtom, filterValue.amountTopLimit)
+    set(spokenLanguagesAtom, filterValue.spokenLanguages)
+    set(
+      intendedConnectionLevelAtom,
+      filterValue.friendLevel?.includes('SECOND_DEGREE') ? 'ALL' : 'FIRST'
+    )
+  }
+)
+
+export const initializeOffersFilterOnDisplayActionAtom = atom(
+  null,
+  (get, set) => {
+    const filterFromStorage = get(offersFilterFromStorageAtom)
+
+    set(setAllFilterAtomsActionAtom, filterFromStorage)
+  }
+)
+
+export const resetFilterAtom = atom(null, (get, set) => {
+  set(setAllFilterAtomsActionAtom, offersFilterInitialState)
+})
+
 export const saveFilterActionAtom = atom(null, (get, set) => {
-  const offersFilter = get(offersFilterAtom)
-  const intendedConnectionLevel = get(intendedConnectionLevelAtom)
-  const sorting = get(sortingAtom)
   const newFilterValue: OffersFilter = {
-    sort: sorting,
-    offerType: offersFilter.offerType,
-    currency: offersFilter.currency,
-    location: offersFilter.location,
-    locationState: offersFilter.locationState,
-    paymentMethod: offersFilter.paymentMethod,
-    btcNetwork: offersFilter.btcNetwork,
+    sort: get(sortingAtom),
+    currency: get(currencyAtom),
+    location: get(locationAtom),
+    locationState: get(locationStateAtom),
+    paymentMethod: get(paymentMethodAtom),
+    btcNetwork: get(btcNetworkAtom),
     friendLevel:
-      intendedConnectionLevel === 'FIRST'
+      get(intendedConnectionLevelAtom) === 'FIRST'
         ? ['FIRST_DEGREE']
         : ['FIRST_DEGREE', 'SECOND_DEGREE'],
-    spokenLanguages: offersFilter.spokenLanguages,
-    amountBottomLimit: offersFilter.amountBottomLimit,
-    amountTopLimit: offersFilter.amountTopLimit,
-    text: offersFilter.text,
+    spokenLanguages: get(spokenLanguagesAtom),
+    amountBottomLimit: get(amountBottomLimitAtom),
+    amountTopLimit: get(amountTopLimitAtom),
+    text: get(focusTextFilterAtom),
   }
 
   set(offersFilterFromStorageAtom, newFilterValue)
-})
-
-export const resetFilterAtom = atom(null, (get, set) => {
-  set(sortingAtom, undefined)
-  set(intendedConnectionLevelAtom, 'ALL')
-  set(offersFilterAtom, offersFilterInitialState)
 })

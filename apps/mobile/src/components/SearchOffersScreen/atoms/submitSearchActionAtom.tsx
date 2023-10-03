@@ -2,7 +2,10 @@ import {atom} from 'jotai'
 import {searchTextAtom} from './searchTextAtom'
 import {addToPreviousSearchesActionAtom} from './previousSearchesAtom'
 import {safeNavigateBackOutsideReact} from '../../../utils/navigation'
-import {focusTextFilterAtom} from '../../FilterOffersScreen/atom'
+import {
+  offersFilterInitialState,
+  offersFilterTextFromStorageAtom,
+} from '../../../state/marketplace/filterAtoms'
 
 const submitSearchActionAtom = atom(
   null,
@@ -14,14 +17,14 @@ const submitSearchActionAtom = atom(
       return
     }
     set(addToPreviousSearchesActionAtom, filledText)
-    set(focusTextFilterAtom, filledText)
+    set(offersFilterTextFromStorageAtom, filledText)
     safeNavigateBackOutsideReact()
   }
 )
 
 export const clearSearchActionAtom = atom(null, (get, set) => {
   set(searchTextAtom, '')
-  set(focusTextFilterAtom, undefined)
+  set(offersFilterTextFromStorageAtom, offersFilterInitialState.text)
   safeNavigateBackOutsideReact()
 })
 

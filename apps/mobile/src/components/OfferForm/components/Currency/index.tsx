@@ -8,13 +8,13 @@ import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import DropdownSelectButton from '../../../DropdownSelectButton'
 
 interface Props {
-  currencyAtom: PrimitiveAtom<CurrencyCode>
+  currencyAtom: PrimitiveAtom<CurrencyCode | undefined>
   updateCurrencyLimitsAtom: WritableAtom<
     null,
     [
       {
-        currency: CurrencyCode
-      }
+        currency: CurrencyCode | undefined
+      },
     ],
     boolean
   >
@@ -40,17 +40,25 @@ function CurrencyComponent({
           setCurrencySelectVisible(true)
         }}
       >
-        <XStack ai={'center'} space={'$1'}>
-          <Text ff={'$body600'} fos={18} col={'$main'}>
-            {currencies[currency].symbol}
-          </Text>
-          <Text ff={'$body600'} fos={10} col={'$greyOnBlack'}>
-            {'●'}
-          </Text>
-          <Text ff={'$body600'} fos={18} col={'$main'}>
-            {currencies[currency].code}
-          </Text>
-        </XStack>
+        {currency ? (
+          <XStack ai={'center'} space={'$1'}>
+            <Text ff={'$body600'} fos={18} col={'$main'}>
+              {currencies[currency].symbol}
+            </Text>
+            <Text ff={'$body600'} fos={10} col={'$greyOnBlack'}>
+              {'●'}
+            </Text>
+            <Text ff={'$body600'} fos={18} col={'$main'}>
+              {currencies[currency].code}
+            </Text>
+          </XStack>
+        ) : (
+          <Stack>
+            <Text ff={'$body'} fos={18} col={'$greyOnBlack'}>
+              {t('filterOffers.chooseCurrency')}
+            </Text>
+          </Stack>
+        )}
       </DropdownSelectButton>
       <CurrencySelect
         selectedCurrencyCodeAtom={currencyAtom}

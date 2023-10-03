@@ -47,10 +47,14 @@ const friendLevelSubtitleAtom = atom((get) => {
 })
 
 interface Props {
+  hideSubtitle?: boolean
   intendedConnectionLevelAtom: Atom<IntendedConnectionLevel | undefined>
 }
 
-function FriendLevel({intendedConnectionLevelAtom}: Props): JSX.Element {
+function FriendLevel({
+  hideSubtitle,
+  intendedConnectionLevelAtom,
+}: Props): JSX.Element {
   const {t} = useTranslation()
   const [intendedConnectionLevel, setIntendedConnectionLevel] = useAtom(
     intendedConnectionLevelAtom
@@ -65,7 +69,7 @@ function FriendLevel({intendedConnectionLevelAtom}: Props): JSX.Element {
         type="FIRST"
         onPress={setIntendedConnectionLevel}
         title={t('offerForm.friendLevel.firstDegree')}
-        subtitle={subtitle.firstFriendLevelText}
+        subtitle={!hideSubtitle ? subtitle.firstFriendLevelText : undefined}
       />
       <FriendLevelCell
         image={secondDegreeFriendsSvg}
@@ -73,7 +77,7 @@ function FriendLevel({intendedConnectionLevelAtom}: Props): JSX.Element {
         type="ALL"
         onPress={setIntendedConnectionLevel}
         title={t('offerForm.friendLevel.secondDegree')}
-        subtitle={subtitle.secondFriendLevelText}
+        subtitle={!hideSubtitle ? subtitle.secondFriendLevelText : undefined}
       />
     </XStack>
   )

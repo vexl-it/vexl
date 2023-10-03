@@ -18,9 +18,8 @@ import {
 } from '../../../../../state/marketplace/atom'
 import {
   isFilterActiveAtom,
-  resetFilterAtom,
-  saveFilterActionAtom,
-} from '../../../../FilterOffersScreen/atom'
+  resetFilterInStorageActionAtom,
+} from '../../../../../state/marketplace/filterAtoms'
 import EmptyMarketplaceSuggestions from './EmptyMarketplaceSuggestions'
 import MarketplaceSuggestion from './MarketplaceSuggestion'
 import {useCallback, useMemo, useState} from 'react'
@@ -70,8 +69,7 @@ function EmptyListPlaceholder(): JSX.Element {
   const filterActive = useAtomValue(isFilterActiveAtom)
   const reachNumber = useAtomValue(reachNumberAtom)
   const lastImportOfContacts = useAtomValue(lastImportOfContactsAtom)
-  const saveFilter = useSetAtom(saveFilterActionAtom)
-  const resetFilter = useSetAtom(resetFilterAtom)
+  const resetFilterInStorage = useSetAtom(resetFilterInStorageActionAtom)
   const createOfferSuggestionVisible = useAtomValue(
     createOfferSuggestionVisibleAtom
   )
@@ -98,8 +96,7 @@ function EmptyListPlaceholder(): JSX.Element {
     )
 
   function resetFilterAndSaveIt(): void {
-    resetFilter()
-    saveFilter()
+    resetFilterInStorage()
     setResetFilterSuggestionVisible(true)
   }
 

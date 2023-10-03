@@ -8,14 +8,15 @@ import Button from '../Button'
 import React, {useCallback} from 'react'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import useContent from './useContent'
-import {
-  resetFilterAtom,
-  saveFilterActionAtom,
-  setOffersFilterAtom,
-} from './atom'
 import {useSetAtom} from 'jotai'
 import Screen from '../Screen'
 import useSafeGoBack from '../../utils/useSafeGoBack'
+import {useFocusEffect} from '@react-navigation/native'
+import {
+  initializeOffersFilterOnDisplayActionAtom,
+  resetFilterAtom,
+  saveFilterActionAtom,
+} from './atom'
 
 const styles = StyleSheet.create({
   contentStyles: {
@@ -30,7 +31,9 @@ function FilterOffersScreen(): JSX.Element {
   const content = useContent()
   const saveFilter = useSetAtom(saveFilterActionAtom)
   const resetFilter = useSetAtom(resetFilterAtom)
-  const setOffersFilter = useSetAtom(setOffersFilterAtom)
+  const initializeOffersFilterOnDisplay = useSetAtom(
+    initializeOffersFilterOnDisplayActionAtom
+  )
 
   const resetOfferForm = useCallback(() => {
     resetFilter()
@@ -38,8 +41,13 @@ function FilterOffersScreen(): JSX.Element {
 
   function onFilterOffersClose(): void {
     safeGoBack()
-    setOffersFilter()
   }
+
+  useFocusEffect(
+    useCallback(() => {
+      initializeOffersFilterOnDisplay()
+    }, [initializeOffersFilterOnDisplay])
+  )
 
   return (
     <Screen customHorizontalPadding={tokens.size[2].val}>

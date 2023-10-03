@@ -20,7 +20,6 @@ import sortOffers from './utils/sortOffers'
 import isSomeIn30KmRange from './utils/isIn30KmRadius'
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
 import filterOffersByText from './utils/filterOffersByText'
-import {focusTextFilterAtom} from '../../components/FilterOffersScreen/atom'
 
 export const addMoreContactsSuggestionVisibleAtom = atom<boolean>(true)
 export const resetFilterSuggestionVisibleAtom = atom<boolean>(true)
@@ -116,7 +115,7 @@ export function createFilteredOffersAtom(
 ): Atom<OneOfferInState[]> {
   return atom((get) => {
     const offersToSeeInMarketplace = get(offersToSeeInMarketplaceAtom)
-    const textFilter = get(focusTextFilterAtom)
+    const textFilter = filter.text
 
     const filtered = offersToSeeInMarketplace.filter(
       (offer) =>

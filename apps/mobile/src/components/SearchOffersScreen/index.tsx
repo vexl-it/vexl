@@ -10,8 +10,8 @@ import SearchSuggestions from './components/SearchSuggestions'
 import submitSearchActionAtom from './atoms/submitSearchActionAtom'
 import {searchTextAtom} from './atoms/searchTextAtom'
 import {useFocusEffect} from '@react-navigation/native'
-import {focusTextFilterAtom} from '../FilterOffersScreen/atom'
 import magnifyingGlass from '../images/magnifyingGlass'
+import {offersFilterTextFromStorageAtom} from '../../state/marketplace/filterAtoms'
 
 function SearchOffersScreen(): JSX.Element {
   const safeGoBack = useSafeGoBack()
@@ -21,7 +21,7 @@ function SearchOffersScreen(): JSX.Element {
 
   useFocusEffect(
     useCallback(() => {
-      setSearchText(store.get(focusTextFilterAtom) ?? '')
+      setSearchText(store.get(offersFilterTextFromStorageAtom) ?? '')
     }, [setSearchText, store])
   )
 
@@ -41,7 +41,7 @@ function SearchOffersScreen(): JSX.Element {
             onPress={submitSearch}
             variant={'secondary'}
             icon={magnifyingGlass}
-          ></IconButton>
+          />
         </XStack>
         <SearchSuggestions />
       </YStack>

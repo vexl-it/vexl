@@ -14,7 +14,6 @@ import {useCallback, useMemo} from 'react'
 import {getTokens, useMedia} from 'tamagui'
 import {useAppState} from '../../../../utils/useAppState'
 import {useAtomValue, useSetAtom} from 'jotai'
-import {setOffersFilterAtom} from '../../../FilterOffersScreen/atom'
 
 const Tab = createMaterialTopTabNavigator<MarketplaceTabParamsList>()
 
@@ -31,7 +30,6 @@ function MarketplaceScreen(): JSX.Element {
   const {t} = useTranslation()
   const media = useMedia()
   const tokens = getTokens()
-  const setOffersFilter = useSetAtom(setOffersFilterAtom)
   const i18n = useAtomValue(i18nAtom)
 
   const {
@@ -80,11 +78,10 @@ function MarketplaceScreen(): JSX.Element {
     useCallback(
       (state) => {
         if (state === 'active') {
-          setOffersFilter()
           void refreshOffers()
         }
       },
-      [refreshOffers, setOffersFilter]
+      [refreshOffers]
     )
   )
 

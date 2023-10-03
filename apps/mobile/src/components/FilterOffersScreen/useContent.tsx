@@ -2,37 +2,46 @@ import {useTranslation} from '../../utils/localization/I18nProvider'
 import {useMemo} from 'react'
 import sortingSvg from '../images/sortingSvg'
 import Sorting from './components/Sorting'
-import AmountOfTransaction from './components/AmountOfTransaction'
-import PaymentMethod from './components/PaymentMethod'
 import locationSvg from '../images/locationSvg'
-import Location from './components/Location'
 import amountOfTransactionSvg from '../images/amountOfTransactionSvg'
 import paymentMethodSvg from '../images/paymentMethod'
-import Network from './components/Network'
 import networkSvg from '../images/networkSvg'
-import FriendLevel from './components/FriendLevel'
 import friendLevelSvg from '../images/friendLevelSvg'
-import Currency from './components/Currency'
 import {type SectionProps} from '../Section'
 import coinsSvg from '../images/coinsSvg'
-import {
-  amountBottomLimitAtom,
-  amountTopLimitAtom,
-  currencyAtom,
-  locationAtom,
-  sortingAtom,
-  updateCurrencyLimitsAtom,
-  locationStateAtom,
-  updateLocationStatePaymentMethodAtom,
-  paymentMethodAtom,
-  btcNetworkAtom,
-  intendedConnectionLevelAtom,
-} from './atom'
 import TextFilter from './components/TextFilter'
 import magnifyingGlass from '../images/magnifyingGlass'
 import spokenLanguagesSvg from '../images/spokenLanguagesSvg'
 import {getTokens} from 'tamagui'
-import SpokenLanguages from './components/SpokenLanguages'
+import Currency from '../OfferForm/components/Currency'
+import AmountOfTransaction from '../OfferForm/components/AmountOfTransaction'
+import Location from '../OfferForm/components/Location'
+import SpokenLanguages from '../OfferForm/components/SpokenLanguages'
+import PaymentMethod from '../OfferForm/components/PaymentMethod'
+import Network from '../OfferForm/components/Network'
+import FriendLevel from '../OfferForm/components/FriendLevel'
+import {
+  amountBottomLimitAtom,
+  amountTopLimitAtom,
+  currencyAtom,
+  updateCurrencyLimitsAtom,
+  locationAtom,
+  locationStateAtom,
+  locationSuggestionsAtomsAtom,
+  locationSuggestionsAtom,
+  setOfferLocationActionAtom,
+  updateLocationStatePaymentMethodAtom,
+  updateAndRefreshLocationSuggestionsActionAtom,
+  spokenLanguagesAtomsAtom,
+  saveSelectedSpokenLanguagesActionAtom,
+  resetSpokenLanguagesToInitialStateActionAtom,
+  removeSpokenLanguageActionAtom,
+  createIsThisLanguageSelectedAtom,
+  paymentMethodAtom,
+  btcNetworkAtom,
+  intendedConnectionLevelAtom,
+  sortingAtom,
+} from './atom'
 
 export default function useContent(): SectionProps[] {
   const {t} = useTranslation()
@@ -78,6 +87,12 @@ export default function useContent(): SectionProps[] {
           <Location
             locationAtom={locationAtom}
             locationStateAtom={locationStateAtom}
+            locationSuggestionsAtom={locationSuggestionsAtom}
+            locationSuggestionsAtomsAtom={locationSuggestionsAtomsAtom}
+            setOfferLocationActionAtom={setOfferLocationActionAtom}
+            updateAndRefreshLocationSuggestionsActionAtom={
+              updateAndRefreshLocationSuggestionsActionAtom
+            }
             updateLocationStatePaymentMethodAtom={
               updateLocationStatePaymentMethodAtom
             }
@@ -88,7 +103,19 @@ export default function useContent(): SectionProps[] {
         title: t('offerForm.spokenLanguages.language'),
         image: spokenLanguagesSvg,
         imageFill: tokens.color.white.val,
-        children: <SpokenLanguages />,
+        children: (
+          <SpokenLanguages
+            createIsThisLanguageSelectedAtom={createIsThisLanguageSelectedAtom}
+            removeSpokenLanguageActionAtom={removeSpokenLanguageActionAtom}
+            resetSelectedSpokenLanguagesActionAtom={
+              resetSpokenLanguagesToInitialStateActionAtom
+            }
+            saveSelectedSpokenLanguagesActionAtom={
+              saveSelectedSpokenLanguagesActionAtom
+            }
+            spokenLanguagesAtomsAtom={spokenLanguagesAtomsAtom}
+          />
+        ),
       },
       {
         title: t('offerForm.paymentMethod.paymentMethod'),
@@ -110,6 +137,7 @@ export default function useContent(): SectionProps[] {
         image: friendLevelSvg,
         children: (
           <FriendLevel
+            hideSubtitle
             intendedConnectionLevelAtom={intendedConnectionLevelAtom}
           />
         ),

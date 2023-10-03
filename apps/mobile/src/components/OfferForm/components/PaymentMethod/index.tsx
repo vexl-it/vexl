@@ -11,8 +11,8 @@ import SelectableCell from '../../../SelectableCell'
 import infoSvg from '../../../images/infoSvg'
 
 interface Props {
-  locationStateAtom: PrimitiveAtom<LocationState>
-  paymentMethodAtom: PrimitiveAtom<PaymentMethod[]>
+  locationStateAtom: PrimitiveAtom<LocationState | undefined>
+  paymentMethodAtom: PrimitiveAtom<PaymentMethod[] | undefined>
 }
 
 function PaymentMethodComponent({

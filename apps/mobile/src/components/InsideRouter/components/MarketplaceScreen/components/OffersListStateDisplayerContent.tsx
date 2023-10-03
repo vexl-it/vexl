@@ -16,7 +16,7 @@ import {useAtomValue, useSetAtom} from 'jotai'
 import {createFilteredOffersAtom} from '../../../../../state/marketplace/atom'
 import {splitAtom} from 'jotai/utils'
 import TotalOffersCount from './TotalOffersCount'
-import {offersFilterFromStorageAtom} from '../../../../../state/offersFilter'
+import {offersFilterFromStorageAtom} from '../../../../../state/marketplace/filterAtoms'
 import ImportNewContactsSuggestion from './ImportNewContactsSuggestion'
 
 interface Props {

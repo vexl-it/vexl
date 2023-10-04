@@ -604,8 +604,8 @@ const otherEn =
       "offerAdded": "Added {{date}}",
       "sortedByNewest": "Sorted by newest",
       "sortedByOldest": "Sorted by oldest",
-      "offerToSell": "Offer to sell",
-      "offerToBuy": "Offer to buy"
+      "offerToSell": "You are selling",
+      "offerToBuy": "You are buying"
     },
     "editOffer": {
       "editOffer": "Edit offer",

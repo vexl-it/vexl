@@ -614,8 +614,8 @@ const otherSp: typeof en =
       "offerAdded": "Añadido {{date}}",
       "sortedByNewest": "Ordenado por más reciente",
       "sortedByOldest": "Ordenada por más antigua",
-      "offerToSell": "Offer to sell",
-      "offerToBuy": "Offer to buy"
+      "offerToSell": "You are selling",
+      "offerToBuy": "You are buying"
     },
     "editOffer": {
       "editOffer": "Editar oferta",

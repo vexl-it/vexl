@@ -9,7 +9,9 @@ function RemoteConfigView(): JSX.Element {
   const remoteConfigValue = useAtomValue(remoteConfigAtom)
   return (
     <Stack>
-      <Text>Remote config: {JSON.stringify(remoteConfigValue, null, 2)}</Text>
+      <Text color={'$black'}>
+        Remote config: {JSON.stringify(remoteConfigValue, null, 2)}
+      </Text>
       <Button
         variant={'secondary'}
         size={'small'}

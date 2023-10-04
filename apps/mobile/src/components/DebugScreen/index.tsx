@@ -50,20 +50,21 @@ function DebugScreen(): JSX.Element {
       <WhiteContainer>
         <ScrollView>
           <YStack space="$2">
-            <Text fos={20} ff="$heading">
+            <Text color="$black" fos={20} ff="$heading">
               Debug screen
             </Text>
             <CryptoBenchmarks />
-            <Text>
+            <Text color="$black">
               enableHiddenFeatures: {enableHiddenFeatures ? 'true' : 'false'}
             </Text>
-            <Text>apiEnv: {JSON.stringify(apiEnv, null, 2)}</Text>
+            <Text color="$black">
+              apiEnv: {JSON.stringify(apiEnv, null, 2)}
+            </Text>
             <Spacer />
             <RemoteConfigView />
             <Spacer />
             <LanguagePicker />
             <Spacer />
-            <FilesInDocuments />
             <Button
               variant={'primary'}
               size={'small'}

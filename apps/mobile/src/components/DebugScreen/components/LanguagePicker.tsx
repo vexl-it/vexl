@@ -19,7 +19,9 @@ function LanguagePicker(): JSX.Element {
 
   return (
     <YStack>
-      <Text fos={25}>Change language</Text>
+      <Text color="$black" fos={25}>
+        Change language
+      </Text>
       <Picker
         selectedValue={selectedLanguage}
         onValueChange={setSelectedLanguage}

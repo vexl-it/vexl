@@ -621,8 +621,8 @@ const otherDe: typeof en =
       "offerAdded": "Hinzugefügt {{date}}",
       "sortedByNewest": "Sortiert nach neuesten",
       "sortedByOldest": "Sortiert nach dem ältesten",
-      "offerToSell": "Offer to sell",
-      "offerToBuy": "Offer to buy"
+      "offerToSell": "You are selling",
+      "offerToBuy": "You are buying"
     },
     "editOffer": {
       "editOffer": "Angebot bearbeiten",

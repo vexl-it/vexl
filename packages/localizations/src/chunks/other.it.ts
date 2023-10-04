@@ -618,8 +618,8 @@ const otherIt: typeof en =
       "offerAdded": "Aggiunte {{date}}",
       "sortedByNewest": "Ordinate per più recenti",
       "sortedByOldest": "Ordinata per più vecchia",
-      "offerToSell": "Offer to sell",
-      "offerToBuy": "Offer to buy"
+      "offerToSell": "You are selling",
+      "offerToBuy": "You are buying"
     },
     "editOffer": {
       "editOffer": "Modifica offerta",

@@ -891,7 +891,7 @@ const otherCs: typeof en =
       "importNow": "Import now"
     },
     "addContactDialog": {
-      "addContact": "Ruční přidání kontaktu {{number}}",
+      "addContact": "Přidat kontakt",
       "addThisPhoneNumber":
         "Would you like to add this phone number to your Vexl contacts?",
       "addContactName": "Add contact name",

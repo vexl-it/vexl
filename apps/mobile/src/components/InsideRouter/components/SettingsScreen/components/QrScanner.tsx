@@ -1,5 +1,5 @@
 import React, {Alert, Dimensions, Linking} from 'react-native'
-import {Text, YStack} from 'tamagui'
+import {Stack, Text, YStack} from 'tamagui'
 import * as T from 'fp-ts/Task'
 import SettingsScreenDialog from './SettingsScreenDialog'
 import {useAtom, useSetAtom} from 'jotai'
@@ -21,7 +21,13 @@ function parseDeepLink(
   return parse(parsedDeepLink.query.link, true)
 }
 
-const scannerStyle = {flex: 1}
+const scannerStyle = {
+  // On android camera view will be resized to fit the whole camera preview. That will result in
+  // container not being filled all the way and that will result in border radius not visible
+  // so we need to scale it up a bit to always fill the whole container.
+  transform: [{scale: 1.2}],
+  flex: 1,
+}
 
 function QrScanner(): JSX.Element {
   const {t} = useTranslation()
@@ -128,7 +134,14 @@ function QrScanner(): JSX.Element {
         )}
         {/* Unmount barCodeScanner if not visible as advised in official documentation */}
         {isVisible && hasPermissions && (
-          <BarCodeScanner style={scannerStyle} onBarCodeScanned={onScanned} />
+          <Stack
+            borderRadius="$4"
+            flex={1}
+            overflow={'hidden'}
+            position={'relative'}
+          >
+            <BarCodeScanner style={scannerStyle} onBarCodeScanned={onScanned} />
+          </Stack>
         )}
         {!hasPermissions && (
           <YStack space="$3" f={1} alignItems="center" justifyContent="center">

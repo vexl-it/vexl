@@ -8,6 +8,7 @@ const preferencesToEdit = [
   'disableOfferRerequestLimit',
   'allowSendingImages',
   'enableNewOffersNotificationDevMode',
+  'showFriendLevelBanner',
 ] as const
 
 function Preferences(): JSX.Element {
@@ -15,10 +16,10 @@ function Preferences(): JSX.Element {
 
   return (
     <YStack>
-      <Text>Preferences</Text>
+      <Text color="$black">Preferences</Text>
       {preferencesToEdit.map((key) => (
         <XStack key={key}>
-          <Text>{key}</Text>
+          <Text color="$black">{key}</Text>
           <Switch
             value={preferences[key]}
             onValueChange={(newValue) => {

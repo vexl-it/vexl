@@ -18,6 +18,36 @@ import {useNavigation} from '@react-navigation/native'
 import {getChatIdOfChatOnCurrentScreenIfAny} from '../utils/navigation'
 import focusChatWithMessagesAtom from './chat/atoms/focusChatWithMessagesAtom'
 import {AppState} from 'react-native'
+import {ChatNotificationDataBrand} from '../utils/notifications/ChatNotificationData.brand'
+
+function isChatDisplayedOnScreen({
+  inboxKey,
+  sender,
+  navigationState,
+  store,
+}: {
+  inboxKey: PublicKeyPemBase64
+  sender: PublicKeyPemBase64
+  navigationState: Parameters<typeof getChatIdOfChatOnCurrentScreenIfAny>['0']
+  store: ReturnType<typeof useStore>
+}): boolean {
+  return pipe(
+    getChatIdOfChatOnCurrentScreenIfAny(navigationState),
+    O.bindTo('currentChatId'),
+    O.bind('displayedChat', ({currentChatId}) =>
+      O.fromNullable(
+        store.get(focusChatWithMessagesAtom({chatId: currentChatId, inboxKey}))
+      )
+    ),
+    O.match(
+      () => false,
+      ({displayedChat}) =>
+        AppState.currentState === 'active' &&
+        displayedChat.chat.otherSide.publicKey === sender &&
+        displayedChat.chat.inbox.privateKey.publicKeyPemBase64 === inboxKey
+    )
+  )
+}
 
 export function useHandleReceivedNotifications(): void {
   const navigation = useNavigation()
@@ -43,32 +73,32 @@ export function useHandleReceivedNotifications(): void {
         console.info('📳 Refreshing inbox')
 
         pipe(
-          data.inbox,
-          safeParse(PublicKeyPemBase64),
+          data,
+          safeParse(ChatNotificationDataBrand),
           O.fromEither,
-          O.bindTo('inboxKey'),
-          O.bind('sender', () =>
-            O.fromEither(safeParse(PublicKeyPemBase64)(data.sender))
-          ),
-          O.bind('chatId', () =>
-            getChatIdOfChatOnCurrentScreenIfAny(navigation.getState())
-          ),
-          O.bind('displayedChat', ({chatId, inboxKey}) =>
-            O.fromNullable(
-              store.get(focusChatWithMessagesAtom({chatId, inboxKey}))
-            )
-          ),
           O.match(
             () => {
-              void showUINotificationFromRemoteMessage(remoteMessage)
+              // Do not display. Can not parse inbox key or sender
+              reportError(
+                'warn',
+                'Received chat notification with invalid inbox key or sender key',
+                {
+                  data,
+                }
+              )
             },
-            ({chatId, inboxKey, displayedChat, sender}) => {
+            ({inbox, sender}) => {
               if (
-                AppState.currentState !== 'active' ||
-                displayedChat.chat.otherSide.publicKey !== sender
-              ) {
-                void showUINotificationFromRemoteMessage(remoteMessage)
-              }
+                isChatDisplayedOnScreen({
+                  inboxKey: inbox,
+                  sender,
+                  navigationState: navigation.getState(),
+                  store,
+                })
+              )
+                return
+
+              void showUINotificationFromRemoteMessage(remoteMessage)
             }
           )
         )

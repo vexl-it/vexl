@@ -9,6 +9,9 @@ import {getDefaultStore} from 'jotai'
 import {translationAtom} from '../localization/I18nProvider'
 import {notificationPreferencesAtom} from '../preferences'
 import reportError from '../reportError'
+import {NotificationId} from './NotificationId.brand'
+import {addNotificationToDisplayedNotificationsActionAtom} from '../../state/displayedNotifications'
+import {ChatNotificationDataBrand} from './ChatNotificationData.brand'
 
 async function getChannelForMessages(): Promise<string> {
   return await notifee.createChannel({
@@ -59,11 +62,30 @@ export async function showUINotificationFromRemoteMessage(
 
     if (type === CHAT_NOTIFICATION_TYPE.CANCEL_REQUEST_MESSAGING) return // No message displayed in this case
 
-    await notifee.displayNotification({
-      title: t(`notifications.${type}.title`),
-      body: t(`notifications.${type}.body`),
-      data: remoteMessage.data,
-      android: {channelId: await getChannelForMessages()},
+    const notificationData = ChatNotificationDataBrand.safeParse(
+      remoteMessage.data
+    )
+    if (!notificationData.success) {
+      reportError(
+        'warn',
+        'Unable to parse notification data for chat notification',
+        remoteMessage
+      )
+      return
+    }
+
+    const notificationId = NotificationId.parse(
+      await notifee.displayNotification({
+        title: t(`notifications.${type}.title`),
+        body: t(`notifications.${type}.body`),
+        data: remoteMessage.data,
+        android: {channelId: await getChannelForMessages()},
+      })
+    )
+    getDefaultStore().set(addNotificationToDisplayedNotificationsActionAtom, {
+      type: 'chat',
+      notificationId,
+      notificationData: notificationData.data,
     })
   } else if (type === INACTIVITY_REMINDER) {
     if (!notificationPreferences.inactivityWarnings) {
@@ -72,11 +94,13 @@ export async function showUINotificationFromRemoteMessage(
       )
       return
     }
-    await notifee.displayNotification({
-      title: t(`notifications.INACTIVITY_REMINDER.title`),
-      body: t(`notifications.INACTIVITY_REMINDER.body`),
-      data: remoteMessage.data,
-      android: {channelId: await getDefaultChannel()},
-    })
+    NotificationId.parse(
+      await notifee.displayNotification({
+        title: t(`notifications.INACTIVITY_REMINDER.title`),
+        body: t(`notifications.INACTIVITY_REMINDER.body`),
+        data: remoteMessage.data,
+        android: {channelId: await getDefaultChannel()},
+      })
+    )
   }
 }

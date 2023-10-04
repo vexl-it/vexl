@@ -33,6 +33,7 @@ import ChangeProfilePictureScreen from '../ChangeProfilePictureScreen/ChangeProf
 import NotificationSettingsScreen from '../NotificationSettingsScreen'
 import {useSetCombinedContactsAfterLastSubmitForCurrentUsers} from '../../state/contacts/hooks/useSetCombinedContactsAfterLastSubmitForCurrentUsers'
 import SearchOffersScreen from '../SearchOffersScreen'
+import {useHideInactivityReminderNotificationsOnResume} from '../../state/displayedNotifications'
 
 const Stack = createNativeStackNavigator<RootStackParamsList>()
 
@@ -47,6 +48,8 @@ function LoggedInHookGroup(): null {
   useSyncConnections()
   useHandleDeepLink()
   useSetCombinedContactsAfterLastSubmitForCurrentUsers()
+
+  useHideInactivityReminderNotificationsOnResume()
 
   return null
 }

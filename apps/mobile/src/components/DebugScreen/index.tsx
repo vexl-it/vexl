@@ -27,7 +27,6 @@ import RemoteConfigView from './components/RemoteConfigView'
 import fetchMessagesForAllInboxesAtom from '../../state/chat/atoms/fetchNewMessagesActionAtom'
 import {pipe} from 'fp-ts/function'
 import * as T from 'fp-ts/Task'
-import FilesInDocuments from './components/FilesInDocuments'
 
 // const ContentScroll = styled(ScrollView, {
 //   marginBottom: '$2',

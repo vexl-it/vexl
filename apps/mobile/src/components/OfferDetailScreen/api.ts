@@ -11,8 +11,6 @@ import {toCommonErrorMessage} from '../../utils/useCommonErrorMessages'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 import {useShowLoadingOverlay} from '../LoadingOverlayProvider'
 import {createSingleOfferReportedFlagAtom} from '../../state/marketplace/atom'
-import reportOfferSvg from './images/reportOfferSvg'
-import offerReportedSvg from './images/offerReportedSvg'
 import showErrorAlert from '../../utils/showErrorAlert'
 import {Alert} from 'react-native'
 
@@ -35,7 +33,10 @@ export function useReportOfferHandleUI(): (
           steps: [
             {
               type: 'StepWithText',
-              image: {type: 'svgXml', svgXml: reportOfferSvg},
+              image: {
+                type: 'requiredImage',
+                image: require('./images/reportOffer.png'),
+              },
               title: t('offer.report.areYouSureTitle'),
               description: t('offer.report.areYouSureText'),
               positiveButtonText: t('offer.report.yes'),
@@ -71,7 +72,10 @@ export function useReportOfferHandleUI(): (
             steps: [
               {
                 type: 'StepWithText',
-                image: {type: 'svgXml', svgXml: offerReportedSvg},
+                image: {
+                  type: 'requiredImage',
+                  image: require('./images/reportOfferSuccess.png'),
+                },
                 title: t('offer.report.thankYou'),
                 description: t('offer.report.inappropriateContentWasReported'),
                 positiveButtonText: t('common.continue'),

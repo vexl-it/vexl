@@ -25,7 +25,7 @@ const scannerStyle = {
   // On android camera view will be resized to fit the whole camera preview. That will result in
   // container not being filled all the way and that will result in border radius not visible
   // so we need to scale it up a bit to always fill the whole container.
-  transform: [{scale: 1.2}],
+  transform: [{scale: 1.5}],
   flex: 1,
 }
 

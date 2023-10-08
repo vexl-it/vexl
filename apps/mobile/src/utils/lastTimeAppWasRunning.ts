@@ -6,7 +6,6 @@ import {
 import {storage} from './fpMmkv'
 import {pipe} from 'fp-ts/function'
 import * as E from 'fp-ts/Either'
-import {safeParse} from './fpUtils'
 
 const LAST_TIME_APP_WAS_RUNNING_KEY = 'lastTimeAppWasRunning'
 
@@ -17,8 +16,7 @@ export function setLastTimeAppWasRunningToNow(): void {
 
 export function getLastTimeAppWasRunning(): UnixMilliseconds {
   return pipe(
-    localStorage.get(LAST_TIME_APP_WAS_RUNNING_KEY),
-    E.chain(safeParse(UnixMilliseconds)),
+    storage.getVerified(LAST_TIME_APP_WAS_RUNNING_KEY, UnixMilliseconds),
     E.getOrElse(() => UnixMilliseconds0)
   )
 }

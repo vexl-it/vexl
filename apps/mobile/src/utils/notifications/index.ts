@@ -117,6 +117,11 @@ export async function showDebugNotificationIfEnabled({
   await notifee.displayNotification({
     title,
     body,
-    android: {channelId},
+    android: {
+      channelId,
+      pressAction: {
+        id: 'default',
+      },
+    },
   })
 }

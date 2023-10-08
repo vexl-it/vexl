@@ -6,7 +6,11 @@ import {
 import {pipe} from 'fp-ts/function'
 import {type ChatMessage} from '@vexl-next/domain/dist/general/messaging'
 import * as TE from 'fp-ts/TaskEither'
-import {encryptMessage, type ErrorEncryptingMessage} from './utils/chatCrypto'
+import {
+  encryptMessage,
+  encryptMessagePreview,
+  type ErrorEncryptingMessage,
+} from './utils/chatCrypto'
 import {type ServerMessage} from '@vexl-next/rest-api/dist/services/chat/contracts'
 import {type ExtractLeftTE} from '../utils/ExtractLeft'
 import mapMessageTypeToBackwardCompatibleMessageType from './utils/mapMessageTypeToBackwardCompatibleMessageType'
@@ -32,10 +36,15 @@ export default function sendMessage({
   return pipe(
     message,
     encryptMessage(receiverPublicKey),
-    TE.chainW((encrypted) =>
+    TE.bindTo('encryptedMessage'),
+    TE.bind('encryptedPreview', () =>
+      encryptMessagePreview(receiverPublicKey)(message)
+    ),
+    TE.chainW(({encryptedMessage, encryptedPreview}) =>
       pipe(
         api.sendMessage({
-          message: encrypted,
+          message: encryptedMessage,
+          messagePreview: encryptedPreview,
           messageType: mapMessageTypeToBackwardCompatibleMessageType(
             message.messageType
           ),

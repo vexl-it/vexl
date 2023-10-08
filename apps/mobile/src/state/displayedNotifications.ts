@@ -6,7 +6,7 @@ import notifee from '@notifee/react-native'
 import {focusAtom} from 'jotai-optics'
 import {useAppState} from '../utils/useAppState'
 import {useCallback} from 'react'
-import {ChatNotificationDataBrand} from '../utils/notifications/ChatNotificationData.brand'
+import {ChatNotificationData} from '../utils/notifications/ChatNotificationData'
 import {
   type ChatWithMessagesAtom,
   focusChatInfoAtom,
@@ -16,7 +16,7 @@ const StoredNotification = z.discriminatedUnion('type', [
   z.object({
     type: z.literal('chat'),
     notificationId: NotificationId,
-    notificationData: ChatNotificationDataBrand,
+    notificationData: ChatNotificationData,
   }),
   z.object({
     type: z.literal('inactivityReminder'),

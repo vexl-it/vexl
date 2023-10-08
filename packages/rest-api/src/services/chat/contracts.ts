@@ -146,6 +146,7 @@ export const SendMessageRequest = z.object({
   receiverPublicKey: PublicKeyPemBase64,
   message: z.string(),
   messageType: MessageTypeBackwardCompatible,
+  messagePreview: z.string().optional(),
 })
 export type SendMessageRequest = z.TypeOf<typeof SendMessageRequest>
 
@@ -166,6 +167,7 @@ export const MessageInBatch = z.object({
   receiverPublicKey: PublicKeyPemBase64,
   message: z.string(),
   messageType: MessageTypeBackwardCompatible,
+  messagePreview: z.string().optional(),
 })
 export type MessageInBatch = z.TypeOf<typeof MessageInBatch>
 

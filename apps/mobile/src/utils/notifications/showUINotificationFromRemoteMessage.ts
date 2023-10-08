@@ -11,7 +11,8 @@ import {notificationPreferencesAtom} from '../preferences'
 import reportError from '../reportError'
 import {NotificationId} from './NotificationId.brand'
 import {addNotificationToDisplayedNotificationsActionAtom} from '../../state/displayedNotifications'
-import {ChatNotificationDataBrand} from './ChatNotificationData.brand'
+import {ChatNotificationData} from './ChatNotificationData'
+import decodeNotificationPreviewAction from '../../state/chat/atoms/decodeChatNotificationPreviewActionAtom'
 
 async function getChannelForMessages(): Promise<string> {
   return await notifee.createChannel({
@@ -62,9 +63,7 @@ export async function showUINotificationFromRemoteMessage(
 
     if (type === CHAT_NOTIFICATION_TYPE.CANCEL_REQUEST_MESSAGING) return // No message displayed in this case
 
-    const notificationData = ChatNotificationDataBrand.safeParse(
-      remoteMessage.data
-    )
+    const notificationData = ChatNotificationData.safeParse(remoteMessage.data)
     if (!notificationData.success) {
       reportError(
         'warn',
@@ -74,19 +73,37 @@ export async function showUINotificationFromRemoteMessage(
       return
     }
 
-    const notificationId = NotificationId.parse(
-      await notifee.displayNotification({
-        title: t(`notifications.${type}.title`),
-        body: t(`notifications.${type}.body`),
-        data: remoteMessage.data,
-        android: {
-          channelId: await getChannelForMessages(),
-          pressAction: {
-            id: 'default',
-          },
-        },
-      })
-    )
+    const decodedPreview = await getDefaultStore().set(
+      decodeNotificationPreviewAction,
+      notificationData.data
+    )()
+
+    const notificationId = await (async () => {
+      if (decodedPreview) {
+        return NotificationId.parse(
+          await notifee.displayNotification({
+            title: decodedPreview.name,
+            body: decodedPreview.text,
+            data: remoteMessage.data,
+            android: {channelId: await getChannelForMessages(), pressAction: {
+                id: 'default',
+              },},
+          })
+        )
+      } else {
+        return NotificationId.parse(
+          await notifee.displayNotification({
+            title: t(`notifications.${type}.title`),
+            body: t(`notifications.${type}.body`),
+            data: remoteMessage.data,
+            android: {channelId: await getChannelForMessages(), pressAction: {
+                id: 'default',
+              },},
+          })
+        )
+      }
+    })()
+
     getDefaultStore().set(addNotificationToDisplayedNotificationsActionAtom, {
       type: 'chat',
       notificationId,

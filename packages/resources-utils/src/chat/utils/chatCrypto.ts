@@ -1,5 +1,6 @@
 import {
   type PrivateKeyHolder,
+  type PrivateKeyPemBase64,
   type PublicKeyPemBase64,
 } from '@vexl-next/cryptography/dist/KeyHolder'
 import {
@@ -15,6 +16,7 @@ import {type ServerMessage} from '@vexl-next/rest-api/dist/services/chat/contrac
 import {type BasicError, toError} from '@vexl-next/domain/dist/utility/errors'
 import {UriString} from '@vexl-next/domain/dist/utility/UriString.brand'
 import {Base64String} from '@vexl-next/domain/dist/utility/Base64String.brand'
+import truncate from 'just-truncate'
 
 export type ErrorEncryptingMessage = BasicError<'ErrorEncryptingMessage'>
 
@@ -124,4 +126,30 @@ export function decryptMessage(
       }),
       TE.mapLeft(toError('ErrorDecryptingMessage'))
     )
+}
+
+export function encryptMessagePreview(
+  publicKey: PublicKeyPemBase64
+): (
+  message: ChatMessage
+) => TE.TaskEither<ErrorEncryptingMessage, string | undefined> {
+  return (message: ChatMessage) => {
+    if (message.messageType !== 'MESSAGE') return TE.right(undefined)
+    return pipe(
+      TE.right(truncate(message.text, 250)),
+      TE.chainW(eciesEncrypt(publicKey)),
+      TE.mapLeft(toError('ErrorEncryptingMessage'))
+    )
+  }
+}
+
+export function decryptMessagePreview(
+  privKey: PrivateKeyPemBase64
+): (message: string) => TE.TaskEither<ErrorDecryptingMessage, string> {
+  return (message) => {
+    return pipe(
+      eciesDecrypt(privKey)(message),
+      TE.mapLeft(toError('ErrorDecryptingMessage'))
+    )
+  }
 }

@@ -1,10 +1,9 @@
 import {z} from 'zod'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
 
-export const ChatNotificationDataBrand = z.object({
+export const ChatNotificationData = z.object({
   inbox: PublicKeyPemBase64,
   sender: PublicKeyPemBase64,
+  preview: z.string().optional(),
 })
-export type ChatNotificationDataBrand = z.TypeOf<
-  typeof ChatNotificationDataBrand
->
+export type ChatNotificationData = z.TypeOf<typeof ChatNotificationData>

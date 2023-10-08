@@ -13,7 +13,11 @@ import {
 } from '@vexl-next/rest-api/dist/services/chat/contracts'
 import * as TE from 'fp-ts/TaskEither'
 import * as A from 'fp-ts/Array'
-import {encryptMessage, type ErrorEncryptingMessage} from './utils/chatCrypto'
+import {
+  encryptMessage,
+  encryptMessagePreview,
+  type ErrorEncryptingMessage,
+} from './utils/chatCrypto'
 import * as O from 'fp-ts/Option'
 import {
   type ErrorGeneratingSignedChallengeBatch,
@@ -43,11 +47,16 @@ function createMessageInBatch({
   return pipe(
     message,
     encryptMessage(receiverPublicKey),
-    TE.map((encrypted) => ({
-      message: encrypted,
+    TE.bindTo('encryptedMessage'),
+    TE.bind('encryptedPreview', () =>
+      encryptMessagePreview(receiverPublicKey)(message)
+    ),
+    TE.map(({encryptedMessage, encryptedPreview}) => ({
+      message: encryptedMessage,
       messageType: mapMessageTypeToBackwardCompatibleMessageType(
         message.messageType
       ),
+      messagePreview: encryptedPreview,
       receiverPublicKey,
     }))
   )

@@ -19,7 +19,7 @@ import {useNavigation} from '@react-navigation/native'
 import {getChatIdOfChatOnCurrentScreenIfAny} from '../utils/navigation'
 import focusChatWithMessagesAtom from './chat/atoms/focusChatWithMessagesAtom'
 import {AppState} from 'react-native'
-import {ChatNotificationDataBrand} from '../utils/notifications/ChatNotificationData.brand'
+import {ChatNotificationData} from '../utils/notifications/ChatNotificationData'
 
 function isChatDisplayedOnScreen({
   inboxKey,
@@ -75,7 +75,7 @@ export function useHandleReceivedNotifications(): void {
 
         pipe(
           data,
-          safeParse(ChatNotificationDataBrand),
+          safeParse(ChatNotificationData),
           O.fromEither,
           O.match(
             () => {

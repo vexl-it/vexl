@@ -11,6 +11,7 @@ import {showUINotificationFromRemoteMessage} from '../utils/notifications/showUI
 import {
   CHAT_NOTIFICATION_TYPES,
   NEW_CONNECTION,
+  NEW_CONTENT,
 } from '../utils/notifications/notificationTypes'
 import {useSetAtom, useStore} from 'jotai'
 import {updateAllOffersConnectionsActionAtom} from './connections/atom/offerToConnectionsAtom'
@@ -127,6 +128,13 @@ export function useHandleReceivedNotifications(): void {
           '📳 Received notification about new user. Checking and updating offers accordingly.'
         )
         await updateOffersConnections({isInBackground: false})()
+        return
+      }
+
+      if (data.type === NEW_CONTENT) {
+        console.info(
+          'Received notification about new content. Doing nothing since this notification is meant to be displayed only if user is innactive.'
+        )
         return
       }
 

@@ -26,7 +26,11 @@ function reportError(lvl: LogLvl, message: string, ...args: any[]): void {
     crashlytics().log(toJsonWithRemovedSensitiveData({lvl, message, args}))
     crashlytics().recordError(new Error(removeSensitiveData(message)))
   }
-  getConsoleLvl(lvl)('‼️ there was an error reported. See hermes logs')
+  getConsoleLvl(lvl)(
+    '‼️ there was an error reported. See hermes logs',
+    message,
+    JSON.stringify(args, null, 2)
+  )
   getConsoleLvl(lvl)(message, ...args)
 }
 

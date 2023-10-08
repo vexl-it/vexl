@@ -18,7 +18,6 @@ import {
   unixMillisecondsNow,
 } from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
 import {storage} from '../fpMmkv'
-import {safeParse} from '../fpUtils'
 import {getLastTimeAppWasRunning} from '../lastTimeAppWasRunning'
 
 const LAST_NEW_OFFERS_NOTIFICATION_KEY = 'lastNewOffersNotification'
@@ -47,8 +46,7 @@ export function setLastNewOffersNotificationIssuedNow(): void {
 
 export function getLastNewOffersNotificationIssuedAt(): UnixMilliseconds {
   return pipe(
-    localStorage.get(LAST_NEW_OFFERS_NOTIFICATION_KEY),
-    E.chain(safeParse(UnixMilliseconds)),
+    storage.getVerified(LAST_NEW_OFFERS_NOTIFICATION_KEY, UnixMilliseconds),
     E.getOrElse(() => UnixMilliseconds0)
   )
 }
@@ -71,6 +69,9 @@ async function displayNotification(t: TFunction): Promise<void> {
     },
     android: {
       channelId: await getDefaultChannel(),
+      pressAction: {
+        id: 'default',
+      },
     },
   })
 }

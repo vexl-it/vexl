@@ -79,7 +79,12 @@ export async function showUINotificationFromRemoteMessage(
         title: t(`notifications.${type}.title`),
         body: t(`notifications.${type}.body`),
         data: remoteMessage.data,
-        android: {channelId: await getChannelForMessages()},
+        android: {
+          channelId: await getChannelForMessages(),
+          pressAction: {
+            id: 'default',
+          },
+        },
       })
     )
     getDefaultStore().set(addNotificationToDisplayedNotificationsActionAtom, {
@@ -99,7 +104,12 @@ export async function showUINotificationFromRemoteMessage(
         title: t(`notifications.INACTIVITY_REMINDER.title`),
         body: t(`notifications.INACTIVITY_REMINDER.body`),
         data: remoteMessage.data,
-        android: {channelId: await getDefaultChannel()},
+        android: {
+          channelId: await getDefaultChannel(),
+          pressAction: {
+            id: 'default',
+          },
+        },
       })
     )
   }

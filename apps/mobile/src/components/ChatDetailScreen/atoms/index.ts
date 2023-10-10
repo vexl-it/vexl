@@ -22,6 +22,7 @@ import deleteChatActionAtom from '../../../state/chat/atoms/deleteChatActionAtom
 import blockChatActionAtom from '../../../state/chat/atoms/blockChatActionAtom'
 import * as TE from 'fp-ts/TaskEither'
 import * as E from 'fp-ts/Either'
+import * as T from 'fp-ts/Task'
 import {pipe} from 'fp-ts/function'
 import {loadingOverlayDisplayedAtom} from '../../LoadingOverlayProvider'
 import {Alert} from 'react-native'
@@ -558,10 +559,16 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
       const offer = get(offerForChatAtom)
       if (!offer) {
         set(showOfferDeletedWithOptionToDeleteActionAtom)
-        return
+        return T.of(false)
       }
 
-      return set(sendRequestHandleUIActionAtom, {text, originOffer: offer})()
+      return pipe(
+        set(sendRequestHandleUIActionAtom, {text, originOffer: offer}),
+        TE.match(
+          () => false,
+          () => true
+        )
+      )
     }
   )
 

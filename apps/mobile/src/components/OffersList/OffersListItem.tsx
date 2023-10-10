@@ -1,5 +1,4 @@
 import {useTranslation} from '../../utils/localization/I18nProvider'
-import Button from '../Button'
 import {useNavigation} from '@react-navigation/native'
 import {Stack} from 'tamagui'
 import OfferWithBubbleTip from '../OfferWithBubbleTip'
@@ -12,6 +11,7 @@ import {
 } from '../../state/chat/utils/offerStates'
 import {offerRerequestLimitDaysAtom} from '../../utils/remoteConfig/atoms'
 import {type OneOfferInState} from '@vexl-next/domain/dist/general/offers'
+import Button from '../Button'
 
 interface Props {
   readonly offerAtom: Atom<OneOfferInState>

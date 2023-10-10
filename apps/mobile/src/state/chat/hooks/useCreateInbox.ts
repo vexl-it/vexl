@@ -16,7 +16,7 @@ import {getNotificationToken} from '../../../utils/notifications'
 import messagingStateAtom from '../atoms/messagingStateAtom'
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-function focusAddInbox(optic: O.OpticFor<MessagingState>) {
+export function focusAddInbox(optic: O.OpticFor<MessagingState>) {
   return optic.appendTo()
 }
 

@@ -69,7 +69,9 @@ const otherDe: typeof en =
       "change": "Ändern",
       "errorWhileReadingQrCode": "Fehler beim Lesen des QR-Codes",
       "copyErrorToClipboard": "Fehler in die Zwischenablage kopieren",
-      "me": "Ich"
+      "me": "Ich",
+      "error": "Error",
+      "chatNotFoundError": "Chat not found!"
     },
     "loginFlow": {
       "anonymityNotice":

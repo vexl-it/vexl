@@ -68,7 +68,9 @@ const otherCs: typeof en =
       "change": "Změnit",
       "errorWhileReadingQrCode": "Error while reading QR code",
       "copyErrorToClipboard": "Zkopírovat chybu do schránky",
-      "me": "Me"
+      "me": "Me",
+      "error": "Error",
+      "chatNotFoundError": "Chat not found!"
     },
     "loginFlow": {
       "anonymityNotice": "Bez tvého svolení jej nikdo neuvidí. Ani my.",

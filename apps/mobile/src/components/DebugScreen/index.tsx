@@ -27,6 +27,8 @@ import RemoteConfigView from './components/RemoteConfigView'
 import fetchMessagesForAllInboxesAtom from '../../state/chat/atoms/fetchNewMessagesActionAtom'
 import {pipe} from 'fp-ts/function'
 import * as T from 'fp-ts/Task'
+import deleteInboxAtom from './atoms/deleteInboxAtom'
+import deleteAllInboxesActionAtom from '../../state/chat/atoms/deleteAllInboxesActionAtom'
 
 // const ContentScroll = styled(ScrollView, {
 //   marginBottom: '$2',
@@ -43,6 +45,8 @@ function DebugScreen(): JSX.Element {
   const refreshMessaging = useSetAtom(fetchMessagesForAllInboxesAtom)
   const refreshOffers = useSetAtom(triggerOffersRefreshAtom)
   const updateConnections = useSetAtom(updateAllOffersConnectionsActionAtom)
+  const deleteInbox = useSetAtom(deleteInboxAtom)
+  const deleteAllInboxes = useSetAtom(deleteAllInboxesActionAtom)
 
   return (
     <Screen>
@@ -194,11 +198,48 @@ function DebugScreen(): JSX.Element {
             <Button
               variant={'primary'}
               size={'small'}
+              text={'Delete user inbox'}
+              onPress={() => {
+                void pipe(
+                  deleteInbox(session.privateKey),
+                  T.map((result) => {
+                    if (result) {
+                      Alert.alert('done')
+                    } else {
+                      Alert.alert('error')
+                    }
+                  })
+                )()
+              }}
+            />
+
+            <Button
+              variant={'primary'}
+              size={'small'}
+              text={'Delete all inboxes'}
+              onPress={() => {
+                void pipe(
+                  deleteAllInboxes(),
+                  T.map((result) => {
+                    if (result) {
+                      Alert.alert('done')
+                    } else {
+                      Alert.alert('error')
+                    }
+                  })
+                )()
+              }}
+            />
+
+            <Button
+              variant={'primary'}
+              size={'small'}
               text={'Update all offers connections'}
               onPress={() => {
                 void updateConnections({isInBackground: false})()
               }}
             />
+
             <Button
               variant={'primary'}
               size={'small'}

@@ -14,6 +14,8 @@ import useSafeGoBack from '../../../utils/useSafeGoBack'
 import {useCallback, useState} from 'react'
 import RerequestButtonOrMessage from './RerequestButtonOrMessage'
 import OfferRequestTextInput from '../../OfferRequestTextInput'
+import {pipe} from 'fp-ts/function'
+import * as T from 'fp-ts/Task'
 
 function RequestScreen(): JSX.Element {
   const {
@@ -49,9 +51,14 @@ function RequestScreen(): JSX.Element {
   const onRerequestPressed = useCallback(() => {
     if (!canBeRerequested || !text.trim()) return
 
-    void rerequestOffer({text})?.then((success) => {
-      if (success) setText('')
-    })
+    void pipe(
+      rerequestOffer({text}),
+      T.map((success) => {
+        if (success) {
+          setText('')
+        }
+      })
+    )()
   }, [canBeRerequested, text, rerequestOffer])
 
   const onHistoryPress = useCallback(() => {

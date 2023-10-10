@@ -33,7 +33,7 @@ import {
 } from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
 import {type OneOfferInState} from '@vexl-next/domain/dist/general/offers'
 
-function createInboxAtom(
+function focusInboxInMessagingStateAtom(
   publicKey: PublicKeyPemBase64
 ): WritableAtom<
   InboxInState | undefined,
@@ -177,7 +177,7 @@ export const fetchAndStoreMessagesForInboxAtom = atom<
 >(null, (get, set, params) => {
   const {key} = params
   const api = get(privateApiAtom)
-  const inbox = get(createInboxAtom(key))
+  const inbox = get(focusInboxInMessagingStateAtom(key))
 
   if (!inbox) {
     reportError(
@@ -190,7 +190,7 @@ export const fetchAndStoreMessagesForInboxAtom = atom<
 
   return pipe(
     refreshInbox(api.chat)(
-      () => get(createInboxAtom(key)) ?? inbox,
+      () => get(focusInboxInMessagingStateAtom(key)) ?? inbox,
       get(focusOfferByOfferId(inbox.inbox.offerId))
     ),
     TE.match(
@@ -200,7 +200,9 @@ export const fetchAndStoreMessagesForInboxAtom = atom<
       },
       ({newMessages, updatedInbox}) => {
         set(
-          createInboxAtom(inbox.inbox.privateKey.publicKeyPemBase64),
+          focusInboxInMessagingStateAtom(
+            inbox.inbox.privateKey.publicKeyPemBase64
+          ),
           updatedInbox
         )
 

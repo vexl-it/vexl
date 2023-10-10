@@ -31,6 +31,7 @@ import {
   type LeaveChatRequest,
   LeaveChatResponse,
   type OtherSideAccountDeleted,
+  type ReceiverOfferInboxDoesNotExistError,
   type RequestAlreadyApprovedError,
   type RequestApprovalRequest,
   RequestApprovalResponse,
@@ -38,6 +39,7 @@ import {
   type RequestNotFoundError,
   type RetrieveMessagesRequest,
   RetrieveMessagesResponse,
+  type SenderUserInboxDoesNotExistError,
   type SendMessageRequest,
   SendMessageResponse,
   type SendMessagesRequest,
@@ -146,10 +148,29 @@ export function privateApi({
       )
     },
     requestApproval(data: RequestApprovalRequest) {
-      return axiosCallWithValidation(
-        axiosInstance,
-        {method: 'post', url: '/inboxes/approval/request', data},
-        RequestApprovalResponse
+      return pipe(
+        axiosCallWithValidation(
+          axiosInstance,
+          {method: 'post', url: '/inboxes/approval/request', data},
+          RequestApprovalResponse
+        ),
+        TE.mapLeft((e) => {
+          if (e._tag === 'BadStatusCodeError') {
+            if (e.response.data.code === '100101') {
+              return {
+                _tag: 'ReceiverOfferInboxDoesNotExistError',
+              } as ReceiverOfferInboxDoesNotExistError
+            }
+          }
+          if (e._tag === 'BadStatusCodeError') {
+            if (e.response.data.code === '100107') {
+              return {
+                _tag: 'SenderUserInboxDoesNotExistError',
+              } as SenderUserInboxDoesNotExistError
+            }
+          }
+          return e
+        })
       )
     },
     cancelRequestApproval(data: CancelApprovalRequest) {

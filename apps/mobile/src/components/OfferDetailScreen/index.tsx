@@ -44,7 +44,7 @@ function OfferDetailScreen({
               variant={'primary'}
               onPress={safeGoBack}
               text={t('common.back')}
-            ></Button>
+            />
           </YStack>
         )}
       </KeyboardAvoidingView>

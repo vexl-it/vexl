@@ -3,7 +3,7 @@ import OfferWithBubbleTip from '../../OfferWithBubbleTip'
 import ScreenTitle from '../../ScreenTitle'
 import useSafeGoBack from '../../../utils/useSafeGoBack'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
-import {ScrollView} from 'react-native'
+import {Alert, ScrollView} from 'react-native'
 import IconButton from '../../IconButton'
 import flagSvg from '../images/flagSvg'
 import {useReportOfferHandleUI} from '../api'
@@ -23,7 +23,7 @@ import showCommonFriendsExplanationUIActionAtom from '../atoms'
 import identityIconSvg from '../../images/identityIconSvg'
 import Button from '../../Button'
 import {pipe} from 'fp-ts/function'
-import * as TO from 'fp-ts/TaskOption'
+import * as TE from 'fp-ts/TaskEither'
 import {sendRequestHandleUIActionAtom} from '../../../state/chat/atoms/sendRequestActionAtom'
 import OfferRequestTextInput from '../../OfferRequestTextInput'
 import {offerRerequestLimitDaysAtom} from '../../../utils/remoteConfig/atoms'
@@ -32,6 +32,8 @@ import RerequestInfo from './RerequestInfo'
 import {type OneOfferInState} from '@vexl-next/domain/dist/general/offers'
 import randomName from '../../../utils/randomName'
 import {friendLevelBannerPreferenceAtom} from '../../../utils/preferences'
+import ButtonWithPressTimeout from '../../ButtonWithPressTimeout'
+import {createSingleOfferReportedFlagAtom} from '../../../state/marketplace/atom'
 
 function OfferInfo({
   offer,
@@ -43,6 +45,10 @@ function OfferInfo({
   const goBack = useSafeGoBack()
   const {t} = useTranslation()
   const reportOffer = useReportOfferHandleUI()
+  const reportedFlagAtom = createSingleOfferReportedFlagAtom(
+    offer.offerInfo.offerId
+  )
+  const flagOffer = useSetAtom(reportedFlagAtom)
   const submitRequest = useSetAtom(sendRequestHandleUIActionAtom)
   const [text, setText] = useState('')
   const offerRerequestLimitDays = useAtomValue(offerRerequestLimitDaysAtom)
@@ -83,14 +89,29 @@ function OfferInfo({
     if (!text.trim()) return
     void pipe(
       submitRequest({text, originOffer: offer}),
-      TO.map((chat) => {
-        navigation.replace('ChatDetail', {
-          chatId: chat.id,
-          inboxKey: chat.inbox.privateKey.publicKeyPemBase64,
-        })
-      })
+      TE.match(
+        (e) => {
+          if (e._tag === 'ReceiverOfferInboxDoesNotExistError') {
+            Alert.alert(t('common.error'), t('offer.offerNotFound'), [
+              {
+                text: t('common.close'),
+                onPress: () => {
+                  flagOffer(true)
+                  goBack()
+                },
+              },
+            ])
+          }
+        },
+        (chat) => {
+          navigation.replace('ChatDetail', {
+            chatId: chat.id,
+            inboxKey: chat.inbox.privateKey.publicKeyPemBase64,
+          })
+        }
+      )
     )()
-  }, [navigation, offer, submitRequest, text])
+  }, [flagOffer, goBack, navigation, offer, submitRequest, t, text])
 
   const showRequestButton =
     !chatForOffer || requestPossibleInfo.canBeRerequested
@@ -150,7 +171,7 @@ function OfferInfo({
       </ScrollView>
 
       {showRequestButton ? (
-        <Button
+        <ButtonWithPressTimeout
           disabled={!text.trim()}
           onPress={onRequestPressed}
           variant={'secondary'}

@@ -4,7 +4,7 @@ import {type SvgString} from '@vexl-next/domain/dist/utility/SvgString.brand'
 import Image from './Image'
 import {getTokens, Stack, styled, Text} from 'tamagui'
 
-interface Props {
+export interface Props {
   onPress: () => void
   variant:
     | 'primary'

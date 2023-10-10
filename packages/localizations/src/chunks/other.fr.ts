@@ -70,7 +70,9 @@ const otherFr: typeof en =
       "change": "Change",
       "errorWhileReadingQrCode": "Error while reading QR code",
       "copyErrorToClipboard": "Copy error to clipboard",
-      "me": "Me"
+      "me": "Me",
+      "error": "Error",
+      "chatNotFoundError": "Chat not found!"
     },
     "loginFlow": {
       "anonymityNotice":

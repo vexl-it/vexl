@@ -68,7 +68,9 @@ const otherSk: typeof en =
       "change": "Zmeniť",
       "errorWhileReadingQrCode": "Error while reading QR code",
       "copyErrorToClipboard": "Skopírovať chybu do schránky",
-      "me": "Me"
+      "me": "Me",
+      "error": "Error",
+      "chatNotFoundError": "Chat not found!"
     },
     "loginFlow": {
       "anonymityNotice": "Kým to nepovolíš, nikto to neuvidí. Dokonca ani my.",

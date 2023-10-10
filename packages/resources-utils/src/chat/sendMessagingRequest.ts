@@ -47,8 +47,6 @@ export function sendMessagingRequest({
   ApiErrorRequestMessaging | ErrorEncryptingMessage,
   ChatMessage
 > {
-  console.log(`Encrypting message to ${toPublicKey}`)
-
   return pipe(
     createRequestChatMessage({
       text,

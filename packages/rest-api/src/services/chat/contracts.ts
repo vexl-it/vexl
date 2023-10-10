@@ -27,6 +27,14 @@ export interface OtherSideAccountDeleted {
   readonly _tag: 'OtherSideAccountDeleted'
 }
 
+export interface ReceiverOfferInboxDoesNotExistError {
+  readonly _tag: 'ReceiverOfferInboxDoesNotExistError'
+}
+
+export interface SenderUserInboxDoesNotExistError {
+  readonly _tag: 'SenderUserInboxDoesNotExistError'
+}
+
 export const SignedChallenge = z.object({
   challenge: z.string(),
   signature: z.string(),

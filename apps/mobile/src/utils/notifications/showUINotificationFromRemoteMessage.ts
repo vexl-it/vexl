@@ -13,6 +13,7 @@ import {NotificationId} from './NotificationId.brand'
 import {addNotificationToDisplayedNotificationsActionAtom} from '../../state/displayedNotifications'
 import {ChatNotificationData} from './ChatNotificationData'
 import decodeNotificationPreviewAction from '../../state/chat/atoms/decodeChatNotificationPreviewActionAtom'
+import {sha256} from '@vexl-next/cryptography/dist/operations/sha'
 
 async function getChannelForMessages(): Promise<string> {
   return await notifee.createChannel({
@@ -78,6 +79,18 @@ export async function showUINotificationFromRemoteMessage(
       notificationData.data
     )()
 
+    const groupId = sha256(
+      `${notificationData.data.inbox}${notificationData.data.sender}`
+    )
+    await notifee.displayNotification({
+      title: decodedPreview?.name ?? 'new messages',
+      body: 'You have X unread messages from Y',
+      android: {
+        channelId: await getChannelForMessages(),
+        groupSummary: true,
+      },
+    })
+
     const notificationId = await (async () => {
       if (decodedPreview) {
         return NotificationId.parse(
@@ -85,9 +98,13 @@ export async function showUINotificationFromRemoteMessage(
             title: decodedPreview.name,
             body: decodedPreview.text,
             data: remoteMessage.data,
-            android: {channelId: await getChannelForMessages(), pressAction: {
+            android: {
+              channelId: await getChannelForMessages(),
+              pressAction: {
                 id: 'default',
-              },},
+              },
+              groupId,
+            },
           })
         )
       } else {
@@ -96,9 +113,12 @@ export async function showUINotificationFromRemoteMessage(
             title: t(`notifications.${type}.title`),
             body: t(`notifications.${type}.body`),
             data: remoteMessage.data,
-            android: {channelId: await getChannelForMessages(), pressAction: {
+            android: {
+              channelId: await getChannelForMessages(),
+              pressAction: {
                 id: 'default',
-              },},
+              },
+            },
           })
         )
       }

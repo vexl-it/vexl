@@ -156,7 +156,7 @@ const otherCs: typeof en =
       "contactsExplanation": {
         "title": "Pojďme nyní najít tvoje přátele!",
         "text":
-          "Vexl používá tvojí reálnou sociální síť - tvoje přátele a jejich přátele. Čím více kontaktů přidáte, tím více nabídek uvidíte.",
+          "Vexl vás anonymně propojuje s vašimi přáteli a přáteli vašich přátel. Později můžete spravovat své kontakty a rozhodnout, které z nich chcete zahrnout do svého sociálního okruhu.",
         "anonymizationCaption":
           "Tvé kontakty neuvidí nikdo další. Dokonce ani my."
       },

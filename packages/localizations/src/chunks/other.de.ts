@@ -162,7 +162,7 @@ const otherDe: typeof en =
       "contactsExplanation": {
         "title": "Finden wir jetzt deine Freunde!",
         "text":
-          "Vexl nutzt dein reales soziales Netzwerk - deine Freunde und deren Freunde. Je mehr Kontakte du hinzufügst, desto mehr Angebote wirst du sehen.",
+          "Vexl verbindet dich anonym mit deinen Freunden und Freunden von Freunden. Du kannst später deine Kontakte verwalten und auswählen, welche du in deinem sozialen Umfeld einschließen möchtest.",
         "anonymizationCaption":
           "Niemand kann deine Kontakte sehen. Nicht einmal wir."
       },

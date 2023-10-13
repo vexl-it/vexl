@@ -153,7 +153,7 @@ const otherEn =
       "contactsExplanation": {
         "title": "Now, let’s find your friends!",
         "text":
-          "Vexl is using your real-world social network - your friends and their friends. The more contacts you add, the more offers you’ll see.",
+          "Vexl connects you anonymously with your friends and friends of friends. You can later manage your contacts and choose which ones you want to include in your social reach.",
         "anonymizationCaption": "Nobody can see your contacts. Not even us."
       },
       "importContactsButton": "Import contacts",

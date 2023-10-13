@@ -161,7 +161,7 @@ const otherSp: typeof en =
       "contactsExplanation": {
         "title": "Ahora, ¡vamos a encontrar a tus amigos!",
         "text":
-          "Vexl utiliza tu red social del mundo real: tus amigos y sus amigos. Cuantos más contactos añadas, más ofertas verás.",
+          "Vexl te conecta de forma anónima con tus amigos y amigos de amigos. Posteriormente, puedes gestionar tus contactos y elegir cuáles deseas incluir en tu alcance social.",
         "anonymizationCaption":
           "Nadie puede ver tus contactos. Ni siquiera nosotros."
       },

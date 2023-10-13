@@ -157,7 +157,7 @@ const otherSk: typeof en =
       "contactsExplanation": {
         "title": "Nájdime teraz tvojich priateľov!",
         "text":
-          "Vexl používa tvoju reálnu sociálnu sieť - tvojich priateľov a ich priateľov. Čím viac kontaktov pridáš, tým viac ponúk uvidíš.",
+          "Vexl vás anonymne prepojí s vašimi priateľmi a priateľmi vašich priateľov. Neskôr môžete spravovať svoje kontakty a rozhodnúť, ktorých z nich chcete zahrnúť do svojho sociálneho okruhu.",
         "anonymizationCaption":
           "Tvoje kontakty neuvidí nikto ďalší. Dokonca ani my."
       },

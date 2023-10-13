@@ -159,7 +159,7 @@ const otherFr: typeof en =
       "contactsExplanation": {
         "title": "Maintenant, trouvons vos amis !",
         "text":
-          "Vexl utilise votre sphère sociale réèlle - vos amis et leurs amis. Plus vous ajoutez de contacts, plus vous recevrez d'offres.",
+          "Vexl vous connecte de manière anonyme avec vos amis et les amis de vos amis. Vous pouvez ensuite gérer vos contacts et choisir ceux que vous souhaitez inclure dans votre réseau social.",
         "anonymizationCaption":
           "Personne ne peut voir vos contacts. Même pas nous."
       },

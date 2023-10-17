@@ -64,7 +64,7 @@ function EditOfferScreen({
             <EditOfferHeader offer={offer} />
             {offer ? (
               <>
-                <Section image={userSvg}>
+                <Section title={t('offerForm.iWantTo')} image={userSvg}>
                   <OfferType offerTypeAtom={offerTypeAtom} />
                 </Section>
                 <OfferForm content={content} />

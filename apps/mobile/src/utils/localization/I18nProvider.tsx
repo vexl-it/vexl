@@ -12,6 +12,8 @@ export const i18n = new I18n(
     : {
         en: {localeName: 'en', ...translations.en},
         de: {localeName: 'de', ...translations.de},
+        cs: {localeName: 'cs', ...translations.cs},
+        sk: {localeName: 'sk', ...translations.sk},
       }
 )
 i18n.locale = getLocales().at(0)?.languageTag ?? 'en'

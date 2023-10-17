@@ -255,8 +255,8 @@ const otherSk: typeof en =
       "isBuying": "kupuje",
       "directFriend": "Priamy priateľ",
       "friendOfFriend": "Priateľ priateľa",
-      "buy": "Nákup",
-      "sell": "Predaj",
+      "buy": "Kúpiť",
+      "sell": "Predať",
       "filterOffers": "Filtrovať ponuky",
       "numberOfCommon": "{{number}} spoločných",
       "offerNotFound":
@@ -922,8 +922,7 @@ const otherSk: typeof en =
       "grantPermissionsInSettings":
         "Nebolo možné získať povolenie. Pre naskenovanie QR kódu otvor nastavenia a povoľ Vexlu používanie fotoaparátu.",
       "openSettings": "Otvoriť nastavenia"
-    },
-    "": ""
+    }
   }
 /* JSON ends */
 

@@ -66,12 +66,14 @@ export function chatTime(dateTime: DateTime): string {
   const dateTimeWithCorrectLocal = dateTime.setLocale(i18n.locale)
 
   if (dateTime.hasSame(now, 'day')) {
-    return dateTime.toLocaleString(DateTime.TIME_24_SIMPLE)
+    return dateTime
+      .setLocale(i18n.locale)
+      .toLocaleString(DateTime.TIME_24_SIMPLE)
   }
 
   if (dateTime.hasSame(now, 'week')) {
     return dateTimeWithCorrectLocal.toFormat('cccc')
   }
 
-  return dateTime.toLocaleString(DateTime.DATE_FULL)
+  return dateTime.setLocale(i18n.locale).toLocaleString(DateTime.DATE_FULL)
 }

@@ -7,7 +7,7 @@ import {useChatForOffer} from '../state/chat/hooks/useChatForOffer'
 import UserAvatar from './UserAvatar'
 import {DateTime} from 'luxon'
 import {userDataAtom} from '../state/session'
-import {useTranslation} from '../utils/localization/I18nProvider'
+import {i18n, useTranslation} from '../utils/localization/I18nProvider'
 import {useAtomValue} from 'jotai'
 import {useMemo} from 'react'
 import {selectImportedContactsWithHashes} from '../state/contacts'
@@ -46,9 +46,9 @@ function OfferAuthorAvatar({
             </Text>
             <Text fos={12} ff={'$body500'} col={'$greyOnBlack'}>
               {t('myOffers.offerAdded', {
-                date: DateTime.fromISO(offerInfo.createdAt).toLocaleString(
-                  DateTime.DATE_FULL
-                ),
+                date: DateTime.fromISO(offerInfo.createdAt)
+                  .setLocale(i18n.locale)
+                  .toLocaleString(DateTime.DATE_FULL),
               })}
             </Text>
           </Stack>

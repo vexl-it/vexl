@@ -57,6 +57,7 @@ import {splitAtom} from 'jotai/utils'
 import {fetchLocationSuggestionsAtom} from '../../../state/location/atoms/fetchLocationSuggestionsAtom'
 import getValueFromSetStateActionOfAtom from '../../../utils/atomUtils/getValueFromSetStateActionOfAtom'
 import getDefaultSpokenLanguage from '../../../utils/localization/getDefaultSpokenLanguage'
+import {displayOfferCreationFeedbackAtom} from '../../../state/feedback/atoms'
 
 function getAtomWithNullableValueHandling<T, S>(
   nullableAtom: PrimitiveAtom<T | undefined>,
@@ -397,6 +398,8 @@ export const offerFormMolecule = molecule(() => {
 
   const createOfferActionAtom = atom(null, (get, set): T.Task<boolean> => {
     const {t} = get(translationAtom)
+    const displayOfferCreationFeedback = get(displayOfferCreationFeedbackAtom)
+
     const {
       location,
       locationState,
@@ -477,6 +480,9 @@ export const offerFormMolecule = molecule(() => {
       T.chain(delayInPipeT(3000)),
       T.map((result) => {
         set(encryptingOfferAtom, false)
+        if (!displayOfferCreationFeedback) {
+          set(displayOfferCreationFeedbackAtom, true)
+        }
         return result
       })
     )

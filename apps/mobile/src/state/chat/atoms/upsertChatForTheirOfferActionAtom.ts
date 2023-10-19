@@ -33,6 +33,7 @@ function createNewChat({
       },
       isUnread: false,
       showInfoBar: true,
+      feedbackDone: false,
     },
     messages: [initialMessage],
   }

@@ -15,8 +15,14 @@ export interface Props {
   ListHeaderComponent?: ComponentProps<typeof FlatList>['ListHeaderComponent']
 }
 
-function renderItem({item}: {item: Atom<OneOfferInState>}): JSX.Element {
-  return <OffersListItem offerAtom={item} />
+function renderItem({
+  item,
+  index,
+}: {
+  item: Atom<OneOfferInState>
+  index: number
+}): JSX.Element {
+  return <OffersListItem isFirst={index === 0} offerAtom={item} />
 }
 
 function OffersList({

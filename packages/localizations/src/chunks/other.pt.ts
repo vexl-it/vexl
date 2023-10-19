@@ -70,7 +70,9 @@ const otherPt: typeof en =
       "copyErrorToClipboard": "Copy error to clipboard",
       "me": "Me",
       "error": "Error",
-      "chatNotFoundError": "Chat not found!"
+      "chatNotFoundError": "Chat not found!",
+      "send": "Send",
+      "thanks": "Thanks!"
     },
     "loginFlow": {
       "anonymityNotice": "Ninguém verá isto até que o autorize. Nem mesmo nós.",
@@ -815,7 +817,14 @@ const otherPt: typeof en =
       "contactIsAlreadyInYourContactList":
         "Contact is already in your contact list.",
       "addUserToYourContacts": "Add {{name}} to your contacts?",
-      "tapToAddToYourVexlContacts": "Tap to add to your Vexl contacts."
+      "tapToAddToYourVexlContacts": "Tap to add to your Vexl contacts.",
+      "howWasTheTrade": "How was the trade?",
+      "yourAnswerIsAnonymous": "Your answer is 100% anonymous",
+      "anyProblems": "Any problems?",
+      "whatWasWrongExactly": "What was wrong exactly?",
+      "howWasCreatingNewOffer": "How was creating new offer?",
+      "whatWasGreatAboutIt": "What was great about it?",
+      "whatWorkedWellExactly": "What worked well exactly?"
     },
     "progressBar": {
       "ENCRYPTING_PRIVATE_PAYLOADS": "{{percentDone}} Concluído",
@@ -927,7 +936,20 @@ const otherPt: typeof en =
         "Unable to ask for permissions. To use QR scanner open settings and allow Vexl to use camera.",
       "openSettings": "Open settings"
     },
-    "": ""
+    "feedback": {
+      "objection": {
+        "APP": "App",
+        "PROCESS": "Process",
+        "RESPONDING_TIME": "Responding time",
+        "CANCELED_OFFER": "Canceled offer",
+        "IMPOSSIBLE_TO_AGREE": "Impossible to agree",
+        "LEFT_THE_CHAT": "Left the chat",
+        "DID_NOT_SHOW_UP": "Didn't show up",
+        "I_MET_NEW_FRIEND": "I met new friend",
+        "DEAL_WAS_SMOOTH": "Deal was smooth",
+        "IT_WAS_FAST": "It was fast"
+      }
+    }
   }
 /* JSON ends */
 

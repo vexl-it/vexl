@@ -4,7 +4,7 @@ import {DateTime} from 'luxon'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import {useFocusEffect, useNavigation} from '@react-navigation/native'
 import Image from '../../../../Image'
-import emptyMarketplaceAnonymousAvatarSvg from '../images/emptyMarketplaceAnonymousAvatarSvg'
+import anonymousAvatarSvg from '../../../../images/anonymousAvatarSvg'
 import {useAtom, useAtomValue, useSetAtom} from 'jotai'
 import {reachNumberAtom} from '../../../../../state/connections/atom/connectionStateAtom'
 import {
@@ -48,7 +48,7 @@ function EmptyListWrapper({
   return (
     <ScrollView contentContainerStyle={{paddingBottom: tabBarEndsAt + 25}}>
       <YStack f={1} ai={'center'} jc={'center'} py="$4" space="$4">
-        <Image source={emptyMarketplaceAnonymousAvatarSvg} />
+        <Image source={anonymousAvatarSvg} />
         {children}
         <Button
           text={buttonText}

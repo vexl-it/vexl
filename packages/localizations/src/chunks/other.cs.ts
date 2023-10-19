@@ -70,7 +70,9 @@ const otherCs: typeof en =
       "copyErrorToClipboard": "Zkopírovat chybu do schránky",
       "me": "Já",
       "error": "Chyba",
-      "chatNotFoundError": "Chat nebyl nalezen!"
+      "chatNotFoundError": "Chat nebyl nalezen!",
+      "send": "Send",
+      "thanks": "Thanks!"
     },
     "loginFlow": {
       "anonymityNotice": "Bez tvého svolení jej nikdo neuvidí. Ani my.",
@@ -254,8 +256,8 @@ const otherCs: typeof en =
       "isBuying": "kupuje",
       "directFriend": "Přímý přítel",
       "friendOfFriend": "Přítel přítele",
-      "buy": "Nákup",
-      "sell": "Prodej",
+      "buy": "Koupit",
+      "sell": "Prodat",
       "filterOffers": "Filtrovat nabídky",
       "numberOfCommon": "{{number}} společných",
       "offerNotFound":
@@ -810,7 +812,14 @@ const otherCs: typeof en =
       "contactIsAlreadyInYourContactList":
         "Kontakt už byl uložen do telefonního seznamu.",
       "addUserToYourContacts": "Přidat {{name}} do kontaktů?",
-      "tapToAddToYourVexlContacts": "Přidat do Vexl kontaktů."
+      "tapToAddToYourVexlContacts": "Přidat do Vexl kontaktů.",
+      "howWasTheTrade": "How was the trade?",
+      "yourAnswerIsAnonymous": "Your answer is 100% anonymous",
+      "anyProblems": "Any problems?",
+      "whatWasWrongExactly": "What was wrong exactly?",
+      "howWasCreatingNewOffer": "How was creating new offer?",
+      "whatWasGreatAboutIt": "What was great about it?",
+      "whatWorkedWellExactly": "What worked well exactly?"
     },
     "progressBar": {
       "ENCRYPTING_PRIVATE_PAYLOADS": "{{percentDone}}% hotovo",
@@ -922,7 +931,20 @@ const otherCs: typeof en =
         "Povolení nebylo možné získat. Chceš-li naskenovat QR kód, otevři nastavení a povol Vexlu používání fotoaparát.",
       "openSettings": "Otevřít nastavení"
     },
-    "": "You have added {{contactName}} to your Vexl contacts."
+    "feedback": {
+      "objection": {
+        "APP": "App",
+        "PROCESS": "Process",
+        "RESPONDING_TIME": "Responding time",
+        "CANCELED_OFFER": "Canceled offer",
+        "IMPOSSIBLE_TO_AGREE": "Impossible to agree",
+        "LEFT_THE_CHAT": "Left the chat",
+        "DID_NOT_SHOW_UP": "Didn't show up",
+        "I_MET_NEW_FRIEND": "I met new friend",
+        "DEAL_WAS_SMOOTH": "Deal was smooth",
+        "IT_WAS_FAST": "It was fast"
+      }
+    }
   }
 /* JSON ends */
 

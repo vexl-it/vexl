@@ -13,9 +13,6 @@ function Description({offerDescriptionAtom}: Props): JSX.Element {
   const {t} = useTranslation()
   const [offerDescription, setOfferDescription] = useAtom(offerDescriptionAtom)
 
-  const handleInputChange = (text: string): void => {
-    setOfferDescription(text)
-  }
   return (
     <Stack>
       <Text ff="$body600" fos={16} col="$greyOnBlack">
@@ -29,7 +26,7 @@ function Description({offerDescriptionAtom}: Props): JSX.Element {
           numberOfLines={5}
           variant="transparentOnGrey"
           value={offerDescription}
-          onChangeText={handleInputChange}
+          onChangeText={setOfferDescription}
         />
         <Stack ai="flex-end">
           <Text

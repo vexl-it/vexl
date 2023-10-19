@@ -11,6 +11,7 @@ import {
   type PreviousCodeNotExpired,
   type PublicKeyOrHashInvalid,
   type SignatureCouldNotBeGenerated,
+  type SubmitFeedbackRequest,
   type UserAlreadyExists,
   type UserNotFound,
   type VerificationNotFound,
@@ -188,6 +189,14 @@ export function privateApi({
           return e
         })
       )
+    },
+
+    submitFeedback: (request: SubmitFeedbackRequest) => {
+      return axiosCall(axiosInstance, {
+        method: 'post',
+        url: `/feedback/submit`,
+        data: request,
+      })
     },
   }
 }

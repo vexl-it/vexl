@@ -12,12 +12,15 @@ import {
 import {offerRerequestLimitDaysAtom} from '../../utils/remoteConfig/atoms'
 import {type OneOfferInState} from '@vexl-next/domain/dist/general/offers'
 import Button from '../Button'
+import {feedbackDoneAtom} from '../../state/feedback/atoms'
+import UserFeedbackBannerWrapper from '../UserFeedbackBannerWrapper'
 
 interface Props {
+  readonly isFirst: boolean
   readonly offerAtom: Atom<OneOfferInState>
 }
 
-function OffersListItem({offerAtom}: Props): JSX.Element {
+function OffersListItem({isFirst, offerAtom}: Props): JSX.Element {
   const {t} = useTranslation()
   const navigation = useNavigation()
   const offer = useAtomValue(offerAtom)
@@ -177,6 +180,11 @@ function OffersListItem({offerAtom}: Props): JSX.Element {
         }
         offer={offer}
       />
+      {isMine && isFirst && (
+        <Stack mt={'$4'}>
+          <UserFeedbackBannerWrapper feedbackDoneAtom={feedbackDoneAtom} />
+        </Stack>
+      )}
     </Stack>
   )
 }

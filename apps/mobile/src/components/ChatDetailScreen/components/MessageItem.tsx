@@ -12,6 +12,7 @@ import Image from '../../Image'
 import BlockIconSvg from '../../../images/blockIconSvg'
 import IdentityRevealMessageItem from './IdentityRevealMessageItem'
 import ContactRevealMessageItem from './ContactRevealMessageItem'
+import UserFeedbackBannerWrapper from '../../UserFeedbackBannerWrapper'
 
 function MessageItem({
   itemAtom,
@@ -19,7 +20,8 @@ function MessageItem({
   itemAtom: Atom<MessagesListItem>
 }): JSX.Element | null {
   const item = useAtomValue(itemAtom)
-  const {otherSideDataAtom} = useMolecule(chatMolecule)
+  const {chatAtom, feedbackDoneAtom, otherSideDataAtom} =
+    useMolecule(chatMolecule)
   const {t} = useTranslation()
   const {userName, image} = useAtomValue(otherSideDataAtom)
 
@@ -55,20 +57,31 @@ function MessageItem({
 
     if (item.message.message.messageType === 'DELETE_CHAT') {
       return (
-        <BigIconMessage
-          isLatest={item.isLatest}
-          smallerText={t(`messages.messagePreviews.${direction}.DELETE_CHAT`, {
-            them: userName,
-          })}
-          icon={
-            <UserAvatar
-              height={80}
-              width={80}
-              userImage={image}
-              grayScale={true}
+        <>
+          <BigIconMessage
+            isLatest={item.isLatest}
+            smallerText={t(
+              `messages.messagePreviews.${direction}.DELETE_CHAT`,
+              {
+                them: userName,
+              }
+            )}
+            icon={
+              <UserAvatar
+                height={80}
+                width={80}
+                userImage={image}
+                grayScale={true}
+              />
+            }
+          />
+          {direction === 'incoming' && (
+            <UserFeedbackBannerWrapper
+              feedbackDoneAtom={feedbackDoneAtom}
+              chatAtom={chatAtom}
             />
-          }
-        />
+          )}
+        </>
       )
     }
 

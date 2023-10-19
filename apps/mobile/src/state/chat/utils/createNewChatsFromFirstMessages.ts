@@ -37,6 +37,7 @@ export default function createNewChatsFromFirstMessages({
             id: generateChatId(),
             isUnread: true,
             showInfoBar: true,
+            feedbackDone: false,
           },
           messages: [...messages],
         }

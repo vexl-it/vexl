@@ -70,7 +70,9 @@ const otherSk: typeof en =
       "copyErrorToClipboard": "Skopírovať chybu do schránky",
       "me": "Ja",
       "error": "Chyba",
-      "chatNotFoundError": "Chat nenájdený!"
+      "chatNotFoundError": "Chat nenájdený!",
+      "send": "Send",
+      "thanks": "Thanks!"
     },
     "loginFlow": {
       "anonymityNotice":
@@ -812,7 +814,14 @@ const otherSk: typeof en =
       "contactIsAlreadyInYourContactList":
         "Kontakt už bol uložený do telefónneho zoznamu.",
       "addUserToYourContacts": "Pridať {{name}} do kontaktov?",
-      "tapToAddToYourVexlContacts": "Pridať do Vexl kontaktov."
+      "tapToAddToYourVexlContacts": "Pridať do Vexl kontaktov.",
+      "howWasTheTrade": "How was the trade?",
+      "yourAnswerIsAnonymous": "Your answer is 100% anonymous",
+      "anyProblems": "Any problems?",
+      "whatWasWrongExactly": "What was wrong exactly?",
+      "howWasCreatingNewOffer": "How was creating new offer?",
+      "whatWasGreatAboutIt": "What was great about it?",
+      "whatWorkedWellExactly": "What worked well exactly?"
     },
     "progressBar": {
       "ENCRYPTING_PRIVATE_PAYLOADS": "{{percentDone}}% hotovo",
@@ -922,6 +931,20 @@ const otherSk: typeof en =
       "grantPermissionsInSettings":
         "Nebolo možné získať povolenie. Pre naskenovanie QR kódu otvor nastavenia a povoľ Vexlu používanie fotoaparátu.",
       "openSettings": "Otvoriť nastavenia"
+    },
+    "feedback": {
+      "objection": {
+        "APP": "App",
+        "PROCESS": "Process",
+        "RESPONDING_TIME": "Responding time",
+        "CANCELED_OFFER": "Canceled offer",
+        "IMPOSSIBLE_TO_AGREE": "Impossible to agree",
+        "LEFT_THE_CHAT": "Left the chat",
+        "DID_NOT_SHOW_UP": "Didn't show up",
+        "I_MET_NEW_FRIEND": "I met new friend",
+        "DEAL_WAS_SMOOTH": "Deal was smooth",
+        "IT_WAS_FAST": "It was fast"
+      }
     }
   }
 /* JSON ends */

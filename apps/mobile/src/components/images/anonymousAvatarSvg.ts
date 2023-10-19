@@ -1,6 +1,6 @@
-import {stringToSvgStringRuntimeError} from '../../../../Image'
+import {stringToSvgStringRuntimeError} from '../Image'
 
-const emptyMarketplaceAnonymousAvatarSvg =
+const anonymousAvatarSvg =
   stringToSvgStringRuntimeError(`<svg width="85" height="84" viewBox="0 0 85 84" fill="none" xmlns="http://www.w3.org/2000/svg">
 <rect x="0.5" width="84" height="84" rx="21" fill="#262626"/>
 <g clip-path="url(#clip0_7518_64028)">
@@ -28,4 +28,4 @@ const emptyMarketplaceAnonymousAvatarSvg =
 
 `)
 
-export default emptyMarketplaceAnonymousAvatarSvg
+export default anonymousAvatarSvg

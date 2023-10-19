@@ -71,7 +71,9 @@ const otherDe: typeof en =
       "copyErrorToClipboard": "Fehler in die Zwischenablage kopieren",
       "me": "Ich",
       "error": "Error",
-      "chatNotFoundError": "Chat not found!"
+      "chatNotFoundError": "Chat not found!",
+      "send": "Send",
+      "thanks": "Thanks!"
     },
     "loginFlow": {
       "anonymityNotice":
@@ -262,8 +264,8 @@ const otherDe: typeof en =
       "isBuying": "kauft",
       "directFriend": "Direkter Freund",
       "friendOfFriend": "Freund eines Freundes",
-      "buy": "Kauf",
-      "sell": "Verkauf",
+      "buy": "Kaufen",
+      "sell": "Verkaufen",
       "filterOffers": "Angebote filtern",
       "numberOfCommon": "{{number}} Allgemein",
       "offerNotFound":
@@ -833,7 +835,14 @@ const otherDe: typeof en =
         "Der Kontakt befindet sich bereits in deiner Kontaktliste.",
       "addUserToYourContacts": "Füge {{Name}} zu deinen Kontakten hinzu?",
       "tapToAddToYourVexlContacts":
-        "Tipp auf, um sie zu deinen Vexl-Kontakten hinzuzufügen."
+        "Tipp auf, um sie zu deinen Vexl-Kontakten hinzuzufügen.",
+      "howWasTheTrade": "How was the trade?",
+      "yourAnswerIsAnonymous": "Your answer is 100% anonymous",
+      "anyProblems": "Any problems?",
+      "whatWasWrongExactly": "What was wrong exactly?",
+      "howWasCreatingNewOffer": "How was creating new offer?",
+      "whatWasGreatAboutIt": "What was great about it?",
+      "whatWorkedWellExactly": "What worked well exactly?"
     },
     "progressBar": {
       "ENCRYPTING_PRIVATE_PAYLOADS": "{{percentDone}}% erledigt",
@@ -945,7 +954,20 @@ const otherDe: typeof en =
         "Unable to ask for permissions. To use QR scanner open settings and allow Vexl to use camera.",
       "openSettings": "Open settings"
     },
-    "": ""
+    "feedback": {
+      "objection": {
+        "APP": "App",
+        "PROCESS": "Process",
+        "RESPONDING_TIME": "Responding time",
+        "CANCELED_OFFER": "Canceled offer",
+        "IMPOSSIBLE_TO_AGREE": "Impossible to agree",
+        "LEFT_THE_CHAT": "Left the chat",
+        "DID_NOT_SHOW_UP": "Didn't show up",
+        "I_MET_NEW_FRIEND": "I met new friend",
+        "DEAL_WAS_SMOOTH": "Deal was smooth",
+        "IT_WAS_FAST": "It was fast"
+      }
+    }
   }
 /* JSON ends */
 

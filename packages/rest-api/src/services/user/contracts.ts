@@ -118,3 +118,13 @@ export const GetCryptocurrencyDetailsResponse = z.object({
 export type GetCryptocurrencyDetailsResponse = z.TypeOf<
   typeof GetCryptocurrencyDetailsResponse
 >
+
+export const SubmitFeedbackRequest = z.object({
+  formId: z.string().nonempty(),
+  type: z.string().nonempty(),
+  stars: z.number().optional(),
+  objections: z.string().optional(),
+  textComment: z.string().optional(),
+})
+
+export type SubmitFeedbackRequest = z.TypeOf<typeof SubmitFeedbackRequest>

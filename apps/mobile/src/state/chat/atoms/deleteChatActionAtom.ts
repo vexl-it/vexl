@@ -16,6 +16,7 @@ import {privateApiAtom} from '../../../api'
 import shouldSendTerminationMessageToChat from '../utils/shouldSendTerminationMessageToChat'
 import sendLeaveChat from '@vexl-next/resources-utils/dist/chat/sendLeaveChat'
 import {deleteChatFiles} from '../../../utils/fsDirectories'
+import {deleteChatFeedbackEntryFromStorageByChatIdAtom} from '../../feedback/atoms'
 
 export default function deleteChatActionAtom(
   chatWithMessagesAtom: FocusAtomType<ChatWithMessages>
@@ -74,6 +75,8 @@ export default function deleteChatActionAtom(
           chat.inbox.privateKey.publicKeyPemBase64,
           chat.otherSide.publicKey
         )
+
+        set(deleteChatFeedbackEntryFromStorageByChatIdAtom, chat.id)
 
         set(chatWithMessagesAtom, (old) => ({
           ...old,

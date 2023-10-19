@@ -65,6 +65,7 @@ export const dummyChatWithMessages: ChatWithMessages = {
     origin: {type: 'unknown'},
     isUnread: false,
     showInfoBar: true,
+    feedbackDone: false,
   },
   messages: [],
 }
@@ -662,6 +663,8 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
 
   const showInfoBarAtom = focusAtom(chatAtom, (o) => o.prop('showInfoBar'))
 
+  const feedbackDoneAtom = focusAtom(chatAtom, (o) => o.prop('feedbackDone'))
+
   return {
     showModalAtom: atom<boolean>(false),
     chatAtom,
@@ -703,5 +706,6 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     clearExtraToSendActionAtom,
     receivedContactRevealRequestMessageAtom,
     showInfoBarAtom,
+    feedbackDoneAtom,
   }
 })

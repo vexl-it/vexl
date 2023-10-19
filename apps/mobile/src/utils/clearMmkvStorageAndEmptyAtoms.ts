@@ -16,6 +16,10 @@ import {preferencesAtom} from './preferences'
 import {type OneOfferInState} from '@vexl-next/domain/dist/general/offers'
 import {previousSearchesAtom} from '../components/SearchOffersScreen/atoms/previousSearchesAtom'
 import {displayedNotificationsAtom} from '../state/displayedNotifications'
+import {
+  chatsToFeedbacksStorageAtom,
+  offerFeedbackDoneStorageAtom,
+} from '../state/feedback/atoms'
 
 export default function clearMmkvStorageAndEmptyAtoms(): void {
   // TODO:#110 find a better way how to clear the state
@@ -29,6 +33,12 @@ export default function clearMmkvStorageAndEmptyAtoms(): void {
   })
   getDefaultStore().set(offerToConnectionsAtom, {
     offerToConnections: [],
+  })
+  getDefaultStore().set(chatsToFeedbacksStorageAtom, {
+    chatsToFeedbacks: [],
+  })
+  getDefaultStore().set(offerFeedbackDoneStorageAtom, {
+    offerFeedbackDone: false,
   })
   getDefaultStore().set(importedContactsStorageAtom, {
     importedContacts: [],

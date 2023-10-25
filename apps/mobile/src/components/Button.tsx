@@ -1,4 +1,9 @@
-import {type StyleProp, TouchableOpacity, type ViewStyle} from 'react-native'
+import {
+  type ColorValue,
+  type StyleProp,
+  TouchableOpacity,
+  type ViewStyle,
+} from 'react-native'
 import {useCallback, useMemo} from 'react'
 import {type SvgString} from '@vexl-next/domain/dist/utility/SvgString.brand'
 import Image from './Image'
@@ -19,9 +24,10 @@ export interface Props {
   style?: StyleProp<ViewStyle>
 
   disabled?: boolean
-  fontSize?: number
   afterIcon?: SvgString
   beforeIcon?: SvgString
+  iconSize?: number
+  iconFill?: ColorValue
   fullWidth?: boolean
   fullSize?: boolean
   size?: 'small' | 'medium' | 'large'
@@ -152,6 +158,8 @@ function Button({
   style,
   afterIcon,
   beforeIcon,
+  iconSize,
+  iconFill,
   fullWidth = false,
   fullSize = false,
   adjustTextToFitOneLine = false,
@@ -216,9 +224,10 @@ function Button({
         {beforeIcon && (
           <Stack mr="$2">
             <Image
-              height={18}
-              width={18}
+              height={iconSize ?? 18}
+              width={iconSize ?? 18}
               stroke={buttonIconColor}
+              fill={iconFill ?? 'none'}
               source={beforeIcon}
             />
           </Stack>
@@ -238,9 +247,10 @@ function Button({
         {afterIcon && (
           <Stack ml="$1">
             <Image
-              height={18}
-              width={18}
+              height={iconSize ?? 18}
+              width={iconSize ?? 18}
               stroke={buttonIconColor}
+              fill={iconFill ?? 'none'}
               source={afterIcon}
             />
           </Stack>

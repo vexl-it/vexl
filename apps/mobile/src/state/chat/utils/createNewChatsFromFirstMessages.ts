@@ -38,6 +38,8 @@ export default function createNewChatsFromFirstMessages({
             isUnread: true,
             showInfoBar: true,
             feedbackDone: false,
+            showVexlbotInitialMessage: true,
+            showVexlbotNotifications: true,
           },
           messages: [...messages],
         }

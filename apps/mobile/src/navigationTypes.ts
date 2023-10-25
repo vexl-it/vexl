@@ -28,6 +28,8 @@ export type RootStackParamsList = {
 
   InsideTabs: NavigatorScreenParams<InsideTabParamsList>
 
+  TradeChecklistFlow: NavigatorScreenParams<TradeChecklistStackParamsList>
+
   CreateOffer: undefined
   EditOffer: {offerId: OfferId}
   FilterOffers: undefined
@@ -136,6 +138,22 @@ export type MarketplaceTabScreenProps<
 > = CompositeScreenProps<
   MaterialTopTabScreenProps<MarketplaceTabParamsList, T>,
   InsideTabScreenProps<keyof InsideTabParamsList>
+>
+
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type TradeChecklistStackParamsList = {
+  AgreeOnTradeDetails: {
+    chatId: ChatId
+    inboxKey: PublicKeyPemBase64
+  }
+}
+
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type TradeChecklistStackScreenProps<
+  T extends keyof TradeChecklistStackParamsList,
+> = CompositeScreenProps<
+  NativeStackScreenProps<TradeChecklistStackParamsList, T>,
+  RootStackScreenProps<keyof RootStackParamsList>
 >
 
 declare global {

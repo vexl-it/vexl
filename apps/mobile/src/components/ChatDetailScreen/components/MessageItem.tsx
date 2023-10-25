@@ -13,6 +13,7 @@ import BlockIconSvg from '../../../images/blockIconSvg'
 import IdentityRevealMessageItem from './IdentityRevealMessageItem'
 import ContactRevealMessageItem from './ContactRevealMessageItem'
 import UserFeedbackBannerWrapper from '../../UserFeedbackBannerWrapper'
+import VexlbotMessageItem from './VexlbotMessageItem'
 
 function MessageItem({
   itemAtom,
@@ -149,6 +150,12 @@ function MessageItem({
           isLatest={item.isLatest}
           direction={direction}
         />
+      )
+    }
+
+    if (item.message.message.messageType === 'VEXLBOT_INITIAL_MESSAGE') {
+      return (
+        <VexlbotMessageItem message={item.message.message} them={userName} />
       )
     }
 

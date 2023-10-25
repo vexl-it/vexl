@@ -10,26 +10,16 @@ import ImageZoomOverlay from './ImageZoomOverlay'
 import StickyHeader from './StickyHeader'
 
 function MessagesScreen(): JSX.Element {
-  const {showModalAtom, canSendMessagesAtom, identityRevealStatusAtom} =
-    useMolecule(chatMolecule)
+  const {showModalAtom, canSendMessagesAtom} = useMolecule(chatMolecule)
   const [showModal, setShowModal] = useAtom(showModalAtom)
   const canSendMessages = useAtomValue(canSendMessagesAtom)
-  const identityRevealStatus = useAtomValue(identityRevealStatusAtom)
 
   return (
     <>
       <ChatHeader
         mode={showModal ? 'photoTop' : 'photoLeft'}
         leftButton={showModal ? 'closeModal' : 'back'}
-        rightButton={
-          showModal
-            ? 'block'
-            : !canSendMessages
-            ? null
-            : identityRevealStatus === 'shared'
-            ? 'contactReveal'
-            : 'identityReveal'
-        }
+        rightButton={'tradeChecklist'}
         onPressMiddle={() => {
           setShowModal((v) => !v)
         }}

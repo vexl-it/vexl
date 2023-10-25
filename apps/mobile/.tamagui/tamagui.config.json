@@ -19745,6 +19745,13 @@
           "name": "color-27",
           "val": "#4C3D20",
           "variable": ""
+        },
+        "yellowAccent3": {
+          "isVar": true,
+          "key": "$yellowAccent3",
+          "name": "color-28",
+          "val": "#322916",
+          "variable": ""
         }
       },
       "size": {
@@ -20372,6 +20379,13 @@
         "key": "$yellowAccent2",
         "name": "color-27",
         "val": "#4C3D20",
+        "variable": ""
+      },
+      "$color.yellowAccent3": {
+        "isVar": true,
+        "key": "$yellowAccent3",
+        "name": "color-28",
+        "val": "#322916",
         "variable": ""
       },
       "$size.0": {

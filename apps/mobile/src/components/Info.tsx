@@ -13,6 +13,7 @@ interface Props {
   onActionPress: () => void
   hideCloseButton?: boolean
   visibleStateAtom?: PrimitiveAtom<boolean>
+  variant?: 'pink' | 'yellow'
 }
 
 function Info({
@@ -21,6 +22,7 @@ function Info({
   onActionPress,
   hideCloseButton,
   visibleStateAtom: nullableVisibleStateAtom,
+  variant = 'pink',
 }: Props): JSX.Element | null {
   const tokens = getTokens()
 
@@ -32,12 +34,26 @@ function Info({
   if (!isVisible) return null
 
   return (
-    <Stack jc={'center'} p={'$4'} bc={'$pinkAccent1'} br={'$4'}>
+    <Stack
+      jc={'center'}
+      p={'$4'}
+      bc={variant === 'pink' ? '$pinkAccent1' : '$yellowAccent3'}
+      br={'$4'}
+    >
       <XStack ai={'center'} justifyContent={'space-between'} mb={'$4'}>
         <XStack f={1} space={'$2'} ai={'center'} mr={'$1'}>
-          <SvgImage fill={tokens.color.pink.val} source={infoSvg} />
+          <SvgImage
+            fill={
+              variant === 'pink' ? tokens.color.pink.val : tokens.color.main.val
+            }
+            source={infoSvg}
+          />
           <Stack fs={1}>
-            <Text fos={14} col={'$pink'} textAlign={'justify'}>
+            <Text
+              fos={14}
+              col={variant === 'pink' ? '$pink' : '$main'}
+              textAlign={'justify'}
+            >
               {text}
             </Text>
           </Stack>
@@ -55,7 +71,7 @@ function Info({
       <Button
         text={actionButtonText}
         onPress={onActionPress}
-        variant={'hint'}
+        variant={variant === 'pink' ? 'hint' : 'primary'}
         size={'medium'}
       />
     </Stack>

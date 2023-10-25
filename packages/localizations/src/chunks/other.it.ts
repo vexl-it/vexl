@@ -74,7 +74,9 @@ const otherIt: typeof en =
       "error": "Error",
       "chatNotFoundError": "Chat not found!",
       "send": "Send",
-      "thanks": "Thanks!"
+      "thanks": "Thanks!",
+      "vexl": "Vexl",
+      "dontShowMeThisAgain": "Don’t show me this again"
     },
     "loginFlow": {
       "anonymityNotice":
@@ -833,7 +835,9 @@ const otherIt: typeof en =
       "whatWasWrongExactly": "What was wrong exactly?",
       "howWasCreatingNewOffer": "How was creating new offer?",
       "whatWasGreatAboutIt": "What was great about it?",
-      "whatWorkedWellExactly": "What worked well exactly?"
+      "whatWorkedWellExactly": "What worked well exactly?",
+      "tradeChecklist": "Trade checklist",
+      "vexlbotNotifications": "Vexlbot notifications"
     },
     "progressBar": {
       "ENCRYPTING_PRIVATE_PAYLOADS": "{{percentDone}} Fatto",
@@ -957,6 +961,35 @@ const otherIt: typeof en =
         "DEAL_WAS_SMOOTH": "Deal was smooth",
         "IT_WAS_FAST": "It was fast"
       }
+    },
+    "vexlbot": {
+      "bot": "bot",
+      "initialWelcomeMessage":
+        "Welcome to the chat. Let’s agree on trade details with {{name}}. I’ll help you along the way.",
+      "openTradeChecklist": "Open Trade Checklist"
+    },
+    "tradeChecklist": {
+      "agreeOnTradeDetails": "Agree on trade details",
+      "thisDealIsFullyOnline":
+        "This deal is fully online. Be careful and consider risks. Meeting in person is always safer.",
+      "readMoreInFullArticle": "Read more in full article",
+      "tradeOnlyWithPeopleYouKnow": "Trade online only with people you know.",
+      "alwaysMoneyBeforeBtc": "Always money before BTC.",
+      "watchOutForSuspiciousBehaviour": "Watch out for suspicious behaviour.",
+      "notVisibleToAnyoneNotice":
+        "Not visible to anyone except chat participants",
+      "acknowledgeAndContinue": "Acknowledge and continue chatting",
+      "youCanPickWhatYouFill": "It’s optional. You can pick what you fill.",
+      "options": {
+        "DATE_AND_TIME": "Date and time",
+        "MEETING_LOCATION": "Meeting location",
+        "CALCULATE_AMOUNT": "Calculate amount",
+        "SET_NETWORK": "Set network",
+        "REVEAL_IDENTITY": "Reveal identity",
+        "REVEAL_PHONE_NUMBER": "Reveal phone number"
+      },
+      "saveAndContinue": "Save and continue chatting",
+      "shareRecognitionSignInChat": "Or share the recognition sign in chat"
     }
   }
 /* JSON ends */

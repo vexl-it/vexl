@@ -1,52 +1,45 @@
 import IconButton from '../../IconButton'
 import {getTokens, Stack, XStack} from 'tamagui'
 import OtherSideNamePhotoAndInfo from './OtherSideNamePhotoAndInfo'
-import blockIconSvg from '../../../images/blockIconSvg'
 import backButtonSvg from '../../../images/backButtonSvg'
-import identityIconSvg from '../../images/identityIconSvg'
 import useSafeGoBack from '../../../utils/useSafeGoBack'
 import {Keyboard, TouchableOpacity} from 'react-native'
 import {useMolecule} from 'jotai-molecules'
 import {chatMolecule} from '../atoms'
 import {useAtom, useAtomValue, useSetAtom} from 'jotai'
+import {useCallback} from 'react'
+import tradeChecklistSvg from '../../../images/tradeChecklistSvg'
 import binSvg from '../images/binSvg'
 import useResetNavigationToMessagingScreen from '../../../utils/useResetNavigationToMessagingScreen'
-import {useCallback} from 'react'
-import phoneSvg from '../images/phoneSvg'
+import blockIconSvg from '../../../images/blockIconSvg'
+import {useNavigation} from '@react-navigation/native'
 
 type ButtonType =
   | 'back'
-  | 'identityReveal'
-  | 'contactReveal'
-  | 'block'
   | 'closeModal'
   | 'deleteChat'
+  | 'block'
+  | 'tradeChecklist'
   | null
 
 function Button({type}: {type: ButtonType}): JSX.Element | null {
-  const tokens = getTokens()
   const safeGoBack = useSafeGoBack()
+  const navigation = useNavigation()
   const {
+    chatAtom,
     showModalAtom,
     deleteChatWithUiFeedbackAtom,
     blockChatWithUiFeedbackAtom,
-    identityRevealStatusAtom,
-    revealIdentityWithUiFeedbackAtom,
-    revealContactWithUiFeedbackAtom,
     forceShowHistoryAtom,
-    contactRevealStatusAtom,
   } = useMolecule(chatMolecule)
   const setModal = useSetAtom(showModalAtom)
   const resetNavigationToMessagingScreen = useResetNavigationToMessagingScreen()
-  const identityRevealStatus = useAtomValue(identityRevealStatusAtom)
-  const contactRevealStatus = useAtomValue(contactRevealStatusAtom)
 
   const blockChat = useSetAtom(blockChatWithUiFeedbackAtom)
   const deleteChat = useSetAtom(deleteChatWithUiFeedbackAtom)
-  const revealIdentity = useSetAtom(revealIdentityWithUiFeedbackAtom)
-  const revealContact = useSetAtom(revealContactWithUiFeedbackAtom)
 
   const [forceShowHistory, setForceShowHistory] = useAtom(forceShowHistoryAtom)
+  const chat = useAtomValue(chatAtom)
 
   const onGoBackPressed = useCallback(() => {
     if (forceShowHistory) {
@@ -77,33 +70,6 @@ function Button({type}: {type: ButtonType}): JSX.Element | null {
       />
     )
 
-  if (type === 'identityReveal' && identityRevealStatus === 'notStarted')
-    return (
-      <IconButton
-        icon={identityIconSvg}
-        variant={'primary'}
-        onPress={() => {
-          void revealIdentity('REQUEST_REVEAL')
-        }}
-      />
-    )
-
-  if (
-    type === 'contactReveal' &&
-    identityRevealStatus === 'shared' &&
-    contactRevealStatus === 'notStarted'
-  )
-    return (
-      <IconButton
-        icon={phoneSvg}
-        iconFill={tokens.color.main.val}
-        variant={'primary'}
-        onPress={() => {
-          void revealContact('REQUEST_REVEAL')
-        }}
-      />
-    )
-
   if (type === 'block')
     return (
       <IconButton
@@ -118,7 +84,7 @@ function Button({type}: {type: ButtonType}): JSX.Element | null {
       />
     )
 
-  if (type === 'deleteChat') {
+  if (type === 'deleteChat')
     return (
       <IconButton
         icon={binSvg}
@@ -131,7 +97,28 @@ function Button({type}: {type: ButtonType}): JSX.Element | null {
         }}
       />
     )
-  }
+
+  if (type === 'tradeChecklist')
+    return (
+      <IconButton
+        icon={tradeChecklistSvg}
+        variant={'primary'}
+        onPress={() => {
+          Keyboard.dismiss()
+          setModal(false)
+          navigation.navigate('TradeChecklistFlow', {
+            screen: 'AgreeOnTradeDetails',
+            params: {
+              chatId: chat.id,
+              inboxKey: chat.inbox.privateKey.publicKeyPemBase64,
+            },
+          })
+        }}
+        iconFill={getTokens().color.main.val}
+        iconHeight={24}
+        iconWidth={24}
+      />
+    )
 
   return <Stack w={40} h={40} />
 }

@@ -25,6 +25,7 @@ export const MessageType = z.enum([
   'APPROVE_CONTACT_REVEAL',
   'DISAPPROVE_CONTACT_REVEAL',
   'REQUEST_CONTACT_REVEAL',
+  'VEXLBOT_INITIAL_MESSAGE',
 ])
 export type MessageType = z.TypeOf<typeof MessageType>
 
@@ -144,5 +145,7 @@ export const Chat = z.object({
   isUnread: z.boolean().default(true),
   showInfoBar: z.boolean().default(true),
   feedbackDone: z.boolean().default(false),
+  showVexlbotNotifications: z.boolean().default(true),
+  showVexlbotInitialMessage: z.boolean().default(true),
 })
 export type Chat = z.TypeOf<typeof Chat>

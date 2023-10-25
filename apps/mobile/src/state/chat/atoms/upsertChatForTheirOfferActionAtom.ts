@@ -13,6 +13,7 @@ import focusChatForTheirOfferAtom from './focusChatForTheirOfferAtom'
 import messagingStateAtom from './messagingStateAtom'
 import * as O from 'optics-ts'
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
+import createVexlbotInitialMessage from '../utils/createVexlbotInitialMessage'
 
 function createNewChat({
   inbox,
@@ -34,8 +35,15 @@ function createNewChat({
       isUnread: false,
       showInfoBar: true,
       feedbackDone: false,
+      showVexlbotInitialMessage: true,
+      showVexlbotNotifications: true,
     },
-    messages: [initialMessage],
+    messages: [
+      createVexlbotInitialMessage({
+        senderPublicKey: inbox.privateKey.publicKeyPemBase64,
+      }),
+      initialMessage,
+    ],
   }
 }
 

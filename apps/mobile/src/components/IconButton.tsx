@@ -20,6 +20,8 @@ interface Props {
   style?: StyleProp<ViewStyle>
   variant?: 'dark' | 'light' | 'primary' | 'negative' | 'secondary' | 'plain'
   oval?: boolean
+  iconWidth?: number
+  iconHeight?: number
 }
 
 const PressableStyled = styled(Stack, {
@@ -69,6 +71,8 @@ function IconButton({
   height,
   style,
   oval,
+  iconWidth,
+  iconHeight,
 }: Props): JSX.Element {
   const onPressInner = useCallback(() => {
     if (!disabled) onPress()
@@ -96,8 +100,8 @@ function IconButton({
         disabled={disabled}
       >
         <Image
-          width={20}
-          height={20}
+          width={iconWidth ?? 20}
+          height={iconHeight ?? 20}
           stroke={
             !iconFill
               ? variant === 'dark'

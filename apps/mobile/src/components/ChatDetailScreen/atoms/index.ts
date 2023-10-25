@@ -66,6 +66,8 @@ export const dummyChatWithMessages: ChatWithMessages = {
     isUnread: false,
     showInfoBar: true,
     feedbackDone: false,
+    showVexlbotInitialMessage: true,
+    showVexlbotNotifications: true,
   },
   messages: [],
 }
@@ -665,6 +667,13 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
 
   const feedbackDoneAtom = focusAtom(chatAtom, (o) => o.prop('feedbackDone'))
 
+  const showVexlbotNotificationsForCurrentChatAtom = focusAtom(chatAtom, (o) =>
+    o.prop('showVexlbotNotifications')
+  )
+  const showVexlbotInitialMessageForCurrentChatAtom = focusAtom(chatAtom, (o) =>
+    o.prop('showVexlbotInitialMessage')
+  )
+
   return {
     showModalAtom: atom<boolean>(false),
     chatAtom,
@@ -707,5 +716,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     receivedContactRevealRequestMessageAtom,
     showInfoBarAtom,
     feedbackDoneAtom,
+    showVexlbotNotificationsForCurrentChatAtom,
+    showVexlbotInitialMessageForCurrentChatAtom,
   }
 })

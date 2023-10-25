@@ -10,6 +10,9 @@ import {privateApiAtom} from '../../../api'
 import {pipe} from 'fp-ts/function'
 import addMessageToChat from '../utils/addMessageToChat'
 import createAccountDeletedMessage from '../utils/createAccountDeletedMessage'
+import createVexlbotInitialMessage from '../utils/createVexlbotInitialMessage'
+import {sessionDataOrDummyAtom} from '../../session'
+import addVexlBotInitialMessageToChat from '../utils/addVexlBotInitialMessageToChat'
 
 type AcceptMessagingRequestAtom = ActionAtomType<
   [
@@ -29,6 +32,7 @@ const acceptMessagingRequestAtom: AcceptMessagingRequestAtom = atom(
   null,
   (get, set, {chatAtom, approve, text}) => {
     const api = get(privateApiAtom)
+    const session = get(sessionDataOrDummyAtom)
     const {chat} = get(chatAtom)
 
     return pipe(
@@ -56,6 +60,17 @@ const acceptMessagingRequestAtom: AcceptMessagingRequestAtom = atom(
       TE.map((message): ChatMessageWithState => ({state: 'sent', message})),
       TE.map((message) => {
         set(chatAtom, addMessageToChat(message))
+        return message
+      }),
+      TE.map((message) => {
+        set(
+          chatAtom,
+          addVexlBotInitialMessageToChat(
+            createVexlbotInitialMessage({
+              senderPublicKey: session.privateKey.publicKeyPemBase64,
+            })
+          )
+        )
         return message
       })
     )

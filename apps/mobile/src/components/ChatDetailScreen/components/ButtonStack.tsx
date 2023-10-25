@@ -1,42 +1,53 @@
 import {type SvgString} from '@vexl-next/domain/dist/utility/SvgString.brand'
-import {TouchableOpacity} from 'react-native'
+import {type ColorValue, TouchableOpacity} from 'react-native'
 import {getTokens, Stack, Text, XStack, YStack} from 'tamagui'
 import Image from '../../Image'
 import {Fragment} from 'react'
+import Switch from '../../Switch'
 
 export interface StackButtonProps {
+  displaySwitch?: boolean
   icon: SvgString
+  iconFill?: ColorValue
   text: string
   onPress: () => void
   isNegative: boolean
+  switchValue?: boolean
 }
 
 function StackButton({
+  displaySwitch,
   icon,
+  iconFill,
   text,
   onPress,
   isNegative,
+  switchValue,
 }: StackButtonProps): JSX.Element {
   return (
-    <TouchableOpacity onPress={onPress}>
-      <XStack px={'$4'} py={'$4'} space="$3" alignItems={'center'}>
-        <Image
-          stroke={
-            isNegative
-              ? getTokens().color.red.val
-              : getTokens().color.greyOnBlack.val
-          }
-          width={24}
-          height={24}
-          source={icon}
-        />
-        <Text
-          color={isNegative ? '$red' : '$white'}
-          fontSize={18}
-          fontFamily="$body500"
-        >
-          {text}
-        </Text>
+    <TouchableOpacity disabled={displaySwitch} onPress={onPress}>
+      <XStack ai={'center'} jc={'space-between'} px={'$4'} py={'$4'}>
+        <XStack space={'$3'} ai={'center'}>
+          <Image
+            stroke={
+              isNegative
+                ? getTokens().color.red.val
+                : getTokens().color.greyOnBlack.val
+            }
+            fill={iconFill ?? 'none'}
+            width={24}
+            height={24}
+            source={icon}
+          />
+          <Text
+            color={isNegative ? '$red' : '$white'}
+            fontSize={18}
+            fontFamily="$body500"
+          >
+            {text}
+          </Text>
+        </XStack>
+        {displaySwitch && <Switch value={switchValue} onChange={onPress} />}
       </XStack>
     </TouchableOpacity>
   )

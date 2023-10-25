@@ -34,6 +34,7 @@ import NotificationSettingsScreen from '../NotificationSettingsScreen'
 import {useSetCombinedContactsAfterLastSubmitForCurrentUsers} from '../../state/contacts/hooks/useSetCombinedContactsAfterLastSubmitForCurrentUsers'
 import SearchOffersScreen from '../SearchOffersScreen'
 import {useHideInactivityReminderNotificationsOnResume} from '../../state/displayedNotifications'
+import TradeChecklistFlow from '../TradeChecklistFlow'
 
 const Stack = createNativeStackNavigator<RootStackParamsList>()
 
@@ -99,6 +100,14 @@ function RootNavigation(): JSX.Element {
             <Stack.Screen
               name={'ChangeProfilePicture'}
               component={ChangeProfilePictureScreen}
+            />
+            <Stack.Screen
+              name={'TradeChecklistFlow'}
+              options={{
+                animation: 'fade',
+                presentation: 'transparentModal',
+              }}
+              component={TradeChecklistFlow}
             />
           </Stack.Group>
         )}

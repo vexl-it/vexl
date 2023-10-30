@@ -8287,6 +8287,7 @@ __metadata:
     "@types/koa-json": ^2
     "@types/koa-router": ^7.4.4
     "@vexl-next/eslint-config": 0.0.0
+    "@vexl-next/prettier-config": 0.0.0
     "@vexl-next/tsconfig": 0.0.0
     axios: ^1.3.4
     dotenv: ^16.0.3
@@ -8363,6 +8364,7 @@ __metadata:
     "@vexl-next/eslint-config": 0.0.0
     "@vexl-next/fix-brorand-for-expo": 0.0.0
     "@vexl-next/localizations": 0.0.0
+    "@vexl-next/prettier-config": 0.0.0
     "@vexl-next/react-native-ecdh-platform-native-utils": 0.0.0
     "@vexl-next/resources-utils": 0.0.0
     "@vexl-next/rest-api": 0.0.0

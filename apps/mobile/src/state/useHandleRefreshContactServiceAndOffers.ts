@@ -115,7 +115,7 @@ export function useRefreshOffers(): void {
           },
           TE.fromPredicate(
             isNonEmpty,
-            () => ({_tag: 'noOffersToRefresh'} as const)
+            () => ({_tag: 'noOffersToRefresh'}) as const
           ),
           TE.chainW((adminIds) => api.offer.refreshOffer({adminIds})),
           TE.match(

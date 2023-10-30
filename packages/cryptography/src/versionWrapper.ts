@@ -37,7 +37,7 @@ export function parseStringWithVersion(b64: string): {
 export function stripVersion(stringWithVersion: string): string {
   const [version, ...rest] = stringWithVersion.split('.')
   if (rest.length === 0) {
-    return version
+    return version ?? ''
   }
   return rest.join('.')
 }

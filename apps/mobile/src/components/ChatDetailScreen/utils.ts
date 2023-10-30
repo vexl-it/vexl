@@ -1,5 +1,5 @@
-import {type ChatMessageWithState} from '../../state/chat/domain'
 import {DateTime} from 'luxon'
+import {type ChatMessageWithState} from '../../state/chat/domain'
 import {i18n} from '../../utils/localization/I18nProvider'
 
 export type MessagesListItem =
@@ -27,44 +27,38 @@ export type MessagesListItem =
 export function messagesToListData(
   messages: ChatMessageWithState[]
 ): MessagesListItem[] {
-  const result = [] as MessagesListItem[]
-
   let prevMessageTime: DateTime | null = null
 
-  for (let i = messages.length - 1; i >= 0; i--) {
-    const message = messages[i]
+  return messages.map((message, i) => {
     const messageTime = DateTime.fromMillis(message.message.time)
     if (
       prevMessageTime &&
       prevMessageTime.diff(messageTime, 'minutes').minutes > 10
     ) {
-      result.push({
+      return {
         type: 'time',
         time: prevMessageTime,
         key: `time-${prevMessageTime.toString()}`,
-      })
-      prevMessageTime = messageTime
+      }
     } else if (
       prevMessageTime &&
       prevMessageTime.diff(messageTime, 'minutes').minutes > 1
     ) {
-      result.push({
+      return {
         type: 'space',
         key: `space-${message.message.uuid}`,
-      })
+      }
     }
     prevMessageTime = messageTime
 
-    result.push({
+    return {
       type: 'message',
       time: messageTime,
       message,
       isLatest: i === messages.length - 1,
       key: `message-${message.message.uuid}`,
-    })
-  }
-
-  return result
+    }
+  })
 }
 
 export function chatTime(dateTime: DateTime): string {

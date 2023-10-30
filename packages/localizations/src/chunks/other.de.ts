@@ -262,8 +262,8 @@ const otherDe: typeof en =
       "isBuying": "kauft",
       "directFriend": "Direkter Freund",
       "friendOfFriend": "Freund eines Freundes",
-      "buy": "Kaufen",
-      "sell": "Verkaufen",
+      "buy": "Kauf",
+      "sell": "Verkauf",
       "filterOffers": "Angebote filtern",
       "numberOfCommon": "{{number}} Allgemein",
       "offerNotFound":
@@ -353,7 +353,7 @@ const otherDe: typeof en =
         "Vexl ist eine Plattform, auf der du mit Bitcoin innerhalb deines realen sozialen Netzwerks - deninen Freunden und den Freunden ihrer Freunde - handeln kannst, während du völlig anonym bleibst - wenn du es wünschst.",
       "whoCanSeeMyContacts": "Wer kann meine Kontakte sehen?",
       "peopleWhomYouAllowToSee":
-        "Personen, denen du erlaubst, deine Identität zu sehen, können die Freunde sehen, die Sie gemeinsam haben, das ist alles.",
+        "Personen, denen du erlaubst, deine Identität zu sehen, können deinen Namen und dein Profilbild sehen, und das ist alles.",
       "howCanIRemainAnonymous":
         "Wie kann ich anonym bleiben und trotzdem an Vexl teilnehmen?",
       "byDefaultYouParticipateInTheNetwork":
@@ -577,12 +577,12 @@ const otherDe: typeof en =
           "body": "marketplace"
         },
         "newOfferInMarketplace": {
-          "title": "newOfferInMarketplace",
-          "body": "newOfferInMarketplace"
+          "title": "Benachrichtigungen über neue Angebote",
+          "body": "Benachrichtigungen über neue Angebote erhalten."
         },
         "newPhoneContacts": {
-          "title": "newPhoneContacts",
-          "body": "newPhoneContacts"
+          "title": "Benachrichtigungen über neue Kontakte",
+          "body": "Benachrichtigungen über neue Kontakte im Netzwerk erhalten."
         },
         "offer": {
           "title": "offer",
@@ -851,7 +851,7 @@ const otherDe: typeof en =
     },
     "reportIssue": {
       "openInEmail": "In E-Mail öffnen",
-      "somethingWentWrong": "Ein Fehler ist aufgetreten",
+      "somethingWentWrong": "Ein Fehler ist aufgetreten?",
       "feelFreeToGetInTouch": "Wende dich bitte an unseren Support.",
       "predefinedBody": "Hallo! Ich melde ein Problem..."
     },
@@ -936,7 +936,6 @@ const otherDe: typeof en =
       "youHaveSuccessfullyUpdatedContact":
         "Du hast deine Vexl-Kontakte erfolgreich aktualisiert."
     },
-    "": "",
     "qrScanner": {
       "title": "Scan other user's qrcode",
       "invalidQrCodeScanned": "Invalid qrcode scanned",
@@ -945,7 +944,8 @@ const otherDe: typeof en =
       "grantPermissionsInSettings":
         "Unable to ask for permissions. To use QR scanner open settings and allow Vexl to use camera.",
       "openSettings": "Open settings"
-    }
+    },
+    "": ""
   }
 /* JSON ends */
 

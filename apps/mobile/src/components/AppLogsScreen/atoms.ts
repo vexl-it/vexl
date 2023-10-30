@@ -10,7 +10,9 @@ appLogsAtom.onMount = (setAtom) => {
 }
 
 export const appLogAtomsAtom = splitAtom(appLogsAtom)
-export const appLogsEmptyAtom = selectAtom(appLogAtomsAtom, logs => logs.length === 0)
+export const appLogsEmptyAtom = selectAtom(
+  appLogAtomsAtom,
+  (logs) => logs.length === 0
+)
 
 export default appLogsAtom
-

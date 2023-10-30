@@ -15,6 +15,9 @@ function FaqsScreen(): JSX.Element {
   const safeGoBack = useSafeGoBack()
   const content = useContent()
   const [page, setPage] = useState<number>(0)
+
+  const pageContent = content[page]
+
   return (
     <Screen>
       <HeaderProxy hidden showBackButton={true} progressNumber={1} />
@@ -33,17 +36,19 @@ function FaqsScreen(): JSX.Element {
           <IconButton variant="light" icon={closeSvg} onPress={safeGoBack} />
         </XStack>
         <Stack f={1} ai="center" jc="center" w="100%" h="100%">
-          <SvgImage
-            height={content[page].height ?? '100%'}
-            width={content[page].width ?? '100%'}
-            source={content[page].svg}
-          />
+          {pageContent && (
+            <SvgImage
+              height={pageContent.height ?? '100%'}
+              width={pageContent.width ?? '100%'}
+              source={pageContent.svg}
+            />
+          )}
         </Stack>
         <Text fos={24} ff="$heading" col="$black" mb="$2">
-          {content[page].title}
+          {pageContent?.title}
         </Text>
         <Text ff="$body500" col="$greyOnWhite">
-          {content[page].text}
+          {content[page]?.text}
         </Text>
       </ProgressJourney>
     </Screen>

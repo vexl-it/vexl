@@ -18,14 +18,15 @@ export default async function checkContactSync(
     sort: SortTypes.UserDefault,
   })
   const deviceContactsNumbers = deviceContacts.data
-    .map((one) =>
-      one.phoneNumbers?.map((one) => {
-        const parseResult = E164PhoneNumber.safeParse(one.number)
-        if (parseResult.success) {
-          return parseResult.data
-        }
-        return undefined
-      })
+    .map(
+      (one) =>
+        one.phoneNumbers?.map((one) => {
+          const parseResult = E164PhoneNumber.safeParse(one.number)
+          if (parseResult.success) {
+            return parseResult.data
+          }
+          return undefined
+        })
     )
     .flat()
     .filter(notEmpty)

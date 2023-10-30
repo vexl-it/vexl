@@ -122,7 +122,7 @@ export async function* runBenchmark() {
   for (let i = 0; i < encryptedPrivateParts.length; i++) {
     await eciesLegacy.eciesLegacyDecrypt({
       privateKey: keypair1.privateKeyPemBase64,
-      data: encryptedPrivateParts[i],
+      data: encryptedPrivateParts[i] ?? '',
     })
   }
   yield `Took ${msToString(Date.now() - nowMs)}`
@@ -143,7 +143,7 @@ export async function* runBenchmark() {
   yield `AES decrypting dummy public parts ${NUMBER_OF_GENERATIONS} times`
   for (let i = 0; i < encryptedPublicParts.length; i++) {
     aes.aesGCMIgnoreTagDecrypt({
-      data: encryptedPublicParts[i],
+      data: encryptedPublicParts[i] ?? '',
       password: dummySymetricKey,
     })
   }

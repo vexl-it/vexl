@@ -17,7 +17,7 @@ type AcceptMessagingRequestAtom = ActionAtomType<
       chatAtom: PrimitiveAtom<ChatWithMessages>
       approve: boolean
       text: string
-    }
+    },
   ],
   TE.TaskEither<
     ApiConfirmMessagingRequest | ErrorEncryptingMessage,

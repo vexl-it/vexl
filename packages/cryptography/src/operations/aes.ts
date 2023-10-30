@@ -1,7 +1,7 @@
 import crypto from 'node:crypto'
 import {CYPHER_ALGORITHM, PBKDF2ITER, SALT} from '../constants'
-import {appendVersion, parseStringWithVersion} from '../versionWrapper'
 import {removeEmptyBytesAtTheEnd} from '../utils'
+import {appendVersion, parseStringWithVersion} from '../versionWrapper'
 
 export function aesGCMEncrypt({
   data,
@@ -53,6 +53,7 @@ export function aesGCMDecrypt({
   const decipher = crypto.createDecipheriv(CYPHER_ALGORITHM, cipherKey, iv)
 
   const [encrypted, authTag] = data.split('.')
+  if (!authTag || !encrypted) throw new Error('Bad data')
   decipher.setAuthTag(Buffer.from(authTag, 'base64'))
 
   return `${decipher.update(encrypted, 'base64', 'utf8')}${decipher.final(
@@ -176,6 +177,7 @@ export function aesCTRDecrypt({
   const decipher = crypto.createDecipheriv('aes-256-ctr', cipherKey, iv)
 
   const encrypted = data.split('.')[1]
+  if (!encrypted) throw new Error('Bad data')
 
   return `${decipher.update(encrypted, 'base64', 'utf8')}${decipher.final(
     'utf8'

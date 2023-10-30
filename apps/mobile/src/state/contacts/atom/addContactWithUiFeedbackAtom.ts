@@ -81,7 +81,7 @@ const editExistingContact = atom(
         contactNumber: existingContact.normalizedNumber,
       }),
       TE.map((dialogActionResult) =>
-        dialogActionResult[0].type === 'inputResult'
+        dialogActionResult[0]?.type === 'inputResult'
           ? dialogActionResult[0].value
           : existingContact.name
       ),
@@ -171,7 +171,7 @@ const createContact = atom(null, (get, set, newContact: ContactNormalized) => {
       contactName: newContact.name,
     }),
     TE.map((dialogActionResult) =>
-      dialogActionResult[0].type === 'inputResult'
+      dialogActionResult[0]?.type === 'inputResult'
         ? dialogActionResult[0].value
         : newContact.normalizedNumber
     ),

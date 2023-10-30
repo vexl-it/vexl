@@ -1,12 +1,12 @@
 import crypto from 'node:crypto'
-import {CYPHER_ALGORITHM, HMAC_ALGORITHM, PBKDF2ITER, SALT} from '../constants'
-import {appendVersion, parseStringWithVersion} from '../versionWrapper'
-import pbkdf2 from './pbkdf2Promise'
 import {
   type PrivateKeyPemBase64,
   type PublicKeyPemBase64,
 } from '../KeyHolder/brands'
 import {privatePemToRaw, publicPemToRaw} from '../KeyHolder/keyUtils'
+import {CYPHER_ALGORITHM, HMAC_ALGORITHM, PBKDF2ITER, SALT} from '../constants'
+import {appendVersion, parseStringWithVersion} from '../versionWrapper'
+import pbkdf2 from './pbkdf2Promise'
 
 export async function eciesGTMEncrypt({
   publicKey,
@@ -70,6 +70,8 @@ export async function eciesGTMDecrypt({
 }): Promise<string> {
   const {data} = parseStringWithVersion(dataBase64)
   const [cipherText, mac, epk, securityTag] = data.split('.')
+
+  if (!cipherText || !mac || !epk || !securityTag) throw new Error('Bad data')
 
   const {privateKey: privateKeyRawBuffer, curve} = privatePemToRaw(privateKey)
   const ecdh = crypto.createECDH(curve)
@@ -171,6 +173,8 @@ export async function eciesCTRDecrypt({
 }): Promise<string> {
   const {data} = parseStringWithVersion(dataBase64)
   const [cipherText, mac, epk] = data.split('.')
+
+  if (!cipherText || !mac || !epk) throw new Error('Bad data')
 
   const {privateKey: privateKeyRawBuffer, curve} = privatePemToRaw(privateKey)
 

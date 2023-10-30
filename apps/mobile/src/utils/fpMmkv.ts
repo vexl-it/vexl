@@ -59,7 +59,7 @@ function createFpMMKV(storage: MMKV): FpMMKV {
           storage.set(key, value)
           return true
         },
-        (e) => ({_tag: 'WritingToStoreError', error: e} as const)
+        (e) => ({_tag: 'WritingToStoreError', error: e}) as const
       )
   }
 
@@ -67,11 +67,11 @@ function createFpMMKV(storage: MMKV): FpMMKV {
     return pipe(
       E.tryCatch(
         () => storage.getString(key),
-        (e) => ({_tag: 'ReadingFromStoreError', error: e} as const)
+        (e) => ({_tag: 'ReadingFromStoreError', error: e}) as const
       ),
       E.filterOrElseW(
         (x): x is NonNullable<typeof x> => x !== null && x !== undefined,
-        () => ({_tag: 'ValueNotSet'} as const)
+        () => ({_tag: 'ValueNotSet'}) as const
       )
     )
   }

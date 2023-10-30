@@ -1,10 +1,10 @@
-import {type Atom} from 'jotai'
+import {type UserNameAndAvatar} from '@vexl-next/domain/dist/general/UserNameAndAvatar.brand'
 import {type Chat} from '@vexl-next/domain/dist/general/messaging'
+import {type Atom} from 'jotai'
 import {selectAtom} from 'jotai/utils'
+import avatarsSvg from '../../../components/AnonymousAvatar/images/avatarsSvg'
 import randomName from '../../../utils/randomName'
 import {randomNumberFromSeed} from '../../../utils/randomNumber'
-import avatarsSvg from '../../../components/AnonymousAvatar/images/avatarsSvg'
-import {type UserNameAndAvatar} from '@vexl-next/domain/dist/general/UserNameAndAvatar.brand'
 
 export default function selectOtherSideDataAtom(
   chatAtom: Atom<Chat>
@@ -21,6 +21,7 @@ export function getOtherSideData(chat: Chat): UserNameAndAvatar {
 
   return {
     userName: chat.otherSide.realLifeInfo?.userName ?? randomName(seed),
+    // @ts-expect-error TODO: typescript error
     image: chat.otherSide.realLifeInfo?.image ?? {
       type: 'svgXml',
       svgXml: image,

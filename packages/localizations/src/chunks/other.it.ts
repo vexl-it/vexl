@@ -352,7 +352,7 @@ const otherIt: typeof en =
         "Vexl è una piattaforma in cui è possibile scambiare Bitcoin all'interno della propria rete sociale - i propri amici e gli amici dei loro amici - rimanendo completamente anonimi, se lo si desidera.",
       "whoCanSeeMyContacts": "Chi può vedere i miei contatti?",
       "peopleWhomYouAllowToSee":
-        "Le persone a cui permettete di vedere la vostra identità possono vedere gli amici che avete in comune.",
+        "Le persone a cui permetti di vedere la tua identità possono vedere il tuo nome e la tua immagine del profilo, e questo è tutto.",
       "howCanIRemainAnonymous":
         "Come posso rimanere anonimo e partecipare a Vexl?",
       "byDefaultYouParticipateInTheNetwork":
@@ -926,7 +926,6 @@ const otherIt: typeof en =
       "youHaveSuccessfullyUpdatedContact":
         "You have successfully updated your Vexl contacts."
     },
-    "": "",
     "qrScanner": {
       "title": "Scan other user's qrcode",
       "invalidQrCodeScanned": "Invalid qrcode scanned",
@@ -935,7 +934,8 @@ const otherIt: typeof en =
       "grantPermissionsInSettings":
         "Unable to ask for permissions. To use QR scanner open settings and allow Vexl to use camera.",
       "openSettings": "Open settings"
-    }
+    },
+    "": ""
   }
 /* JSON ends */
 

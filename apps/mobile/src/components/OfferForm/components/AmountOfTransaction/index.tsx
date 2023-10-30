@@ -1,15 +1,15 @@
-import {getTokens, Stack, Text, XStack} from 'tamagui'
-import {useCallback, useEffect, useMemo, useState} from 'react'
-import SvgImage from '../../../Image'
-import {type PrimitiveAtom, useAtom, useAtomValue} from 'jotai'
-import LimitInput from './components/LimitInput'
 import {type CurrencyCode} from '@vexl-next/domain/dist/general/offers'
+import {useAtom, useAtomValue, type PrimitiveAtom} from 'jotai'
+import {DateTime} from 'luxon'
+import {useCallback, useEffect, useMemo, useState} from 'react'
+import {getTokens, Stack, Text, XStack} from 'tamagui'
+import {currencies} from '../../../../utils/localization/currency'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
+import SvgImage from '../../../Image'
+import dashSvg from '../../../images/dashSvg'
 import infoSvg from '../../../images/infoSvg'
 import Slider from '../../../Slider'
-import dashSvg from '../../../images/dashSvg'
-import {DateTime} from 'luxon'
-import {currencies} from '../../../../utils/localization/currency'
+import LimitInput from './components/LimitInput'
 
 const SLIDER_MIN_VALUE = 0
 const INPUT_MIN_VALUE = 0
@@ -75,12 +75,12 @@ function AmountOfTransaction({
 
   const onSliderValueChange = (value: number[]): void => {
     if (amountBottomLimit !== value[0]) {
-      setBottomLimit(value[0])
+      setBottomLimit(value[0] ?? 0)
       setInputMin(value[0])
     }
     if (amountTopLimit !== value[1]) {
-      setTopLimit(value[1])
-      setInputMax(value[1])
+      setTopLimit(value[1] ?? 0)
+      setInputMax(value[1] ?? 0)
     }
   }
 

@@ -2,8 +2,8 @@
 
 // INITIAL SETUP - KEEP THIS AT THE TOP
 import './src/components/AppLogsScreen/setupAppLogs'
-import './src/utils/setupCryptoImplementation'
 import './src/utils/notifications/backgroundHandler'
+import './src/utils/setupCryptoImplementation'
 // INITIAL SETUP DONE
 
 import {registerRootComponent} from 'expo'
@@ -17,7 +17,7 @@ if (![].at) {
   }
 }
 
-// eslint-disable-next-line react/prop-types
+// eslint-disable-next-line
 function HeadlessCheck({isHeadless}) {
   if (isHeadless) {
     return null

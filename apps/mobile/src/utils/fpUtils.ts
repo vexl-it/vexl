@@ -74,7 +74,7 @@ export function getItemFromAsyncStorage(
       () =>
         ({
           _tag: 'storeEmpty',
-        } as const)
+        }) as const
     )
   )
 }
@@ -94,7 +94,7 @@ export function getItemFromSecretStorage(
       () =>
         ({
           _tag: 'storeEmpty',
-        } as const)
+        }) as const
     )
   )
 }
@@ -148,7 +148,7 @@ export function aesDecrypt(
 ): TE.TaskEither<CryptoError, string> {
   return TE.tryCatch(
     async () => crypto.aes.aesCTRDecrypt({data, password}),
-    (e) => ({_tag: 'cryptoError', e} as const)
+    (e) => ({_tag: 'cryptoError', e}) as const
   )
 }
 
@@ -158,7 +158,7 @@ export function aesEncrypt(
   return (data: string) =>
     TE.tryCatch(
       async () => crypto.aes.aesCTREncrypt({data, password}),
-      (e) => ({_tag: 'cryptoError', e} as const)
+      (e) => ({_tag: 'cryptoError', e}) as const
     )
 }
 
@@ -168,7 +168,7 @@ export function aesGCMIgnoreTagDecrypt(
   return (data) =>
     TE.tryCatch(
       async () => crypto.aes.aesGCMIgnoreTagDecrypt({data, password}),
-      (e) => ({_tag: 'cryptoError', e} as const)
+      (e) => ({_tag: 'cryptoError', e}) as const
     )
 }
 
@@ -178,7 +178,7 @@ export function aesGCMIgnoreTagEncrypt(
 ): TE.TaskEither<CryptoError, string> {
   return TE.tryCatch(
     async () => crypto.aes.aesGCMIgnoreTagEncrypt({data, password}),
-    (e) => ({_tag: 'cryptoError', e} as const)
+    (e) => ({_tag: 'cryptoError', e}) as const
   )
 }
 
@@ -189,7 +189,7 @@ export function eciesDecrypt(
     TE.tryCatch(
       async () =>
         await crypto.eciesLegacy.eciesLegacyDecrypt({data, privateKey}),
-      (e) => ({_tag: 'cryptoError', e} as const)
+      (e) => ({_tag: 'cryptoError', e}) as const
     )
 }
 
@@ -200,7 +200,7 @@ export function eciesEncrypt(
     TE.tryCatch(
       async () =>
         await crypto.eciesLegacy.eciesLegacyEncrypt({data, publicKey}),
-      (e) => ({_tag: 'cryptoError', e} as const)
+      (e) => ({_tag: 'cryptoError', e}) as const
     )
 }
 
@@ -214,7 +214,7 @@ export function stringifyToJson(
 ): E.Either<JsonStringifyError, string> {
   return E.tryCatch(
     () => JSON.stringify(data),
-    (e) => ({_tag: 'jsonError', e} as const)
+    (e) => ({_tag: 'jsonError', e}) as const
   )
 }
 

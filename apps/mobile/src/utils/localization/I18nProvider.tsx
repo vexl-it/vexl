@@ -1,10 +1,10 @@
+import {translations, type LocaleKeys} from '@vexl-next/localizations'
+import {getLocales} from 'expo-localization'
 import type {TranslateOptions} from 'i18n-js'
 import {I18n} from 'i18n-js'
-import {type LocaleKeys, translations} from '@vexl-next/localizations'
 import {atom, useAtomValue} from 'jotai'
-import {enableHiddenFeatures} from '../environment'
-import {getLocales} from 'expo-localization'
 import {selectAtom} from 'jotai/utils'
+import {enableHiddenFeatures} from '../environment'
 // SETUP I18n
 export const i18n = new I18n(
   enableHiddenFeatures
@@ -14,7 +14,7 @@ export const i18n = new I18n(
         de: {localeName: 'de', ...translations.de},
       }
 )
-i18n.locale = getLocales()[0].languageTag
+i18n.locale = getLocales().at(0)?.languageTag ?? 'en'
 i18n.defaultLocale = 'en'
 i18n.enableFallback = true
 // Setup provider

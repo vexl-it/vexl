@@ -1,13 +1,13 @@
+import * as crypto from 'node:crypto'
+import {PrivateKeyPemBase64, generatePrivateKey} from '../KeyHolder'
+import {normalizeCurveName} from '../KeyHolder/Curve.brand'
+import {privateRawToPem} from '../KeyHolder/keyUtils'
 import {
   eciesCTRDecrypt,
   eciesCTREncrypt,
   eciesGTMDecrypt,
   eciesGTMEncrypt,
 } from './ecies'
-import * as crypto from 'node:crypto'
-import {generatePrivateKey, PrivateKeyPemBase64} from '../KeyHolder'
-import {privateRawToPem} from '../KeyHolder/keyUtils'
-import {normalizeCurveName} from '../KeyHolder/Curve.brand'
 
 const privateKey = generatePrivateKey()
 
@@ -49,6 +49,7 @@ describe('ECIES GTM', () => {
     })
 
     const [version, epk, mac, tag, payload] = encrypted.split('.')
+    if (!tag || !epk || !mac) throw new Error('Bad data')
     const badTag = crypto.randomBytes(tag.length).toString('base64')
     const badEpk = crypto.randomBytes(epk.length).toString('base64')
     const badMac = crypto.randomBytes(mac.length).toString('base64')
@@ -131,6 +132,7 @@ describe('ECIES CTR', () => {
     })
 
     const [version, epk, mac, payload] = encrypted.split('.')
+    if (!epk || !mac) throw new Error('Bad data')
     const badEpk = crypto.randomBytes(epk.length).toString('base64')
     const badMac = crypto.randomBytes(mac.length).toString('base64')
 

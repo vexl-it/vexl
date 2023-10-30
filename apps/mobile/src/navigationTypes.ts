@@ -132,7 +132,7 @@ export type MarketplaceTabParamsList = {
 }
 
 export type MarketplaceTabScreenProps<
-  T extends keyof MarketplaceTabParamsList
+  T extends keyof MarketplaceTabParamsList,
 > = CompositeScreenProps<
   MaterialTopTabScreenProps<MarketplaceTabParamsList, T>,
   InsideTabScreenProps<keyof InsideTabParamsList>

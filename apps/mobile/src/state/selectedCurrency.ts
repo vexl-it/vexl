@@ -28,7 +28,7 @@ const euLocales = [
 
 function getLocale(): string {
   try {
-    return i18n.locale.split('-')[0]
+    return i18n.locale.split('-')[0] ?? 'en'
   } catch (err) {
     return 'en'
   }

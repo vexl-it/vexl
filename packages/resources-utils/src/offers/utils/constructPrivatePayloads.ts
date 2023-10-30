@@ -1,13 +1,13 @@
-import {type ConnectionsInfoForOffer} from './fetchContactsForOffer'
-import * as E from 'fp-ts/Either'
-import {keys} from '../../utils/keys'
+import {PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
 import {
   OfferPrivatePart,
   type SymmetricKey,
 } from '@vexl-next/domain/dist/general/offers'
-import {PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
+import {toError, type BasicError} from '@vexl-next/domain/dist/utility/errors'
+import * as E from 'fp-ts/Either'
 import {z} from 'zod'
-import {type BasicError, toError} from '@vexl-next/domain/dist/utility/errors'
+import {keys} from '../../utils/keys'
+import {type ConnectionsInfoForOffer} from './fetchContactsForOffer'
 
 export type ErrorConstructingPrivatePayloads =
   BasicError<'ErrorConstructingPrivatePayloads'>
@@ -32,33 +32,42 @@ export default function constructPrivatePayloads({
   connectionsInfo: ConnectionsInfoForOffer
   symmetricKey: SymmetricKey
 }): E.Either<ErrorConstructingPrivatePayloads, OfferPrivatePayloadToEncrypt[]> {
-  return E.tryCatch(() => {
-    // First we need to find out friend levels for each connection.
-    // We can do that by iterating over firstDegreeFriends and secondDegreeFriends
-    const friendLevel: Record<
-      PublicKeyPemBase64,
-      Set<'FIRST_DEGREE' | 'SECOND_DEGREE'>
-    > = {}
-    for (const firstDegreeFriendPublicKey of firstDegreeConnections) {
-      friendLevel[firstDegreeFriendPublicKey] = new Set(['FIRST_DEGREE'])
-    }
+  return E.tryCatch(
+    () => {
+      // First we need to find out friend levels for each connection.
+      // We can do that by iterating over firstDegreeFriends and secondDegreeFriends
+      const friendLevel: Record<
+        PublicKeyPemBase64,
+        Set<'FIRST_DEGREE' | 'SECOND_DEGREE'>
+      > = {}
+      for (const firstDegreeFriendPublicKey of firstDegreeConnections) {
+        friendLevel[firstDegreeFriendPublicKey] = new Set(['FIRST_DEGREE'])
+      }
 
-    // There are duplicities. That is why all these shinanigans with Set
-    for (const secondDegreeFriendPublicKey of secondDegreeConnections) {
-      if (!friendLevel[secondDegreeFriendPublicKey])
-        friendLevel[secondDegreeFriendPublicKey] = new Set(['SECOND_DEGREE'])
-      else friendLevel[secondDegreeFriendPublicKey].add('SECOND_DEGREE')
-    }
+      // There are duplicities. That is why all these shinanigans with Set
+      for (const secondDegreeFriendPublicKey of secondDegreeConnections) {
+        if (!friendLevel[secondDegreeFriendPublicKey])
+          friendLevel[secondDegreeFriendPublicKey] = new Set(['SECOND_DEGREE'])
+        else friendLevel[secondDegreeFriendPublicKey]?.add('SECOND_DEGREE')
+      }
 
-    return keys(friendLevel).map((key) => ({
-      toPublicKey: key,
-      payloadPrivate: {
-        commonFriends:
-          commonFriends.commonContacts.find((one) => one.publicKey === key)
-            ?.common?.hashes ?? [],
-        friendLevel: friendLevel[key] ? Array.from(friendLevel[key]) : [],
-        symmetricKey,
-      },
-    }))
-  }, toError('ErrorConstructingPrivatePayloads', 'Failed to construct private parts'))
+      return keys(friendLevel).map((key) => {
+        const friendLevelValue = friendLevel[key]
+        return {
+          toPublicKey: key,
+          payloadPrivate: {
+            commonFriends:
+              commonFriends.commonContacts.find((one) => one.publicKey === key)
+                ?.common?.hashes ?? [],
+            friendLevel: friendLevelValue ? Array.from(friendLevelValue) : [],
+            symmetricKey,
+          },
+        }
+      })
+    },
+    toError(
+      'ErrorConstructingPrivatePayloads',
+      'Failed to construct private parts'
+    )
+  )
 }

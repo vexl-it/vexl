@@ -1,8 +1,8 @@
-import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
 import {type UserNameAndAvatar} from '@vexl-next/domain/dist/general/UserNameAndAvatar.brand'
 import avatarsSvg from '../../../components/AnonymousAvatar/images/avatarsSvg'
 import {randomNumberFromSeed} from '../../../utils/randomNumber'
 import resolveLocalUri from '../../../utils/resolveLocalUri'
+import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
 
 function setRealLifeInfo(
   realLifeInfo: UserNameAndAvatar
@@ -27,6 +27,7 @@ export default function processIdentityRevealMessageIfAny(
 
     const realLifeInfo: UserNameAndAvatar = {
       userName: identityRevealMessage.message.deanonymizedUser.name,
+      // @ts-expect-error TODO: typescript error
       image: identityRevealMessage.message.image
         ? {
             type: 'imageUri',

@@ -1,25 +1,25 @@
-import {useEffect} from 'react'
 import messaging from '@react-native-firebase/messaging'
-import {fetchAndStoreMessagesForInboxAtom} from './chat/atoms/fetchNewMessagesActionAtom'
+import {useNavigation} from '@react-navigation/native'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
-import {pipe} from 'fp-ts/function'
-import * as TE from 'fp-ts/TaskEither'
 import * as O from 'fp-ts/Option'
+import * as TE from 'fp-ts/TaskEither'
+import {pipe} from 'fp-ts/function'
+import {useSetAtom, useStore} from 'jotai'
+import {useEffect} from 'react'
+import {AppState} from 'react-native'
 import {safeParse} from '../utils/fpUtils'
-import reportError from '../utils/reportError'
-import {showUINotificationFromRemoteMessage} from '../utils/notifications/showUINotificationFromRemoteMessage'
+import {getChatIdOfChatOnCurrentScreenIfAny} from '../utils/navigation'
+import {ChatNotificationData} from '../utils/notifications/ChatNotificationData'
 import {
   CHAT_NOTIFICATION_TYPES,
   NEW_CONNECTION,
   NEW_CONTENT,
 } from '../utils/notifications/notificationTypes'
-import {useSetAtom, useStore} from 'jotai'
-import {updateAllOffersConnectionsActionAtom} from './connections/atom/offerToConnectionsAtom'
-import {useNavigation} from '@react-navigation/native'
-import {getChatIdOfChatOnCurrentScreenIfAny} from '../utils/navigation'
+import {showUINotificationFromRemoteMessage} from '../utils/notifications/showUINotificationFromRemoteMessage'
+import reportError from '../utils/reportError'
+import {fetchAndStoreMessagesForInboxAtom} from './chat/atoms/fetchNewMessagesActionAtom'
 import focusChatWithMessagesAtom from './chat/atoms/focusChatWithMessagesAtom'
-import {AppState} from 'react-native'
-import {ChatNotificationData} from '../utils/notifications/ChatNotificationData'
+import {updateAllOffersConnectionsActionAtom} from './connections/atom/offerToConnectionsAtom'
 
 function isChatDisplayedOnScreen({
   inboxKey,
@@ -70,7 +70,10 @@ export function useHandleReceivedNotifications(): void {
         return
       }
 
-      if ((CHAT_NOTIFICATION_TYPES as string[]).includes(data.type)) {
+      if (
+        data.type &&
+        (CHAT_NOTIFICATION_TYPES as string[]).includes(data.type)
+      ) {
         console.info('📳 Refreshing inbox')
 
         pipe(

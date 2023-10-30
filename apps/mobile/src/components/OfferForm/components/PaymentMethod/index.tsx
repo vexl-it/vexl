@@ -1,14 +1,14 @@
-import useContent from './useContent'
 import {
   type LocationState,
   type PaymentMethod,
 } from '@vexl-next/domain/dist/general/offers'
 import {useAtom, useAtomValue, type PrimitiveAtom} from 'jotai'
-import {getTokens, Text, XStack} from 'tamagui'
-import SvgImage from '../../../Image'
+import {Text, XStack, getTokens} from 'tamagui'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
+import SvgImage from '../../../Image'
 import SelectableCell from '../../../SelectableCell'
 import infoSvg from '../../../images/infoSvg'
+import useContent from './useContent'
 
 interface Props {
   locationStateAtom: PrimitiveAtom<LocationState | undefined>
@@ -52,16 +52,19 @@ function PaymentMethodComponent({
   }
 
   if (locationState === 'IN_PERSON') {
+    const contentLocationState0 = content[locationState][0]
+
     return (
       <SelectableCell
-        key={content[locationState][0].type}
+        key={content[locationState][0]?.type}
         fullWidth={false}
         selected={
-          paymentMethod?.includes(content[locationState][0].type) ?? false
+          !contentLocationState0 ||
+          (paymentMethod?.includes(contentLocationState0.type) ?? false)
         }
         onPress={onMethodCellPress}
-        title={content[locationState][0].title}
-        type={content[locationState][0].type}
+        title={contentLocationState0?.title ?? ''}
+        type={contentLocationState0?.type ?? 'CASH'}
       />
     )
   }

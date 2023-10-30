@@ -70,7 +70,7 @@ export function encryptPrivatePart(
           _tag: 'PrivatePartEncryptionError',
           error: new Error('Error encrypting private part', {cause: e?.error}),
           toPublicKey: privatePart.toPublicKey,
-        } as const)
+        }) as const
     )
   )
 }

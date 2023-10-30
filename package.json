@@ -3,19 +3,25 @@
   "packageManager": "yarn@3.4.1",
   "workspaces": [
     "packages/*",
-    "apps/*"
+    "apps/*",
+    "tooling/*"
   ],
   "scripts": {
     "turbo:build": "turbo build",
     "turbo:clean": "turbo clean",
-    "turbo:dev-packages": "turbo build-watch",
-    "turbo:lint": "turbo lint",
-    "location-service:build-docker-image": "./scripts/build-image-location-service.sh",
+    "turbo:format": "turbo format --continue -- --cache --cache-location='node_modules/.cache/.prettiercache'",
+    "turbo:format:fix": "turbo format --continue -- --write --cache --cache-location='node_modules/.cache/.prettiercache'",
+    "turbo:lint": "turbo lint --continue -- --cache --cache-location 'node_modules/.cache/.eslintcache' && manypkg check",
+    "turbo:lint:fix": "turbo lint --continue -- --fix --cache --cache-location 'node_modules/.cache/.eslintcache' && manypkg fix",
+    "turbo:typecheck": "turbo typecheck",
     "utils:sync-translations": "yarn workspace @vexl-next/localizations utils:sync && yarn workspace @vexl-next/localizations build",
-    "utils:add-translation": "yarn workspace @vexl-next/localizations utils:add && yarn workspace @vexl-next/localizations build"
+    "utils:add-translation": "yarn workspace @vexl-next/localizations utils:add && yarn workspace @vexl-next/localizations build",
+    "location-service:build-docker-image": "./scripts/build-image-location-service.sh",
+    "postinstall": "manypkg check"
   },
   "private": true,
-  "devDependencies": {
+  "dependencies": {
+    "@manypkg/cli": "^0.21.0",
     "@types/jest": "^29.4.0",
     "@types/node": "^18.11.18",
     "eslint": "^8.50.0",
@@ -27,8 +33,5 @@
     "react-native-quick-base64@^2.0.5": "patch:react-native-quick-base64@npm%3A2.0.5#./.yarn/patches/react-native-quick-base64-npm-2.0.5-8355f57fab.patch",
     "expo-image-picker@14.1.1": "patch:expo-image-picker@npm%3A14.1.1#./.yarn/patches/expo-image-picker-npm-14.1.1-c6baa99e3c.patch",
     "react-native-quick-crypto@^0.6.1": "patch:react-native-quick-crypto@npm%3A0.6.1#./.yarn/patches/react-native-quick-crypto-npm-0.6.1-02196a3db2.patch"
-  },
-  "dependencies": {
-    "just-truncate": "^2.2.0"
   }
 }

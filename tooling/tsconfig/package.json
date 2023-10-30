@@ -1,0 +1,8 @@
+{
+  "name": "@vexl-next/tsconfig",
+  "version": "0.0.0",
+  "files": [
+    "base.json",
+    "generic-esm.json"
+  ]
+}

@@ -63,6 +63,9 @@ it('Should encrypt and decrypt message with secp256k1 key', async () => {
     data: message,
   })
   expect(
-    await eciesLegacyDecrypt({privateKey: key.privateKeyPemBase64, data: cipher})
+    await eciesLegacyDecrypt({
+      privateKey: key.privateKeyPemBase64,
+      data: cipher,
+    })
   ).toEqual(message)
 })

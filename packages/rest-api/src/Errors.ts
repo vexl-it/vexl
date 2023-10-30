@@ -20,7 +20,7 @@ export interface UnknownError {
 export interface NetworkError {
   readonly _tag: 'NetworkError'
   readonly code:
-                 | typeof AxiosError.ERR_NETWORK
+    | typeof AxiosError.ERR_NETWORK
     | typeof AxiosError.ERR_CANCELED
     | typeof AxiosError.ETIMEDOUT
     | typeof AxiosError.ECONNABORTED

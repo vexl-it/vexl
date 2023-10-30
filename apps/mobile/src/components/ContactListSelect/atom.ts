@@ -1,42 +1,42 @@
-import {createScope, molecule} from 'jotai-molecules'
-import {
-  ContactNormalized,
-  type ContactNormalizedWithHash,
-} from '../../state/contacts/domain'
-import {type Atom, atom, type SetStateAction, type WritableAtom} from 'jotai'
-import {matchSorter} from 'match-sorter'
-import {contactsFromDeviceAtom} from '../../state/contacts/atom/contactsFromDeviceAtom'
-import getValueFromSetStateActionOfAtom from '../../utils/atomUtils/getValueFromSetStateActionOfAtom'
-import {pipe} from 'fp-ts/function'
-import * as O from 'fp-ts/Option'
+import {IsoDatetimeString} from '@vexl-next/domain/dist/utility/IsoDatetimeString.brand'
 import * as A from 'fp-ts/Array'
-import * as TE from 'fp-ts/TaskEither'
 import * as E from 'fp-ts/Either'
+import * as O from 'fp-ts/Option'
 import * as T from 'fp-ts/Task'
-import {safeParse} from '../../utils/fpUtils'
+import * as TE from 'fp-ts/TaskEither'
+import {pipe} from 'fp-ts/function'
+import {atom, type Atom, type SetStateAction, type WritableAtom} from 'jotai'
+import {createScope, molecule} from 'jotai-molecules'
 import {splitAtom} from 'jotai/utils'
-import {privateApiAtom} from '../../api'
+import {matchSorter} from 'match-sorter'
 import {Alert} from 'react-native'
-import {toCommonErrorMessage} from '../../utils/useCommonErrorMessages'
-import {translationAtom} from '../../utils/localization/I18nProvider'
-import reportError from '../../utils/reportError'
-import {loadingOverlayDisplayedAtom} from '../LoadingOverlayProvider'
+import {privateApiAtom} from '../../api'
+import {syncConnectionsActionAtom} from '../../state/connections/atom/connectionStateAtom'
+import {updateAllOffersConnectionsActionAtom} from '../../state/connections/atom/offerToConnectionsAtom'
 import {
   combineContactsFromDeviceWithImportedContacts,
   combinedContactsAfterLastSubmitAtom,
   importedContactsAtom,
   lastImportOfContactsAtom,
 } from '../../state/contacts'
-import notEmpty from '../../utils/notEmpty'
-import {updateAllOffersConnectionsActionAtom} from '../../state/connections/atom/offerToConnectionsAtom'
-import {hashPhoneNumber} from '../../state/contacts/utils'
-import toE164PhoneNumberWithDefaultCountryCode from '../../utils/toE164PhoneNumberWithDefaultCountryCode'
-import {IsoDatetimeString} from '@vexl-next/domain/dist/utility/IsoDatetimeString.brand'
-import {askAreYouSureActionAtom} from '../AreYouSureDialog'
-import userSvg from '../images/userSvg'
-import {syncConnectionsActionAtom} from '../../state/connections/atom/connectionStateAtom'
-import {deduplicateBy} from '../../utils/deduplicate'
+import {contactsFromDeviceAtom} from '../../state/contacts/atom/contactsFromDeviceAtom'
 import newlyAddedContactsToPhoneContactListAtom from '../../state/contacts/atom/newlyAddedContactsToPhoneContactListAtom'
+import {
+  ContactNormalized,
+  type ContactNormalizedWithHash,
+} from '../../state/contacts/domain'
+import {hashPhoneNumber} from '../../state/contacts/utils'
+import getValueFromSetStateActionOfAtom from '../../utils/atomUtils/getValueFromSetStateActionOfAtom'
+import {deduplicateBy} from '../../utils/deduplicate'
+import {safeParse} from '../../utils/fpUtils'
+import {translationAtom} from '../../utils/localization/I18nProvider'
+import notEmpty from '../../utils/notEmpty'
+import reportError from '../../utils/reportError'
+import toE164PhoneNumberWithDefaultCountryCode from '../../utils/toE164PhoneNumberWithDefaultCountryCode'
+import {toCommonErrorMessage} from '../../utils/useCommonErrorMessages'
+import {askAreYouSureActionAtom} from '../AreYouSureDialog'
+import {loadingOverlayDisplayedAtom} from '../LoadingOverlayProvider'
+import userSvg from '../images/userSvg'
 
 export const ContactsSelectScope = createScope<{
   importedContacts: ContactNormalized[]
@@ -251,7 +251,7 @@ export const contactSelectMolecule = molecule((getMolecule, getScope) => {
           ],
         }),
         TE.map((result) =>
-          result[0].type === 'inputResult' ? result[0].value : contact.name
+          result[0]?.type === 'inputResult' ? result[0].value : contact.name
         ),
         TE.map((customName) => {
           set(newlyAddedCustomContactsAtom, (val) => [

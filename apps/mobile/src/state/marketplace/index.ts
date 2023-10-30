@@ -203,7 +203,7 @@ export const createOfferAtom = atom<
       payloadPublic: OfferPublicPart
       intendedConnectionLevel: IntendedConnectionLevel
       onProgress?: (status: OfferEncryptionProgress) => void
-    }
+    },
   ],
   TE.TaskEither<
     | ApiErrorFetchingContactsForOffer
@@ -269,7 +269,7 @@ export const updateOfferAtom = atom<
       symmetricKey: SymmetricKey
       adminId: OfferAdminId
       intendedConnectionLevel: IntendedConnectionLevel
-    }
+    },
   ],
   TE.TaskEither<
     | ApiErrorUpdatingOffer

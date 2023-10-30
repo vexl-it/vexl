@@ -65,7 +65,7 @@ export function moveImageToInternalDirectory({
       await FileSystem.copyAsync({from: imagePath, to: path})
       return path
     },
-    (e) => ({_tag: 'imagePickerError', reason: 'FileError', error: e} as const)
+    (e) => ({_tag: 'imagePickerError', reason: 'FileError', error: e}) as const
   )
 }
 

@@ -1,14 +1,14 @@
-import ProgressJourney from '../../../ProgressJourney'
 import {useState} from 'react'
-import useContent from './useContent'
+import {Image} from 'react-native'
+import {Stack, Text} from 'tamagui'
 import {type LoginStackScreenProps} from '../../../../navigationTypes'
+import SvgImage from '../../../Image'
 import {
   HeaderProxy,
   NextButtonProxy,
 } from '../../../PageWithButtonAndProgressHeader'
-import {Stack, Text} from 'tamagui'
-import {Image} from 'react-native'
-import SvgImage from '../../../Image'
+import ProgressJourney from '../../../ProgressJourney'
+import useContent from './useContent'
 
 type Props = LoginStackScreenProps<'Intro'>
 
@@ -16,8 +16,8 @@ function Intro({navigation}: Props): JSX.Element {
   const [page, setPage] = useState(0)
   const content = useContent()
 
-  const svg = content[page].svg
-  const image = content[page].image
+  const svg = content[page]?.svg
+  const image = content[page]?.image
 
   return (
     <Stack f={1}>
@@ -41,7 +41,7 @@ function Intro({navigation}: Props): JSX.Element {
         </Stack>
         <Stack h={150} maw={350} jc="flex-end">
           <Text color="$black" fontSize={24} ff="$heading">
-            {content[page].title}
+            {content[page]?.title}
           </Text>
         </Stack>
       </ProgressJourney>

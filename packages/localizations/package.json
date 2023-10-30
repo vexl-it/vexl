@@ -2,24 +2,26 @@
   "name": "@vexl-next/localizations",
   "packageManager": "yarn@3.3.1",
   "main": "./dist/index.js",
+  "version": "0.0.0",
   "types": "./dist/index.d.js",
   "exports": {
     ".": "./dist/index.js"
   },
   "type": "module",
   "scripts": {
-    "build": "yarn tsc --project src",
+    "build": "yarn tsc --project src --emitDeclarationOnly --declaration --declarationMap --sourceMap",
     "clean": "rimraf dist tsconfig.tsbuildinfo utilsDist",
-    "lint": "eslint --config src/.eslintrc.cjs src --ext .js,.jsx,.ts,.tsx && tsc --project src/tsconfig.json --noEmit",
+    "lint": "eslint --config src/.eslintrc.cjs src --ext .js,.jsx,.ts,.tsx",
+    "typecheck": "tsc --project src/tsconfig.json --noEmit",
     "utils:sync": "node esbuild.config.js && node utilsDist/index.cjs && yarn utils:format-translations",
     "utils:add": "node esbuild.config.js && node utilsDist/index.cjs add-translation && yarn utils:format-translations",
     "utils:format-translations": "prettier --write ./src/**/*.ts && eslint src/**/*.ts --fix"
   },
   "devDependencies": {
     "@types/luxon": "^3",
-    "@vexl-next/eslint-config": "workspace:*",
-    "@vexl-next/ts-config": "workspace:*",
-    "esbuild": "^0.18.2",
+    "@vexl-next/eslint-config": "0.0.0",
+    "@vexl-next/tsconfig": "0.0.0",
+    "esbuild": "^0.17.16",
     "eslint": "^8.50.0",
     "luxon": "^3.3.0",
     "prettier": "^3.0.3",

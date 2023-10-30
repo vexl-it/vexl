@@ -2,8 +2,7 @@ import {z} from 'zod'
 import {UnixMilliseconds} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
 import {FetchCommonConnectionsResponse} from '@vexl-next/rest-api/dist/services/contact/contracts'
-import {OfferAdminId,SymmetricKey} from '@vexl-next/domain/dist/general/offers'
-
+import {OfferAdminId, SymmetricKey} from '@vexl-next/domain/dist/general/offers'
 
 export const ConnectionsState = z.object({
   lastUpdate: UnixMilliseconds,

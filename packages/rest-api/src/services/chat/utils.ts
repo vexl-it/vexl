@@ -32,7 +32,7 @@ export function ecdsaSign(
           privateKey,
           challenge,
         }),
-      (e) => ({_tag: 'ErrorSigningChallenge', error: e} as const)
+      (e) => ({_tag: 'ErrorSigningChallenge', error: e}) as const
     )
 }
 

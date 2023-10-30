@@ -29,9 +29,12 @@ export function eciesDecrypt(
   privateKey: PrivateKeyPemBase64
 ): (data: string) => TE.TaskEither<CryptoError, string> {
   return (data) =>
-    TE.tryCatch(async () => {
-      return await crypto.eciesLegacy.eciesLegacyDecrypt({data, privateKey})
-    }, toError('CryptoError', 'Error while decrypting data'))
+    TE.tryCatch(
+      async () => {
+        return await crypto.eciesLegacy.eciesLegacyDecrypt({data, privateKey})
+      },
+      toError('CryptoError', 'Error while decrypting data')
+    )
 }
 
 export function eciesEncrypt(
@@ -52,9 +55,12 @@ export function aesGCMIgnoreTagDecrypt(
   password: string
 ): (data: string) => TE.TaskEither<CryptoError, string> {
   return (data) =>
-    TE.tryCatch(async () => {
-      return crypto.aes.aesGCMIgnoreTagDecrypt({data, password})
-    }, toError('CryptoError', 'Error while decrypting data'))
+    TE.tryCatch(
+      async () => {
+        return crypto.aes.aesGCMIgnoreTagDecrypt({data, password})
+      },
+      toError('CryptoError', 'Error while decrypting data')
+    )
 }
 
 export function aesGCMIgnoreTagEncrypt(
@@ -95,10 +101,13 @@ export function generateKeyPair(): E.Either<CryptoError, PrivateKeyHolder> {
 }
 
 export function hashMD5(payload: string): E.Either<CryptoError, string> {
-  return E.tryCatch(() => {
-    return createHash('md5')
-      .update(payload, 'utf-8')
-      .digest()
-      .toString('base64')
-  }, toError('CryptoError', 'error while creating hash'))
+  return E.tryCatch(
+    () => {
+      return createHash('md5')
+        .update(payload, 'utf-8')
+        .digest()
+        .toString('base64')
+    },
+    toError('CryptoError', 'error while creating hash')
+  )
 }

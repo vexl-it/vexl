@@ -4,7 +4,7 @@
   "description": "Vexl CLI",
   "private": true,
   "repository": "https://github.com/vexl-it/vexl-next/",
-  "scripts": {
+  "disabled-scripts": {
     "build": "yarn build:esbuild & yarn build:typecheck",
     "build:esbuild": "node esbuild.config.js",
     "build:typecheck": "tsc --noEmit",
@@ -17,9 +17,9 @@
   "devDependencies": {
     "@types/luxon": "^3",
     "@types/source-map-support": "^0",
-    "@vexl-next/eslint-config": "workspace:*",
-    "@vexl-next/ts-config": "workspace:*",
-    "esbuild": "^0.17.14",
+    "@vexl-next/eslint-config": "0.0.0",
+    "@vexl-next/tsconfig": "0.0.0",
+    "esbuild": "^0.17.16",
     "eslint": "^8.50.0",
     "prettier": "^3.0.3",
     "rimraf": "^4.4.0",
@@ -27,11 +27,11 @@
     "typescript": "^5.1.3"
   },
   "dependencies": {
-    "@vexl-next/cryptography": "workspace:*",
-    "@vexl-next/domain": "workspace:*",
-    "@vexl-next/resources-utils": "workspace:*",
-    "@vexl-next/rest-api": "workspace:*",
-    "axios": "^1.2.1",
+    "@vexl-next/cryptography": "0.0.0",
+    "@vexl-next/domain": "0.0.0",
+    "@vexl-next/resources-utils": "0.0.0",
+    "@vexl-next/rest-api": "0.0.0",
+    "axios": "^1.3.4",
     "commander": "^9.4.1",
     "dotenv": "^16.0.3",
     "eckey-utils": "^0.7.13",

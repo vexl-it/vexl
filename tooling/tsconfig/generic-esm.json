@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "display": "Generic esm configuration - should be used for universal packages.",
+  "extends": "./base.json",
+  "compilerOptions": {
+    "lib": ["ESNext"],
+    "module": "ESNext",
+    "target": "ES2022",
+    "sourceMap": true,
+    "declarationMap": true,
+    "declaration": true,
+    "noEmit": false
+  }
+}

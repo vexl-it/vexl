@@ -1,13 +1,13 @@
-import {atom, useAtom, type WritableAtom} from 'jotai'
-import {Stack, Text, XStack, YStack} from 'tamagui'
-import {BackHandler, ScrollView, StyleSheet, View} from 'react-native'
-import Button from './Button'
-import type * as TE from 'fp-ts/TaskEither'
-import * as E from 'fp-ts/Either'
+import {useFocusEffect} from '@react-navigation/native'
 import {
-  type BasicError,
   toBasicError,
+  type BasicError,
 } from '@vexl-next/domain/dist/utility/errors'
+import * as E from 'fp-ts/Either'
+import type * as TE from 'fp-ts/TaskEither'
+import {atom, useAtom, type WritableAtom} from 'jotai'
+import React from 'react'
+import {BackHandler, ScrollView, StyleSheet, View} from 'react-native'
 import Animated, {
   FadeIn,
   FadeOut,
@@ -15,8 +15,8 @@ import Animated, {
   SlideOutDown,
 } from 'react-native-reanimated'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
-import {useFocusEffect} from '@react-navigation/native'
-import React from 'react'
+import {Stack, Text, XStack, YStack} from 'tamagui'
+import Button from './Button'
 import {ImageUniversal, type ImageUniversalSourcePropType} from './Image'
 import Input, {type Props as VexlTextInputProps} from './Input'
 import KeyboardAvoidingView from './KeyboardAvoidingView'
@@ -204,7 +204,7 @@ function AreYouSureDialog(): JSX.Element | null {
                       </Text>
                       <Input
                         value={
-                          stepResult.type === 'inputResult'
+                          stepResult?.type === 'inputResult'
                             ? stepResult.value
                             : ''
                         }

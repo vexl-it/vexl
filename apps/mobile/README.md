@@ -5,6 +5,7 @@
 This repository contains code for the Vexl mobile app. The app is built using React Native and Expo.
 
 ## How to run the app
+
 1. Clone the repository
 2. Setup expo environment on your computer [See this guide](https://docs.expo.dev/get-started/installation/).
 3. Build and install developer build on your phone or emulator [See this guide](https://docs.expo.dev/development/create-development-builds).
@@ -14,6 +15,7 @@ This repository contains code for the Vexl mobile app. The app is built using Re
 7. Open the app and select your computer as a host to download the js bundle from.
 
 ## How to run unit tests
+
 1. Make sure you have packages installed by running `yarn install`.
 2. Run `yarn test` to run unit tests.
 

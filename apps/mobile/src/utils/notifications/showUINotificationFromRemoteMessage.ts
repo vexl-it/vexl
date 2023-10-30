@@ -85,9 +85,12 @@ export async function showUINotificationFromRemoteMessage(
             title: decodedPreview.name,
             body: decodedPreview.text,
             data: remoteMessage.data,
-            android: {channelId: await getChannelForMessages(), pressAction: {
+            android: {
+              channelId: await getChannelForMessages(),
+              pressAction: {
                 id: 'default',
-              },},
+              },
+            },
           })
         )
       } else {
@@ -96,9 +99,12 @@ export async function showUINotificationFromRemoteMessage(
             title: t(`notifications.${type}.title`),
             body: t(`notifications.${type}.body`),
             data: remoteMessage.data,
-            android: {channelId: await getChannelForMessages(), pressAction: {
+            android: {
+              channelId: await getChannelForMessages(),
+              pressAction: {
                 id: 'default',
-              },},
+              },
+            },
           })
         )
       }

@@ -15,7 +15,7 @@ export function toError<N extends string>(
       _tag: name,
       error: new Error(message, {cause: e?.error ? e.error : e}),
       cause: e,
-    } as const)
+    }) as const
 }
 
 export const toBasicError = toError

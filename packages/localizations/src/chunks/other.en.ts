@@ -163,7 +163,7 @@ const otherEn =
         "addContactManually": "Add contact {{number}} manually",
         "inputPlaceholder": "Search or Add number",
         "nothingFound": {
-          "title": "No contact found. ",
+          "title": "No contact found.",
           "text":
             "To add phone number, type it into the search bar (with country code prefix)."
         },
@@ -342,7 +342,7 @@ const otherEn =
         "Vexl is a platform where you can trade Bitcoin within your real world social network - your friends and friends of their friends - while staying completely anonymous - if you wish.",
       "whoCanSeeMyContacts": "Who can see my contacts?",
       "peopleWhomYouAllowToSee":
-        "People whom you allow to see your identity can see the friends you have in common and that's all.",
+        "People you allow to see your identity can view your name and profile picture, and that's it.",
       "howCanIRemainAnonymous":
         "How can I remain anonymous and still participate in Vexl? ",
       "byDefaultYouParticipateInTheNetwork":
@@ -560,12 +560,12 @@ const otherEn =
           "body": "marketplace"
         },
         "newOfferInMarketplace": {
-          "title": "newOfferInMarketplace",
-          "body": "newOfferInMarketplace"
+          "title": "Notifications about new offers",
+          "body": "Receive notifications about new offers"
         },
         "newPhoneContacts": {
-          "title": "newPhoneContacts",
-          "body": "newPhoneContacts"
+          "title": "Notifications about new contacts",
+          "body": "Receive notifications about new contacts in the network"
         },
         "offer": {
           "title": "offer",
@@ -698,7 +698,7 @@ const otherEn =
       "sending": "sending...",
       "unknownErrorWhileSending": "Unknown error while sending message",
       "tapToResent": "Tap to resend.",
-      "deniedByMe": "You denied messaging request request with {{name}}.",
+      "deniedByMe": "You denied messaging request from {{name}}.",
       "deniedByThem": "{{name}} denied your messaging request.",
       "requestMessageWasDeleted": "User didn't provide any initial message.",
       "typeSomething": "Type something ...",
@@ -823,7 +823,7 @@ const otherEn =
     },
     "reportIssue": {
       "openInEmail": "Open in e-mail",
-      "somethingWentWrong": "Something went wrong",
+      "somethingWentWrong": "Something went wrong?",
       "feelFreeToGetInTouch": "Feel free to get in touch with our support.",
       "predefinedBody": "Hi! I am reporting an issue..."
     },
@@ -901,13 +901,12 @@ const otherEn =
         "You have added {{contactName}} to your Vexl contacts.",
       "contactAlreadyInContactList": "Contact is already in your contact list.",
       "wouldYouLikeToChangeTheName":
-        "Would you like to change the name for {{name}} for this phone number?",
+        "Would you like to change the name for {{name}}?",
       "keepCurrent": "Keep current",
       "contactUpdated": "Contact updated",
       "youHaveSuccessfullyUpdatedContact":
         "You have successfully updated your Vexl contacts."
     },
-    "": "",
     "qrScanner": {
       "title": "Scan other user's qrcode",
       "invalidQrCodeScanned": "Invalid qrcode scanned",
@@ -916,7 +915,8 @@ const otherEn =
       "grantPermissionsInSettings":
         "Unable to ask for permissions. To use QR scanner open settings and allow Vexl to use camera.",
       "openSettings": "Open settings"
-    }
+    },
+    "": ""
   }
 /* JSON ends */
 

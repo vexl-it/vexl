@@ -1,0 +1,18 @@
+{
+  "name": "@vexl-next/prettier-config",
+  "version": "0.0.0",
+  "main": "index.mjs",
+  "scripts": {
+    "clean": "rm -rf .turbo node_modules",
+    "format": "prettier --check \"**/*.{mjs,ts,md,json}\"",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "prettier": "^3.0.3"
+  },
+  "devDependencies": {
+    "@vexl-next/tsconfig": "0.0.0",
+    "typescript": "^5.1.3"
+  },
+  "prettier": "./index.mjs"
+}

@@ -11,9 +11,8 @@ import {I18n} from 'i18n-js'
 const languages = keys(translations)
 
 function LanguagePicker(): JSX.Element {
-  const [selectedLanguage, setSelectedLanguage] = useState<
-    (typeof languages)[number]
-  >(languages[0])
+  const [selectedLanguage, setSelectedLanguage] =
+    useState<(typeof languages)[number]>('en')
 
   const setI18nAtom = useSetAtom(i18nAtom)
 

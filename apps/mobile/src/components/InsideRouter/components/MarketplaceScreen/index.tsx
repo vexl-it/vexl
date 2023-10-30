@@ -1,19 +1,19 @@
-import ContainerWithTopBorderRadius, {
-  CONTAINER_WITH_TOP_BORDER_RADIUS_TOP_PADDING,
-} from '../ContainerWithTopBorderRadius'
-import {type MarketplaceTabParamsList} from '../../../../navigationTypes'
 import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs'
-import OffersListWithFilter from './components/OffersListStateDisplayer'
+import {OfferType} from '@vexl-next/domain/dist/general/offers'
+import {useAtomValue, useSetAtom} from 'jotai'
+import {useCallback, useMemo} from 'react'
+import {getTokens, useMedia} from 'tamagui'
+import {type MarketplaceTabParamsList} from '../../../../navigationTypes'
+import {triggerOffersRefreshAtom} from '../../../../state/marketplace'
 import {
   i18nAtom,
   useTranslation,
 } from '../../../../utils/localization/I18nProvider'
-import {OfferType} from '@vexl-next/domain/dist/general/offers'
-import {triggerOffersRefreshAtom} from '../../../../state/marketplace'
-import {useCallback, useMemo} from 'react'
-import {getTokens, useMedia} from 'tamagui'
 import {useAppState} from '../../../../utils/useAppState'
-import {useAtomValue, useSetAtom} from 'jotai'
+import ContainerWithTopBorderRadius, {
+  CONTAINER_WITH_TOP_BORDER_RADIUS_TOP_PADDING,
+} from '../ContainerWithTopBorderRadius'
+import OffersListWithFilter from './components/OffersListStateDisplayer'
 
 const Tab = createMaterialTopTabNavigator<MarketplaceTabParamsList>()
 
@@ -43,9 +43,9 @@ function MarketplaceScreen(): JSX.Element {
         tabsFontSizes[i18n.locale.split('-').at(0) ?? 'default'] ??
         tabsFontSizes.default
 
-      if (media.sm) return sizesForLangauge.sm
-      if (media.md) return sizesForLangauge.md
-      if (media.lg) return sizesForLangauge.lg
+      if (media.sm) return sizesForLangauge?.sm
+      if (media.md) return sizesForLangauge?.md
+      if (media.lg) return sizesForLangauge?.lg
     })()
 
     return {

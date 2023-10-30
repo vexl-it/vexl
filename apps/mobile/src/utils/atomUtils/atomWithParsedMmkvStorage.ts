@@ -103,7 +103,7 @@ export function atomWithParsedMmkvStorage<Value extends z.ZodObject<any>>(
             () =>
               ({
                 _tag: 'authoredByThisAtom',
-              } as const)
+              }) as const
           ),
           E.map(({[AUTHOR_ID_KEY]: _, ...rest}) => rest),
           E.chainW(safeParse(zodType)),

@@ -1,9 +1,9 @@
-import {type StyleProp, type ViewStyle} from 'react-native'
-import Image from '../Image'
-import avatarsSvg from './images/avatarsSvg'
 import {type SvgString} from '@vexl-next/domain/dist/utility/SvgString.brand'
+import {type StyleProp, type ViewStyle} from 'react-native'
 import {randomNumberFromSeed} from '../../utils/randomNumber'
+import Image from '../Image'
 import UserAvatar from '../UserAvatar'
+import avatarsSvg from './images/avatarsSvg'
 
 interface Props {
   avatarIndex: number
@@ -11,13 +11,18 @@ interface Props {
 }
 
 function AnonymousAvatar({avatarIndex, style}: Props): JSX.Element {
-  return <Image source={avatarsSvg[avatarIndex]} style={style}></Image>
+  return (
+    <Image
+      source={avatarsSvg[avatarIndex] ?? avatarsSvg[0]}
+      style={style}
+    ></Image>
+  )
 }
 
 export default AnonymousAvatar
 
 export function getAvatarSvg(avatarIndex: number): SvgString {
-  return avatarsSvg[avatarIndex]
+  return avatarsSvg[avatarIndex] ?? avatarsSvg[0]
 }
 
 export function AnonymousAvatarFromSeed({
@@ -32,7 +37,8 @@ export function AnonymousAvatarFromSeed({
   grayScale: boolean
 }): JSX.Element {
   const avatar =
-    avatarsSvg[randomNumberFromSeed(0, avatarsSvg.length - 1, seed)]
+    avatarsSvg[randomNumberFromSeed(0, avatarsSvg.length - 1, seed)] ??
+    avatarsSvg[0]
 
   return (
     <UserAvatar

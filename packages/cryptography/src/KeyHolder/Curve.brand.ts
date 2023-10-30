@@ -20,4 +20,4 @@ export function normalizeCurveName(rawCurveName: string): Curve {
   return foundCurve
 }
 
-export const defaultCurve = curvesMap.secp256k1
+export const defaultCurve: Curve = Curve.parse('secp256k1')

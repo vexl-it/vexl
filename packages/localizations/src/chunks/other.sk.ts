@@ -10,45 +10,45 @@ const otherSk: typeof en =
       "confirm": "Potvrdiť",
       "continue": "Pokračovať",
       "save": "Uložiť",
-      "gotIt": "Mám to",
-      "search": "Vyhľadávanie",
-      "deselectAll": "Zrušiť výber všetkých",
-      "selectAll": "Vybrať všetko",
+      "gotIt": "Rozumiem",
+      "search": "Hľadať",
+      "deselectAll": "Zrušiť výber",
+      "selectAll": "Vybrať všetky",
       "cancel": "Zrušiť",
       "unknownError": "Neznáma chyba",
       "unexpectedServerResponse": "Neočakávaná odpoveď servera",
       "networkErrors": {
-        "errNetwork": "Vyskytla sa chyba siete. Ste pripojení na internet?",
+        "errNetwork": "Chyba sieťového pripojenia. Ste pripojení k internetu?",
         "errCanceled": "Požiadavka bola zrušená",
-        "etimedout": "Požiadavka sa vyčerpala",
-        "econnaborted": "Pripojenie sa prerušilo"
+        "etimedout": "Časový limit požiadavky vypršal",
+        "econnaborted": "Pripojenie prerušené"
       },
-      "submit": "Odoslať",
-      "cryptoError": "Neočakávaná chyba kryptografie",
+      "submit": "Potvrdiť",
+      "cryptoError": "Neočakávaná chyba šifrovania",
       "secondsShort": "s",
       "ok": "ok",
-      "request": "Požiadavka",
+      "request": "Požiadať",
       "back": "Späť",
-      "goBack": "Vráť sa späť",
-      "close": "Zatvoriť",
+      "goBack": "Krok späť",
+      "close": "Zavrieť",
       "done": "Hotovo",
-      "errorCreatingInbox": "Chyba pri vytváraní používateľskej schránky.",
-      "accept": "Prijať",
+      "errorCreatingInbox": "Chyba pri vytváraní schránky používateľa.",
+      "accept": "Akceptovať",
       "decline": "Odmietnuť",
-      "youSure": "Určite?",
+      "youSure": "Si si istý?",
       "nope": "Nie",
       "yesDelete": "Áno, vymazať",
-      "more": "Viac na",
+      "more": "Viac",
       "yes": "Áno",
       "no": "Nie",
       "myOffers": "Moje ponuky",
       "errorOpeningLink": {
-        "message": "Chyba pri otváraní linku.",
+        "message": "Chyba pri otváraní odkazu.",
         "text": "Skopírovať do schránky?",
         "copy": "Skopírovať a zavrieť"
       },
       "nice": "Dobre",
-      "success": "Podarilo sa",
+      "success": "Podarilo sa!",
       "requested": "Požiadané",
       "now": "Teraz",
       "declined": "Zamietnuté",
@@ -58,49 +58,50 @@ const otherSk: typeof en =
       "currency": "Mena",
       "whatDoesThisMean": "Čo znamená '{{term}}'?",
       "learnMore": "Dozvedieť sa viac",
-      "unableToShareImage": "Unable to share the image",
-      "requestAgain": "Request again",
-      "seeDetail": "See details",
-      "notNow": "Not now",
+      "unableToShareImage": "Nemožno zdieľať obrázok.",
+      "requestAgain": "Požiadať znovu",
+      "seeDetail": "Zobraziť podrobnosti",
+      "notNow": "Teraz nie",
       "niceWithExclamationMark": "Nice!",
       "nothingFound": "Nič sme nenašli.",
-      "sendRequest": "Odoslať žiadosť",
+      "sendRequest": "Odoslať požiadavku",
       "change": "Zmeniť",
-      "errorWhileReadingQrCode": "Error while reading QR code",
+      "errorWhileReadingQrCode": "Chyba pri načítaní QR kódu.",
       "copyErrorToClipboard": "Skopírovať chybu do schránky",
-      "me": "Me",
-      "error": "Error",
-      "chatNotFoundError": "Chat not found!"
+      "me": "Ja",
+      "error": "Chyba",
+      "chatNotFoundError": "Chat nenájdený!"
     },
     "loginFlow": {
-      "anonymityNotice": "Kým to nepovolíš, nikto to neuvidí. Dokonca ani my.",
+      "anonymityNotice":
+        "Bez tvojho povolenia to nikto neuvidí. Dokonca ani my.",
       "intro": {
-        "title1": "Anonymne se spoj so svojimi kontaktami.",
-        "title2": "Pozri sa na ich ponuky.",
-        "title3": "Začnite chatovat, odhaľte svoje identity a obchodujte."
+        "title1": "Anonymne sa spoj so svojimi kontaktami.",
+        "title2": "Pozri si ich ponuky.",
+        "title3": "Začni chatovat, odhaľte svoje identity a obchodujte."
       },
       "start": {
         "subtitle": "Vitaj! Chceš začať vexlovať?",
         "touLabel": "Súhlasím s",
-        "termsOfUse": "podmienkami"
+        "termsOfUse": "podmienkami používania"
       },
       "anonymizationNotice": {
         "title": "Tvoja identita bude anonymizovaná.",
         "text":
-          "Nikto neuvidí tvoje skutočné meno a profilový obrázok, kým ho neodhalíš pre konkrétny obchod. Dokonca aj my. Najprv nastavíme tvoju skutočnú identitu."
+          "Nikto neuvidí tvoje skutočné meno a profilový obrázok, kým ho neodhalíš v konkrétnom obchode. Dokonca ani my. Najskôr poďme nastaviť tvoju skutočnú identitu."
       },
       "name": {
-        "prompt": "Ako ti vravia kamaráti?",
+        "prompt": "Ako ti hovoria tvoji priatelia?",
         "placeholder": "Meno alebo prezývka",
         "nameValidationError":
-          "Meno by malo mať aspoň 1 znak a maximálne 25 znakov"
+          "Tvoje meno by malo byť dostatočne dlhé na to, aby si ho nevedela zapamäť zlatá rybička, ale zároveň dostatočne krátke na to, aby sa zmestilo na papierik v koláčiku šťastia - povedzme niekde medzi 1 a 25 znakmi."
       },
       "photo": {
         "title": "Ahoj {{name}}! Vyber si svoju profilovú fotku.",
         "selectSource": "Vyber si, odkiaľ chceš obrázok nahrať",
         "camera": "Fotoaparát",
         "gallery": "Galéria",
-        "permissionsNotGranted": "Oprávnenia neboli udelené.",
+        "permissionsNotGranted": "Prístup zamietnutý.",
         "nothingSelected": "Nebol vybraný žiadny obrázok"
       },
       "anonymization": {
@@ -108,13 +109,13 @@ const otherSk: typeof en =
         "afterTitle": "Identita anonymizovaná!",
         "action": "Anonymizovať",
         "afterDescription":
-          "Takto ťa uvidia ostatní užívatelia, než im odhalíš svoj súkromný profil."
+          "Takto ťa uvidia ostatní užívatelia, než im odhalíš svoju identitu."
       },
       "phoneNumber": {
         "title": "Aké je tvoje telefónne číslo?",
         "placeholder": "Telefónne číslo",
         "text":
-          "Aby sme ťa mohli spojiť s komunitou Vexl, musíš zadať svoje telefónne číslo.",
+          "Aby sme ťa mohli spojiť s Vexl komunitou, musíš zadať svoje telefónne číslo.",
         "errors": {
           "invalidPhoneNumber":
             "Neplatné telefónne číslo. Skús to prosím znovu.",
@@ -126,14 +127,14 @@ const otherSk: typeof en =
         "title": "Práve sme ti poslali verifikačný kód",
         "text": "Na overenie ho zadaj nižšie",
         "inputPlaceholder": "Overovací kód",
-        "retryCountdown": "Nedostal si kód? Skús ho poslať znovu.",
-        "retry": "Nedostal si kód? Skús ho poslať znovu.",
+        "retryCountdown": "Nedostal si kód? Poslať znovu o",
+        "retry": "Nedostal si kód? Poslať znovu",
         "errors": {
           "userAlreadyExists":
-            "Používateľ s týmto telefónnym číslom už existuje",
+            "Používateľ s týmto telefónnym číslom už existuje.",
           "challengeCouldNotBeGenerated":
-            "Výzvu nebolo možné vygenerovať. Skúste to znova neskôr",
-          "verificationNotFound": "Overovací kód je nesprávny.",
+            "Výzvu nebolo možné vytvoriť. Skús to znova neskôr.",
+          "verificationNotFound": "Neplatný kód notifikácie",
           "UserNotFound": "Používateľ nebol nájdený. Skús kód poslať znova.",
           "SignatureCouldNotBeGenerated":
             "Podpis sa nepodarilo vygenerovať. Skús to znova neskôr.",
@@ -141,7 +142,7 @@ const otherSk: typeof en =
             "Verejný kľúč alebo hash je neplatný. Skús to znova neskôr"
         },
         "success": {
-          "title": "Tvoje číslo bolo overené. [nwln] Čas nastaviť tvoj profil.",
+          "title": "Tvoje číslo bolo overené. Poďme nastaviť tvoj profil.",
           "errorWhileParsingSessionForInternalState":
             "Chyba pri ukladaní používateľa"
         }
@@ -159,21 +160,21 @@ const otherSk: typeof en =
       "contactsExplanation": {
         "title": "Nájdime teraz tvojich priateľov!",
         "text":
-          "Vexl vás anonymne prepojí s vašimi priateľmi a priateľmi vašich priateľov. Neskôr môžete spravovať svoje kontakty a rozhodnúť, ktorých z nich chcete zahrnúť do svojho sociálneho okruhu.",
+          "Vexl ťa anonymne prepojí s tvojimi priateľmi a priateľmi tvojich priateľov. Neskôr môžeš spravovať svoje kontakty a rozhodnúť, ktorých z nich chceš zahrnúť do svojho sociálneho okruhu.",
         "anonymizationCaption":
           "Tvoje kontakty neuvidí nikto ďalší. Dokonca ani my."
       },
       "importContactsButton": "Import kontaktov",
       "contactsList": {
-        "addContactManually": "Manuálne pridanie kontaktu {{number}}",
-        "inputPlaceholder": "Vyhľadávanie alebo pridanie čísla",
+        "addContactManually": "Pridať kontakt {{number}} manuálne",
+        "inputPlaceholder": "Hľadať alebo pridať číslo",
         "nothingFound": {
-          "title": "Nenašiel sa žiadny kontakt.",
+          "title": "Nebol nájdený žiadny kontakt.",
           "text":
-            "Ak chceš pridať telefónne číslo napriamo, zadaj ho do vyhľadávacieho riadku (s predvoľbou krajiny)."
+            "Ak chceš pridať telefónne číslo, ktoré nemáš v zozname kontaktov, zadaj ho do vyhľadávacieho riadku (s predvoľbou krajiny)."
         },
         "toAddCustomContact":
-          "Ak chceš pridať telefónne číslo napriamo, zadaj ho do vyhľadávacieho riadku (s predvoľbou krajiny).",
+          "Ak chceš pridať telefónne číslo, ktoré nemáš v zozname kontaktov, zadaj ho do vyhľadávacieho riadku (s predvoľbou krajiny).",
         "addContact": "Pridať kontakt",
         "addThisPhoneNumber":
           "Chceš pridať toto číslo medzi tvoje Vexl kontakty?",
@@ -181,9 +182,9 @@ const otherSk: typeof en =
         "contactAdded": "Kontakt bol pridaný.",
         "youHaveAddedContact":
           "{{contactName}} bol pridaný k tvojim Vexl kontaktom.",
-        "submitted": "Submitted",
-        "new": "New",
-        "nonSubmitted": "Non-submitted"
+        "submitted": "Odoslané",
+        "new": "Nové",
+        "nonSubmitted": "Neodoslané"
       },
       "allowNotifications": {
         "title": "Povoliť notifikácie",
@@ -193,9 +194,9 @@ const otherSk: typeof en =
         "cancel": "Preskočiť",
         "errors": {
           "permissionDenied":
-            "Notifikácie neboli povolené. Môžeš ich povoliť pozdejšie v nastavení systému.",
-          "unknownError": "Neznáma chyba pri vyžiadaní oprávnení",
-          "notAvailableOnEmulator": "Oznámenia nie sú v emulátore k dispozícii"
+            "Notifikácie neboli povolené. Môžeš ich povoliť neskôr v systémových nastaveniach.",
+          "unknownError": "Neznáma chyba v procese žiadosti o povolenie.",
+          "notAvailableOnEmulator": "Notifikácie niesú v emulátore dostupné."
         },
         "vexlCantBeUsedWithoutNotifications":
           "Aplikáciu Vexl nie je možné používať bez notifikácií."
@@ -205,17 +206,17 @@ const otherSk: typeof en =
       "yourReach": "Tvoj dosah: {{number}} vexlákov",
       "items": {
         "changeProfilePicture": "Zmeniť profilový obrázok",
-        "editName": "Upraviť meno",
+        "editName": "Zmeniť meno",
         "contactsImported": "Správa kontaktov",
         "xFriends": "{{number}} priateľov",
         "setPin": "Nastaviť PIN",
         "faceId": "Face ID",
         "allowScreenshots": "Povoliť screenshoty",
-        "allowScreenshotsDescription": "Zákazať užívateľom screenshoty chatu",
-        "termsAndPrivacy": "Podmienky a ochrana osobných údajov",
-        "faqs": "Podmienky použitia a Ochrana súkromia",
+        "allowScreenshotsDescription": "Zákazať užívateľom snímky chatu",
+        "termsAndPrivacy": "Podmienky a Ochrana súkromia",
+        "faqs": "Často kladené otázky",
         "reportIssue": "Kontaktovať podporu",
-        "inAppLogs": "Logy aplikácie",
+        "inAppLogs": "Hlásenia v aplikácii",
         "requestKnownData": "Vyžiadanie údajov",
         "followUsOn": "Sleduj nás na",
         "twitter": "Twitter",
@@ -223,80 +224,81 @@ const otherSk: typeof en =
         "readMoreOn": "Prečítaj si viac na",
         "medium": "Medium",
         "mediumUrl": "https://blog.vexl.it",
-        "learnMoreOn": "Ďalšie informácie na",
+        "learnMoreOn": "Viac sa dozvieš na",
         "website": "Vexl.it",
         "websiteUrl": "https://vexl.it",
-        "deleteAccount": "Odstrániť účet",
+        "deleteAccount": "Zmazať účet",
         "supportEmail": "support@vexl.it"
       },
       "noLogoutExplanation":
-        "Chceš sa odhlásiť? Taká možnosť vo Vexli nie je - môžeš ale vymazať účet.",
+        "Chceš sa odhlásiť? Takúto možnosť Vexl neponúka - môžeš ale zmazať svoj účet.",
       "support":
-        "Ak se ti Vexl páči, budeme radi za tvoj príspevok v tvrdej mene.",
-      "version": "Verzia aplikácie Vexl: Vxl: {{version}}",
+        "Ak sa ti Vexl páči a chceš nás podporiť, budeme radi za akýkoľvek príspevok v Bitcoine.",
+      "version": "Verzia Vexl aplikácie: {{version}}",
       "logoutDialog": {
-        "title": "Vymazať účet?",
+        "title": "Zmazať účet?",
         "title2": "Si si istý?",
         "description":
-          "Naozaj chcete vymazať svoj účet? Túto akciu už nikdy nebudete môcť vrátiť späť."
+          "Naozaj si želáš vymazať tvoj účet? Tento krok nie je možné vrátiť späť."
       }
     },
     "offer": {
       "title": "Ponuka",
-      "cashOnly": "Iba v hotovosti",
-      "onlineOnly": "Len online",
+      "cashOnly": "V hotovosti",
+      "onlineOnly": "Online platba",
       "upTo": "Až do",
       "forSeller": "Pre predávajúceho",
       "forBuyer": "Pre kupujúceho",
       "bank": "Banka",
-      "revolut": "Online platby",
+      "revolut": "Online platba",
       "isSelling": "predáva",
       "isBuying": "kupuje",
       "directFriend": "Priamy priateľ",
       "friendOfFriend": "Priateľ priateľa",
-      "buy": "Kúpiť",
-      "sell": "Predať",
-      "filterOffers": "Filtrovanie ponúk",
-      "numberOfCommon": "{{number}} spoločné",
-      "offerNotFound": "Ponuka nebola nájdená. Autor ju možno vymazal",
+      "buy": "Nákup",
+      "sell": "Predaj",
+      "filterOffers": "Filtrovať ponuky",
+      "numberOfCommon": "{{number}} spoločných",
+      "offerNotFound":
+        "Ponuka nebola nájdená. Je možné, že ju autor odstránil.",
       "inputPlaceholder": "Tu napíš správu...",
       "sendRequest": "Odoslať žiadosť",
       "report": {
         "areYouSureTitle": "Nahlásiť ponuku?",
         "areYouSureText":
-          "Skutočne chcete nahlásiť túto ponuku? Táto akcia je nevratná.",
+          "Skutočne chceš nahlásiť túto ponuku? Tento krok nie je možné vrátiť späť.",
         "yes": "Áno, nahlásiť",
         "thankYou": "Ďakujeme!",
         "inappropriateContentWasReported":
           "Nevhodný obsah bol anonymne nahlásený.",
         "reportLimitReached":
-          "Pre dnešok bol dosiahnutý maximálny počet hlásení. Skús to znova za 24 hodín."
+          "Pre dnešok si dosiahol maximálny počet možných nahlásení. Skús to znova za 24 hodín."
       },
-      "goToChat": "Prejdite do chatu",
+      "goToChat": "Prejsť na chat",
       "requestStatus": {
         "requested":
-          "Bola odoslaná žiadosť o obchodovanie. Po jej prijatí vám dáme vedieť.",
-        "accepted": "Your request was accepted.",
-        "denied": "Your request was declined.",
-        "initial": "This will be your first interaction with this offer.",
+          "Žiadosť o obchodovanie odoslaná. Oznámime ti, keď bude akceptovaná.",
+        "accepted": "Žiadosť bola prijatá",
+        "denied": "Žiadosť bola odmietnutá",
+        "initial": "Toto bude tvoja prvá interakcia s touto ponukou.",
         "cancelled":
-          "You previously cancelled the trade request for this offer.",
+          "V minulosti si v súvislosti s touto ponukou zrušil žiadosť o obchod.",
         "deleted":
-          "You have already interacted with this offer, but you deleted the chat.",
+          "S týmto používateľom si sa už o tejto ponuke rozprával, ale vymazal si chat.",
         "otherSideLeft":
-          "You have already interacted with this offer, but the counterparty left the chat.",
-        "leaved": "You have already interacted with this offer before."
+          "Na túto ponuku si už reagoval, ale protistrana opustila chat.",
+        "leaved": "Na túto ponuku si už v minulosti reagoval."
       },
       "listEmpty": "Tvoj marketplace sa práve zahrieva. Vráť sa o pár minút!",
       "emptyAction": "Pridať novú ponuku",
       "createOfferAndReachVexlers":
-        "Tvoj dosah je {{reachNumber}} vexlákov.\nNaimportuj viac kontaktov, aby si videl viac ponúk",
+        "Tvoj dosah je {{reachNumber}} vexlákov. Naimportuj viac kontaktov, aby si videl viac ponúk",
       "filterActive": "Filter aktívny",
       "totalOffers": "Celkovo: {{totalCount}} ponúk",
       "notImportedAnyContacts":
         "Nemáš importované žiadne kontakty. Import kontaktov ti umožní zobraziť ponuky z tvojej siete.",
       "socialNetworkTooSmall":
-        "Z dôvodu importovania malého množstva kontaktov je možné, že nebudeš vidieť žiadne ponuky.",
+        "Importoval si malé množstvo kontaktov. Je možné, že nebudeš vidieť žiadne ponuky.",
       "noOffersToMatchFilter":
         "Nemáš žiadne ponuky, ktoré zodpovedajú zadaným filtrovacím kritériám.",
       "offersAreLoadingAndShouldBeReady":
@@ -316,50 +318,50 @@ const otherSk: typeof en =
         "Nezabudni si overiť identitu protistrany prostredníctvom spoločného priateľa.",
       "noDirectConnection":
         "S týmto človekom sa pravdepodobne osobne nepoznáte.",
-      "rerequestTomorrow": "You can send another request tomorrow.",
-      "rerequestDays": "You can send another request in {{days}} days.",
-      "rerequest": "Poslať požiadavku znova",
-      "cancelRequest": "Zruš požiadavku",
+      "rerequestTomorrow": "Ďalšiu žiadosť môžeš poslať zajtra.",
+      "rerequestDays": "Ďalšiu požiadavku môžeš poslať o {{days}} dní.",
+      "rerequest": "Poslať žiadosť znova",
+      "cancelRequest": "Zrušiť žiadosť",
       "requestWasCancelledByOtherSide":
-        "Požiadavku nemožno prijať, pretože jej druhá strana zrušila.",
+        "Žiadosť nemožno prijať, pretože ju druhá strana zrušila.",
       "requestNotFound":
-        "Požiadavku nemožno prijať, pretože druhá strana zrušila svoj účet.",
+        "Žiadosť nemožno prijať, pretože druhá strana zrušila svoj účet.",
       "otherSideAccountDeleted": "Protistrana zmazala účet",
       "createOfferNudge":
-        "Expand your reach within the social network and be the first one to create an offer for this criteria.",
-      "offerAuthorSpeaks": "{{name}} speaks {{spokenLanguages}}"
+        "Rozšír svoj dosah v sociálnej sieti a buď prvý, kto vytvorí ponuku podľa daných kritérií.",
+      "offerAuthorSpeaks": "{{name}} hovorí {{spokenLanguages}}"
     },
     "termsOfUse": {
       "termsOfUse": "Podmienky používania",
-      "privacyPolicy": "Zásady ochrany osobných údajov",
+      "privacyPolicy": "Ochrana súkromia",
       "dontHaveTime":
-        "Nemáte čas to všetko čítať? Pozrite sa na často kladené otázky.",
+        "Nemáš čas to všetko čítať? Pozri si často kladené otázky.",
       "cautiousNoticeAboutMachineTranslation":
-        "Nasledujúci text prešiel strojovým prekladom, aby ste sa dostali k pôvodnej anglickej verzii, pokračujte na webovú stránku."
+        "Upozornenie: Nasledujúci text prešiel strojovým prekladom, pre prístup k pôvodnej anglickej verzii pokračuj na webovú stránku."
     },
     "faqs": {
       "faqs": "Často kladené otázky",
       "whatIsVexl": "Čo je to Vexl?",
       "vexlIsPlatform":
-        "Vexl je platforma kde môžeš dohadovať zmenu bitcoinu v rámci svojej reálnej sociálnej siete - so svojimi priateľmi a priateľmi ich priateľov - a pritom zostať úplne anonymný, pokiaľ si to praješ.",
+        "Vexl je platforma, kde môžeš dohadovať zmenu Bitcoinu v rámci svojej reálnej sociálnej siete - so svojimi priateľmi a priateľmi ich priateľov - a pritom, pokiaľ si to želáš, zostať v úplnej anonymite.",
       "whoCanSeeMyContacts": "Kto môže vidieť moje kontakty?",
       "peopleWhomYouAllowToSee":
-        "Ľudia, ktorým dovolíš vidieť svoju identitu, môžu vidieť vaších spoločných priateľov. To je všetko.",
+        "Ľudia, ktorým odhalíš svoju identitu, môžu vidieť tvoje meno a profilový obrázok, nič viac.",
       "howCanIRemainAnonymous":
-        "Ako môžem zostať anonymný a pritom byť súčasťou Vexlu?",
+        "Ako môžem zostať v anonymite a pritom byť súčasťou Vexlu?",
       "byDefaultYouParticipateInTheNetwork":
-        "Ostatní účastníci siete ťa uvidia pod tvojim Vexl menom a avatarom, ktoré ti boli pridelené pri registrácii. Svoju identitu môžeš odhaliť iba pre konkrétny obchod v našom zabezpečenom, end-to-end šifrovanom chate.",
+        "Ostatní účastníci siete ťa uvidia pod tvojím Vexl menom a avatarom, ktoré ti boli pridelené pri registrácii. Svoju identitu môžeš odhaliť iba pre konkrétny obchod v našom zabezpečenom, end-to-end šifrovanom chate.",
       "howCanIMakeSure":
-        "Ako sa môžem uistiť, že osoba, s ktorou sa bavím, je ta, s ktorou sa chcem baviť?",
+        "Ako sa môžem uistiť, že osoba, s ktorou sa rozprávam, je práve tá, s ktorou sa chcem rozprávať?",
       "oneChallenge":
-        "Jedným z úskalí skutočne anonymných komunikačných systémov, ako je Vexl, je to, že si niekedy musíte overiť totožnosť osoby, s ktorou komunikujete! V takýchto prípadoch je najlepšie použiť zabezpečený sekundárny komunikačný kanál, aby si si s druhou osobou potvrdil, že ste obaja tí, za ktorých sa vydávate.",
+        "Jedným z úskalí skutočne anonymných komunikačných systémov, ako je Vexl, je to, že si niekedy musíš overiť totožnosť osoby, s ktorou komunikuješ! V takýchto prípadoch je najlepšie použiť zabezpečený sekundárny komunikačný kanál, aby si si s druhou osobou potvrdil, že ste obaja tí, za ktorých sa vydávate.",
       "howCanIEnsure":
         "Ako sa môžem uistiť, že moja komunikácia a obchody sú súkromné a šifrované?",
       "vexlIsOpensource":
-        "Vexl má otvorený zdrojový kod - ktokoľvek v ňom môže hľadať zadné vrátka alebo škodlivé úmysly. Môžeš sa tiež pozrieť na správu z nezávislého bezpečnostného auditu.",
-      "howCanYouEnsure": "Ako môžete zaistiť ochranu mojich údajov?",
+        "Vexl má voľne dostupný zdrojový kod, je tzv. open source - ktokoľvek v ňom môže hľadať zadné vrátka, škodlivé úmysly. Môžeš sa tiež pozrieť na správu z nezávislého bezpečnostného auditu.",
+      "howCanYouEnsure": "Ako si môžem byť istý, že moje údaje sú chránené?",
       "vexlIsDesigned":
-        "Vexl je navrhnutý tak, aby nikto nezhromažďoval ani neukládal žiadne citlivé informácie. K správam a ďalšiemu obsahu nemáme my ani iné tretie strany prístup, pretože sú vždy šifrované end-to-end. Naše podmienky poskytovania služieb a zásady ochrany osobných údajov sú k dispozícii nižšie.",
+        "Vexl je navrhnutý tak, aby nikdy nezhromažďoval ani neukladal žiadne citlivé informácie. K správam a ďalšiemu obsahu nemáme my, ani iné tretie strany prístup, pretože sú vždy end-to-end šifrované. Naše podmienky poskytovania služieb a zásady ochrany osobných údajov sú k dispozícii nižšie.",
       "howDoIContactVexl": "Ako môžem kontaktovať Vexl ?",
       "youCanAlwaysReachOutToUs":
         "Vždy sa na nás môžeš obrátiť prostredníctvom e-mailu: support@vexl.it. Alebo sa s nami môžeš stretnúť počas svojho budúceho P2P obchodu! 😻"
@@ -375,9 +377,9 @@ const otherSk: typeof en =
         "pleaseSelectLocationFirst": "Najskôr si vyber miesto"
       },
       "premiumOrDiscount": {
-        "premiumOrDiscount": "Premium alebo zľava",
+        "premiumOrDiscount": "Prémium alebo zľava",
         "youBuyForTheActualMarketPrice":
-          "Kupuješ za skutočnú trhovú cenu. Pohni s posuvníkom, aby si nakúpil rýchlejšie alebo lacnejšie.",
+          "Kupuješ za trhovú cenu. Pohni s posuvníkom, aby si nakúpil rýchlejšie alebo lacnejšie.",
         "theOptimalPositionForMostPeople":
           "Optimálna pozícia pre väčšinu ľudí. Nakupuješ o niečo rýchlejšie, ale za trochu vyššiu cenu.",
         "youBuyReallyFast":
@@ -389,25 +391,25 @@ const otherSk: typeof en =
         "buyFaster": "Nakupuješ rýchlejšie",
         "buyCheaply": "Nakupuješ lacno",
         "youSellForTheActualMarketPrice":
-          "Predávaš za skutočnú trhovú cenu. Pohni s posuvníkom, aby si predával rýchlejšie alebo zarobil viac.",
+          "Predácaš za trhovú cenu. Pohni s posuvníkom, aby si predal rýchlejšie alebo zarobil viac.",
         "youEarnBitMore":
-          "Zarábaš o niečo viac, ale môže to trvať o niečo dlhšie.",
+          "Zarobíš o niečo viac, ale môže to trvať o niečo dlhšie.",
         "youWantToEarnFortune":
           "Chceš zarobiť veľa, ale môže trvať roky, kým nájdeš kupcu.",
         "youSellSlightlyFaster":
           "Predávaš o niečo rýchlejšie, ale trochu pod trhovou cenou",
         "youSellMuchFaster":
           "Predávaš oveľa rýchlejšie, ale hlboko pod trhovou cenou",
-        "youBuyBtcFor": "Kupujete BTC za",
-        "youSellBtcFor": "Predávate BTC za",
-        "marketPrice": "trhovú cenu",
-        "sellFaster": "Predávaš rýchlejšie",
-        "earnMore": "Zarobíš viac",
-        "premiumOrDiscountExplained": "Vysvetlenie prémia a zľavy",
+        "youBuyBtcFor": "Nakupuješ BTC za",
+        "youSellBtcFor": "Predávaš BTC za",
+        "marketPrice": "trhová cena",
+        "sellFaster": "Predať rýchlejšie",
+        "earnMore": "Zarobiť viac",
+        "premiumOrDiscountExplained": "Vysvetlenie prémie a zľavy",
         "influenceImpactOfYourSellOffer":
-          "Ovplyvni dosah svojej ponuky. Predaj rýchlejšie pridaním zľavy alebo zarob viac pridaním prémia k trhovej cene bitcoinu.",
+          "Ovplyvni dosah tvojej ponuky. Predaj rýchlejšie pridaním zľavy alebo zarob viac pridaním prémia k trhovej cene Bitcoinu.",
         "influenceImpactOfYourBuyOffer":
-          "Ovplyvni dosah svojej ponuky. Nakupuj rýchlejšie pridaním zľavy alebo nakupuj viac pridaním prémia k trhovej cene bitcoinu.",
+          "Ovplyvni dosah tvojej ponuky. Nakúp lacnejšie pridaním zľavy alebo kúp rýchlejšie pridaním prémia k trhovej cene Bitcoinu.",
         "playWithItAndSee":
           "Pohni posuvníkom a zisti, ako to ovplyvní záujem ostatných.",
         "plus": "+",
@@ -415,44 +417,44 @@ const otherSk: typeof en =
         "youEarnSoMuchMore": "Zarobíš omnoho viac, ale môže to chvíľu trvať."
       },
       "buyCheaperByUsingDiscount":
-        "Nakúp lacnejšie použitím zľavy alebo nakúp rýchlejšie pridaním prémia k trhovej cene bitcoinu",
+        "Nakúp lacnejšie použitím zľavy alebo nakúp rýchlejšie pridaním prémia k trhovej cene Bitcoinu",
       "sellFasterWithDiscount":
-        "Predávaj rýchlejšie pomocou zľavy alebo zarob viac pridaním prémia k trhovej cene bitcoinu.",
+        "Predávaj rýchlejšie pomocou zľavy alebo zarob viac pridaním prémia k trhovej cene Bitcoinu.",
       "location": {
         "location": "Lokalita",
         "meetingInPerson":
-          "Osobné stretnutie je bezpečnejšie. Na čo si dať pozor pri online obchodoch? ",
+          "Osobné stretnutie je bezpečnejšie. Na čo si dať pozor pri online obchode? ",
         "checkItOut": "Pozri sa na to",
-        "addCityOrDistrict": "Pridať mesto alebo okres",
-        "whatToWatchOutForOnline": "Na čo si dať pozor online?",
+        "addCityOrDistrict": "Pridať mesto alebo oblasť",
+        "whatToWatchOutForOnline": "Na čo si dať pozor pri online obchodovaní?",
         "moneySentByRandomPerson":
-          "Peniaze poslané náhodnou osobou môžu mať kriminálny pôvod a dajú sa vystopovať.",
-        "neverSendCrypto": "Nikdy neposielajte bitcoin pred prijatím platby.",
+          "Peniaze obdržané od náhodnej osoby môžu mať kriminálny pôvod a byť vystopovateľné.",
+        "neverSendCrypto": "Nikdy neposielaj Bitcoin pred prijatím platby.",
         "alwaysVerifyTheName":
           "Vždy si over meno majiteľa účtu, od ktorého si platbu prijal, či sedí s deklarovanou identitou protistrany.",
         "forwardTheAddress":
-          "Adresu preposielaj bezpečným spôsobom a nezabudnite ju overiť iným bezpečným kanálom."
+          "Adresu preposielaj bezpečným spôsobom a nezabudni si ju overiť iným bezpečným kanálom."
       },
       "inPerson": "Osobne",
       "online": "Online",
       "paymentMethod": {
-        "paymentMethod": "Spôsob platby",
+        "paymentMethod": "Platobná metóda",
         "cash": "Hotovosť",
         "bank": "Banka",
-        "revolut": "Online platby"
+        "revolut": "Online platba"
       },
       "network": {
         "network": "Sieť",
         "lightning": "Lightning",
         "theBestOption":
-          "Najlepšia možnosť pre malé sumy. Zvyčajne super rýchla.",
+          "Najlepšia možnosť pre nižšie čiastky. Zvyčajne super rýchla.",
         "onChain": "On chain",
-        "theBestFor": "Lepšia pre pomerne veľké sumy. Môže to trvať dlhšie."
+        "theBestFor": "Lepšia pre pomerne veľké sumy. Môže trvať dlhšie."
       },
       "description": {
         "description": "Popis",
         "writeWhyPeopleShouldTake":
-          "Napíšte, prečo by ľudia mali prijať vašu ponuku."
+          "Napíš, prečo by ľudia mali prijať tvoju ponuku."
       },
       "friendLevel": {
         "friendLevel": "Úroveň priateľov",
@@ -464,11 +466,11 @@ const otherSk: typeof en =
       "publishOffer": "Zverejniť ponuku",
       "errorCreatingOffer": "Chyba pri vytváraní ponuky",
       "errorSearchingForAvailableLocation":
-        "Chyba pri vyhľadávaní dostupných miest",
+        "Chyba pri vyhľadávaní dostupných lokalít",
       "offerEncryption": {
-        "encryptingYourOffer": "Šifrovanie ponuky ...",
+        "encryptingYourOffer": "Šifrovanie tvojej ponuky ...",
         "dontShutDownTheApp":
-          "Počas šifrovania nevypínajte aplikáciu. Môže to trvať niekoľko minút.",
+          "Nevypínaj prosím aplikáciu počas šifrovania tvojej ponuky. Môže to trvať niekoľko minút.",
         "forVexlers": "pre {{count}} vexlákov",
         "doneOfferPoster": "Hotovo! Ponuka odoslaná.",
         "yourFriendsAndFriendsOfFriends":
@@ -479,26 +481,26 @@ const otherSk: typeof en =
       "noVexlersFoundForYourOffer":
         "Pre tvoju ponuku neboli nájdení žiadni vexláci",
       "errorLocationNotFilled": "Vyplň prosím lokalitu.",
-      "errorDescriptionNotFilled": "Vyplň prosím popis nabídky.",
+      "errorDescriptionNotFilled": "Vyplň prosím popis ponuky.",
       "selectCurrency": "Výber meny",
       "currencyYouWouldLikeToUse": "Mena, ktorú chceš použiť pri obchodovaní.",
       "spokenLanguages": {
-        "indicatePreferredLanguage": "Indicate preferred language",
-        "ENG": "English",
-        "DEU": "German",
-        "CZE": "Czech",
-        "SVK": "Slovak",
-        "PRT": "Portuguese",
-        "FRA": "French",
-        "ITA": "Italian",
-        "ESP": "Spanish",
-        "language": "Language",
-        "preferredLanguages": "Preferred languages"
+        "indicatePreferredLanguage": "Zadaj preferovaný jazyk",
+        "ENG": "Anglicky",
+        "DEU": "Nemecky",
+        "CZE": "Česky",
+        "SVK": "Slovensky",
+        "PRT": "Protugalsky",
+        "FRA": "Francúzsky",
+        "ITA": "Taliansky",
+        "ESP": "Španielsky",
+        "language": "Jazyk",
+        "preferredLanguages": "Preferovaný jazyk"
       }
     },
     "notifications": {
       "permissionsNotGranted": {
-        "title": "Neboli povolené notifikace.",
+        "title": "Notifikáce neboli povolené.",
         "message": "Môžeš ich povoliť v nastaveniach.",
         "openSettings": "Otvoriť nastavenia"
       },
@@ -513,7 +515,7 @@ const otherSk: typeof en =
       },
       "APPROVE_REVEAL": {
         "title": "Identita odhalená!",
-        "body": "Tvoja žiadosť o odhalenie identity bola schválená."
+        "body": "Tvoja žiadosť na odhalenie identity bola schválená."
       },
       "DISAPPROVE_REVEAL": {
         "title": "Žiadosť zamietnutá!",
@@ -524,15 +526,15 @@ const otherSk: typeof en =
         "body": "Máš novú žiadosť."
       },
       "APPROVE_MESSAGING": {
-        "title": "Schválená žiadosť!",
+        "title": "Žiadosť schválená!",
         "body": "Tvoja žiadosť bola schválená."
       },
       "DISAPPROVE_MESSAGING": {
-        "title": "Zamietnutá žiadosť",
-        "body": "Tvoja žiadosť bola zamietnutá-"
+        "title": "Žiadosť zamietnutá!",
+        "body": "Tvoja žiadosť bola zamietnutá."
       },
       "DELETE_CHAT": {
-        "title": "Zmazaný chat",
+        "title": "Chat bol zmazaný",
         "body": "Jeden z tvojich chatov bol vymazaný."
       },
       "BLOCK_CHAT": {
@@ -542,7 +544,7 @@ const otherSk: typeof en =
       "INACTIVITY_REMINDER": {
         "title": "Dlho sme o tebe nepočuli!",
         "body":
-          "Od poslednej návštevy appky už ubehlo hodne času. Otvor Vexl, aby tvoje ponuky ostali aktívne!"
+          "Od poslednej návštevy aplikácie už ubehlo veľa času. Otvor Vexl, aby tvoje ponuky ostali aktívne!"
       },
       "preferences": {
         "marketing": {
@@ -556,19 +558,19 @@ const otherSk: typeof en =
         "inactivityWarnings": {
           "title": "Varovanie o neaktivite",
           "body":
-            "Dáme ti vedieť, keď by mali byť tvoje ponuky vymazané kvôli neaktivite."
+            "Dáme ti vedieť, keď by mali byť tvoje ponuky kvôli neaktivite vymazané."
         },
         "marketplace": {
           "title": "marketplace",
           "body": "marketplace"
         },
         "newOfferInMarketplace": {
-          "title": "newOfferInMarketplace",
-          "body": "newOfferInMarketplace"
+          "title": "Notifikácie o ponukách",
+          "body": "Dostávaj notifikácie o nových ponukách."
         },
         "newPhoneContacts": {
-          "title": "newPhoneContacts",
-          "body": "newPhoneContacts"
+          "title": "Notifikácie o nových kontaktoch",
+          "body": "Dostávaj notifikácie o nových kontaktoch v sieti."
         },
         "offer": {
           "title": "offer",
@@ -578,7 +580,7 @@ const otherSk: typeof en =
       },
       "REQUEST_CONTACT_REVEAL": {
         "title": "Žiadosť o telefónne číslo",
-        "body": "Bolo požiadané o výmenu telefónneho čísla."
+        "body": "Dostal si žiadosť o odhalenie telefónneho čísla"
       },
       "APPROVE_CONTACT_REVEAL": {
         "title": "Telefónne číslo odhalené!",
@@ -589,63 +591,62 @@ const otherSk: typeof en =
         "body": "Tvoja žiadosť o odhalenie telefónneho čísla bola zamietnutá."
       },
       "NEW_OFFERS_IN_MARKETPLACE": {
-        "title": "New offers in marketplace",
-        "body":
-          "There are new offers in marketplace. Open the app to view them."
+        "title": "Nové ponuky na marketplace",
+        "body": "Máš nové ponuky na marketplace"
       },
       "NEW_CONTACTS_ON_DEVICE": {
-        "title": "Your contacts are not synced all the way",
+        "title": "Nemáš synchronizované všetky svoje kontakty",
         "body":
-          "You have new contacts on device that you have not synced. Exapand your network and sync them all!"
+          "Na zariadení máš nové kontakty, ktoré si ešte nesynchronizoval s Vexlom. Rozšír si sieť ich synchronizáciou."
       }
     },
     "myOffers": {
       "addNewOffer": "Pridať novú ponuku",
-      "activeOffers": "{{count}} aktívne ponuky",
-      "filterOffers": "Filtrovanie ponúk",
+      "activeOffers": "{{count}} aktívnych ponúk",
+      "filterOffers": "Filtrovať ponuky",
       "errorWhileFetchingYourOffers": "Chyba pri načítavaní ponúk",
       "editOffer": "Upraviť ponuku",
       "myOffer": "Moja ponuka",
-      "offerAdded": "Pridané {{date}}",
+      "offerAdded": "Pridaná {{date}}",
       "sortedByNewest": "Zoradené podľa najnovších",
       "sortedByOldest": "Zoradené podľa najstarších",
-      "offerToSell": "Offer to sell",
-      "offerToBuy": "Offer to buy"
+      "offerToSell": "Predávaš",
+      "offerToBuy": "Nakupuješ"
     },
     "editOffer": {
       "editOffer": "Upraviť ponuku",
-      "active": "Aktívne",
-      "inactive": "Neaktívne",
+      "active": "Aktívna",
+      "inactive": "Neaktívna",
       "saveChanges": "Uložiť zmeny",
       "offerUnableToChangeOfferActivation":
-        "Nie je možné zmeniť aktiváciu ponuky",
-      "editingYourOffer": "Úprava ponuky ...",
+        "Nebolo možné zmeniť aktiváciu ponuky.",
+      "editingYourOffer": "Úprava tvojej ponuky ...",
       "pleaseWait": "Počkaj prosím",
       "offerEditSuccess": "Úprava prebehla úspešne",
       "youCanCheckYourOffer":
         "Svoju ponuku si môžeš skontrolovať v časti Moje ponuky",
-      "errorEditingOffer": "Chyba pri úprave ponuky",
-      "errorOfferNotFound": "Ponuka nebola nájdená!",
-      "deletingYourOffer": "Odstránenie tvojej ponuky ...",
+      "errorEditingOffer": "Chyba pri upravovaní ponuky",
+      "errorOfferNotFound": "Ponuka nenájdená!",
+      "deletingYourOffer": "Mazanie tvojej ponuky ...",
       "offerDeleted": "Ponuka odstránená",
-      "errorDeletingOffer": "Chyba pri odstraňovaní ponuky",
+      "errorDeletingOffer": "Chyba pri mazaní ponuky",
       "deleteOffer": "Zmazať ponuku?",
       "deleteOfferDescription":
-        "Naozaj chcete vymazať svoju ponuku? Túto akciu nie je možné vrátiť späť."
+        "Naozaj chceš vymazať svoju ponuku? Túto akciu nie je možné vrátiť späť."
     },
     "filterOffers": {
-      "filterResults": "Filtrovanie výsledkov",
-      "sorting": "Triedenie",
+      "filterResults": "Filtrovať výsledky",
+      "sorting": "Zoradenie",
       "lowestFeeFirst": "Najnižší poplatok",
       "highestFee": "Najvyšší poplatok",
       "newestOffer": "Najnovšia ponuka",
       "oldestOffer": "Najstaršia ponuka",
-      "lowestAmount": "Najnižšia suma",
-      "highestAmount": "Najvyššia suma",
-      "selectSortingMethod": "Vyberte spôsob triedenia",
-      "searchByText": "Search by text",
-      "noTextFilter": "No text filter selected",
-      "chooseCurrency": "Choose currency"
+      "lowestAmount": "Najnižšia hodnota",
+      "highestAmount": "Najvyššia hodnota",
+      "selectSortingMethod": "Vyber spôsob zoradenia",
+      "searchByText": "Vyhľadávanie podľa textu",
+      "noTextFilter": "Nebol zvolený žiaden textový filter",
+      "chooseCurrency": "Vyber menu"
     },
     "messages": {
       "yourOffer": "Tvoja ponuka",
@@ -654,9 +655,9 @@ const otherSk: typeof en =
       "isBuying": "kupuje",
       "isSelling": "predáva",
       "thisWillBeYourFirstInteraction":
-        "Toto bude tvoja prvá interakcia s touto ponukou.",
+        "Toto bude tvoja prvá interakcia s týmto používateľom v súvislosti s touto ponukou.",
       "wellLetYouKnowOnceUserAccepts":
-        "Žiadosť odoslaná. Dáme ti vedieť, keď druhá strana odpovie.",
+        "Žiadosť odoslaná. Dáme ti vedieť hneď, keď druhá strana odpovie.",
       "messagePreviews": {
         "incoming": {
           "MESSAGE": "{{them}}: {{message}}",
@@ -670,8 +671,8 @@ const otherSk: typeof en =
           "BLOCK_CHAT": "{{them}} ťa zablokoval.",
           "OFFER_DELETED": "{{them}} vymazal svoju ponuku.",
           "INBOX_DELETED": "{{them}} vymazal chat.",
-          "CANCEL_REQUEST_MESSAGING": "Zrušil žiadosť o správu",
-          "ONLY_IMAGE": "{{them}} sent an image",
+          "CANCEL_REQUEST_MESSAGING": "Žiadosť o komunikáciu zrušená",
+          "ONLY_IMAGE": "{{them}} poslal obrázok",
           "REQUEST_CONTACT_REVEAL":
             "{{them}} chce odhaliť tvoje telefónne číslo.",
           "APPROVE_CONTACT_REVEAL": "Telefónne číslo odhalené",
@@ -680,18 +681,18 @@ const otherSk: typeof en =
         },
         "outgoing": {
           "MESSAGE": "Ja: {{message}}",
-          "REQUEST_REVEAL": "Požiadali ste o odhalenie identity",
+          "REQUEST_REVEAL": "Požiadal si o odhalenie identity",
           "APPROVE_REVEAL": "Identita odhalená",
           "DISAPPROVE_REVEAL": "Odhalenie identity zamietnuté.",
           "REQUEST_MESSAGING": "Žiadosť odoslaná",
-          "APPROVE_MESSAGING": "Schválili ste zasielanie správ",
+          "APPROVE_MESSAGING": "Schválil si komunikáciu.",
           "DISAPPROVE_MESSAGING": "Odmietol si žiadosť o správu.",
           "DELETE_CHAT": "Opustil si chat",
-          "BLOCK_CHAT": "Používateľ bol zablokovaný",
+          "BLOCK_CHAT": "Užívateľ bol zabolkovaný",
           "OFFER_DELETED": "Vymazal si svoju ponuku.",
           "INBOX_DELETED": "Vymazal si chat.",
-          "CANCEL_REQUEST_MESSAGING": "Žiadosť o správu zrušená",
-          "ONLY_IMAGE": "You have sent an image",
+          "CANCEL_REQUEST_MESSAGING": "Zrušil si žiadosť o komunikáciu.",
+          "ONLY_IMAGE": "Poslal si obrázok",
           "REQUEST_CONTACT_REVEAL":
             "Tvoja žiadosť o telefónne číslo bola odoslaná.",
           "APPROVE_CONTACT_REVEAL": "Telefónne číslo bolo odhalené",
@@ -700,93 +701,93 @@ const otherSk: typeof en =
         }
       },
       "deleteChat": "Odstrániť chat",
-      "askToReveal": "Požiadajte o odhalenie identity",
-      "blockUser": "Zablokovať používateľa",
+      "askToReveal": "Požiadať o odhalenie identity",
+      "blockUser": "Zablokovať užívateľa",
       "sending": "odosielanie...",
       "unknownErrorWhileSending": "Neznáma chyba pri odosielaní správy",
-      "tapToResent": "Ťuknite na položku pre opätovné odoslanie.",
-      "deniedByMe": "Odmietli ste žiadosť o odoslanie správy s {{name}}.",
+      "tapToResent": "Odoslať znova.",
+      "deniedByMe": "Odmietol si žiadosť o komunikáciu s užívateľom {{name}}.",
       "deniedByThem": "{{name}} zamietol vašu žiadosť o správu.",
       "requestMessageWasDeleted": "Užívateľ neposlal žiadnu úvodnú správu.",
-      "typeSomething": "Zadajte niečo ...",
-      "offerDeleted": "Ponuka odstránená",
-      "leaveToo": "Odísť tiež?",
+      "typeSomething": "Napíš niečo ...",
+      "offerDeleted": "Ponuka vymazaná",
+      "leaveToo": "Tiež opustiť?",
       "leaveChat": "Opustiť chat?",
-      "deleteChatQuestion": "Vymazať chat?",
+      "deleteChatQuestion": "Zmazať chat?",
       "blockForewerQuestion": "Zablokovať navždy?",
-      "yesBlock": "Áno, zablokovať",
+      "yesBlock": "Áno, zablokovať.",
       "deleteChatExplanation1":
-        "Skončili ste s obchodovaním? Ukončenie chatu znamená, že vaša konverzácia bude natrvalo vymazaná.",
+        "Ukončil si obchod? Zatvorením chatu bude táto konverzácia nenávratne odstránená.",
       "deleteChatExplanation2":
         "Tento krok je nevratný. Chceš tento chat zmazať?",
       "blockChatExplanation1":
-        "Naozaj chceš užívateľa zablokovať? Tento krok nejde vrátiť späť. Dobre si to rozmysli.",
+        "Naozaj chceš tohto užívateľa zablokovať? Tento krok nejde vrátiť späť. Dobre si to rozmysli.",
       "blockChatExplanation2":
-        "Naozaj chceš užívateľa zablokovať? Tento krok nejde vrátiť späť. Dobre si to rozmysli.",
-      "chatEmpty": "Zatiaľ žiadne chaty",
-      "chatEmptyExplanation": "Začni konverzáciu odoslaním žiadosti na ponuku.",
-      "seeOffers": "Pozrite si ponuky",
+        "Naozaj chceš tohto užívateľa zablokovať? Tento krok nejde vrátiť späť. Dobre si to rozmysli.",
+      "chatEmpty": "Zatiaľ nemáš žiadne chaty",
+      "chatEmptyExplanation": "Začni konverzáciu reakciou na ponuku.",
+      "seeOffers": "Pozri si ponuky",
       "identityRevealRequestModal": {
-        "title": "Poslať žiadosť o odhalenie identity?",
+        "title": "Poslať žiadosť na odhalenie identity?",
         "text":
-          "Odoslaním žiadosti o odhalenie identity súhlasíš aj s odhalením tvojej identity.",
+          "Odoslaním žiadosti na odhalenie identity zárověn súhlasíš s odhalením tvojej identity.",
         "send": "Odoslať žiadosť"
       },
       "identityRevealRespondModal": {
-        "title": "Chceš odhaliť identitu?",
+        "title": "Chceš odhaliť svoju identitu?",
         "text": "Ak odhalíš svoju identitu, uvidíš aj identitu protistrany."
       },
       "identityAlreadyRequested":
-        "V konverzácii už bola odoslaná žiadosť o zistenie identity",
+        "V tejto konverzácii už bola odoslaná žiadosť na odhalenie identity",
       "identityRevealRequest": "Žiadosť o odhalenie identity",
-      "identityRevealed": "Identity revealed",
+      "identityRevealed": "Identita odhalená",
       "identitySend": {
-        "title": "Identity request sent",
-        "subtitle": "waiting for response"
+        "title": "Odhalenie identity odoslané",
+        "subtitle": "čakanie na odpoveď"
       },
-      "tapToReveal": "Klikni pre odhalenie identity alebo zamietnutie",
+      "tapToReveal": "Stlač pre odhalenie alebo zamietnutie",
       "letsRevealIdentities": "Poďme si odhaliť identity!",
       "reveal": "Odhaliť",
-      "themDeclined": "{{name}} odmietol",
-      "youDeclined": "Odmietli ste",
+      "themDeclined": "{{name}} zamietol",
+      "youDeclined": "Zamietol si",
       "reportOffer": "Nahlásiť ponuku",
-      "ended": " ukončené",
+      "ended": "Ukončené",
       "textMessageTypes": {
         "REQUEST_MESSAGING": "Reakcia na tvoju ponuku: {{message}}",
-        "CANCEL_REQUEST_MESSAGING": "This request was cancelled.",
-        "DISAPPROVE_MESSAGING": "This request was denied.",
+        "CANCEL_REQUEST_MESSAGING": "Táto požiadavka bola zrušená.",
+        "DISAPPROVE_MESSAGING": "Táto požiadavka bola zamietnutá.",
         "APPROVE_MESSAGING":
-          "Request approved, you can now discuss the details."
+          "Požiadavka schválená, teraz sa môžete pobaviť o detailoch."
       },
       "youHaveAlreadyTalked":
-        "S tímto uživatelem už jste si psali. Klepnutím zobrazíte historii.",
+        "S týmto užívateľom si si už v minulosti písal. Stlačením zobrazíš históriu.",
       "requestPendingActionBar": {
-        "top": "Chat is waiting for your approval",
-        "bottom": "Above is communication you had with the user so far"
+        "top": "Chat čaká na tvoje schválenie",
+        "bottom": "Vyššie je vaša predošlá komunikácia."
       },
       "showFullChatHistory":
-        "You have already interacted with this offer. Tap to see chat history.",
+        "S týmto používateľom si si už o tejto ponuke chatoval, stlač pre zobrazenie histórie chatu.",
       "unableToRespondOfferRemoved": {
-        "title": "Offer was removed",
+        "title": "Ponuka bola odstránená",
         "text":
-          "Unable to send response. Offer has been deleted. Do you want to leave the chat?"
+          "Nieje možné odoslať odpoveď. Ponuka bola odstránená. Chceš opustiť chat?"
       },
-      "offerWasReported": "Offer was reported",
+      "offerWasReported": "Ponuka bola nahlásená.",
       "unableToSelectImageToSend": {
-        "title": "Unable to select image",
+        "title": "Nebolo možné vybrať obrázok",
         "missingPermissions":
-          "Vexl needs permission to access your images. Enable them in the settings."
+          "Vexl potrebuje povolenie na prístup k tvojim obrázkom. Môžeš to zmeniť v nastaveniach."
       },
-      "imageToSend": "Image to send: ",
+      "imageToSend": "Odoslať obrázok:",
       "actionBanner": {
-        "requestPending": "Request pending",
-        "bottomText": "Previous communication is displayed above",
-        "buttonText": "Respond"
+        "requestPending": "Čakanie na odpoveď",
+        "bottomText": "Predošlá komunikácia je zobrazená vyššie",
+        "buttonText": "Odpovedať"
       },
       "cancelRequestDialog": {
         "title": "Si si istý?",
         "description":
-          "If you cancel the messaging request other side will be unable to accept it",
+          "Ak zrušíš žiadosť o komunikáciu, druhá strana ju nebude môcť prijať.",
         "yes": "Áno, zrušiť"
       },
       "contactRevealRespondModal": {
@@ -795,12 +796,12 @@ const otherSk: typeof en =
       },
       "contactRevealRequestModal": {
         "title": "Požiadaj o telefónne číslo",
-        "text": "Odoslaním žiadosti súhlasíš s odhalením svojho čísla."
+        "text": "Odoslaním žiadosti zároveň súhlasíš s odhalením svojho čísla."
       },
       "contactAlreadyRequested": "Žiadosť o telefónne číslo už bola odoslaná.",
-      "contactRevealRequest": "Žiadosť o odhalenie čísla",
+      "contactRevealRequest": "Žiadosť na odhalenie čísla",
       "contactRevealSent": {
-        "title": "Žiadosť o odhalenie čísla bola odoslaná",
+        "title": "Žiadosť na odhalenie čísla bola odoslaná",
         "subtitle": "Čakanie na odpoveď"
       },
       "letsExchangeContacts": "Vymeňme si kontakty!",
@@ -819,18 +820,18 @@ const otherSk: typeof en =
       "CONSTRUCTING_PRIVATE_PAYLOADS": "Konštruovanie súkromného nákladu",
       "CONSTRUCTING_PUBLIC_PAYLOAD":
         "Konštruovanie a šifrovanie verejného užitočného zaťaženia",
-      "SENDING_OFFER_TO_NETWORK": "Odoslanie ponuky",
+      "SENDING_OFFER_TO_NETWORK": "Odosielanie ponuky",
       "DONE": "Hotovo"
     },
     "commonFriends": {
       "commonFriends": "Spoloční priatelia",
       "commonFriendsCount": "{{commonFriendsCount}} spoločných priateľov",
-      "call": "Call"
+      "call": "Volať"
     },
     "reportIssue": {
-      "openInEmail": "Otvoriť v emaili.",
-      "somethingWentWrong": "Niečo sa pokazilo.",
-      "feelFreeToGetInTouch": "Kontaktujte našu podporu",
+      "openInEmail": "Otvoriť v emaili",
+      "somethingWentWrong": "Niečo sa pokazilo?",
+      "feelFreeToGetInTouch": "Kontaktuj našu podporu",
       "predefinedBody": "Ahoj! Chcel by som nahlásiť chybu..."
     },
     "AppLogs": {
@@ -839,17 +840,17 @@ const otherSk: typeof en =
       "export": "Exportovať logy",
       "errorExporting": "Došlo k chybe pri exportovaní logov.",
       "warning":
-        "Povolenie zaznamenávania aplikačných logov môže zapríčíniť spomalenie aplikácie a zaberať väčší priestor na disku.",
+        "Povolenie zaznamenávania aplikačných logov môže zapríčíniť spomalenie aplikácie a zaberať väčší úložný priestor.",
       "anonymizeAlert": {
         "title": "Would you like to anonymize logs?",
         "text":
           "We can try to strip private keys and personal information from logs before exporting them. Always make sure to verify by yourself."
       },
-      "noLogs": "No logs"
+      "noLogs": "Žiadne logy"
     },
     "MaintenanceScreen": {
-      "title": "Údržba marketplace",
-      "text": "Aplikácia Vexl je v údržbe. Vráťte sa, prosím, neskôr."
+      "title": "Údržba na marketplace",
+      "text": "Aplikácia Vexl je v údržbe. Vráť sa, prosím, neskôr."
     },
     "ForceUpdateScreen": {
       "title": "Je dostupná nová verzia aplikácie!",
@@ -858,14 +859,14 @@ const otherSk: typeof en =
     },
     "btcPriceChart": {
       "requestCouldNotBeProcessed":
-        "Request to obtain current BTC price failed"
+        "Požiadavka na získanie aktuálnej ceny BTC zlyhala."
     },
     "deepLinks": {
       "importContacts": {
         "alert": {
           "title": "Import kontaktov",
           "text":
-            "Chcete importovať {{contactName}} s číslom {{contactNumber}}?"
+            "Chceš importovať {{contactName}} s číslom {{contactNumber}}?"
         },
         "successAlert": {
           "title": "Kontakt pridaný"
@@ -893,36 +894,36 @@ const otherSk: typeof en =
       "createYourFirstOffer":
         "👋 Vytvor svoju prvú ponuku na nákup alebo predaj Bitcoinu.",
       "importNewlyAddedContacts":
-        "👋 Looks like you've got some new contacts. Want to import them now?",
-      "importNow": "Import now"
+        "👋 Vyzerá to, že máš nejaké nové kontakty. Chceš ich importovať?",
+      "importNow": "Importovať teraz"
     },
     "addContactDialog": {
       "addContact": "Přidat kontakt",
       "addThisPhoneNumber":
-        "Would you like to add this phone number to your Vexl contacts?",
-      "addContactName": "Add contact name",
-      "contactAdded": "Contact added.",
+        "Chceš pridať toto telefónne číslo medzi svoje Vexl kontakty?",
+      "addContactName": "Pridať meno kontaktu",
+      "contactAdded": "Kontakt pridaný",
       "youHaveAddedContact":
-        "You have added {{contactName}} to your Vexl contacts.",
+        "Pridal si si {{contactName}} do svojich Vexl kontaktov.",
       "contactAlreadyInContactList":
         "Kontakt už bol uložený do telefónneho zoznamu.",
       "wouldYouLikeToChangeTheName":
-        "Chceš pre toto číslo zmeniť meno na {{name}}?",
+        "Chceš pre toto číslo zmeniť meno z uloženého {{name}}?",
       "keepCurrent": "Ponechať",
       "contactUpdated": "Kontakt aktualizovaný",
       "youHaveSuccessfullyUpdatedContact":
         "Vexl kontakty boli úspešne aktualizované."
     },
-    "": "",
     "qrScanner": {
-      "title": "Scan other user's qrcode",
-      "invalidQrCodeScanned": "Invalid qrcode scanned",
-      "missingCameraPermissions": "Missing camera permissions",
-      "grantPermissions": "Grant permissions",
+      "title": "Naskenuj QR kód iného používateľa.",
+      "invalidQrCodeScanned": "Naskenovaný QR kód je chybný.",
+      "missingCameraPermissions": "Chýbajúce povolenia pre fotoaparát.",
+      "grantPermissions": "Získať povolenia",
       "grantPermissionsInSettings":
-        "Unable to ask for permissions. To use QR scanner open settings and allow Vexl to use camera.",
-      "openSettings": "Open settings"
-    }
+        "Nebolo možné získať povolenie. Pre naskenovanie QR kódu otvor nastavenia a povoľ Vexlu používanie fotoaparátu.",
+      "openSettings": "Otvoriť nastavenia"
+    },
+    "": ""
   }
 /* JSON ends */
 

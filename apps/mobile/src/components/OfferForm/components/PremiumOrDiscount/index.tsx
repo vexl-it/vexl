@@ -40,7 +40,7 @@ function PremiumOrDiscount({
   const [detailVisible, setDetailVisible] = useState<boolean>(false)
 
   const onSliderValueChange = (value: number[]): void => {
-    setFeeAmount(value[0])
+    setFeeAmount(value[0] ?? 0)
   }
 
   const onSwitchValueChange = (): void => {

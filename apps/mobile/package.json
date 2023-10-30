@@ -49,7 +49,7 @@
     "@vexl-next/rest-api": "workspace:*",
     "awesome-phonenumber": "^5.1.0",
     "babel-plugin-transform-inline-environment-variables": "^0.4.4",
-    "burnt": "^0.10.0",
+    "burnt": "^0.12.1",
     "country-data": "^0.0.31",
     "deep-equal": "^2.2.0",
     "expo": "^49.0.0",

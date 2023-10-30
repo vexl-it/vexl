@@ -8725,7 +8725,7 @@ __metadata:
     "@welldone-software/why-did-you-render": ^7.0.1
     awesome-phonenumber: ^5.1.0
     babel-plugin-transform-inline-environment-variables: ^0.4.4
-    burnt: ^0.10.0
+    burnt: ^0.12.1
     country-data: ^0.0.31
     deep-equal: ^2.2.0
     eslint: ^8.50.0
@@ -10295,16 +10295,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"burnt@npm:^0.10.0":
-  version: 0.10.0
-  resolution: "burnt@npm:0.10.0"
+"burnt@npm:^0.12.1":
+  version: 0.12.1
+  resolution: "burnt@npm:0.12.1"
   dependencies:
     sf-symbols-typescript: ^1.0.0
+    sonner: ^0.3.5
   peerDependencies:
     expo: "*"
     react: "*"
     react-native: "*"
-  checksum: b33a84b0a57be34cc37d18f50710d46fb72e8d8eb2c5d5ae687a22dad41a1c6a42a49d507a71065480b5286729c887e3ee281f47af1325321f63fdc15e3af913
+  checksum: 5aa27ffd871daf47237a973f43611031bbb7a00ae50b7469c875b2a487659e43440d616e71671cc433c1c15b83fe8c2563320d8b72700508b0d0149460d9a747
   languageName: node
   linkType: hard
 
@@ -24031,6 +24032,16 @@ __metadata:
     ip: ^2.0.0
     smart-buffer: ^4.2.0
   checksum: 259d9e3e8e1c9809a7f5c32238c3d4d2a36b39b83851d0f573bfde5f21c4b1288417ce1af06af1452569cd1eb0841169afd4998f0e04ba04656f6b7f0e46d748
+  languageName: node
+  linkType: hard
+
+"sonner@npm:^0.3.5":
+  version: 0.3.5
+  resolution: "sonner@npm:0.3.5"
+  peerDependencies:
+    react: ^18.0.0
+    react-dom: ^18.0.0
+  checksum: c0c564eddef03edb61d5a9ba4993d2a2d05a1e24e7ac9bdd4fa461e8b1fceeef69b99d4da0ffa23b3e8cbffdb660eb54327d583a9131aca34eb436a88a063691
   languageName: node
   linkType: hard
 

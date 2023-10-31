@@ -2,14 +2,18 @@
   "name": "@vexl-next/localizations",
   "packageManager": "yarn@3.3.1",
   "main": "./dist/index.js",
+  "module": "./dist/index.js",
   "version": "0.0.0",
   "types": "./dist/index.d.js",
+  "files": [
+    "dist"
+  ],
   "exports": {
     ".": "./dist/index.js"
   },
   "type": "module",
   "scripts": {
-    "build": "yarn tsc --project src --emitDeclarationOnly --declaration --declarationMap --sourceMap",
+    "build": "yarn tsc --project src --declaration --declarationMap --sourceMap",
     "clean": "rimraf dist tsconfig.tsbuildinfo utilsDist",
     "lint": "eslint --config src/.eslintrc.cjs src --ext .js,.jsx,.ts,.tsx",
     "typecheck": "tsc --project src/tsconfig.json --noEmit",
@@ -34,6 +38,6 @@
   "dependencies": {
     "@json2csv/plainjs": "^7.0.1",
     "googleapis": "^118.0.0",
-    "i18n-js": "^4.2.3"
+    "i18n-js": "4.2.0"
   }
 }

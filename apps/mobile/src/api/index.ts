@@ -1,26 +1,26 @@
-import {atom, useAtomValue} from 'jotai'
 import {
+  ENV_PRESETS,
+  PlatformName,
   chat,
   contact,
-  ENV_PRESETS,
-  type EnvPreset,
   location,
   offer,
-  PlatformName,
   user,
+  type EnvPreset,
 } from '@vexl-next/rest-api'
-import {Platform} from 'react-native'
-import {dummySession, sessionHolderAtom} from '../state/session'
 import {type UserSessionCredentials} from '@vexl-next/rest-api/dist/UserSessionCredentials.brand'
-import {type ContactPrivateApi} from '@vexl-next/rest-api/dist/services/contact'
-import {type OfferPrivateApi} from '@vexl-next/rest-api/dist/services/offer'
 import {type ChatPrivateApi} from '@vexl-next/rest-api/dist/services/chat'
+import {type ContactPrivateApi} from '@vexl-next/rest-api/dist/services/contact'
+import {type LocationPublicApi} from '@vexl-next/rest-api/dist/services/location'
+import {type OfferPrivateApi} from '@vexl-next/rest-api/dist/services/offer'
 import {
   type UserPrivateApi,
   type UserPublicApi,
 } from '@vexl-next/rest-api/dist/services/user'
+import {atom, useAtomValue} from 'jotai'
+import {Platform} from 'react-native'
+import {dummySession, sessionHolderAtom} from '../state/session'
 import {apiPreset, versionCode} from '../utils/environment'
-import {type LocationPublicApi} from '@vexl-next/rest-api/dist/services/location'
 // import {ServiceUrl} from '@vexl-next/rest-api/dist/ServiceUrl.brand'
 
 export const platform = PlatformName.parse(

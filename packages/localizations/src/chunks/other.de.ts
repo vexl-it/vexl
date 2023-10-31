@@ -266,8 +266,8 @@ const otherDe: typeof en =
       "isBuying": "kauft",
       "directFriend": "Direkter Freund",
       "friendOfFriend": "Freund eines Freundes",
-      "buy": "Kaufen",
-      "sell": "Verkaufen",
+      "buy": "Kauf",
+      "sell": "Verkauf",
       "filterOffers": "Angebote filtern",
       "numberOfCommon": "{{number}} Allgemein",
       "offerNotFound":
@@ -958,6 +958,7 @@ const otherDe: typeof en =
         "Unable to ask for permissions. To use QR scanner open settings and allow Vexl to use camera.",
       "openSettings": "Open settings"
     },
+    "": "",
     "feedback": {
       "objection": {
         "APP": "App",

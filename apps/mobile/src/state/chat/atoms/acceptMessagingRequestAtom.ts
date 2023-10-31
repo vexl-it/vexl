@@ -12,7 +12,7 @@ import addMessageToChat from '../utils/addMessageToChat'
 import createAccountDeletedMessage from '../utils/createAccountDeletedMessage'
 import createVexlbotInitialMessage from '../utils/createVexlbotInitialMessage'
 import {sessionDataOrDummyAtom} from '../../session'
-import addVexlBotInitialMessageToChat from '../utils/addVexlBotInitialMessageToChat'
+import prependMessageToChat from '../utils/prependMessageToChat'
 
 type AcceptMessagingRequestAtom = ActionAtomType<
   [
@@ -65,7 +65,7 @@ const acceptMessagingRequestAtom: AcceptMessagingRequestAtom = atom(
       TE.map((message) => {
         set(
           chatAtom,
-          addVexlBotInitialMessageToChat(
+          prependMessageToChat(
             createVexlbotInitialMessage({
               senderPublicKey: session.privateKey.publicKeyPemBase64,
             })

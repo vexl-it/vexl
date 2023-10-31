@@ -23,7 +23,6 @@ function FeedbackBannerContent({feedbackDoneAtom}: Props): JSX.Element {
     currentFeedbackPageAtom,
     feedbackFlowFinishedAtom,
     submitChatFeedbackAndHandleUIAtom,
-    submitOfferCreationFeedbackHandleUIAtom,
     submitTextCommentButtonDisabledAtom,
   } = useMolecule(feedbackMolecule)
   const currentPage = useAtomValue(currentFeedbackPageAtom)
@@ -31,9 +30,6 @@ function FeedbackBannerContent({feedbackDoneAtom}: Props): JSX.Element {
   const feedbackFlowFinished = useAtomValue(feedbackFlowFinishedAtom)
   const setFeedbackDone = useSetAtom(feedbackDoneAtom)
   const submitChatFeedback = useSetAtom(submitChatFeedbackAndHandleUIAtom)
-  const submitOfferCreationFeedback = useSetAtom(
-    submitOfferCreationFeedbackHandleUIAtom
-  )
   const submitTextCommentButtonDisabled = useAtomValue(
     submitTextCommentButtonDisabledAtom
   )
@@ -96,22 +92,22 @@ function FeedbackBannerContent({feedbackDoneAtom}: Props): JSX.Element {
           <></>
         )}
       </Stack>
-      {!feedbackFlowFinished && (
-        <Button
-          disabled={submitTextCommentButtonDisabled}
-          onPress={() => {
-            if (currentPage === 'OFFER_RATING')
-              void submitOfferCreationFeedback()
-            else void submitChatFeedback()
-          }}
-          variant={'secondary'}
-          text={
-            currentPage === 'TEXT_COMMENT' || currentPage === 'OFFER_RATING'
-              ? t('common.send')
-              : t('common.next')
-          }
-        />
-      )}
+      {!feedbackFlowFinished &&
+        currentPage !== 'CHAT_RATING' &&
+        currentPage !== 'OFFER_RATING' && (
+          <Button
+            disabled={submitTextCommentButtonDisabled}
+            onPress={() => {
+              void submitChatFeedback()
+            }}
+            variant={'secondary'}
+            text={
+              currentPage === 'TEXT_COMMENT'
+                ? t('common.send')
+                : t('common.next')
+            }
+          />
+        )}
     </Stack>
   )
 }

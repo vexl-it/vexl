@@ -1,6 +1,6 @@
 import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
 
-export default function addVexlBotInitialMessageToChat(
+export default function prependMessageToChat(
   message: ChatMessageWithState
 ): (chat: ChatWithMessages) => ChatWithMessages {
   return (chat) => ({

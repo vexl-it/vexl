@@ -3,6 +3,9 @@ import {
   type Feedback,
   generateFeedbackFormId,
   type ObjectionType,
+  objectionTypeNegativeOptions,
+  objectionTypePositiveOptions,
+  POSITIVE_STAR_RATING_THRESHOLD,
 } from '@vexl-next/domain/dist/general/feedback'
 import {atom, type SetStateAction, type WritableAtom} from 'jotai'
 import getValueFromSetStateActionOfAtom from '../../../utils/atomUtils/getValueFromSetStateActionOfAtom'
@@ -11,32 +14,34 @@ import {pipe} from 'fp-ts/function'
 import * as TE from 'fp-ts/TaskEither'
 import * as T from 'fp-ts/Task'
 import reportError from '../../../utils/reportError'
-import {chatsToFeedbacksStorageAtom} from '../../../state/feedback/atoms'
-import {chatMolecule} from '../../ChatDetailScreen/atoms'
 import {focusAtom} from 'jotai-optics'
 
-const dummyFeedback = {
-  formId: generateFeedbackFormId(),
-  stars: 0,
-  objections: [],
-  textComment: '',
+export function generateInitialOfferFeedback(): Feedback {
+  return {
+    type: 'OFFER_RATING',
+    formId: generateFeedbackFormId(),
+    stars: 0,
+    objections: [],
+    textComment: '',
+  }
 }
-export const dummyOfferFeedback: Feedback = {
-  type: 'OFFER_RATING',
-  ...dummyFeedback,
-}
-export const dummyChatFeedback: Feedback = {
-  type: 'CHAT_RATING',
-  ...dummyFeedback,
+
+export function generateInitialChatFeedback(): Feedback {
+  return {
+    type: 'CHAT_RATING',
+    formId: generateFeedbackFormId(),
+    stars: 0,
+    objections: [],
+    textComment: '',
+  }
 }
 
 export const FeedbackScope = createScope<
   WritableAtom<Feedback, [SetStateAction<Feedback>], void>
->(atom<Feedback>(dummyChatFeedback))
+>(atom<Feedback>(generateInitialChatFeedback()))
 
 export const feedbackMolecule = molecule((getMolecule, getScope) => {
   const feedbackAtom = getScope(FeedbackScope)
-  const {chatAtom} = getMolecule(chatMolecule)
 
   const starRatingAtom = focusAtom(feedbackAtom, (o) => o.prop('stars'))
   const selectedObjectionsAtom = focusAtom(feedbackAtom, (o) =>
@@ -49,7 +54,7 @@ export const feedbackMolecule = molecule((getMolecule, getScope) => {
   const submitTextCommentButtonDisabledAtom = atom((get) => {
     return (
       get(currentFeedbackPageAtom) === 'TEXT_COMMENT' &&
-      get(textCommentAtom) === ''
+      get(textCommentAtom).trim() === ''
     )
   })
 
@@ -94,23 +99,19 @@ export const feedbackMolecule = molecule((getMolecule, getScope) => {
     null,
     (get, set, isOfferCreationFeedback: boolean) => {
       const privateApi = get(privateApiAtom)
-      const formId = get(formIdAtom)
-      const currentPage = get(currentFeedbackPageAtom)
-      const starRating = get(starRatingAtom)
-      const objections = get(selectedObjectionsAtom)
-      const textComment = get(textCommentAtom)
+      const {formId, type, stars, objections, textComment} = get(feedbackAtom)
 
       return pipe(
         TE.Do,
         TE.chainW(() =>
           privateApi.user.submitFeedback({
             formId,
-            type: currentPage,
-            ...(starRating !== 0 && {stars: starRating}),
+            type,
+            ...(stars !== 0 && {stars}),
             ...(!isOfferCreationFeedback &&
               objections.length !== 0 && {objections: objections?.join(',')}),
             ...(!isOfferCreationFeedback &&
-              textComment !== '' && {textComment}),
+              textComment.trim() !== '' && {textComment}),
           })
         ),
         TE.match(
@@ -138,42 +139,36 @@ export const feedbackMolecule = molecule((getMolecule, getScope) => {
   })
 
   const submitChatFeedbackAndHandleUIAtom = atom(null, (get, set) => {
-    const currentPage = get(currentFeedbackPageAtom)
-    const formId = get(formIdAtom)
-    const starRating = get(starRatingAtom)
-    const objections = get(selectedObjectionsAtom)
-    const textComment = get(textCommentAtom)
-    const {chatsToFeedbacks} = get(chatsToFeedbacksStorageAtom)
-    const chat = get(chatAtom)
+    const {type, stars, objections} = get(feedbackAtom)
 
     return pipe(
       TE.Do,
       TE.map((r) => {
-        if (currentPage === 'TEXT_COMMENT') {
+        if (type === 'TEXT_COMMENT') {
           set(feedbackFlowFinishedAtom, true)
         }
-        const filteredChatsToFeedbacks = chatsToFeedbacks.filter(
-          (item) => item.feedback.formId !== formId
-        )
 
-        // wee need to set state first regardless of api call success/failure
-        // to not bother user with broken flow, error is still caught later
-        set(chatsToFeedbacksStorageAtom, {
-          chatsToFeedbacks: [
-            ...filteredChatsToFeedbacks,
-            {
-              chatId: chat.id,
-              feedback: {
-                formId,
-                stars: starRating,
-                type:
-                  currentPage === 'CHAT_RATING' ? 'OBJECTIONS' : 'TEXT_COMMENT',
-                objections,
-                textComment,
-              },
-            },
-          ],
-        })
+        if (type === 'CHAT_RATING') {
+          // we have to filter out previous objections if rating changed from positive -> negative and opposite
+          if (
+            (stars > POSITIVE_STAR_RATING_THRESHOLD &&
+              objections.some((objection) =>
+                objectionTypeNegativeOptions.includes(objection)
+              )) ||
+            (stars < POSITIVE_STAR_RATING_THRESHOLD &&
+              objections.some((objection) =>
+                objectionTypePositiveOptions.includes(objection)
+              ))
+          ) {
+            set(selectedObjectionsAtom, [])
+          }
+
+          set(currentFeedbackPageAtom, 'OBJECTIONS')
+        }
+
+        if (type === 'OBJECTIONS') {
+          set(currentFeedbackPageAtom, 'TEXT_COMMENT')
+        }
 
         return r
       }),

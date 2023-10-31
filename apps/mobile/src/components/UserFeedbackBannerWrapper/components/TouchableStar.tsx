@@ -1,5 +1,5 @@
 import {useMemo} from 'react'
-import {useAtom} from 'jotai'
+import {useAtom, useAtomValue, useSetAtom} from 'jotai'
 import SvgImage from '../../Image'
 import {TouchableOpacity} from 'react-native'
 import {getTokens} from 'tamagui'
@@ -12,7 +12,19 @@ interface Props {
 }
 
 function TouchableStar({starOrderNumber}: Props): JSX.Element {
-  const {createIsStarSelectedAtom} = useMolecule(feedbackMolecule)
+  const {
+    createIsStarSelectedAtom,
+    currentFeedbackPageAtom,
+    submitChatFeedbackAndHandleUIAtom,
+    submitOfferCreationFeedbackHandleUIAtom,
+  } = useMolecule(feedbackMolecule)
+  const currentPage = useAtomValue(currentFeedbackPageAtom)
+  const submitChatFeedbackAndHandleUI = useSetAtom(
+    submitChatFeedbackAndHandleUIAtom
+  )
+  const submitOfferCreationFeedbackHandleUI = useSetAtom(
+    submitOfferCreationFeedbackHandleUIAtom
+  )
   const [isSelected, select] = useAtom(
     useMemo(
       () => createIsStarSelectedAtom(starOrderNumber),
@@ -24,6 +36,11 @@ function TouchableStar({starOrderNumber}: Props): JSX.Element {
     <TouchableOpacity
       onPress={() => {
         select(!isSelected)
+        if (currentPage === 'OFFER_RATING') {
+          void submitOfferCreationFeedbackHandleUI()
+        } else {
+          void submitChatFeedbackAndHandleUI()
+        }
       }}
     >
       <SvgImage

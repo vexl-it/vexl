@@ -26,13 +26,4 @@ jobs:
         run: yarn
 
       - name: Build
-        run: yarn turbo:build
-
-      - name: Format
-        run: yarn turbo:format
-
-      - name: Lint
-        run: yarn turbo:lint
-
-      - name: Typecheck
-        run: yarn turbo:typecheck
+        run: yarn turbo:check-code

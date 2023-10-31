@@ -46,8 +46,9 @@ export function focusFeedbackForChatAtom(
 
 export const displayOfferCreationFeedbackAtom = atom<boolean>(false)
 
-export const feedbackDoneAtom = focusAtom(offerFeedbackDoneStorageAtom, (o) =>
-  o.prop('offerFeedbackDone')
+export const newOfferFeedbackDoneAtom = focusAtom(
+  offerFeedbackDoneStorageAtom,
+  (o) => o.prop('offerFeedbackDone')
 )
 
 export const deleteChatFeedbackEntryFromStorageByChatIdAtom = atom(

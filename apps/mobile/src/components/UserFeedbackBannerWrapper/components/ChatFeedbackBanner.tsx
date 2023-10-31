@@ -1,12 +1,14 @@
-import {atom, type PrimitiveAtom, useAtomValue} from 'jotai'
+import {type PrimitiveAtom, useAtomValue, useSetAtom} from 'jotai'
 import {ScopeProvider} from 'jotai-molecules'
-import {dummyChatFeedback, FeedbackScope} from '../atoms'
-import {focusFeedbackForChatAtom} from '../../../state/feedback/atoms'
+import {generateInitialChatFeedback, FeedbackScope} from '../atoms'
+import {
+  chatsToFeedbacksStorageAtom,
+  focusFeedbackForChatAtom,
+} from '../../../state/feedback/atoms'
 import {type Chat} from '@vexl-next/domain/dist/general/messaging'
 import FeedbackBanner from './FeedbackBanner'
 import {useMemo} from 'react'
 import hasNonNullableValueAtom from '../../../utils/atomUtils/hasNonNullableValueAtom'
-import {type Feedback} from '@vexl-next/domain/dist/general/feedback'
 
 interface Props {
   chatAtom: PrimitiveAtom<Chat>
@@ -19,19 +21,35 @@ function ChatFeedbackBanner({
 }: Props): JSX.Element | null {
   const feedbackDone = useAtomValue(feedbackDoneAtom)
   const chat = useAtomValue(chatAtom)
-  const nonNullFeedbackAtomExistsAtom = useMemo(
-    () => hasNonNullableValueAtom(focusFeedbackForChatAtom(chat.id)),
-    [chat.id]
+  const setChatsToFeedbacks = useSetAtom(chatsToFeedbacksStorageAtom)
+
+  const feedbackForChatExists = useAtomValue(
+    useMemo(
+      () => hasNonNullableValueAtom(focusFeedbackForChatAtom(chat.id)),
+      [chat.id]
+    )
   )
 
-  const nonNullFeedbackAtom = useAtomValue(nonNullFeedbackAtomExistsAtom)
-    ? focusFeedbackForChatAtom(chat.id)
-    : atom<Feedback>(dummyChatFeedback)
+  const focusedFeedbackAtom = useMemo(() => {
+    if (!feedbackForChatExists) {
+      setChatsToFeedbacks((prev) => ({
+        chatsToFeedbacks: [
+          ...prev.chatsToFeedbacks,
+          {
+            chatId: chat.id,
+            feedback: generateInitialChatFeedback(),
+          },
+        ],
+      }))
+    }
+
+    return focusFeedbackForChatAtom(chat.id)
+  }, [chat.id, feedbackForChatExists, setChatsToFeedbacks])
 
   if (feedbackDone) return null
 
   return (
-    <ScopeProvider scope={FeedbackScope} value={nonNullFeedbackAtom}>
+    <ScopeProvider scope={FeedbackScope} value={focusedFeedbackAtom}>
       <FeedbackBanner feedbackDoneAtom={feedbackDoneAtom} />
     </ScopeProvider>
   )

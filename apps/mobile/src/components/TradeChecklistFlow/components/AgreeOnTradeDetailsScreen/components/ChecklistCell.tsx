@@ -12,9 +12,14 @@ interface Props extends TouchableOpacityProps {
   sideNote?: string
 }
 
-function ChecklistCell({sideNote, subtitle, title}: Props): JSX.Element {
+function ChecklistCell({
+  sideNote,
+  subtitle,
+  title,
+  ...props
+}: Props): JSX.Element {
   return (
-    <TouchableOpacity>
+    <TouchableOpacity {...props}>
       <XStack
         ai={'center'}
         jc={'space-between'}

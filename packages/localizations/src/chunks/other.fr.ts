@@ -948,6 +948,7 @@ const otherFr: typeof en =
         "Unable to ask for permissions. To use QR scanner open settings and allow Vexl to use camera.",
       "openSettings": "Open settings"
     },
+    "": "",
     "feedback": {
       "objection": {
         "APP": "App",

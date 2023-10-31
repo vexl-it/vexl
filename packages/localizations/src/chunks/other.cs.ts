@@ -258,8 +258,8 @@ const otherCs: typeof en =
       "isBuying": "kupuje",
       "directFriend": "Přímý přítel",
       "friendOfFriend": "Přítel přítele",
-      "buy": "Koupit",
-      "sell": "Prodat",
+      "buy": "Nákup",
+      "sell": "Prodej",
       "filterOffers": "Filtrovat nabídky",
       "numberOfCommon": "{{number}} společných",
       "offerNotFound":
@@ -935,6 +935,7 @@ const otherCs: typeof en =
         "Povolení nebylo možné získat. Chceš-li naskenovat QR kód, otevři nastavení a povol Vexlu používání fotoaparát.",
       "openSettings": "Otevřít nastavení"
     },
+    "": "You have added {{contactName}} to your Vexl contacts.",
     "feedback": {
       "objection": {
         "APP": "App",

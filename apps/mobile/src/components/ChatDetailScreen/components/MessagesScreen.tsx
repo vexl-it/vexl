@@ -8,18 +8,32 @@ import MessagesList from './MessagesList'
 import QuickActionBanner from './QuickActionBanner'
 import ImageZoomOverlay from './ImageZoomOverlay'
 import StickyHeader from './StickyHeader'
+import {preferencesAtom} from '../../../utils/preferences'
 
 function MessagesScreen(): JSX.Element {
-  const {showModalAtom, canSendMessagesAtom} = useMolecule(chatMolecule)
+  const {showModalAtom, canSendMessagesAtom, identityRevealStatusAtom} =
+    useMolecule(chatMolecule)
   const [showModal, setShowModal] = useAtom(showModalAtom)
   const canSendMessages = useAtomValue(canSendMessagesAtom)
+  const identityRevealStatus = useAtomValue(identityRevealStatusAtom)
+  const preferences = useAtomValue(preferencesAtom)
 
   return (
     <>
       <ChatHeader
         mode={showModal ? 'photoTop' : 'photoLeft'}
         leftButton={showModal ? 'closeModal' : 'back'}
-        rightButton={'tradeChecklist'}
+        rightButton={
+          preferences.tradeChecklistEnabled
+            ? 'tradeChecklist'
+            : showModal
+            ? 'block'
+            : !canSendMessages
+            ? null
+            : identityRevealStatus === 'shared'
+            ? 'contactReveal'
+            : 'identityReveal'
+        }
         onPressMiddle={() => {
           setShowModal((v) => !v)
         }}

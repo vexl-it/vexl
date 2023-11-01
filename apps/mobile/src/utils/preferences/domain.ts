@@ -17,6 +17,7 @@ export const Preferences = z.object({
   notificationPreferences: NotificationPreferences,
   enableNewOffersNotificationDevMode: z.boolean().default(false),
   showFriendLevelBanner: z.boolean().default(true),
+  tradeChecklistEnabled: z.boolean().default(false),
 })
 
 export type Preferences = z.infer<typeof Preferences>

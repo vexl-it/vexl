@@ -14,6 +14,7 @@ import IdentityRevealMessageItem from './IdentityRevealMessageItem'
 import ContactRevealMessageItem from './ContactRevealMessageItem'
 import UserFeedbackBannerWrapper from '../../UserFeedbackBannerWrapper'
 import VexlbotMessageItem from './VexlbotMessageItem'
+import {preferencesAtom} from '../../../utils/preferences'
 
 function MessageItem({
   itemAtom,
@@ -25,6 +26,7 @@ function MessageItem({
     useMolecule(chatMolecule)
   const {t} = useTranslation()
   const {userName, image} = useAtomValue(otherSideDataAtom)
+  const preferences = useAtomValue(preferencesAtom)
 
   if (item.type === 'message') {
     if (
@@ -154,8 +156,10 @@ function MessageItem({
     }
 
     if (item.message.message.messageType === 'VEXLBOT_INITIAL_MESSAGE') {
-      return (
+      return preferences.tradeChecklistEnabled ? (
         <VexlbotMessageItem message={item.message.message} them={userName} />
+      ) : (
+        <></>
       )
     }
 

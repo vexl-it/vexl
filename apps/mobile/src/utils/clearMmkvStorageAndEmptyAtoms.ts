@@ -71,6 +71,7 @@ export default function clearMmkvStorageAndEmptyAtoms(): void {
     },
     enableNewOffersNotificationDevMode: false,
     showFriendLevelBanner: true,
+    tradeChecklistEnabled: false,
   })
 
   getDefaultStore().set(previousSearchesAtom, [])

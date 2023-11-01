@@ -14,15 +14,18 @@ import messagingStateAtom from './messagingStateAtom'
 import * as O from 'optics-ts'
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
 import createVexlbotInitialMessage from '../utils/createVexlbotInitialMessage'
+import {preferencesAtom} from '../../../utils/preferences'
 
 function createNewChat({
   inbox,
   initialMessage,
   offer,
+  tradeChecklistEnabled,
 }: {
   inbox: Inbox
   initialMessage: ChatMessageWithState
   offer: OneOfferInState
+  tradeChecklistEnabled: boolean
 }): ChatWithMessages {
   return {
     chat: {
@@ -38,12 +41,14 @@ function createNewChat({
       showVexlbotInitialMessage: true,
       showVexlbotNotifications: true,
     },
-    messages: [
-      createVexlbotInitialMessage({
-        senderPublicKey: inbox.privateKey.publicKeyPemBase64,
-      }),
-      initialMessage,
-    ],
+    messages: tradeChecklistEnabled
+      ? [
+          createVexlbotInitialMessage({
+            senderPublicKey: inbox.privateKey.publicKeyPemBase64,
+          }),
+          initialMessage,
+        ]
+      : [initialMessage],
   }
 }
 
@@ -75,6 +80,7 @@ const upsertChatForTheirOfferActionAtom = atom(
       offerInfo: offer.offerInfo,
     })
     const existingChat = get(existingChatAtom)
+    const preferences = get(preferencesAtom)
     if (existingChat) {
       set(existingChatAtom, (prev) => ({
         ...prev,
@@ -82,7 +88,12 @@ const upsertChatForTheirOfferActionAtom = atom(
       }))
       return existingChat.chat
     } else {
-      const newChat = createNewChat({inbox, initialMessage, offer})
+      const newChat = createNewChat({
+        inbox,
+        initialMessage,
+        offer,
+        tradeChecklistEnabled: preferences.tradeChecklistEnabled,
+      })
       set(messagingStateAtom, (old) =>
         O.set(
           focusPrependChatToInbox(

@@ -19,6 +19,7 @@ import {useReportOfferHandleUI} from '../../OfferDetailScreen/api'
 import tradeChecklistSvg from '../../../images/tradeChecklistSvg'
 import vexlbotNotificationsSvg from '../images/vexlbotNotificationsSvg'
 import {useNavigation} from '@react-navigation/native'
+import {preferencesAtom} from '../../../utils/preferences'
 
 function ChatInfoModal(): JSX.Element | null {
   const {
@@ -51,6 +52,7 @@ function ChatInfoModal(): JSX.Element | null {
   const [showVexlbotNotifications, setShowVexlbotNotifications] = useAtom(
     showVexlbotNotificationsForCurrentChatAtom
   )
+  const preferences = useAtomValue(preferencesAtom)
 
   if (!showModal) return null
 
@@ -93,34 +95,38 @@ function ChatInfoModal(): JSX.Element | null {
                     },
                   ]
                 : []),
-              {
-                icon: tradeChecklistSvg,
-                isNegative: false,
-                text: t('messages.tradeChecklist'),
-                iconFill: getTokens().color.greyOnBlack.val,
-                onPress: () => {
-                  setShowModal(false)
-                  navigation.navigate('TradeChecklistFlow', {
-                    screen: 'AgreeOnTradeDetails',
-                    params: {
-                      chatId: chat.id,
-                      inboxKey: chat.inbox.privateKey.publicKeyPemBase64,
+              ...(preferences.tradeChecklistEnabled
+                ? [
+                    {
+                      icon: tradeChecklistSvg,
+                      isNegative: false,
+                      text: t('messages.tradeChecklist'),
+                      iconFill: getTokens().color.greyOnBlack.val,
+                      onPress: () => {
+                        setShowModal(false)
+                        navigation.navigate('TradeChecklistFlow', {
+                          screen: 'AgreeOnTradeDetails',
+                          params: {
+                            chatId: chat.id,
+                            inboxKey: chat.inbox.privateKey.publicKeyPemBase64,
+                          },
+                        })
+                      },
                     },
-                  })
-                },
-              },
-              {
-                icon: vexlbotNotificationsSvg,
-                isNegative: false,
-                displaySwitch: true,
-                text: t('messages.vexlbotNotifications'),
-                iconFill: getTokens().color.greyOnBlack.val,
-                switchValue: showVexlbotNotifications,
-                onPress: () => {
-                  // I know this rerenders all buttons but maybe most "code clean" way?
-                  setShowVexlbotNotifications(!showVexlbotNotifications)
-                },
-              },
+                    {
+                      icon: vexlbotNotificationsSvg,
+                      isNegative: false,
+                      displaySwitch: true,
+                      text: t('messages.vexlbotNotifications'),
+                      iconFill: getTokens().color.greyOnBlack.val,
+                      switchValue: showVexlbotNotifications,
+                      onPress: () => {
+                        // I know this rerenders all buttons but maybe most "code clean" way?
+                        setShowVexlbotNotifications(!showVexlbotNotifications)
+                      },
+                    },
+                  ]
+                : []),
               {
                 icon: WarningSvg,
                 isNegative: false,

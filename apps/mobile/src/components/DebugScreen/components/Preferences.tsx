@@ -9,6 +9,7 @@ const preferencesToEdit = [
   'allowSendingImages',
   'enableNewOffersNotificationDevMode',
   'showFriendLevelBanner',
+  'tradeChecklistEnabled',
 ] as const
 
 function Preferences(): JSX.Element {

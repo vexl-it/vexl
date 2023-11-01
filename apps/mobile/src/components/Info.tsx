@@ -37,7 +37,7 @@ function Info({
     <Stack
       jc={'center'}
       p={'$4'}
-      bc={variant === 'pink' ? '$pinkAccent1' : '$yellowAccent3'}
+      bc={variant === 'pink' ? '$pinkAccent1' : '$yellowAccent2'}
       br={'$4'}
     >
       <XStack ai={'center'} justifyContent={'space-between'} mb={'$4'}>

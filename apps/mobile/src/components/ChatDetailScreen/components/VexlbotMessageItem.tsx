@@ -14,6 +14,7 @@ import {useState} from 'react'
 import {useMolecule} from 'jotai-molecules'
 import {chatMolecule} from '../atoms'
 import {showVexlbotInitialMessageForAllChatsAtom} from '../../../state/chat/atoms/showVexlbotInitialMessageForAllChatsAtom'
+import {useNavigation} from '@react-navigation/native'
 
 interface Props {
   message: ChatMessage
@@ -22,12 +23,17 @@ interface Props {
 
 function VexlbotMessageItem({message, them}: Props): JSX.Element | null {
   const {t} = useTranslation()
+  const navigation = useNavigation()
   const [dontShowSwitchValue, setDontShowSwitchValue] = useState<boolean>(false)
 
   const {
+    chatIdAtom,
+    publicKeyPemBase64Atom,
     showVexlbotNotificationsForCurrentChatAtom,
     showVexlbotInitialMessageForCurrentChatAtom,
   } = useMolecule(chatMolecule)
+  const chatId = useAtomValue(chatIdAtom)
+  const inboxKey = useAtomValue(publicKeyPemBase64Atom)
   const showVexlbotNotificationsForCurrentChat = useAtomValue(
     showVexlbotNotificationsForCurrentChatAtom
   )
@@ -93,7 +99,13 @@ function VexlbotMessageItem({message, them}: Props): JSX.Element | null {
             beforeIcon={tradeChecklistSvg}
             iconSize={24}
             iconFill={getTokens().color.darkBrown.val}
-            onPress={() => {}}
+            onPress={() => {
+              navigation.navigate('TradeChecklistFlow', {
+                screen: 'AgreeOnTradeDetails',
+                chatId,
+                inboxKey,
+              })
+            }}
             variant={'secondary'}
             size={'medium'}
             text={t('vexlbot.openTradeChecklist')}

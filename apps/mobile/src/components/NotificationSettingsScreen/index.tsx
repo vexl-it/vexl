@@ -12,7 +12,7 @@ const notificationPreferencesToShow = [
   'marketing',
   'chat',
   'inactivityWarnings',
-  'newPhoneContacts',
+  // 'newPhoneContacts',
   'newOfferInMarketplace',
 ] as const
 

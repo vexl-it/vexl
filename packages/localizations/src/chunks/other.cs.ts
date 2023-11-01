@@ -74,7 +74,8 @@ const otherCs: typeof en =
       "send": "Odeslat",
       "thanks": "Díky!",
       "vexl": "Vexl",
-      "dontShowMeThisAgain": "Don’t show me this again"
+      "dontShowMeThisAgain": "Don’t show me this again",
+      "addMore": "Přidat další"
     },
     "loginFlow": {
       "anonymityNotice": "Bez tvého svolení jej nikdo neuvidí. Ani my.",
@@ -951,33 +952,39 @@ const otherCs: typeof en =
     "vexlbot": {
       "bot": "bot",
       "initialWelcomeMessage":
-        "Welcome to the chat. Let’s agree on trade details with {{name}}. I’ll help you along the way.",
-      "openTradeChecklist": "Open Trade Checklist"
+        "Vítej v chatu. Dohodni se na podrobnostech obchodu s {{name}}. Rád ti při tom pomůžu.",
+      "openTradeChecklist": "Otevřít Trade Checklist"
     },
     "tradeChecklist": {
-      "agreeOnTradeDetails": "Agree on trade details",
+      "agreeOnTradeDetails": "Domluvit se na detailech",
       "thisDealIsFullyOnline":
-        "This deal is fully online. Be careful and consider risks. Meeting in person is always safer.",
-      "readMoreInFullArticle": "Read more in full article",
-      "tradeOnlyWithPeopleYouKnow": "Trade online only with people you know.",
-      "alwaysMoneyBeforeBtc": "Always money before BTC.",
-      "watchOutForSuspiciousBehaviour": "Watch out for suspicious behaviour.",
-      "notVisibleToAnyoneNotice":
-        "Not visible to anyone except chat participants",
-      "acknowledgeAndContinue": "Acknowledge and continue chatting",
-      "youCanPickWhatYouFill": "It’s optional. You can pick what you fill.",
+        "Tento obchod probíhá online. Buď opatrný a zvaž rizika. Osobní setkání je vždy bezpečnější.",
+      "readMoreInFullArticle": "Přečti si více v článku",
+      "tradeOnlyWithPeopleYouKnow":
+        "Obchoduj online pouze s lidmi, které znáš.",
+      "alwaysMoneyBeforeBtc": "Vždy peníze až pak BTC.",
+      "watchOutForSuspiciousBehaviour": "Dávej bacha na podezřelé chování.",
+      "notVisibleToAnyoneNotice": "Viditelné pouze účastníkům chatu.",
+      "acknowledgeAndContinue": "Potvrdit a pokračovat v chatu",
+      "youCanPickWhatYouFill": "Je to nepovinné. Můžeš si vybrat, co vyplníš.",
       "options": {
-        "DATE_AND_TIME": "Date and time",
-        "MEETING_LOCATION": "Meeting location",
-        "CALCULATE_AMOUNT": "Calculate amount",
-        "SET_NETWORK": "Set network",
-        "REVEAL_IDENTITY": "Reveal identity",
-        "REVEAL_PHONE_NUMBER": "Reveal phone number"
+        "DATE_AND_TIME": "Datum a čas",
+        "MEETING_LOCATION": "Místo setkání",
+        "CALCULATE_AMOUNT": "Vypočítat částku",
+        "SET_NETWORK": "Nastavit síť",
+        "REVEAL_IDENTITY": "Odhalit identitu",
+        "REVEAL_PHONE_NUMBER": "Odhalit telefonní číslo"
       },
-      "saveAndContinue": "Save and continue chatting",
-      "shareRecognitionSignInChat": "Or share the recognition sign in chat"
-    },
-    "": "You have added {{contactName}} to your Vexl contacts."
+      "saveAndContinue": "Uložit a pokračovat v chatu",
+      "shareRecognitionSignInChat": "Nebo nasdílej v chatu poznávací znamení",
+      "dateAndTime": {
+        "screenTitle": "Datum a čas",
+        "chooseAvailableDays": "Ideálně vyber 3 a více dostupných dnů.",
+        "addTimeOptionsLater":
+          "Časové možnosti pro jednotlivé dny přidáš později.",
+        "addYourTimeOptions": "Přidej tvé časové možnosti"
+      }
+    }
   }
 /* JSON ends */
 

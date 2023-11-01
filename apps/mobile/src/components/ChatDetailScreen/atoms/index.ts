@@ -103,6 +103,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
   const deleteChatAtom = deleteChatActionAtom(chatWithMessagesAtom)
 
   const nameAtom = selectAtom(chatAtom, (o) => randomName(o.id))
+  const chatIdAtom = focusAtom(chatAtom, (o) => o.prop('id'))
   const publicKeyPemBase64Atom = focusAtom(chatAtom, (o) =>
     o.prop('inbox').prop('privateKey').prop('publicKeyPemBase64')
   )
@@ -181,14 +182,11 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
           },
           () => {
             set(loadingOverlayDisplayedAtom, false)
+            if (!feedbackFinished) void set(giveFeedbackForDeletedChatAtom)
 
             return true
           }
-        ),
-        T.map((one) => {
-          if (!feedbackFinished) void set(giveFeedbackForDeletedChatAtom)
-          return one
-        })
+        )
       )()
     }
   )
@@ -758,5 +756,6 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     showVexlbotNotificationsForCurrentChatAtom,
     showVexlbotInitialMessageForCurrentChatAtom,
     publicKeyPemBase64Atom,
+    chatIdAtom,
   }
 })

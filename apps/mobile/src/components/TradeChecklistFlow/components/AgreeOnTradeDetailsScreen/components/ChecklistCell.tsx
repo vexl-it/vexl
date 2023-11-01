@@ -1,18 +1,19 @@
 import {TouchableOpacity, type TouchableOpacityProps} from 'react-native'
 import {getTokens, Stack, Text, XStack} from 'tamagui'
-import {type TradeChecklistItemStatus} from '../../../../../state/chat/domain'
 import StatusIndicator from './StatusIndicator'
 import Image from '../../../../Image'
 import chevronRightSvg from '../../../../../images/chevronRightSvg'
+import {type TradeChecklistItemStatus} from '../../../domain'
 
 interface Props extends TouchableOpacityProps {
-  itemStatus: TradeChecklistItemStatus
+  itemStatus?: TradeChecklistItemStatus
   title: string
   subtitle?: string
   sideNote?: string
 }
 
 function ChecklistCell({
+  itemStatus = 'unknown',
   sideNote,
   subtitle,
   title,
@@ -29,7 +30,7 @@ function ChecklistCell({
         br={'$4'}
       >
         <XStack ai={'center'} space={'$4'}>
-          <StatusIndicator />
+          <StatusIndicator itemStatus={itemStatus} />
           <Stack>
             <Text fos={16} ff={'$body500'} col={'$white'}>
               {title}

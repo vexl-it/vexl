@@ -19,9 +19,12 @@ import {useReportOfferHandleUI} from '../../OfferDetailScreen/api'
 import tradeChecklistSvg from '../../../images/tradeChecklistSvg'
 import vexlbotNotificationsSvg from '../images/vexlbotNotificationsSvg'
 import {preferencesAtom} from '../../../utils/preferences'
+import {useNavigation} from '@react-navigation/native'
 
 function ChatInfoModal(): JSX.Element | null {
   const {
+    chatIdAtom,
+    publicKeyPemBase64Atom,
     offerForChatAtom,
     theirOfferAndNotReportedAtom,
     showModalAtom,
@@ -35,6 +38,7 @@ function ChatInfoModal(): JSX.Element | null {
   const [showModal, setShowModal] = useAtom(showModalAtom)
   const {top} = useSafeAreaInsets()
   const {t} = useTranslation()
+  const navigation = useNavigation()
   const resetNavigationToMessagingScreen = useResetNavigationToMessagingScreen()
   const reportOffer = useReportOfferHandleUI()
 
@@ -48,6 +52,8 @@ function ChatInfoModal(): JSX.Element | null {
   const [showVexlbotNotifications, setShowVexlbotNotifications] = useAtom(
     showVexlbotNotificationsForCurrentChatAtom
   )
+  const chatId = useAtomValue(chatIdAtom)
+  const inboxKey = useAtomValue(publicKeyPemBase64Atom)
   const preferences = useAtomValue(preferencesAtom)
 
   if (!showModal) return null
@@ -100,6 +106,11 @@ function ChatInfoModal(): JSX.Element | null {
                       iconFill: getTokens().color.greyOnBlack.val,
                       onPress: () => {
                         setShowModal(false)
+                        navigation.navigate('TradeChecklistFlow', {
+                          screen: 'AgreeOnTradeDetails',
+                          chatId,
+                          inboxKey,
+                        })
                       },
                     },
                     {

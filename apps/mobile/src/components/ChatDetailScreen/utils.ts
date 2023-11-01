@@ -27,38 +27,45 @@ export type MessagesListItem =
 export function messagesToListData(
   messages: ChatMessageWithState[]
 ): MessagesListItem[] {
+  const result = [] as MessagesListItem[]
+
   let prevMessageTime: DateTime | null = null
 
-  return messages.map((message, i) => {
+  for (let i = messages.length - 1; i >= 0; i--) {
+    const message = messages[i]
+    if (!message) continue
     const messageTime = DateTime.fromMillis(message.message.time)
     if (
       prevMessageTime &&
       prevMessageTime.diff(messageTime, 'minutes').minutes > 10
     ) {
-      return {
+      result.push({
         type: 'time',
         time: prevMessageTime,
         key: `time-${prevMessageTime.toString()}`,
-      }
+      })
+      prevMessageTime = messageTime
     } else if (
       prevMessageTime &&
       prevMessageTime.diff(messageTime, 'minutes').minutes > 1
     ) {
-      return {
+      result.push({
         type: 'space',
         key: `space-${message.message.uuid}`,
-      }
+      })
     }
     prevMessageTime = messageTime
 
-    return {
+    result.push({
       type: 'message',
       time: messageTime,
       message,
       isLatest: i === messages.length - 1,
       key: `message-${message.message.uuid}`,
-    }
-  })
+    })
+  }
+
+  return result
 }
 
 export function chatTime(dateTime: DateTime): string {

@@ -58,14 +58,14 @@ export type InitPhoneNumberVerificationResponse = z.TypeOf<
 
 export const VerifyPhoneNumberRequest = z.object({
   id: VerificationId,
-  code: z.string().nonempty(),
+  code: z.string().min(1),
   // TODO branded type for keys
   userPublicKey: PublicKeyPemBase64,
 })
 export type VerifyPhoneNumberRequest = z.TypeOf<typeof VerifyPhoneNumberRequest>
 
 export const VerifyPhoneNumberResponse = z.object({
-  challenge: z.string().nonempty(),
+  challenge: z.string().min(1),
   phoneVerified: z.boolean(),
 })
 export type VerifyPhoneNumberResponse = z.TypeOf<
@@ -74,19 +74,19 @@ export type VerifyPhoneNumberResponse = z.TypeOf<
 
 export const VerifyChallengeRequest = z.object({
   userPublicKey: PublicKeyPemBase64,
-  signature: z.string().nonempty(),
+  signature: z.string().min(1),
 })
 export type VerifyChallengeRequest = z.TypeOf<typeof VerifyChallengeRequest>
 
 export const VerifyChallengeResponse = z.object({
-  hash: z.string().nonempty(),
-  signature: z.string().nonempty(),
+  hash: z.string().min(1),
+  signature: z.string().min(1),
   challengeVerified: z.boolean(),
 })
 export type VerifyChallengeResponse = z.TypeOf<typeof VerifyChallengeResponse>
 
 export const ExportDataResponse = z.object({
-  pdfFile: z.string().nonempty(),
+  pdfFile: z.string().min(1),
 })
 export type ExportDataResponse = z.TypeOf<typeof ExportDataResponse>
 
@@ -120,8 +120,8 @@ export type GetCryptocurrencyDetailsResponse = z.TypeOf<
 >
 
 export const SubmitFeedbackRequest = z.object({
-  formId: z.string().nonempty(),
-  type: z.string().nonempty(),
+  formId: z.string().min(1),
+  type: z.enum(['create', 'trade']),
   stars: z.number().optional(),
   objections: z.string().optional(),
   textComment: z.string().optional(),

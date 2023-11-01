@@ -106,7 +106,7 @@ export const feedbackMolecule = molecule((getMolecule, getScope) => {
         TE.chainW(() =>
           privateApi.user.submitFeedback({
             formId,
-            type,
+            type: type === 'OFFER_RATING' ? 'trade' : 'create',
             ...(stars !== 0 && {stars}),
             ...(!isOfferCreationFeedback &&
               objections.length !== 0 && {objections: objections?.join(',')}),

@@ -8,6 +8,7 @@ import {FlashList} from '@shopify/flash-list'
 import notEmpty from '../../../../../utils/notEmpty'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import {Text, YStack} from 'tamagui'
+import usePixelsFromBottomWhereTabsEnd from '../../../utils'
 
 const chatIdsAtom = selectAtom(messagingStateAtom, (inboxes): ChatListData[] =>
   inboxes
@@ -55,6 +56,7 @@ function renderItem({item}: {item: Atom<ChatListData>}): JSX.Element {
 function ChatsList(): JSX.Element | null {
   const {t} = useTranslation()
   const elementAtoms = useAtomValue(chatIdAtomsAtom)
+  const tabBarEndsAt = usePixelsFromBottomWhereTabsEnd()
 
   if (elementAtoms.length === 0) {
     return (
@@ -75,6 +77,7 @@ function ChatsList(): JSX.Element | null {
       data={elementAtoms}
       keyExtractor={atomKeyExtractor}
       renderItem={renderItem}
+      contentContainerStyle={{paddingBottom: tabBarEndsAt + 25}}
     />
   )
 }

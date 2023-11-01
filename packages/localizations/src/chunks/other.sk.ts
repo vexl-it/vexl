@@ -74,7 +74,8 @@ const otherSk: typeof en =
       "send": "Odoslať",
       "thanks": "Ďakujem!",
       "vexl": "Vexl",
-      "dontShowMeThisAgain": "Nabudúce už nezobrazovať"
+      "dontShowMeThisAgain": "Nabudúce už nezobrazovať",
+      "addMore": "Pridať ďalšie"
     },
     "loginFlow": {
       "anonymityNotice":
@@ -952,33 +953,41 @@ const otherSk: typeof en =
     "vexlbot": {
       "bot": "bot",
       "initialWelcomeMessage":
-        "Welcome to the chat. Let’s agree on trade details with {{name}}. I’ll help you along the way.",
-      "openTradeChecklist": "Open Trade Checklist"
+        "Vitaj v chate. Dohodni sa na podrobnostiach obchodu s {{name}}. Rád ti pri tom pomôžem.",
+      "openTradeChecklist": "Otvoriť Trade Checklist"
     },
     "tradeChecklist": {
-      "agreeOnTradeDetails": "Agree on trade details",
+      "agreeOnTradeDetails": "Dohodnúť sa na detailoch",
       "thisDealIsFullyOnline":
-        "This deal is fully online. Be careful and consider risks. Meeting in person is always safer.",
-      "readMoreInFullArticle": "Read more in full article",
-      "tradeOnlyWithPeopleYouKnow": "Trade online only with people you know.",
-      "alwaysMoneyBeforeBtc": "Always money before BTC.",
-      "watchOutForSuspiciousBehaviour": "Watch out for suspicious behaviour.",
-      "notVisibleToAnyoneNotice":
-        "Not visible to anyone except chat participants",
-      "acknowledgeAndContinue": "Acknowledge and continue chatting",
-      "youCanPickWhatYouFill": "It’s optional. You can pick what you fill.",
+        "Tento obchod prebieha online. Buď opatrný a zváž riziká. Osobné stretnutie je vždy bezpečnejšie.",
+      "readMoreInFullArticle": "Prečítaj si viac v článku",
+      "tradeOnlyWithPeopleYouKnow":
+        "Obchoduj online iba s ľuďmi, ktorých poznáš.",
+      "alwaysMoneyBeforeBtc": "Vždy peniaze až potom BTC.",
+      "watchOutForSuspiciousBehaviour":
+        "Dávaj si pozor na podozrivé správanie.",
+      "notVisibleToAnyoneNotice": "Viditeľné len pre účastníkov chatu.",
+      "acknowledgeAndContinue": "Potvrdiť a pokračovať v chate",
+      "youCanPickWhatYouFill": "Je to nepovinné. Môžeš si vybrať, čo vyplníš.",
       "options": {
-        "DATE_AND_TIME": "Date and time",
-        "MEETING_LOCATION": "Meeting location",
-        "CALCULATE_AMOUNT": "Calculate amount",
-        "SET_NETWORK": "Set network",
-        "REVEAL_IDENTITY": "Reveal identity",
-        "REVEAL_PHONE_NUMBER": "Reveal phone number"
+        "DATE_AND_TIME": "Dátum a čas",
+        "MEETING_LOCATION": "Miesto stretnutia",
+        "CALCULATE_AMOUNT": "Vypočítať sumu",
+        "SET_NETWORK": "Nastaviť sieť",
+        "REVEAL_IDENTITY": "Odhaliť identitu",
+        "REVEAL_PHONE_NUMBER": "Odhaliť telefónne číslo"
       },
-      "saveAndContinue": "Save and continue chatting",
-      "shareRecognitionSignInChat": "Or share the recognition sign in chat"
-    },
-    "": ""
+      "saveAndContinue": "Uložiť a pokračovať v chate",
+      "shareRecognitionSignInChat":
+        "Alebo nazdieľaj v chate poznávacie znamenie",
+      "dateAndTime": {
+        "screenTitle": "Dátum a čas",
+        "chooseAvailableDays": "Ideálne si vyber 3 a viac dostupných dní.",
+        "addTimeOptionsLater":
+          "Časové možnosti pre jednotlivé dni pridáš neskôr.",
+        "addYourTimeOptions": "Pridaj tvoje časové možnosti."
+      }
+    }
   }
 /* JSON ends */
 

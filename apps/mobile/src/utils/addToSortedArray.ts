@@ -16,7 +16,7 @@ export default function addToSortedArray<T>(
     if (index === -1) {
       array.push(item)
     } else {
-      array[index] = item
+      array.splice(index, 0, item)
     }
 
     return array

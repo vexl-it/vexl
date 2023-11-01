@@ -14,6 +14,7 @@ import {chatMolecule} from '../atoms'
 import binSvg from '../images/binSvg'
 import phoneSvg from '../images/phoneSvg'
 import OtherSideNamePhotoAndInfo from './OtherSideNamePhotoAndInfo'
+import {useNavigation} from '@react-navigation/native'
 
 type ButtonType =
   | 'back'
@@ -27,7 +28,10 @@ type ButtonType =
 
 function Button({type}: {type: ButtonType}): JSX.Element | null {
   const safeGoBack = useSafeGoBack()
+  const navigation = useNavigation()
   const {
+    chatIdAtom,
+    publicKeyPemBase64Atom,
     showModalAtom,
     deleteChatWithUiFeedbackAtom,
     blockChatWithUiFeedbackAtom,
@@ -37,6 +41,8 @@ function Button({type}: {type: ButtonType}): JSX.Element | null {
     revealContactWithUiFeedbackAtom,
     contactRevealStatusAtom,
   } = useMolecule(chatMolecule)
+  const chatId = useAtomValue(chatIdAtom)
+  const inboxKey = useAtomValue(publicKeyPemBase64Atom)
   const identityRevealStatus = useAtomValue(identityRevealStatusAtom)
   const contactRevealStatus = useAtomValue(contactRevealStatusAtom)
   const revealIdentity = useSetAtom(revealIdentityWithUiFeedbackAtom)
@@ -143,6 +149,11 @@ function Button({type}: {type: ButtonType}): JSX.Element | null {
         onPress={() => {
           Keyboard.dismiss()
           setModal(false)
+          navigation.navigate('TradeChecklistFlow', {
+            screen: 'AgreeOnTradeDetails',
+            chatId,
+            inboxKey,
+          })
         }}
         iconFill={getTokens().color.main.val}
         iconHeight={24}

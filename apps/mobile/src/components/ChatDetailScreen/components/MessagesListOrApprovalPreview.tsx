@@ -24,7 +24,7 @@ export default function MessagesListOrApprovalPreview(): JSX.Element {
       void fetchAndStoreMessagesForInbox({
         key: publicKeyPemBase64,
       })
-    }, [publicKeyPemBase64, fetchAndStoreMessagesForInbox])
+    }, [fetchAndStoreMessagesForInbox, publicKeyPemBase64])
   )
 
   const toRender =

@@ -19,6 +19,7 @@ import {
 import {type ChatId} from '@vexl-next/domain/dist/general/messaging'
 import {type KeyHolder} from '@vexl-next/cryptography'
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
+import {type ChatDataForTradeChecklist} from './state/tradeChecklist/domain'
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type RootStackParamsList = {
@@ -28,7 +29,8 @@ export type RootStackParamsList = {
 
   InsideTabs: NavigatorScreenParams<InsideTabParamsList>
 
-  TradeChecklistFlow: NavigatorScreenParams<TradeChecklistStackParamsList>
+  TradeChecklistFlow: NavigatorScreenParams<TradeChecklistStackParamsList> &
+    ChatDataForTradeChecklist
 
   CreateOffer: undefined
   EditOffer: {offerId: OfferId}
@@ -142,10 +144,9 @@ export type MarketplaceTabScreenProps<
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type TradeChecklistStackParamsList = {
-  AgreeOnTradeDetails: {
-    chatId: ChatId
-    inboxKey: PublicKeyPemBase64
-  }
+  AgreeOnTradeDetails: undefined
+  ChooseAvailableDays: undefined
+  AddTimeOptions: undefined
 }
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions

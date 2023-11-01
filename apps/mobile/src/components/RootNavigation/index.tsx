@@ -104,7 +104,7 @@ function RootNavigation(): JSX.Element {
             <Stack.Screen
               name={'TradeChecklistFlow'}
               options={{
-                animation: 'fade',
+                animation: 'slide_from_bottom',
                 presentation: 'transparentModal',
               }}
               component={TradeChecklistFlow}

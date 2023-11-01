@@ -75,7 +75,8 @@ const otherDe: typeof en =
       "send": "Senden",
       "thanks": "Danke!",
       "vexl": "Vexl",
-      "dontShowMeThisAgain": "Don’t show me this again"
+      "dontShowMeThisAgain": "Don’t show me this again",
+      "addMore": "Mehr hinzufügen"
     },
     "loginFlow": {
       "anonymityNotice":
@@ -975,33 +976,41 @@ const otherDe: typeof en =
     "vexlbot": {
       "bot": "bot",
       "initialWelcomeMessage":
-        "Welcome to the chat. Let’s agree on trade details with {{name}}. I’ll help you along the way.",
-      "openTradeChecklist": "Open Trade Checklist"
+        "Willkomme im Chat. Lass dich die Details des Handels mit {{name}} vereinbaren. Ich werde dir den Weg weisen.",
+      "openTradeChecklist": "Trade Checklist öffnen"
     },
     "tradeChecklist": {
-      "agreeOnTradeDetails": "Agree on trade details",
+      "agreeOnTradeDetails": "Einigung über Handelsdetails",
       "thisDealIsFullyOnline":
-        "This deal is fully online. Be careful and consider risks. Meeting in person is always safer.",
-      "readMoreInFullArticle": "Read more in full article",
-      "tradeOnlyWithPeopleYouKnow": "Trade online only with people you know.",
-      "alwaysMoneyBeforeBtc": "Always money before BTC.",
-      "watchOutForSuspiciousBehaviour": "Watch out for suspicious behaviour.",
+        "Der Handel findet vollständig online statt. Sei vorsichtig und bedenke Risiken. Ein persönliches Treffen ist immer sicherer.",
+      "readMoreInFullArticle": "Mehr im vollständigen Artikel",
+      "tradeOnlyWithPeopleYouKnow":
+        "Handel online nur mit Personen, die du kennst.",
+      "alwaysMoneyBeforeBtc": "Immer Geld vor BTC.",
+      "watchOutForSuspiciousBehaviour": "Achte auf verdächtiges Verhalten.",
       "notVisibleToAnyoneNotice":
-        "Not visible to anyone except chat participants",
-      "acknowledgeAndContinue": "Acknowledge and continue chatting",
-      "youCanPickWhatYouFill": "It’s optional. You can pick what you fill.",
+        "Nicht sichtbar für jemanden außer den Chat-Teilnehmern.",
+      "acknowledgeAndContinue": "Bestätigen und weiter chatten",
+      "youCanPickWhatYouFill":
+        "Es ist optional. Du kannst auswählen, was du ausfüllst.",
       "options": {
-        "DATE_AND_TIME": "Date and time",
-        "MEETING_LOCATION": "Meeting location",
-        "CALCULATE_AMOUNT": "Calculate amount",
-        "SET_NETWORK": "Set network",
-        "REVEAL_IDENTITY": "Reveal identity",
-        "REVEAL_PHONE_NUMBER": "Reveal phone number"
+        "DATE_AND_TIME": "Datum und Zeit",
+        "MEETING_LOCATION": "Treffpunkt",
+        "CALCULATE_AMOUNT": "Betrag berechnen",
+        "SET_NETWORK": "Netzwerk einrichten",
+        "REVEAL_IDENTITY": "Identität enthüllen",
+        "REVEAL_PHONE_NUMBER": "Telefonnummer anzeigen"
       },
-      "saveAndContinue": "Save and continue chatting",
-      "shareRecognitionSignInChat": "Or share the recognition sign in chat"
-    },
-    "": ""
+      "saveAndContinue": "Speichern und weiter chatten",
+      "shareRecognitionSignInChat": "Oder teile das Erkennungszeichen im Chat.",
+      "dateAndTime": {
+        "screenTitle": "Datum und Zeit",
+        "chooseAvailableDays": "Wähle idealerweise 3+ verfügbare Tage.",
+        "addTimeOptionsLater":
+          "Du wirdst später Zeitoptionen für jeden Tag hinzufügen.",
+        "addYourTimeOptions": "Füge deine Zeitoptionen hinzu."
+      }
+    }
   }
 /* JSON ends */
 

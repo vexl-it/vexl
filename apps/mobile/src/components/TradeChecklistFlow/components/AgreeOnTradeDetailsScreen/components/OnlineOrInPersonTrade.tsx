@@ -1,17 +1,20 @@
-import {getTokens, Stack, Text, XStack} from 'tamagui'
+import {Stack, Text} from 'tamagui'
 import Image from '../../../../Image'
 import anonymousAvatarHappyNoBackgroundSvg from '../../../../images/anonymousAvatarHappyNoBackgroundSvg'
 import Info from '../../../../Info'
 import TradeRule from './TradeRule'
 import ChecklistCell from './ChecklistCell'
-import eyeSvg from '../../../../images/eyeSvg'
-import Button from '../../../../Button'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
-import useSafeGoBack from '../../../../../utils/useSafeGoBack'
-import {useMolecule} from 'jotai-molecules'
-import {chatMolecule} from '../../../../ChatDetailScreen/atoms'
 import {useAtomValue} from 'jotai'
-import {type TradeChecklistItem} from '../../../../../state/chat/domain'
+import {useCallback} from 'react'
+import {type NavigationProp, useNavigation} from '@react-navigation/native'
+import {type TradeChecklistStackParamsList} from '../../../../../navigationTypes'
+import {type TradeChecklistItem} from '../../../domain'
+import openUrl from '../../../../../utils/openUrl'
+import {
+  mainTradeCheckListStateAtom,
+  offerForTradeChecklistAtom,
+} from '../../../atoms'
 
 const tradeChecklistItems: TradeChecklistItem[] = [
   'DATE_AND_TIME',
@@ -21,11 +24,28 @@ const tradeChecklistItems: TradeChecklistItem[] = [
   'REVEAL_IDENTITY',
 ]
 
+const VEXL_BLOG_URL =
+  'https://blog.vexl.it/how-to-do-peer-to-peer-trading-on-vexl-6745f3954ae9'
+
+function openVexlBlog(): void {
+  openUrl(VEXL_BLOG_URL)()
+}
+
 function OnlineOrInPersonTrade(): JSX.Element {
   const {t} = useTranslation()
-  const goBack = useSafeGoBack()
-  const {offerForChatAtom} = useMolecule(chatMolecule)
-  const offer = useAtomValue(offerForChatAtom)
+  const navigation: NavigationProp<TradeChecklistStackParamsList> =
+    useNavigation()
+  const offerForTradeChecklist = useAtomValue(offerForTradeChecklistAtom)
+  const mainTradeCheckListState = useAtomValue(mainTradeCheckListStateAtom)
+
+  const checklistCellOnPress = useCallback(
+    (item: TradeChecklistItem) => {
+      if (item === 'DATE_AND_TIME') {
+        navigation.navigate('ChooseAvailableDays')
+      }
+    },
+    [navigation]
+  )
 
   return (
     <Stack f={1} space={'$3'}>
@@ -39,13 +59,14 @@ function OnlineOrInPersonTrade(): JSX.Element {
       <Text textAlign={'center'} ff={'$heading'} fos={32}>
         {t('tradeChecklist.agreeOnTradeDetails')}
       </Text>
-      {offer?.offerInfo.publicPart.locationState === 'ONLINE' ? (
+      {offerForTradeChecklist?.offerInfo.publicPart.locationState ===
+      'ONLINE' ? (
         <>
           <Info
             actionButtonText={t('tradeChecklist.readMoreInFullArticle')}
             hideCloseButton
             text={t('tradeChecklist.thisDealIsFullyOnline')}
-            onActionPress={() => {}}
+            onActionPress={openVexlBlog}
             variant={'yellow'}
           />
           <Stack my={'$4'} gap={'$2'}>
@@ -78,8 +99,11 @@ function OnlineOrInPersonTrade(): JSX.Element {
             {tradeChecklistItems.map((item) => (
               <ChecklistCell
                 key={item}
-                itemStatus={'unknown'}
+                itemStatus={mainTradeCheckListState[item].status}
                 title={t(`tradeChecklist.options.${item}`)}
+                onPress={() => {
+                  checklistCellOnPress(item)
+                }}
                 subtitle={
                   item === 'REVEAL_IDENTITY'
                     ? t('tradeChecklist.shareRecognitionSignInChat')
@@ -90,23 +114,6 @@ function OnlineOrInPersonTrade(): JSX.Element {
           </Stack>
         </>
       )}
-      <XStack ai={'center'} jc={'center'}>
-        <Image stroke={getTokens().color.greyOnWhite.val} source={eyeSvg} />
-        <Text fos={14} ff={'$body400'} ml={'$2'} col={'$greyOnWhite'}>
-          {t('tradeChecklist.notVisibleToAnyoneNotice')}
-        </Text>
-      </XStack>
-      <Button
-        fullWidth
-        size={'medium'}
-        onPress={goBack}
-        variant={'secondary'}
-        text={
-          offer?.offerInfo.publicPart.locationState === 'ONLINE'
-            ? t('tradeChecklist.acknowledgeAndContinue')
-            : t('tradeChecklist.saveAndContinue')
-        }
-      />
     </Stack>
   )
 }

@@ -74,7 +74,8 @@ const otherPt: typeof en =
       "send": "Send",
       "thanks": "Thanks!",
       "vexl": "Vexl",
-      "dontShowMeThisAgain": "Don’t show me this again"
+      "dontShowMeThisAgain": "Don’t show me this again",
+      "addMore": "Add more"
     },
     "loginFlow": {
       "anonymityNotice": "Ninguém verá isto até que o autorize. Nem mesmo nós.",
@@ -981,9 +982,14 @@ const otherPt: typeof en =
         "REVEAL_PHONE_NUMBER": "Reveal phone number"
       },
       "saveAndContinue": "Save and continue chatting",
-      "shareRecognitionSignInChat": "Or share the recognition sign in chat"
-    },
-    "": ""
+      "shareRecognitionSignInChat": "Or share the recognition sign in chat",
+      "dateAndTime": {
+        "screenTitle": "Date and time",
+        "chooseAvailableDays": "Choose 3+ available days.",
+        "addTimeOptionsLater": "You’ll add time options for each day later.",
+        "addYourTimeOptions": "Add your time options"
+      }
+    }
   }
 /* JSON ends */
 

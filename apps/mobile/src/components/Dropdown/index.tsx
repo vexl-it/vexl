@@ -1,5 +1,5 @@
 import {useCallback, useMemo, useState} from 'react'
-import {TouchableOpacity, TouchableWithoutFeedback} from 'react-native'
+import {TouchableWithoutFeedback} from 'react-native'
 import {getTokens, Stack, styled, Text, XStack} from 'tamagui'
 import Image from '../Image'
 import chevronDownSvg from '../../images/chevronDownSvg'
@@ -65,7 +65,7 @@ function DropdownCell({
   size,
 }: DropdownCellProps): JSX.Element {
   return (
-    <TouchableOpacity onPress={onPress}>
+    <TouchableWithoutFeedback onPress={onPress}>
       <StyledRow isOpen={isOpen} isLast={isLast}>
         <Text
           ff={size === 'small' ? '$body' : '$body600'}
@@ -75,7 +75,7 @@ function DropdownCell({
           {title}
         </Text>
       </StyledRow>
-    </TouchableOpacity>
+    </TouchableWithoutFeedback>
   )
 }
 
@@ -140,7 +140,7 @@ function Dropdown<T>({
           <XStack>
             {activeRow && size === 'large' && (
               <Stack mr={'$2'}>
-                <TouchableOpacity
+                <TouchableWithoutFeedback
                   onPress={() => {
                     setActiveRowType(undefined)
                   }}
@@ -149,7 +149,7 @@ function Dropdown<T>({
                     stroke={tokens.color.main.val}
                     source={clearInputSvg}
                   />
-                </TouchableOpacity>
+                </TouchableWithoutFeedback>
               </Stack>
             )}
             <Animated.View style={animatedStyle}>

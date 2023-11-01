@@ -62,7 +62,7 @@ function MessageItem({
       return (
         <>
           <BigIconMessage
-            isLatest={item.isLatest}
+            isLatest={direction !== 'incoming' && item.isLatest}
             smallerText={t(
               `messages.messagePreviews.${direction}.DELETE_CHAT`,
               {

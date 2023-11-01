@@ -13,6 +13,8 @@ import binSvg from '../images/binSvg'
 import useResetNavigationToMessagingScreen from '../../../utils/useResetNavigationToMessagingScreen'
 import blockIconSvg from '../../../images/blockIconSvg'
 import {useNavigation} from '@react-navigation/native'
+import phoneSvg from '../images/phoneSvg'
+import identityIconSvg from '../../images/identityIconSvg'
 
 type ButtonType =
   | 'back'
@@ -20,6 +22,8 @@ type ButtonType =
   | 'deleteChat'
   | 'block'
   | 'tradeChecklist'
+  | 'identityReveal'
+  | 'contactReveal'
   | null
 
 function Button({type}: {type: ButtonType}): JSX.Element | null {
@@ -31,7 +35,15 @@ function Button({type}: {type: ButtonType}): JSX.Element | null {
     deleteChatWithUiFeedbackAtom,
     blockChatWithUiFeedbackAtom,
     forceShowHistoryAtom,
+    identityRevealStatusAtom,
+    revealIdentityWithUiFeedbackAtom,
+    revealContactWithUiFeedbackAtom,
+    contactRevealStatusAtom,
   } = useMolecule(chatMolecule)
+  const identityRevealStatus = useAtomValue(identityRevealStatusAtom)
+  const contactRevealStatus = useAtomValue(contactRevealStatusAtom)
+  const revealIdentity = useSetAtom(revealIdentityWithUiFeedbackAtom)
+  const revealContact = useSetAtom(revealContactWithUiFeedbackAtom)
   const setModal = useSetAtom(showModalAtom)
   const resetNavigationToMessagingScreen = useResetNavigationToMessagingScreen()
 
@@ -94,6 +106,33 @@ function Button({type}: {type: ButtonType}): JSX.Element | null {
           void deleteChat().then((success) => {
             if (success) resetNavigationToMessagingScreen()
           })
+        }}
+      />
+    )
+
+  if (type === 'identityReveal' && identityRevealStatus === 'notStarted')
+    return (
+      <IconButton
+        icon={identityIconSvg}
+        variant={'primary'}
+        onPress={() => {
+          void revealIdentity('REQUEST_REVEAL')
+        }}
+      />
+    )
+
+  if (
+    type === 'contactReveal' &&
+    identityRevealStatus === 'shared' &&
+    contactRevealStatus === 'notStarted'
+  )
+    return (
+      <IconButton
+        icon={phoneSvg}
+        iconFill={getTokens().color.main.val}
+        variant={'primary'}
+        onPress={() => {
+          void revealContact('REQUEST_REVEAL')
         }}
       />
     )

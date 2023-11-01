@@ -11,9 +11,9 @@
     "lint": "eslint src --ext .js,.jsx,.ts,.tsx",
     "typecheck": "tsc --noemit",
     "format": "prettier --check \"**/*.{mjs,ts,md,json}\"",
-    "eas-build-post-install": "yarn turbo:build",
-    "fresh-start-ios": "yarn install && yarn turbo:build && npx expo prebuild --clean -p ios && npx expo run:ios",
-    "fresh-start-android": "yarn install && yarn turbo:build && npx expo prebuild --clean -p android && npx expo run:android"
+    "eas-build-post-install": "yarn build",
+    "fresh-start-ios": "yarn install && yarn build && npx expo prebuild --clean -p ios && npx expo run:ios",
+    "fresh-start-android": "yarn install && yarn build && npx expo prebuild --clean -p android && npx expo run:android"
   },
   "dependencies": {
     "@bam.tech/react-native-image-resizer": "^3.0.5",

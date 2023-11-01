@@ -28,8 +28,8 @@ const INTERVALS = {
 
 const INTERVALS_DEBUG = {
   // 5 hours
-  checkAfterInactivity: 1000 * 60 * 60 * 5,
-  minimalNotificationInterval: 1000 * 60 * 60 * 12,
+  checkAfterInactivity: 0,
+  minimalNotificationInterval: 0,
 } as const
 
 function getIntervalValues(): typeof INTERVALS {
@@ -86,8 +86,10 @@ export default async function checkForNewOffers(): Promise<void> {
         unixMillisecondsNow() ||
       !store.get(userLoggedInAtom) ||
       !store.get(notificationPreferencesAtom).newOfferInMarketplace
-    )
+    ) {
+      console.debug('Checking for new offers skipped. Reason: first condition')
       return
+    }
 
     const previousOffersIds = store
       .get(createFilteredOffersAtom(store.get(offersFilterFromStorageAtom)))
@@ -99,7 +101,10 @@ export default async function checkForNewOffers(): Promise<void> {
       .map((one) => one.offerInfo.offerId)
 
     if (difference(updatedOffersIds, previousOffersIds).length > 0) {
+      console.debug('New offers found. Displaying notification')
       await displayNotification(t)
+    } else {
+      console.debug('No new offers found')
     }
   } catch (e) {
     reportError('error', 'Error while checking new offers in background', e)

@@ -8,6 +8,7 @@
   ],
   "scripts": {
     "build": "turbo build",
+    "turbo:build": "yarn build",
     "clean": "turbo clean && rm -rf ./node_modules/.cache",
     "format": "turbo format --continue -- --cache --cache-location='node_modules/.cache/.prettiercache'",
     "format:fix": "turbo format --continue -- --write --cache --cache-location='node_modules/.cache/.prettiercache'",

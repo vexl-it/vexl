@@ -6,6 +6,7 @@ import {PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {getDefaultStore} from 'jotai'
+import {showDebugNotificationIfEnabled} from '.'
 import {fetchAndStoreMessagesForInboxAtom} from '../../state/chat/atoms/fetchNewMessagesActionAtom'
 import {unreadChatsCountAtom} from '../../state/chat/atoms/unreadChatsCountAtom'
 import {updateAllOffersConnectionsActionAtom} from '../../state/connections/atom/offerToConnectionsAtom'
@@ -24,8 +25,12 @@ export async function processBackgroundMessage(
 ): Promise<void> {
   try {
     console.info('📳 Background notification received', remoteMessage)
-
     await showUINotificationFromRemoteMessage(remoteMessage)
+
+    void showDebugNotificationIfEnabled({
+      title: `Background notification received`,
+      body: `type: ${remoteMessage?.data?.type ?? '[empty]'}`,
+    })
 
     const data = remoteMessage.data
     if (!data) {
@@ -79,9 +84,17 @@ export async function processBackgroundMessage(
       console.info(
         '📳 Received notification about new content. Triggering check'
       )
+      void showDebugNotificationIfEnabled({
+        title: 'calling check for new coffers',
+        body: 'ok',
+      })
       void checkForNewOffers()
     }
   } catch (error) {
+    void showDebugNotificationIfEnabled({
+      title: 'Error while processing notification on background',
+      body: (error as Error).message ?? 'no message',
+    })
     reportError(
       'error',
       'Error while processing background notification',

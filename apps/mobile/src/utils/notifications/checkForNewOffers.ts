@@ -1,24 +1,29 @@
-import reportError from '../reportError'
-import {getDefaultStore} from 'jotai'
-import {userLoggedInAtom} from '../../state/session'
-import {notificationPreferencesAtom, preferencesAtom} from '../preferences'
-import * as E from 'fp-ts/Either'
-import {pipe} from 'fp-ts/function'
-import {createFilteredOffersAtom} from '../../state/marketplace/atom'
 import notifee from '@notifee/react-native'
-import {type TFunction, translationAtom} from '../localization/I18nProvider'
-import {getDefaultChannel} from './showUINotificationFromRemoteMessage'
-import {NEW_OFFERS_IN_MARKETPLACE} from './notificationTypes'
-import {offersFilterFromStorageAtom} from '../../state/marketplace/filterAtoms'
-import {triggerOffersRefreshAtom} from '../../state/marketplace'
-import {difference} from 'set-operations'
 import {
   UnixMilliseconds,
   UnixMilliseconds0,
   unixMillisecondsNow,
 } from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
+import * as E from 'fp-ts/Either'
+import {pipe} from 'fp-ts/function'
+import {getDefaultStore} from 'jotai'
+import {difference} from 'set-operations'
+import {showDebugNotificationIfEnabled} from '.'
+import {triggerOffersRefreshAtom} from '../../state/marketplace'
+import {createFilteredOffersAtom} from '../../state/marketplace/atom'
+import {offersFilterFromStorageAtom} from '../../state/marketplace/filterAtoms'
+import {
+  loadSession,
+  sessionHolderAtom,
+  userLoggedInAtom,
+} from '../../state/session'
 import {storage} from '../fpMmkv'
 import {getLastTimeAppWasRunning} from '../lastTimeAppWasRunning'
+import {translationAtom, type TFunction} from '../localization/I18nProvider'
+import {notificationPreferencesAtom, preferencesAtom} from '../preferences'
+import reportError from '../reportError'
+import {NEW_OFFERS_IN_MARKETPLACE} from './notificationTypes'
+import {getDefaultChannel} from './showUINotificationFromRemoteMessage'
 
 const LAST_NEW_OFFERS_NOTIFICATION_KEY = 'lastNewOffersNotification'
 const INTERVALS = {
@@ -81,13 +86,32 @@ export default async function checkForNewOffers(): Promise<void> {
     const store = getDefaultStore()
     const {t} = store.get(translationAtom)
     // check if user is logged in & preferences
-    if (
+
+    await loadSession()
+
+    const appWasInnactiveForLongTime =
       getLastTimeAppWasRunning() + getIntervalValues().checkAfterInactivity >
-        unixMillisecondsNow() ||
-      !store.get(userLoggedInAtom) ||
-      !store.get(notificationPreferencesAtom).newOfferInMarketplace
+      unixMillisecondsNow()
+    const userIsLoggedIn = store.get(userLoggedInAtom) // get logged in state is ready
+    const newOffersInMarketpacePreference = store.get(
+      notificationPreferencesAtom
+    ).newOfferInMarketplace
+
+    if (
+      appWasInnactiveForLongTime ||
+      !userIsLoggedIn ||
+      !newOffersInMarketpacePreference
     ) {
       console.debug('Checking for new offers skipped. Reason: first condition')
+      void showDebugNotificationIfEnabled({
+        title: 'Not showing new offers notification',
+        body: JSON.stringify({
+          session: store.get(sessionHolderAtom).state,
+          innactive: appWasInnactiveForLongTime,
+          loggedIn: userIsLoggedIn,
+          preference: newOffersInMarketpacePreference,
+        }),
+      })
       return
     }
 
@@ -101,12 +125,24 @@ export default async function checkForNewOffers(): Promise<void> {
       .map((one) => one.offerInfo.offerId)
 
     if (difference(updatedOffersIds, previousOffersIds).length > 0) {
+      void showDebugNotificationIfEnabled({
+        title: 'Showing first offer notification',
+        body: 'SHowing new offers notification',
+      })
       console.debug('New offers found. Displaying notification')
       await displayNotification(t)
     } else {
+      void showDebugNotificationIfEnabled({
+        title: 'Not showing new offers notification',
+        body: 'No new offers',
+      })
       console.debug('No new offers found')
     }
   } catch (e) {
+    void showDebugNotificationIfEnabled({
+      title: 'Error while checking new offers in background',
+      body: `e ${(e as Error).message ?? '[no error message ]'}`,
+    })
     reportError('error', 'Error while checking new offers in background', e)
   }
 }

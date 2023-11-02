@@ -21,7 +21,7 @@ function AnonymizationCaption({style, fontSize, text}: Props): JSX.Element {
         <Image source={eyeSvg} stroke={getTokens().color.greyOnWhite.val} />
       </Stack>
       <Stack fs={1}>
-        <Text col="$greyOnWhite" fos={fontSize ?? 14}>
+        <Text col="$greyOnWhite" ff={'$body500'} fos={fontSize ?? 14}>
           {textToDisplay}
         </Text>
       </Stack>

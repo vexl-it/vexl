@@ -59,7 +59,7 @@ function AnonymizationAnimationScreen({
 
   return (
     <>
-      <HeaderProxy showBackButton={true} progressNumber={undefined} />
+      <HeaderProxy showBackButton={true} progressNumber={1} />
       <Stack f={1} bg="$backgroundBlack">
         {contentTransitions((style, showAnonymized) => {
           if (showAnonymized)

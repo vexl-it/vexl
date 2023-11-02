@@ -158,8 +158,7 @@ const otherEn =
     "postLoginFlow": {
       "contactsExplanation": {
         "title": "Now, let’s find your friends!",
-        "text":
-          "Vexl connects you anonymously with your friends and friends of friends. You can later manage your contacts and choose which ones you want to include in your social reach.",
+        "text": "You can manage your social network in the settings later.",
         "anonymizationCaption": "Nobody can see your contacts. Not even us."
       },
       "importContactsButton": "Import contacts",
@@ -929,7 +928,6 @@ const otherEn =
         "Unable to ask for permissions. To use QR scanner open settings and allow Vexl to use camera.",
       "openSettings": "Open settings"
     },
-    "": "",
     "feedback": {
       "objection": {
         "APP": "App",

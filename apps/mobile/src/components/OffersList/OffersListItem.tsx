@@ -14,6 +14,7 @@ import {type OneOfferInState} from '@vexl-next/domain/dist/general/offers'
 import Button from '../Button'
 import {newOfferFeedbackDoneAtom} from '../../state/feedback/atoms'
 import UserFeedbackBannerWrapper from '../UserFeedbackBannerWrapper'
+import {preferencesAtom} from '../../utils/preferences'
 
 interface Props {
   readonly isFirst: boolean
@@ -25,6 +26,7 @@ function OffersListItem({isFirst, offerAtom}: Props): JSX.Element {
   const navigation = useNavigation()
   const offer = useAtomValue(offerAtom)
   const rerequestLimitDays = useAtomValue(offerRerequestLimitDaysAtom)
+  const preferences = useAtomValue(preferencesAtom)
 
   const isMine = useMemo(
     () => !!offer.ownershipInfo?.adminId,
@@ -180,7 +182,7 @@ function OffersListItem({isFirst, offerAtom}: Props): JSX.Element {
         }
         offer={offer}
       />
-      {isMine && isFirst && (
+      {isMine && isFirst && preferences.offerFeedbackEnabled && (
         <UserFeedbackBannerWrapper
           feedbackDoneAtom={newOfferFeedbackDoneAtom}
         />

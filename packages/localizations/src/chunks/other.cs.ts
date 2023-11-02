@@ -71,8 +71,8 @@ const otherCs: typeof en =
       "me": "Já",
       "error": "Chyba",
       "chatNotFoundError": "Chat nebyl nalezen!",
-      "send": "Send",
-      "thanks": "Thanks!",
+      "send": "Odeslat",
+      "thanks": "Díky!",
       "vexl": "Vexl",
       "dontShowMeThisAgain": "Don’t show me this again"
     },
@@ -161,8 +161,7 @@ const otherCs: typeof en =
     "postLoginFlow": {
       "contactsExplanation": {
         "title": "Pojďme nyní najít tvoje přátele!",
-        "text":
-          "Vexl tě anonymně propojuje s tvými přáteli a přáteli tvých přátel. Později můžeš spravovat své kontakty a rozhodnout, které z nich chceš zahrnout do svého sociálního okruhu.",
+        "text": "Svou sociální síť můžeš později upravovat v nastavení.",
         "anonymizationCaption":
           "Tvé kontakty neuvidí nikdo další. Dokonce ani my."
       },
@@ -329,7 +328,7 @@ const otherCs: typeof en =
         "Žádost nelze přijmout, protože druhá strana odstranila svůj účet.",
       "otherSideAccountDeleted": "Protistrana smazala účet",
       "createOfferNudge":
-        "Rozšiřte svůj dosah v tvé sociální síti a buď první, kdo předloží nabídku na základě daných kritérií.",
+        "Rozšiř svůj dosah v tvé sociální síti a buď první, kdo předloží nabídku na základě daných kritérií.",
       "offerAuthorSpeaks": "{{name}} mluví {{spokenLanguages}}"
     },
     "termsOfUse": {
@@ -935,7 +934,6 @@ const otherCs: typeof en =
         "Povolení nebylo možné získat. Chceš-li naskenovat QR kód, otevři nastavení a povol Vexlu používání fotoaparát.",
       "openSettings": "Otevřít nastavení"
     },
-    "": "You have added {{contactName}} to your Vexl contacts.",
     "feedback": {
       "objection": {
         "APP": "App",

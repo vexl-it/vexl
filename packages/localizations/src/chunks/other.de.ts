@@ -70,10 +70,10 @@ const otherDe: typeof en =
       "errorWhileReadingQrCode": "Fehler beim Lesen des QR-Codes",
       "copyErrorToClipboard": "Fehler in die Zwischenablage kopieren",
       "me": "Ich",
-      "error": "Error",
-      "chatNotFoundError": "Chat not found!",
-      "send": "Send",
-      "thanks": "Thanks!",
+      "error": "Fehler",
+      "chatNotFoundError": "Chat nicht gefunden!",
+      "send": "Senden",
+      "thanks": "Danke!",
       "vexl": "Vexl",
       "dontShowMeThisAgain": "Don’t show me this again"
     },
@@ -168,7 +168,7 @@ const otherDe: typeof en =
       "contactsExplanation": {
         "title": "Finden wir jetzt deine Freunde!",
         "text":
-          "Vexl verbindet dich anonym mit deinen Freunden und Freunden von Freunden. Du kannst später deine Kontakte verwalten und auswählen, welche du in deinem sozialen Umfeld einschließen möchtest.",
+          "Du kannst später deine soziales Netzwerk in den Einstellungen verwalten.",
         "anonymizationCaption":
           "Niemand kann deine Kontakte sehen. Nicht einmal wir."
       },
@@ -339,8 +339,8 @@ const otherDe: typeof en =
         "Kann nicht genehmigt werden. Die Gegenseite hat ihr Konto gelöscht",
       "otherSideAccountDeleted": "Other side has deleted their account",
       "createOfferNudge":
-        "Expand your reach within the social network and be the first one to create an offer for this criteria.",
-      "offerAuthorSpeaks": "{{name}} speaks {{spokenLanguages}}"
+        "Erweiter dein Einfluss im sozialen Netzwerk und sei der Erste, der ein Angebot für diese Kriterien erstellt.",
+      "offerAuthorSpeaks": "{{name}} spricht {{spokenLanguages}}"
     },
     "termsOfUse": {
       "termsOfUse": "AGB",
@@ -500,17 +500,17 @@ const otherDe: typeof en =
       "currencyYouWouldLikeToUse":
         "Die Währung, die du für deinen Handel verwenden möchtest.",
       "spokenLanguages": {
-        "indicatePreferredLanguage": "Indicate preferred language",
+        "indicatePreferredLanguage": "Gewünschte Sprache angeben",
         "ENG": "English",
-        "DEU": "German",
-        "CZE": "Czech",
-        "SVK": "Slovak",
-        "PRT": "Portuguese",
-        "FRA": "French",
-        "ITA": "Italian",
-        "ESP": "Spanish",
-        "language": "Language",
-        "preferredLanguages": "Preferred languages"
+        "DEU": "Deutsch",
+        "CZE": "Tschechisch",
+        "SVK": "Slowakisch",
+        "PRT": "Portugiesisch",
+        "FRA": "Französisch",
+        "ITA": "Italienisch",
+        "ESP": "Spanisch",
+        "language": "Sprache",
+        "preferredLanguages": "Bevorzugte Sprachen"
       }
     },
     "notifications": {
@@ -627,8 +627,8 @@ const otherDe: typeof en =
       "offerAdded": "Hinzugefügt {{date}}",
       "sortedByNewest": "Sortiert nach neuesten",
       "sortedByOldest": "Sortiert nach dem ältesten",
-      "offerToSell": "You are selling",
-      "offerToBuy": "You are buying"
+      "offerToSell": "Du verkaufst",
+      "offerToBuy": "Du kaufst"
     },
     "editOffer": {
       "editOffer": "Angebot bearbeiten",
@@ -860,7 +860,7 @@ const otherDe: typeof en =
     "commonFriends": {
       "commonFriends": "Gemeinsame Freunde",
       "commonFriendsCount": "{{commonFriendsCount}} gemeinsame Freunde",
-      "call": "Call"
+      "call": "Anruf"
     },
     "reportIssue": {
       "openInEmail": "In E-Mail öffnen",
@@ -950,15 +950,14 @@ const otherDe: typeof en =
         "Du hast deine Vexl-Kontakte erfolgreich aktualisiert."
     },
     "qrScanner": {
-      "title": "Scan other user's qrcode",
-      "invalidQrCodeScanned": "Invalid qrcode scanned",
-      "missingCameraPermissions": "Missing camera permissions",
-      "grantPermissions": "Grant permissions",
+      "title": "Scan den QR-Code eines anderen Benutzers",
+      "invalidQrCodeScanned": "Ungültiger QR-Code gescannt",
+      "missingCameraPermissions": "Fehlende Kameraberechtigungen",
+      "grantPermissions": "Berechtigungen erteilen",
       "grantPermissionsInSettings":
-        "Unable to ask for permissions. To use QR scanner open settings and allow Vexl to use camera.",
-      "openSettings": "Open settings"
+        "Kann keine Berechtigungen anfragen. Öffne die Einstellungen, um den Kamerazugriff für Vexl zu erlauben.",
+      "openSettings": "Einstellungen öffnen"
     },
-    "": "",
     "feedback": {
       "objection": {
         "APP": "App",

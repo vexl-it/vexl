@@ -71,8 +71,8 @@ const otherSk: typeof en =
       "me": "Ja",
       "error": "Chyba",
       "chatNotFoundError": "Chat nenájdený!",
-      "send": "Send",
-      "thanks": "Thanks!",
+      "send": "Odoslať",
+      "thanks": "Ďakujem!",
       "vexl": "Vexl",
       "dontShowMeThisAgain": "Don’t show me this again"
     },
@@ -163,8 +163,7 @@ const otherSk: typeof en =
     "postLoginFlow": {
       "contactsExplanation": {
         "title": "Nájdime teraz tvojich priateľov!",
-        "text":
-          "Vexl ťa anonymne prepojí s tvojimi priateľmi a priateľmi tvojich priateľov. Neskôr môžeš spravovať svoje kontakty a rozhodnúť, ktorých z nich chceš zahrnúť do svojho sociálneho okruhu.",
+        "text": "Tvoju sociálnu sieť môžeš neskôr upraviť v nastaveniach.",
         "anonymizationCaption":
           "Tvoje kontakty neuvidí nikto ďalší. Dokonca ani my."
       },
@@ -936,7 +935,6 @@ const otherSk: typeof en =
         "Nebolo možné získať povolenie. Pre naskenovanie QR kódu otvor nastavenia a povoľ Vexlu používanie fotoaparátu.",
       "openSettings": "Otvoriť nastavenia"
     },
-    "": "",
     "feedback": {
       "objection": {
         "APP": "App",

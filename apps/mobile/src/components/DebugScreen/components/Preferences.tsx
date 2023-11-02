@@ -10,6 +10,7 @@ const preferencesToEdit = [
   'enableNewOffersNotificationDevMode',
   'showFriendLevelBanner',
   'tradeChecklistEnabled',
+  'offerFeedbackEnabled',
 ] as const
 
 function Preferences(): JSX.Element {

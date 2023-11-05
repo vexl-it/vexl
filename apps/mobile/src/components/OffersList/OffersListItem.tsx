@@ -13,7 +13,7 @@ import {offerRerequestLimitDaysAtom} from '../../utils/remoteConfig/atoms'
 import {type OneOfferInState} from '@vexl-next/domain/dist/general/offers'
 import Button from '../Button'
 import {newOfferFeedbackDoneAtom} from '../../state/feedback/atoms'
-import UserFeedbackBannerWrapper from '../UserFeedbackBannerWrapper'
+import {FeedbackWithoutSavedProgress} from '../UserFeedback'
 import {preferencesAtom} from '../../utils/preferences'
 
 interface Props {
@@ -183,7 +183,8 @@ function OffersListItem({isFirst, offerAtom}: Props): JSX.Element {
         offer={offer}
       />
       {isMine && isFirst && preferences.offerFeedbackEnabled && (
-        <UserFeedbackBannerWrapper
+        <FeedbackWithoutSavedProgress
+          type={'OFFER_RATING'}
           feedbackDoneAtom={newOfferFeedbackDoneAtom}
         />
       )}

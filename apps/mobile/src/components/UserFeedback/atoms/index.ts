@@ -1,6 +1,7 @@
 import {createScope, molecule} from 'jotai-molecules'
 import {
   type Feedback,
+  type FeedbackType,
   generateFeedbackFormId,
   type ObjectionType,
   objectionTypeNegativeOptions,
@@ -16,19 +17,9 @@ import * as T from 'fp-ts/Task'
 import reportError from '../../../utils/reportError'
 import {focusAtom} from 'jotai-optics'
 
-export function generateInitialOfferFeedback(): Feedback {
+export function generateInitialFeedback(type: FeedbackType): Feedback {
   return {
-    type: 'OFFER_RATING',
-    formId: generateFeedbackFormId(),
-    stars: 0,
-    objections: [],
-    textComment: '',
-  }
-}
-
-export function generateInitialChatFeedback(): Feedback {
-  return {
-    type: 'CHAT_RATING',
+    type,
     formId: generateFeedbackFormId(),
     stars: 0,
     objections: [],
@@ -38,7 +29,7 @@ export function generateInitialChatFeedback(): Feedback {
 
 export const FeedbackScope = createScope<
   WritableAtom<Feedback, [SetStateAction<Feedback>], void>
->(atom<Feedback>(generateInitialChatFeedback()))
+>(atom<Feedback>(generateInitialFeedback('CHAT_RATING')))
 
 export const feedbackMolecule = molecule((getMolecule, getScope) => {
   const feedbackAtom = getScope(FeedbackScope)

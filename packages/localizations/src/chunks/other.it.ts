@@ -990,7 +990,8 @@ const otherIt: typeof en =
       },
       "saveAndContinue": "Save and continue chatting",
       "shareRecognitionSignInChat": "Or share the recognition sign in chat"
-    }
+    },
+    "": ""
   }
 /* JSON ends */
 

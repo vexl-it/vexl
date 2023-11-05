@@ -29,6 +29,7 @@ import {pipe} from 'fp-ts/function'
 import * as T from 'fp-ts/Task'
 import deleteInboxAtom from './atoms/deleteInboxAtom'
 import deleteAllInboxesActionAtom from '../../state/chat/atoms/deleteAllInboxesActionAtom'
+import {chatsToFeedbacksStorageAtom} from '../../state/feedback/atoms'
 
 // const ContentScroll = styled(ScrollView, {
 //   marginBottom: '$2',
@@ -118,6 +119,15 @@ function DebugScreen(): JSX.Element {
                 const userInbox: Inbox = {privateKey: session.privateKey}
 
                 store.set(messagingStateAtom, [{inbox: userInbox, chats: []}])
+                Alert.alert('Done')
+              }}
+            />
+            <Button
+              variant={'primary'}
+              size={'small'}
+              text={'Clear chats to feedbacks state'}
+              onPress={() => {
+                store.set(chatsToFeedbacksStorageAtom, {chatsToFeedbacks: []})
                 Alert.alert('Done')
               }}
             />

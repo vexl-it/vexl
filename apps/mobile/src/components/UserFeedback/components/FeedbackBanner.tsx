@@ -1,17 +1,23 @@
 import {getTokens, Stack, Text, XStack} from 'tamagui'
 import BannerBackButton from './BannerBackButton'
 import SvgImage from '../../Image'
-import anonymousAvatarSvg from '../../images/anonymousAvatarSvg'
 import FeedbackBannerContent from './FeedbackBannerContent'
 import eyeSvg from '../../images/eyeSvg'
 import {type PrimitiveAtom} from 'jotai'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import BannerCloseButton from './BannerCloseButton'
+import FeedbackAvatar from './FeedbackAvatar'
 
 interface Props {
+  autoCloseWhenFinished?: boolean
   feedbackDoneAtom: PrimitiveAtom<boolean>
+  hideCloseButton?: boolean
 }
-function FeedbackBanner({feedbackDoneAtom}: Props): JSX.Element {
+function FeedbackBanner({
+  autoCloseWhenFinished,
+  feedbackDoneAtom,
+  hideCloseButton,
+}: Props): JSX.Element {
   const {t} = useTranslation()
 
   return (
@@ -25,10 +31,16 @@ function FeedbackBanner({feedbackDoneAtom}: Props): JSX.Element {
     >
       <XStack ai={'flex-start'} jc={'space-between'}>
         <BannerBackButton />
-        <SvgImage source={anonymousAvatarSvg} />
-        <BannerCloseButton feedbackDoneAtom={feedbackDoneAtom} />
+        <FeedbackAvatar />
+        <BannerCloseButton
+          feedbackDoneAtom={feedbackDoneAtom}
+          hideCloseButton={hideCloseButton}
+        />
       </XStack>
-      <FeedbackBannerContent feedbackDoneAtom={feedbackDoneAtom} />
+      <FeedbackBannerContent
+        autoCloseWhenFinished={autoCloseWhenFinished}
+        feedbackDoneAtom={feedbackDoneAtom}
+      />
       <XStack ai={'center'} jc={'center'}>
         <SvgImage stroke={getTokens().color.greyOnWhite.val} source={eyeSvg} />
         <Text fos={14} ff={'$body400'} ml={'$2'} col={'$greyOnWhite'}>

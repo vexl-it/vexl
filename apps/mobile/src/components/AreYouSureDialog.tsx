@@ -15,7 +15,7 @@ import Animated, {
   SlideOutDown,
 } from 'react-native-reanimated'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
-import {Stack, Text, XStack, YStack} from 'tamagui'
+import {type ColorTokens, Stack, Text, XStack, YStack} from 'tamagui'
 import Button from './Button'
 import {ImageUniversal, type ImageUniversalSourcePropType} from './Image'
 import Input, {type Props as VexlTextInputProps} from './Input'
@@ -34,7 +34,8 @@ interface StepWithChildren {
   type: 'StepWithChildren'
   negativeButtonText?: string
   positiveButtonText: string
-  children: React.ReactNode
+  backgroundColor?: ColorTokens
+  children: (props: any) => React.ReactNode | null
 }
 
 interface StepWithInput {
@@ -169,7 +170,17 @@ function AreYouSureDialog(): JSX.Element | null {
           >
             <ScrollView style={styles.flip}>
               <View style={styles.flip}>
-                <Stack px={'$4'} br={'$4'} mx={'$2'} py="$5" bc={'$white'}>
+                <Stack
+                  px={'$4'}
+                  br={'$4'}
+                  mx={'$2'}
+                  py="$5"
+                  bc={
+                    step.type === 'StepWithChildren' && step.backgroundColor
+                      ? step.backgroundColor
+                      : '$white'
+                  }
+                >
                   {step.type === 'StepWithText' ? (
                     <>
                       {step.image && (
@@ -224,7 +235,7 @@ function AreYouSureDialog(): JSX.Element | null {
                       />
                     </Stack>
                   ) : (
-                    step.children
+                    <step.children />
                   )}
                 </Stack>
               </View>

@@ -74,7 +74,7 @@ const otherSk: typeof en =
       "send": "Odoslať",
       "thanks": "Ďakujem!",
       "vexl": "Vexl",
-      "dontShowMeThisAgain": "Don’t show me this again"
+      "dontShowMeThisAgain": "Nabudúce už nezobrazovať"
     },
     "loginFlow": {
       "anonymityNotice":
@@ -816,13 +816,13 @@ const otherSk: typeof en =
         "Kontakt už bol uložený do telefónneho zoznamu.",
       "addUserToYourContacts": "Pridať {{name}} do kontaktov?",
       "tapToAddToYourVexlContacts": "Pridať do Vexl kontaktov.",
-      "howWasTheTrade": "How was the trade?",
-      "yourAnswerIsAnonymous": "Your answer is 100% anonymous",
-      "anyProblems": "Any problems?",
-      "whatWasWrongExactly": "What was wrong exactly?",
-      "howWasCreatingNewOffer": "How was creating new offer?",
-      "whatWasGreatAboutIt": "What was great about it?",
-      "whatWorkedWellExactly": "What worked well exactly?",
+      "howWasTheTrade": "Ako prebehol obchod?",
+      "yourAnswerIsAnonymous": "Tvoja odpoveď je 100% anonymná.",
+      "anyProblems": "Nejaké problémy?",
+      "whatWasWrongExactly": "Čo konkrétne bolo zle?",
+      "howWasCreatingNewOffer": "Aké bolo vytváranie novej ponuky?",
+      "whatWasGreatAboutIt": "Čo sa ti páčilo?",
+      "whatWorkedWellExactly": "Čo fungovalo dobre?",
       "tradeChecklist": "Trade checklist",
       "vexlbotNotifications": "Vexlbot notifications"
     },
@@ -937,16 +937,16 @@ const otherSk: typeof en =
     },
     "feedback": {
       "objection": {
-        "APP": "App",
-        "PROCESS": "Process",
-        "RESPONDING_TIME": "Responding time",
-        "CANCELED_OFFER": "Canceled offer",
-        "IMPOSSIBLE_TO_AGREE": "Impossible to agree",
-        "LEFT_THE_CHAT": "Left the chat",
-        "DID_NOT_SHOW_UP": "Didn't show up",
-        "I_MET_NEW_FRIEND": "I met new friend",
-        "DEAL_WAS_SMOOTH": "Deal was smooth",
-        "IT_WAS_FAST": "It was fast"
+        "APP": "Aplikácia",
+        "PROCESS": "Proces",
+        "RESPONDING_TIME": "Reakčný čas",
+        "CANCELED_OFFER": "Zrušená ponuka",
+        "IMPOSSIBLE_TO_AGREE": "Nemožné sa dohodnúť",
+        "LEFT_THE_CHAT": "Opustil/a chat",
+        "DID_NOT_SHOW_UP": "Protistrana neprišla",
+        "I_MET_NEW_FRIEND": "Zoznámil/a som sa s novým priateľom",
+        "DEAL_WAS_SMOOTH": "Obchod prebehol hladko.",
+        "IT_WAS_FAST": "Bolo to rýchle."
       }
     },
     "vexlbot": {
@@ -977,7 +977,8 @@ const otherSk: typeof en =
       },
       "saveAndContinue": "Save and continue chatting",
       "shareRecognitionSignInChat": "Or share the recognition sign in chat"
-    }
+    },
+    "": ""
   }
 /* JSON ends */
 

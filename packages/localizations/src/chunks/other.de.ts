@@ -838,13 +838,13 @@ const otherDe: typeof en =
       "addUserToYourContacts": "Füge {{Name}} zu deinen Kontakten hinzu?",
       "tapToAddToYourVexlContacts":
         "Tipp auf, um sie zu deinen Vexl-Kontakten hinzuzufügen.",
-      "howWasTheTrade": "How was the trade?",
-      "yourAnswerIsAnonymous": "Your answer is 100% anonymous",
-      "anyProblems": "Any problems?",
-      "whatWasWrongExactly": "What was wrong exactly?",
-      "howWasCreatingNewOffer": "How was creating new offer?",
-      "whatWasGreatAboutIt": "What was great about it?",
-      "whatWorkedWellExactly": "What worked well exactly?",
+      "howWasTheTrade": "Wie lief der Handel?",
+      "yourAnswerIsAnonymous": "Deine Antwort ist 100% anonym.",
+      "anyProblems": "Irgendwelche Probleme?",
+      "whatWasWrongExactly": "Was war falsch genau?",
+      "howWasCreatingNewOffer": "Wie war das Erstellen eines neuen Angebots?",
+      "whatWasGreatAboutIt": "Was hat dir gefallen?",
+      "whatWorkedWellExactly": "Was hat gut funktioniert?",
       "tradeChecklist": "Trade checklist",
       "vexlbotNotifications": "Vexlbot notifications"
     },
@@ -961,15 +961,15 @@ const otherDe: typeof en =
     "feedback": {
       "objection": {
         "APP": "App",
-        "PROCESS": "Process",
-        "RESPONDING_TIME": "Responding time",
-        "CANCELED_OFFER": "Canceled offer",
-        "IMPOSSIBLE_TO_AGREE": "Impossible to agree",
-        "LEFT_THE_CHAT": "Left the chat",
-        "DID_NOT_SHOW_UP": "Didn't show up",
-        "I_MET_NEW_FRIEND": "I met new friend",
-        "DEAL_WAS_SMOOTH": "Deal was smooth",
-        "IT_WAS_FAST": "It was fast"
+        "PROCESS": "Prozess",
+        "RESPONDING_TIME": "Reaktionszeit",
+        "CANCELED_OFFER": "Abgebrochenes Angebot",
+        "IMPOSSIBLE_TO_AGREE": "Unmöglich zu vereinbaren",
+        "LEFT_THE_CHAT": "Hat den Chat verlassen",
+        "DID_NOT_SHOW_UP": "Ist nicht erschienen",
+        "I_MET_NEW_FRIEND": "Ich habe einen neuen Freund kennengelernt.",
+        "DEAL_WAS_SMOOTH": "Der Deal verlief reibungslos.",
+        "IT_WAS_FAST": "Es ging schnell."
       }
     },
     "vexlbot": {
@@ -1000,7 +1000,8 @@ const otherDe: typeof en =
       },
       "saveAndContinue": "Save and continue chatting",
       "shareRecognitionSignInChat": "Or share the recognition sign in chat"
-    }
+    },
+    "": ""
   }
 /* JSON ends */
 

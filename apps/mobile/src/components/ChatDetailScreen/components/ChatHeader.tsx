@@ -39,6 +39,7 @@ function Button({type}: {type: ButtonType}): JSX.Element | null {
     revealIdentityWithUiFeedbackAtom,
     revealContactWithUiFeedbackAtom,
     contactRevealStatusAtom,
+    giveFeedbackForDeletedChatAtom,
   } = useMolecule(chatMolecule)
   const identityRevealStatus = useAtomValue(identityRevealStatusAtom)
   const contactRevealStatus = useAtomValue(contactRevealStatusAtom)
@@ -49,6 +50,7 @@ function Button({type}: {type: ButtonType}): JSX.Element | null {
 
   const blockChat = useSetAtom(blockChatWithUiFeedbackAtom)
   const deleteChat = useSetAtom(deleteChatWithUiFeedbackAtom)
+  const giveFeedback = useSetAtom(giveFeedbackForDeletedChatAtom)
 
   const [forceShowHistory, setForceShowHistory] = useAtom(forceShowHistoryAtom)
   const chat = useAtomValue(chatAtom)
@@ -104,7 +106,10 @@ function Button({type}: {type: ButtonType}): JSX.Element | null {
         onPress={() => {
           Keyboard.dismiss()
           void deleteChat().then((success) => {
-            if (success) resetNavigationToMessagingScreen()
+            if (success) {
+              resetNavigationToMessagingScreen()
+              void giveFeedback()
+            }
           })
         }}
       />

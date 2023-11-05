@@ -5,25 +5,24 @@ import {TouchableOpacity} from 'react-native'
 import SvgImage from '../../Image'
 import closeSvg from '../../images/closeSvg'
 import {getTokens, Stack} from 'tamagui'
-import {deleteChatFeedbackEntryFromStorageByFormIdAtom} from '../../../state/feedback/atoms'
 
 interface Props {
   feedbackDoneAtom: PrimitiveAtom<boolean>
+  hideCloseButton?: boolean
 }
 
-function BannerCloseButton({feedbackDoneAtom}: Props): JSX.Element | null {
-  const {currentFeedbackPageAtom, formIdAtom} = useMolecule(feedbackMolecule)
+function BannerCloseButton({
+  feedbackDoneAtom,
+  hideCloseButton,
+}: Props): JSX.Element | null {
+  const {currentFeedbackPageAtom} = useMolecule(feedbackMolecule)
   const currentPage = useAtomValue(currentFeedbackPageAtom)
   const setFeedbackDone = useSetAtom(feedbackDoneAtom)
-  const deleteChatFeedbackEntryFromStorage = useSetAtom(
-    deleteChatFeedbackEntryFromStorageByFormIdAtom
-  )
 
-  return currentPage !== 'OFFER_RATING' ? (
+  return currentPage !== 'OFFER_RATING' && !hideCloseButton ? (
     <TouchableOpacity
       onPress={() => {
         setFeedbackDone(true)
-        deleteChatFeedbackEntryFromStorage(formIdAtom)
       }}
     >
       <SvgImage

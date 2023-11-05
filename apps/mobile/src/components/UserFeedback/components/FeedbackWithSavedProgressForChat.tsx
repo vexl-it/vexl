@@ -1,6 +1,6 @@
 import {type PrimitiveAtom, useAtomValue, useSetAtom} from 'jotai'
 import {ScopeProvider} from 'jotai-molecules'
-import {generateInitialChatFeedback, FeedbackScope} from '../atoms'
+import {FeedbackScope, generateInitialFeedback} from '../atoms'
 import {
   chatsToFeedbacksStorageAtom,
   focusFeedbackForChatAtom,
@@ -9,15 +9,20 @@ import {type Chat} from '@vexl-next/domain/dist/general/messaging'
 import FeedbackBanner from './FeedbackBanner'
 import {useMemo} from 'react'
 import hasNonNullableValueAtom from '../../../utils/atomUtils/hasNonNullableValueAtom'
+import {type FeedbackType} from '@vexl-next/domain/dist/general/feedback'
 
 interface Props {
+  autoCloseWhenFinished?: boolean
   chatAtom: PrimitiveAtom<Chat>
   feedbackDoneAtom: PrimitiveAtom<boolean>
+  type: FeedbackType
 }
 
-function ChatFeedbackBanner({
+function FeedbackWithSavedProgressForChat({
+  autoCloseWhenFinished,
   chatAtom,
   feedbackDoneAtom,
+  type,
 }: Props): JSX.Element | null {
   const feedbackDone = useAtomValue(feedbackDoneAtom)
   const chat = useAtomValue(chatAtom)
@@ -37,22 +42,25 @@ function ChatFeedbackBanner({
           ...prev.chatsToFeedbacks,
           {
             chatId: chat.id,
-            feedback: generateInitialChatFeedback(),
+            feedback: generateInitialFeedback(type),
           },
         ],
       }))
     }
 
     return focusFeedbackForChatAtom(chat.id)
-  }, [chat.id, feedbackForChatExists, setChatsToFeedbacks])
+  }, [chat.id, feedbackForChatExists, setChatsToFeedbacks, type])
 
-  if (feedbackDone) return null
+  if (feedbackDone || !chat.id) return null
 
   return (
     <ScopeProvider scope={FeedbackScope} value={focusedFeedbackAtom}>
-      <FeedbackBanner feedbackDoneAtom={feedbackDoneAtom} />
+      <FeedbackBanner
+        autoCloseWhenFinished={autoCloseWhenFinished}
+        feedbackDoneAtom={feedbackDoneAtom}
+      />
     </ScopeProvider>
   )
 }
 
-export default ChatFeedbackBanner
+export default FeedbackWithSavedProgressForChat

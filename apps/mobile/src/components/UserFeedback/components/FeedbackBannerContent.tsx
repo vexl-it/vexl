@@ -8,14 +8,17 @@ import {type PrimitiveAtom, useAtomValue, useSetAtom} from 'jotai'
 import {useEffect, useMemo} from 'react'
 import {useMolecule} from 'jotai-molecules'
 import {feedbackMolecule} from '../atoms'
-import {deleteChatFeedbackEntryFromStorageByFormIdAtom} from '../../../state/feedback/atoms'
 import {POSITIVE_STAR_RATING_THRESHOLD} from '@vexl-next/domain/dist/general/feedback'
 
 interface Props {
+  autoCloseWhenFinished?: boolean
   feedbackDoneAtom: PrimitiveAtom<boolean>
 }
 
-function FeedbackBannerContent({feedbackDoneAtom}: Props): JSX.Element {
+function FeedbackBannerContent({
+  autoCloseWhenFinished,
+  feedbackDoneAtom,
+}: Props): JSX.Element {
   const {t} = useTranslation()
   const {
     formIdAtom,
@@ -32,9 +35,6 @@ function FeedbackBannerContent({feedbackDoneAtom}: Props): JSX.Element {
   const submitChatFeedback = useSetAtom(submitChatFeedbackAndHandleUIAtom)
   const submitTextCommentButtonDisabled = useAtomValue(
     submitTextCommentButtonDisabledAtom
-  )
-  const deleteChatFeedbackEntryFromStorage = useSetAtom(
-    deleteChatFeedbackEntryFromStorageByFormIdAtom
   )
 
   const title = useMemo(() => {
@@ -54,12 +54,9 @@ function FeedbackBannerContent({feedbackDoneAtom}: Props): JSX.Element {
   }, [currentPage, feedbackFlowFinished, starRating, t])
 
   useEffect(() => {
-    if (feedbackFlowFinished) {
+    if (feedbackFlowFinished && autoCloseWhenFinished) {
       const timeout = setTimeout(() => {
         setFeedbackDone(true)
-        if (currentPage !== 'OFFER_RATING') {
-          deleteChatFeedbackEntryFromStorage(formIdAtom)
-        }
       }, 2000)
 
       return () => {
@@ -67,8 +64,8 @@ function FeedbackBannerContent({feedbackDoneAtom}: Props): JSX.Element {
       }
     }
   }, [
+    autoCloseWhenFinished,
     currentPage,
-    deleteChatFeedbackEntryFromStorage,
     feedbackFlowFinished,
     formIdAtom,
     setFeedbackDone,
@@ -100,7 +97,7 @@ function FeedbackBannerContent({feedbackDoneAtom}: Props): JSX.Element {
             onPress={() => {
               void submitChatFeedback()
             }}
-            variant={'secondary'}
+            variant={'primary'}
             text={
               currentPage === 'TEXT_COMMENT'
                 ? t('common.send')

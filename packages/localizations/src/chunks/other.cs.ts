@@ -814,13 +814,13 @@ const otherCs: typeof en =
         "Kontakt už byl uložen do telefonního seznamu.",
       "addUserToYourContacts": "Přidat {{name}} do kontaktů?",
       "tapToAddToYourVexlContacts": "Přidat do Vexl kontaktů.",
-      "howWasTheTrade": "How was the trade?",
-      "yourAnswerIsAnonymous": "Your answer is 100% anonymous",
-      "anyProblems": "Any problems?",
-      "whatWasWrongExactly": "What was wrong exactly?",
-      "howWasCreatingNewOffer": "How was creating new offer?",
-      "whatWasGreatAboutIt": "What was great about it?",
-      "whatWorkedWellExactly": "What worked well exactly?",
+      "howWasTheTrade": "Jak probíhal obchod?",
+      "yourAnswerIsAnonymous": "Tvoje odpověď je 100% anonymní.",
+      "anyProblems": "Nějaké problémy?",
+      "whatWasWrongExactly": "Co konkrétně bylo špatně?",
+      "howWasCreatingNewOffer": "Jaké bylo vytváření nové nabídky?",
+      "whatWasGreatAboutIt": "Co se ti líbilo?",
+      "whatWorkedWellExactly": "Co fungovalo dobře?",
       "tradeChecklist": "Trade checklist",
       "vexlbotNotifications": "Vexlbot notifications"
     },
@@ -936,16 +936,16 @@ const otherCs: typeof en =
     },
     "feedback": {
       "objection": {
-        "APP": "App",
-        "PROCESS": "Process",
-        "RESPONDING_TIME": "Responding time",
-        "CANCELED_OFFER": "Canceled offer",
-        "IMPOSSIBLE_TO_AGREE": "Impossible to agree",
-        "LEFT_THE_CHAT": "Left the chat",
-        "DID_NOT_SHOW_UP": "Didn't show up",
-        "I_MET_NEW_FRIEND": "I met new friend",
-        "DEAL_WAS_SMOOTH": "Deal was smooth",
-        "IT_WAS_FAST": "It was fast"
+        "APP": "Aplikace",
+        "PROCESS": "Proces",
+        "RESPONDING_TIME": "Reakční doba",
+        "CANCELED_OFFER": "Zrušená nabídka",
+        "IMPOSSIBLE_TO_AGREE": "Nemožné se dohodnout",
+        "LEFT_THE_CHAT": "Opustil/a chat",
+        "DID_NOT_SHOW_UP": "Protistrana nepřišla",
+        "I_MET_NEW_FRIEND": "Potkal/a jsem nového přítele",
+        "DEAL_WAS_SMOOTH": "Obchod probíhal hladce.",
+        "IT_WAS_FAST": "Bylo to rychlé."
       }
     },
     "vexlbot": {
@@ -976,7 +976,8 @@ const otherCs: typeof en =
       },
       "saveAndContinue": "Save and continue chatting",
       "shareRecognitionSignInChat": "Or share the recognition sign in chat"
-    }
+    },
+    "": "You have added {{contactName}} to your Vexl contacts."
   }
 /* JSON ends */
 

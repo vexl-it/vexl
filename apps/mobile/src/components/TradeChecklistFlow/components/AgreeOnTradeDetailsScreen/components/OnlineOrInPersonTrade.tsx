@@ -1,6 +1,6 @@
 import {getTokens, Stack, Text, XStack} from 'tamagui'
 import Image from '../../../../Image'
-import anonymousAvatarNoBackgroundSvg from '../../../../images/anonymousAvatarNoBackgroundSvg'
+import anonymousAvatarHappyNoBackgroundSvg from '../../../../images/anonymousAvatarHappyNoBackgroundSvg'
 import Info from '../../../../Info'
 import TradeRule from './TradeRule'
 import ChecklistCell from './ChecklistCell'
@@ -33,7 +33,7 @@ function OnlineOrInPersonTrade(): JSX.Element {
         <Image
           height={120}
           width={120}
-          source={anonymousAvatarNoBackgroundSvg}
+          source={anonymousAvatarHappyNoBackgroundSvg}
         />
       </Stack>
       <Text textAlign={'center'} ff={'$heading'} fos={32}>

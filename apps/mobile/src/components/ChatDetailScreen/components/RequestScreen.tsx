@@ -30,6 +30,7 @@ function RequestScreen(): JSX.Element {
     hasPreviousCommunicationAtom,
     canBeRerequestedAtom,
     rerequestOfferActionAtom,
+    giveFeedbackForDeletedChatAtom,
   } = useMolecule(chatMolecule)
   const offer = useAtomValue(offerForChatAtom)
   const chat = useAtomValue(chatAtom)
@@ -40,6 +41,7 @@ function RequestScreen(): JSX.Element {
   const wasDenied = useAtomValue(wasDeniedAtom)
   const wasCancelled = useAtomValue(wasCancelledAtom)
   const deleteChat = useSetAtom(deleteChatWithUiFeedbackAtom)
+  const giveFeedback = useSetAtom(giveFeedbackForDeletedChatAtom)
   const safeGoBack = useSafeGoBack()
   const setForceShowHistory = useSetAtom(forceShowHistoryAtom)
   const hasPreviousCommunication = useAtomValue(hasPreviousCommunicationAtom)
@@ -138,7 +140,10 @@ function RequestScreen(): JSX.Element {
               variant="primary"
               onPress={() => {
                 void deleteChat().then((success) => {
-                  if (success) safeGoBack()
+                  if (success) {
+                    safeGoBack()
+                    void giveFeedback()
+                  }
                 })
               }}
             />

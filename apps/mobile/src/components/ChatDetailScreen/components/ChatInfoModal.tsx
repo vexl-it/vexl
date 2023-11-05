@@ -33,6 +33,7 @@ function ChatInfoModal(): JSX.Element | null {
     revealIdentityWithUiFeedbackAtom,
     identityRevealStatusAtom,
     showVexlbotNotificationsForCurrentChatAtom,
+    giveFeedbackForDeletedChatAtom,
   } = useMolecule(chatMolecule)
   const [showModal, setShowModal] = useAtom(showModalAtom)
   const {top} = useSafeAreaInsets()
@@ -42,6 +43,7 @@ function ChatInfoModal(): JSX.Element | null {
   const reportOffer = useReportOfferHandleUI()
 
   const deleteChat = useSetAtom(deleteChatWithUiFeedbackAtom)
+  const giveFeedback = useSetAtom(giveFeedbackForDeletedChatAtom)
   const blockChat = useSetAtom(blockChatWithUiFeedbackAtom)
   const requestReveal = useSetAtom(revealIdentityWithUiFeedbackAtom)
   const canSendMessages = useAtomValue(canSendMessagesAtom)
@@ -133,7 +135,10 @@ function ChatInfoModal(): JSX.Element | null {
                 text: t('messages.deleteChat'),
                 onPress: () => {
                   void deleteChat().then((success) => {
-                    if (success) resetNavigationToMessagingScreen()
+                    if (success) {
+                      resetNavigationToMessagingScreen()
+                      void giveFeedback()
+                    }
                   })
                 },
               },

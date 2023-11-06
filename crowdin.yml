@@ -1,5 +1,5 @@
 base_path: .
-base_url: 'https://api.crowdin.com'
+base_url: "https://api.crowdin.com"
 preserve_hierarchy: 1
 files:
   - source: /packages/localization-next

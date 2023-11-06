@@ -24,6 +24,7 @@ export function generateInitialFeedback(type: FeedbackType): Feedback {
     stars: 0,
     objections: [],
     textComment: '',
+    finished: false,
   }
 }
 
@@ -33,7 +34,6 @@ export const FeedbackScope = createScope<
 
 export const feedbackMolecule = molecule((getMolecule, getScope) => {
   const feedbackAtom = getScope(FeedbackScope)
-
   const starRatingAtom = focusAtom(feedbackAtom, (o) => o.prop('stars'))
   const selectedObjectionsAtom = focusAtom(feedbackAtom, (o) =>
     o.prop('objections')
@@ -41,6 +41,9 @@ export const feedbackMolecule = molecule((getMolecule, getScope) => {
   const textCommentAtom = focusAtom(feedbackAtom, (o) => o.prop('textComment'))
   const formIdAtom = focusAtom(feedbackAtom, (o) => o.prop('formId'))
   const currentFeedbackPageAtom = focusAtom(feedbackAtom, (o) => o.prop('type'))
+  const chatFeedbackFinishedAtom = focusAtom(feedbackAtom, (o) =>
+    o.prop('finished')
+  )
   const feedbackFlowFinishedAtom = atom<boolean>(false)
   const submitTextCommentButtonDisabledAtom = atom((get) => {
     return (
@@ -170,6 +173,7 @@ export const feedbackMolecule = molecule((getMolecule, getScope) => {
   return {
     starRatingAtom,
     createIsStarSelectedAtom,
+    chatFeedbackFinishedAtom,
     selectedObjectionsAtom,
     createIsObjectionSelectedAtom,
     formIdAtom,
@@ -177,7 +181,7 @@ export const feedbackMolecule = molecule((getMolecule, getScope) => {
     currentFeedbackPageAtom,
     submitChatFeedbackAndHandleUIAtom,
     submitOfferCreationFeedbackHandleUIAtom,
-    feedbackFlowFinishedAtom,
     submitTextCommentButtonDisabledAtom,
+    feedbackFlowFinishedAtom,
   }
 })

@@ -3,7 +3,7 @@ import {useNavigation} from '@react-navigation/native'
 import {Stack} from 'tamagui'
 import OfferWithBubbleTip from '../OfferWithBubbleTip'
 import {useCallback, useMemo} from 'react'
-import {type Atom, useAtomValue} from 'jotai'
+import {atom, type Atom, useAtomValue} from 'jotai'
 import {useChatWithMessagesForOffer} from '../../state/chat/hooks/useChatForOffer'
 import {
   canChatBeRequested,
@@ -12,9 +12,10 @@ import {
 import {offerRerequestLimitDaysAtom} from '../../utils/remoteConfig/atoms'
 import {type OneOfferInState} from '@vexl-next/domain/dist/general/offers'
 import Button from '../Button'
-import {newOfferFeedbackDoneAtom} from '../../state/feedback/atoms'
-import {FeedbackWithoutSavedProgress} from '../UserFeedback'
+import UserFeedback from '../UserFeedback'
 import {preferencesAtom} from '../../utils/preferences'
+import {generateInitialFeedback} from '../UserFeedback/atoms'
+import {newOfferFeedbackDoneAtom} from '../../state/feedback/atoms'
 
 interface Props {
   readonly isFirst: boolean
@@ -27,6 +28,7 @@ function OffersListItem({isFirst, offerAtom}: Props): JSX.Element {
   const offer = useAtomValue(offerAtom)
   const rerequestLimitDays = useAtomValue(offerRerequestLimitDaysAtom)
   const preferences = useAtomValue(preferencesAtom)
+  const newOfferFeedbackDone = useAtomValue(newOfferFeedbackDoneAtom)
 
   const isMine = useMemo(
     () => !!offer.ownershipInfo?.adminId,
@@ -182,12 +184,14 @@ function OffersListItem({isFirst, offerAtom}: Props): JSX.Element {
         }
         offer={offer}
       />
-      {isMine && isFirst && preferences.offerFeedbackEnabled && (
-        <FeedbackWithoutSavedProgress
-          type={'OFFER_RATING'}
-          feedbackDoneAtom={newOfferFeedbackDoneAtom}
-        />
-      )}
+      {isMine &&
+        isFirst &&
+        !newOfferFeedbackDone &&
+        preferences.offerFeedbackEnabled && (
+          <UserFeedback
+            feedbackAtom={atom(generateInitialFeedback('OFFER_RATING'))}
+          />
+        )}
     </Stack>
   )
 }

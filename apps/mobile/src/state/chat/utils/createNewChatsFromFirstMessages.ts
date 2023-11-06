@@ -9,6 +9,7 @@ import {group} from 'group-items'
 import {keys} from '@vexl-next/resources-utils/dist/utils/keys'
 import notEmpty from '../../../utils/notEmpty'
 import {type OneOfferInState} from '@vexl-next/domain/dist/general/offers'
+import {generateInitialFeedback} from '../../../components/UserFeedback/atoms'
 
 export default function createNewChatsFromFirstMessages({
   inbox,
@@ -37,10 +38,10 @@ export default function createNewChatsFromFirstMessages({
             id: generateChatId(),
             isUnread: true,
             showInfoBar: true,
-            feedbackDone: false,
             showVexlbotInitialMessage: true,
             showVexlbotNotifications: true,
           },
+          feedback: generateInitialFeedback('CHAT_RATING'),
           messages: [...messages],
         }
       }),

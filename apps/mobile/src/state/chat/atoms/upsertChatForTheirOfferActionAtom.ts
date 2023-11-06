@@ -15,6 +15,7 @@ import * as O from 'optics-ts'
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
 import createVexlbotInitialMessage from '../utils/createVexlbotInitialMessage'
 import {preferencesAtom} from '../../../utils/preferences'
+import {generateInitialFeedback} from '../../../components/UserFeedback/atoms'
 
 function createNewChat({
   inbox,
@@ -37,10 +38,10 @@ function createNewChat({
       },
       isUnread: false,
       showInfoBar: true,
-      feedbackDone: false,
       showVexlbotInitialMessage: true,
       showVexlbotNotifications: true,
     },
+    feedback: generateInitialFeedback('CHAT_RATING'),
     messages: tradeChecklistEnabled
       ? [
           createVexlbotInitialMessage({

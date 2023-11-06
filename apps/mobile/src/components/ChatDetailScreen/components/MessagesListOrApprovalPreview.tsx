@@ -11,22 +11,20 @@ import {useCallback} from 'react'
 import {fetchAndStoreMessagesForInboxAtom} from '../../../state/chat/atoms/fetchNewMessagesActionAtom'
 
 export default function MessagesListOrApprovalPreview(): JSX.Element {
-  const {chatUiModeAtom, chatAtom} = useMolecule(chatMolecule)
+  const {chatUiModeAtom, chatAtom, publicKeyPemBase64Atom} =
+    useMolecule(chatMolecule)
   const chatUiMode = useAtomValue(chatUiModeAtom)
   const fetchAndStoreMessagesForInbox = useSetAtom(
     fetchAndStoreMessagesForInboxAtom
   )
-  const chat = useAtomValue(chatAtom)
+  const publicKeyPemBase64 = useAtomValue(publicKeyPemBase64Atom)
 
   useAppState(
     useCallback(() => {
       void fetchAndStoreMessagesForInbox({
-        key: chat.inbox.privateKey.publicKeyPemBase64,
+        key: publicKeyPemBase64,
       })
-    }, [
-      chat.inbox.privateKey.publicKeyPemBase64,
-      fetchAndStoreMessagesForInbox,
-    ])
+    }, [publicKeyPemBase64, fetchAndStoreMessagesForInbox])
   )
 
   const toRender =

@@ -12,7 +12,7 @@ import Image from '../../Image'
 import BlockIconSvg from '../../../images/blockIconSvg'
 import IdentityRevealMessageItem from './IdentityRevealMessageItem'
 import ContactRevealMessageItem from './ContactRevealMessageItem'
-import {FeedbackWithSavedProgressForChat} from '../../UserFeedback'
+import UserFeedback from '../../UserFeedback'
 import VexlbotMessageItem from './VexlbotMessageItem'
 import {preferencesAtom} from '../../../utils/preferences'
 
@@ -22,8 +22,7 @@ function MessageItem({
   itemAtom: Atom<MessagesListItem>
 }): JSX.Element | null {
   const item = useAtomValue(itemAtom)
-  const {chatAtom, chatFeedbackDoneAtom, otherSideDataAtom} =
-    useMolecule(chatMolecule)
+  const {chatFeedbackAtom, otherSideDataAtom} = useMolecule(chatMolecule)
   const {t} = useTranslation()
   const {userName, image} = useAtomValue(otherSideDataAtom)
   const preferences = useAtomValue(preferencesAtom)
@@ -79,11 +78,9 @@ function MessageItem({
             }
           />
           {direction === 'incoming' && (
-            <FeedbackWithSavedProgressForChat
+            <UserFeedback
               autoCloseWhenFinished
-              feedbackDoneAtom={chatFeedbackDoneAtom}
-              chatAtom={chatAtom}
-              type={'CHAT_RATING'}
+              feedbackAtom={chatFeedbackAtom}
             />
           )}
         </>

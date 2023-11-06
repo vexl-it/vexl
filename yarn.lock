@@ -4620,24 +4620,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@json2csv/formatters@npm:^7.0.1":
-  version: 7.0.1
-  resolution: "@json2csv/formatters@npm:7.0.1"
-  checksum: a9f2b2cfe8b3e3c68a0fc0484b75ec2d3d8b4d2040bef93ed242c286beb9109d5f1f6d3e314f3420477023601296bc6739185c1b8e8e3c77e2624a4391b361a2
-  languageName: node
-  linkType: hard
-
-"@json2csv/plainjs@npm:^7.0.1":
-  version: 7.0.1
-  resolution: "@json2csv/plainjs@npm:7.0.1"
-  dependencies:
-    "@json2csv/formatters": ^7.0.1
-    "@streamparser/json": ^0.0.15
-    lodash.get: ^4.4.2
-  checksum: 73532b97fd70be4206460f16e552646d96c8ef3b145111be569c2041b99d2616d8a29e5ecc9b8d0ca5ecd1eedf65da5a0508b3093593169b9ebbc31136c5e28a
-  languageName: node
-  linkType: hard
-
 "@likashefqet/react-native-image-zoom@npm:^1.3.0":
   version: 1.3.0
   resolution: "@likashefqet/react-native-image-zoom@npm:1.3.0"
@@ -5817,13 +5799,6 @@ __metadata:
   dependencies:
     "@sinonjs/commons": ^2.0.0
   checksum: c62aa98e7cefda8dedc101ce227abc888dc46b8ff9706c5f0a8dfd9c3ada97d0a5611384738d9ba0b26b59f99c2ba24efece8e779bb08329e9e87358fa309824
-  languageName: node
-  linkType: hard
-
-"@streamparser/json@npm:^0.0.15":
-  version: 0.0.15
-  resolution: "@streamparser/json@npm:0.0.15"
-  checksum: db98e67ba7fd500b25c56d2a22a942310307c41a95281b68f6627802173b24a76025b98563968ed84490e5401cb2ccb53d331de9245e8410777b45bb917c5c1d
   languageName: node
   linkType: hard
 
@@ -8256,31 +8231,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@vexl-next/localization-next@0.0.0, @vexl-next/localization-next@workspace:packages/localization-next":
+"@vexl-next/localization@0.0.0, @vexl-next/localization@workspace:packages/localization":
   version: 0.0.0-use.local
-  resolution: "@vexl-next/localization-next@workspace:packages/localization-next"
-  languageName: unknown
-  linkType: soft
-
-"@vexl-next/localizations@workspace:packages/localizations":
-  version: 0.0.0-use.local
-  resolution: "@vexl-next/localizations@workspace:packages/localizations"
-  dependencies:
-    "@json2csv/plainjs": ^7.0.1
-    "@types/luxon": ^3
-    "@vexl-next/eslint-config": 0.0.0
-    "@vexl-next/tsconfig": 0.0.0
-    esbuild: ^0.17.16
-    eslint: ^8.50.0
-    googleapis: ^118.0.0
-    i18n-js: 4.2.0
-    luxon: ^3.3.0
-    prettier: ^3.0.3
-    rimraf: ^4.4.0
-    set-operations: ^2.0.2
-    ts-jest: ^29.0.5
-    ts-node: ^10.9.1
-    typescript: ^5.1.3
+  resolution: "@vexl-next/localization@workspace:packages/localization"
   languageName: unknown
   linkType: soft
 
@@ -8369,7 +8322,7 @@ __metadata:
     "@vexl-next/domain": 0.0.0
     "@vexl-next/eslint-config": 0.0.0
     "@vexl-next/fix-brorand-for-expo": 0.0.0
-    "@vexl-next/localization-next": 0.0.0
+    "@vexl-next/localization": 0.0.0
     "@vexl-next/prettier-config": 0.0.0
     "@vexl-next/react-native-ecdh-platform-native-utils": 0.0.0
     "@vexl-next/resources-utils": 0.0.0
@@ -14704,30 +14657,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"googleapis-common@npm:^6.0.0":
-  version: 6.0.4
-  resolution: "googleapis-common@npm:6.0.4"
-  dependencies:
-    extend: ^3.0.2
-    gaxios: ^5.0.1
-    google-auth-library: ^8.0.2
-    qs: ^6.7.0
-    url-template: ^2.0.8
-    uuid: ^9.0.0
-  checksum: 718db6b533bdbfaef8f50df8ad9c7cf5a145a346dde16601e7380c5a845920c0801fa84b915e82998f9c4fc1ca77022b585fa5e94c3a40ec35600def7b9d94fe
-  languageName: node
-  linkType: hard
-
-"googleapis@npm:^118.0.0":
-  version: 118.0.0
-  resolution: "googleapis@npm:118.0.0"
-  dependencies:
-    google-auth-library: ^8.0.2
-    googleapis-common: ^6.0.0
-  checksum: 9f415214504858ce5ca733d27d0888a837e342ac11f181e2084789275dc0344e73567db0698f34e9c02ed1fc2bd4c71d71abab27f7d91c710011a7f55b0ca86e
-  languageName: node
-  linkType: hard
-
 "gopd@npm:^1.0.1":
   version: 1.0.1
   resolution: "gopd@npm:1.0.1"
@@ -17888,13 +17817,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lodash.get@npm:^4.4.2":
-  version: 4.4.2
-  resolution: "lodash.get@npm:4.4.2"
-  checksum: e403047ddb03181c9d0e92df9556570e2b67e0f0a930fcbbbd779370972368f5568e914f913e93f3b08f6d492abc71e14d4e9b7a18916c31fa04bd2306efe545
-  languageName: node
-  linkType: hard
-
 "lodash.isarguments@npm:^3.1.0":
   version: 3.1.0
   resolution: "lodash.isarguments@npm:3.1.0"
@@ -20858,15 +20780,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"qs@npm:^6.7.0":
-  version: 6.11.2
-  resolution: "qs@npm:6.11.2"
-  dependencies:
-    side-channel: ^1.0.4
-  checksum: e812f3c590b2262548647d62f1637b6989cc56656dc960b893fe2098d96e1bd633f36576f4cd7564dfbff9db42e17775884db96d846bebe4f37420d073ecdc0b
-  languageName: node
-  linkType: hard
-
 "query-string@npm:^7.1.3":
   version: 7.1.3
   resolution: "query-string@npm:7.1.3"
@@ -22764,13 +22677,6 @@ __metadata:
     functions-have-names: ^1.2.3
     has-property-descriptors: ^1.0.0
   checksum: 4975d17d90c40168eee2c7c9c59d023429f0a1690a89d75656306481ece0c3c1fb1ebcc0150ea546d1913e35fbd037bace91372c69e543e51fc5d1f31a9fa126
-  languageName: node
-  linkType: hard
-
-"set-operations@npm:^2.0.2":
-  version: 2.0.2
-  resolution: "set-operations@npm:2.0.2"
-  checksum: 6979818af73281d5725c66a6f0d85e7b092a7790265f58cec7a2bbbeea2fe881b4ed08a338306ad7aa6c7547cdc56a3346a43101d1114a072aab9e1553a82130
   languageName: node
   linkType: hard
 
@@ -24939,13 +24845,6 @@ __metadata:
     querystringify: ^2.1.1
     requires-port: ^1.0.0
   checksum: fbdba6b1d83336aca2216bbdc38ba658d9cfb8fc7f665eb8b17852de638ff7d1a162c198a8e4ed66001ddbf6c9888d41e4798912c62b4fd777a31657989f7bdf
-  languageName: node
-  linkType: hard
-
-"url-template@npm:^2.0.8":
-  version: 2.0.8
-  resolution: "url-template@npm:2.0.8"
-  checksum: 4183fccd74e3591e4154134d4443dccecba9c455c15c7df774f1f1e3fa340fd9bffb903b5beec347196d15ce49c34edf6dec0634a95d170ad6e78c0467d6e13e
   languageName: node
   linkType: hard
 

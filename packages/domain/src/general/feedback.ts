@@ -57,5 +57,6 @@ export const Feedback = z.object({
   stars: z.number(),
   objections: z.array(ObjectionType),
   textComment: z.string(),
+  finished: z.boolean().default(false),
 })
 export type Feedback = z.TypeOf<typeof Feedback>

@@ -18,12 +18,10 @@ import flagSvg from '../../OfferDetailScreen/images/flagSvg'
 import {useReportOfferHandleUI} from '../../OfferDetailScreen/api'
 import tradeChecklistSvg from '../../../images/tradeChecklistSvg'
 import vexlbotNotificationsSvg from '../images/vexlbotNotificationsSvg'
-import {useNavigation} from '@react-navigation/native'
 import {preferencesAtom} from '../../../utils/preferences'
 
 function ChatInfoModal(): JSX.Element | null {
   const {
-    chatAtom,
     offerForChatAtom,
     theirOfferAndNotReportedAtom,
     showModalAtom,
@@ -38,7 +36,6 @@ function ChatInfoModal(): JSX.Element | null {
   const [showModal, setShowModal] = useAtom(showModalAtom)
   const {top} = useSafeAreaInsets()
   const {t} = useTranslation()
-  const navigation = useNavigation()
   const resetNavigationToMessagingScreen = useResetNavigationToMessagingScreen()
   const reportOffer = useReportOfferHandleUI()
 
@@ -50,7 +47,6 @@ function ChatInfoModal(): JSX.Element | null {
   const identityRevealStatus = useAtomValue(identityRevealStatusAtom)
   const offerForChat = useAtomValue(offerForChatAtom)
   const theirOfferAndNotReported = useAtomValue(theirOfferAndNotReportedAtom)
-  const chat = useAtomValue(chatAtom)
   const [showVexlbotNotifications, setShowVexlbotNotifications] = useAtom(
     showVexlbotNotificationsForCurrentChatAtom
   )
@@ -106,13 +102,6 @@ function ChatInfoModal(): JSX.Element | null {
                       iconFill: getTokens().color.greyOnBlack.val,
                       onPress: () => {
                         setShowModal(false)
-                        navigation.navigate('TradeChecklistFlow', {
-                          screen: 'AgreeOnTradeDetails',
-                          params: {
-                            chatId: chat.id,
-                            inboxKey: chat.inbox.privateKey.publicKeyPemBase64,
-                          },
-                        })
                       },
                     },
                     {

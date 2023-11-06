@@ -54,8 +54,8 @@ import revealContactActionAtom, {
   type RevealContactMessageType,
 } from '../../../state/chat/atoms/revealContactActionAtom'
 import showErrorAlert from '../../../utils/showErrorAlert'
-import {FeedbackWithoutSavedProgress} from '../../UserFeedback'
-import {deleteChatFeedbackEntryFromStorage} from '../../../state/feedback/atoms'
+import ChatFeedbackDialogContent from '../components/ChatFeedbackDialogContent'
+import {generateInitialFeedback} from '../../UserFeedback/atoms'
 
 type ChatUIMode = 'approval' | 'messages'
 
@@ -67,11 +67,11 @@ export const dummyChatWithMessages: ChatWithMessages = {
     origin: {type: 'unknown'},
     isUnread: false,
     showInfoBar: true,
-    feedbackDone: false,
     showVexlbotInitialMessage: true,
     showVexlbotNotifications: true,
   },
   messages: [],
+  feedback: generateInitialFeedback('CHAT_RATING'),
 }
 
 export type ExtraToSend =
@@ -104,6 +104,9 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
   const deleteChatAtom = deleteChatActionAtom(chatWithMessagesAtom)
 
   const nameAtom = selectAtom(chatAtom, (o) => randomName(o.id))
+  const publicKeyPemBase64Atom = focusAtom(chatAtom, (o) =>
+    o.prop('inbox').prop('privateKey').prop('publicKeyPemBase64')
+  )
 
   const commonConnectionsHashesAtom = atom((get) => {
     const offer = get(offerForChatAtom)
@@ -125,7 +128,6 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     null,
     async (get, set, {skipAsk}: {skipAsk: boolean} = {skipAsk: false}) => {
       const {t} = get(translationAtom)
-      const chat = get(chatAtom)
 
       return await pipe(
         skipAsk
@@ -178,7 +180,6 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
           },
           () => {
             set(loadingOverlayDisplayedAtom, false)
-            set(deleteChatFeedbackEntryFromStorage, chat.id)
 
             return true
           }
@@ -187,22 +188,21 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     }
   )
 
+  const chatFeedbackAtom = focusAtom(chatWithMessagesAtom, (o) =>
+    o.prop('feedback')
+  )
+
   const giveFeedbackForDeletedChatAtom = atom(null, async (get, set) => {
     const {t} = get(translationAtom)
-    const chatFeedbackDone = get(chatFeedbackDoneAtom)
+    const chatFeedback = get(chatFeedbackAtom)
 
-    if (!chatFeedbackDone) {
+    if (!chatFeedback.finished) {
       await pipe(
         set(askAreYouSureActionAtom, {
           steps: [
             {
               type: 'StepWithChildren',
-              children: () =>
-                FeedbackWithoutSavedProgress({
-                  feedbackDoneAtom: chatFeedbackDoneAtom,
-                  type: 'CHAT_RATING',
-                  hideCloseButton: true,
-                }),
+              MainSectionComponent: ChatFeedbackDialogContent,
               positiveButtonText: t('common.close'),
               backgroundColor: '$grey',
             },
@@ -701,10 +701,6 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
 
   const showInfoBarAtom = focusAtom(chatAtom, (o) => o.prop('showInfoBar'))
 
-  const chatFeedbackDoneAtom = focusAtom(chatAtom, (o) =>
-    o.prop('feedbackDone')
-  )
-
   const showVexlbotNotificationsForCurrentChatAtom = focusAtom(chatAtom, (o) =>
     o.prop('showVexlbotNotifications')
   )
@@ -753,9 +749,10 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     clearExtraToSendActionAtom,
     receivedContactRevealRequestMessageAtom,
     showInfoBarAtom,
-    chatFeedbackDoneAtom,
+    chatFeedbackAtom,
     showVexlbotNotificationsForCurrentChatAtom,
     showVexlbotInitialMessageForCurrentChatAtom,
     giveFeedbackForDeletedChatAtom,
+    publicKeyPemBase64Atom,
   }
 })

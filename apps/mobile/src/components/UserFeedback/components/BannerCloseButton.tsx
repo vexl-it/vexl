@@ -1,23 +1,20 @@
 import {useMolecule} from 'jotai-molecules'
 import {feedbackMolecule} from '../atoms'
-import {useAtomValue, type PrimitiveAtom, useSetAtom} from 'jotai'
+import {useAtomValue, useSetAtom} from 'jotai'
 import {TouchableOpacity} from 'react-native'
 import SvgImage from '../../Image'
 import closeSvg from '../../images/closeSvg'
 import {getTokens, Stack} from 'tamagui'
 
 interface Props {
-  feedbackDoneAtom: PrimitiveAtom<boolean>
   hideCloseButton?: boolean
 }
 
-function BannerCloseButton({
-  feedbackDoneAtom,
-  hideCloseButton,
-}: Props): JSX.Element | null {
-  const {currentFeedbackPageAtom} = useMolecule(feedbackMolecule)
+function BannerCloseButton({hideCloseButton}: Props): JSX.Element | null {
+  const {currentFeedbackPageAtom, chatFeedbackFinishedAtom} =
+    useMolecule(feedbackMolecule)
   const currentPage = useAtomValue(currentFeedbackPageAtom)
-  const setFeedbackDone = useSetAtom(feedbackDoneAtom)
+  const setFeedbackDone = useSetAtom(chatFeedbackFinishedAtom)
 
   return currentPage !== 'OFFER_RATING' && !hideCloseButton ? (
     <TouchableOpacity

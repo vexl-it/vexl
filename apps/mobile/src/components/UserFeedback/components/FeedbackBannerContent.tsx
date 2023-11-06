@@ -4,7 +4,7 @@ import Objections from './Objections'
 import TextComment from './TextComment'
 import Button from '../../Button'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
-import {type PrimitiveAtom, useAtomValue, useSetAtom} from 'jotai'
+import {useAtomValue, useSetAtom} from 'jotai'
 import {useEffect, useMemo} from 'react'
 import {useMolecule} from 'jotai-molecules'
 import {feedbackMolecule} from '../atoms'
@@ -12,26 +12,23 @@ import {POSITIVE_STAR_RATING_THRESHOLD} from '@vexl-next/domain/dist/general/fee
 
 interface Props {
   autoCloseWhenFinished?: boolean
-  feedbackDoneAtom: PrimitiveAtom<boolean>
 }
 
-function FeedbackBannerContent({
-  autoCloseWhenFinished,
-  feedbackDoneAtom,
-}: Props): JSX.Element {
+function FeedbackBannerContent({autoCloseWhenFinished}: Props): JSX.Element {
   const {t} = useTranslation()
   const {
     formIdAtom,
+    chatFeedbackFinishedAtom,
     starRatingAtom,
     currentFeedbackPageAtom,
-    feedbackFlowFinishedAtom,
     submitChatFeedbackAndHandleUIAtom,
     submitTextCommentButtonDisabledAtom,
+    feedbackFlowFinishedAtom,
   } = useMolecule(feedbackMolecule)
+  const feedbackFlowFinished = useAtomValue(feedbackFlowFinishedAtom)
   const currentPage = useAtomValue(currentFeedbackPageAtom)
   const starRating = useAtomValue(starRatingAtom)
-  const feedbackFlowFinished = useAtomValue(feedbackFlowFinishedAtom)
-  const setFeedbackDone = useSetAtom(feedbackDoneAtom)
+  const setChatFeedbackFinished = useSetAtom(chatFeedbackFinishedAtom)
   const submitChatFeedback = useSetAtom(submitChatFeedbackAndHandleUIAtom)
   const submitTextCommentButtonDisabled = useAtomValue(
     submitTextCommentButtonDisabledAtom
@@ -51,12 +48,12 @@ function FeedbackBannerContent({
         ? t('messages.whatWorkedWellExactly')
         : t('messages.whatWasWrongExactly')
       : t('common.thanks')
-  }, [currentPage, feedbackFlowFinished, starRating, t])
+  }, [feedbackFlowFinished, currentPage, starRating, t])
 
   useEffect(() => {
     if (feedbackFlowFinished && autoCloseWhenFinished) {
       const timeout = setTimeout(() => {
-        setFeedbackDone(true)
+        setChatFeedbackFinished(true)
       }, 2000)
 
       return () => {
@@ -66,9 +63,9 @@ function FeedbackBannerContent({
   }, [
     autoCloseWhenFinished,
     currentPage,
-    feedbackFlowFinished,
     formIdAtom,
-    setFeedbackDone,
+    feedbackFlowFinished,
+    setChatFeedbackFinished,
   ])
 
   return (

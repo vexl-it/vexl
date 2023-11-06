@@ -6,7 +6,7 @@ import {
 import * as E from 'fp-ts/Either'
 import type * as TE from 'fp-ts/TaskEither'
 import {atom, useAtom, type WritableAtom} from 'jotai'
-import React from 'react'
+import React, {type ComponentType} from 'react'
 import {BackHandler, ScrollView, StyleSheet, View} from 'react-native'
 import Animated, {
   FadeIn,
@@ -35,7 +35,7 @@ interface StepWithChildren {
   negativeButtonText?: string
   positiveButtonText: string
   backgroundColor?: ColorTokens
-  children: (props: any) => React.ReactNode | null
+  MainSectionComponent: ComponentType
 }
 
 interface StepWithInput {
@@ -235,7 +235,7 @@ function AreYouSureDialog(): JSX.Element | null {
                       />
                     </Stack>
                   ) : (
-                    <step.children />
+                    <step.MainSectionComponent />
                   )}
                 </Stack>
               </View>

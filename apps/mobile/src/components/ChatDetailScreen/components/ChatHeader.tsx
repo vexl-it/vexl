@@ -12,7 +12,6 @@ import tradeChecklistSvg from '../../../images/tradeChecklistSvg'
 import binSvg from '../images/binSvg'
 import useResetNavigationToMessagingScreen from '../../../utils/useResetNavigationToMessagingScreen'
 import blockIconSvg from '../../../images/blockIconSvg'
-import {useNavigation} from '@react-navigation/native'
 import phoneSvg from '../images/phoneSvg'
 import identityIconSvg from '../../images/identityIconSvg'
 
@@ -28,9 +27,7 @@ type ButtonType =
 
 function Button({type}: {type: ButtonType}): JSX.Element | null {
   const safeGoBack = useSafeGoBack()
-  const navigation = useNavigation()
   const {
-    chatAtom,
     showModalAtom,
     deleteChatWithUiFeedbackAtom,
     blockChatWithUiFeedbackAtom,
@@ -53,7 +50,6 @@ function Button({type}: {type: ButtonType}): JSX.Element | null {
   const giveFeedback = useSetAtom(giveFeedbackForDeletedChatAtom)
 
   const [forceShowHistory, setForceShowHistory] = useAtom(forceShowHistoryAtom)
-  const chat = useAtomValue(chatAtom)
 
   const onGoBackPressed = useCallback(() => {
     if (forceShowHistory) {
@@ -150,13 +146,6 @@ function Button({type}: {type: ButtonType}): JSX.Element | null {
         onPress={() => {
           Keyboard.dismiss()
           setModal(false)
-          navigation.navigate('TradeChecklistFlow', {
-            screen: 'AgreeOnTradeDetails',
-            params: {
-              chatId: chat.id,
-              inboxKey: chat.inbox.privateKey.publicKeyPemBase64,
-            },
-          })
         }}
         iconFill={getTokens().color.main.val}
         iconHeight={24}

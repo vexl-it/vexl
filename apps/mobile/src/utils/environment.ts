@@ -15,3 +15,5 @@ export const hmacPassword = String(
 export const packageName = String(
   Constants.expoConfig?.extra?.packageName ?? 'it.vexl.next'
 )
+
+export const isStaging = apiPreset === 'stageEnv'

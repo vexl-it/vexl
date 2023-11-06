@@ -1,4 +1,3 @@
-import {translations} from '@vexl-next/localizations'
 import {keys} from '@vexl-next/resources-utils/dist/utils/keys'
 import {Picker} from '@react-native-picker/picker'
 import {Text, YStack} from 'tamagui'
@@ -7,6 +6,7 @@ import Button from '../../Button'
 import {i18nAtom} from '../../../utils/localization/I18nProvider'
 import {useSetAtom} from 'jotai'
 import {I18n} from 'i18n-js'
+import * as translations from '../../../utils/localization/translations'
 
 const languages = keys(translations)
 

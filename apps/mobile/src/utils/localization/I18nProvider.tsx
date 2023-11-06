@@ -4,12 +4,14 @@ import type {TranslateOptions} from 'i18n-js'
 import {I18n} from 'i18n-js'
 import {atom, useAtomValue} from 'jotai'
 import {selectAtom} from 'jotai/utils'
-import {enableHiddenFeatures} from '../environment'
+import {enableHiddenFeatures, isStaging} from '../environment'
+import {enDev} from './createTranslationObject'
 // SETUP I18n
 export const i18n = new I18n(
   enableHiddenFeatures
     ? translations
     : {
+        'en_dev': {localeName: 'en', ...enDev},
         en: {localeName: 'en', ...translations.en},
         de: {localeName: 'de', ...translations.de},
         cs: {localeName: 'cs', ...translations.cs},
@@ -17,7 +19,7 @@ export const i18n = new I18n(
       }
 )
 i18n.locale = getLocales().at(0)?.languageTag ?? 'en'
-i18n.defaultLocale = 'en'
+i18n.defaultLocale = isStaging ? 'en_dev' : 'en'
 i18n.enableFallback = true
 // Setup provider
 export type TFunction = (key: LocaleKeys, options?: TranslateOptions) => string

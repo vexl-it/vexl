@@ -2,6 +2,7 @@
   "name": "@vexl-next/localization-next",
   "version": "0.0.0",
   "files": [
+    "source.json",
     "cs.json",
     "de.json",
     "en.json",

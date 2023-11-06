@@ -1,0 +1,13 @@
+{
+  "name": "@vexl-next/localization-next",
+  "version": "0.0.0",
+  "files": [
+    "cs.json",
+    "de.json",
+    "en.json",
+    "fr.json",
+    "it.json",
+    "pt.json",
+    "sp.json"
+  ]
+}

@@ -1,0 +1,9 @@
+"project_id": "625640"
+"base_path": "/packages/localization-next"
+"preserve_hierarchy": true
+"files": [
+    {
+      "source": "/base.json", #source files filter
+      "translation": "/%two_letters_code%-%original_file_name%", #where translations are stored
+    },
+  ]

@@ -7,4 +7,4 @@ files:
       - package.json
       - .gitignore
       - "*-*.json"
-    translation: /%two_letters_code%-%original_file_name%
+    translation: /%original_file_name%-%two_letters_code%

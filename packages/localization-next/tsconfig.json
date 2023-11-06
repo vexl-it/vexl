@@ -1,9 +1,0 @@
-{
-  "extends": "@vexl-next/tsconfig/generic-esm.json",
-  "compilerOptions": {
-    "rootDir": "./src",
-    "outDir": "."
-  },
-  "exclude": ["./dist/**", "./tests/**", "node_modules"],
-  "include": ["."]
-}

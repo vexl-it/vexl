@@ -1,19 +1,19 @@
-import IconButton from '../../IconButton'
-import {getTokens, Stack, XStack} from 'tamagui'
-import OtherSideNamePhotoAndInfo from './OtherSideNamePhotoAndInfo'
-import backButtonSvg from '../../../images/backButtonSvg'
-import useSafeGoBack from '../../../utils/useSafeGoBack'
-import {Keyboard, TouchableOpacity} from 'react-native'
-import {useMolecule} from 'jotai-molecules'
-import {chatMolecule} from '../atoms'
 import {useAtom, useAtomValue, useSetAtom} from 'jotai'
+import {useMolecule} from 'jotai-molecules'
 import {useCallback} from 'react'
-import tradeChecklistSvg from '../../../images/tradeChecklistSvg'
-import binSvg from '../images/binSvg'
-import useResetNavigationToMessagingScreen from '../../../utils/useResetNavigationToMessagingScreen'
+import {Keyboard, TouchableOpacity} from 'react-native'
+import {getTokens, Stack, XStack} from 'tamagui'
+import backButtonSvg from '../../../images/backButtonSvg'
 import blockIconSvg from '../../../images/blockIconSvg'
-import phoneSvg from '../images/phoneSvg'
+import tradeChecklistSvg from '../../../images/tradeChecklistSvg'
+import useResetNavigationToMessagingScreen from '../../../utils/useResetNavigationToMessagingScreen'
+import useSafeGoBack from '../../../utils/useSafeGoBack'
+import IconButton from '../../IconButton'
 import identityIconSvg from '../../images/identityIconSvg'
+import {chatMolecule} from '../atoms'
+import binSvg from '../images/binSvg'
+import phoneSvg from '../images/phoneSvg'
+import OtherSideNamePhotoAndInfo from './OtherSideNamePhotoAndInfo'
 
 type ButtonType =
   | 'back'
@@ -36,7 +36,6 @@ function Button({type}: {type: ButtonType}): JSX.Element | null {
     revealIdentityWithUiFeedbackAtom,
     revealContactWithUiFeedbackAtom,
     contactRevealStatusAtom,
-    giveFeedbackForDeletedChatAtom,
   } = useMolecule(chatMolecule)
   const identityRevealStatus = useAtomValue(identityRevealStatusAtom)
   const contactRevealStatus = useAtomValue(contactRevealStatusAtom)
@@ -47,7 +46,6 @@ function Button({type}: {type: ButtonType}): JSX.Element | null {
 
   const blockChat = useSetAtom(blockChatWithUiFeedbackAtom)
   const deleteChat = useSetAtom(deleteChatWithUiFeedbackAtom)
-  const giveFeedback = useSetAtom(giveFeedbackForDeletedChatAtom)
 
   const [forceShowHistory, setForceShowHistory] = useAtom(forceShowHistoryAtom)
 
@@ -104,7 +102,6 @@ function Button({type}: {type: ButtonType}): JSX.Element | null {
           void deleteChat().then((success) => {
             if (success) {
               resetNavigationToMessagingScreen()
-              void giveFeedback()
             }
           })
         }}

@@ -1,4 +1,4 @@
-import {z} from 'zod'
+import {PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
 import {
   Chat,
   ChatId,
@@ -7,7 +7,6 @@ import {
 } from '@vexl-next/domain/dist/general/messaging'
 import {type BasicError} from '@vexl-next/domain/dist/utility/errors'
 import {type ErrorEncryptingMessage} from '@vexl-next/resources-utils/dist/chat/utils/chatCrypto'
-import {PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
 import {
   type BadStatusCodeError,
   type NetworkError,
@@ -22,10 +21,8 @@ import {
   type InboxDoesNotExist,
   type NotPermittedToSendMessageToTargetInbox,
 } from '@vexl-next/rest-api/dist/services/contact/contracts'
+import {z} from 'zod'
 import {type ReadingFileError} from './utils/replaceImageFileUrisWithBase64'
-import {Feedback} from '@vexl-next/domain/dist/general/feedback'
-import {Uuid} from '@vexl-next/domain/dist/utility/Uuid.brand'
-import {randomUUID} from 'node:crypto'
 
 export type ApiErrorCreatingInbox = BasicError<'ApiErrorCreatingInbox'>
 export type ErrorInboxAlreadyExists = BasicError<'ErrorInboxAlreadyExists'>
@@ -56,14 +53,6 @@ export type ChatMessageWithState = z.TypeOf<typeof ChatMessageWithState>
 export const ChatWithMessages = z.object({
   chat: Chat,
   messages: z.array(ChatMessageWithState),
-  feedback: Feedback.default({
-    formId: Uuid.parse(randomUUID()),
-    finished: false,
-    type: 'CHAT_RATING',
-    stars: 0,
-    objections: [],
-    textComment: '',
-  }),
 })
 export type ChatWithMessages = z.TypeOf<typeof ChatWithMessages>
 

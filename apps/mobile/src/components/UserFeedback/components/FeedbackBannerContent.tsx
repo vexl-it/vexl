@@ -9,6 +9,7 @@ import {useEffect, useMemo} from 'react'
 import {useMolecule} from 'jotai-molecules'
 import {feedbackMolecule} from '../atoms'
 import {POSITIVE_STAR_RATING_THRESHOLD} from '@vexl-next/domain/dist/general/feedback'
+import {newOfferFeedbackDoneAtom} from '../../../state/feedback/atoms'
 
 interface Props {
   autoCloseWhenFinished?: boolean
@@ -33,6 +34,7 @@ function FeedbackBannerContent({autoCloseWhenFinished}: Props): JSX.Element {
   const submitTextCommentButtonDisabled = useAtomValue(
     submitTextCommentButtonDisabledAtom
   )
+  const setNewOfferFeedbackDone = useSetAtom(newOfferFeedbackDoneAtom)
 
   const title = useMemo(() => {
     return !feedbackFlowFinished
@@ -54,6 +56,10 @@ function FeedbackBannerContent({autoCloseWhenFinished}: Props): JSX.Element {
     if (feedbackFlowFinished && autoCloseWhenFinished) {
       const timeout = setTimeout(() => {
         setChatFeedbackFinished(true)
+
+        if (currentPage === 'OFFER_RATING') {
+          setNewOfferFeedbackDone(true)
+        }
       }, 2000)
 
       return () => {
@@ -66,6 +72,7 @@ function FeedbackBannerContent({autoCloseWhenFinished}: Props): JSX.Element {
     formIdAtom,
     feedbackFlowFinished,
     setChatFeedbackFinished,
+    setNewOfferFeedbackDone,
   ])
 
   return (

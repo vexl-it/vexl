@@ -1,21 +1,20 @@
-import {atom} from 'jotai'
+import {type PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
 import {
   generateChatId,
   type Inbox,
 } from '@vexl-next/domain/dist/general/messaging'
+import {type OneOfferInState} from '@vexl-next/domain/dist/general/offers'
+import {atom} from 'jotai'
+import * as O from 'optics-ts'
+import {preferencesAtom} from '../../../utils/preferences'
 import {
   type ChatMessageWithState,
   type ChatWithMessages,
   type MessagingState,
 } from '../domain'
-import {type OneOfferInState} from '@vexl-next/domain/dist/general/offers'
+import createVexlbotInitialMessage from '../utils/createVexlbotInitialMessage'
 import focusChatForTheirOfferAtom from './focusChatForTheirOfferAtom'
 import messagingStateAtom from './messagingStateAtom'
-import * as O from 'optics-ts'
-import {type PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
-import createVexlbotInitialMessage from '../utils/createVexlbotInitialMessage'
-import {preferencesAtom} from '../../../utils/preferences'
-import {generateInitialFeedback} from '../../../components/UserFeedback/atoms'
 
 function createNewChat({
   inbox,
@@ -41,7 +40,6 @@ function createNewChat({
       showVexlbotInitialMessage: true,
       showVexlbotNotifications: true,
     },
-    feedback: generateInitialFeedback('CHAT_RATING'),
     messages: tradeChecklistEnabled
       ? [
           createVexlbotInitialMessage({

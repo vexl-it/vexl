@@ -1,22 +1,25 @@
-import {storage} from './fpMmkv'
+import {type OneOfferInState} from '@vexl-next/domain/dist/general/offers'
+import {MINIMAL_DATE} from '@vexl-next/domain/dist/utility/IsoDatetimeString.brand'
+import {UnixMilliseconds} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
 import {getDefaultStore} from 'jotai'
+import {previousSearchesAtom} from '../components/SearchOffersScreen/atoms/previousSearchesAtom'
 import {messagingStateAtomStorageAtom} from '../state/chat/atoms/messagingStateAtom'
 import connectionStateAtom from '../state/connections/atom/connectionStateAtom'
-import {UnixMilliseconds} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
 import offerToConnectionsAtom from '../state/connections/atom/offerToConnectionsAtom'
 import {
   combinedContactsAfterLastSubmitStorageAtom,
   importedContactsStorageAtom,
 } from '../state/contacts'
+import {displayedNotificationsAtom} from '../state/displayedNotifications'
+import {
+  feedbacksForClosedChatsStorageAtom,
+  newOfferFeedbackDoneStorageAtom,
+} from '../state/feedback/atoms'
 import {offersStateAtom} from '../state/marketplace/atom'
-import {MINIMAL_DATE} from '@vexl-next/domain/dist/utility/IsoDatetimeString.brand'
 import {postLoginFinishedStorageAtom} from '../state/postLoginOnboarding'
 import {selectedCurrencyStorageAtom} from '../state/selectedCurrency'
+import {storage} from './fpMmkv'
 import {preferencesAtom} from './preferences'
-import {type OneOfferInState} from '@vexl-next/domain/dist/general/offers'
-import {previousSearchesAtom} from '../components/SearchOffersScreen/atoms/previousSearchesAtom'
-import {displayedNotificationsAtom} from '../state/displayedNotifications'
-import {newOfferFeedbackDoneStorageAtom} from '../state/feedback/atoms'
 
 export default function clearMmkvStorageAndEmptyAtoms(): void {
   // TODO:#110 find a better way how to clear the state
@@ -72,6 +75,8 @@ export default function clearMmkvStorageAndEmptyAtoms(): void {
   getDefaultStore().set(previousSearchesAtom, [])
 
   getDefaultStore().set(displayedNotificationsAtom, [])
+
+  getDefaultStore().set(feedbacksForClosedChatsStorageAtom, {feedbacks: {}})
 
   storage._storage.clearAll()
 }

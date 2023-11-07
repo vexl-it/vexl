@@ -92,7 +92,6 @@ function QuickActionBanner(): JSX.Element | null {
     requestStateAtom,
     forceShowHistoryAtom,
     receivedContactRevealRequestMessageAtom,
-    giveFeedbackForDeletedChatAtom,
   } = useMolecule(chatMolecule)
 
   const lastMessage = useAtomValue(lastMessageAtom)
@@ -100,7 +99,6 @@ function QuickActionBanner(): JSX.Element | null {
   const identityRevealStatus = useAtomValue(identityRevealStatusAtom)
   const contactRevealStatus = useAtomValue(contactRevealStatusAtom)
   const deleteChat = useSetAtom(deleteChatWithUiFeedbackAtom)
-  const giveFeedback = useSetAtom(giveFeedbackForDeletedChatAtom)
   const revealIdentity = useSetAtom(revealIdentityWithUiFeedbackAtom)
   const revealContact = useSetAtom(revealContactWithUiFeedbackAtom)
   const requestState = useAtomValue(requestStateAtom)
@@ -156,7 +154,6 @@ function QuickActionBanner(): JSX.Element | null {
           void deleteChat().then((result) => {
             if (result) {
               resetNavigationToMessagingScreen()
-              void giveFeedback()
             }
           })
         }}

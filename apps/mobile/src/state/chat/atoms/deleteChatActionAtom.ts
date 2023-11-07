@@ -1,21 +1,22 @@
-import {type ActionAtomType} from '../../../utils/atomUtils/ActionAtomType'
-import * as TE from 'fp-ts/TaskEither'
-import * as E from 'fp-ts/Either'
-import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
 import {
-  type ChatMessage,
   generateChatMessageId,
+  type ChatMessage,
 } from '@vexl-next/domain/dist/general/messaging'
-import {atom} from 'jotai'
 import {unixMillisecondsNow} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
-import {pipe} from 'fp-ts/function'
-import {type FocusAtomType} from '../../../utils/atomUtils/FocusAtomType'
-import {type ErrorEncryptingMessage} from '@vexl-next/resources-utils/dist/chat/utils/chatCrypto'
-import {type SendMessageApiErrors} from '@vexl-next/resources-utils/dist/chat/sendMessage'
-import {privateApiAtom} from '../../../api'
-import shouldSendTerminationMessageToChat from '../utils/shouldSendTerminationMessageToChat'
 import sendLeaveChat from '@vexl-next/resources-utils/dist/chat/sendLeaveChat'
+import {type SendMessageApiErrors} from '@vexl-next/resources-utils/dist/chat/sendMessage'
+import {type ErrorEncryptingMessage} from '@vexl-next/resources-utils/dist/chat/utils/chatCrypto'
+import * as E from 'fp-ts/Either'
+import * as TE from 'fp-ts/TaskEither'
+import {pipe} from 'fp-ts/function'
+import {atom} from 'jotai'
+import {privateApiAtom} from '../../../api'
+import {type ActionAtomType} from '../../../utils/atomUtils/ActionAtomType'
+import {type FocusAtomType} from '../../../utils/atomUtils/FocusAtomType'
 import {deleteChatFiles} from '../../../utils/fsDirectories'
+import {removeFeedbackRecordActionAtom} from '../../feedback/atoms'
+import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
+import shouldSendTerminationMessageToChat from '../utils/shouldSendTerminationMessageToChat'
 
 export default function deleteChatActionAtom(
   chatWithMessagesAtom: FocusAtomType<ChatWithMessages>
@@ -74,6 +75,8 @@ export default function deleteChatActionAtom(
           chat.inbox.privateKey.publicKeyPemBase64,
           chat.otherSide.publicKey
         )
+
+        set(removeFeedbackRecordActionAtom, chatWithMessages.chat.id)
 
         set(chatWithMessagesAtom, (old) => ({
           ...old,

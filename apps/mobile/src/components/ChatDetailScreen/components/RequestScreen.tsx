@@ -1,21 +1,21 @@
-import {Stack, YStack} from 'tamagui'
-import ChatRequestPreview from './ChatRequestPreview'
-import InfoSquare from '../../InfoSquare'
-import AcceptDeclineButtons from './AcceptDeclineButtons'
-import {ScrollView} from 'react-native'
-import ChatHeader from './ChatHeader'
-import {useMolecule} from 'jotai-molecules'
-import {chatMolecule} from '../atoms'
+import * as T from 'fp-ts/Task'
+import {pipe} from 'fp-ts/function'
 import {useAtomValue, useSetAtom} from 'jotai'
+import {useMolecule} from 'jotai-molecules'
+import {useCallback, useState} from 'react'
+import {ScrollView} from 'react-native'
+import {Stack, YStack} from 'tamagui'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import randomName from '../../../utils/randomName'
-import Button from '../../Button'
 import useSafeGoBack from '../../../utils/useSafeGoBack'
-import {useCallback, useState} from 'react'
-import RerequestButtonOrMessage from './RerequestButtonOrMessage'
+import Button from '../../Button'
+import InfoSquare from '../../InfoSquare'
 import OfferRequestTextInput from '../../OfferRequestTextInput'
-import {pipe} from 'fp-ts/function'
-import * as T from 'fp-ts/Task'
+import {chatMolecule} from '../atoms'
+import AcceptDeclineButtons from './AcceptDeclineButtons'
+import ChatHeader from './ChatHeader'
+import ChatRequestPreview from './ChatRequestPreview'
+import RerequestButtonOrMessage from './RerequestButtonOrMessage'
 
 function RequestScreen(): JSX.Element {
   const {
@@ -30,7 +30,6 @@ function RequestScreen(): JSX.Element {
     hasPreviousCommunicationAtom,
     canBeRerequestedAtom,
     rerequestOfferActionAtom,
-    giveFeedbackForDeletedChatAtom,
   } = useMolecule(chatMolecule)
   const offer = useAtomValue(offerForChatAtom)
   const chat = useAtomValue(chatAtom)
@@ -41,7 +40,6 @@ function RequestScreen(): JSX.Element {
   const wasDenied = useAtomValue(wasDeniedAtom)
   const wasCancelled = useAtomValue(wasCancelledAtom)
   const deleteChat = useSetAtom(deleteChatWithUiFeedbackAtom)
-  const giveFeedback = useSetAtom(giveFeedbackForDeletedChatAtom)
   const safeGoBack = useSafeGoBack()
   const setForceShowHistory = useSetAtom(forceShowHistoryAtom)
   const hasPreviousCommunication = useAtomValue(hasPreviousCommunicationAtom)
@@ -142,7 +140,6 @@ function RequestScreen(): JSX.Element {
                 void deleteChat().then((success) => {
                   if (success) {
                     safeGoBack()
-                    void giveFeedback()
                   }
                 })
               }}

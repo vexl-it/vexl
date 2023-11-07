@@ -1,3 +1,11 @@
+import {generatePrivateKey} from '@vexl-next/cryptography/dist/KeyHolder'
+import {generateChatId} from '@vexl-next/domain/dist/general/messaging'
+import {type FriendLevel} from '@vexl-next/domain/dist/general/offers'
+import {type UriString} from '@vexl-next/domain/dist/utility/UriString.brand'
+import * as E from 'fp-ts/Either'
+import {pipe} from 'fp-ts/function'
+import * as T from 'fp-ts/Task'
+import * as TE from 'fp-ts/TaskEither'
 import {
   atom,
   type PrimitiveAtom,
@@ -5,57 +13,49 @@ import {
   type WritableAtom,
 } from 'jotai'
 import {createScope, molecule} from 'jotai-molecules'
-import {generateChatId} from '@vexl-next/domain/dist/general/messaging'
-import {offerForChatOriginAtom} from '../../../state/marketplace/atom'
+import {focusAtom} from 'jotai-optics'
 import {selectAtom, splitAtom} from 'jotai/utils'
-import {generatePrivateKey} from '@vexl-next/cryptography/dist/KeyHolder'
+import {Alert} from 'react-native'
+import blockChatActionAtom from '../../../state/chat/atoms/blockChatActionAtom'
+import cancelRequestActionAtomHandleUI from '../../../state/chat/atoms/cancelRequestActionAtomHandleUI'
+import createCanChatBeRerequestedAtom from '../../../state/chat/atoms/createCanBeRerequestedAtom'
+import createIsCancelledAtom from '../../../state/chat/atoms/createIsCancelledAtom'
+import {createRequestStateAtom} from '../../../state/chat/atoms/createRequestStateAtom'
+import deleteChatActionAtom from '../../../state/chat/atoms/deleteChatActionAtom'
+import {focusWasDeniedAtom} from '../../../state/chat/atoms/focusDenyRequestMessageAtom'
+import focusOtherSideLeftAtom from '../../../state/chat/atoms/focusOtherSideLeftAtom'
+import focusRequestMessageAtom from '../../../state/chat/atoms/focusRequestMessageAtom'
+import revealContactActionAtom, {
+  type RevealContactMessageType,
+} from '../../../state/chat/atoms/revealContactActionAtom'
+import revealIdentityActionAtom, {
+  type RevealMessageType,
+} from '../../../state/chat/atoms/revealIdentityActionAtom'
+import selectOtherSideDataAtom from '../../../state/chat/atoms/selectOtherSideDataAtom'
 import sendMessageActionAtom from '../../../state/chat/atoms/sendMessageActionAtom'
+import {sendRequestHandleUIActionAtom} from '../../../state/chat/atoms/sendRequestActionAtom'
 import {
   type ChatMessageWithState,
   type ChatWithMessages,
 } from '../../../state/chat/domain'
-import {messagesToListData} from '../utils'
-import focusRequestMessageAtom from '../../../state/chat/atoms/focusRequestMessageAtom'
-import {focusAtom} from 'jotai-optics'
-import {focusWasDeniedAtom} from '../../../state/chat/atoms/focusDenyRequestMessageAtom'
-import deleteChatActionAtom from '../../../state/chat/atoms/deleteChatActionAtom'
-import blockChatActionAtom from '../../../state/chat/atoms/blockChatActionAtom'
-import * as TE from 'fp-ts/TaskEither'
-import * as E from 'fp-ts/Either'
-import * as T from 'fp-ts/Task'
-import {pipe} from 'fp-ts/function'
-import {loadingOverlayDisplayedAtom} from '../../LoadingOverlayProvider'
-import {Alert} from 'react-native'
-import randomName from '../../../utils/randomName'
-import selectOtherSideDataAtom from '../../../state/chat/atoms/selectOtherSideDataAtom'
-import focusOtherSideLeftAtom from '../../../state/chat/atoms/focusOtherSideLeftAtom'
-import {askAreYouSureActionAtom} from '../../AreYouSureDialog'
-import {deleteChatStep1Svg} from '../images/deleteChatSvg'
-import {translationAtom} from '../../../utils/localization/I18nProvider'
-import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
-import revealIdentityActionAtom, {
-  type RevealMessageType,
-} from '../../../state/chat/atoms/revealIdentityActionAtom'
-import reportError from '../../../utils/reportError'
 import connectionStateAtom, {
   createFriendLevelInfoAtom,
 } from '../../../state/connections/atom/connectionStateAtom'
-import {type FriendLevel} from '@vexl-next/domain/dist/general/offers'
-import {type UriString} from '@vexl-next/domain/dist/utility/UriString.brand'
-import createIsCancelledAtom from '../../../state/chat/atoms/createIsCancelledAtom'
-import {createRequestStateAtom} from '../../../state/chat/atoms/createRequestStateAtom'
-import createCanChatBeRerequestedAtom from '../../../state/chat/atoms/createCanBeRerequestedAtom'
-import {sendRequestHandleUIActionAtom} from '../../../state/chat/atoms/sendRequestActionAtom'
-import cancelRequestActionAtomHandleUI from '../../../state/chat/atoms/cancelRequestActionAtomHandleUI'
-import {safeNavigateBackOutsideReact} from '../../../utils/navigation'
-import {type SelectedImage} from '../../../utils/imagePickers'
+import {createFeedbackForChatAtom} from '../../../state/feedback/atoms'
+import {offerForChatOriginAtom} from '../../../state/marketplace/atom'
 import getValueFromSetStateActionOfAtom from '../../../utils/atomUtils/getValueFromSetStateActionOfAtom'
-import revealContactActionAtom, {
-  type RevealContactMessageType,
-} from '../../../state/chat/atoms/revealContactActionAtom'
+import {type SelectedImage} from '../../../utils/imagePickers'
+import {translationAtom} from '../../../utils/localization/I18nProvider'
+import {safeNavigateBackOutsideReact} from '../../../utils/navigation'
+import randomName from '../../../utils/randomName'
+import reportError from '../../../utils/reportError'
 import showErrorAlert from '../../../utils/showErrorAlert'
+import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
+import {askAreYouSureActionAtom} from '../../AreYouSureDialog'
+import {loadingOverlayDisplayedAtom} from '../../LoadingOverlayProvider'
 import ChatFeedbackDialogContent from '../components/ChatFeedbackDialogContent'
-import {generateInitialFeedback} from '../../UserFeedback/atoms'
+import {deleteChatStep1Svg} from '../images/deleteChatSvg'
+import {messagesToListData} from '../utils'
 
 type ChatUIMode = 'approval' | 'messages'
 
@@ -71,7 +71,6 @@ export const dummyChatWithMessages: ChatWithMessages = {
     showVexlbotNotifications: true,
   },
   messages: [],
-  feedback: generateInitialFeedback('CHAT_RATING'),
 }
 
 export type ExtraToSend =
@@ -129,6 +128,8 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     async (get, set, {skipAsk}: {skipAsk: boolean} = {skipAsk: false}) => {
       const {t} = get(translationAtom)
 
+      const feedbackFinished = get(chatFeedbackAtom).finished
+
       return await pipe(
         skipAsk
           ? TE.right([{type: 'noResult'}])
@@ -183,13 +184,17 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
 
             return true
           }
-        )
+        ),
+        T.map((one) => {
+          if (!feedbackFinished) void set(giveFeedbackForDeletedChatAtom)
+          return one
+        })
       )()
     }
   )
 
-  const chatFeedbackAtom = focusAtom(chatWithMessagesAtom, (o) =>
-    o.prop('feedback')
+  const chatFeedbackAtom = createFeedbackForChatAtom(
+    atom((get) => get(chatAtom).id)
   )
 
   const giveFeedbackForDeletedChatAtom = atom(null, async (get, set) => {
@@ -752,7 +757,6 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     chatFeedbackAtom,
     showVexlbotNotificationsForCurrentChatAtom,
     showVexlbotInitialMessageForCurrentChatAtom,
-    giveFeedbackForDeletedChatAtom,
     publicKeyPemBase64Atom,
   }
 })

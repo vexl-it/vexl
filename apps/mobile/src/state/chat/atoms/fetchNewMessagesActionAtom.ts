@@ -1,37 +1,38 @@
-import {flow, pipe} from 'fp-ts/function'
-import * as A from 'fp-ts/Array'
-import * as E from 'fp-ts/Either'
-import {type ChatPrivateApi} from '@vexl-next/rest-api/dist/services/chat'
-import {type ChatMessageWithState, type InboxInState} from '../domain'
-import * as TE from 'fp-ts/TaskEither'
-import retrieveMessages, {
-  type ApiErrorRetrievingMessages,
-} from '@vexl-next/resources-utils/dist/chat/retrieveMessages'
-import reportError from '../../../utils/reportError'
-import * as T from 'fp-ts/Task'
-import {privateApiAtom} from '../../../api'
-import {atom, type SetStateAction, type WritableAtom} from 'jotai'
 import {
   type PrivateKeyHolder,
   type PublicKeyPemBase64,
 } from '@vexl-next/cryptography/dist/KeyHolder'
-import addMessagesToChats from '../utils/addMessagesToChats'
-import createNewChatsFromMessages from '../utils/createNewChatsFromFirstMessages'
+import {type OneOfferInState} from '@vexl-next/domain/dist/general/offers'
+import {
+  UnixMilliseconds0,
+  unixMillisecondsNow,
+  type UnixMilliseconds,
+} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
+import retrieveMessages, {
+  type ApiErrorRetrievingMessages,
+} from '@vexl-next/resources-utils/dist/chat/retrieveMessages'
+import {type ChatPrivateApi} from '@vexl-next/rest-api/dist/services/chat'
+import * as A from 'fp-ts/Array'
+import * as E from 'fp-ts/Either'
+import * as T from 'fp-ts/Task'
+import * as TE from 'fp-ts/TaskEither'
+import {flow, pipe} from 'fp-ts/function'
 import {group} from 'group-items'
+import {atom, type SetStateAction, type WritableAtom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
-import messagingStateAtom from '../atoms/messagingStateAtom'
-import replaceBase64UriWithImageFileUri from '../utils/replaceBase64UriWithImageFileUri'
+import {privateApiAtom} from '../../../api'
+import {getNotificationToken} from '../../../utils/notifications'
+import reportError from '../../../utils/reportError'
 import {
   createSingleOfferReportedFlagFromAtomAtom,
   focusOfferByOfferId,
   focusOfferByPublicKeyAtom,
 } from '../../marketplace/atom'
-import {
-  type UnixMilliseconds,
-  UnixMilliseconds0,
-  unixMillisecondsNow,
-} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
-import {type OneOfferInState} from '@vexl-next/domain/dist/general/offers'
+import messagingStateAtom from '../atoms/messagingStateAtom'
+import {type ChatMessageWithState, type InboxInState} from '../domain'
+import addMessagesToChats from '../utils/addMessagesToChats'
+import createNewChatsFromMessages from '../utils/createNewChatsFromFirstMessages'
+import replaceBase64UriWithImageFileUri from '../utils/replaceBase64UriWithImageFileUri'
 
 function focusInboxInMessagingStateAtom(
   publicKey: PublicKeyPemBase64
@@ -193,10 +194,40 @@ export const fetchAndStoreMessagesForInboxAtom = atom<
       () => get(focusInboxInMessagingStateAtom(key)) ?? inbox,
       get(focusOfferByOfferId(inbox.inbox.offerId))
     ),
-    TE.match(
+    TE.matchEW(
       (error) => {
-        reportError('error', 'Api Error fetching messages for inbox', error)
-        return inbox
+        reportError(
+          'warn',
+          'Api Error fetching messages for inbox. Trying to create the inbox again.',
+          error
+        )
+
+        if (error._tag === 'inboxDoesNotExist')
+          return pipe(
+            getNotificationToken(),
+            TE.fromTask,
+            TE.chainW((token) =>
+              api.chat.createInbox({
+                token: token ?? undefined,
+                keyPair: inbox.inbox.privateKey,
+              })
+            ),
+            TE.match(
+              (e) => {
+                reportError('error', 'Error recreating inbox on server', e)
+                return false
+              },
+              () => {
+                console.info(
+                  `✅ Inbox ${inbox.inbox.privateKey.publicKeyPemBase64} successfully recreated`
+                )
+                return true
+              }
+            ),
+            T.map(() => inbox)
+          )
+
+        return T.of(inbox)
       },
       ({newMessages, updatedInbox}) => {
         set(
@@ -219,7 +250,7 @@ export const fetchAndStoreMessagesForInboxAtom = atom<
             )
           })
 
-        return updatedInbox
+        return T.of(updatedInbox)
       }
     ),
     T.chainFirst(() =>

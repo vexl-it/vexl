@@ -1,14 +1,20 @@
-import {useAppState} from '../utils/useAppState'
-import {useCallback} from 'react'
-import {usePrivateApiAssumeLoggedIn} from '../api'
-import {pipe} from 'fp-ts/function'
-import * as TE from 'fp-ts/TaskEither'
-import {useStore} from 'jotai'
-import reportError from '../utils/reportError'
+import {type OneOfferInState} from '@vexl-next/domain/dist/general/offers'
+import {generateKeyPair} from '@vexl-next/resources-utils/dist/utils/crypto'
 import * as A from 'fp-ts/Array'
 import {isNonEmpty} from 'fp-ts/Array'
-import {myOffersAtom} from './marketplace/atom'
+import * as T from 'fp-ts/Task'
+import * as TE from 'fp-ts/TaskEither'
+import {pipe} from 'fp-ts/function'
+import {atom, useStore} from 'jotai'
+import {useCallback} from 'react'
+import {usePrivateApiAssumeLoggedIn} from '../api'
 import notEmpty from '../utils/notEmpty'
+import {inboxesAtom} from '../utils/notifications/useRefreshNotificationTokenOnResumeAssumeLoggedIn'
+import reportError from '../utils/reportError'
+import {useAppState} from '../utils/useAppState'
+import {createInboxAtom} from './chat/hooks/useCreateInbox'
+import {updateOfferAtom} from './marketplace'
+import {myOffersAtom} from './marketplace/atom'
 import {useLogout} from './useLogout'
 
 export function useRefreshUserOnContactService(): void {
@@ -138,7 +144,99 @@ export function useRefreshOffers(): void {
   )
 }
 
+const recreateInboxAndUpdateOfferAtom = atom(
+  null,
+  (get, set, offerWithoutInbox: OneOfferInState) => {
+    reportError(
+      'warn',
+      'Found offer without corresponding inbox. Trying to recreate the inbox and updating offer.',
+      {}
+    )
+    const adminId = offerWithoutInbox.ownershipInfo?.adminId
+    const intendedConnectionLevel =
+      offerWithoutInbox.ownershipInfo?.intendedConnectionLevel
+    const symmetricKey = offerWithoutInbox.offerInfo.privatePart.symmetricKey
+    if (!adminId || !symmetricKey || !intendedConnectionLevel) {
+      reportError(
+        'error',
+        'Missing data to update offer after recreating inbox',
+        {}
+      )
+      return T.of(false)
+    }
+
+    return pipe(
+      generateKeyPair(),
+      TE.fromEither,
+      TE.chainFirstW((keyPair) =>
+        set(createInboxAtom, {
+          inbox: {
+            privateKey: keyPair,
+            offerId: offerWithoutInbox.offerInfo.offerId,
+          },
+        })
+      ),
+      TE.chainW(({publicKeyPemBase64}) => {
+        return set(updateOfferAtom, {
+          payloadPublic: {
+            ...offerWithoutInbox.offerInfo.publicPart,
+            offerPublicKey: publicKeyPemBase64,
+          },
+          symmetricKey,
+          adminId,
+          intendedConnectionLevel,
+        })
+      }),
+      TE.match(
+        (e) => {
+          reportError(
+            'error',
+            'Errow while recreating inbox and updating offer',
+            e
+          )
+          return false
+        },
+        () => {
+          console.info('✅ Inbox recreated and offer updated')
+          return true
+        }
+      )
+    )
+  }
+)
+
+function useCheckOfferInboxes(): void {
+  const store = useStore()
+
+  useAppState(
+    useCallback(
+      (state) => {
+        if (state !== 'active') return
+
+        const publicKeys = store
+          .get(inboxesAtom)
+          .map((one) => one.privateKey.publicKeyPemBase64)
+
+        void pipe(
+          store.get(myOffersAtom),
+          A.filter((offer) => {
+            const offerPublicKey = offer.offerInfo.publicPart.offerPublicKey
+            return !publicKeys.includes(offerPublicKey)
+          }),
+          A.map(
+            (offerWithoutInbox): T.Task<boolean> =>
+              store.set(recreateInboxAndUpdateOfferAtom, offerWithoutInbox)
+          ),
+          A.sequence(T.ApplicativeSeq)
+        )()
+      },
+      [store]
+    )
+  )
+}
+
 export default function useHandleRefreshContactServiceAndOffers(): void {
   useRefreshUserOnContactService()
   useRefreshOffers()
+  useCheckOfferInboxes()
 }

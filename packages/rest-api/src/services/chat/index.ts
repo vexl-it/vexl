@@ -285,7 +285,15 @@ export function privateApi({
             {method: 'put', url: '/inboxes/messages', data},
             RetrieveMessagesResponse
           )
-        )
+        ),
+        TE.mapLeft((e) => {
+          if (e._tag === 'BadStatusCodeError') {
+            if (e.response.data.code === '100101') {
+              return {_tag: 'inboxDoesNotExist'} as InboxDoesNotExist
+            }
+          }
+          return e
+        })
       )
     },
     sendMessage(data: SendMessageRequest) {

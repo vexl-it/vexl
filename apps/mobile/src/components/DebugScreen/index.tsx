@@ -1,34 +1,35 @@
-import WhiteContainer from '../WhiteContainer'
-import {Spacer, Text, YStack} from 'tamagui'
-import Screen from '../Screen'
-import Button from '../Button'
-import {useSetAtom, useStore} from 'jotai'
-import {offersStateAtom} from '../../state/marketplace/atom'
-import {MINIMAL_DATE} from '@vexl-next/domain/dist/utility/IsoDatetimeString.brand'
-import {useSessionAssumeLoggedIn} from '../../state/session'
-import {Alert, ScrollView} from 'react-native'
 import Clipboard from '@react-native-clipboard/clipboard'
-import {triggerOffersRefreshAtom} from '../../state/marketplace'
+import messaging from '@react-native-firebase/messaging'
 import {type Inbox} from '@vexl-next/domain/dist/general/messaging'
-import messagingStateAtom from '../../state/chat/atoms/messagingStateAtom'
-import {enableHiddenFeatures} from '../../utils/environment'
+import {MINIMAL_DATE} from '@vexl-next/domain/dist/utility/IsoDatetimeString.brand'
+import * as T from 'fp-ts/Task'
+import {pipe} from 'fp-ts/function'
+import {useSetAtom, useStore} from 'jotai'
+import {Alert, ScrollView} from 'react-native'
+import {Spacer, Text, YStack} from 'tamagui'
 import {apiEnv} from '../../api'
-import CryptoBenchmarks from './components/CryptoBenchmarks'
+import deleteAllInboxesActionAtom from '../../state/chat/atoms/deleteAllInboxesActionAtom'
+import fetchMessagesForAllInboxesAtom from '../../state/chat/atoms/fetchNewMessagesActionAtom'
+import messagingStateAtom from '../../state/chat/atoms/messagingStateAtom'
 import offerToConnectionsAtom, {
   updateAllOffersConnectionsActionAtom,
 } from '../../state/connections/atom/offerToConnectionsAtom'
-import messaging from '@react-native-firebase/messaging'
-import Preferences from './components/Preferences'
-import useSafeGoBack from '../../utils/useSafeGoBack'
-import reportError from '../../utils/reportError'
 import {importedContactsAtom} from '../../state/contacts'
-import LanguagePicker from './components/LanguagePicker'
-import RemoteConfigView from './components/RemoteConfigView'
-import fetchMessagesForAllInboxesAtom from '../../state/chat/atoms/fetchNewMessagesActionAtom'
-import {pipe} from 'fp-ts/function'
-import * as T from 'fp-ts/Task'
+import {triggerOffersRefreshAtom} from '../../state/marketplace'
+import {offersStateAtom} from '../../state/marketplace/atom'
+import {useSessionAssumeLoggedIn} from '../../state/session'
+import {enableHiddenFeatures} from '../../utils/environment'
+import reportError from '../../utils/reportError'
+import useSafeGoBack from '../../utils/useSafeGoBack'
+import Button from '../Button'
+import Screen from '../Screen'
+import WhiteContainer from '../WhiteContainer'
 import deleteInboxAtom from './atoms/deleteInboxAtom'
-import deleteAllInboxesActionAtom from '../../state/chat/atoms/deleteAllInboxesActionAtom'
+import CryptoBenchmarks from './components/CryptoBenchmarks'
+import LanguagePicker from './components/LanguagePicker'
+import Preferences from './components/Preferences'
+import RemoteConfigView from './components/RemoteConfigView'
+import SimulateMissingOfferInbox from './components/SimulateMissingOfferInbox'
 
 // const ContentScroll = styled(ScrollView, {
 //   marginBottom: '$2',
@@ -252,6 +253,7 @@ function DebugScreen(): JSX.Element {
               }}
             />
           </YStack>
+          <SimulateMissingOfferInbox />
           <Preferences />
         </ScrollView>
         <Button variant="secondary" text="back" onPress={safeGoBack} />

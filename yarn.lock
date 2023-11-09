@@ -8403,7 +8403,7 @@ __metadata:
     jest: ^29.4.1
     jest-expo: ^49.0.0
     join-path: ^1.1.1
-    jotai: ^2.0.1
+    jotai: ^2.5.1
     jotai-molecules: ^1.1.1
     jotai-optics: ^0.3.0
     just-truncate: ^2.2.0
@@ -17057,15 +17057,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jotai@npm:^2.0.1":
-  version: 2.0.1
-  resolution: "jotai@npm:2.0.1"
+"jotai@npm:^2.5.1":
+  version: 2.5.1
+  resolution: "jotai@npm:2.5.1"
   peerDependencies:
+    "@types/react": ">=17.0.0"
     react: ">=17.0.0"
   peerDependenciesMeta:
+    "@types/react":
+      optional: true
     react:
       optional: true
-  checksum: a04c601b4983e68526dd9170549ab062da7808ef950dabe9100124638e648cf32ce69291de153f18a3178cae52a2fe7e471a33ff59e9e2606b040fd83dff8948
+  checksum: a8168a8cf2f7a5be3870ec5ee151a2e8ac1ad635e39241c5e223cb29a678eb88cea996cfc37466a017f83b34e33c76e764a3af5aeef8ab67b5b32543d6079456
   languageName: node
   linkType: hard
 

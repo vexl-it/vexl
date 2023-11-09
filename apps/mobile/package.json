@@ -74,7 +74,7 @@
     "i18n-js": "4.2.0",
     "jest-expo": "^49.0.0",
     "join-path": "^1.1.1",
-    "jotai": "^2.0.1",
+    "jotai": "^2.5.1",
     "jotai-molecules": "^1.1.1",
     "jotai-optics": "^0.3.0",
     "just-truncate": "^2.2.0",

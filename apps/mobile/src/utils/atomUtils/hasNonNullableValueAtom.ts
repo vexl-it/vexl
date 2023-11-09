@@ -1,10 +1,10 @@
-import {selectAtom} from 'jotai/utils'
-import {type Atom} from 'jotai'
+import {type Atom, atom} from 'jotai'
 
 export default function hasNonNullableValueAtom(
-  atom: Atom<any>
+  valueAtom: Atom<any>
 ): Atom<boolean> {
-  return selectAtom(atom, (value) => {
+  return atom((get) => {
+    const value = get(valueAtom)
     return value !== null && value !== undefined
   })
 }

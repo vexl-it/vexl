@@ -57,7 +57,7 @@ function ChatListItem({dataAtom}: {dataAtom: Atom<ChatListData>}): JSX.Element {
     <TouchableOpacity
       onPress={() => {
         navigation.navigate('ChatDetail', {
-          chatId: chatInfo.id,
+          otherSideKey: chatInfo.otherSide.publicKey,
           inboxKey: chatInfo.inbox.privateKey.publicKeyPemBase64,
         })
       }}

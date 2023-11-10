@@ -1,4 +1,4 @@
-import {type Atom, atom} from 'jotai'
+import {atom, type Atom} from 'jotai'
 
 export default function hasNonNullableValueAtom(
   valueAtom: Atom<any>

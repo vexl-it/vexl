@@ -6,9 +6,8 @@ import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {useSetAtom, useStore} from 'jotai'
 import {useEffect} from 'react'
-import {AppState} from 'react-native'
 import {safeParse} from '../utils/fpUtils'
-import {getChatIdOfChatOnCurrentScreenIfAny} from '../utils/navigation'
+import {isOnSpecificChat} from '../utils/navigation'
 import {ChatNotificationData} from '../utils/notifications/ChatNotificationData'
 import {
   CHAT_NOTIFICATION_TYPES,
@@ -18,37 +17,7 @@ import {
 import {showUINotificationFromRemoteMessage} from '../utils/notifications/showUINotificationFromRemoteMessage'
 import reportError from '../utils/reportError'
 import {fetchAndStoreMessagesForInboxAtom} from './chat/atoms/fetchNewMessagesActionAtom'
-import focusChatWithMessagesAtom from './chat/atoms/focusChatWithMessagesAtom'
 import {updateAllOffersConnectionsActionAtom} from './connections/atom/offerToConnectionsAtom'
-
-function isChatDisplayedOnScreen({
-  inboxKey,
-  sender,
-  navigationState,
-  store,
-}: {
-  inboxKey: PublicKeyPemBase64
-  sender: PublicKeyPemBase64
-  navigationState: Parameters<typeof getChatIdOfChatOnCurrentScreenIfAny>['0']
-  store: ReturnType<typeof useStore>
-}): boolean {
-  return pipe(
-    getChatIdOfChatOnCurrentScreenIfAny(navigationState),
-    O.bindTo('currentChatId'),
-    O.bind('displayedChat', ({currentChatId}) =>
-      O.fromNullable(
-        store.get(focusChatWithMessagesAtom({chatId: currentChatId, inboxKey}))
-      )
-    ),
-    O.match(
-      () => false,
-      ({displayedChat}) =>
-        AppState.currentState === 'active' &&
-        displayedChat.chat.otherSide.publicKey === sender &&
-        displayedChat.chat.inbox.privateKey.publicKeyPemBase64 === inboxKey
-    )
-  )
-}
 
 export function useHandleReceivedNotifications(): void {
   const navigation = useNavigation()
@@ -93,11 +62,9 @@ export function useHandleReceivedNotifications(): void {
             },
             ({inbox, sender}) => {
               if (
-                isChatDisplayedOnScreen({
+                isOnSpecificChat(navigation.getState(), {
+                  otherSideKey: sender,
                   inboxKey: inbox,
-                  sender,
-                  navigationState: navigation.getState(),
-                  store,
                 })
               )
                 return

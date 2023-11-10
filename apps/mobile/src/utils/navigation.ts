@@ -1,11 +1,13 @@
 // TODO how to type this properly?
-import {type NavigationState} from 'react-native-tab-view'
-import {ChatId} from '@vexl-next/domain/dist/general/messaging'
-import {pipe} from 'fp-ts/function'
-import {safeParse} from './fpUtils'
-import * as O from 'fp-ts/Option'
-import reportError from './reportError'
 import {createNavigationContainerRef} from '@react-navigation/native'
+import {ChatId} from '@vexl-next/domain/dist/general/messaging'
+import fastDeepEqual from 'fast-deep-equal'
+import * as O from 'fp-ts/Option'
+import {pipe} from 'fp-ts/function'
+import {type NavigationState} from 'react-native-tab-view'
+import {type RootStackParamsList} from '../navigationTypes'
+import {safeParse} from './fpUtils'
+import reportError from './reportError'
 
 export const navigationRef = createNavigationContainerRef()
 
@@ -46,13 +48,14 @@ function getActiveRoute(route: NavigationState<any>): any | null {
 
 export function isOnSpecificChat(
   state: NavigationState<any>,
-  chatId: ChatId
+  keys: RootStackParamsList['ChatDetail']
 ): boolean {
   try {
     const activeRoute = getActiveRoute(state)
     if (!activeRoute) return false
     return (
-      activeRoute.name === 'ChatDetail' && activeRoute.params?.chatId === chatId
+      activeRoute.name === 'ChatDetail' &&
+      fastDeepEqual(activeRoute.params, keys)
     )
   } catch (e) {
     reportError('warn', 'Error in isOnSpecificChat', e)

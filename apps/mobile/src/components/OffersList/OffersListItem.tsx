@@ -55,7 +55,7 @@ function OffersListItem({isFirst, offerAtom}: Props): JSX.Element {
     if (!chatForOffer?.chat) return
 
     navigation.navigate('ChatDetail', {
-      chatId: chatForOffer.chat.id,
+      otherSideKey: chatForOffer.chat.otherSide.publicKey,
       inboxKey: chatForOffer.chat.inbox.privateKey.publicKeyPemBase64,
     })
   }, [chatForOffer, navigation])

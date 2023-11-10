@@ -1,20 +1,19 @@
-import {useCallback, useEffect} from 'react'
 import notifee, {EventType, type Notification} from '@notifee/react-native'
-import {useAppState} from '../utils/useAppState'
-import {atom, useStore} from 'jotai'
 import {useNavigation} from '@react-navigation/native'
-import {pipe} from 'fp-ts/function'
-import {z} from 'zod'
-import * as E from 'fp-ts/Either'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
+import * as E from 'fp-ts/Either'
+import {pipe} from 'fp-ts/function'
+import {atom, useStore} from 'jotai'
+import {useCallback, useEffect} from 'react'
+import {z} from 'zod'
 import {safeParse} from '../utils/fpUtils'
-import focusChatByInboxKeyAndSenderKey from './chat/atoms/focusChatByInboxKeyAndSenderKey'
-import reportError from '../utils/reportError'
 import {isOnMessagesList, isOnSpecificChat} from '../utils/navigation'
 import {
-  NEW_OFFERS_IN_MARKETPLACE,
   NEW_CONTACTS_TO_SYNC,
+  NEW_OFFERS_IN_MARKETPLACE,
 } from '../utils/notifications/notificationTypes'
+import reportError from '../utils/reportError'
+import {useAppState} from '../utils/useAppState'
 
 const lastNotificationIdHandledAtom = atom<string | undefined>(undefined)
 
@@ -40,23 +39,13 @@ function useReactOnNotificationOpen(): (notification: Notification) => void {
         pipe(
           notification.data,
           safeParse(MessageNotificationPayload),
-          E.chainNullableK({_tag: 'chatNotFound'})((payload) =>
-            store.get(
-              focusChatByInboxKeyAndSenderKey({
-                inboxKey: payload.inbox,
-                senderKey: payload.sender,
-              })
-            )
-          ),
           E.match(
             (l) => {
-              if (l._tag !== 'chatNotFound')
-                // This is to be expected
-                reportError(
-                  'error',
-                  'Error while opening chat from notification',
-                  l
-                )
+              reportError(
+                'error',
+                'Error while opening chat from notification',
+                l
+              )
 
               // as fallback navigate to messages list.
               if (!isOnMessagesList(navigation.getState())) {
@@ -64,13 +53,16 @@ function useReactOnNotificationOpen(): (notification: Notification) => void {
               }
             },
             (payload) => {
-              if (isOnSpecificChat(navigation.getState(), payload.chat.id))
-                return 'ok'
-              navigation.navigate('ChatDetail', {
-                inboxKey: payload.chat.inbox.privateKey.publicKeyPemBase64,
-                chatId: payload.chat.id,
-              })
+              const keys = {
+                otherSideKey: payload.sender,
+                inboxKey: payload.inbox,
+              }
 
+              if (isOnSpecificChat(navigation.getState(), keys))
+                // no need to navigate. We are already on the chat.
+                return 'ok'
+
+              navigation.navigate('ChatDetail', keys)
               return 'ok'
             }
           )

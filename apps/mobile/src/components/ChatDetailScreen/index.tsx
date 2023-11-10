@@ -1,27 +1,27 @@
-import {type RootStackScreenProps} from '../../navigationTypes'
-import {ScopeProvider} from 'jotai-molecules'
-import {ChatScope, dummyChatWithMessages} from './atoms'
 import {useAtomValue, useSetAtom} from 'jotai'
+import {ScopeProvider} from 'jotai-molecules'
 import React, {useCallback, useMemo} from 'react'
-import focusChatWithMessagesAtom from '../../state/chat/atoms/focusChatWithMessagesAtom'
-import MessagesListOrApprovalPreview from './components/MessagesListOrApprovalPreview'
-import valueOrDefaultAtom from '../../utils/atomUtils/valueOrDefaultAtom'
-import hasNonNullableValueAtom from '../../utils/atomUtils/hasNonNullableValueAtom'
-import KeyboardAvoidingView from '../KeyboardAvoidingView'
-import {useOnFocusAndAppState} from '../ContactListSelect/utils'
-import {hideNotificationsForChatActionAtom} from '../../state/displayedNotifications'
 import {Stack, Text} from 'tamagui'
-import {useTranslation} from '../../utils/localization/I18nProvider'
-import Screen from '../Screen'
-import IconButton from '../IconButton'
 import backButtonSvg from '../../images/backButtonSvg'
+import {type RootStackScreenProps} from '../../navigationTypes'
+import {focusChatWithMessagesByKeysAtom} from '../../state/chat/atoms/focusChatWithMessagesAtom'
+import {hideNotificationsForChatActionAtom} from '../../state/displayedNotifications'
+import hasNonNullableValueAtom from '../../utils/atomUtils/hasNonNullableValueAtom'
+import valueOrDefaultAtom from '../../utils/atomUtils/valueOrDefaultAtom'
+import {useTranslation} from '../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../utils/useSafeGoBack'
+import {useOnFocusAndAppState} from '../ContactListSelect/utils'
+import IconButton from '../IconButton'
+import KeyboardAvoidingView from '../KeyboardAvoidingView'
+import Screen from '../Screen'
+import {ChatScope, dummyChatWithMessages} from './atoms'
+import MessagesListOrApprovalPreview from './components/MessagesListOrApprovalPreview'
 
 type Props = RootStackScreenProps<'ChatDetail'>
 
 export default function ChatDetailScreen({
   route: {
-    params: {chatId, inboxKey},
+    params: {otherSideKey, inboxKey},
   },
 }: Props): JSX.Element {
   const {t} = useTranslation()
@@ -31,7 +31,10 @@ export default function ChatDetailScreen({
   )
 
   const {nonNullChatWithMessagesAtom, chatExistsAtom} = useMemo(() => {
-    const chatWithMessagesAtom = focusChatWithMessagesAtom({chatId, inboxKey})
+    const chatWithMessagesAtom = focusChatWithMessagesByKeysAtom({
+      otherSideKey,
+      inboxKey,
+    })
 
     const nonNullChatWithMessagesAtom = valueOrDefaultAtom({
       nullableAtom: chatWithMessagesAtom,
@@ -41,7 +44,7 @@ export default function ChatDetailScreen({
     const chatExistsAtom = hasNonNullableValueAtom(chatWithMessagesAtom)
 
     return {nonNullChatWithMessagesAtom, chatExistsAtom}
-  }, [chatId, inboxKey])
+  }, [inboxKey, otherSideKey])
 
   const chatExists = useAtomValue(chatExistsAtom)
 

@@ -105,7 +105,7 @@ function OfferInfo({
         },
         (chat) => {
           navigation.replace('ChatDetail', {
-            chatId: chat.id,
+            otherSideKey: chat.otherSide.publicKey,
             inboxKey: chat.inbox.privateKey.publicKeyPemBase64,
           })
         }
@@ -187,7 +187,7 @@ function OfferInfo({
               onPress={() => {
                 if (!chatForOffer) return
                 navigation.navigate('ChatDetail', {
-                  chatId: chatForOffer.chat.id,
+                  otherSideKey: chatForOffer.chat.otherSide.publicKey,
                   inboxKey:
                     chatForOffer.chat.inbox.privateKey.publicKeyPemBase64,
                 })

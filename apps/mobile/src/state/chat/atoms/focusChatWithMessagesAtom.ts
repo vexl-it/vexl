@@ -1,12 +1,13 @@
+import {type PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
+import {type Chat} from '@vexl-next/domain/dist/general/messaging'
+import {focusAtom} from 'jotai-optics'
 import {type FocusAtomType} from '../../../utils/atomUtils/FocusAtomType'
 import {
   type ChatIds,
   type ChatMessageWithState,
   type ChatWithMessages,
 } from '../domain'
-import {focusAtom} from 'jotai-optics'
 import messagingStateAtom from './messagingStateAtom'
-import {type Chat} from '@vexl-next/domain/dist/general/messaging'
 
 export type ChatWithMessagesAtom = FocusAtomType<ChatWithMessages | undefined>
 export default function focusChatWithMessagesAtom({
@@ -18,6 +19,21 @@ export default function focusChatWithMessagesAtom({
       .find((one) => one.inbox.privateKey.publicKeyPemBase64 === inboxKey)
       .prop('chats')
       .find((one) => one.chat.id === chatId)
+  )
+}
+
+export function focusChatWithMessagesByKeysAtom({
+  otherSideKey,
+  inboxKey,
+}: {
+  inboxKey: PublicKeyPemBase64
+  otherSideKey: PublicKeyPemBase64
+}): ChatWithMessagesAtom {
+  return focusAtom(messagingStateAtom, (o) =>
+    o
+      .find((one) => one.inbox.privateKey.publicKeyPemBase64 === inboxKey)
+      .prop('chats')
+      .find((one) => one.chat.otherSide.publicKey === otherSideKey)
   )
 }
 

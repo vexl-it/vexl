@@ -1,24 +1,23 @@
-import {type UserNameAndAvatar} from '@vexl-next/domain/dist/general/UserNameAndAvatar.brand'
-import {type UserName} from '@vexl-next/domain/dist/general/UserName.brand'
-import {
-  type InitPhoneNumberVerificationResponse,
-  type VerifyPhoneNumberResponse,
-} from '@vexl-next/rest-api/dist/services/user/contracts'
-import {type E164PhoneNumber} from '@vexl-next/domain/dist/general/E164PhoneNumber.brand'
-import {type NativeStackScreenProps} from '@react-navigation/native-stack'
 import {type BottomTabScreenProps} from '@react-navigation/bottom-tabs'
 import {type MaterialTopTabScreenProps} from '@react-navigation/material-top-tabs'
 import {
   type CompositeScreenProps,
   type NavigatorScreenParams,
 } from '@react-navigation/native'
+import {type NativeStackScreenProps} from '@react-navigation/native-stack'
+import {type KeyHolder} from '@vexl-next/cryptography'
+import {type PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
+import {type E164PhoneNumber} from '@vexl-next/domain/dist/general/E164PhoneNumber.brand'
+import {type UserName} from '@vexl-next/domain/dist/general/UserName.brand'
+import {type UserNameAndAvatar} from '@vexl-next/domain/dist/general/UserNameAndAvatar.brand'
 import {
   type OfferId,
   type OfferType,
 } from '@vexl-next/domain/dist/general/offers'
-import {type ChatId} from '@vexl-next/domain/dist/general/messaging'
-import {type KeyHolder} from '@vexl-next/cryptography'
-import {type PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
+import {
+  type InitPhoneNumberVerificationResponse,
+  type VerifyPhoneNumberResponse,
+} from '@vexl-next/rest-api/dist/services/user/contracts'
 import {type ChatDataForTradeChecklist} from './state/tradeChecklist/domain'
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
@@ -40,7 +39,7 @@ export type RootStackParamsList = {
 
   OfferDetail: {offerId: OfferId}
 
-  ChatDetail: {chatId: ChatId; inboxKey: PublicKeyPemBase64}
+  ChatDetail: {otherSideKey: PublicKeyPemBase64; inboxKey: PublicKeyPemBase64}
 
   NotificationPermissionsMissing: undefined
 

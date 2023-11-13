@@ -1,4 +1,3 @@
-import ScreenWrapper from '../ScreenWrapper'
 import OnlineOrInPersonTrade from './components/OnlineOrInPersonTrade'
 import {useAtomValue, useSetAtom} from 'jotai'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
@@ -7,6 +6,11 @@ import {
   offerForTradeChecklistAtom,
   submitChangesAndSendMessageActionAtom,
 } from '../../atoms'
+import React, {useCallback} from 'react'
+import {useFocusEffect} from '@react-navigation/native'
+import headerStateAtom from '../../../PageWithNavigationHeader/state/headerStateAtom'
+import {FooterButtonProxy} from '../../../PageWithNavigationHeader'
+import Content from '../Content'
 
 function AgreeOnTradeDetailsScreen(): JSX.Element {
   const {t} = useTranslation()
@@ -15,26 +19,35 @@ function AgreeOnTradeDetailsScreen(): JSX.Element {
   const submitChangesAndSendMessage = useSetAtom(
     submitChangesAndSendMessageActionAtom
   )
+  const setHeaderState = useSetAtom(headerStateAtom)
+
+  useFocusEffect(
+    useCallback(() => {
+      setHeaderState((prev) => ({...prev, hidden: true}))
+    }, [setHeaderState])
+  )
 
   return (
-    <ScreenWrapper
-      showAnonymizationNotice
-      scrollable
-      buttonTitle={
-        offerForTradeChecklist?.offerInfo.publicPart.locationState === 'ONLINE'
-          ? t('tradeChecklist.acknowledgeAndContinue')
-          : t('tradeChecklist.saveAndContinue')
-      }
-      onButtonPress={() => {
-        void submitChangesAndSendMessage().then((success) => {
-          if (success) {
-            goBack()
-          }
-        })
-      }}
-    >
-      <OnlineOrInPersonTrade />
-    </ScreenWrapper>
+    <>
+      <Content scrollable>
+        <OnlineOrInPersonTrade />
+      </Content>
+      <FooterButtonProxy
+        text={
+          offerForTradeChecklist?.offerInfo.publicPart.locationState ===
+          'ONLINE'
+            ? t('tradeChecklist.acknowledgeAndContinue')
+            : t('tradeChecklist.saveAndContinue')
+        }
+        onPress={() => {
+          void submitChangesAndSendMessage().then((success) => {
+            if (success) {
+              goBack()
+            }
+          })
+        }}
+      />
+    </>
   )
 }
 

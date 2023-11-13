@@ -5,7 +5,7 @@ interface Props {
   subtitle?: string
 }
 
-function ScreenHeader({title, subtitle}: Props): JSX.Element {
+function Header({title, subtitle}: Props): JSX.Element {
   return (
     <Stack space={'$2'} mt={'$4'} maw={'80%'}>
       <Text fos={24} ff={'$heading'} col={'$white'}>
@@ -20,4 +20,4 @@ function ScreenHeader({title, subtitle}: Props): JSX.Element {
   )
 }
 
-export default ScreenHeader
+export default Header

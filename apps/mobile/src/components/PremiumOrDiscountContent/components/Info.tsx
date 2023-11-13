@@ -1,20 +1,18 @@
 import {TouchableOpacity} from 'react-native'
 import {getTokens, Stack, Text, YStack} from 'tamagui'
-import SvgImage from '../../../../Image'
+import SvgImage from '../../Image'
 import arrowRightSvg from '../images/arrowRightSvg'
-import Help from '../../Help'
-import stayAnonymousSvg from '../../../../images/stayAnonymousSvg'
+import stayAnonymousSvg from '../../images/stayAnonymousSvg'
 import {useMemo, useState} from 'react'
-import {useTranslation} from '../../../../../utils/localization/I18nProvider'
-import ComponentContainer from './ComponentContainer'
-import {type SetStateAction, useAtomValue, type WritableAtom} from 'jotai'
+import {useTranslation} from '../../../utils/localization/I18nProvider'
+import {type Atom, useAtomValue} from 'jotai'
 import {type OfferType} from '@vexl-next/domain/dist/general/offers'
-import infoSvg from '../../../../images/infoSvg'
+import Help from '../../Help'
+import infoSvg from '../../images/infoSvg'
 
 interface Props {
-  feeAmountAtom: WritableAtom<number, [SetStateAction<number>], void>
-  offerTypeAtom: WritableAtom<OfferType, [SetStateAction<OfferType>], void>
-
+  feeAmountAtom: Atom<number>
+  offerTypeAtom: Atom<OfferType | undefined>
   sliderThreshold: number
 }
 
@@ -81,23 +79,30 @@ function Info({
           setHelpVisible(true)
         }}
       >
-        <ComponentContainer
-          fd="row"
-          ai="center"
-          jc="space-evenly"
-          extremeValue={Math.abs(feeAmount) > sliderThreshold / 2}
-          zeroValue={feeAmount === 0}
+        <Stack
+          fd={'row'}
+          ai={'center'}
+          jc={'space-evenly'}
+          p={'$4'}
+          br={'$4'}
+          bc={
+            feeAmount === 0
+              ? '$grey'
+              : Math.abs(feeAmount) > sliderThreshold / 2
+              ? '$redAccent1'
+              : '$darkBrown'
+          }
         >
-          <Stack als="flex-start">
+          <Stack als={'flex-start'}>
             <SvgImage fill={elementsColor} source={infoSvg} />
           </Stack>
-          <Stack fs={1} px="$2">
+          <Stack fs={1} px={'$2'}>
             <Text col={elementsColor}>{message}</Text>
           </Stack>
-          <Stack als="flex-end">
+          <Stack als={'flex-end'}>
             <SvgImage stroke={elementsColor} source={arrowRightSvg} />
           </Stack>
-        </ComponentContainer>
+        </Stack>
       </TouchableOpacity>
       <Help
         visible={helpVisible}
@@ -107,13 +112,13 @@ function Info({
         title={t('offerForm.premiumOrDiscount.premiumOrDiscountExplained')}
         image={stayAnonymousSvg}
       >
-        <YStack space="$6">
-          <Text fos={18} color="$greyOnWhite">
+        <YStack space={'$6'}>
+          <Text fos={18} color={'$greyOnWhite'}>
             {offerType === 'BUY'
               ? t('offerForm.premiumOrDiscount.influenceImpactOfYourBuyOffer')
               : t('offerForm.premiumOrDiscount.influenceImpactOfYourSellOffer')}
           </Text>
-          <Text fos={18} color="$greyOnWhite">
+          <Text fos={18} color={'$greyOnWhite'}>
             {t('offerForm.premiumOrDiscount.playWithItAndSee')}
           </Text>
         </YStack>

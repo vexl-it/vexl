@@ -2,7 +2,6 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {Stack, type YStackProps} from 'tamagui'
 
 interface Props extends YStackProps {
-  backgroundColor?: string
   children: JSX.Element | JSX.Element[]
   customHorizontalPadding?: number
   customVerticalPadding?: number

@@ -7,7 +7,7 @@ import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import {TouchableOpacity, TouchableWithoutFeedback} from 'react-native'
 import closeSvg from '../../../images/closeSvg'
 import magnifyingGlass from '../../../images/magnifyingGlass'
-import Help from '../Help'
+import Help from '../../../Help'
 import anonymousCounterpartSvg from '../../../images/anonymousCounterpartSvg'
 import {
   type PrimitiveAtom,

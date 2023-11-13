@@ -2,11 +2,14 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {Stack, Text, XStack} from 'tamagui'
 import {TouchableOpacity} from 'react-native'
 import {useAtomValue, useSetAtom} from 'jotai'
-import {btcPriceAtom, refreshBtcPriceActionAtom} from '../atoms'
 import {useFocusEffect} from '@react-navigation/native'
 import {useCallback, useMemo} from 'react'
-import formatNumber from '../../../utils/formatNumber'
 import {selectedCurrencyAtom} from '../../../state/selectedCurrency'
+import {formatBtcPrice} from '../../../utils/formatBtcPrice'
+import {
+  btcPriceAtom,
+  refreshBtcPriceActionAtom,
+} from '../../../state/currentBtcPriceAtoms'
 
 export const CHART_HEIGHT_PX = 100
 
@@ -16,20 +19,8 @@ function BitcoinPriceChart(): JSX.Element {
   const btcPrice = useAtomValue(btcPriceAtom)
   const selectedCurrency = useAtomValue(selectedCurrencyAtom)
   const btcPriceValue = useMemo(
-    () =>
-      formatNumber(
-        selectedCurrency === 'USD'
-          ? btcPrice?.priceUsd
-          : selectedCurrency === 'EUR'
-          ? btcPrice?.priceEur
-          : btcPrice?.priceCzk
-      ),
-    [
-      btcPrice?.priceCzk,
-      btcPrice?.priceEur,
-      btcPrice?.priceUsd,
-      selectedCurrency,
-    ]
+    () => formatBtcPrice(selectedCurrency, btcPrice),
+    [btcPrice, selectedCurrency]
   )
 
   useFocusEffect(

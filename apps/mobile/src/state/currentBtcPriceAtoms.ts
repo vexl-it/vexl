@@ -1,14 +1,14 @@
 import {atom} from 'jotai'
-import {privateApiAtom} from '../../api'
+import {privateApiAtom} from '../api'
 import * as TE from 'fp-ts/TaskEither'
 import * as T from 'fp-ts/Task'
 import {pipe} from 'fp-ts/function'
-import {toCommonErrorMessage} from '../../utils/useCommonErrorMessages'
-import {translationAtom} from '../../utils/localization/I18nProvider'
+import {toCommonErrorMessage} from '../utils/useCommonErrorMessages'
+import {translationAtom} from '../utils/localization/I18nProvider'
 import {type Task} from 'fp-ts/Task'
-import reportError from '../../utils/reportError'
+import reportError from '../utils/reportError'
 import {type GetCryptocurrencyDetailsResponse} from '@vexl-next/rest-api/dist/services/user/contracts'
-import showErrorAlert from '../../utils/showErrorAlert'
+import showErrorAlert from '../utils/showErrorAlert'
 import {
   type UnixMilliseconds,
   UnixMilliseconds0,

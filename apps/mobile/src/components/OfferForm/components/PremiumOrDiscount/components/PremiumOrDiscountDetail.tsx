@@ -15,7 +15,7 @@ import {Stack, Text, XStack} from 'tamagui'
 import {Modal} from 'react-native'
 import KeyboardAvoidingView from '../../../../KeyboardAvoidingView'
 import Input from '../../../../Input'
-import {SLIDER_THRESHOLD} from './BuySellSlider'
+import {SLIDER_THRESHOLD} from '../../../../BuySellSlider'
 import {type OfferType} from '@vexl-next/domain/dist/general/offers'
 
 interface Props {

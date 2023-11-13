@@ -5,16 +5,23 @@ import {
   type TradeChecklistStackParamsList,
 } from '../../navigationTypes'
 import AgreeOnTradeDetailsScreen from './components/AgreeOnTradeDetailsScreen'
-import {Stack} from 'tamagui'
 import ChooseAvailableDaysScreen from './components/DateAndTimeFlow/components/ChooseAvailableDaysScreen'
 import AddTimeOptionsScreen from './components/DateAndTimeFlow/components/AddTimeOptionsScreen'
-import {StyleSheet} from 'react-native'
-import Animated, {FadeIn} from 'react-native-reanimated'
 import {useSetAtom} from 'jotai'
 import {syncTradeCheckListStateWithChatActionAtom} from './atoms'
+import Animated, {FadeIn} from 'react-native-reanimated'
+import {Stack} from 'tamagui'
+import {StyleSheet} from 'react-native'
+import PageWithNavigationHeader from '../PageWithNavigationHeader'
+import SetYourOwnPriceScreen from './components/CalculateAmountFlow/components/SetYourOwnPriceScreen'
+import CalculateAmountScreen from './components/CalculateAmountFlow/components/CalculateAmountScreen'
+import PremiumOrDiscountScreen from './components/CalculateAmountFlow/components/PremiumOrDiscountScreen'
+import TradePriceTypeDialog from './components/CalculateAmountFlow/components/TradePriceTypeDialog'
 
 const StackNavigator =
   createNativeStackNavigator<TradeChecklistStackParamsList>()
+
+type Props = RootStackScreenProps<'TradeChecklistFlow'>
 
 const styles = StyleSheet.create({
   backdrop: {
@@ -26,8 +33,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.55)',
   },
 })
-
-type Props = RootStackScreenProps<'TradeChecklistFlow'>
 
 export default function TradeChecklistFlow({
   route: {
@@ -46,23 +51,46 @@ export default function TradeChecklistFlow({
     <>
       <Animated.View entering={FadeIn.delay(200)} style={styles.backdrop} />
       <Stack h={100} />
-      <StackNavigator.Navigator
-        screenOptions={{headerShown: false}}
-        initialRouteName={'AgreeOnTradeDetails'}
-      >
-        <StackNavigator.Screen
-          name={'AgreeOnTradeDetails'}
-          component={AgreeOnTradeDetailsScreen}
-        />
-        <StackNavigator.Screen
-          name={'ChooseAvailableDays'}
-          component={ChooseAvailableDaysScreen}
-        />
-        <StackNavigator.Screen
-          name={'AddTimeOptions'}
-          component={AddTimeOptionsScreen}
-        />
-      </StackNavigator.Navigator>
+      <Stack
+        width={36}
+        h={5}
+        als={'center'}
+        bc={'$greyAccent1'}
+        br={'$5'}
+        mt={'$4'}
+      />
+      <PageWithNavigationHeader>
+        <StackNavigator.Navigator
+          screenOptions={{headerShown: false}}
+          initialRouteName={'AgreeOnTradeDetails'}
+        >
+          <StackNavigator.Screen
+            name={'AgreeOnTradeDetails'}
+            component={AgreeOnTradeDetailsScreen}
+          />
+          <StackNavigator.Screen
+            name={'ChooseAvailableDays'}
+            component={ChooseAvailableDaysScreen}
+          />
+          <StackNavigator.Screen
+            name={'AddTimeOptions'}
+            component={AddTimeOptionsScreen}
+          />
+          <StackNavigator.Screen
+            name={'CalculateAmount'}
+            component={CalculateAmountScreen}
+          />
+          <StackNavigator.Screen
+            name={'SetYourOwnPrice'}
+            component={SetYourOwnPriceScreen}
+          />
+          <StackNavigator.Screen
+            name={'PremiumOrDiscount'}
+            component={PremiumOrDiscountScreen}
+          />
+        </StackNavigator.Navigator>
+      </PageWithNavigationHeader>
+      <TradePriceTypeDialog />
     </>
   )
 }

@@ -146,6 +146,9 @@ export type TradeChecklistStackParamsList = {
   AgreeOnTradeDetails: undefined
   ChooseAvailableDays: undefined
   AddTimeOptions: undefined
+  CalculateAmount: undefined
+  SetYourOwnPrice: undefined
+  PremiumOrDiscount: undefined
 }
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions

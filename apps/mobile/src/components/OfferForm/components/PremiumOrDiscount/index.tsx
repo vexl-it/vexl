@@ -3,14 +3,11 @@ import SvgImage from '../../../Image'
 import percentageSvg from './images/percentageSvg'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import Switch from '../../../Switch'
-import {TouchableOpacity} from 'react-native'
-import Info from './components/Info'
-import BuySellSlider, {SLIDER_THRESHOLD} from './components/BuySellSlider'
-import SliderText from './components/SliderText'
 import {
   type SetStateAction,
   useAtom,
   useAtomValue,
+  useSetAtom,
   type WritableAtom,
 } from 'jotai'
 import {useState} from 'react'
@@ -19,6 +16,7 @@ import {
   type FeeState,
   type OfferType,
 } from '@vexl-next/domain/dist/general/offers'
+import PremiumOrDiscountContent from '../../../PremiumOrDiscountContent'
 
 interface Props {
   feeAmountAtom: WritableAtom<number, [SetStateAction<number>], void>
@@ -35,13 +33,9 @@ function PremiumOrDiscount({
   const {t} = useTranslation()
 
   const offerType = useAtomValue(offerTypeAtom)
-  const [feeAmount, setFeeAmount] = useAtom(feeAmountAtom)
+  const setFeeAmount = useSetAtom(feeAmountAtom)
   const [feeState, setFeeState] = useAtom(feeStateAtom)
   const [detailVisible, setDetailVisible] = useState<boolean>(false)
-
-  const onSliderValueChange = (value: number[]): void => {
-    setFeeAmount(value[0] ?? 0)
-  }
 
   const onSwitchValueChange = (): void => {
     if (feeState === 'WITH_FEE') {
@@ -86,46 +80,17 @@ function PremiumOrDiscount({
           : t('offerForm.sellFasterWithDiscount')}
       </Text>
       {feeState === 'WITH_FEE' && (
-        <YStack space="$2">
-          <XStack f={1} ai="center" jc="space-between">
-            <Text maxWidth={'50%'} mr="$4" fos={18} ff="$body600" col="$white">
-              {offerType === 'BUY'
-                ? t('offerForm.premiumOrDiscount.youBuyBtcFor')
-                : t('offerForm.premiumOrDiscount.youSellBtcFor')}
-            </Text>
-            <TouchableOpacity
-              style={{flex: 1}}
-              onPress={() => {
-                setDetailVisible(true)
-              }}
-            >
-              <XStack f={1} ai="center" jc="center" bc="$grey" br="$4" p="$4">
-                <Text mr="$2" fos={16} ff="$body600" col="$greyOnWhite">
-                  {t('offerForm.premiumOrDiscount.marketPrice')}
-                </Text>
-                {feeAmount !== 0 && (
-                  <SliderText
-                    zeroValue={feeAmount === 0}
-                    extremeValue={Math.abs(feeAmount) > SLIDER_THRESHOLD / 2}
-                  >
-                    {`${feeAmount > 0 ? '+' : '-'} ${Math.abs(feeAmount)} %`}
-                  </SliderText>
-                )}
-              </XStack>
-            </TouchableOpacity>
-          </XStack>
-          <BuySellSlider
-            offerTypeAtom={offerTypeAtom}
-            sliderThreshold={SLIDER_THRESHOLD}
-            sliderValue={feeAmount}
-            onValueChange={onSliderValueChange}
-          />
-          <Info
-            feeAmountAtom={feeAmountAtom}
-            offerTypeAtom={offerTypeAtom}
-            sliderThreshold={SLIDER_THRESHOLD}
-          />
-        </YStack>
+        <PremiumOrDiscountContent
+          feeAmountAtom={feeAmountAtom}
+          offerTypeAtom={offerTypeAtom}
+          onProceedToDetailPress={() => {
+            setDetailVisible(true)
+          }}
+        >
+          <Text mr="$2" fos={16} ff="$body600" col="$greyOnWhite">
+            {t('offerForm.premiumOrDiscount.marketPrice')}
+          </Text>
+        </PremiumOrDiscountContent>
       )}
       {detailVisible && (
         <PremiumOrDiscountDetail

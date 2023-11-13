@@ -658,5 +658,22 @@
   "tradeChecklist.dateAndTime.screenTitle": "Date and time",
   "tradeChecklist.dateAndTime.chooseAvailableDays": "Ideally, choose 3+ available days.",
   "tradeChecklist.dateAndTime.addTimeOptionsLater": "You’ll add time options for each day later.",
-  "tradeChecklist.dateAndTime.addYourTimeOptions": "Add your time options"
+  "tradeChecklist.dateAndTime.addYourTimeOptions": "Add your time options",
+  "tradeChecklist.calculateAmount.calculateAmount": "Calculate amount",
+  "tradeChecklist.calculateAmount.livePrice": "Live price",
+  "tradeChecklist.calculateAmount.frozenPrice": "Frozen price",
+  "tradeChecklist.calculateAmount.customPrice": "Custom price",
+  "tradeChecklist.calculateAmount.yourPrice": "Your price",
+  "tradeChecklist.calculateAmount.sourceCoinGecko": "Source: CoinGecko.com",
+  "tradeChecklist.calculateAmount.youAreUsingLivePrice": "You are using live market price as a rate for calculating the deal.",
+  "tradeChecklist.calculateAmount.youAreUsingYourPrice": "You are using your custom set price as a rate for calculating the deal.",
+  "tradeChecklist.calculateAmount.youAreUsingFrozenPrice": "You are using frozen market price as a rate for calculating the deal.",
+  "tradeChecklist.calculateAmount.setYourOwnPrice": "Set your own price",
+  "tradeChecklist.calculateAmount.setLivePrice": "Set live price",
+  "tradeChecklist.calculateAmount.freezeCurrentMarketPrice": "Freeze current marker price",
+  "tradeChecklist.calculateAmount.premiumOrDiscount": "Premium or discount",
+  "tradeChecklist.calculateAmount.premiumIncluded": "Premium {{value}} included",
+  "tradeChecklist.calculateAmount.calculatedWithLiveRate": "Calculated with live rate",
+  "tradeChecklist.setYourOwnPrice.ourNewBtcPriceIsHigher": "Our new BTC price is {{percentage}}% higher than live market price.",
+  "tradeChecklist.setYourOwnPrice.ourNewBtcPriceIsLower": "Our new BTC price is {{percentage}}% lower than live market price."
 }

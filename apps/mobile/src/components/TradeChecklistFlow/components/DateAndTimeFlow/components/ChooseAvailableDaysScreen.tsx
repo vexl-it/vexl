@@ -1,7 +1,6 @@
 import {Calendar, type DateData} from 'react-native-calendars'
 import {type MarkedDates, type Theme} from 'react-native-calendars/src/types'
-import ScreenWrapper from '../../ScreenWrapper'
-import ScreenHeader from '../../ScreenHeader'
+import Header from '../../Header'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import {type NavigationProp, useNavigation} from '@react-navigation/native'
 import {StyleSheet} from 'react-native'
@@ -19,6 +18,11 @@ import {
 import {type AvailableDateTimeOption} from '../../../domain'
 import {MINIMUM_AVAILABLE_DAYS_THRESHOLD} from '../../../utils'
 import useSafeGoBack from '../../../../../utils/useSafeGoBack'
+import {
+  FooterButtonProxy,
+  HeaderProxy,
+} from '../../../../PageWithNavigationHeader'
+import Content from '../../Content'
 
 export const reactNativeCalendarsDateFormat = 'yyyy-MM-dd'
 
@@ -102,35 +106,35 @@ function ChooseAvailableDaysScreen(): JSX.Element {
   }, [syncAvailableDateTimesWithMainState])
 
   return (
-    <ScreenWrapper
-      scrollable
-      navigationRowShown
-      onBackButtonPress={goBack}
-      onCloseButtonPress={goBack}
-      screenTitle={t('tradeChecklist.dateAndTime.screenTitle')}
-      onButtonPress={() => {
-        navigation.navigate('AddTimeOptions')
-      }}
-      buttonTitle={t('common.continue')}
-      buttonDisabled={
-        availableDateTimes.length < MINIMUM_AVAILABLE_DAYS_THRESHOLD
-      }
-    >
-      <ScreenHeader
-        title={t('tradeChecklist.dateAndTime.chooseAvailableDays')}
-        subtitle={t('tradeChecklist.dateAndTime.addTimeOptionsLater')}
+    <>
+      <HeaderProxy
+        onClose={goBack}
+        title={t('tradeChecklist.dateAndTime.screenTitle')}
       />
-      <Stack f={1} my={'$6'}>
-        <Calendar
-          headerStyle={styles.header}
-          disableAllTouchEventsForDisabledDays
-          minDate={today}
-          theme={calendarTheme}
-          markedDates={markedDates}
-          onDayPress={handleAvailableDaysChange}
+      <Content scrollable>
+        <Header
+          title={t('tradeChecklist.dateAndTime.chooseAvailableDays')}
+          subtitle={t('tradeChecklist.dateAndTime.addTimeOptionsLater')}
         />
-      </Stack>
-    </ScreenWrapper>
+        <Stack f={1} my={'$6'}>
+          <Calendar
+            headerStyle={styles.header}
+            disableAllTouchEventsForDisabledDays
+            minDate={today}
+            theme={calendarTheme}
+            markedDates={markedDates}
+            onDayPress={handleAvailableDaysChange}
+          />
+        </Stack>
+      </Content>
+      <FooterButtonProxy
+        disabled={availableDateTimes.length < MINIMUM_AVAILABLE_DAYS_THRESHOLD}
+        text={t('common.continue')}
+        onPress={() => {
+          navigation.navigate('AddTimeOptions')
+        }}
+      />
+    </>
   )
 }
 

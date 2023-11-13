@@ -1,12 +1,12 @@
 import {Modal, ScrollView, StyleSheet, useWindowDimensions} from 'react-native'
 import {Stack, Text} from 'tamagui'
-import WhiteContainer from '../../WhiteContainer'
-import Button from '../../Button'
-import {useTranslation} from '../../../utils/localization/I18nProvider'
-import SvgImage from '../../Image'
+import WhiteContainer from './WhiteContainer'
+import Button from './Button'
+import {useTranslation} from '../utils/localization/I18nProvider'
+import SvgImage from './Image'
 import {type SvgString} from '@vexl-next/domain/dist/utility/SvgString.brand'
 import {type ReactNode} from 'react'
-import Screen from '../../Screen'
+import Screen from './Screen'
 
 interface Props {
   visible: boolean

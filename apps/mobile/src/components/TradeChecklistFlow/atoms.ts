@@ -9,7 +9,6 @@ import deepEqual from 'deep-equal'
 import {type ChatDataForTradeChecklist} from '../../state/tradeChecklist/domain'
 
 export const offerForTradeChecklistAtom = atom<OneOfferInState | null>(null)
-
 export const chatDataForTradeChecklistAtom = atom<
   ChatDataForTradeChecklist | undefined
 >(undefined)
@@ -24,6 +23,12 @@ export const mainTradeCheckListStateAtom = atom<MainTradeCheckListState>({
   },
   'CALCULATE_AMOUNT': {
     status: 'unknown',
+    btcOrSat: 'BTC',
+    tradePriceType: 'live',
+    btcPrice: 0,
+    btcAmount: 0,
+    fiatAmount: 0,
+    feeAmount: 0,
   },
   'SET_NETWORK': {
     status: 'unknown',

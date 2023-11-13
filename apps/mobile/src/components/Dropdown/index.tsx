@@ -86,12 +86,16 @@ export function Dropdown<T>({
         fontWeight: '500',
         color: getTokens().color.greyOnBlack.val,
       }}
-      renderRightIcon={() => (
-        <Image
-          source={chevronDownSvg}
-          stroke={getTokens().color.greyOnBlack.val}
-        />
-      )}
+      renderRightIcon={() =>
+        !props.disable ? (
+          <Image
+            source={chevronDownSvg}
+            stroke={getTokens().color.greyOnBlack.val}
+          />
+        ) : (
+          <></>
+        )
+      }
       renderItem={renderItem}
       {...props}
     />

@@ -8,9 +8,9 @@ import {useMemo} from 'react'
 import {atom, type PrimitiveAtom, useAtom} from 'jotai'
 
 interface Props {
-  actionButtonText: string
+  actionButtonText?: string
   text: string
-  onActionPress: () => void
+  onActionPress?: () => void
   hideCloseButton?: boolean
   visibleStateAtom?: PrimitiveAtom<boolean>
   variant?: 'pink' | 'yellow'
@@ -40,7 +40,7 @@ function Info({
       bc={variant === 'pink' ? '$pinkAccent1' : '$yellowAccent2'}
       br={'$4'}
     >
-      <XStack ai={'center'} justifyContent={'space-between'} mb={'$4'}>
+      <XStack ai={'center'} justifyContent={'space-between'}>
         <XStack f={1} space={'$2'} ai={'center'} mr={'$1'}>
           <SvgImage
             fill={
@@ -68,12 +68,16 @@ function Info({
           </TouchableOpacity>
         )}
       </XStack>
-      <Button
-        text={actionButtonText}
-        onPress={onActionPress}
-        variant={variant === 'pink' ? 'hint' : 'primary'}
-        size={'medium'}
-      />
+      {onActionPress && (
+        <Stack mt={'$4'}>
+          <Button
+            text={actionButtonText}
+            onPress={onActionPress}
+            variant={variant === 'pink' ? 'hint' : 'primary'}
+            size={'medium'}
+          />
+        </Stack>
+      )}
     </Stack>
   )
 }

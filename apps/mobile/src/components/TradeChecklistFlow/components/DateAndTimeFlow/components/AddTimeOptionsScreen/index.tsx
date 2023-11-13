@@ -1,5 +1,5 @@
-import ScreenWrapper from '../../../ScreenWrapper'
-import ScreenHeader from '../../../ScreenHeader'
+import Content from '../../../Content'
+import Header from '../../../Header'
 import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
 import {useAtomValue, useSetAtom} from 'jotai'
 import {
@@ -16,6 +16,10 @@ import React from 'react'
 import {MINIMUM_AVAILABLE_DAYS_THRESHOLD} from '../../../../utils'
 import {type NavigationProp, useNavigation} from '@react-navigation/native'
 import {type TradeChecklistStackParamsList} from '../../../../../../navigationTypes'
+import {
+  FooterButtonProxy,
+  HeaderProxy,
+} from '../../../../../PageWithNavigationHeader'
 
 const BOTTOM_MARGIN_FOR_OPENED_PICKER = 120
 
@@ -30,27 +34,15 @@ function AddTimeOptionsScreen(): JSX.Element {
   const availableDateTimes = useAtomValue(availableDateTimesAtom)
 
   return (
-    <ScreenWrapper
-      scrollable
-      navigationRowShown
-      screenTitle={t('tradeChecklist.dateAndTime.screenTitle')}
-      onButtonPress={() => {
-        saveLocalDateTimeStateToMainState()
-        navigation.navigate('AgreeOnTradeDetails')
-      }}
-      onBackButtonPress={goBack}
-      onCloseButtonPress={() => {
-        navigation.navigate('AgreeOnTradeDetails')
-      }}
-      buttonTitle={t('common.save')}
-      buttonDisabled={
-        availableDateTimes.length < MINIMUM_AVAILABLE_DAYS_THRESHOLD
-      }
-    >
-      <Stack f={1}>
-        <ScreenHeader
-          title={t('tradeChecklist.dateAndTime.addYourTimeOptions')}
-        />
+    <>
+      <HeaderProxy
+        title={t('tradeChecklist.dateAndTime.screenTitle')}
+        onClose={() => {
+          navigation.navigate('AgreeOnTradeDetails')
+        }}
+      />
+      <Content scrollable>
+        <Header title={t('tradeChecklist.dateAndTime.addYourTimeOptions')} />
         <Stack f={1} mt={'$4'}>
           {availableDateTimes.map((value) => (
             <TimeOptionCell key={value.date} availableDateTime={value} />
@@ -71,8 +63,16 @@ function AddTimeOptionsScreen(): JSX.Element {
             </TouchableOpacity>
           </Stack>
         </Stack>
-      </Stack>
-    </ScreenWrapper>
+      </Content>
+      <FooterButtonProxy
+        text={t('common.save')}
+        disabled={availableDateTimes.length < MINIMUM_AVAILABLE_DAYS_THRESHOLD}
+        onPress={() => {
+          saveLocalDateTimeStateToMainState()
+          navigation.navigate('AgreeOnTradeDetails')
+        }}
+      />
+    </>
   )
 }
 

@@ -1,13 +1,13 @@
-import {getTokens, Stack, type StackProps, Text, XStack} from 'tamagui'
+import {useSetAtom} from 'jotai'
 import {DateTime} from 'luxon'
-import {i18n} from '../../../../../../../utils/localization/I18nProvider'
 import {TouchableOpacity} from 'react-native'
+import {Stack, Text, XStack, getTokens, type StackProps} from 'tamagui'
+import {getCurrentLocale} from '../../../../../../../utils/localization/I18nProvider'
 import Image from '../../../../../../Image'
 import closeSvg from '../../../../../../images/closeSvg'
-import {useSetAtom} from 'jotai'
+import {type AvailableDateTimeOption} from '../../../../../domain'
 import {removeTimestampFromAvailableAtom} from '../../../atoms'
 import TimeFromDropdown from './TimeFromDropdown'
-import {type AvailableDateTimeOption} from '../../../../../domain'
 import TimeToDropdown from './TimeToDropdown'
 
 interface Props extends StackProps {
@@ -31,7 +31,7 @@ function TimeOptionCell({availableDateTime, ...props}: Props): JSX.Element {
       <Text fos={16} ff={'$body600'}>
         {DateTime.fromMillis(availableDateTime.date).toLocaleString(
           DateTime.DATE_MED_WITH_WEEKDAY,
-          {locale: i18n.locale}
+          {locale: getCurrentLocale()}
         )}
       </Text>
       <XStack

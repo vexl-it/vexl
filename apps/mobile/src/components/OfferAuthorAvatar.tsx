@@ -1,17 +1,20 @@
-import {AnonymousAvatarFromSeed} from './AnonymousAvatar'
-import {Stack, Text} from 'tamagui'
-import UserNameWithSellingBuying from './UserNameWithSellingBuying'
-import randomName from '../utils/randomName'
-import ContactTypeAndCommonNumber from './ContactTypeAndCommonNumber'
-import {useChatForOffer} from '../state/chat/hooks/useChatForOffer'
-import UserAvatar from './UserAvatar'
-import {DateTime} from 'luxon'
-import {userDataAtom} from '../state/session'
-import {i18n, useTranslation} from '../utils/localization/I18nProvider'
-import {useAtomValue} from 'jotai'
-import {useMemo} from 'react'
-import {selectImportedContactsWithHashes} from '../state/contacts'
 import {type OneOfferInState} from '@vexl-next/domain/dist/general/offers'
+import {useAtomValue} from 'jotai'
+import {DateTime} from 'luxon'
+import {useMemo} from 'react'
+import {Stack, Text} from 'tamagui'
+import {useChatForOffer} from '../state/chat/hooks/useChatForOffer'
+import {selectImportedContactsWithHashes} from '../state/contacts'
+import {userDataAtom} from '../state/session'
+import {
+  getCurrentLocale,
+  useTranslation,
+} from '../utils/localization/I18nProvider'
+import randomName from '../utils/randomName'
+import {AnonymousAvatarFromSeed} from './AnonymousAvatar'
+import ContactTypeAndCommonNumber from './ContactTypeAndCommonNumber'
+import UserAvatar from './UserAvatar'
+import UserNameWithSellingBuying from './UserNameWithSellingBuying'
 
 function OfferAuthorAvatar({
   offer: {offerInfo, ownershipInfo},
@@ -47,7 +50,7 @@ function OfferAuthorAvatar({
             <Text fos={12} ff={'$body500'} col={'$greyOnBlack'}>
               {t('myOffers.offerAdded', {
                 date: DateTime.fromISO(offerInfo.createdAt)
-                  .setLocale(i18n.locale)
+                  .setLocale(getCurrentLocale())
                   .toLocaleString(DateTime.DATE_FULL),
               })}
             </Text>

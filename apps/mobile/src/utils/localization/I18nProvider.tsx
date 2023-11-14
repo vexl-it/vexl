@@ -8,17 +8,18 @@ import * as translations from './translations'
 // SETUP I18n
 export const i18n = new I18n(
   enableHiddenFeatures
-    ? translations
+    ? {'en_dev': {localeName: 'en_dev', ...translations.dev}, ...translations}
     : {
-        'en_dev': {localeName: 'en', ...translations.dev},
+        'en_dev': {localeName: 'en_dev', ...translations.dev},
         en: {localeName: 'en', ...translations.en},
         de: {localeName: 'de', ...translations.de},
         cs: {localeName: 'cs', ...translations.cs},
         sk: {localeName: 'sk', ...translations.sk},
       }
 )
+i18n.defaultSeparator = '$'
 i18n.locale = isStaging ? 'en_dev' : getLocales().at(0)?.languageTag ?? 'en'
-i18n.defaultLocale = isStaging ? 'en_dev' : 'en'
+i18n.defaultLocale = 'en_dev'
 i18n.enableFallback = true
 // Setup provider
 export type TFunction = (
@@ -42,4 +43,8 @@ export const translationAtom = selectAtom(
 
 export function useTranslation(): TranslationContext {
   return useAtomValue(translationAtom)
+}
+
+export function getCurrentLocale(): string {
+  return (i18n.locale === 'en_dev' ? 'en' : i18n.locale) ?? 'en'
 }

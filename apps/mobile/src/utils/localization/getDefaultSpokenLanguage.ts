@@ -1,14 +1,15 @@
 import {type SpokenLanguage} from '@vexl-next/domain/dist/general/offers'
-import {i18n} from './I18nProvider'
+import {getCurrentLocale} from './I18nProvider'
 
 function getDefaultSpokenLanguage(): SpokenLanguage[] {
-  if (i18n.locale.split('-').includes('pt')) return ['PRT']
-  if (i18n.locale.split('-').includes('es')) return ['ESP']
-  if (i18n.locale.split('-').includes('de')) return ['DEU']
-  if (i18n.locale.split('-').includes('sk')) return ['SVK']
-  if (i18n.locale.split('-').includes('cs')) return ['CZE']
-  if (i18n.locale.split('-').includes('it')) return ['ITA']
-  if (i18n.locale.split('-').includes('fr')) return ['FRA']
+  const currentLocale = getCurrentLocale()
+  if (currentLocale.split('-').includes('pt')) return ['PRT']
+  if (currentLocale.split('-').includes('es')) return ['ESP']
+  if (currentLocale.split('-').includes('de')) return ['DEU']
+  if (currentLocale.split('-').includes('sk')) return ['SVK']
+  if (currentLocale.split('-').includes('cs')) return ['CZE']
+  if (currentLocale.split('-').includes('it')) return ['ITA']
+  if (currentLocale.split('-').includes('fr')) return ['FRA']
   return ['ENG']
 }
 

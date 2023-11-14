@@ -66,6 +66,7 @@
   "common.thanks": "Thanks!",
   "common.vexl": "Vexl",
   "common.dontShowMeThisAgain": "Don’t show me this again",
+  "common.addMore": "Add more",
   "loginFlow.anonymityNotice": "Niemand wird dies sehen, bis du es erlaubst. Nicht einmal wir.",
   "loginFlow.intro.title1": "Importiere deine Kontakte anonym.",
   "loginFlow.intro.title2": "Sieh deren Kauf- und Verkaufsangebote.",
@@ -381,6 +382,9 @@
   "notifications.NEW_OFFERS_IN_MARKETPLACE.body": "Neue Angebote auf dem Marktplatz. Öffne die App, um sie zu sehen.",
   "notifications.NEW_CONTACTS_ON_DEVICE.title": "Deine Kontakte sind nicht synchronisiert",
   "notifications.NEW_CONTACTS_ON_DEVICE.body": "Du hast neue Kontakte, die du nicht synchronisiert hast. Erweiter dein Netzwerk und synchronisiere Sie sie alle!",
+  "notifications.groupNotificationChat.subtitle": "You have new messages from {userName}",
+  "notifications.groupNotificationRequest.subtitle": "You have new requests for your offers",
+  "notifications.groupNotificationRequest.title": "New requests",
   "myOffers.addNewOffer": "Neues Angebot hinzufügen",
   "myOffers.activeOffers": "{{count}} aktive Angebote",
   "myOffers.filterOffers": "Angebote filtern",
@@ -602,7 +606,6 @@
   "qrScanner.grantPermissions": "Grant permissions",
   "qrScanner.grantPermissionsInSettings": "Unable to ask for permissions. To use QR scanner open settings and allow Vexl to use camera.",
   "qrScanner.openSettings": "Einstellungen öffnen",
-  "": "",
   "feedback.objection.APP": "App",
   "feedback.objection.PROCESS": "Process",
   "feedback.objection.RESPONDING_TIME": "Responding time",
@@ -632,5 +635,9 @@
   "tradeChecklist.options.REVEAL_IDENTITY": "Reveal identity",
   "tradeChecklist.options.REVEAL_PHONE_NUMBER": "Reveal phone number",
   "tradeChecklist.saveAndContinue": "Save and continue chatting",
-  "tradeChecklist.shareRecognitionSignInChat": "Or share the recognition sign in chat"
+  "tradeChecklist.shareRecognitionSignInChat": "Or share the recognition sign in chat",
+  "tradeChecklist.dateAndTime.screenTitle": "Date and time",
+  "tradeChecklist.dateAndTime.chooseAvailableDays": "Ideally, choose 3+ available days.",
+  "tradeChecklist.dateAndTime.addTimeOptionsLater": "You’ll add time options for each day later.",
+  "tradeChecklist.dateAndTime.addYourTimeOptions": "Add your time options"
 }

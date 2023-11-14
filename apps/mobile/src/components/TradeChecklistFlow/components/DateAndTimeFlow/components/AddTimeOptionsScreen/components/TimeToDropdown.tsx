@@ -1,13 +1,13 @@
-import {useAtom} from 'jotai'
-import {useMemo} from 'react'
-import {createTimeOptionAtomForTimeToDropdown} from '../../../atoms'
 import {UnixMilliseconds} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
+import {useAtom} from 'jotai'
 import {DateTime} from 'luxon'
-import {i18n} from '../../../../../../../utils/localization/I18nProvider'
+import {useMemo} from 'react'
+import {getCurrentLocale} from '../../../../../../../utils/localization/I18nProvider'
 import {
   DropdownPicker,
   type DropdownItemProps,
 } from '../../../../../../DropDownPicker'
+import {createTimeOptionAtomForTimeToDropdown} from '../../../atoms'
 
 interface Props {
   availableDateTimeFrom: UnixMilliseconds
@@ -42,7 +42,7 @@ function TimeToDropdown({
           DateTime.fromMillis(availableDateTimeFrom).plus({hour: i}).toMillis()
         )
         const timeOptionString = DateTime.fromMillis(timeOptionMillis)
-          .setLocale(i18n.locale)
+          .setLocale(getCurrentLocale())
           .toLocaleString(DateTime.TIME_SIMPLE)
 
         options.push({

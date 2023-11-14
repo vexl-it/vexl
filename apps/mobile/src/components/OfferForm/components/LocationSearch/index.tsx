@@ -1,21 +1,24 @@
-import {i18nAtom, useTranslation} from '../../../../utils/localization/I18nProvider'
+import {type LocationSuggestion} from '@vexl-next/rest-api/dist/services/location/contracts'
 import {
-  type PrimitiveAtom,
-  type WritableAtom,
-  type Atom,
   useAtomValue,
   useSetAtom,
+  type Atom,
+  type PrimitiveAtom,
+  type WritableAtom,
 } from 'jotai'
 import React, {useEffect, useRef, useState} from 'react'
-import {useDebounceValue} from 'tamagui'
 import {Modal, Platform, type TextInput} from 'react-native'
-import {type LocationSuggestion} from '@vexl-next/rest-api/dist/services/location/contracts'
+import {useDebounceValue} from 'tamagui'
+import {
+  getCurrentLocale,
+  useTranslation,
+} from '../../../../utils/localization/I18nProvider'
+import IconButton from '../../../IconButton'
+import Input from '../../../Input'
 import Screen from '../../../Screen'
 import ScreenTitle from '../../../ScreenTitle'
-import Input from '../../../Input'
-import magnifyingGlass from '../../../images/magnifyingGlass'
-import IconButton from '../../../IconButton'
 import closeSvg from '../../../images/closeSvg'
+import magnifyingGlass from '../../../images/magnifyingGlass'
 import LocationsList from './LocationsList'
 
 interface Props {
@@ -44,7 +47,6 @@ function LocationSearch({
   visible,
 }: Props): JSX.Element {
   const {t} = useTranslation()
-  const i18n = useAtomValue(i18nAtom)
   const inputRef = useRef<TextInput>(null)
   const [inputValue, setInputValue] = useState<string>('')
   const debouncedSearchValue = useDebounceValue(inputValue, 1000)
@@ -63,7 +65,7 @@ function LocationSearch({
     if (debouncedSearchValue.length > 0) {
       void updateAndRefreshLocationSuggestions({
         phrase: debouncedSearchValue,
-        lang: i18n.locale,
+        lang: getCurrentLocale(),
       })
     }
 
@@ -73,7 +75,6 @@ function LocationSearch({
   }, [
     debouncedSearchValue,
     updateAndRefreshLocationSuggestions,
-    i18n.locale,
     setLocationSuggestions,
   ])
 

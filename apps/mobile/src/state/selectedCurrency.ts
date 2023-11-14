@@ -1,8 +1,8 @@
-import {atomWithParsedMmkvStorage} from '../utils/atomUtils/atomWithParsedMmkvStorage'
 import {CurrencyCode} from '@vexl-next/domain/src/general/offers'
-import {z} from 'zod'
 import {focusAtom} from 'jotai-optics'
-import {i18n} from '../utils/localization/I18nProvider'
+import {z} from 'zod'
+import {atomWithParsedMmkvStorage} from '../utils/atomUtils/atomWithParsedMmkvStorage'
+import {getCurrentLocale} from '../utils/localization/I18nProvider'
 
 const euLocales = [
   'at', // Austria
@@ -28,7 +28,7 @@ const euLocales = [
 
 function getLocale(): string {
   try {
-    return i18n.locale.split('-')[0] ?? 'en'
+    return getCurrentLocale().split('-')[0] ?? 'en'
   } catch (err) {
     return 'en'
   }

@@ -1,12 +1,12 @@
 import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs'
 import {OfferType} from '@vexl-next/domain/dist/general/offers'
-import {useAtomValue, useSetAtom} from 'jotai'
+import {useSetAtom} from 'jotai'
 import {useCallback, useMemo} from 'react'
 import {getTokens, useMedia} from 'tamagui'
 import {type MarketplaceTabParamsList} from '../../../../navigationTypes'
 import {triggerOffersRefreshAtom} from '../../../../state/marketplace'
 import {
-  i18nAtom,
+  getCurrentLocale,
   useTranslation,
 } from '../../../../utils/localization/I18nProvider'
 import {useAppState} from '../../../../utils/useAppState'
@@ -32,7 +32,6 @@ function MarketplaceScreen(): JSX.Element {
   const {t} = useTranslation()
   const media = useMedia()
   const tokens = getTokens()
-  const i18n = useAtomValue(i18nAtom)
 
   const {
     tabBarStyle,
@@ -42,7 +41,7 @@ function MarketplaceScreen(): JSX.Element {
   } = useMemo(() => {
     const tabLabelFontSize = (() => {
       const sizesForLangauge =
-        tabsFontSizes[i18n.locale.split('-').at(0) ?? 'default'] ??
+        tabsFontSizes[getCurrentLocale().split('-').at(0) ?? 'default'] ??
         tabsFontSizes.default
 
       if (media.sm) return sizesForLangauge?.sm
@@ -72,7 +71,7 @@ function MarketplaceScreen(): JSX.Element {
         bottom: -2,
       },
     } as const
-  }, [tokens.color.black.val, tokens.color.grey.val, media, i18n])
+  }, [tokens.color.black.val, tokens.color.grey.val, media])
 
   const refreshOffers = useSetAtom(triggerOffersRefreshAtom)
 

@@ -1,6 +1,6 @@
 import {DateTime} from 'luxon'
 import {type ChatMessageWithState} from '../../state/chat/domain'
-import {i18n} from '../../utils/localization/I18nProvider'
+import {getCurrentLocale} from '../../utils/localization/I18nProvider'
 
 export type MessagesListItem =
   | {
@@ -70,11 +70,11 @@ export function messagesToListData(
 
 export function chatTime(dateTime: DateTime): string {
   const now = DateTime.now()
-  const dateTimeWithCorrectLocal = dateTime.setLocale(i18n.locale)
+  const dateTimeWithCorrectLocal = dateTime.setLocale(getCurrentLocale())
 
   if (dateTime.hasSame(now, 'day')) {
     return dateTime
-      .setLocale(i18n.locale)
+      .setLocale(getCurrentLocale())
       .toLocaleString(DateTime.TIME_24_SIMPLE)
   }
 
@@ -82,5 +82,7 @@ export function chatTime(dateTime: DateTime): string {
     return dateTimeWithCorrectLocal.toFormat('cccc')
   }
 
-  return dateTime.setLocale(i18n.locale).toLocaleString(DateTime.DATE_FULL)
+  return dateTime
+    .setLocale(getCurrentLocale())
+    .toLocaleString(DateTime.DATE_FULL)
 }

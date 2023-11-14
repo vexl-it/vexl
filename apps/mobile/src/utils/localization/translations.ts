@@ -1,3 +1,5 @@
+import {unflatten} from 'flat'
+
 import base from '@vexl-next/localization/base.json'
 import privacyPolicyDev from '@vexl-next/localization/privacyPolicy.json'
 import termsOfUse from '@vexl-next/localization/termsOfUse.json'
@@ -35,55 +37,55 @@ import skPrivacyPolicyDev from '@vexl-next/localization/sk-privacyPolicy.json'
 import skTermsOfUse from '@vexl-next/localization/sk-termsOfUse.json'
 
 export const dev = {
-  ...base,
+  ...unflatten<typeof base, typeof base>(base),
   termsOfUseMD: termsOfUse,
   privacyPolicyMD: privacyPolicyDev,
 } as const
 
 export const cs = {
-  ...csBase,
+  ...unflatten<typeof csBase, typeof base>(csBase),
   termsOfUseMD: csTermsOfUse,
   privacyPolicyMD: csPrivacyPolicyDev,
 } as const
 
 export const de = {
-  ...deBase,
+  ...unflatten<typeof deBase, typeof base>(deBase),
   termsOfUseMD: deTermsOfUse,
   privacyPolicyMD: dePrivacyPolicyDev,
 } as const
 
 export const en = {
-  ...enBase,
+  ...unflatten<typeof enBase, typeof base>(enBase),
   termsOfUseMD: enTermsOfUse,
   privacyPolicyMD: enPrivacyPolicyDev,
 } as const
 
 export const fr = {
-  ...frBase,
+  ...unflatten<typeof frBase, typeof base>(frBase),
   termsOfUseMD: frTermsOfUse,
   privacyPolicyMD: frPrivacyPolicyDev,
 } as const
 
 export const it = {
-  ...itBase,
+  ...unflatten<typeof itBase, typeof base>(itBase),
   termsOfUseMD: itTermsOfUse,
   privacyPolicyMD: itPrivacyPolicyDev,
 } as const
 
 export const pt = {
-  ...ptBase,
+  ...unflatten<typeof ptBase, typeof base>(ptBase),
   termsOfUseMD: ptTermsOfUse,
   privacyPolicyMD: ptPrivacyPolicyDev,
 } as const
 
 export const es = {
-  ...esBase,
+  ...unflatten<typeof esBase, typeof base>(esBase),
   termsOfUseMD: esTermsOfUse,
   privacyPolicyMD: esPrivacyPolicyDev,
 } as const
 
 export const sk = {
-  ...skBase,
+  ...unflatten<typeof skBase, typeof base>(skBase),
   termsOfUseMD: skTermsOfUse,
   privacyPolicyMD: skPrivacyPolicyDev,
 } as const

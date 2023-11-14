@@ -1,10 +1,10 @@
+import {useNavigation} from '@react-navigation/native'
 import {type DateTime} from 'luxon'
 import {useEffect, useState} from 'react'
-import {useNavigation} from '@react-navigation/native'
 import {
-  i18n,
-  type TFunction,
+  getCurrentLocale,
   useTranslation,
+  type TFunction,
 } from '../utils/localization/I18nProvider'
 
 function whenShouldIUpdateNext(difNowSec: number): number | null {
@@ -19,7 +19,7 @@ function getTimeToShow(date: DateTime, t: TFunction): string {
   if (Math.abs(date.diffNow(['seconds']).seconds) < 60) {
     return t('common.now')
   }
-  return date.toRelative({style: 'narrow', locale: i18n.locale}) ?? ''
+  return date.toRelative({style: 'narrow', locale: getCurrentLocale()}) ?? ''
 }
 
 function FromNowComponent({date}: {date: DateTime}): JSX.Element {

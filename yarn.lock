@@ -8399,6 +8399,7 @@ __metadata:
     react-navigation-heavy-screen: ^1.2.1
     react-test-renderer: ^18.2.0
     seed-random: ^2.2.0
+    set-operations: ^2.0.2
     tamagui: ^1.72.3
     ts-node: ^10.9.1
     typescript: ^5.1.3
@@ -22728,6 +22729,13 @@ __metadata:
     functions-have-names: ^1.2.3
     has-property-descriptors: ^1.0.0
   checksum: 4975d17d90c40168eee2c7c9c59d023429f0a1690a89d75656306481ece0c3c1fb1ebcc0150ea546d1913e35fbd037bace91372c69e543e51fc5d1f31a9fa126
+  languageName: node
+  linkType: hard
+
+"set-operations@npm:^2.0.2":
+  version: 2.0.2
+  resolution: "set-operations@npm:2.0.2"
+  checksum: 6979818af73281d5725c66a6f0d85e7b092a7790265f58cec7a2bbbeea2fe881b4ed08a338306ad7aa6c7547cdc56a3346a43101d1114a072aab9e1553a82130
   languageName: node
   linkType: hard
 

@@ -5,19 +5,21 @@ import {atom, useAtomValue} from 'jotai'
 import {selectAtom} from 'jotai/utils'
 import {enableHiddenFeatures, isStaging} from '../environment'
 import * as translations from './translations'
+
+const {dev: devTranslation, ...prodTranslations} = translations
+
 // SETUP I18n
 export const i18n = new I18n(
   enableHiddenFeatures
-    ? {'en_dev': {localeName: 'en_dev', ...translations.dev}, ...translations}
+    ? {'en_dev': devTranslation, ...prodTranslations}
     : {
-        'en_dev': {localeName: 'en_dev', ...translations.dev},
-        en: {localeName: 'en', ...translations.en},
-        de: {localeName: 'de', ...translations.de},
-        cs: {localeName: 'cs', ...translations.cs},
-        sk: {localeName: 'sk', ...translations.sk},
+        en_dev: translations.dev,
+        en: translations.en,
+        de: translations.de,
+        cs: translations.cs,
+        sk: translations.sk,
       }
 )
-i18n.defaultSeparator = '$'
 i18n.locale = isStaging ? 'en_dev' : getLocales().at(0)?.languageTag ?? 'en'
 i18n.defaultLocale = 'en_dev'
 i18n.enableFallback = true

@@ -37,48 +37,56 @@ import skPrivacyPolicyDev from '@vexl-next/localization/sk-privacyPolicy.json'
 import skTermsOfUse from '@vexl-next/localization/sk-termsOfUse.json'
 
 export const dev = {
+  localeName: 'en_dev',
   ...unflatten<typeof base, typeof base>(base),
   termsOfUseMD: termsOfUse,
   privacyPolicyMD: privacyPolicyDev,
 } as const
 
 export const cs = {
+  localeName: 'cs',
   ...unflatten<typeof csBase, typeof base>(csBase),
   termsOfUseMD: csTermsOfUse,
   privacyPolicyMD: csPrivacyPolicyDev,
 } as const
 
 export const de = {
+  localeName: 'de',
   ...unflatten<typeof deBase, typeof base>(deBase),
   termsOfUseMD: deTermsOfUse,
   privacyPolicyMD: dePrivacyPolicyDev,
 } as const
 
 export const en = {
+  localeName: 'en',
   ...unflatten<typeof enBase, typeof base>(enBase),
   termsOfUseMD: enTermsOfUse,
   privacyPolicyMD: enPrivacyPolicyDev,
 } as const
 
 export const fr = {
+  localeName: 'fr',
   ...unflatten<typeof frBase, typeof base>(frBase),
   termsOfUseMD: frTermsOfUse,
   privacyPolicyMD: frPrivacyPolicyDev,
 } as const
 
 export const it = {
+  localeName: 'it',
   ...unflatten<typeof itBase, typeof base>(itBase),
   termsOfUseMD: itTermsOfUse,
   privacyPolicyMD: itPrivacyPolicyDev,
 } as const
 
 export const pt = {
+  localeName: 'pt',
   ...unflatten<typeof ptBase, typeof base>(ptBase),
   termsOfUseMD: ptTermsOfUse,
   privacyPolicyMD: ptPrivacyPolicyDev,
 } as const
 
 export const es = {
+  localeName: 'es',
   ...unflatten<typeof esBase, typeof base>(esBase),
   termsOfUseMD: esTermsOfUse,
   privacyPolicyMD: esPrivacyPolicyDev,
@@ -86,6 +94,7 @@ export const es = {
 
 export const sk = {
   ...unflatten<typeof skBase, typeof base>(skBase),
+  localeName: 'sk',
   termsOfUseMD: skTermsOfUse,
   privacyPolicyMD: skPrivacyPolicyDev,
 } as const

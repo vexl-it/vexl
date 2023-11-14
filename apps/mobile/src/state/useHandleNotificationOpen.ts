@@ -1,13 +1,12 @@
 import notifee, {EventType, type Notification} from '@notifee/react-native'
 import {useNavigation} from '@react-navigation/native'
-import {PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
 import * as E from 'fp-ts/Either'
 import {pipe} from 'fp-ts/function'
 import {atom, useStore} from 'jotai'
 import {useCallback, useEffect} from 'react'
-import {z} from 'zod'
 import {safeParse} from '../utils/fpUtils'
 import {isOnMessagesList, isOnSpecificChat} from '../utils/navigation'
+import {ChatNotificationData} from '../utils/notifications/ChatNotificationData'
 import {
   NEW_CONTACTS_TO_SYNC,
   NEW_OFFERS_IN_MARKETPLACE,
@@ -16,11 +15,6 @@ import reportError from '../utils/reportError'
 import {useAppState} from '../utils/useAppState'
 
 const lastNotificationIdHandledAtom = atom<string | undefined>(undefined)
-
-const MessageNotificationPayload = z.object({
-  inbox: PublicKeyPemBase64,
-  sender: PublicKeyPemBase64,
-})
 
 function useReactOnNotificationOpen(): (notification: Notification) => void {
   const store = useStore()
@@ -38,7 +32,7 @@ function useReactOnNotificationOpen(): (notification: Notification) => void {
       } else if (notification.data?.inbox && notification.data?.sender) {
         pipe(
           notification.data,
-          safeParse(MessageNotificationPayload),
+          safeParse(ChatNotificationData),
           E.match(
             (l) => {
               reportError(

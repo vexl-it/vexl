@@ -602,6 +602,13 @@ const otherSk: typeof en =
         "title": "Nemáš synchronizované všetky svoje kontakty",
         "body":
           "Na zariadení máš nové kontakty, ktoré si ešte nesynchronizoval s Vexlom. Rozšír si sieť ich synchronizáciou."
+      },
+      "groupNotificationChat": {
+        "subtitle": "You have new messages from {userName}"
+      },
+      "groupNotificationRequest": {
+        "subtitle": "You have new requests for your offers",
+        "title": "New requests"
       }
     },
     "myOffers": {

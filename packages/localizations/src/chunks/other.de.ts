@@ -616,6 +616,13 @@ const otherDe: typeof en =
         "title": "Deine Kontakte sind nicht synchronisiert",
         "body":
           "Du hast neue Kontakte, die du nicht synchronisiert hast. Erweiter dein Netzwerk und synchronisiere Sie sie alle!"
+      },
+      "groupNotificationChat": {
+        "subtitle": "You have new messages from {userName}"
+      },
+      "groupNotificationRequest": {
+        "subtitle": "You have new requests for your offers",
+        "title": "New requests"
       }
     },
     "myOffers": {

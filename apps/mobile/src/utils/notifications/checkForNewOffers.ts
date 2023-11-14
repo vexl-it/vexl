@@ -22,8 +22,8 @@ import {getLastTimeAppWasRunning} from '../lastTimeAppWasRunning'
 import {translationAtom, type TFunction} from '../localization/I18nProvider'
 import {notificationPreferencesAtom, preferencesAtom} from '../preferences'
 import reportError from '../reportError'
+import {getDefaultChannel} from './notificationChannels'
 import {NEW_OFFERS_IN_MARKETPLACE} from './notificationTypes'
-import {getDefaultChannel} from './showUINotificationFromRemoteMessage'
 
 const LAST_NEW_OFFERS_NOTIFICATION_KEY = 'lastNewOffersNotification'
 const INTERVALS = {

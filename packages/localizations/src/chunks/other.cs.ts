@@ -600,6 +600,13 @@ const otherCs: typeof en =
         "title": "Nemáš synchronizované všechny kontakty.",
         "body":
           "V zařízení máš nové kontakty, které jsi ještě nesynchronizoval s Vexlem. Rozšiř svou síť jejich synchronizací."
+      },
+      "groupNotificationChat": {
+        "subtitle": "You have new messages from {userName}"
+      },
+      "groupNotificationRequest": {
+        "subtitle": "You have new requests for your offers",
+        "title": "New requests"
       }
     },
     "myOffers": {

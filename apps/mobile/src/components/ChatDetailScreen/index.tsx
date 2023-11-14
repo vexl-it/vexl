@@ -1,14 +1,14 @@
-import {useAtomValue, useSetAtom} from 'jotai'
+import {useAtomValue, useStore} from 'jotai'
 import {ScopeProvider} from 'jotai-molecules'
 import React, {useCallback, useMemo} from 'react'
 import {Stack, Text} from 'tamagui'
 import backButtonSvg from '../../images/backButtonSvg'
 import {type RootStackScreenProps} from '../../navigationTypes'
 import {focusChatWithMessagesByKeysAtom} from '../../state/chat/atoms/focusChatWithMessagesAtom'
-import {hideNotificationsForChatActionAtom} from '../../state/displayedNotifications'
 import hasNonNullableValueAtom from '../../utils/atomUtils/hasNonNullableValueAtom'
 import valueOrDefaultAtom from '../../utils/atomUtils/valueOrDefaultAtom'
 import {useTranslation} from '../../utils/localization/I18nProvider'
+import {hideNotificationsForChat} from '../../utils/notifications/chatNotifications'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 import {useOnFocusAndAppState} from '../ContactListSelect/utils'
 import IconButton from '../IconButton'
@@ -26,9 +26,7 @@ export default function ChatDetailScreen({
 }: Props): JSX.Element {
   const {t} = useTranslation()
   const safeGoBack = useSafeGoBack()
-  const hideNotificationsForChat = useSetAtom(
-    hideNotificationsForChatActionAtom
-  )
+  const store = useStore()
 
   const {nonNullChatWithMessagesAtom, chatExistsAtom} = useMemo(() => {
     const chatWithMessagesAtom = focusChatWithMessagesByKeysAtom({
@@ -50,8 +48,8 @@ export default function ChatDetailScreen({
 
   useOnFocusAndAppState(
     useCallback(() => {
-      hideNotificationsForChat(nonNullChatWithMessagesAtom)
-    }, [hideNotificationsForChat, nonNullChatWithMessagesAtom])
+      void hideNotificationsForChat(store.get(nonNullChatWithMessagesAtom).chat)
+    }, [nonNullChatWithMessagesAtom, store])
   )
 
   if (!chatExists)

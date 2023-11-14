@@ -1,40 +1,40 @@
-import InsideScreen from '../InsideRouter'
-import LoginFlow from '../LoginFlow'
-import {useIsUserLoggedIn} from '../../state/session'
 import {createNativeStackNavigator} from '@react-navigation/native-stack'
 import {type RootStackParamsList} from '../../navigationTypes'
+import {useSyncConnections} from '../../state/connections'
+import {useSetCombinedContactsAfterLastSubmitForCurrentUsers} from '../../state/contacts/hooks/useSetCombinedContactsAfterLastSubmitForCurrentUsers'
+import {useIsUserLoggedIn} from '../../state/session'
+import useHandleNotificationOpen from '../../state/useHandleNotificationOpen'
+import {useHandleReceivedNotifications} from '../../state/useHandleReceivedNotifications'
+import useHandleRefreshContactServiceAndOffers from '../../state/useHandleRefreshContactServiceAndOffers'
+import {useHandleDeepLink} from '../../utils/deepLinks'
+import {useHideInnactivityReminderNotificationsOnResume} from '../../utils/notifications/chatNotifications'
+import {useRefreshNotificationTokenOnResumeAssumeLoggedIn} from '../../utils/notifications/useRefreshNotificationTokenOnResumeAssumeLoggedIn'
+import AppLogsScreen from '../AppLogsScreen'
+import ChangeProfilePictureScreen from '../ChangeProfilePictureScreen/ChangeProfilePictureScreen'
+import ChatDetailScreen from '../ChatDetailScreen'
+import CommonFriendsScreen from '../CommonFriendsScreen'
+import DebugScreen from '../DebugScreen'
+import EditNameScreen from '../EditNameScreen'
+import FaqsScreen from '../FaqScreen'
+import FilterOffersScreen from '../FilterOffersScreen'
+import InsideScreen from '../InsideRouter'
+import LoginFlow from '../LoginFlow'
+import CreateOfferScreen from '../ModifyOffer/components/CreateOfferScreen'
+import EditOfferScreen from '../ModifyOffer/components/EditOfferScreen'
+import MyOffersScreen from '../MyOffersScreen'
+import {NotificationPermissionsScreen} from '../NotificationPermissionsScreen'
+import NotificationSettingsScreen from '../NotificationSettingsScreen'
+import OfferDetailScreen from '../OfferDetailScreen'
 import PostLoginFlow from '../PostLoginFlow'
+import SearchOffersScreen from '../SearchOffersScreen'
+import SetContactsScreen from '../SetContactsScreen'
+import TodoScreen from '../TodoScreen'
+import TosScreen from '../TosScreen'
+import TradeChecklistFlow from '../TradeChecklistFlow'
 import {
   useHandleNotificationsPermissionsRedirect,
   useHandlePostLoginFlowRedirect,
 } from './utils'
-import TodoScreen from '../TodoScreen'
-import OfferDetailScreen from '../OfferDetailScreen'
-import ChatDetailScreen from '../ChatDetailScreen'
-import TosScreen from '../TosScreen'
-import FaqsScreen from '../FaqScreen'
-import CreateOfferScreen from '../ModifyOffer/components/CreateOfferScreen'
-import {NotificationPermissionsScreen} from '../NotificationPermissionsScreen'
-import {useRefreshNotificationTokenOnResumeAssumeLoggedIn} from '../../utils/notifications/useRefreshNotificationTokenOnResumeAssumeLoggedIn'
-import {useHandleReceivedNotifications} from '../../state/useHandleReceivedNotifications'
-import DebugScreen from '../DebugScreen'
-import SetContactsScreen from '../SetContactsScreen'
-import useHandleRefreshContactServiceAndOffers from '../../state/useHandleRefreshContactServiceAndOffers'
-import MyOffersScreen from '../MyOffersScreen'
-import {useSyncConnections} from '../../state/connections'
-import EditOfferScreen from '../ModifyOffer/components/EditOfferScreen'
-import FilterOffersScreen from '../FilterOffersScreen'
-import CommonFriendsScreen from '../CommonFriendsScreen'
-import AppLogsScreen from '../AppLogsScreen'
-import useHandleNotificationOpen from '../../state/useHandleNotificationOpen'
-import {useHandleDeepLink} from '../../utils/deepLinks'
-import EditNameScreen from '../EditNameScreen'
-import ChangeProfilePictureScreen from '../ChangeProfilePictureScreen/ChangeProfilePictureScreen'
-import NotificationSettingsScreen from '../NotificationSettingsScreen'
-import {useSetCombinedContactsAfterLastSubmitForCurrentUsers} from '../../state/contacts/hooks/useSetCombinedContactsAfterLastSubmitForCurrentUsers'
-import SearchOffersScreen from '../SearchOffersScreen'
-import {useHideInactivityReminderNotificationsOnResume} from '../../state/displayedNotifications'
-import TradeChecklistFlow from '../TradeChecklistFlow'
 
 const Stack = createNativeStackNavigator<RootStackParamsList>()
 
@@ -50,7 +50,7 @@ function LoggedInHookGroup(): null {
   useHandleDeepLink()
   useSetCombinedContactsAfterLastSubmitForCurrentUsers()
 
-  useHideInactivityReminderNotificationsOnResume()
+  useHideInnactivityReminderNotificationsOnResume()
 
   return null
 }

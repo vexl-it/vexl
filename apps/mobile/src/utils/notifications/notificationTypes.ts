@@ -1,3 +1,22 @@
+import {z} from 'zod'
+
+export const ChatNotificationType = z.enum([
+  'MESSAGE',
+  'REQUEST_REVEAL',
+  'APPROVE_REVEAL',
+  'DISAPPROVE_REVEAL',
+  'REQUEST_MESSAGING',
+  'APPROVE_MESSAGING',
+  'DISAPPROVE_MESSAGING',
+  'DELETE_CHAT',
+  'BLOCK_CHAT',
+  'CANCEL_REQUEST_MESSAGING',
+  'REQUEST_CONTACT_REVEAL',
+  'APPROVE_CONTACT_REVEAL',
+  'DISAPPROVE_CONTACT_REVEAL',
+])
+export type ChatNotificationType = z.TypeOf<typeof ChatNotificationType>
+
 export const CHAT_NOTIFICATION_TYPE = {
   MESSAGE: 'MESSAGE',
   REQUEST_REVEAL: 'REQUEST_REVEAL',

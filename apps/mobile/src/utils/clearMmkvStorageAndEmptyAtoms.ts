@@ -10,7 +10,6 @@ import {
   combinedContactsAfterLastSubmitStorageAtom,
   importedContactsStorageAtom,
 } from '../state/contacts'
-import {displayedNotificationsAtom} from '../state/displayedNotifications'
 import {
   feedbacksForClosedChatsStorageAtom,
   newOfferFeedbackDoneStorageAtom,
@@ -73,8 +72,6 @@ export default function clearMmkvStorageAndEmptyAtoms(): void {
   })
 
   getDefaultStore().set(previousSearchesAtom, [])
-
-  getDefaultStore().set(displayedNotificationsAtom, [])
 
   getDefaultStore().set(feedbacksForClosedChatsStorageAtom, {feedbacks: {}})
 

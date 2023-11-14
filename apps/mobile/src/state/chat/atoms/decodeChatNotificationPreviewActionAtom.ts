@@ -1,12 +1,12 @@
-import {atom} from 'jotai'
-import focusChatByInboxKeyAndSenderKey from './focusChatByInboxKeyAndSenderKey'
-import {type ChatNotificationData} from '../../../utils/notifications/ChatNotificationData'
+import {decryptMessagePreview} from '@vexl-next/resources-utils/dist/chat/utils/chatCrypto'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
-import {getOtherSideData} from './selectOtherSideDataAtom'
+import {atom} from 'jotai'
+import {type ChatNotificationData} from '../../../utils/notifications/ChatNotificationData'
 import reportError from '../../../utils/reportError'
-import {decryptMessagePreview} from '@vexl-next/resources-utils/dist/chat/utils/chatCrypto'
+import focusChatByInboxKeyAndSenderKey from './focusChatByInboxKeyAndSenderKey'
+import {getOtherSideData} from './selectOtherSideDataAtom'
 
 const decodeNotificationPreviewAction = atom(
   null,
@@ -14,8 +14,8 @@ const decodeNotificationPreviewAction = atom(
     get,
     set,
     notificationData: ChatNotificationData
-  ): T.Task<{name: string; text: string} | null> => {
-    if (!notificationData.preview) return T.of(null)
+  ): T.Task<{name: string; text?: string} | null> => {
+    if (!notificationData.inbox || !notificationData.sender) return T.of(null)
     const chat = get(
       focusChatByInboxKeyAndSenderKey({
         inboxKey: notificationData.inbox,
@@ -24,6 +24,8 @@ const decodeNotificationPreviewAction = atom(
     )
 
     if (!chat) return T.of(null)
+    if (!notificationData.preview)
+      return T.of({name: getOtherSideData(chat.chat).userName})
 
     return pipe(
       decryptMessagePreview(chat.chat.inbox.privateKey.privateKeyPemBase64)(
@@ -36,7 +38,9 @@ const decodeNotificationPreviewAction = atom(
             'error while decoding notification preview',
             notificationData
           )
-          return null
+          return {
+            name: getOtherSideData(chat.chat).userName,
+          }
         },
         (messageDecrypted) => {
           return {

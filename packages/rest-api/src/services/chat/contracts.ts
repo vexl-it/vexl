@@ -1,15 +1,12 @@
-import {z} from 'zod'
-import {IdNumeric} from '@vexl-next/domain/dist/utility/IdNumeric'
-import {
-  MessageType,
-  MessageTypeBackwardCompatible,
-} from '@vexl-next/domain/dist/general/messaging'
-import {UnixMilliseconds} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
-import {NoContentResponse} from '../../NoContentResponse.brand'
 import {
   PrivateKeyHolder,
   PublicKeyPemBase64,
 } from '@vexl-next/cryptography/dist/KeyHolder'
+import {MessageType} from '@vexl-next/domain/dist/general/messaging'
+import {IdNumeric} from '@vexl-next/domain/dist/utility/IdNumeric'
+import {UnixMilliseconds} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
+import {z} from 'zod'
+import {NoContentResponse} from '../../NoContentResponse.brand'
 
 export interface RequestCancelledError {
   readonly _tag: 'RequestCancelledError'
@@ -153,7 +150,7 @@ export const SendMessageRequest = z.object({
   keyPair: PrivateKeyHolder,
   receiverPublicKey: PublicKeyPemBase64,
   message: z.string(),
-  messageType: MessageTypeBackwardCompatible,
+  messageType: MessageType,
   messagePreview: z.string().optional(),
 })
 export type SendMessageRequest = z.TypeOf<typeof SendMessageRequest>
@@ -174,7 +171,7 @@ export type LeaveChatResponse = z.TypeOf<typeof LeaveChatResponse>
 export const MessageInBatch = z.object({
   receiverPublicKey: PublicKeyPemBase64,
   message: z.string(),
-  messageType: MessageTypeBackwardCompatible,
+  messageType: MessageType,
   messagePreview: z.string().optional(),
 })
 export type MessageInBatch = z.TypeOf<typeof MessageInBatch>

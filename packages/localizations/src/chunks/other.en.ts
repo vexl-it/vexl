@@ -598,6 +598,13 @@ const otherEn =
         "title": "Your contacts are not synced all the way",
         "body":
           "You have new contacts on device that you have not synced. Exapand your network and sync them all!"
+      },
+      "groupNotificationChat": {
+        "subtitle": "You have new messages from {userName}"
+      },
+      "groupNotificationRequest": {
+        "subtitle": "You have new requests for your offers",
+        "title": "New requests"
       }
     },
     "myOffers": {

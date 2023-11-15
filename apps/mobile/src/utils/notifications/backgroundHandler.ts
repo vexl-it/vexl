@@ -19,6 +19,7 @@ import {
   NEW_CONTENT,
 } from './notificationTypes'
 import {showUINotificationFromRemoteMessage} from './showUINotificationFromRemoteMessage'
+import {loadSession} from '../../state/session'
 
 export async function processBackgroundMessage(
   remoteMessage: FirebaseMessagingTypes.RemoteMessage
@@ -46,6 +47,7 @@ export async function processBackgroundMessage(
     ) {
       console.info('📳 Refreshing inbox')
 
+      await loadSession()
       void pipe(
         data.inbox,
         safeParse(PublicKeyPemBase64),

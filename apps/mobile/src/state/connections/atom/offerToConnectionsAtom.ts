@@ -18,9 +18,10 @@ import {
   UnixMilliseconds,
   unixMillisecondsNow,
 } from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
-import {singleOfferByAdminIdAtom} from '../../marketplace/atom'
+import {offersStateAtom, singleOfferByAdminIdAtom} from '../../marketplace/atom'
 import {subtractArrays} from '@vexl-next/resources-utils/dist/utils/array'
 import {type OfferAdminId} from '@vexl-next/domain/dist/general/offers'
+import notEmpty from '../../../utils/notEmpty'
 
 const BACKGROUND_TIME_LIMIT_MS = 25_000
 
@@ -50,6 +51,17 @@ export const upsertOfferToConnectionsActionAtom = atom<
       ),
       newValue,
     ],
+  }))
+})
+
+export const deleteOrphanRecordsActionAtom = atom(null, (get, set) => {
+  const adminIds = get(offersStateAtom)
+    .offers.map((one) => one.ownershipInfo?.adminId)
+    .filter(notEmpty)
+  set(offerToConnectionsAtom, (old) => ({
+    offerToConnections: old.offerToConnections.filter((one) =>
+      adminIds.includes(one.adminId)
+    ),
   }))
 })
 
@@ -83,6 +95,7 @@ export const updateAllOffersConnectionsActionAtom = atom(
     const endUpdateOfferConnectionsMeasure = startMeasure(
       "Update all offers' connections"
     )
+    set(deleteOrphanRecordsActionAtom)
 
     const offerToConnectionsAtoms = get(offerToConnectionsAtomsAtom)
 

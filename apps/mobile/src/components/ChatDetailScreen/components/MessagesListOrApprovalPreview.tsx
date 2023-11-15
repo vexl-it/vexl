@@ -23,7 +23,7 @@ export default function MessagesListOrApprovalPreview(): JSX.Element {
     useCallback(() => {
       void fetchAndStoreMessagesForInbox({
         key: publicKeyPemBase64,
-      })
+      })()
     }, [fetchAndStoreMessagesForInbox, publicKeyPemBase64])
   )
 

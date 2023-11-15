@@ -70,13 +70,17 @@ function splitMessagesArrayToNewChatsAndExistingChats({
     .asObject()
 }
 
+export interface NoMessagesLeft {
+  _tag: 'noMessages'
+}
+
 function refreshInbox(
   api: ChatPrivateApi
 ): (
   getInbox: () => InboxInState,
   inboxOffer?: OneOfferInState
 ) => TE.TaskEither<
-  ApiErrorRetrievingMessages,
+  ApiErrorRetrievingMessages | NoMessagesLeft,
   {updatedInbox: InboxInState; newMessages: readonly ChatMessageWithState[]}
 > {
   return (getInbox, inboxOffer) =>
@@ -145,7 +149,7 @@ function refreshInbox(
       TE.match(
         (e) => {
           if (e === 'noMessages') {
-            return E.right({updatedInbox: getInbox(), newMessages: []})
+            return E.left({_tag: 'noMessages'} as const)
           }
           return E.left(e)
         },
@@ -197,6 +201,11 @@ export const fetchAndStoreMessagesForInboxAtom = atom<
     ),
     TE.matchEW(
       (error) => {
+        if (error._tag === 'noMessages') {
+          console.info('No new messages in inbox')
+          return T.of(inbox)
+        }
+
         reportError(
           'warn',
           'Api Error fetching messages for inbox. Trying to create the inbox again.',
@@ -251,14 +260,14 @@ export const fetchAndStoreMessagesForInboxAtom = atom<
             )
           })
 
-        return T.of(updatedInbox)
+        return pipe(
+          deletePulledMessagesReportLeft({
+            api: api.chat,
+            keyPair: updatedInbox.inbox.privateKey,
+          }),
+          T.map(() => updatedInbox)
+        )
       }
-    ),
-    T.chainFirst(() =>
-      deletePulledMessagesReportLeft({
-        api: api.chat,
-        keyPair: inbox.inbox.privateKey,
-      })
     )
   )
 })

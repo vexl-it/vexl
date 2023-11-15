@@ -30,6 +30,7 @@ import LanguagePicker from './components/LanguagePicker'
 import Preferences from './components/Preferences'
 import RemoteConfigView from './components/RemoteConfigView'
 import SimulateMissingOfferInbox from './components/SimulateMissingOfferInbox'
+import {deleteOrphanRecordsActionAtom} from '../../state/connections/atom/dist/offerToConnectionsAtom'
 
 // const ContentScroll = styled(ScrollView, {
 //   marginBottom: '$2',
@@ -181,6 +182,15 @@ function DebugScreen(): JSX.Element {
                     chats: [],
                   },
                 ])
+              }}
+            />
+
+            <Button
+              variant="primary"
+              size="small"
+              text="Delete offer connections without offer"
+              onPress={() => {
+                store.set(deleteOrphanRecordsActionAtom)
               }}
             />
 

@@ -12,6 +12,7 @@ import deleteAllInboxesActionAtom from '../../state/chat/atoms/deleteAllInboxesA
 import fetchMessagesForAllInboxesAtom from '../../state/chat/atoms/fetchNewMessagesActionAtom'
 import messagingStateAtom from '../../state/chat/atoms/messagingStateAtom'
 import offerToConnectionsAtom, {
+  deleteOrphanRecordsActionAtom,
   updateAllOffersConnectionsActionAtom,
 } from '../../state/connections/atom/offerToConnectionsAtom'
 import {importedContactsAtom} from '../../state/contacts'
@@ -30,7 +31,6 @@ import LanguagePicker from './components/LanguagePicker'
 import Preferences from './components/Preferences'
 import RemoteConfigView from './components/RemoteConfigView'
 import SimulateMissingOfferInbox from './components/SimulateMissingOfferInbox'
-import {deleteOrphanRecordsActionAtom} from '../../state/connections/atom/dist/offerToConnectionsAtom'
 
 // const ContentScroll = styled(ScrollView, {
 //   marginBottom: '$2',

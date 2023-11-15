@@ -23,6 +23,7 @@ import {focusAtom} from 'jotai-optics'
 import {privateApiAtom} from '../../../api'
 import {getNotificationToken} from '../../../utils/notifications'
 import reportError from '../../../utils/reportError'
+import {startMeasure} from '../../../utils/reportTime'
 import {
   createSingleOfferReportedFlagFromAtomAtom,
   focusOfferByOfferId,
@@ -268,21 +269,24 @@ const fetchMessagesForAllInboxesAtom = atom(null, (get, set) => {
   const lastRefresh = get(lastRefreshAtom)
 
   if (unixMillisecondsNow() - lastRefresh < 120) return T.of('done')
+  console.log(`Last refresh before ${unixMillisecondsNow() - lastRefresh}`)
 
   set(lastRefreshAtom, unixMillisecondsNow())
+  const measure = startMeasure('Fetch inboxes')
   console.log('Refreshing all inboxes')
 
   return pipe(
     get(messagingStateAtom),
-    A.map(
-      async (inbox) =>
-        await set(fetchAndStoreMessagesForInboxAtom, {
-          key: inbox.inbox.privateKey.publicKeyPemBase64,
-        })()
+    A.map((inbox) =>
+      set(fetchAndStoreMessagesForInboxAtom, {
+        key: inbox.inbox.privateKey.publicKeyPemBase64,
+      })
     ),
-    // @ts-expect-error bad typings?
-    A.sequence(T.ApplicativeSeq),
-    T.map(() => 'done' as const)
+    T.sequenceSeqArray,
+    T.map(() => {
+      measure()
+      return 'done' as const
+    })
   )
 })
 

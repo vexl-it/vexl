@@ -1,192 +1,99 @@
-import {useCallback, useMemo, useState} from 'react'
-import {TouchableWithoutFeedback} from 'react-native'
-import {getTokens, Stack, styled, Text, XStack} from 'tamagui'
 import Image from '../Image'
+import {Dropdown as RNEDropdown} from 'react-native-element-dropdown'
 import chevronDownSvg from '../../images/chevronDownSvg'
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-} from 'react-native-reanimated'
-import clearInputSvg from '../images/clearInputSvg'
+import {getTokens, Text, XStack} from 'tamagui'
+import {type DropdownProps} from 'react-native-element-dropdown/lib/typescript/components/Dropdown/model'
+import checkmarkSvg from '../images/checkmarkSvg'
 
-type Size = 'small' | 'large'
-
-export interface RowProps<T> {
-  type: T
-  title: string
+export interface DropdownItemProps<T> {
+  label: string
+  value: T
 }
 
-interface Props<T> {
-  activeRowType: T | undefined
-  placeholder?: string
-  setActiveRowType: (rowType: T | undefined) => void
-  rows: Array<RowProps<T>>
-  size: Size
-}
-
-interface DropdownCellProps {
-  isOpen: boolean
-  isLast: boolean
-  onPress: () => void
-  title: string
-  size: Size
-}
-
-const StyledRow = styled(Stack, {
-  fd: 'row',
-  ai: 'center',
-  jc: 'space-between',
-  px: '$5',
-  py: '$4',
-  variants: {
-    isLast: {
-      true: {
-        borderBottomRightRadius: '$5',
-        borderBottomLeftRadius: '$5',
-      },
-    },
-    isOpen: {
-      true: {
-        bc: '$grey',
-      },
-      false: {
-        bc: '$primary',
-      },
-    },
-  },
-} as const)
-
-function DropdownCell({
-  title,
-  isLast,
-  isOpen,
-  onPress,
-  size,
-}: DropdownCellProps): JSX.Element {
+function renderItem<T>(
+  item: DropdownItemProps<T>,
+  selected?: boolean | undefined
+): JSX.Element {
   return (
-    <TouchableWithoutFeedback onPress={onPress}>
-      <StyledRow isOpen={isOpen} isLast={isLast}>
-        <Text
-          ff={size === 'small' ? '$body' : '$body600'}
-          fos={size === 'small' ? 16 : 18}
-          col={'$greyOnBlack'}
-        >
-          {title}
-        </Text>
-      </StyledRow>
-    </TouchableWithoutFeedback>
-  )
-}
-
-function Dropdown<T>({
-  activeRowType,
-  placeholder,
-  setActiveRowType,
-  rows,
-  size,
-}: Props<T>): JSX.Element {
-  const tokens = getTokens()
-  const [isOpen, setIsOpen] = useState<boolean>(false)
-  const activeRow = useMemo(
-    () => rows.find((row) => row.type === activeRowType),
-    [activeRowType, rows]
-  )
-
-  const rotation = useSharedValue(isOpen ? 180 : 0)
-
-  const animatedStyle = useAnimatedStyle(() => {
-    return {
-      transform: [{rotate: `${rotation.value}deg`}],
-    }
-  })
-
-  const toggleRotation = useCallback(
-    () => (rotation.value = withTiming(isOpen ? 0 : 180)),
-
-    [isOpen, rotation]
-  )
-
-  return (
-    <Stack f={1}>
-      <TouchableWithoutFeedback
-        onPress={() => {
-          setIsOpen(!isOpen)
-          toggleRotation()
-        }}
-      >
-        <Stack
-          fd={'row'}
-          ai={'center'}
-          jc={'space-between'}
-          px={size === 'small' ? '$3' : '$5'}
-          py={size === 'small' ? '$2' : '$4'}
-          btlr={'$5'}
-          btrr={'$5'}
-          bbrr={isOpen ? '$0' : '$5'}
-          bblr={isOpen ? '$0' : '$5'}
-          bbw={isOpen ? 1 : 0}
-          bbc={'$greyAccent1'}
-          bc={'$grey'}
-        >
-          <Text
-            ff={size === 'small' || !activeRow ? '$body' : '$body600'}
-            fos={size === 'small' ? 16 : 18}
-            col={size === 'small' || !activeRow ? '$greyOnBlack' : '$main'}
-            mr={'$1'}
-          >
-            {activeRow?.title ?? placeholder}
-          </Text>
-          <XStack>
-            {activeRow && size === 'large' && (
-              <Stack mr={'$2'}>
-                <TouchableWithoutFeedback
-                  onPress={() => {
-                    setActiveRowType(undefined)
-                  }}
-                >
-                  <Image
-                    stroke={tokens.color.main.val}
-                    source={clearInputSvg}
-                  />
-                </TouchableWithoutFeedback>
-              </Stack>
-            )}
-            <Animated.View style={animatedStyle}>
-              <Image
-                height={size === 'small' ? 16 : 24}
-                width={size === 'small' ? 16 : 24}
-                stroke={
-                  size === 'small' || !activeRow
-                    ? tokens.color.greyOnBlack.val
-                    : tokens.color.main.val
-                }
-                source={chevronDownSvg}
-              />
-            </Animated.View>
-          </XStack>
-        </Stack>
-      </TouchableWithoutFeedback>
-      {isOpen && (
-        <Stack>
-          {rows.map((row, index) => (
-            <DropdownCell
-              key={row.title}
-              isOpen={isOpen}
-              isLast={index === rows.length - 1}
-              onPress={() => {
-                setActiveRowType(row.type)
-                setIsOpen(!isOpen)
-                toggleRotation()
-              }}
-              title={row.title}
-              size={size}
-            />
-          ))}
-        </Stack>
+    <XStack ai={'center'} jc={'space-between'} py={'$3'} pl={'$4'} pr={'$2'}>
+      <Text ff={'$body500'} fos={16} col={'$white'}>
+        {item.label}
+      </Text>
+      {selected && (
+        <Image
+          source={checkmarkSvg}
+          height={20}
+          width={20}
+          stroke={getTokens().color.main.val}
+        />
       )}
-    </Stack>
+    </XStack>
   )
 }
 
-export default Dropdown
+interface Props<T>
+  extends Omit<
+    DropdownProps<DropdownItemProps<T>>,
+    'labelField' | 'valueField' | 'renderItem'
+  > {
+  size?: 'medium' | 'large'
+  variant?: 'yellow' | 'grey'
+}
+
+export function Dropdown<T>({
+  size = 'medium',
+  variant = 'grey',
+  ...props
+}: Props<T>): JSX.Element {
+  return (
+    <RNEDropdown
+      activeColor={getTokens().color.greyAccent1.val}
+      labelField={'label'}
+      valueField={'value'}
+      showsVerticalScrollIndicator={false}
+      style={{
+        height: size === 'large' ? 56 : 48,
+        backgroundColor: getTokens().color.grey.val,
+        borderRadius: getTokens().radius[4].val,
+        paddingHorizontal: 12,
+      }}
+      containerStyle={{
+        backgroundColor: getTokens().color.grey.val,
+        borderRadius: getTokens().radius[4].val,
+        borderWidth: 0,
+        height: 200,
+      }}
+      itemContainerStyle={{
+        borderRadius: getTokens().radius[4].val,
+      }}
+      itemTextStyle={{
+        color: getTokens().color.white.val,
+        fontWeight: '500',
+        fontSize: size === 'large' ? 18 : 16,
+      }}
+      selectedTextProps={{numberOfLines: 2, adjustsFontSizeToFit: true}}
+      selectedTextStyle={{
+        color:
+          variant === 'yellow'
+            ? getTokens().color.main.val
+            : getTokens().color.white.val,
+        fontWeight: '500',
+        fontSize: size === 'large' ? 18 : 16,
+        fontFamily: 'TTSatoshi500',
+      }}
+      placeholderStyle={{
+        fontSize: 18,
+        fontWeight: '500',
+        color: getTokens().color.greyOnBlack.val,
+      }}
+      renderRightIcon={() => (
+        <Image
+          source={chevronDownSvg}
+          stroke={getTokens().color.greyOnBlack.val}
+        />
+      )}
+      renderItem={renderItem}
+      {...props}
+    />
+  )
+}

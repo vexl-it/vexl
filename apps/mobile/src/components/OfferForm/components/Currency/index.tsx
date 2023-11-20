@@ -54,7 +54,7 @@ function CurrencyComponent({
           </XStack>
         ) : (
           <Stack>
-            <Text ff={'$body'} fos={18} col={'$greyOnBlack'}>
+            <Text ff={'$body600'} fos={18} col={'$greyOnBlack'}>
               {t('filterOffers.chooseCurrency')}
             </Text>
           </Stack>

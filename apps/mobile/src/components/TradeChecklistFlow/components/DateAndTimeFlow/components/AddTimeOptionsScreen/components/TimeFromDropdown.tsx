@@ -3,10 +3,7 @@ import {useAtom} from 'jotai'
 import {DateTime} from 'luxon'
 import {useMemo} from 'react'
 import {getCurrentLocale} from '../../../../../../../utils/localization/I18nProvider'
-import {
-  DropdownPicker,
-  type DropdownItemProps,
-} from '../../../../../../DropDownPicker'
+import {Dropdown, type DropdownItemProps} from '../../../../../../Dropdown'
 import {createTimeOptionAtomForTimeFromDropdown} from '../../../atoms'
 
 interface Props {
@@ -53,7 +50,7 @@ function TimeFromDropdown({availableDateTimeFrom}: Props): JSX.Element {
   )
 
   return (
-    <DropdownPicker
+    <Dropdown
       onChange={(item) => {
         if (item.value) setAvailableFromTimestamp(item.value)
       }}

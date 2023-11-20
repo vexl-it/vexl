@@ -14,13 +14,13 @@ function MockedTouchableTextInput({
 }: Props): JSX.Element {
   return (
     <TouchableWithoutFeedback onPress={onPress}>
-      <Stack br={'$4'} f={1} bc="$grey" p={'$4'}>
+      <Stack br={'$4'} f={1} bc={'$grey'} p={'$4'}>
         {text ? (
           <Text fos={18} color="$main">
             {text}
           </Text>
         ) : (
-          <Text fos={18} color="$greyAccent2">
+          <Text ff={'$body600'} fos={18} color={'$greyOnBlack'}>
             {placeholder}
           </Text>
         )}

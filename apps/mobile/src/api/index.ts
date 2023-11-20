@@ -10,6 +10,10 @@ import {
 } from '@vexl-next/rest-api'
 import {type UserSessionCredentials} from '@vexl-next/rest-api/dist/UserSessionCredentials.brand'
 import {type ChatPrivateApi} from '@vexl-next/rest-api/dist/services/chat'
+import {
+  createBtcPriceApi,
+  type BtcPricePublicApi,
+} from '@vexl-next/rest-api/dist/services/btcPrice'
 import {type ContactPrivateApi} from '@vexl-next/rest-api/dist/services/contact'
 import {type LocationPublicApi} from '@vexl-next/rest-api/dist/services/location'
 import {type OfferPrivateApi} from '@vexl-next/rest-api/dist/services/offer'
@@ -54,6 +58,10 @@ const _publicApiAtom = atom({
     clientVersion: versionCode,
     url: apiEnv.locationMs,
   }),
+  btcPrice: createBtcPriceApi({
+    platform,
+    clientVersion: versionCode,
+  }),
 })
 
 export const publicApiAtom = atom((get) => get(_publicApiAtom))
@@ -64,6 +72,10 @@ export function useUserPublicApi(): UserPublicApi {
 
 export function useLocationPublicApi(): LocationPublicApi {
   return useAtomValue(publicApiAtom).location
+}
+
+export function useBtcPricePublicApi(): BtcPricePublicApi {
+  return useAtomValue(publicApiAtom).btcPrice
 }
 
 const sessionCredentialsAtom = atom<UserSessionCredentials>((get) => {

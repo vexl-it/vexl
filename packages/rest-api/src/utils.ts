@@ -203,6 +203,7 @@ export function createAxiosInstance(
     ...axiosConfig,
     headers: {
       ...axiosConfig?.headers,
+      'User-Agent': `Vexl/${clientVersion} ${platform}`,
       [HEADER_CRYPTO_VERSION]: '2',
       [HEADER_PLATFORM]: platform,
       [HEADER_CLIENT_VERSION]: clientVersion.toString(),

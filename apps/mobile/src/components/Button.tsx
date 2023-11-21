@@ -117,7 +117,7 @@ const TextStyled = styled(Text, {
         col: '$greyOnBlack',
       },
       link: {
-        col: '$white',
+        col: '$red',
       },
       hint: {
         col: '$pink',

@@ -9,8 +9,12 @@ import IconButton from '../IconButton'
 import closeSvg from '../images/closeSvg'
 import {Stack, Text, XStack} from 'tamagui'
 import useSafeGoBack from '../../utils/useSafeGoBack'
+import openUrl from '../../utils/openUrl'
+import {type RootStackScreenProps} from '../../navigationTypes'
 
-function FaqsScreen(): JSX.Element {
+type Props = RootStackScreenProps<'Faqs'>
+
+function FaqsScreen({navigation}: Props): JSX.Element {
   const {t} = useTranslation()
   const safeGoBack = useSafeGoBack()
   const content = useContent()
@@ -47,9 +51,42 @@ function FaqsScreen(): JSX.Element {
         <Text fos={24} ff="$heading" col="$black" mb="$2">
           {pageContent?.title}
         </Text>
-        <Text ff="$body500" col="$greyOnWhite">
-          {content[page]?.text}
-        </Text>
+        {content[page]?.withLink ? (
+          <Text
+            ff={'$body500'}
+            col={'$greyOnWhite'}
+            onPress={openUrl(content[page]?.url ?? '')}
+          >
+            <>
+              {content[page]?.textBefore}{' '}
+              <Text
+                textDecorationLine={'underline'}
+                ff={'$body700'}
+                col={'$greyOnWhite'}
+              >
+                {content[page]?.linkText}
+              </Text>{' '}
+              {content[page]?.textAfter}
+            </>
+          </Text>
+        ) : (
+          <Text ff={'$body500'} col={'$greyOnWhite'}>
+            {content[page]?.text}
+          </Text>
+        )}
+        {content[page]?.type === 'HOW_CAN_YOU_ENSURE' && (
+          <Text
+            mt={'$2'}
+            textDecorationLine={'underline'}
+            ff={'$body700'}
+            col={'$greyOnWhite'}
+            onPress={() => {
+              navigation.navigate('TermsAndConditions')
+            }}
+          >
+            {t('faqs.howCanYouEnsureTosAndPP')}
+          </Text>
+        )}
       </ProgressJourney>
     </Screen>
   )

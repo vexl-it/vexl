@@ -30,14 +30,20 @@ function ScreenTitle({
   const safeGoBack = useSafeGoBack()
   return (
     <YStack mt={'$2'} bc={'transparent'} {...props}>
-      <XStack fd="row" ai="flex-start" jc="space-between" mb="$5">
-        <Stack fs={1} maw="60%">
+      <XStack
+        fd={'row'}
+        ai={'flex-start'}
+        jc={'space-between'}
+        mb={'$5'}
+        space={'$2'}
+      >
+        <Stack fs={1}>
           <Text
             adjustsFontSizeToFit
-            numberOfLines={2}
+            numberOfLines={3}
             col={textColor ?? '$white'}
             fontSize={32}
-            ff="$heading"
+            ff={'$heading'}
           >
             {text}
           </Text>
@@ -49,7 +55,7 @@ function ScreenTitle({
           </XStack>
         )}
       </XStack>
-      {withBottomBorder && <Stack h={0.5} mx="$-4" bg="$grey" />}
+      {withBottomBorder && <Stack h={0.5} mx={'$-4'} bg={'$grey'} />}
     </YStack>
   )
 }

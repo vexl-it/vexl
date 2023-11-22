@@ -31,14 +31,9 @@ type ConditionalProps =
   | {
       withLink?: false
       text: string
-      textBefore?: never
-      textAfter?: never
-      linkText?: never
-      url?: never
     }
   | {
       withLink: true
-      text?: never
       textBefore: string
       textAfter: string
       linkText: string

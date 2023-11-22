@@ -2,7 +2,6 @@ import {getLocales} from 'expo-localization'
 import type {TranslateOptions} from 'i18n-js'
 import {I18n} from 'i18n-js'
 import {atom, useAtomValue} from 'jotai'
-import {selectAtom} from 'jotai/utils'
 import {enableHiddenFeatures, isStaging} from '../environment'
 import * as translations from './translations'
 
@@ -35,13 +34,15 @@ interface TranslationContext {
 }
 
 export const i18nAtom = atom(i18n)
-export const translationAtom = selectAtom(
-  i18nAtom,
-  (i18nVal): TranslationContext => ({
-    t: i18nVal.t.bind(i18nVal),
+export const showDevLabelsAtom = atom(false)
+export const translationAtom = atom((get): TranslationContext => {
+  const i18nVal = get(i18nAtom)
+  const showDevLabels = get(showDevLabelsAtom)
+  return {
+    t: !showDevLabels ? i18nVal.t.bind(i18nVal) : (val) => val,
     isEnglish: (): boolean => i18nVal.t('localeName') === 'en',
-  })
-)
+  }
+})
 
 export function useTranslation(): TranslationContext {
   return useAtomValue(translationAtom)

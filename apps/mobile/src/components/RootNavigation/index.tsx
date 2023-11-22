@@ -36,6 +36,9 @@ import {
   useHandlePostLoginFlowRedirect,
 } from './utils'
 import useRefreshContactsFromDeviceOnResume from '../../state/contacts/hooks/useRefreshContactsFromDeviceOnResume'
+import DevTranslationFloatingButton from '../DevTranslationFloatingButtons'
+import {showTextDebugButtonAtom} from '../../utils/preferences'
+import {useAtomValue} from 'jotai'
 
 const Stack = createNativeStackNavigator<RootStackParamsList>()
 
@@ -59,6 +62,7 @@ function LoggedInHookGroup(): null {
 
 function RootNavigation(): JSX.Element {
   const isLoggedIn = useIsUserLoggedIn()
+  const showTextDebugButton = useAtomValue(showTextDebugButtonAtom)
 
   return (
     <>
@@ -121,6 +125,7 @@ function RootNavigation(): JSX.Element {
         <Stack.Screen name={'Faqs'} component={FaqsScreen} />
         <Stack.Screen name={'DebugScreen'} component={DebugScreen} />
       </Stack.Navigator>
+      {showTextDebugButton && <DevTranslationFloatingButton />}
       {isLoggedIn && <LoggedInHookGroup />}
     </>
   )

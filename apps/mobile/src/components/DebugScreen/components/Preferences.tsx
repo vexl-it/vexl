@@ -11,6 +11,7 @@ const preferencesToEdit = [
   'showFriendLevelBanner',
   'tradeChecklistEnabled',
   'offerFeedbackEnabled',
+  'showTextDebugButton',
 ] as const
 
 function Preferences(): JSX.Element {

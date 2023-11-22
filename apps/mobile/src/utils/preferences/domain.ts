@@ -19,6 +19,7 @@ export const Preferences = z.object({
   showFriendLevelBanner: z.boolean().default(true),
   tradeChecklistEnabled: z.boolean().default(false),
   offerFeedbackEnabled: z.boolean().default(false),
+  showTextDebugButton: z.boolean().default(false),
 })
 
 export type Preferences = z.infer<typeof Preferences>

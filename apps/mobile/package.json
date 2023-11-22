@@ -88,6 +88,7 @@
     "react-native-background-fetch": "^4.2.1",
     "react-native-calendars": "^1.1301.0",
     "react-native-color-matrix-image-filters": "^6.0.3",
+    "react-native-draggable": "^3.3.0",
     "react-native-element-dropdown": "2.10.0",
     "react-native-flags": "^1.0.0",
     "react-native-gesture-handler": "~2.12.0",

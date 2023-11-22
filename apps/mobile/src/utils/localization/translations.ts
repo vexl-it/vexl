@@ -39,62 +39,62 @@ import skTermsOfUse from '@vexl-next/localization/sk-termsOfUse.json'
 export const dev = {
   localeName: 'en_dev',
   ...unflatten<typeof base, typeof base>(base),
-  termsOfUseMD: termsOfUse.text,
-  privacyPolicyMD: privacyPolicyDev.text,
+  termsOfUseMD: termsOfUse.termsOfUseText,
+  privacyPolicyMD: privacyPolicyDev.privacyPolicyText,
 } as const
 
 export const cs = {
   localeName: 'cs',
   ...unflatten<typeof csBase, typeof base>(csBase),
-  termsOfUseMD: csTermsOfUse.text,
-  privacyPolicyMD: csPrivacyPolicyDev.text,
+  termsOfUseMD: csTermsOfUse.termsOfUseText,
+  privacyPolicyMD: csPrivacyPolicyDev.privacyPolicyText,
 } as const
 
 export const de = {
   localeName: 'de',
   ...unflatten<typeof deBase, typeof base>(deBase),
-  termsOfUseMD: deTermsOfUse.text,
-  privacyPolicyMD: dePrivacyPolicyDev.text,
+  termsOfUseMD: deTermsOfUse.termsOfUseText,
+  privacyPolicyMD: dePrivacyPolicyDev.privacyPolicyText,
 } as const
 
 export const en = {
   localeName: 'en',
   ...unflatten<typeof enBase, typeof base>(enBase),
-  termsOfUseMD: enTermsOfUse.text,
-  privacyPolicyMD: enPrivacyPolicyDev.text,
+  termsOfUseMD: enTermsOfUse.termsOfUseText,
+  privacyPolicyMD: enPrivacyPolicyDev.privacyPolicyText,
 } as const
 
 export const fr = {
   localeName: 'fr',
   ...unflatten<typeof frBase, typeof base>(frBase),
-  termsOfUseMD: frTermsOfUse.text,
-  privacyPolicyMD: frPrivacyPolicyDev.text,
+  termsOfUseMD: frTermsOfUse.termsOfUseText,
+  privacyPolicyMD: frPrivacyPolicyDev.privacyPolicyText,
 } as const
 
 export const it = {
   localeName: 'it',
   ...unflatten<typeof itBase, typeof base>(itBase),
-  termsOfUseMD: itTermsOfUse.text,
-  privacyPolicyMD: itPrivacyPolicyDev.text,
+  termsOfUseMD: itTermsOfUse.termsOfUseText,
+  privacyPolicyMD: itPrivacyPolicyDev.privacyPolicyText,
 } as const
 
 export const pt = {
   localeName: 'pt',
   ...unflatten<typeof ptBase, typeof base>(ptBase),
-  termsOfUseMD: ptTermsOfUse.text,
-  privacyPolicyMD: ptPrivacyPolicyDev.text,
+  termsOfUseMD: ptTermsOfUse.termsOfUseText,
+  privacyPolicyMD: ptPrivacyPolicyDev.privacyPolicyText,
 } as const
 
 export const es = {
   localeName: 'es',
   ...unflatten<typeof esBase, typeof base>(esBase),
-  termsOfUseMD: esTermsOfUse.text,
-  privacyPolicyMD: esPrivacyPolicyDev.text,
+  termsOfUseMD: esTermsOfUse.termsOfUseText,
+  privacyPolicyMD: esPrivacyPolicyDev.privacyPolicyText,
 } as const
 
 export const sk = {
   ...unflatten<typeof skBase, typeof base>(skBase),
   localeName: 'sk',
-  termsOfUseMD: skTermsOfUse.text,
-  privacyPolicyMD: skPrivacyPolicyDev.text,
+  termsOfUseMD: skTermsOfUse.termsOfUseText,
+  privacyPolicyMD: skPrivacyPolicyDev.privacyPolicyText,
 } as const

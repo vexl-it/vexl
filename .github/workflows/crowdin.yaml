@@ -1,8 +1,9 @@
-name: Push pull translations to crowdin
+name: [translate] translations to/from crowdin
 
 on:
-  push:
-    branches: [main]
+  pull_request:
+    branches:
+      - main
 
 jobs:
   synchronize-with-crowdin:

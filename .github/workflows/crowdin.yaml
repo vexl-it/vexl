@@ -1,4 +1,4 @@
-name: [translate] translations to/from crowdin
+name: "[translate] translations to/from crowdin"
 
 on:
   pull_request:

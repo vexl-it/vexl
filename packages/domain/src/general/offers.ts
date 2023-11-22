@@ -172,3 +172,13 @@ export const OneOfferInState = z.object({
     .optional(),
 })
 export type OneOfferInState = z.TypeOf<typeof OneOfferInState>
+
+export const MyOfferInState = z.object({
+  offerInfo: OfferInfo,
+  flags: OfferFlags,
+  ownershipInfo: z.object({
+    adminId: OfferAdminId,
+    intendedConnectionLevel: IntendedConnectionLevel,
+  }),
+})
+export type MyOfferInState = z.TypeOf<typeof MyOfferInState>

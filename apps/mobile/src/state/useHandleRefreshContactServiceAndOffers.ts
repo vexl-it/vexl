@@ -14,8 +14,9 @@ import reportError from '../utils/reportError'
 import {useAppState} from '../utils/useAppState'
 import {createInboxAtom} from './chat/hooks/useCreateInbox'
 import {updateOfferAtom} from './marketplace'
-import {myOffersAtom} from './marketplace/atom'
+import {myOffersAtom} from './marketplace/atoms/myOffers'
 import {useLogout} from './useLogout'
+import {offersMissingOnServerAtom} from './marketplace/atoms/offersMissingOnServer'
 
 export function useRefreshUserOnContactService(): void {
   const api = usePrivateApiAssumeLoggedIn()
@@ -111,8 +112,10 @@ export function useRefreshOffers(): void {
       (state) => {
         if (state !== 'active') return
 
+        const myOffers = store.get(myOffersAtom)
+
         void pipe(
-          store.get(myOffersAtom),
+          myOffers,
           A.map((offer) => offer.ownershipInfo?.adminId),
           A.filter(notEmpty),
           (o) => {
@@ -124,6 +127,15 @@ export function useRefreshOffers(): void {
             () => ({_tag: 'noOffersToRefresh'}) as const
           ),
           TE.chainW((adminIds) => api.offer.refreshOffer({adminIds})),
+          TE.map((offerIdsOnServer) => {
+            const offerIdsOnDevice = myOffers.map(
+              (one) => one.offerInfo.offerId
+            )
+            const offerIdsNotOnServer = offerIdsOnDevice.filter(
+              (oneOnDevice) => !offerIdsOnServer.includes(oneOnDevice)
+            )
+            store.set(offersMissingOnServerAtom, offerIdsNotOnServer)
+          }),
           TE.match(
             (l) => {
               if (l._tag === 'noOffersToRefresh') {

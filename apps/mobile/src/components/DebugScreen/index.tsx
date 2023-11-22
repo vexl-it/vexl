@@ -7,7 +7,7 @@ import {pipe} from 'fp-ts/function'
 import {useSetAtom, useStore} from 'jotai'
 import {Alert, ScrollView} from 'react-native'
 import {Spacer, Text, YStack} from 'tamagui'
-import {apiEnv} from '../../api'
+import {apiEnv, privateApiAtom} from '../../api'
 import deleteAllInboxesActionAtom from '../../state/chat/atoms/deleteAllInboxesActionAtom'
 import fetchMessagesForAllInboxesAtom from '../../state/chat/atoms/fetchNewMessagesActionAtom'
 import messagingStateAtom from '../../state/chat/atoms/messagingStateAtom'
@@ -17,7 +17,6 @@ import offerToConnectionsAtom, {
 } from '../../state/connections/atom/offerToConnectionsAtom'
 import {importedContactsAtom} from '../../state/contacts'
 import {triggerOffersRefreshAtom} from '../../state/marketplace'
-import {offersStateAtom} from '../../state/marketplace/atom'
 import {useSessionAssumeLoggedIn} from '../../state/session'
 import {enableHiddenFeatures} from '../../utils/environment'
 import reportError from '../../utils/reportError'
@@ -31,6 +30,8 @@ import LanguagePicker from './components/LanguagePicker'
 import Preferences from './components/Preferences'
 import RemoteConfigView from './components/RemoteConfigView'
 import SimulateMissingOfferInbox from './components/SimulateMissingOfferInbox'
+import {offersStateAtom} from '../../state/marketplace/atoms/offersState'
+import {myOffersAtom} from '../../state/marketplace/atoms/myOffers'
 
 // const ContentScroll = styled(ScrollView, {
 //   marginBottom: '$2',
@@ -260,6 +261,26 @@ function DebugScreen(): JSX.Element {
                 Clipboard.setString(
                   (await messaging().getToken()) || 'No token'
                 )
+              }}
+            />
+            <Button
+              variant="primary"
+              size="small"
+              text="Simulate offers deleted from server"
+              onPress={() => {
+                void store
+                  .get(privateApiAtom)
+                  .offer.deleteOffer({
+                    adminIds: store
+                      .get(myOffersAtom)
+                      .map((one) => one.ownershipInfo.adminId),
+                  })()
+                  .then(() => {
+                    Alert.alert('done')
+                  })
+                  .catch((error) => {
+                    Alert.alert('Error', error.message)
+                  })
               }}
             />
           </YStack>

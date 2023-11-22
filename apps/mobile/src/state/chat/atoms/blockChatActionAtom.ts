@@ -15,7 +15,7 @@ import sendMessage from '@vexl-next/resources-utils/dist/chat/sendMessage'
 import {privateApiAtom} from '../../../api'
 import {type ExtractLeftTE} from '@vexl-next/resources-utils/dist/utils/ExtractLeft'
 import {type ChatPrivateApi} from '@vexl-next/rest-api/dist/services/chat'
-import {createSingleOfferReportedFlagAtom} from '../../marketplace/atom'
+import {createSingleOfferReportedFlagAtom} from '../../marketplace/atoms/offersState'
 
 export default function blockChatActionAtom(
   chatWithMessagesAtom: FocusAtomType<ChatWithMessages>

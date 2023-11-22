@@ -26,9 +26,9 @@ import reportError from '../../../utils/reportError'
 import {startMeasure} from '../../../utils/reportTime'
 import {
   createSingleOfferReportedFlagFromAtomAtom,
-  focusOfferByOfferId,
   focusOfferByPublicKeyAtom,
-} from '../../marketplace/atom'
+  singleOfferAtom,
+} from '../../marketplace/atoms/offersState'
 import messagingStateAtom from '../atoms/messagingStateAtom'
 import {type ChatMessageWithState, type InboxInState} from '../domain'
 import addMessagesToChats from '../utils/addMessagesToChats'
@@ -197,7 +197,7 @@ export const fetchAndStoreMessagesForInboxAtom = atom<
   return pipe(
     refreshInbox(api.chat)(
       () => get(focusInboxInMessagingStateAtom(key)) ?? inbox,
-      get(focusOfferByOfferId(inbox.inbox.offerId))
+      get(singleOfferAtom(inbox.inbox.offerId))
     ),
     TE.matchEW(
       (error) => {

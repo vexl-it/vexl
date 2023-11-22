@@ -6,8 +6,8 @@ import {Alert} from 'react-native'
 import {Text, YStack} from 'tamagui'
 import {usePrivateApiAssumeLoggedIn} from '../../../api'
 import messagingStateAtom from '../../../state/chat/atoms/messagingStateAtom'
-import {myOffersAtom} from '../../../state/marketplace/atom'
 import Button from '../../Button'
+import {myOffersAtom} from '../../../state/marketplace/atoms/myOffers'
 
 function SimulateMissingOfferInbox(): JSX.Element {
   const offers = useAtomValue(myOffersAtom)

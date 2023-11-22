@@ -4,7 +4,7 @@ import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import {
   addMoreContactsSuggestionVisibleAtom,
   createOfferSuggestionVisibleAtom,
-} from '../../../../../state/marketplace/atom'
+} from '../../../../../state/marketplace/atoms/offerSuggestionVisible'
 import {useAtom} from 'jotai'
 import {useNavigation} from '@react-navigation/native'
 import {YStack} from 'tamagui'

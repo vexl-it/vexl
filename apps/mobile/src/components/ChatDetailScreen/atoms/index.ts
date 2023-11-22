@@ -42,7 +42,7 @@ import connectionStateAtom, {
   createFriendLevelInfoAtom,
 } from '../../../state/connections/atom/connectionStateAtom'
 import {createFeedbackForChatAtom} from '../../../state/feedback/atoms'
-import {offerForChatOriginAtom} from '../../../state/marketplace/atom'
+import {offerForChatOriginAtom} from '../../../state/marketplace/atoms/offersState'
 import getValueFromSetStateActionOfAtom from '../../../utils/atomUtils/getValueFromSetStateActionOfAtom'
 import {type SelectedImage} from '../../../utils/imagePickers'
 import {translationAtom} from '../../../utils/localization/I18nProvider'

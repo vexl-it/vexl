@@ -14,7 +14,8 @@ import {
   feedbacksForClosedChatsStorageAtom,
   newOfferFeedbackDoneStorageAtom,
 } from '../state/feedback/atoms'
-import {offersStateAtom} from '../state/marketplace/atom'
+import {offersStateAtom} from '../state/marketplace/atoms/offersState'
+import {offersMissingOnServerStorageAtom} from '../state/marketplace/atoms/offersMissingOnServer'
 import {postLoginFinishedStorageAtom} from '../state/postLoginOnboarding'
 import {selectedCurrencyStorageAtom} from '../state/selectedCurrency'
 import {storage} from './fpMmkv'
@@ -74,6 +75,11 @@ export default function clearMmkvStorageAndEmptyAtoms(): void {
   getDefaultStore().set(previousSearchesAtom, [])
 
   getDefaultStore().set(feedbacksForClosedChatsStorageAtom, {feedbacks: {}})
+
+  getDefaultStore().set(offersMissingOnServerStorageAtom, {
+    offerIds: [],
+    progress: null,
+  })
 
   storage._storage.clearAll()
 }

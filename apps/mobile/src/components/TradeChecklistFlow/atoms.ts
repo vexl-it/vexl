@@ -1,6 +1,6 @@
 import {atom} from 'jotai'
 import {type MainTradeCheckListState} from './domain'
-import {offerForChatOriginAtom} from '../../state/marketplace/atom'
+import {offerForChatOriginAtom} from '../../state/marketplace/atoms/offersState'
 import focusChatWithMessagesAtom from '../../state/chat/atoms/focusChatWithMessagesAtom'
 import valueOrDefaultAtom from '../../utils/atomUtils/valueOrDefaultAtom'
 import {dummyChatWithMessages} from '../ChatDetailScreen/atoms'

@@ -39,7 +39,7 @@ import numberOfFriendsAtom from './numberOfFriendsAtom'
 import * as E from 'fp-ts/Either'
 import {generateKeyPair} from '@vexl-next/resources-utils/dist/utils/crypto'
 import {createInboxAtom} from '../../../state/chat/hooks/useCreateInbox'
-import {delayInPipeT} from '../../../utils/fpUtils'
+import {offerProgressModalActionAtoms as progressModal} from '../../UploadingOfferProgressModal/atoms'
 import {generateUuid, Uuid} from '@vexl-next/domain/dist/utility/Uuid.brand'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
 import {focusAtom} from 'jotai-optics'
@@ -389,12 +389,6 @@ export const offerFormMolecule = molecule(() => {
     }
   )
 
-  const loadingAtom = atom<boolean>(false)
-  const encryptingOfferAtom = atom<boolean>(false)
-  const createOfferProgressAtom = atom<OfferProgressState | undefined>(
-    undefined
-  )
-
   const createOfferActionAtom = atom(null, (get, set): T.Task<boolean> => {
     const {t} = get(translationAtom)
 
@@ -407,6 +401,7 @@ export const offerFormMolecule = molecule(() => {
     } = get(offerFormAtom)
 
     const intendedConnectionLevel = get(intendedConnectionLevelAtom)
+    const belowProgresLeft = get(modifyOfferLoaderTitleAtom)
 
     if (locationState === 'IN_PERSON' && location.length === 0) {
       Alert.alert(t('offerForm.errorLocationNotFilled'))
@@ -418,8 +413,12 @@ export const offerFormMolecule = molecule(() => {
       return T.of(false)
     }
 
-    set(loadingAtom, true)
-    set(encryptingOfferAtom, true)
+    set(progressModal.show, {
+      title: t('offerForm.offerEncryption.encryptingYourOffer'),
+      belowProgressLeft: belowProgresLeft.loadingText,
+      bottomText: t('offerForm.offerEncryption.dontShutDownTheApp'),
+      indicateProgress: {type: 'intermediate'},
+    })
     return pipe(
       generateKeyPair(),
       TE.fromEither,
@@ -434,20 +433,15 @@ export const offerFormMolecule = molecule(() => {
             ...restOfPublicPart,
           },
           intendedConnectionLevel: intendedConnectionLevel ?? 'FIRST',
-          onProgress: (status) => {
-            if (status.type === 'ENCRYPTING_PRIVATE_PAYLOADS')
-              set(createOfferProgressAtom, {
-                currentState: status.type,
-                percentage: {
-                  total: status.totalToEncrypt,
-                  current: status.currentlyProcessingIndex,
-                },
-              })
-            else
-              set(createOfferProgressAtom, (old) => ({
-                ...(old ?? {percentage: undefined}),
-                currentState: status.type,
-              }))
+          onProgress: (progress) => {
+            set(progressModal.showStep, {
+              progress,
+              textData: {
+                title: t('offerForm.offerEncryption.encryptingYourOffer'),
+                belowProgressLeft: belowProgresLeft.loadingText,
+                bottomText: t('offerForm.offerEncryption.dontShutDownTheApp'),
+              },
+            })
           },
         })
       ),
@@ -459,27 +453,34 @@ export const offerFormMolecule = molecule(() => {
           },
         })
       ),
-      TE.matchW(
+      TE.matchEW(
         (e) => {
-          set(loadingAtom, false)
-          set(encryptingOfferAtom, false)
+          set(progressModal.hide)
           showErrorAlert({
             title:
               toCommonErrorMessage(e, t) ?? t('offerForm.errorCreatingOffer'),
             error: e,
           })
-          return false
+          return T.of(false)
         },
         () => {
-          set(loadingAtom, false)
-          return true
+          return pipe(
+            set(progressModal.hideDeffered, {
+              data: {
+                title: t('offerForm.offerEncryption.doneOfferPoster'),
+                bottomText: t(
+                  'offerForm.offerEncryption.yourFriendsAndFriendsOfFriends'
+                ),
+                belowProgressLeft: belowProgresLeft.doneText,
+                belowProgressRight: t('progressBar.DONE'),
+                indicateProgress: {type: 'progress', percentage: 100},
+              },
+              delayMs: 3000,
+            }),
+            T.map((one) => true)
+          )
         }
-      ),
-      T.chain(delayInPipeT(3000)),
-      T.map((result) => {
-        set(encryptingOfferAtom, false)
-        return result
-      })
+      )
     )
   })
 
@@ -528,7 +529,7 @@ export const offerFormMolecule = molecule(() => {
 
           return {
             loadingText: t('offerForm.noVexlersFoundForYourOffer'),
-            notLoadingText: t('offerForm.noVexlersFoundForYourOffer'),
+            doneText: t('offerForm.noVexlersFoundForYourOffer'),
           }
         },
         (r) => {
@@ -539,7 +540,7 @@ export const offerFormMolecule = molecule(() => {
                   ? r.firstLevelFriendsCount
                   : r.secondLevelFriendsCount,
             }),
-            notLoadingText: t(
+            doneText: t(
               'offerForm.offerEncryption.anonymouslyDeliveredToVexlers',
               {
                 count:
@@ -557,15 +558,24 @@ export const offerFormMolecule = molecule(() => {
   const toggleOfferActiveAtom = atom(null, (get, set) => {
     const {t} = get(translationAtom)
     const offer = get(offerAtom)
+    const belowProgresLeft = get(modifyOfferLoaderTitleAtom)
 
-    set(loadingAtom, true)
-    set(encryptingOfferAtom, true)
+    const targetValue = !offer.offerInfo.publicPart.active
+
+    set(progressModal.show, {
+      title: t('editOffer.editingYourOffer'),
+      bottomText: t('editOffer.pleaseWait'),
+      belowProgressLeft: targetValue
+        ? belowProgresLeft.loadingText
+        : t('editOffer.pausingOfferProgress'),
+      indicateProgress: {type: 'intermediate'},
+    })
 
     return pipe(
       set(updateOfferAtom, {
         payloadPublic: {
           ...offer.offerInfo.publicPart,
-          active: !offer.offerInfo.publicPart.active,
+          active: targetValue,
         },
         adminId: offer.ownershipInfo?.adminId ?? ('' as OfferAdminId),
         symmetricKey: offer.offerInfo.privatePart.symmetricKey,
@@ -573,28 +583,37 @@ export const offerFormMolecule = molecule(() => {
           ? offer.ownershipInfo.intendedConnectionLevel
           : 'FIRST',
       }),
-      TE.match(
+      TE.matchE(
         (e) => {
-          set(loadingAtom, false)
-          set(encryptingOfferAtom, false)
+          set(progressModal.hide)
           showErrorAlert({
             title:
               toCommonErrorMessage(e, t) ??
               t('editOffer.offerUnableToChangeOfferActivation'),
             error: e,
           })
-          return false
+          return T.of(false)
         },
         () => {
-          set(loadingAtom, false)
-          return true
+          return pipe(
+            T.Do,
+            T.chain(() =>
+              set(progressModal.hideDeffered, {
+                data: {
+                  title: t('editOffer.offerEditSuccess'),
+                  bottomText: t('editOffer.youCanCheckYourOffer'),
+                  belowProgressLeft: targetValue
+                    ? belowProgresLeft.doneText
+                    : t('editOffer.pausingOfferSuccess'),
+                  indicateProgress: {type: 'done'},
+                },
+                delayMs: 2000,
+              })
+            ),
+            T.map(() => true)
+          )
         }
-      ),
-      T.chain(delayInPipeT(2000)),
-      T.map((v) => {
-        set(encryptingOfferAtom, false)
-        return v
-      })
+      )
     )
   })
 
@@ -605,6 +624,7 @@ export const offerFormMolecule = molecule(() => {
     const {locationState, location, offerDescription, ...restOfPublicPart} =
       get(offerFormAtom)
     const intendedConnectionLevel = get(intendedConnectionLevelAtom)
+    const belowProgresLeft = get(modifyOfferLoaderTitleAtom)
 
     if (locationState === 'IN_PERSON' && location.length === 0) {
       Alert.alert(t('offerForm.errorLocationNotFilled'))
@@ -616,8 +636,12 @@ export const offerFormMolecule = molecule(() => {
       return T.of(false)
     }
 
-    set(loadingAtom, true)
-    set(encryptingOfferAtom, true)
+    set(progressModal.show, {
+      title: t('editOffer.editingYourOffer'),
+      bottomText: t('editOffer.pleaseWait'),
+      belowProgressLeft: belowProgresLeft.loadingText,
+      indicateProgress: {type: 'intermediate'},
+    })
 
     return pipe(
       set(updateOfferAtom, {
@@ -631,27 +655,34 @@ export const offerFormMolecule = molecule(() => {
         symmetricKey: offer.offerInfo.privatePart.symmetricKey,
         intendedConnectionLevel: intendedConnectionLevel ?? 'FIRST',
       }),
-      TE.match(
+      TE.matchE(
         (e) => {
-          set(loadingAtom, false)
-          set(encryptingOfferAtom, false)
+          set(progressModal.hide)
           showErrorAlert({
             title:
               toCommonErrorMessage(e, t) ?? t('editOffer.errorEditingOffer'),
             error: e,
           })
-          return false
+          return T.of(false)
         },
         () => {
-          set(loadingAtom, false)
-          return true
+          return pipe(
+            T.Do,
+            T.chain(() =>
+              set(progressModal.hideDeffered, {
+                data: {
+                  title: t('editOffer.offerEditSuccess'),
+                  bottomText: t('editOffer.youCanCheckYourOffer'),
+                  belowProgressLeft: belowProgresLeft.doneText,
+                  indicateProgress: {type: 'done'},
+                },
+                delayMs: 2000,
+              })
+            ),
+            T.map(() => true)
+          )
         }
-      ),
-      T.chain(delayInPipeT(2000)),
-      T.map((v) => {
-        set(encryptingOfferAtom, false)
-        return v
-      })
+      )
     )
   })
 
@@ -686,8 +717,6 @@ export const offerFormMolecule = molecule(() => {
     deleteOfferActionAtom,
     intendedConnectionLevelAtom,
     modifyOfferLoaderTitleAtom,
-    loadingAtom,
-    encryptingOfferAtom,
     toggleOfferActiveAtom,
     editOfferAtom,
     createOfferActionAtom,
@@ -705,7 +734,6 @@ export const offerFormMolecule = molecule(() => {
     offerActiveAtom,
     updateCurrencyLimitsAtom,
     updateLocationStatePaymentMethodAtom,
-    createOfferProgressAtom,
     locationSuggestionsAtom,
     locationSuggestionsAtomsAtom,
     updateAndRefreshLocationSuggestionsActionAtom,

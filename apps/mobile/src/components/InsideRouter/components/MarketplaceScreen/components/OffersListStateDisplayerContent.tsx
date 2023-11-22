@@ -13,11 +13,12 @@ import {
   useOffersLoadingError,
 } from '../../../../../state/marketplace'
 import {useAtomValue, useSetAtom} from 'jotai'
-import {createFilteredOffersAtom} from '../../../../../state/marketplace/atom'
+import {createFilteredOffersAtom} from '../../../../../state/marketplace/atoms/filteredOffers'
 import {splitAtom} from 'jotai/utils'
 import TotalOffersCount from './TotalOffersCount'
 import {offersFilterFromStorageAtom} from '../../../../../state/marketplace/filterAtoms'
 import ImportNewContactsSuggestion from './ImportNewContactsSuggestion'
+import ReencryptOffersSuggestion from '../../../../ReencryptOffersSuggestion'
 
 interface Props {
   type: 'BUY' | 'SELL'
@@ -49,7 +50,7 @@ function OffersListStateDisplayerContent({
     )
   )
 
-  const renderListHeader = useMemo(() => {
+  const ListHeaderComponent = useMemo(() => {
     if (isNone(error))
       return (
         <Stack>
@@ -57,6 +58,7 @@ function OffersListStateDisplayerContent({
             filteredOffersCount={offersAtoms.length}
             offerType={type}
           />
+          <ReencryptOffersSuggestion px={'$0'} />
           <ImportNewContactsSuggestion px={'$0'} />
         </Stack>
       )
@@ -83,7 +85,7 @@ function OffersListStateDisplayerContent({
         <EmptyListPlaceholder />
       ) : (
         <OffersList
-          ListHeaderComponent={renderListHeader}
+          ListHeaderComponent={ListHeaderComponent}
           offersAtoms={offersAtoms}
           // eslint-disable-next-line @typescript-eslint/no-misused-promises
           onRefresh={refreshOffers}

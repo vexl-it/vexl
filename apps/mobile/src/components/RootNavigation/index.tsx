@@ -35,6 +35,7 @@ import {
   useHandleNotificationsPermissionsRedirect,
   useHandlePostLoginFlowRedirect,
 } from './utils'
+import useRefreshContactsFromDeviceOnResume from '../../state/contacts/hooks/useRefreshContactsFromDeviceOnResume'
 
 const Stack = createNativeStackNavigator<RootStackParamsList>()
 
@@ -51,6 +52,7 @@ function LoggedInHookGroup(): null {
   useSetCombinedContactsAfterLastSubmitForCurrentUsers()
 
   useHideInnactivityReminderNotificationsOnResume()
+  useRefreshContactsFromDeviceOnResume()
 
   return null
 }

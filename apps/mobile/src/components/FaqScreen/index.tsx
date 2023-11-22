@@ -14,7 +14,7 @@ import {type RootStackScreenProps} from '../../navigationTypes'
 
 type Props = RootStackScreenProps<'Faqs'>
 
-function FaqsScreen({navigation}: Props): JSX.Element {
+function FaqsScreen({navigation}: Props): JSX.Element | null {
   const {t} = useTranslation()
   const safeGoBack = useSafeGoBack()
   const content = useContent()
@@ -33,59 +33,69 @@ function FaqsScreen({navigation}: Props): JSX.Element {
         onSkip={safeGoBack}
         withBackButton
       >
-        <XStack ai="center" jc="space-between">
-          <Text col="$black" ff="$body600">
-            {t('faqs.faqs')}
-          </Text>
-          <IconButton variant="light" icon={closeSvg} onPress={safeGoBack} />
-        </XStack>
-        <Stack f={1} ai="center" jc="center" w="100%" h="100%">
-          {pageContent && (
-            <SvgImage
-              height={pageContent.height ?? '100%'}
-              width={pageContent.width ?? '100%'}
-              source={pageContent.svg}
-            />
-          )}
-        </Stack>
-        <Text fos={24} ff="$heading" col="$black" mb="$2">
-          {pageContent?.title}
-        </Text>
-        {content[page]?.withLink ? (
-          <Text
-            ff={'$body500'}
-            col={'$greyOnWhite'}
-            onPress={openUrl(content[page]?.url ?? '')}
-          >
-            <>
-              {content[page]?.textBefore}{' '}
+        {!pageContent ? (
+          <></>
+        ) : (
+          <>
+            <XStack ai="center" jc="space-between">
+              <Text col="$black" ff="$body600">
+                {t('faqs.faqs')}
+              </Text>
+              <IconButton
+                variant="light"
+                icon={closeSvg}
+                onPress={safeGoBack}
+              />
+            </XStack>
+            <Stack f={1} ai="center" jc="center" w="100%" h="100%">
+              {pageContent && (
+                <SvgImage
+                  height={pageContent.height ?? '100%'}
+                  width={pageContent.width ?? '100%'}
+                  source={pageContent.svg}
+                />
+              )}
+            </Stack>
+            <Text fos={24} ff="$heading" col="$black" mb="$2">
+              {pageContent?.title}
+            </Text>
+            {pageContent.withLink ? (
               <Text
+                ff={'$body500'}
+                col={'$greyOnWhite'}
+                onPress={openUrl(pageContent?.url ?? '')}
+              >
+                <>
+                  {pageContent?.textBefore}{' '}
+                  <Text
+                    textDecorationLine={'underline'}
+                    ff={'$body700'}
+                    col={'$greyOnWhite'}
+                  >
+                    {pageContent?.linkText}
+                  </Text>{' '}
+                  {pageContent?.textAfter}
+                </>
+              </Text>
+            ) : (
+              <Text ff={'$body500'} col={'$greyOnWhite'}>
+                {pageContent?.text}
+              </Text>
+            )}
+            {pageContent?.type === 'HOW_CAN_YOU_ENSURE' && (
+              <Text
+                mt={'$2'}
                 textDecorationLine={'underline'}
                 ff={'$body700'}
                 col={'$greyOnWhite'}
+                onPress={() => {
+                  navigation.navigate('TermsAndConditions')
+                }}
               >
-                {content[page]?.linkText}
-              </Text>{' '}
-              {content[page]?.textAfter}
-            </>
-          </Text>
-        ) : (
-          <Text ff={'$body500'} col={'$greyOnWhite'}>
-            {content[page]?.text}
-          </Text>
-        )}
-        {content[page]?.type === 'HOW_CAN_YOU_ENSURE' && (
-          <Text
-            mt={'$2'}
-            textDecorationLine={'underline'}
-            ff={'$body700'}
-            col={'$greyOnWhite'}
-            onPress={() => {
-              navigation.navigate('TermsAndConditions')
-            }}
-          >
-            {t('faqs.howCanYouEnsureTosAndPP')}
-          </Text>
+                {t('faqs.howCanYouEnsureTosAndPP')}
+              </Text>
+            )}
+          </>
         )}
       </ProgressJourney>
     </Screen>

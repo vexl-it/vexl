@@ -10,7 +10,7 @@ import {type OfferId} from '@vexl-next/domain/dist/general/offers'
 import {toCommonErrorMessage} from '../../utils/useCommonErrorMessages'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 import {useShowLoadingOverlay} from '../LoadingOverlayProvider'
-import {createSingleOfferReportedFlagAtom} from '../../state/marketplace/atom'
+import {createSingleOfferReportedFlagAtom} from '../../state/marketplace/atoms/offersState'
 import showErrorAlert from '../../utils/showErrorAlert'
 import {Alert} from 'react-native'
 

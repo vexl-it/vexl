@@ -12,7 +12,8 @@ import closeSvg from '../images/closeSvg'
 import {
   myActiveOffersAtom,
   myOffersSortedAtomsAtom,
-} from '../../state/marketplace/atom'
+} from '../../state/marketplace/atoms/myOffers'
+import ReencryptOffersSuggestion from '../ReencryptOffersSuggestion'
 import {selectAtom} from 'jotai/utils'
 import React from 'react'
 import MyOffersSortingDropdown from './components/MyOffersSortingDropdown'
@@ -21,6 +22,14 @@ import useSafeGoBack from '../../utils/useSafeGoBack'
 type Props = RootStackScreenProps<'MyOffers'>
 
 const myActiveOffers = selectAtom(myActiveOffersAtom, (offers) => offers.length)
+
+function ListHeaderComponent(): JSX.Element {
+  return (
+    <Stack mt="$4">
+      <ReencryptOffersSuggestion px={'$0'} />
+    </Stack>
+  )
+}
 
 function MyOffersScreen({navigation}: Props): JSX.Element {
   const {t} = useTranslation()
@@ -64,7 +73,10 @@ function MyOffersScreen({navigation}: Props): JSX.Element {
         text={t('myOffers.addNewOffer')}
         variant={'secondary'}
       />
-      <OffersList offersAtoms={myOffersSortedAtoms} />
+      <OffersList
+        ListHeaderComponent={ListHeaderComponent}
+        offersAtoms={myOffersSortedAtoms}
+      />
     </Screen>
   )
 }

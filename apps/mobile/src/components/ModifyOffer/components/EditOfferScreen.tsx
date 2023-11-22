@@ -3,7 +3,6 @@ import {useTranslation} from '../../../utils/localization/I18nProvider'
 import Screen from '../../Screen'
 import KeyboardAvoidingView from '../../KeyboardAvoidingView'
 import React, {useCallback, useMemo} from 'react'
-import {singleOfferAtom} from '../../../state/marketplace/atom'
 import {useAtomValue, useSetAtom} from 'jotai'
 import {Stack, Text} from 'tamagui'
 import useSafeGoBack from '../../../utils/useSafeGoBack'
@@ -12,7 +11,6 @@ import OfferForm from '../../OfferForm'
 import Button from '../../Button'
 import {pipe} from 'fp-ts/function'
 import * as T from 'fp-ts/Task'
-import OfferInProgress from './OfferInProgress'
 import {useFocusEffect} from '@react-navigation/native'
 import {useMolecule} from 'jotai-molecules'
 import {offerFormMolecule} from '../atoms/offerFormStateAtoms'
@@ -21,6 +19,7 @@ import EditOfferHeader from './EditOfferHeader'
 import userSvg from '../../images/userSvg'
 import Section from '../../Section'
 import OfferType from '../../OfferForm/components/OfferType'
+import {singleOfferAtom} from '../../../state/marketplace/atoms/offersState'
 
 const styles = StyleSheet.create({
   contentStyles: {
@@ -95,12 +94,6 @@ function EditOfferScreen({
               />
             </Stack>
           )}
-          <OfferInProgress
-            loadingTitle={t('editOffer.editingYourOffer')}
-            loadingDoneTitle={t('editOffer.offerEditSuccess')}
-            loadingSubtitle={t('editOffer.pleaseWait')}
-            loadingDoneSubtitle={t('editOffer.youCanCheckYourOffer')}
-          />
         </>
       </KeyboardAvoidingView>
     </Screen>

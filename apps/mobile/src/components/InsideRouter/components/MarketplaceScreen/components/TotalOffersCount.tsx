@@ -5,7 +5,7 @@ import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import {
   buyOffersToSeeInMarketplaceCountAtom,
   sellOffersToSeeInMarketplaceCountAtom,
-} from '../../../../../state/marketplace/atom'
+} from '../../../../../state/marketplace/atoms/offersToSeeInMarketplace'
 
 interface Props {
   filteredOffersCount: number

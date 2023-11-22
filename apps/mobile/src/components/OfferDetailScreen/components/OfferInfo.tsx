@@ -33,7 +33,7 @@ import {type OneOfferInState} from '@vexl-next/domain/dist/general/offers'
 import randomName from '../../../utils/randomName'
 import {friendLevelBannerPreferenceAtom} from '../../../utils/preferences'
 import ButtonWithPressTimeout from '../../ButtonWithPressTimeout'
-import {createSingleOfferReportedFlagAtom} from '../../../state/marketplace/atom'
+import {createSingleOfferReportedFlagAtom} from '../../../state/marketplace/atoms/offersState'
 
 function OfferInfo({
   offer,

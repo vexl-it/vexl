@@ -7,15 +7,6 @@ import {
   type SymmetricKey,
 } from '@vexl-next/domain/dist/general/offers'
 import {atom, useAtomValue} from 'jotai'
-import {
-  lastUpdatedAtAtom,
-  loadingStateAtom,
-  offerForChatOriginAtom,
-  offersAtom,
-  offersIdsAtom,
-  offersStateAtom,
-  singleOfferAtom,
-} from './atom'
 import * as Option from 'fp-ts/Option'
 import {privateApiAtom} from '../../api'
 import {pipe} from 'fp-ts/function'
@@ -53,6 +44,15 @@ import {type OfferEncryptionProgress} from '@vexl-next/resources-utils/dist/offe
 import {type ExtractLeftTE} from '@vexl-next/rest-api/dist/services/chat/utils'
 import {type OfferPrivateApi} from '@vexl-next/rest-api/dist/services/offer'
 import getCountryPrefix from '../../utils/getCountryCode'
+import {
+  lastUpdatedAtAtom,
+  offerForChatOriginAtom,
+  offersAtom,
+  offersIdsAtom,
+  offersStateAtom,
+  singleOfferAtom,
+} from './atoms/offersState'
+import {loadingStateAtom} from './atoms/loadingState'
 
 export const triggerOffersRefreshAtom = atom(null, async (get, set) => {
   const api = get(privateApiAtom)

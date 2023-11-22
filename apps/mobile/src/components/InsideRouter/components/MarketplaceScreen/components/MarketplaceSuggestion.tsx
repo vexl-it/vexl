@@ -10,8 +10,9 @@ import vexlerAvatarSvg from '../images/vexlerAvatarSvg'
 
 interface Props extends YStackProps {
   buttonText: string
+  type?: 'warning' | 'info'
   onButtonPress: () => void
-  onClosePress: () => void
+  onClosePress?: () => void
   text: string
 }
 
@@ -19,6 +20,7 @@ function MarketplaceSuggestion({
   buttonText,
   onButtonPress,
   onClosePress,
+  type,
   text,
   ...props
 }: Props): JSX.Element {
@@ -36,11 +38,16 @@ function MarketplaceSuggestion({
           pr={'$7'}
           br={'$5'}
         >
-          <Stack pos={'absolute'} right={8} top={8}>
-            <TouchableOpacity onPress={onClosePress}>
-              <Image stroke={tokens.color.greyOnWhite.val} source={closeSvg} />
-            </TouchableOpacity>
-          </Stack>
+          {onClosePress && (
+            <Stack pos={'absolute'} right={8} top={8}>
+              <TouchableOpacity onPress={onClosePress}>
+                <Image
+                  stroke={tokens.color.greyOnWhite.val}
+                  source={closeSvg}
+                />
+              </TouchableOpacity>
+            </Stack>
+          )}
           <Text col="$black" fos={20} ff={'$body500'}>
             {text}
           </Text>
@@ -62,15 +69,27 @@ function MarketplaceSuggestion({
                 {t('suggestion.vexl')}
               </Text>
               <Text> </Text>
-              <Text
-                adjustsFontSizeToFit
-                numberOfLines={1}
-                col={'$main'}
-                fos={16}
-                ff={'$body600'}
-              >
-                {t('suggestion.suggests')}
-              </Text>
+              {type === 'warning' ? (
+                <Text
+                  adjustsFontSizeToFit
+                  numberOfLines={1}
+                  col={'$red'}
+                  fos={16}
+                  ff={'$body600'}
+                >
+                  {t('suggestion.warns')}
+                </Text>
+              ) : (
+                <Text
+                  adjustsFontSizeToFit
+                  numberOfLines={1}
+                  col={'$main'}
+                  fos={16}
+                  ff={'$body600'}
+                >
+                  {t('suggestion.suggests')}
+                </Text>
+              )}
             </XStack>
             <Text
               adjustsFontSizeToFit
@@ -88,7 +107,7 @@ function MarketplaceSuggestion({
             size={'medium'}
             text={buttonText}
             onPress={onButtonPress}
-            variant={'secondary'}
+            variant={type === 'warning' ? 'redLight' : 'secondary'}
           />
         </Stack>
       </XStack>

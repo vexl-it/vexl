@@ -18,7 +18,10 @@ import {
   UnixMilliseconds,
   unixMillisecondsNow,
 } from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
-import {offersStateAtom, singleOfferByAdminIdAtom} from '../../marketplace/atom'
+import {
+  offersStateAtom,
+  singleOfferByAdminIdAtom,
+} from '../../marketplace/atoms/offersState'
 import {subtractArrays} from '@vexl-next/resources-utils/dist/utils/array'
 import {type OfferAdminId} from '@vexl-next/domain/dist/general/offers'
 import notEmpty from '../../../utils/notEmpty'
@@ -37,6 +40,17 @@ export default offerToConnectionsAtom
 
 const offerToConnectionsAtomsAtom = splitAtom(
   focusAtom(offerToConnectionsAtom, (p) => p.prop('offerToConnections'))
+)
+
+export const deleteOfferToConnectionsAtom = atom(
+  null,
+  (get, set, adminIdToDelete: OfferAdminId) => {
+    set(offerToConnectionsAtom, (old) => ({
+      offerToConnections: old.offerToConnections.filter(
+        (one) => one.adminId !== adminIdToDelete
+      ),
+    }))
+  }
 )
 
 export const upsertOfferToConnectionsActionAtom = atom<

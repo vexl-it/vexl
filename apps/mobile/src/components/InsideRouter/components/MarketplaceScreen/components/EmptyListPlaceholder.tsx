@@ -15,7 +15,7 @@ import {
   addMoreContactsSuggestionVisibleAtom,
   createOfferSuggestionVisibleAtom,
   resetFilterSuggestionVisibleAtom,
-} from '../../../../../state/marketplace/atom'
+} from '../../../../../state/marketplace/atoms/offerSuggestionVisible'
 import {
   isFilterActiveAtom,
   resetFilterInStorageActionAtom,

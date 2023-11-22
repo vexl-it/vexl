@@ -11,7 +11,6 @@ import {Stack} from 'tamagui'
 import Button from '../../Button'
 import {pipe} from 'fp-ts/function'
 import * as T from 'fp-ts/Task'
-import OfferInProgress from './OfferInProgress'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import useContent from '../useContent'
 import {useMolecule} from 'jotai-molecules'
@@ -79,14 +78,6 @@ function CreateOfferScreen(): JSX.Element {
               variant="secondary"
             />
           </Stack>
-          <OfferInProgress
-            loadingTitle={t('offerForm.offerEncryption.encryptingYourOffer')}
-            loadingDoneTitle={t('offerForm.offerEncryption.doneOfferPoster')}
-            loadingSubtitle={t('offerForm.offerEncryption.dontShutDownTheApp')}
-            loadingDoneSubtitle={t(
-              'offerForm.offerEncryption.yourFriendsAndFriendsOfFriends'
-            )}
-          />
         </>
       </KeyboardAvoidingView>
     </Screen>

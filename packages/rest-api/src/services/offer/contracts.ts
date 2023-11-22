@@ -79,7 +79,7 @@ export const RefreshOfferRequest = z.object({
 })
 export type RefreshOfferRequest = z.TypeOf<typeof RefreshOfferRequest>
 
-export const RefreshOfferResponse = NoContentResponse
+export const RefreshOfferResponse = z.array(OfferId)
 export type RefreshOfferResponse = z.TypeOf<typeof RefreshOfferResponse>
 
 export const DeleteOfferRequest = z.object({

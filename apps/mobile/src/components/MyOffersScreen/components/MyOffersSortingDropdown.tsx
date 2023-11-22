@@ -1,6 +1,6 @@
 import React, {useMemo} from 'react'
 import {atom, useAtom, useAtomValue} from 'jotai'
-import {selectedMyOffersSortingOptionAtom} from '../../../state/marketplace/atom'
+import {selectedMyOffersSortingOptionAtom} from '../../../state/marketplace/atoms/myOffers'
 import {type Sort} from '@vexl-next/domain/dist/general/offers'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
 import {type DropdownItemProps, Dropdown} from '../../Dropdown'

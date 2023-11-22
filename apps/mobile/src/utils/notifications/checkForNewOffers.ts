@@ -10,7 +10,7 @@ import {getDefaultStore} from 'jotai'
 import {difference} from 'set-operations'
 import {showDebugNotificationIfEnabled} from '.'
 import {triggerOffersRefreshAtom} from '../../state/marketplace'
-import {createFilteredOffersAtom} from '../../state/marketplace/atom'
+import {createFilteredOffersAtom} from '../../state/marketplace/atoms/filteredOffers'
 import {offersFilterFromStorageAtom} from '../../state/marketplace/filterAtoms'
 import {
   loadSession,

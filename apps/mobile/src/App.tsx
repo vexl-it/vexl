@@ -17,6 +17,7 @@ import {navigationRef} from './utils/navigation'
 import BadgeCountManager from './components/BadgeCountManager'
 import {useAppState} from './utils/useAppState'
 import {setLastTimeAppWasRunningToNow} from './utils/lastTimeAppWasRunning'
+import UploadingOfferProgressModal from './components/UploadingOfferProgressModal'
 
 void SplashScreen.preventAutoHideAsync()
 
@@ -56,6 +57,7 @@ function App(): JSX.Element {
         <LoadingOverlayProvider>
           <MaintenanceAndForceUpdateCheck>
             <RootNavigation />
+            <UploadingOfferProgressModal />
           </MaintenanceAndForceUpdateCheck>
         </LoadingOverlayProvider>
         <AreYouSureDialog />

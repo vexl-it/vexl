@@ -15,11 +15,13 @@ import reportError from '../reportError'
 import checkForNewOffers from './checkForNewOffers'
 import {
   CHAT_NOTIFICATION_TYPES,
+  CREATE_OFFER_PROMPT,
   NEW_CONNECTION,
   NEW_CONTENT,
 } from './notificationTypes'
 import {showUINotificationFromRemoteMessage} from './showUINotificationFromRemoteMessage'
 import {loadSession} from '../../state/session'
+import checkAndShowCreateOfferPrompt from './checkAndShowCreateOfferPrompt'
 
 export async function processBackgroundMessage(
   remoteMessage: FirebaseMessagingTypes.RemoteMessage
@@ -91,6 +93,10 @@ export async function processBackgroundMessage(
         body: 'ok',
       })
       void checkForNewOffers()
+    }
+
+    if (remoteMessage.data?.type === CREATE_OFFER_PROMPT) {
+      void checkAndShowCreateOfferPrompt(getDefaultStore())
     }
   } catch (error) {
     void showDebugNotificationIfEnabled({

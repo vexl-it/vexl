@@ -18,6 +18,7 @@ import BadgeCountManager from './components/BadgeCountManager'
 import {useAppState} from './utils/useAppState'
 import {setLastTimeAppWasRunningToNow} from './utils/lastTimeAppWasRunning'
 import UploadingOfferProgressModal from './components/UploadingOfferProgressModal'
+import {subscribeToGeneralTopic} from './utils/notifications'
 
 void SplashScreen.preventAutoHideAsync()
 
@@ -34,6 +35,10 @@ function App(): JSX.Element {
   }, [fontsLoaded, sessionLoaded, remoteConfigSetup])
 
   useAppState(setLastTimeAppWasRunningToNow, true)
+
+  useEffect(() => {
+    void subscribeToGeneralTopic()
+  })
 
   // Handled by splashscreen
   if (!fontsLoaded) return <></>

@@ -5,6 +5,10 @@ on:
     branches:
       - main
 
+permissions:
+  pull-requests: write
+  contents: read
+
 jobs:
   synchronize-with-crowdin:
     runs-on: ubuntu-latest

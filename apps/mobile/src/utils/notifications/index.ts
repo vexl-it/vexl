@@ -15,6 +15,7 @@ import {
 import {useTranslation} from '../localization/I18nProvider'
 import {getDefaultStore} from 'jotai'
 import {preferencesAtom} from '../preferences'
+import reportError from '../reportError'
 
 type UnknownErrorNotifications = BasicError<'UnknownErrorNotifications'>
 
@@ -124,4 +125,13 @@ export async function showDebugNotificationIfEnabled({
       },
     },
   })
+}
+
+export async function subscribeToGeneralTopic(): Promise<void> {
+  try {
+    await messaging().subscribeToTopic('general')
+    console.info('Subscribed to general topic')
+  } catch (e) {
+    reportError('error', 'Error while subscribing to general topic', e)
+  }
 }

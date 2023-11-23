@@ -11,6 +11,7 @@ import {isOnSpecificChat} from '../utils/navigation'
 import {ChatNotificationData} from '../utils/notifications/ChatNotificationData'
 import {
   CHAT_NOTIFICATION_TYPES,
+  CREATE_OFFER_PROMPT,
   NEW_CONNECTION,
   NEW_CONTENT,
 } from '../utils/notifications/notificationTypes'
@@ -18,6 +19,8 @@ import {showUINotificationFromRemoteMessage} from '../utils/notifications/showUI
 import reportError from '../utils/reportError'
 import {fetchAndStoreMessagesForInboxAtom} from './chat/atoms/fetchNewMessagesActionAtom'
 import {updateAllOffersConnectionsActionAtom} from './connections/atom/offerToConnectionsAtom'
+import checkAndShowCreateOfferPrompt from '../utils/notifications/checkAndShowCreateOfferPrompt'
+import {showDebugNotificationIfEnabled} from '../utils/notifications'
 
 export function useHandleReceivedNotifications(): void {
   const navigation = useNavigation()
@@ -30,6 +33,10 @@ export function useHandleReceivedNotifications(): void {
   useEffect(() => {
     return messaging().onMessage(async (remoteMessage) => {
       console.info('📳 Received notification', remoteMessage)
+      await showDebugNotificationIfEnabled({
+        title: 'Received notification in foreground',
+        body: JSON.stringify(remoteMessage.data),
+      })
 
       const data = remoteMessage.data
       if (!data) {
@@ -105,6 +112,11 @@ export function useHandleReceivedNotifications(): void {
         console.info(
           'Received notification about new content. Doing nothing since this notification is meant to be displayed only if user is innactive.'
         )
+        return
+      }
+
+      if (data.type === CREATE_OFFER_PROMPT) {
+        void checkAndShowCreateOfferPrompt(store)
         return
       }
 

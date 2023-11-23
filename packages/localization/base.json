@@ -389,6 +389,8 @@
   "notifications.groupNotificationChat.subtitle": "You have new messages from {userName}",
   "notifications.groupNotificationRequest.subtitle": "You have new requests for your offers",
   "notifications.groupNotificationRequest.title": "New requests",
+  "notifications.createOfferPrompt.title": "Create your offer",
+  "notifications.createOfferPrompt.body": "Create offer to get the best out of Vexl",
   "myOffers.addNewOffer": "Add new offer",
   "myOffers.activeOffers": "{{count}} active offers",
   "myOffers.filterOffers": "Filter offers",

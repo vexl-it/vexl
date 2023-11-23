@@ -3,7 +3,7 @@ name: "[translate] translations to/from crowdin"
 permissions:
   pull-requests: write
   contents: read
-  id-token: read
+  id-token: write
 
 on:
   pull_request:

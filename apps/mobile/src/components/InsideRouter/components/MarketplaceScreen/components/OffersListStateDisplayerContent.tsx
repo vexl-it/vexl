@@ -58,8 +58,8 @@ function OffersListStateDisplayerContent({
             filteredOffersCount={offersAtoms.length}
             offerType={type}
           />
-          <ReencryptOffersSuggestion px={'$0'} />
-          <ImportNewContactsSuggestion px={'$0'} />
+          <ReencryptOffersSuggestion mt="$5" px={'$0'} />
+          <ImportNewContactsSuggestion mt="$5" px={'$0'} />
         </Stack>
       )
 

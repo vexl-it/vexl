@@ -73,7 +73,7 @@ function StartScreen({navigation}: Props): JSX.Element {
       <NextButtonProxy
         disabled={!touAgree}
         onPress={() => {
-          navigation.navigate('AnonymizationNotice')
+          navigation.navigate('PhoneNumber')
         }}
         text={t('common.continue')}
       />

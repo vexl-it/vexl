@@ -1,4 +1,7 @@
-import {useSessionAssumeLoggedIn} from '../../../../../state/session'
+import {
+  userDataRealOrAnonymizedAtom,
+  userPhoneNumberAtom,
+} from '../../../../../state/session'
 import UserDataDisplay from '../../../../LoginFlow/components/AnonymizationAnimationScreen/components/UserDataDisplay'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import SvgImage from '../../../../Image'
@@ -24,10 +27,12 @@ const GrayBackContainer = styled(XStack, {
 
 function ProfileSection(): JSX.Element {
   const {t} = useTranslation()
-  const session = useSessionAssumeLoggedIn()
   const reachNumber = useAtomValue(reachNumberAtom)
   const setQrCodeDialogVisible = useSetAtom(qrCodeDialogVisibleAtom)
   const setQrScannerDialogVisible = useSetAtom(qrScannerDialogVisibleAtom)
+
+  const userDataRealOrAnonymized = useAtomValue(userDataRealOrAnonymizedAtom)
+  const userPhoneNumber = useAtomValue(userPhoneNumberAtom)
 
   return (
     <Stack ai="center" ml="$4" mr="$4">
@@ -65,14 +70,9 @@ function ProfileSection(): JSX.Element {
           </TouchableOpacity>
         </XStack>
       </XStack>
-      <UserDataDisplay
-        userNameAndAvatar={{
-          userName: session.realUserData.userName,
-          image: session.realUserData.image ?? session.anonymizedUserData.image,
-        }}
-      />
+      <UserDataDisplay userNameAndAvatar={userDataRealOrAnonymized} />
       <Text ta="center" mt="$2" col="$greyOnBlack">
-        {session.phoneNumber}
+        {userPhoneNumber}
       </Text>
       <QrCode />
       <QrScanner />

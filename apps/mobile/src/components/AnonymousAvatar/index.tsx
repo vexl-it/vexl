@@ -25,6 +25,11 @@ export function getAvatarSvg(avatarIndex: number): SvgString {
   return avatarsSvg[avatarIndex] ?? avatarsSvg[0]
 }
 
+export function getRandomAvatarSvgFromSeed(seed: string): SvgString {
+  const randomNumber = randomNumberFromSeed(0, avatarsSvg.length - 1, seed)
+  return getAvatarSvg(randomNumber)
+}
+
 export function AnonymousAvatarFromSeed({
   seed,
   width,

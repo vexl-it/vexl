@@ -7,20 +7,20 @@ import useSafeGoBack from '../../utils/useSafeGoBack'
 import {getTokens, Stack} from 'tamagui'
 import {useState} from 'react'
 import {useAtom} from 'jotai'
-import {userNameAtom} from '../../state/session'
 import Input from '../Input'
 import Button from '../Button'
 import KeyboardAvoidingView from '../KeyboardAvoidingView'
 import {UserName} from '@vexl-next/domain/dist/general/UserName.brand'
 import {Alert} from 'react-native'
+import {realUserNameAtom} from '../../state/session'
 
 function EditNameScreen(): JSX.Element {
   const {t} = useTranslation()
   const safeGoBack = useSafeGoBack()
   const tokens = getTokens()
-  const [userName, setUserName] = useAtom(userNameAtom)
+  const [userName, setUserName] = useAtom(realUserNameAtom)
 
-  const [name, setName] = useState<string>(userName)
+  const [name, setName] = useState<string>(() => userName ?? '')
 
   return (
     <Screen customHorizontalPadding={tokens.space[2].val}>

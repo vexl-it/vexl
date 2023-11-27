@@ -4,7 +4,7 @@ import {UserName} from './UserName.brand'
 import {UriString} from '../utility/UriString.brand'
 
 export const UserNameAndUriAvatar = z.object({
-  userName: UserName,
+  userName: UserName.optional(),
   image: z
     .object({
       type: z.literal('imageUri'),

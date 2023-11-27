@@ -18,12 +18,7 @@ import {Stack, Text} from 'tamagui'
 
 type Props = LoginStackScreenProps<'PhoneNumber'>
 
-function PhoneNumberScreen({
-  navigation,
-  route: {
-    params: {anonymizedUserData, realUserData},
-  },
-}: Props): JSX.Element {
+function PhoneNumberScreen({navigation}: Props): JSX.Element {
   const {t} = useTranslation()
   const [phoneNumber, setPhoneNumber] = useState<O.Option<E164PhoneNumber>>(
     O.none
@@ -64,8 +59,6 @@ function PhoneNumberScreen({
             .then(
               E.match(Alert.alert, (result) => {
                 navigation.navigate('VerificationCode', {
-                  realUserData,
-                  anonymizedUserData,
                   phoneNumber: phoneNumber.value,
                   initPhoneVerificationResponse: result,
                 })

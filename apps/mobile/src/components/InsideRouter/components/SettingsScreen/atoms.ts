@@ -1,5 +1,6 @@
+import {userPhoneNumberAtom} from './../../../../state/session/index'
 import {atom} from 'jotai'
-import {sessionDataOrDummyAtom} from '../../../../state/session'
+import {userDataRealOrAnonymizedAtom} from '../../../../state/session'
 import {type ImportContactFromLinkPayload} from '../../../../state/contacts/domain'
 
 export const reportIssueDialogVisibleAtom = atom<boolean>(false)
@@ -8,12 +9,13 @@ export const qrCodeDialogVisibleAtom = atom<boolean>(false)
 export const qrScannerDialogVisibleAtom = atom<boolean>(false)
 
 export const encodedUserDetailsUriAtom = atom<string>((get) => {
-  const session = get(sessionDataOrDummyAtom)
+  const userData = get(userDataRealOrAnonymizedAtom)
+  const phoneNumber = get(userPhoneNumberAtom)
 
   const userDetails: ImportContactFromLinkPayload = {
-    name: session.realUserData.userName,
+    name: userData.userName,
     label: 'Scanned from qr code',
-    numberToDisplay: session.phoneNumber,
+    numberToDisplay: phoneNumber,
   }
 
   const userDetailsToLink = encodeURIComponent(JSON.stringify(userDetails))

@@ -74,22 +74,15 @@ export type LoginStackParamsList = {
   AnonymizationNotice: undefined
   Intro: undefined
   Name: undefined
-  PhoneNumber: {
-    readonly realUserData: UserNameAndAvatar
-    readonly anonymizedUserData: UserNameAndAvatar
-  }
+  PhoneNumber: undefined
   Photo: {userName: UserName}
   Start: undefined
   SuccessLogin: {
     readonly verifyPhoneNumberResponse: VerifyPhoneNumberResponse
     readonly privateKey: KeyHolder.PrivateKeyHolder
-    readonly realUserData: UserNameAndAvatar
-    readonly anonymizedUserData: UserNameAndAvatar
     readonly phoneNumber: E164PhoneNumber
   }
   VerificationCode: {
-    readonly realUserData: UserNameAndAvatar
-    readonly anonymizedUserData: UserNameAndAvatar
     readonly phoneNumber: E164PhoneNumber
     readonly initPhoneVerificationResponse: InitPhoneNumberVerificationResponse
   }

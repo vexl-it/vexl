@@ -24,12 +24,7 @@ type Props = LoginStackScreenProps<'VerificationCode'>
 function VerificationCodeScreen({
   navigation,
   route: {
-    params: {
-      phoneNumber,
-      initPhoneVerificationResponse,
-      anonymizedUserData,
-      realUserData,
-    },
+    params: {phoneNumber, initPhoneVerificationResponse},
   },
 }: Props): JSX.Element {
   const safeGoBack = useSafeGoBack()
@@ -119,8 +114,6 @@ function VerificationCodeScreen({
                 navigation.navigate('SuccessLogin', {
                   verifyPhoneNumberResponse,
                   privateKey,
-                  realUserData,
-                  anonymizedUserData,
                   phoneNumber,
                 })
               }

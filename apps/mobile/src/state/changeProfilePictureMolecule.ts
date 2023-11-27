@@ -10,12 +10,12 @@ import {translationAtom} from '../utils/localization/I18nProvider'
 import reportError from '../utils/reportError'
 import * as O from 'fp-ts/Option'
 import {type UriString} from '@vexl-next/domain/dist/utility/UriString.brand'
-import {userImageAtom} from './session'
 import getValueFromSetStateActionOfAtom from '../utils/atomUtils/getValueFromSetStateActionOfAtom'
 import {Alert} from 'react-native'
 import {pipe} from 'fp-ts/function'
 import * as TE from 'fp-ts/TaskEither'
 import showErrorAlert from '../utils/showErrorAlert'
+import {realUserDataAtom} from './session'
 
 export const changeProfilePictureMolecule = molecule(() => {
   const reportAndTranslateErrorsAtom = atom<
@@ -45,7 +45,7 @@ export const changeProfilePictureMolecule = molecule(() => {
   const selectedImageUriAtom: PrimitiveAtom<O.Option<UriString>> = atom(
     (get) => {
       const selectImageUri = get(_selectedImageUriAtom)
-      const userImage = get(userImageAtom)?.imageUri
+      const userImage = get(realUserDataAtom)?.image?.imageUri
       return selectImageUri ?? O.fromNullable(userImage)
     },
     (get, set, update) => {
@@ -57,7 +57,10 @@ export const changeProfilePictureMolecule = molecule(() => {
   )
 
   const syncImageWithSessionUriAtom = atom(null, (get, set) => {
-    set(_selectedImageUriAtom, O.fromNullable(get(userImageAtom)?.imageUri))
+    set(
+      _selectedImageUriAtom,
+      O.fromNullable(get(realUserDataAtom)?.image?.imageUri)
+    )
     set(didImageUriChangeAtom, false)
   })
 

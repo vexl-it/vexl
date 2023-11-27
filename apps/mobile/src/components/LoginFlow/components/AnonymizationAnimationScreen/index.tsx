@@ -111,10 +111,10 @@ function AnonymizationAnimationScreen({
         ) : (
           <NextButtonProxy
             onPress={() => {
-              navigation.navigate('PhoneNumber', {
-                anonymizedUserData,
-                realUserData,
-              })
+              //   navigation.navigate('PhoneNumber', {
+              //     anonymizedUserData,
+              //     realUserData,
+              //   })
             }}
             disabled={false}
             text={t('common.continue')}

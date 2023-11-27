@@ -1,6 +1,5 @@
 import Screen from '../Screen'
 import {useAtomValue, useSetAtom} from 'jotai'
-import {userImageAtom} from '../../state/session'
 import {getTokens, Stack, XStack} from 'tamagui'
 import {useFocusEffect} from '@react-navigation/native'
 import {useCallback} from 'react'
@@ -13,6 +12,7 @@ import Button from '../Button'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import {changeProfilePictureMolecule} from '../../state/changeProfilePictureMolecule'
+import {realUserImageAtom} from '../../state/session'
 
 function ChangeProfilePictureScreen(): JSX.Element {
   const {t} = useTranslation()
@@ -29,7 +29,7 @@ function ChangeProfilePictureScreen(): JSX.Element {
   const selectImage = useSetAtom(selectImageActionAtom)
   const didImageUriChange = useAtomValue(didImageUriChangeAtom)
 
-  const setUserImageUriInState = useSetAtom(userImageAtom)
+  const setUserImageUriInState = useSetAtom(realUserImageAtom)
 
   useFocusEffect(
     useCallback(() => {

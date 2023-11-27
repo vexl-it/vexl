@@ -25,13 +25,7 @@ const TARGET_TIME_MILLISECONDS = 3000
 
 function SuccessLoginScreen({
   route: {
-    params: {
-      verifyPhoneNumberResponse,
-      privateKey,
-      phoneNumber,
-      realUserData,
-      anonymizedUserData,
-    },
+    params: {verifyPhoneNumberResponse, privateKey, phoneNumber},
   },
 }: Props): JSX.Element {
   const setSession = useSetSession()
@@ -69,13 +63,8 @@ function SuccessLoginScreen({
       ),
       TE.chainW(({privateKey, signature, verifyChallengeResponse}) => {
         return pipe(
-          E.right({
+          E.right<never, Zod.input<typeof Session>>({
             version: 1,
-            realUserData:
-              realUserData.image.type === 'svgXml'
-                ? {userName: realUserData.userName}
-                : realUserData,
-            anonymizedUserData,
             sessionCredentials: {
               publicKey: privateKey.publicKeyPemBase64,
               hash: verifyChallengeResponse.hash,
@@ -121,8 +110,6 @@ function SuccessLoginScreen({
     verifyPhoneNumberResponse.challenge,
     t,
     verifyChallenge,
-    realUserData,
-    anonymizedUserData,
     phoneNumber,
     createUserAtContactMs,
     safeGoBack,

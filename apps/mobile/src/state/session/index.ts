@@ -2,9 +2,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import crashlytics from '@react-native-firebase/crashlytics'
 import {KeyHolder} from '@vexl-next/cryptography'
 import {E164PhoneNumber} from '@vexl-next/domain/dist/general/E164PhoneNumber.brand'
-import {UserName} from '@vexl-next/domain/dist/general/UserName.brand'
-import {type UserNameAndAvatar} from '@vexl-next/domain/dist/general/UserNameAndAvatar.brand'
-import {UriString} from '@vexl-next/domain/dist/utility/UriString.brand'
+import {
+  type UserNameAndUriAvatar,
+  type UserNameAndAvatar,
+} from '@vexl-next/domain/dist/general/UserNameAndAvatar.brand'
 import {parsePhoneNumber} from 'awesome-phonenumber'
 import * as SecretStorage from 'expo-secure-store'
 import * as O from 'fp-ts/Option'
@@ -24,6 +25,8 @@ import getValueFromSetStateActionOfAtom from '../../utils/atomUtils/getValueFrom
 import {replaceAll} from '../../utils/replaceAll'
 import readSessionFromStorage from './readSessionFromStorage'
 import writeSessionToStorage from './writeSessionToStorage'
+import {generateRandomUserData} from './utils'
+import {type UserName} from '@vexl-next/domain/dist/general/UserName.brand'
 
 // duplicated code but we can not remove cyclic dependency otherwise
 // --------------
@@ -34,7 +37,6 @@ function removeSensitiveData(string: string): string {
     session.sessionCredentials.hash,
     session.sessionCredentials.publicKey,
     session.phoneNumber,
-    session.realUserData.userName,
     session.privateKey.privateKeyPemBase64,
   ]
   return replaceAll(string, toReplace, '[[stripped]]')
@@ -73,18 +75,6 @@ export const dummySession: Session = Session.parse({
     hash: '',
     publicKey: dummyPrivKey.publicKeyPemBase64,
     signature: 'dummysign',
-  },
-  anonymizedUserData: {
-    image: {
-      type: 'imageUri',
-      imageUri: UriString.parse(
-        'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAAD5Ip3+AAAADUlEQVQIHWM4c+bMfwAIMANkxSThkAAAAABJRU5ErkJggg=='
-      ),
-    },
-    userName: UserName.parse('Logout please'),
-  },
-  realUserData: {
-    userName: UserName.parse('Logout please'),
   },
   phoneNumber: E164PhoneNumber.parse('+420733733733'),
   version: 0,
@@ -213,20 +203,66 @@ export const sessionDataOrDummyAtom = atom(
   }
 )
 
-export const userNameAtom = focusAtom(sessionDataOrDummyAtom, (o) => {
-  return o.prop('realUserData').prop('userName')
+export const anonymizedUserDataAtom = atom((get) => {
+  const {privateKey} = get(sessionDataOrDummyAtom)
+  return generateRandomUserData(privateKey?.publicKeyPemBase64)
 })
 
-export const userImageAtom = focusAtom(sessionDataOrDummyAtom, (o) => {
-  return o.prop('realUserData').prop('image')
-})
+export const realUserDataAtom = focusAtom(sessionDataOrDummyAtom, (p) =>
+  p.prop('realUserData')
+)
 
-export const userDataAtom = atom<UserNameAndAvatar>((get) => {
-  const session = get(sessionDataOrDummyAtom)
+export const userDataRealOrAnonymizedAtom = atom<UserNameAndAvatar>((get) => {
+  const real = get(realUserDataAtom)
+  const anonymized = get(anonymizedUserDataAtom)
+
   return {
-    userName: session.realUserData.userName,
-    image: session.realUserData.image ?? session.anonymizedUserData.image,
+    userName: real?.userName ?? anonymized.userName,
+    image: real?.image ?? anonymized.image,
   }
+})
+
+export const userPhoneNumberAtom = focusAtom(sessionDataOrDummyAtom, (p) =>
+  p.prop('phoneNumber')
+)
+
+export const realUserNameAtom = atom(
+  (get): UserName | undefined => {
+    return get(realUserDataAtom)?.userName
+  },
+  (get, set, update: SetStateAction<UserName | undefined>) => {
+    const newValue = getValueFromSetStateActionOfAtom(update)(
+      () => get(realUserDataAtom)?.userName
+    )
+
+    set(realUserDataAtom, (old): UserNameAndUriAvatar => {
+      return {...old, userName: newValue}
+    })
+  }
+)
+
+export const realUserImageAtom = atom(
+  (get): UserNameAndUriAvatar['image'] | undefined => {
+    return get(realUserDataAtom)?.image
+  },
+  (
+    get,
+    set,
+    update: SetStateAction<UserNameAndUriAvatar['image'] | undefined>
+  ) => {
+    const newValue = getValueFromSetStateActionOfAtom(update)(
+      () => get(realUserDataAtom)?.image
+    )
+
+    set(realUserDataAtom, (old): UserNameAndUriAvatar => {
+      return {...old, image: newValue}
+    })
+  }
+)
+
+export const areRealUserDataSet = atom((get) => {
+  const {userName, image} = get(realUserDataAtom) ?? {}
+  return !!userName && !!image
 })
 
 export const countryCodeAtom = atom<string>((get) => {

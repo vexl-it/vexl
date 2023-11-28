@@ -22,12 +22,12 @@ function Section({
 }: SectionProps): JSX.Element {
   const tokens = getTokens()
   return (
-    <YStack mb="$4">
+    <YStack mb={'$4'}>
       {!customSection && (
-        <XStack ai="center" jc="space-between" py="$4">
-          <XStack ai="center">
+        <XStack ai={'center'} jc={'space-between'} py={'$4'}>
+          <XStack ai={'center'}>
             {image && (
-              <Stack mr="$2">
+              <Stack mr={'$2'}>
                 <SvgImage
                   width={24}
                   height={24}
@@ -37,12 +37,12 @@ function Section({
                 />
               </Stack>
             )}
-            <Text ff="$body700" color="$white" fos={24}>
+            <Text ff={'$body700'} color={'$white'} fos={24}>
               {title}
             </Text>
           </XStack>
           {mandatory && (
-            <Text fos={24} ff="$body700" color="$greyOnBlack">
+            <Text fos={24} ff={'$body700'} color={'$greyOnBlack'}>
               *
             </Text>
           )}

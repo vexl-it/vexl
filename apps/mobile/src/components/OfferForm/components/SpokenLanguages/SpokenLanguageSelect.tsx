@@ -47,7 +47,7 @@ function SpokenLanguageSelect({
   )
 
   return (
-    <Modal animationType="fade" transparent visible={visible}>
+    <Modal animationType={'fade'} transparent visible={visible}>
       <Stack f={1} bc={'$grey'} px={'$4'} pb={bottom} pt={top}>
         <ScreenTitle
           text={t('offerForm.spokenLanguages.preferredLanguages')}

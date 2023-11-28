@@ -21,6 +21,8 @@ import coinsSvg from '../images/coinsSvg'
 import spokenLanguagesSvg from '../images/spokenLanguagesSvg'
 import SpokenLanguages from '../OfferForm/components/SpokenLanguages'
 import {getTokens} from 'tamagui'
+import clockSvg from '../images/clockSvg'
+import Expiration from '../OfferForm/components/Expiration'
 
 export default function useContent(): SectionProps[] {
   const {t} = useTranslation()
@@ -38,6 +40,8 @@ export default function useContent(): SectionProps[] {
     locationAtom,
     locationStateAtom,
     paymentMethodAtom,
+    expirationDateAtom,
+    offerExpirationModalVisibleAtom,
     updateCurrencyLimitsAtom,
     updateLocationStatePaymentMethodAtom,
     locationSuggestionsAtom,
@@ -82,6 +86,16 @@ export default function useContent(): SectionProps[] {
             offerTypeAtom={offerTypeOrDummyValueAtom}
             feeAmountAtom={feeAmountAtom}
             feeStateAtom={feeStateAtom}
+          />
+        ),
+      },
+      {
+        title: t('offerForm.expiration.expiration'),
+        image: clockSvg,
+        children: (
+          <Expiration
+            expirationDateAtom={expirationDateAtom}
+            offerExpirationModalVisibleAtom={offerExpirationModalVisibleAtom}
           />
         ),
       },
@@ -166,6 +180,8 @@ export default function useContent(): SectionProps[] {
       offerTypeOrDummyValueAtom,
       feeAmountAtom,
       feeStateAtom,
+      expirationDateAtom,
+      offerExpirationModalVisibleAtom,
       setOfferLocationActionAtom,
       locationSuggestionsAtom,
       locationSuggestionsAtomsAtom,

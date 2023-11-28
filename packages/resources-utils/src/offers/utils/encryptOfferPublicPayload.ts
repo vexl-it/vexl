@@ -13,6 +13,7 @@ import {
 } from '@vexl-next/domain/dist/general/offers'
 import {type BasicError, toError} from '@vexl-next/domain/dist/utility/errors'
 import {booleanToString} from '../../utils/booleanString'
+import {JSDateString} from '@vexl-next/domain/dist/utility/JSDateString.brand'
 
 const OfferPublicPartToEncrypt = z.object({
   offerPublicKey: PublicKeyPemBase64,
@@ -28,6 +29,7 @@ const OfferPublicPartToEncrypt = z.object({
   currency: z.string(),
   offerType: z.string(),
   spokenLanguages: z.array(z.string()).optional(),
+  expirationDate: JSDateString.optional(),
   activePriceState: z.string(),
   activePriceValue: z.coerce.string(),
   activePriceCurrency: z.string(),

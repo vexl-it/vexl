@@ -31,7 +31,7 @@
     "@vexl-next/domain": "0.0.0",
     "@vexl-next/resources-utils": "0.0.0",
     "@vexl-next/rest-api": "0.0.0",
-    "axios": "^1.3.4",
+    "axios": "^1.6.0",
     "commander": "^9.4.1",
     "dotenv": "^16.0.3",
     "eckey-utils": "^0.7.13",

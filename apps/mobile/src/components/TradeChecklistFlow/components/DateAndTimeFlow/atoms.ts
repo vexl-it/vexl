@@ -1,6 +1,6 @@
 import {focusAtom} from 'jotai-optics'
 import {
-  type UnixMilliseconds,
+  UnixMilliseconds,
   unixMillisecondsNow,
 } from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
 import {atom, type SetStateAction, type WritableAtom} from 'jotai'
@@ -8,6 +8,8 @@ import getValueFromSetStateActionOfAtom from '../../../../utils/atomUtils/getVal
 import {DateTime} from 'luxon'
 import {mainTradeCheckListStateAtom} from '../../atoms'
 import {type AvailableDateTimeOption} from '../../domain'
+import {type DateData} from 'react-native-calendars'
+import addToSortedArray from '../../../../utils/addToSortedArray'
 
 export const mainDateAndTimeStateAtom = focusAtom(
   mainTradeCheckListStateAtom,
@@ -96,6 +98,33 @@ export function createTimeOptionAtomForTimeFromDropdown(
     }
   )
 }
+
+export const handleAvailableDaysChangeActionAtom = atom(
+  null,
+  (get, set, day: DateData) => {
+    const millis = UnixMilliseconds.parse(
+      DateTime.fromMillis(day.timestamp).startOf('day').toMillis()
+    )
+    const availableDateTimes = get(availableDateTimesAtom)
+
+    if (availableDateTimes.some((dateTime) => dateTime.date === millis)) {
+      set(
+        availableDateTimesAtom,
+        availableDateTimes.filter(
+          (availableDateTime) => availableDateTime.date !== millis
+        )
+      )
+    } else {
+      set(
+        availableDateTimesAtom,
+        addToSortedArray(
+          availableDateTimes,
+          (t1, t2) => t1.date - t2.date
+        )({from: millis, to: millis, date: millis})
+      )
+    }
+  }
+)
 
 export const removeTimestampFromAvailableAtom = atom(
   null,

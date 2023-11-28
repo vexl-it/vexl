@@ -2,6 +2,7 @@ import {selectAtom} from 'jotai/utils'
 import {offersAtom} from './offersState'
 import {importedContactsHashesAtom} from '../../contacts'
 import {atom} from 'jotai'
+import {isOfferExpired} from '../../../utils/isOfferExpired'
 
 export const offersToSeeInMarketplaceAtom = atom((get) => {
   const importedContactsHashes = get(importedContactsHashesAtom)
@@ -10,6 +11,8 @@ export const offersToSeeInMarketplaceAtom = atom((get) => {
     (oneOffer) =>
       // only active offers
       oneOffer.offerInfo.publicPart.active &&
+      // only not expired offers
+      !isOfferExpired(oneOffer.offerInfo.publicPart.expirationDate) &&
       // Not mine offers
       !oneOffer.ownershipInfo &&
       // Not reported offers

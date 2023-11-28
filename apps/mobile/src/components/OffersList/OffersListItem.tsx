@@ -16,6 +16,7 @@ import UserFeedback from '../UserFeedback'
 import {preferencesAtom} from '../../utils/preferences'
 import {generateInitialFeedback} from '../UserFeedback/atoms'
 import {newOfferFeedbackDoneAtom} from '../../state/feedback/atoms'
+import {isOfferExpired} from '../../utils/isOfferExpired'
 
 interface Props {
   readonly isFirst: boolean
@@ -173,7 +174,11 @@ function OffersListItem({isFirst, offerAtom}: Props): JSX.Element {
     <Stack mt={'$6'}>
       <OfferWithBubbleTip
         onInfoRectPress={content.onPress}
-        negative={!content.actionableUI || !offer.offerInfo.publicPart.active}
+        negative={
+          !content.actionableUI ||
+          !offer.offerInfo.publicPart.active ||
+          isOfferExpired(offer.offerInfo.publicPart.expirationDate)
+        }
         button={
           <Button
             size={'medium'}

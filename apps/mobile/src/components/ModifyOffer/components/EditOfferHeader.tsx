@@ -1,5 +1,5 @@
 import ScreenTitle from '../../ScreenTitle'
-import {Stack, Text, XStack} from 'tamagui'
+import {getTokens, Stack, Text, XStack} from 'tamagui'
 import IconButton from '../../IconButton'
 import trashSvg from '../images/trashSvg'
 import playSvg from '../images/playSvg'
@@ -16,6 +16,9 @@ import {offerFormMolecule} from '../atoms/offerFormStateAtoms'
 import useSafeGoBack from '../../../utils/useSafeGoBack'
 import {type OneOfferInState} from '@vexl-next/domain/dist/general/offers'
 import pauseSvg from '../../../images/pauseSvg'
+import {isOfferExpired} from '../../../utils/isOfferExpired'
+import clockSvg from '../../images/clockSvg'
+import Image from '../../Image'
 
 interface Props {
   offer: OneOfferInState | undefined
@@ -63,7 +66,10 @@ function EditOfferHeader({offer}: Props): JSX.Element {
       <Stack>
         <XStack space={'$2'} mb={'$4'}>
           {offer && (
-            <XStack space={'$2'}>
+            <XStack ai={'center'} space={'$2'}>
+              {isOfferExpired(offer?.offerInfo?.publicPart?.expirationDate) && (
+                <Image source={clockSvg} stroke={getTokens().color.red.val} />
+              )}
               <IconButton
                 variant="dark"
                 icon={trashSvg}
@@ -82,6 +88,7 @@ function EditOfferHeader({offer}: Props): JSX.Element {
           )}
           <IconButton variant="dark" icon={closeSvg} onPress={safeGoBack} />
         </XStack>
+
         {offer && (
           <XStack space={'$2'} ai={'center'} jc={'flex-end'}>
             <Stack h={12} w={12} br={12} bc={offerActive ? '$green' : '$red'} />

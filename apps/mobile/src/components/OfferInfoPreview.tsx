@@ -10,6 +10,8 @@ import getBtcPragueLogoSvg from './InsideRouter/components/MarketplaceScreen/ima
 import {useMemo} from 'react'
 import pauseSvg from '../images/pauseSvg'
 import spokenLanguagesSvg from './images/spokenLanguagesSvg'
+import clockSvg from './images/clockSvg'
+import {isOfferExpired} from '../utils/isOfferExpired'
 
 const BTC_PRAGUE_FRIEND = '8o5OvkfRga/xBYbfb0e0MJZIjy4g7xGVimCdNLrydGs='
 const BTC_PRAGUE_FRIEND_STAGE = '9c6r0q7LCn1oqES2pfqQDVQH91fY8ZHYcJKbJYOU7hE='
@@ -81,12 +83,20 @@ function OfferInfoPreview({
           >
             {offer.publicPart.offerDescription}
           </Text>
-          {!offer.publicPart.active && (
-            <SvgImage
-              stroke={getTokens().color.$greyOnBlack.val}
-              source={pauseSvg}
-            />
-          )}
+          <XStack space={'$1'}>
+            {isOfferExpired(offer.publicPart.expirationDate) && (
+              <SvgImage
+                stroke={getTokens().color.$greyOnBlack.val}
+                source={clockSvg}
+              />
+            )}
+            {!offer.publicPart.active && (
+              <SvgImage
+                stroke={getTokens().color.$greyOnBlack.val}
+                source={pauseSvg}
+              />
+            )}
+          </XStack>
         </XStack>
       </XStack>
       <XStack space={'$1'}>

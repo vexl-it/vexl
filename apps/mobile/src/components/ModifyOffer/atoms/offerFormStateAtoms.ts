@@ -23,7 +23,10 @@ import {
 import {molecule} from 'jotai-molecules'
 
 import {IdNumeric} from '@vexl-next/domain/dist/utility/IdNumeric'
-import {IsoDatetimeString} from '@vexl-next/domain/dist/utility/IsoDatetimeString.brand'
+import {
+  IsoDatetimeString,
+  MINIMAL_DATE,
+} from '@vexl-next/domain/dist/utility/IsoDatetimeString.brand'
 import {pipe} from 'fp-ts/function'
 import * as TE from 'fp-ts/TaskEither'
 import * as T from 'fp-ts/Task'
@@ -44,7 +47,6 @@ import {generateUuid, Uuid} from '@vexl-next/domain/dist/utility/Uuid.brand'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
 import {focusAtom} from 'jotai-optics'
 import notEmpty from '../../../utils/notEmpty'
-import {type OfferEncryptionProgress} from '@vexl-next/resources-utils/dist/offers/OfferEncryptionProgress'
 import {currencies} from '../../../utils/localization/currency'
 import {sessionDataOrDummyAtom} from '../../../state/session'
 import {parsePhoneNumber} from 'awesome-phonenumber'
@@ -109,14 +111,6 @@ export function createOfferDummyPublicPart(): OfferPublicPart {
   }
 }
 
-export interface OfferProgressState {
-  currentState: OfferEncryptionProgress['type']
-  percentage?: {
-    total: number
-    current: number
-  }
-}
-
 export const dummyOffer: OneOfferInState = {
   ownershipInfo: {
     adminId: OfferAdminId.parse('offerAdminId'),
@@ -134,8 +128,8 @@ export const dummyOffer: OneOfferInState = {
       symmetricKey: SymmetricKey.parse('symmetricKey'),
     },
     publicPart: createOfferDummyPublicPart(),
-    createdAt: IsoDatetimeString.parse('1970-01-01T00:00:00.000Z'),
-    modifiedAt: IsoDatetimeString.parse('1970-01-01T00:00:00.000Z'),
+    createdAt: IsoDatetimeString.parse(MINIMAL_DATE),
+    modifiedAt: IsoDatetimeString.parse(MINIMAL_DATE),
   },
 }
 
@@ -272,6 +266,10 @@ export const offerFormMolecule = molecule(() => {
     'paymentMethod'
   )
 
+  const expirationDateAtom = focusAtom(offerFormAtom, (optic) =>
+    optic.prop('expirationDate')
+  )
+
   const offerDescriptionAtom = focusAtom(offerFormAtom, (optic) =>
     optic.prop('offerDescription')
   )
@@ -352,6 +350,8 @@ export const offerFormMolecule = molecule(() => {
   const saveSelectedSpokenLanguagesActionAtom = atom(null, (get, set) => {
     set(spokenLanguagesAtom, get(selectedSpokenLanguagesAtom))
   })
+
+  const offerExpirationModalVisibleAtom = atom<boolean>(false)
 
   const updateAndRefreshLocationSuggestionsActionAtom = atom(
     null,
@@ -477,7 +477,7 @@ export const offerFormMolecule = molecule(() => {
               },
               delayMs: 3000,
             }),
-            T.map((one) => true)
+            T.map(() => true)
           )
         }
       )
@@ -558,7 +558,7 @@ export const offerFormMolecule = molecule(() => {
   const toggleOfferActiveAtom = atom(null, (get, set) => {
     const {t} = get(translationAtom)
     const offer = get(offerAtom)
-    const belowProgresLeft = get(modifyOfferLoaderTitleAtom)
+    const belowProgressLeft = get(modifyOfferLoaderTitleAtom)
 
     const targetValue = !offer.offerInfo.publicPart.active
 
@@ -566,7 +566,7 @@ export const offerFormMolecule = molecule(() => {
       title: t('editOffer.editingYourOffer'),
       bottomText: t('editOffer.pleaseWait'),
       belowProgressLeft: targetValue
-        ? belowProgresLeft.loadingText
+        ? belowProgressLeft.loadingText
         : t('editOffer.pausingOfferProgress'),
       indicateProgress: {type: 'intermediate'},
     })
@@ -603,7 +603,7 @@ export const offerFormMolecule = molecule(() => {
                   title: t('editOffer.offerEditSuccess'),
                   bottomText: t('editOffer.youCanCheckYourOffer'),
                   belowProgressLeft: targetValue
-                    ? belowProgresLeft.doneText
+                    ? belowProgressLeft.doneText
                     : t('editOffer.pausingOfferSuccess'),
                   indicateProgress: {type: 'done'},
                 },
@@ -624,7 +624,7 @@ export const offerFormMolecule = molecule(() => {
     const {locationState, location, offerDescription, ...restOfPublicPart} =
       get(offerFormAtom)
     const intendedConnectionLevel = get(intendedConnectionLevelAtom)
-    const belowProgresLeft = get(modifyOfferLoaderTitleAtom)
+    const belowProgressLeft = get(modifyOfferLoaderTitleAtom)
 
     if (locationState === 'IN_PERSON' && location.length === 0) {
       Alert.alert(t('offerForm.errorLocationNotFilled'))
@@ -639,7 +639,7 @@ export const offerFormMolecule = molecule(() => {
     set(progressModal.show, {
       title: t('editOffer.editingYourOffer'),
       bottomText: t('editOffer.pleaseWait'),
-      belowProgressLeft: belowProgresLeft.loadingText,
+      belowProgressLeft: belowProgressLeft.loadingText,
       indicateProgress: {type: 'intermediate'},
     })
 
@@ -673,7 +673,7 @@ export const offerFormMolecule = molecule(() => {
                 data: {
                   title: t('editOffer.offerEditSuccess'),
                   bottomText: t('editOffer.youCanCheckYourOffer'),
-                  belowProgressLeft: belowProgresLeft.doneText,
+                  belowProgressLeft: belowProgressLeft.doneText,
                   indicateProgress: {type: 'done'},
                 },
                 delayMs: 2000,
@@ -728,6 +728,8 @@ export const offerFormMolecule = molecule(() => {
     feeStateAtom,
     locationStateAtom,
     locationAtom,
+    expirationDateAtom,
+    offerExpirationModalVisibleAtom,
     btcNetworkAtom,
     paymentMethodAtom,
     offerDescriptionAtom,

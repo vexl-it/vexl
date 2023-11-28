@@ -4,6 +4,7 @@ import {IdNumeric} from '../utility/IdNumeric'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
 import {IsoDatetimeString} from '../utility/IsoDatetimeString.brand'
 import {CurrencyCode} from './currency.brand'
+import {JSDateString} from '../utility/JSDateString.brand'
 
 export const Sort = z.enum([
   'LOWEST_FEE_FIRST',
@@ -109,6 +110,7 @@ export const OfferPublicPart = z.object({
   btcNetwork: z.array(BtcNetwork),
   currency: CurrencyCode,
   spokenLanguages: z.array(SpokenLanguage).default([]),
+  expirationDate: JSDateString.optional(),
   offerType: OfferType,
   activePriceState: ActivePriceState,
   activePriceValue: z.coerce.number(),

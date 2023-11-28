@@ -8137,7 +8137,7 @@ __metadata:
     "@vexl-next/resources-utils": 0.0.0
     "@vexl-next/rest-api": 0.0.0
     "@vexl-next/tsconfig": 0.0.0
-    axios: ^1.3.4
+    axios: ^1.6.0
     commander: ^9.4.1
     dotenv: ^16.0.3
     eckey-utils: ^0.7.13
@@ -8248,7 +8248,7 @@ __metadata:
     "@vexl-next/eslint-config": 0.0.0
     "@vexl-next/prettier-config": 0.0.0
     "@vexl-next/tsconfig": 0.0.0
-    axios: ^1.3.4
+    axios: ^1.6.0
     dotenv: ^16.0.3
     dynamic-import-polyfill: ^0.1.1
     esbuild: ^0.17.16
@@ -8417,7 +8417,7 @@ __metadata:
     "@vexl-next/eslint-config": 0.0.0
     "@vexl-next/prettier-config": 0.0.0
     "@vexl-next/tsconfig": 0.0.0
-    axios: ^1.3.4
+    axios: ^1.6.0
     dotenv: ^16.0.3
     dynamic-import-polyfill: ^0.1.1
     esbuild: ^0.17.16
@@ -8513,7 +8513,7 @@ __metadata:
     "@vexl-next/eslint-config": 0.0.0
     "@vexl-next/prettier-config": 0.0.0
     "@vexl-next/tsconfig": 0.0.0
-    axios: ^1.3.4
+    axios: ^1.6.0
     eslint: ^8.50.0
     jest: ^29.4.1
     prettier: ^3.0.3
@@ -9143,14 +9143,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axios@npm:^1.3.4":
-  version: 1.3.4
-  resolution: "axios@npm:1.3.4"
+"axios@npm:^1.6.0":
+  version: 1.6.2
+  resolution: "axios@npm:1.6.2"
   dependencies:
     follow-redirects: ^1.15.0
     form-data: ^4.0.0
     proxy-from-env: ^1.1.0
-  checksum: 7440edefcf8498bc3cdf39de00443e8101f249972c83b739c6e880d9d669fea9486372dbe8739e88b3bf8bb1ad15f6106693f206f078f4516fe8fd47b1c3093c
+  checksum: 4a7429e2b784be0f2902ca2680964391eae7236faa3967715f30ea45464b98ae3f1c6f631303b13dfe721b17126b01f486c7644b9ef276bfc63112db9fd379f8
   languageName: node
   linkType: hard
 

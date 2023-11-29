@@ -1,5 +1,11 @@
 import {z} from 'zod'
 import {UnixMilliseconds} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
+import {BtcNetwork} from '@vexl-next/domain/dist/general/offers'
+
+export const BtcAddress = z
+  .string()
+  .regex(/^(bc1|[13])[a-zA-HJ-NP-Z0-9]{25,39}$/)
+export type BtcAddress = z.TypeOf<typeof BtcAddress>
 
 export const TradeChecklistItemStatus = z.enum([
   'pending',
@@ -49,11 +55,17 @@ export const CalculateAmountState = TradeChecklistStateItemStatus.extend({
 })
 export type CalculateAmountState = z.TypeOf<typeof CalculateAmountState>
 
+export const NetworkState = TradeChecklistStateItemStatus.extend({
+  btcNetwork: BtcNetwork,
+  btcAddress: BtcAddress.optional(),
+})
+export type NetworkState = z.TypeOf<typeof NetworkState>
+
 export const MainTradeCheckListState = z.object({
   [TradeChecklistItem.enum.DATE_AND_TIME]: DateAndTimeState,
   [TradeChecklistItem.enum.MEETING_LOCATION]: TradeChecklistStateItemStatus,
   [TradeChecklistItem.enum.CALCULATE_AMOUNT]: CalculateAmountState,
-  [TradeChecklistItem.enum.SET_NETWORK]: TradeChecklistStateItemStatus,
+  [TradeChecklistItem.enum.SET_NETWORK]: NetworkState,
   [TradeChecklistItem.enum.REVEAL_IDENTITY]: TradeChecklistStateItemStatus,
   [TradeChecklistItem.enum.REVEAL_PHONE_NUMBER]: TradeChecklistStateItemStatus,
 })

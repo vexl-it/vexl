@@ -675,5 +675,15 @@
   "tradeChecklist.calculateAmount.premiumIncluded": "Premium {{value}} included",
   "tradeChecklist.calculateAmount.calculatedWithLiveRate": "Calculated with live rate",
   "tradeChecklist.setYourOwnPrice.ourNewBtcPriceIsHigher": "Our new BTC price is {{percentage}}% higher than live market price.",
-  "tradeChecklist.setYourOwnPrice.ourNewBtcPriceIsLower": "Our new BTC price is {{percentage}}% lower than live market price."
+  "tradeChecklist.setYourOwnPrice.ourNewBtcPriceIsLower": "Our new BTC price is {{percentage}}% lower than live market price.",
+  "tradeChecklist.network.network": "Network",
+  "tradeChecklist.network.youWillGenerateQrCode": "You’ll generate QR code from your wallet right on the meeting for transferring BTC.",
+  "tradeChecklist.network.pasteBtcAddress": "Paste the BTC address (optional)",
+  "tradeChecklist.network.itsOkIfYouDontHaveBtcAddressNow": "It’s ok If you don’t have BTC address right now, just don’t forget to generate it before the meeting.",
+  "tradeChecklist.network.lightning": "Lightning",
+  "tradeChecklist.network.bestOptionForSmallAmounts": "The best option for really small amounts. Usually much faster.",
+  "tradeChecklist.network.onChain": "On chain",
+  "tradeChecklist.network.bestOptionForHugeAmounts": "The best for fairly huge amounts. It takes time sometime.",
+  "tradeChecklist.network.invalidBtcAddress": "BTC address is not valid",
+  "tradeChecklist.btcAddress.btcAddress": "BTC address"
 }

@@ -1,4 +1,4 @@
-import {getTokens, Stack, Text, XStack} from 'tamagui'
+import {Stack, Text} from 'tamagui'
 import Image from '../../../../Image'
 import anonymousAvatarHappyNoBackgroundSvg from '../../../../images/anonymousAvatarHappyNoBackgroundSvg'
 import Info from '../../../../Info'
@@ -15,7 +15,7 @@ import {
   mainTradeCheckListStateAtom,
   offerForTradeChecklistAtom,
 } from '../../../atoms'
-import eyeSvg from '../../../../images/eyeSvg'
+import AnonymizationNotice from '../../AnonymizationNotice'
 
 const tradeChecklistItems: TradeChecklistItem[] = [
   'DATE_AND_TIME',
@@ -45,6 +45,8 @@ function OnlineOrInPersonTrade(): JSX.Element {
         navigation.navigate('ChooseAvailableDays')
       } else if (item === 'CALCULATE_AMOUNT') {
         navigation.navigate('CalculateAmount')
+      } else if (item === 'SET_NETWORK') {
+        navigation.navigate('Network')
       }
     },
     [navigation]
@@ -119,12 +121,7 @@ function OnlineOrInPersonTrade(): JSX.Element {
           </>
         )}
       </Stack>
-      <XStack ai={'center'} jc={'center'} mb={'$2'}>
-        <Image stroke={getTokens().color.greyOnWhite.val} source={eyeSvg} />
-        <Text fos={14} ff={'$body400'} ml={'$2'} col={'$greyOnWhite'}>
-          {t('tradeChecklist.notVisibleToAnyoneNotice')}
-        </Text>
-      </XStack>
+      <AnonymizationNotice />
     </>
   )
 }

@@ -149,6 +149,8 @@ export type TradeChecklistStackParamsList = {
   CalculateAmount: undefined
   SetYourOwnPrice: undefined
   PremiumOrDiscount: undefined
+  Network: undefined
+  BtcAddress: undefined
 }
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions

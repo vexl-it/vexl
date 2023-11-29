@@ -17,6 +17,8 @@ import SetYourOwnPriceScreen from './components/CalculateAmountFlow/components/S
 import CalculateAmountScreen from './components/CalculateAmountFlow/components/CalculateAmountScreen'
 import PremiumOrDiscountScreen from './components/CalculateAmountFlow/components/PremiumOrDiscountScreen'
 import TradePriceTypeDialog from './components/CalculateAmountFlow/components/TradePriceTypeDialog'
+import NetworkScreen from './components/NetworkFlow/components/NetworkScreen'
+import BtcAddressScreen from './components/NetworkFlow/components/BtcAddressScreen'
 
 const StackNavigator =
   createNativeStackNavigator<TradeChecklistStackParamsList>()
@@ -87,6 +89,11 @@ export default function TradeChecklistFlow({
           <StackNavigator.Screen
             name={'PremiumOrDiscount'}
             component={PremiumOrDiscountScreen}
+          />
+          <StackNavigator.Screen name={'Network'} component={NetworkScreen} />
+          <StackNavigator.Screen
+            name={'BtcAddress'}
+            component={BtcAddressScreen}
           />
         </StackNavigator.Navigator>
       </PageWithNavigationHeader>

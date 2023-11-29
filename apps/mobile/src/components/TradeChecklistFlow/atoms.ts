@@ -32,6 +32,7 @@ export const mainTradeCheckListStateAtom = atom<MainTradeCheckListState>({
   },
   'SET_NETWORK': {
     status: 'unknown',
+    btcNetwork: 'LIGHTING',
   },
   'REVEAL_IDENTITY': {
     status: 'unknown',

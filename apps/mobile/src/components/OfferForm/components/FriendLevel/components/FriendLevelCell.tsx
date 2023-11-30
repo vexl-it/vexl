@@ -2,7 +2,7 @@ import {Stack, Text} from 'tamagui'
 import SvgImage from '../../../../Image'
 import {type SvgString} from '@vexl-next/domain/dist/utility/SvgString.brand'
 import {TouchableOpacity} from 'react-native'
-import {userDataAtom} from '../../../../../state/session'
+import {userDataRealOrAnonymizedAtom} from '../../../../../state/session'
 import UserAvatar from '../../../../UserAvatar'
 import {type IntendedConnectionLevel} from '@vexl-next/domain/dist/general/offers'
 import checkmarkInCircleSvg from '../../../../images/checkmarkInCircleSvg'
@@ -28,7 +28,7 @@ function FriendLevelCell({
   title,
   type,
 }: Props): JSX.Element {
-  const userData = useAtomValue(userDataAtom)
+  const userData = useAtomValue(userDataRealOrAnonymizedAtom)
   return (
     <TouchableOpacity
       onPress={() => {

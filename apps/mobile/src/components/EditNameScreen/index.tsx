@@ -6,18 +6,23 @@ import closeSvg from '../images/closeSvg'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 import {getTokens, Stack} from 'tamagui'
 import {useState} from 'react'
-import {useAtom} from 'jotai'
+import {useAtom, useSetAtom} from 'jotai'
 import Input from '../Input'
 import Button from '../Button'
 import KeyboardAvoidingView from '../KeyboardAvoidingView'
 import {UserName} from '@vexl-next/domain/dist/general/UserName.brand'
-import {Alert} from 'react-native'
-import {realUserNameAtom} from '../../state/session'
+import {
+  invalidUsernameUIFeedbackAtom,
+  realUserNameAtom,
+} from '../../state/session'
 
 function EditNameScreen(): JSX.Element {
   const {t} = useTranslation()
   const safeGoBack = useSafeGoBack()
   const tokens = getTokens()
+  const showInvalidUsernameUIFeedback = useSetAtom(
+    invalidUsernameUIFeedbackAtom
+  )
   const [userName, setUserName] = useAtom(realUserNameAtom)
 
   const [name, setName] = useState<string>(() => userName ?? '')
@@ -41,12 +46,12 @@ function EditNameScreen(): JSX.Element {
             }}
           />
         </Stack>
-        <Stack pb={'$3'}>
+        <Stack pb={'$3'} space={'$2'}>
           <Button
             onPress={() => {
               const parsedUserName = UserName.safeParse(name.trim())
               if (!parsedUserName.success) {
-                Alert.alert(t('editName.errorUserNameNotValid'))
+                void showInvalidUsernameUIFeedback()
                 return
               }
               setUserName(parsedUserName.data)
@@ -54,6 +59,15 @@ function EditNameScreen(): JSX.Element {
             }}
             variant={'secondary'}
             text={t('common.save')}
+          />
+          <Button
+            disabled={!userName}
+            onPress={() => {
+              setUserName(undefined)
+              safeGoBack()
+            }}
+            variant={'primary'}
+            text={t('editName.clearName')}
           />
         </Stack>
       </KeyboardAvoidingView>

@@ -56,6 +56,17 @@ import {loadingOverlayDisplayedAtom} from '../../LoadingOverlayProvider'
 import ChatFeedbackDialogContent from '../components/ChatFeedbackDialogContent'
 import {deleteChatStep1Svg} from '../images/deleteChatSvg'
 import {messagesToListData} from '../utils'
+import {
+  invalidUsernameUIFeedbackAtom,
+  realUserImageAtom,
+  realUserNameAtom,
+} from '../../../state/session'
+import {UserName} from '@vexl-next/domain/dist/general/UserName.brand'
+import {
+  ImageDialogContent,
+  UsernameDialogContent,
+} from '../components/RevealIdentityDialogContent'
+import {toBasicError} from '@vexl-next/domain/dist/utility/errors'
 
 type ChatUIMode = 'approval' | 'messages'
 
@@ -336,6 +347,11 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
   const revealIdentityAtom = revealIdentityActionAtom(chatWithMessagesAtom)
   const revealContactAtom = revealContactActionAtom(chatWithMessagesAtom)
 
+  const revealIdentityUsernameAtom = atom<string>('')
+  const usernameSavedForFutureUseAtom = atom<boolean>(false)
+  const revealIdentityImageUriAtom = atom<UriString | undefined>(undefined)
+  const imageSavedForFutureUseAtom = atom<boolean>(false)
+
   const openedImageUriAtom = atom<UriString | undefined>(undefined)
 
   const revealIdentityWithUiFeedbackAtom = atom(
@@ -349,20 +365,45 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
             title: t('messages.identityRevealRequestModal.title'),
             description: t('messages.identityRevealRequestModal.text'),
             negativeButtonText: t('common.back'),
-            positiveButtonText: t('messages.identityRevealRequestModal.send'),
+            positiveButtonText: t('common.continue'),
           }
         }
         return {
           title: t('messages.identityRevealRespondModal.title'),
           description: t('messages.identityRevealRespondModal.text'),
           negativeButtonText: t('common.no'),
-          positiveButtonText: t('common.yes'),
+          positiveButtonText: t('common.continue'),
         }
       })()
 
       return await pipe(
         set(askAreYouSureActionAtom, {
-          steps: [{...modalContent, type: 'StepWithText'}],
+          steps: [
+            {...modalContent, type: 'StepWithText'},
+            {
+              type: 'StepWithChildren',
+              MainSectionComponent: () => (
+                <ImageDialogContent
+                  imageSavedForFutureUseAtom={imageSavedForFutureUseAtom}
+                  revealIdentityImageUriAtom={revealIdentityImageUriAtom}
+                />
+              ),
+              positiveButtonText: t('common.continue'),
+              negativeButtonText: t('common.close'),
+            },
+            {
+              type: 'StepWithChildren',
+              MainSectionComponent: () => (
+                <UsernameDialogContent
+                  revealIdentityUsernameAtom={revealIdentityUsernameAtom}
+                  usernameSavedForFutureUseAtom={usernameSavedForFutureUseAtom}
+                />
+              ),
+              goBackOnNegativeButtonPress: true,
+              positiveButtonText: t('common.continue'),
+              negativeButtonText: t('common.back'),
+            },
+          ],
           variant: 'info',
         }),
         TE.map((val) => {
@@ -383,13 +424,55 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
                 : ('REQUEST_REVEAL' as RevealMessageType)
             )
         ),
-        TE.chainW((type) => set(revealIdentityAtom, {type})),
+        TE.bindTo('type'),
+        TE.bindW('username', ({type}) => {
+          if (type === 'DISAPPROVE_REVEAL') return TE.right(undefined)
+
+          const username = UserName.safeParse(
+            get(revealIdentityUsernameAtom).trim()
+          )
+
+          if (!username.success)
+            return TE.left(
+              toBasicError('UsernameEmptyError')(new Error('UsernameEmpty'))
+            )
+
+          const usernameSavedForFutureUse = get(usernameSavedForFutureUseAtom)
+
+          if (usernameSavedForFutureUse) set(realUserNameAtom, username.data)
+
+          return TE.right(username.data)
+        }),
+        TE.bindW('imageUri', ({type}) => {
+          if (type === 'DISAPPROVE_REVEAL') return TE.right(undefined)
+
+          const imageSavedForFutureUse = get(imageSavedForFutureUseAtom)
+          const revealIdentityImageUri = get(revealIdentityImageUriAtom)
+
+          if (imageSavedForFutureUse && revealIdentityImageUri)
+            set(realUserImageAtom, {
+              type: 'imageUri',
+              imageUri: revealIdentityImageUri,
+            })
+
+          return TE.right(revealIdentityImageUri)
+        }),
+        TE.chainW(({type, username, imageUri}) =>
+          set(revealIdentityAtom, {type, username, imageUri})
+        ),
         TE.match(
           (e) => {
             set(loadingOverlayDisplayedAtom, false)
             if (e._tag === 'UserDeclinedError') {
               return false
             }
+
+            if (e._tag === 'UsernameEmptyError') {
+              void set(invalidUsernameUIFeedbackAtom)
+
+              return false
+            }
+
             if (e._tag === 'IdentityRequestAlreadySentError') {
               showErrorAlert({
                 title: t('messages.identityAlreadyRequested'),

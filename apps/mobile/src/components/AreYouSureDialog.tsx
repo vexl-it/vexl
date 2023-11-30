@@ -27,6 +27,7 @@ interface StepWithChildren {
   negativeButtonText?: string
   positiveButtonText: string
   backgroundColor?: ColorTokens
+  goBackOnNegativeButtonPress?: boolean
   MainSectionComponent: ComponentType
 }
 
@@ -194,8 +195,16 @@ function AreYouSureDialog(): JSX.Element | null {
             fullSize
             variant={state.variant === 'danger' ? 'redDark' : 'primary'}
             onPress={() => {
-              state?.onDismiss()
-              setState(null)
+              if (
+                step.type === 'StepWithChildren' &&
+                step.goBackOnNegativeButtonPress &&
+                state.currentStep > 0
+              ) {
+                setState({...state, currentStep: state.currentStep - 1})
+              } else {
+                state?.onDismiss()
+                setState(null)
+              }
             }}
             text={step.negativeButtonText}
           />

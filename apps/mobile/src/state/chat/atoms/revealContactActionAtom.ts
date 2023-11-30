@@ -8,7 +8,7 @@ import sendMessage, {
 import {type ErrorEncryptingMessage} from '@vexl-next/resources-utils/dist/chat/utils/chatCrypto'
 import {type ReadingFileError} from '../utils/replaceImageFileUrisWithBase64'
 import {atom} from 'jotai'
-import {sessionDataOrDummyAtom} from '../../session'
+import {anonymizedUserDataAtom, sessionDataOrDummyAtom} from '../../session'
 import {privateApiAtom} from '../../../api'
 import {
   type ChatMessage,
@@ -66,11 +66,16 @@ export default function revealContactActionAtom(
         } as const)
       }
 
-      const {
-        realUserData: {userName},
-        phoneNumber,
-      } = get(sessionDataOrDummyAtom)
+      const {realUserData, phoneNumber} = get(sessionDataOrDummyAtom)
+      const anonymizedUserData = get(anonymizedUserDataAtom)
       const api = get(privateApiAtom)
+      const identityRevealMessage = messages.find(
+        (message) =>
+          (message.message.messageType === 'APPROVE_REVEAL' ||
+            message.message.messageType === 'REQUEST_REVEAL') &&
+          message.message.senderPublicKey ===
+            chat.inbox.privateKey.publicKeyPemBase64
+      )
 
       const anonymizedPhoneNumber = anonymizePhoneNumber(phoneNumber)
 
@@ -80,7 +85,10 @@ export default function revealContactActionAtom(
             ? `Contact reveal denied`
             : `Contact reveal ${type}`,
         deanonymizedUser: {
-          name: userName,
+          name:
+            identityRevealMessage?.message.deanonymizedUser?.name ??
+            realUserData?.userName ??
+            anonymizedUserData.userName,
           fullPhoneNumber: phoneNumber,
           partialPhoneNumber: anonymizedPhoneNumber,
         },

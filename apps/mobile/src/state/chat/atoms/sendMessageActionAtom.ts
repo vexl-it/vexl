@@ -14,10 +14,11 @@ import {type FocusAtomType} from '../../../utils/atomUtils/FocusAtomType'
 import {type ActionAtomType} from '../../../utils/atomUtils/ActionAtomType'
 import {now} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
 import replaceImageFileUrisWithBase64 from '../utils/replaceImageFileUrisWithBase64'
+import {InteractionManager} from 'react-native'
 
 type SendMessageAtom = ActionAtomType<
   [ChatMessage],
-  T.Task<ChatMessageWithState>
+  ReturnType<typeof InteractionManager.runAfterInteractions>
 >
 
 export default function sendMessageActionAtom(
@@ -37,51 +38,52 @@ export default function sendMessageActionAtom(
     const chatWithMessages = get(chatWithMessagesAtom)
     const {chat} = chatWithMessages
 
-    return pipe(
-      TE.Do,
-      T.delay(2000), // TODO check for value maybe try `InteractionManager.runAfterTransaction`?
-      TE.chainTaskK(() => replaceImageFileUrisWithBase64(message)),
-      TE.chainW((m) =>
-        sendMessage({
-          message: m,
-          api: api.chat,
-          senderKeypair: chat.inbox.privateKey,
-          receiverPublicKey: chat.otherSide.publicKey,
-        })
-      ),
-      TE.match(
-        (e): ChatMessageWithState => {
-          if (
-            e._tag === 'inboxDoesNotExist' ||
-            e._tag === 'notPermittedToSendMessageToTargetInbox'
-          ) {
-            return {
-              state: 'received',
-              message: {
-                messageType: 'INBOX_DELETED',
-                time: now(),
-                senderPublicKey: chatWithMessages.chat.otherSide.publicKey,
-                uuid: generateChatMessageId(),
-                text: 'Inbox deleted',
-              },
+    return InteractionManager.runAfterInteractions(() => {
+      void pipe(
+        TE.Do,
+        TE.chainTaskK(() => replaceImageFileUrisWithBase64(message)),
+        TE.chainW((m) =>
+          sendMessage({
+            message: m,
+            api: api.chat,
+            senderKeypair: chat.inbox.privateKey,
+            receiverPublicKey: chat.otherSide.publicKey,
+          })
+        ),
+        TE.match(
+          (e): ChatMessageWithState => {
+            if (
+              e._tag === 'inboxDoesNotExist' ||
+              e._tag === 'notPermittedToSendMessageToTargetInbox'
+            ) {
+              return {
+                state: 'received',
+                message: {
+                  messageType: 'INBOX_DELETED',
+                  time: now(),
+                  senderPublicKey: chatWithMessages.chat.otherSide.publicKey,
+                  uuid: generateChatMessageId(),
+                  text: 'Inbox deleted',
+                },
+              }
             }
-          }
 
-          return {
-            state: 'sendingError',
-            error: e,
+            return {
+              state: 'sendingError',
+              error: e,
+              message,
+            }
+          },
+          (): ChatMessageWithState => ({
+            state: 'sent',
             message,
-          }
-        },
-        (): ChatMessageWithState => ({
-          state: 'sent',
-          message,
+          })
+        ),
+        T.map((message) => {
+          set(chatWithMessagesAtom, addMessageToChat(message))
+          return message
         })
-      ),
-      T.map((message) => {
-        set(chatWithMessagesAtom, addMessageToChat(message))
-        return message
-      })
-    )
+      )()
+    })
   })
 }

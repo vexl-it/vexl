@@ -1,4 +1,5 @@
 import {atom, type PrimitiveAtom} from 'jotai'
+import {InteractionManager} from 'react-native'
 import {type z} from 'zod'
 import {pipe} from 'fp-ts/function'
 import * as E from 'fp-ts/Either'
@@ -24,23 +25,21 @@ function toShadowStorageAtom<Value extends z.ZodObject<any>>(
         const newValue = getValueFromSetStateActionOfAtom(update)(() =>
           get(baseAtom)
         )
+        set(baseAtom, newValue)
 
-        pipe(
-          {...newValue, [AUTHOR_ID_KEY]: baseAtom.toString()},
-          storage.setJSON(key),
-          E.match(
-            (l) => {
+        void InteractionManager.runAfterInteractions(() => {
+          pipe(
+            {...newValue, [AUTHOR_ID_KEY]: baseAtom.toString()},
+            storage.setJSON(key),
+            E.getOrElseW((l) => {
               reportError(
                 'warn',
                 `Error while saving value to storage. Key: ${key}`,
                 l
               )
-            },
-            (r) => {
-              set(baseAtom, newValue)
-            }
+            })
           )
-        )
+        })
       }
     )
 }
@@ -96,33 +95,37 @@ export function atomWithParsedMmkvStorage<Value extends z.ZodObject<any>>(
       (changedKey) => {
         if (changedKey !== key) return
 
-        pipe(
-          storage.getJSON(key),
-          E.filterOrElseW(
-            (value) => value[AUTHOR_ID_KEY] !== mmkvAtom.toString(),
-            () =>
-              ({
-                _tag: 'authoredByThisAtom',
-              }) as const
-          ),
-          E.map(({[AUTHOR_ID_KEY]: _, ...rest}) => rest),
-          E.chainW(safeParse(zodType)),
-          E.match((e) => {
-            if (e._tag === 'authoredByThisAtom') return
-            if (e._tag === 'ValueNotSet') {
-              console.info(
-                `MMKV value for key '${key}' was deleted. Setting atom to default value`
+        void InteractionManager.runAfterInteractions(() => {
+          pipe(
+            storage.getJSON(key),
+            E.filterOrElseW(
+              (value) => value[AUTHOR_ID_KEY] !== coreAtom.toString(),
+              () =>
+                ({
+                  _tag: 'authoredByThisAtom',
+                }) as const
+            ),
+            E.map(({[AUTHOR_ID_KEY]: _, ...rest}) => rest),
+            E.chainW(safeParse(zodType)),
+            E.match((e) => {
+              if (e._tag === 'authoredByThisAtom') {
+                return
+              }
+              if (e._tag === 'ValueNotSet') {
+                console.info(
+                  `MMKV value for key '${key}' was deleted. Setting atom to default value`
+                )
+                setAtom(defaultValue)
+                return
+              }
+              reportError(
+                'warn',
+                `Error while parsing stored mmkv value in onChange function. Key: '${key}'`,
+                e
               )
-              setAtom(defaultValue)
-              return
-            }
-            reportError(
-              'warn',
-              `Error while parsing stored mmkv value in onChange function. Key: '${key}'`,
-              e
-            )
-          }, setAtom)
-        )
+            }, setAtom)
+          )
+        })
       }
     )
 

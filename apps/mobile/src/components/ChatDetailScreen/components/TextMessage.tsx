@@ -180,7 +180,7 @@ function TextMessage({
       void sendMessage({
         ...messageItem.message.message,
         time: unixMillisecondsNow(),
-      })()
+      })
     }
   }, [sendMessage, messageItem])
 

@@ -80,7 +80,7 @@ function ChatTextInput(): JSX.Element | null {
     setReplyToMessage(undefined)
     setSelectedImage(undefined)
 
-    void sendMessage(message)()
+    void sendMessage(message)
   }, [
     value,
     selectedImage,

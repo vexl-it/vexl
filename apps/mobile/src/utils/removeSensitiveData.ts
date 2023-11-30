@@ -10,9 +10,12 @@ export default function removeSensitiveData(string: string): string {
     session.sessionCredentials.hash,
     session.sessionCredentials.publicKey,
     session.phoneNumber,
-    session.realUserData.userName,
     session.privateKey.privateKeyPemBase64,
   ]
+
+  if (session.realUserData?.userName)
+    toReplace.push(session.realUserData.userName)
+
   return replaceAll(string, toReplace, '[[stripped]]')
 }
 

@@ -1,9 +1,6 @@
 import Screen from '../Screen'
-import {useAtomValue, useSetAtom} from 'jotai'
+import {atom, useAtom, useAtomValue, useSetAtom} from 'jotai'
 import {getTokens, Stack, XStack} from 'tamagui'
-import {useFocusEffect} from '@react-navigation/native'
-import {useCallback} from 'react'
-import {useMolecule} from 'jotai-molecules'
 import ScreenTitle from '../ScreenTitle'
 import IconButton from '../IconButton'
 import closeSvg from '../images/closeSvg'
@@ -11,31 +8,28 @@ import SelectProfilePicture from '../SelectProfilePicture'
 import Button from '../Button'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 import {useTranslation} from '../../utils/localization/I18nProvider'
-import {changeProfilePictureMolecule} from '../../state/changeProfilePictureMolecule'
 import {realUserImageAtom} from '../../state/session'
+import {selectImageActionAtom} from '../../state/selectImageActionAtom'
+import {type UriString} from '@vexl-next/domain/dist/utility/UriString.brand'
+import {useEffect} from 'react'
+
+const selectedImageUriAtom = atom<UriString | undefined>(undefined)
 
 function ChangeProfilePictureScreen(): JSX.Element {
   const {t} = useTranslation()
   const tokens = getTokens()
   const safeGoBack = useSafeGoBack()
-  const {
-    didImageUriChangeAtom,
-    selectedImageUriAtom,
-    selectImageActionAtom,
-    syncImageActionAtom,
-  } = useMolecule(changeProfilePictureMolecule)
-  const syncImageWithSessionUri = useSetAtom(syncImageActionAtom)
-  const selectedImageUri = useAtomValue(selectedImageUriAtom)
+
+  const realUserImage = useAtomValue(realUserImageAtom)
+  const [selectedImageUri, setSelectedImageUri] = useAtom(selectedImageUriAtom)
+  const setRealUserImage = useSetAtom(realUserImageAtom)
   const selectImage = useSetAtom(selectImageActionAtom)
-  const didImageUriChange = useAtomValue(didImageUriChangeAtom)
 
-  const setUserImageUriInState = useSetAtom(realUserImageAtom)
+  const setRealUserImageAtom = useSetAtom(realUserImageAtom)
 
-  useFocusEffect(
-    useCallback(() => {
-      syncImageWithSessionUri()
-    }, [syncImageWithSessionUri])
-  )
+  useEffect(() => {
+    setSelectedImageUri(realUserImage?.imageUri)
+  }, [realUserImage?.imageUri, setSelectedImageUri])
 
   return (
     <Screen customHorizontalPadding={tokens.space[2].val}>
@@ -43,23 +37,26 @@ function ChangeProfilePictureScreen(): JSX.Element {
         <IconButton icon={closeSvg} onPress={safeGoBack} />
       </ScreenTitle>
       <Stack f={1} ai={'center'} jc={'center'}>
-        <SelectProfilePicture />
+        <SelectProfilePicture selectedImageUriAtom={selectedImageUriAtom} />
       </Stack>
-      {didImageUriChange ? (
+      {selectedImageUri ? (
         <XStack space={'$2'}>
           <Button
             fullSize
-            onPress={safeGoBack}
+            onPress={() => {
+              setRealUserImage(undefined)
+              safeGoBack()
+            }}
             variant={'primary'}
-            text={t('common.cancel')}
+            text={t('changeProfilePicture.clearPhoto')}
           />
           <Button
             fullSize
             onPress={() => {
-              if (selectedImageUri._tag === 'Some') {
-                setUserImageUriInState({
-                  imageUri: selectedImageUri.value,
+              if (selectedImageUri) {
+                setRealUserImageAtom({
                   type: 'imageUri',
+                  imageUri: selectedImageUri,
                 })
                 safeGoBack()
               }
@@ -69,12 +66,25 @@ function ChangeProfilePictureScreen(): JSX.Element {
           />
         </XStack>
       ) : (
-        <Button
-          fullWidth
-          onPress={selectImage}
-          variant={'secondary'}
-          text={t('changeProfilePicture.uploadNewPhoto')}
-        />
+        <Stack space={'$2'}>
+          <Button
+            fullWidth
+            onPress={() => {
+              selectImage(selectedImageUriAtom)
+            }}
+            variant={'secondary'}
+            text={t('changeProfilePicture.uploadNewPhoto')}
+          />
+          <Button
+            fullWidth
+            onPress={() => {
+              setRealUserImage(undefined)
+              safeGoBack()
+            }}
+            variant={'primary'}
+            text={t('changeProfilePicture.clearPhoto')}
+          />
+        </Stack>
       )}
     </Screen>
   )

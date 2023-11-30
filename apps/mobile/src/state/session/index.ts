@@ -27,6 +27,8 @@ import readSessionFromStorage from './readSessionFromStorage'
 import writeSessionToStorage from './writeSessionToStorage'
 import {generateRandomUserData} from './utils'
 import {type UserName} from '@vexl-next/domain/dist/general/UserName.brand'
+import {askAreYouSureActionAtom} from '../../components/AreYouSureDialog'
+import {translationAtom} from '../../utils/localization/I18nProvider'
 
 // duplicated code but we can not remove cyclic dependency otherwise
 // --------------
@@ -240,6 +242,24 @@ export const realUserNameAtom = atom(
     })
   }
 )
+
+export const invalidUsernameUIFeedbackAtom = atom(null, async (get, set) => {
+  const {t} = get(translationAtom)
+
+  return await pipe(
+    set(askAreYouSureActionAtom, {
+      steps: [
+        {
+          type: 'StepWithText',
+          title: t('editName.invalidUsername'),
+          description: t('loginFlow.name.nameValidationError'),
+          positiveButtonText: t('common.close'),
+        },
+      ],
+      variant: 'danger',
+    })
+  )()
+})
 
 export const realUserImageAtom = atom(
   (get): UserNameAndUriAvatar['image'] | undefined => {

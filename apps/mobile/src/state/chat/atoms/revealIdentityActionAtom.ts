@@ -1,7 +1,7 @@
 import {type FocusAtomType} from '../../../utils/atomUtils/FocusAtomType'
 import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
 import {atom} from 'jotai'
-import {sessionDataOrDummyAtom} from '../../session'
+import {anonymizedUserDataAtom, sessionDataOrDummyAtom} from '../../session'
 import {
   type ChatMessage,
   generateChatMessageId,
@@ -22,6 +22,8 @@ import {type ErrorEncryptingMessage} from '@vexl-next/resources-utils/dist/chat/
 import processIdentityRevealMessageIfAny from '../utils/processIdentityRevealMessageIfAny'
 import removeFile from '../../../utils/removeFile'
 import anonymizePhoneNumber from '../utils/anonymizePhoneNumber'
+import {type UserName} from '@vexl-next/domain/dist/general/UserName.brand'
+import {type UriString} from '@vexl-next/domain/dist/utility/UriString.brand'
 
 export type IdentityRequestAlreadySentError =
   BasicError<'IdentityRequestAlreadySentError'>
@@ -34,7 +36,13 @@ export type RevealMessageType =
 export default function revealIdentityActionAtom(
   chatWithMessagesAtom: FocusAtomType<ChatWithMessages>
 ): ActionAtomType<
-  [{type: RevealMessageType}],
+  [
+    {
+      type: RevealMessageType
+      username: UserName | undefined
+      imageUri?: UriString
+    },
+  ],
   TE.TaskEither<
     | SendMessageApiErrors
     | ErrorEncryptingMessage
@@ -48,7 +56,7 @@ export default function revealIdentityActionAtom(
     (
       get,
       set,
-      {type}
+      {type, username, imageUri}
     ): TE.TaskEither<
       | SendMessageApiErrors
       | ErrorEncryptingMessage
@@ -68,11 +76,9 @@ export default function revealIdentityActionAtom(
         } as const)
       }
 
-      const {
-        realUserData: {userName, image},
-        phoneNumber,
-      } = get(sessionDataOrDummyAtom)
+      const {phoneNumber} = get(sessionDataOrDummyAtom)
       const api = get(privateApiAtom)
+      const anonymizedUserData = get(anonymizedUserDataAtom)
 
       const anonymizedPhoneNumber = anonymizePhoneNumber(phoneNumber)
 
@@ -80,9 +86,9 @@ export default function revealIdentityActionAtom(
         type !== 'DISAPPROVE_REVEAL'
           ? {
               text: `Identity reveal ${type}`,
-              image: image?.imageUri,
+              image: imageUri,
               deanonymizedUser: {
-                name: userName,
+                name: username ?? anonymizedUserData.userName,
                 partialPhoneNumber: anonymizedPhoneNumber,
               },
               time: unixMillisecondsNow(),

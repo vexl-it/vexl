@@ -13,13 +13,12 @@ import {
 } from '../../../PageWithButtonAndProgressHeader'
 import {Stack, Text, useMedia} from 'tamagui'
 import SelectProfilePicture from '../../../SelectProfilePicture'
-import {useAtomValue, useSetAtom} from 'jotai'
-import {useMolecule} from 'jotai-molecules'
-import {changeProfilePictureMolecule} from '../../../../state/changeProfilePictureMolecule'
+import {atom, useAtomValue} from 'jotai'
 import {getAvatarSvg} from '../../../AnonymousAvatar'
 import randomNumber from '../../../../utils/randomNumber'
-import {useFocusEffect} from '@react-navigation/native'
-import {useCallback} from 'react'
+import {type UriString} from '@vexl-next/domain/dist/utility/UriString.brand'
+
+const selectedImageUriAtom = atom<UriString | undefined>(undefined)
 
 type Props = LoginStackScreenProps<'Photo'>
 
@@ -31,17 +30,7 @@ function PhotoScreen({
 }: Props): JSX.Element {
   const {t} = useTranslation()
   const media = useMedia()
-  const {selectedImageUriAtom, syncImageActionAtom} = useMolecule(
-    changeProfilePictureMolecule
-  )
   const selectedImageUri = useAtomValue(selectedImageUriAtom)
-  const syncImageWithSessionUri = useSetAtom(syncImageActionAtom)
-
-  useFocusEffect(
-    useCallback(() => {
-      syncImageWithSessionUri()
-    }, [syncImageWithSessionUri])
-  )
 
   return (
     <>
@@ -62,7 +51,7 @@ function PhotoScreen({
           <AnonymizationCaption />
         </Stack>
         <Stack f={1} ai="center" jc="center">
-          <SelectProfilePicture />
+          <SelectProfilePicture selectedImageUriAtom={selectedImageUriAtom} />
         </Stack>
       </WhiteContainer>
       <NextButtonProxy
@@ -71,10 +60,9 @@ function PhotoScreen({
           navigation.navigate('AnonymizationAnimation', {
             realUserData: UserNameAndAvatar.parse({
               userName,
-              image:
-                selectedImageUri._tag === 'Some'
-                  ? fromImageUri(selectedImageUri.value)
-                  : fromSvgString(getAvatarSvg(randomNumber(0, 3))),
+              image: selectedImageUri
+                ? fromImageUri(selectedImageUri)
+                : fromSvgString(getAvatarSvg(randomNumber(0, 3))),
             }),
           })
         }}

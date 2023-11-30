@@ -1,0 +1,135 @@
+import {atom, type PrimitiveAtom} from 'jotai'
+import {type FileSystemError} from '../utils/internalStorage'
+import {
+  getImageFromCameraAndTryToResolveThePermissionsAlongTheWay,
+  getImageFromGalleryAndTryToResolveThePermissionsAlongTheWay,
+  type ImagePickerError,
+} from '../utils/imagePickers'
+import {translationAtom} from '../utils/localization/I18nProvider'
+import reportError from '../utils/reportError'
+import * as O from 'fp-ts/Option'
+import {type UriString} from '@vexl-next/domain/dist/utility/UriString.brand'
+import {Alert} from 'react-native'
+import {pipe} from 'fp-ts/function'
+import * as TE from 'fp-ts/TaskEither'
+import * as T from 'fp-ts/Task'
+import showErrorAlert from '../utils/showErrorAlert'
+
+const reportAndTranslateErrorsAtom = atom<
+  null,
+  [{error: FileSystemError | ImagePickerError}],
+  string
+>(null, (get, set, params) => {
+  const {error} = params
+  const {t} = get(translationAtom)
+
+  if (error._tag === 'imagePickerError') {
+    switch (error.reason) {
+      case 'PermissionsNotGranted':
+        return t('loginFlow.photo.permissionsNotGranted')
+      case 'NothingSelected':
+        return t('loginFlow.photo.nothingSelected')
+    }
+  }
+  reportError('error', 'Unexpected error while picking image', error)
+  return t('common.unknownError') // how is it that linter needs this line
+})
+
+export const selectImageActionAtom = atom(
+  null,
+  (get, set, atomToSetOnSuccess: PrimitiveAtom<UriString | undefined>) => {
+    const {t} = get(translationAtom)
+
+    Alert.alert(t('loginFlow.photo.selectSource'), undefined, [
+      {
+        text: t('loginFlow.photo.gallery'),
+        onPress: () => {
+          void pipe(
+            getImageFromGalleryAndTryToResolveThePermissionsAlongTheWay({
+              saveTo: 'documents',
+              aspect: [1, 1],
+            }),
+            TE.match(
+              (e) => {
+                if (
+                  e._tag === 'imagePickerError' &&
+                  e.reason === 'NothingSelected'
+                ) {
+                  return O.none
+                }
+
+                showErrorAlert({
+                  title: set(reportAndTranslateErrorsAtom, {error: e}),
+                  error: e,
+                })
+                return O.none
+              },
+              (r) => {
+                return O.some(r.uri)
+              }
+            ),
+            T.map((uri) => {
+              pipe(
+                uri,
+                O.match(
+                  () => {
+                    return false
+                  },
+                  (uri) => {
+                    set(atomToSetOnSuccess, uri)
+                    return true
+                  }
+                )
+              )
+            })
+          )()
+        },
+      },
+      {
+        text: t('loginFlow.photo.camera'),
+        onPress: () => {
+          void pipe(
+            getImageFromCameraAndTryToResolveThePermissionsAlongTheWay({
+              saveTo: 'documents',
+              aspect: [1, 1],
+            }),
+            TE.match(
+              (e) => {
+                showErrorAlert({
+                  title: set(reportAndTranslateErrorsAtom, {error: e}),
+                  error: e,
+                })
+
+                return O.none
+              },
+              (r) => {
+                return O.some(r.uri)
+                // set(didImageUriChangeAtom, true)
+              }
+            ),
+            T.map((uri) => {
+              pipe(
+                uri,
+                O.match(
+                  () => {
+                    return false
+                  },
+                  (uri) => {
+                    set(atomToSetOnSuccess, uri)
+                    return true
+                  }
+                )
+              )
+            })
+          )()
+        },
+      },
+      {
+        text: t('common.cancel'),
+        style: 'cancel',
+      },
+    ])
+
+    return O.none
+  }
+)

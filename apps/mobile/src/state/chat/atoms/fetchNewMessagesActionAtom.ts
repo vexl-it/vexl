@@ -206,13 +206,12 @@ export const fetchAndStoreMessagesForInboxAtom = atom<
           return T.of(inbox)
         }
 
-        reportError(
-          'warn',
-          'Api Error fetching messages for inbox. Trying to create the inbox again.',
-          error
-        )
-
-        if (error._tag === 'inboxDoesNotExist')
+        if (error._tag === 'inboxDoesNotExist') {
+          reportError(
+            'warn',
+            'Api Error fetching messages for inbox. Trying to create the inbox again.',
+            error
+          )
           return pipe(
             getNotificationToken(),
             TE.fromTask,
@@ -236,7 +235,7 @@ export const fetchAndStoreMessagesForInboxAtom = atom<
             ),
             T.map(() => inbox)
           )
-
+        }
         return T.of(inbox)
       },
       ({newMessages, updatedInbox}) => {

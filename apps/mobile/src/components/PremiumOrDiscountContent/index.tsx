@@ -1,6 +1,8 @@
 import {Text, XStack, YStack} from 'tamagui'
 import {TouchableOpacity} from 'react-native'
-import BuySellSlider, {SLIDER_THRESHOLD} from '../BuySellSlider'
+import PremiumOrDiscountSlider, {
+  SLIDER_THRESHOLD,
+} from '../PremiumOrDiscountSlider'
 import {
   type SetStateAction,
   type WritableAtom,
@@ -78,7 +80,7 @@ function PremiumOrDiscountContent({
           </XStack>
         </TouchableOpacity>
       </XStack>
-      <BuySellSlider
+      <PremiumOrDiscountSlider
         offerTypeAtom={offerTypeAtom}
         sliderThreshold={SLIDER_THRESHOLD}
         sliderValue={feeAmount}

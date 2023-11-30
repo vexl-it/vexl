@@ -3,6 +3,7 @@ import {useTranslation} from '../utils/localization/I18nProvider'
 import {type Atom, useAtomValue} from 'jotai'
 import {type OfferType} from '@vexl-next/domain/dist/general/offers'
 import Slider from './Slider'
+import {iosHapticFeedback} from '../utils/iosHapticFeedback'
 
 export const SLIDER_THRESHOLD = 10
 
@@ -13,7 +14,7 @@ interface Props {
   offerTypeAtom: Atom<OfferType | undefined>
 }
 
-function BuySellSlider({
+function PremiumOrDiscountSlider({
   sliderThreshold,
   onValueChange,
   sliderValue,
@@ -79,10 +80,15 @@ function BuySellSlider({
         minimumValue={-sliderThreshold}
         step={1}
         value={sliderValue}
-        onValueChange={onValueChange}
+        onValueChange={(value) => {
+          if (value[0] !== sliderValue) {
+            iosHapticFeedback()
+            onValueChange(value)
+          }
+        }}
       />
     </Stack>
   )
 }
 
-export default BuySellSlider
+export default PremiumOrDiscountSlider

@@ -10,6 +10,7 @@ import dashSvg from '../../../images/dashSvg'
 import infoSvg from '../../../images/infoSvg'
 import Slider from '../../../Slider'
 import LimitInput from './components/LimitInput'
+import {iosHapticFeedback} from '../../../../utils/iosHapticFeedback'
 
 const SLIDER_MIN_VALUE = 0
 const INPUT_MIN_VALUE = 0
@@ -77,10 +78,12 @@ function AmountOfTransaction({
     if (amountBottomLimit !== value[0]) {
       setBottomLimit(value[0] ?? 0)
       setInputMin(value[0])
+      iosHapticFeedback()
     }
     if (amountTopLimit !== value[1]) {
       setTopLimit(value[1] ?? 0)
       setInputMax(value[1] ?? 0)
+      iosHapticFeedback()
     }
   }
 

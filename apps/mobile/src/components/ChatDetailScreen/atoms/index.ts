@@ -128,6 +128,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     null,
     async (get, set, {skipAsk}: {skipAsk: boolean} = {skipAsk: false}) => {
       const {t} = get(translationAtom)
+      const deniedMessaging = get(focusWasDeniedAtom(chatWithMessagesAtom))
 
       const feedbackFinished = get(chatFeedbackAtom).finished
 
@@ -182,7 +183,9 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
           },
           () => {
             set(loadingOverlayDisplayedAtom, false)
-            if (!feedbackFinished) void set(giveFeedbackForDeletedChatAtom)
+
+            if (!feedbackFinished && !deniedMessaging)
+              void set(giveFeedbackForDeletedChatAtom)
 
             return true
           }

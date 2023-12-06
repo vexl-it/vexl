@@ -2,22 +2,20 @@ import OnlineOrInPersonTrade from './components/OnlineOrInPersonTrade'
 import {useAtomValue, useSetAtom} from 'jotai'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../../../utils/useSafeGoBack'
-import {
-  offerForTradeChecklistAtom,
-  submitChangesAndSendMessageActionAtom,
-} from '../../atoms'
+import * as fromChatAtoms from '../../atoms/fromChatAtoms'
 import React, {useCallback} from 'react'
 import {useFocusEffect} from '@react-navigation/native'
 import headerStateAtom from '../../../PageWithNavigationHeader/state/headerStateAtom'
 import {FooterButtonProxy} from '../../../PageWithNavigationHeader'
 import Content from '../Content'
+import {submitTradeChecklistUpdatesActionAtom} from '../../atoms/updatesToBeSentAtom'
 
 function AgreeOnTradeDetailsScreen(): JSX.Element {
   const {t} = useTranslation()
   const goBack = useSafeGoBack()
-  const offerForTradeChecklist = useAtomValue(offerForTradeChecklistAtom)
+  const offerForTradeChecklist = useAtomValue(fromChatAtoms.originOfferAtom)
   const submitChangesAndSendMessage = useSetAtom(
-    submitChangesAndSendMessageActionAtom
+    submitTradeChecklistUpdatesActionAtom
   )
   const setHeaderState = useSetAtom(headerStateAtom)
 
@@ -40,7 +38,7 @@ function AgreeOnTradeDetailsScreen(): JSX.Element {
             : t('tradeChecklist.saveAndContinue')
         }
         onPress={() => {
-          void submitChangesAndSendMessage().then((success) => {
+          void submitChangesAndSendMessage()().then((success) => {
             if (success) {
               goBack()
             }

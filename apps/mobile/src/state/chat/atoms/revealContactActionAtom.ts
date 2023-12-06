@@ -18,6 +18,7 @@ import {unixMillisecondsNow} from '@vexl-next/domain/dist/utility/UnixMillisecon
 import {pipe} from 'fp-ts/function'
 import {type BasicError} from '@vexl-next/domain/dist/utility/errors'
 import anonymizePhoneNumber from '../utils/anonymizePhoneNumber'
+import {addMessageToMessagesArray} from '../utils/addMessageToChat'
 
 export type ContactRevealRequestAlreadySentError =
   BasicError<'ContactRevealRequestAlreadySentError'>
@@ -112,7 +113,7 @@ export default function revealContactActionAtom(
           }
           set(chatWithMessagesAtom, (old) => ({
             ...old,
-            messages: [...old.messages, successMessage],
+            messages: addMessageToMessagesArray(old.messages)(successMessage),
           }))
           return successMessage
         })

@@ -1,18 +1,10 @@
 import {z} from 'zod'
-import {UnixMilliseconds} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
 import {BtcNetwork} from '@vexl-next/domain/dist/general/offers'
-
-export const BtcAddress = z
-  .string()
-  .regex(/^(bc1|[13])[a-zA-HJ-NP-Z0-9]{25,39}$/)
-export type BtcAddress = z.TypeOf<typeof BtcAddress>
-
-export const TradeChecklistItemStatus = z.enum([
-  'pending',
-  'accepted',
-  'unknown',
-])
-export type TradeChecklistItemStatus = z.TypeOf<typeof TradeChecklistItemStatus>
+import {BtcAddress} from '@vexl-next/domain/dist/utility/BtcAddress.brand'
+import {
+  AvailableDateTimeOption,
+  TradeChecklistStateItemStatus,
+} from '../../../../../packages/domain/src/general/tradeChecklist'
 
 export const TradeChecklistItem = z.enum([
   'DATE_AND_TIME',
@@ -23,16 +15,6 @@ export const TradeChecklistItem = z.enum([
   'REVEAL_PHONE_NUMBER',
 ])
 export type TradeChecklistItem = z.TypeOf<typeof TradeChecklistItem>
-
-export const AvailableDateTimeOption = z.object({
-  date: UnixMilliseconds,
-  from: UnixMilliseconds,
-  to: UnixMilliseconds,
-})
-export type AvailableDateTimeOption = z.TypeOf<typeof AvailableDateTimeOption>
-export const TradeChecklistStateItemStatus = z.object({
-  status: TradeChecklistItemStatus,
-})
 
 export const TradePriceType = z.enum(['live', 'custom', 'frozen', 'your'])
 export type TradePriceType = z.TypeOf<typeof TradePriceType>

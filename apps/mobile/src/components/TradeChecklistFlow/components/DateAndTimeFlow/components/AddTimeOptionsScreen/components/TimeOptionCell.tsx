@@ -5,10 +5,10 @@ import {Stack, Text, XStack, getTokens, type StackProps} from 'tamagui'
 import {getCurrentLocale} from '../../../../../../../utils/localization/I18nProvider'
 import Image from '../../../../../../Image'
 import closeSvg from '../../../../../../images/closeSvg'
-import {type AvailableDateTimeOption} from '../../../../../domain'
 import {removeTimestampFromAvailableAtom} from '../../../atoms'
 import TimeFromDropdown from './TimeFromDropdown'
 import TimeToDropdown from './TimeToDropdown'
+import {type AvailableDateTimeOption} from '@vexl-next/domain/dist/general/tradeChecklist'
 
 interface Props extends StackProps {
   availableDateTime: AvailableDateTimeOption

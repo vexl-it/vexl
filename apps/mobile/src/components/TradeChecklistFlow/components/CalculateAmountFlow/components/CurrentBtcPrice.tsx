@@ -6,7 +6,7 @@ import {
   tradeBtcPriceAtom,
   tradePriceTypeAtom,
 } from '../atoms'
-import {offerForTradeChecklistAtom} from '../../../atoms'
+import * as fromChatAtoms from '../../../atoms/fromChatAtoms'
 
 function CurrentBtcPrice(props: TextProps): JSX.Element {
   const refreshCurrentBtcPrice = useSetAtom(refreshCurrentBtcPriceActionAtom)
@@ -14,8 +14,8 @@ function CurrentBtcPrice(props: TextProps): JSX.Element {
   const tradePriceType = useAtomValue(tradePriceTypeAtom)
 
   const tradeCurrency =
-    useAtomValue(offerForTradeChecklistAtom)?.offerInfo.publicPart.currency ??
-    'USD'
+    useAtomValue(fromChatAtoms.originOfferAtom)?.offerInfo.publicPart
+      .currency ?? 'USD'
 
   return (
     <TouchableOpacity

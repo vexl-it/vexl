@@ -1,21 +1,16 @@
-import {Stack, Text} from 'tamagui'
-import Image from '../../../../Image'
-import anonymousAvatarHappyNoBackgroundSvg from '../../../../images/anonymousAvatarHappyNoBackgroundSvg'
-import Info from '../../../../Info'
-import TradeRule from './TradeRule'
-import ChecklistCell from './ChecklistCell'
-import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import {useAtomValue} from 'jotai'
-import React, {useCallback} from 'react'
-import {type NavigationProp, useNavigation} from '@react-navigation/native'
-import {type TradeChecklistStackParamsList} from '../../../../../navigationTypes'
-import {type TradeChecklistItem} from '../../../domain'
+import React from 'react'
+import {Stack, Text} from 'tamagui'
+import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import openUrl from '../../../../../utils/openUrl'
-import {
-  mainTradeCheckListStateAtom,
-  offerForTradeChecklistAtom,
-} from '../../../atoms'
+import Image from '../../../../Image'
+import Info from '../../../../Info'
+import anonymousAvatarHappyNoBackgroundSvg from '../../../../images/anonymousAvatarHappyNoBackgroundSvg'
+import * as fromChatAtoms from '../../../atoms/fromChatAtoms'
+import {type TradeChecklistItem} from '../../../domain'
 import AnonymizationNotice from '../../AnonymizationNotice'
+import ChecklistCell from './ChecklistCell'
+import TradeRule from './TradeRule'
 
 const tradeChecklistItems: TradeChecklistItem[] = [
   'DATE_AND_TIME',
@@ -34,23 +29,7 @@ function openVexlBlog(): void {
 
 function OnlineOrInPersonTrade(): JSX.Element {
   const {t} = useTranslation()
-  const navigation: NavigationProp<TradeChecklistStackParamsList> =
-    useNavigation()
-  const offerForTradeChecklist = useAtomValue(offerForTradeChecklistAtom)
-  const mainTradeCheckListState = useAtomValue(mainTradeCheckListStateAtom)
-
-  const checklistCellOnPress = useCallback(
-    (item: TradeChecklistItem) => {
-      if (item === 'DATE_AND_TIME') {
-        navigation.navigate('ChooseAvailableDays')
-      } else if (item === 'CALCULATE_AMOUNT') {
-        navigation.navigate('CalculateAmount')
-      } else if (item === 'SET_NETWORK') {
-        navigation.navigate('Network')
-      }
-    },
-    [navigation]
-  )
+  const offerForTradeChecklist = useAtomValue(fromChatAtoms.originOfferAtom)
 
   return (
     <>
@@ -103,19 +82,7 @@ function OnlineOrInPersonTrade(): JSX.Element {
             </Text>
             <Stack my={'$8'} gap={'$2'}>
               {tradeChecklistItems.map((item) => (
-                <ChecklistCell
-                  key={item}
-                  itemStatus={mainTradeCheckListState[item].status}
-                  title={t(`tradeChecklist.options.${item}`)}
-                  onPress={() => {
-                    checklistCellOnPress(item)
-                  }}
-                  subtitle={
-                    item === 'REVEAL_IDENTITY'
-                      ? t('tradeChecklist.shareRecognitionSignInChat')
-                      : undefined
-                  }
-                />
+                <ChecklistCell key={item} item={item} />
               ))}
             </Stack>
           </>

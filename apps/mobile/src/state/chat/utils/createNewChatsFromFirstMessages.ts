@@ -1,3 +1,4 @@
+import {createEmptyTradeChecklistInState} from './../../tradeChecklist/domain'
 import {
   generateChatId,
   type Inbox,
@@ -39,6 +40,9 @@ export default function createNewChatsFromFirstMessages({
             showInfoBar: true,
             showVexlbotInitialMessage: true,
             showVexlbotNotifications: true,
+          },
+          tradeChecklist: {
+            ...createEmptyTradeChecklistInState(),
           },
           messages: [...messages],
         }

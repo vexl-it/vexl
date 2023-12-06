@@ -1,6 +1,8 @@
 import {generatePrivateKey} from '@vexl-next/cryptography/dist/KeyHolder'
 import {generateChatId} from '@vexl-next/domain/dist/general/messaging'
 import {type FriendLevel} from '@vexl-next/domain/dist/general/offers'
+import {UserName} from '@vexl-next/domain/dist/general/UserName.brand'
+import {toBasicError} from '@vexl-next/domain/dist/utility/errors'
 import {type UriString} from '@vexl-next/domain/dist/utility/UriString.brand'
 import * as E from 'fp-ts/Either'
 import {pipe} from 'fp-ts/function'
@@ -43,6 +45,11 @@ import connectionStateAtom, {
 } from '../../../state/connections/atom/connectionStateAtom'
 import {createFeedbackForChatAtom} from '../../../state/feedback/atoms'
 import {offerForChatOriginAtom} from '../../../state/marketplace/atoms/offersState'
+import {
+  invalidUsernameUIFeedbackAtom,
+  realUserImageAtom,
+  realUserNameAtom,
+} from '../../../state/session'
 import getValueFromSetStateActionOfAtom from '../../../utils/atomUtils/getValueFromSetStateActionOfAtom'
 import {type SelectedImage} from '../../../utils/imagePickers'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
@@ -54,19 +61,13 @@ import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 import {askAreYouSureActionAtom} from '../../AreYouSureDialog'
 import {loadingOverlayDisplayedAtom} from '../../LoadingOverlayProvider'
 import ChatFeedbackDialogContent from '../components/ChatFeedbackDialogContent'
-import {deleteChatStep1Svg} from '../images/deleteChatSvg'
-import {messagesToListData} from '../utils'
-import {
-  invalidUsernameUIFeedbackAtom,
-  realUserImageAtom,
-  realUserNameAtom,
-} from '../../../state/session'
-import {UserName} from '@vexl-next/domain/dist/general/UserName.brand'
 import {
   ImageDialogContent,
   UsernameDialogContent,
 } from '../components/RevealIdentityDialogContent'
-import {toBasicError} from '@vexl-next/domain/dist/utility/errors'
+import {deleteChatStep1Svg} from '../images/deleteChatSvg'
+import buildMessagesListData from '../utils/buildMessagesListData'
+import {createEmptyTradeChecklistInState} from './../../../state/tradeChecklist/domain'
 
 type ChatUIMode = 'approval' | 'messages'
 
@@ -80,6 +81,9 @@ export const dummyChatWithMessages: ChatWithMessages = {
     showInfoBar: true,
     showVexlbotInitialMessage: true,
     showVexlbotNotifications: true,
+  },
+  tradeChecklist: {
+    ...createEmptyTradeChecklistInState(),
   },
   messages: [],
 }
@@ -108,7 +112,13 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     return origin ? get(offerForChatOriginAtom(origin)) : null
   })
 
-  const messagesListDataAtom = selectAtom(messagesAtom, messagesToListData)
+  const tradeChecklistAtom = focusAtom(chatWithMessagesAtom, (o) =>
+    o.prop('tradeChecklist')
+  )
+
+  const messagesListDataAtom = atom((get) =>
+    buildMessagesListData(get(messagesAtom), get(tradeChecklistAtom))
+  )
   const messagesListAtomAtoms = splitAtom(messagesListDataAtom)
 
   const deleteChatAtom = deleteChatActionAtom(chatWithMessagesAtom)
@@ -797,6 +807,10 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     o.prop('showVexlbotInitialMessage')
   )
 
+  const tradeChecklistDateAndTimeAtom = focusAtom(tradeChecklistAtom, (o) =>
+    o.prop('dateAndTime')
+  )
+
   return {
     showModalAtom: atom<boolean>(false),
     chatAtom,
@@ -843,5 +857,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     showVexlbotInitialMessageForCurrentChatAtom,
     publicKeyPemBase64Atom,
     chatIdAtom,
+    tradeChecklistAtom,
+    tradeChecklistDateAndTimeAtom,
   }
 })

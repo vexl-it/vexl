@@ -24,6 +24,7 @@ import removeFile from '../../../utils/removeFile'
 import anonymizePhoneNumber from '../utils/anonymizePhoneNumber'
 import {type UserName} from '@vexl-next/domain/dist/general/UserName.brand'
 import {type UriString} from '@vexl-next/domain/dist/utility/UriString.brand'
+import {addMessageToMessagesArray} from '../utils/addMessageToChat'
 
 export type IdentityRequestAlreadySentError =
   BasicError<'IdentityRequestAlreadySentError'>
@@ -146,7 +147,7 @@ export default function revealIdentityActionAtom(
           }
           set(chatWithMessagesAtom, (old) => ({
             ...old,
-            messages: [...old.messages, successMessage],
+            messages: addMessageToMessagesArray(old.messages)(successMessage),
           }))
           return successMessage
         })

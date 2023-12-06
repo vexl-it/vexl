@@ -34,7 +34,8 @@ function TimeToDropdown({
           ).hours
       )
 
-      for (let i = 0; i < numberOfHoursTillMidnight; i++) {
+      // Start from 1 to not allow user to choose the same time as available from (which would result in 0 hours of trade ex.: 12:00 - 12:00)
+      for (let i = 1; i < numberOfHoursTillMidnight; i++) {
         const timeOptionMillis = UnixMilliseconds.parse(
           DateTime.fromMillis(availableDateTimeFrom).plus({hour: i}).toMillis()
         )

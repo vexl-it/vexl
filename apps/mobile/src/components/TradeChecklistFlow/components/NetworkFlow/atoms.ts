@@ -1,8 +1,8 @@
 import {atom} from 'jotai'
 import {type BtcNetwork} from '@vexl-next/domain/dist/general/offers'
 import {focusAtom} from 'jotai-optics'
-import {mainTradeCheckListStateAtom} from '../../atoms'
-import {BtcAddress} from '../../domain'
+import {mainTradeCheckListStateAtom} from '../../atoms/mainTradeChecklistStateAtom'
+import {BtcAddress} from '@vexl-next/domain/dist/utility/BtcAddress.brand'
 
 export const mainNetworkStateAtom = focusAtom(
   mainTradeCheckListStateAtom,

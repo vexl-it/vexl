@@ -18,7 +18,8 @@ import {
   type InitPhoneNumberVerificationResponse,
   type VerifyPhoneNumberResponse,
 } from '@vexl-next/rest-api/dist/services/user/contracts'
-import {type ChatDataForTradeChecklist} from './state/tradeChecklist/domain'
+import {type AvailableDateTimeOption} from '@vexl-next/domain/dist/general/tradeChecklist'
+import {type ChatIds} from './state/chat/domain'
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type RootStackParamsList = {
@@ -29,7 +30,7 @@ export type RootStackParamsList = {
   InsideTabs: NavigatorScreenParams<InsideTabParamsList>
 
   TradeChecklistFlow: NavigatorScreenParams<TradeChecklistStackParamsList> &
-    ChatDataForTradeChecklist
+    ChatIds
 
   CreateOffer: undefined
   EditOffer: {offerId: OfferId}
@@ -137,7 +138,17 @@ export type MarketplaceTabScreenProps<
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type TradeChecklistStackParamsList = {
   AgreeOnTradeDetails: undefined
-  ChooseAvailableDays: undefined
+  ChooseAvailableDays: {
+    readonly chosenDays: AvailableDateTimeOption[] | undefined
+  }
+  PickDateFromSuggestions: {
+    readonly chosenDays: AvailableDateTimeOption[]
+    readonly submitUpdateOnTimePick?: boolean
+  }
+  PickTimeFromSuggestions: {
+    readonly chosenDay: AvailableDateTimeOption
+    readonly submitUpdateOnTimePick?: boolean
+  }
   AddTimeOptions: undefined
   CalculateAmount: undefined
   SetYourOwnPrice: undefined

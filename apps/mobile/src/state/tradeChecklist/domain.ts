@@ -1,6 +1,7 @@
 import {z} from 'zod'
 import {ChatId} from '@vexl-next/domain/dist/general/messaging'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
+import {DateTimeChatMessage} from '@vexl-next/domain/dist/general/tradeChecklist'
 
 export const ChatDataForTradeChecklist = z.object({
   chatId: ChatId,
@@ -9,3 +10,35 @@ export const ChatDataForTradeChecklist = z.object({
 export type ChatDataForTradeChecklist = z.TypeOf<
   typeof ChatDataForTradeChecklist
 >
+
+export const TradeChecklistInState = z.object({
+  dateAndTime: z.object({
+    sent: DateTimeChatMessage.optional(),
+    received: DateTimeChatMessage.optional(),
+  }),
+  location: z.object({
+    sent: z.object({}).optional(),
+    received: z.object({}).optional(),
+  }),
+  amount: z.object({
+    sent: z.object({}).optional(),
+    received: z.object({}).optional(),
+  }),
+  network: z.object({
+    sent: z.object({}).optional(),
+    received: z.object({}).optional(),
+  }),
+  identity: z.object({
+    sent: z.object({}).optional(),
+    received: z.object({}).optional(),
+  }),
+})
+export type TradeChecklistInState = z.TypeOf<typeof TradeChecklistInState>
+
+export const createEmptyTradeChecklistInState = (): TradeChecklistInState => ({
+  dateAndTime: {},
+  location: {},
+  amount: {},
+  network: {},
+  identity: {},
+})

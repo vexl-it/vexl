@@ -1,11 +1,10 @@
-import {useMolecule} from 'jotai-molecules'
-import {chatMolecule} from '../atoms'
-import {type Atom, useAtomValue} from 'jotai'
-import {type MessagesListItem} from '../utils'
-import React from 'react'
 import {FlashList} from '@shopify/flash-list'
+import {useAtomValue, type Atom} from 'jotai'
+import {useMolecule} from 'jotai-molecules'
+import React from 'react'
 import atomKeyExtractor from '../../../utils/atomUtils/atomKeyExtractor'
-import MessageItem from './MessageItem'
+import {chatMolecule} from '../atoms'
+import MessageItem, {type MessagesListItem} from './MessageItem'
 
 function renderItem({
   item,

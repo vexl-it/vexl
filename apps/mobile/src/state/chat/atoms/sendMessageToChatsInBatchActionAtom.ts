@@ -16,6 +16,7 @@ import allChatsAtom from './allChatsAtom'
 import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
 import shouldSendTerminationMessageToChat from '../utils/shouldSendTerminationMessageToChat'
 import {type ExtractLeftTE} from '@vexl-next/rest-api/dist/services/chat/utils'
+import {addMessageToMessagesArray} from '../utils/addMessageToChat'
 
 interface Params {
   chats: readonly ChatWithMessages[]
@@ -95,7 +96,9 @@ const sendMessageToChatsInBatchActionAtom = atom(
 
               return {
                 ...oneChat,
-                messages: [...oneChat.messages, messageToState],
+                messages: addMessageToMessagesArray(oneChat.messages)(
+                  messageToState
+                ),
               }
             })
           )

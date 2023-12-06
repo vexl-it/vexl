@@ -1,3 +1,4 @@
+import {DateTime} from 'luxon'
 import {z} from 'zod'
 
 export const UnixMilliseconds = z
@@ -20,3 +21,13 @@ export function unixMilliseconds(): UnixMilliseconds {
 }
 
 export const UnixMilliseconds0 = UnixMilliseconds.parse(0)
+
+export function fromDateTime(dateTime: DateTime): UnixMilliseconds {
+  return UnixMilliseconds.parse(dateTime.valueOf())
+}
+
+export function toStartOfTheDay(dateTime: UnixMilliseconds): UnixMilliseconds {
+  return UnixMilliseconds.parse(
+    DateTime.fromMillis(dateTime).startOf('day').toMillis()
+  )
+}

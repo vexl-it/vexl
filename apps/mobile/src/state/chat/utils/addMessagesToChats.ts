@@ -5,6 +5,8 @@ import compareMessages from './compareMessages'
 import areMessagesEqual from './areMessagesEqual'
 import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
 import processIdentityRevealMessageIfAny from './processIdentityRevealMessageIfAny'
+import {updateTradeChecklistState} from '../../tradeChecklist/utils'
+import notEmpty from '../../../utils/notEmpty'
 
 // function processDeleteChatMessageIfAny(
 //   deleteChatMessage?: ChatMessageWithState
@@ -55,6 +57,11 @@ export default function addMessagesToChats(
           .filter((one) => ['APPROVE_REVEAL'].includes(one.message.messageType))
           ?.at(-1)
 
+        const tradeChecklistUpdates = messagesToAddToThisChat
+          .filter((one) => one.message.messageType === 'TRADE_CHECKLIST_UPDATE')
+          .map((one) => one.message.tradeChecklistUpdate)
+          .filter(notEmpty)
+
         // const deleteTypeMessageTime =
         //   deleteTypeMessage?.message.time ?? UnixMilliseconds.parse(0)
         // const identityRevealMessageTime =
@@ -74,7 +81,16 @@ export default function addMessagesToChats(
         // }
 
         return pipe(
-          {...oneChat, messages, chat: {...oneChat.chat, isUnread: true}},
+          {
+            ...oneChat,
+            messages,
+            tradeChecklist: tradeChecklistUpdates.reduce(
+              (acc, update) =>
+                updateTradeChecklistState(acc)({update, direction: 'received'}),
+              oneChat.tradeChecklist
+            ),
+            chat: {...oneChat.chat, isUnread: true},
+          },
           processIdentityRevealMessageIfAny(identityRevealMessage)
         )
       })

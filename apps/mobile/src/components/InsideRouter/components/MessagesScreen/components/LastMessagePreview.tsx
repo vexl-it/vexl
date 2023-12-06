@@ -147,6 +147,14 @@ function MessagePreview({
         })}
       </BaseText>
     )
+  } else if (message.messageType === 'TRADE_CHECKLIST_UPDATE') {
+    return (
+      <BaseText>
+        {t(`messages.messagePreviews.${direction}.TRADE_CHECKLIST_UPDATE`, {
+          them: name,
+        })}
+      </BaseText>
+    )
   } else {
     return <BaseText>{message.text}</BaseText>
   }

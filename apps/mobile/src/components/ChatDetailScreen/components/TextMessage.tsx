@@ -1,5 +1,15 @@
-import {getTokens, Stack, Text, XStack, YStack} from 'tamagui'
 import Clipboard from '@react-native-clipboard/clipboard'
+import {type ChatMessage} from '@vexl-next/domain/dist/general/messaging'
+import {unixMillisecondsNow} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
+import {
+  atom,
+  useAtom,
+  useAtomValue,
+  useSetAtom,
+  type Atom,
+  type SetStateAction,
+} from 'jotai'
+import {useMolecule} from 'jotai-molecules'
 import React, {useCallback, useMemo} from 'react'
 import {
   Image,
@@ -9,26 +19,17 @@ import {
   TouchableWithoutFeedback,
 } from 'react-native'
 import Animated, {FadeIn, FadeOut} from 'react-native-reanimated'
-import {
-  atom,
-  type Atom,
-  type SetStateAction,
-  useAtom,
-  useAtomValue,
-  useSetAtom,
-} from 'jotai'
-import {chatTime, type MessagesListItem} from '../utils'
-import {useTranslation} from '../../../utils/localization/I18nProvider'
-import {useMolecule} from 'jotai-molecules'
-import {chatMolecule} from '../atoms'
-import {unixMillisecondsNow} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
-import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
-import replyToSvg from '../images/replyToSvg'
+import {getTokens, Stack, Text, XStack, YStack} from 'tamagui'
 import getValueFromSetStateActionOfAtom from '../../../utils/atomUtils/getValueFromSetStateActionOfAtom'
-import copySvg from '../images/copySvg'
-import IconButton from '../../IconButton'
-import {type ChatMessage} from '@vexl-next/domain/dist/general/messaging'
+import {useTranslation} from '../../../utils/localization/I18nProvider'
 import resolveLocalUri from '../../../utils/resolveLocalUri'
+import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
+import IconButton from '../../IconButton'
+import {chatMolecule} from '../atoms'
+import copySvg from '../images/copySvg'
+import replyToSvg from '../images/replyToSvg'
+import formatChatTime from '../utils/formatChatTime'
+import {type MessagesListItem} from './MessageItem'
 
 const style = StyleSheet.create({
   textInputStyle: {
@@ -341,7 +342,7 @@ function TextMessage({
           >
             {message.state === 'sending' && t('messages.sending')}
             {(message.state === 'sent' || message.state === 'received') &&
-              chatTime(time)}
+              formatChatTime(time)}
           </Text>
         )}
       </Stack>

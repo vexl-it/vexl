@@ -2,10 +2,7 @@ import Content from '../../../Content'
 import Header from '../../../Header'
 import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
 import {useAtomValue, useSetAtom} from 'jotai'
-import {
-  availableDateTimesAtom,
-  saveLocalDateTimeStateToMainStateActionAtom,
-} from '../../atoms'
+import {availableDateTimesAtom, submitSuggestionsActionAtom} from '../../atoms'
 import TimeOptionCell from './components/TimeOptionCell'
 import {getTokens, Stack, Text, XStack} from 'tamagui'
 import {TouchableOpacity} from 'react-native'
@@ -29,7 +26,7 @@ function AddTimeOptionsScreen(): JSX.Element {
   const navigation: NavigationProp<TradeChecklistStackParamsList> =
     useNavigation()
   const saveLocalDateTimeStateToMainState = useSetAtom(
-    saveLocalDateTimeStateToMainStateActionAtom
+    submitSuggestionsActionAtom
   )
   const availableDateTimes = useAtomValue(availableDateTimesAtom)
 

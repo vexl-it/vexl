@@ -8,10 +8,13 @@ export default function addMessageToChat(
 ): (chat: ChatWithMessages) => ChatWithMessages {
   return (chat) => ({
     ...chat,
-    messages: addToSortedArray(
-      chat.messages,
-      compareMessages,
-      areMessagesEqual
-    )(message),
+    messages: addMessageToMessagesArray(chat.messages)(message),
   })
+}
+
+export function addMessageToMessagesArray(
+  messages: ChatMessageWithState[]
+): (args: ChatMessageWithState) => ChatMessageWithState[] {
+  return (message) =>
+    addToSortedArray(messages, compareMessages, areMessagesEqual)(message)
 }

@@ -25,7 +25,9 @@ import {
   askAreYouSureActionAtom,
   type UserDeclinedError,
 } from '../../../components/AreYouSureDialog'
-import addMessageToChat from '../utils/addMessageToChat'
+import addMessageToChat, {
+  addMessageToMessagesArray,
+} from '../utils/addMessageToChat'
 import createAccountDeletedMessage from '../utils/createAccountDeletedMessage'
 import showErrorAlert from '../../../utils/showErrorAlert'
 
@@ -105,7 +107,7 @@ const cancelRequestActionAtomHandleUI = atom(
         } as const
         set(chatAtom, (old) => ({
           ...old,
-          messages: [...old.messages, successMessage],
+          messages: addMessageToMessagesArray(old.messages)(successMessage),
         }))
         return successMessage
       }),

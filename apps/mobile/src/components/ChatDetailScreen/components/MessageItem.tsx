@@ -1,6 +1,5 @@
 import React from 'react'
 import {type Atom, useAtomValue} from 'jotai'
-import {chatTime, type MessagesListItem} from '../utils'
 import {useMolecule} from 'jotai-molecules'
 import {chatMolecule} from '../atoms'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
@@ -13,8 +12,38 @@ import BlockIconSvg from '../../../images/blockIconSvg'
 import IdentityRevealMessageItem from './IdentityRevealMessageItem'
 import ContactRevealMessageItem from './ContactRevealMessageItem'
 import UserFeedback from '../../UserFeedback'
-import VexlbotMessageItem from './VexlbotMessageItem'
-import {preferencesAtom} from '../../../utils/preferences'
+import VexlBotMessageItem from './VexlbotMessageItem'
+import formatChatTime from '../utils/formatChatTime'
+import {type ChatMessageWithState} from '../../../state/chat/domain'
+import {type VexlBotMessageData} from './VexlbotMessageItem/domain'
+import {type DateTime} from 'luxon'
+
+export type MessagesListItem =
+  | {
+      type: 'time'
+      time: DateTime
+      key: string
+    }
+  | {
+      type: 'message'
+      time: DateTime
+      message: ChatMessageWithState
+      isLatest: boolean
+      key: string
+    }
+  | {
+      type: 'space'
+      key: string
+    }
+  | {
+      type: 'originInfo'
+      key: string
+    }
+  | {
+      type: 'vexlBot'
+      key: string
+      data: VexlBotMessageData
+    }
 
 function MessageItem({
   itemAtom,
@@ -25,7 +54,6 @@ function MessageItem({
   const {chatFeedbackAtom, otherSideDataAtom} = useMolecule(chatMolecule)
   const {t} = useTranslation()
   const {userName, image} = useAtomValue(otherSideDataAtom)
-  const preferences = useAtomValue(preferencesAtom)
 
   if (item.type === 'message') {
     if (
@@ -154,20 +182,21 @@ function MessageItem({
       )
     }
 
-    if (item.message.message.messageType === 'VEXLBOT_INITIAL_MESSAGE') {
-      return preferences.tradeChecklistEnabled ? (
-        <VexlbotMessageItem message={item.message.message} them={userName} />
-      ) : (
-        <></>
-      )
+    if (item.message.message.messageType === 'TRADE_CHECKLIST_UPDATE') {
+      return null
     }
 
     return <TextMessage messageAtom={itemAtom} />
   }
+
+  if (item.type === 'vexlBot') {
+    return <VexlBotMessageItem data={item.data} />
+  }
+
   if (item.type === 'time')
     return (
       <Stack ai={'center'}>
-        <Text color="$greyOnBlack">{chatTime(item.time)}</Text>
+        <Text color="$greyOnBlack">{formatChatTime(item.time)}</Text>
       </Stack>
     )
   if (item.type === 'space') return <Stack h={'$3'} />

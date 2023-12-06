@@ -8,6 +8,7 @@ import {KeyHolder} from '@vexl-next/cryptography'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
 import {UriString} from '../utility/UriString.brand'
 import {Base64String} from '../utility/Base64String.brand'
+import {TradeChecklistUpdate} from './tradeChecklist'
 
 export const MessageType = z.enum([
   'MESSAGE',
@@ -25,7 +26,7 @@ export const MessageType = z.enum([
   'APPROVE_CONTACT_REVEAL',
   'DISAPPROVE_CONTACT_REVEAL',
   'REQUEST_CONTACT_REVEAL',
-  'VEXLBOT_INITIAL_MESSAGE',
+  'TRADE_CHECKLIST_UPDATE',
 ])
 export type MessageType = z.TypeOf<typeof MessageType>
 
@@ -81,6 +82,7 @@ export const ChatMessagePayload = z.object({
   repliedTo: RepliedToData.optional(),
   time: UnixMilliseconds,
   messageType: MessageType.optional(),
+  tradeChecklistUpdate: TradeChecklistUpdate.optional(),
   deanonymizedUser: z
     .object({
       name: UserName,
@@ -102,6 +104,7 @@ export const ChatMessage = z.object({
   time: UnixMilliseconds,
   image: UriString.optional(),
   repliedTo: RepliedToData.optional(),
+  tradeChecklistUpdate: TradeChecklistUpdate.optional(),
   deanonymizedUser: DeanonymizedUser.optional(),
   senderPublicKey: PublicKeyPemBase64,
   messageType: MessageType,

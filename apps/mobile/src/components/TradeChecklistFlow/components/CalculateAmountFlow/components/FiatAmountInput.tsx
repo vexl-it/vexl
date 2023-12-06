@@ -6,8 +6,8 @@ import {replaceNonDecimalCharsInInput} from '../../../utils'
 import {Stack, Text} from 'tamagui'
 import AmountInput from './AmountInput'
 import {currencies} from '../../../../../utils/localization/currency'
-import {offerForTradeChecklistAtom} from '../../../atoms'
 import CalculatedWithLiveRate from './CalculatedWithLiveRate'
+import * as fromChatAtoms from '../../../atoms/fromChatAtoms'
 
 interface Props {
   automaticCalculationDisabled?: boolean
@@ -26,7 +26,7 @@ function FiatAmountInput({
   const [isFocused, setIsFocused] = useState<boolean>(false)
 
   const fiatValue = useAtomValue(fiatValueAtom)
-  const offerForTradeChecklist = useAtomValue(offerForTradeChecklistAtom)
+  const offerForTradeChecklist = useAtomValue(fromChatAtoms.originOfferAtom)
   const calculateBtcValueOnFiatAmountChange = useSetAtom(
     calculateBtcValueOnFiatAmountChangeActionAtom
   )

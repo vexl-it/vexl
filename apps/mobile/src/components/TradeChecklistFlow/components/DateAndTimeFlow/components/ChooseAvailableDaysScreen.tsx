@@ -1,18 +1,22 @@
 import {type MarkedDates} from 'react-native-calendars/src/types'
 import Header from '../../Header'
-import {useTranslation} from '../../../../../utils/localization/I18nProvider'
+import {
+  getCurrentLocale,
+  useTranslation,
+} from '../../../../../utils/localization/I18nProvider'
 import {type NavigationProp, useNavigation} from '@react-navigation/native'
 import {DateTime} from 'luxon'
 import {Stack} from 'tamagui'
-import {type TradeChecklistStackParamsList} from '../../../../../navigationTypes'
-import {useAtomValue, useSetAtom} from 'jotai'
+import {
+  type TradeChecklistStackParamsList,
+  type TradeChecklistStackScreenProps,
+} from '../../../../../navigationTypes'
+import {useAtom, useSetAtom} from 'jotai'
 import {useEffect, useMemo} from 'react'
 import {
   availableDateTimesAtom,
   handleAvailableDaysChangeActionAtom,
-  syncAvailableDateTimesWithMainStateActionAtom,
 } from '../atoms'
-import {type AvailableDateTimeOption} from '../../../domain'
 import {MINIMUM_AVAILABLE_DAYS_THRESHOLD} from '../../../utils'
 import useSafeGoBack from '../../../../../utils/useSafeGoBack'
 import Calendar, {
@@ -24,14 +28,21 @@ import {
 } from '../../../../PageWithNavigationHeader'
 import Content from '../../Content'
 
-function ChooseAvailableDaysScreen(): JSX.Element {
+import {type AvailableDateTimeOption} from '@vexl-next/domain/dist/general/tradeChecklist'
+
+type Props = TradeChecklistStackScreenProps<'ChooseAvailableDays'>
+
+function ChooseAvailableDaysScreen({
+  route: {
+    params: {chosenDays},
+  },
+}: Props): JSX.Element {
   const {t} = useTranslation()
   const goBack = useSafeGoBack()
   const navigation: NavigationProp<TradeChecklistStackParamsList> =
     useNavigation()
-  const availableDateTimes = useAtomValue(availableDateTimesAtom)
-  const syncAvailableDateTimesWithMainState = useSetAtom(
-    syncAvailableDateTimesWithMainStateActionAtom
+  const [availableDateTimes, setAvailableDateTimes] = useAtom(
+    availableDateTimesAtom
   )
   const handleAvailableDaysChange = useSetAtom(
     handleAvailableDaysChangeActionAtom
@@ -43,9 +54,9 @@ function ChooseAvailableDaysScreen(): JSX.Element {
         (result: MarkedDates, dateTime: AvailableDateTimeOption) => {
           return {
             ...result,
-            [DateTime.fromMillis(dateTime.date).toFormat(
-              REACT_NATIVE_CALENDARS_DATE_FORMAT
-            )]: {selected: true},
+            [DateTime.fromMillis(dateTime.date)
+              .setLocale(getCurrentLocale())
+              .toFormat(REACT_NATIVE_CALENDARS_DATE_FORMAT)]: {selected: true},
           }
         },
         {}
@@ -54,8 +65,8 @@ function ChooseAvailableDaysScreen(): JSX.Element {
   )
 
   useEffect(() => {
-    syncAvailableDateTimesWithMainState()
-  }, [syncAvailableDateTimesWithMainState])
+    setAvailableDateTimes(chosenDays ?? [])
+  }, [chosenDays, setAvailableDateTimes])
 
   return (
     <>

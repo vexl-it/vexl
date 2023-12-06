@@ -3,16 +3,14 @@ import {type BtcOrSat, type TradePriceType} from '../../domain'
 import {focusAtom} from 'jotai-optics'
 import * as TE from 'fp-ts/TaskEither'
 import * as T from 'fp-ts/Task'
-import {
-  mainTradeCheckListStateAtom,
-  offerForTradeChecklistAtom,
-} from '../../atoms'
 import {publicApiAtom} from '../../../../api'
 import {pipe} from 'fp-ts/function'
 import {AcceptedCurrency} from '@vexl-next/rest-api/dist/services/btcPrice'
 import reportError from '../../../../utils/reportError'
 import {replaceNonDecimalCharsInInput} from '../../utils'
 import {getCurrentLocale} from '../../../../utils/localization/I18nProvider'
+import {mainTradeCheckListStateAtom} from '../../atoms/mainTradeChecklistStateAtom'
+import * as fromChatAtoms from '../../atoms/fromChatAtoms'
 
 export const SATOSHIS_IN_BTC = 100_000_000
 export const DECIMALS_FOR_BTC_VALUE = 8
@@ -102,13 +100,13 @@ export const saveYourPriceActionAtom = atom(
 )
 
 export const offerTypeAtom = atom((get) => {
-  const offerForTradeChecklist = get(offerForTradeChecklistAtom)
+  const offerForTradeChecklist = get(fromChatAtoms.originOfferAtom)
   return offerForTradeChecklist?.offerInfo?.publicPart?.offerType
 })
 
 export const refreshCurrentBtcPriceActionAtom = atom(null, (get, set) => {
   const api = get(publicApiAtom)
-  const offerForTradeChecklist = get(offerForTradeChecklistAtom)
+  const offerForTradeChecklist = get(fromChatAtoms.originOfferAtom)
   const currency =
     AcceptedCurrency.parse(
       offerForTradeChecklist?.offerInfo?.publicPart?.currency?.toLowerCase()

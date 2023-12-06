@@ -63,6 +63,7 @@ export function encryptMessage(
         image: message.image,
         repliedTo: message.repliedTo,
         messageType: message.messageType,
+        tradeChecklistUpdate: message.tradeChecklistUpdate,
         deanonymizedUser,
       }),
       TE.chainEitherKW(safeParse(ChatMessagePayload)),
@@ -122,6 +123,7 @@ export function decryptMessage(
               }
             : undefined,
           senderPublicKey: message.senderPublicKey,
+          tradeChecklistUpdate: payload.tradeChecklistUpdate,
         }
       }),
       TE.mapLeft(toError('ErrorDecryptingMessage'))

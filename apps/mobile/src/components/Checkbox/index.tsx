@@ -12,7 +12,7 @@ interface Props {
   style?: StyleProp<ViewStyle>
   value: boolean
   onChange: (value: boolean) => void
-  size?: 'small' | 'large'
+  size?: 'small' | 'large' | '24x24'
 }
 
 const StackStyled = styled(Stack, {
@@ -25,6 +25,10 @@ const StackStyled = styled(Stack, {
       large: {
         width: 32,
         height: 32,
+      },
+      '24x24': {
+        width: 24,
+        height: 24,
       },
     },
   },

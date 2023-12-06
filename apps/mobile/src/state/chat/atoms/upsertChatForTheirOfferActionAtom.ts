@@ -1,3 +1,4 @@
+import {createEmptyTradeChecklistInState} from './../../tradeChecklist/domain'
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
 import {
   generateChatId,
@@ -6,13 +7,12 @@ import {
 import {type OneOfferInState} from '@vexl-next/domain/dist/general/offers'
 import {atom} from 'jotai'
 import * as O from 'optics-ts'
-import {preferencesAtom} from '../../../utils/preferences'
 import {
   type ChatMessageWithState,
   type ChatWithMessages,
   type MessagingState,
 } from '../domain'
-import createVexlbotInitialMessage from '../utils/createVexlbotInitialMessage'
+import {addMessageToMessagesArray} from '../utils/addMessageToChat'
 import focusChatForTheirOfferAtom from './focusChatForTheirOfferAtom'
 import messagingStateAtom from './messagingStateAtom'
 
@@ -20,12 +20,10 @@ function createNewChat({
   inbox,
   initialMessage,
   offer,
-  tradeChecklistEnabled,
 }: {
   inbox: Inbox
   initialMessage: ChatMessageWithState
   offer: OneOfferInState
-  tradeChecklistEnabled: boolean
 }): ChatWithMessages {
   return {
     chat: {
@@ -40,14 +38,10 @@ function createNewChat({
       showVexlbotInitialMessage: true,
       showVexlbotNotifications: true,
     },
-    messages: tradeChecklistEnabled
-      ? [
-          createVexlbotInitialMessage({
-            senderPublicKey: inbox.privateKey.publicKeyPemBase64,
-          }),
-          initialMessage,
-        ]
-      : [initialMessage],
+    tradeChecklist: {
+      ...createEmptyTradeChecklistInState(),
+    },
+    messages: [initialMessage],
   }
 }
 
@@ -79,11 +73,10 @@ const upsertChatForTheirOfferActionAtom = atom(
       offerInfo: offer.offerInfo,
     })
     const existingChat = get(existingChatAtom)
-    const preferences = get(preferencesAtom)
     if (existingChat) {
       set(existingChatAtom, (prev) => ({
         ...prev,
-        messages: [...prev.messages, initialMessage],
+        messages: addMessageToMessagesArray(prev.messages)(initialMessage),
       }))
       return existingChat.chat
     } else {
@@ -91,7 +84,6 @@ const upsertChatForTheirOfferActionAtom = atom(
         inbox,
         initialMessage,
         offer,
-        tradeChecklistEnabled: preferences.tradeChecklistEnabled,
       })
       set(messagingStateAtom, (old) =>
         O.set(

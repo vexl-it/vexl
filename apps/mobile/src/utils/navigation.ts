@@ -1,13 +1,14 @@
-// TODO how to type this properly?
 import {createNavigationContainerRef} from '@react-navigation/native'
 import {ChatId} from '@vexl-next/domain/dist/general/messaging'
 import fastDeepEqual from 'fast-deep-equal'
 import * as O from 'fp-ts/Option'
 import {pipe} from 'fp-ts/function'
+import {useCallback} from 'react'
 import {type NavigationState} from 'react-native-tab-view'
 import {type RootStackParamsList} from '../navigationTypes'
 import {safeParse} from './fpUtils'
 import reportError from './reportError'
+import useSafeGoBack from './useSafeGoBack'
 
 export const navigationRef = createNavigationContainerRef()
 
@@ -82,4 +83,21 @@ export function isOnMessagesList(state: NavigationState<any>): boolean {
     reportError('warn', 'Error in isOnMessagesList', e)
     return false
   }
+}
+
+export function useGoBackXTimes(): (times: number) => void {
+  const safeGoBack = useSafeGoBack()
+
+  return useCallback(
+    (times) => {
+      // Not the ideal solution, but it works.
+      // TODO find a better way to do this
+      Array(times)
+        .fill(0)
+        .forEach(() => {
+          safeGoBack()
+        })
+    },
+    [safeGoBack]
+  )
 }

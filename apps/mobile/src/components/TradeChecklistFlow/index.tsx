@@ -8,7 +8,6 @@ import AgreeOnTradeDetailsScreen from './components/AgreeOnTradeDetailsScreen'
 import ChooseAvailableDaysScreen from './components/DateAndTimeFlow/components/ChooseAvailableDaysScreen'
 import AddTimeOptionsScreen from './components/DateAndTimeFlow/components/AddTimeOptionsScreen'
 import {useSetAtom} from 'jotai'
-import {syncTradeCheckListStateWithChatActionAtom} from './atoms'
 import Animated, {FadeIn} from 'react-native-reanimated'
 import {Stack} from 'tamagui'
 import {StyleSheet} from 'react-native'
@@ -19,6 +18,9 @@ import PremiumOrDiscountScreen from './components/CalculateAmountFlow/components
 import TradePriceTypeDialog from './components/CalculateAmountFlow/components/TradePriceTypeDialog'
 import NetworkScreen from './components/NetworkFlow/components/NetworkScreen'
 import BtcAddressScreen from './components/NetworkFlow/components/BtcAddressScreen'
+import * as fromChatAtoms from './atoms/fromChatAtoms'
+import PickDateFromSuggestionsScreen from './components/DateAndTimeFlow/components/PickDateFromSuggestionsScreen'
+import PickTimeFromSuggestions from './components/DateAndTimeFlow/components/PickTimeFromSuggestions'
 
 const StackNavigator =
   createNativeStackNavigator<TradeChecklistStackParamsList>()
@@ -41,13 +43,11 @@ export default function TradeChecklistFlow({
     params: {chatId, inboxKey},
   },
 }: Props): JSX.Element {
-  const syncTradeCheckListStateWithChat = useSetAtom(
-    syncTradeCheckListStateWithChatActionAtom
-  )
+  const setParentChat = useSetAtom(fromChatAtoms.setParentChatActionAtom)
 
   useEffect(() => {
-    syncTradeCheckListStateWithChat({chatId, inboxKey})
-  }, [chatId, syncTradeCheckListStateWithChat, inboxKey])
+    setParentChat({chatId, inboxKey})
+  }, [chatId, setParentChat, inboxKey])
 
   return (
     <>
@@ -78,6 +78,15 @@ export default function TradeChecklistFlow({
             name={'AddTimeOptions'}
             component={AddTimeOptionsScreen}
           />
+          <StackNavigator.Screen
+            name={'PickDateFromSuggestions'}
+            component={PickDateFromSuggestionsScreen}
+          />
+          <StackNavigator.Screen
+            name={'PickTimeFromSuggestions'}
+            component={PickTimeFromSuggestions}
+          />
+
           <StackNavigator.Screen
             name={'CalculateAmount'}
             component={CalculateAmountScreen}

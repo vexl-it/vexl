@@ -23,6 +23,7 @@ import {
 } from '@vexl-next/rest-api/dist/services/contact/contracts'
 import {z} from 'zod'
 import {type ReadingFileError} from './utils/replaceImageFileUrisWithBase64'
+import {TradeChecklistInState} from '../tradeChecklist/domain'
 
 export type ApiErrorCreatingInbox = BasicError<'ApiErrorCreatingInbox'>
 export type ErrorInboxAlreadyExists = BasicError<'ErrorInboxAlreadyExists'>
@@ -53,6 +54,13 @@ export type ChatMessageWithState = z.TypeOf<typeof ChatMessageWithState>
 export const ChatWithMessages = z.object({
   chat: Chat,
   messages: z.array(ChatMessageWithState),
+  tradeChecklist: TradeChecklistInState.default({
+    dateAndTime: {},
+    location: {},
+    amount: {},
+    network: {},
+    identity: {},
+  }),
 })
 export type ChatWithMessages = z.TypeOf<typeof ChatWithMessages>
 

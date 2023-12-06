@@ -1,20 +1,15 @@
-import {focusAtom} from 'jotai-optics'
+import {type AvailableDateTimeOption} from '@vexl-next/domain/dist/general/tradeChecklist'
 import {
-  UnixMilliseconds,
+  fromDateTime,
   unixMillisecondsNow,
+  type UnixMilliseconds,
 } from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
 import {atom, type SetStateAction, type WritableAtom} from 'jotai'
-import getValueFromSetStateActionOfAtom from '../../../../utils/atomUtils/getValueFromSetStateActionOfAtom'
 import {DateTime} from 'luxon'
-import {mainTradeCheckListStateAtom} from '../../atoms'
-import {type AvailableDateTimeOption} from '../../domain'
 import {type DateData} from 'react-native-calendars'
 import addToSortedArray from '../../../../utils/addToSortedArray'
-
-export const mainDateAndTimeStateAtom = focusAtom(
-  mainTradeCheckListStateAtom,
-  (o) => o.prop('DATE_AND_TIME')
-)
+import getValueFromSetStateActionOfAtom from '../../../../utils/atomUtils/getValueFromSetStateActionOfAtom'
+import {addDateAndTimeSuggestionsActionAtom} from '../../atoms/updatesToBeSentAtom'
 
 export const availableDateTimesAtom = atom<AvailableDateTimeOption[]>([])
 
@@ -102,9 +97,8 @@ export function createTimeOptionAtomForTimeFromDropdown(
 export const handleAvailableDaysChangeActionAtom = atom(
   null,
   (get, set, day: DateData) => {
-    const millis = UnixMilliseconds.parse(
-      DateTime.fromMillis(day.timestamp).startOf('day').toMillis()
-    )
+    const dateTime = DateTime.fromMillis(day.timestamp)
+    const millis = fromDateTime(dateTime.startOf('day'))
     const availableDateTimes = get(availableDateTimesAtom)
 
     if (availableDateTimes.some((dateTime) => dateTime.date === millis)) {
@@ -120,7 +114,11 @@ export const handleAvailableDaysChangeActionAtom = atom(
         addToSortedArray(
           availableDateTimes,
           (t1, t2) => t1.date - t2.date
-        )({from: millis, to: millis, date: millis})
+        )({
+          from: fromDateTime(dateTime.startOf('day').plus({hour: 12})),
+          to: fromDateTime(dateTime.startOf('day').plus({hour: 13})),
+          date: millis,
+        })
       )
     }
   }
@@ -137,18 +135,7 @@ export const removeTimestampFromAvailableAtom = atom(
   }
 )
 
-export const syncAvailableDateTimesWithMainStateActionAtom = atom(
-  null,
-  (get, set) => {
-    const mainDateAndTimeState = get(mainDateAndTimeStateAtom)
-    set(availableDateTimesAtom, mainDateAndTimeState.data)
-  }
-)
-
-export const saveLocalDateTimeStateToMainStateActionAtom = atom(
-  null,
-  (get, set) => {
-    const data = get(availableDateTimesAtom)
-    set(mainDateAndTimeStateAtom, {status: 'pending', data})
-  }
-)
+export const submitSuggestionsActionAtom = atom(null, (get, set) => {
+  const data = get(availableDateTimesAtom)
+  set(addDateAndTimeSuggestionsActionAtom, data)
+})

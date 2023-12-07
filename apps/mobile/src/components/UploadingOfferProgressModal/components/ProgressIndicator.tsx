@@ -1,6 +1,6 @@
 import {useAtomValue} from 'jotai'
 import {Spinner, Text, XStack, YStack} from 'tamagui'
-import ProgressBar from './ProgressBar'
+import ProgressBar from '../../ProgressBar'
 import {uploadingProgressDataForProgressIndicatorElementAtom} from '../atoms'
 
 function ProgressIndicator(): JSX.Element {

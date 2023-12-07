@@ -20,6 +20,7 @@ import {setLastTimeAppWasRunningToNow} from './utils/lastTimeAppWasRunning'
 import UploadingOfferProgressModal from './components/UploadingOfferProgressModal'
 import {subscribeToGeneralTopic} from './utils/notifications'
 import PreventScreenshots from './components/PreventScreenshots'
+import ContactsHashingProgressModal from './components/ContactsHashingProgressModal'
 
 void SplashScreen.preventAutoHideAsync()
 
@@ -65,6 +66,7 @@ function App(): JSX.Element {
           <MaintenanceAndForceUpdateCheck>
             <RootNavigation />
             <UploadingOfferProgressModal />
+            <ContactsHashingProgressModal />
           </MaintenanceAndForceUpdateCheck>
         </LoadingOverlayProvider>
         <AreYouSureDialog />

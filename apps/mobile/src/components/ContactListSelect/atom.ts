@@ -1,8 +1,8 @@
 import {IsoDatetimeString} from '@vexl-next/domain/dist/utility/IsoDatetimeString.brand'
 import * as A from 'fp-ts/Array'
-import * as E from 'fp-ts/Either'
 import * as O from 'fp-ts/Option'
 import * as T from 'fp-ts/Task'
+import * as E from 'fp-ts/Either'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {atom, type Atom, type SetStateAction, type WritableAtom} from 'jotai'
@@ -35,8 +35,11 @@ import reportError from '../../utils/reportError'
 import toE164PhoneNumberWithDefaultCountryCode from '../../utils/toE164PhoneNumberWithDefaultCountryCode'
 import {toCommonErrorMessage} from '../../utils/useCommonErrorMessages'
 import {askAreYouSureActionAtom} from '../AreYouSureDialog'
-import {loadingOverlayDisplayedAtom} from '../LoadingOverlayProvider'
 import userSvg from '../images/userSvg'
+import {loadingOverlayDisplayedAtom} from '../LoadingOverlayProvider'
+import sequenceTasksWithAnimationFrames from '../../utils/sequenceTasksWithAnimationFrames'
+import flattenTaskOfEithers from '@vexl-next/resources-utils/dist/utils/flattenTaskOfEithers'
+import {hashingProgressPercentageAtom} from '../ContactsHashingProgressModal/atoms'
 
 export const ContactsSelectScope = createScope<{
   importedContacts: ContactNormalized[]
@@ -300,7 +303,9 @@ export const contactSelectMolecule = molecule((getMolecule, getScope) => {
 
     const selectedNumbers = Array.from(get(selectedNumbersAtom))
     const allContacts = get(allContactsAtom)
+
     set(loadingOverlayDisplayedAtom, true)
+
     return pipe(
       selectedNumbers,
       A.map((oneNumber) =>
@@ -311,14 +316,19 @@ export const contactSelectMolecule = molecule((getMolecule, getScope) => {
       A.filter(notEmpty),
       A.map((oneContact) => {
         return pipe(
-          hashPhoneNumber(oneContact.normalizedNumber),
-          E.map((hash): ContactNormalizedWithHash => ({...oneContact, hash}))
+          E.Do,
+          E.chainW(() => hashPhoneNumber(oneContact.normalizedNumber)),
+          E.map((hash): ContactNormalizedWithHash => ({...oneContact, hash})),
+          TE.fromEither
         )
       }),
-      E.sequenceArray,
-      TE.fromEither,
-      TE.chainFirstW((contacts) =>
-        contactApi.importContacts({contacts: contacts.map((one) => one.hash)})
+      sequenceTasksWithAnimationFrames(300, (progress) => {
+        set(hashingProgressPercentageAtom, progress * 100)
+      }),
+      flattenTaskOfEithers,
+      TE.fromTask,
+      TE.chainFirstW(({rights}) =>
+        contactApi.importContacts({contacts: rights.map((one) => one.hash)})
       ),
       TE.match(
         (e) => {
@@ -329,7 +339,11 @@ export const contactSelectMolecule = molecule((getMolecule, getScope) => {
           Alert.alert(toCommonErrorMessage(e, t) ?? t('common.unknownError'))
           return false
         },
-        (importedContacts) => {
+        ({lefts, rights: importedContacts}) => {
+          if (lefts.length > 0) {
+            reportError('warn', 'Error when hashing phone numbers', lefts)
+          }
+
           set(importedContactsAtom, [...importedContacts])
 
           const convertedToContactsNormalized: ContactNormalized[] =
@@ -362,6 +376,7 @@ export const contactSelectMolecule = molecule((getMolecule, getScope) => {
       ),
       T.map((v) => {
         set(loadingOverlayDisplayedAtom, false)
+        set(hashingProgressPercentageAtom, 0)
         return v
       })
     )

@@ -76,12 +76,11 @@ export function aesGCMIgnoreTagEncrypt(
 export function hmacSign(
   password: string
 ): (data: string) => E.Either<CryptoError, string> {
-  return (data) => {
-    return E.tryCatch(
+  return (data) =>
+    E.tryCatch(
       () => crypto.hmac.hmacSign({data, password}),
       toError('CryptoError', 'Error while signing data')
     )
-  }
 }
 
 export function importKeyPair(

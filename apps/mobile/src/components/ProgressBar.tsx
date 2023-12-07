@@ -24,6 +24,7 @@ function ProgressBar({percentDone}: Props): JSX.Element {
       bottom: 0,
       backgroundColor: tokens.color.black.val,
       width: progress.value * (progressContainerWidth / 100),
+      borderRadius: 36,
     }
   })
 

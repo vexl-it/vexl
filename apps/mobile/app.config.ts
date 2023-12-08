@@ -14,7 +14,8 @@ const presets = {
     foregroundImage: './assets/android-front.png',
     backgroundImage: './assets/android-back-stage.png',
     icon: './assets/icon-stage.png',
-    hmacPassword: 'VexlVexl',
+    hmacPassword:
+      'UHQyykWs4nE1Yn8IQi/lsz2QemK3zA+JIWdGll3PEtle9/aMMBvQk6kKgYkjyewTiK0ypuquBSBVJwuSiYs8FQ==',
   },
   prod: {
     enableHiddenFeatures: false,
@@ -28,7 +29,7 @@ const presets = {
     backgroundImage: './assets/android-back.png',
     icon: './assets/icon-next.png',
     hmacPassword:
-      '9cf02ca3b233f17160e71b0db098f95396e73f27ef672dda482a6566d8e29484',
+      'rv5AKXDcED4txmI5Nltz9eZFAHOI1VrLT3JWOpEZefE5uGInq53rfHkQLUIjaMUHv3hicbk/wtSKOfsNZ3aNNw==',
   },
 }
 

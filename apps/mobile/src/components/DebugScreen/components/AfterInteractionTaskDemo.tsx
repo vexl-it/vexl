@@ -17,11 +17,20 @@ function sleepPromise(ms: number): Promise<void> {
   })
 }
 
-function createIntensiveTasks(): Array<T.Task<string>> {
-  return Array(3000)
+function createIntensiveTasks(
+  onProgress: (progress: number) => void = () => {}
+): Array<T.Task<string>> {
+  return Array(10000)
     .fill('ahojTotojetest')
-    .map((input) => {
-      return async () => hmac.hmacSign({data: input, password: 'ahoj'})
+    .map((input, i, array) => {
+      return async () => {
+        const result = hmac.hmacSign({
+          data: input,
+          password: 'ahoj',
+        })
+        onProgress((i + 1) / array.length)
+        return result
+      }
     })
 }
 
@@ -37,7 +46,7 @@ export default function AfterInteractionTaskDemo(): JSX.Element {
       const startAt = Date.now()
       const result = await pipe(
         createIntensiveTasks(),
-        sequenceTasksWithAnimationFrames(50, (progress) => {
+        sequenceTasksWithAnimationFrames(500, (progress) => {
           setProgress(progress)
         })
       )()

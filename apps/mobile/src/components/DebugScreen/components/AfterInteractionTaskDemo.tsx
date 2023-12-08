@@ -1,0 +1,71 @@
+import {Text, YStack} from 'tamagui'
+import {hmac} from '@vexl-next/cryptography'
+import {useCallback, useState} from 'react'
+import Button from '../../Button'
+import ProgressBar from '../../UploadingOfferProgressModal/components/ProgressBar'
+import type * as T from 'fp-ts/Task'
+import {pipe} from 'fp-ts/function'
+import sequenceTasksWithAnimationFrames from '../../../utils/sequenceTasksWithAnimationFrames'
+import formatNumber from '../../../utils/formatNumber'
+
+// sleep promise
+function sleepPromise(ms: number): Promise<void> {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve()
+    }, ms)
+  })
+}
+
+function createIntensiveTasks(): Array<T.Task<string>> {
+  return Array(3000)
+    .fill('ahojTotojetest')
+    .map((input) => {
+      return async () => hmac.hmacSign({data: input, password: 'ahoj'})
+    })
+}
+
+export default function AfterInteractionTaskDemo(): JSX.Element {
+  const [progress, setProgress] = useState(0)
+  const [result, setResult] = useState<string | undefined>(undefined)
+
+  const runTask = useCallback(() => {
+    void (async () => {
+      setProgress(0)
+      setResult(undefined)
+      await sleepPromise(1000)
+      const startAt = Date.now()
+      const result = await pipe(
+        createIntensiveTasks(),
+        sequenceTasksWithAnimationFrames(50, (progress) => {
+          setProgress(progress)
+        })
+      )()
+      setResult(
+        `Done. Got ${result.length} items. Took ${formatNumber(
+          Date.now() - startAt
+        )}ms`
+      )
+    })()
+  }, [])
+
+  return (
+    <YStack space="$2" my={'$2'}>
+      <Text color="$black">
+        Test extensive calculation that updates UI. (Calculating 2000 hmacs)
+      </Text>
+      <Button
+        size={'small'}
+        variant={'secondary'}
+        text="run"
+        onPress={runTask}
+      ></Button>
+      <ProgressBar percentDone={progress * 100} />
+      {!result ? (
+        <Text color={'$black'}>{Math.round(progress * 100)}</Text>
+      ) : (
+        <Text color={'$black'}>{result}</Text>
+      )}
+    </YStack>
+  )
+}

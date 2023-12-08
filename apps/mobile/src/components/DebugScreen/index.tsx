@@ -32,6 +32,7 @@ import RemoteConfigView from './components/RemoteConfigView'
 import SimulateMissingOfferInbox from './components/SimulateMissingOfferInbox'
 import {offersStateAtom} from '../../state/marketplace/atoms/offersState'
 import {myOffersAtom} from '../../state/marketplace/atoms/myOffers'
+import AfterInteractionTaskDemo from './components/AfterInteractionTaskDemo'
 
 // const ContentScroll = styled(ScrollView, {
 //   marginBottom: '$2',
@@ -286,6 +287,7 @@ function DebugScreen(): JSX.Element {
           </YStack>
           <SimulateMissingOfferInbox />
           <Preferences />
+          <AfterInteractionTaskDemo />
         </ScrollView>
         <Button variant="secondary" text="back" onPress={safeGoBack} />
       </WhiteContainer>

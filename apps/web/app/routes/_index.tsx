@@ -1,4 +1,11 @@
 import type {MetaFunction} from '@remix-run/node'
+import {publicApi} from '@vexl-next/rest-api/dist/services/user/index.js'
+import {ServiceUrl} from '@vexl-next/rest-api/dist/ServiceUrl.brand.js'
+import {PlatformName} from '@vexl-next/rest-api'
+import {type E164PhoneNumber} from '@vexl-next/domain/dist/general/E164PhoneNumber.brand.js'
+import {KeyHolder} from '@vexl-next/cryptography'
+import {curves} from '@vexl-next/cryptography/dist/KeyHolder/Curve.brand.js'
+import {useMemo} from 'react'
 
 export const meta: MetaFunction = () => {
   return [
@@ -7,35 +14,31 @@ export const meta: MetaFunction = () => {
   ]
 }
 
+function initPhoneVerification(phoneNumber: E164PhoneNumber) {
+  const userPublicApi = publicApi({
+    clientVersion: 0,
+    url: ServiceUrl.parse('https://stage-user.vexl.it'),
+    platform: PlatformName.parse('WEB'),
+  })
+
+  userPublicApi.initPhoneVerification({phoneNumber})
+}
+
+function generateKeys() {
+  return KeyHolder.generatePrivateKey(curves.secp256k1)
+}
+
 export default function Index(): JSX.Element {
+  const keys = useMemo(() => {
+    return generateKeys()
+  }, [])
+
   return (
-    <div style={{fontFamily: 'system-ui, sans-serif', lineHeight: '1.8'}}>
-      <h1>Welcome to Remix</h1>
-      <ul>
-        <li>
-          <a
-            target="_blank"
-            href="https://remix.run/tutorials/blog"
-            rel="noreferrer"
-          >
-            15m Quickstart Blog Tutorial
-          </a>
-        </li>
-        <li>
-          <a
-            target="_blank"
-            href="https://remix.run/tutorials/jokes"
-            rel="noreferrer"
-          >
-            Deep Dive Jokes App Tutorial
-          </a>
-        </li>
-        <li>
-          <a target="_blank" href="https://remix.run/docs" rel="noreferrer">
-            Remix Docs
-          </a>
-        </li>
-      </ul>
+    <div>
+      <div>
+        <h1>keys</h1>
+        <code>{JSON.stringify(keys, null, 2)}</code>
+      </div>
     </div>
   )
 }

@@ -36,8 +36,13 @@ export default function sequenceTasksWithAnimationFrames<Result>(
         pipe(
           requestAnimationFrameTask,
           T.chain(() => {
-            onProgress((i + 1) / numberOfChunks)
-            return T.sequenceSeqArray(chunks)
+            return pipe(
+              T.sequenceSeqArray(chunks),
+              T.map((one) => {
+                onProgress((i + 1) / numberOfChunks)
+                return one
+              })
+            )
           })
         )
       ),

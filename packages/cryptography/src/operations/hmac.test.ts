@@ -1,6 +1,10 @@
 import {hmacSign, hmacVerify} from './hmac'
+import crypto from 'node:crypto'
 
-const password = 'testPass'
+const password = crypto
+  .pbkdf2Sync('testPass', 'vexlvexl', 2000, 108, 'sha256')
+  .subarray(44, 44 + 64)
+  .toString('base64')
 
 it('Should successfully sign and verify', () => {
   const data = 'Some data'
@@ -24,7 +28,12 @@ it('Should fail when verifying with bad password', () => {
 })
 
 it('Should produce expected output', () => {
-  expect(hmacSign({password: 'something', data: 'something else'})).toEqual(
+  const password = crypto
+    .pbkdf2Sync('something', 'vexlvexl', 2000, 108, 'sha256')
+    .subarray(44, 44 + 64)
+    .toString('base64')
+
+  expect(hmacSign({password, data: 'something else'})).toEqual(
     'MWrLhqnIDcPLSXzqJUbo0Bm+qL430mUs3ZtptnA+ylw='
   )
 })

@@ -19,6 +19,7 @@ import {useAppState} from './utils/useAppState'
 import {setLastTimeAppWasRunningToNow} from './utils/lastTimeAppWasRunning'
 import UploadingOfferProgressModal from './components/UploadingOfferProgressModal'
 import {subscribeToGeneralTopic} from './utils/notifications'
+import PreventScreenshots from './components/PreventScreenshots'
 
 void SplashScreen.preventAutoHideAsync()
 
@@ -47,6 +48,7 @@ function App(): JSX.Element {
     <SafeAreaProvider>
       <StatusBar style="light" />
       <BadgeCountManager />
+      <PreventScreenshots />
       <NavigationContainer
         ref={navigationRef}
         theme={{

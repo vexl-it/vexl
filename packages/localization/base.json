@@ -168,6 +168,8 @@
   "settings.logoutDialog.title": "Delete account?",
   "settings.logoutDialog.title2": "You sure?",
   "settings.logoutDialog.description": "Are you sure you want to delete your account? This action cannot be undone",
+  "settings.screenshotsNotAllowed": "Screenshots Not Allowed",
+  "settings.otherUserDisabledScreenshots": "You have disabled app screenshots.",
   "offer.title": "Offer",
   "offer.cashOnly": "Cash only",
   "offer.onlineOnly": "Online only",

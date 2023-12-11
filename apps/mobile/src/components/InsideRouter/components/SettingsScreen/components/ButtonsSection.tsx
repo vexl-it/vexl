@@ -19,7 +19,7 @@ import coinsIconSvg from '../images/coinsIconSvg'
 import faceIdIconSvg from '../images/faceIdIconSvg'
 import contactIconSvg from '../images/contactIconSvg'
 import {useNavigation} from '@react-navigation/native'
-import {getTokens, Stack, styled, Text, XStack} from 'tamagui'
+import {getTokens, Stack, XStack} from 'tamagui'
 import {enableHiddenFeatures} from '../../../../../utils/environment'
 import notEmpty from '../../../../../utils/notEmpty'
 import {useSetAtom} from 'jotai'
@@ -31,30 +31,33 @@ import ReportIssue from './ReportIssue'
 import {
   changeCurrencyDialogVisibleAtom,
   reportIssueDialogVisibleAtom,
+  toggleScreenshotsDisabledActionAtom,
 } from '../atoms'
 import openUrl from '../../../../../utils/openUrl'
 import ChangeCurrency from './ChangeCurrency'
 import ContactsImportedTitle from './ContactsImportedTitle'
 import SelectedCurrencyTitle from './SelectedCurrencyTitle'
 import notificationsIconSvg from '../images/notificationsIconSvg'
+import AllowScreenshots from './AllowScreenshots'
+import ItemText from './ButtonSectionItemText'
 
-const ItemText = styled(Text, {
-  fos: 18,
-})
+interface ItemProps {
+  text: string | JSX.Element
+  icon: SvgString
+  onPress: () => void
+  children?: React.ReactNode
+  hidden?: boolean
+}
 
 function Item({
   text,
   icon,
   onPress,
   children,
-}: {
-  text: string | JSX.Element
-  icon: SvgString
-  onPress: () => void
-  children?: React.ReactNode
-}): JSX.Element {
+  hidden,
+}: ItemProps): JSX.Element | null {
   const tokens = getTokens()
-  return (
+  return !hidden ? (
     <TouchableWithoutFeedback onPress={onPress}>
       <XStack ai="center" h={66} mx="$7">
         <Stack w={24} h={24} mr="$4">
@@ -63,16 +66,14 @@ function Item({
         {children ??
           (typeof text === 'string' ? (
             <Stack f={1}>
-              <ItemText ff="$body500" col="$white">
-                {text}
-              </ItemText>
+              <ItemText>{text}</ItemText>
             </Stack>
           ) : (
             text
           ))}
       </XStack>
     </TouchableWithoutFeedback>
-  )
+  ) : null
 }
 
 function ButtonsSection(): JSX.Element {
@@ -83,6 +84,9 @@ function ButtonsSection(): JSX.Element {
   const setReportIssueDialogVisible = useSetAtom(reportIssueDialogVisibleAtom)
   const setChangeCurrencyDialogVisible = useSetAtom(
     changeCurrencyDialogVisibleAtom
+  )
+  const toggleScreenshotsDisabled = useSetAtom(
+    toggleScreenshotsDisabledActionAtom
   )
 
   function todo(): void {
@@ -114,14 +118,7 @@ function ButtonsSection(): JSX.Element {
     )()
   }, [showAreYouSure, t, logout])
 
-  const data: Array<
-    Array<{
-      icon: SvgString
-      text: string | JSX.Element
-      onPress: () => void
-      children?: React.ReactNode
-    } | null>
-  > = useMemo(
+  const data: Array<Array<ItemProps | null>> = useMemo(
     () =>
       [
         [
@@ -178,11 +175,13 @@ function ButtonsSection(): JSX.Element {
                 },
                 children: <SelectedCurrencyTitle />,
               },
-
               {
                 text: t('settings.items.allowScreenshots'),
                 icon: imageIconSvg,
-                onPress: todo,
+                onPress: toggleScreenshotsDisabled,
+                children: <AllowScreenshots />,
+                // not working correctly for iOS 17 and above
+                hidden: Platform.OS === 'ios' && Number(Platform.Version) > 17,
               },
             ]
           : [
@@ -193,6 +192,14 @@ function ButtonsSection(): JSX.Element {
                   setChangeCurrencyDialogVisible(true)
                 },
                 children: <SelectedCurrencyTitle />,
+              },
+              {
+                text: t('settings.items.allowScreenshots'),
+                icon: imageIconSvg,
+                onPress: toggleScreenshotsDisabled,
+                children: <AllowScreenshots />,
+                // not working correctly for iOS 17 and above
+                hidden: Platform.OS === 'ios' && Number(Platform.Version) > 17,
               },
             ],
         [
@@ -297,6 +304,7 @@ function ButtonsSection(): JSX.Element {
       setChangeCurrencyDialogVisible,
       setReportIssueDialogVisible,
       t,
+      toggleScreenshotsDisabled,
     ]
   )
 

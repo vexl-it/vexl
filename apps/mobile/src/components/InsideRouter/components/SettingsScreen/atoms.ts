@@ -1,12 +1,19 @@
-import {userPhoneNumberAtom} from './../../../../state/session/index'
+import {
+  userPhoneNumberAtom,
+  userDataRealOrAnonymizedAtom,
+} from '../../../../state/session'
 import {atom} from 'jotai'
-import {userDataRealOrAnonymizedAtom} from '../../../../state/session'
 import {type ImportContactFromLinkPayload} from '../../../../state/contacts/domain'
+import {screenshotsDisabledAtom} from '../../../../state/showYouDidNotAllowScreenshotsActionAtom'
 
 export const reportIssueDialogVisibleAtom = atom<boolean>(false)
 export const changeCurrencyDialogVisibleAtom = atom<boolean>(false)
 export const qrCodeDialogVisibleAtom = atom<boolean>(false)
 export const qrScannerDialogVisibleAtom = atom<boolean>(false)
+
+export const toggleScreenshotsDisabledActionAtom = atom(null, (get, set) => {
+  set(screenshotsDisabledAtom, !get(screenshotsDisabledAtom))
+})
 
 export const encodedUserDetailsUriAtom = atom<string>((get) => {
   const userData = get(userDataRealOrAnonymizedAtom)

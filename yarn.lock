@@ -8394,6 +8394,7 @@ __metadata:
     react-native-reanimated: ~3.3.0
     react-native-safe-area-context: 4.6.3
     react-native-screens: ~3.22.0
+    react-native-screenshot-prevent: ^1.1.9
     react-native-sound: ^0.11.2
     react-native-svg: 13.9.0
     react-native-tab-view: ^3.5.1
@@ -21345,6 +21346,16 @@ __metadata:
     react: "*"
     react-native: "*"
   checksum: 3b592ff31d9dfde5e2ce967f85f3ad17a94f4f3bee2248a3dad9ec791e7cda72a431f86b468b3b2a70ebeffb49b462f8162668a58fb9ddabb10b5a369816850d
+  languageName: node
+  linkType: hard
+
+"react-native-screenshot-prevent@npm:^1.1.9":
+  version: 1.1.9
+  resolution: "react-native-screenshot-prevent@npm:1.1.9"
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: 98b8a80b0505ae450e4f47de35af90be2b278f4d47e45a1a13411dbb588665a58a0015bad2057b59fcadf0b3f05562f151eaed658c504e2f58c7db7d2e922bdd
   languageName: node
   linkType: hard
 

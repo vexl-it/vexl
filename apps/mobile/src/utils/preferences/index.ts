@@ -22,6 +22,7 @@ export const preferencesAtom = atomWithParsedMmkvStorage(
     tradeChecklistEnabled: false,
     offerFeedbackEnabled: false,
     showTextDebugButton: false,
+    disableScreenshots: false,
   },
   Preferences
 )

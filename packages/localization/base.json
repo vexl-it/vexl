@@ -164,6 +164,7 @@
   "settings.noLogoutExplanation": "Can't find logout? There's no such thing.\nBut you can delete your account.",
   "settings.support": "If you like Vexl, support it’s improvement by sending some bitcoin as donation!",
   "settings.version": "Vexl App version: {{version}}",
+  "settings.btcPriceSourceCredit": "BTC price source: CoinGecko.com",
   "settings.logoutDialog.title": "Delete account?",
   "settings.logoutDialog.title2": "You sure?",
   "settings.logoutDialog.description": "Are you sure you want to delete your account? This action cannot be undone",

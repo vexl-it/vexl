@@ -39,6 +39,7 @@ import useRefreshContactsFromDeviceOnResume from '../../state/contacts/hooks/use
 import DevTranslationFloatingButton from '../DevTranslationFloatingButtons'
 import {showTextDebugButtonAtom} from '../../utils/preferences'
 import {useAtomValue} from 'jotai'
+import {useSetAppLanguageFromStore} from '../../state/useSetAppLanguageFromStore'
 
 const Stack = createNativeStackNavigator<RootStackParamsList>()
 
@@ -56,6 +57,7 @@ function LoggedInHookGroup(): null {
 
   useHideInnactivityReminderNotificationsOnResume()
   useRefreshContactsFromDeviceOnResume()
+  useSetAppLanguageFromStore()
 
   return null
 }

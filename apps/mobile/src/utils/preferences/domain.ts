@@ -22,6 +22,7 @@ export const Preferences = z.object({
   showTextDebugButton: z.boolean().default(false),
   disableScreenshots: z.boolean().default(false),
   isDeveloper: z.boolean().default(false),
+  appLanguage: z.string().optional(),
 })
 
 export type Preferences = z.infer<typeof Preferences>

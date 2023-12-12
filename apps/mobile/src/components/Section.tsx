@@ -37,9 +37,11 @@ function Section({
                 />
               </Stack>
             )}
-            <Text ff={'$body700'} color={'$white'} fos={24}>
-              {title}
-            </Text>
+            <Stack fs={1}>
+              <Text ff={'$body700'} color={'$white'} fos={24}>
+                {title}
+              </Text>
+            </Stack>
           </XStack>
           {mandatory && (
             <Text fos={24} ff={'$body700'} color={'$greyOnBlack'}>

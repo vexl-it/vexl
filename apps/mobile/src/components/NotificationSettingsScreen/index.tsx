@@ -6,7 +6,10 @@ import {notificationPreferencesAtom} from '../../utils/preferences'
 import PreferenceItem from './components/PreferenceItem'
 import {ScrollView} from 'react-native'
 import {useTranslation} from '../../utils/localization/I18nProvider'
-import {useMemo} from 'react'
+import React, {useMemo} from 'react'
+import useSafeGoBack from '../../utils/useSafeGoBack'
+import closeSvg from '../images/closeSvg'
+import IconButton from '../IconButton'
 
 const notificationPreferencesToShow = [
   'marketing',
@@ -18,6 +21,7 @@ const notificationPreferencesToShow = [
 
 function NotificationSettingsScreen(): JSX.Element {
   const {t} = useTranslation()
+  const safeGoBack = useSafeGoBack()
 
   const contents = useMemo(() => {
     return notificationPreferencesToShow.map((one) => ({
@@ -29,10 +33,9 @@ function NotificationSettingsScreen(): JSX.Element {
 
   return (
     <Screen customHorizontalPadding={getTokens().space[2].val}>
-      <ScreenTitle
-        text={t('notifications.preferences.screenTitle')}
-        showCloseButton
-      />
+      <ScreenTitle text={t('notifications.preferences.screenTitle')}>
+        <IconButton variant="dark" icon={closeSvg} onPress={safeGoBack} />
+      </ScreenTitle>
       <ScrollView>
         <YStack space={6}>
           {contents.map((one) => (

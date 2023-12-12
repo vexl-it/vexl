@@ -67,7 +67,7 @@ function PremiumOrDiscountDetail({
   }
 
   return (
-    <Modal animationType="fade" transparent visible={visible}>
+    <Modal animationType={'fade'} transparent visible={visible}>
       <Screen customHorizontalPadding={16}>
         <KeyboardAvoidingView>
           <Stack flex={1}>
@@ -75,24 +75,22 @@ function PremiumOrDiscountDetail({
               text={t('offerForm.premiumOrDiscount.premiumOrDiscount')}
               withBottomBorder
             >
-              <IconButton variant="dark" icon={closeSvg} onPress={onClose} />
+              <IconButton variant={'dark'} icon={closeSvg} onPress={onClose} />
             </ScreenTitle>
             <XStack ai={'center'} jc={'space-between'} py={'$4'}>
-              <Stack f={2}>
-                <Text
-                  numberOfLines={2}
-                  adjustsFontSizeToFit
-                  mr="$4"
-                  fos={18}
-                  ff="$body600"
-                  col="$white"
-                >
-                  {offerType === 'BUY'
-                    ? t('offerForm.premiumOrDiscount.youBuyBtcFor')
-                    : t('offerForm.premiumOrDiscount.youSellBtcFor')}
-                </Text>
-              </Stack>
-              <Stack f={3}>
+              <Text
+                numberOfLines={2}
+                adjustsFontSizeToFit
+                mr="$4"
+                fos={18}
+                ff={'$body600'}
+                col={'$white'}
+              >
+                {offerType === 'BUY'
+                  ? t('offerForm.premiumOrDiscount.youBuyBtcFor')
+                  : t('offerForm.premiumOrDiscount.youSellBtcFor')}
+              </Text>
+              <Stack f={1}>
                 <Input
                   value={inputValue}
                   onChangeText={onInputValueChange}

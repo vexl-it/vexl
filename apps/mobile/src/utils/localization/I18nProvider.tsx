@@ -1,11 +1,18 @@
-import {getLocales} from 'expo-localization'
 import type {TranslateOptions} from 'i18n-js'
 import {I18n} from 'i18n-js'
 import {atom, useAtomValue} from 'jotai'
 import {enableHiddenFeatures, isStaging} from '../environment'
 import * as translations from './translations'
+import {getLocales} from 'expo-localization'
 
 const {dev: devTranslation, ...prodTranslations} = translations
+
+export const supportedTranslations = {
+  en: translations.en,
+  de: translations.de,
+  cs: translations.cs,
+  sk: translations.sk,
+}
 
 // SETUP I18n
 export const i18n = new I18n(
@@ -13,10 +20,7 @@ export const i18n = new I18n(
     ? {'en_dev': devTranslation, ...prodTranslations}
     : {
         en_dev: translations.dev,
-        en: translations.en,
-        de: translations.de,
-        cs: translations.cs,
-        sk: translations.sk,
+        ...supportedTranslations,
       }
 )
 i18n.locale = isStaging ? 'en_dev' : getLocales().at(0)?.languageTag ?? 'en'

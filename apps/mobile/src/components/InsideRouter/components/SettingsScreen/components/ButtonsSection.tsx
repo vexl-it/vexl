@@ -2,7 +2,12 @@ import SvgImage from '../../../../Image'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import {type SvgString} from '@vexl-next/domain/dist/utility/SvgString.brand'
 import profileIconSvg from '../../../images/profileIconSvg'
-import {Alert, Platform, TouchableWithoutFeedback} from 'react-native'
+import {
+  Alert,
+  type ColorValue,
+  Platform,
+  TouchableWithoutFeedback,
+} from 'react-native'
 import imageIconSvg from '../images/imageIconSvg'
 import {Fragment, useCallback, useMemo} from 'react'
 import editIconSvg from '../images/editIconSvg'
@@ -38,12 +43,16 @@ import ChangeCurrency from './ChangeCurrency'
 import ContactsImportedTitle from './ContactsImportedTitle'
 import SelectedCurrencyTitle from './SelectedCurrencyTitle'
 import notificationsIconSvg from '../images/notificationsIconSvg'
+import spokenLanguagesSvg from '../../../../images/spokenLanguagesSvg'
 import AllowScreenshots from './AllowScreenshots'
 import ItemText from './ButtonSectionItemText'
+import {isUsingIos17AndAbove} from '../../../../../utils/isUsingIos17AndAbove'
+import {changeLanguageActionAtom} from '../actionAtoms'
 
 interface ItemProps {
   text: string | JSX.Element
   icon: SvgString
+  iconFill?: ColorValue
   onPress: () => void
   children?: React.ReactNode
   hidden?: boolean
@@ -52,6 +61,7 @@ interface ItemProps {
 function Item({
   text,
   icon,
+  iconFill,
   onPress,
   children,
   hidden,
@@ -61,7 +71,11 @@ function Item({
     <TouchableWithoutFeedback onPress={onPress}>
       <XStack ai="center" h={66} mx="$7">
         <Stack w={24} h={24} mr="$4">
-          <SvgImage stroke={tokens.color.greyOnBlack.val} source={icon} />
+          <SvgImage
+            stroke={!iconFill ? tokens.color.greyOnBlack.val : undefined}
+            fill={iconFill ?? 'none'}
+            source={icon}
+          />
         </Stack>
         {children ??
           (typeof text === 'string' ? (
@@ -88,6 +102,7 @@ function ButtonsSection(): JSX.Element {
   const toggleScreenshotsDisabled = useSetAtom(
     toggleScreenshotsDisabledActionAtom
   )
+  const changeLanguage = useSetAtom(changeLanguageActionAtom)
 
   function todo(): void {
     Alert.alert('To be implemented')
@@ -145,6 +160,12 @@ function ButtonsSection(): JSX.Element {
               navigation.navigate('EditName')
             },
           },
+          {
+            text: t('settings.items.changeLanguage'),
+            icon: spokenLanguagesSvg,
+            iconFill: getTokens().color.greyOnBlack.val,
+            onPress: changeLanguage,
+          },
         ],
         [
           {
@@ -181,7 +202,7 @@ function ButtonsSection(): JSX.Element {
                 onPress: toggleScreenshotsDisabled,
                 children: <AllowScreenshots />,
                 // not working correctly for iOS 17 and above
-                hidden: Platform.OS === 'ios' && Number(Platform.Version) > 17,
+                hidden: isUsingIos17AndAbove(),
               },
             ]
           : [
@@ -199,7 +220,7 @@ function ButtonsSection(): JSX.Element {
                 onPress: toggleScreenshotsDisabled,
                 children: <AllowScreenshots />,
                 // not working correctly for iOS 17 and above
-                hidden: Platform.OS === 'ios' && Number(Platform.Version) > 17,
+                hidden: isUsingIos17AndAbove(),
               },
             ],
         [
@@ -299,6 +320,7 @@ function ButtonsSection(): JSX.Element {
         ],
       ].filter(notEmpty),
     [
+      changeLanguage,
       deleteAccountWithAreYouSure,
       navigation,
       setChangeCurrencyDialogVisible,

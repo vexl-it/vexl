@@ -43,3 +43,7 @@ export const showTextDebugButtonAtom = focusAtom(preferencesAtom, (p) =>
 export const isDeveloperAtom = focusAtom(preferencesAtom, (p) =>
   p.prop('isDeveloper')
 )
+
+export const currentAppLanguageAtom = focusAtom(preferencesAtom, (o) =>
+  o.prop('appLanguage')
+)

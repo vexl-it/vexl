@@ -6,6 +6,7 @@ import {
   showYouDidNotAllowTakingScreenshotsActionAtom,
 } from '../state/showYouDidNotAllowScreenshotsActionAtom'
 import {Platform} from 'react-native'
+import {isUsingIos17AndAbove} from '../utils/isUsingIos17AndAbove'
 
 function PreventScreenshots(): null {
   const screenshotsDisabled = useAtomValue(screenshotsDisabledAtom)
@@ -26,7 +27,7 @@ function PreventScreenshots(): null {
 
   useEffect(() => {
     // not working correctly for iOS 17 and above
-    if (Platform.OS === 'ios' && Number(Platform.Version) < 17) {
+    if (Platform.OS !== 'android' && !isUsingIos17AndAbove()) {
       if (screenshotsDisabled) RNScreenshotPrevent.enableSecureView()
     } else if (Platform.OS === 'android') {
       RNScreenshotPrevent.enabled(screenshotsDisabled)

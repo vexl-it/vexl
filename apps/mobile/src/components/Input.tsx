@@ -176,9 +176,17 @@ function TextInput(
         </Stack>
       )}
       {leftText && (
-        <StyledText mr="$2" variant={variant} textColor={leftTextColor}>
-          {leftText}
-        </StyledText>
+        <Stack maw={'50%'} fs={1}>
+          <StyledText
+            numberOfLines={2}
+            adjustsFontSizeToFit
+            mr="$2"
+            variant={variant}
+            textColor={leftTextColor}
+          >
+            {leftText}
+          </StyledText>
+        </Stack>
       )}
       <InputStyled
         multiline={multiline}
@@ -205,18 +213,24 @@ function TextInput(
             onClearPress?.()
           }}
         >
-          <Image height={22} stroke={tokens.color.grey.val} source={clearInputSvg} />
+          <Image
+            height={22}
+            stroke={tokens.color.grey.val}
+            source={clearInputSvg}
+          />
         </TouchableOpacity>
       )}
       {rightText && (
-        <StyledText
-          adjustsFontSizeToFit
-          ml="$2"
-          variant={variant}
-          textColor={rightTextColor}
-        >
-          {rightText}
-        </StyledText>
+        <Stack fs={1}>
+          <StyledText
+            adjustsFontSizeToFit
+            ml="$2"
+            variant={variant}
+            textColor={rightTextColor}
+          >
+            {rightText}
+          </StyledText>
+        </Stack>
       )}
       {rightElement ?? null}
     </RootContainer>

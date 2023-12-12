@@ -58,7 +58,7 @@ function PremiumOrDiscount({
               source={percentageSvg}
             />
           </Stack>
-          <Stack>
+          <Stack fs={1}>
             <Text
               numberOfLines={2}
               ff="$body700"

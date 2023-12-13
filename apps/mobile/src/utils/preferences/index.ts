@@ -22,6 +22,7 @@ export const preferencesAtom = atomWithParsedMmkvStorage(
     tradeChecklistEnabled: false,
     offerFeedbackEnabled: false,
     showTextDebugButton: false,
+    isDeveloper: false,
   },
   Preferences
 )
@@ -36,4 +37,8 @@ export const friendLevelBannerPreferenceAtom = focusAtom(preferencesAtom, (p) =>
 
 export const showTextDebugButtonAtom = focusAtom(preferencesAtom, (p) =>
   p.prop('showTextDebugButton')
+)
+
+export const isDeveloperAtom = focusAtom(preferencesAtom, (p) =>
+  p.prop('isDeveloper')
 )

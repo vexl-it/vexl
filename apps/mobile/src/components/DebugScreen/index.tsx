@@ -4,7 +4,7 @@ import {type Inbox} from '@vexl-next/domain/dist/general/messaging'
 import {MINIMAL_DATE} from '@vexl-next/domain/dist/utility/IsoDatetimeString.brand'
 import * as T from 'fp-ts/Task'
 import {pipe} from 'fp-ts/function'
-import {useSetAtom, useStore} from 'jotai'
+import {useAtomValue, useSetAtom, useStore} from 'jotai'
 import {Alert, ScrollView} from 'react-native'
 import {Spacer, Text, YStack} from 'tamagui'
 import {apiEnv, privateApiAtom} from '../../api'
@@ -32,6 +32,7 @@ import RemoteConfigView from './components/RemoteConfigView'
 import SimulateMissingOfferInbox from './components/SimulateMissingOfferInbox'
 import {offersStateAtom} from '../../state/marketplace/atoms/offersState'
 import {myOffersAtom} from '../../state/marketplace/atoms/myOffers'
+import {isDeveloperAtom, showTextDebugButtonAtom} from '../../utils/preferences'
 
 // const ContentScroll = styled(ScrollView, {
 //   marginBottom: '$2',
@@ -50,6 +51,32 @@ function DebugScreen(): JSX.Element {
   const updateConnections = useSetAtom(updateAllOffersConnectionsActionAtom)
   const deleteInbox = useSetAtom(deleteInboxAtom)
   const deleteAllInboxes = useSetAtom(deleteAllInboxesActionAtom)
+  const isDeveloper = useAtomValue(isDeveloperAtom)
+  const showTextDebugButton = useSetAtom(showTextDebugButtonAtom)
+
+  if (!isDeveloper) {
+    const buttonText = !isDeveloper
+      ? 'Show translators debug button'
+      : 'Hide translators debug button'
+    return (
+      <Screen>
+        <WhiteContainer>
+          <Text color="$black" fos={20} ff="$heading">
+            Debug screen
+          </Text>
+          <Spacer />
+          <Button
+            variant="secondary"
+            size="small"
+            onPress={() => {
+              showTextDebugButton((old) => !old)
+            }}
+            text={buttonText}
+          />
+        </WhiteContainer>
+      </Screen>
+    )
+  }
 
   return (
     <Screen>

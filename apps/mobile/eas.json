@@ -6,7 +6,7 @@
   "build": {
     "staging": {
       "android": {
-        "image": "ubuntu-18.04-jdk-11-ndk-r19c",
+        "image": "ubuntu-20.04-jdk-11-ndk-r19c",
         "credentialsSource": "remote"
       },
       "ios": {
@@ -19,7 +19,7 @@
     },
     "stagingApk": {
       "android": {
-        "image": "ubuntu-18.04-jdk-11-ndk-r19c",
+        "image": "ubuntu-20.04-jdk-11-ndk-r19c",
         "credentialsSource": "remote",
         "buildType": "apk"
       },
@@ -30,7 +30,7 @@
     },
     "production": {
       "android": {
-        "image": "ubuntu-18.04-jdk-11-ndk-r19c",
+        "image": "ubuntu-20.04-jdk-11-ndk-r19c",
         "credentialsSource": "remote"
       },
       "ios": {
@@ -43,7 +43,7 @@
     },
     "productionApk": {
       "android": {
-        "image": "ubuntu-18.04-jdk-11-ndk-r19c",
+        "image": "ubuntu-20.04-jdk-11-ndk-r19c",
         "credentialsSource": "remote",
         "buildType": "apk"
       },

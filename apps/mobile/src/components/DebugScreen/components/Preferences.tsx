@@ -12,6 +12,7 @@ const preferencesToEdit = [
   'tradeChecklistEnabled',
   'offerFeedbackEnabled',
   'showTextDebugButton',
+  'isDeveloper',
 ] as const
 
 function Preferences(): JSX.Element {

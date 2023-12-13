@@ -1,10 +1,12 @@
 import {getTokens, Text} from 'tamagui'
-import {Text as RNText} from 'react-native'
+import {Alert, Text as RNText} from 'react-native'
 import {FlashList} from '@shopify/flash-list'
-import {type Atom, useAtomValue} from 'jotai'
+import {type Atom, useAtomValue, useStore} from 'jotai'
 import atomKeyExtractor from '../../../utils/atomUtils/atomKeyExtractor'
 import {appLogAtomsAtom} from '../atoms'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
+import SecretDoor from '../../SecretDoor'
+import {isDeveloperAtom} from '../../../utils/preferences'
 
 const logTextStyle = {
   marginBottom: getTokens().space[2].val,
@@ -27,9 +29,19 @@ function renderLogItem({item}: {item: Atom<string>}): JSX.Element {
 function LogsList(): JSX.Element {
   const logsAtoms = useAtomValue(appLogAtomsAtom)
   const {t} = useTranslation()
+  const store = useStore()
 
   if (logsAtoms.length === 0)
-    return <Text color="white">{t('AppLogs.noLogs')}</Text>
+    return (
+      <SecretDoor
+        onSecretDoorOpen={() => {
+          store.set(isDeveloperAtom, true)
+          Alert.alert('You are now in a developer mode!')
+        }}
+      >
+        <Text color="white">{t('AppLogs.noLogs')}</Text>
+      </SecretDoor>
+    )
 
   return (
     <FlashList

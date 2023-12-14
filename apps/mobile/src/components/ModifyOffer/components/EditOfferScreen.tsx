@@ -2,8 +2,8 @@ import {type RootStackScreenProps} from '../../../navigationTypes'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import Screen from '../../Screen'
 import KeyboardAvoidingView from '../../KeyboardAvoidingView'
-import React, {useCallback, useMemo} from 'react'
-import {useAtomValue, useSetAtom} from 'jotai'
+import React, {useCallback} from 'react'
+import {useSetAtom} from 'jotai'
 import {Stack, Text} from 'tamagui'
 import useSafeGoBack from '../../../utils/useSafeGoBack'
 import {ScrollView, StyleSheet} from 'react-native'
@@ -11,7 +11,6 @@ import OfferForm from '../../OfferForm'
 import Button from '../../Button'
 import {pipe} from 'fp-ts/function'
 import * as T from 'fp-ts/Task'
-import {useFocusEffect} from '@react-navigation/native'
 import {useMolecule} from 'jotai-molecules'
 import {offerFormMolecule} from '../atoms/offerFormStateAtoms'
 import useContent from '../useContent'
@@ -19,7 +18,9 @@ import EditOfferHeader from './EditOfferHeader'
 import userSvg from '../../images/userSvg'
 import Section from '../../Section'
 import OfferType from '../../OfferForm/components/OfferType'
-import {singleOfferAtom} from '../../../state/marketplace/atoms/offersState'
+import {useSingleOffer} from '../../../state/marketplace'
+import {isSome} from 'fp-ts/Option'
+import {useFocusEffect} from '@react-navigation/native'
 
 const styles = StyleSheet.create({
   contentStyles: {
@@ -39,20 +40,16 @@ function EditOfferScreen({
   const safeGoBack = useSafeGoBack()
   const content = useContent()
 
-  const {offerAtom, editOfferAtom, offerTypeAtom} =
+  const {editOfferAtom, offerTypeAtom, setOfferFormActionAtom} =
     useMolecule(offerFormMolecule)
   const editOffer = useSetAtom(editOfferAtom)
-  const setOffer = useSetAtom(offerAtom)
-  const setOfferType = useSetAtom(offerTypeAtom)
-  const offer = useAtomValue(useMemo(() => singleOfferAtom(offerId), [offerId]))
+  const offer = useSingleOffer(offerId)
+  const setOfferForm = useSetAtom(setOfferFormActionAtom)
 
   useFocusEffect(
     useCallback(() => {
-      if (offer) {
-        setOffer(offer)
-        setOfferType(offer.offerInfo.publicPart.offerType)
-      }
-    }, [offer, setOffer, setOfferType])
+      setOfferForm(offerId)
+    }, [offerId, setOfferForm])
   )
 
   return (
@@ -61,7 +58,7 @@ function EditOfferScreen({
         <>
           <ScrollView contentContainerStyle={styles.contentStyles}>
             <EditOfferHeader offer={offer} />
-            {offer ? (
+            {isSome(offer) ? (
               <>
                 <Section title={t('offerForm.iWantTo')} image={userSvg}>
                   <OfferType offerTypeAtom={offerTypeAtom} />
@@ -76,7 +73,7 @@ function EditOfferScreen({
               </Stack>
             )}
           </ScrollView>
-          {offer && (
+          {isSome(offer) && (
             <Stack px="$4" py="$4" bc="transparent">
               <Button
                 text={t('editOffer.saveChanges')}

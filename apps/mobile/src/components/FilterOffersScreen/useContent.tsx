@@ -7,7 +7,7 @@ import amountOfTransactionSvg from '../images/amountOfTransactionSvg'
 import paymentMethodSvg from '../images/paymentMethod'
 import networkSvg from '../images/networkSvg'
 import friendLevelSvg from '../images/friendLevelSvg'
-import {type SectionProps} from '../Section'
+import {type Props} from '../Section'
 import coinsSvg from '../images/coinsSvg'
 import TextFilter from './components/TextFilter'
 import magnifyingGlass from '../images/magnifyingGlass'
@@ -43,7 +43,7 @@ import {
   sortingAtom,
 } from './atom'
 
-export default function useContent(): SectionProps[] {
+export default function useContent(): Props[] {
   const {t} = useTranslation()
   const tokens = getTokens()
 

@@ -61,7 +61,7 @@ function PremiumOrDiscount({
           <Stack fs={1}>
             <Text
               numberOfLines={2}
-              ff="$body700"
+              ff={'$body700'}
               col={feeState === 'WITH_FEE' ? '$white' : '$greyOnWhite'}
               fos={24}
             >
@@ -74,7 +74,12 @@ function PremiumOrDiscount({
           onValueChange={onSwitchValueChange}
         />
       </XStack>
-      <Text mb="$4" col="$greyOnWhite" fos={16}>
+      <Text
+        ff={'$body600'}
+        mb={'$4'}
+        col={feeState === 'WITH_FEE' ? '$white' : '$greyOnWhite'}
+        fos={16}
+      >
         {offerType === 'BUY'
           ? t('offerForm.buyCheaperByUsingDiscount')
           : t('offerForm.sellFasterWithDiscount')}

@@ -1,56 +1,56 @@
 import {getTokens, Stack, Text, XStack, YStack} from 'tamagui'
 import SvgImage from './Image'
 import {type SvgString} from '@vexl-next/domain/dist/utility/SvgString.brand'
-import {type ReactNode} from 'react'
 
-export interface SectionProps {
-  customSection?: boolean
-  children?: ReactNode
-  image?: SvgString
-  imageFill?: string
+interface BaseSectionProps {
+  children: React.ReactNode
+  title: string
   mandatory?: boolean
-  title?: string
 }
 
-function Section({
-  children,
-  customSection,
-  image,
-  imageFill,
-  mandatory,
-  title,
-}: SectionProps): JSX.Element {
-  const tokens = getTokens()
+interface CustomSectionProps extends BaseSectionProps {
+  customSection: true
+}
+
+interface SectionProps extends BaseSectionProps {
+  customSection?: false
+  image: SvgString
+  imageFill?: string
+}
+
+export type Props = SectionProps | CustomSectionProps
+
+function Section(props: Props): JSX.Element {
   return (
     <YStack mb={'$4'}>
-      {!customSection && (
+      {!props.customSection && (
         <XStack ai={'center'} jc={'space-between'} py={'$4'}>
           <XStack ai={'center'}>
-            {image && (
+            {props.image && (
               <Stack mr={'$2'}>
                 <SvgImage
                   width={24}
                   height={24}
-                  stroke={tokens.color.white.val}
-                  fill={imageFill ?? 'none'}
-                  source={image}
+                  stroke={getTokens().color.white.val}
+                  fill={props.imageFill ?? 'none'}
+                  source={props.image}
                 />
               </Stack>
             )}
             <Stack fs={1}>
               <Text ff={'$body700'} color={'$white'} fos={24}>
-                {title}
+                {props.title}
               </Text>
             </Stack>
           </XStack>
-          {mandatory && (
+          {props.mandatory && (
             <Text fos={24} ff={'$body700'} color={'$greyOnBlack'}>
               *
             </Text>
           )}
         </XStack>
       )}
-      {children}
+      {props.children}
     </YStack>
   )
 }

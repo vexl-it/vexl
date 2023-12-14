@@ -310,6 +310,7 @@ function TextMessage({
                   icon={copySvg}
                   onPress={onCopyPressed}
                   variant="plain"
+                  iconFill={getTokens().color.white.val}
                 />
               </XStack>
             </Animated.View>

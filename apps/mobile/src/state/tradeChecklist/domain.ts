@@ -1,7 +1,10 @@
 import {z} from 'zod'
 import {ChatId} from '@vexl-next/domain/dist/general/messaging'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
-import {DateTimeChatMessage} from '@vexl-next/domain/dist/general/tradeChecklist'
+import {
+  DateTimeChatMessage,
+  NetworkChatMessage,
+} from '@vexl-next/domain/dist/general/tradeChecklist'
 
 export const ChatDataForTradeChecklist = z.object({
   chatId: ChatId,
@@ -25,8 +28,8 @@ export const TradeChecklistInState = z.object({
     received: z.object({}).optional(),
   }),
   network: z.object({
-    sent: z.object({}).optional(),
-    received: z.object({}).optional(),
+    sent: NetworkChatMessage.optional(),
+    received: NetworkChatMessage.optional(),
   }),
   identity: z.object({
     sent: z.object({}).optional(),

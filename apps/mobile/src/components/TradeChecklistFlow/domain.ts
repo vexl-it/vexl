@@ -4,7 +4,7 @@ import {BtcAddress} from '@vexl-next/domain/dist/utility/BtcAddress.brand'
 import {
   AvailableDateTimeOption,
   TradeChecklistStateItemStatus,
-} from '../../../../../packages/domain/src/general/tradeChecklist'
+} from '@vexl-next/domain/dist/general/tradeChecklist'
 
 export const TradeChecklistItem = z.enum([
   'DATE_AND_TIME',

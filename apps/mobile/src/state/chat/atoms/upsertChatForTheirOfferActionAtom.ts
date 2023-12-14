@@ -1,4 +1,4 @@
-import {createEmptyTradeChecklistInState} from './../../tradeChecklist/domain'
+import {createEmptyTradeChecklistInState} from '../../tradeChecklist/domain'
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
 import {
   generateChatId,

@@ -19,10 +19,11 @@ import {tradeChecklistWithUpdatesMergedAtom} from '../../../atoms/updatesToBeSen
 
 interface Props {
   item: TradeChecklistItem
+  hideNetworkCell: boolean
 }
 
 // Ideally make cell for every item.
-function ChecklistCell({item}: Props): JSX.Element {
+function ChecklistCell({item, hideNetworkCell}: Props): JSX.Element {
   const {t} = useTranslation()
   const store = useStore()
   // not ideal, but there is no other way how to do this with types working
@@ -54,11 +55,16 @@ function ChecklistCell({item}: Props): JSX.Element {
     } else if (item === 'CALCULATE_AMOUNT') {
       navigation.navigate('CalculateAmount')
     } else if (item === 'SET_NETWORK') {
-      navigation.navigate('Network')
+      navigation.navigate('Network', {
+        networkData: {
+          btcNetwork: tradeChecklistData.network.sent?.btcNetwork,
+          btcAddress: tradeChecklistData.network.sent?.btcAddress,
+        },
+      })
     }
   }, [navigation, item, store])
 
-  // again not ideal (rerenders to much), but there is no way how to do this with types working
+  // again not ideal (re-renders too much), but there is no way how to do this with types working
   const subtitle = useMemo(() => {
     if (item === 'DATE_AND_TIME') {
       const pick = DateAndTime.getPick(nextChecklistData.dateAndTime)
@@ -80,7 +86,9 @@ function ChecklistCell({item}: Props): JSX.Element {
     }
   }, [item, nextChecklistData.dateAndTime, t, otherSideData.userName])
 
-  return (
+  return item === 'SET_NETWORK' && hideNetworkCell ? (
+    <></>
+  ) : (
     <TouchableOpacity onPress={onPress}>
       <XStack
         ai={'center'}
@@ -104,11 +112,6 @@ function ChecklistCell({item}: Props): JSX.Element {
           </Stack>
         </XStack>
         <XStack ai={'center'} space={'$2'}>
-          {/* {sideNote && (
-            <Text fos={12} ff={'$body500'} col={'$greyOnBlack'}>
-              {sideNote}
-            </Text>
-          )} */}
           <Image
             source={chevronRightSvg}
             stroke={getTokens().color.greyOnBlack.val}

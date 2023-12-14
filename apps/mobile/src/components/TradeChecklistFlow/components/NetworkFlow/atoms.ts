@@ -1,13 +1,7 @@
 import {atom} from 'jotai'
 import {type BtcNetwork} from '@vexl-next/domain/dist/general/offers'
-import {focusAtom} from 'jotai-optics'
-import {mainTradeCheckListStateAtom} from '../../atoms/mainTradeChecklistStateAtom'
 import {BtcAddress} from '@vexl-next/domain/dist/utility/BtcAddress.brand'
-
-export const mainNetworkStateAtom = focusAtom(
-  mainTradeCheckListStateAtom,
-  (o) => o.prop('SET_NETWORK')
-)
+import {addNetworkActionAtom} from '../../atoms/updatesToBeSentAtom'
 
 export const btcNetworkAtom = atom<BtcNetwork>('LIGHTING')
 export const btcAddressAtom = atom<BtcAddress | undefined>(undefined)
@@ -39,10 +33,6 @@ export const saveLocalNetworkStateToMainStateActionAtom = atom(
     const btcNetwork = get(btcNetworkAtom)
     const btcAddress = get(btcAddressAtom)
 
-    set(mainNetworkStateAtom, {
-      status: 'pending',
-      btcNetwork,
-      btcAddress,
-    })
+    set(addNetworkActionAtom, {btcNetwork, btcAddress})
   }
 )

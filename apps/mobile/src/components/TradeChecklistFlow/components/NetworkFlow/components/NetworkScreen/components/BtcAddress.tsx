@@ -1,4 +1,4 @@
-import {Stack, Text, XStack} from 'tamagui'
+import {getTokens, Stack, Text, XStack} from 'tamagui'
 import SectionTitle from './SectionTitle'
 import btcSvg from '../images/btcSvg'
 import {useTranslation} from '../../../../../../../utils/localization/I18nProvider'
@@ -9,8 +9,8 @@ import {type TradeChecklistStackParamsList} from '../../../../../../../navigatio
 import {useAtomValue} from 'jotai'
 import {btcAddressAtom, btcNetworkAtom} from '../../../atoms'
 import Image from '../../../../../../Image'
-import copyPasteSvg from '../images/copyPasteSvg'
 import Clipboard from '@react-native-clipboard/clipboard'
+import copySvg from '../../../../../../ChatDetailScreen/images/copySvg'
 
 function BtcAddress(): JSX.Element | null {
   const {t} = useTranslation()
@@ -54,7 +54,12 @@ function BtcAddress(): JSX.Element | null {
                 Clipboard.setString(btcAddress)
               }}
             >
-              <Image height={24} width={24} source={copyPasteSvg} />
+              <Image
+                height={24}
+                width={24}
+                source={copySvg}
+                fill={getTokens().color.white.val}
+              />
             </TouchableOpacity>
           )}
         </XStack>

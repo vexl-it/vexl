@@ -1,6 +1,7 @@
 import {atom} from 'jotai'
 import {
   type AvailableDateTimeOption,
+  type NetworkData,
   type PickedDateTimeOption,
   type TradeChecklistUpdate,
 } from '@vexl-next/domain/dist/general/tradeChecklist'
@@ -13,7 +14,11 @@ import reportError from '../../../utils/reportError'
 import {chatWithMessagesAtom, tradeChecklistDataAtom} from './fromChatAtoms'
 import {updateTradeChecklistState} from '../../../state/tradeChecklist/utils'
 
-const updatesToBeSentAtom = atom<TradeChecklistUpdate>({})
+const UPDATES_TO_BE_SENT_INITIAL_STATE = {}
+
+const updatesToBeSentAtom = atom<TradeChecklistUpdate>(
+  UPDATES_TO_BE_SENT_INITIAL_STATE
+)
 export default updatesToBeSentAtom
 
 export const tradeChecklistWithUpdatesMergedAtom = atom((get) => {
@@ -45,6 +50,19 @@ export const saveDateTimePickActionAtom = atom(
       ...updates,
       dateAndTime: {
         picks,
+        timestamp: unixMillisecondsNow(),
+      },
+    }))
+  }
+)
+
+export const addNetworkActionAtom = atom(
+  null,
+  (get, set, networkData: NetworkData) => {
+    set(updatesToBeSentAtom, (updates) => ({
+      ...updates,
+      network: {
+        ...networkData,
         timestamp: unixMillisecondsNow(),
       },
     }))

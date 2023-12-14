@@ -19,9 +19,10 @@ import pauseSvg from '../../../images/pauseSvg'
 import {isOfferExpired} from '../../../utils/isOfferExpired'
 import clockSvg from '../../images/clockSvg'
 import Image from '../../Image'
+import {type Option, isSome} from 'fp-ts/Option'
 
 interface Props {
-  offer: OneOfferInState | undefined
+  offer: Option<OneOfferInState>
 }
 
 function EditOfferHeader({offer}: Props): JSX.Element {
@@ -65,9 +66,11 @@ function EditOfferHeader({offer}: Props): JSX.Element {
     <ScreenTitle text={t('editOffer.editOffer')}>
       <Stack>
         <XStack space={'$2'} mb={'$4'}>
-          {offer && (
+          {isSome(offer) && (
             <XStack ai={'center'} space={'$2'}>
-              {isOfferExpired(offer?.offerInfo?.publicPart?.expirationDate) && (
+              {isOfferExpired(
+                offer.value.offerInfo?.publicPart?.expirationDate
+              ) && (
                 <Image source={clockSvg} stroke={getTokens().color.red.val} />
               )}
               <IconButton

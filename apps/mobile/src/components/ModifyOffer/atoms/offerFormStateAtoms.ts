@@ -59,6 +59,7 @@ import {splitAtom} from 'jotai/utils'
 import {fetchLocationSuggestionsAtom} from '../../../state/location/atoms/fetchLocationSuggestionsAtom'
 import getValueFromSetStateActionOfAtom from '../../../utils/atomUtils/getValueFromSetStateActionOfAtom'
 import getDefaultSpokenLanguage from '../../../utils/localization/getDefaultSpokenLanguage'
+import {singleOfferAtom} from '../../../state/marketplace/atoms/offersState'
 
 function getAtomWithNullableValueHandling<T, S>(
   nullableAtom: PrimitiveAtom<T | undefined>,
@@ -686,6 +687,25 @@ export const offerFormMolecule = molecule(() => {
     )
   })
 
+  const setOfferFormActionAtom = atom(null, (get, set, offerId: OfferId) => {
+    const offer = get(singleOfferAtom(offerId))
+
+    if (offer) {
+      const offerPublicPart = offer.offerInfo.publicPart
+
+      set(offerAtom, offer)
+      set(offerTypeAtom, offer.offerInfo.publicPart.offerType)
+      set(nullableOfferTypeAtom, offerPublicPart.offerType)
+      set(nullableCurrencyAtom, offerPublicPart.currency)
+      set(nullableAmountTopLimitAtom, offerPublicPart.amountTopLimit)
+      set(nullableAmountBottomLimitAtom, offerPublicPart.amountBottomLimit)
+      set(nullableBtcNetworkAtom, offerPublicPart.btcNetwork)
+      set(nullablePaymentMethodAtom, offerPublicPart.paymentMethod)
+      set(nullableLocationStateAtom, offerPublicPart.locationState)
+      set(nullableLocationAtom, offerPublicPart.location)
+    }
+  })
+
   const resetOfferFormActionAtom = atom(null, (get, set) => {
     set(offerAtom, dummyOffer)
     set(nullableOfferTypeAtom, undefined)
@@ -749,5 +769,6 @@ export const offerFormMolecule = molecule(() => {
     selectedSpokenLanguagesAtom,
     resetSelectedSpokenLanguagesActionAtom,
     saveSelectedSpokenLanguagesActionAtom,
+    setOfferFormActionAtom,
   }
 })

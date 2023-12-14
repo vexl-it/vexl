@@ -16,15 +16,14 @@ import FriendLevel from '../OfferForm/components/FriendLevel'
 import PremiumOrDiscount from '../OfferForm/components/PremiumOrDiscount'
 import {useMolecule} from 'jotai-molecules'
 import {offerFormMolecule} from './atoms/offerFormStateAtoms'
-import {type SectionProps} from '../Section'
+import {type Props} from '../Section'
 import coinsSvg from '../images/coinsSvg'
 import spokenLanguagesSvg from '../images/spokenLanguagesSvg'
 import SpokenLanguages from '../OfferForm/components/SpokenLanguages'
 import {getTokens} from 'tamagui'
-import clockSvg from '../images/clockSvg'
 import Expiration from '../OfferForm/components/Expiration'
 
-export default function useContent(): SectionProps[] {
+export default function useContent(): Props[] {
   const {t} = useTranslation()
   const tokens = getTokens()
   const {
@@ -91,7 +90,7 @@ export default function useContent(): SectionProps[] {
       },
       {
         title: t('offerForm.expiration.expiration'),
-        image: clockSvg,
+        customSection: true,
         children: (
           <Expiration
             expirationDateAtom={expirationDateAtom}

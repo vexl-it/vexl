@@ -1,12 +1,8 @@
 import React from 'react'
 import {ActivityIndicator} from 'react-native'
 import {getTokens, Stack} from 'tamagui'
-import Section, {type SectionProps} from '../Section'
+import Section, {type Props} from '../Section'
 import ChunkView from '../ChunkView'
-
-interface Props {
-  content: SectionProps[]
-}
 
 function LoaderComponent(): JSX.Element {
   const tokens = getTokens()
@@ -17,21 +13,32 @@ function LoaderComponent(): JSX.Element {
   )
 }
 
-function OfferForm({content}: Props): JSX.Element {
+function OfferForm({content}: {content: Props[]}): JSX.Element {
   return (
     <ChunkView displayOnProgress={<LoaderComponent />}>
-      {content.map((item) => (
-        <Section
-          key={item.title}
-          customSection={item.customSection}
-          image={item.image}
-          imageFill={item.imageFill}
-          title={item.title}
-          mandatory={item.mandatory}
-        >
-          {item.children}
-        </Section>
-      ))}
+      {content.map((item) =>
+        item.customSection ? (
+          <Section
+            key={item.title}
+            customSection={item.customSection}
+            mandatory={item.mandatory}
+            title={item.title}
+          >
+            {item.children}
+          </Section>
+        ) : (
+          <Section
+            key={item.title}
+            customSection={item.customSection}
+            image={item.image}
+            imageFill={item.imageFill}
+            title={item.title}
+            mandatory={item.mandatory}
+          >
+            {item.children}
+          </Section>
+        )
+      )}
     </ChunkView>
   )
 }

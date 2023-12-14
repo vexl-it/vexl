@@ -353,6 +353,7 @@
   "offerForm.spokenLanguages.language": "Language",
   "offerForm.spokenLanguages.preferredLanguages": "Preferred languages",
   "offerForm.expiration.expiration": "Expiration",
+  "offerForm.expiration.setExpirationDateForYourOffer": "Set an expiration date for your offer.",
   "offerForm.expiration.expirationDate": "Expiration date",
   "offerForm.expiration.offerExpirationDate": "Offer expiration date",
   "offerForm.expiration.uponThisDate": "Upon this date the offer won't be visible to the other vexlers. To change it you'll have to update the expiration date.",

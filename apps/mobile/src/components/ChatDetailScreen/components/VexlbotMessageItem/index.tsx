@@ -5,6 +5,7 @@ import TradeChecklistReminder from './components/TradeChecklistReminder'
 import {useAtomValue} from 'jotai/index'
 import {preferencesAtom} from '../../../../utils/preferences'
 import TradeChecklistDateAndTimeView from './components/TradeChecklistDateAndTimeView'
+import TradeChecklistNetworkView from './components/TradeChecklistNetworkView'
 
 export default function VexlbotMessageItem({
   data,
@@ -20,6 +21,10 @@ export default function VexlbotMessageItem({
 
   if (data.type === 'dateAndTimePreview') {
     return <TradeChecklistDateAndTimeView />
+  }
+
+  if (data.type === 'networkPreview') {
+    return <TradeChecklistNetworkView />
   }
 
   return (

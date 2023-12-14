@@ -7,20 +7,40 @@ import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
 import Content from '../../../Content'
 import {Stack} from 'tamagui'
 import networkSvg from '../../../../../images/networkSvg'
-import LightningCell from './components/LightningCell'
-import OnChainCell from './components/OnChainCell'
 import SectionTitle from './components/SectionTitle'
 import BtcAddress from './components/BtcAddress'
 import NetworkInfo from './components/NetworkInfo'
-import {saveLocalNetworkStateToMainStateActionAtom} from '../../atoms'
+import {
+  btcAddressAtom,
+  btcNetworkAtom,
+  saveLocalNetworkStateToMainStateActionAtom,
+} from '../../atoms'
 import {useSetAtom} from 'jotai'
+import {type TradeChecklistStackScreenProps} from '../../../../../../navigationTypes'
+import LightningOrOnChain from './components/LightningOrOnChain'
+import {useEffect} from 'react'
 
-function NetworkScreen(): JSX.Element {
+type Props = TradeChecklistStackScreenProps<'Network'>
+
+function NetworkScreen({
+  navigation,
+  route: {
+    params: {networkData},
+  },
+}: Props): JSX.Element {
+  const {btcAddress, btcNetwork} = networkData
   const {t} = useTranslation()
   const goBack = useSafeGoBack()
   const saveLocalNetworkStateToMainState = useSetAtom(
     saveLocalNetworkStateToMainStateActionAtom
   )
+  const setBtcNetwork = useSetAtom(btcNetworkAtom)
+  const setBtcAddress = useSetAtom(btcAddressAtom)
+
+  useEffect(() => {
+    setBtcNetwork(btcNetwork ?? 'LIGHTING')
+    setBtcAddress(btcAddress)
+  }, [btcAddress, btcNetwork, setBtcAddress, setBtcNetwork])
 
   return (
     <>
@@ -32,18 +52,19 @@ function NetworkScreen(): JSX.Element {
         <SectionTitle
           text={t('tradeChecklist.network.network')}
           icon={networkSvg}
+          mt={'$4'}
         />
         <Stack space={'$6'}>
-          <Stack space={'$2'}>
-            <LightningCell />
-            <OnChainCell />
-          </Stack>
+          <LightningOrOnChain />
           <BtcAddress />
         </Stack>
       </Content>
       <NetworkInfo />
       <FooterButtonProxy
-        onPress={saveLocalNetworkStateToMainState}
+        onPress={() => {
+          saveLocalNetworkStateToMainState()
+          navigation.navigate('AgreeOnTradeDetails')
+        }}
         text={t('common.confirm')}
       />
     </>

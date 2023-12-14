@@ -43,6 +43,25 @@ function addVexlBotMessagesToMessagesListData(
       }
 
       return addVexlBotOrMessageWithStateToArray(messageToInsert)(a)
+    },
+    (a) => {
+      const networkInteraction = UnixMilliseconds.parse(
+        Math.max(
+          tradeChecklist.network.sent?.timestamp ?? 0,
+          tradeChecklist.network.received?.timestamp ?? 0
+        )
+      )
+
+      if (networkInteraction === 0) return a
+      const messageToInsert: VexlBotOrMessageWithState = {
+        type: 'vexlBot',
+        message: {
+          type: 'networkPreview' as const,
+          date: networkInteraction,
+        },
+      }
+
+      return addVexlBotOrMessageWithStateToArray(messageToInsert)(a)
     }
   )
 }

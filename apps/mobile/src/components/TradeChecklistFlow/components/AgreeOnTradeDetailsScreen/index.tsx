@@ -18,6 +18,11 @@ function AgreeOnTradeDetailsScreen(): JSX.Element {
     submitTradeChecklistUpdatesActionAtom
   )
   const setHeaderState = useSetAtom(headerStateAtom)
+  const hideNetworkCellInChecklist =
+    (!!offerForTradeChecklist?.ownershipInfo &&
+      offerForTradeChecklist?.offerInfo.publicPart.offerType === 'SELL') ||
+    (!offerForTradeChecklist?.ownershipInfo &&
+      offerForTradeChecklist?.offerInfo.publicPart.offerType === 'BUY')
 
   useFocusEffect(
     useCallback(() => {
@@ -28,7 +33,7 @@ function AgreeOnTradeDetailsScreen(): JSX.Element {
   return (
     <>
       <Content scrollable>
-        <OnlineOrInPersonTrade />
+        <OnlineOrInPersonTrade hideNetworkCell={hideNetworkCellInChecklist} />
       </Content>
       <FooterButtonProxy
         text={

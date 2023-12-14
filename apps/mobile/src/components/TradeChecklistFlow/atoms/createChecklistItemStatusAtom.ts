@@ -25,6 +25,18 @@ export default function createChecklistItemStatusAtom(
       return 'initial'
     }
 
+    if (item === 'SET_NETWORK') {
+      const network = tradeChecklistData.network
+
+      if (updates.network) return 'readyToSend'
+
+      if (network?.sent?.btcNetwork) {
+        return 'accepted'
+      }
+
+      return 'initial'
+    }
+
     return 'initial'
   })
 }

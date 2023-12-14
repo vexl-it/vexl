@@ -1,5 +1,7 @@
 import {z} from 'zod'
 import {UnixMilliseconds} from '../utility/UnixMilliseconds.brand'
+import {BtcNetwork} from './offers'
+import {BtcAddress} from '../utility/BtcAddress.brand'
 
 /**
  * TODO move to apps/mobile
@@ -43,6 +45,12 @@ export const PickedDateTimeOption = z.object({
 })
 export type PickedDateTimeOption = z.TypeOf<typeof PickedDateTimeOption>
 
+export const NetworkData = z.object({
+  btcNetwork: BtcNetwork.optional(),
+  btcAddress: BtcAddress.optional(),
+})
+export type NetworkData = z.TypeOf<typeof NetworkData>
+
 export const TradeChecklistMessageBase = z.object({
   timestamp: UnixMilliseconds,
 })
@@ -56,11 +64,14 @@ export const DateTimeChatMessage = TradeChecklistMessageBase.extend({
 })
 export type DateTimeChatMessage = z.TypeOf<typeof DateTimeChatMessage>
 
+export const NetworkChatMessage = TradeChecklistMessageBase.merge(NetworkData)
+export type NetworkChatMessage = z.TypeOf<typeof NetworkChatMessage>
+
 export const TradeChecklistUpdate = z.object({
   dateAndTime: DateTimeChatMessage.optional(),
   location: z.object({}).optional(),
   amount: z.object({}).optional(),
-  network: z.object({}).optional(),
+  network: NetworkChatMessage.optional(),
   identity: z.object({}).optional(),
 })
 export type TradeChecklistUpdate = z.TypeOf<typeof TradeChecklistUpdate>

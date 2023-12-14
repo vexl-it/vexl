@@ -18,7 +18,10 @@ import {
   type InitPhoneNumberVerificationResponse,
   type VerifyPhoneNumberResponse,
 } from '@vexl-next/rest-api/dist/services/user/contracts'
-import {type AvailableDateTimeOption} from '@vexl-next/domain/dist/general/tradeChecklist'
+import {
+  type AvailableDateTimeOption,
+  type NetworkData,
+} from '@vexl-next/domain/dist/general/tradeChecklist'
 import {type ChatIds} from './state/chat/domain'
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
@@ -153,7 +156,7 @@ export type TradeChecklistStackParamsList = {
   CalculateAmount: undefined
   SetYourOwnPrice: undefined
   PremiumOrDiscount: undefined
-  Network: undefined
+  Network: {networkData: NetworkData}
   BtcAddress: undefined
 }
 

@@ -27,7 +27,11 @@ function openVexlBlog(): void {
   openUrl(VEXL_BLOG_URL)()
 }
 
-function OnlineOrInPersonTrade(): JSX.Element {
+interface Props {
+  hideNetworkCell: boolean
+}
+
+function OnlineOrInPersonTrade({hideNetworkCell}: Props): JSX.Element {
   const {t} = useTranslation()
   const offerForTradeChecklist = useAtomValue(fromChatAtoms.originOfferAtom)
 
@@ -82,7 +86,11 @@ function OnlineOrInPersonTrade(): JSX.Element {
             </Text>
             <Stack my={'$8'} gap={'$2'}>
               {tradeChecklistItems.map((item) => (
-                <ChecklistCell key={item} item={item} />
+                <ChecklistCell
+                  key={item}
+                  item={item}
+                  hideNetworkCell={hideNetworkCell}
+                />
               ))}
             </Stack>
           </>

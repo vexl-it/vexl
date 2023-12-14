@@ -67,7 +67,7 @@ import {
 } from '../components/RevealIdentityDialogContent'
 import {deleteChatStep1Svg} from '../images/deleteChatSvg'
 import buildMessagesListData from '../utils/buildMessagesListData'
-import {createEmptyTradeChecklistInState} from './../../../state/tradeChecklist/domain'
+import {createEmptyTradeChecklistInState} from '../../../state/tradeChecklist/domain'
 
 type ChatUIMode = 'approval' | 'messages'
 
@@ -811,6 +811,10 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     o.prop('dateAndTime')
   )
 
+  const tradeChecklistNetworkAtom = focusAtom(tradeChecklistAtom, (o) =>
+    o.prop('network')
+  )
+
   return {
     showModalAtom: atom<boolean>(false),
     chatAtom,
@@ -859,5 +863,6 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     chatIdAtom,
     tradeChecklistAtom,
     tradeChecklistDateAndTimeAtom,
+    tradeChecklistNetworkAtom,
   }
 })

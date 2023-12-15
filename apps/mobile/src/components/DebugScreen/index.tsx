@@ -55,7 +55,7 @@ function DebugScreen(): JSX.Element {
   const showTextDebugButton = useSetAtom(showTextDebugButtonAtom)
 
   if (!isDeveloper) {
-    const buttonText = !isDeveloper
+    const buttonText = !showTextDebugButton
       ? 'Show translators debug button'
       : 'Hide translators debug button'
     return (

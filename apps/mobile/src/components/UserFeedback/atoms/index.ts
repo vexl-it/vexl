@@ -16,6 +16,7 @@ import * as TE from 'fp-ts/TaskEither'
 import * as T from 'fp-ts/Task'
 import reportError from '../../../utils/reportError'
 import {focusAtom} from 'jotai-optics'
+import {regionCodeAtom} from '../../../state/session'
 
 export function generateInitialFeedback(type: FeedbackType): Feedback {
   return {
@@ -94,12 +95,14 @@ export const feedbackMolecule = molecule((getMolecule, getScope) => {
     (get, set, isOfferCreationFeedback: boolean) => {
       const privateApi = get(privateApiAtom)
       const {formId, type, stars, objections, textComment} = get(feedbackAtom)
+      const regionCode = get(regionCodeAtom)
 
       return pipe(
         TE.Do,
         TE.chainW(() =>
           privateApi.user.submitFeedback({
             formId,
+            countryCode: regionCode,
             type: type === 'OFFER_RATING' ? 'trade' : 'create',
             ...(stars !== 0 && {stars}),
             ...(!isOfferCreationFeedback &&

@@ -1,3 +1,7 @@
+import {
+  type RegionCode,
+  phoneNumberToRegionCode,
+} from '@vexl-next/domain/src/utility/RegionCode.brand'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import crashlytics from '@react-native-firebase/crashlytics'
 import {KeyHolder} from '@vexl-next/cryptography'
@@ -6,7 +10,6 @@ import {
   type UserNameAndUriAvatar,
   type UserNameAndAvatar,
 } from '@vexl-next/domain/dist/general/UserNameAndAvatar.brand'
-import {parsePhoneNumber} from 'awesome-phonenumber'
 import * as SecretStorage from 'expo-secure-store'
 import * as O from 'fp-ts/Option'
 import * as TE from 'fp-ts/TaskEither'
@@ -285,11 +288,8 @@ export const areRealUserDataSet = atom((get) => {
   return !!userName && !!image
 })
 
-export const countryCodeAtom = atom<string>((get) => {
-  return (
-    parsePhoneNumber(get(sessionDataOrDummyAtom).phoneNumber)?.regionCode ??
-    'cs'
-  )
+export const regionCodeAtom = atom<RegionCode | undefined>((get) => {
+  return phoneNumberToRegionCode(get(sessionDataOrDummyAtom).phoneNumber)
 })
 
 // --------- hooks ---------

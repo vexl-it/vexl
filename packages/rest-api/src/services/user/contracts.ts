@@ -1,8 +1,9 @@
-import z from 'zod'
-import {type AxiosResponse} from 'axios'
-import {type E164PhoneNumber} from '@vexl-next/domain/dist/general/E164PhoneNumber.brand'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
+import {type E164PhoneNumber} from '@vexl-next/domain/dist/general/E164PhoneNumber.brand'
 import {IsoDatetimeString} from '@vexl-next/domain/dist/utility/IsoDatetimeString.brand'
+import {RegionCode} from '@vexl-next/domain/dist/utility/RegionCode.brand'
+import {type AxiosResponse} from 'axios'
+import z from 'zod'
 
 export interface InvalidPhoneNumber {
   _tag: 'InvalidPhoneNumber'
@@ -125,6 +126,7 @@ export const SubmitFeedbackRequest = z.object({
   stars: z.number().optional(),
   objections: z.string().optional(),
   textComment: z.string().optional(),
+  countryCode: RegionCode.optional(),
 })
 
 export type SubmitFeedbackRequest = z.TypeOf<typeof SubmitFeedbackRequest>

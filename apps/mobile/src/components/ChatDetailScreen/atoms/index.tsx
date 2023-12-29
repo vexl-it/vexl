@@ -815,6 +815,10 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     o.prop('network')
   )
 
+  const tradeChecklistAmountAtom = focusAtom(tradeChecklistAtom, (o) =>
+    o.prop('amount')
+  )
+
   return {
     showModalAtom: atom<boolean>(false),
     chatAtom,
@@ -864,5 +868,6 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     tradeChecklistAtom,
     tradeChecklistDateAndTimeAtom,
     tradeChecklistNetworkAtom,
+    tradeChecklistAmountAtom,
   }
 })

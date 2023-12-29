@@ -19,6 +19,7 @@ import {
   type VerifyPhoneNumberResponse,
 } from '@vexl-next/rest-api/dist/services/user/contracts'
 import {
+  type AmountData,
   type AvailableDateTimeOption,
   type NetworkData,
 } from '@vexl-next/domain/dist/general/tradeChecklist'
@@ -153,10 +154,16 @@ export type TradeChecklistStackParamsList = {
     readonly submitUpdateOnTimePick?: boolean
   }
   AddTimeOptions: undefined
-  CalculateAmount: undefined
+  CalculateAmount: {
+    readonly amountData: AmountData | undefined
+    readonly navigateBackToChatOnSave?: boolean | undefined
+  }
   SetYourOwnPrice: undefined
   PremiumOrDiscount: undefined
-  Network: {networkData: NetworkData}
+  Network: {
+    readonly networkData: NetworkData | undefined
+    readonly navigateBackToChatOnSave?: boolean | undefined
+  }
   BtcAddress: undefined
 }
 

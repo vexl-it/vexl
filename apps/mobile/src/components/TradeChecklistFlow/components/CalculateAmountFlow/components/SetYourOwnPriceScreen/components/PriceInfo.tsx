@@ -3,9 +3,9 @@ import {
   getCurrentLocale,
   useTranslation,
 } from '../../../../../../../utils/localization/I18nProvider'
-import {tradeBtcPriceAtom} from '../../../atoms'
 import {type PrimitiveAtom, useAtomValue} from 'jotai'
-import {useMemo} from 'react'
+import calculatePercentageDifference from '../../../../../../../utils/calculatePercentageDifference'
+import {currentBtcPriceAtom} from '../../../../../../../state/currentBtcPriceAtoms'
 
 interface Props {
   fiatTempValueAtom: PrimitiveAtom<string>
@@ -14,12 +14,12 @@ interface Props {
 function PriceInfo({fiatTempValueAtom}: Props): JSX.Element | null {
   const {t} = useTranslation()
   const locale = getCurrentLocale()
-  const tradeBtcPrice = useAtomValue(tradeBtcPriceAtom)
   const fiatTempValue = Number(useAtomValue(fiatTempValueAtom)) ?? 0
+  const currentBtcPrice = useAtomValue(currentBtcPriceAtom)
 
-  const percentageDifference = useMemo(
-    () => 100 - (fiatTempValue / tradeBtcPrice) * 100,
-    [fiatTempValue, tradeBtcPrice]
+  const percentageDifference = calculatePercentageDifference(
+    fiatTempValue,
+    currentBtcPrice ?? 0
   )
 
   return fiatTempValue && fiatTempValue > 0 && percentageDifference !== 0 ? (
@@ -27,7 +27,7 @@ function PriceInfo({fiatTempValueAtom}: Props): JSX.Element | null {
       variant={'yellow'}
       hideCloseButton
       text={t(
-        percentageDifference < 0
+        percentageDifference > 0
           ? 'tradeChecklist.setYourOwnPrice.ourNewBtcPriceIsHigher'
           : 'tradeChecklist.setYourOwnPrice.ourNewBtcPriceIsLower',
         {

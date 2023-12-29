@@ -115,7 +115,7 @@ function RootNavigation(): JSX.Element {
               name={'TradeChecklistFlow'}
               options={{
                 animation: 'slide_from_bottom',
-                presentation: 'transparentModal',
+                presentation: 'containedTransparentModal',
               }}
               component={TradeChecklistFlow}
             />

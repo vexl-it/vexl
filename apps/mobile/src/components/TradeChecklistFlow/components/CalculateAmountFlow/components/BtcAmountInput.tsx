@@ -9,7 +9,7 @@ import {
 import {replaceNonDecimalCharsInInput} from '../../../utils'
 import {getTokens, Stack} from 'tamagui'
 import {type DropdownItemProps, Dropdown} from '../../../../Dropdown'
-import {type BtcOrSat} from '../../../domain'
+import {type BtcOrSat} from '@vexl-next/domain/dist/general/tradeChecklist'
 import AmountInput from './AmountInput'
 import CalculatedWithLiveRate from './CalculatedWithLiveRate'
 

@@ -2,10 +2,11 @@ import {type VexlBotMessageData} from './domain'
 import {Stack, Text} from 'tamagui'
 import React from 'react'
 import TradeChecklistReminder from './components/TradeChecklistReminder'
-import {useAtomValue} from 'jotai/index'
+import {useAtomValue} from 'jotai'
 import {preferencesAtom} from '../../../../utils/preferences'
 import TradeChecklistDateAndTimeView from './components/TradeChecklistDateAndTimeView'
 import TradeChecklistNetworkView from './components/TradeChecklistNetworkView'
+import TradeChecklistAmountView from './components/TradeChecklistAmountView'
 
 export default function VexlbotMessageItem({
   data,
@@ -21,6 +22,10 @@ export default function VexlbotMessageItem({
 
   if (data.type === 'dateAndTimePreview') {
     return <TradeChecklistDateAndTimeView />
+  }
+
+  if (data.type === 'amountPreview') {
+    return <TradeChecklistAmountView />
   }
 
   if (data.type === 'networkPreview') {

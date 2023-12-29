@@ -18,29 +18,55 @@ import {
 import {useSetAtom} from 'jotai'
 import {type TradeChecklistStackScreenProps} from '../../../../../../navigationTypes'
 import LightningOrOnChain from './components/LightningOrOnChain'
-import {useEffect} from 'react'
+import {useCallback, useEffect} from 'react'
+import {submitTradeChecklistUpdatesActionAtom} from '../../../../atoms/updatesToBeSentAtom'
+import {loadingOverlayDisplayedAtom} from '../../../../../LoadingOverlayProvider'
 
 type Props = TradeChecklistStackScreenProps<'Network'>
 
 function NetworkScreen({
-  navigation,
   route: {
-    params: {networkData},
+    params: {networkData, navigateBackToChatOnSave},
   },
 }: Props): JSX.Element {
-  const {btcAddress, btcNetwork} = networkData
   const {t} = useTranslation()
   const goBack = useSafeGoBack()
   const saveLocalNetworkStateToMainState = useSetAtom(
     saveLocalNetworkStateToMainStateActionAtom
   )
+  const submitTradeChecklistUpdates = useSetAtom(
+    submitTradeChecklistUpdatesActionAtom
+  )
+  const showLoadingOverlay = useSetAtom(loadingOverlayDisplayedAtom)
   const setBtcNetwork = useSetAtom(btcNetworkAtom)
   const setBtcAddress = useSetAtom(btcAddressAtom)
 
+  const onFooterButtonPress = useCallback(() => {
+    saveLocalNetworkStateToMainState()
+    if (navigateBackToChatOnSave) {
+      showLoadingOverlay(true)
+      void submitTradeChecklistUpdates()().finally(() => {
+        showLoadingOverlay(false)
+      })
+    }
+    goBack()
+  }, [
+    goBack,
+    navigateBackToChatOnSave,
+    saveLocalNetworkStateToMainState,
+    showLoadingOverlay,
+    submitTradeChecklistUpdates,
+  ])
+
   useEffect(() => {
-    setBtcNetwork(btcNetwork ?? 'LIGHTING')
-    setBtcAddress(btcAddress)
-  }, [btcAddress, btcNetwork, setBtcAddress, setBtcNetwork])
+    setBtcNetwork(networkData?.btcNetwork ?? 'LIGHTING')
+    setBtcAddress(networkData?.btcAddress)
+  }, [
+    networkData?.btcAddress,
+    networkData?.btcNetwork,
+    setBtcAddress,
+    setBtcNetwork,
+  ])
 
   return (
     <>
@@ -61,10 +87,7 @@ function NetworkScreen({
       </Content>
       <NetworkInfo />
       <FooterButtonProxy
-        onPress={() => {
-          saveLocalNetworkStateToMainState()
-          navigation.navigate('AgreeOnTradeDetails')
-        }}
+        onPress={onFooterButtonPress}
         text={t('common.confirm')}
       />
     </>

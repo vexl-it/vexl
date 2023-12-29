@@ -82,7 +82,8 @@ export const AcceptedCurrency = z.enum([
   'bits',
   'sats',
 ])
-type AcceptedCurrency = z.TypeOf<typeof AcceptedCurrency>
+
+export type AcceptedCurrency = z.TypeOf<typeof AcceptedCurrency>
 
 export function createBtcPriceApi({
   platform,

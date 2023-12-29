@@ -8,6 +8,7 @@ import AmountInput from './AmountInput'
 import {currencies} from '../../../../../utils/localization/currency'
 import CalculatedWithLiveRate from './CalculatedWithLiveRate'
 import * as fromChatAtoms from '../../../atoms/fromChatAtoms'
+import {currentBtcPriceAtom} from '../../../../../state/currentBtcPriceAtoms'
 
 interface Props {
   automaticCalculationDisabled?: boolean
@@ -30,6 +31,7 @@ function FiatAmountInput({
   const calculateBtcValueOnFiatAmountChange = useSetAtom(
     calculateBtcValueOnFiatAmountChangeActionAtom
   )
+  const currentBtcPrice = useAtomValue(currentBtcPriceAtom)
 
   return (
     <AmountInput
@@ -45,7 +47,7 @@ function FiatAmountInput({
       onWrapperPress={() => {
         ref.current?.focus()
       }}
-      placeholder={`${offerForTradeChecklist?.offerInfo.publicPart.amountTopLimit}`}
+      placeholder={`${currentBtcPrice}`}
       value={fiatValue}
       onChangeText={(input) => {
         calculateBtcValueOnFiatAmountChange({

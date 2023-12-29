@@ -16,6 +16,7 @@ import {
 import {type TradeChecklistItem} from '../../../domain'
 import StatusIndicator from './StatusIndicator'
 import {tradeChecklistWithUpdatesMergedAtom} from '../../../atoms/updatesToBeSentAtom'
+import {type AmountData} from '@vexl-next/domain/dist/general/tradeChecklist'
 
 interface Props {
   item: TradeChecklistItem
@@ -53,7 +54,28 @@ function ChecklistCell({item, hideNetworkCell}: Props): JSX.Element {
         })
       }
     } else if (item === 'CALCULATE_AMOUNT') {
-      navigation.navigate('CalculateAmount')
+      const initialDataToSet: AmountData | undefined =
+        (tradeChecklistData.amount.received?.timestamp ?? 0) >
+        (tradeChecklistData.amount.sent?.timestamp ?? 0)
+          ? {
+              ...tradeChecklistData.amount.received,
+              // on the side of receiver we need to map the type to custom but preserve it on side of creator (for edit trade price purposes)
+              tradePriceType:
+                tradeChecklistData.amount.received?.tradePriceType === 'your'
+                  ? 'custom'
+                  : tradeChecklistData.amount.received?.tradePriceType,
+            }
+          : tradeChecklistData.amount.sent
+
+      navigation.navigate('CalculateAmount', {
+        amountData: {
+          btcAmount: initialDataToSet?.btcAmount,
+          fiatAmount: initialDataToSet?.fiatAmount,
+          tradePriceType: initialDataToSet?.tradePriceType,
+          feeAmount: initialDataToSet?.feeAmount,
+          btcPrice: initialDataToSet?.btcPrice,
+        },
+      })
     } else if (item === 'SET_NETWORK') {
       navigation.navigate('Network', {
         networkData: {
@@ -62,7 +84,7 @@ function ChecklistCell({item, hideNetworkCell}: Props): JSX.Element {
         },
       })
     }
-  }, [navigation, item, store])
+  }, [store, item, navigation])
 
   // again not ideal (re-renders too much), but there is no way how to do this with types working
   const subtitle = useMemo(() => {

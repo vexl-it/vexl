@@ -10,6 +10,11 @@ export interface TradingChecklistDateAndTimePreview {
   date: UnixMilliseconds
 }
 
+export interface TradingChecklistAmountPreview {
+  type: 'amountPreview'
+  date: UnixMilliseconds
+}
+
 export interface TradingChecklistNetworkPreview {
   type: 'networkPreview'
   date: UnixMilliseconds
@@ -20,4 +25,5 @@ export interface TradingChecklistNetworkPreview {
 export type VexlBotMessageData =
   | TradingChecklistSuggestion
   | TradingChecklistDateAndTimePreview
+  | TradingChecklistAmountPreview
   | TradingChecklistNetworkPreview

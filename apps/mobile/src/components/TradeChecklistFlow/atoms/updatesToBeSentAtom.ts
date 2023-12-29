@@ -1,5 +1,6 @@
 import {atom} from 'jotai'
 import {
+  type AmountData,
   type AvailableDateTimeOption,
   type NetworkData,
   type PickedDateTimeOption,
@@ -13,6 +14,7 @@ import * as T from 'fp-ts/Task'
 import reportError from '../../../utils/reportError'
 import {chatWithMessagesAtom, tradeChecklistDataAtom} from './fromChatAtoms'
 import {updateTradeChecklistState} from '../../../state/tradeChecklist/utils'
+import {loadingOverlayDisplayedAtom} from '../../LoadingOverlayProvider'
 
 const UPDATES_TO_BE_SENT_INITIAL_STATE = {}
 
@@ -56,6 +58,19 @@ export const saveDateTimePickActionAtom = atom(
   }
 )
 
+export const addAmountActionAtom = atom(
+  null,
+  (get, set, amountData: AmountData) => {
+    set(updatesToBeSentAtom, (updates) => ({
+      ...updates,
+      amount: {
+        ...amountData,
+        timestamp: unixMillisecondsNow(),
+      },
+    }))
+  }
+)
+
 export const addNetworkActionAtom = atom(
   null,
   (get, set, networkData: NetworkData) => {
@@ -78,6 +93,8 @@ export const submitTradeChecklistUpdatesActionAtom = atom(
     const updatesToBeSent = get(updatesToBeSentAtom)
     if (Object.keys(updatesToBeSent).length === 0) return T.of(true) // No updates to be sent
 
+    set(loadingOverlayDisplayedAtom, true)
+
     return pipe(
       set(submitTradeChecklistUpdateAtom, get(updatesToBeSentAtom)),
       TE.match(
@@ -87,6 +104,7 @@ export const submitTradeChecklistUpdatesActionAtom = atom(
         },
         () => {
           set(updatesToBeSentAtom, {})
+          set(loadingOverlayDisplayedAtom, false)
           return true
         }
       )

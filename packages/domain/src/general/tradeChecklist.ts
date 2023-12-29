@@ -20,6 +20,10 @@ export const TradeChecklistItemStatus = z.enum([
    */
   'accepted',
   /**
+   * Other side suggestion is in conflict with yours
+   */
+  'warning',
+  /**
    * Initial state
    */
   'initial',
@@ -51,6 +55,21 @@ export const NetworkData = z.object({
 })
 export type NetworkData = z.TypeOf<typeof NetworkData>
 
+export const TradePriceType = z.enum(['live', 'custom', 'frozen', 'your'])
+export type TradePriceType = z.TypeOf<typeof TradePriceType>
+
+export const BtcOrSat = z.enum(['BTC', 'SAT'])
+export type BtcOrSat = z.TypeOf<typeof BtcOrSat>
+
+export const AmountData = z.object({
+  tradePriceType: TradePriceType.optional(),
+  btcPrice: z.coerce.number().optional(),
+  btcAmount: z.coerce.number().optional(),
+  fiatAmount: z.coerce.number().optional(),
+  feeAmount: z.coerce.number().optional(),
+})
+export type AmountData = z.TypeOf<typeof AmountData>
+
 export const TradeChecklistMessageBase = z.object({
   timestamp: UnixMilliseconds,
 })
@@ -64,13 +83,16 @@ export const DateTimeChatMessage = TradeChecklistMessageBase.extend({
 })
 export type DateTimeChatMessage = z.TypeOf<typeof DateTimeChatMessage>
 
+export const AmountChatMessage = TradeChecklistMessageBase.merge(AmountData)
+export type AmountChatMessage = z.TypeOf<typeof AmountChatMessage>
+
 export const NetworkChatMessage = TradeChecklistMessageBase.merge(NetworkData)
 export type NetworkChatMessage = z.TypeOf<typeof NetworkChatMessage>
 
 export const TradeChecklistUpdate = z.object({
   dateAndTime: DateTimeChatMessage.optional(),
   location: z.object({}).optional(),
-  amount: z.object({}).optional(),
+  amount: AmountChatMessage.optional(),
   network: NetworkChatMessage.optional(),
   identity: z.object({}).optional(),
 })

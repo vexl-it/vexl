@@ -3,6 +3,7 @@ import {getTokens, Stack} from 'tamagui'
 import pendingSvg from '../../../../../images/pendingSvg'
 import Checkbox from '../../../../Checkbox'
 import Image from '../../../../Image'
+import warningSvg from '../../../../ChatDetailScreen/images/warningSvg'
 
 interface Props {
   itemStatus: TradeChecklistItemStatus
@@ -23,6 +24,8 @@ function StatusIndicator({itemStatus}: Props): JSX.Element {
       bc={
         ['readyToSend', 'pending'].includes(itemStatus)
           ? '$yellowAccent2'
+          : itemStatus === 'warning'
+          ? '$pink'
           : 'transparent'
       }
     >
@@ -33,6 +36,8 @@ function StatusIndicator({itemStatus}: Props): JSX.Element {
           source={pendingSvg}
           stroke={getTokens().color.main.val}
         />
+      ) : itemStatus === 'warning' ? (
+        <Image height={18} width={18} source={warningSvg} />
       ) : itemStatus === 'accepted' ? (
         <Checkbox size={'24x24'} value={true} onChange={empty} />
       ) : (

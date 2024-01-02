@@ -25,6 +25,7 @@
   "dependencies": {
     "@vexl-next/cryptography": "0.0.0",
     "awesome-phonenumber": "^5.1.0",
+    "compare-versions": "^6.1.0",
     "fp-ts": "^2.13.1",
     "js-base64": "^3.7.5",
     "luxon": "^3.3.0",

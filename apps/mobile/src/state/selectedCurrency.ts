@@ -1,8 +1,8 @@
-import {CurrencyCode} from '@vexl-next/domain/src/general/offers'
 import {focusAtom} from 'jotai-optics'
 import {z} from 'zod'
 import {atomWithParsedMmkvStorage} from '../utils/atomUtils/atomWithParsedMmkvStorage'
 import {getCurrentLocale} from '../utils/localization/I18nProvider'
+import {CurrencyCode} from '@vexl-next/domain/dist/general/currency.brand'
 
 const euLocales = [
   'at', // Austria

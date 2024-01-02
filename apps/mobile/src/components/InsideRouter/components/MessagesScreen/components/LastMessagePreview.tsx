@@ -155,6 +155,8 @@ function MessagePreview({
         })}
       </BaseText>
     )
+  } else if (message.messageType === 'REQUIRES_NEWER_VERSION') {
+    return <BaseText>{t(`messages.incompatible.title`)}</BaseText>
   } else {
     return <BaseText>{message.text}</BaseText>
   }

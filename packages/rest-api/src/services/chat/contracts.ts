@@ -2,7 +2,10 @@ import {
   PrivateKeyHolder,
   PublicKeyPemBase64,
 } from '@vexl-next/cryptography/dist/KeyHolder'
-import {MessageType} from '@vexl-next/domain/dist/general/messaging'
+import {
+  MessageType,
+  ServerMessage,
+} from '@vexl-next/domain/dist/general/messaging'
 import {IdNumeric} from '@vexl-next/domain/dist/utility/IdNumeric'
 import {UnixMilliseconds} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
 import {z} from 'zod'
@@ -37,13 +40,6 @@ export const SignedChallenge = z.object({
   signature: z.string(),
 })
 export type SignedChallenge = z.TypeOf<typeof SignedChallenge>
-
-export const ServerMessage = z.object({
-  message: z.string(),
-  senderPublicKey: PublicKeyPemBase64,
-  messageType: MessageType,
-})
-export type ServerMessage = z.TypeOf<typeof ServerMessage>
 
 export const ServerMessageWithId = ServerMessage.extend({
   id: IdNumeric,

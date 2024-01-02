@@ -2,16 +2,19 @@ import {
   type PrivateKeyHolder,
   type PublicKeyPemBase64,
 } from '@vexl-next/cryptography/dist/KeyHolder'
-import {type ChatPrivateApi} from '@vexl-next/rest-api/dist/services/chat'
 import {
-  type ChatMessage,
   generateChatMessageId,
+  type ChatMessage,
+  type ChatMessagePayload,
 } from '@vexl-next/domain/dist/general/messaging'
 import {now} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
-import {flow, pipe} from 'fp-ts/function'
+import {type ChatPrivateApi} from '@vexl-next/rest-api/dist/services/chat'
 import * as TE from 'fp-ts/TaskEither'
-import {encryptMessage, type ErrorEncryptingMessage} from './utils/chatCrypto'
+import {flow, pipe} from 'fp-ts/function'
 import {type ExtractLeftTE} from '../utils/ExtractLeft'
+import {type JsonStringifyError, type ZodParseError} from '../utils/parsing'
+import {type ErrorEncryptingMessage} from './utils/chatCrypto'
+import {messageToNetwork} from './utils/messageIO'
 
 function createRequestChatMessage({
   text,
@@ -44,7 +47,10 @@ export function sendMessagingRequest({
   toPublicKey: PublicKeyPemBase64
   api: ChatPrivateApi
 }): TE.TaskEither<
-  ApiErrorRequestMessaging | ErrorEncryptingMessage,
+  | ApiErrorRequestMessaging
+  | JsonStringifyError
+  | ZodParseError<ChatMessagePayload>
+  | ErrorEncryptingMessage,
   ChatMessage
 > {
   return pipe(
@@ -55,7 +61,7 @@ export function sendMessagingRequest({
     TE.right,
     TE.chainFirstW(
       flow(
-        encryptMessage(toPublicKey),
+        messageToNetwork(toPublicKey),
         TE.chainW((message) =>
           pipe(api.requestApproval({message, publicKey: toPublicKey}))
         )

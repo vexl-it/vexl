@@ -13,12 +13,17 @@ import {privateApiAtom} from '../../../api'
 import {
   type ChatMessage,
   generateChatMessageId,
+  type ChatMessagePayload,
 } from '@vexl-next/domain/dist/general/messaging'
 import {unixMillisecondsNow} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
 import {pipe} from 'fp-ts/function'
 import {type BasicError} from '@vexl-next/domain/dist/utility/errors'
 import anonymizePhoneNumber from '../utils/anonymizePhoneNumber'
 import {addMessageToMessagesArray} from '../utils/addMessageToChat'
+import {
+  type JsonStringifyError,
+  type ZodParseError,
+} from '@vexl-next/resources-utils/dist/utils/parsing'
 
 export type ContactRevealRequestAlreadySentError =
   BasicError<'ContactRevealRequestAlreadySentError'>
@@ -36,6 +41,8 @@ export default function revealContactActionAtom(
     | SendMessageApiErrors
     | ErrorEncryptingMessage
     | ReadingFileError
+    | JsonStringifyError
+    | ZodParseError<ChatMessagePayload>
     | ContactRevealRequestAlreadySentError,
     ChatMessageWithState
   >
@@ -50,6 +57,8 @@ export default function revealContactActionAtom(
       | SendMessageApiErrors
       | ErrorEncryptingMessage
       | ReadingFileError
+      | JsonStringifyError
+      | ZodParseError<ChatMessagePayload>
       | ContactRevealRequestAlreadySentError,
       ChatMessageWithState
     > => {

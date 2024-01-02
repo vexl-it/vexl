@@ -34,6 +34,9 @@ import {type ChatMessageWithState, type InboxInState} from '../domain'
 import addMessagesToChats from '../utils/addMessagesToChats'
 import createNewChatsFromMessages from '../utils/createNewChatsFromFirstMessages'
 import replaceBase64UriWithImageFileUri from '../utils/replaceBase64UriWithImageFileUri'
+import {version} from '../../../utils/environment'
+import {type ErrorChatMessageRequiresNewerVersion} from '@vexl-next/resources-utils/dist/chat/utils/parseChatMessage'
+import {type ChatMessage} from '@vexl-next/domain/dist/general/messaging'
 
 function focusInboxInMessagingStateAtom(
   publicKey: PublicKeyPemBase64
@@ -70,6 +73,24 @@ function splitMessagesArrayToNewChatsAndExistingChats({
     .asObject()
 }
 
+function incompatableErrorToChatMessageWithState(
+  error: ErrorChatMessageRequiresNewerVersion
+): ChatMessageWithState {
+  return {
+    message: error.message,
+    state: 'receivedButRequiresNewerVersion',
+  }
+}
+
+function messageToChatMessageWithState(
+  message: ChatMessage
+): ChatMessageWithState {
+  return {
+    message,
+    state: 'received',
+  }
+}
+
 export interface NoMessagesLeft {
   _tag: 'noMessages'
 }
@@ -85,30 +106,46 @@ function refreshInbox(
 > {
   return (getInbox, inboxOffer) =>
     pipe(
-      retrieveMessages({api, inboxKeypair: getInbox().inbox.privateKey}),
+      retrieveMessages({
+        api,
+        currentAppVersion: version,
+        inboxKeypair: getInbox().inbox.privateKey,
+      }),
       TE.map((one) => {
-        if (one.errors.length > 0) {
-          reportError('error', 'Error decrypting messages', one.errors)
+        const incompatibleMessagesError = one.errors.filter(
+          (
+            one
+          ): one is typeof one & {
+            _tag: 'ErrorChatMessageRequiresNewerVersion'
+          } => one._tag === 'ErrorChatMessageRequiresNewerVersion'
+        )
+        const otherErrors = one.errors.filter(
+          (one) => one._tag !== 'ErrorChatMessageRequiresNewerVersion'
+        )
+
+        if (otherErrors.length > 0) {
+          reportError('error', 'Error decrypting messages', otherErrors)
         }
 
-        return one.messages
+        return [
+          ...incompatibleMessagesError.map(
+            incompatableErrorToChatMessageWithState
+          ),
+          ...one.messages.map(messageToChatMessageWithState),
+        ]
       }),
       TE.filterOrElseW(
         (messages) => messages.length > 0,
         () => 'noMessages' as const
       ),
-      TE.map((newMessages) =>
-        newMessages.map(
-          (oneMessage): ChatMessageWithState => ({
-            state: 'received',
-            message: oneMessage,
-          })
-        )
-      ),
       TE.chainW(
         flow(
           A.map((oneMessage): T.Task<ChatMessageWithState> => {
-            if (!oneMessage.message.image) return T.of(oneMessage)
+            if (
+              oneMessage.state !== 'receivedButRequiresNewerVersion' &&
+              !oneMessage.message.image
+            )
+              return T.of(oneMessage)
             return replaceBase64UriWithImageFileUri(
               oneMessage,
               getInbox().inbox.privateKey.publicKeyPemBase64,

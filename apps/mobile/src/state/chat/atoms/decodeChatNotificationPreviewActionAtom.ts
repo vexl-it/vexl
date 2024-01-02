@@ -1,4 +1,4 @@
-import {decryptMessagePreview} from '@vexl-next/resources-utils/dist/chat/utils/chatCrypto'
+import {messagePreviewFromNetwork} from '@vexl-next/resources-utils/dist/chat/utils/messagePreviewIO'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
@@ -28,7 +28,7 @@ const decodeNotificationPreviewAction = atom(
       return T.of({name: getOtherSideData(chat.chat).userName})
 
     return pipe(
-      decryptMessagePreview(chat.chat.inbox.privateKey.privateKeyPemBase64)(
+      messagePreviewFromNetwork(chat.chat.inbox.privateKey.privateKeyPemBase64)(
         notificationData.preview
       ),
       TE.match(

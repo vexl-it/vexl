@@ -14,7 +14,6 @@ import {safeParse} from '../fpUtils'
 import reportError from '../reportError'
 import checkForNewOffers from './checkForNewOffers'
 import {
-  CHAT_NOTIFICATION_TYPES,
   CREATE_OFFER_PROMPT,
   NEW_CONNECTION,
   NEW_CONTENT,
@@ -22,6 +21,7 @@ import {
 import {showUINotificationFromRemoteMessage} from './showUINotificationFromRemoteMessage'
 import {loadSession} from '../../state/session'
 import checkAndShowCreateOfferPrompt from './checkAndShowCreateOfferPrompt'
+import isChatMessageNotification from './isChatMessageNotification'
 
 export async function processBackgroundMessage(
   remoteMessage: FirebaseMessagingTypes.RemoteMessage
@@ -43,10 +43,7 @@ export async function processBackgroundMessage(
       return
     }
 
-    if (
-      data.type &&
-      (CHAT_NOTIFICATION_TYPES as string[]).includes(data.type)
-    ) {
+    if (isChatMessageNotification(remoteMessage)) {
       console.info('📳 Refreshing inbox')
 
       await loadSession()

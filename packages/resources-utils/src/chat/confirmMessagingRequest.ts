@@ -3,16 +3,19 @@ import {
   type PublicKeyPemBase64,
 } from '@vexl-next/cryptography/dist/KeyHolder'
 
-import {now} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
-import * as TE from 'fp-ts/TaskEither'
-import {type ChatPrivateApi} from '@vexl-next/rest-api/dist/services/chat'
-import {flow, pipe} from 'fp-ts/function'
-import {encryptMessage, type ErrorEncryptingMessage} from './utils/chatCrypto'
-import {type ExtractLeftTE} from '../utils/ExtractLeft'
 import {
-  type ChatMessage,
   generateChatMessageId,
+  type ChatMessage,
+  type ChatMessagePayload,
 } from '@vexl-next/domain/dist/general/messaging'
+import {now} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
+import {type ChatPrivateApi} from '@vexl-next/rest-api/dist/services/chat'
+import * as TE from 'fp-ts/TaskEither'
+import {flow, pipe} from 'fp-ts/function'
+import {type ExtractLeftTE} from '../utils/ExtractLeft'
+import {type JsonStringifyError, type ZodParseError} from '../utils/parsing'
+import {type ErrorEncryptingMessage} from './utils/chatCrypto'
+import {messageToNetwork} from './utils/messageIO'
 
 function createApproveChatMessage({
   text,
@@ -49,7 +52,10 @@ export default function confirmMessagingRequest({
   api: ChatPrivateApi
   approve: boolean
 }): TE.TaskEither<
-  ApiConfirmMessagingRequest | ErrorEncryptingMessage,
+  | ApiConfirmMessagingRequest
+  | JsonStringifyError
+  | ZodParseError<ChatMessagePayload>
+  | ErrorEncryptingMessage,
   ChatMessage
 > {
   return pipe(
@@ -61,7 +67,7 @@ export default function confirmMessagingRequest({
     TE.right,
     TE.chainFirstW(
       flow(
-        encryptMessage(toPublicKey),
+        messageToNetwork(toPublicKey),
         TE.chainFirstW((message) =>
           pipe(
             api.approveRequest({

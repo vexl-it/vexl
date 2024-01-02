@@ -10,7 +10,6 @@ import {safeParse} from '../utils/fpUtils'
 import {isOnSpecificChat} from '../utils/navigation'
 import {ChatNotificationData} from '../utils/notifications/ChatNotificationData'
 import {
-  CHAT_NOTIFICATION_TYPES,
   CREATE_OFFER_PROMPT,
   NEW_CONNECTION,
   NEW_CONTENT,
@@ -21,6 +20,7 @@ import {fetchAndStoreMessagesForInboxAtom} from './chat/atoms/fetchNewMessagesAc
 import {updateAllOffersConnectionsActionAtom} from './connections/atom/offerToConnectionsAtom'
 import checkAndShowCreateOfferPrompt from '../utils/notifications/checkAndShowCreateOfferPrompt'
 import {showDebugNotificationIfEnabled} from '../utils/notifications'
+import isChatMessageNotification from '../utils/notifications/isChatMessageNotification'
 
 export function useHandleReceivedNotifications(): void {
   const navigation = useNavigation()
@@ -46,10 +46,7 @@ export function useHandleReceivedNotifications(): void {
         return
       }
 
-      if (
-        data.type &&
-        (CHAT_NOTIFICATION_TYPES as string[]).includes(data.type)
-      ) {
+      if (data.type && isChatMessageNotification(remoteMessage)) {
         console.info('📳 Refreshing inbox')
 
         pipe(

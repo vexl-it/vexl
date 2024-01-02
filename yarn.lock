@@ -8189,6 +8189,7 @@ __metadata:
     "@vexl-next/prettier-config": 0.0.0
     "@vexl-next/tsconfig": 0.0.0
     awesome-phonenumber: ^5.1.0
+    compare-versions: ^6.1.0
     eslint: ^8.50.0
     fp-ts: ^2.13.1
     js-base64: ^3.7.5
@@ -8332,6 +8333,7 @@ __metadata:
     awesome-phonenumber: ^5.1.0
     babel-plugin-transform-inline-environment-variables: ^0.4.4
     burnt: ^0.12.1
+    compare-versions: ^6.1.0
     country-data: ^0.0.31
     deep-equal: ^2.2.0
     eslint: ^8.50.0
@@ -10566,6 +10568,13 @@ __metadata:
   version: 3.6.0
   resolution: "compare-versions@npm:3.6.0"
   checksum: 7492a50cdaa2c27f5254eee7c4b38856e1c164991bab3d98d7fd067fe4b570d47123ecb92523b78338be86aa221668fd3868bfe8caa5587dc3ebbe1a03d52b5d
+  languageName: node
+  linkType: hard
+
+"compare-versions@npm:^6.1.0":
+  version: 6.1.0
+  resolution: "compare-versions@npm:6.1.0"
+  checksum: d4e2a45706a023d8d0b6680338b66b79e20bd02d1947f0ac6531dab634cbed89fa373b3f03d503c5e489761194258d6e1bae67a07f88b1efc61648454f2d47e7
   languageName: node
   linkType: hard
 

@@ -1,4 +1,3 @@
-import {createEmptyTradeChecklistInState} from './../../tradeChecklist/domain'
 import {
   generateChatId,
   type Inbox,
@@ -10,6 +9,7 @@ import {pipe} from 'fp-ts/function'
 import {group} from 'group-items'
 import notEmpty from '../../../utils/notEmpty'
 import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
+import {createEmptyTradeChecklistInState} from './../../tradeChecklist/domain'
 
 export default function createNewChatsFromFirstMessages({
   inbox,

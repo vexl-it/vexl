@@ -4,16 +4,18 @@ import {
   type PublicKeyPemBase64,
 } from '@vexl-next/cryptography/dist/KeyHolder'
 import {pipe} from 'fp-ts/function'
-import {type ChatMessage} from '@vexl-next/domain/dist/general/messaging'
-import * as TE from 'fp-ts/TaskEither'
 import {
-  encryptMessage,
-  encryptMessagePreview,
-  type ErrorEncryptingMessage,
-} from './utils/chatCrypto'
-import {type ServerMessage} from '@vexl-next/rest-api/dist/services/chat/contracts'
+  type ChatMessagePayload,
+  type ChatMessage,
+  type ServerMessage,
+} from '@vexl-next/domain/dist/general/messaging'
+import * as TE from 'fp-ts/TaskEither'
+import {type ErrorEncryptingMessage} from './utils/chatCrypto'
 import {type ExtractLeftTE} from '../utils/ExtractLeft'
 import mapMessageTypeToBackwardCompatibleMessageType from './utils/mapMessageTypeToBackwardCompatibleMessageType'
+import {messageToNetwork} from './utils/messageIO'
+import {type JsonStringifyError, type ZodParseError} from '../utils/parsing'
+import {messagePreviewToNetwork} from './utils/messagePreviewIO'
 
 export type SendMessageApiErrors = ExtractLeftTE<
   ReturnType<ChatPrivateApi['sendMessage']>
@@ -30,15 +32,18 @@ export default function sendMessage({
   message: ChatMessage
   senderKeypair: PrivateKeyHolder
 }): TE.TaskEither<
-  ErrorEncryptingMessage | SendMessageApiErrors,
+  | JsonStringifyError
+  | ZodParseError<ChatMessagePayload>
+  | ErrorEncryptingMessage
+  | SendMessageApiErrors,
   ServerMessage
 > {
   return pipe(
     message,
-    encryptMessage(receiverPublicKey),
+    messageToNetwork(receiverPublicKey),
     TE.bindTo('encryptedMessage'),
-    TE.bind('encryptedPreview', () =>
-      encryptMessagePreview(receiverPublicKey)(message)
+    TE.bindW('encryptedPreview', () =>
+      messagePreviewToNetwork(receiverPublicKey)(message)
     ),
     TE.chainW(({encryptedMessage, encryptedPreview}) =>
       pipe(

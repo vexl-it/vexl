@@ -1,24 +1,24 @@
-import * as TE from 'fp-ts/TaskEither'
-import {type ChatMessageWithState} from '../domain'
-import {pipe} from 'fp-ts/function'
+import {type PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
+import {UriString} from '@vexl-next/domain/dist/utility/UriString.brand'
 import {generateUuid} from '@vexl-next/domain/dist/utility/Uuid.brand'
+import {
+  toBasicError,
+  type BasicError,
+} from '@vexl-next/domain/dist/utility/errors'
+import {
+  hashMD5,
+  type CryptoError,
+} from '@vexl-next/resources-utils/dist/utils/crypto'
+import * as FileSystem from 'expo-file-system'
 import * as E from 'fp-ts/Either'
 import * as T from 'fp-ts/Task'
-import {UriString} from '@vexl-next/domain/dist/utility/UriString.brand'
-import * as FileSystem from 'expo-file-system'
-import {
-  type BasicError,
-  toBasicError,
-} from '@vexl-next/domain/dist/utility/errors'
+import * as TE from 'fp-ts/TaskEither'
+import {pipe} from 'fp-ts/function'
 import urlJoin from 'url-join'
 import {safeParse} from '../../../utils/fpUtils'
-import reportError from '../../../utils/reportError'
-import {type PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
-import {
-  type CryptoError,
-  hashMD5,
-} from '@vexl-next/resources-utils/dist/utils/crypto'
 import {IMAGES_DIRECTORY} from '../../../utils/fsDirectories'
+import reportError from '../../../utils/reportError'
+import {type ChatMessageWithState} from './../domain'
 
 type NoDocumentDirectoryError = BasicError<'NoDocumentDirectoryError'>
 type CreatingDirectoryError = BasicError<'CreatingDirectoryError'>
@@ -138,6 +138,7 @@ function replaceImages(
   replyToImage: UriString | undefined
 }) => ChatMessageWithState {
   return ({image, replyToImage}) => {
+    if (source.state === 'receivedButRequiresNewerVersion') return source
     if (!source.message.deanonymizedUser) return source
     return {
       ...source,
@@ -160,6 +161,8 @@ export default function replaceBase64UriWithImageFileUri(
   inboxPublicKey: PublicKeyPemBase64,
   otherSidePublicKey: PublicKeyPemBase64
 ): T.Task<ChatMessageWithState> {
+  if (message.state === 'receivedButRequiresNewerVersion') return T.of(message)
+
   const image = message.message.image
   const replyToImage = message.message?.repliedTo?.image
 

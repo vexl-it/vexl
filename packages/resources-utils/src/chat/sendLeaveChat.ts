@@ -4,11 +4,16 @@ import {
   type PublicKeyPemBase64,
 } from '@vexl-next/cryptography/dist/KeyHolder'
 import {pipe} from 'fp-ts/function'
-import {type ChatMessage} from '@vexl-next/domain/dist/general/messaging'
+import {
+  type ChatMessagePayload,
+  type ChatMessage,
+  type ServerMessage,
+} from '@vexl-next/domain/dist/general/messaging'
 import * as TE from 'fp-ts/TaskEither'
-import {encryptMessage, type ErrorEncryptingMessage} from './utils/chatCrypto'
-import {type ServerMessage} from '@vexl-next/rest-api/dist/services/chat/contracts'
+import {type ErrorEncryptingMessage} from './utils/chatCrypto'
 import {type ExtractLeftTE} from '../utils/ExtractLeft'
+import {messageToNetwork} from './utils/messageIO'
+import {type JsonStringifyError, type ZodParseError} from '../utils/parsing'
 
 export type SendMessageApiErrors = ExtractLeftTE<
   ReturnType<ChatPrivateApi['sendMessage']>
@@ -25,12 +30,15 @@ export default function sendLeaveChat({
   message: ChatMessage
   senderKeypair: PrivateKeyHolder
 }): TE.TaskEither<
-  ErrorEncryptingMessage | SendMessageApiErrors,
+  | ZodParseError<ChatMessagePayload>
+  | JsonStringifyError
+  | ErrorEncryptingMessage
+  | SendMessageApiErrors,
   ServerMessage
 > {
   return pipe(
     message,
-    encryptMessage(receiverPublicKey),
+    messageToNetwork(receiverPublicKey),
     TE.chainW((encrypted) =>
       api.leaveChat({
         message: encrypted,

@@ -13,6 +13,7 @@ import {translationAtom} from '../../../utils/localization/I18nProvider'
 import {
   type ChatMessage,
   generateChatMessageId,
+  type ChatMessagePayload,
 } from '@vexl-next/domain/dist/general/messaging'
 import {unixMillisecondsNow} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
 import {loadingOverlayDisplayedAtom} from '../../../components/LoadingOverlayProvider'
@@ -30,6 +31,10 @@ import addMessageToChat, {
 } from '../utils/addMessageToChat'
 import createAccountDeletedMessage from '../utils/createAccountDeletedMessage'
 import showErrorAlert from '../../../utils/showErrorAlert'
+import {
+  type JsonStringifyError,
+  type ZodParseError,
+} from '@vexl-next/resources-utils/dist/utils/parsing'
 
 type ChatNotFoundError = BasicError<'ChatNotFoundError'>
 type CancelRequestApprovalErrors = ExtractLeftTE<
@@ -46,7 +51,10 @@ const cancelRequestActionAtomHandleUI = atom(
     | ErrorEncryptingMessage
     | ChatNotFoundError
     | CancelRequestApprovalErrors
-    | UserDeclinedError,
+    | UserDeclinedError
+    | JsonStringifyError
+    | ZodParseError<ChatMessagePayload>
+    | ErrorEncryptingMessage,
     ChatMessageWithState
   > => {
     const session = get(sessionDataOrDummyAtom)

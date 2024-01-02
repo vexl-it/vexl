@@ -43,3 +43,25 @@ it('Adds item to correct position in the end', () => {
     )(3)
   ).toEqual([-1, 0, 2, 3])
 })
+
+it('Adds to correct position when the item is duplicate', () => {
+  const array = [
+    {order: 1, equal: 4},
+    {order: 2, equal: 3},
+    {order: 3, equal: 2},
+    {order: 4, equal: 1},
+  ]
+
+  expect(
+    addToSortedArray(
+      array,
+      (a, b) => a.order - b.order,
+      (a, b) => a.equal === b.equal
+    )({order: 10, equal: 3})
+  ).toBe([
+    {order: 1, equal: 4},
+    {order: 3, equal: 2},
+    {order: 4, equal: 1},
+    {order: 10, equal: 3},
+  ])
+})

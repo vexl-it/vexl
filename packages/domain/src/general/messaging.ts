@@ -9,6 +9,7 @@ import {PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
 import {UriString} from '../utility/UriString.brand'
 import {Base64String} from '../utility/Base64String.brand'
 import {TradeChecklistUpdate} from './tradeChecklist'
+import {SemverString} from '../utility/SmeverString.brand'
 
 export const MessageType = z.enum([
   'MESSAGE',
@@ -81,8 +82,9 @@ export const ChatMessagePayload = z.object({
   image: UriString.optional(),
   repliedTo: RepliedToData.optional(),
   time: UnixMilliseconds,
-  messageType: MessageType.optional(),
+  messageType: MessageType,
   tradeChecklistUpdate: TradeChecklistUpdate.optional(),
+  minimalRequiredVersion: SemverString.optional(),
   deanonymizedUser: z
     .object({
       name: UserName,
@@ -101,6 +103,7 @@ export function generateChatMessageId(): ChatMessageId {
 export const ChatMessage = z.object({
   uuid: ChatMessageId,
   text: z.string(),
+  minimalRequiredVersion: SemverString.optional(),
   time: UnixMilliseconds,
   image: UriString.optional(),
   repliedTo: RepliedToData.optional(),
@@ -151,3 +154,25 @@ export const Chat = z.object({
   showVexlbotInitialMessage: z.boolean().default(true),
 })
 export type Chat = z.TypeOf<typeof Chat>
+
+export const ServerMessage = z.object({
+  message: z.string(),
+  senderPublicKey: PublicKeyPemBase64,
+})
+export type ServerMessage = z.TypeOf<typeof ServerMessage>
+
+export const ChatMessageRequiringNewerVersion = z.object({
+  uuid: ChatMessageId,
+  messageType: z.literal('REQUIRES_NEWER_VERSION'),
+  serverMessage: ServerMessage,
+  minimalRequiredVersion: SemverString,
+  time: UnixMilliseconds,
+  senderPublicKey: PublicKeyPemBase64,
+  messageParsed: z.unknown(),
+  text: z.literal('-'),
+  deanonymizedUser: z.undefined(),
+  image: z.undefined(),
+})
+export type ChatMessageRequiringNewerVersion = z.infer<
+  typeof ChatMessageRequiringNewerVersion
+>

@@ -18,7 +18,7 @@ import offerToConnectionsAtom, {
 import {importedContactsAtom} from '../../state/contacts'
 import {triggerOffersRefreshAtom} from '../../state/marketplace'
 import {useSessionAssumeLoggedIn} from '../../state/session'
-import {enableHiddenFeatures} from '../../utils/environment'
+import {enableHiddenFeatures, version} from '../../utils/environment'
 import reportError from '../../utils/reportError'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 import Button from '../Button'
@@ -87,6 +87,7 @@ function DebugScreen(): JSX.Element {
             <Text color="$black" fos={20} ff="$heading">
               Debug screen
             </Text>
+            <Text color="$black">App version: {version}</Text>
             <CryptoBenchmarks />
             <Text color="$black">
               enableHiddenFeatures: {enableHiddenFeatures ? 'true' : 'false'}

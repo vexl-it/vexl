@@ -206,6 +206,7 @@ function TextMessage({
   const {message, isLatest, time} = messageItem
 
   if (!message) return null
+  if (message.state === 'receivedButRequiresNewerVersion') return null
 
   const isMine = message.state !== 'received'
 

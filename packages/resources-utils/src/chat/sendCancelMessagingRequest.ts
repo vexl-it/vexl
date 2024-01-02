@@ -6,12 +6,15 @@ import {type ChatPrivateApi} from '@vexl-next/rest-api/dist/services/chat'
 import {
   type ChatMessage,
   generateChatMessageId,
+  type ChatMessagePayload,
 } from '@vexl-next/domain/dist/general/messaging'
 import {now} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
 import {flow, pipe} from 'fp-ts/function'
 import * as TE from 'fp-ts/TaskEither'
-import {encryptMessage, type ErrorEncryptingMessage} from './utils/chatCrypto'
+import {type ErrorEncryptingMessage} from './utils/chatCrypto'
 import {type ExtractLeftTE} from '../utils/ExtractLeft'
+import {messageToNetwork} from './utils/messageIO'
+import {type JsonStringifyError, type ZodParseError} from '../utils/parsing'
 
 function createCancelRequestChatMessage({
   text,
@@ -44,7 +47,10 @@ export function sendCancelMessagingRequest({
   toPublicKey: PublicKeyPemBase64
   api: ChatPrivateApi
 }): TE.TaskEither<
-  ApiErrorRequestMessaging | ErrorEncryptingMessage,
+  | ApiErrorRequestMessaging
+  | JsonStringifyError
+  | ZodParseError<ChatMessagePayload>
+  | ErrorEncryptingMessage,
   ChatMessage
 > {
   return pipe(
@@ -55,7 +61,7 @@ export function sendCancelMessagingRequest({
     TE.right,
     TE.chainFirstW(
       flow(
-        encryptMessage(toPublicKey),
+        messageToNetwork(toPublicKey),
         TE.chainW((message) =>
           pipe(api.cancelRequestApproval({message, publicKey: toPublicKey}))
         )

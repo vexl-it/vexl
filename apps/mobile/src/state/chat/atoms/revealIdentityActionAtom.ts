@@ -5,6 +5,7 @@ import {anonymizedUserDataAtom, sessionDataOrDummyAtom} from '../../session'
 import {
   type ChatMessage,
   generateChatMessageId,
+  type ChatMessagePayload,
 } from '@vexl-next/domain/dist/general/messaging'
 import {unixMillisecondsNow} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
 import {type ActionAtomType} from '../../../utils/atomUtils/ActionAtomType'
@@ -25,6 +26,10 @@ import anonymizePhoneNumber from '../utils/anonymizePhoneNumber'
 import {type UserName} from '@vexl-next/domain/dist/general/UserName.brand'
 import {type UriString} from '@vexl-next/domain/dist/utility/UriString.brand'
 import {addMessageToMessagesArray} from '../utils/addMessageToChat'
+import {
+  type JsonStringifyError,
+  type ZodParseError,
+} from '@vexl-next/resources-utils/dist/utils/parsing'
 
 export type IdentityRequestAlreadySentError =
   BasicError<'IdentityRequestAlreadySentError'>
@@ -46,6 +51,8 @@ export default function revealIdentityActionAtom(
   ],
   TE.TaskEither<
     | SendMessageApiErrors
+    | JsonStringifyError
+    | ZodParseError<ChatMessagePayload>
     | ErrorEncryptingMessage
     | ReadingFileError
     | IdentityRequestAlreadySentError,
@@ -60,6 +67,8 @@ export default function revealIdentityActionAtom(
       {type, username, imageUri}
     ): TE.TaskEither<
       | SendMessageApiErrors
+      | JsonStringifyError
+      | ZodParseError<ChatMessagePayload>
       | ErrorEncryptingMessage
       | ReadingFileError
       | IdentityRequestAlreadySentError,
@@ -108,7 +117,7 @@ export default function revealIdentityActionAtom(
       return pipe(
         replaceImageFileUrisWithBase64(messageWithFileUri),
         TE.fromTask,
-        TE.chainW((message) =>
+        TE.chainFirstW((message) =>
           sendMessage({
             api: api.chat,
             senderKeypair: chat.inbox.privateKey,

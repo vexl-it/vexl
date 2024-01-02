@@ -1,8 +1,10 @@
-import {type MyOfferInState} from './../../../../../../packages/domain/src/general/offers'
 import {type OfferEncryptionProgress} from '@vexl-next/resources-utils/dist/offers/OfferEncryptionProgress'
 import {z} from 'zod'
 import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
-import {OfferId} from '@vexl-next/domain/dist/general/offers'
+import {
+  type MyOfferInState,
+  OfferId,
+} from '@vexl-next/domain/dist/general/offers'
 import {atom} from 'jotai'
 import {myOffersAtom} from './myOffers'
 import {pipe} from 'fp-ts/lib/function'

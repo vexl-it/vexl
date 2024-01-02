@@ -4,6 +4,7 @@ import {type FocusAtomType} from '../../../utils/atomUtils/FocusAtomType'
 import {
   type ChatMessage,
   generateChatMessageId,
+  type ChatMessagePayload,
 } from '@vexl-next/domain/dist/general/messaging'
 import {unixMillisecondsNow} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
 import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
@@ -17,13 +18,20 @@ import {addMessageToMessagesArray} from '../utils/addMessageToChat'
 import {type ActionAtomType} from '../../../utils/atomUtils/ActionAtomType'
 import * as TE from 'fp-ts/TaskEither'
 import {type ErrorEncryptingMessage} from '@vexl-next/resources-utils/dist/chat/utils/chatCrypto'
+import {
+  type JsonStringifyError,
+  type ZodParseError,
+} from '@vexl-next/resources-utils/dist/utils/parsing'
 
 export default function createSubmitChecklistUpdateActionAtom(
   chatWithMessagesAtom: FocusAtomType<ChatWithMessages>
 ): ActionAtomType<
   [TradeChecklistUpdate],
   TE.TaskEither<
-    SendMessageApiErrors | ErrorEncryptingMessage,
+    | SendMessageApiErrors
+    | ErrorEncryptingMessage
+    | JsonStringifyError
+    | ZodParseError<ChatMessagePayload>,
     ChatMessageWithState
   >
 > {

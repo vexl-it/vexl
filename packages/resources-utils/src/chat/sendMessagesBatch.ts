@@ -1,4 +1,7 @@
-import {type ChatMessage} from '@vexl-next/domain/dist/general/messaging'
+import {
+  type ChatMessagePayload,
+  type ChatMessage,
+} from '@vexl-next/domain/dist/general/messaging'
 import {
   type PrivateKeyHolder,
   type PublicKeyPemBase64,
@@ -13,11 +16,7 @@ import {
 } from '@vexl-next/rest-api/dist/services/chat/contracts'
 import * as TE from 'fp-ts/TaskEither'
 import * as A from 'fp-ts/Array'
-import {
-  encryptMessage,
-  encryptMessagePreview,
-  type ErrorEncryptingMessage,
-} from './utils/chatCrypto'
+import {type ErrorEncryptingMessage} from './utils/chatCrypto'
 import * as O from 'fp-ts/Option'
 import {
   type ErrorGeneratingSignedChallengeBatch,
@@ -26,6 +25,9 @@ import {
 import {type BasicError, toError} from '@vexl-next/domain/dist/utility/errors'
 import {type ExtractLeftTE} from '../utils/ExtractLeft'
 import mapMessageTypeToBackwardCompatibleMessageType from './utils/mapMessageTypeToBackwardCompatibleMessageType'
+import {messagePreviewToNetwork} from './utils/messagePreviewIO'
+import {messageToNetwork} from './utils/messageIO'
+import {type JsonStringifyError, type ZodParseError} from '../utils/parsing'
 
 export interface MessageInInbox {
   readonly message: ChatMessage
@@ -43,13 +45,18 @@ function createMessageInBatch({
 }: {
   message: ChatMessage
   receiverPublicKey: PublicKeyPemBase64
-}): TE.TaskEither<ErrorEncryptingMessage, MessageInBatch> {
+}): TE.TaskEither<
+  | JsonStringifyError
+  | ZodParseError<ChatMessagePayload>
+  | ErrorEncryptingMessage,
+  MessageInBatch
+> {
   return pipe(
     message,
-    encryptMessage(receiverPublicKey),
+    messageToNetwork(receiverPublicKey),
     TE.bindTo('encryptedMessage'),
-    TE.bind('encryptedPreview', () =>
-      encryptMessagePreview(receiverPublicKey)(message)
+    TE.bindW('encryptedPreview', () =>
+      messagePreviewToNetwork(receiverPublicKey)(message)
     ),
     TE.map(({encryptedMessage, encryptedPreview}) => ({
       message: encryptedMessage,
@@ -88,7 +95,10 @@ function createInboxInBatch(
   messages: Array<{message: ChatMessage; receiverPublicKey: PublicKeyPemBase64}>
   senderPublicKey: PublicKeyPemBase64
 }) => TE.TaskEither<
-  ErrorEncryptingMessage | ErrorNoChallengeForPublicKey,
+  | JsonStringifyError
+  | ZodParseError<ChatMessagePayload>
+  | ErrorEncryptingMessage
+  | ErrorNoChallengeForPublicKey,
   InboxInBatch
 > {
   return ({messages, senderPublicKey}) =>
@@ -124,6 +134,8 @@ export default function sendMessagesBatch({
   inboxes: Inbox[]
 }): TE.TaskEither<
   | ErrorGeneratingSignedChallengeBatch
+  | JsonStringifyError
+  | ZodParseError<ChatMessagePayload>
   | ErrorEncryptingMessage
   | ErrorNoChallengeForPublicKey
   | ApiErrorSendingMessagesBatch,

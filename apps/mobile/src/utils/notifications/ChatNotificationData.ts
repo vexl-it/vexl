@@ -4,7 +4,7 @@ import {ChatNotificationType} from './notificationTypes'
 
 export const ChatNotificationData = z.object({
   inbox: PublicKeyPemBase64,
-  type: ChatNotificationType,
+  type: z.union([ChatNotificationType, z.literal('UNKNOWN')]).catch('UNKNOWN'),
   sender: PublicKeyPemBase64,
   preview: z.string().optional(),
 })

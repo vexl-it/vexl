@@ -6,11 +6,8 @@ import {notificationPreferencesAtom} from '../preferences'
 import reportError from '../reportError'
 import {showChatNotification} from './chatNotifications'
 import {getDefaultChannel} from './notificationChannels'
-import {ChatNotificationType, INACTIVITY_REMINDER} from './notificationTypes'
-
-function isChatNotificationType(type: string): type is ChatNotificationType {
-  return ChatNotificationType.safeParse(type).success
-}
+import {INACTIVITY_REMINDER} from './notificationTypes'
+import isChatMessageNotification from './isChatMessageNotification'
 
 export async function showUINotificationFromRemoteMessage(
   remoteMessage: FirebaseMessagingTypes.RemoteMessage
@@ -29,7 +26,7 @@ export async function showUINotificationFromRemoteMessage(
     return
   }
 
-  if (isChatNotificationType(type)) {
+  if (isChatMessageNotification(remoteMessage)) {
     if (!notificationPreferences.chat) {
       console.info(
         'Received chat notification but chat notifications are disabled. Not showing notification.'

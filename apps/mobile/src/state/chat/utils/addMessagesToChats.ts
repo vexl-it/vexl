@@ -8,26 +8,6 @@ import processIdentityRevealMessageIfAny from './processIdentityRevealMessageIfA
 import {updateTradeChecklistState} from '../../tradeChecklist/utils'
 import notEmpty from '../../../utils/notEmpty'
 
-// function processDeleteChatMessageIfAny(
-//   deleteChatMessage?: ChatMessageWithState
-// ): (chat: ChatWithMessages) => ChatWithMessages {
-//   return (chat) => {
-//     if (deleteChatMessage?.message.messageType !== 'DELETE_CHAT') return chat
-//
-//     const indexOfDeleteMessage = chat.messages.findIndex(
-//       (message) => message.message.uuid === deleteChatMessage.message.uuid
-//     )
-//
-//     return {
-//       ...chat,
-//       messages:
-//         indexOfDeleteMessage !== -1
-//           ? chat.messages.slice(indexOfDeleteMessage)
-//           : chat.messages,
-//     }
-//   }
-// }
-
 export default function addMessagesToChats(
   chats: ChatWithMessages[]
 ): (toAdd: ChatMessageWithState[]) => ChatWithMessages[] {
@@ -58,27 +38,15 @@ export default function addMessagesToChats(
           ?.at(-1)
 
         const tradeChecklistUpdates = messagesToAddToThisChat
-          .filter((one) => one.message.messageType === 'TRADE_CHECKLIST_UPDATE')
+          .filter(
+            (
+              one
+            ): one is typeof one & {
+              message: {messageType: 'TRADE_CHECKLIST_UPDATE'}
+            } => one.message.messageType === 'TRADE_CHECKLIST_UPDATE'
+          )
           .map((one) => one.message.tradeChecklistUpdate)
           .filter(notEmpty)
-
-        // const deleteTypeMessageTime =
-        //   deleteTypeMessage?.message.time ?? UnixMilliseconds.parse(0)
-        // const identityRevealMessageTime =
-        //   identityRevealMessage?.message.time ?? UnixMilliseconds.parse(0)
-
-        // if (deleteTypeMessageTime < identityRevealMessageTime) {
-        //   return pipe(
-        //     {...oneChat, messages, isUnread: true},
-        //     processDeleteChatMessageIfAny(deleteTypeMessage),
-        //     processIdentityRevealMessageIfAny(identityRevealMessage)
-        //   )
-        // } else {
-        //   return pipe(
-        //     {...oneChat, messages, isUnread: true},
-        //     processDeleteChatMessageIfAny(deleteTypeMessage)
-        //   )
-        // }
 
         return pipe(
           {

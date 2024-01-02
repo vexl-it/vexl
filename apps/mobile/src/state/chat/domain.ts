@@ -3,6 +3,8 @@ import {
   Chat,
   ChatId,
   ChatMessage,
+  type ChatMessagePayload,
+  ChatMessageRequiringNewerVersion,
   Inbox,
 } from '@vexl-next/domain/dist/general/messaging'
 import {type BasicError} from '@vexl-next/domain/dist/utility/errors'
@@ -24,12 +26,20 @@ import {
 import {z} from 'zod'
 import {type ReadingFileError} from './utils/replaceImageFileUrisWithBase64'
 import {TradeChecklistInState} from '../tradeChecklist/domain'
+import {
+  type JsonStringifyError,
+  type ZodParseError,
+} from '@vexl-next/resources-utils/dist/utils/parsing'
 
 export type ApiErrorCreatingInbox = BasicError<'ApiErrorCreatingInbox'>
 export type ErrorInboxAlreadyExists = BasicError<'ErrorInboxAlreadyExists'>
 
 export const ChatMessageWithState = z.discriminatedUnion('state', [
   z.object({state: z.literal('received'), message: ChatMessage}),
+  z.object({
+    state: z.literal('receivedButRequiresNewerVersion'),
+    message: ChatMessageRequiringNewerVersion,
+  }),
   z.object({state: z.literal('sending'), message: ChatMessage}),
   z.object({
     state: z.literal('sendingError'),
@@ -44,6 +54,8 @@ export const ChatMessageWithState = z.discriminatedUnion('state', [
       | ErrorSigningChallenge
       | InboxDoesNotExist
       | NotPermittedToSendMessageToTargetInbox
+      | JsonStringifyError
+      | ZodParseError<ChatMessagePayload>
       | ReadingFileError
     >((one) => !!(one as any)._tag),
   }),

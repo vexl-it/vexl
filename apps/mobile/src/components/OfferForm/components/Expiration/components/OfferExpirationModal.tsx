@@ -12,7 +12,7 @@ import Calendar, {
 } from '../../../../Calendar'
 import {type MarkedDates} from 'react-native-calendars/src/types'
 import {DateTime} from 'luxon'
-import {JSDateString} from '../../../../../../../../packages/domain/src/utility/JSDateString.brand'
+import {JSDateString} from '@vexl-next/domain/dist/utility/JSDateString.brand'
 
 interface Props {
   expirationDateAtom: PrimitiveAtom<JSDateString | undefined>

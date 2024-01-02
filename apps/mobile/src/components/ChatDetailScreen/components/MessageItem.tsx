@@ -17,6 +17,7 @@ import formatChatTime from '../utils/formatChatTime'
 import {type ChatMessageWithState} from '../../../state/chat/domain'
 import {type VexlBotMessageData} from './VexlbotMessageItem/domain'
 import {type DateTime} from 'luxon'
+import MessageIncompatibleItem from './MessageIncompatibleItem'
 
 export type MessagesListItem =
   | {
@@ -56,6 +57,10 @@ function MessageItem({
   const {userName, image} = useAtomValue(otherSideDataAtom)
 
   if (item.type === 'message') {
+    if (item.message.state === 'receivedButRequiresNewerVersion') {
+      return <MessageIncompatibleItem message={item.message.message} />
+    }
+
     if (
       item.message.state === 'received' &&
       item.message.message.messageType === 'INBOX_DELETED'

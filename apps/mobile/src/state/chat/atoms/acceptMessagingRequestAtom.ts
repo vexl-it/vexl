@@ -6,28 +6,36 @@ import {pipe} from 'fp-ts/function'
 import * as TE from 'fp-ts/TaskEither'
 import {atom, type PrimitiveAtom} from 'jotai'
 import {privateApiAtom} from '../../../api'
-import {type ActionAtomType} from '../../../utils/atomUtils/ActionAtomType'
 import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
 import addMessageToChat from '../utils/addMessageToChat'
 import createAccountDeletedMessage from '../utils/createAccountDeletedMessage'
+import {
+  type ZodParseError,
+  type JsonStringifyError,
+} from '@vexl-next/resources-utils/dist/utils/parsing'
+import {type ChatMessagePayload} from '@vexl-next/domain/dist/general/messaging'
 
-type AcceptMessagingRequestAtom = ActionAtomType<
-  [
+const acceptMessagingRequestAtom = atom(
+  null,
+  (
+    get,
+    set,
     {
+      chatAtom,
+      approve,
+      text,
+    }: {
       chatAtom: PrimitiveAtom<ChatWithMessages>
       approve: boolean
       text: string
-    },
-  ],
-  TE.TaskEither<
-    ApiConfirmMessagingRequest | ErrorEncryptingMessage,
+    }
+  ): TE.TaskEither<
+    | ApiConfirmMessagingRequest
+    | JsonStringifyError
+    | ZodParseError<ChatMessagePayload>
+    | ErrorEncryptingMessage,
     ChatMessageWithState
-  >
->
-
-const acceptMessagingRequestAtom: AcceptMessagingRequestAtom = atom(
-  null,
-  (get, set, {chatAtom, approve, text}) => {
+  > => {
     const api = get(privateApiAtom)
     const {chat} = get(chatAtom)
 

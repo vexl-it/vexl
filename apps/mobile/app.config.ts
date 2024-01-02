@@ -1,12 +1,18 @@
+import {SemverString} from '@vexl-next/domain/dist/utility/SmeverString.brand'
+
 const VERSION_CODE = 88
-const VERSION = '1.7.3'
+const VERSION = '1.8.9'
 const ENV_PRESET = process.env.ENV_PRESET
+
+// check if version is valid
+SemverString.parse(VERSION)
 
 const presets = {
   stage: {
     enableHiddenFeatures: true,
     apiPreset: 'stageEnv',
     versionCode: VERSION_CODE,
+    semver: VERSION,
     version: `${VERSION} (${VERSION_CODE})`,
     packageName: 'it.vexl.nextstaging',
     appName: 'Vexl 2.0 (stage)',
@@ -22,6 +28,7 @@ const presets = {
     apiPreset: 'prodEnv',
     versionCode: VERSION_CODE,
     version: `${VERSION} (${VERSION_CODE})`,
+    semver: VERSION,
     packageName: 'it.vexl.next',
     appName: 'Vexl 2.0',
     googleServicesInfoPlistFile: './creds/GoogleService-Info.plist',

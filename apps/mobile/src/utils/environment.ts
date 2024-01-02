@@ -1,3 +1,4 @@
+import {SemverString} from '@vexl-next/domain/dist/utility/SmeverString.brand'
 import Constants from 'expo-constants'
 
 // export const enableHiddenFeatures =
@@ -6,7 +7,9 @@ import Constants from 'expo-constants'
 export const enableHiddenFeatures =
   Constants.expoConfig?.extra?.enableHiddenFeatures
 export const apiPreset = Constants.expoConfig?.extra?.apiPreset ?? 'stageEnv'
-export const version = String(Constants.expoConfig?.extra?.version ?? 'local')
+export const version = SemverString.parse(
+  Constants.expoConfig?.extra?.semver ?? '0.0.0'
+)
 export const versionCode = Number(Constants.expoConfig?.extra?.versionCode ?? 0)
 export const hmacPassword = String(
   Constants.expoConfig?.extra?.hmacPassword ??

@@ -1,6 +1,6 @@
 import {validateStrict} from 'compare-versions'
 
-const VERSION_CODE = 99
+const VERSION_CODE = 100
 const VERSION = '1.12.0'
 const ENV_PRESET = process.env.ENV_PRESET
 

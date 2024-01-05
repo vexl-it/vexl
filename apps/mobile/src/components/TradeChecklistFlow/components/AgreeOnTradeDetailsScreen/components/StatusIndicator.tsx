@@ -37,7 +37,7 @@ function StatusIndicator({itemStatus}: Props): JSX.Element {
           stroke={getTokens().color.main.val}
         />
       ) : itemStatus === 'warning' ? (
-        <Image height={18} width={18} source={warningSvg} />
+        <Image stroke="black" height={18} width={18} source={warningSvg} />
       ) : itemStatus === 'accepted' ? (
         <Checkbox size={'24x24'} value={true} onChange={empty} />
       ) : (

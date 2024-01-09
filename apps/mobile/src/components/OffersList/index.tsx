@@ -6,7 +6,7 @@ import usePixelsFromBottomWhereTabsEnd from '../InsideRouter/utils'
 import {FlashList} from '@shopify/flash-list'
 import {type Atom} from 'jotai'
 import atomKeyExtractor from '../../utils/atomUtils/atomKeyExtractor'
-import {type OneOfferInState} from '@vexl-next/domain/dist/general/offers'
+import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
 
 export interface Props {
   readonly offersAtoms: Array<Atom<OneOfferInState>>

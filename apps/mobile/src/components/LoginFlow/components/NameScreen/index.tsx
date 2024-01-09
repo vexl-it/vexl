@@ -3,7 +3,7 @@ import TextInput from '../../../Input'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import AnonymizationCaption from '../../../AnonymizationCaption/AnonymizationCaption'
 import {useState} from 'react'
-import {UserName} from '@vexl-next/domain/dist/general/UserName.brand'
+import {UserName} from '@vexl-next/domain/src/general/UserName.brand'
 import {Alert} from 'react-native'
 import {type LoginStackScreenProps} from '../../../../navigationTypes'
 import {

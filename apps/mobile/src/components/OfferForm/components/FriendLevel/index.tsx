@@ -5,7 +5,7 @@ import {
   useTranslation,
 } from '../../../../utils/localization/I18nProvider'
 import {type Atom, atom, useAtom, useAtomValue} from 'jotai'
-import {type IntendedConnectionLevel} from '@vexl-next/domain/dist/general/offers'
+import {type IntendedConnectionLevel} from '@vexl-next/domain/src/general/offers'
 import numberOfFriendsAtom from '../../../ModifyOffer/atoms/numberOfFriendsAtom'
 import {pipe} from 'fp-ts/function'
 import * as E from 'fp-ts/Either'

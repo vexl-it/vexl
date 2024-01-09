@@ -5,7 +5,7 @@ import * as Sharing from 'expo-sharing'
 import {
   type BasicError,
   toBasicError,
-} from '@vexl-next/domain/dist/utility/errors'
+} from '@vexl-next/domain/src/utility/errors'
 import {readLogsRaw} from './storage'
 import {version} from '../../../utils/environment'
 import removeSensitiveData from '../../../utils/removeSensitiveData'

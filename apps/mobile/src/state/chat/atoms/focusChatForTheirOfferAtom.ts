@@ -1,7 +1,7 @@
 import {focusAtom} from 'jotai-optics'
 import messagingStateAtom from './messagingStateAtom'
-import {type OfferInfo} from '@vexl-next/domain/dist/general/offers'
-import {type Inbox} from '@vexl-next/domain/dist/general/messaging'
+import {type OfferInfo} from '@vexl-next/domain/src/general/offers'
+import {type Inbox} from '@vexl-next/domain/src/general/messaging'
 import {type FocusAtomType} from '../../../utils/atomUtils/FocusAtomType'
 import {type ChatWithMessages} from '../domain'
 

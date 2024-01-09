@@ -1,4 +1,4 @@
-import {type UnixMilliseconds} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
+import {type UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {type VexlBotMessageData} from '../components/VexlbotMessageItem/domain'
 import {type ChatMessageWithState} from '../../../state/chat/domain'
 import addToSortedArray from '../../../utils/addToSortedArray'

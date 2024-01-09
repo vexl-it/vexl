@@ -6,8 +6,8 @@ import {
   type ChatMessage,
   generateChatMessageId,
   type ChatMessagePayload,
-} from '@vexl-next/domain/dist/general/messaging'
-import {unixMillisecondsNow} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
+} from '@vexl-next/domain/src/general/messaging'
+import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {type ActionAtomType} from '../../../utils/atomUtils/ActionAtomType'
 import * as TE from 'fp-ts/TaskEither'
 import replaceImageFileUrisWithBase64, {
@@ -17,19 +17,19 @@ import {pipe} from 'fp-ts/function'
 import {privateApiAtom} from '../../../api'
 import sendMessage, {
   type SendMessageApiErrors,
-} from '@vexl-next/resources-utils/dist/chat/sendMessage'
-import {type BasicError} from '@vexl-next/domain/dist/utility/errors'
-import {type ErrorEncryptingMessage} from '@vexl-next/resources-utils/dist/chat/utils/chatCrypto'
+} from '@vexl-next/resources-utils/src/chat/sendMessage'
+import {type BasicError} from '@vexl-next/domain/src/utility/errors'
+import {type ErrorEncryptingMessage} from '@vexl-next/resources-utils/src/chat/utils/chatCrypto'
 import processIdentityRevealMessageIfAny from '../utils/processIdentityRevealMessageIfAny'
 import removeFile from '../../../utils/removeFile'
 import anonymizePhoneNumber from '../utils/anonymizePhoneNumber'
-import {type UserName} from '@vexl-next/domain/dist/general/UserName.brand'
-import {type UriString} from '@vexl-next/domain/dist/utility/UriString.brand'
+import {type UserName} from '@vexl-next/domain/src/general/UserName.brand'
+import {type UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {addMessageToMessagesArray} from '../utils/addMessageToChat'
 import {
   type JsonStringifyError,
   type ZodParseError,
-} from '@vexl-next/resources-utils/dist/utils/parsing'
+} from '@vexl-next/resources-utils/src/utils/parsing'
 
 export type IdentityRequestAlreadySentError =
   BasicError<'IdentityRequestAlreadySentError'>

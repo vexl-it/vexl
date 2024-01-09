@@ -1,11 +1,11 @@
 import {
   type AvailableDateTimeOption,
   type PickedDateTimeOption,
-} from '@vexl-next/domain/dist/general/tradeChecklist'
+} from '@vexl-next/domain/src/general/tradeChecklist'
 import {
   type UnixMilliseconds,
   UnixMilliseconds0,
-} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
+} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {DateTime} from 'luxon'
 import {getCurrentLocale} from '../../../utils/localization/I18nProvider'
 import {type TradeChecklistInState} from '../domain'

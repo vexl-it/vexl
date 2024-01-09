@@ -1,4 +1,4 @@
-import {type OneOfferInState} from '@vexl-next/domain/dist/general/offers'
+import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
 import {type OffersFilter} from '../domain'
 import isSomeIn30KmRange from '../utils/isIn30KmRadius'
 import {type Atom, atom} from 'jotai'

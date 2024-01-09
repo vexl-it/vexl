@@ -1,6 +1,6 @@
 import {parsePhoneNumber} from 'awesome-phonenumber'
-import {CountryPrefix} from '@vexl-next/domain/dist/general/CountryPrefix.brand'
-import {type E164PhoneNumber} from '@vexl-next/domain/dist/general/E164PhoneNumber.brand'
+import {CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
+import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import reportError from './reportError'
 
 const INVALID_COUNTRY_CODE = CountryPrefix.parse(-1)

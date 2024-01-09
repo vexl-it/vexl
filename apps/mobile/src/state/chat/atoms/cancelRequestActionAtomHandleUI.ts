@@ -2,26 +2,26 @@ import * as TE from 'fp-ts/TaskEither'
 import * as T from 'fp-ts/Task'
 import {type ChatMessageWithState} from '../domain'
 import {atom} from 'jotai'
-import {type ExtractLeftTE} from '@vexl-next/resources-utils/dist/utils/ExtractLeft'
-import {type ChatPrivateApi} from '@vexl-next/rest-api/dist/services/chat'
+import {type ExtractLeftTE} from '@vexl-next/resources-utils/src/utils/ExtractLeft'
+import {type ChatPrivateApi} from '@vexl-next/rest-api/src/services/chat'
 import focusChatByInboxKeyAndSenderKey from './focusChatByInboxKeyAndSenderKey'
 import {sessionDataOrDummyAtom} from '../../session'
-import {type BasicError} from '@vexl-next/domain/dist/utility/errors'
-import {type ErrorEncryptingMessage} from '@vexl-next/resources-utils/dist/chat/utils/chatCrypto'
+import {type BasicError} from '@vexl-next/domain/src/utility/errors'
+import {type ErrorEncryptingMessage} from '@vexl-next/resources-utils/src/chat/utils/chatCrypto'
 import {privateApiAtom} from '../../../api'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
 import {
   type ChatMessage,
   generateChatMessageId,
   type ChatMessagePayload,
-} from '@vexl-next/domain/dist/general/messaging'
-import {unixMillisecondsNow} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
+} from '@vexl-next/domain/src/general/messaging'
+import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {loadingOverlayDisplayedAtom} from '../../../components/LoadingOverlayProvider'
-import {sendCancelMessagingRequest} from '@vexl-next/resources-utils/dist/chat/sendCancelMessagingRequest'
+import {sendCancelMessagingRequest} from '@vexl-next/resources-utils/src/chat/sendCancelMessagingRequest'
 import {Alert} from 'react-native'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 import {pipe} from 'fp-ts/function'
-import {type OfferInfo} from '@vexl-next/domain/dist/general/offers'
+import {type OfferInfo} from '@vexl-next/domain/src/general/offers'
 import {
   askAreYouSureActionAtom,
   type UserDeclinedError,
@@ -34,7 +34,7 @@ import showErrorAlert from '../../../utils/showErrorAlert'
 import {
   type JsonStringifyError,
   type ZodParseError,
-} from '@vexl-next/resources-utils/dist/utils/parsing'
+} from '@vexl-next/resources-utils/src/utils/parsing'
 
 type ChatNotFoundError = BasicError<'ChatNotFoundError'>
 type CancelRequestApprovalErrors = ExtractLeftTE<

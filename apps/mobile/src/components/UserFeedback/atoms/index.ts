@@ -7,7 +7,7 @@ import {
   objectionTypeNegativeOptions,
   objectionTypePositiveOptions,
   POSITIVE_STAR_RATING_THRESHOLD,
-} from '@vexl-next/domain/dist/general/feedback'
+} from '@vexl-next/domain/src/general/feedback'
 import {atom, type SetStateAction, type WritableAtom} from 'jotai'
 import getValueFromSetStateActionOfAtom from '../../../utils/atomUtils/getValueFromSetStateActionOfAtom'
 import {privateApiAtom} from '../../../api'

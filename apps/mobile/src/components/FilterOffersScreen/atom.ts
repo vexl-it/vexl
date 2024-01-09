@@ -1,5 +1,5 @@
 import {type Atom, atom, type SetStateAction, type WritableAtom} from 'jotai'
-import {type CurrencyCode} from '@vexl-next/domain/dist/general/currency.brand'
+import {type CurrencyCode} from '@vexl-next/domain/src/general/currency.brand'
 import {currencies} from '../../utils/localization/currency'
 import {
   type BtcNetwork,
@@ -9,13 +9,13 @@ import {
   type PaymentMethod,
   type Sort,
   type SpokenLanguage,
-} from '@vexl-next/domain/dist/general/offers'
+} from '@vexl-next/domain/src/general/offers'
 import {splitAtom} from 'jotai/utils'
 import getValueFromSetStateActionOfAtom from '../../utils/atomUtils/getValueFromSetStateActionOfAtom'
 import {
   type GetLocationSuggestionsRequest,
   type LocationSuggestion,
-} from '@vexl-next/rest-api/dist/services/location/contracts'
+} from '@vexl-next/rest-api/src/services/location/contracts'
 import {pipe} from 'fp-ts/function'
 import {fetchLocationSuggestionsAtom} from '../../state/location/atoms/fetchLocationSuggestionsAtom'
 import * as T from 'fp-ts/Task'

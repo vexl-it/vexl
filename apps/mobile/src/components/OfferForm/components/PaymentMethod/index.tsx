@@ -1,7 +1,7 @@
 import {
   type LocationState,
   type PaymentMethod,
-} from '@vexl-next/domain/dist/general/offers'
+} from '@vexl-next/domain/src/general/offers'
 import {useAtom, useAtomValue, type PrimitiveAtom} from 'jotai'
 import {Text, XStack, getTokens} from 'tamagui'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'

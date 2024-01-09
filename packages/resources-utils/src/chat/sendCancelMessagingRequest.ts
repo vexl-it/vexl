@@ -1,14 +1,14 @@
 import {
   type PrivateKeyHolder,
   type PublicKeyPemBase64,
-} from '@vexl-next/cryptography/dist/KeyHolder'
-import {type ChatPrivateApi} from '@vexl-next/rest-api/dist/services/chat'
+} from '@vexl-next/cryptography/src/KeyHolder'
+import {type ChatPrivateApi} from '@vexl-next/rest-api/src/services/chat'
 import {
   type ChatMessage,
   generateChatMessageId,
   type ChatMessagePayload,
-} from '@vexl-next/domain/dist/general/messaging'
-import {now} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
+} from '@vexl-next/domain/src/general/messaging'
+import {now} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {flow, pipe} from 'fp-ts/function'
 import * as TE from 'fp-ts/TaskEither'
 import {type ErrorEncryptingMessage} from './utils/chatCrypto'

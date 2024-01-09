@@ -1,5 +1,5 @@
 import {type SetStateAction, type WritableAtom, useAtom} from 'jotai'
-import {type SpokenLanguage} from '@vexl-next/domain/dist/general/offers'
+import {type SpokenLanguage} from '@vexl-next/domain/src/general/offers'
 import React, {useMemo} from 'react'
 import {TouchableOpacity} from 'react-native'
 import {getTokens, Text, XStack} from 'tamagui'

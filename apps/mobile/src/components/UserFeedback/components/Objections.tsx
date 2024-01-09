@@ -2,7 +2,7 @@ import {
   objectionTypeNegativeOptions,
   objectionTypePositiveOptions,
   POSITIVE_STAR_RATING_THRESHOLD,
-} from '@vexl-next/domain/dist/general/feedback'
+} from '@vexl-next/domain/src/general/feedback'
 import ObjectionCell from './ObjectionCell'
 import {XStack} from 'tamagui'
 import {useMolecule} from 'jotai-molecules'

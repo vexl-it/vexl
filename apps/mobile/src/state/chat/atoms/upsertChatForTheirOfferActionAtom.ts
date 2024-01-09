@@ -1,10 +1,10 @@
 import {createEmptyTradeChecklistInState} from '../../tradeChecklist/domain'
-import {type PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
+import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {
   generateChatId,
   type Inbox,
-} from '@vexl-next/domain/dist/general/messaging'
-import {type OneOfferInState} from '@vexl-next/domain/dist/general/offers'
+} from '@vexl-next/domain/src/general/messaging'
+import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
 import {atom} from 'jotai'
 import * as O from 'optics-ts'
 import {

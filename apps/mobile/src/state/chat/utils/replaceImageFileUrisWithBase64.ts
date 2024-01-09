@@ -4,10 +4,10 @@ import * as T from 'fp-ts/Task'
 import {
   type BasicError,
   toBasicError,
-} from '@vexl-next/domain/dist/utility/errors'
-import {type ChatMessage} from '@vexl-next/domain/dist/general/messaging'
+} from '@vexl-next/domain/src/utility/errors'
+import {type ChatMessage} from '@vexl-next/domain/src/general/messaging'
 import {pipe} from 'fp-ts/function'
-import {UriString} from '@vexl-next/domain/dist/utility/UriString.brand'
+import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import ImageResizer from '@bam.tech/react-native-image-resizer'
 import joinUrl from 'url-join'
 import {Platform} from 'react-native'

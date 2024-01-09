@@ -1,4 +1,4 @@
-import type {AvailableDateTimeOption} from '@vexl-next/domain/dist/general/tradeChecklist'
+import type {AvailableDateTimeOption} from '@vexl-next/domain/src/general/tradeChecklist'
 import type {Item as OptionsListItem} from '../OptionsList'
 import {DateTime} from 'luxon'
 import {atom, type Atom, useAtomValue, useSetAtom} from 'jotai/index'

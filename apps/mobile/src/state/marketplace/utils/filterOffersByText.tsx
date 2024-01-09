@@ -1,4 +1,4 @@
-import {type OneOfferInState} from '@vexl-next/domain/dist/general/offers'
+import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
 import {type ContactNormalizedWithHash} from '../../contacts/domain'
 
 const DIVIDER = ' ## '

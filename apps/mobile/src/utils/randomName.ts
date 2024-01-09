@@ -1,4 +1,4 @@
-import {UserName} from '@vexl-next/domain/dist/general/UserName.brand'
+import {UserName} from '@vexl-next/domain/src/general/UserName.brand'
 import seed from 'seed-random'
 
 const sils = [

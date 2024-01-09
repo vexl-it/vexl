@@ -28,7 +28,7 @@ import {
 } from '../../../../PageWithNavigationHeader'
 import Content from '../../Content'
 
-import {type AvailableDateTimeOption} from '@vexl-next/domain/dist/general/tradeChecklist'
+import {type AvailableDateTimeOption} from '@vexl-next/domain/src/general/tradeChecklist'
 
 type Props = TradeChecklistStackScreenProps<'ChooseAvailableDays'>
 

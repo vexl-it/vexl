@@ -1,4 +1,4 @@
-import {type PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
+import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import messagingStateAtom from './messagingStateAtom'
 import {type ChatWithMessages} from '../domain'
 import {focusAtom} from 'jotai-optics'

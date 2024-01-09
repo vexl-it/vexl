@@ -1,5 +1,5 @@
 import {createNavigationContainerRef} from '@react-navigation/native'
-import {ChatId} from '@vexl-next/domain/dist/general/messaging'
+import {ChatId} from '@vexl-next/domain/src/general/messaging'
 import fastDeepEqual from 'fast-deep-equal'
 import * as O from 'fp-ts/Option'
 import {pipe} from 'fp-ts/function'

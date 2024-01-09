@@ -1,6 +1,6 @@
 import Clipboard from '@react-native-clipboard/clipboard'
-import {type ChatMessage} from '@vexl-next/domain/dist/general/messaging'
-import {unixMillisecondsNow} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
+import {type ChatMessage} from '@vexl-next/domain/src/general/messaging'
+import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {
   atom,
   useAtom,

@@ -2,7 +2,7 @@ import ScreenTitle from '../ScreenTitle'
 import React from 'react'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import {Stack} from 'tamagui'
-import {type CurrencyCode} from '@vexl-next/domain/dist/general/currency.brand'
+import {type CurrencyCode} from '@vexl-next/domain/src/general/currency.brand'
 import IconButton from '../IconButton'
 import closeSvg from '../images/closeSvg'
 import {type Atom, type WritableAtom, useAtomValue} from 'jotai'
@@ -21,7 +21,7 @@ interface Props {
     [
       {
         currency: CurrencyCode
-      }
+      },
     ],
     boolean
   >

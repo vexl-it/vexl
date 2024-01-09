@@ -1,19 +1,19 @@
 import {
   type ChatMessagePayload,
   type ChatMessage,
-} from '@vexl-next/domain/dist/general/messaging'
+} from '@vexl-next/domain/src/general/messaging'
 import {
   type PrivateKeyHolder,
   type PublicKeyPemBase64,
-} from '@vexl-next/cryptography/dist/KeyHolder'
-import {type ChatPrivateApi} from '@vexl-next/rest-api/dist/services/chat'
+} from '@vexl-next/cryptography/src/KeyHolder'
+import {type ChatPrivateApi} from '@vexl-next/rest-api/src/services/chat'
 import {pipe} from 'fp-ts/function'
 import {
   type InboxInBatch,
   type MessageInBatch,
   type ServerMessageWithId,
   type SignedChallenge,
-} from '@vexl-next/rest-api/dist/services/chat/contracts'
+} from '@vexl-next/rest-api/src/services/chat/contracts'
 import * as TE from 'fp-ts/TaskEither'
 import * as A from 'fp-ts/Array'
 import {type ErrorEncryptingMessage} from './utils/chatCrypto'
@@ -22,7 +22,7 @@ import {
   type ErrorGeneratingSignedChallengeBatch,
   generateSignedChallengeBatch,
 } from './utils/generateSignedChallengesBatch'
-import {type BasicError, toError} from '@vexl-next/domain/dist/utility/errors'
+import {type BasicError, toError} from '@vexl-next/domain/src/utility/errors'
 import {type ExtractLeftTE} from '../utils/ExtractLeft'
 import mapMessageTypeToBackwardCompatibleMessageType from './utils/mapMessageTypeToBackwardCompatibleMessageType'
 import {messagePreviewToNetwork} from './utils/messagePreviewIO'

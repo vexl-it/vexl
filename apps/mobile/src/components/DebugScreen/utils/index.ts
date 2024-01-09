@@ -2,13 +2,13 @@ import {
   generatePrivateKey,
   importPrivateKey,
   PrivateKeyPemBase64,
-} from '@vexl-next/cryptography/dist/KeyHolder'
+} from '@vexl-next/cryptography/src/KeyHolder'
 import {
   eciesLegacyDecrypt,
   eciesLegacyEncrypt,
-} from '@vexl-next/cryptography/dist/operations/eciesLegacy'
+} from '@vexl-next/cryptography/src/operations/eciesLegacy'
 import {aes, ecdsa, eciesLegacy} from '@vexl-next/cryptography'
-import {E164PhoneNumber} from '@vexl-next/domain/dist/general/E164PhoneNumber.brand'
+import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {hashPhoneNumber} from '../../../state/contacts/utils'
 
 const dummyPrivatePart = `"privatePart": {"commonFriends": [MEEe3tRp7bx+hRA7osU/x+hhMVy6PiAfBR3Gu2r+MEEe3tRp7bx+hRA7osU/x+hhMVy6PiAfBR3Gu2r+MEEe3tRp7bx+hRA7osU/x+hhMVy6PiAfBR3Gu2r+MEEe3tRp7bx+hRA7osU/x+hhMVy6PiAfBR3Gu2r+MEEe3tRp7bx+hRA7osU/x+hhMVy6PiAfBR3Gu2r+MEEe3tRp7bx+hRA7osU/x+hhMVy6PiAfBR3Gu2r+MEEe3tRp7bx+hRA7osU/x+hhMVy6PiAfBR3Gu2r+MEEe3tRp7bx+hRA7osU/x+hhMVy6PiAfBR3Gu2r+],"friendLevel": ["NOT_SPECIFIED"],"symmetricKey": "MEEe3tRp7bx+hRA7osU/x+hhMVy6PiAfBR3Gu2r+RG0="},`

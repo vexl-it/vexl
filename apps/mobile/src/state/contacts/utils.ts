@@ -1,4 +1,4 @@
-import {type E164PhoneNumber} from '@vexl-next/domain/dist/general/E164PhoneNumber.brand'
+import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import type * as TE from 'fp-ts/TaskEither'
 import * as E from 'fp-ts/Either'
 import * as O from 'fp-ts/Option'
@@ -6,7 +6,7 @@ import * as Contacts from 'expo-contacts'
 import {
   type CryptoError,
   hmacSign,
-} from '@vexl-next/resources-utils/dist/utils/crypto'
+} from '@vexl-next/resources-utils/src/utils/crypto'
 import {hmacPassword} from '../../utils/environment'
 import {ContactNormalized} from './domain'
 import {SortTypes} from 'expo-contacts'

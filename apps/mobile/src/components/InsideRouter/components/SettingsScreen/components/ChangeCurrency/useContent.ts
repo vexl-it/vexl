@@ -1,4 +1,4 @@
-import {type CurrencyCode} from '@vexl-next/domain/dist/general/offers'
+import {type CurrencyCode} from '@vexl-next/domain/src/general/offers'
 
 import {useMemo} from 'react'
 

@@ -10,7 +10,7 @@ import UserAvatar from '../../UserAvatar'
 import SvgImage from '../../Image'
 import React from 'react'
 import blockPhoneNumberRevealSvg from '../../../images/blockPhoneNumberRevealSvg'
-import {E164PhoneNumber} from '@vexl-next/domain/dist/general/E164PhoneNumber.brand'
+import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {addContactWithUiFeedbackAtom} from '../../../state/contacts/atom/addContactWithUiFeedbackAtom'
 import resolveLocalUri from '../../../utils/resolveLocalUri'
 

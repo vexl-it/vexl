@@ -10,7 +10,7 @@ import useSafeGoBack from '../../utils/useSafeGoBack'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import {realUserImageAtom} from '../../state/session'
 import {selectImageActionAtom} from '../../state/selectImageActionAtom'
-import {type UriString} from '@vexl-next/domain/dist/utility/UriString.brand'
+import {type UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {useEffect} from 'react'
 
 const selectedImageUriAtom = atom<UriString | undefined>(undefined)

@@ -1,16 +1,16 @@
-import {type OfferPrivateApi} from '@vexl-next/rest-api/dist/services/offer'
+import {type OfferPrivateApi} from '@vexl-next/rest-api/src/services/offer'
 import {
   type OfferAdminId,
   type OfferInfo,
   type OfferPublicPart,
   type SymmetricKey,
-} from '@vexl-next/domain/dist/general/offers'
+} from '@vexl-next/domain/src/general/offers'
 import {pipe} from 'fp-ts/function'
 import * as TE from 'fp-ts/TaskEither'
 import encryptOfferPublicPayload, {
   type ErrorEncryptingPublicPart,
 } from './utils/encryptOfferPublicPayload'
-import {type PrivateKeyHolder} from '@vexl-next/cryptography/dist/KeyHolder'
+import {type PrivateKeyHolder} from '@vexl-next/cryptography/src/KeyHolder'
 import decryptOffer, {
   type ErrorDecryptingOffer,
   type NonCompatibleOfferVersionError,

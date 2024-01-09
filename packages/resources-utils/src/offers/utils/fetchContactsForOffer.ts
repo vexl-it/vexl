@@ -1,13 +1,13 @@
 import {
   type ConnectionLevel,
   type FetchCommonConnectionsResponse,
-} from '@vexl-next/rest-api/dist/services/contact/contracts'
-import {type ContactPrivateApi} from '@vexl-next/rest-api/dist/services/contact'
+} from '@vexl-next/rest-api/src/services/contact/contracts'
+import {type ContactPrivateApi} from '@vexl-next/rest-api/src/services/contact'
 import * as TE from 'fp-ts/TaskEither'
-import {type PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
+import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {pipe} from 'fp-ts/function'
 import {type ExtractLeftTE} from '../../utils/ExtractLeft'
-import {type IntendedConnectionLevel} from '@vexl-next/domain/dist/general/offers'
+import {type IntendedConnectionLevel} from '@vexl-next/domain/src/general/offers'
 
 function fetchFriendsPublicKeys({
   lvl,

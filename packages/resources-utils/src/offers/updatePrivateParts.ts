@@ -1,13 +1,13 @@
-import {type PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
+import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {
   type OfferAdminId,
   type SymmetricKey,
-} from '@vexl-next/domain/dist/general/offers'
+} from '@vexl-next/domain/src/general/offers'
 import {flow, pipe} from 'fp-ts/function'
 import constructPrivatePayloads, {
   type ErrorConstructingPrivatePayloads,
 } from './utils/constructPrivatePayloads'
-import {type FetchCommonConnectionsResponse} from '@vexl-next/rest-api/dist/services/contact/contracts'
+import {type FetchCommonConnectionsResponse} from '@vexl-next/rest-api/src/services/contact/contracts'
 import * as TE from 'fp-ts/TaskEither'
 import * as A from 'fp-ts/Array'
 import * as T from 'fp-ts/Task'
@@ -16,10 +16,10 @@ import {
   type PrivatePartEncryptionError,
 } from './utils/offerPrivatePayload'
 import flattenTaskOfEithers from '../utils/flattenTaskOfEithers'
-import {type OfferPrivateApi} from '@vexl-next/rest-api/dist/services/offer'
+import {type OfferPrivateApi} from '@vexl-next/rest-api/src/services/offer'
 import {type ExtractLeftTE} from '../utils/ExtractLeft'
 import {deduplicate, subtractArrays} from '../utils/array'
-import {type UnixMilliseconds} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
+import {type UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import * as E from 'fp-ts/Either'
 
 export interface TimeLimitReachedError {

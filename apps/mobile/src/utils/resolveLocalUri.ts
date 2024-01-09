@@ -1,4 +1,4 @@
-import {UriString} from '@vexl-next/domain/dist/utility/UriString.brand'
+import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {Platform} from 'react-native'
 import {documentDirectory, cacheDirectory} from 'expo-file-system'
 

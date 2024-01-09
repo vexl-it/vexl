@@ -4,7 +4,7 @@ import WhiteContainer from './WhiteContainer'
 import Button from './Button'
 import {useTranslation} from '../utils/localization/I18nProvider'
 import SvgImage from './Image'
-import {type SvgString} from '@vexl-next/domain/dist/utility/SvgString.brand'
+import {type SvgString} from '@vexl-next/domain/src/utility/SvgString.brand'
 import {type ReactNode} from 'react'
 import Screen from './Screen'
 

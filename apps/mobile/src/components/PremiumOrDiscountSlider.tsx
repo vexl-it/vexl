@@ -1,7 +1,7 @@
 import {getTokens, Stack, Text, XStack} from 'tamagui'
 import {useTranslation} from '../utils/localization/I18nProvider'
 import {type Atom, useAtomValue} from 'jotai'
-import {type OfferType} from '@vexl-next/domain/dist/general/offers'
+import {type OfferType} from '@vexl-next/domain/src/general/offers'
 import Slider from './Slider'
 import {iosHapticFeedback} from '../utils/iosHapticFeedback'
 

@@ -1,14 +1,13 @@
 {
   "name": "@vexl-next/domain",
-  "packageManager": "yarn@3.3.1",
-  "main": "dist/index.js",
   "version": "0.0.0",
+  "type": "module",
+  "main": "src/index",
   "scripts": {
     "clean": "rimraf .turbo node_modules",
     "lint": "eslint '**/*.{js,ts,tsx,jsx,cjs,mjs}'",
     "format": "prettier --check \"**/*.{mjs,ts,md,json}\"",
-    "typecheck": "tsc --noEmit",
-    "build": "tsup --onSuccess \"tsc --emitDeclarationOnly\""
+    "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
     "@types/luxon": "^3",
@@ -37,16 +36,6 @@
     "root": true,
     "extends": [
       "@vexl-next/eslint-config/index"
-    ]
-  },
-  "tsup": {
-    "entryPoints": [
-      "src"
-    ],
-    "clean": true,
-    "sourcemap": true,
-    "format": [
-      "cjs"
     ]
   },
   "prettier": "@vexl-next/prettier-config"

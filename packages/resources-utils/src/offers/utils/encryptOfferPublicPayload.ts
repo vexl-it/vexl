@@ -1,5 +1,5 @@
 import {z} from 'zod'
-import {PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
+import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {pipe} from 'fp-ts/function'
 import * as A from 'fp-ts/Array'
 import {safeParse, stringifyToJson} from '../../utils/parsing'
@@ -10,10 +10,10 @@ import {
   type OfferPublicPart,
   PublicPayloadEncrypted,
   type SymmetricKey,
-} from '@vexl-next/domain/dist/general/offers'
-import {type BasicError, toError} from '@vexl-next/domain/dist/utility/errors'
+} from '@vexl-next/domain/src/general/offers'
+import {type BasicError, toError} from '@vexl-next/domain/src/utility/errors'
 import {booleanToString} from '../../utils/booleanString'
-import {JSDateString} from '@vexl-next/domain/dist/utility/JSDateString.brand'
+import {JSDateString} from '@vexl-next/domain/src/utility/JSDateString.brand'
 
 const OfferPublicPartToEncrypt = z.object({
   offerPublicKey: PublicKeyPemBase64,

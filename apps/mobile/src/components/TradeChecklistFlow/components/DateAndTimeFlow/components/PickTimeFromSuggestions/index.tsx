@@ -1,4 +1,4 @@
-import {UnixMilliseconds} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
+import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {useSetAtom} from 'jotai'
 import {DateTime} from 'luxon'
 import {useCallback} from 'react'

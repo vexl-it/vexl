@@ -1,6 +1,6 @@
-import {ChatMessagePayload} from '@vexl-next/domain/dist/general/messaging'
-import {chatMessagePayloadToChatMessage} from '@vexl-next/resources-utils/dist/chat/utils/parseChatMessage'
-import {safeParse} from '@vexl-next/resources-utils/dist/utils/parsing'
+import {ChatMessagePayload} from '@vexl-next/domain/src/general/messaging'
+import {chatMessagePayloadToChatMessage} from '@vexl-next/resources-utils/src/chat/utils/parseChatMessage'
+import {safeParse} from '@vexl-next/resources-utils/src/utils/parsing'
 import * as A from 'fp-ts/Array'
 import * as O from 'fp-ts/Option'
 import {pipe} from 'fp-ts/lib/function'
@@ -14,7 +14,7 @@ import messagingStateAtom, {
   messagingStateAtomStorageAtom,
 } from './messagingStateAtom'
 import {startMeasure} from '../../../utils/reportTime'
-import {compare} from '@vexl-next/domain/dist/utility/SmeverString.brand'
+import {compare} from '@vexl-next/domain/src/utility/SmeverString.brand'
 
 const decodePreviouslyUncompatibleMessagesActionAtom = atom(
   null,

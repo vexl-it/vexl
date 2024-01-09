@@ -4,8 +4,8 @@ import {useEffect, useState} from 'react'
 import {
   defaultImplementation,
   setEcdhComputeSecretImplementation,
-} from '@vexl-next/cryptography/dist/implementations/ecdhComputeSecret'
-import {computeSharedSecret} from '@vexl-next/react-native-ecdh-platform-native-utils/src'
+} from '@vexl-next/cryptography/src/implementations/ecdhComputeSecret'
+import {computeSharedSecret} from '@vexl-next/react-native-ecdh-platform-native-utils'
 import {Platform} from 'react-native'
 import {NUMBER_OF_GENERATIONS, runBenchmark, runTests} from '../utils'
 
@@ -23,6 +23,9 @@ function createDummyImplementation(
     })
   }
 }
+
+const dummy0Implementation = createDummyImplementation(0)
+const dummy10Implementation = createDummyImplementation(10)
 
 // setEcdhComputeSecretImplementation(createDummyImplementation(2))
 
@@ -93,7 +96,7 @@ export default function CryptoBenchmarks(): JSX.Element {
       />
       <Button
         onPress={() => {
-          setEcdhComputeSecretImplementation(createDummyImplementation(10))
+          setEcdhComputeSecretImplementation(dummy10Implementation)
         }}
         variant="primary"
         size={'small'}
@@ -101,7 +104,7 @@ export default function CryptoBenchmarks(): JSX.Element {
       />
       <Button
         onPress={() => {
-          setEcdhComputeSecretImplementation(createDummyImplementation(0))
+          setEcdhComputeSecretImplementation(dummy0Implementation)
         }}
         variant="primary"
         size={'small'}

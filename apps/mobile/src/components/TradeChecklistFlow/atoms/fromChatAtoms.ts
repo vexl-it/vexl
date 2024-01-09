@@ -7,7 +7,7 @@ import valueOrDefaultAtom from '../../../utils/atomUtils/valueOrDefaultAtom'
 import focusChatWithMessagesAtom from '../../../state/chat/atoms/focusChatWithMessagesAtom'
 import {focusAtom} from 'jotai-optics'
 import {offerForChatOriginAtom} from '../../../state/marketplace/atoms/offersState'
-import {type OneOfferInState} from '@vexl-next/domain/dist/general/offers'
+import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
 import {getOtherSideData} from '../../../state/chat/atoms/selectOtherSideDataAtom'
 
 export const parentChatAtomAtom = atom<FocusAtomType<ChatWithMessages>>(

@@ -1,7 +1,7 @@
 import {
   type InitPhoneNumberVerificationRequest,
   type InitPhoneNumberVerificationResponse,
-} from '@vexl-next/rest-api/dist/services/user/contracts'
+} from '@vexl-next/rest-api/src/services/user/contracts'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {useUserPublicApi} from '../../../api'
 import * as TE from 'fp-ts/TaskEither'

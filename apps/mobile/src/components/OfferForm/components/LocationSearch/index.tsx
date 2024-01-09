@@ -1,4 +1,4 @@
-import {type LocationSuggestion} from '@vexl-next/rest-api/dist/services/location/contracts'
+import {type LocationSuggestion} from '@vexl-next/rest-api/src/services/location/contracts'
 import {
   useAtomValue,
   useSetAtom,

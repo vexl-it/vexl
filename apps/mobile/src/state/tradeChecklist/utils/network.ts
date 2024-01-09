@@ -1,5 +1,5 @@
-import {type NetworkData} from '@vexl-next/domain/dist/general/tradeChecklist'
-import {UnixMilliseconds0} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
+import {type NetworkData} from '@vexl-next/domain/src/general/tradeChecklist'
+import {UnixMilliseconds0} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {type TradeChecklistInState} from '../domain'
 
 type NetworkInState = TradeChecklistInState['network']

@@ -11,7 +11,7 @@ import {pipe} from 'fp-ts/function'
 import * as TE from 'fp-ts/TaskEither'
 import {parseJson, safeParse} from '../fpUtils'
 import {ImportContactFromLinkPayload} from '../../state/contacts/domain'
-import {E164PhoneNumber} from '@vexl-next/domain/dist/general/E164PhoneNumber.brand'
+import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {addContactWithUiFeedbackAtom} from '../../state/contacts/atom/addContactWithUiFeedbackAtom'
 import showErrorAlert from '../showErrorAlert'
 

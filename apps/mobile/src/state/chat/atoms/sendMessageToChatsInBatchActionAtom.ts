@@ -2,20 +2,20 @@ import {atom} from 'jotai'
 import {
   type ChatMessage,
   generateChatMessageId,
-} from '@vexl-next/domain/dist/general/messaging'
+} from '@vexl-next/domain/src/general/messaging'
 import {pipe} from 'fp-ts/function'
 import * as TE from 'fp-ts/TaskEither'
 import * as E from 'fp-ts/Either'
 import * as A from 'fp-ts/Array'
 import * as RNEA from 'fp-ts/ReadonlyNonEmptyArray'
 import notEmpty from '../../../utils/notEmpty'
-import {unixMillisecondsNow} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
-import sendMessagesBatch from '@vexl-next/resources-utils/dist/chat/sendMessagesBatch'
+import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import sendMessagesBatch from '@vexl-next/resources-utils/src/chat/sendMessagesBatch'
 import {privateApiAtom} from '../../../api'
 import allChatsAtom from './allChatsAtom'
 import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
 import shouldSendTerminationMessageToChat from '../utils/shouldSendTerminationMessageToChat'
-import {type ExtractLeftTE} from '@vexl-next/rest-api/dist/services/chat/utils'
+import {type ExtractLeftTE} from '@vexl-next/rest-api/src/services/chat/utils'
 import {addMessageToMessagesArray} from '../utils/addMessageToChat'
 
 interface Params {

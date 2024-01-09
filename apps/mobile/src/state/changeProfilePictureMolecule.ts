@@ -1,6 +1,6 @@
 import {molecule} from 'jotai-molecules'
 import {atom} from 'jotai'
-import {type UriString} from '@vexl-next/domain/dist/utility/UriString.brand'
+import {type UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 
 export const changeProfilePictureMolecule = molecule(() => {
   console.log(`Render`)

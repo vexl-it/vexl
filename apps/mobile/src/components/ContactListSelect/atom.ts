@@ -1,4 +1,4 @@
-import {IsoDatetimeString} from '@vexl-next/domain/dist/utility/IsoDatetimeString.brand'
+import {IsoDatetimeString} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
 import * as A from 'fp-ts/Array'
 import * as O from 'fp-ts/Option'
 import * as T from 'fp-ts/Task'
@@ -38,7 +38,7 @@ import {askAreYouSureActionAtom} from '../AreYouSureDialog'
 import userSvg from '../images/userSvg'
 import {loadingOverlayDisplayedAtom} from '../LoadingOverlayProvider'
 import sequenceTasksWithAnimationFrames from '../../utils/sequenceTasksWithAnimationFrames'
-import flattenTaskOfEithers from '@vexl-next/resources-utils/dist/utils/flattenTaskOfEithers'
+import flattenTaskOfEithers from '@vexl-next/resources-utils/src/utils/flattenTaskOfEithers'
 import {hashingProgressPercentageAtom} from '../ContactsHashingProgressModal/atoms'
 
 export const ContactsSelectScope = createScope<{

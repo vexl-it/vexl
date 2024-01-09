@@ -10,7 +10,7 @@ import {useAtom, useSetAtom} from 'jotai'
 import Input from '../Input'
 import Button from '../Button'
 import KeyboardAvoidingView from '../KeyboardAvoidingView'
-import {UserName} from '@vexl-next/domain/dist/general/UserName.brand'
+import {UserName} from '@vexl-next/domain/src/general/UserName.brand'
 import {
   invalidUsernameUIFeedbackAtom,
   realUserNameAtom,

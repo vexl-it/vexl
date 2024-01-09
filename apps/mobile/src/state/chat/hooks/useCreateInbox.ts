@@ -1,4 +1,4 @@
-import {type Inbox} from '@vexl-next/domain/dist/general/messaging'
+import {type Inbox} from '@vexl-next/domain/src/general/messaging'
 import * as TE from 'fp-ts/TaskEither'
 import {
   type ApiErrorCreatingInbox,
@@ -9,9 +9,9 @@ import {
 import {privateApiAtom} from '../../../api'
 import {atom, useSetAtom} from 'jotai'
 import * as O from 'optics-ts'
-import {toBasicError} from '@vexl-next/domain/dist/utility/errors'
+import {toBasicError} from '@vexl-next/domain/src/utility/errors'
 import {pipe} from 'fp-ts/function'
-import {type PrivateKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
+import {type PrivateKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {getNotificationToken} from '../../../utils/notifications'
 import messagingStateAtom from '../atoms/messagingStateAtom'
 

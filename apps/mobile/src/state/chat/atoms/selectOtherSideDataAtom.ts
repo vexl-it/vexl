@@ -1,5 +1,5 @@
-import {type UserNameAndAvatar} from '@vexl-next/domain/dist/general/UserNameAndAvatar.brand'
-import {type Chat} from '@vexl-next/domain/dist/general/messaging'
+import {type UserNameAndAvatar} from '@vexl-next/domain/src/general/UserNameAndAvatar.brand'
+import {type Chat} from '@vexl-next/domain/src/general/messaging'
 import {type Atom} from 'jotai'
 import {selectAtom} from 'jotai/utils'
 import avatarsSvg from '../../../components/AnonymousAvatar/images/avatarsSvg'

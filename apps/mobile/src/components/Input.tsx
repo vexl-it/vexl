@@ -3,7 +3,7 @@ import {
   type TextInputProps,
   TouchableOpacity,
 } from 'react-native'
-import {type SvgString} from '@vexl-next/domain/dist/utility/SvgString.brand'
+import {type SvgString} from '@vexl-next/domain/src/utility/SvgString.brand'
 import Image from './Image'
 import {
   Stack,

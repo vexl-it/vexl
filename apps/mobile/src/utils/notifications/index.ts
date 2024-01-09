@@ -11,7 +11,7 @@ import messaging from '@react-native-firebase/messaging'
 import {
   type BasicError,
   toBasicError,
-} from '@vexl-next/domain/dist/utility/errors'
+} from '@vexl-next/domain/src/utility/errors'
 import {useTranslation} from '../localization/I18nProvider'
 import {getDefaultStore} from 'jotai'
 import {preferencesAtom} from '../preferences'

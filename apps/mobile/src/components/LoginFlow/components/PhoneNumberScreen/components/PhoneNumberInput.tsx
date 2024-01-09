@@ -4,7 +4,7 @@ import type * as O from 'fp-ts/Option'
 import {
   toE164PhoneNumber,
   type E164PhoneNumber,
-} from '@vexl-next/domain/dist/general/E164PhoneNumber.brand'
+} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {XStack} from 'tamagui'
 import {type StyleProp, type ViewStyle} from 'react-native'
 

@@ -1,5 +1,5 @@
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
-import {type BtcNetwork} from '@vexl-next/domain/dist/general/offers'
+import {type BtcNetwork} from '@vexl-next/domain/src/general/offers'
 import {useMemo} from 'react'
 import {type SelectableCellContentProps} from '../../../SelectableCell'
 

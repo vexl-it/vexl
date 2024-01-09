@@ -1,4 +1,4 @@
-import {SemverString} from '@vexl-next/domain/dist/utility/SmeverString.brand'
+import {SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import Constants from 'expo-constants'
 
 // export const enableHiddenFeatures =

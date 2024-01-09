@@ -1,18 +1,18 @@
-import {MINIMAL_DATE} from '@vexl-next/domain/dist/utility/IsoDatetimeString.brand'
+import {MINIMAL_DATE} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
 import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
 import {
   type OfferFlags,
   type OfferAdminId,
   type OfferId,
   type OneOfferInState,
-} from '@vexl-next/domain/dist/general/offers'
+} from '@vexl-next/domain/src/general/offers'
 import {OffersState} from '../domain'
 import {focusAtom} from 'jotai-optics'
 import {type FocusAtomType} from '../../../utils/atomUtils/FocusAtomType'
 import {atom, type WritableAtom} from 'jotai'
 import {type SetStateAction} from 'react'
-import {type PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
-import {type ChatOrigin} from '@vexl-next/domain/dist/general/messaging'
+import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
+import {type ChatOrigin} from '@vexl-next/domain/src/general/messaging'
 
 export const offersStateAtom = atomWithParsedMmkvStorage(
   'offers',

@@ -1,5 +1,5 @@
 import {useFocusEffect} from '@react-navigation/native'
-import {unixMillisecondsNow} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
+import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {useAtomValue, type Atom} from 'jotai'
 import {useCallback, useMemo, useState} from 'react'
 

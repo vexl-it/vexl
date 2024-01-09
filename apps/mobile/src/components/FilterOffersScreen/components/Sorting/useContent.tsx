@@ -1,6 +1,6 @@
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import {useMemo} from 'react'
-import {type Sort} from '@vexl-next/domain/dist/general/offers'
+import {type Sort} from '@vexl-next/domain/src/general/offers'
 
 interface SortingProps {
   title: string

@@ -8,7 +8,7 @@ import closeSvg from '../../../../../../images/closeSvg'
 import {removeTimestampFromAvailableAtom} from '../../../atoms'
 import TimeFromDropdown from './TimeFromDropdown'
 import TimeToDropdown from './TimeToDropdown'
-import {type AvailableDateTimeOption} from '@vexl-next/domain/dist/general/tradeChecklist'
+import {type AvailableDateTimeOption} from '@vexl-next/domain/src/general/tradeChecklist'
 
 interface Props extends StackProps {
   availableDateTime: AvailableDateTimeOption

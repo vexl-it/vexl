@@ -1,4 +1,4 @@
-import {type SvgString} from '@vexl-next/domain/dist/utility/SvgString.brand'
+import {type SvgString} from '@vexl-next/domain/src/utility/SvgString.brand'
 import {type ColorValue, TouchableOpacity} from 'react-native'
 import {getTokens, Stack, Text, XStack, YStack} from 'tamagui'
 import Image from '../../Image'

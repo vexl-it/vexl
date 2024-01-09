@@ -2,7 +2,7 @@ import {
   UnixMilliseconds,
   UnixMilliseconds0,
   unixMillisecondsNow,
-} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
+} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {storage} from './fpMmkv'
 import {pipe} from 'fp-ts/function'
 import * as E from 'fp-ts/Either'

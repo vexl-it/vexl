@@ -1,6 +1,6 @@
 import {TouchableOpacity} from 'react-native'
 import {useSetAtom} from 'jotai'
-import {type UriString} from '@vexl-next/domain/dist/utility/UriString.brand'
+import {type UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {useMolecule} from 'jotai-molecules'
 import {chatMolecule} from '../atoms'
 

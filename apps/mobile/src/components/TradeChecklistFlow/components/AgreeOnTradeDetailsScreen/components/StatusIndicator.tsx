@@ -1,4 +1,4 @@
-import {type TradeChecklistItemStatus} from '@vexl-next/domain/dist/general/tradeChecklist'
+import {type TradeChecklistItemStatus} from '@vexl-next/domain/src/general/tradeChecklist'
 import {getTokens, Stack} from 'tamagui'
 import pendingSvg from '../../../../../images/pendingSvg'
 import Checkbox from '../../../../Checkbox'

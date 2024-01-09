@@ -1,5 +1,5 @@
 import {stringToSvgStringRuntimeError} from '../../../../Image'
-import {type SvgString} from '@vexl-next/domain/dist/utility/SvgString.brand'
+import {type SvgString} from '@vexl-next/domain/src/utility/SvgString.brand'
 
 interface Props {
   darkBackground?: boolean

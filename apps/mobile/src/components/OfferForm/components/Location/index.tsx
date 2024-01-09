@@ -20,10 +20,10 @@ import {
 import {
   type Location,
   type LocationState,
-} from '@vexl-next/domain/dist/general/offers'
+} from '@vexl-next/domain/src/general/offers'
 import LocationSearch from '../LocationSearch'
 import Info from '../../../Info'
-import {type LocationSuggestion} from '@vexl-next/rest-api/dist/services/location/contracts'
+import {type LocationSuggestion} from '@vexl-next/rest-api/src/services/location/contracts'
 
 interface Props {
   setOfferLocationActionAtom: WritableAtom<

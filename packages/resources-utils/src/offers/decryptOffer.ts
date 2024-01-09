@@ -1,13 +1,13 @@
 import {type KeyHolder} from '@vexl-next/cryptography'
-import {type ServerOffer} from '@vexl-next/rest-api/dist/services/offer/contracts'
+import {type ServerOffer} from '@vexl-next/rest-api/src/services/offer/contracts'
 import * as TE from 'fp-ts/TaskEither'
 import {flow, pipe} from 'fp-ts/function'
-import {type BasicError, toError} from '@vexl-next/domain/dist/utility/errors'
+import {type BasicError, toError} from '@vexl-next/domain/src/utility/errors'
 import {
   OfferInfo,
   OfferPrivatePart,
   OfferPublicPart,
-} from '@vexl-next/domain/dist/general/offers'
+} from '@vexl-next/domain/src/general/offers'
 import {aesGCMIgnoreTagDecrypt, eciesDecrypt} from '../utils/crypto'
 import {
   type JsonParseError,

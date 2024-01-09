@@ -2,7 +2,7 @@ import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import {
   type PaymentMethod,
   LocationState,
-} from '@vexl-next/domain/dist/general/offers'
+} from '@vexl-next/domain/src/general/offers'
 import {useMemo} from 'react'
 import {type SelectableCellContentProps} from '../../../SelectableCell'
 

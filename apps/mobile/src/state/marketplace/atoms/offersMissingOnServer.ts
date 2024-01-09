@@ -1,10 +1,10 @@
-import {type OfferEncryptionProgress} from '@vexl-next/resources-utils/dist/offers/OfferEncryptionProgress'
+import {type OfferEncryptionProgress} from '@vexl-next/resources-utils/src/offers/OfferEncryptionProgress'
 import {z} from 'zod'
 import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
 import {
   type MyOfferInState,
   OfferId,
-} from '@vexl-next/domain/dist/general/offers'
+} from '@vexl-next/domain/src/general/offers'
 import {atom} from 'jotai'
 import {myOffersAtom} from './myOffers'
 import {pipe} from 'fp-ts/lib/function'
@@ -13,7 +13,7 @@ import * as RA from 'fp-ts/ReadonlyArray'
 import * as TE from 'fp-ts/TaskEither'
 import * as E from 'fp-ts/Either'
 import * as T from 'fp-ts/Task'
-import createNewOfferForMyContacts from '@vexl-next/resources-utils/dist/offers/createOfferHandleContacts'
+import createNewOfferForMyContacts from '@vexl-next/resources-utils/src/offers/createOfferHandleContacts'
 import {privateApiAtom} from '../../../api'
 import {sessionDataOrDummyAtom} from '../../session'
 import getCountryPrefix from '../../../utils/getCountryCode'

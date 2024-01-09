@@ -6,7 +6,7 @@ import {type ReactNode, useCallback} from 'react'
 import OfferAuthorAvatar from './OfferAuthorAvatar'
 import {TouchableWithoutFeedback} from 'react-native'
 import bubbleTipSvg, {bubbleTipSvgNegative} from './images/bubbleTipSvg'
-import {type OneOfferInState} from '@vexl-next/domain/dist/general/offers'
+import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
 
 export default function OfferWithBubbleTip({
   offer,

@@ -6,8 +6,8 @@ import randomNumber from '../../../../utils/randomNumber'
 import randomName from '../../../../utils/randomName'
 import {animated, useTransition} from '@react-spring/native'
 import {getAvatarSvg} from '../../../AnonymousAvatar'
-import {fromSvgString} from '@vexl-next/domain/dist/utility/SvgStringOrImageUri.brand'
-import {UserNameAndAvatar} from '@vexl-next/domain/dist/general/UserNameAndAvatar.brand'
+import {fromSvgString} from '@vexl-next/domain/src/utility/SvgStringOrImageUri.brand'
+import {UserNameAndAvatar} from '@vexl-next/domain/src/general/UserNameAndAvatar.brand'
 import {type LoginStackScreenProps} from '../../../../navigationTypes'
 import {
   HeaderProxy,

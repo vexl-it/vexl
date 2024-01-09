@@ -16,7 +16,7 @@ import {
 import {type TradeChecklistItem} from '../../../domain'
 import StatusIndicator from './StatusIndicator'
 import {tradeChecklistWithUpdatesMergedAtom} from '../../../atoms/updatesToBeSentAtom'
-import {type AmountData} from '@vexl-next/domain/dist/general/tradeChecklist'
+import {type AmountData} from '@vexl-next/domain/src/general/tradeChecklist'
 
 interface Props {
   item: TradeChecklistItem

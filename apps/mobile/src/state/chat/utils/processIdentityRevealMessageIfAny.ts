@@ -1,4 +1,4 @@
-import {type UserNameAndAvatar} from '@vexl-next/domain/dist/general/UserNameAndAvatar.brand'
+import {type UserNameAndAvatar} from '@vexl-next/domain/src/general/UserNameAndAvatar.brand'
 import avatarsSvg from '../../../components/AnonymousAvatar/images/avatarsSvg'
 import {randomNumberFromSeed} from '../../../utils/randomNumber'
 import resolveLocalUri from '../../../utils/resolveLocalUri'

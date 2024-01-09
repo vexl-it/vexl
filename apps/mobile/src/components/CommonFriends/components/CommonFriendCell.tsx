@@ -1,6 +1,6 @@
 import {Image, Text, XStack} from 'tamagui'
 import SvgImage from '../../Image'
-import {type UriString} from '@vexl-next/domain/dist/utility/UriString.brand'
+import {type UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import picturePlaceholderSvg from '../../images/picturePlaceholderSvg'
 
 interface Props {

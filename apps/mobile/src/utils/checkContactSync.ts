@@ -1,6 +1,6 @@
 import * as Contacts from 'expo-contacts'
 import {SortTypes} from 'expo-contacts'
-import {E164PhoneNumber} from '@vexl-next/domain/dist/general/E164PhoneNumber.brand'
+import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import notEmpty from './notEmpty'
 import {importedContactsAtom} from '../state/contacts'
 import {difference} from 'set-operations'

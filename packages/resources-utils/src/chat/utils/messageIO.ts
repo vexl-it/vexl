@@ -1,12 +1,12 @@
 import {
   type PrivateKeyHolder,
   type PublicKeyPemBase64,
-} from '@vexl-next/cryptography/dist/KeyHolder'
+} from '@vexl-next/cryptography/src/KeyHolder'
 import {
   type ServerMessage,
   type ChatMessage,
   type ChatMessagePayload,
-} from '@vexl-next/domain/dist/general/messaging'
+} from '@vexl-next/domain/src/general/messaging'
 import * as TE from 'fp-ts/TaskEither'
 import {flow, pipe} from 'fp-ts/function'
 import {type JsonStringifyError, type ZodParseError} from '../../utils/parsing'
@@ -22,7 +22,7 @@ import {
   decryptMessage,
   encryptMessage,
 } from './chatCrypto'
-import {type SemverString} from '@vexl-next/domain/dist/utility/SmeverString.brand'
+import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 
 export function messageToNetwork(
   receiverPublicKey: PublicKeyPemBase64

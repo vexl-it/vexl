@@ -5,16 +5,16 @@ import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
 import {
   type ChatMessage,
   generateChatMessageId,
-} from '@vexl-next/domain/dist/general/messaging'
+} from '@vexl-next/domain/src/general/messaging'
 import {atom} from 'jotai'
-import {unixMillisecondsNow} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
+import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {pipe} from 'fp-ts/function'
 import {type FocusAtomType} from '../../../utils/atomUtils/FocusAtomType'
-import {type ErrorEncryptingMessage} from '@vexl-next/resources-utils/dist/chat/utils/chatCrypto'
-import sendMessage from '@vexl-next/resources-utils/dist/chat/sendMessage'
+import {type ErrorEncryptingMessage} from '@vexl-next/resources-utils/src/chat/utils/chatCrypto'
+import sendMessage from '@vexl-next/resources-utils/src/chat/sendMessage'
 import {privateApiAtom} from '../../../api'
-import {type ExtractLeftTE} from '@vexl-next/resources-utils/dist/utils/ExtractLeft'
-import {type ChatPrivateApi} from '@vexl-next/rest-api/dist/services/chat'
+import {type ExtractLeftTE} from '@vexl-next/resources-utils/src/utils/ExtractLeft'
+import {type ChatPrivateApi} from '@vexl-next/rest-api/src/services/chat'
 import {createSingleOfferReportedFlagAtom} from '../../marketplace/atoms/offersState'
 
 export default function blockChatActionAtom(

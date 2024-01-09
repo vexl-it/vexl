@@ -1,7 +1,7 @@
 import DropdownSelectButton from '../../../DropdownSelectButton'
 import {type PrimitiveAtom, useSetAtom} from 'jotai'
 import OfferExpirationModal from './components/OfferExpirationModal'
-import {JSDateString} from '@vexl-next/domain/dist/utility/JSDateString.brand'
+import {JSDateString} from '@vexl-next/domain/src/utility/JSDateString.brand'
 import {getTokens, Stack, Text, XStack, YStack} from 'tamagui'
 import {DateTime} from 'luxon'
 import {useAtom} from 'jotai'

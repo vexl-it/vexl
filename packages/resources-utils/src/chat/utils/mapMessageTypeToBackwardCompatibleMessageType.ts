@@ -1,7 +1,7 @@
 import {
   type MessageType,
   type MessageTypeBackwardCompatible,
-} from '@vexl-next/domain/dist/general/messaging'
+} from '@vexl-next/domain/src/general/messaging'
 
 export default function mapMessageTypeToBackwardCompatibleMessageType(
   messageType: MessageType

@@ -1,7 +1,7 @@
 import {
   type VerifyChallengeRequest,
   type VerifyChallengeResponse,
-} from '@vexl-next/rest-api/dist/services/user/contracts'
+} from '@vexl-next/rest-api/src/services/user/contracts'
 import {type TaskEither} from 'fp-ts/TaskEither'
 import {useUserPublicApi} from '../../../api'
 import {useTranslation} from '../../../utils/localization/I18nProvider'

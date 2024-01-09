@@ -1,5 +1,5 @@
 import {z} from 'zod'
-import {type ChatMessageId} from '@vexl-next/domain/dist/general/messaging'
+import {type ChatMessageId} from '@vexl-next/domain/src/general/messaging'
 import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
 import {type PrimitiveAtom, type SetStateAction, useAtom} from 'jotai'
 import {focusAtom} from 'jotai-optics'

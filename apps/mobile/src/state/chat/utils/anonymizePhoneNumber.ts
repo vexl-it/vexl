@@ -1,4 +1,4 @@
-import {type E164PhoneNumber} from '@vexl-next/domain/dist/general/E164PhoneNumber.brand'
+import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 
 export default function anonymizePhoneNumber(
   phoneNumber: E164PhoneNumber

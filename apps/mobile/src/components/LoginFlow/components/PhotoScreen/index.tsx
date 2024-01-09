@@ -1,11 +1,11 @@
 import WhiteContainer from '../../../WhiteContainer'
 import AnonymizationCaption from '../../../AnonymizationCaption/AnonymizationCaption'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
-import {UserNameAndAvatar} from '@vexl-next/domain/dist/general/UserNameAndAvatar.brand'
+import {UserNameAndAvatar} from '@vexl-next/domain/src/general/UserNameAndAvatar.brand'
 import {
   fromImageUri,
   fromSvgString,
-} from '@vexl-next/domain/dist/utility/SvgStringOrImageUri.brand'
+} from '@vexl-next/domain/src/utility/SvgStringOrImageUri.brand'
 import {type LoginStackScreenProps} from '../../../../navigationTypes'
 import {
   HeaderProxy,
@@ -16,7 +16,7 @@ import SelectProfilePicture from '../../../SelectProfilePicture'
 import {atom, useAtomValue} from 'jotai'
 import {getAvatarSvg} from '../../../AnonymousAvatar'
 import randomNumber from '../../../../utils/randomNumber'
-import {type UriString} from '@vexl-next/domain/dist/utility/UriString.brand'
+import {type UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 
 const selectedImageUriAtom = atom<UriString | undefined>(undefined)
 

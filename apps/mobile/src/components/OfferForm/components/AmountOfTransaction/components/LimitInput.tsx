@@ -1,7 +1,7 @@
 import Input from '../../../../Input'
 import {type PrimitiveAtom, useAtomValue} from 'jotai'
 import {type TextInputProps} from 'react-native'
-import {type CurrencyCode} from '@vexl-next/domain/dist/general/offers'
+import {type CurrencyCode} from '@vexl-next/domain/src/general/offers'
 import {
   getCurrencyLeftText,
   getCurrencyRightText,

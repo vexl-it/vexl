@@ -1,4 +1,5 @@
 /* eslint-disable */
+// @ts-nocheck
 import asn from 'asn1.js'
 
 const util = {

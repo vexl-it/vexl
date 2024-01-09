@@ -6,23 +6,23 @@ import {
 } from '@react-navigation/native'
 import {type NativeStackScreenProps} from '@react-navigation/native-stack'
 import {type KeyHolder} from '@vexl-next/cryptography'
-import {type PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
-import {type E164PhoneNumber} from '@vexl-next/domain/dist/general/E164PhoneNumber.brand'
-import {type UserName} from '@vexl-next/domain/dist/general/UserName.brand'
-import {type UserNameAndAvatar} from '@vexl-next/domain/dist/general/UserNameAndAvatar.brand'
+import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
+import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
+import {type UserName} from '@vexl-next/domain/src/general/UserName.brand'
+import {type UserNameAndAvatar} from '@vexl-next/domain/src/general/UserNameAndAvatar.brand'
 import {
   type OfferId,
   type OfferType,
-} from '@vexl-next/domain/dist/general/offers'
+} from '@vexl-next/domain/src/general/offers'
 import {
   type InitPhoneNumberVerificationResponse,
   type VerifyPhoneNumberResponse,
-} from '@vexl-next/rest-api/dist/services/user/contracts'
+} from '@vexl-next/rest-api/src/services/user/contracts'
 import {
   type AmountData,
   type AvailableDateTimeOption,
   type NetworkData,
-} from '@vexl-next/domain/dist/general/tradeChecklist'
+} from '@vexl-next/domain/src/general/tradeChecklist'
 import {type ChatIds} from './state/chat/domain'
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions

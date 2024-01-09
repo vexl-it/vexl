@@ -4,8 +4,8 @@ import {type ActionAtomType} from '../../../utils/atomUtils/ActionAtomType'
 import * as TE from 'fp-ts/TaskEither'
 import sendMessage, {
   type SendMessageApiErrors,
-} from '@vexl-next/resources-utils/dist/chat/sendMessage'
-import {type ErrorEncryptingMessage} from '@vexl-next/resources-utils/dist/chat/utils/chatCrypto'
+} from '@vexl-next/resources-utils/src/chat/sendMessage'
+import {type ErrorEncryptingMessage} from '@vexl-next/resources-utils/src/chat/utils/chatCrypto'
 import {type ReadingFileError} from '../utils/replaceImageFileUrisWithBase64'
 import {atom} from 'jotai'
 import {anonymizedUserDataAtom, sessionDataOrDummyAtom} from '../../session'
@@ -14,16 +14,16 @@ import {
   type ChatMessage,
   generateChatMessageId,
   type ChatMessagePayload,
-} from '@vexl-next/domain/dist/general/messaging'
-import {unixMillisecondsNow} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
+} from '@vexl-next/domain/src/general/messaging'
+import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {pipe} from 'fp-ts/function'
-import {type BasicError} from '@vexl-next/domain/dist/utility/errors'
+import {type BasicError} from '@vexl-next/domain/src/utility/errors'
 import anonymizePhoneNumber from '../utils/anonymizePhoneNumber'
 import {addMessageToMessagesArray} from '../utils/addMessageToChat'
 import {
   type JsonStringifyError,
   type ZodParseError,
-} from '@vexl-next/resources-utils/dist/utils/parsing'
+} from '@vexl-next/resources-utils/src/utils/parsing'
 
 export type ContactRevealRequestAlreadySentError =
   BasicError<'ContactRevealRequestAlreadySentError'>

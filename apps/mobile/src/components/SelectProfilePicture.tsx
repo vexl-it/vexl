@@ -5,7 +5,7 @@ import MiniCameraSvg from './LoginFlow/components/PhotoScreen/images/miniCameraS
 import selectIconSvg from './LoginFlow/components/PhotoScreen/images/selectIconSvg'
 import {type PrimitiveAtom, useAtomValue, useSetAtom} from 'jotai'
 import {selectImageActionAtom} from '../state/selectImageActionAtom'
-import {type UriString} from '@vexl-next/domain/dist/utility/UriString.brand'
+import {type UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 
 interface Props {
   selectedImageUriAtom: PrimitiveAtom<UriString | undefined>

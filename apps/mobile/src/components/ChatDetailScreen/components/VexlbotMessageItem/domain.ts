@@ -1,4 +1,4 @@
-import {type UnixMilliseconds} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
+import {type UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 
 export interface TradingChecklistSuggestion {
   type: 'tradeChecklistSuggestion'

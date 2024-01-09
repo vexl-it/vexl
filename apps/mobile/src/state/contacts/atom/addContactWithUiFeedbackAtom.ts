@@ -11,7 +11,7 @@ import * as E from 'fp-ts/Either'
 import {loadingOverlayDisplayedAtom} from '../../../components/LoadingOverlayProvider'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 import {importedContactsAtom, importedContactsHashesAtom} from '../index'
-import {type E164PhoneNumber} from '@vexl-next/domain/dist/general/E164PhoneNumber.brand'
+import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import showErrorAlert from '../../../utils/showErrorAlert'
 
 const showCreateOrEditDialogAtom = atom(

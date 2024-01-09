@@ -1,6 +1,6 @@
-import {SymmetricKey} from '@vexl-next/domain/dist/general/offers'
+import {SymmetricKey} from '@vexl-next/domain/src/general/offers'
 import crypto from 'node:crypto'
-import {type BasicError, toError} from '@vexl-next/domain/dist/utility/errors'
+import {type BasicError, toError} from '@vexl-next/domain/src/utility/errors'
 import * as E from 'fp-ts/Either'
 
 export type ErrorGeneratingSymmetricKey =

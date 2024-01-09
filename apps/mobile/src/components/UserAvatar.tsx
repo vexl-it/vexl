@@ -1,4 +1,4 @@
-import {type SvgStringOrImageUri} from '@vexl-next/domain/dist/utility/SvgStringOrImageUri.brand'
+import {type SvgStringOrImageUri} from '@vexl-next/domain/src/utility/SvgStringOrImageUri.brand'
 import Image from './Image'
 import {
   BackdropFilter,

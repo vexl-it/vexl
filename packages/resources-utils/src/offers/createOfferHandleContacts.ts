@@ -1,6 +1,6 @@
-import {type OfferPrivateApi} from '@vexl-next/rest-api/dist/services/offer'
-import {type ContactPrivateApi} from '@vexl-next/rest-api/dist/services/contact'
-import {type PrivateKeyHolder} from '@vexl-next/cryptography/dist/KeyHolder'
+import {type OfferPrivateApi} from '@vexl-next/rest-api/src/services/offer'
+import {type ContactPrivateApi} from '@vexl-next/rest-api/src/services/contact'
+import {type PrivateKeyHolder} from '@vexl-next/cryptography/src/KeyHolder'
 import * as TE from 'fp-ts/TaskEither'
 import {
   type IntendedConnectionLevel,
@@ -8,7 +8,7 @@ import {
   type OfferInfo,
   type OfferPublicPart,
   type SymmetricKey,
-} from '@vexl-next/domain/dist/general/offers'
+} from '@vexl-next/domain/src/general/offers'
 import {pipe} from 'fp-ts/function'
 import generateSymmetricKey, {
   type ErrorGeneratingSymmetricKey,
@@ -31,7 +31,7 @@ import {
 import {type ExtractLeftTE} from '../utils/ExtractLeft'
 import {type ErrorConstructingPrivatePayloads} from './utils/constructPrivatePayloads'
 import {type OfferEncryptionProgress} from './OfferEncryptionProgress'
-import {type CountryPrefix} from '@vexl-next/domain/dist/general/CountryPrefix.brand'
+import {type CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 
 export type ApiErrorWhileCreatingOffer = ExtractLeftTE<
   ReturnType<OfferPrivateApi['createNewOffer']>

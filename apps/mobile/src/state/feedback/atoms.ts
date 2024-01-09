@@ -1,5 +1,5 @@
-import {Feedback} from '@vexl-next/domain/dist/general/feedback'
-import {ChatId} from '@vexl-next/domain/dist/general/messaging'
+import {Feedback} from '@vexl-next/domain/src/general/feedback'
+import {ChatId} from '@vexl-next/domain/src/general/messaging'
 import {atom, type Atom, type PrimitiveAtom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {type SetStateAction} from 'react'

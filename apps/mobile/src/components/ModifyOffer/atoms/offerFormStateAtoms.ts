@@ -19,14 +19,14 @@ import {
   type PaymentMethod,
   type SpokenLanguage,
   SymmetricKey,
-} from '@vexl-next/domain/dist/general/offers'
+} from '@vexl-next/domain/src/general/offers'
 import {molecule} from 'jotai-molecules'
 
-import {IdNumeric} from '@vexl-next/domain/dist/utility/IdNumeric'
+import {IdNumeric} from '@vexl-next/domain/src/utility/IdNumeric'
 import {
   IsoDatetimeString,
   MINIMAL_DATE,
-} from '@vexl-next/domain/dist/utility/IsoDatetimeString.brand'
+} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
 import {pipe} from 'fp-ts/function'
 import * as TE from 'fp-ts/TaskEither'
 import * as T from 'fp-ts/Task'
@@ -40,11 +40,11 @@ import {
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 import numberOfFriendsAtom from './numberOfFriendsAtom'
 import * as E from 'fp-ts/Either'
-import {generateKeyPair} from '@vexl-next/resources-utils/dist/utils/crypto'
+import {generateKeyPair} from '@vexl-next/resources-utils/src/utils/crypto'
 import {createInboxAtom} from '../../../state/chat/hooks/useCreateInbox'
 import {offerProgressModalActionAtoms as progressModal} from '../../UploadingOfferProgressModal/atoms'
-import {generateUuid, Uuid} from '@vexl-next/domain/dist/utility/Uuid.brand'
-import {PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
+import {generateUuid, Uuid} from '@vexl-next/domain/src/utility/Uuid.brand'
+import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {focusAtom} from 'jotai-optics'
 import notEmpty from '../../../utils/notEmpty'
 import {currencies} from '../../../utils/localization/currency'
@@ -54,7 +54,7 @@ import showErrorAlert from '../../../utils/showErrorAlert'
 import {
   type GetLocationSuggestionsRequest,
   type LocationSuggestion,
-} from '@vexl-next/rest-api/dist/services/location/contracts'
+} from '@vexl-next/rest-api/src/services/location/contracts'
 import {splitAtom} from 'jotai/utils'
 import {fetchLocationSuggestionsAtom} from '../../../state/location/atoms/fetchLocationSuggestionsAtom'
 import getValueFromSetStateActionOfAtom from '../../../utils/atomUtils/getValueFromSetStateActionOfAtom'

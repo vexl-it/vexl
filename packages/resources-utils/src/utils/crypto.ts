@@ -4,9 +4,9 @@ import * as TE from 'fp-ts/TaskEither'
 import {
   type PrivateKeyHolder,
   type PrivateKeyPemBase64,
-} from '@vexl-next/cryptography/dist/KeyHolder'
+} from '@vexl-next/cryptography/src/KeyHolder'
 import {type KeyHolder} from '@vexl-next/cryptography'
-import {type BasicError, toError} from '@vexl-next/domain/dist/utility/errors'
+import {type BasicError, toError} from '@vexl-next/domain/src/utility/errors'
 import {createHash} from 'crypto'
 
 export type CryptoError = BasicError<'CryptoError'>

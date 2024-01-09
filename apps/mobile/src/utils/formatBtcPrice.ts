@@ -1,5 +1,5 @@
-import {type CurrencyCode} from '@vexl-next/domain/dist/general/currency.brand'
-import {type GetCryptocurrencyDetailsResponse} from '@vexl-next/rest-api/dist/services/user/contracts'
+import {type CurrencyCode} from '@vexl-next/domain/src/general/currency.brand'
+import {type GetCryptocurrencyDetailsResponse} from '@vexl-next/rest-api/src/services/user/contracts'
 import formatNumber from './formatNumber'
 
 export function formatBtcPrice(

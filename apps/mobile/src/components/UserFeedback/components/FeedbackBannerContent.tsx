@@ -8,7 +8,7 @@ import {useAtomValue, useSetAtom} from 'jotai'
 import {useEffect, useMemo} from 'react'
 import {useMolecule} from 'jotai-molecules'
 import {feedbackMolecule} from '../atoms'
-import {POSITIVE_STAR_RATING_THRESHOLD} from '@vexl-next/domain/dist/general/feedback'
+import {POSITIVE_STAR_RATING_THRESHOLD} from '@vexl-next/domain/src/general/feedback'
 import {newOfferFeedbackDoneAtom} from '../../../state/feedback/atoms'
 
 interface Props {

@@ -1,4 +1,4 @@
-import {type SvgString} from '@vexl-next/domain/dist/utility/SvgString.brand'
+import {type SvgString} from '@vexl-next/domain/src/utility/SvgString.brand'
 import {type StyleProp, type ViewStyle} from 'react-native'
 import {randomNumberFromSeed} from '../../utils/randomNumber'
 import Image from '../Image'

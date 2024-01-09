@@ -5,7 +5,7 @@ import {
   type ViewStyle,
 } from 'react-native'
 import {useCallback, useMemo} from 'react'
-import {type SvgString} from '@vexl-next/domain/dist/utility/SvgString.brand'
+import {type SvgString} from '@vexl-next/domain/src/utility/SvgString.brand'
 import Image from './Image'
 import {getTokens, Stack, styled, Text} from 'tamagui'
 

@@ -2,15 +2,15 @@ import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsed
 import {
   UnixMilliseconds,
   unixMillisecondsNow,
-} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
+} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {ConnectionsState} from '../domain'
-import {type ConnectionLevel} from '@vexl-next/rest-api/dist/services/contact/contracts'
-import {type ContactPrivateApi} from '@vexl-next/rest-api/dist/services/contact'
+import {type ConnectionLevel} from '@vexl-next/rest-api/src/services/contact/contracts'
+import {type ContactPrivateApi} from '@vexl-next/rest-api/src/services/contact'
 import * as TE from 'fp-ts/TaskEither'
-import {type ExtractLeftTE} from '@vexl-next/resources-utils/dist/utils/ExtractLeft'
-import {type PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
+import {type ExtractLeftTE} from '@vexl-next/resources-utils/src/utils/ExtractLeft'
+import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {pipe} from 'fp-ts/function'
-import {MAX_PAGE_SIZE} from '@vexl-next/rest-api/dist/Pagination.brand'
+import {MAX_PAGE_SIZE} from '@vexl-next/rest-api/src/Pagination.brand'
 import type * as T from 'fp-ts/Task'
 import {privateApiAtom} from '../../../api'
 import {sequenceS} from 'fp-ts/Apply'

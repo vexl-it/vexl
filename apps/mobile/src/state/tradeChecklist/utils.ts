@@ -1,5 +1,5 @@
 import {type TradeChecklistInState} from './domain'
-import {type TradeChecklistUpdate} from '@vexl-next/domain/dist/general/tradeChecklist'
+import {type TradeChecklistUpdate} from '@vexl-next/domain/src/general/tradeChecklist'
 
 export function updateTradeChecklistState(
   state: TradeChecklistInState

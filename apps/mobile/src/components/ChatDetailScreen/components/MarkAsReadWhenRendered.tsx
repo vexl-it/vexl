@@ -1,5 +1,5 @@
 import {type PrimitiveAtom, useAtom} from 'jotai'
-import {type Chat} from '@vexl-next/domain/dist/general/messaging'
+import {type Chat} from '@vexl-next/domain/src/general/messaging'
 import {useIsFocused} from '@react-navigation/native'
 import {useEffect, useMemo} from 'react'
 import focusIsUnReadAtom from '../../../state/chat/atoms/focusIsUnReadAtom'

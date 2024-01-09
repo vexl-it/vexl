@@ -1,13 +1,13 @@
 import {
   type PrivateKeyHolder,
   type PublicKeyPemBase64,
-} from '@vexl-next/cryptography/dist/KeyHolder'
+} from '@vexl-next/cryptography/src/KeyHolder'
 import {
   type IntendedConnectionLevel,
   PrivatePayloadEncrypted,
   type SymmetricKey,
-} from '@vexl-next/domain/dist/general/offers'
-import {type BasicError} from '@vexl-next/domain/dist/utility/errors'
+} from '@vexl-next/domain/src/general/offers'
+import {type BasicError} from '@vexl-next/domain/src/utility/errors'
 import fetchContactsForOffer, {
   type ApiErrorFetchingContactsForOffer,
   type ConnectionsInfoForOffer,
@@ -16,8 +16,8 @@ import {flow, pipe} from 'fp-ts/function'
 import * as TE from 'fp-ts/TaskEither'
 import {safeParse, stringifyToJson} from '../../utils/parsing'
 import {eciesEncrypt} from '../../utils/crypto'
-import {type ServerPrivatePart} from '@vexl-next/rest-api/dist/services/offer/contracts'
-import {type ContactPrivateApi} from '@vexl-next/rest-api/dist/services/contact'
+import {type ServerPrivatePart} from '@vexl-next/rest-api/src/services/offer/contracts'
+import {type ContactPrivateApi} from '@vexl-next/rest-api/src/services/contact'
 import * as A from 'fp-ts/Array'
 import * as T from 'fp-ts/Task'
 import flattenTaskOfEithers from '../../utils/flattenTaskOfEithers'

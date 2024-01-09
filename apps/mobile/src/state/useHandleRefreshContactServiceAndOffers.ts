@@ -1,5 +1,5 @@
-import {type OneOfferInState} from '@vexl-next/domain/dist/general/offers'
-import {generateKeyPair} from '@vexl-next/resources-utils/dist/utils/crypto'
+import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
+import {generateKeyPair} from '@vexl-next/resources-utils/src/utils/crypto'
 import * as A from 'fp-ts/Array'
 import {isNonEmpty} from 'fp-ts/Array'
 import * as T from 'fp-ts/Task'

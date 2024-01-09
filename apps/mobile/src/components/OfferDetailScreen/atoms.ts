@@ -3,7 +3,7 @@ import {pipe} from 'fp-ts/function'
 import {askAreYouSureActionAtom} from '../AreYouSureDialog'
 import * as TE from 'fp-ts/TaskEither'
 import {atom} from 'jotai'
-import {type OneOfferInState} from '@vexl-next/domain/dist/general/offers'
+import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
 
 const showCommonFriendsExplanationUIActionAtom = atom(
   null,

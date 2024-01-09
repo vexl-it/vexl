@@ -9,10 +9,10 @@ import useResetNavigationToMessagingScreen from '../../../utils/useResetNavigati
 import {Keyboard} from 'react-native'
 import {useHideActionForMessage} from '../atoms/createHideActionForMessageMmkvAtom'
 import {useCallback} from 'react'
-import {type SvgString} from '@vexl-next/domain/dist/utility/SvgString.brand'
+import {type SvgString} from '@vexl-next/domain/src/utility/SvgString.brand'
 import IconButton from '../../IconButton'
 import phoneSvg from '../images/phoneSvg'
-import {E164PhoneNumber} from '@vexl-next/domain/dist/general/E164PhoneNumber.brand'
+import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {addContactWithUiFeedbackAtom} from '../../../state/contacts/atom/addContactWithUiFeedbackAtom'
 
 function QuickActionBannerUi({

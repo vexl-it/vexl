@@ -1,7 +1,7 @@
 import {
   type PrivateKeyHolder,
   type PublicKeyPemBase64,
-} from '@vexl-next/cryptography/dist/KeyHolder'
+} from '@vexl-next/cryptography/src/KeyHolder'
 import * as E from 'fp-ts/Either'
 import * as crypto from '@vexl-next/cryptography'
 import {type AxiosInstance} from 'axios'

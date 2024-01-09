@@ -1,5 +1,5 @@
-import {type OfferPrivateApi} from '@vexl-next/rest-api/dist/services/offer'
-import {type PrivateKeyHolder} from '@vexl-next/cryptography/dist/KeyHolder'
+import {type OfferPrivateApi} from '@vexl-next/rest-api/src/services/offer'
+import {type PrivateKeyHolder} from '@vexl-next/cryptography/src/KeyHolder'
 import * as TE from 'fp-ts/TaskEither'
 import type * as E from 'fp-ts/Either'
 import decryptOffer, {
@@ -9,8 +9,8 @@ import decryptOffer, {
 import {pipe} from 'fp-ts/function'
 import * as A from 'fp-ts/Array'
 import * as T from 'fp-ts/Task'
-import {type IsoDatetimeString} from '@vexl-next/domain/dist/utility/IsoDatetimeString.brand'
-import {type OfferInfo} from '@vexl-next/domain/dist/general/offers'
+import {type IsoDatetimeString} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
+import {type OfferInfo} from '@vexl-next/domain/src/general/offers'
 import {type ExtractLeftTE} from '../utils/ExtractLeft'
 
 export type ApiErrorFetchingOffers = ExtractLeftTE<

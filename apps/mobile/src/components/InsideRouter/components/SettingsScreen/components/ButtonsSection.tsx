@@ -1,6 +1,6 @@
 import SvgImage from '../../../../Image'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
-import {type SvgString} from '@vexl-next/domain/dist/utility/SvgString.brand'
+import {type SvgString} from '@vexl-next/domain/src/utility/SvgString.brand'
 import profileIconSvg from '../../../images/profileIconSvg'
 import {
   Alert,

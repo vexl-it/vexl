@@ -1,4 +1,4 @@
-import {type UriString} from '@vexl-next/domain/dist/utility/UriString.brand'
+import {type UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import React, {useEffect, useState} from 'react'
 import {Image as TmImage} from 'tamagui'
 import {getImageSize} from '../utils/fpUtils'

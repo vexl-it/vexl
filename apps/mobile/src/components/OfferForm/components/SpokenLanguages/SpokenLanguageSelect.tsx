@@ -7,7 +7,7 @@ import {
   useSetAtom,
 } from 'jotai'
 import React, {useCallback} from 'react'
-import {type SpokenLanguage} from '@vexl-next/domain/dist/general/offers'
+import {type SpokenLanguage} from '@vexl-next/domain/src/general/offers'
 import {Modal} from 'react-native'
 import {Stack} from 'tamagui'
 import ScreenTitle from '../../../ScreenTitle'

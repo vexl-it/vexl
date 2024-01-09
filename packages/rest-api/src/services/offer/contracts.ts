@@ -5,12 +5,12 @@ import {
   PrivatePayloadEncrypted,
   PublicPayloadEncrypted,
   OfferAdminId,
-} from '@vexl-next/domain/dist/general/offers'
-import {PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
+} from '@vexl-next/domain/src/general/offers'
+import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {NoContentResponse} from '../../NoContentResponse.brand'
-import {UnixMilliseconds} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
-import {IsoDatetimeString} from '@vexl-next/domain/dist/utility/IsoDatetimeString.brand'
-import {CountryPrefix} from '@vexl-next/domain/dist/general/CountryPrefix.brand'
+import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {IsoDatetimeString} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
+import {CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 
 export interface ReportOfferLimitReachedError {
   readonly _tag: 'ReportOfferLimitReachedError'

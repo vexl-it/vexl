@@ -1,15 +1,14 @@
 {
   "name": "@vexl-next/cryptography",
-  "packageManager": "yarn@3.3.1",
   "version": "0.0.0",
-  "main": "dist/index.js",
+  "type": "module",
+  "main": "src/index",
   "scripts": {
     "test": "yarn jest",
     "clean": "rimraf .turbo node_modules",
     "lint": "eslint .",
     "format": "prettier --check \"**/*.{mjs,ts,md,json}\"",
-    "typecheck": "tsc --noEmit",
-    "build": "tsup --onSuccess \"tsc --emitDeclarationOnly\""
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@craftzdog/react-native-buffer": "^6.0.5",
@@ -36,16 +35,6 @@
     "root": true,
     "extends": [
       "@vexl-next/eslint-config/index"
-    ]
-  },
-  "tsup": {
-    "entryPoints": [
-      "src"
-    ],
-    "clean": true,
-    "sourcemap": true,
-    "format": [
-      "cjs"
     ]
   },
   "jest": {

@@ -1,4 +1,4 @@
-import {type OneOfferInState} from '@vexl-next/domain/dist/general/offers'
+import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
 import {useAtomValue} from 'jotai'
 import {DateTime} from 'luxon'
 import {useMemo} from 'react'

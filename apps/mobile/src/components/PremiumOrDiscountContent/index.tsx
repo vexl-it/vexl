@@ -10,7 +10,7 @@ import {
   useAtomValue,
   type Atom,
 } from 'jotai'
-import {type OfferType} from '@vexl-next/domain/dist/general/offers'
+import {type OfferType} from '@vexl-next/domain/src/general/offers'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import Info from './components/Info'
 import {type ReactNode} from 'react'

@@ -3,7 +3,7 @@ import {type TaskEither} from 'fp-ts/TaskEither'
 import {
   type VerifyPhoneNumberRequest,
   type VerifyPhoneNumberResponse,
-} from '@vexl-next/rest-api/dist/services/user/contracts'
+} from '@vexl-next/rest-api/src/services/user/contracts'
 import {pipe} from 'fp-ts/function'
 import {useUserPublicApi} from '../../../api'
 import {useTranslation} from '../../../utils/localization/I18nProvider'

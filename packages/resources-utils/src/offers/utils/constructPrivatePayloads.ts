@@ -1,9 +1,9 @@
-import {PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
+import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {
   OfferPrivatePart,
   type SymmetricKey,
-} from '@vexl-next/domain/dist/general/offers'
-import {toError, type BasicError} from '@vexl-next/domain/dist/utility/errors'
+} from '@vexl-next/domain/src/general/offers'
+import {toError, type BasicError} from '@vexl-next/domain/src/utility/errors'
 import * as E from 'fp-ts/Either'
 import {z} from 'zod'
 import {keys} from '../../utils/keys'

@@ -1,7 +1,7 @@
 import {z} from 'zod'
-import {UserNameAndUriAvatar} from '@vexl-next/domain/dist/general/UserNameAndAvatar.brand'
-import {E164PhoneNumber} from '@vexl-next/domain/dist/general/E164PhoneNumber.brand'
-import {UserSessionCredentials} from '@vexl-next/rest-api/dist/UserSessionCredentials.brand'
+import {UserNameAndUriAvatar} from '@vexl-next/domain/src/general/UserNameAndAvatar.brand'
+import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
+import {UserSessionCredentials} from '@vexl-next/rest-api/src/UserSessionCredentials.brand'
 import {KeyHolder} from '@vexl-next/cryptography'
 
 export const Session = z.object({

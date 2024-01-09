@@ -1,6 +1,6 @@
-import {type ChatId} from '@vexl-next/domain/dist/general/messaging'
+import {type ChatId} from '@vexl-next/domain/src/general/messaging'
 import focusChatWithMessagesAtom from './focusChatWithMessagesAtom'
-import {type PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
+import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {selectAtom} from 'jotai/utils'
 import {type Atom} from 'jotai'
 

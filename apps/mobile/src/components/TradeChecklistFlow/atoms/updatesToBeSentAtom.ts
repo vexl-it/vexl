@@ -5,8 +5,8 @@ import {
   type NetworkData,
   type PickedDateTimeOption,
   type TradeChecklistUpdate,
-} from '@vexl-next/domain/dist/general/tradeChecklist'
-import {unixMillisecondsNow} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
+} from '@vexl-next/domain/src/general/tradeChecklist'
+import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import createSubmitChecklistUpdateActionAtom from '../../../state/chat/atoms/sendTradeChecklistUpdateActionAtom'
 import {pipe} from 'fp-ts/function'
 import * as TE from 'fp-ts/TaskEither'

@@ -1,5 +1,5 @@
 import {Picker} from '@react-native-picker/picker'
-import {type OneOfferInState} from '@vexl-next/domain/dist/general/offers'
+import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
 import {useAtomValue, useStore} from 'jotai'
 import {useState} from 'react'
 import {Alert} from 'react-native'

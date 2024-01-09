@@ -5,7 +5,7 @@ import {type SetStateAction, type WritableAtom} from 'jotai'
 import {
   type SpokenLanguage,
   spokenLanguagesOptions,
-} from '@vexl-next/domain/dist/general/offers'
+} from '@vexl-next/domain/src/general/offers'
 import SpokenLanguagesListItem from './SpokenLanguagesListItem'
 
 interface Props {

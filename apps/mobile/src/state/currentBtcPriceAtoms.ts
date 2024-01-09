@@ -7,15 +7,15 @@ import {toCommonErrorMessage} from '../utils/useCommonErrorMessages'
 import {translationAtom} from '../utils/localization/I18nProvider'
 import {type Task} from 'fp-ts/Task'
 import reportError from '../utils/reportError'
-import {type GetCryptocurrencyDetailsResponse} from '@vexl-next/rest-api/dist/services/user/contracts'
+import {type GetCryptocurrencyDetailsResponse} from '@vexl-next/rest-api/src/services/user/contracts'
 import showErrorAlert from '../utils/showErrorAlert'
 import {
   type UnixMilliseconds,
   UnixMilliseconds0,
   unixMillisecondsNow,
-} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
-import {AcceptedCurrency} from '@vexl-next/rest-api/dist/services/btcPrice'
-import {type CurrencyCode} from '@vexl-next/domain/dist/general/currency.brand'
+} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {AcceptedCurrency} from '@vexl-next/rest-api/src/services/btcPrice'
+import {type CurrencyCode} from '@vexl-next/domain/src/general/currency.brand'
 
 const BTC_PRICE_UPDATE_TRIGGER_THRESHOLD_MILLISECONDS = 900000
 

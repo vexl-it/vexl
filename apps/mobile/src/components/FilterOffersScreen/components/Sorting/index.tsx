@@ -3,7 +3,7 @@ import {
   translationAtom,
   useTranslation,
 } from '../../../../utils/localization/I18nProvider'
-import {type Sort} from '@vexl-next/domain/dist/general/offers'
+import {type Sort} from '@vexl-next/domain/src/general/offers'
 import {type DropdownItemProps, Dropdown} from '../../../Dropdown'
 import {useMemo} from 'react'
 

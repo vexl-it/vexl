@@ -1,7 +1,7 @@
 import filesystem from 'expo-file-system'
 import * as TE from 'fp-ts/TaskEither'
-import {type UriString} from '@vexl-next/domain/dist/utility/UriString.brand'
-import {type BasicError} from '@vexl-next/domain/dist/utility/errors'
+import {type UriString} from '@vexl-next/domain/src/utility/UriString.brand'
+import {type BasicError} from '@vexl-next/domain/src/utility/errors'
 
 export type RemoveFileError = BasicError<'RemoveFileError'>
 export default function removeFile(

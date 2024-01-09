@@ -1,11 +1,11 @@
 import {
   type PrivateKeyPemBase64,
   type PublicKeyPemBase64,
-} from '@vexl-next/cryptography/dist/KeyHolder'
+} from '@vexl-next/cryptography/src/KeyHolder'
 import {useSessionAssumeLoggedIn} from '../../session'
 import {useMemo} from 'react'
 import {useAtomValue} from 'jotai'
-import {type Chat} from '@vexl-next/domain/dist/general/messaging'
+import {type Chat} from '@vexl-next/domain/src/general/messaging'
 import {focusAtom} from 'jotai-optics'
 import {type FocusAtomType} from '../../../utils/atomUtils/FocusAtomType'
 import messagingStateAtom from '../atoms/messagingStateAtom'

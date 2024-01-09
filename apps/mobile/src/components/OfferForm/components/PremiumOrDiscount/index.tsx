@@ -15,7 +15,7 @@ import PremiumOrDiscountDetail from './components/PremiumOrDiscountDetail'
 import {
   type FeeState,
   type OfferType,
-} from '@vexl-next/domain/dist/general/offers'
+} from '@vexl-next/domain/src/general/offers'
 import PremiumOrDiscountContent from '../../../PremiumOrDiscountContent'
 
 interface Props {

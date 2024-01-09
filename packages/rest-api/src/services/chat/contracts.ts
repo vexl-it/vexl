@@ -1,13 +1,13 @@
 import {
   PrivateKeyHolder,
   PublicKeyPemBase64,
-} from '@vexl-next/cryptography/dist/KeyHolder'
+} from '@vexl-next/cryptography/src/KeyHolder'
 import {
   MessageType,
   ServerMessage,
-} from '@vexl-next/domain/dist/general/messaging'
-import {IdNumeric} from '@vexl-next/domain/dist/utility/IdNumeric'
-import {UnixMilliseconds} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
+} from '@vexl-next/domain/src/general/messaging'
+import {IdNumeric} from '@vexl-next/domain/src/utility/IdNumeric'
+import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {z} from 'zod'
 import {NoContentResponse} from '../../NoContentResponse.brand'
 

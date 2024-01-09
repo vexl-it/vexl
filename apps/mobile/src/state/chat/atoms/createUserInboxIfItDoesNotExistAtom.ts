@@ -1,4 +1,4 @@
-import {type PrivateKeyHolder} from '@vexl-next/cryptography/dist/KeyHolder'
+import {type PrivateKeyHolder} from '@vexl-next/cryptography/src/KeyHolder'
 import {focusAtom} from 'jotai-optics'
 import messagingStateAtom from './messagingStateAtom'
 import {type InboxInState, type MessagingState} from '../domain'

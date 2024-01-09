@@ -4,7 +4,7 @@ import {focusAtom} from 'jotai-optics'
 import {ContactNormalized, ContactNormalizedWithHash} from './domain'
 import {type Atom} from 'jotai'
 import {selectAtom} from 'jotai/utils'
-import {IsoDatetimeString} from '@vexl-next/domain/dist/utility/IsoDatetimeString.brand'
+import {IsoDatetimeString} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
 
 export const combinedContactsAfterLastSubmitStorageAtom =
   atomWithParsedMmkvStorage(

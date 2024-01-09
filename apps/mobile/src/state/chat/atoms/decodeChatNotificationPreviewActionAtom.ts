@@ -1,4 +1,4 @@
-import {messagePreviewFromNetwork} from '@vexl-next/resources-utils/dist/chat/utils/messagePreviewIO'
+import {messagePreviewFromNetwork} from '@vexl-next/resources-utils/src/chat/utils/messagePreviewIO'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'

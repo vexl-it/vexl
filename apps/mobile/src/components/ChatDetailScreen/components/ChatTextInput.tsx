@@ -12,8 +12,8 @@ import {useAtom, useAtomValue, useSetAtom} from 'jotai'
 import {
   type ChatMessage,
   generateChatMessageId,
-} from '@vexl-next/domain/dist/general/messaging'
-import {unixMillisecondsNow} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
+} from '@vexl-next/domain/src/general/messaging'
+import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {useSessionAssumeLoggedIn} from '../../../state/session'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import CancelSvg from '../images/cancelSvg'

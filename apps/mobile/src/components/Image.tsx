@@ -6,8 +6,8 @@ import {
   type StyleProp,
 } from 'react-native'
 import {SvgXml, type XmlProps} from 'react-native-svg'
-import {SvgString} from '@vexl-next/domain/dist/utility/SvgString.brand'
-import {type SvgStringOrImageUri} from '@vexl-next/domain/dist/utility/SvgStringOrImageUri.brand'
+import {SvgString} from '@vexl-next/domain/src/utility/SvgString.brand'
+import {type SvgStringOrImageUri} from '@vexl-next/domain/src/utility/SvgStringOrImageUri.brand'
 
 export function isSvgString(something: unknown): something is SvgString {
   return SvgString.safeParse(something).success

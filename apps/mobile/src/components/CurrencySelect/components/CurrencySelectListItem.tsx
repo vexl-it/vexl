@@ -2,7 +2,7 @@ import {getTokens, Stack, Text, XStack} from 'tamagui'
 import {
   type CurrencyCode,
   type CurrencyInfo,
-} from '@vexl-next/domain/dist/general/currency.brand'
+} from '@vexl-next/domain/src/general/currency.brand'
 import {TouchableOpacity} from 'react-native'
 import Image from '../../Image'
 import checkmarkSvg from '../../images/checkmarkSvg'
@@ -17,7 +17,7 @@ interface Props {
     [
       {
         currency: CurrencyCode
-      }
+      },
     ],
     boolean
   >

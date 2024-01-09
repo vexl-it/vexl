@@ -1,6 +1,6 @@
 import {Stack} from 'tamagui'
 import SelectableCell from '../../../../../../SelectableCell'
-import {type BtcNetwork} from '@vexl-next/domain/dist/general/offers'
+import {type BtcNetwork} from '@vexl-next/domain/src/general/offers'
 import {useTranslation} from '../../../../../../../utils/localization/I18nProvider'
 import {useAtom} from 'jotai'
 import {btcNetworkAtom} from '../../../atoms'

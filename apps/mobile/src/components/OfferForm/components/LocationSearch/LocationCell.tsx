@@ -2,7 +2,7 @@ import {Stack, Text, XStack} from 'tamagui'
 import SvgImage from '../../../Image'
 import locationSvg from '../../../images/locationSvg'
 import {TouchableOpacity} from 'react-native'
-import {type LocationSuggestion} from '@vexl-next/rest-api/dist/services/location/contracts'
+import {type LocationSuggestion} from '@vexl-next/rest-api/src/services/location/contracts'
 import {
   type Atom,
   type PrimitiveAtom,

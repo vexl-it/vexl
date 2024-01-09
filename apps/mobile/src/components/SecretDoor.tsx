@@ -1,7 +1,7 @@
 import {
   unixMillisecondsNow,
   type UnixMilliseconds,
-} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
+} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {useRef} from 'react'
 import {Pressable, type StyleProp, type ViewStyle} from 'react-native'
 

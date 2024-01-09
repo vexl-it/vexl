@@ -1,9 +1,9 @@
 import {atom} from 'jotai'
-import {type OneOfferInState} from '@vexl-next/domain/dist/general/offers'
+import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
 import {privateApiAtom} from '../../../api'
 import {sessionDataOrDummyAtom} from '../../session'
 import {pipe} from 'fp-ts/function'
-import {sendMessagingRequest} from '@vexl-next/resources-utils/dist/chat/sendMessagingRequest'
+import {sendMessagingRequest} from '@vexl-next/resources-utils/src/chat/sendMessagingRequest'
 import * as TE from 'fp-ts/TaskEither'
 import upsertChatForTheirOfferActionAtom from './upsertChatForTheirOfferActionAtom'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
@@ -13,7 +13,7 @@ import showErrorAlert from '../../../utils/showErrorAlert'
 import {createUserInboxIfItDoesNotExistAtom} from './createUserInboxIfItDoesNotExistAtom'
 import {getNotificationToken} from '../../../utils/notifications'
 import reportError from '../../../utils/reportError'
-import {toBasicError} from '@vexl-next/domain/dist/utility/errors'
+import {toBasicError} from '@vexl-next/domain/src/utility/errors'
 
 const sendRequestActionAtom = atom(
   null,

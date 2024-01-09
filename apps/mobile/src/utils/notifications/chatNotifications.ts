@@ -3,9 +3,9 @@ import notifee, {
   type DisplayedNotification,
 } from '@notifee/react-native'
 import {type FirebaseMessagingTypes} from '@react-native-firebase/messaging'
-import {type PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
-import {sha256} from '@vexl-next/cryptography/dist/operations/sha'
-import {type Chat} from '@vexl-next/domain/dist/general/messaging'
+import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
+import {sha256} from '@vexl-next/cryptography/src/operations/sha'
+import {type Chat} from '@vexl-next/domain/src/general/messaging'
 import {getDefaultStore} from 'jotai'
 import {useCallback} from 'react'
 import decodeNotificationPreviewAction from '../../state/chat/atoms/decodeChatNotificationPreviewActionAtom'

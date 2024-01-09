@@ -1,4 +1,4 @@
-import {type JSDateString} from '@vexl-next/domain/dist/utility/JSDateString.brand'
+import {type JSDateString} from '@vexl-next/domain/src/utility/JSDateString.brand'
 import {DateTime} from 'luxon'
 
 export function isOfferExpired(

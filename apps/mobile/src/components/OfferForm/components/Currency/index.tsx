@@ -1,5 +1,5 @@
 import {type PrimitiveAtom, useAtomValue, type WritableAtom} from 'jotai'
-import {type CurrencyCode} from '@vexl-next/domain/dist/general/offers'
+import {type CurrencyCode} from '@vexl-next/domain/src/general/offers'
 import {XStack, Text, Stack} from 'tamagui'
 import {currencies} from '../../../../utils/localization/currency'
 import {useState} from 'react'

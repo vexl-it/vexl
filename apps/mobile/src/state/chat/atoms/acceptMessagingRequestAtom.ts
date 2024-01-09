@@ -1,7 +1,7 @@
 import confirmMessagingRequest, {
   type ApiConfirmMessagingRequest,
-} from '@vexl-next/resources-utils/dist/chat/confirmMessagingRequest'
-import {type ErrorEncryptingMessage} from '@vexl-next/resources-utils/dist/chat/utils/chatCrypto'
+} from '@vexl-next/resources-utils/src/chat/confirmMessagingRequest'
+import {type ErrorEncryptingMessage} from '@vexl-next/resources-utils/src/chat/utils/chatCrypto'
 import {pipe} from 'fp-ts/function'
 import * as TE from 'fp-ts/TaskEither'
 import {atom, type PrimitiveAtom} from 'jotai'
@@ -12,8 +12,8 @@ import createAccountDeletedMessage from '../utils/createAccountDeletedMessage'
 import {
   type ZodParseError,
   type JsonStringifyError,
-} from '@vexl-next/resources-utils/dist/utils/parsing'
-import {type ChatMessagePayload} from '@vexl-next/domain/dist/general/messaging'
+} from '@vexl-next/resources-utils/src/utils/parsing'
+import {type ChatMessagePayload} from '@vexl-next/domain/src/general/messaging'
 
 const acceptMessagingRequestAtom = atom(
   null,

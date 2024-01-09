@@ -4,7 +4,7 @@ import {type TradeChecklistInState} from '../../../state/tradeChecklist/domain'
 import {
   UnixMilliseconds,
   UnixMilliseconds0,
-} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
+} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {
   type VexlBotOrMessageWithState,
   addVexlBotOrMessageWithStateToArray,

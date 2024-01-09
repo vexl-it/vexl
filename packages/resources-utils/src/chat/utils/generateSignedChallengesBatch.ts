@@ -1,13 +1,13 @@
-import {type ChatPrivateApi} from '@vexl-next/rest-api/dist/services/chat'
+import {type ChatPrivateApi} from '@vexl-next/rest-api/src/services/chat'
 import * as TE from 'fp-ts/TaskEither'
-import {type SignedChallenge} from '@vexl-next/rest-api/dist/services/chat/contracts'
+import {type SignedChallenge} from '@vexl-next/rest-api/src/services/chat/contracts'
 import {flow, pipe} from 'fp-ts/function'
 import * as A from 'fp-ts/Array'
-import {type BasicError, toError} from '@vexl-next/domain/dist/utility/errors'
+import {type BasicError, toError} from '@vexl-next/domain/src/utility/errors'
 import {
   type PrivateKeyHolder,
   type PublicKeyPemBase64,
-} from '@vexl-next/cryptography/dist/KeyHolder'
+} from '@vexl-next/cryptography/src/KeyHolder'
 import {ecdsaSign} from '../../utils/crypto'
 import * as O from 'fp-ts/Option'
 import {type ExtractLeftTE} from '../../utils/ExtractLeft'

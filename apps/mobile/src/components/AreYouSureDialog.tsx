@@ -1,7 +1,7 @@
 import {
   toBasicError,
   type BasicError,
-} from '@vexl-next/domain/dist/utility/errors'
+} from '@vexl-next/domain/src/utility/errors'
 import * as E from 'fp-ts/Either'
 import type * as TE from 'fp-ts/TaskEither'
 import {atom, useAtom, type WritableAtom} from 'jotai'

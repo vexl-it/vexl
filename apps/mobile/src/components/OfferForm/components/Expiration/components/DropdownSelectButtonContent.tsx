@@ -9,7 +9,7 @@ import {TouchableOpacity} from 'react-native'
 import Image from '../../../../Image'
 import clearInputSvg from '../../../../images/clearInputSvg'
 import {DateTime} from 'luxon'
-import {type JSDateString} from '@vexl-next/domain/dist/utility/JSDateString.brand'
+import {type JSDateString} from '@vexl-next/domain/src/utility/JSDateString.brand'
 
 interface Props {
   expirationDateAtom: PrimitiveAtom<JSDateString | undefined>

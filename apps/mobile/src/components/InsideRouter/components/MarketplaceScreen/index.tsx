@@ -1,5 +1,5 @@
 import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs'
-import {OfferType} from '@vexl-next/domain/dist/general/offers'
+import {OfferType} from '@vexl-next/domain/src/general/offers'
 import {useSetAtom} from 'jotai'
 import {useCallback, useMemo} from 'react'
 import {getTokens} from 'tamagui'

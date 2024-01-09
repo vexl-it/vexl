@@ -1,9 +1,9 @@
 import {
   type OfferId,
   type OfferInfo,
-} from '@vexl-next/domain/dist/general/offers'
-import {type OfferPrivateApi} from '@vexl-next/rest-api/dist/services/offer'
-import {type PrivateKeyHolder} from '@vexl-next/cryptography/dist/KeyHolder'
+} from '@vexl-next/domain/src/general/offers'
+import {type OfferPrivateApi} from '@vexl-next/rest-api/src/services/offer'
+import {type PrivateKeyHolder} from '@vexl-next/cryptography/src/KeyHolder'
 import {flow, pipe} from 'fp-ts/function'
 import * as A from 'fp-ts/Array'
 import * as TE from 'fp-ts/TaskEither'

@@ -5,9 +5,9 @@ import {
   ChatMessageId,
   generateChatMessageId,
   ServerMessage,
-} from '@vexl-next/domain/dist/general/messaging'
-import {UriString} from '@vexl-next/domain/dist/utility/UriString.brand'
-import {toError, type BasicError} from '@vexl-next/domain/dist/utility/errors'
+} from '@vexl-next/domain/src/general/messaging'
+import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
+import {toError, type BasicError} from '@vexl-next/domain/src/utility/errors'
 import * as E from 'fp-ts/Either'
 import {pipe} from 'fp-ts/lib/function'
 import {parseJson, safeParse} from '../../utils/parsing'
@@ -15,12 +15,12 @@ import {z} from 'zod'
 import {
   UnixMilliseconds,
   unixMillisecondsNow,
-} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
-import {PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
+} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {
   SemverString,
   compare as compareSemver,
-} from '@vexl-next/domain/dist/utility/SmeverString.brand'
+} from '@vexl-next/domain/src/utility/SmeverString.brand'
 
 function setImageForBackwardCompatibility(
   payload: ChatMessagePayload

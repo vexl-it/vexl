@@ -1,5 +1,5 @@
 import useContent from './useContent'
-import {type BtcNetwork} from '@vexl-next/domain/dist/general/offers'
+import {type BtcNetwork} from '@vexl-next/domain/src/general/offers'
 import {type PrimitiveAtom, useAtom} from 'jotai'
 import {YStack} from 'tamagui'
 import SelectableCell from '../../../SelectableCell'

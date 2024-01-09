@@ -3,7 +3,7 @@ import {TouchableOpacity, type TouchableOpacityProps} from 'react-native'
 import {useAtom} from 'jotai'
 import {useMemo} from 'react'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
-import {type ObjectionType} from '@vexl-next/domain/dist/general/feedback'
+import {type ObjectionType} from '@vexl-next/domain/src/general/feedback'
 import {useMolecule} from 'jotai-molecules'
 import {feedbackMolecule} from '../atoms'
 

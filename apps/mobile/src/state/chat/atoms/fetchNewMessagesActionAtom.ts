@@ -1,17 +1,17 @@
 import {
   type PrivateKeyHolder,
   type PublicKeyPemBase64,
-} from '@vexl-next/cryptography/dist/KeyHolder'
-import {type OneOfferInState} from '@vexl-next/domain/dist/general/offers'
+} from '@vexl-next/cryptography/src/KeyHolder'
+import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
 import {
   UnixMilliseconds0,
   unixMillisecondsNow,
   type UnixMilliseconds,
-} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
+} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import retrieveMessages, {
   type ApiErrorRetrievingMessages,
-} from '@vexl-next/resources-utils/dist/chat/retrieveMessages'
-import {type ChatPrivateApi} from '@vexl-next/rest-api/dist/services/chat'
+} from '@vexl-next/resources-utils/src/chat/retrieveMessages'
+import {type ChatPrivateApi} from '@vexl-next/rest-api/src/services/chat'
 import * as A from 'fp-ts/Array'
 import * as E from 'fp-ts/Either'
 import * as T from 'fp-ts/Task'
@@ -35,8 +35,8 @@ import addMessagesToChats from '../utils/addMessagesToChats'
 import createNewChatsFromMessages from '../utils/createNewChatsFromFirstMessages'
 import replaceBase64UriWithImageFileUri from '../utils/replaceBase64UriWithImageFileUri'
 import {version} from '../../../utils/environment'
-import {type ErrorChatMessageRequiresNewerVersion} from '@vexl-next/resources-utils/dist/chat/utils/parseChatMessage'
-import {type ChatMessage} from '@vexl-next/domain/dist/general/messaging'
+import {type ErrorChatMessageRequiresNewerVersion} from '@vexl-next/resources-utils/src/chat/utils/parseChatMessage'
+import {type ChatMessage} from '@vexl-next/domain/src/general/messaging'
 
 function focusInboxInMessagingStateAtom(
   publicKey: PublicKeyPemBase64

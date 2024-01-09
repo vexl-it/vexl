@@ -4,15 +4,15 @@ import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
 import {
   type ChatMessage,
   generateChatMessageId,
-} from '@vexl-next/domain/dist/general/messaging'
+} from '@vexl-next/domain/src/general/messaging'
 import {privateApiAtom} from '../../../api'
 import addMessageToChat from '../utils/addMessageToChat'
 import {pipe} from 'fp-ts/function'
 import * as TE from 'fp-ts/TaskEither'
-import sendMessage from '@vexl-next/resources-utils/dist/chat/sendMessage'
+import sendMessage from '@vexl-next/resources-utils/src/chat/sendMessage'
 import {type FocusAtomType} from '../../../utils/atomUtils/FocusAtomType'
 import {type ActionAtomType} from '../../../utils/atomUtils/ActionAtomType'
-import {now} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
+import {now} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import replaceImageFileUrisWithBase64 from '../utils/replaceImageFileUrisWithBase64'
 import {InteractionManager} from 'react-native'
 

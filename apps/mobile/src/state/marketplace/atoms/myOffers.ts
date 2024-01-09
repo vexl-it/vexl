@@ -6,7 +6,7 @@ import {splitAtom} from 'jotai/utils'
 import {
   type MyOfferInState,
   type Sort,
-} from '@vexl-next/domain/dist/general/offers'
+} from '@vexl-next/domain/src/general/offers'
 
 export const myOffersAtom = focusAtom(offersAtom, (optic) =>
   optic.filter(

@@ -1,4 +1,4 @@
-import {PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
+import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {z} from 'zod'
 import {ChatNotificationType} from './notificationTypes'
 

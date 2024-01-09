@@ -1,7 +1,7 @@
 import {
   type OneOfferInState,
   type Sort,
-} from '@vexl-next/domain/dist/general/offers'
+} from '@vexl-next/domain/src/general/offers'
 
 export default function sortOffers(
   offers: OneOfferInState[],

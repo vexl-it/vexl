@@ -29,6 +29,7 @@
     "@types/koa-bodyparser": "^4",
     "@types/koa-json": "^2",
     "@types/koa-router": "^7.4.4",
+    "@types/source-map-support": "^0.5.10",
     "@vexl-next/eslint-config": "0.0.0",
     "@vexl-next/prettier-config": "0.0.0",
     "@vexl-next/tsconfig": "0.0.0",

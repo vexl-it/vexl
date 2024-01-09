@@ -1,9 +1,9 @@
 import {
   generateChatId,
   type Inbox,
-} from '@vexl-next/domain/dist/general/messaging'
-import {type OneOfferInState} from '@vexl-next/domain/dist/general/offers'
-import {keys} from '@vexl-next/resources-utils/dist/utils/keys'
+} from '@vexl-next/domain/src/general/messaging'
+import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
+import {keys} from '@vexl-next/resources-utils/src/utils/keys'
 import * as A from 'fp-ts/Array'
 import {pipe} from 'fp-ts/function'
 import {group} from 'group-items'

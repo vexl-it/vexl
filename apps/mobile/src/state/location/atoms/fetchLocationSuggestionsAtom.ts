@@ -4,7 +4,7 @@ import {pipe} from 'fp-ts/function'
 import {
   type GetLocationSuggestionsRequest,
   type GetLocationSuggestionsResponse,
-} from '@vexl-next/rest-api/dist/services/location/contracts'
+} from '@vexl-next/rest-api/src/services/location/contracts'
 import * as TE from 'fp-ts/TaskEither'
 import * as T from 'fp-ts/Task'
 import showErrorAlert from '../../../utils/showErrorAlert'

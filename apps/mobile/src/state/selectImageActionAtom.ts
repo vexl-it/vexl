@@ -8,7 +8,7 @@ import {
 import {translationAtom} from '../utils/localization/I18nProvider'
 import reportError from '../utils/reportError'
 import * as O from 'fp-ts/Option'
-import {type UriString} from '@vexl-next/domain/dist/utility/UriString.brand'
+import {type UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {Alert} from 'react-native'
 import {pipe} from 'fp-ts/function'
 import * as TE from 'fp-ts/TaskEither'

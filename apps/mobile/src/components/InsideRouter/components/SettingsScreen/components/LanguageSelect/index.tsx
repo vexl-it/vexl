@@ -1,5 +1,5 @@
 import {Stack, Text} from 'tamagui'
-import {keys} from '@vexl-next/resources-utils/dist/utils/keys'
+import {keys} from '@vexl-next/resources-utils/src/utils/keys'
 import {
   supportedTranslations,
   useTranslation,

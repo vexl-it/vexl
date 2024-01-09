@@ -3,7 +3,7 @@ import {Stack} from 'tamagui'
 import {
   type CurrencyCode,
   type CurrencyInfo,
-} from '@vexl-next/domain/dist/general/currency.brand'
+} from '@vexl-next/domain/src/general/currency.brand'
 import CurrencySelectListItem from './CurrencySelectListItem'
 import {type Atom, type WritableAtom} from 'jotai'
 import {FlatList} from 'react-native'
@@ -18,7 +18,7 @@ interface Props {
     [
       {
         currency: CurrencyCode
-      }
+      },
     ],
     boolean
   >

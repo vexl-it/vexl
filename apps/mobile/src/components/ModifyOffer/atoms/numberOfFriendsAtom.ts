@@ -1,12 +1,12 @@
 import {atom} from 'jotai'
-import {MAX_PAGE_SIZE} from '@vexl-next/rest-api/dist/Pagination.brand'
+import {MAX_PAGE_SIZE} from '@vexl-next/rest-api/src/Pagination.brand'
 import * as TE from 'fp-ts/TaskEither'
 import * as T from 'fp-ts/Task'
 import * as E from 'fp-ts/Either'
 import {privateApiAtom} from '../../../api'
 import {pipe} from 'fp-ts/function'
-import {type ContactPrivateApi} from '@vexl-next/rest-api/dist/services/contact'
-import {type ExtractLeftTE} from '@vexl-next/resources-utils/dist/utils/ExtractLeft'
+import {type ContactPrivateApi} from '@vexl-next/rest-api/src/services/contact'
+import {type ExtractLeftTE} from '@vexl-next/resources-utils/src/utils/ExtractLeft'
 import {sequenceS} from 'fp-ts/Apply'
 
 const numberOfFriendsStorageAtom = atom<

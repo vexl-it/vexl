@@ -1,4 +1,4 @@
-import {type SpokenLanguage} from '@vexl-next/domain/dist/general/offers'
+import {type SpokenLanguage} from '@vexl-next/domain/src/general/offers'
 import {getCurrentLocale} from './I18nProvider'
 
 function getDefaultSpokenLanguage(): SpokenLanguage[] {

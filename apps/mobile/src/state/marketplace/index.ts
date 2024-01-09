@@ -5,44 +5,44 @@ import {
   type OfferPublicPart,
   type OneOfferInState,
   type SymmetricKey,
-} from '@vexl-next/domain/dist/general/offers'
+} from '@vexl-next/domain/src/general/offers'
 import {atom, useAtomValue} from 'jotai'
 import * as Option from 'fp-ts/Option'
 import {privateApiAtom} from '../../api'
 import {pipe} from 'fp-ts/function'
 import {sessionDataOrDummyAtom} from '../session'
-import {isoNow} from '@vexl-next/domain/dist/utility/IsoDatetimeString.brand'
+import {isoNow} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
 import * as TE from 'fp-ts/TaskEither'
 import * as E from 'fp-ts/Either'
 import * as A from 'fp-ts/Array'
 import reportError from '../../utils/reportError'
 import createNewOfferForMyContacts, {
   type ApiErrorWhileCreatingOffer,
-} from '@vexl-next/resources-utils/dist/offers/createOfferHandleContacts'
-import {type ApiErrorFetchingContactsForOffer} from '@vexl-next/resources-utils/dist/offers/utils/fetchContactsForOffer'
-import {type ErrorGeneratingSymmetricKey} from '@vexl-next/resources-utils/dist/offers/utils/generateSymmetricKey'
-import {type ErrorEncryptingPublicPart} from '@vexl-next/resources-utils/dist/offers/utils/encryptOfferPublicPayload'
+} from '@vexl-next/resources-utils/src/offers/createOfferHandleContacts'
+import {type ApiErrorFetchingContactsForOffer} from '@vexl-next/resources-utils/src/offers/utils/fetchContactsForOffer'
+import {type ErrorGeneratingSymmetricKey} from '@vexl-next/resources-utils/src/offers/utils/generateSymmetricKey'
+import {type ErrorEncryptingPublicPart} from '@vexl-next/resources-utils/src/offers/utils/encryptOfferPublicPayload'
 import updateOffer, {
   type ApiErrorUpdatingOffer,
-} from '@vexl-next/resources-utils/dist/offers/updateOffer'
+} from '@vexl-next/resources-utils/src/offers/updateOffer'
 import {
   type ErrorDecryptingOffer,
   type NonCompatibleOfferVersionError,
-} from '@vexl-next/resources-utils/dist/offers/decryptOffer'
+} from '@vexl-next/resources-utils/src/offers/decryptOffer'
 import {useMemo} from 'react'
 import deduplicate from '../../utils/deduplicate'
 import notEmpty from '../../utils/notEmpty'
-import {type ChatOrigin} from '@vexl-next/domain/dist/general/messaging'
+import {type ChatOrigin} from '@vexl-next/domain/src/general/messaging'
 import offerToConnectionsAtom, {
   upsertOfferToConnectionsActionAtom,
 } from '../connections/atom/offerToConnectionsAtom'
 import getNewOffersAndDecrypt, {
   type ApiErrorFetchingOffers,
-} from '@vexl-next/resources-utils/dist/offers/getNewOffersAndDecrypt'
-import {type ErrorConstructingPrivatePayloads} from '@vexl-next/resources-utils/dist/offers/utils/constructPrivatePayloads'
-import {type OfferEncryptionProgress} from '@vexl-next/resources-utils/dist/offers/OfferEncryptionProgress'
-import {type ExtractLeftTE} from '@vexl-next/rest-api/dist/services/chat/utils'
-import {type OfferPrivateApi} from '@vexl-next/rest-api/dist/services/offer'
+} from '@vexl-next/resources-utils/src/offers/getNewOffersAndDecrypt'
+import {type ErrorConstructingPrivatePayloads} from '@vexl-next/resources-utils/src/offers/utils/constructPrivatePayloads'
+import {type OfferEncryptionProgress} from '@vexl-next/resources-utils/src/offers/OfferEncryptionProgress'
+import {type ExtractLeftTE} from '@vexl-next/rest-api/src/services/chat/utils'
+import {type OfferPrivateApi} from '@vexl-next/rest-api/src/services/offer'
 import getCountryPrefix from '../../utils/getCountryCode'
 import {
   lastUpdatedAtAtom,

@@ -5,7 +5,7 @@ import {type PrimitiveAtom, useAtom, useAtomValue, useSetAtom} from 'jotai'
 import {type ReactNode, useEffect} from 'react'
 import SelectProfilePicture from '../../SelectProfilePicture'
 import {realUserImageAtom, realUserNameAtom} from '../../../state/session'
-import {type UriString} from '@vexl-next/domain/dist/utility/UriString.brand'
+import {type UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 
 interface ContentProps {

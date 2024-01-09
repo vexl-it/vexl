@@ -1,9 +1,9 @@
 import {
   type PrivateKeyPemBase64,
   type PublicKeyPemBase64,
-} from '@vexl-next/cryptography/dist/KeyHolder'
-import {type ChatMessage} from '@vexl-next/domain/dist/general/messaging'
-import {toError} from '@vexl-next/domain/dist/utility/errors'
+} from '@vexl-next/cryptography/src/KeyHolder'
+import {type ChatMessage} from '@vexl-next/domain/src/general/messaging'
+import {toError} from '@vexl-next/domain/src/utility/errors'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import truncate from 'just-truncate'

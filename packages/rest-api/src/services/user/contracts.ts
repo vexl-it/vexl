@@ -1,7 +1,7 @@
-import {PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
-import {type E164PhoneNumber} from '@vexl-next/domain/dist/general/E164PhoneNumber.brand'
-import {IsoDatetimeString} from '@vexl-next/domain/dist/utility/IsoDatetimeString.brand'
-import {RegionCode} from '@vexl-next/domain/dist/utility/RegionCode.brand'
+import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
+import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
+import {IsoDatetimeString} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
+import {RegionCode} from '@vexl-next/domain/src/utility/RegionCode.brand'
 import {type AxiosResponse} from 'axios'
 import z from 'zod'
 

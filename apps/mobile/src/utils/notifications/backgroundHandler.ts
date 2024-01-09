@@ -2,7 +2,7 @@ import notifee from '@notifee/react-native'
 import messaging, {
   type FirebaseMessagingTypes,
 } from '@react-native-firebase/messaging'
-import {PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
+import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {getDefaultStore} from 'jotai'

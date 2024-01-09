@@ -1,9 +1,9 @@
-import {type AvailableDateTimeOption} from '@vexl-next/domain/dist/general/tradeChecklist'
+import {type AvailableDateTimeOption} from '@vexl-next/domain/src/general/tradeChecklist'
 import {
   fromDateTime,
   unixMillisecondsNow,
   type UnixMilliseconds,
-} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
+} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {atom, type SetStateAction, type WritableAtom} from 'jotai'
 import {DateTime} from 'luxon'
 import {type DateData} from 'react-native-calendars'

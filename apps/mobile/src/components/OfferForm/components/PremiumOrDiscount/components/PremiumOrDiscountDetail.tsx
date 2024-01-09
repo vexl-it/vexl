@@ -16,7 +16,7 @@ import {Modal} from 'react-native'
 import KeyboardAvoidingView from '../../../../KeyboardAvoidingView'
 import Input from '../../../../Input'
 import {SLIDER_THRESHOLD} from '../../../../PremiumOrDiscountSlider'
-import {type OfferType} from '@vexl-next/domain/dist/general/offers'
+import {type OfferType} from '@vexl-next/domain/src/general/offers'
 
 interface Props {
   feeAmountAtom: WritableAtom<number, [SetStateAction<number>], void>

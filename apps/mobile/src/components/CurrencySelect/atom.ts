@@ -1,5 +1,5 @@
 import {atom} from 'jotai'
-import {type CurrencyInfo} from '@vexl-next/domain/dist/general/currency.brand'
+import {type CurrencyInfo} from '@vexl-next/domain/src/general/currency.brand'
 import {currencies} from '../../utils/localization/currency'
 import {matchSorter} from 'match-sorter'
 import {splitAtom} from 'jotai/utils'

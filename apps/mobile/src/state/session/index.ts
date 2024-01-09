@@ -5,11 +5,11 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import crashlytics from '@react-native-firebase/crashlytics'
 import {KeyHolder} from '@vexl-next/cryptography'
-import {E164PhoneNumber} from '@vexl-next/domain/dist/general/E164PhoneNumber.brand'
+import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {
   type UserNameAndUriAvatar,
   type UserNameAndAvatar,
-} from '@vexl-next/domain/dist/general/UserNameAndAvatar.brand'
+} from '@vexl-next/domain/src/general/UserNameAndAvatar.brand'
 import * as SecretStorage from 'expo-secure-store'
 import * as O from 'fp-ts/Option'
 import * as TE from 'fp-ts/TaskEither'
@@ -29,7 +29,7 @@ import {replaceAll} from '../../utils/replaceAll'
 import readSessionFromStorage from './readSessionFromStorage'
 import writeSessionToStorage from './writeSessionToStorage'
 import {generateRandomUserData} from './utils'
-import {type UserName} from '@vexl-next/domain/dist/general/UserName.brand'
+import {type UserName} from '@vexl-next/domain/src/general/UserName.brand'
 import {askAreYouSureActionAtom} from '../../components/AreYouSureDialog'
 import {translationAtom} from '../../utils/localization/I18nProvider'
 

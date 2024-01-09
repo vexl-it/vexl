@@ -8,7 +8,7 @@ import {
   useSetAtom,
   type WritableAtom,
 } from 'jotai'
-import {type SpokenLanguage} from '@vexl-next/domain/dist/general/offers'
+import {type SpokenLanguage} from '@vexl-next/domain/src/general/offers'
 import {Stack, Text, XStack} from 'tamagui'
 import DropdownSelectButton from '../../../DropdownSelectButton'
 import atomKeyExtractor from '../../../../utils/atomUtils/atomKeyExtractor'

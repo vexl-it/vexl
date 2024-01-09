@@ -1,11 +1,11 @@
 import {z} from 'zod'
-import {ChatId} from '@vexl-next/domain/dist/general/messaging'
-import {PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
+import {ChatId} from '@vexl-next/domain/src/general/messaging'
+import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {
   AmountChatMessage,
   DateTimeChatMessage,
   NetworkChatMessage,
-} from '@vexl-next/domain/dist/general/tradeChecklist'
+} from '@vexl-next/domain/src/general/tradeChecklist'
 import reportError from '../../utils/reportError'
 
 export const ChatDataForTradeChecklist = z.object({

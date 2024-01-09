@@ -6,7 +6,7 @@ import stayAnonymousSvg from '../../images/stayAnonymousSvg'
 import {useMemo, useState} from 'react'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {type Atom, useAtomValue} from 'jotai'
-import {type OfferType} from '@vexl-next/domain/dist/general/offers'
+import {type OfferType} from '@vexl-next/domain/src/general/offers'
 import Help from '../../Help'
 import infoSvg from '../../images/infoSvg'
 

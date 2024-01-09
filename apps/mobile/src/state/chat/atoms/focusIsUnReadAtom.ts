@@ -1,4 +1,4 @@
-import {type Chat} from '@vexl-next/domain/dist/general/messaging'
+import {type Chat} from '@vexl-next/domain/src/general/messaging'
 import {focusAtom} from 'jotai-optics'
 import {type PrimitiveAtom} from 'jotai'
 

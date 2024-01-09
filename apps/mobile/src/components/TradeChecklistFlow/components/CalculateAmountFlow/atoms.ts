@@ -8,7 +8,7 @@ import {
   type AmountData,
   type BtcOrSat,
   type TradePriceType,
-} from '@vexl-next/domain/dist/general/tradeChecklist'
+} from '@vexl-next/domain/src/general/tradeChecklist'
 import updatesToBeSentAtom, {
   addAmountActionAtom,
 } from '../../atoms/updatesToBeSentAtom'

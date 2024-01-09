@@ -1,7 +1,7 @@
 import {
   type Uuid,
   generateUuid as generateUuidFromDomain,
-} from '@vexl-next/domain/dist/utility/Uuid.brand'
+} from '@vexl-next/domain/src/utility/Uuid.brand'
 
 /**
  * @deprecated Use {@link generateUuidFromDomain} instead

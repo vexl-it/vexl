@@ -2,7 +2,7 @@ import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsed
 import {z} from 'zod'
 import {MessagingState} from '../domain'
 import {focusAtom} from 'jotai-optics'
-import {SemverString} from '@vexl-next/domain/dist/utility/SmeverString.brand'
+import {SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 
 export const messagingStateAtomStorageAtom = atomWithParsedMmkvStorage(
   'messagingState',

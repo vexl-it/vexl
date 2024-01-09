@@ -1,6 +1,6 @@
 import {z} from 'zod'
-import {ChatId} from '@vexl-next/domain/dist/general/messaging'
-import {Feedback} from '@vexl-next/domain/dist/general/feedback'
+import {ChatId} from '@vexl-next/domain/src/general/messaging'
+import {Feedback} from '@vexl-next/domain/src/general/feedback'
 
 export const ChatToFeedbackItem = z.object({
   chatId: ChatId,

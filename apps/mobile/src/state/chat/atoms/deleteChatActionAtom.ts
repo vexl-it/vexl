@@ -2,11 +2,11 @@ import {
   generateChatMessageId,
   type ChatMessage,
   type ChatMessagePayload,
-} from '@vexl-next/domain/dist/general/messaging'
-import {unixMillisecondsNow} from '@vexl-next/domain/dist/utility/UnixMilliseconds.brand'
-import sendLeaveChat from '@vexl-next/resources-utils/dist/chat/sendLeaveChat'
-import {type SendMessageApiErrors} from '@vexl-next/resources-utils/dist/chat/sendMessage'
-import {type ErrorEncryptingMessage} from '@vexl-next/resources-utils/dist/chat/utils/chatCrypto'
+} from '@vexl-next/domain/src/general/messaging'
+import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import sendLeaveChat from '@vexl-next/resources-utils/src/chat/sendLeaveChat'
+import {type SendMessageApiErrors} from '@vexl-next/resources-utils/src/chat/sendMessage'
+import {type ErrorEncryptingMessage} from '@vexl-next/resources-utils/src/chat/utils/chatCrypto'
 import * as E from 'fp-ts/Either'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
@@ -21,7 +21,7 @@ import shouldSendTerminationMessageToChat from '../utils/shouldSendTerminationMe
 import {
   type JsonStringifyError,
   type ZodParseError,
-} from '@vexl-next/resources-utils/dist/utils/parsing'
+} from '@vexl-next/resources-utils/src/utils/parsing'
 
 export default function deleteChatActionAtom(
   chatWithMessagesAtom: FocusAtomType<ChatWithMessages>

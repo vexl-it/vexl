@@ -6,7 +6,7 @@ import faq5Svg from './images/faq5Svg'
 import faq6Svg from './images/faq6Svg'
 import anonymizationNoticeSvg from '../../images/anonymizationNoticeSvg'
 import notificationsSvg from '../../images/notificationsSvg'
-import {type SvgString} from '@vexl-next/domain/dist/utility/SvgString.brand'
+import {type SvgString} from '@vexl-next/domain/src/utility/SvgString.brand'
 
 const VEXL_AUDIT_URL = 'https://vexl.it/audit'
 

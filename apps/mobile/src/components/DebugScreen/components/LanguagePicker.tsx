@@ -1,5 +1,5 @@
 import {Picker} from '@react-native-picker/picker'
-import {keys} from '@vexl-next/resources-utils/dist/utils/keys'
+import {keys} from '@vexl-next/resources-utils/src/utils/keys'
 import {I18n} from 'i18n-js'
 import {useSetAtom} from 'jotai'
 import {useState} from 'react'

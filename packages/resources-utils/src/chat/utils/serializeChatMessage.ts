@@ -1,7 +1,7 @@
 import {
   ChatMessagePayload,
   type ChatMessage,
-} from '@vexl-next/domain/dist/general/messaging'
+} from '@vexl-next/domain/src/general/messaging'
 import * as E from 'fp-ts/Either'
 import {pipe} from 'fp-ts/lib/function'
 import {
@@ -10,7 +10,7 @@ import {
   safeParse,
   stringifyToJson,
 } from '../../utils/parsing'
-import {Base64String} from '@vexl-next/domain/dist/utility/Base64String.brand'
+import {Base64String} from '@vexl-next/domain/src/utility/Base64String.brand'
 
 function deanonymizedUserToPayload(
   message: ChatMessage

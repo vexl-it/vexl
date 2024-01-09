@@ -1,6 +1,6 @@
 import messaging from '@react-native-firebase/messaging'
 import {useNavigation} from '@react-navigation/native'
-import {PublicKeyPemBase64} from '@vexl-next/cryptography/dist/KeyHolder'
+import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import * as O from 'fp-ts/Option'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'

@@ -10,7 +10,7 @@ import {
   getRequestState,
 } from '../../state/chat/utils/offerStates'
 import {offerRerequestLimitDaysAtom} from '../../utils/remoteConfig/atoms'
-import {type OneOfferInState} from '@vexl-next/domain/dist/general/offers'
+import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
 import Button from '../Button'
 import UserFeedback from '../UserFeedback'
 import {preferencesAtom} from '../../utils/preferences'

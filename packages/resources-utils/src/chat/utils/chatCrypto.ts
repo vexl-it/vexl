@@ -1,9 +1,9 @@
 import {
   type PrivateKeyHolder,
   type PublicKeyPemBase64,
-} from '@vexl-next/cryptography/dist/KeyHolder'
-import {toError, type BasicError} from '@vexl-next/domain/dist/utility/errors'
-import {type ServerMessage} from '@vexl-next/domain/dist/general/messaging'
+} from '@vexl-next/cryptography/src/KeyHolder'
+import {toError, type BasicError} from '@vexl-next/domain/src/utility/errors'
+import {type ServerMessage} from '@vexl-next/domain/src/general/messaging'
 import * as TE from 'fp-ts/TaskEither'
 import {flow, pipe} from 'fp-ts/function'
 import {eciesDecrypt, eciesEncrypt} from '../../utils/crypto'

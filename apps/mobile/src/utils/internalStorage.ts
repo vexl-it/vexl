@@ -1,9 +1,9 @@
-import {UriString} from '@vexl-next/domain/dist/utility/UriString.brand'
+import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import * as TE from 'fp-ts/TaskEither'
 import * as E from 'fp-ts/Either'
 import * as FileSystem from 'expo-file-system'
 import {pipe} from 'fp-ts/function'
-import {PathString} from '@vexl-next/domain/dist/utility/PathString.brand'
+import {PathString} from '@vexl-next/domain/src/utility/PathString.brand'
 import urlJoin from 'url-join'
 import {safeParse} from './fpUtils'
 

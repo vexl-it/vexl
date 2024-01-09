@@ -1,4 +1,4 @@
-import {type SvgString} from '@vexl-next/domain/dist/utility/SvgString.brand'
+import {type SvgString} from '@vexl-next/domain/src/utility/SvgString.brand'
 import {getTokens, type StackProps, Text, XStack} from 'tamagui'
 import Image from '../../../../../../Image'
 

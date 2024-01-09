@@ -1,11 +1,11 @@
-import {SemverString} from '@vexl-next/domain/dist/utility/SmeverString.brand'
+// import {SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 
 const VERSION_CODE = 88
 const VERSION = '1.8.9'
 const ENV_PRESET = process.env.ENV_PRESET
 
-// check if version is valid
-SemverString.parse(VERSION)
+// // check if version is valid
+// SemverString.parse(VERSION)
 
 const presets = {
   stage: {

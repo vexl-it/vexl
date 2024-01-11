@@ -408,7 +408,7 @@
   "notifications.NEW_CONTACTS_ON_DEVICE.body": "Du hast neue Kontakte, die du nicht synchronisiert hast. Erweiter dein Netzwerk und synchronisiere Sie sie alle!",
   "notifications.UNKNOWN.title": "Neue Nachricht",
   "notifications.UNKNOWN.body": "Du hast eine neue Nachricht erhalten.",
-  "notifications.groupNotificationChat.subtitle": "You have new messages from {userName}",
+  "notifications.groupNotificationChat.subtitle": "You have new messages from {{userName}}",
   "notifications.groupNotificationRequest.subtitle": "You have new requests for your offers",
   "notifications.groupNotificationRequest.title": "New requests",
   "notifications.createOfferPrompt.title": "Create your offer",

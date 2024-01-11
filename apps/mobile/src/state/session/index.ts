@@ -101,19 +101,25 @@ export const sessionHolderAtom = atom({
   state: 'initial',
 } as SessionAtomValueType)
 
-sessionHolderAtom.onMount = () => {
-  void loadSession(true)
-}
-
 export async function loadSession(
-  showErrorAlert: boolean = false
+  store: ReturnType<typeof getDefaultStore> = getDefaultStore(),
+  showErrorAlert: boolean = false,
+  forceReload: boolean = false
 ): Promise<void> {
+  const sessionState = store.get(sessionHolderAtom).state
+
   void showDebugNotificationIfEnabled({
     title: 'Loading session',
-    body: `showErrorAlert: ${showErrorAlert}`,
+    body: `showErrorAlert: ${showErrorAlert}, sessionState: ${sessionState}`,
   })
 
-  if (getDefaultStore().get(sessionHolderAtom).state !== 'initial') {
+  if (
+    !(sessionState === 'initial' || (forceReload && sessionState !== 'loading'))
+  ) {
+    void showDebugNotificationIfEnabled({
+      title: 'Skipping loading session',
+      body: `showErrorAlert: ${showErrorAlert}, sessionState: ${sessionState}`,
+    })
     console.debug(
       'Calling loadSession function but session is not in initial state. Skipping.'
     )
@@ -227,6 +233,10 @@ export const sessionAtom: WritableAtom<
           '‼️ Error while writing user data to secure storage.',
           error
         )
+        void showDebugNotificationIfEnabled({
+          title: 'Error while writing user data to secure storage',
+          body: 'Error while writing user data to secure storage',
+        })
         void AsyncStorage.removeItem(SESSION_KEY)
         void SecretStorage.deleteItemAsync(SECRET_TOKEN_KEY)
         set(sessionHolderAtom, {state: 'loggedOut'})

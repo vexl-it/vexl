@@ -13,6 +13,7 @@ import joinUrl from 'url-join'
 import {Platform} from 'react-native'
 import reportError from '../../../utils/reportError'
 import resolveLocalUri from '../../../utils/resolveLocalUri'
+import {type IdentityRevealChatMessage} from '@vexl-next/domain/src/general/tradeChecklist'
 
 export type ReadingFileError = BasicError<'ReadingFileError'>
 
@@ -126,5 +127,27 @@ export default function replaceImageFileUrisWithBase64(
       )
     }),
     T.map(setImage(message))
+  )
+}
+
+export function replaceIdentityImageFileUriWithBase64(
+  identityRevealChatMessage: IdentityRevealChatMessage | undefined
+): T.Task<IdentityRevealChatMessage | undefined> {
+  const image = identityRevealChatMessage?.image
+
+  if (!image) return T.of(identityRevealChatMessage)
+
+  return pipe(
+    readAsBase64({path: image, imageWidthOrHeightLimit: 512}),
+    TE.match(
+      (e) => {
+        reportError('error', 'Error while reading image as file as base64', e)
+        return identityRevealChatMessage
+      },
+      (image) => ({
+        ...identityRevealChatMessage,
+        image,
+      })
+    )
   )
 }

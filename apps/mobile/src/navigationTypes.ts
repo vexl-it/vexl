@@ -9,7 +9,7 @@ import {type KeyHolder} from '@vexl-next/cryptography'
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {type UserName} from '@vexl-next/domain/src/general/UserName.brand'
-import {type UserNameAndAvatar} from '@vexl-next/domain/src/general/UserNameAndAvatar.brand'
+import {type RealLifeInfo} from '@vexl-next/domain/src/general/UserNameAndAvatar.brand'
 import {
   type OfferId,
   type OfferType,
@@ -74,7 +74,7 @@ export type RootStackScreenProps<T extends keyof RootStackParamsList> =
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type LoginStackParamsList = {
   AnonymizationAnimation: {
-    readonly realUserData: UserNameAndAvatar
+    readonly realUserData: RealLifeInfo
   }
   AnonymizationNotice: undefined
   Intro: undefined

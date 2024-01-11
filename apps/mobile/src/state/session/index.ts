@@ -4,8 +4,8 @@ import {KeyHolder} from '@vexl-next/cryptography'
 import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {type UserName} from '@vexl-next/domain/src/general/UserName.brand'
 import {
-  type UserNameAndAvatar,
   type UserNameAndUriAvatar,
+  type RealLifeInfo,
 } from '@vexl-next/domain/src/general/UserNameAndAvatar.brand'
 import {
   phoneNumberToRegionCode,
@@ -170,7 +170,7 @@ export const realUserDataAtom = focusAtom(sessionDataOrDummyAtom, (p) =>
   p.prop('realUserData')
 )
 
-export const userDataRealOrAnonymizedAtom = atom<UserNameAndAvatar>((get) => {
+export const userDataRealOrAnonymizedAtom = atom<RealLifeInfo>((get) => {
   const real = get(realUserDataAtom)
   const anonymized = get(anonymizedUserDataAtom)
 

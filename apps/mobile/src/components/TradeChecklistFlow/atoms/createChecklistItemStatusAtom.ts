@@ -1,5 +1,5 @@
 import {type Atom, atom} from 'jotai'
-import {tradeChecklistDataAtom} from './fromChatAtoms'
+import {tradeChecklistDataAtom} from '../../../state/tradeChecklist/atoms/fromChatAtoms'
 import updatesToBeSentAtom from './updatesToBeSentAtom'
 import {type TradeChecklistItem} from '../domain'
 import {type TradeChecklistItemStatus} from '@vexl-next/domain/src/general/tradeChecklist'
@@ -28,10 +28,10 @@ export default function createChecklistItemStatusAtom(
 
     if (item === 'CALCULATE_AMOUNT') {
       const amount = tradeChecklistData.amount
-      const {timestamp: tsSent, ...sentDataNoTimestamp} = {
+      const {timestamp: tsSent = undefined, ...sentDataNoTimestamp} = {
         ...amount.sent,
       }
-      const {timestamp: tsReceived, ...receivedDataNoTimestamp} = {
+      const {timestamp: tsReceived = undefined, ...receivedDataNoTimestamp} = {
         ...amount.received,
       }
 
@@ -68,6 +68,60 @@ export default function createChecklistItemStatusAtom(
       }
 
       return 'initial'
+    }
+
+    if (item === 'REVEAL_IDENTITY') {
+      const identityReveal = tradeChecklistData.identity
+
+      if (updates.identity?.status === 'REQUEST_REVEAL') return 'readyToSend'
+
+      if (
+        identityReveal?.received?.status === 'DISAPPROVE_REVEAL' ||
+        updates?.identity?.status === 'DISAPPROVE_REVEAL' ||
+        identityReveal?.sent?.status === 'DISAPPROVE_REVEAL'
+      )
+        return 'declined'
+
+      if (
+        identityReveal?.received?.status === 'APPROVE_REVEAL' ||
+        identityReveal?.sent?.status === 'APPROVE_REVEAL'
+      )
+        return 'accepted'
+
+      if (
+        identityReveal?.sent?.status === 'REQUEST_REVEAL' ||
+        identityReveal?.received?.status === 'REQUEST_REVEAL'
+      )
+        return 'pending'
+
+      if (identityReveal?.received?.status === 'disapproved') return 'warning'
+    }
+
+    if (item === 'REVEAL_PHONE_NUMBER') {
+      const contactReveal = tradeChecklistData.contact
+
+      if (updates.contact?.status === 'REQUEST_REVEAL') return 'readyToSend'
+
+      if (
+        contactReveal?.received?.status === 'DISAPPROVE_REVEAL' ||
+        updates?.contact?.status === 'DISAPPROVE_REVEAL' ||
+        contactReveal?.sent?.status === 'DISAPPROVE_REVEAL'
+      )
+        return 'declined'
+
+      if (
+        contactReveal?.received?.status === 'APPROVE_REVEAL' ||
+        contactReveal?.sent?.status === 'APPROVE_REVEAL'
+      )
+        return 'accepted'
+
+      if (
+        contactReveal?.sent?.status === 'REQUEST_REVEAL' ||
+        contactReveal?.received?.status === 'REQUEST_REVEAL'
+      )
+        return 'pending'
+
+      if (contactReveal?.received?.status === 'disapproved') return 'warning'
     }
 
     return 'initial'

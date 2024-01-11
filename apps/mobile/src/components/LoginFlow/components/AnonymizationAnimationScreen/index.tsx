@@ -7,7 +7,7 @@ import randomName from '../../../../utils/randomName'
 import {animated, useTransition} from '@react-spring/native'
 import {getAvatarSvg} from '../../../AnonymousAvatar'
 import {fromSvgString} from '@vexl-next/domain/src/utility/SvgStringOrImageUri.brand'
-import {UserNameAndAvatar} from '@vexl-next/domain/src/general/UserNameAndAvatar.brand'
+import {RealLifeInfo} from '@vexl-next/domain/src/general/UserNameAndAvatar.brand'
 import {type LoginStackScreenProps} from '../../../../navigationTypes'
 import {
   HeaderProxy,
@@ -30,7 +30,6 @@ const CaptionContainer = styled(animated.View, {
 type Props = LoginStackScreenProps<'AnonymizationAnimation'>
 
 function AnonymizationAnimationScreen({
-  navigation,
   route: {
     params: {realUserData},
   },
@@ -38,9 +37,9 @@ function AnonymizationAnimationScreen({
   const {t} = useTranslation()
   const [anonymized, setAnonymized] = useState(false)
 
-  const anonymizedUserData = useMemo<UserNameAndAvatar>(
+  const anonymizedUserData = useMemo<RealLifeInfo>(
     () =>
-      UserNameAndAvatar.parse({
+      RealLifeInfo.parse({
         image: fromSvgString(getAvatarSvg(randomNumber(0, 3))),
         userName: randomName(),
       }),
@@ -68,7 +67,7 @@ function AnonymizationAnimationScreen({
                 style={{...style, transform: [{scale: style.scale}]}}
               >
                 <UserDataDisplay
-                  userNameAndAvatar={anonymizedUserData}
+                  realLifeInfo={anonymizedUserData}
                   topText={t('loginFlow.anonymization.afterTitle')}
                 />
               </ContentContainer>
@@ -78,7 +77,7 @@ function AnonymizationAnimationScreen({
               style={{...style, transform: [{scale: style.scale}]}}
             >
               <UserDataDisplay
-                userNameAndAvatar={realUserData}
+                realLifeInfo={realUserData}
                 topText={t('loginFlow.anonymization.beforeTitle')}
               />
             </ContentContainer>

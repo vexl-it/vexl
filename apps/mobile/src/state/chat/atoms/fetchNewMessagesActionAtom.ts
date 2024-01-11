@@ -143,7 +143,8 @@ function refreshInbox(
           A.map((oneMessage): T.Task<ChatMessageWithState> => {
             if (
               oneMessage.state !== 'receivedButRequiresNewerVersion' &&
-              !oneMessage.message.image
+              !oneMessage.message.image &&
+              !oneMessage.message.tradeChecklistUpdate?.identity?.image
             )
               return T.of(oneMessage)
             return replaceBase64UriWithImageFileUri(

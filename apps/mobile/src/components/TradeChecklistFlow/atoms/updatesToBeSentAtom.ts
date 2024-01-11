@@ -2,6 +2,8 @@ import {atom} from 'jotai'
 import {
   type AmountData,
   type AvailableDateTimeOption,
+  type IdentityReveal,
+  type ContactReveal,
   type NetworkData,
   type PickedDateTimeOption,
   type TradeChecklistUpdate,
@@ -12,7 +14,10 @@ import {pipe} from 'fp-ts/function'
 import * as TE from 'fp-ts/TaskEither'
 import * as T from 'fp-ts/Task'
 import reportError from '../../../utils/reportError'
-import {chatWithMessagesAtom, tradeChecklistDataAtom} from './fromChatAtoms'
+import {
+  chatWithMessagesAtom,
+  tradeChecklistDataAtom,
+} from '../../../state/tradeChecklist/atoms/fromChatAtoms'
 import {updateTradeChecklistState} from '../../../state/tradeChecklist/utils'
 import {loadingOverlayDisplayedAtom} from '../../LoadingOverlayProvider'
 
@@ -84,6 +89,32 @@ export const addNetworkActionAtom = atom(
   }
 )
 
+export const revealIdentityActionAtom = atom(
+  null,
+  (get, set, identity: IdentityReveal) => {
+    set(updatesToBeSentAtom, (updates) => ({
+      ...updates,
+      identity: {
+        ...identity,
+        timestamp: unixMillisecondsNow(),
+      },
+    }))
+  }
+)
+
+export const revealContactActionAtom = atom(
+  null,
+  (get, set, contact: ContactReveal) => {
+    set(updatesToBeSentAtom, (updates) => ({
+      ...updates,
+      contact: {
+        ...contact,
+        timestamp: unixMillisecondsNow(),
+      },
+    }))
+  }
+)
+
 export const submitTradeChecklistUpdatesActionAtom = atom(
   null,
   (get, set): T.Task<boolean> => {
@@ -104,10 +135,14 @@ export const submitTradeChecklistUpdatesActionAtom = atom(
         },
         () => {
           set(updatesToBeSentAtom, {})
-          set(loadingOverlayDisplayedAtom, false)
+
           return true
         }
-      )
+      ),
+      T.map((r) => {
+        set(loadingOverlayDisplayedAtom, false)
+        return r
+      })
     )
   }
 )

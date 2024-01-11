@@ -1,5 +1,5 @@
 import {useNavigation, type NavigationProp} from '@react-navigation/native'
-import {useAtomValue, useStore} from 'jotai'
+import {useAtomValue, useSetAtom, useStore} from 'jotai'
 import {useCallback, useMemo} from 'react'
 import {TouchableOpacity} from 'react-native'
 import {Stack, Text, XStack, getTokens} from 'tamagui'
@@ -10,26 +10,42 @@ import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import Image from '../../../../Image'
 import createChecklistItemStatusAtom from '../../../atoms/createChecklistItemStatusAtom'
 import {
+  contactRevealedAtom,
+  contactRevealTriggeredFromChatAtom,
+  identityRevealedAtom,
+  identityRevealTriggeredFromChatAtom,
   otherSideDataAtom,
   tradeChecklistDataAtom,
-} from '../../../atoms/fromChatAtoms'
+} from '../../../../../state/tradeChecklist/atoms/fromChatAtoms'
 import {type TradeChecklistItem} from '../../../domain'
 import StatusIndicator from './StatusIndicator'
 import {tradeChecklistWithUpdatesMergedAtom} from '../../../atoms/updatesToBeSentAtom'
 import {type AmountData} from '@vexl-next/domain/src/general/tradeChecklist'
+import {revealIdentityWithUiFeedbackAtom} from '../../../atoms/revealIdentityAtoms'
+import {revealContactWithUiFeedbackAtom} from '../../../atoms/revealContactAtom'
 
 interface Props {
   item: TradeChecklistItem
   hideNetworkCell: boolean
 }
 
-// Ideally make cell for every item.
+// TODO: make cell for every item.
 function ChecklistCell({item, hideNetworkCell}: Props): JSX.Element {
   const {t} = useTranslation()
   const store = useStore()
   // not ideal, but there is no other way how to do this with types working
   const nextChecklistData = useAtomValue(tradeChecklistWithUpdatesMergedAtom)
   const otherSideData = useAtomValue(otherSideDataAtom)
+  const identityRevealTriggeredFromChat = useAtomValue(
+    identityRevealTriggeredFromChatAtom
+  )
+  const contactRevealTriggeredFromChat = useAtomValue(
+    contactRevealTriggeredFromChatAtom
+  )
+  const identityRevealed = useAtomValue(identityRevealedAtom)
+  const contactRevealed = useAtomValue(contactRevealedAtom)
+  const revealIdentity = useSetAtom(revealIdentityWithUiFeedbackAtom)
+  const revealContact = useSetAtom(revealContactWithUiFeedbackAtom)
 
   const navigation: NavigationProp<TradeChecklistStackParamsList> =
     useNavigation()
@@ -37,6 +53,35 @@ function ChecklistCell({item, hideNetworkCell}: Props): JSX.Element {
   const itemStatus = useAtomValue(
     useMemo(() => createChecklistItemStatusAtom(item), [item])
   )
+
+  const itemDisabled = useMemo(() => {
+    const tradeChecklistData = store.get(tradeChecklistDataAtom)
+    const revealIdentityAlreadySent =
+      itemStatus === 'pending' &&
+      tradeChecklistData.identity.sent &&
+      !tradeChecklistData.identity.received
+    const contactRevealAlreadySent =
+      itemStatus === 'pending' &&
+      tradeChecklistData.contact.sent &&
+      !tradeChecklistData.contact.received
+    const contactOrIdentityRevealAccepted = itemStatus === 'accepted'
+    const identityRevealDeclined =
+      tradeChecklistData.identity.sent && itemStatus === 'declined'
+    const contactRevealDeclined =
+      tradeChecklistData.contact.sent && itemStatus === 'declined'
+
+    return (
+      (item === 'REVEAL_IDENTITY' || 'REVEAL_PHONE_NUMBER') &&
+      // eslint-disable-next-line
+      (revealIdentityAlreadySent ||
+        // eslint-disable-next-line
+        contactRevealAlreadySent ||
+        contactOrIdentityRevealAccepted ||
+        // eslint-disable-next-line
+        identityRevealDeclined ||
+        contactRevealDeclined)
+    )
+  }, [item, itemStatus, store])
 
   const onPress = useCallback(() => {
     const tradeChecklistData = store.get(tradeChecklistDataAtom)
@@ -83,8 +128,12 @@ function ChecklistCell({item, hideNetworkCell}: Props): JSX.Element {
           btcAddress: tradeChecklistData.network.sent?.btcAddress,
         },
       })
+    } else if (item === 'REVEAL_IDENTITY') {
+      void revealIdentity()
+    } else if (item === 'REVEAL_PHONE_NUMBER') {
+      void revealContact()
     }
-  }, [store, item, navigation])
+  }, [store, item, navigation, revealIdentity, revealContact])
 
   // again not ideal (re-renders too much), but there is no way how to do this with types working
   const subtitle = useMemo(() => {
@@ -105,13 +154,33 @@ function ChecklistCell({item, hideNetworkCell}: Props): JSX.Element {
             number: suggestions.suggestions.length,
           }
         )}`
+    } else if (item === 'REVEAL_IDENTITY') {
+      return itemDisabled
+        ? t('tradeChecklist.identityRevealAlreadySent')
+        : t('tradeChecklist.shareRecognitionSignInChat')
+    } else if (item === 'REVEAL_PHONE_NUMBER') {
+      return itemDisabled
+        ? t('tradeChecklist.contactRevealAlreadySent')
+        : undefined
     }
-  }, [item, nextChecklistData.dateAndTime, t, otherSideData.userName])
+  }, [
+    item,
+    nextChecklistData.dateAndTime,
+    t,
+    otherSideData.userName,
+    itemDisabled,
+  ])
 
-  return item === 'SET_NETWORK' && hideNetworkCell ? (
+  return (item === 'SET_NETWORK' && hideNetworkCell) ||
+    (item === 'REVEAL_IDENTITY' &&
+      (identityRevealTriggeredFromChat || identityRevealed)) ||
+    (item === 'REVEAL_PHONE_NUMBER' &&
+      (contactRevealTriggeredFromChat ||
+        contactRevealed ||
+        !identityRevealed)) ? (
     <></>
   ) : (
-    <TouchableOpacity onPress={onPress}>
+    <TouchableOpacity disabled={itemDisabled} onPress={onPress}>
       <XStack
         ai={'center'}
         jc={'space-between'}
@@ -119,6 +188,7 @@ function ChecklistCell({item, hideNetworkCell}: Props): JSX.Element {
         px={'$4'}
         py={'$5'}
         br={'$4'}
+        opacity={itemDisabled ? 0.7 : 1}
       >
         <XStack ai={'center'} space={'$4'}>
           <StatusIndicator itemStatus={itemStatus} />
@@ -134,10 +204,12 @@ function ChecklistCell({item, hideNetworkCell}: Props): JSX.Element {
           </Stack>
         </XStack>
         <XStack ai={'center'} space={'$2'}>
-          <Image
-            source={chevronRightSvg}
-            stroke={getTokens().color.greyOnBlack.val}
-          />
+          {!itemDisabled && (
+            <Image
+              source={chevronRightSvg}
+              stroke={getTokens().color.greyOnBlack.val}
+            />
+          )}
         </XStack>
       </XStack>
     </TouchableOpacity>

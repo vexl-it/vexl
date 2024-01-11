@@ -27,7 +27,7 @@ function PriceInfo({fiatTempValueAtom}: Props): JSX.Element | null {
       variant={'yellow'}
       hideCloseButton
       text={t(
-        percentageDifference > 0
+        percentageDifference >= 0
           ? 'tradeChecklist.setYourOwnPrice.ourNewBtcPriceIsHigher'
           : 'tradeChecklist.setYourOwnPrice.ourNewBtcPriceIsLower',
         {

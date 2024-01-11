@@ -1,7 +1,10 @@
 import {z} from 'zod'
 import {UnixMilliseconds} from '../utility/UnixMilliseconds.brand'
 import {BtcNetwork} from './offers'
+import {DeanonymizedUser} from './DeanonymizedUser'
 import {BtcAddress} from '../utility/BtcAddress.brand'
+import {UriString} from '../utility/UriString.brand'
+import {UserName} from './UserName.brand'
 
 /**
  * TODO move to apps/mobile
@@ -23,6 +26,10 @@ export const TradeChecklistItemStatus = z.enum([
    * Other side suggestion is in conflict with yours
    */
   'warning',
+  /**
+   * Other side declined reveal identity or phone number
+   */
+  'declined',
   /**
    * Initial state
    */
@@ -54,6 +61,28 @@ export const NetworkData = z.object({
   btcAddress: BtcAddress.optional(),
 })
 export type NetworkData = z.TypeOf<typeof NetworkData>
+
+export const RevealStatus = z.enum([
+  'REQUEST_REVEAL',
+  'APPROVE_REVEAL',
+  'DISAPPROVE_REVEAL',
+])
+export type RevealStatus = z.TypeOf<typeof RevealStatus>
+
+export const IdentityReveal = z.object({
+  status: RevealStatus.optional(),
+  image: UriString.optional(),
+  name: UserName.optional(),
+  partialPhoneNumber: z.string().optional(),
+  deanonymizedUser: DeanonymizedUser.optional(),
+})
+export type IdentityReveal = z.TypeOf<typeof IdentityReveal>
+
+export const ContactReveal = z.object({
+  status: RevealStatus.optional(),
+  fullPhoneNumber: z.string().optional(),
+})
+export type ContactReveal = z.TypeOf<typeof ContactReveal>
 
 export const TradePriceType = z.enum(['live', 'custom', 'frozen', 'your'])
 export type TradePriceType = z.TypeOf<typeof TradePriceType>
@@ -89,11 +118,22 @@ export type AmountChatMessage = z.TypeOf<typeof AmountChatMessage>
 export const NetworkChatMessage = TradeChecklistMessageBase.merge(NetworkData)
 export type NetworkChatMessage = z.TypeOf<typeof NetworkChatMessage>
 
+export const IdentityRevealChatMessage =
+  TradeChecklistMessageBase.merge(IdentityReveal)
+export type IdentityRevealChatMessage = z.TypeOf<
+  typeof IdentityRevealChatMessage
+>
+
+export const ContactRevealChatMessage =
+  TradeChecklistMessageBase.merge(ContactReveal)
+export type ContactRevealChatMessage = z.TypeOf<typeof ContactRevealChatMessage>
+
 export const TradeChecklistUpdate = z.object({
   dateAndTime: DateTimeChatMessage.optional(),
   location: z.object({}).optional(),
   amount: AmountChatMessage.optional(),
   network: NetworkChatMessage.optional(),
-  identity: z.object({}).optional(),
+  identity: IdentityRevealChatMessage.optional(),
+  contact: ContactRevealChatMessage.optional(),
 })
 export type TradeChecklistUpdate = z.TypeOf<typeof TradeChecklistUpdate>

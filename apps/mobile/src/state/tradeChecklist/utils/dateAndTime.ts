@@ -25,7 +25,7 @@ export function getPick(
   const sentTimestamp = data.sent.timestamp
   const receivedTimestamp = data.received.timestamp
 
-  // Picks needs to be send after suggestions
+  // Picks needs to be sent after suggestions
   if (sentTimestamp > receivedTimestamp && receivedSuggestions && sentPick) {
     const sentPickIsInSuggestions = receivedSuggestions.some(
       ({from, to}) => from <= sentPick.dateTime && sentPick.dateTime <= to

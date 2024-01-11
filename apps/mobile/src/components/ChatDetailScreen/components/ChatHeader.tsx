@@ -143,22 +143,44 @@ function Button({type}: {type: ButtonType}): JSX.Element | null {
 
   if (type === 'tradeChecklist')
     return (
-      <IconButton
-        icon={tradeChecklistSvg}
-        variant={'primary'}
-        onPress={() => {
-          Keyboard.dismiss()
-          setModal(false)
-          navigation.navigate('TradeChecklistFlow', {
-            screen: 'AgreeOnTradeDetails',
-            chatId,
-            inboxKey,
-          })
-        }}
-        iconFill={getTokens().color.main.val}
-        iconHeight={24}
-        iconWidth={24}
-      />
+      <XStack space={'$1'}>
+        {identityRevealStatus === 'notStarted' && (
+          <IconButton
+            icon={identityIconSvg}
+            variant={'primary'}
+            onPress={() => {
+              void revealIdentity('REQUEST_REVEAL')
+            }}
+          />
+        )}
+        {identityRevealStatus === 'shared' &&
+          contactRevealStatus === 'notStarted' && (
+            <IconButton
+              icon={phoneSvg}
+              iconFill={getTokens().color.main.val}
+              variant={'primary'}
+              onPress={() => {
+                void revealContact('REQUEST_REVEAL')
+              }}
+            />
+          )}
+        <IconButton
+          icon={tradeChecklistSvg}
+          variant={'primary'}
+          onPress={() => {
+            Keyboard.dismiss()
+            setModal(false)
+            navigation.navigate('TradeChecklistFlow', {
+              screen: 'AgreeOnTradeDetails',
+              chatId,
+              inboxKey,
+            })
+          }}
+          iconFill={getTokens().color.main.val}
+          iconHeight={24}
+          iconWidth={24}
+        />
+      </XStack>
     )
 
   return <Stack w={40} h={40} />

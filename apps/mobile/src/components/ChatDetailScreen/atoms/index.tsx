@@ -1,8 +1,4 @@
-import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
-import {generateChatId} from '@vexl-next/domain/src/general/messaging'
 import {type FriendLevel} from '@vexl-next/domain/src/general/offers'
-import {UserName} from '@vexl-next/domain/src/general/UserName.brand'
-import {toBasicError} from '@vexl-next/domain/src/utility/errors'
 import {type UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import * as E from 'fp-ts/Either'
 import {pipe} from 'fp-ts/function'
@@ -30,26 +26,20 @@ import focusRequestMessageAtom from '../../../state/chat/atoms/focusRequestMessa
 import revealContactActionAtom, {
   type RevealContactMessageType,
 } from '../../../state/chat/atoms/revealContactActionAtom'
-import revealIdentityActionAtom, {
-  type RevealMessageType,
-} from '../../../state/chat/atoms/revealIdentityActionAtom'
+import revealIdentityActionAtom from '../../../state/chat/atoms/revealIdentityActionAtom'
 import selectOtherSideDataAtom from '../../../state/chat/atoms/selectOtherSideDataAtom'
 import sendMessageActionAtom from '../../../state/chat/atoms/sendMessageActionAtom'
 import {sendRequestHandleUIActionAtom} from '../../../state/chat/atoms/sendRequestActionAtom'
 import {
   type ChatMessageWithState,
   type ChatWithMessages,
+  dummyChatWithMessages,
 } from '../../../state/chat/domain'
 import connectionStateAtom, {
   createFriendLevelInfoAtom,
 } from '../../../state/connections/atom/connectionStateAtom'
 import {createFeedbackForChatAtom} from '../../../state/feedback/atoms'
 import {offerForChatOriginAtom} from '../../../state/marketplace/atoms/offersState'
-import {
-  invalidUsernameUIFeedbackAtom,
-  realUserImageAtom,
-  realUserNameAtom,
-} from '../../../state/session'
 import getValueFromSetStateActionOfAtom from '../../../utils/atomUtils/getValueFromSetStateActionOfAtom'
 import {type SelectedImage} from '../../../utils/imagePickers'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
@@ -61,32 +51,12 @@ import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 import {askAreYouSureActionAtom} from '../../AreYouSureDialog'
 import {loadingOverlayDisplayedAtom} from '../../LoadingOverlayProvider'
 import ChatFeedbackDialogContent from '../components/ChatFeedbackDialogContent'
-import {
-  ImageDialogContent,
-  UsernameDialogContent,
-} from '../components/RevealIdentityDialogContent'
 import {deleteChatStep1Svg} from '../images/deleteChatSvg'
 import buildMessagesListData from '../utils/buildMessagesListData'
-import {createEmptyTradeChecklistInState} from '../../../state/tradeChecklist/domain'
+import {revealIdentityDialogUIAtom} from '../../RevealIdentityDialog/atoms'
+import {invalidUsernameUIFeedbackAtom} from '../../../state/session'
 
 type ChatUIMode = 'approval' | 'messages'
-
-export const dummyChatWithMessages: ChatWithMessages = {
-  chat: {
-    id: generateChatId(),
-    inbox: {privateKey: generatePrivateKey()},
-    otherSide: {publicKey: generatePrivateKey().publicKeyPemBase64},
-    origin: {type: 'unknown'},
-    isUnread: false,
-    showInfoBar: true,
-    showVexlbotInitialMessage: true,
-    showVexlbotNotifications: true,
-  },
-  tradeChecklist: {
-    ...createEmptyTradeChecklistInState(),
-  },
-  messages: [],
-}
 
 export type ExtraToSend =
   | {type: 'image'; image: SelectedImage}
@@ -307,15 +277,6 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     )()
   })
   const lastMessageAtom = selectAtom(messagesAtom, (o) => o.at(-1))
-  const receivedContactRevealRequestMessageAtom = selectAtom(
-    messagesAtom,
-    (messages) =>
-      messages.find(
-        (message) =>
-          message.message.messageType === 'REQUEST_CONTACT_REVEAL' &&
-          message.state === 'received'
-      )
-  )
 
   const forceShowHistoryAtom = atom(false)
 
@@ -374,103 +335,13 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     async (get, set, type: 'REQUEST_REVEAL' | 'RESPOND_REVEAL') => {
       const {t} = get(translationAtom)
 
-      const modalContent = (() => {
-        if (type === 'REQUEST_REVEAL') {
-          return {
-            title: t('messages.identityRevealRequestModal.title'),
-            description: t('messages.identityRevealRequestModal.text'),
-            negativeButtonText: t('common.back'),
-            positiveButtonText: t('common.continue'),
-          }
-        }
-        return {
-          title: t('messages.identityRevealRespondModal.title'),
-          description: t('messages.identityRevealRespondModal.text'),
-          negativeButtonText: t('common.no'),
-          positiveButtonText: t('common.continue'),
-        }
-      })()
-
       return await pipe(
-        set(askAreYouSureActionAtom, {
-          steps: [
-            {...modalContent, type: 'StepWithText'},
-            {
-              type: 'StepWithChildren',
-              MainSectionComponent: () => (
-                <ImageDialogContent
-                  imageSavedForFutureUseAtom={imageSavedForFutureUseAtom}
-                  revealIdentityImageUriAtom={revealIdentityImageUriAtom}
-                />
-              ),
-              positiveButtonText: t('common.continue'),
-              negativeButtonText: t('common.close'),
-            },
-            {
-              type: 'StepWithChildren',
-              MainSectionComponent: () => (
-                <UsernameDialogContent
-                  revealIdentityUsernameAtom={revealIdentityUsernameAtom}
-                  usernameSavedForFutureUseAtom={usernameSavedForFutureUseAtom}
-                />
-              ),
-              goBackOnNegativeButtonPress: true,
-              positiveButtonText: t('common.continue'),
-              negativeButtonText: t('common.back'),
-            },
-          ],
-          variant: 'info',
-        }),
-        TE.map((val) => {
-          set(loadingOverlayDisplayedAtom, true)
-          return val
-        }),
-        TE.match(
-          (e) => {
-            if (e._tag === 'UserDeclinedError' && type === 'RESPOND_REVEAL') {
-              return E.right('DISAPPROVE_REVEAL' as RevealMessageType)
-            }
-            return E.left(e)
-          },
-          () =>
-            E.right(
-              type === 'RESPOND_REVEAL'
-                ? ('APPROVE_REVEAL' as RevealMessageType)
-                : ('REQUEST_REVEAL' as RevealMessageType)
-            )
-        ),
-        TE.bindTo('type'),
-        TE.bindW('username', ({type}) => {
-          if (type === 'DISAPPROVE_REVEAL') return TE.right(undefined)
-
-          const username = UserName.safeParse(
-            get(revealIdentityUsernameAtom).trim()
-          )
-
-          if (!username.success)
-            return TE.left(
-              toBasicError('UsernameEmptyError')(new Error('UsernameEmpty'))
-            )
-
-          const usernameSavedForFutureUse = get(usernameSavedForFutureUseAtom)
-
-          if (usernameSavedForFutureUse) set(realUserNameAtom, username.data)
-
-          return TE.right(username.data)
-        }),
-        TE.bindW('imageUri', ({type}) => {
-          if (type === 'DISAPPROVE_REVEAL') return TE.right(undefined)
-
-          const imageSavedForFutureUse = get(imageSavedForFutureUseAtom)
-          const revealIdentityImageUri = get(revealIdentityImageUriAtom)
-
-          if (imageSavedForFutureUse && revealIdentityImageUri)
-            set(realUserImageAtom, {
-              type: 'imageUri',
-              imageUri: revealIdentityImageUri,
-            })
-
-          return TE.right(revealIdentityImageUri)
+        set(revealIdentityDialogUIAtom, {
+          type,
+          revealIdentityUsernameAtom,
+          usernameSavedForFutureUseAtom,
+          revealIdentityImageUriAtom,
+          imageSavedForFutureUseAtom,
         }),
         TE.chainW(({type, username, imageUri}) =>
           set(revealIdentityAtom, {type, username, imageUri})
@@ -596,6 +467,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     chatWithMessagesAtom,
     ({
       messages,
+      tradeChecklist,
     }): 'shared' | 'denied' | 'iAsked' | 'theyAsked' | 'notStarted' => {
       const response = messages.find(
         (one) =>
@@ -607,6 +479,18 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
           ? 'shared'
           : 'denied' // no need to search further
 
+      // check also tradeChecklist for identity reveal messages
+      if (
+        tradeChecklist.identity.received?.status === 'APPROVE_REVEAL' ||
+        tradeChecklist.identity.sent?.status === 'APPROVE_REVEAL'
+      )
+        return 'shared'
+      if (
+        tradeChecklist.identity.received?.status === 'DISAPPROVE_REVEAL' ||
+        tradeChecklist.identity.sent?.status === 'DISAPPROVE_REVEAL'
+      )
+        return 'denied'
+
       const requestMessage = messages.find(
         (one) => one.message.messageType === 'REQUEST_REVEAL'
       )
@@ -614,14 +498,39 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
       if (requestMessage)
         return requestMessage.state === 'received' ? 'theyAsked' : 'iAsked'
 
+      // check also tradeChecklist for identity reveal messages
+      if (tradeChecklist.identity.received?.status === 'REQUEST_REVEAL')
+        return 'theyAsked'
+      if (tradeChecklist.identity.sent?.status === 'REQUEST_REVEAL')
+        return 'iAsked'
+
       return 'notStarted'
     }
   )
+
+  const identityRevealTriggeredFromTradeChecklistAtom = atom((get) => {
+    const chatWithMessages = get(chatWithMessagesAtom)
+
+    return (
+      chatWithMessages.tradeChecklist.identity.received?.status ===
+      'REQUEST_REVEAL'
+    )
+  })
+
+  const contactRevealTriggeredFromTradeChecklistAtom = atom((get) => {
+    const chatWithMessages = get(chatWithMessagesAtom)
+
+    return (
+      chatWithMessages.tradeChecklist.contact.received?.status ===
+      'REQUEST_REVEAL'
+    )
+  })
 
   const contactRevealStatusAtom = selectAtom(
     chatWithMessagesAtom,
     ({
       messages,
+      tradeChecklist,
     }): 'shared' | 'denied' | 'iAsked' | 'theyAsked' | 'notStarted' => {
       const response = messages.find(
         (one) =>
@@ -633,12 +542,30 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
           ? 'shared'
           : 'denied' // no need to search further
 
+      // check also tradeChecklist for contact reveal messages
+      if (
+        tradeChecklist.contact.received?.status === 'APPROVE_REVEAL' ||
+        tradeChecklist.contact.sent?.status === 'APPROVE_REVEAL'
+      )
+        return 'shared'
+      if (
+        tradeChecklist.contact.received?.status === 'DISAPPROVE_REVEAL' ||
+        tradeChecklist.contact.sent?.status === 'DISAPPROVE_REVEAL'
+      )
+        return 'denied'
+
       const requestMessage = messages.find(
         (one) => one.message.messageType === 'REQUEST_CONTACT_REVEAL'
       )
 
       if (requestMessage)
         return requestMessage.state === 'received' ? 'theyAsked' : 'iAsked'
+
+      // check also tradeChecklist for contact reveal messages
+      if (tradeChecklist.contact.received?.status === 'REQUEST_REVEAL')
+        return 'theyAsked'
+      if (tradeChecklist.contact.sent?.status === 'REQUEST_REVEAL')
+        return 'iAsked'
 
       return 'notStarted'
     }
@@ -824,6 +751,14 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     o.prop('amount')
   )
 
+  const tradeChecklistIdentityRevealAtom = focusAtom(tradeChecklistAtom, (o) =>
+    o.prop('identity')
+  )
+
+  const tradeChecklistContactRevealAtom = focusAtom(tradeChecklistAtom, (o) =>
+    o.prop('contact')
+  )
+
   return {
     showModalAtom: atom<boolean>(false),
     chatAtom,
@@ -863,7 +798,6 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     cancelRequestActionAtom,
     selectedImageAtom,
     clearExtraToSendActionAtom,
-    receivedContactRevealRequestMessageAtom,
     showInfoBarAtom,
     chatFeedbackAtom,
     showVexlbotNotificationsForCurrentChatAtom,
@@ -874,6 +808,10 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     tradeChecklistDateAndTimeAtom,
     tradeChecklistNetworkAtom,
     tradeChecklistAmountAtom,
-    offerCurrencyAtom,
+      offerCurrencyAtom,
+    tradeChecklistIdentityRevealAtom,
+    tradeChecklistContactRevealAtom,
+    identityRevealTriggeredFromTradeChecklistAtom,
+    contactRevealTriggeredFromTradeChecklistAtom,
   }
 })

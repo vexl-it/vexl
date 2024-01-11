@@ -8,7 +8,7 @@ import AmountInput from './AmountInput'
 import {currencies} from '../../../../../utils/localization/currency'
 import CalculatedWithLiveRate from './CalculatedWithLiveRate'
 import {btcPriceForOfferWithStateAtom} from '../../../atoms/btcPriceForOfferWithStateAtom'
-import {originOfferCurrencyAtom} from '../../../atoms/fromChatAtoms'
+import {originOfferCurrencyAtom} from '../../../../../state/tradeChecklist/atoms/fromChatAtoms'
 
 interface Props {
   automaticCalculationDisabled?: boolean

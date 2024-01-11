@@ -6,7 +6,7 @@ import openUrl from '../../../../../utils/openUrl'
 import Image from '../../../../Image'
 import Info from '../../../../Info'
 import anonymousAvatarHappyNoBackgroundSvg from '../../../../images/anonymousAvatarHappyNoBackgroundSvg'
-import * as fromChatAtoms from '../../../atoms/fromChatAtoms'
+import * as fromChatAtoms from '../../../../../state/tradeChecklist/atoms/fromChatAtoms'
 import {type TradeChecklistItem} from '../../../domain'
 import AnonymizationNotice from '../../AnonymizationNotice'
 import ChecklistCell from './ChecklistCell'
@@ -18,6 +18,7 @@ const tradeChecklistItems: TradeChecklistItem[] = [
   'CALCULATE_AMOUNT',
   'SET_NETWORK',
   'REVEAL_IDENTITY',
+  'REVEAL_PHONE_NUMBER',
 ]
 
 const VEXL_BLOG_URL =

@@ -7,6 +7,7 @@ import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
 import processIdentityRevealMessageIfAny from './processIdentityRevealMessageIfAny'
 import {updateTradeChecklistState} from '../../tradeChecklist/utils'
 import notEmpty from '../../../utils/notEmpty'
+import addRealLifeInfoToChat from './addRealLifeInfoToChat'
 
 export default function addMessagesToChats(
   chats: ChatWithMessages[]
@@ -48,6 +49,18 @@ export default function addMessagesToChats(
           .map((one) => one.message.tradeChecklistUpdate)
           .filter(notEmpty)
 
+        const tradeChecklistIdentityRevealMessage = tradeChecklistUpdates.find(
+          (update) =>
+            update.identity?.status &&
+            ['APPROVE_REVEAL'].includes(update.identity.status)
+        )?.identity
+
+        const tradeChecklistContactRevealMessage = tradeChecklistUpdates.find(
+          (update) =>
+            update.contact?.status &&
+            ['APPROVE_REVEAL'].includes(update.contact.status)
+        )?.contact
+
         return pipe(
           {
             ...oneChat,
@@ -59,7 +72,11 @@ export default function addMessagesToChats(
             ),
             chat: {...oneChat.chat, isUnread: true},
           },
-          processIdentityRevealMessageIfAny(identityRevealMessage)
+          processIdentityRevealMessageIfAny(identityRevealMessage),
+          addRealLifeInfoToChat(
+            tradeChecklistIdentityRevealMessage,
+            tradeChecklistContactRevealMessage
+          )
         )
       })
     )

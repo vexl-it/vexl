@@ -4,6 +4,7 @@ import pendingSvg from '../../../../../images/pendingSvg'
 import Checkbox from '../../../../Checkbox'
 import Image from '../../../../Image'
 import warningSvg from '../../../../ChatDetailScreen/images/warningSvg'
+import BlockIconSvg from '../../../../../images/blockIconSvg'
 
 interface Props {
   itemStatus: TradeChecklistItemStatus
@@ -38,6 +39,8 @@ function StatusIndicator({itemStatus}: Props): JSX.Element {
         />
       ) : itemStatus === 'warning' ? (
         <Image stroke="black" height={18} width={18} source={warningSvg} />
+      ) : itemStatus === 'declined' ? (
+        <Image height={18} width={18} source={BlockIconSvg} />
       ) : itemStatus === 'accepted' ? (
         <Checkbox size={'24x24'} value={true} onChange={empty} />
       ) : (

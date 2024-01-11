@@ -1,5 +1,5 @@
 import {z} from 'zod'
-import {UserNameAndAvatar} from './UserNameAndAvatar.brand'
+import {RealLifeInfo} from './UserNameAndAvatar.brand'
 import {OfferId, OneOfferInState} from './offers'
 import {UserName} from './UserName.brand'
 import {generateUuid, Uuid} from '../utility/Uuid.brand'
@@ -10,6 +10,7 @@ import {UriString} from '../utility/UriString.brand'
 import {Base64String} from '../utility/Base64String.brand'
 import {TradeChecklistUpdate} from './tradeChecklist'
 import {SemverString} from '../utility/SmeverString.brand'
+import {DeanonymizedUser} from './DeanonymizedUser'
 
 export const MessageType = z.enum([
   'MESSAGE',
@@ -48,16 +49,9 @@ export type MessageTypeBackwardCompatible = z.TypeOf<
 
 export const ChatUserIdentity = z.object({
   publicKey: PublicKeyPemBase64,
-  realLifeInfo: UserNameAndAvatar.optional(),
+  realLifeInfo: RealLifeInfo.optional(),
 })
 export type ChatUserIdentity = z.TypeOf<typeof ChatUserIdentity>
-
-export const DeanonymizedUser = z.object({
-  name: UserName,
-  partialPhoneNumber: z.string().optional(),
-  fullPhoneNumber: z.string().optional(),
-})
-export type DeanonymizedUser = z.TypeOf<typeof DeanonymizedUser>
 
 export const ChatMessageId = z.string().uuid().brand<'ChatMessageId'>()
 export type ChatMessageId = z.TypeOf<typeof ChatMessageId>

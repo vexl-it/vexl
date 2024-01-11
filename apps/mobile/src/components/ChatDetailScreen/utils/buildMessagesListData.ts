@@ -81,6 +81,44 @@ function addVexlBotMessagesToMessagesListData(
       }
 
       return addVexlBotOrMessageWithStateToArray(messageToInsert)(a)
+    },
+    (a) => {
+      const identityInteraction = UnixMilliseconds.parse(
+        Math.max(
+          tradeChecklist.identity.sent?.timestamp ?? 0,
+          tradeChecklist.identity.received?.timestamp ?? 0
+        )
+      )
+
+      if (identityInteraction === 0) return a
+      const messageToInsert: VexlBotOrMessageWithState = {
+        type: 'vexlBot',
+        message: {
+          type: 'identityRevealPreview' as const,
+          date: identityInteraction,
+        },
+      }
+
+      return addVexlBotOrMessageWithStateToArray(messageToInsert)(a)
+    },
+    (a) => {
+      const contactInteraction = UnixMilliseconds.parse(
+        Math.max(
+          tradeChecklist.contact.sent?.timestamp ?? 0,
+          tradeChecklist.contact.received?.timestamp ?? 0
+        )
+      )
+
+      if (contactInteraction === 0) return a
+      const messageToInsert: VexlBotOrMessageWithState = {
+        type: 'vexlBot',
+        message: {
+          type: 'contactRevealPreview' as const,
+          date: contactInteraction,
+        },
+      }
+
+      return addVexlBotOrMessageWithStateToArray(messageToInsert)(a)
     }
   )
 }

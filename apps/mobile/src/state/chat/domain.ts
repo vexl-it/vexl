@@ -1,10 +1,14 @@
-import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
+import {
+  generatePrivateKey,
+  PublicKeyPemBase64,
+} from '@vexl-next/cryptography/src/KeyHolder'
 import {
   Chat,
   ChatId,
   ChatMessage,
   type ChatMessagePayload,
   ChatMessageRequiringNewerVersion,
+  generateChatId,
   Inbox,
 } from '@vexl-next/domain/src/general/messaging'
 import {type BasicError} from '@vexl-next/domain/src/utility/errors'
@@ -25,7 +29,10 @@ import {
 } from '@vexl-next/rest-api/src/services/contact/contracts'
 import {z} from 'zod'
 import {type ReadingFileError} from './utils/replaceImageFileUrisWithBase64'
-import {TradeChecklistInState} from '../tradeChecklist/domain'
+import {
+  createEmptyTradeChecklistInState,
+  TradeChecklistInState,
+} from '../tradeChecklist/domain'
 import {
   type JsonStringifyError,
   type ZodParseError,
@@ -72,6 +79,7 @@ export const ChatWithMessages = z.object({
     amount: {},
     network: {},
     identity: {},
+    contact: {},
   }),
 })
 export type ChatWithMessages = z.TypeOf<typeof ChatWithMessages>
@@ -101,3 +109,20 @@ export const RequestState = z.enum([
   'otherSideLeft',
 ])
 export type RequestState = z.TypeOf<typeof RequestState>
+
+export const dummyChatWithMessages: ChatWithMessages = {
+  chat: {
+    id: generateChatId(),
+    inbox: {privateKey: generatePrivateKey()},
+    otherSide: {publicKey: generatePrivateKey().publicKeyPemBase64},
+    origin: {type: 'unknown'},
+    isUnread: false,
+    showInfoBar: true,
+    showVexlbotInitialMessage: true,
+    showVexlbotNotifications: true,
+  },
+  tradeChecklist: {
+    ...createEmptyTradeChecklistInState(),
+  },
+  messages: [],
+}

@@ -18,7 +18,7 @@ import PremiumOrDiscountScreen from './components/CalculateAmountFlow/components
 import TradePriceTypeDialog from './components/CalculateAmountFlow/components/TradePriceTypeDialog'
 import NetworkScreen from './components/NetworkFlow/components/NetworkScreen'
 import BtcAddressScreen from './components/NetworkFlow/components/BtcAddressScreen'
-import * as fromChatAtoms from './atoms/fromChatAtoms'
+import * as fromChatAtoms from '../../state/tradeChecklist/atoms/fromChatAtoms'
 import PickDateFromSuggestionsScreen from './components/DateAndTimeFlow/components/PickDateFromSuggestionsScreen'
 import PickTimeFromSuggestions from './components/DateAndTimeFlow/components/PickTimeFromSuggestions'
 

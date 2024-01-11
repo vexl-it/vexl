@@ -175,6 +175,8 @@ export async function loadSession(
               },
             ]
           )
+        } else {
+          getDefaultStore().set(sessionHolderAtom, {state: 'initial'})
         }
 
         // TODO loggout use when it makes sense

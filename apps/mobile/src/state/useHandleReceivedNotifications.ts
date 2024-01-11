@@ -19,7 +19,7 @@ import reportError from '../utils/reportError'
 import {fetchAndStoreMessagesForInboxAtom} from './chat/atoms/fetchNewMessagesActionAtom'
 import {updateAllOffersConnectionsActionAtom} from './connections/atom/offerToConnectionsAtom'
 import checkAndShowCreateOfferPrompt from '../utils/notifications/checkAndShowCreateOfferPrompt'
-import {showDebugNotificationIfEnabled} from '../utils/notifications'
+import {showDebugNotificationIfEnabled} from '../utils/notifications/showDebugNotificationIfEnabled'
 import isChatMessageNotification from '../utils/notifications/isChatMessageNotification'
 
 export function useHandleReceivedNotifications(): void {

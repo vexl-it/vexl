@@ -408,7 +408,7 @@
   "notifications.NEW_CONTACTS_ON_DEVICE.body": "Na zariadení máš nové kontakty, ktoré si ešte nesynchronizoval s Vexlom. Rozšír si sieť ich synchronizáciou.",
   "notifications.UNKNOWN.title": "Nová správa",
   "notifications.UNKNOWN.body": "Dostal si novú správu.",
-  "notifications.groupNotificationChat.subtitle": "You have new messages from {userName}",
+  "notifications.groupNotificationChat.subtitle": "You have new messages from {{userName}}",
   "notifications.groupNotificationRequest.subtitle": "You have new requests for your offers",
   "notifications.groupNotificationRequest.title": "New requests",
   "notifications.createOfferPrompt.title": "Vytvor ponuku",

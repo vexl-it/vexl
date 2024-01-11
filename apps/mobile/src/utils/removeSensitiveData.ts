@@ -11,7 +11,7 @@ export default function removeSensitiveData(string: string): string {
     session.sessionCredentials.publicKey,
     session.phoneNumber,
     session.privateKey.privateKeyPemBase64,
-  ]
+  ].filter((one) => Boolean(one.trim()))
 
   if (session.realUserData?.userName)
     toReplace.push(session.realUserData.userName)

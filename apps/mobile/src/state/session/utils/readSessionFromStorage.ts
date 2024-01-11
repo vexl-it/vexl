@@ -2,7 +2,7 @@ import {pipe} from 'fp-ts/function'
 import {
   aesDecrypt,
   type CryptoError,
-  type ErrorReadingFromStore,
+  type ErrorReadingFromAsyncStorage,
   getItemFromAsyncStorage,
   getItemFromSecretStorage,
   type JsonParseError,
@@ -10,19 +10,10 @@ import {
   safeParse,
   type StoreEmpty,
   type ZodParseError,
-} from '../../utils/fpUtils'
+  type ErrorReadingFromSecureStorage,
+} from '../../../utils/fpUtils'
 import * as TE from 'fp-ts/TaskEither'
-import {Session} from '../../brands/Session.brand'
-
-export interface ParsingPrivateKeyError {
-  _tag: 'errorParsingPrivateKey'
-  error: unknown
-}
-
-export interface SecretStoreError {
-  _tag: 'secretStoreError'
-  error: unknown
-}
+import {Session} from '../../../brands/Session.brand'
 
 export default function readSessionFromStorage({
   asyncStorageKey,
@@ -32,10 +23,9 @@ export default function readSessionFromStorage({
   secretStorageKey: string
 }): TE.TaskEither<
   | StoreEmpty
-  | ErrorReadingFromStore
-  | SecretStoreError
+  | ErrorReadingFromSecureStorage
+  | ErrorReadingFromAsyncStorage
   | CryptoError
-  | ParsingPrivateKeyError
   | JsonParseError
   | ZodParseError<Session>,
   Session
@@ -43,14 +33,7 @@ export default function readSessionFromStorage({
   return pipe(
     getItemFromAsyncStorage(asyncStorageKey),
     TE.bindTo('encryptedSessionJson'),
-    TE.bindW('secretToken', () =>
-      pipe(
-        getItemFromSecretStorage(secretStorageKey),
-        TE.mapLeft((l) => {
-          return {_tag: 'secretStoreError', error: l} as const
-        })
-      )
-    ),
+    TE.bindW('secretToken', () => getItemFromSecretStorage(secretStorageKey)),
     TE.chainW(({encryptedSessionJson, secretToken}) =>
       aesDecrypt(encryptedSessionJson, secretToken)
     ),

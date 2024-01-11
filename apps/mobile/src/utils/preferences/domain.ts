@@ -11,7 +11,6 @@ const NotificationPreferences = z.object({
 })
 
 export const Preferences = z.object({
-  showDebugNotifications: z.boolean().default(false),
   disableOfferRerequestLimit: z.boolean().default(false),
   allowSendingImages: z.boolean().default(false),
   notificationPreferences: NotificationPreferences,

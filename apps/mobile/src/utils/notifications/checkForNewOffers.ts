@@ -8,15 +8,11 @@ import * as E from 'fp-ts/Either'
 import {pipe} from 'fp-ts/function'
 import {getDefaultStore} from 'jotai'
 import {difference} from 'set-operations'
-import {showDebugNotificationIfEnabled} from '.'
+import {showDebugNotificationIfEnabled} from './showDebugNotificationIfEnabled'
 import {triggerOffersRefreshAtom} from '../../state/marketplace'
 import {createFilteredOffersAtom} from '../../state/marketplace/atoms/filteredOffers'
 import {offersFilterFromStorageAtom} from '../../state/marketplace/filterAtoms'
-import {
-  loadSession,
-  sessionHolderAtom,
-  userLoggedInAtom,
-} from '../../state/session'
+import {sessionHolderAtom, userLoggedInAtom} from '../../state/session'
 import {storage} from '../fpMmkv'
 import {getLastTimeAppWasRunning} from '../lastTimeAppWasRunning'
 import {translationAtom, type TFunction} from '../localization/I18nProvider'
@@ -24,6 +20,7 @@ import {notificationPreferencesAtom, preferencesAtom} from '../preferences'
 import reportError from '../reportError'
 import {getDefaultChannel} from './notificationChannels'
 import {NEW_OFFERS_IN_MARKETPLACE} from './notificationTypes'
+import {loadSession} from '../../state/session/loadSession'
 
 const LAST_NEW_OFFERS_NOTIFICATION_KEY = 'lastNewOffersNotification'
 const INTERVALS = {
@@ -87,7 +84,10 @@ export default async function checkForNewOffers(): Promise<void> {
     const {t} = store.get(translationAtom)
     // check if user is logged in & preferences
 
-    await loadSession()
+    if (!(await loadSession())) {
+      console.info('Session not loaded. Skipping check for new offers')
+      return
+    }
 
     const appWasInnactiveForLongTime =
       getLastTimeAppWasRunning() + getIntervalValues().checkAfterInactivity >

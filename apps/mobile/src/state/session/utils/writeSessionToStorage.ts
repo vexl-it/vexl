@@ -1,4 +1,4 @@
-import {type Session} from '../../brands/Session.brand'
+import {type Session} from '../../../brands/Session.brand'
 import {pipe} from 'fp-ts/function'
 import * as TE from 'fp-ts/TaskEither'
 import {
@@ -9,7 +9,7 @@ import {
   type JsonStringifyError,
   saveItemToAsyncStorage,
   saveItemToSecretStorage,
-} from '../../utils/fpUtils'
+} from '../../../utils/fpUtils'
 
 // TODO refactor to ReaderTaskEither to remove sideeffects
 export default function writeSessionToStorage(

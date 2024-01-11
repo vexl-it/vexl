@@ -6,7 +6,7 @@ import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {getDefaultStore} from 'jotai'
-import {showDebugNotificationIfEnabled} from '.'
+import {showDebugNotificationIfEnabled} from './showDebugNotificationIfEnabled'
 import {fetchAndStoreMessagesForInboxAtom} from '../../state/chat/atoms/fetchNewMessagesActionAtom'
 import {unreadChatsCountAtom} from '../../state/chat/atoms/unreadChatsCountAtom'
 import {updateAllOffersConnectionsActionAtom} from '../../state/connections/atom/offerToConnectionsAtom'
@@ -19,9 +19,9 @@ import {
   NEW_CONTENT,
 } from './notificationTypes'
 import {showUINotificationFromRemoteMessage} from './showUINotificationFromRemoteMessage'
-import {loadSession} from '../../state/session'
 import checkAndShowCreateOfferPrompt from './checkAndShowCreateOfferPrompt'
 import isChatMessageNotification from './isChatMessageNotification'
+import {loadSession} from '../../state/session/loadSession'
 
 export async function processBackgroundMessage(
   remoteMessage: FirebaseMessagingTypes.RemoteMessage
@@ -46,7 +46,11 @@ export async function processBackgroundMessage(
     if (isChatMessageNotification(remoteMessage)) {
       console.info('📳 Refreshing inbox')
 
-      await loadSession()
+      if (!(await loadSession())) {
+        console.info('📳 No session in storage. Skipping refreshing inbox')
+        return
+      }
+
       void pipe(
         data.inbox,
         safeParse(PublicKeyPemBase64),

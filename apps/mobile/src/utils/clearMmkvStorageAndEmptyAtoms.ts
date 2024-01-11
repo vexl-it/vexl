@@ -54,7 +54,6 @@ export default function clearMmkvStorageAndEmptyAtoms(): void {
     currency: 'USD',
   })
   getDefaultStore().set(preferencesAtom, {
-    showDebugNotifications: false,
     disableOfferRerequestLimit: false,
     allowSendingImages: false,
     notificationPreferences: {

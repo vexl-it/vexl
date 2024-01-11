@@ -1,14 +1,15 @@
 import notifee from '@notifee/react-native'
 import {type getDefaultStore} from 'jotai'
 import {myOffersAtom} from '../../state/marketplace/atoms/myOffers'
-import {showDebugNotificationIfEnabled} from '.'
-import {loadSession, userLoggedInAtom} from '../../state/session'
+import {showDebugNotificationIfEnabled} from './showDebugNotificationIfEnabled'
+import {userLoggedInAtom} from '../../state/session'
 import {notificationPreferencesAtom} from '../preferences'
 import {triggerOffersRefreshAtom} from '../../state/marketplace'
 import {offersToSeeInMarketplaceAtom} from '../../state/marketplace/atoms/offersToSeeInMarketplace'
 import {translationAtom} from '../localization/I18nProvider'
 import {CREATE_OFFER_PROMPT} from './notificationTypes'
 import {getDefaultChannel} from './notificationChannels'
+import {loadSession} from '../../state/session/loadSession'
 
 export default async function checkAndShowCreateOfferPrompt(
   store: ReturnType<typeof getDefaultStore>
@@ -29,7 +30,12 @@ export default async function checkAndShowCreateOfferPrompt(
     })
   }
 
-  await loadSession()
+  if (!(await loadSession())) {
+    console.info(
+      'No session in storage. Skipping checkAndShowCreateOfferPrompt'
+    )
+    return
+  }
 
   if (!store.get(userLoggedInAtom)) {
     void showDebugNotificationIfEnabled({

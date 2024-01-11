@@ -1,20 +1,15 @@
-import notifee, {
-  AndroidImportance,
-  AuthorizationStatus,
-} from '@notifee/react-native'
-import * as TE from 'fp-ts/lib/TaskEither'
-import * as E from 'fp-ts/lib/Either'
-import type * as T from 'fp-ts/lib/Task'
-import {Alert} from 'react-native'
-import NotificationSetting from 'react-native-open-notification'
+import notifee, {AuthorizationStatus} from '@notifee/react-native'
 import messaging from '@react-native-firebase/messaging'
 import {
-  type BasicError,
   toBasicError,
+  type BasicError,
 } from '@vexl-next/domain/src/utility/errors'
+import * as E from 'fp-ts/lib/Either'
+import type * as T from 'fp-ts/lib/Task'
+import * as TE from 'fp-ts/lib/TaskEither'
+import {Alert} from 'react-native'
+import NotificationSetting from 'react-native-open-notification'
 import {useTranslation} from '../localization/I18nProvider'
-import {getDefaultStore} from 'jotai'
-import {preferencesAtom} from '../preferences'
 import reportError from '../reportError'
 
 type UnknownErrorNotifications = BasicError<'UnknownErrorNotifications'>
@@ -99,32 +94,6 @@ export function areNotificationsEnabled(): TE.TaskEither<
 
 export async function deactivateToken(): Promise<void> {
   await messaging().deleteToken()
-}
-
-export async function showDebugNotificationIfEnabled({
-  title,
-  body,
-}: {
-  title: string
-  body: string
-}): Promise<void> {
-  if (!getDefaultStore().get(preferencesAtom).showDebugNotifications) return
-  const channelId = await notifee.createChannel({
-    id: 'test',
-    name: 'Testing notifications',
-    importance: AndroidImportance.HIGH,
-  })
-
-  await notifee.displayNotification({
-    title,
-    body,
-    android: {
-      channelId,
-      pressAction: {
-        id: 'default',
-      },
-    },
-  })
 }
 
 export async function subscribeToGeneralTopic(): Promise<void> {

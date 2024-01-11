@@ -1,15 +1,16 @@
-import {
-  type RegionCode,
-  phoneNumberToRegionCode,
-} from '@vexl-next/domain/src/utility/RegionCode.brand'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import crashlytics from '@react-native-firebase/crashlytics'
 import {KeyHolder} from '@vexl-next/cryptography'
 import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
+import {type UserName} from '@vexl-next/domain/src/general/UserName.brand'
 import {
-  type UserNameAndUriAvatar,
   type UserNameAndAvatar,
+  type UserNameAndUriAvatar,
 } from '@vexl-next/domain/src/general/UserNameAndAvatar.brand'
+import {
+  phoneNumberToRegionCode,
+  type RegionCode,
+} from '@vexl-next/domain/src/utility/RegionCode.brand'
 import * as SecretStorage from 'expo-secure-store'
 import * as O from 'fp-ts/Option'
 import * as TE from 'fp-ts/TaskEither'
@@ -24,14 +25,13 @@ import {
 } from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {Session} from '../../brands/Session.brand'
-import getValueFromSetStateActionOfAtom from '../../utils/atomUtils/getValueFromSetStateActionOfAtom'
-import {replaceAll} from '../../utils/replaceAll'
-import readSessionFromStorage from './readSessionFromStorage'
-import writeSessionToStorage from './writeSessionToStorage'
-import {generateRandomUserData} from './utils'
-import {type UserName} from '@vexl-next/domain/src/general/UserName.brand'
 import {askAreYouSureActionAtom} from '../../components/AreYouSureDialog'
+import getValueFromSetStateActionOfAtom from '../../utils/atomUtils/getValueFromSetStateActionOfAtom'
 import {translationAtom} from '../../utils/localization/I18nProvider'
+import {replaceAll} from '../../utils/replaceAll'
+import {SECRET_TOKEN_KEY, SESSION_KEY} from './sessionKeys'
+import {generateRandomUserData} from './utils/generateRandomUserData'
+import writeSessionToStorage from './utils/writeSessionToStorage'
 
 // duplicated code but we can not remove cyclic dependency otherwise
 // --------------
@@ -85,9 +85,6 @@ export const dummySession: Session = Session.parse({
   version: 0,
 })
 
-const SESSION_KEY = 'session'
-const SECRET_TOKEN_KEY = 'secretToken'
-
 type SessionAtomValueType =
   | {readonly state: 'initial'}
   | {readonly state: 'loading'}
@@ -98,50 +95,6 @@ type SessionAtomValueType =
 export const sessionHolderAtom = atom({
   state: 'initial',
 } as SessionAtomValueType)
-
-sessionHolderAtom.onMount = () => {
-  void loadSession()
-}
-
-export async function loadSession(): Promise<void> {
-  if (getDefaultStore().get(sessionHolderAtom).state !== 'initial') {
-    console.debug(
-      'Calling loadSession function but session is not in initial state. Skipping.'
-    )
-    return
-  }
-
-  console.info('🔑Trying to find session in storage')
-  getDefaultStore().set(sessionHolderAtom, {state: 'loading'})
-  await pipe(
-    readSessionFromStorage({
-      asyncStorageKey: SESSION_KEY,
-      secretStorageKey: SECRET_TOKEN_KEY,
-    }),
-    TE.match(
-      (left) => {
-        if (left._tag !== 'storeEmpty') {
-          reportError(
-            '‼️ Error while reading user data from secure storage.',
-            left
-          )
-        }
-        void AsyncStorage.removeItem(SESSION_KEY)
-        void SecretStorage.deleteItemAsync(SECRET_TOKEN_KEY)
-        console.info('🔑No usable session in storage. User is logged out.')
-
-        getDefaultStore().set(sessionHolderAtom, {state: 'loggedOut'})
-      },
-      (s) => {
-        console.info('🔑 We have a session 🎉. User is logged in.')
-        getDefaultStore().set(sessionHolderAtom, {
-          state: 'loggedIn',
-          session: s,
-        })
-      }
-    )
-  )()
-}
 
 export const sessionAtom: WritableAtom<
   SessionAtomValueType,

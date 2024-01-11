@@ -34,6 +34,10 @@ import {offersStateAtom} from '../../state/marketplace/atoms/offersState'
 import {myOffersAtom} from '../../state/marketplace/atoms/myOffers'
 import AfterInteractionTaskDemo from './components/AfterInteractionTaskDemo'
 import {isDeveloperAtom, showTextDebugButtonAtom} from '../../utils/preferences'
+import {
+  getShowDebugNotifications,
+  setShowDebugNotifications,
+} from '../../utils/notifications/showDebugNotificationIfEnabled'
 
 // const ContentScroll = styled(ScrollView, {
 //   marginBottom: '$2',
@@ -310,6 +314,18 @@ function DebugScreen(): JSX.Element {
                   .catch((error) => {
                     Alert.alert('Error', error.message)
                   })
+              }}
+            />
+
+            <Button
+              variant="primary"
+              size="small"
+              text="Toggle debug notifications"
+              onPress={() => {
+                setShowDebugNotifications(!getShowDebugNotifications())
+                Alert.alert(
+                  getShowDebugNotifications() ? 'Enabled' : 'Disabled'
+                )
               }}
             />
           </YStack>

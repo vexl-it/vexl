@@ -1,26 +1,27 @@
-import {StatusBar} from 'expo-status-bar'
+import ThemeProvider from './utils/ThemeProvider'
 import {DefaultTheme, NavigationContainer} from '@react-navigation/native'
 import * as SplashScreen from 'expo-splash-screen'
+import {StatusBar} from 'expo-status-bar'
 import {useEffect} from 'react'
-import useLoadFonts from './utils/useLoadFonts'
-import ThemeProvider from './utils/ThemeProvider'
-import RootNavigation from './components/RootNavigation'
-import LoadingOverlayProvider from './components/LoadingOverlayProvider'
-import {useIsSessionLoaded} from './state/session'
+import 'react-native-gesture-handler'
 import {SafeAreaProvider} from 'react-native-safe-area-context'
 import {useTheme} from 'tamagui'
 import AreYouSureDialog from './components/AreYouSureDialog'
-import MaintenanceAndForceUpdateCheck from './components/MaintenanceAndForceUpdateCheck'
-import useSetupRemoteConfig from './utils/remoteConfig/useSetupRemoteConfig'
-import 'react-native-gesture-handler'
-import {navigationRef} from './utils/navigation'
 import BadgeCountManager from './components/BadgeCountManager'
-import {useAppState} from './utils/useAppState'
-import {setLastTimeAppWasRunningToNow} from './utils/lastTimeAppWasRunning'
-import UploadingOfferProgressModal from './components/UploadingOfferProgressModal'
-import {subscribeToGeneralTopic} from './utils/notifications'
-import PreventScreenshots from './components/PreventScreenshots'
 import ContactsHashingProgressModal from './components/ContactsHashingProgressModal'
+import LoadingOverlayProvider from './components/LoadingOverlayProvider'
+import MaintenanceAndForceUpdateCheck from './components/MaintenanceAndForceUpdateCheck'
+import PreventScreenshots from './components/PreventScreenshots'
+import RootNavigation from './components/RootNavigation'
+import UploadingOfferProgressModal from './components/UploadingOfferProgressModal'
+import {useIsSessionLoaded} from './state/session'
+import {setLastTimeAppWasRunningToNow} from './utils/lastTimeAppWasRunning'
+import {navigationRef} from './utils/navigation'
+import {subscribeToGeneralTopic} from './utils/notifications'
+import useSetupRemoteConfig from './utils/remoteConfig/useSetupRemoteConfig'
+import {useAppState} from './utils/useAppState'
+import useLoadFonts from './utils/useLoadFonts'
+import {loadSession} from './state/session/loadSession'
 
 void SplashScreen.preventAutoHideAsync()
 
@@ -39,8 +40,9 @@ function App(): JSX.Element {
   useAppState(setLastTimeAppWasRunningToNow, true)
 
   useEffect(() => {
+    void loadSession({forceReload: true, showErrorAlert: true})
     void subscribeToGeneralTopic()
-  })
+  }, [])
 
   // Handled by splashscreen
   if (!fontsLoaded) return <></>

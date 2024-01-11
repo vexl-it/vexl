@@ -6,8 +6,8 @@ import {
   tradeBtcPriceAtom,
   tradePriceTypeAtom,
 } from '../atoms'
-import {originOfferCurrencyAtom} from '../../../atoms/fromChatAtoms'
 import {btcPriceForOfferWithStateAtom} from '../../../atoms/btcPriceForOfferWithStateAtom'
+import {originOfferCurrencyAtom} from '../../../../../state/tradeChecklist/atoms/fromChatAtoms'
 
 function CurrentBtcPrice(props: TextProps): JSX.Element {
   const refreshCurrentBtcPrice = useSetAtom(refreshCurrentBtcPriceActionAtom)

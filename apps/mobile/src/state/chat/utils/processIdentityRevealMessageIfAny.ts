@@ -1,11 +1,12 @@
-import {type UserNameAndAvatar} from '@vexl-next/domain/src/general/UserNameAndAvatar.brand'
+import {type RealLifeInfo} from '@vexl-next/domain/src/general/UserNameAndAvatar.brand'
 import avatarsSvg from '../../../components/AnonymousAvatar/images/avatarsSvg'
 import {randomNumberFromSeed} from '../../../utils/randomNumber'
 import resolveLocalUri from '../../../utils/resolveLocalUri'
 import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
+import {type SvgString} from '@vexl-next/domain/src/utility/SvgString.brand'
 
 function setRealLifeInfo(
-  realLifeInfo: UserNameAndAvatar
+  realLifeInfo: RealLifeInfo
 ): (chat: ChatWithMessages) => ChatWithMessages {
   return (chat) => ({
     ...chat,
@@ -25,9 +26,8 @@ export default function processIdentityRevealMessageIfAny(
   return (chat) => {
     if (!identityRevealMessage?.message.deanonymizedUser?.name) return chat
 
-    const realLifeInfo: UserNameAndAvatar = {
+    const realLifeInfo: RealLifeInfo = {
       userName: identityRevealMessage.message.deanonymizedUser.name,
-      // @ts-expect-error TODO: typescript error
       image: identityRevealMessage.message.image
         ? {
             type: 'imageUri',
@@ -35,14 +35,13 @@ export default function processIdentityRevealMessageIfAny(
           }
         : {
             type: 'svgXml',
-            svgXml:
-              avatarsSvg[
-                randomNumberFromSeed(
-                  0,
-                  avatarsSvg.length - 1,
-                  identityRevealMessage.message.deanonymizedUser.name
-                )
-              ],
+            svgXml: avatarsSvg[
+              randomNumberFromSeed(
+                0,
+                avatarsSvg.length - 1,
+                identityRevealMessage.message.deanonymizedUser.name
+              )
+            ] as SvgString,
           },
     }
     return setRealLifeInfo(realLifeInfo)(chat)

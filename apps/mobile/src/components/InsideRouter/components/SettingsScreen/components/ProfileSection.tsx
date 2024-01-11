@@ -70,7 +70,7 @@ function ProfileSection(): JSX.Element {
           </TouchableOpacity>
         </XStack>
       </XStack>
-      <UserDataDisplay userNameAndAvatar={userDataRealOrAnonymized} />
+      <UserDataDisplay realLifeInfo={userDataRealOrAnonymized} />
       <Text ta="center" mt="$2" col="$greyOnBlack">
         {userPhoneNumber}
       </Text>

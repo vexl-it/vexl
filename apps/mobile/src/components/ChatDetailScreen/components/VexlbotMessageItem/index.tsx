@@ -7,6 +7,8 @@ import {preferencesAtom} from '../../../../utils/preferences'
 import TradeChecklistDateAndTimeView from './components/TradeChecklistDateAndTimeView'
 import TradeChecklistNetworkView from './components/TradeChecklistNetworkView'
 import TradeChecklistAmountView from './components/TradeChecklistAmountView'
+import TradeChecklistIdentityRevealView from './components/TradeChecklistIdentityRevealView'
+import TradeChecklistContactRevealView from './components/TradeChecklistContactRevealView'
 
 export default function VexlbotMessageItem({
   data,
@@ -30,6 +32,14 @@ export default function VexlbotMessageItem({
 
   if (data.type === 'networkPreview') {
     return <TradeChecklistNetworkView />
+  }
+
+  if (data.type === 'identityRevealPreview') {
+    return <TradeChecklistIdentityRevealView />
+  }
+
+  if (data.type === 'contactRevealPreview') {
+    return <TradeChecklistContactRevealView />
   }
 
   return (

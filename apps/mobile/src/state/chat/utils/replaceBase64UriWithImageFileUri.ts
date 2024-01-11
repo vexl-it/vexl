@@ -18,7 +18,7 @@ import urlJoin from 'url-join'
 import {safeParse} from '../../../utils/fpUtils'
 import {IMAGES_DIRECTORY} from '../../../utils/fsDirectories'
 import reportError from '../../../utils/reportError'
-import {type ChatMessageWithState} from './../domain'
+import {type ChatMessageWithState} from '../domain'
 
 type NoDocumentDirectoryError = BasicError<'NoDocumentDirectoryError'>
 type CreatingDirectoryError = BasicError<'CreatingDirectoryError'>
@@ -136,10 +136,16 @@ function replaceImages(
 ): (args: {
   image: UriString | undefined
   replyToImage: UriString | undefined
+  tradeChecklistIdentityImage: UriString | undefined
 }) => ChatMessageWithState {
-  return ({image, replyToImage}) => {
+  return ({image, replyToImage, tradeChecklistIdentityImage}) => {
     if (source.state === 'receivedButRequiresNewerVersion') return source
-    if (!source.message.deanonymizedUser) return source
+    if (
+      !source.message.deanonymizedUser &&
+      !source.message.tradeChecklistUpdate?.identity
+    )
+      return source
+
     return {
       ...source,
       message: {
@@ -151,6 +157,14 @@ function replaceImages(
               image: replyToImage,
             }
           : undefined,
+        tradeChecklistUpdate: source.message.tradeChecklistUpdate?.identity
+          ? {
+              identity: {
+                ...source.message.tradeChecklistUpdate.identity,
+                image: tradeChecklistIdentityImage,
+              },
+            }
+          : source.message.tradeChecklistUpdate,
       },
     }
   }
@@ -165,6 +179,8 @@ export default function replaceBase64UriWithImageFileUri(
 
   const image = message.message.image
   const replyToImage = message.message?.repliedTo?.image
+  const tradeChecklistIdentityImage =
+    message.message.tradeChecklistUpdate?.identity?.image
 
   return pipe(
     T.Do,
@@ -197,6 +213,24 @@ export default function replaceBase64UriWithImageFileUri(
                   'Error while processing message replyToImage',
                   e
                 )
+                return undefined
+              },
+              (one) => one
+            )
+          )
+        : T.of(undefined)
+    ),
+    T.bind('tradeChecklistIdentityImage', () =>
+      tradeChecklistIdentityImage
+        ? pipe(
+            saveBase64ImageToStorage(
+              tradeChecklistIdentityImage,
+              inboxPublicKey,
+              otherSidePublicKey
+            ),
+            TE.match(
+              (e) => {
+                reportError('error', 'Error while processing message image', e)
                 return undefined
               },
               (one) => one

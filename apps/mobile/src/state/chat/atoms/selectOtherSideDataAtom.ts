@@ -1,4 +1,4 @@
-import {type UserNameAndAvatar} from '@vexl-next/domain/src/general/UserNameAndAvatar.brand'
+import {type RealLifeInfo} from '@vexl-next/domain/src/general/UserNameAndAvatar.brand'
 import {type Chat} from '@vexl-next/domain/src/general/messaging'
 import {type Atom} from 'jotai'
 import {selectAtom} from 'jotai/utils'
@@ -8,13 +8,13 @@ import {randomNumberFromSeed} from '../../../utils/randomNumber'
 
 export default function selectOtherSideDataAtom(
   chatAtom: Atom<Chat>
-): Atom<UserNameAndAvatar> {
+): Atom<RealLifeInfo> {
   return selectAtom(chatAtom, (chat) => {
     return getOtherSideData(chat)
   })
 }
 
-export function getOtherSideData(chat: Chat): UserNameAndAvatar {
+export function getOtherSideData(chat: Chat): RealLifeInfo {
   const seed = chat.origin.type === 'theirOffer' ? chat.origin.offerId : chat.id
 
   const image = avatarsSvg[randomNumberFromSeed(0, avatarsSvg.length - 1, seed)]
@@ -26,5 +26,7 @@ export function getOtherSideData(chat: Chat): UserNameAndAvatar {
       type: 'svgXml',
       svgXml: image,
     },
+    partialPhoneNumber: chat.otherSide.realLifeInfo?.partialPhoneNumber,
+    fullPhoneNumber: chat.otherSide.realLifeInfo?.fullPhoneNumber,
   } as const
 }

@@ -1,7 +1,7 @@
 import WhiteContainer from '../../../WhiteContainer'
 import AnonymizationCaption from '../../../AnonymizationCaption/AnonymizationCaption'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
-import {UserNameAndAvatar} from '@vexl-next/domain/src/general/UserNameAndAvatar.brand'
+import {RealLifeInfo} from '@vexl-next/domain/src/general/UserNameAndAvatar.brand'
 import {
   fromImageUri,
   fromSvgString,
@@ -58,7 +58,7 @@ function PhotoScreen({
         disabled={false}
         onPress={() => {
           navigation.navigate('AnonymizationAnimation', {
-            realUserData: UserNameAndAvatar.parse({
+            realUserData: RealLifeInfo.parse({
               userName,
               image: selectedImageUri
                 ? fromImageUri(selectedImageUri)

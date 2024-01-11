@@ -1,6 +1,7 @@
 import {type ChatMessageWithState} from '../../../state/chat/domain'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {useMolecule} from 'jotai-molecules'
+import Clipboard from '@react-native-clipboard/clipboard'
 import {chatMolecule} from '../atoms'
 import {useAtomValue, useSetAtom} from 'jotai'
 import BigIconMessage from './BigIconMessage'
@@ -26,7 +27,7 @@ function RevealedContactMessageItem({
   const {t} = useTranslation()
 
   const {otherSideDataAtom} = useMolecule(chatMolecule)
-  const {image} = useAtomValue(otherSideDataAtom)
+  const {image, userName} = useAtomValue(otherSideDataAtom)
   const addRevealedContact = useSetAtom(addContactWithUiFeedbackAtom)
 
   return (
@@ -34,8 +35,13 @@ function RevealedContactMessageItem({
       isLatest={isLatest}
       smallerText={t('messages.phoneNumberRevealed')}
       biggerText={message.message.deanonymizedUser?.fullPhoneNumber ?? ''}
-      bottomText={message.message.deanonymizedUser?.name}
-      onTextPress={() => {
+      bottomText={userName}
+      onCopyToClipboardPress={() => {
+        Clipboard.setString(
+          message.message.deanonymizedUser?.fullPhoneNumber ?? ''
+        )
+      }}
+      onPress={() => {
         void addRevealedContact({
           name: message.message.deanonymizedUser?.fullPhoneNumber ?? '',
           normalizedNumber: E164PhoneNumber.parse(
@@ -106,7 +112,7 @@ function ContactRevealMessageItem({
     return (
       <BigIconMessage
         isLatest={isLatest}
-        smallerText={message.message.deanonymizedUser?.name ?? ''}
+        smallerText={userName ?? ''}
         biggerText={t('messages.letsExchangeContacts')}
         bottomText={message.message.deanonymizedUser?.partialPhoneNumber}
         icon={<UserAvatar height={80} width={80} userImage={image} />}

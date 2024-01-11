@@ -14,8 +14,9 @@ import {useOnFocusAndAppState} from '../ContactListSelect/utils'
 import IconButton from '../IconButton'
 import KeyboardAvoidingView from '../KeyboardAvoidingView'
 import Screen from '../Screen'
-import {ChatScope, dummyChatWithMessages} from './atoms'
+import {ChatScope} from './atoms'
 import MessagesListOrApprovalPreview from './components/MessagesListOrApprovalPreview'
+import {dummyChatWithMessages} from '../../state/chat/domain'
 
 type Props = RootStackScreenProps<'ChatDetail'>
 

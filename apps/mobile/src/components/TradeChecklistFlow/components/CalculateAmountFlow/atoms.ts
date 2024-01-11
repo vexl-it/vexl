@@ -3,7 +3,7 @@ import * as T from 'fp-ts/Task'
 import {pipe} from 'fp-ts/function'
 import {replaceNonDecimalCharsInInput} from '../../utils'
 import {getCurrentLocale} from '../../../../utils/localization/I18nProvider'
-import * as fromChatAtoms from '../../atoms/fromChatAtoms'
+import * as fromChatAtoms from '../../../../state/tradeChecklist/atoms/fromChatAtoms'
 import {
   type AmountData,
   type BtcOrSat,
@@ -14,7 +14,7 @@ import updatesToBeSentAtom, {
 } from '../../atoms/updatesToBeSentAtom'
 import {refreshBtcPriceActionAtom} from '../../../../state/currentBtcPriceAtoms'
 import {btcPriceForOfferWithStateAtom} from '../../atoms/btcPriceForOfferWithStateAtom'
-import {originOfferCurrencyAtom} from '../../atoms/fromChatAtoms'
+import {originOfferCurrencyAtom} from '../../../../state/tradeChecklist/atoms/fromChatAtoms'
 
 export const SATOSHIS_IN_BTC = 100_000_000
 export const DECIMALS_FOR_BTC_VALUE = 8

@@ -28,7 +28,7 @@ import {loadingOverlayDisplayedAtom} from '../../../../../LoadingOverlayProvider
 import {submitTradeChecklistUpdatesActionAtom} from '../../../../atoms/updatesToBeSentAtom'
 import Info from '../../../../../Info'
 import calculatePercentageDifference from '../../../../../../utils/calculatePercentageDifference'
-import {otherSideDataAtom} from '../../../../atoms/fromChatAtoms'
+import {otherSideDataAtom} from '../../../../../../state/tradeChecklist/atoms/fromChatAtoms'
 import {btcPriceForOfferWithStateAtom} from '../../../../atoms/btcPriceForOfferWithStateAtom'
 
 type Props = TradeChecklistStackScreenProps<'CalculateAmount'>

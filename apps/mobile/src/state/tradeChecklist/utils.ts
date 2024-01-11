@@ -57,5 +57,13 @@ export function updateTradeChecklistState(
           ? update.identity
           : state.identity.received) ?? state.identity.received,
     },
+    contact: {
+      sent:
+        (direction === 'sent' ? update.contact : state.contact?.sent) ??
+        state.contact?.sent,
+      received:
+        (direction === 'received' ? update.contact : state.contact?.received) ??
+        state.contact?.received,
+    },
   })
 }

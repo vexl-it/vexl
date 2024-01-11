@@ -43,7 +43,11 @@ function MessagePreview({
         })}
       </BaseText>
     )
-  } else if (message.messageType === 'APPROVE_REVEAL') {
+  } else if (
+    message.messageType === 'APPROVE_REVEAL' ||
+    (message.messageType === 'TRADE_CHECKLIST_UPDATE' &&
+      message.tradeChecklistUpdate?.identity?.status === 'APPROVE_REVEAL')
+  ) {
     return (
       <BaseText color="$green">
         {t(`messages.messagePreviews.${direction}.APPROVE_REVEAL`, {
@@ -71,7 +75,11 @@ function MessagePreview({
         {t(`messages.messagePreviews.${direction}.DELETE_CHAT`, {them: name})}
       </BaseText>
     )
-  } else if (message.messageType === 'DISAPPROVE_REVEAL') {
+  } else if (
+    message.messageType === 'DISAPPROVE_REVEAL' ||
+    (message.messageType === 'TRADE_CHECKLIST_UPDATE' &&
+      message.tradeChecklistUpdate?.identity?.status === 'DISAPPROVE_REVEAL')
+  ) {
     return (
       <BaseText color="$red">
         {t(`messages.messagePreviews.${direction}.DISAPPROVE_REVEAL`, {
@@ -87,7 +95,11 @@ function MessagePreview({
         })}
       </BaseText>
     )
-  } else if (message.messageType === 'REQUEST_REVEAL') {
+  } else if (
+    message.messageType === 'REQUEST_REVEAL' ||
+    (message.messageType === 'TRADE_CHECKLIST_UPDATE' &&
+      message.tradeChecklistUpdate?.identity?.status === 'REQUEST_REVEAL')
+  ) {
     return (
       <BaseText>
         {t(`messages.messagePreviews.${direction}.REQUEST_REVEAL`, {
@@ -123,7 +135,11 @@ function MessagePreview({
         })}
       </BaseText>
     )
-  } else if (message.messageType === 'REQUEST_CONTACT_REVEAL') {
+  } else if (
+    message.messageType === 'REQUEST_CONTACT_REVEAL' ||
+    (message.messageType === 'TRADE_CHECKLIST_UPDATE' &&
+      message.tradeChecklistUpdate?.contact?.status === 'REQUEST_REVEAL')
+  ) {
     return (
       <BaseText>
         {t(`messages.messagePreviews.${direction}.REQUEST_CONTACT_REVEAL`, {
@@ -131,7 +147,11 @@ function MessagePreview({
         })}
       </BaseText>
     )
-  } else if (message.messageType === 'APPROVE_CONTACT_REVEAL') {
+  } else if (
+    message.messageType === 'APPROVE_CONTACT_REVEAL' ||
+    (message.messageType === 'TRADE_CHECKLIST_UPDATE' &&
+      message.tradeChecklistUpdate?.contact?.status === 'APPROVE_REVEAL')
+  ) {
     return (
       <BaseText>
         {t(`messages.messagePreviews.${direction}.APPROVE_CONTACT_REVEAL`, {
@@ -139,7 +159,11 @@ function MessagePreview({
         })}
       </BaseText>
     )
-  } else if (message.messageType === 'DISAPPROVE_CONTACT_REVEAL') {
+  } else if (
+    message.messageType === 'DISAPPROVE_CONTACT_REVEAL' ||
+    (message.messageType === 'TRADE_CHECKLIST_UPDATE' &&
+      message.tradeChecklistUpdate?.contact?.status === 'DISAPPROVE_REVEAL')
+  ) {
     return (
       <BaseText>
         {t(`messages.messagePreviews.${direction}.DISAPPROVE_CONTACT_REVEAL`, {

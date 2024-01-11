@@ -91,22 +91,26 @@ function QuickActionBanner(): JSX.Element | null {
     revealContactWithUiFeedbackAtom,
     requestStateAtom,
     forceShowHistoryAtom,
-    receivedContactRevealRequestMessageAtom,
+    identityRevealTriggeredFromTradeChecklistAtom,
+    contactRevealTriggeredFromTradeChecklistAtom,
   } = useMolecule(chatMolecule)
 
   const lastMessage = useAtomValue(lastMessageAtom)
   const otherSideData = useAtomValue(otherSideDataAtom)
   const identityRevealStatus = useAtomValue(identityRevealStatusAtom)
   const contactRevealStatus = useAtomValue(contactRevealStatusAtom)
+  const identityRevealTriggeredFromTradeChecklist = useAtomValue(
+    identityRevealTriggeredFromTradeChecklistAtom
+  )
+  const contactRevealTriggeredFromTradeChecklist = useAtomValue(
+    contactRevealTriggeredFromTradeChecklistAtom
+  )
   const deleteChat = useSetAtom(deleteChatWithUiFeedbackAtom)
   const revealIdentity = useSetAtom(revealIdentityWithUiFeedbackAtom)
   const revealContact = useSetAtom(revealContactWithUiFeedbackAtom)
   const requestState = useAtomValue(requestStateAtom)
   const setShowHistory = useSetAtom(forceShowHistoryAtom)
   const addRevealedContact = useSetAtom(addContactWithUiFeedbackAtom)
-  const receivedContactRevealRequestMessage = useAtomValue(
-    receivedContactRevealRequestMessageAtom
-  )
 
   const onBackToRequestPressed = useCallback(() => {
     setShowHistory(false)
@@ -219,7 +223,10 @@ function QuickActionBanner(): JSX.Element | null {
     )
   }
 
-  if (identityRevealStatus === 'theyAsked') {
+  if (
+    identityRevealStatus === 'theyAsked' &&
+    !identityRevealTriggeredFromTradeChecklist
+  ) {
     return (
       <QuickActionBannerUi
         topText={t('messages.identityRevealRequest')}
@@ -270,7 +277,10 @@ function QuickActionBanner(): JSX.Element | null {
     )
   }
 
-  if (contactRevealStatus === 'theyAsked') {
+  if (
+    contactRevealStatus === 'theyAsked' &&
+    !contactRevealTriggeredFromTradeChecklist
+  ) {
     return (
       <QuickActionBannerUi
         topText={t('messages.contactRevealRequest')}
@@ -287,15 +297,11 @@ function QuickActionBanner(): JSX.Element | null {
     )
   }
 
-  if (
-    contactRevealStatus === 'shared' &&
-    lastMessage.message.messageType === 'APPROVE_CONTACT_REVEAL' &&
-    lastMessage.state === 'received'
-  ) {
+  if (contactRevealStatus === 'shared') {
     return (
       <QuickActionBannerUi
         topText={t('messages.addUserToYourContacts', {
-          name: lastMessage.message.deanonymizedUser?.name,
+          name: otherSideData.userName,
         })}
         bottomText={t('messages.tapToAddToYourVexlContacts')}
         headingType={'boldTop'}
@@ -305,43 +311,8 @@ function QuickActionBanner(): JSX.Element | null {
         }
         onButtonPress={() => {
           const fullPhoneNumber =
+            otherSideData.fullPhoneNumber ??
             lastMessage.message.deanonymizedUser?.fullPhoneNumber
-
-          if (fullPhoneNumber) {
-            void addRevealedContact({
-              name: fullPhoneNumber,
-              normalizedNumber: E164PhoneNumber.parse(fullPhoneNumber),
-              fromContactList: false,
-              numberToDisplay: fullPhoneNumber,
-            })
-            hide()
-          }
-        }}
-      />
-    )
-  }
-
-  if (
-    contactRevealStatus === 'shared' &&
-    lastMessage.message.messageType === 'APPROVE_CONTACT_REVEAL' &&
-    lastMessage.state === 'sent'
-  ) {
-    return (
-      <QuickActionBannerUi
-        topText={t('messages.addUserToYourContacts', {
-          name: receivedContactRevealRequestMessage?.message.deanonymizedUser
-            ?.name,
-        })}
-        bottomText={t('messages.tapToAddToYourVexlContacts')}
-        headingType={'boldTop'}
-        icon={phoneSvg}
-        leftElement={
-          <UserAvatar width={48} height={48} userImage={otherSideData.image} />
-        }
-        onButtonPress={() => {
-          const fullPhoneNumber =
-            receivedContactRevealRequestMessage?.message.deanonymizedUser
-              ?.fullPhoneNumber
 
           if (fullPhoneNumber) {
             void addRevealedContact({

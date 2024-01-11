@@ -4,6 +4,8 @@ import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {
   AmountChatMessage,
   DateTimeChatMessage,
+  IdentityRevealChatMessage,
+  ContactRevealChatMessage,
   NetworkChatMessage,
 } from '@vexl-next/domain/src/general/tradeChecklist'
 import reportError from '../../utils/reportError'
@@ -28,30 +30,42 @@ export const TradeChecklistInState = z.object({
       sent: DateTimeChatMessage.optional(),
       received: DateTimeChatMessage.optional(),
     })
+    .default({})
     .catch(catchFormatError),
   location: z
     .object({
       sent: z.object({}).optional(),
       received: z.object({}).optional(),
     })
+    .default({})
     .catch(catchFormatError),
   amount: z
     .object({
       sent: AmountChatMessage.optional(),
       received: AmountChatMessage.optional(),
     })
+    .default({})
     .catch(catchFormatError),
   network: z
     .object({
       sent: NetworkChatMessage.optional(),
       received: NetworkChatMessage.optional(),
     })
+    .default({})
     .catch(catchFormatError),
   identity: z
     .object({
-      sent: z.object({}).optional(),
-      received: z.object({}).optional(),
+      sent: IdentityRevealChatMessage.optional(),
+      received: IdentityRevealChatMessage.optional(),
     })
+    .default({})
+    .catch(catchFormatError),
+  contact: z
+    .object({
+      sent: ContactRevealChatMessage.optional(),
+      received: ContactRevealChatMessage.optional(),
+    })
+    .default({})
     .catch(catchFormatError),
 })
 
@@ -63,4 +77,5 @@ export const createEmptyTradeChecklistInState = (): TradeChecklistInState => ({
   amount: {},
   network: {},
   identity: {},
+  contact: {},
 })

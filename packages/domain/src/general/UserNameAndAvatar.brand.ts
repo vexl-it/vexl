@@ -14,8 +14,10 @@ export const UserNameAndUriAvatar = z.object({
 })
 export type UserNameAndUriAvatar = z.TypeOf<typeof UserNameAndUriAvatar>
 
-export const UserNameAndAvatar = z.object({
+export const RealLifeInfo = z.object({
   userName: UserName,
   image: SvgStringOrImageUri,
+  partialPhoneNumber: z.string().optional(),
+  fullPhoneNumber: z.string().optional(),
 })
-export type UserNameAndAvatar = z.TypeOf<typeof UserNameAndAvatar>
+export type RealLifeInfo = z.TypeOf<typeof RealLifeInfo>

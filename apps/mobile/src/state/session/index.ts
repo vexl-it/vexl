@@ -108,6 +108,11 @@ sessionHolderAtom.onMount = () => {
 export async function loadSession(
   showErrorAlert: boolean = false
 ): Promise<void> {
+  void showDebugNotificationIfEnabled({
+    title: 'Loading session',
+    body: `showErrorAlert: ${showErrorAlert}`,
+  })
+
   if (getDefaultStore().get(sessionHolderAtom).state !== 'initial') {
     console.debug(
       'Calling loadSession function but session is not in initial state. Skipping.'
@@ -195,6 +200,10 @@ export const sessionAtom: WritableAtom<
   (get) => get(sessionHolderAtom),
   (get, set, nextValue) => {
     if (nextValue._tag === 'None') {
+      void showDebugNotificationIfEnabled({
+        title: 'Removing user from session atom',
+        body: 'Removing user from session atom',
+      })
       console.info('🔑 Logging out user and removing session from storage.')
 
       void AsyncStorage.removeItem(SESSION_KEY)

@@ -13,6 +13,7 @@ import reportError from '../utils/reportError'
 import {loadingOverlayDisplayedAtom} from '../components/LoadingOverlayProvider'
 import notifee from '@notifee/react-native'
 import {deleteAllFiles} from '../utils/fsDirectories'
+import {showDebugNotificationIfEnabled} from '../utils/notifications'
 
 async function failSilently<T>(promise: Promise<T>): Promise<
   | {success: true; result: T}
@@ -29,6 +30,11 @@ async function failSilently<T>(promise: Promise<T>): Promise<
 }
 
 export const logoutActionAtom = atom(null, async (get, set) => {
+  void showDebugNotificationIfEnabled({
+    title: 'Logging out',
+    body: 'logging out from logout atom',
+  })
+
   set(loadingOverlayDisplayedAtom, true)
   try {
     // offer service

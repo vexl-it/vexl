@@ -54,19 +54,19 @@ export interface StoreEmpty {
   readonly _tag: 'storeEmpty'
 }
 
-export interface ErrorReadingFromStore {
-  readonly _tag: 'errorReadingFromStore'
+export interface ErrorReadingFromAsyncStorage {
+  readonly _tag: 'errorReadingFromAsyncStorage'
   readonly error: unknown
 }
 
 export function getItemFromAsyncStorage(
   key: string
-): TE.TaskEither<StoreEmpty | ErrorReadingFromStore, string> {
+): TE.TaskEither<StoreEmpty | ErrorReadingFromAsyncStorage, string> {
   return pipe(
     TE.tryCatch(
       async () => await AsyncStorage.getItem(key),
       (e) => {
-        return {_tag: 'errorReadingFromStore', error: e} as const
+        return {_tag: 'errorReadingFromAsyncStorage', error: e} as const
       }
     ),
     TE.filterOrElseW(
@@ -79,14 +79,19 @@ export function getItemFromAsyncStorage(
   )
 }
 
+export interface ErrorReadingFromSecureStorage {
+  readonly _tag: 'errorReadingFromSecureStorage'
+  readonly error: unknown
+}
+
 export function getItemFromSecretStorage(
   key: string
-): TE.TaskEither<StoreEmpty | ErrorReadingFromStore, string> {
+): TE.TaskEither<StoreEmpty | ErrorReadingFromSecureStorage, string> {
   return pipe(
     TE.tryCatch(
       async () => await SecretStore.getItemAsync(key),
       (e) => {
-        return {_tag: 'errorReadingFromStore', error: e} as const
+        return {_tag: 'errorReadingFromSecureStorage', error: e} as const
       }
     ),
     TE.filterOrElseW(

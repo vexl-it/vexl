@@ -5,7 +5,6 @@ import {focusAtom} from 'jotai-optics'
 export const preferencesAtom = atomWithParsedMmkvStorage(
   'preferences',
   {
-    showDebugNotifications: false,
     disableOfferRerequestLimit: false,
     allowSendingImages: false,
     notificationPreferences: {

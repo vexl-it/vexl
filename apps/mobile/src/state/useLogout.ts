@@ -13,7 +13,7 @@ import reportError from '../utils/reportError'
 import {loadingOverlayDisplayedAtom} from '../components/LoadingOverlayProvider'
 import notifee from '@notifee/react-native'
 import {deleteAllFiles} from '../utils/fsDirectories'
-import {showDebugNotificationIfEnabled} from '../utils/notifications'
+import {showDebugNotificationIfEnabled} from '../utils/notifications/showDebugNotificationIfEnabled'
 
 async function failSilently<T>(promise: Promise<T>): Promise<
   | {success: true; result: T}

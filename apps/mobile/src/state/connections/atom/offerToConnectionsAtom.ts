@@ -13,7 +13,7 @@ import * as TE from 'fp-ts/TaskEither'
 import * as E from 'fp-ts/Either'
 import reportError from '../../../utils/reportError'
 import connectionStateAtom from './connectionStateAtom'
-import {showDebugNotificationIfEnabled} from '../../../utils/notifications'
+import {showDebugNotificationIfEnabled} from '../../../utils/notifications/showDebugNotificationIfEnabled'
 import {
   UnixMilliseconds,
   unixMillisecondsNow,

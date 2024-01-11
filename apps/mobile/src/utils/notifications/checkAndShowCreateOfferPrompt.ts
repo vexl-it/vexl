@@ -1,7 +1,7 @@
 import notifee from '@notifee/react-native'
 import {type getDefaultStore} from 'jotai'
 import {myOffersAtom} from '../../state/marketplace/atoms/myOffers'
-import {showDebugNotificationIfEnabled} from '.'
+import {showDebugNotificationIfEnabled} from './showDebugNotificationIfEnabled'
 import {loadSession, userLoggedInAtom} from '../../state/session'
 import {notificationPreferencesAtom} from '../preferences'
 import {triggerOffersRefreshAtom} from '../../state/marketplace'

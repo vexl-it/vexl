@@ -4,7 +4,6 @@ import {Text, XStack, YStack} from 'tamagui'
 import Switch from '../../Switch'
 
 const preferencesToEdit = [
-  'showDebugNotifications',
   'disableOfferRerequestLimit',
   'allowSendingImages',
   'enableNewOffersNotificationDevMode',

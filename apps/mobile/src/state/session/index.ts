@@ -33,7 +33,7 @@ import {replaceAll} from '../../utils/replaceAll'
 import readSessionFromStorage from './readSessionFromStorage'
 import {generateRandomUserData} from './utils'
 import writeSessionToStorage from './writeSessionToStorage'
-import {showDebugNotificationIfEnabled} from '../../utils/notifications'
+import {showDebugNotificationIfEnabled} from '../../utils/notifications/showDebugNotificationIfEnabled'
 
 // duplicated code but we can not remove cyclic dependency otherwise
 // --------------

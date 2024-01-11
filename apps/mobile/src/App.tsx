@@ -18,13 +18,11 @@ import {loadSession, useIsSessionLoaded} from './state/session'
 import ThemeProvider from './utils/ThemeProvider'
 import {setLastTimeAppWasRunningToNow} from './utils/lastTimeAppWasRunning'
 import {navigationRef} from './utils/navigation'
-import {
-  showDebugNotificationIfEnabled,
-  subscribeToGeneralTopic,
-} from './utils/notifications'
+import {subscribeToGeneralTopic} from './utils/notifications'
 import useSetupRemoteConfig from './utils/remoteConfig/useSetupRemoteConfig'
 import {useAppState} from './utils/useAppState'
 import useLoadFonts from './utils/useLoadFonts'
+import {showDebugNotificationIfEnabled} from './utils/notifications/showDebugNotificationIfEnabled'
 
 void SplashScreen.preventAutoHideAsync()
 

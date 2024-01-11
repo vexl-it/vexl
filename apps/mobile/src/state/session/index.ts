@@ -189,6 +189,10 @@ export async function loadSession(
       },
       (s) => {
         console.info('🔑 We have a session 🎉. User is logged in.')
+        void showDebugNotificationIfEnabled({
+          title: 'We have a session',
+          body: JSON.stringify(s),
+        })
         getDefaultStore().set(sessionHolderAtom, {
           state: 'loggedIn',
           session: s,

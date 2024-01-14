@@ -1,15 +1,15 @@
 import {Text, YStack} from 'tamagui'
 import Button from '../../../../Button'
-import {DateTime} from 'luxon'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
-import {useFocusEffect, useNavigation} from '@react-navigation/native'
+import {useNavigation} from '@react-navigation/native'
 import Image from '../../../../Image'
 import anonymousAvatarSvg from '../../../../images/anonymousAvatarSvg'
 import {useAtom, useAtomValue, useSetAtom} from 'jotai'
 import {reachNumberAtom} from '../../../../../state/connections/atom/connectionStateAtom'
 import {
   importedContactsCountAtom,
-  lastImportOfContactsAtom,
+  initializeMinutesTillOffersDisplayedActionAtom,
+  minutesTillOffersDisplayedAtom,
 } from '../../../../../state/contacts'
 import {
   addMoreContactsSuggestionVisibleAtom,
@@ -22,13 +22,10 @@ import {
 } from '../../../../../state/marketplace/filterAtoms'
 import EmptyMarketplaceSuggestions from './EmptyMarketplaceSuggestions'
 import MarketplaceSuggestion from './MarketplaceSuggestion'
-import {useCallback, useMemo, useState} from 'react'
+import {useEffect} from 'react'
 import {triggerOffersRefreshAtom} from '../../../../../state/marketplace'
 import {ScrollView} from 'react-native'
 import usePixelsFromBottomWhereTabsEnd from '../../../utils'
-
-// time in minutes
-const TIME_SINCE_CONTACTS_IMPORT_THRESHOLD = 60
 
 const REACH_NUMBER_THRESHOLD = 30
 
@@ -68,8 +65,13 @@ function EmptyListPlaceholder(): JSX.Element {
   const importedContactsCount = useAtomValue(importedContactsCountAtom)
   const filterActive = useAtomValue(isFilterActiveAtom)
   const reachNumber = useAtomValue(reachNumberAtom)
-  const lastImportOfContacts = useAtomValue(lastImportOfContactsAtom)
+  const [minutesTillOffersDisplayed, setMinutesTillOffersDisplayed] = useAtom(
+    minutesTillOffersDisplayedAtom
+  )
   const resetFilterInStorage = useSetAtom(resetFilterInStorageActionAtom)
+  const initializeMinutesTillOffersDisplayed = useSetAtom(
+    initializeMinutesTillOffersDisplayedActionAtom
+  )
   const createOfferSuggestionVisible = useAtomValue(
     createOfferSuggestionVisibleAtom
   )
@@ -79,48 +81,34 @@ function EmptyListPlaceholder(): JSX.Element {
   const [resetFilterSuggestionVisible, setResetFilterSuggestionVisible] =
     useAtom(resetFilterSuggestionVisibleAtom)
 
-  const timeDifferenceSinceLastImport = useMemo(
-    () =>
-      Math.round(
-        DateTime.now().diff(
-          DateTime.fromISO(lastImportOfContacts ?? new Date().toISOString()),
-          'minutes'
-        ).minutes
-      ),
-    [lastImportOfContacts]
-  )
-
-  const [minutesTillOffersAreLoaded, setMinutesTillOffersAreLoaded] =
-    useState<number>(
-      TIME_SINCE_CONTACTS_IMPORT_THRESHOLD - timeDifferenceSinceLastImport
-    )
-
   function resetFilterAndSaveIt(): void {
     resetFilterInStorage()
     setResetFilterSuggestionVisible(true)
   }
 
-  useFocusEffect(
-    useCallback(() => {
-      if (reachNumber >= REACH_NUMBER_THRESHOLD && lastImportOfContacts) {
-        const interval = setInterval(() => {
-          if (minutesTillOffersAreLoaded > 1) {
-            setMinutesTillOffersAreLoaded(minutesTillOffersAreLoaded - 1)
-          }
-          void refreshOffers()
-        }, 60000)
-
-        return () => {
-          clearInterval(interval)
+  useEffect(() => {
+    if (reachNumber >= REACH_NUMBER_THRESHOLD) {
+      const interval = setInterval(() => {
+        if (minutesTillOffersDisplayed > 0) {
+          setMinutesTillOffersDisplayed(minutesTillOffersDisplayed - 1)
         }
+        void refreshOffers()
+      }, 60000)
+
+      return () => {
+        clearInterval(interval)
       }
-    }, [
-      lastImportOfContacts,
-      minutesTillOffersAreLoaded,
-      reachNumber,
-      refreshOffers,
-    ])
-  )
+    }
+  }, [
+    minutesTillOffersDisplayed,
+    reachNumber,
+    refreshOffers,
+    setMinutesTillOffersDisplayed,
+  ])
+
+  useEffect(() => {
+    initializeMinutesTillOffersDisplayed()
+  }, [initializeMinutesTillOffersDisplayed])
 
   if (filterActive) {
     return resetFilterSuggestionVisible ? (
@@ -184,9 +172,7 @@ function EmptyListPlaceholder(): JSX.Element {
     )
   }
 
-  if (reachNumber >= REACH_NUMBER_THRESHOLD && lastImportOfContacts) {
-    const diffIsLessThenHour =
-      timeDifferenceSinceLastImport < TIME_SINCE_CONTACTS_IMPORT_THRESHOLD
+  if (reachNumber >= REACH_NUMBER_THRESHOLD) {
     return (
       <EmptyListWrapper
         buttonText={t('offer.emptyAction')}
@@ -194,7 +180,7 @@ function EmptyListPlaceholder(): JSX.Element {
           navigation.navigate('CreateOffer')
         }}
       >
-        {diffIsLessThenHour ? (
+        {minutesTillOffersDisplayed > 0 ? (
           <Text
             textAlign={'center'}
             col={'$greyOnWhite'}
@@ -202,7 +188,7 @@ function EmptyListPlaceholder(): JSX.Element {
             ff={'$body600'}
           >
             {t('offer.offersAreLoadingAndShouldBeReady', {
-              minutes: minutesTillOffersAreLoaded,
+              minutes: minutesTillOffersDisplayed,
             })}
           </Text>
         ) : (

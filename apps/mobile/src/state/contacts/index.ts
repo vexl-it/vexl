@@ -2,9 +2,13 @@ import {atomWithParsedMmkvStorage} from '../../utils/atomUtils/atomWithParsedMmk
 import {z} from 'zod'
 import {focusAtom} from 'jotai-optics'
 import {ContactNormalized, ContactNormalizedWithHash} from './domain'
-import {type Atom} from 'jotai'
+import {atom, type Atom} from 'jotai'
 import {selectAtom} from 'jotai/utils'
 import {IsoDatetimeString} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
+import {DateTime} from 'luxon'
+
+// time in minutes
+const TIME_SINCE_CONTACTS_IMPORT_THRESHOLD = 60
 
 export const combinedContactsAfterLastSubmitStorageAtom =
   atomWithParsedMmkvStorage(
@@ -22,7 +26,10 @@ export const combinedContactsAfterLastSubmitAtom = focusAtom(
 
 export const importedContactsStorageAtom = atomWithParsedMmkvStorage(
   'importedContacts',
-  {importedContacts: [], lastImport: undefined},
+  {
+    importedContacts: [],
+    lastImport: undefined,
+  },
   z.object({
     importedContacts: z.array(ContactNormalizedWithHash),
     lastImport: IsoDatetimeString.optional(),
@@ -47,6 +54,35 @@ export const importedContactsCountAtom = selectAtom(
 export const importedContactsHashesAtom = selectAtom(
   importedContactsAtom,
   (o) => o.map((one) => one.hash)
+)
+
+export const minutesTillOffersDisplayedAtom = atom(
+  TIME_SINCE_CONTACTS_IMPORT_THRESHOLD
+)
+
+export const initializeMinutesTillOffersDisplayedActionAtom = atom(
+  null,
+  (get, set) => {
+    const lastImportOfContacts = get(lastImportOfContactsAtom)
+
+    const minutesSinceLastImport = Math.abs(
+      Math.round(
+        DateTime.now().diff(
+          DateTime.fromISO(lastImportOfContacts ?? new Date().toISOString()),
+          'minutes'
+        ).minutes
+      )
+    )
+    const timeLeftTillOffersAreLoaded =
+      TIME_SINCE_CONTACTS_IMPORT_THRESHOLD - minutesSinceLastImport
+
+    set(
+      minutesTillOffersDisplayedAtom,
+      timeLeftTillOffersAreLoaded > 0 && timeLeftTillOffersAreLoaded <= 60
+        ? timeLeftTillOffersAreLoaded
+        : 0
+    )
+  }
 )
 
 export function selectImportedContactsWithHashes(

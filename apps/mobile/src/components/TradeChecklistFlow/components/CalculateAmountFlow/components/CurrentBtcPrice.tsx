@@ -1,23 +1,22 @@
-import {Text, type TextProps, XStack} from 'tamagui'
+import {getTokens, Text, type TextProps, XStack} from 'tamagui'
 import {useAtomValue, useSetAtom} from 'jotai'
-import {TouchableOpacity} from 'react-native'
+import {ActivityIndicator, TouchableOpacity} from 'react-native'
 import {
   refreshCurrentBtcPriceActionAtom,
   tradeBtcPriceAtom,
   tradePriceTypeAtom,
 } from '../atoms'
-import * as fromChatAtoms from '../../../atoms/fromChatAtoms'
-import {currentBtcPriceAtom} from '../../../../../state/currentBtcPriceAtoms'
+import {originOfferCurrencyAtom} from '../../../atoms/fromChatAtoms'
+import {btcPriceForOfferWithStateAtom} from '../../../atoms/btcPriceForOfferWithStateAtom'
 
 function CurrentBtcPrice(props: TextProps): JSX.Element {
   const refreshCurrentBtcPrice = useSetAtom(refreshCurrentBtcPriceActionAtom)
   const tradePriceType = useAtomValue(tradePriceTypeAtom)
   const tradeBtcPrice = useAtomValue(tradeBtcPriceAtom)
-  const currentBtcPrice = useAtomValue(currentBtcPriceAtom)
+  const btcPriceForOfferWithState = useAtomValue(btcPriceForOfferWithStateAtom)
+  const originOfferCurrency = useAtomValue(originOfferCurrencyAtom)
 
-  const tradeCurrency =
-    useAtomValue(fromChatAtoms.originOfferAtom)?.offerInfo.publicPart
-      .currency ?? 'USD'
+  const tradeCurrency = originOfferCurrency ?? 'USD'
 
   return (
     <TouchableOpacity
@@ -27,11 +26,22 @@ function CurrentBtcPrice(props: TextProps): JSX.Element {
       }}
     >
       <XStack ai={'center'}>
-        <Text fos={16} ff={'$body500'} col={'$greyOnBlack'} {...props}>
-          {`1 BTC = ${
-            tradePriceType === 'live' ? currentBtcPrice : tradeBtcPrice
-          } ${tradeCurrency}`}
-        </Text>
+        {btcPriceForOfferWithState?.state === 'loading' ? (
+          <ActivityIndicator
+            size={'small'}
+            color={getTokens().color.greyOnBlack.val}
+          />
+        ) : (
+          <Text fos={16} ff={'$body500'} col={'$greyOnBlack'} {...props}>
+            {`1 BTC = ${
+              tradePriceType === 'live'
+                ? btcPriceForOfferWithState?.state === 'error'
+                  ? '-'
+                  : btcPriceForOfferWithState?.btcPrice
+                : tradeBtcPrice
+            } ${tradeCurrency}`}
+          </Text>
+        )}
       </XStack>
     </TouchableOpacity>
   )

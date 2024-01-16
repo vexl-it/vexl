@@ -52,6 +52,12 @@ export const originOfferAtom = atom<OneOfferInState | undefined>((get) => {
   return get(offerForChatOriginAtom(chatOrigin))
 })
 
+export const originOfferCurrencyAtom = atom((get) => {
+  const originOffer = get(originOfferAtom)
+
+  return originOffer?.offerInfo?.publicPart?.currency
+})
+
 export const otherSideDataAtom = atom((get) => {
   const chatData = get(chatWithMessagesAtom)
   return getOtherSideData(chatData.chat)

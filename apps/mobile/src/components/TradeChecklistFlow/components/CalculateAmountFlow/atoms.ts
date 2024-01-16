@@ -12,10 +12,9 @@ import {
 import updatesToBeSentAtom, {
   addAmountActionAtom,
 } from '../../atoms/updatesToBeSentAtom'
-import {
-  currentBtcPriceAtom,
-  fetchBtcPriceActionAtom,
-} from '../../../../state/currentBtcPriceAtoms'
+import {refreshBtcPriceActionAtom} from '../../../../state/currentBtcPriceAtoms'
+import {btcPriceForOfferWithStateAtom} from '../../atoms/btcPriceForOfferWithStateAtom'
+import {originOfferCurrencyAtom} from '../../atoms/fromChatAtoms'
 
 export const SATOSHIS_IN_BTC = 100_000_000
 export const DECIMALS_FOR_BTC_VALUE = 8
@@ -103,42 +102,32 @@ export const offerTypeAtom = atom((get) => {
 })
 
 export const refreshCurrentBtcPriceActionAtom = atom(null, (get, set) => {
-  const offerForTradeChecklist = get(fromChatAtoms.originOfferAtom)
+  const offerCurrency = get(originOfferCurrencyAtom)
 
-  return pipe(
-    set(
-      fetchBtcPriceActionAtom,
-      offerForTradeChecklist?.offerInfo?.publicPart?.currency ?? 'USD'
+  return pipe(set(refreshBtcPriceActionAtom, offerCurrency ?? 'USD'))
+})
+
+export const setFormDataBasedOnTypeActionAtom = atom(
+  null,
+  (get, set, tradePriceType: TradePriceType) => {
+    return pipe(
+      set(refreshCurrentBtcPriceActionAtom),
+      T.map(() => {
+        set(tradePriceTypeAtom, tradePriceType)
+        set(btcInputValueAtom, '1')
+        set(
+          fiatInputValueAtom,
+          `${get(btcPriceForOfferWithStateAtom)?.btcPrice}`
+        )
+        set(
+          tradeBtcPriceAtom,
+          (prev) => get(btcPriceForOfferWithStateAtom)?.btcPrice ?? prev
+        )
+        set(applyFeeOnTradePriceTypeChangeActionAtom)
+      })
     )
-  )
-})
-
-export const freezePriceActionAtom = atom(null, (get, set) => {
-  const currentBtcPrice = get(currentBtcPriceAtom)
-  return pipe(
-    set(refreshCurrentBtcPriceActionAtom),
-    T.map(() => {
-      set(tradePriceTypeAtom, 'frozen')
-      set(btcInputValueAtom, '1')
-      set(fiatInputValueAtom, `${currentBtcPrice}`)
-      set(applyFeeOnTradePriceTypeChangeActionAtom)
-    })
-  )
-})
-
-export const setLivePriceActionAtom = atom(null, (get, set) => {
-  const currentBtcPrice = get(currentBtcPriceAtom)
-
-  return pipe(
-    set(refreshCurrentBtcPriceActionAtom),
-    T.map(() => {
-      set(tradePriceTypeAtom, 'live')
-      set(btcInputValueAtom, '1')
-      set(fiatInputValueAtom, `${currentBtcPrice}`)
-      set(applyFeeOnTradePriceTypeChangeActionAtom)
-    })
-  )
-})
+  }
+)
 
 export const calculateFiatValueOnBtcAmountChangeActionAtom = atom(
   null,
@@ -265,20 +254,28 @@ export const syncDataWithChatStateActionAtom = atom(
   (get, set, data: AmountData | undefined) => {
     const updatesToBeSent = get(updatesToBeSentAtom)
     const initialDataToSet = updatesToBeSent.amount ?? data
-    const currentBtcPrice = get(currentBtcPriceAtom)
 
-    set(tradePriceTypeAtom, initialDataToSet?.tradePriceType ?? 'live')
-    set(btcInputValueAtom, String(initialDataToSet?.btcAmount ?? 0))
-    set(fiatInputValueAtom, String(initialDataToSet?.fiatAmount ?? 0))
-    set(
-      tradeBtcPriceAtom,
-      (prev) => initialDataToSet?.btcPrice ?? currentBtcPrice ?? prev
-    )
-    set(
-      premiumOrDiscountEnabledAtom,
-      initialDataToSet?.feeAmount !== 0 ?? false
-    )
-    set(feeAmountAtom, initialDataToSet?.feeAmount ?? 0)
+    return pipe(
+      set(refreshCurrentBtcPriceActionAtom),
+      T.map(() => {
+        set(tradePriceTypeAtom, initialDataToSet?.tradePriceType ?? 'live')
+        set(btcInputValueAtom, String(initialDataToSet?.btcAmount ?? ''))
+        set(fiatInputValueAtom, String(initialDataToSet?.fiatAmount ?? ''))
+        set(
+          tradeBtcPriceAtom,
+          (prev) =>
+            initialDataToSet?.btcPrice ??
+            get(btcPriceForOfferWithStateAtom)?.btcPrice ??
+            prev
+        )
+
+        set(
+          premiumOrDiscountEnabledAtom,
+          initialDataToSet?.feeAmount !== 0 ?? false
+        )
+        set(feeAmountAtom, initialDataToSet?.feeAmount ?? 0)
+      })
+    )()
   }
 )
 
@@ -289,9 +286,10 @@ export const saveLocalCalculatedAmountDataStateToMainStateActionAtom = atom(
     const btcAmount = Number(get(btcInputValueAtom))
     const fiatAmount = Number(get(fiatInputValueAtom))
     const feeAmount = get(feeAmountAtom)
+    const btcPriceForOfferWithState = get(btcPriceForOfferWithStateAtom)
     const btcPrice =
       tradePriceType === 'live'
-        ? get(currentBtcPriceAtom)
+        ? btcPriceForOfferWithState?.btcPrice
         : get(tradeBtcPriceAtom)
 
     set(addAmountActionAtom, {

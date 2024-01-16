@@ -5,7 +5,6 @@ import SwitchTradePriceTypeButton from './components/SwitchTradePriceTypeButton'
 import {
   btcInputValueAtom,
   fiatInputValueAtom,
-  refreshCurrentBtcPriceActionAtom,
   saveButtonDisabledAtom,
   saveLocalCalculatedAmountDataStateToMainStateActionAtom,
   syncDataWithChatStateActionAtom,
@@ -23,15 +22,14 @@ import PremiumOrDiscount from './components/PremiumOrDiscount'
 import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
 import BtcAmountInput from '../../components/BtcAmountInput'
 import FiatAmountInput from '../../components/FiatAmountInput'
-import {useFocusEffect} from '@react-navigation/native'
 import {dismissKeyboardAndResolveOnLayoutUpdate} from '../../../../../../utils/dismissKeyboardPromise'
 import {type TradeChecklistStackScreenProps} from '../../../../../../navigationTypes'
 import {loadingOverlayDisplayedAtom} from '../../../../../LoadingOverlayProvider'
 import {submitTradeChecklistUpdatesActionAtom} from '../../../../atoms/updatesToBeSentAtom'
 import Info from '../../../../../Info'
-import {currentBtcPriceAtom} from '../../../../../../state/currentBtcPriceAtoms'
 import calculatePercentageDifference from '../../../../../../utils/calculatePercentageDifference'
 import {otherSideDataAtom} from '../../../../atoms/fromChatAtoms'
+import {btcPriceForOfferWithStateAtom} from '../../../../atoms/btcPriceForOfferWithStateAtom'
 
 type Props = TradeChecklistStackScreenProps<'CalculateAmount'>
 
@@ -46,7 +44,6 @@ function CalculateAmountScreen({
   const saveButtonDisabled = useAtomValue(saveButtonDisabledAtom)
   const tradePriceType = useAtomValue(tradePriceTypeAtom)
   const otherSideData = useAtomValue(otherSideDataAtom)
-  const refreshCurrentBtcPrice = useSetAtom(refreshCurrentBtcPriceActionAtom)
   const setTradePriceTypeDialogVisible = useSetAtom(
     tradePriceTypeDialogVisibleAtom
   )
@@ -58,14 +55,17 @@ function CalculateAmountScreen({
   const submitTradeChecklistUpdates = useSetAtom(
     submitTradeChecklistUpdatesActionAtom
   )
-  const currentBtcPrice = useAtomValue(currentBtcPriceAtom)
+  const btcPriceForOfferWithState = useAtomValue(btcPriceForOfferWithStateAtom)
 
   const btcPricePercentageDifference = useMemo(() => {
-    if (tradePriceType === 'custom' && amountData?.btcPrice && currentBtcPrice)
-      return calculatePercentageDifference(amountData.btcPrice, currentBtcPrice)
+    if (tradePriceType === 'custom' && amountData?.btcPrice)
+      return calculatePercentageDifference(
+        amountData.btcPrice,
+        btcPriceForOfferWithState?.btcPrice
+      )
 
     return 0
-  }, [amountData?.btcPrice, currentBtcPrice, tradePriceType])
+  }, [amountData?.btcPrice, btcPriceForOfferWithState, tradePriceType])
 
   const onFooterButtonPress = useCallback(() => {
     void dismissKeyboardAndResolveOnLayoutUpdate().then(() => {
@@ -87,14 +87,8 @@ function CalculateAmountScreen({
   ])
 
   useEffect(() => {
-    syncDataWithChatState(amountData)
+    void syncDataWithChatState(amountData)
   }, [amountData, syncDataWithChatState])
-
-  useFocusEffect(
-    useCallback(() => {
-      void refreshCurrentBtcPrice()()
-    }, [refreshCurrentBtcPrice])
-  )
 
   return (
     <>

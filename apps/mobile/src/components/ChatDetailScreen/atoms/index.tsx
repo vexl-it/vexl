@@ -112,6 +112,11 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     return origin ? get(offerForChatOriginAtom(origin)) : null
   })
 
+  const offerCurrencyAtom = atom((get) => {
+    const offerForChat = get(offerForChatAtom)
+    return offerForChat?.offerInfo?.publicPart?.currency ?? 'USD'
+  })
+
   const tradeChecklistAtom = focusAtom(chatWithMessagesAtom, (o) =>
     o.prop('tradeChecklist')
   )
@@ -869,5 +874,6 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     tradeChecklistDateAndTimeAtom,
     tradeChecklistNetworkAtom,
     tradeChecklistAmountAtom,
+    offerCurrencyAtom,
   }
 })

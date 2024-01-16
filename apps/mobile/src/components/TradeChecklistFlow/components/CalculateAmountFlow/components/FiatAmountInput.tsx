@@ -7,8 +7,8 @@ import {Stack, Text} from 'tamagui'
 import AmountInput from './AmountInput'
 import {currencies} from '../../../../../utils/localization/currency'
 import CalculatedWithLiveRate from './CalculatedWithLiveRate'
-import * as fromChatAtoms from '../../../atoms/fromChatAtoms'
-import {currentBtcPriceAtom} from '../../../../../state/currentBtcPriceAtoms'
+import {btcPriceForOfferWithStateAtom} from '../../../atoms/btcPriceForOfferWithStateAtom'
+import {originOfferCurrencyAtom} from '../../../atoms/fromChatAtoms'
 
 interface Props {
   automaticCalculationDisabled?: boolean
@@ -27,11 +27,11 @@ function FiatAmountInput({
   const [isFocused, setIsFocused] = useState<boolean>(false)
 
   const fiatValue = useAtomValue(fiatValueAtom)
-  const offerForTradeChecklist = useAtomValue(fromChatAtoms.originOfferAtom)
   const calculateBtcValueOnFiatAmountChange = useSetAtom(
     calculateBtcValueOnFiatAmountChangeActionAtom
   )
-  const currentBtcPrice = useAtomValue(currentBtcPriceAtom)
+  const originOfferCurrency = useAtomValue(originOfferCurrencyAtom)
+  const btcPriceForOfferWithState = useAtomValue(btcPriceForOfferWithStateAtom)
 
   return (
     <AmountInput
@@ -47,7 +47,11 @@ function FiatAmountInput({
       onWrapperPress={() => {
         ref.current?.focus()
       }}
-      placeholder={`${currentBtcPrice}`}
+      placeholder={
+        btcPriceForOfferWithState?.state === 'success'
+          ? `${btcPriceForOfferWithState.btcPrice}`
+          : '-'
+      }
       value={fiatValue}
       onChangeText={(input) => {
         calculateBtcValueOnFiatAmountChange({
@@ -60,11 +64,7 @@ function FiatAmountInput({
     >
       <Stack>
         <Text fos={18} ff={'$body500'} col={'$white'}>
-          {
-            currencies[
-              offerForTradeChecklist?.offerInfo.publicPart.currency ?? 'USD'
-            ].code
-          }
+          {currencies[originOfferCurrency ?? 'USD'].code}
         </Text>
         {!isFocused && fiatValue && !automaticCalculationDisabled && (
           <CalculatedWithLiveRate />

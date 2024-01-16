@@ -1,42 +1,63 @@
-import {atom} from 'jotai'
-import {privateApiAtom, publicApiAtom} from '../api'
+import {type Atom, atom, type PrimitiveAtom} from 'jotai'
+import {publicApiAtom} from '../api'
 import * as TE from 'fp-ts/TaskEither'
 import * as T from 'fp-ts/Task'
 import {pipe} from 'fp-ts/function'
 import {toCommonErrorMessage} from '../utils/useCommonErrorMessages'
 import {translationAtom} from '../utils/localization/I18nProvider'
-import {type Task} from 'fp-ts/Task'
 import reportError from '../utils/reportError'
-import {type GetCryptocurrencyDetailsResponse} from '@vexl-next/rest-api/src/services/user/contracts'
 import showErrorAlert from '../utils/showErrorAlert'
-import {
-  type UnixMilliseconds,
-  UnixMilliseconds0,
-  unixMillisecondsNow,
-} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {AcceptedCurrency} from '@vexl-next/rest-api/src/services/btcPrice'
-import {type CurrencyCode} from '@vexl-next/domain/src/general/currency.brand'
+import {CurrencyCode} from '@vexl-next/domain/src/general/currency.brand'
+import {type BtcPriceDataWithState} from '@vexl-next/domain/src/general/btcPrice'
+import {selectedCurrencyAtom} from './selectedCurrency'
 
-const BTC_PRICE_UPDATE_TRIGGER_THRESHOLD_MILLISECONDS = 900000
+const BULGARIAN_LEV_PEGGED_EURO_RATE = 1.95583
 
-const btcPriceLastUpdateAtAtom = atom<UnixMilliseconds>(UnixMilliseconds0)
+const dummyBtcPriceDataState: Record<string, BtcPriceDataWithState> = {
+  [CurrencyCode.parse('USD')]: {
+    btcPrice: 0,
+    state: 'error',
+  },
+}
 
-// TODO change type to number and use new api: api.btcPrice(currency)
-export const btcPriceAtom = atom<GetCryptocurrencyDetailsResponse | undefined>(
-  undefined
-)
+export const btcPriceDataAtom: PrimitiveAtom<
+  Record<string, BtcPriceDataWithState>
+> = atom(dummyBtcPriceDataState)
 
-export const currentBtcPriceAtom = atom<number | undefined>(undefined)
+export const btcPriceForSelectedCurrencyAtom: Atom<BtcPriceDataWithState> =
+  atom((get) => {
+    const selectedCurrency = get(selectedCurrencyAtom)
+    const btcPriceData = get(btcPriceDataAtom)
 
-export const fetchBtcPriceActionAtom = atom(
+    return (
+      btcPriceData[selectedCurrency] ??
+      ({btcPrice: 0, state: 'error'} satisfies BtcPriceDataWithState)
+    )
+  })
+
+export const refreshBtcPriceActionAtom = atom(
   undefined,
   (get, set, currency: CurrencyCode) => {
     const api = get(publicApiAtom)
     const {t} = get(translationAtom)
 
-    const acceptedCurrency = AcceptedCurrency.safeParse(currency.toLowerCase())
+    // Bulgarian LEV is pegged to Euro and as CoinGecko does not support it
+    // we calculate it manually from EUR price
+    const acceptedCurrency =
+      currency === 'BGN'
+        ? AcceptedCurrency.safeParse('EUR'.toLowerCase())
+        : AcceptedCurrency.safeParse(currency.toLowerCase())
 
     if (!acceptedCurrency.success) return T.of(false)
+
+    set(btcPriceDataAtom, (prevState) => ({
+      ...prevState,
+      [currency]: {
+        btcPrice: prevState[currency]?.btcPrice ?? 0,
+        state: 'loading',
+      },
+    }))
 
     return pipe(
       api.btcPrice(acceptedCurrency.data),
@@ -49,48 +70,36 @@ export const fetchBtcPriceActionAtom = atom(
             error: l,
           })
           reportError('warn', 'Error while fetching btc price', l)
+
+          set(btcPriceDataAtom, (prevState) => ({
+            ...prevState,
+            [currency]: {
+              btcPrice: prevState[currency]?.btcPrice ?? 0,
+              state: 'error',
+            },
+          }))
+
           return false
         },
         (btcPrice) => {
-          set(currentBtcPriceAtom, btcPrice)
-          return true
-        }
-      )
-    )
-  }
-)
+          if (currency === 'BGN') {
+            set(btcPriceDataAtom, (prevState) => ({
+              ...prevState,
+              [currency]: {
+                btcPrice: Math.round(btcPrice * BULGARIAN_LEV_PEGGED_EURO_RATE),
+                state: 'success',
+              },
+            }))
+          } else {
+            set(btcPriceDataAtom, (prevState) => ({
+              ...prevState,
+              [currency]: {
+                btcPrice,
+                state: 'success',
+              },
+            }))
+          }
 
-// TODO change to use new api: api.btcPrice(currency)
-export const refreshBtcPriceActionAtom = atom<undefined, [], Task<boolean>>(
-  undefined,
-  (get, set) => {
-    const api = get(privateApiAtom)
-    const {t} = get(translationAtom)
-    const btcPriceLastUpdateAt = get(btcPriceLastUpdateAtAtom)
-    const timeDifferenceSinceLastUpdate = Date.now() - btcPriceLastUpdateAt
-
-    if (
-      timeDifferenceSinceLastUpdate <
-      BTC_PRICE_UPDATE_TRIGGER_THRESHOLD_MILLISECONDS
-    )
-      return T.of(true)
-
-    return pipe(
-      api.user.getCryptocurrencyDetails({coin: 'bitcoin'}),
-      TE.matchW(
-        (l) => {
-          showErrorAlert({
-            title:
-              toCommonErrorMessage(l, t) ??
-              t('btcPriceChart.requestCouldNotBeProcessed'),
-            error: l,
-          })
-          reportError('warn', 'Error while fetching btc price', l)
-          return false
-        },
-        (r) => {
-          set(btcPriceLastUpdateAtAtom, unixMillisecondsNow())
-          set(btcPriceAtom, r)
           return true
         }
       )

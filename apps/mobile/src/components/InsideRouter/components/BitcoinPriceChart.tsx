@@ -1,13 +1,12 @@
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
-import {Stack, Text, XStack} from 'tamagui'
-import {TouchableOpacity} from 'react-native'
+import {getTokens, Stack, Text, XStack} from 'tamagui'
+import {ActivityIndicator, TouchableOpacity} from 'react-native'
 import {useAtomValue, useSetAtom} from 'jotai'
 import {useFocusEffect} from '@react-navigation/native'
-import {useCallback, useMemo} from 'react'
+import {useCallback} from 'react'
 import {selectedCurrencyAtom} from '../../../state/selectedCurrency'
-import {formatBtcPrice} from '../../../utils/formatBtcPrice'
 import {
-  btcPriceAtom,
+  btcPriceForSelectedCurrencyAtom,
   refreshBtcPriceActionAtom,
 } from '../../../state/currentBtcPriceAtoms'
 
@@ -16,17 +15,15 @@ export const CHART_HEIGHT_PX = 100
 function BitcoinPriceChart(): JSX.Element {
   const insets = useSafeAreaInsets()
   const refreshBtcPrice = useSetAtom(refreshBtcPriceActionAtom)
-  const btcPrice = useAtomValue(btcPriceAtom)
   const selectedCurrency = useAtomValue(selectedCurrencyAtom)
-  const btcPriceValue = useMemo(
-    () => formatBtcPrice(selectedCurrency, btcPrice),
-    [btcPrice, selectedCurrency]
+  const btcPriceForSelectedCurrency = useAtomValue(
+    btcPriceForSelectedCurrencyAtom
   )
 
   useFocusEffect(
     useCallback(() => {
-      void refreshBtcPrice()()
-    }, [refreshBtcPrice])
+      void refreshBtcPrice(selectedCurrency)()
+    }, [refreshBtcPrice, selectedCurrency])
   )
 
   return (
@@ -36,13 +33,24 @@ function BitcoinPriceChart(): JSX.Element {
         <Stack />
         <TouchableOpacity
           onPress={() => {
-            void refreshBtcPrice()()
+            void refreshBtcPrice(selectedCurrency)()
           }}
         >
           <XStack>
-            <Text fos={28} ff={'$heading'} color={'$yellowAccent1'}>
-              {btcPriceValue ?? '- '}
-            </Text>
+            {btcPriceForSelectedCurrency.state === 'loading' ? (
+              <Stack mr={'$2'}>
+                <ActivityIndicator
+                  size={'small'}
+                  color={getTokens().color.main.val}
+                />
+              </Stack>
+            ) : (
+              <Text fos={28} ff={'$heading'} color={'$yellowAccent1'}>
+                {btcPriceForSelectedCurrency.state === 'error'
+                  ? '- '
+                  : btcPriceForSelectedCurrency.btcPrice}
+              </Text>
+            )}
             <Text fos={12} ff={'$body700'} color={'$yellowAccent1'}>
               {selectedCurrency}
             </Text>

@@ -17,12 +17,10 @@ import {
   addAmountActionAtom,
   submitTradeChecklistUpdatesActionAtom,
 } from '../../../../TradeChecklistFlow/atoms/updatesToBeSentAtom'
-import {
-  currentBtcPriceAtom,
-  fetchBtcPriceActionAtom,
-} from '../../../../../state/currentBtcPriceAtoms'
+import {refreshBtcPriceActionAtom} from '../../../../../state/currentBtcPriceAtoms'
 import TradeChecklistNetworkSetupSuggestionView from './TradeChecklistNetworkSetupSuggestionView'
 import {calculateBtcPricePercentageDifference} from '../../../../../state/tradeChecklist/utils/amount'
+import {btcPriceForOfferWithStateAtom} from '../../../../TradeChecklistFlow/atoms/btcPriceForOfferWithStateAtom'
 
 function TradeChecklistAmountView(): JSX.Element | null {
   const {t} = useTranslation()
@@ -30,11 +28,11 @@ function TradeChecklistAmountView(): JSX.Element | null {
   const {
     chatIdAtom,
     publicKeyPemBase64Atom,
-    offerForChatAtom,
     otherSideDataAtom,
     tradeChecklistAmountAtom,
+    offerCurrencyAtom,
   } = useMolecule(chatMolecule)
-  const offerForChat = useAtomValue(offerForChatAtom)
+  const offerCurrency = useAtomValue(offerCurrencyAtom)
   const amountData = useAtomValue(tradeChecklistAmountAtom)
   const otherSideData = useAtomValue(otherSideDataAtom)
   const amountDataToDisplay = amount.getAmountData(amountData)
@@ -45,16 +43,16 @@ function TradeChecklistAmountView(): JSX.Element | null {
     submitTradeChecklistUpdatesActionAtom
   )
   const addAmount = useSetAtom(addAmountActionAtom)
-  const currentBtcPrice = useAtomValue(currentBtcPriceAtom)
-  const fetchBtcPrice = useSetAtom(fetchBtcPriceActionAtom)
+  const refreshBtcPrice = useSetAtom(refreshBtcPriceActionAtom)
+  const btcPriceForOfferWithState = useAtomValue(btcPriceForOfferWithStateAtom)
 
   const btcPricePercentageDifference = useMemo(
     () =>
       calculateBtcPricePercentageDifference(
         amountDataToDisplay,
-        currentBtcPrice
+        btcPriceForOfferWithState?.btcPrice
       ),
-    [amountDataToDisplay, currentBtcPrice]
+    [amountDataToDisplay, btcPriceForOfferWithState?.btcPrice]
   )
 
   const onAcceptButtonPress = useCallback(() => {
@@ -74,10 +72,8 @@ function TradeChecklistAmountView(): JSX.Element | null {
 
   useFocusEffect(
     useCallback(() => {
-      if (offerForChat?.offerInfo.publicPart.currency) {
-        void fetchBtcPrice(offerForChat.offerInfo.publicPart.currency)()
-      }
-    }, [fetchBtcPrice, offerForChat?.offerInfo.publicPart.currency])
+      void refreshBtcPrice(offerCurrency)()
+    }, [refreshBtcPrice, offerCurrency])
   )
 
   if (!amountDataToDisplay?.amountData.btcAmount) return null
@@ -123,10 +119,7 @@ function TradeChecklistAmountView(): JSX.Element | null {
           )}
           {amountDataToDisplay.amountData.fiatAmount && (
             <Button
-              text={
-                currencies[offerForChat?.offerInfo.publicPart.currency ?? 'USD']
-                  .code
-              }
+              text={currencies[offerCurrency].code}
               beforeIcon={copySvg}
               onPress={() => {
                 Clipboard.setString(
@@ -223,9 +216,7 @@ function TradeChecklistAmountView(): JSX.Element | null {
                 : otherSideData.userName,
             btcAmount: amountDataToDisplay.amountData.btcAmount,
             fiatAmount: amountDataToDisplay.amountData.fiatAmount,
-            fiatCurrency:
-              currencies[offerForChat?.offerInfo.publicPart.currency ?? 'USD']
-                .code,
+            fiatCurrency: currencies[offerCurrency].code,
             feeAmount: amountDataToDisplay.amountData.feeAmount,
           }
         )}

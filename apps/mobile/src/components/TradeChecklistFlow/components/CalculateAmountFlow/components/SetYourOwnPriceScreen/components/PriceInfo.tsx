@@ -5,7 +5,7 @@ import {
 } from '../../../../../../../utils/localization/I18nProvider'
 import {type PrimitiveAtom, useAtomValue} from 'jotai'
 import calculatePercentageDifference from '../../../../../../../utils/calculatePercentageDifference'
-import {currentBtcPriceAtom} from '../../../../../../../state/currentBtcPriceAtoms'
+import {btcPriceForOfferWithStateAtom} from '../../../../../atoms/btcPriceForOfferWithStateAtom'
 
 interface Props {
   fiatTempValueAtom: PrimitiveAtom<string>
@@ -15,11 +15,11 @@ function PriceInfo({fiatTempValueAtom}: Props): JSX.Element | null {
   const {t} = useTranslation()
   const locale = getCurrentLocale()
   const fiatTempValue = Number(useAtomValue(fiatTempValueAtom)) ?? 0
-  const currentBtcPrice = useAtomValue(currentBtcPriceAtom)
+  const btcPriceForOfferWithState = useAtomValue(btcPriceForOfferWithStateAtom)
 
   const percentageDifference = calculatePercentageDifference(
     fiatTempValue,
-    currentBtcPrice ?? 0
+    btcPriceForOfferWithState?.btcPrice
   )
 
   return fiatTempValue && fiatTempValue > 0 && percentageDifference !== 0 ? (

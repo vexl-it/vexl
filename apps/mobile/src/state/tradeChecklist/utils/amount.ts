@@ -58,7 +58,6 @@ export function calculateBtcPricePercentageDifference(
   if (
     amountDataToDisplay?.by === 'them' &&
     amountDataToDisplay.amountData.btcPrice &&
-    currentBtcPrice &&
     (amountDataToDisplay.amountData.tradePriceType === 'custom' ||
       amountDataToDisplay.amountData.tradePriceType === 'frozen')
   ) {

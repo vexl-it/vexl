@@ -5,8 +5,7 @@ import Button from '../../../../Button'
 import {useAtom, useAtomValue, useSetAtom} from 'jotai'
 import PriceTypeIndicator from './PriceTypeIndicator'
 import {
-  freezePriceActionAtom,
-  setLivePriceActionAtom,
+  setFormDataBasedOnTypeActionAtom,
   tradePriceTypeAtom,
   tradePriceTypeDialogVisibleAtom,
 } from '../atoms'
@@ -28,8 +27,7 @@ function TradePriceTypeDialog(): JSX.Element | null {
   const [tradePriceTypeDialogVisible, setTradePriceTypeDialogVisible] = useAtom(
     tradePriceTypeDialogVisibleAtom
   )
-  const freezePrice = useSetAtom(freezePriceActionAtom)
-  const setLivePrice = useSetAtom(setLivePriceActionAtom)
+  const setFormDataBasedOnType = useSetAtom(setFormDataBasedOnTypeActionAtom)
 
   if (!tradePriceTypeDialogVisible) return null
 
@@ -109,7 +107,7 @@ function TradePriceTypeDialog(): JSX.Element | null {
               <Button
                 onPress={() => {
                   setTradePriceTypeDialogVisible(false)
-                  void setLivePrice()()
+                  void setFormDataBasedOnType('live')()
                 }}
                 variant={'primary'}
                 text={t('tradeChecklist.calculateAmount.setLivePrice')}
@@ -118,7 +116,7 @@ function TradePriceTypeDialog(): JSX.Element | null {
             {tradePriceType !== 'frozen' && (
               <Button
                 onPress={() => {
-                  void freezePrice()()
+                  void setFormDataBasedOnType('frozen')()
                   setTradePriceTypeDialogVisible(false)
                 }}
                 variant={'primary'}

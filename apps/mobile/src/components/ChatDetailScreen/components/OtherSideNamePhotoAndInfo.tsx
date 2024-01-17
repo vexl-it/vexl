@@ -1,6 +1,6 @@
 import {Stack, YStack} from 'tamagui'
 import {useAtomValue} from 'jotai'
-import {useMolecule} from 'jotai-molecules'
+import {useMolecule} from 'bunshi/dist/react'
 import {chatMolecule} from '../atoms'
 import UserAvatar from '../../UserAvatar'
 import UserNameWithSellingBuying from '../../UserNameWithSellingBuying'

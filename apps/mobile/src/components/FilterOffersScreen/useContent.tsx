@@ -27,11 +27,7 @@ import {
   updateCurrencyLimitsAtom,
   locationAtom,
   locationStateAtom,
-  locationSuggestionsAtomsAtom,
-  locationSuggestionsAtom,
-  setOfferLocationActionAtom,
   updateLocationStatePaymentMethodAtom,
-  updateAndRefreshLocationSuggestionsActionAtom,
   spokenLanguagesAtomsAtom,
   saveSelectedSpokenLanguagesActionAtom,
   resetSpokenLanguagesToInitialStateActionAtom,
@@ -41,6 +37,7 @@ import {
   btcNetworkAtom,
   intendedConnectionLevelAtom,
   sortingAtom,
+  setOfferLocationActionAtom,
 } from './atom'
 
 export default function useContent(): Props[] {
@@ -87,12 +84,7 @@ export default function useContent(): Props[] {
           <Location
             locationAtom={locationAtom}
             locationStateAtom={locationStateAtom}
-            locationSuggestionsAtom={locationSuggestionsAtom}
-            locationSuggestionsAtomsAtom={locationSuggestionsAtomsAtom}
             setOfferLocationActionAtom={setOfferLocationActionAtom}
-            updateAndRefreshLocationSuggestionsActionAtom={
-              updateAndRefreshLocationSuggestionsActionAtom
-            }
             updateLocationStatePaymentMethodAtom={
               updateLocationStatePaymentMethodAtom
             }

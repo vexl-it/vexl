@@ -1,5 +1,5 @@
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
-import {useMolecule} from 'jotai-molecules'
+import {useMolecule} from 'bunshi/dist/react'
 import {chatMolecule} from '../../../atoms'
 import {useAtomValue} from 'jotai'
 import * as network from '../../../../../state/tradeChecklist/utils/network'

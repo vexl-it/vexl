@@ -1,65 +1,60 @@
 import {
-  atom,
-  type Atom,
-  getDefaultStore,
-  type PrimitiveAtom,
-  type SetStateAction,
-  type WritableAtom,
-} from 'jotai'
-import {
+  OfferAdminId,
+  OfferId,
+  SymmetricKey,
   type BtcNetwork,
   type CurrencyCode,
   type Location,
   type LocationState,
-  OfferAdminId,
-  OfferId,
   type OfferPublicPart,
   type OfferType,
   type OneOfferInState,
   type PaymentMethod,
   type SpokenLanguage,
-  SymmetricKey,
 } from '@vexl-next/domain/src/general/offers'
-import {molecule} from 'jotai-molecules'
+import {molecule} from 'bunshi/dist/react'
+import {
+  atom,
+  getDefaultStore,
+  type PrimitiveAtom,
+  type SetStateAction,
+  type WritableAtom,
+} from 'jotai'
 
+import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {IdNumeric} from '@vexl-next/domain/src/utility/IdNumeric'
 import {
   IsoDatetimeString,
   MINIMAL_DATE,
 } from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
-import {pipe} from 'fp-ts/function'
-import * as TE from 'fp-ts/TaskEither'
+import {Uuid, generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
+import {generateKeyPair} from '@vexl-next/resources-utils/src/utils/crypto'
+import {type LocationSuggestion} from '@vexl-next/rest-api/src/services/location/contracts'
+import {parsePhoneNumber} from 'awesome-phonenumber'
+import * as E from 'fp-ts/Either'
 import * as T from 'fp-ts/Task'
+import * as TE from 'fp-ts/TaskEither'
+import {pipe} from 'fp-ts/function'
+import {focusAtom} from 'jotai-optics'
+import {splitAtom} from 'jotai/utils'
 import {Alert} from 'react-native'
-import {translationAtom} from '../../../utils/localization/I18nProvider'
+import {createInboxAtom} from '../../../state/chat/hooks/useCreateInbox'
 import {
   createOfferAtom,
   deleteOffersActionAtom,
   updateOfferAtom,
 } from '../../../state/marketplace'
-import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
-import numberOfFriendsAtom from './numberOfFriendsAtom'
-import * as E from 'fp-ts/Either'
-import {generateKeyPair} from '@vexl-next/resources-utils/src/utils/crypto'
-import {createInboxAtom} from '../../../state/chat/hooks/useCreateInbox'
-import {offerProgressModalActionAtoms as progressModal} from '../../UploadingOfferProgressModal/atoms'
-import {generateUuid, Uuid} from '@vexl-next/domain/src/utility/Uuid.brand'
-import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
-import {focusAtom} from 'jotai-optics'
-import notEmpty from '../../../utils/notEmpty'
-import {currencies} from '../../../utils/localization/currency'
-import {sessionDataOrDummyAtom} from '../../../state/session'
-import {parsePhoneNumber} from 'awesome-phonenumber'
-import showErrorAlert from '../../../utils/showErrorAlert'
-import {
-  type GetLocationSuggestionsRequest,
-  type LocationSuggestion,
-} from '@vexl-next/rest-api/src/services/location/contracts'
-import {splitAtom} from 'jotai/utils'
-import {fetchLocationSuggestionsAtom} from '../../../state/location/atoms/fetchLocationSuggestionsAtom'
-import getValueFromSetStateActionOfAtom from '../../../utils/atomUtils/getValueFromSetStateActionOfAtom'
-import getDefaultSpokenLanguage from '../../../utils/localization/getDefaultSpokenLanguage'
 import {singleOfferAtom} from '../../../state/marketplace/atoms/offersState'
+import {sessionDataOrDummyAtom} from '../../../state/session'
+import getValueFromSetStateActionOfAtom from '../../../utils/atomUtils/getValueFromSetStateActionOfAtom'
+import {translationAtom} from '../../../utils/localization/I18nProvider'
+import {currencies} from '../../../utils/localization/currency'
+import getDefaultSpokenLanguage from '../../../utils/localization/getDefaultSpokenLanguage'
+import notEmpty from '../../../utils/notEmpty'
+import showErrorAlert from '../../../utils/showErrorAlert'
+import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
+import {offerProgressModalActionAtoms as progressModal} from '../../UploadingOfferProgressModal/atoms'
+import numberOfFriendsAtom from './numberOfFriendsAtom'
 
 function getAtomWithNullableValueHandling<T, S>(
   nullableAtom: PrimitiveAtom<T | undefined>,
@@ -289,10 +284,6 @@ export const offerFormMolecule = molecule(() => {
         .prop('intendedConnectionLevel') ?? 'FIRST'
   )
 
-  const locationSuggestionsAtom = atom<LocationSuggestion[]>([])
-
-  const locationSuggestionsAtomsAtom = splitAtom(locationSuggestionsAtom)
-
   const selectedSpokenLanguagesAtom = atom<SpokenLanguage[]>(
     getDefaultSpokenLanguage()
   )
@@ -354,23 +345,10 @@ export const offerFormMolecule = molecule(() => {
 
   const offerExpirationModalVisibleAtom = atom<boolean>(false)
 
-  const updateAndRefreshLocationSuggestionsActionAtom = atom(
-    null,
-    (get, set, request: GetLocationSuggestionsRequest) => {
-      return pipe(
-        set(fetchLocationSuggestionsAtom, request),
-        T.map((result) => {
-          set(locationSuggestionsAtom, result.result)
-        })
-      )()
-    }
-  )
-
   const setOfferLocationActionAtom = atom(
     null,
-    (get, set, locationSuggestionAtom: Atom<LocationSuggestion>) => {
+    (get, set, locationSuggestion: LocationSuggestion) => {
       const location = get(locationAtom)
-      const locationSuggestion = get(locationSuggestionAtom)
 
       if (
         !location?.some(
@@ -756,9 +734,6 @@ export const offerFormMolecule = molecule(() => {
     offerActiveAtom,
     updateCurrencyLimitsAtom,
     updateLocationStatePaymentMethodAtom,
-    locationSuggestionsAtom,
-    locationSuggestionsAtomsAtom,
-    updateAndRefreshLocationSuggestionsActionAtom,
     setOfferLocationActionAtom,
     resetOfferFormActionAtom,
     offerTypeOrDummyValueAtom,

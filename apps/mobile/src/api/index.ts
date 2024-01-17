@@ -15,7 +15,7 @@ import {
   type BtcPricePublicApi,
 } from '@vexl-next/rest-api/src/services/btcPrice'
 import {type ContactPrivateApi} from '@vexl-next/rest-api/src/services/contact'
-import {type LocationPublicApi} from '@vexl-next/rest-api/src/services/location'
+import {type LocationPrivateApi} from '@vexl-next/rest-api/src/services/location'
 import {type OfferPrivateApi} from '@vexl-next/rest-api/src/services/offer'
 import {
   type UserPrivateApi,
@@ -53,11 +53,6 @@ const _publicApiAtom = atom({
     url: apiEnv.userMs,
     platform,
   }),
-  location: location.publicApi({
-    platform,
-    clientVersion: versionCode,
-    url: apiEnv.locationMs,
-  }),
   btcPrice: createBtcPriceApi({
     platform,
     clientVersion: versionCode,
@@ -68,10 +63,6 @@ export const publicApiAtom = atom((get) => get(_publicApiAtom))
 
 export function useUserPublicApi(): UserPublicApi {
   return useAtomValue(publicApiAtom).user
-}
-
-export function useLocationPublicApi(): LocationPublicApi {
-  return useAtomValue(publicApiAtom).location
 }
 
 export function useBtcPricePublicApi(): BtcPricePublicApi {
@@ -121,6 +112,12 @@ export const privateApiAtom = atom((get) => {
       url: apiEnv.userMs,
       getUserSessionCredentials,
     }),
+    location: location.privateApi({
+      platform,
+      clientVersion: versionCode,
+      url: apiEnv.locationMs,
+      getUserSessionCredentials,
+    }),
   }
 })
 
@@ -129,6 +126,7 @@ export function usePrivateApiAssumeLoggedIn(): {
   offer: OfferPrivateApi
   chat: ChatPrivateApi
   user: UserPrivateApi
+  location: LocationPrivateApi
 } {
   return useAtomValue(privateApiAtom)
 }

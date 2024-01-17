@@ -1,5 +1,5 @@
 import {atom} from 'jotai'
-import {publicApiAtom} from '../../../api'
+import {privateApiAtom} from '../../../api'
 import {pipe} from 'fp-ts/function'
 import {
   type GetLocationSuggestionsRequest,
@@ -15,7 +15,7 @@ import {translationAtom} from '../../../utils/localization/I18nProvider'
 export const fetchLocationSuggestionsAtom = atom(
   null,
   (get, set, request: GetLocationSuggestionsRequest) => {
-    const api = get(publicApiAtom)
+    const api = get(privateApiAtom)
     const {t} = get(translationAtom)
 
     return pipe(

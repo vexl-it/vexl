@@ -10,7 +10,7 @@ import {
   type SetStateAction,
   type WritableAtom,
 } from 'jotai'
-import {createScope, molecule} from 'jotai-molecules'
+import {createScope, molecule} from 'bunshi/dist/react'
 import {focusAtom} from 'jotai-optics'
 import {selectAtom, splitAtom} from 'jotai/utils'
 import {Alert} from 'react-native'
@@ -759,6 +759,10 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     o.prop('contact')
   )
 
+  const tradeChecklistMeetingLocationAtom = focusAtom(tradeChecklistAtom, (o) =>
+    o.prop('location')
+  )
+
   return {
     showModalAtom: atom<boolean>(false),
     chatAtom,
@@ -813,5 +817,6 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     tradeChecklistContactRevealAtom,
     identityRevealTriggeredFromTradeChecklistAtom,
     contactRevealTriggeredFromTradeChecklistAtom,
+    tradeChecklistMeetingLocationAtom,
   }
 })

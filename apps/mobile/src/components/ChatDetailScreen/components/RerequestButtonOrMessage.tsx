@@ -1,4 +1,4 @@
-import {useMolecule} from 'jotai-molecules'
+import {useMolecule} from 'bunshi/dist/react'
 import {chatMolecule} from '../atoms'
 import {useAtomValue, useSetAtom} from 'jotai'
 import Button from '../../Button'

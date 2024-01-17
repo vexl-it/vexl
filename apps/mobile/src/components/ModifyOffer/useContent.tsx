@@ -1,27 +1,27 @@
-import {useTranslation} from '../../utils/localization/I18nProvider'
+import {useMolecule} from 'bunshi/dist/react'
 import {useMemo} from 'react'
-import Currency from '../OfferForm/components/Currency'
-import amountOfTransactionSvg from '../images/amountOfTransactionSvg'
-import AmountOfTransaction from '../OfferForm/components/AmountOfTransaction'
-import locationSvg from '../images/locationSvg'
-import Location from '../OfferForm/components/Location'
-import paymentMethodSvg from '../images/paymentMethod'
-import PaymentMethod from '../OfferForm/components/PaymentMethod'
-import networkSvg from '../images/networkSvg'
-import Network from '../OfferForm/components/Network'
-import descriptionSvg from './images/descriptionSvg'
-import Description from '../OfferForm/components/Description'
-import friendLevelSvg from '../images/friendLevelSvg'
-import FriendLevel from '../OfferForm/components/FriendLevel'
-import PremiumOrDiscount from '../OfferForm/components/PremiumOrDiscount'
-import {useMolecule} from 'jotai-molecules'
-import {offerFormMolecule} from './atoms/offerFormStateAtoms'
-import {type Props} from '../Section'
-import coinsSvg from '../images/coinsSvg'
-import spokenLanguagesSvg from '../images/spokenLanguagesSvg'
-import SpokenLanguages from '../OfferForm/components/SpokenLanguages'
 import {getTokens} from 'tamagui'
+import {useTranslation} from '../../utils/localization/I18nProvider'
+import AmountOfTransaction from '../OfferForm/components/AmountOfTransaction'
+import Currency from '../OfferForm/components/Currency'
+import Description from '../OfferForm/components/Description'
 import Expiration from '../OfferForm/components/Expiration'
+import FriendLevel from '../OfferForm/components/FriendLevel'
+import Location from '../OfferForm/components/Location'
+import Network from '../OfferForm/components/Network'
+import PaymentMethod from '../OfferForm/components/PaymentMethod'
+import PremiumOrDiscount from '../OfferForm/components/PremiumOrDiscount'
+import SpokenLanguages from '../OfferForm/components/SpokenLanguages'
+import {type Props} from '../Section'
+import amountOfTransactionSvg from '../images/amountOfTransactionSvg'
+import coinsSvg from '../images/coinsSvg'
+import friendLevelSvg from '../images/friendLevelSvg'
+import locationSvg from '../images/locationSvg'
+import networkSvg from '../images/networkSvg'
+import paymentMethodSvg from '../images/paymentMethod'
+import spokenLanguagesSvg from '../images/spokenLanguagesSvg'
+import {offerFormMolecule} from './atoms/offerFormStateAtoms'
+import descriptionSvg from './images/descriptionSvg'
 
 export default function useContent(): Props[] {
   const {t} = useTranslation()
@@ -43,9 +43,6 @@ export default function useContent(): Props[] {
     offerExpirationModalVisibleAtom,
     updateCurrencyLimitsAtom,
     updateLocationStatePaymentMethodAtom,
-    locationSuggestionsAtom,
-    locationSuggestionsAtomsAtom,
-    updateAndRefreshLocationSuggestionsActionAtom,
     setOfferLocationActionAtom,
     spokenLanguagesAtomsAtom,
     removeSpokenLanguageActionAtom,
@@ -104,11 +101,6 @@ export default function useContent(): Props[] {
         children: (
           <Location
             setOfferLocationActionAtom={setOfferLocationActionAtom}
-            locationSuggestionsAtom={locationSuggestionsAtom}
-            locationSuggestionsAtomsAtom={locationSuggestionsAtomsAtom}
-            updateAndRefreshLocationSuggestionsActionAtom={
-              updateAndRefreshLocationSuggestionsActionAtom
-            }
             locationAtom={locationAtom}
             locationStateAtom={locationStateAtom}
             updateLocationStatePaymentMethodAtom={
@@ -182,9 +174,6 @@ export default function useContent(): Props[] {
       expirationDateAtom,
       offerExpirationModalVisibleAtom,
       setOfferLocationActionAtom,
-      locationSuggestionsAtom,
-      locationSuggestionsAtomsAtom,
-      updateAndRefreshLocationSuggestionsActionAtom,
       locationAtom,
       locationStateAtom,
       updateLocationStatePaymentMethodAtom,

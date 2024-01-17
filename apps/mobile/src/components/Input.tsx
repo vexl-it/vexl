@@ -47,6 +47,9 @@ const RootContainer = styled(XStack, {
         bc: 'transparent',
         p: '$0',
       },
+      black: {
+        bc: '$black',
+      },
     },
   } as const,
 })
@@ -73,6 +76,10 @@ const InputStyled = styled(RNTextInput, {
       transparentOnGrey: {
         color: '$greyOnBlack',
       },
+      black: {
+        color: '$white',
+        selectionColor: getTokens().color.main.val,
+      },
     },
     textColor: {
       '...color': (color) => {
@@ -97,6 +104,10 @@ const StyledText = styled(Text, {
       transparentOnGrey: {
         color: '$greyOnBlack',
       },
+      black: {
+        color: '$white',
+        selectionColor: getTokens().color.main.val,
+      },
     },
     textColor: {
       '...color': (color) => {
@@ -119,7 +130,7 @@ export interface Props extends Omit<TextInputProps, 'style'> {
   textColor?: ColorTokens
   leftTextColor?: ColorTokens
   rightTextColor?: ColorTokens
-  variant?: 'greyOnWhite' | 'greyOnBlack' | 'transparentOnGrey'
+  variant?: 'greyOnWhite' | 'greyOnBlack' | 'transparentOnGrey' | 'black'
   rightElement?: ReactNode
   borderRadius?: ComponentProps<typeof RootContainer>['borderRadius']
   numberOfLines?: ComponentProps<typeof InputStyled>['numberOfLines']

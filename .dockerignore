@@ -1,3 +1,13 @@
 node_modules
 dist
 .expo
+.env
+credentials/google.json
+.git
+.turbo
+.ds_store
+apps/mobile/ios/
+apps/mobile/android/
+packages/ecdh-platform-native-utils/ios/build
+packages/ecdh-platform-native-utils/android/build
+xcuserdata

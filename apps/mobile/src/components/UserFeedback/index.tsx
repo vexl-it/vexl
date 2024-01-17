@@ -1,5 +1,5 @@
 import {type SetStateAction, type WritableAtom} from 'jotai'
-import {ScopeProvider} from 'jotai-molecules'
+import {ScopeProvider} from 'bunshi/dist/react'
 import {FeedbackScope} from './atoms'
 import {type Feedback} from '@vexl-next/domain/src/general/feedback'
 import FeedbackBanner from './components/FeedbackBanner'

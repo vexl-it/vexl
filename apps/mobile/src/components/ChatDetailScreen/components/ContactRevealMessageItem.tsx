@@ -1,6 +1,6 @@
 import {type ChatMessageWithState} from '../../../state/chat/domain'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
-import {useMolecule} from 'jotai-molecules'
+import {useMolecule} from 'bunshi/dist/react'
 import Clipboard from '@react-native-clipboard/clipboard'
 import {chatMolecule} from '../atoms'
 import {useAtomValue, useSetAtom} from 'jotai'

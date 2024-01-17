@@ -19,11 +19,13 @@ import {
   type VerifyPhoneNumberResponse,
 } from '@vexl-next/rest-api/src/services/user/contracts'
 import {
+  type MeetingLocationData,
   type AmountData,
   type AvailableDateTimeOption,
   type NetworkData,
 } from '@vexl-next/domain/src/general/tradeChecklist'
 import {type ChatIds} from './state/chat/domain'
+import {type LocationSuggestion} from '@vexl-next/rest-api/src/services/location/contracts'
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type RootStackParamsList = {
@@ -165,6 +167,18 @@ export type TradeChecklistStackParamsList = {
     readonly navigateBackToChatOnSave?: boolean | undefined
   }
   BtcAddress: undefined
+
+  LocationMapPreview: {
+    readonly selectedLocation: MeetingLocationData
+    readonly submitUpdateOnPick?: boolean | undefined
+  }
+  LocationMapSelect: {
+    readonly selectedLocation: LocationSuggestion
+    readonly submitUpdateOnPick?: boolean | undefined
+  }
+  LocationSearch: {
+    readonly submitUpdateOnPick?: boolean | undefined
+  }
 }
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions

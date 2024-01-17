@@ -1,7 +1,7 @@
 import * as T from 'fp-ts/Task'
 import {pipe} from 'fp-ts/function'
 import {useAtomValue, useSetAtom} from 'jotai'
-import {useMolecule} from 'jotai-molecules'
+import {useMolecule} from 'bunshi/dist/react'
 import {useCallback, useState} from 'react'
 import {ScrollView} from 'react-native'
 import {Stack, YStack} from 'tamagui'

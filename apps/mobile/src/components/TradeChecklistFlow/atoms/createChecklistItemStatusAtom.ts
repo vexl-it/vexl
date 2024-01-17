@@ -4,6 +4,7 @@ import updatesToBeSentAtom from './updatesToBeSentAtom'
 import {type TradeChecklistItem} from '../domain'
 import {type TradeChecklistItemStatus} from '@vexl-next/domain/src/general/tradeChecklist'
 import * as DateAndTime from '../../../state/tradeChecklist/utils/dateAndTime'
+import * as MeetingLocation from '../../../state/tradeChecklist/utils/location'
 import fastDeepEqual from 'fast-deep-equal'
 
 export default function createChecklistItemStatusAtom(
@@ -122,6 +123,15 @@ export default function createChecklistItemStatusAtom(
         return 'pending'
 
       if (contactReveal?.received?.status === 'disapproved') return 'warning'
+    }
+
+    if (item === 'MEETING_LOCATION') {
+      if (updates.location) return 'readyToSend'
+      if (MeetingLocation.getAgreed(tradeChecklistData.location))
+        return 'accepted'
+      if (MeetingLocation.getPendingSuggestion(tradeChecklistData.location))
+        return 'pending'
+      return 'initial'
     }
 
     return 'initial'

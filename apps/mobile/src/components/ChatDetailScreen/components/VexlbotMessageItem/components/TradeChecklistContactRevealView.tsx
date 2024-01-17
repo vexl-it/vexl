@@ -1,4 +1,4 @@
-import {useMolecule} from 'jotai-molecules'
+import {useMolecule} from 'bunshi/dist/react'
 import Clipboard from '@react-native-clipboard/clipboard'
 import {chatMolecule} from '../../../atoms'
 import * as contact from '../../../../../state/tradeChecklist/utils/contact'

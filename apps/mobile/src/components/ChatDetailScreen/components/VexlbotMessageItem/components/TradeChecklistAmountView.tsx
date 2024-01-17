@@ -1,5 +1,5 @@
 import {useAtomValue, useSetAtom} from 'jotai'
-import {useMolecule} from 'jotai-molecules'
+import {useMolecule} from 'bunshi/dist/react'
 import {chatMolecule} from '../../../atoms'
 import * as amount from '../../../../../state/tradeChecklist/utils/amount'
 import VexlbotBubble from './VexlbotBubble'

@@ -1,5 +1,6 @@
 import {atom} from 'jotai'
 import {
+  type MeetingLocationData,
   type AmountData,
   type AvailableDateTimeOption,
   type IdentityReveal,
@@ -109,6 +110,19 @@ export const revealContactActionAtom = atom(
       ...updates,
       contact: {
         ...contact,
+        timestamp: unixMillisecondsNow(),
+      },
+    }))
+  }
+)
+
+export const addMeetingLocationActionAtom = atom(
+  null,
+  (get, set, locationData: MeetingLocationData) => {
+    set(updatesToBeSentAtom, (updates) => ({
+      ...updates,
+      location: {
+        data: locationData,
         timestamp: unixMillisecondsNow(),
       },
     }))

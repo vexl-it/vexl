@@ -4,7 +4,7 @@ import {useAtom} from 'jotai'
 import {useMemo} from 'react'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {type ObjectionType} from '@vexl-next/domain/src/general/feedback'
-import {useMolecule} from 'jotai-molecules'
+import {useMolecule} from 'bunshi/dist/react'
 import {feedbackMolecule} from '../atoms'
 
 interface Props extends TouchableOpacityProps {

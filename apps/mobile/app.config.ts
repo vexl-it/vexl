@@ -67,6 +67,7 @@ export default {
     'bundleIdentifier': extra.packageName,
     'config': {
       'usesNonExemptEncryption': false,
+      'googleMapsApiKey': 'AIzaSyBPgybp7oEgATEKocJLZ6oj1M_VFbUWVwc',
     },
     'infoPlist': {
       'UIBackgroundModes': ['fetch', 'remote-notification', 'processing'],
@@ -86,6 +87,11 @@ export default {
     'adaptiveIcon': {
       'foregroundImage': extra.foregroundImage,
       'backgroundImage': extra.backgroundImage,
+    },
+    'config': {
+      'googleMaps': {
+        'apiKey': 'AIzaSyBPgybp7oEgATEKocJLZ6oj1M_VFbUWVwc',
+      },
     },
     'package': extra.packageName,
     'googleServicesFile': './creds/google-services.json',
@@ -175,6 +181,7 @@ export default {
     './expo-plugins/disable-firebase-analytics.js',
     './expo-plugins/setup-headless-background-message-processing-ios.js',
     'react-native-background-fetch',
+    './expo-plugins/react-native-maps-plugin.js',
   ],
 
   'extra': {

@@ -1,6 +1,6 @@
 import {type Atom, useAtomValue} from 'jotai/index'
 import {type ContactNormalized} from '../../../state/contacts/domain'
-import {useMolecule} from 'jotai-molecules'
+import {useMolecule} from 'bunshi/dist/react'
 import {contactSelectMolecule} from '../atom'
 import {useMemo} from 'react'
 import {Stack} from 'tamagui'

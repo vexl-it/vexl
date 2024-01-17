@@ -2,7 +2,7 @@ import {XStack} from 'tamagui'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import ContactsFilterButton from './ContactsFilterButton'
 import {contactSelectMolecule} from '../atom'
-import {useMolecule} from 'jotai-molecules'
+import {useMolecule} from 'bunshi/dist/react'
 
 function ContactsFilter(): JSX.Element {
   const {t} = useTranslation()

@@ -316,7 +316,6 @@ function DebugScreen(): JSX.Element {
                   })
               }}
             />
-
             <Button
               variant="primary"
               size="small"

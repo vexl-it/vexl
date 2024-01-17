@@ -1,6 +1,6 @@
 import {useNavigation} from '@react-navigation/native'
 import {useAtomValue, useStore} from 'jotai'
-import {useMolecule} from 'jotai-molecules'
+import {useMolecule} from 'bunshi/dist/react'
 import * as dateAndTime from '../../../../../state/tradeChecklist/utils/dateAndTime'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import Button from '../../../../Button'

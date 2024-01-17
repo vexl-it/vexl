@@ -30,6 +30,11 @@ export interface TradingChecklistContactRevealPreview {
   date: UnixMilliseconds
 }
 
+export interface TradingChecklistMeetingLocationPreview {
+  type: 'meetingLocation'
+  date: UnixMilliseconds
+}
+
 export type VexlBotMessageData =
   | TradingChecklistSuggestion
   | TradingChecklistDateAndTimePreview
@@ -37,3 +42,4 @@ export type VexlBotMessageData =
   | TradingChecklistNetworkPreview
   | TradingChecklistIdentityRevealPreview
   | TradingChecklistContactRevealPreview
+  | TradingChecklistMeetingLocationPreview

@@ -3,7 +3,7 @@ import Button from '../../Button'
 import TextInput from '../../Input'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {Stack, XStack} from 'tamagui'
-import {useMolecule} from 'jotai-molecules'
+import {useMolecule} from 'bunshi/dist/react'
 import {contactSelectMolecule} from '../atom'
 import {useAtom, useAtomValue} from 'jotai'
 

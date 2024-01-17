@@ -1,6 +1,7 @@
 // import './src/utils/wdyr'
 
 // INITIAL SETUP - KEEP THIS AT THE TOP
+import './src/utils/ThemeProvider/tamagui.config'
 import './src/components/AppLogsScreen/setupAppLogs'
 import './src/utils/notifications/backgroundHandler'
 import './src/utils/setupCryptoImplementation'

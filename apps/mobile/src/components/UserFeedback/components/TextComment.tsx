@@ -2,7 +2,7 @@ import {useAtom} from 'jotai'
 import Input from '../../Input'
 import {getTokens, Stack, Text} from 'tamagui'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
-import {useMolecule} from 'jotai-molecules'
+import {useMolecule} from 'bunshi/dist/react'
 import {feedbackMolecule} from '../atoms'
 
 const MAX_INPUT_LENGTH = 200

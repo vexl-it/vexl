@@ -1,6 +1,6 @@
 import {getTokens, Stack, YStack} from 'tamagui'
 import {useAtom, useAtomValue, useSetAtom} from 'jotai'
-import {useMolecule} from 'jotai-molecules'
+import {useMolecule} from 'bunshi/dist/react'
 import {chatMolecule} from '../atoms'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {PHOTO_AND_INFO_PHOTO_TOP_HEIGHT} from './OtherSideNamePhotoAndInfo'

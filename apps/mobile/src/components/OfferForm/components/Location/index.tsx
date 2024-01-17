@@ -4,7 +4,7 @@ import {useState} from 'react'
 import {getTokens, Stack, Text, XStack, YStack} from 'tamagui'
 import SvgImage from '../../../Image'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
-import {TouchableOpacity, TouchableWithoutFeedback} from 'react-native'
+import {Modal, TouchableOpacity, TouchableWithoutFeedback} from 'react-native'
 import closeSvg from '../../../images/closeSvg'
 import magnifyingGlass from '../../../images/magnifyingGlass'
 import Help from '../../../Help'
@@ -15,29 +15,28 @@ import {
   useAtomValue,
   useSetAtom,
   type WritableAtom,
-  type Atom,
 } from 'jotai'
 import {
   type Location,
   type LocationState,
 } from '@vexl-next/domain/src/general/offers'
-import LocationSearch from '../LocationSearch'
 import Info from '../../../Info'
 import {type LocationSuggestion} from '@vexl-next/rest-api/src/services/location/contracts'
+import LocationSearch from '../../../LocationSearch'
+import {
+  type LocationSessionId,
+  newLocationSessionId,
+} from '../../../LocationSearch/molecule'
+import ScreenTitle from '../../../ScreenTitle'
+import IconButton from '../../../IconButton'
+import Screen from '../../../Screen'
 
 interface Props {
   setOfferLocationActionAtom: WritableAtom<
     null,
-    [locationSuggestionAtom: Atom<LocationSuggestion>],
+    [locationSuggestionAtom: LocationSuggestion],
     void
   >
-  updateAndRefreshLocationSuggestionsActionAtom: WritableAtom<
-    null,
-    [request: {phrase: string; lang: string}],
-    Promise<void>
-  >
-  locationSuggestionsAtom: PrimitiveAtom<LocationSuggestion[]>
-  locationSuggestionsAtomsAtom: Atom<Array<Atom<LocationSuggestion>>>
   locationAtom: PrimitiveAtom<Location[] | undefined>
   locationStateAtom: PrimitiveAtom<LocationState | undefined>
   updateLocationStatePaymentMethodAtom: WritableAtom<
@@ -53,9 +52,6 @@ interface Props {
 
 function LocationComponent({
   setOfferLocationActionAtom,
-  locationSuggestionsAtomsAtom,
-  locationSuggestionsAtom,
-  updateAndRefreshLocationSuggestionsActionAtom,
   locationAtom,
   locationStateAtom,
   updateLocationStatePaymentMethodAtom,
@@ -70,8 +66,11 @@ function LocationComponent({
     updateLocationStatePaymentMethodAtom
   )
   const [helpVisible, setHelpVisible] = useState<boolean>(false)
+
   const [locationSearchVisible, setLocationSearchVisible] =
-    useState<boolean>(false)
+    useState<LocationSessionId | null>(null)
+
+  const setOfferLocation = useSetAtom(setOfferLocationActionAtom)
 
   const onLocationStateChange = (locationState: LocationState): void => {
     updateLocationStatePaymentMethod({locationState})
@@ -94,7 +93,7 @@ function LocationComponent({
           {(!location || (location && location.length < 3)) && (
             <TouchableWithoutFeedback
               onPress={() => {
-                setLocationSearchVisible(true)
+                setLocationSearchVisible(newLocationSessionId())
               }}
             >
               <XStack ai="center" p="$5" bc="$grey" br="$5">
@@ -143,18 +142,41 @@ function LocationComponent({
         />
       )}
       {locationSearchVisible && (
-        <LocationSearch
-          setOfferLocationActionAtom={setOfferLocationActionAtom}
-          updateAndRefreshLocationSuggestionsActionAtom={
-            updateAndRefreshLocationSuggestionsActionAtom
-          }
-          locationSuggestionsAtomsAtom={locationSuggestionsAtomsAtom}
-          locationSuggestionsAtom={locationSuggestionsAtom}
-          onClosePress={() => {
-            setLocationSearchVisible(false)
+        <Modal
+          animationType="fade"
+          visible={!!locationSearchVisible}
+          onRequestClose={() => {
+            setLocationSearchVisible(null)
           }}
-          visible={locationSearchVisible}
-        />
+          // Looks like it is not needed anymore.
+          // onShow={() => {
+          //   if (Platform.OS === 'android') {
+          //     setTimeout(() => {
+          //       inputRef.current?.blur()
+          //       inputRef.current?.focus()
+          //     }, 100)
+          //   }
+          // }}
+        >
+          <Screen customHorizontalPadding={16}>
+            <ScreenTitle text={''}>
+              <IconButton
+                variant="dark"
+                icon={closeSvg}
+                onPress={() => {
+                  setLocationSearchVisible(null)
+                }}
+              />
+            </ScreenTitle>
+            <LocationSearch
+              onPress={(a) => {
+                setOfferLocation(a)
+                setLocationSearchVisible(null)
+              }}
+              sessionId={locationSearchVisible}
+            />
+          </Screen>
+        </Modal>
       )}
       {helpVisible && (
         <Help

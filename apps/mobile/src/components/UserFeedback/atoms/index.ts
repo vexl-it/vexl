@@ -1,4 +1,4 @@
-import {createScope, molecule} from 'jotai-molecules'
+import {createScope, molecule} from 'bunshi/dist/react'
 import {
   type Feedback,
   type FeedbackType,

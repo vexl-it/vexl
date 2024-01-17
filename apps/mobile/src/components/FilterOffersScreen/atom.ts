@@ -1,6 +1,4 @@
-import {type Atom, atom, type SetStateAction, type WritableAtom} from 'jotai'
 import {type CurrencyCode} from '@vexl-next/domain/src/general/currency.brand'
-import {currencies} from '../../utils/localization/currency'
 import {
   type BtcNetwork,
   type IntendedConnectionLevel,
@@ -10,20 +8,16 @@ import {
   type Sort,
   type SpokenLanguage,
 } from '@vexl-next/domain/src/general/offers'
+import {type LocationSuggestion} from '@vexl-next/rest-api/src/services/location/contracts'
+import {atom, type SetStateAction, type WritableAtom} from 'jotai'
 import {splitAtom} from 'jotai/utils'
-import getValueFromSetStateActionOfAtom from '../../utils/atomUtils/getValueFromSetStateActionOfAtom'
-import {
-  type GetLocationSuggestionsRequest,
-  type LocationSuggestion,
-} from '@vexl-next/rest-api/src/services/location/contracts'
-import {pipe} from 'fp-ts/function'
-import {fetchLocationSuggestionsAtom} from '../../state/location/atoms/fetchLocationSuggestionsAtom'
-import * as T from 'fp-ts/Task'
 import {type OffersFilter} from '../../state/marketplace/domain'
 import {
   offersFilterFromStorageAtom,
   offersFilterInitialState,
 } from '../../state/marketplace/filterAtoms'
+import getValueFromSetStateActionOfAtom from '../../utils/atomUtils/getValueFromSetStateActionOfAtom'
+import {currencies} from '../../utils/localization/currency'
 
 export const currencyAtom = atom<CurrencyCode | undefined>(
   offersFilterInitialState.currency
@@ -164,31 +158,14 @@ export const saveSelectedSpokenLanguagesActionAtom = atom(null, (get, set) => {
   set(spokenLanguagesAtom, get(selectedSpokenLanguagesAtom))
 })
 
-export const locationSuggestionsAtom = atom<LocationSuggestion[]>([])
-
-export const locationSuggestionsAtomsAtom = splitAtom(locationSuggestionsAtom)
-
-export const updateAndRefreshLocationSuggestionsActionAtom = atom(
-  null,
-  (get, set, request: GetLocationSuggestionsRequest) => {
-    return pipe(
-      set(fetchLocationSuggestionsAtom, request),
-      T.map((result) => {
-        set(locationSuggestionsAtom, result.result)
-      })
-    )()
-  }
-)
-
 export const focusTextFilterAtom = atom<string | undefined>(
   offersFilterInitialState.text
 )
 
 export const setOfferLocationActionAtom = atom(
   null,
-  (get, set, locationSuggestionAtom: Atom<LocationSuggestion>) => {
+  (get, set, locationSuggestion: LocationSuggestion) => {
     const location = get(locationAtom)
-    const locationSuggestion = get(locationSuggestionAtom)
 
     if (
       !location?.some(

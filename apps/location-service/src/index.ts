@@ -1,73 +1,57 @@
 import './sourcemapSupport'
-import Koa from 'koa'
-import Router from 'koa-router'
-import json from 'koa-json'
+// import {registerSetryMiddleware} from './utils/sentry'
 
-import {LocationResponse, SuggestQueryData} from './brands.js'
-import startHealthServer from './healthServer.js'
-import {querySuggest} from './googleSuggest.js'
-import redisMiddleware from './utils/redisMiddleware'
+import {serve} from '@hono/node-server'
+import {zValidator} from '@hono/zod-validator'
+import {Hono} from 'hono'
+import googleGeocode from './apis/googleGeocode'
+import {querySuggest} from './apis/googleSuggest.js'
+import {GeocodeQueryData, SuggestQueryData} from './brands.js'
+import startHealthServerIfPortIsSet from './healthServer'
 
-const app = new Koa()
-const router = new Router()
+const app = new Hono()
 
-router.get(
-  '/suggest',
-  async (ctx, next) => {
-    const query = SuggestQueryData.safeParse(ctx.query)
-    if (!query.success) {
-      ctx.response.status = 400
-      ctx.response.body = query.error
-      return
-    }
+// registerSetryMiddleware(app)
 
-    // TODO remove once V1 vexl support is dropped
-    if (query.data.phrase.trim().length === 0) {
-      ctx.response.body = LocationResponse.safeParse({result: []})
-      return
-    }
-
-    ctx.state = query.data
-    await next()
-  },
-  redisMiddleware,
-  async (ctx, next) => {
-    console.info('[SUGGEST]: fetching suggestion from google apis')
-
-    const query = ctx.state as SuggestQueryData
-    const results = await querySuggest(query)
-    const toReturn = LocationResponse.safeParse({
-      result: results.map((one) => ({userData: one})),
-    })
-    if (toReturn.success) {
-      ctx.response.body = toReturn.data
-    } else {
-      console.error('Error while preparing results', toReturn.error)
-      ctx.response.status = 500
-      ctx.response.body = {message: toReturn.error.message}
-    }
-
-    await next()
-  }
-)
-
-// Middlewares
-app.use(json())
-// logging
-app.use(async (ctx, next) => {
-  console.info(`--> Received request: ${ctx.request.method} ${ctx.request.url}`)
+app.use('*', async (c, next) => {
+  const start = Date.now()
+  console.info(`--> Received request: ${c.req.method} ${c.req.url}`)
   await next()
   console.info(
-    `<-- Sending response: ${ctx.request.method} ${ctx.request.url} ${ctx.response.status}`,
-    ctx.response.body?.result?.map((one: any) => one.userData)
+    `<-- Sending response: ${c.req.method} ${c.req.url} ${c.res.status} ${
+      Date.now() - start
+    } ms`
   )
 })
 
-// Routes
-app.use(router.routes()).use(router.allowedMethods())
+app.get('/suggest', zValidator('query', SuggestQueryData), async (c, next) => {
+  const query = c.req.valid('query')
+  const results = await querySuggest(query)
 
-const PORT = process.env.PORT ?? 3000
-app.listen(PORT, () => {
-  console.log(`Server listening on ${PORT}`)
-  startHealthServer()
+  return c.json(results)
 })
+
+app.get('/geocode', zValidator('query', GeocodeQueryData), async (c) => {
+  const query = c.req.valid('query')
+  const result = await googleGeocode(query)
+
+  if (result === null) return c.json({error: 'No results found'}, 404)
+
+  return c.json(result)
+})
+
+app.get('/sentry-test', () => {
+  throw new Error('Sentry test')
+})
+
+const PORT = Number(process.env.PORT ?? 3000)
+serve(
+  {
+    fetch: app.fetch,
+    port: PORT,
+  },
+  (addressInfo) => {
+    console.log('⚡️ Location service running', addressInfo)
+    startHealthServerIfPortIsSet()
+  }
+)

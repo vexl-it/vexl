@@ -3,7 +3,7 @@ import SvgImage from '../../Image'
 import backButtonSvg from '../../../images/backButtonSvg'
 import {getTokens, Stack} from 'tamagui'
 import {useAtom, useAtomValue} from 'jotai'
-import {useMolecule} from 'jotai-molecules'
+import {useMolecule} from 'bunshi/dist/react'
 import {feedbackMolecule} from '../atoms'
 
 function BannerBackButton(): JSX.Element {

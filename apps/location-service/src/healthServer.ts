@@ -1,12 +1,25 @@
-import Koa from 'koa'
+import {Hono} from 'hono'
+import {serve} from '@hono/node-server'
+import env from './environment'
 
-const HEALTH_SERVER_PORT = process.env.HEALTH_SERVER_PORT ?? 3001
 export default function startHealthServerIfPortIsSet(): void {
-  const app = new Koa()
-  app.use(async (ctx) => {
-    ctx.response.status = 200
+  if (!env.HEALTH_SERVER_PORT) {
+    console.log('HEALTH_SERVER_PORT not set. Not starting health server.')
+    return
+  }
+
+  const app = new Hono()
+
+  app.get('/health', (c) => {
+    return c.text('ok', 200)
   })
-  app.listen(HEALTH_SERVER_PORT, () => {
-    console.log(`Health server started on port ${HEALTH_SERVER_PORT}`)
-  })
+  serve(
+    {
+      fetch: app.fetch,
+      port: env.HEALTH_SERVER_PORT,
+    },
+    (addressInfo) => {
+      console.log('⚡️ Location service health server running', addressInfo)
+    }
+  )
 }

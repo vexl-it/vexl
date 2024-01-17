@@ -1,6 +1,6 @@
 import ChatHeader from './ChatHeader'
 import {useAtom, useAtomValue} from 'jotai'
-import {useMolecule} from 'jotai-molecules'
+import {useMolecule} from 'bunshi/dist/react'
 import {chatMolecule} from '../atoms'
 import ChatTextInput from './ChatTextInput'
 import {Stack} from 'tamagui'

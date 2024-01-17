@@ -1,7 +1,7 @@
 import {type Atom, useAtom} from 'jotai'
 import Checkbox from '../../Checkbox'
 import {useMemo} from 'react'
-import {useMolecule} from 'jotai-molecules'
+import {useMolecule} from 'bunshi/dist/react'
 import {contactSelectMolecule} from '../atom'
 import {type ContactNormalized} from '../../../state/contacts/domain'
 

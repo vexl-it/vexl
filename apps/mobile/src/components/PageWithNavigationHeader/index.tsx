@@ -13,9 +13,10 @@ import KeyboardAvoidingView from '../KeyboardAvoidingView'
 
 interface Props {
   children: ReactNode
+  fullScreen?: boolean
 }
 
-function PageWithNavigationHeader({children}: Props): JSX.Element {
+function PageWithNavigationHeader({children, fullScreen}: Props): JSX.Element {
   const {bottom} = useSafeAreaInsets()
 
   return (
@@ -23,11 +24,11 @@ function PageWithNavigationHeader({children}: Props): JSX.Element {
       <Stack
         f={1}
         bc={'$black'}
-        pt={'$2'}
-        px={'$2'}
-        btlr={'$7'}
-        btrr={'$7'}
-        mb={bottom + 20}
+        pt={fullScreen ? 0 : '$2'}
+        px={fullScreen ? 0 : '$2'}
+        btlr={fullScreen ? 0 : '$7'}
+        btrr={fullScreen ? 0 : '$7'}
+        mb={fullScreen ? 0 : bottom + 20}
       >
         <Header />
         {children}

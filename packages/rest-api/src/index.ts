@@ -1,10 +1,10 @@
 import {z} from 'zod'
 import {ServiceUrl} from './ServiceUrl.brand'
-import * as user from './services/user'
-import * as contact from './services/contact'
-import * as offer from './services/offer'
 import * as chat from './services/chat'
+import * as contact from './services/contact'
 import * as location from './services/location'
+import * as offer from './services/offer'
+import * as user from './services/user'
 
 import {PlatformName} from './PlatformName'
 import * as UserSessionCredentials from './UserSessionCredentials.brand'
@@ -24,7 +24,7 @@ export interface CredentialHeaders {
   signature: string
 }
 
-export {user, contact, offer, chat, location}
+export {chat, contact, location, offer, user}
 
 export const ENV_PRESETS: {stageEnv: EnvPreset; prodEnv: EnvPreset} = {
   stageEnv: {
@@ -32,7 +32,7 @@ export const ENV_PRESETS: {stageEnv: EnvPreset; prodEnv: EnvPreset} = {
     contactMs: ServiceUrl.parse('https://stage-contact.vexl.it'),
     chatMs: ServiceUrl.parse('https://stage-chat.vexl.it'),
     offerMs: ServiceUrl.parse('https://stage-offer2.vexl.it'),
-    locationMs: ServiceUrl.parse('https://location.vexl.it'),
+    locationMs: ServiceUrl.parse('https://stage-location.vexl.it'),
   },
   prodEnv: {
     userMs: ServiceUrl.parse('https://user.vexl.it'),
@@ -43,5 +43,4 @@ export const ENV_PRESETS: {stageEnv: EnvPreset; prodEnv: EnvPreset} = {
   },
 }
 
-export {UserSessionCredentials}
-export {PlatformName}
+export {PlatformName, UserSessionCredentials}

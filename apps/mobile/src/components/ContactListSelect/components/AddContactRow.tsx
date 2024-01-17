@@ -4,7 +4,7 @@ import addSvg from '../image/addSvg'
 import {type ContactNormalized} from '../brands/ContactNormalized.brand'
 import {Stack, Text} from 'tamagui'
 import {TouchableOpacity} from 'react-native'
-import {useMolecule} from 'jotai-molecules'
+import {useMolecule} from 'bunshi/dist/react'
 import {contactSelectMolecule} from '../atom'
 import {useSetAtom} from 'jotai'
 

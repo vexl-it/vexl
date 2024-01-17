@@ -1,5 +1,5 @@
 import {useAtomValue, useStore} from 'jotai'
-import {ScopeProvider} from 'jotai-molecules'
+import {ScopeProvider} from 'bunshi/dist/react'
 import React, {useCallback, useMemo} from 'react'
 import {Stack, Text} from 'tamagui'
 import backButtonSvg from '../../images/backButtonSvg'

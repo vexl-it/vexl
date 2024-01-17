@@ -6,6 +6,7 @@ import {
   DateTimeChatMessage,
   IdentityRevealChatMessage,
   ContactRevealChatMessage,
+  MeetingLocationChatMessage,
   NetworkChatMessage,
 } from '@vexl-next/domain/src/general/tradeChecklist'
 import reportError from '../../utils/reportError'
@@ -34,8 +35,8 @@ export const TradeChecklistInState = z.object({
     .catch(catchFormatError),
   location: z
     .object({
-      sent: z.object({}).optional(),
-      received: z.object({}).optional(),
+      sent: MeetingLocationChatMessage.optional(),
+      received: MeetingLocationChatMessage.optional(),
     })
     .default({})
     .catch(catchFormatError),

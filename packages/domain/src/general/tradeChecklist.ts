@@ -128,9 +128,34 @@ export const ContactRevealChatMessage =
   TradeChecklistMessageBase.merge(ContactReveal)
 export type ContactRevealChatMessage = z.TypeOf<typeof ContactRevealChatMessage>
 
+export const MeetingLocationData = z.object({
+  address: z.string(),
+  latitude: z.number(),
+  longitude: z.number(),
+  viewport: z.object({
+    northeast: z.object({
+      latitude: z.number(),
+      longitude: z.number(),
+    }),
+    southwest: z.object({
+      latitude: z.number(),
+      longitude: z.number(),
+    }),
+  }),
+  note: z.string().optional(),
+})
+export type MeetingLocationData = z.TypeOf<typeof MeetingLocationData>
+
+export const MeetingLocationChatMessage = TradeChecklistMessageBase.extend({
+  data: MeetingLocationData,
+})
+export type MeetingLocationChatMessage = z.TypeOf<
+  typeof MeetingLocationChatMessage
+>
+
 export const TradeChecklistUpdate = z.object({
   dateAndTime: DateTimeChatMessage.optional(),
-  location: z.object({}).optional(),
+  location: MeetingLocationChatMessage.optional(),
   amount: AmountChatMessage.optional(),
   network: NetworkChatMessage.optional(),
   identity: IdentityRevealChatMessage.optional(),

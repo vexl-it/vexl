@@ -9,7 +9,7 @@ import {
   type Atom,
   type SetStateAction,
 } from 'jotai'
-import {useMolecule} from 'jotai-molecules'
+import {useMolecule} from 'bunshi/dist/react'
 import React, {useCallback, useMemo} from 'react'
 import {
   Image,

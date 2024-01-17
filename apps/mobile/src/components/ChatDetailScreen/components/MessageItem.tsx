@@ -1,6 +1,6 @@
 import React from 'react'
 import {type Atom, useAtomValue} from 'jotai'
-import {useMolecule} from 'jotai-molecules'
+import {useMolecule} from 'bunshi/dist/react'
 import {chatMolecule} from '../atoms'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import BigIconMessage from './BigIconMessage'

@@ -4,7 +4,7 @@ import SvgImage from '../../Image'
 import {TouchableOpacity} from 'react-native'
 import {getTokens} from 'tamagui'
 import starSvg from '../images/starSvg'
-import {useMolecule} from 'jotai-molecules'
+import {useMolecule} from 'bunshi/dist/react'
 import {feedbackMolecule} from '../atoms'
 
 interface Props {

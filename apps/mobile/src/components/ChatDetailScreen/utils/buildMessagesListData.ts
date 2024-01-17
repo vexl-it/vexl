@@ -119,6 +119,23 @@ function addVexlBotMessagesToMessagesListData(
       }
 
       return addVexlBotOrMessageWithStateToArray(messageToInsert)(a)
+    },
+    (a) => {
+      const locationInteraction = UnixMilliseconds.parse(
+        Math.max(
+          tradeChecklist.location.sent?.timestamp ?? 0,
+          tradeChecklist.location.received?.timestamp ?? 0
+        )
+      )
+      if (locationInteraction === 0) return a
+      const messageToInsert: VexlBotOrMessageWithState = {
+        type: 'vexlBot',
+        message: {
+          type: 'meetingLocation' as const,
+          date: locationInteraction,
+        },
+      }
+      return addVexlBotOrMessageWithStateToArray(messageToInsert)(a)
     }
   )
 }

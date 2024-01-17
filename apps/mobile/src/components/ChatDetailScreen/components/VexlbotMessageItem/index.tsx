@@ -9,6 +9,7 @@ import TradeChecklistNetworkView from './components/TradeChecklistNetworkView'
 import TradeChecklistAmountView from './components/TradeChecklistAmountView'
 import TradeChecklistIdentityRevealView from './components/TradeChecklistIdentityRevealView'
 import TradeChecklistContactRevealView from './components/TradeChecklistContactRevealView'
+import TradeChecklistMeetingLocationView from './components/TradeChecklistMeetingLocationView'
 
 export default function VexlbotMessageItem({
   data,
@@ -40,6 +41,10 @@ export default function VexlbotMessageItem({
 
   if (data.type === 'contactRevealPreview') {
     return <TradeChecklistContactRevealView />
+  }
+
+  if (data.type === 'meetingLocation') {
+    return <TradeChecklistMeetingLocationView />
   }
 
   return (

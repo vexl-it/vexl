@@ -4,14 +4,16 @@ import {useFocusEffect} from '@react-navigation/native'
 
 export interface HeaderState {
   hidden?: boolean
+  hiddenAllTheWay?: boolean
   title?: string
-  onClose: () => void
-  goBack: () => void
+  onClose?: () => void
+  goBack?: () => void
 }
 
 const headerStateAtom = atom<HeaderState>({
   hidden: true,
   title: undefined,
+  hiddenAllTheWay: undefined,
   goBack: () => undefined,
   onClose: () => undefined,
 })

@@ -12,7 +12,7 @@ import {
   contactsLoadingAtom,
   triggerContactsReloadAtom,
 } from '../../../../../state/contacts/atom/contactsFromDeviceAtom'
-import {useMolecule} from 'jotai-molecules'
+import {useMolecule} from 'bunshi/dist/react'
 import {contactSelectMolecule} from '../../../../ContactListSelect/atom'
 import {useOnFocusAndAppState} from '../../../../ContactListSelect/utils'
 import {useCallback, useEffect} from 'react'

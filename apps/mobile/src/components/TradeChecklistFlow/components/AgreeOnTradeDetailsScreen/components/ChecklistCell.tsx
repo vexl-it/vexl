@@ -6,6 +6,7 @@ import {Stack, Text, XStack, getTokens} from 'tamagui'
 import chevronRightSvg from '../../../../../images/chevronRightSvg'
 import {type TradeChecklistStackParamsList} from '../../../../../navigationTypes'
 import * as DateAndTime from '../../../../../state/tradeChecklist/utils/dateAndTime'
+import * as MeetingLocation from '../../../../../state/tradeChecklist/utils/location'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import Image from '../../../../Image'
 import createChecklistItemStatusAtom from '../../../atoms/createChecklistItemStatusAtom'
@@ -55,6 +56,9 @@ function ChecklistCell({item, hideNetworkCell}: Props): JSX.Element {
   )
 
   const itemDisabled = useMemo(() => {
+    if (item !== 'REVEAL_IDENTITY' && item !== 'REVEAL_PHONE_NUMBER')
+      return false
+
     const tradeChecklistData = store.get(tradeChecklistDataAtom)
     const revealIdentityAlreadySent =
       itemStatus === 'pending' &&
@@ -71,15 +75,11 @@ function ChecklistCell({item, hideNetworkCell}: Props): JSX.Element {
       tradeChecklistData.contact.sent && itemStatus === 'declined'
 
     return (
-      (item === 'REVEAL_IDENTITY' || 'REVEAL_PHONE_NUMBER') &&
-      // eslint-disable-next-line
-      (revealIdentityAlreadySent ||
-        // eslint-disable-next-line
-        contactRevealAlreadySent ||
-        contactOrIdentityRevealAccepted ||
-        // eslint-disable-next-line
-        identityRevealDeclined ||
-        contactRevealDeclined)
+      !!revealIdentityAlreadySent ||
+      !!contactRevealAlreadySent ||
+      !!contactOrIdentityRevealAccepted ||
+      !!identityRevealDeclined ||
+      contactRevealDeclined
     )
   }, [item, itemStatus, store])
 
@@ -132,6 +132,17 @@ function ChecklistCell({item, hideNetworkCell}: Props): JSX.Element {
       void revealIdentity()
     } else if (item === 'REVEAL_PHONE_NUMBER') {
       void revealContact()
+    } else if (item === 'MEETING_LOCATION') {
+      const pendingSuggestion = MeetingLocation.getPendingSuggestion(
+        tradeChecklistData.location
+      )
+      if (pendingSuggestion?.by === 'them') {
+        navigation.navigate('LocationMapPreview', {
+          selectedLocation: pendingSuggestion.data.data,
+        })
+      } else {
+        navigation.navigate('LocationSearch', {})
+      }
     }
   }, [store, item, navigation, revealIdentity, revealContact])
 
@@ -162,10 +173,13 @@ function ChecklistCell({item, hideNetworkCell}: Props): JSX.Element {
       return itemDisabled
         ? t('tradeChecklist.contactRevealAlreadySent')
         : undefined
+    } else if (item === 'MEETING_LOCATION') {
+      return MeetingLocation.getSubtitle(nextChecklistData.location)
     }
   }, [
     item,
     nextChecklistData.dateAndTime,
+    nextChecklistData.location,
     t,
     otherSideData.userName,
     itemDisabled,
@@ -190,9 +204,9 @@ function ChecklistCell({item, hideNetworkCell}: Props): JSX.Element {
         br={'$4'}
         opacity={itemDisabled ? 0.7 : 1}
       >
-        <XStack ai={'center'} space={'$4'}>
+        <XStack ai={'center'} space={'$4'} f={1}>
           <StatusIndicator itemStatus={itemStatus} />
-          <Stack>
+          <Stack f={1}>
             <Text fos={16} ff={'$body500'} col={'$white'}>
               {t(`tradeChecklist.options.${item}`)}
             </Text>
@@ -203,7 +217,7 @@ function ChecklistCell({item, hideNetworkCell}: Props): JSX.Element {
             )}
           </Stack>
         </XStack>
-        <XStack ai={'center'} space={'$2'}>
+        <XStack ai={'center'}>
           {!itemDisabled && (
             <Image
               source={chevronRightSvg}

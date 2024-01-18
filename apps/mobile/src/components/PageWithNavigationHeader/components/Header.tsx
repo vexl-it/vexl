@@ -3,7 +3,7 @@ import IconButton from '../../IconButton'
 import backButtonSvg from '../../../images/backButtonSvg'
 import closeSvg from '../../images/closeSvg'
 import React from 'react'
-import {useAtomValue} from 'jotai/index'
+import {useAtomValue} from 'jotai'
 import headerStateAtom from '../state/headerStateAtom'
 
 function Header(): JSX.Element | null {

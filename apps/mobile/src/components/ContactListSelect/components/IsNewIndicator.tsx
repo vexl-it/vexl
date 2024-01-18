@@ -1,4 +1,4 @@
-import {type Atom, useAtomValue} from 'jotai/index'
+import {type Atom, useAtomValue} from 'jotai'
 import {type ContactNormalized} from '../../../state/contacts/domain'
 import {useMolecule} from 'bunshi/dist/react'
 import {contactSelectMolecule} from '../atom'

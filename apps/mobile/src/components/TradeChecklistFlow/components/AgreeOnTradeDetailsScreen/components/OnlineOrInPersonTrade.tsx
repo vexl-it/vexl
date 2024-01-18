@@ -7,19 +7,13 @@ import Image from '../../../../Image'
 import Info from '../../../../Info'
 import anonymousAvatarHappyNoBackgroundSvg from '../../../../images/anonymousAvatarHappyNoBackgroundSvg'
 import * as fromChatAtoms from '../../../../../state/tradeChecklist/atoms/fromChatAtoms'
-import {type TradeChecklistItem} from '../../../domain'
 import AnonymizationNotice from '../../AnonymizationNotice'
-import ChecklistCell from './ChecklistCell'
 import TradeRule from './TradeRule'
-
-const tradeChecklistItems: TradeChecklistItem[] = [
-  'DATE_AND_TIME',
-  'MEETING_LOCATION',
-  'CALCULATE_AMOUNT',
-  'SET_NETWORK',
-  'REVEAL_IDENTITY',
-  'REVEAL_PHONE_NUMBER',
-]
+import DateAndTimeCell from './DateAndTimeCell'
+import CalculateAmountCell from './CalculateAmountCell'
+import SetNetworkCell from './SetNetworkCell'
+import RevealPhoneNumberCell from './RevealPhoneNumberCell'
+import RevealIdentityCell from './RevealIdentityCell'
 
 const VEXL_BLOG_URL =
   'https://blog.vexl.it/how-to-do-peer-to-peer-trading-on-vexl-6745f3954ae9'
@@ -28,11 +22,7 @@ function openVexlBlog(): void {
   openUrl(VEXL_BLOG_URL)()
 }
 
-interface Props {
-  hideNetworkCell: boolean
-}
-
-function OnlineOrInPersonTrade({hideNetworkCell}: Props): JSX.Element {
+function OnlineOrInPersonTrade(): JSX.Element {
   const {t} = useTranslation()
   const offerForTradeChecklist = useAtomValue(fromChatAtoms.originOfferAtom)
 
@@ -86,13 +76,11 @@ function OnlineOrInPersonTrade({hideNetworkCell}: Props): JSX.Element {
               {t('tradeChecklist.youCanPickWhatYouFill')}
             </Text>
             <Stack my={'$8'} gap={'$2'}>
-              {tradeChecklistItems.map((item) => (
-                <ChecklistCell
-                  key={item}
-                  item={item}
-                  hideNetworkCell={hideNetworkCell}
-                />
-              ))}
+              <DateAndTimeCell />
+              <CalculateAmountCell />
+              <SetNetworkCell />
+              <RevealIdentityCell />
+              <RevealPhoneNumberCell />
             </Stack>
           </>
         )}

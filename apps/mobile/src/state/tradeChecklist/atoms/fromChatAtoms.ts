@@ -26,6 +26,22 @@ export const tradeChecklistDataAtom = focusAtom(chatWithMessagesAtom, (p) =>
   p.prop('tradeChecklist')
 )
 
+export const tradeChecklistDateAndTimeDataAtom = atom(
+  (get) => get(tradeChecklistDataAtom).dateAndTime
+)
+export const tradeChecklistAmountDataAtom = atom(
+  (get) => get(tradeChecklistDataAtom).amount
+)
+export const tradeChecklistNetworkDataAtom = atom(
+  (get) => get(tradeChecklistDataAtom).network
+)
+export const tradeChecklistIdentityDataAtom = atom(
+  (get) => get(tradeChecklistDataAtom).identity
+)
+export const tradeChecklistContactDataAtom = atom(
+  (get) => get(tradeChecklistDataAtom).contact
+)
+
 export const identityRevealedAtom = atom((get) => {
   const tradeChecklistData = get(tradeChecklistDataAtom)
   const identityRevealedOldWay = get(chatWithMessagesAtom).messages.some(
@@ -38,30 +54,6 @@ export const identityRevealedAtom = atom((get) => {
     identityRevealedOldWay
   )
 })
-
-export const contactRevealedAtom = atom((get) => {
-  const tradeChecklistData = get(tradeChecklistDataAtom)
-
-  return (
-    tradeChecklistData.contact.sent?.status === 'APPROVE_REVEAL' ||
-    tradeChecklistData.contact.received?.status === 'APPROVE_REVEAL'
-  )
-})
-
-export const tradeChecklistDataToChecklistItem = {
-  DATE_AND_TIME: focusAtom(tradeChecklistDataAtom, (o) =>
-    o.prop('dateAndTime')
-  ),
-  CALCULATE_AMOUNT: focusAtom(tradeChecklistDataAtom, (o) => o.prop('amount')),
-  SET_NETWORK: focusAtom(tradeChecklistDataAtom, (o) => o.prop('network')),
-  MEETING_LOCATION: focusAtom(tradeChecklistDataAtom, (o) =>
-    o.prop('location')
-  ),
-  REVEAL_IDENTITY: focusAtom(tradeChecklistDataAtom, (o) => o.prop('identity')),
-  REVEAL_PHONE_NUMBER: focusAtom(tradeChecklistDataAtom, (o) =>
-    o.prop('contact')
-  ),
-} as const
 
 const chatOriginAtom = focusAtom(chatWithMessagesAtom, (p) =>
   p.prop('chat').prop('origin')

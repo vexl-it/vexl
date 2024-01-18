@@ -29,6 +29,18 @@ const updatesToBeSentAtom = atom<TradeChecklistUpdate>(
 )
 export default updatesToBeSentAtom
 
+export const dateAndTimePickUpdateToBeSentAtom = atom(
+  (get) => get(updatesToBeSentAtom).dateAndTime?.picks?.dateTime
+)
+
+export const btcAmountUpdateToBeSentAtom = atom(
+  (get) => get(updatesToBeSentAtom).amount?.btcAmount?.toString()
+)
+
+export const networkUpdateToBeSentAtom = atom(
+  (get) => get(updatesToBeSentAtom).network?.btcNetwork
+)
+
 export const tradeChecklistWithUpdatesMergedAtom = atom((get) => {
   const tradeChecklistData = get(tradeChecklistDataAtom)
   const update = get(updatesToBeSentAtom)

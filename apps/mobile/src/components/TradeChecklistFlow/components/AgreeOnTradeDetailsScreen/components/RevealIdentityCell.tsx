@@ -1,16 +1,17 @@
-import {useAtomValue, useSetAtom, useStore} from 'jotai'
+import {useAtomValue, useSetAtom} from 'jotai'
 import {
   identityRevealedAtom,
   identityRevealTriggeredFromChatAtom,
-  tradeChecklistDataAtom,
+  tradeChecklistIdentityDataAtom,
 } from '../../../../../state/tradeChecklist/atoms/fromChatAtoms'
 import ChecklistCell from './ChecklistCell'
 import {revealIdentityWithUiFeedbackAtom} from '../../../atoms/revealIdentityAtoms'
 import {useMemo} from 'react'
 import createChecklistItemStatusAtom from '../../../atoms/createChecklistItemStatusAtom'
+import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 
 function RevealIdentityCell(): JSX.Element {
-  const store = useStore()
+  const {t} = useTranslation()
   const identityRevealed = useAtomValue(identityRevealedAtom)
   const itemStatus = useAtomValue(
     useMemo(() => createChecklistItemStatusAtom('REVEAL_IDENTITY'), [])
@@ -18,23 +19,30 @@ function RevealIdentityCell(): JSX.Element {
   const identityRevealTriggeredFromChat = useAtomValue(
     identityRevealTriggeredFromChatAtom
   )
+  const tradeChecklistIdentityData = useAtomValue(
+    tradeChecklistIdentityDataAtom
+  )
   const revealIdentity = useSetAtom(revealIdentityWithUiFeedbackAtom)
 
   const disabled = useMemo(() => {
-    const tradeChecklistData = store.get(tradeChecklistDataAtom)
     const revealIdentityAlreadySent =
-      tradeChecklistData.identity.sent && !tradeChecklistData.identity.received
+      tradeChecklistIdentityData.sent && !tradeChecklistIdentityData.received
     const identityRevealDeclined =
-      tradeChecklistData.identity.sent && itemStatus === 'declined'
+      tradeChecklistIdentityData.sent && itemStatus === 'declined'
 
     // eslint-disable-next-line
     return revealIdentityAlreadySent || identityRevealDeclined
-  }, [itemStatus, store])
+  }, [
+    itemStatus,
+    tradeChecklistIdentityData.received,
+    tradeChecklistIdentityData.sent,
+  ])
 
   return (
     <ChecklistCell
       isDisabled={disabled}
       hidden={identityRevealed || identityRevealTriggeredFromChat}
+      subtitle={t('tradeChecklist.shareRecognitionSignInChat')}
       item={'REVEAL_IDENTITY'}
       onPress={() => {
         void revealIdentity()

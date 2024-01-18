@@ -18,6 +18,9 @@ export default function createChecklistItemStatusAtom(
       const dateAndTime = tradeChecklistData.dateAndTime
       const picks = DateAndTime.getPick(dateAndTime)
 
+      if (picks?.by === 'them' && picks.pick) return 'accepted'
+      if (picks?.by === 'me' && picks.pick) return 'accepted'
+
       if (updates.dateAndTime) return 'readyToSend'
 
       if (picks) return 'pending'

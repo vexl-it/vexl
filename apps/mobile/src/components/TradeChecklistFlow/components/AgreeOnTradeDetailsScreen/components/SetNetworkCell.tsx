@@ -1,29 +1,44 @@
-import {useAtomValue, useStore} from 'jotai'
+import {useAtomValue} from 'jotai'
 import {type NavigationProp, useNavigation} from '@react-navigation/native'
 import {type TradeChecklistStackParamsList} from '../../../../../navigationTypes'
 import {useCallback} from 'react'
 import {
   originOfferAtom,
-  tradeChecklistDataAtom,
+  tradeChecklistNetworkDataAtom,
 } from '../../../../../state/tradeChecklist/atoms/fromChatAtoms'
 import ChecklistCell from './ChecklistCell'
+import {networkUpdateToBeSentAtom} from '../../../atoms/updatesToBeSentAtom'
+import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 
 function SetNetworkCell(): JSX.Element {
-  const store = useStore()
+  const {t} = useTranslation()
   const navigation: NavigationProp<TradeChecklistStackParamsList> =
     useNavigation()
   const originOffer = useAtomValue(originOfferAtom)
+  const networkUpdateToBeSent = useAtomValue(networkUpdateToBeSentAtom)
+  const tradeChecklistNetworkData = useAtomValue(tradeChecklistNetworkDataAtom)
+
+  const sideNote =
+    networkUpdateToBeSent === 'LIGHTING' ||
+    tradeChecklistNetworkData.received?.btcNetwork === 'LIGHTING'
+      ? t('tradeChecklist.network.lightning')
+      : networkUpdateToBeSent === 'ON_CHAIN' ||
+        tradeChecklistNetworkData.received?.btcNetwork === 'ON_CHAIN'
+      ? t('tradeChecklist.network.onChain')
+      : undefined
 
   const onPress = useCallback(() => {
-    const tradeChecklistData = store.get(tradeChecklistDataAtom)
-
     navigation.navigate('Network', {
       networkData: {
-        btcNetwork: tradeChecklistData.network.sent?.btcNetwork,
-        btcAddress: tradeChecklistData.network.sent?.btcAddress,
+        btcNetwork: tradeChecklistNetworkData.sent?.btcNetwork,
+        btcAddress: tradeChecklistNetworkData.sent?.btcAddress,
       },
     })
-  }, [navigation, store])
+  }, [
+    navigation,
+    tradeChecklistNetworkData.sent?.btcAddress,
+    tradeChecklistNetworkData.sent?.btcNetwork,
+  ])
 
   return (
     <ChecklistCell
@@ -35,6 +50,7 @@ function SetNetworkCell(): JSX.Element {
       }
       item={'SET_NETWORK'}
       onPress={onPress}
+      sideNote={sideNote}
     />
   )
 }

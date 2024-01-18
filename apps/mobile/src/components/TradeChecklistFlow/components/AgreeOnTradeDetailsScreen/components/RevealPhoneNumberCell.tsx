@@ -1,35 +1,38 @@
 import ChecklistCell from './ChecklistCell'
-import {useAtomValue, useSetAtom, useStore} from 'jotai'
+import {useAtomValue, useSetAtom} from 'jotai'
 import {revealContactWithUiFeedbackAtom} from '../../../atoms/revealContactAtom'
 import {useMemo} from 'react'
 import {
   contactRevealTriggeredFromChatAtom,
   identityRevealedAtom,
-  tradeChecklistDataAtom,
+  tradeChecklistContactDataAtom,
 } from '../../../../../state/tradeChecklist/atoms/fromChatAtoms'
 import createChecklistItemStatusAtom from '../../../atoms/createChecklistItemStatusAtom'
 
 function RevealPhoneNumberCell(): JSX.Element {
-  const store = useStore()
   const identityRevealed = useAtomValue(identityRevealedAtom)
   const revealContact = useSetAtom(revealContactWithUiFeedbackAtom)
   const itemStatus = useAtomValue(
     useMemo(() => createChecklistItemStatusAtom('REVEAL_PHONE_NUMBER'), [])
   )
+  const tradeChecklistContactData = useAtomValue(tradeChecklistContactDataAtom)
   const contactRevealTriggeredFromChat = useAtomValue(
     contactRevealTriggeredFromChatAtom
   )
 
   const disabled = useMemo(() => {
-    const tradeChecklistData = store.get(tradeChecklistDataAtom)
     const revealContactAlreadySent =
-      tradeChecklistData.contact.sent && !tradeChecklistData.contact.received
+      tradeChecklistContactData.sent && !tradeChecklistContactData.received
     const contactRevealDeclined =
-      tradeChecklistData.contact.sent && itemStatus === 'declined'
+      tradeChecklistContactData.sent && itemStatus === 'declined'
 
     // eslint-disable-next-line
     return revealContactAlreadySent || contactRevealDeclined
-  }, [itemStatus, store])
+  }, [
+    itemStatus,
+    tradeChecklistContactData.received,
+    tradeChecklistContactData.sent,
+  ])
 
   return (
     <ChecklistCell

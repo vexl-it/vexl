@@ -14,6 +14,7 @@ interface Props {
   isDisabled?: boolean
   item: TradeChecklistItem
   onPress: () => void
+  sideNote?: string
   subtitle?: string
 }
 
@@ -22,6 +23,7 @@ function ChecklistCell({
   isDisabled,
   item,
   onPress,
+  sideNote,
   subtitle,
 }: Props): JSX.Element {
   const {t} = useTranslation()
@@ -56,6 +58,11 @@ function ChecklistCell({
           </Stack>
         </XStack>
         <XStack ai={'center'} space={'$2'}>
+          {sideNote && (
+            <Text fos={12} ff={'$body500'} col={'$greyOnBlack'}>
+              {sideNote}
+            </Text>
+          )}
           {!isDisabled && (
             <Image
               source={chevronRightSvg}

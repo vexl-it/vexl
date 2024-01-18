@@ -1,31 +1,32 @@
 import {useCallback} from 'react'
-import {type AmountData} from '@vexl-next/domain/dist/general/tradeChecklist'
-import {tradeChecklistDataAtom} from '../../../../../state/tradeChecklist/atoms/fromChatAtoms'
-import {useStore} from 'jotai'
+import {type AmountData} from '@vexl-next/domain/src/general/tradeChecklist'
+import {tradeChecklistAmountDataAtom} from '../../../../../state/tradeChecklist/atoms/fromChatAtoms'
+import {useAtomValue} from 'jotai'
 import {type NavigationProp, useNavigation} from '@react-navigation/native'
 import {type TradeChecklistStackParamsList} from '../../../../../navigationTypes'
 import ChecklistCell from './ChecklistCell'
+import {btcAmountUpdateToBeSentAtom} from '../../../atoms/updatesToBeSentAtom'
 
 function CalculateAmountCell(): JSX.Element {
-  const store = useStore()
   const navigation: NavigationProp<TradeChecklistStackParamsList> =
     useNavigation()
 
-  const onPress = useCallback(() => {
-    const tradeChecklistData = store.get(tradeChecklistDataAtom)
+  const btcAmountUpdateToBeSent = useAtomValue(btcAmountUpdateToBeSentAtom)
+  const tradeChecklistAmountData = useAtomValue(tradeChecklistAmountDataAtom)
 
+  const onPress = useCallback(() => {
     const initialDataToSet: AmountData | undefined =
-      (tradeChecklistData.amount.received?.timestamp ?? 0) >
-      (tradeChecklistData.amount.sent?.timestamp ?? 0)
+      (tradeChecklistAmountData.received?.timestamp ?? 0) >
+      (tradeChecklistAmountData.sent?.timestamp ?? 0)
         ? {
-            ...tradeChecklistData.amount.received,
+            ...tradeChecklistAmountData.received,
             // on the side of receiver we need to map the type to custom but preserve it on side of creator (for edit trade price purposes)
             tradePriceType:
-              tradeChecklistData.amount.received?.tradePriceType === 'your'
+              tradeChecklistAmountData.received?.tradePriceType === 'your'
                 ? 'custom'
-                : tradeChecklistData.amount.received?.tradePriceType,
+                : tradeChecklistAmountData.received?.tradePriceType,
           }
-        : tradeChecklistData.amount.sent
+        : tradeChecklistAmountData.sent
 
     navigation.navigate('CalculateAmount', {
       amountData: {
@@ -36,9 +37,27 @@ function CalculateAmountCell(): JSX.Element {
         btcPrice: initialDataToSet?.btcPrice,
       },
     })
-  }, [navigation, store])
+  }, [
+    navigation,
+    tradeChecklistAmountData.received,
+    tradeChecklistAmountData.sent,
+  ])
 
-  return <ChecklistCell item={'CALCULATE_AMOUNT'} onPress={onPress} />
+  return (
+    <ChecklistCell
+      item={'CALCULATE_AMOUNT'}
+      onPress={onPress}
+      sideNote={
+        btcAmountUpdateToBeSent
+          ? `${btcAmountUpdateToBeSent} BTC`
+          : tradeChecklistAmountData.sent?.btcAmount
+          ? `${tradeChecklistAmountData.sent.btcAmount} BTC`
+          : tradeChecklistAmountData.received?.btcAmount
+          ? `${tradeChecklistAmountData.received.btcAmount} BTC`
+          : undefined
+      }
+    />
+  )
 }
 
 export default CalculateAmountCell

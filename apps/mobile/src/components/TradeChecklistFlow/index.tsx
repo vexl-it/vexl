@@ -65,6 +65,7 @@ export default function TradeChecklistFlow({
             name={'PickTimeFromSuggestions'}
             component={PickTimeFromSuggestions}
           />
+
           <StackNavigator.Screen
             name={'CalculateAmount'}
             component={CalculateAmountScreen}

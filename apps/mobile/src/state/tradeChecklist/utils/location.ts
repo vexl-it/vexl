@@ -1,6 +1,6 @@
 import fastDeepEqual from 'fast-deep-equal'
 import {type TradeChecklistInState} from '../domain'
-import {type MeetingLocationChatMessage} from './../../../../../../packages/domain/src/general/tradeChecklist'
+import {type MeetingLocationChatMessage} from '@vexl-next/domain/src/general/tradeChecklist'
 
 type MeetingLocationInState = TradeChecklistInState['location']
 
@@ -55,7 +55,7 @@ export function getPendingSuggestion(data: MeetingLocationInState):
   return undefined
 }
 
-export function getSubtitle(data: MeetingLocationInState): string | null {
+export function getSubtitle(data: MeetingLocationInState): string | undefined {
   const agreed = getAgreed(data)
   if (agreed) {
     return `${agreed.data.data.address}${
@@ -70,5 +70,5 @@ export function getSubtitle(data: MeetingLocationInState): string | null {
     }`
   }
 
-  return null
+  return undefined
 }

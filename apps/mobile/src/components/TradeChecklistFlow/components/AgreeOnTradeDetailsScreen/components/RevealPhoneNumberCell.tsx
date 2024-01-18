@@ -26,8 +26,7 @@ function RevealPhoneNumberCell(): JSX.Element {
     const contactRevealDeclined =
       tradeChecklistContactData.sent && itemStatus === 'declined'
 
-    // eslint-disable-next-line
-    return revealContactAlreadySent || contactRevealDeclined
+    return Boolean(revealContactAlreadySent) || Boolean(contactRevealDeclined)
   }, [
     itemStatus,
     tradeChecklistContactData.received,

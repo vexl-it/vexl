@@ -14,6 +14,7 @@ import CalculateAmountCell from './CalculateAmountCell'
 import SetNetworkCell from './SetNetworkCell'
 import RevealPhoneNumberCell from './RevealPhoneNumberCell'
 import RevealIdentityCell from './RevealIdentityCell'
+import MeetingLocationCell from './MeetingLocationCell'
 
 const VEXL_BLOG_URL =
   'https://blog.vexl.it/how-to-do-peer-to-peer-trading-on-vexl-6745f3954ae9'
@@ -77,6 +78,7 @@ function OnlineOrInPersonTrade(): JSX.Element {
             </Text>
             <Stack my={'$8'} gap={'$2'}>
               <DateAndTimeCell />
+              <MeetingLocationCell />
               <CalculateAmountCell />
               <SetNetworkCell />
               <RevealIdentityCell />

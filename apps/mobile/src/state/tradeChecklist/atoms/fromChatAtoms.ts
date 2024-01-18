@@ -29,6 +29,9 @@ export const tradeChecklistDataAtom = focusAtom(chatWithMessagesAtom, (p) =>
 export const tradeChecklistDateAndTimeDataAtom = atom(
   (get) => get(tradeChecklistDataAtom).dateAndTime
 )
+export const tradeChecklistLocationDataAtom = atom(
+  (get) => get(tradeChecklistDataAtom).location
+)
 export const tradeChecklistAmountDataAtom = atom(
   (get) => get(tradeChecklistDataAtom).amount
 )

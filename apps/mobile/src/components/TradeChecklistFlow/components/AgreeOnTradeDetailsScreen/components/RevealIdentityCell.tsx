@@ -30,8 +30,7 @@ function RevealIdentityCell(): JSX.Element {
     const identityRevealDeclined =
       tradeChecklistIdentityData.sent && itemStatus === 'declined'
 
-    // eslint-disable-next-line
-    return revealIdentityAlreadySent || identityRevealDeclined
+    return Boolean(revealIdentityAlreadySent) || Boolean(identityRevealDeclined)
   }, [
     itemStatus,
     tradeChecklistIdentityData.received,

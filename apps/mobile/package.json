@@ -98,7 +98,7 @@
     "react-native-map-clustering": "^3.4.2",
     "react-native-maps": "1.7.1",
     "react-native-markdown-display": "^7.0.0-alpha.2",
-    "react-native-mmkv": "^2.8.0",
+    "react-native-mmkv": "^2.11.0",
     "react-native-open-notification": "^0.1.4",
     "react-native-pager-view": "6.2.0",
     "react-native-phone-number-input": "^2.1.0",

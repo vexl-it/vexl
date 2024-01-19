@@ -18,8 +18,8 @@ function LimitInput({currencyAtom, ...props}: Props): JSX.Element {
       leftText={getCurrencyLeftText(currency)}
       rightText={getCurrencyRightText(currency)}
       variant="greyOnBlack"
-      leftTextColor={'$main'}
-      rightTextColor={'$main'}
+      leftTextColor="$main"
+      rightTextColor="$main"
       style={{f: 1}}
       {...props}
     />

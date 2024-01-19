@@ -65,9 +65,9 @@ function EditOfferHeader({offer}: Props): JSX.Element {
   return (
     <ScreenTitle text={t('editOffer.editOffer')}>
       <Stack>
-        <XStack space={'$2'} mb={'$4'}>
+        <XStack space="$2" mb="$4">
           {isSome(offer) && (
-            <XStack ai={'center'} space={'$2'}>
+            <XStack ai="center" space="$2">
               {isOfferExpired(
                 offer.value.offerInfo?.publicPart?.expirationDate
               ) && (
@@ -93,12 +93,12 @@ function EditOfferHeader({offer}: Props): JSX.Element {
         </XStack>
 
         {offer && (
-          <XStack space={'$2'} ai={'center'} jc={'flex-end'}>
+          <XStack space="$2" ai="center" jc="flex-end">
             <Stack h={12} w={12} br={12} bc={offerActive ? '$green' : '$red'} />
             <Text
               col={offerActive ? '$green' : '$red'}
               fos={18}
-              ff={'$body500'}
+              ff="$body500"
             >
               {offerActive ? t('editOffer.active') : t('editOffer.inactive')}
             </Text>

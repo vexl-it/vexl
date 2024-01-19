@@ -30,21 +30,21 @@ function VexlbotBubble({
 
   return (
     <Stack
-      m={'$4'}
-      maxWidth={'80%'}
-      br={'$6'}
-      backgroundColor={'$grey'}
-      p={'$3'}
-      space={'$2'}
+      m="$4"
+      maxWidth="80%"
+      br="$6"
+      backgroundColor="$grey"
+      p="$3"
+      space="$2"
     >
-      <XStack ai={'stretch'} jc={'space-between'}>
-        <XStack ai={'center'} space={'$2'}>
+      <XStack ai="stretch" jc="space-between">
+        <XStack ai="center" space="$2">
           <Image width={24} height={24} source={vexlbotSvg} />
           <XStack>
-            <Text fos={16} ff={'$body600'} col={'$white'}>
+            <Text fos={16} ff="$body600" col="$white">
               {t('common.vexl')}
             </Text>
-            <Text fos={16} ff={'$body600'} col={'$main'}>
+            <Text fos={16} ff="$body600" col="$main">
               {t('vexlbot.bot')}
             </Text>
           </XStack>
@@ -52,13 +52,13 @@ function VexlbotBubble({
         {status === 'accepted' && (
           <XStack
             space="$1"
-            br={'$3'}
+            br="$3"
             px="$2"
             backgroundColor="$main"
             alignItems="center"
           >
             <Image source={checkIconSvg}></Image>
-            <Text fos={12} ff="$body500" color={'$black'}>
+            <Text fos={12} ff="$body500" color="$black">
               {t('common.accepted')}
             </Text>
           </XStack>
@@ -66,13 +66,13 @@ function VexlbotBubble({
         {status === 'pending' && (
           <XStack
             space="$1"
-            br={'$3'}
+            br="$3"
             px="$2"
             backgroundColor="$yellowAccent2"
             alignItems="center"
           >
             <Image source={clockIconSvg}></Image>
-            <Text fos={12} ff="$body500" color={'$main'}>
+            <Text fos={12} ff="$body500" color="$main">
               {t('common.pending')}
             </Text>
           </XStack>
@@ -93,14 +93,14 @@ function VexlbotBubble({
           </TouchableOpacity>
         )}
       </XStack>
-      <Stack space={'$2'}>
+      <Stack space="$2">
         {introText && (
-          <Text fos={16} ff={'$body500'} col={'$greyOnWhite'}>
+          <Text fos={16} ff="$body500" col="$greyOnWhite">
             {introText}
           </Text>
         )}
         {text && (
-          <Text fos={16} ff={'$body500'} col={'$greyOnWhite'}>
+          <Text fos={16} ff="$body500" col="$greyOnWhite">
             {text}
           </Text>
         )}

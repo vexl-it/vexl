@@ -1,7 +1,7 @@
-import {type ChatWithMessagesAtom} from './focusChatWithMessagesAtom'
 import {atom, type Atom} from 'jotai'
 import {offerRerequestLimitDaysAtom} from '../../../utils/remoteConfig/atoms'
 import {canChatBeRequested} from '../utils/offerStates'
+import {type ChatWithMessagesAtom} from './focusChatWithMessagesAtom'
 
 export default function createCanChatBeRerequestedAtom(
   chatAtom: ChatWithMessagesAtom

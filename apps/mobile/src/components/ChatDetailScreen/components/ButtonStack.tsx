@@ -26,8 +26,8 @@ function StackButton({
 }: StackButtonProps): JSX.Element {
   return (
     <TouchableOpacity disabled={displaySwitch} onPress={onPress}>
-      <XStack ai={'center'} jc={'space-between'} px={'$4'} py={'$4'}>
-        <XStack space={'$3'} ai={'center'}>
+      <XStack ai="center" jc="space-between" px="$4" py="$4">
+        <XStack space="$3" ai="center">
           <Image
             stroke={
               isNegative
@@ -59,10 +59,10 @@ export interface Props {
 
 function ButtonStack({buttons}: Props): JSX.Element {
   return (
-    <YStack backgroundColor="$blackAccent1" borderRadius={'$true'}>
+    <YStack backgroundColor="$blackAccent1" borderRadius="$true">
       {buttons.map((one, i) => (
         <Fragment key={one.text}>
-          {i !== 0 && <Stack mx={'$6'} height={2} backgroundColor={'$grey'} />}
+          {i !== 0 && <Stack mx="$6" height={2} backgroundColor="$grey" />}
           <StackButton {...one} />
         </Fragment>
       ))}

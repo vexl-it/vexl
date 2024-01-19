@@ -21,22 +21,22 @@ function OffersListButtons({
   const filterActive = useAtomValue(isFilterActiveAtom)
 
   return (
-    <XStack mt="$4" mx="$2" jc="space-between" space={'$2'}>
+    <XStack mt="$4" mx="$2" jc="space-between" space="$2">
       <Stack f={1}>
         {!marketplaceEmpty || filterActive ? <FilterButtons /> : <Stack />}
       </Stack>
-      <XStack space={'$2'} mx={'$1'}>
+      <XStack space="$2" mx="$1">
         <Button
           onPress={onMyOffersPress}
-          variant={'primary'}
-          size={'small'}
+          variant="primary"
+          size="small"
           text={t('common.myOffers')}
           numberOfLines={2}
         />
         <Button
           onPress={onAddPress}
-          variant={'primary'}
-          size={'small'}
+          variant="primary"
+          size="small"
           afterIcon={addIconSvg}
         />
       </XStack>

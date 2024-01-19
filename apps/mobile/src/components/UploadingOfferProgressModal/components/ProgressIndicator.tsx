@@ -9,23 +9,21 @@ function ProgressIndicator(): JSX.Element {
   )
 
   return (
-    <YStack gap={'$2'}>
+    <YStack gap="$2">
       {data.indicateProgress.type === 'intermediate' && (
-        <Spinner color={'$black'} />
+        <Spinner color="$black" />
       )}
       {data.indicateProgress.type === 'progress' && (
         <ProgressBar percentDone={data.indicateProgress.percentage} />
       )}
 
-      <XStack fd={'row'} ai={'center'} jc={'space-between'}>
-        <Text fos={14} ff={'$body500'} col={'$black'}>
+      <XStack fd="row" ai="center" jc="space-between">
+        <Text fos={14} ff="$body500" col="$black">
           {data.belowProgressLeft ?? ''}
         </Text>
-        {
-          <Text fos={14} ff={'$body500'} col={'$greyOnWhite'}>
+        <Text fos={14} ff="$body500" col="$greyOnWhite">
             {data.belowProgressRight ?? ''}
           </Text>
-        }
       </XStack>
     </YStack>
   )

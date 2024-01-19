@@ -50,7 +50,7 @@ function PremiumOrDiscountScreen(): JSX.Element {
         }}
       />
       <Content scrollable>
-        <Text fos={16} mt={'$2'} mb={'$4'} col={'$greyOnBlack'}>
+        <Text fos={16} mt="$2" mb="$4" col="$greyOnBlack">
           {offerType === 'BUY'
             ? t('offerForm.buyCheaperByUsingDiscount')
             : t('offerForm.sellFasterWithDiscount')}
@@ -60,7 +60,7 @@ function PremiumOrDiscountScreen(): JSX.Element {
           feeAmountAtom={tempFeeAmountAtom}
           offerTypeAtom={offerTypeAtom}
         >
-          <PriceTypeIndicator displayInGrayColor mr={'$2'} />
+          <PriceTypeIndicator displayInGrayColor mr="$2" />
         </PremiumOrDiscountContent>
       </Content>
       <FooterButtonProxy

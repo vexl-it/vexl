@@ -10,7 +10,7 @@ import closeSvg from '../../images/closeSvg'
 import {TouchableWithoutFeedback} from 'react-native'
 
 function Bullet(): JSX.Element {
-  return <Stack bg={'$greyOnWhite'} w={'$1'} h={'$1'} br={'$1'} mx="$2" />
+  return <Stack bg="$greyOnWhite" w="$1" h="$1" br="$1" mx="$2" />
 }
 
 function StickyHeader(): JSX.Element | null {
@@ -50,16 +50,16 @@ function StickyHeader(): JSX.Element | null {
   return (
     <XStack
       justifyContent="space-between"
-      py={'$2'}
-      px={'$4'}
-      mt={'$4'}
+      py="$2"
+      px="$4"
+      mt="$4"
       borderColor="$grey"
       borderTopWidth={1}
       borderBottomWidth={1}
     >
       <YStack f={1}>
         <Text color="$white" fontFamily="$body500" fos={16} numberOfLines={1}>
-          <Text color={'$main'}>
+          <Text color="$main">
             {offer.ownershipInfo?.adminId
               ? t('common.me')
               : otherSideData.userName}
@@ -67,18 +67,18 @@ function StickyHeader(): JSX.Element | null {
           </Text>
           {offer.offerInfo.publicPart.offerDescription}
         </Text>
-        <XStack alignItems={'center'}>
-          <Text fontFamily="$body500" fos={14} color={'$greyOnWhite'}>
+        <XStack alignItems="center">
+          <Text fontFamily="$body500" fos={14} color="$greyOnWhite">
             {t('offer.upTo')}: {offerAmount}
           </Text>
           <Bullet />
-          <Text fontFamily="$body500" fos={14} color={'$greyOnWhite'}>
+          <Text fontFamily="$body500" fos={14} color="$greyOnWhite">
             {paymentMethodsText}
           </Text>
           {offer.offerInfo.publicPart.paymentMethod.includes('CASH') && (
             <>
               <Bullet />
-              <Text fontFamily="$body500" fos={14} color={'$greyOnWhite'}>
+              <Text fontFamily="$body500" fos={14} color="$greyOnWhite">
                 {offer.offerInfo.publicPart.location
                   .map((one) => one.city)
                   .join(', ')}

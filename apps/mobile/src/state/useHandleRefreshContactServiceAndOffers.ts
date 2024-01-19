@@ -15,8 +15,8 @@ import {useAppState} from '../utils/useAppState'
 import {createInboxAtom} from './chat/hooks/useCreateInbox'
 import {updateOfferAtom} from './marketplace'
 import {myOffersAtom} from './marketplace/atoms/myOffers'
-import {useLogout} from './useLogout'
 import {offersMissingOnServerAtom} from './marketplace/atoms/offersMissingOnServer'
+import {useLogout} from './useLogout'
 
 export function useRefreshUserOnContactService(): void {
   const api = usePrivateApiAssumeLoggedIn()

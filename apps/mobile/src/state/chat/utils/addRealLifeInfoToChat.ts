@@ -1,11 +1,11 @@
+import {type RealLifeInfo} from '@vexl-next/domain/src/general/UserNameAndAvatar.brand'
 import {
   type ContactReveal,
   type IdentityReveal,
 } from '@vexl-next/domain/src/general/tradeChecklist'
 import {type ChatWithMessages} from '../domain'
-import {type RealLifeInfo} from '@vexl-next/domain/src/general/UserNameAndAvatar.brand'
-import processTradeChecklistIdentityRevealMessageIfAny from './processTradeChecklistIdentityRevealMessageIfAny'
 import processTradeChecklistContactRevealMessageIfAny from './processTradeChecklistContactRevealMessageIfAny'
+import processTradeChecklistIdentityRevealMessageIfAny from './processTradeChecklistIdentityRevealMessageIfAny'
 
 function setRealLifeInfo(
   realLifeInfo: RealLifeInfo

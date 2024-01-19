@@ -6,13 +6,17 @@ import {
   Chat,
   ChatId,
   ChatMessage,
-  type ChatMessagePayload,
   ChatMessageRequiringNewerVersion,
   generateChatId,
   Inbox,
+  type ChatMessagePayload,
 } from '@vexl-next/domain/src/general/messaging'
 import {type BasicError} from '@vexl-next/domain/src/utility/errors'
 import {type ErrorEncryptingMessage} from '@vexl-next/resources-utils/src/chat/utils/chatCrypto'
+import {
+  type JsonStringifyError,
+  type ZodParseError,
+} from '@vexl-next/resources-utils/src/utils/parsing'
 import {
   type BadStatusCodeError,
   type NetworkError,
@@ -28,15 +32,11 @@ import {
   type NotPermittedToSendMessageToTargetInbox,
 } from '@vexl-next/rest-api/src/services/contact/contracts'
 import {z} from 'zod'
-import {type ReadingFileError} from './utils/replaceImageFileUrisWithBase64'
 import {
   createEmptyTradeChecklistInState,
   TradeChecklistInState,
 } from '../tradeChecklist/domain'
-import {
-  type JsonStringifyError,
-  type ZodParseError,
-} from '@vexl-next/resources-utils/src/utils/parsing'
+import {type ReadingFileError} from './utils/replaceImageFileUrisWithBase64'
 
 export type ApiErrorCreatingInbox = BasicError<'ApiErrorCreatingInbox'>
 export type ErrorInboxAlreadyExists = BasicError<'ErrorInboxAlreadyExists'>

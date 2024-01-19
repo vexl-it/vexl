@@ -1,7 +1,7 @@
-import {Alert} from 'react-native'
-import {getDefaultStore} from 'jotai'
-import {translationAtom} from './localization/I18nProvider'
 import Clipboard from '@react-native-clipboard/clipboard'
+import {getDefaultStore} from 'jotai'
+import {Alert} from 'react-native'
+import {translationAtom} from './localization/I18nProvider'
 
 interface ShowErrorAlertParams {
   title: string

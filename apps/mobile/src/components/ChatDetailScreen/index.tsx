@@ -59,8 +59,8 @@ export default function ChatDetailScreen({
         <Stack>
           <IconButton icon={backButtonSvg} onPress={safeGoBack} />
         </Stack>
-        <Stack f={1} ai={'center'} mt={'$6'}>
-          <Text ff={'$heading'} fos={16} col={'$white'}>
+        <Stack f={1} ai="center" mt="$6">
+          <Text ff="$heading" fos={16} col="$white">
             {t('common.chatNotFoundError')}
           </Text>
         </Stack>

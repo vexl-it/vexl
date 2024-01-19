@@ -85,8 +85,8 @@ export default function TradeChecklistMeetingLocationView(): JSX.Element | null 
                 },
               })
             }}
-            variant={'secondary'}
-            size={'small'}
+            variant="secondary"
+            size="small"
             text={t('common.respond')}
           />
         )}

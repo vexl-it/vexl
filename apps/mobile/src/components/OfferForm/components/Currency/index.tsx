@@ -41,20 +41,20 @@ function CurrencyComponent({
         }}
       >
         {currency ? (
-          <XStack ai={'center'} space={'$1'}>
-            <Text ff={'$body600'} fos={18} col={'$main'}>
+          <XStack ai="center" space="$1">
+            <Text ff="$body600" fos={18} col="$main">
               {currencies[currency].symbol}
             </Text>
-            <Text ff={'$body600'} fos={10} col={'$greyOnBlack'}>
-              {'●'}
+            <Text ff="$body600" fos={10} col="$greyOnBlack">
+              ●
             </Text>
-            <Text ff={'$body600'} fos={18} col={'$main'}>
+            <Text ff="$body600" fos={18} col="$main">
               {currencies[currency].code}
             </Text>
           </XStack>
         ) : (
           <Stack>
-            <Text ff={'$body600'} fos={18} col={'$greyOnBlack'}>
+            <Text ff="$body600" fos={18} col="$greyOnBlack">
               {t('filterOffers.chooseCurrency')}
             </Text>
           </Stack>

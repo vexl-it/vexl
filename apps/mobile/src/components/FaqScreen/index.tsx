@@ -61,16 +61,16 @@ function FaqsScreen({navigation}: Props): JSX.Element | null {
             </Text>
             {pageContent.withLink ? (
               <Text
-                ff={'$body500'}
-                col={'$greyOnWhite'}
+                ff="$body500"
+                col="$greyOnWhite"
                 onPress={openUrl(pageContent?.url ?? '')}
               >
                 <>
                   {pageContent?.textBefore}{' '}
                   <Text
-                    textDecorationLine={'underline'}
-                    ff={'$body700'}
-                    col={'$greyOnWhite'}
+                    textDecorationLine="underline"
+                    ff="$body700"
+                    col="$greyOnWhite"
                   >
                     {pageContent?.linkText}
                   </Text>{' '}
@@ -78,16 +78,16 @@ function FaqsScreen({navigation}: Props): JSX.Element | null {
                 </>
               </Text>
             ) : (
-              <Text ff={'$body500'} col={'$greyOnWhite'}>
+              <Text ff="$body500" col="$greyOnWhite">
                 {pageContent?.text}
               </Text>
             )}
             {pageContent?.type === 'HOW_CAN_YOU_ENSURE' && (
               <Text
-                mt={'$2'}
-                textDecorationLine={'underline'}
-                ff={'$body700'}
-                col={'$greyOnWhite'}
+                mt="$2"
+                textDecorationLine="underline"
+                ff="$body700"
+                col="$greyOnWhite"
                 onPress={() => {
                   navigation.navigate('TermsAndConditions')
                 }}

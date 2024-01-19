@@ -85,7 +85,7 @@ function DateAndTimeCell(): JSX.Element {
 
   return (
     <ChecklistCell
-      item={'DATE_AND_TIME'}
+      item="DATE_AND_TIME"
       onPress={onPress}
       subtitle={subtitle}
       sideNote={sideNote}

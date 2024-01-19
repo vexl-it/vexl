@@ -84,21 +84,21 @@ function TradeChecklistAmountView(): JSX.Element | null {
         <>
           {amountDataToDisplay.amountData.btcAmount && (
             <Button
-              text={'BTC'}
+              text="BTC"
               beforeIcon={copySvg}
               onPress={() => {
                 Clipboard.setString(
                   `${amountDataToDisplay.amountData.btcAmount}`
                 )
               }}
-              size={'small'}
-              variant={'primary'}
+              size="small"
+              variant="primary"
               iconFill={getTokens().color.main.val}
             />
           )}
           {amountDataToDisplay.amountData.btcAmount && (
             <Button
-              text={'SAT'}
+              text="SAT"
               beforeIcon={copySvg}
               onPress={() => {
                 Clipboard.setString(
@@ -112,8 +112,8 @@ function TradeChecklistAmountView(): JSX.Element | null {
                   }`
                 )
               }}
-              size={'small'}
-              variant={'primary'}
+              size="small"
+              variant="primary"
               iconFill={getTokens().color.main.val}
             />
           )}
@@ -126,8 +126,8 @@ function TradeChecklistAmountView(): JSX.Element | null {
                   `${amountDataToDisplay.amountData.fiatAmount}`
                 )
               }}
-              size={'small'}
-              variant={'primary'}
+              size="small"
+              variant="primary"
               iconFill={getTokens().color.main.val}
             />
           )}
@@ -144,8 +144,8 @@ function TradeChecklistAmountView(): JSX.Element | null {
           fullWidth
           disabled={!amountData?.received}
           onPress={onAcceptButtonPress}
-          variant={'secondary'}
-          size={'small'}
+          variant="secondary"
+          size="small"
           text={t('common.accept')}
         />
       )
@@ -221,7 +221,7 @@ function TradeChecklistAmountView(): JSX.Element | null {
           }
         )}
       >
-        <XStack f={1} ai={'center'} jc={'space-between'}>
+        <XStack f={1} ai="center" jc="space-between">
           {renderFooter}
         </XStack>
       </VexlbotBubble>

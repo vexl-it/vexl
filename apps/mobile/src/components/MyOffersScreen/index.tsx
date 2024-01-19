@@ -26,7 +26,7 @@ const myActiveOffers = selectAtom(myActiveOffersAtom, (offers) => offers.length)
 function ListHeaderComponent(): JSX.Element {
   return (
     <Stack mt="$4">
-      <ReencryptOffersSuggestion px={'$0'} />
+      <ReencryptOffersSuggestion px="$0" />
     </Stack>
   )
 }
@@ -45,19 +45,19 @@ function MyOffersScreen({navigation}: Props): JSX.Element {
         <IconButton variant="dark" icon={closeSvg} onPress={safeGoBack} />
       </ScreenTitle>
       <XStack
-        pos={'relative'}
-        py={'$4'}
-        px={'$2'}
-        ai={'center'}
-        jc={'space-between'}
+        pos="relative"
+        py="$4"
+        px="$2"
+        ai="center"
+        jc="space-between"
       >
         <Stack f={1}>
           <Text
             adjustsFontSizeToFit
             numberOfLines={1}
-            ff={'$body600'}
+            ff="$body600"
             fos={18}
-            col={'$white'}
+            col="$white"
           >
             {t('myOffers.activeOffers', {count: activeOffersCount})}
           </Text>
@@ -69,9 +69,9 @@ function MyOffersScreen({navigation}: Props): JSX.Element {
         onPress={() => {
           navigation.navigate('CreateOffer')
         }}
-        size={'medium'}
+        size="medium"
         text={t('myOffers.addNewOffer')}
-        variant={'secondary'}
+        variant="secondary"
       />
       <OffersList
         ListHeaderComponent={ListHeaderComponent}

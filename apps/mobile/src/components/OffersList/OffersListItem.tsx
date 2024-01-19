@@ -171,7 +171,7 @@ function OffersListItem({isFirst, offerAtom}: Props): JSX.Element {
   }, [canBeRequested, chatForOffer, isMine, navigateToChat, navigateToOffer, t])
 
   return (
-    <Stack mt={'$6'}>
+    <Stack mt="$6">
       <OfferWithBubbleTip
         onInfoRectPress={content.onPress}
         negative={
@@ -181,7 +181,7 @@ function OffersListItem({isFirst, offerAtom}: Props): JSX.Element {
         }
         button={
           <Button
-            size={'medium'}
+            size="medium"
             text={content.buttonText}
             variant={content.actionableUI ? 'secondary' : 'primary'}
             onPress={content.onPress}

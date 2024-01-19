@@ -1,10 +1,10 @@
-import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
-import {z} from 'zod'
-import {focusAtom} from 'jotai-optics'
 import {atom} from 'jotai'
-import {searchTextAtom} from './searchTextAtom'
+import {focusAtom} from 'jotai-optics'
 import {splitAtom} from 'jotai/utils'
+import {z} from 'zod'
+import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
 import deduplicate from '../../../utils/deduplicate'
+import {searchTextAtom} from './searchTextAtom'
 
 const PREVIOUS_SEARCHES_MAX_COUNT = 20
 

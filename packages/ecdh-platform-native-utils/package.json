@@ -2,11 +2,7 @@
   "name": "@vexl-next/react-native-ecdh-platform-native-utils",
   "version": "0.0.0",
   "description": "test",
-  "main": "lib/commonjs/index",
-  "module": "lib/module/index",
-  "types": "lib/typescript/index.d.ts",
-  "react-native": "src/index",
-  "source": "src/index",
+  "main": "src/index.js",
   "files": [
     "src",
     "lib",
@@ -30,8 +26,7 @@
     "test": "jest",
     "typecheck": "tsc --noEmit",
     "lint": "eslint \"**/*.{js,ts,tsx}\"",
-    "clean": "rimraf lib tsconfig.tsbuildinfo",
-    "build": "bob build"
+    "clean": "rimraf lib tsconfig.tsbuildinfo"
   },
   "devDependencies": {
     "@commitlint/config-conventional": "^17.0.2",

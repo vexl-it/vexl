@@ -1,12 +1,12 @@
-import {useAppState} from '../../../utils/useAppState'
+import {useAtom, useAtomValue} from 'jotai'
 import {useCallback} from 'react'
+import {useAppState} from '../../../utils/useAppState'
+import {contactsFromDeviceAtom} from '../atom/contactsFromDeviceAtom'
 import {
   combineContactsFromDeviceWithImportedContacts,
   combinedContactsAfterLastSubmitAtom,
   importedContactsAtom,
 } from '../index'
-import {contactsFromDeviceAtom} from '../atom/contactsFromDeviceAtom'
-import {useAtom, useAtomValue} from 'jotai'
 
 export function useSetCombinedContactsAfterLastSubmitForCurrentUsers(): void {
   const [combinedContactsAfterLastSubmit, setCombinedContactsAfterLastSubmit] =

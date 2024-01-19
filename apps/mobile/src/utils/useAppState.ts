@@ -1,5 +1,5 @@
-import {AppState, type AppStateStatus} from 'react-native'
 import {useEffect} from 'react'
+import {AppState, type AppStateStatus} from 'react-native'
 
 export function useAppState(
   callback: (state: AppStateStatus) => void,

@@ -35,13 +35,13 @@ function OfferDetailScreen({
             alignItems="center"
             justifyContent="center"
           >
-            <Text color="$white" fs={20} ff={'$body600'} textAlign={'center'}>
+            <Text color="$white" fs={20} ff="$body600" textAlign="center">
               {t('offer.offerNotFound')}
             </Text>
             <Button
-              size={'small'}
+              size="small"
               fullWidth
-              variant={'primary'}
+              variant="primary"
               onPress={safeGoBack}
               text={t('common.back')}
             />

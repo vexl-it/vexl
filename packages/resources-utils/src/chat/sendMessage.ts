@@ -1,20 +1,20 @@
-import {type ChatPrivateApi} from '@vexl-next/rest-api/src/services/chat'
 import {
   type PrivateKeyHolder,
   type PublicKeyPemBase64,
 } from '@vexl-next/cryptography/src/KeyHolder'
-import {pipe} from 'fp-ts/function'
 import {
-  type ChatMessagePayload,
   type ChatMessage,
+  type ChatMessagePayload,
   type ServerMessage,
 } from '@vexl-next/domain/src/general/messaging'
+import {type ChatPrivateApi} from '@vexl-next/rest-api/src/services/chat'
 import * as TE from 'fp-ts/TaskEither'
-import {type ErrorEncryptingMessage} from './utils/chatCrypto'
+import {pipe} from 'fp-ts/function'
 import {type ExtractLeftTE} from '../utils/ExtractLeft'
+import {type JsonStringifyError, type ZodParseError} from '../utils/parsing'
+import {type ErrorEncryptingMessage} from './utils/chatCrypto'
 import mapMessageTypeToBackwardCompatibleMessageType from './utils/mapMessageTypeToBackwardCompatibleMessageType'
 import {messageToNetwork} from './utils/messageIO'
-import {type JsonStringifyError, type ZodParseError} from '../utils/parsing'
 import {messagePreviewToNetwork} from './utils/messagePreviewIO'
 
 export type SendMessageApiErrors = ExtractLeftTE<

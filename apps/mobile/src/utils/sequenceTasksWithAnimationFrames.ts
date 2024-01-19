@@ -1,6 +1,6 @@
-import * as T from 'fp-ts/Task'
 import * as A from 'fp-ts/Array'
 import * as RA from 'fp-ts/ReadonlyArray'
+import * as T from 'fp-ts/Task'
 import {pipe} from 'fp-ts/function'
 
 const requestAnimationFrameTask: T.Task<void> = () =>

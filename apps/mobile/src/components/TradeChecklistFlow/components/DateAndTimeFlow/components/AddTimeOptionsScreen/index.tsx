@@ -40,14 +40,14 @@ function AddTimeOptionsScreen(): JSX.Element {
       />
       <Content scrollable>
         <Header title={t('tradeChecklist.dateAndTime.addYourTimeOptions')} />
-        <Stack f={1} mt={'$4'}>
+        <Stack f={1} mt="$4">
           {availableDateTimes.map((value) => (
             <TimeOptionCell key={value.date} availableDateTime={value} />
           ))}
           <Stack zi={-1} mb={BOTTOM_MARGIN_FOR_OPENED_PICKER}>
             <TouchableOpacity onPress={goBack}>
-              <XStack ai={'center'} jc={'space-between'} py={'$6'}>
-                <Text fos={16} ff={'$body500'} col={'$greyOnBlack'}>
+              <XStack ai="center" jc="space-between" py="$6">
+                <Text fos={16} ff="$body500" col="$greyOnBlack">
                   {t('common.addMore')}
                 </Text>
                 <Image

@@ -36,18 +36,18 @@ function ChangeProfilePictureScreen(): JSX.Element {
       <ScreenTitle text={t('changeProfilePicture.changeProfilePicture')}>
         <IconButton icon={closeSvg} onPress={safeGoBack} />
       </ScreenTitle>
-      <Stack f={1} ai={'center'} jc={'center'}>
+      <Stack f={1} ai="center" jc="center">
         <SelectProfilePicture selectedImageUriAtom={selectedImageUriAtom} />
       </Stack>
       {selectedImageUri ? (
-        <XStack space={'$2'}>
+        <XStack space="$2">
           <Button
             fullSize
             onPress={() => {
               setRealUserImage(undefined)
               safeGoBack()
             }}
-            variant={'primary'}
+            variant="primary"
             text={t('changeProfilePicture.clearPhoto')}
           />
           <Button
@@ -61,18 +61,18 @@ function ChangeProfilePictureScreen(): JSX.Element {
                 safeGoBack()
               }
             }}
-            variant={'secondary'}
+            variant="secondary"
             text={t('common.confirm')}
           />
         </XStack>
       ) : (
-        <Stack space={'$2'}>
+        <Stack space="$2">
           <Button
             fullWidth
             onPress={() => {
               selectImage(selectedImageUriAtom)
             }}
-            variant={'secondary'}
+            variant="secondary"
             text={t('changeProfilePicture.uploadNewPhoto')}
           />
           <Button
@@ -81,7 +81,7 @@ function ChangeProfilePictureScreen(): JSX.Element {
               setRealUserImage(undefined)
               safeGoBack()
             }}
-            variant={'primary'}
+            variant="primary"
             text={t('changeProfilePicture.clearPhoto')}
           />
         </Stack>

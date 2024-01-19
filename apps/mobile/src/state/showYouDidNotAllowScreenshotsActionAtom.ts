@@ -1,9 +1,9 @@
-import {atom} from 'jotai'
-import {translationAtom} from '../utils/localization/I18nProvider'
-import {pipe} from 'fp-ts/function'
-import {askAreYouSureActionAtom} from '../components/AreYouSureDialog'
 import * as TE from 'fp-ts/TaskEither'
+import {pipe} from 'fp-ts/function'
+import {atom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
+import {askAreYouSureActionAtom} from '../components/AreYouSureDialog'
+import {translationAtom} from '../utils/localization/I18nProvider'
 import {preferencesAtom} from '../utils/preferences'
 
 export const screenshotsDisabledAtom = focusAtom(preferencesAtom, (o) =>

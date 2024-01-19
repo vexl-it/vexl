@@ -24,7 +24,7 @@ function OfferFormSpokenLanguageCell({
     <SelectableCell
       selected
       onPress={removeSpokenLanguage}
-      size={'small'}
+      size="small"
       title={t(`offerForm.spokenLanguages.${spokenLanguage}`)}
       type={spokenLanguage}
     />

@@ -46,9 +46,9 @@ function ReportIssue(): JSX.Element {
       visible={reportIssueVisible}
     >
       <XStack
-        ai={'center'}
-        gap={'$3'}
-        mt={'$6'}
+        ai="center"
+        gap="$3"
+        mt="$6"
         onPress={() => {
           openUrl(
             `mailto:${supportEmail}?body=${emailBody}`,
@@ -57,15 +57,15 @@ function ReportIssue(): JSX.Element {
         }}
       >
         <Stack
-          ai={'center'}
-          jc={'center'}
-          bc={'$greyAccent5'}
-          p={'$3'}
-          br={'$5'}
+          ai="center"
+          jc="center"
+          bc="$greyAccent5"
+          p="$3"
+          br="$5"
         >
           <Image stroke={tokens.color.greyOnWhite.val} source={emailIconSvg} />
         </Stack>
-        <Text fos={18} ff={'$body500'} col={'$black'}>
+        <Text fos={18} ff="$body500" col="$black">
           {supportEmail}
         </Text>
       </XStack>

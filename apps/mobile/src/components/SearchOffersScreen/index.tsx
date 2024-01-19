@@ -28,7 +28,7 @@ function SearchOffersScreen(): JSX.Element {
   return (
     <Screen>
       <YStack f={1}>
-        <XStack p={'$2'} pb={0} alignItems={'center'} space={'$2'}>
+        <XStack p="$2" pb={0} alignItems="center" space="$2">
           <IconButton
             height={60}
             variant="dark"
@@ -39,7 +39,7 @@ function SearchOffersScreen(): JSX.Element {
           <IconButton
             height={60}
             onPress={submitSearch}
-            variant={'secondary'}
+            variant="secondary"
             icon={magnifyingGlass}
           />
         </XStack>

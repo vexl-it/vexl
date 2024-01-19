@@ -29,7 +29,7 @@ function BitcoinPriceChart(): JSX.Element {
   return (
     <Stack h={CHART_HEIGHT_PX}>
       <Stack f={1} pt={insets.top} />
-      <XStack jc={'space-between'} alignItems={'center'} px={'$6'} py={'$2'}>
+      <XStack jc="space-between" alignItems="center" px="$6" py="$2">
         <Stack />
         <TouchableOpacity
           onPress={() => {
@@ -38,20 +38,20 @@ function BitcoinPriceChart(): JSX.Element {
         >
           <XStack>
             {btcPriceForSelectedCurrency.state === 'loading' ? (
-              <Stack mr={'$2'}>
+              <Stack mr="$2">
                 <ActivityIndicator
-                  size={'small'}
+                  size="small"
                   color={getTokens().color.main.val}
                 />
               </Stack>
             ) : (
-              <Text fos={28} ff={'$heading'} color={'$yellowAccent1'}>
+              <Text fos={28} ff="$heading" color="$yellowAccent1">
                 {btcPriceForSelectedCurrency.state === 'error'
                   ? '- '
                   : btcPriceForSelectedCurrency.btcPrice}
               </Text>
             )}
-            <Text fos={12} ff={'$body700'} color={'$yellowAccent1'}>
+            <Text fos={12} ff="$body700" color="$yellowAccent1">
               {selectedCurrency}
             </Text>
           </XStack>

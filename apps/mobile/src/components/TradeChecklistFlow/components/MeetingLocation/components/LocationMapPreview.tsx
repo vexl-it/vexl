@@ -58,7 +58,7 @@ export default function LocationMapPreview({
         topChildren={
           <YStack marginVertical="$2" marginHorizontal="$4" space="$4">
             <IconButton
-              variant={'primary'}
+              variant="primary"
               icon={backButtonSvg}
               onPress={navigation.goBack}
             />

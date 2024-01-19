@@ -1,9 +1,9 @@
-import * as TE from 'fp-ts/TaskEither'
-import {type TaskEither} from 'fp-ts/TaskEither'
 import {
   type VerifyPhoneNumberRequest,
   type VerifyPhoneNumberResponse,
 } from '@vexl-next/rest-api/src/services/user/contracts'
+import * as TE from 'fp-ts/TaskEither'
+import {type TaskEither} from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {useUserPublicApi} from '../../../api'
 import {useTranslation} from '../../../utils/localization/I18nProvider'

@@ -12,14 +12,14 @@ function SearchSuggestionItem({atom}: {atom: Atom<string>}): JSX.Element {
   const submit = useSetAtom(submitSearchActionAtom)
 
   return (
-    <XStack px={'$2'} alignItems={'stretch'} justifyContent={'flex-start'}>
-      <Stack my={'$3'} f={1}>
+    <XStack px="$2" alignItems="stretch" justifyContent="flex-start">
+      <Stack my="$3" f={1}>
         <TouchableWithoutFeedback
           onPress={() => {
             submit(value)
           }}
         >
-          <Text fos={18} fontFamily={'$body600'} color={'$greyOnBlack'}>
+          <Text fos={18} fontFamily="$body600" color="$greyOnBlack">
             {value}
           </Text>
         </TouchableWithoutFeedback>
@@ -29,9 +29,9 @@ function SearchSuggestionItem({atom}: {atom: Atom<string>}): JSX.Element {
           setText(value)
         }}
       >
-        <Stack px={'$2'} alignItems={'center'} justifyContent={'center'}>
+        <Stack px="$2" alignItems="center" justifyContent="center">
           <Image
-            fill={'white'}
+            fill="white"
             style={{transform: [{rotate: '135deg'}]}}
             source={downArrow}
           />

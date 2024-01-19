@@ -1,9 +1,9 @@
-import {
-  userPhoneNumberAtom,
-  userDataRealOrAnonymizedAtom,
-} from '../../../../state/session'
 import {atom, type SetStateAction, type WritableAtom} from 'jotai'
 import {type ImportContactFromLinkPayload} from '../../../../state/contacts/domain'
+import {
+  userDataRealOrAnonymizedAtom,
+  userPhoneNumberAtom,
+} from '../../../../state/session'
 import {screenshotsDisabledAtom} from '../../../../state/showYouDidNotAllowScreenshotsActionAtom'
 import getValueFromSetStateActionOfAtom from '../../../../utils/atomUtils/getValueFromSetStateActionOfAtom'
 

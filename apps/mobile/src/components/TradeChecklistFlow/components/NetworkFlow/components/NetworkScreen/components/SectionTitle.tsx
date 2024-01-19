@@ -9,14 +9,14 @@ interface Props extends StackProps {
 
 function SectionTitle({icon, text, ...props}: Props): JSX.Element {
   return (
-    <XStack ai={'center'} space={'$2'} mb={'$4'} {...props}>
+    <XStack ai="center" space="$2" mb="$4" {...props}>
       <Image
         source={icon}
         width={24}
         height={24}
         color={getTokens().color.white.val}
       />
-      <Text fos={24} ff={'$body600'} col={'$white'}>
+      <Text fos={24} ff="$body600" col="$white">
         {text}
       </Text>
     </XStack>

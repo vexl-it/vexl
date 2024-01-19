@@ -1,6 +1,6 @@
 import {atom} from 'jotai'
-import {listenOnAppLogs, readLogs} from './utils/storage'
 import {selectAtom, splitAtom} from 'jotai/utils'
+import {listenOnAppLogs, readLogs} from './utils/storage'
 
 const appLogsAtom = atom<string[]>([])
 appLogsAtom.onMount = (setAtom) => {

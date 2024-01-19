@@ -41,13 +41,13 @@ function Item<T>({
       }}
     >
       <XStack
-        mt={'$2'}
-        ai={'center'}
-        jc={'space-between'}
-        bc={'$grey'}
-        px={'$4'}
-        py={'$5'}
-        br={'$4'}
+        mt="$2"
+        ai="center"
+        jc="space-between"
+        bc="$grey"
+        px="$4"
+        py="$5"
+        br="$4"
       >
         <Text
           h={24}
@@ -57,9 +57,9 @@ function Item<T>({
         >
           {item.title}
         </Text>
-        <XStack space="$2" ai={'center'}>
+        <XStack space="$2" ai="center">
           {item.rightText && (
-            <Text fos={12} ff={'$body500'} color={'$greyOnBlack'}>
+            <Text fos={12} ff="$body500" color="$greyOnBlack">
               {item.rightText}
             </Text>
           )}

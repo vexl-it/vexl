@@ -1,12 +1,25 @@
 import {type CreateAxiosDefaults} from 'axios'
+import {pipe} from 'fp-ts/function'
+import * as TE from 'fp-ts/TaskEither'
 import urlJoin from 'url-join'
+import {type PlatformName} from '../../PlatformName'
 import {type ServiceUrl} from '../../ServiceUrl.brand'
+import {type GetUserSessionCredentials} from '../../UserSessionCredentials.brand'
 import {
+  axiosCall,
+  axiosCallWithValidation,
+  createAxiosInstance,
+  createAxiosInstanceWithAuthAndLogging,
+  type LoggingFunction,
+} from '../../utils'
+import {
+  GetCryptocurrencyDetailsResponse,
+  InitPhoneNumberVerificationResponse,
+  VerifyChallengeResponse,
+  VerifyPhoneNumberResponse,
   type ChallengeCouldNotBeGenerated,
   type GetCryptocurrencyDetailsRequest,
-  GetCryptocurrencyDetailsResponse,
   type InitPhoneNumberVerificationRequest,
-  InitPhoneNumberVerificationResponse,
   type InvalidPhoneNumber,
   type PreviousCodeNotExpired,
   type PublicKeyOrHashInvalid,
@@ -16,21 +29,8 @@ import {
   type UserNotFound,
   type VerificationNotFound,
   type VerifyChallengeRequest,
-  VerifyChallengeResponse,
   type VerifyPhoneNumberRequest,
-  VerifyPhoneNumberResponse,
 } from './contracts'
-import {
-  axiosCall,
-  axiosCallWithValidation,
-  createAxiosInstance,
-  createAxiosInstanceWithAuthAndLogging,
-  type LoggingFunction,
-} from '../../utils'
-import * as TE from 'fp-ts/TaskEither'
-import {pipe} from 'fp-ts/function'
-import {type PlatformName} from '../../PlatformName'
-import {type GetUserSessionCredentials} from '../../UserSessionCredentials.brand'
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function publicApi({

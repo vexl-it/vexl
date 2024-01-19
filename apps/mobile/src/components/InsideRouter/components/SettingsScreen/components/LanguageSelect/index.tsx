@@ -28,8 +28,8 @@ function LanguageSelect(): JSX.Element {
     <Stack>
       <Text
         col="$black"
-        my={'$4'}
-        ff={'$heading'}
+        my="$4"
+        ff="$heading"
         fos={28}
         numberOfLines={2}
         adjustsFontSizeToFit

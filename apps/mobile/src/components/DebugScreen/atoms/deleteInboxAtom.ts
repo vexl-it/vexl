@@ -1,8 +1,8 @@
+import {type KeyHolder} from '@vexl-next/cryptography'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
-import {privateApiAtom} from '../../../api'
 import {atom} from 'jotai'
-import {type KeyHolder} from '@vexl-next/cryptography'
+import {privateApiAtom} from '../../../api'
 
 const deleteInboxActionAtom = atom(
   null,

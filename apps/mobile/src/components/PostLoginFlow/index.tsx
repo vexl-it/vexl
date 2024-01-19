@@ -16,11 +16,11 @@ export default function PostLoginFlow(): JSX.Element {
         }}
       >
         <Stack.Screen
-          name={'ImportContactsExplanation'}
+          name="ImportContactsExplanation"
           component={ImportContactsExplanation}
         />
         <Stack.Screen
-          name={'AllowNotificationsExplanation'}
+          name="AllowNotificationsExplanation"
           component={AllowNotificationsExplanationScreen}
         />
       </Stack.Navigator>

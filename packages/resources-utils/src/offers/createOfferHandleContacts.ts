@@ -1,7 +1,5 @@
-import {type OfferPrivateApi} from '@vexl-next/rest-api/src/services/offer'
-import {type ContactPrivateApi} from '@vexl-next/rest-api/src/services/contact'
 import {type PrivateKeyHolder} from '@vexl-next/cryptography/src/KeyHolder'
-import * as TE from 'fp-ts/TaskEither'
+import {type CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {
   type IntendedConnectionLevel,
   type OfferAdminId,
@@ -9,7 +7,24 @@ import {
   type OfferPublicPart,
   type SymmetricKey,
 } from '@vexl-next/domain/src/general/offers'
+import {type ContactPrivateApi} from '@vexl-next/rest-api/src/services/contact'
+import {type OfferPrivateApi} from '@vexl-next/rest-api/src/services/offer'
+import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
+import {type ExtractLeftTE} from '../utils/ExtractLeft'
+import {type OfferEncryptionProgress} from './OfferEncryptionProgress'
+import decryptOffer, {
+  type ErrorDecryptingOffer,
+  type NonCompatibleOfferVersionError,
+} from './decryptOffer'
+import {type ErrorConstructingPrivatePayloads} from './utils/constructPrivatePayloads'
+import encryptOfferPublicPayload, {
+  type ErrorEncryptingPublicPart,
+} from './utils/encryptOfferPublicPayload'
+import {
+  type ApiErrorFetchingContactsForOffer,
+  type ConnectionsInfoForOffer,
+} from './utils/fetchContactsForOffer'
 import generateSymmetricKey, {
   type ErrorGeneratingSymmetricKey,
 } from './utils/generateSymmetricKey'
@@ -17,21 +32,6 @@ import {
   fetchInfoAndGeneratePrivatePayloads,
   type PrivatePartEncryptionError,
 } from './utils/offerPrivatePayload'
-import encryptOfferPublicPayload, {
-  type ErrorEncryptingPublicPart,
-} from './utils/encryptOfferPublicPayload'
-import decryptOffer, {
-  type ErrorDecryptingOffer,
-  type NonCompatibleOfferVersionError,
-} from './decryptOffer'
-import {
-  type ApiErrorFetchingContactsForOffer,
-  type ConnectionsInfoForOffer,
-} from './utils/fetchContactsForOffer'
-import {type ExtractLeftTE} from '../utils/ExtractLeft'
-import {type ErrorConstructingPrivatePayloads} from './utils/constructPrivatePayloads'
-import {type OfferEncryptionProgress} from './OfferEncryptionProgress'
-import {type CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 
 export type ApiErrorWhileCreatingOffer = ExtractLeftTE<
   ReturnType<OfferPrivateApi['createNewOffer']>

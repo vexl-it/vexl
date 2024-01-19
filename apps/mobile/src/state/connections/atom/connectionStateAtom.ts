@@ -1,23 +1,23 @@
-import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
+import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {
   UnixMilliseconds,
   unixMillisecondsNow,
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {ConnectionsState} from '../domain'
-import {type ConnectionLevel} from '@vexl-next/rest-api/src/services/contact/contracts'
-import {type ContactPrivateApi} from '@vexl-next/rest-api/src/services/contact'
-import * as TE from 'fp-ts/TaskEither'
 import {type ExtractLeftTE} from '@vexl-next/resources-utils/src/utils/ExtractLeft'
-import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
-import {pipe} from 'fp-ts/function'
 import {MAX_PAGE_SIZE} from '@vexl-next/rest-api/src/Pagination.brand'
-import type * as T from 'fp-ts/Task'
-import {privateApiAtom} from '../../../api'
+import {type ContactPrivateApi} from '@vexl-next/rest-api/src/services/contact'
+import {type ConnectionLevel} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {sequenceS} from 'fp-ts/Apply'
+import type * as T from 'fp-ts/Task'
+import * as TE from 'fp-ts/TaskEither'
+import {pipe} from 'fp-ts/function'
+import {atom, type Atom} from 'jotai'
+import {selectAtom} from 'jotai/utils'
+import {privateApiAtom} from '../../../api'
+import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
 import deduplicate from '../../../utils/deduplicate'
 import reportError from '../../../utils/reportError'
-import {type Atom, atom} from 'jotai'
-import {selectAtom} from 'jotai/utils'
+import {ConnectionsState} from '../domain'
 
 const connectionStateAtom = atomWithParsedMmkvStorage(
   'connectionsState',

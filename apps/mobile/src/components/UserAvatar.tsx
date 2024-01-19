@@ -56,7 +56,7 @@ function UserAvatar({userImage, grayScale, width, height}: Props): JSX.Element {
         <Group clip={roundedRect}>
           {image && (
             <SkiaImage
-              fit={'cover'}
+              fit="cover"
               x={0}
               y={0}
               width={width}

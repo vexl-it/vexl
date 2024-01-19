@@ -1,7 +1,7 @@
-import Button from './Button'
 import {useNavigation} from '@react-navigation/native'
 import {Stack, Text} from 'tamagui'
 import useSafeGoBack from '../utils/useSafeGoBack'
+import Button from './Button'
 
 function TodoScreen(): JSX.Element {
   const safeGoBack = useSafeGoBack()

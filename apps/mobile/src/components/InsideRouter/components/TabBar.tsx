@@ -77,13 +77,13 @@ function TabBar({state, navigation}: BottomTabBarProps): JSX.Element {
               >
                 {newMessageIndicator && (
                   <Stack
-                    backgroundColor={'$main'}
+                    backgroundColor="$main"
                     w={16}
                     h={16}
                     br={8}
-                    position={'absolute'}
-                    top={'$2'}
-                    right={'$2'}
+                    position="absolute"
+                    top="$2"
+                    right="$2"
                   />
                 )}
                 <Stack w={24} h={24}>

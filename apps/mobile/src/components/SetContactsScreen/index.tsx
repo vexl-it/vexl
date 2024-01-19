@@ -27,9 +27,9 @@ function SetContactsScreen({
   const renderButton = useCallback(
     ({onSubmit}: {onSubmit: () => void}) => {
       return (
-        <Stack mt={'$2'}>
+        <Stack mt="$2">
           <Button
-            variant={'secondary'}
+            variant="secondary"
             onPress={onSubmit}
             fullWidth
             text={t('common.submit')}
@@ -50,10 +50,10 @@ function SetContactsScreen({
     <>
       <Screen>
         <KeyboardAvoidingView>
-          <ScreenTitle p={'$2'} text={t('loginFlow.importContacts.action')}>
+          <ScreenTitle p="$2" text={t('loginFlow.importContacts.action')}>
             <IconButton variant="dark" icon={closeSvg} onPress={goBack} />
           </ScreenTitle>
-          <Stack f={1} mx={'$2'}>
+          <Stack f={1} mx="$2">
             <ContactsListSelect
               showFilter
               showNewByDefault={showNew ?? false}

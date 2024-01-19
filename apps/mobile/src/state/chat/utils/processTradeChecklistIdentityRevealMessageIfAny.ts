@@ -1,9 +1,9 @@
 import {type RealLifeInfo} from '@vexl-next/domain/src/general/UserNameAndAvatar.brand'
+import {type IdentityReveal} from '@vexl-next/domain/src/general/tradeChecklist'
+import {type SvgString} from '@vexl-next/domain/src/utility/SvgString.brand'
 import avatarsSvg from '../../../components/AnonymousAvatar/images/avatarsSvg'
 import {randomNumberFromSeed} from '../../../utils/randomNumber'
 import resolveLocalUri from '../../../utils/resolveLocalUri'
-import {type IdentityReveal} from '@vexl-next/domain/src/general/tradeChecklist'
-import {type SvgString} from '@vexl-next/domain/src/utility/SvgString.brand'
 
 export default function processTradeChecklistIdentityRevealMessageIfAny(
   identityRevealData: IdentityReveal | undefined

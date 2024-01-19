@@ -51,6 +51,8 @@ esbuild
       nativeNodeModulesPlugin,
       // Put the Sentry esbuild plugin after all other plugins
       sentryEsbuildPlugin({
+        // TODO enable this when we have a release
+        disable: true,
         authToken: process.env.SENTRY_AUTH_TOKEN,
         org: 'vexl',
         project: 'location',

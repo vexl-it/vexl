@@ -10,9 +10,9 @@ function SwitchTradePriceTypeButton(props: TouchableOpacityProps): JSX.Element {
   const tradePriceType = useAtomValue(tradePriceTypeAtom)
   return (
     <TouchableOpacity {...props}>
-      <XStack ai={'center'}>
+      <XStack ai="center">
         <PriceTypeIndicator />
-        <Stack ml={'$1'}>
+        <Stack ml="$1">
           <Image
             width={16}
             height={16}

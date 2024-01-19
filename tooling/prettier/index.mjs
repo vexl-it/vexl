@@ -7,6 +7,7 @@ const config = {
   bracketSpacing: false,
   quoteProps: 'preserve',
   semi: false,
+  plugins: ['prettier-plugin-organize-imports'],
 }
 
 export default config

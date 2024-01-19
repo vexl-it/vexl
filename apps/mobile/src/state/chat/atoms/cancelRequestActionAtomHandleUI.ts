@@ -1,40 +1,40 @@
-import * as TE from 'fp-ts/TaskEither'
-import * as T from 'fp-ts/Task'
-import {type ChatMessageWithState} from '../domain'
-import {atom} from 'jotai'
-import {type ExtractLeftTE} from '@vexl-next/resources-utils/src/utils/ExtractLeft'
-import {type ChatPrivateApi} from '@vexl-next/rest-api/src/services/chat'
-import focusChatByInboxKeyAndSenderKey from './focusChatByInboxKeyAndSenderKey'
-import {sessionDataOrDummyAtom} from '../../session'
-import {type BasicError} from '@vexl-next/domain/src/utility/errors'
-import {type ErrorEncryptingMessage} from '@vexl-next/resources-utils/src/chat/utils/chatCrypto'
-import {privateApiAtom} from '../../../api'
-import {translationAtom} from '../../../utils/localization/I18nProvider'
 import {
-  type ChatMessage,
   generateChatMessageId,
+  type ChatMessage,
   type ChatMessagePayload,
 } from '@vexl-next/domain/src/general/messaging'
-import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {loadingOverlayDisplayedAtom} from '../../../components/LoadingOverlayProvider'
-import {sendCancelMessagingRequest} from '@vexl-next/resources-utils/src/chat/sendCancelMessagingRequest'
-import {Alert} from 'react-native'
-import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
-import {pipe} from 'fp-ts/function'
 import {type OfferInfo} from '@vexl-next/domain/src/general/offers'
-import {
-  askAreYouSureActionAtom,
-  type UserDeclinedError,
-} from '../../../components/AreYouSureDialog'
-import addMessageToChat, {
-  addMessageToMessagesArray,
-} from '../utils/addMessageToChat'
-import createAccountDeletedMessage from '../utils/createAccountDeletedMessage'
-import showErrorAlert from '../../../utils/showErrorAlert'
+import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {type BasicError} from '@vexl-next/domain/src/utility/errors'
+import {sendCancelMessagingRequest} from '@vexl-next/resources-utils/src/chat/sendCancelMessagingRequest'
+import {type ErrorEncryptingMessage} from '@vexl-next/resources-utils/src/chat/utils/chatCrypto'
+import {type ExtractLeftTE} from '@vexl-next/resources-utils/src/utils/ExtractLeft'
 import {
   type JsonStringifyError,
   type ZodParseError,
 } from '@vexl-next/resources-utils/src/utils/parsing'
+import {type ChatPrivateApi} from '@vexl-next/rest-api/src/services/chat'
+import * as T from 'fp-ts/Task'
+import * as TE from 'fp-ts/TaskEither'
+import {pipe} from 'fp-ts/function'
+import {atom} from 'jotai'
+import {Alert} from 'react-native'
+import {privateApiAtom} from '../../../api'
+import {
+  askAreYouSureActionAtom,
+  type UserDeclinedError,
+} from '../../../components/AreYouSureDialog'
+import {loadingOverlayDisplayedAtom} from '../../../components/LoadingOverlayProvider'
+import {translationAtom} from '../../../utils/localization/I18nProvider'
+import showErrorAlert from '../../../utils/showErrorAlert'
+import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
+import {sessionDataOrDummyAtom} from '../../session'
+import {type ChatMessageWithState} from '../domain'
+import addMessageToChat, {
+  addMessageToMessagesArray,
+} from '../utils/addMessageToChat'
+import createAccountDeletedMessage from '../utils/createAccountDeletedMessage'
+import focusChatByInboxKeyAndSenderKey from './focusChatByInboxKeyAndSenderKey'
 
 type ChatNotFoundError = BasicError<'ChatNotFoundError'>
 type CancelRequestApprovalErrors = ExtractLeftTE<

@@ -34,11 +34,11 @@ function ProgressBar({percentDone}: Props): JSX.Element {
 
   return (
     <XStack
-      pos={'relative'}
-      w={'100%'}
+      pos="relative"
+      w="100%"
       h={4}
-      br={'$11'}
-      bc={'$greyAccent3'}
+      br="$11"
+      bc="$greyAccent3"
       onLayout={(e) => {
         setProgressContainerWidth(e.nativeEvent.layout.width)
       }}

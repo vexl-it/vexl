@@ -1,7 +1,7 @@
 import {z} from 'zod'
 import {SvgStringOrImageUri} from '../utility/SvgStringOrImageUri.brand'
-import {UserName} from './UserName.brand'
 import {UriString} from '../utility/UriString.brand'
+import {UserName} from './UserName.brand'
 
 export const UserNameAndUriAvatar = z.object({
   userName: UserName.optional(),

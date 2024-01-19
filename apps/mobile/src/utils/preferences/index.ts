@@ -1,6 +1,6 @@
+import {focusAtom} from 'jotai-optics'
 import {atomWithParsedMmkvStorage} from '../atomUtils/atomWithParsedMmkvStorage'
 import {Preferences} from './domain'
-import {focusAtom} from 'jotai-optics'
 
 export const preferencesAtom = atomWithParsedMmkvStorage(
   'preferences',

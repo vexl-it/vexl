@@ -27,12 +27,12 @@ function FilterButtons(): JSX.Element {
   }, [navigation])
 
   return (
-    <XStack space={'$2'}>
+    <XStack space="$2">
       <Stack flex={1}>
         <Button
           onPress={onFilterOffersPress}
           variant={isFilterActive ? 'secondary' : 'blackOnDark'}
-          size={'small'}
+          size="small"
           text={t(isFilterActive ? 'offer.filterActive' : 'offer.filterOffers')}
           afterIcon={downArrow}
           numberOfLines={2}

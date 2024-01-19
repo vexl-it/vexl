@@ -2,12 +2,12 @@ import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {getDefaultStore} from 'jotai'
 import {Alert, Linking} from 'react-native'
-import {translationAtom} from '../../utils/localization/I18nProvider'
-import readSessionFromStorage from './utils/readSessionFromStorage'
-import {showDebugNotificationIfEnabled} from '../../utils/notifications/showDebugNotificationIfEnabled'
 import {sessionHolderAtom} from '.'
-import {SECRET_TOKEN_KEY, SESSION_KEY} from './sessionKeys'
+import {translationAtom} from '../../utils/localization/I18nProvider'
+import {showDebugNotificationIfEnabled} from '../../utils/notifications/showDebugNotificationIfEnabled'
 import reportError from '../../utils/reportError'
+import {SECRET_TOKEN_KEY, SESSION_KEY} from './sessionKeys'
+import readSessionFromStorage from './utils/readSessionFromStorage'
 
 function logLoadSessionProgress(text: string): void {
   console.log('inside loadSession', text)

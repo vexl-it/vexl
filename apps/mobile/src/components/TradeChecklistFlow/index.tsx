@@ -43,44 +43,44 @@ export default function TradeChecklistFlow({
       <TradeChecklistFlowPageContainer>
         <StackNavigator.Navigator
           screenOptions={{headerShown: false}}
-          initialRouteName={'AgreeOnTradeDetails'}
+          initialRouteName="AgreeOnTradeDetails"
         >
           <StackNavigator.Screen
-            name={'AgreeOnTradeDetails'}
+            name="AgreeOnTradeDetails"
             component={AgreeOnTradeDetailsScreen}
           />
           <StackNavigator.Screen
-            name={'ChooseAvailableDays'}
+            name="ChooseAvailableDays"
             component={ChooseAvailableDaysScreen}
           />
           <StackNavigator.Screen
-            name={'AddTimeOptions'}
+            name="AddTimeOptions"
             component={AddTimeOptionsScreen}
           />
           <StackNavigator.Screen
-            name={'PickDateFromSuggestions'}
+            name="PickDateFromSuggestions"
             component={PickDateFromSuggestionsScreen}
           />
           <StackNavigator.Screen
-            name={'PickTimeFromSuggestions'}
+            name="PickTimeFromSuggestions"
             component={PickTimeFromSuggestions}
           />
 
           <StackNavigator.Screen
-            name={'CalculateAmount'}
+            name="CalculateAmount"
             component={CalculateAmountScreen}
           />
           <StackNavigator.Screen
-            name={'SetYourOwnPrice'}
+            name="SetYourOwnPrice"
             component={SetYourOwnPriceScreen}
           />
           <StackNavigator.Screen
-            name={'PremiumOrDiscount'}
+            name="PremiumOrDiscount"
             component={PremiumOrDiscountScreen}
           />
-          <StackNavigator.Screen name={'Network'} component={NetworkScreen} />
+          <StackNavigator.Screen name="Network" component={NetworkScreen} />
           <StackNavigator.Screen
-            name={'BtcAddress'}
+            name="BtcAddress"
             component={BtcAddressScreen}
           />
           <StackNavigator.Screen

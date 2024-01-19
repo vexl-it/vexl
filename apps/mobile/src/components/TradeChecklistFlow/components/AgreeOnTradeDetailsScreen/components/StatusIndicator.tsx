@@ -15,13 +15,13 @@ function empty(): void {}
 function StatusIndicator({itemStatus}: Props): JSX.Element {
   return (
     <Stack
-      ai={'center'}
-      jc={'center'}
+      ai="center"
+      jc="center"
       w={24}
       h={24}
       borderWidth={itemStatus !== 'initial' ? 0 : 1}
-      boc={'$greyAccent3'}
-      br={'$2'}
+      boc="$greyAccent3"
+      br="$2"
       bc={
         ['readyToSend', 'pending'].includes(itemStatus)
           ? '$yellowAccent2'
@@ -42,7 +42,7 @@ function StatusIndicator({itemStatus}: Props): JSX.Element {
       ) : itemStatus === 'declined' ? (
         <Image height={18} width={18} source={BlockIconSvg} />
       ) : itemStatus === 'accepted' ? (
-        <Checkbox size={'24x24'} value={true} onChange={empty} />
+        <Checkbox size="24x24" value={true} onChange={empty} />
       ) : (
         <></>
       )}

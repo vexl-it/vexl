@@ -40,30 +40,30 @@ function TradePriceTypeDialog(): JSX.Element | null {
     >
       <ScrollView style={styles.flip}>
         <View style={styles.flip}>
-          <Stack space={'$2'} mb={'$4'} bc={'$blackAccent1'}>
-            <Stack px={'$4'} br={'$4'} mx={'$2'} py="$5" bc={'$white'}>
-              <XStack ai={'center'} jc={'space-between'}>
+          <Stack space="$2" mb="$4" bc="$blackAccent1">
+            <Stack px="$4" br="$4" mx="$2" py="$5" bc="$white">
+              <XStack ai="center" jc="space-between">
                 <Stack
-                  ai={'center'}
-                  jc={'center'}
-                  br={'$4'}
-                  bc={'$grey'}
-                  px={'$4'}
-                  py={'$2'}
+                  ai="center"
+                  jc="center"
+                  br="$4"
+                  bc="$grey"
+                  px="$4"
+                  py="$2"
                 >
                   <PriceTypeIndicator />
                 </Stack>
                 {tradePriceType === 'live' ? (
-                  <Text fos={16} ff={'$body500'} col={'$greyOnBlack'}>
+                  <Text fos={16} ff="$body500" col="$greyOnBlack">
                     {t('tradeChecklist.calculateAmount.sourceCoinGecko')}
                   </Text>
                 ) : (
                   <Stack />
                 )}
               </XStack>
-              <Stack space={'$2'} py={'$4'}>
-                <CurrentBtcPrice fos={24} ff={'$heading'} col={'$black'} />
-                <Text fos={18} ff={'$body500'} col={'$greyOnWhite'}>
+              <Stack space="$2" py="$4">
+                <CurrentBtcPrice fos={24} ff="$heading" col="$black" />
+                <Text fos={18} ff="$body500" col="$greyOnWhite">
                   {tradePriceType === 'live'
                     ? t('tradeChecklist.calculateAmount.youAreUsingLivePrice')
                     : tradePriceType === 'your'
@@ -74,14 +74,14 @@ function TradePriceTypeDialog(): JSX.Element | null {
                 </Text>
               </Stack>
               {tradePriceType === 'your' ? (
-                <XStack f={1} gap={'$2'}>
+                <XStack f={1} gap="$2">
                   <Button
                     fullSize
                     text={t('common.continue')}
                     onPress={() => {
                       setTradePriceTypeDialogVisible(false)
                     }}
-                    variant={'primary'}
+                    variant="primary"
                   />
                   <Button
                     fullSize
@@ -90,7 +90,7 @@ function TradePriceTypeDialog(): JSX.Element | null {
                       setTradePriceTypeDialogVisible(false)
                       navigation.navigate('SetYourOwnPrice')
                     }}
-                    variant={'secondary'}
+                    variant="secondary"
                   />
                 </XStack>
               ) : (
@@ -99,7 +99,7 @@ function TradePriceTypeDialog(): JSX.Element | null {
                   onPress={() => {
                     setTradePriceTypeDialogVisible(false)
                   }}
-                  variant={'secondary'}
+                  variant="secondary"
                 />
               )}
             </Stack>
@@ -109,7 +109,7 @@ function TradePriceTypeDialog(): JSX.Element | null {
                   setTradePriceTypeDialogVisible(false)
                   void setFormDataBasedOnType('live')()
                 }}
-                variant={'primary'}
+                variant="primary"
                 text={t('tradeChecklist.calculateAmount.setLivePrice')}
               />
             )}
@@ -119,7 +119,7 @@ function TradePriceTypeDialog(): JSX.Element | null {
                   void setFormDataBasedOnType('frozen')()
                   setTradePriceTypeDialogVisible(false)
                 }}
-                variant={'primary'}
+                variant="primary"
                 text={t(
                   'tradeChecklist.calculateAmount.freezeCurrentMarketPrice'
                 )}
@@ -131,7 +131,7 @@ function TradePriceTypeDialog(): JSX.Element | null {
                   setTradePriceTypeDialogVisible(false)
                   navigation.navigate('SetYourOwnPrice')
                 }}
-                variant={'primary'}
+                variant="primary"
                 text={t('tradeChecklist.calculateAmount.setYourOwnPrice')}
               />
             )}

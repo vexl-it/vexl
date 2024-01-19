@@ -1,6 +1,6 @@
+import {type Atom} from 'jotai'
 import {selectAtom} from 'jotai/utils'
 import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
-import {type Atom} from 'jotai'
 
 export default function focusRequestMessageAtom(
   chatAtom: Atom<ChatWithMessages>

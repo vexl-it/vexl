@@ -47,13 +47,13 @@ function SpokenLanguageSelect({
   )
 
   return (
-    <Modal animationType={'fade'} transparent visible={visible}>
-      <Stack f={1} bc={'$grey'} px={'$4'} pb={bottom} pt={top}>
+    <Modal animationType="fade" transparent visible={visible}>
+      <Stack f={1} bc="$grey" px="$4" pb={bottom} pt={top}>
         <ScreenTitle
           text={t('offerForm.spokenLanguages.preferredLanguages')}
-          textColor={'$greyAccent5'}
+          textColor="$greyAccent5"
         >
-          <IconButton variant={'dark'} icon={closeSvg} onPress={onClose} />
+          <IconButton variant="dark" icon={closeSvg} onPress={onClose} />
         </ScreenTitle>
         <SpokenLanguagesList
           createIsThisLanguageSelectedAtom={createIsThisLanguageSelectedAtom}
@@ -63,7 +63,7 @@ function SpokenLanguageSelect({
             onSubmit()
             onClose()
           }}
-          variant={'secondary'}
+          variant="secondary"
           text={t('common.submit')}
         />
       </Stack>

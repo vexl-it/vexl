@@ -1,21 +1,21 @@
-import {type OfferPrivateApi} from '@vexl-next/rest-api/src/services/offer'
+import {type PrivateKeyHolder} from '@vexl-next/cryptography/src/KeyHolder'
 import {
   type OfferAdminId,
   type OfferInfo,
   type OfferPublicPart,
   type SymmetricKey,
 } from '@vexl-next/domain/src/general/offers'
-import {pipe} from 'fp-ts/function'
+import {type OfferPrivateApi} from '@vexl-next/rest-api/src/services/offer'
 import * as TE from 'fp-ts/TaskEither'
-import encryptOfferPublicPayload, {
-  type ErrorEncryptingPublicPart,
-} from './utils/encryptOfferPublicPayload'
-import {type PrivateKeyHolder} from '@vexl-next/cryptography/src/KeyHolder'
+import {pipe} from 'fp-ts/function'
+import {type ExtractLeftTE} from '../utils/ExtractLeft'
 import decryptOffer, {
   type ErrorDecryptingOffer,
   type NonCompatibleOfferVersionError,
 } from './decryptOffer'
-import {type ExtractLeftTE} from '../utils/ExtractLeft'
+import encryptOfferPublicPayload, {
+  type ErrorEncryptingPublicPart,
+} from './utils/encryptOfferPublicPayload'
 
 export type ApiErrorUpdatingOffer = ExtractLeftTE<
   ReturnType<OfferPrivateApi['updateOffer']>

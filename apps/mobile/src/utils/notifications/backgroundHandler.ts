@@ -6,22 +6,22 @@ import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {getDefaultStore} from 'jotai'
-import {showDebugNotificationIfEnabled} from './showDebugNotificationIfEnabled'
 import {fetchAndStoreMessagesForInboxAtom} from '../../state/chat/atoms/fetchNewMessagesActionAtom'
 import {unreadChatsCountAtom} from '../../state/chat/atoms/unreadChatsCountAtom'
 import {updateAllOffersConnectionsActionAtom} from '../../state/connections/atom/offerToConnectionsAtom'
+import {loadSession} from '../../state/session/loadSession'
 import {safeParse} from '../fpUtils'
 import reportError from '../reportError'
+import checkAndShowCreateOfferPrompt from './checkAndShowCreateOfferPrompt'
 import checkForNewOffers from './checkForNewOffers'
+import isChatMessageNotification from './isChatMessageNotification'
 import {
   CREATE_OFFER_PROMPT,
   NEW_CONNECTION,
   NEW_CONTENT,
 } from './notificationTypes'
+import {showDebugNotificationIfEnabled} from './showDebugNotificationIfEnabled'
 import {showUINotificationFromRemoteMessage} from './showUINotificationFromRemoteMessage'
-import checkAndShowCreateOfferPrompt from './checkAndShowCreateOfferPrompt'
-import isChatMessageNotification from './isChatMessageNotification'
-import {loadSession} from '../../state/session/loadSession'
 
 export async function processBackgroundMessage(
   remoteMessage: FirebaseMessagingTypes.RemoteMessage

@@ -33,8 +33,8 @@ function SpokenLanguagesListItem({
         select(!isSelected)
       }}
     >
-      <XStack ai={'center'} jc={'space-between'} px={'$2'} py={'$4'}>
-        <Text col={'$white'} fos={18}>
+      <XStack ai="center" jc="space-between" px="$2" py="$4">
+        <Text col="$white" fos={18}>
           {t(`offerForm.spokenLanguages.${spokenLanguage}`)}
         </Text>
         {isSelected && (

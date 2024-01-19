@@ -1,8 +1,8 @@
-import {bigNumberToString} from '../bigNumberToString'
 import {
-  type CurrencyCode,
   CurrencyInfo,
+  type CurrencyCode,
 } from '@vexl-next/domain/src/general/currency.brand'
+import {bigNumberToString} from '../bigNumberToString'
 
 export const currencies = {
   'AED': CurrencyInfo.parse({

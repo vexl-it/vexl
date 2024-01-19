@@ -49,7 +49,7 @@ function ProgressJourney({
         <Stack f={1} fg={0} fd="row" mx="$2" my="$3">
           {Array.from({length: numberOfPages}).map((_, index) => (
             <BreadCrumb
-              testID={'breadcrumb'}
+              testID="breadcrumb"
               key={index}
               active={index <= currentPage}
             />
@@ -70,14 +70,14 @@ function ProgressJourney({
                     onPageChange(currentPage - 1)
                   }
             }
-            variant={'primary'}
+            variant="primary"
             text={t(currentPage === 0 ? 'common.close' : 'common.back')}
           />
         ) : (
           <Button
             fullSize
             onPress={currentPage === numberOfPages - 1 ? onFinish : onSkip}
-            variant={'primary'}
+            variant="primary"
             text={t('common.skip')}
           />
         )}
@@ -86,7 +86,7 @@ function ProgressJourney({
           <Button
             fullSize
             onPress={onFinish}
-            variant={'secondary'}
+            variant="secondary"
             text={t(withBackButton ? 'common.done' : 'common.finish')}
           />
         ) : (
@@ -95,7 +95,7 @@ function ProgressJourney({
             onPress={() => {
               onPageChange(currentPage + 1)
             }}
-            variant={'secondary'}
+            variant="secondary"
             text={t('common.next')}
           />
         )}

@@ -43,9 +43,9 @@ function Expiration({
 
   return (
     <YStack>
-      <XStack ai={'center'} jc={'space-between'} py={'$4'}>
-        <XStack f={1} ai={'center'} mr={'$1'}>
-          <Stack mr={'$2'}>
+      <XStack ai="center" jc="space-between" py="$4">
+        <XStack f={1} ai="center" mr="$1">
+          <Stack mr="$2">
             <SvgImage
               stroke={
                 expirationDate
@@ -58,7 +58,7 @@ function Expiration({
           <Stack fs={1}>
             <Text
               numberOfLines={2}
-              ff={'$body700'}
+              ff="$body700"
               col={expirationDate ? '$white' : '$greyOnWhite'}
               fos={24}
             >
@@ -69,10 +69,10 @@ function Expiration({
         <Switch value={!!expirationDate} onValueChange={toggleExpirationDate} />
       </XStack>
       <Text
-        ff={'$body600'}
+        ff="$body600"
         fos={16}
         col={expirationDate ? '$white' : '$greyOnWhite'}
-        mb={'$4'}
+        mb="$4"
       >
         {t('offerForm.expiration.setExpirationDateForYourOffer')}
       </Text>
@@ -87,7 +87,7 @@ function Expiration({
         >
           <Text
             fos={18}
-            ff={'$body600'}
+            ff="$body600"
             col={expirationDate ? '$main' : '$greyOnBlack'}
           >
             {expirationDate

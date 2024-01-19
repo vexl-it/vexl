@@ -20,14 +20,14 @@ function SearchBar(): JSX.Element {
 
   return (
     <Stack>
-      <XStack mt={'$4'} mb={'$2'}>
+      <XStack mt="$4" mb="$2">
         <Stack f={5} pr="$2">
           <TextInput
             placeholder={t('postLoginFlow.contactsList.inputPlaceholder')}
             value={searchText}
             onChangeText={setSearchText}
             icon={magnifyingGlass}
-            size={'small'}
+            size="small"
           />
         </Stack>
         <Stack f={3}>
@@ -37,7 +37,7 @@ function SearchBar(): JSX.Element {
             }}
             disabled={!areThereAnyContactsToDisplay}
             variant="black"
-            size={'small'}
+            size="small"
             adjustTextToFitOneLine
             fullSize
             text={t(

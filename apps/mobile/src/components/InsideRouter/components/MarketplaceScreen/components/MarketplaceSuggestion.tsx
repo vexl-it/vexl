@@ -29,17 +29,17 @@ function MarketplaceSuggestion({
 
   return (
     <YStack px="$2" {...props}>
-      <Stack mb={'$2'}>
+      <Stack mb="$2">
         <Stack
-          pos={'relative'}
-          bc={'$white'}
-          py={'$6'}
-          pl={'$6'}
-          pr={'$7'}
-          br={'$5'}
+          pos="relative"
+          bc="$white"
+          py="$6"
+          pl="$6"
+          pr="$7"
+          br="$5"
         >
           {onClosePress && (
-            <Stack pos={'absolute'} right={8} top={8}>
+            <Stack pos="absolute" right={8} top={8}>
               <TouchableOpacity onPress={onClosePress}>
                 <Image
                   stroke={tokens.color.greyOnWhite.val}
@@ -48,7 +48,7 @@ function MarketplaceSuggestion({
               </TouchableOpacity>
             </Stack>
           )}
-          <Text col="$black" fos={20} ff={'$body500'}>
+          <Text col="$black" fos={20} ff="$body500">
             {text}
           </Text>
         </Stack>
@@ -56,16 +56,16 @@ function MarketplaceSuggestion({
           <Image source={bubbleTipSvg} />
         </Stack>
       </Stack>
-      <XStack jc={'space-between'}>
-        <XStack f={1} mr={'$2'}>
+      <XStack jc="space-between">
+        <XStack f={1} mr="$2">
           <UserAvatar
             userImage={{type: 'svgXml', svgXml: vexlerAvatarSvg}}
             width={48}
             height={48}
           />
-          <Stack fs={1} ml={'$2'} jc={'space-around'}>
-            <XStack fs={1} flexWrap={'wrap'}>
-              <Text col={'$white'} fos={16} ff={'$body600'}>
+          <Stack fs={1} ml="$2" jc="space-around">
+            <XStack fs={1} flexWrap="wrap">
+              <Text col="$white" fos={16} ff="$body600">
                 {t('suggestion.vexl')}
               </Text>
               <Text> </Text>
@@ -73,9 +73,9 @@ function MarketplaceSuggestion({
                 <Text
                   adjustsFontSizeToFit
                   numberOfLines={1}
-                  col={'$red'}
+                  col="$red"
                   fos={16}
-                  ff={'$body600'}
+                  ff="$body600"
                 >
                   {t('suggestion.warns')}
                 </Text>
@@ -83,9 +83,9 @@ function MarketplaceSuggestion({
                 <Text
                   adjustsFontSizeToFit
                   numberOfLines={1}
-                  col={'$main'}
+                  col="$main"
                   fos={16}
-                  ff={'$body600'}
+                  ff="$body600"
                 >
                   {t('suggestion.suggests')}
                 </Text>
@@ -95,16 +95,16 @@ function MarketplaceSuggestion({
               adjustsFontSizeToFit
               numberOfLines={2}
               fos={12}
-              col={'$greyOnBlack'}
+              col="$greyOnBlack"
             >
               {t('suggestion.yourAppGuide')}
             </Text>
           </Stack>
         </XStack>
-        <Stack maxWidth={'70%'}>
+        <Stack maxWidth="70%">
           <Button
             numberOfLines={2}
-            size={'medium'}
+            size="medium"
             text={buttonText}
             onPress={onButtonPress}
             variant={type === 'warning' ? 'redLight' : 'secondary'}

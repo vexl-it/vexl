@@ -23,8 +23,8 @@ function MessagesScreen(): JSX.Element {
 
   return (
     <ContainerWithTopBorderRadius withTopPadding>
-      <Stack mx={'$4'} f={1}>
-        <Text ff={'$heading'} color={'$white'} fos={32}>
+      <Stack mx="$4" f={1}>
+        <Text ff="$heading" color="$white" fos={32}>
           {t('messages.listTitle')}
         </Text>
         <ChatsList />

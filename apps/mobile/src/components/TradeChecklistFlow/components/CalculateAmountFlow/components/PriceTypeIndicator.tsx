@@ -42,7 +42,7 @@ function AnimatedLiveIndicator({
 
   return (
     <Animated.View style={animatedStyle}>
-      <Stack h={8} w={8} bc={color} br={'$5'} />
+      <Stack h={8} w={8} bc={color} br="$5" />
     </Animated.View>
   )
 }
@@ -59,7 +59,7 @@ function PriceTypeIndicator({
   const tradePriceType = useAtomValue(tradePriceTypeAtom)
 
   return (
-    <XStack ai={'center'} space={'$2'} {...props}>
+    <XStack ai="center" space="$2" {...props}>
       {tradePriceType === 'live' ? (
         <AnimatedLiveIndicator
           color={displayInGrayColor ? '$greyOnBlack' : '$main'}
@@ -89,7 +89,7 @@ function PriceTypeIndicator({
       )}
       <Text
         fos={16}
-        ff={'$body500'}
+        ff="$body500"
         col={
           displayInGrayColor
             ? '$greyOnBlack'

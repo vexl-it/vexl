@@ -59,21 +59,21 @@ export default function AfterInteractionTaskDemo(): JSX.Element {
   }, [])
 
   return (
-    <YStack space="$2" my={'$2'}>
+    <YStack space="$2" my="$2">
       <Text color="$black">
         Test extensive calculation that updates UI. (Calculating 2000 hmacs)
       </Text>
       <Button
-        size={'small'}
-        variant={'secondary'}
+        size="small"
+        variant="secondary"
         text="run"
         onPress={runTask}
       ></Button>
       <ProgressBar percentDone={progress * 100} />
       {!result ? (
-        <Text color={'$black'}>{Math.round(progress * 100)}</Text>
+        <Text color="$black">{Math.round(progress * 100)}</Text>
       ) : (
-        <Text color={'$black'}>{result}</Text>
+        <Text color="$black">{result}</Text>
       )}
     </YStack>
   )

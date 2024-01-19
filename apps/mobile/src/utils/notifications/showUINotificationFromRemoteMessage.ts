@@ -5,9 +5,9 @@ import {translationAtom} from '../localization/I18nProvider'
 import {notificationPreferencesAtom} from '../preferences'
 import reportError from '../reportError'
 import {showChatNotification} from './chatNotifications'
+import isChatMessageNotification from './isChatMessageNotification'
 import {getDefaultChannel} from './notificationChannels'
 import {INACTIVITY_REMINDER} from './notificationTypes'
-import isChatMessageNotification from './isChatMessageNotification'
 
 export async function showUINotificationFromRemoteMessage(
   remoteMessage: FirebaseMessagingTypes.RemoteMessage

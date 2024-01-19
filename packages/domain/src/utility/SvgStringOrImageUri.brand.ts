@@ -1,6 +1,6 @@
-import {UriString} from './UriString.brand'
-import {SvgString} from './SvgString.brand'
 import {z} from 'zod'
+import {SvgString} from './SvgString.brand'
+import {UriString} from './UriString.brand'
 
 export const SvgStringOrImageUri = z.custom<
   | {

@@ -33,7 +33,7 @@ function NameScreen({navigation}: Props): JSX.Element {
         >
           {t('loginFlow.name.prompt')}
         </Text>
-        <Stack my="$4" mx={'$-4'}>
+        <Stack my="$4" mx="$-4">
           <TextInput
             maxLength={USERNAME_MAX_LENGTH}
             value={value}

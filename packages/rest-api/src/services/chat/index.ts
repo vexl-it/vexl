@@ -1,58 +1,58 @@
+import {type CreateAxiosDefaults} from 'axios'
+import {pipe} from 'fp-ts/function'
+import * as TE from 'fp-ts/TaskEither'
+import urlJoin from 'url-join'
 import {type PlatformName} from '../../PlatformName'
 import {type ServiceUrl} from '../../ServiceUrl.brand'
 import {type GetUserSessionCredentials} from '../../UserSessionCredentials.brand'
-import {type CreateAxiosDefaults} from 'axios'
-import urlJoin from 'url-join'
-import * as TE from 'fp-ts/TaskEither'
 import {
   axiosCallWithValidation,
   createAxiosInstanceWithAuthAndLogging,
   type LoggingFunction,
 } from '../../utils'
 import {
-  type ApproveRequestRequest,
+  type InboxDoesNotExist,
+  type NotPermittedToSendMessageToTargetInbox,
+} from '../contact/contracts'
+import {
   ApproveRequestResponse,
-  type BlockInboxRequest,
   BlockInboxResponse,
-  type CancelApprovalRequest,
   CancelApprovalResponse,
-  type CreateChallengeRequest,
   CreateChallengeResponse,
-  type CreateChallengesRequest,
   CreateChallengesResponse,
-  type CreateInboxRequest,
   CreateInboxResponse,
-  type DeleteInboxesRequest,
   DeleteInboxesResponse,
-  type DeleteInboxRequest,
   DeleteInboxResponse,
-  type DeletePulledMessagesRequest,
   DeletePulledMessagesResponse,
-  type LeaveChatRequest,
   LeaveChatResponse,
+  RequestApprovalResponse,
+  RetrieveMessagesResponse,
+  SendMessageResponse,
+  SendMessagesResponse,
+  UpdateInboxResponse,
+  type ApproveRequestRequest,
+  type BlockInboxRequest,
+  type CancelApprovalRequest,
+  type CreateChallengeRequest,
+  type CreateChallengesRequest,
+  type CreateInboxRequest,
+  type DeleteInboxesRequest,
+  type DeleteInboxRequest,
+  type DeletePulledMessagesRequest,
+  type LeaveChatRequest,
   type OtherSideAccountDeleted,
   type ReceiverOfferInboxDoesNotExistError,
   type RequestAlreadyApprovedError,
   type RequestApprovalRequest,
-  RequestApprovalResponse,
   type RequestCancelledError,
   type RequestNotFoundError,
   type RetrieveMessagesRequest,
-  RetrieveMessagesResponse,
   type SenderUserInboxDoesNotExistError,
   type SendMessageRequest,
-  SendMessageResponse,
   type SendMessagesRequest,
-  SendMessagesResponse,
   type UpdateInboxRequest,
-  UpdateInboxResponse,
 } from './contracts'
-import {pipe} from 'fp-ts/function'
 import {addChallengeToRequest} from './utils'
-import {
-  type InboxDoesNotExist,
-  type NotPermittedToSendMessageToTargetInbox,
-} from '../contact/contracts'
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function privateApi({

@@ -187,7 +187,7 @@ function TextInput(
         </Stack>
       )}
       {leftText && (
-        <Stack maw={'50%'} fs={1}>
+        <Stack maw="50%" fs={1}>
           <StyledText
             numberOfLines={2}
             adjustsFontSizeToFit

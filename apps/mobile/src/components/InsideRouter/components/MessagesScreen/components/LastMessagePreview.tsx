@@ -29,7 +29,7 @@ function MessagePreview({
 
   if (message.messageType === 'APPROVE_MESSAGING') {
     return (
-      <BaseText color={'$pastelGreen'}>
+      <BaseText color="$pastelGreen">
         {t(`messages.messagePreviews.${direction}.APPROVE_MESSAGING`, {
           them: name,
         })}
@@ -110,7 +110,7 @@ function MessagePreview({
   } else if (message.messageType === 'MESSAGE') {
     if (message.text.trim() === '' && message.image !== undefined) {
       return (
-        <BaseText fontStyle={'italic'}>
+        <BaseText fontStyle="italic">
           {t(`messages.messagePreviews.${direction}.ONLY_IMAGE`, {
             message: message.text,
             them: name,
@@ -128,7 +128,7 @@ function MessagePreview({
     )
   } else if (message.messageType === 'INBOX_DELETED') {
     return (
-      <BaseText color={'$red'}>
+      <BaseText color="$red">
         {t(`messages.messagePreviews.${direction}.INBOX_DELETED`, {
           message: message.text,
           them: name,

@@ -1,10 +1,10 @@
-import {HMAC_ALGORITHM, PBKDF2ITER, SALT} from '../constants'
 import crypto from 'node:crypto'
-import pbkdf2 from './pbkdf2Promise'
-import {removeEmptyBytesAtTheEnd} from '../utils'
-import {privatePemToRaw, publicPemToRaw} from '../KeyHolder/keyUtils'
 import {type PrivateKeyPemBase64, type PublicKeyPemBase64} from '../KeyHolder'
+import {privatePemToRaw, publicPemToRaw} from '../KeyHolder/keyUtils'
+import {HMAC_ALGORITHM, PBKDF2ITER, SALT} from '../constants'
 import {getECDHComputeSecretFunction} from '../implementations/ecdhComputeSecret'
+import {removeEmptyBytesAtTheEnd} from '../utils'
+import pbkdf2 from './pbkdf2Promise'
 
 function encodePart(data: Buffer): string {
   const base64 = data.toString('base64')

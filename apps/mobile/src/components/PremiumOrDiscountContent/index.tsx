@@ -50,7 +50,7 @@ function PremiumOrDiscountContent({
   return (
     <YStack space="$2">
       <XStack f={1} ai="center" jc="space-between">
-        <Text maxWidth={'50%'} mr="$4" fos={18} ff="$body600" col="$white">
+        <Text maxWidth="50%" mr="$4" fos={18} ff="$body600" col="$white">
           {offerType === 'BUY'
             ? t('offerForm.premiumOrDiscount.youBuyBtcFor')
             : t('offerForm.premiumOrDiscount.youSellBtcFor')}
@@ -65,7 +65,7 @@ function PremiumOrDiscountContent({
             {feeAmount !== 0 && (
               <Text
                 fos={18}
-                ff={'$body600'}
+                ff="$body600"
                 col={
                   feeAmount === 0
                     ? '$greyOnBlack'

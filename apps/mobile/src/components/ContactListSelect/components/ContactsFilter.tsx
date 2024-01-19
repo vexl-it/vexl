@@ -1,8 +1,8 @@
+import {useMolecule} from 'bunshi/dist/react'
 import {XStack} from 'tamagui'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
-import ContactsFilterButton from './ContactsFilterButton'
 import {contactSelectMolecule} from '../atom'
-import {useMolecule} from 'bunshi/dist/react'
+import ContactsFilterButton from './ContactsFilterButton'
 
 function ContactsFilter(): JSX.Element {
   const {t} = useTranslation()
@@ -13,7 +13,7 @@ function ContactsFilter(): JSX.Element {
   } = useMolecule(contactSelectMolecule)
 
   return (
-    <XStack ai={'center'} space={'$2'}>
+    <XStack ai="center" space="$2">
       <ContactsFilterButton
         isSelectedAtom={showSubmittedContactsAtom}
         title={t('postLoginFlow.contactsList.submitted')}

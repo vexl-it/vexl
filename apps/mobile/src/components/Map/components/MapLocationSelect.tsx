@@ -117,7 +117,7 @@ export default function MapLocationSelect({
   const setRegion = useSetAtom(atoms.selectedRegionAtom)
 
   return (
-    <Stack position="relative" {...restProps} backgroundColor={'$black'}>
+    <Stack position="relative" {...restProps} backgroundColor="$black">
       <MapView
         provider={PROVIDER_GOOGLE}
         customMapStyle={mapTheme}
@@ -156,7 +156,7 @@ export default function MapLocationSelect({
             paddingVertical="$2"
             borderRadius="$6"
             alignSelf="center"
-            backgroundColor={'rgba(0, 0, 0,0.8)'}
+            backgroundColor="rgba(0, 0, 0,0.8)"
           >
             <PickedLocationText atom={atoms.getGeocodedRegion} />
           </Stack>

@@ -1,7 +1,7 @@
 import addToSortedArray from '../../../utils/addToSortedArray'
-import compareMessages from './compareMessages'
-import areMessagesEqual from './areMessagesEqual'
 import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
+import areMessagesEqual from './areMessagesEqual'
+import compareMessages from './compareMessages'
 
 export default function addMessageToChat(
   message: ChatMessageWithState

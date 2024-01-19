@@ -1,5 +1,5 @@
-import {hmacSign, hmacVerify} from './hmac'
 import crypto from 'node:crypto'
+import {hmacSign, hmacVerify} from './hmac'
 
 const password = crypto
   .pbkdf2Sync('testPass', 'vexlvexl', 2000, 108, 'sha256')

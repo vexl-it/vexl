@@ -51,10 +51,10 @@ export default function ImportContactsExplanationContent({
     <WhiteContainer>
       <Stack f={1} jc="space-between">
         <HeaderProxy showBackButton={false} progressNumber={3} />
-        <Stack f={1} ai={'center'} mb="$4">
+        <Stack f={1} ai="center" mb="$4">
           <Image
             style={{height: '100%', width: '100%'}}
-            resizeMode={'contain'}
+            resizeMode="contain"
             source={require('../image/importContacts.png')}
           />
         </Stack>

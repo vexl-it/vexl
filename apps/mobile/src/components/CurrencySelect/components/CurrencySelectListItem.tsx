@@ -41,19 +41,19 @@ function CurrencySelectListItem({
         onItemPress()
       }}
     >
-      <XStack ai={'center'} jc={'space-between'}>
-        <Stack my={'$2'}>
-          <XStack ai={'center'}>
-            <Text ff={'$body500'} col={'$greyAccent5'} fos={18}>
+      <XStack ai="center" jc="space-between">
+        <Stack my="$2">
+          <XStack ai="center">
+            <Text ff="$body500" col="$greyAccent5" fos={18}>
               {`${currency.flag} ${currency.name}`}
             </Text>
           </XStack>
-          <XStack ai={'center'} space={'$1'}>
-            <Text col={'$greyAccent3'}>{currency.symbol}</Text>
-            <Text col={'$greyAccent3'} fos={6}>
-              {'●'}
+          <XStack ai="center" space="$1">
+            <Text col="$greyAccent3">{currency.symbol}</Text>
+            <Text col="$greyAccent3" fos={6}>
+              ●
             </Text>
-            <Text col={'$greyAccent3'}>{currency.code}</Text>
+            <Text col="$greyAccent3">{currency.code}</Text>
           </XStack>
         </Stack>
         {selectedCurrencyCode === currency.code && (

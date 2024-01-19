@@ -1,10 +1,10 @@
 import {type PrivateKeyHolder} from '@vexl-next/cryptography/src/KeyHolder'
-import {focusAtom} from 'jotai-optics'
-import messagingStateAtom from './messagingStateAtom'
-import {type InboxInState, type MessagingState} from '../domain'
 import {atom} from 'jotai'
+import {focusAtom} from 'jotai-optics'
 import * as O from 'optics-ts'
+import {type InboxInState, type MessagingState} from '../domain'
 import {focusAddInbox} from '../hooks/useCreateInbox'
+import messagingStateAtom from './messagingStateAtom'
 
 export const createUserInboxIfItDoesNotExistAtom = atom(
   null,

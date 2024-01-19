@@ -1,12 +1,12 @@
+import {generateSignedChallengeBatch} from '@vexl-next/resources-utils/src/chat/utils/generateSignedChallengesBatch'
+import * as TE from 'fp-ts/TaskEither'
+import {pipe} from 'fp-ts/function'
 import {atom} from 'jotai'
 import {privateApiAtom} from '../../../api'
 import {inboxesAtom} from '../../../utils/notifications/useRefreshNotificationTokenOnResumeAssumeLoggedIn'
-import {pipe} from 'fp-ts/function'
-import * as TE from 'fp-ts/TaskEither'
-import {generateSignedChallengeBatch} from '@vexl-next/resources-utils/src/chat/utils/generateSignedChallengesBatch'
 import allChatsAtom from './allChatsAtom'
-import sendMessageToChatsInBatchActionAtom from './sendMessageToChatsInBatchActionAtom'
 import messagingStateAtom from './messagingStateAtom'
+import sendMessageToChatsInBatchActionAtom from './sendMessageToChatsInBatchActionAtom'
 
 const deleteAllInboxesActionAtom = atom(null, (get, set) => {
   const api = get(privateApiAtom)

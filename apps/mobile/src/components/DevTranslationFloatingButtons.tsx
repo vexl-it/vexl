@@ -13,7 +13,7 @@ function DevTranslationFloatingButton(): JSX.Element {
       z={1000}
       renderSize={56}
       renderColor={getTokens().color.red.val}
-      renderText={'🔍'}
+      renderText="🔍"
       isCircle
       onShortPressRelease={() => {
         setShowDevLabels((prev) => !prev)

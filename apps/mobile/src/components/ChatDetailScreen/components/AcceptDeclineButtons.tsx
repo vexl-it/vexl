@@ -61,12 +61,12 @@ function AcceptDeclineButtons({
       <Button
         onPress={approve(false)}
         fullSize
-        variant={'primary'}
+        variant="primary"
         text={t('common.decline')}
       />
       <Button
         onPress={approve(true)}
-        variant={'secondary'}
+        variant="secondary"
         fullSize
         text={t('common.accept')}
       />

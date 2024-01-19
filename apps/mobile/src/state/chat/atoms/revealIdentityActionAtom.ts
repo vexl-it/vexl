@@ -1,35 +1,35 @@
-import {type FocusAtomType} from '../../../utils/atomUtils/FocusAtomType'
-import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
-import {atom} from 'jotai'
-import {anonymizedUserDataAtom, sessionDataOrDummyAtom} from '../../session'
+import {type UserName} from '@vexl-next/domain/src/general/UserName.brand'
 import {
-  type ChatMessage,
   generateChatMessageId,
+  type ChatMessage,
   type ChatMessagePayload,
 } from '@vexl-next/domain/src/general/messaging'
 import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {type ActionAtomType} from '../../../utils/atomUtils/ActionAtomType'
-import * as TE from 'fp-ts/TaskEither'
-import replaceImageFileUrisWithBase64, {
-  type ReadingFileError,
-} from '../utils/replaceImageFileUrisWithBase64'
-import {pipe} from 'fp-ts/function'
-import {privateApiAtom} from '../../../api'
+import {type UriString} from '@vexl-next/domain/src/utility/UriString.brand'
+import {type BasicError} from '@vexl-next/domain/src/utility/errors'
 import sendMessage, {
   type SendMessageApiErrors,
 } from '@vexl-next/resources-utils/src/chat/sendMessage'
-import {type BasicError} from '@vexl-next/domain/src/utility/errors'
 import {type ErrorEncryptingMessage} from '@vexl-next/resources-utils/src/chat/utils/chatCrypto'
-import processIdentityRevealMessageIfAny from '../utils/processIdentityRevealMessageIfAny'
-import removeFile from '../../../utils/removeFile'
-import anonymizePhoneNumber from '../utils/anonymizePhoneNumber'
-import {type UserName} from '@vexl-next/domain/src/general/UserName.brand'
-import {type UriString} from '@vexl-next/domain/src/utility/UriString.brand'
-import {addMessageToMessagesArray} from '../utils/addMessageToChat'
 import {
   type JsonStringifyError,
   type ZodParseError,
 } from '@vexl-next/resources-utils/src/utils/parsing'
+import * as TE from 'fp-ts/TaskEither'
+import {pipe} from 'fp-ts/function'
+import {atom} from 'jotai'
+import {privateApiAtom} from '../../../api'
+import {type ActionAtomType} from '../../../utils/atomUtils/ActionAtomType'
+import {type FocusAtomType} from '../../../utils/atomUtils/FocusAtomType'
+import removeFile from '../../../utils/removeFile'
+import {anonymizedUserDataAtom, sessionDataOrDummyAtom} from '../../session'
+import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
+import {addMessageToMessagesArray} from '../utils/addMessageToChat'
+import anonymizePhoneNumber from '../utils/anonymizePhoneNumber'
+import processIdentityRevealMessageIfAny from '../utils/processIdentityRevealMessageIfAny'
+import replaceImageFileUrisWithBase64, {
+  type ReadingFileError,
+} from '../utils/replaceImageFileUrisWithBase64'
 
 export type IdentityRequestAlreadySentError =
   BasicError<'IdentityRequestAlreadySentError'>

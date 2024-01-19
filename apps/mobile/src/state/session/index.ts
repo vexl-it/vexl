@@ -4,8 +4,8 @@ import {KeyHolder} from '@vexl-next/cryptography'
 import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {type UserName} from '@vexl-next/domain/src/general/UserName.brand'
 import {
-  type UserNameAndUriAvatar,
   type RealLifeInfo,
+  type UserNameAndUriAvatar,
 } from '@vexl-next/domain/src/general/UserNameAndAvatar.brand'
 import {
   phoneNumberToRegionCode,

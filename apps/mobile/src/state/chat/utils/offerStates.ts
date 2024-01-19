@@ -1,6 +1,6 @@
-import {type ChatWithMessages, type RequestState} from '../domain'
 import {DateTime} from 'luxon'
 import {type OfferRerequestLimitDays} from '../../../utils/remoteConfig/domain'
+import {type ChatWithMessages, type RequestState} from '../domain'
 
 export function getRequestState(chat?: ChatWithMessages): RequestState {
   const lastMessage = chat?.messages.at(-1)

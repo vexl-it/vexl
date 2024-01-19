@@ -67,7 +67,7 @@ function PremiumOrDiscountDetail({
   }
 
   return (
-    <Modal animationType={'fade'} transparent visible={visible}>
+    <Modal animationType="fade" transparent visible={visible}>
       <Screen customHorizontalPadding={16}>
         <KeyboardAvoidingView>
           <Stack flex={1}>
@@ -75,16 +75,16 @@ function PremiumOrDiscountDetail({
               text={t('offerForm.premiumOrDiscount.premiumOrDiscount')}
               withBottomBorder
             >
-              <IconButton variant={'dark'} icon={closeSvg} onPress={onClose} />
+              <IconButton variant="dark" icon={closeSvg} onPress={onClose} />
             </ScreenTitle>
-            <XStack ai={'center'} jc={'space-between'} py={'$4'}>
+            <XStack ai="center" jc="space-between" py="$4">
               <Text
                 numberOfLines={2}
                 adjustsFontSizeToFit
                 mr="$4"
                 fos={18}
-                ff={'$body600'}
-                col={'$white'}
+                ff="$body600"
+                col="$white"
               >
                 {offerType === 'BUY'
                   ? t('offerForm.premiumOrDiscount.youBuyBtcFor')
@@ -94,11 +94,11 @@ function PremiumOrDiscountDetail({
                 <Input
                   value={inputValue}
                   onChangeText={onInputValueChange}
-                  placeholder={'+0'}
-                  keyboardType={'number-pad'}
+                  placeholder="+0"
+                  keyboardType="number-pad"
                   leftText={t('offerForm.premiumOrDiscount.marketPrice')}
-                  rightText={'%'}
-                  variant={'greyOnBlack'}
+                  rightText="%"
+                  variant="greyOnBlack"
                   textColor={
                     Number(inputValue) === 0
                       ? '$greyOnBlack'
@@ -112,21 +112,21 @@ function PremiumOrDiscountDetail({
             <Button
               onPress={onContinuePress}
               text={t('common.continue')}
-              variant={'primary'}
+              variant="primary"
             />
           </Stack>
-          <XStack pb={'$2'}>
+          <XStack pb="$2">
             <Button
               text={t('offerForm.premiumOrDiscount.minus')}
               onPress={onMinusPress}
-              variant={'blackOnDark'}
+              variant="blackOnDark"
               fullSize
             />
-            <Stack w={'$2'} />
+            <Stack w="$2" />
             <Button
               text={t('offerForm.premiumOrDiscount.plus')}
               onPress={onPlusPress}
-              variant={'blackOnDark'}
+              variant="blackOnDark"
               fullSize
             />
           </XStack>

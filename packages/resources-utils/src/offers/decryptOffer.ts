@@ -1,23 +1,23 @@
 import {type KeyHolder} from '@vexl-next/cryptography'
-import {type ServerOffer} from '@vexl-next/rest-api/src/services/offer/contracts'
-import * as TE from 'fp-ts/TaskEither'
-import {flow, pipe} from 'fp-ts/function'
-import {type BasicError, toError} from '@vexl-next/domain/src/utility/errors'
 import {
   OfferInfo,
   OfferPrivatePart,
   OfferPublicPart,
 } from '@vexl-next/domain/src/general/offers'
+import {toError, type BasicError} from '@vexl-next/domain/src/utility/errors'
+import {type ServerOffer} from '@vexl-next/rest-api/src/services/offer/contracts'
+import * as A from 'fp-ts/Array'
+import * as E from 'fp-ts/Either'
+import * as TE from 'fp-ts/TaskEither'
+import {flow, pipe} from 'fp-ts/function'
+import {stringToBoolean} from '../utils/booleanString'
 import {aesGCMIgnoreTagDecrypt, eciesDecrypt} from '../utils/crypto'
 import {
-  type JsonParseError,
   parseJson,
   safeParse,
+  type JsonParseError,
   type ZodParseError,
 } from '../utils/parsing'
-import * as E from 'fp-ts/Either'
-import * as A from 'fp-ts/Array'
-import {stringToBoolean} from '../utils/booleanString'
 
 export interface ErrorDecryptingOffer
   extends BasicError<'ErrorDecryptingOffer'> {

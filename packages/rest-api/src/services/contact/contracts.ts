@@ -1,7 +1,7 @@
-import {z} from 'zod'
-import {PageRequest, PageResponse} from '../../Pagination.brand'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {ConnectionLevel} from '@vexl-next/domain/src/general/offers'
+import {z} from 'zod'
+import {PageRequest, PageResponse} from '../../Pagination.brand'
 
 export interface InboxDoesNotExist {
   _tag: 'inboxDoesNotExist'

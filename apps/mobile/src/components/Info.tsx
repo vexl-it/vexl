@@ -35,13 +35,13 @@ function Info({
 
   return (
     <Stack
-      jc={'center'}
-      p={'$4'}
+      jc="center"
+      p="$4"
       bc={variant === 'pink' ? '$pinkAccent1' : '$yellowAccent2'}
-      br={'$4'}
+      br="$4"
     >
-      <XStack ai={'center'} justifyContent={'space-between'}>
-        <XStack f={1} space={'$2'} ai={'center'} mr={'$1'}>
+      <XStack ai="center" justifyContent="space-between">
+        <XStack f={1} space="$2" ai="center" mr="$1">
           <SvgImage
             fill={
               variant === 'pink' ? tokens.color.pink.val : tokens.color.main.val
@@ -52,7 +52,7 @@ function Info({
             <Text
               fos={14}
               col={variant === 'pink' ? '$pink' : '$main'}
-              textAlign={'justify'}
+              textAlign="justify"
             >
               {text}
             </Text>
@@ -69,12 +69,12 @@ function Info({
         )}
       </XStack>
       {onActionPress && (
-        <Stack mt={'$4'}>
+        <Stack mt="$4">
           <Button
             text={actionButtonText}
             onPress={onActionPress}
             variant={variant === 'pink' ? 'hint' : 'primary'}
-            size={'medium'}
+            size="medium"
           />
         </Stack>
       )}

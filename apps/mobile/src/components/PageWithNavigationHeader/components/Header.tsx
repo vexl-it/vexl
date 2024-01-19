@@ -10,17 +10,17 @@ function Header(): JSX.Element | null {
   const headerState = useAtomValue(headerStateAtom)
 
   return !headerState.hidden && !headerState.hiddenAllTheWay ? (
-    <XStack ai={'center'} jc={'space-between'} pb={'$2'}>
+    <XStack ai="center" jc="space-between" pb="$2">
       {headerState.goBack ? (
         <IconButton
-          variant={'primary'}
+          variant="primary"
           icon={backButtonSvg}
           onPress={headerState.goBack}
         />
       ) : (
         <Stack />
       )}
-      <Text fos={20} ff={'$body600'} col={'$white'}>
+      <Text fos={20} ff="$body600" col="$white">
         {headerState.title}
       </Text>
       {headerState.onClose ? (

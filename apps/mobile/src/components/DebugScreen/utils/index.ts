@@ -1,13 +1,13 @@
+import {aes, ecdsa, eciesLegacy} from '@vexl-next/cryptography'
 import {
+  PrivateKeyPemBase64,
   generatePrivateKey,
   importPrivateKey,
-  PrivateKeyPemBase64,
 } from '@vexl-next/cryptography/src/KeyHolder'
 import {
   eciesLegacyDecrypt,
   eciesLegacyEncrypt,
 } from '@vexl-next/cryptography/src/operations/eciesLegacy'
-import {aes, ecdsa, eciesLegacy} from '@vexl-next/cryptography'
 import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {hashPhoneNumber} from '../../../state/contacts/utils'
 

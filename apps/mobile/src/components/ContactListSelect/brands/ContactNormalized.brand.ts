@@ -1,6 +1,6 @@
-import {z} from 'zod'
-import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
+import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
+import {z} from 'zod'
 
 export const ContactNormalized = z.object({
   name: z.string(),

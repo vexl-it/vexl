@@ -1,14 +1,14 @@
-import {type Session} from '../../../brands/Session.brand'
-import {pipe} from 'fp-ts/function'
 import * as TE from 'fp-ts/TaskEither'
+import {pipe} from 'fp-ts/function'
+import {type Session} from '../../../brands/Session.brand'
 import {
   aesEncrypt,
-  type CryptoError,
-  type ErrorWritingToStore,
-  stringifyToJson,
-  type JsonStringifyError,
   saveItemToAsyncStorage,
   saveItemToSecretStorage,
+  stringifyToJson,
+  type CryptoError,
+  type ErrorWritingToStore,
+  type JsonStringifyError,
 } from '../../../utils/fpUtils'
 
 // TODO refactor to ReaderTaskEither to remove sideeffects

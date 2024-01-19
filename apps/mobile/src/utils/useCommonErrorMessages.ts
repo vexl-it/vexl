@@ -1,5 +1,5 @@
-import {type TFunction, useTranslation} from './localization/I18nProvider'
 import {AxiosError} from 'axios'
+import {useTranslation, type TFunction} from './localization/I18nProvider'
 
 interface SomeError {
   _tag: string

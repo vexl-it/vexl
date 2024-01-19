@@ -25,14 +25,14 @@ function CurrentBtcPrice(props: TextProps): JSX.Element {
         void refreshCurrentBtcPrice()()
       }}
     >
-      <XStack ai={'center'}>
+      <XStack ai="center">
         {btcPriceForOfferWithState?.state === 'loading' ? (
           <ActivityIndicator
-            size={'small'}
+            size="small"
             color={getTokens().color.greyOnBlack.val}
           />
         ) : (
-          <Text fos={16} ff={'$body500'} col={'$greyOnBlack'} {...props}>
+          <Text fos={16} ff="$body500" col="$greyOnBlack" {...props}>
             {`1 BTC = ${
               tradePriceType === 'live'
                 ? btcPriceForOfferWithState?.state === 'error'

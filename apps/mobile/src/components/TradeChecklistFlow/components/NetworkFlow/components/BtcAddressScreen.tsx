@@ -47,12 +47,12 @@ function BtcAddressScreen(): JSX.Element {
         title={t('tradeChecklist.btcAddress.btcAddress')}
       />
       <Content scrollable>
-        <Stack mt={'$6'}>
+        <Stack mt="$6">
           <TextInput
-            autoCapitalize={'none'}
+            autoCapitalize="none"
             autoCorrect={false}
             style={{backgroundColor: getTokens().color.grey.val}}
-            textAlign={'left'}
+            textAlign="left"
             value={btcAddressTemp}
             onChangeText={(text) => {
               if (displayParsingError) {
@@ -61,7 +61,7 @@ function BtcAddressScreen(): JSX.Element {
               setBtcAddressTemp(text)
             }}
             selectionColor={getTokens().color.main.val}
-            textColor={'$main'}
+            textColor="$main"
             placeholder={t('tradeChecklist.btcAddress.btcAddress')}
             showClearButton={!!btcAddressTemp}
             onClearPress={() => {
@@ -69,9 +69,9 @@ function BtcAddressScreen(): JSX.Element {
             }}
           />
           {displayParsingError && (
-            <XStack ai={'center'} space={'$2'} mt={'$2'} ml={'$2'}>
+            <XStack ai="center" space="$2" mt="$2" ml="$2">
               <Image source={infoSvg} fill={getTokens().color.red.val} />
-              <Text col={'$red'} fos={14} ff={'$body500'}>
+              <Text col="$red" fos={14} ff="$body500">
                 {t('tradeChecklist.network.invalidBtcAddress')}
               </Text>
             </XStack>

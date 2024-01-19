@@ -64,9 +64,9 @@ function ChatInfoModal(): JSX.Element | null {
       exiting={SlideOutDown}
       topMargin={PHOTO_AND_INFO_PHOTO_TOP_HEIGHT + top}
     >
-      <YStack px={'$4'} backgroundColor="$black" f={1}>
+      <YStack px="$4" backgroundColor="$black" f={1}>
         <ScrollView>
-          <Stack mt={'$4'} mb={'$7'}>
+          <Stack mt="$4" mb="$7">
             <ChatRequestPreview mode="offerFirst" />
           </Stack>
           <ButtonStack
@@ -151,7 +151,7 @@ function ChatInfoModal(): JSX.Element | null {
               },
             ]}
           />
-          <Stack h={'$4'} />
+          <Stack h="$4" />
         </ScrollView>
       </YStack>
     </AnimatedModal>

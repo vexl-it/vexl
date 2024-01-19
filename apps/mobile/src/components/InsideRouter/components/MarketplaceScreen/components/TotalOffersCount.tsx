@@ -22,8 +22,8 @@ function TotalOffersCount({
   const sellOffersCount = useAtomValue(sellOffersToSeeInMarketplaceCountAtom)
 
   return (
-    <Stack als={'flex-start'} my={'$2'} mx="$2">
-      <Text ff={'$body600'} color={'$greyOnBlack'}>
+    <Stack als="flex-start" my="$2" mx="$2">
+      <Text ff="$body600" color="$greyOnBlack">
         {filterActive
           ? t('offer.totalFilteredOffers', {
               count: filteredOffersCount,

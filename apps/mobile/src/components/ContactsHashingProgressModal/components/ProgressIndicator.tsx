@@ -9,13 +9,13 @@ function ProgressIndicator(): JSX.Element {
   const hashingProgressPercentage = useAtomValue(hashingProgressPercentageAtom)
 
   return (
-    <Stack gap={'$2'}>
+    <Stack gap="$2">
       <ProgressBar percentDone={hashingProgressPercentage} />
-      <XStack ai={'center'} jc={'space-between'}>
-        <Text fos={14} ff={'$body500'} col={'$black'}>
+      <XStack ai="center" jc="space-between">
+        <Text fos={14} ff="$body500" col="$black">
           {t('addContactDialog.currentProgress')}
         </Text>
-        <Text fos={14} ff={'$body500'} col={'$greyOnWhite'}>
+        <Text fos={14} ff="$body500" col="$greyOnWhite">
           {`${Math.round(hashingProgressPercentage)} %`}
         </Text>
       </XStack>

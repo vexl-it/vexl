@@ -61,7 +61,7 @@ function TimeToDropdown({
 
   return (
     <Dropdown
-      placeholder={''}
+      placeholder=""
       onChange={(item) => {
         if (item.value) setAvailableToTimestamp(item.value)
       }}

@@ -25,7 +25,7 @@ function NextButton(): JSX.Element | null {
   if (!nextButtonState.text) return null
 
   return (
-    <XStack mt="$2" space={'$2'}>
+    <XStack mt="$2" space="$2">
       {nextButtonState.secondButton && (
         <Button
           fullSize

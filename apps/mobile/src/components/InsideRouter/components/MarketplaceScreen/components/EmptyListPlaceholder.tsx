@@ -44,13 +44,13 @@ function EmptyListWrapper({
 
   return (
     <ScrollView contentContainerStyle={{paddingBottom: tabBarEndsAt + 25}}>
-      <YStack f={1} ai={'center'} jc={'center'} py="$4" space="$4">
+      <YStack f={1} ai="center" jc="center" py="$4" space="$4">
         <Image source={anonymousAvatarSvg} />
         {children}
         <Button
           text={buttonText}
-          variant={'primary'}
-          size={'small'}
+          variant="primary"
+          size="small"
           onPress={onButtonPress}
         />
       </YStack>
@@ -113,7 +113,7 @@ function EmptyListPlaceholder(): JSX.Element {
   if (filterActive) {
     return resetFilterSuggestionVisible ? (
       <MarketplaceSuggestion
-        mt={'$4'}
+        mt="$4"
         buttonText={t('offer.resetFilter')}
         onButtonPress={resetFilterAndSaveIt}
         onClosePress={() => {
@@ -127,10 +127,10 @@ function EmptyListPlaceholder(): JSX.Element {
         onButtonPress={resetFilterAndSaveIt}
       >
         <Text
-          textAlign={'center'}
-          col={'$greyOnWhite'}
+          textAlign="center"
+          col="$greyOnWhite"
           fos={20}
-          ff={'$body600'}
+          ff="$body600"
           adjustsFontSizeToFit
           numberOfLines={4}
         >
@@ -138,8 +138,8 @@ function EmptyListPlaceholder(): JSX.Element {
         </Text>
         <Button
           text={t('myOffers.addNewOffer')}
-          variant={'secondary'}
-          size={'small'}
+          variant="secondary"
+          size="small"
           onPress={() => {
             navigation.navigate('CreateOffer')
           }}
@@ -159,10 +159,10 @@ function EmptyListPlaceholder(): JSX.Element {
         }}
       >
         <Text
-          textAlign={'center'}
-          col={'$greyOnWhite'}
+          textAlign="center"
+          col="$greyOnWhite"
           fos={20}
-          ff={'$body600'}
+          ff="$body600"
         >
           {importedContactsCount === 0
             ? t('offer.notImportedAnyContacts')
@@ -182,10 +182,10 @@ function EmptyListPlaceholder(): JSX.Element {
       >
         {minutesTillOffersDisplayed > 0 ? (
           <Text
-            textAlign={'center'}
-            col={'$greyOnWhite'}
+            textAlign="center"
+            col="$greyOnWhite"
             fos={20}
-            ff={'$body600'}
+            ff="$body600"
           >
             {t('offer.offersAreLoadingAndShouldBeReady', {
               minutes: minutesTillOffersDisplayed,
@@ -193,10 +193,10 @@ function EmptyListPlaceholder(): JSX.Element {
           </Text>
         ) : (
           <Text
-            textAlign={'center'}
-            col={'$greyOnWhite'}
+            textAlign="center"
+            col="$greyOnWhite"
             fos={20}
-            ff={'$body600'}
+            ff="$body600"
           >
             {t('offer.marketplaceEmpty')}
           </Text>

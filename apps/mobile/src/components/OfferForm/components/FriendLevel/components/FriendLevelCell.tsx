@@ -50,7 +50,7 @@ function FriendLevelCell({
             </Stack>
           )}
           <SvgImage source={image} />
-          <Stack pos={'absolute'} zi={100} top={16}>
+          <Stack pos="absolute" zi={100} top={16}>
             <UserAvatar
               height={type === 'FIRST' ? 50 : 25}
               width={type === 'FIRST' ? 50 : 25}

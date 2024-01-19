@@ -58,12 +58,12 @@ export default function CryptoBenchmarks(): JSX.Element {
   }
 
   return (
-    <YStack space={'$2'}>
-      <Text fos={20} color={'$black'}>
+    <YStack space="$2">
+      <Text fos={20} color="$black">
         For each crypto operation, we run {NUMBER_OF_GENERATIONS} iterations and
         measure the time
       </Text>
-      <Text col={'$black'}>{text}</Text>
+      <Text col="$black">{text}</Text>
       <Button
         // eslint-disable-next-line @typescript-eslint/no-misused-promises
         onPress={async () => {
@@ -71,9 +71,9 @@ export default function CryptoBenchmarks(): JSX.Element {
           const generator = runBenchmark()
           await printGenerator(generator)
         }}
-        variant={'secondary'}
-        text={'Run benchmark'}
-        size={'small'}
+        variant="secondary"
+        text="Run benchmark"
+        size="small"
       />
       <Button
         // eslint-disable-next-line @typescript-eslint/no-misused-promises
@@ -82,16 +82,16 @@ export default function CryptoBenchmarks(): JSX.Element {
           const generator = runTests()
           await printGenerator(generator)
         }}
-        variant={'secondary'}
-        text={'Run tests'}
-        size={'small'}
+        variant="secondary"
+        text="Run tests"
+        size="small"
       />
       <Button
         onPress={() => {
           setEcdhComputeSecretImplementation(defaultImplementation)
         }}
         variant="primary"
-        size={'small'}
+        size="small"
         text="set pure JS implementation"
       />
       <Button
@@ -99,7 +99,7 @@ export default function CryptoBenchmarks(): JSX.Element {
           setEcdhComputeSecretImplementation(dummy10Implementation)
         }}
         variant="primary"
-        size={'small'}
+        size="small"
         text="set 10ms implementation"
       />
       <Button
@@ -107,7 +107,7 @@ export default function CryptoBenchmarks(): JSX.Element {
           setEcdhComputeSecretImplementation(dummy0Implementation)
         }}
         variant="primary"
-        size={'small'}
+        size="small"
         text="set instant implementation"
       />
       <Button
@@ -115,7 +115,7 @@ export default function CryptoBenchmarks(): JSX.Element {
           setEcdhComputeSecretImplementation(computeSharedSecret)
         }}
         variant="primary"
-        size={'small'}
+        size="small"
         text="set android native implementation"
       />
     </YStack>

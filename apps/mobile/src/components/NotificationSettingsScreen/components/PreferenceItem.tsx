@@ -13,10 +13,10 @@ function PreferenceItem({title, description, atom}: Props): JSX.Element {
   return (
     <XStack>
       <YStack f={1}>
-        <Text fontSize={16} ff="$body600" color={'white'}>
+        <Text fontSize={16} ff="$body600" color="white">
           {title}
         </Text>
-        <Text color={'$greyOnBlack'}>{description}</Text>
+        <Text color="$greyOnBlack">{description}</Text>
       </YStack>
       <Switch value={value} onValueChange={setValue} />
     </XStack>

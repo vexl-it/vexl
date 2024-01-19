@@ -1,10 +1,10 @@
+import * as crypto from 'node:crypto'
 import {
   aesGCMDecrypt,
   aesGCMEncrypt,
   aesGCMIgnoreTagDecrypt,
   aesGCMIgnoreTagEncrypt,
 } from './aes'
-import * as crypto from 'node:crypto'
 
 describe('aes gcm', () => {
   const password = 'testPass'

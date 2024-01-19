@@ -2,8 +2,11 @@
 
 // INITIAL SETUP - KEEP THIS AT THE TOP
 import './src/utils/ThemeProvider/tamagui.config'
+// Order matters
 import './src/components/AppLogsScreen/setupAppLogs'
+// Order matters
 import './src/utils/notifications/backgroundHandler'
+// Order matters
 import './src/utils/setupCryptoImplementation'
 // INITIAL SETUP DONE
 

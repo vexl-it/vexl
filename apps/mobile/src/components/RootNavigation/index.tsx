@@ -1,19 +1,25 @@
 import {createNativeStackNavigator} from '@react-navigation/native-stack'
+import {useAtomValue} from 'jotai'
 import {type RootStackParamsList} from '../../navigationTypes'
+import {useDecodePreviouslyUncompatibleMessagesOnMount} from '../../state/chat/atoms/decodePreviouslyUncompatibleMessagesActionAtom'
 import {useSyncConnections} from '../../state/connections'
+import useRefreshContactsFromDeviceOnResume from '../../state/contacts/hooks/useRefreshContactsFromDeviceOnResume'
 import {useSetCombinedContactsAfterLastSubmitForCurrentUsers} from '../../state/contacts/hooks/useSetCombinedContactsAfterLastSubmitForCurrentUsers'
 import {useIsUserLoggedIn} from '../../state/session'
 import useHandleNotificationOpen from '../../state/useHandleNotificationOpen'
 import {useHandleReceivedNotifications} from '../../state/useHandleReceivedNotifications'
 import useHandleRefreshContactServiceAndOffers from '../../state/useHandleRefreshContactServiceAndOffers'
+import {useSetAppLanguageFromStore} from '../../state/useSetAppLanguageFromStore'
 import {useHandleDeepLink} from '../../utils/deepLinks'
 import {useHideInnactivityReminderNotificationsOnResume} from '../../utils/notifications/chatNotifications'
 import {useRefreshNotificationTokenOnResumeAssumeLoggedIn} from '../../utils/notifications/useRefreshNotificationTokenOnResumeAssumeLoggedIn'
+import {showTextDebugButtonAtom} from '../../utils/preferences'
 import AppLogsScreen from '../AppLogsScreen'
 import ChangeProfilePictureScreen from '../ChangeProfilePictureScreen/ChangeProfilePictureScreen'
 import ChatDetailScreen from '../ChatDetailScreen'
 import CommonFriendsScreen from '../CommonFriendsScreen'
 import DebugScreen from '../DebugScreen'
+import DevTranslationFloatingButton from '../DevTranslationFloatingButtons'
 import EditNameScreen from '../EditNameScreen'
 import FaqsScreen from '../FaqScreen'
 import FilterOffersScreen from '../FilterOffersScreen'
@@ -35,12 +41,6 @@ import {
   useHandleNotificationsPermissionsRedirect,
   useHandlePostLoginFlowRedirect,
 } from './utils'
-import useRefreshContactsFromDeviceOnResume from '../../state/contacts/hooks/useRefreshContactsFromDeviceOnResume'
-import DevTranslationFloatingButton from '../DevTranslationFloatingButtons'
-import {showTextDebugButtonAtom} from '../../utils/preferences'
-import {useAtomValue} from 'jotai'
-import {useDecodePreviouslyUncompatibleMessagesOnMount} from '../../state/chat/atoms/decodePreviouslyUncompatibleMessagesActionAtom'
-import {useSetAppLanguageFromStore} from '../../state/useSetAppLanguageFromStore'
 
 const Stack = createNativeStackNavigator<RootStackParamsList>()
 
@@ -77,42 +77,36 @@ function RootNavigation(): JSX.Element {
         }}
       >
         {!isLoggedIn ? (
-          <Stack.Screen name={'LoginFlow'} component={LoginFlow} />
+          <Stack.Screen name="LoginFlow" component={LoginFlow} />
         ) : (
           <Stack.Group>
-            <Stack.Screen name={'InsideTabs'} component={InsideScreen} />
-            <Stack.Screen name={'TodoScreen'} component={TodoScreen} />
-            <Stack.Screen name={'PostLoginFlow'} component={PostLoginFlow} />
-            <Stack.Screen name={'OfferDetail'} component={OfferDetailScreen} />
-            <Stack.Screen name={'CreateOffer'} component={CreateOfferScreen} />
-            <Stack.Screen name={'EditOffer'} component={EditOfferScreen} />
+            <Stack.Screen name="InsideTabs" component={InsideScreen} />
+            <Stack.Screen name="TodoScreen" component={TodoScreen} />
+            <Stack.Screen name="PostLoginFlow" component={PostLoginFlow} />
+            <Stack.Screen name="OfferDetail" component={OfferDetailScreen} />
+            <Stack.Screen name="CreateOffer" component={CreateOfferScreen} />
+            <Stack.Screen name="EditOffer" component={EditOfferScreen} />
+            <Stack.Screen name="FilterOffers" component={FilterOffersScreen} />
+            <Stack.Screen name="SearchOffers" component={SearchOffersScreen} />
+            <Stack.Screen name="MyOffers" component={MyOffersScreen} />
+            <Stack.Screen name="AppLogs" component={AppLogsScreen} />
+            <Stack.Screen name="ChatDetail" component={ChatDetailScreen} />
+            <Stack.Screen name="SetContacts" component={SetContactsScreen} />
             <Stack.Screen
-              name={'FilterOffers'}
-              component={FilterOffersScreen}
-            />
-            <Stack.Screen
-              name={'SearchOffers'}
-              component={SearchOffersScreen}
-            />
-            <Stack.Screen name={'MyOffers'} component={MyOffersScreen} />
-            <Stack.Screen name={'AppLogs'} component={AppLogsScreen} />
-            <Stack.Screen name={'ChatDetail'} component={ChatDetailScreen} />
-            <Stack.Screen name={'SetContacts'} component={SetContactsScreen} />
-            <Stack.Screen
-              name={'CommonFriends'}
+              name="CommonFriends"
               component={CommonFriendsScreen}
             />
             <Stack.Screen
-              name={'NotificationPermissionsMissing'}
+              name="NotificationPermissionsMissing"
               component={NotificationPermissionsScreen}
             />
-            <Stack.Screen name={'EditName'} component={EditNameScreen} />
+            <Stack.Screen name="EditName" component={EditNameScreen} />
             <Stack.Screen
-              name={'ChangeProfilePicture'}
+              name="ChangeProfilePicture"
               component={ChangeProfilePictureScreen}
             />
             <Stack.Screen
-              name={'TradeChecklistFlow'}
+              name="TradeChecklistFlow"
               options={{
                 animation: 'slide_from_bottom',
                 presentation: 'containedTransparentModal',
@@ -122,12 +116,12 @@ function RootNavigation(): JSX.Element {
           </Stack.Group>
         )}
         <Stack.Screen
-          name={'NotificationSettings'}
+          name="NotificationSettings"
           component={NotificationSettingsScreen}
         />
-        <Stack.Screen name={'TermsAndConditions'} component={TosScreen} />
-        <Stack.Screen name={'Faqs'} component={FaqsScreen} />
-        <Stack.Screen name={'DebugScreen'} component={DebugScreen} />
+        <Stack.Screen name="TermsAndConditions" component={TosScreen} />
+        <Stack.Screen name="Faqs" component={FaqsScreen} />
+        <Stack.Screen name="DebugScreen" component={DebugScreen} />
       </Stack.Navigator>
       {showTextDebugButton && <DevTranslationFloatingButton />}
       {isLoggedIn && <LoggedInHookGroup />}

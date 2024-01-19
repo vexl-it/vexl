@@ -21,13 +21,13 @@ export default function MessageIncompatibleItem({
   if (compare(message.minimalRequiredVersion)('<=', version)) return null
 
   return (
-    <Stack mx={'$4'} mt={'$1'} flex={1} alignItems={'flex-start'}>
+    <Stack mx="$4" mt="$1" flex={1} alignItems="flex-start">
       <Stack
         gap="$2"
-        maxWidth={'80%'}
-        br={'$6'}
-        backgroundColor={'$grey'}
-        p={'$3'}
+        maxWidth="80%"
+        br="$6"
+        backgroundColor="$grey"
+        p="$3"
       >
         <XStack gap="$2">
           <Image
@@ -36,11 +36,11 @@ export default function MessageIncompatibleItem({
             height={18}
             source={warningSvg}
           />
-          <Text fontFamily={'$body500'} color="$white">
+          <Text fontFamily="$body500" color="$white">
             {t('messages.incompatible.title')}
           </Text>
         </XStack>
-        <Text fos={12} fontFamily={'$body500'} color="$red">
+        <Text fos={12} fontFamily="$body500" color="$red">
           {t('messages.incompatible.text', {
             targetVersion: message.minimalRequiredVersion,
           })}

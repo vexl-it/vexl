@@ -1,14 +1,14 @@
+import * as crypto from '@vexl-next/cryptography'
 import {
   type PrivateKeyHolder,
   type PublicKeyPemBase64,
 } from '@vexl-next/cryptography/src/KeyHolder'
-import * as E from 'fp-ts/Either'
-import * as crypto from '@vexl-next/cryptography'
 import {type AxiosInstance} from 'axios'
+import * as E from 'fp-ts/Either'
+import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {axiosCallWithValidation} from '../../utils'
 import {CreateChallengeResponse, type SignedChallenge} from './contracts'
-import * as TE from 'fp-ts/TaskEither'
 
 export type ExtractLeftTE<T extends TE.TaskEither<any, any>> =
   T extends TE.TaskEither<infer L, unknown> ? L : never

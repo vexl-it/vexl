@@ -87,7 +87,7 @@ function AppLogsScreen(): JSX.Element {
             <IconButton icon={closeSvg} onPress={safeGoBack} />
           </>
         </ScreenTitle>
-        <Text mb="$3" ff={'$body600'} color="$white">
+        <Text mb="$3" ff="$body600" color="$white">
           {t('AppLogs.warning')}
         </Text>
 
@@ -97,8 +97,8 @@ function AppLogsScreen(): JSX.Element {
         <XStack space="$2">
           <Button
             fullSize
-            size={'small'}
-            variant={'primary'}
+            size="small"
+            variant="primary"
             onPress={clearLogs}
             text={t('AppLogs.clear')}
             disabled={isAppLogsEmpty}
@@ -106,8 +106,8 @@ function AppLogsScreen(): JSX.Element {
 
           <Button
             fullSize
-            size={'small'}
-            variant={'secondary'}
+            size="small"
+            variant="secondary"
             onPress={exportLogs}
             text={t('AppLogs.export')}
             disabled={isAppLogsEmpty}

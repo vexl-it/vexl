@@ -1,16 +1,16 @@
-import {type ChatPrivateApi} from '@vexl-next/rest-api/src/services/chat'
-import * as TE from 'fp-ts/TaskEither'
-import {type SignedChallenge} from '@vexl-next/rest-api/src/services/chat/contracts'
-import {flow, pipe} from 'fp-ts/function'
-import * as A from 'fp-ts/Array'
-import {type BasicError, toError} from '@vexl-next/domain/src/utility/errors'
 import {
   type PrivateKeyHolder,
   type PublicKeyPemBase64,
 } from '@vexl-next/cryptography/src/KeyHolder'
-import {ecdsaSign} from '../../utils/crypto'
+import {toError, type BasicError} from '@vexl-next/domain/src/utility/errors'
+import {type ChatPrivateApi} from '@vexl-next/rest-api/src/services/chat'
+import {type SignedChallenge} from '@vexl-next/rest-api/src/services/chat/contracts'
+import * as A from 'fp-ts/Array'
 import * as O from 'fp-ts/Option'
+import * as TE from 'fp-ts/TaskEither'
+import {flow, pipe} from 'fp-ts/function'
 import {type ExtractLeftTE} from '../../utils/ExtractLeft'
+import {ecdsaSign} from '../../utils/crypto'
 
 function selectKeyPair(
   keyPairs: PrivateKeyHolder[]

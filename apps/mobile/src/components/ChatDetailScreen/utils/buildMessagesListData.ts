@@ -1,19 +1,19 @@
-import {flow, pipe} from 'fp-ts/lib/function'
-import {type ChatMessageWithState} from '../../../state/chat/domain'
-import {type TradeChecklistInState} from '../../../state/tradeChecklist/domain'
 import {
   UnixMilliseconds,
   UnixMilliseconds0,
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import * as A from 'fp-ts/Array'
+import {flow, pipe} from 'fp-ts/lib/function'
+import {DateTime} from 'luxon'
+import {type ChatMessageWithState} from '../../../state/chat/domain'
+import {type TradeChecklistInState} from '../../../state/tradeChecklist/domain'
+import {type MessagesListItem} from '../components/MessageItem'
 import {
-  type VexlBotOrMessageWithState,
   addVexlBotOrMessageWithStateToArray,
   getMessageTime,
   getUniqueKey,
+  type VexlBotOrMessageWithState,
 } from './VexlBotMessageOrMessageWithState'
-import {DateTime} from 'luxon'
-import * as A from 'fp-ts/Array'
-import {type MessagesListItem} from '../components/MessageItem'
 
 function addVexlBotMessagesToMessagesListData(
   tradeChecklist: TradeChecklistInState

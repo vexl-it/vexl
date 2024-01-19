@@ -60,7 +60,7 @@ function RevealedContactMessageItem({
             <Image
               height={80}
               width={80}
-              borderRadius={'$8'}
+              borderRadius="$8"
               source={{uri: resolveLocalUri(image.imageUri)}}
             />
           </UserAvatarTouchableWrapper>
@@ -147,10 +147,10 @@ function ContactRevealMessageItem({
           <Stack
             width={80}
             height={80}
-            backgroundColor={'$darkRed'}
+            backgroundColor="$darkRed"
             alignItems="center"
-            justifyContent={'center'}
-            borderRadius={'$7'}
+            justifyContent="center"
+            borderRadius="$7"
           >
             <SvgImage
               width={35}

@@ -38,12 +38,12 @@ function QuickActionBannerUi({
 
   return (
     <XStack
-      space={'$2'}
+      space="$2"
       bc="$white"
       py="$3"
       px="$4"
-      ai={'center'}
-      jc={'space-between'}
+      ai="center"
+      jc="space-between"
     >
       {leftElement && leftElement}
       <YStack flex={1}>
@@ -60,7 +60,7 @@ function QuickActionBannerUi({
         <IconButton
           height={40}
           width={40}
-          variant={'secondary'}
+          variant="secondary"
           icon={icon}
           iconFill={tokens.color.black.val}
           onPress={onButtonPress}
@@ -68,7 +68,7 @@ function QuickActionBannerUi({
       ) : (
         <Button
           onPress={onButtonPress}
-          size={'small'}
+          size="small"
           variant="secondary"
           text={buttonText}
         />
@@ -124,7 +124,7 @@ function QuickActionBanner(): JSX.Element | null {
     return (
       <QuickActionBannerUi
         leftElement={<></>}
-        headingType={'boldTop'}
+        headingType="boldTop"
         onButtonPress={onBackToRequestPressed}
         topText={t('messages.actionBanner.requestPending')}
         bottomText={t('messages.actionBanner.bottomText')}
@@ -143,7 +143,7 @@ function QuickActionBanner(): JSX.Element | null {
           them: otherSideData.userName,
         })}
         bottomText={t('messages.leaveToo')}
-        headingType={'boldBottom'}
+        headingType="boldBottom"
         buttonText={t('messages.deleteChat')}
         leftElement={
           <UserAvatar
@@ -175,7 +175,7 @@ function QuickActionBanner(): JSX.Element | null {
           them: otherSideData.userName,
         })}
         bottomText={t('messages.leaveChat')}
-        headingType={'boldBottom'}
+        headingType="boldBottom"
         buttonText={t('messages.deleteChat')}
         leftElement={
           <UserAvatar
@@ -204,7 +204,7 @@ function QuickActionBanner(): JSX.Element | null {
           them: otherSideData.userName,
         })}
         bottomText={t('messages.leaveChat')}
-        headingType={'boldBottom'}
+        headingType="boldBottom"
         buttonText={t('messages.deleteChat')}
         leftElement={
           <UserAvatar
@@ -231,7 +231,7 @@ function QuickActionBanner(): JSX.Element | null {
       <QuickActionBannerUi
         topText={t('messages.identityRevealRequest')}
         bottomText={t('messages.tapToReveal')}
-        headingType={'boldTop'}
+        headingType="boldTop"
         buttonText={t('common.more')}
         leftElement={
           <UserAvatar width={48} height={48} userImage={otherSideData.image} />
@@ -248,7 +248,7 @@ function QuickActionBanner(): JSX.Element | null {
       <QuickActionBannerUi
         topText={t('messages.identitySend.title')}
         bottomText={t('messages.identitySend.subtitle')}
-        headingType={'boldTop'}
+        headingType="boldTop"
         buttonText={t('common.ok')}
         leftElement={
           <UserAvatar width={48} height={48} userImage={otherSideData.image} />
@@ -265,7 +265,7 @@ function QuickActionBanner(): JSX.Element | null {
       <QuickActionBannerUi
         topText={t('messages.contactRevealSent.title')}
         bottomText={t('messages.contactRevealSent.subtitle')}
-        headingType={'boldTop'}
+        headingType="boldTop"
         buttonText={t('common.ok')}
         leftElement={
           <UserAvatar width={48} height={48} userImage={otherSideData.image} />
@@ -285,7 +285,7 @@ function QuickActionBanner(): JSX.Element | null {
       <QuickActionBannerUi
         topText={t('messages.contactRevealRequest')}
         bottomText={t('messages.tapToReveal')}
-        headingType={'boldTop'}
+        headingType="boldTop"
         buttonText={t('common.more')}
         leftElement={
           <UserAvatar width={48} height={48} userImage={otherSideData.image} />
@@ -304,7 +304,7 @@ function QuickActionBanner(): JSX.Element | null {
           name: otherSideData.userName,
         })}
         bottomText={t('messages.tapToAddToYourVexlContacts')}
-        headingType={'boldTop'}
+        headingType="boldTop"
         icon={phoneSvg}
         leftElement={
           <UserAvatar width={48} height={48} userImage={otherSideData.image} />

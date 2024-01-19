@@ -18,17 +18,17 @@ function Tab({active, onPress, title}: TabTitleProps): JSX.Element {
   return (
     <Stack
       f={1}
-      ai={'center'}
-      jc={'center'}
+      ai="center"
+      jc="center"
       mt={CONTAINER_WITH_TOP_BORDER_RADIUS_TOP_PADDING}
-      px={'$2'}
-      pb={'$2'}
+      px="$2"
+      pb="$2"
     >
       <TouchableOpacity onPress={onPress}>
         <Text
           col={active ? '$main' : '$greyOnBlack'}
           fos={40}
-          ff={'$heading'}
+          ff="$heading"
           numberOfLines={1}
           adjustsFontSizeToFit
         >
@@ -66,7 +66,7 @@ function CustomTabBar(props: MaterialTopTabBarProps): JSX.Element {
 
   return (
     <Stack>
-      <XStack ai={'center'} jc={'space-around'}>
+      <XStack ai="center" jc="space-around">
         <Tab
           active={navigation.getState().index === SELL_TAB_INDEX}
           onPress={() => {
@@ -82,7 +82,7 @@ function CustomTabBar(props: MaterialTopTabBarProps): JSX.Element {
           title={t('offer.buy')}
         />
       </XStack>
-      <Stack height={2} bc={'$grey'}>
+      <Stack height={2} bc="$grey">
         <AnimatedLine isLeft={navigation.getState().index === SELL_TAB_INDEX} />
       </Stack>
     </Stack>

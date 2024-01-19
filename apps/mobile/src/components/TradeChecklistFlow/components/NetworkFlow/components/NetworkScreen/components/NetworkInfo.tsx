@@ -9,10 +9,10 @@ function NetworkInfo(): JSX.Element {
   const btcNetwork = useAtomValue(btcNetworkAtom)
 
   return (
-    <Stack mb={'$4'}>
+    <Stack mb="$4">
       <Info
         hideCloseButton
-        variant={'yellow'}
+        variant="yellow"
         text={
           btcNetwork === 'LIGHTING'
             ? t('tradeChecklist.network.youWillGenerateQrCode')

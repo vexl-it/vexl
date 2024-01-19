@@ -10,9 +10,9 @@ function FooterButton(): JSX.Element | null {
     <Button
       fullWidth
       disabled={footerButtonState.disabled}
-      size={'medium'}
+      size="medium"
       onPress={footerButtonState.onPress}
-      variant={'secondary'}
+      variant="secondary"
       text={footerButtonState.text}
     />
   ) : null

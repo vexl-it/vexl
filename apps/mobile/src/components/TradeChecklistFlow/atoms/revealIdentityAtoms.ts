@@ -1,13 +1,13 @@
-import {atom} from 'jotai'
-import {pipe} from 'fp-ts/function'
+import {type IdentityReveal} from '@vexl-next/domain/src/general/tradeChecklist'
 import {type UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import * as TE from 'fp-ts/TaskEither'
+import {pipe} from 'fp-ts/function'
+import {atom} from 'jotai'
+import anonymizePhoneNumber from '../../../state/chat/utils/anonymizePhoneNumber'
 import {
   anonymizedUserDataAtom,
   sessionDataOrDummyAtom,
 } from '../../../state/session'
-import anonymizePhoneNumber from '../../../state/chat/utils/anonymizePhoneNumber'
-import {type IdentityReveal} from '@vexl-next/domain/src/general/tradeChecklist'
 import {tradeChecklistDataAtom} from '../../../state/tradeChecklist/atoms/fromChatAtoms'
 import {revealIdentityDialogUIAtom} from '../../RevealIdentityDialog/atoms'
 import {revealIdentityActionAtom} from './updatesToBeSentAtom'

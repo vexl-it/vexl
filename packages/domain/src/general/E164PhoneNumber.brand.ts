@@ -1,7 +1,6 @@
+import {parsePhoneNumber} from 'awesome-phonenumber'
 import * as O from 'fp-ts/Option'
 import {z} from 'zod'
-
-import {parsePhoneNumber} from 'awesome-phonenumber'
 
 export const E164PhoneNumber = z
   .string()

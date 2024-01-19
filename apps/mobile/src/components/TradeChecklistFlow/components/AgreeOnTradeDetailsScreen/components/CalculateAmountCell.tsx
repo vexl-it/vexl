@@ -45,7 +45,7 @@ function CalculateAmountCell(): JSX.Element {
 
   return (
     <ChecklistCell
-      item={'CALCULATE_AMOUNT'}
+      item="CALCULATE_AMOUNT"
       onPress={onPress}
       sideNote={
         btcAmountUpdateToBeSent

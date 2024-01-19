@@ -1,7 +1,7 @@
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
-import {type ChatMessageWithState} from '../domain'
 import {generateChatMessageId} from '@vexl-next/domain/src/general/messaging'
 import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {type ChatMessageWithState} from '../domain'
 
 export default function createAccountDeletedMessage({
   senderPublicKey,

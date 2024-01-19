@@ -25,7 +25,7 @@ function LocationsList({onPress}: Props): JSX.Element {
   )
 
   return (
-    <Stack pt={'$2'}>
+    <Stack pt="$2">
       {searchResultsAtoms.length === 0 && (
         <Text mt="$10" ta="center" col="$greyOnBlack">
           {t('common.noResults')}

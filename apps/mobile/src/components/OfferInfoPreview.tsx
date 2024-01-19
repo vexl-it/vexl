@@ -69,12 +69,12 @@ function OfferInfoPreview({
     <>
       {(offer.privatePart.commonFriends.includes(BTC_PRAGUE_FRIEND) ||
         offer.privatePart.commonFriends.includes(BTC_PRAGUE_FRIEND_STAGE)) && (
-        <Stack alignSelf={'flex-end'}>
+        <Stack alignSelf="flex-end">
           <SvgImage width={60} height={20} source={btcPragueLogoSvg} />
         </Stack>
       )}
-      <XStack ai={'flex-start'} jc={'space-between'}>
-        <XStack mb={'$4'}>
+      <XStack ai="flex-start" jc="space-between">
+        <XStack mb="$4">
           <Text
             flex={1}
             fos={20}
@@ -83,7 +83,7 @@ function OfferInfoPreview({
           >
             {offer.publicPart.offerDescription}
           </Text>
-          <XStack space={'$1'}>
+          <XStack space="$1">
             {isOfferExpired(offer.publicPart.expirationDate) && (
               <SvgImage
                 stroke={getTokens().color.$greyOnBlack.val}
@@ -99,7 +99,7 @@ function OfferInfoPreview({
           </XStack>
         </XStack>
       </XStack>
-      <XStack space={'$1'}>
+      <XStack space="$1">
         <InfoItemContainer>
           <PriceText>
             {t('offer.upTo')} <PriceBigger>{offerAmount}</PriceBigger>
@@ -134,7 +134,7 @@ function OfferInfoPreview({
         {!hideSpokenLanguages &&
           offer.publicPart.spokenLanguages.length > 0 && (
             <InfoItemContainer>
-              <Stack mb={'$2'}>
+              <Stack mb="$2">
                 <SvgImage
                   height={24}
                   width={24}

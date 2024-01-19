@@ -9,18 +9,18 @@ import {useEffect} from 'react'
 import {safeParse} from '../utils/fpUtils'
 import {isOnSpecificChat} from '../utils/navigation'
 import {ChatNotificationData} from '../utils/notifications/ChatNotificationData'
+import checkAndShowCreateOfferPrompt from '../utils/notifications/checkAndShowCreateOfferPrompt'
+import isChatMessageNotification from '../utils/notifications/isChatMessageNotification'
 import {
   CREATE_OFFER_PROMPT,
   NEW_CONNECTION,
   NEW_CONTENT,
 } from '../utils/notifications/notificationTypes'
+import {showDebugNotificationIfEnabled} from '../utils/notifications/showDebugNotificationIfEnabled'
 import {showUINotificationFromRemoteMessage} from '../utils/notifications/showUINotificationFromRemoteMessage'
 import reportError from '../utils/reportError'
 import {fetchAndStoreMessagesForInboxAtom} from './chat/atoms/fetchNewMessagesActionAtom'
 import {updateAllOffersConnectionsActionAtom} from './connections/atom/offerToConnectionsAtom'
-import checkAndShowCreateOfferPrompt from '../utils/notifications/checkAndShowCreateOfferPrompt'
-import {showDebugNotificationIfEnabled} from '../utils/notifications/showDebugNotificationIfEnabled'
-import isChatMessageNotification from '../utils/notifications/isChatMessageNotification'
 
 export function useHandleReceivedNotifications(): void {
   const navigation = useNavigation()

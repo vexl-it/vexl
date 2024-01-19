@@ -53,7 +53,7 @@ function TradeChecklistReminder(): JSX.Element | null {
       }}
       text={t('vexlbot.initialWelcomeMessage', {name: otherSideData.userName})}
     >
-      <Stack space={'$4'}>
+      <Stack space="$4">
         <Button
           beforeIcon={tradeChecklistSvg}
           iconSize={24}
@@ -65,19 +65,19 @@ function TradeChecklistReminder(): JSX.Element | null {
               inboxKey,
             })
           }}
-          variant={'secondary'}
-          size={'medium'}
+          variant="secondary"
+          size="medium"
           text={t('vexlbot.openTradeChecklist')}
         />
-        <XStack space={'$2'}>
+        <XStack space="$2">
           <Checkbox
-            size={'small'}
+            size="small"
             value={dontShowSwitchValue}
             onChange={() => {
               setDontShowSwitchValue(!dontShowSwitchValue)
             }}
           />
-          <Text fos={12} ff={'$body500'} col={'$greyOnBlack'}>
+          <Text fos={12} ff="$body500" col="$greyOnBlack">
             {t('common.dontShowMeThisAgain')}
           </Text>
         </XStack>

@@ -26,8 +26,8 @@ function PremiumOrDiscountSlider({
 
   return (
     <Stack
-      p={'$4'}
-      br={'$4'}
+      p="$4"
+      br="$4"
       bc={
         sliderValue === 0
           ? '$grey'
@@ -36,7 +36,7 @@ function PremiumOrDiscountSlider({
           : '$darkBrown'
       }
     >
-      <XStack f={1} jc={'space-between'} mb={'$4'}>
+      <XStack f={1} jc="space-between" mb="$4">
         <Text
           fos={16}
           col={
@@ -48,7 +48,7 @@ function PremiumOrDiscountSlider({
           }
           numberOfLines={2}
           adjustsFontSizeToFit
-          maxWidth={'50%'}
+          maxWidth="50%"
         >
           {offerType === 'BUY'
             ? t('offerForm.premiumOrDiscount.buyCheaply')
@@ -64,7 +64,7 @@ function PremiumOrDiscountSlider({
           }
           numberOfLines={2}
           adjustsFontSizeToFit
-          maxWidth={'50%'}
+          maxWidth="50%"
         >
           {offerType === 'BUY'
             ? t('offerForm.premiumOrDiscount.buyFaster')

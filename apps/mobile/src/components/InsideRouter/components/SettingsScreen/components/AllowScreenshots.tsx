@@ -12,7 +12,7 @@ function AllowScreenshots(): JSX.Element {
   )
 
   return (
-    <XStack f={1} ai={'center'} jc={'space-between'}>
+    <XStack f={1} ai="center" jc="space-between">
       <ItemText>{t('settings.items.allowScreenshots')}</ItemText>
       <Switch
         value={!screenshotsDisabled}

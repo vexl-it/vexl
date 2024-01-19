@@ -25,8 +25,8 @@ function PremiumOrDiscount(): JSX.Element {
 
   return (
     <Stack>
-      <XStack ai={'center'} jc={'space-between'} mb={'$4'}>
-        <Text fos={20} ff={'$body600'} col={'$white'}>{`% ${t(
+      <XStack ai="center" jc="space-between" mb="$4">
+        <Text fos={20} ff="$body600" col="$white">{`% ${t(
           'tradeChecklist.calculateAmount.premiumOrDiscount'
         )}`}</Text>
         <Switch
@@ -45,13 +45,13 @@ function PremiumOrDiscount(): JSX.Element {
         >
           <XStack
             h={56}
-            ai={'center'}
-            jc={'space-between'}
-            bc={'$grey'}
-            p={'$4'}
-            br={'$4'}
+            ai="center"
+            jc="space-between"
+            bc="$grey"
+            p="$4"
+            br="$4"
           >
-            <Text col={'$greyOnBlack'} fos={16} ff={'$body500'}>
+            <Text col="$greyOnBlack" fos={16} ff="$body500">
               {`${feeAmount > 0 ? '+' : feeAmount < 0 ? '-' : ''} ${Math.abs(
                 feeAmount
               )} %`}

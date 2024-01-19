@@ -1,10 +1,10 @@
 import {z} from 'zod'
-import {UnixMilliseconds} from '../utility/UnixMilliseconds.brand'
-import {BtcNetwork} from './offers'
-import {DeanonymizedUser} from './DeanonymizedUser'
 import {BtcAddress} from '../utility/BtcAddress.brand'
+import {UnixMilliseconds} from '../utility/UnixMilliseconds.brand'
 import {UriString} from '../utility/UriString.brand'
+import {DeanonymizedUser} from './DeanonymizedUser'
 import {UserName} from './UserName.brand'
+import {BtcNetwork} from './offers'
 
 /**
  * TODO move to apps/mobile

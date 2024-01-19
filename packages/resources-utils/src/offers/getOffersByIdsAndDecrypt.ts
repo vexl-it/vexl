@@ -1,19 +1,19 @@
+import {type PrivateKeyHolder} from '@vexl-next/cryptography/src/KeyHolder'
 import {
   type OfferId,
   type OfferInfo,
 } from '@vexl-next/domain/src/general/offers'
 import {type OfferPrivateApi} from '@vexl-next/rest-api/src/services/offer'
-import {type PrivateKeyHolder} from '@vexl-next/cryptography/src/KeyHolder'
-import {flow, pipe} from 'fp-ts/function'
 import * as A from 'fp-ts/Array'
-import * as TE from 'fp-ts/TaskEither'
-import * as T from 'fp-ts/Task'
 import type * as E from 'fp-ts/Either'
+import * as T from 'fp-ts/Task'
+import * as TE from 'fp-ts/TaskEither'
+import {flow, pipe} from 'fp-ts/function'
+import {type ExtractLeftTE} from '../utils/ExtractLeft'
 import decryptOffer, {
   type ErrorDecryptingOffer,
   type NonCompatibleOfferVersionError,
 } from './decryptOffer'
-import {type ExtractLeftTE} from '../utils/ExtractLeft'
 
 export type ApiErrorWhileFetchingOffers = ExtractLeftTE<
   ReturnType<OfferPrivateApi['getOffersByIds']>

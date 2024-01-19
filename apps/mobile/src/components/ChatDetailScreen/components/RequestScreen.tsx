@@ -72,16 +72,16 @@ function RequestScreen(): JSX.Element {
   return (
     <>
       <ChatHeader
-        mode={'photoTop'}
-        leftButton={'back'}
+        mode="photoTop"
+        leftButton="back"
         rightButton={
           requestIsClosed ? 'deleteChat' : requestedByMe ? null : 'block'
         }
       />
       <ScrollView bounces={false}>
-        <YStack space="$6" f={1} mx={'$4'} my={'$6'}>
+        <YStack space="$6" f={1} mx="$4" my="$6">
           {offer && (
-            <ChatRequestPreview showRequestMessage mode={'commonFirst'} />
+            <ChatRequestPreview showRequestMessage mode="commonFirst" />
           )}
 
           <YStack space="$2">
@@ -110,7 +110,7 @@ function RequestScreen(): JSX.Element {
           </YStack>
         </YStack>
       </ScrollView>
-      <Stack mx="$4" mb={'$4'}>
+      <Stack mx="$4" mb="$4">
         {requestState === 'requested' &&
           (requestedByMe ? (
             <YStack space="$2">

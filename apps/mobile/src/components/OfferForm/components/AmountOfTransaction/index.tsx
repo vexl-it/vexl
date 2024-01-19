@@ -153,9 +153,9 @@ function AmountOfTransaction({
       </Stack>
     </>
   ) : (
-    <XStack ai={'center'} jc={'center'} gap={'$1'}>
+    <XStack ai="center" jc="center" gap="$1">
       <SvgImage source={infoSvg} fill={tokens.color.white.val} />
-      <Text col={'white'}>
+      <Text col="white">
         {t('offerForm.amountOfTransaction.pleaseSelectCurrencyFirst')}
       </Text>
     </XStack>

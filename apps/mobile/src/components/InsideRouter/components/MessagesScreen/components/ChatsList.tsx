@@ -60,11 +60,11 @@ function ChatsList(): JSX.Element | null {
 
   if (elementAtoms.length === 0) {
     return (
-      <YStack space="$0" ai={'center'} py="$4" jc={'center'} f={1}>
-        <Text color="$white" fos={20} ff={'$body600'}>
+      <YStack space="$0" ai="center" py="$4" jc="center" f={1}>
+        <Text color="$white" fos={20} ff="$body600">
           {t('messages.chatEmpty')}
         </Text>
-        <Text mb="$4" color={'$greyOnBlack'}>
+        <Text mb="$4" color="$greyOnBlack">
           {t('messages.chatEmptyExplanation')}
         </Text>
       </YStack>

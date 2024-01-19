@@ -11,7 +11,7 @@ function SettingsScreen(): JSX.Element {
     <ContainerWithTopBorderRadius scrollView withTopPadding>
       <ProfileSection />
       <ButtonsSection />
-      <Text fos={14} ta="center" mt="$5" col={'$greyOnBlack'}>
+      <Text fos={14} ta="center" mt="$5" col="$greyOnBlack">
         {t('settings.noLogoutExplanation')}
       </Text>
       <Stack mt="$5">

@@ -1,7 +1,7 @@
 import * as Sentry from '@sentry/node'
 import {ProfilingIntegration} from '@sentry/profiling-node'
-import {HTTPException} from 'hono/http-exception'
 import {type Hono} from 'hono'
+import {HTTPException} from 'hono/http-exception'
 import env from '../environment'
 
 Sentry.init({

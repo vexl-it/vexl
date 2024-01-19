@@ -1,14 +1,14 @@
-import {atom} from 'jotai'
-import {translationAtom} from '../../../utils/localization/I18nProvider'
-import {pipe} from 'fp-ts/function'
-import {askAreYouSureActionAtom} from '../../AreYouSureDialog'
-import * as TE from 'fp-ts/TaskEither'
-import * as E from 'fp-ts/Either'
-import {tradeChecklistDataAtom} from '../../../state/tradeChecklist/atoms/fromChatAtoms'
 import {type ContactReveal} from '@vexl-next/domain/src/general/tradeChecklist'
-import {revealContactActionAtom} from './updatesToBeSentAtom'
-import {sessionDataOrDummyAtom} from '../../../state/session'
+import * as E from 'fp-ts/Either'
+import * as TE from 'fp-ts/TaskEither'
+import {pipe} from 'fp-ts/function'
+import {atom} from 'jotai'
 import {type RevealMessageType} from '../../../state/chat/atoms/revealIdentityActionAtom'
+import {sessionDataOrDummyAtom} from '../../../state/session'
+import {tradeChecklistDataAtom} from '../../../state/tradeChecklist/atoms/fromChatAtoms'
+import {translationAtom} from '../../../utils/localization/I18nProvider'
+import {askAreYouSureActionAtom} from '../../AreYouSureDialog'
+import {revealContactActionAtom} from './updatesToBeSentAtom'
 
 export const revealContactWithUiFeedbackAtom = atom(null, async (get, set) => {
   const {t} = get(translationAtom)

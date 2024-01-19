@@ -1,16 +1,16 @@
 import {type LocationSuggestion} from '@vexl-next/rest-api/src/services/location/contracts'
-import {type MoleculeOrInterface, createScope, molecule} from 'bunshi'
-import * as TE from 'fp-ts/TaskEither'
+import {createScope, molecule, type MoleculeOrInterface} from 'bunshi'
+import {useMolecule} from 'bunshi/dist/react'
 import * as E from 'fp-ts/Either'
 import {pipe} from 'fp-ts/lib/function'
+import * as TE from 'fp-ts/TaskEither'
 import {atom} from 'jotai'
+import {splitAtom} from 'jotai/utils'
 import {randomUUID} from 'node:crypto'
 import {z} from 'zod'
 import {privateApiAtom} from '../../api'
 import {loadableEither} from '../../utils/atomUtils/loadableEither'
 import {getCurrentLocale} from '../../utils/localization/I18nProvider'
-import {useMolecule} from 'bunshi/dist/react'
-import {splitAtom} from 'jotai/utils'
 
 export const LocationSessionId = z.string().uuid().brand<'LocationSessionId'>()
 export type LocationSessionId = z.TypeOf<typeof LocationSessionId>

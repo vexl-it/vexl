@@ -1,9 +1,9 @@
-import {atomWithParsedMmkvStorage} from '../../utils/atomUtils/atomWithParsedMmkvStorage'
-import {z} from 'zod'
-import {OffersFilter} from './domain'
-import {focusAtom} from 'jotai-optics'
 import {atom} from 'jotai'
+import {focusAtom} from 'jotai-optics'
 import {selectAtom} from 'jotai/utils'
+import {z} from 'zod'
+import {atomWithParsedMmkvStorage} from '../../utils/atomUtils/atomWithParsedMmkvStorage'
+import {OffersFilter} from './domain'
 
 export const offersFilterInitialState: OffersFilter = {
   sort: undefined,

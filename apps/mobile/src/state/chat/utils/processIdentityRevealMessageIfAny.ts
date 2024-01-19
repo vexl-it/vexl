@@ -1,9 +1,9 @@
 import {type RealLifeInfo} from '@vexl-next/domain/src/general/UserNameAndAvatar.brand'
+import {type SvgString} from '@vexl-next/domain/src/utility/SvgString.brand'
 import avatarsSvg from '../../../components/AnonymousAvatar/images/avatarsSvg'
 import {randomNumberFromSeed} from '../../../utils/randomNumber'
 import resolveLocalUri from '../../../utils/resolveLocalUri'
 import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
-import {type SvgString} from '@vexl-next/domain/src/utility/SvgString.brand'
 
 function setRealLifeInfo(
   realLifeInfo: RealLifeInfo

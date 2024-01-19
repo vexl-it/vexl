@@ -15,8 +15,8 @@ function renderItem<T>(
   selected?: boolean | undefined
 ): JSX.Element {
   return (
-    <XStack ai={'center'} jc={'space-between'} py={'$3'} pl={'$4'} pr={'$2'}>
-      <Text ff={'$body500'} fos={16} col={'$white'}>
+    <XStack ai="center" jc="space-between" py="$3" pl="$4" pr="$2">
+      <Text ff="$body500" fos={16} col="$white">
         {item.label}
       </Text>
       {selected && (
@@ -48,8 +48,8 @@ export function Dropdown<T>({
   return (
     <RNEDropdown
       activeColor={getTokens().color.greyAccent1.val}
-      labelField={'label'}
-      valueField={'value'}
+      labelField="label"
+      valueField="value"
       showsVerticalScrollIndicator={false}
       style={{
         height: size === 'large' ? 56 : 48,

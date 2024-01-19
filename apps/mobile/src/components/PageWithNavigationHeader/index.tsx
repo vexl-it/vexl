@@ -23,7 +23,7 @@ function PageWithNavigationHeader({children, fullScreen}: Props): JSX.Element {
     <KeyboardAvoidingView>
       <Stack
         f={1}
-        bc={'$black'}
+        bc="$black"
         pt={fullScreen ? 0 : '$2'}
         px={fullScreen ? 0 : '$2'}
         btlr={fullScreen ? 0 : '$7'}

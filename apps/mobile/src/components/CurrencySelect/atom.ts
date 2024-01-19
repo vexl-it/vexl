@@ -1,8 +1,8 @@
-import {atom} from 'jotai'
 import {type CurrencyInfo} from '@vexl-next/domain/src/general/currency.brand'
-import {currencies} from '../../utils/localization/currency'
-import {matchSorter} from 'match-sorter'
+import {atom} from 'jotai'
 import {splitAtom} from 'jotai/utils'
+import {matchSorter} from 'match-sorter'
+import {currencies} from '../../utils/localization/currency'
 
 export const searchTextAtom = atom<string>('')
 

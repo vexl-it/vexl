@@ -47,8 +47,8 @@ function SetYourOwnPriceScreen(): JSX.Element {
         title={t('tradeChecklist.calculateAmount.setYourOwnPrice')}
       />
       <Content scrollable>
-        <Stack space={'$4'}>
-          <Stack space={'$2'}>
+        <Stack space="$4">
+          <Stack space="$2">
             <BtcAmountInput
               automaticCalculationDisabled
               btcValueAtom={btcTempValueAtom}

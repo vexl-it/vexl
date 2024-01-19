@@ -1,7 +1,7 @@
-import {ecdsaSign, ecdsaVerify} from './ecdsa'
-import {stripVersion} from '../versionWrapper'
 import {generatePrivateKey} from '../KeyHolder'
 import {PublicKeyPemBase64} from '../KeyHolder/brands'
+import {stripVersion} from '../versionWrapper'
+import {ecdsaSign, ecdsaVerify} from './ecdsa'
 
 const privateKey = generatePrivateKey()
 

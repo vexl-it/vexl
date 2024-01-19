@@ -23,26 +23,26 @@ function ScreenTitle({
   ...props
 }: Props): JSX.Element {
   return (
-    <YStack mt={'$2'} bc={'transparent'} {...props}>
-      <XStack ai={'flex-start'} jc={'space-between'} mb={'$5'} space={'$2'}>
+    <YStack mt="$2" bc="transparent" {...props}>
+      <XStack ai="flex-start" jc="space-between" mb="$5" space="$2">
         <Stack fs={1}>
           <Text
             adjustsFontSizeToFit
             numberOfLines={2}
             col={textColor ?? '$white'}
             fontSize={32}
-            ff={'$heading'}
+            ff="$heading"
           >
             {text}
           </Text>
         </Stack>
         {children && (
-          <XStack ai={'center'} space={'$2'}>
+          <XStack ai="center" space="$2">
             {children}
           </XStack>
         )}
       </XStack>
-      {withBottomBorder && <Stack h={0.5} mx={'$-4'} bg={'$grey'} />}
+      {withBottomBorder && <Stack h={0.5} mx="$-4" bg="$grey" />}
     </YStack>
   )
 }

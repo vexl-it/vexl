@@ -1,7 +1,7 @@
-import {useTranslation} from '../../../../utils/localization/I18nProvider'
-import {image1, image2} from './images/svgs'
 import {type SvgString} from '@vexl-next/domain/src/utility/SvgString.brand'
 import {type ImageSourcePropType} from 'react-native'
+import {useTranslation} from '../../../../utils/localization/I18nProvider'
+import {image1, image2} from './images/svgs'
 
 export default function useContent(): Array<{
   svg?: SvgString

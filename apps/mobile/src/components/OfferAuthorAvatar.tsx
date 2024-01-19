@@ -41,13 +41,13 @@ function OfferAuthorAvatar({
       {ownershipInfo ? (
         <>
           <UserAvatar width={48} height={48} userImage={userData.image} />
-          <Stack f={1} ml={'$2'}>
-            <Text fos={16} ff={'$body600'} col={'$white'}>
+          <Stack f={1} ml="$2">
+            <Text fos={16} ff="$body600" col="$white">
               {offerInfo.publicPart.offerType === 'BUY'
                 ? t('myOffers.offerToBuy')
                 : t('myOffers.offerToSell')}
             </Text>
-            <Text fos={12} ff={'$body500'} col={'$greyOnBlack'}>
+            <Text fos={12} ff="$body500" col="$greyOnBlack">
               {t('myOffers.offerAdded', {
                 date: DateTime.fromISO(offerInfo.createdAt)
                   .setLocale(getCurrentLocale())

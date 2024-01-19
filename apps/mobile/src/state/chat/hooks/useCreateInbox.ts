@@ -1,19 +1,19 @@
+import {type PrivateKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {type Inbox} from '@vexl-next/domain/src/general/messaging'
+import {toBasicError} from '@vexl-next/domain/src/utility/errors'
 import * as TE from 'fp-ts/TaskEither'
-import {
-  type ApiErrorCreatingInbox,
-  type MessagingState,
-  type ErrorInboxAlreadyExists,
-  type InboxInState,
-} from '../domain'
-import {privateApiAtom} from '../../../api'
+import {pipe} from 'fp-ts/function'
 import {atom, useSetAtom} from 'jotai'
 import * as O from 'optics-ts'
-import {toBasicError} from '@vexl-next/domain/src/utility/errors'
-import {pipe} from 'fp-ts/function'
-import {type PrivateKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
+import {privateApiAtom} from '../../../api'
 import {getNotificationToken} from '../../../utils/notifications'
 import messagingStateAtom from '../atoms/messagingStateAtom'
+import {
+  type ApiErrorCreatingInbox,
+  type ErrorInboxAlreadyExists,
+  type InboxInState,
+  type MessagingState,
+} from '../domain'
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function focusAddInbox(optic: O.OpticFor<MessagingState>) {

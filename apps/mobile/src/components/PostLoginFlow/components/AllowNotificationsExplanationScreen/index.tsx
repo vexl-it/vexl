@@ -73,7 +73,7 @@ function AllowNotificationsExplanationScreen({navigation}: Props): JSX.Element {
     <>
       <HeaderProxy showBackButton={true} progressNumber={3} />
       <WhiteContainer>
-        <Stack mb={'$3'} f={1} ai="center" jc="center">
+        <Stack mb="$3" f={1} ai="center" jc="center">
           <SvgImage
             style={{height: '100%', flex: 1}}
             source={NotificationsSvg}

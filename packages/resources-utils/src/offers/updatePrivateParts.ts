@@ -3,24 +3,24 @@ import {
   type OfferAdminId,
   type SymmetricKey,
 } from '@vexl-next/domain/src/general/offers'
+import {type UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {type FetchCommonConnectionsResponse} from '@vexl-next/rest-api/src/services/contact/contracts'
+import {type OfferPrivateApi} from '@vexl-next/rest-api/src/services/offer'
+import * as A from 'fp-ts/Array'
+import * as E from 'fp-ts/Either'
+import * as T from 'fp-ts/Task'
+import * as TE from 'fp-ts/TaskEither'
 import {flow, pipe} from 'fp-ts/function'
+import {type ExtractLeftTE} from '../utils/ExtractLeft'
+import {deduplicate, subtractArrays} from '../utils/array'
+import flattenTaskOfEithers from '../utils/flattenTaskOfEithers'
 import constructPrivatePayloads, {
   type ErrorConstructingPrivatePayloads,
 } from './utils/constructPrivatePayloads'
-import {type FetchCommonConnectionsResponse} from '@vexl-next/rest-api/src/services/contact/contracts'
-import * as TE from 'fp-ts/TaskEither'
-import * as A from 'fp-ts/Array'
-import * as T from 'fp-ts/Task'
 import {
   encryptPrivatePart,
   type PrivatePartEncryptionError,
 } from './utils/offerPrivatePayload'
-import flattenTaskOfEithers from '../utils/flattenTaskOfEithers'
-import {type OfferPrivateApi} from '@vexl-next/rest-api/src/services/offer'
-import {type ExtractLeftTE} from '../utils/ExtractLeft'
-import {deduplicate, subtractArrays} from '../utils/array'
-import {type UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import * as E from 'fp-ts/Either'
 
 export interface TimeLimitReachedError {
   readonly _tag: 'TimeLimitReachedError'

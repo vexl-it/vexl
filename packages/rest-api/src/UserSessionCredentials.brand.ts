@@ -1,5 +1,5 @@
-import {z} from 'zod'
 import {KeyHolder} from '@vexl-next/cryptography'
+import {z} from 'zod'
 
 // TODO refine properties
 export const UserSessionCredentials = z.object({

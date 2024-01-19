@@ -9,11 +9,11 @@ import {
   type EnvPreset,
 } from '@vexl-next/rest-api'
 import {type UserSessionCredentials} from '@vexl-next/rest-api/src/UserSessionCredentials.brand'
-import {type ChatPrivateApi} from '@vexl-next/rest-api/src/services/chat'
 import {
   createBtcPriceApi,
   type BtcPricePublicApi,
 } from '@vexl-next/rest-api/src/services/btcPrice'
+import {type ChatPrivateApi} from '@vexl-next/rest-api/src/services/chat'
 import {type ContactPrivateApi} from '@vexl-next/rest-api/src/services/contact'
 import {type LocationPrivateApi} from '@vexl-next/rest-api/src/services/location'
 import {type OfferPrivateApi} from '@vexl-next/rest-api/src/services/offer'

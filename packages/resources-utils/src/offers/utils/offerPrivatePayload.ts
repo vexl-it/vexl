@@ -3,29 +3,29 @@ import {
   type PublicKeyPemBase64,
 } from '@vexl-next/cryptography/src/KeyHolder'
 import {
-  type IntendedConnectionLevel,
   PrivatePayloadEncrypted,
+  type IntendedConnectionLevel,
   type SymmetricKey,
 } from '@vexl-next/domain/src/general/offers'
 import {type BasicError} from '@vexl-next/domain/src/utility/errors'
-import fetchContactsForOffer, {
-  type ApiErrorFetchingContactsForOffer,
-  type ConnectionsInfoForOffer,
-} from './fetchContactsForOffer'
-import {flow, pipe} from 'fp-ts/function'
-import * as TE from 'fp-ts/TaskEither'
-import {safeParse, stringifyToJson} from '../../utils/parsing'
-import {eciesEncrypt} from '../../utils/crypto'
-import {type ServerPrivatePart} from '@vexl-next/rest-api/src/services/offer/contracts'
 import {type ContactPrivateApi} from '@vexl-next/rest-api/src/services/contact'
+import {type ServerPrivatePart} from '@vexl-next/rest-api/src/services/offer/contracts'
 import * as A from 'fp-ts/Array'
 import * as T from 'fp-ts/Task'
+import * as TE from 'fp-ts/TaskEither'
+import {flow, pipe} from 'fp-ts/function'
+import {eciesEncrypt} from '../../utils/crypto'
 import flattenTaskOfEithers from '../../utils/flattenTaskOfEithers'
+import {safeParse, stringifyToJson} from '../../utils/parsing'
+import {type OfferEncryptionProgress} from '../OfferEncryptionProgress'
 import constructPrivatePayloads, {
   type ErrorConstructingPrivatePayloads,
   type OfferPrivatePayloadToEncrypt,
 } from './constructPrivatePayloads'
-import {type OfferEncryptionProgress} from '../OfferEncryptionProgress'
+import fetchContactsForOffer, {
+  type ApiErrorFetchingContactsForOffer,
+  type ConnectionsInfoForOffer,
+} from './fetchContactsForOffer'
 
 function privatePayloadForOwner({
   ownerCredentials,

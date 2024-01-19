@@ -1,6 +1,6 @@
+import {type BtcPriceDataWithState} from '@vexl-next/domain/src/general/btcPrice'
 import {atom} from 'jotai'
 import {btcPriceDataAtom} from '../../../state/currentBtcPriceAtoms'
-import {type BtcPriceDataWithState} from '@vexl-next/domain/src/general/btcPrice'
 import {originOfferCurrencyAtom} from '../../../state/tradeChecklist/atoms/fromChatAtoms'
 
 export const btcPriceForOfferWithStateAtom = atom((get) => {

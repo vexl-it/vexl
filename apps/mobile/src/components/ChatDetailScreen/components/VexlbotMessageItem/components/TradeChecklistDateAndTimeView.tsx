@@ -20,7 +20,7 @@ export default function TradeChecklistDateAndTimeView(): JSX.Element | null {
   if (pick) {
     return (
       <VexlbotBubble
-        status={'accepted'}
+        status="accepted"
         text={`${t('vexlbot.yourMeetingIsOn')}\n${dateAndTime.toStringWithTime(
           pick.pick.dateTime
         )}`}
@@ -58,8 +58,8 @@ export default function TradeChecklistDateAndTimeView(): JSX.Element | null {
                 },
               })
             }}
-            variant={'secondary'}
-            size={'small'}
+            variant="secondary"
+            size="small"
             text={t('common.respond')}
           />
         )}

@@ -21,14 +21,14 @@ function IsNewIndicator({
 
   return isNewContact ? (
     <Stack
-      pos={'absolute'}
+      pos="absolute"
       r={-7}
       t={-7}
       w={15}
       h={15}
       br={15}
       zi="$10"
-      bc={'$main'}
+      bc="$main"
     />
   ) : null
 }

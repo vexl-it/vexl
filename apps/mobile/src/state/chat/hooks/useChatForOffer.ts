@@ -2,14 +2,14 @@ import {
   type PrivateKeyPemBase64,
   type PublicKeyPemBase64,
 } from '@vexl-next/cryptography/src/KeyHolder'
-import {useSessionAssumeLoggedIn} from '../../session'
-import {useMemo} from 'react'
-import {useAtomValue} from 'jotai'
 import {type Chat} from '@vexl-next/domain/src/general/messaging'
+import {useAtomValue} from 'jotai'
 import {focusAtom} from 'jotai-optics'
-import {type FocusAtomType} from '../../../utils/atomUtils/FocusAtomType'
-import messagingStateAtom from '../atoms/messagingStateAtom'
 import {selectAtom} from 'jotai/utils'
+import {useMemo} from 'react'
+import {type FocusAtomType} from '../../../utils/atomUtils/FocusAtomType'
+import {useSessionAssumeLoggedIn} from '../../session'
+import messagingStateAtom from '../atoms/messagingStateAtom'
 import {type ChatWithMessages} from '../domain'
 
 export function chatForPublicKeyAtom({

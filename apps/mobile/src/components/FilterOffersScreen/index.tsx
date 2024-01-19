@@ -52,11 +52,11 @@ function FilterOffersScreen(): JSX.Element {
   return (
     <Screen customHorizontalPadding={tokens.size[2].val}>
       <ScreenTitle text={t('filterOffers.filterResults')} withBottomBorder>
-        <XStack ai={'center'} space={'$2'}>
+        <XStack ai="center" space="$2">
           <Button
             onPress={resetOfferForm}
-            size={'small'}
-            variant={'primary'}
+            size="small"
+            variant="primary"
             text={t('common.reset')}
           />
           <IconButton

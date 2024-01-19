@@ -1,15 +1,15 @@
 import notifee from '@notifee/react-native'
 import {type getDefaultStore} from 'jotai'
-import {myOffersAtom} from '../../state/marketplace/atoms/myOffers'
-import {showDebugNotificationIfEnabled} from './showDebugNotificationIfEnabled'
-import {userLoggedInAtom} from '../../state/session'
-import {notificationPreferencesAtom} from '../preferences'
 import {triggerOffersRefreshAtom} from '../../state/marketplace'
+import {myOffersAtom} from '../../state/marketplace/atoms/myOffers'
 import {offersToSeeInMarketplaceAtom} from '../../state/marketplace/atoms/offersToSeeInMarketplace'
-import {translationAtom} from '../localization/I18nProvider'
-import {CREATE_OFFER_PROMPT} from './notificationTypes'
-import {getDefaultChannel} from './notificationChannels'
+import {userLoggedInAtom} from '../../state/session'
 import {loadSession} from '../../state/session/loadSession'
+import {translationAtom} from '../localization/I18nProvider'
+import {notificationPreferencesAtom} from '../preferences'
+import {getDefaultChannel} from './notificationChannels'
+import {CREATE_OFFER_PROMPT} from './notificationTypes'
+import {showDebugNotificationIfEnabled} from './showDebugNotificationIfEnabled'
 
 export default async function checkAndShowCreateOfferPrompt(
   store: ReturnType<typeof getDefaultStore>

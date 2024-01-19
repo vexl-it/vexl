@@ -1,7 +1,6 @@
-import {atom, type ExtractAtomValue} from 'jotai'
-import {useSetAtom} from 'jotai'
-import {useCallback} from 'react'
 import {useFocusEffect} from '@react-navigation/native'
+import {atom, useSetAtom, type ExtractAtomValue} from 'jotai'
+import {useCallback} from 'react'
 
 export interface HeaderState {
   showBackButton: boolean

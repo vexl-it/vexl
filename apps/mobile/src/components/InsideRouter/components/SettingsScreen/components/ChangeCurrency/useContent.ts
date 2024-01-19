@@ -1,5 +1,4 @@
 import {type CurrencyCode} from '@vexl-next/domain/src/general/offers'
-
 import {useMemo} from 'react'
 
 export default function useContent(): Array<{

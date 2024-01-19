@@ -37,9 +37,9 @@ function LanguagePicker(): JSX.Element {
           newI18n.enableFallback = true
           setI18nAtom(newI18n)
         }}
-        variant={'primary'}
+        variant="primary"
         size="small"
-        text={'Set language'}
+        text="Set language"
       />
     </YStack>
   )

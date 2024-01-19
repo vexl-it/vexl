@@ -31,7 +31,7 @@ function MeetingLocationCell(): JSX.Element {
 
   return (
     <ChecklistCell
-      item={'MEETING_LOCATION'}
+      item="MEETING_LOCATION"
       subtitle={MeetingLocation.getSubtitle(nextChecklistData.location)}
       onPress={onPress}
     />

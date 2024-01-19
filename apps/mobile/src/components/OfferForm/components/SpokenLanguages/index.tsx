@@ -54,13 +54,13 @@ function SpokenLanguagesComponent({
           setSpokenLanguageSelectVisible(true)
         }}
       >
-        <Text fos={18} ff={'$body600'} col={'$greyOnBlack'}>
+        <Text fos={18} ff="$body600" col="$greyOnBlack">
           {t('offerForm.spokenLanguages.indicatePreferredLanguage')}
         </Text>
       </DropdownSelectButton>
-      <XStack ai={'center'} mt={'$4'} flexWrap={'wrap'} space={'$2'}>
+      <XStack ai="center" mt="$4" flexWrap="wrap" space="$2">
         {spokenLanguagesAtoms.map((spokenLanguageAtom) => (
-          <Stack key={atomKeyExtractor(spokenLanguageAtom)} mt={'$2'}>
+          <Stack key={atomKeyExtractor(spokenLanguageAtom)} mt="$2">
             <OfferFormSpokenLanguageCell
               spokenLanguageAtom={spokenLanguageAtom}
               removeSpokenLanguageActionAtom={removeSpokenLanguageActionAtom}

@@ -27,7 +27,7 @@ function LanguageSelectItem({language}: LanguageSelectItemProps): JSX.Element {
         select(isSelected)
       }}
     >
-      <XStack my={'$3'} space={'$2'}>
+      <XStack my="$3" space="$2">
         <RadioButton
           active={isSelected}
           onPress={() => {
@@ -37,7 +37,7 @@ function LanguageSelectItem({language}: LanguageSelectItemProps): JSX.Element {
         <Text
           col={isSelected ? '$black' : '$greyOnWhite'}
           fos={18}
-          ff={'$body500'}
+          ff="$body500"
         >
           {t(`settings.items.language.${language}`)}
         </Text>

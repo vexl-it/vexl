@@ -1,12 +1,11 @@
-import {Stack, XStack} from 'tamagui'
-import OfferInfoPreview from './OfferInfoPreview'
-import SvgImage from './Image'
-
-import {type ReactNode, useCallback} from 'react'
-import OfferAuthorAvatar from './OfferAuthorAvatar'
-import {TouchableWithoutFeedback} from 'react-native'
-import bubbleTipSvg, {bubbleTipSvgNegative} from './images/bubbleTipSvg'
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
+import {useCallback, type ReactNode} from 'react'
+import {TouchableWithoutFeedback} from 'react-native'
+import {Stack, XStack} from 'tamagui'
+import SvgImage from './Image'
+import OfferAuthorAvatar from './OfferAuthorAvatar'
+import OfferInfoPreview from './OfferInfoPreview'
+import bubbleTipSvg, {bubbleTipSvgNegative} from './images/bubbleTipSvg'
 
 export default function OfferWithBubbleTip({
   offer,
@@ -41,7 +40,7 @@ export default function OfferWithBubbleTip({
       </TouchableWithoutFeedback>
       <XStack ai="center" jc="space-between" mt="$2">
         <OfferAuthorAvatar offer={offer} negative={negative ?? false} />
-        {button && <Stack maw={'60%'}>{button}</Stack>}
+        {button && <Stack maw="60%">{button}</Stack>}
       </XStack>
     </Stack>
   )

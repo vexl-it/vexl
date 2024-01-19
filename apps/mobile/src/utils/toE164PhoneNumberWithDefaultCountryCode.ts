@@ -1,6 +1,6 @@
 import {
-  type E164PhoneNumber,
   toE164PhoneNumber,
+  type E164PhoneNumber,
 } from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import * as O from 'fp-ts/Option'
 import {getDefaultStore} from 'jotai'

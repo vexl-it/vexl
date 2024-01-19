@@ -1,16 +1,16 @@
-import {atom} from 'jotai'
-import {privateApiAtom} from '../../../api'
-import {pipe} from 'fp-ts/function'
 import {
   type GetLocationSuggestionsRequest,
   type GetLocationSuggestionsResponse,
 } from '@vexl-next/rest-api/src/services/location/contracts'
-import * as TE from 'fp-ts/TaskEither'
 import * as T from 'fp-ts/Task'
+import * as TE from 'fp-ts/TaskEither'
+import {pipe} from 'fp-ts/function'
+import {atom} from 'jotai'
+import {privateApiAtom} from '../../../api'
+import {translationAtom} from '../../../utils/localization/I18nProvider'
+import reportError from '../../../utils/reportError'
 import showErrorAlert from '../../../utils/showErrorAlert'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
-import reportError from '../../../utils/reportError'
-import {translationAtom} from '../../../utils/localization/I18nProvider'
 
 export const fetchLocationSuggestionsAtom = atom(
   null,

@@ -1,10 +1,10 @@
-import SvgImage from '../../Image'
-import {Image, Stack, Text, XStack} from 'tamagui'
-import {type Atom, useAtomValue} from 'jotai'
 import {type ContactNormalized} from '../../../state/contacts/domain'
-import IsSelectedCheckbox from './IsSelectedCheckbox'
+import SvgImage from '../../Image'
 import picturePlaceholderSvg from '../../images/picturePlaceholderSvg'
 import IsNewIndicator from './IsNewIndicator'
+import IsSelectedCheckbox from './IsSelectedCheckbox'
+import {type Atom, useAtomValue} from 'jotai'
+import {Image, Stack, Text, XStack} from 'tamagui'
 
 interface Props {
   contactAtom: Atom<ContactNormalized>
@@ -23,7 +23,7 @@ function ContactItem({contactAtom}: Props): JSX.Element {
             width={50}
             height={50}
             br="$5"
-            resizeMode={'cover'}
+            resizeMode="cover"
             source={{uri: imageUri}}
           />
         ) : (
@@ -31,10 +31,10 @@ function ContactItem({contactAtom}: Props): JSX.Element {
         )}
       </Stack>
       <Stack f={1} ml="$4" jc="space-between">
-        <Text ff={'$body500'} fs={18} mb={'$1'} color={'$black'}>
+        <Text ff="$body500" fs={18} mb="$1" color="$black">
           {name}
         </Text>
-        <Text ff={'$body600'} col={'$greyOnBlack'} fos={14}>
+        <Text ff="$body600" col="$greyOnBlack" fos={14}>
           {normalizedNumber}
         </Text>
       </Stack>

@@ -1,12 +1,12 @@
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
+import {atom, type Atom} from 'jotai'
+import {importedContactsAtom} from '../../contacts'
 import {type OffersFilter} from '../domain'
-import isSomeIn30KmRange from '../utils/isIn30KmRadius'
-import {type Atom, atom} from 'jotai'
-import {offersToSeeInMarketplaceAtom} from './offersToSeeInMarketplace'
 import areIncluded from '../utils/areIncluded'
 import filterOffersByText from '../utils/filterOffersByText'
-import {importedContactsAtom} from '../../contacts'
+import isSomeIn30KmRange from '../utils/isIn30KmRadius'
 import sortOffers from '../utils/sortOffers'
+import {offersToSeeInMarketplaceAtom} from './offersToSeeInMarketplace'
 
 export function createFilteredOffersAtom(
   filter: OffersFilter

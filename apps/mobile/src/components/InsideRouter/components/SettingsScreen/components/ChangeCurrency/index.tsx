@@ -24,8 +24,8 @@ function CurrencyItem({
 }: CurrencyItemProps): JSX.Element {
   return (
     <XStack
-      ai={'center'}
-      space={'$2'}
+      ai="center"
+      space="$2"
       onPress={() => {
         onButtonPress(currency)
       }}
@@ -36,7 +36,7 @@ function CurrencyItem({
           onButtonPress(currency)
         }}
       />
-      <Text col={active ? '$black' : '$greyOnWhite'} fos={18} ff={'$body500'}>
+      <Text col={active ? '$black' : '$greyOnWhite'} fos={18} ff="$body500">
         {title}
       </Text>
     </XStack>
@@ -71,7 +71,7 @@ function ChangeCurrency(): JSX.Element {
       title={t('common.currency')}
       visible={changeCurrencyDialogVisible}
     >
-      <YStack space={'$6'}>
+      <YStack space="$6">
         {content.map((item) => (
           <CurrencyItem
             key={item.currency}

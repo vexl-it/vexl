@@ -1,6 +1,6 @@
+import {IsoDatetimeString} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
 import {DateTime} from 'luxon'
 import {z} from 'zod'
-import {IsoDatetimeString} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
 
 export const MaintenanceConfig = z.object({
   from: IsoDatetimeString,

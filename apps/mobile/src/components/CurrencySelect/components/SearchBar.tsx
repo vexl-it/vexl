@@ -21,8 +21,8 @@ function SearchBar(): JSX.Element {
       value={searchText}
       onChangeText={setSearchText}
       icon={magnifyingGlass}
-      size={'small'}
-      variant={'greyOnWhite'}
+      size="small"
+      variant="greyOnWhite"
     />
   )
 }

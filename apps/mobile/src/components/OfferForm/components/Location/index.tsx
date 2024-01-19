@@ -159,7 +159,7 @@ function LocationComponent({
           // }}
         >
           <Screen customHorizontalPadding={16}>
-            <ScreenTitle text={''}>
+            <ScreenTitle text="">
               <IconButton
                 variant="dark"
                 icon={closeSvg}

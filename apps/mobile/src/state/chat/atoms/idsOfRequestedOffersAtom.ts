@@ -1,7 +1,7 @@
-import allChatsAtom from './allChatsAtom'
+import {type OfferId} from '@vexl-next/domain/src/general/offers'
 import {selectAtom} from 'jotai/utils'
 import notEmpty from '../../../utils/notEmpty'
-import {type OfferId} from '@vexl-next/domain/src/general/offers'
+import allChatsAtom from './allChatsAtom'
 
 const idsOfRequestedOffersAtom = selectAtom(
   allChatsAtom,

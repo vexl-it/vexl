@@ -112,12 +112,12 @@ function QrScanner(): JSX.Element {
       secondaryButton={secondaryButton}
       visible={isVisible}
     >
-      <YStack space={'$3'} height={Dimensions.get('screen').height * 0.7}>
+      <YStack space="$3" height={Dimensions.get('screen').height * 0.7}>
         {error ? (
           <Text
             fontSize={20}
             fontFamily="$body500"
-            color={'$red'}
+            color="$red"
             textAlign="center"
           >
             {error}
@@ -126,8 +126,8 @@ function QrScanner(): JSX.Element {
           <Text
             fontSize={20}
             fontFamily="$body500"
-            color={'$black'}
-            textAlign={'center'}
+            color="$black"
+            textAlign="center"
           >
             {t('qrScanner.title')}
           </Text>
@@ -137,8 +137,8 @@ function QrScanner(): JSX.Element {
           <Stack
             borderRadius="$4"
             flex={1}
-            overflow={'hidden'}
-            position={'relative'}
+            overflow="hidden"
+            position="relative"
           >
             <BarCodeScanner style={scannerStyle} onBarCodeScanned={onScanned} />
           </Stack>
@@ -148,13 +148,13 @@ function QrScanner(): JSX.Element {
             <Text
               fontSize={20}
               fontFamily="$body500"
-              color={'$black'}
-              textAlign={'center'}
+              color="$black"
+              textAlign="center"
             >
               {t('qrScanner.missingCameraPermissions')}
             </Text>
             <Button
-              size={'small'}
+              size="small"
               onPress={requestPermissions as () => void}
               variant="primary"
               text={t('qrScanner.grantPermissions')}

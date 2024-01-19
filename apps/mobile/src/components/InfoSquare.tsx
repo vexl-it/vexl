@@ -16,11 +16,11 @@ function InfoSquare({
     <TouchableWithoutFeedback onPress={onPress}>
       <XStack
         bc={negative ? '$darkRed' : '$grey'}
-        p={'$3'}
-        br={'$true'}
-        alignItems={'center'}
+        p="$3"
+        br="$true"
+        alignItems="center"
       >
-        <Stack w={16} h={16} mr={'$3'}>
+        <Stack w={16} h={16} mr="$3">
           <Image
             fill={
               negative

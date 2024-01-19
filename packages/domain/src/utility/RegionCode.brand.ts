@@ -1,6 +1,6 @@
+import {parsePhoneNumber} from 'awesome-phonenumber'
 import {z} from 'zod'
 import {type E164PhoneNumber} from '../general/E164PhoneNumber.brand'
-import {parsePhoneNumber} from 'awesome-phonenumber'
 
 export const RegionCode = z.string().brand<'RegionCode'>()
 export type RegionCode = z.TypeOf<typeof RegionCode>

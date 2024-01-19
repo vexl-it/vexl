@@ -63,7 +63,7 @@ function FiatAmountInput({
       }}
     >
       <Stack>
-        <Text fos={18} ff={'$body500'} col={'$white'}>
+        <Text fos={18} ff="$body500" col="$white">
           {currencies[originOfferCurrency ?? 'USD'].code}
         </Text>
         {!isFocused && fiatValue && !automaticCalculationDisabled && (

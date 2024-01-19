@@ -22,7 +22,7 @@ function ItemSeparatorComponent(): JSX.Element {
 function ContactsList({contacts}: Props): JSX.Element {
   return (
     <Stack f={1} bg="$white">
-      <Stack pt={'$2'}>
+      <Stack pt="$2">
         <FlatList
           showsHorizontalScrollIndicator={false}
           showsVerticalScrollIndicator={false}

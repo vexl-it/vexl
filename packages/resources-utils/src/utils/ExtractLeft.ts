@@ -1,5 +1,5 @@
-import type * as TE from 'fp-ts/TaskEither'
 import type * as E from 'fp-ts/Either'
+import type * as TE from 'fp-ts/TaskEither'
 
 export type ExtractLeftTE<T extends TE.TaskEither<any, any>> =
   T extends TE.TaskEither<infer L, unknown> ? L : never

@@ -19,10 +19,10 @@ function VersionTextWithSecretDoor({
         navigation.navigate('DebugScreen')
       }}
     >
-      <Text ta={'center'} fos={14} col={'$greyOnBlack'}>
+      <Text ta="center" fos={14} col="$greyOnBlack">
         {t('settings.version', {version})}
       </Text>
-      <Text ta={'center'} fos={12} col={'$greyAccent2'}>
+      <Text ta="center" fos={12} col="$greyAccent2">
         {t('settings.btcPriceSourceCredit')}
       </Text>
     </SecretDoor>

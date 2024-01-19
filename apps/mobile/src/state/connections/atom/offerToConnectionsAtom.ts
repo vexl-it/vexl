@@ -1,30 +1,30 @@
-import {type OfferToConnectionsItem, OfferToConnectionsItems} from '../domain'
-import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
-import {splitAtom} from 'jotai/utils'
-import {focusAtom} from 'jotai-optics'
-import {atom} from 'jotai'
-import * as T from 'fp-ts/Task'
-import {privateApiAtom} from '../../../api'
-import {startMeasure} from '../../../utils/reportTime'
-import {pipe} from 'fp-ts/function'
-import * as A from 'fp-ts/Array'
-import updatePrivateParts from '@vexl-next/resources-utils/src/offers/updatePrivateParts'
-import * as TE from 'fp-ts/TaskEither'
-import * as E from 'fp-ts/Either'
-import reportError from '../../../utils/reportError'
-import connectionStateAtom from './connectionStateAtom'
-import {showDebugNotificationIfEnabled} from '../../../utils/notifications/showDebugNotificationIfEnabled'
+import {type OfferAdminId} from '@vexl-next/domain/src/general/offers'
 import {
   UnixMilliseconds,
   unixMillisecondsNow,
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import updatePrivateParts from '@vexl-next/resources-utils/src/offers/updatePrivateParts'
+import {subtractArrays} from '@vexl-next/resources-utils/src/utils/array'
+import * as A from 'fp-ts/Array'
+import * as E from 'fp-ts/Either'
+import * as T from 'fp-ts/Task'
+import * as TE from 'fp-ts/TaskEither'
+import {pipe} from 'fp-ts/function'
+import {atom} from 'jotai'
+import {focusAtom} from 'jotai-optics'
+import {splitAtom} from 'jotai/utils'
+import {privateApiAtom} from '../../../api'
+import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
+import notEmpty from '../../../utils/notEmpty'
+import {showDebugNotificationIfEnabled} from '../../../utils/notifications/showDebugNotificationIfEnabled'
+import reportError from '../../../utils/reportError'
+import {startMeasure} from '../../../utils/reportTime'
 import {
   offersStateAtom,
   singleOfferByAdminIdAtom,
 } from '../../marketplace/atoms/offersState'
-import {subtractArrays} from '@vexl-next/resources-utils/src/utils/array'
-import {type OfferAdminId} from '@vexl-next/domain/src/general/offers'
-import notEmpty from '../../../utils/notEmpty'
+import {OfferToConnectionsItems, type OfferToConnectionsItem} from '../domain'
+import connectionStateAtom from './connectionStateAtom'
 
 const BACKGROUND_TIME_LIMIT_MS = 25_000
 

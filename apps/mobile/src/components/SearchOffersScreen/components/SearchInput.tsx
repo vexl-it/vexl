@@ -18,8 +18,8 @@ function SearchInput(): JSX.Element {
       <Input
         autoFocus
         onSubmitEditing={onSubmit}
-        returnKeyType={'search'}
-        variant={'greyOnBlack'}
+        returnKeyType="search"
+        variant="greyOnBlack"
         value={searchText}
         onChangeText={setSearchText}
       />

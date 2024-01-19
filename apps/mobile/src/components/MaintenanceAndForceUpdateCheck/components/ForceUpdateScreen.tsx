@@ -17,9 +17,9 @@ function ForceUpdateScreen(): JSX.Element {
     <Screen>
       <YStack p="$2" f={1} space="$2">
         <WhiteContainer>
-          <Stack f={1} jc={'center'} ai="center">
+          <Stack f={1} jc="center" ai="center">
             <Image
-              resizeMode={'contain'}
+              resizeMode="contain"
               source={require('../../../images/logo.png')}
             />
             <SVGImage width={211} height={66} source={bigNameSvg} />

@@ -14,8 +14,8 @@ import {
   feedbacksForClosedChatsStorageAtom,
   newOfferFeedbackDoneStorageAtom,
 } from '../state/feedback/atoms'
-import {offersStateAtom} from '../state/marketplace/atoms/offersState'
 import {offersMissingOnServerStorageAtom} from '../state/marketplace/atoms/offersMissingOnServer'
+import {offersStateAtom} from '../state/marketplace/atoms/offersState'
 import {postLoginFinishedStorageAtom} from '../state/postLoginOnboarding'
 import {selectedCurrencyStorageAtom} from '../state/selectedCurrency'
 import {storage} from './fpMmkv'

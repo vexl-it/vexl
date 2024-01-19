@@ -126,9 +126,9 @@ function AreYouSureDialog(): JSX.Element | null {
       <ScrollView style={styles.flip}>
         <View style={styles.flip}>
           <Stack
-            px={'$4'}
-            br={'$4'}
-            mx={'$2'}
+            px="$4"
+            br="$4"
+            mx="$2"
             py="$5"
             bc={
               step.type === 'StepWithChildren' && step.backgroundColor
@@ -144,24 +144,24 @@ function AreYouSureDialog(): JSX.Element | null {
                     source={step.image}
                   />
                 )}
-                <Text fontFamily={'$heading'} fontSize={32} color={'$black'}>
+                <Text fontFamily="$heading" fontSize={32} color="$black">
                   {step.title}
                 </Text>
                 {step.description && (
-                  <Text fontSize={18} color={'$greyOnWhite'}>
+                  <Text fontSize={18} color="$greyOnWhite">
                     {step.description}
                   </Text>
                 )}
               </>
             ) : step.type === 'StepWithInput' ? (
-              <Stack space={'$4'}>
-                <Text fos={28} col={'$black'} ff={'$heading'}>
+              <Stack space="$4">
+                <Text fos={28} col="$black" ff="$heading">
                   {step.title}
                 </Text>
-                <Text fos={18} col={'$greyOnWhite'} ff={'$body500'}>
+                <Text fos={18} col="$greyOnWhite" ff="$body500">
                   {step.description}
                 </Text>
-                <Text fos={18} col={'$black'} ff={'$heading'}>
+                <Text fos={18} col="$black" ff="$heading">
                   {step.subtitle}
                 </Text>
                 <Input

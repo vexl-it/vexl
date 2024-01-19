@@ -1,5 +1,5 @@
-import {atom} from 'jotai'
 import {type NetworkError} from '@vexl-next/rest-api/src/Errors'
+import {atom} from 'jotai'
 
 const HandleNetworkErrorUIActionAtom = atom(
   null,

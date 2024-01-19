@@ -17,10 +17,10 @@ function ContactTypeAndCommonNumber({
   const {t} = useTranslation()
   return (
     <XStack
-      flexWrap={'wrap'}
+      flexWrap="wrap"
       space="$1"
       justifyContent={center ? 'center' : 'flex-start'}
-      alignItems={'center'}
+      alignItems="center"
     >
       <Text color="$greyOnBlack">
         {friendLevel.includes('FIRST_DEGREE') ? (
@@ -35,7 +35,7 @@ function ContactTypeAndCommonNumber({
       <Stack w={14} h={14}>
         <Image source={friendsSvg} />
       </Stack>
-      <Text color={'$greyOnBlack'}>
+      <Text color="$greyOnBlack">
         {t('offer.numberOfCommon', {
           number: numberOfCommonFriends,
         })}

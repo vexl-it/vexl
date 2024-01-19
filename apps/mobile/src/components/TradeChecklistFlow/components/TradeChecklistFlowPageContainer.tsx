@@ -49,10 +49,10 @@ export default function TradeChecklistFlowPageContainer({
           <Stack
             width={36}
             h={5}
-            als={'center'}
-            bc={'$greyAccent1'}
-            br={'$5'}
-            mt={'$4'}
+            als="center"
+            bc="$greyAccent1"
+            br="$5"
+            mt="$4"
           />
         </>
       )}

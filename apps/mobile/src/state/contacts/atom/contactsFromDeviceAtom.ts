@@ -1,9 +1,9 @@
-import {type ContactNormalized} from '../domain'
-import {pipe} from 'fp-ts/function'
 import * as TE from 'fp-ts/TaskEither'
+import {pipe} from 'fp-ts/function'
 import {atom} from 'jotai'
-import getContactsAndTryToResolveThePermissionsAlongTheWay from '../utils'
 import {selectAtom} from 'jotai/utils'
+import {type ContactNormalized} from '../domain'
+import getContactsAndTryToResolveThePermissionsAlongTheWay from '../utils'
 
 const contactsFromDeviceWithLoadingProgressAtom = atom<
   | {loading: true}

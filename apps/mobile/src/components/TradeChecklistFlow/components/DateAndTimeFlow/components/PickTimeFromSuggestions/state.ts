@@ -1,9 +1,9 @@
 import type {AvailableDateTimeOption} from '@vexl-next/domain/src/general/tradeChecklist'
-import type {Item as OptionsListItem} from '../OptionsList'
-import {DateTime} from 'luxon'
-import {atom, type Atom, useAtomValue, useSetAtom} from 'jotai'
-import {useMemo} from 'react'
+import {atom, useAtomValue, useSetAtom, type Atom} from 'jotai'
 import {splitAtom} from 'jotai/utils'
+import {DateTime} from 'luxon'
+import {useMemo} from 'react'
+import type {Item as OptionsListItem} from '../OptionsList'
 
 function generateHoursList(
   forOption: AvailableDateTimeOption

@@ -48,7 +48,7 @@ function SetNetworkCell(): JSX.Element {
         (!originOffer?.ownershipInfo &&
           originOffer?.offerInfo.publicPart.offerType === 'BUY')
       }
-      item={'SET_NETWORK'}
+      item="SET_NETWORK"
       onPress={onPress}
       sideNote={sideNote}
     />

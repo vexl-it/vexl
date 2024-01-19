@@ -48,16 +48,16 @@ function CommonFriends({
       }}
     >
       <XStack
-        pos={'relative'}
-        ai={'center'}
-        jc={'space-between'}
+        pos="relative"
+        ai="center"
+        jc="space-between"
         bc={variant === 'light' ? '$greyAccent5' : '$grey'}
-        br={'$4'}
-        px={'$4'}
+        br="$4"
+        px="$4"
       >
-        <Stack fs={1} pt={'$3'}>
+        <Stack fs={1} pt="$3">
           {!hideCommonFriendsCount && (
-            <Text col={'$greyOnBlack'} fos={14} ff={'$body700'}>
+            <Text col="$greyOnBlack" fos={14} ff="$body700">
               {t('commonFriends.commonFriendsCount', {
                 commonFriendsCount: commonFriends.length,
               })}
@@ -75,7 +75,7 @@ function CommonFriends({
                 />
               }
             >
-              <XStack pb={'$3'}>
+              <XStack pb="$3">
                 {commonFriends.slice(0, 5).map((friend) => (
                   <CommonFriendCell
                     key={friend.hash}
@@ -103,7 +103,7 @@ function CommonFriends({
           )}
         </Stack>
         {commonFriends.length !== 0 && (
-          <Stack ai={'flex-end'} jc={'center'}>
+          <Stack ai="flex-end" jc="center">
             <Image
               stroke={
                 variant === 'light'

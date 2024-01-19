@@ -45,17 +45,17 @@ function OfferExpirationModal({
 
   return (
     <Modal
-      animationType={'fade'}
+      animationType="fade"
       transparent
       visible={offerExpirationModalVisible}
     >
-      <Stack f={1} bc={'$grey'} px={'$4'} pb={bottom} pt={top}>
+      <Stack f={1} bc="$grey" px="$4" pb={bottom} pt={top}>
         <ScreenTitle
           text={t('offerForm.expiration.offerExpirationDate')}
-          textColor={'$greyAccent5'}
+          textColor="$greyAccent5"
         >
           <IconButton
-            variant={'dark'}
+            variant="dark"
             icon={closeSvg}
             onPress={() => {
               setOfferExpirationModalVisible(false)
@@ -63,10 +63,10 @@ function OfferExpirationModal({
           />
         </ScreenTitle>
         <ScrollView showsVerticalScrollIndicator={false}>
-          <Text col={'$white'} fos={16} ff={'$body500'}>
+          <Text col="$white" fos={16} ff="$body500">
             {t('offerForm.expiration.uponThisDate')}
           </Text>
-          <Stack f={1} my={'$6'}>
+          <Stack f={1} my="$6">
             <Calendar
               markedDates={markedDates}
               onDayPress={(date) => {

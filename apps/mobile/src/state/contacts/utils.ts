@@ -1,16 +1,16 @@
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
-import type * as TE from 'fp-ts/TaskEither'
+import {
+  hmacSign,
+  type CryptoError,
+} from '@vexl-next/resources-utils/src/utils/crypto'
+import * as Contacts from 'expo-contacts'
+import {SortTypes} from 'expo-contacts'
 import * as E from 'fp-ts/Either'
 import * as O from 'fp-ts/Option'
-import * as Contacts from 'expo-contacts'
-import {
-  type CryptoError,
-  hmacSign,
-} from '@vexl-next/resources-utils/src/utils/crypto'
+import type * as TE from 'fp-ts/TaskEither'
 import {hmacPassword} from '../../utils/environment'
-import {ContactNormalized} from './domain'
-import {SortTypes} from 'expo-contacts'
 import toE164PhoneNumberWithDefaultCountryCode from '../../utils/toE164PhoneNumberWithDefaultCountryCode'
+import {ContactNormalized} from './domain'
 
 export interface PermissionsNotGranted {
   readonly _tag: 'PermissionsNotGranted'

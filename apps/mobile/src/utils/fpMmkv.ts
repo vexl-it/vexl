@@ -1,15 +1,15 @@
 import * as E from 'fp-ts/Either'
+import {pipe} from 'fp-ts/function'
+import {MMKV} from 'react-native-mmkv'
 import {type z} from 'zod'
 import {
-  type JsonParseError,
-  type JsonStringifyError,
   parseJson,
   safeParse,
   stringifyToJson,
+  type JsonParseError,
+  type JsonStringifyError,
   type ZodParseError,
 } from './fpUtils'
-import {MMKV} from 'react-native-mmkv'
-import {pipe} from 'fp-ts/function'
 
 export interface ReadingFromStoreError {
   readonly _tag: 'ReadingFromStoreError'

@@ -36,30 +36,30 @@ function ChecklistCell({
   return (
     <TouchableOpacity disabled={isDisabled} onPress={onPress}>
       <XStack
-        ai={'center'}
-        jc={'space-between'}
-        bc={'$grey'}
-        px={'$4'}
-        py={'$5'}
-        br={'$4'}
+        ai="center"
+        jc="space-between"
+        bc="$grey"
+        px="$4"
+        py="$5"
+        br="$4"
         opacity={isDisabled ? 0.7 : 1}
       >
-        <XStack ai={'center'} space={'$4'} f={1}>
+        <XStack ai="center" space="$4" f={1}>
           <StatusIndicator itemStatus={itemStatus} />
           <Stack f={1}>
-            <Text fos={16} ff={'$body500'} col={'$white'}>
+            <Text fos={16} ff="$body500" col="$white">
               {t(`tradeChecklist.options.${item}`)}
             </Text>
             {subtitle && (
-              <Text fos={12} ff={'$body500'} col={'$greyOnBlack'}>
+              <Text fos={12} ff="$body500" col="$greyOnBlack">
                 {subtitle}
               </Text>
             )}
           </Stack>
         </XStack>
-        <XStack ai={'center'} space={'$2'}>
+        <XStack ai="center" space="$2">
           {sideNote && (
-            <Text fos={12} ff={'$body500'} col={'$greyOnBlack'}>
+            <Text fos={12} ff="$body500" col="$greyOnBlack">
               {sideNote}
             </Text>
           )}

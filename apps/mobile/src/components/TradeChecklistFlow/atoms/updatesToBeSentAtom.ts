@@ -1,25 +1,25 @@
-import {atom} from 'jotai'
 import {
-  type MeetingLocationData,
   type AmountData,
   type AvailableDateTimeOption,
-  type IdentityReveal,
   type ContactReveal,
+  type IdentityReveal,
+  type MeetingLocationData,
   type NetworkData,
   type PickedDateTimeOption,
   type TradeChecklistUpdate,
 } from '@vexl-next/domain/src/general/tradeChecklist'
 import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import createSubmitChecklistUpdateActionAtom from '../../../state/chat/atoms/sendTradeChecklistUpdateActionAtom'
-import {pipe} from 'fp-ts/function'
-import * as TE from 'fp-ts/TaskEither'
 import * as T from 'fp-ts/Task'
-import reportError from '../../../utils/reportError'
+import * as TE from 'fp-ts/TaskEither'
+import {pipe} from 'fp-ts/function'
+import {atom} from 'jotai'
+import createSubmitChecklistUpdateActionAtom from '../../../state/chat/atoms/sendTradeChecklistUpdateActionAtom'
 import {
   chatWithMessagesAtom,
   tradeChecklistDataAtom,
 } from '../../../state/tradeChecklist/atoms/fromChatAtoms'
 import {updateTradeChecklistState} from '../../../state/tradeChecklist/utils'
+import reportError from '../../../utils/reportError'
 import {loadingOverlayDisplayedAtom} from '../../LoadingOverlayProvider'
 
 const UPDATES_TO_BE_SENT_INITIAL_STATE = {}

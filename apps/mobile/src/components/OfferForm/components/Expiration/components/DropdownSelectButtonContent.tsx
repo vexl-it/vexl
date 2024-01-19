@@ -21,8 +21,8 @@ function DropdownSelectButtonContent({expirationDateAtom}: Props): JSX.Element {
   const [expirationDate, setExpirationDate] = useAtom(expirationDateAtom)
 
   return (
-    <XStack f={1} ai={'center'} jc={'space-between'}>
-      <Text fos={18} ff={'$body600'} col={'$greyOnBlack'}>
+    <XStack f={1} ai="center" jc="space-between">
+      <Text fos={18} ff="$body600" col="$greyOnBlack">
         {expirationDate
           ? DateTime.fromISO(expirationDate).toLocaleString(
               DateTime.DATE_FULL,

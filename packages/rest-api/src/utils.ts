@@ -1,11 +1,12 @@
 import Axios, {
   AxiosError,
+  isAxiosError,
   type AxiosInstance,
   type AxiosRequestConfig,
   type CreateAxiosDefaults,
-  isAxiosError,
 } from 'axios'
 import * as TE from 'fp-ts/TaskEither'
+import {pipe} from 'fp-ts/function'
 import type z from 'zod'
 import {
   type BadStatusCodeError,
@@ -13,7 +14,8 @@ import {
   type UnexpectedApiResponseError,
   type UnknownError,
 } from './Errors'
-import {pipe} from 'fp-ts/function'
+import {type PlatformName} from './PlatformName'
+import {type GetUserSessionCredentials} from './UserSessionCredentials.brand'
 import {
   HEADER_CLIENT_VERSION,
   HEADER_CRYPTO_VERSION,
@@ -22,8 +24,6 @@ import {
   HEADER_PUBLIC_KEY,
   HEADER_SIGNATURE,
 } from './constants'
-import {type GetUserSessionCredentials} from './UserSessionCredentials.brand'
-import {type PlatformName} from './PlatformName'
 
 const DEFAULT_TIMEOUT_MS = 60_000 // Up timeout to 1 minute
 

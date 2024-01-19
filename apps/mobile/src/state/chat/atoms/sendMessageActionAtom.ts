@@ -1,20 +1,20 @@
-import {atom} from 'jotai'
-import * as T from 'fp-ts/Task'
-import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
 import {
-  type ChatMessage,
   generateChatMessageId,
+  type ChatMessage,
 } from '@vexl-next/domain/src/general/messaging'
-import {privateApiAtom} from '../../../api'
-import addMessageToChat from '../utils/addMessageToChat'
-import {pipe} from 'fp-ts/function'
-import * as TE from 'fp-ts/TaskEither'
-import sendMessage from '@vexl-next/resources-utils/src/chat/sendMessage'
-import {type FocusAtomType} from '../../../utils/atomUtils/FocusAtomType'
-import {type ActionAtomType} from '../../../utils/atomUtils/ActionAtomType'
 import {now} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import replaceImageFileUrisWithBase64 from '../utils/replaceImageFileUrisWithBase64'
+import sendMessage from '@vexl-next/resources-utils/src/chat/sendMessage'
+import * as T from 'fp-ts/Task'
+import * as TE from 'fp-ts/TaskEither'
+import {pipe} from 'fp-ts/function'
+import {atom} from 'jotai'
 import {InteractionManager} from 'react-native'
+import {privateApiAtom} from '../../../api'
+import {type ActionAtomType} from '../../../utils/atomUtils/ActionAtomType'
+import {type FocusAtomType} from '../../../utils/atomUtils/FocusAtomType'
+import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
+import addMessageToChat from '../utils/addMessageToChat'
+import replaceImageFileUrisWithBase64 from '../utils/replaceImageFileUrisWithBase64'
 
 type SendMessageAtom = ActionAtomType<
   [ChatMessage],

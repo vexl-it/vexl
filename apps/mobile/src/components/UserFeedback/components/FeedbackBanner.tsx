@@ -26,22 +26,22 @@ function FeedbackBanner({
 
   return (
     <Stack
-      pos={'relative'}
-      p={'$4'}
-      br={'$4'}
-      bc={'$blackAccent1'}
-      mb={'$8'}
-      space={'$4'}
+      pos="relative"
+      p="$4"
+      br="$4"
+      bc="$blackAccent1"
+      mb="$8"
+      space="$4"
     >
-      <XStack ai={'flex-start'} jc={'space-between'}>
+      <XStack ai="flex-start" jc="space-between">
         <BannerBackButton />
         <FeedbackAvatar />
         <BannerCloseButton hideCloseButton={hideCloseButton} />
       </XStack>
       <FeedbackBannerContent autoCloseWhenFinished={autoCloseWhenFinished} />
-      <XStack ai={'center'} jc={'center'}>
+      <XStack ai="center" jc="center">
         <SvgImage stroke={getTokens().color.greyOnWhite.val} source={eyeSvg} />
-        <Text fos={14} ff={'$body400'} ml={'$2'} col={'$greyOnWhite'}>
+        <Text fos={14} ff="$body400" ml="$2" col="$greyOnWhite">
           {t('messages.yourAnswerIsAnonymous')}
         </Text>
       </XStack>

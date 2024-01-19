@@ -11,7 +11,7 @@ function renderItem({item}: {item: Atom<string>}): JSX.Element {
 }
 
 function ItemSeparatorComponent(): JSX.Element {
-  return <Stack h={2} bc={'$greyAccent1'} />
+  return <Stack h={2} bc="$greyAccent1" />
 }
 
 function SearchSuggestions(): JSX.Element {
@@ -20,7 +20,7 @@ function SearchSuggestions(): JSX.Element {
   return (
     <Stack flex={1}>
       <FlatList
-        keyboardShouldPersistTaps={'always'}
+        keyboardShouldPersistTaps="always"
         data={previousSearchesAtoms}
         ItemSeparatorComponent={ItemSeparatorComponent}
         renderItem={renderItem}

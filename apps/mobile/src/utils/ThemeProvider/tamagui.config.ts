@@ -1,7 +1,7 @@
-import {createFont, createTamagui, createTokens} from 'tamagui'
 import {createAnimations} from '@tamagui/animations-moti'
-import {shorthands} from '@tamagui/shorthands'
 import {createMedia} from '@tamagui/react-native-media-driver'
+import {shorthands} from '@tamagui/shorthands'
+import {createFont, createTamagui, createTokens} from 'tamagui'
 
 const color = {
   backgroundBlack: '#101010',

@@ -1,8 +1,8 @@
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
-import messagingStateAtom from './messagingStateAtom'
-import {type ChatWithMessages} from '../domain'
 import {focusAtom} from 'jotai-optics'
 import {type FocusAtomType} from '../../../utils/atomUtils/FocusAtomType'
+import {type ChatWithMessages} from '../domain'
+import messagingStateAtom from './messagingStateAtom'
 
 function focusChatByInboxKeyAndSenderKey({
   inboxKey,

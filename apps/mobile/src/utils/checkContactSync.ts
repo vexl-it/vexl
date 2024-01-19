@@ -1,10 +1,10 @@
+import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import * as Contacts from 'expo-contacts'
 import {SortTypes} from 'expo-contacts'
-import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
-import notEmpty from './notEmpty'
-import {importedContactsAtom} from '../state/contacts'
-import {difference} from 'set-operations'
 import {getDefaultStore} from 'jotai'
+import {difference} from 'set-operations'
+import {importedContactsAtom} from '../state/contacts'
+import notEmpty from './notEmpty'
 
 export default async function checkContactSync(
   store: ReturnType<typeof getDefaultStore> = getDefaultStore()

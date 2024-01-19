@@ -1,18 +1,18 @@
-import {pipe} from 'fp-ts/function'
 import * as TE from 'fp-ts/TaskEither'
+import {pipe} from 'fp-ts/function'
 import z from 'zod'
-import {
-  type LoggingFunction,
-  createAxiosInstance,
-  axiosCallWithValidation,
-} from '../utils'
-import {type PlatformName} from '../PlatformName'
 import {
   type BadStatusCodeError,
   type NetworkError,
   type UnexpectedApiResponseError,
   type UnknownError,
 } from '../Errors'
+import {type PlatformName} from '../PlatformName'
+import {
+  axiosCallWithValidation,
+  createAxiosInstance,
+  type LoggingFunction,
+} from '../utils'
 
 // List of currencies can be found here: https://cdn.trezor.io/dynamic/coingecko/api/v3/simple/supported_vs_currencies
 

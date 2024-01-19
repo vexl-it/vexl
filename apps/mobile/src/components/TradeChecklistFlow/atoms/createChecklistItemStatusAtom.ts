@@ -1,11 +1,11 @@
-import {type Atom, atom} from 'jotai'
-import {tradeChecklistDataAtom} from '../../../state/tradeChecklist/atoms/fromChatAtoms'
-import updatesToBeSentAtom from './updatesToBeSentAtom'
-import {type TradeChecklistItem} from '../domain'
 import {type TradeChecklistItemStatus} from '@vexl-next/domain/src/general/tradeChecklist'
+import fastDeepEqual from 'fast-deep-equal'
+import {atom, type Atom} from 'jotai'
+import {tradeChecklistDataAtom} from '../../../state/tradeChecklist/atoms/fromChatAtoms'
 import * as DateAndTime from '../../../state/tradeChecklist/utils/dateAndTime'
 import * as MeetingLocation from '../../../state/tradeChecklist/utils/location'
-import fastDeepEqual from 'fast-deep-equal'
+import {type TradeChecklistItem} from '../domain'
+import updatesToBeSentAtom from './updatesToBeSentAtom'
 
 export default function createChecklistItemStatusAtom(
   item: TradeChecklistItem

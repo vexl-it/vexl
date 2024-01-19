@@ -1,4 +1,3 @@
-import {createEmptyTradeChecklistInState} from '../../tradeChecklist/domain'
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {
   generateChatId,
@@ -7,6 +6,7 @@ import {
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
 import {atom} from 'jotai'
 import * as O from 'optics-ts'
+import {createEmptyTradeChecklistInState} from '../../tradeChecklist/domain'
 import {
   type ChatMessageWithState,
   type ChatWithMessages,

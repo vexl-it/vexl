@@ -97,8 +97,8 @@ function CalculateAmountScreen({
         title={t('tradeChecklist.calculateAmount.calculateAmount')}
       />
       <Content scrollable>
-        <Stack space={'$4'}>
-          <XStack ai={'center'} jc={'space-between'}>
+        <Stack space="$4">
+          <XStack ai="center" jc="space-between">
             <SwitchTradePriceTypeButton
               onPress={() => {
                 setTradePriceTypeDialogVisible(true)
@@ -109,7 +109,7 @@ function CalculateAmountScreen({
           {tradePriceType === 'custom' && (
             <Info
               hideCloseButton
-              variant={'yellow'}
+              variant="yellow"
               text={`${t(
                 'tradeChecklist.calculateAmount.choseToCalculateWithCustomPrice',
                 {
@@ -123,7 +123,7 @@ function CalculateAmountScreen({
               }`}
             />
           )}
-          <Stack space={'$2'}>
+          <Stack space="$2">
             <BtcAmountInput
               btcValueAtom={btcInputValueAtom}
               fiatValueAtom={fiatInputValueAtom}

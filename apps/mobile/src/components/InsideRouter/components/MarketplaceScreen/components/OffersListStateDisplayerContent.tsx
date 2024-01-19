@@ -58,17 +58,17 @@ function OffersListStateDisplayerContent({
             filteredOffersCount={offersAtoms.length}
             offerType={type}
           />
-          <ReencryptOffersSuggestion mt="$5" px={'$0'} />
-          <ImportNewContactsSuggestion mt="$5" px={'$0'} />
+          <ReencryptOffersSuggestion mt="$5" px="$0" />
+          <ImportNewContactsSuggestion mt="$5" px="$0" />
         </Stack>
       )
 
-    return <ErrorListHeader mt={'$6'} error={error.value} />
+    return <ErrorListHeader mt="$6" error={error.value} />
   }, [error, offersAtoms.length, type])
 
   if (offersAtoms.length === 0 && loading) {
     return (
-      <Stack f={1} ai={'center'} jc={'center'} pt="$5">
+      <Stack f={1} ai="center" jc="center" pt="$5">
         <ActivityIndicator color={tokens.color.main.val} size="large" />
       </Stack>
     )

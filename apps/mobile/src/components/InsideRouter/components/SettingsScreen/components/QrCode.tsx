@@ -22,15 +22,15 @@ function QrCode(): JSX.Element {
       }}
       visible={qrCodeDialogVisible}
     >
-      <YStack ai={'center'} space={'$4'}>
-        <Stack height={350} ai={'center'} jc={'center'}>
+      <YStack ai="center" space="$4">
+        <Stack height={350} ai="center" jc="center">
           <SvgQRCode
             size={300}
             value={encodedUserDetailsUri}
             logo={require('../images/app_logo.png')}
           />
         </Stack>
-        <Text col="$black" fos={28} ff={'$heading'}>
+        <Text col="$black" fos={28} ff="$heading">
           {t('qrCode.joinVexl')}
         </Text>
       </YStack>

@@ -2,11 +2,11 @@ import {
   type VerifyChallengeRequest,
   type VerifyChallengeResponse,
 } from '@vexl-next/rest-api/src/services/user/contracts'
+import * as TE from 'fp-ts/TaskEither'
 import {type TaskEither} from 'fp-ts/TaskEither'
+import {pipe} from 'fp-ts/function'
 import {useUserPublicApi} from '../../../api'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
-import {pipe} from 'fp-ts/function'
-import * as TE from 'fp-ts/TaskEither'
 import reportError from '../../../utils/reportError'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 

@@ -105,18 +105,18 @@ function DebugScreen(): JSX.Element {
             <LanguagePicker />
             <Spacer />
             <Button
-              variant={'primary'}
-              size={'small'}
-              text={'Print contacts'}
+              variant="primary"
+              size="small"
+              text="Print contacts"
               onPress={() => {
                 const contacts = store.get(importedContactsAtom)
                 console.log('Contacts: ', JSON.stringify(contacts, null, 2))
               }}
             />
             <Button
-              variant={'primary'}
-              size={'small'}
-              text={'Simulate non fatal error'}
+              variant="primary"
+              size="small"
+              text="Simulate non fatal error"
               onPress={() => {
                 reportError(
                   'error',
@@ -127,17 +127,17 @@ function DebugScreen(): JSX.Element {
               }}
             />
             <Button
-              variant={'primary'}
-              size={'small'}
-              text={'Simulate fatal error'}
+              variant="primary"
+              size="small"
+              text="Simulate fatal error"
               onPress={() => {
                 throw new Error(`Simulated fatal error`)
               }}
             />
             <Button
-              variant={'primary'}
-              size={'small'}
-              text={'Clear offers state'}
+              variant="primary"
+              size="small"
+              text="Clear offers state"
               onPress={() => {
                 store.set(offersStateAtom, {
                   lastUpdatedAt: MINIMAL_DATE,
@@ -147,9 +147,9 @@ function DebugScreen(): JSX.Element {
               }}
             />
             <Button
-              variant={'primary'}
-              size={'small'}
-              text={'Clear messaging state'}
+              variant="primary"
+              size="small"
+              text="Clear messaging state"
               onPress={() => {
                 const userInbox: Inbox = {privateKey: session.privateKey}
 
@@ -158,9 +158,9 @@ function DebugScreen(): JSX.Element {
               }}
             />
             <Button
-              variant={'primary'}
-              size={'small'}
-              text={'Refresh chat state'}
+              variant="primary"
+              size="small"
+              text="Refresh chat state"
               onPress={() => {
                 void pipe(
                   refreshMessaging(),
@@ -173,9 +173,9 @@ function DebugScreen(): JSX.Element {
               }}
             />
             <Button
-              variant={'primary'}
-              size={'small'}
-              text={'Refresh messages state'}
+              variant="primary"
+              size="small"
+              text="Refresh messages state"
               onPress={() => {
                 void pipe(
                   refreshMessaging(),
@@ -188,9 +188,9 @@ function DebugScreen(): JSX.Element {
               }}
             />
             <Button
-              variant={'primary'}
-              size={'small'}
-              text={'Refresh offers state'}
+              variant="primary"
+              size="small"
+              text="Refresh offers state"
               onPress={() => {
                 void refreshOffers().then(() => {
                   Alert.alert('done')
@@ -199,9 +199,9 @@ function DebugScreen(): JSX.Element {
             />
 
             <Button
-              variant={'primary'}
-              size={'small'}
-              text={'Reconstruct user inbox'}
+              variant="primary"
+              size="small"
+              text="Reconstruct user inbox"
               onPress={() => {
                 store.set(messagingStateAtom, (old) => [
                   ...old.filter(
@@ -229,9 +229,9 @@ function DebugScreen(): JSX.Element {
             />
 
             <Button
-              variant={'primary'}
-              size={'small'}
-              text={'Print offer and chat state into console'}
+              variant="primary"
+              size="small"
+              text="Print offer and chat state into console"
               onPress={() => {
                 const offers = store.get(offersStateAtom)
                 const messagingState = store.get(messagingStateAtom)
@@ -241,9 +241,9 @@ function DebugScreen(): JSX.Element {
             />
 
             <Button
-              variant={'primary'}
-              size={'small'}
-              text={'Delete user inbox'}
+              variant="primary"
+              size="small"
+              text="Delete user inbox"
               onPress={() => {
                 void pipe(
                   deleteInbox(session.privateKey),
@@ -259,9 +259,9 @@ function DebugScreen(): JSX.Element {
             />
 
             <Button
-              variant={'primary'}
-              size={'small'}
-              text={'Delete all inboxes'}
+              variant="primary"
+              size="small"
+              text="Delete all inboxes"
               onPress={() => {
                 void pipe(
                   deleteAllInboxes(),
@@ -277,18 +277,18 @@ function DebugScreen(): JSX.Element {
             />
 
             <Button
-              variant={'primary'}
-              size={'small'}
-              text={'Update all offers connections'}
+              variant="primary"
+              size="small"
+              text="Update all offers connections"
               onPress={() => {
                 void updateConnections({isInBackground: false})()
               }}
             />
 
             <Button
-              variant={'primary'}
-              size={'small'}
-              text={'Copy notification token'}
+              variant="primary"
+              size="small"
+              text="Copy notification token"
               // eslint-disable-next-line @typescript-eslint/no-misused-promises
               onPress={async () => {
                 Clipboard.setString(

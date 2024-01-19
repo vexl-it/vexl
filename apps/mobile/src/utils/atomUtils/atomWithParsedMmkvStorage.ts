@@ -1,12 +1,12 @@
+import * as E from 'fp-ts/Either'
+import {pipe} from 'fp-ts/function'
 import {atom, type PrimitiveAtom} from 'jotai'
 import {InteractionManager} from 'react-native'
 import {type z} from 'zod'
-import {pipe} from 'fp-ts/function'
-import * as E from 'fp-ts/Either'
-import reportError from '../reportError'
 import {storage} from '../fpMmkv'
-import getValueFromSetStateActionOfAtom from './getValueFromSetStateActionOfAtom'
 import {safeParse} from '../fpUtils'
+import reportError from '../reportError'
+import getValueFromSetStateActionOfAtom from './getValueFromSetStateActionOfAtom'
 
 const AUTHOR_ID_KEY = '___author_id'
 

@@ -39,7 +39,7 @@ function ContactsListSelect({
   if (loading)
     return (
       <WhiteContainer>
-        <Stack alignItems={'center'} justifyContent={'center'} flex={1}>
+        <Stack alignItems="center" justifyContent="center" flex={1}>
           <ActivityIndicator size="large" color={getTokens().color.main.val} />
         </Stack>
       </WhiteContainer>

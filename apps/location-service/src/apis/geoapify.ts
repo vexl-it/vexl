@@ -1,5 +1,5 @@
-import {LocationData, type SuggestQueryData} from '../brands.js'
 import axios from 'axios'
+import {LocationData, type SuggestQueryData} from '../brands.js'
 
 const API_KEY = process.env.API_KEY ?? ''
 if (!API_KEY) {

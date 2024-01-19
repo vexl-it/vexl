@@ -8,9 +8,9 @@ function AnonymizationNotice(props: StackProps): JSX.Element {
   const {t} = useTranslation()
 
   return (
-    <XStack ai={'center'} jc={'center'} mb={'$2'} {...props}>
+    <XStack ai="center" jc="center" mb="$2" {...props}>
       <Image stroke={getTokens().color.greyOnWhite.val} source={eyeSvg} />
-      <Text fos={14} ff={'$body500'} ml={'$2'} col={'$greyOnWhite'}>
+      <Text fos={14} ff="$body500" ml="$2" col="$greyOnWhite">
         {t('tradeChecklist.notVisibleToAnyoneNotice')}
       </Text>
     </XStack>

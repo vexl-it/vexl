@@ -22,12 +22,12 @@ export type Props = SectionProps | CustomSectionProps
 
 function Section(props: Props): JSX.Element {
   return (
-    <YStack mb={'$4'}>
+    <YStack mb="$4">
       {!props.customSection && (
-        <XStack ai={'center'} jc={'space-between'} py={'$4'}>
-          <XStack ai={'center'}>
+        <XStack ai="center" jc="space-between" py="$4">
+          <XStack ai="center">
             {props.image && (
-              <Stack mr={'$2'}>
+              <Stack mr="$2">
                 <SvgImage
                   width={24}
                   height={24}
@@ -38,13 +38,13 @@ function Section(props: Props): JSX.Element {
               </Stack>
             )}
             <Stack fs={1}>
-              <Text ff={'$body700'} color={'$white'} fos={24}>
+              <Text ff="$body700" color="$white" fos={24}>
                 {props.title}
               </Text>
             </Stack>
           </XStack>
           {props.mandatory && (
-            <Text fos={24} ff={'$body700'} color={'$greyOnBlack'}>
+            <Text fos={24} ff="$body700" color="$greyOnBlack">
               *
             </Text>
           )}

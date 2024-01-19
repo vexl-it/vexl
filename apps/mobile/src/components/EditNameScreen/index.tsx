@@ -31,13 +31,13 @@ function EditNameScreen(): JSX.Element {
     <Screen customHorizontalPadding={tokens.space[2].val}>
       <KeyboardAvoidingView>
         <ScreenTitle text={t('editName.editName')}>
-          <IconButton variant={'dark'} icon={closeSvg} onPress={safeGoBack} />
+          <IconButton variant="dark" icon={closeSvg} onPress={safeGoBack} />
         </ScreenTitle>
         <Stack f={1}>
           <Input
             autoFocus
-            variant={'greyOnBlack'}
-            textColor={'$white'}
+            variant="greyOnBlack"
+            textColor="$white"
             value={name}
             onChangeText={setName}
             showClearButton={!!name}
@@ -46,7 +46,7 @@ function EditNameScreen(): JSX.Element {
             }}
           />
         </Stack>
-        <Stack pb={'$3'} space={'$2'}>
+        <Stack pb="$3" space="$2">
           <Button
             onPress={() => {
               const parsedUserName = UserName.safeParse(name.trim())
@@ -57,7 +57,7 @@ function EditNameScreen(): JSX.Element {
               setUserName(parsedUserName.data)
               safeGoBack()
             }}
-            variant={'secondary'}
+            variant="secondary"
             text={t('common.save')}
           />
           <Button
@@ -66,7 +66,7 @@ function EditNameScreen(): JSX.Element {
               setUserName(undefined)
               safeGoBack()
             }}
-            variant={'primary'}
+            variant="primary"
             text={t('editName.clearName')}
           />
         </Stack>

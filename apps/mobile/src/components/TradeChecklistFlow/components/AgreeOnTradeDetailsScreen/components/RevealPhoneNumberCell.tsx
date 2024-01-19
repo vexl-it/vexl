@@ -37,7 +37,7 @@ function RevealPhoneNumberCell(): JSX.Element {
     <ChecklistCell
       isDisabled={disabled}
       hidden={!identityRevealed || contactRevealTriggeredFromChat}
-      item={'REVEAL_PHONE_NUMBER'}
+      item="REVEAL_PHONE_NUMBER"
       onPress={() => {
         void revealContact()
       }}

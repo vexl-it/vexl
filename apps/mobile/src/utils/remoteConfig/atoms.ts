@@ -1,4 +1,11 @@
+import remoteConfig from '@react-native-firebase/remote-config'
+import * as E from 'fp-ts/Either'
+import {pipe} from 'fp-ts/function'
 import {atom} from 'jotai'
+import {AppState} from 'react-native'
+import {parseJson, safeParse} from '../fpUtils'
+import {preferencesAtom} from '../preferences'
+import reportError from '../reportError'
 import {
   DEFAULT_REMOTE_CONFIG,
   MaintenanceConfig,
@@ -6,13 +13,6 @@ import {
   OfferRerequestLimitDays,
   type RemoteConfig,
 } from './domain'
-import {pipe} from 'fp-ts/function'
-import remoteConfig from '@react-native-firebase/remote-config'
-import {parseJson, safeParse} from '../fpUtils'
-import * as E from 'fp-ts/Either'
-import reportError from '../reportError'
-import {AppState} from 'react-native'
-import {preferencesAtom} from '../preferences'
 
 export const remoteConfigAtom = atom<RemoteConfig>(DEFAULT_REMOTE_CONFIG)
 

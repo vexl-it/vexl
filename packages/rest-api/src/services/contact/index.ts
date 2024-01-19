@@ -1,28 +1,28 @@
-import {type ServiceUrl} from '../../ServiceUrl.brand'
 import {type CreateAxiosDefaults} from 'axios'
-import {type GetUserSessionCredentials} from '../../UserSessionCredentials.brand'
+import {pipe} from 'fp-ts/function'
+import * as TE from 'fp-ts/TaskEither'
 import urlJoin from 'url-join'
+import {type PlatformName} from '../../PlatformName'
+import {type ServiceUrl} from '../../ServiceUrl.brand'
+import {type GetUserSessionCredentials} from '../../UserSessionCredentials.brand'
 import {
   axiosCall,
   axiosCallWithValidation,
   createAxiosInstanceWithAuthAndLogging,
   type LoggingFunction,
 } from '../../utils'
-import {type PlatformName} from '../../PlatformName'
 import {
+  FetchCommonConnectionsResponse,
+  FetchMyContactsResponse,
+  ImportContactsResponse,
   type CreateUserRequest,
   type FetchCommonConnectionsRequest,
-  FetchCommonConnectionsResponse,
   type FetchMyContactsRequest,
-  FetchMyContactsResponse,
   type ImportContactsRequest,
-  ImportContactsResponse,
   type RefreshUserRequest,
   type UpdateFirebaseTokenRequest,
   type UserNotFoundError,
 } from './contracts'
-import {pipe} from 'fp-ts/function'
-import * as TE from 'fp-ts/TaskEither'
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function privateApi({

@@ -127,7 +127,7 @@ function TextMessageAccent({
 
   if (shouldHaveItalicPrefix(message.messageType)) {
     return (
-      <Text color={isMine ? '$black' : '$white'} fontStyle={'italic'}>
+      <Text color={isMine ? '$black' : '$white'} fontStyle="italic">
         {t(`messages.textMessageTypes.${message.messageType}`, {
           message: message.text,
         })}
@@ -212,20 +212,20 @@ function TextMessage({
 
   return (
     <TouchableWithoutFeedback onPress={hideExtended}>
-      <Stack mx={'$4'} mt={'$1'} flex={1} alignItems={'stretch'}>
+      <Stack mx="$4" mt="$1" flex={1} alignItems="stretch">
         <XStack
           flex={1}
           flexDirection={!isMine ? 'row' : 'row-reverse'}
-          space={'$2'}
-          alignItems={'center'}
+          space="$2"
+          alignItems="center"
         >
           <TouchableWithoutFeedback style={{flex: 1}} onPress={toggleExtended}>
             <Stack
               width={message.message.image ? '80%' : undefined}
-              maxWidth={'80%'}
-              br={'$6'}
+              maxWidth="80%"
+              br="$6"
               backgroundColor={isMine ? '$main' : '$grey'}
-              p={'$3'}
+              p="$3"
             >
               {message.message.repliedTo && (
                 <YStack
@@ -236,7 +236,7 @@ function TextMessage({
                   {message.message.repliedTo.image && (
                     <Image
                       style={style.replyImage}
-                      resizeMode={'contain'}
+                      resizeMode="contain"
                       source={{
                         uri: resolveLocalUri(message.message.repliedTo.image),
                       }}
@@ -264,7 +264,7 @@ function TextMessage({
                   <TouchableWithoutFeedback onPress={onImagePressed}>
                     <Image
                       style={style.image}
-                      resizeMode={'contain'}
+                      resizeMode="contain"
                       source={{uri: resolveLocalUri(message.message.image)}}
                     />
                   </TouchableWithoutFeedback>
@@ -288,7 +288,7 @@ function TextMessage({
                 <Text
                   selectable
                   fos={16}
-                  fontFamily={'$body500'}
+                  fontFamily="$body500"
                   color={isMine ? '$black' : '$white'}
                 >
                   <TextMessageAccent

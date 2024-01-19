@@ -24,23 +24,23 @@ function Content({
   const [checkboxValue, setCheckboxValue] = useAtom(checkboxValueAtom)
 
   return (
-    <Stack space={'$4'}>
-      <Text fontFamily={'$heading'} fontSize={32} color={'$black'}>
+    <Stack space="$4">
+      <Text fontFamily="$heading" fontSize={32} color="$black">
         {title}
       </Text>
-      <Text fontSize={18} color={'$greyOnWhite'}>
+      <Text fontSize={18} color="$greyOnWhite">
         {subtitle}
       </Text>
       {children}
-      <XStack ai={'center'} space={'$2'}>
+      <XStack ai="center" space="$2">
         <Checkbox
-          size={'small'}
+          size="small"
           value={checkboxValue}
           onChange={() => {
             setCheckboxValue(!checkboxValue)
           }}
         />
-        <Text fontSize={14} color={'$greyOnWhite'}>
+        <Text fontSize={14} color="$greyOnWhite">
           Save to profile for future use
         </Text>
       </XStack>
@@ -107,7 +107,7 @@ export function ImageDialogContent({
       subtitle={t('messages.identityRevealDialog.selectPictureToBeUsed')}
       checkboxValueAtom={imageSavedForFutureUseAtom}
     >
-      <Stack f={1} ai={'center'} jc={'center'}>
+      <Stack f={1} ai="center" jc="center">
         <SelectProfilePicture
           selectedImageUriAtom={revealIdentityImageUriAtom}
         />

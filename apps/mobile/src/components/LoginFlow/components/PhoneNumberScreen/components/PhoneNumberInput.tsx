@@ -85,7 +85,7 @@ export default function PhoneNumberInput({onChange}: Props): JSX.Element {
         ref={ref}
         placeholder={' '}
         onChangeFormattedText={handleChangeFormatted}
-        defaultCode={'CZ'}
+        defaultCode="CZ"
         countryPickerProps={{
           preferredCountries: ['CZ', 'SK'],
           translation: 'common',

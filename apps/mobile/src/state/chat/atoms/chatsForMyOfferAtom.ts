@@ -1,7 +1,7 @@
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
-import messagingStateAtom from '../atoms/messagingStateAtom'
 import {type Atom} from 'jotai'
 import {selectAtom} from 'jotai/utils'
+import messagingStateAtom from '../atoms/messagingStateAtom'
 import {type ChatWithMessages} from '../domain'
 
 export function chatsForMyOfferAtom({

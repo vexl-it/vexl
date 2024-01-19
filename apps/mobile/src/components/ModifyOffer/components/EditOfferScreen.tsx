@@ -66,8 +66,8 @@ function EditOfferScreen({
                 <OfferForm content={content} />
               </>
             ) : (
-              <Stack f={1} ai={'center'}>
-                <Text ff={'$heading'} fos={16} col={'$white'}>
+              <Stack f={1} ai="center">
+                <Text ff="$heading" fos={16} col="$white">
                   {t('editOffer.errorOfferNotFound')}
                 </Text>
               </Stack>

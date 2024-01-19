@@ -16,7 +16,7 @@ export function NotificationPermissionsScreen(): JSX.Element {
   return (
     <Screen>
       <WhiteContainer>
-        <Stack mb={'$3'} f={1} ai="center" jc="center">
+        <Stack mb="$3" f={1} ai="center" jc="center">
           <SvgImage
             style={{height: '100%', flex: 1}}
             source={NotificationsSvg}
@@ -37,19 +37,19 @@ export function NotificationPermissionsScreen(): JSX.Element {
           )}`}
         </Text>
       </WhiteContainer>
-      <XStack space={'$2'} mb={'$2'} mt={'$4'}>
+      <XStack space="$2" mb="$2" mt="$4">
         <Button
           fullSize
           onPress={() => {
             void requestNotificationPermissions()
           }}
-          variant={'secondary'}
+          variant="secondary"
           text={t('common.allow')}
         />
         <Button
           fullSize
           onPress={safeGoBack}
-          variant={'primary'}
+          variant="primary"
           text={t('common.back')}
         />
       </XStack>

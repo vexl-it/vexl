@@ -76,9 +76,9 @@ function FeedbackBannerContent({autoCloseWhenFinished}: Props): JSX.Element {
   ])
 
   return (
-    <Stack space={'$4'}>
-      <Stack ai={'center'} space={'$4'}>
-        <Text fos={18} ff={'$body700'} col={'$white'}>
+    <Stack space="$4">
+      <Stack ai="center" space="$4">
+        <Text fos={18} ff="$body700" col="$white">
           {title}
         </Text>
         {!feedbackFlowFinished ? (
@@ -101,7 +101,7 @@ function FeedbackBannerContent({autoCloseWhenFinished}: Props): JSX.Element {
             onPress={() => {
               void submitChatFeedback()
             }}
-            variant={'primary'}
+            variant="primary"
             text={
               currentPage === 'TEXT_COMMENT'
                 ? t('common.send')

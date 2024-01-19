@@ -1,8 +1,8 @@
-import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {type StyleProp, type ViewStyle} from 'react-native'
+import {Stack, Text, getTokens} from 'tamagui'
+import {useTranslation} from '../../../utils/localization/I18nProvider'
 import Image from '../../Image'
 import eyeSvg from '../../images/eyeSvg'
-import {getTokens, Stack, Text} from 'tamagui'
 
 interface Props {
   style?: StyleProp<ViewStyle>
@@ -21,7 +21,7 @@ function AnonymizationCaption({style, fontSize, text}: Props): JSX.Element {
         <Image source={eyeSvg} stroke={getTokens().color.greyOnWhite.val} />
       </Stack>
       <Stack fs={1}>
-        <Text col="$greyOnWhite" ff={'$body500'} fos={fontSize ?? 14}>
+        <Text col="$greyOnWhite" ff="$body500" fos={fontSize ?? 14}>
           {textToDisplay}
         </Text>
       </Stack>

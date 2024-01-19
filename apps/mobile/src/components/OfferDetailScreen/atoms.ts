@@ -1,9 +1,9 @@
-import {translationAtom} from '../../utils/localization/I18nProvider'
-import {pipe} from 'fp-ts/function'
-import {askAreYouSureActionAtom} from '../AreYouSureDialog'
-import * as TE from 'fp-ts/TaskEither'
-import {atom} from 'jotai'
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
+import * as TE from 'fp-ts/TaskEither'
+import {pipe} from 'fp-ts/function'
+import {atom} from 'jotai'
+import {translationAtom} from '../../utils/localization/I18nProvider'
+import {askAreYouSureActionAtom} from '../AreYouSureDialog'
 
 const showCommonFriendsExplanationUIActionAtom = atom(
   null,

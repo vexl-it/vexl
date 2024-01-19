@@ -1,19 +1,19 @@
-import {useCallback, useEffect} from 'react'
 import dynamicLinks, {
   type FirebaseDynamicLinksTypes,
 } from '@react-native-firebase/dynamic-links'
-import reportError from '../reportError'
-import {translationAtom, useTranslation} from '../localization/I18nProvider'
-import parse from 'url-parse'
-import {LINK_TYPE_IMPORT_CONTACT} from './domain'
-import {atom, useSetAtom} from 'jotai'
-import {pipe} from 'fp-ts/function'
-import * as TE from 'fp-ts/TaskEither'
-import {parseJson, safeParse} from '../fpUtils'
-import {ImportContactFromLinkPayload} from '../../state/contacts/domain'
 import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
+import * as TE from 'fp-ts/TaskEither'
+import {pipe} from 'fp-ts/function'
+import {atom, useSetAtom} from 'jotai'
+import {useCallback, useEffect} from 'react'
+import parse from 'url-parse'
 import {addContactWithUiFeedbackAtom} from '../../state/contacts/atom/addContactWithUiFeedbackAtom'
+import {ImportContactFromLinkPayload} from '../../state/contacts/domain'
+import {parseJson, safeParse} from '../fpUtils'
+import {translationAtom, useTranslation} from '../localization/I18nProvider'
+import reportError from '../reportError'
 import showErrorAlert from '../showErrorAlert'
+import {LINK_TYPE_IMPORT_CONTACT} from './domain'
 
 type DynamicLink = FirebaseDynamicLinksTypes.DynamicLink
 

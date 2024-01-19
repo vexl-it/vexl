@@ -61,8 +61,8 @@ function TradeChecklistNetworkView(): JSX.Element | null {
             }}
             beforeIcon={copySvg}
             text={t('vexlbot.btcAddress')}
-            size={'small'}
-            variant={'primary'}
+            size="small"
+            variant="primary"
             iconFill={getTokens().color.main.val}
           />
         )}

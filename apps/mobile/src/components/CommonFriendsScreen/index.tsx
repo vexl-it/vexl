@@ -43,11 +43,11 @@ function CommonFriendsScreen({
   )
 
   return (
-    <Screen customHorizontalPadding={16} bc={'$white'}>
-      <Stack f={1} mb={'$2'}>
+    <Screen customHorizontalPadding={16} bc="$white">
+      <Stack f={1} mb="$2">
         <ScreenTitle
           text={t('commonFriends.commonFriends')}
-          textColor={'$black'}
+          textColor="$black"
         />
         <FlashList
           estimatedItemSize={64}
@@ -67,7 +67,7 @@ function CommonFriendsScreen({
         />
         <Button
           onPress={safeGoBack}
-          variant={'secondary'}
+          variant="secondary"
           text={t('common.gotIt')}
         />
       </Stack>

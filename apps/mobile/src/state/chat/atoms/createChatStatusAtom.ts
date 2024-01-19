@@ -1,8 +1,8 @@
-import {type ChatId} from '@vexl-next/domain/src/general/messaging'
-import focusChatWithMessagesAtom from './focusChatWithMessagesAtom'
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
-import {selectAtom} from 'jotai/utils'
+import {type ChatId} from '@vexl-next/domain/src/general/messaging'
 import {type Atom} from 'jotai'
+import {selectAtom} from 'jotai/utils'
+import focusChatWithMessagesAtom from './focusChatWithMessagesAtom'
 
 export type ChatStatus = 'requested' | 'denied' | 'accepted'
 

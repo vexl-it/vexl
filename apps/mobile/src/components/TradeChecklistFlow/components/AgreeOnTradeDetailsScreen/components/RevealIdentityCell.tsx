@@ -42,7 +42,7 @@ function RevealIdentityCell(): JSX.Element {
       isDisabled={disabled}
       hidden={identityRevealed || identityRevealTriggeredFromChat}
       subtitle={t('tradeChecklist.shareRecognitionSignInChat')}
-      item={'REVEAL_IDENTITY'}
+      item="REVEAL_IDENTITY"
       onPress={() => {
         void revealIdentity()
       }}

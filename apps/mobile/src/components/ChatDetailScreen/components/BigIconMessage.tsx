@@ -23,31 +23,31 @@ export default function BigIconMessage({
 }): JSX.Element | null {
   return (
     <Stack mb={isLatest ? '$10' : '$4'}>
-      <YStack my={'$5'} space={'$4'} alignItems={'center'}>
+      <YStack my="$5" space="$4" alignItems="center">
         {icon && icon}
         <YStack>
-          <XStack alignItems={'center'}>
-            <Stack flex={1} height={1} bc={'$grey'} />
+          <XStack alignItems="center">
+            <Stack flex={1} height={1} bc="$grey" />
             <Text
               textAlign="center"
-              mx={'$5'}
+              mx="$5"
               color="$greyOnBlack"
               fontSize={14}
               fontFamily="$body500"
             >
               {smallerText}
             </Text>
-            <Stack flex={1} height={1} bc={'$grey'} />
+            <Stack flex={1} height={1} bc="$grey" />
           </XStack>
           {biggerText && (
-            <XStack ai={'center'} jc={'center'} space={'$1'}>
+            <XStack ai="center" jc="center" space="$1">
               <TouchableOpacity disabled={!onPress} onPress={onPress}>
                 <Text
-                  mx={'$4'}
+                  mx="$4"
                   textAlign="center"
                   color="$white"
                   fos={20}
-                  ff={'$body500'}
+                  ff="$body500"
                 >
                   {biggerText}
                 </Text>
@@ -62,7 +62,7 @@ export default function BigIconMessage({
           {bottomText && (
             <Text
               textAlign="center"
-              mx={'$5'}
+              mx="$5"
               color="$greyOnBlack"
               fontSize={14}
               fontFamily="$body500"

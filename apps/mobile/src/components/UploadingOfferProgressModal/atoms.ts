@@ -1,9 +1,9 @@
 import {type OfferEncryptionProgress} from '@vexl-next/resources-utils/src/offers/OfferEncryptionProgress'
-import {atom} from 'jotai'
-import {translationAtom} from '../../utils/localization/I18nProvider'
-import {pipe} from 'fp-ts/lib/function'
-import {delayInPipeT} from '../../utils/fpUtils'
 import * as T from 'fp-ts/Task'
+import {pipe} from 'fp-ts/lib/function'
+import {atom} from 'jotai'
+import {delayInPipeT} from '../../utils/fpUtils'
+import {translationAtom} from '../../utils/localization/I18nProvider'
 
 export interface ShownData {
   mode: 'shown'

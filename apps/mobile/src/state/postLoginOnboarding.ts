@@ -1,7 +1,7 @@
 import {useAtomValue, useSetAtom} from 'jotai'
+import {focusAtom} from 'jotai-optics'
 import {z} from 'zod'
 import {atomWithParsedMmkvStorage} from '../utils/atomUtils/atomWithParsedMmkvStorage'
-import {focusAtom} from 'jotai-optics'
 
 export const postLoginFinishedStorageAtom = atomWithParsedMmkvStorage(
   'postLoginFinished1',

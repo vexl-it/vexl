@@ -1,7 +1,7 @@
 import {type UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {type VexlBotMessageData} from '../components/VexlbotMessageItem/domain'
 import {type ChatMessageWithState} from '../../../state/chat/domain'
 import addToSortedArray from '../../../utils/addToSortedArray'
+import {type VexlBotMessageData} from '../components/VexlbotMessageItem/domain'
 
 export type VexlBotOrMessageWithState =
   | {type: 'vexlBot'; message: VexlBotMessageData}

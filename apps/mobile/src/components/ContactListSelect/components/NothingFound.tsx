@@ -9,11 +9,11 @@ function NothingFound(): JSX.Element {
       <Text
         numberOfLines={1}
         adjustsFontSizeToFit
-        textAlign={'center'}
+        textAlign="center"
         fos={24}
         ff="$heading"
         col="$greyOnWhite"
-        mb={'$1'}
+        mb="$1"
       >
         {t('postLoginFlow.contactsList.nothingFound.title')}
       </Text>

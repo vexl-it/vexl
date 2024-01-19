@@ -63,7 +63,7 @@ function ChatListItem({dataAtom}: {dataAtom: Atom<ChatListData>}): JSX.Element {
       }}
     >
       <Stack mt="$6">
-        <XStack space="$2" ai={'center'}>
+        <XStack space="$2" ai="center">
           <Stack h={48} w={48}>
             <UserAvatar
               grayScale={isAvatarGray}
@@ -72,7 +72,7 @@ function ChatListItem({dataAtom}: {dataAtom: Atom<ChatListData>}): JSX.Element {
               height={48}
             />
           </Stack>
-          <YStack jc={'space-between'} alignSelf="stretch" f={1} py="$1">
+          <YStack jc="space-between" alignSelf="stretch" f={1} py="$1">
             <XStack jc="space-between">
               <UserNameWithSellingBuying
                 userName={userName}
@@ -88,10 +88,10 @@ function ChatListItem({dataAtom}: {dataAtom: Atom<ChatListData>}): JSX.Element {
               />
               {isUnread && (
                 <Stack
-                  w={'$4'}
-                  h={'$4'}
+                  w="$4"
+                  h="$4"
                   borderRadius={8}
-                  backgroundColor={'$main'}
+                  backgroundColor="$main"
                 />
               )}
             </XStack>
@@ -101,8 +101,8 @@ function ChatListItem({dataAtom}: {dataAtom: Atom<ChatListData>}): JSX.Element {
                 fos={16}
                 numberOfLines={1}
                 flex={1}
-                ellipsizeMode={'clip'}
-                mr={'$3'}
+                ellipsizeMode="clip"
+                mr="$3"
               >
                 <MessagePreview
                   lastMessageAtom={lastMessageAtom}
@@ -115,7 +115,7 @@ function ChatListItem({dataAtom}: {dataAtom: Atom<ChatListData>}): JSX.Element {
               </Text>
             </XStack>
           </YStack>
-          <Stack jc={'flex-end'} alignSelf="stretch"></Stack>
+          <Stack jc="flex-end" alignSelf="stretch"></Stack>
         </XStack>
       </Stack>
     </TouchableOpacity>

@@ -55,7 +55,7 @@ function IdentityRevealMessageItem({
                 <Image
                   height={80}
                   width={80}
-                  borderRadius={'$8'}
+                  borderRadius="$8"
                   source={{uri: resolveLocalUri(message.message.image)}}
                 />
               </UserAvatarTouchableWrapper>
@@ -93,7 +93,7 @@ function IdentityRevealMessageItem({
               <Image
                 height={80}
                 width={80}
-                borderRadius={'$8'}
+                borderRadius="$8"
                 source={{uri: message.message.image}}
               />
             </UserAvatarTouchableWrapper>
@@ -119,10 +119,10 @@ function IdentityRevealMessageItem({
           <Stack
             width={80}
             height={80}
-            backgroundColor={'$darkRed'}
+            backgroundColor="$darkRed"
             alignItems="center"
-            justifyContent={'center'}
-            borderRadius={'$7'}
+            justifyContent="center"
+            borderRadius="$7"
           >
             <SvgImage width={35} height={35} source={BlockIconSvg} />
           </Stack>

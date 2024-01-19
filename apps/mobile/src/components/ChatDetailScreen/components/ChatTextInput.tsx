@@ -113,7 +113,7 @@ function ChatTextInput(): JSX.Element | null {
             margin="$3"
             padding="$3"
             backgroundColor="$yellowAccent2"
-            justifyContent={'space-between'}
+            justifyContent="space-between"
           >
             <YStack f={1}>
               {replyToMessage.message.image && (
@@ -140,11 +140,11 @@ function ChatTextInput(): JSX.Element | null {
             margin="$3"
             padding="$3"
             backgroundColor="$yellowAccent2"
-            space={'$2'}
-            alignItems={'flex-start'}
+            space="$2"
+            alignItems="flex-start"
           >
-            <XStack alignSelf={'stretch'} justifyContent="space-between">
-              <Text color={'$main'}>{t('messages.imageToSend')}</Text>
+            <XStack alignSelf="stretch" justifyContent="space-between">
+              <Text color="$main">{t('messages.imageToSend')}</Text>
               <Image source={CancelSvg} onPress={onExtraClearPressed} />
             </XStack>
             <UriImageWithSizeLimits
@@ -154,26 +154,26 @@ function ChatTextInput(): JSX.Element | null {
           </YStack>
         )}
         <Stack
-          justifyContent={'center'}
+          justifyContent="center"
           minHeight={textInputInitialHeight}
-          py={'$2'}
+          py="$2"
         >
           <TextInput
             multiline
-            textAlignVertical={'center'}
+            textAlignVertical="center"
             value={value}
             onChangeText={setValue}
             style={styles.textInput}
-            textColor={'$white'}
-            variant={'greyOnBlack'}
-            borderRadius={'$8'}
+            textColor="$white"
+            variant="greyOnBlack"
+            borderRadius="$8"
             placeholder={t('messages.typeSomething')}
             placeholderTextColor={getTokens().color.greyOnBlack.val}
             rightElement={
               <Animated.View style={animatedStyle}>
                 <IconButton
                   oval
-                  variant={'secondary'}
+                  variant="secondary"
                   icon={sendSvg}
                   iconFill={tokens.color.black.val}
                   onPress={sendText}

@@ -7,6 +7,10 @@ import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMillisecond
 import sendLeaveChat from '@vexl-next/resources-utils/src/chat/sendLeaveChat'
 import {type SendMessageApiErrors} from '@vexl-next/resources-utils/src/chat/sendMessage'
 import {type ErrorEncryptingMessage} from '@vexl-next/resources-utils/src/chat/utils/chatCrypto'
+import {
+  type JsonStringifyError,
+  type ZodParseError,
+} from '@vexl-next/resources-utils/src/utils/parsing'
 import * as E from 'fp-ts/Either'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
@@ -18,10 +22,6 @@ import {deleteChatFiles} from '../../../utils/fsDirectories'
 import {removeFeedbackRecordActionAtom} from '../../feedback/atoms'
 import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
 import shouldSendTerminationMessageToChat from '../utils/shouldSendTerminationMessageToChat'
-import {
-  type JsonStringifyError,
-  type ZodParseError,
-} from '@vexl-next/resources-utils/src/utils/parsing'
 
 export default function deleteChatActionAtom(
   chatWithMessagesAtom: FocusAtomType<ChatWithMessages>

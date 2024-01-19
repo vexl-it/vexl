@@ -54,8 +54,8 @@ function Sorting({sortingAtom}: Props): JSX.Element {
 
   return (
     <Dropdown
-      size={'large'}
-      variant={'yellow'}
+      size="large"
+      variant="yellow"
       value={{value: sorting, label: selectedLabel ?? ''}}
       data={dropdownRows}
       onChange={(item) => {

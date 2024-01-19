@@ -1,22 +1,22 @@
-import {createScope, molecule} from 'bunshi/dist/react'
 import {
-  type Feedback,
-  type FeedbackType,
+  POSITIVE_STAR_RATING_THRESHOLD,
   generateFeedbackFormId,
-  type ObjectionType,
   objectionTypeNegativeOptions,
   objectionTypePositiveOptions,
-  POSITIVE_STAR_RATING_THRESHOLD,
+  type Feedback,
+  type FeedbackType,
+  type ObjectionType,
 } from '@vexl-next/domain/src/general/feedback'
-import {atom, type SetStateAction, type WritableAtom} from 'jotai'
-import getValueFromSetStateActionOfAtom from '../../../utils/atomUtils/getValueFromSetStateActionOfAtom'
-import {privateApiAtom} from '../../../api'
-import {pipe} from 'fp-ts/function'
-import * as TE from 'fp-ts/TaskEither'
+import {createScope, molecule} from 'bunshi/dist/react'
 import * as T from 'fp-ts/Task'
-import reportError from '../../../utils/reportError'
+import * as TE from 'fp-ts/TaskEither'
+import {pipe} from 'fp-ts/function'
+import {atom, type SetStateAction, type WritableAtom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
+import {privateApiAtom} from '../../../api'
 import {regionCodeAtom} from '../../../state/session'
+import getValueFromSetStateActionOfAtom from '../../../utils/atomUtils/getValueFromSetStateActionOfAtom'
+import reportError from '../../../utils/reportError'
 
 export function generateInitialFeedback(type: FeedbackType): Feedback {
   return {

@@ -1,14 +1,14 @@
-import {atom} from 'jotai'
-import type {FocusAtomType} from '../../../utils/atomUtils/FocusAtomType'
-import type {ChatIds, ChatWithMessages} from '../../chat/domain'
-import type {SetStateAction} from 'jotai'
-import valueOrDefaultAtom from '../../../utils/atomUtils/valueOrDefaultAtom'
-import focusChatWithMessagesAtom from '../../../state/chat/atoms/focusChatWithMessagesAtom'
-import {focusAtom} from 'jotai-optics'
-import {offerForChatOriginAtom} from '../../marketplace/atoms/offersState'
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
+import type {SetStateAction} from 'jotai'
+import {atom} from 'jotai'
+import {focusAtom} from 'jotai-optics'
+import focusChatWithMessagesAtom from '../../../state/chat/atoms/focusChatWithMessagesAtom'
+import type {FocusAtomType} from '../../../utils/atomUtils/FocusAtomType'
+import valueOrDefaultAtom from '../../../utils/atomUtils/valueOrDefaultAtom'
 import {getOtherSideData} from '../../chat/atoms/selectOtherSideDataAtom'
+import type {ChatIds, ChatWithMessages} from '../../chat/domain'
 import {dummyChatWithMessages} from '../../chat/domain'
+import {offerForChatOriginAtom} from '../../marketplace/atoms/offersState'
 
 export const parentChatAtomAtom = atom<FocusAtomType<ChatWithMessages>>(
   atom(dummyChatWithMessages)

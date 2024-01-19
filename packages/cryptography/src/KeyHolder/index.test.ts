@@ -1,5 +1,5 @@
-import {generatePrivateKey, importPrivateKey} from './index'
 import {PrivateKeyPemBase64} from './brands'
+import {generatePrivateKey, importPrivateKey} from './index'
 
 // Todo test curves
 describe('private key', () => {

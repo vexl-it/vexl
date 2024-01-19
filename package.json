@@ -7,16 +7,15 @@
     "tooling/*"
   ],
   "scripts": {
-    "turbo:build": "turbo build",
     "turbo:clean": "turbo clean && rm -rf ./node_modules/.cache",
     "turbo:format": "turbo format --continue -- --cache --cache-location='node_modules/.cache/.prettiercache'",
     "turbo:format:fix": "turbo format --continue -- --write --cache --cache-location='node_modules/.cache/.prettiercache'",
     "turbo:lint": "turbo lint --continue -- --cache --cache-location 'node_modules/.cache/.eslintcache' && manypkg check",
     "turbo:lint:fix": "turbo lint --continue -- --fix --cache --cache-location 'node_modules/.cache/.eslintcache' && manypkg fix",
     "turbo:typecheck": "turbo typecheck",
-    "turbo:check-code": "yarn turbo build format lint typecheck",
-    "utils:sync-translations": "yarn workspace @vexl-next/localizations utils:sync && yarn workspace @vexl-next/localizations build",
-    "utils:add-translation": "yarn workspace @vexl-next/localizations utils:add && yarn workspace @vexl-next/localizations build",
+    "turbo:check-code": "yarn turbo format lint typecheck",
+    "utils:sync-translations": "yarn workspace @vexl-next/localizations utils:sync",
+    "utils:add-translation": "yarn workspace @vexl-next/localizations utils:add",
     "location-service:build-docker-image": "./scripts/build-image-location-service.sh",
     "postinstall": "manypkg check"
   },

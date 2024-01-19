@@ -24,17 +24,17 @@ function CommonFriendsListItem({friend}: Props): JSX.Element {
           width={50}
           height={50}
           br="$5"
-          resizeMode={'cover'}
+          resizeMode="cover"
           source={{uri: friend.imageUri}}
         />
       ) : (
         <SvgImage width={50} height={50} source={picturePlaceholderSvg} />
       )}
       <Stack f={1} ml="$4" jc="space-between">
-        <Text ff={'$body500'} fs={18} mb={'$2'} col="$black">
+        <Text ff="$body500" fs={18} mb="$2" col="$black">
           {friend.name}
         </Text>
-        <Text ff={'$body600'} col={'$greyOnBlack'} fos={14}>
+        <Text ff="$body600" col="$greyOnBlack" fos={14}>
           {friend.normalizedNumber}
         </Text>
       </Stack>
@@ -42,7 +42,7 @@ function CommonFriendsListItem({friend}: Props): JSX.Element {
         onPress={dialFriend}
         variant="secondary"
         text={t('commonFriends.call')}
-        size={'small'}
+        size="small"
       />
     </Stack>
   )

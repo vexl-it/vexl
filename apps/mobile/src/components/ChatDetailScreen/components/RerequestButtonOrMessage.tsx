@@ -36,7 +36,7 @@ function RerequestButtonOrMessage({
         <Button
           disabled={rerequestButtonDisabled}
           onPress={onRerequestPressed}
-          variant={'secondary'}
+          variant="secondary"
           beforeIcon={identityIconSvg}
           text={t('offer.rerequest')}
         />

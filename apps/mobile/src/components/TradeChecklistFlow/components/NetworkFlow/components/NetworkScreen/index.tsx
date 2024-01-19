@@ -78,9 +78,9 @@ function NetworkScreen({
         <SectionTitle
           text={t('tradeChecklist.network.network')}
           icon={networkSvg}
-          mt={'$4'}
+          mt="$4"
         />
-        <Stack space={'$6'}>
+        <Stack space="$6">
           <LightningOrOnChain />
           <BtcAddress />
         </Stack>

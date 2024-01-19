@@ -67,7 +67,7 @@ function Button({type}: {type: ButtonType}): JSX.Element | null {
     return (
       <IconButton
         icon={backButtonSvg}
-        variant={'primary'}
+        variant="primary"
         onPress={onGoBackPressed}
       />
     )
@@ -76,7 +76,7 @@ function Button({type}: {type: ButtonType}): JSX.Element | null {
     return (
       <IconButton
         icon={backButtonSvg}
-        variant={'primary'}
+        variant="primary"
         onPress={() => {
           Keyboard.dismiss()
           setModal(false)
@@ -88,7 +88,7 @@ function Button({type}: {type: ButtonType}): JSX.Element | null {
     return (
       <IconButton
         icon={blockIconSvg}
-        variant={'negative'}
+        variant="negative"
         onPress={() => {
           Keyboard.dismiss()
           void blockChat().then((success) => {
@@ -102,7 +102,7 @@ function Button({type}: {type: ButtonType}): JSX.Element | null {
     return (
       <IconButton
         icon={binSvg}
-        variant={'negative'}
+        variant="negative"
         onPress={() => {
           Keyboard.dismiss()
           void deleteChat().then((success) => {
@@ -118,7 +118,7 @@ function Button({type}: {type: ButtonType}): JSX.Element | null {
     return (
       <IconButton
         icon={identityIconSvg}
-        variant={'primary'}
+        variant="primary"
         onPress={() => {
           void revealIdentity('REQUEST_REVEAL')
         }}
@@ -134,7 +134,7 @@ function Button({type}: {type: ButtonType}): JSX.Element | null {
       <IconButton
         icon={phoneSvg}
         iconFill={getTokens().color.main.val}
-        variant={'primary'}
+        variant="primary"
         onPress={() => {
           void revealContact('REQUEST_REVEAL')
         }}
@@ -143,11 +143,11 @@ function Button({type}: {type: ButtonType}): JSX.Element | null {
 
   if (type === 'tradeChecklist')
     return (
-      <XStack space={'$1'}>
+      <XStack space="$1">
         {identityRevealStatus === 'notStarted' && (
           <IconButton
             icon={identityIconSvg}
-            variant={'primary'}
+            variant="primary"
             onPress={() => {
               void revealIdentity('REQUEST_REVEAL')
             }}
@@ -158,7 +158,7 @@ function Button({type}: {type: ButtonType}): JSX.Element | null {
             <IconButton
               icon={phoneSvg}
               iconFill={getTokens().color.main.val}
-              variant={'primary'}
+              variant="primary"
               onPress={() => {
                 void revealContact('REQUEST_REVEAL')
               }}
@@ -166,7 +166,7 @@ function Button({type}: {type: ButtonType}): JSX.Element | null {
           )}
         <IconButton
           icon={tradeChecklistSvg}
-          variant={'primary'}
+          variant="primary"
           onPress={() => {
             Keyboard.dismiss()
             setModal(false)
@@ -202,7 +202,7 @@ function ChatHeader({
     onPressMiddle()
   }, [onPressMiddle])
   return (
-    <XStack mx={'$4'} mt={'$4'}>
+    <XStack mx="$4" mt="$4">
       <Button type={leftButton} />
 
       <Stack f={1} mx={mode === 'photoLeft' ? '$2' : 0}>

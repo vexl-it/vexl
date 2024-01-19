@@ -13,7 +13,7 @@ function TextComment(): JSX.Element {
   const [textComment, setTextComment] = useAtom(textCommentAtom)
 
   return (
-    <Stack w={'100%'} height={150} px={'$2'} pb={'$2'} br="$4" bc="$grey">
+    <Stack w="100%" height={150} px="$2" pb="$2" br="$4" bc="$grey">
       <Stack f={1}>
         <Input
           placeholder={t('messages.typeSomething')}

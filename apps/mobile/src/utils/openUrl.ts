@@ -1,6 +1,6 @@
-import {Alert, Linking} from 'react-native'
 import Clipboard from '@react-native-clipboard/clipboard'
 import {getDefaultStore} from 'jotai'
+import {Alert, Linking} from 'react-native'
 import {translationAtom} from './localization/I18nProvider'
 
 export default function openUrl(

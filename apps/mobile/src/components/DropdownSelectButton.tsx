@@ -21,12 +21,12 @@ function DropdownSelectButton({
   return (
     <TouchableOpacity {...props}>
       <XStack
-        ai={'center'}
-        jc={'space-between'}
-        px={'$5'}
-        py={'$4'}
-        br={'$5'}
-        bc={'$grey'}
+        ai="center"
+        jc="space-between"
+        px="$5"
+        py="$4"
+        br="$5"
+        bc="$grey"
       >
         {children}
         {clearButtonVisible ? (

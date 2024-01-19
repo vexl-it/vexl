@@ -24,7 +24,7 @@ function PriceInfo({fiatTempValueAtom}: Props): JSX.Element | null {
 
   return fiatTempValue && fiatTempValue > 0 && percentageDifference !== 0 ? (
     <Info
-      variant={'yellow'}
+      variant="yellow"
       hideCloseButton
       text={t(
         percentageDifference >= 0

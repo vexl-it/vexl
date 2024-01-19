@@ -123,11 +123,11 @@ function OfferInfo({
   })()
 
   return (
-    <Stack f={1} mx={'$2'} my={'$4'}>
+    <Stack f={1} mx="$2" my="$4">
       <ScreenTitle text={t('offer.title')}>
         {!offer.flags.reported && (
           <IconButton
-            variant={'dark'}
+            variant="dark"
             icon={flagSvg}
             onPress={() => {
               void reportOffer(offer.offerInfo.offerId)()
@@ -137,14 +137,14 @@ function OfferInfo({
         <IconButton variant="dark" icon={closeSvg} onPress={goBack} />
       </ScreenTitle>
       <ScrollView>
-        <YStack space={'$2'} mb="$2">
+        <YStack space="$2" mb="$2">
           <OfferWithBubbleTip
             hideSpokenLanguages
             negative={!requestPossibleInfo.canBeRerequested}
             offer={offer}
           />
           <CommonFriends
-            variant={'dark'}
+            variant="dark"
             contactsHashes={offer.offerInfo.privatePart.commonFriends}
           />
           <Info
@@ -174,7 +174,7 @@ function OfferInfo({
         <ButtonWithPressTimeout
           disabled={!text.trim()}
           onPress={onRequestPressed}
-          variant={'secondary'}
+          variant="secondary"
           beforeIcon={identityIconSvg}
           text={t('offer.sendRequest')}
         />

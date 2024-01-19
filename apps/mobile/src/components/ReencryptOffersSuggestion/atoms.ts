@@ -1,9 +1,9 @@
+import * as T from 'fp-ts/Task'
+import {pipe} from 'fp-ts/lib/function'
 import {atom} from 'jotai'
 import {reencryptOffersMissingOnServerActionAtom} from '../../state/marketplace/atoms/offersMissingOnServer'
-import {offerProgressModalActionAtoms} from '../UploadingOfferProgressModal/atoms'
-import {pipe} from 'fp-ts/lib/function'
-import * as T from 'fp-ts/Task'
 import {translationAtom} from '../../utils/localization/I18nProvider'
+import {offerProgressModalActionAtoms} from '../UploadingOfferProgressModal/atoms'
 
 export const reencryptOffersWithModalActionAtom = atom(null, (get, set) => {
   const {t} = get(translationAtom)

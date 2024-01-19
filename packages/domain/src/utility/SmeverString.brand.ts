@@ -1,9 +1,9 @@
-import {z} from 'zod'
 import {
-  validate,
   compare as compareVersions,
+  validate,
   type CompareOperator,
 } from 'compare-versions'
+import {z} from 'zod'
 
 export const SemverString = z
   .string()

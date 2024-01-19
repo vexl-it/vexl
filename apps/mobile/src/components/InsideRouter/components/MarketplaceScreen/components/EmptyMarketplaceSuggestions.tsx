@@ -24,7 +24,7 @@ function EmptyMarketplaceSuggestions(): JSX.Element {
 
   return (
     <ScrollView contentContainerStyle={{paddingBottom: tabBarEndsAt + 25}}>
-      <YStack mt={'$4'} space={'$4'}>
+      <YStack mt="$4" space="$4">
         {createOfferSuggestionVisible && (
           <MarketplaceSuggestion
             buttonText={t('myOffers.addNewOffer')}

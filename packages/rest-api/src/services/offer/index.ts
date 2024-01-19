@@ -1,39 +1,39 @@
-import {type ServiceUrl} from '../../ServiceUrl.brand'
 import {type CreateAxiosDefaults} from 'axios'
-import {type GetUserSessionCredentials} from '../../UserSessionCredentials.brand'
+import {pipe} from 'fp-ts/function'
+import * as TE from 'fp-ts/TaskEither'
 import urlJoin from 'url-join'
+import {type PlatformName} from '../../PlatformName'
+import {type ServiceUrl} from '../../ServiceUrl.brand'
+import {type GetUserSessionCredentials} from '../../UserSessionCredentials.brand'
 import {
   axiosCallWithValidation,
   createAxiosInstanceWithAuthAndLogging,
   type LoggingFunction,
 } from '../../utils'
-import {type PlatformName} from '../../PlatformName'
 import {
-  type CreateNewOfferRequest,
   CreateNewOfferResponse,
-  type CreatePrivatePartRequest,
   CreatePrivatePartResponse,
-  type DeleteOfferRequest,
   DeleteOfferResponse,
-  type DeletePrivatePartRequest,
   DeletePrivatePartResponse,
   GetOfferByIdsResponse,
-  type GetOffersByIdsRequest,
-  type GetOffersForMeCreatedOrModifiedAfterRequest,
   GetOffersForMeCreatedOrModifiedAfterResponse,
   GetOffersForMeResponse,
-  type RefreshOfferRequest,
   RefreshOfferResponse,
-  type RemovedOfferIdsRequest,
   RemovedOfferIdsResponse,
+  ReportOfferResponse,
+  UpdateOfferResponse,
+  type CreateNewOfferRequest,
+  type CreatePrivatePartRequest,
+  type DeleteOfferRequest,
+  type DeletePrivatePartRequest,
+  type GetOffersByIdsRequest,
+  type GetOffersForMeCreatedOrModifiedAfterRequest,
+  type RefreshOfferRequest,
+  type RemovedOfferIdsRequest,
   type ReportOfferLimitReachedError,
   type ReportOfferRequest,
-  ReportOfferResponse,
   type UpdateOfferRequest,
-  UpdateOfferResponse,
 } from './contracts'
-import {pipe} from 'fp-ts/function'
-import * as TE from 'fp-ts/TaskEither'
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function privateApi({

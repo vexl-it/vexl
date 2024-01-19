@@ -1,12 +1,12 @@
-import {atom} from 'jotai'
-import {focusAtom} from 'jotai-optics'
-import {offersAtom} from './offersState'
-import sortOffers from '../utils/sortOffers'
-import {splitAtom} from 'jotai/utils'
 import {
   type MyOfferInState,
   type Sort,
 } from '@vexl-next/domain/src/general/offers'
+import {atom} from 'jotai'
+import {focusAtom} from 'jotai-optics'
+import {splitAtom} from 'jotai/utils'
+import sortOffers from '../utils/sortOffers'
+import {offersAtom} from './offersState'
 
 export const myOffersAtom = focusAtom(offersAtom, (optic) =>
   optic.filter(

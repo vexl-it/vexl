@@ -40,13 +40,13 @@ function CurrencySelect({
 
   return (
     <Modal animationType="fade" transparent visible={visible}>
-      <Stack f={1} bc={'$grey'} px={'$4'} pb={bottom} pt={top}>
-        <Stack pb={'$2'}>
+      <Stack f={1} bc="$grey" px="$4" pb={bottom} pt={top}>
+        <Stack pb="$2">
           <ScreenTitle
             text={t('offerForm.selectCurrency')}
-            textColor={'$greyAccent5'}
+            textColor="$greyAccent5"
           >
-            <IconButton variant={'dark'} icon={closeSvg} onPress={onClose} />
+            <IconButton variant="dark" icon={closeSvg} onPress={onClose} />
           </ScreenTitle>
           <SearchBar />
         </Stack>

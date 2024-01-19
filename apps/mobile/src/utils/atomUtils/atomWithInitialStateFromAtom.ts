@@ -1,7 +1,7 @@
-import {type Atom, atom, type PrimitiveAtom, type SetStateAction} from 'jotai'
-import * as O from 'fp-ts/Option'
-import getValueFromSetStateActionOfAtom from './getValueFromSetStateActionOfAtom'
 import {pipe} from 'fp-ts/function'
+import * as O from 'fp-ts/Option'
+import {atom, type Atom, type PrimitiveAtom, type SetStateAction} from 'jotai'
+import getValueFromSetStateActionOfAtom from './getValueFromSetStateActionOfAtom'
 
 export function atomWithInitialStateFromAtom<T>(
   initialValueAtom: Atom<T>

@@ -34,11 +34,11 @@ function ChatRequestPreview({
   const commonFriendsSection = (
     <>
       {commonConnectionsHashes && commonConnectionsHashes.length > 0 && (
-        <Stack mx={'$-4'}>
+        <Stack mx="$-4">
           <CommonFriends
             hideCommonFriendsCount
             contactsHashes={commonConnectionsHashes}
-            variant={'light'}
+            variant="light"
           />
         </Stack>
       )}
@@ -63,27 +63,27 @@ function ChatRequestPreview({
     <>
       {offer?.flags.reported && (
         <XStack
-          borderRadius={'$true'}
-          mx={'$-4'}
-          px={'$4'}
-          py={'$4'}
-          bg={'$darkRed'}
-          space={'$2'}
+          borderRadius="$true"
+          mx="$-4"
+          px="$4"
+          py="$4"
+          bg="$darkRed"
+          space="$2"
         >
           <Image source={flagSvg} stroke={tokens.color.red.val} />
-          <Text fos={16} col={'$red'}>
+          <Text fos={16} col="$red">
             {t('messages.offerWasReported')}
           </Text>
         </XStack>
       )}
       <Stack
-        borderRadius={'$true'}
-        mx={'$-4'}
-        px={'$4'}
-        py={'$4'}
+        borderRadius="$true"
+        mx="$-4"
+        px="$4"
+        py="$4"
         backgroundColor="$greyAccent5"
       >
-        <Text fontFamily={'$body600'} mb="$2" fos={14} col={'$greyOnWhite'}>
+        <Text fontFamily="$body600" mb="$2" fos={14} col="$greyOnWhite">
           {chat.origin.type === 'myOffer'
             ? t('messages.yourOffer')
             : t('messages.theirOffer')}
@@ -95,11 +95,11 @@ function ChatRequestPreview({
 
   return (
     <Stack>
-      <Stack pos="absolute" t={-8} l={0} r={0} alignItems={'center'}>
+      <Stack pos="absolute" t={-8} l={0} r={0} alignItems="center">
         <Image source={bubbleTypTopSvg} />
       </Stack>
       <YStack
-        pos={'relative'}
+        pos="relative"
         backgroundColor="$white"
         borderRadius="$7"
         pt="$6"
@@ -109,27 +109,27 @@ function ChatRequestPreview({
       >
         {offer?.flags.reported && (
           <XStack
-            borderRadius={'$true'}
-            mx={'$-4'}
-            px={'$4'}
-            py={'$4'}
-            bg={'$darkRed'}
-            space={'$2'}
+            borderRadius="$true"
+            mx="$-4"
+            px="$4"
+            py="$4"
+            bg="$darkRed"
+            space="$2"
           >
             <Image source={flagSvg} stroke={tokens.color.red.val} />
-            <Text fos={16} col={'$red'}>
+            <Text fos={16} col="$red">
               {t('messages.offerWasReported')}
             </Text>
           </XStack>
         )}
         {showRequestMessage && requestMessageSection}
         {mode === 'commonFirst' ? (
-          <YStack space={'$4'}>
+          <YStack space="$4">
             {commonFriendsSection}
             {offerInfoPreviewSection}
           </YStack>
         ) : (
-          <Stack space={'$4'}>
+          <Stack space="$4">
             {offerInfoPreviewSection}
             {commonFriendsSection}
           </Stack>

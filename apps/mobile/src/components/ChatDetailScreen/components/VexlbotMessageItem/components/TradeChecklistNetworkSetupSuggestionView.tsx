@@ -30,8 +30,8 @@ function TradeChecklistNetworkSetupSuggestionView(): JSX.Element | null {
             params: {networkData: undefined, navigateBackToChatOnSave: true},
           })
         }}
-        size={'medium'}
-        variant={'secondary'}
+        size="medium"
+        variant="secondary"
         text={t('tradeChecklist.options.SET_NETWORK')}
       />
     </VexlbotBubble>

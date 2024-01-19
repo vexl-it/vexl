@@ -30,15 +30,15 @@ function ObjectionCell({objection, ...props}: Props): JSX.Element {
       {...props}
     >
       <Stack
-        ai={'center'}
-        jc={'center'}
-        px={'$4'}
-        py={'$2'}
-        br={'$4'}
+        ai="center"
+        jc="center"
+        px="$4"
+        py="$2"
+        br="$4"
         bc={isSelected ? '$yellowAccent2' : '$greyAccent1'}
-        mb={'$2'}
+        mb="$2"
       >
-        <Text fos={16} ff={'$body500'} col={isSelected ? '$main' : '$white'}>
+        <Text fos={16} ff="$body500" col={isSelected ? '$main' : '$white'}>
           {t(`feedback.objection.${objection}`)}
         </Text>
       </Stack>

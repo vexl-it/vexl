@@ -1,6 +1,6 @@
 import {atom} from 'jotai'
-import {versionCode} from '../../utils/environment'
 import {DateTime} from 'luxon'
+import {versionCode} from '../../utils/environment'
 import {remoteConfigAtom} from '../../utils/remoteConfig/atoms'
 
 export const shouldDisplayForceUpdateScreenAtom = atom((get) => {

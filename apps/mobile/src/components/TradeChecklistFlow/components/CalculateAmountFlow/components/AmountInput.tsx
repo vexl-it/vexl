@@ -46,23 +46,23 @@ function AmountInput(
     <TouchableWithoutFeedback onPress={onWrapperPress}>
       <XStack
         h={65}
-        ai={'center'}
-        jc={'space-between'}
-        bc={'$grey'}
+        ai="center"
+        jc="space-between"
+        bc="$grey"
         boc={isFocused ? '$yellowAccent2' : 'transparent'}
         bw={2}
-        px={'$4'}
-        py={'$3'}
-        br={'$4'}
+        px="$4"
+        py="$3"
+        br="$4"
       >
         {children}
-        <Stack w={'60%'}>
+        <Stack w="60%">
           <InputStyled
             ref={inputRef}
             placeholderTextColor={getTokens().color.greyAccent1.val}
-            keyboardType={'decimal-pad'}
+            keyboardType="decimal-pad"
             numberOfLines={1}
-            textAlign={'right'}
+            textAlign="right"
             textColor={isFocused ? '$main' : '$white'}
             selectionColor={
               isFocused

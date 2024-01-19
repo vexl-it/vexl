@@ -15,17 +15,17 @@ import {
   type OfferType,
 } from '@vexl-next/domain/src/general/offers'
 import {
+  type AmountData,
+  type AvailableDateTimeOption,
+  type MeetingLocationData,
+  type NetworkData,
+} from '@vexl-next/domain/src/general/tradeChecklist'
+import {type LocationSuggestion} from '@vexl-next/rest-api/src/services/location/contracts'
+import {
   type InitPhoneNumberVerificationResponse,
   type VerifyPhoneNumberResponse,
 } from '@vexl-next/rest-api/src/services/user/contracts'
-import {
-  type MeetingLocationData,
-  type AmountData,
-  type AvailableDateTimeOption,
-  type NetworkData,
-} from '@vexl-next/domain/src/general/tradeChecklist'
 import {type ChatIds} from './state/chat/domain'
-import {type LocationSuggestion} from '@vexl-next/rest-api/src/services/location/contracts'
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type RootStackParamsList = {

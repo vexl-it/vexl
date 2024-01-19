@@ -1,7 +1,7 @@
-import {flow} from 'fp-ts/function'
+import {toError, type BasicError} from '@vexl-next/domain/src/utility/errors'
 import * as E from 'fp-ts/Either'
+import {flow} from 'fp-ts/function'
 import {type TypeOf, type ZodError, type ZodType} from 'zod'
-import {type BasicError, toError} from '@vexl-next/domain/src/utility/errors'
 
 export interface ZodParseError<T> extends BasicError<'ZodParseError'> {
   zodError: ZodError<T>

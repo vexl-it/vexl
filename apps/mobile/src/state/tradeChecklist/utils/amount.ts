@@ -1,8 +1,8 @@
 import {type AmountData} from '@vexl-next/domain/src/general/tradeChecklist'
 import {UnixMilliseconds0} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {type TradeChecklistInState} from '../domain'
 import fastDeepEqual from 'fast-deep-equal'
 import calculatePercentageDifference from '../../../utils/calculatePercentageDifference'
+import {type TradeChecklistInState} from '../domain'
 
 type AmountInState = TradeChecklistInState['amount']
 

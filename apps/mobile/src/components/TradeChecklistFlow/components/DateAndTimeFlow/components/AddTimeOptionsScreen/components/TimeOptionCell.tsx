@@ -21,27 +21,27 @@ function TimeOptionCell({availableDateTime, ...props}: Props): JSX.Element {
 
   return (
     <Stack
-      ai={'flex-start'}
-      jc={'space-between'}
+      ai="flex-start"
+      jc="space-between"
       bbw={2}
-      bbc={'$backgroundBlack'}
-      py={'$6'}
+      bbc="$backgroundBlack"
+      py="$6"
       {...props}
     >
-      <Text fos={16} ff={'$body600'}>
+      <Text fos={16} ff="$body600">
         {DateTime.fromMillis(availableDateTime.date).toLocaleString(
           DateTime.DATE_MED_WITH_WEEKDAY,
           {locale: getCurrentLocale()}
         )}
       </Text>
       <XStack
-        width={'100%'}
-        ai={'center'}
-        jc={'space-between'}
-        px={'$2'}
-        mt={'$2'}
+        width="100%"
+        ai="center"
+        jc="space-between"
+        px="$2"
+        mt="$2"
       >
-        <XStack f={1} ai={'center'} jc={'space-around'}>
+        <XStack f={1} ai="center" jc="space-around">
           <Stack width={150}>
             <TimeFromDropdown availableDateTimeFrom={availableDateTime.from} />
           </Stack>
@@ -53,7 +53,7 @@ function TimeOptionCell({availableDateTime, ...props}: Props): JSX.Element {
             />
           </Stack>
         </XStack>
-        <XStack ai={'center'}>
+        <XStack ai="center">
           <TouchableOpacity
             onPress={() => {
               removeTimestampFromAvailable(availableDateTime.date)

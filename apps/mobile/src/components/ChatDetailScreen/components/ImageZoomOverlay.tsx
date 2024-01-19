@@ -42,17 +42,17 @@ const ZoomedImage = gestureHandlerRootHOC(() => {
       pb={bottom}
       pl={left}
       pr={right}
-      jc={'center'}
-      ai={'center'}
-      bc={'rgba(0,0,0,0.8)'}
+      jc="center"
+      ai="center"
+      bc="rgba(0,0,0,0.8)"
     >
       <XStack
-        pos={'absolute'}
-        ai={'center'}
-        space={'$2'}
+        pos="absolute"
+        ai="center"
+        space="$2"
         top={top}
-        right={'$4'}
-        zIndex={'$100'}
+        right="$4"
+        zIndex="$100"
       >
         {openedImageUri && (
           <IconButton

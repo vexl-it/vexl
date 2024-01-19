@@ -1,6 +1,6 @@
+import {type MeetingLocationChatMessage} from '@vexl-next/domain/src/general/tradeChecklist'
 import fastDeepEqual from 'fast-deep-equal'
 import {type TradeChecklistInState} from '../domain'
-import {type MeetingLocationChatMessage} from '@vexl-next/domain/src/general/tradeChecklist'
 
 type MeetingLocationInState = TradeChecklistInState['location']
 

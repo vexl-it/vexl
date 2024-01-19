@@ -15,7 +15,7 @@ function ContactsFilterButton({isSelectedAtom, title}: Props): JSX.Element {
         setIsSelected(!isSelected)
       }}
       variant={isSelected ? 'secondary' : 'blackOnDark'}
-      size={'small'}
+      size="small"
     />
   )
 }

@@ -1,19 +1,19 @@
-import * as FileSystem from 'expo-file-system'
-import * as TE from 'fp-ts/TaskEither'
-import * as T from 'fp-ts/Task'
-import {
-  type BasicError,
-  toBasicError,
-} from '@vexl-next/domain/src/utility/errors'
-import {type ChatMessage} from '@vexl-next/domain/src/general/messaging'
-import {pipe} from 'fp-ts/function'
-import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import ImageResizer from '@bam.tech/react-native-image-resizer'
-import joinUrl from 'url-join'
+import {type ChatMessage} from '@vexl-next/domain/src/general/messaging'
+import {type IdentityRevealChatMessage} from '@vexl-next/domain/src/general/tradeChecklist'
+import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
+import {
+  toBasicError,
+  type BasicError,
+} from '@vexl-next/domain/src/utility/errors'
+import * as FileSystem from 'expo-file-system'
+import * as T from 'fp-ts/Task'
+import * as TE from 'fp-ts/TaskEither'
+import {pipe} from 'fp-ts/function'
 import {Platform} from 'react-native'
+import joinUrl from 'url-join'
 import reportError from '../../../utils/reportError'
 import resolveLocalUri from '../../../utils/resolveLocalUri'
-import {type IdentityRevealChatMessage} from '@vexl-next/domain/src/general/tradeChecklist'
 
 export type ReadingFileError = BasicError<'ReadingFileError'>
 

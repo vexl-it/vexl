@@ -1,23 +1,18 @@
-import {type MarkedDates} from 'react-native-calendars/src/types'
-import Header from '../../Header'
-import {
-  getCurrentLocale,
-  useTranslation,
-} from '../../../../../utils/localization/I18nProvider'
-import {type NavigationProp, useNavigation} from '@react-navigation/native'
+import {useNavigation, type NavigationProp} from '@react-navigation/native'
+import {type AvailableDateTimeOption} from '@vexl-next/domain/src/general/tradeChecklist'
+import {useAtom, useSetAtom} from 'jotai'
 import {DateTime} from 'luxon'
+import {useEffect, useMemo} from 'react'
+import {type MarkedDates} from 'react-native-calendars/src/types'
 import {Stack} from 'tamagui'
 import {
   type TradeChecklistStackParamsList,
   type TradeChecklistStackScreenProps,
 } from '../../../../../navigationTypes'
-import {useAtom, useSetAtom} from 'jotai'
-import {useEffect, useMemo} from 'react'
 import {
-  availableDateTimesAtom,
-  handleAvailableDaysChangeActionAtom,
-} from '../atoms'
-import {MINIMUM_AVAILABLE_DAYS_THRESHOLD} from '../../../utils'
+  getCurrentLocale,
+  useTranslation,
+} from '../../../../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../../../../utils/useSafeGoBack'
 import Calendar, {
   REACT_NATIVE_CALENDARS_DATE_FORMAT,
@@ -26,9 +21,13 @@ import {
   FooterButtonProxy,
   HeaderProxy,
 } from '../../../../PageWithNavigationHeader'
+import {MINIMUM_AVAILABLE_DAYS_THRESHOLD} from '../../../utils'
 import Content from '../../Content'
-
-import {type AvailableDateTimeOption} from '@vexl-next/domain/src/general/tradeChecklist'
+import Header from '../../Header'
+import {
+  availableDateTimesAtom,
+  handleAvailableDaysChangeActionAtom,
+} from '../atoms'
 
 type Props = TradeChecklistStackScreenProps<'ChooseAvailableDays'>
 
@@ -79,7 +78,7 @@ function ChooseAvailableDaysScreen({
           title={t('tradeChecklist.dateAndTime.chooseAvailableDays')}
           subtitle={t('tradeChecklist.dateAndTime.addTimeOptionsLater')}
         />
-        <Stack f={1} my={'$6'}>
+        <Stack f={1} my="$6">
           <Calendar
             markedDates={markedDates}
             onDayPress={handleAvailableDaysChange}

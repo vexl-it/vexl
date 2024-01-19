@@ -29,15 +29,15 @@ function OnlineOrInPersonTrade(): JSX.Element {
 
   return (
     <>
-      <Stack space={'$3'}>
-        <Stack als={'center'}>
+      <Stack space="$3">
+        <Stack als="center">
           <Image
             height={120}
             width={120}
             source={anonymousAvatarHappyNoBackgroundSvg}
           />
         </Stack>
-        <Text textAlign={'center'} ff={'$heading'} fos={32}>
+        <Text textAlign="center" ff="$heading" fos={32}>
           {t('tradeChecklist.agreeOnTradeDetails')}
         </Text>
         {offerForTradeChecklist?.offerInfo.publicPart.locationState ===
@@ -48,9 +48,9 @@ function OnlineOrInPersonTrade(): JSX.Element {
               hideCloseButton
               text={t('tradeChecklist.thisDealIsFullyOnline')}
               onActionPress={openVexlBlog}
-              variant={'yellow'}
+              variant="yellow"
             />
-            <Stack my={'$4'} gap={'$2'}>
+            <Stack my="$4" gap="$2">
               <TradeRule
                 ruleNumber={1}
                 title={t('tradeChecklist.tradeOnlyWithPeopleYouKnow')}
@@ -68,15 +68,15 @@ function OnlineOrInPersonTrade(): JSX.Element {
         ) : (
           <>
             <Text
-              als={'center'}
+              als="center"
               fos={14}
-              ff={'$body400'}
-              ml={'$2'}
-              col={'$greyOnWhite'}
+              ff="$body400"
+              ml="$2"
+              col="$greyOnWhite"
             >
               {t('tradeChecklist.youCanPickWhatYouFill')}
             </Text>
-            <Stack my={'$8'} gap={'$2'}>
+            <Stack my="$8" gap="$2">
               <DateAndTimeCell />
               <MeetingLocationCell />
               <CalculateAmountCell />

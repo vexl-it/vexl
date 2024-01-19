@@ -10,20 +10,20 @@ function LightningOrOnChain(): JSX.Element {
   const [btcNetwork, setBtcNetwork] = useAtom(btcNetworkAtom)
 
   return (
-    <Stack space={'$2'}>
+    <Stack space="$2">
       <SelectableCell<BtcNetwork>
         selected={btcNetwork === 'LIGHTING'}
         onPress={setBtcNetwork}
         title={t('tradeChecklist.network.lightning')}
         subtitle={t('tradeChecklist.network.bestOptionForSmallAmounts')}
-        type={'LIGHTING'}
+        type="LIGHTING"
       />
       <SelectableCell<BtcNetwork>
         selected={btcNetwork === 'ON_CHAIN'}
         onPress={setBtcNetwork}
         title={t('tradeChecklist.network.onChain')}
         subtitle={t('tradeChecklist.network.bestOptionForHugeAmounts')}
-        type={'ON_CHAIN'}
+        type="ON_CHAIN"
       />
     </Stack>
   )

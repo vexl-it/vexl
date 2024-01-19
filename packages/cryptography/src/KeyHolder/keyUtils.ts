@@ -1,7 +1,7 @@
 import crypto from 'node:crypto'
+import {normalizeCurveName, type Curve} from './Curve.brand'
 import ECConverter from './ECConverter'
-import {type PrivateKeyPemBase64, PublicKeyPemBase64} from './brands'
-import {type Curve, normalizeCurveName} from './Curve.brand'
+import {PublicKeyPemBase64, type PrivateKeyPemBase64} from './brands'
 
 function decodeBase64Url(string: string): Buffer {
   // Replace non-url compatible chars with base64 standard chars

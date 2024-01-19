@@ -33,18 +33,18 @@ function BtcAddress(): JSX.Element | null {
         }}
       >
         <XStack
-          ai={'center'}
-          jc={'space-between'}
-          p={'$4'}
-          bc={'$grey'}
-          br={'$5'}
+          ai="center"
+          jc="space-between"
+          p="$4"
+          bc="$grey"
+          br="$5"
         >
           <Text
             fs={1}
-            mr={'$2'}
+            mr="$2"
             col={btcAddress ? '$white' : '$greyOnWhite'}
             fos={18}
-            ff={'$body500'}
+            ff="$body500"
           >
             {btcAddress ?? t('tradeChecklist.network.pasteBtcAddress')}
           </Text>
@@ -64,7 +64,7 @@ function BtcAddress(): JSX.Element | null {
           )}
         </XStack>
       </TouchableOpacity>
-      <AnonymizationNotice als={'flex-start'} mt={'$2'} />
+      <AnonymizationNotice als="flex-start" mt="$2" />
     </Stack>
   )
 }

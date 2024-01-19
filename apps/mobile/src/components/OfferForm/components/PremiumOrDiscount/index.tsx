@@ -47,7 +47,7 @@ function PremiumOrDiscount({
   return (
     <YStack>
       <XStack ai="center" jc="space-between" py="$4">
-        <XStack f={1} ai="center" mr={'$1'}>
+        <XStack f={1} ai="center" mr="$1">
           <Stack mr="$2">
             <SvgImage
               stroke={
@@ -61,7 +61,7 @@ function PremiumOrDiscount({
           <Stack fs={1}>
             <Text
               numberOfLines={2}
-              ff={'$body700'}
+              ff="$body700"
               col={feeState === 'WITH_FEE' ? '$white' : '$greyOnWhite'}
               fos={24}
             >
@@ -75,8 +75,8 @@ function PremiumOrDiscount({
         />
       </XStack>
       <Text
-        ff={'$body600'}
-        mb={'$4'}
+        ff="$body600"
+        mb="$4"
         col={feeState === 'WITH_FEE' ? '$white' : '$greyOnWhite'}
         fos={16}
       >

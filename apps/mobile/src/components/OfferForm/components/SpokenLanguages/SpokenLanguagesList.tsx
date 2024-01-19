@@ -15,7 +15,7 @@ interface Props {
 }
 
 function ItemSeparatorComponent(): JSX.Element {
-  return <Stack h={2} bc={'$greyAccent1'} />
+  return <Stack h={2} bc="$greyAccent1" />
 }
 
 function SpokenLanguagesList({

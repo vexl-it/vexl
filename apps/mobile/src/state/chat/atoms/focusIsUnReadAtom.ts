@@ -1,6 +1,6 @@
 import {type Chat} from '@vexl-next/domain/src/general/messaging'
-import {focusAtom} from 'jotai-optics'
 import {type PrimitiveAtom} from 'jotai'
+import {focusAtom} from 'jotai-optics'
 
 export default function focusIsUnReadAtom(
   chatAtom: PrimitiveAtom<Chat>

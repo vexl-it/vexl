@@ -75,10 +75,10 @@ function MessageItem({
             <Stack
               width={80}
               height={80}
-              backgroundColor={'$darkRed'}
+              backgroundColor="$darkRed"
               alignItems="center"
-              justifyContent={'center'}
-              borderRadius={'$7'}
+              justifyContent="center"
+              borderRadius="$7"
             >
               <Image width={35} height={35} source={BlockIconSvg} />
             </Stack>
@@ -200,11 +200,11 @@ function MessageItem({
 
   if (item.type === 'time')
     return (
-      <Stack ai={'center'}>
+      <Stack ai="center">
         <Text color="$greyOnBlack">{formatChatTime(item.time)}</Text>
       </Stack>
     )
-  if (item.type === 'space') return <Stack h={'$3'} />
+  if (item.type === 'space') return <Stack h="$3" />
   return null
 }
 

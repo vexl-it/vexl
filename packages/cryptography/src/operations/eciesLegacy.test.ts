@@ -1,11 +1,11 @@
-import {eciesLegacyDecrypt, eciesLegacyEncrypt} from './eciesLegacy'
 import {
+  PublicKeyPemBase64,
   generatePrivateKey,
   importPrivateKey,
-  PublicKeyPemBase64,
 } from '../KeyHolder'
-import {PrivateKeyPemBase64} from '../KeyHolder/brands'
 import {Curve} from '../KeyHolder/Curve.brand'
+import {PrivateKeyPemBase64} from '../KeyHolder/brands'
+import {eciesLegacyDecrypt, eciesLegacyEncrypt} from './eciesLegacy'
 
 it('Should decrypt message as expected', async () => {
   const privateKey = importPrivateKey({

@@ -1,13 +1,13 @@
-import {pipe} from 'fp-ts/function'
 import * as A from 'fp-ts/Array'
+import {pipe} from 'fp-ts/function'
 import addToSortedArray from '../../../utils/addToSortedArray'
-import compareMessages from './compareMessages'
-import areMessagesEqual from './areMessagesEqual'
-import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
-import processIdentityRevealMessageIfAny from './processIdentityRevealMessageIfAny'
-import {updateTradeChecklistState} from '../../tradeChecklist/utils'
 import notEmpty from '../../../utils/notEmpty'
+import {updateTradeChecklistState} from '../../tradeChecklist/utils'
+import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
 import addRealLifeInfoToChat from './addRealLifeInfoToChat'
+import areMessagesEqual from './areMessagesEqual'
+import compareMessages from './compareMessages'
+import processIdentityRevealMessageIfAny from './processIdentityRevealMessageIfAny'
 
 export default function addMessagesToChats(
   chats: ChatWithMessages[]

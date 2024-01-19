@@ -1,5 +1,5 @@
-import {useEffect, useState} from 'react'
 import remoteConfig from '@react-native-firebase/remote-config'
+import {useEffect, useState} from 'react'
 import {DEFAULT_REMOTE_CONFIG} from './domain'
 
 export default function useSetupRemoteConfig(): boolean {

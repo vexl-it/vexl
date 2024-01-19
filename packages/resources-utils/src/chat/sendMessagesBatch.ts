@@ -1,33 +1,33 @@
 import {
-  type ChatMessagePayload,
-  type ChatMessage,
-} from '@vexl-next/domain/src/general/messaging'
-import {
   type PrivateKeyHolder,
   type PublicKeyPemBase64,
 } from '@vexl-next/cryptography/src/KeyHolder'
+import {
+  type ChatMessage,
+  type ChatMessagePayload,
+} from '@vexl-next/domain/src/general/messaging'
+import {toError, type BasicError} from '@vexl-next/domain/src/utility/errors'
 import {type ChatPrivateApi} from '@vexl-next/rest-api/src/services/chat'
-import {pipe} from 'fp-ts/function'
 import {
   type InboxInBatch,
   type MessageInBatch,
   type ServerMessageWithId,
   type SignedChallenge,
 } from '@vexl-next/rest-api/src/services/chat/contracts'
-import * as TE from 'fp-ts/TaskEither'
 import * as A from 'fp-ts/Array'
-import {type ErrorEncryptingMessage} from './utils/chatCrypto'
 import * as O from 'fp-ts/Option'
-import {
-  type ErrorGeneratingSignedChallengeBatch,
-  generateSignedChallengeBatch,
-} from './utils/generateSignedChallengesBatch'
-import {type BasicError, toError} from '@vexl-next/domain/src/utility/errors'
+import * as TE from 'fp-ts/TaskEither'
+import {pipe} from 'fp-ts/function'
 import {type ExtractLeftTE} from '../utils/ExtractLeft'
-import mapMessageTypeToBackwardCompatibleMessageType from './utils/mapMessageTypeToBackwardCompatibleMessageType'
-import {messagePreviewToNetwork} from './utils/messagePreviewIO'
-import {messageToNetwork} from './utils/messageIO'
 import {type JsonStringifyError, type ZodParseError} from '../utils/parsing'
+import {type ErrorEncryptingMessage} from './utils/chatCrypto'
+import {
+  generateSignedChallengeBatch,
+  type ErrorGeneratingSignedChallengeBatch,
+} from './utils/generateSignedChallengesBatch'
+import mapMessageTypeToBackwardCompatibleMessageType from './utils/mapMessageTypeToBackwardCompatibleMessageType'
+import {messageToNetwork} from './utils/messageIO'
+import {messagePreviewToNetwork} from './utils/messagePreviewIO'
 
 export interface MessageInInbox {
   readonly message: ChatMessage

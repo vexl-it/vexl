@@ -80,7 +80,7 @@ function StickyHeader(): JSX.Element | null {
               <Bullet />
               <Text fontFamily="$body500" fos={14} color="$greyOnWhite">
                 {offer.offerInfo.publicPart.location
-                  .map((one) => one.city)
+                  .map((one) => one.shortAddress)
                   .join(', ')}
               </Text>
             </>

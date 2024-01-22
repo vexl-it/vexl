@@ -1,5 +1,6 @@
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {
+  OfferLocation,
   PublicPayloadEncrypted,
   type OfferPublicPart,
   type SymmetricKey,
@@ -15,9 +16,23 @@ import {booleanToString} from '../../utils/booleanString'
 import {aesGCMIgnoreTagEncrypt} from '../../utils/crypto'
 import {safeParse, stringifyToJson} from '../../utils/parsing'
 
+const OfferLocationDepreciated = z.object({
+  longitude: z.string(),
+  latitude: z.string(),
+  city: z.string(),
+})
+type OfferLocationDepreciated = z.TypeOf<typeof OfferLocationDepreciated>
+
+/**
+ * Shape of the offer public part that is encrypted.
+ * Handles backward compatibility
+ */
 const OfferPublicPartToEncrypt = z.object({
   offerPublicKey: PublicKeyPemBase64,
+  // TODO(#702): remove offer location backward compatibility
+  // location V2 -> location
   location: z.array(z.string()),
+  locationV2: z.array(OfferLocation),
   offerDescription: z.string(),
   amountBottomLimit: z.coerce.string(),
   amountTopLimit: z.coerce.string(),
@@ -37,17 +52,29 @@ const OfferPublicPartToEncrypt = z.object({
   groupUuids: z.array(z.string()),
 })
 
+// TODO unit test
 function offerPublicPartToJsonString(
   publicPart: OfferPublicPart
 ): E.Either<unknown, string> {
   return pipe(
     publicPart.location,
+    A.map(
+      (oneLocation) =>
+        ({
+          longitude: oneLocation.longitude,
+          latitude: oneLocation.latitude,
+          city: oneLocation.shortAddress,
+        }) satisfies OfferLocationDepreciated
+    ),
     A.map(stringifyToJson),
     A.sequence(E.Applicative),
     E.map((location) => ({
       ...publicPart,
       active: booleanToString(publicPart.active),
       location,
+      // TODO(#702): remove offer location backward compatibility
+      // location V2 -> location
+      locationV2: publicPart.location,
     })),
     E.chainW(safeParse(OfferPublicPartToEncrypt)),
     E.chainW(stringifyToJson)

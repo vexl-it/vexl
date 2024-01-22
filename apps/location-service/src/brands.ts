@@ -3,6 +3,7 @@
 import {z} from 'zod'
 
 export const LocationData = z.object({
+  placeId: z.string(),
   suggestFirstRow: z.string(),
   suggestSecondRow: z.string(),
   latitude: z.number(),
@@ -60,6 +61,7 @@ export const GeocodeQueryData = z.object({
 export type GeocodeQueryData = z.TypeOf<typeof GeocodeQueryData>
 
 export const GeocodeResponse = z.object({
+  placeId: z.string(),
   address: z.string(),
   latitude: z.number(),
   longitude: z.number(),

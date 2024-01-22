@@ -1,6 +1,6 @@
+import {type SvgString} from '@vexl-next/domain/src/utility/SvgString.brand'
 import {getTokens, Stack, Text, XStack, YStack} from 'tamagui'
 import SvgImage from './Image'
-import {type SvgString} from '@vexl-next/domain/src/utility/SvgString.brand'
 
 interface BaseSectionProps {
   children: React.ReactNode

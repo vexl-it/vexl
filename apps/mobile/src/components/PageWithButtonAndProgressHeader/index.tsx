@@ -1,16 +1,16 @@
-import {type ReactNode, useCallback} from 'react'
-import KeyboardAvoidingView from '../KeyboardAvoidingView'
+import {useNavigation} from '@react-navigation/native'
+import {useCallback, type ReactNode} from 'react'
 import {StatusBar as RNStatusBar, View} from 'react-native'
+import {Stack} from 'tamagui'
+import KeyboardAvoidingView from '../KeyboardAvoidingView'
+import Screen from '../Screen'
 import Header from './components/Header'
 import NextButton from './components/NextButton'
+import {useSetHeaderState, type HeaderState} from './state/headerStateAtom'
 import {
-  type NextButtonState,
   useSetNextButtonState,
+  type NextButtonState,
 } from './state/nextButtonStateAtom'
-import {type HeaderState, useSetHeaderState} from './state/headerStateAtom'
-import {useNavigation} from '@react-navigation/native'
-import {Stack} from 'tamagui'
-import Screen from '../Screen'
 
 function PageWithButtonAndProgressHeader({
   children,

@@ -1,9 +1,9 @@
+import {type ReactNode} from 'react'
 import {
-  KeyboardAvoidingView as RNKeyboardAvoidingView,
   Platform,
+  KeyboardAvoidingView as RNKeyboardAvoidingView,
   View,
 } from 'react-native'
-import {type ReactNode} from 'react'
 
 function KeyboardAvoidingView({children}: {children: ReactNode}): JSX.Element {
   return (

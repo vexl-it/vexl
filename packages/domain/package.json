@@ -6,7 +6,7 @@
   "scripts": {
     "clean": "rimraf .turbo node_modules",
     "lint": "eslint '**/*.{js,ts,tsx,jsx,cjs,mjs}'",
-    "format": "prettier --check \"**/*.{mjs,ts,md,json}\"",
+    "format": "prettier --check \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json}\"",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {

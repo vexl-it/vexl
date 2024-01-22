@@ -1,10 +1,10 @@
-import {useEffect, useState} from 'react'
-import {Stack, Text} from 'tamagui'
 import {
   documentDirectory,
   getInfoAsync,
   readDirectoryAsync,
 } from 'expo-file-system'
+import {useEffect, useState} from 'react'
+import {Stack, Text} from 'tamagui'
 import urlJoin from 'url-join'
 
 async function getFileOrDirectory(path: string): Promise<string> {

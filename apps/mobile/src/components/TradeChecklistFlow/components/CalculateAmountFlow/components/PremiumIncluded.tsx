@@ -1,7 +1,7 @@
 import {useAtomValue} from 'jotai'
-import {feeAmountAtom} from '../atoms'
 import {Stack, Text} from 'tamagui'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
+import {feeAmountAtom} from '../atoms'
 
 function PremiumIncluded(): JSX.Element | null {
   const {t} = useTranslation()

@@ -1,10 +1,10 @@
-import SvgImage from '../../Image'
 import {POSITIVE_STAR_RATING_THRESHOLD} from '@vexl-next/domain/src/general/feedback'
+import {useMolecule} from 'bunshi/dist/react'
+import {useAtomValue} from 'jotai'
+import SvgImage from '../../Image'
 import anonymousAvatarHappyNoBackgroundSvg from '../../images/anonymousAvatarHappyNoBackgroundSvg'
 import anonymousAvatarSadNoBackgroundSvg from '../../images/anonymousAvatarSadNoBackgroundSvg'
-import {useMolecule} from 'bunshi/dist/react'
 import {feedbackMolecule} from '../atoms'
-import {useAtomValue} from 'jotai'
 
 function FeedbackAvatar(): JSX.Element {
   const {starRatingAtom} = useMolecule(feedbackMolecule)

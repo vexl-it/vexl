@@ -1,5 +1,5 @@
-import {type MarketplaceTabScreenProps} from '../../../../../navigationTypes'
 import {useNavigation} from '@react-navigation/native'
+import {type MarketplaceTabScreenProps} from '../../../../../navigationTypes'
 import OffersListStateDisplayerContent from './OffersListStateDisplayerContent'
 
 type Props = MarketplaceTabScreenProps<'Buy' | 'Sell'>

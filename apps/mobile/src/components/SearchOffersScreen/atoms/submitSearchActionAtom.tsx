@@ -1,11 +1,11 @@
 import {atom} from 'jotai'
-import {searchTextAtom} from './searchTextAtom'
-import {addToPreviousSearchesActionAtom} from './previousSearchesAtom'
-import {safeNavigateBackOutsideReact} from '../../../utils/navigation'
 import {
   offersFilterInitialState,
   offersFilterTextFromStorageAtom,
 } from '../../../state/marketplace/filterAtoms'
+import {safeNavigateBackOutsideReact} from '../../../utils/navigation'
+import {addToPreviousSearchesActionAtom} from './previousSearchesAtom'
+import {searchTextAtom} from './searchTextAtom'
 
 const submitSearchActionAtom = atom(
   null,

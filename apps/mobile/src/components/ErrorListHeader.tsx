@@ -1,5 +1,5 @@
+import {useMemo, type ComponentProps} from 'react'
 import {Stack, Text} from 'tamagui'
-import {type ComponentProps, useMemo} from 'react'
 import useCommonErrorMessages from '../utils/useCommonErrorMessages'
 
 type Props<T> = {

@@ -1,15 +1,15 @@
-import React, {type ReactNode} from 'react'
-import {Stack} from 'tamagui'
-import {type HeaderState, useSetHeaderState} from './state/headerStateAtom'
 import {useNavigation} from '@react-navigation/native'
+import React, {type ReactNode} from 'react'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
-import Header from './components/Header'
-import FooterButton from './components/FooterButton'
-import {
-  type FooterButtonState,
-  useSetFooterButtonState,
-} from './state/footerButtonStateAtom'
+import {Stack} from 'tamagui'
 import KeyboardAvoidingView from '../KeyboardAvoidingView'
+import FooterButton from './components/FooterButton'
+import Header from './components/Header'
+import {
+  useSetFooterButtonState,
+  type FooterButtonState,
+} from './state/footerButtonStateAtom'
+import {useSetHeaderState, type HeaderState} from './state/headerStateAtom'
 
 interface Props {
   children: ReactNode

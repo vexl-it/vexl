@@ -1,16 +1,16 @@
 import {type FriendLevel} from '@vexl-next/domain/src/general/offers'
 import {type UriString} from '@vexl-next/domain/src/utility/UriString.brand'
+import {createScope, molecule} from 'bunshi/dist/react'
 import * as E from 'fp-ts/Either'
-import {pipe} from 'fp-ts/function'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
+import {pipe} from 'fp-ts/function'
 import {
   atom,
   type PrimitiveAtom,
   type SetStateAction,
   type WritableAtom,
 } from 'jotai'
-import {createScope, molecule} from 'bunshi/dist/react'
 import {focusAtom} from 'jotai-optics'
 import {selectAtom, splitAtom} from 'jotai/utils'
 import {Alert} from 'react-native'
@@ -31,15 +31,16 @@ import selectOtherSideDataAtom from '../../../state/chat/atoms/selectOtherSideDa
 import sendMessageActionAtom from '../../../state/chat/atoms/sendMessageActionAtom'
 import {sendRequestHandleUIActionAtom} from '../../../state/chat/atoms/sendRequestActionAtom'
 import {
+  dummyChatWithMessages,
   type ChatMessageWithState,
   type ChatWithMessages,
-  dummyChatWithMessages,
 } from '../../../state/chat/domain'
 import connectionStateAtom, {
   createFriendLevelInfoAtom,
 } from '../../../state/connections/atom/connectionStateAtom'
 import {createFeedbackForChatAtom} from '../../../state/feedback/atoms'
 import {offerForChatOriginAtom} from '../../../state/marketplace/atoms/offersState'
+import {invalidUsernameUIFeedbackAtom} from '../../../state/session'
 import getValueFromSetStateActionOfAtom from '../../../utils/atomUtils/getValueFromSetStateActionOfAtom'
 import {type SelectedImage} from '../../../utils/imagePickers'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
@@ -50,11 +51,10 @@ import showErrorAlert from '../../../utils/showErrorAlert'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 import {askAreYouSureActionAtom} from '../../AreYouSureDialog'
 import {loadingOverlayDisplayedAtom} from '../../LoadingOverlayProvider'
+import {revealIdentityDialogUIAtom} from '../../RevealIdentityDialog/atoms'
 import ChatFeedbackDialogContent from '../components/ChatFeedbackDialogContent'
 import {deleteChatStep1Svg} from '../images/deleteChatSvg'
 import buildMessagesListData from '../utils/buildMessagesListData'
-import {revealIdentityDialogUIAtom} from '../../RevealIdentityDialog/atoms'
-import {invalidUsernameUIFeedbackAtom} from '../../../state/session'
 
 type ChatUIMode = 'approval' | 'messages'
 
@@ -812,7 +812,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     tradeChecklistDateAndTimeAtom,
     tradeChecklistNetworkAtom,
     tradeChecklistAmountAtom,
-      offerCurrencyAtom,
+    offerCurrencyAtom,
     tradeChecklistIdentityRevealAtom,
     tradeChecklistContactRevealAtom,
     identityRevealTriggeredFromTradeChecklistAtom,

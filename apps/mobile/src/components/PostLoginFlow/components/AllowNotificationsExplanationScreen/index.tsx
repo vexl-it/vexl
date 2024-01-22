@@ -1,22 +1,22 @@
+import * as TE from 'fp-ts/TaskEither'
+import {pipe} from 'fp-ts/function'
+import {Stack, Text} from 'tamagui'
+import NotificationsSvg from '../../../../images/notificationsSvg'
+import {type PostLoginFlowScreenProps} from '../../../../navigationTypes'
+import useCreateInbox from '../../../../state/chat/hooks/useCreateInbox'
+import {useFinishPostLoginFlow} from '../../../../state/postLoginOnboarding'
+import {useSessionAssumeLoggedIn} from '../../../../state/session'
+import {useTranslation} from '../../../../utils/localization/I18nProvider'
+import {useRequestNotificationPermissions} from '../../../../utils/notifications'
+import reportError from '../../../../utils/reportError'
+import showErrorAlert from '../../../../utils/showErrorAlert'
+import SvgImage from '../../../Image'
+import {useShowLoadingOverlay} from '../../../LoadingOverlayProvider'
 import {
   HeaderProxy,
   NextButtonProxy,
 } from '../../../PageWithButtonAndProgressHeader'
 import WhiteContainer from '../../../WhiteContainer'
-import SvgImage from '../../../Image'
-import {useTranslation} from '../../../../utils/localization/I18nProvider'
-import NotificationsSvg from '../../../../images/notificationsSvg'
-import {pipe} from 'fp-ts/function'
-import * as TE from 'fp-ts/TaskEither'
-import {type PostLoginFlowScreenProps} from '../../../../navigationTypes'
-import {useFinishPostLoginFlow} from '../../../../state/postLoginOnboarding'
-import {Stack, Text} from 'tamagui'
-import useCreateInbox from '../../../../state/chat/hooks/useCreateInbox'
-import {useSessionAssumeLoggedIn} from '../../../../state/session'
-import reportError from '../../../../utils/reportError'
-import {useRequestNotificationPermissions} from '../../../../utils/notifications'
-import {useShowLoadingOverlay} from '../../../LoadingOverlayProvider'
-import showErrorAlert from '../../../../utils/showErrorAlert'
 
 type Props = PostLoginFlowScreenProps<'AllowNotificationsExplanation'>
 

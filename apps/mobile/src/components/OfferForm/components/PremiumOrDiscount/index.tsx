@@ -1,22 +1,22 @@
-import {getTokens, Stack, Text, XStack, YStack} from 'tamagui'
-import SvgImage from '../../../Image'
-import percentageSvg from './images/percentageSvg'
-import {useTranslation} from '../../../../utils/localization/I18nProvider'
-import Switch from '../../../Switch'
-import {
-  type SetStateAction,
-  useAtom,
-  useAtomValue,
-  useSetAtom,
-  type WritableAtom,
-} from 'jotai'
-import {useState} from 'react'
-import PremiumOrDiscountDetail from './components/PremiumOrDiscountDetail'
 import {
   type FeeState,
   type OfferType,
 } from '@vexl-next/domain/src/general/offers'
+import {
+  useAtom,
+  useAtomValue,
+  useSetAtom,
+  type SetStateAction,
+  type WritableAtom,
+} from 'jotai'
+import {useState} from 'react'
+import {Stack, Text, XStack, YStack, getTokens} from 'tamagui'
+import {useTranslation} from '../../../../utils/localization/I18nProvider'
+import SvgImage from '../../../Image'
 import PremiumOrDiscountContent from '../../../PremiumOrDiscountContent'
+import Switch from '../../../Switch'
+import PremiumOrDiscountDetail from './components/PremiumOrDiscountDetail'
+import percentageSvg from './images/percentageSvg'
 
 interface Props {
   feeAmountAtom: WritableAtom<number, [SetStateAction<number>], void>

@@ -1,10 +1,10 @@
 import {type TradeChecklistItemStatus} from '@vexl-next/domain/src/general/tradeChecklist'
 import {getTokens, Stack} from 'tamagui'
+import BlockIconSvg from '../../../../../images/blockIconSvg'
 import pendingSvg from '../../../../../images/pendingSvg'
+import warningSvg from '../../../../ChatDetailScreen/images/warningSvg'
 import Checkbox from '../../../../Checkbox'
 import Image from '../../../../Image'
-import warningSvg from '../../../../ChatDetailScreen/images/warningSvg'
-import BlockIconSvg from '../../../../../images/blockIconSvg'
 
 interface Props {
   itemStatus: TradeChecklistItemStatus

@@ -1,11 +1,11 @@
-import RNScreenshotPrevent, {addListener} from 'react-native-screenshot-prevent'
 import {useAtomValue, useSetAtom} from 'jotai'
 import {useEffect} from 'react'
+import {Platform} from 'react-native'
+import RNScreenshotPrevent, {addListener} from 'react-native-screenshot-prevent'
 import {
   screenshotsDisabledAtom,
   showYouDidNotAllowTakingScreenshotsActionAtom,
 } from '../state/showYouDidNotAllowScreenshotsActionAtom'
-import {Platform} from 'react-native'
 import {isUsingIos17AndAbove} from '../utils/isUsingIos17AndAbove'
 
 function PreventScreenshots(): null {

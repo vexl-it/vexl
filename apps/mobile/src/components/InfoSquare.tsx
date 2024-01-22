@@ -1,7 +1,7 @@
-import {getTokens, Stack, Text, XStack} from 'tamagui'
-import Image from './Image'
-import infoSvg from './ChatDetailScreen/images/infoSvg'
 import {TouchableWithoutFeedback} from 'react-native'
+import {getTokens, Stack, Text, XStack} from 'tamagui'
+import infoSvg from './ChatDetailScreen/images/infoSvg'
+import Image from './Image'
 
 function InfoSquare({
   children,

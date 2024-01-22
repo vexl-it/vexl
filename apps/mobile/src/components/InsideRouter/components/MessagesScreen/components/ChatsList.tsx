@@ -1,14 +1,14 @@
-import {type Atom, useAtomValue} from 'jotai'
-import ChatListItem, {type ChatListData} from './ChatListItem'
-import {selectAtom, splitAtom} from 'jotai/utils'
-import {type ChatWithMessages} from '../../../../../state/chat/domain'
-import messagingStateAtom from '../../../../../state/chat/atoms/messagingStateAtom'
-import atomKeyExtractor from '../../../../../utils/atomUtils/atomKeyExtractor'
 import {FlashList} from '@shopify/flash-list'
-import notEmpty from '../../../../../utils/notEmpty'
-import {useTranslation} from '../../../../../utils/localization/I18nProvider'
+import {useAtomValue, type Atom} from 'jotai'
+import {selectAtom, splitAtom} from 'jotai/utils'
 import {Text, YStack} from 'tamagui'
+import messagingStateAtom from '../../../../../state/chat/atoms/messagingStateAtom'
+import {type ChatWithMessages} from '../../../../../state/chat/domain'
+import atomKeyExtractor from '../../../../../utils/atomUtils/atomKeyExtractor'
+import {useTranslation} from '../../../../../utils/localization/I18nProvider'
+import notEmpty from '../../../../../utils/notEmpty'
 import usePixelsFromBottomWhereTabsEnd from '../../../utils'
+import ChatListItem, {type ChatListData} from './ChatListItem'
 
 const chatIdsAtom = selectAtom(messagingStateAtom, (inboxes): ChatListData[] =>
   inboxes

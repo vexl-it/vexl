@@ -1,14 +1,14 @@
+import {type ReactNode} from 'react'
+import {StyleSheet} from 'react-native'
 import Animated, {
+  SlideInDown,
+  SlideOutDown,
   type BaseAnimationBuilder,
   type EntryExitAnimationFunction,
   type Keyframe,
-  SlideInDown,
-  SlideOutDown,
 } from 'react-native-reanimated'
-import {type ReactNode} from 'react'
-import {Stack} from 'tamagui'
-import {StyleSheet} from 'react-native'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
+import {Stack} from 'tamagui'
 
 interface Props {
   topMargin: number

@@ -1,11 +1,11 @@
-import {getTokens, Stack, Text, XStack} from 'tamagui'
-import SvgImage from './Image'
-import infoSvg from './images/infoSvg'
-import {TouchableOpacity} from 'react-native'
-import closeSvg from './images/closeSvg'
-import Button from './Button'
+import {atom, useAtom, type PrimitiveAtom} from 'jotai'
 import {useMemo} from 'react'
-import {atom, type PrimitiveAtom, useAtom} from 'jotai'
+import {TouchableOpacity} from 'react-native'
+import {Stack, Text, XStack, getTokens} from 'tamagui'
+import Button from './Button'
+import SvgImage from './Image'
+import closeSvg from './images/closeSvg'
+import infoSvg from './images/infoSvg'
 
 interface Props {
   actionButtonText?: string

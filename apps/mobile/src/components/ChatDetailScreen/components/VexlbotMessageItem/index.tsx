@@ -1,15 +1,15 @@
-import {type VexlBotMessageData} from './domain'
-import {Stack, Text} from 'tamagui'
-import React from 'react'
-import TradeChecklistReminder from './components/TradeChecklistReminder'
 import {useAtomValue} from 'jotai'
+import React from 'react'
+import {Stack, Text} from 'tamagui'
 import {preferencesAtom} from '../../../../utils/preferences'
-import TradeChecklistDateAndTimeView from './components/TradeChecklistDateAndTimeView'
-import TradeChecklistNetworkView from './components/TradeChecklistNetworkView'
 import TradeChecklistAmountView from './components/TradeChecklistAmountView'
-import TradeChecklistIdentityRevealView from './components/TradeChecklistIdentityRevealView'
 import TradeChecklistContactRevealView from './components/TradeChecklistContactRevealView'
+import TradeChecklistDateAndTimeView from './components/TradeChecklistDateAndTimeView'
+import TradeChecklistIdentityRevealView from './components/TradeChecklistIdentityRevealView'
 import TradeChecklistMeetingLocationView from './components/TradeChecklistMeetingLocationView'
+import TradeChecklistNetworkView from './components/TradeChecklistNetworkView'
+import TradeChecklistReminder from './components/TradeChecklistReminder'
+import {type VexlBotMessageData} from './domain'
 
 export default function VexlbotMessageItem({
   data,

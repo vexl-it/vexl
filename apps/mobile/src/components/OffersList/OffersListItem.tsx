@@ -1,22 +1,22 @@
-import {useTranslation} from '../../utils/localization/I18nProvider'
 import {useNavigation} from '@react-navigation/native'
-import {Stack} from 'tamagui'
-import OfferWithBubbleTip from '../OfferWithBubbleTip'
+import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
+import {atom, useAtomValue, type Atom} from 'jotai'
 import {useCallback, useMemo} from 'react'
-import {atom, type Atom, useAtomValue} from 'jotai'
+import {Stack} from 'tamagui'
 import {useChatWithMessagesForOffer} from '../../state/chat/hooks/useChatForOffer'
 import {
   canChatBeRequested,
   getRequestState,
 } from '../../state/chat/utils/offerStates'
-import {offerRerequestLimitDaysAtom} from '../../utils/remoteConfig/atoms'
-import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
-import Button from '../Button'
-import UserFeedback from '../UserFeedback'
-import {preferencesAtom} from '../../utils/preferences'
-import {generateInitialFeedback} from '../UserFeedback/atoms'
 import {newOfferFeedbackDoneAtom} from '../../state/feedback/atoms'
 import {isOfferExpired} from '../../utils/isOfferExpired'
+import {useTranslation} from '../../utils/localization/I18nProvider'
+import {preferencesAtom} from '../../utils/preferences'
+import {offerRerequestLimitDaysAtom} from '../../utils/remoteConfig/atoms'
+import Button from '../Button'
+import OfferWithBubbleTip from '../OfferWithBubbleTip'
+import UserFeedback from '../UserFeedback'
+import {generateInitialFeedback} from '../UserFeedback/atoms'
 
 interface Props {
   readonly isFirst: boolean

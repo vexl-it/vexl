@@ -1,13 +1,13 @@
-import {getTokens, Stack, Text, XStack, YStack} from 'tamagui'
-import Image from '../../Image'
-import bubbleTypTopSvg from '../images/bubbleTypTopSvg'
-import OfferInfoPreview from '../../OfferInfoPreview'
-import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {useMolecule} from 'bunshi/dist/react'
-import {chatMolecule} from '../atoms'
 import {useAtomValue} from 'jotai'
+import {getTokens, Stack, Text, XStack, YStack} from 'tamagui'
+import {useTranslation} from '../../../utils/localization/I18nProvider'
 import CommonFriends from '../../CommonFriends'
+import Image from '../../Image'
 import flagSvg from '../../OfferDetailScreen/images/flagSvg'
+import OfferInfoPreview from '../../OfferInfoPreview'
+import {chatMolecule} from '../atoms'
+import bubbleTypTopSvg from '../images/bubbleTypTopSvg'
 
 function ChatRequestPreview({
   mode,

@@ -1,14 +1,14 @@
 import {useMolecule} from 'bunshi/dist/react'
-import {chatMolecule} from '../atoms'
 import {useAtomValue, useSetAtom} from 'jotai'
-import Button from '../../Button'
-import InfoSquare from '../../InfoSquare'
 import React from 'react'
-import {useTranslation} from '../../../utils/localization/I18nProvider'
-import identityIconSvg from '../../images/identityIconSvg'
 import {YStack} from 'tamagui'
 import getRerequestPossibleInDaysText from '../../../utils/getRerequestPossibleInDaysText'
+import {useTranslation} from '../../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../../utils/useSafeGoBack'
+import Button from '../../Button'
+import InfoSquare from '../../InfoSquare'
+import identityIconSvg from '../../images/identityIconSvg'
+import {chatMolecule} from '../atoms'
 
 function RerequestButtonOrMessage({
   onRerequestPressed,

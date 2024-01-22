@@ -1,11 +1,11 @@
-import VexlbotBubble from './VexlbotBubble'
-import Button from '../../../../Button'
-import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import {useNavigation} from '@react-navigation/native'
 import {useMolecule} from 'bunshi/dist/react'
-import {chatMolecule} from '../../../atoms'
 import {useAtomValue} from 'jotai'
 import * as network from '../../../../../state/tradeChecklist/utils/network'
+import {useTranslation} from '../../../../../utils/localization/I18nProvider'
+import Button from '../../../../Button'
+import {chatMolecule} from '../../../atoms'
+import VexlbotBubble from './VexlbotBubble'
 
 function TradeChecklistNetworkSetupSuggestionView(): JSX.Element | null {
   const {t} = useTranslation()

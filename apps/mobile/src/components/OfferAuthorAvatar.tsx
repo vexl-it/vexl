@@ -5,6 +5,7 @@ import {useMemo} from 'react'
 import {Stack, Text} from 'tamagui'
 import {useChatForOffer} from '../state/chat/hooks/useChatForOffer'
 import {selectImportedContactsWithHashes} from '../state/contacts'
+import {userDataRealOrAnonymizedAtom} from '../state/session'
 import {
   getCurrentLocale,
   useTranslation,
@@ -14,7 +15,6 @@ import {AnonymousAvatarFromSeed} from './AnonymousAvatar'
 import ContactTypeAndCommonNumber from './ContactTypeAndCommonNumber'
 import UserAvatar from './UserAvatar'
 import UserNameWithSellingBuying from './UserNameWithSellingBuying'
-import {userDataRealOrAnonymizedAtom} from '../state/session'
 
 function OfferAuthorAvatar({
   offer: {offerInfo, ownershipInfo},

@@ -1,10 +1,10 @@
-import {Stack, Text} from 'tamagui'
-import {TouchableOpacity, type TouchableOpacityProps} from 'react-native'
-import {useAtom} from 'jotai'
-import {useMemo} from 'react'
-import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {type ObjectionType} from '@vexl-next/domain/src/general/feedback'
 import {useMolecule} from 'bunshi/dist/react'
+import {useAtom} from 'jotai'
+import {useMemo} from 'react'
+import {TouchableOpacity, type TouchableOpacityProps} from 'react-native'
+import {Stack, Text} from 'tamagui'
+import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {feedbackMolecule} from '../atoms'
 
 interface Props extends TouchableOpacityProps {

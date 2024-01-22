@@ -1,16 +1,16 @@
-import {getTokens, Stack, Text, XStack} from 'tamagui'
-import SectionTitle from './SectionTitle'
-import btcSvg from '../images/btcSvg'
-import {useTranslation} from '../../../../../../../utils/localization/I18nProvider'
-import AnonymizationNotice from '../../../../AnonymizationNotice'
-import {TouchableOpacity} from 'react-native'
-import {type NavigationProp, useNavigation} from '@react-navigation/native'
-import {type TradeChecklistStackParamsList} from '../../../../../../../navigationTypes'
-import {useAtomValue} from 'jotai'
-import {btcAddressAtom, btcNetworkAtom} from '../../../atoms'
-import Image from '../../../../../../Image'
 import Clipboard from '@react-native-clipboard/clipboard'
+import {useNavigation, type NavigationProp} from '@react-navigation/native'
+import {useAtomValue} from 'jotai'
+import {TouchableOpacity} from 'react-native'
+import {Stack, Text, XStack, getTokens} from 'tamagui'
+import {type TradeChecklistStackParamsList} from '../../../../../../../navigationTypes'
+import {useTranslation} from '../../../../../../../utils/localization/I18nProvider'
 import copySvg from '../../../../../../ChatDetailScreen/images/copySvg'
+import Image from '../../../../../../Image'
+import AnonymizationNotice from '../../../../AnonymizationNotice'
+import {btcAddressAtom, btcNetworkAtom} from '../../../atoms'
+import btcSvg from '../images/btcSvg'
+import SectionTitle from './SectionTitle'
 
 function BtcAddress(): JSX.Element | null {
   const {t} = useTranslation()
@@ -32,13 +32,7 @@ function BtcAddress(): JSX.Element | null {
           navigation.navigate('BtcAddress')
         }}
       >
-        <XStack
-          ai="center"
-          jc="space-between"
-          p="$4"
-          bc="$grey"
-          br="$5"
-        >
+        <XStack ai="center" jc="space-between" p="$4" bc="$grey" br="$5">
           <Text
             fs={1}
             mr="$2"

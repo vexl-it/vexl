@@ -1,5 +1,5 @@
-import {Stack, styled} from 'tamagui'
 import {ScrollView} from 'react-native'
+import {Stack, styled} from 'tamagui'
 
 const WhiteContainer = styled(Stack, {
   f: 1,

@@ -1,15 +1,15 @@
+import {useNavigation} from '@react-navigation/native'
+import {useAtom} from 'jotai'
 import {ScrollView} from 'react-native'
-import MarketplaceSuggestion from './MarketplaceSuggestion'
-import {useTranslation} from '../../../../../utils/localization/I18nProvider'
+import {YStack} from 'tamagui'
 import {
   addMoreContactsSuggestionVisibleAtom,
   createOfferSuggestionVisibleAtom,
 } from '../../../../../state/marketplace/atoms/offerSuggestionVisible'
-import {useAtom} from 'jotai'
-import {useNavigation} from '@react-navigation/native'
-import {YStack} from 'tamagui'
+import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import usePixelsFromBottomWhereTabsEnd from '../../../utils'
 import ImportNewContactsSuggestion from './ImportNewContactsSuggestion'
+import MarketplaceSuggestion from './MarketplaceSuggestion'
 
 function EmptyMarketplaceSuggestions(): JSX.Element {
   const {t} = useTranslation()

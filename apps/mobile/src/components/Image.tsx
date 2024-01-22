@@ -1,13 +1,13 @@
+import {SvgString} from '@vexl-next/domain/src/utility/SvgString.brand'
+import {type SvgStringOrImageUri} from '@vexl-next/domain/src/utility/SvgStringOrImageUri.brand'
 import {
   Image as RNImage,
-  type ImageProps as RNImageProps,
   type ImageSourcePropType,
   type ImageStyle,
+  type ImageProps as RNImageProps,
   type StyleProp,
 } from 'react-native'
 import {SvgXml, type XmlProps} from 'react-native-svg'
-import {SvgString} from '@vexl-next/domain/src/utility/SvgString.brand'
-import {type SvgStringOrImageUri} from '@vexl-next/domain/src/utility/SvgStringOrImageUri.brand'
 
 export function isSvgString(something: unknown): something is SvgString {
   return SvgString.safeParse(something).success

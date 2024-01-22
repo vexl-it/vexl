@@ -1,20 +1,20 @@
-import AnonymizationCaption from '../../../AnonymizationCaption/AnonymizationCaption'
-import {WhiteContainerWithScroll} from '../../../WhiteContainer'
-import {useTranslation} from '../../../../utils/localization/I18nProvider'
-import PhoneNumberInput from './components/PhoneNumberInput'
-import * as O from 'fp-ts/Option'
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import * as E from 'fp-ts/Either'
-import {Alert} from 'react-native'
-import {useShowLoadingOverlay} from '../../../LoadingOverlayProvider'
-import {useInitPhoneVerification} from '../../api/initPhoneVerification'
+import * as O from 'fp-ts/Option'
 import {useState} from 'react'
+import {Alert} from 'react-native'
+import {Stack, Text} from 'tamagui'
 import {type LoginStackScreenProps} from '../../../../navigationTypes'
+import {useTranslation} from '../../../../utils/localization/I18nProvider'
+import AnonymizationCaption from '../../../AnonymizationCaption/AnonymizationCaption'
+import {useShowLoadingOverlay} from '../../../LoadingOverlayProvider'
 import {
   HeaderProxy,
   NextButtonProxy,
 } from '../../../PageWithButtonAndProgressHeader'
-import {Stack, Text} from 'tamagui'
+import {WhiteContainerWithScroll} from '../../../WhiteContainer'
+import {useInitPhoneVerification} from '../../api/initPhoneVerification'
+import PhoneNumberInput from './components/PhoneNumberInput'
 
 type Props = LoginStackScreenProps<'PhoneNumber'>
 

@@ -1,11 +1,11 @@
-import {type ContactNormalized} from '../brands/ContactNormalized.brand'
-import {FlatList} from 'react-native'
-import ContactItem from './ContactItem'
-import ListHeader from './ListHeader'
-import ListFooter from './ListFooter'
-import {Stack} from 'tamagui'
 import {type Atom} from 'jotai'
+import {FlatList} from 'react-native'
+import {Stack} from 'tamagui'
 import atomKeyExtractor from '../../../utils/atomUtils/atomKeyExtractor'
+import {type ContactNormalized} from '../brands/ContactNormalized.brand'
+import ContactItem from './ContactItem'
+import ListFooter from './ListFooter'
+import ListHeader from './ListHeader'
 
 interface Props {
   contacts: Array<Atom<ContactNormalized>>

@@ -1,9 +1,9 @@
-import SettingsScreenDialog from './SettingsScreenDialog'
 import {useAtom, useAtomValue} from 'jotai'
 import SvgQRCode from 'react-native-qrcode-svg'
-import {encodedUserDetailsUriAtom, qrCodeDialogVisibleAtom} from '../atoms'
-import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import {Stack, Text, YStack} from 'tamagui'
+import {useTranslation} from '../../../../../utils/localization/I18nProvider'
+import {encodedUserDetailsUriAtom, qrCodeDialogVisibleAtom} from '../atoms'
+import SettingsScreenDialog from './SettingsScreenDialog'
 
 function QrCode(): JSX.Element {
   const {t} = useTranslation()

@@ -1,11 +1,11 @@
-import {atom, type PrimitiveAtom, useAtom, useAtomValue} from 'jotai'
+import {type Sort} from '@vexl-next/domain/src/general/offers'
+import {atom, useAtom, useAtomValue, type PrimitiveAtom} from 'jotai'
+import {useMemo} from 'react'
 import {
   translationAtom,
   useTranslation,
 } from '../../../../utils/localization/I18nProvider'
-import {type Sort} from '@vexl-next/domain/src/general/offers'
-import {type DropdownItemProps, Dropdown} from '../../../Dropdown'
-import {useMemo} from 'react'
+import {Dropdown, type DropdownItemProps} from '../../../Dropdown'
 
 export interface Props {
   sortingAtom: PrimitiveAtom<Sort | undefined>

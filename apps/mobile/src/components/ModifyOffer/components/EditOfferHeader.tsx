@@ -1,25 +1,25 @@
-import ScreenTitle from '../../ScreenTitle'
-import {getTokens, Stack, Text, XStack} from 'tamagui'
-import IconButton from '../../IconButton'
-import trashSvg from '../images/trashSvg'
-import playSvg from '../images/playSvg'
-import closeSvg from '../../images/closeSvg'
-import React, {useCallback} from 'react'
+import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
+import {useMolecule} from 'bunshi/dist/react'
 import {pipe} from 'fp-ts/function'
+import {isSome, type Option} from 'fp-ts/Option'
 import * as TE from 'fp-ts/TaskEither'
 import {useAtomValue, useSetAtom} from 'jotai'
-import {askAreYouSureActionAtom} from '../../AreYouSureDialog'
-import {useShowLoadingOverlay} from '../../LoadingOverlayProvider'
-import {useTranslation} from '../../../utils/localization/I18nProvider'
-import {useMolecule} from 'bunshi/dist/react'
-import {offerFormMolecule} from '../atoms/offerFormStateAtoms'
-import useSafeGoBack from '../../../utils/useSafeGoBack'
-import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
+import React, {useCallback} from 'react'
+import {getTokens, Stack, Text, XStack} from 'tamagui'
 import pauseSvg from '../../../images/pauseSvg'
 import {isOfferExpired} from '../../../utils/isOfferExpired'
-import clockSvg from '../../images/clockSvg'
+import {useTranslation} from '../../../utils/localization/I18nProvider'
+import useSafeGoBack from '../../../utils/useSafeGoBack'
+import {askAreYouSureActionAtom} from '../../AreYouSureDialog'
+import IconButton from '../../IconButton'
 import Image from '../../Image'
-import {type Option, isSome} from 'fp-ts/Option'
+import clockSvg from '../../images/clockSvg'
+import closeSvg from '../../images/closeSvg'
+import {useShowLoadingOverlay} from '../../LoadingOverlayProvider'
+import ScreenTitle from '../../ScreenTitle'
+import {offerFormMolecule} from '../atoms/offerFormStateAtoms'
+import playSvg from '../images/playSvg'
+import trashSvg from '../images/trashSvg'
 
 interface Props {
   offer: Option<OneOfferInState>
@@ -95,11 +95,7 @@ function EditOfferHeader({offer}: Props): JSX.Element {
         {offer && (
           <XStack space="$2" ai="center" jc="flex-end">
             <Stack h={12} w={12} br={12} bc={offerActive ? '$green' : '$red'} />
-            <Text
-              col={offerActive ? '$green' : '$red'}
-              fos={18}
-              ff="$body500"
-            >
+            <Text col={offerActive ? '$green' : '$red'} fos={18} ff="$body500">
               {offerActive ? t('editOffer.active') : t('editOffer.inactive')}
             </Text>
           </XStack>

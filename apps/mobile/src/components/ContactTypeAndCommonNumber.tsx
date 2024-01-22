@@ -1,9 +1,9 @@
 import {type FriendLevel} from '@vexl-next/domain/src/general/offers'
-import {useTranslation} from '../utils/localization/I18nProvider'
-import {Stack, Text, XStack} from 'tamagui'
-import Image from './Image'
-import friendsSvg from './ChatDetailScreen/images/friendsSvg'
 import React from 'react'
+import {Stack, Text, XStack} from 'tamagui'
+import {useTranslation} from '../utils/localization/I18nProvider'
+import friendsSvg from './ChatDetailScreen/images/friendsSvg'
+import Image from './Image'
 
 function ContactTypeAndCommonNumber({
   center,

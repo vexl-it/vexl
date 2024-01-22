@@ -1,16 +1,15 @@
-import {Text, YStack} from 'tamagui'
-import Button from '../../../../Button'
-import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import {useNavigation} from '@react-navigation/native'
-import Image from '../../../../Image'
-import anonymousAvatarSvg from '../../../../images/anonymousAvatarSvg'
 import {useAtom, useAtomValue, useSetAtom} from 'jotai'
+import {useEffect} from 'react'
+import {ScrollView} from 'react-native'
+import {Text, YStack} from 'tamagui'
 import {reachNumberAtom} from '../../../../../state/connections/atom/connectionStateAtom'
 import {
   importedContactsCountAtom,
   initializeMinutesTillOffersDisplayedActionAtom,
   minutesTillOffersDisplayedAtom,
 } from '../../../../../state/contacts'
+import {triggerOffersRefreshAtom} from '../../../../../state/marketplace'
 import {
   addMoreContactsSuggestionVisibleAtom,
   createOfferSuggestionVisibleAtom,
@@ -20,12 +19,13 @@ import {
   isFilterActiveAtom,
   resetFilterInStorageActionAtom,
 } from '../../../../../state/marketplace/filterAtoms'
+import {useTranslation} from '../../../../../utils/localization/I18nProvider'
+import Button from '../../../../Button'
+import Image from '../../../../Image'
+import anonymousAvatarSvg from '../../../../images/anonymousAvatarSvg'
+import usePixelsFromBottomWhereTabsEnd from '../../../utils'
 import EmptyMarketplaceSuggestions from './EmptyMarketplaceSuggestions'
 import MarketplaceSuggestion from './MarketplaceSuggestion'
-import {useEffect} from 'react'
-import {triggerOffersRefreshAtom} from '../../../../../state/marketplace'
-import {ScrollView} from 'react-native'
-import usePixelsFromBottomWhereTabsEnd from '../../../utils'
 
 const REACH_NUMBER_THRESHOLD = 30
 
@@ -158,12 +158,7 @@ function EmptyListPlaceholder(): JSX.Element {
           navigation.navigate('SetContacts', {})
         }}
       >
-        <Text
-          textAlign="center"
-          col="$greyOnWhite"
-          fos={20}
-          ff="$body600"
-        >
+        <Text textAlign="center" col="$greyOnWhite" fos={20} ff="$body600">
           {importedContactsCount === 0
             ? t('offer.notImportedAnyContacts')
             : t('offer.socialNetworkTooSmall')}
@@ -181,23 +176,13 @@ function EmptyListPlaceholder(): JSX.Element {
         }}
       >
         {minutesTillOffersDisplayed > 0 ? (
-          <Text
-            textAlign="center"
-            col="$greyOnWhite"
-            fos={20}
-            ff="$body600"
-          >
+          <Text textAlign="center" col="$greyOnWhite" fos={20} ff="$body600">
             {t('offer.offersAreLoadingAndShouldBeReady', {
               minutes: minutesTillOffersDisplayed,
             })}
           </Text>
         ) : (
-          <Text
-            textAlign="center"
-            col="$greyOnWhite"
-            fos={20}
-            ff="$body600"
-          >
+          <Text textAlign="center" col="$greyOnWhite" fos={20} ff="$body600">
             {t('offer.marketplaceEmpty')}
           </Text>
         )}

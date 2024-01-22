@@ -1,12 +1,12 @@
 import {Stack, Text, XStack} from 'tamagui'
-import WhiteContainer from '../WhiteContainer'
-import Button from '../Button'
-import {useRequestNotificationPermissions} from '../../utils/notifications'
-import useSafeGoBack from '../../utils/useSafeGoBack'
-import SvgImage from '../Image'
 import NotificationsSvg from '../../images/notificationsSvg'
 import {useTranslation} from '../../utils/localization/I18nProvider'
+import {useRequestNotificationPermissions} from '../../utils/notifications'
+import useSafeGoBack from '../../utils/useSafeGoBack'
+import Button from '../Button'
+import SvgImage from '../Image'
 import Screen from '../Screen'
+import WhiteContainer from '../WhiteContainer'
 
 export function NotificationPermissionsScreen(): JSX.Element {
   const {t} = useTranslation()

@@ -1,18 +1,18 @@
+import {useAtomValue, useSetAtom, useStore} from 'jotai'
 import {
-  type Ref,
+  forwardRef,
   useImperativeHandle,
+  useMemo,
   useRef,
   useState,
-  useMemo,
-  forwardRef,
+  type Ref,
 } from 'react'
-import Input from '../../Input'
 import {type TextInput} from 'react-native'
-import {useLocationSearchMolecule} from '../molecule'
-import {useAtomValue, useSetAtom, useStore} from 'jotai'
 import {Spinner, debounce} from 'tamagui'
-import magnifyingGlass from '../../images/magnifyingGlass'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
+import Input from '../../Input'
+import magnifyingGlass from '../../images/magnifyingGlass'
+import {useLocationSearchMolecule} from '../molecule'
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface Props {}

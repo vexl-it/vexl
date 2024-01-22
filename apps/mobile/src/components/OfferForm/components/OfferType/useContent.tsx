@@ -1,7 +1,7 @@
-import {useTranslation} from '../../../../utils/localization/I18nProvider'
-import {type TabProps} from '../../../Tabs'
 import {type OfferType} from '@vexl-next/domain/src/general/offers'
 import {useMemo} from 'react'
+import {useTranslation} from '../../../../utils/localization/I18nProvider'
+import {type TabProps} from '../../../Tabs'
 
 export default function useContent(): Array<TabProps<OfferType>> {
   const {t} = useTranslation()

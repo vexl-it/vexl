@@ -1,5 +1,5 @@
-import Button from './Button'
 import {XStack} from 'tamagui'
+import Button from './Button'
 
 export interface TabProps<T> {
   title: string

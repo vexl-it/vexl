@@ -1,7 +1,7 @@
+import {useAtom, type SetStateAction, type WritableAtom} from 'jotai'
 import {Stack, Text} from 'tamagui'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import Input from '../../Input'
-import {type SetStateAction, useAtom, type WritableAtom} from 'jotai'
 
 const MAX_INPUT_LENGTH = 140
 

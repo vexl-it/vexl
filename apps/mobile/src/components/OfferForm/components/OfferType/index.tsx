@@ -1,7 +1,7 @@
-import useContent from './useContent'
-import Tabs from '../../../Tabs'
-import {type PrimitiveAtom, useAtom} from 'jotai'
 import {type OfferType} from '@vexl-next/domain/src/general/offers'
+import {useAtom, type PrimitiveAtom} from 'jotai'
+import Tabs from '../../../Tabs'
+import useContent from './useContent'
 
 interface Props {
   offerTypeAtom: PrimitiveAtom<OfferType | undefined>

@@ -10,8 +10,8 @@ import {useAppState} from '../../../../utils/useAppState'
 import ContainerWithTopBorderRadius, {
   CONTAINER_WITH_TOP_BORDER_RADIUS_TOP_PADDING,
 } from '../ContainerWithTopBorderRadius'
-import OffersListWithFilter from './components/OffersListStateDisplayer'
 import CustomTabBar from './components/CustomTabBar'
+import OffersListWithFilter from './components/OffersListStateDisplayer'
 
 const Tab = createMaterialTopTabNavigator<MarketplaceTabParamsList>()
 

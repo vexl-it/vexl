@@ -1,10 +1,10 @@
-import Info from '../../../../../../Info'
+import {useAtomValue, type PrimitiveAtom} from 'jotai'
+import calculatePercentageDifference from '../../../../../../../utils/calculatePercentageDifference'
 import {
   getCurrentLocale,
   useTranslation,
 } from '../../../../../../../utils/localization/I18nProvider'
-import {type PrimitiveAtom, useAtomValue} from 'jotai'
-import calculatePercentageDifference from '../../../../../../../utils/calculatePercentageDifference'
+import Info from '../../../../../../Info'
 import {btcPriceForOfferWithStateAtom} from '../../../../../atoms/btcPriceForOfferWithStateAtom'
 
 interface Props {

@@ -1,8 +1,8 @@
-import ContainerWithTopBorderRadius from '../ContainerWithTopBorderRadius'
-import ProfileSection from './components/ProfileSection'
-import ButtonsSection from './components/ButtonsSection'
-import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import {Stack, Text} from 'tamagui'
+import {useTranslation} from '../../../../utils/localization/I18nProvider'
+import ContainerWithTopBorderRadius from '../ContainerWithTopBorderRadius'
+import ButtonsSection from './components/ButtonsSection'
+import ProfileSection from './components/ProfileSection'
 import VersionTextWithSecretDoor from './components/VersionTextWithSecretDoor'
 
 function SettingsScreen(): JSX.Element {

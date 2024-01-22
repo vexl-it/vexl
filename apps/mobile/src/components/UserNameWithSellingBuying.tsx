@@ -1,7 +1,7 @@
-import {styled, Text} from 'tamagui'
-import React from 'react'
-import {useTranslation} from '../utils/localization/I18nProvider'
 import {type OfferType} from '@vexl-next/domain/src/general/offers'
+import React from 'react'
+import {styled, Text} from 'tamagui'
+import {useTranslation} from '../utils/localization/I18nProvider'
 
 const AfterNameBasicText = styled(Text, {
   fs: 16,

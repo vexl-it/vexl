@@ -1,15 +1,15 @@
-import {Stack, Text} from 'tamagui'
+import {useFocusEffect} from '@react-navigation/native'
 import {keys} from '@vexl-next/resources-utils/src/utils/keys'
+import {useAtomValue, useSetAtom} from 'jotai'
+import {useCallback} from 'react'
+import {Stack, Text} from 'tamagui'
 import {
   supportedTranslations,
   useTranslation,
 } from '../../../../../../utils/localization/I18nProvider'
-import LanguageSelectItem from './components/LanguageSelectItem'
-import {useAtomValue, useSetAtom} from 'jotai'
-import {selectedLanguageAtom} from '../../atoms'
-import {useCallback} from 'react'
-import {useFocusEffect} from '@react-navigation/native'
 import {currentAppLanguageAtom} from '../../../../../../utils/preferences'
+import {selectedLanguageAtom} from '../../atoms'
+import LanguageSelectItem from './components/LanguageSelectItem'
 
 const languages = keys(supportedTranslations)
 

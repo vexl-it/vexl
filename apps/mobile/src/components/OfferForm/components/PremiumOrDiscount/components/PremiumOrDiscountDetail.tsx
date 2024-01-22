@@ -1,22 +1,22 @@
-import ScreenTitle from '../../../../ScreenTitle'
-import {useTranslation} from '../../../../../utils/localization/I18nProvider'
-import Screen from '../../../../Screen'
-import IconButton from '../../../../IconButton'
-import closeSvg from '../../../../images/closeSvg'
-import React, {useState} from 'react'
+import {type OfferType} from '@vexl-next/domain/src/general/offers'
 import {
   useAtom,
   useAtomValue,
   type SetStateAction,
   type WritableAtom,
 } from 'jotai'
-import Button from '../../../../Button'
-import {Stack, Text, XStack} from 'tamagui'
+import React, {useState} from 'react'
 import {Modal} from 'react-native'
-import KeyboardAvoidingView from '../../../../KeyboardAvoidingView'
+import {Stack, Text, XStack} from 'tamagui'
+import {useTranslation} from '../../../../../utils/localization/I18nProvider'
+import Button from '../../../../Button'
+import IconButton from '../../../../IconButton'
 import Input from '../../../../Input'
+import KeyboardAvoidingView from '../../../../KeyboardAvoidingView'
 import {SLIDER_THRESHOLD} from '../../../../PremiumOrDiscountSlider'
-import {type OfferType} from '@vexl-next/domain/src/general/offers'
+import Screen from '../../../../Screen'
+import ScreenTitle from '../../../../ScreenTitle'
+import closeSvg from '../../../../images/closeSvg'
 
 interface Props {
   feeAmountAtom: WritableAtom<number, [SetStateAction<number>], void>

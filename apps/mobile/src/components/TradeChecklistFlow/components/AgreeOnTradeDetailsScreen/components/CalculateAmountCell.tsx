@@ -1,11 +1,11 @@
-import {useCallback} from 'react'
+import {useNavigation, type NavigationProp} from '@react-navigation/native'
 import {type AmountData} from '@vexl-next/domain/src/general/tradeChecklist'
-import {tradeChecklistAmountDataAtom} from '../../../../../state/tradeChecklist/atoms/fromChatAtoms'
 import {useAtomValue} from 'jotai'
-import {type NavigationProp, useNavigation} from '@react-navigation/native'
+import {useCallback} from 'react'
 import {type TradeChecklistStackParamsList} from '../../../../../navigationTypes'
-import ChecklistCell from './ChecklistCell'
+import {tradeChecklistAmountDataAtom} from '../../../../../state/tradeChecklist/atoms/fromChatAtoms'
 import {btcAmountUpdateToBeSentAtom} from '../../../atoms/updatesToBeSentAtom'
+import ChecklistCell from './ChecklistCell'
 
 function CalculateAmountCell(): JSX.Element {
   const navigation: NavigationProp<TradeChecklistStackParamsList> =

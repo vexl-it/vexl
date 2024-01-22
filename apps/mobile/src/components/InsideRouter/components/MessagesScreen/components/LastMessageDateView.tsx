@@ -1,8 +1,8 @@
-import {type Atom, useAtomValue} from 'jotai'
-import {type ChatMessageWithState} from '../../../../../state/chat/domain'
-import React, {useMemo} from 'react'
+import {useAtomValue, type Atom} from 'jotai'
 import {selectAtom} from 'jotai/utils'
 import {DateTime} from 'luxon'
+import React, {useMemo} from 'react'
+import {type ChatMessageWithState} from '../../../../../state/chat/domain'
 import FromNowComponent from '../../../../FromNowComponent'
 
 function LastMessageDateView({

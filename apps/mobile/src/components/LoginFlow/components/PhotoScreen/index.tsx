@@ -1,22 +1,22 @@
-import WhiteContainer from '../../../WhiteContainer'
-import AnonymizationCaption from '../../../AnonymizationCaption/AnonymizationCaption'
-import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import {RealLifeInfo} from '@vexl-next/domain/src/general/UserNameAndAvatar.brand'
 import {
   fromImageUri,
   fromSvgString,
 } from '@vexl-next/domain/src/utility/SvgStringOrImageUri.brand'
+import {type UriString} from '@vexl-next/domain/src/utility/UriString.brand'
+import {atom, useAtomValue} from 'jotai'
+import {Stack, Text, useMedia} from 'tamagui'
 import {type LoginStackScreenProps} from '../../../../navigationTypes'
+import {useTranslation} from '../../../../utils/localization/I18nProvider'
+import randomNumber from '../../../../utils/randomNumber'
+import AnonymizationCaption from '../../../AnonymizationCaption/AnonymizationCaption'
+import {getAvatarSvg} from '../../../AnonymousAvatar'
 import {
   HeaderProxy,
   NextButtonProxy,
 } from '../../../PageWithButtonAndProgressHeader'
-import {Stack, Text, useMedia} from 'tamagui'
 import SelectProfilePicture from '../../../SelectProfilePicture'
-import {atom, useAtomValue} from 'jotai'
-import {getAvatarSvg} from '../../../AnonymousAvatar'
-import randomNumber from '../../../../utils/randomNumber'
-import {type UriString} from '@vexl-next/domain/src/utility/UriString.brand'
+import WhiteContainer from '../../../WhiteContainer'
 
 const selectedImageUriAtom = atom<UriString | undefined>(undefined)
 

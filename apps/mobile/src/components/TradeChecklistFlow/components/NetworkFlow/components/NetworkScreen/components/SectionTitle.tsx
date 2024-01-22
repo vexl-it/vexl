@@ -1,5 +1,5 @@
 import {type SvgString} from '@vexl-next/domain/src/utility/SvgString.brand'
-import {getTokens, type StackProps, Text, XStack} from 'tamagui'
+import {Text, XStack, getTokens, type StackProps} from 'tamagui'
 import Image from '../../../../../../Image'
 
 interface Props extends StackProps {

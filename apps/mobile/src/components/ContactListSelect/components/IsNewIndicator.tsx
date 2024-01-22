@@ -1,9 +1,9 @@
-import {type Atom, useAtomValue} from 'jotai'
-import {type ContactNormalized} from '../../../state/contacts/domain'
 import {useMolecule} from 'bunshi/dist/react'
-import {contactSelectMolecule} from '../atom'
+import {useAtomValue, type Atom} from 'jotai'
 import {useMemo} from 'react'
 import {Stack} from 'tamagui'
+import {type ContactNormalized} from '../../../state/contacts/domain'
+import {contactSelectMolecule} from '../atom'
 
 function IsNewIndicator({
   contactAtom,

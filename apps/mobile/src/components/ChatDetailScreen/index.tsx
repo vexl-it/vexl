@@ -1,10 +1,11 @@
-import {useAtomValue, useStore} from 'jotai'
 import {ScopeProvider} from 'bunshi/dist/react'
+import {useAtomValue, useStore} from 'jotai'
 import React, {useCallback, useMemo} from 'react'
 import {Stack, Text} from 'tamagui'
 import backButtonSvg from '../../images/backButtonSvg'
 import {type RootStackScreenProps} from '../../navigationTypes'
 import {focusChatWithMessagesByKeysAtom} from '../../state/chat/atoms/focusChatWithMessagesAtom'
+import {dummyChatWithMessages} from '../../state/chat/domain'
 import hasNonNullableValueAtom from '../../utils/atomUtils/hasNonNullableValueAtom'
 import valueOrDefaultAtom from '../../utils/atomUtils/valueOrDefaultAtom'
 import {useTranslation} from '../../utils/localization/I18nProvider'
@@ -16,7 +17,6 @@ import KeyboardAvoidingView from '../KeyboardAvoidingView'
 import Screen from '../Screen'
 import {ChatScope} from './atoms'
 import MessagesListOrApprovalPreview from './components/MessagesListOrApprovalPreview'
-import {dummyChatWithMessages} from '../../state/chat/domain'
 
 type Props = RootStackScreenProps<'ChatDetail'>
 

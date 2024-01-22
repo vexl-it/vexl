@@ -1,4 +1,4 @@
-import {type PrimitiveAtom, useAtom} from 'jotai'
+import {useAtom, type PrimitiveAtom} from 'jotai'
 import {Text, XStack, YStack} from 'tamagui'
 import Switch from '../../Switch'
 

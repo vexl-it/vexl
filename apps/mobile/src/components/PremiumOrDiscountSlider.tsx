@@ -1,9 +1,9 @@
-import {getTokens, Stack, Text, XStack} from 'tamagui'
-import {useTranslation} from '../utils/localization/I18nProvider'
-import {type Atom, useAtomValue} from 'jotai'
 import {type OfferType} from '@vexl-next/domain/src/general/offers'
-import Slider from './Slider'
+import {useAtomValue, type Atom} from 'jotai'
+import {Stack, Text, XStack, getTokens} from 'tamagui'
 import {iosHapticFeedback} from '../utils/iosHapticFeedback'
+import {useTranslation} from '../utils/localization/I18nProvider'
+import Slider from './Slider'
 
 export const SLIDER_THRESHOLD = 10
 

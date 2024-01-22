@@ -1,10 +1,10 @@
-import {type PrimitiveAtom, useAtomValue, type WritableAtom} from 'jotai'
 import {type CurrencyCode} from '@vexl-next/domain/src/general/offers'
-import {XStack, Text, Stack} from 'tamagui'
-import {currencies} from '../../../../utils/localization/currency'
+import {useAtomValue, type PrimitiveAtom, type WritableAtom} from 'jotai'
 import {useState} from 'react'
-import CurrencySelect from '../../../CurrencySelect'
+import {Stack, Text, XStack} from 'tamagui'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
+import {currencies} from '../../../../utils/localization/currency'
+import CurrencySelect from '../../../CurrencySelect'
 import DropdownSelectButton from '../../../DropdownSelectButton'
 
 interface Props {

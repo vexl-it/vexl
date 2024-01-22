@@ -1,24 +1,24 @@
-import {useMemo} from 'react'
 import {isNone} from 'fp-ts/Option'
-import ErrorListHeader from '../../../../ErrorListHeader'
-import {getTokens, Stack} from 'tamagui'
+import {useAtomValue, useSetAtom} from 'jotai'
+import {splitAtom} from 'jotai/utils'
+import {useMemo} from 'react'
 import {ActivityIndicator} from 'react-native'
-import ContainerWithTopBorderRadius from '../../ContainerWithTopBorderRadius'
-import OffersListButtons from './OffersListButtons'
-import EmptyListPlaceholder from './EmptyListPlaceholder'
-import OffersList from '../../../../OffersList'
+import {Stack, getTokens} from 'tamagui'
 import {
   triggerOffersRefreshAtom,
   useAreOffersLoading,
   useOffersLoadingError,
 } from '../../../../../state/marketplace'
-import {useAtomValue, useSetAtom} from 'jotai'
 import {createFilteredOffersAtom} from '../../../../../state/marketplace/atoms/filteredOffers'
-import {splitAtom} from 'jotai/utils'
-import TotalOffersCount from './TotalOffersCount'
 import {offersFilterFromStorageAtom} from '../../../../../state/marketplace/filterAtoms'
-import ImportNewContactsSuggestion from './ImportNewContactsSuggestion'
+import ErrorListHeader from '../../../../ErrorListHeader'
+import OffersList from '../../../../OffersList'
 import ReencryptOffersSuggestion from '../../../../ReencryptOffersSuggestion'
+import ContainerWithTopBorderRadius from '../../ContainerWithTopBorderRadius'
+import EmptyListPlaceholder from './EmptyListPlaceholder'
+import ImportNewContactsSuggestion from './ImportNewContactsSuggestion'
+import OffersListButtons from './OffersListButtons'
+import TotalOffersCount from './TotalOffersCount'
 
 interface Props {
   type: 'BUY' | 'SELL'

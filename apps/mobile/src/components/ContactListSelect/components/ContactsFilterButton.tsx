@@ -1,5 +1,5 @@
+import {useAtom, type PrimitiveAtom} from 'jotai'
 import Button from '../../Button'
-import {type PrimitiveAtom, useAtom} from 'jotai'
 
 interface Props {
   isSelectedAtom: PrimitiveAtom<boolean>

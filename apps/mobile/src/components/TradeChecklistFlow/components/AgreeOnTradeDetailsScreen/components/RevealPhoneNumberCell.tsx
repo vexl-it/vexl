@@ -1,6 +1,4 @@
-import ChecklistCell from './ChecklistCell'
 import {useAtomValue, useSetAtom} from 'jotai'
-import {revealContactWithUiFeedbackAtom} from '../../../atoms/revealContactAtom'
 import {useMemo} from 'react'
 import {
   contactRevealTriggeredFromChatAtom,
@@ -8,6 +6,8 @@ import {
   tradeChecklistContactDataAtom,
 } from '../../../../../state/tradeChecklist/atoms/fromChatAtoms'
 import createChecklistItemStatusAtom from '../../../atoms/createChecklistItemStatusAtom'
+import {revealContactWithUiFeedbackAtom} from '../../../atoms/revealContactAtom'
+import ChecklistCell from './ChecklistCell'
 
 function RevealPhoneNumberCell(): JSX.Element {
   const identityRevealed = useAtomValue(identityRevealedAtom)

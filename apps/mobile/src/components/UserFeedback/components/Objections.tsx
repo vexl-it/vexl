@@ -3,11 +3,11 @@ import {
   objectionTypePositiveOptions,
   POSITIVE_STAR_RATING_THRESHOLD,
 } from '@vexl-next/domain/src/general/feedback'
-import ObjectionCell from './ObjectionCell'
-import {XStack} from 'tamagui'
 import {useMolecule} from 'bunshi/dist/react'
-import {feedbackMolecule} from '../atoms'
 import {useAtomValue} from 'jotai'
+import {XStack} from 'tamagui'
+import {feedbackMolecule} from '../atoms'
+import ObjectionCell from './ObjectionCell'
 
 function Objections(): JSX.Element {
   const {starRatingAtom} = useMolecule(feedbackMolecule)

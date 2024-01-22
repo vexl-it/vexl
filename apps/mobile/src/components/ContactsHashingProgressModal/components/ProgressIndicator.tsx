@@ -1,8 +1,8 @@
 import {useAtomValue} from 'jotai'
 import {Stack, Text, XStack} from 'tamagui'
-import {hashingProgressPercentageAtom} from '../atoms'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import ProgressBar from '../../ProgressBar'
+import {hashingProgressPercentageAtom} from '../atoms'
 
 function ProgressIndicator(): JSX.Element {
   const {t} = useTranslation()

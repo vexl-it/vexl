@@ -8,7 +8,7 @@
     "build:esbuild": "node esbuild.config.js",
     "clean": "rimraf ./dist",
     "lint": "eslint src --ext .js,.jsx,.ts,.tsx",
-    "format": "prettier --check \"**/*.{mjs,ts,md,json}\"",
+    "format": "prettier --check \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json}\"",
     "typecheck": "tsc --noemit",
     "dev": "yarn build:esbuild && yarn start",
     "start": "node dist"

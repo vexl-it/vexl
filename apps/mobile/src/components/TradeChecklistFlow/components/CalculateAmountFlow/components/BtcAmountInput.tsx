@@ -1,15 +1,15 @@
+import {type BtcOrSat} from '@vexl-next/domain/src/general/tradeChecklist'
+import {useAtomValue, useSetAtom, type PrimitiveAtom} from 'jotai'
 import {useRef, useState} from 'react'
 import {StyleSheet, type TextInput} from 'react-native'
-import {useAtomValue, useSetAtom, type PrimitiveAtom} from 'jotai'
+import {Stack, getTokens} from 'tamagui'
+import {Dropdown, type DropdownItemProps} from '../../../../Dropdown'
+import {replaceNonDecimalCharsInInput} from '../../../utils'
 import {
   btcOrSatAtom,
   calculateFiatValueOnBtcAmountChangeActionAtom,
   toggleBtcOrSatValueActionAtom,
 } from '../atoms'
-import {replaceNonDecimalCharsInInput} from '../../../utils'
-import {getTokens, Stack} from 'tamagui'
-import {type DropdownItemProps, Dropdown} from '../../../../Dropdown'
-import {type BtcOrSat} from '@vexl-next/domain/src/general/tradeChecklist'
 import AmountInput from './AmountInput'
 import CalculatedWithLiveRate from './CalculatedWithLiveRate'
 

@@ -1,6 +1,6 @@
+import {TouchableOpacity} from 'react-native'
 import {getTokens, Stack, Text, XStack} from 'tamagui'
 import Image from './Image'
-import {TouchableOpacity} from 'react-native'
 import checkmarkSvg from './images/checkmarkSvg'
 
 export interface SelectableCellContentProps<T> {

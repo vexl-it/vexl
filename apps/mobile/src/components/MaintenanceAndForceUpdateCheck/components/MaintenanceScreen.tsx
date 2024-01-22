@@ -1,10 +1,10 @@
+import {Image} from 'react-native'
 import {Stack, Text, YStack} from 'tamagui'
+import bigNameSvg from '../../../images/bigNameSvg'
+import {useTranslation} from '../../../utils/localization/I18nProvider'
+import SVGImage from '../../Image'
 import Screen from '../../Screen'
 import WhiteContainer from '../../WhiteContainer'
-import {useTranslation} from '../../../utils/localization/I18nProvider'
-import {Image} from 'react-native'
-import SVGImage from '../../Image'
-import bigNameSvg from '../../../images/bigNameSvg'
 
 function MaintenanceScreen(): JSX.Element {
   const {t} = useTranslation()

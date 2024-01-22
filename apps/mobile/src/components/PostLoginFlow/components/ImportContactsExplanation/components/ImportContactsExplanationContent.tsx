@@ -1,22 +1,22 @@
-import WhiteContainer from '../../../../WhiteContainer'
-import AnonymizationCaption from '../../../../AnonymizationCaption/AnonymizationCaption'
-import {useTranslation} from '../../../../../utils/localization/I18nProvider'
-import {
-  HeaderProxy,
-  NextButtonProxy,
-} from '../../../../PageWithButtonAndProgressHeader'
-import {Stack, Text} from 'tamagui'
-import {Image} from 'react-native'
+import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue, useSetAtom} from 'jotai'
+import {useCallback, useEffect} from 'react'
+import {Image} from 'react-native'
+import {Stack, Text} from 'tamagui'
 import {
   contactsLoadingAtom,
   triggerContactsReloadAtom,
 } from '../../../../../state/contacts/atom/contactsFromDeviceAtom'
-import {useMolecule} from 'bunshi/dist/react'
+import {useTranslation} from '../../../../../utils/localization/I18nProvider'
+import AnonymizationCaption from '../../../../AnonymizationCaption/AnonymizationCaption'
 import {contactSelectMolecule} from '../../../../ContactListSelect/atom'
 import {useOnFocusAndAppState} from '../../../../ContactListSelect/utils'
-import {useCallback, useEffect} from 'react'
 import {useShowLoadingOverlay} from '../../../../LoadingOverlayProvider'
+import {
+  HeaderProxy,
+  NextButtonProxy,
+} from '../../../../PageWithButtonAndProgressHeader'
+import WhiteContainer from '../../../../WhiteContainer'
 
 interface Props {
   onContactsSubmitted: () => void

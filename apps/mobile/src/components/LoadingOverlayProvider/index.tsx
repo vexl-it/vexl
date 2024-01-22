@@ -1,7 +1,7 @@
-import {type ReactNode, useMemo} from 'react'
 import {atom, useAtomValue, useSetAtom} from 'jotai'
+import {useMemo, type ReactNode} from 'react'
 import {ActivityIndicator} from 'react-native'
-import {getTokens, Stack, styled} from 'tamagui'
+import {Stack, getTokens, styled} from 'tamagui'
 
 const RootContainer = styled(Stack, {
   pos: 'absolute',

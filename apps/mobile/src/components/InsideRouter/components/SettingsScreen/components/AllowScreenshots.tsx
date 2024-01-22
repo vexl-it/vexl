@@ -1,9 +1,9 @@
+import {useAtom} from 'jotai'
 import {XStack} from 'tamagui'
+import {screenshotsDisabledAtom} from '../../../../../state/showYouDidNotAllowScreenshotsActionAtom'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import Switch from '../../../../Switch'
-import {useAtom} from 'jotai'
 import ItemText from './ButtonSectionItemText'
-import {screenshotsDisabledAtom} from '../../../../../state/showYouDidNotAllowScreenshotsActionAtom'
 
 function AllowScreenshots(): JSX.Element {
   const {t} = useTranslation()

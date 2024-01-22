@@ -1,15 +1,15 @@
+import {useFocusEffect} from '@react-navigation/native'
+import React from 'react'
 import {BackHandler, StyleSheet} from 'react-native'
-import {Stack, YStack} from 'tamagui'
-import KeyboardAvoidingView from './KeyboardAvoidingView'
 import Animated, {
   FadeIn,
   FadeOut,
   SlideInDown,
   SlideOutDown,
 } from 'react-native-reanimated'
-import React from 'react'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
-import {useFocusEffect} from '@react-navigation/native'
+import {Stack, YStack} from 'tamagui'
+import KeyboardAvoidingView from './KeyboardAvoidingView'
 
 const styles = StyleSheet.create({
   backdrop: {

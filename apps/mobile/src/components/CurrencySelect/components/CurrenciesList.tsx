@@ -1,13 +1,13 @@
-import React, {useCallback} from 'react'
-import {Stack} from 'tamagui'
 import {
   type CurrencyCode,
   type CurrencyInfo,
 } from '@vexl-next/domain/src/general/currency.brand'
-import CurrencySelectListItem from './CurrencySelectListItem'
 import {type Atom, type WritableAtom} from 'jotai'
+import React, {useCallback} from 'react'
 import {FlatList} from 'react-native'
+import {Stack} from 'tamagui'
 import atomKeyExtractor from '../../../utils/atomUtils/atomKeyExtractor'
+import CurrencySelectListItem from './CurrencySelectListItem'
 
 interface Props {
   currencies: Array<Atom<CurrencyInfo>>

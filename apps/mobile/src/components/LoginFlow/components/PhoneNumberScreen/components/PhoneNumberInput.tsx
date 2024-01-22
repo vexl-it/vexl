@@ -1,12 +1,12 @@
-import PhoneInput from 'react-native-phone-number-input'
-import {useCallback, useMemo, useRef} from 'react'
-import type * as O from 'fp-ts/Option'
 import {
   toE164PhoneNumber,
   type E164PhoneNumber,
 } from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
-import {XStack} from 'tamagui'
+import type * as O from 'fp-ts/Option'
+import {useCallback, useMemo, useRef} from 'react'
 import {type StyleProp, type ViewStyle} from 'react-native'
+import PhoneInput from 'react-native-phone-number-input'
+import {XStack} from 'tamagui'
 
 interface Props {
   onChange: (e164: O.Option<E164PhoneNumber>) => void

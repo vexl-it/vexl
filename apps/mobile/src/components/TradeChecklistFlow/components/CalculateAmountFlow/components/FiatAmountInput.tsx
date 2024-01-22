@@ -1,14 +1,14 @@
+import {useAtomValue, useSetAtom, type PrimitiveAtom} from 'jotai'
 import {useRef, useState} from 'react'
 import {type TextInput} from 'react-native'
-import {type PrimitiveAtom, useAtomValue, useSetAtom} from 'jotai'
-import {calculateBtcValueOnFiatAmountChangeActionAtom} from '../atoms'
-import {replaceNonDecimalCharsInInput} from '../../../utils'
 import {Stack, Text} from 'tamagui'
-import AmountInput from './AmountInput'
-import {currencies} from '../../../../../utils/localization/currency'
-import CalculatedWithLiveRate from './CalculatedWithLiveRate'
-import {btcPriceForOfferWithStateAtom} from '../../../atoms/btcPriceForOfferWithStateAtom'
 import {originOfferCurrencyAtom} from '../../../../../state/tradeChecklist/atoms/fromChatAtoms'
+import {currencies} from '../../../../../utils/localization/currency'
+import {btcPriceForOfferWithStateAtom} from '../../../atoms/btcPriceForOfferWithStateAtom'
+import {replaceNonDecimalCharsInInput} from '../../../utils'
+import {calculateBtcValueOnFiatAmountChangeActionAtom} from '../atoms'
+import AmountInput from './AmountInput'
+import CalculatedWithLiveRate from './CalculatedWithLiveRate'
 
 interface Props {
   automaticCalculationDisabled?: boolean

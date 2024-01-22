@@ -1,6 +1,6 @@
-import {preferencesAtom} from '../../../utils/preferences'
 import {useAtom} from 'jotai'
 import {Text, XStack, YStack} from 'tamagui'
+import {preferencesAtom} from '../../../utils/preferences'
 import Switch from '../../Switch'
 
 const preferencesToEdit = [

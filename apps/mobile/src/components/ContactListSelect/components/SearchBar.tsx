@@ -1,11 +1,11 @@
-import magnifyingGlass from '../../images/magnifyingGlass'
+import {useMolecule} from 'bunshi/dist/react'
+import {useAtom, useAtomValue} from 'jotai'
+import {Stack, XStack} from 'tamagui'
+import {useTranslation} from '../../../utils/localization/I18nProvider'
 import Button from '../../Button'
 import TextInput from '../../Input'
-import {useTranslation} from '../../../utils/localization/I18nProvider'
-import {Stack, XStack} from 'tamagui'
-import {useMolecule} from 'bunshi/dist/react'
+import magnifyingGlass from '../../images/magnifyingGlass'
 import {contactSelectMolecule} from '../atom'
-import {useAtom, useAtomValue} from 'jotai'
 
 function SearchBar(): JSX.Element {
   const {t} = useTranslation()

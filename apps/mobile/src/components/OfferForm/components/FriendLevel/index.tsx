@@ -1,18 +1,18 @@
+import {type IntendedConnectionLevel} from '@vexl-next/domain/src/general/offers'
+import * as E from 'fp-ts/Either'
+import {pipe} from 'fp-ts/function'
+import {atom, useAtom, useAtomValue, type Atom} from 'jotai'
 import {XStack} from 'tamagui'
-import FriendLevelCell from './components/FriendLevelCell'
 import {
   translationAtom,
   useTranslation,
 } from '../../../../utils/localization/I18nProvider'
-import {type Atom, atom, useAtom, useAtomValue} from 'jotai'
-import {type IntendedConnectionLevel} from '@vexl-next/domain/src/general/offers'
-import numberOfFriendsAtom from '../../../ModifyOffer/atoms/numberOfFriendsAtom'
-import {pipe} from 'fp-ts/function'
-import * as E from 'fp-ts/Either'
+import showErrorAlert from '../../../../utils/showErrorAlert'
 import {toCommonErrorMessage} from '../../../../utils/useCommonErrorMessages'
+import numberOfFriendsAtom from '../../../ModifyOffer/atoms/numberOfFriendsAtom'
 import firstDegreeFriendsSvg from '../../../images/firstDegreeFriendsSvg'
 import secondDegreeFriendsSvg from '../../../images/secondDegreeFriendsSvg'
-import showErrorAlert from '../../../../utils/showErrorAlert'
+import FriendLevelCell from './components/FriendLevelCell'
 
 const friendLevelSubtitleAtom = atom((get) => {
   const {t} = get(translationAtom)

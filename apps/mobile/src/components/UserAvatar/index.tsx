@@ -1,7 +1,7 @@
-import {Image, type ImageProps, Stack} from 'tamagui'
-import SvgImage from '../Image'
 import {type SvgStringOrImageUri} from '@vexl-next/domain/src/utility/SvgStringOrImageUri.brand'
+import {Image, Stack, type ImageProps} from 'tamagui'
 import resolveLocalUri from '../../utils/resolveLocalUri'
+import SvgImage from '../Image'
 
 interface Props extends Omit<ImageProps, 'src'> {
   avatar: SvgStringOrImageUri

@@ -22,8 +22,8 @@ function ProgressIndicator(): JSX.Element {
           {data.belowProgressLeft ?? ''}
         </Text>
         <Text fos={14} ff="$body500" col="$greyOnWhite">
-            {data.belowProgressRight ?? ''}
-          </Text>
+          {data.belowProgressRight ?? ''}
+        </Text>
       </XStack>
     </YStack>
   )

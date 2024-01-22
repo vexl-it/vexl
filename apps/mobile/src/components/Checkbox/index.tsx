@@ -1,12 +1,12 @@
 import {
-  type StyleProp,
   TouchableWithoutFeedback,
+  type StyleProp,
   type ViewStyle,
 } from 'react-native'
+import {Stack, styled} from 'tamagui'
+import Image from '../Image'
 import checkedSvg from './image/checkedSvg'
 import uncheckedSvg from './image/uncheckedSvg'
-import Image from '../Image'
-import {Stack, styled} from 'tamagui'
 
 interface Props {
   style?: StyleProp<ViewStyle>

@@ -1,23 +1,23 @@
-import {
-  getCurrentLocale,
-  useTranslation,
-} from '../../../../../utils/localization/I18nProvider'
+import {useNavigation, type NavigationProp} from '@react-navigation/native'
+import {type UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {useAtomValue} from 'jotai'
-import {
-  dateAndTimePickUpdateToBeSentAtom,
-  tradeChecklistWithUpdatesMergedAtom,
-} from '../../../atoms/updatesToBeSentAtom'
-import {type NavigationProp, useNavigation} from '@react-navigation/native'
-import {type TradeChecklistStackParamsList} from '../../../../../navigationTypes'
+import {DateTime} from 'luxon'
 import {useCallback, useMemo} from 'react'
+import {type TradeChecklistStackParamsList} from '../../../../../navigationTypes'
 import {
   otherSideDataAtom,
   tradeChecklistDateAndTimeDataAtom,
 } from '../../../../../state/tradeChecklist/atoms/fromChatAtoms'
 import * as DateAndTime from '../../../../../state/tradeChecklist/utils/dateAndTime'
+import {
+  getCurrentLocale,
+  useTranslation,
+} from '../../../../../utils/localization/I18nProvider'
+import {
+  dateAndTimePickUpdateToBeSentAtom,
+  tradeChecklistWithUpdatesMergedAtom,
+} from '../../../atoms/updatesToBeSentAtom'
 import ChecklistCell from './ChecklistCell'
-import {DateTime} from 'luxon'
-import {type UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 
 function formatDateTime(millis: UnixMilliseconds): string {
   return DateTime.fromMillis(Number(millis))

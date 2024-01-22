@@ -1,5 +1,5 @@
+import {fireEvent, render, screen} from 'testUtils'
 import Button from './Button'
-import {render, screen, fireEvent} from 'testUtils'
 
 test('onPress call function', () => {
   const text = 'text'

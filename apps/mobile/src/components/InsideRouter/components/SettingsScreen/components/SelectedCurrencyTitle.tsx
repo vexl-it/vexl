@@ -1,6 +1,6 @@
 import {useAtomValue} from 'jotai'
-import {selectedCurrencyAtom} from '../../../../../state/selectedCurrency'
 import {styled, Text} from 'tamagui'
+import {selectedCurrencyAtom} from '../../../../../state/selectedCurrency'
 
 export const ItemText = styled(Text, {
   fos: 18,

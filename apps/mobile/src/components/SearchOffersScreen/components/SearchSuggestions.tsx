@@ -1,10 +1,10 @@
-import {Stack} from 'tamagui'
+import {useAtomValue, type Atom} from 'jotai'
+import React from 'react'
 import {FlatList} from 'react-native'
-import {type Atom, useAtomValue} from 'jotai'
+import {Stack} from 'tamagui'
+import atomKeyExtractor from '../../../utils/atomUtils/atomKeyExtractor'
 import {previousSearchToDisplayAtomsAtom} from '../atoms/previousSearchesAtom'
 import SearchSuggestionItem from './SearchSuggestionItem'
-import React from 'react'
-import atomKeyExtractor from '../../../utils/atomUtils/atomKeyExtractor'
 
 function renderItem({item}: {item: Atom<string>}): JSX.Element {
   return <SearchSuggestionItem atom={item} />

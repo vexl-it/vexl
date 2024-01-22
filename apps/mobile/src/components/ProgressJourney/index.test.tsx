@@ -1,7 +1,7 @@
 import React from 'react'
-import ProgressJourney, {type Props} from './index'
-import {fireEvent, render, screen} from 'testUtils'
 import {View} from 'react-native'
+import {fireEvent, render, screen} from 'testUtils'
+import ProgressJourney, {type Props} from './index'
 
 const defaultProps: Omit<Props, 'children'> = {
   onSkip: () => undefined,

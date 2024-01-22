@@ -1,10 +1,10 @@
+import {useAtomValue, type Atom} from 'jotai'
+import {Image, Stack, Text, XStack} from 'tamagui'
 import {type ContactNormalized} from '../../../state/contacts/domain'
 import SvgImage from '../../Image'
 import picturePlaceholderSvg from '../../images/picturePlaceholderSvg'
 import IsNewIndicator from './IsNewIndicator'
 import IsSelectedCheckbox from './IsSelectedCheckbox'
-import {type Atom, useAtomValue} from 'jotai'
-import {Image, Stack, Text, XStack} from 'tamagui'
 
 interface Props {
   contactAtom: Atom<ContactNormalized>

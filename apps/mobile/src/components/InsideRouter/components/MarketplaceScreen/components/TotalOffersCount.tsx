@@ -1,11 +1,11 @@
 import {useAtomValue} from 'jotai'
 import {Stack, Text} from 'tamagui'
-import {isFilterActiveAtom} from '../../../../../state/marketplace/filterAtoms'
-import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import {
   buyOffersToSeeInMarketplaceCountAtom,
   sellOffersToSeeInMarketplaceCountAtom,
 } from '../../../../../state/marketplace/atoms/offersToSeeInMarketplace'
+import {isFilterActiveAtom} from '../../../../../state/marketplace/filterAtoms'
+import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 
 interface Props {
   filteredOffersCount: number

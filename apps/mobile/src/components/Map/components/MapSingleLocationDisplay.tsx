@@ -1,10 +1,10 @@
+import {useMemo} from 'react'
+import MapView, {Marker, PROVIDER_GOOGLE, type Region} from 'react-native-maps'
+import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {Stack} from 'tamagui'
 import {type MapValue} from '../brands'
-import MapView, {Marker, PROVIDER_GOOGLE, type Region} from 'react-native-maps'
-import mapTheme from '../utils/mapStyle'
-import {useSafeAreaInsets} from 'react-native-safe-area-context'
-import {useMemo} from 'react'
 import calculateDeltaFromViewport from '../utils/calculateDeltaFromViewport'
+import mapTheme from '../utils/mapStyle'
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const markerImage = require('../img/pin.png')

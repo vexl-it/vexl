@@ -1,12 +1,12 @@
-import {getTokens, Stack, Text, XStack} from 'tamagui'
 import {
   type CurrencyCode,
   type CurrencyInfo,
 } from '@vexl-next/domain/src/general/currency.brand'
+import {useAtomValue, useSetAtom, type Atom, type WritableAtom} from 'jotai'
 import {TouchableOpacity} from 'react-native'
+import {Stack, Text, XStack, getTokens} from 'tamagui'
 import Image from '../../Image'
 import checkmarkSvg from '../../images/checkmarkSvg'
-import {type Atom, type WritableAtom, useAtomValue, useSetAtom} from 'jotai'
 
 interface Props {
   currencyAtom: Atom<CurrencyInfo>

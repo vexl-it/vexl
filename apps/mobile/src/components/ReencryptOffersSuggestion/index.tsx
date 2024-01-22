@@ -1,9 +1,9 @@
 import {useAtomValue, useSetAtom} from 'jotai'
-import MarketplaceSuggestion from '../InsideRouter/components/MarketplaceScreen/components/MarketplaceSuggestion'
-import {areThereMissingOffersOnServerAtom} from '../../state/marketplace/atoms/offersMissingOnServer'
 import {type YStackProps} from 'tamagui'
-import {reencryptOffersWithModalActionAtom} from './atoms'
+import {areThereMissingOffersOnServerAtom} from '../../state/marketplace/atoms/offersMissingOnServer'
 import {useTranslation} from '../../utils/localization/I18nProvider'
+import MarketplaceSuggestion from '../InsideRouter/components/MarketplaceScreen/components/MarketplaceSuggestion'
+import {reencryptOffersWithModalActionAtom} from './atoms'
 
 export default function ReencryptOffersSuggestion(
   props: YStackProps

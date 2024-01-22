@@ -1,9 +1,9 @@
-import {Modal} from 'react-native'
-import {Stack, Text} from 'tamagui'
-import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {useAtomValue} from 'jotai'
-import ProgressIndicator from './components/ProgressIndicator'
+import {Modal} from 'react-native'
+import {useSafeAreaInsets} from 'react-native-safe-area-context'
+import {Stack, Text} from 'tamagui'
 import {uploadingProgressDataForRootElement} from './atoms'
+import ProgressIndicator from './components/ProgressIndicator'
 
 function UploadingOfferProgressModal(): JSX.Element {
   const {bottom} = useSafeAreaInsets()

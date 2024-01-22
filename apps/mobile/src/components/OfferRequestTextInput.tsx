@@ -1,8 +1,8 @@
-import {getTokens} from 'tamagui'
-import TextInput from './Input'
 import React from 'react'
 import {StyleSheet} from 'react-native'
+import {getTokens} from 'tamagui'
 import {useTranslation} from '../utils/localization/I18nProvider'
+import TextInput from './Input'
 
 const style = StyleSheet.create({
   textInput: {

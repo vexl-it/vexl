@@ -1,12 +1,12 @@
 import {type LocationSuggestion} from '@vexl-next/rest-api/src/services/location/contracts'
 import {useAtomValue, type Atom} from 'jotai'
+import {useCallback} from 'react'
 import {FlatList} from 'react-native'
 import {Stack, Text} from 'tamagui'
 import atomKeyExtractor from '../../../utils/atomUtils/atomKeyExtractor'
+import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {useLocationSearchMolecule} from '../molecule'
 import LocationCell from './LocationListItem'
-import {useCallback} from 'react'
-import {useTranslation} from '../../../utils/localization/I18nProvider'
 
 interface Props {
   onPress: (data: LocationSuggestion) => void

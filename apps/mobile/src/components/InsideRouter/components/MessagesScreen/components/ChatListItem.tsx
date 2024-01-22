@@ -1,17 +1,17 @@
-import {Stack, Text, XStack, YStack} from 'tamagui'
-import {type ChatMessageWithState} from '../../../../../state/chat/domain'
-import {TouchableOpacity} from 'react-native'
-import React, {useMemo} from 'react'
 import {useNavigation} from '@react-navigation/native'
-import {type Atom, useAtomValue} from 'jotai'
-import {selectAtom} from 'jotai/utils'
-import MessagePreview from './LastMessagePreview'
-import LastMessageDateView from './LastMessageDateView'
 import {type Chat} from '@vexl-next/domain/src/general/messaging'
+import {useAtomValue, type Atom} from 'jotai'
+import {selectAtom} from 'jotai/utils'
+import React, {useMemo} from 'react'
+import {TouchableOpacity} from 'react-native'
+import {Stack, Text, XStack, YStack} from 'tamagui'
 import selectOtherSideDataAtom from '../../../../../state/chat/atoms/selectOtherSideDataAtom'
+import {type ChatMessageWithState} from '../../../../../state/chat/domain'
+import {useOfferForChatOrigin} from '../../../../../state/marketplace'
 import UserAvatar from '../../../../UserAvatar'
 import UserNameWithSellingBuying from '../../../../UserNameWithSellingBuying'
-import {useOfferForChatOrigin} from '../../../../../state/marketplace'
+import LastMessageDateView from './LastMessageDateView'
+import MessagePreview from './LastMessagePreview'
 
 export interface ChatListData {
   chat: Chat
@@ -87,12 +87,7 @@ function ChatListItem({dataAtom}: {dataAtom: Atom<ChatListData>}): JSX.Element {
                 }
               />
               {isUnread && (
-                <Stack
-                  w="$4"
-                  h="$4"
-                  borderRadius={8}
-                  backgroundColor="$main"
-                />
+                <Stack w="$4" h="$4" borderRadius={8} backgroundColor="$main" />
               )}
             </XStack>
             <XStack jc="space-between">

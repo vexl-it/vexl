@@ -1,12 +1,12 @@
-import Image from '../../Image'
-import {useTranslation} from '../../../utils/localization/I18nProvider'
-import addSvg from '../image/addSvg'
-import {type ContactNormalized} from '../brands/ContactNormalized.brand'
-import {Stack, Text} from 'tamagui'
-import {TouchableOpacity} from 'react-native'
 import {useMolecule} from 'bunshi/dist/react'
-import {contactSelectMolecule} from '../atom'
 import {useSetAtom} from 'jotai'
+import {TouchableOpacity} from 'react-native'
+import {Stack, Text} from 'tamagui'
+import {useTranslation} from '../../../utils/localization/I18nProvider'
+import Image from '../../Image'
+import {contactSelectMolecule} from '../atom'
+import {type ContactNormalized} from '../brands/ContactNormalized.brand'
+import addSvg from '../image/addSvg'
 
 function AddContactRow({contact}: {contact: ContactNormalized}): JSX.Element {
   const {t} = useTranslation()

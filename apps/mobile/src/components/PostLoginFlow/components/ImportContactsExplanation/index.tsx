@@ -1,5 +1,5 @@
-import {type PostLoginFlowScreenProps} from '../../../../navigationTypes'
 import {ScopeProvider} from 'bunshi/dist/react'
+import {type PostLoginFlowScreenProps} from '../../../../navigationTypes'
 import {ContactsSelectScope} from '../../../ContactListSelect/atom'
 import ImportContactsExplanationContent from './components/ImportContactsExplanationContent'
 

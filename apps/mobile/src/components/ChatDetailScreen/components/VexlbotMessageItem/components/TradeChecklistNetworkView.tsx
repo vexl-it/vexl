@@ -1,13 +1,13 @@
-import {useTranslation} from '../../../../../utils/localization/I18nProvider'
-import {useMolecule} from 'bunshi/dist/react'
-import {chatMolecule} from '../../../atoms'
-import {useAtomValue} from 'jotai'
-import * as network from '../../../../../state/tradeChecklist/utils/network'
-import VexlbotBubble from './VexlbotBubble'
-import Button from '../../../../Button'
 import Clipboard from '@react-native-clipboard/clipboard'
-import copySvg from '../../../images/copySvg'
+import {useMolecule} from 'bunshi/dist/react'
+import {useAtomValue} from 'jotai'
 import {getTokens} from 'tamagui'
+import * as network from '../../../../../state/tradeChecklist/utils/network'
+import {useTranslation} from '../../../../../utils/localization/I18nProvider'
+import Button from '../../../../Button'
+import {chatMolecule} from '../../../atoms'
+import copySvg from '../../../images/copySvg'
+import VexlbotBubble from './VexlbotBubble'
 
 function TradeChecklistNetworkView(): JSX.Element | null {
   const {t} = useTranslation()

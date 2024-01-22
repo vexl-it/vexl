@@ -1,9 +1,9 @@
 import {type UriString} from '@vexl-next/domain/src/utility/UriString.brand'
+import * as TE from 'fp-ts/TaskEither'
+import {pipe} from 'fp-ts/function'
 import React, {useEffect, useState} from 'react'
 import {Image as TmImage} from 'tamagui'
 import {getImageSize} from '../utils/fpUtils'
-import * as TE from 'fp-ts/TaskEither'
-import {pipe} from 'fp-ts/function'
 import getImageDimensionsWithinLimits from '../utils/getImageDimensionsWithLimits'
 
 interface Props {

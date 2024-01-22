@@ -1,3 +1,4 @@
+import {type AvailableDateTimeOption} from '@vexl-next/domain/src/general/tradeChecklist'
 import {useSetAtom} from 'jotai'
 import {DateTime} from 'luxon'
 import {TouchableOpacity} from 'react-native'
@@ -8,7 +9,6 @@ import closeSvg from '../../../../../../images/closeSvg'
 import {removeTimestampFromAvailableAtom} from '../../../atoms'
 import TimeFromDropdown from './TimeFromDropdown'
 import TimeToDropdown from './TimeToDropdown'
-import {type AvailableDateTimeOption} from '@vexl-next/domain/src/general/tradeChecklist'
 
 interface Props extends StackProps {
   availableDateTime: AvailableDateTimeOption
@@ -34,13 +34,7 @@ function TimeOptionCell({availableDateTime, ...props}: Props): JSX.Element {
           {locale: getCurrentLocale()}
         )}
       </Text>
-      <XStack
-        width="100%"
-        ai="center"
-        jc="space-between"
-        px="$2"
-        mt="$2"
-      >
+      <XStack width="100%" ai="center" jc="space-between" px="$2" mt="$2">
         <XStack f={1} ai="center" jc="space-around">
           <Stack width={150}>
             <TimeFromDropdown availableDateTimeFrom={availableDateTime.from} />

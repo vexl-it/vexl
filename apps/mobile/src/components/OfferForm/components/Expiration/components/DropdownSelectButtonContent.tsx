@@ -1,15 +1,14 @@
-import {getTokens, Text, XStack} from 'tamagui'
+import {type JSDateString} from '@vexl-next/domain/src/utility/JSDateString.brand'
+import {useAtom, type PrimitiveAtom} from 'jotai'
+import {DateTime} from 'luxon'
+import {TouchableOpacity} from 'react-native'
+import {Text, XStack, getTokens} from 'tamagui'
 import {
   getCurrentLocale,
   useTranslation,
 } from '../../../../../utils/localization/I18nProvider'
-import {type PrimitiveAtom} from 'jotai'
-import {useAtom} from 'jotai'
-import {TouchableOpacity} from 'react-native'
 import Image from '../../../../Image'
 import clearInputSvg from '../../../../images/clearInputSvg'
-import {DateTime} from 'luxon'
-import {type JSDateString} from '@vexl-next/domain/src/utility/JSDateString.brand'
 
 interface Props {
   expirationDateAtom: PrimitiveAtom<JSDateString | undefined>

@@ -1,14 +1,14 @@
-import OnlineOrInPersonTrade from './components/OnlineOrInPersonTrade'
+import {useFocusEffect} from '@react-navigation/native'
 import {useAtomValue, useSetAtom} from 'jotai'
+import React, {useCallback} from 'react'
+import * as fromChatAtoms from '../../../../state/tradeChecklist/atoms/fromChatAtoms'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../../../utils/useSafeGoBack'
-import * as fromChatAtoms from '../../../../state/tradeChecklist/atoms/fromChatAtoms'
-import React, {useCallback} from 'react'
-import {useFocusEffect} from '@react-navigation/native'
-import headerStateAtom from '../../../PageWithNavigationHeader/state/headerStateAtom'
 import {FooterButtonProxy} from '../../../PageWithNavigationHeader'
-import Content from '../Content'
+import headerStateAtom from '../../../PageWithNavigationHeader/state/headerStateAtom'
 import {submitTradeChecklistUpdatesActionAtom} from '../../atoms/updatesToBeSentAtom'
+import Content from '../Content'
+import OnlineOrInPersonTrade from './components/OnlineOrInPersonTrade'
 
 function AgreeOnTradeDetailsScreen(): JSX.Element {
   const {t} = useTranslation()

@@ -1,22 +1,22 @@
+import {useFocusEffect} from '@react-navigation/native'
+import {atom, useAtom, useAtomValue, useSetAtom} from 'jotai'
+import {useCallback, useEffect} from 'react'
+import {Stack, Text, XStack, getTokens} from 'tamagui'
+import {useTranslation} from '../../../../../utils/localization/I18nProvider'
+import useSafeGoBack from '../../../../../utils/useSafeGoBack'
+import Image from '../../../../Image'
+import TextInput from '../../../../Input'
 import {
   FooterButtonProxy,
   HeaderProxy,
 } from '../../../../PageWithNavigationHeader'
-import useSafeGoBack from '../../../../../utils/useSafeGoBack'
-import {useTranslation} from '../../../../../utils/localization/I18nProvider'
-import TextInput from '../../../../Input'
-import {atom, useAtom, useAtomValue, useSetAtom} from 'jotai'
-import {getTokens, Stack, Text, XStack} from 'tamagui'
+import infoSvg from '../../../../images/infoSvg'
 import Content from '../../Content'
 import {
   btcAddressAtom,
   displayParsingErrorAtom,
   saveBtcAddressActionAtom,
 } from '../atoms'
-import {useFocusEffect} from '@react-navigation/native'
-import {useCallback, useEffect} from 'react'
-import Image from '../../../../Image'
-import infoSvg from '../../../../images/infoSvg'
 
 const btcAddressTempAtom = atom<string>('')
 

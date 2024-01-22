@@ -1,6 +1,6 @@
-import {getTokens, Stack, Text, XStack, YStack} from 'tamagui'
 import React from 'react'
 import {TouchableOpacity} from 'react-native'
+import {getTokens, Stack, Text, XStack, YStack} from 'tamagui'
 import Image from '../../Image'
 import copySvg from '../images/copySvg'
 

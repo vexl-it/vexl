@@ -1,7 +1,7 @@
 /* eslint-disable */
 
-import React, {type FC, type ReactElement} from 'react'
 import {render, type RenderOptions} from '@testing-library/react-native'
+import React, {type FC, type ReactElement} from 'react'
 import ThemeProvider from './utils/ThemeProvider'
 // import I18nProvider from './utils/localization/I18nProvider'
 

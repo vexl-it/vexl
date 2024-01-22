@@ -1,10 +1,10 @@
-import React, {useMemo} from 'react'
-import {atom, useAtom, useAtomValue} from 'jotai'
-import {selectedMyOffersSortingOptionAtom} from '../../../state/marketplace/atoms/myOffers'
 import {type Sort} from '@vexl-next/domain/src/general/offers'
+import {atom, useAtom, useAtomValue} from 'jotai'
+import React, {useMemo} from 'react'
+import {Stack, getTokens} from 'tamagui'
+import {selectedMyOffersSortingOptionAtom} from '../../../state/marketplace/atoms/myOffers'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
-import {type DropdownItemProps, Dropdown} from '../../Dropdown'
-import {getTokens, Stack} from 'tamagui'
+import {Dropdown, type DropdownItemProps} from '../../Dropdown'
 
 const myOffersSortingOptionsAtom = atom<Array<DropdownItemProps<Sort>>>(
   (get) => {

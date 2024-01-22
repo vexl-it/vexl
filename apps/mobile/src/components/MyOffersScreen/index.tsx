@@ -1,23 +1,23 @@
-import Screen from '../Screen'
-import ScreenTitle from '../ScreenTitle'
-import {type RootStackScreenProps} from '../../navigationTypes'
-import {useTranslation} from '../../utils/localization/I18nProvider'
-import Button from '../Button'
-import plusSvg from './images/plusSvg'
-import {getTokens, Stack, Text, XStack} from 'tamagui'
 import {useAtomValue} from 'jotai'
-import OffersList from '../OffersList'
-import IconButton from '../IconButton'
-import closeSvg from '../images/closeSvg'
+import {selectAtom} from 'jotai/utils'
+import React from 'react'
+import {getTokens, Stack, Text, XStack} from 'tamagui'
+import {type RootStackScreenProps} from '../../navigationTypes'
 import {
   myActiveOffersAtom,
   myOffersSortedAtomsAtom,
 } from '../../state/marketplace/atoms/myOffers'
-import ReencryptOffersSuggestion from '../ReencryptOffersSuggestion'
-import {selectAtom} from 'jotai/utils'
-import React from 'react'
-import MyOffersSortingDropdown from './components/MyOffersSortingDropdown'
+import {useTranslation} from '../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../utils/useSafeGoBack'
+import Button from '../Button'
+import IconButton from '../IconButton'
+import closeSvg from '../images/closeSvg'
+import OffersList from '../OffersList'
+import ReencryptOffersSuggestion from '../ReencryptOffersSuggestion'
+import Screen from '../Screen'
+import ScreenTitle from '../ScreenTitle'
+import MyOffersSortingDropdown from './components/MyOffersSortingDropdown'
+import plusSvg from './images/plusSvg'
 
 type Props = RootStackScreenProps<'MyOffers'>
 
@@ -44,13 +44,7 @@ function MyOffersScreen({navigation}: Props): JSX.Element {
       <ScreenTitle text={t('common.myOffers')} withBottomBorder>
         <IconButton variant="dark" icon={closeSvg} onPress={safeGoBack} />
       </ScreenTitle>
-      <XStack
-        pos="relative"
-        py="$4"
-        px="$2"
-        ai="center"
-        jc="space-between"
-      >
+      <XStack pos="relative" py="$4" px="$2" ai="center" jc="space-between">
         <Stack f={1}>
           <Text
             adjustsFontSizeToFit

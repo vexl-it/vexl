@@ -1,22 +1,22 @@
-import Content from '../../../Content'
-import Header from '../../../Header'
-import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
+import {useNavigation, type NavigationProp} from '@react-navigation/native'
 import {useAtomValue, useSetAtom} from 'jotai'
-import {availableDateTimesAtom, submitSuggestionsActionAtom} from '../../atoms'
-import TimeOptionCell from './components/TimeOptionCell'
-import {getTokens, Stack, Text, XStack} from 'tamagui'
+import React from 'react'
 import {TouchableOpacity} from 'react-native'
+import {Stack, Text, XStack, getTokens} from 'tamagui'
+import {type TradeChecklistStackParamsList} from '../../../../../../navigationTypes'
+import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
+import useSafeGoBack from '../../../../../../utils/useSafeGoBack'
 import Image from '../../../../../Image'
 import plusSvg from '../../../../../MyOffersScreen/images/plusSvg'
-import useSafeGoBack from '../../../../../../utils/useSafeGoBack'
-import React from 'react'
-import {MINIMUM_AVAILABLE_DAYS_THRESHOLD} from '../../../../utils'
-import {type NavigationProp, useNavigation} from '@react-navigation/native'
-import {type TradeChecklistStackParamsList} from '../../../../../../navigationTypes'
 import {
   FooterButtonProxy,
   HeaderProxy,
 } from '../../../../../PageWithNavigationHeader'
+import {MINIMUM_AVAILABLE_DAYS_THRESHOLD} from '../../../../utils'
+import Content from '../../../Content'
+import Header from '../../../Header'
+import {availableDateTimesAtom, submitSuggestionsActionAtom} from '../../atoms'
+import TimeOptionCell from './components/TimeOptionCell'
 
 const BOTTOM_MARGIN_FOR_OPENED_PICKER = 120
 

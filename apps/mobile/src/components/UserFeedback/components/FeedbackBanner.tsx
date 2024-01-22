@@ -1,14 +1,14 @@
+import {useMolecule} from 'bunshi/dist/react'
+import {useAtomValue} from 'jotai'
 import {getTokens, Stack, Text, XStack} from 'tamagui'
-import BannerBackButton from './BannerBackButton'
-import SvgImage from '../../Image'
-import FeedbackBannerContent from './FeedbackBannerContent'
-import eyeSvg from '../../images/eyeSvg'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
+import SvgImage from '../../Image'
+import eyeSvg from '../../images/eyeSvg'
+import {feedbackMolecule} from '../atoms'
+import BannerBackButton from './BannerBackButton'
 import BannerCloseButton from './BannerCloseButton'
 import FeedbackAvatar from './FeedbackAvatar'
-import {useMolecule} from 'bunshi/dist/react'
-import {feedbackMolecule} from '../atoms'
-import {useAtomValue} from 'jotai'
+import FeedbackBannerContent from './FeedbackBannerContent'
 
 interface Props {
   autoCloseWhenFinished?: boolean
@@ -25,14 +25,7 @@ function FeedbackBanner({
   if (chatFeedbackFinished) return null
 
   return (
-    <Stack
-      pos="relative"
-      p="$4"
-      br="$4"
-      bc="$blackAccent1"
-      mb="$8"
-      space="$4"
-    >
+    <Stack pos="relative" p="$4" br="$4" bc="$blackAccent1" mb="$8" space="$4">
       <XStack ai="flex-start" jc="space-between">
         <BannerBackButton />
         <FeedbackAvatar />

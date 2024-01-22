@@ -1,19 +1,19 @@
-import {Text, XStack, YStack} from 'tamagui'
-import {TouchableOpacity} from 'react-native'
-import PremiumOrDiscountSlider, {
-  SLIDER_THRESHOLD,
-} from '../PremiumOrDiscountSlider'
+import {type OfferType} from '@vexl-next/domain/src/general/offers'
 import {
-  type SetStateAction,
-  type WritableAtom,
   useAtom,
   useAtomValue,
   type Atom,
+  type SetStateAction,
+  type WritableAtom,
 } from 'jotai'
-import {type OfferType} from '@vexl-next/domain/src/general/offers'
-import {useTranslation} from '../../utils/localization/I18nProvider'
-import Info from './components/Info'
 import {type ReactNode} from 'react'
+import {TouchableOpacity} from 'react-native'
+import {Text, XStack, YStack} from 'tamagui'
+import {useTranslation} from '../../utils/localization/I18nProvider'
+import PremiumOrDiscountSlider, {
+  SLIDER_THRESHOLD,
+} from '../PremiumOrDiscountSlider'
+import Info from './components/Info'
 
 interface CommonProps {
   children: ReactNode

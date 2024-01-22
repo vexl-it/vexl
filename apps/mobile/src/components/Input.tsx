@@ -1,27 +1,27 @@
-import {
-  TextInput as RNTextInput,
-  type TextInputProps,
-  TouchableOpacity,
-} from 'react-native'
 import {type SvgString} from '@vexl-next/domain/src/utility/SvgString.brand'
-import Image from './Image'
 import {
-  Stack,
-  XStack,
-  styled,
-  type XStackProps,
-  getTokens,
-  type ColorTokens,
-  Text,
-} from 'tamagui'
-import {
-  type ComponentProps,
   forwardRef,
-  type ReactNode,
-  type Ref,
   useImperativeHandle,
   useRef,
+  type ComponentProps,
+  type ReactNode,
+  type Ref,
 } from 'react'
+import {
+  TextInput as RNTextInput,
+  TouchableOpacity,
+  type TextInputProps,
+} from 'react-native'
+import {
+  Stack,
+  Text,
+  XStack,
+  getTokens,
+  styled,
+  type ColorTokens,
+  type XStackProps,
+} from 'tamagui'
+import Image from './Image'
 import clearInputSvg from './images/clearInputSvg'
 
 const RootContainer = styled(XStack, {

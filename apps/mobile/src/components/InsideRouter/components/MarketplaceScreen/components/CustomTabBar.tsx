@@ -1,9 +1,9 @@
-import {getTokens, Stack, Text, XStack} from 'tamagui'
 import {type MaterialTopTabBarProps} from '@react-navigation/material-top-tabs'
-import {useTranslation} from '../../../../../utils/localization/I18nProvider'
-import {CONTAINER_WITH_TOP_BORDER_RADIUS_TOP_PADDING} from '../../ContainerWithTopBorderRadius'
 import {StyleSheet, TouchableOpacity, useWindowDimensions} from 'react-native'
 import Animated, {useAnimatedStyle, withTiming} from 'react-native-reanimated'
+import {Stack, Text, XStack, getTokens} from 'tamagui'
+import {useTranslation} from '../../../../../utils/localization/I18nProvider'
+import {CONTAINER_WITH_TOP_BORDER_RADIUS_TOP_PADDING} from '../../ContainerWithTopBorderRadius'
 
 const SELL_TAB_INDEX = 0
 const BUY_TAB_INDEX = 1

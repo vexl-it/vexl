@@ -1,8 +1,8 @@
-import {type Atom, useAtomValue} from 'jotai'
+import {useAtomValue, type Atom} from 'jotai'
+import React from 'react'
+import {Text, styled} from 'tamagui'
 import {type ChatMessageWithState} from '../../../../../state/chat/domain'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
-import React from 'react'
-import {styled, Text} from 'tamagui'
 
 const BaseText = styled(Text, {
   color: '$greyOnBlack',

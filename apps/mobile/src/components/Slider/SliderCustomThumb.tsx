@@ -1,4 +1,4 @@
-import {type ColorTokens, Stack} from 'tamagui'
+import {Stack, type ColorTokens} from 'tamagui'
 
 interface Props {
   customKnobColor?: ColorTokens

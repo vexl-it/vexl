@@ -1,13 +1,13 @@
-import WhiteContainer from '../../../WhiteContainer'
-import {useTranslation} from '../../../../utils/localization/I18nProvider'
+import {Stack, Text} from 'tamagui'
 import anonymizationNoticeSvg from '../../../../images/anonymizationNoticeSvg'
-import Image from '../../../Image'
 import {type LoginStackScreenProps} from '../../../../navigationTypes'
+import {useTranslation} from '../../../../utils/localization/I18nProvider'
+import Image from '../../../Image'
 import {
   HeaderProxy,
   NextButtonProxy,
 } from '../../../PageWithButtonAndProgressHeader'
-import {Stack, Text} from 'tamagui'
+import WhiteContainer from '../../../WhiteContainer'
 
 type Props = LoginStackScreenProps<'AnonymizationNotice'>
 

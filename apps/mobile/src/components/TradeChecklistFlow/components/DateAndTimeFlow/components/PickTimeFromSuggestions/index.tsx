@@ -5,6 +5,7 @@ import {useCallback} from 'react'
 import {Stack} from 'tamagui'
 import type {TradeChecklistStackScreenProps} from '../../../../../../navigationTypes'
 import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
+import {useGoBackXTimes} from '../../../../../../utils/navigation'
 import useSafeGoBack from '../../../../../../utils/useSafeGoBack'
 import {loadingOverlayDisplayedAtom} from '../../../../../LoadingOverlayProvider'
 import {
@@ -19,7 +20,6 @@ import Content from '../../../Content'
 import Header from '../../../Header'
 import OptionsList from '../OptionsList'
 import {useState} from './state'
-import {useGoBackXTimes} from '../../../../../../utils/navigation'
 
 type Props = TradeChecklistStackScreenProps<'PickTimeFromSuggestions'>
 

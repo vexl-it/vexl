@@ -1,13 +1,13 @@
-import {TouchableOpacity} from 'react-native'
-import {getTokens, Stack, Text, XStack} from 'tamagui'
-import StatusIndicator from './StatusIndicator'
-import Image from '../../../../Image'
-import chevronRightSvg from '../../../../../images/chevronRightSvg'
 import {useAtomValue} from 'jotai'
 import {useMemo} from 'react'
+import {TouchableOpacity} from 'react-native'
+import {getTokens, Stack, Text, XStack} from 'tamagui'
+import chevronRightSvg from '../../../../../images/chevronRightSvg'
+import {useTranslation} from '../../../../../utils/localization/I18nProvider'
+import Image from '../../../../Image'
 import createChecklistItemStatusAtom from '../../../atoms/createChecklistItemStatusAtom'
 import {type TradeChecklistItem} from '../../../domain'
-import {useTranslation} from '../../../../../utils/localization/I18nProvider'
+import StatusIndicator from './StatusIndicator'
 
 interface Props {
   hidden?: boolean

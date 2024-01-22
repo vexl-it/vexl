@@ -1,9 +1,9 @@
-import {TouchableOpacity} from 'react-native'
-import SvgImage from '../../Image'
-import backButtonSvg from '../../../images/backButtonSvg'
-import {getTokens, Stack} from 'tamagui'
-import {useAtom, useAtomValue} from 'jotai'
 import {useMolecule} from 'bunshi/dist/react'
+import {useAtom, useAtomValue} from 'jotai'
+import {TouchableOpacity} from 'react-native'
+import {Stack, getTokens} from 'tamagui'
+import backButtonSvg from '../../../images/backButtonSvg'
+import SvgImage from '../../Image'
 import {feedbackMolecule} from '../atoms'
 
 function BannerBackButton(): JSX.Element {

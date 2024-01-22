@@ -1,17 +1,17 @@
-import {getTokens, Stack, Text, XStack} from 'tamagui'
+import {useNavigation, type NavigationProp} from '@react-navigation/native'
 import {useAtom, useAtomValue, useSetAtom} from 'jotai'
+import {TouchableOpacity} from 'react-native'
+import {Stack, Text, XStack, getTokens} from 'tamagui'
+import chevronRightSvg from '../../../../../../../images/chevronRightSvg'
+import {type TradeChecklistStackParamsList} from '../../../../../../../navigationTypes'
+import {useTranslation} from '../../../../../../../utils/localization/I18nProvider'
+import Image from '../../../../../../Image'
+import Switch from '../../../../../../Switch'
 import {
   applyFeeOnFeeChangeActionAtom,
   feeAmountAtom,
   premiumOrDiscountEnabledAtom,
 } from '../../../atoms'
-import chevronRightSvg from '../../../../../../../images/chevronRightSvg'
-import Image from '../../../../../../Image'
-import {TouchableOpacity} from 'react-native'
-import Switch from '../../../../../../Switch'
-import {useTranslation} from '../../../../../../../utils/localization/I18nProvider'
-import {type NavigationProp, useNavigation} from '@react-navigation/native'
-import {type TradeChecklistStackParamsList} from '../../../../../../../navigationTypes'
 
 function PremiumOrDiscount(): JSX.Element {
   const {t} = useTranslation()

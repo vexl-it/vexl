@@ -1,44 +1,44 @@
-import {useTranslation} from '../../utils/localization/I18nProvider'
 import {useMemo} from 'react'
-import sortingSvg from '../images/sortingSvg'
-import Sorting from './components/Sorting'
-import locationSvg from '../images/locationSvg'
-import amountOfTransactionSvg from '../images/amountOfTransactionSvg'
-import paymentMethodSvg from '../images/paymentMethod'
-import networkSvg from '../images/networkSvg'
-import friendLevelSvg from '../images/friendLevelSvg'
-import {type Props} from '../Section'
-import coinsSvg from '../images/coinsSvg'
-import TextFilter from './components/TextFilter'
-import magnifyingGlass from '../images/magnifyingGlass'
-import spokenLanguagesSvg from '../images/spokenLanguagesSvg'
 import {getTokens} from 'tamagui'
-import Currency from '../OfferForm/components/Currency'
+import {useTranslation} from '../../utils/localization/I18nProvider'
 import AmountOfTransaction from '../OfferForm/components/AmountOfTransaction'
-import Location from '../OfferForm/components/Location'
-import SpokenLanguages from '../OfferForm/components/SpokenLanguages'
-import PaymentMethod from '../OfferForm/components/PaymentMethod'
-import Network from '../OfferForm/components/Network'
+import Currency from '../OfferForm/components/Currency'
 import FriendLevel from '../OfferForm/components/FriendLevel'
+import Location from '../OfferForm/components/Location'
+import Network from '../OfferForm/components/Network'
+import PaymentMethod from '../OfferForm/components/PaymentMethod'
+import SpokenLanguages from '../OfferForm/components/SpokenLanguages'
+import {type Props} from '../Section'
+import amountOfTransactionSvg from '../images/amountOfTransactionSvg'
+import coinsSvg from '../images/coinsSvg'
+import friendLevelSvg from '../images/friendLevelSvg'
+import locationSvg from '../images/locationSvg'
+import magnifyingGlass from '../images/magnifyingGlass'
+import networkSvg from '../images/networkSvg'
+import paymentMethodSvg from '../images/paymentMethod'
+import sortingSvg from '../images/sortingSvg'
+import spokenLanguagesSvg from '../images/spokenLanguagesSvg'
 import {
   amountBottomLimitAtom,
   amountTopLimitAtom,
+  btcNetworkAtom,
+  createIsThisLanguageSelectedAtom,
   currencyAtom,
-  updateCurrencyLimitsAtom,
+  intendedConnectionLevelAtom,
   locationAtom,
   locationStateAtom,
-  updateLocationStatePaymentMethodAtom,
-  spokenLanguagesAtomsAtom,
-  saveSelectedSpokenLanguagesActionAtom,
-  resetSpokenLanguagesToInitialStateActionAtom,
-  removeSpokenLanguageActionAtom,
-  createIsThisLanguageSelectedAtom,
   paymentMethodAtom,
-  btcNetworkAtom,
-  intendedConnectionLevelAtom,
-  sortingAtom,
+  removeSpokenLanguageActionAtom,
+  resetSpokenLanguagesToInitialStateActionAtom,
+  saveSelectedSpokenLanguagesActionAtom,
   setOfferLocationActionAtom,
+  sortingAtom,
+  spokenLanguagesAtomsAtom,
+  updateCurrencyLimitsAtom,
+  updateLocationStatePaymentMethodAtom,
 } from './atom'
+import Sorting from './components/Sorting'
+import TextFilter from './components/TextFilter'
 
 export default function useContent(): Props[] {
   const {t} = useTranslation()

@@ -1,11 +1,11 @@
-import {Image, Stack, Text} from 'tamagui'
 import React, {useCallback} from 'react'
+import {Image, Stack, Text} from 'tamagui'
 import {type ContactNormalizedWithHash} from '../../../state/contacts/domain'
+import {useTranslation} from '../../../utils/localization/I18nProvider'
+import openUrl from '../../../utils/openUrl'
+import Button from '../../Button'
 import SvgImage from '../../Image'
 import picturePlaceholderSvg from '../../images/picturePlaceholderSvg'
-import Button from '../../Button'
-import openUrl from '../../../utils/openUrl'
-import {useTranslation} from '../../../utils/localization/I18nProvider'
 
 interface Props {
   friend: ContactNormalizedWithHash

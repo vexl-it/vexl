@@ -5,21 +5,21 @@ import {
   type RootStackScreenProps,
   type TradeChecklistStackParamsList,
 } from '../../navigationTypes'
+import * as fromChatAtoms from '../../state/tradeChecklist/atoms/fromChatAtoms'
 import AgreeOnTradeDetailsScreen from './components/AgreeOnTradeDetailsScreen'
 import CalculateAmountScreen from './components/CalculateAmountFlow/components/CalculateAmountScreen'
 import PremiumOrDiscountScreen from './components/CalculateAmountFlow/components/PremiumOrDiscountScreen'
 import SetYourOwnPriceScreen from './components/CalculateAmountFlow/components/SetYourOwnPriceScreen'
 import TradePriceTypeDialog from './components/CalculateAmountFlow/components/TradePriceTypeDialog'
-import NetworkScreen from './components/NetworkFlow/components/NetworkScreen'
-import BtcAddressScreen from './components/NetworkFlow/components/BtcAddressScreen'
-import * as fromChatAtoms from '../../state/tradeChecklist/atoms/fromChatAtoms'
+import AddTimeOptionsScreen from './components/DateAndTimeFlow/components/AddTimeOptionsScreen'
+import ChooseAvailableDaysScreen from './components/DateAndTimeFlow/components/ChooseAvailableDaysScreen'
 import PickDateFromSuggestionsScreen from './components/DateAndTimeFlow/components/PickDateFromSuggestionsScreen'
 import PickTimeFromSuggestions from './components/DateAndTimeFlow/components/PickTimeFromSuggestions'
 import LocationMapPreview from './components/MeetingLocation/components/LocationMapPreview'
 import LocationMapSelect from './components/MeetingLocation/components/LocationMapSelect'
 import LocationSearch from './components/MeetingLocation/components/LocationSearch'
-import AddTimeOptionsScreen from './components/DateAndTimeFlow/components/AddTimeOptionsScreen'
-import ChooseAvailableDaysScreen from './components/DateAndTimeFlow/components/ChooseAvailableDaysScreen'
+import BtcAddressScreen from './components/NetworkFlow/components/BtcAddressScreen'
+import NetworkScreen from './components/NetworkFlow/components/NetworkScreen'
 import TradeChecklistFlowPageContainer from './components/TradeChecklistFlowPageContainer'
 
 const StackNavigator =

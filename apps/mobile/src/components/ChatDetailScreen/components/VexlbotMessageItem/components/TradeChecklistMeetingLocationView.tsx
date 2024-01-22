@@ -1,14 +1,14 @@
+import {useNavigation} from '@react-navigation/native'
+import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue, useStore} from 'jotai'
 import * as MeetingLocation from '../../../../../state/tradeChecklist/utils/location'
 import {
-  type TFunction,
   useTranslation,
+  type TFunction,
 } from '../../../../../utils/localization/I18nProvider'
-import {useMolecule} from 'bunshi/dist/react'
+import Button from '../../../../Button'
 import {chatMolecule} from '../../../atoms'
 import VexlbotBubble from './VexlbotBubble'
-import Button from '../../../../Button'
-import {useNavigation} from '@react-navigation/native'
 
 function getTextForVexlbot({
   by,

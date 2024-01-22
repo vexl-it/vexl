@@ -1,7 +1,7 @@
-import {type SetStateAction, type WritableAtom} from 'jotai'
-import {ScopeProvider} from 'bunshi/dist/react'
-import {FeedbackScope} from './atoms'
 import {type Feedback} from '@vexl-next/domain/src/general/feedback'
+import {ScopeProvider} from 'bunshi/dist/react'
+import {type SetStateAction, type WritableAtom} from 'jotai'
+import {FeedbackScope} from './atoms'
 import FeedbackBanner from './components/FeedbackBanner'
 
 interface Props {

@@ -1,41 +1,44 @@
 import {useNavigation} from '@react-navigation/native'
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue} from 'jotai'
-import * as network from '../../../../../state/tradeChecklist/utils/network'
+import * as amount from '../../../../../state/tradeChecklist/utils/amount'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import Button from '../../../../Button'
 import {chatMolecule} from '../../../atoms'
 import VexlbotBubble from './VexlbotBubble'
 
-function TradeChecklistNetworkSetupSuggestionView(): JSX.Element | null {
+function TradeChecklistAmountSuggestionView(): JSX.Element | null {
   const {t} = useTranslation()
   const navigation = useNavigation()
-  const {chatIdAtom, publicKeyPemBase64Atom, tradeChecklistNetworkAtom} =
+  const {chatIdAtom, publicKeyPemBase64Atom, tradeChecklistAmountAtom} =
     useMolecule(chatMolecule)
-  const networkData = useAtomValue(tradeChecklistNetworkAtom)
+  const amountData = useAtomValue(tradeChecklistAmountAtom)
   const chatId = useAtomValue(chatIdAtom)
   const inboxKey = useAtomValue(publicKeyPemBase64Atom)
-  const networkDataToDisplay = network.getNetworkData(networkData)
+  const amountDataToDisplay = amount.getAmountData(amountData)
 
-  if (networkDataToDisplay?.networkData.btcNetwork) return null
+  if (amountDataToDisplay?.amountData) return null
 
   return (
-    <VexlbotBubble text={t('vexlbot.agreeOnPreferredNetwork')}>
+    <VexlbotBubble text={t('vexlbot.agreeOnPreferredAmount')}>
       <Button
         onPress={() => {
           navigation.navigate('TradeChecklistFlow', {
-            screen: 'Network',
+            screen: 'CalculateAmount',
             chatId,
             inboxKey,
-            params: {networkData: undefined, navigateBackToChatOnSave: true},
+            params: {
+              amountData: undefined,
+              navigateBackToChatOnSave: true,
+            },
           })
         }}
         size="medium"
         variant="secondary"
-        text={t('tradeChecklist.options.SET_NETWORK')}
+        text={t('tradeChecklist.options.CALCULATE_AMOUNT')}
       />
     </VexlbotBubble>
   )
 }
 
-export default TradeChecklistNetworkSetupSuggestionView
+export default TradeChecklistAmountSuggestionView

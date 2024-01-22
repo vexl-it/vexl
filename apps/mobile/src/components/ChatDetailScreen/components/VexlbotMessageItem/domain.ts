@@ -10,8 +10,28 @@ export interface TradingChecklistDateAndTimePreview {
   date: UnixMilliseconds
 }
 
+export interface TradingChecklistMeetingLocationSuggestionPreview {
+  type: 'meetingLocationSuggestionPreview'
+  date: UnixMilliseconds
+}
+
+export interface TradingChecklistMeetingLocationPreview {
+  type: 'meetingLocationPreview'
+  date: UnixMilliseconds
+}
+
+export interface TradingChecklistAmountSuggestionPreview {
+  type: 'amountSuggestionPreview'
+  date: UnixMilliseconds
+}
+
 export interface TradingChecklistAmountPreview {
   type: 'amountPreview'
+  date: UnixMilliseconds
+}
+
+export interface TradingChecklistNetworkSuggestionPreview {
+  type: 'networkSuggestionPreview'
   date: UnixMilliseconds
 }
 
@@ -30,16 +50,20 @@ export interface TradingChecklistContactRevealPreview {
   date: UnixMilliseconds
 }
 
-export interface TradingChecklistMeetingLocationPreview {
-  type: 'meetingLocation'
+export interface TradingChecklistAllSetPreview {
+  type: 'allSetPreview'
   date: UnixMilliseconds
 }
 
 export type VexlBotMessageData =
   | TradingChecklistSuggestion
   | TradingChecklistDateAndTimePreview
+  | TradingChecklistMeetingLocationSuggestionPreview
+  | TradingChecklistMeetingLocationPreview
+  | TradingChecklistAmountSuggestionPreview
   | TradingChecklistAmountPreview
+  | TradingChecklistNetworkSuggestionPreview
   | TradingChecklistNetworkPreview
   | TradingChecklistIdentityRevealPreview
   | TradingChecklistContactRevealPreview
-  | TradingChecklistMeetingLocationPreview
+  | TradingChecklistAllSetPreview

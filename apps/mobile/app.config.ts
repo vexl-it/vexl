@@ -51,6 +51,7 @@ export default {
   'icon': extra.icon,
   'userInterfaceStyle': 'light',
   'jsEngine': 'hermes',
+  'platforms': ['ios', 'android'],
   'splash': {
     'image': './assets/splash.png',
     'resizeMode': 'contain',
@@ -180,8 +181,8 @@ export default {
     '@react-native-firebase/dynamic-links',
     './expo-plugins/disable-firebase-analytics.js',
     './expo-plugins/setup-headless-background-message-processing-ios.js',
-    'react-native-background-fetch',
-    './expo-plugins/react-native-maps-plugin.js',
+    'expo-font',
+    'expo-secure-store',
   ],
 
   'extra': {

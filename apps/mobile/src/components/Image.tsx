@@ -28,7 +28,8 @@ type Props = (RNImageProps | (Omit<XmlProps, 'xml'> & {source: SvgString})) & {
 }
 export default function Image({source, ...props}: Props): JSX.Element {
   if (isSvgString(source)) {
-    const xmlProps = props as XmlProps
+    // @ts-expect-error for some reasons onClick is passed and causes crash
+    const {onClick, ...xmlProps} = props as XmlProps
     return <SvgXml {...xmlProps} xml={source.xml} />
   }
   const imageProps = props as RNImageProps

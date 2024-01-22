@@ -1,13 +1,13 @@
-import {getTokens, Stack, Text, XStack, YStack} from 'tamagui'
 import {useMolecule} from 'bunshi/dist/react'
-import {chatMolecule} from '../atoms'
 import {useAtom, useAtomValue} from 'jotai'
-import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {useMemo} from 'react'
+import {TouchableWithoutFeedback} from 'react-native'
+import {getTokens, Stack, Text, XStack, YStack} from 'tamagui'
 import {formatCurrencyAmount} from '../../../utils/localization/currency'
+import {useTranslation} from '../../../utils/localization/I18nProvider'
 import SvgImage from '../../Image'
 import closeSvg from '../../images/closeSvg'
-import {TouchableWithoutFeedback} from 'react-native'
+import {chatMolecule} from '../atoms'
 
 function Bullet(): JSX.Element {
   return <Stack bg="$greyOnWhite" w="$1" h="$1" br="$1" mx="$2" />
@@ -80,7 +80,7 @@ function StickyHeader(): JSX.Element | null {
               <Bullet />
               <Text fontFamily="$body500" fos={14} color="$greyOnWhite">
                 {offer.offerInfo.publicPart.location
-                  .map((one) => one.city)
+                  .map((one) => one.shortAddress)
                   .join(', ')}
               </Text>
             </>

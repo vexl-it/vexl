@@ -1,3 +1,4 @@
+import {LocationPlaceId} from '@vexl-next/domain/src/general/offers'
 import {z} from 'zod'
 
 export const GetLocationSuggestionsRequest = z.object({
@@ -15,6 +16,7 @@ export type GetLocationSuggestionsRequest = z.TypeOf<
 >
 
 export const LocationData = z.object({
+  placeId: LocationPlaceId,
   suggestFirstRow: z.string(),
   suggestSecondRow: z.string(),
   latitude: z.number(),
@@ -66,6 +68,7 @@ export type GetGeocodedCoordinatesRequest = z.TypeOf<
 >
 
 export const GetGeocodedCoordinatesResponse = z.object({
+  placeId: LocationPlaceId,
   address: z.string(),
   latitude: z.number(),
   longitude: z.number(),

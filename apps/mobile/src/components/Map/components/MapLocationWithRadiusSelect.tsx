@@ -3,6 +3,7 @@ import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/lib/function'
 import {atom, useAtomValue, useSetAtom} from 'jotai'
 import {useMemo} from 'react'
+import {Dimensions} from 'react-native'
 import MapView, {PROVIDER_GOOGLE, type Region} from 'react-native-maps'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {Stack, Text, getTokens} from 'tamagui'
@@ -16,6 +17,7 @@ import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 import Image from '../../Image'
 import {type MapValue} from '../brands'
 import pinSvg from '../img/pinSvg'
+import radiusRingSvg from '../img/radiusRingSvg'
 import calculateDeltaFromViewport from '../utils/calculateDeltaFromViewport'
 import mapTheme from '../utils/mapStyle'
 
@@ -27,11 +29,13 @@ type Props = React.ComponentProps<typeof Stack> & {
 }
 
 const mapPaddings = {
-  top: getTokens().space[8].val,
-  bottom: getTokens().space[8].val,
+  top: getTokens().space[10].val,
+  bottom: getTokens().space[10].val,
   left: 0,
   right: 0,
 }
+
+const circleMargin = getTokens().space[2].val
 
 const mapStyle = {
   width: '100%',
@@ -86,6 +90,16 @@ function PickedLocationText({
   const geocodingState = useAtomValue(atom)
   const {t} = useTranslation()
 
+  if (
+    geocodingState.state === 'done' &&
+    geocodingState.either._tag === 'Right'
+  ) {
+    console.log('picked', {
+      lat: geocodingState.either.right.latitude,
+      lng: geocodingState.either.right.longitude,
+    })
+  }
+
   return geocodingState.state === 'loading' ? (
     <Text>{t('common.loading')}...</Text>
   ) : (
@@ -105,7 +119,14 @@ function PickedLocationText({
   )
 }
 
-export default function MapLocationSelect({
+function calculateRadiusDelta(value: MapValue) {
+  // Let's assume we are in portrait mode
+  // const {} = value
+  const {width} = Dimensions.get('window')
+  const usedWidthWithoutPadding = width - circleMargin * 2
+}
+
+export default function MapLocationWithRadiusSelect({
   onPick,
   initialValue,
   topChildren,
@@ -136,6 +157,10 @@ export default function MapLocationSelect({
         onRegionChangeComplete={(region, {isGesture}) => {
           if (isGesture) {
             setRegion(region)
+            console.log(
+              'reg',
+              JSON.stringify({lat: region.latitude, lng: region.longitude})
+            )
           }
         }}
         region={initialRegion}
@@ -148,6 +173,20 @@ export default function MapLocationSelect({
         transform={[{translateX: -70 / 2}, {translateY: (-70 / 3) * 2}]}
       >
         <Image width={70} height={70} source={pinSvg} />
+      </Stack>
+
+      <Stack
+        pointerEvents="none"
+        position="absolute"
+        justifyContent="center"
+        alignItems="center"
+        marginHorizontal={circleMargin}
+        top={0}
+        right={0}
+        left={0}
+        bottom={0}
+      >
+        <Image source={radiusRingSvg} />
       </Stack>
 
       <Stack

@@ -79,13 +79,43 @@ export const CommonFriend = z.object({
 })
 export type CommonFriend = z.TypeOf<typeof CommonFriend>
 
-export const Location = z.object({
+const OfferLocationDepreciated = z.object({
   longitude: z.string(),
   latitude: z.string(),
   city: z.string(),
 })
 
-export type Location = z.TypeOf<typeof Location>
+export const LocationPlaceId = z.string().brand<'LocationPlaceId'>()
+export type LocationPlaceId = z.TypeOf<typeof LocationPlaceId>
+
+export const OfferLocation = z
+  .unknown()
+  .transform((previous) => {
+    const depreciatedLocationFormat =
+      OfferLocationDepreciated.safeParse(previous)
+    if (depreciatedLocationFormat.success) {
+      return {
+        placeId: `old:${depreciatedLocationFormat.data.city}`,
+        latitude: depreciatedLocationFormat.data.latitude,
+        longitude: depreciatedLocationFormat.data.longitude,
+        radiusMeters: 1000,
+        address: depreciatedLocationFormat.data.city,
+        shortAddress: depreciatedLocationFormat.data.city,
+      }
+    }
+    return previous
+  })
+  .pipe(
+    z.object({
+      placeId: LocationPlaceId,
+      longitude: z.coerce.number(),
+      latitude: z.coerce.number(),
+      radiusMeters: z.number().positive().int(),
+      address: z.string(),
+      shortAddress: z.string(),
+    })
+  )
+export type OfferLocation = z.TypeOf<typeof OfferLocation>
 
 export const SymmetricKey = z.string().brand<'SymmetricKey'>()
 export type SymmetricKey = z.TypeOf<typeof SymmetricKey>
@@ -99,7 +129,7 @@ export type OfferPrivatePart = z.TypeOf<typeof OfferPrivatePart>
 
 export const OfferPublicPart = z.object({
   offerPublicKey: PublicKeyPemBase64,
-  location: z.array(Location),
+  location: z.array(OfferLocation).catch([]),
   offerDescription: z.string(),
   amountBottomLimit: z.coerce.number(),
   amountTopLimit: z.coerce.number(),

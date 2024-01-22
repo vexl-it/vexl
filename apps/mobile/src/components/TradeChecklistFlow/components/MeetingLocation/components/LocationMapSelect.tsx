@@ -1,25 +1,25 @@
 import {type GetGeocodedCoordinatesResponse} from '@vexl-next/rest-api/src/services/location/contracts'
+import {useSetAtom} from 'jotai'
 import {useMemo, useState} from 'react'
 import {YStack} from 'tamagui'
-import {type TradeChecklistStackScreenProps} from '../../../../../navigationTypes'
-import Button from '../../../../Button'
-import Input from '../../../../Input'
-import MapLocationSelect from '../../../../Map/components/MapLocationSelect'
-import {useTranslation} from '../../../../../utils/localization/I18nProvider'
-import IconButton from '../../../../IconButton'
 import backButtonSvg from '../../../../../images/backButtonSvg'
-import {
-  addMeetingLocationActionAtom,
-  submitTradeChecklistUpdatesActionAtom,
-} from '../../../atoms/updatesToBeSentAtom'
-import {useSetAtom} from 'jotai'
+import {type TradeChecklistStackScreenProps} from '../../../../../navigationTypes'
+import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import {useGoBackXTimes} from '../../../../../utils/navigation'
+import Button from '../../../../Button'
+import IconButton from '../../../../IconButton'
+import Input from '../../../../Input'
+import {loadingOverlayDisplayedAtom} from '../../../../LoadingOverlayProvider'
+import MapLocationSelect from '../../../../Map/components/MapLocationSelect'
 import {
   FooterButtonProxy,
   HeaderProxy,
 } from '../../../../PageWithNavigationHeader'
+import {
+  addMeetingLocationActionAtom,
+  submitTradeChecklistUpdatesActionAtom,
+} from '../../../atoms/updatesToBeSentAtom'
 import {useSetFullscreen} from '../../TradeChecklistFlowPageContainer'
-import {loadingOverlayDisplayedAtom} from '../../../../LoadingOverlayProvider'
 
 type Props = TradeChecklistStackScreenProps<'LocationMapSelect'>
 export default function LocationMapSelect({

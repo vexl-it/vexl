@@ -4,7 +4,6 @@ import {
   SymmetricKey,
   type BtcNetwork,
   type CurrencyCode,
-  type Location,
   type LocationState,
   type OfferPublicPart,
   type OfferType,
@@ -348,23 +347,23 @@ export const offerFormMolecule = molecule(() => {
   const setOfferLocationActionAtom = atom(
     null,
     (get, set, locationSuggestion: LocationSuggestion) => {
-      const location = get(locationAtom)
-
-      if (
-        !location?.some(
-          (offerLocation) =>
-            offerLocation.city === locationSuggestion.userData.suggestFirstRow
-        )
-      ) {
-        set(locationAtom, [
-          ...(location ?? []),
-          {
-            latitude: String(locationSuggestion.userData.latitude),
-            longitude: String(locationSuggestion.userData.longitude),
-            city: locationSuggestion.userData.suggestFirstRow,
-          },
-        ])
-      }
+      // TODO handle this
+      // const location = get(locationAtom)
+      // if (
+      //   !location?.some(
+      //     (offerLocation) =>
+      //       offerLocation.city === locationSuggestion.userData.suggestFirstRow
+      //   )
+      // ) {
+      //   set(locationAtom, [
+      //     ...(location ?? []),
+      //     {
+      //       latitude: String(locationSuggestion.userData.latitude),
+      //       longitude: String(locationSuggestion.userData.longitude),
+      //       city: locationSuggestion.userData.suggestFirstRow,
+      //     },
+      //   ])
+      // }
     }
   )
 

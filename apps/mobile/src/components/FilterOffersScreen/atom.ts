@@ -2,8 +2,8 @@ import {type CurrencyCode} from '@vexl-next/domain/src/general/currency.brand'
 import {
   type BtcNetwork,
   type IntendedConnectionLevel,
-  type Location,
   type LocationState,
+  type OfferLocation,
   type PaymentMethod,
   type Sort,
   type SpokenLanguage,
@@ -36,7 +36,7 @@ export const locationStateAtom = atom<LocationState | undefined>(
   offersFilterInitialState.locationState
 )
 
-export const locationAtom = atom<Location[] | undefined>(
+export const locationAtom = atom<OfferLocation[] | undefined>(
   offersFilterInitialState.location
 )
 
@@ -166,19 +166,25 @@ export const setOfferLocationActionAtom = atom(
   null,
   (get, set, locationSuggestion: LocationSuggestion) => {
     const location = get(locationAtom)
-
     if (
       !location?.some(
         (offerLocation) =>
-          offerLocation.city === locationSuggestion.userData.suggestFirstRow
+          offerLocation.placeId === locationSuggestion.userData.suggestFirstRow
       )
     ) {
       set(locationAtom, [
         ...(location ?? []),
         {
-          latitude: String(locationSuggestion.userData.latitude),
-          longitude: String(locationSuggestion.userData.longitude),
-          city: locationSuggestion.userData.suggestFirstRow,
+          placeId: locationSuggestion.userData.placeId,
+          address:
+            locationSuggestion.userData.suggestFirstRow +
+            ', ' +
+            locationSuggestion.userData.suggestSecondRow,
+          // TODO where to take short address from?
+          shortAddress: locationSuggestion.userData.suggestFirstRow,
+          latitude: locationSuggestion.userData.latitude,
+          longitude: locationSuggestion.userData.longitude,
+          radiusMeters: 1000, // TODO change
         },
       ])
     }

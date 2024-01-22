@@ -4,6 +4,7 @@ import env from '../environment'
 
 interface GoogleGeocodeResponse {
   results: Array<{
+    place_id: string
     formatted_address: string
     geometry: {
       location: {
@@ -45,6 +46,7 @@ export default async function googleGeocode({
   if (!firstHit) return null
 
   return GeocodeResponse.parse({
+    placeId: firstHit.place_id,
     address: firstHit.formatted_address,
     latitude: firstHit.geometry.location.lat,
     longitude: firstHit.geometry.location.lng,

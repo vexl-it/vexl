@@ -28,7 +28,7 @@ export default function filterOffersByText({
         )
         .join(DIVIDER),
       offer.offerInfo.publicPart.location
-        ?.map((one) => one.city ?? '')
+        ?.map((one) => one.address ?? '')
         .join(DIVIDER),
     ]
       .join(DIVIDER)

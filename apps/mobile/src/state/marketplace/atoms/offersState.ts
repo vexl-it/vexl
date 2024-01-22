@@ -14,6 +14,7 @@ import {type FocusAtomType} from '../../../utils/atomUtils/FocusAtomType'
 import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
 import {OffersState} from '../domain'
 
+// TODO migrate offers to new Location form
 export const offersStateAtom = atomWithParsedMmkvStorage(
   'offers',
   {

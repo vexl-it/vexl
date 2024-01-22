@@ -1,35 +1,32 @@
-import useContent from './useContent'
-import Tabs from '../../../Tabs'
-import {useState} from 'react'
-import {getTokens, Stack, Text, XStack, YStack} from 'tamagui'
-import SvgImage from '../../../Image'
-import {useTranslation} from '../../../../utils/localization/I18nProvider'
-import {Modal, TouchableOpacity, TouchableWithoutFeedback} from 'react-native'
-import closeSvg from '../../../images/closeSvg'
-import magnifyingGlass from '../../../images/magnifyingGlass'
-import Help from '../../../Help'
-import anonymousCounterpartSvg from '../../../images/anonymousCounterpartSvg'
 import {
-  type PrimitiveAtom,
+  type LocationState,
+  type OfferLocation,
+} from '@vexl-next/domain/src/general/offers'
+import {type LocationSuggestion} from '@vexl-next/rest-api/src/services/location/contracts'
+import {
   useAtom,
   useAtomValue,
   useSetAtom,
+  type PrimitiveAtom,
   type WritableAtom,
 } from 'jotai'
-import {
-  type Location,
-  type LocationState,
-} from '@vexl-next/domain/src/general/offers'
+import {useState} from 'react'
+import {TouchableOpacity, TouchableWithoutFeedback} from 'react-native'
+import {Stack, Text, XStack, YStack, getTokens} from 'tamagui'
+import {useTranslation} from '../../../../utils/localization/I18nProvider'
+import Help from '../../../Help'
+import SvgImage from '../../../Image'
 import Info from '../../../Info'
-import {type LocationSuggestion} from '@vexl-next/rest-api/src/services/location/contracts'
-import LocationSearch from '../../../LocationSearch'
 import {
-  type LocationSessionId,
   newLocationSessionId,
+  type LocationSessionId,
 } from '../../../LocationSearch/molecule'
-import ScreenTitle from '../../../ScreenTitle'
-import IconButton from '../../../IconButton'
-import Screen from '../../../Screen'
+import Tabs from '../../../Tabs'
+import anonymousCounterpartSvg from '../../../images/anonymousCounterpartSvg'
+import closeSvg from '../../../images/closeSvg'
+import magnifyingGlass from '../../../images/magnifyingGlass'
+import SelectLocationFlowModal from './components/SelectLocationFlowModal'
+import useContent from './useContent'
 
 interface Props {
   setOfferLocationActionAtom: WritableAtom<
@@ -37,7 +34,7 @@ interface Props {
     [locationSuggestionAtom: LocationSuggestion],
     void
   >
-  locationAtom: PrimitiveAtom<Location[] | undefined>
+  locationAtom: PrimitiveAtom<OfferLocation[] | undefined>
   locationStateAtom: PrimitiveAtom<LocationState | undefined>
   updateLocationStatePaymentMethodAtom: WritableAtom<
     null,
@@ -76,8 +73,10 @@ function LocationComponent({
     updateLocationStatePaymentMethod({locationState})
   }
 
-  const onLocationRemove = (city: string): void => {
-    const filteredLocation = location?.filter((loc) => loc.city !== city)
+  const onLocationRemove = (locationToRemove: OfferLocation): void => {
+    const filteredLocation = location?.filter(
+      (loc) => loc.placeId !== locationToRemove.placeId
+    )
     if (filteredLocation) setLocation(filteredLocation)
   }
 
@@ -119,11 +118,11 @@ function LocationComponent({
               jc="space-between"
             >
               <Text fos={18} color="$main">
-                {loc.city}
+                {loc.shortAddress}
               </Text>
               <TouchableOpacity
                 onPress={() => {
-                  onLocationRemove(loc.city)
+                  onLocationRemove(loc)
                 }}
               >
                 <SvgImage stroke={tokens.color.main.val} source={closeSvg} />
@@ -141,43 +140,17 @@ function LocationComponent({
           }}
         />
       )}
-      {locationSearchVisible && (
-        <Modal
-          animationType="fade"
-          visible={!!locationSearchVisible}
-          onRequestClose={() => {
-            setLocationSearchVisible(null)
-          }}
-          // Looks like it is not needed anymore.
-          // onShow={() => {
-          //   if (Platform.OS === 'android') {
-          //     setTimeout(() => {
-          //       inputRef.current?.blur()
-          //       inputRef.current?.focus()
-          //     }, 100)
-          //   }
-          // }}
-        >
-          <Screen customHorizontalPadding={16}>
-            <ScreenTitle text="">
-              <IconButton
-                variant="dark"
-                icon={closeSvg}
-                onPress={() => {
-                  setLocationSearchVisible(null)
-                }}
-              />
-            </ScreenTitle>
-            <LocationSearch
-              onPress={(a) => {
-                setOfferLocation(a)
-                setLocationSearchVisible(null)
-              }}
-              sessionId={locationSearchVisible}
-            />
-          </Screen>
-        </Modal>
-      )}
+      <SelectLocationFlowModal
+        locationSessionId={locationSearchVisible ?? newLocationSessionId()}
+        onLocationPicked={() => {}}
+        locationAtom={locationAtom}
+        onSetVisible={(visible) => {
+          if (visible) setLocationSearchVisible(newLocationSessionId())
+          setLocationSearchVisible(null)
+        }}
+        visible={!!locationSearchVisible}
+      />
+
       {helpVisible && (
         <Help
           visible={helpVisible}

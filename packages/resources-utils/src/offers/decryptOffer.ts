@@ -1,15 +1,23 @@
 import {type KeyHolder} from '@vexl-next/cryptography'
 import {
+  LocationPlaceId,
   OfferInfo,
   OfferPrivatePart,
   OfferPublicPart,
+  type OfferLocation,
 } from '@vexl-next/domain/src/general/offers'
 import {toError, type BasicError} from '@vexl-next/domain/src/utility/errors'
+import {
+  Latitude,
+  Longitude,
+  getDefaultRadius,
+} from '@vexl-next/domain/src/utility/geoCoordinates'
 import {type ServerOffer} from '@vexl-next/rest-api/src/services/offer/contracts'
 import * as A from 'fp-ts/Array'
 import * as E from 'fp-ts/Either'
 import * as TE from 'fp-ts/TaskEither'
 import {flow, pipe} from 'fp-ts/function'
+import {z} from 'zod'
 import {stringToBoolean} from '../utils/booleanString'
 import {aesGCMIgnoreTagDecrypt, eciesDecrypt} from '../utils/crypto'
 import {
@@ -18,6 +26,13 @@ import {
   type JsonParseError,
   type ZodParseError,
 } from '../utils/parsing'
+
+const OfferLocationDepreciated = z.object({
+  longitude: z.coerce.number().pipe(Longitude),
+  latitude: z.coerce.number().pipe(Latitude),
+  city: z.string(),
+})
+type OfferLocationDepreciated = z.TypeOf<typeof OfferLocationDepreciated>
 
 export interface ErrorDecryptingOffer
   extends BasicError<'ErrorDecryptingOffer'> {
@@ -50,16 +65,46 @@ function decryptedPayloadsToOffer({
   )
 }
 
-function decodeLocation(json: any): E.Either<JsonParseError, unknown> {
+function decodeLocation(
+  offerJson: any
+): E.Either<JsonParseError | ZodParseError<OfferLocationDepreciated>, unknown> {
+  if (offerJson.locationV2)
+    return E.right({...offerJson, location: offerJson.locationV2})
+
   return pipe(
-    json,
+    offerJson,
     E.right,
-    E.map((one) => one.location),
-    E.chainW(flow(A.map(parseJson), A.sequence(E.Applicative))),
-    E.map((location) => ({...json, location}))
+    E.map((one) => one.location ?? []),
+    E.chainW(
+      flow(
+        A.map((oneLocationRaw: unknown) => {
+          if (typeof oneLocationRaw === 'string') {
+            return pipe(
+              parseJson(oneLocationRaw),
+              E.chainW(safeParse(OfferLocationDepreciated)),
+              E.map((oneLocation) => {
+                return {
+                  placeId: LocationPlaceId.parse(oneLocation.city),
+                  longitude: oneLocation.longitude,
+                  latitude: oneLocation.latitude,
+                  shortAddress: oneLocation.city,
+                  address: oneLocation.city,
+                  radius: getDefaultRadius(oneLocation.latitude),
+                } satisfies OfferLocation
+              })
+            )
+          }
+
+          return E.right(oneLocationRaw)
+        }),
+        A.sequence(E.Applicative)
+      )
+    ),
+    E.map((location) => ({...offerJson, location}))
   )
 }
 
+// TODO write unit test for this function
 export default function decryptOffer(
   privateKey: KeyHolder.PrivateKeyHolder
 ): (

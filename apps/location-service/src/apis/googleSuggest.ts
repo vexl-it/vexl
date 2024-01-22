@@ -9,6 +9,7 @@ import env from '../environment'
 interface GooglePlacesResponse {
   results: Array<{
     formatted_address: string
+    place_id: string
     geometry: {
       location: {
         lat: number
@@ -51,6 +52,7 @@ export async function querySuggest({
     const secondRow: string = rest.join(', ')
     return {
       userData: {
+        placeId: one.place_id,
         suggestFirstRow: firstRow,
         suggestSecondRow: secondRow,
         latitude: one.geometry.location.lat,

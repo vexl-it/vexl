@@ -1,7 +1,7 @@
 import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs'
 import {OfferType} from '@vexl-next/domain/src/general/offers'
 import {useSetAtom} from 'jotai'
-import {useCallback, useMemo} from 'react'
+import {useCallback} from 'react'
 import {getTokens} from 'tamagui'
 import {type MarketplaceTabParamsList} from '../../../../navigationTypes'
 import {triggerOffersRefreshAtom} from '../../../../state/marketplace'
@@ -15,34 +15,27 @@ import OffersListWithFilter from './components/OffersListStateDisplayer'
 
 const Tab = createMaterialTopTabNavigator<MarketplaceTabParamsList>()
 
+const screenOptions = {
+  tabBarStyle: {
+    marginTop: CONTAINER_WITH_TOP_BORDER_RADIUS_TOP_PADDING,
+    backgroundColor: getTokens().color.black.val,
+    borderBottomColor: getTokens().color.grey.val,
+    borderBottomWidth: 2,
+  },
+  tabBarContentContainerStyle: {
+    margin: 0,
+    padding: 0,
+  },
+  tabBarActiveTintColor: getTokens().color.main.val,
+  tabBarInactiveTintColor: getTokens().color.greyOnBlack.val,
+  tabBarIndicatorStyle: {
+    height: 2,
+    bottom: -2,
+  },
+}
+
 function MarketplaceScreen(): JSX.Element {
   const {t} = useTranslation()
-  const tokens = getTokens()
-
-  const {
-    tabBarStyle,
-    tabBarContentContainerStyle,
-    // tabBarLabelStyle,
-    tabBarIndicatorStyle,
-  } = useMemo(() => {
-    return {
-      tabBarStyle: {
-        marginTop: CONTAINER_WITH_TOP_BORDER_RADIUS_TOP_PADDING,
-        backgroundColor: tokens.color.black.val,
-        borderBottomColor: tokens.color.grey.val,
-        borderBottomWidth: 2,
-      },
-      tabBarContentContainerStyle: {
-        margin: 0,
-        padding: 0,
-      },
-      tabBarIndicatorStyle: {
-        height: 2,
-        bottom: -2,
-      },
-    } as const
-  }, [tokens.color.black.val, tokens.color.grey.val])
-
   const refreshOffers = useSetAtom(triggerOffersRefreshAtom)
 
   useAppState(
@@ -58,16 +51,7 @@ function MarketplaceScreen(): JSX.Element {
 
   return (
     <ContainerWithTopBorderRadius>
-      <Tab.Navigator
-        tabBar={CustomTabBar}
-        screenOptions={{
-          tabBarStyle,
-          tabBarContentContainerStyle,
-          tabBarActiveTintColor: tokens.color.main.val,
-          tabBarInactiveTintColor: tokens.color.greyOnBlack.val,
-          tabBarIndicatorStyle,
-        }}
-      >
+      <Tab.Navigator tabBar={CustomTabBar} screenOptions={screenOptions}>
         <Tab.Screen
           name="Sell"
           options={{

@@ -94,7 +94,7 @@ function CommonFriends({
             >
               {commonFriends.slice(0, 5).map((friend) => (
                 <CommonFriendCell
-                  key={friend.computedValues.hash}
+                  key={`${friend.computedValues.hash} - ${friend.info.name}`}
                   name={friend.info.name}
                   imageUri={friend.info.imageUri}
                 />

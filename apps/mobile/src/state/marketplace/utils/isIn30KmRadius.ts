@@ -1,9 +1,6 @@
-interface Point {
-  longitude: string
-  latitude: string
-}
+import {type LatLong} from '@vexl-next/domain/src/utility/geoCoordinates'
 
-function distanceInKm(point1: Point, point2: Point): number {
+function distanceInKm(point1: LatLong, point2: LatLong): number {
   const R = 6371 // Radius of the Earth in kilometers
   const lat1 = Number(point1.latitude) * (Math.PI / 180)
   const long1 = Number(point1.longitude) * (Math.PI / 180)
@@ -23,8 +20,8 @@ function distanceInKm(point1: Point, point2: Point): number {
 }
 
 export default function isSomeIn30KmRange(
-  point: Point,
-  toTest: Point[]
+  point: LatLong,
+  toTest: LatLong[]
 ): boolean {
   return toTest.some((toTestPoint) => distanceInKm(point, toTestPoint) <= 30)
 }

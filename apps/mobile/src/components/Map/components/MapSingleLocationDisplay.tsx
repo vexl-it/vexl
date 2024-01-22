@@ -3,13 +3,12 @@ import MapView, {
   Marker,
   PROVIDER_GOOGLE,
   type EdgePadding,
-  type Region,
 } from 'react-native-maps'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {Stack} from 'tamagui'
 import {type MapValue} from '../brands'
-import calculateDeltaFromViewport from '../utils/calculateDeltaFromViewport'
 import mapTheme from '../utils/mapStyle'
+import mapValueToRegion from '../utils/mapValueToRegion'
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const markerImage = require('../img/pin.png')
@@ -35,22 +34,13 @@ export default function MapSingleLocationDisplay({
 }: Props): JSX.Element {
   const safeAreaInsets = useSafeAreaInsets()
 
-  const initialRegion = useMemo((): Region => {
-    const deltas = calculateDeltaFromViewport(value.viewport)
-    return {
-      latitude: value.latitude,
-      longitude: value.longitude,
-      ...deltas,
-    }
-  }, [value])
-
   return (
     <Stack position="relative" {...restProps} backgroundColor="$black">
       <MapView
         mapPadding={mapPadding}
         style={mapStyle}
         provider={PROVIDER_GOOGLE}
-        region={initialRegion}
+        region={useMemo(() => mapValueToRegion(value), [value])}
         customMapStyle={mapTheme}
       >
         <Marker image={markerImage} coordinate={value} />

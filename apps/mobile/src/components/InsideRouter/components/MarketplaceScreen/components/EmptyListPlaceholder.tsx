@@ -11,14 +11,17 @@ import {
 import {importedContactsCountAtom} from '../../../../../state/contacts/atom/contactsStore'
 import {triggerOffersRefreshAtom} from '../../../../../state/marketplace'
 import {
+  isFilterActiveAtom,
+  resetFilterInStorageActionAtom,
+} from '../../../../../state/marketplace/atoms/filterAtoms'
+import {countOfFilteredOffersBeforeLocationAtom} from '../../../../../state/marketplace/atoms/filteredOffers'
+import {refocusMapActionAtom} from '../../../../../state/marketplace/atoms/map/focusedOffer'
+import marketplaceLayoutModeAtom from '../../../../../state/marketplace/atoms/map/marketplaceLayoutModeAtom'
+import {
   addMoreContactsSuggestionVisibleAtom,
   createOfferSuggestionVisibleAtom,
   resetFilterSuggestionVisibleAtom,
 } from '../../../../../state/marketplace/atoms/offerSuggestionVisible'
-import {
-  isFilterActiveAtom,
-  resetFilterInStorageActionAtom,
-} from '../../../../../state/marketplace/filterAtoms'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import Button from '../../../../Button'
 import Image from '../../../../Image'
@@ -78,6 +81,10 @@ function EmptyListPlaceholder({refreshing, onRefresh}: Props): JSX.Element {
   const refreshOffers = useSetAtom(triggerOffersRefreshAtom)
   const importedContactsCount = useAtomValue(importedContactsCountAtom)
   const filterActive = useAtomValue(isFilterActiveAtom)
+  const marketplaceLayout = useAtomValue(marketplaceLayoutModeAtom)
+  const countOfFilteredOffersBeforeLocation = useAtomValue(
+    countOfFilteredOffersBeforeLocationAtom
+  )
   const reachNumber = useAtomValue(reachNumberAtom)
   const [minutesTillOffersDisplayed, setMinutesTillOffersDisplayed] = useAtom(
     minutesTillOffersDisplayedAtom
@@ -92,6 +99,7 @@ function EmptyListPlaceholder({refreshing, onRefresh}: Props): JSX.Element {
   const addMoreContactsSuggestionVisible = useAtomValue(
     addMoreContactsSuggestionVisibleAtom
   )
+  const refocusMap = useSetAtom(refocusMapActionAtom)
   const [resetFilterSuggestionVisible, setResetFilterSuggestionVisible] =
     useAtom(resetFilterSuggestionVisibleAtom)
 
@@ -123,6 +131,19 @@ function EmptyListPlaceholder({refreshing, onRefresh}: Props): JSX.Element {
   useEffect(() => {
     initializeMinutesTillOffersDisplayed()
   }, [initializeMinutesTillOffersDisplayed])
+
+  if (marketplaceLayout === 'map' && countOfFilteredOffersBeforeLocation > 0) {
+    return (
+      <MarketplaceSuggestion
+        mt="$4"
+        buttonText={t('map.showOffersOnMap')}
+        onButtonPress={() => {
+          refocusMap({focusAllOffers: true})
+        }}
+        text={t('map.noOffersInSelectedRegion')}
+      />
+    )
+  }
 
   if (filterActive) {
     return resetFilterSuggestionVisible ? (

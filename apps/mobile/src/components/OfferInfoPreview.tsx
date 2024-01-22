@@ -185,7 +185,7 @@ function OfferInfoPreview({
               .map((method) => {
                 if (method === 'CASH') {
                   return offer.publicPart.location
-                    .map((one) => one.city)
+                    .map((one) => one.shortAddress)
                     .join(', ')
                 }
                 if (method === 'REVOLUT') {

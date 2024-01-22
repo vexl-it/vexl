@@ -466,6 +466,7 @@
   "filterOffers.highestAmount": "Highest amount",
   "filterOffers.selectSortingMethod": "Select sorting method",
   "filterOffers.searchByText": "Search by text",
+  "filterOffers.searchOffersByLocation": "Search offers by location",
   "filterOffers.noTextFilter": "No text filter selected",
   "filterOffers.chooseCurrency": "Choose currency",
   "reuploadOffers.suggestionCell.title": "🚨 Some offers need to be reencrypted to be visible for others!",

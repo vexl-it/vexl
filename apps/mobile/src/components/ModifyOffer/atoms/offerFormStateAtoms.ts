@@ -4,8 +4,8 @@ import {
   SymmetricKey,
   type BtcNetwork,
   type CurrencyCode,
-  type Location,
   type LocationState,
+  type OfferLocation,
   type OfferPublicPart,
   type OfferType,
   type OneOfferInState,
@@ -28,6 +28,7 @@ import {
   MINIMAL_DATE,
 } from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
 import {Uuid, generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
+import {calculateViewportRadius} from '@vexl-next/domain/src/utility/geoCoordinates'
 import {generateKeyPair} from '@vexl-next/resources-utils/src/utils/crypto'
 import {type LocationSuggestion} from '@vexl-next/rest-api/src/services/location/contracts'
 import {parsePhoneNumber} from 'awesome-phonenumber'
@@ -150,7 +151,7 @@ export const offerFormMolecule = molecule(() => {
   const nullableLocationStateAtom = atom<LocationState | undefined>(
     dummyOffer.offerInfo.publicPart.locationState
   )
-  const nullableLocationAtom = atom<Location[] | undefined>(
+  const nullableLocationAtom = atom<OfferLocation[] | undefined>(
     dummyOffer.offerInfo.publicPart.location
   )
 
@@ -343,8 +344,6 @@ export const offerFormMolecule = molecule(() => {
     set(spokenLanguagesAtom, get(selectedSpokenLanguagesAtom))
   })
 
-  const offerExpirationModalVisibleAtom = atom<boolean>(false)
-
   const setOfferLocationActionAtom = atom(
     null,
     (get, set, locationSuggestion: LocationSuggestion) => {
@@ -353,20 +352,30 @@ export const offerFormMolecule = molecule(() => {
       if (
         !location?.some(
           (offerLocation) =>
-            offerLocation.city === locationSuggestion.userData.suggestFirstRow
+            offerLocation.placeId === locationSuggestion.userData.placeId
         )
       ) {
         set(locationAtom, [
           ...(location ?? []),
           {
-            latitude: String(locationSuggestion.userData.latitude),
-            longitude: String(locationSuggestion.userData.longitude),
-            city: locationSuggestion.userData.suggestFirstRow,
+            placeId: locationSuggestion.userData.placeId,
+            address:
+              locationSuggestion.userData.suggestFirstRow +
+              ', ' +
+              locationSuggestion.userData.suggestSecondRow,
+            shortAddress: locationSuggestion.userData.suggestFirstRow,
+            latitude: locationSuggestion.userData.latitude,
+            longitude: locationSuggestion.userData.longitude,
+            radius: calculateViewportRadius(
+              locationSuggestion.userData.viewport
+            ),
           },
         ])
       }
     }
   )
+
+  const offerExpirationModalVisibleAtom = atom<boolean>(false)
 
   const createOfferActionAtom = atom(null, (get, set): T.Task<boolean> => {
     const {t} = get(translationAtom)
@@ -734,8 +743,8 @@ export const offerFormMolecule = molecule(() => {
     offerActiveAtom,
     updateCurrencyLimitsAtom,
     updateLocationStatePaymentMethodAtom,
-    setOfferLocationActionAtom,
     resetOfferFormActionAtom,
+    setOfferLocationActionAtom,
     offerTypeOrDummyValueAtom,
     spokenLanguagesAtom,
     spokenLanguagesAtomsAtom,

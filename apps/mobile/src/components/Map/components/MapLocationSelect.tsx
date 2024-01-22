@@ -1,3 +1,4 @@
+import {Latitude, Longitude} from '@vexl-next/domain/src/utility/geoCoordinates'
 import * as E from 'fp-ts/Either'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/lib/function'
@@ -20,8 +21,8 @@ import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 import Image from '../../Image'
 import {type MapValue} from '../brands'
 import pinSvg from '../img/pinSvg'
-import calculateDeltaFromViewport from '../utils/calculateDeltaFromViewport'
 import mapTheme from '../utils/mapStyle'
+import mapValueToRegion from '../utils/mapValueToRegion'
 
 type Props = React.ComponentProps<typeof Stack> & {
   topChildren?: React.ReactNode
@@ -60,8 +61,8 @@ function useAtoms({
             location.getGeocodedCoordinates(
               {
                 lang: getCurrentLocale(),
-                latitude: region.latitude,
-                longitude: region.longitude,
+                latitude: Latitude.parse(region.latitude),
+                longitude: Longitude.parse(region.longitude),
               },
               signal
             ),
@@ -113,16 +114,15 @@ export default function MapLocationSelect({
 }: Props): JSX.Element {
   const safeAreaInsets = useSafeAreaInsets()
 
-  const initialRegion = useMemo((): Region => {
-    const deltas = calculateDeltaFromViewport(initialValue.viewport)
-    return {
-      latitude: initialValue.latitude,
-      longitude: initialValue.longitude,
-      ...deltas,
-    }
-  }, [initialValue])
+  const initialRegion = useMemo(
+    () => mapValueToRegion(initialValue),
+    [initialValue]
+  )
 
-  const atoms = useAtoms({initialRegion, onPick})
+  const atoms = useAtoms({
+    initialRegion,
+    onPick,
+  })
   const setRegion = useSetAtom(atoms.selectedRegionAtom)
 
   return (

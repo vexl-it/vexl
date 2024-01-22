@@ -1,10 +1,10 @@
 import {useAtomValue} from 'jotai'
 import {Stack, Text} from 'tamagui'
+import marketplaceLayoutModeAtom from '../../../../../state/marketplace/atoms/map/marketplaceLayoutModeAtom'
 import {
   buyOffersToSeeInMarketplaceCountAtom,
   sellOffersToSeeInMarketplaceCountAtom,
 } from '../../../../../state/marketplace/atoms/offersToSeeInMarketplace'
-import {isFilterActiveAtom} from '../../../../../state/marketplace/filterAtoms'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 
 interface Props {
@@ -17,22 +17,28 @@ function TotalOffersCount({
   offerType,
 }: Props): JSX.Element {
   const {t} = useTranslation()
-  const filterActive = useAtomValue(isFilterActiveAtom)
-  const buyOffersCount = useAtomValue(buyOffersToSeeInMarketplaceCountAtom)
-  const sellOffersCount = useAtomValue(sellOffersToSeeInMarketplaceCountAtom)
+  const markeplaceLayout = useAtomValue(marketplaceLayoutModeAtom)
+  const totalCount = useAtomValue(
+    offerType === 'BUY'
+      ? buyOffersToSeeInMarketplaceCountAtom
+      : sellOffersToSeeInMarketplaceCountAtom
+  )
 
   return (
     <Stack als="flex-start" my="$2" mx="$2">
+      {markeplaceLayout === 'map' && (
+        <Text ff="$body600" color="$greyOnBlack">
+          {t('map.showingOnlyInPersonOffers')}
+        </Text>
+      )}
       <Text ff="$body600" color="$greyOnBlack">
-        {filterActive
+        {totalCount !== filteredOffersCount
           ? t('offer.totalFilteredOffers', {
               count: filteredOffersCount,
-              totalCount:
-                offerType === 'BUY' ? buyOffersCount : sellOffersCount,
+              totalCount,
             })
           : t('offer.totalOffers', {
-              totalCount:
-                offerType === 'BUY' ? buyOffersCount : sellOffersCount,
+              totalCount,
             })}
       </Text>
     </Stack>

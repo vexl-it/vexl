@@ -12,8 +12,6 @@ import {selectedCurrencyAtom} from '../../../state/selectedCurrency'
 import {getCurrentLocale} from '../../../utils/localization/I18nProvider'
 import {preferencesAtom} from '../../../utils/preferences'
 
-export const CHART_HEIGHT_PX = 100
-
 function BitcoinPriceChart(): JSX.Element {
   const preferences = useAtomValue(preferencesAtom)
   const insets = useSafeAreaInsets()
@@ -30,7 +28,7 @@ function BitcoinPriceChart(): JSX.Element {
   )
 
   return (
-    <Stack h={CHART_HEIGHT_PX}>
+    <Stack h="100%">
       <Stack f={1} pt={insets.top} />
       <XStack jc="space-between" alignItems="center" px="$6" py="$2">
         <Stack />

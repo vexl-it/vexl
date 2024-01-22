@@ -1,4 +1,5 @@
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
+
 import {type StoredContactWithComputedValues} from '../../contacts/domain'
 
 const DIVIDER = ' ## '
@@ -30,7 +31,7 @@ export default function filterOffersByText({
         )
         .join(DIVIDER),
       offer.offerInfo.publicPart.location
-        ?.map((one) => one.city ?? '')
+        ?.map((one) => one.address ?? '')
         .join(DIVIDER),
     ]
       .join(DIVIDER)

@@ -2,20 +2,21 @@ import {type CurrencyCode} from '@vexl-next/domain/src/general/currency.brand'
 import {
   type BtcNetwork,
   type IntendedConnectionLevel,
-  type Location,
   type LocationState,
+  type OfferLocation,
   type PaymentMethod,
   type Sort,
   type SpokenLanguage,
 } from '@vexl-next/domain/src/general/offers'
+import {calculateViewportRadius} from '@vexl-next/domain/src/utility/geoCoordinates'
 import {type LocationSuggestion} from '@vexl-next/rest-api/src/services/location/contracts'
 import {atom, type SetStateAction, type WritableAtom} from 'jotai'
 import {splitAtom} from 'jotai/utils'
-import {type OffersFilter} from '../../state/marketplace/domain'
 import {
   offersFilterFromStorageAtom,
   offersFilterInitialState,
-} from '../../state/marketplace/filterAtoms'
+} from '../../state/marketplace/atoms/filterAtoms'
+import {type OffersFilter} from '../../state/marketplace/domain'
 import getValueFromSetStateActionOfAtom from '../../utils/atomUtils/getValueFromSetStateActionOfAtom'
 import {currencies} from '../../utils/localization/currency'
 
@@ -36,8 +37,25 @@ export const locationStateAtom = atom<LocationState | undefined>(
   offersFilterInitialState.locationState
 )
 
-export const locationAtom = atom<Location[] | undefined>(
+export const locationAtom = atom<OfferLocation | undefined>(
   offersFilterInitialState.location
+)
+
+export const locationArrayOfOneAtom = atom(
+  (get): OfferLocation[] | undefined => {
+    const location = get(locationAtom)
+    if (location) {
+      return [location]
+    }
+    return undefined
+  },
+  (get, set, action: SetStateAction<OfferLocation[] | undefined>) => {
+    const location = getValueFromSetStateActionOfAtom(action)(() =>
+      get(locationArrayOfOneAtom)
+    )
+    if (!location || location.length === 0) set(locationAtom, undefined)
+    else set(locationAtom, location.at(-1))
+  }
 )
 
 export const btcNetworkAtom = atom<BtcNetwork[] | undefined>(
@@ -96,7 +114,7 @@ export const updateLocationStatePaymentMethodAtom = atom<
       paymentMethodAtom,
       locationState === 'ONLINE' ? ['BANK', 'REVOLUT'] : ['CASH']
     )
-    set(locationAtom, [])
+    set(locationAtom, undefined)
   }
 
   return true
@@ -165,23 +183,17 @@ export const focusTextFilterAtom = atom<string | undefined>(
 export const setOfferLocationActionAtom = atom(
   null,
   (get, set, locationSuggestion: LocationSuggestion) => {
-    const location = get(locationAtom)
-
-    if (
-      !location?.some(
-        (offerLocation) =>
-          offerLocation.city === locationSuggestion.userData.suggestFirstRow
-      )
-    ) {
-      set(locationAtom, [
-        ...(location ?? []),
-        {
-          latitude: String(locationSuggestion.userData.latitude),
-          longitude: String(locationSuggestion.userData.longitude),
-          city: locationSuggestion.userData.suggestFirstRow,
-        },
-      ])
-    }
+    set(locationAtom, {
+      placeId: locationSuggestion.userData.placeId,
+      address:
+        locationSuggestion.userData.suggestFirstRow +
+        ', ' +
+        locationSuggestion.userData.suggestSecondRow,
+      shortAddress: locationSuggestion.userData.suggestFirstRow,
+      latitude: locationSuggestion.userData.latitude,
+      longitude: locationSuggestion.userData.longitude,
+      radius: calculateViewportRadius(locationSuggestion.userData.viewport),
+    })
   }
 )
 

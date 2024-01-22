@@ -1,6 +1,5 @@
 import {isNone} from 'fp-ts/Option'
 import {useAtomValue, useSetAtom} from 'jotai'
-import {splitAtom} from 'jotai/utils'
 import {useMemo} from 'react'
 import {ActivityIndicator} from 'react-native'
 import {Stack, getTokens} from 'tamagui'
@@ -9,8 +8,10 @@ import {
   useAreOffersLoading,
   useOffersLoadingError,
 } from '../../../../../state/marketplace'
-import {createFilteredOffersAtom} from '../../../../../state/marketplace/atoms/filteredOffers'
-import {offersFilterFromStorageAtom} from '../../../../../state/marketplace/filterAtoms'
+import {
+  filteredOffersBuyAtomsAtom,
+  filteredOffersSellAtomsAtom,
+} from '../../../../../state/marketplace/atoms/filteredOffers'
 import ErrorListHeader from '../../../../ErrorListHeader'
 import OffersList from '../../../../OffersList'
 import ReencryptOffersSuggestion from '../../../../ReencryptOffersSuggestion'
@@ -35,19 +36,9 @@ function OffersListStateDisplayerContent({
   const loading = useAreOffersLoading()
   const error = useOffersLoadingError()
   const refreshOffers = useSetAtom(triggerOffersRefreshAtom)
-  const filter = useAtomValue(offersFilterFromStorageAtom)
-  const basicFilter = useMemo(
-    () => ({
-      offerType: type,
-    }),
-    [type]
-  )
 
   const offersAtoms = useAtomValue(
-    useMemo(
-      () => splitAtom(createFilteredOffersAtom({...filter, ...basicFilter})),
-      [filter, basicFilter]
-    )
+    type === 'SELL' ? filteredOffersSellAtomsAtom : filteredOffersBuyAtomsAtom
   )
 
   const ListHeaderComponent = useMemo(() => {

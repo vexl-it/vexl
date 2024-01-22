@@ -2,8 +2,8 @@ import {atom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {selectAtom} from 'jotai/utils'
 import {z} from 'zod'
-import {atomWithParsedMmkvStorage} from '../../utils/atomUtils/atomWithParsedMmkvStorage'
-import {OffersFilter} from './domain'
+import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
+import {OffersFilter} from '../domain'
 
 export const offersFilterInitialState: OffersFilter = {
   sort: undefined,
@@ -29,6 +29,19 @@ export const offersFilterFromStorageAtom = focusAtom(
   offersFilterStorageAtom,
   (o) => o.prop('filter')
 )
+
+export const locationFilterAtom = focusAtom(offersFilterStorageAtom, (o) =>
+  o.prop('filter').prop('location')
+)
+
+export const resetLocationFilterActionAtom = atom(null, (get, set) => {
+  set(offersFilterFromStorageAtom, (old) => ({
+    ...old,
+    location: undefined,
+    locationState: undefined,
+    paymentMethod: undefined,
+  }))
+})
 
 export const isFilterActiveAtom = selectAtom(
   offersFilterFromStorageAtom,

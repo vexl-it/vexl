@@ -100,6 +100,7 @@ export default function useContent(): Props[] {
         image: locationSvg,
         children: (
           <Location
+            randomizeLocation
             setOfferLocationActionAtom={setOfferLocationActionAtom}
             locationAtom={locationAtom}
             locationStateAtom={locationStateAtom}

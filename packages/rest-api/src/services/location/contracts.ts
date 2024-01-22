@@ -1,3 +1,5 @@
+import {LocationPlaceId} from '@vexl-next/domain/src/general/offers'
+import {Latitude, Longitude} from '@vexl-next/domain/src/utility/geoCoordinates'
 import {z} from 'zod'
 
 export const GetLocationSuggestionsRequest = z.object({
@@ -15,18 +17,19 @@ export type GetLocationSuggestionsRequest = z.TypeOf<
 >
 
 export const LocationData = z.object({
+  placeId: LocationPlaceId,
   suggestFirstRow: z.string(),
   suggestSecondRow: z.string(),
-  latitude: z.number(),
-  longitude: z.number(),
+  latitude: Latitude,
+  longitude: Longitude,
   viewport: z.object({
     northeast: z.object({
-      latitude: z.number(),
-      longitude: z.number(),
+      latitude: Latitude,
+      longitude: Longitude,
     }),
     southwest: z.object({
-      latitude: z.number(),
-      longitude: z.number(),
+      latitude: Latitude,
+      longitude: Longitude,
     }),
   }),
 })
@@ -47,18 +50,8 @@ export type GetLocationSuggestionsResponse = z.TypeOf<
 >
 
 export const GetGeocodedCoordinatesRequest = z.object({
-  latitude: z
-    .string()
-    .default('10')
-    // Not nice, well 🤷‍♂️... https://github.com/honojs/middleware/issues/98
-    .transform((e) => +e)
-    .pipe(z.number().min(-180).max(180)),
-  longitude: z
-    .string()
-    .default('10')
-    // Not nice, well 🤷‍♂️... https://github.com/honojs/middleware/issues/98
-    .transform((e) => +e)
-    .pipe(z.number().min(-90).max(90)),
+  latitude: Latitude,
+  longitude: Longitude,
   lang: z.string().min(2),
 })
 export type GetGeocodedCoordinatesRequest = z.TypeOf<
@@ -66,17 +59,18 @@ export type GetGeocodedCoordinatesRequest = z.TypeOf<
 >
 
 export const GetGeocodedCoordinatesResponse = z.object({
+  placeId: LocationPlaceId,
   address: z.string(),
-  latitude: z.number(),
-  longitude: z.number(),
+  latitude: Latitude,
+  longitude: Longitude,
   viewport: z.object({
     northeast: z.object({
-      latitude: z.number(),
-      longitude: z.number(),
+      latitude: Latitude,
+      longitude: Longitude,
     }),
     southwest: z.object({
-      latitude: z.number(),
-      longitude: z.number(),
+      latitude: Latitude,
+      longitude: Longitude,
     }),
   }),
 })

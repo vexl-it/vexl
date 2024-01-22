@@ -1,5 +1,4 @@
 import {atom} from 'jotai'
-import {selectAtom} from 'jotai/utils'
 import {isOfferExpired} from '../../../utils/isOfferExpired'
 import {importedContactsHashesAtom} from '../../contacts/atom/contactsStore'
 import {offersAtom} from './offersState'
@@ -25,16 +24,20 @@ export const offersToSeeInMarketplaceAtom = atom((get) => {
   )
 })
 
-export const buyOffersToSeeInMarketplaceCountAtom = selectAtom(
-  offersToSeeInMarketplaceAtom,
-  (offers) =>
-    offers.filter((offer) => offer.offerInfo.publicPart.offerType === 'BUY')
-      .length
+export const areThereOffersToSeeInMarketplaceWithoutFiltersAtom = atom(
+  (get) => get(offersToSeeInMarketplaceAtom).length > 0
 )
 
-export const sellOffersToSeeInMarketplaceCountAtom = selectAtom(
-  offersToSeeInMarketplaceAtom,
-  (offers) =>
-    offers.filter((offer) => offer.offerInfo.publicPart.offerType === 'SELL')
-      .length
-)
+export const buyOffersToSeeInMarketplaceCountAtom = atom((get) => {
+  const offers = get(offersToSeeInMarketplaceAtom)
+  return offers.filter(
+    (offer) => offer.offerInfo.publicPart.offerType === 'BUY'
+  ).length
+})
+
+export const sellOffersToSeeInMarketplaceCountAtom = atom((get) => {
+  const offers = get(offersToSeeInMarketplaceAtom)
+  return offers.filter(
+    (offer) => offer.offerInfo.publicPart.offerType === 'SELL'
+  ).length
+})

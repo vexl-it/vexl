@@ -1,14 +1,4 @@
-import {
-  type ColorTokens,
-  getTokens,
-  Stack,
-  type StackProps,
-  Text,
-  XStack,
-} from 'tamagui'
 import {useAtomValue} from 'jotai'
-import Image from '../../../../Image'
-import snowflakeSvg from '../images/snowflakeSvg'
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -16,9 +6,19 @@ import Animated, {
   withRepeat,
   withTiming,
 } from 'react-native-reanimated'
-import {tradePriceTypeAtom} from '../atoms'
-import userSvg from '../../../../images/userSvg'
+import {
+  Stack,
+  Text,
+  XStack,
+  getTokens,
+  type ColorTokens,
+  type StackProps,
+} from 'tamagui'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
+import Image from '../../../../Image'
+import userSvg from '../../../../images/userSvg'
+import {tradePriceTypeAtom} from '../atoms'
+import snowflakeSvg from '../images/snowflakeSvg'
 
 interface AnimatedLiveIndicatorProps {
   color?: ColorTokens

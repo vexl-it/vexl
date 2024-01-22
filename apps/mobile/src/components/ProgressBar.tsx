@@ -1,10 +1,10 @@
-import {getTokens, XStack} from 'tamagui'
 import {useEffect, useState} from 'react'
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated'
+import {XStack, getTokens} from 'tamagui'
 
 interface Props {
   percentDone: number

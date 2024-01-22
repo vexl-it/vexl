@@ -1,5 +1,5 @@
-import UserFeedback from '../../UserFeedback'
 import {atom} from 'jotai'
+import UserFeedback from '../../UserFeedback'
 import {generateInitialFeedback} from '../../UserFeedback/atoms'
 
 function ChatFeedbackDialogContent(): JSX.Element {

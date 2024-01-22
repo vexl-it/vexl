@@ -1,19 +1,19 @@
-import React from 'react'
-import AnimatedDialogWrapper from '../../../../AnimatedDialogWrapper'
-import {Stack, Text, XStack} from 'tamagui'
-import Button from '../../../../Button'
+import {useNavigation, type NavigationProp} from '@react-navigation/native'
 import {useAtom, useAtomValue, useSetAtom} from 'jotai'
-import PriceTypeIndicator from './PriceTypeIndicator'
+import React from 'react'
+import {ScrollView, StyleSheet, View} from 'react-native'
+import {Stack, Text, XStack} from 'tamagui'
+import {type TradeChecklistStackParamsList} from '../../../../../navigationTypes'
+import {useTranslation} from '../../../../../utils/localization/I18nProvider'
+import AnimatedDialogWrapper from '../../../../AnimatedDialogWrapper'
+import Button from '../../../../Button'
 import {
   setFormDataBasedOnTypeActionAtom,
   tradePriceTypeAtom,
   tradePriceTypeDialogVisibleAtom,
 } from '../atoms'
-import {ScrollView, StyleSheet, View} from 'react-native'
-import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import CurrentBtcPrice from './CurrentBtcPrice'
-import {type NavigationProp, useNavigation} from '@react-navigation/native'
-import {type TradeChecklistStackParamsList} from '../../../../../navigationTypes'
+import PriceTypeIndicator from './PriceTypeIndicator'
 
 const styles = StyleSheet.create({
   flip: {transform: [{scaleY: -1}]},

@@ -1,12 +1,12 @@
-import {Stack, Text, XStack} from 'tamagui'
-import TextInput from '../Input'
-import Checkbox from '../Checkbox'
-import {type PrimitiveAtom, useAtom, useAtomValue, useSetAtom} from 'jotai'
-import {type ReactNode, useEffect} from 'react'
-import SelectProfilePicture from '../SelectProfilePicture'
-import {realUserImageAtom, realUserNameAtom} from '../../state/session'
 import {type UriString} from '@vexl-next/domain/src/utility/UriString.brand'
+import {useAtom, useAtomValue, useSetAtom, type PrimitiveAtom} from 'jotai'
+import {useEffect, type ReactNode} from 'react'
+import {Stack, Text, XStack} from 'tamagui'
+import {realUserImageAtom, realUserNameAtom} from '../../state/session'
 import {useTranslation} from '../../utils/localization/I18nProvider'
+import Checkbox from '../Checkbox'
+import TextInput from '../Input'
+import SelectProfilePicture from '../SelectProfilePicture'
 
 interface ContentProps {
   children: ReactNode

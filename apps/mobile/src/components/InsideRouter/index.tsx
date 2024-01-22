@@ -1,16 +1,16 @@
-import React from 'react'
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs'
+import {LinearGradient} from 'expo-linear-gradient'
+import React from 'react'
+import {Stack, styled} from 'tamagui'
 import {type InsideTabParamsList} from '../../navigationTypes'
+import BitcoinPriceChart, {
+  CHART_HEIGHT_PX,
+} from './components/BitcoinPriceChart'
+import {CONTAINER_WITH_TOP_BORDER_RADIUS_TOP_PADDING} from './components/ContainerWithTopBorderRadius'
 import MarketplaceScreen from './components/MarketplaceScreen'
 import MessagesScreen from './components/MessagesScreen'
 import SettingsScreen from './components/SettingsScreen'
 import TabBar from './components/TabBar'
-import BitcoinPriceChart, {
-  CHART_HEIGHT_PX,
-} from './components/BitcoinPriceChart'
-import {LinearGradient} from 'expo-linear-gradient'
-import {CONTAINER_WITH_TOP_BORDER_RADIUS_TOP_PADDING} from './components/ContainerWithTopBorderRadius'
-import {Stack, styled} from 'tamagui'
 
 const Tab = createBottomTabNavigator<InsideTabParamsList>()
 

@@ -1,6 +1,6 @@
 import {FlashList} from '@shopify/flash-list'
-import {useAtomValue, type Atom} from 'jotai'
 import {useMolecule} from 'bunshi/dist/react'
+import {useAtomValue, type Atom} from 'jotai'
 import React from 'react'
 import atomKeyExtractor from '../../../utils/atomUtils/atomKeyExtractor'
 import {chatMolecule} from '../atoms'

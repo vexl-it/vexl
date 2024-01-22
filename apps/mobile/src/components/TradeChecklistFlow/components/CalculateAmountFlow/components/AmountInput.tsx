@@ -1,13 +1,16 @@
-import {getTokens, Stack, styled, XStack} from 'tamagui'
-import {type TextInputProps} from 'react-native'
-import {TextInput as RNTextInput, TouchableWithoutFeedback} from 'react-native'
 import {
-  type ReactNode,
   forwardRef,
-  type Ref,
-  useRef,
   useImperativeHandle,
+  useRef,
+  type ReactNode,
+  type Ref,
 } from 'react'
+import {
+  TextInput as RNTextInput,
+  TouchableWithoutFeedback,
+  type TextInputProps,
+} from 'react-native'
+import {Stack, XStack, getTokens, styled} from 'tamagui'
 import PremiumIncluded from './PremiumIncluded'
 
 const InputStyled = styled(RNTextInput, {

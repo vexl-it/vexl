@@ -1,21 +1,21 @@
-import {useTranslation} from '../../../../utils/localization/I18nProvider'
-import {useSafeAreaInsets} from 'react-native-safe-area-context'
+import {useFocusEffect} from '@react-navigation/native'
+import {type SpokenLanguage} from '@vexl-next/domain/src/general/offers'
 import {
+  useSetAtom,
+  type PrimitiveAtom,
   type SetStateAction,
   type WritableAtom,
-  type PrimitiveAtom,
-  useSetAtom,
 } from 'jotai'
 import React, {useCallback} from 'react'
-import {type SpokenLanguage} from '@vexl-next/domain/src/general/offers'
 import {Modal} from 'react-native'
+import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {Stack} from 'tamagui'
-import ScreenTitle from '../../../ScreenTitle'
-import IconButton from '../../../IconButton'
-import closeSvg from '../../../images/closeSvg'
+import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import Button from '../../../Button'
+import IconButton from '../../../IconButton'
+import ScreenTitle from '../../../ScreenTitle'
+import closeSvg from '../../../images/closeSvg'
 import SpokenLanguagesList from './SpokenLanguagesList'
-import {useFocusEffect} from '@react-navigation/native'
 
 interface Props {
   createIsThisLanguageSelectedAtom: (

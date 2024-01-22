@@ -1,17 +1,17 @@
-import {useTranslation} from '../../../../utils/localization/I18nProvider'
-import Switch from '../../../Switch'
-import WhiteContainer from '../../../WhiteContainer'
-import bigNameSvg from '../../../../images/bigNameSvg'
-import notepadSvg from './images/notepadSvg'
 import {useState} from 'react'
+import {Image} from 'react-native'
+import {Stack, Text, XStack} from 'tamagui'
+import bigNameSvg from '../../../../images/bigNameSvg'
 import {type LoginStackScreenProps} from '../../../../navigationTypes'
+import {useTranslation} from '../../../../utils/localization/I18nProvider'
+import SVGImage from '../../../Image'
 import {
   HeaderProxy,
   NextButtonProxy,
 } from '../../../PageWithButtonAndProgressHeader'
-import SVGImage from '../../../Image'
-import {Image} from 'react-native'
-import {Stack, Text, XStack} from 'tamagui'
+import Switch from '../../../Switch'
+import WhiteContainer from '../../../WhiteContainer'
+import notepadSvg from './images/notepadSvg'
 
 type Props = LoginStackScreenProps<'Start'>
 
@@ -40,14 +40,7 @@ function StartScreen({navigation}: Props): JSX.Element {
           </Text>
         </Stack>
       </WhiteContainer>
-      <XStack
-        ai="center"
-        py="$4"
-        px="$5"
-        br="$5"
-        my="$3"
-        bc="$backgroundBlack"
-      >
+      <XStack ai="center" py="$4" px="$5" br="$5" my="$3" bc="$backgroundBlack">
         <XStack ai="center" space="$2">
           <SVGImage source={notepadSvg} />
           <XStack f={1} ai="center" jc="space-between">

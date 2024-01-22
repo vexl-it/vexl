@@ -1,10 +1,10 @@
 import {useAtomValue} from 'jotai'
-import {offerRerequestLimitDaysAtom} from '../../../utils/remoteConfig/atoms'
-import {useTranslation} from '../../../utils/localization/I18nProvider'
-import InfoSquare from '../../InfoSquare'
 import React, {useMemo} from 'react'
-import {canChatBeRequested} from '../../../state/chat/utils/offerStates'
 import {type ChatWithMessages} from '../../../state/chat/domain'
+import {canChatBeRequested} from '../../../state/chat/utils/offerStates'
+import {useTranslation} from '../../../utils/localization/I18nProvider'
+import {offerRerequestLimitDaysAtom} from '../../../utils/remoteConfig/atoms'
+import InfoSquare from '../../InfoSquare'
 
 function RerequestInfo({chat}: {chat: ChatWithMessages}): JSX.Element | null {
   const {t} = useTranslation()

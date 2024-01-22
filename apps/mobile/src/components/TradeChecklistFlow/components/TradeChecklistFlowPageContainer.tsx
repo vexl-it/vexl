@@ -1,10 +1,10 @@
+import {useFocusEffect} from '@react-navigation/native'
+import {atom, useAtomValue, useSetAtom} from 'jotai'
+import {useCallback} from 'react'
+import {StyleSheet} from 'react-native'
 import Animated, {FadeIn} from 'react-native-reanimated'
 import {Stack} from 'tamagui'
 import PageWithNavigationHeader from '../../PageWithNavigationHeader'
-import {StyleSheet} from 'react-native'
-import {atom, useAtomValue, useSetAtom} from 'jotai'
-import {useFocusEffect} from '@react-navigation/native'
-import {useCallback} from 'react'
 
 const styles = StyleSheet.create({
   backdrop: {

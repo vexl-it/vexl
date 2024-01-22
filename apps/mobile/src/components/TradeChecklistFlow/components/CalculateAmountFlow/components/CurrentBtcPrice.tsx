@@ -1,13 +1,13 @@
-import {getTokens, Text, type TextProps, XStack} from 'tamagui'
 import {useAtomValue, useSetAtom} from 'jotai'
 import {ActivityIndicator, TouchableOpacity} from 'react-native'
+import {Text, XStack, getTokens, type TextProps} from 'tamagui'
+import {originOfferCurrencyAtom} from '../../../../../state/tradeChecklist/atoms/fromChatAtoms'
+import {btcPriceForOfferWithStateAtom} from '../../../atoms/btcPriceForOfferWithStateAtom'
 import {
   refreshCurrentBtcPriceActionAtom,
   tradeBtcPriceAtom,
   tradePriceTypeAtom,
 } from '../atoms'
-import {btcPriceForOfferWithStateAtom} from '../../../atoms/btcPriceForOfferWithStateAtom'
-import {originOfferCurrencyAtom} from '../../../../../state/tradeChecklist/atoms/fromChatAtoms'
 
 function CurrentBtcPrice(props: TextProps): JSX.Element {
   const refreshCurrentBtcPrice = useSetAtom(refreshCurrentBtcPriceActionAtom)

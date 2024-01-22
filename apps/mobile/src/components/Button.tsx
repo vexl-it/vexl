@@ -1,13 +1,13 @@
+import {type SvgString} from '@vexl-next/domain/src/utility/SvgString.brand'
+import {useCallback, useMemo} from 'react'
 import {
+  TouchableOpacity,
   type ColorValue,
   type StyleProp,
-  TouchableOpacity,
   type ViewStyle,
 } from 'react-native'
-import {useCallback, useMemo} from 'react'
-import {type SvgString} from '@vexl-next/domain/src/utility/SvgString.brand'
+import {Stack, Text, getTokens, styled} from 'tamagui'
 import Image from './Image'
-import {getTokens, Stack, styled, Text} from 'tamagui'
 
 export interface Props {
   onPress: () => void

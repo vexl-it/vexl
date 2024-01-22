@@ -1,8 +1,8 @@
-import {Stack, Text, XStack} from 'tamagui'
-import {type Atom, useAtomValue, useSetAtom} from 'jotai'
+import {useAtomValue, useSetAtom, type Atom} from 'jotai'
 import {TouchableWithoutFeedback} from 'react-native'
-import Image from '../../Image'
+import {Stack, Text, XStack} from 'tamagui'
 import downArrow from '../../../images/downArrow'
+import Image from '../../Image'
 import {searchTextAtom} from '../atoms/searchTextAtom'
 import submitSearchActionAtom from '../atoms/submitSearchActionAtom'
 

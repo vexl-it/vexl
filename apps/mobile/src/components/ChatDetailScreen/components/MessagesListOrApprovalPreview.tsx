@@ -1,14 +1,14 @@
 import {useMolecule} from 'bunshi/dist/react'
-import {chatMolecule} from '../atoms'
 import {useAtomValue, useSetAtom} from 'jotai'
-import RequestScreen from './RequestScreen'
-import MessagesScreen from './MessagesScreen'
-import Screen from '../../Screen'
-import ChatInfoModal from './ChatInfoModal'
-import MarkAsReadWhenRendered from './MarkAsReadWhenRendered'
-import {useAppState} from '../../../utils/useAppState'
 import {useCallback} from 'react'
 import {fetchAndStoreMessagesForInboxAtom} from '../../../state/chat/atoms/fetchNewMessagesActionAtom'
+import {useAppState} from '../../../utils/useAppState'
+import Screen from '../../Screen'
+import {chatMolecule} from '../atoms'
+import ChatInfoModal from './ChatInfoModal'
+import MarkAsReadWhenRendered from './MarkAsReadWhenRendered'
+import MessagesScreen from './MessagesScreen'
+import RequestScreen from './RequestScreen'
 
 export default function MessagesListOrApprovalPreview(): JSX.Element {
   const {chatUiModeAtom, chatAtom, publicKeyPemBase64Atom} =

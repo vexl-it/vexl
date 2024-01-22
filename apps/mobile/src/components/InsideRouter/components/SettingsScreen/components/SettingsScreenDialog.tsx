@@ -1,7 +1,7 @@
-import {Stack, Text, XStack} from 'tamagui'
-import Button from '../../../../Button'
 import {Modal} from 'react-native'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
+import {Stack, Text, XStack} from 'tamagui'
+import Button from '../../../../Button'
 
 interface Props {
   primaryButton?: {

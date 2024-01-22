@@ -1,8 +1,8 @@
-import {type PostLoginStackParamsList} from '../../navigationTypes'
 import {createNativeStackNavigator} from '@react-navigation/native-stack'
-import ImportContactsExplanation from './components/ImportContactsExplanation'
+import {type PostLoginStackParamsList} from '../../navigationTypes'
 import PageWithButtonAndProgressHeader from '../PageWithButtonAndProgressHeader'
 import AllowNotificationsExplanationScreen from './components/AllowNotificationsExplanationScreen'
+import ImportContactsExplanation from './components/ImportContactsExplanation'
 
 const Stack = createNativeStackNavigator<PostLoginStackParamsList>()
 

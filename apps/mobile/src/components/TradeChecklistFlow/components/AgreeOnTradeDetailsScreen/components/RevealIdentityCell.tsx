@@ -1,14 +1,14 @@
 import {useAtomValue, useSetAtom} from 'jotai'
+import {useMemo} from 'react'
 import {
-  identityRevealedAtom,
   identityRevealTriggeredFromChatAtom,
+  identityRevealedAtom,
   tradeChecklistIdentityDataAtom,
 } from '../../../../../state/tradeChecklist/atoms/fromChatAtoms'
-import ChecklistCell from './ChecklistCell'
-import {revealIdentityWithUiFeedbackAtom} from '../../../atoms/revealIdentityAtoms'
-import {useMemo} from 'react'
-import createChecklistItemStatusAtom from '../../../atoms/createChecklistItemStatusAtom'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
+import createChecklistItemStatusAtom from '../../../atoms/createChecklistItemStatusAtom'
+import {revealIdentityWithUiFeedbackAtom} from '../../../atoms/revealIdentityAtoms'
+import ChecklistCell from './ChecklistCell'
 
 function RevealIdentityCell(): JSX.Element {
   const {t} = useTranslation()

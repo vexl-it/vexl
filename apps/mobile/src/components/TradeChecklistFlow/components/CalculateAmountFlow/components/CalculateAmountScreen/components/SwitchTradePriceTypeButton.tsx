@@ -1,10 +1,10 @@
-import {TouchableOpacity, type TouchableOpacityProps} from 'react-native'
-import {getTokens, Stack, XStack} from 'tamagui'
 import {useAtomValue} from 'jotai'
-import Image from '../../../../../../Image'
+import {TouchableOpacity, type TouchableOpacityProps} from 'react-native'
+import {Stack, XStack, getTokens} from 'tamagui'
 import chevronDownSvg from '../../../../../../../images/chevronDownSvg'
-import PriceTypeIndicator from '../../PriceTypeIndicator'
+import Image from '../../../../../../Image'
 import {tradePriceTypeAtom} from '../../../atoms'
+import PriceTypeIndicator from '../../PriceTypeIndicator'
 
 function SwitchTradePriceTypeButton(props: TouchableOpacityProps): JSX.Element {
   const tradePriceType = useAtomValue(tradePriceTypeAtom)

@@ -1,5 +1,5 @@
-import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {Stack, Text} from 'tamagui'
+import {useTranslation} from '../../../utils/localization/I18nProvider'
 
 function NothingFound(): JSX.Element {
   const {t} = useTranslation()

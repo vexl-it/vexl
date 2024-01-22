@@ -1,12 +1,12 @@
-import {getTokens, Text} from 'tamagui'
-import {Alert, Text as RNText} from 'react-native'
 import {FlashList} from '@shopify/flash-list'
-import {type Atom, useAtomValue, useStore} from 'jotai'
+import {useAtomValue, useStore, type Atom} from 'jotai'
+import {Alert, Text as RNText} from 'react-native'
+import {Text, getTokens} from 'tamagui'
 import atomKeyExtractor from '../../../utils/atomUtils/atomKeyExtractor'
-import {appLogAtomsAtom} from '../atoms'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
-import SecretDoor from '../../SecretDoor'
 import {isDeveloperAtom} from '../../../utils/preferences'
+import SecretDoor from '../../SecretDoor'
+import {appLogAtomsAtom} from '../atoms'
 
 const logTextStyle = {
   marginBottom: getTokens().space[2].val,

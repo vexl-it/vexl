@@ -1,12 +1,12 @@
+import {useAtomValue, type Atom} from 'jotai'
+import React, {useCallback} from 'react'
 import {FlatList, TouchableWithoutFeedback} from 'react-native'
 import {Text, XStack} from 'tamagui'
 import chevronRightSvg from '../../../../../images/chevronRightSvg'
-import Image from '../../../../Image'
-import React, {useCallback} from 'react'
 import {tokens} from '../../../../../utils/ThemeProvider/tamagui.config'
-import selectedCheckSvg from '../images/selectedCheckSvg'
-import {type Atom, useAtomValue} from 'jotai'
 import atomKeyExtractor from '../../../../../utils/atomUtils/atomKeyExtractor'
+import Image from '../../../../Image'
+import selectedCheckSvg from '../images/selectedCheckSvg'
 
 export interface Item<T> {
   data: T

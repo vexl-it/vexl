@@ -1,18 +1,18 @@
-import {atom, type PrimitiveAtom} from 'jotai'
-import {translationAtom} from '../../utils/localization/I18nProvider'
+import {UserName} from '@vexl-next/domain/src/general/UserName.brand'
+import {toBasicError} from '@vexl-next/domain/src/utility/errors'
+import {type UriString} from '@vexl-next/domain/src/utility/UriString.brand'
+import * as E from 'fp-ts/Either'
 import {pipe} from 'fp-ts/function'
+import * as TE from 'fp-ts/TaskEither'
+import {atom, type PrimitiveAtom} from 'jotai'
+import {type RevealMessageType} from '../../state/chat/atoms/revealIdentityActionAtom'
+import {realUserImageAtom, realUserNameAtom} from '../../state/session'
+import {translationAtom} from '../../utils/localization/I18nProvider'
 import {askAreYouSureActionAtom} from '../AreYouSureDialog'
 import {
   ImageDialogContent,
   UsernameDialogContent,
 } from './RevealIdentityDialogContent'
-import * as TE from 'fp-ts/TaskEither'
-import * as E from 'fp-ts/Either'
-import {type RevealMessageType} from '../../state/chat/atoms/revealIdentityActionAtom'
-import {UserName} from '@vexl-next/domain/src/general/UserName.brand'
-import {toBasicError} from '@vexl-next/domain/src/utility/errors'
-import {realUserImageAtom, realUserNameAtom} from '../../state/session'
-import {type UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 
 interface RevealIdentityActionParams {
   type: 'REQUEST_REVEAL' | 'RESPOND_REVEAL'

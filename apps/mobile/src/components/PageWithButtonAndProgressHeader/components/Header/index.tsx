@@ -1,10 +1,10 @@
-import backButtonSvg from '../../../../images/backButtonSvg'
 import {useAtomValue} from 'jotai'
-import headerStateAtom from '../../state/headerStateAtom'
-import {Stack, styled, XStack} from 'tamagui'
-import IconButton from '../../../IconButton'
 import {useCallback} from 'react'
+import {Stack, styled, XStack} from 'tamagui'
+import backButtonSvg from '../../../../images/backButtonSvg'
 import {dismissKeyboardAndResolveOnLayoutUpdate} from '../../../../utils/dismissKeyboardPromise'
+import IconButton from '../../../IconButton'
+import headerStateAtom from '../../state/headerStateAtom'
 
 const BackButtonFiller = styled(Stack, {
   h: 40,

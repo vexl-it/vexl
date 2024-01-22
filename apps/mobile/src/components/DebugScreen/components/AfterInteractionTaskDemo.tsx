@@ -1,12 +1,12 @@
-import {Text, YStack} from 'tamagui'
 import {hmac} from '@vexl-next/cryptography'
-import {useCallback, useState} from 'react'
-import Button from '../../Button'
-import ProgressBar from '../../ProgressBar'
 import type * as T from 'fp-ts/Task'
 import {pipe} from 'fp-ts/function'
-import sequenceTasksWithAnimationFrames from '../../../utils/sequenceTasksWithAnimationFrames'
+import {useCallback, useState} from 'react'
+import {Text, YStack} from 'tamagui'
 import formatNumber from '../../../utils/formatNumber'
+import sequenceTasksWithAnimationFrames from '../../../utils/sequenceTasksWithAnimationFrames'
+import Button from '../../Button'
+import ProgressBar from '../../ProgressBar'
 
 // sleep promise
 function sleepPromise(ms: number): Promise<void> {

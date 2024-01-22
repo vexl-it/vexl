@@ -1,19 +1,19 @@
+import {useAtomValue, useSetAtom} from 'jotai'
+import {TouchableOpacity} from 'react-native'
+import {Stack, Text, XStack, styled} from 'tamagui'
+import {reachNumberAtom} from '../../../../../state/connections/atom/connectionStateAtom'
 import {
   userDataRealOrAnonymizedAtom,
   userPhoneNumberAtom,
 } from '../../../../../state/session'
-import UserDataDisplay from '../../../../LoginFlow/components/AnonymizationAnimationScreen/components/UserDataDisplay'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import SvgImage from '../../../../Image'
-import QRIconSVG from '../images/QRIconSVG'
-import {TouchableOpacity} from 'react-native'
-import reachIconSVG from '../images/reachIconSVG'
-import {Stack, styled, Text, XStack} from 'tamagui'
-import {useAtomValue, useSetAtom} from 'jotai'
-import {reachNumberAtom} from '../../../../../state/connections/atom/connectionStateAtom'
-import {qrCodeDialogVisibleAtom, qrScannerDialogVisibleAtom} from '../atoms'
-import QrCode from './QrCode'
+import UserDataDisplay from '../../../../LoginFlow/components/AnonymizationAnimationScreen/components/UserDataDisplay'
 import cameraSvg from '../../../images/cameraSvg'
+import {qrCodeDialogVisibleAtom, qrScannerDialogVisibleAtom} from '../atoms'
+import QRIconSVG from '../images/QRIconSVG'
+import reachIconSVG from '../images/reachIconSVG'
+import QrCode from './QrCode'
 import QrScanner from './QrScanner'
 
 const GrayBackContainer = styled(XStack, {

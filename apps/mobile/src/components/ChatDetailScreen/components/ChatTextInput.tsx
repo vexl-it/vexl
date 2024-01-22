@@ -1,26 +1,26 @@
-import TextInput from '../../Input'
-import IconButton from '../../IconButton'
-import sendSvg from '../images/sendSvg'
-import {getTokens, Stack, Text, XStack, YStack} from 'tamagui'
-import {Dimensions, StyleSheet} from 'react-native'
-import React, {useCallback, useMemo, useState} from 'react'
-import Animated, {useAnimatedStyle, withSpring} from 'react-native-reanimated'
-import {useMolecule} from 'bunshi/dist/react'
-import {chatMolecule} from '../atoms'
-import truncate from 'just-truncate'
-import {useAtom, useAtomValue, useSetAtom} from 'jotai'
 import {
-  type ChatMessage,
   generateChatMessageId,
+  type ChatMessage,
 } from '@vexl-next/domain/src/general/messaging'
 import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {useMolecule} from 'bunshi/dist/react'
+import {useAtom, useAtomValue, useSetAtom} from 'jotai'
+import truncate from 'just-truncate'
+import React, {useCallback, useMemo, useState} from 'react'
+import {Dimensions, StyleSheet} from 'react-native'
+import Animated, {useAnimatedStyle, withSpring} from 'react-native-reanimated'
+import {Stack, Text, XStack, YStack, getTokens} from 'tamagui'
 import {useSessionAssumeLoggedIn} from '../../../state/session'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
-import CancelSvg from '../images/cancelSvg'
-import Image from '../../Image'
-import SendImageButton from './SendImageButton'
-import UriImageWithSizeLimits from '../../UriImageWithSizeLimits'
 import {preferencesAtom} from '../../../utils/preferences'
+import IconButton from '../../IconButton'
+import Image from '../../Image'
+import TextInput from '../../Input'
+import UriImageWithSizeLimits from '../../UriImageWithSizeLimits'
+import {chatMolecule} from '../atoms'
+import CancelSvg from '../images/cancelSvg'
+import sendSvg from '../images/sendSvg'
+import SendImageButton from './SendImageButton'
 
 const textInputInitialHeight = getTokens().space[10].val
 

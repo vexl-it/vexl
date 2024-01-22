@@ -1,26 +1,26 @@
 import {
+  useFocusEffect,
+  useNavigation,
+  type NavigationProp,
+} from '@react-navigation/native'
+import {atom, useAtom, useAtomValue, useSetAtom} from 'jotai'
+import {useCallback} from 'react'
+import {Text} from 'tamagui'
+import {type TradeChecklistStackParamsList} from '../../../../../../navigationTypes'
+import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
+import useSafeGoBack from '../../../../../../utils/useSafeGoBack'
+import {
   FooterButtonProxy,
   HeaderProxy,
 } from '../../../../../PageWithNavigationHeader'
-import {
-  type NavigationProp,
-  useFocusEffect,
-  useNavigation,
-} from '@react-navigation/native'
-import {type TradeChecklistStackParamsList} from '../../../../../../navigationTypes'
-import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
-import Content from '../../../Content'
-import useSafeGoBack from '../../../../../../utils/useSafeGoBack'
 import PremiumOrDiscountContent from '../../../../../PremiumOrDiscountContent'
+import Content from '../../../Content'
 import {
   applyFeeOnFeeChangeActionAtom,
   feeAmountAtom,
   offerTypeAtom,
 } from '../../atoms'
-import {Text} from 'tamagui'
-import {atom, useAtom, useAtomValue, useSetAtom} from 'jotai'
 import PriceTypeIndicator from '../PriceTypeIndicator'
-import {useCallback} from 'react'
 
 const tempFeeAmountAtom = atom<number>(0)
 

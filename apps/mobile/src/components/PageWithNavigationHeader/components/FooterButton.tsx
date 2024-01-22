@@ -1,6 +1,6 @@
-import Button from '../../Button'
-import React from 'react'
 import {useAtomValue} from 'jotai'
+import React from 'react'
+import Button from '../../Button'
 import footerButtonStateAtom from '../state/footerButtonStateAtom'
 
 function FooterButton(): JSX.Element | null {

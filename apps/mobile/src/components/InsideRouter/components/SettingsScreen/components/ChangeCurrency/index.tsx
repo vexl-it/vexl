@@ -1,13 +1,13 @@
-import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
+import {type CurrencyCode} from '@vexl-next/domain/src/general/offers'
 import {useAtom} from 'jotai'
+import {useState} from 'react'
+import {Text, XStack, YStack} from 'tamagui'
+import {selectedCurrencyAtom} from '../../../../../../state/selectedCurrency'
+import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
+import RadioButton from '../../../../../RadioButton'
 import {changeCurrencyDialogVisibleAtom} from '../../atoms'
 import SettingsScreenDialog from '../SettingsScreenDialog'
-import {Text, XStack, YStack} from 'tamagui'
-import RadioButton from '../../../../../RadioButton'
-import {type CurrencyCode} from '@vexl-next/domain/src/general/offers'
 import useContent from './useContent'
-import {selectedCurrencyAtom} from '../../../../../../state/selectedCurrency'
-import {useState} from 'react'
 
 interface CurrencyItemProps {
   active: boolean

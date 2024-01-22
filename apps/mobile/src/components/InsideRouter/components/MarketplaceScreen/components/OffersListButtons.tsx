@@ -1,10 +1,10 @@
+import {useAtomValue} from 'jotai'
+import {Stack, XStack} from 'tamagui'
+import addIconSvg from '../../../../../images/addIconSvg'
+import {isFilterActiveAtom} from '../../../../../state/marketplace/filterAtoms'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import Button from '../../../../Button'
-import addIconSvg from '../../../../../images/addIconSvg'
-import {Stack, XStack} from 'tamagui'
 import FilterButtons from './FilterButtons'
-import {useAtomValue} from 'jotai'
-import {isFilterActiveAtom} from '../../../../../state/marketplace/filterAtoms'
 
 interface Props {
   marketplaceEmpty: boolean

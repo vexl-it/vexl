@@ -1,7 +1,7 @@
 import {Slider as RNSlider} from '@miblanchard/react-native-slider'
-import SliderCustomThumb from './SliderCustomThumb'
-import {type ColorTokens, getTokens} from 'tamagui'
 import {type SliderOnChangeCallback} from '@miblanchard/react-native-slider/lib/types'
+import {getTokens, type ColorTokens} from 'tamagui'
+import SliderCustomThumb from './SliderCustomThumb'
 
 interface Props {
   customKnobColor?: ColorTokens

@@ -1,23 +1,23 @@
-import {WhiteContainerWithScroll} from '../../../WhiteContainer'
-import TextInput from '../../../Input'
-import {useTranslation} from '../../../../utils/localization/I18nProvider'
-import {parsePhoneNumber} from 'awesome-phonenumber'
-import {useState} from 'react'
 import * as crypto from '@vexl-next/cryptography'
-import {useVerifyPhoneNumber} from '../../api/verifyPhoneNumber'
-import {pipe} from 'fp-ts/function'
+import {parsePhoneNumber} from 'awesome-phonenumber'
 import * as TE from 'fp-ts/TaskEither'
-import {Alert, TouchableWithoutFeedback} from 'react-native'
-import Countdown from './components/Countdown'
+import {pipe} from 'fp-ts/function'
 import {DateTime} from 'luxon'
-import {useShowLoadingOverlay} from '../../../LoadingOverlayProvider'
+import {useState} from 'react'
+import {Alert, TouchableWithoutFeedback} from 'react-native'
+import {Stack, Text} from 'tamagui'
 import {type LoginStackScreenProps} from '../../../../navigationTypes'
+import {useTranslation} from '../../../../utils/localization/I18nProvider'
+import useSafeGoBack from '../../../../utils/useSafeGoBack'
+import TextInput from '../../../Input'
+import {useShowLoadingOverlay} from '../../../LoadingOverlayProvider'
 import {
   HeaderProxy,
   NextButtonProxy,
 } from '../../../PageWithButtonAndProgressHeader'
-import {Stack, Text} from 'tamagui'
-import useSafeGoBack from '../../../../utils/useSafeGoBack'
+import {WhiteContainerWithScroll} from '../../../WhiteContainer'
+import {useVerifyPhoneNumber} from '../../api/verifyPhoneNumber'
+import Countdown from './components/Countdown'
 
 type Props = LoginStackScreenProps<'VerificationCode'>
 

@@ -1,7 +1,7 @@
-import {useTranslation} from '../../../../utils/localization/I18nProvider'
-import {type Atom, type WritableAtom, useAtomValue, useSetAtom} from 'jotai'
-import SelectableCell from '../../../SelectableCell'
 import {type SpokenLanguage} from '@vexl-next/domain/src/general/offers'
+import {useAtomValue, useSetAtom, type Atom, type WritableAtom} from 'jotai'
+import {useTranslation} from '../../../../utils/localization/I18nProvider'
+import SelectableCell from '../../../SelectableCell'
 
 interface Props {
   spokenLanguageAtom: Atom<SpokenLanguage>

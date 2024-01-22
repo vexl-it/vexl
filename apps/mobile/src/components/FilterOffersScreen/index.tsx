@@ -1,22 +1,22 @@
-import {ScrollView, StyleSheet} from 'react-native'
-import ScreenTitle from '../ScreenTitle'
-import IconButton from '../IconButton'
-import closeSvg from '../images/closeSvg'
-import FilterForm from '../OfferForm'
-import {getTokens, Stack, XStack} from 'tamagui'
-import Button from '../Button'
-import React, {useCallback} from 'react'
-import {useTranslation} from '../../utils/localization/I18nProvider'
-import useContent from './useContent'
-import {useSetAtom} from 'jotai'
-import Screen from '../Screen'
-import useSafeGoBack from '../../utils/useSafeGoBack'
 import {useFocusEffect} from '@react-navigation/native'
+import {useSetAtom} from 'jotai'
+import React, {useCallback} from 'react'
+import {ScrollView, StyleSheet} from 'react-native'
+import {Stack, XStack, getTokens} from 'tamagui'
+import {useTranslation} from '../../utils/localization/I18nProvider'
+import useSafeGoBack from '../../utils/useSafeGoBack'
+import Button from '../Button'
+import IconButton from '../IconButton'
+import FilterForm from '../OfferForm'
+import Screen from '../Screen'
+import ScreenTitle from '../ScreenTitle'
+import closeSvg from '../images/closeSvg'
 import {
   initializeOffersFilterOnDisplayActionAtom,
   resetFilterAtom,
   saveFilterActionAtom,
 } from './atom'
+import useContent from './useContent'
 
 const styles = StyleSheet.create({
   contentStyles: {

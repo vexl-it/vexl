@@ -1,11 +1,11 @@
-import {TouchableWithoutFeedback, useWindowDimensions, View} from 'react-native'
+import {type UriString} from '@vexl-next/domain/src/utility/UriString.brand'
+import {useAtomValue, useSetAtom, type PrimitiveAtom} from 'jotai'
+import {TouchableWithoutFeedback, View, useWindowDimensions} from 'react-native'
 import {Image, Stack} from 'tamagui'
+import {selectImageActionAtom} from '../state/selectImageActionAtom'
 import SvgImage from './Image'
 import MiniCameraSvg from './LoginFlow/components/PhotoScreen/images/miniCameraSvg'
 import selectIconSvg from './LoginFlow/components/PhotoScreen/images/selectIconSvg'
-import {type PrimitiveAtom, useAtomValue, useSetAtom} from 'jotai'
-import {selectImageActionAtom} from '../state/selectImageActionAtom'
-import {type UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 
 interface Props {
   selectedImageUriAtom: PrimitiveAtom<UriString | undefined>

@@ -1,14 +1,14 @@
-import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {type BottomTabBarProps} from '@react-navigation/bottom-tabs'
+import {type SvgString} from '@vexl-next/domain/src/utility/SvgString.brand'
+import {useAtomValue} from 'jotai'
+import {TouchableWithoutFeedback} from 'react-native'
+import {useSafeAreaInsets} from 'react-native-safe-area-context'
+import {getTokens, Stack, XStack} from 'tamagui'
+import {areThereUnreadMessagesAtom} from '../../../state/chat/atoms/unreadChatsCountAtom'
 import Image from '../../Image'
 import marketplaceIconSvg from '../images/marketplaceIconSvg'
 import messagesIconSvg from '../images/messagesIconSvg'
 import profileIconSvg from '../images/profileIconSvg'
-import {type SvgString} from '@vexl-next/domain/src/utility/SvgString.brand'
-import {getTokens, Stack, XStack} from 'tamagui'
-import {TouchableWithoutFeedback} from 'react-native'
-import {useAtomValue} from 'jotai'
-import {areThereUnreadMessagesAtom} from '../../../state/chat/atoms/unreadChatsCountAtom'
 
 export const TAB_BAR_HEIGHT_PX = 72
 

@@ -1,19 +1,19 @@
+import {useFocusEffect} from '@react-navigation/native'
+import {atom, useAtomValue, useSetAtom} from 'jotai'
+import {useCallback} from 'react'
+import {Stack} from 'tamagui'
+import {dismissKeyboardAndResolveOnLayoutUpdate} from '../../../../../../utils/dismissKeyboardPromise'
+import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
+import useSafeGoBack from '../../../../../../utils/useSafeGoBack'
 import {
   FooterButtonProxy,
   HeaderProxy,
 } from '../../../../../PageWithNavigationHeader'
-import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
-import useSafeGoBack from '../../../../../../utils/useSafeGoBack'
 import Content from '../../../Content'
-import {Stack} from 'tamagui'
+import {saveYourPriceActionAtom, tradePriceTypeAtom} from '../../atoms'
 import BtcAmountInput from '../BtcAmountInput'
 import FiatAmountInput from '../FiatAmountInput'
 import PriceInfo from './components/PriceInfo'
-import {atom, useAtomValue, useSetAtom} from 'jotai'
-import {saveYourPriceActionAtom, tradePriceTypeAtom} from '../../atoms'
-import {useFocusEffect} from '@react-navigation/native'
-import {useCallback} from 'react'
-import {dismissKeyboardAndResolveOnLayoutUpdate} from '../../../../../../utils/dismissKeyboardPromise'
 
 const btcTempValueAtom = atom<string>('1')
 const fiatTempValueAtom = atom<string>('')

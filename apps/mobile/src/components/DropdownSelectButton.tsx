@@ -1,7 +1,7 @@
-import {getTokens, XStack} from 'tamagui'
 import {TouchableOpacity, type TouchableOpacityProps} from 'react-native'
-import Image from './Image'
+import {XStack, getTokens} from 'tamagui'
 import chevronDownSvg from '../images/chevronDownSvg'
+import Image from './Image'
 import clearInputSvg from './images/clearInputSvg'
 
 interface Props extends TouchableOpacityProps {
@@ -20,14 +20,7 @@ function DropdownSelectButton({
 
   return (
     <TouchableOpacity {...props}>
-      <XStack
-        ai="center"
-        jc="space-between"
-        px="$5"
-        py="$4"
-        br="$5"
-        bc="$grey"
-      >
+      <XStack ai="center" jc="space-between" px="$5" py="$4" br="$5" bc="$grey">
         {children}
         {clearButtonVisible ? (
           <TouchableOpacity onPress={onClearPress}>

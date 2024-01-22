@@ -1,7 +1,7 @@
-import Image from '../Image'
-import loaderSvg from './image/loaderSvg'
 import {type StyleProp, type ViewStyle} from 'react-native'
 import {Stack, Text} from 'tamagui'
+import Image from '../Image'
+import loaderSvg from './image/loaderSvg'
 
 interface Props {
   text: string

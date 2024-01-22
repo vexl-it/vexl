@@ -17,27 +17,27 @@ import offerToConnectionsAtom, {
 } from '../../state/connections/atom/offerToConnectionsAtom'
 import {importedContactsAtom} from '../../state/contacts'
 import {triggerOffersRefreshAtom} from '../../state/marketplace'
+import {myOffersAtom} from '../../state/marketplace/atoms/myOffers'
+import {offersStateAtom} from '../../state/marketplace/atoms/offersState'
 import {useSessionAssumeLoggedIn} from '../../state/session'
 import {enableHiddenFeatures, version} from '../../utils/environment'
+import {
+  getShowDebugNotifications,
+  setShowDebugNotifications,
+} from '../../utils/notifications/showDebugNotificationIfEnabled'
+import {isDeveloperAtom, showTextDebugButtonAtom} from '../../utils/preferences'
 import reportError from '../../utils/reportError'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 import Button from '../Button'
 import Screen from '../Screen'
 import WhiteContainer from '../WhiteContainer'
 import deleteInboxAtom from './atoms/deleteInboxAtom'
+import AfterInteractionTaskDemo from './components/AfterInteractionTaskDemo'
 import CryptoBenchmarks from './components/CryptoBenchmarks'
 import LanguagePicker from './components/LanguagePicker'
 import Preferences from './components/Preferences'
 import RemoteConfigView from './components/RemoteConfigView'
 import SimulateMissingOfferInbox from './components/SimulateMissingOfferInbox'
-import {offersStateAtom} from '../../state/marketplace/atoms/offersState'
-import {myOffersAtom} from '../../state/marketplace/atoms/myOffers'
-import AfterInteractionTaskDemo from './components/AfterInteractionTaskDemo'
-import {isDeveloperAtom, showTextDebugButtonAtom} from '../../utils/preferences'
-import {
-  getShowDebugNotifications,
-  setShowDebugNotifications,
-} from '../../utils/notifications/showDebugNotificationIfEnabled'
 
 // const ContentScroll = styled(ScrollView, {
 //   marginBottom: '$2',

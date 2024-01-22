@@ -1,10 +1,10 @@
-import {Stack, YStack} from 'tamagui'
-import {useAtomValue} from 'jotai'
 import {useMolecule} from 'bunshi/dist/react'
-import {chatMolecule} from '../atoms'
+import {useAtomValue} from 'jotai'
+import {Stack, YStack} from 'tamagui'
+import ContactTypeAndCommonNumber from '../../ContactTypeAndCommonNumber'
 import UserAvatar from '../../UserAvatar'
 import UserNameWithSellingBuying from '../../UserNameWithSellingBuying'
-import ContactTypeAndCommonNumber from '../../ContactTypeAndCommonNumber'
+import {chatMolecule} from '../atoms'
 import UserAvatarTouchableWrapper from './UserAvatarTouchableWrapper'
 
 interface Props {

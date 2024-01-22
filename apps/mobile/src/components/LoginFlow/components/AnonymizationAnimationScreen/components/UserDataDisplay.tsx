@@ -1,8 +1,8 @@
-import {type StyleProp, type ViewStyle} from 'react-native'
-import SvgImage from '../../../../Image'
 import {type RealLifeInfo} from '@vexl-next/domain/src/general/UserNameAndAvatar.brand'
+import {type StyleProp, type ViewStyle} from 'react-native'
 import {Image, Stack, Text} from 'tamagui'
 import resolveLocalUri from '../../../../../utils/resolveLocalUri'
+import SvgImage from '../../../../Image'
 
 interface Props {
   topText?: string

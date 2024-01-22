@@ -1,9 +1,9 @@
-import {Stack, Text} from 'tamagui'
+import remoteConfig from '@react-native-firebase/remote-config'
 import {useAtomValue} from 'jotai'
+import {Alert} from 'react-native'
+import {Stack, Text} from 'tamagui'
 import {remoteConfigAtom} from '../../../utils/remoteConfig/atoms'
 import Button from '../../Button'
-import remoteConfig from '@react-native-firebase/remote-config'
-import {Alert} from 'react-native'
 
 function RemoteConfigView(): JSX.Element {
   const remoteConfigValue = useAtomValue(remoteConfigAtom)

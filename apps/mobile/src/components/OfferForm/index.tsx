@@ -1,8 +1,8 @@
 import React from 'react'
 import {ActivityIndicator} from 'react-native'
 import {getTokens, Stack} from 'tamagui'
-import Section, {type Props} from '../Section'
 import ChunkView from '../ChunkView'
+import Section, {type Props} from '../Section'
 
 function LoaderComponent(): JSX.Element {
   const tokens = getTokens()

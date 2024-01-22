@@ -2,6 +2,7 @@ import {useSetAtom} from 'jotai'
 import {XStack, YStack} from 'tamagui'
 import backButtonSvg from '../../../../../images/backButtonSvg'
 import {type TradeChecklistStackScreenProps} from '../../../../../navigationTypes'
+import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import Button from '../../../../Button'
 import IconButton from '../../../../IconButton'
 import {loadingOverlayDisplayedAtom} from '../../../../LoadingOverlayProvider'
@@ -15,7 +16,6 @@ import {
   submitTradeChecklistUpdatesActionAtom,
 } from '../../../atoms/updatesToBeSentAtom'
 import {useSetFullscreen} from '../../TradeChecklistFlowPageContainer'
-import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 
 type Props = TradeChecklistStackScreenProps<'LocationMapPreview'>
 export default function LocationMapPreview({

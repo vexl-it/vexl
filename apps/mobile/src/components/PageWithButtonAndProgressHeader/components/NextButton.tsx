@@ -1,9 +1,9 @@
-import Button from '../../Button'
 import {useAtomValue} from 'jotai'
-import nextButtonStateAtom from '../state/nextButtonStateAtom'
-import {XStack} from 'tamagui'
 import {useCallback} from 'react'
+import {XStack} from 'tamagui'
 import {dismissKeyboardAndResolveOnLayoutUpdate} from '../../../utils/dismissKeyboardPromise'
+import Button from '../../Button'
+import nextButtonStateAtom from '../state/nextButtonStateAtom'
 
 function emptyPress(): void {}
 

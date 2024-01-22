@@ -1,26 +1,26 @@
+import {useAtomValue, useSetAtom} from 'jotai'
+import {useCallback, useState} from 'react'
+import {Alert} from 'react-native'
+import {Stack, Text, XStack} from 'tamagui'
+import {useTranslation} from '../../utils/localization/I18nProvider'
+import showErrorAlert from '../../utils/showErrorAlert'
+import useSafeGoBack from '../../utils/useSafeGoBack'
+import Button from '../Button'
+import IconButton from '../IconButton'
+import {loadingOverlayDisplayedAtom} from '../LoadingOverlayProvider'
 import Screen from '../Screen'
 import ScreenTitle from '../ScreenTitle'
-import {useTranslation} from '../../utils/localization/I18nProvider'
-import {Stack, Text, XStack} from 'tamagui'
 import Switch from '../Switch'
-import {useCallback, useState} from 'react'
+import closeSvg from '../images/closeSvg'
+import {appLogsEmptyAtom} from './atoms'
+import LogsList from './components/LogsList'
+import saveLogsToDirectoryAndShare from './utils/saveLogsToDirectory'
+import {setupAppLogs} from './utils/setupAppLogs'
 import {
   clearLogs,
   getCustomLoggingEnabled,
   setCustomLoggingEnabled,
 } from './utils/storage'
-import LogsList from './components/LogsList'
-import Button from '../Button'
-import saveLogsToDirectoryAndShare from './utils/saveLogsToDirectory'
-import {useSetAtom, useAtomValue} from 'jotai'
-import {loadingOverlayDisplayedAtom} from '../LoadingOverlayProvider'
-import {Alert} from 'react-native'
-import {setupAppLogs} from './utils/setupAppLogs'
-import IconButton from '../IconButton'
-import closeSvg from '../images/closeSvg'
-import useSafeGoBack from '../../utils/useSafeGoBack'
-import showErrorAlert from '../../utils/showErrorAlert'
-import { appLogsEmptyAtom } from './atoms'
 
 function AppLogsScreen(): JSX.Element {
   const {t} = useTranslation()

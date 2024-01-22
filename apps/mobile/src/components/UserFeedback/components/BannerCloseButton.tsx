@@ -1,10 +1,10 @@
 import {useMolecule} from 'bunshi/dist/react'
-import {feedbackMolecule} from '../atoms'
 import {useAtomValue, useSetAtom} from 'jotai'
 import {TouchableOpacity} from 'react-native'
+import {Stack, getTokens} from 'tamagui'
 import SvgImage from '../../Image'
 import closeSvg from '../../images/closeSvg'
-import {getTokens, Stack} from 'tamagui'
+import {feedbackMolecule} from '../atoms'
 
 interface Props {
   hideCloseButton?: boolean

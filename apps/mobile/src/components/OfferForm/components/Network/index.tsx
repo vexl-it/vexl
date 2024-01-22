@@ -1,8 +1,8 @@
-import useContent from './useContent'
 import {type BtcNetwork} from '@vexl-next/domain/src/general/offers'
-import {type PrimitiveAtom, useAtom} from 'jotai'
+import {useAtom, type PrimitiveAtom} from 'jotai'
 import {YStack} from 'tamagui'
 import SelectableCell from '../../../SelectableCell'
+import useContent from './useContent'
 
 interface Props {
   btcNetworkAtom: PrimitiveAtom<BtcNetwork[] | undefined>

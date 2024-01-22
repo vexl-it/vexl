@@ -1,12 +1,12 @@
-import OffersListItem from './OffersListItem'
+import {FlashList} from '@shopify/flash-list'
+import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
+import {type Atom} from 'jotai'
+import React, {useMemo, type ComponentProps} from 'react'
 import {type FlatList} from 'react-native'
 import {getTokens} from 'tamagui'
-import React, {type ComponentProps, useMemo} from 'react'
-import usePixelsFromBottomWhereTabsEnd from '../InsideRouter/utils'
-import {FlashList} from '@shopify/flash-list'
-import {type Atom} from 'jotai'
 import atomKeyExtractor from '../../utils/atomUtils/atomKeyExtractor'
-import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
+import usePixelsFromBottomWhereTabsEnd from '../InsideRouter/utils'
+import OffersListItem from './OffersListItem'
 
 export interface Props {
   readonly offersAtoms: Array<Atom<OneOfferInState>>

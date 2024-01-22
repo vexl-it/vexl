@@ -1,11 +1,11 @@
-import {useMemo} from 'react'
+import {useMolecule} from 'bunshi/dist/react'
 import {useAtom, useAtomValue, useSetAtom} from 'jotai'
-import SvgImage from '../../Image'
+import {useMemo} from 'react'
 import {TouchableOpacity} from 'react-native'
 import {getTokens} from 'tamagui'
-import starSvg from '../images/starSvg'
-import {useMolecule} from 'bunshi/dist/react'
+import SvgImage from '../../Image'
 import {feedbackMolecule} from '../atoms'
+import starSvg from '../images/starSvg'
 
 interface Props {
   starOrderNumber: number

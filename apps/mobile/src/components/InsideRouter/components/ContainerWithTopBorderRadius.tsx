@@ -1,6 +1,6 @@
 import {type ReactNode} from 'react'
-import usePixelsFromBottomWhereTabsEnd from '../utils'
 import {ScrollView, Stack, styled} from 'tamagui'
+import usePixelsFromBottomWhereTabsEnd from '../utils'
 
 export const CONTAINER_WITH_TOP_BORDER_RADIUS_TOP_PADDING = 24
 

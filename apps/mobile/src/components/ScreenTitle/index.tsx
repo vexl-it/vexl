@@ -1,12 +1,12 @@
+import {type ReactNode} from 'react'
 import {
-  type ColorTokens,
   Stack,
   Text,
   XStack,
   YStack,
+  type ColorTokens,
   type YStackProps,
 } from 'tamagui'
-import {type ReactNode} from 'react'
 
 interface Props extends YStackProps {
   children?: ReactNode

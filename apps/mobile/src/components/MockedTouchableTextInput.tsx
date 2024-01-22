@@ -1,5 +1,5 @@
-import {Stack, Text} from 'tamagui'
 import {TouchableWithoutFeedback} from 'react-native'
+import {Stack, Text} from 'tamagui'
 
 interface Props {
   text: string

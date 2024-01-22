@@ -1,14 +1,14 @@
+import {keys} from '@vexl-next/resources-utils/src/utils/keys'
 import {useAtom} from 'jotai'
 import {useMemo} from 'react'
 import {TouchableOpacity} from 'react-native'
 import {Text, XStack} from 'tamagui'
-import {keys} from '@vexl-next/resources-utils/src/utils/keys'
 import {
   supportedTranslations,
   useTranslation,
 } from '../../../../../../../utils/localization/I18nProvider'
-import {createIsLanguageSelectedAtom} from '../../../atoms'
 import RadioButton from '../../../../../../RadioButton'
+import {createIsLanguageSelectedAtom} from '../../../atoms'
 
 const languages = keys(supportedTranslations)
 interface LanguageSelectItemProps {

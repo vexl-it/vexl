@@ -1,5 +1,5 @@
-import {Stack, styled} from 'tamagui'
 import {TouchableOpacity, type TouchableOpacityProps} from 'react-native'
+import {Stack, styled} from 'tamagui'
 
 const StyledRadioButton = styled(Stack, {
   w: 24,

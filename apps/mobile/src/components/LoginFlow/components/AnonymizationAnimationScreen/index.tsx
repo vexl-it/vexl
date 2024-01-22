@@ -1,19 +1,19 @@
-import UserDataDisplay from './components/UserDataDisplay'
-import {useTranslation} from '../../../../utils/localization/I18nProvider'
-import AnonymizationCaption from '../../../AnonymizationCaption/AnonymizationCaption'
-import {useMemo, useState} from 'react'
-import randomNumber from '../../../../utils/randomNumber'
-import randomName from '../../../../utils/randomName'
 import {animated, useTransition} from '@react-spring/native'
-import {getAvatarSvg} from '../../../AnonymousAvatar'
-import {fromSvgString} from '@vexl-next/domain/src/utility/SvgStringOrImageUri.brand'
 import {RealLifeInfo} from '@vexl-next/domain/src/general/UserNameAndAvatar.brand'
+import {fromSvgString} from '@vexl-next/domain/src/utility/SvgStringOrImageUri.brand'
+import {useMemo, useState} from 'react'
+import {Stack, Text, styled} from 'tamagui'
 import {type LoginStackScreenProps} from '../../../../navigationTypes'
+import {useTranslation} from '../../../../utils/localization/I18nProvider'
+import randomName from '../../../../utils/randomName'
+import randomNumber from '../../../../utils/randomNumber'
+import AnonymizationCaption from '../../../AnonymizationCaption/AnonymizationCaption'
+import {getAvatarSvg} from '../../../AnonymousAvatar'
 import {
   HeaderProxy,
   NextButtonProxy,
 } from '../../../PageWithButtonAndProgressHeader'
-import {Stack, styled, Text} from 'tamagui'
+import UserDataDisplay from './components/UserDataDisplay'
 
 const ContentContainer = styled(animated.View, {
   f: 1,

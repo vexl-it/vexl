@@ -1,8 +1,8 @@
-import Image from '../Image'
 import {Dropdown as RNEDropdown} from 'react-native-element-dropdown'
-import chevronDownSvg from '../../images/chevronDownSvg'
-import {getTokens, Text, XStack} from 'tamagui'
 import {type DropdownProps} from 'react-native-element-dropdown/lib/typescript/components/Dropdown/model'
+import {getTokens, Text, XStack} from 'tamagui'
+import chevronDownSvg from '../../images/chevronDownSvg'
+import Image from '../Image'
 import checkmarkSvg from '../images/checkmarkSvg'
 
 export interface DropdownItemProps<T> {

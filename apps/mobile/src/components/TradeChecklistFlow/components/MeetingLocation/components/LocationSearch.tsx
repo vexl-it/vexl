@@ -1,11 +1,11 @@
-import LocationSearch from '../../../../LocationSearch'
 import {type TradeChecklistStackScreenProps} from '../../../../../navigationTypes'
+import LocationSearch from '../../../../LocationSearch'
+import {newLocationSessionId} from '../../../../LocationSearch/molecule'
 import {
   FooterButtonProxy,
   HeaderProxy,
 } from '../../../../PageWithNavigationHeader'
 import Content from '../../Content'
-import {newLocationSessionId} from '../../../../LocationSearch/molecule'
 
 type Props = TradeChecklistStackScreenProps<'LocationSearch'>
 

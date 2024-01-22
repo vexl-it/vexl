@@ -1,16 +1,16 @@
-import {WhiteContainerWithScroll} from '../../../WhiteContainer'
-import TextInput from '../../../Input'
+import {UserName} from '@vexl-next/domain/src/general/UserName.brand'
+import {useState} from 'react'
+import {Alert} from 'react-native'
+import {Stack, Text} from 'tamagui'
+import {type LoginStackScreenProps} from '../../../../navigationTypes'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import AnonymizationCaption from '../../../AnonymizationCaption/AnonymizationCaption'
-import {useState} from 'react'
-import {UserName} from '@vexl-next/domain/src/general/UserName.brand'
-import {Alert} from 'react-native'
-import {type LoginStackScreenProps} from '../../../../navigationTypes'
+import TextInput from '../../../Input'
 import {
   HeaderProxy,
   NextButtonProxy,
 } from '../../../PageWithButtonAndProgressHeader'
-import {Stack, Text} from 'tamagui'
+import {WhiteContainerWithScroll} from '../../../WhiteContainer'
 
 type Props = LoginStackScreenProps<'Name'>
 

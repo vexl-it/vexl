@@ -1,5 +1,5 @@
-import MarkdownDisplay from 'react-native-markdown-display'
 import {StyleSheet} from 'react-native'
+import MarkdownDisplay from 'react-native-markdown-display'
 
 interface Props {
   children: string

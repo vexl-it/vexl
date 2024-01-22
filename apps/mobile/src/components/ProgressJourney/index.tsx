@@ -1,8 +1,8 @@
-import Button from '../Button'
 import {type ReactNode} from 'react'
-import {useTranslation} from '../../utils/localization/I18nProvider'
-import WhiteContainer from '../WhiteContainer'
 import {Stack, styled} from 'tamagui'
+import {useTranslation} from '../../utils/localization/I18nProvider'
+import Button from '../Button'
+import WhiteContainer from '../WhiteContainer'
 
 const BreadCrumb = styled(Stack, {
   h: 4,

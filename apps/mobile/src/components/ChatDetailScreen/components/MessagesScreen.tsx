@@ -1,14 +1,14 @@
-import ChatHeader from './ChatHeader'
-import {useAtom, useAtomValue} from 'jotai'
 import {useMolecule} from 'bunshi/dist/react'
-import {chatMolecule} from '../atoms'
-import ChatTextInput from './ChatTextInput'
+import {useAtom, useAtomValue} from 'jotai'
 import {Stack} from 'tamagui'
+import {preferencesAtom} from '../../../utils/preferences'
+import {chatMolecule} from '../atoms'
+import ChatHeader from './ChatHeader'
+import ChatTextInput from './ChatTextInput'
+import ImageZoomOverlay from './ImageZoomOverlay'
 import MessagesList from './MessagesList'
 import QuickActionBanner from './QuickActionBanner'
-import ImageZoomOverlay from './ImageZoomOverlay'
 import StickyHeader from './StickyHeader'
-import {preferencesAtom} from '../../../utils/preferences'
 
 function MessagesScreen(): JSX.Element {
   const {showModalAtom, canSendMessagesAtom, identityRevealStatusAtom} =

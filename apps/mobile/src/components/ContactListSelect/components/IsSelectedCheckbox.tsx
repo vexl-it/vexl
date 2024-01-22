@@ -1,9 +1,9 @@
-import {type Atom, useAtom} from 'jotai'
-import Checkbox from '../../Checkbox'
-import {useMemo} from 'react'
 import {useMolecule} from 'bunshi/dist/react'
-import {contactSelectMolecule} from '../atom'
+import {useAtom, type Atom} from 'jotai'
+import {useMemo} from 'react'
 import {type ContactNormalized} from '../../../state/contacts/domain'
+import Checkbox from '../../Checkbox'
+import {contactSelectMolecule} from '../atom'
 
 function IsSelectedCheckbox({
   contactAtom,

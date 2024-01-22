@@ -5,13 +5,13 @@ import {
 import * as E from 'fp-ts/Either'
 import type * as TE from 'fp-ts/TaskEither'
 import {atom, useAtom, type WritableAtom} from 'jotai'
-import React, {type ComponentType, useCallback} from 'react'
+import React, {useCallback, type ComponentType} from 'react'
 import {ScrollView, StyleSheet, View} from 'react-native'
-import {type ColorTokens, Stack, Text, XStack} from 'tamagui'
+import {Stack, Text, XStack, type ColorTokens} from 'tamagui'
+import AnimatedDialogWrapper from './AnimatedDialogWrapper'
 import Button from './Button'
 import {ImageUniversal, type ImageUniversalSourcePropType} from './Image'
 import Input, {type Props as VexlTextInputProps} from './Input'
-import AnimatedDialogWrapper from './AnimatedDialogWrapper'
 
 interface StepWithText {
   type: 'StepWithText'

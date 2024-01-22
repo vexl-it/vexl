@@ -1,13 +1,13 @@
-import {type RootStackScreenProps} from '../../navigationTypes'
-import Screen from '../Screen'
-import useSafeGoBack from '../../utils/useSafeGoBack'
-import {useTranslation} from '../../utils/localization/I18nProvider'
-import {useSingleOffer} from '../../state/marketplace'
-import {Text, YStack} from 'tamagui'
-import OfferInfo from './components/OfferInfo'
 import {isSome} from 'fp-ts/Option'
+import {Text, YStack} from 'tamagui'
+import {type RootStackScreenProps} from '../../navigationTypes'
+import {useSingleOffer} from '../../state/marketplace'
+import {useTranslation} from '../../utils/localization/I18nProvider'
+import useSafeGoBack from '../../utils/useSafeGoBack'
 import Button from '../Button'
 import KeyboardAvoidingView from '../KeyboardAvoidingView'
+import Screen from '../Screen'
+import OfferInfo from './components/OfferInfo'
 
 type Props = RootStackScreenProps<'OfferDetail'>
 

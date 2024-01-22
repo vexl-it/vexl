@@ -1,35 +1,35 @@
-import useContent from './useContent'
-import Tabs from '../../../Tabs'
-import {useState} from 'react'
-import {getTokens, Stack, Text, XStack, YStack} from 'tamagui'
-import SvgImage from '../../../Image'
-import {useTranslation} from '../../../../utils/localization/I18nProvider'
-import {Modal, TouchableOpacity, TouchableWithoutFeedback} from 'react-native'
-import closeSvg from '../../../images/closeSvg'
-import magnifyingGlass from '../../../images/magnifyingGlass'
-import Help from '../../../Help'
-import anonymousCounterpartSvg from '../../../images/anonymousCounterpartSvg'
-import {
-  type PrimitiveAtom,
-  useAtom,
-  useAtomValue,
-  useSetAtom,
-  type WritableAtom,
-} from 'jotai'
 import {
   type Location,
   type LocationState,
 } from '@vexl-next/domain/src/general/offers'
-import Info from '../../../Info'
 import {type LocationSuggestion} from '@vexl-next/rest-api/src/services/location/contracts'
+import {
+  useAtom,
+  useAtomValue,
+  useSetAtom,
+  type PrimitiveAtom,
+  type WritableAtom,
+} from 'jotai'
+import {useState} from 'react'
+import {Modal, TouchableOpacity, TouchableWithoutFeedback} from 'react-native'
+import {Stack, Text, XStack, YStack, getTokens} from 'tamagui'
+import {useTranslation} from '../../../../utils/localization/I18nProvider'
+import Help from '../../../Help'
+import IconButton from '../../../IconButton'
+import SvgImage from '../../../Image'
+import Info from '../../../Info'
 import LocationSearch from '../../../LocationSearch'
 import {
-  type LocationSessionId,
   newLocationSessionId,
+  type LocationSessionId,
 } from '../../../LocationSearch/molecule'
-import ScreenTitle from '../../../ScreenTitle'
-import IconButton from '../../../IconButton'
 import Screen from '../../../Screen'
+import ScreenTitle from '../../../ScreenTitle'
+import Tabs from '../../../Tabs'
+import anonymousCounterpartSvg from '../../../images/anonymousCounterpartSvg'
+import closeSvg from '../../../images/closeSvg'
+import magnifyingGlass from '../../../images/magnifyingGlass'
+import useContent from './useContent'
 
 interface Props {
   setOfferLocationActionAtom: WritableAtom<

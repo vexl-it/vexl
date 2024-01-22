@@ -1,9 +1,9 @@
+import {useAtom} from 'jotai'
+import {useEffect} from 'react'
+import {useTranslation} from '../../../utils/localization/I18nProvider'
 import TextInput from '../../Input'
 import magnifyingGlass from '../../images/magnifyingGlass'
-import {useAtom} from 'jotai'
 import {searchTextAtom} from '../atom'
-import {useTranslation} from '../../../utils/localization/I18nProvider'
-import {useEffect} from 'react'
 
 function SearchBar(): JSX.Element {
   const {t} = useTranslation()

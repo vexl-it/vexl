@@ -1,7 +1,7 @@
+import {TouchableOpacity} from 'react-native'
+import {Stack, Text} from 'tamagui'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import Image from '../../Image'
-import {Stack, Text} from 'tamagui'
-import {TouchableOpacity} from 'react-native'
 import playInContainerSvg from '../images/playInContainerSvg'
 interface Props {
   onPress: () => void

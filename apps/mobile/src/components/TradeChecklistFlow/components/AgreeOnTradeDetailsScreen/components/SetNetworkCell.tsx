@@ -1,14 +1,14 @@
+import {useNavigation, type NavigationProp} from '@react-navigation/native'
 import {useAtomValue} from 'jotai'
-import {type NavigationProp, useNavigation} from '@react-navigation/native'
-import {type TradeChecklistStackParamsList} from '../../../../../navigationTypes'
 import {useCallback} from 'react'
+import {type TradeChecklistStackParamsList} from '../../../../../navigationTypes'
 import {
   originOfferAtom,
   tradeChecklistNetworkDataAtom,
 } from '../../../../../state/tradeChecklist/atoms/fromChatAtoms'
-import ChecklistCell from './ChecklistCell'
-import {networkUpdateToBeSentAtom} from '../../../atoms/updatesToBeSentAtom'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
+import {networkUpdateToBeSentAtom} from '../../../atoms/updatesToBeSentAtom'
+import ChecklistCell from './ChecklistCell'
 
 function SetNetworkCell(): JSX.Element {
   const {t} = useTranslation()

@@ -1,12 +1,12 @@
-import {Stack, Text} from 'tamagui'
-import SvgImage from '../../../../Image'
-import {type SvgString} from '@vexl-next/domain/src/utility/SvgString.brand'
-import {TouchableOpacity} from 'react-native'
-import {userDataRealOrAnonymizedAtom} from '../../../../../state/session'
-import UserAvatar from '../../../../UserAvatar'
 import {type IntendedConnectionLevel} from '@vexl-next/domain/src/general/offers'
-import checkmarkInCircleSvg from '../../../../images/checkmarkInCircleSvg'
+import {type SvgString} from '@vexl-next/domain/src/utility/SvgString.brand'
 import {useAtomValue} from 'jotai'
+import {TouchableOpacity} from 'react-native'
+import {Stack, Text} from 'tamagui'
+import {userDataRealOrAnonymizedAtom} from '../../../../../state/session'
+import SvgImage from '../../../../Image'
+import UserAvatar from '../../../../UserAvatar'
+import checkmarkInCircleSvg from '../../../../images/checkmarkInCircleSvg'
 
 interface FriendLevelCellContentProps {
   image: SvgString

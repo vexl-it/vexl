@@ -1,14 +1,14 @@
-import {TouchableOpacity} from 'react-native'
-import {getTokens, Stack, Text, YStack} from 'tamagui'
-import SvgImage from '../../Image'
-import arrowRightSvg from '../images/arrowRightSvg'
-import stayAnonymousSvg from '../../images/stayAnonymousSvg'
-import {useMemo, useState} from 'react'
-import {useTranslation} from '../../../utils/localization/I18nProvider'
-import {type Atom, useAtomValue} from 'jotai'
 import {type OfferType} from '@vexl-next/domain/src/general/offers'
+import {useAtomValue, type Atom} from 'jotai'
+import {useMemo, useState} from 'react'
+import {TouchableOpacity} from 'react-native'
+import {Stack, Text, YStack, getTokens} from 'tamagui'
+import {useTranslation} from '../../../utils/localization/I18nProvider'
 import Help from '../../Help'
+import SvgImage from '../../Image'
 import infoSvg from '../../images/infoSvg'
+import stayAnonymousSvg from '../../images/stayAnonymousSvg'
+import arrowRightSvg from '../images/arrowRightSvg'
 
 interface Props {
   feeAmountAtom: Atom<number>

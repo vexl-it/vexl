@@ -1,6 +1,7 @@
 import Clipboard from '@react-native-clipboard/clipboard'
 import {type ChatMessage} from '@vexl-next/domain/src/general/messaging'
 import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {useMolecule} from 'bunshi/dist/react'
 import {
   atom,
   useAtom,
@@ -9,7 +10,6 @@ import {
   type Atom,
   type SetStateAction,
 } from 'jotai'
-import {useMolecule} from 'bunshi/dist/react'
 import React, {useCallback, useMemo} from 'react'
 import {
   Image,
@@ -19,7 +19,7 @@ import {
   TouchableWithoutFeedback,
 } from 'react-native'
 import Animated, {FadeIn, FadeOut} from 'react-native-reanimated'
-import {getTokens, Stack, Text, XStack, YStack} from 'tamagui'
+import {Stack, Text, XStack, YStack, getTokens} from 'tamagui'
 import getValueFromSetStateActionOfAtom from '../../../utils/atomUtils/getValueFromSetStateActionOfAtom'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import resolveLocalUri from '../../../utils/resolveLocalUri'

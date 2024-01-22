@@ -1,7 +1,7 @@
-import Input from '../../Input'
-import {Stack} from 'tamagui'
-import React, {useCallback} from 'react'
 import {useAtom, useSetAtom} from 'jotai'
+import React, {useCallback} from 'react'
+import {Stack} from 'tamagui'
+import Input from '../../Input'
 import {searchTextAtom} from '../atoms/searchTextAtom'
 import submitSearchActionAtom from '../atoms/submitSearchActionAtom'
 

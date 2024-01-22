@@ -1,6 +1,6 @@
-import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import {type BtcNetwork} from '@vexl-next/domain/src/general/offers'
 import {useMemo} from 'react'
+import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import {type SelectableCellContentProps} from '../../../SelectableCell'
 
 export default function useContent(): Array<

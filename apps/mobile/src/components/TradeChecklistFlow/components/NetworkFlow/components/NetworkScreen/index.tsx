@@ -1,26 +1,26 @@
+import {useSetAtom} from 'jotai'
+import {useCallback, useEffect} from 'react'
+import {Stack} from 'tamagui'
+import {type TradeChecklistStackScreenProps} from '../../../../../../navigationTypes'
+import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
+import useSafeGoBack from '../../../../../../utils/useSafeGoBack'
+import {loadingOverlayDisplayedAtom} from '../../../../../LoadingOverlayProvider'
 import {
   FooterButtonProxy,
   HeaderProxy,
 } from '../../../../../PageWithNavigationHeader'
-import useSafeGoBack from '../../../../../../utils/useSafeGoBack'
-import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
-import Content from '../../../Content'
-import {Stack} from 'tamagui'
 import networkSvg from '../../../../../images/networkSvg'
-import SectionTitle from './components/SectionTitle'
-import BtcAddress from './components/BtcAddress'
-import NetworkInfo from './components/NetworkInfo'
+import {submitTradeChecklistUpdatesActionAtom} from '../../../../atoms/updatesToBeSentAtom'
+import Content from '../../../Content'
 import {
   btcAddressAtom,
   btcNetworkAtom,
   saveLocalNetworkStateToMainStateActionAtom,
 } from '../../atoms'
-import {useSetAtom} from 'jotai'
-import {type TradeChecklistStackScreenProps} from '../../../../../../navigationTypes'
+import BtcAddress from './components/BtcAddress'
 import LightningOrOnChain from './components/LightningOrOnChain'
-import {useCallback, useEffect} from 'react'
-import {submitTradeChecklistUpdatesActionAtom} from '../../../../atoms/updatesToBeSentAtom'
-import {loadingOverlayDisplayedAtom} from '../../../../../LoadingOverlayProvider'
+import NetworkInfo from './components/NetworkInfo'
+import SectionTitle from './components/SectionTitle'
 
 type Props = TradeChecklistStackScreenProps<'Network'>
 

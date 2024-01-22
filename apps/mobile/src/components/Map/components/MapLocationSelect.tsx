@@ -52,11 +52,14 @@ function useAtoms({
 
           onPick(null) // loading
           return await pipe(
-            location.getGeocodedCoordinates({
-              lang: getCurrentLocale(),
-              latitude: region.latitude,
-              longitude: region.longitude,
-            }, signal),
+            location.getGeocodedCoordinates(
+              {
+                lang: getCurrentLocale(),
+                latitude: region.latitude,
+                longitude: region.longitude,
+              },
+              signal
+            ),
             TE.map((data) => {
               onPick(data)
               return data

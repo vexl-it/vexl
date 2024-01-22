@@ -1,12 +1,12 @@
-import {Text, YStack} from 'tamagui'
-import Button from '../../Button'
-import {useEffect, useState} from 'react'
 import {
   defaultImplementation,
   setEcdhComputeSecretImplementation,
 } from '@vexl-next/cryptography/src/implementations/ecdhComputeSecret'
 import {computeSharedSecret} from '@vexl-next/react-native-ecdh-platform-native-utils'
+import {useEffect, useState} from 'react'
 import {Platform} from 'react-native'
+import {Text, YStack} from 'tamagui'
+import Button from '../../Button'
 import {NUMBER_OF_GENERATIONS, runBenchmark, runTests} from '../utils'
 
 function createDummyImplementation(

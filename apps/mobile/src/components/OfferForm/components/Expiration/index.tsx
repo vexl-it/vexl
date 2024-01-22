@@ -1,19 +1,18 @@
-import DropdownSelectButton from '../../../DropdownSelectButton'
-import {type PrimitiveAtom, useSetAtom} from 'jotai'
-import OfferExpirationModal from './components/OfferExpirationModal'
 import {JSDateString} from '@vexl-next/domain/src/utility/JSDateString.brand'
-import {getTokens, Stack, Text, XStack, YStack} from 'tamagui'
+import {useAtom, useSetAtom, type PrimitiveAtom} from 'jotai'
 import {DateTime} from 'luxon'
-import {useAtom} from 'jotai'
+import {useCallback} from 'react'
+import {Stack, Text, XStack, YStack, getTokens} from 'tamagui'
 import {
   getCurrentLocale,
   useTranslation,
 } from '../../../../utils/localization/I18nProvider'
+import {REACT_NATIVE_CALENDARS_DATE_FORMAT} from '../../../Calendar'
+import DropdownSelectButton from '../../../DropdownSelectButton'
 import SvgImage from '../../../Image'
 import Switch from '../../../Switch'
 import clockSvg from '../../../images/clockSvg'
-import {useCallback} from 'react'
-import {REACT_NATIVE_CALENDARS_DATE_FORMAT} from '../../../Calendar'
+import OfferExpirationModal from './components/OfferExpirationModal'
 
 interface Props {
   expirationDateAtom: PrimitiveAtom<JSDateString | undefined>

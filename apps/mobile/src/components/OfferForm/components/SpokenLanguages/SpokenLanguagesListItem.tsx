@@ -1,11 +1,11 @@
-import {type SetStateAction, type WritableAtom, useAtom} from 'jotai'
 import {type SpokenLanguage} from '@vexl-next/domain/src/general/offers'
+import {useAtom, type SetStateAction, type WritableAtom} from 'jotai'
 import React, {useMemo} from 'react'
 import {TouchableOpacity} from 'react-native'
-import {getTokens, Text, XStack} from 'tamagui'
+import {Text, XStack, getTokens} from 'tamagui'
+import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import Image from '../../../Image'
 import checkmarkSvg from '../../../images/checkmarkSvg'
-import {useTranslation} from '../../../../utils/localization/I18nProvider'
 
 interface Props {
   createIsThisLanguageSelectedAtom: (

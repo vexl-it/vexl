@@ -1,11 +1,11 @@
-import ChecklistCell from './ChecklistCell'
+import {useNavigation, type NavigationProp} from '@react-navigation/native'
+import {useAtomValue} from 'jotai'
 import {useCallback} from 'react'
-import * as MeetingLocation from '../../../../../state/tradeChecklist/utils/location'
-import {type NavigationProp, useNavigation} from '@react-navigation/native'
 import {type TradeChecklistStackParamsList} from '../../../../../navigationTypes'
 import {tradeChecklistLocationDataAtom} from '../../../../../state/tradeChecklist/atoms/fromChatAtoms'
-import {useAtomValue} from 'jotai'
+import * as MeetingLocation from '../../../../../state/tradeChecklist/utils/location'
 import {tradeChecklistWithUpdatesMergedAtom} from '../../../atoms/updatesToBeSentAtom'
+import ChecklistCell from './ChecklistCell'
 
 function MeetingLocationCell(): JSX.Element {
   const navigation: NavigationProp<TradeChecklistStackParamsList> =

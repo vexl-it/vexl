@@ -1,23 +1,23 @@
-import {useCallback, useEffect} from 'react'
-import {useSetSession} from '../../../../state/session'
-import reportError from '../../../../utils/reportError'
-import {Alert} from 'react-native'
-import {useTranslation} from '../../../../utils/localization/I18nProvider'
-import {Session} from '../../../../brands/Session.brand'
-import LoaderView from '../../../LoaderView'
-import {pipe} from 'fp-ts/function'
+import * as crypto from '@vexl-next/cryptography'
 import * as E from 'fp-ts/Either'
 import * as TE from 'fp-ts/TaskEither'
-import {useVerifyChallenge} from '../../api/verifyChallenge'
-import * as crypto from '@vexl-next/cryptography'
-import {safeParse} from '../../../../utils/fpUtils'
+import {pipe} from 'fp-ts/function'
+import {useCallback, useEffect} from 'react'
+import {Alert} from 'react-native'
+import {Session} from '../../../../brands/Session.brand'
 import {type LoginStackScreenProps} from '../../../../navigationTypes'
+import {useSetSession} from '../../../../state/session'
+import {safeParse} from '../../../../utils/fpUtils'
+import {useTranslation} from '../../../../utils/localization/I18nProvider'
+import reportError from '../../../../utils/reportError'
+import useSafeGoBack from '../../../../utils/useSafeGoBack'
+import LoaderView from '../../../LoaderView'
 import {
   HeaderProxy,
   NextButtonProxy,
 } from '../../../PageWithButtonAndProgressHeader'
 import {useCreateUserAtContactMs} from '../../api/createUserAtContactsMS'
-import useSafeGoBack from '../../../../utils/useSafeGoBack'
+import {useVerifyChallenge} from '../../api/verifyChallenge'
 
 type Props = LoginStackScreenProps<'SuccessLogin'>
 

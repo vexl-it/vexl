@@ -1,11 +1,11 @@
-import {getTokens, Stack, Text, XStack, YStack, type YStackProps} from 'tamagui'
-import closeSvg from '../../../../images/closeSvg'
 import {TouchableOpacity} from 'react-native'
+import {getTokens, Stack, Text, XStack, YStack, type YStackProps} from 'tamagui'
+import {useTranslation} from '../../../../../utils/localization/I18nProvider'
+import Button from '../../../../Button'
 import Image from '../../../../Image'
 import bubbleTipSvg from '../../../../images/bubbleTipSvg'
+import closeSvg from '../../../../images/closeSvg'
 import UserAvatar from '../../../../UserAvatar'
-import Button from '../../../../Button'
-import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import vexlerAvatarSvg from '../images/vexlerAvatarSvg'
 
 interface Props extends YStackProps {
@@ -30,14 +30,7 @@ function MarketplaceSuggestion({
   return (
     <YStack px="$2" {...props}>
       <Stack mb="$2">
-        <Stack
-          pos="relative"
-          bc="$white"
-          py="$6"
-          pl="$6"
-          pr="$7"
-          br="$5"
-        >
+        <Stack pos="relative" bc="$white" py="$6" pl="$6" pr="$7" br="$5">
           {onClosePress && (
             <Stack pos="absolute" right={8} top={8}>
               <TouchableOpacity onPress={onClosePress}>

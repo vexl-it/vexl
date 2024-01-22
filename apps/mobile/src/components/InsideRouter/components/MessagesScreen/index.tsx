@@ -1,12 +1,12 @@
-import ContainerWithTopBorderRadius from '../ContainerWithTopBorderRadius'
-import {Stack, Text} from 'tamagui'
-import {useCallback} from 'react'
-import {useAppState} from '../../../../utils/useAppState'
-import {useTranslation} from '../../../../utils/localization/I18nProvider'
-import ChatsList from './components/ChatsList'
-import {useSetAtom} from 'jotai'
-import fetchMessagesForAllInboxesAtom from '../../../../state/chat/atoms/fetchNewMessagesActionAtom'
 import {pipe} from 'fp-ts/function'
+import {useSetAtom} from 'jotai'
+import {useCallback} from 'react'
+import {Stack, Text} from 'tamagui'
+import fetchMessagesForAllInboxesAtom from '../../../../state/chat/atoms/fetchNewMessagesActionAtom'
+import {useTranslation} from '../../../../utils/localization/I18nProvider'
+import {useAppState} from '../../../../utils/useAppState'
+import ContainerWithTopBorderRadius from '../ContainerWithTopBorderRadius'
+import ChatsList from './components/ChatsList'
 
 function MessagesScreen(): JSX.Element {
   const {t} = useTranslation()

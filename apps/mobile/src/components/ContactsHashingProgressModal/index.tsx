@@ -1,10 +1,10 @@
-import {Stack, Text} from 'tamagui'
+import {useAtomValue} from 'jotai'
 import {Modal} from 'react-native'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
-import {useAtomValue} from 'jotai'
-import ProgressIndicator from './components/ProgressIndicator'
-import {hashingInProgressAtom} from './atoms'
+import {Stack, Text} from 'tamagui'
 import {useTranslation} from '../../utils/localization/I18nProvider'
+import {hashingInProgressAtom} from './atoms'
+import ProgressIndicator from './components/ProgressIndicator'
 
 function ContactsHashingProgressModal(): JSX.Element {
   const {t} = useTranslation()

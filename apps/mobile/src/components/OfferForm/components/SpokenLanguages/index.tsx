@@ -1,19 +1,19 @@
-import {useTranslation} from '../../../../utils/localization/I18nProvider'
-import {useState} from 'react'
+import {type SpokenLanguage} from '@vexl-next/domain/src/general/offers'
 import {
+  useAtomValue,
+  useSetAtom,
   type Atom,
   type PrimitiveAtom,
   type SetStateAction,
-  useAtomValue,
-  useSetAtom,
   type WritableAtom,
 } from 'jotai'
-import {type SpokenLanguage} from '@vexl-next/domain/src/general/offers'
+import {useState} from 'react'
 import {Stack, Text, XStack} from 'tamagui'
-import DropdownSelectButton from '../../../DropdownSelectButton'
 import atomKeyExtractor from '../../../../utils/atomUtils/atomKeyExtractor'
-import SpokenLanguageSelect from './SpokenLanguageSelect'
+import {useTranslation} from '../../../../utils/localization/I18nProvider'
+import DropdownSelectButton from '../../../DropdownSelectButton'
 import OfferFormSpokenLanguageCell from './OfferFormSpokenLanguageCell'
+import SpokenLanguageSelect from './SpokenLanguageSelect'
 
 interface Props {
   createIsThisLanguageSelectedAtom: (

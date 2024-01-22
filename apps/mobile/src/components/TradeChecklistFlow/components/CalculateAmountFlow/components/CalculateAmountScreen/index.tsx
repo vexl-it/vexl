@@ -1,7 +1,21 @@
-import Content from '../../../Content'
-import useSafeGoBack from '../../../../../../utils/useSafeGoBack'
+import {useAtomValue, useSetAtom} from 'jotai'
+import {useCallback, useEffect, useMemo} from 'react'
 import {Stack, XStack} from 'tamagui'
-import SwitchTradePriceTypeButton from './components/SwitchTradePriceTypeButton'
+import {type TradeChecklistStackScreenProps} from '../../../../../../navigationTypes'
+import {otherSideDataAtom} from '../../../../../../state/tradeChecklist/atoms/fromChatAtoms'
+import calculatePercentageDifference from '../../../../../../utils/calculatePercentageDifference'
+import {dismissKeyboardAndResolveOnLayoutUpdate} from '../../../../../../utils/dismissKeyboardPromise'
+import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
+import useSafeGoBack from '../../../../../../utils/useSafeGoBack'
+import Info from '../../../../../Info'
+import {loadingOverlayDisplayedAtom} from '../../../../../LoadingOverlayProvider'
+import {
+  FooterButtonProxy,
+  HeaderProxy,
+} from '../../../../../PageWithNavigationHeader'
+import {btcPriceForOfferWithStateAtom} from '../../../../atoms/btcPriceForOfferWithStateAtom'
+import {submitTradeChecklistUpdatesActionAtom} from '../../../../atoms/updatesToBeSentAtom'
+import Content from '../../../Content'
 import {
   btcInputValueAtom,
   fiatInputValueAtom,
@@ -11,25 +25,11 @@ import {
   tradePriceTypeAtom,
   tradePriceTypeDialogVisibleAtom,
 } from '../../atoms'
-import {useAtomValue, useSetAtom} from 'jotai'
-import {
-  FooterButtonProxy,
-  HeaderProxy,
-} from '../../../../../PageWithNavigationHeader'
-import CurrentBtcPrice from '../CurrentBtcPrice'
-import {useCallback, useEffect, useMemo} from 'react'
-import PremiumOrDiscount from './components/PremiumOrDiscount'
-import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
 import BtcAmountInput from '../../components/BtcAmountInput'
 import FiatAmountInput from '../../components/FiatAmountInput'
-import {dismissKeyboardAndResolveOnLayoutUpdate} from '../../../../../../utils/dismissKeyboardPromise'
-import {type TradeChecklistStackScreenProps} from '../../../../../../navigationTypes'
-import {loadingOverlayDisplayedAtom} from '../../../../../LoadingOverlayProvider'
-import {submitTradeChecklistUpdatesActionAtom} from '../../../../atoms/updatesToBeSentAtom'
-import Info from '../../../../../Info'
-import calculatePercentageDifference from '../../../../../../utils/calculatePercentageDifference'
-import {otherSideDataAtom} from '../../../../../../state/tradeChecklist/atoms/fromChatAtoms'
-import {btcPriceForOfferWithStateAtom} from '../../../../atoms/btcPriceForOfferWithStateAtom'
+import CurrentBtcPrice from '../CurrentBtcPrice'
+import PremiumOrDiscount from './components/PremiumOrDiscount'
+import SwitchTradePriceTypeButton from './components/SwitchTradePriceTypeButton'
 
 type Props = TradeChecklistStackScreenProps<'CalculateAmount'>
 

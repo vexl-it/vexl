@@ -1,16 +1,16 @@
-import IconButton from '../../IconButton'
-import cameraSvg from '../images/cameraSvg'
-import {getTokens} from 'tamagui'
 import {useMolecule} from 'bunshi/dist/react'
-import {chatMolecule} from '../atoms'
-import {useSetAtom} from 'jotai'
-import {useCallback} from 'react'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
+import {useSetAtom} from 'jotai'
+import {useCallback} from 'react'
+import {Alert} from 'react-native'
+import {getTokens} from 'tamagui'
 import {getImageFromGalleryAndTryToResolveThePermissionsAlongTheWay} from '../../../utils/imagePickers'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
-import {Alert} from 'react-native'
 import showErrorAlert from '../../../utils/showErrorAlert'
+import IconButton from '../../IconButton'
+import {chatMolecule} from '../atoms'
+import cameraSvg from '../images/cameraSvg'
 
 function SendImageButton(): JSX.Element {
   const {selectedImageAtom} = useMolecule(chatMolecule)

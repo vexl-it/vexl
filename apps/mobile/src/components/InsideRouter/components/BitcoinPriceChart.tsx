@@ -1,14 +1,14 @@
-import {useSafeAreaInsets} from 'react-native-safe-area-context'
-import {getTokens, Stack, Text, XStack} from 'tamagui'
-import {ActivityIndicator, TouchableOpacity} from 'react-native'
-import {useAtomValue, useSetAtom} from 'jotai'
 import {useFocusEffect} from '@react-navigation/native'
+import {useAtomValue, useSetAtom} from 'jotai'
 import {useCallback} from 'react'
-import {selectedCurrencyAtom} from '../../../state/selectedCurrency'
+import {ActivityIndicator, TouchableOpacity} from 'react-native'
+import {useSafeAreaInsets} from 'react-native-safe-area-context'
+import {Stack, Text, XStack, getTokens} from 'tamagui'
 import {
   btcPriceForSelectedCurrencyAtom,
   refreshBtcPriceActionAtom,
 } from '../../../state/currentBtcPriceAtoms'
+import {selectedCurrencyAtom} from '../../../state/selectedCurrency'
 
 export const CHART_HEIGHT_PX = 100
 

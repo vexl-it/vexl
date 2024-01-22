@@ -1,8 +1,8 @@
 import {type SvgString} from '@vexl-next/domain/src/utility/SvgString.brand'
-import {type ColorValue, TouchableOpacity} from 'react-native'
-import {getTokens, Stack, Text, XStack, YStack} from 'tamagui'
-import Image from '../../Image'
 import {Fragment} from 'react'
+import {TouchableOpacity, type ColorValue} from 'react-native'
+import {Stack, Text, XStack, YStack, getTokens} from 'tamagui'
+import Image from '../../Image'
 import Switch from '../../Switch'
 
 export interface StackButtonProps {

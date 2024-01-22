@@ -1,12 +1,12 @@
 import {type ChatMessageRequiringNewerVersion} from '@vexl-next/domain/src/general/messaging'
-import {Stack, Text, XStack, getTokens} from 'tamagui'
-import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {compare} from '@vexl-next/domain/src/utility/SmeverString.brand'
+import {Stack, Text, XStack, getTokens} from 'tamagui'
 import {version} from '../../../utils/environment'
+import {useTranslation} from '../../../utils/localization/I18nProvider'
+import openUrl from '../../../utils/openUrl'
+import Button from '../../Button'
 import Image from '../../Image'
 import warningSvg from '../images/warningSvg'
-import Button from '../../Button'
-import openUrl from '../../../utils/openUrl'
 
 const DOWNLOAD_URL = 'https://vexl.it/download'
 
@@ -22,13 +22,7 @@ export default function MessageIncompatibleItem({
 
   return (
     <Stack mx="$4" mt="$1" flex={1} alignItems="flex-start">
-      <Stack
-        gap="$2"
-        maxWidth="80%"
-        br="$6"
-        backgroundColor="$grey"
-        p="$3"
-      >
+      <Stack gap="$2" maxWidth="80%" br="$6" backgroundColor="$grey" p="$3">
         <XStack gap="$2">
           <Image
             stroke={getTokens().color.red.val}

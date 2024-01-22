@@ -1,19 +1,19 @@
-import {type SvgStringOrImageUri} from '@vexl-next/domain/src/utility/SvgStringOrImageUri.brand'
-import Image from './Image'
 import {
   BackdropFilter,
   Canvas,
   ColorMatrix,
   Group,
-  Image as SkiaImage,
   ImageSVG,
+  Skia,
+  Image as SkiaImage,
   rect,
   rrect,
-  Skia,
   useImage,
 } from '@shopify/react-native-skia'
+import {type SvgStringOrImageUri} from '@vexl-next/domain/src/utility/SvgStringOrImageUri.brand'
 import {useMemo} from 'react'
 import resolveLocalUri from '../utils/resolveLocalUri'
+import Image from './Image'
 
 interface Props {
   userImage: SvgStringOrImageUri

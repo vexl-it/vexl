@@ -10,7 +10,6 @@ import {SECRET_TOKEN_KEY, SESSION_KEY} from './sessionKeys'
 import readSessionFromStorage from './utils/readSessionFromStorage'
 
 function logLoadSessionProgress(text: string): void {
-  console.log('inside loadSession', text)
   void showDebugNotificationIfEnabled({
     title: 'Load session',
     body: text,

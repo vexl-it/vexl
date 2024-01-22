@@ -2,10 +2,11 @@ import {z} from 'zod'
 import {BtcAddress} from '../utility/BtcAddress.brand'
 import {UnixMilliseconds} from '../utility/UnixMilliseconds.brand'
 import {UriString} from '../utility/UriString.brand'
+import {Latitude, Longitude} from '../utility/geoCoordinates'
 import {DeanonymizedUser} from './DeanonymizedUser'
 import {E164PhoneNumber} from './E164PhoneNumber.brand'
 import {UserName} from './UserName.brand'
-import {BtcNetwork, CurrencyCode} from './offers'
+import {BtcNetwork, CurrencyCode, LocationPlaceId} from './offers'
 
 /**
  * TODO move to apps/mobile
@@ -131,17 +132,18 @@ export const ContactRevealChatMessage =
 export type ContactRevealChatMessage = z.TypeOf<typeof ContactRevealChatMessage>
 
 export const MeetingLocationData = z.object({
+  placeId: LocationPlaceId,
   address: z.string(),
-  latitude: z.number(),
-  longitude: z.number(),
+  latitude: Latitude,
+  longitude: Longitude,
   viewport: z.object({
     northeast: z.object({
-      latitude: z.number(),
-      longitude: z.number(),
+      latitude: Latitude,
+      longitude: Longitude,
     }),
     southwest: z.object({
-      latitude: z.number(),
-      longitude: z.number(),
+      latitude: Latitude,
+      longitude: Longitude,
     }),
   }),
   note: z.string().optional(),

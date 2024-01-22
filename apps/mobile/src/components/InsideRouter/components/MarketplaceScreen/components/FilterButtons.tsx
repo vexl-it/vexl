@@ -6,7 +6,7 @@ import downArrow from '../../../../../images/downArrow'
 import {
   isFilterActiveAtom,
   isTextFilterActiveAtom,
-} from '../../../../../state/marketplace/filterAtoms'
+} from '../../../../../state/marketplace/atoms/filterAtoms'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import Button from '../../../../Button'
 import IconButton from '../../../../IconButton'

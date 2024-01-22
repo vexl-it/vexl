@@ -2,7 +2,7 @@ import {atom} from 'jotai'
 import {
   offersFilterInitialState,
   offersFilterTextFromStorageAtom,
-} from '../../../state/marketplace/filterAtoms'
+} from '../../../state/marketplace/atoms/filterAtoms'
 import {safeNavigateBackOutsideReact} from '../../../utils/navigation'
 import {addToPreviousSearchesActionAtom} from './previousSearchesAtom'
 import {searchTextAtom} from './searchTextAtom'

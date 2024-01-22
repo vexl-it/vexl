@@ -25,7 +25,7 @@ import {
   createIsThisLanguageSelectedAtom,
   currencyAtom,
   intendedConnectionLevelAtom,
-  locationAtom,
+  locationArrayOfOneAtom,
   locationStateAtom,
   paymentMethodAtom,
   removeSpokenLanguageActionAtom,
@@ -82,7 +82,8 @@ export default function useContent(): Props[] {
         image: locationSvg,
         children: (
           <Location
-            locationAtom={locationAtom}
+            randomizeLocation={false}
+            locationAtom={locationArrayOfOneAtom}
             locationStateAtom={locationStateAtom}
             setOfferLocationActionAtom={setOfferLocationActionAtom}
             updateLocationStatePaymentMethodAtom={

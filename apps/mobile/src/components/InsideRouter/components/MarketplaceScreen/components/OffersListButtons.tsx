@@ -1,9 +1,13 @@
-import {useAtomValue} from 'jotai'
+import {useAtom, useAtomValue} from 'jotai'
 import {Stack, XStack} from 'tamagui'
 import addIconSvg from '../../../../../images/addIconSvg'
-import {isFilterActiveAtom} from '../../../../../state/marketplace/filterAtoms'
+import {isFilterActiveAtom} from '../../../../../state/marketplace/atoms/filterAtoms'
+import {toggleMarketplaceLayoutModeActionAtom} from '../../../../../state/marketplace/atoms/map/marketplaceLayoutModeAtom'
+import {areThereOffersToSeeInMarketplaceWithoutFiltersAtom} from '../../../../../state/marketplace/atoms/offersToSeeInMarketplace'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import Button from '../../../../Button'
+import listSvg from '../images/listSvg'
+import mapSvg from '../images/mapSvg'
 import FilterButtons from './FilterButtons'
 
 interface Props {
@@ -19,6 +23,12 @@ function OffersListButtons({
 }: Props): JSX.Element {
   const {t} = useTranslation()
   const filterActive = useAtomValue(isFilterActiveAtom)
+  const [marketplaceLayout, toggleMarketplaceLayout] = useAtom(
+    toggleMarketplaceLayoutModeActionAtom
+  )
+  const areThereOffersToSeeInMarketplaceWithoutFilters = useAtomValue(
+    areThereOffersToSeeInMarketplaceWithoutFiltersAtom
+  )
 
   return (
     <XStack mt="$4" mx="$2" jc="space-between" space="$2">
@@ -39,6 +49,25 @@ function OffersListButtons({
           size="small"
           afterIcon={addIconSvg}
         />
+        {!!areThereOffersToSeeInMarketplaceWithoutFilters && (
+          <>
+            {marketplaceLayout === 'map' ? (
+              <Button
+                onPress={toggleMarketplaceLayout}
+                variant="primary"
+                size="small"
+                afterIcon={listSvg}
+              />
+            ) : (
+              <Button
+                onPress={toggleMarketplaceLayout}
+                variant="primary"
+                size="small"
+                afterIcon={mapSvg}
+              />
+            )}
+          </>
+        )}
       </XStack>
     </XStack>
   )

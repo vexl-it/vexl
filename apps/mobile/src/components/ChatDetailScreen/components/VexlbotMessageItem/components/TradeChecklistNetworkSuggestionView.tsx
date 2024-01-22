@@ -1,23 +1,35 @@
-import VexlbotBubble from './VexlbotBubble'
-import Button from '../../../../Button'
-import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import {useNavigation} from '@react-navigation/native'
 import {useMolecule} from 'bunshi/dist/react'
-import {chatMolecule} from '../../../atoms'
 import {useAtomValue} from 'jotai'
 import * as network from '../../../../../state/tradeChecklist/utils/network'
+import {useTranslation} from '../../../../../utils/localization/I18nProvider'
+import Button from '../../../../Button'
+import {chatMolecule} from '../../../atoms'
+import VexlbotBubble from './VexlbotBubble'
 
-function TradeChecklistNetworkSetupSuggestionView(): JSX.Element | null {
+function TradeChecklistNetworkSuggestionView(): JSX.Element | null {
   const {t} = useTranslation()
   const navigation = useNavigation()
-  const {chatIdAtom, publicKeyPemBase64Atom, tradeChecklistNetworkAtom} =
-    useMolecule(chatMolecule)
+  const {
+    chatIdAtom,
+    offerForChatAtom,
+    publicKeyPemBase64Atom,
+    tradeChecklistNetworkAtom,
+  } = useMolecule(chatMolecule)
+  const offerForChat = useAtomValue(offerForChatAtom)
   const networkData = useAtomValue(tradeChecklistNetworkAtom)
   const chatId = useAtomValue(chatIdAtom)
   const inboxKey = useAtomValue(publicKeyPemBase64Atom)
   const networkDataToDisplay = network.getNetworkData(networkData)
 
-  if (networkDataToDisplay?.networkData.btcNetwork) return null
+  if (
+    Boolean(networkDataToDisplay?.networkData.btcNetwork) ||
+    (!!offerForChat?.ownershipInfo &&
+      offerForChat?.offerInfo.publicPart.offerType === 'SELL') ||
+    (!offerForChat?.ownershipInfo &&
+      offerForChat?.offerInfo.publicPart.offerType === 'BUY')
+  )
+    return null
 
   return (
     <VexlbotBubble text={t('vexlbot.agreeOnPreferredNetwork')}>
@@ -38,4 +50,4 @@ function TradeChecklistNetworkSetupSuggestionView(): JSX.Element | null {
   )
 }
 
-export default TradeChecklistNetworkSetupSuggestionView
+export default TradeChecklistNetworkSuggestionView

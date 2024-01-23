@@ -98,3 +98,11 @@ export function toStringWithRange(suggestion: AvailableDateTimeOption): string {
     DateTime.TIME_SIMPLE
   )}`
 }
+
+export function dateAndTimeSettled(data: DateAndTimeInState): boolean {
+  return !!getPick(data)
+}
+
+export function dateAndTimePending(data: DateAndTimeInState): boolean {
+  return !!getSuggestions(data)
+}

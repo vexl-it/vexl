@@ -1,44 +1,47 @@
 import {useNavigation} from '@react-navigation/native'
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue} from 'jotai'
-import * as amount from '../../../../../state/tradeChecklist/utils/amount'
+import * as dateAndTime from '../../../../../state/tradeChecklist/utils/dateAndTime'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import Button from '../../../../Button'
 import {chatMolecule} from '../../../atoms'
 import VexlbotBubble from './VexlbotBubble'
 
-function TradeChecklistAmountSuggestionView(): JSX.Element | null {
+function TradeChecklistDateAndTimeSuggestionView(): JSX.Element | null {
   const {t} = useTranslation()
   const navigation = useNavigation()
-  const {chatIdAtom, publicKeyPemBase64Atom, tradeChecklistAmountAtom} =
+  const {chatIdAtom, publicKeyPemBase64Atom, tradeChecklistDateAndTimeAtom} =
     useMolecule(chatMolecule)
-  const amountData = useAtomValue(tradeChecklistAmountAtom)
+  const tradeChecklistDateAndTimeData = useAtomValue(
+    tradeChecklistDateAndTimeAtom
+  )
   const chatId = useAtomValue(chatIdAtom)
   const inboxKey = useAtomValue(publicKeyPemBase64Atom)
-  const amountPending = amount.amountPending(amountData)
+  const dateAndTimePending = dateAndTime.dateAndTimePending(
+    tradeChecklistDateAndTimeData
+  )
 
-  if (amountPending) return null
+  if (dateAndTimePending) return null
 
   return (
-    <VexlbotBubble text={t('vexlbot.agreeOnPreferredAmount')}>
+    <VexlbotBubble text={t('vexlbot.agreeOnPreferredDateAndTime')}>
       <Button
         onPress={() => {
           navigation.navigate('TradeChecklistFlow', {
-            screen: 'CalculateAmount',
+            screen: 'ChooseAvailableDays',
             chatId,
             inboxKey,
             params: {
-              amountData: undefined,
-              navigateBackToChatOnSave: true,
+              chosenDays: tradeChecklistDateAndTimeData.sent?.suggestions,
             },
           })
         }}
         size="medium"
         variant="secondary"
-        text={t('tradeChecklist.options.CALCULATE_AMOUNT')}
+        text={t('vexlbot.setDateAndTime')}
       />
     </VexlbotBubble>
   )
 }
 
-export default TradeChecklistAmountSuggestionView
+export default TradeChecklistDateAndTimeSuggestionView

@@ -7,9 +7,6 @@ import {flow, pipe} from 'fp-ts/lib/function'
 import {DateTime} from 'luxon'
 import {type ChatMessageWithState} from '../../../state/chat/domain'
 import {type TradeChecklistInState} from '../../../state/tradeChecklist/domain'
-import {getAmountData} from '../../../state/tradeChecklist/utils/amount'
-import {getPick} from '../../../state/tradeChecklist/utils/dateAndTime'
-import {getAgreed} from '../../../state/tradeChecklist/utils/location'
 import {type MessagesListItem} from '../components/MessageItem'
 import {
   addVexlBotOrMessageWithStateToArray,
@@ -21,22 +18,6 @@ import {
 function addVexlBotMessagesToMessagesListData(
   tradeChecklist: TradeChecklistInState
 ): (args: ChatMessageWithState[]) => VexlBotOrMessageWithState[] {
-  const dateAndTimePickExists = getPick(tradeChecklist.dateAndTime)?.pick
-  const amountAccepted =
-    getAmountData(tradeChecklist.amount)?.status === 'accepted'
-  const agreedOnLocation = getAgreed(tradeChecklist.location)
-  const networkSet =
-    !!tradeChecklist.network.sent || !!tradeChecklist.network.received
-  const contactRevealed =
-    tradeChecklist.contact.sent?.status === 'APPROVE_REVEAL' ||
-    tradeChecklist.contact.received?.status === 'APPROVE_REVEAL'
-  const isAllSet =
-    dateAndTimePickExists &&
-    amountAccepted &&
-    agreedOnLocation &&
-    networkSet &&
-    contactRevealed
-
   return flow(
     A.map(
       (message): VexlBotOrMessageWithState => ({
@@ -72,22 +53,6 @@ function addVexlBotMessagesToMessagesListData(
       )
 
       if (locationInteraction === 0) {
-        if (dateAndTimePickExists && !amountAccepted && !networkSet) {
-          const dateAndTimeInteraction = UnixMilliseconds.parse(
-            Math.max(
-              tradeChecklist.dateAndTime.sent?.timestamp ?? 0,
-              tradeChecklist.dateAndTime.received?.timestamp ?? 0
-            )
-          )
-          const messageToInsert: VexlBotOrMessageWithState = {
-            type: 'vexlBot',
-            message: {
-              type: 'meetingLocationSuggestionPreview' as const,
-              date: UnixMilliseconds.parse(dateAndTimeInteraction + 1),
-            },
-          }
-          return addVexlBotOrMessageWithStateToArray(messageToInsert)(a)
-        }
         return a
       }
 
@@ -109,22 +74,6 @@ function addVexlBotMessagesToMessagesListData(
       )
 
       if (amountInteraction === 0) {
-        if (agreedOnLocation && !networkSet) {
-          const locationInteraction = UnixMilliseconds.parse(
-            Math.max(
-              tradeChecklist.location.sent?.timestamp ?? 0,
-              tradeChecklist.location.received?.timestamp ?? 0
-            )
-          )
-          const messageToInsert: VexlBotOrMessageWithState = {
-            type: 'vexlBot',
-            message: {
-              type: 'amountSuggestionPreview' as const,
-              date: UnixMilliseconds.parse(locationInteraction + 1),
-            },
-          }
-          return addVexlBotOrMessageWithStateToArray(messageToInsert)(a)
-        }
         return a
       }
       const messageToInsert: VexlBotOrMessageWithState = {
@@ -146,22 +95,6 @@ function addVexlBotMessagesToMessagesListData(
       )
 
       if (networkInteraction === 0) {
-        if (amountAccepted) {
-          const amountInteraction = UnixMilliseconds.parse(
-            Math.max(
-              tradeChecklist.amount.sent?.timestamp ?? 0,
-              tradeChecklist.amount.received?.timestamp ?? 0
-            )
-          )
-          const messageToInsert: VexlBotOrMessageWithState = {
-            type: 'vexlBot',
-            message: {
-              type: 'networkSuggestionPreview' as const,
-              date: UnixMilliseconds.parse(amountInteraction + 1),
-            },
-          }
-          return addVexlBotOrMessageWithStateToArray(messageToInsert)(a)
-        }
         return a
       }
 
@@ -214,23 +147,21 @@ function addVexlBotMessagesToMessagesListData(
       return addVexlBotOrMessageWithStateToArray(messageToInsert)(a)
     },
     (a) => {
-      if (!isAllSet) return a
+      const lastVexlbotMessage = [...a]
+        .reverse()
+        .find(
+          (message): message is typeof message & {type: 'vexlBot'} =>
+            message.type === 'vexlBot'
+        )
 
-      const tradeChecklistGreatestTimestamp = Math.max(
-        ...Object.values(tradeChecklist).flatMap((entry) => [
-          entry.sent?.timestamp ?? 0,
-          entry.received?.timestamp ?? 0,
-        ])
-      ) satisfies number
-
-      const messageToInsert: VexlBotOrMessageWithState = {
-        type: 'vexlBot',
-        message: {
-          type: 'allSetPreview' as const,
-          date: UnixMilliseconds.parse(tradeChecklistGreatestTimestamp + 1),
-        },
-      }
-      return addVexlBotOrMessageWithStateToArray(messageToInsert)(a)
+      return lastVexlbotMessage
+        ? a.map((message) =>
+            message.type === 'vexlBot' &&
+            message.message.type === lastVexlbotMessage.message.type
+              ? {...lastVexlbotMessage, isLast: true}
+              : message
+          )
+        : a
     }
   )
 }
@@ -280,6 +211,7 @@ function messagesToListData(
         type: 'vexlBot',
         key: `vexlBot-${getUniqueKey(message)}`,
         data: message.message,
+        isLast: message.isLast,
       })
     }
   }

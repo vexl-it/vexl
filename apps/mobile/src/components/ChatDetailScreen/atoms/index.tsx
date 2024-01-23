@@ -763,6 +763,17 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     o.prop('location')
   )
 
+  const shouldHideNetworkCellForTradeChecklistAtom = atom((get) => {
+    const offerForChat = get(offerForChatAtom)
+
+    return (
+      (!!offerForChat?.ownershipInfo &&
+        offerForChat?.offerInfo.publicPart.offerType === 'SELL') ||
+      (!offerForChat?.ownershipInfo &&
+        offerForChat?.offerInfo.publicPart.offerType === 'BUY')
+    )
+  })
+
   return {
     showModalAtom: atom<boolean>(false),
     chatAtom,
@@ -818,5 +829,6 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     identityRevealTriggeredFromTradeChecklistAtom,
     contactRevealTriggeredFromTradeChecklistAtom,
     tradeChecklistMeetingLocationAtom,
+    shouldHideNetworkCellForTradeChecklistAtom,
   }
 })

@@ -69,3 +69,11 @@ export function calculateBtcPricePercentageDifference(
 
   return 0
 }
+
+export function amountSettled(data: AmountInState): boolean {
+  return getAmountData(data)?.status === 'accepted'
+}
+
+export function amountPending(data: AmountInState): boolean {
+  return getAmountData(data)?.status === 'pending'
+}

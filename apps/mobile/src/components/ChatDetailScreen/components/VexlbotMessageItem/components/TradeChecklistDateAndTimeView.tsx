@@ -32,6 +32,7 @@ export default function TradeChecklistDateAndTimeView(): JSX.Element | null {
   if (suggestions && suggestions.suggestions.length > 0) {
     return (
       <VexlbotBubble
+        status="pending"
         text={`${t(
           suggestions.by === 'me'
             ? 'vexlbot.youAddedTimeOptions'

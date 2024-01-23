@@ -72,3 +72,11 @@ export function getSubtitle(data: MeetingLocationInState): string | undefined {
 
   return undefined
 }
+
+export function locationSettled(data: MeetingLocationInState): boolean {
+  return !!getAgreed(data)
+}
+
+export function locationPending(data: MeetingLocationInState): boolean {
+  return !!getPendingSuggestion(data)
+}

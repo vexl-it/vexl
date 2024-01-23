@@ -13,14 +13,13 @@ import Button from '../../../../Button'
 import {loadingOverlayDisplayedAtom} from '../../../../LoadingOverlayProvider'
 import {btcPriceForOfferWithStateAtom} from '../../../../TradeChecklistFlow/atoms/btcPriceForOfferWithStateAtom'
 import {
-    addAmountActionAtom,
-    submitTradeChecklistUpdatesActionAtom,
+  addAmountActionAtom,
+  submitTradeChecklistUpdatesActionAtom,
 } from '../../../../TradeChecklistFlow/atoms/updatesToBeSentAtom'
 import {SATOSHIS_IN_BTC} from '../../../../TradeChecklistFlow/components/CalculateAmountFlow/atoms'
 import {chatMolecule} from '../../../atoms'
 import copySvg from '../../../images/copySvg'
 import VexlbotBubble from './VexlbotBubble'
-
 
 function TradeChecklistAmountView(): JSX.Element | null {
   const {t} = useTranslation()

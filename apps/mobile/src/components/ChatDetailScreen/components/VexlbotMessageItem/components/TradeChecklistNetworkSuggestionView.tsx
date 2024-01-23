@@ -12,24 +12,19 @@ function TradeChecklistNetworkSuggestionView(): JSX.Element | null {
   const navigation = useNavigation()
   const {
     chatIdAtom,
-    offerForChatAtom,
     publicKeyPemBase64Atom,
     tradeChecklistNetworkAtom,
+    shouldHideNetworkCellForTradeChecklistAtom,
   } = useMolecule(chatMolecule)
-  const offerForChat = useAtomValue(offerForChatAtom)
+  const shouldHideNetworkCellForTradeChecklist = useAtomValue(
+    shouldHideNetworkCellForTradeChecklistAtom
+  )
   const networkData = useAtomValue(tradeChecklistNetworkAtom)
   const chatId = useAtomValue(chatIdAtom)
   const inboxKey = useAtomValue(publicKeyPemBase64Atom)
-  const networkDataToDisplay = network.getNetworkData(networkData)
+  const agreedOnNetwork = network.networkSettled(networkData)
 
-  if (
-    Boolean(networkDataToDisplay?.networkData.btcNetwork) ||
-    (!!offerForChat?.ownershipInfo &&
-      offerForChat?.offerInfo.publicPart.offerType === 'SELL') ||
-    (!offerForChat?.ownershipInfo &&
-      offerForChat?.offerInfo.publicPart.offerType === 'BUY')
-  )
-    return null
+  if (agreedOnNetwork || shouldHideNetworkCellForTradeChecklist) return null
 
   return (
     <VexlbotBubble text={t('vexlbot.agreeOnPreferredNetwork')}>

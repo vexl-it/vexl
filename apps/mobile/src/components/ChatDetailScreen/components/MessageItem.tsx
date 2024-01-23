@@ -17,6 +17,7 @@ import IdentityRevealMessageItem from './IdentityRevealMessageItem'
 import MessageIncompatibleItem from './MessageIncompatibleItem'
 import TextMessage from './TextMessage'
 import VexlBotMessageItem from './VexlbotMessageItem'
+import VexlbotNextActionSuggestion from './VexlbotMessageItem/components/VexlbotNextActionSuggestion'
 import {type VexlBotMessageData} from './VexlbotMessageItem/domain'
 
 export type MessagesListItem =
@@ -44,6 +45,7 @@ export type MessagesListItem =
       type: 'vexlBot'
       key: string
       data: VexlBotMessageData
+      isLast?: boolean
     }
 
 function MessageItem({
@@ -195,7 +197,12 @@ function MessageItem({
   }
 
   if (item.type === 'vexlBot') {
-    return <VexlBotMessageItem data={item.data} />
+    return (
+      <>
+        <VexlBotMessageItem data={item.data} />
+        {item.isLast && <VexlbotNextActionSuggestion />}
+      </>
+    )
   }
 
   if (item.type === 'time')

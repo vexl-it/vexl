@@ -55,6 +55,7 @@ export default function LocationMapPreview({
     <>
       <HeaderProxy hidden hiddenAllTheWay />
       <MapSingleLocationDisplay
+        mapPadding={{top: 40, bottom: 40, left: 0, right: 0}}
         topChildren={
           <YStack marginVertical="$2" marginHorizontal="$4" space="$4">
             <IconButton

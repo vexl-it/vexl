@@ -75,6 +75,7 @@ export default function LocationMapSelect({
     <>
       <HeaderProxy hidden hiddenAllTheWay />
       <MapLocationSelect
+        mapPadding={{top: 150, bottom: 150, left: 0, right: 0}}
         initialValue={initialValue}
         onPick={setPickedValue}
         topChildren={

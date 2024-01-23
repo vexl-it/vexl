@@ -145,7 +145,6 @@ function SimulateMissingOfferInbox(): JSX.Element {
         onPress={() => {
           if (!selectedOffer) return
           void cloneOffer10x(selectedOffer)().then(() => {
-            removeInboxFromState(selectedOffer)
             Alert.alert('Done')
           })
         }}

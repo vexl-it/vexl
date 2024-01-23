@@ -8,8 +8,9 @@ import IconButton from '../../../../IconButton'
 import {loadingOverlayDisplayedAtom} from '../../../../LoadingOverlayProvider'
 import MapSingleLocationDisplay from '../../../../Map/components/MapSingleLocationDisplay'
 import {
-  FooterButtonProxy,
   HeaderProxy,
+  PrimaryFooterButtonProxy,
+  SecondaryFooterButtonProxy,
 } from '../../../../PageWithNavigationHeader'
 import {
   addMeetingLocationActionAtom,
@@ -89,7 +90,8 @@ export default function LocationMapPreview({
         }
         value={selectedLocation}
       />
-      <FooterButtonProxy hidden onPress={() => {}} />
+      <PrimaryFooterButtonProxy hidden />
+      <SecondaryFooterButtonProxy hidden />
     </>
   )
 }

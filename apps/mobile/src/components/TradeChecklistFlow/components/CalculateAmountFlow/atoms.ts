@@ -8,7 +8,10 @@ import {pipe} from 'fp-ts/function'
 import {atom, type PrimitiveAtom} from 'jotai'
 import {refreshBtcPriceActionAtom} from '../../../../state/currentBtcPriceAtoms'
 import * as fromChatAtoms from '../../../../state/tradeChecklist/atoms/fromChatAtoms'
-import {originOfferCurrencyAtom} from '../../../../state/tradeChecklist/atoms/fromChatAtoms'
+import {
+  originOfferCurrencyAtom,
+  tradeChecklistAmountDataAtom,
+} from '../../../../state/tradeChecklist/atoms/fromChatAtoms'
 import {getCurrentLocale} from '../../../../utils/localization/I18nProvider'
 import {btcPriceForOfferWithStateAtom} from '../../atoms/btcPriceForOfferWithStateAtom'
 import updatesToBeSentAtom, {
@@ -107,7 +110,7 @@ export const refreshCurrentBtcPriceActionAtom = atom(null, (get, set) => {
   return pipe(set(refreshBtcPriceActionAtom, offerCurrency ?? 'USD'))
 })
 
-export const setFormDataBasedOnTypeActionAtom = atom(
+export const setFormDataBasedOnBtcPriceTypeActionAtom = atom(
   null,
   (get, set, tradePriceType: TradePriceType) => {
     return pipe(
@@ -249,6 +252,33 @@ export const saveButtonDisabledAtom = atom((get) => {
   return !btcInputValue || !fiatInputValue
 })
 
+export const isOtherSideAmountDataNewerThanMineAtom = atom((get) => {
+  const tradeChecklistAmountData = get(tradeChecklistAmountDataAtom)
+  const otherSideTimestampIsGreater =
+    (tradeChecklistAmountData.received?.timestamp ?? 0) >
+    (tradeChecklistAmountData.sent?.timestamp ?? 0)
+  const tradePriceTypeDiffers =
+    get(tradePriceTypeAtom) !==
+    tradeChecklistAmountData.received?.tradePriceType
+  const btcAmountDiffers =
+    get(btcInputValueAtom) !==
+    tradeChecklistAmountData.received?.btcAmount?.toString()
+  const fiatAmountDiffers =
+    get(fiatInputValueAtom) !==
+    tradeChecklistAmountData.received?.fiatAmount?.toString()
+  const feeDiffers =
+    get(feeAmountAtom) !== tradeChecklistAmountData.received?.feeAmount
+
+  return (
+    otherSideTimestampIsGreater &&
+    !get(updatesToBeSentAtom).amount &&
+    !tradePriceTypeDiffers &&
+    !btcAmountDiffers &&
+    !fiatAmountDiffers &&
+    !feeDiffers
+  )
+})
+
 export const syncDataWithChatStateActionAtom = atom(
   null,
   (get, set, data: AmountData | undefined) => {
@@ -286,11 +316,7 @@ export const saveLocalCalculatedAmountDataStateToMainStateActionAtom = atom(
     const btcAmount = Number(get(btcInputValueAtom))
     const fiatAmount = Number(get(fiatInputValueAtom))
     const feeAmount = get(feeAmountAtom)
-    const btcPriceForOfferWithState = get(btcPriceForOfferWithStateAtom)
-    const btcPrice =
-      tradePriceType === 'live'
-        ? btcPriceForOfferWithState?.btcPrice
-        : get(tradeBtcPriceAtom)
+    const btcPrice = get(tradeBtcPriceAtom)
 
     set(addAmountActionAtom, {
       tradePriceType: tradePriceType === 'custom' ? 'your' : tradePriceType,

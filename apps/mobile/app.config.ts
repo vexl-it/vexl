@@ -1,6 +1,6 @@
 // import {SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 
-const VERSION_CODE = 107
+const VERSION_CODE = 108
 const VERSION = '1.12.1'
 const ENV_PRESET = process.env.ENV_PRESET
 

@@ -1,11 +1,33 @@
-import magnifyingGlass from '../../images/magnifyingGlass'
+import {useMolecule} from 'jotai-molecules'
+import * as TE from 'fp-ts/TaskEither'
+import {pipe} from 'fp-ts/lib/function'
+import {useAtom, useAtomValue, useSetAtom} from 'jotai'
+import {useEffect} from 'react'
+import {Stack, Text, XStack} from 'tamagui'
+import {useTranslation} from '../../../utils/localization/I18nProvider'
+import {askAreYouSureActionAtom} from '../../AreYouSureDialog'
 import Button from '../../Button'
 import TextInput from '../../Input'
-import {useTranslation} from '../../../utils/localization/I18nProvider'
-import {Stack, XStack} from 'tamagui'
-import {useMolecule} from 'jotai-molecules'
+import magnifyingGlass from '../../images/magnifyingGlass'
 import {contactSelectMolecule} from '../atom'
-import {useAtom, useAtomValue} from 'jotai'
+
+function NiceJobHuntingSats(): JSX.Element {
+  return (
+    <Stack gap="$2">
+      <Text fontFamily="$heading" fontSize={32} color="$black">
+        Nice job hunting sats!
+      </Text>
+      <Text color="$black">
+        Your word is{' '}
+        <Text color="$black" fontWeight="800">
+          empower
+        </Text>
+        💪.
+      </Text>
+      <Text color="$black">Good luck finding the rest! 🚀</Text>
+    </Stack>
+  )
+}
 
 function SearchBar(): JSX.Element {
   const {t} = useTranslation()
@@ -17,6 +39,27 @@ function SearchBar(): JSX.Element {
   const areThereAnyContactsToDisplay = useAtomValue(
     areThereAnyContactsToDisplayAtom
   )
+  const showModal = useSetAtom(askAreYouSureActionAtom)
+
+  useEffect(() => {
+    if (searchText.trim() === '3367666933777') {
+      void pipe(
+        showModal({
+          variant: 'info',
+          steps: [
+            {
+              MainSectionComponent: NiceJobHuntingSats,
+              positiveButtonText: 'Nice!',
+              type: 'StepWithChildren',
+            },
+          ],
+        }),
+        TE.map(() => {
+          setSearchText('')
+        })
+      )()
+    }
+  }, [searchText, setSearchText, showModal])
 
   return (
     <Stack>

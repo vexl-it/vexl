@@ -1,4 +1,4 @@
-import crashlytics from '@react-native-firebase/crashlytics'
+import {captureException} from '@sentry/react-native'
 import {getDefaultStore} from 'jotai'
 import {sessionDataOrDummyAtom} from '../state/session'
 import {replaceAll} from './replaceAll'
@@ -24,8 +24,8 @@ export function toJsonWithRemovedSensitiveData(object: any): string {
     const jsonString = JSON.stringify(object)
     return removeSensitiveData(jsonString)
   } catch (e) {
-    crashlytics().recordError(
-      new Error('Error stringify-ing object for crashlytics', {cause: e})
+    captureException(
+      new Error('Error stringify-ing object for sentry', {cause: e})
     )
     return '[[Error stringify-ing object]]'
   }

@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import crashlytics from '@react-native-firebase/crashlytics'
+import {captureException, captureMessage} from '@sentry/react-native'
 import {KeyHolder} from '@vexl-next/cryptography'
 import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {type UserName} from '@vexl-next/domain/src/general/UserName.brand'
@@ -52,8 +52,8 @@ function toJsonWithRemovedSensitiveData(object: any): string {
     const jsonString = JSON.stringify(object)
     return removeSensitiveData(jsonString)
   } catch (e) {
-    crashlytics().recordError(
-      new Error('Error stringify-ing object for crashlytics', {cause: e})
+    captureException(
+      new Error('Error stringify-ing object for sentry', {cause: e})
     )
     return '[[Error stringify-ing object]]'
   }
@@ -62,10 +62,9 @@ function toJsonWithRemovedSensitiveData(object: any): string {
 function reportError(message: string, errorData: unknown): void {
   // We can not use reportError method because of circular require
   if (!__DEV__) {
-    crashlytics().log(message)
-    crashlytics().log(toJsonWithRemovedSensitiveData(errorData))
-    crashlytics().recordError(
-      new Error('error while reading data from secure storage')
+    captureMessage(
+      toJsonWithRemovedSensitiveData({message: errorData}),
+      'error'
     )
   }
   console.error(message, errorData)

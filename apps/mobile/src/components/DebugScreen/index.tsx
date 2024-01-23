@@ -92,6 +92,7 @@ function DebugScreen(): JSX.Element {
               Debug screen
             </Text>
             <Text color="$black">App version: {version}</Text>
+            <Text color="$black">__DEV__: {__DEV__}</Text>
             <CryptoBenchmarks />
             <Text color="$black">
               enableHiddenFeatures: {enableHiddenFeatures ? 'true' : 'false'}

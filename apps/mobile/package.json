@@ -11,7 +11,6 @@
     "lint": "eslint src --ext .js,.jsx,.ts,.tsx",
     "typecheck": "tsc --noemit",
     "format": "prettier --check \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json}\"",
-    "eas-build-post-install": "yarn turbo:build",
     "fresh-start-ios": "yarn install && yarn turbo:build && npx expo prebuild --clean -p ios && npx expo run:ios",
     "fresh-start-android": "yarn install && yarn turbo:build && npx expo prebuild --clean -p android && npx expo run:android"
   },
@@ -34,6 +33,7 @@
     "@react-navigation/native": "^6.0.16",
     "@react-navigation/native-stack": "^6.9.4",
     "@react-spring/native": "^9.6.1",
+    "@sentry/react-native": "5.16.0",
     "@shopify/flash-list": "1.6.3",
     "@shopify/react-native-skia": "0.1.221",
     "@tamagui/animations-moti": "^1.72.3",

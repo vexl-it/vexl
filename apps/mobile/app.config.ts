@@ -176,8 +176,16 @@ export default {
         },
       },
     ],
+    [
+      '@sentry/react-native/expo',
+      {
+        'url': 'https://sentry.io/',
+        'authToken': process.env.SENTRY_AUTH_TOKEN,
+        'project': 'vexl-app',
+        'organization': 'vexl',
+      },
+    ],
     '@react-native-firebase/app',
-    '@react-native-firebase/crashlytics',
     '@react-native-firebase/dynamic-links',
     './expo-plugins/disable-firebase-analytics.js',
     './expo-plugins/setup-headless-background-message-processing-ios.js',

@@ -7,8 +7,9 @@ import useSafeGoBack from '../../../../../utils/useSafeGoBack'
 import Image from '../../../../Image'
 import TextInput from '../../../../Input'
 import {
-  FooterButtonProxy,
   HeaderProxy,
+  PrimaryFooterButtonProxy,
+  SecondaryFooterButtonProxy,
 } from '../../../../PageWithNavigationHeader'
 import infoSvg from '../../../../images/infoSvg'
 import Content from '../../Content'
@@ -78,7 +79,8 @@ function BtcAddressScreen(): JSX.Element {
           )}
         </Stack>
       </Content>
-      <FooterButtonProxy
+      <PrimaryFooterButtonProxy hidden />
+      <SecondaryFooterButtonProxy
         onPress={() => {
           const success = saveBtcAddress(btcAddressTemp)
           if (success) goBack()

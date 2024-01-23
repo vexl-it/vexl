@@ -146,6 +146,7 @@ export type TradeChecklistStackParamsList = {
   AgreeOnTradeDetails: undefined
   ChooseAvailableDays: {
     readonly chosenDays: AvailableDateTimeOption[] | undefined
+    readonly navigateBackToChatOnSave?: boolean | undefined
   }
   PickDateFromSuggestions: {
     readonly chosenDays: AvailableDateTimeOption[]
@@ -155,7 +156,9 @@ export type TradeChecklistStackParamsList = {
     readonly chosenDay: AvailableDateTimeOption
     readonly submitUpdateOnTimePick?: boolean
   }
-  AddTimeOptions: undefined
+  AddTimeOptions: {
+    readonly navigateBackToChatOnSave?: boolean | undefined
+  }
   CalculateAmount: {
     readonly amountData: AmountData | undefined
     readonly navigateBackToChatOnSave?: boolean | undefined

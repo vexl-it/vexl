@@ -9,6 +9,7 @@ import {
   type TradeChecklistUpdate,
 } from '@vexl-next/domain/src/general/tradeChecklist'
 import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import fastDeepEqual from 'fast-deep-equal'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
@@ -29,12 +30,21 @@ const updatesToBeSentAtom = atom<TradeChecklistUpdate>(
 )
 export default updatesToBeSentAtom
 
+export const areThereUpdatesToBeSentAtom = atom(
+  (get) =>
+    !fastDeepEqual(get(updatesToBeSentAtom), UPDATES_TO_BE_SENT_INITIAL_STATE)
+)
+
+export const clearUpdatesToBeSentActionAtom = atom(null, (get, set) => {
+  set(updatesToBeSentAtom, UPDATES_TO_BE_SENT_INITIAL_STATE)
+})
+
 export const dateAndTimePickUpdateToBeSentAtom = atom(
   (get) => get(updatesToBeSentAtom).dateAndTime?.picks?.dateTime
 )
 
-export const btcAmountUpdateToBeSentAtom = atom(
-  (get) => get(updatesToBeSentAtom).amount?.btcAmount?.toString()
+export const amountUpdateToBeSentAtom = atom(
+  (get) => get(updatesToBeSentAtom).amount
 )
 
 export const networkUpdateToBeSentAtom = atom(
@@ -164,7 +174,7 @@ export const submitTradeChecklistUpdatesActionAtom = atom(
           return false
         },
         () => {
-          set(updatesToBeSentAtom, {})
+          set(clearUpdatesToBeSentActionAtom)
 
           return true
         }

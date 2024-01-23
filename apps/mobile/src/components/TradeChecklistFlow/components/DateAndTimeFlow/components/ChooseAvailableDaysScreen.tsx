@@ -18,8 +18,9 @@ import Calendar, {
   REACT_NATIVE_CALENDARS_DATE_FORMAT,
 } from '../../../../Calendar'
 import {
-  FooterButtonProxy,
   HeaderProxy,
+  PrimaryFooterButtonProxy,
+  SecondaryFooterButtonProxy,
 } from '../../../../PageWithNavigationHeader'
 import {MINIMUM_AVAILABLE_DAYS_THRESHOLD} from '../../../utils'
 import Content from '../../Content'
@@ -33,7 +34,7 @@ type Props = TradeChecklistStackScreenProps<'ChooseAvailableDays'>
 
 function ChooseAvailableDaysScreen({
   route: {
-    params: {chosenDays},
+    params: {chosenDays, navigateBackToChatOnSave},
   },
 }: Props): JSX.Element {
   const {t} = useTranslation()
@@ -85,11 +86,14 @@ function ChooseAvailableDaysScreen({
           />
         </Stack>
       </Content>
-      <FooterButtonProxy
+      <PrimaryFooterButtonProxy hidden />
+      <SecondaryFooterButtonProxy
         disabled={availableDateTimes.length < MINIMUM_AVAILABLE_DAYS_THRESHOLD}
         text={t('common.continue')}
         onPress={() => {
-          navigation.navigate('AddTimeOptions')
+          navigation.navigate('AddTimeOptions', {
+            navigateBackToChatOnSave,
+          })
         }}
       />
     </>

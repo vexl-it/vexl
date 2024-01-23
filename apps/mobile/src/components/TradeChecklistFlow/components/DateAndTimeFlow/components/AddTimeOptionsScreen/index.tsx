@@ -1,34 +1,78 @@
 import {useNavigation, type NavigationProp} from '@react-navigation/native'
 import {useAtomValue, useSetAtom} from 'jotai'
-import React from 'react'
+import React, {useCallback} from 'react'
 import {TouchableOpacity} from 'react-native'
 import {Stack, Text, XStack, getTokens} from 'tamagui'
-import {type TradeChecklistStackParamsList} from '../../../../../../navigationTypes'
+import {
+  type TradeChecklistStackParamsList,
+  type TradeChecklistStackScreenProps,
+} from '../../../../../../navigationTypes'
 import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
+import {useGoBackXTimes} from '../../../../../../utils/navigation'
 import useSafeGoBack from '../../../../../../utils/useSafeGoBack'
 import Image from '../../../../../Image'
+import {loadingOverlayDisplayedAtom} from '../../../../../LoadingOverlayProvider'
 import plusSvg from '../../../../../MyOffersScreen/images/plusSvg'
 import {
-  FooterButtonProxy,
   HeaderProxy,
+  PrimaryFooterButtonProxy,
+  SecondaryFooterButtonProxy,
 } from '../../../../../PageWithNavigationHeader'
+import {
+  addDateAndTimeSuggestionsActionAtom,
+  submitTradeChecklistUpdatesActionAtom,
+} from '../../../../atoms/updatesToBeSentAtom'
 import {MINIMUM_AVAILABLE_DAYS_THRESHOLD} from '../../../../utils'
 import Content from '../../../Content'
 import Header from '../../../Header'
-import {availableDateTimesAtom, submitSuggestionsActionAtom} from '../../atoms'
+import {availableDateTimesAtom} from '../../atoms'
 import TimeOptionCell from './components/TimeOptionCell'
 
 const BOTTOM_MARGIN_FOR_OPENED_PICKER = 120
 
-function AddTimeOptionsScreen(): JSX.Element {
+type Props = TradeChecklistStackScreenProps<'AddTimeOptions'>
+
+function AddTimeOptionsScreen({
+  route: {
+    params: {navigateBackToChatOnSave},
+  },
+}: Props): JSX.Element {
   const {t} = useTranslation()
   const goBack = useSafeGoBack()
+  const goBackXTimes = useGoBackXTimes()
   const navigation: NavigationProp<TradeChecklistStackParamsList> =
     useNavigation()
-  const saveLocalDateTimeStateToMainState = useSetAtom(
-    submitSuggestionsActionAtom
+  const showLoadingOverlay = useSetAtom(loadingOverlayDisplayedAtom)
+  const addDateAndTimeSuggestions = useSetAtom(
+    addDateAndTimeSuggestionsActionAtom
+  )
+  const submitTradeChecklistUpdates = useSetAtom(
+    submitTradeChecklistUpdatesActionAtom
   )
   const availableDateTimes = useAtomValue(availableDateTimesAtom)
+
+  const onFooterButtonPress = useCallback(() => {
+    addDateAndTimeSuggestions(availableDateTimes)
+    if (navigateBackToChatOnSave) {
+      showLoadingOverlay(true)
+      void submitTradeChecklistUpdates()().finally(() => {
+        showLoadingOverlay(false)
+      })
+    }
+    if (navigateBackToChatOnSave) {
+      goBackXTimes(2)
+    } else {
+      navigation.navigate('AgreeOnTradeDetails')
+    }
+  }, [
+    addDateAndTimeSuggestions,
+    availableDateTimes,
+    goBackXTimes,
+    navigateBackToChatOnSave,
+    navigation,
+    showLoadingOverlay,
+    submitTradeChecklistUpdates,
+  ])
 
   return (
     <>
@@ -61,13 +105,11 @@ function AddTimeOptionsScreen(): JSX.Element {
           </Stack>
         </Stack>
       </Content>
-      <FooterButtonProxy
+      <PrimaryFooterButtonProxy hidden />
+      <SecondaryFooterButtonProxy
         text={t('common.save')}
         disabled={availableDateTimes.length < MINIMUM_AVAILABLE_DAYS_THRESHOLD}
-        onPress={() => {
-          saveLocalDateTimeStateToMainState()
-          navigation.navigate('AgreeOnTradeDetails')
-        }}
+        onPress={onFooterButtonPress}
       />
     </>
   )

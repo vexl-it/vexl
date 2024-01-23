@@ -6,8 +6,9 @@ import {dismissKeyboardAndResolveOnLayoutUpdate} from '../../../../../../utils/d
 import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../../../../../utils/useSafeGoBack'
 import {
-  FooterButtonProxy,
   HeaderProxy,
+  PrimaryFooterButtonProxy,
+  SecondaryFooterButtonProxy,
 } from '../../../../../PageWithNavigationHeader'
 import Content from '../../../Content'
 import {saveYourPriceActionAtom, tradePriceTypeAtom} from '../../atoms'
@@ -64,7 +65,8 @@ function SetYourOwnPriceScreen(): JSX.Element {
           <PriceInfo fiatTempValueAtom={fiatTempValueAtom} />
         </Stack>
       </Content>
-      <FooterButtonProxy
+      <PrimaryFooterButtonProxy hidden />
+      <SecondaryFooterButtonProxy
         disabled={saveButtonDisabled}
         onPress={() => {
           void dismissKeyboardAndResolveOnLayoutUpdate().then(() => {

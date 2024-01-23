@@ -4,22 +4,40 @@ import {useCallback} from 'react'
 
 export interface FooterButtonState {
   text?: string
-  onPress: () => void
+  onPress?: () => void
   disabled?: boolean
   hidden?: boolean
 }
 
-const footerButtonStateAtom = atom<FooterButtonState>({
+const primaryFooterButtonStateAtom = atom<FooterButtonState>({
+  text: undefined,
+  disabled: false,
+  hidden: true,
+  onPress: () => {},
+})
+
+const secondaryFooterButtonStateAtom = atom<FooterButtonState>({
   text: undefined,
   disabled: false,
   hidden: false,
   onPress: () => {},
 })
 
-export default footerButtonStateAtom
+export {primaryFooterButtonStateAtom, secondaryFooterButtonStateAtom}
 
-export function useSetFooterButtonState(state: FooterButtonState): void {
-  const setFooterButtonState = useSetAtom(footerButtonStateAtom)
+export function useSetPrimaryFooterButtonState(state: FooterButtonState): void {
+  const setFooterButtonState = useSetAtom(primaryFooterButtonStateAtom)
+  useFocusEffect(
+    useCallback(() => {
+      setFooterButtonState(state)
+    }, [setFooterButtonState, state])
+  )
+}
+
+export function useSetSecondaryFooterButtonState(
+  state: FooterButtonState
+): void {
+  const setFooterButtonState = useSetAtom(secondaryFooterButtonStateAtom)
   useFocusEffect(
     useCallback(() => {
       setFooterButtonState(state)

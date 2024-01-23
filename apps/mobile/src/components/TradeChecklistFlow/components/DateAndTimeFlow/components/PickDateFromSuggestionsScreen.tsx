@@ -9,8 +9,9 @@ import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import {useAtomValueRefreshOnFocus} from '../../../../../utils/useFocusMemo'
 import useSafeGoBack from '../../../../../utils/useSafeGoBack'
 import {
-  FooterButtonProxy,
   HeaderProxy,
+  PrimaryFooterButtonProxy,
+  SecondaryFooterButtonProxy,
 } from '../../../../PageWithNavigationHeader'
 import Content from '../../Content'
 import Header from '../../Header'
@@ -74,7 +75,12 @@ export default function PickDateFromSuggestionsScreen(
           items={itemsToShowAtoms}
         />
       </Content>
-      <FooterButtonProxy hidden text={t('common.continue')} onPress={empty} />
+      <PrimaryFooterButtonProxy hidden />
+      <SecondaryFooterButtonProxy
+        hidden
+        text={t('common.continue')}
+        onPress={empty}
+      />
     </>
   )
 }

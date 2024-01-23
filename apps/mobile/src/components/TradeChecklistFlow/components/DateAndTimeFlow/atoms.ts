@@ -9,7 +9,6 @@ import {DateTime} from 'luxon'
 import {type DateData} from 'react-native-calendars'
 import addToSortedArray from '../../../../utils/addToSortedArray'
 import getValueFromSetStateActionOfAtom from '../../../../utils/atomUtils/getValueFromSetStateActionOfAtom'
-import {addDateAndTimeSuggestionsActionAtom} from '../../atoms/updatesToBeSentAtom'
 
 export const availableDateTimesAtom = atom<AvailableDateTimeOption[]>([])
 
@@ -134,8 +133,3 @@ export const removeTimestampFromAvailableAtom = atom(
     )
   }
 )
-
-export const submitSuggestionsActionAtom = atom(null, (get, set) => {
-  const data = get(availableDateTimesAtom)
-  set(addDateAndTimeSuggestionsActionAtom, data)
-})

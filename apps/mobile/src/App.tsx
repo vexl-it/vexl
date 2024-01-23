@@ -2,7 +2,7 @@ import {DefaultTheme, NavigationContainer} from '@react-navigation/native'
 import * as SplashScreen from 'expo-splash-screen'
 import {StatusBar} from 'expo-status-bar'
 import {useEffect} from 'react'
-import 'react-native-gesture-handler'
+import {GestureHandlerRootView} from 'react-native-gesture-handler'
 import {SafeAreaProvider} from 'react-native-safe-area-context'
 import {useTheme} from 'tamagui'
 import AreYouSureDialog from './components/AreYouSureDialog'
@@ -66,7 +66,9 @@ function App(): JSX.Element {
       >
         <LoadingOverlayProvider>
           <MaintenanceAndForceUpdateCheck>
-            <RootNavigation />
+            <GestureHandlerRootView style={{flex: 1}}>
+              <RootNavigation />
+            </GestureHandlerRootView>
             <UploadingOfferProgressModal />
             <ContactsHashingProgressModal />
           </MaintenanceAndForceUpdateCheck>

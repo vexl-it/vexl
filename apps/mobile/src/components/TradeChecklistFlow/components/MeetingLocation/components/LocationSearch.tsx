@@ -2,14 +2,13 @@ import {type TradeChecklistStackScreenProps} from '../../../../../navigationType
 import LocationSearch from '../../../../LocationSearch'
 import {newLocationSessionId} from '../../../../LocationSearch/molecule'
 import {
-  FooterButtonProxy,
   HeaderProxy,
+  PrimaryFooterButtonProxy,
+  SecondaryFooterButtonProxy,
 } from '../../../../PageWithNavigationHeader'
 import Content from '../../Content'
 
 type Props = TradeChecklistStackScreenProps<'LocationSearch'>
-
-const empty = (): void => {}
 
 export default function LocationMapSearch({
   navigation,
@@ -31,7 +30,8 @@ export default function LocationMapSearch({
           }}
         />
       </Content>
-      <FooterButtonProxy text="" onPress={empty} hidden />
+      <PrimaryFooterButtonProxy hidden />
+      <SecondaryFooterButtonProxy hidden />
     </>
   )
 }

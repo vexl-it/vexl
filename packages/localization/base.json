@@ -719,6 +719,7 @@
   "tradeChecklist.options.REVEAL_PHONE_NUMBER": "Reveal phone number",
   "tradeChecklist.optionsDetail.DATE_AND_TIME.themAddedTimeOptions": "{{them}} added {{number}} time optionss",
   "tradeChecklist.optionsDetail.DATE_AND_TIME.youAddedTimeOptions": "You added {{number}} time options",
+  "tradeChecklist.optionsDetail.CALCULATE_AMOUNT.themAddedAmount": "{{them}} set {{btcAmount}} BTC for {{fiatAmount}} {{currency}}",
   "tradeChecklist.saveAndContinue": "Save and continue chatting",
   "tradeChecklist.closeAndContinue": "Close and continue chatting",
   "tradeChecklist.shareRecognitionSignInChat": "Or share the recognition sign in chat",

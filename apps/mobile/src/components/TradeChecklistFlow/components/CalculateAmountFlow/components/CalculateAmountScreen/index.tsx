@@ -10,8 +10,9 @@ import useSafeGoBack from '../../../../../../utils/useSafeGoBack'
 import Info from '../../../../../Info'
 import {loadingOverlayDisplayedAtom} from '../../../../../LoadingOverlayProvider'
 import {
-  FooterButtonProxy,
   HeaderProxy,
+  PrimaryFooterButtonProxy,
+  SecondaryFooterButtonProxy,
 } from '../../../../../PageWithNavigationHeader'
 import {btcPriceForOfferWithStateAtom} from '../../../../atoms/btcPriceForOfferWithStateAtom'
 import {submitTradeChecklistUpdatesActionAtom} from '../../../../atoms/updatesToBeSentAtom'
@@ -19,6 +20,7 @@ import Content from '../../../Content'
 import {
   btcInputValueAtom,
   fiatInputValueAtom,
+  isOtherSideAmountDataNewerThanMineAtom,
   saveButtonDisabledAtom,
   saveLocalCalculatedAmountDataStateToMainStateActionAtom,
   syncDataWithChatStateActionAtom,
@@ -41,6 +43,9 @@ function CalculateAmountScreen({
   const {t} = useTranslation()
   const goBack = useSafeGoBack()
 
+  const isOtherSideAmountDataNewerThanMine = useAtomValue(
+    isOtherSideAmountDataNewerThanMineAtom
+  )
   const saveButtonDisabled = useAtomValue(saveButtonDisabledAtom)
   const tradePriceType = useAtomValue(tradePriceTypeAtom)
   const otherSideData = useAtomValue(otherSideDataAtom)
@@ -137,10 +142,15 @@ function CalculateAmountScreen({
           <PremiumOrDiscount />
         </Stack>
       </Content>
-      <FooterButtonProxy
+      <PrimaryFooterButtonProxy hidden />
+      <SecondaryFooterButtonProxy
         disabled={saveButtonDisabled}
         onPress={onFooterButtonPress}
-        text={t('common.save')}
+        text={
+          isOtherSideAmountDataNewerThanMine
+            ? t('common.accept')
+            : t('common.save')
+        }
       />
     </>
   )

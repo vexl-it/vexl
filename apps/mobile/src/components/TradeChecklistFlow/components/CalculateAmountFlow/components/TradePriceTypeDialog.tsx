@@ -8,7 +8,7 @@ import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import AnimatedDialogWrapper from '../../../../AnimatedDialogWrapper'
 import Button from '../../../../Button'
 import {
-  setFormDataBasedOnTypeActionAtom,
+  setFormDataBasedOnBtcPriceTypeActionAtom,
   tradePriceTypeAtom,
   tradePriceTypeDialogVisibleAtom,
 } from '../atoms'
@@ -27,7 +27,9 @@ function TradePriceTypeDialog(): JSX.Element | null {
   const [tradePriceTypeDialogVisible, setTradePriceTypeDialogVisible] = useAtom(
     tradePriceTypeDialogVisibleAtom
   )
-  const setFormDataBasedOnType = useSetAtom(setFormDataBasedOnTypeActionAtom)
+  const setFormDataBasedOnBtcPriceType = useSetAtom(
+    setFormDataBasedOnBtcPriceTypeActionAtom
+  )
 
   if (!tradePriceTypeDialogVisible) return null
 
@@ -107,7 +109,7 @@ function TradePriceTypeDialog(): JSX.Element | null {
               <Button
                 onPress={() => {
                   setTradePriceTypeDialogVisible(false)
-                  void setFormDataBasedOnType('live')()
+                  void setFormDataBasedOnBtcPriceType('live')()
                 }}
                 variant="primary"
                 text={t('tradeChecklist.calculateAmount.setLivePrice')}
@@ -116,7 +118,7 @@ function TradePriceTypeDialog(): JSX.Element | null {
             {tradePriceType !== 'frozen' && (
               <Button
                 onPress={() => {
-                  void setFormDataBasedOnType('frozen')()
+                  void setFormDataBasedOnBtcPriceType('frozen')()
                   setTradePriceTypeDialogVisible(false)
                 }}
                 variant="primary"

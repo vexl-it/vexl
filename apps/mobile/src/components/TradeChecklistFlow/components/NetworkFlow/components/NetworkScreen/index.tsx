@@ -6,8 +6,9 @@ import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../../../../../utils/useSafeGoBack'
 import {loadingOverlayDisplayedAtom} from '../../../../../LoadingOverlayProvider'
 import {
-  FooterButtonProxy,
   HeaderProxy,
+  PrimaryFooterButtonProxy,
+  SecondaryFooterButtonProxy,
 } from '../../../../../PageWithNavigationHeader'
 import networkSvg from '../../../../../images/networkSvg'
 import {submitTradeChecklistUpdatesActionAtom} from '../../../../atoms/updatesToBeSentAtom'
@@ -86,7 +87,8 @@ function NetworkScreen({
         </Stack>
       </Content>
       <NetworkInfo />
-      <FooterButtonProxy
+      <PrimaryFooterButtonProxy hidden />
+      <SecondaryFooterButtonProxy
         onPress={onFooterButtonPress}
         text={t('common.confirm')}
       />

@@ -9,8 +9,9 @@ import {useGoBackXTimes} from '../../../../../../utils/navigation'
 import useSafeGoBack from '../../../../../../utils/useSafeGoBack'
 import {loadingOverlayDisplayedAtom} from '../../../../../LoadingOverlayProvider'
 import {
-  FooterButtonProxy,
   HeaderProxy,
+  PrimaryFooterButtonProxy,
+  SecondaryFooterButtonProxy,
 } from '../../../../../PageWithNavigationHeader'
 import {
   saveDateTimePickActionAtom,
@@ -93,8 +94,8 @@ function PickTimeFromSuggestions({
         <Stack h="$1" />
         <OptionsList<DateTime> onItemPress={onItemPress} items={itemsAtoms} />
       </Content>
-
-      <FooterButtonProxy
+      <PrimaryFooterButtonProxy hidden />
+      <SecondaryFooterButtonProxy
         text={t('common.continue')}
         hidden={!submitUpdateOnTimePick}
         disabled={!selectedItem}

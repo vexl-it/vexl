@@ -10,8 +10,9 @@ import {type TradeChecklistStackParamsList} from '../../../../../../navigationTy
 import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../../../../../utils/useSafeGoBack'
 import {
-  FooterButtonProxy,
   HeaderProxy,
+  PrimaryFooterButtonProxy,
+  SecondaryFooterButtonProxy,
 } from '../../../../../PageWithNavigationHeader'
 import PremiumOrDiscountContent from '../../../../../PremiumOrDiscountContent'
 import Content from '../../../Content'
@@ -63,7 +64,8 @@ function PremiumOrDiscountScreen(): JSX.Element {
           <PriceTypeIndicator displayInGrayColor mr="$2" />
         </PremiumOrDiscountContent>
       </Content>
-      <FooterButtonProxy
+      <PrimaryFooterButtonProxy hidden />
+      <SecondaryFooterButtonProxy
         onPress={() => {
           applyFeeOnFeeChange(tempFeeAmount)
           goBack()

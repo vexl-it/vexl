@@ -46,14 +46,9 @@ export default function TradeChecklistFlowPageContainer({
         <>
           <Animated.View entering={FadeIn.delay(200)} style={styles.backdrop} />
           <Stack h={100} />
-          <Stack
-            width={36}
-            h={5}
-            als="center"
-            bc="$greyAccent1"
-            br="$5"
-            mt="$4"
-          />
+          <Stack bc="$black" pt="$2">
+            <Stack width={36} h={5} als="center" bc="$greyAccent1" br="$5" />
+          </Stack>
         </>
       )}
       <PageWithNavigationHeader fullScreen={isFullScreen}>

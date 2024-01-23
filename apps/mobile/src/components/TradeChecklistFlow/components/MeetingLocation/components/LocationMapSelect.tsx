@@ -12,8 +12,9 @@ import Input from '../../../../Input'
 import {loadingOverlayDisplayedAtom} from '../../../../LoadingOverlayProvider'
 import MapLocationSelect from '../../../../Map/components/MapLocationSelect'
 import {
-  FooterButtonProxy,
   HeaderProxy,
+  PrimaryFooterButtonProxy,
+  SecondaryFooterButtonProxy,
 } from '../../../../PageWithNavigationHeader'
 import {
   addMeetingLocationActionAtom,
@@ -103,7 +104,8 @@ export default function LocationMapSelect({
           </YStack>
         }
       />
-      <FooterButtonProxy hidden onPress={() => {}} />
+      <PrimaryFooterButtonProxy hidden />
+      <SecondaryFooterButtonProxy hidden />
     </>
   )
 }

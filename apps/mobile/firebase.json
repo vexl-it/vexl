@@ -1,6 +1,5 @@
 {
   "react-native": {
-    "analytics_auto_collection_enabled": false,
-    "crashlytics_debug_enabled": true
+    "analytics_auto_collection_enabled": false
   }
 }

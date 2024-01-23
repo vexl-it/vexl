@@ -99,8 +99,8 @@ export default function replaceImageFileUrisWithBase64(
           (e) => {
             reportError(
               'error',
-              'Error while reading image as file as base64',
-              e
+              new Error('Error while reading image as file as base64'),
+              {e}
             )
             return undefined
           },
@@ -117,8 +117,8 @@ export default function replaceImageFileUrisWithBase64(
           (e) => {
             reportError(
               'error',
-              'Error while reading replyToImage as file as base64',
-              e
+              new Error('Error while reading replyToImage as file as base64'),
+              {e}
             )
             return undefined
           },
@@ -141,7 +141,11 @@ export function replaceIdentityImageFileUriWithBase64(
     readAsBase64({path: image, imageWidthOrHeightLimit: 512}),
     TE.match(
       (e) => {
-        reportError('error', 'Error while reading image as file as base64', e)
+        reportError(
+          'error',
+          new Error('Error while reading image as file as base64'),
+          {e}
+        )
         return identityRevealChatMessage
       },
       (image) => ({

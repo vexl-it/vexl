@@ -190,7 +190,13 @@ export default function replaceBase64UriWithImageFileUri(
             saveBase64ImageToStorage(image, inboxPublicKey, otherSidePublicKey),
             TE.match(
               (e) => {
-                reportError('error', 'Error while processing message image', e)
+                reportError(
+                  'error',
+                  new Error('Error while processing message image'),
+                  {
+                    e,
+                  }
+                )
                 return undefined
               },
               (one) => one
@@ -210,8 +216,8 @@ export default function replaceBase64UriWithImageFileUri(
               (e) => {
                 reportError(
                   'error',
-                  'Error while processing message replyToImage',
-                  e
+                  new Error('Error while processing message replyToImage'),
+                  {e}
                 )
                 return undefined
               },
@@ -230,7 +236,13 @@ export default function replaceBase64UriWithImageFileUri(
             ),
             TE.match(
               (e) => {
-                reportError('error', 'Error while processing message image', e)
+                reportError(
+                  'error',
+                  new Error('Error while processing message image'),
+                  {
+                    e,
+                  }
+                )
                 return undefined
               },
               (one) => one

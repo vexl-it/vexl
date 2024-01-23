@@ -69,7 +69,7 @@ export const refreshBtcPriceActionAtom = atom(
               t('btcPriceChart.requestCouldNotBeProcessed'),
             error: l,
           })
-          reportError('warn', 'Error while fetching btc price', l)
+          reportError('warn', new Error('Error while fetching btc price'), {l})
 
           set(btcPriceDataAtom, (prevState) => ({
             ...prevState,

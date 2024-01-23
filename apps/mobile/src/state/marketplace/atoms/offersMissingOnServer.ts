@@ -84,11 +84,9 @@ const reencryptOneOfferActionAtom = atom(
       }),
       TE.map((r) => {
         if (r.encryptionErrors.length > 0) {
-          reportError(
-            'error',
-            'Error while encrypting offer',
-            r.encryptionErrors
-          )
+          reportError('error', new Error('Error while encrypting offer'), {
+            excryptionErrors: r.encryptionErrors,
+          })
         }
 
         const recreatedOffer: MyOfferInState = {
@@ -160,7 +158,9 @@ export const reencryptOffersMissingOnServerActionAtom = atom(
       T.map((results) => {
         const errors = results.filter(E.isLeft).map((one) => one.left)
         if (errors.length > 0)
-          reportError('error', 'Error while reencrypting offers', errors)
+          reportError('error', new Error('Error while reencrypting offers'), {
+            errors,
+          })
 
         return {
           reuploaded: pipe(

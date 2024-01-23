@@ -59,7 +59,7 @@ export function isOnSpecificChat(
       fastDeepEqual(activeRoute.params, keys)
     )
   } catch (e) {
-    reportError('warn', 'Error in isOnSpecificChat', e)
+    reportError('warn', new Error('Error in isOnSpecificChat'), {e})
     return false
   }
 }
@@ -80,7 +80,7 @@ export function isOnMessagesList(state: NavigationState<any>): boolean {
     const activeRoute = getActiveRoute(state)
     return activeRoute.name === 'Messages'
   } catch (e) {
-    reportError('warn', 'Error in isOnMessagesList', e)
+    reportError('warn', new Error('Error in isOnMessagesList'), {e})
     return false
   }
 }

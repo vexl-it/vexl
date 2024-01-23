@@ -28,8 +28,10 @@ export function useInitPhoneVerification(): (
           case 'UnexpectedApiResponseError':
             reportError(
               'error',
-              'Unexpected api response while initializing phone verification',
-              l
+              new Error(
+                'Unexpected api response while initializing phone verification'
+              ),
+              {l}
             )
             return t('common.unexpectedServerResponse')
           case 'NetworkError':
@@ -38,8 +40,10 @@ export function useInitPhoneVerification(): (
           case 'BadStatusCodeError':
             reportError(
               'error',
-              'Bad status code error while initializing phone verification',
-              l
+              new Error(
+                'Bad status code error while initializing phone verification'
+              ),
+              {l}
             )
             return t('common.unknownError')
         }

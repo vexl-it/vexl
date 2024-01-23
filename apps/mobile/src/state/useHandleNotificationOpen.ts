@@ -37,8 +37,8 @@ function useReactOnNotificationOpen(): (notification: Notification) => void {
             (l) => {
               reportError(
                 'error',
-                'Error while opening chat from notification',
-                l
+                new Error('Error while opening chat from notification'),
+                {l}
               )
 
               // as fallback navigate to messages list.

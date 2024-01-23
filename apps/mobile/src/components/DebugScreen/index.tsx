@@ -20,7 +20,11 @@ import {triggerOffersRefreshAtom} from '../../state/marketplace'
 import {myOffersAtom} from '../../state/marketplace/atoms/myOffers'
 import {offersStateAtom} from '../../state/marketplace/atoms/offersState'
 import {useSessionAssumeLoggedIn} from '../../state/session'
-import {enableHiddenFeatures, version} from '../../utils/environment'
+import {
+  commitHash,
+  enableHiddenFeatures,
+  version,
+} from '../../utils/environment'
 import {
   getShowDebugNotifications,
   setShowDebugNotifications,
@@ -92,6 +96,10 @@ function DebugScreen(): JSX.Element {
               Debug screen
             </Text>
             <Text color="$black">App version: {version}</Text>
+            <Text color="$black" selectable>
+              On Commit: {commitHash}
+            </Text>
+            <Text color="$black">__DEV__: {__DEV__}</Text>
             <CryptoBenchmarks />
             <Text color="$black">
               enableHiddenFeatures: {enableHiddenFeatures ? 'true' : 'false'}
@@ -116,13 +124,30 @@ function DebugScreen(): JSX.Element {
             <Button
               variant="primary"
               size="small"
-              text="Simulate non fatal error"
+              text="Simulate non fatal error Error A"
               onPress={() => {
                 reportError(
                   'error',
+                  new Error('Simulated non fatal error A'),
                   // Private key should be stripped
-                  `Simulated non fatal error ${session.privateKey.privateKeyPemBase64}`,
-                  new Error('Simulated non fatal error')
+                  {
+                    text: `Simulated non fatal error ${session.privateKey.privateKeyPemBase64}`,
+                  }
+                )
+              }}
+            />
+            <Button
+              variant="primary"
+              size="small"
+              text="Simulate non fatal error Error B"
+              onPress={() => {
+                reportError(
+                  'error',
+                  new Error('Simulated non fatal error B'),
+                  // Private key should be stripped
+                  {
+                    text: `Simulated non fatal error ${session.privateKey.privateKeyPemBase64}`,
+                  }
                 )
               }}
             />

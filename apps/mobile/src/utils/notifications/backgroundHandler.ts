@@ -8,18 +8,10 @@ import {pipe} from 'fp-ts/function'
 import {getDefaultStore} from 'jotai'
 import {fetchAndStoreMessagesForInboxAtom} from '../../state/chat/atoms/fetchNewMessagesActionAtom'
 import {unreadChatsCountAtom} from '../../state/chat/atoms/unreadChatsCountAtom'
-import {updateAllOffersConnectionsActionAtom} from '../../state/connections/atom/offerToConnectionsAtom'
 import {loadSession} from '../../state/session/loadSession'
 import {safeParse} from '../fpUtils'
 import reportError from '../reportError'
-import checkAndShowCreateOfferPrompt from './checkAndShowCreateOfferPrompt'
-import checkForNewOffers from './checkForNewOffers'
 import isChatMessageNotification from './isChatMessageNotification'
-import {
-  CREATE_OFFER_PROMPT,
-  NEW_CONNECTION,
-  NEW_CONTENT,
-} from './notificationTypes'
 import {showDebugNotificationIfEnabled} from './showDebugNotificationIfEnabled'
 import {showUINotificationFromRemoteMessage} from './showUINotificationFromRemoteMessage'
 
@@ -60,7 +52,11 @@ export async function processBackgroundMessage(
         ),
         TE.match(
           (e) => {
-            reportError('error', 'Error processing messaging notification', e)
+            reportError(
+              'error',
+              new Error('Error processing messaging notification'),
+              {e}
+            )
           },
           () => {
             console.info('📳 Inbox refreshed successfully')
@@ -68,36 +64,11 @@ export async function processBackgroundMessage(
             notifee
               .setBadgeCount(getDefaultStore().get(unreadChatsCountAtom))
               .catch((e) => {
-                reportError('warn', 'Unable to set badge count', e)
+                reportError('warn', new Error('Unable to set badge count'), {e})
               })
           }
         )
       )()
-      return
-    }
-
-    if (remoteMessage.data?.type === NEW_CONNECTION) {
-      console.info(
-        '📳 Received notification about new user. Checking and updating offers accordingly.'
-      )
-      await getDefaultStore().set(updateAllOffersConnectionsActionAtom, {
-        isInBackground: true,
-      })()
-    }
-
-    if (remoteMessage.data?.type === NEW_CONTENT) {
-      console.info(
-        '📳 Received notification about new content. Triggering check'
-      )
-      void showDebugNotificationIfEnabled({
-        title: 'calling check for new coffers',
-        body: 'ok',
-      })
-      void checkForNewOffers()
-    }
-
-    if (remoteMessage.data?.type === CREATE_OFFER_PROMPT) {
-      void checkAndShowCreateOfferPrompt(getDefaultStore())
     }
   } catch (error) {
     void showDebugNotificationIfEnabled({
@@ -106,8 +77,10 @@ export async function processBackgroundMessage(
     })
     reportError(
       'error',
-      'Error while processing background notification',
-      error
+      new Error('Error while processing background notification'),
+      {
+        error,
+      }
     )
   }
 }
@@ -119,8 +92,10 @@ function setupBackgroundMessaging(): void {
   } catch (error) {
     reportError(
       'error',
-      'Error while registering background message handler',
-      error
+      new Error('Error while registering background message handler'),
+      {
+        error,
+      }
     )
   }
 }

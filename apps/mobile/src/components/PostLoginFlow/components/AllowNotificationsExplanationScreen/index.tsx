@@ -39,7 +39,7 @@ function AllowNotificationsExplanationScreen({navigation}: Props): JSX.Element {
             finishPostLoginFlow(true)
             return
           }
-          reportError('error', 'Error creating inbox', e)
+          reportError('error', new Error('Error creating inbox'), {e})
           showErrorAlert({
             title: t('common.errorCreatingInbox'),
             error: e,

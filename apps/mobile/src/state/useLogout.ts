@@ -70,7 +70,7 @@ export const logoutActionAtom = atom(null, async (get, set) => {
     // firebase token
     await failSilently(messaging().deleteToken())
   } catch (e) {
-    reportError('error', 'Critical error while logging out', e)
+    reportError('error', new Error('Critical error while logging out'), {e})
 
     set(sessionAtom, O.none)
     clearMmkvStorageAndEmptyAtoms()

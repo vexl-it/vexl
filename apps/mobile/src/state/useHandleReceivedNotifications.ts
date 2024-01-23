@@ -58,7 +58,9 @@ export function useHandleReceivedNotifications(): void {
               // Do not display. Can not parse inbox key or sender
               reportError(
                 'warn',
-                'Received chat notification with invalid inbox key or sender key',
+                new Error(
+                  'Received chat notification with invalid inbox key or sender key'
+                ),
                 {
                   data,
                 }
@@ -85,7 +87,13 @@ export function useHandleReceivedNotifications(): void {
           TE.chainTaskK((inbox) => fetchMessagesForInbox({key: inbox})),
           TE.match(
             (e) => {
-              reportError('error', 'Error processing messaging notification', e)
+              reportError(
+                'error',
+                new Error('Error processing messaging notification'),
+                {
+                  e,
+                }
+              )
             },
             () => {
               console.info('📳 Inbox refreshed successfully')
@@ -117,7 +125,9 @@ export function useHandleReceivedNotifications(): void {
         return
       }
 
-      reportError('warn', 'Unknown notification type', data.type)
+      reportError('warn', new Error('Unknown notification type'), {
+        type: data.type,
+      })
     })
   }, [fetchMessagesForInbox, navigation, store, updateOffersConnections])
 }

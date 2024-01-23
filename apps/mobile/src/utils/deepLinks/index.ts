@@ -29,8 +29,10 @@ export const handleImportDeepContactActionAtom = atom(
         (e) => {
           reportError(
             'warn',
-            'Error while parsing phone number from QR code',
-            e
+            new Error('Error while parsing phone number from QR code'),
+            {
+              e,
+            }
           )
           showErrorAlert({
             title: t('common.errorWhileReadingQrCode'),
@@ -68,7 +70,7 @@ export function useHandleDeepLink(): void {
           }
           break
         default:
-          reportError('warn', 'Unknown deep link type', {url})
+          reportError('warn', new Error('Unknown deep link type'), {url})
       }
     },
     [handleImportDeepContact]
@@ -83,7 +85,7 @@ export function useHandleDeepLink(): void {
         }
       })
       .catch((err) => {
-        reportError('warn', 'Error while opening deep link', err)
+        reportError('warn', new Error('Error while opening deep link'), {err})
         showErrorAlert({
           title: t('common.errorOpeningLink.message'),
           error: err,

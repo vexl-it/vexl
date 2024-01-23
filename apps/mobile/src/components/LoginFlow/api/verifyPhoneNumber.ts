@@ -32,8 +32,8 @@ export function useVerifyPhoneNumber(): (
           case 'UnexpectedApiResponseError':
             reportError(
               'error',
-              'Unexpected api response while verifying phone number',
-              l
+              new Error('Unexpected api response while verifying phone number'),
+              {l}
             )
             return t('common.unexpectedServerResponse')
           case 'NetworkError':
@@ -42,8 +42,8 @@ export function useVerifyPhoneNumber(): (
           case 'BadStatusCodeError':
             reportError(
               'error',
-              'Unexpected error while verifying phone number',
-              l
+              new Error('Unexpected error while verifying phone number'),
+              {l}
             )
             return t('common.unknownError')
         }

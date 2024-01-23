@@ -43,8 +43,8 @@ export function useRefreshUserOnContactService(): void {
               } else if (e._tag === 'UnknownError') {
                 reportError(
                   'warn',
-                  'Unknown error refreshing user. Not logging out.',
-                  e
+                  new Error('Unknown error refreshing user. Not logging out.'),
+                  {e}
                 )
                 console.warn(
                   '🦋 🚨 Unknown error refreshing user. Not logging out.',
@@ -53,8 +53,10 @@ export function useRefreshUserOnContactService(): void {
               } else if (e._tag === 'UnexpectedApiResponseError') {
                 reportError(
                   'warn',
-                  'UnexpectedApiResponseError error refreshing user. Not logging out.',
-                  e
+                  new Error(
+                    'UnexpectedApiResponseError error refreshing user. Not logging out.'
+                  ),
+                  {e}
                 )
                 console.warn(
                   '🦋 🚨 UnexpectedApiResponseError error refreshing user. Not logging out.',
@@ -68,27 +70,31 @@ export function useRefreshUserOnContactService(): void {
                   console.warn('🦋 🚨 Bad status code while refreshing user')
                   reportError(
                     'warn',
-                    'Bad status code while error refreshing user. Not logging out.',
-                    e
+                    new Error(
+                      'Bad status code while error refreshing user. Not logging out.'
+                    ),
+                    {e}
                   )
                   void logout()
                 } else {
                   console.warn('🦋 🚨 Bad status code while refreshing user')
                   reportError(
                     'warn',
-                    'Bad status code error refreshing user. Not logging out.',
-                    e
+                    new Error(
+                      'Bad status code error refreshing user. Not logging out.'
+                    ),
+                    {e}
                   )
                 }
               } else {
                 reportError(
                   'error',
-                  'Uncaught error refreshing user. Not logging out.',
+                  new Error('Uncaught error refreshing user. Not logging out.'),
                   e
                 )
                 console.error(
                   '🦋 🚨 UnexpectedApiResponseError error refreshing user. Not logging out.',
-                  e
+                  {e}
                 )
               }
             },
@@ -142,7 +148,11 @@ export function useRefreshOffers(): void {
                 console.info('🦋 No offers to refresh')
               } else {
                 console.error('🦋 🚨 Error while refreshing offers', l._tag)
-                reportError('warn', 'Error while refreshing offers', l)
+                reportError(
+                  'warn',
+                  new Error('Error while refreshing offers'),
+                  {l}
+                )
               }
             },
             () => {
@@ -161,7 +171,9 @@ const recreateInboxAndUpdateOfferAtom = atom(
   (get, set, offerWithoutInbox: OneOfferInState) => {
     reportError(
       'warn',
-      'Found offer without corresponding inbox. Trying to recreate the inbox and updating offer.',
+      new Error(
+        'Found offer without corresponding inbox. Trying to recreate the inbox and updating offer.'
+      ),
       {}
     )
     const adminId = offerWithoutInbox.ownershipInfo?.adminId
@@ -171,7 +183,7 @@ const recreateInboxAndUpdateOfferAtom = atom(
     if (!adminId || !symmetricKey || !intendedConnectionLevel) {
       reportError(
         'error',
-        'Missing data to update offer after recreating inbox',
+        new Error('Missing data to update offer after recreating inbox'),
         {}
       )
       return T.of(false)
@@ -203,8 +215,8 @@ const recreateInboxAndUpdateOfferAtom = atom(
         (e) => {
           reportError(
             'error',
-            'Errow while recreating inbox and updating offer',
-            e
+            new Error('Errow while recreating inbox and updating offer'),
+            {e}
           )
           return false
         },

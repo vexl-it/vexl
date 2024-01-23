@@ -124,7 +124,9 @@ function refreshInbox(
         )
 
         if (otherErrors.length > 0) {
-          reportError('error', 'Error decrypting messages', otherErrors)
+          reportError('error', new Error('Error decrypting messages'), {
+            otherErrors,
+          })
         }
 
         return [
@@ -207,7 +209,9 @@ function deletePulledMessagesReportLeft({
     api.deletePulledMessages({keyPair}),
     TE.match(
       (error) => {
-        reportError('error', 'Error deleting pulled messages', error)
+        reportError('error', new Error('Error deleting pulled messages'), {
+          error,
+        })
       },
       () => {}
     )
@@ -226,8 +230,7 @@ export const fetchAndStoreMessagesForInboxAtom = atom<
   if (!inbox) {
     reportError(
       'error',
-      `Trying to refresh inbox with public key: ${key}, but inbox does not exist.`,
-      new Error('Inbox does not exist')
+      new Error('Trying to refresh an inbox but inbox does not exist')
     )
     return T.of(undefined)
   }
@@ -247,8 +250,10 @@ export const fetchAndStoreMessagesForInboxAtom = atom<
         if (error._tag === 'inboxDoesNotExist') {
           reportError(
             'warn',
-            'Api Error fetching messages for inbox. Trying to create the inbox again.',
-            error
+            new Error(
+              'Api Error fetching messages for inbox. Trying to create the inbox again.'
+            ),
+            {error}
           )
           return pipe(
             getNotificationToken(),
@@ -261,7 +266,11 @@ export const fetchAndStoreMessagesForInboxAtom = atom<
             ),
             TE.match(
               (e) => {
-                reportError('error', 'Error recreating inbox on server', e)
+                reportError(
+                  'error',
+                  new Error('Error recreating inbox on server'),
+                  {e}
+                )
                 return false
               },
               () => {

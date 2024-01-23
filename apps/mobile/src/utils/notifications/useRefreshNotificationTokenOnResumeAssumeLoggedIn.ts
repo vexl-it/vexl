@@ -44,8 +44,10 @@ export function useRefreshNotificationTokenOnResumeAssumeLoggedIn(): void {
           (e) => {
             reportError(
               'error',
-              'Error while refreshing notification token at contact service',
-              e
+              new Error(
+                'Error while refreshing notification token at contact service'
+              ),
+              {e}
             )
           },
           () => {
@@ -64,7 +66,9 @@ export function useRefreshNotificationTokenOnResumeAssumeLoggedIn(): void {
             }),
             TE.match(
               (e) => {
-                reportError('error', 'Error while updating inbox', e)
+                reportError('error', new Error('Error while updating inbox'), {
+                  e,
+                })
               },
               () => {
                 console.info(

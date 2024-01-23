@@ -8,7 +8,7 @@ function BadgeCountManager(): null {
   const unreadChatsCount = useAtomValue(unreadChatsCountAtom)
   useEffect(() => {
     notifee.setBadgeCount(unreadChatsCount).catch((err) => {
-      reportError('warn', 'Failed to set badge count', err)
+      reportError('warn', new Error('Failed to set badge count'), {err})
     })
   }, [unreadChatsCount])
 

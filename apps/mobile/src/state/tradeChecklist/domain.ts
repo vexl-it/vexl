@@ -21,7 +21,13 @@ export type ChatDataForTradeChecklist = z.TypeOf<
 
 // eslint-disable-next-line @typescript-eslint/ban-types
 function catchFormatError<T>(err: T): {} {
-  reportError('error', 'Trade checklist in state formatting error caught', err)
+  reportError(
+    'error',
+    new Error('Trade checklist in state formatting error caught'),
+    {
+      err,
+    }
+  )
   return {}
 }
 

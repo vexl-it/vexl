@@ -22,7 +22,9 @@ export async function showUINotificationFromRemoteMessage(
   if (!remoteMessage.data && !remoteMessage.notification) return
 
   if (!type) {
-    reportError('warn', 'Notification type is missing', remoteMessage)
+    reportError('warn', new Error('Notification type is missing'), {
+      remoteMessage,
+    })
     return
   }
 

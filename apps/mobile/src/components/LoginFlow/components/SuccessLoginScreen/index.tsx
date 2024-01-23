@@ -49,7 +49,11 @@ function SuccessLoginScreen({
             }),
 
           (error) => {
-            reportError('error', 'error while signing login challenge', error)
+            reportError(
+              'error',
+              new Error('error while signing login challenge'),
+              {error}
+            )
             return t('common.cryptoError')
           }
         )
@@ -75,7 +79,9 @@ function SuccessLoginScreen({
           }),
           E.chainW(safeParse(Session)),
           E.mapLeft((error) => {
-            reportError('error', 'Error while creating session', error)
+            reportError('error', new Error('Error while creating session'), {
+              error,
+            })
             return t('common.unknownError')
           }),
           TE.fromEither

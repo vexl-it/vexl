@@ -67,8 +67,10 @@ export async function loadSession(
 
         reportError(
           'error',
-          '‼️ Error while reading or parsing user data from secure storage.',
-          left
+          new Error(
+            '‼️ Error while reading or parsing user data from secure storage.'
+          ),
+          {left}
         )
 
         if (showErrorAlert) {

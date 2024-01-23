@@ -78,7 +78,9 @@ export const triggerOffersRefreshAtom = atom(null, async (get, set) => {
         TE.matchW(
           (error) => {
             if (error._tag !== 'NetworkError')
-              reportError('error', 'Error fetching removed offers', error)
+              reportError('error', new Error('Error fetching removed offers'), {
+                error,
+              })
             return [] as OfferId[]
           },
           (result) => result.offerIds
@@ -89,7 +91,7 @@ export const triggerOffersRefreshAtom = atom(null, async (get, set) => {
     TE.matchW(
       (error) => {
         if (error._tag !== 'NetworkError')
-          reportError('error', 'Error fetching offers', error)
+          reportError('error', new Error('Error fetching offers'), {error})
         set(loadingStateAtom, {state: 'error', error})
       },
       ({newOffers: decryptingResults, removedOffers}) => {
@@ -106,7 +108,11 @@ export const triggerOffersRefreshAtom = atom(null, async (get, set) => {
                 (one) => one._tag !== 'NonCompatibleOfferVersionError'
               )
               if (criticalErrors.length > 0)
-                reportError('error', 'Error while decrypting offers', error)
+                reportError(
+                  'error',
+                  new Error('Error while decrypting offers'),
+                  {error}
+                )
 
               const nonCompatibleErrors = error.filter(
                 (one) => one._tag === 'NonCompatibleOfferVersionError'
@@ -237,7 +243,9 @@ export const createOfferAtom = atom<
     }),
     TE.map((r) => {
       if (r.encryptionErrors.length > 0) {
-        reportError('error', 'Error while encrypting offer', r.encryptionErrors)
+        reportError('error', new Error('Error while encrypting offer'), {
+          errors: r.encryptionErrors,
+        })
       }
 
       const createdOffer: OneOfferInState = {
@@ -336,7 +344,7 @@ export const deleteOffersActionAtom = atom<
     TE.chainFirstW(() => api.offer.deleteOffer({adminIds: adminIdsToDelete})),
     TE.match(
       (left) => {
-        reportError('error', 'Error while deleting offers', left)
+        reportError('error', new Error('Error while deleting offers'), {left})
         return E.left(left)
       },
       () => {

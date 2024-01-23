@@ -12,10 +12,8 @@ export default function getCountryCode(number: E164PhoneNumber): CountryPrefix {
     return countryCode.data
   }
 
-  reportError(
-    'warn',
-    'Can not get country code from number',
-    number.slice(0, 3)
-  )
+  reportError('warn', new Error('Can not get country code from number'), {
+    number: number.slice(0, 3),
+  })
   return INVALID_COUNTRY_CODE
 }

@@ -62,7 +62,11 @@ export const sendRequestHandleUIActionAtom = atom(
         TE.matchE(
           (e) => {
             if (e._tag === 'SenderUserInboxDoesNotExistError') {
-              reportError('warn', 'Sender user inbox does not exist', e)
+              reportError(
+                'warn',
+                new Error('Sender user inbox does not exist'),
+                {e}
+              )
 
               return pipe(
                 TE.Do,
@@ -91,8 +95,8 @@ export const sendRequestHandleUIActionAtom = atom(
         if (e._tag === 'ApiErrorCreatingInbox') {
           reportError(
             'error',
-            'Error recreating user inbox after it was deleted',
-            e
+            new Error('Error recreating user inbox after it was deleted'),
+            {e}
           )
 
           showErrorAlert({

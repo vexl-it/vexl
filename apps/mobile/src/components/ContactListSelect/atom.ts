@@ -333,7 +333,9 @@ export const contactSelectMolecule = molecule((getMolecule, getScope) => {
       TE.match(
         (e) => {
           if (e._tag !== 'NetworkError') {
-            reportError('error', 'error while submitting contacts', e)
+            reportError('error', new Error('error while submitting contacts'), {
+              e,
+            })
           }
 
           Alert.alert(toCommonErrorMessage(e, t) ?? t('common.unknownError'))
@@ -341,7 +343,9 @@ export const contactSelectMolecule = molecule((getMolecule, getScope) => {
         },
         ({lefts, rights: importedContacts}) => {
           if (lefts.length > 0) {
-            reportError('warn', 'Error when hashing phone numbers', lefts)
+            reportError('warn', new Error('Error when hashing phone numbers'), {
+              lefts,
+            })
           }
 
           set(importedContactsAtom, [...importedContacts])

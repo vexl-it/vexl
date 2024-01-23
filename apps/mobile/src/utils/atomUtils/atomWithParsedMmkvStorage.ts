@@ -34,8 +34,8 @@ function toShadowStorageAtom<Value extends z.ZodObject<any>>(
             E.getOrElseW((l) => {
               reportError(
                 'warn',
-                `Error while saving value to storage. Key: ${key}`,
-                l
+                new Error(`Error while saving value to storage. Key: ${key}`),
+                {l}
               )
             })
           )
@@ -59,8 +59,10 @@ function getInitialValue<Value extends z.ZodObject<any>>({
       if (l._tag !== 'ValueNotSet') {
         reportError(
           'warn',
-          `Error while parsing stored value. Using provided default. Key: ${key}`,
-          l
+          new Error(
+            `Error while parsing stored value. Using provided default. Key: ${key}`
+          ),
+          {l}
         )
       }
       return defaultValue
@@ -120,8 +122,10 @@ export function atomWithParsedMmkvStorage<Value extends z.ZodObject<any>>(
               }
               reportError(
                 'warn',
-                `Error while parsing stored mmkv value in onChange function. Key: '${key}'`,
-                e
+                new Error(
+                  `Error while parsing stored mmkv value in onChange function. Key: '${key}'`
+                ),
+                {e}
               )
             }, setAtom)
           )

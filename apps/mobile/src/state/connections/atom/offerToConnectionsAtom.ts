@@ -164,24 +164,28 @@ export const updateAllOffersConnectionsActionAtom = atom(
               if (error._tag === 'SkippedBecauseTimeLimitReached') {
                 reportError(
                   'warn',
-                  `Skipped updating ${i + 1} / ${
-                    offerToConnectionsAtoms.length
-                  } offer connections due to time limit reached`,
-                  error
+                  new Error(
+                    `Skipped updating ${i + 1} / ${
+                      offerToConnectionsAtoms.length
+                    } offer connections due to time limit reached`
+                  ),
+                  {error}
                 )
-                return {
-                  adminId: oneOfferConections.adminId,
-                  success: false,
-                }
               }
               if (error._tag === 'NetworkError') {
                 reportError(
                   'info',
-                  'Unable to update offer connections due to network error',
-                  error
+                  new Error(
+                    'Unable to update offer connections due to network error'
+                  ),
+                  {error}
                 )
               }
-              reportError('warn', 'Unable to update offer connections', error)
+              reportError(
+                'warn',
+                new Error('Unable to update offer connections'),
+                {error}
+              )
               return {
                 adminId: oneOfferConections.adminId,
                 success: false,
@@ -196,23 +200,25 @@ export const updateAllOffersConnectionsActionAtom = atom(
               if (encryptionErrors.length > 0) {
                 reportError(
                   'error',
-                  'Error while encrypting new connections for offer',
-                  encryptionErrors
+                  new Error('Error while encrypting new connections for offer'),
+                  {encryptionErrors}
                 )
               }
 
               if (timeLimitReachedErrors.length > 0) {
                 reportError(
                   'warn',
-                  `Offer connections: ${i + 1} / ${
-                    offerToConnectionsAtoms.length
-                  } did not update fully due to time limit reached. Total connections updated: ${
-                    newConnections.firstLevel.length +
-                    (newConnections.secondLevel?.length ?? 0)
-                  }. Total connections skipped: ${String(
-                    timeLimitReachedErrors.length
-                  )}.`,
-                  timeLimitReachedErrors
+                  new Error(
+                    `Offer connections: ${i + 1} / ${
+                      offerToConnectionsAtoms.length
+                    } did not update fully due to time limit reached. Total connections updated: ${
+                      newConnections.firstLevel.length +
+                      (newConnections.secondLevel?.length ?? 0)
+                    }. Total connections skipped: ${String(
+                      timeLimitReachedErrors.length
+                    )}.`
+                  ),
+                  {timeLimitReachedErrors}
                 )
               }
 

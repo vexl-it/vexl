@@ -101,6 +101,10 @@ export async function subscribeToGeneralTopic(): Promise<void> {
     await messaging().subscribeToTopic('general')
     console.info('Subscribed to general topic')
   } catch (e) {
-    reportError('error', 'Error while subscribing to general topic', e)
+    reportError(
+      'error',
+      new Error('Error while subscribing to general topic'),
+      {e}
+    )
   }
 }

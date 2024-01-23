@@ -29,8 +29,8 @@ export const fetchLocationSuggestionsAtom = atom(
         })
         reportError(
           'error',
-          'Error when getting user location to create offer',
-          e
+          new Error('Error when getting user location to create offer'),
+          {e}
         )
         return T.of({result: []} as GetLocationSuggestionsResponse)
       })

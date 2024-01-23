@@ -143,6 +143,10 @@ export default async function checkForNewOffers(): Promise<void> {
       title: 'Error while checking new offers in background',
       body: `e ${(e as Error).message ?? '[no error message ]'}`,
     })
-    reportError('error', 'Error while checking new offers in background', e)
+    reportError(
+      'error',
+      new Error('Error while checking new offers in background'),
+      {e}
+    )
   }
 }

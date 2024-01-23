@@ -156,7 +156,11 @@ export const submitTradeChecklistUpdatesActionAtom = atom(
       set(submitTradeChecklistUpdateAtom, get(updatesToBeSentAtom)),
       TE.match(
         (e) => {
-          reportError('error', 'Error submitting trade checklist update', e)
+          reportError(
+            'error',
+            new Error('Error submitting trade checklist update'),
+            {e}
+          )
           return false
         },
         () => {

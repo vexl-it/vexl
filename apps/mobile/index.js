@@ -1,5 +1,6 @@
 // import './src/utils/wdyr'
 
+import './src/utils/setupSentry'
 // INITIAL SETUP - KEEP THIS AT THE TOP
 import './src/utils/ThemeProvider/tamagui.config'
 // Order matters
@@ -10,6 +11,7 @@ import './src/utils/notifications/backgroundHandler'
 import './src/utils/setupCryptoImplementation'
 // INITIAL SETUP DONE
 
+import * as Sentry from '@sentry/react-native'
 import {registerRootComponent} from 'expo'
 import App from './src/App'
 
@@ -30,4 +32,4 @@ function HeadlessCheck({isHeadless}) {
   return <App />
 }
 
-registerRootComponent(HeadlessCheck)
+registerRootComponent(Sentry.wrap(HeadlessCheck))

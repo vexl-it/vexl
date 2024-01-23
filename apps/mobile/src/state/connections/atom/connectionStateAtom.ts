@@ -74,7 +74,11 @@ export const syncConnectionsActionAtom = atom(
             // TODO let user know somehow
             return false
           }
-          reportError('warn', 'Unable to refresh connections state', e)
+          reportError(
+            'warn',
+            new Error('Unable to refresh connections state'),
+            {e}
+          )
           return false
         },
         (data) => {

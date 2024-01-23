@@ -113,7 +113,7 @@ export const feedbackMolecule = molecule((getMolecule, getScope) => {
         ),
         TE.match(
           (e) => {
-            reportError('error', 'Error sending feedback', e)
+            reportError('error', new Error('Error sending feedback'), {e})
             return false
           },
           () => {

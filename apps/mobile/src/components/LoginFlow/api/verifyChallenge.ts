@@ -32,8 +32,8 @@ export function useVerifyChallenge(): (
           case 'PublicKeyOrHashInvalid':
             reportError(
               'error',
-              'Public key or hash invalid while verifying challenge',
-              l
+              new Error('Public key or hash invalid while verifying challenge'),
+              {l}
             )
             return t(
               'loginFlow.verificationCode.errors.challengeCouldNotBeGenerated'
@@ -41,15 +41,19 @@ export function useVerifyChallenge(): (
           case 'UnexpectedApiResponseError':
             reportError(
               'error',
-              'Unexpected api response while verifying challenge',
-              l
+              new Error('Unexpected api response while verifying challenge'),
+              {l}
             )
             return t('common.unexpectedServerResponse')
           case 'NetworkError':
             return toCommonErrorMessage(l, t) ?? t('common.unknownError')
           case 'UnknownError':
           case 'BadStatusCodeError':
-            reportError('error', 'Bad status code while verifying challenge', l)
+            reportError(
+              'error',
+              new Error('Bad status code while verifying challenge'),
+              {l}
+            )
             return t('common.unknownError')
         }
       })

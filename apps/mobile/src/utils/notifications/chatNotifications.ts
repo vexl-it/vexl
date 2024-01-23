@@ -72,8 +72,8 @@ export async function showChatNotification(
   if (!notificationDataVerification.success) {
     reportError(
       'warn',
-      'Unable to parse notification data for chat notification',
-      remoteMessage
+      new Error('Unable to parse notification data for chat notification'),
+      {remoteMessage}
     )
     return
   }

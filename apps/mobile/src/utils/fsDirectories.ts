@@ -31,8 +31,8 @@ export async function deleteChatFiles(
     E.mapLeft((e) => {
       reportError(
         'warn',
-        'Error getting MD5 of public key while deleting chat files',
-        e
+        new Error('Error getting MD5 of public key while deleting chat files'),
+        {e}
       )
     }),
     E.getOrElse(() => '')

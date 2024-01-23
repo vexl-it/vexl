@@ -31,7 +31,9 @@ const reportAndTranslateErrorsAtom = atom<
         return t('loginFlow.photo.nothingSelected')
     }
   }
-  reportError('error', 'Unexpected error while picking image', error)
+  reportError('error', new Error('Unexpected error while picking image'), {
+    error,
+  })
   return t('common.unknownError') // how is it that linter needs this line
 })
 

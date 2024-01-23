@@ -27,8 +27,10 @@ remoteConfigAtom.onMount = (set) => {
       E.getOrElse((e) => {
         reportError(
           'warn',
-          'Error while reading next__force_update from remote config',
-          e
+          new Error(
+            'Error while reading next__force_update from remote config'
+          ),
+          {e}
         )
         return DEFAULT_REMOTE_CONFIG.next__force_update
       })
@@ -42,8 +44,8 @@ remoteConfigAtom.onMount = (set) => {
       E.getOrElse((e) => {
         reportError(
           'warn',
-          'Error while reading next__maintenance from remote config',
-          e
+          new Error('Error while reading next__maintenance from remote config'),
+          {e}
         )
         return DEFAULT_REMOTE_CONFIG.next__maintenance
       })
@@ -57,8 +59,10 @@ remoteConfigAtom.onMount = (set) => {
       E.getOrElse((e) => {
         reportError(
           'warn',
-          'Error while reading next__offer_rerequest_limit_days from remote config',
-          e
+          new Error(
+            'Error while reading next__offer_rerequest_limit_days from remote config'
+          ),
+          {e}
         )
         return DEFAULT_REMOTE_CONFIG.next__offer_rerequest_limit_days
       })

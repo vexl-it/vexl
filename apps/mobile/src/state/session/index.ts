@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import crashlytics from '@react-native-firebase/crashlytics'
+import {captureException} from '@sentry/react-native'
 import {KeyHolder} from '@vexl-next/cryptography'
 import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {type UserName} from '@vexl-next/domain/src/general/UserName.brand'
@@ -52,23 +52,35 @@ function toJsonWithRemovedSensitiveData(object: any): string {
     const jsonString = JSON.stringify(object)
     return removeSensitiveData(jsonString)
   } catch (e) {
-    crashlytics().recordError(
-      new Error('Error stringify-ing object for crashlytics', {cause: e})
+    captureException(
+      new Error('Error stringify-ing object for sentry', {cause: e})
     )
     return '[[Error stringify-ing object]]'
   }
 }
 
-function reportError(message: string, errorData: unknown): void {
+export function toExtraWithRemovedSensitiveData(
+  extra: Record<string, unknown>
+): Record<string, string> {
+  return Object.entries(extra).reduce((acc, [key, value]) => {
+    return {
+      ...acc,
+      [key]:
+        // Keep errors to get stacktrace
+        value instanceof Error ? value : toJsonWithRemovedSensitiveData(value),
+    }
+  }, {})
+}
+
+function reportError(error: Error, extra: Record<string, unknown>): void {
   // We can not use reportError method because of circular require
   if (!__DEV__) {
-    crashlytics().log(message)
-    crashlytics().log(toJsonWithRemovedSensitiveData(errorData))
-    crashlytics().recordError(
-      new Error('error while reading data from secure storage')
-    )
+    captureException(error, {
+      level: 'error',
+      extra: extra ? toExtraWithRemovedSensitiveData(extra) : undefined,
+    })
   }
-  console.error(message, errorData)
+  console.error(error, extra)
 }
 
 // -------------- end of duplicated code
@@ -124,8 +136,8 @@ export const sessionAtom: WritableAtom<
       }),
       TE.mapLeft((error) => {
         reportError(
-          '‼️ Error while writing user data to secure storage.',
-          error
+          new Error('‼️ Error while writing user data to secure storage.'),
+          {error}
         )
         void AsyncStorage.removeItem(SESSION_KEY)
         void SecretStorage.deleteItemAsync(SECRET_TOKEN_KEY)

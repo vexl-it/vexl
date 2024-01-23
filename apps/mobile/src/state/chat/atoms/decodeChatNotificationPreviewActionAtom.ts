@@ -35,8 +35,10 @@ const decodeNotificationPreviewAction = atom(
         () => {
           reportError(
             'warn',
-            'error while decoding notification preview',
-            notificationData
+            new Error('error while decoding notification preview'),
+            {
+              notificationData,
+            }
           )
           return {
             name: getOtherSideData(chat.chat).userName,

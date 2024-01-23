@@ -3,7 +3,11 @@ import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/lib/function'
 import {atom, useAtomValue, useSetAtom} from 'jotai'
 import {useMemo} from 'react'
-import MapView, {PROVIDER_GOOGLE, type Region} from 'react-native-maps'
+import MapView, {
+  PROVIDER_GOOGLE,
+  type EdgePadding,
+  type Region,
+} from 'react-native-maps'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {Stack, Text} from 'tamagui'
 import {usePrivateApiAssumeLoggedIn} from '../../../api'
@@ -23,6 +27,7 @@ type Props = React.ComponentProps<typeof Stack> & {
   topChildren?: React.ReactNode
   bottomChildren?: React.ReactNode
   initialValue: MapValue
+  mapPadding?: EdgePadding
   onPick: (place: MapValue | null) => void
 }
 
@@ -103,6 +108,7 @@ export default function MapLocationSelect({
   initialValue,
   topChildren,
   bottomChildren,
+  mapPadding,
   ...restProps
 }: Props): JSX.Element {
   const safeAreaInsets = useSafeAreaInsets()
@@ -122,6 +128,7 @@ export default function MapLocationSelect({
   return (
     <Stack position="relative" {...restProps} backgroundColor="$black">
       <MapView
+        mapPadding={mapPadding}
         provider={PROVIDER_GOOGLE}
         customMapStyle={mapTheme}
         style={mapStyle}

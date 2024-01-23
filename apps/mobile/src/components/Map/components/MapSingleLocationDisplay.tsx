@@ -1,5 +1,10 @@
 import {useMemo} from 'react'
-import MapView, {Marker, PROVIDER_GOOGLE, type Region} from 'react-native-maps'
+import MapView, {
+  Marker,
+  PROVIDER_GOOGLE,
+  type EdgePadding,
+  type Region,
+} from 'react-native-maps'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {Stack} from 'tamagui'
 import {type MapValue} from '../brands'
@@ -13,6 +18,7 @@ type Props = React.ComponentProps<typeof Stack> & {
   topChildren?: React.ReactNode
   bottomChildren?: React.ReactNode
   value: MapValue
+  mapPadding?: EdgePadding
 }
 
 const mapStyle = {
@@ -24,6 +30,7 @@ export default function MapSingleLocationDisplay({
   topChildren,
   bottomChildren,
   value,
+  mapPadding,
   ...restProps
 }: Props): JSX.Element {
   const safeAreaInsets = useSafeAreaInsets()
@@ -40,6 +47,7 @@ export default function MapSingleLocationDisplay({
   return (
     <Stack position="relative" {...restProps} backgroundColor="$black">
       <MapView
+        mapPadding={mapPadding}
         style={mapStyle}
         provider={PROVIDER_GOOGLE}
         region={initialRegion}

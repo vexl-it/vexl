@@ -1,6 +1,6 @@
 import {useNavigation} from '@react-navigation/native'
-import {useAtomValue, useStore} from 'jotai'
 import {useMolecule} from 'bunshi/dist/react'
+import {useAtomValue, useStore} from 'jotai'
 import * as dateAndTime from '../../../../../state/tradeChecklist/utils/dateAndTime'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import Button from '../../../../Button'
@@ -32,6 +32,7 @@ export default function TradeChecklistDateAndTimeView(): JSX.Element | null {
   if (suggestions && suggestions.suggestions.length > 0) {
     return (
       <VexlbotBubble
+        status="pending"
         text={`${t(
           suggestions.by === 'me'
             ? 'vexlbot.youAddedTimeOptions'

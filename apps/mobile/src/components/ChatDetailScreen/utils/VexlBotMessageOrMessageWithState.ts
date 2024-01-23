@@ -4,7 +4,7 @@ import addToSortedArray from '../../../utils/addToSortedArray'
 import {type VexlBotMessageData} from '../components/VexlbotMessageItem/domain'
 
 export type VexlBotOrMessageWithState =
-  | {type: 'vexlBot'; message: VexlBotMessageData}
+  | {type: 'vexlBot'; message: VexlBotMessageData; isLast?: boolean}
   | {
       type: 'message'
       message: ChatMessageWithState

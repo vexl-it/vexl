@@ -1,23 +1,24 @@
-import React from 'react'
-import {type Atom, useAtomValue} from 'jotai'
 import {useMolecule} from 'bunshi/dist/react'
-import {chatMolecule} from '../atoms'
-import {useTranslation} from '../../../utils/localization/I18nProvider'
-import BigIconMessage from './BigIconMessage'
-import UserAvatar from '../../UserAvatar'
-import TextMessage from './TextMessage'
-import {Stack, Text} from 'tamagui'
-import Image from '../../Image'
-import BlockIconSvg from '../../../images/blockIconSvg'
-import IdentityRevealMessageItem from './IdentityRevealMessageItem'
-import ContactRevealMessageItem from './ContactRevealMessageItem'
-import UserFeedback from '../../UserFeedback'
-import VexlBotMessageItem from './VexlbotMessageItem'
-import formatChatTime from '../utils/formatChatTime'
-import {type ChatMessageWithState} from '../../../state/chat/domain'
-import {type VexlBotMessageData} from './VexlbotMessageItem/domain'
+import {useAtomValue, type Atom} from 'jotai'
 import {type DateTime} from 'luxon'
+import React from 'react'
+import {Stack, Text} from 'tamagui'
+import BlockIconSvg from '../../../images/blockIconSvg'
+import {type ChatMessageWithState} from '../../../state/chat/domain'
+import {useTranslation} from '../../../utils/localization/I18nProvider'
+import Image from '../../Image'
+import UserAvatar from '../../UserAvatar'
+import UserFeedback from '../../UserFeedback'
+import {chatMolecule} from '../atoms'
+import formatChatTime from '../utils/formatChatTime'
+import BigIconMessage from './BigIconMessage'
+import ContactRevealMessageItem from './ContactRevealMessageItem'
+import IdentityRevealMessageItem from './IdentityRevealMessageItem'
 import MessageIncompatibleItem from './MessageIncompatibleItem'
+import TextMessage from './TextMessage'
+import VexlBotMessageItem from './VexlbotMessageItem'
+import VexlbotNextActionSuggestion from './VexlbotMessageItem/components/VexlbotNextActionSuggestion'
+import {type VexlBotMessageData} from './VexlbotMessageItem/domain'
 
 export type MessagesListItem =
   | {
@@ -44,6 +45,7 @@ export type MessagesListItem =
       type: 'vexlBot'
       key: string
       data: VexlBotMessageData
+      isLast?: boolean
     }
 
 function MessageItem({
@@ -195,7 +197,13 @@ function MessageItem({
   }
 
   if (item.type === 'vexlBot') {
-    return <VexlBotMessageItem data={item.data} />
+    console.log(`Item: ${JSON.stringify(item, null, 2)}`)
+    return (
+      <>
+        <VexlBotMessageItem data={item.data} />
+        {item.isLast && <VexlbotNextActionSuggestion />}
+      </>
+    )
   }
 
   if (item.type === 'time')

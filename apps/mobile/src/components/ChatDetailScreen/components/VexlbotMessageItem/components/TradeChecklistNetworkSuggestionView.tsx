@@ -20,10 +20,10 @@ function TradeChecklistNetworkSuggestionView(): JSX.Element | null {
   const networkData = useAtomValue(tradeChecklistNetworkAtom)
   const chatId = useAtomValue(chatIdAtom)
   const inboxKey = useAtomValue(publicKeyPemBase64Atom)
-  const networkDataToDisplay = network.getNetworkData(networkData)
+  const agreedOnNetwork = network.networkSettled(networkData)
 
   if (
-    Boolean(networkDataToDisplay?.networkData.btcNetwork) ||
+    agreedOnNetwork ||
     (!!offerForChat?.ownershipInfo &&
       offerForChat?.offerInfo.publicPart.offerType === 'SELL') ||
     (!offerForChat?.ownershipInfo &&

@@ -31,3 +31,10 @@ export function getContactData(data: ContactInState):
 
   return undefined
 }
+
+export function contactRevealed(data: ContactInState): boolean {
+  return (
+    data.sent?.status === 'APPROVE_REVEAL' ||
+    data.received?.status === 'APPROVE_REVEAL'
+  )
+}

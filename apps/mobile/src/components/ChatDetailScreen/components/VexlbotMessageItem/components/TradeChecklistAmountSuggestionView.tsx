@@ -15,9 +15,10 @@ function TradeChecklistAmountSuggestionView(): JSX.Element | null {
   const amountData = useAtomValue(tradeChecklistAmountAtom)
   const chatId = useAtomValue(chatIdAtom)
   const inboxKey = useAtomValue(publicKeyPemBase64Atom)
-  const amountDataToDisplay = amount.getAmountData(amountData)
+  const agreedOnAmount = amount.amountSettled(amountData)
+  const amountPending = amount.amountPending(amountData)
 
-  if (amountDataToDisplay?.amountData) return null
+  if (amountPending || agreedOnAmount) return null
 
   return (
     <VexlbotBubble text={t('vexlbot.agreeOnPreferredAmount')}>

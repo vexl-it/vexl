@@ -18,10 +18,10 @@ function TradeChecklistMeetingLocationSuggestionView(): JSX.Element | null {
   const locationData = useAtomValue(tradeChecklistMeetingLocationAtom)
   const chatId = useAtomValue(chatIdAtom)
   const inboxKey = useAtomValue(publicKeyPemBase64Atom)
-  const meetingLocationDataToDisplay =
-    location.getPendingSuggestion(locationData)
+  const agreedOnLocation = location.locationSettled(locationData)
+  const locationPending = location.locationPending(locationData)
 
-  if (meetingLocationDataToDisplay?.data.data) return null
+  if (locationPending || agreedOnLocation) return null
 
   return (
     <VexlbotBubble text={t('vexlbot.agreeOnPreferredLocation')}>

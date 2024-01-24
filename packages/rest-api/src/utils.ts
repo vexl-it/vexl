@@ -148,11 +148,13 @@ function addLoggingInterceptor(
     loggingFunction(
       `🌐 ⬆️ Sending request: ${
         config.method?.toUpperCase() ?? '[unknown method]'
-      } "${config.baseURL ?? ''}${config.url ?? '[unknown url]'}"`,
+      } ${config.baseURL ?? 'none'}${config.url ?? '[unknown url]'}`,
       {
         headers: stripSensitiveHeaders(config.headers),
         data: config.data,
         params: config.params,
+        baseURL: config.baseURL,
+        url: config.url,
       }
     )
 
@@ -163,9 +165,7 @@ function addLoggingInterceptor(
       loggingFunction(
         `🌐 ✅  Response received: ${
           response.config.method?.toUpperCase() ?? '[unknown method]'
-        } "${response.config.baseURL ?? ''}${
-          response.config.url ?? '[unknown url]'
-        }". Status: ${response.status}`,
+        } "${response.request.url ?? ''}". Status: ${response.status}`,
         {status: response.status, data: response.data}
       )
       return response

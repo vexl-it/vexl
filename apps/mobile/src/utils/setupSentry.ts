@@ -6,4 +6,5 @@ Sentry.init({
   debug: !isStaging, // If `true`, Sentry will try to print out useful debugging information if something goes wrong with sending the event. Set it to `false` in production
   environment: __DEV__ ? 'dev' : isStaging ? 'staging' : 'production',
   release: commitHash,
+  tracesSampleRate: 0.2,
 })

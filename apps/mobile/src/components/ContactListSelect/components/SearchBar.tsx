@@ -3,6 +3,7 @@ import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/lib/function'
 import {useAtom, useAtomValue, useSetAtom} from 'jotai'
 import {useEffect} from 'react'
+import {Keyboard} from 'react-native'
 import {Stack, Text, XStack} from 'tamagui'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {askAreYouSureActionAtom} from '../../AreYouSureDialog'
@@ -43,6 +44,7 @@ function SearchBar(): JSX.Element {
 
   useEffect(() => {
     if (searchText.trim() === '3367666933777') {
+      Keyboard.dismiss()
       void pipe(
         showModal({
           variant: 'info',

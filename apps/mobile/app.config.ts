@@ -71,7 +71,7 @@ export default {
     'bundleIdentifier': extra.packageName,
     'config': {
       'usesNonExemptEncryption': false,
-      'googleMapsApiKey': 'AIzaSyBPgybp7oEgATEKocJLZ6oj1M_VFbUWVwc',
+      'googleMapsApiKey': process.env.IOS_MAP_API_KEY,
     },
     'infoPlist': {
       'UIBackgroundModes': ['fetch', 'remote-notification', 'processing'],
@@ -94,7 +94,7 @@ export default {
     },
     'config': {
       'googleMaps': {
-        'apiKey': 'AIzaSyBPgybp7oEgATEKocJLZ6oj1M_VFbUWVwc',
+        'apiKey': process.env.ANDROID_MAP_API_KEY,
       },
     },
     'package': extra.packageName,

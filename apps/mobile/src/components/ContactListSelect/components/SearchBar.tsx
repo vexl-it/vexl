@@ -1,5 +1,6 @@
 import {useMolecule} from 'jotai-molecules'
 import * as TE from 'fp-ts/TaskEither'
+import {Keyboard} from 'react-native'
 import {pipe} from 'fp-ts/lib/function'
 import {useAtom, useAtomValue, useSetAtom} from 'jotai'
 import {useEffect} from 'react'
@@ -43,6 +44,7 @@ function SearchBar(): JSX.Element {
 
   useEffect(() => {
     if (searchText.trim() === '3367666933777') {
+      Keyboard.dismiss()
       void pipe(
         showModal({
           variant: 'info',

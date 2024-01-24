@@ -15,6 +15,7 @@ import {
   FetchCommonConnectionsResponse,
   FetchMyContactsResponse,
   ImportContactsResponse,
+  UserExistsResponse,
   type CreateUserRequest,
   type FetchCommonConnectionsRequest,
   type FetchMyContactsRequest,
@@ -52,6 +53,16 @@ export function privateApi({
   )
 
   return {
+    checkUserExists: () => {
+      return axiosCallWithValidation(
+        axiosInstance,
+        {
+          method: 'post',
+          'url': '/users/check-exists',
+        },
+        UserExistsResponse
+      )
+    },
     createUser: (request: CreateUserRequest) => {
       return axiosCall(axiosInstance, {
         method: 'post',

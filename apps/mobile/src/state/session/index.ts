@@ -19,7 +19,6 @@ import {
   atom,
   getDefaultStore,
   useAtomValue,
-  useSetAtom,
   type SetStateAction,
   type WritableAtom,
 } from 'jotai'
@@ -258,13 +257,6 @@ export const regionCodeAtom = atom<RegionCode | undefined>((get) => {
 })
 
 // --------- hooks ---------
-export function useSetSession(): (newSession: Session) => void {
-  const set = useSetAtom(sessionAtom)
-  return (s) => {
-    set(O.some(s))
-  }
-}
-
 export function useSessionAssumeLoggedIn(): Session {
   const value = useAtomValue(sessionAtom)
   if (value.state === 'loggedIn') {

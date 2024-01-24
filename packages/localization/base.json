@@ -119,6 +119,8 @@
   "loginFlow.importContacts.text": "Vexl is using your real-world social network - your friends and their friends. The more contacts you add, the more offers you’ll see.",
   "loginFlow.importContacts.anonymityNotice": "Nobody can see your contacts. Not even us.",
   "loginFlow.importContacts.action": "Import contacts",
+  "loginFlow.userAlreadyExists": "User already exists",
+  "loginFlow.phoneNumberPreviouslyRegistered": "The provided phone number has been previously registered on Vexl and is associated with an existing account. By proceeding, you agree that the previous account will be deleted. Are you sure?",
   "postLoginFlow.contactsExplanation.title": "Now, let’s find your friends!",
   "postLoginFlow.contactsExplanation.text": "You can manage your social network in the settings later.",
   "postLoginFlow.contactsExplanation.anonymizationCaption": "Nobody can see your contacts. Not even us.",

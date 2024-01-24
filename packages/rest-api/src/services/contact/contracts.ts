@@ -77,3 +77,9 @@ export const FetchCommonConnectionsResponse = z.object({
 export type FetchCommonConnectionsResponse = z.TypeOf<
   typeof FetchCommonConnectionsResponse
 >
+
+export const UserExistsResponse = z.object({
+  exists: z.boolean(),
+})
+
+export type UserExistsResponse = z.TypeOf<typeof UserExistsResponse>

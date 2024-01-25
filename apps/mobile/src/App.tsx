@@ -2,6 +2,7 @@ import {DefaultTheme, NavigationContainer} from '@react-navigation/native'
 import * as SplashScreen from 'expo-splash-screen'
 import {StatusBar} from 'expo-status-bar'
 import {useEffect} from 'react'
+import {AppState} from 'react-native'
 import {GestureHandlerRootView} from 'react-native-gesture-handler'
 import {SafeAreaProvider} from 'react-native-safe-area-context'
 import {useTheme} from 'tamagui'
@@ -20,10 +21,21 @@ import {setLastTimeAppWasRunningToNow} from './utils/lastTimeAppWasRunning'
 import {navigationRef} from './utils/navigation'
 import {subscribeToGeneralTopic} from './utils/notifications'
 import useSetupRemoteConfig from './utils/remoteConfig/useSetupRemoteConfig'
+import reportError from './utils/reportError'
 import {useAppState} from './utils/useAppState'
 import useLoadFonts from './utils/useLoadFonts'
 
-void SplashScreen.preventAutoHideAsync()
+void SplashScreen.preventAutoHideAsync().catch((e) => {
+  if (
+    AppState.currentState !== 'active' &&
+    e instanceof Error &&
+    e.message ===
+      "No native splash screen registered for given view controller. Call 'SplashScreen.show' for given view controller first."
+  ) {
+    return
+  }
+  reportError('error', e, {currentState: AppState.currentState})
+})
 
 function App(): JSX.Element {
   const [fontsLoaded] = useLoadFonts()

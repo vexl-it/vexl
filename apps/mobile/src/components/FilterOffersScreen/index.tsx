@@ -37,7 +37,9 @@ function FilterOffersScreen(): JSX.Element {
 
   const resetOfferForm = useCallback(() => {
     resetFilter()
-  }, [resetFilter])
+    saveFilter()
+    safeGoBack()
+  }, [resetFilter, safeGoBack, saveFilter])
 
   function onFilterOffersClose(): void {
     safeGoBack()

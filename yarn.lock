@@ -21733,11 +21733,11 @@ __metadata:
 
 "react-native-screenshot-prevent@patch:react-native-screenshot-prevent@npm%3A1.1.9#./.yarn/patches/react-native-screenshot-prevent-npm-1.1.9-b09a78f908.patch::locator=vexl-next%40workspace%3A.":
   version: 1.1.9
-  resolution: "react-native-screenshot-prevent@patch:react-native-screenshot-prevent@npm%3A1.1.9#./.yarn/patches/react-native-screenshot-prevent-npm-1.1.9-b09a78f908.patch::version=1.1.9&hash=e2246f&locator=vexl-next%40workspace%3A."
+  resolution: "react-native-screenshot-prevent@patch:react-native-screenshot-prevent@npm%3A1.1.9#./.yarn/patches/react-native-screenshot-prevent-npm-1.1.9-b09a78f908.patch::version=1.1.9&hash=fda440&locator=vexl-next%40workspace%3A."
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: da386057fbfc6c943d6b22069719681a481291840ace6411c5a72f4145b3dfc3f310616d4068fbec8cd402925677d64a8353d0ea5811d28fbae965eb8fe9649e
+  checksum: 165d88a24376a3e9a12daadcb8c9f64210506e0be1ca025f80464ccf38e7382dee34ed6d59c4b59f6c8876f822a5084ef9ce6cf5d911cae9d63ae074fbf2d979
   languageName: node
   linkType: hard
 

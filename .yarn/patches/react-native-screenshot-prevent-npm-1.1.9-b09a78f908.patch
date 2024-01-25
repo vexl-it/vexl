@@ -7,7 +7,7 @@ index d0187a37fae44d0cf0b51616a884fb508f1c0e23..1589628f29f662820ce0b6706b5019d3
    public void enabled(boolean _enable) {
      if (this.reactContext.hasCurrentActivity()) {
 -      final Activity activity = this.reactContext.getCurrentActivity();
-+      final Activity activity = this.activity;
++      final Activity activity = this.reactContext.getCurrentActivity();
        if (activity != null) {
          if (_enable) {
            activity.runOnUiThread(new Runnable() {
@@ -30,13 +30,13 @@ index d0187a37fae44d0cf0b51616a884fb508f1c0e23..1589628f29f662820ce0b6706b5019d3
        }
      }
    }
--  
+-
 +
    @ReactMethod
    public void enableSecureView() {
      if (this.reactContext.hasCurrentActivity()) {
 -      final Activity activity = this.reactContext.getCurrentActivity();
-+      final Activity activity = this.activity;
++      final Activity activity = this.reactContext.getCurrentActivity();
        if (activity != null) {
          activity.runOnUiThread(new Runnable() {
            @Override
@@ -49,13 +49,13 @@ index d0187a37fae44d0cf0b51616a884fb508f1c0e23..1589628f29f662820ce0b6706b5019d3
        }
      }
    }
--  
+-
 +
    @ReactMethod
    public void disableSecureView() {
      if (this.reactContext.hasCurrentActivity()) {
 -      final Activity activity = this.reactContext.getCurrentActivity();
-+      final Activity activity = this.activity;
++      final Activity activity = this.reactContext.getCurrentActivity();
        if (activity != null) {
          activity.runOnUiThread(new Runnable() {
            @Override

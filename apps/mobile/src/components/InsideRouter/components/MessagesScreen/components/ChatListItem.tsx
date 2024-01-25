@@ -1,15 +1,18 @@
 import {useNavigation} from '@react-navigation/native'
 import {type Chat} from '@vexl-next/domain/src/general/messaging'
-import {useAtomValue, type Atom} from 'jotai'
+import {useAtomValue, useSetAtom, type Atom} from 'jotai'
 import {selectAtom} from 'jotai/utils'
-import React, {useMemo} from 'react'
+import React, {useMemo, useRef} from 'react'
 import {TouchableOpacity} from 'react-native'
+import {Swipeable} from 'react-native-gesture-handler'
 import {Stack, Text, XStack, YStack} from 'tamagui'
 import selectOtherSideDataAtom from '../../../../../state/chat/atoms/selectOtherSideDataAtom'
 import {type ChatMessageWithState} from '../../../../../state/chat/domain'
 import {useOfferForChatOrigin} from '../../../../../state/marketplace'
 import UserAvatar from '../../../../UserAvatar'
 import UserNameWithSellingBuying from '../../../../UserNameWithSellingBuying'
+import {deleteChatFromListActionAtom} from '../atoms'
+import ChatListItemRightSwipeActions from './ChatListItemRightSwipeActions'
 import LastMessageDateView from './LastMessageDateView'
 import MessagePreview from './LastMessagePreview'
 
@@ -19,6 +22,7 @@ export interface ChatListData {
 }
 
 function ChatListItem({dataAtom}: {dataAtom: Atom<ChatListData>}): JSX.Element {
+  const swipeableRef = useRef<Swipeable>(null)
   const navigation = useNavigation()
 
   const {
@@ -52,6 +56,7 @@ function ChatListItem({dataAtom}: {dataAtom: Atom<ChatListData>}): JSX.Element {
   const {userName, image: userAvatar} = useAtomValue(otherSideInfoAtom)
   const isAvatarGray = useAtomValue(isAvatarGrayAtom)
   const offer = useOfferForChatOrigin(chatInfo.origin)
+  const deleteChatFromList = useSetAtom(deleteChatFromListActionAtom)
 
   return (
     <TouchableOpacity
@@ -62,56 +67,76 @@ function ChatListItem({dataAtom}: {dataAtom: Atom<ChatListData>}): JSX.Element {
         })
       }}
     >
-      <Stack mt="$6">
-        <XStack space="$2" ai="center">
-          <Stack h={48} w={48}>
-            <UserAvatar
-              grayScale={isAvatarGray}
-              userImage={userAvatar}
-              width={48}
-              height={48}
+      <Stack mt="$6" br="$2">
+        <Swipeable
+          ref={swipeableRef}
+          renderRightActions={() => (
+            <ChatListItemRightSwipeActions
+              onPress={() => {
+                void deleteChatFromList({
+                  otherSideKey: chatInfo.otherSide.publicKey,
+                  inboxKey: chatInfo.inbox.privateKey.publicKeyPemBase64,
+                })
+                swipeableRef.current?.close()
+              }}
             />
-          </Stack>
-          <YStack jc="space-between" alignSelf="stretch" f={1} py="$1">
-            <XStack jc="space-between">
-              <UserNameWithSellingBuying
-                userName={userName}
-                center={false}
-                offerInfo={
-                  chatInfo.origin.type !== 'unknown' && offer
-                    ? {
-                        offerType: offer.offerInfo.publicPart.offerType,
-                        offerDirection: chatInfo.origin.type,
-                      }
-                    : undefined
-                }
+          )}
+        >
+          <XStack space="$2" ai="center" bc="$black">
+            <Stack h={48} w={48}>
+              <UserAvatar
+                grayScale={isAvatarGray}
+                userImage={userAvatar}
+                width={48}
+                height={48}
               />
-              {isUnread && (
-                <Stack w="$4" h="$4" borderRadius={8} backgroundColor="$main" />
-              )}
-            </XStack>
-            <XStack jc="space-between">
-              <Text
-                color="$greyOnBlack"
-                fos={16}
-                numberOfLines={1}
-                flex={1}
-                ellipsizeMode="clip"
-                mr="$3"
-              >
-                <MessagePreview
-                  lastMessageAtom={lastMessageAtom}
-                  name={userName}
-                  unread={isUnread}
+            </Stack>
+            <YStack jc="space-between" alignSelf="stretch" f={1} py="$1">
+              <XStack jc="space-between">
+                <UserNameWithSellingBuying
+                  userName={userName}
+                  center={false}
+                  offerInfo={
+                    chatInfo.origin.type !== 'unknown' && offer
+                      ? {
+                          offerType: offer.offerInfo.publicPart.offerType,
+                          offerDirection: chatInfo.origin.type,
+                        }
+                      : undefined
+                  }
                 />
-              </Text>
-              <Text color="$greyOnBlack">
-                <LastMessageDateView lastMessageAtom={lastMessageAtom} />
-              </Text>
-            </XStack>
-          </YStack>
-          <Stack jc="flex-end" alignSelf="stretch"></Stack>
-        </XStack>
+                {isUnread && (
+                  <Stack
+                    w="$4"
+                    h="$4"
+                    borderRadius={8}
+                    backgroundColor="$main"
+                  />
+                )}
+              </XStack>
+              <XStack jc="space-between">
+                <Text
+                  color="$greyOnBlack"
+                  fos={16}
+                  numberOfLines={1}
+                  flex={1}
+                  ellipsizeMode="clip"
+                  mr="$3"
+                >
+                  <MessagePreview
+                    lastMessageAtom={lastMessageAtom}
+                    name={userName}
+                    unread={isUnread}
+                  />
+                </Text>
+                <Text color="$greyOnBlack">
+                  <LastMessageDateView lastMessageAtom={lastMessageAtom} />
+                </Text>
+              </XStack>
+            </YStack>
+            <Stack jc="flex-end" alignSelf="stretch"></Stack>
+          </XStack>
+        </Swipeable>
       </Stack>
     </TouchableOpacity>
   )

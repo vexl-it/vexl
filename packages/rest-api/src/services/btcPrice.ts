@@ -1,5 +1,10 @@
-import * as TE from 'fp-ts/TaskEither'
+import {BtcPrice} from '@vexl-next/domain/src/general/btcPrice'
+import {
+  safeParse,
+  type ZodParseError,
+} from '@vexl-next/resources-utils/src/utils/parsing'
 import {pipe} from 'fp-ts/function'
+import * as TE from 'fp-ts/TaskEither'
 import z from 'zod'
 import {
   type BadStatusCodeError,
@@ -13,6 +18,8 @@ import {
   createAxiosInstance,
   type LoggingFunction,
 } from '../utils'
+
+const BULGARIAN_LEV_PEGGED_EURO_RATE = 1.95583
 
 // List of currencies can be found here: https://cdn.trezor.io/dynamic/coingecko/api/v3/simple/supported_vs_currencies
 
@@ -81,6 +88,7 @@ export const AcceptedCurrency = z.enum([
   'xau',
   'bits',
   'sats',
+  'bgn',
 ])
 
 export type AcceptedCurrency = z.TypeOf<typeof AcceptedCurrency>
@@ -96,7 +104,11 @@ export function createBtcPriceApi({
 }): (
   currency: AcceptedCurrency
 ) => TE.TaskEither<
-  UnknownError | BadStatusCodeError | UnexpectedApiResponseError | NetworkError,
+  | UnknownError
+  | BadStatusCodeError
+  | UnexpectedApiResponseError
+  | NetworkError
+  | ZodParseError<BtcPrice>,
   number
 > {
   const axiosInstance = createAxiosInstance(
@@ -112,19 +124,35 @@ export function createBtcPriceApi({
     | UnknownError
     | BadStatusCodeError
     | UnexpectedApiResponseError
+    | ZodParseError<BtcPrice>
     | NetworkError,
-    number
+    BtcPrice
   > {
+    // Bulgarian LEV is pegged to Euro and as CoinGecko does not support it
+    // we calculate it manually from EUR price
+    const currencyToFetch = currency === 'bgn' ? 'eur' : currency
     const ExpectedResponse = z.object({
-      bitcoin: z.record(z.literal(currency), z.number()),
+      bitcoin: z.record(z.literal(currencyToFetch), BtcPrice),
     })
+
     return pipe(
       axiosCallWithValidation(
         axiosInstance,
-        {method: 'get', url: URL_TEMPLATE + currency},
+        {
+          method: 'get',
+          url: URL_TEMPLATE + currencyToFetch,
+        },
         ExpectedResponse
       ),
-      TE.map((val) => Number(val.bitcoin[currency]))
+      TE.chainEitherKW((val) => {
+        if (currency === 'bgn') {
+          return safeParse(BtcPrice)(
+            Number(val.bitcoin[currencyToFetch]) *
+              BULGARIAN_LEV_PEGGED_EURO_RATE
+          )
+        }
+        return safeParse(BtcPrice)(val.bitcoin[currency])
+      })
     )
   }
 }

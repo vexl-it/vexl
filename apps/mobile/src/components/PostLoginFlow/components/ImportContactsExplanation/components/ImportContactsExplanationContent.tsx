@@ -1,16 +1,12 @@
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue, useSetAtom} from 'jotai'
-import {useCallback, useEffect} from 'react'
+import {useEffect} from 'react'
 import {Image} from 'react-native'
 import {Stack, Text} from 'tamagui'
-import {
-  contactsLoadingAtom,
-  triggerContactsReloadAtom,
-} from '../../../../../state/contacts/atom/contactsFromDeviceAtom'
+import {contactsLoadingAtom} from '../../../../../state/contacts/atom/contactsFromDeviceAtom'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import AnonymizationCaption from '../../../../AnonymizationCaption/AnonymizationCaption'
 import {contactSelectMolecule} from '../../../../ContactListSelect/atom'
-import {useOnFocusAndAppState} from '../../../../ContactListSelect/utils'
 import {useShowLoadingOverlay} from '../../../../LoadingOverlayProvider'
 import {
   HeaderProxy,
@@ -27,25 +23,21 @@ export default function ImportContactsExplanationContent({
 }: Props): JSX.Element {
   const {t} = useTranslation()
   const contactsLoading = useAtomValue(contactsLoadingAtom)
-  const {selectAllAtom, submitActionAtom} = useMolecule(contactSelectMolecule)
-  const submit = useSetAtom(submitActionAtom)
-  const selectAll = useSetAtom(selectAllAtom)
-  const triggerContactsReload = useSetAtom(triggerContactsReloadAtom)
-  const loadingOverlay = useShowLoadingOverlay()
-
-  useOnFocusAndAppState(
-    useCallback(() => {
-      triggerContactsReload()
-    }, [triggerContactsReload])
+  const {submitAllContactsOnStartupActionAtom} = useMolecule(
+    contactSelectMolecule
   )
+  const submitAllContactsOnStartup = useSetAtom(
+    submitAllContactsOnStartupActionAtom
+  )
+  const loadingOverlay = useShowLoadingOverlay()
 
   useEffect(() => {
     if (contactsLoading) {
-      loadingOverlay.show()
+      loadingOverlay.show(t('contacts.loadingContacts'))
     } else {
       loadingOverlay.hide()
     }
-  }, [contactsLoading, loadingOverlay])
+  }, [contactsLoading, loadingOverlay, t])
 
   return (
     <WhiteContainer>
@@ -75,8 +67,7 @@ export default function ImportContactsExplanationContent({
         <NextButtonProxy
           text={t('postLoginFlow.importContactsButton')}
           onPress={() => {
-            selectAll(true)
-            void submit()().then((success) => {
+            void submitAllContactsOnStartup()().then((success) => {
               if (success) onContactsSubmitted()
             })
           }}

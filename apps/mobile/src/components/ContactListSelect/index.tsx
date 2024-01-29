@@ -29,12 +29,12 @@ function ContactsListSelect({
   const {
     searchTextAsCustomContactAtom,
     contactsToDisplayAtomsAtom,
-    submitActionAtom,
+    submitSelectedContactsActionAtom,
   } = useMolecule(contactSelectMolecule)
   const customContactToAdd = useAtomValue(searchTextAsCustomContactAtom)
   const toDisplay = useAtomValue(contactsToDisplayAtomsAtom)
   const loading = useAtomValue(contactsLoadingAtom)
-  const submit = useSetAtom(submitActionAtom)
+  const submitSelectedContacts = useSetAtom(submitSelectedContactsActionAtom)
 
   if (loading)
     return (
@@ -62,7 +62,7 @@ function ContactsListSelect({
       </WhiteContainer>
       {renderFooter({
         onSubmit: () => {
-          void submit()().then((success) => {
+          void submitSelectedContacts()().then((success) => {
             if (success) onContactsSubmitted()
           })
         },

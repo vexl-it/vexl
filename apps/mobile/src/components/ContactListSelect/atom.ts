@@ -148,7 +148,7 @@ export const contactSelectMolecule = molecule((getMolecule, getScope) => {
     })
   })
 
-  const contactsToDisplayAtomsAtom = splitAtom(contactsToDisplayAtom)
+  const contactsToDisplayAtomsAtom = splitAtom(allContactsAtom)
 
   const areThereAnyContactsToDisplayAtom = atom((get) => {
     const contactsToDisplayAtom = get(contactsToDisplayAtomsAtom)
@@ -297,94 +297,125 @@ export const contactSelectMolecule = molecule((getMolecule, getScope) => {
     }
   )
 
-  const submitActionAtom = atom(null, (get, set): T.Task<boolean> => {
-    const contactApi = get(privateApiAtom).contact
-    const {t} = get(translationAtom)
+  const submitContactsActionAtom = atom(
+    null,
+    (get, set, contacts: Array<ContactNormalized | undefined>) => {
+      const contactApi = get(privateApiAtom).contact
+      const {t} = get(translationAtom)
 
-    const selectedNumbers = Array.from(get(selectedNumbersAtom))
+      set(loadingOverlayDisplayedAtom, true)
+
+      return pipe(
+        contacts,
+        A.filter(notEmpty),
+        A.map((oneContact) => {
+          return pipe(
+            E.Do,
+            E.chainW(() => hashPhoneNumber(oneContact.normalizedNumber)),
+            E.map((hash): ContactNormalizedWithHash => ({...oneContact, hash})),
+            TE.fromEither
+          )
+        }),
+        sequenceTasksWithAnimationFrames(300, (progress) => {
+          set(hashingProgressPercentageAtom, progress * 100)
+        }),
+        flattenTaskOfEithers,
+        TE.fromTask,
+        TE.chainFirstW(({rights}) =>
+          contactApi.importContacts({contacts: rights.map((one) => one.hash)})
+        ),
+        TE.match(
+          (e) => {
+            if (e._tag !== 'NetworkError') {
+              reportError(
+                'error',
+                new Error('error while submitting contacts'),
+                {
+                  e,
+                }
+              )
+            }
+
+            Alert.alert(toCommonErrorMessage(e, t) ?? t('common.unknownError'))
+            return false
+          },
+          ({lefts, rights: importedContacts}) => {
+            if (lefts.length > 0) {
+              reportError(
+                'warn',
+                new Error('Error when hashing phone numbers'),
+                {
+                  lefts,
+                }
+              )
+            }
+
+            set(importedContactsAtom, [...importedContacts])
+
+            const convertedToContactsNormalized: ContactNormalized[] =
+              importedContacts.map((contact) => {
+                const {hash, ...restProps} = contact
+                return restProps
+              })
+
+            // need to save also custom contacts added through app
+            // with deduplicating we extract them from returned imported contacts
+            set(
+              combinedContactsAfterLastSubmitAtom,
+              deduplicateBy(
+                [
+                  ...get(combinedContactsAtom),
+                  ...convertedToContactsNormalized,
+                ],
+                (one) => one.normalizedNumber
+              )
+            )
+            set(newlyAddedCustomContactsAtom, [])
+            set(
+              lastImportOfContactsAtom,
+              IsoDatetimeString.parse(new Date().toISOString())
+            )
+
+            void set(syncConnectionsActionAtom)()
+            void set(updateAllOffersConnectionsActionAtom, {
+              isInBackground: false,
+            })()
+            return true
+          }
+        ),
+        T.map((v) => {
+          set(loadingOverlayDisplayedAtom, false)
+          set(hashingProgressPercentageAtom, 0)
+          return v
+        })
+      )
+    }
+  )
+
+  const submitAllContactsOnStartupActionAtom = atom(null, (get, set) => {
     const allContacts = get(allContactsAtom)
 
-    set(loadingOverlayDisplayedAtom, true)
+    return pipe(set(submitContactsActionAtom, allContacts))
+  })
 
-    return pipe(
-      selectedNumbers,
-      A.map((oneNumber) =>
+  const submitSelectedContactsActionAtom = atom(
+    null,
+    (get, set): T.Task<boolean> => {
+      // if (selectAll) {
+      //   set(selectAllAtom, selectAll)
+      // }
+
+      const selectedNumbers = Array.from(get(selectedNumbersAtom))
+      const allContacts = get(allContactsAtom)
+      const contactsToSubmit = selectedNumbers.map((oneNumber) =>
         allContacts.find(
           (oneContact) => oneContact.normalizedNumber === oneNumber
         )
-      ),
-      A.filter(notEmpty),
-      A.map((oneContact) => {
-        return pipe(
-          E.Do,
-          E.chainW(() => hashPhoneNumber(oneContact.normalizedNumber)),
-          E.map((hash): ContactNormalizedWithHash => ({...oneContact, hash})),
-          TE.fromEither
-        )
-      }),
-      sequenceTasksWithAnimationFrames(300, (progress) => {
-        set(hashingProgressPercentageAtom, progress * 100)
-      }),
-      flattenTaskOfEithers,
-      TE.fromTask,
-      TE.chainFirstW(({rights}) =>
-        contactApi.importContacts({contacts: rights.map((one) => one.hash)})
-      ),
-      TE.match(
-        (e) => {
-          if (e._tag !== 'NetworkError') {
-            reportError('error', new Error('error while submitting contacts'), {
-              e,
-            })
-          }
+      )
 
-          Alert.alert(toCommonErrorMessage(e, t) ?? t('common.unknownError'))
-          return false
-        },
-        ({lefts, rights: importedContacts}) => {
-          if (lefts.length > 0) {
-            reportError('warn', new Error('Error when hashing phone numbers'), {
-              lefts,
-            })
-          }
-
-          set(importedContactsAtom, [...importedContacts])
-
-          const convertedToContactsNormalized: ContactNormalized[] =
-            importedContacts.map((contact) => {
-              const {hash, ...restProps} = contact
-              return restProps
-            })
-
-          // need to save also custom contacts added through app
-          // with deduplicating we extract them from returned imported contacts
-          set(
-            combinedContactsAfterLastSubmitAtom,
-            deduplicateBy(
-              [...get(combinedContactsAtom), ...convertedToContactsNormalized],
-              (one) => one.normalizedNumber
-            )
-          )
-          set(newlyAddedCustomContactsAtom, [])
-          set(
-            lastImportOfContactsAtom,
-            IsoDatetimeString.parse(new Date().toISOString())
-          )
-
-          void set(syncConnectionsActionAtom)()
-          void set(updateAllOffersConnectionsActionAtom, {
-            isInBackground: false,
-          })()
-          return true
-        }
-      ),
-      T.map((v) => {
-        set(loadingOverlayDisplayedAtom, false)
-        set(hashingProgressPercentageAtom, 0)
-        return v
-      })
-    )
-  })
+      return pipe(set(submitContactsActionAtom, contactsToSubmit))
+    }
+  )
 
   return {
     selectAllAtom,
@@ -395,10 +426,12 @@ export const contactSelectMolecule = molecule((getMolecule, getScope) => {
     createIsNewContactAtom,
     searchTextAsCustomContactAtom,
     addAndSelectContactWithUiFeedbackAtom,
-    submitActionAtom,
+    submitContactsActionAtom,
     showSubmittedContactsAtom,
     showNonSubmittedContactsAtom,
     showNewContactsAtom,
     areThereAnyContactsToDisplayAtom,
+    submitAllContactsOnStartupActionAtom,
+    submitSelectedContactsActionAtom,
   }
 })

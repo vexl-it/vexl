@@ -84,9 +84,7 @@ export default function getContactsAndTryToResolveThePermissionsAlongTheWay(): T
         sort: SortTypes.UserDefault,
       })
 
-      return E.right(
-        contacts.data.map(normalizeContactPhoneNumbersOrNone).flat()
-      )
+      return E.right(contacts.data.flatMap(normalizeContactPhoneNumbersOrNone))
     } catch (error) {
       return E.left({_tag: 'UnknownContactsError', error} as const)
     }

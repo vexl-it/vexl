@@ -1,7 +1,8 @@
 import {atom, useAtomValue, useSetAtom} from 'jotai'
+import {focusAtom} from 'jotai-optics'
 import {useMemo, type ReactNode} from 'react'
 import {ActivityIndicator} from 'react-native'
-import {Stack, getTokens, styled} from 'tamagui'
+import {Stack, Text, getTokens, styled} from 'tamagui'
 
 const RootContainer = styled(Stack, {
   pos: 'absolute',
@@ -17,18 +18,35 @@ const RootContainer = styled(Stack, {
 interface Props {
   children: ReactNode
 }
+export const loadingOverlayAtom = atom<{loading: boolean; message?: string}>({
+  loading: false,
+})
 
-export const loadingOverlayDisplayedAtom = atom(false)
+export const loadingOverlayDisplayedAtom = focusAtom(loadingOverlayAtom, (o) =>
+  o.prop('loading')
+)
+export const loadingOverlayMessageAtom = focusAtom(loadingOverlayAtom, (o) =>
+  o.prop('message')
+)
 
 function LoadingOverlayProvider({children}: Props): JSX.Element {
   const isDisplayed = useAtomValue(loadingOverlayDisplayedAtom)
+  const loadingOverlayMessage = useAtomValue(loadingOverlayMessageAtom)
   const tokens = getTokens()
+
   return (
     <>
       {children}
       {isDisplayed && (
         <RootContainer>
-          <ActivityIndicator size="large" color={tokens.color.main.val} />
+          <Stack ai="center" jc="center">
+            <ActivityIndicator size="large" color={tokens.color.main.val} />
+            {loadingOverlayMessage && (
+              <Text col="$main" fs={24}>
+                {loadingOverlayMessage}
+              </Text>
+            )}
+          </Stack>
         </RootContainer>
       )}
     </>
@@ -38,20 +56,22 @@ function LoadingOverlayProvider({children}: Props): JSX.Element {
 export default LoadingOverlayProvider
 
 export function useShowLoadingOverlay(): {
-  show: () => void
+  show: (message?: string) => void
   hide: () => void
-  setDisplayed: (value: boolean) => void
+  setDisplayed: (value: boolean, message?: string) => void
 } {
-  const setDisplayed = useSetAtom(loadingOverlayDisplayedAtom)
+  const setDisplayed = useSetAtom(loadingOverlayAtom)
   return useMemo(
     () => ({
-      show: () => {
-        setDisplayed(true)
+      show: (message) => {
+        setDisplayed({loading: true, message})
       },
       hide: () => {
-        setDisplayed(false)
+        setDisplayed({loading: false})
       },
-      setDisplayed,
+      setDisplayed: (loading) => {
+        setDisplayed({loading})
+      },
     }),
     [setDisplayed]
   )

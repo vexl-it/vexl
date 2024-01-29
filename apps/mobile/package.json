@@ -68,7 +68,7 @@
     "expo-localization": "~14.8.3",
     "expo-secure-store": "~12.8.1",
     "expo-sharing": "~11.10.0",
-    "expo-splash-screen": "~0.26.3",
+    "expo-splash-screen": "~0.26.4",
     "expo-status-bar": "~1.11.1",
     "expo-updates": "~0.24.8",
     "fast-deep-equal": "^3.1.3",

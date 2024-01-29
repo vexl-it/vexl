@@ -21,6 +21,7 @@ export const packageName = String(
 )
 
 export const isStaging = apiPreset === 'stageEnv'
+export const isProd = apiPreset === 'prodEnv'
 
 export const commitHash = String(
   Constants.expoConfig?.extra?.commitHash ?? 'local'

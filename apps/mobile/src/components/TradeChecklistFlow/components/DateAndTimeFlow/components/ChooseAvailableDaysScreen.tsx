@@ -13,7 +13,6 @@ import {
   getCurrentLocale,
   useTranslation,
 } from '../../../../../utils/localization/I18nProvider'
-import useSafeGoBack from '../../../../../utils/useSafeGoBack'
 import Calendar, {
   REACT_NATIVE_CALENDARS_DATE_FORMAT,
 } from '../../../../Calendar'
@@ -34,11 +33,10 @@ type Props = TradeChecklistStackScreenProps<'ChooseAvailableDays'>
 
 function ChooseAvailableDaysScreen({
   route: {
-    params: {chosenDays, navigateBackToChatOnSave},
+    params: {chosenDays},
   },
 }: Props): JSX.Element {
   const {t} = useTranslation()
-  const goBack = useSafeGoBack()
   const navigation: NavigationProp<TradeChecklistStackParamsList> =
     useNavigation()
   const [availableDateTimes, setAvailableDateTimes] = useAtom(
@@ -71,7 +69,9 @@ function ChooseAvailableDaysScreen({
   return (
     <>
       <HeaderProxy
-        onClose={goBack}
+        onClose={() => {
+          navigation.navigate('AgreeOnTradeDetails')
+        }}
         title={t('tradeChecklist.dateAndTime.screenTitle')}
       />
       <Content scrollable>
@@ -91,9 +91,7 @@ function ChooseAvailableDaysScreen({
         disabled={availableDateTimes.length < MINIMUM_AVAILABLE_DAYS_THRESHOLD}
         text={t('common.continue')}
         onPress={() => {
-          navigation.navigate('AddTimeOptions', {
-            navigateBackToChatOnSave,
-          })
+          navigation.navigate('AddTimeOptions')
         }}
       />
     </>

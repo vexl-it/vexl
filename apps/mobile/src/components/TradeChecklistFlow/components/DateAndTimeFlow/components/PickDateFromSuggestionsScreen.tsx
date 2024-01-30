@@ -7,7 +7,6 @@ import {Stack} from 'tamagui'
 import type {TradeChecklistStackScreenProps} from '../../../../../navigationTypes'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import {useAtomValueRefreshOnFocus} from '../../../../../utils/useFocusMemo'
-import useSafeGoBack from '../../../../../utils/useSafeGoBack'
 import {
   HeaderProxy,
   PrimaryFooterButtonProxy,
@@ -38,7 +37,6 @@ type Props = TradeChecklistStackScreenProps<'PickDateFromSuggestions'>
 export default function PickDateFromSuggestionsScreen(
   props: Props
 ): JSX.Element {
-  const goBack = useSafeGoBack()
   const {t} = useTranslation()
 
   const itemsToShowAtoms = useAtomValueRefreshOnFocus(
@@ -54,7 +52,6 @@ export default function PickDateFromSuggestionsScreen(
   function onItemPress(data: AvailableDateTimeOption): void {
     props.navigation.navigate('PickTimeFromSuggestions', {
       chosenDay: data,
-      submitUpdateOnTimePick: props.route.params.submitUpdateOnTimePick,
     })
   }
 
@@ -62,7 +59,9 @@ export default function PickDateFromSuggestionsScreen(
     <>
       <HeaderProxy
         title={t('tradeChecklist.dateAndTime.screenTitle')}
-        onClose={goBack}
+        onClose={() => {
+          props.navigation.navigate('AgreeOnTradeDetails')
+        }}
       />
       <Content>
         <Header title={t('tradeChecklist.dateAndTime.chooseTheDay')} />
@@ -78,7 +77,6 @@ export default function PickDateFromSuggestionsScreen(
         onPress={() => {
           props.navigation.navigate('ChooseAvailableDays', {
             chosenDays: props.route.params.chosenDays,
-            navigateBackToChatOnSave: props.route.params.submitUpdateOnTimePick,
           })
         }}
         text={t('tradeChecklist.dateAndTime.addDifferentTime')}

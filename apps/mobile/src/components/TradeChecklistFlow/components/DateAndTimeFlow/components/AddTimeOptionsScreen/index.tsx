@@ -20,7 +20,10 @@ import {
   addDateAndTimeSuggestionsActionAtom,
   submitTradeChecklistUpdatesActionAtom,
 } from '../../../../atoms/updatesToBeSentAtom'
-import {MINIMUM_AVAILABLE_DAYS_THRESHOLD} from '../../../../utils'
+import {
+  MINIMUM_AVAILABLE_DAYS_THRESHOLD,
+  useWasOpenFromAgreeOnTradeDetailsScreen,
+} from '../../../../utils'
 import Content from '../../../Content'
 import Header from '../../../Header'
 import {availableDateTimesAtom} from '../../atoms'
@@ -30,12 +33,7 @@ const BOTTOM_MARGIN_FOR_OPENED_PICKER = 120
 
 type Props = TradeChecklistStackScreenProps<'AddTimeOptions'>
 
-function AddTimeOptionsScreen({
-  navigation,
-  route: {
-    params: {navigateBackToChatOnSave},
-  },
-}: Props): JSX.Element {
+function AddTimeOptionsScreen({navigation}: Props): JSX.Element {
   const {t} = useTranslation()
   const goBack = useSafeGoBack()
   const showLoadingOverlay = useSetAtom(loadingOverlayDisplayedAtom)
@@ -48,11 +46,13 @@ function AddTimeOptionsScreen({
   const availableDateTimes = useAtomValue(availableDateTimesAtom)
   const store = useStore()
 
+  const shouldSendOnSubmit = !useWasOpenFromAgreeOnTradeDetailsScreen()
+
   const onFooterButtonPress = useCallback(() => {
     addDateAndTimeSuggestions(availableDateTimes)
 
     void pipe(
-      navigateBackToChatOnSave
+      shouldSendOnSubmit
         ? pipe(
             T.Do,
             T.map(() => {
@@ -67,7 +67,7 @@ function AddTimeOptionsScreen({
         : T.of(true),
       T.map((success) => {
         if (!success) return
-        if (navigateBackToChatOnSave) {
+        if (shouldSendOnSubmit) {
           navigation.navigate('ChatDetail', store.get(chatWithMessagesKeys))
         } else {
           navigation.navigate('AgreeOnTradeDetails')
@@ -77,11 +77,11 @@ function AddTimeOptionsScreen({
   }, [
     addDateAndTimeSuggestions,
     availableDateTimes,
-    navigateBackToChatOnSave,
     navigation,
     showLoadingOverlay,
     store,
     submitTradeChecklistUpdates,
+    shouldSendOnSubmit,
   ])
 
   return (
@@ -89,7 +89,7 @@ function AddTimeOptionsScreen({
       <HeaderProxy
         title={t('tradeChecklist.dateAndTime.screenTitle')}
         onClose={() => {
-          if (navigateBackToChatOnSave) {
+          if (shouldSendOnSubmit) {
             navigation.navigate('AgreeOnTradeDetails')
           } else {
             navigation.navigate('ChatDetail', store.get(chatWithMessagesKeys))

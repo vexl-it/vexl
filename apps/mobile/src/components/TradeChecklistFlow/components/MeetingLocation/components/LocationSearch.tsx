@@ -10,12 +10,7 @@ import Content from '../../Content'
 
 type Props = TradeChecklistStackScreenProps<'LocationSearch'>
 
-export default function LocationMapSearch({
-  navigation,
-  route: {
-    params: {submitUpdateOnPick},
-  },
-}: Props): JSX.Element {
+export default function LocationMapSearch({navigation}: Props): JSX.Element {
   return (
     <>
       <HeaderProxy />
@@ -25,7 +20,6 @@ export default function LocationMapSearch({
           onPress={(data) => {
             navigation.navigate('LocationMapSelect', {
               selectedLocation: data,
-              submitUpdateOnPick,
             })
           }}
         />

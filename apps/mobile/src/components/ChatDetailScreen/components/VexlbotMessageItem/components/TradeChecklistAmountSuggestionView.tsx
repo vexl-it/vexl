@@ -29,7 +29,6 @@ function TradeChecklistAmountSuggestionView(): JSX.Element | null {
             inboxKey,
             params: {
               amountData: undefined,
-              navigateBackToChatOnSave: true,
             },
           })
         }}

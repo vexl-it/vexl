@@ -146,42 +146,31 @@ export type TradeChecklistStackParamsList = {
   AgreeOnTradeDetails: undefined
   ChooseAvailableDays: {
     readonly chosenDays: AvailableDateTimeOption[] | undefined
-    readonly navigateBackToChatOnSave?: boolean | undefined
   }
   PickDateFromSuggestions: {
     readonly chosenDays: AvailableDateTimeOption[]
-    readonly submitUpdateOnTimePick?: boolean
   }
   PickTimeFromSuggestions: {
     readonly chosenDay: AvailableDateTimeOption
-    readonly submitUpdateOnTimePick?: boolean
   }
-  AddTimeOptions: {
-    readonly navigateBackToChatOnSave?: boolean | undefined
-  }
+  AddTimeOptions: undefined
   CalculateAmount: {
     readonly amountData: AmountData | undefined
-    readonly navigateBackToChatOnSave?: boolean | undefined
   }
   SetYourOwnPrice: undefined
   PremiumOrDiscount: undefined
   Network: {
     readonly networkData: NetworkData | undefined
-    readonly navigateBackToChatOnSave?: boolean | undefined
   }
   BtcAddress: undefined
 
   LocationMapPreview: {
     readonly selectedLocation: MeetingLocationData
-    readonly submitUpdateOnPick?: boolean | undefined
   }
   LocationMapSelect: {
     readonly selectedLocation: LocationSuggestion
-    readonly submitUpdateOnPick?: boolean | undefined
   }
-  LocationSearch: {
-    readonly submitUpdateOnPick?: boolean | undefined
-  }
+  LocationSearch: undefined
 }
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions

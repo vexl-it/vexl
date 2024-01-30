@@ -55,7 +55,6 @@ export default function TradeChecklistDateAndTimeView(): JSX.Element | null {
                 screen: 'PickDateFromSuggestions',
                 params: {
                   chosenDays: suggestions.suggestions,
-                  submitUpdateOnTimePick: true,
                 },
               })
             }}

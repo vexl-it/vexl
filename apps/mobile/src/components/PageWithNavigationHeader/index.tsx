@@ -24,19 +24,36 @@ interface Props {
   fullScreen?: boolean
 }
 
-function PageWithNavigationHeader({children, fullScreen}: Props): JSX.Element {
+function GoBackOnSwipeDown({
+  children,
+}: {
+  children: React.ReactNode
+}): JSX.Element {
   const goBack = useSafeGoBack()
+
+  return (
+    <GestureDetector
+      gesture={Gesture.Fling()
+        .direction(Directions.DOWN)
+        .onEnd(() => {
+          runOnJS(goBack)()
+        })}
+    >
+      {children}
+    </GestureDetector>
+  )
+}
+
+function PageWithNavigationHeader({children, fullScreen}: Props): JSX.Element {
   const {bottom} = useSafeAreaInsets()
+
+  const GoBackOnSwipeDownOrFragment = fullScreen
+    ? React.Fragment
+    : GoBackOnSwipeDown
 
   return (
     <KeyboardAvoidingView>
-      <GestureDetector
-        gesture={Gesture.Fling()
-          .direction(Directions.DOWN)
-          .onEnd(() => {
-            runOnJS(goBack)()
-          })}
-      >
+      <GoBackOnSwipeDownOrFragment>
         <Stack
           f={1}
           bc="$black"
@@ -50,7 +67,7 @@ function PageWithNavigationHeader({children, fullScreen}: Props): JSX.Element {
           {children}
           <FooterButtons />
         </Stack>
-      </GestureDetector>
+      </GoBackOnSwipeDownOrFragment>
     </KeyboardAvoidingView>
   )
 }

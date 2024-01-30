@@ -40,13 +40,19 @@ function SetNetworkCell(): JSX.Element {
     tradeChecklistNetworkData.sent?.btcNetwork,
   ])
 
+  const isDisabled =
+    (!!originOffer?.ownershipInfo &&
+      originOffer?.offerInfo.publicPart.offerType === 'SELL') ||
+    (!originOffer?.ownershipInfo &&
+      originOffer?.offerInfo.publicPart.offerType === 'BUY')
+
   return (
     <ChecklistCell
-      hidden={
-        (!!originOffer?.ownershipInfo &&
-          originOffer?.offerInfo.publicPart.offerType === 'SELL') ||
-        (!originOffer?.ownershipInfo &&
-          originOffer?.offerInfo.publicPart.offerType === 'BUY')
+      isDisabled={isDisabled}
+      subtitle={
+        isDisabled
+          ? t('tradeChecklist.network.btcNetworkWillBeSetByReceiver')
+          : undefined
       }
       item="SET_NETWORK"
       onPress={onPress}

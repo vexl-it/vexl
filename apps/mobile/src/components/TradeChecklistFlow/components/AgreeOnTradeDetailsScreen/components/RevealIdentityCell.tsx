@@ -44,7 +44,7 @@ function RevealIdentityCell(): JSX.Element {
       subtitle={t('tradeChecklist.shareRecognitionSignInChat')}
       item="REVEAL_IDENTITY"
       onPress={() => {
-        void revealIdentity()
+        void revealIdentity()()
       }}
     />
   )

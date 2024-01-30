@@ -10,6 +10,8 @@ import {useTranslation} from '../../../utils/localization/I18nProvider'
 import useResetNavigationToMessagingScreen from '../../../utils/useResetNavigationToMessagingScreen'
 import Button from '../../Button'
 import IconButton from '../../IconButton'
+import {revealContactFromQuickActionBannerAtom} from '../../TradeChecklistFlow/atoms/revealContactAtoms'
+import {revealIdentityFromQuickActionBannerAtom} from '../../TradeChecklistFlow/atoms/revealIdentityAtoms'
 import UserAvatar from '../../UserAvatar'
 import {chatMolecule} from '../atoms'
 import {useHideActionForMessage} from '../atoms/createHideActionForMessageMmkvAtom'
@@ -93,6 +95,8 @@ function QuickActionBanner(): JSX.Element | null {
     forceShowHistoryAtom,
     identityRevealTriggeredFromTradeChecklistAtom,
     contactRevealTriggeredFromTradeChecklistAtom,
+    publicKeyPemBase64Atom,
+    chatIdAtom,
   } = useMolecule(chatMolecule)
 
   const lastMessage = useAtomValue(lastMessageAtom)
@@ -111,6 +115,14 @@ function QuickActionBanner(): JSX.Element | null {
   const requestState = useAtomValue(requestStateAtom)
   const setShowHistory = useSetAtom(forceShowHistoryAtom)
   const addRevealedContact = useSetAtom(addContactWithUiFeedbackAtom)
+  const chatId = useAtomValue(chatIdAtom)
+  const inboxKey = useAtomValue(publicKeyPemBase64Atom)
+  const revealIdentityFromQuickActionBanner = useSetAtom(
+    revealIdentityFromQuickActionBannerAtom
+  )
+  const revealContactFromQuickActionBanner = useSetAtom(
+    revealContactFromQuickActionBannerAtom
+  )
 
   const onBackToRequestPressed = useCallback(() => {
     setShowHistory(false)
@@ -223,10 +235,7 @@ function QuickActionBanner(): JSX.Element | null {
     )
   }
 
-  if (
-    identityRevealStatus === 'theyAsked' &&
-    !identityRevealTriggeredFromTradeChecklist
-  ) {
+  if (identityRevealStatus === 'theyAsked') {
     return (
       <QuickActionBannerUi
         topText={t('messages.identityRevealRequest')}
@@ -237,7 +246,11 @@ function QuickActionBanner(): JSX.Element | null {
           <UserAvatar width={48} height={48} userImage={otherSideData.image} />
         }
         onButtonPress={() => {
-          void revealIdentity('RESPOND_REVEAL')
+          if (identityRevealTriggeredFromTradeChecklist) {
+            void revealIdentityFromQuickActionBanner({chatId, inboxKey})
+          } else {
+            void revealIdentity('RESPOND_REVEAL')
+          }
         }}
       />
     )
@@ -277,10 +290,7 @@ function QuickActionBanner(): JSX.Element | null {
     )
   }
 
-  if (
-    contactRevealStatus === 'theyAsked' &&
-    !contactRevealTriggeredFromTradeChecklist
-  ) {
+  if (contactRevealStatus === 'theyAsked') {
     return (
       <QuickActionBannerUi
         topText={t('messages.contactRevealRequest')}
@@ -291,7 +301,11 @@ function QuickActionBanner(): JSX.Element | null {
           <UserAvatar width={48} height={48} userImage={otherSideData.image} />
         }
         onButtonPress={() => {
-          void revealContact('RESPOND_REVEAL')
+          if (contactRevealTriggeredFromTradeChecklist) {
+            void revealContactFromQuickActionBanner({chatId, inboxKey})
+          } else {
+            void revealContact('RESPOND_REVEAL')
+          }
         }}
       />
     )

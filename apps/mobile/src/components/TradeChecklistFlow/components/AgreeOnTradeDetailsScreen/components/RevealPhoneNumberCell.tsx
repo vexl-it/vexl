@@ -6,7 +6,7 @@ import {
   tradeChecklistContactDataAtom,
 } from '../../../../../state/tradeChecklist/atoms/fromChatAtoms'
 import createChecklistItemStatusAtom from '../../../atoms/createChecklistItemStatusAtom'
-import {revealContactWithUiFeedbackAtom} from '../../../atoms/revealContactAtom'
+import {revealContactWithUiFeedbackAtom} from '../../../atoms/revealContactAtoms'
 import ChecklistCell from './ChecklistCell'
 
 function RevealPhoneNumberCell(): JSX.Element {
@@ -39,7 +39,7 @@ function RevealPhoneNumberCell(): JSX.Element {
       hidden={!identityRevealed || contactRevealTriggeredFromChat}
       item="REVEAL_PHONE_NUMBER"
       onPress={() => {
-        void revealContact()
+        void revealContact()()
       }}
     />
   )

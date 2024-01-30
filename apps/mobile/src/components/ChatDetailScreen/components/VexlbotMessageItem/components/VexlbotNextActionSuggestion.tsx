@@ -20,6 +20,8 @@ function VexlbotNextActionSuggestion(): JSX.Element | null {
     tradeChecklistNetworkAtom,
     tradeChecklistContactRevealAtom,
     shouldHideNetworkCellForTradeChecklistAtom,
+    identityRevealStatusAtom,
+    contactRevealStatusAtom,
   } = useMolecule(chatMolecule)
   const shouldHideNetworkCellForTradeChecklist = useAtomValue(
     shouldHideNetworkCellForTradeChecklistAtom
@@ -37,6 +39,13 @@ function VexlbotNextActionSuggestion(): JSX.Element | null {
   const agreedOnContactReveal = contactRevealed(
     useAtomValue(tradeChecklistContactRevealAtom)
   )
+  const identityRevealStatus = useAtomValue(identityRevealStatusAtom)
+  const contactRevealStatus = useAtomValue(contactRevealStatusAtom)
+
+  if (identityRevealStatus === 'iAsked' || identityRevealStatus === 'theyAsked')
+    return null
+  if (contactRevealStatus === 'iAsked' || contactRevealStatus === 'theyAsked')
+    return null
 
   if (
     agreedOnDateAndTime &&

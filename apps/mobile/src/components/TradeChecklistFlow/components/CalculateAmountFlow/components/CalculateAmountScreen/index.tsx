@@ -9,6 +9,7 @@ import {
 import calculatePercentageDifference from '../../../../../../utils/calculatePercentageDifference'
 import {dismissKeyboardAndResolveOnLayoutUpdate} from '../../../../../../utils/dismissKeyboardPromise'
 import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
+import useSafeGoBack from '../../../../../../utils/useSafeGoBack'
 import Info from '../../../../../Info'
 import {loadingOverlayDisplayedAtom} from '../../../../../LoadingOverlayProvider'
 import {
@@ -16,12 +17,12 @@ import {
   PrimaryFooterButtonProxy,
   SecondaryFooterButtonProxy,
 } from '../../../../../PageWithNavigationHeader'
-import {btcPriceForOfferWithStateAtom} from '../../../../atoms/btcPriceForOfferWithStateAtom'
 import {submitTradeChecklistUpdatesActionAtom} from '../../../../atoms/updatesToBeSentAtom'
 import {useWasOpenFromAgreeOnTradeDetailsScreen} from '../../../../utils'
 import Content from '../../../Content'
 import {
   btcInputValueAtom,
+  btcPriceForOfferWithStateAtom,
   fiatInputValueAtom,
   isOtherSideAmountDataNewerThanMineAtom,
   saveButtonDisabledAtom,
@@ -45,6 +46,7 @@ function CalculateAmountScreen({
   },
 }: Props): JSX.Element {
   const {t} = useTranslation()
+  const goBack = useSafeGoBack()
 
   const isOtherSideAmountDataNewerThanMine = useAtomValue(
     isOtherSideAmountDataNewerThanMineAtom
@@ -86,16 +88,19 @@ function CalculateAmountScreen({
         void submitTradeChecklistUpdates()().finally(() => {
           showLoadingOverlay(false)
         })
+        navigation.navigate('ChatDetail', store.get(chatWithMessagesKeys))
+      } else {
+        goBack()
       }
-      navigation.navigate('ChatDetail', store.get(chatWithMessagesKeys))
     })
   }, [
     saveLocalCalculatedAmountDataStateToMainState,
     shouldNavigateBackToChatOnSave,
-    navigation,
-    store,
     showLoadingOverlay,
     submitTradeChecklistUpdates,
+    navigation,
+    store,
+    goBack,
   ])
 
   useEffect(() => {

@@ -4,9 +4,9 @@ import {useAtomValue} from 'jotai'
 import {useCallback, useMemo} from 'react'
 import {type TradeChecklistStackParamsList} from '../../../../../navigationTypes'
 import {
-  originOfferCurrencyAtom,
   otherSideDataAtom,
   tradeChecklistAmountDataAtom,
+  tradeOrOriginOfferCurrencyAtom,
 } from '../../../../../state/tradeChecklist/atoms/fromChatAtoms'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import createChecklistItemStatusAtom from '../../../atoms/createChecklistItemStatusAtom'
@@ -18,7 +18,9 @@ function CalculateAmountCell(): JSX.Element {
   const navigation: NavigationProp<TradeChecklistStackParamsList> =
     useNavigation()
 
-  const originOfferCurrency = useAtomValue(originOfferCurrencyAtom)
+  const tradeOrOriginOfferCurrency = useAtomValue(
+    tradeOrOriginOfferCurrencyAtom
+  )
   const otherSideData = useAtomValue(otherSideDataAtom)
   const amountUpdateToBeSent = useAtomValue(amountUpdateToBeSentAtom)
   const tradeChecklistAmountData = useAtomValue(tradeChecklistAmountDataAtom)
@@ -40,7 +42,7 @@ function CalculateAmountCell(): JSX.Element {
           them: otherSideData.userName,
           btcAmount: tradeChecklistAmountData.received.btcAmount,
           fiatAmount: tradeChecklistAmountData.received.fiatAmount,
-          currency: originOfferCurrency,
+          currency: tradeOrOriginOfferCurrency,
         }
       )
     }
@@ -48,7 +50,7 @@ function CalculateAmountCell(): JSX.Element {
   }, [
     amountUpdateToBeSent,
     itemStatus,
-    originOfferCurrency,
+    tradeOrOriginOfferCurrency,
     otherSideData.userName,
     t,
     tradeChecklistAmountData.received,

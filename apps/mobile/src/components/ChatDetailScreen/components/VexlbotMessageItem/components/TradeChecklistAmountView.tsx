@@ -1,17 +1,15 @@
 import Clipboard from '@react-native-clipboard/clipboard'
-import {useFocusEffect, useNavigation} from '@react-navigation/native'
+import {useNavigation} from '@react-navigation/native'
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue, useSetAtom} from 'jotai'
 import {useCallback, useMemo} from 'react'
 import {Stack, XStack, getTokens} from 'tamagui'
-import {refreshBtcPriceActionAtom} from '../../../../../state/currentBtcPriceAtoms'
 import * as amount from '../../../../../state/tradeChecklist/utils/amount'
 import {calculateBtcPricePercentageDifference} from '../../../../../state/tradeChecklist/utils/amount'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import {currencies} from '../../../../../utils/localization/currency'
 import Button from '../../../../Button'
 import {loadingOverlayDisplayedAtom} from '../../../../LoadingOverlayProvider'
-import {btcPriceForOfferWithStateAtom} from '../../../../TradeChecklistFlow/atoms/btcPriceForOfferWithStateAtom'
 import {
   addAmountActionAtom,
   submitTradeChecklistUpdatesActionAtom,
@@ -29,9 +27,12 @@ function TradeChecklistAmountView(): JSX.Element | null {
     publicKeyPemBase64Atom,
     otherSideDataAtom,
     tradeChecklistAmountAtom,
-    offerCurrencyAtom,
+    btcPriceForTradeCurrencyAtom,
+    tradeOrOriginOfferCurrencyAtom,
   } = useMolecule(chatMolecule)
-  const offerCurrency = useAtomValue(offerCurrencyAtom)
+  const tradeOrOriginOfferCurrency = useAtomValue(
+    tradeOrOriginOfferCurrencyAtom
+  )
   const amountData = useAtomValue(tradeChecklistAmountAtom)
   const otherSideData = useAtomValue(otherSideDataAtom)
   const amountDataToDisplay = amount.getAmountData(amountData)
@@ -42,16 +43,15 @@ function TradeChecklistAmountView(): JSX.Element | null {
     submitTradeChecklistUpdatesActionAtom
   )
   const addAmount = useSetAtom(addAmountActionAtom)
-  const refreshBtcPrice = useSetAtom(refreshBtcPriceActionAtom)
-  const btcPriceForOfferWithState = useAtomValue(btcPriceForOfferWithStateAtom)
+  const btcPriceForTradeCurrency = useAtomValue(btcPriceForTradeCurrencyAtom)
 
   const btcPricePercentageDifference = useMemo(
     () =>
       calculateBtcPricePercentageDifference(
         amountDataToDisplay,
-        btcPriceForOfferWithState?.btcPrice
+        btcPriceForTradeCurrency?.btcPrice
       ),
-    [amountDataToDisplay, btcPriceForOfferWithState?.btcPrice]
+    [amountDataToDisplay, btcPriceForTradeCurrency?.btcPrice]
   )
 
   const onAcceptButtonPress = useCallback(() => {
@@ -68,12 +68,6 @@ function TradeChecklistAmountView(): JSX.Element | null {
     showLoadingOverlay,
     submitTradeChecklistUpdates,
   ])
-
-  useFocusEffect(
-    useCallback(() => {
-      void refreshBtcPrice(offerCurrency)()
-    }, [refreshBtcPrice, offerCurrency])
-  )
 
   if (!amountDataToDisplay?.amountData.btcAmount) return null
 
@@ -118,7 +112,7 @@ function TradeChecklistAmountView(): JSX.Element | null {
           )}
           {amountDataToDisplay.amountData.fiatAmount && (
             <Button
-              text={currencies[offerCurrency].code}
+              text={currencies[tradeOrOriginOfferCurrency].code}
               beforeIcon={copySvg}
               onPress={() => {
                 Clipboard.setString(
@@ -214,7 +208,7 @@ function TradeChecklistAmountView(): JSX.Element | null {
                 : otherSideData.userName,
             btcAmount: amountDataToDisplay.amountData.btcAmount,
             fiatAmount: amountDataToDisplay.amountData.fiatAmount,
-            fiatCurrency: currencies[offerCurrency].code,
+            fiatCurrency: currencies[tradeOrOriginOfferCurrency].code,
             feeAmount: amountDataToDisplay.amountData.feeAmount,
           }
         )}

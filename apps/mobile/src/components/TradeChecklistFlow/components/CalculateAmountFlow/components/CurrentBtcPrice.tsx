@@ -1,10 +1,11 @@
 import {useAtomValue, useSetAtom} from 'jotai'
 import {ActivityIndicator, TouchableOpacity} from 'react-native'
 import {Text, XStack, getTokens, type TextProps} from 'tamagui'
-import {originOfferCurrencyAtom} from '../../../../../state/tradeChecklist/atoms/fromChatAtoms'
-import {btcPriceForOfferWithStateAtom} from '../../../atoms/btcPriceForOfferWithStateAtom'
+import {tradeOrOriginOfferCurrencyAtom} from '../../../../../state/tradeChecklist/atoms/fromChatAtoms'
 import {
+  btcPriceForOfferWithStateAtom,
   refreshCurrentBtcPriceActionAtom,
+  selectedCurrencyCodeAtom,
   tradeBtcPriceAtom,
   tradePriceTypeAtom,
 } from '../atoms'
@@ -14,9 +15,13 @@ function CurrentBtcPrice(props: TextProps): JSX.Element {
   const tradePriceType = useAtomValue(tradePriceTypeAtom)
   const tradeBtcPrice = useAtomValue(tradeBtcPriceAtom)
   const btcPriceForOfferWithState = useAtomValue(btcPriceForOfferWithStateAtom)
-  const originOfferCurrency = useAtomValue(originOfferCurrencyAtom)
+  const tradeOrOriginOfferCurrency = useAtomValue(
+    tradeOrOriginOfferCurrencyAtom
+  )
+  const selectedCurrencyCode = useAtomValue(selectedCurrencyCodeAtom)
 
-  const tradeCurrency = originOfferCurrency ?? 'USD'
+  const tradeCurrency =
+    selectedCurrencyCode ?? tradeOrOriginOfferCurrency ?? 'USD'
 
   return (
     <TouchableOpacity

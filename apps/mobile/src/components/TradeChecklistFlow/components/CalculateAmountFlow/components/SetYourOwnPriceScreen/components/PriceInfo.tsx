@@ -5,7 +5,7 @@ import {
   useTranslation,
 } from '../../../../../../../utils/localization/I18nProvider'
 import Info from '../../../../../../Info'
-import {btcPriceForOfferWithStateAtom} from '../../../../../atoms/btcPriceForOfferWithStateAtom'
+import {btcPriceForOfferWithStateAtom} from '../../../atoms'
 
 interface Props {
   fiatTempValueAtom: PrimitiveAtom<string>

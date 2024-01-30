@@ -1,11 +1,11 @@
 import {type GetGeocodedCoordinatesResponse} from '@vexl-next/rest-api/src/services/location/contracts'
-import {useSetAtom} from 'jotai'
+import {useSetAtom, useStore} from 'jotai'
 import {useMemo, useState} from 'react'
 import {YStack} from 'tamagui'
 import backButtonSvg from '../../../../../images/backButtonSvg'
 import {type TradeChecklistStackScreenProps} from '../../../../../navigationTypes'
+import {chatWithMessagesKeys} from '../../../../../state/tradeChecklist/atoms/fromChatAtoms'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
-import {useGoBackXTimes} from '../../../../../utils/navigation'
 import Button from '../../../../Button'
 import IconButton from '../../../../IconButton'
 import Input from '../../../../Input'
@@ -20,13 +20,14 @@ import {
   addMeetingLocationActionAtom,
   submitTradeChecklistUpdatesActionAtom,
 } from '../../../atoms/updatesToBeSentAtom'
+import {useWasOpenFromAgreeOnTradeDetailsScreen} from '../../../utils'
 import {useSetFullscreen} from '../../TradeChecklistFlowPageContainer'
 
 type Props = TradeChecklistStackScreenProps<'LocationMapSelect'>
 export default function LocationMapSelect({
   navigation,
   route: {
-    params: {selectedLocation, submitUpdateOnPick},
+    params: {selectedLocation},
   },
   navigation: {goBack},
 }: Props): JSX.Element {
@@ -40,13 +41,14 @@ export default function LocationMapSelect({
     submitTradeChecklistUpdatesActionAtom
   )
   useSetFullscreen()
+  const shouldSubmitUpdateOnPick = !useWasOpenFromAgreeOnTradeDetailsScreen()
+  const store = useStore()
 
   const [pickedValue, setPickedValue] =
     useState<GetGeocodedCoordinatesResponse | null>(null)
   const [note, setNote] = useState('')
 
   const stageMeetingLocation = useSetAtom(addMeetingLocationActionAtom)
-  const goBackXTimes = useGoBackXTimes()
 
   function onSubmit(): void {
     if (!pickedValue) return
@@ -57,14 +59,14 @@ export default function LocationMapSelect({
     }
     stageMeetingLocation(toSubmit)
 
-    if (!submitUpdateOnPick) {
+    if (!shouldSubmitUpdateOnPick) {
       navigation.navigate('AgreeOnTradeDetails')
     } else {
       showLoadingOverlay(true)
       void submitTradeChecklistUpdates()()
         .then((success) => {
           if (!success) return
-          goBackXTimes(3)
+          navigation.navigate('ChatDetail', store.get(chatWithMessagesKeys))
         })
         .finally(() => {
           showLoadingOverlay(false)

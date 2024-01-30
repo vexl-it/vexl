@@ -1,7 +1,8 @@
-import {useSetAtom} from 'jotai'
+import {useSetAtom, useStore} from 'jotai'
 import {useCallback, useEffect} from 'react'
 import {Stack} from 'tamagui'
 import {type TradeChecklistStackScreenProps} from '../../../../../../navigationTypes'
+import {chatWithMessagesKeys} from '../../../../../../state/tradeChecklist/atoms/fromChatAtoms'
 import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../../../../../utils/useSafeGoBack'
 import {loadingOverlayDisplayedAtom} from '../../../../../LoadingOverlayProvider'
@@ -12,6 +13,7 @@ import {
 } from '../../../../../PageWithNavigationHeader'
 import networkSvg from '../../../../../images/networkSvg'
 import {submitTradeChecklistUpdatesActionAtom} from '../../../../atoms/updatesToBeSentAtom'
+import {useWasOpenFromAgreeOnTradeDetailsScreen} from '../../../../utils'
 import Content from '../../../Content'
 import {
   btcAddressAtom,
@@ -26,12 +28,14 @@ import SectionTitle from './components/SectionTitle'
 type Props = TradeChecklistStackScreenProps<'Network'>
 
 function NetworkScreen({
+  navigation,
   route: {
-    params: {networkData, navigateBackToChatOnSave},
+    params: {networkData},
   },
 }: Props): JSX.Element {
   const {t} = useTranslation()
   const goBack = useSafeGoBack()
+  const store = useStore()
   const saveLocalNetworkStateToMainState = useSetAtom(
     saveLocalNetworkStateToMainStateActionAtom
   )
@@ -41,22 +45,31 @@ function NetworkScreen({
   const showLoadingOverlay = useSetAtom(loadingOverlayDisplayedAtom)
   const setBtcNetwork = useSetAtom(btcNetworkAtom)
   const setBtcAddress = useSetAtom(btcAddressAtom)
+  const shouldNavigateBackToChatOnSave =
+    !useWasOpenFromAgreeOnTradeDetailsScreen()
 
   const onFooterButtonPress = useCallback(() => {
     saveLocalNetworkStateToMainState()
-    if (navigateBackToChatOnSave) {
+    if (shouldNavigateBackToChatOnSave) {
       showLoadingOverlay(true)
-      void submitTradeChecklistUpdates()().finally(() => {
-        showLoadingOverlay(false)
-      })
+      void submitTradeChecklistUpdates()()
+        .then((success) => {
+          if (!success) return
+          navigation.navigate('ChatDetail', store.get(chatWithMessagesKeys))
+        })
+        .finally(() => {
+          showLoadingOverlay(false)
+        })
+    } else {
+      navigation.navigate('AgreeOnTradeDetails')
     }
-    goBack()
   }, [
-    goBack,
-    navigateBackToChatOnSave,
     saveLocalNetworkStateToMainState,
+    shouldNavigateBackToChatOnSave,
     showLoadingOverlay,
     submitTradeChecklistUpdates,
+    navigation,
+    store,
   ])
 
   useEffect(() => {

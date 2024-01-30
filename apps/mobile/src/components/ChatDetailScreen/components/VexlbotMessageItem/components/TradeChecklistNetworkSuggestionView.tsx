@@ -34,7 +34,7 @@ function TradeChecklistNetworkSuggestionView(): JSX.Element | null {
             screen: 'Network',
             chatId,
             inboxKey,
-            params: {networkData: undefined, navigateBackToChatOnSave: true},
+            params: {networkData: undefined},
           })
         }}
         size="medium"

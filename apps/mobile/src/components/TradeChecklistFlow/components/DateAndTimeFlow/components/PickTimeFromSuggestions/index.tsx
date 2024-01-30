@@ -6,7 +6,6 @@ import {Stack} from 'tamagui'
 import type {TradeChecklistStackScreenProps} from '../../../../../../navigationTypes'
 import {chatWithMessagesKeys} from '../../../../../../state/tradeChecklist/atoms/fromChatAtoms'
 import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
-import useSafeGoBack from '../../../../../../utils/useSafeGoBack'
 import {loadingOverlayDisplayedAtom} from '../../../../../LoadingOverlayProvider'
 import {
   HeaderProxy,
@@ -17,6 +16,7 @@ import {
   saveDateTimePickActionAtom,
   submitTradeChecklistUpdatesActionAtom,
 } from '../../../../atoms/updatesToBeSentAtom'
+import {useWasOpenFromAgreeOnTradeDetailsScreen} from '../../../../utils'
 import Content from '../../../Content'
 import Header from '../../../Header'
 import OptionsList from '../OptionsList'
@@ -27,13 +27,13 @@ type Props = TradeChecklistStackScreenProps<'PickTimeFromSuggestions'>
 function PickTimeFromSuggestions({
   navigation,
   route: {
-    params: {chosenDay, submitUpdateOnTimePick},
+    params: {chosenDay},
   },
 }: Props): JSX.Element {
   const {t} = useTranslation()
-  const goBack = useSafeGoBack()
   const store = useStore()
 
+  const shouldSendOnSubmit = !useWasOpenFromAgreeOnTradeDetailsScreen()
   const {selectItem, selectedItem, itemsAtoms} = useState(chosenDay)
   const showLoadingOverlay = useSetAtom(loadingOverlayDisplayedAtom)
   const saveDateTimePick = useSetAtom(saveDateTimePickActionAtom)
@@ -43,14 +43,14 @@ function PickTimeFromSuggestions({
 
   const onItemPress = useCallback(
     (item: DateTime) => {
-      if (submitUpdateOnTimePick) {
+      if (shouldSendOnSubmit) {
         selectItem(item)
       } else {
         saveDateTimePick({dateTime: UnixMilliseconds.parse(item.toMillis())})
         navigation.navigate('AgreeOnTradeDetails')
       }
     },
-    [navigation, saveDateTimePick, selectItem, submitUpdateOnTimePick]
+    [navigation, saveDateTimePick, selectItem, shouldSendOnSubmit]
   )
 
   const onFooterButtonPress = useCallback(() => {
@@ -85,7 +85,9 @@ function PickTimeFromSuggestions({
           month: 'numeric',
           weekday: 'short',
         })}
-        onClose={goBack}
+        onClose={() => {
+          navigation.navigate('AgreeOnTradeDetails')
+        }}
       />
 
       <Content>
@@ -96,7 +98,7 @@ function PickTimeFromSuggestions({
       <PrimaryFooterButtonProxy hidden />
       <SecondaryFooterButtonProxy
         text={t('common.continue')}
-        hidden={!submitUpdateOnTimePick}
+        hidden={!shouldSendOnSubmit}
         disabled={!selectedItem}
         onPress={onFooterButtonPress}
       />

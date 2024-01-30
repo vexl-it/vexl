@@ -1,7 +1,8 @@
-import {useSetAtom} from 'jotai'
+import {useSetAtom, useStore} from 'jotai'
 import {XStack, YStack} from 'tamagui'
 import backButtonSvg from '../../../../../images/backButtonSvg'
 import {type TradeChecklistStackScreenProps} from '../../../../../navigationTypes'
+import {chatWithMessagesKeys} from '../../../../../state/tradeChecklist/atoms/fromChatAtoms'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import Button from '../../../../Button'
 import IconButton from '../../../../IconButton'
@@ -16,18 +17,21 @@ import {
   addMeetingLocationActionAtom,
   submitTradeChecklistUpdatesActionAtom,
 } from '../../../atoms/updatesToBeSentAtom'
+import {useWasOpenFromAgreeOnTradeDetailsScreen} from '../../../utils'
 import {useSetFullscreen} from '../../TradeChecklistFlowPageContainer'
 
 type Props = TradeChecklistStackScreenProps<'LocationMapPreview'>
 export default function LocationMapPreview({
   navigation,
   route: {
-    params: {selectedLocation, submitUpdateOnPick},
+    params: {selectedLocation},
   },
 }: Props): JSX.Element {
   const stageLocation = useSetAtom(addMeetingLocationActionAtom)
   const showLoadingOverlay = useSetAtom(loadingOverlayDisplayedAtom)
   const {t} = useTranslation()
+  const submitUpdateOnPick = !useWasOpenFromAgreeOnTradeDetailsScreen()
+  const store = useStore()
 
   useSetFullscreen()
 
@@ -44,7 +48,7 @@ export default function LocationMapPreview({
       void submitTradeChecklistUpdates()()
         .then((success) => {
           if (!success) return
-          navigation.goBack()
+          navigation.navigate('ChatDetail', store.get(chatWithMessagesKeys))
         })
         .finally(() => {
           showLoadingOverlay(false)
@@ -74,9 +78,7 @@ export default function LocationMapPreview({
               text={t('map.location.suggestDifferent')}
               variant="primary"
               onPress={() => {
-                navigation.navigate('LocationSearch', {
-                  submitUpdateOnPick,
-                })
+                navigation.navigate('LocationSearch')
               }}
             />
             <Button

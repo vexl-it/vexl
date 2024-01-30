@@ -177,7 +177,6 @@ function TradeChecklistAmountView(): JSX.Element | null {
                           ? 'custom'
                           : amountData.received?.tradePriceType,
                     },
-                    navigateBackToChatOnSave: true,
                   },
                   chatId,
                   inboxKey,

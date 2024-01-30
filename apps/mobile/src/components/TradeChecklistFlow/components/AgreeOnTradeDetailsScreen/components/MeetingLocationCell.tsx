@@ -25,7 +25,7 @@ function MeetingLocationCell(): JSX.Element {
         selectedLocation: pendingSuggestion.data.data,
       })
     } else {
-      navigation.navigate('LocationSearch', {})
+      navigation.navigate('LocationSearch')
     }
   }, [navigation, tradeChecklistLocationData])
 

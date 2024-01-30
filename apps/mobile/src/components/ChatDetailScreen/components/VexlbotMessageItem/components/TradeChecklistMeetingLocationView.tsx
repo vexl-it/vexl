@@ -81,7 +81,6 @@ export default function TradeChecklistMeetingLocationView(): JSX.Element | null 
                 screen: 'LocationMapPreview',
                 params: {
                   selectedLocation: pendingSuggestion.data.data,
-                  submitUpdateOnPick: true,
                 },
               })
             }}

@@ -1,12 +1,14 @@
-import {useAtomValue, useSetAtom} from 'jotai'
+import {useAtomValue, useSetAtom, useStore} from 'jotai'
 import {useCallback, useEffect, useMemo} from 'react'
 import {Stack, XStack} from 'tamagui'
 import {type TradeChecklistStackScreenProps} from '../../../../../../navigationTypes'
-import {otherSideDataAtom} from '../../../../../../state/tradeChecklist/atoms/fromChatAtoms'
+import {
+  chatWithMessagesKeys,
+  otherSideDataAtom,
+} from '../../../../../../state/tradeChecklist/atoms/fromChatAtoms'
 import calculatePercentageDifference from '../../../../../../utils/calculatePercentageDifference'
 import {dismissKeyboardAndResolveOnLayoutUpdate} from '../../../../../../utils/dismissKeyboardPromise'
 import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
-import useSafeGoBack from '../../../../../../utils/useSafeGoBack'
 import Info from '../../../../../Info'
 import {loadingOverlayDisplayedAtom} from '../../../../../LoadingOverlayProvider'
 import {
@@ -16,6 +18,7 @@ import {
 } from '../../../../../PageWithNavigationHeader'
 import {btcPriceForOfferWithStateAtom} from '../../../../atoms/btcPriceForOfferWithStateAtom'
 import {submitTradeChecklistUpdatesActionAtom} from '../../../../atoms/updatesToBeSentAtom'
+import {useWasOpenFromAgreeOnTradeDetailsScreen} from '../../../../utils'
 import Content from '../../../Content'
 import {
   btcInputValueAtom,
@@ -36,12 +39,12 @@ import SwitchTradePriceTypeButton from './components/SwitchTradePriceTypeButton'
 type Props = TradeChecklistStackScreenProps<'CalculateAmount'>
 
 function CalculateAmountScreen({
+  navigation,
   route: {
-    params: {amountData, navigateBackToChatOnSave},
+    params: {amountData},
   },
 }: Props): JSX.Element {
   const {t} = useTranslation()
-  const goBack = useSafeGoBack()
 
   const isOtherSideAmountDataNewerThanMine = useAtomValue(
     isOtherSideAmountDataNewerThanMineAtom
@@ -52,6 +55,9 @@ function CalculateAmountScreen({
   const setTradePriceTypeDialogVisible = useSetAtom(
     tradePriceTypeDialogVisibleAtom
   )
+  const store = useStore()
+  const shouldNavigateBackToChatOnSave =
+    !useWasOpenFromAgreeOnTradeDetailsScreen()
   const syncDataWithChatState = useSetAtom(syncDataWithChatStateActionAtom)
   const saveLocalCalculatedAmountDataStateToMainState = useSetAtom(
     saveLocalCalculatedAmountDataStateToMainStateActionAtom
@@ -75,18 +81,19 @@ function CalculateAmountScreen({
   const onFooterButtonPress = useCallback(() => {
     void dismissKeyboardAndResolveOnLayoutUpdate().then(() => {
       saveLocalCalculatedAmountDataStateToMainState()
-      if (navigateBackToChatOnSave) {
+      if (shouldNavigateBackToChatOnSave) {
         showLoadingOverlay(true)
         void submitTradeChecklistUpdates()().finally(() => {
           showLoadingOverlay(false)
         })
       }
-      goBack()
+      navigation.navigate('ChatDetail', store.get(chatWithMessagesKeys))
     })
   }, [
-    goBack,
-    navigateBackToChatOnSave,
     saveLocalCalculatedAmountDataStateToMainState,
+    shouldNavigateBackToChatOnSave,
+    navigation,
+    store,
     showLoadingOverlay,
     submitTradeChecklistUpdates,
   ])
@@ -98,7 +105,7 @@ function CalculateAmountScreen({
   return (
     <>
       <HeaderProxy
-        onClose={goBack}
+        onClose={navigation.goBack}
         title={t('tradeChecklist.calculateAmount.calculateAmount')}
       />
       <Content scrollable>

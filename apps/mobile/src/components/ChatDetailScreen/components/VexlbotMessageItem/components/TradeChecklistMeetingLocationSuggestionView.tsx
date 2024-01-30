@@ -30,7 +30,6 @@ function TradeChecklistMeetingLocationSuggestionView(): JSX.Element | null {
             screen: 'LocationSearch',
             chatId,
             inboxKey,
-            params: {},
           })
         }}
         size="medium"

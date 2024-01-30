@@ -13,15 +13,15 @@ import {
 } from '@vexl-next/resources-utils/src/utils/parsing'
 import * as E from 'fp-ts/Either'
 import * as TE from 'fp-ts/TaskEither'
-import {pipe} from 'fp-ts/function'
+import {flow, pipe} from 'fp-ts/function'
 import {atom} from 'jotai'
 import {privateApiAtom} from '../../../api'
 import {type ActionAtomType} from '../../../utils/atomUtils/ActionAtomType'
 import {type FocusAtomType} from '../../../utils/atomUtils/FocusAtomType'
 import {deleteChatFiles} from '../../../utils/fsDirectories'
 import {removeFeedbackRecordActionAtom} from '../../feedback/atoms'
-import {createEmptyTradeChecklistInState} from '../../tradeChecklist/domain'
 import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
+import {resetRealLifeInfo, resetTradeChecklist} from '../utils/resetData'
 import shouldSendTerminationMessageToChat from '../utils/shouldSendTerminationMessageToChat'
 
 export default function deleteChatActionAtom(
@@ -87,11 +87,17 @@ export default function deleteChatActionAtom(
 
         set(removeFeedbackRecordActionAtom, chatWithMessages.chat.id)
 
-        set(chatWithMessagesAtom, (old) => ({
-          ...old,
-          tradeChecklist: createEmptyTradeChecklistInState(),
-          messages: [successMessage],
-        }))
+        set(
+          chatWithMessagesAtom,
+          flow(
+            (old) => ({
+              ...old,
+              messages: [successMessage],
+            }),
+            resetTradeChecklist,
+            resetRealLifeInfo
+          )
+        )
         return successMessage
       })
     )

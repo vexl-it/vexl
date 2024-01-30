@@ -2,13 +2,14 @@ import confirmMessagingRequest, {
   type ApiConfirmMessagingRequest,
 } from '@vexl-next/resources-utils/src/chat/confirmMessagingRequest'
 import {type ErrorEncryptingMessage} from '@vexl-next/resources-utils/src/chat/utils/chatCrypto'
-import {pipe} from 'fp-ts/function'
+import {flow, pipe} from 'fp-ts/function'
 import * as TE from 'fp-ts/TaskEither'
 import {atom, type PrimitiveAtom} from 'jotai'
 import {privateApiAtom} from '../../../api'
 import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
 import addMessageToChat from '../utils/addMessageToChat'
 import createAccountDeletedMessage from '../utils/createAccountDeletedMessage'
+import {resetRealLifeInfo} from '../utils/resetData'
 import {
   type ZodParseError,
   type JsonStringifyError,
@@ -63,7 +64,7 @@ const acceptMessagingRequestAtom = atom(
       }),
       TE.map((message): ChatMessageWithState => ({state: 'sent', message})),
       TE.map((message) => {
-        set(chatAtom, addMessageToChat(message))
+        set(chatAtom, flow(addMessageToChat(message), resetRealLifeInfo))
         return message
       })
     )

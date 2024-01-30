@@ -9,7 +9,7 @@ import {type SendMessageApiErrors} from '@vexl-next/resources-utils/src/chat/sen
 import {type ErrorEncryptingMessage} from '@vexl-next/resources-utils/src/chat/utils/chatCrypto'
 import * as E from 'fp-ts/Either'
 import * as TE from 'fp-ts/TaskEither'
-import {pipe} from 'fp-ts/function'
+import {flow, pipe} from 'fp-ts/function'
 import {atom} from 'jotai'
 import {privateApiAtom} from '../../../api'
 import {type ActionAtomType} from '../../../utils/atomUtils/ActionAtomType'
@@ -17,6 +17,7 @@ import {type FocusAtomType} from '../../../utils/atomUtils/FocusAtomType'
 import {deleteChatFiles} from '../../../utils/fsDirectories'
 import {removeFeedbackRecordActionAtom} from '../../feedback/atoms'
 import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
+import {resetRealLifeInfo} from '../utils/resetData'
 import shouldSendTerminationMessageToChat from '../utils/shouldSendTerminationMessageToChat'
 import {
   type JsonStringifyError,
@@ -86,10 +87,16 @@ export default function deleteChatActionAtom(
 
         set(removeFeedbackRecordActionAtom, chatWithMessages.chat.id)
 
-        set(chatWithMessagesAtom, (old) => ({
-          ...old,
-          messages: [successMessage],
-        }))
+        set(
+          chatWithMessagesAtom,
+          flow(
+            (old) => ({
+              ...old,
+              messages: [successMessage],
+            }),
+            resetRealLifeInfo
+          )
+        )
         return successMessage
       })
     )

@@ -1,19 +1,30 @@
 import {useAtomValue} from 'jotai'
-import React from 'react'
+import React, {useCallback} from 'react'
 import {XStack} from 'tamagui'
+import {dismissKeyboardAndResolveOnLayoutUpdate} from '../../../utils/dismissKeyboardPromise'
 import Button from '../../Button'
 import {
   primaryFooterButtonStateAtom,
   secondaryFooterButtonStateAtom,
 } from '../state/footerButtonStateAtom'
 
-const empty = (): void => {}
-
 function FooterButtons(): JSX.Element | null {
   const primaryFooterButtonState = useAtomValue(primaryFooterButtonStateAtom)
   const secondaryFooterButtonState = useAtomValue(
     secondaryFooterButtonStateAtom
   )
+
+  const onPrimaryButtonPress = useCallback(() => {
+    const onPress = primaryFooterButtonState.onPress
+    if (!onPress) return
+    void dismissKeyboardAndResolveOnLayoutUpdate().then(onPress)
+  }, [primaryFooterButtonState.onPress])
+
+  const onSecodaryButtonPress = useCallback(() => {
+    const onPress = secondaryFooterButtonState.onPress
+    if (!onPress) return
+    void dismissKeyboardAndResolveOnLayoutUpdate().then(onPress)
+  }, [secondaryFooterButtonState.onPress])
 
   return (
     <XStack jc="space-around" space="$2">
@@ -22,7 +33,7 @@ function FooterButtons(): JSX.Element | null {
           fullSize
           disabled={primaryFooterButtonState.disabled}
           size="medium"
-          onPress={primaryFooterButtonState.onPress ?? empty}
+          onPress={onPrimaryButtonPress}
           variant="primary"
           text={primaryFooterButtonState.text}
         />
@@ -32,7 +43,7 @@ function FooterButtons(): JSX.Element | null {
           fullSize
           disabled={secondaryFooterButtonState.disabled}
           size="medium"
-          onPress={secondaryFooterButtonState.onPress ?? empty}
+          onPress={onSecodaryButtonPress}
           variant="secondary"
           text={secondaryFooterButtonState.text}
         />

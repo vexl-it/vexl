@@ -1,7 +1,8 @@
 import {useAtomValue} from 'jotai'
-import React from 'react'
+import React, {useCallback} from 'react'
 import {Stack, Text, XStack} from 'tamagui'
 import backButtonSvg from '../../../images/backButtonSvg'
+import {dismissKeyboardAndResolveOnLayoutUpdate} from '../../../utils/dismissKeyboardPromise'
 import IconButton from '../../IconButton'
 import closeSvg from '../../images/closeSvg'
 import headerStateAtom from '../state/headerStateAtom'
@@ -9,13 +10,27 @@ import headerStateAtom from '../state/headerStateAtom'
 function Header(): JSX.Element | null {
   const headerState = useAtomValue(headerStateAtom)
 
+  const onBackButtonPress = useCallback(() => {
+    void dismissKeyboardAndResolveOnLayoutUpdate().then(() => {
+      if (headerState.goBack) {
+        headerState.goBack()
+      }
+    })
+  }, [headerState])
+
+  const onCloseButtonPress = useCallback(() => {
+    const onClose = headerState.onClose
+    if (!onClose) return
+    void dismissKeyboardAndResolveOnLayoutUpdate().then(onClose)
+  }, [headerState])
+
   return !headerState.hidden && !headerState.hiddenAllTheWay ? (
     <XStack ai="center" jc="space-between" pb="$2">
       {headerState.goBack ? (
         <IconButton
           variant="primary"
           icon={backButtonSvg}
-          onPress={headerState.goBack}
+          onPress={onBackButtonPress}
         />
       ) : (
         <Stack />
@@ -24,7 +39,7 @@ function Header(): JSX.Element | null {
         {headerState.title}
       </Text>
       {headerState.onClose ? (
-        <IconButton icon={closeSvg} onPress={headerState.onClose} />
+        <IconButton icon={closeSvg} onPress={onCloseButtonPress} />
       ) : (
         <Stack />
       )}

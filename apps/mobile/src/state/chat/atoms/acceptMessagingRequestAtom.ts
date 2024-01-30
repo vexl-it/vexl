@@ -11,17 +11,10 @@ import * as TE from 'fp-ts/TaskEither'
 import {flow, pipe} from 'fp-ts/function'
 import {atom, type PrimitiveAtom} from 'jotai'
 import {privateApiAtom} from '../../../api'
-import {createEmptyTradeChecklistInState} from '../../tradeChecklist/domain'
 import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
 import addMessageToChat from '../utils/addMessageToChat'
 import createAccountDeletedMessage from '../utils/createAccountDeletedMessage'
-
-function resetTradeChecklist(chat: ChatWithMessages): ChatWithMessages {
-  return {
-    ...chat,
-    tradeChecklist: createEmptyTradeChecklistInState(),
-  }
-}
+import {resetRealLifeInfo, resetTradeChecklist} from '../utils/resetData'
 
 const acceptMessagingRequestAtom = atom(
   null,
@@ -76,7 +69,8 @@ const acceptMessagingRequestAtom = atom(
           flow(
             addMessageToChat(message),
             // Make sure to reset checklist. If they open chat again after rerequest, we don't want to show the checklist again
-            resetTradeChecklist
+            resetTradeChecklist,
+            resetRealLifeInfo
           )
         )
         return message

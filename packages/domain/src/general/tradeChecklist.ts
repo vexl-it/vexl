@@ -4,7 +4,7 @@ import {UnixMilliseconds} from '../utility/UnixMilliseconds.brand'
 import {UriString} from '../utility/UriString.brand'
 import {DeanonymizedUser} from './DeanonymizedUser'
 import {UserName} from './UserName.brand'
-import {BtcNetwork} from './offers'
+import {BtcNetwork, CurrencyCode} from './offers'
 
 /**
  * TODO move to apps/mobile
@@ -96,6 +96,7 @@ export const AmountData = z.object({
   btcAmount: z.coerce.number().optional(),
   fiatAmount: z.coerce.number().optional(),
   feeAmount: z.coerce.number().optional(),
+  currency: CurrencyCode.optional(),
 })
 export type AmountData = z.TypeOf<typeof AmountData>
 

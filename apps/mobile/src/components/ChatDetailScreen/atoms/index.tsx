@@ -38,9 +38,11 @@ import {
 import connectionStateAtom, {
   createFriendLevelInfoAtom,
 } from '../../../state/connections/atom/connectionStateAtom'
+import {createBtcPriceForCurrencyAtom} from '../../../state/currentBtcPriceAtoms'
 import {createFeedbackForChatAtom} from '../../../state/feedback/atoms'
 import {offerForChatOriginAtom} from '../../../state/marketplace/atoms/offersState'
 import {invalidUsernameUIFeedbackAtom} from '../../../state/session'
+import {getAmountData} from '../../../state/tradeChecklist/utils/amount'
 import getValueFromSetStateActionOfAtom from '../../../utils/atomUtils/getValueFromSetStateActionOfAtom'
 import {type SelectedImage} from '../../../utils/imagePickers'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
@@ -778,6 +780,23 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     )
   })
 
+  const tradeOrOriginOfferCurrencyAtom = atom((get) => {
+    const originOffer = get(offerForChatAtom)
+    const tradeChecklistAmountData = getAmountData(
+      get(tradeChecklistAmountAtom)
+    )
+
+    return (
+      tradeChecklistAmountData?.amountData.currency ??
+      originOffer?.offerInfo?.publicPart?.currency ??
+      'USD'
+    )
+  })
+
+  const btcPriceForTradeCurrencyAtom = atom((get) => {
+    return get(createBtcPriceForCurrencyAtom(tradeOrOriginOfferCurrencyAtom))
+  })
+
   return {
     showModalAtom: atom<boolean>(false),
     chatAtom,
@@ -834,5 +853,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     contactRevealTriggeredFromTradeChecklistAtom,
     tradeChecklistMeetingLocationAtom,
     shouldHideNetworkCellForTradeChecklistAtom,
+    tradeOrOriginOfferCurrencyAtom,
+    btcPriceForTradeCurrencyAtom,
   }
 })

@@ -9,10 +9,7 @@ import {
   type TradeChecklistStackParamsList,
   type TradeChecklistStackScreenProps,
 } from '../../../../../navigationTypes'
-import {
-  getCurrentLocale,
-  useTranslation,
-} from '../../../../../utils/localization/I18nProvider'
+import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import Calendar, {
   REACT_NATIVE_CALENDARS_DATE_FORMAT,
 } from '../../../../Calendar'
@@ -52,9 +49,9 @@ function ChooseAvailableDaysScreen({
         (result: MarkedDates, dateTime: AvailableDateTimeOption) => {
           return {
             ...result,
-            [DateTime.fromMillis(dateTime.date)
-              .setLocale(getCurrentLocale())
-              .toFormat(REACT_NATIVE_CALENDARS_DATE_FORMAT)]: {selected: true},
+            [DateTime.fromMillis(dateTime.date).toFormat(
+              REACT_NATIVE_CALENDARS_DATE_FORMAT
+            )]: {selected: true},
           }
         },
         {}

@@ -39,6 +39,7 @@ const defaultMinDate = DateTime.now().toFormat(
 function Calendar(props: CalendarProps): JSX.Element {
   return (
     <RNCalendar
+      enableSwipeMonths
       disableAllTouchEventsForDisabledDays
       headerStyle={styles.header}
       minDate={defaultMinDate}

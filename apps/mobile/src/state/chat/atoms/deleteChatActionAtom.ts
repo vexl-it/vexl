@@ -20,6 +20,7 @@ import {type ActionAtomType} from '../../../utils/atomUtils/ActionAtomType'
 import {type FocusAtomType} from '../../../utils/atomUtils/FocusAtomType'
 import {deleteChatFiles} from '../../../utils/fsDirectories'
 import {removeFeedbackRecordActionAtom} from '../../feedback/atoms'
+import {createEmptyTradeChecklistInState} from '../../tradeChecklist/domain'
 import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
 import shouldSendTerminationMessageToChat from '../utils/shouldSendTerminationMessageToChat'
 
@@ -88,6 +89,7 @@ export default function deleteChatActionAtom(
 
         set(chatWithMessagesAtom, (old) => ({
           ...old,
+          tradeChecklist: createEmptyTradeChecklistInState(),
           messages: [successMessage],
         }))
         return successMessage

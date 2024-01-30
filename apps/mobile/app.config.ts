@@ -76,6 +76,8 @@ export default {
     'infoPlist': {
       'UIBackgroundModes': ['fetch', 'remote-notification', 'processing'],
       'LSApplicationQueriesSchemes': ['itms-apps'],
+      'NSLocationWhenInUseUsageDescription':
+        'Vexl needs access to you location to show your position on the map. Location will never be share with anyone (even ourselves).',
       'FirebaseDynamicLinksCustomDomains': [
         'https://link.vexl.it',
         'https://nextlink.vexl.it',

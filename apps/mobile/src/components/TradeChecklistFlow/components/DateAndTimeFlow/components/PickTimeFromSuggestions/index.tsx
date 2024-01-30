@@ -1,11 +1,11 @@
 import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {useSetAtom} from 'jotai'
+import {useSetAtom, useStore} from 'jotai'
 import {DateTime} from 'luxon'
 import {useCallback} from 'react'
 import {Stack} from 'tamagui'
 import type {TradeChecklistStackScreenProps} from '../../../../../../navigationTypes'
+import {chatWithMessagesKeys} from '../../../../../../state/tradeChecklist/atoms/fromChatAtoms'
 import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
-import {useGoBackXTimes} from '../../../../../../utils/navigation'
 import useSafeGoBack from '../../../../../../utils/useSafeGoBack'
 import {loadingOverlayDisplayedAtom} from '../../../../../LoadingOverlayProvider'
 import {
@@ -32,7 +32,7 @@ function PickTimeFromSuggestions({
 }: Props): JSX.Element {
   const {t} = useTranslation()
   const goBack = useSafeGoBack()
-  const goBackXTimes = useGoBackXTimes()
+  const store = useStore()
 
   const {selectItem, selectedItem, itemsAtoms} = useState(chosenDay)
   const showLoadingOverlay = useSetAtom(loadingOverlayDisplayedAtom)
@@ -47,12 +47,10 @@ function PickTimeFromSuggestions({
         selectItem(item)
       } else {
         saveDateTimePick({dateTime: UnixMilliseconds.parse(item.toMillis())})
-        // This works but assumes we are staying in the same navigator
-        // (there are more than 2 items in current navigator history)
-        goBackXTimes(2)
+        navigation.navigate('AgreeOnTradeDetails')
       }
     },
-    [goBackXTimes, saveDateTimePick, selectItem, submitUpdateOnTimePick]
+    [navigation, saveDateTimePick, selectItem, submitUpdateOnTimePick]
   )
 
   const onFooterButtonPress = useCallback(() => {
@@ -65,16 +63,17 @@ function PickTimeFromSuggestions({
     void submitTradeChecklistUpdates()()
       .then((success) => {
         if (!success) return
-        goBackXTimes(2)
+        navigation.navigate('ChatDetail', store.get(chatWithMessagesKeys))
       })
       .finally(() => {
         showLoadingOverlay(false)
       })
   }, [
-    goBackXTimes,
+    navigation,
     saveDateTimePick,
     selectedItem,
     showLoadingOverlay,
+    store,
     submitTradeChecklistUpdates,
   ])
 

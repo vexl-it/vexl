@@ -1,10 +1,10 @@
 import {useFocusEffect} from '@react-navigation/native'
-import {useAtomValue, useSetAtom} from 'jotai'
+import {useAtomValue, useSetAtom, useStore} from 'jotai'
 import React, {useCallback} from 'react'
 import {Stack} from 'tamagui'
+import {type TradeChecklistStackScreenProps} from '../../../../navigationTypes'
 import * as fromChatAtoms from '../../../../state/tradeChecklist/atoms/fromChatAtoms'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
-import useSafeGoBack from '../../../../utils/useSafeGoBack'
 import {
   PrimaryFooterButtonProxy,
   SecondaryFooterButtonProxy,
@@ -18,14 +18,16 @@ import {
 import Content from '../Content'
 import OnlineOrInPersonTrade from './components/OnlineOrInPersonTrade'
 
-function AgreeOnTradeDetailsScreen(): JSX.Element {
+type Props = TradeChecklistStackScreenProps<'AgreeOnTradeDetails'>
+
+function AgreeOnTradeDetailsScreen(props: Props): JSX.Element {
   const {t} = useTranslation()
-  const goBack = useSafeGoBack()
   const offerForTradeChecklist = useAtomValue(fromChatAtoms.originOfferAtom)
   const areThereUpdatesToBeSent = useAtomValue(areThereUpdatesToBeSentAtom)
   const submitChangesAndSendMessage = useSetAtom(
     submitTradeChecklistUpdatesActionAtom
   )
+  const store = useStore()
   const clearUpdatesToBeSent = useSetAtom(clearUpdatesToBeSentActionAtom)
   const setHeaderState = useSetAtom(headerStateAtom)
 
@@ -48,7 +50,10 @@ function AgreeOnTradeDetailsScreen(): JSX.Element {
         text={t('common.cancel')}
         onPress={() => {
           clearUpdatesToBeSent()
-          goBack()
+          props.navigation.navigate(
+            'ChatDetail',
+            store.get(fromChatAtoms.chatWithMessagesKeys)
+          )
         }}
       />
       <SecondaryFooterButtonProxy
@@ -65,7 +70,10 @@ function AgreeOnTradeDetailsScreen(): JSX.Element {
         onPress={() => {
           void submitChangesAndSendMessage()().then((success) => {
             if (success) {
-              goBack()
+              props.navigation.navigate(
+                'ChatDetail',
+                store.get(fromChatAtoms.chatWithMessagesKeys)
+              )
             }
           })
         }}

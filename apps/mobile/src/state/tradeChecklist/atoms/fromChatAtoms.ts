@@ -1,3 +1,4 @@
+import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
 import type {SetStateAction} from 'jotai'
 import {atom} from 'jotai'
@@ -19,6 +20,16 @@ export const chatWithMessagesAtom = atom(
   (get, set, update: SetStateAction<ChatWithMessages>) => {
     const chatWithMessagesAtom = get(parentChatAtomAtom)
     set(chatWithMessagesAtom, update)
+  }
+)
+
+export const chatWithMessagesKeys = atom(
+  (get): {otherSideKey: PublicKeyPemBase64; inboxKey: PublicKeyPemBase64} => {
+    const chat = get(chatWithMessagesAtom)
+    return {
+      inboxKey: chat.chat.inbox.privateKey.publicKeyPemBase64,
+      otherSideKey: chat.chat.otherSide.publicKey,
+    }
   }
 )
 

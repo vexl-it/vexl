@@ -17,8 +17,6 @@ import Content from '../../Content'
 import Header from '../../Header'
 import OptionsList, {type Item as OptionItem} from './OptionsList'
 
-function empty(): void {}
-
 function createOptionsFromChosenDays(
   days: AvailableDateTimeOption[]
 ): Array<OptionItem<AvailableDateTimeOption>> {
@@ -77,9 +75,13 @@ export default function PickDateFromSuggestionsScreen(
       </Content>
       <PrimaryFooterButtonProxy hidden />
       <SecondaryFooterButtonProxy
-        hidden
-        text={t('common.continue')}
-        onPress={empty}
+        onPress={() => {
+          props.navigation.navigate('ChooseAvailableDays', {
+            chosenDays: props.route.params.chosenDays,
+            navigateBackToChatOnSave: props.route.params.submitUpdateOnTimePick,
+          })
+        }}
+        text={t('tradeChecklist.dateAndTime.addDifferentTime')}
       />
     </>
   )

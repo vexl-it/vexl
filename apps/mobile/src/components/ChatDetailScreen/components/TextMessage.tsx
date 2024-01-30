@@ -159,20 +159,6 @@ function TextMessage({
   const otherSideData = useAtomValue(otherSideDataAtom)
   const openImage = useSetAtom(openedImageUriAtom)
 
-  const textInputStyle = useMemo(
-    () => [
-      style.textInputStyle,
-      {
-        color:
-          messageItem.type === 'message' &&
-          messageItem.message.state !== 'received'
-            ? tokens.color.black.val
-            : tokens.color.white.val,
-      },
-    ],
-    [messageItem, tokens.color.black.val, tokens.color.white.val]
-  )
-
   const onPressResend = useCallback(() => {
     if (
       messageItem.type === 'message' &&
@@ -201,6 +187,25 @@ function TextMessage({
     if (messageItem.type !== 'message') return
     openImage(messageItem.message.message.image)
   }, [messageItem, openImage])
+
+  const textInputStyle = useMemo(() => {
+    if (messageItem.type !== 'message') return style.textInputStyle
+
+    return [
+      style.textInputStyle,
+      {
+        color:
+          messageItem.message.state !== 'received'
+            ? tokens.color.black.val
+            : tokens.color.white.val,
+        fontStyle: shouldHaveItalicPrefix(
+          messageItem.message.message.messageType
+        )
+          ? 'italic'
+          : undefined,
+      } as const,
+    ]
+  }, [messageItem, tokens.color.black.val, tokens.color.white.val])
 
   if (messageItem.type !== 'message') return null
   const {message, isLatest, time} = messageItem
@@ -278,12 +283,8 @@ function TextMessage({
                   showSoftInputOnFocus={false}
                   spellCheck={false}
                   style={textInputStyle}
-                >
-                  <TextMessageAccent
-                    isMine={isMine}
-                    message={message.message}
-                  />
-                </TextInput>
+                  value={message.message.text}
+                />
               ) : (
                 <Text
                   selectable

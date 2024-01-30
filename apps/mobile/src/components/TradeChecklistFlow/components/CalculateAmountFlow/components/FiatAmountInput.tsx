@@ -1,4 +1,4 @@
-import {type CurrencyCode} from '@vexl-next/domain/src/general/currency.brand'
+import {CurrencyCode} from '@vexl-next/domain/src/general/currency.brand'
 import {useAtomValue, useSetAtom, type PrimitiveAtom} from 'jotai'
 import {useMemo, useRef, useState} from 'react'
 import {StyleSheet, type TextInput} from 'react-native'
@@ -48,9 +48,9 @@ interface Props {
 }
 
 const fiatCurrenciesDropdownData: Array<DropdownItemProps<CurrencyCode>> =
-  Object.values(currencies).map((currency) => ({
-    label: currency.code,
-    value: currency.code,
+  Object.values(CurrencyCode.options).map((currency) => ({
+    label: currency,
+    value: currency,
   }))
 
 function FiatAmountInput({

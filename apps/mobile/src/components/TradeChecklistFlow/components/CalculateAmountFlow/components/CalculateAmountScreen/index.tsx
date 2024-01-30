@@ -9,7 +9,6 @@ import {
 import calculatePercentageDifference from '../../../../../../utils/calculatePercentageDifference'
 import {dismissKeyboardAndResolveOnLayoutUpdate} from '../../../../../../utils/dismissKeyboardPromise'
 import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
-import useSafeGoBack from '../../../../../../utils/useSafeGoBack'
 import Info from '../../../../../Info'
 import {loadingOverlayDisplayedAtom} from '../../../../../LoadingOverlayProvider'
 import {
@@ -46,7 +45,6 @@ function CalculateAmountScreen({
   },
 }: Props): JSX.Element {
   const {t} = useTranslation()
-  const goBack = useSafeGoBack()
 
   const isOtherSideAmountDataNewerThanMine = useAtomValue(
     isOtherSideAmountDataNewerThanMineAtom
@@ -90,7 +88,7 @@ function CalculateAmountScreen({
         })
         navigation.navigate('ChatDetail', store.get(chatWithMessagesKeys))
       } else {
-        goBack()
+        navigation.navigate('AgreeOnTradeDetails')
       }
     })
   }, [
@@ -100,7 +98,6 @@ function CalculateAmountScreen({
     submitTradeChecklistUpdates,
     navigation,
     store,
-    goBack,
   ])
 
   useEffect(() => {

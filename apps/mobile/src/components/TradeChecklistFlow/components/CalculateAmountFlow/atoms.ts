@@ -1,4 +1,4 @@
-import {type CurrencyCode} from '@vexl-next/domain/src/general/currency.brand'
+import {CurrencyCode} from '@vexl-next/domain/src/general/currency.brand'
 import {
   type AmountData,
   type BtcOrSat,
@@ -8,7 +8,6 @@ import * as T from 'fp-ts/Task'
 import {pipe} from 'fp-ts/function'
 import {atom, type PrimitiveAtom} from 'jotai'
 import {
-  btcPriceDataAtom,
   createBtcPriceForCurrencyAtom,
   refreshBtcPriceActionAtom,
 } from '../../../../state/currentBtcPriceAtoms'
@@ -39,16 +38,15 @@ export const fiatInputValueAtom = atom<string>('')
 
 export const feeAmountAtom = atom<number>(0)
 
-export const btcPriceForOfferWithStateAtom = atom((get) => {
-  const selectedCurrencyCode = get(selectedCurrencyCodeAtom)
-  const tradeOrOriginOfferCurrency = get(tradeOrOriginOfferCurrencyAtom)
+export const btcPriceCurrencyAtom = atom(
+  (get) =>
+    get(selectedCurrencyCodeAtom) ??
+    get(tradeOrOriginOfferCurrencyAtom) ??
+    'USD'
+)
 
-  return get(
-    createBtcPriceForCurrencyAtom(
-      selectedCurrencyCode ?? tradeOrOriginOfferCurrency ?? 'USD'
-    )
-  )
-})
+export const btcPriceForOfferWithStateAtom =
+  createBtcPriceForCurrencyAtom(btcPriceCurrencyAtom)
 
 export const applyFeeOnFeeChangeActionAtom = atom(
   null,
@@ -243,20 +241,18 @@ export const calculateBtcValueOnFiatAmountChangeActionAtom = atom(
 )
 
 export const refreshCurrentBtcPriceActionAtom = atom(null, (get, set) => {
-  const currency =
-    get(selectedCurrencyCodeAtom) ??
-    get(tradeOrOriginOfferCurrencyAtom) ??
-    'USD'
+  const btcPriceCurrency = get(btcPriceCurrencyAtom)
   const btcInputValue = get(btcInputValueAtom)
 
   return pipe(
-    set(refreshBtcPriceActionAtom, currency),
+    set(refreshBtcPriceActionAtom, btcPriceCurrency),
     T.map(() => {
       set(
         tradeBtcPriceAtom,
         (prev) => get(btcPriceForOfferWithStateAtom)?.btcPrice ?? prev
       )
       // we need to recalculate amount of fiat based on new btc price
+      // TODO: rewrite this to use get() on atoms directly in calculateFiatValueOnBtcAmountChangeActionAtom
       set(calculateFiatValueOnBtcAmountChangeActionAtom, {
         btcAmount: btcInputValue,
         btcValueAtom: btcInputValueAtom,
@@ -284,22 +280,8 @@ export const toggleBtcOrSatValueActionAtom = atom(
 export const toggleFiatCurrencyActionAtom = atom(
   null,
   (get, set, currency: CurrencyCode) => {
-    const btcInputValue = get(btcInputValueAtom)
-    const btcPriceData = get(btcPriceDataAtom)[currency]
-
-    set(selectedCurrencyCodeAtom, currency)
-
-    if (!btcPriceData || btcPriceData.state === 'error') {
-      void set(refreshCurrentBtcPriceActionAtom)()
-    } else if (btcPriceData.state === 'success') {
-      set(tradeBtcPriceAtom, btcPriceData.btcPrice)
-      // we need to recalculate amount of fiat based on new btc price
-      set(calculateFiatValueOnBtcAmountChangeActionAtom, {
-        btcAmount: btcInputValue,
-        btcValueAtom: btcInputValueAtom,
-        fiatValueAtom: fiatInputValueAtom,
-      })
-    }
+    set(selectedCurrencyCodeAtom, CurrencyCode.parse(currency))
+    void set(refreshCurrentBtcPriceActionAtom)()
   }
 )
 

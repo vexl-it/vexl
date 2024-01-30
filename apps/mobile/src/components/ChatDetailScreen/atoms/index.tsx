@@ -793,9 +793,9 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     )
   })
 
-  const btcPriceForTradeCurrencyAtom = atom((get) => {
-    return get(createBtcPriceForCurrencyAtom(tradeOrOriginOfferCurrencyAtom))
-  })
+  const btcPriceForTradeCurrencyAtom = createBtcPriceForCurrencyAtom(
+    tradeOrOriginOfferCurrencyAtom
+  )
 
   return {
     showModalAtom: atom<boolean>(false),

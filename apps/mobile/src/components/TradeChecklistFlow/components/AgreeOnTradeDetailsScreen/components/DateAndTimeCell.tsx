@@ -49,6 +49,13 @@ function DateAndTimeCell(): JSX.Element {
     : undefined
 
   const onPress = useCallback(() => {
+    if (DateAndTime.dateAndTimeSettled(tradeChecklistDateAndTimeData)) {
+      navigation.navigate('ChooseAvailableDays', {
+        chosenDays: tradeChecklistDateAndTimeData.sent?.suggestions,
+      })
+      return
+    }
+
     const receivedSuggestions =
       tradeChecklistDateAndTimeData.received?.suggestions
     if (receivedSuggestions && receivedSuggestions.length > 0) {
@@ -60,11 +67,7 @@ function DateAndTimeCell(): JSX.Element {
         chosenDays: tradeChecklistDateAndTimeData.sent?.suggestions,
       })
     }
-  }, [
-    navigation,
-    tradeChecklistDateAndTimeData.received?.suggestions,
-    tradeChecklistDateAndTimeData.sent?.suggestions,
-  ])
+  }, [navigation, tradeChecklistDateAndTimeData])
 
   const subtitle = useMemo(() => {
     const suggestions = DateAndTime.getSuggestions(

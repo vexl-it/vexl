@@ -1,14 +1,12 @@
-import {useNavigation, type NavigationProp} from '@react-navigation/native'
-import {useAtomValue, useSetAtom} from 'jotai'
+import * as T from 'fp-ts/Task'
+import {pipe} from 'fp-ts/function'
+import {useAtomValue, useSetAtom, useStore} from 'jotai'
 import React, {useCallback} from 'react'
 import {TouchableOpacity} from 'react-native'
 import {Stack, Text, XStack, getTokens} from 'tamagui'
-import {
-  type TradeChecklistStackParamsList,
-  type TradeChecklistStackScreenProps,
-} from '../../../../../../navigationTypes'
+import {type TradeChecklistStackScreenProps} from '../../../../../../navigationTypes'
+import {chatWithMessagesKeys} from '../../../../../../state/tradeChecklist/atoms/fromChatAtoms'
 import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
-import {useGoBackXTimes} from '../../../../../../utils/navigation'
 import useSafeGoBack from '../../../../../../utils/useSafeGoBack'
 import Image from '../../../../../Image'
 import {loadingOverlayDisplayedAtom} from '../../../../../LoadingOverlayProvider'
@@ -33,15 +31,13 @@ const BOTTOM_MARGIN_FOR_OPENED_PICKER = 120
 type Props = TradeChecklistStackScreenProps<'AddTimeOptions'>
 
 function AddTimeOptionsScreen({
+  navigation,
   route: {
     params: {navigateBackToChatOnSave},
   },
 }: Props): JSX.Element {
   const {t} = useTranslation()
   const goBack = useSafeGoBack()
-  const goBackXTimes = useGoBackXTimes()
-  const navigation: NavigationProp<TradeChecklistStackParamsList> =
-    useNavigation()
   const showLoadingOverlay = useSetAtom(loadingOverlayDisplayedAtom)
   const addDateAndTimeSuggestions = useSetAtom(
     addDateAndTimeSuggestionsActionAtom
@@ -50,27 +46,41 @@ function AddTimeOptionsScreen({
     submitTradeChecklistUpdatesActionAtom
   )
   const availableDateTimes = useAtomValue(availableDateTimesAtom)
+  const store = useStore()
 
   const onFooterButtonPress = useCallback(() => {
     addDateAndTimeSuggestions(availableDateTimes)
-    if (navigateBackToChatOnSave) {
-      showLoadingOverlay(true)
-      void submitTradeChecklistUpdates()().finally(() => {
-        showLoadingOverlay(false)
+
+    void pipe(
+      navigateBackToChatOnSave
+        ? pipe(
+            T.Do,
+            T.map(() => {
+              showLoadingOverlay(true)
+            }),
+            T.chain(submitTradeChecklistUpdates),
+            T.map((val) => {
+              showLoadingOverlay(false)
+              return val
+            })
+          )
+        : T.of(true),
+      T.map((success) => {
+        if (!success) return
+        if (navigateBackToChatOnSave) {
+          navigation.navigate('ChatDetail', store.get(chatWithMessagesKeys))
+        } else {
+          navigation.navigate('AgreeOnTradeDetails')
+        }
       })
-    }
-    if (navigateBackToChatOnSave) {
-      goBackXTimes(2)
-    } else {
-      navigation.navigate('AgreeOnTradeDetails')
-    }
+    )()
   }, [
     addDateAndTimeSuggestions,
     availableDateTimes,
-    goBackXTimes,
     navigateBackToChatOnSave,
     navigation,
     showLoadingOverlay,
+    store,
     submitTradeChecklistUpdates,
   ])
 
@@ -79,7 +89,11 @@ function AddTimeOptionsScreen({
       <HeaderProxy
         title={t('tradeChecklist.dateAndTime.screenTitle')}
         onClose={() => {
-          navigation.navigate('AgreeOnTradeDetails')
+          if (navigateBackToChatOnSave) {
+            navigation.navigate('AgreeOnTradeDetails')
+          } else {
+            navigation.navigate('ChatDetail', store.get(chatWithMessagesKeys))
+          }
         }}
       />
       <Content scrollable>

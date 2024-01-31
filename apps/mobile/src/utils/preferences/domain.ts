@@ -16,7 +16,6 @@ export const Preferences = z.object({
   notificationPreferences: NotificationPreferences,
   enableNewOffersNotificationDevMode: z.boolean().default(false),
   showFriendLevelBanner: z.boolean().default(true),
-  tradeChecklistEnabled: z.boolean().default(false),
   offerFeedbackEnabled: z.boolean().default(false),
   showTextDebugButton: z.boolean().default(false),
   disableScreenshots: z.boolean().default(false),

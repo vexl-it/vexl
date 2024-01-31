@@ -1,7 +1,6 @@
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtom, useAtomValue} from 'jotai'
 import {Stack} from 'tamagui'
-import {preferencesAtom} from '../../../utils/preferences'
 import {chatMolecule} from '../atoms'
 import ChatHeader from './ChatHeader'
 import ChatTextInput from './ChatTextInput'
@@ -11,29 +10,16 @@ import QuickActionBanner from './QuickActionBanner'
 import StickyHeader from './StickyHeader'
 
 function MessagesScreen(): JSX.Element {
-  const {showModalAtom, canSendMessagesAtom, identityRevealStatusAtom} =
-    useMolecule(chatMolecule)
+  const {showModalAtom, canSendMessagesAtom} = useMolecule(chatMolecule)
   const [showModal, setShowModal] = useAtom(showModalAtom)
   const canSendMessages = useAtomValue(canSendMessagesAtom)
-  const identityRevealStatus = useAtomValue(identityRevealStatusAtom)
-  const preferences = useAtomValue(preferencesAtom)
 
   return (
     <>
       <ChatHeader
         mode={showModal ? 'photoTop' : 'photoLeft'}
         leftButton={showModal ? 'closeModal' : 'back'}
-        rightButton={
-          preferences.tradeChecklistEnabled
-            ? 'tradeChecklist'
-            : showModal
-            ? 'block'
-            : !canSendMessages
-            ? null
-            : identityRevealStatus === 'shared'
-            ? 'contactReveal'
-            : 'identityReveal'
-        }
+        rightButton="tradeChecklist"
         onPressMiddle={() => {
           setShowModal((v) => !v)
         }}

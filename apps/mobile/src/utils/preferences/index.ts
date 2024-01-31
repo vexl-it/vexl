@@ -18,7 +18,6 @@ export const preferencesAtom = atomWithParsedMmkvStorage(
     },
     enableNewOffersNotificationDevMode: false,
     showFriendLevelBanner: true,
-    tradeChecklistEnabled: false,
     offerFeedbackEnabled: false,
     showTextDebugButton: false,
     disableScreenshots: false,

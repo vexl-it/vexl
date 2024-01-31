@@ -8,7 +8,6 @@ import {Stack, YStack, getTokens} from 'tamagui'
 import BlockIconSvg from '../../../images/blockIconSvg'
 import tradeChecklistSvg from '../../../images/tradeChecklistSvg'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
-import {preferencesAtom} from '../../../utils/preferences'
 import useResetNavigationToMessagingScreen from '../../../utils/useResetNavigationToMessagingScreen'
 import AnimatedModal from '../../AnimatedModal'
 import {useReportOfferHandleUI} from '../../OfferDetailScreen/api'
@@ -54,7 +53,6 @@ function ChatInfoModal(): JSX.Element | null {
   )
   const chatId = useAtomValue(chatIdAtom)
   const inboxKey = useAtomValue(publicKeyPemBase64Atom)
-  const preferences = useAtomValue(preferencesAtom)
 
   if (!showModal) return null
 
@@ -97,36 +95,33 @@ function ChatInfoModal(): JSX.Element | null {
                     },
                   ]
                 : []),
-              ...(preferences.tradeChecklistEnabled
-                ? [
-                    {
-                      icon: tradeChecklistSvg,
-                      isNegative: false,
-                      text: t('messages.tradeChecklist'),
-                      iconFill: getTokens().color.greyOnBlack.val,
-                      onPress: () => {
-                        setShowModal(false)
-                        navigation.navigate('TradeChecklistFlow', {
-                          screen: 'AgreeOnTradeDetails',
-                          chatId,
-                          inboxKey,
-                        })
-                      },
-                    },
-                    {
-                      icon: vexlbotNotificationsSvg,
-                      isNegative: false,
-                      displaySwitch: true,
-                      text: t('messages.vexlbotNotifications'),
-                      iconFill: getTokens().color.greyOnBlack.val,
-                      switchValue: showVexlbotNotifications,
-                      onPress: () => {
-                        // I know this rerenders all buttons but maybe most "code clean" way?
-                        setShowVexlbotNotifications(!showVexlbotNotifications)
-                      },
-                    },
-                  ]
-                : []),
+
+              {
+                icon: tradeChecklistSvg,
+                isNegative: false,
+                text: t('messages.tradeChecklist'),
+                iconFill: getTokens().color.greyOnBlack.val,
+                onPress: () => {
+                  setShowModal(false)
+                  navigation.navigate('TradeChecklistFlow', {
+                    screen: 'AgreeOnTradeDetails',
+                    chatId,
+                    inboxKey,
+                  })
+                },
+              },
+              {
+                icon: vexlbotNotificationsSvg,
+                isNegative: false,
+                displaySwitch: true,
+                text: t('messages.vexlbotNotifications'),
+                iconFill: getTokens().color.greyOnBlack.val,
+                switchValue: showVexlbotNotifications,
+                onPress: () => {
+                  // I know this rerenders all buttons but maybe most "code clean" way?
+                  setShowVexlbotNotifications(!showVexlbotNotifications)
+                },
+              },
               {
                 icon: WarningSvg,
                 isNegative: false,

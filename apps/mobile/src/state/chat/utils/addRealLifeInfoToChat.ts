@@ -8,7 +8,7 @@ import processTradeChecklistContactRevealMessageIfAny from './processTradeCheckl
 import processTradeChecklistIdentityRevealMessageIfAny from './processTradeChecklistIdentityRevealMessageIfAny'
 
 function setRealLifeInfo(
-  realLifeInfo: RealLifeInfo
+  realLifeInfo: RealLifeInfo | undefined
 ): (chat: ChatWithMessages) => ChatWithMessages {
   return (chat) => ({
     ...chat,
@@ -27,19 +27,21 @@ export default function addRealLifeInfoToChat(
   contactRevealData: ContactReveal | undefined
 ): (chat: ChatWithMessages) => ChatWithMessages {
   return (chat) => {
-    const dataFromIdentityReveal =
-      processTradeChecklistIdentityRevealMessageIfAny(identityRevealData)
+    if (identityRevealData) {
+      const dataFromIdentityReveal =
+        processTradeChecklistIdentityRevealMessageIfAny(identityRevealData)
 
-    const dataFromContactReveal =
-      processTradeChecklistContactRevealMessageIfAny(
-        contactRevealData,
-        chat.chat.otherSide.realLifeInfo
-      )
-
-    if (dataFromIdentityReveal)
       return setRealLifeInfo(dataFromIdentityReveal)(chat)
-    if (dataFromContactReveal)
+    }
+
+    if (contactRevealData) {
+      const dataFromContactReveal =
+        processTradeChecklistContactRevealMessageIfAny(
+          contactRevealData,
+          chat.chat.otherSide.realLifeInfo
+        )
       return setRealLifeInfo(dataFromContactReveal)(chat)
+    }
 
     return chat
   }

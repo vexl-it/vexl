@@ -7,6 +7,7 @@ import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
 import addRealLifeInfoToChat from './addRealLifeInfoToChat'
 import areMessagesEqual from './areMessagesEqual'
 import compareMessages from './compareMessages'
+import processContactRevealMessageIfAny from './processContactRevealMessageIfAny'
 import processIdentityRevealMessageIfAny from './processIdentityRevealMessageIfAny'
 
 export default function addMessagesToChats(
@@ -36,6 +37,12 @@ export default function addMessagesToChats(
 
         const identityRevealMessage = messagesToAddToThisChat
           .filter((one) => ['APPROVE_REVEAL'].includes(one.message.messageType))
+          ?.at(-1)
+
+        const contactRevealMessage = messagesToAddToThisChat
+          .filter((one) =>
+            ['APPROVE_CONTACT_REVEAL'].includes(one.message.messageType)
+          )
           ?.at(-1)
 
         const tradeChecklistUpdates = messagesToAddToThisChat
@@ -73,6 +80,7 @@ export default function addMessagesToChats(
             chat: {...oneChat.chat, isUnread: true},
           },
           processIdentityRevealMessageIfAny(identityRevealMessage),
+          processContactRevealMessageIfAny(contactRevealMessage),
           addRealLifeInfoToChat(
             tradeChecklistIdentityRevealMessage,
             tradeChecklistContactRevealMessage

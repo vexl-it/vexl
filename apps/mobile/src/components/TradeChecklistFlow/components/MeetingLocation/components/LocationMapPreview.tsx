@@ -71,9 +71,8 @@ export default function LocationMapPreview({
           </YStack>
         }
         bottomChildren={
-          <XStack gap="$2" marginHorizontal="$2">
+          <XStack gap="$2" marginHorizontal="$2" mb="$2">
             <Button
-              size="small"
               fullSize
               text={t('map.location.suggestDifferent')}
               variant="primary"
@@ -83,7 +82,6 @@ export default function LocationMapPreview({
             />
             <Button
               fullSize
-              size="small"
               text={t('common.accept')}
               variant="secondary"
               onPress={submit}

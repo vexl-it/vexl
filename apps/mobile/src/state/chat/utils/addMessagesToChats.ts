@@ -4,7 +4,10 @@ import addToSortedArray from '../../../utils/addToSortedArray'
 import notEmpty from '../../../utils/notEmpty'
 import {updateTradeChecklistState} from '../../tradeChecklist/utils'
 import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
-import addRealLifeInfoToChat from './addRealLifeInfoToChat'
+import {
+  addContactRealLifeInfoToChat,
+  addIdentityRealLifeInfoToChat,
+} from './addRealLifeInfoToChat'
 import areMessagesEqual from './areMessagesEqual'
 import compareMessages from './compareMessages'
 import processContactRevealMessageIfAny from './processContactRevealMessageIfAny'
@@ -81,10 +84,8 @@ export default function addMessagesToChats(
           },
           processIdentityRevealMessageIfAny(identityRevealMessage),
           processContactRevealMessageIfAny(contactRevealMessage),
-          addRealLifeInfoToChat(
-            tradeChecklistIdentityRevealMessage,
-            tradeChecklistContactRevealMessage
-          )
+          addIdentityRealLifeInfoToChat(tradeChecklistIdentityRevealMessage),
+          addContactRealLifeInfoToChat(tradeChecklistContactRevealMessage)
         )
       })
     )

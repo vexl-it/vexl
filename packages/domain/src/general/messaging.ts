@@ -7,6 +7,7 @@ import {UnixMilliseconds} from '../utility/UnixMilliseconds.brand'
 import {UriString} from '../utility/UriString.brand'
 import {Uuid, generateUuid} from '../utility/Uuid.brand'
 import {DeanonymizedUser} from './DeanonymizedUser'
+import {E164PhoneNumber} from './E164PhoneNumber.brand'
 import {UserName} from './UserName.brand'
 import {RealLifeInfo} from './UserNameAndAvatar.brand'
 import {OfferId, OneOfferInState} from './offers'
@@ -84,7 +85,7 @@ export const ChatMessagePayload = z.object({
       name: UserName,
       imageBase64: Base64String.optional(),
       partialPhoneNumber: z.string().optional(),
-      fullPhoneNumber: z.string().optional(),
+      fullPhoneNumber: E164PhoneNumber.optional(),
     })
     .optional(),
 })

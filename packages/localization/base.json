@@ -553,6 +553,7 @@
   "messages.identityRevealDialog.inOrderToRevealIdentity": "In order to reveal identity you need to provide at least username that will be shown to the other side",
   "messages.identityRevealDialog.chooseYourPicture": "Choose your picture",
   "messages.identityRevealDialog.selectPictureToBeUsed": "Select picture to be used in identity reveal process for this chat. (optional)",
+  "messages.identityRevealDialog.saveForFutureUse": "Save to profile for future use",
   "messages.tapToReveal": "Tap to reveal or decline",
   "messages.letsRevealIdentities": "Let's reveal identities!",
   "messages.reveal": "Reveal",

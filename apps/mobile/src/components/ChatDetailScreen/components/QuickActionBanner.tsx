@@ -1,4 +1,3 @@
-import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {type SvgString} from '@vexl-next/domain/src/utility/SvgString.brand'
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue, useSetAtom} from 'jotai'
@@ -324,14 +323,12 @@ function QuickActionBanner(): JSX.Element | null {
           <UserAvatar width={48} height={48} userImage={otherSideData.image} />
         }
         onButtonPress={() => {
-          const fullPhoneNumber =
-            otherSideData.fullPhoneNumber ??
-            lastMessage.message.deanonymizedUser?.fullPhoneNumber
+          const fullPhoneNumber = otherSideData.fullPhoneNumber
 
           if (fullPhoneNumber) {
             void addRevealedContact({
               name: fullPhoneNumber,
-              normalizedNumber: E164PhoneNumber.parse(fullPhoneNumber),
+              normalizedNumber: fullPhoneNumber,
               fromContactList: false,
               numberToDisplay: fullPhoneNumber,
             })

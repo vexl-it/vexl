@@ -23,6 +23,7 @@ import {anonymizedUserDataAtom, sessionDataOrDummyAtom} from '../../session'
 import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
 import {addMessageToMessagesArray} from '../utils/addMessageToChat'
 import anonymizePhoneNumber from '../utils/anonymizePhoneNumber'
+import processContactRevealMessageIfAny from '../utils/processContactRevealMessageIfAny'
 import {type ReadingFileError} from '../utils/replaceImageFileUrisWithBase64'
 
 export type ContactRevealRequestAlreadySentError =
@@ -89,7 +90,7 @@ export default function revealContactActionAtom(
 
       const anonymizedPhoneNumber = anonymizePhoneNumber(phoneNumber)
 
-      const chatMessage: ChatMessage = {
+      const message: ChatMessage = {
         text:
           type === 'DISAPPROVE_CONTACT_REVEAL'
             ? `Contact reveal denied`
@@ -113,17 +114,32 @@ export default function revealContactActionAtom(
           api: api.chat,
           senderKeypair: chat.inbox.privateKey,
           receiverPublicKey: chat.otherSide.publicKey,
-          message: chatMessage,
+          message,
         }),
         TE.map(() => {
           const successMessage: ChatMessageWithState = {
-            message: chatMessage,
+            message,
             state: 'sent',
           }
+
+          if (successMessage.message.messageType === 'APPROVE_CONTACT_REVEAL') {
+            const contactRevealMessage = get(
+              chatWithMessagesAtom
+            ).messages.find(
+              (one) => one.message.messageType === 'REQUEST_CONTACT_REVEAL'
+            )
+
+            set(
+              chatWithMessagesAtom,
+              processContactRevealMessageIfAny(contactRevealMessage)
+            )
+          }
+
           set(chatWithMessagesAtom, (old) => ({
             ...old,
             messages: addMessageToMessagesArray(old.messages)(successMessage),
           }))
+
           return successMessage
         })
       )

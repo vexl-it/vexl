@@ -3,6 +3,7 @@ import {BtcAddress} from '../utility/BtcAddress.brand'
 import {UnixMilliseconds} from '../utility/UnixMilliseconds.brand'
 import {UriString} from '../utility/UriString.brand'
 import {DeanonymizedUser} from './DeanonymizedUser'
+import {E164PhoneNumber} from './E164PhoneNumber.brand'
 import {UserName} from './UserName.brand'
 import {BtcNetwork, CurrencyCode} from './offers'
 
@@ -80,7 +81,7 @@ export type IdentityReveal = z.TypeOf<typeof IdentityReveal>
 
 export const ContactReveal = z.object({
   status: RevealStatus.optional(),
-  fullPhoneNumber: z.string().optional(),
+  fullPhoneNumber: E164PhoneNumber.optional(),
 })
 export type ContactReveal = z.TypeOf<typeof ContactReveal>
 

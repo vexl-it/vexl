@@ -21,6 +21,7 @@ function Content({
   title,
   subtitle,
 }: ContentProps): JSX.Element {
+  const {t} = useTranslation()
   const [checkboxValue, setCheckboxValue] = useAtom(checkboxValueAtom)
 
   return (
@@ -34,14 +35,13 @@ function Content({
       {children}
       <XStack ai="center" space="$2">
         <Checkbox
-          size="small"
           value={checkboxValue}
           onChange={() => {
             setCheckboxValue(!checkboxValue)
           }}
         />
         <Text fontSize={14} color="$greyOnWhite">
-          Save to profile for future use
+          {t('messages.identityRevealDialog.saveForFutureUse')}
         </Text>
       </XStack>
     </Stack>

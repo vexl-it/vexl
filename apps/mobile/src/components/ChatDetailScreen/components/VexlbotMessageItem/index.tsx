@@ -1,7 +1,5 @@
-import {useAtomValue} from 'jotai'
 import React from 'react'
 import {Stack, Text} from 'tamagui'
-import {preferencesAtom} from '../../../../utils/preferences'
 import TradeChecklistAmountView from './components/TradeChecklistAmountView'
 import TradeChecklistContactRevealView from './components/TradeChecklistContactRevealView'
 import TradeChecklistDateAndTimeView from './components/TradeChecklistDateAndTimeView'
@@ -16,9 +14,6 @@ export default function VexlbotMessageItem({
 }: {
   data: VexlBotMessageData
 }): JSX.Element | null {
-  const preferences = useAtomValue(preferencesAtom)
-  if (!preferences.tradeChecklistEnabled) return null
-
   if (data.type === 'tradeChecklistSuggestion') {
     return <TradeChecklistReminder />
   }

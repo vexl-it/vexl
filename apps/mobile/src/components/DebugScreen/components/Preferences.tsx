@@ -8,7 +8,6 @@ const preferencesToEdit = [
   'allowSendingImages',
   'enableNewOffersNotificationDevMode',
   'showFriendLevelBanner',
-  'tradeChecklistEnabled',
   'offerFeedbackEnabled',
   'showTextDebugButton',
   'isDeveloper',

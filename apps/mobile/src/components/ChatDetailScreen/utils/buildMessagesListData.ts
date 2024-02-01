@@ -228,8 +228,8 @@ function messagesToListData(
     },
   }
 
-  // Vexl bot should be displayed after the first two messages
-  if (result.length < 3) return [...result, vexlBotTradingChecklistMessage]
+  // Vexl bot should be displayed after the first 3 messages
+  if (result.length < 3) return [vexlBotTradingChecklistMessage, ...result]
   return [
     ...result.slice(0, -2),
     vexlBotTradingChecklistMessage,

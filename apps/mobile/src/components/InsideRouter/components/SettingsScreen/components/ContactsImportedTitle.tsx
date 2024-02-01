@@ -1,6 +1,6 @@
 import {useAtomValue} from 'jotai'
 import {styled, Text, YStack} from 'tamagui'
-import {importedContactsCountAtom} from '../../../../../state/contacts'
+import {importedContactsCountAtom} from '../../../../../state/contacts/atom/contactsStore'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 
 const ItemText = styled(Text, {

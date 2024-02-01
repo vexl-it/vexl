@@ -1,6 +1,6 @@
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
 import {atom, type Atom} from 'jotai'
-import {importedContactsAtom} from '../../contacts'
+import {importedContactsAtom} from '../../contacts/atom/contactsStore'
 import {type OffersFilter} from '../domain'
 import areIncluded from '../utils/areIncluded'
 import filterOffersByText from '../utils/filterOffersByText'

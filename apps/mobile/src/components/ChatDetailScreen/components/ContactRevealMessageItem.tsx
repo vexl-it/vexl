@@ -1,13 +1,18 @@
 import Clipboard from '@react-native-clipboard/clipboard'
 import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
+import {safeParse} from '@vexl-next/resources-utils/src/utils/parsing'
 import {useMolecule} from 'bunshi/dist/react'
+import * as E from 'fp-ts/lib/Either'
+import {pipe} from 'fp-ts/lib/function'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React from 'react'
 import {Image, Stack} from 'tamagui'
 import blockPhoneNumberRevealSvg from '../../../images/blockPhoneNumberRevealSvg'
 import {type ChatMessageWithState} from '../../../state/chat/domain'
 import {addContactWithUiFeedbackAtom} from '../../../state/contacts/atom/addContactWithUiFeedbackAtom'
+import {hashPhoneNumber} from '../../../state/contacts/utils'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
+import reportError from '../../../utils/reportError'
 import resolveLocalUri from '../../../utils/resolveLocalUri'
 import SvgImage from '../../Image'
 import UserAvatar from '../../UserAvatar'
@@ -42,15 +47,38 @@ function RevealedContactMessageItem({
         )
       }}
       onPress={() => {
-        void addRevealedContact({
-          name: message.message.deanonymizedUser?.fullPhoneNumber ?? '',
-          normalizedNumber: E164PhoneNumber.parse(
-            message.message.deanonymizedUser?.fullPhoneNumber
+        pipe(
+          message.message.deanonymizedUser?.fullPhoneNumber,
+          safeParse(E164PhoneNumber),
+          E.bindTo('normalizedNumber'),
+          E.bindW('hash', ({normalizedNumber}) =>
+            hashPhoneNumber(normalizedNumber)
           ),
-          fromContactList: false,
-          numberToDisplay:
-            message.message.deanonymizedUser?.fullPhoneNumber ?? '',
-        })
+          E.map(({normalizedNumber, hash}) => {
+            void addRevealedContact({
+              info: {
+                name: message.message.deanonymizedUser?.fullPhoneNumber ?? '',
+                numberToDisplay:
+                  message.message.deanonymizedUser?.fullPhoneNumber ?? '',
+                rawNumber:
+                  message.message.deanonymizedUser?.fullPhoneNumber ?? '',
+              },
+              computedValues: {
+                hash,
+                normalizedNumber,
+              },
+            })
+          }),
+          E.mapLeft((l) => {
+            reportError(
+              'warn',
+              new Error('Error while adding reveledContact from chat message'),
+              {
+                l,
+              }
+            )
+          })
+        )
       }}
       icon={
         direction === 'incoming' && image.type === 'imageUri' ? (

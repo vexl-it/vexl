@@ -3,8 +3,8 @@ import {useStore} from 'jotai'
 import React, {useMemo} from 'react'
 import {getTokens, Stack} from 'tamagui'
 import {type RootStackScreenProps} from '../../navigationTypes'
-import {selectImportedContactsWithHashes} from '../../state/contacts'
-import {type ContactNormalizedWithHash} from '../../state/contacts/domain'
+import createImportedContactsForHashesAtom from '../../state/contacts/atom/createImportedContactsForHashesAtom'
+import {type StoredContactWithComputedValues} from '../../state/contacts/domain'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 import Button from '../Button'
@@ -15,11 +15,15 @@ import CommonFriendsListItem from './components/CommonFriendsListItem'
 
 type Props = RootStackScreenProps<'CommonFriends'>
 
-function keyExtractor(contact: ContactNormalizedWithHash): string {
-  return contact.hash
+function keyExtractor(contact: StoredContactWithComputedValues): string {
+  return contact.computedValues.hash
 }
 
-function renderItem({item}: {item: ContactNormalizedWithHash}): JSX.Element {
+function renderItem({
+  item,
+}: {
+  item: StoredContactWithComputedValues
+}): JSX.Element {
   return <CommonFriendsListItem friend={item} />
 }
 
@@ -38,7 +42,7 @@ function CommonFriendsScreen({
   const bottomOffset = usePixelsFromBottomWhereTabsEnd()
 
   const commonFriends = useMemo(
-    () => store.get(selectImportedContactsWithHashes(contactsHashes)),
+    () => store.get(createImportedContactsForHashesAtom(contactsHashes)),
     [contactsHashes, store]
   )
 

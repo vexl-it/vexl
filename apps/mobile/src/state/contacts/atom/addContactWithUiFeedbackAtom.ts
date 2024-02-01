@@ -1,5 +1,4 @@
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
-import * as E from 'fp-ts/Either'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {atom} from 'jotai'
@@ -10,9 +9,16 @@ import userSvg from '../../../components/images/userSvg'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
 import showErrorAlert from '../../../utils/showErrorAlert'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
-import {type ContactNormalized, type ContactNormalizedWithHash} from '../domain'
-import {importedContactsAtom, importedContactsHashesAtom} from '../index'
-import {hashPhoneNumber} from '../utils'
+import {
+  type ContactComputedValues,
+  type ContactInfo,
+  type StoredContactWithComputedValues,
+} from '../domain'
+import {
+  importedContactsAtom,
+  importedContactsHashesAtom,
+  storedContactsAtom,
+} from './contactsStore'
 
 const showCreateOrEditDialogAtom = atom(
   null,
@@ -52,6 +58,7 @@ const showCreateOrEditDialogAtom = atom(
               ? t('common.change')
               : t('addContactDialog.addContact'),
           type: 'StepWithInput',
+          defaultValue: contactName,
           textInputProps: {
             autoCorrect: false,
             placeholder:
@@ -60,7 +67,6 @@ const showCreateOrEditDialogAtom = atom(
                 : t('addContactDialog.addContactName'),
             variant: 'greyOnWhite',
             icon: userSvg,
-            defaultValue: contactName,
           },
         },
       ],
@@ -70,28 +76,29 @@ const showCreateOrEditDialogAtom = atom(
 
 const editExistingContact = atom(
   null,
-  async (get, set, existingContact: ContactNormalizedWithHash) => {
+  async (get, set, existingContact: StoredContactWithComputedValues) => {
     const {t} = get(translationAtom)
     const importedContacts = get(importedContactsAtom)
 
     await pipe(
       set(showCreateOrEditDialogAtom, {
         type: 'edit',
-        contactName: existingContact.name,
-        contactNumber: existingContact.normalizedNumber,
+        contactName: existingContact.info.name,
+        contactNumber: existingContact.computedValues.normalizedNumber,
       }),
       TE.map((dialogActionResult) =>
         dialogActionResult[0]?.type === 'inputResult'
           ? dialogActionResult[0].value
-          : existingContact.name
+          : existingContact.info.name
       ),
       TE.map((contactName) => {
         set(
-          importedContactsAtom,
+          storedContactsAtom,
           importedContacts.map((contact) =>
-            contact.normalizedNumber !== existingContact.normalizedNumber
+            contact.computedValues?.normalizedNumber !==
+            existingContact.computedValues.normalizedNumber
               ? contact
-              : {...contact, name: contactName}
+              : {...contact, info: {...contact.info, name: contactName}}
           )
         )
         return contactName
@@ -125,106 +132,123 @@ const editExistingContact = atom(
 
 const importContactActionAtom = atom(
   null,
-  (get, set, newContact: ContactNormalized) => {
+  (get, set, newContact: StoredContactWithComputedValues) => {
     const contactApi = get(privateApiAtom).contact
 
     return pipe(
-      hashPhoneNumber(newContact.normalizedNumber),
-      E.map(
-        (hash): ContactNormalizedWithHash => ({
-          ...newContact,
-          hash,
-        })
-      ),
-      TE.fromEither,
+      TE.Do,
       TE.map((v) => {
         set(loadingOverlayDisplayedAtom, true)
         return v
       }),
-      TE.chainFirstW((contact) =>
+      TE.chainFirstW(() =>
         contactApi.importContacts({
-          contacts: [contact.hash, ...get(importedContactsHashesAtom)],
+          contacts: [
+            newContact.computedValues.hash,
+            ...get(importedContactsHashesAtom),
+          ],
         })
       ),
-      TE.map((importedContact) => {
-        set(importedContactsAtom, (contacts) => [
+      TE.map(() => {
+        set(storedContactsAtom, (contacts) => [
           ...contacts.filter(
-            (one) => one.normalizedNumber !== importedContact.normalizedNumber
+            (one) =>
+              one.computedValues?.normalizedNumber !==
+              newContact.computedValues.normalizedNumber
           ),
-          importedContact,
+          newContact,
         ])
         set(loadingOverlayDisplayedAtom, false)
-        return importedContact
-      }),
-      TE.mapLeft((e) => e)
+        return newContact
+      })
     )
   }
 )
 
-const createContact = atom(null, (get, set, newContact: ContactNormalized) => {
-  const {t} = get(translationAtom)
+const createContact = atom(
+  null,
+  (get, set, newContact: StoredContactWithComputedValues) => {
+    const {t} = get(translationAtom)
 
-  return pipe(
-    set(showCreateOrEditDialogAtom, {
-      type: 'create',
-      contactNumber: newContact.normalizedNumber,
-      contactName: newContact.name,
-    }),
-    TE.map((dialogActionResult) =>
-      dialogActionResult[0]?.type === 'inputResult'
-        ? dialogActionResult[0].value
-        : newContact.normalizedNumber
-    ),
-    TE.bindTo('customName'),
-    TE.bindW('importedContact', ({customName}) =>
-      set(importContactActionAtom, {...newContact, name: customName})
-    ),
-    TE.chainFirstW(({customName}) =>
-      set(askAreYouSureActionAtom, {
-        steps: [
-          {
-            type: 'StepWithText',
-            title: t('addContactDialog.contactAdded'),
-            description: t('addContactDialog.youHaveAddedContact', {
-              contactName: customName,
-            }),
-            positiveButtonText: t('common.niceWithExclamationMark'),
-          },
-        ],
-        variant: 'info',
-      })
-    ),
-    TE.match(
-      (e) => {
-        if (e._tag === 'UserDeclinedError') {
-          // ignore user closed the dialog
-          return
-        }
-
-        showErrorAlert({
-          title:
-            toCommonErrorMessage(e, get(translationAtom).t) ??
-            t('common.unknownError'),
-          error: e,
+    return pipe(
+      set(showCreateOrEditDialogAtom, {
+        type: 'create',
+        contactNumber: newContact.computedValues.normalizedNumber,
+        contactName: newContact.info.name,
+      }),
+      TE.map((dialogActionResult) =>
+        dialogActionResult[0]?.type === 'inputResult'
+          ? dialogActionResult[0].value
+          : newContact.computedValues.normalizedNumber
+      ),
+      TE.bindTo('customName'),
+      TE.bindW('importedContact', ({customName}) =>
+        set(importContactActionAtom, {
+          ...newContact,
+          info: {...newContact.info, name: customName},
         })
-      },
-      () => {
-        // everything OK
-      }
-    )
-  )()
-})
+      ),
+      TE.chainFirstW(({customName}) =>
+        set(askAreYouSureActionAtom, {
+          steps: [
+            {
+              type: 'StepWithText',
+              title: t('addContactDialog.contactAdded'),
+              description: t('addContactDialog.youHaveAddedContact', {
+                contactName: customName,
+              }),
+              positiveButtonText: t('common.niceWithExclamationMark'),
+            },
+          ],
+          variant: 'info',
+        })
+      ),
+      TE.match(
+        (e) => {
+          if (e._tag === 'UserDeclinedError') {
+            // ignore user closed the dialog
+            return
+          }
+
+          showErrorAlert({
+            title:
+              toCommonErrorMessage(e, get(translationAtom).t) ??
+              t('common.unknownError'),
+            error: e,
+          })
+        },
+        () => {
+          // everything OK
+        }
+      )
+    )()
+  }
+)
 
 export const addContactWithUiFeedbackAtom = atom(
   null,
-  async (get, set, newContact: ContactNormalized) => {
+  async (
+    get,
+    set,
+    newContact: {info: ContactInfo; computedValues: ContactComputedValues}
+  ) => {
     const importedContacts = get(importedContactsAtom)
     const existingContact = importedContacts.find(
       (importedContact) =>
-        importedContact.normalizedNumber === newContact.normalizedNumber
+        importedContact.computedValues?.normalizedNumber ===
+        newContact.computedValues.normalizedNumber
     )
 
     if (existingContact) await set(editExistingContact, existingContact)
-    else await set(createContact, newContact)
+    else
+      await set(createContact, {
+        ...newContact,
+        flags: {
+          seen: true,
+          imported: false,
+          importedManually: true,
+          invalidNumber: 'valid',
+        },
+      })
   }
 )

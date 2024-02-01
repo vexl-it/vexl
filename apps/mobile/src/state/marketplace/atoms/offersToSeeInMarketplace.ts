@@ -1,7 +1,7 @@
 import {atom} from 'jotai'
 import {selectAtom} from 'jotai/utils'
 import {isOfferExpired} from '../../../utils/isOfferExpired'
-import {importedContactsHashesAtom} from '../../contacts'
+import {importedContactsHashesAtom} from '../../contacts/atom/contactsStore'
 import {offersAtom} from './offersState'
 
 export const offersToSeeInMarketplaceAtom = atom((get) => {

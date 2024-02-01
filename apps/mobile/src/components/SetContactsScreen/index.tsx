@@ -1,17 +1,15 @@
-import {useSetAtom} from 'jotai'
-import {useCallback, useEffect} from 'react'
+import {useCallback} from 'react'
 import {Stack} from 'tamagui'
 import {type RootStackScreenProps} from '../../navigationTypes'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 import Button from '../Button'
-import ContactsListSelect from '../ContactListSelect'
-import {newlyAddedCustomContactsAtom} from '../ContactListSelect/atom'
 import IconButton from '../IconButton'
 import KeyboardAvoidingView from '../KeyboardAvoidingView'
 import Screen from '../Screen'
 import ScreenTitle from '../ScreenTitle'
 import closeSvg from '../images/closeSvg'
+import ContactsListSelect from './components/ContactListSelect'
 
 type Props = RootStackScreenProps<'SetContacts'>
 
@@ -22,7 +20,6 @@ function SetContactsScreen({
 }: Props): JSX.Element {
   const goBack = useSafeGoBack()
   const {t} = useTranslation()
-  const setNewlyAddedCustomContacts = useSetAtom(newlyAddedCustomContactsAtom)
 
   const renderButton = useCallback(
     ({onSubmit}: {onSubmit: () => void}) => {
@@ -39,12 +36,6 @@ function SetContactsScreen({
     },
     [t]
   )
-
-  useEffect(() => {
-    return () => {
-      setNewlyAddedCustomContacts([])
-    }
-  }, [setNewlyAddedCustomContacts])
 
   return (
     <>

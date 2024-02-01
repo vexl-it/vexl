@@ -6,7 +6,7 @@ import React, {useMemo} from 'react'
 import {Platform, ScrollView, StyleSheet, TouchableOpacity} from 'react-native'
 import {Stack, Text, XStack, getTokens} from 'tamagui'
 import chevronRightSvg from '../../images/chevronRightSvg'
-import {selectImportedContactsWithHashes} from '../../state/contacts'
+import createImportedContactsForHashesAtom from '../../state/contacts/atom/createImportedContactsForHashesAtom'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import Image from '../Image'
 import CommonFriendCell from './components/CommonFriendCell'
@@ -36,7 +36,7 @@ function CommonFriends({
   const store = useStore()
   const navigation = useNavigation()
   const commonFriends = useMemo(
-    () => store.get(selectImportedContactsWithHashes(contactsHashes)),
+    () => store.get(createImportedContactsForHashesAtom(contactsHashes)),
     [contactsHashes, store]
   )
 
@@ -78,9 +78,9 @@ function CommonFriends({
               <XStack pb="$3">
                 {commonFriends.slice(0, 5).map((friend) => (
                   <CommonFriendCell
-                    key={friend.hash}
-                    name={friend.name}
-                    imageUri={friend.imageUri}
+                    key={friend.computedValues.hash}
+                    name={friend.info.name}
+                    imageUri={friend.info.imageUri}
                   />
                 ))}
               </XStack>
@@ -94,9 +94,9 @@ function CommonFriends({
             >
               {commonFriends.slice(0, 5).map((friend) => (
                 <CommonFriendCell
-                  key={friend.hash}
-                  name={friend.name}
-                  imageUri={friend.imageUri}
+                  key={friend.computedValues.hash}
+                  name={friend.info.name}
+                  imageUri={friend.info.imageUri}
                 />
               ))}
             </ScrollView>

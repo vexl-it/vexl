@@ -1,18 +1,21 @@
 import {useAtomValue, type Atom} from 'jotai'
 import {Image, Stack, Text, XStack} from 'tamagui'
-import {type ContactNormalized} from '../../../state/contacts/domain'
-import SvgImage from '../../Image'
-import picturePlaceholderSvg from '../../images/picturePlaceholderSvg'
+import {type StoredContactWithComputedValues} from '../../../../../state/contacts/domain'
+import SvgImage from '../../../../Image'
+import picturePlaceholderSvg from '../../../../images/picturePlaceholderSvg'
 import IsNewIndicator from './IsNewIndicator'
 import IsSelectedCheckbox from './IsSelectedCheckbox'
 
 interface Props {
-  contactAtom: Atom<ContactNormalized>
+  contactAtom: Atom<StoredContactWithComputedValues>
 }
 
 function ContactItem({contactAtom}: Props): JSX.Element {
   const contact = useAtomValue(contactAtom)
-  const {imageUri, normalizedNumber, name} = contact
+  const {
+    info: {imageUri, name},
+    computedValues: {normalizedNumber},
+  } = contact
 
   return (
     <XStack ai="center">

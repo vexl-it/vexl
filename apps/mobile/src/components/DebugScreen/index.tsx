@@ -15,7 +15,7 @@ import offerToConnectionsAtom, {
   deleteOrphanRecordsActionAtom,
   updateAllOffersConnectionsActionAtom,
 } from '../../state/connections/atom/offerToConnectionsAtom'
-import {importedContactsAtom} from '../../state/contacts'
+import {storedContactsAtom} from '../../state/contacts/atom/contactsStore'
 import {triggerOffersRefreshAtom} from '../../state/marketplace'
 import {myOffersAtom} from '../../state/marketplace/atoms/myOffers'
 import {offersStateAtom} from '../../state/marketplace/atoms/offersState'
@@ -121,7 +121,7 @@ function DebugScreen(): JSX.Element {
               size="small"
               text="Print contacts"
               onPress={() => {
-                const contacts = store.get(importedContactsAtom)
+                const contacts = store.get(storedContactsAtom)
                 console.log('Contacts: ', JSON.stringify(contacts, null, 2))
               }}
             />

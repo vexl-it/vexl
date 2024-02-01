@@ -1,12 +1,14 @@
 import {ScopeProvider, useMolecule} from 'bunshi/dist/react'
 import * as O from 'fp-ts/Option'
 import {useAtomValue, useSetAtom, useStore} from 'jotai'
-import {useMemo} from 'react'
-import {ActivityIndicator} from 'react-native'
-import {Stack, getTokens} from 'tamagui'
-import {importedContactsAtom} from '../../state/contacts'
-import {contactsLoadingAtom} from '../../state/contacts/atom/contactsFromDeviceAtom'
-import WhiteContainer from '../WhiteContainer'
+import {useEffect, useMemo} from 'react'
+import {Stack} from 'tamagui'
+import {
+  normalizedContactsAtom,
+  resolveAllContactsAsSeenActionAtom,
+} from '../../../../state/contacts/atom/contactsStore'
+import NormalizeContactsWithLoadingScreen from '../../../NormalizeContactsWithLoadingScreen'
+import WhiteContainer from '../../../WhiteContainer'
 import {ContactsSelectScope, contactSelectMolecule} from './atom'
 import AddContactRow from './components/AddContactRow'
 import ContactsFilter from './components/ContactsFilter'
@@ -33,20 +35,20 @@ function ContactsListSelect({
   } = useMolecule(contactSelectMolecule)
   const customContactToAdd = useAtomValue(searchTextAsCustomContactAtom)
   const toDisplay = useAtomValue(contactsToDisplayAtomsAtom)
-  const loading = useAtomValue(contactsLoadingAtom)
+  const resolveAllContactsAsSeen = useSetAtom(
+    resolveAllContactsAsSeenActionAtom
+  )
   const submit = useSetAtom(submitActionAtom)
 
-  if (loading)
-    return (
-      <WhiteContainer>
-        <Stack alignItems="center" justifyContent="center" flex={1}>
-          <ActivityIndicator size="large" color={getTokens().color.main.val} />
-        </Stack>
-      </WhiteContainer>
-    )
+  useEffect(() => {
+    return () => {
+      // TODO: Contacts - race condition with contacts fetching to display
+      resolveAllContactsAsSeen()
+    }
+  }, [resolveAllContactsAsSeen])
 
   return (
-    <>
+    <NormalizeContactsWithLoadingScreen>
       <WhiteContainer noPadding>
         <Stack f={1} px="$4">
           <SearchBar />
@@ -67,7 +69,7 @@ function ContactsListSelect({
           })
         },
       })}
-    </>
+    </NormalizeContactsWithLoadingScreen>
   )
 }
 
@@ -76,7 +78,7 @@ export default function ContactListSelectWithProvider(
 ): JSX.Element {
   const store = useStore()
   const importedContacts = useMemo(
-    () => store.get(importedContactsAtom),
+    () => store.get(normalizedContactsAtom),
     [store]
   )
 

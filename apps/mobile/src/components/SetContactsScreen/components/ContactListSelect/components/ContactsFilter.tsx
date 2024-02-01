@@ -1,6 +1,6 @@
 import {useMolecule} from 'bunshi/dist/react'
 import {XStack} from 'tamagui'
-import {useTranslation} from '../../../utils/localization/I18nProvider'
+import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import {contactSelectMolecule} from '../atom'
 import ContactsFilterButton from './ContactsFilterButton'
 

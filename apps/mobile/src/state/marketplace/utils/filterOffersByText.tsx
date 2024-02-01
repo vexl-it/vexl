@@ -1,5 +1,5 @@
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
-import {type ContactNormalizedWithHash} from '../../contacts/domain'
+import {type StoredContactWithComputedValues} from '../../contacts/domain'
 
 const DIVIDER = ' ## '
 export default function filterOffersByText({
@@ -9,7 +9,7 @@ export default function filterOffersByText({
 }: {
   text: string
   offers: OneOfferInState[]
-  importedContacts: ContactNormalizedWithHash[]
+  importedContacts: StoredContactWithComputedValues[]
 }): OneOfferInState[] {
   // TODO - better search. This is just a placeholder
 
@@ -22,8 +22,10 @@ export default function filterOffersByText({
       offer.offerInfo.privatePart.commonFriends
         .map((hash) =>
           importedContacts
-            .filter((one) => one.hash === hash)
-            .map((o) => [o.name, o.normalizedNumber].join(DIVIDER))
+            .filter((one) => one.computedValues.hash === hash)
+            .map((o) =>
+              [o.info.name, o.computedValues.normalizedNumber].join(DIVIDER)
+            )
             .join(DIVIDER)
         )
         .join(DIVIDER),

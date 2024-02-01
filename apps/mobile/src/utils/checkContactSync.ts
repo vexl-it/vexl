@@ -3,7 +3,7 @@ import * as Contacts from 'expo-contacts'
 import {SortTypes} from 'expo-contacts'
 import {getDefaultStore} from 'jotai'
 import {difference} from 'set-operations'
-import {importedContactsAtom} from '../state/contacts'
+import {importedContactsAtom} from '../state/contacts/atom/contactsStore'
 import notEmpty from './notEmpty'
 
 export default async function checkContactSync(
@@ -33,7 +33,7 @@ export default async function checkContactSync(
 
   const storedContactsNumbers = store
     .get(importedContactsAtom)
-    .map((one) => one.normalizedNumber)
+    .map((one) => one.computedValues.normalizedNumber)
 
   const newContacts = difference(deviceContactsNumbers, storedContactsNumbers)
   if (newContacts.length > 0) {

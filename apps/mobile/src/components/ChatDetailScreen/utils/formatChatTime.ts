@@ -1,21 +1,17 @@
 import {DateTime} from 'luxon'
-import {getCurrentLocale} from '../../../utils/localization/I18nProvider'
+import {setTimezoneOfUser} from '../../../utils/unixMillisecondsToLocaleDateTime'
 
 export default function formatChatTime(dateTime: DateTime): string {
   const now = DateTime.now()
-  const dateTimeWithCorrectLocal = dateTime.setLocale(getCurrentLocale())
+  const dateTimeWithCorrectLocal = setTimezoneOfUser(dateTime)
 
   if (dateTime.hasSame(now, 'day')) {
-    return dateTime
-      .setLocale(getCurrentLocale())
-      .toLocaleString(DateTime.TIME_24_SIMPLE)
+    return setTimezoneOfUser(dateTime).toLocaleString(DateTime.TIME_24_SIMPLE)
   }
 
   if (dateTime.hasSame(now, 'week')) {
     return dateTimeWithCorrectLocal.toFormat('cccc')
   }
 
-  return dateTime
-    .setLocale(getCurrentLocale())
-    .toLocaleString(DateTime.DATE_FULL)
+  return setTimezoneOfUser(dateTime).toLocaleString(DateTime.DATE_FULL)
 }

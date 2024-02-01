@@ -3,6 +3,7 @@ import {selectAtom} from 'jotai/utils'
 import {DateTime} from 'luxon'
 import React, {useMemo} from 'react'
 import {type ChatMessageWithState} from '../../../../../state/chat/domain'
+import unixMillisecondsToLocaleDateTime from '../../../../../utils/unixMillisecondsToLocaleDateTime'
 import FromNowComponent from '../../../../FromNowComponent'
 
 function LastMessageDateView({
@@ -17,7 +18,7 @@ function LastMessageDateView({
           lastMessageAtom,
           (l) =>
             l
-              ? DateTime.fromMillis(l.message.time)
+              ? unixMillisecondsToLocaleDateTime(l.message.time)
               : DateTime.invalid('No last message'),
           (a, b) => a.equals(b)
         ),

@@ -7,7 +7,7 @@ import {
   type UnixMilliseconds,
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {DateTime} from 'luxon'
-import {getCurrentLocale} from '../../../utils/localization/I18nProvider'
+import unixMillisecondsToLocaleDateTime from '../../../utils/unixMillisecondsToLocaleDateTime'
 import {type TradeChecklistInState} from '../domain'
 
 type DateAndTimeInState = TradeChecklistInState['dateAndTime']
@@ -70,25 +70,19 @@ export function getSuggestions(data: DateAndTimeInState):
 }
 
 export function toStringWithTime(unixMilliseconds: UnixMilliseconds): string {
-  return DateTime.fromMillis(unixMilliseconds)
-    .setLocale(getCurrentLocale())
-    .toLocaleString({
-      weekday: 'short',
-      month: 'numeric',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: 'numeric',
-    })
+  return unixMillisecondsToLocaleDateTime(unixMilliseconds).toLocaleString({
+    weekday: 'short',
+    month: 'numeric',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: 'numeric',
+  })
 }
 
 export function toStringWithRange(suggestion: AvailableDateTimeOption): string {
-  const from = DateTime.fromMillis(suggestion.from).setLocale(
-    getCurrentLocale()
-  )
-  const to = DateTime.fromMillis(suggestion.to).setLocale(getCurrentLocale())
-  const date = DateTime.fromMillis(suggestion.date).setLocale(
-    getCurrentLocale()
-  )
+  const from = unixMillisecondsToLocaleDateTime(suggestion.from)
+  const to = unixMillisecondsToLocaleDateTime(suggestion.to)
+  const date = unixMillisecondsToLocaleDateTime(suggestion.date)
 
   return `${date.toLocaleString({
     weekday: 'short',

@@ -2,7 +2,7 @@ import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.b
 import {useAtom} from 'jotai'
 import {DateTime} from 'luxon'
 import {useMemo} from 'react'
-import {getCurrentLocale} from '../../../../../../../utils/localization/I18nProvider'
+import unixMillisecondsToLocaleDateTime from '../../../../../../../utils/unixMillisecondsToLocaleDateTime'
 import {Dropdown, type DropdownItemProps} from '../../../../../../Dropdown'
 import {createTimeOptionAtomForTimeFromDropdown} from '../../../atoms'
 
@@ -24,14 +24,14 @@ function TimeFromDropdown({availableDateTimeFrom}: Props): JSX.Element {
 
       for (let i = 0; i < 24; i++) {
         const timeOptionMillis = UnixMilliseconds.parse(
-          DateTime.fromMillis(availableDateTimeFrom)
+          unixMillisecondsToLocaleDateTime(availableDateTimeFrom)
             .startOf('day')
             .plus({hour: i})
             .toMillis()
         )
-        const timeOptionString = DateTime.fromMillis(timeOptionMillis)
-          .setLocale(getCurrentLocale())
-          .toLocaleString(DateTime.TIME_SIMPLE)
+        const timeOptionString = unixMillisecondsToLocaleDateTime(
+          timeOptionMillis
+        ).toLocaleString(DateTime.TIME_SIMPLE)
 
         options.push({
           label: timeOptionString,

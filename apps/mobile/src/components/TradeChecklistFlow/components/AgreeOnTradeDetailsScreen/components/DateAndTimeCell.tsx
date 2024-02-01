@@ -9,10 +9,8 @@ import {
   tradeChecklistDateAndTimeDataAtom,
 } from '../../../../../state/tradeChecklist/atoms/fromChatAtoms'
 import * as DateAndTime from '../../../../../state/tradeChecklist/utils/dateAndTime'
-import {
-  getCurrentLocale,
-  useTranslation,
-} from '../../../../../utils/localization/I18nProvider'
+import {useTranslation} from '../../../../../utils/localization/I18nProvider'
+import unixMillisecondsToLocaleDateTime from '../../../../../utils/unixMillisecondsToLocaleDateTime'
 import {
   dateAndTimePickUpdateToBeSentAtom,
   tradeChecklistWithUpdatesMergedAtom,
@@ -20,9 +18,9 @@ import {
 import ChecklistCell from './ChecklistCell'
 
 function formatDateTime(millis: UnixMilliseconds): string {
-  return DateTime.fromMillis(Number(millis))
-    .setLocale(getCurrentLocale())
-    .toLocaleString(DateTime.DATETIME_SHORT)
+  return unixMillisecondsToLocaleDateTime(millis).toLocaleString(
+    DateTime.DATETIME_SHORT
+  )
 }
 
 function DateAndTimeCell(): JSX.Element {

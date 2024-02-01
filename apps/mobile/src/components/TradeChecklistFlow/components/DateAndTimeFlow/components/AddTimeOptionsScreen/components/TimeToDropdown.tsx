@@ -2,7 +2,7 @@ import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.b
 import {useAtom} from 'jotai'
 import {DateTime} from 'luxon'
 import {useMemo} from 'react'
-import {getCurrentLocale} from '../../../../../../../utils/localization/I18nProvider'
+import unixMillisecondsToLocaleDateTime from '../../../../../../../utils/unixMillisecondsToLocaleDateTime'
 import {Dropdown, type DropdownItemProps} from '../../../../../../Dropdown'
 import {createTimeOptionAtomForTimeToDropdown} from '../../../atoms'
 
@@ -26,10 +26,12 @@ function TimeToDropdown({
     useMemo(() => {
       const options: Array<DropdownItemProps<UnixMilliseconds>> = []
       const numberOfHoursTillMidnight = Math.round(
-        DateTime.fromMillis(availableDateTimeFrom)
+        unixMillisecondsToLocaleDateTime(availableDateTimeFrom)
           .endOf('day')
           .diff(
-            DateTime.fromMillis(availableDateTimeFrom).startOf('hour'),
+            unixMillisecondsToLocaleDateTime(availableDateTimeFrom).startOf(
+              'hour'
+            ),
             'hours'
           ).hours
       )
@@ -37,11 +39,13 @@ function TimeToDropdown({
       // Start from 1 to not allow user to choose the same time as available from (which would result in 0 hours of trade ex.: 12:00 - 12:00)
       for (let i = 1; i < numberOfHoursTillMidnight; i++) {
         const timeOptionMillis = UnixMilliseconds.parse(
-          DateTime.fromMillis(availableDateTimeFrom).plus({hour: i}).toMillis()
+          unixMillisecondsToLocaleDateTime(availableDateTimeFrom)
+            .plus({hour: i})
+            .toMillis()
         )
-        const timeOptionString = DateTime.fromMillis(timeOptionMillis)
-          .setLocale(getCurrentLocale())
-          .toLocaleString(DateTime.TIME_SIMPLE)
+        const timeOptionString = unixMillisecondsToLocaleDateTime(
+          timeOptionMillis
+        ).toLocaleString(DateTime.TIME_SIMPLE)
 
         options.push({
           label: timeOptionString,

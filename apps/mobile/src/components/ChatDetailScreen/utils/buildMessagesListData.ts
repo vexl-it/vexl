@@ -4,9 +4,10 @@ import {
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import * as A from 'fp-ts/Array'
 import {flow, pipe} from 'fp-ts/lib/function'
-import {DateTime} from 'luxon'
+import {type DateTime} from 'luxon'
 import {type ChatMessageWithState} from '../../../state/chat/domain'
 import {type TradeChecklistInState} from '../../../state/tradeChecklist/domain'
+import unixMillisecondsToLocaleDateTime from '../../../utils/unixMillisecondsToLocaleDateTime'
 import {type MessagesListItem} from '../components/MessageItem'
 import {
   addVexlBotOrMessageWithStateToArray,
@@ -176,7 +177,9 @@ function messagesToListData(
   for (let i = messages.length - 1; i >= 0; i--) {
     const message = messages[i]
     if (!message) continue
-    const messageTime = DateTime.fromMillis(getMessageTime(message))
+    const messageTime = unixMillisecondsToLocaleDateTime(
+      getMessageTime(message)
+    )
     if (
       prevMessageTime &&
       prevMessageTime.diff(messageTime, 'minutes').minutes > 10

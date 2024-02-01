@@ -9,6 +9,7 @@ import {DateTime} from 'luxon'
 import {type DateData} from 'react-native-calendars'
 import addToSortedArray from '../../../../utils/addToSortedArray'
 import getValueFromSetStateActionOfAtom from '../../../../utils/atomUtils/getValueFromSetStateActionOfAtom'
+import unixMillisecondsToLocaleDateTime from '../../../../utils/unixMillisecondsToLocaleDateTime'
 
 export const availableDateTimesAtom = atom<AvailableDateTimeOption[]>([])
 
@@ -30,8 +31,8 @@ export function createTimeOptionAtomForTimeToDropdown(
       )
 
       const dateTimeToChange = availableDateTimes.find((dateTime) =>
-        DateTime.fromMillis(dateTime.to).hasSame(
-          DateTime.fromMillis(selectedDateTime),
+        unixMillisecondsToLocaleDateTime(dateTime.to).hasSame(
+          unixMillisecondsToLocaleDateTime(selectedDateTime),
           'day'
         )
       )
@@ -68,8 +69,8 @@ export function createTimeOptionAtomForTimeFromDropdown(
       )
 
       const dateTimeToChange = availableDateTimes.find((dateTime) =>
-        DateTime.fromMillis(dateTime.from).hasSame(
-          DateTime.fromMillis(selectedDateTime),
+        unixMillisecondsToLocaleDateTime(dateTime.from).hasSame(
+          unixMillisecondsToLocaleDateTime(selectedDateTime),
           'day'
         )
       )
@@ -96,8 +97,12 @@ export function createTimeOptionAtomForTimeFromDropdown(
 export const handleAvailableDaysChangeActionAtom = atom(
   null,
   (get, set, day: DateData) => {
-    const dateTime = DateTime.fromMillis(day.timestamp)
-    const millis = fromDateTime(dateTime.startOf('day'))
+    const dateTime = DateTime.fromObject({
+      year: day.year,
+      month: day.month,
+      day: day.day,
+    })
+    const millis = fromDateTime(dateTime)
     const availableDateTimes = get(availableDateTimesAtom)
 
     if (availableDateTimes.some((dateTime) => dateTime.date === millis)) {

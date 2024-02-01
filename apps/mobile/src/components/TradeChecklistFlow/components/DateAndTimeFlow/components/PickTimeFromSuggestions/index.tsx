@@ -1,11 +1,12 @@
 import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {useSetAtom, useStore} from 'jotai'
-import {DateTime} from 'luxon'
+import {type DateTime} from 'luxon'
 import {useCallback} from 'react'
 import {Stack} from 'tamagui'
 import type {TradeChecklistStackScreenProps} from '../../../../../../navigationTypes'
 import {chatWithMessagesKeys} from '../../../../../../state/tradeChecklist/atoms/fromChatAtoms'
 import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
+import unixMillisecondsToLocaleDateTime from '../../../../../../utils/unixMillisecondsToLocaleDateTime'
 import {loadingOverlayDisplayedAtom} from '../../../../../LoadingOverlayProvider'
 import {
   HeaderProxy,
@@ -80,7 +81,7 @@ function PickTimeFromSuggestions({
   return (
     <>
       <HeaderProxy
-        title={DateTime.fromMillis(chosenDay.date).toLocaleString({
+        title={unixMillisecondsToLocaleDateTime(chosenDay.date).toLocaleString({
           day: 'numeric',
           month: 'numeric',
           weekday: 'short',

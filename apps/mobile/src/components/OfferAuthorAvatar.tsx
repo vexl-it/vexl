@@ -6,11 +6,9 @@ import {Stack, Text} from 'tamagui'
 import {useChatForOffer} from '../state/chat/hooks/useChatForOffer'
 import {selectImportedContactsWithHashes} from '../state/contacts'
 import {userDataRealOrAnonymizedAtom} from '../state/session'
-import {
-  getCurrentLocale,
-  useTranslation,
-} from '../utils/localization/I18nProvider'
+import {useTranslation} from '../utils/localization/I18nProvider'
 import randomName from '../utils/randomName'
+import {setTimezoneOfUser} from '../utils/unixMillisecondsToLocaleDateTime'
 import {AnonymousAvatarFromSeed} from './AnonymousAvatar'
 import ContactTypeAndCommonNumber from './ContactTypeAndCommonNumber'
 import UserAvatar from './UserAvatar'
@@ -49,9 +47,9 @@ function OfferAuthorAvatar({
             </Text>
             <Text fos={12} ff="$body500" col="$greyOnBlack">
               {t('myOffers.offerAdded', {
-                date: DateTime.fromISO(offerInfo.createdAt)
-                  .setLocale(getCurrentLocale())
-                  .toLocaleString(DateTime.DATE_FULL),
+                date: setTimezoneOfUser(
+                  DateTime.fromISO(offerInfo.createdAt)
+                ).toLocaleString(DateTime.DATE_FULL),
               })}
             </Text>
           </Stack>

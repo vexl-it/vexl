@@ -4,6 +4,7 @@ import {DateTime} from 'luxon'
 import {TouchableOpacity} from 'react-native'
 import {Stack, Text, XStack, getTokens, type StackProps} from 'tamagui'
 import {getCurrentLocale} from '../../../../../../../utils/localization/I18nProvider'
+import unixMillisecondsToLocaleDateTime from '../../../../../../../utils/unixMillisecondsToLocaleDateTime'
 import Image from '../../../../../../Image'
 import closeSvg from '../../../../../../images/closeSvg'
 import {removeTimestampFromAvailableAtom} from '../../../atoms'
@@ -29,10 +30,11 @@ function TimeOptionCell({availableDateTime, ...props}: Props): JSX.Element {
       {...props}
     >
       <Text fos={16} ff="$body600">
-        {DateTime.fromMillis(availableDateTime.date).toLocaleString(
-          DateTime.DATE_MED_WITH_WEEKDAY,
-          {locale: getCurrentLocale()}
-        )}
+        {unixMillisecondsToLocaleDateTime(
+          availableDateTime.date
+        ).toLocaleString(DateTime.DATE_MED_WITH_WEEKDAY, {
+          locale: getCurrentLocale(),
+        })}
       </Text>
       <XStack width="100%" ai="center" jc="space-between" px="$2" mt="$2">
         <XStack f={1} ai="center" jc="space-around">

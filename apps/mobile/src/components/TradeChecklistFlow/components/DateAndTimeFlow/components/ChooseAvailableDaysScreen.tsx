@@ -1,7 +1,6 @@
 import {useNavigation, type NavigationProp} from '@react-navigation/native'
 import {type AvailableDateTimeOption} from '@vexl-next/domain/src/general/tradeChecklist'
 import {useAtom, useSetAtom} from 'jotai'
-import {DateTime} from 'luxon'
 import {useEffect, useMemo} from 'react'
 import {type MarkedDates} from 'react-native-calendars/src/types'
 import {Stack} from 'tamagui'
@@ -10,6 +9,7 @@ import {
   type TradeChecklistStackScreenProps,
 } from '../../../../../navigationTypes'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
+import unixMillisecondsToLocaleDateTime from '../../../../../utils/unixMillisecondsToLocaleDateTime'
 import Calendar, {
   REACT_NATIVE_CALENDARS_DATE_FORMAT,
 } from '../../../../Calendar'
@@ -49,7 +49,7 @@ function ChooseAvailableDaysScreen({
         (result: MarkedDates, dateTime: AvailableDateTimeOption) => {
           return {
             ...result,
-            [DateTime.fromMillis(dateTime.date).toFormat(
+            [unixMillisecondsToLocaleDateTime(dateTime.date).toFormat(
               REACT_NATIVE_CALENDARS_DATE_FORMAT
             )]: {selected: true},
           }

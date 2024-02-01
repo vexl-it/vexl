@@ -1,6 +1,7 @@
 import {IsoDatetimeString} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
-import {DateTime} from 'luxon'
+import {UnixMilliseconds0} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {z} from 'zod'
+import unixMillisecondsToLocaleDateTime from '../unixMillisecondsToLocaleDateTime'
 
 export const MaintenanceConfig = z.object({
   from: IsoDatetimeString,
@@ -30,8 +31,12 @@ export type RemoteConfig = z.TypeOf<typeof RemoteConfig>
 export const DEFAULT_REMOTE_CONFIG: RemoteConfig = {
   next__force_update: NextForceUpdate.parse(0),
   next__maintenance: {
-    from: IsoDatetimeString.parse(DateTime.fromMillis(0).toISO()),
-    to: IsoDatetimeString.parse(DateTime.fromMillis(0).toISO()),
+    from: IsoDatetimeString.parse(
+      unixMillisecondsToLocaleDateTime(UnixMilliseconds0).toISO()
+    ),
+    to: IsoDatetimeString.parse(
+      unixMillisecondsToLocaleDateTime(UnixMilliseconds0).toISO()
+    ),
   },
   next__offer_rerequest_limit_days: OfferRerequestLimitDays.parse(1),
 }

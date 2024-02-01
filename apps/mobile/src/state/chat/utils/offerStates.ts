@@ -1,5 +1,6 @@
 import {DateTime} from 'luxon'
 import {type OfferRerequestLimitDays} from '../../../utils/remoteConfig/domain'
+import unixMillisecondsToLocaleDateTime from '../../../utils/unixMillisecondsToLocaleDateTime'
 import {type ChatWithMessages, type RequestState} from '../domain'
 
 export function getRequestState(chat?: ChatWithMessages): RequestState {
@@ -47,9 +48,9 @@ export function canChatBeRequested(
     lastMessage?.message.messageType === 'DELETE_CHAT'
   ) {
     const now = DateTime.now().startOf('day')
-    const lastMessageAt = DateTime.fromMillis(lastMessage.message.time).startOf(
-      'day'
-    )
+    const lastMessageAt = unixMillisecondsToLocaleDateTime(
+      lastMessage.message.time
+    ).startOf('day')
     const diff = now.diff(lastMessageAt, 'days').toObject().days ?? 0
     const canBeRerequested = diff >= limitDays
     if (canBeRerequested) return {canBeRerequested: true}

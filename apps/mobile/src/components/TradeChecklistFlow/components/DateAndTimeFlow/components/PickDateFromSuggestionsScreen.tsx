@@ -6,6 +6,7 @@ import {useCallback} from 'react'
 import {Stack} from 'tamagui'
 import type {TradeChecklistStackScreenProps} from '../../../../../navigationTypes'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
+import unixMillisecondsToLocaleDateTime from '../../../../../utils/unixMillisecondsToLocaleDateTime'
 import {useAtomValueRefreshOnFocus} from '../../../../../utils/useFocusMemo'
 import {
   HeaderProxy,
@@ -22,14 +23,16 @@ function createOptionsFromChosenDays(
   return days.map((day) => ({
     data: day,
     key: day.date.toString(),
-    title: DateTime.fromMillis(day.date).toLocaleString({
+    title: unixMillisecondsToLocaleDateTime(day.date).toLocaleString({
       weekday: 'short',
       day: 'numeric',
       month: 'numeric',
     }),
-    rightText: `${DateTime.fromMillis(day.from).toLocaleString(
+    rightText: `${unixMillisecondsToLocaleDateTime(day.from).toLocaleString(
       DateTime.TIME_SIMPLE
-    )} - ${DateTime.fromMillis(day.to).toLocaleString(DateTime.TIME_SIMPLE)}`,
+    )} - ${unixMillisecondsToLocaleDateTime(day.to).toLocaleString(
+      DateTime.TIME_SIMPLE
+    )}`,
   }))
 }
 

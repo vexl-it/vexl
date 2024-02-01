@@ -3,13 +3,14 @@ import {atom, useAtomValue, useSetAtom, type Atom} from 'jotai'
 import {splitAtom} from 'jotai/utils'
 import {DateTime} from 'luxon'
 import {useMemo} from 'react'
+import unixMillisecondsToLocaleDateTime from '../../../../../../utils/unixMillisecondsToLocaleDateTime'
 import type {Item as OptionsListItem} from '../OptionsList'
 
 function generateHoursList(
   forOption: AvailableDateTimeOption
 ): Array<OptionsListItem<DateTime>> {
-  const from = DateTime.fromMillis(forOption.from).startOf('hour')
-  const to = DateTime.fromMillis(forOption.to).startOf('hour')
+  const from = unixMillisecondsToLocaleDateTime(forOption.from).startOf('hour')
+  const to = unixMillisecondsToLocaleDateTime(forOption.to).startOf('hour')
 
   const hoursInBetween = to.diff(from).as('hours')
 

@@ -31,7 +31,7 @@
   "resolutions": {
     "react-native-quick-crypto@^0.5.0": "patch:react-native-quick-crypto@npm%3A0.5.0#./.yarn/patches/react-native-quick-crypto-npm-0.5.0-6b2835ed1e.patch",
     "react-native-quick-base64@^2.0.5": "patch:react-native-quick-base64@npm%3A2.0.5#./.yarn/patches/react-native-quick-base64-npm-2.0.5-8355f57fab.patch",
-    "expo-image-picker@14.1.1": "patch:expo-image-picker@npm%3A14.1.1#./.yarn/patches/expo-image-picker-npm-14.1.1-c6baa99e3c.patch",
+    "expo-image-picker@14.7.1": "patch:expo-image-picker@npm%3A14.7.1#./.yarn/patches/expo-image-picker-npm-14.7.1-e9e43aab59.patch",
     "react-native-quick-crypto@^0.6.1": "patch:react-native-quick-crypto@npm%3A0.6.1#./.yarn/patches/react-native-quick-crypto-npm-0.6.1-02196a3db2.patch",
     "react-native-screenshot-prevent@1.1.9": "patch:react-native-screenshot-prevent@npm%3A1.1.9#./.yarn/patches/react-native-screenshot-prevent-npm-1.1.9-b09a78f908.patch"
   }

@@ -1,6 +1,6 @@
 import {useFocusEffect} from '@react-navigation/native'
 import {useCallback} from 'react'
-import {useAppState} from '../../utils/useAppState'
+import {useAppState} from './useAppState'
 
 export function useOnFocusAndAppState(callback: () => void): void {
   useFocusEffect(callback)

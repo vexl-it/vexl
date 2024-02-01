@@ -5,10 +5,10 @@ import {ScrollView} from 'react-native'
 import {Text, YStack} from 'tamagui'
 import {reachNumberAtom} from '../../../../../state/connections/atom/connectionStateAtom'
 import {
-  importedContactsCountAtom,
   initializeMinutesTillOffersDisplayedActionAtom,
   minutesTillOffersDisplayedAtom,
 } from '../../../../../state/contacts'
+import {importedContactsCountAtom} from '../../../../../state/contacts/atom/contactsStore'
 import {triggerOffersRefreshAtom} from '../../../../../state/marketplace'
 import {
   addMoreContactsSuggestionVisibleAtom,

@@ -2,13 +2,13 @@ import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue, type Atom} from 'jotai'
 import {useMemo} from 'react'
 import {Stack} from 'tamagui'
-import {type ContactNormalized} from '../../../state/contacts/domain'
+import {type StoredContactWithComputedValues} from '../../../../../state/contacts/domain'
 import {contactSelectMolecule} from '../atom'
 
 function IsNewIndicator({
   contactAtom,
 }: {
-  contactAtom: Atom<ContactNormalized>
+  contactAtom: Atom<StoredContactWithComputedValues>
 }): JSX.Element | null {
   const {createIsNewContactAtom} = useMolecule(contactSelectMolecule)
 

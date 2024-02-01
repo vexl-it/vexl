@@ -4,8 +4,7 @@ import {type RootStackParamsList} from '../../navigationTypes'
 import {useCheckAndReportCurrrentVersionToChatsActionAtom} from '../../state/chat/atoms/checkAndReportCurrentVersionToChatsActionAtom'
 import {useDecodePreviouslyUncompatibleMessagesOnMount} from '../../state/chat/atoms/decodePreviouslyUncompatibleMessagesActionAtom'
 import {useSyncConnections} from '../../state/connections'
-import useRefreshContactsFromDeviceOnResume from '../../state/contacts/hooks/useRefreshContactsFromDeviceOnResume'
-import {useSetCombinedContactsAfterLastSubmitForCurrentUsers} from '../../state/contacts/hooks/useSetCombinedContactsAfterLastSubmitForCurrentUsers'
+import {useRefreshContactsFromDeviceOnResume} from '../../state/contacts/atom/loadContactsFromDeviceActionAtom'
 import {useIsUserLoggedIn} from '../../state/session'
 import useHandleNotificationOpen from '../../state/useHandleNotificationOpen'
 import {useHandleReceivedNotifications} from '../../state/useHandleReceivedNotifications'
@@ -55,7 +54,6 @@ function LoggedInHookGroup(): null {
   useHandleRefreshContactServiceAndOffers()
   useSyncConnections()
   useHandleDeepLink()
-  useSetCombinedContactsAfterLastSubmitForCurrentUsers()
   useCheckAndReportCurrrentVersionToChatsActionAtom()
 
   useHideInnactivityReminderNotificationsOnResume()

@@ -4,7 +4,7 @@ import {DateTime} from 'luxon'
 import {useMemo} from 'react'
 import {Stack, Text} from 'tamagui'
 import {useChatForOffer} from '../state/chat/hooks/useChatForOffer'
-import {selectImportedContactsWithHashes} from '../state/contacts'
+import createImportedContactsForHashesAtom from '../state/contacts/atom/createImportedContactsForHashesAtom'
 import {userDataRealOrAnonymizedAtom} from '../state/session'
 import {useTranslation} from '../utils/localization/I18nProvider'
 import randomName from '../utils/randomName'
@@ -29,7 +29,9 @@ function OfferAuthorAvatar({
   const commonFriends = useAtomValue(
     useMemo(
       () =>
-        selectImportedContactsWithHashes(offerInfo.privatePart.commonFriends),
+        createImportedContactsForHashesAtom(
+          offerInfo.privatePart.commonFriends
+        ),
       [offerInfo.privatePart.commonFriends]
     )
   )

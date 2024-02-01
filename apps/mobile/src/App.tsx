@@ -8,12 +8,12 @@ import {SafeAreaProvider} from 'react-native-safe-area-context'
 import {useTheme} from 'tamagui'
 import AreYouSureDialog from './components/AreYouSureDialog'
 import BadgeCountManager from './components/BadgeCountManager'
-import ContactsHashingProgressModal from './components/ContactsHashingProgressModal'
 import LoadingOverlayProvider from './components/LoadingOverlayProvider'
 import MaintenanceAndForceUpdateCheck from './components/MaintenanceAndForceUpdateCheck'
 import PreventScreenshots from './components/PreventScreenshots'
 import RootNavigation from './components/RootNavigation'
 import UploadingOfferProgressModal from './components/UploadingOfferProgressModal'
+import VersionMigrations from './components/VersionMigrations'
 import {useIsSessionLoaded} from './state/session'
 import {loadSession} from './state/session/loadSession'
 import ThemeProvider from './utils/ThemeProvider'
@@ -78,11 +78,12 @@ function App(): JSX.Element {
       >
         <LoadingOverlayProvider>
           <MaintenanceAndForceUpdateCheck>
-            <GestureHandlerRootView style={{flex: 1}}>
-              <RootNavigation />
-            </GestureHandlerRootView>
+            <VersionMigrations>
+              <GestureHandlerRootView style={{flex: 1}}>
+                <RootNavigation />
+              </GestureHandlerRootView>
+            </VersionMigrations>
             <UploadingOfferProgressModal />
-            <ContactsHashingProgressModal />
           </MaintenanceAndForceUpdateCheck>
         </LoadingOverlayProvider>
         <AreYouSureDialog />

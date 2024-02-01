@@ -6,10 +6,7 @@ import {previousSearchesAtom} from '../components/SearchOffersScreen/atoms/previ
 import {messagingStateAtomStorageAtom} from '../state/chat/atoms/messagingStateAtom'
 import connectionStateAtom from '../state/connections/atom/connectionStateAtom'
 import offerToConnectionsAtom from '../state/connections/atom/offerToConnectionsAtom'
-import {
-  combinedContactsAfterLastSubmitStorageAtom,
-  importedContactsStorageAtom,
-} from '../state/contacts'
+import {contactsStoreAtom} from '../state/contacts/atom/contactsStore'
 import {
   feedbacksForClosedChatsStorageAtom,
   newOfferFeedbackDoneStorageAtom,
@@ -37,11 +34,8 @@ export default function clearMmkvStorageAndEmptyAtoms(): void {
   getDefaultStore().set(newOfferFeedbackDoneStorageAtom, {
     newOfferFeedbackDone: false,
   })
-  getDefaultStore().set(importedContactsStorageAtom, {
-    importedContacts: [],
-  })
-  getDefaultStore().set(combinedContactsAfterLastSubmitStorageAtom, {
-    combinedContactsAfterLastSubmit: null,
+  getDefaultStore().set(contactsStoreAtom, {
+    contacts: [],
   })
   getDefaultStore().set(offersStateAtom, {
     lastUpdatedAt: MINIMAL_DATE,

@@ -2,13 +2,17 @@ import {useMolecule} from 'bunshi/dist/react'
 import {useSetAtom} from 'jotai'
 import {TouchableOpacity} from 'react-native'
 import {Stack, Text} from 'tamagui'
-import {useTranslation} from '../../../utils/localization/I18nProvider'
-import Image from '../../Image'
+import {type StoredContactWithComputedValues} from '../../../../../state/contacts/domain'
+import {useTranslation} from '../../../../../utils/localization/I18nProvider'
+import Image from '../../../../Image'
 import {contactSelectMolecule} from '../atom'
-import {type ContactNormalized} from '../brands/ContactNormalized.brand'
 import addSvg from '../image/addSvg'
 
-function AddContactRow({contact}: {contact: ContactNormalized}): JSX.Element {
+function AddContactRow({
+  contact,
+}: {
+  contact: StoredContactWithComputedValues
+}): JSX.Element {
   const {t} = useTranslation()
   const {addAndSelectContactWithUiFeedbackAtom} = useMolecule(
     contactSelectMolecule
@@ -28,7 +32,7 @@ function AddContactRow({contact}: {contact: ContactNormalized}): JSX.Element {
         </Stack>
         <Text col="$greyOnWhite">
           {t('postLoginFlow.contactsList.addContactManually', {
-            number: contact.numberToDisplay,
+            number: contact.info.numberToDisplay,
           })}
         </Text>
       </Stack>

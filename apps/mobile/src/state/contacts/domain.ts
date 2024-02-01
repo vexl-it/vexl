@@ -2,23 +2,58 @@ import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.bra
 import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {z} from 'zod'
 
-export const ContactNormalized = z.object({
+export const ContactInfo = z.object({
   name: z.string(),
   label: z.string().optional(),
   numberToDisplay: z.string(),
-  normalizedNumber: E164PhoneNumber,
+  rawNumber: z.string(),
   imageUri: UriString.optional(),
-  fromContactList: z.boolean(),
 })
+export type ContactInfo = z.TypeOf<typeof ContactInfo>
 
-export type ContactNormalized = z.TypeOf<typeof ContactNormalized>
-
-export const ContactNormalizedWithHash = ContactNormalized.extend({
+export const ContactComputedValues = z.object({
+  normalizedNumber: E164PhoneNumber,
   hash: z.string(),
 })
-export type ContactNormalizedWithHash = z.TypeOf<
-  typeof ContactNormalizedWithHash
+export type ContactComputedValues = z.TypeOf<typeof ContactComputedValues>
+
+export const ContactFlags = z.object({
+  seen: z.boolean(),
+  imported: z.boolean(),
+  importedManually: z.boolean(),
+  invalidNumber: z.enum(['notTriedYet', 'valid', 'invalid']),
+})
+export type ContactFlags = z.TypeOf<typeof ContactFlags>
+
+export const StoredContact = z.object({
+  info: ContactInfo,
+  computedValues: ContactComputedValues.optional(),
+  flags: ContactFlags.default({
+    seen: false,
+    imported: false,
+    importedManually: false,
+    invalidNumber: 'notTriedYet',
+  }),
+})
+export type StoredContact = z.TypeOf<typeof StoredContact>
+
+export const StoredContactWithComputedValues = z.object({
+  info: ContactInfo,
+  computedValues: ContactComputedValues,
+  flags: ContactFlags.default({
+    seen: false,
+    imported: false,
+    importedManually: false,
+    invalidNumber: 'notTriedYet',
+  }),
+})
+export type StoredContactWithComputedValues = z.TypeOf<
+  typeof StoredContactWithComputedValues
 >
+
+export type StoredContactWithoutComputedValues = StoredContact & {
+  computedValues: undefined
+}
 
 export const ImportContactFromLinkPayload = z.object({
   name: z.string(),
@@ -29,3 +64,9 @@ export const ImportContactFromLinkPayload = z.object({
 export type ImportContactFromLinkPayload = z.TypeOf<
   typeof ImportContactFromLinkPayload
 >
+
+export function hasComputedValues(
+  contact: StoredContact
+): contact is StoredContactWithComputedValues {
+  return !!contact.computedValues
+}

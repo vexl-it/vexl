@@ -5,7 +5,9 @@ import {useCallback} from 'react'
 import {Keyboard} from 'react-native'
 import {Text, XStack, YStack, getTokens} from 'tamagui'
 import {addContactWithUiFeedbackAtom} from '../../../state/contacts/atom/addContactWithUiFeedbackAtom'
+import {hashPhoneNumber} from '../../../state/contacts/utils'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
+import reportError from '../../../utils/reportError'
 import useResetNavigationToMessagingScreen from '../../../utils/useResetNavigationToMessagingScreen'
 import Button from '../../Button'
 import IconButton from '../../IconButton'
@@ -323,15 +325,33 @@ function QuickActionBanner(): JSX.Element | null {
           <UserAvatar width={48} height={48} userImage={otherSideData.image} />
         }
         onButtonPress={() => {
-          const fullPhoneNumber = otherSideData.fullPhoneNumber
+          try {
+            const fullPhoneNumber = otherSideData.fullPhoneNumber
 
-          if (fullPhoneNumber) {
-            void addRevealedContact({
-              name: fullPhoneNumber,
-              normalizedNumber: fullPhoneNumber,
-              fromContactList: false,
-              numberToDisplay: fullPhoneNumber,
-            })
+            if (fullPhoneNumber) {
+              const numberHash = hashPhoneNumber(fullPhoneNumber)
+              if (numberHash._tag === 'Left') {
+                reportError(
+                  'warn',
+                  new Error('hashPhoneNumber failed in QuickActionBanner.tsx'),
+                  {error: numberHash.left}
+                )
+                return
+              }
+
+              void addRevealedContact({
+                info: {
+                  name: otherSideData.userName,
+                  numberToDisplay: fullPhoneNumber,
+                  rawNumber: fullPhoneNumber,
+                },
+                computedValues: {
+                  normalizedNumber: fullPhoneNumber,
+                  hash: numberHash.right,
+                },
+              })
+            }
+          } finally {
             hide()
           }
         }}

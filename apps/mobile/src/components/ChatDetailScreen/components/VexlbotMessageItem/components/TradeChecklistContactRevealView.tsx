@@ -1,14 +1,15 @@
 import Clipboard from '@react-native-clipboard/clipboard'
 import {useNavigation} from '@react-navigation/native'
-import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React from 'react'
 import {Image, Stack} from 'tamagui'
 import blockPhoneNumberRevealSvg from '../../../../../images/blockPhoneNumberRevealSvg'
 import {addContactWithUiFeedbackAtom} from '../../../../../state/contacts/atom/addContactWithUiFeedbackAtom'
+import {hashPhoneNumber} from '../../../../../state/contacts/utils'
 import * as contact from '../../../../../state/tradeChecklist/utils/contact'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
+import reportError from '../../../../../utils/reportError'
 import resolveLocalUri from '../../../../../utils/resolveLocalUri'
 import SvgImage from '../../../../Image'
 import UserAvatar from '../../../../UserAvatar'
@@ -39,13 +40,30 @@ function RevealedContactMessageItem({
         Clipboard.setString(otherSideData.fullPhoneNumber ?? '')
       }}
       onPress={() => {
+        if (!otherSideData.fullPhoneNumber) return
+        const hash = hashPhoneNumber(otherSideData.fullPhoneNumber)
+        if (hash._tag === 'Left') {
+          reportError(
+            'warn',
+            new Error(
+              'failed to hash phone number in TradeChecklistContactRevealView'
+            ),
+            {left: hash.left}
+          )
+          return
+        }
+
         void addRevealedContact({
-          name: otherSideData.fullPhoneNumber ?? '',
-          normalizedNumber: E164PhoneNumber.parse(
-            otherSideData.fullPhoneNumber
-          ),
-          fromContactList: false,
-          numberToDisplay: otherSideData.fullPhoneNumber ?? '',
+          info: {
+            name: otherSideData.userName,
+            label: otherSideData.userName,
+            numberToDisplay: otherSideData.fullPhoneNumber,
+            rawNumber: otherSideData.fullPhoneNumber,
+          },
+          computedValues: {
+            normalizedNumber: otherSideData.fullPhoneNumber,
+            hash: hash.right,
+          },
         })
       }}
       icon={

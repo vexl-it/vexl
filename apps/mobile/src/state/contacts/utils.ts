@@ -1,4 +1,5 @@
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
+import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {
   hmacSign,
   type CryptoError,
@@ -6,11 +7,11 @@ import {
 import * as Contacts from 'expo-contacts'
 import {SortTypes} from 'expo-contacts'
 import * as E from 'fp-ts/Either'
-import * as O from 'fp-ts/Option'
 import type * as TE from 'fp-ts/TaskEither'
 import {hmacPassword} from '../../utils/environment'
-import toE164PhoneNumberWithDefaultCountryCode from '../../utils/toE164PhoneNumberWithDefaultCountryCode'
-import {ContactNormalized} from './domain'
+import notEmpty from '../../utils/notEmpty'
+import {type ContactInfo} from './domain'
+// import toE164PhoneNumberWithDefaultCountryCode from '../../utils/toE164PhoneNumberWithDefaultCountryCode'
 
 export interface PermissionsNotGranted {
   readonly _tag: 'PermissionsNotGranted'
@@ -27,46 +28,9 @@ export function hashPhoneNumber(
   return hmacSign(hmacPassword)(normalizedPhoneNumber)
 }
 
-function normalizeContactPhoneNumbersOrNone(
-  contact: Contacts.Contact
-): ContactNormalized[] {
-  const {name, phoneNumbers, image} = contact
-  if (!phoneNumbers) {
-    return []
-  }
-
-  const normalizedWithNulls = phoneNumbers.map(
-    ({label, number, countryCode}) => {
-      const normalizedNumber = toE164PhoneNumberWithDefaultCountryCode(
-        number ?? '',
-        countryCode
-      )
-
-      if (O.isNone(normalizedNumber) || !number) {
-        return null
-      }
-
-      const parseResult = ContactNormalized.safeParse({
-        name,
-        label,
-        numberToDisplay: number,
-        normalizedNumber: normalizedNumber.value,
-        imageUri: image?.uri,
-        fromContactList: true,
-      })
-
-      return parseResult.success ? parseResult.data : null
-    }
-  )
-
-  return normalizedWithNulls.filter(
-    (x): x is NonNullable<typeof x> => x !== null
-  )
-}
-
 export default function getContactsAndTryToResolveThePermissionsAlongTheWay(): TE.TaskEither<
   PermissionsNotGranted | UnknownContactsError,
-  ContactNormalized[]
+  ContactInfo[]
 > {
   return async () => {
     try {
@@ -85,7 +49,24 @@ export default function getContactsAndTryToResolveThePermissionsAlongTheWay(): T
       })
 
       return E.right(
-        contacts.data.map(normalizeContactPhoneNumbersOrNone).flat()
+        contacts.data.flatMap(
+          (contact) =>
+            contact.phoneNumbers
+              ?.map((number) => {
+                if (!number.number) return null
+
+                return {
+                  name: contact.name,
+                  label: number.label,
+                  numberToDisplay: number.number,
+                  rawNumber: number.number,
+                  imageUri: contact.image
+                    ? UriString.parse(contact.image.uri)
+                    : undefined,
+                } satisfies ContactInfo
+              })
+              .filter(notEmpty) ?? []
+        )
       )
     } catch (error) {
       return E.left({_tag: 'UnknownContactsError', error} as const)

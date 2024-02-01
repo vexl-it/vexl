@@ -9,6 +9,7 @@ import {useCallback, useEffect} from 'react'
 import parse from 'url-parse'
 import {addContactWithUiFeedbackAtom} from '../../state/contacts/atom/addContactWithUiFeedbackAtom'
 import {ImportContactFromLinkPayload} from '../../state/contacts/domain'
+import {hashPhoneNumber} from '../../state/contacts/utils'
 import {parseJson, safeParse} from '../fpUtils'
 import {translationAtom, useTranslation} from '../localization/I18nProvider'
 import reportError from '../reportError'
@@ -25,6 +26,13 @@ export const handleImportDeepContactActionAtom = atom(
       parseJson(contactJsonString),
       TE.fromEither,
       TE.chainEitherKW(safeParse(ImportContactFromLinkPayload)),
+      TE.bindTo('payload'),
+      TE.bindW('parsedNumber', ({payload}) =>
+        pipe(payload.numberToDisplay, safeParse(E164PhoneNumber), TE.fromEither)
+      ),
+      TE.bindW('numberHash', ({parsedNumber}) =>
+        pipe(parsedNumber, hashPhoneNumber, TE.fromEither)
+      ),
       TE.match(
         (e) => {
           reportError(
@@ -40,12 +48,18 @@ export const handleImportDeepContactActionAtom = atom(
           })
           return false
         },
-        (contact) => {
+        ({payload, numberHash, parsedNumber}) => {
           void set(addContactWithUiFeedbackAtom, {
-            name: contact.name,
-            normalizedNumber: E164PhoneNumber.parse(contact.numberToDisplay),
-            fromContactList: false,
-            numberToDisplay: contact.numberToDisplay,
+            info: {
+              name: payload.name,
+              label: payload.label,
+              numberToDisplay: payload.numberToDisplay,
+              rawNumber: payload.numberToDisplay,
+            },
+            computedValues: {
+              normalizedNumber: parsedNumber,
+              hash: numberHash,
+            },
           })
           return true
         }

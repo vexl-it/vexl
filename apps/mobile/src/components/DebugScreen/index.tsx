@@ -82,6 +82,10 @@ function DebugScreen(): JSX.Element {
             }}
             text={buttonText}
           />
+          <Spacer />
+          <LanguagePicker />
+          <Spacer />
+          <Button variant="secondary" text="back" onPress={safeGoBack} />
         </WhiteContainer>
       </Screen>
     )

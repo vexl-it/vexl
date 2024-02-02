@@ -763,6 +763,7 @@
   "tradeChecklist.network.bestOptionForHugeAmounts": "The best for fairly huge amounts. It takes time sometime.",
   "tradeChecklist.network.invalidBtcAddress": "BTC address is not valid",
   "tradeChecklist.network.btcNetworkWillBeSetByReceiver": "The BTC network will be set by the receiving party",
+  "tradeChecklist.network.btcNetworkWasSetByReceiver": "The BTC network was set by the receiving party",
   "tradeChecklist.location.addNote": "Add note",
   "tradeChecklist.location.youSetMeetingLocation": "You set meeting location",
   "tradeChecklist.location.themSetMeetingLocation": "{{them}} set meeting location",

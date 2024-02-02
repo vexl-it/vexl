@@ -1,6 +1,5 @@
 import {useAtomValue, useSetAtom} from 'jotai'
 import {useEffect} from 'react'
-import {isStaging} from '../utils/environment'
 import {getNewI18n} from '../utils/getNewI18n'
 import {i18nAtom} from '../utils/localization/I18nProvider'
 import {preferencesAtom} from '../utils/preferences'
@@ -10,7 +9,7 @@ export function useSetAppLanguageFromStore(): void {
   const setI18n = useSetAtom(i18nAtom)
 
   useEffect(() => {
-    if (!isStaging && preferences?.appLanguage) {
+    if (!__DEV__ && preferences?.appLanguage) {
       setI18n(getNewI18n(preferences.appLanguage))
     }
   }, [preferences.appLanguage, setI18n])

@@ -67,7 +67,7 @@ export default function createChecklistItemStatusAtom(
 
       if (updates.network) return 'readyToSend'
 
-      if (network?.sent?.btcNetwork) {
+      if (!!network?.sent?.btcNetwork || !!network?.received?.btcNetwork) {
         return 'accepted'
       }
 

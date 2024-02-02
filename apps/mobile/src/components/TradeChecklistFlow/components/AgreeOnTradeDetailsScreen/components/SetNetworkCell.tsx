@@ -18,12 +18,14 @@ function SetNetworkCell(): JSX.Element {
   const networkUpdateToBeSent = useAtomValue(networkUpdateToBeSentAtom)
   const tradeChecklistNetworkData = useAtomValue(tradeChecklistNetworkDataAtom)
 
+  const btcNetworkInState = (
+    tradeChecklistNetworkData?.received ?? tradeChecklistNetworkData?.sent
+  )?.btcNetwork
+
   const sideNote =
-    networkUpdateToBeSent === 'LIGHTING' ||
-    tradeChecklistNetworkData.received?.btcNetwork === 'LIGHTING'
+    networkUpdateToBeSent === 'LIGHTING' || btcNetworkInState === 'LIGHTING'
       ? t('tradeChecklist.network.lightning')
-      : networkUpdateToBeSent === 'ON_CHAIN' ||
-        tradeChecklistNetworkData.received?.btcNetwork === 'ON_CHAIN'
+      : networkUpdateToBeSent === 'ON_CHAIN' || btcNetworkInState === 'ON_CHAIN'
       ? t('tradeChecklist.network.onChain')
       : undefined
 
@@ -51,7 +53,9 @@ function SetNetworkCell(): JSX.Element {
       isDisabled={isDisabled}
       subtitle={
         isDisabled
-          ? t('tradeChecklist.network.btcNetworkWillBeSetByReceiver')
+          ? tradeChecklistNetworkData?.received?.btcNetwork
+            ? t('tradeChecklist.network.btcNetworkWasSetByReceiver')
+            : t('tradeChecklist.network.btcNetworkWillBeSetByReceiver')
           : undefined
       }
       item="SET_NETWORK"

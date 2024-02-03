@@ -56,8 +56,6 @@ export const sendUpdateNoticeMessageActionAtom = atom(
       chat: chat.chat,
     })
 
-    console.log(`Sending update: ${JSON.stringify(messageToSend, null, 2)}`)
-
     const api = get(privateApiAtom)
     return pipe(
       sendMessage({

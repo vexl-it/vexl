@@ -57,8 +57,6 @@ const handleOtherSideUpdatedActionAtom = atom(
         one.message.lastReceivedVersion !== version
     )
 
-    console.log(`New messages: ${JSON.stringify(newMessages, null, 2)}`)
-
     messagesToRespondWithCurrentVersion.forEach(
       (oneMessageToRespondWithCurrentVersion) => {
         const chatAtom = focusChatByInboxKeyAndSenderKey({

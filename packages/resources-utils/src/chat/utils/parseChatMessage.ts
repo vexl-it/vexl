@@ -155,9 +155,6 @@ export function parseChatMessage({
   ChatMessage
 > {
   return (jsonString) => {
-    console.log(
-      `Parsing chat message: ${JSON.stringify(JSON.parse(jsonString), null, 2)}`
-    )
     return pipe(
       E.right(jsonString),
       E.chainW(parseJson),

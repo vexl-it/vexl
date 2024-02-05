@@ -83,7 +83,7 @@ function ContactRevealMessageItem({
 }): JSX.Element | null {
   const {t} = useTranslation()
   const {otherSideDataAtom, contactRevealStatusAtom} = useMolecule(chatMolecule)
-  const {image, userName} = useAtomValue(otherSideDataAtom)
+  const {image, userName, partialPhoneNumber} = useAtomValue(otherSideDataAtom)
   const contactRevealStatus = useAtomValue(contactRevealStatusAtom)
 
   if (
@@ -114,7 +114,7 @@ function ContactRevealMessageItem({
         isLatest={isLatest}
         smallerText={userName ?? ''}
         biggerText={t('messages.letsExchangeContacts')}
-        bottomText={message.message.deanonymizedUser?.partialPhoneNumber}
+        bottomText={partialPhoneNumber}
         icon={<UserAvatar height={80} width={80} userImage={image} />}
       />
     )

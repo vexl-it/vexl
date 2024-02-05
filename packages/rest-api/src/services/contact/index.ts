@@ -53,12 +53,17 @@ export function privateApi({
   )
 
   return {
-    checkUserExists: () => {
+    checkUserExists: ({
+      notifyExistingUserAboutLogin,
+    }: {
+      notifyExistingUserAboutLogin: boolean
+    }) => {
       return axiosCallWithValidation(
         axiosInstance,
         {
           method: 'post',
           'url': '/users/check-exists',
+          params: {notifyExistingUserAboutLogin},
         },
         UserExistsResponse
       )

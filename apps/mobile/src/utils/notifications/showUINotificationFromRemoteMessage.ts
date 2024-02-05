@@ -7,7 +7,10 @@ import reportError from '../reportError'
 import {showChatNotification} from './chatNotifications'
 import isChatMessageNotification from './isChatMessageNotification'
 import {getDefaultChannel} from './notificationChannels'
-import {INACTIVITY_REMINDER} from './notificationTypes'
+import {
+  INACTIVITY_REMINDER,
+  LOGGING_ON_DIFFERENT_DEVICE,
+} from './notificationTypes'
 
 export async function showUINotificationFromRemoteMessage(
   remoteMessage: FirebaseMessagingTypes.RemoteMessage
@@ -18,6 +21,21 @@ export async function showUINotificationFromRemoteMessage(
   )
 
   const type = remoteMessage?.data?.type
+
+  if (type === LOGGING_ON_DIFFERENT_DEVICE) {
+    void notifee.displayNotification({
+      title: t('notifications.loggingOnDifferentDevice.title'),
+      body: t('notifications.loggingOnDifferentDevice.body'),
+      data: remoteMessage.data,
+      android: {
+        channelId: await getDefaultChannel(),
+        pressAction: {
+          id: 'default',
+        },
+      },
+    })
+    return
+  }
 
   if (!remoteMessage.data && !remoteMessage.notification) return
 

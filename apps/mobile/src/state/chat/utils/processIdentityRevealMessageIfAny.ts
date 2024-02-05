@@ -43,6 +43,8 @@ export default function processIdentityRevealMessageIfAny(
               )
             ] as SvgString,
           },
+      partialPhoneNumber:
+        identityRevealMessage.message.deanonymizedUser.partialPhoneNumber,
     }
     return setRealLifeInfo(realLifeInfo)(chat)
   }

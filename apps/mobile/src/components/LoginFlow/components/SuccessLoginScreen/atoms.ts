@@ -329,7 +329,7 @@ export const finishLoginActionAtom = atom(
           getUserSessionCredentials: () => session.sessionCredentials,
         })
 
-        return contactApi.checkUserExists()
+        return contactApi.checkUserExists({notifyExistingUserAboutLogin: true})
       }),
       TE.match(
         (e) => {

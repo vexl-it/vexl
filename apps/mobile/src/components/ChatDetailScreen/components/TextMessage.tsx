@@ -1,5 +1,4 @@
 import Clipboard from '@react-native-clipboard/clipboard'
-import {type ChatMessage} from '@vexl-next/domain/src/general/messaging'
 import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {useMolecule} from 'bunshi/dist/react'
 import {
@@ -15,10 +14,8 @@ import {
   Image,
   Pressable,
   StyleSheet,
-  TextInput,
   TouchableWithoutFeedback,
 } from 'react-native'
-import Animated, {FadeIn, FadeOut} from 'react-native-reanimated'
 import {Stack, Text, XStack, YStack, getTokens} from 'tamagui'
 import getValueFromSetStateActionOfAtom from '../../../utils/atomUtils/getValueFromSetStateActionOfAtom'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
@@ -32,12 +29,6 @@ import formatChatTime from '../utils/formatChatTime'
 import {type MessagesListItem} from './MessageItem'
 
 const style = StyleSheet.create({
-  textInputStyle: {
-    fontSize: 16,
-    fontFamily: 'TTSatoshi500',
-    margin: 0,
-    padding: 0,
-  },
   image: {
     width: '100%',
     height: 300,
@@ -48,7 +39,7 @@ const style = StyleSheet.create({
   },
 })
 
-const textInputHitSlop = {top: 15, bottom: 15, left: 10, right: 10}
+// const textInputHitSlop = {top: 15, bottom: 15, left: 10, right: 10}
 
 function useIsExtended(messageItem: MessagesListItem): {
   isExtended: boolean
@@ -116,34 +107,11 @@ function shouldHaveItalicPrefix(
   ].includes(messageType)
 }
 
-function TextMessageAccent({
-  message,
-  isMine,
-}: {
-  message: ChatMessage
-  isMine: boolean
-}): JSX.Element {
-  const {t} = useTranslation()
-
-  if (shouldHaveItalicPrefix(message.messageType)) {
-    return (
-      <Text color={isMine ? '$black' : '$white'} fontStyle="italic">
-        {t(`messages.textMessageTypes.${message.messageType}`, {
-          message: message.text,
-        })}
-      </Text>
-    )
-  }
-
-  return <>{message.text}</>
-}
-
 function TextMessage({
   messageAtom,
 }: {
   messageAtom: Atom<MessagesListItem>
 }): JSX.Element | null {
-  const tokens = getTokens()
   const messageItem = useAtomValue(messageAtom)
   const {
     sendMessageAtom,
@@ -188,25 +156,6 @@ function TextMessage({
     openImage(messageItem.message.message.image)
   }, [messageItem, openImage])
 
-  const textInputStyle = useMemo(() => {
-    if (messageItem.type !== 'message') return style.textInputStyle
-
-    return [
-      style.textInputStyle,
-      {
-        color:
-          messageItem.message.state !== 'received'
-            ? tokens.color.black.val
-            : tokens.color.white.val,
-        fontStyle: shouldHaveItalicPrefix(
-          messageItem.message.message.messageType
-        )
-          ? 'italic'
-          : undefined,
-      } as const,
-    ]
-  }, [messageItem, tokens.color.black.val, tokens.color.white.val])
-
   if (messageItem.type !== 'message') return null
   const {message, isLatest, time} = messageItem
 
@@ -214,6 +163,21 @@ function TextMessage({
   if (message.state === 'receivedButRequiresNewerVersion') return null
 
   const isMine = message.state !== 'received'
+
+  const {messageText, italic} = (() => {
+    if (shouldHaveItalicPrefix(message.message?.messageType)) {
+      return {
+        messageText: t(
+          `messages.textMessageTypes.${message.message.messageType}`,
+          {
+            message: message.message.text,
+          }
+        ),
+        italic: true,
+      }
+    }
+    return {messageText: message.message.text, italic: false}
+  })()
 
   return (
     <TouchableWithoutFeedback onPress={hideExtended}>
@@ -275,47 +239,32 @@ function TextMessage({
                   </TouchableWithoutFeedback>
                 </YStack>
               )}
-              {isExtended ? (
-                <TextInput
-                  caretHidden
-                  multiline
-                  hitSlop={textInputHitSlop}
-                  showSoftInputOnFocus={false}
-                  spellCheck={false}
-                  style={textInputStyle}
-                  value={message.message.text}
-                />
-              ) : (
-                <Text
-                  selectable
-                  fos={16}
-                  fontFamily="$body500"
-                  color={isMine ? '$black' : '$white'}
-                >
-                  <TextMessageAccent
-                    isMine={isMine}
-                    message={message.message}
-                  />
-                </Text>
-              )}
+
+              <Text
+                fontStyle={italic ? 'italic' : undefined}
+                selectable
+                fos={16}
+                fontFamily={italic ? undefined : '$body500'}
+                color={isMine ? '$black' : '$white'}
+              >
+                {messageText}
+              </Text>
             </Stack>
           </TouchableWithoutFeedback>
           {isExtended && (
-            <Animated.View entering={FadeIn} exiting={FadeOut}>
-              <XStack>
-                <IconButton
-                  icon={replyToSvg}
-                  onPress={onReplyPressed}
-                  variant="plain"
-                />
-                <IconButton
-                  icon={copySvg}
-                  onPress={onCopyPressed}
-                  variant="plain"
-                  iconFill={getTokens().color.white.val}
-                />
-              </XStack>
-            </Animated.View>
+            <XStack>
+              <IconButton
+                icon={replyToSvg}
+                onPress={onReplyPressed}
+                variant="plain"
+              />
+              <IconButton
+                icon={copySvg}
+                onPress={onCopyPressed}
+                variant="plain"
+                iconFill={getTokens().color.white.val}
+              />
+            </XStack>
           )}
           {message.state === 'sendingError' && (
             <Pressable onPress={onPressResend}>

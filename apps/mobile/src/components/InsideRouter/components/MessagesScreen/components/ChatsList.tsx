@@ -4,6 +4,7 @@ import {selectAtom, splitAtom} from 'jotai/utils'
 import {Text, YStack} from 'tamagui'
 import messagingStateAtom from '../../../../../state/chat/atoms/messagingStateAtom'
 import {type ChatWithMessages} from '../../../../../state/chat/domain'
+import isChatActive from '../../../../../state/chat/utils/isChatActive'
 import atomKeyExtractor from '../../../../../utils/atomUtils/atomKeyExtractor'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import notEmpty from '../../../../../utils/notEmpty'
@@ -15,28 +16,12 @@ const chatIdsAtom = selectAtom(messagingStateAtom, (inboxes): ChatListData[] =>
     .reduce<ChatWithMessages[]>((acc, one) => {
       return acc.concat(one.chats)
     }, [])
+    .filter(isChatActive)
     .map((one) => {
       if (one.messages.length === 0) return null
 
       const lastMessage = one.messages.at(-1)
       if (!lastMessage) return null
-
-      const lastMessageIsMeDeletingChat =
-        lastMessage.message.messageType === 'DELETE_CHAT' &&
-        lastMessage.state === 'sent'
-      const lastMessageIsMeBlockingChat =
-        lastMessage.message.messageType === 'BLOCK_CHAT' &&
-        lastMessage.state === 'sent'
-      const lastMessageIsMeCancellingRequest =
-        lastMessage.message.messageType === 'CANCEL_REQUEST_MESSAGING' &&
-        lastMessage.state === 'sent'
-
-      if (
-        lastMessageIsMeDeletingChat ||
-        lastMessageIsMeBlockingChat ||
-        lastMessageIsMeCancellingRequest
-      )
-        return null
 
       return {chat: one.chat, lastMessage}
     })

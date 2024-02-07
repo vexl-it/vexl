@@ -17,7 +17,7 @@ import {
 } from '@vexl-next/resources-utils/src/utils/parsing'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
-import {pipe} from 'fp-ts/function'
+import {flow, pipe} from 'fp-ts/function'
 import {atom} from 'jotai'
 import {privateApiAtom} from '../../../api'
 import {type ActionAtomType} from '../../../utils/atomUtils/ActionAtomType'
@@ -26,7 +26,7 @@ import removeFile from '../../../utils/removeFile'
 import {tradeChecklistDataAtom} from '../../tradeChecklist/atoms/fromChatAtoms'
 import {updateTradeChecklistState} from '../../tradeChecklist/utils'
 import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
-import {addMessageToMessagesArray} from '../utils/addMessageToChat'
+import addMessageToChat from '../utils/addMessageToChat'
 import processTradeChecklistContactRevealMessageIfAny from '../utils/processTradeChecklistContactRevealMessageIfAny'
 import processTradeChecklistIdentityRevealMessageIfAny from '../utils/processTradeChecklistIdentityRevealMessageIfAny'
 import {replaceIdentityImageFileUriWithBase64} from '../utils/replaceImageFileUrisWithBase64'
@@ -108,22 +108,25 @@ export default function createSubmitChecklistUpdateActionAtom(
 
         set(
           chatWithMessagesAtom,
-          (old) =>
-            ({
-              ...old,
-              chat: {
-                ...old.chat,
-                otherSide: {
-                  ...old.chat.otherSide,
-                  realLifeInfo: realLifeInfo ?? old.chat.otherSide.realLifeInfo,
+          flow(
+            (old) =>
+              ({
+                ...old,
+                chat: {
+                  ...old.chat,
+                  otherSide: {
+                    ...old.chat.otherSide,
+                    realLifeInfo:
+                      realLifeInfo ?? old.chat.otherSide.realLifeInfo,
+                  },
                 },
-              },
-              tradeChecklist: updateTradeChecklistState(old.tradeChecklist)({
-                update,
-                direction: 'sent',
-              }),
-              messages: addMessageToMessagesArray(old.messages)(successMessage),
-            }) satisfies ChatWithMessages
+                tradeChecklist: updateTradeChecklistState(old.tradeChecklist)({
+                  update,
+                  direction: 'sent',
+                }),
+              }) satisfies ChatWithMessages,
+            addMessageToChat(successMessage)
+          )
         )
 
         return successMessage

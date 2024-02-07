@@ -11,6 +11,7 @@ import {Dimensions, StyleSheet} from 'react-native'
 import Animated, {useAnimatedStyle, withSpring} from 'react-native-reanimated'
 import {Stack, Text, XStack, YStack, getTokens} from 'tamagui'
 import {useSessionAssumeLoggedIn} from '../../../state/session'
+import {version} from '../../../utils/environment'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {preferencesAtom} from '../../../utils/preferences'
 import IconButton from '../../IconButton'
@@ -63,6 +64,7 @@ function ChatTextInput(): JSX.Element | null {
 
     const message: ChatMessage = {
       text: value,
+      myVersion: version,
       time: unixMillisecondsNow(),
       uuid: generateChatMessageId(),
       image: selectedImage?.uri ?? undefined,

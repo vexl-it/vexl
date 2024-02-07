@@ -7,6 +7,7 @@ import {
   type ChatMessage,
   type ChatMessagePayload,
 } from '@vexl-next/domain/src/general/messaging'
+import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {now} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {type ChatPrivateApi} from '@vexl-next/rest-api/src/services/chat'
 import * as TE from 'fp-ts/TaskEither'
@@ -19,15 +20,18 @@ import {messageToNetwork} from './utils/messageIO'
 function createRequestChatMessage({
   text,
   senderPublicKey,
+  myVersion,
 }: {
   text: string
   senderPublicKey: PublicKeyPemBase64
+  myVersion: SemverString
 }): ChatMessage {
   return {
     uuid: generateChatMessageId(),
     messageType: 'REQUEST_MESSAGING',
     text,
     time: now(),
+    myVersion,
     senderPublicKey,
   }
 }
@@ -41,11 +45,13 @@ export function sendMessagingRequest({
   fromKeypair,
   toPublicKey,
   api,
+  myVersion,
 }: {
   text: string
   fromKeypair: PrivateKeyHolder
   toPublicKey: PublicKeyPemBase64
   api: ChatPrivateApi
+  myVersion: SemverString
 }): TE.TaskEither<
   | ApiErrorRequestMessaging
   | JsonStringifyError
@@ -57,6 +63,7 @@ export function sendMessagingRequest({
     createRequestChatMessage({
       text,
       senderPublicKey: fromKeypair.publicKeyPemBase64,
+      myVersion,
     }),
     TE.right,
     TE.chainFirstW(

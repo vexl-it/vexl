@@ -2,11 +2,12 @@ import {useNavigation} from '@react-navigation/native'
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtom, useAtomValue, useSetAtom} from 'jotai'
 import {useCallback} from 'react'
-import {Keyboard, TouchableOpacity} from 'react-native'
+import {Alert, Keyboard, TouchableOpacity} from 'react-native'
 import {Stack, XStack, getTokens} from 'tamagui'
 import backButtonSvg from '../../../images/backButtonSvg'
 import blockIconSvg from '../../../images/blockIconSvg'
 import tradeChecklistSvg from '../../../images/tradeChecklistSvg'
+import {useTranslation} from '../../../utils/localization/I18nProvider'
 import useResetNavigationToMessagingScreen from '../../../utils/useResetNavigationToMessagingScreen'
 import useSafeGoBack from '../../../utils/useSafeGoBack'
 import IconButton from '../../IconButton'
@@ -29,6 +30,7 @@ type ButtonType =
 function Button({type}: {type: ButtonType}): JSX.Element | null {
   const safeGoBack = useSafeGoBack()
   const navigation = useNavigation()
+  const {t} = useTranslation()
   const {
     chatIdAtom,
     publicKeyPemBase64Atom,
@@ -40,6 +42,7 @@ function Button({type}: {type: ButtonType}): JSX.Element | null {
     revealIdentityWithUiFeedbackAtom,
     revealContactWithUiFeedbackAtom,
     contactRevealStatusAtom,
+    otherSideSupportsTradingChecklistAtom,
   } = useMolecule(chatMolecule)
   const chatId = useAtomValue(chatIdAtom)
   const inboxKey = useAtomValue(publicKeyPemBase64Atom)
@@ -49,6 +52,9 @@ function Button({type}: {type: ButtonType}): JSX.Element | null {
   const revealContact = useSetAtom(revealContactWithUiFeedbackAtom)
   const setModal = useSetAtom(showModalAtom)
   const resetNavigationToMessagingScreen = useResetNavigationToMessagingScreen()
+  const otherSideSupportsTradingChecklist = useAtomValue(
+    otherSideSupportsTradingChecklistAtom
+  )
 
   const blockChat = useSetAtom(blockChatWithUiFeedbackAtom)
   const deleteChat = useSetAtom(deleteChatWithUiFeedbackAtom)
@@ -168,6 +174,13 @@ function Button({type}: {type: ButtonType}): JSX.Element | null {
           icon={tradeChecklistSvg}
           variant="primary"
           onPress={() => {
+            if (!otherSideSupportsTradingChecklist) {
+              Alert.alert(
+                t('tradeChecklist.notSupportedByOtherSide.title'),
+                t('tradeChecklist.notSupportedByOtherSide.body')
+              )
+              return
+            }
             Keyboard.dismiss()
             setModal(false)
             navigation.navigate('TradeChecklistFlow', {

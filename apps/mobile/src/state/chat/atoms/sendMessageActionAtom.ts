@@ -12,6 +12,7 @@ import {InteractionManager} from 'react-native'
 import {privateApiAtom} from '../../../api'
 import {type ActionAtomType} from '../../../utils/atomUtils/ActionAtomType'
 import {type FocusAtomType} from '../../../utils/atomUtils/FocusAtomType'
+import {version} from '../../../utils/environment'
 import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
 import addMessageToChat from '../utils/addMessageToChat'
 import replaceImageFileUrisWithBase64 from '../utils/replaceImageFileUrisWithBase64'
@@ -63,6 +64,7 @@ export default function sendMessageActionAtom(
                   time: now(),
                   senderPublicKey: chatWithMessages.chat.otherSide.publicKey,
                   uuid: generateChatMessageId(),
+                  myVersion: version,
                   text: 'Inbox deleted',
                 },
               }

@@ -28,6 +28,22 @@ export default function createNewChatsFromFirstMessages({
       A.map((senderPublicKey): ChatWithMessages | undefined => {
         const messages = messagesBySender[senderPublicKey]
         if (!messages) return undefined
+
+        const lastMessage = messages.at(-1)
+        if (!lastMessage) return undefined
+
+        const otherSideVersion =
+          lastMessage.state === 'receivedButRequiresNewerVersion' ||
+          lastMessage.state === 'received'
+            ? lastMessage.message.myVersion
+            : undefined
+        const lastReportedVersion =
+          lastMessage.state === 'sending' ||
+          lastMessage.state === 'sendingError' ||
+          lastMessage.state === 'sent'
+            ? lastMessage.message.myVersion
+            : undefined
+
         return {
           chat: {
             inbox,
@@ -40,6 +56,8 @@ export default function createNewChatsFromFirstMessages({
             showInfoBar: true,
             showVexlbotInitialMessage: true,
             showVexlbotNotifications: true,
+            otherSideVersion,
+            lastReportedVersion,
           },
           tradeChecklist: {
             ...createEmptyTradeChecklistInState(),

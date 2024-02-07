@@ -14,7 +14,7 @@ import {atom} from 'jotai'
 import {privateApiAtom} from '../../../api'
 import notEmpty from '../../../utils/notEmpty'
 import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
-import {addMessageToMessagesArray} from '../utils/addMessageToChat'
+import addMessageToChat from '../utils/addMessageToChat'
 import shouldSendTerminationMessageToChat from '../utils/shouldSendTerminationMessageToChat'
 import allChatsAtom from './allChatsAtom'
 
@@ -94,12 +94,7 @@ const sendMessageToChatsInBatchActionAtom = atom(
                 message: sentMessage.message,
               }
 
-              return {
-                ...oneChat,
-                messages: addMessageToMessagesArray(oneChat.messages)(
-                  messageToState
-                ),
-              }
+              return addMessageToChat(messageToState)(oneChat)
             })
           )
           return E.right(true)

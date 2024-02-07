@@ -21,10 +21,11 @@ import {atom} from 'jotai'
 import {privateApiAtom} from '../../../api'
 import {type ActionAtomType} from '../../../utils/atomUtils/ActionAtomType'
 import {type FocusAtomType} from '../../../utils/atomUtils/FocusAtomType'
+import {version} from '../../../utils/environment'
 import removeFile from '../../../utils/removeFile'
 import {anonymizedUserDataAtom, sessionDataOrDummyAtom} from '../../session'
 import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
-import {addMessageToMessagesArray} from '../utils/addMessageToChat'
+import addMessageToChat from '../utils/addMessageToChat'
 import anonymizePhoneNumber from '../utils/anonymizePhoneNumber'
 import processIdentityRevealMessageIfAny from '../utils/processIdentityRevealMessageIfAny'
 import replaceImageFileUrisWithBase64, {
@@ -103,12 +104,14 @@ export default function revealIdentityActionAtom(
               },
               time: unixMillisecondsNow(),
               uuid: generateChatMessageId(),
+              myVersion: version,
               messageType: type,
               senderPublicKey: chat.inbox.privateKey.publicKeyPemBase64,
             }
           : {
               text: 'Identity reveal denied',
               time: unixMillisecondsNow(),
+              myVersion: version,
               uuid: generateChatMessageId(),
               messageType: type,
               senderPublicKey: chat.inbox.privateKey.publicKeyPemBase64,
@@ -154,10 +157,7 @@ export default function revealIdentityActionAtom(
             message: messageWithFileUri,
             state: 'sent',
           }
-          set(chatWithMessagesAtom, (old) => ({
-            ...old,
-            messages: addMessageToMessagesArray(old.messages)(successMessage),
-          }))
+          set(chatWithMessagesAtom, addMessageToChat(successMessage))
           return successMessage
         })
       )

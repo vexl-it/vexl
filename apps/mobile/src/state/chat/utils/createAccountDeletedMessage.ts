@@ -1,6 +1,7 @@
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {generateChatMessageId} from '@vexl-next/domain/src/general/messaging'
 import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {version} from '../../../utils/environment'
 import {type ChatMessageWithState} from '../domain'
 
 export default function createAccountDeletedMessage({
@@ -16,6 +17,7 @@ export default function createAccountDeletedMessage({
       text: '',
       time: unixMillisecondsNow(),
       senderPublicKey,
+      myVersion: version,
     },
   }
 }

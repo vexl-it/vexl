@@ -19,9 +19,10 @@ import {atom} from 'jotai'
 import {privateApiAtom} from '../../../api'
 import {type ActionAtomType} from '../../../utils/atomUtils/ActionAtomType'
 import {type FocusAtomType} from '../../../utils/atomUtils/FocusAtomType'
+import {version} from '../../../utils/environment'
 import {anonymizedUserDataAtom, sessionDataOrDummyAtom} from '../../session'
 import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
-import {addMessageToMessagesArray} from '../utils/addMessageToChat'
+import addMessageToChat from '../utils/addMessageToChat'
 import anonymizePhoneNumber from '../utils/anonymizePhoneNumber'
 import processContactRevealMessageIfAny from '../utils/processContactRevealMessageIfAny'
 import {type ReadingFileError} from '../utils/replaceImageFileUrisWithBase64'
@@ -103,6 +104,7 @@ export default function revealContactActionAtom(
           fullPhoneNumber: phoneNumber,
           partialPhoneNumber: anonymizedPhoneNumber,
         },
+        myVersion: version,
         time: unixMillisecondsNow(),
         uuid: generateChatMessageId(),
         messageType: type,
@@ -135,10 +137,7 @@ export default function revealContactActionAtom(
             )
           }
 
-          set(chatWithMessagesAtom, (old) => ({
-            ...old,
-            messages: addMessageToMessagesArray(old.messages)(successMessage),
-          }))
+          set(chatWithMessagesAtom, addMessageToChat(successMessage))
 
           return successMessage
         })

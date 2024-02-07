@@ -14,6 +14,7 @@ import {atom} from 'jotai'
 import {privateApiAtom} from '../../../api'
 import {type ActionAtomType} from '../../../utils/atomUtils/ActionAtomType'
 import {type FocusAtomType} from '../../../utils/atomUtils/FocusAtomType'
+import {version} from '../../../utils/environment'
 import {createSingleOfferReportedFlagAtom} from '../../marketplace/atoms/offersState'
 import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
 
@@ -36,6 +37,7 @@ export default function blockChatActionAtom(
       text,
       time: unixMillisecondsNow(),
       uuid: generateChatMessageId(),
+      myVersion: version,
       messageType: 'BLOCK_CHAT',
       senderPublicKey: chat.inbox.privateKey.publicKeyPemBase64,
     }
@@ -75,6 +77,11 @@ export default function blockChatActionAtom(
 
         set(chatWithMessagesAtom, (old) => ({
           ...old,
+          chat: {
+            ...old.chat,
+            lastReportedVersion:
+              messageToSend.myVersion ?? old.chat.lastReportedVersion,
+          },
           messages: [successMessage],
         }))
 

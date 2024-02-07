@@ -71,16 +71,31 @@ export default function addMessagesToChats(
             ['APPROVE_REVEAL'].includes(update.contact.status)
         )?.contact
 
+        const lastReceivedMessage = messages.findLast(
+          (one) =>
+            one.state === 'received' ||
+            one.state === 'receivedButRequiresNewerVersion'
+        )
+
         return pipe(
           {
             ...oneChat,
-            messages,
+            // Do not show version updates in chat
+            messages: messages.filter(
+              (one) => one.message.messageType !== 'VERSION_UPDATE'
+            ),
             tradeChecklist: tradeChecklistUpdates.reduce(
               (acc, update) =>
                 updateTradeChecklistState(acc)({update, direction: 'received'}),
               oneChat.tradeChecklist
             ),
-            chat: {...oneChat.chat, isUnread: true},
+            chat: {
+              ...oneChat.chat,
+              isUnread: true,
+              otherSideVersion:
+                lastReceivedMessage?.message.myVersion ??
+                oneChat.chat.otherSideVersion,
+            },
           },
           processIdentityRevealMessageIfAny(identityRevealMessage),
           processContactRevealMessageIfAny(contactRevealMessage),

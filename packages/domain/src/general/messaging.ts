@@ -30,6 +30,7 @@ export const MessageType = z.enum([
   'DISAPPROVE_CONTACT_REVEAL',
   'REQUEST_CONTACT_REVEAL',
   'TRADE_CHECKLIST_UPDATE',
+  'VERSION_UPDATE',
 ])
 export type MessageType = z.TypeOf<typeof MessageType>
 
@@ -78,6 +79,9 @@ export const ChatMessagePayload = z.object({
   repliedTo: RepliedToData.optional(),
   time: UnixMilliseconds,
   messageType: MessageType,
+  // myVersion: SemverString.default(SemverString.parse('1.12.0')),
+  // TODO - default
+  myVersion: SemverString.optional(),
   tradeChecklistUpdate: TradeChecklistUpdate.optional(),
   minimalRequiredVersion: SemverString.optional(),
   deanonymizedUser: z
@@ -100,6 +104,9 @@ export const ChatMessage = z.object({
   text: z.string(),
   minimalRequiredVersion: SemverString.optional(),
   time: UnixMilliseconds,
+  // myVersion: SemverString.default(SemverString.parse('1.12.0')),
+  // TODO default
+  myVersion: SemverString.optional(),
   image: UriString.optional(),
   repliedTo: RepliedToData.optional(),
   tradeChecklistUpdate: TradeChecklistUpdate.optional(),
@@ -147,6 +154,8 @@ export const Chat = z.object({
   showInfoBar: z.boolean().default(true),
   showVexlbotNotifications: z.boolean().default(true),
   showVexlbotInitialMessage: z.boolean().default(true),
+  otherSideVersion: SemverString.optional(),
+  lastReportedVersion: SemverString.optional(),
 })
 export type Chat = z.TypeOf<typeof Chat>
 
@@ -160,6 +169,7 @@ export const ChatMessageRequiringNewerVersion = z.object({
   uuid: ChatMessageId,
   messageType: z.literal('REQUIRES_NEWER_VERSION'),
   serverMessage: ServerMessage,
+  myVersion: SemverString.optional(),
   minimalRequiredVersion: SemverString,
   time: UnixMilliseconds,
   senderPublicKey: PublicKeyPemBase64,

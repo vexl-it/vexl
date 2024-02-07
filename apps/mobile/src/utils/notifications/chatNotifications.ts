@@ -77,7 +77,12 @@ export async function showChatNotification(
     )
     return
   }
+
   const notificationData = notificationDataVerification.data
+  if (notificationData.type === 'VERSION_UPDATE') {
+    // DO not show notification in this case
+    return
+  }
   if (notificationData.type === 'CANCEL_REQUEST_MESSAGING') return // No message displayed in this case
 
   const {t} = getDefaultStore().get(translationAtom)

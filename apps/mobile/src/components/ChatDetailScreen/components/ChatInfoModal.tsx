@@ -1,12 +1,13 @@
 import {useNavigation} from '@react-navigation/native'
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtom, useAtomValue, useSetAtom} from 'jotai'
-import {ScrollView} from 'react-native'
+import {Alert, ScrollView} from 'react-native'
 import {SlideInDown, SlideOutDown} from 'react-native-reanimated'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
-import {Stack, YStack, getTokens} from 'tamagui'
+import {Stack, Text, YStack, getTokens} from 'tamagui'
 import BlockIconSvg from '../../../images/blockIconSvg'
 import tradeChecklistSvg from '../../../images/tradeChecklistSvg'
+import {enableHiddenFeatures} from '../../../utils/environment'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import useResetNavigationToMessagingScreen from '../../../utils/useResetNavigationToMessagingScreen'
 import AnimatedModal from '../../AnimatedModal'
@@ -33,6 +34,8 @@ function ChatInfoModal(): JSX.Element | null {
     revealIdentityWithUiFeedbackAtom,
     identityRevealStatusAtom,
     showVexlbotNotificationsForCurrentChatAtom,
+    otherSideSupportsTradingChecklistAtom,
+    chatAtom,
   } = useMolecule(chatMolecule)
   const [showModal, setShowModal] = useAtom(showModalAtom)
   const {top} = useSafeAreaInsets()
@@ -53,6 +56,10 @@ function ChatInfoModal(): JSX.Element | null {
   )
   const chatId = useAtomValue(chatIdAtom)
   const inboxKey = useAtomValue(publicKeyPemBase64Atom)
+  const chat = useAtomValue(chatAtom)
+  const otherSideSupportsTradingChecklist = useAtomValue(
+    otherSideSupportsTradingChecklistAtom
+  )
 
   if (!showModal) return null
 
@@ -67,6 +74,13 @@ function ChatInfoModal(): JSX.Element | null {
           <Stack mt="$4" mb="$7">
             <ChatRequestPreview mode="offerFirst" />
           </Stack>
+          {enableHiddenFeatures && (
+            <Text>
+              Last reported: {chat.lastReportedVersion ?? 'none'} : gotVersion:{' '}
+              {chat.otherSideVersion ?? 'none'} (this will NOT be visible in
+              production)
+            </Text>
+          )}
           <ButtonStack
             buttons={[
               ...(canSendMessages && identityRevealStatus === 'notStarted'
@@ -102,6 +116,13 @@ function ChatInfoModal(): JSX.Element | null {
                 text: t('messages.tradeChecklist'),
                 iconFill: getTokens().color.greyOnBlack.val,
                 onPress: () => {
+                  if (!otherSideSupportsTradingChecklist) {
+                    Alert.alert(
+                      t('tradeChecklist.notSupportedByOtherSide.title'),
+                      t('tradeChecklist.notSupportedByOtherSide.body')
+                    )
+                    return
+                  }
                   setShowModal(false)
                   navigation.navigate('TradeChecklistFlow', {
                     screen: 'AgreeOnTradeDetails',

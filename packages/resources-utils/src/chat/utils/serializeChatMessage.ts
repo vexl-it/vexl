@@ -56,6 +56,7 @@ export default function serializeChatMessage(
       messageType: message.messageType,
       minimalRequiredVersion: message.minimalRequiredVersion,
       tradeChecklistUpdate: message.tradeChecklistUpdate,
+      myVersion: message.myVersion,
       deanonymizedUser: deanonymizedUserToPayload(message),
     } satisfies ChatMessagePayload,
     safeParse(ChatMessagePayload),

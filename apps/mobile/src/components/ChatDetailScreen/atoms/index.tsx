@@ -18,6 +18,7 @@ import blockChatActionAtom from '../../../state/chat/atoms/blockChatActionAtom'
 import cancelRequestActionAtomHandleUI from '../../../state/chat/atoms/cancelRequestActionAtomHandleUI'
 import createCanChatBeRerequestedAtom from '../../../state/chat/atoms/createCanBeRerequestedAtom'
 import createIsCancelledAtom from '../../../state/chat/atoms/createIsCancelledAtom'
+import {createOtherSideSupportsTradingChecklistAtom} from '../../../state/chat/atoms/createOtherSideSupportTradingChecklistAtom'
 import {createRequestStateAtom} from '../../../state/chat/atoms/createRequestStateAtom'
 import deleteChatActionAtom from '../../../state/chat/atoms/deleteChatActionAtom'
 import {focusWasDeniedAtom} from '../../../state/chat/atoms/focusDenyRequestMessageAtom'
@@ -831,6 +832,8 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     forceShowHistoryAtom,
     requestStateAtom: createRequestStateAtom(chatWithMessagesAtom),
     canBeRerequestedAtom: createCanChatBeRerequestedAtom(chatWithMessagesAtom),
+    otherSideSupportsTradingChecklistAtom:
+      createOtherSideSupportsTradingChecklistAtom(chatAtom),
     rerequestOfferActionAtom,
     hasPreviousCommunicationAtom,
     cancelRequestActionAtom,

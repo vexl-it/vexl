@@ -1,6 +1,7 @@
 import {createNativeStackNavigator} from '@react-navigation/native-stack'
 import {useAtomValue} from 'jotai'
 import {type RootStackParamsList} from '../../navigationTypes'
+import {useCheckAndReportCurrrentVersionToChatsActionAtom} from '../../state/chat/atoms/checkAndReportCurrentVersionToChatsActionAtom'
 import {useDecodePreviouslyUncompatibleMessagesOnMount} from '../../state/chat/atoms/decodePreviouslyUncompatibleMessagesActionAtom'
 import {useSyncConnections} from '../../state/connections'
 import useRefreshContactsFromDeviceOnResume from '../../state/contacts/hooks/useRefreshContactsFromDeviceOnResume'
@@ -55,6 +56,7 @@ function LoggedInHookGroup(): null {
   useSyncConnections()
   useHandleDeepLink()
   useSetCombinedContactsAfterLastSubmitForCurrentUsers()
+  useCheckAndReportCurrrentVersionToChatsActionAtom()
 
   useHideInnactivityReminderNotificationsOnResume()
   useRefreshContactsFromDeviceOnResume()

@@ -18,6 +18,7 @@ import {atom} from 'jotai'
 import {privateApiAtom} from '../../../api'
 import {type ActionAtomType} from '../../../utils/atomUtils/ActionAtomType'
 import {type FocusAtomType} from '../../../utils/atomUtils/FocusAtomType'
+import {version} from '../../../utils/environment'
 import {deleteChatFiles} from '../../../utils/fsDirectories'
 import {removeFeedbackRecordActionAtom} from '../../feedback/atoms'
 import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
@@ -49,6 +50,7 @@ export default function deleteChatActionAtom(
       time: unixMillisecondsNow(),
       uuid: generateChatMessageId(),
       messageType: 'DELETE_CHAT',
+      myVersion: version,
       senderPublicKey: chat.inbox.privateKey.publicKeyPemBase64,
     }
 
@@ -92,6 +94,11 @@ export default function deleteChatActionAtom(
           flow(
             (old) => ({
               ...old,
+              chat: {
+                ...old.chat,
+                lastReportedVersion:
+                  messageToSend.myVersion ?? old.chat.lastReportedVersion,
+              },
               messages: [successMessage],
             }),
             resetTradeChecklist,

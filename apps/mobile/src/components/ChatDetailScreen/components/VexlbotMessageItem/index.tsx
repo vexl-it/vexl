@@ -1,5 +1,8 @@
+import {useMolecule} from 'bunshi/dist/react'
+import {useAtomValue} from 'jotai'
 import React from 'react'
 import {Stack, Text} from 'tamagui'
+import {chatMolecule} from '../../atoms'
 import TradeChecklistAmountView from './components/TradeChecklistAmountView'
 import TradeChecklistContactRevealView from './components/TradeChecklistContactRevealView'
 import TradeChecklistDateAndTimeView from './components/TradeChecklistDateAndTimeView'
@@ -14,6 +17,12 @@ export default function VexlbotMessageItem({
 }: {
   data: VexlBotMessageData
 }): JSX.Element | null {
+  const {otherSideSupportsTradingChecklistAtom} = useMolecule(chatMolecule)
+  const otherSideSupportsTradingChecklist = useAtomValue(
+    otherSideSupportsTradingChecklistAtom
+  )
+
+  if (!otherSideSupportsTradingChecklist) return null
   if (data.type === 'tradeChecklistSuggestion') {
     return <TradeChecklistReminder />
   }

@@ -1,10 +1,5 @@
-import {
-  generateChatMessageId,
-  type ChatMessage,
-  type ChatMessagePayload,
-} from '@vexl-next/domain/src/general/messaging'
+import {type ChatMessagePayload} from '@vexl-next/domain/src/general/messaging'
 import {type OfferInfo} from '@vexl-next/domain/src/general/offers'
-import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {type BasicError} from '@vexl-next/domain/src/utility/errors'
 import {sendCancelMessagingRequest} from '@vexl-next/resources-utils/src/chat/sendCancelMessagingRequest'
 import {type ErrorEncryptingMessage} from '@vexl-next/resources-utils/src/chat/utils/chatCrypto'
@@ -25,14 +20,13 @@ import {
   type UserDeclinedError,
 } from '../../../components/AreYouSureDialog'
 import {loadingOverlayDisplayedAtom} from '../../../components/LoadingOverlayProvider'
+import {version} from '../../../utils/environment'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
 import showErrorAlert from '../../../utils/showErrorAlert'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 import {sessionDataOrDummyAtom} from '../../session'
 import {type ChatMessageWithState} from '../domain'
-import addMessageToChat, {
-  addMessageToMessagesArray,
-} from '../utils/addMessageToChat'
+import addMessageToChat from '../utils/addMessageToChat'
 import createAccountDeletedMessage from '../utils/createAccountDeletedMessage'
 import focusChatByInboxKeyAndSenderKey from './focusChatByInboxKeyAndSenderKey'
 
@@ -74,14 +68,6 @@ const cancelRequestActionAtomHandleUI = atom(
     const api = get(privateApiAtom)
     const {t} = get(translationAtom)
 
-    const messageToSend: ChatMessage = {
-      text,
-      time: unixMillisecondsNow(),
-      uuid: generateChatMessageId(),
-      messageType: 'CANCEL_REQUEST_MESSAGING',
-      senderPublicKey: chat.inbox.privateKey.publicKeyPemBase64,
-    }
-
     return pipe(
       TE.Do,
       TE.chainW(() =>
@@ -106,17 +92,15 @@ const cancelRequestActionAtomHandleUI = atom(
           text,
           fromKeypair: chat.inbox.privateKey,
           toPublicKey: chat.otherSide.publicKey,
+          myVersion: version,
         })
       }),
-      TE.map((): ChatMessageWithState => {
+      TE.map((sentMessage): ChatMessageWithState => {
         const successMessage = {
-          message: messageToSend,
+          message: sentMessage,
           state: 'sent',
         } as const
-        set(chatAtom, (old) => ({
-          ...old,
-          messages: addMessageToMessagesArray(old.messages)(successMessage),
-        }))
+        set(chatAtom, addMessageToChat(successMessage))
         return successMessage
       }),
       TE.mapLeft((error) => {

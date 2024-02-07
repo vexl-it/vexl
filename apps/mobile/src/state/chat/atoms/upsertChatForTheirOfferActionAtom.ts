@@ -12,7 +12,7 @@ import {
   type ChatWithMessages,
   type MessagingState,
 } from '../domain'
-import {addMessageToMessagesArray} from '../utils/addMessageToChat'
+import addMessageToChat from '../utils/addMessageToChat'
 import focusChatForTheirOfferAtom from './focusChatForTheirOfferAtom'
 import messagingStateAtom from './messagingStateAtom'
 
@@ -25,6 +25,18 @@ function createNewChat({
   initialMessage: ChatMessageWithState
   offer: OneOfferInState
 }): ChatWithMessages {
+  const otherSideVersion =
+    initialMessage.state === 'receivedButRequiresNewerVersion' ||
+    initialMessage.state === 'received'
+      ? initialMessage.message.myVersion
+      : undefined
+  const lastReportedVersion =
+    initialMessage.state === 'sending' ||
+    initialMessage.state === 'sendingError' ||
+    initialMessage.state === 'sent'
+      ? initialMessage.message.myVersion
+      : undefined
+
   return {
     chat: {
       id: generateChatId(),
@@ -37,12 +49,14 @@ function createNewChat({
       showInfoBar: true,
       showVexlbotInitialMessage: true,
       showVexlbotNotifications: true,
+      lastReportedVersion,
+      otherSideVersion,
     },
     tradeChecklist: {
       ...createEmptyTradeChecklistInState(),
     },
     messages: [initialMessage],
-  }
+  } satisfies ChatWithMessages
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
@@ -74,10 +88,7 @@ const upsertChatForTheirOfferActionAtom = atom(
     })
     const existingChat = get(existingChatAtom)
     if (existingChat) {
-      set(existingChatAtom, (prev) => ({
-        ...prev,
-        messages: addMessageToMessagesArray(prev.messages)(initialMessage),
-      }))
+      set(existingChatAtom, addMessageToChat(initialMessage))
       return existingChat.chat
     } else {
       const newChat = createNewChat({

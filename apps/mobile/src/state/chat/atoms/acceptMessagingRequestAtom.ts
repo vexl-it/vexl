@@ -11,6 +11,7 @@ import * as TE from 'fp-ts/TaskEither'
 import {flow, pipe} from 'fp-ts/function'
 import {atom, type PrimitiveAtom} from 'jotai'
 import {privateApiAtom} from '../../../api'
+import {version} from '../../../utils/environment'
 import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
 import addMessageToChat from '../utils/addMessageToChat'
 import createAccountDeletedMessage from '../utils/createAccountDeletedMessage'
@@ -47,6 +48,7 @@ const acceptMessagingRequestAtom = atom(
         api: api.chat,
         fromKeypair: chat.inbox.privateKey,
         toPublicKey: chat.otherSide.publicKey,
+        myVersion: version,
       }),
       TE.mapLeft((error) => {
         if (error._tag === 'OtherSideAccountDeleted') {

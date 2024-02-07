@@ -55,6 +55,7 @@ const ChatMessageRequiringNewerVersionWithDefaults = z.object({
   senderPublicKey: PublicKeyPemBase64,
   messageParsed: z.unknown(),
   serverMessage: ServerMessage,
+  myVersion: SemverString.optional(),
   time: UnixMilliseconds.catch(() => unixMillisecondsNow()),
   uuid: ChatMessageId.catch(() => generateChatMessageId()),
   text: z.literal('-').catch('-'),
@@ -106,6 +107,7 @@ function ensureCompatibleVersion({
         _tag: 'ErrorChatMessageRequiresNewerVersion',
         message: {
           ...errorDataParsed.data,
+          myVersion: errorDataParsed.data.myVersion,
           messageType: 'REQUIRES_NEWER_VERSION',
         },
       } satisfies ErrorChatMessageRequiresNewerVersion)
@@ -134,6 +136,7 @@ export function chatMessagePayloadToChatMessage(
         }
       : undefined,
     senderPublicKey,
+    myVersion: payload.myVersion,
     tradeChecklistUpdate: payload.tradeChecklistUpdate,
   })
 }

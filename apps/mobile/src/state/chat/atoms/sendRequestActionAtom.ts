@@ -6,6 +6,7 @@ import {pipe} from 'fp-ts/function'
 import {atom} from 'jotai'
 import {privateApiAtom} from '../../../api'
 import {loadingOverlayDisplayedAtom} from '../../../components/LoadingOverlayProvider'
+import {version} from '../../../utils/environment'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
 import {getNotificationToken} from '../../../utils/notifications'
 import reportError from '../../../utils/reportError'
@@ -30,6 +31,7 @@ const sendRequestActionAtom = atom(
         text,
         api: api.chat,
         fromKeypair: session.privateKey,
+        myVersion: version,
         toPublicKey: originOffer.offerInfo.publicPart.offerPublicKey,
       }),
       TE.map((message) =>

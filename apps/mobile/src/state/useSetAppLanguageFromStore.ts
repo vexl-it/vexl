@@ -9,7 +9,7 @@ export function useSetAppLanguageFromStore(): void {
   const setI18n = useSetAtom(i18nAtom)
 
   useEffect(() => {
-    if (!__DEV__ && preferences?.appLanguage) {
+    if (preferences?.appLanguage) {
       setI18n(getNewI18n(preferences.appLanguage))
     }
   }, [preferences.appLanguage, setI18n])

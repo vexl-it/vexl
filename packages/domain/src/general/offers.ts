@@ -36,16 +36,9 @@ export type BtcNetwork = z.TypeOf<typeof BtcNetwork>
 export const OfferType = z.enum(['BUY', 'SELL'])
 export type OfferType = z.TypeOf<typeof OfferType>
 
-export const SpokenLanguage = z.enum([
-  'ENG',
-  'DEU',
-  'CZE',
-  'SVK',
-  'PRT',
-  'FRA',
-  'ITA',
-  'ESP',
-])
+export const SpokenLanguage = z
+  .enum(['ENG', 'DEU', 'CZE', 'SVK', 'PRT', 'FRA', 'ITA', 'ESP', 'BG'])
+  .default('ENG')
 export type SpokenLanguage = z.TypeOf<typeof SpokenLanguage>
 
 export {CurrencyCode}
@@ -129,6 +122,7 @@ export const spokenLanguagesOptions: SpokenLanguage[] = [
   'CZE',
   'SVK',
   'PRT',
+  'BG',
 ]
 
 export const OfferInfo = z.object({

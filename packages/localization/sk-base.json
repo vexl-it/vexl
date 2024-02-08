@@ -469,7 +469,7 @@
   "reuploadOffers.progress.errorExplanation": "{{failedCount}} z {{totalCount}} ponúk sa nepodarilo zašifrovať. Uisti sa, že si pripojený k internetu a skús to znova, prípadne kontaktuj podporu.",
   "reuploadOffers.progress.errorExplanationShort": "Chyba pri nahrávaní {{failedCount}} ponúk. ",
   "reuploadOffers.progress.successTitle": "Tvoje ponuky sú znova viditeľné!",
-  "reuploadOffers.progress.bottomText": "Ostatní môžu znova vidieť tvoje ponuky. ",
+  "reuploadOffers.progress.bottomText": "Others can now ses your offers again.",
   "reuploadOffers.progress.belowProgressLeft": "Nahrali sme {{reuploadedCount}} ponúk",
   "messages.yourOffer": "Tvoja ponuka",
   "messages.theirOffer": "Ponuka protistrany",

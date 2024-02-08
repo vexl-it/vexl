@@ -1,4 +1,7 @@
 import base from '@vexl-next/localization/base.json'
+import bgBase from '@vexl-next/localization/bg-base.json'
+import bgPrivacyPolicyDev from '@vexl-next/localization/bg-privacyPolicy.json'
+import bgTermsOfUse from '@vexl-next/localization/bg-termsOfUse.json'
 import csBase from '@vexl-next/localization/cs-base.json'
 import csPrivacyPolicyDev from '@vexl-next/localization/cs-privacyPolicy.json'
 import csTermsOfUse from '@vexl-next/localization/cs-termsOfUse.json'
@@ -88,4 +91,11 @@ export const sk = {
   localeName: 'sk',
   termsOfUseMD: skTermsOfUse.termsOfUseText,
   privacyPolicyMD: skPrivacyPolicyDev.privacyPolicyText,
+} as const
+
+export const bg = {
+  ...unflatten<typeof bgBase, typeof base>(bgBase),
+  localeName: 'bg',
+  termsOfUseMD: bgTermsOfUse.termsOfUseText,
+  privacyPolicyMD: bgPrivacyPolicyDev.privacyPolicyText,
 } as const

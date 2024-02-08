@@ -12,6 +12,7 @@ export const supportedTranslations = {
   de: translations.de,
   cs: translations.cs,
   sk: translations.sk,
+  bg: translations.bg,
 }
 
 // SETUP I18n
@@ -39,6 +40,7 @@ interface TranslationContext {
 
 export const i18nAtom = atom(i18n)
 export const showDevLabelsAtom = atom(false)
+
 export const translationAtom = atom((get): TranslationContext => {
   const i18nVal = get(i18nAtom)
   const showDevLabels = get(showDevLabelsAtom)

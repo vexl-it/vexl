@@ -469,7 +469,7 @@
   "reuploadOffers.progress.errorExplanation": "Les offres {{failedCount}} sur {{totalCount}} n'ont pas pu être envoyées. Assurez-vous que vous êtes connecté à internet et réessayez, ou contactez le support.",
   "reuploadOffers.progress.errorExplanationShort": "Échec de l'envoi de {{failedCount}} offres.",
   "reuploadOffers.progress.successTitle": "Vos offres sont à nouveau en direct !",
-  "reuploadOffers.progress.bottomText": "Les autres peuvent à nouveau voir vos offres.",
+  "reuploadOffers.progress.bottomText": "Others can now ses your offers again.",
   "reuploadOffers.progress.belowProgressLeft": "{{reuploadedCount}} offres réenvoyées",
   "messages.yourOffer": "Votre offre",
   "messages.theirOffer": "Leur offre",

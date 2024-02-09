@@ -22,9 +22,11 @@ function TradeChecklistReminder(): JSX.Element | null {
     showVexlbotNotificationsForCurrentChatAtom,
     showVexlbotInitialMessageForCurrentChatAtom,
     otherSideDataAtom,
+    offerForChatAtom,
   } = useMolecule(chatMolecule)
   const otherSideData = useAtomValue(otherSideDataAtom)
   const chatId = useAtomValue(chatIdAtom)
+  const offerForChat = useAtomValue(offerForChatAtom)
   const inboxKey = useAtomValue(publicKeyPemBase64Atom)
   const showVexlbotNotificationsForCurrentChat = useAtomValue(
     showVexlbotNotificationsForCurrentChatAtom
@@ -45,30 +47,54 @@ function TradeChecklistReminder(): JSX.Element | null {
   )
     return null
 
+  const offerIsInperson =
+    offerForChat?.offerInfo.publicPart.locationState === 'IN_PERSON'
+
   return (
     <VexlbotBubble
       onCancelPress={() => {
         setShowVexlbotInitialMessageForCurrentChat(false)
         if (dontShowSwitchValue) setShowVexlbotInitialMessageForAllChats(false)
       }}
-      text={t('vexlbot.initialWelcomeMessage', {name: otherSideData.userName})}
+      text={t(
+        offerIsInperson
+          ? 'vexlbot.initialWelcomeMessage'
+          : 'vexlbot.initialWelcomeMessageOnline',
+        {name: otherSideData.userName}
+      )}
     >
       <Stack space="$4">
-        <Button
-          beforeIcon={tradeChecklistSvg}
-          iconSize={24}
-          iconFill={getTokens().color.darkBrown.val}
-          onPress={() => {
-            navigation.navigate('TradeChecklistFlow', {
-              screen: 'AgreeOnTradeDetails',
-              chatId,
-              inboxKey,
-            })
-          }}
-          variant="secondary"
-          size="medium"
-          text={t('vexlbot.openTradeChecklist')}
-        />
+        {offerIsInperson ? (
+          <Button
+            beforeIcon={tradeChecklistSvg}
+            iconSize={24}
+            iconFill={getTokens().color.darkBrown.val}
+            onPress={() => {
+              navigation.navigate('TradeChecklistFlow', {
+                screen: 'AgreeOnTradeDetails',
+                chatId,
+                inboxKey,
+              })
+            }}
+            variant="secondary"
+            size="medium"
+            text={t('vexlbot.openTradeChecklist')}
+          />
+        ) : (
+          <Button
+            iconFill={getTokens().color.darkBrown.val}
+            onPress={() => {
+              navigation.navigate('TradeChecklistFlow', {
+                screen: 'AgreeOnTradeDetails',
+                chatId,
+                inboxKey,
+              })
+            }}
+            variant="secondary"
+            size="medium"
+            text={t('vexlbot.openTradeChecklistOnline')}
+          />
+        )}
         <XStack space="$2">
           <Checkbox
             size="small"

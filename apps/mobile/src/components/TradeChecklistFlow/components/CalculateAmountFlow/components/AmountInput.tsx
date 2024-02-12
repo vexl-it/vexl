@@ -66,10 +66,11 @@ function AmountInput(
             keyboardType="decimal-pad"
             numberOfLines={1}
             textAlign="right"
+            selectTextOnFocus
             textColor={isFocused ? '$main' : '$white'}
             selectionColor={
               isFocused
-                ? getTokens().color.main.val
+                ? getTokens().color.$yellowAccent1.val
                 : getTokens().color.white.val
             }
             focusStyle={{

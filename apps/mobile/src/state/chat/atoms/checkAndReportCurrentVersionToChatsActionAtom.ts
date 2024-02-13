@@ -1,6 +1,7 @@
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {
   generateChatMessageId,
+  type Chat,
   type ChatMessage,
 } from '@vexl-next/domain/src/general/messaging'
 import {SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
@@ -25,22 +26,25 @@ import focusChatByInboxKeyAndSenderKey from './focusChatByInboxKeyAndSenderKey'
 function createUpdateNoticeChatMessage({
   version,
   senderPublicKey,
+  chat,
 }: {
   version: SemverString
   senderPublicKey: PublicKeyPemBase64
+  chat: Chat
 }): ChatMessage {
   return {
     uuid: generateChatMessageId(),
     text: `I have updated to ${version}`,
     messageType: 'VERSION_UPDATE',
     minimalRequiredVersion: SemverString.parse('1.13.1'),
+    lastReceivedVersion: chat.otherSideVersion,
     time: now(),
     myVersion: version,
     senderPublicKey,
   } satisfies ChatMessage
 }
 
-const sendUpdateNoticeMessageActionAtom = atom(
+export const sendUpdateNoticeMessageActionAtom = atom(
   null,
   (get, set, chatAtom: FocusAtomType<ChatWithMessages | undefined>) => {
     const chat = get(chatAtom)
@@ -49,7 +53,10 @@ const sendUpdateNoticeMessageActionAtom = atom(
     const messageToSend = createUpdateNoticeChatMessage({
       version,
       senderPublicKey: chat.chat.inbox.privateKey.publicKeyPemBase64,
+      chat: chat.chat,
     })
+
+    console.log(`Sending update: ${JSON.stringify(messageToSend, null, 2)}`)
 
     const api = get(privateApiAtom)
     return pipe(
@@ -120,52 +127,14 @@ const checkAndReportCurrentVersionToChatsActionAtom = atom(null, (get, set) => {
   )()
 })
 
-const tryToInferOtherSideVersionWhereNotSetActionAtom = atom(
-  null,
-  (get, set) => {
-    const chatsWithoutOtherSideVersion = get(allChatsAtom)
-      .flat()
-      .filter(isChatActive)
-      .filter((oneChat) => oneChat.chat.otherSideVersion === undefined)
-
-    chatsWithoutOtherSideVersion.forEach((chat) => {
-      const lastReceivedMessage = chat.messages.findLast(
-        (one) => one.state === 'received'
-      )
-      const otherSideVersion = lastReceivedMessage?.message.myVersion
-      if (!otherSideVersion) return
-      set(
-        focusChatByInboxKeyAndSenderKey({
-          inboxKey: chat.chat.inbox.privateKey.publicKeyPemBase64,
-          senderKey: chat.chat.otherSide.publicKey,
-        }),
-        (v) => ({
-          ...v,
-          chat: {
-            ...v.chat,
-            otherSideVersion: otherSideVersion ?? v.chat.otherSideVersion,
-          },
-        })
-      )
-    })
-  }
-)
-
 export default checkAndReportCurrentVersionToChatsActionAtom
 
 export function useCheckAndReportCurrrentVersionToChatsActionAtom(): void {
   const setCheckAndReportCurrentVersionToChatsAction = useSetAtom(
     checkAndReportCurrentVersionToChatsActionAtom
   )
-  const tryToInferOtherSideVersionWhereNotSet = useSetAtom(
-    tryToInferOtherSideVersionWhereNotSetActionAtom
-  )
 
   useEffect(() => {
     setCheckAndReportCurrentVersionToChatsAction()
-    tryToInferOtherSideVersionWhereNotSet()
-  }, [
-    setCheckAndReportCurrentVersionToChatsAction,
-    tryToInferOtherSideVersionWhereNotSet,
-  ])
+  }, [setCheckAndReportCurrentVersionToChatsAction])
 }

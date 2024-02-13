@@ -79,8 +79,7 @@ export const ChatMessagePayload = z.object({
   repliedTo: RepliedToData.optional(),
   time: UnixMilliseconds,
   messageType: MessageType,
-  // myVersion: SemverString.default(SemverString.parse('1.12.0')),
-  // TODO - default
+  lastReceivedVersion: SemverString.optional(),
   myVersion: SemverString.optional(),
   tradeChecklistUpdate: TradeChecklistUpdate.optional(),
   minimalRequiredVersion: SemverString.optional(),
@@ -104,9 +103,12 @@ export const ChatMessage = z.object({
   text: z.string(),
   minimalRequiredVersion: SemverString.optional(),
   time: UnixMilliseconds,
-  // myVersion: SemverString.default(SemverString.parse('1.12.0')),
-  // TODO default
   myVersion: SemverString.optional(),
+
+  /**
+   * Used only for messages  of type `VERSION_UPDATE`
+   */
+  lastReceivedVersion: SemverString.optional(),
   image: UriString.optional(),
   repliedTo: RepliedToData.optional(),
   tradeChecklistUpdate: TradeChecklistUpdate.optional(),

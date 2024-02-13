@@ -170,29 +170,31 @@ function Button({type}: {type: ButtonType}): JSX.Element | null {
               }}
             />
           )}
-        <IconButton
-          icon={tradeChecklistSvg}
-          variant="primary"
-          onPress={() => {
-            if (!otherSideSupportsTradingChecklist) {
-              Alert.alert(
-                t('tradeChecklist.notSupportedByOtherSide.title'),
-                t('tradeChecklist.notSupportedByOtherSide.body')
-              )
-              return
-            }
-            Keyboard.dismiss()
-            setModal(false)
-            navigation.navigate('TradeChecklistFlow', {
-              screen: 'AgreeOnTradeDetails',
-              chatId,
-              inboxKey,
-            })
-          }}
-          iconFill={getTokens().color.main.val}
-          iconHeight={24}
-          iconWidth={24}
-        />
+        {otherSideSupportsTradingChecklist && (
+          <IconButton
+            icon={tradeChecklistSvg}
+            variant="primary"
+            onPress={() => {
+              if (!otherSideSupportsTradingChecklist) {
+                Alert.alert(
+                  t('tradeChecklist.notSupportedByOtherSide.title'),
+                  t('tradeChecklist.notSupportedByOtherSide.body')
+                )
+                return
+              }
+              Keyboard.dismiss()
+              setModal(false)
+              navigation.navigate('TradeChecklistFlow', {
+                screen: 'AgreeOnTradeDetails',
+                chatId,
+                inboxKey,
+              })
+            }}
+            iconFill={getTokens().color.main.val}
+            iconHeight={24}
+            iconWidth={24}
+          />
+        )}
       </XStack>
     )
 

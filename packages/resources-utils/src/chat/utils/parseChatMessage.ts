@@ -137,6 +137,7 @@ export function chatMessagePayloadToChatMessage(
       : undefined,
     senderPublicKey,
     myVersion: payload.myVersion,
+    lastReceivedVersion: payload.lastReceivedVersion,
     tradeChecklistUpdate: payload.tradeChecklistUpdate,
   })
 }
@@ -153,8 +154,11 @@ export function parseChatMessage({
   ErrorParsingChatMessage | ErrorChatMessageRequiresNewerVersion,
   ChatMessage
 > {
-  return (jsonString) =>
-    pipe(
+  return (jsonString) => {
+    console.log(
+      `Parsing chat message: ${JSON.stringify(JSON.parse(jsonString), null, 2)}`
+    )
+    return pipe(
       E.right(jsonString),
       E.chainW(parseJson),
       E.chainFirstW(ensureCompatibleVersion({appVersion, serverMessage})),
@@ -166,4 +170,5 @@ export function parseChatMessage({
         return toError('ErrorParsingChatMessage')(error)
       })
     )
+  }
 }

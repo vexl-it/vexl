@@ -110,27 +110,31 @@ function ChatInfoModal(): JSX.Element | null {
                   ]
                 : []),
 
-              {
-                icon: tradeChecklistSvg,
-                isNegative: false,
-                text: t('messages.tradeChecklist'),
-                iconFill: getTokens().color.greyOnBlack.val,
-                onPress: () => {
-                  if (!otherSideSupportsTradingChecklist) {
-                    Alert.alert(
-                      t('tradeChecklist.notSupportedByOtherSide.title'),
-                      t('tradeChecklist.notSupportedByOtherSide.body')
-                    )
-                    return
-                  }
-                  setShowModal(false)
-                  navigation.navigate('TradeChecklistFlow', {
-                    screen: 'AgreeOnTradeDetails',
-                    chatId,
-                    inboxKey,
-                  })
-                },
-              },
+              ...(otherSideSupportsTradingChecklist
+                ? [
+                    {
+                      icon: tradeChecklistSvg,
+                      isNegative: false,
+                      text: t('messages.tradeChecklist'),
+                      iconFill: getTokens().color.greyOnBlack.val,
+                      onPress: () => {
+                        if (!otherSideSupportsTradingChecklist) {
+                          Alert.alert(
+                            t('tradeChecklist.notSupportedByOtherSide.title'),
+                            t('tradeChecklist.notSupportedByOtherSide.body')
+                          )
+                          return
+                        }
+                        setShowModal(false)
+                        navigation.navigate('TradeChecklistFlow', {
+                          screen: 'AgreeOnTradeDetails',
+                          chatId,
+                          inboxKey,
+                        })
+                      },
+                    },
+                  ]
+                : []),
               {
                 icon: vexlbotNotificationsSvg,
                 isNegative: false,

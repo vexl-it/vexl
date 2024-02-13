@@ -33,10 +33,44 @@ import {
   singleOfferAtom,
 } from '../../marketplace/atoms/offersState'
 import messagingStateAtom from '../atoms/messagingStateAtom'
-import {type ChatMessageWithState, type InboxInState} from '../domain'
+import {type InboxInState} from '../domain'
 import addMessagesToChats from '../utils/addMessagesToChats'
 import createNewChatsFromMessages from '../utils/createNewChatsFromFirstMessages'
 import replaceBase64UriWithImageFileUri from '../utils/replaceBase64UriWithImageFileUri'
+import {type ChatMessageWithState} from './../domain'
+import {sendUpdateNoticeMessageActionAtom} from './checkAndReportCurrentVersionToChatsActionAtom'
+import focusChatByInboxKeyAndSenderKey from './focusChatByInboxKeyAndSenderKey'
+
+const handleOtherSideUpdatedActionAtom = atom(
+  null,
+  (
+    get,
+    set,
+    {
+      newMessages,
+      inbox,
+    }: {newMessages: readonly ChatMessageWithState[]; inbox: InboxInState}
+  ) => {
+    const messagesToRespondWithCurrentVersion = newMessages.filter(
+      (one) =>
+        one.message.messageType === 'VERSION_UPDATE' &&
+        one.message.lastReceivedVersion !== version
+    )
+
+    console.log(`New messages: ${JSON.stringify(newMessages, null, 2)}`)
+
+    messagesToRespondWithCurrentVersion.forEach(
+      (oneMessageToRespondWithCurrentVersion) => {
+        const chatAtom = focusChatByInboxKeyAndSenderKey({
+          inboxKey: inbox.inbox.privateKey.publicKeyPemBase64,
+          senderKey:
+            oneMessageToRespondWithCurrentVersion.message.senderPublicKey,
+        })
+        void set(sendUpdateNoticeMessageActionAtom, chatAtom)()
+      }
+    )
+  }
+)
 
 function focusInboxInMessagingStateAtom(
   publicKey: PublicKeyPemBase64
@@ -305,6 +339,11 @@ export const fetchAndStoreMessagesForInboxAtom = atom<
               true
             )
           })
+
+        set(handleOtherSideUpdatedActionAtom, {
+          newMessages,
+          inbox: updatedInbox,
+        })
 
         return pipe(
           deletePulledMessagesReportLeft({

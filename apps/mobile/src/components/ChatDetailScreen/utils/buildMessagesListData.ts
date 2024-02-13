@@ -228,12 +228,18 @@ function messagesToListData(
     },
   }
 
-  // Vexl bot should be displayed after the first 3 messages
-  if (result.length < 3) return [vexlBotTradingChecklistMessage, ...result]
+  // Vexl bot should be displayed after the approve message
+  const acceptMessageIndex = result.findIndex(
+    (one) =>
+      one.type === 'message' &&
+      one.message.message.messageType === 'APPROVE_MESSAGING'
+  )
+
+  if (acceptMessageIndex === -1) return result
   return [
-    ...result.slice(0, -2),
+    ...result.slice(0, acceptMessageIndex),
     vexlBotTradingChecklistMessage,
-    ...result.slice(-2),
+    ...result.slice(acceptMessageIndex),
   ]
 }
 

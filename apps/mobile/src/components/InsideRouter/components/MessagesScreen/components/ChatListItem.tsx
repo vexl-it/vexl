@@ -105,7 +105,7 @@ function ChatListItem({dataAtom}: {dataAtom: Atom<ChatListData>}): JSX.Element {
                       : undefined
                   }
                 />
-                {isUnread && (
+                {!!isUnread && (
                   <Stack
                     w="$4"
                     h="$4"

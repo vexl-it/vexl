@@ -48,7 +48,7 @@ function FaqsScreen({navigation}: Props): JSX.Element | null {
               />
             </XStack>
             <Stack f={1} ai="center" jc="center" w="100%" h="100%">
-              {pageContent && (
+              {!!pageContent && (
                 <SvgImage
                   height={pageContent.height ?? '100%'}
                   width={pageContent.width ?? '100%'}

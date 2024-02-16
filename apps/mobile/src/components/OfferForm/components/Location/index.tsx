@@ -90,7 +90,7 @@ function LocationComponent({
       />
       {locationState === 'IN_PERSON' && (
         <YStack space="$2">
-          {(!location || (location && location.length < 3)) && (
+          {!!(!location || (location && location.length < 3)) && (
             <TouchableWithoutFeedback
               onPress={() => {
                 setLocationSearchVisible(newLocationSessionId())
@@ -141,7 +141,7 @@ function LocationComponent({
           }}
         />
       )}
-      {locationSearchVisible && (
+      {!!locationSearchVisible && (
         <Modal
           animationType="fade"
           visible={!!locationSearchVisible}
@@ -178,7 +178,7 @@ function LocationComponent({
           </Screen>
         </Modal>
       )}
-      {helpVisible && (
+      {!!helpVisible && (
         <Help
           visible={helpVisible}
           onClose={() => {

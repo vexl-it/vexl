@@ -42,7 +42,7 @@ function BtcAddress(): JSX.Element | null {
           >
             {btcAddress ?? t('tradeChecklist.network.pasteBtcAddress')}
           </Text>
-          {btcAddress && (
+          {!!btcAddress && (
             <TouchableOpacity
               onPress={() => {
                 Clipboard.setString(btcAddress)

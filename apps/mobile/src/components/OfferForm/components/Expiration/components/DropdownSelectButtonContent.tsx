@@ -29,7 +29,7 @@ function DropdownSelectButtonContent({expirationDateAtom}: Props): JSX.Element {
             )
           : t('offerForm.expiration.expirationDate')}
       </Text>
-      {expirationDate && (
+      {!!expirationDate && (
         <TouchableOpacity
           onPress={() => {
             setExpirationDate(undefined)

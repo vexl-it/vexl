@@ -26,7 +26,7 @@ function LoadingOverlayProvider({children}: Props): JSX.Element {
   return (
     <>
       {children}
-      {isDisplayed && (
+      {!!isDisplayed && (
         <RootContainer>
           <ActivityIndicator size="large" color={tokens.color.main.val} />
         </RootContainer>

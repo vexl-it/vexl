@@ -74,7 +74,7 @@ function ChatInfoModal(): JSX.Element | null {
           <Stack mt="$4" mb="$7">
             <ChatRequestPreview mode="offerFirst" />
           </Stack>
-          {enableHiddenFeatures && (
+          {!!enableHiddenFeatures && (
             <Text>
               Last reported: {chat.lastReportedVersion ?? 'none'} : gotVersion:{' '}
               {chat.otherSideVersion ?? 'none'} (this will NOT be visible in

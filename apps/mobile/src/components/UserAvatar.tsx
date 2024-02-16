@@ -41,7 +41,7 @@ function UserAvatar({userImage, grayScale, width, height}: Props): JSX.Element {
 
       return (
         <Canvas style={{width, height}}>
-          {svg && (
+          {!!svg && (
             <ImageSVG svg={svg} x={0} y={0} height={height} width={width} />
           )}
           <BackdropFilter filter={<ColorMatrix matrix={BLACK_AND_WHITE} />} />
@@ -54,7 +54,7 @@ function UserAvatar({userImage, grayScale, width, height}: Props): JSX.Element {
     return (
       <Canvas style={{width, height}}>
         <Group clip={roundedRect}>
-          {image && (
+          {!!image && (
             <SkiaImage
               fit="cover"
               x={0}
@@ -65,7 +65,7 @@ function UserAvatar({userImage, grayScale, width, height}: Props): JSX.Element {
             />
           )}
         </Group>
-        {grayScale && (
+        {!!grayScale && (
           <BackdropFilter filter={<ColorMatrix matrix={BLACK_AND_WHITE} />} />
         )}
       </Canvas>

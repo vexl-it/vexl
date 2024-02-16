@@ -18,7 +18,7 @@ function UploadingOfferProgressModal(): JSX.Element {
             {data.title}
           </Text>
           <ProgressIndicator />
-          {data.bottomText && (
+          {!!data.bottomText && (
             <Text pt="$4" fos={18} col="$greyOnWhite">
               {data.bottomText}
             </Text>

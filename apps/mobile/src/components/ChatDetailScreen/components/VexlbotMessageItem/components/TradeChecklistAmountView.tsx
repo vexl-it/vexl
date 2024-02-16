@@ -75,7 +75,7 @@ function TradeChecklistAmountView(): JSX.Element | null {
     if (amountDataToDisplay.status === 'accepted') {
       return (
         <>
-          {amountDataToDisplay.amountData.btcAmount && (
+          {!!amountDataToDisplay.amountData.btcAmount && (
             <Button
               text="BTC"
               beforeIcon={copySvg}
@@ -89,7 +89,7 @@ function TradeChecklistAmountView(): JSX.Element | null {
               iconFill={getTokens().color.main.val}
             />
           )}
-          {amountDataToDisplay.amountData.btcAmount && (
+          {!!amountDataToDisplay.amountData.btcAmount && (
             <Button
               text="SAT"
               beforeIcon={copySvg}
@@ -110,7 +110,7 @@ function TradeChecklistAmountView(): JSX.Element | null {
               iconFill={getTokens().color.main.val}
             />
           )}
-          {amountDataToDisplay.amountData.fiatAmount && (
+          {!!amountDataToDisplay.amountData.fiatAmount && (
             <Button
               text={currencies[tradeOrOriginOfferCurrency].code}
               beforeIcon={copySvg}

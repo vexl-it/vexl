@@ -56,7 +56,7 @@ function SelectableCell<T>({
             >
               {title}
             </Text>
-            {subtitle && (
+            {!!subtitle && (
               <Text fos={14} col={selected ? '$main' : '$greyOnBlack'} mt="$2">
                 {subtitle}
               </Text>

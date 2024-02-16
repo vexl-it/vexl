@@ -50,7 +50,7 @@ function ChecklistCell({
             <Text fos={16} ff="$body500" col="$white">
               {t(`tradeChecklist.options.${item}`)}
             </Text>
-            {subtitle && (
+            {!!subtitle && (
               <Text fos={12} ff="$body500" col="$greyOnBlack">
                 {subtitle}
               </Text>
@@ -58,7 +58,7 @@ function ChecklistCell({
           </Stack>
         </XStack>
         <XStack ai="center" space="$2">
-          {sideNote && (
+          {!!sideNote && (
             <Text fos={12} ff="$body500" col="$greyOnBlack">
               {sideNote}
             </Text>

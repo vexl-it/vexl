@@ -35,7 +35,7 @@ function SettingsScreenDialog({
       <Stack f={1} jc="flex-end" pb={bottom} bc="rgba(0,0,0,0.6)" px="$2">
         <Stack py="$4" px="$4" backgroundColor="$white" br="$4">
           <Stack jc="flex-end">
-            {title && (
+            {!!title && (
               <Text
                 col="$black"
                 my="$4"
@@ -47,7 +47,7 @@ function SettingsScreenDialog({
                 {title}
               </Text>
             )}
-            {subtitle && (
+            {!!subtitle && (
               <Text fos={18} ff="$body500" col="$greyOnWhite">
                 {subtitle}
               </Text>
@@ -56,7 +56,7 @@ function SettingsScreenDialog({
           {children}
         </Stack>
         <XStack space="$2" my="$2">
-          {secondaryButton && (
+          {!!secondaryButton && (
             <Button
               fullSize
               adjustTextToFitOneLine
@@ -71,7 +71,7 @@ function SettingsScreenDialog({
               }}
             />
           )}
-          {primaryButton && (
+          {!!primaryButton && (
             <Button
               fullSize
               adjustTextToFitOneLine

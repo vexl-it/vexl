@@ -40,7 +40,7 @@ export default function OfferWithBubbleTip({
       </TouchableWithoutFeedback>
       <XStack ai="center" jc="space-between" mt="$2">
         <OfferAuthorAvatar offer={offer} negative={negative ?? false} />
-        {button && <Stack maw="60%">{button}</Stack>}
+        {!!button && <Stack maw="60%">{button}</Stack>}
       </XStack>
     </Stack>
   )

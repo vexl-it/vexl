@@ -60,7 +60,7 @@ function CreateOfferScreen(): JSX.Element {
             <Section title={t('offerForm.iWantTo')} image={userSvg}>
               <OfferType offerTypeAtom={offerTypeAtom} />
             </Section>
-            {showAllFields && <OfferForm content={content} />}
+            {!!showAllFields && <OfferForm content={content} />}
           </ScrollView>
           <Stack px="$4" py="$4" bc="transparent">
             <Button

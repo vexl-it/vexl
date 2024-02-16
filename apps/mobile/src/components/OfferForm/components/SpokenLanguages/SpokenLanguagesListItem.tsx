@@ -37,7 +37,7 @@ function SpokenLanguagesListItem({
         <Text col="$white" fos={18}>
           {t(`offerForm.spokenLanguages.${spokenLanguage}`)}
         </Text>
-        {isSelected && (
+        {!!isSelected && (
           <Image
             height={18}
             width={18}

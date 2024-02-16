@@ -77,12 +77,12 @@ function VexlbotBubble({
             </Text>
           </XStack>
         )}
-        {onEditPress && (
+        {!!onEditPress && (
           <TouchableOpacity onPress={onEditPress}>
             <Image source={editSvg} />
           </TouchableOpacity>
         )}
-        {onCancelPress && (
+        {!!onCancelPress && (
           <TouchableOpacity onPress={onCancelPress}>
             <Image
               width={24}
@@ -94,12 +94,12 @@ function VexlbotBubble({
         )}
       </XStack>
       <Stack space="$2">
-        {introText && (
+        {!!introText && (
           <Text fos={16} ff="$body500" col="$greyOnWhite">
             {introText}
           </Text>
         )}
-        {text && (
+        {!!text && (
           <Text fos={16} ff="$body500" col="$greyOnWhite">
             {text}
           </Text>

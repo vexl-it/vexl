@@ -172,7 +172,7 @@ function TextInput(
       borderRadius={borderRadius ?? '$4'}
       {...style}
     >
-      {icon && (
+      {!!icon && (
         <Stack mr="$2">
           <Stack w={size === 'small' ? 14 : 24} h={size === 'small' ? 14 : 24}>
             <Image
@@ -186,7 +186,7 @@ function TextInput(
           </Stack>
         </Stack>
       )}
-      {leftText && (
+      {!!leftText && (
         <Stack maw="50%" fs={1}>
           <StyledText
             numberOfLines={2}
@@ -217,7 +217,7 @@ function TextInput(
         textColor={textColor}
         {...restProps}
       />
-      {showClearButton && (
+      {!!showClearButton && (
         <TouchableOpacity
           onPress={() => {
             inputRef.current?.clear()
@@ -231,7 +231,7 @@ function TextInput(
           />
         </TouchableOpacity>
       )}
-      {rightText && (
+      {!!rightText && (
         <Stack fs={1}>
           <StyledText
             adjustsFontSizeToFit

@@ -107,9 +107,9 @@ function ChatTextInput(): JSX.Element | null {
 
   return (
     <XStack space="$2" alignItems="center">
-      {preferences.allowSendingImages && <SendImageButton />}
+      {!!preferences.allowSendingImages && <SendImageButton />}
       <Stack f={1} backgroundColor="$grey" borderRadius="$8">
-        {replyToMessage && (
+        {!!replyToMessage && (
           <XStack
             borderRadius="$5"
             margin="$3"
@@ -118,7 +118,7 @@ function ChatTextInput(): JSX.Element | null {
             justifyContent="space-between"
           >
             <YStack f={1}>
-              {replyToMessage.message.image && (
+              {!!replyToMessage.message.image && (
                 <UriImageWithSizeLimits
                   uri={replyToMessage.message.image}
                   limits={responseImagePreviewLimits}
@@ -136,7 +136,7 @@ function ChatTextInput(): JSX.Element | null {
             <Image source={CancelSvg} onPress={onExtraClearPressed} />
           </XStack>
         )}
-        {selectedImage && (
+        {!!selectedImage && (
           <YStack
             borderRadius="$5"
             margin="$3"

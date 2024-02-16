@@ -54,7 +54,7 @@ const ZoomedImage = gestureHandlerRootHOC(() => {
         right="$4"
         zIndex="$100"
       >
-        {openedImageUri && (
+        {!!openedImageUri && (
           <IconButton
             icon={Platform.OS === 'ios' ? shareIosSvg : shareAndroidSvg}
             onPress={() => {
@@ -70,7 +70,7 @@ const ZoomedImage = gestureHandlerRootHOC(() => {
         />
       </XStack>
       <Stack f={1}>
-        {openedImageUri && (
+        {!!openedImageUri && (
           <ImageZoom
             imageContainerStyle={{flex: 1}}
             containerStyle={{flex: 1}}

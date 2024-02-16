@@ -25,7 +25,7 @@ function EmptyMarketplaceSuggestions(): JSX.Element {
   return (
     <ScrollView contentContainerStyle={{paddingBottom: tabBarEndsAt + 25}}>
       <YStack mt="$4" space="$4">
-        {createOfferSuggestionVisible && (
+        {!!createOfferSuggestionVisible && (
           <MarketplaceSuggestion
             buttonText={t('myOffers.addNewOffer')}
             onButtonPress={() => {
@@ -37,7 +37,7 @@ function EmptyMarketplaceSuggestions(): JSX.Element {
             text={t('suggestion.createYourFirstOffer')}
           />
         )}
-        {addMoreContactsSuggestionVisible && (
+        {!!addMoreContactsSuggestionVisible && (
           <MarketplaceSuggestion
             buttonText={t('suggestion.addMoreContacts')}
             onButtonPress={() => {

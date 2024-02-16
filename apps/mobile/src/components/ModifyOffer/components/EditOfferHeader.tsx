@@ -92,7 +92,7 @@ function EditOfferHeader({offer}: Props): JSX.Element {
           <IconButton variant="dark" icon={closeSvg} onPress={safeGoBack} />
         </XStack>
 
-        {offer && (
+        {!!offer && (
           <XStack space="$2" ai="center" jc="flex-end">
             <Stack h={12} w={12} br={12} bc={offerActive ? '$green' : '$red'} />
             <Text col={offerActive ? '$green' : '$red'} fos={18} ff="$body500">

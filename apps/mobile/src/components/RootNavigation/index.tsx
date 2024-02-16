@@ -125,8 +125,8 @@ function RootNavigation(): JSX.Element {
         <Stack.Screen name="Faqs" component={FaqsScreen} />
         <Stack.Screen name="DebugScreen" component={DebugScreen} />
       </Stack.Navigator>
-      {showTextDebugButton && <DevTranslationFloatingButton />}
-      {isLoggedIn && <LoggedInHookGroup />}
+      {!!showTextDebugButton && <DevTranslationFloatingButton />}
+      {!!isLoggedIn && <LoggedInHookGroup />}
     </>
   )
 }

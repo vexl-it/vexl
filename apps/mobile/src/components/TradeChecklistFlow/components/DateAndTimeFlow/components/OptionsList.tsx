@@ -58,13 +58,13 @@ function Item<T>({
           {item.title}
         </Text>
         <XStack space="$2" ai="center">
-          {item.rightText && (
+          {!!item.rightText && (
             <Text fos={12} ff="$body500" color="$greyOnBlack">
               {item.rightText}
             </Text>
           )}
-          {selected && <Image source={selectedCheckSvg}></Image>}
-          {showChevron && (
+          {!!selected && <Image source={selectedCheckSvg}></Image>}
+          {!!showChevron && (
             <Image
               stroke={tokens.color.greyOnBlack.val}
               source={chevronRightSvg}

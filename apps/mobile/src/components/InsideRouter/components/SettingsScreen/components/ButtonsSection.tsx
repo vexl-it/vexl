@@ -337,7 +337,7 @@ function ButtonsSection(): JSX.Element {
           <Stack br="$4" bg="$blackAccent1">
             {group.map((item, itemIndex) => (
               <Fragment key={itemIndex}>
-                {item && <Item {...item} />}
+                {!!item && <Item {...item} />}
                 {itemIndex !== group.length - 1 && (
                   <Stack h={2} bg="$grey" als="stretch" ml="$7" />
                 )}

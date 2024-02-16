@@ -200,7 +200,7 @@ function MessageItem({
     return (
       <>
         <VexlBotMessageItem data={item.data} />
-        {item.isLast && <VexlbotNextActionSuggestion />}
+        {!!item.isLast && <VexlbotNextActionSuggestion />}
       </>
     )
   }

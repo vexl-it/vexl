@@ -133,7 +133,7 @@ function QrScanner(): JSX.Element {
           </Text>
         )}
         {/* Unmount barCodeScanner if not visible as advised in official documentation */}
-        {isVisible && hasPermissions && (
+        {!!isVisible && !!hasPermissions && (
           <Stack
             borderRadius="$4"
             flex={1}

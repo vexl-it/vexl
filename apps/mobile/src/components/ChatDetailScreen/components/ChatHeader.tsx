@@ -170,7 +170,7 @@ function Button({type}: {type: ButtonType}): JSX.Element | null {
               }}
             />
           )}
-        {otherSideSupportsTradingChecklist && (
+        {!!otherSideSupportsTradingChecklist && (
           <IconButton
             icon={tradeChecklistSvg}
             variant="primary"

@@ -30,5 +30,9 @@ module.exports = {
     '@typescript-eslint/key-spacing': 'off',
     'react/prop-types': 'off',
     'react/jsx-curly-brace-presence': 'error',
+    'react/jsx-no-leaked-render': [
+      'error',
+      {'validStrategies': ['coerce', 'ternary']},
+    ],
   },
 }

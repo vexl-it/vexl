@@ -221,7 +221,7 @@ function Button({
         fullSize={fullSize}
         disabled={disabled}
       >
-        {beforeIcon && (
+        {!!beforeIcon && (
           <Stack mr="$2">
             <Image
               height={iconSize ?? 18}
@@ -232,7 +232,7 @@ function Button({
             />
           </Stack>
         )}
-        {text && (
+        {!!text && (
           <TextStyled
             numberOfLines={adjustTextToFitOneLine ? 1 : numberOfLines}
             adjustsFontSizeToFit={adjustTextToFitOneLine}
@@ -244,7 +244,7 @@ function Button({
             {text}
           </TextStyled>
         )}
-        {afterIcon && (
+        {!!afterIcon && (
           <Stack ml="$1">
             <Image
               height={iconSize ?? 18}

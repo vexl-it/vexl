@@ -19,7 +19,7 @@ function renderItem<T>(
       <Text ff="$body500" fos={16} col="$white">
         {item.label}
       </Text>
-      {selected && (
+      {!!selected && (
         <Image
           source={checkmarkSvg}
           height={20}

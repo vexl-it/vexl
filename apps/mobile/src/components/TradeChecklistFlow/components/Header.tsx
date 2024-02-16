@@ -11,7 +11,7 @@ function Header({title, subtitle}: Props): JSX.Element {
       <Text fos={24} ff="$heading" col="$white">
         {title}
       </Text>
-      {subtitle && (
+      {!!subtitle && (
         <Text fos={16} ff="$body500" col="$greyOnBlack">
           {subtitle}
         </Text>

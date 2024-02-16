@@ -31,7 +31,7 @@ function MessagesScreen(): JSX.Element {
       <Stack mb="$3">
         <QuickActionBanner />
       </Stack>
-      {canSendMessages && (
+      {!!canSendMessages && (
         <Stack mx="$4" mb="$2">
           <ChatTextInput />
         </Stack>

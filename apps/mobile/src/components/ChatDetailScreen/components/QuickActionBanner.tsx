@@ -46,7 +46,7 @@ function QuickActionBannerUi({
       ai="center"
       jc="space-between"
     >
-      {leftElement && leftElement}
+      {!!leftElement && leftElement}
       <YStack flex={1}>
         <Text {...(headingType === 'boldTop' ? headingStyle : subtitleStyle)}>
           {topText}

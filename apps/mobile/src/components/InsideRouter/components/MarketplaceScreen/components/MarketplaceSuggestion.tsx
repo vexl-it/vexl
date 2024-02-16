@@ -31,7 +31,7 @@ function MarketplaceSuggestion({
     <YStack px="$2" {...props}>
       <Stack mb="$2">
         <Stack pos="relative" bc="$white" py="$6" pl="$6" pr="$7" br="$5">
-          {onClosePress && (
+          {!!onClosePress && (
             <Stack pos="absolute" right={8} top={8}>
               <TouchableOpacity onPress={onClosePress}>
                 <Image

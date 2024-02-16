@@ -28,7 +28,7 @@ export default function ErrorListHeader<T extends {_tag: string}>({
   if (!message) return null
   return (
     <Stack p="$4" backgroundColor="$darkRed" {...rest}>
-      {topText && (
+      {!!topText && (
         <Text color="$red" fs={20}>
           {topText}
         </Text>

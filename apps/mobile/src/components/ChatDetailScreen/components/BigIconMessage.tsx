@@ -24,7 +24,7 @@ export default function BigIconMessage({
   return (
     <Stack mb={isLatest ? '$10' : '$4'}>
       <YStack my="$5" space="$4" alignItems="center">
-        {icon && icon}
+        {!!icon && icon}
         <YStack>
           <XStack alignItems="center">
             <Stack flex={1} height={1} bc="$grey" />
@@ -39,7 +39,7 @@ export default function BigIconMessage({
             </Text>
             <Stack flex={1} height={1} bc="$grey" />
           </XStack>
-          {biggerText && (
+          {!!biggerText && (
             <XStack ai="center" jc="center" space="$1">
               <TouchableOpacity disabled={!onPress} onPress={onPress}>
                 <Text
@@ -52,14 +52,14 @@ export default function BigIconMessage({
                   {biggerText}
                 </Text>
               </TouchableOpacity>
-              {onCopyToClipboardPress && (
+              {!!onCopyToClipboardPress && (
                 <TouchableOpacity onPress={onCopyToClipboardPress}>
                   <Image fill={getTokens().color.white.val} source={copySvg} />
                 </TouchableOpacity>
               )}
             </XStack>
           )}
-          {bottomText && (
+          {!!bottomText && (
             <Text
               textAlign="center"
               mx="$5"

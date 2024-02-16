@@ -189,10 +189,10 @@ function OffersListItem({isFirst, offerAtom}: Props): JSX.Element {
         }
         offer={offer}
       />
-      {isMine &&
-        isFirst &&
+      {!!isMine &&
+        !!isFirst &&
         !newOfferFeedbackDone &&
-        preferences.offerFeedbackEnabled && (
+        !!preferences.offerFeedbackEnabled && (
           <UserFeedback
             autoCloseWhenFinished
             feedbackAtom={atom(generateInitialFeedback('OFFER_RATING'))}

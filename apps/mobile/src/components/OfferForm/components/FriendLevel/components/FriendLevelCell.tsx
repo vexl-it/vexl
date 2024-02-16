@@ -44,7 +44,7 @@ function FriendLevelCell({
           p="$4"
           br="$5"
         >
-          {selected && (
+          {!!selected && (
             <Stack pos="absolute" left={8} top={8}>
               <SvgImage source={checkmarkInCircleSvg} />
             </Stack>

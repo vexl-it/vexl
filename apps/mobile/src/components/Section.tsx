@@ -26,7 +26,7 @@ function Section(props: Props): JSX.Element {
       {!props.customSection && (
         <XStack ai="center" jc="space-between" py="$4">
           <XStack ai="center">
-            {props.image && (
+            {!!props.image && (
               <Stack mr="$2">
                 <SvgImage
                   width={24}
@@ -43,7 +43,7 @@ function Section(props: Props): JSX.Element {
               </Text>
             </Stack>
           </XStack>
-          {props.mandatory && (
+          {!!props.mandatory && (
             <Text fos={24} ff="$body700" color="$greyOnBlack">
               *
             </Text>

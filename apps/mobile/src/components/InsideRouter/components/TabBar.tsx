@@ -75,7 +75,7 @@ function TabBar({state, navigation}: BottomTabBarProps): JSX.Element {
                 br="$6"
                 bg={isFocused ? '$darkBrown' : 'transparent'}
               >
-                {newMessageIndicator && (
+                {!!newMessageIndicator && (
                   <Stack
                     backgroundColor="$main"
                     w={16}

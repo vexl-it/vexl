@@ -33,7 +33,7 @@ function ChatRequestPreview({
 
   const commonFriendsSection = (
     <>
-      {commonConnectionsHashes && commonConnectionsHashes.length > 0 && (
+      {!!commonConnectionsHashes && commonConnectionsHashes.length > 0 && (
         <Stack mx="$-4">
           <CommonFriends
             hideCommonFriendsCount
@@ -61,7 +61,7 @@ function ChatRequestPreview({
 
   const offerInfoPreviewSection = (
     <>
-      {offer?.flags.reported && (
+      {!!offer?.flags.reported && (
         <XStack
           borderRadius="$true"
           mx="$-4"
@@ -88,7 +88,7 @@ function ChatRequestPreview({
             ? t('messages.yourOffer')
             : t('messages.theirOffer')}
         </Text>
-        {offer && <OfferInfoPreview offer={offer.offerInfo} />}
+        {!!offer && <OfferInfoPreview offer={offer.offerInfo} />}
       </Stack>
     </>
   )
@@ -107,7 +107,7 @@ function ChatRequestPreview({
         px="$6"
         space="$4"
       >
-        {offer?.flags.reported && (
+        {!!offer?.flags.reported && (
           <XStack
             borderRadius="$true"
             mx="$-4"
@@ -122,7 +122,7 @@ function ChatRequestPreview({
             </Text>
           </XStack>
         )}
-        {showRequestMessage && requestMessageSection}
+        {!!showRequestMessage && requestMessageSection}
         {mode === 'commonFirst' ? (
           <YStack space="$4">
             {commonFriendsSection}

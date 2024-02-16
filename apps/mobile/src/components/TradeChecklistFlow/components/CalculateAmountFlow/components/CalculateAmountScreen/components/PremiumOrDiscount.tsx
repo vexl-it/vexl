@@ -37,7 +37,7 @@ function PremiumOrDiscount(): JSX.Element {
           }}
         />
       </XStack>
-      {premiumOrDiscountEnabled && (
+      {!!premiumOrDiscountEnabled && (
         <TouchableOpacity
           onPress={() => {
             navigation.navigate('PremiumOrDiscount')

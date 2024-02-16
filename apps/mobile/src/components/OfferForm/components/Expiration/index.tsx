@@ -75,7 +75,7 @@ function Expiration({
       >
         {t('offerForm.expiration.setExpirationDateForYourOffer')}
       </Text>
-      {expirationDate && (
+      {!!expirationDate && (
         <DropdownSelectButton
           onClearPress={() => {
             setExpirationDate(undefined)

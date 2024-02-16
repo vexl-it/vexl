@@ -43,7 +43,7 @@ function BitcoinPriceChart(): JSX.Element {
                   size="small"
                   color={getTokens().color.main.val}
                 />
-                {btcPriceForSelectedCurrency.btcPrice && (
+                {!!btcPriceForSelectedCurrency.btcPrice && (
                   <Text>{btcPriceForSelectedCurrency.btcPrice}</Text>
                 )}
               </XStack>

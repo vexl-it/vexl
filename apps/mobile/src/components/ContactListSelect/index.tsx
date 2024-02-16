@@ -50,7 +50,7 @@ function ContactsListSelect({
       <WhiteContainer noPadding>
         <Stack f={1} px="$4">
           <SearchBar />
-          {showFilter && <ContactsFilter />}
+          {!!showFilter && <ContactsFilter />}
           {toDisplay.length > 0 && <ContactsList contacts={toDisplay} />}
           {toDisplay.length === 0 && !O.isSome(customContactToAdd) && (
             <NothingFound />

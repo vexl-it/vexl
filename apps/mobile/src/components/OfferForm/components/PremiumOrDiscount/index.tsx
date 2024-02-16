@@ -97,7 +97,7 @@ function PremiumOrDiscount({
           </Text>
         </PremiumOrDiscountContent>
       )}
-      {detailVisible && (
+      {!!detailVisible && (
         <PremiumOrDiscountDetail
           offerTypeAtom={offerTypeAtom}
           feeAmountAtom={feeAmountAtom}

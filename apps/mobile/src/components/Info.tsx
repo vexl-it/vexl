@@ -68,7 +68,7 @@ function Info({
           </TouchableOpacity>
         )}
       </XStack>
-      {onActionPress && (
+      {!!onActionPress && (
         <Stack mt="$4">
           <Button
             text={actionButtonText}

@@ -123,7 +123,7 @@ function FiatAmountInput({
           itemContainerStyle={styles.dropdownItemContainerStyle}
           selectedTextStyle={styles.selectedTextStyle}
         />
-        {!isFocused && fiatValue && !automaticCalculationDisabled && (
+        {!isFocused && !!fiatValue && !automaticCalculationDisabled && (
           <CalculatedWithLiveRate />
         )}
       </Stack>

@@ -164,7 +164,7 @@ function OfferInfo({
             </InfoSquare>
           )}
           <InfoSquare>{t(`offer.requestStatus.${requestState}`)}</InfoSquare>
-          {showRequestButton && (
+          {!!showRequestButton && (
             <OfferRequestTextInput text={text} onChange={setText} />
           )}
         </YStack>

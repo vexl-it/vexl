@@ -13,7 +13,7 @@ interface Props {
 function UserDataDisplay({topText, realLifeInfo, style}: Props): JSX.Element {
   return (
     <Stack ai="center" jc="center" style={style}>
-      {topText && (
+      {!!topText && (
         <Stack mb="$6">
           <Text fos={18} ff="$body600" color="$white">
             {topText}

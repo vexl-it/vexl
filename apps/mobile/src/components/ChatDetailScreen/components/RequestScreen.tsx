@@ -80,7 +80,7 @@ function RequestScreen(): JSX.Element {
       />
       <ScrollView bounces={false}>
         <YStack space="$6" f={1} mx="$4" my="$6">
-          {offer && (
+          {!!offer && (
             <ChatRequestPreview showRequestMessage mode="commonFirst" />
           )}
 
@@ -94,17 +94,17 @@ function RequestScreen(): JSX.Element {
               <InfoSquare>{t('offer.requestStatus.deleted')}</InfoSquare>
             )}
             {hasPreviousCommunication === 'firstInteraction' &&
-              requestedByMe && (
+              !!requestedByMe && (
                 <InfoSquare>
                   {t('messages.thisWillBeYourFirstInteraction')}
                 </InfoSquare>
               )}
-            {requestState === 'requested' && requestedByMe && (
+            {requestState === 'requested' && !!requestedByMe && (
               <InfoSquare>
                 {t('messages.wellLetYouKnowOnceUserAccepts')}
               </InfoSquare>
             )}
-            {canBeRerequested.canBeRerequested && (
+            {!!canBeRerequested.canBeRerequested && (
               <OfferRequestTextInput text={text} onChange={setText} />
             )}
           </YStack>

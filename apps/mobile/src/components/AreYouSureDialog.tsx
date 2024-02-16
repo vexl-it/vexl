@@ -138,7 +138,7 @@ function AreYouSureDialog(): JSX.Element | null {
           >
             {step.type === 'StepWithText' ? (
               <>
-                {step.image && (
+                {!!step.image && (
                   <ImageUniversal
                     style={{maxWidth: '100%'}}
                     source={step.image}
@@ -147,7 +147,7 @@ function AreYouSureDialog(): JSX.Element | null {
                 <Text fontFamily="$heading" fontSize={32} color="$black">
                   {step.title}
                 </Text>
-                {step.description && (
+                {!!step.description && (
                   <Text fontSize={18} color="$greyOnWhite">
                     {step.description}
                   </Text>
@@ -190,7 +190,7 @@ function AreYouSureDialog(): JSX.Element | null {
         </View>
       </ScrollView>
       <XStack space="$2" m="$2" height={60}>
-        {step.negativeButtonText && (
+        {!!step.negativeButtonText && (
           <Button
             fullSize
             variant={state.variant === 'danger' ? 'redDark' : 'primary'}

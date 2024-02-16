@@ -36,13 +36,13 @@ function ScreenTitle({
             {text}
           </Text>
         </Stack>
-        {children && (
+        {!!children && (
           <XStack ai="center" space="$2">
             {children}
           </XStack>
         )}
       </XStack>
-      {withBottomBorder && <Stack h={0.5} mx="$-4" bg="$grey" />}
+      {!!withBottomBorder && <Stack h={0.5} mx="$-4" bg="$grey" />}
     </YStack>
   )
 }

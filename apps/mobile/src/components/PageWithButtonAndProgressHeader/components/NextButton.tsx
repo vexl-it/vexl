@@ -26,7 +26,7 @@ function NextButton(): JSX.Element | null {
 
   return (
     <XStack mt="$2" space="$2">
-      {nextButtonState.secondButton && (
+      {!!nextButtonState.secondButton && (
         <Button
           fullSize
           adjustTextToFitOneLine

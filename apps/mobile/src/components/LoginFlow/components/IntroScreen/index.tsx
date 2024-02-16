@@ -34,8 +34,8 @@ function Intro({navigation}: Props): JSX.Element {
         }}
       >
         <Stack f={1}>
-          {svg && <SvgImage source={svg} />}
-          {image && (
+          {!!svg && <SvgImage source={svg} />}
+          {!!image && (
             <Image style={{flex: 1}} resizeMode="contain" source={image} />
           )}
         </Stack>

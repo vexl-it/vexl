@@ -196,13 +196,13 @@ function TextMessage({
               backgroundColor={isMine ? '$main' : '$grey'}
               p="$3"
             >
-              {message.message.repliedTo && (
+              {!!message.message.repliedTo && (
                 <YStack
                   borderRadius="$5"
                   padding="$3"
                   backgroundColor="$yellowAccent2"
                 >
-                  {message.message.repliedTo.image && (
+                  {!!message.message.repliedTo.image && (
                     <Image
                       style={style.replyImage}
                       resizeMode="contain"
@@ -224,7 +224,7 @@ function TextMessage({
                   </Text>
                 </YStack>
               )}
-              {message.message.image && (
+              {!!message.message.image && (
                 <YStack
                   borderRadius="$5"
                   padding="$3"
@@ -251,7 +251,7 @@ function TextMessage({
               </Text>
             </Stack>
           </TouchableWithoutFeedback>
-          {isExtended && (
+          {!!isExtended && (
             <XStack>
               <IconButton
                 icon={replyToSvg}
@@ -284,7 +284,7 @@ function TextMessage({
             </Pressable>
           )}
         </XStack>
-        {isLatest && (
+        {!!isLatest && (
           <Text
             selectable
             textAlign={isMine ? 'right' : 'left'}

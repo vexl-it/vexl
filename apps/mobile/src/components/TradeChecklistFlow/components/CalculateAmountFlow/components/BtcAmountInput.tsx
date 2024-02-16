@@ -106,7 +106,7 @@ function BtcAmountInput({
           itemContainerStyle={styles.dropdownItemContainerStyle}
           selectedTextStyle={styles.selectedTextStyle}
         />
-        {!isFocused && btcValue && !automaticCalculationDisabled && (
+        {!isFocused && !!btcValue && !automaticCalculationDisabled && (
           <CalculatedWithLiveRate />
         )}
       </Stack>

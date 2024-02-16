@@ -47,7 +47,7 @@ function StackButton({
             {text}
           </Text>
         </XStack>
-        {displaySwitch && <Switch value={switchValue} onChange={onPress} />}
+        {!!displaySwitch && <Switch value={switchValue} onChange={onPress} />}
       </XStack>
     </TouchableOpacity>
   )

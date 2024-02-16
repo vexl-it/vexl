@@ -52,7 +52,7 @@ function TradeChecklistNetworkView(): JSX.Element | null {
       }
     >
       {networkDataToDisplay.networkData.btcNetwork === 'ON_CHAIN' &&
-        networkDataToDisplay.networkData.btcAddress && (
+        !!networkDataToDisplay.networkData.btcAddress && (
           <Button
             onPress={() => {
               Clipboard.setString(

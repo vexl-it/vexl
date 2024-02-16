@@ -78,7 +78,7 @@ function AmountInput(
             }}
             {...props}
           />
-          {showSubtitle && <PremiumIncluded />}
+          {!!showSubtitle && <PremiumIncluded />}
         </Stack>
       </XStack>
     </TouchableWithoutFeedback>

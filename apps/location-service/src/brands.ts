@@ -17,6 +17,11 @@ export const LocationData = z.object({
       longitude: z.number(),
     }),
   }),
+
+  /** Depreciated, left for backwards compatibility */
+  municipality: z.string(),
+  region: z.string(),
+  country: z.string(),
 })
 
 export type LocationData = z.TypeOf<typeof LocationData>

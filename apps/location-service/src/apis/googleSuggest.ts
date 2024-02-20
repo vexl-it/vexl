@@ -65,6 +65,9 @@ export async function querySuggest({
             longitude: one.geometry.viewport.southwest.lng,
           },
         },
+        municipality: firstRow,
+        region: secondRow,
+        country: secondRow,
       } satisfies LocationData,
     }
   })

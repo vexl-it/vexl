@@ -46,7 +46,6 @@ function deanonymizedUserToPayload(
 export default function serializeChatMessage(
   message: ChatMessage
 ): E.Either<JsonStringifyError | ZodParseError<ChatMessagePayload>, string> {
-  console.log(`Serializing chat message: ${JSON.stringify(message)}`)
   return pipe(
     {
       time: message.time,

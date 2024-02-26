@@ -42,7 +42,6 @@ function ContactsListSelect({
 
   useEffect(() => {
     return () => {
-      // TODO: Contacts - race condition with contacts fetching to display
       resolveAllContactsAsSeen()
     }
   }, [resolveAllContactsAsSeen])

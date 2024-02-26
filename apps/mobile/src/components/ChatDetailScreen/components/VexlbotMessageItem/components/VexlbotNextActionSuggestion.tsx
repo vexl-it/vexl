@@ -14,6 +14,7 @@ import TradeChecklistNetworkSuggestionView from './TradeChecklistNetworkSuggesti
 
 function VexlbotNextActionSuggestion(): JSX.Element | null {
   const {
+    offerForChatAtom,
     tradeChecklistDateAndTimeAtom,
     tradeChecklistMeetingLocationAtom,
     tradeChecklistAmountAtom,
@@ -23,6 +24,7 @@ function VexlbotNextActionSuggestion(): JSX.Element | null {
     identityRevealStatusAtom,
     contactRevealStatusAtom,
   } = useMolecule(chatMolecule)
+  const offerForChat = useAtomValue(offerForChatAtom)
   const shouldHideNetworkCellForTradeChecklist = useAtomValue(
     shouldHideNetworkCellForTradeChecklistAtom
   )
@@ -41,6 +43,8 @@ function VexlbotNextActionSuggestion(): JSX.Element | null {
   )
   const identityRevealStatus = useAtomValue(identityRevealStatusAtom)
   const contactRevealStatus = useAtomValue(contactRevealStatusAtom)
+
+  if (offerForChat?.offerInfo.publicPart.locationState === 'ONLINE') return null
 
   if (identityRevealStatus === 'iAsked' || identityRevealStatus === 'theyAsked')
     return null

@@ -82,7 +82,7 @@ function OffersListStateDisplayerContent({
         onMyOffersPress={navigateToMyOffers}
       />
       {offersAtoms.length === 0 ? (
-        <EmptyListPlaceholder />
+        <EmptyListPlaceholder refreshing={loading} onRefresh={refreshOffers} />
       ) : (
         <OffersList
           ListHeaderComponent={ListHeaderComponent}

@@ -193,6 +193,8 @@
   "offer.title": "Offer",
   "offer.cashOnly": "Cash only",
   "offer.onlineOnly": "Online only",
+  "offer.from": "From",
+  "offer.to": "to",
   "offer.upTo": "Up to",
   "offer.forSeller": "For seller",
   "offer.forBuyer": "For buyer",

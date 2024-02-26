@@ -1,7 +1,7 @@
 import {useNavigation} from '@react-navigation/native'
 import {useAtom, useAtomValue, useSetAtom} from 'jotai'
 import {useEffect} from 'react'
-import {ScrollView} from 'react-native'
+import {RefreshControl, ScrollView} from 'react-native'
 import {Text, YStack} from 'tamagui'
 import {reachNumberAtom} from '../../../../../state/connections/atom/connectionStateAtom'
 import {
@@ -33,17 +33,26 @@ interface EmptyListWrapperProps {
   buttonText: string
   children: React.ReactNode
   onButtonPress: () => void
+  refreshing?: boolean
+  onRefresh?: () => void
 }
 
 function EmptyListWrapper({
   buttonText,
   children,
   onButtonPress,
+  refreshing = false,
+  onRefresh,
 }: EmptyListWrapperProps): JSX.Element {
   const tabBarEndsAt = usePixelsFromBottomWhereTabsEnd()
 
   return (
-    <ScrollView contentContainerStyle={{paddingBottom: tabBarEndsAt + 25}}>
+    <ScrollView
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+      contentContainerStyle={{paddingBottom: tabBarEndsAt + 25}}
+    >
       <YStack f={1} ai="center" jc="center" py="$4" space="$4">
         <Image source={anonymousAvatarSvg} />
         {children}
@@ -58,7 +67,12 @@ function EmptyListWrapper({
   )
 }
 
-function EmptyListPlaceholder(): JSX.Element {
+interface Props {
+  refreshing: boolean
+  onRefresh?: () => Promise<void>
+}
+
+function EmptyListPlaceholder({refreshing, onRefresh}: Props): JSX.Element {
   const navigation = useNavigation()
   const {t} = useTranslation()
   const refreshOffers = useSetAtom(triggerOffersRefreshAtom)
@@ -125,6 +139,8 @@ function EmptyListPlaceholder(): JSX.Element {
       <EmptyListWrapper
         buttonText={t('offer.resetFilter')}
         onButtonPress={resetFilterAndSaveIt}
+        refreshing={refreshing}
+        onRefresh={onRefresh}
       >
         <Text
           textAlign="center"
@@ -150,10 +166,15 @@ function EmptyListPlaceholder(): JSX.Element {
 
   if (importedContactsCount === 0 || reachNumber < REACH_NUMBER_THRESHOLD) {
     return addMoreContactsSuggestionVisible || createOfferSuggestionVisible ? (
-      <EmptyMarketplaceSuggestions />
+      <EmptyMarketplaceSuggestions
+        refreshing={refreshing}
+        onRefresh={onRefresh}
+      />
     ) : (
       <EmptyListWrapper
         buttonText={t('suggestion.addMoreContacts')}
+        refreshing={refreshing}
+        onRefresh={onRefresh}
         onButtonPress={() => {
           navigation.navigate('SetContacts', {})
         }}
@@ -171,6 +192,8 @@ function EmptyListPlaceholder(): JSX.Element {
     return (
       <EmptyListWrapper
         buttonText={t('offer.emptyAction')}
+        refreshing={refreshing}
+        onRefresh={onRefresh}
         onButtonPress={() => {
           navigation.navigate('CreateOffer')
         }}

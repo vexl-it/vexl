@@ -51,14 +51,6 @@ export const normalizedContactsAtom = atom(
     )
 )
 
-export const contactsToNormalizeAtom = atom(
-  (get): StoredContactWithComputedValues[] =>
-    get(storedContactsAtom).filter(
-      (contact): contact is StoredContactWithComputedValues =>
-        !!contact.computedValues
-    )
-)
-
 export const importedContactsHashesAtom = atom((get) =>
   get(importedContactsAtom)
     .map((contact) => contact.computedValues?.hash)

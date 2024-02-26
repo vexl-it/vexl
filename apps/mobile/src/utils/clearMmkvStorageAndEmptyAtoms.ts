@@ -15,6 +15,7 @@ import {offersMissingOnServerStorageAtom} from '../state/marketplace/atoms/offer
 import {offersStateAtom} from '../state/marketplace/atoms/offersState'
 import {postLoginFinishedStorageAtom} from '../state/postLoginOnboarding'
 import {selectedCurrencyStorageAtom} from '../state/selectedCurrency'
+import vexlCalendarStorageAtom from '../state/tradeChecklist/atoms/vexlCalendarStorageAtom'
 import {storage} from './fpMmkv'
 import {preferencesAtom} from './preferences'
 
@@ -75,6 +76,8 @@ export default function clearMmkvStorageAndEmptyAtoms(): void {
     offerIds: [],
     progress: null,
   })
+
+  getDefaultStore().set(vexlCalendarStorageAtom, {id: undefined})
 
   storage._storage.clearAll()
 }

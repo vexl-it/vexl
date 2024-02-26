@@ -739,6 +739,10 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
 
   const showInfoBarAtom = focusAtom(chatAtom, (o) => o.prop('showInfoBar'))
 
+  const calendarEventIdAtom = focusAtom(chatAtom, (o) =>
+    o.prop('tradeChecklistCalendarEventId')
+  )
+
   const showVexlbotNotificationsForCurrentChatAtom = focusAtom(chatAtom, (o) =>
     o.prop('showVexlbotNotifications')
   )
@@ -858,5 +862,6 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     shouldHideNetworkCellForTradeChecklistAtom,
     tradeOrOriginOfferCurrencyAtom,
     btcPriceForTradeCurrencyAtom,
+    calendarEventIdAtom,
   }
 })

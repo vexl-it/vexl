@@ -150,6 +150,9 @@ export function generateChatId(): ChatId {
   return ChatId.parse(Uuid.parse(generateUuid()))
 }
 
+export const CalendarEventId = z.string().brand<'calendarEventId'>()
+export type CalendarEventId = z.TypeOf<typeof CalendarEventId>
+
 export const Chat = z.object({
   id: ChatId,
   inbox: Inbox,
@@ -159,6 +162,7 @@ export const Chat = z.object({
   showInfoBar: z.boolean().default(true),
   showVexlbotNotifications: z.boolean().default(true),
   showVexlbotInitialMessage: z.boolean().default(true),
+  tradeChecklistCalendarEventId: CalendarEventId.optional(),
   otherSideVersion: SemverString.optional(),
   lastReportedVersion: SemverString.optional(),
 })

@@ -1,12 +1,16 @@
 import {useNavigation} from '@react-navigation/native'
 import {useMolecule} from 'bunshi/dist/react'
-import {useAtomValue, useStore} from 'jotai'
+import {useAtomValue, useSetAtom, useStore} from 'jotai'
+import {DateTime} from 'luxon'
+import * as dateAndTime from '../../../../../state/tradeChecklist/utils/dateAndTime'
 import * as MeetingLocation from '../../../../../state/tradeChecklist/utils/location'
+import {addEventToCalendarActionAtom} from '../../../../../utils/calendar'
 import {
   useTranslation,
   type TFunction,
 } from '../../../../../utils/localization/I18nProvider'
 import Button from '../../../../Button'
+import termsIconSvg from '../../../../InsideRouter/components/SettingsScreen/images/termsIconSvg'
 import {chatMolecule} from '../../../atoms'
 import VexlbotBubble from './VexlbotBubble'
 
@@ -34,12 +38,21 @@ function getTextForVexlbot({
 
 export default function TradeChecklistMeetingLocationView(): JSX.Element | null {
   const {t} = useTranslation()
-  const {tradeChecklistMeetingLocationAtom, otherSideDataAtom, chatAtom} =
-    useMolecule(chatMolecule)
+  const {
+    calendarEventIdAtom,
+    tradeChecklistDateAndTimeAtom,
+    tradeChecklistMeetingLocationAtom,
+    otherSideDataAtom,
+    chatAtom,
+  } = useMolecule(chatMolecule)
   const meetingLocationData = useAtomValue(tradeChecklistMeetingLocationAtom)
+  const dateAndTimeData = useAtomValue(tradeChecklistDateAndTimeAtom)
   const otherSideData = useAtomValue(otherSideDataAtom)
   const store = useStore()
   const navigation = useNavigation()
+  const addEventToCalendar = useSetAtom(addEventToCalendarActionAtom)
+  const pickedDateAndTime = dateAndTime.getPick(dateAndTimeData)
+  const calendarEventId = useAtomValue(calendarEventIdAtom)
 
   const agreedOn = MeetingLocation.getAgreed(meetingLocationData)
   if (agreedOn) {
@@ -53,7 +66,38 @@ export default function TradeChecklistMeetingLocationView(): JSX.Element | null 
           otherSideUsername: otherSideData.userName,
           t,
         })}
-      />
+      >
+        {!!pickedDateAndTime && (
+          <Button
+            onPress={() => {
+              void addEventToCalendar({
+                calendarEventIdAtom,
+                event: {
+                  startDate: DateTime.fromMillis(
+                    pickedDateAndTime.pick.dateTime
+                  ).toJSDate(),
+                  endDate: DateTime.fromMillis(
+                    pickedDateAndTime.pick.dateTime
+                  ).toJSDate(),
+                  title: t('tradeChecklist.vexlMeetingEventTitle', {
+                    name: otherSideData.userName,
+                  }),
+                  location: agreedOn?.data.data?.address,
+                  notes: agreedOn?.data.data.note,
+                },
+              })()
+            }}
+            beforeIcon={termsIconSvg}
+            size="small"
+            variant="primary"
+            text={
+              calendarEventId
+                ? t('vexlbot.updateCalendarEventLocation')
+                : t('vexlbot.addEventToCalendar')
+            }
+          />
+        )}
+      </VexlbotBubble>
     )
   }
 

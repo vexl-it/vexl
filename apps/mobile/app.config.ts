@@ -126,7 +126,7 @@ export default {
         category: ['BROWSABLE', 'DEFAULT'],
       },
     ],
-    permissions: ['READ_CONTACTS'],
+    permissions: ['READ_CONTACTS', 'READ_CALENDAR', 'WRITE_CALENDAR'],
   },
   'locales': {
     'bg': '../../packages/localization/bg-infoPlist.json',
@@ -162,6 +162,13 @@ export default {
       {
         'contactsPermission':
           'Vexl needs access to your contacts to make your offers visible for them in a secure way. Phone number of contacts you select will be encrypted and uploaded to the server.',
+      },
+    ],
+    [
+      'expo-calendar',
+      {
+        'calendarPermission':
+          'Vexl needs access to your calendar for scheduling trade meetings. Your data is kept private and only used for coordinating trades.',
       },
     ],
     [

@@ -45,7 +45,7 @@ function AgreeOnTradeDetailsScreen(props: Props): JSX.Element {
       <PrimaryFooterButtonProxy
         hidden={
           offerForTradeChecklist?.offerInfo.publicPart.locationState ===
-          'ONLINE'
+            'ONLINE' && !areThereUpdatesToBeSent
         }
         text={t('common.cancel')}
         onPress={() => {
@@ -63,7 +63,7 @@ function AgreeOnTradeDetailsScreen(props: Props): JSX.Element {
         }
         text={
           offerForTradeChecklist?.offerInfo.publicPart.locationState ===
-          'ONLINE'
+            'ONLINE' && !areThereUpdatesToBeSent
             ? t('tradeChecklist.acknowledgeAndContinue')
             : t('common.send')
         }

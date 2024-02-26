@@ -40,9 +40,15 @@ function OnlineOrInPersonTrade(): JSX.Element {
         <Text textAlign="center" ff="$heading" fos={32}>
           {t('tradeChecklist.agreeOnTradeDetails')}
         </Text>
+        <Text als="center" fos={14} ff="$body400" ml="$2" col="$greyOnWhite">
+          {t('tradeChecklist.youCanPickWhatYouFill')}
+        </Text>
         {offerForTradeChecklist?.offerInfo.publicPart.locationState ===
         'ONLINE' ? (
           <>
+            <Stack mb="$4">
+              <CalculateAmountCell />
+            </Stack>
             <Info
               actionButtonText={t('tradeChecklist.readMoreInFullArticle')}
               hideCloseButton
@@ -66,25 +72,14 @@ function OnlineOrInPersonTrade(): JSX.Element {
             </Stack>
           </>
         ) : (
-          <>
-            <Text
-              als="center"
-              fos={14}
-              ff="$body400"
-              ml="$2"
-              col="$greyOnWhite"
-            >
-              {t('tradeChecklist.youCanPickWhatYouFill')}
-            </Text>
-            <Stack my="$8" gap="$2">
-              <DateAndTimeCell />
-              <MeetingLocationCell />
-              <CalculateAmountCell />
-              <SetNetworkCell />
-              <RevealIdentityCell />
-              <RevealPhoneNumberCell />
-            </Stack>
-          </>
+          <Stack my="$8" gap="$2">
+            <DateAndTimeCell />
+            <MeetingLocationCell />
+            <CalculateAmountCell />
+            <SetNetworkCell />
+            <RevealIdentityCell />
+            <RevealPhoneNumberCell />
+          </Stack>
         )}
       </Stack>
       <AnonymizationNotice />

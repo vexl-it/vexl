@@ -1,17 +1,18 @@
 import {type OfferInfo} from '@vexl-next/domain/src/general/offers'
 import {useMemo} from 'react'
-import {getTokens, Stack, styled, Text, XStack} from 'tamagui'
+import {Stack, Text, XStack, getTokens, styled} from 'tamagui'
 import pauseSvg from '../images/pauseSvg'
+import {bigNumberToString} from '../utils/bigNumberToString'
 import {isOfferExpired} from '../utils/isOfferExpired'
-import {formatCurrencyAmount} from '../utils/localization/currency'
 import {useTranslation} from '../utils/localization/I18nProvider'
+import {formatCurrencyAmount} from '../utils/localization/currency'
 import SvgImage from './Image'
-import clockSvg from './images/clockSvg'
-import spokenLanguagesSvg from './images/spokenLanguagesSvg'
 import bankSvg from './InsideRouter/components/MarketplaceScreen/images/bankSvg'
 import getBtcPragueLogoSvg from './InsideRouter/components/MarketplaceScreen/images/btcPragueLogoSvg'
 import mapTagSvg from './InsideRouter/components/MarketplaceScreen/images/mapTagSvg'
 import onlineTransferSvg from './InsideRouter/components/MarketplaceScreen/images/onlineTransferSvg'
+import clockSvg from './images/clockSvg'
+import spokenLanguagesSvg from './images/spokenLanguagesSvg'
 
 const BTC_PRAGUE_FRIEND = '8o5OvkfRga/xBYbfb0e0MJZIjy4g7xGVimCdNLrydGs='
 const BTC_PRAGUE_FRIEND_STAGE = '9c6r0q7LCn1oqES2pfqQDVQH91fY8ZHYcJKbJYOU7hE='
@@ -58,12 +59,16 @@ function OfferInfoPreview({
     [negative]
   )
 
-  const offerAmount = useMemo(() => {
+  const offerAmountTopLimit = useMemo(() => {
     return formatCurrencyAmount(
       offer.publicPart.currency,
       offer.publicPart.amountTopLimit
     )
   }, [offer.publicPart.amountTopLimit, offer.publicPart.currency])
+
+  const offerAmountBottomLimit = useMemo(() => {
+    return bigNumberToString(offer.publicPart.amountBottomLimit)
+  }, [offer.publicPart.amountBottomLimit])
 
   return (
     <>
@@ -101,9 +106,17 @@ function OfferInfoPreview({
       </XStack>
       <XStack space="$1">
         <InfoItemContainer>
-          <PriceText>
-            {t('offer.upTo')} <PriceBigger>{offerAmount}</PriceBigger>
-          </PriceText>
+          {offer.publicPart.amountBottomLimit > 0 ? (
+            <PriceText>
+              {t('offer.from')}{' '}
+              <PriceBigger>{offerAmountBottomLimit}</PriceBigger>{' '}
+              {t('offer.to')} <PriceBigger>{offerAmountTopLimit}</PriceBigger>
+            </PriceText>
+          ) : (
+            <PriceText>
+              {t('offer.upTo')} <PriceBigger>{offerAmountTopLimit}</PriceBigger>
+            </PriceText>
+          )}
           <InfoText>
             {offer.publicPart.locationState === 'ONLINE' &&
               t('offer.onlineOnly')}

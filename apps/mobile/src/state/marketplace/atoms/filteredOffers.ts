@@ -43,11 +43,12 @@ export function createFilteredOffersAtom(
             : true)) &&
         (!filter.offerType ||
           offer.offerInfo.publicPart.offerType === filter.offerType) &&
-        (!filter.amountBottomLimit ||
-          offer.offerInfo.publicPart.amountBottomLimit >=
-            filter.amountBottomLimit) &&
         (!filter.amountTopLimit ||
-          offer.offerInfo.publicPart.amountTopLimit <= filter.amountTopLimit) &&
+          offer.offerInfo.publicPart.amountBottomLimit <=
+            filter.amountTopLimit) &&
+        (!filter.amountBottomLimit ||
+          offer.offerInfo.publicPart.amountTopLimit >=
+            filter.amountBottomLimit) &&
         (filter.spokenLanguages.length === 0 ||
           filter.spokenLanguages.some((item) =>
             offer.offerInfo.publicPart.spokenLanguages.includes(item)

@@ -8,6 +8,7 @@ import {
   type Ref,
 } from 'react'
 import {
+  Platform,
   TextInput as RNTextInput,
   TouchableOpacity,
   type TextInputProps,
@@ -205,11 +206,25 @@ function TextInput(
         textAlignVertical={numberOfLines ? 'top' : 'center'}
         numberOfLines={numberOfLines}
         placeholderTextColor={tokens.color.greyAccent2.val}
-        selectionColor={
+        cursorColor={
           variant === 'greyOnBlack'
             ? tokens.color.main.val
             : variant === 'transparentOnGrey'
             ? tokens.color.greyOnBlack.val
+            : tokens.color.darkColorText.val
+        }
+        // android selectionColor not reducing color opacity by default
+        selectionColor={
+          variant === 'greyOnBlack'
+            ? Platform.OS === 'android'
+              ? 'rgba(252, 205, 108, 0.3)'
+              : tokens.color.main.val
+            : variant === 'transparentOnGrey'
+            ? Platform.OS === 'android'
+              ? 'rgba(175, 175, 175, 0.3)'
+              : tokens.color.greyOnBlack.val
+            : Platform.OS === 'android'
+            ? 'rgba(0, 0, 0, 0.3)'
             : tokens.color.darkColorText.val
         }
         size={size}

@@ -9019,6 +9019,7 @@ __metadata:
     eslint-plugin-react: ^7.33.2
     expo: ~50.0.8
     expo-build-properties: ~0.11.1
+    expo-calendar: ~12.2.1
     expo-camera: ~14.0.5
     expo-contacts: ~12.8.2
     expo-dev-client: ~3.3.9
@@ -13850,6 +13851,15 @@ __metadata:
   peerDependencies:
     expo: "*"
   checksum: e6d5310b1a700baef23b4870e9cb7118a559eaf34ebec14d33d0ddc600fcf9d0ad2fd03099cd2275fc7b1cb0a2cd6bb4544c6d8d6f0487a5e6c31a458927dbde
+  languageName: node
+  linkType: hard
+
+"expo-calendar@npm:~12.2.1":
+  version: 12.2.1
+  resolution: "expo-calendar@npm:12.2.1"
+  peerDependencies:
+    expo: "*"
+  checksum: 89ef2b14bf10be315df2b8f80e6cb7d249eafca33592d102a3bc495aca312500f8fdfc33d4db1c0fe20148992a5c53d382d496da1941bea67d9c4bf39667b70b
   languageName: node
   linkType: hard
 

@@ -110,6 +110,8 @@ export const ChatMessage = z.object({
    * Used only for messages  of type `VERSION_UPDATE`
    */
   lastReceivedVersion: SemverString.optional(),
+  forceShow: z.boolean().optional(),
+
   image: UriString.optional(),
   repliedTo: RepliedToData.optional(),
   tradeChecklistUpdate: TradeChecklistUpdate.optional(),

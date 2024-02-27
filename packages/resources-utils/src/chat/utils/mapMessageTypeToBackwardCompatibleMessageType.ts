@@ -23,6 +23,8 @@ export default function mapMessageTypeToBackwardCompatibleMessageType(
       return 'BLOCK_CHAT'
     case 'DELETE_CHAT':
       return 'DELETE_CHAT'
+    case 'VERSION_UPDATE':
+      return 'VERSION_UPDATE'
     default:
       return 'MESSAGE'
   }

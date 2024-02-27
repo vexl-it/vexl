@@ -8,8 +8,6 @@ import faq1Svg from './images/faq1Svg'
 import faq5Svg from './images/faq5Svg'
 import faq6Svg from './images/faq6Svg'
 
-const VEXL_AUDIT_URL = 'https://vexl.it/audit'
-
 export type FaqType =
   | 'WHAT_IS_VEXL'
   | 'WHO_CAN_SEE_MY_CONTACTS'
@@ -78,7 +76,7 @@ export default function useContent(): Props[] {
       textBefore: t('faqs.vexlIsOpensourceTextBeforeLink'),
       textAfter: t('faqs.vexlIsOpensourceTextAfterLink'),
       linkText: t('faqs.vexlIsOpensourceLinkText'),
-      url: VEXL_AUDIT_URL,
+      url: t('faqs.auditUrl'),
     },
     {
       type: 'HOW_CAN_YOU_ENSURE',

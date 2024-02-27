@@ -8,6 +8,10 @@ export default function useContent(): Array<{
   return useMemo(
     () => [
       {
+        title: 'BGN',
+        currency: 'BGN',
+      },
+      {
         title: 'CZK',
         currency: 'CZK',
       },

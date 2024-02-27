@@ -76,13 +76,12 @@ export default {
     'infoPlist': {
       'UIBackgroundModes': ['fetch', 'remote-notification', 'processing'],
       'LSApplicationQueriesSchemes': ['itms-apps'],
-      'NSLocationWhenInUseUsageDescription':
-        'Vexl needs access to you location to show your position on the map. Location will never be share with anyone (even ourselves).',
       'FirebaseDynamicLinksCustomDomains': [
         'https://link.vexl.it',
         'https://nextlink.vexl.it',
       ],
       'BGTaskSchedulerPermittedIdentifiers': ['com.transistorsoft.fetch'],
+      'CFBundleAllowMixedLocalizations': true,
     },
     'googleServicesFile': extra.googleServicesInfoPlistFile,
     'associatedDomains': ['applinks:link.vexl.it', 'applinks:nextlink.vexl.it'],
@@ -126,34 +125,29 @@ export default {
       },
     ],
   },
+  'locales': {
+    'bg': '../../packages/localization/bg-infoPlist.json',
+    'cs': '../../packages/localization/cs-infoPlist.json',
+    'de': '../../packages/localization/de-infoPlist.json',
+    'en': '../../packages/localization/en-infoPlist.json',
+    'es': '../../packages/localization/es-infoPlist.json',
+    'fr': '../../packages/localization/fr-infoPlist.json',
+    'it': '../../packages/localization/it-infoPlist.json',
+    'ja': '../../packages/localization/ja-infoPlist.json',
+    'pl': '../../packages/localization/pl-infoPlist.json',
+    'pt': '../../packages/localization/pt-infoPlist.json',
+    'sk': '../../packages/localization/sk-infoPlist.json',
+  },
   'owner': 'vexlit',
   'runtimeVersion': {
     'policy': 'sdkVersion',
   },
   'plugins': [
-    [
-      'expo-barcode-scanner',
-      {
-        'cameraPermission':
-          'Vexl needs access to your camera to add contact via scanning qrcode',
-      },
-    ],
     'expo-localization',
     [
       'expo-image-picker',
       {
-        'photosPermission':
-          'Vexl wants to access your camera in order to select a photo for your avatar.',
-        'cameraPermission':
-          'Vexl wants to access your camera in order to take a photo for your avatar.',
         'microphonePermission': false,
-      },
-    ],
-    [
-      'expo-contacts',
-      {
-        'contactsPermission':
-          'Vexl needs access to your contacts to make your offers visible for them in a secure way. Phone number of contacts you select will be encrypted and uploaded to the server.',
       },
     ],
     [

@@ -1,5 +1,6 @@
-import {XStack} from 'tamagui'
-import Button from './Button'
+import {TouchableOpacity} from 'react-native'
+import {Stack, XStack} from 'tamagui'
+import TabTitle from './TabTitle'
 
 export interface TabProps<T> {
   title: string
@@ -14,17 +15,32 @@ interface Props<T> {
 
 function Tabs<T>({activeTab, onTabPress, tabs}: Props<T>): JSX.Element {
   return (
-    <XStack ai="center" br="$4" bg="$grey" p="$1" space="$1">
+    <XStack ai="center" br="$5" bg="$grey" p="$1" space="$1">
       {tabs.map((tab) => (
-        <Button
+        <TouchableOpacity
           key={tab.title}
-          fullSize
-          variant={activeTab === tab.type ? 'primary' : 'blackOnDark'}
-          text={tab.title}
+          style={{flex: 1}}
           onPress={() => {
             onTabPress(tab.type)
           }}
-        />
+        >
+          <Stack
+            ai="center"
+            bc={activeTab === tab.type ? '$yellowAccent2' : 'transparent'}
+            jc="center"
+            px="$2"
+            py="$5"
+            br="$4"
+          >
+            <TabTitle
+              active={activeTab === tab.type}
+              fontSize={20}
+              title={tab.title}
+              numberOfLines={2}
+              ff="$body600"
+            />
+          </Stack>
+        </TouchableOpacity>
       ))}
     </XStack>
   )

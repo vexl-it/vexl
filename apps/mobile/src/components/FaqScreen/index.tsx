@@ -1,4 +1,5 @@
 import {useState} from 'react'
+import {TouchableWithoutFeedback} from 'react-native'
 import {Stack, Text, XStack} from 'tamagui'
 import {type RootStackScreenProps} from '../../navigationTypes'
 import {useTranslation} from '../../utils/localization/I18nProvider'
@@ -60,40 +61,43 @@ function FaqsScreen({navigation}: Props): JSX.Element | null {
               {pageContent?.title}
             </Text>
             {pageContent.withLink ? (
-              <Text
-                ff="$body500"
-                col="$greyOnWhite"
+              <TouchableWithoutFeedback
                 onPress={openUrl(pageContent?.url ?? '')}
               >
-                <>
-                  {pageContent?.textBefore}{' '}
-                  <Text
-                    textDecorationLine="underline"
-                    ff="$body700"
-                    col="$greyOnWhite"
-                  >
-                    {pageContent?.linkText}
-                  </Text>{' '}
-                  {pageContent?.textAfter}
-                </>
-              </Text>
+                <Text ff="$body500" col="$greyOnWhite">
+                  <>
+                    {pageContent?.textBefore}{' '}
+                    <Text
+                      textDecorationLine="underline"
+                      ff="$body700"
+                      col="$greyOnWhite"
+                    >
+                      {pageContent?.linkText}
+                    </Text>{' '}
+                    {pageContent?.textAfter}
+                  </>
+                </Text>
+              </TouchableWithoutFeedback>
             ) : (
               <Text ff="$body500" col="$greyOnWhite">
                 {pageContent?.text}
               </Text>
             )}
             {pageContent?.type === 'HOW_CAN_YOU_ENSURE' && (
-              <Text
-                mt="$2"
-                textDecorationLine="underline"
-                ff="$body700"
-                col="$greyOnWhite"
+              <TouchableWithoutFeedback
                 onPress={() => {
                   navigation.navigate('TermsAndConditions')
                 }}
               >
-                {t('faqs.howCanYouEnsureTosAndPP')}
-              </Text>
+                <Text
+                  mt="$2"
+                  textDecorationLine="underline"
+                  ff="$body700"
+                  col="$greyOnWhite"
+                >
+                  {t('faqs.howCanYouEnsureTosAndPP')}
+                </Text>
+              </TouchableWithoutFeedback>
             )}
           </>
         )}

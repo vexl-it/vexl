@@ -77,6 +77,10 @@ export default function addMessagesToChats(
             one.state === 'receivedButRequiresNewerVersion'
         )
 
+        const isOnlyVersionUpdate = !messages.some(
+          (one) => one.message.messageType !== 'VERSION_UPDATE'
+        )
+
         return pipe(
           {
             ...oneChat,
@@ -95,7 +99,7 @@ export default function addMessagesToChats(
             ),
             chat: {
               ...oneChat.chat,
-              isUnread: true,
+              isUnread: isOnlyVersionUpdate ? oneChat.chat.isUnread : true,
               otherSideVersion:
                 lastReceivedMessage?.message.myVersion ??
                 oneChat.chat.otherSideVersion,

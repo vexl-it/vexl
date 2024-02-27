@@ -16,7 +16,7 @@ import {
   tradeChecklistAmountDataAtom,
   tradeOrOriginOfferCurrencyAtom,
 } from '../../../../state/tradeChecklist/atoms/fromChatAtoms'
-import {getCurrentLocale} from '../../../../utils/localization/I18nProvider'
+import {removeTrailingZerosFromNumberString} from '../../../../utils/removeTrailingZerosFromNumberString'
 import updatesToBeSentAtom, {
   addAmountActionAtom,
 } from '../../atoms/updatesToBeSentAtom'
@@ -51,22 +51,21 @@ export const btcPriceForOfferWithStateAtom =
 export const applyFeeOnFeeChangeActionAtom = atom(
   null,
   (get, set, feeAmount: number) => {
+    const btcOrSat = get(btcOrSatAtom)
     const btcInputValue = Number(get(btcInputValueAtom))
     const appliedFee = get(feeAmountAtom)
 
     const btcValueWithoutFee = btcInputValue / (1 - appliedFee / 100)
-    const locale = getCurrentLocale()
+    const btcValueWithFeeApplied =
+      btcValueWithoutFee - btcValueWithoutFee * (feeAmount / 100)
 
     set(
       btcInputValueAtom,
-      replaceNonDecimalCharsInInput(
-        (
-          btcValueWithoutFee -
-          btcValueWithoutFee * (feeAmount / 100)
-        ).toLocaleString(locale, {
-          maximumFractionDigits: DECIMALS_FOR_BTC_VALUE,
-        })
-      )
+      btcOrSat === 'SAT'
+        ? String(Math.round(btcValueWithFeeApplied))
+        : removeTrailingZerosFromNumberString(
+            btcValueWithFeeApplied.toFixed(DECIMALS_FOR_BTC_VALUE)
+          )
     )
     set(feeAmountAtom, feeAmount)
   }
@@ -123,11 +122,12 @@ export const offerTypeAtom = atom((get) => {
 export const setFormDataBasedOnBtcPriceTypeActionAtom = atom(
   null,
   (get, set, tradePriceType: TradePriceType) => {
+    const btcOrSat = get(btcOrSatAtom)
     return pipe(
       set(refreshCurrentBtcPriceActionAtom),
       T.map(() => {
         set(tradePriceTypeAtom, tradePriceType)
-        set(btcInputValueAtom, '1')
+        set(btcInputValueAtom, btcOrSat === 'BTC' ? '1' : '100000000')
         set(
           fiatInputValueAtom,
           `${get(btcPriceForOfferWithStateAtom)?.btcPrice}`
@@ -222,14 +222,15 @@ export const calculateBtcValueOnFiatAmountChangeActionAtom = atom(
     if (tradeBtcPrice) {
       const numberValue = Number(fiatAmount)
       const fee = (numberValue / tradeBtcPrice) * (feeAmount / 100)
-      const locale = getCurrentLocale()
 
       set(
         btcValueAtom,
         btcOrSat === 'BTC'
-          ? (numberValue / tradeBtcPrice - fee).toLocaleString(locale, {
-              maximumFractionDigits: DECIMALS_FOR_BTC_VALUE,
-            })
+          ? removeTrailingZerosFromNumberString(
+              (numberValue / tradeBtcPrice - fee).toFixed(
+                DECIMALS_FOR_BTC_VALUE
+              )
+            )
           : `${Math.round(
               (numberValue / tradeBtcPrice - fee) * SATOSHIS_IN_BTC
             )}`

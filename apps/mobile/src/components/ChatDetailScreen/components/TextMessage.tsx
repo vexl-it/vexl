@@ -95,6 +95,7 @@ type messageTypesWithItalicPrefix =
   | 'CANCEL_REQUEST_MESSAGING'
   | 'DISAPPROVE_MESSAGING'
   | 'APPROVE_MESSAGING'
+  | 'VERSION_UPDATE'
 
 function shouldHaveItalicPrefix(
   messageType: string
@@ -104,6 +105,7 @@ function shouldHaveItalicPrefix(
     'CANCEL_REQUEST_MESSAGING',
     'DISAPPROVE_MESSAGING',
     'APPROVE_MESSAGING',
+    'VERSION_UPDATE',
   ].includes(messageType)
 }
 
@@ -171,6 +173,7 @@ function TextMessage({
           `messages.textMessageTypes.${message.message.messageType}`,
           {
             message: message.message.text,
+            version: message.message.myVersion,
           }
         ),
         italic: true,

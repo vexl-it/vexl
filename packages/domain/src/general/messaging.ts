@@ -167,6 +167,8 @@ export type Chat = z.TypeOf<typeof Chat>
 export const ServerMessage = z.object({
   message: z.string(),
   senderPublicKey: PublicKeyPemBase64,
+  /** depreciated. Used as fallback from old Vexl version */
+  messageType: z.string().optional(),
 })
 export type ServerMessage = z.TypeOf<typeof ServerMessage>
 

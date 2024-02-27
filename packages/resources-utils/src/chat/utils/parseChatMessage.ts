@@ -158,6 +158,11 @@ export function parseChatMessage({
     return pipe(
       E.right(jsonString),
       E.chainW(parseJson),
+      // Compatibility with Vexl 1.0
+      E.map((parsedMessage) => ({
+        ...parsedMessage,
+        messageType: parsedMessage.messageType ?? serverMessage.messageType,
+      })),
       E.chainFirstW(ensureCompatibleVersion({appVersion, serverMessage})),
       E.chainW(safeParse(ChatMessagePayload)),
       E.map(setImageForBackwardCompatibility),

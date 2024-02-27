@@ -107,6 +107,8 @@ function MessagePreview({
         })}
       </BaseText>
     )
+  } else if (message.messageType === 'VERSION_UPDATE') {
+    return <BaseText>{t(`messages.textMessageTypes.VERSION_UPDATE`)}</BaseText>
   } else if (message.messageType === 'MESSAGE') {
     if (message.text.trim() === '' && message.image !== undefined) {
       return (

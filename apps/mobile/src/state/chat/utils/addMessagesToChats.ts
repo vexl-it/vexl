@@ -82,7 +82,11 @@ export default function addMessagesToChats(
             ...oneChat,
             // Do not show version updates in chat
             messages: messages.filter(
-              (one) => one.message.messageType !== 'VERSION_UPDATE'
+              (one) =>
+                one.message.messageType !== 'VERSION_UPDATE' ||
+                // Show messages with forceShow flag
+                (one.state !== 'receivedButRequiresNewerVersion' &&
+                  one.message.forceShow)
             ),
             tradeChecklist: tradeChecklistUpdates.reduce(
               (acc, update) =>

@@ -51,7 +51,11 @@ const decodePreviouslyUncompatibleMessagesActionAtom = atom(
                 (one) =>
                   ({
                     state: 'received',
-                    message: one,
+                    message: {
+                      ...one,
+                      forceShow:
+                        one.messageType === 'VERSION_UPDATE' ? true : undefined,
+                    },
                   }) satisfies ChatMessageWithState
               )
             )

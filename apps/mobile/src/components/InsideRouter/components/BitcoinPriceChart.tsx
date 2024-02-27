@@ -9,10 +9,13 @@ import {
   refreshBtcPriceActionAtom,
 } from '../../../state/currentBtcPriceAtoms'
 import {selectedCurrencyAtom} from '../../../state/selectedCurrency'
+import {getCurrentLocale} from '../../../utils/localization/I18nProvider'
+import {preferencesAtom} from '../../../utils/preferences'
 
 export const CHART_HEIGHT_PX = 100
 
 function BitcoinPriceChart(): JSX.Element {
+  const preferences = useAtomValue(preferencesAtom)
   const insets = useSafeAreaInsets()
   const refreshBtcPrice = useSetAtom(refreshBtcPriceActionAtom)
   const selectedCurrency = useAtomValue(selectedCurrencyAtom)
@@ -51,7 +54,9 @@ function BitcoinPriceChart(): JSX.Element {
               <Text fos={28} ff="$heading" color="$yellowAccent1">
                 {btcPriceForSelectedCurrency?.state === 'error'
                   ? '-'
-                  : btcPriceForSelectedCurrency?.btcPrice}
+                  : btcPriceForSelectedCurrency?.btcPrice.toLocaleString(
+                      preferences.appLanguage ?? getCurrentLocale()
+                    )}
               </Text>
             )}
             <Text fos={12} ff="$body700" color="$yellowAccent1">

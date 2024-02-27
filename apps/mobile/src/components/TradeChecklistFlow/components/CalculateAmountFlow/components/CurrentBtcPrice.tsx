@@ -2,6 +2,8 @@ import {useAtomValue, useSetAtom} from 'jotai'
 import {ActivityIndicator, TouchableOpacity} from 'react-native'
 import {Text, XStack, getTokens, type TextProps} from 'tamagui'
 import {tradeOrOriginOfferCurrencyAtom} from '../../../../../state/tradeChecklist/atoms/fromChatAtoms'
+import {getCurrentLocale} from '../../../../../utils/localization/I18nProvider'
+import {preferencesAtom} from '../../../../../utils/preferences'
 import {
   btcPriceForOfferWithStateAtom,
   refreshCurrentBtcPriceActionAtom,
@@ -19,6 +21,8 @@ function CurrentBtcPrice(props: TextProps): JSX.Element {
     tradeOrOriginOfferCurrencyAtom
   )
   const selectedCurrencyCode = useAtomValue(selectedCurrencyCodeAtom)
+  const preferences = useAtomValue(preferencesAtom)
+  const currentLocale = preferences.appLanguage ?? getCurrentLocale()
 
   const tradeCurrency =
     selectedCurrencyCode ?? tradeOrOriginOfferCurrency ?? 'USD'
@@ -42,8 +46,10 @@ function CurrentBtcPrice(props: TextProps): JSX.Element {
               tradePriceType === 'live'
                 ? btcPriceForOfferWithState?.state === 'error'
                   ? '-'
-                  : btcPriceForOfferWithState?.btcPrice
-                : tradeBtcPrice
+                  : btcPriceForOfferWithState?.btcPrice.toLocaleString(
+                      currentLocale
+                    )
+                : tradeBtcPrice.toLocaleString(currentLocale)
             } ${tradeCurrency}`}
           </Text>
         )}

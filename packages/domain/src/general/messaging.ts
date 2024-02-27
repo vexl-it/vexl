@@ -44,6 +44,7 @@ export const MessageTypeBackwardCompatible = z.enum([
   'DISAPPROVE_MESSAGING',
   'DELETE_CHAT',
   'BLOCK_CHAT',
+  'VERSION_UPDATE',
 ])
 export type MessageTypeBackwardCompatible = z.TypeOf<
   typeof MessageTypeBackwardCompatible

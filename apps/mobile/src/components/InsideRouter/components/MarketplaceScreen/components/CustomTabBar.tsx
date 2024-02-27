@@ -1,41 +1,33 @@
 import {type MaterialTopTabBarProps} from '@react-navigation/material-top-tabs'
 import {StyleSheet, TouchableOpacity, useWindowDimensions} from 'react-native'
 import Animated, {useAnimatedStyle, withTiming} from 'react-native-reanimated'
-import {Stack, Text, XStack, getTokens} from 'tamagui'
+import {Stack, XStack, getTokens} from 'tamagui'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
+import TabTitle from '../../../../TabTitle'
 import {CONTAINER_WITH_TOP_BORDER_RADIUS_TOP_PADDING} from '../../ContainerWithTopBorderRadius'
 
 const SELL_TAB_INDEX = 0
 const BUY_TAB_INDEX = 1
 
-interface TabTitleProps {
+interface Props {
   active: boolean
   onPress: () => void
   title: string
 }
 
-function Tab({active, onPress, title}: TabTitleProps): JSX.Element {
+function Tab({active, onPress, title}: Props): JSX.Element {
   return (
-    <Stack
-      f={1}
-      ai="center"
-      jc="center"
-      mt={CONTAINER_WITH_TOP_BORDER_RADIUS_TOP_PADDING}
-      px="$2"
-      pb="$2"
-    >
-      <TouchableOpacity onPress={onPress}>
-        <Text
-          col={active ? '$main' : '$greyOnBlack'}
-          fos={40}
-          ff="$heading"
-          numberOfLines={1}
-          adjustsFontSizeToFit
-        >
-          {title}
-        </Text>
-      </TouchableOpacity>
-    </Stack>
+    <TouchableOpacity style={{flex: 1}} onPress={onPress}>
+      <Stack
+        ai="center"
+        jc="center"
+        mt={CONTAINER_WITH_TOP_BORDER_RADIUS_TOP_PADDING}
+        px="$2"
+        pb="$2"
+      >
+        <TabTitle active={active} onPress={onPress} title={title} />
+      </Stack>
+    </TouchableOpacity>
   )
 }
 

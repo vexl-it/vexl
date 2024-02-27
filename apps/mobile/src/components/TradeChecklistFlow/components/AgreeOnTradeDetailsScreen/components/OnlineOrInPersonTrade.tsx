@@ -16,13 +16,6 @@ import RevealPhoneNumberCell from './RevealPhoneNumberCell'
 import SetNetworkCell from './SetNetworkCell'
 import TradeRule from './TradeRule'
 
-const VEXL_BLOG_URL =
-  'https://blog.vexl.it/how-to-do-peer-to-peer-trading-on-vexl-6745f3954ae9'
-
-function openVexlBlog(): void {
-  openUrl(VEXL_BLOG_URL)()
-}
-
 function OnlineOrInPersonTrade(): JSX.Element {
   const {t} = useTranslation()
   const offerForTradeChecklist = useAtomValue(fromChatAtoms.originOfferAtom)
@@ -53,7 +46,9 @@ function OnlineOrInPersonTrade(): JSX.Element {
               actionButtonText={t('tradeChecklist.readMoreInFullArticle')}
               hideCloseButton
               text={t('tradeChecklist.thisDealIsFullyOnline')}
-              onActionPress={openVexlBlog}
+              onActionPress={() => {
+                openUrl(t('tradeChecklist.vexlBlogUrl'))()
+              }}
               variant="yellow"
             />
             <Stack my="$4" gap="$2">

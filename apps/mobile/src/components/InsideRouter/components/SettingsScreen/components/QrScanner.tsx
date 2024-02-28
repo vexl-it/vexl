@@ -1,4 +1,4 @@
-import {BarCodeScanner} from 'expo-barcode-scanner'
+import {Camera, CameraView} from 'expo-camera/next'
 import * as T from 'fp-ts/Task'
 import {pipe} from 'fp-ts/function'
 import {useAtom, useSetAtom} from 'jotai'
@@ -38,7 +38,7 @@ function QrScanner(): JSX.Element {
   const [hasPermissions, setHasPermissions] = useState(false)
 
   const requestPermissions = useCallback(async () => {
-    if (!(await BarCodeScanner.getPermissionsAsync()).canAskAgain) {
+    if (!(await Camera.requestCameraPermissionsAsync()).canAskAgain) {
       Alert.alert('', t('qrScanner.grantPermissionsInSettings'), [
         {
           text: t('qrScanner.openSettings'),
@@ -52,7 +52,7 @@ function QrScanner(): JSX.Element {
       ])
       return
     }
-    const {status} = await BarCodeScanner.requestPermissionsAsync()
+    const {status} = await Camera.requestCameraPermissionsAsync()
 
     setHasPermissions(status === 'granted')
   }, [t])
@@ -140,7 +140,7 @@ function QrScanner(): JSX.Element {
             overflow="hidden"
             position="relative"
           >
-            <BarCodeScanner style={scannerStyle} onBarCodeScanned={onScanned} />
+            <CameraView style={scannerStyle} onBarcodeScanned={onScanned} />
           </Stack>
         )}
         {!hasPermissions && (

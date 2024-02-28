@@ -2,23 +2,24 @@ import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.bra
 import {IsoDatetimeString} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
 import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import * as T from 'fp-ts/Task'
+import {difference} from 'fp-ts/lib/Array'
 import {pipe} from 'fp-ts/lib/function'
 import {getDefaultStore} from 'jotai'
-import {Alert} from 'react-native'
 import {z} from 'zod'
 import {
   importedContactsAtom,
   lastImportOfContactsAtom,
   normalizedContactsAtom,
-  storedContactsAtom,
 } from '../../../state/contacts/atom/contactsStore'
 import loadContactsFromDeviceActionAtom from '../../../state/contacts/atom/loadContactsFromDeviceActionAtom'
 import normalizeStoredContactsActionAtom from '../../../state/contacts/atom/normalizeStoredContactsActionAtom'
 import {type StoredContactWithComputedValues} from '../../../state/contacts/domain'
 import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
-import {translationAtom} from '../../../utils/localization/I18nProvider'
+import {deduplicateBy} from '../../../utils/deduplicate'
 import reportError from '../../../utils/reportError'
+import {contactsMigratedAtom} from '../atoms'
 import {type MigrationProgress} from '../types'
+import {storedContactsAtom} from './../../../state/contacts/atom/contactsStore'
 
 const ContactNormalized = z.object({
   name: z.string(),
@@ -31,7 +32,7 @@ const ContactNormalized = z.object({
 })
 type ContactNormalized = z.TypeOf<typeof ContactNormalized>
 
-const importedContactsStorageAtom = atomWithParsedMmkvStorage(
+const oldImportedContactsStorageAtom = atomWithParsedMmkvStorage(
   'importedContacts',
   {
     importedContacts: [],
@@ -67,11 +68,29 @@ function oldToNewContactManuallyImported(
   }
 }
 
+function findNumbersThatWereNotMigrated(): Set<E164PhoneNumber> {
+  const store = getDefaultStore()
+  const importedContactsNumberBeforeMigration = store
+    .get(oldImportedContactsStorageAtom)
+    .importedContacts.map((c) => c.normalizedNumber)
+
+  const importedContactsNumberAfterMigration = store
+    .get(importedContactsAtom)
+    .map((c) => c.computedValues.normalizedNumber)
+
+  return new Set(
+    difference({equals: (a: E164PhoneNumber, b: E164PhoneNumber) => a === b})(
+      importedContactsNumberBeforeMigration,
+      importedContactsNumberAfterMigration
+    )
+  )
+}
+
 export default async function migrateContacts(
   onProgress: (p: MigrationProgress) => void
 ): Promise<void> {
   const store = getDefaultStore()
-  const oldImportedContacts = store.get(importedContactsStorageAtom)
+  const oldImportedContacts = store.get(oldImportedContactsStorageAtom)
 
   if (oldImportedContacts.importedContacts.length === 0) return
 
@@ -87,6 +106,7 @@ export default async function migrateContacts(
   })
 
   store.set(lastImportOfContactsAtom, oldImportedContacts.lastImport)
+  store.set(storedContactsAtom, [])
 
   await pipe(
     store.set(loadContactsFromDeviceActionAtom),
@@ -106,54 +126,78 @@ export default async function migrateContacts(
         ])
       )
       const manuallyImportedContacts =
-        oldImportedContacts.importedContacts.filter((oldContact) =>
-          storedContactsMap.has(oldContact.normalizedNumber)
+        oldImportedContacts.importedContacts.filter(
+          (oldContact) => !storedContactsMap.has(oldContact.normalizedNumber)
         )
 
-      store.set(storedContactsAtom, (contacts) => [
-        ...contacts.map((oneContact) => {
-          if (
-            oneContact.computedValues &&
-            oldImportedContactsMap.has(
-              oneContact.computedValues?.normalizedNumber
-            )
-          ) {
-            return {
-              ...oneContact,
-              flags: {...oneContact.flags, imported: true, seen: true},
-            }
-          }
-          return {
-            ...oneContact,
-            flags: {...oneContact.flags, imported: false, seen: true},
-          }
-        }),
-        ...manuallyImportedContacts.map(oldToNewContactManuallyImported),
-      ])
+      store.set(storedContactsAtom, (contacts) =>
+        deduplicateBy(
+          [
+            ...contacts.map((oneContact) => {
+              if (
+                oneContact.computedValues &&
+                oldImportedContactsMap.has(
+                  oneContact.computedValues?.normalizedNumber
+                )
+              ) {
+                return {
+                  ...oneContact,
+                  flags: {...oneContact.flags, imported: true, seen: true},
+                }
+              }
+              return {
+                ...oneContact,
+                flags: {...oneContact.flags, imported: false, seen: true},
+              }
+            }),
+            ...manuallyImportedContacts.map(oldToNewContactManuallyImported),
+          ],
+          (contact) => contact.computedValues?.hash ?? contact.info.rawNumber
+        )
+      )
     })
   )()
 
   // Check numbers
-  const importedContactsNumberBeforeMigration =
-    oldImportedContacts.importedContacts.length
-  const importedContactsNumberAfterMigration =
-    store.get(importedContactsAtom).length
-  if (
-    importedContactsNumberBeforeMigration !==
-    importedContactsNumberAfterMigration
-  ) {
-    Alert.alert(
-      store.get(translationAtom).t('migration.contacts.problemTitle'),
-      store.get(translationAtom).t('migration.contacts.problemText')
+  const numbersThatWereNotImgrated = findNumbersThatWereNotMigrated()
+
+  if (numbersThatWereNotImgrated.size > 0) {
+    console.warn(
+      `Problem while migrating contacts. Total missing contacts: ${numbersThatWereNotImgrated.size}. Trying to recover.`
     )
-    reportError('warn', new Error('Problem while migrating contacts'), {
-      importedContactsNumberAfterMigration,
-      importedContactsNumberBeforeMigration,
-    })
+
+    const missingNumbers = oldImportedContacts.importedContacts
+      .filter((one) => numbersThatWereNotImgrated.has(one.normalizedNumber))
+      .map(oldToNewContactManuallyImported)
+
+    store.set(storedContactsAtom, (contacts) =>
+      deduplicateBy(
+        [...contacts, ...missingNumbers],
+        (contact) => contact.computedValues?.hash ?? contact.info.rawNumber
+      )
+    )
+
+    const recovered = findNumbersThatWereNotMigrated().size === 0
+
+    console.log(
+      `Problem while migrating contacts. ${
+        recovered ? 'Recovered' : 'Not recovered'
+      }`
+    )
+
+    reportError(
+      'warn',
+      new Error('Problem while migrating contacts. Trying to recover.'),
+      {
+        numberOfMissingContacts: numbersThatWereNotImgrated.size,
+        recovered,
+      }
+    )
   } else {
-    store.set(importedContactsStorageAtom, {
+    store.set(oldImportedContactsStorageAtom, {
       importedContacts: [],
       lastImport: undefined,
     })
   }
+  store.set(contactsMigratedAtom, true)
 }

@@ -9005,7 +9005,7 @@ __metadata:
     awesome-phonenumber: ^5.1.0
     babel-plugin-module-resolver: ^5.0.0
     babel-plugin-transform-inline-environment-variables: ^0.4.4
-    bunshi: ^2.0.2
+    bunshi: ^2.1.3
     burnt: ^0.12.1
     compare-versions: ^6.1.0
     country-data: ^0.0.31
@@ -10522,9 +10522,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"bunshi@npm:^2.0.2":
-  version: 2.0.2
-  resolution: "bunshi@npm:2.0.2"
+"bunshi@npm:^2.1.3":
+  version: 2.1.3
+  resolution: "bunshi@npm:2.1.3"
   peerDependencies:
     react: ">=16"
     vue: ">=3"
@@ -10533,7 +10533,7 @@ __metadata:
       optional: true
     vue:
       optional: true
-  checksum: 65b5c1def632e11843c2cedff3b7cbe15d223c3928390dbe9b979d90b5d4d7e052471a649dcf75f98e32249c40c174b770866f3d996bd75354584d7205cb685d
+  checksum: 6ddcc52d22470b615ead617c9074754bd77941d2f6f4fa299a0db49fe12d745383fca83210ee1863230aea4cf971b5eaf54c65cc1b61c0e73b57a9567aae6500
   languageName: node
   linkType: hard
 

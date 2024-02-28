@@ -226,6 +226,14 @@ function DebugScreen(): JSX.Element {
                 })
               }}
             />
+            <Button
+              variant="primary"
+              size="small"
+              text="clear new contacts"
+              onPress={() => {
+                store.set(storedContactsAtom, [])
+              }}
+            />
 
             <Button
               variant="primary"

@@ -22,6 +22,12 @@ if (![].at) {
     return this.slice(pos)[0]
   }
 }
+if (![].toSorted) {
+  // eslint-disable-next-line no-extend-native
+  Array.prototype.toSorted = function (...arg) {
+    return [...this].sort(...arg)
+  }
+}
 
 // eslint-disable-next-line
 function HeadlessCheck({isHeadless}) {

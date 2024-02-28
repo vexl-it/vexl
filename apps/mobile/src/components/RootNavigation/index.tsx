@@ -1,5 +1,6 @@
 import {createNativeStackNavigator} from '@react-navigation/native-stack'
 import {useAtomValue} from 'jotai'
+import {memo} from 'react'
 import {type RootStackParamsList} from '../../navigationTypes'
 import {useCheckAndReportCurrrentVersionToChatsActionAtom} from '../../state/chat/atoms/checkAndReportCurrentVersionToChatsActionAtom'
 import {useDecodePreviouslyUncompatibleMessagesOnMount} from '../../state/chat/atoms/decodePreviouslyUncompatibleMessagesActionAtom'
@@ -64,6 +65,8 @@ function LoggedInHookGroup(): null {
   return null
 }
 
+const LoggedInHookGroupMemoized = memo(LoggedInHookGroup)
+
 function RootNavigation(): JSX.Element {
   const isLoggedIn = useIsUserLoggedIn()
   const showTextDebugButton = useAtomValue(showTextDebugButtonAtom)
@@ -124,7 +127,7 @@ function RootNavigation(): JSX.Element {
         <Stack.Screen name="DebugScreen" component={DebugScreen} />
       </Stack.Navigator>
       {!!showTextDebugButton && <DevTranslationFloatingButton />}
-      {!!isLoggedIn && <LoggedInHookGroup />}
+      {!!isLoggedIn && <LoggedInHookGroupMemoized />}
     </>
   )
 }

@@ -7,10 +7,7 @@ import {pipe} from 'fp-ts/function'
 import {atom, type Atom, type SetStateAction, type WritableAtom} from 'jotai'
 import {splitAtom} from 'jotai/utils'
 import {matchSorter} from 'match-sorter'
-import {
-  normalizedContactsAtom,
-  storedContactsAtom,
-} from '../../../../state/contacts/atom/contactsStore'
+import {storedContactsAtom} from '../../../../state/contacts/atom/contactsStore'
 import {submitContactsActionAtom} from '../../../../state/contacts/atom/submitContactsActionAtom'
 import {
   StoredContactWithComputedValues,
@@ -25,14 +22,14 @@ import {askAreYouSureActionAtom} from '../../../AreYouSureDialog'
 import userSvg from '../../../images/userSvg'
 
 export const ContactsSelectScope = createScope<{
-  importedContacts: StoredContactWithComputedValues[]
+  normalizedContacts: StoredContactWithComputedValues[]
   initialFilters: {
     showSubmitted: boolean
     showNonSubmitted: boolean
     showNew: boolean
   }
 }>({
-  importedContacts: [],
+  normalizedContacts: [],
   initialFilters: {
     showSubmitted: false,
     showNonSubmitted: false,
@@ -40,9 +37,9 @@ export const ContactsSelectScope = createScope<{
   },
 })
 
-export const contactSelectMolecule = molecule((getMolecule, getScope) => {
+export const contactSelectMolecule = molecule((_, getScope) => {
   const searchTextAtom = atom('')
-  const {importedContacts, initialFilters} = getScope(ContactsSelectScope)
+  const {normalizedContacts, initialFilters} = getScope(ContactsSelectScope)
 
   const showSubmittedContactsAtom = atom<boolean>(initialFilters.showSubmitted)
   const showNonSubmittedContactsAtom = atom<boolean>(
@@ -52,46 +49,41 @@ export const contactSelectMolecule = molecule((getMolecule, getScope) => {
 
   const selectedNumbersAtom = atom(
     new Set(
-      importedContacts
+      normalizedContacts
         .filter((one) => one.flags.imported)
         .map((one) => one.computedValues.normalizedNumber)
     )
   )
-
-  const allContactsAtom = atom((get) => {
-    return get(normalizedContactsAtom)
-  })
 
   const contactsToDisplayAtom = atom((get) => {
     const showSubmittedContacts = get(showSubmittedContactsAtom)
     const showNonSubmittedContacts = get(showNonSubmittedContactsAtom)
     const showNewContacts = get(showNewContactsAtom)
     const searchText = get(searchTextAtom)
-    const allContacts = get(allContactsAtom)
 
     const filterActive =
       showNewContacts || showSubmittedContacts || showNonSubmittedContacts
 
     const contactsToShow = deduplicateBy(
       (() => {
-        if (!filterActive) return allContacts
+        if (!filterActive) return normalizedContacts
 
         const selectedNumbers = get(selectedNumbersAtom)
 
         const toShow: StoredContactWithComputedValues[] = []
         if (showNewContacts) {
-          toShow.push(...allContacts.filter((one) => !one.flags.seen))
+          toShow.push(...normalizedContacts.filter((one) => !one.flags.seen))
         }
         if (showSubmittedContacts) {
           toShow.push(
-            ...allContacts.filter((one) =>
+            ...normalizedContacts.filter((one) =>
               selectedNumbers.has(one.computedValues.normalizedNumber)
             )
           )
         }
         if (showNonSubmittedContacts) {
           toShow.push(
-            ...allContacts.filter(
+            ...normalizedContacts.filter(
               (one) => !selectedNumbers.has(one.computedValues.normalizedNumber)
             )
           )

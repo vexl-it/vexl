@@ -785,8 +785,8 @@
   "map.locationSelect.hint": "Move the map to change the pin location",
   "map.location.errors.notFound": "Location not found.",
   "map.location.suggestDifferent": "Suggest different",
-  "contacts.loadingContacts": "Loading contacts to show {{percentDone}}% done.",
-  "migrations.migrating": "Migrating state from old Vexl version. {{percentDone}}% done.",
+  "contacts.loadingContacts": "Loading contacts to show.",
+  "migrations.migrating": "Migrating state from old Vexl version.",
   "migration.contacts.problemTitle": "Problem with migration",
-  "migration.contacts.problemText": "There was a discrepancies while migrating contacts. Please check imported contacts and make sure all contacts are imported properly!"
+  "migration.contacts.problemText": "There was a discrepancies while migrating contacts. Old number of contacts: {{oldSize}}, new number of contacts {{newSize}}. We are trying to recover and save these contacts. Please check imported contacts and make sure all contacts are imported properly!"
 }

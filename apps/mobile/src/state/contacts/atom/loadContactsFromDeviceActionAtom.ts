@@ -1,27 +1,31 @@
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/lib/function'
-import {atom, useSetAtom} from 'jotai'
+import {atom, useSetAtom, useStore} from 'jotai'
 import {useCallback} from 'react'
+import {contactsMigratedAtom} from '../../../components/VersionMigrations/atoms'
 import reportError from '../../../utils/reportError'
-import {useOnFocusAndAppState} from '../../../utils/useFocusAndAppState'
+import {useAppState} from '../../../utils/useAppState'
+import {postLoginFinishedAtom} from '../../postLoginOnboarding'
 import {type ContactInfo, type StoredContact} from '../domain'
 import getContactsAndTryToResolveThePermissionsAlongTheWay from '../utils'
 import {storedContactsAtom} from './contactsStore'
 
-function filterNotStoredContacts(storedContacts: StoredContact[]) {
+function filterNotStoredContacts(
+  storedContacts: StoredContact[]
+): (contactsFromDevice: ContactInfo[]) => ContactInfo[] {
+  const storedContactsMap = new Map(
+    storedContacts.map((c) => [c.info.rawNumber, c])
+  )
+
   return (contactsFromDevice: ContactInfo[]) => {
     return contactsFromDevice.filter(
-      (contactFromDevice) =>
-        !storedContacts.some(
-          (storedContact) =>
-            storedContact.info.rawNumber === contactFromDevice.rawNumber
-        )
+      (contactFromDevice) => !storedContactsMap.has(contactFromDevice.rawNumber)
     )
   }
 }
 
-const loadContactsFromDeviceActionAtom = atom(null, (get, set) =>
-  pipe(
+const loadContactsFromDeviceActionAtom = atom(null, (get, set) => {
+  return pipe(
     getContactsAndTryToResolveThePermissionsAlongTheWay(),
     TE.map(filterNotStoredContacts(get(storedContactsAtom))),
     TE.map((newContacts) => {
@@ -50,18 +54,30 @@ const loadContactsFromDeviceActionAtom = atom(null, (get, set) =>
         )
         return false
       },
-      () => true
+      () => {
+        return true
+      }
     )
   )
-)
+})
 
 export default loadContactsFromDeviceActionAtom
 
 export function useRefreshContactsFromDeviceOnResume(): void {
+  const store = useStore()
   const loadContactsFromDevice = useSetAtom(loadContactsFromDeviceActionAtom)
-  useOnFocusAndAppState(
-    useCallback(() => {
-      void loadContactsFromDevice()()
-    }, [loadContactsFromDevice])
+
+  useAppState(
+    useCallback(
+      (state) => {
+        if (
+          store.get(postLoginFinishedAtom) &&
+          store.get(contactsMigratedAtom) &&
+          state === 'active'
+        )
+          void loadContactsFromDevice()()
+      },
+      [loadContactsFromDevice, store]
+    )
   )
 }

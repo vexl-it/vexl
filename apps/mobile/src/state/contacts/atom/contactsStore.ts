@@ -32,10 +32,14 @@ export const newContactsAtom = atom((get) =>
 
 export const resolveAllContactsAsSeenActionAtom = atom(null, (get, set) => {
   set(storedContactsAtom, (contacts) =>
-    contacts.map((contact) => ({
-      ...contact,
-      flags: {...contact.flags, seen: true},
-    }))
+    contacts.map((contact) =>
+      contact.flags.seen
+        ? contact
+        : {
+            ...contact,
+            flags: {...contact.flags, seen: true},
+          }
+    )
   )
 })
 

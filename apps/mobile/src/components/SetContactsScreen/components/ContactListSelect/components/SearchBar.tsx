@@ -2,9 +2,9 @@ import {useMolecule} from 'bunshi/dist/react'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/lib/function'
 import {useAtom, useAtomValue, useSetAtom} from 'jotai'
-import {useEffect} from 'react'
+import {useCallback, useEffect, useMemo, useState} from 'react'
 import {Keyboard} from 'react-native'
-import {Stack, Text, XStack} from 'tamagui'
+import {Stack, Text, XStack, debounce} from 'tamagui'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import {askAreYouSureActionAtom} from '../../../../AreYouSureDialog'
 import Button from '../../../../Button'
@@ -32,15 +32,32 @@ function NiceJobHuntingSats(): JSX.Element {
 
 function SearchBar(): JSX.Element {
   const {t} = useTranslation()
-
   const {areThereAnyContactsToDisplayAtom, selectAllAtom, searchTextAtom} =
     useMolecule(contactSelectMolecule)
   const [searchText, setSearchText] = useAtom(searchTextAtom)
+  const [inputValue, setInputValue] = useState(() => searchText)
+
   const [allSelected, setAllSelected] = useAtom(selectAllAtom)
   const areThereAnyContactsToDisplay = useAtomValue(
     areThereAnyContactsToDisplayAtom
   )
   const showModal = useSetAtom(askAreYouSureActionAtom)
+
+  const setSearchTextDebounce = useMemo(
+    () =>
+      debounce((t: string) => {
+        setSearchText(t)
+      }, 500),
+    [setSearchText]
+  )
+
+  const onInputValueChange = useCallback(
+    (value: string) => {
+      setInputValue(value)
+      setSearchTextDebounce(value)
+    },
+    [setInputValue, setSearchTextDebounce]
+  )
 
   useEffect(() => {
     if (searchText.trim() === '3367666933777') {
@@ -58,6 +75,7 @@ function SearchBar(): JSX.Element {
         }),
         TE.map(() => {
           setSearchText('')
+          setInputValue('')
         })
       )()
     }
@@ -69,8 +87,8 @@ function SearchBar(): JSX.Element {
         <Stack f={5} pr="$2">
           <TextInput
             placeholder={t('postLoginFlow.contactsList.inputPlaceholder')}
-            value={searchText}
-            onChangeText={setSearchText}
+            value={inputValue}
+            onChangeText={onInputValueChange}
             icon={magnifyingGlass}
             size="small"
           />

@@ -72,11 +72,9 @@ function ContactsListSelect({
   )
 }
 
-export default function ContactListSelectWithProvider(
-  props: Props
-): JSX.Element {
+export function ContactListSelectWithProvider(props: Props): JSX.Element {
   const store = useStore()
-  const importedContacts = useMemo(
+  const normalizedContacts = useMemo(
     () => store.get(normalizedContactsAtom),
     [store]
   )
@@ -85,7 +83,7 @@ export default function ContactListSelectWithProvider(
     <ScopeProvider
       scope={ContactsSelectScope}
       value={{
-        importedContacts,
+        normalizedContacts,
         initialFilters: {
           showNew: props.showNewByDefault,
           showNonSubmitted: false,
@@ -95,5 +93,13 @@ export default function ContactListSelectWithProvider(
     >
       <ContactsListSelect {...props} />
     </ScopeProvider>
+  )
+}
+
+export default function ContactListWithLoadStep(props: Props): JSX.Element {
+  return (
+    <NormalizeContactsWithLoadingScreen>
+      <ContactListSelectWithProvider {...props} />
+    </NormalizeContactsWithLoadingScreen>
   )
 }

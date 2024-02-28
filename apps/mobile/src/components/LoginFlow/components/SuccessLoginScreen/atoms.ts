@@ -25,6 +25,7 @@ import reportError from '../../../../utils/reportError'
 import showErrorAlert from '../../../../utils/showErrorAlert'
 import {toCommonErrorMessage} from '../../../../utils/useCommonErrorMessages'
 import {askAreYouSureActionAtom} from '../../../AreYouSureDialog'
+import {contactsMigratedAtom} from '../../../VersionMigrations/atoms'
 
 const TARGET_TIME_MILLISECONDS = 3000
 
@@ -268,6 +269,8 @@ export const finishLoginActionAtom = atom(
     }
   ) => {
     const {t} = get(translationAtom)
+
+    set(contactsMigratedAtom, true)
 
     await pipe(
       E.right(privateKey),

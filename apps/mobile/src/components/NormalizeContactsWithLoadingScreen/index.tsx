@@ -21,7 +21,10 @@ export default function NormalizeContactsWithLoadingScreen({
   useEffect(() => {
     void normalizeStoredContacts({
       onProgress: ({total, percentDone}) => {
-        setState({progress: {total, percentDone}, done: false})
+        setState({
+          progress: {total, percentDone: Math.round(percentDone * 100)},
+          done: false,
+        })
       },
     })().then(() => {
       setState({done: true})
@@ -34,11 +37,7 @@ export default function NormalizeContactsWithLoadingScreen({
         <Stack alignItems="center" justifyContent="center" flex={1}>
           <ActivityIndicator size="large" color={getTokens().color.main.val} />
           {!!state.progress && (
-            <Text color="black">
-              {t('contacts.loadingContacts', {
-                percentDone: String(state.progress?.percentDone),
-              })}
-            </Text>
+            <Text color="black">{t('contacts.loadingContacts')}</Text>
           )}
         </Stack>
       </WhiteContainer>

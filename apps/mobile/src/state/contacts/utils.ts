@@ -10,6 +10,7 @@ import * as E from 'fp-ts/Either'
 import type * as TE from 'fp-ts/TaskEither'
 import {hmacPassword} from '../../utils/environment'
 import notEmpty from '../../utils/notEmpty'
+import {startMeasure} from '../../utils/reportTime'
 import {type ContactInfo} from './domain'
 // import toE164PhoneNumberWithDefaultCountryCode from '../../utils/toE164PhoneNumberWithDefaultCountryCode'
 
@@ -44,11 +45,16 @@ export default function getContactsAndTryToResolveThePermissionsAlongTheWay(): T
       if (!contactsPermissions.granted)
         return E.left({_tag: 'PermissionsNotGranted'} as const)
 
+      const measureAsyncCall = startMeasure(
+        'Async call to get contacts - should not block'
+      )
       const contacts = await Contacts.getContactsAsync({
         sort: SortTypes.UserDefault,
       })
+      measureAsyncCall()
 
-      return E.right(
+      const measure = startMeasure('Mapping contacts from system to our domain')
+      const toReturn = E.right(
         contacts.data.flatMap(
           (contact) =>
             contact.phoneNumbers
@@ -68,6 +74,8 @@ export default function getContactsAndTryToResolveThePermissionsAlongTheWay(): T
               .filter(notEmpty) ?? []
         )
       )
+      measure()
+      return toReturn
     } catch (error) {
       return E.left({_tag: 'UnknownContactsError', error} as const)
     }

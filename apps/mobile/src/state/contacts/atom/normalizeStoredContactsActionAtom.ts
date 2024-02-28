@@ -4,23 +4,15 @@ import {isNone} from 'fp-ts/lib/Option'
 import * as T from 'fp-ts/Task'
 import {atom} from 'jotai'
 import reportError from '../../../utils/reportError'
+import {startMeasure} from '../../../utils/reportTime'
 import sequenceTasksWithAnimationFrames from '../../../utils/sequenceTasksWithAnimationFrames'
 import toE164PhoneNumberWithDefaultCountryCode from '../../../utils/toE164PhoneNumberWithDefaultCountryCode'
 import {hasComputedValues, type StoredContact} from '../domain'
 import {hashPhoneNumber} from '../utils'
 import {storedContactsAtom} from './contactsStore'
 
-function normalizeContactIfNotNormalizedYet(
-  contact: StoredContact
-): T.Task<StoredContact> {
+function normalizeContact(contact: StoredContact): T.Task<StoredContact> {
   return async () => {
-    if (
-      hasComputedValues(contact) ||
-      contact.flags.invalidNumber === 'invalid'
-    ) {
-      return contact
-    }
-
     const E164PhoneNumber = toE164PhoneNumberWithDefaultCountryCode(
       contact.info.rawNumber
     )
@@ -67,17 +59,34 @@ const normalizeStoredContactsActionAtom = atom(
       onProgress: () => {},
     }
   ) => {
+    const measure = startMeasure('Normalizing contacts')
     const storedContacts = get(storedContactsAtom)
+
     onProgress({total: storedContacts.length, percentDone: 0})
 
+    const {normalized, toNormalize} = storedContacts.reduce(
+      (acc, c) => {
+        if (hasComputedValues(c)) {
+          return {...acc, normalized: [...acc.normalized, c]}
+        } else {
+          return {...acc, toNormalize: [...acc.toNormalize, c]}
+        }
+      },
+      {normalized: [] as StoredContact[], toNormalize: [] as StoredContact[]}
+    )
+
     return pipe(
-      storedContacts,
-      A.map(normalizeContactIfNotNormalizedYet),
+      toNormalize,
+      A.filter((c) => !hasComputedValues(c)),
+      A.map(normalizeContact),
       sequenceTasksWithAnimationFrames(100, (percentage) => {
         onProgress({total: storedContacts.length, percentDone: percentage})
       }),
       T.map((contacts) => {
-        set(storedContactsAtom, [...contacts])
+        onProgress({total: storedContacts.length, percentDone: 1})
+
+        set(storedContactsAtom, [...normalized, ...contacts])
+        measure()
       })
     )
   }

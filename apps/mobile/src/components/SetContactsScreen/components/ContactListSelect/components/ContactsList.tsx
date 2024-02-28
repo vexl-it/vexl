@@ -1,5 +1,5 @@
+import {FlashList} from '@shopify/flash-list'
 import {type Atom} from 'jotai'
-import {FlatList} from 'react-native'
 import {Stack} from 'tamagui'
 import {type StoredContactWithComputedValues} from '../../../../../state/contacts/domain'
 import atomKeyExtractor from '../../../../../utils/atomUtils/atomKeyExtractor'
@@ -26,8 +26,9 @@ function ItemSeparatorComponent(): JSX.Element {
 function ContactsList({contacts}: Props): JSX.Element {
   return (
     <Stack f={1} bg="$white">
-      <Stack pt="$2">
-        <FlatList
+      <Stack pt="$2" f={1}>
+        <FlashList
+          estimatedItemSize={65}
           showsHorizontalScrollIndicator={false}
           showsVerticalScrollIndicator={false}
           ListHeaderComponent={ListHeader}

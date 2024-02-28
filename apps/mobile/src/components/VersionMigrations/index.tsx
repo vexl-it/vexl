@@ -1,6 +1,8 @@
-import {useEffect, useState} from 'react'
+import {useStore} from 'jotai'
+import {useEffect, useMemo, useState} from 'react'
 import {Spinner, Text, YStack} from 'tamagui'
 import {useTranslation} from '../../utils/localization/I18nProvider'
+import {needToRunMigrationAtom} from './atoms'
 import migrateContacts from './migrations/contacts'
 import {type MigrationProgress} from './types'
 
@@ -9,22 +11,29 @@ export default function VersionMigrations({
 }: {
   children: React.ReactNode
 }): JSX.Element {
+  const {t} = useTranslation()
+  const store = useStore()
+  const needToRunMigration = useMemo(() => {
+    return store.get(needToRunMigrationAtom)
+  }, [store])
+
   const [progress, setProgress] = useState<{
     progress: MigrationProgress
     done?: boolean
   }>({
     progress: {percent: 0},
-    done: false,
+    done: !needToRunMigration,
   })
-  const {t} = useTranslation()
 
   useEffect(() => {
+    if (!needToRunMigration) return
+
     void migrateContacts((progress) => {
       setProgress({done: false, progress})
     }).then(() => {
       setProgress({progress: {percent: 100}, done: true})
     })
-  }, [setProgress])
+  }, [setProgress, needToRunMigration])
 
   if (progress.done) return <>{children}</>
 

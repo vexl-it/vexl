@@ -40,7 +40,6 @@
     },
     "productionApk": {
       "android": {
-        "image": "ubuntu-20.04-jdk-11-ndk-r19c",
         "credentialsSource": "remote",
         "buildType": "apk"
       },

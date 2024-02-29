@@ -186,6 +186,7 @@ export default {
     './expo-plugins/setup-headless-background-message-processing-ios.js',
     'expo-font',
     'expo-secure-store',
+    'expo-camera',
   ],
 
   'extra': {

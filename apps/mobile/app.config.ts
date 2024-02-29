@@ -182,7 +182,6 @@ export default {
       '@sentry/react-native/expo',
       {
         'url': 'https://sentry.io/',
-        'authToken': process.env.SENTRY_AUTH_TOKEN,
         'project': 'vexl-app',
         'organization': 'vexl',
       },

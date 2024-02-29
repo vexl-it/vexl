@@ -60,6 +60,10 @@ function SearchBar(): JSX.Element {
   )
 
   useEffect(() => {
+    if (searchText === '') setInputValue('')
+  }, [setInputValue, searchText])
+
+  useEffect(() => {
     if (searchText.trim() === '3367666933777') {
       Keyboard.dismiss()
       void pipe(

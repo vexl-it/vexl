@@ -7,6 +7,10 @@ import {askAreYouSureActionAtom} from '../../../components/AreYouSureDialog'
 import {loadingOverlayDisplayedAtom} from '../../../components/LoadingOverlayProvider'
 import userSvg from '../../../components/images/userSvg'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
+import {
+  getActiveRouteNameOusideOfReact,
+  safeNavigateBackOutsideReact,
+} from '../../../utils/navigation'
 import showErrorAlert from '../../../utils/showErrorAlert'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 import {
@@ -156,8 +160,9 @@ const importContactActionAtom = atom(
               one.computedValues?.normalizedNumber !==
               newContact.computedValues.normalizedNumber
           ),
-          newContact,
+          {...newContact, flags: {...newContact.flags, imported: true}},
         ])
+
         set(loadingOverlayDisplayedAtom, false)
         return newContact
       })
@@ -232,6 +237,11 @@ export const addContactWithUiFeedbackAtom = atom(
     set,
     newContact: {info: ContactInfo; computedValues: ContactComputedValues}
   ) => {
+    // if we are on the SetContacts screen, we should navigate back to the previous screen
+    // to avoid not showing added contact in the list
+    if (getActiveRouteNameOusideOfReact() === 'SetContacts') {
+      safeNavigateBackOutsideReact()
+    }
     const importedContacts = get(importedContactsAtom)
     const existingContact = importedContacts.find(
       (importedContact) =>

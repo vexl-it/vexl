@@ -82,6 +82,7 @@ export default {
       ],
       'BGTaskSchedulerPermittedIdentifiers': ['com.transistorsoft.fetch'],
       'CFBundleAllowMixedLocalizations': true,
+      'NSLocationWhenInUseUsageDescription': true,
     },
     'googleServicesFile': extra.googleServicesInfoPlistFile,
     'associatedDomains': ['applinks:link.vexl.it', 'applinks:nextlink.vexl.it'],
@@ -124,6 +125,7 @@ export default {
         category: ['BROWSABLE', 'DEFAULT'],
       },
     ],
+    permissions: ['READ_CONTACTS'],
   },
   'locales': {
     'bg': '../../packages/localization/bg-infoPlist.json',
@@ -147,7 +149,15 @@ export default {
     [
       'expo-image-picker',
       {
+        'photosPermission': true,
+        'cameraPermission': true,
         'microphonePermission': false,
+      },
+    ],
+    [
+      'expo-contacts',
+      {
+        'contactsPermission': true,
       },
     ],
     [

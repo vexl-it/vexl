@@ -28,6 +28,7 @@ export const ContactsSelectScope = createScope<{
     showNonSubmitted: boolean
     showNew: boolean
   }
+  reloadContacts: () => void
 }>({
   normalizedContacts: [],
   initialFilters: {
@@ -35,11 +36,13 @@ export const ContactsSelectScope = createScope<{
     showNonSubmitted: false,
     showNew: false,
   },
+  reloadContacts: () => {},
 })
 
 export const contactSelectMolecule = molecule((_, getScope) => {
   const searchTextAtom = atom('')
-  const {normalizedContacts, initialFilters} = getScope(ContactsSelectScope)
+  const {normalizedContacts, initialFilters, reloadContacts} =
+    getScope(ContactsSelectScope)
 
   const showSubmittedContactsAtom = atom<boolean>(initialFilters.showSubmitted)
   const showNonSubmittedContactsAtom = atom<boolean>(
@@ -68,24 +71,16 @@ export const contactSelectMolecule = molecule((_, getScope) => {
       (() => {
         if (!filterActive) return normalizedContacts
 
-        const selectedNumbers = get(selectedNumbersAtom)
-
         const toShow: StoredContactWithComputedValues[] = []
         if (showNewContacts) {
           toShow.push(...normalizedContacts.filter((one) => !one.flags.seen))
         }
         if (showSubmittedContacts) {
-          toShow.push(
-            ...normalizedContacts.filter((one) =>
-              selectedNumbers.has(one.computedValues.normalizedNumber)
-            )
-          )
+          toShow.push(...normalizedContacts.filter((one) => one.flags.imported))
         }
         if (showNonSubmittedContacts) {
           toShow.push(
-            ...normalizedContacts.filter(
-              (one) => !selectedNumbers.has(one.computedValues.normalizedNumber)
-            )
+            ...normalizedContacts.filter((one) => !one.flags.imported)
           )
         }
 
@@ -248,8 +243,9 @@ export const contactSelectMolecule = molecule((_, getScope) => {
           return customName
         }),
         TE.chainTaskK(() => set(submitActionAtom)),
-        TE.chainFirstW((customName) =>
-          set(askAreYouSureActionAtom, {
+        TE.chainFirstW((customName) => {
+          reloadContacts()
+          return set(askAreYouSureActionAtom, {
             steps: [
               {
                 type: 'StepWithText',
@@ -262,7 +258,7 @@ export const contactSelectMolecule = molecule((_, getScope) => {
             ],
             variant: 'info',
           })
-        )
+        })
       )()
     }
   )

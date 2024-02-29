@@ -1,7 +1,8 @@
 import {ScopeProvider, useMolecule} from 'bunshi/dist/react'
 import * as O from 'fp-ts/Option'
 import {useAtomValue, useSetAtom, useStore} from 'jotai'
-import {useEffect, useMemo} from 'react'
+import {useEffect, useMemo, useState} from 'react'
+import {AppState} from 'react-native'
 import {Stack} from 'tamagui'
 import {
   normalizedContactsAtom,
@@ -73,11 +74,23 @@ function ContactsListSelect({
 }
 
 export function ContactListSelectWithProvider(props: Props): JSX.Element {
+  const [reloadContactsValue, setReloadContacts] = useState(0)
+
   const store = useStore()
-  const normalizedContacts = useMemo(
-    () => store.get(normalizedContactsAtom),
-    [store]
-  )
+  const normalizedContacts = useMemo(() => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+    reloadContactsValue
+    return store.get(normalizedContactsAtom)
+  }, [store, reloadContactsValue])
+
+  useEffect(() => {
+    const listener = AppState.addEventListener('focus', () => {
+      setReloadContacts((v) => v + 1)
+    })
+    return () => {
+      listener.remove()
+    }
+  }, [reloadContactsValue])
 
   return (
     <ScopeProvider
@@ -88,6 +101,9 @@ export function ContactListSelectWithProvider(props: Props): JSX.Element {
           showNew: props.showNewByDefault,
           showNonSubmitted: false,
           showSubmitted: false,
+        },
+        reloadContacts: () => {
+          setReloadContacts((v) => v + 1)
         },
       }}
     >

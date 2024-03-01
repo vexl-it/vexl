@@ -62,13 +62,14 @@ export default function getContactsAndTryToResolveThePermissionsAlongTheWay(): T
                 if (!number.number) return null
 
                 return {
-                  name: contact.name,
+                  name: contact.name ?? number.number,
                   label: number.label,
                   numberToDisplay: number.number,
                   rawNumber: number.number,
-                  imageUri: contact.image
-                    ? UriString.parse(contact.image.uri)
-                    : undefined,
+                  imageUri:
+                    contact.imageAvailable && contact.image
+                      ? UriString.parse(contact.image.uri)
+                      : undefined,
                 } satisfies ContactInfo
               })
               .filter(notEmpty) ?? []

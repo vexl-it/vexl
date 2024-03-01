@@ -13,13 +13,14 @@ import {storedContactsAtom} from './contactsStore'
 function filterNotStoredContacts(
   storedContacts: StoredContact[]
 ): (contactsFromDevice: ContactInfo[]) => ContactInfo[] {
-  const storedContactsMap = new Map(
-    storedContacts.map((c) => [c.info.rawNumber, c])
+  const storedContactsRawNumbersSet = new Set(
+    storedContacts.map((c) => c.info.rawNumber)
   )
 
   return (contactsFromDevice: ContactInfo[]) => {
     return contactsFromDevice.filter(
-      (contactFromDevice) => !storedContactsMap.has(contactFromDevice.rawNumber)
+      (contactFromDevice) =>
+        !storedContactsRawNumbersSet.has(contactFromDevice.rawNumber)
     )
   }
 }

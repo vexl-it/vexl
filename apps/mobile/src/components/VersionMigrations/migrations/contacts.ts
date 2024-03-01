@@ -137,7 +137,7 @@ export default async function migrateContacts(
               if (
                 oneContact.computedValues &&
                 oldImportedContactsMap.has(
-                  oneContact.computedValues?.normalizedNumber
+                  oneContact.computedValues.normalizedNumber
                 )
               ) {
                 return {
@@ -159,15 +159,15 @@ export default async function migrateContacts(
   )()
 
   // Check numbers
-  const numbersThatWereNotImgrated = findNumbersThatWereNotMigrated()
+  const numbersThatWereNotMigrated = findNumbersThatWereNotMigrated()
 
-  if (numbersThatWereNotImgrated.size > 0) {
+  if (numbersThatWereNotMigrated.size > 0) {
     console.warn(
-      `Problem while migrating contacts. Total missing contacts: ${numbersThatWereNotImgrated.size}. Trying to recover.`
+      `Problem while migrating contacts. Total missing contacts: ${numbersThatWereNotMigrated.size}. Trying to recover.`
     )
 
     const missingNumbers = oldImportedContacts.importedContacts
-      .filter((one) => numbersThatWereNotImgrated.has(one.normalizedNumber))
+      .filter((one) => numbersThatWereNotMigrated.has(one.normalizedNumber))
       .map(oldToNewContactManuallyImported)
 
     store.set(storedContactsAtom, (contacts) =>
@@ -189,7 +189,7 @@ export default async function migrateContacts(
       'warn',
       new Error('Problem while migrating contacts. Trying to recover.'),
       {
-        numberOfMissingContacts: numbersThatWereNotImgrated.size,
+        numberOfMissingContacts: numbersThatWereNotMigrated.size,
         recovered,
       }
     )

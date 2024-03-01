@@ -84,8 +84,8 @@ export function ContactListSelectWithProvider(props: Props): JSX.Element {
   }, [store, reloadContactsValue])
 
   useEffect(() => {
-    const listener = AppState.addEventListener('focus', () => {
-      setReloadContacts((v) => v + 1)
+    const listener = AppState.addEventListener('change', (event) => {
+      if (event === 'active') setReloadContacts((v) => v + 1)
     })
     return () => {
       listener.remove()

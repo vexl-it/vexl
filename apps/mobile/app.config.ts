@@ -82,7 +82,8 @@ export default {
       ],
       'BGTaskSchedulerPermittedIdentifiers': ['com.transistorsoft.fetch'],
       'CFBundleAllowMixedLocalizations': true,
-      'NSLocationWhenInUseUsageDescription': true,
+      'NSLocationWhenInUseUsageDescription':
+        'Vexl needs access to you location to show your position on the map. Location will never be share with anyone (even ourselves).',
     },
     'googleServicesFile': extra.googleServicesInfoPlistFile,
     'associatedDomains': ['applinks:link.vexl.it', 'applinks:nextlink.vexl.it'],
@@ -149,15 +150,18 @@ export default {
     [
       'expo-image-picker',
       {
-        'photosPermission': true,
-        'cameraPermission': true,
+        'photosPermission':
+          'Vexl wants to access your photos in order to select a picture for your avatar.',
+        'cameraPermission':
+          'Vexl wants to access your camera in order to take a photo for your avatar or scan QR code to add other users to your Vexl network.',
         'microphonePermission': false,
       },
     ],
     [
       'expo-contacts',
       {
-        'contactsPermission': true,
+        'contactsPermission':
+          'Vexl needs access to your contacts to make your offers visible for them in a secure way. Phone number of contacts you select will be encrypted and uploaded to the server.',
       },
     ],
     [

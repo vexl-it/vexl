@@ -780,5 +780,6 @@
   "tradeChecklist.notSupportedByOtherSide.body": "Other side uses older version of Vexl and does not support trading checklist feature.",
   "map.locationSelect.hint": "Move the map to change the pin location",
   "map.location.errors.notFound": "Location not found.",
-  "map.location.suggestDifferent": "Suggest different"
+  "map.location.suggestDifferent": "Suggest different",
+  "migrations.migrating": "Updating vexl"
 }

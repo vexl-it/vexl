@@ -1,10 +1,7 @@
 import {useNavigation} from '@react-navigation/native'
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue, useSetAtom, useStore} from 'jotai'
-import {DateTime} from 'luxon'
-import * as dateAndTime from '../../../../../state/tradeChecklist/utils/dateAndTime'
 import * as MeetingLocation from '../../../../../state/tradeChecklist/utils/location'
-import {addEventToCalendarActionAtom} from '../../../../../utils/calendar'
 import {
   useTranslation,
   type TFunction,
@@ -39,19 +36,19 @@ function getTextForVexlbot({
 export default function TradeChecklistMeetingLocationView(): JSX.Element | null {
   const {t} = useTranslation()
   const {
+    addEventToCalendarActionAtom,
+    isDateAndTimePickedAtom,
     calendarEventIdAtom,
-    tradeChecklistDateAndTimeAtom,
     tradeChecklistMeetingLocationAtom,
     otherSideDataAtom,
     chatAtom,
   } = useMolecule(chatMolecule)
   const meetingLocationData = useAtomValue(tradeChecklistMeetingLocationAtom)
-  const dateAndTimeData = useAtomValue(tradeChecklistDateAndTimeAtom)
   const otherSideData = useAtomValue(otherSideDataAtom)
   const store = useStore()
   const navigation = useNavigation()
   const addEventToCalendar = useSetAtom(addEventToCalendarActionAtom)
-  const pickedDateAndTime = dateAndTime.getPick(dateAndTimeData)
+  const isDateAndTimePicked = useAtomValue(isDateAndTimePickedAtom)
   const calendarEventId = useAtomValue(calendarEventIdAtom)
 
   const agreedOn = MeetingLocation.getAgreed(meetingLocationData)
@@ -67,25 +64,10 @@ export default function TradeChecklistMeetingLocationView(): JSX.Element | null 
           t,
         })}
       >
-        {!!pickedDateAndTime && (
+        {!!isDateAndTimePicked && (
           <Button
             onPress={() => {
-              void addEventToCalendar({
-                calendarEventIdAtom,
-                event: {
-                  startDate: DateTime.fromMillis(
-                    pickedDateAndTime.pick.dateTime
-                  ).toJSDate(),
-                  endDate: DateTime.fromMillis(
-                    pickedDateAndTime.pick.dateTime
-                  ).toJSDate(),
-                  title: t('tradeChecklist.vexlMeetingEventTitle', {
-                    name: otherSideData.userName,
-                  }),
-                  location: agreedOn?.data.data?.address,
-                  notes: agreedOn?.data.data.note,
-                },
-              })()
+              void addEventToCalendar()()
             }}
             beforeIcon={termsIconSvg}
             size="small"

@@ -13,6 +13,7 @@ import {
 } from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {selectAtom, splitAtom} from 'jotai/utils'
+import {DateTime} from 'luxon'
 import {Alert} from 'react-native'
 import blockChatActionAtom from '../../../state/chat/atoms/blockChatActionAtom'
 import cancelRequestActionAtomHandleUI from '../../../state/chat/atoms/cancelRequestActionAtomHandleUI'
@@ -43,8 +44,15 @@ import {createBtcPriceForCurrencyAtom} from '../../../state/currentBtcPriceAtoms
 import {createFeedbackForChatAtom} from '../../../state/feedback/atoms'
 import {offerForChatOriginAtom} from '../../../state/marketplace/atoms/offersState'
 import {invalidUsernameUIFeedbackAtom} from '../../../state/session'
+import {otherSideDataAtom} from '../../../state/tradeChecklist/atoms/fromChatAtoms'
 import {getAmountData} from '../../../state/tradeChecklist/utils/amount'
+import * as dateAndTime from '../../../state/tradeChecklist/utils/dateAndTime'
+import * as MeetingLocation from '../../../state/tradeChecklist/utils/location'
 import getValueFromSetStateActionOfAtom from '../../../utils/atomUtils/getValueFromSetStateActionOfAtom'
+import {
+  createCalendarEvent,
+  createCalendarIfNotExistsAndTryToResolvePermissionsAlongTheWayActionAtom,
+} from '../../../utils/calendar'
 import {type SelectedImage} from '../../../utils/imagePickers'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
 import {safeNavigateBackOutsideReact} from '../../../utils/navigation'
@@ -802,6 +810,96 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     tradeOrOriginOfferCurrencyAtom
   )
 
+  const isDateAndTimePickedAtom = atom((get) => {
+    const dateAndTimeData = get(tradeChecklistDateAndTimeAtom)
+    const pick = dateAndTime.getPick(dateAndTimeData)
+
+    return !!pick
+  })
+
+  const addEventToCalendarActionAtom = atom(
+    null,
+    (get, set): T.Task<boolean> => {
+      const {t} = get(translationAtom)
+      const calendarEventId = get(calendarEventIdAtom)
+      const meetingLocationData = get(tradeChecklistMeetingLocationAtom)
+      const agreedOn = MeetingLocation.getAgreed(meetingLocationData)
+      const dateAndTimeData = get(tradeChecklistDateAndTimeAtom)
+      const otherSideData = get(otherSideDataAtom)
+      const pick = dateAndTime.getPick(dateAndTimeData)
+
+      if (!pick) return T.of(false)
+
+      const event = {
+        startDate: DateTime.fromMillis(pick.pick.dateTime).toJSDate(),
+        endDate: DateTime.fromMillis(pick.pick.dateTime).toJSDate(),
+        title: t('tradeChecklist.vexlMeetingEventTitle', {
+          name: otherSideData.userName,
+        }),
+        location: agreedOn?.data.data?.address,
+        notes: agreedOn?.data.data.note,
+      }
+
+      set(loadingOverlayDisplayedAtom, true)
+
+      return pipe(
+        TE.Do,
+        TE.bindW('calendarId', () =>
+          set(
+            createCalendarIfNotExistsAndTryToResolvePermissionsAlongTheWayActionAtom
+          )
+        ),
+        (a) => a,
+        TE.bindW('calendarEventId', ({calendarId}) =>
+          createCalendarEvent({
+            calendarEventId,
+            calendarId,
+            event,
+          })
+        ),
+        TE.chainFirstW(() =>
+          set(askAreYouSureActionAtom, {
+            steps: [
+              {
+                type: 'StepWithText',
+                title: t('tradeChecklist.eventAddedSuccess'),
+                description: t('tradeChecklist.eventAddedSuccessDescription'),
+                positiveButtonText: t('common.close'),
+              },
+            ],
+            variant: 'info',
+          })
+        ),
+        TE.match(
+          (e) => {
+            set(loadingOverlayDisplayedAtom, false)
+            if (e._tag === 'permissionsNotGranted') {
+              Alert.alert(t('tradeChecklist.calendarPermissionsNotGranted'))
+            }
+
+            if (e._tag === 'unknown') {
+              reportError('error', new Error('Error creating calendar event'), {
+                e,
+              })
+
+              showErrorAlert({
+                title: toCommonErrorMessage(e, t) ?? t('common.unknownError'),
+                error: e,
+              })
+            }
+
+            return false
+          },
+          ({calendarEventId}) => {
+            set(loadingOverlayDisplayedAtom, false)
+            set(calendarEventIdAtom, calendarEventId)
+            return true
+          }
+        )
+      )
+    }
+  )
+
   return {
     showModalAtom: atom<boolean>(false),
     chatAtom,
@@ -863,5 +961,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     tradeOrOriginOfferCurrencyAtom,
     btcPriceForTradeCurrencyAtom,
     calendarEventIdAtom,
+    isDateAndTimePickedAtom,
+    addEventToCalendarActionAtom,
   }
 })

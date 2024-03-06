@@ -1,10 +1,7 @@
 import {useNavigation} from '@react-navigation/native'
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue, useSetAtom, useStore} from 'jotai'
-import {DateTime} from 'luxon'
 import * as dateAndTime from '../../../../../state/tradeChecklist/utils/dateAndTime'
-import * as MeetingLocation from '../../../../../state/tradeChecklist/utils/location'
-import {addEventToCalendarActionAtom} from '../../../../../utils/calendar'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import Button from '../../../../Button'
 import termsIconSvg from '../../../../InsideRouter/components/SettingsScreen/images/termsIconSvg'
@@ -15,16 +12,13 @@ export default function TradeChecklistDateAndTimeView(): JSX.Element | null {
   const {t} = useTranslation()
   const navigation = useNavigation()
   const {
-    calendarEventIdAtom,
+    addEventToCalendarActionAtom,
     tradeChecklistDateAndTimeAtom,
-    tradeChecklistMeetingLocationAtom,
     otherSideDataAtom,
     chatAtom,
   } = useMolecule(chatMolecule)
   const store = useStore()
   const dateAndTimeData = useAtomValue(tradeChecklistDateAndTimeAtom)
-  const meetingLocationData = useAtomValue(tradeChecklistMeetingLocationAtom)
-  const agreedOn = MeetingLocation.getAgreed(meetingLocationData)
   const otherSideData = useAtomValue(otherSideDataAtom)
   const addEventToCalendar = useSetAtom(addEventToCalendarActionAtom)
 
@@ -39,18 +33,7 @@ export default function TradeChecklistDateAndTimeView(): JSX.Element | null {
       >
         <Button
           onPress={() => {
-            void addEventToCalendar({
-              calendarEventIdAtom,
-              event: {
-                startDate: DateTime.fromMillis(pick.pick.dateTime).toJSDate(),
-                endDate: DateTime.fromMillis(pick.pick.dateTime).toJSDate(),
-                title: t('tradeChecklist.vexlMeetingEventTitle', {
-                  name: otherSideData.userName,
-                }),
-                location: agreedOn?.data.data?.address,
-                notes: agreedOn?.data.data.note,
-              },
-            })()
+            void addEventToCalendar()()
           }}
           beforeIcon={termsIconSvg}
           size="small"

@@ -7,6 +7,7 @@ import {pipe} from 'fp-ts/function'
 import {atom, type Atom, type SetStateAction, type WritableAtom} from 'jotai'
 import {splitAtom} from 'jotai/utils'
 import {matchSorter} from 'match-sorter'
+import {addContactToPhoneWithUIFeedbackAtom} from '../../../../state/contacts/atom/addContactToPhoneWithUIFeedbackAtom'
 import {storedContactsAtom} from '../../../../state/contacts/atom/contactsStore'
 import {submitContactsActionAtom} from '../../../../state/contacts/atom/submitContactsActionAtom'
 import {
@@ -242,6 +243,12 @@ export const contactSelectMolecule = molecule((_, getScope) => {
 
           return customName
         }),
+        TE.chainFirstTaskK((customName) =>
+          set(addContactToPhoneWithUIFeedbackAtom, {
+            customName,
+            number: contact.computedValues.normalizedNumber,
+          })
+        ),
         TE.chainTaskK(() => set(submitActionAtom)),
         TE.chainFirstW((customName) => {
           reloadContacts()

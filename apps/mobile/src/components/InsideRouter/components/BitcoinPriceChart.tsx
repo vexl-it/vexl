@@ -41,13 +41,15 @@ function BitcoinPriceChart(): JSX.Element {
         >
           <XStack>
             {btcPriceForSelectedCurrency?.state === 'loading' ? (
-              <XStack mr="$2">
+              <XStack space="$2" mr="$2">
                 <ActivityIndicator
                   size="small"
                   color={getTokens().color.main.val}
                 />
                 {!!btcPriceForSelectedCurrency.btcPrice && (
-                  <Text>{btcPriceForSelectedCurrency.btcPrice}</Text>
+                  <Text fos={28} ff="$heading" color="$yellowAccent1">
+                    {btcPriceForSelectedCurrency.btcPrice}
+                  </Text>
                 )}
               </XStack>
             ) : (

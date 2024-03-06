@@ -34,22 +34,6 @@ export const MessageType = z.enum([
 ])
 export type MessageType = z.TypeOf<typeof MessageType>
 
-export const MessageTypeBackwardCompatible = z.enum([
-  'MESSAGE',
-  'REQUEST_REVEAL',
-  'APPROVE_REVEAL',
-  'DISAPPROVE_REVEAL',
-  'REQUEST_MESSAGING',
-  'APPROVE_MESSAGING',
-  'DISAPPROVE_MESSAGING',
-  'DELETE_CHAT',
-  'BLOCK_CHAT',
-  'VERSION_UPDATE',
-])
-export type MessageTypeBackwardCompatible = z.TypeOf<
-  typeof MessageTypeBackwardCompatible
->
-
 export const ChatUserIdentity = z.object({
   publicKey: PublicKeyPemBase64,
   realLifeInfo: RealLifeInfo.optional(),
@@ -171,8 +155,6 @@ export type Chat = z.TypeOf<typeof Chat>
 export const ServerMessage = z.object({
   message: z.string(),
   senderPublicKey: PublicKeyPemBase64,
-  /** depreciated. Used as fallback from old Vexl version */
-  messageType: z.string().optional(),
 })
 export type ServerMessage = z.TypeOf<typeof ServerMessage>
 

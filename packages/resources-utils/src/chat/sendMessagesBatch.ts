@@ -25,7 +25,6 @@ import {
   generateSignedChallengeBatch,
   type ErrorGeneratingSignedChallengeBatch,
 } from './utils/generateSignedChallengesBatch'
-import mapMessageTypeToBackwardCompatibleMessageType from './utils/mapMessageTypeToBackwardCompatibleMessageType'
 import {messageToNetwork} from './utils/messageIO'
 import {messagePreviewToNetwork} from './utils/messagePreviewIO'
 
@@ -60,9 +59,7 @@ function createMessageInBatch({
     ),
     TE.map(({encryptedMessage, encryptedPreview}) => ({
       message: encryptedMessage,
-      messageType: mapMessageTypeToBackwardCompatibleMessageType(
-        message.messageType
-      ),
+      messageType: message.messageType,
       messagePreview: encryptedPreview,
       receiverPublicKey,
     }))

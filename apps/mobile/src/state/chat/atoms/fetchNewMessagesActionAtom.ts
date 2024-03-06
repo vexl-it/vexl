@@ -33,11 +33,10 @@ import {
   singleOfferAtom,
 } from '../../marketplace/atoms/offersState'
 import messagingStateAtom from '../atoms/messagingStateAtom'
-import {type InboxInState} from '../domain'
+import {type ChatMessageWithState, type InboxInState} from '../domain'
 import addMessagesToChats from '../utils/addMessagesToChats'
 import createNewChatsFromMessages from '../utils/createNewChatsFromFirstMessages'
 import replaceBase64UriWithImageFileUri from '../utils/replaceBase64UriWithImageFileUri'
-import {type ChatMessageWithState} from './../domain'
 import {sendUpdateNoticeMessageActionAtom} from './checkAndReportCurrentVersionToChatsActionAtom'
 import focusChatByInboxKeyAndSenderKey from './focusChatByInboxKeyAndSenderKey'
 
@@ -105,7 +104,7 @@ function splitMessagesArrayToNewChatsAndExistingChats({
     .asObject()
 }
 
-function incompatableErrorToChatMessageWithState(
+function incompatibleErrorToChatMessageWithState(
   error: ErrorChatMessageRequiresNewerVersion
 ): ChatMessageWithState {
   return {
@@ -163,7 +162,7 @@ function refreshInbox(
 
         return [
           ...incompatibleMessagesError.map(
-            incompatableErrorToChatMessageWithState
+            incompatibleErrorToChatMessageWithState
           ),
           ...one.messages.map(messageToChatMessageWithState),
         ]

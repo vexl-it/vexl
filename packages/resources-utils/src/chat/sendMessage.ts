@@ -13,7 +13,6 @@ import {pipe} from 'fp-ts/function'
 import {type ExtractLeftTE} from '../utils/ExtractLeft'
 import {type JsonStringifyError, type ZodParseError} from '../utils/parsing'
 import {type ErrorEncryptingMessage} from './utils/chatCrypto'
-import mapMessageTypeToBackwardCompatibleMessageType from './utils/mapMessageTypeToBackwardCompatibleMessageType'
 import {messageToNetwork} from './utils/messageIO'
 import {messagePreviewToNetwork} from './utils/messagePreviewIO'
 
@@ -50,9 +49,7 @@ export default function sendMessage({
         api.sendMessage({
           message: encryptedMessage,
           messagePreview: encryptedPreview,
-          messageType: mapMessageTypeToBackwardCompatibleMessageType(
-            message.messageType
-          ),
+          messageType: message.messageType,
           receiverPublicKey,
           keyPair: senderKeypair,
         })

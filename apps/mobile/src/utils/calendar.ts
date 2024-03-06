@@ -6,17 +6,11 @@ import {
   type Source,
 } from 'expo-calendar'
 import * as E from 'fp-ts/Either'
-import type * as T from 'fp-ts/Task'
-import * as TE from 'fp-ts/TaskEither'
-import {pipe} from 'fp-ts/function'
-import {atom, type PrimitiveAtom} from 'jotai'
-import {Alert, Platform} from 'react-native'
+import type * as TE from 'fp-ts/TaskEither'
+import {atom} from 'jotai'
+import {Platform} from 'react-native'
 import {getTokens} from 'tamagui'
-import {askAreYouSureActionAtom} from '../components/AreYouSureDialog'
-import {loadingOverlayDisplayedAtom} from '../components/LoadingOverlayProvider'
 import {vexlCalendarIdAtom} from '../state/tradeChecklist/atoms/vexlCalendarStorageAtom'
-import {translationAtom} from './localization/I18nProvider'
-import reportError from './reportError'
 
 const CALENDAR_TITLE = 'Vexl'
 
@@ -112,7 +106,7 @@ export const createCalendarIfNotExistsAndTryToResolvePermissionsAlongTheWayActio
     }
   )
 
-function createCalendarEvent({
+export function createCalendarEvent({
   calendarEventId,
   calendarId,
   event,
@@ -140,75 +134,3 @@ function createCalendarEvent({
     }
   }
 }
-
-export const addEventToCalendarActionAtom = atom(
-  null,
-  (
-    get,
-    set,
-    {
-      calendarEventIdAtom,
-      event,
-    }: {
-      calendarEventIdAtom: PrimitiveAtom<CalendarEventId | undefined>
-      event: TradeChecklistCalendarEvent
-    }
-  ): T.Task<boolean> => {
-    const {t} = get(translationAtom)
-    const calendarEventId = get(calendarEventIdAtom)
-
-    set(loadingOverlayDisplayedAtom, true)
-
-    return pipe(
-      TE.Do,
-      TE.bindW('calendarId', () =>
-        set(
-          createCalendarIfNotExistsAndTryToResolvePermissionsAlongTheWayActionAtom
-        )
-      ),
-      (a) => a,
-      TE.bindW('calendarEventId', ({calendarId}) =>
-        createCalendarEvent({
-          calendarEventId,
-          calendarId,
-          event,
-        })
-      ),
-      TE.chainFirstW(() =>
-        set(askAreYouSureActionAtom, {
-          steps: [
-            {
-              type: 'StepWithText',
-              title: t('tradeChecklist.eventAddedSuccess'),
-              description: t('tradeChecklist.eventAddedSuccessDescription'),
-              positiveButtonText: t('common.close'),
-            },
-          ],
-          variant: 'info',
-        })
-      ),
-      TE.match(
-        (e) => {
-          set(loadingOverlayDisplayedAtom, false)
-          if (e._tag === 'permissionsNotGranted') {
-            Alert.alert(t('tradeChecklist.calendarPermissionsNotGranted'))
-          }
-
-          if (e._tag === 'unknown') {
-            reportError('error', new Error('Error creating calendar event'), {
-              e,
-            })
-            Alert.alert(t('tradeChecklist.eventAddedError'))
-          }
-
-          return false
-        },
-        ({calendarEventId}) => {
-          set(loadingOverlayDisplayedAtom, false)
-          set(calendarEventIdAtom, calendarEventId)
-          return true
-        }
-      )
-    )
-  }
-)

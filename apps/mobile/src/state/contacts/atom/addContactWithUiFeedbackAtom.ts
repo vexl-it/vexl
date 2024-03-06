@@ -18,6 +18,7 @@ import {
   type ContactInfo,
   type StoredContactWithComputedValues,
 } from '../domain'
+import {addContactToPhoneWithUIFeedbackAtom} from './addContactToPhoneWithUIFeedbackAtom'
 import {
   importedContactsAtom,
   importedContactsHashesAtom,
@@ -193,7 +194,13 @@ const createContact = atom(
           info: {...newContact.info, name: customName},
         })
       ),
-      TE.chainFirstW(({customName}) =>
+      TE.chainFirstTaskK(({customName, importedContact}) =>
+        set(addContactToPhoneWithUIFeedbackAtom, {
+          customName,
+          number: importedContact.computedValues.normalizedNumber,
+        })
+      ),
+      TE.chainFirstTaskK(({customName}) =>
         set(askAreYouSureActionAtom, {
           steps: [
             {

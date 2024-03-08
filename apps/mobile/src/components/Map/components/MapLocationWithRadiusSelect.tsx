@@ -46,6 +46,7 @@ const circleMargin = getTokens().space[2].val
 const mapStyle = {
   width: '100%',
   height: '100%',
+  backgroundColor: 'black',
 } as const
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type

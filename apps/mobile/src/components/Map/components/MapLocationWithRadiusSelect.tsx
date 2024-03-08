@@ -2,7 +2,7 @@ import {
   Latitude,
   Longitude,
   Radius,
-  longitudeDeltaToMeters,
+  longitudeDeltaToKilometers,
 } from '@vexl-next/domain/src/utility/geoCoordinates'
 import * as E from 'fp-ts/Either'
 import * as TE from 'fp-ts/TaskEither'
@@ -68,11 +68,11 @@ function useAtoms({
         const radiusLongitudeDeg = selectedRegion.longitudeDelta / 2
         return Intl.NumberFormat(getCurrentLocale()).format(
           Math.round(
-            longitudeDeltaToMeters(
+            longitudeDeltaToKilometers(
               radiusLongitudeDeg,
               Latitude.parse(selectedRegion.latitude)
-            )
-          )
+            ) * 10
+          ) / 10
         )
       }),
       getGeocodedRegion: loadableEither(
@@ -122,7 +122,7 @@ function PickedLocationText({
 }): JSX.Element {
   const geocodingState = useAtomValue(geocodedRegionAtom)
   const {t} = useTranslation()
-  const radiusMeters = useAtomValue(selectedRegionRadiusAtom)
+  const radius = useAtomValue(selectedRegionRadiusAtom)
 
   return geocodingState.state === 'loading' ? (
     <Text>{t('common.loading')}...</Text>
@@ -146,7 +146,7 @@ function PickedLocationText({
         color={E.isLeft(geocodingState.either) ? '$red' : '$white'}
       >
         {t('map.locationSelect.radius', {
-          radius: radiusMeters,
+          radius,
         })}
       </Text>
     </>

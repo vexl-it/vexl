@@ -797,7 +797,7 @@
   "map.locationSelect.hint": "Move the map to change the pin location",
   "map.location.errors.notFound": "Location not found.",
   "map.location.suggestDifferent": "Suggest different",
-  "map.locationSelect.radius": "in radius of {{radius}} meters",
+  "map.locationSelect.radius": "in radius of {{radius}} km",
   "map.reset": "Reset map",
   "map.resetTo": "Reset to {{name}}",
   "map.showingOnlyInPersonOffers": "Showing only in person offers",

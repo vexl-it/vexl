@@ -63,6 +63,13 @@ export function longitudeDeltaToMeters(
   return longitudeDegDelta * metersPerDegLongitude
 }
 
+export function longitudeDeltaToKilometers(
+  longitudeDegDelta: number,
+  latitudePoint: Latitude
+): number {
+  return longitudeDeltaToMeters(longitudeDegDelta, latitudePoint) / 1000
+}
+
 export function metersAtLatitudeToDegreesLongitude(
   meters: number,
   latitudePoint: Latitude

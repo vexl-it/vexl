@@ -137,7 +137,9 @@ function Point<T>({
         }}
       >
         {!isFocused ? (
-          <Stack w={8} h={8} borderRadius={4} bg="$main" />
+          <Stack w={20} h={20} alignItems="center" justifyContent="center">
+            <Stack w={8} h={8} borderRadius={4} bg="$main" />
+          </Stack>
         ) : (
           <Image source={markerImage} />
         )}

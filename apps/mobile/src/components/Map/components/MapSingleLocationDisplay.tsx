@@ -39,6 +39,7 @@ export default function MapSingleLocationDisplay({
       <MapView
         mapPadding={mapPadding}
         style={mapStyle}
+        toolbarEnabled={false}
         provider={PROVIDER_GOOGLE}
         region={useMemo(() => mapValueToRegion(value), [value])}
         customMapStyle={mapTheme}

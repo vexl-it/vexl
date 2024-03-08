@@ -96,6 +96,7 @@ function MMapView({
       loadingEnabled
       provider={PROVIDER_GOOGLE}
       mapPadding={mapPadding}
+      toolbarEnabled={false}
       style={mapStyle}
       onRegionChangeComplete={onRegionChangeComplete ?? empty}
     >

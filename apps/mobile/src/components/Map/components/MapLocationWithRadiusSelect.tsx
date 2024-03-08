@@ -180,6 +180,7 @@ export default function MapLocationWithRadiusSelect({
         provider={PROVIDER_GOOGLE}
         customMapStyle={mapTheme}
         style={mapStyle}
+        toolbarEnabled={false}
         onRegionChangeComplete={(region) => {
           setRegion(region)
         }}

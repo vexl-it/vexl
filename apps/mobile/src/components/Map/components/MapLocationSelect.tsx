@@ -130,6 +130,7 @@ export default function MapLocationSelect({
       <MapView
         mapPadding={mapPadding}
         provider={PROVIDER_GOOGLE}
+        toolbarEnabled={false}
         customMapStyle={mapTheme}
         style={mapStyle}
         onRegionChangeComplete={(region, {isGesture}) => {

@@ -2,6 +2,7 @@ import {
   type LocationState,
   type OfferLocation,
 } from '@vexl-next/domain/src/general/offers'
+import {longitudeDeltaToKilometers} from '@vexl-next/domain/src/utility/geoCoordinates'
 import {type LocationSuggestion} from '@vexl-next/rest-api/src/services/location/contracts'
 import {
   useAtom,
@@ -13,7 +14,10 @@ import {
 import {useState} from 'react'
 import {TouchableOpacity, TouchableWithoutFeedback} from 'react-native'
 import {Stack, Text, XStack, YStack, getTokens} from 'tamagui'
-import {useTranslation} from '../../../../utils/localization/I18nProvider'
+import {
+  getCurrentLocale,
+  useTranslation,
+} from '../../../../utils/localization/I18nProvider'
 import Help from '../../../Help'
 import SvgImage from '../../../Image'
 import Info from '../../../Info'
@@ -118,6 +122,14 @@ function LocationComponent({
             >
               <Text fos={18} color="$main">
                 {loc.address}
+                {' - '}
+                {t('map.locationSelect.radius', {
+                  radius: Intl.NumberFormat(getCurrentLocale()).format(
+                    Math.round(
+                      longitudeDeltaToKilometers(loc.radius, loc.latitude) * 10
+                    ) / 10
+                  ),
+                })}
               </Text>
               <TouchableOpacity
                 onPress={() => {

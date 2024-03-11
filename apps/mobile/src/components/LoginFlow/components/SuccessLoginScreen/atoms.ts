@@ -31,17 +31,7 @@ const TARGET_TIME_MILLISECONDS = 3000
 
 function resetNavigationToIntroScreen(): void {
   if (navigationRef.isReady()) {
-    navigationRef.reset({
-      index: 0,
-      routes: [
-        {
-          name: 'LoginFlow',
-          state: {
-            routes: [{name: 'Intro'}],
-          },
-        },
-      ],
-    })
+    navigationRef.navigate('LoginFlow', {screen: 'PhoneNumber'})
   }
 }
 

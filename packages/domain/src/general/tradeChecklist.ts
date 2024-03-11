@@ -2,6 +2,7 @@ import {z} from 'zod'
 import {BtcAddress} from '../utility/BtcAddress.brand'
 import {UnixMilliseconds} from '../utility/UnixMilliseconds.brand'
 import {UriString} from '../utility/UriString.brand'
+import {generateUuid} from '../utility/Uuid.brand'
 import {Latitude, Longitude} from '../utility/geoCoordinates'
 import {DeanonymizedUser} from './DeanonymizedUser'
 import {E164PhoneNumber} from './E164PhoneNumber.brand'
@@ -132,7 +133,7 @@ export const ContactRevealChatMessage =
 export type ContactRevealChatMessage = z.TypeOf<typeof ContactRevealChatMessage>
 
 export const MeetingLocationData = z.object({
-  placeId: LocationPlaceId,
+  placeId: LocationPlaceId.catch((e) => LocationPlaceId.parse(generateUuid())),
   address: z.string(),
   latitude: Latitude,
   longitude: Longitude,

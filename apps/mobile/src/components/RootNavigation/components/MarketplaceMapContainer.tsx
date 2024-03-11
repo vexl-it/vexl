@@ -60,9 +60,11 @@ function useShouldShowMap(): boolean {
   const navigationRoute = useNavigationFromMap()
   const marketplaceLayoutMode = useAtomValue(marketplaceLayoutModeAtom)
   const focusedOfferIsOffline = useAtomValue(focusedOfferIsOfflineAtom)
+  // const keyboardShown = useIsKeyboardShown()
 
   return (
     (navigationRoute === 'Marketplace' && marketplaceLayoutMode === 'map') ||
+    // (!keyboardShown &&
     (navigationRoute === 'OfferDetail' && !focusedOfferIsOffline)
   )
 }
@@ -179,6 +181,7 @@ function MapBarAndButton(): JSX.Element | null {
   )
 }
 
+const MapBarAndButtonMemoized = memo(MapBarAndButton)
 const MarketplaceMapMemoized = memo(MarketplaceMap)
 
 function MarketplaceMapContainer(): JSX.Element | null {
@@ -189,7 +192,7 @@ function MarketplaceMapContainer(): JSX.Element | null {
       <>
         <Stack position="relative">
           <MarketplaceMapMemoized marginTop={100} />
-          <MapBarAndButton />
+          <MapBarAndButtonMemoized />
         </Stack>
       </>
     )

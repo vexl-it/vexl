@@ -15,3 +15,7 @@ cd apps/mobile
 npx expo prebuild --clean
 npx expo run:ios
 ```
+
+## Help us translate the app
+
+See [this guide](docs/how_to_help_transalte.md) for details.

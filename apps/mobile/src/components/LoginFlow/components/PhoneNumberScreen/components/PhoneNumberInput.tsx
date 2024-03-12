@@ -17,7 +17,8 @@ export default function PhoneNumberInput({onChange}: Props): JSX.Element {
 
   const handleChangeFormatted = useCallback(
     (valueWithPrefix: string) => {
-      onChange(toE164PhoneNumber(valueWithPrefix))
+      // remove non ASCII chars from the number input string
+      onChange(toE164PhoneNumber(valueWithPrefix.replace(/[^\x20-\x7E]/g, '')))
     },
     [onChange]
   )

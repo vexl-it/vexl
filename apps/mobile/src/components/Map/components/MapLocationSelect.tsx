@@ -85,21 +85,21 @@ function PickedLocationText({
   const geocodingState = useAtomValue(atom)
   const {t} = useTranslation()
 
-  return geocodingState.state === 'loading' ? (
-    <Text>{t('common.loading')}...</Text>
-  ) : (
-    <Text
-      ta="center"
-      color={E.isLeft(geocodingState.either) ? '$red' : '$white'}
-    >
-      {pipe(
-        geocodingState.either,
-        E.match(
-          (l) =>
-            toCommonErrorMessage(l, t) ?? t('map.location.errors.notFound'),
-          (data) => data?.address ?? t('map.locationSelect.hint')
-        )
-      )}
+  if (geocodingState.state === 'loading')
+    return <Text>{t('common.loading')}...</Text>
+
+  const color = E.isLeft(geocodingState.either) ? '$red' : '$white'
+  const text = pipe(
+    geocodingState.either,
+    E.match(
+      (l) => toCommonErrorMessage(l, t) ?? t('map.location.errors.notFound'),
+      (data) => data?.address ?? t('map.locationSelect.hint')
+    )
+  )
+
+  return (
+    <Text ta="center" color={color}>
+      {text}
     </Text>
   )
 }

@@ -47,7 +47,8 @@ export default async function googleGeocode({
 
   return GeocodeResponse.parse({
     placeId: firstHit.place_id,
-    address: firstHit.formatted_address,
+    // Remove postal code from the start as per #865
+    address: firstHit.formatted_address.replace(/^[\d\s]*/, ''),
     latitude: firstHit.geometry.location.lat,
     longitude: firstHit.geometry.location.lng,
     viewport: {

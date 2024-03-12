@@ -4,6 +4,7 @@ import {
   SymmetricKey,
   type BtcNetwork,
   type CurrencyCode,
+  type ListingType,
   type LocationState,
   type OfferLocation,
   type OfferPublicPart,
@@ -106,6 +107,8 @@ export function createOfferDummyPublicPart(): OfferPublicPart {
     activePriceCurrency: defaultCurrency?.code ?? currencies.USD.code,
     active: true,
     groupUuids: [],
+    listingType: 'BITCOIN',
+    deliveryMethod: [],
   }
 }
 
@@ -133,6 +136,7 @@ export const dummyOffer: OneOfferInState = {
 
 export const offerFormMolecule = molecule(() => {
   const offerAtom = atom<OneOfferInState>(dummyOffer)
+  const nullableListingTypeAtom = atom<ListingType | undefined>(undefined)
   const nullableOfferTypeAtom = atom<OfferType | undefined>(undefined)
   const nullableCurrencyAtom = atom<CurrencyCode | undefined>(
     dummyOffer.offerInfo.publicPart.currency
@@ -156,7 +160,13 @@ export const offerFormMolecule = molecule(() => {
     dummyOffer.offerInfo.publicPart.location
   )
 
-  const showAllFieldsAtom = atom<boolean>(
+  const nullableSinglePriceAtom = atom<number | undefined>(undefined)
+
+  const showBuySellFieldAtom = atom<boolean>(
+    (get) => get(nullableListingTypeAtom) !== undefined
+  )
+
+  const showRestOfTheFieldsAtom = atom<boolean>(
     (get) => get(nullableOfferTypeAtom) !== undefined
   )
 
@@ -216,6 +226,12 @@ export const offerFormMolecule = molecule(() => {
     return true
   })
 
+  const listingTypeAtom = getAtomWithNullableValueHandling(
+    nullableListingTypeAtom,
+    offerFormAtom,
+    'listingType'
+  )
+
   const offerTypeAtom = getAtomWithNullableValueHandling(
     nullableOfferTypeAtom,
     offerFormAtom,
@@ -270,6 +286,16 @@ export const offerFormMolecule = molecule(() => {
 
   const offerDescriptionAtom = focusAtom(offerFormAtom, (optic) =>
     optic.prop('offerDescription')
+  )
+
+  const singlePriceAtom = getAtomWithNullableValueHandling(
+    nullableSinglePriceAtom,
+    offerFormAtom,
+    'singlePrice'
+  )
+
+  const deliveryMethodAtom = focusAtom(offerFormAtom, (optic) =>
+    optic.prop('deliveryMethod')
   )
 
   const offerActiveAtom = focusAtom(offerFormAtom, (optic) =>
@@ -685,10 +711,13 @@ export const offerFormMolecule = molecule(() => {
 
       set(offerAtom, offer)
       set(offerTypeAtom, offer.offerInfo.publicPart.offerType)
+      set(nullableListingTypeAtom, offer.offerInfo.publicPart.listingType)
       set(nullableOfferTypeAtom, offerPublicPart.offerType)
       set(nullableCurrencyAtom, offerPublicPart.currency)
       set(nullableAmountTopLimitAtom, offerPublicPart.amountTopLimit)
       set(nullableAmountBottomLimitAtom, offerPublicPart.amountBottomLimit)
+      set(nullableSinglePriceAtom, offerPublicPart.singlePrice)
+      set(deliveryMethodAtom, offerPublicPart.deliveryMethod)
       set(nullableBtcNetworkAtom, offerPublicPart.btcNetwork)
       set(nullablePaymentMethodAtom, offerPublicPart.paymentMethod)
       set(nullableLocationStateAtom, offerPublicPart.locationState)
@@ -718,11 +747,13 @@ export const offerFormMolecule = molecule(() => {
       dummyOffer.offerInfo.publicPart.locationState
     )
     set(nullableLocationAtom, dummyOffer.offerInfo.publicPart.location)
+    set(nullableSinglePriceAtom, dummyOffer.offerInfo.publicPart.singlePrice)
   })
 
   return {
     offerAtom,
-    showAllFieldsAtom,
+    showBuySellFieldAtom,
+    showRestOfTheFieldsAtom,
     offerFormAtom,
     deleteOfferActionAtom,
     intendedConnectionLevelAtom,
@@ -733,6 +764,7 @@ export const offerFormMolecule = molecule(() => {
     currencyAtom,
     amountBottomLimitAtom,
     amountTopLimitAtom,
+    listingTypeAtom,
     offerTypeAtom,
     feeAmountAtom,
     feeStateAtom,
@@ -743,6 +775,8 @@ export const offerFormMolecule = molecule(() => {
     btcNetworkAtom,
     paymentMethodAtom,
     offerDescriptionAtom,
+    singlePriceAtom,
+    deliveryMethodAtom,
     offerActiveAtom,
     updateCurrencyLimitsAtom,
     updateLocationStatePaymentMethodAtom,

@@ -12,14 +12,17 @@ import Button from '../../Button'
 import IconButton from '../../IconButton'
 import KeyboardAvoidingView from '../../KeyboardAvoidingView'
 import OfferForm from '../../OfferForm'
+import ListingType from '../../OfferForm/components/ListingType'
 import OfferType from '../../OfferForm/components/OfferType'
 import Screen from '../../Screen'
 import ScreenTitle from '../../ScreenTitle'
 import Section from '../../Section'
 import closeSvg from '../../images/closeSvg'
+import listingTypeSvg from '../../images/listingTypeSvg'
 import userSvg from '../../images/userSvg'
 import {offerFormMolecule} from '../atoms/offerFormStateAtoms'
-import useContent from '../useContent'
+import useBtcOfferContent from '../useBtcOfferContent'
+import useProductOfferContent from '../useProductOfferContent'
 
 const styles = StyleSheet.create({
   contentStyles: {
@@ -31,15 +34,20 @@ const styles = StyleSheet.create({
 function CreateOfferScreen(): JSX.Element {
   const safeGoBack = useSafeGoBack()
   const {t} = useTranslation()
-  const content = useContent()
 
   const {
     createOfferActionAtom,
+    listingTypeAtom,
     resetOfferFormActionAtom,
     offerTypeAtom,
-    showAllFieldsAtom,
+    showBuySellFieldAtom,
+    showRestOfTheFieldsAtom,
   } = useMolecule(offerFormMolecule)
-  const showAllFields = useAtomValue(showAllFieldsAtom)
+  const btcOfferContent = useBtcOfferContent()
+  const productOfferContent = useProductOfferContent()
+  const listingType = useAtomValue(listingTypeAtom)
+  const showBuySellField = useAtomValue(showBuySellFieldAtom)
+  const showRestOfTheFields = useAtomValue(showRestOfTheFieldsAtom)
   const createOffer = useSetAtom(createOfferActionAtom)
   const resetForm = useSetAtom(resetOfferFormActionAtom)
 
@@ -57,10 +65,26 @@ function CreateOfferScreen(): JSX.Element {
             <ScreenTitle text={t('offerForm.myNewOffer')} withBottomBorder>
               <IconButton variant="dark" icon={closeSvg} onPress={safeGoBack} />
             </ScreenTitle>
-            <Section title={t('offerForm.iWantTo')} image={userSvg}>
-              <OfferType offerTypeAtom={offerTypeAtom} />
+            <Section title={t('offerForm.listingType')} image={listingTypeSvg}>
+              <ListingType
+                onTabPress={resetForm}
+                listingTypeAtom={listingTypeAtom}
+              />
             </Section>
-            {!!showAllFields && <OfferForm content={content} />}
+            {!!showBuySellField && (
+              <Section title={t('offerForm.iWantTo')} image={userSvg}>
+                <OfferType offerTypeAtom={offerTypeAtom} />
+              </Section>
+            )}
+            {!!showRestOfTheFields && (
+              <OfferForm
+                content={
+                  listingType === 'BITCOIN'
+                    ? btcOfferContent
+                    : productOfferContent
+                }
+              />
+            )}
           </ScrollView>
           <Stack px="$4" py="$4" bc="transparent">
             <Button

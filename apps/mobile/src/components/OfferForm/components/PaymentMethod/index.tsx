@@ -18,7 +18,7 @@ interface Props {
 function PaymentMethodComponent({
   locationStateAtom,
   paymentMethodAtom,
-}: Props): JSX.Element {
+}: Props): JSX.Element | null {
   const {t} = useTranslation()
   const content = useContent()
   const tokens = getTokens()

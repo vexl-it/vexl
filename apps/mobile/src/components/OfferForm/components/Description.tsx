@@ -1,26 +1,64 @@
-import {useAtom, type SetStateAction, type WritableAtom} from 'jotai'
-import {Stack, Text} from 'tamagui'
+import {
+  type ListingType,
+  type OfferType,
+} from '@vexl-next/domain/src/general/offers'
+import {
+  useAtom,
+  useAtomValue,
+  type PrimitiveAtom,
+  type SetStateAction,
+  type WritableAtom,
+} from 'jotai'
+import {useMemo} from 'react'
+import {Stack, Text, YStack} from 'tamagui'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import Input from '../../Input'
 
-const MAX_INPUT_LENGTH = 140
+const MAX_INPUT_LENGTH_BTC_LISTING = 140
+const MAX_INPUT_LENGTH_PRODUCT_OTHER_LISTING = 500
 
 interface Props {
+  listingTypeAtom: PrimitiveAtom<ListingType | undefined>
+  offerTypeAtom: PrimitiveAtom<OfferType | undefined>
   offerDescriptionAtom: WritableAtom<string, [SetStateAction<string>], void>
 }
 
-function Description({offerDescriptionAtom}: Props): JSX.Element {
+function Description({
+  listingTypeAtom,
+  offerTypeAtom,
+  offerDescriptionAtom,
+}: Props): JSX.Element | null {
   const {t} = useTranslation()
   const [offerDescription, setOfferDescription] = useAtom(offerDescriptionAtom)
+  const listingType = useAtomValue(listingTypeAtom)
+  const offerType = useAtomValue(offerTypeAtom)
+
+  const subtitle = useMemo(() => {
+    if (listingType === 'PRODUCT') {
+      return offerType === 'SELL'
+        ? t('offerForm.description.moreAboutYourItem')
+        : t('offerForm.description.whatAreYouLookingFor')
+    }
+    if (listingType === 'OTHER') {
+      return offerType === 'SELL'
+        ? t('offerForm.description.moreAboutYourOffer')
+        : t('offerForm.moreAboutYourRequest')
+    }
+    return t('offerForm.description.writeWhyPeopleShouldTake')
+  }, [listingType, offerType, t])
 
   return (
-    <Stack>
+    <YStack>
       <Text ff="$body600" fos={16} col="$greyOnBlack">
-        {t('offerForm.description.writeWhyPeopleShouldTake')}
+        {subtitle}
       </Text>
       <Stack mt="$4" br="$4" p="$4" bc="$grey">
         <Input
-          maxLength={MAX_INPUT_LENGTH}
+          maxLength={
+            listingType === 'BITCOIN'
+              ? MAX_INPUT_LENGTH_BTC_LISTING
+              : MAX_INPUT_LENGTH_PRODUCT_OTHER_LISTING
+          }
           multiline
           textAlignVertical="top"
           numberOfLines={5}
@@ -29,14 +67,16 @@ function Description({offerDescriptionAtom}: Props): JSX.Element {
           onChangeText={setOfferDescription}
         />
         <Stack ai="flex-end">
-          <Text
-            col="$white"
-            fos={16}
-            ff="$body600"
-          >{`${offerDescription.length}/${MAX_INPUT_LENGTH}`}</Text>
+          <Text col="$white" fos={16} ff="$body600">{`${
+            offerDescription.length
+          }/${
+            listingType === 'BITCOIN'
+              ? MAX_INPUT_LENGTH_BTC_LISTING
+              : MAX_INPUT_LENGTH_PRODUCT_OTHER_LISTING
+          }`}</Text>
         </Stack>
       </Stack>
-    </Stack>
+    </YStack>
   )
 }
 

@@ -42,6 +42,12 @@ export type BtcNetwork = z.TypeOf<typeof BtcNetwork>
 export const OfferType = z.enum(['BUY', 'SELL'])
 export type OfferType = z.TypeOf<typeof OfferType>
 
+export const ListingType = z.enum(['BITCOIN', 'PRODUCT', 'OTHER'])
+export type ListingType = z.TypeOf<typeof ListingType>
+
+export const DeliveryMethod = z.enum(['PICKUP', 'DELIVERY'])
+export type DeliveryMethod = z.TypeOf<typeof DeliveryMethod>
+
 export const SpokenLanguage = z
   .enum(['ENG', 'DEU', 'CZE', 'SVK', 'PRT', 'FRA', 'ITA', 'ESP', 'BG'])
   .default('ENG')
@@ -134,7 +140,7 @@ export const OfferPublicPart = z.object({
   amountTopLimit: z.coerce.number(),
   feeState: FeeState,
   feeAmount: z.coerce.number(),
-  locationState: LocationState,
+  locationState: LocationState.default('IN_PERSON'),
   paymentMethod: z.array(PaymentMethod),
   btcNetwork: z.array(BtcNetwork),
   currency: CurrencyCode,
@@ -146,6 +152,9 @@ export const OfferPublicPart = z.object({
   activePriceCurrency: CurrencyCode,
   active: z.boolean(),
   groupUuids: z.array(z.string()),
+  listingType: ListingType.optional(),
+  singlePrice: z.number().optional(),
+  deliveryMethod: z.array(DeliveryMethod).default([]),
 })
 export type OfferPublicPart = z.TypeOf<typeof OfferPublicPart>
 

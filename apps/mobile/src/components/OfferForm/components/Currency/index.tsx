@@ -23,7 +23,7 @@ interface Props {
 function CurrencyComponent({
   currencyAtom,
   updateCurrencyLimitsAtom,
-}: Props): JSX.Element {
+}: Props): JSX.Element | null {
   const {t} = useTranslation()
   const currency = useAtomValue(currencyAtom)
 

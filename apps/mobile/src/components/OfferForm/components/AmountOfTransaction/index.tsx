@@ -30,7 +30,7 @@ function AmountOfTransaction({
   amountTopLimitAtom,
   amountBottomLimitAtom,
   currencyAtom,
-}: Props): JSX.Element {
+}: Props): JSX.Element | null {
   const {t} = useTranslation()
   const tokens = getTokens()
 

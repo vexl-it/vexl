@@ -21,6 +21,7 @@ export const Preferences = z.object({
   disableScreenshots: z.boolean().default(false),
   isDeveloper: z.boolean().default(false),
   appLanguage: z.string().optional(),
+  hideOtherListingType: z.boolean().default(true),
 })
 
 export type Preferences = z.infer<typeof Preferences>

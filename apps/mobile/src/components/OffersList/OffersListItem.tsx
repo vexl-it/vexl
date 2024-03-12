@@ -173,6 +173,7 @@ function OffersListItem({isFirst, offerAtom}: Props): JSX.Element {
   return (
     <Stack mt="$6">
       <OfferWithBubbleTip
+        reduceDescriptionLength
         onInfoRectPress={content.onPress}
         negative={
           !content.actionableUI ||

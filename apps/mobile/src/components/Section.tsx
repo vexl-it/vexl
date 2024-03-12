@@ -4,8 +4,6 @@ import SvgImage from './Image'
 
 interface BaseSectionProps {
   children: React.ReactNode
-  title: string
-  mandatory?: boolean
 }
 
 interface CustomSectionProps extends BaseSectionProps {
@@ -14,43 +12,47 @@ interface CustomSectionProps extends BaseSectionProps {
 
 interface SectionProps extends BaseSectionProps {
   customSection?: false
-  image: SvgString
+  mandatory?: boolean
   imageFill?: string
+  title: string
+  image: SvgString
 }
 
 export type Props = SectionProps | CustomSectionProps
 
-function Section(props: Props): JSX.Element {
+function Section({
+  mandatory,
+  title,
+  image,
+  imageFill,
+  children,
+}: SectionProps): JSX.Element {
   return (
     <YStack mb="$4">
-      {!props.customSection && (
-        <XStack ai="center" jc="space-between" py="$4">
-          <XStack ai="center">
-            {!!props.image && (
-              <Stack mr="$2">
-                <SvgImage
-                  width={24}
-                  height={24}
-                  stroke={getTokens().color.white.val}
-                  fill={props.imageFill ?? 'none'}
-                  source={props.image}
-                />
-              </Stack>
-            )}
-            <Stack fs={1}>
-              <Text ff="$body700" color="$white" fos={24}>
-                {props.title}
-              </Text>
-            </Stack>
-          </XStack>
-          {!!props.mandatory && (
-            <Text fos={24} ff="$body700" color="$greyOnBlack">
-              *
+      <XStack ai="center" jc="space-between" py="$4">
+        <XStack ai="center">
+          <Stack mr="$2">
+            <SvgImage
+              width={24}
+              height={24}
+              stroke={getTokens().color.white.val}
+              fill={imageFill ?? 'none'}
+              source={image}
+            />
+          </Stack>
+          <Stack fs={1}>
+            <Text ff="$body700" color="$white" fos={24}>
+              {title}
             </Text>
-          )}
+          </Stack>
         </XStack>
-      )}
-      {props.children}
+        {!!mandatory && (
+          <Text fos={24} ff="$body700" color="$greyOnBlack">
+            *
+          </Text>
+        )}
+      </XStack>
+      {children}
     </YStack>
   )
 }

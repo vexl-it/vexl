@@ -17,6 +17,7 @@ export const offersFilterInitialState: OffersFilter = {
   amountBottomLimit: undefined,
   amountTopLimit: undefined,
   text: undefined,
+  listingType: undefined,
 }
 
 export const offersFilterStorageAtom = atomWithParsedMmkvStorage(
@@ -32,6 +33,10 @@ export const offersFilterFromStorageAtom = focusAtom(
 
 export const locationFilterAtom = focusAtom(offersFilterStorageAtom, (o) =>
   o.prop('filter').prop('location')
+)
+
+export const listingTypeFilterAtom = focusAtom(offersFilterStorageAtom, (o) =>
+  o.prop('filter').prop('listingType')
 )
 
 export const resetLocationFilterActionAtom = atom(null, (get, set) => {

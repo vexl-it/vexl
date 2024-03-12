@@ -8,7 +8,7 @@ interface Props {
   btcNetworkAtom: PrimitiveAtom<BtcNetwork[] | undefined>
 }
 
-function Network({btcNetworkAtom}: Props): JSX.Element {
+function Network({btcNetworkAtom}: Props): JSX.Element | null {
   const content = useContent()
   const [btcNetwork, setBtcNetwork] = useAtom(btcNetworkAtom)
 
@@ -20,6 +20,7 @@ function Network({btcNetworkAtom}: Props): JSX.Element {
       setBtcNetwork([...(btcNetwork ?? []), type])
     }
   }
+
   return (
     <YStack space="$2">
       {content.map((cell) => (

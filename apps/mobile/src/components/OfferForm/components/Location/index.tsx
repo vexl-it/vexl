@@ -57,7 +57,7 @@ function LocationComponent({
   locationStateAtom,
   updateLocationStatePaymentMethodAtom,
   randomizeLocation,
-}: Props): JSX.Element {
+}: Props): JSX.Element | null {
   const {t} = useTranslation()
   const tokens = getTokens()
   const content = useContent()

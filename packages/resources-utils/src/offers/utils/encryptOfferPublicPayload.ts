@@ -16,12 +16,12 @@ import {booleanToString} from '../../utils/booleanString'
 import {aesGCMIgnoreTagEncrypt} from '../../utils/crypto'
 import {safeParse, stringifyToJson} from '../../utils/parsing'
 
-const OfferLocationDepreciated = z.object({
+const OfferLocationDeprecated = z.object({
   longitude: z.string(),
   latitude: z.string(),
   city: z.string(),
 })
-type OfferLocationDepreciated = z.TypeOf<typeof OfferLocationDepreciated>
+type OfferLocationDeprecated = z.TypeOf<typeof OfferLocationDeprecated>
 
 /**
  * Shape of the offer public part that is encrypted.
@@ -50,6 +50,9 @@ const OfferPublicPartToEncrypt = z.object({
   activePriceCurrency: z.string(),
   active: z.enum(['true', 'false']),
   groupUuids: z.array(z.string()),
+  listingType: z.string(),
+  deliveryMethod: z.array(z.string()).optional(),
+  singlePrice: z.number().optional(),
 })
 
 function offerPublicPartToJsonString(
@@ -63,7 +66,7 @@ function offerPublicPartToJsonString(
           longitude: String(oneLocation.longitude),
           latitude: String(oneLocation.latitude),
           city: oneLocation.shortAddress,
-        }) satisfies OfferLocationDepreciated
+        }) satisfies OfferLocationDeprecated
     ),
     A.map(stringifyToJson),
     A.sequence(E.Applicative),

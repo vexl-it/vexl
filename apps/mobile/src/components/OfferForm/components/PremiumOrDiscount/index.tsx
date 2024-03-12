@@ -2,13 +2,7 @@ import {
   type FeeState,
   type OfferType,
 } from '@vexl-next/domain/src/general/offers'
-import {
-  useAtom,
-  useAtomValue,
-  useSetAtom,
-  type SetStateAction,
-  type WritableAtom,
-} from 'jotai'
+import {useAtom, useAtomValue, useSetAtom, type PrimitiveAtom} from 'jotai'
 import {useState} from 'react'
 import {Stack, Text, XStack, YStack, getTokens} from 'tamagui'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
@@ -19,16 +13,16 @@ import PremiumOrDiscountDetail from './components/PremiumOrDiscountDetail'
 import percentageSvg from './images/percentageSvg'
 
 interface Props {
-  feeAmountAtom: WritableAtom<number, [SetStateAction<number>], void>
-  feeStateAtom: WritableAtom<FeeState, [SetStateAction<FeeState>], void>
-  offerTypeAtom: WritableAtom<OfferType, [SetStateAction<OfferType>], void>
+  feeAmountAtom: PrimitiveAtom<number>
+  feeStateAtom: PrimitiveAtom<FeeState>
+  offerTypeAtom: PrimitiveAtom<OfferType>
 }
 
 function PremiumOrDiscount({
   feeAmountAtom,
   feeStateAtom,
   offerTypeAtom,
-}: Props): JSX.Element {
+}: Props): JSX.Element | null {
   const tokens = getTokens()
   const {t} = useTranslation()
 
@@ -45,7 +39,7 @@ function PremiumOrDiscount({
   }
 
   return (
-    <YStack>
+    <YStack mb="$4">
       <XStack ai="center" jc="space-between" py="$4">
         <XStack f={1} ai="center" mr="$1">
           <Stack mr="$2">

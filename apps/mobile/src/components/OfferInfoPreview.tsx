@@ -11,6 +11,7 @@ import bankSvg from './InsideRouter/components/MarketplaceScreen/images/bankSvg'
 import mapTagSvg from './InsideRouter/components/MarketplaceScreen/images/mapTagSvg'
 import onlineTransferSvg from './InsideRouter/components/MarketplaceScreen/images/onlineTransferSvg'
 import clockSvg from './images/clockSvg'
+import pickupSvg from './images/pickupSvg'
 import spokenLanguagesSvg from './images/spokenLanguagesSvg'
 
 // const BTC_PRAGUE_FRIEND = '8o5OvkfRga/xBYbfb0e0MJZIjy4g7xGVimCdNLrydGs='
@@ -46,10 +47,12 @@ function OfferInfoPreview({
   hideSpokenLanguages,
   offer,
   negative,
+  reduceDescriptionLength,
 }: {
   hideSpokenLanguages?: boolean
   offer: OfferInfo
   negative?: boolean
+  reduceDescriptionLength?: boolean
 }): JSX.Element {
   const {t} = useTranslation()
   const tokens = getTokens()
@@ -73,14 +76,32 @@ function OfferInfoPreview({
     <>
       {/* {(offer.privatePart.commonFriends.includes(BTC_PRAGUE_FRIEND) ||
         offer.privatePart.commonFriends.includes(BTC_PRAGUE_FRIEND_STAGE)) && (
-        <Stack alignSelf="flex-end">
+        <Stack f={1} ai="center" jc="space-between">
           <SvgImage width={60} height={20} source={btcPragueLogoSvg} />
         </Stack>
       )} */}
+      {!!offer.publicPart.listingType && (
+        <Stack
+          ai="center"
+          jc="center"
+          als="flex-start"
+          bc="$greyAccent5"
+          py="$2"
+          px="$3"
+          br="$3"
+          mb="$3"
+        >
+          <Text fos={12} col="$greyOnWhite" ff="$body600">
+            {t(`offerForm.${offer.publicPart.listingType}`)}
+          </Text>
+        </Stack>
+      )}
       <XStack ai="flex-start" jc="space-between">
         <XStack mb="$4">
           <Text
             flex={1}
+            numberOfLines={reduceDescriptionLength ? 5 : undefined}
+            ellipsizeMode={reduceDescriptionLength ? 'tail' : undefined}
             fos={20}
             color={negative ? '$greyOnBlack' : '$black'}
             ff="$body500"
@@ -124,6 +145,19 @@ function OfferInfoPreview({
           </InfoText>
         </InfoItemContainer>
         <InfoDivider />
+        {offer.publicPart.deliveryMethod.includes('PICKUP') && (
+          <InfoItemContainer>
+            <Stack mb="$2">
+              <SvgImage
+                height={24}
+                width={24}
+                fill={tokens.color.greyOnWhite.val}
+                source={pickupSvg}
+              />
+            </Stack>
+            <InfoText>{t('offerForm.pickup')}</InfoText>
+          </InfoItemContainer>
+        )}
         {offer.publicPart.feeState === 'WITH_FEE' &&
           offer.publicPart.feeAmount !== undefined &&
           offer.publicPart.feeAmount !== 0 && (

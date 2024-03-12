@@ -66,10 +66,9 @@ export const addContactToPhoneWithUIFeedbackAtom = atom(
           steps: [
             {
               type: 'StepWithText',
-              title: t('addContactDialog.alsoAddToPhoneContacts'),
+              title: t('addContactDialog.addToPhonesContacts'),
               description: t('addContactDialog.addContactDescription', {
                 name: customName,
-                number,
               }),
               positiveButtonText: t('common.yes'),
               negativeButtonText: t('common.skip'),

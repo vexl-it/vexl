@@ -243,23 +243,32 @@ export const contactSelectMolecule = molecule((_, getScope) => {
 
           return customName
         }),
-        TE.chainFirstTaskK((customName) =>
-          set(addContactToPhoneWithUIFeedbackAtom, {
-            customName,
-            number: contact.computedValues.normalizedNumber,
-          })
+        TE.bindTo('customName'),
+        TE.bindW('addToPhoneSuccess', ({customName}) =>
+          pipe(
+            set(addContactToPhoneWithUIFeedbackAtom, {
+              customName,
+              number: contact.computedValues.normalizedNumber,
+            }),
+            TE.fromTask
+          )
         ),
-        TE.chainTaskK(() => set(submitActionAtom)),
-        TE.chainFirstW((customName) => {
+        TE.chainFirstTaskK(() => set(submitActionAtom)),
+        TE.chainFirstW(({addToPhoneSuccess, customName}) => {
           reloadContacts()
           return set(askAreYouSureActionAtom, {
             steps: [
               {
                 type: 'StepWithText',
                 title: t('addContactDialog.contactAdded'),
-                description: t('addContactDialog.youHaveAddedContact', {
-                  contactName: customName,
-                }),
+                description: t(
+                  addToPhoneSuccess
+                    ? 'addContactDialog.youHaveAddedContactToVexlAndPhoneContacts'
+                    : 'addContactDialog.youHaveAddedContactToVexlContacts',
+                  {
+                    contactName: customName,
+                  }
+                ),
                 positiveButtonText: t('common.niceWithExclamationMark'),
               },
             ],

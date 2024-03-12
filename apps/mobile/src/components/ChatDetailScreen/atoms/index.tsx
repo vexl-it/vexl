@@ -822,10 +822,10 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     (get, set): T.Task<boolean> => {
       const {t} = get(translationAtom)
       const calendarEventId = get(calendarEventIdAtom)
-      const meetingLocationData = get(tradeChecklistMeetingLocationAtom)
-      const agreedOn = MeetingLocation.getAgreed(meetingLocationData)
+      const agreedOn = MeetingLocation.getAgreed(
+        get(tradeChecklistMeetingLocationAtom)
+      )
       const dateAndTimeData = get(tradeChecklistDateAndTimeAtom)
-      const otherSideData = get(otherSideDataAtom)
       const pick = dateAndTime.getPick(dateAndTimeData)
 
       if (!pick) return T.of(false)
@@ -834,10 +834,10 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
         startDate: DateTime.fromMillis(pick.pick.dateTime).toJSDate(),
         endDate: DateTime.fromMillis(pick.pick.dateTime).toJSDate(),
         title: t('tradeChecklist.vexlMeetingEventTitle', {
-          name: otherSideData.userName,
+          name: get(otherSideDataAtom).userName,
         }),
         location: agreedOn?.data.data?.address,
-        notes: agreedOn?.data.data.note,
+        notes: agreedOn?.data.data.note ?? '',
       }
 
       set(loadingOverlayDisplayedAtom, true)
@@ -850,20 +850,26 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
           )
         ),
         (a) => a,
-        TE.bindW('calendarEventId', ({calendarId}) =>
+        TE.bindW('createEventActionResult', ({calendarId}) =>
           createCalendarEvent({
             calendarEventId,
             calendarId,
             event,
           })
         ),
-        TE.chainFirstW(() =>
+        TE.chainFirstW(({createEventActionResult: {action}}) =>
           set(askAreYouSureActionAtom, {
             steps: [
               {
                 type: 'StepWithText',
-                title: t('tradeChecklist.eventAddedSuccess'),
-                description: t('tradeChecklist.eventAddedSuccessDescription'),
+                title:
+                  action === 'created'
+                    ? t('tradeChecklist.eventAddedSuccess')
+                    : t('tradeChecklist.eventEditSuccess'),
+                description:
+                  action === 'created'
+                    ? t('tradeChecklist.eventAddedSuccessDescription')
+                    : t('tradeChecklist.eventEditSuccessDescription'),
                 positiveButtonText: t('common.close'),
               },
             ],
@@ -890,7 +896,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
 
             return false
           },
-          ({calendarEventId}) => {
+          ({createEventActionResult: {calendarEventId}}) => {
             set(loadingOverlayDisplayedAtom, false)
             set(calendarEventIdAtom, calendarEventId)
             return true

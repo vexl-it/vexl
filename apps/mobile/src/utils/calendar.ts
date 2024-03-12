@@ -114,7 +114,10 @@ export function createCalendarEvent({
   calendarEventId: CalendarEventId | undefined
   calendarId: string
   event: TradeChecklistCalendarEvent
-}): TE.TaskEither<UnknownError, CalendarEventId> {
+}): TE.TaskEither<
+  UnknownError,
+  {calendarEventId: CalendarEventId; action: 'created' | 'updated'}
+> {
   return async () => {
     try {
       if (calendarEventId) {
@@ -123,12 +126,18 @@ export function createCalendarEvent({
         ).catch(() => undefined)
         if (existingEvent) {
           await Calendar.updateEventAsync(existingEvent.id, event)
-          return E.right(existingEvent.id as CalendarEventId)
+          return E.right({
+            calendarEventId: existingEvent.id as CalendarEventId,
+            action: 'updated',
+          })
         }
       }
 
       const eventId = await Calendar.createEventAsync(calendarId, event)
-      return E.right(eventId as CalendarEventId)
+      return E.right({
+        calendarEventId: eventId as CalendarEventId,
+        action: 'created',
+      })
     } catch (error) {
       return E.left({_tag: 'unknown', reason: 'Unknown', error})
     }

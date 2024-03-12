@@ -2,7 +2,7 @@ import {type OfferLocation} from '@vexl-next/domain/src/general/offers'
 import {useSetAtom, type PrimitiveAtom} from 'jotai'
 import {useEffect, useState} from 'react'
 import {Modal} from 'react-native'
-import {YStack} from 'tamagui'
+import {Stack, YStack} from 'tamagui'
 import backButtonSvg from '../../../../../images/backButtonSvg'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import randomlyShiftLatLong from '../../../../../utils/randomlyShiftMapValueWithRadius'
@@ -77,66 +77,68 @@ export default function SelectLocationFlowModal({
           />
         </Screen>
       ) : (
-        <MapLocationWithRadiusSelect
-          initialValue={selectedFromList}
-          onPick={setPickedLocation}
-          topChildren={
-            <YStack marginVertical="$2" marginHorizontal="$4" space="$4">
-              <IconButton
-                variant="primary"
-                icon={backButtonSvg}
+        <Stack backgroundColor="$black">
+          <MapLocationWithRadiusSelect
+            initialValue={selectedFromList}
+            onPick={setPickedLocation}
+            topChildren={
+              <YStack marginVertical="$2" marginHorizontal="$4" space="$4">
+                <IconButton
+                  variant="primary"
+                  icon={backButtonSvg}
+                  onPress={() => {
+                    setSelectedFromList(null)
+                  }}
+                />
+              </YStack>
+            }
+            bottomChildren={
+              <Button
+                disabled={!pickedLocation}
                 onPress={() => {
-                  setSelectedFromList(null)
-                }}
-              />
-            </YStack>
-          }
-          bottomChildren={
-            <Button
-              disabled={!pickedLocation}
-              onPress={() => {
-                if (!pickedLocation) return
+                  if (!pickedLocation) return
 
-                const latLongToUse = (() => {
-                  if (!randomizeLocation) {
-                    return {
-                      latitude: pickedLocation.latitude,
-                      longitude: pickedLocation.longitude,
+                  const latLongToUse = (() => {
+                    if (!randomizeLocation) {
+                      return {
+                        latitude: pickedLocation.latitude,
+                        longitude: pickedLocation.longitude,
+                      }
                     }
-                  }
-                  return randomlyShiftLatLong({
-                    latlong: pickedLocation,
-                    maxMeters: 100,
+                    return randomlyShiftLatLong({
+                      latlong: pickedLocation,
+                      maxMeters: 100,
+                    })
+                  })()
+
+                  setOfferLocation((prev) => {
+                    const newLocation = {
+                      placeId: pickedLocation.placeId,
+                      address: pickedLocation.address,
+                      shortAddress:
+                        pickedLocation.address.split(', ')[0] ??
+                        pickedLocation.address,
+                      radius: pickedLocation.radius,
+                      ...latLongToUse,
+                    } satisfies OfferLocation
+
+                    return [
+                      ...(prev
+                        ? prev.filter(
+                            (one) => one.placeId !== pickedLocation.placeId
+                          )
+                        : []),
+                      newLocation,
+                    ]
                   })
-                })()
-
-                setOfferLocation((prev) => {
-                  const newLocation = {
-                    placeId: pickedLocation.placeId,
-                    address: pickedLocation.address,
-                    shortAddress:
-                      pickedLocation.address.split(', ')[0] ??
-                      pickedLocation.address,
-                    radius: pickedLocation.radius,
-                    ...latLongToUse,
-                  } satisfies OfferLocation
-
-                  return [
-                    ...(prev
-                      ? prev.filter(
-                          (one) => one.placeId !== pickedLocation.placeId
-                        )
-                      : []),
-                    newLocation,
-                  ]
-                })
-                onSetVisible(false)
-              }}
-              variant="secondary"
-              text={t(`common.submit`)}
-            />
-          }
-        />
+                  onSetVisible(false)
+                }}
+                variant="secondary"
+                text={t(`common.submit`)}
+              />
+            }
+          />
+        </Stack>
       )}
     </Modal>
   )

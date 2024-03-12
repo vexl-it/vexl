@@ -3,7 +3,7 @@ import {useMolecule} from 'bunshi/dist/react'
 import {isSome} from 'fp-ts/Option'
 import * as T from 'fp-ts/Task'
 import {pipe} from 'fp-ts/function'
-import {useSetAtom} from 'jotai'
+import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback} from 'react'
 import {ScrollView, StyleSheet} from 'react-native'
 import {Stack, Text} from 'tamagui'
@@ -14,12 +14,15 @@ import useSafeGoBack from '../../../utils/useSafeGoBack'
 import Button from '../../Button'
 import KeyboardAvoidingView from '../../KeyboardAvoidingView'
 import OfferForm from '../../OfferForm'
+import ListingType from '../../OfferForm/components/ListingType'
 import OfferType from '../../OfferForm/components/OfferType'
 import Screen from '../../Screen'
 import Section from '../../Section'
+import listingTypeSvg from '../../images/listingTypeSvg'
 import userSvg from '../../images/userSvg'
 import {offerFormMolecule} from '../atoms/offerFormStateAtoms'
-import useContent from '../useContent'
+import useBtcOfferContent from '../useBtcOfferContent'
+import useProductOfferContent from '../useProductOfferContent'
 import EditOfferHeader from './EditOfferHeader'
 
 const styles = StyleSheet.create({
@@ -38,10 +41,16 @@ function EditOfferScreen({
 }: Props): JSX.Element {
   const {t} = useTranslation()
   const safeGoBack = useSafeGoBack()
-  const content = useContent()
+  const btcOfferContent = useBtcOfferContent()
+  const productOfferContent = useProductOfferContent()
 
-  const {editOfferAtom, offerTypeAtom, setOfferFormActionAtom} =
-    useMolecule(offerFormMolecule)
+  const {
+    editOfferAtom,
+    listingTypeAtom,
+    offerTypeAtom,
+    setOfferFormActionAtom,
+  } = useMolecule(offerFormMolecule)
+  const listingType = useAtomValue(listingTypeAtom)
   const editOffer = useSetAtom(editOfferAtom)
   const offer = useSingleOffer(offerId)
   const setOfferForm = useSetAtom(setOfferFormActionAtom)
@@ -60,10 +69,22 @@ function EditOfferScreen({
             <EditOfferHeader offer={offer} />
             {isSome(offer) ? (
               <>
+                <Section
+                  title={t('offerForm.listingType')}
+                  image={listingTypeSvg}
+                >
+                  <ListingType listingTypeAtom={listingTypeAtom} />
+                </Section>
                 <Section title={t('offerForm.iWantTo')} image={userSvg}>
                   <OfferType offerTypeAtom={offerTypeAtom} />
                 </Section>
-                <OfferForm content={content} />
+                <OfferForm
+                  content={
+                    listingType === 'BITCOIN'
+                      ? btcOfferContent
+                      : productOfferContent
+                  }
+                />
               </>
             ) : (
               <Stack f={1} ai="center">

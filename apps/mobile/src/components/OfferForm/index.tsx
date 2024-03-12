@@ -18,18 +18,10 @@ function OfferForm({content}: {content: Props[]}): JSX.Element {
     <ChunkView displayOnProgress={<LoaderComponent />}>
       {content.map((item) =>
         item.customSection ? (
-          <Section
-            key={item.title}
-            customSection={item.customSection}
-            mandatory={item.mandatory}
-            title={item.title}
-          >
-            {item.children}
-          </Section>
+          item.children
         ) : (
           <Section
             key={item.title}
-            customSection={item.customSection}
             image={item.image}
             imageFill={item.imageFill}
             title={item.title}

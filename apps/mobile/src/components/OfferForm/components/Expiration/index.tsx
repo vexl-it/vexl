@@ -41,7 +41,7 @@ function Expiration({
   }, [expirationDate, setExpirationDate])
 
   return (
-    <YStack>
+    <YStack mb="$4">
       <XStack ai="center" jc="space-between" py="$4">
         <XStack f={1} ai="center" mr="$1">
           <Stack mr="$2">

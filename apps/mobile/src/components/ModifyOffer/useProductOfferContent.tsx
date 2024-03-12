@@ -2,46 +2,33 @@ import {useMolecule} from 'bunshi/dist/react'
 import {useMemo} from 'react'
 import {getTokens} from 'tamagui'
 import {useTranslation} from '../../utils/localization/I18nProvider'
-import AmountOfTransaction from '../OfferForm/components/AmountOfTransaction'
-import Currency from '../OfferForm/components/Currency'
 import Description from '../OfferForm/components/Description'
 import Expiration from '../OfferForm/components/Expiration'
 import FriendLevel from '../OfferForm/components/FriendLevel'
 import Location from '../OfferForm/components/Location'
 import Network from '../OfferForm/components/Network'
-import PaymentMethod from '../OfferForm/components/PaymentMethod'
-import PremiumOrDiscount from '../OfferForm/components/PremiumOrDiscount'
 import SpokenLanguages from '../OfferForm/components/SpokenLanguages'
 import {type Props} from '../Section'
-import amountOfTransactionSvg from '../images/amountOfTransactionSvg'
-import coinsSvg from '../images/coinsSvg'
 import friendLevelSvg from '../images/friendLevelSvg'
 import locationSvg from '../images/locationSvg'
 import networkSvg from '../images/networkSvg'
-import paymentMethodSvg from '../images/paymentMethod'
 import spokenLanguagesSvg from '../images/spokenLanguagesSvg'
 import {offerFormMolecule} from './atoms/offerFormStateAtoms'
 import descriptionSvg from './images/descriptionSvg'
 
-export default function useContent(): Props[] {
+export default function useProductOfferContent(): Props[] {
   const {t} = useTranslation()
   const tokens = getTokens()
   const {
-    amountTopLimitAtom,
-    amountBottomLimitAtom,
     btcNetworkAtom,
-    currencyAtom,
-    feeAmountAtom,
-    feeStateAtom,
+    offerTypeAtom,
+    listingTypeAtom,
     offerDescriptionAtom,
-    offerTypeOrDummyValueAtom,
     intendedConnectionLevelAtom,
     locationAtom,
     locationStateAtom,
-    paymentMethodAtom,
     expirationDateAtom,
     offerExpirationModalVisibleAtom,
-    updateCurrencyLimitsAtom,
     updateLocationStatePaymentMethodAtom,
     setOfferLocationActionAtom,
     spokenLanguagesAtomsAtom,
@@ -54,42 +41,22 @@ export default function useContent(): Props[] {
   return useMemo(
     () => [
       {
-        title: t('common.currency'),
-        image: coinsSvg,
+        title: t('offerForm.description.description'),
+        image: descriptionSvg,
         children: (
-          <Currency
-            currencyAtom={currencyAtom}
-            updateCurrencyLimitsAtom={updateCurrencyLimitsAtom}
+          <Description
+            offerDescriptionAtom={offerDescriptionAtom}
+            listingTypeAtom={listingTypeAtom}
+            offerTypeAtom={offerTypeAtom}
           />
         ),
+        mandatory: true,
       },
       {
-        title: t('offerForm.amountOfTransaction.amountOfTransaction'),
-        image: amountOfTransactionSvg,
-        children: (
-          <AmountOfTransaction
-            amountTopLimitAtom={amountTopLimitAtom}
-            amountBottomLimitAtom={amountBottomLimitAtom}
-            currencyAtom={currencyAtom}
-          />
-        ),
-      },
-      {
-        title: t('offerForm.premiumOrDiscount.premiumOrDiscount'),
-        customSection: true,
-        children: (
-          <PremiumOrDiscount
-            offerTypeAtom={offerTypeOrDummyValueAtom}
-            feeAmountAtom={feeAmountAtom}
-            feeStateAtom={feeStateAtom}
-          />
-        ),
-      },
-      {
-        title: t('offerForm.expiration.expiration'),
         customSection: true,
         children: (
           <Expiration
+            key={t('offerForm.expiration.expiration')}
             expirationDateAtom={expirationDateAtom}
             offerExpirationModalVisibleAtom={offerExpirationModalVisibleAtom}
           />
@@ -131,26 +98,9 @@ export default function useContent(): Props[] {
         mandatory: true,
       },
       {
-        title: t('offerForm.paymentMethod.paymentMethod'),
-        image: paymentMethodSvg,
-        children: (
-          <PaymentMethod
-            locationStateAtom={locationStateAtom}
-            paymentMethodAtom={paymentMethodAtom}
-          />
-        ),
-        mandatory: true,
-      },
-      {
         title: t('offerForm.network.network'),
         image: networkSvg,
         children: <Network btcNetworkAtom={btcNetworkAtom} />,
-        mandatory: true,
-      },
-      {
-        title: t('offerForm.description.description'),
-        image: descriptionSvg,
-        children: <Description offerDescriptionAtom={offerDescriptionAtom} />,
         mandatory: true,
       },
       {
@@ -164,14 +114,10 @@ export default function useContent(): Props[] {
       },
     ],
     [
+      offerDescriptionAtom,
+      listingTypeAtom,
+      offerTypeAtom,
       t,
-      currencyAtom,
-      updateCurrencyLimitsAtom,
-      amountTopLimitAtom,
-      amountBottomLimitAtom,
-      offerTypeOrDummyValueAtom,
-      feeAmountAtom,
-      feeStateAtom,
       expirationDateAtom,
       offerExpirationModalVisibleAtom,
       setOfferLocationActionAtom,
@@ -184,9 +130,7 @@ export default function useContent(): Props[] {
       removeSpokenLanguageActionAtom,
       resetSelectedSpokenLanguagesActionAtom,
       saveSelectedSpokenLanguagesActionAtom,
-      paymentMethodAtom,
       btcNetworkAtom,
-      offerDescriptionAtom,
       intendedConnectionLevelAtom,
     ]
   )

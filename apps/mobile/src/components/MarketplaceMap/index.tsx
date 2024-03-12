@@ -9,7 +9,7 @@ import {
   focusedOfferIdAtom,
   refocusMapActionAtom,
 } from '../../state/marketplace/atoms/map/focusedOffer'
-import {mapViewRefAtom} from '../../state/marketplace/atoms/map/mapViewAtoms'
+import {setMapViewRefAtom} from '../../state/marketplace/atoms/map/mapViewAtoms'
 import {mapRegionAtom} from '../../state/marketplace/atoms/mapRegionAtom'
 import {CONTAINER_WITH_TOP_BORDER_RADIUS_TOP_PADDING} from '../InsideRouter/components/ContainerWithTopBorderRadius'
 import MapDisplayMultiplePoints from '../Map/components/MapDisplayMultiplePoints'
@@ -67,7 +67,7 @@ export default function MarketplaceMap({
         pointsAtom={mapPointsAtom}
         onRegionChangeComplete={onRegionSelected}
         pointIdsToFocusAtom={focusedPointsIdsAtom}
-        refAtom={mapViewRefAtom}
+        refAtom={setMapViewRefAtom}
         onPointPress={onPointPress}
       />
     </Stack>

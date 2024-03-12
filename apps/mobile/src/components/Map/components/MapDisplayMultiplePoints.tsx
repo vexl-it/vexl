@@ -9,12 +9,12 @@ import {
   useAtomValue,
   useSetAtom,
   type Atom,
-  type PrimitiveAtom,
+  type WritableAtom,
 } from 'jotai'
-import {splitAtom} from 'jotai/utils'
-import {Fragment, useCallback, useEffect, useMemo, useRef} from 'react'
-import {Image} from 'react-native'
-import MapView, {
+import {useCallback, useEffect, useRef} from 'react'
+import {Platform} from 'react-native'
+import MapView from 'react-native-map-clustering'
+import {
   Circle,
   Marker,
   PROVIDER_GOOGLE,
@@ -22,8 +22,7 @@ import MapView, {
   type EdgePadding,
   type Region,
 } from 'react-native-maps'
-import {Stack, getTokens} from 'tamagui'
-import atomKeyExtractor from '../../../utils/atomUtils/atomKeyExtractor'
+import {Stack, getTokens, useDebounce} from 'tamagui'
 import europeRegion from '../utils/europeRegion'
 import mapTheme from '../utils/mapStyle'
 
@@ -44,11 +43,10 @@ interface Props<T> {
   onPointPress: (p: Point<T>) => void
   pointIdsToFocusAtom: Atom<Array<Point<T>['id']> | undefined>
   onRegionChangeComplete?: (region: Region, d: Details) => void
-  refAtom?: PrimitiveAtom<MapView | undefined>
+  refAtom?: WritableAtom<null, [v: MapView], void>
   onMapReady?: () => void
 }
 
-const empty = (): void => {}
 const emptyAtom = atom<MapView | undefined>(undefined)
 
 const mapStyle = {
@@ -65,7 +63,7 @@ function MMapView({
   onRegionChangeComplete,
 }: {
   children: React.ReactNode
-  refAtom: PrimitiveAtom<MapView | undefined> | undefined
+  refAtom?: WritableAtom<null, [v: MapView], void>
   mapPadding: EdgePadding
   onMapReady?: () => void
   onRegionChangeComplete?: (region: Region, d: Details) => void
@@ -84,105 +82,37 @@ function MMapView({
     setMapViewRef(ref.current ?? undefined)
   }, [ref, setMapViewRef])
 
+  const onChangedDebounce = useDebounce(
+    useCallback(
+      (region: Region, details: Details) => {
+        if (onRegionChangeComplete) onRegionChangeComplete(region, details)
+      },
+      [onRegionChangeComplete]
+    ),
+    500
+  )
+
   return (
     <MapView
       ref={ref}
       initialRegion={europeRegion}
-      maxZoomLevel={15}
+      clusterColor={getTokens().color.main.val}
       customMapStyle={mapTheme}
       onMapLoaded={onMapLoaded}
+      minZoom={0}
+      maxZoom={20}
       loadingBackgroundColor="#000000"
       loadingIndicatorColor={getTokens().color.main.val}
+      clusteringEnabled
       loadingEnabled
       provider={PROVIDER_GOOGLE}
       mapPadding={mapPadding}
       toolbarEnabled={false}
       style={mapStyle}
-      onRegionChangeComplete={onRegionChangeComplete ?? empty}
+      onRegionChange={onChangedDebounce}
     >
       {children}
     </MapView>
-  )
-}
-
-function Point<T>({
-  atom: pointAtom,
-  pointsIdsToFocusAtom,
-  onPointPress,
-}: {
-  atom: Atom<Point<T>>
-  pointsIdsToFocusAtom: Props<T>['pointIdsToFocusAtom']
-  onPointPress: Props<T>['onPointPress']
-}): JSX.Element {
-  const point = useAtomValue(pointAtom)
-  const isFocused = useAtomValue(
-    useMemo(() => {
-      return atom((get) => {
-        const {id} = get(pointAtom)
-        const ids = get(pointsIdsToFocusAtom)
-        return ids?.includes(id) ?? false
-      })
-    }, [pointAtom, pointsIdsToFocusAtom])
-  )
-
-  return (
-    <Fragment key={point.id}>
-      <Marker
-        key={point.id}
-        coordinate={{
-          latitude: point.latitude,
-          longitude: point.longitude,
-        }}
-        onPress={() => {
-          onPointPress(point)
-        }}
-      >
-        {!isFocused ? (
-          <Stack w={20} h={20} alignItems="center" justifyContent="center">
-            <Stack w={8} h={8} borderRadius={4} bg="$main" />
-          </Stack>
-        ) : (
-          <Image source={markerImage} />
-        )}
-      </Marker>
-      {!!isFocused && (
-        <Circle
-          fillColor={`${getTokens().color.main.val}22`}
-          strokeColor={getTokens().color.main.val}
-          center={point}
-          radius={longitudeDeltaToMeters(point.radius, point.latitude)}
-        ></Circle>
-      )}
-    </Fragment>
-  )
-}
-
-function Points<T>({
-  pointsAtom,
-  onPointPress,
-  pointIdsToFocusAtom,
-}: {
-  pointsAtom: Props<T>['pointsAtom']
-  onPointPress: Props<T>['onPointPress']
-  pointIdsToFocusAtom: Props<T>['pointIdsToFocusAtom']
-}): JSX.Element {
-  const pointsAtoms = useAtomValue(
-    useMemo(() => splitAtom(pointsAtom), [pointsAtom])
-  )
-
-  return (
-    <>
-      {pointsAtoms.map((atom) => {
-        return (
-          <Point
-            key={atomKeyExtractor(atom)}
-            atom={atom}
-            onPointPress={onPointPress}
-            pointsIdsToFocusAtom={pointIdsToFocusAtom}
-          ></Point>
-        )
-      })}
-    </>
   )
 }
 
@@ -195,6 +125,24 @@ export default function MapDisplayMultiplePoints<T>({
   refAtom,
   onMapReady,
 }: Props<T>): JSX.Element {
+  const points = useAtomValue(pointsAtom)
+  const idsToFocus = useAtomValue(pointIdsToFocusAtom)
+  const {focusedPoints, notFocusedPoints} = points.reduce(
+    (acc, point) => {
+      const isFocused = idsToFocus?.includes(point.id)
+      if (isFocused) {
+        acc.focusedPoints.push(point)
+      } else {
+        acc.notFocusedPoints.push(point)
+      }
+      return acc
+    },
+    {
+      focusedPoints: [] as Array<Point<T>>,
+      notFocusedPoints: [] as Array<Point<T>>,
+    }
+  )
+
   return (
     <Stack w="100%" h="100%" position="relative">
       <MMapView
@@ -203,11 +151,48 @@ export default function MapDisplayMultiplePoints<T>({
         onMapReady={onMapReady}
         onRegionChangeComplete={onRegionChangeComplete}
       >
-        <Points
-          onPointPress={onPointPress}
-          pointIdsToFocusAtom={pointIdsToFocusAtom}
-          pointsAtom={pointsAtom}
-        />
+        {notFocusedPoints.map((point) => {
+          return (
+            <Marker
+              key={point.id}
+              // https://github.com/react-native-maps/react-native-maps/issues/4997
+              tracksViewChanges={Platform.OS === 'ios'}
+              coordinate={{
+                latitude: point.latitude,
+                longitude: point.longitude,
+              }}
+              onPress={() => {
+                onPointPress(point)
+              }}
+            >
+              <Stack w={28} h={28} alignItems="center" justifyContent="center">
+                <Stack w={8} h={8} borderRadius={4} bg="$main" />
+              </Stack>
+            </Marker>
+          )
+        })}
+        {focusedPoints.map((point) => {
+          return (
+            <>
+              <Marker
+                key={point.id}
+                //  https://github.com/react-native-maps/react-native-maps/issues/4997
+                tracksViewChanges={Platform.OS === 'ios'}
+                image={markerImage}
+                coordinate={{
+                  latitude: point.latitude,
+                  longitude: point.longitude,
+                }}
+              ></Marker>
+              <Circle
+                fillColor={`${getTokens().color.main.val}22`}
+                strokeColor={getTokens().color.main.val}
+                center={point}
+                radius={longitudeDeltaToMeters(point.radius, point.latitude)}
+              ></Circle>
+            </>
+          )
+        })}
       </MMapView>
     </Stack>
   )

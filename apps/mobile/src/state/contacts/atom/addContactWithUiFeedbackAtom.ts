@@ -194,27 +194,35 @@ const createContact = atom(
           info: {...newContact.info, name: customName},
         })
       ),
-      TE.chainFirstTaskK(({customName, importedContact}) =>
-        set(addContactToPhoneWithUIFeedbackAtom, {
-          customName,
-          number: importedContact.computedValues.normalizedNumber,
-        })
+      TE.bindW('addToPhoneSuccess', ({customName, importedContact}) =>
+        pipe(
+          set(addContactToPhoneWithUIFeedbackAtom, {
+            customName,
+            number: importedContact.computedValues.normalizedNumber,
+          }),
+          TE.fromTask
+        )
       ),
-      TE.chainFirstTaskK(({customName}) =>
-        set(askAreYouSureActionAtom, {
+      TE.chainFirstTaskK(({addToPhoneSuccess, customName, importedContact}) => {
+        return set(askAreYouSureActionAtom, {
           steps: [
             {
               type: 'StepWithText',
               title: t('addContactDialog.contactAdded'),
-              description: t('addContactDialog.youHaveAddedContact', {
-                contactName: customName,
-              }),
+              description: t(
+                addToPhoneSuccess
+                  ? 'addContactDialog.youHaveAddedContactToVexlAndPhoneContacts'
+                  : 'addContactDialog.youHaveAddedContactToVexlContacts',
+                {
+                  contactName: customName,
+                }
+              ),
               positiveButtonText: t('common.niceWithExclamationMark'),
             },
           ],
           variant: 'info',
         })
-      ),
+      }),
       TE.match(
         (e) => {
           if (e._tag === 'UserDeclinedError') {

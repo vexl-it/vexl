@@ -114,6 +114,14 @@ export const filteredOffersIncludingLocationFilterAtom = atom((get) => {
   const filteredOffers = get(filteredOffersIgnoreLocationAtom)
   if (!viewportToFilterBy) return filteredOffers
 
+  // Do not filter if user zoomed to too big area
+  if (
+    viewportToFilterBy.northeast.longitude -
+      viewportToFilterBy.southwest.longitude >
+    60
+  )
+    return filteredOffers
+
   return filteredOffers.filter((one) =>
     isOfferInsdieViewPort(viewportToFilterBy, one)
   )

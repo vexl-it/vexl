@@ -95,7 +95,7 @@
     "react-native-gesture-handler": "~2.14.0",
     "react-native-keyboard-aware-scroll-view": "^0.9.5",
     "react-native-map-clustering": "^3.4.2",
-    "react-native-maps": "1.10.0",
+    "react-native-maps": "^1.11.3",
     "react-native-markdown-display": "^7.0.0-alpha.2",
     "react-native-mmkv": "^2.11.0",
     "react-native-open-notification": "^0.1.4",

@@ -9059,7 +9059,7 @@ __metadata:
     react-native-gesture-handler: ~2.14.0
     react-native-keyboard-aware-scroll-view: ^0.9.5
     react-native-map-clustering: ^3.4.2
-    react-native-maps: 1.10.0
+    react-native-maps: ^1.11.3
     react-native-markdown-display: ^7.0.0-alpha.2
     react-native-mmkv: ^2.11.0
     react-native-open-notification: ^0.1.4
@@ -21570,9 +21570,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-maps@npm:1.10.0":
-  version: 1.10.0
-  resolution: "react-native-maps@npm:1.10.0"
+"react-native-maps@npm:^1.11.3":
+  version: 1.11.3
+  resolution: "react-native-maps@npm:1.11.3"
   dependencies:
     "@types/geojson": ^7946.0.13
   peerDependencies:
@@ -21582,7 +21582,7 @@ __metadata:
   peerDependenciesMeta:
     react-native-web:
       optional: true
-  checksum: fa451a6c1d8bd69c1f2185d409b4e7c64d12a23d75e8af35cf519ef87dc86804f120e72ca4e3cf2b53c998a634f67fcdb31dd0e6364558f4d614fb37aacfe28b
+  checksum: dce53cc7e7a65a8344db82868cc5e8b17ca3471ffd9e6a968545e9f39165b91f67d04211db345dd0f52ead72bc944451693d40e46f580c9a2784c5fc597c6430
   languageName: node
   linkType: hard
 

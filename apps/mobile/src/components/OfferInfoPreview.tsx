@@ -8,14 +8,13 @@ import {useTranslation} from '../utils/localization/I18nProvider'
 import {formatCurrencyAmount} from '../utils/localization/currency'
 import SvgImage from './Image'
 import bankSvg from './InsideRouter/components/MarketplaceScreen/images/bankSvg'
-import getBtcPragueLogoSvg from './InsideRouter/components/MarketplaceScreen/images/btcPragueLogoSvg'
 import mapTagSvg from './InsideRouter/components/MarketplaceScreen/images/mapTagSvg'
 import onlineTransferSvg from './InsideRouter/components/MarketplaceScreen/images/onlineTransferSvg'
 import clockSvg from './images/clockSvg'
 import spokenLanguagesSvg from './images/spokenLanguagesSvg'
 
-const BTC_PRAGUE_FRIEND = '8o5OvkfRga/xBYbfb0e0MJZIjy4g7xGVimCdNLrydGs='
-const BTC_PRAGUE_FRIEND_STAGE = '9c6r0q7LCn1oqES2pfqQDVQH91fY8ZHYcJKbJYOU7hE='
+// const BTC_PRAGUE_FRIEND = '8o5OvkfRga/xBYbfb0e0MJZIjy4g7xGVimCdNLrydGs='
+// const BTC_PRAGUE_FRIEND_STAGE = '9c6r0q7LCn1oqES2pfqQDVQH91fY8ZHYcJKbJYOU7hE='
 
 const InfoItemContainer = styled(Stack, {
   f: 1,
@@ -54,10 +53,10 @@ function OfferInfoPreview({
 }): JSX.Element {
   const {t} = useTranslation()
   const tokens = getTokens()
-  const btcPragueLogoSvg = useMemo(
-    () => getBtcPragueLogoSvg({darkBackground: negative}),
-    [negative]
-  )
+  // const btcPragueLogoSvg = useMemo(
+  //   () => getBtcPragueLogoSvg({darkBackground: negative}),
+  //   [negative]
+  // )
 
   const offerAmountTopLimit = useMemo(() => {
     return formatCurrencyAmount(
@@ -72,12 +71,12 @@ function OfferInfoPreview({
 
   return (
     <>
-      {(offer.privatePart.commonFriends.includes(BTC_PRAGUE_FRIEND) ||
+      {/* {(offer.privatePart.commonFriends.includes(BTC_PRAGUE_FRIEND) ||
         offer.privatePart.commonFriends.includes(BTC_PRAGUE_FRIEND_STAGE)) && (
         <Stack alignSelf="flex-end">
           <SvgImage width={60} height={20} source={btcPragueLogoSvg} />
         </Stack>
-      )}
+      )} */}
       <XStack ai="flex-start" jc="space-between">
         <XStack mb="$4">
           <Text

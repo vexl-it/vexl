@@ -66,7 +66,6 @@ export default function clearMmkvStorageAndEmptyAtoms(): void {
     showTextDebugButton: false,
     disableScreenshots: false,
     isDeveloper: false,
-    hideOtherListingType: true,
   })
 
   getDefaultStore().set(previousSearchesAtom, [])

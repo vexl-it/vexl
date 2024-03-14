@@ -25,6 +25,7 @@ import {
   createIsThisLanguageSelectedAtom,
   currencyAtom,
   intendedConnectionLevelAtom,
+  listingTypeAtom,
   locationArrayOfOneAtom,
   locationStateAtom,
   paymentMethodAtom,
@@ -35,7 +36,7 @@ import {
   sortingAtom,
   spokenLanguagesAtomsAtom,
   updateCurrencyLimitsAtom,
-  updateLocationStatePaymentMethodAtom,
+  updateLocationStateAndPaymentMethodAtom,
 } from './atom'
 import Sorting from './components/Sorting'
 import TextFilter from './components/TextFilter'
@@ -82,12 +83,13 @@ export default function useContent(): Props[] {
         image: locationSvg,
         children: (
           <Location
+            listingTypeAtom={listingTypeAtom}
             randomizeLocation={false}
             locationAtom={locationArrayOfOneAtom}
             locationStateAtom={locationStateAtom}
             setOfferLocationActionAtom={setOfferLocationActionAtom}
-            updateLocationStatePaymentMethodAtom={
-              updateLocationStatePaymentMethodAtom
+            updateLocationStateAndPaymentMethodAtom={
+              updateLocationStateAndPaymentMethodAtom
             }
           />
         ),

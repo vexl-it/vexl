@@ -19,6 +19,7 @@ export default function filterOffersByText({
   const offersWithSearchableString = offers.map((offer) => ({
     offer,
     searchableString: [
+      offer.offerInfo.publicPart.listingType,
       offer.offerInfo.publicPart.offerDescription,
       offer.offerInfo.privatePart.commonFriends
         .map((hash) =>

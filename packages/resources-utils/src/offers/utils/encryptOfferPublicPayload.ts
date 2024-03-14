@@ -1,7 +1,9 @@
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {
+  LocationStateToArray,
   OfferLocation,
   PublicPayloadEncrypted,
+  type LocationState,
   type OfferPublicPart,
   type SymmetricKey,
 } from '@vexl-next/domain/src/general/offers'
@@ -38,7 +40,10 @@ const OfferPublicPartToEncrypt = z.object({
   amountTopLimit: z.coerce.string(),
   feeState: z.string(),
   feeAmount: z.coerce.string(),
+  // TODO: remove offer locationState backward compatibility
+  // locationState V2 -> locationState
   locationState: z.string(),
+  locationStateV2: LocationStateToArray,
   paymentMethod: z.array(z.string()),
   btcNetwork: z.array(z.string()),
   currency: z.string(),
@@ -51,9 +56,25 @@ const OfferPublicPartToEncrypt = z.object({
   active: z.enum(['true', 'false']),
   groupUuids: z.array(z.string()),
   listingType: z.string(),
-  deliveryMethod: z.array(z.string()).optional(),
-  singlePrice: z.number().optional(),
+  singlePriceState: z.string().optional(),
 })
+
+function convertLocationStateToOldVersion(
+  publicPart: OfferPublicPart
+): LocationState {
+  if (publicPart.listingType === 'BITCOIN')
+    return publicPart.locationState[0] ?? 'IN_PERSON'
+
+  if (publicPart.listingType === 'OTHER' && publicPart.location.length === 0)
+    return 'ONLINE'
+
+  if (publicPart.locationState.length === 2) return 'IN_PERSON'
+
+  if (publicPart.locationState.length === 1)
+    return publicPart.locationState[0] ?? 'IN_PERSON'
+
+  return 'IN_PERSON'
+}
 
 function offerPublicPartToJsonString(
   publicPart: OfferPublicPart
@@ -77,6 +98,10 @@ function offerPublicPartToJsonString(
       // TODO(#702): remove offer location backward compatibility
       // location V2 -> location
       locationV2: publicPart.location,
+      locationState: convertLocationStateToOldVersion(publicPart),
+      // TODO: remove offer locationState backward compatibility
+      // locationState V2 -> locationState
+      locationStateV2: publicPart.locationState,
     })),
     E.chainW(safeParse(OfferPublicPartToEncrypt)),
     E.chainW(stringifyToJson)

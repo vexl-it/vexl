@@ -12,14 +12,12 @@ export default function OfferWithBubbleTip({
   button,
   negative,
   onInfoRectPress,
-  hideSpokenLanguages,
   reduceDescriptionLength,
 }: {
   offer: OneOfferInState
   button?: ReactNode
   negative?: boolean
   onInfoRectPress?: () => void
-  hideSpokenLanguages?: boolean
   reduceDescriptionLength?: boolean
 }): JSX.Element {
   const onPress = useCallback(() => {
@@ -32,7 +30,6 @@ export default function OfferWithBubbleTip({
         <Stack bg={negative ? '$grey' : '$white'} p="$4" br="$5">
           <OfferInfoPreview
             reduceDescriptionLength={reduceDescriptionLength}
-            hideSpokenLanguages={hideSpokenLanguages}
             negative={negative}
             offer={offer.offerInfo}
           />

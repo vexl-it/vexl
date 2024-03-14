@@ -47,8 +47,8 @@ function TradeChecklistReminder(): JSX.Element | null {
   )
     return null
 
-  const offerIsInperson =
-    offerForChat?.offerInfo.publicPart.locationState === 'IN_PERSON'
+  const offerIsInPerson =
+    offerForChat?.offerInfo.publicPart.locationState.includes('IN_PERSON')
 
   return (
     <VexlbotBubble
@@ -57,14 +57,14 @@ function TradeChecklistReminder(): JSX.Element | null {
         if (dontShowSwitchValue) setShowVexlbotInitialMessageForAllChats(false)
       }}
       text={t(
-        offerIsInperson
+        offerIsInPerson
           ? 'vexlbot.initialWelcomeMessage'
           : 'vexlbot.initialWelcomeMessageOnline',
         {name: otherSideData.userName}
       )}
     >
       <Stack space="$4">
-        {offerIsInperson ? (
+        {offerIsInPerson ? (
           <Button
             beforeIcon={tradeChecklistSvg}
             iconSize={24}

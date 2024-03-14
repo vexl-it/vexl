@@ -10,7 +10,7 @@ export const offersFilterInitialState: OffersFilter = {
   friendLevel: ['FIRST_DEGREE', 'SECOND_DEGREE'],
   currency: undefined,
   location: undefined,
-  locationState: undefined,
+  locationState: [],
   paymentMethod: undefined,
   btcNetwork: undefined,
   spokenLanguages: [],
@@ -43,7 +43,7 @@ export const resetLocationFilterActionAtom = atom(null, (get, set) => {
   set(offersFilterFromStorageAtom, (old) => ({
     ...old,
     location: undefined,
-    locationState: undefined,
+    locationState: [],
     paymentMethod: undefined,
   }))
 })

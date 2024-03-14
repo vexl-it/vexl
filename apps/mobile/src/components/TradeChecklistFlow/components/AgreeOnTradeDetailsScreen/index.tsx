@@ -44,8 +44,9 @@ function AgreeOnTradeDetailsScreen(props: Props): JSX.Element {
       </Content>
       <PrimaryFooterButtonProxy
         hidden={
-          offerForTradeChecklist?.offerInfo.publicPart.locationState ===
-            'ONLINE' && !areThereUpdatesToBeSent
+          !!offerForTradeChecklist?.offerInfo.publicPart.locationState.includes(
+            'ONLINE'
+          ) && !areThereUpdatesToBeSent
         }
         text={t('common.cancel')}
         onPress={() => {
@@ -58,12 +59,14 @@ function AgreeOnTradeDetailsScreen(props: Props): JSX.Element {
       />
       <SecondaryFooterButtonProxy
         disabled={
-          offerForTradeChecklist?.offerInfo.publicPart.locationState !==
-            'ONLINE' && !areThereUpdatesToBeSent
+          !!offerForTradeChecklist?.offerInfo.publicPart.locationState.includes(
+            'ONLINE'
+          ) && !areThereUpdatesToBeSent
         }
         text={
-          offerForTradeChecklist?.offerInfo.publicPart.locationState ===
-            'ONLINE' && !areThereUpdatesToBeSent
+          offerForTradeChecklist?.offerInfo.publicPart.locationState.includes(
+            'ONLINE'
+          ) && !areThereUpdatesToBeSent
             ? t('tradeChecklist.acknowledgeAndContinue')
             : t('common.send')
         }

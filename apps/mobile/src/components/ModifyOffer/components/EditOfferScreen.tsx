@@ -22,6 +22,7 @@ import listingTypeSvg from '../../images/listingTypeSvg'
 import userSvg from '../../images/userSvg'
 import {offerFormMolecule} from '../atoms/offerFormStateAtoms'
 import useBtcOfferContent from '../useBtcOfferContent'
+import useOtherOfferContent from '../useOtherOfferContent'
 import useProductOfferContent from '../useProductOfferContent'
 import EditOfferHeader from './EditOfferHeader'
 
@@ -43,6 +44,7 @@ function EditOfferScreen({
   const safeGoBack = useSafeGoBack()
   const btcOfferContent = useBtcOfferContent()
   const productOfferContent = useProductOfferContent()
+  const otherOfferContent = useOtherOfferContent()
 
   const {
     editOfferAtom,
@@ -76,13 +78,18 @@ function EditOfferScreen({
                   <ListingType listingTypeAtom={listingTypeAtom} />
                 </Section>
                 <Section title={t('offerForm.iWantTo')} image={userSvg}>
-                  <OfferType offerTypeAtom={offerTypeAtom} />
+                  <OfferType
+                    listingTypeAtom={listingTypeAtom}
+                    offerTypeAtom={offerTypeAtom}
+                  />
                 </Section>
                 <OfferForm
                   content={
                     listingType === 'BITCOIN'
                       ? btcOfferContent
-                      : productOfferContent
+                      : listingType === 'PRODUCT'
+                      ? productOfferContent
+                      : otherOfferContent
                   }
                 />
               </>

@@ -22,6 +22,7 @@ import listingTypeSvg from '../../images/listingTypeSvg'
 import userSvg from '../../images/userSvg'
 import {offerFormMolecule} from '../atoms/offerFormStateAtoms'
 import useBtcOfferContent from '../useBtcOfferContent'
+import useOtherOfferContent from '../useOtherOfferContent'
 import useProductOfferContent from '../useProductOfferContent'
 
 const styles = StyleSheet.create({
@@ -45,6 +46,7 @@ function CreateOfferScreen(): JSX.Element {
   } = useMolecule(offerFormMolecule)
   const btcOfferContent = useBtcOfferContent()
   const productOfferContent = useProductOfferContent()
+  const otherOfferContent = useOtherOfferContent()
   const listingType = useAtomValue(listingTypeAtom)
   const showBuySellField = useAtomValue(showBuySellFieldAtom)
   const showRestOfTheFields = useAtomValue(showRestOfTheFieldsAtom)
@@ -66,14 +68,14 @@ function CreateOfferScreen(): JSX.Element {
               <IconButton variant="dark" icon={closeSvg} onPress={safeGoBack} />
             </ScreenTitle>
             <Section title={t('offerForm.listingType')} image={listingTypeSvg}>
-              <ListingType
-                onTabPress={resetForm}
-                listingTypeAtom={listingTypeAtom}
-              />
+              <ListingType listingTypeAtom={listingTypeAtom} />
             </Section>
             {!!showBuySellField && (
               <Section title={t('offerForm.iWantTo')} image={userSvg}>
-                <OfferType offerTypeAtom={offerTypeAtom} />
+                <OfferType
+                  listingTypeAtom={listingTypeAtom}
+                  offerTypeAtom={offerTypeAtom}
+                />
               </Section>
             )}
             {!!showRestOfTheFields && (
@@ -81,7 +83,9 @@ function CreateOfferScreen(): JSX.Element {
                 content={
                   listingType === 'BITCOIN'
                     ? btcOfferContent
-                    : productOfferContent
+                    : listingType === 'PRODUCT'
+                    ? productOfferContent
+                    : otherOfferContent
                 }
               />
             )}

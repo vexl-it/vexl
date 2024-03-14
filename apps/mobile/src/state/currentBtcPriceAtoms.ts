@@ -10,8 +10,12 @@ import {focusAtom} from 'jotai-optics'
 import {z} from 'zod'
 import {publicApiAtom} from '../api'
 import {atomWithParsedMmkvStorage} from '../utils/atomUtils/atomWithParsedMmkvStorage'
+import {currencies} from '../utils/localization/currency'
 import reportError from '../utils/reportError'
 import {selectedCurrencyAtom} from './selectedCurrency'
+
+export const SATOSHIS_IN_BTC = 100_000_000
+export const DECIMALS_FOR_BTC_VALUE = 8
 
 const FETCH_LIMIT = 10 * 60 * 1000 // 10 minutes
 
@@ -54,8 +58,16 @@ export const btcPriceForSelectedCurrencyAtom =
 
 export const refreshBtcPriceActionAtom = atom(
   undefined,
-  (get, set, currency: CurrencyCode) => {
+  (
+    get,
+    set,
+    currencyStringOrAtom: CurrencyCode | Atom<CurrencyCode | undefined>
+  ) => {
     const api = get(publicApiAtom)
+    const currency =
+      (typeof currencyStringOrAtom === 'string'
+        ? currencyStringOrAtom
+        : get(currencyStringOrAtom)) ?? currencies.USD.code
 
     // TODO this can be done statically in constant. Should not be parsed every time.
     const acceptedCurrency = AcceptedCurrency.safeParse(currency.toLowerCase())
@@ -63,8 +75,9 @@ export const refreshBtcPriceActionAtom = atom(
 
     const fetchInfo = get(btcPriceDataAtom)[currency]
     if (
-      fetchInfo?.state === 'success' &&
-      fetchInfo.lastRefreshAt + FETCH_LIMIT > unixMillisecondsNow()
+      fetchInfo?.state === 'loading' ||
+      (fetchInfo?.state === 'success' &&
+        fetchInfo.lastRefreshAt + FETCH_LIMIT > unixMillisecondsNow())
     ) {
       return T.of(true)
     }

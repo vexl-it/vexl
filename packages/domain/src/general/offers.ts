@@ -45,6 +45,9 @@ export type OfferType = z.TypeOf<typeof OfferType>
 export const ListingType = z.enum(['BITCOIN', 'PRODUCT', 'OTHER'])
 export type ListingType = z.TypeOf<typeof ListingType>
 
+export const SinglePriceState = z.enum(['HAS_COST', 'FOR_FREE'])
+export type SinglePriceState = z.TypeOf<typeof SinglePriceState>
+
 export const DeliveryMethod = z.enum(['PICKUP', 'DELIVERY'])
 export type DeliveryMethod = z.TypeOf<typeof DeliveryMethod>
 
@@ -84,7 +87,7 @@ export const CommonFriend = z.object({
 })
 export type CommonFriend = z.TypeOf<typeof CommonFriend>
 
-const OfferLocationDepreciated = z.object({
+const OfferLocationDeprecated = z.object({
   longitude: z.coerce.number().pipe(Longitude),
   latitude: z.coerce.number().pipe(Latitude),
   city: z.string(),
@@ -96,16 +99,15 @@ export type LocationPlaceId = z.TypeOf<typeof LocationPlaceId>
 export const OfferLocation = z
   .unknown()
   .transform((previous) => {
-    const depreciatedLocationFormat =
-      OfferLocationDepreciated.safeParse(previous)
-    if (depreciatedLocationFormat.success) {
+    const deprecatedLocationFormat = OfferLocationDeprecated.safeParse(previous)
+    if (deprecatedLocationFormat.success) {
       return {
-        placeId: `old:${depreciatedLocationFormat.data.city}`,
-        latitude: depreciatedLocationFormat.data.latitude,
-        longitude: depreciatedLocationFormat.data.longitude,
-        radius: getDefaultRadius(depreciatedLocationFormat.data.latitude),
-        address: depreciatedLocationFormat.data.city,
-        shortAddress: depreciatedLocationFormat.data.city,
+        placeId: `old:${deprecatedLocationFormat.data.city}`,
+        latitude: deprecatedLocationFormat.data.latitude,
+        longitude: deprecatedLocationFormat.data.longitude,
+        radius: getDefaultRadius(deprecatedLocationFormat.data.latitude),
+        address: deprecatedLocationFormat.data.city,
+        shortAddress: deprecatedLocationFormat.data.city,
       }
     }
     return previous
@@ -121,6 +123,17 @@ export const OfferLocation = z
     })
   )
 export type OfferLocation = z.TypeOf<typeof OfferLocation>
+
+export const LocationStateToArray = z
+  .unknown()
+  .transform((previous) => {
+    const deprecatedLocationStateFormat = LocationState.safeParse(previous)
+    if (deprecatedLocationStateFormat.success) {
+      return [deprecatedLocationStateFormat]
+    }
+    return previous
+  })
+  .pipe(z.array(LocationState))
 
 export const SymmetricKey = z.string().brand<'SymmetricKey'>()
 export type SymmetricKey = z.TypeOf<typeof SymmetricKey>
@@ -140,7 +153,7 @@ export const OfferPublicPart = z.object({
   amountTopLimit: z.coerce.number(),
   feeState: FeeState,
   feeAmount: z.coerce.number(),
-  locationState: LocationState.default('IN_PERSON'),
+  locationState: LocationStateToArray.catch([]),
   paymentMethod: z.array(PaymentMethod),
   btcNetwork: z.array(BtcNetwork),
   currency: CurrencyCode,
@@ -153,8 +166,7 @@ export const OfferPublicPart = z.object({
   active: z.boolean(),
   groupUuids: z.array(z.string()),
   listingType: ListingType.optional(),
-  singlePrice: z.number().optional(),
-  deliveryMethod: z.array(DeliveryMethod).default([]),
+  singlePriceState: SinglePriceState.optional(),
 })
 export type OfferPublicPart = z.TypeOf<typeof OfferPublicPart>
 

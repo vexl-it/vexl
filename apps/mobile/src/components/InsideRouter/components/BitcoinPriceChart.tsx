@@ -34,7 +34,7 @@ function BitcoinPriceChart(): JSX.Element {
         <Stack />
         <TouchableOpacity
           onPress={() => {
-            void refreshBtcPrice(selectedCurrency)()
+            void refreshBtcPrice(selectedCurrencyAtom)()
           }}
         >
           <XStack>

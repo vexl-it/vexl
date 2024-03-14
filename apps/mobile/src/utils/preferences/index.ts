@@ -22,7 +22,6 @@ export const preferencesAtom = atomWithParsedMmkvStorage(
     showTextDebugButton: false,
     disableScreenshots: false,
     isDeveloper: false,
-    hideOtherListingType: true,
   },
   Preferences
 )
@@ -45,8 +44,4 @@ export const isDeveloperAtom = focusAtom(preferencesAtom, (p) =>
 
 export const currentAppLanguageAtom = focusAtom(preferencesAtom, (o) =>
   o.prop('appLanguage')
-)
-
-export const hideOtherListingTypeAtom = focusAtom(preferencesAtom, (o) =>
-  o.prop('hideOtherListingType')
 )

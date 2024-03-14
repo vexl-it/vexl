@@ -139,7 +139,6 @@ function OfferInfo({
       <ScrollView>
         <YStack space="$2" mb="$2">
           <OfferWithBubbleTip
-            hideSpokenLanguages
             negative={!requestPossibleInfo.canBeRerequested}
             offer={offer}
           />

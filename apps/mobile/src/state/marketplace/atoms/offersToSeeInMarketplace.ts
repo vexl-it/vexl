@@ -1,9 +1,9 @@
 import {atom} from 'jotai'
+import {type OfferInfo} from '../../../../../../packages/domain/src/general/offers'
 import {isOfferExpired} from '../../../utils/isOfferExpired'
 import {isDeveloperAtom} from '../../../utils/preferences'
 import reportError from '../../../utils/reportError'
 import {importedContactsHashesAtom} from '../../contacts/atom/contactsStore'
-import {type OfferInfo} from './../../../../../../packages/domain/src/general/offers'
 import {offersAtom} from './offersState'
 
 export function alertAndReportOnlineOffersWithoutLocation(
@@ -11,28 +11,30 @@ export function alertAndReportOnlineOffersWithoutLocation(
   reportOffersPayload: boolean = false,
   showAlert: boolean = false
 ): void {
-  const onlineOffersWithoutLocation = offers.filter(
+  const inPersonOffersWithoutLocation = offers.filter(
     (one) =>
-      one.publicPart.locationState === 'IN_PERSON' &&
+      one.publicPart.listingType !== 'OTHER' &&
+      (one.publicPart.locationState === 'IN_PERSON' ||
+        one.publicPart.deliveryMethod.includes('PICKUP')) &&
       one.publicPart.location.length === 0
   )
 
   if (showAlert)
     alert(
       `Found ${
-        onlineOffersWithoutLocation.length
+        inPersonOffersWithoutLocation.length
       } in person offers without location. ${
-        onlineOffersWithoutLocation.length > 0
+        inPersonOffersWithoutLocation.length > 0
           ? 'Reporting to sentry.'
           : 'Everything is cool! 👍'
       }`
     )
 
-  if (onlineOffersWithoutLocation.length > 0)
+  if (inPersonOffersWithoutLocation.length > 0)
     reportError('warn', new Error('Found some offers without location'), {
       onlineOffersWithoutLocation: reportOffersPayload
-        ? onlineOffersWithoutLocation
-        : onlineOffersWithoutLocation.map((one) => one.offerId),
+        ? inPersonOffersWithoutLocation
+        : inPersonOffersWithoutLocation.map((one) => one.offerId),
     })
 }
 

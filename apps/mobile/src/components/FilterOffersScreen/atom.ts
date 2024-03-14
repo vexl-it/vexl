@@ -2,6 +2,7 @@ import {type CurrencyCode} from '@vexl-next/domain/src/general/currency.brand'
 import {
   type BtcNetwork,
   type IntendedConnectionLevel,
+  type ListingType,
   type LocationState,
   type OfferLocation,
   type PaymentMethod,
@@ -19,6 +20,10 @@ import {
 import {type OffersFilter} from '../../state/marketplace/domain'
 import getValueFromSetStateActionOfAtom from '../../utils/atomUtils/getValueFromSetStateActionOfAtom'
 import {currencies} from '../../utils/localization/currency'
+
+export const listingTypeAtom = atom<ListingType | undefined>(
+  offersFilterInitialState.listingType
+)
 
 export const currencyAtom = atom<CurrencyCode | undefined>(
   offersFilterInitialState.currency

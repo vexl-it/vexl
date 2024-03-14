@@ -23,8 +23,8 @@ function BitcoinPriceChart(): JSX.Element {
 
   useFocusEffect(
     useCallback(() => {
-      void refreshBtcPrice(selectedCurrency)()
-    }, [refreshBtcPrice, selectedCurrency])
+      void refreshBtcPrice(selectedCurrencyAtom)()
+    }, [refreshBtcPrice])
   )
 
   return (
@@ -34,7 +34,7 @@ function BitcoinPriceChart(): JSX.Element {
         <Stack />
         <TouchableOpacity
           onPress={() => {
-            void refreshBtcPrice(selectedCurrency)()
+            void refreshBtcPrice(selectedCurrencyAtom)()
           }}
         >
           <XStack>

@@ -52,7 +52,8 @@ const OfferPublicPartToEncrypt = z.object({
   groupUuids: z.array(z.string()),
   listingType: z.string(),
   deliveryMethod: z.array(z.string()).optional(),
-  singlePrice: z.number().optional(),
+  singlePriceState: z.string().optional(),
+  singlePriceValue: z.number().optional(),
 })
 
 function offerPublicPartToJsonString(

@@ -103,6 +103,7 @@ export default function useBtcOfferContent(): Props[] {
         children: (
           <Location
             randomizeLocation
+            listingTypeAtom={listingTypeAtom}
             setOfferLocationActionAtom={setOfferLocationActionAtom}
             locationAtom={locationAtom}
             locationStateAtom={locationStateAtom}

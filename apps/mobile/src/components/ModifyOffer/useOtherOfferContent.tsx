@@ -2,37 +2,32 @@ import {useMolecule} from 'bunshi/dist/react'
 import {useMemo} from 'react'
 import {getTokens} from 'tamagui'
 import {useTranslation} from '../../utils/localization/I18nProvider'
-import DeliveryMethod from '../OfferForm/components/DeliveryMethod'
 import Description from '../OfferForm/components/Description'
-import Expiration from '../OfferForm/components/Expiration'
 import FriendLevel from '../OfferForm/components/FriendLevel'
+import Location from '../OfferForm/components/Location'
 import Network from '../OfferForm/components/Network'
 import Price from '../OfferForm/components/Price'
 import SpokenLanguages from '../OfferForm/components/SpokenLanguages'
 import {type Props} from '../Section'
-import deliveryMethodSvg from '../images/deliveryMethodSvg'
 import friendLevelSvg from '../images/friendLevelSvg'
+import locationSvg from '../images/locationSvg'
 import networkSvg from '../images/networkSvg'
 import spokenLanguagesSvg from '../images/spokenLanguagesSvg'
 import {offerFormMolecule} from './atoms/offerFormStateAtoms'
 import descriptionSvg from './images/descriptionSvg'
 
-export default function useProductOfferContent(): Props[] {
+export default function useOtherOfferContent(): Props[] {
   const {t} = useTranslation()
   const tokens = getTokens()
   const {
     btcNetworkAtom,
     currencyAtom,
-    deliveryMethodAtom,
     offerTypeAtom,
     listingTypeAtom,
     offerDescriptionAtom,
     intendedConnectionLevelAtom,
-    locationAtom,
     singlePriceValueAtom,
     singlePriceStateAtom,
-    expirationDateAtom,
-    offerExpirationModalVisibleAtom,
     spokenLanguagesAtomsAtom,
     removeSpokenLanguageActionAtom,
     createIsThisLanguageSelectedAtom,
@@ -43,7 +38,10 @@ export default function useProductOfferContent(): Props[] {
     satsValueAtom,
     toggleCurrencyActionAtom,
     btcPriceForOfferWithCurrencyAtom,
-    changeDeliveryMethodActionAtom,
+    updateLocationStatePaymentMethodAtom,
+    setOfferLocationActionAtom,
+    locationAtom,
+    locationStateAtom,
   } = useMolecule(offerFormMolecule)
 
   return useMemo(
@@ -59,6 +57,22 @@ export default function useProductOfferContent(): Props[] {
           />
         ),
         mandatory: true,
+      },
+      {
+        title: t('offerForm.location.location'),
+        image: locationSvg,
+        children: (
+          <Location
+            listingTypeAtom={listingTypeAtom}
+            randomizeLocation
+            setOfferLocationActionAtom={setOfferLocationActionAtom}
+            locationAtom={locationAtom}
+            locationStateAtom={locationStateAtom}
+            updateLocationStatePaymentMethodAtom={
+              updateLocationStatePaymentMethodAtom
+            }
+          />
+        ),
       },
       {
         customSection: true,
@@ -81,29 +95,6 @@ export default function useProductOfferContent(): Props[] {
         ),
       },
       {
-        customSection: true,
-        children: (
-          <Expiration
-            key={t('offerForm.expiration.expiration')}
-            expirationDateAtom={expirationDateAtom}
-            offerExpirationModalVisibleAtom={offerExpirationModalVisibleAtom}
-          />
-        ),
-      },
-      {
-        title: t('offerForm.deliveryMethod'),
-        image: deliveryMethodSvg,
-        children: (
-          <DeliveryMethod
-            changeDeliveryMethodActionAtom={changeDeliveryMethodActionAtom}
-            deliveryMethodAtom={deliveryMethodAtom}
-            locationAtom={locationAtom}
-            randomizeLocation
-          />
-        ),
-        mandatory: true,
-      },
-      {
         title: t('offerForm.spokenLanguages.language'),
         image: spokenLanguagesSvg,
         imageFill: tokens.color.white.val,
@@ -120,13 +111,11 @@ export default function useProductOfferContent(): Props[] {
             }
           />
         ),
-        mandatory: true,
       },
       {
         title: t('offerForm.network.network'),
         image: networkSvg,
         children: <Network btcNetworkAtom={btcNetworkAtom} />,
-        mandatory: true,
       },
       {
         title: t('offerForm.friendLevel.friendLevel'),
@@ -143,6 +132,10 @@ export default function useProductOfferContent(): Props[] {
       offerDescriptionAtom,
       listingTypeAtom,
       offerTypeAtom,
+      setOfferLocationActionAtom,
+      locationAtom,
+      locationStateAtom,
+      updateLocationStatePaymentMethodAtom,
       btcPriceForOfferWithCurrencyAtom,
       calculateSatsValueOnFiatValueChangeActionAtom,
       calculateFiatValueOnSatsValueChangeActionAtom,
@@ -151,11 +144,6 @@ export default function useProductOfferContent(): Props[] {
       singlePriceValueAtom,
       singlePriceStateAtom,
       toggleCurrencyActionAtom,
-      expirationDateAtom,
-      offerExpirationModalVisibleAtom,
-      changeDeliveryMethodActionAtom,
-      deliveryMethodAtom,
-      locationAtom,
       tokens.color.white.val,
       createIsThisLanguageSelectedAtom,
       spokenLanguagesAtomsAtom,

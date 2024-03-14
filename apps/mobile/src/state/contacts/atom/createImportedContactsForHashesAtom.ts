@@ -13,7 +13,7 @@ export default function createImportedContactsForHashesAtom(
       contacts.filter((contact) =>
         hashes.includes(contact.computedValues.hash)
       ),
-      (o) => `${o.info.name}${o.computedValues.hash}`
+      (o) => `${o.computedValues.hash}`
     )
   })
 }

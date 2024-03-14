@@ -3,6 +3,7 @@ import {atom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {z} from 'zod'
 import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
+import {deduplicateBy} from '../../../utils/deduplicate'
 import notEmpty from '../../../utils/notEmpty'
 import {StoredContact, type StoredContactWithComputedValues} from '../domain'
 
@@ -49,9 +50,12 @@ export const areThereNewContactsAtom = atom((get) => {
 
 export const normalizedContactsAtom = atom(
   (get): StoredContactWithComputedValues[] =>
-    get(storedContactsAtom).filter(
-      (contact): contact is StoredContactWithComputedValues =>
-        !!contact.computedValues
+    deduplicateBy(
+      get(storedContactsAtom).filter(
+        (contact): contact is StoredContactWithComputedValues =>
+          !!contact.computedValues
+      ),
+      (one) => one.computedValues.normalizedNumber
     )
 )
 

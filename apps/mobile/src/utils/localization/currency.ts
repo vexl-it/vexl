@@ -314,6 +314,24 @@ export const currencies = {
     maxAmount: 200000,
     countryCode: [27],
   }),
+  'COP': CurrencyInfo.parse({
+    code: 'COP',
+    flag: '🇨🇴',
+    name: 'Colombian Peso',
+    symbol: 'Col$',
+    position: 'before',
+    maxAmount: 40_000_000,
+    countryCode: [57],
+  }),
+  'TZS': CurrencyInfo.parse({
+    code: 'TZS',
+    flag: '🇹🇿',
+    name: 'Tanzanian Shilling',
+    symbol: 'TZS',
+    position: 'after',
+    maxAmount: 2_000_000,
+    countryCode: [255],
+  }),
 } as const
 
 export function getCurrencyLeftText(

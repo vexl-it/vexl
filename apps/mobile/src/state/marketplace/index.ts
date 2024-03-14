@@ -171,7 +171,7 @@ export const triggerOffersRefreshAtom = atom(null, async (get, set) => {
           A.filter(
             (one) =>
               // Do NOT remove offers that are owned by current user.
-              // They can be reuploaded once #106 is implemented.
+              // They can be re-uploaded once #106 is implemented.
               !!one.ownershipInfo ||
               !removedOffers.includes(one.offerInfo.offerId)
           ),

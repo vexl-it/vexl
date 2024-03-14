@@ -36,8 +36,9 @@ function OnlineOrInPersonTrade(): JSX.Element {
         <Text als="center" fos={14} ff="$body400" ml="$2" col="$greyOnWhite">
           {t('tradeChecklist.youCanPickWhatYouFill')}
         </Text>
-        {offerForTradeChecklist?.offerInfo.publicPart.locationState ===
-        'ONLINE' ? (
+        {offerForTradeChecklist?.offerInfo.publicPart.locationState.includes(
+          'ONLINE'
+        ) ? (
           <>
             <Stack mb="$4">
               <CalculateAmountCell />

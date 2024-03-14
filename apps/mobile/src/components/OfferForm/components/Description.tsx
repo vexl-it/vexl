@@ -14,8 +14,7 @@ import {Stack, Text, YStack} from 'tamagui'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import Input from '../../Input'
 
-const MAX_INPUT_LENGTH_BTC_LISTING = 140
-const MAX_INPUT_LENGTH_PRODUCT_OTHER_LISTING = 500
+const MAX_INPUT_LENGTH = 500
 
 interface Props {
   listingTypeAtom: PrimitiveAtom<ListingType | undefined>
@@ -54,11 +53,7 @@ function Description({
       </Text>
       <Stack mt="$4" br="$4" p="$4" bc="$grey">
         <Input
-          maxLength={
-            listingType === 'BITCOIN'
-              ? MAX_INPUT_LENGTH_BTC_LISTING
-              : MAX_INPUT_LENGTH_PRODUCT_OTHER_LISTING
-          }
+          maxLength={MAX_INPUT_LENGTH}
           multiline
           textAlignVertical="top"
           numberOfLines={5}
@@ -67,13 +62,11 @@ function Description({
           onChangeText={setOfferDescription}
         />
         <Stack ai="flex-end">
-          <Text col="$white" fos={16} ff="$body600">{`${
-            offerDescription.length
-          }/${
-            listingType === 'BITCOIN'
-              ? MAX_INPUT_LENGTH_BTC_LISTING
-              : MAX_INPUT_LENGTH_PRODUCT_OTHER_LISTING
-          }`}</Text>
+          <Text
+            col="$white"
+            fos={16}
+            ff="$body600"
+          >{`${offerDescription.length}/${MAX_INPUT_LENGTH}`}</Text>
         </Stack>
       </Stack>
     </YStack>

@@ -11,12 +11,12 @@ import {
   type OfferType,
   type OneOfferInState,
   type PaymentMethod,
+  type SinglePriceState,
   type SpokenLanguage,
 } from '@vexl-next/domain/src/general/offers'
 import {molecule} from 'bunshi/dist/react'
 import {
   atom,
-  getDefaultStore,
   type PrimitiveAtom,
   type SetStateAction,
   type WritableAtom,
@@ -32,7 +32,6 @@ import {Uuid, generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {calculateViewportRadius} from '@vexl-next/domain/src/utility/geoCoordinates'
 import {generateKeyPair} from '@vexl-next/resources-utils/src/utils/crypto'
 import {type LocationSuggestion} from '@vexl-next/rest-api/src/services/location/contracts'
-import {parsePhoneNumber} from 'awesome-phonenumber'
 import * as E from 'fp-ts/Either'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
@@ -42,14 +41,23 @@ import {splitAtom} from 'jotai/utils'
 import {Alert} from 'react-native'
 import {createInboxAtom} from '../../../state/chat/hooks/useCreateInbox'
 import {
+  SATOSHIS_IN_BTC,
+  createBtcPriceForCurrencyAtom,
+  refreshBtcPriceActionAtom,
+} from '../../../state/currentBtcPriceAtoms'
+import {
   createOfferAtom,
   deleteOffersActionAtom,
   updateOfferAtom,
 } from '../../../state/marketplace'
 import {singleOfferAtom} from '../../../state/marketplace/atoms/offersState'
-import {sessionDataOrDummyAtom} from '../../../state/session'
 import getValueFromSetStateActionOfAtom from '../../../utils/atomUtils/getValueFromSetStateActionOfAtom'
-import {translationAtom} from '../../../utils/localization/I18nProvider'
+import calculatePriceInSats from '../../../utils/calculatePriceInSats'
+import getDefaultCurrency from '../../../utils/getDefaultCurrency'
+import {
+  translationAtom,
+  type TFunction,
+} from '../../../utils/localization/I18nProvider'
 import {currencies} from '../../../utils/localization/currency'
 import getDefaultSpokenLanguage from '../../../utils/localization/getDefaultSpokenLanguage'
 import notEmpty from '../../../utils/notEmpty'
@@ -77,38 +85,133 @@ function getAtomWithNullableValueHandling<T, S>(
   )
 }
 
+function checkConditionsToCreateOfferAreMetAndAlertIfNot({
+  offerForm,
+  t,
+}: {
+  offerForm: OfferPublicPart
+  t: TFunction
+}): boolean {
+  const {
+    amountBottomLimit,
+    currency,
+    listingType,
+    singlePriceState,
+    locationState,
+    location,
+    offerDescription,
+  } = offerForm
+
+  if (
+    listingType !== 'BITCOIN' &&
+    singlePriceState === 'HAS_COST' &&
+    amountBottomLimit === 0
+  ) {
+    Alert.alert(t('offerForm.errorPriceNotFilled'))
+    return false
+  }
+
+  if (listingType === 'PRODUCT' && locationState.length === 0) {
+    Alert.alert(t('offerForm.errorDeliveryMethodNotFilled'))
+    return false
+  }
+
+  if (
+    listingType === 'PRODUCT' &&
+    locationState.includes('IN_PERSON') &&
+    location.length === 0
+  ) {
+    Alert.alert(t('offerForm.errorPickupLocationNotFilled'))
+    return false
+  }
+
+  if (
+    listingType === 'BITCOIN' &&
+    locationState.includes('IN_PERSON') &&
+    location.length === 0
+  ) {
+    Alert.alert(t('offerForm.errorLocationNotFilled'))
+    return false
+  }
+
+  if (offerDescription.trim() === '') {
+    Alert.alert(t('offerForm.errorDescriptionNotFilled'))
+    return false
+  }
+
+  if (
+    currency &&
+    listingType !== 'BITCOIN' &&
+    singlePriceState === 'HAS_COST' &&
+    amountBottomLimit > currencies[currency].maxAmount
+  ) {
+    Alert.alert(
+      t('offerForm.errorExceededLimits', {
+        limit: currencies[currency].maxAmount,
+        currency,
+      })
+    )
+    return false
+  }
+
+  return true
+}
+
+function formatOfferPublicPart(publicPart: OfferPublicPart): OfferPublicPart {
+  const {
+    amountBottomLimit,
+    amountTopLimit,
+    listingType,
+    location,
+    locationState,
+    offerDescription,
+    paymentMethod,
+    ...restOfPublicPart
+  } = publicPart
+
+  return {
+    ...restOfPublicPart,
+    listingType,
+    amountBottomLimit,
+    amountTopLimit:
+      listingType !== 'BITCOIN' ? amountBottomLimit : amountTopLimit,
+    offerDescription: offerDescription.trim(),
+    locationState:
+      listingType === 'OTHER' && location.length === 0 ? [] : locationState,
+    // TODO: remove old vexl apps compatibility fix
+    // without it old vexl app displays empty location in preview
+    paymentMethod:
+      listingType === 'OTHER' && location.length === 0
+        ? ['REVOLUT', 'BANK']
+        : paymentMethod,
+    location,
+  }
+}
+
 export function createOfferDummyPublicPart(): OfferPublicPart {
-  const userPhoneNumber = getDefaultStore().get(
-    sessionDataOrDummyAtom
-  ).phoneNumber
-  const parsedPhoneNumber = parsePhoneNumber(userPhoneNumber)
-  const defaultCurrency = Object.values(currencies).find((currency) =>
-    parsedPhoneNumber.countryCode
-      ? currency.countryCode.includes(parsedPhoneNumber.countryCode)
-      : currencies.USD
-  )
+  const defaultCurrency = getDefaultCurrency()
 
   return {
     offerPublicKey: PublicKeyPemBase64.parse('offerPublicKey'),
     location: [],
     offerDescription: '',
     amountBottomLimit: 0,
-    amountTopLimit: defaultCurrency?.maxAmount ?? currencies.USD.maxAmount,
+    amountTopLimit: defaultCurrency.maxAmount ?? currencies.USD.maxAmount,
     feeState: 'WITHOUT_FEE',
     feeAmount: 0,
-    locationState: 'IN_PERSON',
+    locationState: ['IN_PERSON'],
     paymentMethod: ['CASH'],
     btcNetwork: ['ON_CHAIN'],
-    currency: defaultCurrency?.code ?? currencies.USD.code,
+    currency: defaultCurrency.code ?? currencies.USD.code,
     offerType: 'SELL',
     spokenLanguages: getDefaultSpokenLanguage(),
     activePriceState: 'NONE',
     activePriceValue: 0,
-    activePriceCurrency: defaultCurrency?.code ?? currencies.USD.code,
+    activePriceCurrency: defaultCurrency.code ?? currencies.USD.code,
     active: true,
     groupUuids: [],
     listingType: 'BITCOIN',
-    deliveryMethod: [],
+    singlePriceState: 'HAS_COST',
   }
 }
 
@@ -153,14 +256,12 @@ export const offerFormMolecule = molecule(() => {
   const nullablePaymentMethodAtom = atom<PaymentMethod[] | undefined>(
     dummyOffer.offerInfo.publicPart.paymentMethod
   )
-  const nullableLocationStateAtom = atom<LocationState | undefined>(
-    dummyOffer.offerInfo.publicPart.locationState
-  )
   const nullableLocationAtom = atom<OfferLocation[] | undefined>(
     dummyOffer.offerInfo.publicPart.location
   )
-
-  const nullableSinglePriceAtom = atom<number | undefined>(undefined)
+  const nullableSinglePriceStateAtom = atom<SinglePriceState | undefined>(
+    dummyOffer.offerInfo.publicPart.singlePriceState
+  )
 
   const showBuySellFieldAtom = atom<boolean>(
     (get) => get(nullableListingTypeAtom) !== undefined
@@ -207,24 +308,34 @@ export const offerFormMolecule = molecule(() => {
     return true
   })
 
-  const updateLocationStatePaymentMethodAtom = atom<
+  const updateLocationStateActionAtom = atom(
     null,
-    [
-      {
-        locationState: LocationState
-      },
-    ],
-    boolean
-  >(null, (get, set, params) => {
-    const {locationState} = params
-    set(locationStateAtom, locationState)
-    set(
-      paymentMethodAtom,
-      locationState === 'ONLINE' ? ['BANK', 'REVOLUT'] : ['CASH']
-    )
-    set(locationAtom, [])
-    return true
-  })
+    (get, set, locationState: LocationState) => {
+      const listingType = get(listingTypeAtom)
+
+      if (listingType === 'BITCOIN') {
+        set(locationStateAtom, [locationState])
+      } else {
+        set(locationStateAtom, (prev) =>
+          prev.includes(locationState)
+            ? prev.filter((state) => state !== locationState)
+            : [...prev, locationState]
+        )
+      }
+    }
+  )
+
+  const updateLocationStateAndPaymentMethodAtom = atom(
+    null,
+    (get, set, locationState: LocationState) => {
+      set(updateLocationStateActionAtom, locationState)
+      set(
+        paymentMethodAtom,
+        locationState === 'ONLINE' ? ['BANK', 'REVOLUT'] : ['CASH']
+      )
+      set(locationAtom, [])
+    }
+  )
 
   const listingTypeAtom = getAtomWithNullableValueHandling(
     nullableListingTypeAtom,
@@ -256,10 +367,8 @@ export const offerFormMolecule = molecule(() => {
     optic.prop('feeState')
   )
 
-  const locationStateAtom = getAtomWithNullableValueHandling(
-    nullableLocationStateAtom,
-    offerFormAtom,
-    'locationState'
+  const locationStateAtom = focusAtom(offerFormAtom, (optic) =>
+    optic.prop('locationState')
   )
 
   const locationAtom = getAtomWithNullableValueHandling(
@@ -288,14 +397,10 @@ export const offerFormMolecule = molecule(() => {
     optic.prop('offerDescription')
   )
 
-  const singlePriceAtom = getAtomWithNullableValueHandling(
-    nullableSinglePriceAtom,
+  const singlePriceStateAtom = getAtomWithNullableValueHandling(
+    nullableSinglePriceStateAtom,
     offerFormAtom,
-    'singlePrice'
-  )
-
-  const deliveryMethodAtom = focusAtom(offerFormAtom, (optic) =>
-    optic.prop('deliveryMethod')
+    'singlePriceState'
   )
 
   const offerActiveAtom = focusAtom(offerFormAtom, (optic) =>
@@ -315,6 +420,8 @@ export const offerFormMolecule = molecule(() => {
   const selectedSpokenLanguagesAtom = atom<SpokenLanguage[]>(
     getDefaultSpokenLanguage()
   )
+
+  const satsValueAtom = atom<number>(0)
 
   const removeSpokenLanguageActionAtom = atom(
     null,
@@ -407,33 +514,26 @@ export const offerFormMolecule = molecule(() => {
   const createOfferActionAtom = atom(null, (get, set): T.Task<boolean> => {
     const {t} = get(translationAtom)
 
-    const {
-      location,
-      locationState,
-      offerDescription,
-      offerPublicKey,
-      ...restOfPublicPart
-    } = get(offerFormAtom)
+    if (
+      !checkConditionsToCreateOfferAreMetAndAlertIfNot({
+        offerForm: get(offerFormAtom),
+        t,
+      })
+    ) {
+      return T.of(false)
+    }
 
     const intendedConnectionLevel = get(intendedConnectionLevelAtom)
-    const belowProgresLeft = get(modifyOfferLoaderTitleAtom)
-
-    if (locationState === 'IN_PERSON' && location.length === 0) {
-      Alert.alert(t('offerForm.errorLocationNotFilled'))
-      return T.of(false)
-    }
-
-    if (offerDescription.trim() === '') {
-      Alert.alert(t('offerForm.errorDescriptionNotFilled'))
-      return T.of(false)
-    }
+    const belowProgressLeft = get(modifyOfferLoaderTitleAtom)
+    const payloadPublic = formatOfferPublicPart(get(offerFormAtom))
 
     set(progressModal.show, {
       title: t('offerForm.offerEncryption.encryptingYourOffer'),
-      belowProgressLeft: belowProgresLeft.loadingText,
+      belowProgressLeft: belowProgressLeft.loadingText,
       bottomText: t('offerForm.offerEncryption.dontShutDownTheApp'),
       indicateProgress: {type: 'intermediate'},
     })
+
     return pipe(
       generateKeyPair(),
       TE.fromEither,
@@ -441,11 +541,8 @@ export const offerFormMolecule = molecule(() => {
       TE.bindW('createdOffer', ({key}) =>
         set(createOfferAtom, {
           payloadPublic: {
+            ...payloadPublic,
             offerPublicKey: key.publicKeyPemBase64,
-            location,
-            locationState,
-            offerDescription: offerDescription.trim(),
-            ...restOfPublicPart,
           },
           intendedConnectionLevel: intendedConnectionLevel ?? 'FIRST',
           onProgress: (progress) => {
@@ -453,7 +550,7 @@ export const offerFormMolecule = molecule(() => {
               progress,
               textData: {
                 title: t('offerForm.offerEncryption.encryptingYourOffer'),
-                belowProgressLeft: belowProgresLeft.loadingText,
+                belowProgressLeft: belowProgressLeft.loadingText,
                 bottomText: t('offerForm.offerEncryption.dontShutDownTheApp'),
               },
             })
@@ -488,7 +585,7 @@ export const offerFormMolecule = molecule(() => {
                 bottomText: t(
                   'offerForm.offerEncryption.yourFriendsAndFriendsOfFriends'
                 ),
-                belowProgressLeft: belowProgresLeft.doneText,
+                belowProgressLeft: belowProgressLeft.doneText,
                 belowProgressRight: t('progressBar.DONE'),
                 indicateProgress: {type: 'progress', percentage: 100},
               },
@@ -638,20 +735,19 @@ export const offerFormMolecule = molecule(() => {
     const {t} = get(translationAtom)
     const offer = get(offerAtom)
 
-    const {locationState, location, offerDescription, ...restOfPublicPart} =
-      get(offerFormAtom)
     const intendedConnectionLevel = get(intendedConnectionLevelAtom)
     const belowProgressLeft = get(modifyOfferLoaderTitleAtom)
 
-    if (locationState === 'IN_PERSON' && location.length === 0) {
-      Alert.alert(t('offerForm.errorLocationNotFilled'))
+    if (
+      !checkConditionsToCreateOfferAreMetAndAlertIfNot({
+        offerForm: get(offerFormAtom),
+        t,
+      })
+    ) {
       return T.of(false)
     }
 
-    if (offerDescription.trim() === '') {
-      Alert.alert(t('offerForm.errorDescriptionNotFilled'))
-      return T.of(false)
-    }
+    const payloadPublic = formatOfferPublicPart(get(offerFormAtom))
 
     set(progressModal.show, {
       title: t('editOffer.editingYourOffer'),
@@ -662,12 +758,7 @@ export const offerFormMolecule = molecule(() => {
 
     return pipe(
       set(updateOfferAtom, {
-        payloadPublic: {
-          ...restOfPublicPart,
-          location,
-          locationState,
-          offerDescription: offerDescription.trim(),
-        },
+        payloadPublic,
         adminId: offer.ownershipInfo?.adminId ?? ('' as OfferAdminId),
         symmetricKey: offer.offerInfo.privatePart.symmetricKey,
         intendedConnectionLevel: intendedConnectionLevel ?? 'FIRST',
@@ -709,25 +800,30 @@ export const offerFormMolecule = molecule(() => {
     if (offer) {
       const offerPublicPart = offer.offerInfo.publicPart
 
+      set(
+        calculateSatsValueOnFiatValueChangeActionAtom,
+        String(offer.offerInfo.publicPart.amountTopLimit)
+      )
+
       set(offerAtom, offer)
-      set(offerTypeAtom, offer.offerInfo.publicPart.offerType)
-      set(nullableListingTypeAtom, offer.offerInfo.publicPart.listingType)
+      set(offerTypeAtom, offerPublicPart.offerType)
+      set(listingTypeAtom, offerPublicPart.listingType ?? 'BITCOIN')
       set(nullableOfferTypeAtom, offerPublicPart.offerType)
       set(nullableCurrencyAtom, offerPublicPart.currency)
       set(nullableAmountTopLimitAtom, offerPublicPart.amountTopLimit)
       set(nullableAmountBottomLimitAtom, offerPublicPart.amountBottomLimit)
-      set(nullableSinglePriceAtom, offerPublicPart.singlePrice)
-      set(deliveryMethodAtom, offerPublicPart.deliveryMethod)
       set(nullableBtcNetworkAtom, offerPublicPart.btcNetwork)
       set(nullablePaymentMethodAtom, offerPublicPart.paymentMethod)
-      set(nullableLocationStateAtom, offerPublicPart.locationState)
       set(nullableLocationAtom, offerPublicPart.location)
+      set(nullableSinglePriceStateAtom, offerPublicPart.singlePriceState)
     }
   })
 
   const resetOfferFormActionAtom = atom(null, (get, set) => {
+    // we want to reset whole offer form except of chosen listing type
     set(offerAtom, dummyOffer)
     set(nullableOfferTypeAtom, undefined)
+    set(nullableListingTypeAtom, dummyOffer.offerInfo.publicPart.listingType)
     set(nullableCurrencyAtom, dummyOffer.offerInfo.publicPart.currency)
     set(
       nullableAmountTopLimitAtom,
@@ -742,13 +838,66 @@ export const offerFormMolecule = molecule(() => {
       nullablePaymentMethodAtom,
       dummyOffer.offerInfo.publicPart.paymentMethod
     )
-    set(
-      nullableLocationStateAtom,
-      dummyOffer.offerInfo.publicPart.locationState
-    )
     set(nullableLocationAtom, dummyOffer.offerInfo.publicPart.location)
-    set(nullableSinglePriceAtom, dummyOffer.offerInfo.publicPart.singlePrice)
   })
+
+  const btcPriceForOfferWithCurrencyAtom =
+    createBtcPriceForCurrencyAtom(currencyAtom)
+
+  const calculateSatsValueOnFiatValueChangeActionAtom = atom(
+    null,
+    (get, set, priceString: string) => {
+      if (!priceString || isNaN(Number(priceString))) {
+        set(satsValueAtom, 0)
+        set(amountBottomLimitAtom, 0)
+        return
+      }
+
+      const priceNumber = Number(priceString)
+      const currentBtcPrice = get(btcPriceForOfferWithCurrencyAtom)?.btcPrice
+
+      set(amountBottomLimitAtom, priceNumber)
+
+      if (currentBtcPrice) {
+        set(
+          satsValueAtom,
+          calculatePriceInSats({price: priceNumber, currentBtcPrice}) ?? 0
+        )
+      }
+    }
+  )
+
+  const calculateFiatValueOnSatsValueChangeActionAtom = atom(
+    null,
+    (get, set, satsString: string) => {
+      if (!satsString || isNaN(Number(satsString))) {
+        set(amountBottomLimitAtom, 0)
+        set(satsValueAtom, 0)
+        return
+      }
+
+      const satsNumber = Number(satsString)
+      const currentBtcPrice = get(btcPriceForOfferWithCurrencyAtom)?.btcPrice
+
+      set(satsValueAtom, satsNumber)
+
+      if (currentBtcPrice) {
+        set(
+          amountBottomLimitAtom,
+          Math.round(currentBtcPrice * (satsNumber / SATOSHIS_IN_BTC))
+        )
+      }
+    }
+  )
+
+  const changePriceCurrencyActionAtom = atom(
+    null,
+    (get, set, currencyCode: CurrencyCode) => {
+      set(currencyAtom, currencyCode)
+      set(updateCurrencyLimitsAtom, {currency: currencyCode})
+      void set(refreshBtcPriceActionAtom, currencyCode)()
+    }
+  )
 
   return {
     offerAtom,
@@ -775,11 +924,10 @@ export const offerFormMolecule = molecule(() => {
     btcNetworkAtom,
     paymentMethodAtom,
     offerDescriptionAtom,
-    singlePriceAtom,
-    deliveryMethodAtom,
+    singlePriceStateAtom,
     offerActiveAtom,
     updateCurrencyLimitsAtom,
-    updateLocationStatePaymentMethodAtom,
+    updateLocationStateAndPaymentMethodAtom,
     resetOfferFormActionAtom,
     setOfferLocationActionAtom,
     offerTypeOrDummyValueAtom,
@@ -791,5 +939,11 @@ export const offerFormMolecule = molecule(() => {
     resetSelectedSpokenLanguagesActionAtom,
     saveSelectedSpokenLanguagesActionAtom,
     setOfferFormActionAtom,
+    satsValueAtom,
+    btcPriceForOfferWithCurrencyAtom,
+    calculateSatsValueOnFiatValueChangeActionAtom,
+    calculateFiatValueOnSatsValueChangeActionAtom,
+    changePriceCurrencyActionAtom,
+    updateLocationStateActionAtom,
   }
 })

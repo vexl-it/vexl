@@ -44,7 +44,8 @@ function VexlbotNextActionSuggestion(): JSX.Element | null {
   const identityRevealStatus = useAtomValue(identityRevealStatusAtom)
   const contactRevealStatus = useAtomValue(contactRevealStatusAtom)
 
-  if (offerForChat?.offerInfo.publicPart.locationState === 'ONLINE') return null
+  if (offerForChat?.offerInfo.publicPart.locationState.includes('ONLINE'))
+    return null
 
   if (identityRevealStatus === 'iAsked' || identityRevealStatus === 'theyAsked')
     return null

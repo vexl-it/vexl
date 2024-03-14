@@ -2,6 +2,7 @@ import {type CurrencyCode} from '@vexl-next/domain/src/general/currency.brand'
 import {
   type BtcNetwork,
   type IntendedConnectionLevel,
+  type ListingType,
   type LocationState,
   type OfferLocation,
   type PaymentMethod,
@@ -20,6 +21,10 @@ import {type OffersFilter} from '../../state/marketplace/domain'
 import getValueFromSetStateActionOfAtom from '../../utils/atomUtils/getValueFromSetStateActionOfAtom'
 import {currencies} from '../../utils/localization/currency'
 
+export const listingTypeAtom = atom<ListingType | undefined>(
+  offersFilterInitialState.listingType
+)
+
 export const currencyAtom = atom<CurrencyCode | undefined>(
   offersFilterInitialState.currency
 )
@@ -33,7 +38,7 @@ export const sortingAtom = atom<Sort | undefined>(undefined)
 
 export const intendedConnectionLevelAtom = atom<IntendedConnectionLevel>('ALL')
 
-export const locationStateAtom = atom<LocationState | undefined>(
+export const locationStateAtom = atom<LocationState[]>(
   offersFilterInitialState.locationState
 )
 
@@ -92,33 +97,29 @@ export const updateCurrencyLimitsAtom = atom<
   return true
 })
 
-export const updateLocationStatePaymentMethodAtom = atom<
+export const updateLocationStateAndPaymentMethodAtom = atom(
   null,
-  [
-    {
-      locationState: LocationState
-    },
-  ],
-  boolean
->(null, (get, set, params) => {
-  const {locationState} = params
-  const locationStateFromAtom = get(locationStateAtom)
+  (get, set, locationState: LocationState) => {
+    const locationStateFromAtom = get(locationStateAtom)
 
-  if (locationState === locationStateFromAtom) {
-    set(locationStateAtom, undefined)
-    set(paymentMethodAtom, undefined)
-    set(locationAtom, undefined)
-  } else {
-    set(locationStateAtom, locationState)
-    set(
-      paymentMethodAtom,
-      locationState === 'ONLINE' ? ['BANK', 'REVOLUT'] : ['CASH']
-    )
-    set(locationAtom, undefined)
+    if (locationStateFromAtom?.includes(locationState)) {
+      set(locationStateAtom, [])
+      set(paymentMethodAtom, undefined)
+      set(locationAtom, undefined)
+    } else {
+      set(locationStateAtom, (prev) =>
+        prev?.includes(locationState)
+          ? prev.filter((state) => state !== locationState)
+          : [...(prev ?? []), locationState]
+      )
+      set(
+        paymentMethodAtom,
+        locationState === 'ONLINE' ? ['BANK', 'REVOLUT'] : ['CASH']
+      )
+      set(locationAtom, undefined)
+    }
   }
-
-  return true
-})
+)
 
 export const selectedSpokenLanguagesAtom = atom<SpokenLanguage[]>([])
 

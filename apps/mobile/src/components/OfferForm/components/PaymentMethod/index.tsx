@@ -11,7 +11,7 @@ import infoSvg from '../../../images/infoSvg'
 import useContent from './useContent'
 
 interface Props {
-  locationStateAtom: PrimitiveAtom<LocationState | undefined>
+  locationStateAtom: PrimitiveAtom<LocationState[]>
   paymentMethodAtom: PrimitiveAtom<PaymentMethod[] | undefined>
 }
 
@@ -27,7 +27,7 @@ function PaymentMethodComponent({
 
   const onMethodCellPress = (methodType: PaymentMethod): void => {
     if (
-      locationState !== 'IN_PERSON' &&
+      !locationState?.includes('IN_PERSON') &&
       paymentMethod?.includes(methodType) &&
       paymentMethod.length > 1
     ) {
@@ -51,12 +51,16 @@ function PaymentMethodComponent({
     )
   }
 
-  if (locationState === 'IN_PERSON') {
-    const contentLocationState0 = content[locationState][0]
+  if (
+    locationState.includes('IN_PERSON') &&
+    locationState.length > 0 &&
+    locationState[0]
+  ) {
+    const contentLocationState0 = content[locationState[0]][0]
 
     return (
       <SelectableCell
-        key={content[locationState][0]?.type}
+        key={content[locationState[0]][0]?.type}
         fullWidth={false}
         selected={
           !contentLocationState0 ||

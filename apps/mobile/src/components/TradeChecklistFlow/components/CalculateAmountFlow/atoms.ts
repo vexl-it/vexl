@@ -8,6 +8,8 @@ import * as T from 'fp-ts/Task'
 import {pipe} from 'fp-ts/function'
 import {atom, type PrimitiveAtom} from 'jotai'
 import {
+  DECIMALS_FOR_BTC_VALUE,
+  SATOSHIS_IN_BTC,
   createBtcPriceForCurrencyAtom,
   refreshBtcPriceActionAtom,
 } from '../../../../state/currentBtcPriceAtoms'
@@ -21,9 +23,6 @@ import updatesToBeSentAtom, {
   addAmountActionAtom,
 } from '../../atoms/updatesToBeSentAtom'
 import {replaceNonDecimalCharsInInput} from '../../utils'
-
-export const SATOSHIS_IN_BTC = 100_000_000
-export const DECIMALS_FOR_BTC_VALUE = 8
 
 export const tradeBtcPriceAtom = atom<number>(0)
 export const tradePriceTypeDialogVisibleAtom = atom<boolean>(false)

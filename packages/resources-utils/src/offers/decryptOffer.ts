@@ -27,12 +27,17 @@ import {
   type ZodParseError,
 } from '../utils/parsing'
 
-const OfferLocationDepreciated = z.object({
+const OfferLocationDeprecated = z.object({
   longitude: z.coerce.number().pipe(Longitude),
   latitude: z.coerce.number().pipe(Latitude),
   city: z.string(),
 })
-type OfferLocationDepreciated = z.TypeOf<typeof OfferLocationDepreciated>
+type OfferLocationDeprecated = z.TypeOf<typeof OfferLocationDeprecated>
+
+const OfferLocationStateDeprecated = z.enum(['IN_PERSON', 'ONLINE'])
+type OfferLocationStateDeprecated = z.TypeOf<
+  typeof OfferLocationStateDeprecated
+>
 
 export interface ErrorDecryptingOffer
   extends BasicError<'ErrorDecryptingOffer'> {
@@ -67,7 +72,7 @@ function decryptedPayloadsToOffer({
 
 function decodeLocation(
   offerJson: any
-): E.Either<JsonParseError | ZodParseError<OfferLocationDepreciated>, unknown> {
+): E.Either<JsonParseError | ZodParseError<OfferLocationDeprecated>, unknown> {
   if (offerJson.locationV2)
     return E.right({...offerJson, location: offerJson.locationV2})
 
@@ -81,7 +86,7 @@ function decodeLocation(
           if (typeof oneLocationRaw === 'string') {
             return pipe(
               parseJson(oneLocationRaw),
-              E.chainW(safeParse(OfferLocationDepreciated)),
+              E.chainW(safeParse(OfferLocationDeprecated)),
               E.map((oneLocation) => {
                 return {
                   placeId: LocationPlaceId.parse(oneLocation.city),
@@ -101,6 +106,21 @@ function decodeLocation(
       )
     ),
     E.map((location) => ({...offerJson, location}))
+  )
+}
+
+function decodeLocationState(
+  offerJson: any
+): E.Either<ZodParseError<OfferLocationStateDeprecated>, unknown> {
+  if (offerJson.locationStateV2)
+    return E.right({...offerJson, locationState: offerJson.locationStateV2})
+
+  return pipe(
+    offerJson,
+    E.right,
+    E.map((one) => one.locationState ?? []),
+    E.chainW(safeParse(OfferLocationStateDeprecated)),
+    E.map((locationState) => ({...offerJson, locationState: [locationState]}))
   )
 }
 
@@ -144,6 +164,7 @@ export default function decryptOffer(
             active: stringToBoolean(one.active),
           })),
           TE.chainEitherKW(decodeLocation),
+          TE.chainEitherKW(decodeLocationState),
           TE.chainEitherKW(safeParse(OfferPublicPart))
         )
       }),

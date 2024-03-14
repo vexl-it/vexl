@@ -8,6 +8,7 @@ interface BaseSectionProps {
 
 interface CustomSectionProps extends BaseSectionProps {
   customSection: true
+  title: string
 }
 
 interface SectionProps extends BaseSectionProps {

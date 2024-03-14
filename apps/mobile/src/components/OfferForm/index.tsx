@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {Fragment} from 'react'
 import {ActivityIndicator} from 'react-native'
 import {getTokens, Stack} from 'tamagui'
 import ChunkView from '../ChunkView'
@@ -18,7 +18,7 @@ function OfferForm({content}: {content: Props[]}): JSX.Element {
     <ChunkView displayOnProgress={<LoaderComponent />}>
       {content.map((item) =>
         item.customSection ? (
-          item.children
+          <Fragment key={item.title}>{item.children}</Fragment>
         ) : (
           <Section
             key={item.title}

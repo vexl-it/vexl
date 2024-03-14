@@ -1,8 +1,8 @@
 import {
+  type ListingType,
   type LocationState,
   type OfferLocation,
 } from '@vexl-next/domain/src/general/offers'
-import {longitudeDeltaToKilometers} from '@vexl-next/domain/src/utility/geoCoordinates'
 import {type LocationSuggestion} from '@vexl-next/rest-api/src/services/location/contracts'
 import {
   useAtom,
@@ -12,14 +12,9 @@ import {
   type WritableAtom,
 } from 'jotai'
 import {useState} from 'react'
-import {TouchableOpacity, TouchableWithoutFeedback} from 'react-native'
-import {Stack, Text, XStack, YStack, getTokens} from 'tamagui'
-import {
-  getCurrentLocale,
-  useTranslation,
-} from '../../../../utils/localization/I18nProvider'
+import {Text, YStack} from 'tamagui'
+import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import Help from '../../../Help'
-import SvgImage from '../../../Image'
 import Info from '../../../Info'
 import {
   newLocationSessionId,
@@ -27,45 +22,43 @@ import {
 } from '../../../LocationSearch/molecule'
 import Tabs from '../../../Tabs'
 import anonymousCounterpartSvg from '../../../images/anonymousCounterpartSvg'
-import closeSvg from '../../../images/closeSvg'
-import magnifyingGlass from '../../../images/magnifyingGlass'
+import AddCityOrDistrict from '../AddCityOrDistrict'
+import LocationsList from '../LocationsList'
 import SelectLocationFlowModal from './components/SelectLocationFlowModal'
 import useContent from './useContent'
 
 interface Props {
+  listingTypeAtom: PrimitiveAtom<ListingType | undefined>
   setOfferLocationActionAtom: WritableAtom<
     null,
     [locationSuggestionAtom: LocationSuggestion],
     void
   >
   locationAtom: PrimitiveAtom<OfferLocation[] | undefined>
-  locationStateAtom: PrimitiveAtom<LocationState | undefined>
-  updateLocationStatePaymentMethodAtom: WritableAtom<
+  locationStateAtom: PrimitiveAtom<LocationState[]>
+  updateLocationStateAndPaymentMethodAtom: WritableAtom<
     null,
-    [
-      {
-        locationState: LocationState
-      },
-    ],
-    boolean
+    [locationState: LocationState],
+    void
   >
   randomizeLocation: boolean
 }
 
 function LocationComponent({
+  listingTypeAtom,
   locationAtom,
   locationStateAtom,
-  updateLocationStatePaymentMethodAtom,
+  updateLocationStateAndPaymentMethodAtom,
   randomizeLocation,
 }: Props): JSX.Element | null {
   const {t} = useTranslation()
-  const tokens = getTokens()
   const content = useContent()
 
+  const listingType = useAtomValue(listingTypeAtom)
   const [location, setLocation] = useAtom(locationAtom)
   const locationState = useAtomValue(locationStateAtom)
-  const updateLocationStatePaymentMethod = useSetAtom(
-    updateLocationStatePaymentMethodAtom
+  const updateLocationStateAndPaymentMethod = useSetAtom(
+    updateLocationStateAndPaymentMethodAtom
   )
   const [helpVisible, setHelpVisible] = useState<boolean>(false)
 
@@ -73,7 +66,7 @@ function LocationComponent({
     useState<LocationSessionId | null>(null)
 
   const onLocationStateChange = (locationState: LocationState): void => {
-    updateLocationStatePaymentMethod({locationState})
+    updateLocationStateAndPaymentMethod(locationState)
   }
 
   const onLocationRemove = (locationToRemove: OfferLocation): void => {
@@ -85,64 +78,29 @@ function LocationComponent({
 
   return (
     <YStack space="$2">
-      <Tabs
-        activeTab={locationState}
-        onTabPress={onLocationStateChange}
-        tabs={content}
-      />
-      {locationState === 'IN_PERSON' && (
+      {(!listingType || listingType === 'BITCOIN') && (
+        <Tabs
+          activeTab={locationState[0]}
+          onTabPress={onLocationStateChange}
+          tabs={content}
+        />
+      )}
+      {(locationState.includes('IN_PERSON') || listingType === 'OTHER') && (
         <YStack space="$2">
           {!!(!location || (location && location.length < 3)) && (
-            <TouchableWithoutFeedback
+            <AddCityOrDistrict
               onPress={() => {
                 setLocationSearchVisible(newLocationSessionId())
               }}
-            >
-              <XStack ai="center" p="$5" bc="$grey" br="$5">
-                <Stack h={24} w={24}>
-                  <SvgImage
-                    stroke={tokens.color.white.val}
-                    source={magnifyingGlass}
-                  />
-                </Stack>
-                <Text ml="$4" ff="$body600" fos={18} col="$greyOnBlack">
-                  {t('offerForm.location.addCityOrDistrict')}
-                </Text>
-              </XStack>
-            </TouchableWithoutFeedback>
+            />
           )}
-          {location?.map((loc) => (
-            <XStack
-              key={loc.latitude}
-              br="$5"
-              bc="$darkBrown"
-              p="$4"
-              ai="center"
-              jc="space-between"
-            >
-              <Text fos={18} color="$main">
-                {loc.address}
-                {' - '}
-                {t('map.locationSelect.radius', {
-                  radius: Intl.NumberFormat(getCurrentLocale()).format(
-                    Math.round(
-                      longitudeDeltaToKilometers(loc.radius, loc.latitude) * 10
-                    ) / 10
-                  ),
-                })}
-              </Text>
-              <TouchableOpacity
-                onPress={() => {
-                  onLocationRemove(loc)
-                }}
-              >
-                <SvgImage stroke={tokens.color.main.val} source={closeSvg} />
-              </TouchableOpacity>
-            </XStack>
-          ))}
+          <LocationsList
+            locations={location}
+            onLocationRemove={onLocationRemove}
+          />
         </YStack>
       )}
-      {locationState === 'ONLINE' && (
+      {listingType === 'BITCOIN' && locationState.includes('ONLINE') && (
         <Info
           actionButtonText={t('offerForm.location.checkItOut')}
           text={t('offerForm.location.meetingInPerson')}

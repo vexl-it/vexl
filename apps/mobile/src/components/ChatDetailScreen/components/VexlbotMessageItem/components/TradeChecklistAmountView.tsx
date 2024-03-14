@@ -4,6 +4,7 @@ import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue, useSetAtom} from 'jotai'
 import {useCallback, useMemo} from 'react'
 import {Stack, XStack, getTokens} from 'tamagui'
+import {SATOSHIS_IN_BTC} from '../../../../../state/currentBtcPriceAtoms'
 import * as amount from '../../../../../state/tradeChecklist/utils/amount'
 import {calculateBtcPricePercentageDifference} from '../../../../../state/tradeChecklist/utils/amount'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
@@ -14,7 +15,6 @@ import {
   addAmountActionAtom,
   submitTradeChecklistUpdatesActionAtom,
 } from '../../../../TradeChecklistFlow/atoms/updatesToBeSentAtom'
-import {SATOSHIS_IN_BTC} from '../../../../TradeChecklistFlow/components/CalculateAmountFlow/atoms'
 import {chatMolecule} from '../../../atoms'
 import copySvg from '../../../images/copySvg'
 import VexlbotBubble from './VexlbotBubble'

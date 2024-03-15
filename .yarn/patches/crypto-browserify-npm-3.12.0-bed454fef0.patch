@@ -1,0 +1,33 @@
+diff --git a/index.js b/index.js
+index b6d4d24e1e3350dc59b290d00dbe411a5a873fb0..92064f3f53b9ff75f7e0b40304ad850b6e92462e 100644
+--- a/index.js
++++ b/index.js
+@@ -17,6 +17,28 @@ exports.pbkdf2Sync = p.pbkdf2Sync
+ 
+ var aes = require('browserify-cipher')
+ 
++exports.getRandomValues = function (abv) {
++  var l = abv.length
++  while (l--) {
++    var bytes = exports.randomBytes(7)
++    var randomFloat = (bytes[0] % 32) / 32
++
++    for (var i = 0; i < bytes.length; i++) {
++      var byte = bytes[i]
++      randomFloat = (randomFloat + byte) / 256
++    }
++
++    abv[l] = Math.floor(randomFloat * 256)
++  }
++  return abv
++}
++
++exports.randomUUID = function () {
++  return '10000000-1000-4000-8000-100000000000'.replace(/[018]/g, function (c) {
++    return  (c ^ (exports.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))).toString(16)
++  })
++}
++
+ exports.Cipher = aes.Cipher
+ exports.createCipher = aes.createCipher
+ exports.Cipheriv = aes.Cipheriv

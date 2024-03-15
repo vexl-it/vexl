@@ -11,7 +11,7 @@ export function ecdsaSign({
   challenge: string
   privateKey: PrivateKeyHolder
 }): string {
-  const sign = crypto.createSign('SHA256')
+  const sign = crypto.createSign('sha256')
   sign.update(Buffer.from(challenge, 'utf8'))
   sign.end()
 

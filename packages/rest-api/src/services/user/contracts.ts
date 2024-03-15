@@ -60,7 +60,6 @@ export type InitPhoneNumberVerificationResponse = z.TypeOf<
 export const VerifyPhoneNumberRequest = z.object({
   id: VerificationId,
   code: z.string().min(1),
-  // TODO branded type for keys
   userPublicKey: PublicKeyPemBase64,
 })
 export type VerifyPhoneNumberRequest = z.TypeOf<typeof VerifyPhoneNumberRequest>

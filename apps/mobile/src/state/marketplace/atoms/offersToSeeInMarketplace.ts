@@ -8,22 +8,25 @@ import {offersAtom} from './offersState'
 
 export function alertAndReportOnlineOffersWithoutLocation(
   offers: OfferInfo[],
-  reportOffersPayload: boolean = false
+  reportOffersPayload: boolean = false,
+  showAlert: boolean = false
 ): void {
   const onlineOffersWithoutLocation = offers.filter(
     (one) =>
       one.publicPart.locationState === 'IN_PERSON' &&
       one.publicPart.location.length === 0
   )
-  alert(
-    `Found ${
-      onlineOffersWithoutLocation.length
-    } in person offers without location. ${
-      onlineOffersWithoutLocation.length > 0
-        ? 'Reporting to sentry.'
-        : 'Everything is cool! 👍'
-    }`
-  )
+
+  if (showAlert)
+    alert(
+      `Found ${
+        onlineOffersWithoutLocation.length
+      } in person offers without location. ${
+        onlineOffersWithoutLocation.length > 0
+          ? 'Reporting to sentry.'
+          : 'Everything is cool! 👍'
+      }`
+    )
 
   if (onlineOffersWithoutLocation.length > 0)
     reportError('warn', new Error('Found some offers without location'), {

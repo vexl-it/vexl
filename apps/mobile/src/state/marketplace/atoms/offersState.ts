@@ -17,7 +17,7 @@ import {OffersState} from '../domain'
 export const offersStateAtom = atomWithParsedMmkvStorage(
   'offers',
   {
-    lastUpdatedAt: MINIMAL_DATE,
+    lastUpdatedAt1: MINIMAL_DATE,
     offers: [] as OneOfferInState[],
   },
   OffersState
@@ -31,7 +31,7 @@ export const offersIdsAtom = focusAtom(offersAtom, (optic) =>
 )
 
 export const lastUpdatedAtAtom = focusAtom(offersStateAtom, (optic) =>
-  optic.prop('lastUpdatedAt')
+  optic.prop('lastUpdatedAt1')
 )
 
 export function singleOfferAtom(

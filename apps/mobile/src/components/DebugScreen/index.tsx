@@ -187,7 +187,7 @@ function DebugScreen(): JSX.Element {
               text="Clear offers state"
               onPress={() => {
                 store.set(offersStateAtom, {
-                  lastUpdatedAt: MINIMAL_DATE,
+                  lastUpdatedAt1: MINIMAL_DATE,
                   offers: [],
                 })
                 Alert.alert('Done')

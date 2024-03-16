@@ -10,7 +10,10 @@ import {
   Sort,
   SpokenLanguage,
 } from '@vexl-next/domain/src/general/offers'
-import {IsoDatetimeString} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
+import {
+  IsoDatetimeString,
+  MINIMAL_DATE,
+} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
 import {type BasicError} from '@vexl-next/domain/src/utility/errors'
 import {type ApiErrorFetchingOffers} from '@vexl-next/resources-utils/src/offers/getNewOffersAndDecrypt'
 import {z} from 'zod'
@@ -22,7 +25,7 @@ export type ApiErrorReportingOffer = BasicError<'ApiErrorReportingOffer'>
 export type ApiErrorDeletingOffer = BasicError<'ApiErrorDeletingOffer'>
 
 export const OffersState = z.object({
-  lastUpdatedAt: IsoDatetimeString,
+  lastUpdatedAt: IsoDatetimeString.catch(() => MINIMAL_DATE),
   offers: z.array(OneOfferInState),
 })
 export type OffersState = z.TypeOf<typeof OffersState>

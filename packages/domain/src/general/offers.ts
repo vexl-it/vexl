@@ -79,8 +79,8 @@ export const CommonFriend = z.object({
 export type CommonFriend = z.TypeOf<typeof CommonFriend>
 
 const OfferLocationDepreciated = z.object({
-  longitude: Longitude,
-  latitude: Latitude,
+  longitude: z.coerce.number().pipe(Longitude),
+  latitude: z.coerce.number().pipe(Latitude),
   city: z.string(),
 })
 

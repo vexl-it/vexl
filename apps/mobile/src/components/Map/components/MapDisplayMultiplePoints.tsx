@@ -11,7 +11,7 @@ import {
   type Atom,
   type WritableAtom,
 } from 'jotai'
-import {useCallback, useEffect, useRef} from 'react'
+import {Fragment, useCallback, useEffect, useRef} from 'react'
 import {Platform} from 'react-native'
 import MapView from 'react-native-map-clustering'
 import {
@@ -173,9 +173,8 @@ export default function MapDisplayMultiplePoints<T>({
         })}
         {focusedPoints.map((point) => {
           return (
-            <>
+            <Fragment key={point.id}>
               <Marker
-                key={point.id}
                 //  https://github.com/react-native-maps/react-native-maps/issues/4997
                 tracksViewChanges={Platform.OS === 'ios'}
                 image={markerImage}
@@ -190,7 +189,7 @@ export default function MapDisplayMultiplePoints<T>({
                 center={point}
                 radius={longitudeDeltaToMeters(point.radius, point.latitude)}
               ></Circle>
-            </>
+            </Fragment>
           )
         })}
       </MMapView>

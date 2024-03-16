@@ -7,7 +7,8 @@ import {type OfferInfo} from './../../../../../../packages/domain/src/general/of
 import {offersAtom} from './offersState'
 
 export function alertAndReportOnlineOffersWithoutLocation(
-  offers: OfferInfo[]
+  offers: OfferInfo[],
+  reportOffersPayload: boolean = false
 ): void {
   const onlineOffersWithoutLocation = offers.filter(
     (one) =>
@@ -26,7 +27,9 @@ export function alertAndReportOnlineOffersWithoutLocation(
 
   if (onlineOffersWithoutLocation.length > 0)
     reportError('warn', new Error('Found some offers without location'), {
-      onlineOffersWithoutLocation,
+      onlineOffersWithoutLocation: reportOffersPayload
+        ? onlineOffersWithoutLocation
+        : onlineOffersWithoutLocation.map((one) => one.offerId),
     })
 }
 

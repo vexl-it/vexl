@@ -53,7 +53,7 @@ export default function MarketplaceMap({
     <Stack
       w="100%"
       backgroundColor="black"
-      h={Math.min(Dimensions.get('window').height / 2, 400)}
+      h={Math.min(Dimensions.get('window').height / 3.25, 400)}
       marginBottom={-CONTAINER_WITH_TOP_BORDER_RADIUS_TOP_PADDING}
     >
       <MapDisplayMultiplePoints

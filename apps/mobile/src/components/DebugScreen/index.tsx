@@ -2,8 +2,11 @@ import Clipboard from '@react-native-clipboard/clipboard'
 import messaging from '@react-native-firebase/messaging'
 import {type Inbox} from '@vexl-next/domain/src/general/messaging'
 import {MINIMAL_DATE} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
+import getNewOffersAndDecrypt from '@vexl-next/resources-utils/src/offers/getNewOffersAndDecrypt'
 import * as T from 'fp-ts/Task'
+import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
+import {isLeft, isRight} from 'fp-ts/lib/Either'
 import {useAtomValue, useSetAtom, useStore} from 'jotai'
 import {Alert, ScrollView} from 'react-native'
 import {Spacer, Text, YStack} from 'tamagui'
@@ -18,7 +21,14 @@ import offerToConnectionsAtom, {
 import {storedContactsAtom} from '../../state/contacts/atom/contactsStore'
 import {triggerOffersRefreshAtom} from '../../state/marketplace'
 import {myOffersAtom} from '../../state/marketplace/atoms/myOffers'
-import {offersStateAtom} from '../../state/marketplace/atoms/offersState'
+import {
+  lastUpdatedAtAtom,
+  offersStateAtom,
+} from '../../state/marketplace/atoms/offersState'
+import {
+  alertAndReportOnlineOffersWithoutLocation,
+  reportOffersWithoutLocationActionAtom,
+} from '../../state/marketplace/atoms/offersToSeeInMarketplace'
 import {useSessionAssumeLoggedIn} from '../../state/session'
 import {
   commitHash,
@@ -166,6 +176,14 @@ function DebugScreen(): JSX.Element {
             <Button
               variant="primary"
               size="small"
+              text="Report offers without location"
+              onPress={() => {
+                store.set(reportOffersWithoutLocationActionAtom)
+              }}
+            />
+            <Button
+              variant="primary"
+              size="small"
               text="Clear offers state"
               onPress={() => {
                 store.set(offersStateAtom, {
@@ -173,6 +191,69 @@ function DebugScreen(): JSX.Element {
                   offers: [],
                 })
                 Alert.alert('Done')
+              }}
+            />
+            <Button
+              variant="primary"
+              size="small"
+              text="Test get all offers and alert number"
+              onPress={() => {
+                void pipe(
+                  getNewOffersAndDecrypt({
+                    keyPair: session.privateKey,
+                    modifiedAt: MINIMAL_DATE,
+                    offersApi: store.get(privateApiAtom).offer,
+                  }),
+                  TE.matchW(
+                    (error) => {
+                      Alert.alert('a', JSON.stringify(error, null, 2), [
+                        {text: 'ok'},
+                        {
+                          text: 'copy to clipboard',
+                          onPress: () => {
+                            Clipboard.setString(JSON.stringify(error, null, 2))
+                          },
+                        },
+                      ])
+                    },
+                    (result) => {
+                      const errors = result
+                        .filter(isLeft)
+                        .map((one) => one.left)
+                      const success = result
+                        .filter(isRight)
+                        .map((one) => one.right)
+                      Alert.alert(
+                        'success',
+                        `done got: ${success.length} success and ${errors.length} errors`,
+                        [
+                          {
+                            text: 'ok',
+                          },
+                          {
+                            text: 'Check and copy to clipboard',
+                            onPress: () => {
+                              alertAndReportOnlineOffersWithoutLocation(success)
+                            },
+                          },
+                        ]
+                      )
+                    }
+                  )
+                )()
+              }}
+            />
+            <Button
+              variant="primary"
+              size="small"
+              text="Print lastUpdatedAtAtom"
+              onPress={() => {
+                Alert.alert(
+                  'Last updated at',
+                  `inState: ${store.get(
+                    lastUpdatedAtAtom
+                  )}, minimalDate: ${MINIMAL_DATE}`
+                )
               }}
             />
             <Button

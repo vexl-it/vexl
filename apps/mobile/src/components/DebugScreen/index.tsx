@@ -235,6 +235,7 @@ function DebugScreen(): JSX.Element {
                             onPress: () => {
                               alertAndReportOnlineOffersWithoutLocation(
                                 success,
+                                true,
                                 true
                               )
                             },

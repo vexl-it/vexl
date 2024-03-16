@@ -206,7 +206,7 @@ function DebugScreen(): JSX.Element {
                   }),
                   TE.matchW(
                     (error) => {
-                      Alert.alert('a', JSON.stringify(error, null, 2), [
+                      Alert.alert('error', JSON.stringify(error, null, 2), [
                         {text: 'ok'},
                         {
                           text: 'copy to clipboard',
@@ -233,7 +233,10 @@ function DebugScreen(): JSX.Element {
                           {
                             text: 'Check and copy to clipboard',
                             onPress: () => {
-                              alertAndReportOnlineOffersWithoutLocation(success)
+                              alertAndReportOnlineOffersWithoutLocation(
+                                success,
+                                true
+                              )
                             },
                           },
                         ]

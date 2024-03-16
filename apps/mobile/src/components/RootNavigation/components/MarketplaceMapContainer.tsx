@@ -18,6 +18,7 @@ import {
   mapRegionAtom,
 } from '../../../state/marketplace/atoms/mapRegionAtom'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
+import useIsKeyboardShown from '../../../utils/useIsKeyboardShown'
 import Button from '../../Button'
 import IconButton from '../../IconButton'
 import Image from '../../Image'
@@ -60,12 +61,13 @@ function useShouldShowMap(): boolean {
   const navigationRoute = useNavigationFromMap()
   const marketplaceLayoutMode = useAtomValue(marketplaceLayoutModeAtom)
   const focusedOfferIsOffline = useAtomValue(focusedOfferIsOfflineAtom)
-  // const keyboardShown = useIsKeyboardShown()
+  const keyboardShown = useIsKeyboardShown()
 
   return (
     (navigationRoute === 'Marketplace' && marketplaceLayoutMode === 'map') ||
-    // (!keyboardShown &&
-    (navigationRoute === 'OfferDetail' && !focusedOfferIsOffline)
+    (!keyboardShown &&
+      navigationRoute === 'OfferDetail' &&
+      !focusedOfferIsOffline)
   )
 }
 

@@ -39,7 +39,7 @@ export default function clearMmkvStorageAndEmptyAtoms(): void {
     contacts: [],
   })
   getDefaultStore().set(offersStateAtom, {
-    lastUpdatedAt: MINIMAL_DATE,
+    lastUpdatedAt1: MINIMAL_DATE,
     offers: [] as OneOfferInState[],
   })
   getDefaultStore().set(postLoginFinishedStorageAtom, {

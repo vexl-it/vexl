@@ -175,7 +175,7 @@ export const triggerOffersRefreshAtom = atom(null, async (get, set) => {
               !!one.ownershipInfo ||
               !removedOffers.includes(one.offerInfo.offerId)
           ),
-          (offers) => ({offers, lastUpdatedAt: updateStartedAt}),
+          (offers) => ({offers, lastUpdatedAt1: updateStartedAt}),
           (value) => {
             set(offersStateAtom, value)
           }

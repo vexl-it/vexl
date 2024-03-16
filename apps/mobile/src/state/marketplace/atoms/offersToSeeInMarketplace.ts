@@ -40,7 +40,10 @@ export const offersToSeeInMarketplaceAtom = atom((get) => {
   const importedContactsHashes = get(importedContactsHashesAtom)
   const isDeveloper = get(isDeveloperAtom)
 
-  return get(offersAtom).filter(
+  const offers = get(offersAtom)
+  alertAndReportOnlineOffersWithoutLocation(offers.map((one) => one.offerInfo))
+
+  return offers.filter(
     (oneOffer) =>
       // only active offers
       oneOffer.offerInfo.publicPart.active &&

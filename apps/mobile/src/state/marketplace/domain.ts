@@ -25,7 +25,8 @@ export type ApiErrorReportingOffer = BasicError<'ApiErrorReportingOffer'>
 export type ApiErrorDeletingOffer = BasicError<'ApiErrorDeletingOffer'>
 
 export const OffersState = z.object({
-  lastUpdatedAt: IsoDatetimeString.catch(() => MINIMAL_DATE),
+  // changedName to force clients to refetch all offers after update of the offers location shape
+  lastUpdatedAt1: IsoDatetimeString.catch(() => MINIMAL_DATE),
   offers: z.array(OneOfferInState),
 })
 export type OffersState = z.TypeOf<typeof OffersState>

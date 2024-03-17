@@ -52,6 +52,7 @@ import {translationAtom} from '../../../utils/localization/I18nProvider'
 import {currencies} from '../../../utils/localization/currency'
 import getDefaultSpokenLanguage from '../../../utils/localization/getDefaultSpokenLanguage'
 import notEmpty from '../../../utils/notEmpty'
+import reportError from '../../../utils/reportError'
 import showErrorAlert from '../../../utils/showErrorAlert'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 import {offerProgressModalActionAtoms as progressModal} from '../../UploadingOfferProgressModal/atoms'
@@ -444,6 +445,8 @@ export const offerFormMolecule = molecule(() => {
       TE.matchEW(
         (e) => {
           set(progressModal.hide)
+          if (e._tag !== 'NetworkError')
+            reportError('error', new Error('Error while creating offer'), {e})
           showErrorAlert({
             title:
               toCommonErrorMessage(e, t) ?? t('offerForm.errorCreatingOffer'),

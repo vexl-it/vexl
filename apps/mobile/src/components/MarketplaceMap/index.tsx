@@ -1,4 +1,4 @@
-import {useNavigation} from '@react-navigation/native'
+import {useNavigation, useNavigationState} from '@react-navigation/native'
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
 import {useSetAtom, useStore} from 'jotai'
 import {useCallback} from 'react'
@@ -14,6 +14,38 @@ import {mapRegionAtom} from '../../state/marketplace/atoms/mapRegionAtom'
 import {CONTAINER_WITH_TOP_BORDER_RADIUS_TOP_PADDING} from '../InsideRouter/components/ContainerWithTopBorderRadius'
 import MapDisplayMultiplePoints from '../Map/components/MapDisplayMultiplePoints'
 import {focusedPointsIdsAtom, mapPointsAtom} from './atoms'
+
+function MarketplaceMapSizeContainer({
+  children,
+}: {
+  children: React.ReactNode
+}): JSX.Element {
+  const isOnOfferDetail = useNavigationState(
+    useCallback((navigationState): boolean => {
+      const currentRoute = navigationState?.routes[navigationState?.index]
+
+      if (currentRoute?.name === 'OfferDetail') {
+        return true
+      }
+
+      return false
+    }, [])
+  )
+
+  return (
+    <Stack
+      w="100%"
+      backgroundColor="black"
+      h={Math.min(
+        Dimensions.get('window').height / (isOnOfferDetail ? 3.25 : 2),
+        400
+      )}
+      marginBottom={-CONTAINER_WITH_TOP_BORDER_RADIUS_TOP_PADDING}
+    >
+      {children}
+    </Stack>
+  )
+}
 
 export default function MarketplaceMap({
   marginTop,
@@ -50,12 +82,7 @@ export default function MarketplaceMap({
   }, [refocusMap])
 
   return (
-    <Stack
-      w="100%"
-      backgroundColor="black"
-      h={Math.min(Dimensions.get('window').height / 3.25, 400)}
-      marginBottom={-CONTAINER_WITH_TOP_BORDER_RADIUS_TOP_PADDING}
-    >
+    <MarketplaceMapSizeContainer>
       <MapDisplayMultiplePoints
         mapPadding={{
           top: marginTop,
@@ -70,6 +97,6 @@ export default function MarketplaceMap({
         refAtom={setMapViewRefAtom}
         onPointPress={onPointPress}
       />
-    </Stack>
+    </MarketplaceMapSizeContainer>
   )
 }

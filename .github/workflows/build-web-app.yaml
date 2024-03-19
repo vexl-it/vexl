@@ -1,5 +1,10 @@
 name: "[Build] web-app docker image"
 
+permissions:
+  packages: write
+  contents: write
+  id-token: write
+
 on:
   workflow_dispatch:
     inputs:

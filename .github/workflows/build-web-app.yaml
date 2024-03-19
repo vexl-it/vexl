@@ -56,5 +56,5 @@ jobs:
           provenance: false
           tags: |
             ghcr.io/vexl-it/web-app:latest
-            ghcr.io/vexl-it/web-app:{{inputs.env}}-${{ github.sha }}
+            ghcr.io/vexl-it/web-app:${{inputs.env}}-${{ github.sha }}
             ${{ steps.login-ecr.outputs.registry }}/web-app:${{inputs.env}}-${{ github.sha }}

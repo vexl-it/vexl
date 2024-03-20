@@ -22944,6 +22944,14 @@ __metadata:
   languageName: node
   linkType: hard
 
+"notification-service@workspace:apps/notification-service":
+  version: 0.0.0-use.local
+  resolution: "notification-service@workspace:apps/notification-service"
+  dependencies:
+    "@vexl-next/prettier-config": 0.0.0
+  languageName: unknown
+  linkType: soft
+
 "npm-install-checks@npm:^6.0.0":
   version: 6.3.0
   resolution: "npm-install-checks@npm:6.3.0"

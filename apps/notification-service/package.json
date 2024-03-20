@@ -1,0 +1,10 @@
+{
+  "name": "notification-service",
+  "version": "0.0.0",
+  "main": "index.js",
+  "type": "module",
+  "devDependencies": {
+    "@vexl-next/prettier-config": "0.0.0"
+  },
+  "prettier": "@vexl-next/prettier-config"
+}

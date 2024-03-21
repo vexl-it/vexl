@@ -113,7 +113,7 @@ export function parseFormData<T extends z.ZodType>(
 export function createUserPublicApi(): userApi.UserPublicApi {
   return userApi.publicApi({
     url: getEnvPreset().userMs,
-    clientVersion: 1,
+    clientVersion: 130,
     platform: 'WEB',
   })
 }
@@ -128,7 +128,7 @@ export function createContactsPrivateApi({
   signature: string
 }): contactsApi.ContactPrivateApi {
   return contactsApi.privateApi({
-    clientVersion: 1,
+    clientVersion: 130,
     getUserSessionCredentials: () => ({
       hash,
       publicKey,
@@ -149,7 +149,7 @@ export function createUserPrivateApi({
   signature: string
 }): userApi.UserPrivateApi {
   return userApi.privateApi({
-    clientVersion: 1,
+    clientVersion: 130,
     getUserSessionCredentials: () => ({
       hash,
       publicKey,

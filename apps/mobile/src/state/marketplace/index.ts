@@ -1,6 +1,7 @@
 import {type ChatOrigin} from '@vexl-next/domain/src/general/messaging'
 import {
   type IntendedConnectionLevel,
+  type MyOfferInState,
   type OfferAdminId,
   type OfferId,
   type OfferPublicPart,
@@ -26,8 +27,8 @@ import {type ErrorConstructingPrivatePayloads} from '@vexl-next/resources-utils/
 import {type ErrorEncryptingPublicPart} from '@vexl-next/resources-utils/src/offers/utils/encryptOfferPublicPayload'
 import {type ApiErrorFetchingContactsForOffer} from '@vexl-next/resources-utils/src/offers/utils/fetchContactsForOffer'
 import {type ErrorGeneratingSymmetricKey} from '@vexl-next/resources-utils/src/offers/utils/generateSymmetricKey'
-import {type ExtractLeftTE} from '@vexl-next/rest-api/src/services/chat/utils'
 import {type OfferPrivateApi} from '@vexl-next/rest-api/src/services/offer'
+import {type ExtractLeftTE} from '@vexl-next/rest-api/src/utils'
 import * as A from 'fp-ts/Array'
 import * as E from 'fp-ts/Either'
 import * as Option from 'fp-ts/Option'
@@ -39,10 +40,12 @@ import {privateApiAtom} from '../../api'
 import deduplicate from '../../utils/deduplicate'
 import getCountryPrefix from '../../utils/getCountryCode'
 import notEmpty from '../../utils/notEmpty'
+import {getNotificationToken} from '../../utils/notifications'
 import reportError from '../../utils/reportError'
 import offerToConnectionsAtom, {
   upsertOfferToConnectionsActionAtom,
 } from '../connections/atom/offerToConnectionsAtom'
+import addFCMCypherToPublicPayloadActionAtom from '../notifications/addNotificationTokenToPublicPayloadActionAtom'
 import {sessionDataOrDummyAtom} from '../session'
 import {loadingStateAtom} from './atoms/loadingState'
 import {
@@ -231,47 +234,72 @@ export const createOfferAtom = atom<
   const api = get(privateApiAtom)
   const session = get(sessionDataOrDummyAtom)
   const {payloadPublic, intendedConnectionLevel, onProgress} = params
-  return pipe(
-    createNewOfferForMyContacts({
-      offerApi: api.offer,
-      publicPart: payloadPublic,
-      countryPrefix: getCountryPrefix(session.phoneNumber),
-      contactApi: api.contact,
-      intendedConnectionLevel,
-      ownerKeyPair: session.privateKey,
-      onProgress,
-    }),
-    TE.map((r) => {
-      if (r.encryptionErrors.length > 0) {
-        reportError('error', new Error('Error while encrypting offer'), {
-          errors: r.encryptionErrors,
-        })
-      }
 
-      const createdOffer: OneOfferInState = {
-        ownershipInfo: {
-          adminId: r.adminId,
+  return pipe(
+    TE.Do,
+    TE.bindW('fcmToken', () => pipe(getNotificationToken(), TE.fromTask)),
+    TE.bindW('publicPayloadWithNotificationToken', ({fcmToken}) =>
+      TE.fromTask(
+        set(addFCMCypherToPublicPayloadActionAtom, {
+          publicPart: payloadPublic,
+          fcmToken: Option.fromNullable(fcmToken),
+        })
+      )
+    ),
+    TE.bindW(
+      'createOfferResult',
+      ({publicPayloadWithNotificationToken: {publicPart}}) =>
+        createNewOfferForMyContacts({
+          offerApi: api.offer,
+          publicPart,
+          countryPrefix: getCountryPrefix(session.phoneNumber),
+          contactApi: api.contact,
           intendedConnectionLevel,
-        },
-        flags: {
-          reported: false,
-        },
-        offerInfo: r.offerInfo,
-      }
-      set(offersAtom, (oldState) => [...oldState, createdOffer])
-      set(upsertOfferToConnectionsActionAtom, {
-        connections: {
-          firstLevel: r.encryptedFor.firstDegreeConnections,
-          secondLevel:
-            intendedConnectionLevel === 'ALL'
-              ? r.encryptedFor.secondDegreeConnections
+          ownerKeyPair: session.privateKey,
+          onProgress,
+        })
+    ),
+    TE.map(
+      ({
+        createOfferResult: r,
+        publicPayloadWithNotificationToken,
+        fcmToken,
+      }) => {
+        if (r.encryptionErrors.length > 0) {
+          reportError('error', new Error('Error while encrypting offer'), {
+            errors: r.encryptionErrors,
+          })
+        }
+
+        const createdOffer: MyOfferInState = {
+          ownershipInfo: {
+            adminId: r.adminId,
+            intendedConnectionLevel,
+          },
+          lastCommitedFcmToken:
+            publicPayloadWithNotificationToken.tokenSuccessfullyAdded
+              ? fcmToken ?? undefined
               : undefined,
-        },
-        adminId: r.adminId,
-        symmetricKey: r.symmetricKey,
-      })
-      return createdOffer
-    })
+          flags: {
+            reported: false,
+          },
+          offerInfo: r.offerInfo,
+        }
+        set(offersAtom, (oldState) => [...oldState, createdOffer])
+        set(upsertOfferToConnectionsActionAtom, {
+          connections: {
+            firstLevel: r.encryptedFor.firstDegreeConnections,
+            secondLevel:
+              intendedConnectionLevel === 'ALL'
+                ? r.encryptedFor.secondDegreeConnections
+                : undefined,
+          },
+          adminId: r.adminId,
+          symmetricKey: r.symmetricKey,
+        })
+        return createdOffer
+      }
+    )
   )
 })
 
@@ -298,32 +326,53 @@ export const updateOfferAtom = atom<
   const {payloadPublic, symmetricKey, adminId, intendedConnectionLevel} = params
 
   return pipe(
-    updateOffer({
-      offerApi: api.offer,
-      adminId,
-      publicPayload: payloadPublic,
-      symmetricKey,
-      ownerKeypair: session.privateKey,
-    }),
-    TE.map((r) => {
-      const createdOffer: OneOfferInState = {
-        flags: {
-          reported: false,
-        },
-        ownershipInfo: {
+    TE.Do,
+    TE.bindW('fcmToken', () => pipe(getNotificationToken(), TE.fromTask)),
+    TE.bindW('publicPayloadWithNotificationToken', ({fcmToken}) =>
+      TE.fromTask(
+        set(addFCMCypherToPublicPayloadActionAtom, {
+          publicPart: payloadPublic,
+          fcmToken: Option.fromNullable(fcmToken),
+        })
+      )
+    ),
+    TE.bindW(
+      'updateResult',
+      ({publicPayloadWithNotificationToken: {publicPart}}) =>
+        updateOffer({
+          offerApi: api.offer,
           adminId,
-          intendedConnectionLevel,
-        },
-        offerInfo: r,
+          publicPayload: publicPart,
+          symmetricKey,
+          ownerKeypair: session.privateKey,
+        })
+    ),
+    TE.map(
+      ({updateResult: r, fcmToken, publicPayloadWithNotificationToken}) => {
+        const createdOffer: MyOfferInState = {
+          flags: {
+            reported: false,
+          },
+          lastCommitedFcmToken:
+            publicPayloadWithNotificationToken.tokenSuccessfullyAdded
+              ? fcmToken ?? undefined
+              : undefined,
+          ownershipInfo: {
+            adminId,
+            intendedConnectionLevel,
+          },
+          offerInfo: r,
+        }
+        set(offersAtom, (oldState) => [
+          ...oldState.filter(
+            (offer) =>
+              offer.offerInfo.offerId !== createdOffer.offerInfo.offerId
+          ),
+          createdOffer,
+        ])
+        return createdOffer
       }
-      set(offersAtom, (oldState) => [
-        ...oldState.filter(
-          (offer) => offer.offerInfo.offerId !== createdOffer.offerInfo.offerId
-        ),
-        createdOffer,
-      ])
-      return createdOffer
-    })
+    )
   )
 })
 

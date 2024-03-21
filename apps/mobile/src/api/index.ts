@@ -4,6 +4,7 @@ import {
   chat,
   contact,
   location,
+  notification,
   offer,
   user,
   type EnvPreset,
@@ -16,6 +17,7 @@ import {
 import {type ChatPrivateApi} from '@vexl-next/rest-api/src/services/chat'
 import {type ContactPrivateApi} from '@vexl-next/rest-api/src/services/contact'
 import {type LocationPrivateApi} from '@vexl-next/rest-api/src/services/location'
+import {type NotificationPrivateApi} from '@vexl-next/rest-api/src/services/notification'
 import {type OfferPrivateApi} from '@vexl-next/rest-api/src/services/offer'
 import {
   type UserPrivateApi,
@@ -118,6 +120,12 @@ export const privateApiAtom = atom((get) => {
       url: apiEnv.locationMs,
       getUserSessionCredentials,
     }),
+    notification: notification.privateApi({
+      platform,
+      clientVersion: versionCode,
+      url: apiEnv.notificationMs,
+      getUserSessionCredentials,
+    }),
   }
 })
 
@@ -127,6 +135,7 @@ export function usePrivateApiAssumeLoggedIn(): {
   chat: ChatPrivateApi
   user: UserPrivateApi
   location: LocationPrivateApi
+  notification: NotificationPrivateApi
 } {
   return useAtomValue(privateApiAtom)
 }

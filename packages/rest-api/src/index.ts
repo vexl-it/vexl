@@ -5,6 +5,7 @@ import * as UserSessionCredentials from './UserSessionCredentials.brand'
 import * as chat from './services/chat'
 import * as contact from './services/contact'
 import * as location from './services/location'
+import * as notification from './services/notification'
 import * as offer from './services/offer'
 import * as user from './services/user'
 
@@ -14,6 +15,7 @@ export const EnvPreset = z.object({
   chatMs: ServiceUrl,
   offerMs: ServiceUrl,
   locationMs: ServiceUrl,
+  notificationMs: ServiceUrl,
 })
 export type EnvPreset = z.TypeOf<typeof EnvPreset>
 
@@ -23,7 +25,7 @@ export interface CredentialHeaders {
   signature: string
 }
 
-export {chat, contact, location, offer, user}
+export {chat, contact, location, notification, offer, user}
 
 export const ENV_PRESETS: {stageEnv: EnvPreset; prodEnv: EnvPreset} = {
   stageEnv: {
@@ -32,6 +34,7 @@ export const ENV_PRESETS: {stageEnv: EnvPreset; prodEnv: EnvPreset} = {
     chatMs: ServiceUrl.parse('https://stage-chat.vexl.it'),
     offerMs: ServiceUrl.parse('https://stage-offer2.vexl.it'),
     locationMs: ServiceUrl.parse('https://stage-location.vexl.it'),
+    notificationMs: ServiceUrl.parse('https://notification.vexl.it'),
   },
   prodEnv: {
     userMs: ServiceUrl.parse('https://user.vexl.it'),
@@ -39,6 +42,7 @@ export const ENV_PRESETS: {stageEnv: EnvPreset; prodEnv: EnvPreset} = {
     chatMs: ServiceUrl.parse('https://chat.vexl.it'),
     offerMs: ServiceUrl.parse('https://offer2.vexl.it'),
     locationMs: ServiceUrl.parse('https://location.vexl.it'),
+    notificationMs: ServiceUrl.parse('https://stage-notification.vexl.it'),
   },
 }
 

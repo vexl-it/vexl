@@ -1,4 +1,5 @@
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
+import {FcmCypher} from '@vexl-next/domain/src/general/notifications'
 import {
   LocationStateToArray,
   OfferLocation,
@@ -57,6 +58,7 @@ const OfferPublicPartToEncrypt = z.object({
   groupUuids: z.array(z.string()),
   listingType: z.string(),
   singlePriceState: z.string().optional(),
+  fcmCypher: FcmCypher.optional(),
 })
 
 function convertLocationStateToOldVersion(

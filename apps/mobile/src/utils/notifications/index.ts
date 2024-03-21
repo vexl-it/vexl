@@ -1,12 +1,13 @@
 import notifee, {AuthorizationStatus} from '@notifee/react-native'
 import messaging from '@react-native-firebase/messaging'
+import {FcmToken} from '@vexl-next/domain/src/utility/FcmToken.brand'
 import {
   toBasicError,
   type BasicError,
 } from '@vexl-next/domain/src/utility/errors'
-import * as E from 'fp-ts/lib/Either'
-import type * as T from 'fp-ts/lib/Task'
-import * as TE from 'fp-ts/lib/TaskEither'
+import * as E from 'fp-ts/Either'
+import type * as T from 'fp-ts/Task'
+import * as TE from 'fp-ts/TaskEither'
 import {Alert} from 'react-native'
 import NotificationSetting from 'react-native-open-notification'
 import {useTranslation} from '../localization/I18nProvider'
@@ -62,10 +63,10 @@ export function useRequestNotificationPermissions(): TE.TaskEither<
     })
 }
 
-export function getNotificationToken(): T.Task<string | null> {
+export function getNotificationToken(): T.Task<FcmToken | null> {
   return async () => {
     try {
-      return await messaging().getToken()
+      return FcmToken.parse(await messaging().getToken())
     } catch (e) {
       return null
     }

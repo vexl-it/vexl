@@ -4,7 +4,7 @@ import {
 } from '@vexl-next/domain/src/general/messaging'
 import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import sendMessagesBatch from '@vexl-next/resources-utils/src/chat/sendMessagesBatch'
-import {type ExtractLeftTE} from '@vexl-next/rest-api/src/services/chat/utils'
+import {type ExtractLeftTE} from '@vexl-next/rest-api/src/utils'
 import * as A from 'fp-ts/Array'
 import * as E from 'fp-ts/Either'
 import * as RNEA from 'fp-ts/ReadonlyNonEmptyArray'

@@ -5,7 +5,7 @@ import {isNonEmpty} from 'fp-ts/Array'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
-import {atom, useStore} from 'jotai'
+import {atom, useSetAtom, useStore} from 'jotai'
 import {useCallback} from 'react'
 import {usePrivateApiAssumeLoggedIn} from '../api'
 import notEmpty from '../utils/notEmpty'
@@ -14,6 +14,7 @@ import reportError from '../utils/reportError'
 import {useAppState} from '../utils/useAppState'
 import {createInboxAtom} from './chat/hooks/useCreateInbox'
 import {updateOfferAtom} from './marketplace'
+import checkNotificationTokensAndRefreshOffersActionAtom from './marketplace/atoms/checkNotificationTokensAndRefreshOffersActionAtom'
 import {myOffersAtom} from './marketplace/atoms/myOffers'
 import {offersMissingOnServerAtom} from './marketplace/atoms/offersMissingOnServer'
 import {useLogout} from './useLogout'
@@ -259,8 +260,25 @@ function useCheckOfferInboxes(): void {
   )
 }
 
+function useCheckNotificationTokensAndRefreshOffers(): void {
+  const checkNotificationTokensAndRefreshOffers = useSetAtom(
+    checkNotificationTokensAndRefreshOffersActionAtom
+  )
+
+  useAppState(
+    useCallback(
+      (state) => {
+        if (state !== 'active') return
+        checkNotificationTokensAndRefreshOffers()
+      },
+      [checkNotificationTokensAndRefreshOffers]
+    )
+  )
+}
+
 export default function useHandleRefreshContactServiceAndOffers(): void {
   useRefreshUserOnContactService()
   useRefreshOffers()
   useCheckOfferInboxes()
+  useCheckNotificationTokensAndRefreshOffers()
 }

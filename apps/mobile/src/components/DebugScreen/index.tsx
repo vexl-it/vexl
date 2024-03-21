@@ -365,6 +365,16 @@ function DebugScreen(): JSX.Element {
             <Button
               variant="primary"
               size="small"
+              text="Print my offers into console"
+              onPress={() => {
+                const offers = store.get(myOffersAtom)
+                console.log(JSON.stringify(offers, null, 2))
+              }}
+            />
+
+            <Button
+              variant="primary"
+              size="small"
               text="Delete user inbox"
               onPress={() => {
                 void pipe(

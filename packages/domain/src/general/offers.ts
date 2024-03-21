@@ -1,5 +1,6 @@
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {z} from 'zod'
+import {FcmToken} from '../utility/FcmToken.brand'
 import {IdNumeric} from '../utility/IdNumeric'
 import {IsoDatetimeString} from '../utility/IsoDatetimeString.brand'
 import {JSDateString} from '../utility/JSDateString.brand'
@@ -11,6 +12,7 @@ import {
   getDefaultRadius,
 } from './../utility/geoCoordinates'
 import {CurrencyCode} from './currency.brand'
+import {FcmCypher} from './notifications'
 
 export const Sort = z.enum([
   'LOWEST_FEE_FIRST',
@@ -167,6 +169,7 @@ export const OfferPublicPart = z.object({
   groupUuids: z.array(z.string()),
   listingType: ListingType.optional(),
   singlePriceState: SinglePriceState.optional(),
+  fcmCypher: FcmCypher.optional(),
 })
 export type OfferPublicPart = z.TypeOf<typeof OfferPublicPart>
 
@@ -217,6 +220,7 @@ export type PublicPayloadEncrypted = z.TypeOf<typeof PublicPayloadEncrypted>
 export const OneOfferInState = z.object({
   offerInfo: OfferInfo,
   flags: OfferFlags,
+  lastCommitedFcmToken: FcmToken.optional(),
   ownershipInfo: z
     .object({
       adminId: OfferAdminId,
@@ -229,6 +233,7 @@ export type OneOfferInState = z.TypeOf<typeof OneOfferInState>
 export const MyOfferInState = z.object({
   offerInfo: OfferInfo,
   flags: OfferFlags,
+  lastCommitedFcmToken: FcmToken.optional(),
   ownershipInfo: z.object({
     adminId: OfferAdminId,
     intendedConnectionLevel: IntendedConnectionLevel,

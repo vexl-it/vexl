@@ -14,5 +14,5 @@ export default function deleteAccount4(): JSX.Element {
     }
   }, [navigate])
 
-  return <p>Account deleted. We are sorry, to see you go 😥.</p>
+  return <p>Account deleted. We are sorry to see you go 😥.</p>
 }

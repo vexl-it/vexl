@@ -67,8 +67,10 @@ export const offersToSeeInMarketplaceAtom = atom((get) => {
         oneOffer.offerInfo.privatePart.friendLevel.includes('FIRST_DEGREE')) &&
       // Filter offers that are set to be in person but have no location
       (isDeveloper ||
-        oneOffer.offerInfo.publicPart.locationState.includes('IN_PERSON') ||
-        oneOffer.offerInfo.publicPart.location.length > 0)
+        oneOffer.offerInfo.publicPart.locationState.length === 0 ||
+        oneOffer.offerInfo.publicPart.locationState.includes('ONLINE') ||
+        (oneOffer.offerInfo.publicPart.locationState.includes('IN_PERSON') &&
+          oneOffer.offerInfo.publicPart.location.length > 0))
   )
 })
 

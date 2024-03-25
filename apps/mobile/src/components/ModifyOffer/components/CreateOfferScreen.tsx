@@ -43,6 +43,7 @@ function CreateOfferScreen(): JSX.Element {
     offerTypeAtom,
     showBuySellFieldAtom,
     showRestOfTheFieldsAtom,
+    updateListingTypeActionAtom,
   } = useMolecule(offerFormMolecule)
   const btcOfferContent = useBtcOfferContent()
   const productOfferContent = useProductOfferContent()
@@ -68,7 +69,10 @@ function CreateOfferScreen(): JSX.Element {
               <IconButton variant="dark" icon={closeSvg} onPress={safeGoBack} />
             </ScreenTitle>
             <Section title={t('offerForm.listingType')} image={listingTypeSvg}>
-              <ListingType listingTypeAtom={listingTypeAtom} />
+              <ListingType
+                listingTypeAtom={listingTypeAtom}
+                updateListingTypeActionAtom={updateListingTypeActionAtom}
+              />
             </Section>
             {!!showBuySellField && (
               <Section title={t('offerForm.iWantTo')} image={userSvg}>

@@ -70,6 +70,9 @@ function convertLocationStateToOldVersion(
   if (publicPart.listingType === 'OTHER' && publicPart.location.length === 0)
     return 'ONLINE'
 
+  if (publicPart.listingType === 'OTHER' && publicPart.location.length > 0)
+    return 'IN_PERSON'
+
   if (publicPart.locationState.length === 2) return 'IN_PERSON'
 
   if (publicPart.locationState.length === 1)

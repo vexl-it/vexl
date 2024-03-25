@@ -906,6 +906,11 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     }
   )
 
+  const listingTypeIsOtherAtom = atom((get) => {
+    const offerForChat = get(offerForChatAtom)
+    return offerForChat?.offerInfo?.publicPart?.listingType === 'OTHER'
+  })
+
   return {
     showModalAtom: atom<boolean>(false),
     chatAtom,
@@ -969,5 +974,6 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     calendarEventIdAtom,
     isDateAndTimePickedAtom,
     addEventToCalendarActionAtom,
+    listingTypeIsOtherAtom,
   }
 })

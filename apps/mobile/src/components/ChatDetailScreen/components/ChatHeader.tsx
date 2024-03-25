@@ -43,6 +43,7 @@ function Button({type}: {type: ButtonType}): JSX.Element | null {
     revealContactWithUiFeedbackAtom,
     contactRevealStatusAtom,
     otherSideSupportsTradingChecklistAtom,
+    listingTypeIsOtherAtom,
   } = useMolecule(chatMolecule)
   const chatId = useAtomValue(chatIdAtom)
   const inboxKey = useAtomValue(publicKeyPemBase64Atom)
@@ -55,6 +56,7 @@ function Button({type}: {type: ButtonType}): JSX.Element | null {
   const otherSideSupportsTradingChecklist = useAtomValue(
     otherSideSupportsTradingChecklistAtom
   )
+  const listingTypeIsOther = useAtomValue(listingTypeIsOtherAtom)
 
   const blockChat = useSetAtom(blockChatWithUiFeedbackAtom)
   const deleteChat = useSetAtom(deleteChatWithUiFeedbackAtom)
@@ -170,7 +172,7 @@ function Button({type}: {type: ButtonType}): JSX.Element | null {
               }}
             />
           )}
-        {!!otherSideSupportsTradingChecklist && (
+        {!!otherSideSupportsTradingChecklist && !listingTypeIsOther && (
           <IconButton
             icon={tradeChecklistSvg}
             variant="primary"

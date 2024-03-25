@@ -176,13 +176,15 @@ function formatOfferPublicPart(publicPart: OfferPublicPart): OfferPublicPart {
     amountTopLimit:
       listingType !== 'BITCOIN' ? amountBottomLimit : amountTopLimit,
     offerDescription: offerDescription.trim(),
+    // TODO: old Vexl app versions compatibility fix
+    // remove later
     locationState:
-      listingType === 'OTHER' && location.length === 0 ? [] : locationState,
-    // TODO: remove old vexl apps compatibility fix
-    // without it old vexl app displays empty location in preview
+      listingType === 'OTHER' && location.length === 0
+        ? ['ONLINE']
+        : locationState,
     paymentMethod:
       listingType === 'OTHER' && location.length === 0
-        ? ['REVOLUT', 'BANK']
+        ? ['BANK', 'REVOLUT']
         : paymentMethod,
     location,
   }
@@ -259,6 +261,9 @@ export const offerFormMolecule = molecule(() => {
   const nullableLocationAtom = atom<OfferLocation[] | undefined>(
     dummyOffer.offerInfo.publicPart.location
   )
+  const nullableLocationStateAtom = atom<LocationState[] | undefined>(
+    dummyOffer.offerInfo.publicPart.locationState
+  )
   const nullableSinglePriceStateAtom = atom<SinglePriceState | undefined>(
     dummyOffer.offerInfo.publicPart.singlePriceState
   )
@@ -308,7 +313,7 @@ export const offerFormMolecule = molecule(() => {
     return true
   })
 
-  const updateLocationStateActionAtom = atom(
+  const updateLocationStateAndPaymentMethodAtom = atom(
     null,
     (get, set, locationState: LocationState) => {
       const listingType = get(listingTypeAtom)
@@ -317,18 +322,12 @@ export const offerFormMolecule = molecule(() => {
         set(locationStateAtom, [locationState])
       } else {
         set(locationStateAtom, (prev) =>
-          prev.includes(locationState)
+          prev?.includes(locationState)
             ? prev.filter((state) => state !== locationState)
-            : [...prev, locationState]
+            : [...(prev ?? []), locationState]
         )
       }
-    }
-  )
 
-  const updateLocationStateAndPaymentMethodAtom = atom(
-    null,
-    (get, set, locationState: LocationState) => {
-      set(updateLocationStateActionAtom, locationState)
       set(
         paymentMethodAtom,
         locationState === 'ONLINE' ? ['BANK', 'REVOLUT'] : ['CASH']
@@ -367,8 +366,10 @@ export const offerFormMolecule = molecule(() => {
     optic.prop('feeState')
   )
 
-  const locationStateAtom = focusAtom(offerFormAtom, (optic) =>
-    optic.prop('locationState')
+  const locationStateAtom = getAtomWithNullableValueHandling(
+    nullableLocationStateAtom,
+    offerFormAtom,
+    'locationState'
   )
 
   const locationAtom = getAtomWithNullableValueHandling(
@@ -899,6 +900,53 @@ export const offerFormMolecule = molecule(() => {
     }
   )
 
+  const updateListingTypeActionAtom = atom(
+    null,
+    (get, set, listingType: ListingType | undefined) => {
+      const amountBottomLimit = get(amountBottomLimitAtom)
+      const location = get(locationAtom)
+      const locationState = get(locationStateAtom)
+
+      set(listingTypeAtom, listingType)
+
+      if (
+        (listingType === 'BITCOIN' || listingType === 'PRODUCT') &&
+        locationState?.length === 0
+      ) {
+        set(updateLocationStateAndPaymentMethodAtom, 'IN_PERSON')
+      }
+
+      if (
+        listingType === 'BITCOIN' &&
+        locationState?.includes('IN_PERSON') &&
+        locationState?.includes('ONLINE')
+      ) {
+        set(locationStateAtom, ['IN_PERSON'])
+        set(paymentMethodAtom, ['CASH'])
+      }
+
+      if (
+        (listingType === 'PRODUCT' || listingType === 'OTHER') &&
+        amountBottomLimit
+      ) {
+        set(
+          calculateSatsValueOnFiatValueChangeActionAtom,
+          String(amountBottomLimit)
+        )
+      }
+
+      if (listingType === 'OTHER' && location?.length === 0) {
+        set(locationStateAtom, [])
+        set(
+          paymentMethodAtom,
+          locationState?.length === 1 && locationState?.includes('ONLINE')
+            ? ['BANK', 'REVOLUT']
+            : ['CASH']
+        )
+      }
+    }
+  )
+
   return {
     offerAtom,
     showBuySellFieldAtom,
@@ -944,6 +992,6 @@ export const offerFormMolecule = molecule(() => {
     calculateSatsValueOnFiatValueChangeActionAtom,
     calculateFiatValueOnSatsValueChangeActionAtom,
     changePriceCurrencyActionAtom,
-    updateLocationStateActionAtom,
+    updateListingTypeActionAtom,
   }
 })

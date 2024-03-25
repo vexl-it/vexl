@@ -51,6 +51,7 @@ function EditOfferScreen({
     listingTypeAtom,
     offerTypeAtom,
     setOfferFormActionAtom,
+    updateListingTypeActionAtom,
   } = useMolecule(offerFormMolecule)
   const listingType = useAtomValue(listingTypeAtom)
   const editOffer = useSetAtom(editOfferAtom)
@@ -75,7 +76,10 @@ function EditOfferScreen({
                   title={t('offerForm.listingType')}
                   image={listingTypeSvg}
                 >
-                  <ListingType listingTypeAtom={listingTypeAtom} />
+                  <ListingType
+                    listingTypeAtom={listingTypeAtom}
+                    updateListingTypeActionAtom={updateListingTypeActionAtom}
+                  />
                 </Section>
                 <Section title={t('offerForm.iWantTo')} image={userSvg}>
                   <OfferType

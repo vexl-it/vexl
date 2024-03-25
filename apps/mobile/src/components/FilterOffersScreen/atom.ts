@@ -38,7 +38,7 @@ export const sortingAtom = atom<Sort | undefined>(undefined)
 
 export const intendedConnectionLevelAtom = atom<IntendedConnectionLevel>('ALL')
 
-export const locationStateAtom = atom<LocationState[]>(
+export const locationStateAtom = atom<LocationState[] | undefined>(
   offersFilterInitialState.locationState
 )
 
@@ -102,21 +102,18 @@ export const updateLocationStateAndPaymentMethodAtom = atom(
   (get, set, locationState: LocationState) => {
     const locationStateFromAtom = get(locationStateAtom)
 
+    set(locationStateAtom, (prev) =>
+      prev?.includes(locationState) ? [] : [locationState]
+    )
+
     if (locationStateFromAtom?.includes(locationState)) {
-      set(locationStateAtom, [])
       set(paymentMethodAtom, undefined)
       set(locationAtom, undefined)
     } else {
-      set(locationStateAtom, (prev) =>
-        prev?.includes(locationState)
-          ? prev.filter((state) => state !== locationState)
-          : [...(prev ?? []), locationState]
-      )
       set(
         paymentMethodAtom,
         locationState === 'ONLINE' ? ['BANK', 'REVOLUT'] : ['CASH']
       )
-      set(locationAtom, undefined)
     }
   }
 )
@@ -201,6 +198,7 @@ export const setOfferLocationActionAtom = atom(
 const setAllFilterAtomsActionAtom = atom(
   null,
   (get, set, filterValue: OffersFilter) => {
+    set(listingTypeAtom, filterValue.listingType)
     set(focusTextFilterAtom, filterValue.text)
     set(sortingAtom, filterValue.sort)
     set(currencyAtom, filterValue.currency)

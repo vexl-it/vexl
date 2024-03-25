@@ -24,7 +24,7 @@ import LocationsList from './LocationsList'
 
 interface Props {
   locationAtom: PrimitiveAtom<OfferLocation[] | undefined>
-  locationStateAtom: PrimitiveAtom<LocationState[]>
+  locationStateAtom: PrimitiveAtom<LocationState[] | undefined>
   randomizeLocation: boolean
   updateLocationStateAndPaymentMethodAtom: WritableAtom<
     null,
@@ -60,7 +60,7 @@ function DeliveryMethodComponent({
     <YStack space="$5">
       <YStack space="$2">
         <SelectableCell
-          selected={locationState.includes('IN_PERSON')}
+          selected={locationState?.includes('IN_PERSON') ?? false}
           onPress={() => {
             updateLocationStateAndPaymentMethod('IN_PERSON')
           }}
@@ -68,7 +68,7 @@ function DeliveryMethodComponent({
           subtitle={t('offerForm.pickupDescription')}
           type="PICKUP"
         />
-        {locationState.includes('IN_PERSON') && (
+        {!!locationState?.includes('IN_PERSON') && (
           <YStack space="$1">
             {!!(!locations || (locations && locations.length < 3)) && (
               <AddCityOrDistrict
@@ -86,7 +86,7 @@ function DeliveryMethodComponent({
       </YStack>
       <YStack space="$2">
         <SelectableCell
-          selected={locationState.includes('ONLINE')}
+          selected={locationState?.includes('ONLINE') ?? false}
           onPress={() => {
             updateLocationStateAndPaymentMethod('ONLINE')
           }}
@@ -94,7 +94,7 @@ function DeliveryMethodComponent({
           subtitle={t('offerForm.deliveryDescription')}
           type="DELIVERY"
         />
-        {locationState.includes('ONLINE') && (
+        {!!locationState?.includes('ONLINE') && (
           <Info text={t('offerForm.pickupDeliveryIsSafer')} />
         )}
       </YStack>

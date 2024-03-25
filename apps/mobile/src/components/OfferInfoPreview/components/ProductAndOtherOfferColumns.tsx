@@ -21,7 +21,10 @@ function ProductAndOtherOfferColumns({offer}: Props): JSX.Element {
       {offer.publicPart.singlePriceState === 'HAS_COST' && (
         <PriceInSats offer={offer} />
       )}
-      {offer.publicPart.locationState.length > 0 && (
+      {offer.publicPart.listingType === 'PRODUCT' ||
+      (offer.publicPart.listingType === 'OTHER' &&
+        offer.publicPart.locationState.includes('IN_PERSON') &&
+        offer.publicPart.location.length > 0) ? (
         <>
           <InfoItemContainer>
             <XStack mb="$2">
@@ -54,7 +57,7 @@ function ProductAndOtherOfferColumns({offer}: Props): JSX.Element {
           </InfoItemContainer>
           <InfoDivider />
         </>
-      )}
+      ) : null}
       {offer.publicPart.spokenLanguages.length > 0 && (
         <>
           <InfoItemContainer>

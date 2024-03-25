@@ -35,7 +35,7 @@ interface Props {
     void
   >
   locationAtom: PrimitiveAtom<OfferLocation[] | undefined>
-  locationStateAtom: PrimitiveAtom<LocationState[]>
+  locationStateAtom: PrimitiveAtom<LocationState[] | undefined>
   updateLocationStateAndPaymentMethodAtom: WritableAtom<
     null,
     [locationState: LocationState],
@@ -80,12 +80,12 @@ function LocationComponent({
     <YStack space="$2">
       {(!listingType || listingType === 'BITCOIN') && (
         <Tabs
-          activeTab={locationState[0]}
+          activeTab={locationState ? locationState[0] : undefined}
           onTabPress={onLocationStateChange}
           tabs={content}
         />
       )}
-      {(locationState.includes('IN_PERSON') || listingType === 'OTHER') && (
+      {!!(listingType === 'OTHER' || locationState?.includes('IN_PERSON')) && (
         <YStack space="$2">
           {!!(!location || (location && location.length < 3)) && (
             <AddCityOrDistrict
@@ -100,7 +100,7 @@ function LocationComponent({
           />
         </YStack>
       )}
-      {listingType === 'BITCOIN' && locationState.includes('ONLINE') && (
+      {listingType === 'BITCOIN' && !!locationState?.includes('ONLINE') && (
         <Info
           actionButtonText={t('offerForm.location.checkItOut')}
           text={t('offerForm.location.meetingInPerson')}

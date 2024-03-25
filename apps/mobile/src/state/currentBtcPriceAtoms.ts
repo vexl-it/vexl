@@ -75,9 +75,8 @@ export const refreshBtcPriceActionAtom = atom(
 
     const fetchInfo = get(btcPriceDataAtom)[currency]
     if (
-      fetchInfo?.state === 'loading' ||
-      (fetchInfo?.state === 'success' &&
-        fetchInfo.lastRefreshAt + FETCH_LIMIT > unixMillisecondsNow())
+      fetchInfo?.state === 'success' &&
+      fetchInfo.lastRefreshAt + FETCH_LIMIT > unixMillisecondsNow()
     ) {
       return T.of(true)
     }

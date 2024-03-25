@@ -10,7 +10,7 @@ export const offersFilterInitialState: OffersFilter = {
   friendLevel: ['FIRST_DEGREE', 'SECOND_DEGREE'],
   currency: undefined,
   location: undefined,
-  locationState: [],
+  locationState: undefined,
   paymentMethod: undefined,
   btcNetwork: undefined,
   spokenLanguages: [],
@@ -48,15 +48,14 @@ export const resetLocationFilterActionAtom = atom(null, (get, set) => {
   }))
 })
 
-export const isFilterActiveAtom = selectAtom(
-  offersFilterFromStorageAtom,
-  (offersFilterFromStorage) => {
-    return (
-      JSON.stringify(offersFilterFromStorage) !==
-      JSON.stringify(offersFilterInitialState)
-    )
-  }
-)
+export const isFilterActiveAtom = atom((get) => {
+  const offersFilterFromStorage = get(offersFilterFromStorageAtom)
+
+  return (
+    JSON.stringify(offersFilterFromStorage) !==
+    JSON.stringify(offersFilterInitialState)
+  )
+})
 
 export const isTextFilterActiveAtom = selectAtom(
   offersFilterFromStorageAtom,

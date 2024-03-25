@@ -36,6 +36,7 @@ function ChatInfoModal(): JSX.Element | null {
     showVexlbotNotificationsForCurrentChatAtom,
     otherSideSupportsTradingChecklistAtom,
     chatAtom,
+    listingTypeIsOtherAtom,
   } = useMolecule(chatMolecule)
   const [showModal, setShowModal] = useAtom(showModalAtom)
   const {top} = useSafeAreaInsets()
@@ -60,6 +61,7 @@ function ChatInfoModal(): JSX.Element | null {
   const otherSideSupportsTradingChecklist = useAtomValue(
     otherSideSupportsTradingChecklistAtom
   )
+  const listingTypeIsOther = useAtomValue(listingTypeIsOtherAtom)
 
   if (!showModal) return null
 
@@ -110,7 +112,7 @@ function ChatInfoModal(): JSX.Element | null {
                   ]
                 : []),
 
-              ...(otherSideSupportsTradingChecklist
+              ...(otherSideSupportsTradingChecklist && !listingTypeIsOther
                 ? [
                     {
                       icon: tradeChecklistSvg,

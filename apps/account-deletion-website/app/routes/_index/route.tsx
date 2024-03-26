@@ -4,25 +4,46 @@ import classes from './route.module.css'
 export default function index(): JSX.Element {
   return (
     <div>
-      <p className="text-container">
-        This is a website for deleting your account. Please click the link below
-        to delete your account.
-      </p>
-
       <p>
-        The best way to delete your account is to click on the{' '}
-        <i>delete account</i> button in the app:
+        If you have lost your phone or uninstalled the app you can use this page
+        to remove and delete your account. If you want to continue, click the
+        link below and follow the steps to delete your account.
       </p>
-
+      <p>
+        You can also delete your account in the app by clicking on the delete
+        account button in the app:
+      </p>
       <img className={classes.image} src="/assets/delete.jpeg"></img>
-
       <p>
-        If you lost your phone or uninstalled the app you can remove your
-        account using this page.
+        If you choose to delete your account through this website, the following
+        data will be immediately removed:
       </p>
-
+      <p>
+        <ul>
+          <li>Hashes of your phone number used to log into Vexl.</li>
+          <li>Your inbox associated with your account. </li>
+          <li>
+            All information regarding contacts you've added to your Vexl network
+            (note: we only store hashed versions of this data).
+          </li>
+        </ul>
+      </p>
+      <p>After 30 days, the following will be deleted:</p>
+      <p>
+        <ul>
+          <li>Any posts you've created.</li>
+        </ul>
+      </p>
+      <p>
+        To expedite this process, you can delete your account directly in the
+        app (refer to the image above). The delay in removing posts is because
+        they are not linked to your phone number. Instead, your device generates
+        and maintains a secret passkey for each of your posts. The app
+        automatically updates these posts, which will be removed if not
+        refreshed within 30 days.
+      </p>
       <Link className="button" to="/deleteAccount1">
-        I understand, I want to delete my account here, on the website
+        I understand, I want to delete my account
       </Link>
     </div>
   )

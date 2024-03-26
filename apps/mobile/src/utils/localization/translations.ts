@@ -20,6 +20,9 @@ import frTermsOfUse from '@vexl-next/localization/fr-termsOfUse.json'
 import itBase from '@vexl-next/localization/it-base.json'
 import itPrivacyPolicyDev from '@vexl-next/localization/it-privacyPolicy.json'
 import itTermsOfUse from '@vexl-next/localization/it-termsOfUse.json'
+import plBase from '@vexl-next/localization/pl-base.json'
+import plPrivacyPolicyDev from '@vexl-next/localization/pl-privacyPolicy.json'
+import plTermsOfUse from '@vexl-next/localization/pl-termsOfUse.json'
 import privacyPolicyDev from '@vexl-next/localization/privacyPolicy.json'
 import ptBase from '@vexl-next/localization/pt-base.json'
 import ptPrivacyPolicyDev from '@vexl-next/localization/pt-privacyPolicy.json'
@@ -77,6 +80,13 @@ export const pt = {
   ...unflatten<typeof ptBase, typeof base>(ptBase),
   termsOfUseMD: ptTermsOfUse.termsOfUseText,
   privacyPolicyMD: ptPrivacyPolicyDev.privacyPolicyText,
+} as const
+
+export const pl = {
+  localeName: 'pl',
+  ...unflatten<typeof plBase, typeof base>(plBase),
+  termsOfUseMD: plTermsOfUse.termsOfUseText,
+  privacyPolicyMD: plPrivacyPolicyDev.privacyPolicyText,
 } as const
 
 export const es = {

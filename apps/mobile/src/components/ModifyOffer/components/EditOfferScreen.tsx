@@ -89,7 +89,7 @@ function EditOfferScreen({
                 </Section>
                 <OfferForm
                   content={
-                    listingType === 'BITCOIN'
+                    !listingType || listingType === 'BITCOIN'
                       ? btcOfferContent
                       : listingType === 'PRODUCT'
                       ? productOfferContent

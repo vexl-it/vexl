@@ -212,7 +212,6 @@ export function createOfferDummyPublicPart(): OfferPublicPart {
     activePriceCurrency: defaultCurrency.code ?? currencies.USD.code,
     active: true,
     groupUuids: [],
-    listingType: 'BITCOIN',
     singlePriceState: 'HAS_COST',
   }
 }
@@ -803,12 +802,12 @@ export const offerFormMolecule = molecule(() => {
 
       set(
         calculateSatsValueOnFiatValueChangeActionAtom,
-        String(offer.offerInfo.publicPart.amountTopLimit)
+        String(offer.offerInfo.publicPart.amountBottomLimit)
       )
 
       set(offerAtom, offer)
       set(offerTypeAtom, offerPublicPart.offerType)
-      set(listingTypeAtom, offerPublicPart.listingType ?? 'BITCOIN')
+      set(listingTypeAtom, offerPublicPart.listingType)
       set(nullableOfferTypeAtom, offerPublicPart.offerType)
       set(nullableCurrencyAtom, offerPublicPart.currency)
       set(nullableAmountTopLimitAtom, offerPublicPart.amountTopLimit)

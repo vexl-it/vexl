@@ -8,12 +8,14 @@ import OfferInfoPreview from './OfferInfoPreview'
 import bubbleTipSvg, {bubbleTipSvgNegative} from './images/bubbleTipSvg'
 
 export default function OfferWithBubbleTip({
+  isMine,
   offer,
   button,
   negative,
   onInfoRectPress,
   reduceDescriptionLength,
 }: {
+  isMine?: boolean
   offer: OneOfferInState
   button?: ReactNode
   negative?: boolean
@@ -29,6 +31,7 @@ export default function OfferWithBubbleTip({
       <TouchableWithoutFeedback onPress={onPress}>
         <Stack bg={negative ? '$grey' : '$white'} p="$4" br="$5">
           <OfferInfoPreview
+            isMine={isMine}
             reduceDescriptionLength={reduceDescriptionLength}
             negative={negative}
             offer={offer.offerInfo}

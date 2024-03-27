@@ -68,7 +68,9 @@ function OffersListItem({isFirst, offerAtom}: Props): JSX.Element {
   } => {
     if (isMine) {
       return {
-        buttonText: t('myOffers.editOffer'),
+        buttonText: offer.offerInfo.publicPart.listingType
+          ? t('myOffers.editOffer')
+          : t('myOffers.updateOffer'),
         actionableUI: true,
         onPress: navigateToOffer,
       }
@@ -168,11 +170,20 @@ function OffersListItem({isFirst, offerAtom}: Props): JSX.Element {
       actionableUI: true,
       onPress: navigateToOffer,
     }
-  }, [canBeRequested, chatForOffer, isMine, navigateToChat, navigateToOffer, t])
+  }, [
+    canBeRequested,
+    chatForOffer,
+    isMine,
+    navigateToChat,
+    navigateToOffer,
+    offer.offerInfo.publicPart.listingType,
+    t,
+  ])
 
   return (
     <Stack mt="$6">
       <OfferWithBubbleTip
+        isMine={isMine}
         reduceDescriptionLength
         onInfoRectPress={content.onPress}
         negative={

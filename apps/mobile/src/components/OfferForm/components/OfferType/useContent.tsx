@@ -15,7 +15,7 @@ export default function useContent(): Array<TabProps<OfferType>> {
     () => [
       {
         title:
-          listingType === 'BITCOIN'
+          !listingType || listingType === 'BITCOIN'
             ? t('offerForm.sellBitcoin')
             : listingType === 'PRODUCT'
             ? t('offerForm.sellItem')
@@ -24,7 +24,7 @@ export default function useContent(): Array<TabProps<OfferType>> {
       },
       {
         title:
-          listingType === 'BITCOIN'
+          !listingType || listingType === 'BITCOIN'
             ? t('offerForm.buyBitcoin')
             : listingType === 'PRODUCT'
             ? t('offerForm.buyItem')

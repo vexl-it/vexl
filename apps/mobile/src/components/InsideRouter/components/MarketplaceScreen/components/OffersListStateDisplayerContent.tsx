@@ -16,6 +16,7 @@ import ErrorListHeader from '../../../../ErrorListHeader'
 import OffersList from '../../../../OffersList'
 import ReencryptOffersSuggestion from '../../../../ReencryptOffersSuggestion'
 import ContainerWithTopBorderRadius from '../../ContainerWithTopBorderRadius'
+import AddListingTypeToOffersSuggestion from './AddListingTypeToOffersSuggestion'
 import EmptyListPlaceholder from './EmptyListPlaceholder'
 import ImportNewContactsSuggestion from './ImportNewContactsSuggestion'
 import OffersListButtons from './OffersListButtons'
@@ -51,6 +52,7 @@ function OffersListStateDisplayerContent({
           />
           <ReencryptOffersSuggestion mt="$5" px="$0" />
           <ImportNewContactsSuggestion mt="$5" px="$0" />
+          <AddListingTypeToOffersSuggestion mt="$5" px="$0" />
         </Stack>
       )
 

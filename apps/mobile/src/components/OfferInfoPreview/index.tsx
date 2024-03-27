@@ -5,6 +5,7 @@ import {isOfferExpired} from '../../utils/isOfferExpired'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import SvgImage from '../Image'
 import clockSvg from '../images/clockSvg'
+import infoSvg from '../images/infoSvg'
 import BtcOfferColumns from './components/BtcOfferColumns'
 import ProductAndOtherOfferColumns from './components/ProductAndOtherOfferColumns'
 
@@ -12,10 +13,12 @@ import ProductAndOtherOfferColumns from './components/ProductAndOtherOfferColumn
 // const BTC_PRAGUE_FRIEND_STAGE = '9c6r0q7LCn1oqES2pfqQDVQH91fY8ZHYcJKbJYOU7hE='
 
 function OfferInfoPreview({
+  isMine,
   offer,
   negative,
   reduceDescriptionLength,
 }: {
+  isMine?: boolean
   offer: OfferInfo
   negative?: boolean
   reduceDescriptionLength?: boolean
@@ -34,22 +37,30 @@ function OfferInfoPreview({
           <SvgImage width={60} height={20} source={btcPragueLogoSvg} />
         </Stack>
       )} */}
-      {!!offer.publicPart.listingType && (
-        <Stack
-          ai="center"
-          jc="center"
-          als="flex-start"
-          bc="$greyAccent5"
-          py="$2"
-          px="$3"
-          br="$3"
-          mb="$3"
-        >
-          <Text fos={12} col="$greyOnWhite" ff="$body600">
-            {t(`offerForm.${offer.publicPart.listingType}`)}
-          </Text>
-        </Stack>
-      )}
+      <XStack ai="center" jc="space-between" mb="$3">
+        {!!offer.publicPart.listingType && (
+          <Stack
+            ai="center"
+            jc="center"
+            bc="$greyAccent5"
+            py="$2"
+            px="$3"
+            br="$3"
+          >
+            <Text fos={12} col="$greyOnWhite" ff="$body600">
+              {t(`offerForm.${offer.publicPart.listingType}`)}
+            </Text>
+          </Stack>
+        )}
+        {!!isMine && !offer.publicPart.listingType && (
+          <XStack ai="center" space="$2">
+            <SvgImage source={infoSvg} fill={getTokens().color.red.val} />
+            <Text fos={12} col="$red" ff="$body600">
+              {t('offerForm.listingTypeNotSet')}
+            </Text>
+          </XStack>
+        )}
+      </XStack>
       <XStack ai="flex-start" jc="space-between">
         <XStack mb="$4">
           <Text

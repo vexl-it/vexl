@@ -69,11 +69,7 @@ function OffersListStateDisplayerContent({
 
   return (
     <ContainerWithTopBorderRadius>
-      <OffersListButtons
-        marketplaceEmpty={offersAtoms.length === 0}
-        onAddPress={navigateToCreateOffer}
-        onMyOffersPress={navigateToMyOffers}
-      />
+      <OffersListButtons marketplaceEmpty={offersAtoms.length === 0} />
       {offersAtoms.length === 0 ? (
         <EmptyListPlaceholder refreshing={loading} onRefresh={refreshOffers} />
       ) : (

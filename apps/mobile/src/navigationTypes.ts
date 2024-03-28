@@ -118,6 +118,7 @@ export type PostLoginFlowScreenProps<T extends keyof PostLoginStackParamsList> =
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type InsideTabParamsList = {
   Marketplace: undefined
+  MyOffers: undefined
   Messages: undefined
   Settings: undefined
 }

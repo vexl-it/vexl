@@ -454,6 +454,8 @@
   "notifications.createOfferPrompt.body": "Create offer to get the best out of Vexl",
   "notifications.loggingOnDifferentDevice.title": "You are trying to log in on a different device!",
   "notifications.loggingOnDifferentDevice.body": "Make sure that you have deleted all your offers and closed all your trades. Your data will not be transferred to the new device.",
+  "tabBar.map": "Map",
+  "tabBar.showList": "Show list",
   "myOffers.addNewOffer": "Add new offer",
   "myOffers.activeOffers": "{{count}} active offers",
   "myOffers.filterOffers": "Filter offers",

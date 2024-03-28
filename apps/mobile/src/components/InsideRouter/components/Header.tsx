@@ -5,7 +5,7 @@ import marketplaceLayoutModeAtom from '../../../state/marketplace/atoms/map/mark
 import BitcoinPriceChart from './BitcoinPriceChart'
 import {CONTAINER_WITH_TOP_BORDER_RADIUS_TOP_PADDING} from './ContainerWithTopBorderRadius'
 
-const CHART_HEADER_HEGIHT_PX = 100
+const CHART_HEADER_HEIGHT_PX = 100
 
 const BackgroundImage = styled(LinearGradient, {
   w: '100%',
@@ -16,7 +16,7 @@ const BackgroundImage = styled(LinearGradient, {
 
 function BtcPriceHeader(): JSX.Element {
   return (
-    <Stack h={CHART_HEADER_HEGIHT_PX}>
+    <Stack h={CHART_HEADER_HEIGHT_PX}>
       <Stack
         bg="$black"
         pos="absolute"

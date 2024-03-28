@@ -28,7 +28,6 @@ import InsideScreen from '../InsideRouter'
 import LoginFlow from '../LoginFlow'
 import CreateOfferScreen from '../ModifyOffer/components/CreateOfferScreen'
 import EditOfferScreen from '../ModifyOffer/components/EditOfferScreen'
-import MyOffersScreen from '../MyOffersScreen'
 import {NotificationPermissionsScreen} from '../NotificationPermissionsScreen'
 import NotificationSettingsScreen from '../NotificationSettingsScreen'
 import OfferDetailScreen from '../OfferDetailScreen'
@@ -93,7 +92,6 @@ function RootNavigation(): JSX.Element {
             <Stack.Screen name="EditOffer" component={EditOfferScreen} />
             <Stack.Screen name="FilterOffers" component={FilterOffersScreen} />
             <Stack.Screen name="SearchOffers" component={SearchOffersScreen} />
-            <Stack.Screen name="MyOffers" component={MyOffersScreen} />
             <Stack.Screen name="AppLogs" component={AppLogsScreen} />
             <Stack.Screen name="ChatDetail" component={ChatDetailScreen} />
             <Stack.Screen name="SetContacts" component={SetContactsScreen} />

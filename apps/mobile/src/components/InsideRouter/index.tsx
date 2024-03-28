@@ -4,6 +4,7 @@ import {type InsideTabParamsList} from '../../navigationTypes'
 import Header from './components/Header'
 import MarketplaceScreen from './components/MarketplaceScreen'
 import MessagesScreen from './components/MessagesScreen'
+import MyOffersScreen from './components/MyOffersScreen'
 import SettingsScreen from './components/SettingsScreen'
 import TabBar from './components/TabBar'
 
@@ -23,6 +24,7 @@ export default function InsideScreen(): JSX.Element {
         initialRouteName="Marketplace"
       >
         <Tab.Screen name="Marketplace" component={MarketplaceScreen} />
+        <Tab.Screen name="MyOffers" component={MyOffersScreen} />
         <Tab.Screen name="Messages" component={MessagesScreen} />
         <Tab.Screen name="Settings" component={SettingsScreen} />
       </Tab.Navigator>

@@ -10,12 +10,12 @@ import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../../../../../utils/useSafeGoBack'
 import Image from '../../../../../Image'
 import {loadingOverlayDisplayedAtom} from '../../../../../LoadingOverlayProvider'
-import plusSvg from '../../../../../MyOffersScreen/images/plusSvg'
 import {
   HeaderProxy,
   PrimaryFooterButtonProxy,
   SecondaryFooterButtonProxy,
 } from '../../../../../PageWithNavigationHeader'
+import plusSvg from '../../../../../images/plusSvg'
 import {
   addDateAndTimeSuggestionsActionAtom,
   submitTradeChecklistUpdatesActionAtom,

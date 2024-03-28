@@ -9,6 +9,7 @@ import Image from '../../Image'
 import marketplaceIconSvg from '../images/marketplaceIconSvg'
 import messagesIconSvg from '../images/messagesIconSvg'
 import profileIconSvg from '../images/profileIconSvg'
+import settingsSvg from '../images/settingsSvg'
 
 export const TAB_BAR_HEIGHT_PX = 72
 
@@ -16,10 +17,12 @@ function getIconForRouteName(routeName: string): SvgString {
   switch (routeName) {
     case 'Marketplace':
       return marketplaceIconSvg
+    case 'MyOffers':
+      return profileIconSvg
     case 'Messages':
       return messagesIconSvg
     case 'Settings':
-      return profileIconSvg
+      return settingsSvg
     default:
       throw new Error(`Unknown route name ${routeName}`)
   }

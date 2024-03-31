@@ -22,7 +22,6 @@ export default function useProductOfferContent(): Props[] {
   const tokens = getTokens()
   const {
     amountBottomLimitAtom,
-    btcNetworkAtom,
     currencyAtom,
     offerTypeAtom,
     listingTypeAtom,
@@ -43,6 +42,7 @@ export default function useProductOfferContent(): Props[] {
     satsValueAtom,
     changePriceCurrencyActionAtom,
     updateLocationStateAndPaymentMethodAtom,
+    updateBtcNetworkAtom,
   } = useMolecule(offerFormMolecule)
 
   return useMemo(
@@ -64,7 +64,7 @@ export default function useProductOfferContent(): Props[] {
         title: t('offerForm.price'),
         children: (
           <Price
-            amountBottomLimitAtom={amountBottomLimitAtom}
+            priceAtom={amountBottomLimitAtom}
             calculateSatsValueOnFiatValueChangeActionAtom={
               calculateSatsValueOnFiatValueChangeActionAtom
             }
@@ -125,7 +125,7 @@ export default function useProductOfferContent(): Props[] {
       {
         title: t('offerForm.network.network'),
         image: networkSvg,
-        children: <Network btcNetworkAtom={btcNetworkAtom} />,
+        children: <Network btcNetworkAtom={updateBtcNetworkAtom} />,
         mandatory: true,
       },
       {
@@ -161,7 +161,7 @@ export default function useProductOfferContent(): Props[] {
       removeSpokenLanguageActionAtom,
       resetSelectedSpokenLanguagesActionAtom,
       saveSelectedSpokenLanguagesActionAtom,
-      btcNetworkAtom,
+      updateBtcNetworkAtom,
       intendedConnectionLevelAtom,
     ]
   )

@@ -9,6 +9,7 @@ import DropdownSelectButton from '../../../DropdownSelectButton'
 
 interface Props {
   currencyAtom: PrimitiveAtom<CurrencyCode | undefined>
+  hideInFilter?: boolean
   updateCurrencyLimitsAtom: WritableAtom<
     null,
     [
@@ -22,6 +23,7 @@ interface Props {
 
 function CurrencyComponent({
   currencyAtom,
+  hideInFilter,
   updateCurrencyLimitsAtom,
 }: Props): JSX.Element | null {
   const {t} = useTranslation()
@@ -32,9 +34,11 @@ function CurrencyComponent({
 
   return (
     <Stack>
-      <Text ff="$body600" fos={16} col="$greyOnBlack" mb="$4">
-        {t('offerForm.currencyYouWouldLikeToUse')}
-      </Text>
+      {!hideInFilter && (
+        <Text ff="$body600" fos={16} col="$greyOnBlack" mb="$4">
+          {t('offerForm.currencyYouWouldLikeToUse')}
+        </Text>
+      )}
       <DropdownSelectButton
         onPress={() => {
           setCurrencySelectVisible(true)

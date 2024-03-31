@@ -9,6 +9,7 @@ import {useRef, useState} from 'react'
 import {StyleSheet, type TextInput} from 'react-native'
 import {Stack, getTokens} from 'tamagui'
 import chevronDownSvg from '../../../../../images/chevronDownSvg'
+import {currencies} from '../../../../../utils/localization/currency'
 import {Dropdown, type DropdownItemProps} from '../../../../Dropdown'
 import Image from '../../../../Image'
 import CalculatorInput from './CalculatorInput'
@@ -37,7 +38,7 @@ const styles = StyleSheet.create({
 })
 
 interface Props {
-  amountBottomLimitAtom: PrimitiveAtom<number | undefined>
+  priceAtom: PrimitiveAtom<number | undefined>
   calculateSatsValueOnFiatValueChangeActionAtom: WritableAtom<
     null,
     [priceString: string],
@@ -58,7 +59,7 @@ const fiatCurrenciesDropdownData: Array<DropdownItemProps<CurrencyCode>> =
   }))
 
 function FiatInput({
-  amountBottomLimitAtom,
+  priceAtom,
   calculateSatsValueOnFiatValueChangeActionAtom,
   currencyAtom,
   changePriceCurrencyActionAtom,
@@ -67,8 +68,8 @@ function FiatInput({
 
   const [isFocused, setIsFocused] = useState<boolean>(false)
 
-  const currency = useAtomValue(currencyAtom) ?? 'USD'
-  const amountBottomLimit = useAtomValue(amountBottomLimitAtom)
+  const currency = useAtomValue(currencyAtom) ?? currencies.USD.code
+  const price = useAtomValue(priceAtom)
   const calculateSatsValueOnFiatValueChange = useSetAtom(
     calculateSatsValueOnFiatValueChangeActionAtom
   )
@@ -87,11 +88,7 @@ function FiatInput({
       onWrapperPress={() => {
         ref.current?.focus()
       }}
-      value={
-        amountBottomLimit && amountBottomLimit !== 0
-          ? String(amountBottomLimit)
-          : undefined
-      }
+      value={price && price !== 0 ? String(price) : undefined}
       onChangeText={(input) => {
         calculateSatsValueOnFiatValueChange(input)
       }}

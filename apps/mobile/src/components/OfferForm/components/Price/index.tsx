@@ -12,7 +12,8 @@ import priceTagSvg from '../../../images/priceTagSvg'
 import PriceCalculator from './components/PriceCalculator'
 
 interface Props {
-  amountBottomLimitAtom: PrimitiveAtom<number | undefined>
+  inFilter?: boolean
+  priceAtom: PrimitiveAtom<number | undefined>
   calculateSatsValueOnFiatValueChangeActionAtom: WritableAtom<
     null,
     [priceString: string],
@@ -34,7 +35,8 @@ interface Props {
 }
 
 function Price({
-  amountBottomLimitAtom,
+  inFilter,
+  priceAtom,
   calculateSatsValueOnFiatValueChangeActionAtom,
   calculateFiatValueOnSatsValueChangeActionAtom,
   currencyAtom,
@@ -61,7 +63,7 @@ function Price({
               height={24}
               width={24}
               stroke={
-                singlePriceState === 'HAS_COST'
+                singlePriceState === 'HAS_COST' || inFilter
                   ? tokens.color.white.val
                   : tokens.color.greyOnWhite.val
               }
@@ -72,31 +74,43 @@ function Price({
             <Text
               numberOfLines={2}
               ff="$body700"
-              col={singlePriceState === 'HAS_COST' ? '$white' : '$greyOnWhite'}
+              col={
+                singlePriceState === 'HAS_COST' || inFilter
+                  ? '$white'
+                  : '$greyOnWhite'
+              }
               fos={24}
             >
-              {t('offerForm.price')}
+              {!inFilter ? t('offerForm.price') : t('filterOffers.priceUpTo')}
             </Text>
           </Stack>
         </XStack>
-        <Switch
-          value={singlePriceState === 'HAS_COST'}
-          onValueChange={onSwitchValueChange}
-        />
+        {!inFilter && (
+          <Switch
+            value={singlePriceState === 'HAS_COST'}
+            onValueChange={onSwitchValueChange}
+          />
+        )}
       </XStack>
       <Text
         ff="$body600"
         mb="$4"
-        col={singlePriceState === 'HAS_COST' ? '$white' : '$greyOnWhite'}
+        col={
+          singlePriceState === 'HAS_COST' || inFilter
+            ? '$white'
+            : '$greyOnWhite'
+        }
         fos={16}
       >
-        {singlePriceState === 'HAS_COST'
+        {inFilter
+          ? t('filterOffers.filteredAccordingToValueInSats')
+          : singlePriceState === 'HAS_COST'
           ? t('offerForm.thePriceIsFixedToFiat')
-          : t('offerForm.thisItemWillBeFree')}
+          : t('offerForm.thisItemDoesNotHaveSetPrice')}
       </Text>
-      {singlePriceState === 'HAS_COST' && (
+      {!!(singlePriceState === 'HAS_COST' || inFilter) && (
         <PriceCalculator
-          amountBottomLimitAtom={amountBottomLimitAtom}
+          priceAtom={priceAtom}
           calculateSatsValueOnFiatValueChangeActionAtom={
             calculateSatsValueOnFiatValueChangeActionAtom
           }

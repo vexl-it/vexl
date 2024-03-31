@@ -1,7 +1,9 @@
 import {Latitude, Longitude} from '@vexl-next/domain/src/utility/geoCoordinates'
 import {atom} from 'jotai'
 import {splitAtom} from 'jotai/utils'
+import calculatePriceInSats from '../../../utils/calculatePriceInSats'
 import {importedContactsAtom} from '../../contacts/atom/contactsStore'
+import {createBtcPriceForCurrencyAtom} from '../../currentBtcPriceAtoms'
 import filterOffersByText from '../utils/filterOffersByText'
 import isOfferInsdieViewPort from '../utils/isOfferInsideViewport'
 import sortOffers from '../utils/sortOffers'
@@ -19,17 +21,14 @@ export default function areIncluded<T>(
   return elementsToLookFor.every((element) => arrayToLookIn.includes(element))
 }
 
-/**
- * Filtered offers by every filter except location
- */
-export const filteredOffersIgnoreLocationAtom = atom((get) => {
+const filterBtcOffersAtom = atom((get) => {
   const offersToSeeInMarketplace = get(offersToSeeInMarketplaceAtom)
   const filter = get(offersFilterFromStorageAtom)
-  const textFilter = filter.text
   const layoutMode = get(marketplaceLayoutModeAtom)
 
-  const filtered = offersToSeeInMarketplace.filter(
+  return offersToSeeInMarketplace.filter(
     (offer) =>
+      offer.offerInfo.publicPart.listingType === 'BITCOIN' &&
       (!filter.currency ||
         filter.currency.includes(offer.offerInfo.publicPart.currency)) &&
       (layoutMode === 'list' ||
@@ -65,6 +64,77 @@ export const filteredOffersIgnoreLocationAtom = atom((get) => {
           offer.offerInfo.publicPart.spokenLanguages.includes(item)
         ))
   )
+})
+
+const filterProductAndOtherOffersAtom = atom((get) => {
+  const offersToSeeInMarketplace = get(offersToSeeInMarketplaceAtom)
+  const filter = get(offersFilterFromStorageAtom)
+  const layoutMode = get(marketplaceLayoutModeAtom)
+  const btcPriceWithStateForFilterCurrency = filter.singlePriceCurrency
+    ? get(createBtcPriceForCurrencyAtom(filter.singlePriceCurrency))
+    : undefined
+  const filterPriceInSats =
+    filter.singlePrice &&
+    btcPriceWithStateForFilterCurrency?.state !== 'loading'
+      ? calculatePriceInSats({
+          price: filter.singlePrice,
+          currentBtcPrice: btcPriceWithStateForFilterCurrency?.btcPrice ?? 0,
+        })
+      : null
+
+  return offersToSeeInMarketplace.filter(
+    (offer) =>
+      (!filter.listingType ||
+        offer.offerInfo.publicPart.listingType === filter.listingType) &&
+      (layoutMode === 'list' ||
+        offer.offerInfo.publicPart.location.length > 0) &&
+      (!filter.locationState ||
+        areIncluded(
+          filter.locationState,
+          offer.offerInfo.publicPart.locationState
+        )) &&
+      (!filter.btcNetwork ||
+        areIncluded(
+          filter.btcNetwork,
+          offer.offerInfo.publicPart.btcNetwork
+        )) &&
+      (!filter.friendLevel ||
+        (filter.friendLevel.includes('FIRST_DEGREE') &&
+        !filter.friendLevel.includes('SECOND_DEGREE')
+          ? areIncluded(
+              filter.friendLevel,
+              offer.offerInfo.privatePart.friendLevel
+            )
+          : true)) &&
+      (!filter.offerType ||
+        offer.offerInfo.publicPart.offerType === filter.offerType) &&
+      (!filterPriceInSats ||
+        offer.offerInfo.publicPart.singlePriceState === 'FOR_FREE' ||
+        (calculatePriceInSats({
+          price: offer.offerInfo.publicPart.amountBottomLimit,
+          currentBtcPrice:
+            get(
+              createBtcPriceForCurrencyAtom(offer.offerInfo.publicPart.currency)
+            )?.btcPrice ?? 0,
+        }) ?? 0) <= filterPriceInSats) &&
+      (filter.spokenLanguages.length === 0 ||
+        filter.spokenLanguages.some((item) =>
+          offer.offerInfo.publicPart.spokenLanguages.includes(item)
+        ))
+  )
+})
+
+/**
+ * Filtered offers by every filter except location
+ */
+export const filteredOffersIgnoreLocationAtom = atom((get) => {
+  const filter = get(offersFilterFromStorageAtom)
+  const textFilter = filter.text
+
+  const filtered =
+    filter.listingType === 'BITCOIN'
+      ? get(filterBtcOffersAtom)
+      : get(filterProductAndOtherOffersAtom)
 
   // This could be rewritten with pipe, i know, i know...
   const filteredByText = textFilter

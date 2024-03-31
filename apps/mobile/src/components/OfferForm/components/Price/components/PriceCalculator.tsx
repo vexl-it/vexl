@@ -8,7 +8,7 @@ import FiatInput from './FiatInput'
 import SatsInput from './SatsInput'
 
 interface Props {
-  amountBottomLimitAtom: PrimitiveAtom<number | undefined>
+  priceAtom: PrimitiveAtom<number | undefined>
   calculateSatsValueOnFiatValueChangeActionAtom: WritableAtom<
     null,
     [priceString: string],
@@ -29,7 +29,7 @@ interface Props {
 }
 
 function PriceCalculator({
-  amountBottomLimitAtom,
+  priceAtom,
   calculateSatsValueOnFiatValueChangeActionAtom,
   calculateFiatValueOnSatsValueChangeActionAtom,
   currencyAtom,
@@ -42,7 +42,7 @@ function PriceCalculator({
         <CurrentBtcPrice currencyAtom={currencyAtom} />
       </Stack>
       <FiatInput
-        amountBottomLimitAtom={amountBottomLimitAtom}
+        priceAtom={priceAtom}
         calculateSatsValueOnFiatValueChangeActionAtom={
           calculateSatsValueOnFiatValueChangeActionAtom
         }

@@ -1,4 +1,4 @@
-import {useAtomValue, useSetAtom} from 'jotai/index'
+import {useAtomValue, useSetAtom} from 'jotai'
 import {useEffect, useMemo} from 'react'
 import {ActivityIndicator} from 'react-native'
 import {XStack, getTokens} from 'tamagui'
@@ -9,10 +9,12 @@ import {
 } from '../../../state/currentBtcPriceAtoms'
 import {bigNumberToString} from '../../../utils/bigNumberToString'
 import calculatePriceInSats from '../../../utils/calculatePriceInSats'
+import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {
   InfoDivider,
   InfoItemContainer,
   InfoText,
+  InfoTextSmall,
   PriceBigger,
   PriceText,
 } from '../columnsStyles'
@@ -22,6 +24,7 @@ interface Props {
 }
 
 function PriceInSats({offer}: Props): JSX.Element {
+  const {t} = useTranslation()
   const refreshBtcPrice = useSetAtom(refreshBtcPriceActionAtom)
   const btcPriceWithState = useAtomValue(
     useMemo(
@@ -37,6 +40,7 @@ function PriceInSats({offer}: Props): JSX.Element {
   return (
     <XStack f={1}>
       <InfoItemContainer>
+        <InfoTextSmall>{t('offer.approximatelyAbbreviation')}</InfoTextSmall>
         {btcPriceWithState?.state === 'loading' ? (
           <ActivityIndicator
             size="small"

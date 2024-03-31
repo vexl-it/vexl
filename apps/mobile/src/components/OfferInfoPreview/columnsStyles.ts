@@ -19,6 +19,10 @@ export const InfoText = styled(Text, {
   mx: '$1',
 })
 
+export const InfoTextSmall = styled(InfoText, {
+  fos: 10,
+})
+
 export const PriceText = styled(InfoText, {
   mb: '$2',
 })

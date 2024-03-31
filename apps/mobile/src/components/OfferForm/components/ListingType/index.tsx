@@ -17,7 +17,7 @@ interface Props {
   listingTypeAtom: PrimitiveAtom<ListingType | undefined>
   updateListingTypeActionAtom: WritableAtom<
     null,
-    [listingType: ListingType | undefined],
+    [listingType: ListingType],
     void
   >
   onTabPress?: () => void

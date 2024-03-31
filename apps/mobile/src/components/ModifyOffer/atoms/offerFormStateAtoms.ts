@@ -41,7 +41,6 @@ import {splitAtom} from 'jotai/utils'
 import {Alert} from 'react-native'
 import {createInboxAtom} from '../../../state/chat/hooks/useCreateInbox'
 import {
-  SATOSHIS_IN_BTC,
   createBtcPriceForCurrencyAtom,
   refreshBtcPriceActionAtom,
 } from '../../../state/currentBtcPriceAtoms'
@@ -52,6 +51,7 @@ import {
 } from '../../../state/marketplace'
 import {singleOfferAtom} from '../../../state/marketplace/atoms/offersState'
 import getValueFromSetStateActionOfAtom from '../../../utils/atomUtils/getValueFromSetStateActionOfAtom'
+import calculatePriceInFiatFromSats from '../../../utils/calculatePriceInFiatFromSats'
 import calculatePriceInSats from '../../../utils/calculatePriceInSats'
 import getDefaultCurrency from '../../../utils/getDefaultCurrency'
 import {
@@ -429,6 +429,21 @@ export const offerFormMolecule = molecule(() => {
         .prop('ownershipInfo')
         .optional()
         .prop('intendedConnectionLevel') ?? 'FIRST'
+  )
+
+  const updateBtcNetworkAtom = atom(
+    (get) => get(btcNetworkAtom),
+    (get, set, btcNetwork: BtcNetwork) => {
+      set(btcNetworkAtom, (prev) => {
+        if (prev?.includes(btcNetwork) && prev.length > 1) {
+          return prev.filter((network) => network !== btcNetwork)
+        } else if (!prev?.includes(btcNetwork)) {
+          return [...(prev ?? []), btcNetwork]
+        }
+
+        return prev
+      })
+    }
   )
 
   const selectedSpokenLanguagesAtom = atom<SpokenLanguage[]>(
@@ -903,7 +918,10 @@ export const offerFormMolecule = molecule(() => {
       if (currentBtcPrice) {
         set(
           amountBottomLimitAtom,
-          Math.round(currentBtcPrice * (satsNumber / SATOSHIS_IN_BTC))
+          calculatePriceInFiatFromSats({
+            satsNumber,
+            currentBtcPrice,
+          })
         )
       }
     }
@@ -987,7 +1005,6 @@ export const offerFormMolecule = molecule(() => {
     locationAtom,
     expirationDateAtom,
     offerExpirationModalVisibleAtom,
-    btcNetworkAtom,
     paymentMethodAtom,
     offerDescriptionAtom,
     singlePriceStateAtom,
@@ -1011,5 +1028,6 @@ export const offerFormMolecule = molecule(() => {
     calculateFiatValueOnSatsValueChangeActionAtom,
     changePriceCurrencyActionAtom,
     updateListingTypeActionAtom,
+    updateBtcNetworkAtom,
   }
 })

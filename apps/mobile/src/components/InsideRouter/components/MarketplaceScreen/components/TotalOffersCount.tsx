@@ -17,7 +17,7 @@ function TotalOffersCount({
   offerType,
 }: Props): JSX.Element {
   const {t} = useTranslation()
-  const markeplaceLayout = useAtomValue(marketplaceLayoutModeAtom)
+  const marketplaceLayout = useAtomValue(marketplaceLayoutModeAtom)
   const totalCount = useAtomValue(
     offerType === 'BUY'
       ? buyOffersToSeeInMarketplaceCountAtom
@@ -26,12 +26,12 @@ function TotalOffersCount({
 
   return (
     <Stack als="flex-start" my="$2" mx="$2">
-      {markeplaceLayout === 'map' && (
+      {marketplaceLayout === 'map' && (
         <Text ff="$body600" color="$greyOnBlack">
           {t('map.showingOnlyInPersonOffers')}
         </Text>
       )}
-      <Text ff="$body600" color="$greyOnBlack">
+      <Text fs={48} ff="$body600" color="$greyOnBlack">
         {totalCount !== filteredOffersCount
           ? t('offer.totalFilteredOffers', {
               count: filteredOffersCount,

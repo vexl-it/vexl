@@ -14,11 +14,18 @@ import {type LocationSuggestion} from '@vexl-next/rest-api/src/services/location
 import {atom, type SetStateAction, type WritableAtom} from 'jotai'
 import {splitAtom} from 'jotai/utils'
 import {
+  createBtcPriceForCurrencyAtom,
+  refreshBtcPriceActionAtom,
+} from '../../state/currentBtcPriceAtoms'
+import {
   offersFilterFromStorageAtom,
   offersFilterInitialState,
+  singlePriceStateAtom,
 } from '../../state/marketplace/atoms/filterAtoms'
 import {type OffersFilter} from '../../state/marketplace/domain'
 import getValueFromSetStateActionOfAtom from '../../utils/atomUtils/getValueFromSetStateActionOfAtom'
+import calculatePriceInFiatFromSats from '../../utils/calculatePriceInFiatFromSats'
+import calculatePriceInSats from '../../utils/calculatePriceInSats'
 import {currencies} from '../../utils/localization/currency'
 
 export const listingTypeAtom = atom<ListingType | undefined>(
@@ -79,6 +86,27 @@ export const amountTopLimitAtom = atom<number | undefined>(
   offersFilterInitialState.amountTopLimit
 )
 
+export const singlePriceAtom = atom<number | undefined>(
+  offersFilterInitialState.singlePrice
+)
+
+export const singlePriceCurrencyAtom = atom<CurrencyCode | undefined>(
+  offersFilterInitialState.singlePriceCurrency
+)
+
+export const btcPriceForOfferWithCurrencyAtom = createBtcPriceForCurrencyAtom(
+  singlePriceCurrencyAtom
+)
+
+export const updateBtcNetworkAtom = atom(
+  (get) => get(btcNetworkAtom),
+  (get, set, btcNetwork: BtcNetwork) => {
+    set(btcNetworkAtom, (prev) =>
+      prev?.includes(btcNetwork) ? undefined : [btcNetwork]
+    )
+  }
+)
+
 export const updateCurrencyLimitsAtom = atom<
   null,
   [
@@ -90,12 +118,24 @@ export const updateCurrencyLimitsAtom = atom<
 >(null, (get, set, params) => {
   const {currency} = params
 
+  if (currency) {
+    void set(refreshBtcPriceActionAtom, currency)()
+  }
+
   set(currencyAtom, currency)
   set(amountBottomLimitAtom, 0)
   set(amountTopLimitAtom, currency ? currencies[currency].maxAmount : 0)
 
   return true
 })
+
+export const changePriceCurrencyActionAtom = atom(
+  null,
+  (get, set, currencyCode: CurrencyCode) => {
+    set(singlePriceCurrencyAtom, currencyCode)
+    void set(refreshBtcPriceActionAtom, currencyCode)()
+  }
+)
 
 export const updateLocationStateAndPaymentMethodAtom = atom(
   null,
@@ -113,6 +153,56 @@ export const updateLocationStateAndPaymentMethodAtom = atom(
       set(
         paymentMethodAtom,
         locationState === 'ONLINE' ? ['BANK', 'REVOLUT'] : ['CASH']
+      )
+    }
+  }
+)
+
+export const satsValueAtom = atom<number>(0)
+
+export const calculateSatsValueOnFiatValueChangeActionAtom = atom(
+  null,
+  (get, set, priceString: string) => {
+    if (!priceString || isNaN(Number(priceString))) {
+      set(satsValueAtom, 0)
+      set(singlePriceAtom, undefined)
+      return
+    }
+    const priceNumber = Number(priceString)
+    const currentBtcPrice = get(btcPriceForOfferWithCurrencyAtom)?.btcPrice
+
+    set(singlePriceAtom, priceNumber)
+
+    if (currentBtcPrice) {
+      set(
+        satsValueAtom,
+        calculatePriceInSats({price: priceNumber, currentBtcPrice}) ?? 0
+      )
+    }
+  }
+)
+
+export const calculateFiatValueOnSatsValueChangeActionAtom = atom(
+  null,
+  (get, set, satsString: string) => {
+    if (!satsString || isNaN(Number(satsString))) {
+      set(singlePriceAtom, undefined)
+      set(satsValueAtom, 0)
+      return
+    }
+
+    const satsNumber = Number(satsString)
+    const currentBtcPrice = get(btcPriceForOfferWithCurrencyAtom)?.btcPrice
+
+    set(satsValueAtom, satsNumber)
+
+    if (currentBtcPrice) {
+      set(
+        singlePriceAtom,
+        calculatePriceInFiatFromSats({
+          satsNumber,
+          currentBtcPrice,
+        })
       )
     }
   }
@@ -195,12 +285,9 @@ export const setOfferLocationActionAtom = atom(
   }
 )
 
-const setAllFilterAtomsActionAtom = atom(
+const setConditionallyRenderedFilterElementsActionAtom = atom(
   null,
   (get, set, filterValue: OffersFilter) => {
-    set(listingTypeAtom, filterValue.listingType)
-    set(focusTextFilterAtom, filterValue.text)
-    set(sortingAtom, filterValue.sort)
     set(currencyAtom, filterValue.currency)
     set(locationAtom, filterValue.location)
     set(locationStateAtom, filterValue.locationState)
@@ -209,10 +296,40 @@ const setAllFilterAtomsActionAtom = atom(
     set(amountBottomLimitAtom, filterValue.amountBottomLimit)
     set(amountTopLimitAtom, filterValue.amountTopLimit)
     set(spokenLanguagesAtom, filterValue.spokenLanguages)
+    set(singlePriceAtom, filterValue.singlePrice)
+    set(singlePriceStateAtom, filterValue.singlePriceState)
+    set(singlePriceCurrencyAtom, filterValue.singlePriceCurrency)
     set(
       intendedConnectionLevelAtom,
       filterValue.friendLevel?.includes('SECOND_DEGREE') ? 'ALL' : 'FIRST'
     )
+    set(satsValueAtom, 0)
+  }
+)
+
+const setAllFilterAtomsActionAtom = atom(
+  null,
+  (get, set, filterValue: OffersFilter) => {
+    set(listingTypeAtom, filterValue.listingType)
+    set(focusTextFilterAtom, filterValue.text)
+    set(sortingAtom, filterValue.sort)
+    set(setConditionallyRenderedFilterElementsActionAtom, filterValue)
+  }
+)
+
+export const updateListingTypeActionAtom = atom(
+  null,
+  (get, set, listingType: ListingType) => {
+    set(listingTypeAtom, (prev) =>
+      prev === listingType ? undefined : listingType
+    )
+
+    if (!get(listingTypeAtom)) {
+      set(
+        setConditionallyRenderedFilterElementsActionAtom,
+        offersFilterInitialState
+      )
+    }
   }
 )
 
@@ -222,6 +339,10 @@ export const initializeOffersFilterOnDisplayActionAtom = atom(
     const filterFromStorage = get(offersFilterFromStorageAtom)
 
     set(setAllFilterAtomsActionAtom, filterFromStorage)
+    set(
+      calculateSatsValueOnFiatValueChangeActionAtom,
+      String(filterFromStorage.singlePrice)
+    )
   }
 )
 
@@ -232,6 +353,7 @@ export const resetFilterAtom = atom(null, (get, set) => {
 export const saveFilterActionAtom = atom(null, (get, set) => {
   const newFilterValue: OffersFilter = {
     sort: get(sortingAtom),
+    listingType: get(listingTypeAtom),
     currency: get(currencyAtom),
     location: get(locationAtom),
     locationState: get(locationStateAtom),
@@ -245,6 +367,9 @@ export const saveFilterActionAtom = atom(null, (get, set) => {
     amountBottomLimit: get(amountBottomLimitAtom),
     amountTopLimit: get(amountTopLimitAtom),
     text: get(focusTextFilterAtom),
+    singlePrice: get(singlePriceAtom),
+    singlePriceState: get(singlePriceStateAtom),
+    singlePriceCurrency: get(singlePriceCurrencyAtom),
   }
 
   set(offersFilterFromStorageAtom, newFilterValue)

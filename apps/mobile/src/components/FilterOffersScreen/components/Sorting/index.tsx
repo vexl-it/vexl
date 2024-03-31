@@ -54,12 +54,16 @@ function Sorting({sortingAtom}: Props): JSX.Element {
 
   return (
     <Dropdown
+      showClearButton
       size="large"
       variant="yellow"
       value={{value: sorting, label: selectedLabel ?? ''}}
       data={dropdownRows}
       onChange={(item) => {
         if (item.value) setSorting(item.value)
+      }}
+      onClear={() => {
+        setSorting(undefined)
       }}
       placeholder={t('filterOffers.selectSortingMethod')}
     />

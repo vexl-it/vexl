@@ -13,15 +13,12 @@ import amountOfTransactionSvg from '../images/amountOfTransactionSvg'
 import coinsSvg from '../images/coinsSvg'
 import friendLevelSvg from '../images/friendLevelSvg'
 import locationSvg from '../images/locationSvg'
-import magnifyingGlass from '../images/magnifyingGlass'
 import networkSvg from '../images/networkSvg'
 import paymentMethodSvg from '../images/paymentMethod'
-import sortingSvg from '../images/sortingSvg'
 import spokenLanguagesSvg from '../images/spokenLanguagesSvg'
 import {
   amountBottomLimitAtom,
   amountTopLimitAtom,
-  btcNetworkAtom,
   createIsThisLanguageSelectedAtom,
   currencyAtom,
   intendedConnectionLevelAtom,
@@ -33,35 +30,24 @@ import {
   resetSpokenLanguagesToInitialStateActionAtom,
   saveSelectedSpokenLanguagesActionAtom,
   setOfferLocationActionAtom,
-  sortingAtom,
   spokenLanguagesAtomsAtom,
+  updateBtcNetworkAtom,
   updateCurrencyLimitsAtom,
   updateLocationStateAndPaymentMethodAtom,
 } from './atom'
-import Sorting from './components/Sorting'
-import TextFilter from './components/TextFilter'
 
-export default function useContent(): Props[] {
+export default function useBtcOffersFilterContent(): Props[] {
   const {t} = useTranslation()
   const tokens = getTokens()
 
   return useMemo(
     () => [
       {
-        title: t('filterOffers.searchByText'),
-        image: magnifyingGlass,
-        children: <TextFilter />,
-      },
-      {
-        title: t('filterOffers.sorting'),
-        image: sortingSvg,
-        children: <Sorting sortingAtom={sortingAtom} />,
-      },
-      {
         title: t('common.currency'),
         image: coinsSvg,
         children: (
           <Currency
+            hideInFilter
             currencyAtom={currencyAtom}
             updateCurrencyLimitsAtom={updateCurrencyLimitsAtom}
           />
@@ -125,7 +111,7 @@ export default function useContent(): Props[] {
       {
         title: t('offerForm.network.network'),
         image: networkSvg,
-        children: <Network btcNetworkAtom={btcNetworkAtom} />,
+        children: <Network btcNetworkAtom={updateBtcNetworkAtom} />,
       },
       {
         title: t('offerForm.friendLevel.friendLevel'),

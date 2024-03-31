@@ -3,6 +3,8 @@ import {focusAtom} from 'jotai-optics'
 import {selectAtom} from 'jotai/utils'
 import {z} from 'zod'
 import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
+import getDefaultCurrency from '../../../utils/getDefaultCurrency'
+import {currencies} from '../../../utils/localization/currency'
 import {OffersFilter} from '../domain'
 
 export const offersFilterInitialState: OffersFilter = {
@@ -18,6 +20,9 @@ export const offersFilterInitialState: OffersFilter = {
   amountTopLimit: undefined,
   text: undefined,
   listingType: undefined,
+  singlePriceState: undefined,
+  singlePrice: undefined,
+  singlePriceCurrency: getDefaultCurrency().code ?? currencies.USD.code,
 }
 
 export const offersFilterStorageAtom = atomWithParsedMmkvStorage(
@@ -35,8 +40,8 @@ export const locationFilterAtom = focusAtom(offersFilterStorageAtom, (o) =>
   o.prop('filter').prop('location')
 )
 
-export const listingTypeFilterAtom = focusAtom(offersFilterStorageAtom, (o) =>
-  o.prop('filter').prop('listingType')
+export const singlePriceStateAtom = focusAtom(offersFilterStorageAtom, (o) =>
+  o.prop('filter').prop('singlePriceState')
 )
 
 export const resetLocationFilterActionAtom = atom(null, (get, set) => {
@@ -49,11 +54,23 @@ export const resetLocationFilterActionAtom = atom(null, (get, set) => {
 })
 
 export const isFilterActiveAtom = atom((get) => {
-  const offersFilterFromStorage = get(offersFilterFromStorageAtom)
+  // singlePriceCurrency and singlePrice are used only to calculate Product and Other offers filter SATS value for Price component
+  // this value is stored, but it's not one of the filtering conditions
+  // those values are used to calculate SATS value when filtering Product/Other offers
+  const {
+    singlePriceCurrency: ignoredCurrency1,
+    singlePrice: ignoredSinglePrice1,
+    ...offersFilterFromStorage
+  } = get(offersFilterFromStorageAtom)
+  const {
+    singlePriceCurrency: ignoredCurrency2,
+    singlePrice: ignoredSinglePrice2,
+    ...filterInitialState
+  } = offersFilterInitialState
 
   return (
     JSON.stringify(offersFilterFromStorage) !==
-    JSON.stringify(offersFilterInitialState)
+    JSON.stringify(filterInitialState)
   )
 })
 

@@ -1,9 +1,11 @@
+import {TouchableWithoutFeedback} from 'react-native'
 import {Dropdown as RNEDropdown} from 'react-native-element-dropdown'
 import {type DropdownProps} from 'react-native-element-dropdown/lib/typescript/components/Dropdown/model'
-import {getTokens, Text, XStack} from 'tamagui'
+import {getTokens, Stack, Text, XStack} from 'tamagui'
 import chevronDownSvg from '../../images/chevronDownSvg'
 import Image from '../Image'
 import checkmarkSvg from '../images/checkmarkSvg'
+import closeSvg from '../images/closeSvg'
 
 export interface DropdownItemProps<T> {
   label: string
@@ -38,11 +40,16 @@ interface Props<T>
   > {
   size?: 'medium' | 'large'
   variant?: 'yellow' | 'grey'
+  onClear?: () => void
+  showClearButton?: boolean
 }
 
 export function Dropdown<T>({
   size = 'medium',
   variant = 'grey',
+  value,
+  onClear,
+  showClearButton,
   ...props
 }: Props<T>): JSX.Element {
   return (
@@ -88,15 +95,29 @@ export function Dropdown<T>({
       }}
       renderRightIcon={() =>
         !props.disable ? (
-          <Image
-            source={chevronDownSvg}
-            stroke={getTokens().color.greyOnBlack.val}
-          />
+          <XStack ai="center" space="$2">
+            {typeof value !== 'string' && value?.value && showClearButton ? (
+              <TouchableWithoutFeedback onPress={onClear} hitSlop={5}>
+                <Stack>
+                  <Image
+                    source={closeSvg}
+                    stroke={getTokens().color.greyOnBlack.val}
+                  />
+                </Stack>
+              </TouchableWithoutFeedback>
+            ) : (
+              <Image
+                source={chevronDownSvg}
+                stroke={getTokens().color.greyOnBlack.val}
+              />
+            )}
+          </XStack>
         ) : (
           <></>
         )
       }
       renderItem={renderItem}
+      value={value}
       {...props}
     />
   )

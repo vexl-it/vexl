@@ -9,6 +9,7 @@ import {
 import calculatePercentageDifference from '../../../../../../utils/calculatePercentageDifference'
 import {dismissKeyboardAndResolveOnLayoutUpdate} from '../../../../../../utils/dismissKeyboardPromise'
 import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
+import CurrentBtcPrice from '../../../../../CurrentBtcPrice'
 import Info from '../../../../../Info'
 import {loadingOverlayDisplayedAtom} from '../../../../../LoadingOverlayProvider'
 import {
@@ -21,18 +22,20 @@ import {useWasOpenFromAgreeOnTradeDetailsScreen} from '../../../../utils'
 import Content from '../../../Content'
 import {
   btcInputValueAtom,
+  btcPriceCurrencyAtom,
   btcPriceForOfferWithStateAtom,
+  calculateBtcValueAfterBtcPriceRefreshActionAtom,
   fiatInputValueAtom,
   isOtherSideAmountDataNewerThanMineAtom,
   saveButtonDisabledAtom,
   saveLocalCalculatedAmountDataStateToMainStateActionAtom,
   syncDataWithChatStateActionAtom,
+  tradeBtcPriceAtom,
   tradePriceTypeAtom,
   tradePriceTypeDialogVisibleAtom,
 } from '../../atoms'
 import BtcAmountInput from '../../components/BtcAmountInput'
 import FiatAmountInput from '../../components/FiatAmountInput'
-import CurrentBtcPrice from '../CurrentBtcPrice'
 import PremiumOrDiscount from './components/PremiumOrDiscount'
 import SwitchTradePriceTypeButton from './components/SwitchTradePriceTypeButton'
 
@@ -67,6 +70,9 @@ function CalculateAmountScreen({
     submitTradeChecklistUpdatesActionAtom
   )
   const btcPriceForOfferWithState = useAtomValue(btcPriceForOfferWithStateAtom)
+  const calculateBtcValueAfterBtcPriceRefresh = useSetAtom(
+    calculateBtcValueAfterBtcPriceRefreshActionAtom
+  )
 
   const btcPricePercentageDifference = useMemo(() => {
     if (tradePriceType === 'custom' && amountData?.btcPrice)
@@ -80,16 +86,19 @@ function CalculateAmountScreen({
 
   const onFooterButtonPress = useCallback(() => {
     void dismissKeyboardAndResolveOnLayoutUpdate().then(() => {
-      saveLocalCalculatedAmountDataStateToMainState()
-      if (shouldNavigateBackToChatOnSave) {
-        showLoadingOverlay(true)
-        void submitTradeChecklistUpdates()().finally(() => {
-          showLoadingOverlay(false)
-        })
-        navigation.navigate('ChatDetail', store.get(chatWithMessagesKeys))
-      } else {
-        navigation.navigate('AgreeOnTradeDetails')
-      }
+      void saveLocalCalculatedAmountDataStateToMainState()().then((success) => {
+        if (success) {
+          if (shouldNavigateBackToChatOnSave) {
+            showLoadingOverlay(true)
+            void submitTradeChecklistUpdates()().finally(() => {
+              showLoadingOverlay(false)
+            })
+            navigation.navigate('ChatDetail', store.get(chatWithMessagesKeys))
+          } else {
+            navigation.navigate('AgreeOnTradeDetails')
+          }
+        }
+      })
     })
   }, [
     saveLocalCalculatedAmountDataStateToMainState,
@@ -118,7 +127,13 @@ function CalculateAmountScreen({
                 setTradePriceTypeDialogVisible(true)
               }}
             />
-            <CurrentBtcPrice />
+            <CurrentBtcPrice
+              currencyAtom={btcPriceCurrencyAtom}
+              customBtcPriceAtom={
+                tradePriceType === 'your' ? tradeBtcPriceAtom : undefined
+              }
+              postRefreshActions={calculateBtcValueAfterBtcPriceRefresh}
+            />
           </XStack>
           {tradePriceType === 'custom' && (
             <Info
@@ -138,15 +153,8 @@ function CalculateAmountScreen({
             />
           )}
           <Stack space="$2">
-            <BtcAmountInput
-              btcValueAtom={btcInputValueAtom}
-              fiatValueAtom={fiatInputValueAtom}
-            />
-            <FiatAmountInput
-              showSubtitle
-              btcValueAtom={btcInputValueAtom}
-              fiatValueAtom={fiatInputValueAtom}
-            />
+            <BtcAmountInput btcValueAtom={btcInputValueAtom} />
+            <FiatAmountInput showSubtitle fiatValueAtom={fiatInputValueAtom} />
           </Stack>
           <PremiumOrDiscount />
         </Stack>

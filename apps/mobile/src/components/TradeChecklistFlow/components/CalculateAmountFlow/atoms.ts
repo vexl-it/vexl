@@ -5,8 +5,9 @@ import {
   type TradePriceType,
 } from '@vexl-next/domain/src/general/tradeChecklist'
 import * as T from 'fp-ts/Task'
+import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
-import {atom, type PrimitiveAtom} from 'jotai'
+import {atom} from 'jotai'
 import {
   DECIMALS_FOR_BTC_VALUE,
   SATOSHIS_IN_BTC,
@@ -18,11 +19,13 @@ import {
   tradeChecklistAmountDataAtom,
   tradeOrOriginOfferCurrencyAtom,
 } from '../../../../state/tradeChecklist/atoms/fromChatAtoms'
+import {translationAtom} from '../../../../utils/localization/I18nProvider'
+import {currencies} from '../../../../utils/localization/currency'
 import {removeTrailingZerosFromNumberString} from '../../../../utils/removeTrailingZerosFromNumberString'
+import {askAreYouSureActionAtom} from '../../../AreYouSureDialog'
 import updatesToBeSentAtom, {
   addAmountActionAtom,
 } from '../../atoms/updatesToBeSentAtom'
-import {replaceNonDecimalCharsInInput} from '../../utils'
 
 export const tradeBtcPriceAtom = atom<number>(0)
 export const tradePriceTypeDialogVisibleAtom = atom<boolean>(false)
@@ -37,11 +40,19 @@ export const fiatInputValueAtom = atom<string>('')
 
 export const feeAmountAtom = atom<number>(0)
 
+export const ownPriceAtom = atom<string | undefined>(undefined)
+
+export const ownPriceSaveButtonDisabledAtom = atom((get) => !get(ownPriceAtom))
+
 export const btcPriceCurrencyAtom = atom(
   (get) =>
     get(selectedCurrencyCodeAtom) ??
     get(tradeOrOriginOfferCurrencyAtom) ??
-    'USD'
+    'USD',
+  (get, set, currency: CurrencyCode) => {
+    set(selectedCurrencyCodeAtom, CurrencyCode.parse(currency))
+    void set(refreshCurrentBtcPriceActionAtom)()
+  }
 )
 
 export const btcPriceForOfferWithStateAtom =
@@ -54,18 +65,20 @@ export const applyFeeOnFeeChangeActionAtom = atom(
     const btcInputValue = Number(get(btcInputValueAtom))
     const appliedFee = get(feeAmountAtom)
 
-    const btcValueWithoutFee = btcInputValue / (1 - appliedFee / 100)
-    const btcValueWithFeeApplied =
-      btcValueWithoutFee - btcValueWithoutFee * (feeAmount / 100)
+    if (get(btcInputValueAtom)) {
+      const btcValueWithoutFee = btcInputValue / (1 - appliedFee / 100)
+      const btcValueWithFeeApplied =
+        btcValueWithoutFee - btcValueWithoutFee * (feeAmount / 100)
 
-    set(
-      btcInputValueAtom,
-      btcOrSat === 'SAT'
-        ? String(Math.round(btcValueWithFeeApplied))
-        : removeTrailingZerosFromNumberString(
-            btcValueWithFeeApplied.toFixed(DECIMALS_FOR_BTC_VALUE)
-          )
-    )
+      set(
+        btcInputValueAtom,
+        btcOrSat === 'SAT'
+          ? String(Math.round(btcValueWithFeeApplied))
+          : removeTrailingZerosFromNumberString(
+              btcValueWithFeeApplied.toFixed(DECIMALS_FOR_BTC_VALUE)
+            )
+      )
+    }
     set(feeAmountAtom, feeAmount)
   }
 )
@@ -76,42 +89,33 @@ export const applyFeeOnTradePriceTypeChangeActionAtom = atom(
     const btcInputValue = Number(get(btcInputValueAtom))
     const feeAmount = get(feeAmountAtom)
 
-    set(
-      btcInputValueAtom,
-      replaceNonDecimalCharsInInput(
-        `${btcInputValue - btcInputValue * (feeAmount / 100)}`
+    if (get(btcInputValueAtom)) {
+      set(
+        btcInputValueAtom,
+        removeTrailingZerosFromNumberString(
+          (btcInputValue - btcInputValue * (feeAmount / 100)).toFixed(
+            DECIMALS_FOR_BTC_VALUE
+          )
+        )
       )
-    )
+    }
   }
 )
 
-export const saveYourPriceActionAtom = atom(
-  null,
-  (
-    get,
-    set,
-    {
-      btcValueAtom,
-      fiatValueAtom,
-    }: {
-      btcValueAtom: PrimitiveAtom<string>
-      fiatValueAtom: PrimitiveAtom<string>
-    }
-  ) => {
-    const fiatValue = get(fiatValueAtom)
-    const btcValue = get(btcValueAtom)
+export const saveYourPriceActionAtom = atom(null, (get, set) => {
+  const ownPrice = get(ownPriceAtom)
 
-    if (fiatValue) {
-      set(tradeBtcPriceAtom, Number(fiatValue))
-      set(fiatInputValueAtom, fiatValue)
-    }
-
-    if (btcValue) set(btcInputValueAtom, btcValue)
-
-    set(tradePriceTypeAtom, 'your')
-    set(applyFeeOnTradePriceTypeChangeActionAtom)
+  if (ownPrice) {
+    set(tradeBtcPriceAtom, Number(ownPrice))
   }
-)
+
+  set(calculateBtcValueOnFiatAmountChangeActionAtom, {
+    fiatAmount: get(fiatInputValueAtom),
+  })
+
+  set(tradePriceTypeAtom, 'your')
+  set(applyFeeOnTradePriceTypeChangeActionAtom)
+})
 
 export const offerTypeAtom = atom((get) => {
   const offerForTradeChecklist = get(fromChatAtoms.originOfferAtom)
@@ -121,16 +125,10 @@ export const offerTypeAtom = atom((get) => {
 export const setFormDataBasedOnBtcPriceTypeActionAtom = atom(
   null,
   (get, set, tradePriceType: TradePriceType) => {
-    const btcOrSat = get(btcOrSatAtom)
     return pipe(
       set(refreshCurrentBtcPriceActionAtom),
       T.map(() => {
         set(tradePriceTypeAtom, tradePriceType)
-        set(btcInputValueAtom, btcOrSat === 'BTC' ? '1' : '100000000')
-        set(
-          fiatInputValueAtom,
-          `${get(btcPriceForOfferWithStateAtom)?.btcPrice}`
-        )
         set(
           tradeBtcPriceAtom,
           (prev) => get(btcPriceForOfferWithStateAtom)?.btcPrice ?? prev
@@ -138,6 +136,35 @@ export const setFormDataBasedOnBtcPriceTypeActionAtom = atom(
         set(applyFeeOnTradePriceTypeChangeActionAtom)
       })
     )
+  }
+)
+
+export const calculateBtcValueAfterBtcPriceRefreshActionAtom = atom(
+  null,
+  (get, set) => {
+    const btcOrSat = get(btcOrSatAtom)
+    const feeAmount = get(feeAmountAtom)
+    const refreshedBtcPrice = get(btcPriceForOfferWithStateAtom)?.btcPrice
+    const numberValue = Number(get(fiatInputValueAtom))
+
+    if (refreshedBtcPrice) {
+      const fee = (numberValue / refreshedBtcPrice) * (feeAmount / 100)
+
+      set(tradeBtcPriceAtom, (prev) => refreshedBtcPrice ?? prev)
+
+      set(
+        btcInputValueAtom,
+        btcOrSat === 'BTC'
+          ? removeTrailingZerosFromNumberString(
+              (numberValue / get(tradeBtcPriceAtom) - fee).toFixed(
+                DECIMALS_FOR_BTC_VALUE
+              )
+            )
+          : `${Math.round(
+              (numberValue / get(tradeBtcPriceAtom) - fee) * SATOSHIS_IN_BTC
+            )}`
+      )
+    }
   }
 )
 
@@ -149,27 +176,23 @@ export const calculateFiatValueOnBtcAmountChangeActionAtom = atom(
     {
       automaticCalculationDisabled,
       btcAmount,
-      btcValueAtom,
-      fiatValueAtom,
     }: {
       automaticCalculationDisabled?: boolean
       btcAmount: string
-      btcValueAtom: PrimitiveAtom<string>
-      fiatValueAtom: PrimitiveAtom<string>
     }
   ) => {
     const tradeBtcPrice = get(tradeBtcPriceAtom)
     const btcOrSat = get(btcOrSatAtom)
     const feeAmount = get(feeAmountAtom)
 
-    set(btcValueAtom, btcAmount)
+    set(btcInputValueAtom, btcAmount)
 
     if (automaticCalculationDisabled) {
       return
     }
 
     if (!btcAmount) {
-      set(fiatValueAtom, '')
+      set(fiatInputValueAtom, '')
       return
     }
 
@@ -179,9 +202,12 @@ export const calculateFiatValueOnBtcAmountChangeActionAtom = atom(
           ? Number(btcAmount)
           : Number(btcAmount) / SATOSHIS_IN_BTC
       const fee = Math.round(tradeBtcPrice * numberValue) * (feeAmount / 100)
-      set(fiatValueAtom, `${Math.round(tradeBtcPrice * numberValue + fee)}`)
+      set(
+        fiatInputValueAtom,
+        `${Math.round(tradeBtcPrice * numberValue + fee)}`
+      )
     } else {
-      set(fiatValueAtom, '')
+      set(fiatInputValueAtom, '')
     }
   }
 )
@@ -194,27 +220,23 @@ export const calculateBtcValueOnFiatAmountChangeActionAtom = atom(
     {
       automaticCalculationDisabled,
       fiatAmount,
-      btcValueAtom,
-      fiatValueAtom,
     }: {
       automaticCalculationDisabled?: boolean
       fiatAmount: string
-      btcValueAtom: PrimitiveAtom<string>
-      fiatValueAtom: PrimitiveAtom<string>
     }
   ) => {
     const tradeBtcPrice = get(tradeBtcPriceAtom)
     const btcOrSat = get(btcOrSatAtom)
     const feeAmount = get(feeAmountAtom)
 
-    set(fiatValueAtom, fiatAmount)
+    set(fiatInputValueAtom, fiatAmount)
 
     if (automaticCalculationDisabled) {
       return
     }
 
     if (!fiatAmount) {
-      set(btcValueAtom, '')
+      set(btcInputValueAtom, '')
       return
     }
 
@@ -223,7 +245,7 @@ export const calculateBtcValueOnFiatAmountChangeActionAtom = atom(
       const fee = (numberValue / tradeBtcPrice) * (feeAmount / 100)
 
       set(
-        btcValueAtom,
+        btcInputValueAtom,
         btcOrSat === 'BTC'
           ? removeTrailingZerosFromNumberString(
               (numberValue / tradeBtcPrice - fee).toFixed(
@@ -235,14 +257,14 @@ export const calculateBtcValueOnFiatAmountChangeActionAtom = atom(
             )}`
       )
     } else {
-      set(btcValueAtom, '')
+      set(btcInputValueAtom, '')
     }
   }
 )
 
 export const refreshCurrentBtcPriceActionAtom = atom(null, (get, set) => {
   const btcPriceCurrency = get(btcPriceCurrencyAtom)
-  const btcInputValue = get(btcInputValueAtom)
+  const fiatInputValue = get(fiatInputValueAtom)
 
   return pipe(
     set(refreshBtcPriceActionAtom, btcPriceCurrency),
@@ -251,33 +273,32 @@ export const refreshCurrentBtcPriceActionAtom = atom(null, (get, set) => {
         tradeBtcPriceAtom,
         (prev) => get(btcPriceForOfferWithStateAtom)?.btcPrice ?? prev
       )
-      // we need to recalculate amount of fiat based on new btc price
-      // TODO: rewrite this to use get() on atoms directly in calculateFiatValueOnBtcAmountChangeActionAtom
-      set(calculateFiatValueOnBtcAmountChangeActionAtom, {
-        btcAmount: btcInputValue,
-        btcValueAtom: btcInputValueAtom,
-        fiatValueAtom: fiatInputValueAtom,
+      // we need to recalculate amount of BTC based on new btc price
+      set(calculateBtcValueOnFiatAmountChangeActionAtom, {
+        fiatAmount: fiatInputValue,
       })
     })
   )
 })
 
-export const toggleBtcOrSatValueActionAtom = atom(
+export const switchBtcOrSatValueActionAtom = atom(
   null,
   (get, set, value: BtcOrSat) => {
     const btcValue = get(btcInputValueAtom)
 
     set(btcOrSatAtom, value)
-    set(
-      btcInputValueAtom,
-      value === 'BTC'
-        ? `${Number(btcValue) / SATOSHIS_IN_BTC}`
-        : `${Math.round(Number(btcValue) * SATOSHIS_IN_BTC)}`
-    )
+    if (btcValue) {
+      set(
+        btcInputValueAtom,
+        value === 'BTC'
+          ? `${Number(btcValue) / SATOSHIS_IN_BTC}`
+          : `${Math.round(Number(btcValue) * SATOSHIS_IN_BTC)}`
+      )
+    }
   }
 )
 
-export const toggleFiatCurrencyActionAtom = atom(
+export const updateFiatCurrencyActionAtom = atom(
   null,
   (get, set, currency: CurrencyCode) => {
     set(selectedCurrencyCodeAtom, CurrencyCode.parse(currency))
@@ -330,25 +351,24 @@ export const syncDataWithChatStateActionAtom = atom(
       set(refreshCurrentBtcPriceActionAtom),
       T.map(() => {
         set(tradePriceTypeAtom, initialDataToSet?.tradePriceType ?? 'live')
-        set(btcInputValueAtom, String(initialDataToSet?.btcAmount ?? ''))
-        set(fiatInputValueAtom, String(initialDataToSet?.fiatAmount ?? ''))
+        set(
+          selectedCurrencyCodeAtom,
+          initialDataToSet?.currency ?? tradeOrOriginOfferCurrency
+        )
         set(
           tradeBtcPriceAtom,
-          (prev) =>
-            initialDataToSet?.btcPrice ??
-            get(btcPriceForOfferWithStateAtom)?.btcPrice ??
-            prev
+          (prev) => get(btcPriceForOfferWithStateAtom)?.btcPrice ?? prev
         )
+        set(btcInputValueAtom, String(initialDataToSet?.btcAmount ?? ''))
+        set(calculateFiatValueOnBtcAmountChangeActionAtom, {
+          btcAmount: String(initialDataToSet?.btcAmount ?? 0),
+        })
 
         set(
           premiumOrDiscountEnabledAtom,
           initialDataToSet?.feeAmount !== 0 ?? false
         )
         set(feeAmountAtom, initialDataToSet?.feeAmount ?? 0)
-        set(
-          selectedCurrencyCodeAtom,
-          initialDataToSet?.currency ?? tradeOrOriginOfferCurrency
-        )
       })
     )()
   }
@@ -357,6 +377,7 @@ export const syncDataWithChatStateActionAtom = atom(
 export const saveLocalCalculatedAmountDataStateToMainStateActionAtom = atom(
   null,
   (get, set) => {
+    const {t} = get(translationAtom)
     const tradePriceType = get(tradePriceTypeAtom)
     const btcAmount = Number(get(btcInputValueAtom))
     const fiatAmount = Number(get(fiatInputValueAtom))
@@ -364,13 +385,47 @@ export const saveLocalCalculatedAmountDataStateToMainStateActionAtom = atom(
     const btcPrice = get(tradeBtcPriceAtom)
     const currency = get(selectedCurrencyCodeAtom)
 
-    set(addAmountActionAtom, {
-      tradePriceType: tradePriceType === 'custom' ? 'your' : tradePriceType,
-      btcAmount,
-      fiatAmount,
-      feeAmount,
-      btcPrice,
-      currency,
-    })
+    if (currency && fiatAmount > currencies[currency].maxAmount) {
+      return pipe(
+        TE.Do,
+        TE.chainW(() =>
+          set(askAreYouSureActionAtom, {
+            steps: [
+              {
+                type: 'StepWithText',
+                title: t(
+                  'tradeChecklist.calculateAmount.exceededTransactionLimit'
+                ),
+                description: t(
+                  'tradeChecklist.calculateAmount.transactionLimitForSelectedCurrency',
+                  {amount: currencies[currency].maxAmount, currency}
+                ),
+                positiveButtonText: t('common.close'),
+              },
+            ],
+            variant: 'info',
+          })
+        ),
+        TE.match(
+          () => {
+            return false
+          },
+          () => {
+            return false
+          }
+        )
+      )
+    } else {
+      set(addAmountActionAtom, {
+        tradePriceType: tradePriceType === 'custom' ? 'your' : tradePriceType,
+        btcAmount,
+        fiatAmount,
+        feeAmount,
+        btcPrice,
+        currency,
+      })
+
+      return T.of(true)
+    }
   }
 )

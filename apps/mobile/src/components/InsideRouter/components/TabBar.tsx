@@ -78,7 +78,7 @@ function TabBar({state, navigation}: BottomTabBarProps): JSX.Element {
         jc="space-between"
         br="$7"
         p="$3"
-        maw={338}
+        maw="90%"
         bg="$black"
       >
         {state.routes.map((route, index) => {
@@ -98,6 +98,7 @@ function TabBar({state, navigation}: BottomTabBarProps): JSX.Element {
                 <Stack
                   f={1}
                   h={52}
+                  w={52}
                   ai="center"
                   jc="center"
                   br="$6"
@@ -110,8 +111,8 @@ function TabBar({state, navigation}: BottomTabBarProps): JSX.Element {
                       h={16}
                       br={8}
                       position="absolute"
-                      top="$2"
-                      right="$2"
+                      top="$1"
+                      right="$1"
                     />
                   )}
                   <Stack w={24} h={24}>
@@ -133,7 +134,7 @@ function TabBar({state, navigation}: BottomTabBarProps): JSX.Element {
                   }}
                 >
                   <Stack
-                    f={1}
+                    w={52}
                     h={52}
                     br="$6"
                     bc="$main"

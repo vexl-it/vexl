@@ -6,6 +6,7 @@ import {
   type Ref,
 } from 'react'
 import {
+  ActivityIndicator,
   TextInput as RNTextInput,
   TouchableWithoutFeedback,
   type TextInputProps,
@@ -29,14 +30,15 @@ const InputStyled = styled(RNTextInput, {
 })
 
 interface Props extends TextInputProps {
-  isFocused: boolean
+  isFocused?: boolean
   children: ReactNode
-  onWrapperPress: () => void
+  loading?: boolean
+  onWrapperPress?: () => void
   showSubtitle?: boolean
 }
 
 function AmountInput(
-  {children, isFocused, onWrapperPress, showSubtitle, ...props}: Props,
+  {children, isFocused, loading, onWrapperPress, showSubtitle, ...props}: Props,
   ref: Ref<RNTextInput>
 ): JSX.Element {
   const inputRef: Ref<RNTextInput> = useRef(null)
@@ -60,24 +62,34 @@ function AmountInput(
       >
         {children}
         <Stack w="60%">
-          <InputStyled
-            ref={inputRef}
-            placeholderTextColor={getTokens().color.greyAccent1.val}
-            keyboardType="decimal-pad"
-            numberOfLines={1}
-            textAlign="right"
-            selectTextOnFocus
-            textColor={isFocused ? '$main' : '$white'}
-            selectionColor={
-              isFocused
-                ? getTokens().color.$yellowAccent1.val
-                : getTokens().color.white.val
-            }
-            focusStyle={{
-              textColor: '$main',
-            }}
-            {...props}
-          />
+          {loading ? (
+            <Stack als="flex-end">
+              <ActivityIndicator
+                size="small"
+                color={getTokens().color.greyAccent2.val}
+              />
+            </Stack>
+          ) : (
+            <InputStyled
+              ref={inputRef}
+              placeholderTextColor={getTokens().color.greyAccent1.val}
+              keyboardType="decimal-pad"
+              numberOfLines={1}
+              textAlign="right"
+              selectTextOnFocus
+              textColor={isFocused ? '$main' : '$white'}
+              selectionColor={
+                isFocused
+                  ? getTokens().color.yellowAccent1.val
+                  : getTokens().color.white.val
+              }
+              focusStyle={{
+                textColor: '$main',
+              }}
+              {...props}
+            />
+          )}
+
           {!!showSubtitle && <PremiumIncluded />}
         </Stack>
       </XStack>

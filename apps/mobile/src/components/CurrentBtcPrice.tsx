@@ -1,6 +1,11 @@
 import {type CurrencyCode} from '@vexl-next/domain/src/general/offers'
-import {useAtomValue, type PrimitiveAtom} from 'jotai'
-import {useSetAtom} from 'jotai/index'
+import {
+  atom,
+  useAtomValue,
+  useSetAtom,
+  type Atom,
+  type PrimitiveAtom,
+} from 'jotai'
 import {useMemo} from 'react'
 import {ActivityIndicator, TouchableOpacity} from 'react-native'
 import {Text, XStack, getTokens, type TextProps} from 'tamagui'
@@ -13,18 +18,23 @@ import {currencies} from '../utils/localization/currency'
 import {preferencesAtom} from '../utils/preferences'
 
 interface Props extends TextProps {
-  customBtcPrice?: number
-  currencyAtom: PrimitiveAtom<CurrencyCode | undefined>
+  customBtcPriceAtom?: PrimitiveAtom<number> | undefined
+  currencyAtom: Atom<CurrencyCode | undefined>
   disabled?: boolean
+  postRefreshActions?: () => void
 }
 
+const emptyAtom = atom<number | undefined>(undefined)
+
 function CurrentBtcPrice({
-  customBtcPrice,
+  customBtcPriceAtom,
   currencyAtom,
   disabled,
+  postRefreshActions,
   ...props
 }: Props): JSX.Element {
   const currency = useAtomValue(currencyAtom) ?? currencies.USD.code
+  const customBtcPrice = useAtomValue(customBtcPriceAtom ?? emptyAtom)
   const refreshBtcPrice = useSetAtom(refreshBtcPriceActionAtom)
   const btcPriceWithState = useAtomValue(
     useMemo(() => createBtcPriceForCurrencyAtom(currency), [currency])
@@ -37,7 +47,7 @@ function CurrentBtcPrice({
     <TouchableOpacity
       disabled={disabled}
       onPress={() => {
-        void refreshBtcPrice(currency)()
+        void refreshBtcPrice(currency)().then(postRefreshActions)
       }}
     >
       <XStack ai="center">

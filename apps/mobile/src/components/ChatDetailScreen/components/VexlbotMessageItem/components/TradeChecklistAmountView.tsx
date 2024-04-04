@@ -7,8 +7,12 @@ import {Stack, XStack, getTokens} from 'tamagui'
 import {SATOSHIS_IN_BTC} from '../../../../../state/currentBtcPriceAtoms'
 import * as amount from '../../../../../state/tradeChecklist/utils/amount'
 import {calculateBtcPricePercentageDifference} from '../../../../../state/tradeChecklist/utils/amount'
-import {useTranslation} from '../../../../../utils/localization/I18nProvider'
+import {
+  getCurrentLocale,
+  useTranslation,
+} from '../../../../../utils/localization/I18nProvider'
 import {currencies} from '../../../../../utils/localization/currency'
+import {preferencesAtom} from '../../../../../utils/preferences'
 import Button from '../../../../Button'
 import {loadingOverlayDisplayedAtom} from '../../../../LoadingOverlayProvider'
 import {
@@ -33,6 +37,8 @@ function TradeChecklistAmountView(): JSX.Element | null {
   const tradeOrOriginOfferCurrency = useAtomValue(
     tradeOrOriginOfferCurrencyAtom
   )
+  const preferences = useAtomValue(preferencesAtom)
+  const currentLocale = preferences.appLanguage ?? getCurrentLocale()
   const amountData = useAtomValue(tradeChecklistAmountAtom)
   const otherSideData = useAtomValue(otherSideDataAtom)
   const amountDataToDisplay = amount.getAmountData(amountData)
@@ -206,10 +212,20 @@ function TradeChecklistAmountView(): JSX.Element | null {
               amountDataToDisplay.by === 'me'
                 ? t('common.you')
                 : otherSideData.userName,
-            btcAmount: amountDataToDisplay.amountData.btcAmount,
-            fiatAmount: amountDataToDisplay.amountData.fiatAmount,
+            btcAmount:
+              amountDataToDisplay.amountData.btcAmount?.toLocaleString(
+                currentLocale
+              ),
+            fiatAmount:
+              amountDataToDisplay.amountData.fiatAmount?.toLocaleString(
+                currentLocale
+              ),
             fiatCurrency: currencies[tradeOrOriginOfferCurrency].code,
             feeAmount: amountDataToDisplay.amountData.feeAmount,
+            btcTradePrice:
+              amountDataToDisplay.amountData.btcPrice?.toLocaleString(
+                currentLocale
+              ),
           }
         )}
       >

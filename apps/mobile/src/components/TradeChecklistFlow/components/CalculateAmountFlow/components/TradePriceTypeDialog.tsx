@@ -7,12 +7,13 @@ import {type TradeChecklistStackParamsList} from '../../../../../navigationTypes
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import AnimatedDialogWrapper from '../../../../AnimatedDialogWrapper'
 import Button from '../../../../Button'
+import CurrentBtcPrice from '../../../../CurrentBtcPrice'
 import {
+  btcPriceCurrencyAtom,
   setFormDataBasedOnBtcPriceTypeActionAtom,
   tradePriceTypeAtom,
   tradePriceTypeDialogVisibleAtom,
 } from '../atoms'
-import CurrentBtcPrice from './CurrentBtcPrice'
 import PriceTypeIndicator from './PriceTypeIndicator'
 
 const styles = StyleSheet.create({
@@ -64,7 +65,12 @@ function TradePriceTypeDialog(): JSX.Element | null {
                 )}
               </XStack>
               <Stack space="$2" py="$4">
-                <CurrentBtcPrice fos={24} ff="$heading" col="$black" />
+                <CurrentBtcPrice
+                  currencyAtom={btcPriceCurrencyAtom}
+                  fos={24}
+                  ff="$heading"
+                  col="$black"
+                />
                 <Text fos={18} ff="$body500" col="$greyOnWhite">
                   {tradePriceType === 'live'
                     ? t('tradeChecklist.calculateAmount.youAreUsingLivePrice')

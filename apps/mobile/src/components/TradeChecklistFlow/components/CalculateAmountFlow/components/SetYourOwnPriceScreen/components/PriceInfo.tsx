@@ -1,28 +1,25 @@
-import {useAtomValue, type PrimitiveAtom} from 'jotai'
+import {useAtomValue} from 'jotai'
 import calculatePercentageDifference from '../../../../../../../utils/calculatePercentageDifference'
 import {
   getCurrentLocale,
   useTranslation,
 } from '../../../../../../../utils/localization/I18nProvider'
 import Info from '../../../../../../Info'
-import {btcPriceForOfferWithStateAtom} from '../../../atoms'
+import {btcPriceForOfferWithStateAtom, ownPriceAtom} from '../../../atoms'
 
-interface Props {
-  fiatTempValueAtom: PrimitiveAtom<string>
-}
-
-function PriceInfo({fiatTempValueAtom}: Props): JSX.Element | null {
+function PriceInfo(): JSX.Element | null {
   const {t} = useTranslation()
   const locale = getCurrentLocale()
-  const fiatTempValue = Number(useAtomValue(fiatTempValueAtom)) ?? 0
+
+  const ownPrice = Number(useAtomValue(ownPriceAtom)) ?? 0
   const btcPriceForOfferWithState = useAtomValue(btcPriceForOfferWithStateAtom)
 
   const percentageDifference = calculatePercentageDifference(
-    fiatTempValue,
+    ownPrice,
     btcPriceForOfferWithState?.btcPrice
   )
 
-  return fiatTempValue && fiatTempValue > 0 && percentageDifference !== 0 ? (
+  return ownPrice > 0 && percentageDifference !== 0 ? (
     <Info
       variant="yellow"
       hideCloseButton

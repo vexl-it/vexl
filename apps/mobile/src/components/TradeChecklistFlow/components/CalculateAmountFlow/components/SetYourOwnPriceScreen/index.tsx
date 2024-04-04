@@ -1,6 +1,4 @@
-import {useFocusEffect} from '@react-navigation/native'
-import {atom, useAtomValue, useSetAtom} from 'jotai'
-import {useCallback} from 'react'
+import {useAtomValue, useSetAtom} from 'jotai'
 import {Stack} from 'tamagui'
 import {dismissKeyboardAndResolveOnLayoutUpdate} from '../../../../../../utils/dismissKeyboardPromise'
 import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
@@ -11,35 +9,22 @@ import {
   SecondaryFooterButtonProxy,
 } from '../../../../../PageWithNavigationHeader'
 import Content from '../../../Content'
-import {saveYourPriceActionAtom, tradePriceTypeAtom} from '../../atoms'
-import BtcAmountInput from '../BtcAmountInput'
-import FiatAmountInput from '../FiatAmountInput'
+import {
+  ownPriceSaveButtonDisabledAtom,
+  saveYourPriceActionAtom,
+} from '../../atoms'
+import BtcOwnPriceInput from './components/BtcOwnPriceInput'
+import FiatOwnPriceInput from './components/FiatOwnPriceInput'
 import PriceInfo from './components/PriceInfo'
-
-const btcTempValueAtom = atom<string>('1')
-const fiatTempValueAtom = atom<string>('')
-const saveButtonDisabledAtom = atom((get) => {
-  const fiatTempValue = get(fiatTempValueAtom)
-
-  return !fiatTempValue
-})
 
 function SetYourOwnPriceScreen(): JSX.Element {
   const {t} = useTranslation()
   const goBack = useSafeGoBack()
 
-  const saveButtonDisabled = useAtomValue(saveButtonDisabledAtom)
-  const tradePriceType = useAtomValue(tradePriceTypeAtom)
-  const saveYourPrice = useSetAtom(saveYourPriceActionAtom)
-  const setFiatTempValue = useSetAtom(fiatTempValueAtom)
-
-  useFocusEffect(
-    useCallback(() => {
-      if (tradePriceType !== 'your') {
-        setFiatTempValue('')
-      }
-    }, [setFiatTempValue, tradePriceType])
+  const ownPriceSaveButtonDisabled = useAtomValue(
+    ownPriceSaveButtonDisabledAtom
   )
+  const saveYourPrice = useSetAtom(saveYourPriceActionAtom)
 
   return (
     <>
@@ -50,30 +35,18 @@ function SetYourOwnPriceScreen(): JSX.Element {
       <Content scrollable>
         <Stack space="$4">
           <Stack space="$2">
-            <BtcAmountInput
-              automaticCalculationDisabled
-              btcValueAtom={btcTempValueAtom}
-              editable={false}
-              fiatValueAtom={fiatTempValueAtom}
-            />
-            <FiatAmountInput
-              automaticCalculationDisabled
-              btcValueAtom={btcTempValueAtom}
-              fiatValueAtom={fiatTempValueAtom}
-            />
+            <BtcOwnPriceInput />
+            <FiatOwnPriceInput />
           </Stack>
-          <PriceInfo fiatTempValueAtom={fiatTempValueAtom} />
+          <PriceInfo />
         </Stack>
       </Content>
       <PrimaryFooterButtonProxy hidden />
       <SecondaryFooterButtonProxy
-        disabled={saveButtonDisabled}
+        disabled={ownPriceSaveButtonDisabled}
         onPress={() => {
           void dismissKeyboardAndResolveOnLayoutUpdate().then(() => {
-            saveYourPrice({
-              btcValueAtom: btcTempValueAtom,
-              fiatValueAtom: fiatTempValueAtom,
-            })
+            saveYourPrice()
             goBack()
           })
         }}

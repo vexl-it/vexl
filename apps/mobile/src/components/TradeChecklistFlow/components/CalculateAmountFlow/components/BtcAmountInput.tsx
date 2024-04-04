@@ -3,12 +3,13 @@ import {useAtomValue, useSetAtom, type PrimitiveAtom} from 'jotai'
 import {useRef, useState} from 'react'
 import {StyleSheet, type TextInput} from 'react-native'
 import {Stack, getTokens} from 'tamagui'
+import {SATOSHIS_IN_BTC} from '../../../../../state/currentBtcPriceAtoms'
 import {Dropdown, type DropdownItemProps} from '../../../../Dropdown'
 import {replaceNonDecimalCharsInInput} from '../../../utils'
 import {
   btcOrSatAtom,
   calculateFiatValueOnBtcAmountChangeActionAtom,
-  toggleBtcOrSatValueActionAtom,
+  switchBtcOrSatValueActionAtom,
 } from '../atoms'
 import AmountInput from './AmountInput'
 import CalculatedWithLiveRate from './CalculatedWithLiveRate'
@@ -37,12 +38,12 @@ const styles = StyleSheet.create({
 })
 
 const btcOrSatOptions: BtcOrSat[] = ['BTC', 'SAT']
-const BTC_INPUT_PLACEHOLDER = '0.05'
+const BTC_INPUT_PLACEHOLDER = '1'
+const SATS_INPUT_PLACEHOLDER = `${SATOSHIS_IN_BTC}`
 
 interface Props {
   automaticCalculationDisabled?: boolean
   editable?: boolean
-  fiatValueAtom: PrimitiveAtom<string>
   btcValueAtom: PrimitiveAtom<string>
 }
 
@@ -56,14 +57,13 @@ function BtcAmountInput({
   automaticCalculationDisabled,
   btcValueAtom,
   editable = true,
-  fiatValueAtom,
 }: Props): JSX.Element {
   const ref = useRef<TextInput>(null)
   const [isFocused, setIsFocused] = useState<boolean>(false)
 
   const btcValue = useAtomValue(btcValueAtom)
   const btcOrSat = useAtomValue(btcOrSatAtom)
-  const toggleBtcOrSatValue = useSetAtom(toggleBtcOrSatValueActionAtom)
+  const switchBtcOrSatValue = useSetAtom(switchBtcOrSatValueActionAtom)
   const calculateFiatValueOnBtcAmountChange = useSetAtom(
     calculateFiatValueOnBtcAmountChangeActionAtom
   )
@@ -82,14 +82,14 @@ function BtcAmountInput({
       onWrapperPress={() => {
         ref.current?.focus()
       }}
-      placeholder={BTC_INPUT_PLACEHOLDER}
+      placeholder={
+        btcOrSat === 'BTC' ? BTC_INPUT_PLACEHOLDER : SATS_INPUT_PLACEHOLDER
+      }
       value={btcValue}
       onChangeText={(input) => {
         calculateFiatValueOnBtcAmountChange({
           automaticCalculationDisabled,
           btcAmount: replaceNonDecimalCharsInInput(input),
-          btcValueAtom,
-          fiatValueAtom,
         })
       }}
     >
@@ -99,7 +99,7 @@ function BtcAmountInput({
           value={{value: btcOrSat, label: btcOrSat}}
           data={btcOrSatDropdownData}
           onChange={(item) => {
-            toggleBtcOrSatValue(item.value)
+            switchBtcOrSatValue(item.value)
           }}
           style={styles.dropdown}
           containerStyle={styles.dropdownContainerStyle}

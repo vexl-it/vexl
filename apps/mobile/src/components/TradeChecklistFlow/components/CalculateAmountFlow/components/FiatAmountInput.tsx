@@ -1,61 +1,33 @@
-import {CurrencyCode} from '@vexl-next/domain/src/general/currency.brand'
 import {useAtomValue, useSetAtom, type PrimitiveAtom} from 'jotai'
-import {useMemo, useRef, useState} from 'react'
-import {StyleSheet, type TextInput} from 'react-native'
-import {Stack, getTokens} from 'tamagui'
-import {tradeOrOriginOfferCurrencyAtom} from '../../../../../state/tradeChecklist/atoms/fromChatAtoms'
-import {currencies} from '../../../../../utils/localization/currency'
-import {Dropdown, type DropdownItemProps} from '../../../../Dropdown'
-import {replaceNonDecimalCharsInInput} from '../../../utils'
+import {useRef, useState} from 'react'
+import {type TextInput} from 'react-native'
+import {Stack} from 'tamagui'
+import {Dropdown} from '../../../../Dropdown'
 import {
+  fiatCurrenciesDropdownData,
+  replaceNonDecimalCharsInInput,
+} from '../../../utils'
+import {
+  btcPriceCurrencyAtom,
   btcPriceForOfferWithStateAtom,
   calculateBtcValueOnFiatAmountChangeActionAtom,
-  selectedCurrencyCodeAtom,
-  toggleFiatCurrencyActionAtom,
+  ownPriceAtom,
+  tradePriceTypeAtom,
+  updateFiatCurrencyActionAtom,
 } from '../atoms'
+import {dropdownStyles} from '../styles'
 import AmountInput from './AmountInput'
 import CalculatedWithLiveRate from './CalculatedWithLiveRate'
-
-const styles = StyleSheet.create({
-  dropdown: {
-    width: 65,
-  },
-  dropdownContainerStyle: {
-    backgroundColor: getTokens().color.greyAccent1.val,
-    borderRadius: getTokens().radius[4].val,
-    width: 100,
-    borderWidth: 0,
-    paddingTop: 10,
-    paddingBottom: 10,
-  },
-  dropdownItemContainerStyle: {
-    borderRadius: getTokens().radius[4].val,
-  },
-  selectedTextStyle: {
-    color: getTokens().color.white.val,
-    fontWeight: '500',
-    fontSize: 18,
-    fontFamily: 'TTSatoshi500',
-  },
-})
 
 interface Props {
   automaticCalculationDisabled?: boolean
   fiatValueAtom: PrimitiveAtom<string>
-  btcValueAtom: PrimitiveAtom<string>
   showSubtitle?: boolean
   editable?: boolean
 }
 
-const fiatCurrenciesDropdownData: Array<DropdownItemProps<CurrencyCode>> =
-  Object.values(CurrencyCode.options).map((currency) => ({
-    label: currency,
-    value: currency,
-  }))
-
 function FiatAmountInput({
   automaticCalculationDisabled,
-  btcValueAtom,
   fiatValueAtom,
   showSubtitle,
   editable = true,
@@ -64,28 +36,21 @@ function FiatAmountInput({
   const [isFocused, setIsFocused] = useState<boolean>(false)
 
   const fiatValue = useAtomValue(fiatValueAtom)
-  const selectedCurrencyCode = useAtomValue(selectedCurrencyCodeAtom)
   const calculateBtcValueOnFiatAmountChange = useSetAtom(
     calculateBtcValueOnFiatAmountChangeActionAtom
   )
-  const tradeOrOriginOfferCurrency = useAtomValue(
-    tradeOrOriginOfferCurrencyAtom
-  )
   const btcPriceForOfferWithState = useAtomValue(btcPriceForOfferWithStateAtom)
-  const toggleFiatCurrency = useSetAtom(toggleFiatCurrencyActionAtom)
-
-  const currency = useMemo(
-    () =>
-      selectedCurrencyCode ??
-      currencies[tradeOrOriginOfferCurrency ?? 'USD'].code,
-    [tradeOrOriginOfferCurrency, selectedCurrencyCode]
-  )
+  const updateFiatCurrency = useSetAtom(updateFiatCurrencyActionAtom)
+  const currency = useAtomValue(btcPriceCurrencyAtom)
+  const tradePriceType = useAtomValue(tradePriceTypeAtom)
+  const ownPrice = useAtomValue(ownPriceAtom)
 
   return (
     <AmountInput
       ref={ref}
       showSubtitle={showSubtitle}
       isFocused={isFocused}
+      loading={btcPriceForOfferWithState?.state === 'loading'}
       onBlur={() => {
         setIsFocused(false)
       }}
@@ -96,7 +61,9 @@ function FiatAmountInput({
         ref.current?.focus()
       }}
       placeholder={
-        btcPriceForOfferWithState?.state === 'success'
+        tradePriceType === 'your'
+          ? ownPrice
+          : btcPriceForOfferWithState?.state === 'success'
           ? `${btcPriceForOfferWithState.btcPrice}`
           : '-'
       }
@@ -105,8 +72,6 @@ function FiatAmountInput({
         calculateBtcValueOnFiatAmountChange({
           automaticCalculationDisabled,
           fiatAmount: replaceNonDecimalCharsInInput(input),
-          btcValueAtom,
-          fiatValueAtom,
         })
       }}
     >
@@ -116,12 +81,12 @@ function FiatAmountInput({
           value={{value: currency, label: currency}}
           data={fiatCurrenciesDropdownData}
           onChange={(item) => {
-            toggleFiatCurrency(item.value)
+            updateFiatCurrency(item.value)
           }}
-          style={styles.dropdown}
-          containerStyle={styles.dropdownContainerStyle}
-          itemContainerStyle={styles.dropdownItemContainerStyle}
-          selectedTextStyle={styles.selectedTextStyle}
+          style={dropdownStyles.dropdown}
+          containerStyle={dropdownStyles.dropdownContainerStyle}
+          itemContainerStyle={dropdownStyles.dropdownItemContainerStyle}
+          selectedTextStyle={dropdownStyles.selectedTextStyle}
         />
         {!isFocused && !!fiatValue && !automaticCalculationDisabled && (
           <CalculatedWithLiveRate />

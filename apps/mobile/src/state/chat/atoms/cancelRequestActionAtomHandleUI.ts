@@ -42,7 +42,6 @@ const cancelRequestActionAtomHandleUI = atom(
     set,
     {text, originOffer}: {text: string; originOffer: OfferInfo}
   ): TE.TaskEither<
-    | ErrorEncryptingMessage
     | ChatNotFoundError
     | CancelRequestApprovalErrors
     | UserDeclinedError

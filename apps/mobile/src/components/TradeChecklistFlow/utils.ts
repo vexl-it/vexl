@@ -1,4 +1,6 @@
 import {useNavigationState} from '@react-navigation/native'
+import {CurrencyCode} from '../../../../../packages/domain/src/general/currency.brand'
+import {type DropdownItemProps} from '../Dropdown'
 
 export const MINIMUM_AVAILABLE_DAYS_THRESHOLD = 1
 
@@ -23,3 +25,10 @@ function openFromAgreeOnTradeDetailsScreenSelector(
 export function useWasOpenFromAgreeOnTradeDetailsScreen(): boolean {
   return useNavigationState(openFromAgreeOnTradeDetailsScreenSelector)
 }
+
+export const fiatCurrenciesDropdownData: Array<
+  DropdownItemProps<CurrencyCode>
+> = Object.values(CurrencyCode.options).map((currency) => ({
+  label: currency,
+  value: currency,
+}))

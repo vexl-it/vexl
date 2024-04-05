@@ -102,6 +102,11 @@ function checkConditionsToCreateOfferAreMetAndAlertIfNot({
     offerDescription,
   } = offerForm
 
+  if (!listingType) {
+    Alert.alert(t('offerForm.errorListingTypeNotFilled'))
+    return false
+  }
+
   if (
     listingType !== 'BITCOIN' &&
     singlePriceState === 'HAS_COST' &&

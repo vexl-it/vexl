@@ -77,6 +77,7 @@ function EditOfferScreen({
                   image={listingTypeSvg}
                 >
                   <ListingType
+                    inEditOffer
                     listingTypeAtom={listingTypeAtom}
                     updateListingTypeActionAtom={updateListingTypeActionAtom}
                   />

@@ -35,7 +35,6 @@ function OffersList({
 
   const contentContainerStyle = useMemo(
     () => ({
-      paddingHorizontal: getTokens().space[2].val,
       paddingBottom: bottomOffset + Number(getTokens().space[5].val),
     }),
     [bottomOffset]
@@ -45,6 +44,7 @@ function OffersList({
     <FlashList
       ListHeaderComponent={ListHeaderComponent}
       estimatedItemSize={151}
+      showsVerticalScrollIndicator={false}
       contentContainerStyle={contentContainerStyle}
       data={offersAtoms}
       onRefresh={onRefresh}

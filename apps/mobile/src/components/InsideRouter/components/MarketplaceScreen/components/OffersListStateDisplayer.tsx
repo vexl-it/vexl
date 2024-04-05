@@ -1,4 +1,4 @@
-import {useFocusEffect, useNavigation} from '@react-navigation/native'
+import {useFocusEffect} from '@react-navigation/native'
 import {useSetAtom} from 'jotai'
 import {useCallback} from 'react'
 import {type MarketplaceTabScreenProps} from '../../../../../navigationTypes'
@@ -12,7 +12,6 @@ function OffersListStateDisplayer({
     params: {type},
   },
 }: Props): JSX.Element {
-  const navigation = useNavigation()
   const setVisibleMarketplaceSection = useSetAtom(visibleMarketplaceSectionAtom)
 
   useFocusEffect(
@@ -21,17 +20,7 @@ function OffersListStateDisplayer({
     }, [type, setVisibleMarketplaceSection])
   )
 
-  return (
-    <OffersListStateDisplayerContent
-      type={type}
-      navigateToCreateOffer={() => {
-        navigation.navigate('CreateOffer')
-      }}
-      navigateToMyOffers={() => {
-        navigation.navigate('MyOffers')
-      }}
-    />
-  )
+  return <OffersListStateDisplayerContent type={type} />
 }
 
 export default OffersListStateDisplayer

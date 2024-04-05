@@ -41,12 +41,6 @@ function PriceCalculator({
       <Stack als="flex-end">
         <CurrentBtcPrice currencyAtom={currencyAtom} />
       </Stack>
-      <SatsInput
-        calculateFiatValueOnSatsValueChangeActionAtom={
-          calculateFiatValueOnSatsValueChangeActionAtom
-        }
-        satsValueAtom={satsValueAtom}
-      />
       <FiatInput
         amountBottomLimitAtom={amountBottomLimitAtom}
         calculateSatsValueOnFiatValueChangeActionAtom={
@@ -54,6 +48,12 @@ function PriceCalculator({
         }
         currencyAtom={currencyAtom}
         changePriceCurrencyActionAtom={changePriceCurrencyActionAtom}
+      />
+      <SatsInput
+        calculateFiatValueOnSatsValueChangeActionAtom={
+          calculateFiatValueOnSatsValueChangeActionAtom
+        }
+        satsValueAtom={satsValueAtom}
       />
       <Stack
         als="center"

@@ -35,24 +35,26 @@ function MyOffersScreen({navigation}: Props): JSX.Element {
 
   return (
     <ContainerWithTopBorderRadius withTopPadding>
-      <Stack mx="$4" f={1}>
-        <Text ff="$heading" color="$white" fos={32}>
-          {t('common.myOffers')}
-        </Text>
-        <XStack pos="relative" py="$4" px="$2" ai="center" jc="space-between">
-          <Stack f={1}>
-            <Text
-              adjustsFontSizeToFit
-              numberOfLines={1}
-              ff="$body600"
-              fos={18}
-              col="$white"
-            >
-              {t('myOffers.activeOffers', {count: activeOffersCount})}
-            </Text>
-          </Stack>
-          <MyOffersSortingDropdown />
-        </XStack>
+      <Stack f={1} mx="$2">
+        <Stack mx="$2">
+          <Text ff="$heading" color="$white" fos={32}>
+            {t('common.myOffers')}
+          </Text>
+          <XStack pos="relative" py="$4" ai="center" jc="space-between">
+            <Stack f={1}>
+              <Text
+                adjustsFontSizeToFit
+                numberOfLines={1}
+                ff="$body600"
+                fos={18}
+                col="$white"
+              >
+                {t('myOffers.activeOffers', {count: activeOffersCount})}
+              </Text>
+            </Stack>
+            <MyOffersSortingDropdown />
+          </XStack>
+        </Stack>
         <Button
           beforeIcon={plusSvg}
           onPress={() => {

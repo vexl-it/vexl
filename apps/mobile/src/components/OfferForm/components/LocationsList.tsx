@@ -24,6 +24,7 @@ function LocationsList({
     ? locations?.map((loc) => (
         <XStack
           key={loc.placeId}
+          f={1}
           br="$5"
           bc="$darkBrown"
           p="$4"
@@ -31,7 +32,13 @@ function LocationsList({
           jc="space-between"
           mb="$1"
         >
-          <Text fos={18} color="$main">
+          <Text
+            fos={18}
+            color="$main"
+            numberOfLines={2}
+            ellipsizeMode="tail"
+            flexShrink={1}
+          >
             {loc.address}
             {' - '}
             {t('map.locationSelect.radius', {

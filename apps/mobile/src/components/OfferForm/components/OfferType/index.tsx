@@ -21,7 +21,7 @@ function OfferTypeSection({
   const [offerType, setOfferType] = useAtom(offerTypeAtom)
 
   const activeTab = useMemo(() => {
-    if (listingType === 'BITCOIN') return offerType
+    if (!listingType || listingType === 'BITCOIN') return offerType
 
     // need to revert offerType for product/other offers
     // user is selling BTC to buy goods and opposite

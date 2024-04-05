@@ -24,15 +24,9 @@ import TotalOffersCount from './TotalOffersCount'
 
 interface Props {
   type: 'BUY' | 'SELL'
-  navigateToCreateOffer: () => void
-  navigateToMyOffers: () => void
 }
 
-function OffersListStateDisplayerContent({
-  navigateToCreateOffer,
-  navigateToMyOffers,
-  type,
-}: Props): JSX.Element {
+function OffersListStateDisplayerContent({type}: Props): JSX.Element {
   const tokens = getTokens()
   const loading = useAreOffersLoading()
   const error = useOffersLoadingError()
@@ -73,13 +67,15 @@ function OffersListStateDisplayerContent({
       {offersAtoms.length === 0 ? (
         <EmptyListPlaceholder refreshing={loading} onRefresh={refreshOffers} />
       ) : (
-        <OffersList
-          ListHeaderComponent={ListHeaderComponent}
-          offersAtoms={offersAtoms}
-          // eslint-disable-next-line @typescript-eslint/no-misused-promises
-          onRefresh={refreshOffers}
-          refreshing={loading}
-        />
+        <Stack f={1} mx="$2">
+          <OffersList
+            ListHeaderComponent={ListHeaderComponent}
+            offersAtoms={offersAtoms}
+            // eslint-disable-next-line @typescript-eslint/no-misused-promises
+            onRefresh={refreshOffers}
+            refreshing={loading}
+          />
+        </Stack>
       )}
     </ContainerWithTopBorderRadius>
   )

@@ -10,7 +10,7 @@ import {
   Longitude,
   Radius,
   getDefaultRadius,
-} from './../utility/geoCoordinates'
+} from '../utility/geoCoordinates'
 import {CurrencyCode} from './currency.brand'
 import {FcmCypher} from './notifications'
 

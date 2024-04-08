@@ -322,7 +322,7 @@ export const offerFormMolecule = molecule(() => {
     (get, set, locationState: LocationState) => {
       const listingType = get(listingTypeAtom)
 
-      if (listingType === 'BITCOIN') {
+      if (!listingType || listingType === 'BITCOIN') {
         set(locationStateAtom, [locationState])
       } else {
         set(locationStateAtom, (prev) =>
@@ -332,10 +332,19 @@ export const offerFormMolecule = molecule(() => {
         )
       }
 
-      set(
-        paymentMethodAtom,
-        locationState === 'ONLINE' ? ['BANK', 'REVOLUT'] : ['CASH']
-      )
+      // TODO: after removing compatibility with old vexl apps refactor to ['CASH', 'REVOLUT', 'BANK'] for ['IN_PERSON', 'ONLINE'] delivery method
+      set(paymentMethodAtom, () => {
+        const locationState = get(locationStateAtom)
+        if (
+          locationState?.length === 1 &&
+          locationState?.includes('IN_PERSON')
+        ) {
+          return ['CASH']
+        }
+
+        return ['BANK', 'REVOLUT']
+      })
+
       set(locationAtom, [])
     }
   )
@@ -820,6 +829,7 @@ export const offerFormMolecule = molecule(() => {
       set(nullableBtcNetworkAtom, offerPublicPart.btcNetwork)
       set(nullablePaymentMethodAtom, offerPublicPart.paymentMethod)
       set(nullableLocationAtom, offerPublicPart.location)
+      set(nullableLocationStateAtom, offerPublicPart.locationState)
       set(nullableSinglePriceStateAtom, offerPublicPart.singlePriceState)
     }
   })
@@ -844,6 +854,10 @@ export const offerFormMolecule = molecule(() => {
       dummyOffer.offerInfo.publicPart.paymentMethod
     )
     set(nullableLocationAtom, dummyOffer.offerInfo.publicPart.location)
+    set(
+      nullableLocationStateAtom,
+      dummyOffer.offerInfo.publicPart.locationState
+    )
   })
 
   const btcPriceForOfferWithCurrencyAtom =

@@ -100,15 +100,16 @@ function LocationComponent({
           />
         </YStack>
       )}
-      {listingType === 'BITCOIN' && !!locationState?.includes('ONLINE') && (
-        <Info
-          actionButtonText={t('offerForm.location.checkItOut')}
-          text={t('offerForm.location.meetingInPerson')}
-          onActionPress={() => {
-            setHelpVisible(true)
-          }}
-        />
-      )}
+      {(!listingType || listingType === 'BITCOIN') &&
+        !!locationState?.includes('ONLINE') && (
+          <Info
+            actionButtonText={t('offerForm.location.checkItOut')}
+            text={t('offerForm.location.meetingInPerson')}
+            onActionPress={() => {
+              setHelpVisible(true)
+            }}
+          />
+        )}
       <SelectLocationFlowModal
         randomizeLocation={randomizeLocation}
         locationSessionId={locationSearchVisible ?? newLocationSessionId()}

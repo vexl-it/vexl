@@ -12,6 +12,7 @@ import notEmpty from '../utils/notEmpty'
 import {inboxesAtom} from '../utils/notifications/useRefreshNotificationTokenOnResumeAssumeLoggedIn'
 import reportError from '../utils/reportError'
 import {useAppState} from '../utils/useAppState'
+import {useRefreshNotificationTokensForActiveChatsAssumeLogin} from './chat/atoms/refreshNotificationTokensActionAtom'
 import {createInboxAtom} from './chat/hooks/useCreateInbox'
 import {updateOfferAtom} from './marketplace'
 import checkNotificationTokensAndRefreshOffersActionAtom from './marketplace/atoms/checkNotificationTokensAndRefreshOffersActionAtom'
@@ -281,4 +282,5 @@ export default function useHandleRefreshContactServiceAndOffers(): void {
   useRefreshOffers()
   useCheckOfferInboxes()
   useCheckNotificationTokensAndRefreshOffers()
+  useRefreshNotificationTokensForActiveChatsAssumeLogin()
 }

@@ -7,6 +7,7 @@ import {
   type ChatMessage,
   type ChatMessagePayload,
 } from '@vexl-next/domain/src/general/messaging'
+import {type FcmCypher} from '@vexl-next/domain/src/general/notifications'
 import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {now} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {type ChatPrivateApi} from '@vexl-next/rest-api/src/services/chat'
@@ -20,9 +21,13 @@ import {messageToNetwork} from './utils/messageIO'
 function createRequestChatMessage({
   text,
   senderPublicKey,
+  myFcmCypher,
+  lastReceivedFcmCypher,
   myVersion,
 }: {
   text: string
+  myFcmCypher?: FcmCypher
+  lastReceivedFcmCypher?: FcmCypher
   senderPublicKey: PublicKeyPemBase64
   myVersion: SemverString
 }): ChatMessage {
@@ -30,6 +35,8 @@ function createRequestChatMessage({
     uuid: generateChatMessageId(),
     messageType: 'REQUEST_MESSAGING',
     text,
+    myFcmCypher,
+    lastReceivedFcmCypher,
     time: now(),
     myVersion,
     senderPublicKey,
@@ -44,12 +51,16 @@ export function sendMessagingRequest({
   text,
   fromKeypair,
   toPublicKey,
+  myFcmCypher,
+  lastReceivedFcmCypher,
   api,
   myVersion,
 }: {
   text: string
   fromKeypair: PrivateKeyHolder
   toPublicKey: PublicKeyPemBase64
+  myFcmCypher?: FcmCypher
+  lastReceivedFcmCypher?: FcmCypher
   api: ChatPrivateApi
   myVersion: SemverString
 }): TE.TaskEither<
@@ -64,6 +75,8 @@ export function sendMessagingRequest({
       text,
       senderPublicKey: fromKeypair.publicKeyPemBase64,
       myVersion,
+      myFcmCypher,
+      lastReceivedFcmCypher,
     }),
     TE.right,
     TE.chainFirstW(

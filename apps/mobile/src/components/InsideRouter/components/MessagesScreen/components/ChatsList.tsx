@@ -4,7 +4,7 @@ import {selectAtom, splitAtom} from 'jotai/utils'
 import {Text, YStack} from 'tamagui'
 import messagingStateAtom from '../../../../../state/chat/atoms/messagingStateAtom'
 import {type ChatWithMessages} from '../../../../../state/chat/domain'
-import isChatActive from '../../../../../state/chat/utils/isChatActive'
+import chatShouldBeVisible from '../../../../../state/chat/utils/isChatActive'
 import atomKeyExtractor from '../../../../../utils/atomUtils/atomKeyExtractor'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import notEmpty from '../../../../../utils/notEmpty'
@@ -16,7 +16,7 @@ const chatIdsAtom = selectAtom(messagingStateAtom, (inboxes): ChatListData[] =>
     .reduce<ChatWithMessages[]>((acc, one) => {
       return acc.concat(one.chats)
     }, [])
-    .filter(isChatActive)
+    .filter(chatShouldBeVisible)
     .map((one) => {
       if (one.messages.length === 0) return null
 

@@ -77,17 +77,20 @@ export default function addMessagesToChats(
             one.state === 'receivedButRequiresNewerVersion'
         )
 
-        const isOnlyVersionUpdate = !messages.some(
-          (one) => one.message.messageType !== 'VERSION_UPDATE'
+        const isOnlyMetadataUpdate = !messages.some(
+          (one) =>
+            one.message.messageType !== 'VERSION_UPDATE' &&
+            one.message.messageType !== 'FCM_CYPHER_UPDATE'
         )
 
         return pipe(
           {
             ...oneChat,
-            // Do not show version updates in chat
+            // Do not show metadata updates in chat
             messages: messages.filter(
               (one) =>
-                one.message.messageType !== 'VERSION_UPDATE' ||
+                (one.message.messageType !== 'VERSION_UPDATE' &&
+                  one.message.messageType !== 'FCM_CYPHER_UPDATE') ||
                 // Show messages with forceShow flag
                 (one.state !== 'receivedButRequiresNewerVersion' &&
                   one.message.forceShow)
@@ -99,7 +102,10 @@ export default function addMessagesToChats(
             ),
             chat: {
               ...oneChat.chat,
-              isUnread: isOnlyVersionUpdate ? oneChat.chat.isUnread : true,
+              isUnread: isOnlyMetadataUpdate ? oneChat.chat.isUnread : true,
+              otherSideFcmCypher: lastReceivedMessage?.message?.myFcmCypher
+                ? lastReceivedMessage?.message?.myFcmCypher
+                : oneChat.chat.otherSideFcmCypher,
               otherSideVersion:
                 lastReceivedMessage?.message.myVersion ??
                 oneChat.chat.otherSideVersion,

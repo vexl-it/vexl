@@ -2,6 +2,7 @@ import {KeyHolder} from '@vexl-next/cryptography/src'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {z} from 'zod'
 import {Base64String} from '../utility/Base64String.brand'
+import {FcmToken} from '../utility/FcmToken.brand'
 import {SemverString} from '../utility/SmeverString.brand'
 import {UnixMilliseconds} from '../utility/UnixMilliseconds.brand'
 import {UriString} from '../utility/UriString.brand'
@@ -10,6 +11,7 @@ import {DeanonymizedUser} from './DeanonymizedUser'
 import {E164PhoneNumber} from './E164PhoneNumber.brand'
 import {UserName} from './UserName.brand'
 import {RealLifeInfo} from './UserNameAndAvatar.brand'
+import {FcmCypher} from './notifications'
 import {OfferId, OneOfferInState} from './offers'
 import {TradeChecklistUpdate} from './tradeChecklist'
 
@@ -31,6 +33,7 @@ export const MessageType = z.enum([
   'REQUEST_CONTACT_REVEAL',
   'TRADE_CHECKLIST_UPDATE',
   'VERSION_UPDATE',
+  'FCM_CYPHER_UPDATE',
 ])
 export type MessageType = z.TypeOf<typeof MessageType>
 
@@ -76,6 +79,8 @@ export const ChatMessagePayload = z.object({
       fullPhoneNumber: E164PhoneNumber.optional(),
     })
     .optional(),
+  myFcmCypher: FcmCypher.optional(),
+  lastReceivedFcmCypher: FcmCypher.optional(),
 })
 export type ChatMessagePayload = z.TypeOf<typeof ChatMessagePayload>
 
@@ -102,6 +107,9 @@ export const ChatMessage = z.object({
   deanonymizedUser: DeanonymizedUser.optional(),
   senderPublicKey: PublicKeyPemBase64,
   messageType: MessageType,
+
+  myFcmCypher: FcmCypher.optional(),
+  lastReceivedFcmCypher: FcmCypher.optional(),
 })
 export type ChatMessage = z.TypeOf<typeof ChatMessage>
 //
@@ -137,6 +145,12 @@ export function generateChatId(): ChatId {
 export const CalendarEventId = z.string().brand<'calendarEventId'>()
 export type CalendarEventId = z.TypeOf<typeof CalendarEventId>
 
+export const MyFcmTokenInfo = z.object({
+  token: FcmToken,
+  cypher: FcmCypher,
+})
+export type MyFcmTokenInfo = z.TypeOf<typeof MyFcmTokenInfo>
+
 export const Chat = z.object({
   id: ChatId,
   inbox: Inbox,
@@ -149,6 +163,8 @@ export const Chat = z.object({
   tradeChecklistCalendarEventId: CalendarEventId.optional(),
   otherSideVersion: SemverString.optional(),
   lastReportedVersion: SemverString.optional(),
+  otherSideFcmCypher: FcmCypher.optional(),
+  lastReportedFcmToken: MyFcmTokenInfo.optional(),
 })
 export type Chat = z.TypeOf<typeof Chat>
 
@@ -170,6 +186,8 @@ export const ChatMessageRequiringNewerVersion = z.object({
   text: z.literal('-'),
   deanonymizedUser: z.undefined(),
   image: z.undefined(),
+  myFcmCypher: FcmCypher.optional(),
+  lastReceivedFcmCypher: FcmCypher.optional(),
 })
 export type ChatMessageRequiringNewerVersion = z.infer<
   typeof ChatMessageRequiringNewerVersion

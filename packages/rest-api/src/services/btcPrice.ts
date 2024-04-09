@@ -89,9 +89,25 @@ export const AcceptedCurrency = z.enum([
   'bits',
   'sats',
   'bgn',
+  'nad',
 ])
 
 export type AcceptedCurrency = z.TypeOf<typeof AcceptedCurrency>
+
+function getCurrencyToFetch(currency: AcceptedCurrency): AcceptedCurrency {
+  switch (currency) {
+    // Bulgarian LEV is pegged to Euro and as CoinGecko does not support it
+    // we calculate it manually from EUR price
+    case 'bgn':
+      return 'eur'
+    // Namibian dollar has the same value as ZAR and as CoinGecko does not support it
+    // we need to fetch ZAR value
+    case 'nad':
+      return 'zar'
+    default:
+      return currency
+  }
+}
 
 export function createBtcPriceApi({
   platform,
@@ -128,9 +144,7 @@ export function createBtcPriceApi({
     | NetworkError,
     BtcPrice
   > {
-    // Bulgarian LEV is pegged to Euro and as CoinGecko does not support it
-    // we calculate it manually from EUR price
-    const currencyToFetch = currency === 'bgn' ? 'eur' : currency
+    const currencyToFetch = getCurrencyToFetch(currency)
     const ExpectedResponse = z.object({
       bitcoin: z.record(z.literal(currencyToFetch), BtcPrice),
     })
@@ -151,6 +165,11 @@ export function createBtcPriceApi({
               BULGARIAN_LEV_PEGGED_EURO_RATE
           )
         }
+
+        if (currency === 'nad') {
+          return safeParse(BtcPrice)(val.bitcoin[currencyToFetch])
+        }
+
         return safeParse(BtcPrice)(val.bitcoin[currency])
       })
     )

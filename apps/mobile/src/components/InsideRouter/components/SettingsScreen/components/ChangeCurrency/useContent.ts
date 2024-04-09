@@ -20,8 +20,16 @@ export default function useContent(): Array<{
         currency: 'EUR',
       },
       {
+        title: 'NAD',
+        currency: 'NAD',
+      },
+      {
         title: 'USD',
         currency: 'USD',
+      },
+      {
+        title: 'ZAR',
+        currency: 'ZAR',
       },
     ],
     []

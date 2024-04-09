@@ -188,6 +188,15 @@ export const currencies = {
     maxAmount: 180000,
     countryCode: [52],
   }),
+  'NAD': CurrencyInfo.parse({
+    code: 'NAD',
+    flag: '🇳🇦',
+    name: 'Namibian Dollar',
+    symbol: 'N$',
+    position: 'before',
+    maxAmount: 200000,
+    countryCode: [264],
+  }),
   'NOK': CurrencyInfo.parse({
     code: 'NOK',
     flag: '🇳🇴',

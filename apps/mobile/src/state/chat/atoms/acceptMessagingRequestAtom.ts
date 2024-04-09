@@ -7,6 +7,7 @@ import {
   type JsonStringifyError,
   type ZodParseError,
 } from '@vexl-next/resources-utils/src/utils/parsing'
+import * as O from 'fp-ts/Option'
 import * as TE from 'fp-ts/TaskEither'
 import {flow, pipe} from 'fp-ts/function'
 import {atom, type PrimitiveAtom} from 'jotai'
@@ -16,6 +17,9 @@ import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
 import addMessageToChat from '../utils/addMessageToChat'
 import createAccountDeletedMessage from '../utils/createAccountDeletedMessage'
 import {resetRealLifeInfo, resetTradeChecklist} from '../utils/resetData'
+import generateMyFcmTokenInfoActionAtom, {
+  updateMyFcmTokenInfoInChat,
+} from './generateMyFcmTokenInfoActionAtom'
 
 const acceptMessagingRequestAtom = atom(
   null,
@@ -42,14 +46,22 @@ const acceptMessagingRequestAtom = atom(
     const {chat} = get(chatAtom)
 
     return pipe(
-      confirmMessagingRequest({
-        text,
-        approve,
-        api: api.chat,
-        fromKeypair: chat.inbox.privateKey,
-        toPublicKey: chat.otherSide.publicKey,
-        myVersion: version,
-      }),
+      TE.Do,
+      TE.chainTaskK(() => set(generateMyFcmTokenInfoActionAtom)),
+      TE.bindTo('myFcmCypher'),
+      TE.bindW('configmMessage', ({myFcmCypher}) =>
+        confirmMessagingRequest({
+          text,
+          approve,
+          api: api.chat,
+          fromKeypair: chat.inbox.privateKey,
+          toPublicKey: chat.otherSide.publicKey,
+          myVersion: version,
+          myFcmCypher:
+            myFcmCypher._tag === 'Some' ? myFcmCypher.value.cypher : undefined,
+          lastReceivedFcmCypher: chat.otherSideFcmCypher,
+        })
+      ),
       TE.mapLeft((error) => {
         if (error._tag === 'OtherSideAccountDeleted') {
           set(
@@ -64,15 +76,21 @@ const acceptMessagingRequestAtom = atom(
 
         return error
       }),
-      TE.map((message): ChatMessageWithState => ({state: 'sent', message})),
-      TE.map((message) => {
+      TE.bind('message', ({configmMessage: message}) =>
+        TE.of({
+          state: 'sent',
+          message,
+        } satisfies ChatMessageWithState)
+      ),
+      TE.map(({message, myFcmCypher}) => {
         set(
           chatAtom,
           flow(
             addMessageToChat(message),
             // Make sure to reset checklist. If they open chat again after rerequest, we don't want to show the checklist again
             resetTradeChecklist,
-            resetRealLifeInfo
+            resetRealLifeInfo,
+            updateMyFcmTokenInfoInChat(O.toUndefined(myFcmCypher))
           )
         )
         return message

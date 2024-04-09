@@ -8,6 +8,7 @@ import {
   type ChatMessage,
   type ChatMessagePayload,
 } from '@vexl-next/domain/src/general/messaging'
+import {type FcmCypher} from '@vexl-next/domain/src/general/notifications'
 import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {now} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {type ChatPrivateApi} from '@vexl-next/rest-api/src/services/chat'
@@ -23,11 +24,15 @@ function createApproveChatMessage({
   senderPublicKey,
   approve,
   myVersion,
+  myFcmCypher,
+  lastReceivedFcmCypher,
 }: {
   text: string
   senderPublicKey: PublicKeyPemBase64
   approve: boolean
   myVersion: SemverString
+  myFcmCypher?: FcmCypher
+  lastReceivedFcmCypher?: FcmCypher
 }): ChatMessage {
   return {
     uuid: generateChatMessageId(),
@@ -36,6 +41,8 @@ function createApproveChatMessage({
     time: now(),
     myVersion,
     senderPublicKey,
+    myFcmCypher,
+    lastReceivedFcmCypher,
   }
 }
 
@@ -50,6 +57,8 @@ export default function confirmMessagingRequest({
   api,
   approve,
   myVersion,
+  myFcmCypher,
+  lastReceivedFcmCypher,
 }: {
   text: string
   fromKeypair: PrivateKeyHolder
@@ -57,6 +66,8 @@ export default function confirmMessagingRequest({
   api: ChatPrivateApi
   approve: boolean
   myVersion: SemverString
+  myFcmCypher?: FcmCypher
+  lastReceivedFcmCypher?: FcmCypher
 }): TE.TaskEither<
   | ApiConfirmMessagingRequest
   | JsonStringifyError
@@ -70,6 +81,8 @@ export default function confirmMessagingRequest({
       myVersion,
       senderPublicKey: fromKeypair.publicKeyPemBase64,
       approve,
+      myFcmCypher,
+      lastReceivedFcmCypher,
     }),
     TE.right,
     TE.chainFirstW(

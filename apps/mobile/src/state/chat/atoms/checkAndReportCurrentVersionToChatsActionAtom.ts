@@ -19,7 +19,7 @@ import {version} from '../../../utils/environment'
 import reportError from '../../../utils/reportError'
 import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
 import addMessageToChat from '../utils/addMessageToChat'
-import isChatActive from '../utils/isChatActive'
+import isChatOpen from '../utils/isChatOpen'
 import allChatsAtom from './allChatsAtom'
 import focusChatByInboxKeyAndSenderKey from './focusChatByInboxKeyAndSenderKey'
 
@@ -98,7 +98,7 @@ export const sendUpdateNoticeMessageActionAtom = atom(
 const checkAndReportCurrentVersionToChatsActionAtom = atom(null, (get, set) => {
   const chatsToSendUpdateInto = get(allChatsAtom)
     .flat()
-    .filter(isChatActive)
+    .filter(isChatOpen)
     .filter((oneChat) => oneChat.chat.lastReportedVersion !== version)
 
   if (chatsToSendUpdateInto.length === 0) {

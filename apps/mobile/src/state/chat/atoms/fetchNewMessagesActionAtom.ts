@@ -2,7 +2,10 @@ import {
   type PrivateKeyHolder,
   type PublicKeyPemBase64,
 } from '@vexl-next/cryptography/src/KeyHolder'
-import {type ChatMessage} from '@vexl-next/domain/src/general/messaging'
+import {
+  type Chat,
+  type ChatMessage,
+} from '@vexl-next/domain/src/general/messaging'
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
 import {
   UnixMilliseconds0,
@@ -39,6 +42,7 @@ import createNewChatsFromMessages from '../utils/createNewChatsFromFirstMessages
 import replaceBase64UriWithImageFileUri from '../utils/replaceBase64UriWithImageFileUri'
 import {sendUpdateNoticeMessageActionAtom} from './checkAndReportCurrentVersionToChatsActionAtom'
 import focusChatByInboxKeyAndSenderKey from './focusChatByInboxKeyAndSenderKey'
+import {sendFcmCypherUpdateMessageActionAtom} from './refreshNotificationTokensActionAtom'
 
 const handleOtherSideUpdatedActionAtom = atom(
   null,
@@ -64,6 +68,69 @@ const handleOtherSideUpdatedActionAtom = atom(
             oneMessageToRespondWithCurrentVersion.message.senderPublicKey,
         })
         void set(sendUpdateNoticeMessageActionAtom, chatAtom)()
+      }
+    )
+  }
+)
+
+function findChatForMessage(
+  message: ChatMessage,
+  inbox: InboxInState
+): Chat | undefined {
+  return inbox.chats.find(
+    (one) => one.chat.otherSide.publicKey === message.senderPublicKey
+  )?.chat
+}
+
+const handleOtherSideReportedFcmCypher = atom(
+  null,
+  (
+    get,
+    set,
+    {
+      newMessages,
+      inbox,
+    }: {newMessages: readonly ChatMessageWithState[]; inbox: InboxInState}
+  ) => {
+    const messagesToReportNewCypherTo = newMessages.filter((one) => {
+      if (
+        one.message.messageType !== 'FCM_CYPHER_UPDATE' &&
+        // We also want to check if other side has the correct cypher when they accept messaging request
+        // since there might have been a delay between sending request and approving and the token might
+        // be outdated - update messages are not sent until the chat is approved by both sides
+        one.message.messageType !== 'APPROVE_MESSAGING'
+      )
+        return false
+
+      const chatForMessage = findChatForMessage(one.message, inbox)
+      if (!chatForMessage) return false
+      // only chats that have a different cypher than the one reported
+      return (
+        chatForMessage.lastReportedFcmToken?.cypher !==
+        one.message.lastReceivedFcmCypher
+      )
+    })
+
+    messagesToReportNewCypherTo.forEach(
+      (oneMessageToRespondWithCurrentVersion) => {
+        const chat = get(
+          focusChatByInboxKeyAndSenderKey({
+            inboxKey: inbox.inbox.privateKey.publicKeyPemBase64,
+            senderKey:
+              oneMessageToRespondWithCurrentVersion.message.senderPublicKey,
+          })
+        )
+        if (!chat) return
+
+        void pipe(
+          getNotificationToken(),
+          T.chain((notificationToken) =>
+            set(
+              sendFcmCypherUpdateMessageActionAtom,
+              notificationToken ?? undefined
+            )(chat)
+          )
+        )()
       }
     )
   }
@@ -338,6 +405,11 @@ export const fetchAndStoreMessagesForInboxAtom = atom<
           })
 
         set(handleOtherSideUpdatedActionAtom, {
+          newMessages,
+          inbox: updatedInbox,
+        })
+
+        set(handleOtherSideReportedFcmCypher, {
           newMessages,
           inbox: updatedInbox,
         })

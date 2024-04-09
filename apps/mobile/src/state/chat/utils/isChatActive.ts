@@ -1,6 +1,6 @@
 import {type ChatWithMessages} from '../domain'
 
-export default function isChatActive(chat: ChatWithMessages): boolean {
+export default function chatShouldBeVisible(chat: ChatWithMessages): boolean {
   if (chat.messages.length === 0) return false
 
   const lastMessage = chat.messages.at(-1)

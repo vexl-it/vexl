@@ -79,7 +79,10 @@ export async function showChatNotification(
   }
 
   const notificationData = notificationDataVerification.data
-  if (notificationData.type === 'VERSION_UPDATE') {
+  if (
+    notificationData.type === 'VERSION_UPDATE' ||
+    notificationData.type === 'FCM_CYPHER_UPDATE'
+  ) {
     // DO not show notification in this case
     return
   }

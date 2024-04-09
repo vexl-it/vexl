@@ -139,6 +139,8 @@ export function chatMessagePayloadToChatMessage(
     myVersion: payload.myVersion,
     lastReceivedVersion: payload.lastReceivedVersion,
     tradeChecklistUpdate: payload.tradeChecklistUpdate,
+    myFcmCypher: payload.myFcmCypher,
+    lastReceivedFcmCypher: payload.lastReceivedFcmCypher,
   })
 }
 

@@ -10,11 +10,16 @@ export default function sortOffers(
   const toReturn = [...offers]
 
   toReturn.sort((a, b) => {
-    const aHasListingType = !!a.offerInfo.publicPart.listingType
-    const bHasListingType = !!b.offerInfo.publicPart.listingType
+    const aIsMyOffer = !!a.ownershipInfo
+    const bIsMyOffer = !!b.ownershipInfo
 
-    if (!aHasListingType && bHasListingType) return -1
-    if (aHasListingType && !bHasListingType) return 1
+    if (aIsMyOffer && bIsMyOffer) {
+      const aHasListingType = !!a.offerInfo.publicPart.listingType
+      const bHasListingType = !!b.offerInfo.publicPart.listingType
+
+      if (!aHasListingType && bHasListingType) return -1
+      if (aHasListingType && !bHasListingType) return 1
+    }
 
     if (sort === 'LOWEST_FEE_FIRST')
       return a.offerInfo.publicPart.feeAmount - b.offerInfo.publicPart.feeAmount

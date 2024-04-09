@@ -20,6 +20,7 @@ export const CurrencyCode = z.enum([
   'JPY',
   'KRW',
   'MXN',
+  'NAD',
   'NOK',
   'NZD',
   'PLN',

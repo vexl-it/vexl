@@ -35,8 +35,8 @@ export const CurrencyCode = z.enum([
   'UAH',
   'USD',
   'ZAR',
-  'COP',
-  'TZS',
+  // 'COP',
+  // 'TZS',
 ])
 
 export const CurrencyInfo = z.object({

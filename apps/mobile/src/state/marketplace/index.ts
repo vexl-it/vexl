@@ -151,6 +151,11 @@ export const triggerOffersRefreshAtom = atom(null, async (get, set) => {
               (one) => one.offerInfo.offerId === offerId
             )
 
+            if (oldOffer?.ownershipInfo?.adminId) {
+              // D not update offers that are owned by current user.
+              return oldOffer
+            }
+
             if (oldOffer && fetchedOffer) {
               return {
                 ...oldOffer,

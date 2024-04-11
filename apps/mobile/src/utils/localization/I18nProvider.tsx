@@ -12,6 +12,7 @@ export const supportedTranslations = {
   de: translations.de,
   cs: translations.cs,
   sk: translations.sk,
+  pl: translations.pl,
   bg: translations.bg,
 }
 

@@ -57,7 +57,6 @@ const OfferPublicPartToEncrypt = z.object({
   active: z.enum(['true', 'false']),
   groupUuids: z.array(z.string()),
   listingType: z.string().optional(),
-  singlePriceState: z.string().optional(),
   fcmCypher: FcmCypher.optional(),
 })
 

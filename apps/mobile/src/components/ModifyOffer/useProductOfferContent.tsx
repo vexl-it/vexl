@@ -29,7 +29,7 @@ export default function useProductOfferContent(): Props[] {
     intendedConnectionLevelAtom,
     locationAtom,
     locationStateAtom,
-    singlePriceStateAtom,
+    toggleSinglePriceActiveAtom,
     expirationDateAtom,
     offerExpirationModalVisibleAtom,
     spokenLanguagesAtomsAtom,
@@ -73,7 +73,7 @@ export default function useProductOfferContent(): Props[] {
             }
             currencyAtom={currencyAtom}
             satsValueAtom={satsValueAtom}
-            singlePriceStateAtom={singlePriceStateAtom}
+            toggleSinglePriceActiveAtom={toggleSinglePriceActiveAtom}
             changePriceCurrencyActionAtom={changePriceCurrencyActionAtom}
           />
         ),
@@ -148,7 +148,7 @@ export default function useProductOfferContent(): Props[] {
       calculateFiatValueOnSatsValueChangeActionAtom,
       currencyAtom,
       satsValueAtom,
-      singlePriceStateAtom,
+      toggleSinglePriceActiveAtom,
       changePriceCurrencyActionAtom,
       expirationDateAtom,
       offerExpirationModalVisibleAtom,

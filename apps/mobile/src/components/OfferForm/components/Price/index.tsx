@@ -1,9 +1,5 @@
-import {
-  type CurrencyCode,
-  type SinglePriceState,
-} from '@vexl-next/domain/src/general/offers'
+import {type CurrencyCode} from '@vexl-next/domain/src/general/offers'
 import {useAtom, type PrimitiveAtom, type WritableAtom} from 'jotai'
-import {useCallback} from 'react'
 import {Stack, Text, XStack, YStack, getTokens} from 'tamagui'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import SvgImage from '../../../Image'
@@ -26,7 +22,7 @@ interface Props {
   >
   currencyAtom: PrimitiveAtom<CurrencyCode | undefined>
   satsValueAtom: PrimitiveAtom<number>
-  singlePriceStateAtom: PrimitiveAtom<SinglePriceState | undefined>
+  toggleSinglePriceActiveAtom: WritableAtom<boolean, [isActive: boolean], any>
   changePriceCurrencyActionAtom: WritableAtom<
     null,
     [currencyCode: CurrencyCode],
@@ -41,18 +37,14 @@ function Price({
   calculateFiatValueOnSatsValueChangeActionAtom,
   currencyAtom,
   satsValueAtom,
-  singlePriceStateAtom,
+  toggleSinglePriceActiveAtom,
   changePriceCurrencyActionAtom,
 }: Props): JSX.Element {
   const {t} = useTranslation()
   const tokens = getTokens()
-  const [singlePriceState, setSinglePriceState] = useAtom(singlePriceStateAtom)
-
-  const onSwitchValueChange = useCallback(() => {
-    setSinglePriceState(
-      singlePriceState === 'HAS_COST' ? 'FOR_FREE' : 'HAS_COST'
-    )
-  }, [setSinglePriceState, singlePriceState])
+  const [singlePriceActive, setSinglePriceActive] = useAtom(
+    toggleSinglePriceActiveAtom
+  )
 
   return (
     <YStack mb="$4">
@@ -63,7 +55,7 @@ function Price({
               height={24}
               width={24}
               stroke={
-                singlePriceState === 'HAS_COST' || inFilter
+                !!singlePriceActive || inFilter
                   ? tokens.color.white.val
                   : tokens.color.greyOnWhite.val
               }
@@ -74,11 +66,7 @@ function Price({
             <Text
               numberOfLines={2}
               ff="$body700"
-              col={
-                singlePriceState === 'HAS_COST' || inFilter
-                  ? '$white'
-                  : '$greyOnWhite'
-              }
+              col={!!singlePriceActive || inFilter ? '$white' : '$greyOnWhite'}
               fos={24}
             >
               {!inFilter ? t('offerForm.price') : t('filterOffers.priceUpTo')}
@@ -87,28 +75,24 @@ function Price({
         </XStack>
         {!inFilter && (
           <Switch
-            value={singlePriceState === 'HAS_COST'}
-            onValueChange={onSwitchValueChange}
+            value={singlePriceActive}
+            onValueChange={setSinglePriceActive}
           />
         )}
       </XStack>
       <Text
         ff="$body600"
         mb="$4"
-        col={
-          singlePriceState === 'HAS_COST' || inFilter
-            ? '$white'
-            : '$greyOnWhite'
-        }
+        col={!!singlePriceActive || inFilter ? '$white' : '$greyOnWhite'}
         fos={16}
       >
         {inFilter
           ? t('filterOffers.filteredAccordingToValueInSats')
-          : singlePriceState === 'HAS_COST'
+          : singlePriceActive
           ? t('offerForm.thePriceIsFixedToFiat')
           : t('offerForm.thisItemDoesNotHaveSetPrice')}
       </Text>
-      {!!(singlePriceState === 'HAS_COST' || inFilter) && (
+      {!!(!!singlePriceActive || inFilter) && (
         <PriceCalculator
           priceAtom={priceAtom}
           calculateSatsValueOnFiatValueChangeActionAtom={

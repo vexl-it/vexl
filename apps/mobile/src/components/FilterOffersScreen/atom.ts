@@ -20,7 +20,6 @@ import {
 import {
   offersFilterFromStorageAtom,
   offersFilterInitialState,
-  singlePriceStateAtom,
 } from '../../state/marketplace/atoms/filterAtoms'
 import {type OffersFilter} from '../../state/marketplace/domain'
 import getValueFromSetStateActionOfAtom from '../../utils/atomUtils/getValueFromSetStateActionOfAtom'
@@ -85,6 +84,8 @@ export const amountBottomLimitAtom = atom<number | undefined>(
 export const amountTopLimitAtom = atom<number | undefined>(
   offersFilterInitialState.amountTopLimit
 )
+
+export const singlePriceActiveAtom = atom<boolean>(true)
 
 export const singlePriceAtom = atom<number | undefined>(
   offersFilterInitialState.singlePrice
@@ -297,7 +298,6 @@ const setConditionallyRenderedFilterElementsActionAtom = atom(
     set(amountTopLimitAtom, filterValue.amountTopLimit)
     set(spokenLanguagesAtom, filterValue.spokenLanguages)
     set(singlePriceAtom, filterValue.singlePrice)
-    set(singlePriceStateAtom, filterValue.singlePriceState)
     set(singlePriceCurrencyAtom, filterValue.singlePriceCurrency)
     set(
       intendedConnectionLevelAtom,
@@ -368,7 +368,6 @@ export const saveFilterActionAtom = atom(null, (get, set) => {
     amountTopLimit: get(amountTopLimitAtom),
     text: get(focusTextFilterAtom),
     singlePrice: get(singlePriceAtom),
-    singlePriceState: get(singlePriceStateAtom),
     singlePriceCurrency: get(singlePriceCurrencyAtom),
   }
 

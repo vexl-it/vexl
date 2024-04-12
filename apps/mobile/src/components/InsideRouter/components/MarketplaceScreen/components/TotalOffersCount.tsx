@@ -31,7 +31,7 @@ function TotalOffersCount({
           {t('map.showingOnlyInPersonOffers')}
         </Text>
       )}
-      <Text fs={48} ff="$body600" color="$greyOnBlack">
+      <Text ff="$body600" color="$greyOnBlack">
         {totalCount !== filteredOffersCount
           ? t('offer.totalFilteredOffers', {
               count: filteredOffersCount,

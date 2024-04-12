@@ -1,6 +1,5 @@
 import {useMemo} from 'react'
 import {getTokens} from 'tamagui'
-import {singlePriceStateAtom} from '../../state/marketplace/atoms/filterAtoms'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import DeliveryMethod from '../OfferForm/components/DeliveryMethod'
 import FriendLevel from '../OfferForm/components/FriendLevel'
@@ -24,6 +23,7 @@ import {
   resetSpokenLanguagesToInitialStateActionAtom,
   satsValueAtom,
   saveSelectedSpokenLanguagesActionAtom,
+  singlePriceActiveAtom,
   singlePriceAtom,
   singlePriceCurrencyAtom,
   spokenLanguagesAtomsAtom,
@@ -51,7 +51,7 @@ export default function useProductOffersFilterContent(): Props[] {
               calculateFiatValueOnSatsValueChangeActionAtom
             }
             satsValueAtom={satsValueAtom}
-            singlePriceStateAtom={singlePriceStateAtom}
+            toggleSinglePriceActiveAtom={singlePriceActiveAtom}
             priceAtom={singlePriceAtom}
             changePriceCurrencyActionAtom={changePriceCurrencyActionAtom}
           />

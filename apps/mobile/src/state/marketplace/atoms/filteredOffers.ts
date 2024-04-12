@@ -109,7 +109,8 @@ const filterProductAndOtherOffersAtom = atom((get) => {
       (!filter.offerType ||
         offer.offerInfo.publicPart.offerType === filter.offerType) &&
       (!filterPriceInSats ||
-        offer.offerInfo.publicPart.singlePriceState === 'FOR_FREE' ||
+        (offer.offerInfo.publicPart.amountBottomLimit === 0 &&
+          offer.offerInfo.publicPart.amountTopLimit === 0) ||
         (calculatePriceInSats({
           price: offer.offerInfo.publicPart.amountBottomLimit,
           currentBtcPrice:

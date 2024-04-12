@@ -28,6 +28,7 @@ export const i18n = new I18n(
 i18n.locale = isStaging ? 'en_dev' : getLocales().at(0)?.languageTag ?? 'en'
 i18n.defaultLocale = 'en_dev'
 i18n.enableFallback = true
+
 // Setup provider
 export type TFunction = (
   key: keyof typeof translations.dev,

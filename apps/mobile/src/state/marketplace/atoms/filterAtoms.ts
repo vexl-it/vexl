@@ -20,7 +20,6 @@ export const offersFilterInitialState: OffersFilter = {
   amountTopLimit: undefined,
   text: undefined,
   listingType: undefined,
-  singlePriceState: undefined,
   singlePrice: undefined,
   singlePriceCurrency: getDefaultCurrency().code ?? currencies.USD.code,
 }
@@ -38,10 +37,6 @@ export const offersFilterFromStorageAtom = focusAtom(
 
 export const locationFilterAtom = focusAtom(offersFilterStorageAtom, (o) =>
   o.prop('filter').prop('location')
-)
-
-export const singlePriceStateAtom = focusAtom(offersFilterStorageAtom, (o) =>
-  o.prop('filter').prop('singlePriceState')
 )
 
 export const resetLocationFilterActionAtom = atom(null, (get, set) => {

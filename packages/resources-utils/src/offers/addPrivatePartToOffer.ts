@@ -10,7 +10,7 @@ import {type OfferPrivatePayloadToEncrypt} from './utils/constructPrivatePayload
 import {
   encryptPrivatePart,
   type PrivatePartEncryptionError,
-} from './utils/offerPrivatePayload'
+} from './utils/encryptPrivatePart'
 
 export type ApiErrorAddingPrivateParts = ExtractLeftTE<
   ReturnType<OfferPrivateApi['createPrivatePart']>

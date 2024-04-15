@@ -10,7 +10,6 @@ import Price from '../OfferForm/components/Price'
 import SpokenLanguages from '../OfferForm/components/SpokenLanguages'
 import {type Props} from '../Section'
 import friendLevelSvg from '../images/friendLevelSvg'
-import locationSvg from '../images/locationSvg'
 import networkSvg from '../images/networkSvg'
 import spokenLanguagesSvg from '../images/spokenLanguagesSvg'
 import {offerFormMolecule} from './atoms/offerFormStateAtoms'
@@ -41,6 +40,7 @@ export default function useOtherOfferContent(): Props[] {
     locationAtom,
     locationStateAtom,
     updateBtcNetworkAtom,
+    toggleLocationActiveAtom,
   } = useMolecule(offerFormMolecule)
 
   return useMemo(
@@ -58,8 +58,8 @@ export default function useOtherOfferContent(): Props[] {
         mandatory: true,
       },
       {
+        customSection: true,
         title: t('offerForm.location.location'),
-        image: locationSvg,
         children: (
           <Location
             listingTypeAtom={listingTypeAtom}
@@ -67,6 +67,7 @@ export default function useOtherOfferContent(): Props[] {
             setOfferLocationActionAtom={setOfferLocationActionAtom}
             locationAtom={locationAtom}
             locationStateAtom={locationStateAtom}
+            toggleLocationActiveAtom={toggleLocationActiveAtom}
             updateLocationStateAndPaymentMethodAtom={
               updateLocationStateAndPaymentMethodAtom
             }
@@ -133,6 +134,7 @@ export default function useOtherOfferContent(): Props[] {
       setOfferLocationActionAtom,
       locationAtom,
       locationStateAtom,
+      toggleLocationActiveAtom,
       updateLocationStateAndPaymentMethodAtom,
       amountBottomLimitAtom,
       calculateSatsValueOnFiatValueChangeActionAtom,

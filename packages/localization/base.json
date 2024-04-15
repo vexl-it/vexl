@@ -399,6 +399,7 @@
   "offerForm.expiration.offerExpirationDate": "Offer expiration date",
   "offerForm.expiration.uponThisDate": "Upon this date the offer won't be visible to the other vexlers. To change it you'll have to update the expiration date.",
   "offerForm.listingTypeNotSet": "Listing type not set! Please update the offer",
+  "offerForm.errorOtherOfferLocationNotFilled": "Please fill in offer location or turn the location off.",
   "notifications.permissionsNotGranted.title": "Permissions for notifications were not granted",
   "notifications.permissionsNotGranted.message": "You can enable them in the settings",
   "notifications.permissionsNotGranted.openSettings": "Open settings",

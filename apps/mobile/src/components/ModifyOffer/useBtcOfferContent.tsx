@@ -16,7 +16,6 @@ import {type Props} from '../Section'
 import amountOfTransactionSvg from '../images/amountOfTransactionSvg'
 import coinsSvg from '../images/coinsSvg'
 import friendLevelSvg from '../images/friendLevelSvg'
-import locationSvg from '../images/locationSvg'
 import networkSvg from '../images/networkSvg'
 import paymentMethodSvg from '../images/paymentMethod'
 import spokenLanguagesSvg from '../images/spokenLanguagesSvg'
@@ -51,6 +50,7 @@ export default function useBtcOfferContent(): Props[] {
     resetSelectedSpokenLanguagesActionAtom,
     saveSelectedSpokenLanguagesActionAtom,
     updateBtcNetworkAtom,
+    toggleLocationActiveAtom,
   } = useMolecule(offerFormMolecule)
 
   return useMemo(
@@ -98,8 +98,8 @@ export default function useBtcOfferContent(): Props[] {
         ),
       },
       {
+        customSection: true,
         title: t('offerForm.location.location'),
-        image: locationSvg,
         children: (
           <Location
             randomizeLocation
@@ -107,6 +107,7 @@ export default function useBtcOfferContent(): Props[] {
             setOfferLocationActionAtom={setOfferLocationActionAtom}
             locationAtom={locationAtom}
             locationStateAtom={locationStateAtom}
+            toggleLocationActiveAtom={toggleLocationActiveAtom}
             updateLocationStateAndPaymentMethodAtom={
               updateLocationStateAndPaymentMethodAtom
             }
@@ -187,6 +188,7 @@ export default function useBtcOfferContent(): Props[] {
       setOfferLocationActionAtom,
       locationAtom,
       locationStateAtom,
+      toggleLocationActiveAtom,
       updateLocationStateAndPaymentMethodAtom,
       tokens.color.white.val,
       createIsThisLanguageSelectedAtom,

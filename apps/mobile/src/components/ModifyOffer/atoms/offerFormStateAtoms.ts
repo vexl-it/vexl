@@ -139,6 +139,15 @@ function checkConditionsToCreateOfferAreMetAndAlertIfNot({
     return false
   }
 
+  if (
+    listingType === 'OTHER' &&
+    locationState.includes('IN_PERSON') &&
+    location.length === 0
+  ) {
+    Alert.alert(t('offerForm.errorOtherOfferLocationNotFilled'))
+    return false
+  }
+
   if (offerDescription.trim() === '') {
     Alert.alert(t('offerForm.errorDescriptionNotFilled'))
     return false
@@ -167,10 +176,7 @@ function formatOfferPublicPart(publicPart: OfferPublicPart): OfferPublicPart {
     amountBottomLimit,
     amountTopLimit,
     listingType,
-    location,
-    locationState,
     offerDescription,
-    paymentMethod,
     ...restOfPublicPart
   } = publicPart
 
@@ -181,17 +187,6 @@ function formatOfferPublicPart(publicPart: OfferPublicPart): OfferPublicPart {
     amountTopLimit:
       listingType !== 'BITCOIN' ? amountBottomLimit : amountTopLimit,
     offerDescription: offerDescription.trim(),
-    // TODO: old Vexl app versions compatibility fix
-    // remove later
-    locationState:
-      listingType === 'OTHER' && location.length === 0
-        ? ['ONLINE']
-        : locationState,
-    paymentMethod:
-      listingType === 'OTHER' && location.length === 0
-        ? ['BANK', 'REVOLUT']
-        : paymentMethod,
-    location,
   }
 }
 
@@ -318,7 +313,7 @@ export const offerFormMolecule = molecule(() => {
     (get, set, locationState: LocationState) => {
       const listingType = get(listingTypeAtom)
 
-      if (!listingType || listingType === 'BITCOIN') {
+      if (!listingType || listingType !== 'PRODUCT') {
         set(locationStateAtom, [locationState])
       } else {
         set(locationStateAtom, (prev) =>
@@ -341,7 +336,13 @@ export const offerFormMolecule = molecule(() => {
         return ['BANK', 'REVOLUT']
       })
 
-      set(locationAtom, [])
+      if (
+        (listingType === 'BITCOIN' && locationState === 'ONLINE') ||
+        (listingType === 'PRODUCT' &&
+          !get(locationStateAtom)?.includes('IN_PERSON'))
+      ) {
+        set(locationAtom, [])
+      }
     }
   )
 
@@ -419,6 +420,18 @@ export const offerFormMolecule = molecule(() => {
       }
 
       set(singlePriceActiveAtom, !isActive)
+    }
+  )
+
+  const toggleLocationActiveAtom = atom(
+    (get) => get(locationStateAtom)?.includes('IN_PERSON'),
+    (get, set) => {
+      const isActive = get(locationStateAtom)?.includes('IN_PERSON')
+      set(
+        updateLocationStateAndPaymentMethodAtom,
+        isActive ? 'ONLINE' : 'IN_PERSON'
+      )
+      set(locationAtom, [])
     }
   )
 
@@ -955,7 +968,6 @@ export const offerFormMolecule = molecule(() => {
     null,
     (get, set, listingType: ListingType | undefined) => {
       const amountBottomLimit = get(amountBottomLimitAtom)
-      const location = get(locationAtom)
       const locationState = get(locationStateAtom)
 
       set(listingTypeAtom, listingType)
@@ -972,8 +984,7 @@ export const offerFormMolecule = molecule(() => {
         locationState?.includes('IN_PERSON') &&
         locationState?.includes('ONLINE')
       ) {
-        set(locationStateAtom, ['IN_PERSON'])
-        set(paymentMethodAtom, ['CASH'])
+        set(updateLocationStateAndPaymentMethodAtom, 'IN_PERSON')
       }
 
       if (
@@ -985,16 +996,6 @@ export const offerFormMolecule = molecule(() => {
           String(amountBottomLimit)
         )
         set(singlePriceActiveAtom, true)
-      }
-
-      if (listingType === 'OTHER' && location?.length === 0) {
-        set(locationStateAtom, [])
-        set(
-          paymentMethodAtom,
-          locationState?.length === 1 && locationState?.includes('ONLINE')
-            ? ['BANK', 'REVOLUT']
-            : ['CASH']
-        )
       }
     }
   )
@@ -1024,6 +1025,7 @@ export const offerFormMolecule = molecule(() => {
     paymentMethodAtom,
     offerDescriptionAtom,
     toggleSinglePriceActiveAtom,
+    toggleLocationActiveAtom,
     offerActiveAtom,
     updateCurrencyLimitsAtom,
     updateLocationStateAndPaymentMethodAtom,

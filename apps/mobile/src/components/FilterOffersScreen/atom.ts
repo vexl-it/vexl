@@ -99,6 +99,8 @@ export const btcPriceForOfferWithCurrencyAtom = createBtcPriceForCurrencyAtom(
   singlePriceCurrencyAtom
 )
 
+export const locationActiveAtom = atom<boolean | undefined>(true)
+
 export const updateBtcNetworkAtom = atom(
   (get) => get(btcNetworkAtom),
   (get, set, btcNetwork: BtcNetwork) => {

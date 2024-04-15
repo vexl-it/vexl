@@ -1,4 +1,5 @@
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
+import {randomUUID} from 'node:crypto'
 import {z} from 'zod'
 import {FcmToken} from '../utility/FcmToken.brand'
 import {IdNumeric} from '../utility/IdNumeric'
@@ -29,6 +30,11 @@ export type OfferId = z.TypeOf<typeof OfferId>
 
 export const OfferAdminId = z.string().brand<'OfferAdminId'>()
 export type OfferAdminId = z.TypeOf<typeof OfferAdminId>
+
+export function generateAdminId(): OfferAdminId {
+  return OfferAdminId.parse(randomUUID())
+}
+
 export const LocationState = z.enum(['ONLINE', 'IN_PERSON'])
 export type LocationState = z.TypeOf<typeof LocationState>
 
@@ -140,10 +146,16 @@ export const LocationStateToArray = z
 export const SymmetricKey = z.string().brand<'SymmetricKey'>()
 export type SymmetricKey = z.TypeOf<typeof SymmetricKey>
 
+export const IntendedConnectionLevel = z.enum(['FIRST', 'ALL'])
+export type IntendedConnectionLevel = z.TypeOf<typeof IntendedConnectionLevel>
+
 export const OfferPrivatePart = z.object({
   commonFriends: z.array(z.string()),
   friendLevel: z.array(FriendLevel),
   symmetricKey: SymmetricKey,
+  // For admin only
+  adminId: OfferAdminId.optional(),
+  intendedConnectionLevel: IntendedConnectionLevel.optional(),
 })
 export type OfferPrivatePart = z.TypeOf<typeof OfferPrivatePart>
 
@@ -199,9 +211,6 @@ export type OfferInfo = z.TypeOf<typeof OfferInfo>
 export const ConnectionLevel = z.enum(['FIRST', 'SECOND', 'ALL'])
 export type ConnectionLevel = z.TypeOf<typeof ConnectionLevel>
 
-export const IntendedConnectionLevel = z.enum(['FIRST', 'ALL'])
-export type IntendedConnectionLevel = z.TypeOf<typeof IntendedConnectionLevel>
-
 export const OfferFlags = z.object({
   reported: z.boolean().default(false),
 })
@@ -217,16 +226,18 @@ export const PublicPayloadEncrypted = z
   .brand<'PublicPayloadEncrypted'>()
 export type PublicPayloadEncrypted = z.TypeOf<typeof PublicPayloadEncrypted>
 
+export const OwnershipInfo = z.object({
+  adminId: OfferAdminId,
+  intendedConnectionLevel: IntendedConnectionLevel,
+})
+
+export type OwnershipInfo = z.TypeOf<typeof OwnershipInfo>
+
 export const OneOfferInState = z.object({
   offerInfo: OfferInfo,
   flags: OfferFlags,
   lastCommitedFcmToken: FcmToken.optional(),
-  ownershipInfo: z
-    .object({
-      adminId: OfferAdminId,
-      intendedConnectionLevel: IntendedConnectionLevel,
-    })
-    .optional(),
+  ownershipInfo: OwnershipInfo.optional(),
 })
 export type OneOfferInState = z.TypeOf<typeof OneOfferInState>
 
@@ -234,9 +245,6 @@ export const MyOfferInState = z.object({
   offerInfo: OfferInfo,
   flags: OfferFlags,
   lastCommitedFcmToken: FcmToken.optional(),
-  ownershipInfo: z.object({
-    adminId: OfferAdminId,
-    intendedConnectionLevel: IntendedConnectionLevel,
-  }),
+  ownershipInfo: OwnershipInfo,
 })
 export type MyOfferInState = z.TypeOf<typeof MyOfferInState>

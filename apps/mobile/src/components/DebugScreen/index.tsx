@@ -23,6 +23,7 @@ import {triggerOffersRefreshAtom} from '../../state/marketplace'
 import {myOffersAtom} from '../../state/marketplace/atoms/myOffers'
 import {
   lastUpdatedAtAtom,
+  offersAtom,
   offersStateAtom,
 } from '../../state/marketplace/atoms/offersState'
 import {
@@ -284,6 +285,16 @@ function DebugScreen(): JSX.Element {
                     }
                   })
                 )()
+              }}
+            />
+            <Button
+              variant="primary"
+              size="small"
+              text="Simulate losing ownership info"
+              onPress={() => {
+                store.set(offersAtom, (o) =>
+                  o.map((one) => ({...one, ownershipInfo: undefined}))
+                )
               }}
             />
             <Button

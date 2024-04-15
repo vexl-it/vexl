@@ -20,7 +20,7 @@ import constructPrivatePayloads, {
 import {
   encryptPrivatePart,
   type PrivatePartEncryptionError,
-} from './utils/offerPrivatePayload'
+} from './utils/encryptPrivatePart'
 
 export interface TimeLimitReachedError {
   readonly _tag: 'TimeLimitReachedError'

@@ -1,10 +1,12 @@
 import {type KeyHolder} from '@vexl-next/cryptography'
+import {type PrivateKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {
   LocationPlaceId,
   OfferInfo,
   OfferPrivatePart,
   OfferPublicPart,
   type OfferLocation,
+  type PrivatePayloadEncrypted,
 } from '@vexl-next/domain/src/general/offers'
 import {toError, type BasicError} from '@vexl-next/domain/src/utility/errors'
 import {
@@ -19,7 +21,11 @@ import * as TE from 'fp-ts/TaskEither'
 import {flow, pipe} from 'fp-ts/function'
 import {z} from 'zod'
 import {stringToBoolean} from '../utils/booleanString'
-import {aesGCMIgnoreTagDecrypt, eciesDecrypt} from '../utils/crypto'
+import {
+  aesGCMIgnoreTagDecrypt,
+  eciesDecrypt,
+  type CryptoError,
+} from '../utils/crypto'
 import {
   parseJson,
   safeParse,
@@ -122,6 +128,23 @@ function decodeLocationState(
     E.chainW(safeParse(OfferLocationStateDeprecated)),
     E.map((locationState) => ({...offerJson, locationState: [locationState]}))
   )
+}
+
+export function decryptPrivatePart(
+  privateKey: PrivateKeyPemBase64
+): (
+  encrypted: PrivatePayloadEncrypted
+) => TE.TaskEither<
+  CryptoError | JsonParseError | ZodParseError<OfferPrivatePart>,
+  OfferPrivatePart
+> {
+  return (privatePayload) =>
+    pipe(
+      TE.right(privatePayload.substring(1)),
+      TE.chainW(eciesDecrypt(privateKey)),
+      TE.chainEitherKW(parseJson),
+      TE.chainEitherKW(safeParse(OfferPrivatePart))
+    )
 }
 
 // TODO write unit test for this function

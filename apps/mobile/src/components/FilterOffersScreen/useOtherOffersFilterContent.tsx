@@ -8,7 +8,6 @@ import Price from '../OfferForm/components/Price'
 import SpokenLanguages from '../OfferForm/components/SpokenLanguages'
 import {type Props} from '../Section'
 import friendLevelSvg from '../images/friendLevelSvg'
-import locationSvg from '../images/locationSvg'
 import networkSvg from '../images/networkSvg'
 import spokenLanguagesSvg from '../images/spokenLanguagesSvg'
 import {
@@ -18,6 +17,7 @@ import {
   createIsThisLanguageSelectedAtom,
   intendedConnectionLevelAtom,
   listingTypeAtom,
+  locationActiveAtom,
   locationArrayOfOneAtom,
   locationStateAtom,
   removeSpokenLanguageActionAtom,
@@ -60,15 +60,17 @@ export default function useOtherOffersFilterContent(): Props[] {
         ),
       },
       {
+        customSection: true,
         title: t('offerForm.location.location'),
-        image: locationSvg,
         children: (
           <Location
+            inFilter
             listingTypeAtom={listingTypeAtom}
             randomizeLocation={false}
             locationAtom={locationArrayOfOneAtom}
             locationStateAtom={locationStateAtom}
             setOfferLocationActionAtom={setOfferLocationActionAtom}
+            toggleLocationActiveAtom={locationActiveAtom}
             updateLocationStateAndPaymentMethodAtom={
               updateLocationStateAndPaymentMethodAtom
             }

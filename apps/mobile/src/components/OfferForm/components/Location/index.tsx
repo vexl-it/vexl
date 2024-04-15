@@ -11,23 +11,27 @@ import {
   type PrimitiveAtom,
   type WritableAtom,
 } from 'jotai'
-import {useState} from 'react'
-import {Text, YStack} from 'tamagui'
+import {useMemo, useState} from 'react'
+import {Stack, Text, XStack, YStack, getTokens} from 'tamagui'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import Help from '../../../Help'
+import SvgImage from '../../../Image'
 import Info from '../../../Info'
 import {
   newLocationSessionId,
   type LocationSessionId,
 } from '../../../LocationSearch/molecule'
+import Switch from '../../../Switch'
 import Tabs from '../../../Tabs'
 import anonymousCounterpartSvg from '../../../images/anonymousCounterpartSvg'
+import locationSvg from '../../../images/locationSvg'
 import AddCityOrDistrict from '../AddCityOrDistrict'
 import LocationsList from '../LocationsList'
 import SelectLocationFlowModal from './components/SelectLocationFlowModal'
 import useContent from './useContent'
 
 interface Props {
+  inFilter?: boolean
   listingTypeAtom: PrimitiveAtom<ListingType | undefined>
   setOfferLocationActionAtom: WritableAtom<
     null,
@@ -36,6 +40,7 @@ interface Props {
   >
   locationAtom: PrimitiveAtom<OfferLocation[] | undefined>
   locationStateAtom: PrimitiveAtom<LocationState[] | undefined>
+  toggleLocationActiveAtom: PrimitiveAtom<boolean | undefined>
   updateLocationStateAndPaymentMethodAtom: WritableAtom<
     null,
     [locationState: LocationState],
@@ -45,17 +50,21 @@ interface Props {
 }
 
 function LocationComponent({
+  inFilter,
   listingTypeAtom,
   locationAtom,
   locationStateAtom,
+  toggleLocationActiveAtom,
   updateLocationStateAndPaymentMethodAtom,
   randomizeLocation,
 }: Props): JSX.Element | null {
+  const tokens = getTokens()
   const {t} = useTranslation()
   const content = useContent()
 
   const listingType = useAtomValue(listingTypeAtom)
   const [location, setLocation] = useAtom(locationAtom)
+  const [locationActive, setLocationActive] = useAtom(toggleLocationActiveAtom)
   const locationState = useAtomValue(locationStateAtom)
   const updateLocationStateAndPaymentMethod = useSetAtom(
     updateLocationStateAndPaymentMethodAtom
@@ -64,6 +73,10 @@ function LocationComponent({
 
   const [locationSearchVisible, setLocationSearchVisible] =
     useState<LocationSessionId | null>(null)
+  const switchIsVisible = useMemo(
+    () => listingType === 'OTHER' && !inFilter,
+    [inFilter, listingType]
+  )
 
   const onLocationStateChange = (locationState: LocationState): void => {
     updateLocationStateAndPaymentMethod(locationState)
@@ -77,7 +90,38 @@ function LocationComponent({
   }
 
   return (
-    <YStack space="$2">
+    <YStack space="$2" mb="$4">
+      <XStack ai="center" jc="space-between" py="$4">
+        <XStack f={1} ai="center" mr="$1">
+          <Stack mr="$2">
+            <SvgImage
+              height={24}
+              width={24}
+              stroke={
+                !switchIsVisible || locationActive
+                  ? tokens.color.white.val
+                  : tokens.color.greyOnWhite.val
+              }
+              source={locationSvg}
+            />
+          </Stack>
+          <Stack fs={1}>
+            <Text
+              numberOfLines={2}
+              ff="$body700"
+              col={
+                !switchIsVisible || locationActive ? '$white' : '$greyOnWhite'
+              }
+              fos={24}
+            >
+              {t('offerForm.location.location')}
+            </Text>
+          </Stack>
+        </XStack>
+        {!!switchIsVisible && (
+          <Switch value={locationActive} onValueChange={setLocationActive} />
+        )}
+      </XStack>
       {(!listingType || listingType === 'BITCOIN') && (
         <Tabs
           activeTab={locationState ? locationState[0] : undefined}
@@ -85,7 +129,10 @@ function LocationComponent({
           tabs={content}
         />
       )}
-      {!!(listingType === 'OTHER' || locationState?.includes('IN_PERSON')) && (
+      {!!(
+        (listingType === 'OTHER' && !!locationActive) ||
+        locationState?.includes('IN_PERSON')
+      ) && (
         <YStack space="$2">
           {!!(!location || (location && location.length < 3)) && (
             <AddCityOrDistrict

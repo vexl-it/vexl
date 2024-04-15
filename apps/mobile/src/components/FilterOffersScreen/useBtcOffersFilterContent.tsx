@@ -12,7 +12,6 @@ import {type Props} from '../Section'
 import amountOfTransactionSvg from '../images/amountOfTransactionSvg'
 import coinsSvg from '../images/coinsSvg'
 import friendLevelSvg from '../images/friendLevelSvg'
-import locationSvg from '../images/locationSvg'
 import networkSvg from '../images/networkSvg'
 import paymentMethodSvg from '../images/paymentMethod'
 import spokenLanguagesSvg from '../images/spokenLanguagesSvg'
@@ -23,6 +22,7 @@ import {
   currencyAtom,
   intendedConnectionLevelAtom,
   listingTypeAtom,
+  locationActiveAtom,
   locationArrayOfOneAtom,
   locationStateAtom,
   paymentMethodAtom,
@@ -65,8 +65,8 @@ export default function useBtcOffersFilterContent(): Props[] {
         ),
       },
       {
+        customSection: true,
         title: t('offerForm.location.location'),
-        image: locationSvg,
         children: (
           <Location
             listingTypeAtom={listingTypeAtom}
@@ -74,6 +74,7 @@ export default function useBtcOffersFilterContent(): Props[] {
             locationAtom={locationArrayOfOneAtom}
             locationStateAtom={locationStateAtom}
             setOfferLocationActionAtom={setOfferLocationActionAtom}
+            toggleLocationActiveAtom={locationActiveAtom}
             updateLocationStateAndPaymentMethodAtom={
               updateLocationStateAndPaymentMethodAtom
             }

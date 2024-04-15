@@ -27,7 +27,7 @@ export default function useOtherOfferContent(): Props[] {
     listingTypeAtom,
     offerDescriptionAtom,
     intendedConnectionLevelAtom,
-    singlePriceStateAtom,
+    toggleSinglePriceActiveAtom,
     spokenLanguagesAtomsAtom,
     removeSpokenLanguageActionAtom,
     createIsThisLanguageSelectedAtom,
@@ -87,7 +87,7 @@ export default function useOtherOfferContent(): Props[] {
             }
             currencyAtom={currencyAtom}
             satsValueAtom={satsValueAtom}
-            singlePriceStateAtom={singlePriceStateAtom}
+            toggleSinglePriceActiveAtom={toggleSinglePriceActiveAtom}
             changePriceCurrencyActionAtom={changePriceCurrencyActionAtom}
           />
         ),
@@ -139,7 +139,7 @@ export default function useOtherOfferContent(): Props[] {
       calculateFiatValueOnSatsValueChangeActionAtom,
       currencyAtom,
       satsValueAtom,
-      singlePriceStateAtom,
+      toggleSinglePriceActiveAtom,
       changePriceCurrencyActionAtom,
       tokens.color.white.val,
       createIsThisLanguageSelectedAtom,

@@ -1,11 +1,10 @@
 import {Picker} from '@react-native-picker/picker'
 import {keys} from '@vexl-next/resources-utils/src/utils/keys'
-import {I18n} from 'i18n-js'
 import {useSetAtom} from 'jotai'
 import {useState} from 'react'
 import {Text, YStack} from 'tamagui'
-import {i18nAtom} from '../../../utils/localization/I18nProvider'
 import * as translations from '../../../utils/localization/translations'
+import {currentAppLanguageAtom} from '../../../utils/preferences'
 import Button from '../../Button'
 
 const languages = keys(translations)
@@ -14,7 +13,7 @@ function LanguagePicker(): JSX.Element {
   const [selectedLanguage, setSelectedLanguage] =
     useState<(typeof languages)[number]>('en')
 
-  const setI18nAtom = useSetAtom(i18nAtom)
+  const setCurrentAppLanguage = useSetAtom(currentAppLanguageAtom)
 
   return (
     <YStack>
@@ -31,11 +30,7 @@ function LanguagePicker(): JSX.Element {
       </Picker>
       <Button
         onPress={() => {
-          const newI18n = new I18n(translations)
-          newI18n.locale = selectedLanguage
-          newI18n.defaultLocale = 'en'
-          newI18n.enableFallback = true
-          setI18nAtom(newI18n)
+          setCurrentAppLanguage(selectedLanguage)
         }}
         variant="primary"
         size="small"

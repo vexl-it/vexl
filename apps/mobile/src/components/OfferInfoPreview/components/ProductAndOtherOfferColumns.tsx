@@ -1,4 +1,5 @@
 import {type OfferInfo} from '@vexl-next/domain/src/general/offers'
+import {useMemo} from 'react'
 import {getTokens, Stack, XStack, YStack} from 'tamagui'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import SvgImage from '../../Image'
@@ -16,11 +17,16 @@ interface Props {
 function ProductAndOtherOfferColumns({offer}: Props): JSX.Element {
   const {t} = useTranslation()
 
+  const offerHasPrice = useMemo(
+    () =>
+      offer.publicPart.amountBottomLimit !== 0 &&
+      offer.publicPart.amountTopLimit !== 0,
+    [offer.publicPart.amountBottomLimit, offer.publicPart.amountTopLimit]
+  )
+
   return (
     <XStack f={1} space="$1">
-      {offer.publicPart.singlePriceState === 'HAS_COST' && (
-        <PriceInSats offer={offer} />
-      )}
+      {!!offerHasPrice && <PriceInSats offer={offer} />}
       {offer.publicPart.listingType === 'PRODUCT' ||
       (offer.publicPart.listingType === 'OTHER' &&
         offer.publicPart.locationState.includes('IN_PERSON') &&

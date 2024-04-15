@@ -79,6 +79,8 @@ export const amountTopLimitAtom = atom<number | undefined>(
   offersFilterInitialState.amountTopLimit
 )
 
+export const singlePriceActiveAtom = atom<boolean>(true)
+
 export const updateCurrencyLimitsAtom = atom<
   null,
   [

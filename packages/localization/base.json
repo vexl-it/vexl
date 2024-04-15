@@ -340,6 +340,7 @@
   "offerForm.pickupDeliveryIsSafer": "Pickup in person is safer. Never share your home address with anyone you don’t trust.",
   "offerForm.price": "Price",
   "offerForm.thePriceIsFixedToFiat": "The price is set in fiat and then approximated in BTC.",
+  "offerForm.thisItemDoesNotHaveSetPrice": "This item does not have a set price.",
   "offerForm.thisItemWillBeFree": "This item will be considered free of charge.",
   "offerForm.paymentMethod.paymentMethod": "Payment method",
   "offerForm.paymentMethod.cash": "Cash",

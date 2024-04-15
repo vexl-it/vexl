@@ -53,9 +53,6 @@ export type OfferType = z.TypeOf<typeof OfferType>
 export const ListingType = z.enum(['BITCOIN', 'PRODUCT', 'OTHER'])
 export type ListingType = z.TypeOf<typeof ListingType>
 
-export const SinglePriceState = z.enum(['HAS_COST', 'FOR_FREE'])
-export type SinglePriceState = z.TypeOf<typeof SinglePriceState>
-
 export const DeliveryMethod = z.enum(['PICKUP', 'DELIVERY'])
 export type DeliveryMethod = z.TypeOf<typeof DeliveryMethod>
 
@@ -180,7 +177,6 @@ export const OfferPublicPart = z.object({
   active: z.boolean(),
   groupUuids: z.array(z.string()),
   listingType: ListingType.optional(),
-  singlePriceState: SinglePriceState.optional(),
   fcmCypher: FcmCypher.optional(),
 })
 export type OfferPublicPart = z.TypeOf<typeof OfferPublicPart>

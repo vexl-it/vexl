@@ -8,7 +8,6 @@ import {
   OfferType,
   OneOfferInState,
   PaymentMethod,
-  SinglePriceState,
   Sort,
   SpokenLanguage,
 } from '@vexl-next/domain/src/general/offers'
@@ -66,7 +65,6 @@ export const OffersFilter = z.object({
   friendLevel: z.array(FriendLevel).optional(),
   offerType: OfferType.optional(),
   listingType: ListingType.optional(),
-  singlePriceState: SinglePriceState.optional(),
   singlePrice: z.coerce.number().optional(),
   amountBottomLimit: z.coerce.number().optional(),
   amountTopLimit: z.coerce.number().optional(),

@@ -17,14 +17,17 @@ import {
   type ErrorDecryptingOffer,
   type NonCompatibleOfferVersionError,
 } from '@vexl-next/resources-utils/src/offers/decryptOffer'
+import extractOwnerInfoFromOwnerPrivatePayload from '@vexl-next/resources-utils/src/offers/extractOwnerInfoFromOwnerPrivatePayload'
 import getNewOffersAndDecrypt, {
   type ApiErrorFetchingOffers,
 } from '@vexl-next/resources-utils/src/offers/getNewOffersAndDecrypt'
 import updateOffer, {
   type ApiErrorUpdatingOffer,
 } from '@vexl-next/resources-utils/src/offers/updateOffer'
+import updateOwnerPrivatePayoad from '@vexl-next/resources-utils/src/offers/updateOwnerPrivatePayload'
 import {type ErrorConstructingPrivatePayloads} from '@vexl-next/resources-utils/src/offers/utils/constructPrivatePayloads'
 import {type ErrorEncryptingPublicPart} from '@vexl-next/resources-utils/src/offers/utils/encryptOfferPublicPayload'
+import {type PrivatePartEncryptionError} from '@vexl-next/resources-utils/src/offers/utils/encryptPrivatePart'
 import {type ApiErrorFetchingContactsForOffer} from '@vexl-next/resources-utils/src/offers/utils/fetchContactsForOffer'
 import {type ErrorGeneratingSymmetricKey} from '@vexl-next/resources-utils/src/offers/utils/generateSymmetricKey'
 import {type OfferPrivateApi} from '@vexl-next/rest-api/src/services/offer'
@@ -32,11 +35,11 @@ import {type ExtractLeftTE} from '@vexl-next/rest-api/src/utils'
 import * as A from 'fp-ts/Array'
 import * as E from 'fp-ts/Either'
 import * as Option from 'fp-ts/Option'
+import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {atom, useAtomValue} from 'jotai'
 import {useMemo} from 'react'
-import {privateApiAtom} from '../../api'
 import deduplicate from '../../utils/deduplicate'
 import getCountryPrefix from '../../utils/getCountryCode'
 import notEmpty from '../../utils/notEmpty'
@@ -47,7 +50,9 @@ import offerToConnectionsAtom, {
 } from '../connections/atom/offerToConnectionsAtom'
 import addFCMCypherToPublicPayloadActionAtom from '../notifications/addNotificationTokenToPublicPayloadActionAtom'
 import {sessionDataOrDummyAtom} from '../session'
+import {privateApiAtom} from './../../api/index'
 import {loadingStateAtom} from './atoms/loadingState'
+import {myOffersAtom} from './atoms/myOffers'
 import {
   lastUpdatedAtAtom,
   offerForChatOriginAtom,
@@ -152,7 +157,7 @@ export const triggerOffersRefreshAtom = atom(null, async (get, set) => {
             )
 
             if (oldOffer?.ownershipInfo?.adminId) {
-              // D not update offers that are owned by current user.
+              // D not update offers that are owned the by current user.
               return oldOffer
             }
 
@@ -190,6 +195,105 @@ export const triggerOffersRefreshAtom = atom(null, async (get, set) => {
         )
       }
     )
+  )()
+
+  // Check and try to recover offers that are not saved with ownership info but are owned by the current user (according to private payload)
+  await pipe(
+    get(offersStateAtom).offers,
+    A.filter(
+      (one) => !one.ownershipInfo && !!one.offerInfo.privatePart.adminId
+    ),
+    (offersToRecover) => {
+      if (offersToRecover.length > 0) {
+        console.warn(
+          `🚨 🚨 🚨 Found ${offersToRecover.length} offers that needs to be recovered. This should not happen and should be investigated.🚨 🚨 🚨 \nTrying to recover them.`
+        )
+        reportError(
+          'warn',
+          new Error(
+            `Found ${offersToRecover.length} offers that needs to be recovered.`
+          ),
+          {ids: offersToRecover.map((one) => one.offerInfo.id)}
+        )
+      }
+      return offersToRecover
+    },
+    A.map((one) =>
+      pipe(
+        extractOwnerInfoFromOwnerPrivatePayload(one.offerInfo.privatePart),
+        TE.matchW(
+          (l) => {
+            console.warn('Error while recovering offer', JSON.stringify(l))
+            return false
+          },
+          (r) => {
+            set(offersAtom, (old) =>
+              old.map((oneOffer) => {
+                if (oneOffer.offerInfo.offerId !== one.offerInfo.offerId) {
+                  return oneOffer
+                }
+                return {
+                  ...oneOffer,
+                  ownershipInfo: r,
+                }
+              })
+            )
+            return true
+          }
+        )
+      )
+    ),
+    T.sequenceSeqArray,
+    T.map((results) => {
+      if (results.length === 0) return
+      const successCount = results.filter(Boolean).length
+      const errorCount = results.length - successCount
+      console.info(`Recovered ${successCount} out of ${errorCount} offers.`)
+      if (errorCount > 0) {
+        console.warn(`Unable to recover some offers.`)
+      }
+    })
+  )()
+
+  // Update offers
+  await pipe(
+    get(myOffersAtom),
+    A.filter(
+      (one) =>
+        !one.offerInfo.privatePart.adminId ||
+        !one.offerInfo.privatePart.intendedConnectionLevel
+    ),
+    (offersToUpdate) => {
+      console.log(
+        `Updating offers to include owner info in owner's private payload. Count: ${offersToUpdate.length}`
+      )
+      return offersToUpdate
+    },
+    A.map((one) =>
+      pipe(
+        updateOwnerPrivatePayoad({
+          api: get(privateApiAtom).offer,
+          ownerCredentials: session.privateKey,
+          symmetricKey: one.offerInfo.privatePart.symmetricKey,
+          adminId: one.ownershipInfo.adminId,
+          intendedConnectionLevel: one.ownershipInfo.intendedConnectionLevel,
+        }),
+        TE.match(
+          (e) => {
+            reportError(
+              'warn',
+              new Error('Error updating owner private payload'),
+              {e}
+            )
+            return false
+          },
+          () => {
+            return true
+          }
+        )
+      )
+    ),
+    T.sequenceSeqArray
   )()
 })
 
@@ -322,6 +426,8 @@ export const updateOfferAtom = atom<
     | ApiErrorUpdatingOffer
     | ErrorEncryptingPublicPart
     | ErrorDecryptingOffer
+    | PrivatePartEncryptionError
+    | ExtractLeftTE<ReturnType<OfferPrivateApi['createPrivatePart']>>
     | NonCompatibleOfferVersionError,
     OneOfferInState
   >
@@ -349,6 +455,7 @@ export const updateOfferAtom = atom<
           adminId,
           publicPayload: publicPart,
           symmetricKey,
+          intendedConnectionLevel,
           ownerKeypair: session.privateKey,
         })
     ),

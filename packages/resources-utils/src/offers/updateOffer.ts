@@ -1,5 +1,6 @@
 import {type PrivateKeyHolder} from '@vexl-next/cryptography/src/KeyHolder'
 import {
+  type IntendedConnectionLevel,
   type OfferAdminId,
   type OfferInfo,
   type OfferPublicPart,
@@ -13,9 +14,11 @@ import decryptOffer, {
   type ErrorDecryptingOffer,
   type NonCompatibleOfferVersionError,
 } from './decryptOffer'
+import updateOwnerPrivatePayoad from './updateOwnerPrivatePayload'
 import encryptOfferPublicPayload, {
   type ErrorEncryptingPublicPart,
 } from './utils/encryptOfferPublicPayload'
+import {type PrivatePartEncryptionError} from './utils/encryptPrivatePart'
 
 export type ApiErrorUpdatingOffer = ExtractLeftTE<
   ReturnType<OfferPrivateApi['updateOffer']>
@@ -26,15 +29,19 @@ export default function updateOffer({
   publicPayload,
   symmetricKey,
   ownerKeypair,
+  intendedConnectionLevel,
 }: {
   offerApi: OfferPrivateApi
   adminId: OfferAdminId
   publicPayload: OfferPublicPart
   symmetricKey: SymmetricKey
   ownerKeypair: PrivateKeyHolder
+  intendedConnectionLevel: IntendedConnectionLevel
 }): TE.TaskEither<
   | ApiErrorUpdatingOffer
   | ErrorEncryptingPublicPart
+  | PrivatePartEncryptionError
+  | ExtractLeftTE<ReturnType<OfferPrivateApi['createPrivatePart']>>
   | ErrorDecryptingOffer
   | NonCompatibleOfferVersionError,
   OfferInfo
@@ -53,6 +60,15 @@ export default function updateOffer({
         }),
         TE.chainW(decryptOffer(ownerKeypair))
       )
+    ),
+    TE.chainFirstW(() =>
+      updateOwnerPrivatePayoad({
+        api: offerApi,
+        ownerCredentials: ownerKeypair,
+        symmetricKey,
+        adminId,
+        intendedConnectionLevel,
+      })
     )
   )
 }

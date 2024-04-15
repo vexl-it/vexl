@@ -67,6 +67,7 @@ export const CreateNewOfferRequest = z.object({
   payloadPublic: PublicPayloadEncrypted,
   offerPrivateList: z.array(ServerPrivatePart),
   countryPrefix: CountryPrefix,
+  adminId: OfferAdminId,
 })
 export type CreateNewOfferRequest = z.TypeOf<typeof CreateNewOfferRequest>
 export const CreateNewOfferResponse = ServerOffer.extend({

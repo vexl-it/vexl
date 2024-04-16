@@ -22,6 +22,7 @@ import {atom} from 'jotai'
 import {privateApiAtom} from '../../../api'
 import {type ActionAtomType} from '../../../utils/atomUtils/ActionAtomType'
 import {type FocusAtomType} from '../../../utils/atomUtils/FocusAtomType'
+import {version} from '../../../utils/environment'
 import removeFile from '../../../utils/removeFile'
 import {tradeChecklistDataAtom} from '../../tradeChecklist/atoms/fromChatAtoms'
 import {updateTradeChecklistState} from '../../tradeChecklist/utils'
@@ -64,6 +65,7 @@ export default function createSubmitChecklistUpdateActionAtom(
             },
             time: unixMillisecondsNow(),
             uuid: generateChatMessageId(),
+            myVersion: version,
             senderPublicKey: chatWithMessages.chat.otherSide.publicKey,
             minimalRequiredVersion: MINIMAL_REQUIRED_VERSION,
           }) as ChatMessage

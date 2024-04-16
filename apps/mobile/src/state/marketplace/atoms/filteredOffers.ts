@@ -21,18 +21,27 @@ export default function areIncluded<T>(
   return elementsToLookFor.every((element) => arrayToLookIn.includes(element))
 }
 
-const filterBtcOffersAtom = atom((get) => {
+const filteredOffersAccordingToLayoutModeAtom = atom((get) => {
   const offersToSeeInMarketplace = get(offersToSeeInMarketplaceAtom)
-  const filter = get(offersFilterFromStorageAtom)
   const layoutMode = get(marketplaceLayoutModeAtom)
 
   return offersToSeeInMarketplace.filter(
     (offer) =>
+      layoutMode === 'list' || offer.offerInfo.publicPart.location.length > 0
+  )
+})
+
+const filterBtcOffersAtom = atom((get) => {
+  const filteredOffersAccordingToLayoutMode = get(
+    filteredOffersAccordingToLayoutModeAtom
+  )
+  const filter = get(offersFilterFromStorageAtom)
+
+  return filteredOffersAccordingToLayoutMode.filter(
+    (offer) =>
       offer.offerInfo.publicPart.listingType === 'BITCOIN' &&
       (!filter.currency ||
         filter.currency.includes(offer.offerInfo.publicPart.currency)) &&
-      (layoutMode === 'list' ||
-        offer.offerInfo.publicPart.location.length > 0) &&
       (!filter.paymentMethod ||
         areIncluded(
           filter.paymentMethod,
@@ -67,9 +76,10 @@ const filterBtcOffersAtom = atom((get) => {
 })
 
 const filterProductAndOtherOffersAtom = atom((get) => {
-  const offersToSeeInMarketplace = get(offersToSeeInMarketplaceAtom)
+  const filteredOffersAccordingToLayoutMode = get(
+    filteredOffersAccordingToLayoutModeAtom
+  )
   const filter = get(offersFilterFromStorageAtom)
-  const layoutMode = get(marketplaceLayoutModeAtom)
   const btcPriceWithStateForFilterCurrency = filter.singlePriceCurrency
     ? get(createBtcPriceForCurrencyAtom(filter.singlePriceCurrency))
     : undefined
@@ -82,12 +92,10 @@ const filterProductAndOtherOffersAtom = atom((get) => {
         })
       : null
 
-  return offersToSeeInMarketplace.filter(
+  return filteredOffersAccordingToLayoutMode.filter(
     (offer) =>
       (!filter.listingType ||
         offer.offerInfo.publicPart.listingType === filter.listingType) &&
-      (layoutMode === 'list' ||
-        offer.offerInfo.publicPart.location.length > 0) &&
       (!filter.locationState ||
         areIncluded(
           filter.locationState,
@@ -135,7 +143,9 @@ export const filteredOffersIgnoreLocationAtom = atom((get) => {
   const filtered =
     filter.listingType === 'BITCOIN'
       ? get(filterBtcOffersAtom)
-      : get(filterProductAndOtherOffersAtom)
+      : filter.listingType === 'PRODUCT' || filter.listingType === 'OTHER'
+      ? get(filterProductAndOtherOffersAtom)
+      : get(filteredOffersAccordingToLayoutModeAtom)
 
   // This could be rewritten with pipe, i know, i know...
   const filteredByText = textFilter

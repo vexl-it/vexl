@@ -134,7 +134,7 @@ export const LocationStateToArray = z
   .transform((previous) => {
     const deprecatedLocationStateFormat = LocationState.safeParse(previous)
     if (deprecatedLocationStateFormat.success) {
-      return [deprecatedLocationStateFormat]
+      return [deprecatedLocationStateFormat.data]
     }
     return previous
   })

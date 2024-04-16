@@ -341,7 +341,13 @@ export const offerFormMolecule = molecule(() => {
         return ['BANK', 'REVOLUT']
       })
 
-      set(locationAtom, [])
+      if (
+        (listingType === 'BITCOIN' && locationState === 'ONLINE') ||
+        (listingType === 'PRODUCT' &&
+          !get(locationStateAtom)?.includes('IN_PERSON'))
+      ) {
+        set(locationAtom, [])
+      }
     }
   )
 
@@ -954,8 +960,7 @@ export const offerFormMolecule = molecule(() => {
         locationState?.includes('IN_PERSON') &&
         locationState?.includes('ONLINE')
       ) {
-        set(locationStateAtom, ['IN_PERSON'])
-        set(paymentMethodAtom, ['CASH'])
+        set(updateLocationStateAndPaymentMethodAtom, 'IN_PERSON')
       }
 
       if (

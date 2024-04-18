@@ -74,3 +74,13 @@ export const OffersFilter = z.object({
 })
 
 export type OffersFilter = z.TypeOf<typeof OffersFilter>
+
+export const BaseOffersFilter = z.enum([
+  'BTC_TO_CASH',
+  'CASH_TO_BTC',
+  'BTC_TO_PRODUCT',
+  'PRODUCT_TO_BTC',
+  'STH_ELSE',
+])
+
+export type BaseOffersFilter = z.TypeOf<typeof BaseOffersFilter>

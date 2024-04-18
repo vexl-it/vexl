@@ -1,7 +1,7 @@
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
 import {type Viewport} from '@vexl-next/domain/src/utility/geoCoordinates'
 
-export default function isOfferInsdieViewPort(
+export default function isOfferInsideViewPort(
   viewport: Viewport,
   offer: OneOfferInState
 ): boolean {

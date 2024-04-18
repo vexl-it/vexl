@@ -12,7 +12,7 @@ import {type ExtractLeftTE} from '../utils/ExtractLeft'
 import {constructAndEncryptPrivatePayloadForOwner} from './constructPrivatePayloadForOwner'
 import {type PrivatePartEncryptionError} from './utils/encryptPrivatePart'
 
-export default function updateOwnerPrivatePayoad({
+export default function updateOwnerPrivatePayload({
   api,
   ownerCredentials,
   symmetricKey,

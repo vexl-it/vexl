@@ -3,9 +3,8 @@ import {type LocationSuggestion} from '@vexl-next/rest-api/src/services/location
 import {useAtomValue, useSetAtom} from 'jotai'
 import {memo, useCallback, useState} from 'react'
 import {Modal} from 'react-native'
-import {TouchableWithoutFeedback} from 'react-native-gesture-handler'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
-import {Stack, Text, XStack, YStack, getTokens} from 'tamagui'
+import {Stack, XStack, YStack} from 'tamagui'
 import {locationFilterAtom} from '../../../state/marketplace/atoms/filterAtoms'
 import {
   clearRegionAndRefocusActionAtom,
@@ -21,17 +20,15 @@ import {useTranslation} from '../../../utils/localization/I18nProvider'
 import useIsKeyboardShown from '../../../utils/useIsKeyboardShown'
 import Button from '../../Button'
 import IconButton from '../../IconButton'
-import Image from '../../Image'
+import BaseFilterDropdown from '../../InsideRouter/components/MarketplaceScreen/components/BaseFilterDropdown'
+import FilterButton from '../../InsideRouter/components/MarketplaceScreen/components/FilterButton'
+import SearchOffers from '../../InsideRouter/components/MarketplaceScreen/components/SearchOffers'
 import LocationSearch from '../../LocationSearch'
-import {
-  newLocationSessionId,
-  type LocationSessionId,
-} from '../../LocationSearch/molecule'
+import {type LocationSessionId} from '../../LocationSearch/molecule'
 import MarketplaceMap from '../../MarketplaceMap'
 import Screen from '../../Screen'
 import ScreenTitle from '../../ScreenTitle'
 import closeSvg from '../../images/closeSvg'
-import magnifyingGlass from '../../images/magnifyingGlass'
 
 function useNavigationFromMap(): 'OfferDetail' | 'Marketplace' | 'others' {
   return useNavigationState(
@@ -92,7 +89,7 @@ function MapBarAndButton(): JSX.Element | null {
 
   const onSelectLocationSearch = useCallback(
     (v: LocationSuggestion) => {
-      setLocationSessionId(null)
+      // setLocationSessionId(null)
       const region = {
         latitude: v.userData.latitude,
         longitude: v.userData.longitude,
@@ -122,23 +119,13 @@ function MapBarAndButton(): JSX.Element | null {
         left="$3"
         right="$3"
       >
-        <TouchableWithoutFeedback
-          onPress={() => {
-            setLocationSessionId(newLocationSessionId())
-          }}
-        >
-          <XStack ai="center" p="$5" bc="$grey" br="$5">
-            <Stack h={24} w={24}>
-              <Image
-                stroke={getTokens().color.white.val}
-                source={magnifyingGlass}
-              />
-            </Stack>
-            <Text ml="$4" ff="$body600" fos={18} col="$greyOnBlack">
-              {t('filterOffers.searchOffersByLocation')}
-            </Text>
+        <Stack space="$2">
+          <BaseFilterDropdown postSelectActions={clearAndRefocus} />
+          <XStack space="$2">
+            <SearchOffers postSearchActions={clearAndRefocus} />
+            <FilterButton />
           </XStack>
-        </TouchableWithoutFeedback>
+        </Stack>
         {!!isMapRegionSet && (
           <YStack alignItems="center">
             <Button

@@ -18,12 +18,6 @@ export function newLocationSessionId(): LocationSessionId {
   return LocationSessionId.parse(randomUUID())
 }
 
-export interface LocationSugegstionState {
-  loading: boolean
-  error?: string
-  data: LocationSuggestion[]
-}
-
 export const LocationSearchScope = createScope<{sessionId: LocationSessionId}>({
   sessionId: newLocationSessionId(),
 })

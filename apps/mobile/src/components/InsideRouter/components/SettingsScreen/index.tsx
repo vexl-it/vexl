@@ -1,6 +1,7 @@
 import {Stack, Text} from 'tamagui'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import ContainerWithTopBorderRadius from '../ContainerWithTopBorderRadius'
+import Header from '../Header'
 import ButtonsSection from './components/ButtonsSection'
 import ProfileSection from './components/ProfileSection'
 import VersionTextWithSecretDoor from './components/VersionTextWithSecretDoor'
@@ -8,16 +9,19 @@ import VersionTextWithSecretDoor from './components/VersionTextWithSecretDoor'
 function SettingsScreen(): JSX.Element {
   const {t} = useTranslation()
   return (
-    <ContainerWithTopBorderRadius scrollView withTopPadding>
-      <ProfileSection />
-      <ButtonsSection />
-      <Text fos={14} ta="center" mt="$5" col="$greyOnBlack">
-        {t('settings.noLogoutExplanation')}
-      </Text>
-      <Stack mt="$5">
-        <VersionTextWithSecretDoor />
-      </Stack>
-    </ContainerWithTopBorderRadius>
+    <>
+      <Header />
+      <ContainerWithTopBorderRadius scrollView withTopPadding>
+        <ProfileSection />
+        <ButtonsSection />
+        <Text fos={14} ta="center" mt="$5" col="$greyOnBlack">
+          {t('settings.noLogoutExplanation')}
+        </Text>
+        <Stack mt="$5">
+          <VersionTextWithSecretDoor />
+        </Stack>
+      </ContainerWithTopBorderRadius>
+    </>
   )
 }
 

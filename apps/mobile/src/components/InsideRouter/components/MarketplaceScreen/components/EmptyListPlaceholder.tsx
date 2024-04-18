@@ -14,7 +14,7 @@ import {
   isFilterActiveAtom,
   resetFilterInStorageActionAtom,
 } from '../../../../../state/marketplace/atoms/filterAtoms'
-import {countOfFilteredOffersBeforeLocationAtom} from '../../../../../state/marketplace/atoms/filteredOffers'
+import {offersToSeeInMarketplaceCountAtom} from '../../../../../state/marketplace/atoms/filteredOffersCountAtoms'
 import {refocusMapActionAtom} from '../../../../../state/marketplace/atoms/map/focusedOffer'
 import marketplaceLayoutModeAtom from '../../../../../state/marketplace/atoms/map/marketplaceLayoutModeAtom'
 import {
@@ -82,8 +82,8 @@ function EmptyListPlaceholder({refreshing, onRefresh}: Props): JSX.Element {
   const importedContactsCount = useAtomValue(importedContactsCountAtom)
   const filterActive = useAtomValue(isFilterActiveAtom)
   const marketplaceLayout = useAtomValue(marketplaceLayoutModeAtom)
-  const countOfFilteredOffersBeforeLocation = useAtomValue(
-    countOfFilteredOffersBeforeLocationAtom
+  const offersToSeeInMarketplaceCount = useAtomValue(
+    offersToSeeInMarketplaceCountAtom
   )
   const reachNumber = useAtomValue(reachNumberAtom)
   const [minutesTillOffersDisplayed, setMinutesTillOffersDisplayed] = useAtom(
@@ -132,7 +132,7 @@ function EmptyListPlaceholder({refreshing, onRefresh}: Props): JSX.Element {
     initializeMinutesTillOffersDisplayed()
   }, [initializeMinutesTillOffersDisplayed])
 
-  if (marketplaceLayout === 'map' && countOfFilteredOffersBeforeLocation > 0) {
+  if (marketplaceLayout === 'map' && offersToSeeInMarketplaceCount > 0) {
     return (
       <MarketplaceSuggestion
         mt="$4"

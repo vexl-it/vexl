@@ -1,11 +1,12 @@
-import {atom} from 'jotai'
+import {atom, type Atom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
-import {selectAtom} from 'jotai/utils'
 import {z} from 'zod'
+import {type DropdownItemProps} from '../../../components/Dropdown'
 import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
 import getDefaultCurrency from '../../../utils/getDefaultCurrency'
 import {currencies} from '../../../utils/localization/currency'
-import {OffersFilter} from '../domain'
+import {translationAtom} from '../../../utils/localization/I18nProvider'
+import {OffersFilter, type BaseOffersFilter} from '../domain'
 
 export const offersFilterInitialState: OffersFilter = {
   sort: undefined,
@@ -18,9 +19,10 @@ export const offersFilterInitialState: OffersFilter = {
   spokenLanguages: [],
   amountBottomLimit: undefined,
   amountTopLimit: undefined,
-  text: undefined,
-  listingType: undefined,
+  offerType: 'SELL',
+  listingType: 'BITCOIN',
   singlePrice: undefined,
+  text: undefined,
   singlePriceCurrency: getDefaultCurrency().code ?? currencies.USD.code,
 }
 
@@ -35,8 +37,25 @@ export const offersFilterFromStorageAtom = focusAtom(
   (o) => o.prop('filter')
 )
 
+export const listingTypeFilterAtom = focusAtom(offersFilterStorageAtom, (o) =>
+  o.prop('filter').prop('listingType')
+)
+
+export const offerTypeFilterAtom = focusAtom(offersFilterStorageAtom, (o) =>
+  o.prop('filter').prop('offerType')
+)
+
 export const locationFilterAtom = focusAtom(offersFilterStorageAtom, (o) =>
   o.prop('filter').prop('location')
+)
+
+export const singlePriceCurrencyAtom = focusAtom(offersFilterStorageAtom, (o) =>
+  o.prop('filter').prop('singlePriceCurrency')
+)
+
+export const offersFilterTextFromStorageAtom = focusAtom(
+  offersFilterFromStorageAtom,
+  (o) => o.prop('text')
 )
 
 export const resetLocationFilterActionAtom = atom(null, (get, set) => {
@@ -53,32 +72,123 @@ export const isFilterActiveAtom = atom((get) => {
   // this value is stored, but it's not one of the filtering conditions
   // those values are used to calculate SATS value when filtering Product/Other offers
   const {
-    singlePriceCurrency: ignoredCurrency1,
-    singlePrice: ignoredSinglePrice1,
+    singlePriceCurrency,
+    singlePrice,
+    text,
+    // listingType and offerType are ignored as they are part of the main filter on marketplace
+    listingType,
+    offerType,
     ...offersFilterFromStorage
   } = get(offersFilterFromStorageAtom)
   const {
-    singlePriceCurrency: ignoredCurrency2,
-    singlePrice: ignoredSinglePrice2,
+    singlePriceCurrency: spc,
+    singlePrice: sp,
+    text: t,
+    listingType: lt,
+    offerType: ot,
     ...filterInitialState
   } = offersFilterInitialState
 
   return (
-    JSON.stringify(offersFilterFromStorage) !==
-    JSON.stringify(filterInitialState)
+    JSON.stringify({
+      ...offersFilterFromStorage,
+      singlePrice: listingType !== 'BITCOIN' ? singlePrice : undefined,
+    } satisfies OffersFilter) !== JSON.stringify(filterInitialState)
   )
 })
 
-export const isTextFilterActiveAtom = selectAtom(
-  offersFilterFromStorageAtom,
-  ({text}) => !!text
-)
-
-export const offersFilterTextFromStorageAtom = focusAtom(
-  offersFilterFromStorageAtom,
-  (o) => o.prop('text')
-)
-
 export const resetFilterInStorageActionAtom = atom(null, (get, set) => {
-  set(offersFilterFromStorageAtom, offersFilterInitialState)
+  const {offerType, listingType, ...restOfOffersFilterInitialState} =
+    offersFilterInitialState
+  set(offersFilterFromStorageAtom, (prev) => ({
+    ...prev,
+    ...restOfOffersFilterInitialState,
+  }))
 })
+
+export const baseFilterDropdownDataAtom: Atom<
+  Array<DropdownItemProps<BaseOffersFilter>>
+> = atom((get) => {
+  const {t} = get(translationAtom)
+  const baseFilterOptions: BaseOffersFilter[] = [
+    'BTC_TO_CASH',
+    'CASH_TO_BTC',
+    'BTC_TO_PRODUCT',
+    'PRODUCT_TO_BTC',
+    'STH_ELSE',
+  ]
+
+  return baseFilterOptions.map((option) => ({
+    label: t(`filterOffers.${option}`),
+    value: option,
+  }))
+})
+
+export const baseFilterAtom = atom(
+  (get): BaseOffersFilter | undefined => {
+    const listingTypeFilter = get(listingTypeFilterAtom)
+    const offerTypeFilter = get(offerTypeFilterAtom)
+    if (listingTypeFilter === 'BITCOIN') {
+      if (offerTypeFilter === 'SELL') return 'BTC_TO_CASH'
+      return 'CASH_TO_BTC'
+    }
+
+    if (listingTypeFilter === 'PRODUCT') {
+      if (offerTypeFilter === 'SELL') return 'PRODUCT_TO_BTC'
+      return 'BTC_TO_PRODUCT'
+    }
+
+    if (listingTypeFilter === 'OTHER') {
+      return 'STH_ELSE'
+    }
+
+    return undefined
+  },
+  (get, set, baseFilterValue: BaseOffersFilter | undefined) => {
+    const {filter} = get(offersFilterStorageAtom)
+    if (baseFilterValue === 'BTC_TO_CASH') {
+      set(offersFilterStorageAtom, {
+        filter: {...filter, offerType: 'SELL', listingType: 'BITCOIN'},
+      })
+    }
+
+    if (baseFilterValue === 'CASH_TO_BTC') {
+      set(offersFilterStorageAtom, {
+        filter: {...filter, offerType: 'BUY', listingType: 'BITCOIN'},
+      })
+    }
+
+    if (baseFilterValue === 'BTC_TO_PRODUCT') {
+      set(offersFilterStorageAtom, {
+        filter: {...filter, offerType: 'BUY', listingType: 'PRODUCT'},
+      })
+    }
+
+    if (baseFilterValue === 'PRODUCT_TO_BTC') {
+      set(offersFilterStorageAtom, {
+        filter: {...filter, offerType: 'SELL', listingType: 'PRODUCT'},
+      })
+    }
+
+    if (baseFilterValue === 'STH_ELSE') {
+      set(offersFilterStorageAtom, {
+        filter: {
+          ...filter,
+          offerType: undefined,
+          listingType: 'OTHER',
+        },
+      })
+    }
+  }
+)
+
+export const submitSearchActionAtom = atom(
+  null,
+  (get, set, text: string | undefined = undefined) => {
+    if (!text) {
+      set(offersFilterTextFromStorageAtom, offersFilterInitialState.text)
+      return
+    }
+    set(offersFilterTextFromStorageAtom, text)
+  }
+)

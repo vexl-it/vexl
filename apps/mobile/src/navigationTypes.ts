@@ -1,5 +1,3 @@
-import {type BottomTabScreenProps} from '@react-navigation/bottom-tabs'
-import {type MaterialTopTabScreenProps} from '@react-navigation/material-top-tabs'
 import {
   type CompositeScreenProps,
   type NavigatorScreenParams,
@@ -10,10 +8,7 @@ import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {type UserName} from '@vexl-next/domain/src/general/UserName.brand'
 import {type RealLifeInfo} from '@vexl-next/domain/src/general/UserNameAndAvatar.brand'
-import {
-  type OfferId,
-  type OfferType,
-} from '@vexl-next/domain/src/general/offers'
+import {type OfferId} from '@vexl-next/domain/src/general/offers'
 import {
   type AmountData,
   type AvailableDateTimeOption,
@@ -41,7 +36,6 @@ export type RootStackParamsList = {
   CreateOffer: undefined
   EditOffer: {offerId: OfferId}
   FilterOffers: undefined
-  SearchOffers: undefined
   MyOffers: undefined
 
   OfferDetail: {offerId: OfferId}
@@ -122,25 +116,6 @@ export type InsideTabParamsList = {
   Messages: undefined
   Settings: undefined
 }
-
-export type InsideTabScreenProps<T extends keyof InsideTabParamsList> =
-  CompositeScreenProps<
-    BottomTabScreenProps<InsideTabParamsList, T>,
-    RootStackScreenProps<keyof RootStackParamsList>
-  >
-
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type MarketplaceTabParamsList = {
-  Buy: {type: OfferType}
-  Sell: {type: OfferType}
-}
-
-export type MarketplaceTabScreenProps<
-  T extends keyof MarketplaceTabParamsList,
-> = CompositeScreenProps<
-  MaterialTopTabScreenProps<MarketplaceTabParamsList, T>,
-  InsideTabScreenProps<keyof InsideTabParamsList>
->
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type TradeChecklistStackParamsList = {

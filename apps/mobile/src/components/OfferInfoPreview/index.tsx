@@ -30,7 +30,7 @@ function OfferInfoPreview({
   // )
 
   return (
-    <>
+    <Stack>
       {/* {(offer.privatePart.commonFriends.includes(BTC_PRAGUE_FRIEND) ||
         offer.privatePart.commonFriends.includes(BTC_PRAGUE_FRIEND_STAGE)) && (
         <Stack f={1} ai="center" jc="space-between">
@@ -97,7 +97,7 @@ function OfferInfoPreview({
           <ProductAndOtherOfferColumns offer={offer} />
         )}
       </XStack>
-    </>
+    </Stack>
   )
 }
 

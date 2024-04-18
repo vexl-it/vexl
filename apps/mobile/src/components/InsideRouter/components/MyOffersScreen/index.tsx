@@ -13,6 +13,7 @@ import OffersList from '../../../OffersList'
 import ReencryptOffersSuggestion from '../../../ReencryptOffersSuggestion'
 import plusSvg from '../../../images/plusSvg'
 import ContainerWithTopBorderRadius from '../ContainerWithTopBorderRadius'
+import Header from '../Header'
 import MyOffersSortingDropdown from './components/MyOffersSortingDropdown'
 
 type Props = RootStackScreenProps<'MyOffers'>
@@ -34,42 +35,45 @@ function MyOffersScreen({navigation}: Props): JSX.Element {
   const activeOffersCount = useAtomValue(myActiveOffers)
 
   return (
-    <ContainerWithTopBorderRadius withTopPadding>
-      <Stack f={1} mx="$2">
-        <Stack mx="$2">
-          <Text ff="$heading" color="$white" fos={32}>
-            {t('common.myOffers')}
-          </Text>
-          <XStack pos="relative" py="$4" ai="center" jc="space-between">
-            <Stack f={1}>
-              <Text
-                adjustsFontSizeToFit
-                numberOfLines={1}
-                ff="$body600"
-                fos={18}
-                col="$white"
-              >
-                {t('myOffers.activeOffers', {count: activeOffersCount})}
-              </Text>
-            </Stack>
-            <MyOffersSortingDropdown />
-          </XStack>
+    <>
+      <Header />
+      <ContainerWithTopBorderRadius withTopPadding>
+        <Stack f={1} mx="$2">
+          <Stack mx="$2">
+            <Text ff="$heading" color="$white" fos={32}>
+              {t('common.myOffers')}
+            </Text>
+            <XStack pos="relative" py="$4" ai="center" jc="space-between">
+              <Stack f={1}>
+                <Text
+                  adjustsFontSizeToFit
+                  numberOfLines={1}
+                  ff="$body600"
+                  fos={18}
+                  col="$white"
+                >
+                  {t('myOffers.activeOffers', {count: activeOffersCount})}
+                </Text>
+              </Stack>
+              <MyOffersSortingDropdown />
+            </XStack>
+          </Stack>
+          <Button
+            beforeIcon={plusSvg}
+            onPress={() => {
+              navigation.navigate('CreateOffer')
+            }}
+            size="medium"
+            text={t('myOffers.addNewOffer')}
+            variant="secondary"
+          />
+          <OffersList
+            ListHeaderComponent={ListHeaderComponent}
+            offersAtoms={myOffersSortedAtoms}
+          />
         </Stack>
-        <Button
-          beforeIcon={plusSvg}
-          onPress={() => {
-            navigation.navigate('CreateOffer')
-          }}
-          size="medium"
-          text={t('myOffers.addNewOffer')}
-          variant="secondary"
-        />
-        <OffersList
-          ListHeaderComponent={ListHeaderComponent}
-          offersAtoms={myOffersSortedAtoms}
-        />
-      </Stack>
-    </ContainerWithTopBorderRadius>
+      </ContainerWithTopBorderRadius>
+    </>
   )
 }
 

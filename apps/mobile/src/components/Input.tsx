@@ -205,10 +205,10 @@ function TextInput(
         ref={inputRef}
         textAlignVertical={numberOfLines ? 'top' : 'center'}
         numberOfLines={numberOfLines}
-        placeholderTextColor={tokens.color.greyAccent2.val}
+        placeholderTextColor={tokens.color.greyOnBlack.val}
         cursorColor={
           variant === 'greyOnBlack'
-            ? tokens.color.main.val
+            ? tokens.color.greyOnBlack.val
             : variant === 'transparentOnGrey'
             ? tokens.color.greyOnBlack.val
             : tokens.color.darkColorText.val
@@ -218,7 +218,7 @@ function TextInput(
           variant === 'greyOnBlack'
             ? Platform.OS === 'android'
               ? 'rgba(252, 205, 108, 0.3)'
-              : tokens.color.main.val
+              : tokens.color.greyOnBlack.val
             : variant === 'transparentOnGrey'
             ? Platform.OS === 'android'
               ? 'rgba(175, 175, 175, 0.3)'

@@ -24,7 +24,7 @@ import getNewOffersAndDecrypt, {
 import updateOffer, {
   type ApiErrorUpdatingOffer,
 } from '@vexl-next/resources-utils/src/offers/updateOffer'
-import updateOwnerPrivatePayoad from '@vexl-next/resources-utils/src/offers/updateOwnerPrivatePayload'
+import updateOwnerPrivatePayload from '@vexl-next/resources-utils/src/offers/updateOwnerPrivatePayload'
 import {type ErrorConstructingPrivatePayloads} from '@vexl-next/resources-utils/src/offers/utils/constructPrivatePayloads'
 import {type ErrorEncryptingPublicPart} from '@vexl-next/resources-utils/src/offers/utils/encryptOfferPublicPayload'
 import {type PrivatePartEncryptionError} from '@vexl-next/resources-utils/src/offers/utils/encryptPrivatePart'
@@ -271,7 +271,7 @@ export const triggerOffersRefreshAtom = atom(null, async (get, set) => {
     },
     A.map((one) =>
       pipe(
-        updateOwnerPrivatePayoad({
+        updateOwnerPrivatePayload({
           api: get(privateApiAtom).offer,
           ownerCredentials: session.privateKey,
           symmetricKey: one.offerInfo.privatePart.symmetricKey,

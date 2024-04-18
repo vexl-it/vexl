@@ -5,14 +5,17 @@ import calculatePriceInSats from '../../../utils/calculatePriceInSats'
 import {importedContactsAtom} from '../../contacts/atom/contactsStore'
 import {createBtcPriceForCurrencyAtom} from '../../currentBtcPriceAtoms'
 import filterOffersByText from '../utils/filterOffersByText'
-import isOfferInsdieViewPort from '../utils/isOfferInsideViewport'
+import isOfferInsideViewPort from '../utils/isOfferInsideViewport'
 import sortOffers from '../utils/sortOffers'
 import {deltasToViewport, radiusToViewport} from '../utils/toViewport'
-import {locationFilterAtom, offersFilterFromStorageAtom} from './filterAtoms'
+import {
+  locationFilterAtom,
+  offersFilterFromStorageAtom,
+  singlePriceCurrencyAtom,
+} from './filterAtoms'
 import marketplaceLayoutModeAtom from './map/marketplaceLayoutModeAtom'
 import {mapRegionAtom} from './mapRegionAtom'
 import {offersToSeeInMarketplaceAtom} from './offersToSeeInMarketplace'
-import visibleMarketplaceSectionAtom from './visibleMarketplaceSectionAtom'
 
 export default function areIncluded<T>(
   elementsToLookFor: T[],
@@ -21,27 +24,24 @@ export default function areIncluded<T>(
   return elementsToLookFor.every((element) => arrayToLookIn.includes(element))
 }
 
-const filteredOffersAccordingToLayoutModeAtom = atom((get) => {
+const filterBtcOffersAtom = atom((get) => {
   const offersToSeeInMarketplace = get(offersToSeeInMarketplaceAtom)
+  const filter = get(offersFilterFromStorageAtom)
   const layoutMode = get(marketplaceLayoutModeAtom)
 
   return offersToSeeInMarketplace.filter(
     (offer) =>
-      layoutMode === 'list' || offer.offerInfo.publicPart.location.length > 0
-  )
-})
-
-const filterBtcOffersAtom = atom((get) => {
-  const filteredOffersAccordingToLayoutMode = get(
-    filteredOffersAccordingToLayoutModeAtom
-  )
-  const filter = get(offersFilterFromStorageAtom)
-
-  return filteredOffersAccordingToLayoutMode.filter(
-    (offer) =>
-      offer.offerInfo.publicPart.listingType === 'BITCOIN' &&
+      (!offer.offerInfo.publicPart.listingType ||
+        offer.offerInfo.publicPart.listingType === 'BITCOIN') &&
       (!filter.currency ||
         filter.currency.includes(offer.offerInfo.publicPart.currency)) &&
+      (layoutMode === 'list' ||
+        offer.offerInfo.publicPart.location.length > 0) &&
+      (!filter.locationState ||
+        areIncluded(
+          filter.locationState,
+          offer.offerInfo.publicPart.locationState
+        )) &&
       (!filter.paymentMethod ||
         areIncluded(
           filter.paymentMethod,
@@ -75,27 +75,34 @@ const filterBtcOffersAtom = atom((get) => {
   )
 })
 
+const btcPriceWithStateForFilterCurrencyAtom = createBtcPriceForCurrencyAtom(
+  singlePriceCurrencyAtom
+)
+
 const filterProductAndOtherOffersAtom = atom((get) => {
-  const filteredOffersAccordingToLayoutMode = get(
-    filteredOffersAccordingToLayoutModeAtom
-  )
+  const offersToSeeInMarketplace = get(offersToSeeInMarketplaceAtom)
   const filter = get(offersFilterFromStorageAtom)
-  const btcPriceWithStateForFilterCurrency = filter.singlePriceCurrency
-    ? get(createBtcPriceForCurrencyAtom(filter.singlePriceCurrency))
-    : undefined
+  const layoutMode = get(marketplaceLayoutModeAtom)
+  const btcPriceWithStateForFilterCurrency = get(
+    btcPriceWithStateForFilterCurrencyAtom
+  )
+
   const filterPriceInSats =
     filter.singlePrice &&
-    btcPriceWithStateForFilterCurrency?.state !== 'loading'
+    btcPriceWithStateForFilterCurrency &&
+    btcPriceWithStateForFilterCurrency.state !== 'loading'
       ? calculatePriceInSats({
           price: filter.singlePrice,
-          currentBtcPrice: btcPriceWithStateForFilterCurrency?.btcPrice ?? 0,
+          currentBtcPrice: btcPriceWithStateForFilterCurrency.btcPrice ?? 0,
         })
       : null
 
-  return filteredOffersAccordingToLayoutMode.filter(
+  return offersToSeeInMarketplace.filter(
     (offer) =>
       (!filter.listingType ||
         offer.offerInfo.publicPart.listingType === filter.listingType) &&
+      (layoutMode === 'list' ||
+        offer.offerInfo.publicPart.location.length > 0) &&
       (!filter.locationState ||
         areIncluded(
           filter.locationState,
@@ -143,9 +150,7 @@ export const filteredOffersIgnoreLocationAtom = atom((get) => {
   const filtered =
     filter.listingType === 'BITCOIN'
       ? get(filterBtcOffersAtom)
-      : filter.listingType === 'PRODUCT' || filter.listingType === 'OTHER'
-      ? get(filterProductAndOtherOffersAtom)
-      : get(filteredOffersAccordingToLayoutModeAtom)
+      : get(filterProductAndOtherOffersAtom)
 
   // This could be rewritten with pipe, i know, i know...
   const filteredByText = textFilter
@@ -157,13 +162,6 @@ export const filteredOffersIgnoreLocationAtom = atom((get) => {
     : filtered
 
   return sortOffers(filteredByText, filter.sort ?? 'NEWEST_OFFER')
-})
-
-export const countOfFilteredOffersBeforeLocationAtom = atom((get) => {
-  const visibleSection = get(visibleMarketplaceSectionAtom)
-  return get(filteredOffersIgnoreLocationAtom).filter(
-    (one) => one.offerInfo.publicPart.offerType === visibleSection
-  ).length
 })
 
 const viewportToFilterByAtom = atom((get) => {
@@ -193,6 +191,7 @@ const viewportToFilterByAtom = atom((get) => {
 export const filteredOffersIncludingLocationFilterAtom = atom((get) => {
   const viewportToFilterBy = get(viewportToFilterByAtom)
   const filteredOffers = get(filteredOffersIgnoreLocationAtom)
+
   if (!viewportToFilterBy) return filteredOffers
 
   // Do not filter if user zoomed to too big area
@@ -204,28 +203,72 @@ export const filteredOffersIncludingLocationFilterAtom = atom((get) => {
     return filteredOffers
 
   return filteredOffers.filter((one) =>
-    isOfferInsdieViewPort(viewportToFilterBy, one)
+    isOfferInsideViewPort(viewportToFilterBy, one)
   )
 })
 
-export const filteredOffersSplitByBuySellAtom = atom((get) => {
+export const btcToCashOffersIncludingLocationAtom = atom((get) => {
   const offers = get(filteredOffersIncludingLocationFilterAtom)
-  return {
-    buy: offers.filter(
-      (offer) => offer.offerInfo.publicPart.offerType === 'BUY'
-    ),
-    sell: offers.filter(
-      (offer) => offer.offerInfo.publicPart.offerType === 'SELL'
-    ),
-  }
+
+  return offers.filter(
+    (offer) =>
+      offer.offerInfo.publicPart.offerType === 'SELL' &&
+      (!offer.offerInfo.publicPart.listingType ||
+        offer.offerInfo.publicPart.listingType === 'BITCOIN')
+  )
 })
 
-export const filteredOffersBuyAtom = atom(
-  (get) => get(filteredOffersSplitByBuySellAtom).buy
-)
-export const filteredOffersSellAtom = atom(
-  (get) => get(filteredOffersSplitByBuySellAtom).sell
-)
+export const cashToBtcOffersIncludingLocationAtom = atom((get) => {
+  const offers = get(filteredOffersIncludingLocationFilterAtom)
 
-export const filteredOffersBuyAtomsAtom = splitAtom(filteredOffersBuyAtom)
-export const filteredOffersSellAtomsAtom = splitAtom(filteredOffersSellAtom)
+  return offers.filter(
+    (offer) =>
+      offer.offerInfo.publicPart.offerType === 'BUY' &&
+      (!offer.offerInfo.publicPart.listingType ||
+        offer.offerInfo.publicPart.listingType === 'BITCOIN')
+  )
+})
+
+export const btcToProductOffersIncludingLocationAtom = atom((get) => {
+  const offers = get(filteredOffersIncludingLocationFilterAtom)
+
+  return offers.filter(
+    (offer) =>
+      offer.offerInfo.publicPart.offerType === 'BUY' &&
+      offer.offerInfo.publicPart.listingType === 'PRODUCT'
+  )
+})
+
+export const productToBtcOffersIncludingLocationAtom = atom((get) => {
+  const offers = get(filteredOffersIncludingLocationFilterAtom)
+
+  return offers.filter(
+    (offer) =>
+      offer.offerInfo.publicPart.offerType === 'SELL' &&
+      offer.offerInfo.publicPart.listingType === 'PRODUCT'
+  )
+})
+
+export const sthElseOffersIncludingLocationAtom = atom((get) => {
+  const offers = get(filteredOffersIncludingLocationFilterAtom)
+
+  return offers.filter(
+    (offer) => offer.offerInfo.publicPart.listingType === 'OTHER'
+  )
+})
+
+export const btcToCashOffersIncludingLocationAtomsAtom = splitAtom(
+  btcToCashOffersIncludingLocationAtom
+)
+export const cashToBtcOffersIncludingLocationAtomsAtom = splitAtom(
+  cashToBtcOffersIncludingLocationAtom
+)
+export const btcToProductOffersIncludingLocationAtomsAtom = splitAtom(
+  btcToProductOffersIncludingLocationAtom
+)
+export const productToBtcOffersIncludingLocationAtomsAtom = splitAtom(
+  productToBtcOffersIncludingLocationAtom
+)
+export const sthElseOffersIncludingLocationAtomsAtom = splitAtom(
+  sthElseOffersIncludingLocationAtom
+)

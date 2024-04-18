@@ -36,7 +36,7 @@ function renderItem<T>(
 interface Props<T>
   extends Omit<
     DropdownProps<DropdownItemProps<T>>,
-    'labelField' | 'valueField' | 'renderItem'
+    'labelField' | 'valueField'
   > {
   size?: 'medium' | 'large'
   variant?: 'yellow' | 'grey'

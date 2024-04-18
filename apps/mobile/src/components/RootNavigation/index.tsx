@@ -32,7 +32,6 @@ import {NotificationPermissionsScreen} from '../NotificationPermissionsScreen'
 import NotificationSettingsScreen from '../NotificationSettingsScreen'
 import OfferDetailScreen from '../OfferDetailScreen'
 import PostLoginFlow from '../PostLoginFlow'
-import SearchOffersScreen from '../SearchOffersScreen'
 import SetContactsScreen from '../SetContactsScreen'
 import TodoScreen from '../TodoScreen'
 import TosScreen from '../TosScreen'
@@ -91,7 +90,6 @@ function RootNavigation(): JSX.Element {
             <Stack.Screen name="CreateOffer" component={CreateOfferScreen} />
             <Stack.Screen name="EditOffer" component={EditOfferScreen} />
             <Stack.Screen name="FilterOffers" component={FilterOffersScreen} />
-            <Stack.Screen name="SearchOffers" component={SearchOffersScreen} />
             <Stack.Screen name="AppLogs" component={AppLogsScreen} />
             <Stack.Screen name="ChatDetail" component={ChatDetailScreen} />
             <Stack.Screen name="SetContacts" component={SetContactsScreen} />

@@ -2,7 +2,6 @@ import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
 import {MINIMAL_DATE} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
 import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {getDefaultStore} from 'jotai'
-import {previousSearchesAtom} from '../components/SearchOffersScreen/atoms/previousSearchesAtom'
 import {messagingStateAtomStorageAtom} from '../state/chat/atoms/messagingStateAtom'
 import connectionStateAtom from '../state/connections/atom/connectionStateAtom'
 import offerToConnectionsAtom from '../state/connections/atom/offerToConnectionsAtom'
@@ -67,8 +66,6 @@ export default function clearMmkvStorageAndEmptyAtoms(): void {
     disableScreenshots: false,
     isDeveloper: false,
   })
-
-  getDefaultStore().set(previousSearchesAtom, [])
 
   getDefaultStore().set(feedbacksForClosedChatsStorageAtom, {feedbacks: {}})
 

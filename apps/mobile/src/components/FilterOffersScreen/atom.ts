@@ -5,6 +5,7 @@ import {
   type ListingType,
   type LocationState,
   type OfferLocation,
+  type OfferType,
   type PaymentMethod,
   type Sort,
   type SpokenLanguage,
@@ -18,10 +19,15 @@ import {
   refreshBtcPriceActionAtom,
 } from '../../state/currentBtcPriceAtoms'
 import {
+  listingTypeFilterAtom,
+  offerTypeFilterAtom,
   offersFilterFromStorageAtom,
   offersFilterInitialState,
 } from '../../state/marketplace/atoms/filterAtoms'
-import {type OffersFilter} from '../../state/marketplace/domain'
+import {
+  type BaseOffersFilter,
+  type OffersFilter,
+} from '../../state/marketplace/domain'
 import getValueFromSetStateActionOfAtom from '../../utils/atomUtils/getValueFromSetStateActionOfAtom'
 import calculatePriceInFiatFromSats from '../../utils/calculatePriceInFiatFromSats'
 import calculatePriceInSats from '../../utils/calculatePriceInSats'
@@ -29,6 +35,10 @@ import {currencies} from '../../utils/localization/currency'
 
 export const listingTypeAtom = atom<ListingType | undefined>(
   offersFilterInitialState.listingType
+)
+
+export const offerTypeAtom = atom<OfferType | undefined>(
+  offersFilterInitialState.offerType
 )
 
 export const currencyAtom = atom<CurrencyCode | undefined>(
@@ -313,25 +323,10 @@ const setAllFilterAtomsActionAtom = atom(
   null,
   (get, set, filterValue: OffersFilter) => {
     set(listingTypeAtom, filterValue.listingType)
+    set(offerTypeAtom, filterValue.offerType)
     set(focusTextFilterAtom, filterValue.text)
     set(sortingAtom, filterValue.sort)
     set(setConditionallyRenderedFilterElementsActionAtom, filterValue)
-  }
-)
-
-export const updateListingTypeActionAtom = atom(
-  null,
-  (get, set, listingType: ListingType) => {
-    set(listingTypeAtom, (prev) =>
-      prev === listingType ? undefined : listingType
-    )
-
-    if (!get(listingTypeAtom)) {
-      set(
-        setConditionallyRenderedFilterElementsActionAtom,
-        offersFilterInitialState
-      )
-    }
   }
 )
 
@@ -349,13 +344,64 @@ export const initializeOffersFilterOnDisplayActionAtom = atom(
 )
 
 export const resetFilterAtom = atom(null, (get, set) => {
-  set(setAllFilterAtomsActionAtom, offersFilterInitialState)
+  const {offerType, listingType, ...restOfOffersFilterInitialState} =
+    offersFilterInitialState
+  set(setAllFilterAtomsActionAtom, {
+    listingType: get(listingTypeAtom),
+    offerType: get(offerTypeAtom),
+    ...restOfOffersFilterInitialState,
+  })
 })
+
+export const baseFilterTempAtom = atom(
+  (get): BaseOffersFilter => {
+    const listingType = get(listingTypeAtom) ?? get(listingTypeFilterAtom)
+    const offerType = get(offerTypeAtom) ?? get(offerTypeFilterAtom)
+    if (listingType === 'BITCOIN') {
+      if (offerType === 'SELL') return 'BTC_TO_CASH'
+      return 'CASH_TO_BTC'
+    }
+
+    if (listingType === 'PRODUCT') {
+      if (offerType === 'SELL') return 'PRODUCT_TO_BTC'
+      return 'BTC_TO_PRODUCT'
+    }
+
+    return 'STH_ELSE'
+  },
+  (get, set, filterValue: BaseOffersFilter) => {
+    if (filterValue === 'BTC_TO_CASH') {
+      set(listingTypeAtom, 'BITCOIN')
+      set(offerTypeAtom, 'SELL')
+    }
+
+    if (filterValue === 'CASH_TO_BTC') {
+      set(listingTypeAtom, 'BITCOIN')
+      set(offerTypeAtom, 'BUY')
+    }
+
+    if (filterValue === 'BTC_TO_PRODUCT') {
+      set(listingTypeAtom, 'PRODUCT')
+      set(offerTypeAtom, 'BUY')
+    }
+
+    if (filterValue === 'PRODUCT_TO_BTC') {
+      set(listingTypeAtom, 'PRODUCT')
+      set(offerTypeAtom, 'SELL')
+    }
+
+    if (filterValue === 'STH_ELSE') {
+      set(listingTypeAtom, 'OTHER')
+      set(offerTypeAtom, undefined)
+    }
+  }
+)
 
 export const saveFilterActionAtom = atom(null, (get, set) => {
   const newFilterValue: OffersFilter = {
     sort: get(sortingAtom),
     listingType: get(listingTypeAtom),
+    offerType: get(offerTypeAtom),
     currency: get(currencyAtom),
     location: get(locationAtom),
     locationState: get(locationStateAtom),

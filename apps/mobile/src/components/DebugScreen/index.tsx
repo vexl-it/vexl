@@ -19,6 +19,7 @@ import offerToConnectionsAtom, {
   updateAllOffersConnectionsActionAtom,
 } from '../../state/connections/atom/offerToConnectionsAtom'
 import {storedContactsAtom} from '../../state/contacts/atom/contactsStore'
+import {btcPriceDataAtom} from '../../state/currentBtcPriceAtoms'
 import {triggerOffersRefreshAtom} from '../../state/marketplace'
 import {myOffersAtom} from '../../state/marketplace/atoms/myOffers'
 import {
@@ -269,6 +270,15 @@ function DebugScreen(): JSX.Element {
                 const userInbox: Inbox = {privateKey: session.privateKey}
 
                 store.set(messagingStateAtom, [{inbox: userInbox, chats: []}])
+                Alert.alert('Done')
+              }}
+            />
+            <Button
+              variant="primary"
+              size="small"
+              text="Clear BTC price data state"
+              onPress={() => {
+                store.set(btcPriceDataAtom, {})
                 Alert.alert('Done')
               }}
             />

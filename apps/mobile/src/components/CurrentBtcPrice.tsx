@@ -6,7 +6,7 @@ import {
   type Atom,
   type PrimitiveAtom,
 } from 'jotai'
-import {useMemo} from 'react'
+import {useEffect, useMemo} from 'react'
 import {ActivityIndicator, TouchableOpacity} from 'react-native'
 import {Text, XStack, getTokens, type TextProps} from 'tamagui'
 import {
@@ -42,6 +42,18 @@ function CurrentBtcPrice({
 
   const preferences = useAtomValue(preferencesAtom)
   const currentLocale = preferences.appLanguage ?? getCurrentLocale()
+
+  useEffect(() => {
+    if (!customBtcPrice && !btcPriceWithState) {
+      void refreshBtcPrice(currency)().then(postRefreshActions)
+    }
+  }, [
+    btcPriceWithState,
+    currency,
+    customBtcPrice,
+    postRefreshActions,
+    refreshBtcPrice,
+  ])
 
   return (
     <TouchableOpacity

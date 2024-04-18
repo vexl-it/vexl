@@ -1,0 +1,13 @@
+diff --git a/cpp/Cipher/MGLCipherHostObject.cpp b/cpp/Cipher/MGLCipherHostObject.cpp
+index 3c0346a8a33548b249cca08e018a99a064c0d950..7c539af75c22bae2440cb6070d8944514c7c324e 100644
+--- a/cpp/Cipher/MGLCipherHostObject.cpp
++++ b/cpp/Cipher/MGLCipherHostObject.cpp
+@@ -577,7 +577,7 @@ bool MGLCipherHostObject::InitAuthenticated(const char *cipher_type, int iv_len,
+     // TODO(tniessen) Support CCM decryption in FIPS mode
+ 
+ #if OPENSSL_VERSION_MAJOR >= 3
+-    if (mode == EVP_CIPH_CCM_MODE && kind_ == kDecipher &&
++    if (mode == EVP_CIPH_CCM_MODE && !isCipher_ &&
+         EVP_default_properties_is_fips_enabled(nullptr)) {
+ #else
+     if (mode == EVP_CIPH_CCM_MODE && !isCipher_ && FIPS_mode()) {

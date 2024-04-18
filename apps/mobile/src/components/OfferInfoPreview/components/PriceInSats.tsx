@@ -1,7 +1,7 @@
 import {useAtomValue, useSetAtom} from 'jotai'
 import {useEffect, useMemo} from 'react'
 import {ActivityIndicator} from 'react-native'
-import {XStack, getTokens} from 'tamagui'
+import {Stack, XStack, getTokens} from 'tamagui'
 import {type OfferInfo} from '../../../../../../packages/domain/src/general/offers'
 import {
   createBtcPriceForCurrencyAtom,
@@ -16,7 +16,6 @@ import {
   InfoText,
   InfoTextSmall,
   PriceBigger,
-  PriceText,
 } from '../columnsStyles'
 
 interface Props {
@@ -40,14 +39,16 @@ function PriceInSats({offer}: Props): JSX.Element {
   return (
     <XStack f={1}>
       <InfoItemContainer>
-        <InfoTextSmall>{t('offer.approximatelyAbbreviation')}</InfoTextSmall>
-        {btcPriceWithState?.state === 'loading' ? (
-          <ActivityIndicator
-            size="small"
-            color={getTokens().color.greyOnBlack.val}
-          />
-        ) : (
-          <PriceText>
+        <Stack position="absolute" top={-10}>
+          <InfoTextSmall>{t('offer.approximatelyAbbreviation')}</InfoTextSmall>
+        </Stack>
+        <Stack f={1} ai="center" jc="center">
+          {btcPriceWithState?.state === 'loading' ? (
+            <ActivityIndicator
+              size="small"
+              color={getTokens().color.greyOnBlack.val}
+            />
+          ) : (
             <PriceBigger>
               {bigNumberToString(
                 calculatePriceInSats({
@@ -56,8 +57,8 @@ function PriceInSats({offer}: Props): JSX.Element {
                 })
               )}
             </PriceBigger>
-          </PriceText>
-        )}
+          )}
+        </Stack>
         <InfoText>SATS</InfoText>
       </InfoItemContainer>
       <InfoDivider />

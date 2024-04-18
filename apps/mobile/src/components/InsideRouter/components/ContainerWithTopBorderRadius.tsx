@@ -34,7 +34,6 @@ function ContainerWithTopBorderRadius({
   if (scrollView) {
     return (
       <ScrollView
-        fullscreen
         bg="$black"
         btlr="$7"
         btrr="$7"

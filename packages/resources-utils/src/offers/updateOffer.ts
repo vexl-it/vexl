@@ -14,7 +14,7 @@ import decryptOffer, {
   type ErrorDecryptingOffer,
   type NonCompatibleOfferVersionError,
 } from './decryptOffer'
-import updateOwnerPrivatePayoad from './updateOwnerPrivatePayload'
+import updateOwnerPrivatePayload from './updateOwnerPrivatePayload'
 import encryptOfferPublicPayload, {
   type ErrorEncryptingPublicPart,
 } from './utils/encryptOfferPublicPayload'
@@ -62,7 +62,7 @@ export default function updateOffer({
       )
     ),
     TE.chainFirstW(() =>
-      updateOwnerPrivatePayoad({
+      updateOwnerPrivatePayload({
         api: offerApi,
         ownerCredentials: ownerKeypair,
         symmetricKey,

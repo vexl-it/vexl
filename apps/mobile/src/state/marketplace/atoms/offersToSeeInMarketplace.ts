@@ -77,17 +77,3 @@ export const offersToSeeInMarketplaceAtom = atom((get) => {
 export const areThereOffersToSeeInMarketplaceWithoutFiltersAtom = atom(
   (get) => get(offersToSeeInMarketplaceAtom).length > 0
 )
-
-export const buyOffersToSeeInMarketplaceCountAtom = atom((get) => {
-  const offers = get(offersToSeeInMarketplaceAtom)
-  return offers.filter(
-    (offer) => offer.offerInfo.publicPart.offerType === 'BUY'
-  ).length
-})
-
-export const sellOffersToSeeInMarketplaceCountAtom = atom((get) => {
-  const offers = get(offersToSeeInMarketplaceAtom)
-  return offers.filter(
-    (offer) => offer.offerInfo.publicPart.offerType === 'SELL'
-  ).length
-})

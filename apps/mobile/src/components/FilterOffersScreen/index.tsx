@@ -9,25 +9,22 @@ import Button from '../Button'
 import IconButton from '../IconButton'
 import SvgImage from '../Image'
 import FilterForm from '../OfferForm'
-import ListingType from '../OfferForm/components/ListingType'
 import Screen from '../Screen'
 import ScreenTitle from '../ScreenTitle'
 import Section from '../Section'
 import closeSvg from '../images/closeSvg'
 import infoSvg from '../images/infoSvg'
-import listingTypeSvg from '../images/listingTypeSvg'
-import magnifyingGlass from '../images/magnifyingGlass'
 import sortingSvg from '../images/sortingSvg'
+import userSvg from '../images/userSvg'
 import {
   initializeOffersFilterOnDisplayActionAtom,
   listingTypeAtom,
   resetFilterAtom,
   saveFilterActionAtom,
   sortingAtom,
-  updateListingTypeActionAtom,
 } from './atom'
+import BaseFilter from './components/BaseFilter'
 import Sorting from './components/Sorting'
-import TextFilter from './components/TextFilter'
 import useBtcOffersFilterContent from './useBtcOffersFilterContent'
 import useOtherOffersFilterContent from './useOtherOffersFilterContent'
 import useProductOffersFilterContent from './useProductOffersFilterContent'
@@ -89,17 +86,11 @@ function FilterOffersScreen(): JSX.Element {
         contentContainerStyle={styles.contentStyles}
         showsVerticalScrollIndicator={false}
       >
-        <Section title={t('filterOffers.searchByText')} image={magnifyingGlass}>
-          <TextFilter />
+        <Section title={t('filterOffers.whatIsTheGoal')} image={userSvg}>
+          <BaseFilter />
         </Section>
         <Section title={t('filterOffers.sorting')} image={sortingSvg}>
           <Sorting sortingAtom={sortingAtom} />
-        </Section>
-        <Section title={t('offerForm.listingType')} image={listingTypeSvg}>
-          <ListingType
-            listingTypeAtom={listingTypeAtom}
-            updateListingTypeActionAtom={updateListingTypeActionAtom}
-          />
         </Section>
         {listingType ? (
           <FilterForm

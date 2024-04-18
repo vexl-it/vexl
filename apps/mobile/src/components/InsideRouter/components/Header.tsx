@@ -32,7 +32,7 @@ function BtcPriceHeader(): JSX.Element {
   )
 }
 
-export default function Header(): JSX.Element | null {
+function Header(): JSX.Element | null {
   const marketplaceLayoutMode = useAtomValue(marketplaceLayoutModeAtom)
 
   if (marketplaceLayoutMode === 'map') {
@@ -40,3 +40,5 @@ export default function Header(): JSX.Element | null {
   }
   return <BtcPriceHeader />
 }
+
+export default Header

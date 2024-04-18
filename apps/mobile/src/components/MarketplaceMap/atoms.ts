@@ -1,15 +1,17 @@
 import {atom} from 'jotai'
+import {offersFilterStorageAtom} from '../../state/marketplace/atoms/filterAtoms'
 import {filteredOffersIgnoreLocationAtom} from '../../state/marketplace/atoms/filteredOffers'
 import {focusedOfferAtom} from '../../state/marketplace/atoms/map/focusedOffer'
-import visibleMarketplaceSectionAtom from '../../state/marketplace/atoms/visibleMarketplaceSectionAtom'
 
 export const mapPointsAtom = atom((get) => {
   const offers = get(filteredOffersIgnoreLocationAtom)
-  const visibleMarketplaceSection = get(visibleMarketplaceSectionAtom)
+  const {filter} = get(offersFilterStorageAtom)
 
   return offers
     .filter(
-      (one) => one.offerInfo.publicPart.offerType === visibleMarketplaceSection
+      (one) =>
+        one.offerInfo.publicPart.offerType === filter.offerType &&
+        one.offerInfo.publicPart.listingType === filter.listingType
     )
     .flatMap((offer) => {
       const locations = offer.offerInfo.publicPart.location

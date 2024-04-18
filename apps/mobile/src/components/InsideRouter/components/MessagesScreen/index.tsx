@@ -6,6 +6,7 @@ import fetchMessagesForAllInboxesAtom from '../../../../state/chat/atoms/fetchNe
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import {useAppState} from '../../../../utils/useAppState'
 import ContainerWithTopBorderRadius from '../ContainerWithTopBorderRadius'
+import Header from '../Header'
 import ChatsList from './components/ChatsList'
 
 function MessagesScreen(): JSX.Element {
@@ -22,14 +23,17 @@ function MessagesScreen(): JSX.Element {
   )
 
   return (
-    <ContainerWithTopBorderRadius withTopPadding>
-      <Stack mx="$4" f={1}>
-        <Text ff="$heading" color="$white" fos={32}>
-          {t('messages.listTitle')}
-        </Text>
-        <ChatsList />
-      </Stack>
-    </ContainerWithTopBorderRadius>
+    <>
+      <Header />
+      <ContainerWithTopBorderRadius withTopPadding>
+        <Stack mx="$4" f={1}>
+          <Text ff="$heading" color="$white" fos={32}>
+            {t('messages.listTitle')}
+          </Text>
+          <ChatsList />
+        </Stack>
+      </ContainerWithTopBorderRadius>
+    </>
   )
 }
 

@@ -1,28 +1,17 @@
 import {useAtomValue} from 'jotai'
 import {Stack, Text} from 'tamagui'
+import {offersToSeeInMarketplaceCountAtom} from '../../../../../state/marketplace/atoms/filteredOffersCountAtoms'
 import marketplaceLayoutModeAtom from '../../../../../state/marketplace/atoms/map/marketplaceLayoutModeAtom'
-import {
-  buyOffersToSeeInMarketplaceCountAtom,
-  sellOffersToSeeInMarketplaceCountAtom,
-} from '../../../../../state/marketplace/atoms/offersToSeeInMarketplace'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 
 interface Props {
   filteredOffersCount: number
-  offerType: 'BUY' | 'SELL'
 }
 
-function TotalOffersCount({
-  filteredOffersCount,
-  offerType,
-}: Props): JSX.Element {
+function TotalOffersCount({filteredOffersCount}: Props): JSX.Element {
   const {t} = useTranslation()
   const marketplaceLayout = useAtomValue(marketplaceLayoutModeAtom)
-  const totalCount = useAtomValue(
-    offerType === 'BUY'
-      ? buyOffersToSeeInMarketplaceCountAtom
-      : sellOffersToSeeInMarketplaceCountAtom
-  )
+  const totalCount = useAtomValue(offersToSeeInMarketplaceCountAtom)
 
   return (
     <Stack als="flex-start" my="$2" mx="$2">

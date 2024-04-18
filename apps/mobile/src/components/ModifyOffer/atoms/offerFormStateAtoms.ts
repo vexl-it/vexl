@@ -960,7 +960,15 @@ export const offerFormMolecule = molecule(() => {
     (get, set, currencyCode: CurrencyCode) => {
       set(currencyAtom, currencyCode)
       set(updateCurrencyLimitsAtom, {currency: currencyCode})
-      void set(refreshBtcPriceActionAtom, currencyCode)()
+
+      void set(refreshBtcPriceActionAtom, currencyCode)().then((success) => {
+        if (success) {
+          set(
+            calculateFiatValueOnSatsValueChangeActionAtom,
+            String(get(satsValueAtom))
+          )
+        }
+      })
     }
   )
 

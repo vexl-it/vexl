@@ -54,7 +54,7 @@ function AnimatedSplashScreen({children}: Props): JSX.Element {
     useState(false)
   const [fontsLoaded] = useLoadFonts()
   const sessionLoaded = useIsSessionLoaded()
-  const remoteConfigSetup = useSetupRemoteConfig()
+  useSetupRemoteConfig()
 
   useEffect(() => {
     void loadSession({forceReload: true, showErrorAlert: true})
@@ -62,12 +62,36 @@ function AnimatedSplashScreen({children}: Props): JSX.Element {
   }, [])
 
   useEffect(() => {
-    if (fontsLoaded && sessionLoaded && remoteConfigSetup) {
-      void SplashScreen.hideAsync().then(() => {
-        setIsAppReady(true)
+    // Fallback to hide splash screen after 5 seconds
+    const id = setTimeout(() => {
+      if (!isAppReady) {
+        reportError('warn', new Error('App is taking too long to load'))
+        return
+      }
+
+      setIsSplashAnimationComplete((prev) => {
+        if (!prev)
+          reportError(
+            'warn',
+            new Error(
+              'Splash screen animation did not complete even after 5s. Hiding it anyway to avoid blocking the user from using the app.'
+            ),
+            {isAppReady}
+          )
+        return true
       })
+    }, 5000)
+    return () => {
+      clearTimeout(id)
     }
-  }, [fontsLoaded, sessionLoaded, remoteConfigSetup])
+  }, [setIsSplashAnimationComplete, isAppReady])
+
+  useEffect(() => {
+    if (fontsLoaded && sessionLoaded) {
+      setIsAppReady(true)
+      void SplashScreen.hideAsync()
+    }
+  }, [fontsLoaded, sessionLoaded])
 
   return (
     <Stack f={1}>

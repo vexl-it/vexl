@@ -89,9 +89,12 @@ function AnimatedSplashScreen({children}: Props): JSX.Element {
   useEffect(() => {
     if (fontsLoaded && sessionLoaded) {
       setIsAppReady(true)
-      void SplashScreen.hideAsync()
     }
   }, [fontsLoaded, sessionLoaded])
+
+  useEffect(() => {
+    void SplashScreen.hideAsync()
+  }, [])
 
   return (
     <Stack f={1}>

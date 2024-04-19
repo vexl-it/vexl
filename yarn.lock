@@ -10212,7 +10212,7 @@ __metadata:
     expo-image-picker: 14.7.1
     expo-linear-gradient: ~12.7.2
     expo-localization: ~14.8.3
-    expo-secure-store: ~12.8.1
+    expo-secure-store: ~13.0.0
     expo-sharing: ~11.10.0
     expo-splash-screen: ~0.26.4
     expo-status-bar: ~1.11.1
@@ -16037,12 +16037,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo-secure-store@npm:~12.8.1":
-  version: 12.8.1
-  resolution: "expo-secure-store@npm:12.8.1"
+"expo-secure-store@npm:~13.0.0":
+  version: 13.0.0
+  resolution: "expo-secure-store@npm:13.0.0"
   peerDependencies:
     expo: "*"
-  checksum: 739540167e66f70c1f2d1053251a19ff753ba9cc435b9184f0b63f22fab408d96428a3fef8e276f9f12d1b2fc61435a181f59117a19fc5f4bfd6da0487652b64
+  checksum: 01e22d765c55328e479350f4cfd03ea5c3b7ecb6884283f858f3625c8b68fb696191c14456ff3ba958c2657061bace6a9cd3b061a4378050a29ce2f9ede102fc
   languageName: node
   linkType: hard
 

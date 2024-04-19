@@ -1,7 +1,7 @@
 // import {SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 
-const VERSION_CODE = 130
-const VERSION = '1.13.1'
+const VERSION_CODE = 175
+const VERSION = '1.15.1'
 const ENV_PRESET = process.env.ENV_PRESET
 const COMMIT_HASH = process.env.EAS_BUILD_GIT_COMMIT_HASH ?? 'local'
 

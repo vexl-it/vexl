@@ -3,6 +3,8 @@
   "compilerOptions": {
     "rootDir": "./src",
     "outDir": "./dist",
+    "exactOptionalPropertyTypes": true,
+    "strict": true,
     "checkJs": false
   },
   "exclude": ["./dist/**", "./tests/**", "node_modules"],

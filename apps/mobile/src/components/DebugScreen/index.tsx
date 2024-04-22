@@ -2,6 +2,7 @@ import Clipboard from '@react-native-clipboard/clipboard'
 import messaging from '@react-native-firebase/messaging'
 import {type Inbox} from '@vexl-next/domain/src/general/messaging'
 import {MINIMAL_DATE} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
+import {fetchAndEncryptFcmForOffer} from '@vexl-next/resources-utils/src/notifications/encryptFcmForOffer'
 import getNewOffersAndDecrypt from '@vexl-next/resources-utils/src/offers/getNewOffersAndDecrypt'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
@@ -31,12 +32,16 @@ import {
   alertAndReportOnlineOffersWithoutLocation,
   reportOffersWithoutLocationActionAtom,
 } from '../../state/marketplace/atoms/offersToSeeInMarketplace'
-import {useSessionAssumeLoggedIn} from '../../state/session'
+import {
+  sessionDataOrDummyAtom,
+  useSessionAssumeLoggedIn,
+} from '../../state/session'
 import {
   commitHash,
   enableHiddenFeatures,
   version,
 } from '../../utils/environment'
+import {getNotificationToken} from '../../utils/notifications'
 import {
   getShowDebugNotifications,
   setShowDebugNotifications,
@@ -441,12 +446,53 @@ function DebugScreen(): JSX.Element {
             <Button
               variant="primary"
               size="small"
+              text="Copy public key"
+              // eslint-disable-next-line @typescript-eslint/no-misused-promises
+              onPress={async () => {
+                Clipboard.setString(
+                  store.get(sessionDataOrDummyAtom).privateKey
+                    .publicKeyPemBase64
+                )
+              }}
+            />
+            <Button
+              variant="primary"
+              size="small"
               text="Copy notification token"
               // eslint-disable-next-line @typescript-eslint/no-misused-promises
               onPress={async () => {
                 Clipboard.setString(
                   (await messaging().getToken()) || 'No token'
                 )
+              }}
+            />
+
+            <Button
+              variant="primary"
+              size="small"
+              text="Create and Copy notification cypher"
+              // eslint-disable-next-line @typescript-eslint/no-misused-promises
+              onPress={async () => {
+                void pipe(
+                  TE.fromTask(getNotificationToken()),
+                  TE.filterOrElseW(
+                    (a): a is NonNullable<typeof a> => !!a,
+                    () => ({
+                      _tag: 'no token',
+                    })
+                  ),
+                  TE.chainW((fcmToken) =>
+                    fetchAndEncryptFcmForOffer({
+                      fcmToken,
+                      notificationApi: store.get(privateApiAtom).notification,
+                    })
+                  ),
+                  TE.map((one) => {
+                    Clipboard.setString(one)
+                    Alert.alert('Copied')
+                    return one
+                  })
+                )()
               }}
             />
             <Button

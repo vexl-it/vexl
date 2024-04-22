@@ -1,4 +1,5 @@
 // import './src/utils/wdyr'
+import './globals'
 
 import './src/utils/setupSentry'
 // INITIAL SETUP - KEEP THIS AT THE TOP

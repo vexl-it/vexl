@@ -6,6 +6,7 @@
     "lib": ["ESNext"],
     "module": "ESNext",
     "target": "ES2022",
+    "exactOptionalPropertyTypes": false,
     "sourceMap": true,
     "declarationMap": true,
     "declaration": true,

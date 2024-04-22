@@ -37,7 +37,7 @@ export function fetchInfoAndGeneratePrivatePayloads({
   symmetricKey: SymmetricKey
   ownerCredentials: PrivateKeyHolder
   adminId: OfferAdminId
-  onProgress?: (state: OfferEncryptionProgress) => void
+  onProgress?: ((state: OfferEncryptionProgress) => void) | undefined
 }): TE.TaskEither<
   ApiErrorFetchingContactsForOffer | ErrorConstructingPrivatePayloads,
   {

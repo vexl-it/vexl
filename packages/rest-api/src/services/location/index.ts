@@ -1,6 +1,6 @@
-import {type CreateAxiosDefaults} from 'axios'
-import {pipe} from 'fp-ts/function'
+import {type CreateAxiosDefaults, type GenericAbortSignal} from 'axios'
 import * as TE from 'fp-ts/TaskEither'
+import {pipe} from 'fp-ts/function'
 import urlJoin from 'url-join'
 import {type PlatformName} from '../../PlatformName'
 import {type ServiceUrl} from '../../ServiceUrl.brand'
@@ -48,7 +48,7 @@ export function privateApi({
   return {
     getLocationSuggestions: (
       request: GetLocationSuggestionsRequest,
-      signal?: AbortSignal
+      signal?: GenericAbortSignal
     ) => {
       return pipe(
         axiosCallWithValidation(
@@ -57,7 +57,7 @@ export function privateApi({
             url: '/suggest',
             method: 'get',
             params: {phrase: request.phrase, lang: request.lang},
-            signal,
+            ...(signal ? {signal} : {}),
           },
           GetLocationSuggestionsResponse
         ),
@@ -84,7 +84,7 @@ export function privateApi({
             url: '/geocode',
             method: 'get',
             params: {...request},
-            signal,
+            ...(signal ? {signal} : {}),
           },
           GetGeocodedCoordinatesResponse
         ),

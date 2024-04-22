@@ -59,7 +59,7 @@ export default function updatePrivateParts({
     removedConnections: PublicKeyPemBase64[]
     newConnections: {
       firstLevel: PublicKeyPemBase64[]
-      secondLevel?: PublicKeyPemBase64[]
+      secondLevel?: PublicKeyPemBase64[] | undefined
     }
   }
 > {

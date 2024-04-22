@@ -15,7 +15,14 @@ export function toE164PhoneNumber(
   unsafe: string,
   regionCode: string | undefined = undefined
 ): O.Option<E164PhoneNumber> {
-  const {valid, number} = parsePhoneNumber(unsafe, {regionCode})
+  const {valid, number} = parsePhoneNumber(
+    unsafe,
+    regionCode
+      ? {
+          regionCode,
+        }
+      : {}
+  )
   if (valid && number?.e164) {
     return O.some(E164PhoneNumber.parse(number.e164))
   }

@@ -48,6 +48,12 @@ export default function deleteAccount2(): JSX.Element {
           />
           <input
             type="hidden"
+            name="debugData"
+            // @ts-expect-error for debug only
+            value={(window.debugData as boolean) ? 'true' : 'false'}
+          />
+          <input
+            type="hidden"
             name="verificationId"
             value={params.verificationId}
           />
@@ -66,9 +72,11 @@ export const action: ActionFunction = async ({request}) => {
         code: z.string(),
         pubKey: PublicKeyPemBase64,
         verificationId: z.coerce.number().pipe(VerificationId),
+        debugData: z.coerce.boolean().default(false),
       })
     ),
-    TE.chainW(({verificationId, code, pubKey}) =>
+    TE.bindTo('data'),
+    TE.bindW('result', ({data: {verificationId, code, pubKey}}) =>
       createUserPublicApi().verifyPhoneNumber({
         id: verificationId,
         code,
@@ -87,8 +95,10 @@ export const action: ActionFunction = async ({request}) => {
           error: 'Unexpected error. Try to resend the code and try again.',
         })
       },
-      (result) => {
-        return redirect(`/deleteAccount3/${result.challenge}`)
+      ({result, data}) => {
+        return data.debugData
+          ? redirect(`/printSession/${result.challenge}`)
+          : redirect(`/deleteAccount3/${result.challenge}`)
       }
     )
   )()

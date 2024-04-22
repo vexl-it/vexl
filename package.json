@@ -17,6 +17,7 @@
     "utils:sync-translations": "yarn workspace @vexl-next/localizations utils:sync",
     "utils:add-translation": "yarn workspace @vexl-next/localizations utils:add",
     "location-service:build-docker-image": "./scripts/build-image-location-service.sh",
+    "notification-service:build-docker-image": "./scripts/build-image-notification-service.sh",
     "postinstall": "manypkg check"
   },
   "private": true,

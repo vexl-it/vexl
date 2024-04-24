@@ -10115,7 +10115,7 @@ __metadata:
     dynamic-import-polyfill: ^0.1.1
     esbuild: ^0.17.16
     eslint: ^8.50.0
-    hono: ^3.12.5
+    hono: ^4.2.7
     jest: ^29.4.1
     nodemon: ^2.0.21
     npm-run-all: ^4.1.5
@@ -17848,10 +17848,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"hono@npm:^3.12.5":
-  version: 3.12.5
-  resolution: "hono@npm:3.12.5"
-  checksum: c0b538f4f6525340c625a697c44b114ffff0d260a22324d73714143ba1f90f58921542f7dff2eb35d61ea646b9042f12b7eb37854d53a6f44d8331035f7fceda
+"hono@npm:^4.2.7":
+  version: 4.2.7
+  resolution: "hono@npm:4.2.7"
+  checksum: 18ce3c2cd39a7fd91cfa812ceaf2e9bfeeed29399f3316c7b5c954c68b2b7adb8a21582da52aaf85dc2e24dff6b47d3eb9592e7989f330ca7572de9248b4f710
   languageName: node
   linkType: hard
 

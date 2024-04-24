@@ -1,4 +1,4 @@
-name: "[Build] notification-service docker image"
+name: "[Build] location-service docker image"
 
 permissions:
   packages: write
@@ -50,11 +50,11 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: ./apps/notification-service/Dockerfile
+          file: ./apps/location-service/Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
           provenance: false
           tags: |
-            ghcr.io/vexl-it/notification-service:latest
-            ghcr.io/vexl-it/notification-service:${{inputs.env}}-${{ github.sha }}
-            ${{ steps.login-ecr.outputs.registry }}/notification-service:${{inputs.env}}-${{ github.sha }}
+            ghcr.io/vexl-it/location-service:latest
+            ghcr.io/vexl-it/location-service:${{inputs.env}}-${{ github.sha }}
+            ${{ steps.login-ecr.outputs.registry }}/location-service:${{inputs.env}}-${{ github.sha }}

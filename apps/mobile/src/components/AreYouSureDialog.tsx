@@ -32,6 +32,7 @@ interface StepWithChildren {
 }
 
 interface StepWithInput {
+  autoFocus?: boolean
   type: 'StepWithInput'
   negativeButtonText?: string
   positiveButtonText: string
@@ -165,6 +166,7 @@ function AreYouSureDialog(): JSX.Element | null {
                   {step.subtitle}
                 </Text>
                 <Input
+                  autoFocus={step.autoFocus}
                   value={
                     stepResult?.type === 'inputResult' ? stepResult.value : ''
                   }

@@ -5016,10 +5016,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@hono/node-server@npm:^1.4.1":
-  version: 1.5.0
-  resolution: "@hono/node-server@npm:1.5.0"
-  checksum: a22dc5496ec54ae37b22c1d7624214e8baff90116f8838af4d74eacb8e8505e5f0119e3b38c2a785b4fd5c9cad6531cb5beb57c2a6d7e46061a1736669060d0a
+"@hono/node-server@npm:^1.10.1":
+  version: 1.11.0
+  resolution: "@hono/node-server@npm:1.11.0"
+  checksum: 6850645a27828f8b366349fd24913009770055c41a8805b087c81873fede568d2cc6cb91f222eaaadd60374eee98d88c0fe6bdebf14a18a1d2b5bba52e717aa5
   languageName: node
   linkType: hard
 
@@ -10585,7 +10585,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@vexl-next/location-service@workspace:apps/location-service"
   dependencies:
-    "@hono/node-server": ^1.4.1
+    "@hono/node-server": ^1.10.1
     "@hono/zod-validator": ^0.1.11
     "@sentry/esbuild-plugin": ^2.10.2
     "@sentry/node": ^7.93.0

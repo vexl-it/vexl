@@ -215,6 +215,7 @@ export const contactSelectMolecule = molecule((_, getScope) => {
               positiveButtonText: t('addContactDialog.addContact'),
               type: 'StepWithInput',
               textInputProps: {
+                autoFocus: true,
                 autoCorrect: false,
                 placeholder: t('addContactDialog.addContactName'),
                 variant: 'greyOnWhite',

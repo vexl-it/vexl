@@ -8,6 +8,7 @@ import {Effect, Layer} from 'effect'
 import {createServer} from 'http'
 import {Environment, EnvironmentConstants} from './EnvironmentLayer'
 import {FirebaseMessagingLayer} from './FirebaseMessagingLayer'
+import HealthAppLive from './healthServer'
 import GetKeyRouteLive from './routes/GetkeyRouteLive'
 import IssueNotificationRouteLive from './routes/IssueNotificationRouteLive'
 
@@ -45,6 +46,7 @@ const AppLive = HttpLive.pipe(
   Http.server.serve(Http.middleware.logger),
   Http.server.withLogAddress,
   Layer.provide(ServerLive),
+  Layer.provide(HealthAppLive),
   Layer.provide(FirebaseMessagingLayer.Live),
   Layer.provide(Environment.Live),
   Layer.provide(DevTools.layer())

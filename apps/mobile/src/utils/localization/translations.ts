@@ -20,6 +20,9 @@ import frTermsOfUse from '@vexl-next/localization/fr-termsOfUse.json'
 import itBase from '@vexl-next/localization/it-base.json'
 import itPrivacyPolicyDev from '@vexl-next/localization/it-privacyPolicy.json'
 import itTermsOfUse from '@vexl-next/localization/it-termsOfUse.json'
+import jaBase from '@vexl-next/localization/ja-base.json'
+import jaPrivacyPolicyDev from '@vexl-next/localization/ja-privacyPolicy.json'
+import jaTermsOfUse from '@vexl-next/localization/ja-termsOfUse.json'
 import plBase from '@vexl-next/localization/pl-base.json'
 import plPrivacyPolicyDev from '@vexl-next/localization/pl-privacyPolicy.json'
 import plTermsOfUse from '@vexl-next/localization/pl-termsOfUse.json'
@@ -108,4 +111,11 @@ export const bg = {
   localeName: 'bg',
   termsOfUseMD: bgTermsOfUse.termsOfUseText,
   privacyPolicyMD: bgPrivacyPolicyDev.privacyPolicyText,
+} as const
+
+export const ja = {
+  ...unflatten<typeof jaBase, typeof base>(jaBase),
+  localeName: 'ja',
+  termsOfUseMD: jaTermsOfUse.termsOfUseText,
+  privacyPolicyMD: jaPrivacyPolicyDev.privacyPolicyText,
 } as const

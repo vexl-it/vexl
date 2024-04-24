@@ -20,6 +20,10 @@ export default function useContent(): Array<{
         currency: 'EUR',
       },
       {
+        title: 'JPY',
+        currency: 'JPY',
+      },
+      {
         title: 'NAD',
         currency: 'NAD',
       },

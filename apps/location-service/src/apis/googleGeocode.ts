@@ -36,7 +36,7 @@ export default async function googleGeocode({
       params: {
         key: env.GOOGLE_PLACES_API_KEY,
         language: lang,
-        result_type: 'locality',
+        result_type: 'locality|political',
         latlng: `${latitude},${longitude}`,
       },
     }

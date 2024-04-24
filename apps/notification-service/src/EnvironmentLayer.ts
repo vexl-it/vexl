@@ -13,6 +13,13 @@ const EnvironmentData = S.Struct({
     S.positive(),
     S.optional({default: () => 3000})
   ),
+
+  HEALTH_PORT: S.String.pipe(
+    S.compose(S.NumberFromString),
+    S.int(),
+    S.positive(),
+    S.optional({default: () => 3001})
+  ),
   FCM_TOKEN_PUBLIC_KEY: PublicKeyPemBase64E,
   FCM_TOKEN_PRIVATE_KEY: PrivateKeyPemBase64E,
   SECRET_KEY: PublicKeyPemBase64E,

@@ -16,8 +16,7 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": false,
-    "noUncheckedIndexedAccess": true,
-    "exactOptionalPropertyTypes": false
+    "noUncheckedIndexedAccess": true
   },
   "exclude": ["node_modules", "build", "dist", ".next", ".expo"]
 }

@@ -10679,6 +10679,7 @@ __metadata:
     country-data: ^0.0.31
     deep-equal: ^2.2.0
     effect: ^3.0.1
+    entities: ~2.0.0
     eslint: ^8.50.0
     eslint-config-prettier: ^9.0.0
     eslint-config-standard-with-typescript: ^39.1.0

@@ -16,15 +16,17 @@ function renderItem<T>(
 ): JSX.Element {
   return (
     <XStack ai="center" jc="space-between" py="$3" pl="$4" pr="$2">
-      <Text ff="$heading" fos={16} col="$white">
-        {item.label}
-      </Text>
+      <Stack flexShrink={1}>
+        <Text ff="$heading" fos={16} col={selected ? '$main' : '$white'}>
+          {item.label}
+        </Text>
+      </Stack>
       {!!selected && (
         <Image
           source={checkmarkSvg}
           height={20}
           width={20}
-          stroke={getTokens().color.white.val}
+          stroke={getTokens().color.main.val}
         />
       )}
     </XStack>

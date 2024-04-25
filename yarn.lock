@@ -3393,17 +3393,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@effect/rpc@npm:^0.30.8":
-  version: 0.30.8
-  resolution: "@effect/rpc@npm:0.30.8"
-  peerDependencies:
-    "@effect/platform": ^0.50.3
-    "@effect/schema": ^0.66.6
-    effect: ^3.0.3
-  checksum: f87ab1aac4eb727f5fa44006fb3a68a594cf0090c523e25ef21df52e5056ee722e58ce67b8b92a0afe81964914052b4e03166cc3b6644710614f9f8d685b5e49
-  languageName: node
-  linkType: hard
-
 "@effect/schema@npm:^0.66.1":
   version: 0.66.1
   resolution: "@effect/schema@npm:0.66.1"
@@ -10825,7 +10814,6 @@ __metadata:
     rimraf: ^4.4.0
     ts-jest: ^29.0.5
     ts-node: ^10.9.1
-    tsup: ^7.2.0
     typescript: ^5.3.0
     zod: ^3.22.3
   languageName: unknown
@@ -10854,6 +10842,32 @@ __metadata:
     typescript: ^5.3.0
     url-join: ^5.0.0
     zod: ^3.22.3
+  languageName: unknown
+  linkType: soft
+
+"@vexl-next/server-utils@0.0.0, @vexl-next/server-utils@workspace:packages/server-utils":
+  version: 0.0.0-use.local
+  resolution: "@vexl-next/server-utils@workspace:packages/server-utils"
+  dependencies:
+    "@effect/platform": ^0.49.3
+    "@effect/schema": ^0.66.1
+    "@vexl-next/cryptography": 0.0.0
+    "@vexl-next/domain": 0.0.0
+    "@vexl-next/eslint-config": 0.0.0
+    "@vexl-next/prettier-config": 0.0.0
+    "@vexl-next/resources-utils": 0.0.0
+    "@vexl-next/rest-api": 0.0.0
+    "@vexl-next/tsconfig": 0.0.0
+    awesome-phonenumber: ^5.1.0
+    effect: ^3.0.1
+    eslint: ^8.50.0
+    fast-check: ^3.17.1
+    jest: ^29.4.1
+    luxon: ^3.3.0
+    prettier: ^3.0.3
+    rimraf: ^4.4.0
+    ts-jest: ^29.0.5
+    typescript: ^5.3.0
   languageName: unknown
   linkType: soft
 
@@ -23542,17 +23556,16 @@ __metadata:
     "@effect/opentelemetry": ^0.32.0
     "@effect/platform": ^0.49.3
     "@effect/platform-node": ^0.46.3
-    "@effect/rpc": ^0.30.8
     "@effect/schema": ^0.66.1
     "@opentelemetry/exporter-trace-otlp-http": ^0.50.0
     "@opentelemetry/sdk-trace-node": ^1.23.0
     "@opentelemetry/sdk-trace-web": ^1.23.0
-    "@types/express": ^4
     "@types/text-encoding": ^0
     "@vexl-next/cryptography": 0.0.0
     "@vexl-next/eslint-config": 0.0.0
     "@vexl-next/prettier-config": 0.0.0
     "@vexl-next/rest-api": 0.0.0
+    "@vexl-next/server-utils": 0.0.0
     "@vexl-next/tsconfig": 0.0.0
     effect: ^3.0.1
     esbuild: ^0.17.16
@@ -23560,7 +23573,6 @@ __metadata:
     fast-check: ^3.17.1
     firebase-admin: ^12.1.0
     prettier: ^3.0.3
-    text-encoding: ^0.7.0
     typescript: ^5.3.0
   languageName: unknown
   linkType: soft
@@ -28772,13 +28784,6 @@ __metadata:
     glob: ^7.1.4
     minimatch: ^3.0.4
   checksum: 3b34a3d77165a2cb82b34014b3aba93b1c4637a5011807557dc2f3da826c59975a5ccad765721c4648b39817e3472789f9b0fa98fc854c5c1c7a1e632aacdc28
-  languageName: node
-  linkType: hard
-
-"text-encoding@npm:^0.7.0":
-  version: 0.7.0
-  resolution: "text-encoding@npm:0.7.0"
-  checksum: b6109a843fb1b8748b32e1ecd6df74d370f46c13ac136bcb6ca15db70209bb0b8ec1f296ebb4b0dd9961150e205dcc044b89f8cf7657f6faef78c7569a2a81bc
   languageName: node
   linkType: hard
 

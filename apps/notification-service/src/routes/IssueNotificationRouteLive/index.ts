@@ -3,9 +3,9 @@ import {
   IssueNotificationRequest,
   IssueNotificationResponse,
 } from '@vexl-next/rest-api/src/services/notification/contract'
+import {AuthenticatedSessionInRequestLive} from '@vexl-next/server-utils/src/ServerUserSession'
 import {Effect} from 'effect'
 import {sendFirebaseMessage} from '../../FirebaseMessagingLayer'
-import {AuthenticatedSessionInRequestLive} from '../../validateUserSession'
 import {decodeFcmCypher} from './utils'
 
 const IssueNotificationRouteLive = Http.router.post(

@@ -11,7 +11,6 @@ import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import Button from '../../../Button'
 import OffersList from '../../../OffersList'
 import ReencryptOffersSuggestion from '../../../ReencryptOffersSuggestion'
-import plusSvg from '../../../images/plusSvg'
 import ContainerWithTopBorderRadius from '../ContainerWithTopBorderRadius'
 import Header from '../Header'
 import MyOffersSortingDropdown from './components/MyOffersSortingDropdown'
@@ -59,7 +58,6 @@ function MyOffersScreen({navigation}: Props): JSX.Element {
             </XStack>
           </Stack>
           <Button
-            beforeIcon={plusSvg}
             onPress={() => {
               navigation.navigate('CreateOffer')
             }}

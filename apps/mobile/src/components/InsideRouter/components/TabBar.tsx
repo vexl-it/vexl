@@ -166,6 +166,8 @@ function TabBar({state, navigation}: BottomTabBarProps): JSX.Element {
                 py="$3"
                 px="$4"
                 bc="$grey"
+                borderWidth={1}
+                borderColor="$greyAccent1"
                 br="$6"
                 space="$2"
               >

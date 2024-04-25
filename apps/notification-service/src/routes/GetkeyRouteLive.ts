@@ -1,8 +1,8 @@
 import * as Http from '@effect/platform/HttpServer'
 import {GetPublicKeyResponseE} from '@vexl-next/rest-api/src/services/notification/contract'
+import {AuthenticatedSessionInRequestLive} from '@vexl-next/server-utils/src/ServerUserSession'
 import {Effect} from 'effect'
 import {EnvironmentConstants} from '../EnvironmentLayer'
-import {AuthenticatedSessionInRequestLive} from '../validateUserSession'
 
 const GetKeyRouteLive = Http.router.get(
   '/cypher-public-key',

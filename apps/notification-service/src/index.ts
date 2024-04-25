@@ -4,6 +4,7 @@ import {NodeHttpServer, NodeRuntime} from '@effect/platform-node'
 import * as Http from '@effect/platform/HttpServer'
 import {OTLPTraceExporter} from '@opentelemetry/exporter-trace-otlp-http'
 import {BatchSpanProcessor} from '@opentelemetry/sdk-trace-node'
+import {ServerUserSessionConfig} from '@vexl-next/server-utils/src/ServerUserSession'
 import {Effect, Layer} from 'effect'
 import {createServer} from 'http'
 import {Environment, EnvironmentConstants} from './EnvironmentLayer'
@@ -48,6 +49,14 @@ const AppLive = HttpLive.pipe(
   Layer.provide(ServerLive),
   Layer.provide(HealthAppLive),
   Layer.provide(FirebaseMessagingLayer.Live),
+  Layer.provide(
+    Layer.effect(
+      ServerUserSessionConfig,
+      EnvironmentConstants.SECRET_KEY.pipe(
+        Effect.map((secretKey) => ({secretPublicKey: secretKey}))
+      )
+    )
+  ),
   Layer.provide(Environment.Live),
   Layer.provide(DevTools.layer())
 )

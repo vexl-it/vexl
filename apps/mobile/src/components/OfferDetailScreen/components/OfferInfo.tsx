@@ -29,7 +29,6 @@ import OfferRequestTextInput from '../../OfferRequestTextInput'
 import OfferWithBubbleTip from '../../OfferWithBubbleTip'
 import ScreenTitle from '../../ScreenTitle'
 import closeSvg from '../../images/closeSvg'
-import identityIconSvg from '../../images/identityIconSvg'
 import {useReportOfferHandleUI} from '../api'
 import showCommonFriendsExplanationUIActionAtom from '../atoms'
 import flagSvg from '../images/flagSvg'
@@ -174,7 +173,6 @@ function OfferInfo({
           disabled={!text.trim()}
           onPress={onRequestPressed}
           variant="secondary"
-          beforeIcon={identityIconSvg}
           text={t('offer.sendRequest')}
         />
       ) : (

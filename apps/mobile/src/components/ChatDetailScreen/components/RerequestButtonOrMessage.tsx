@@ -7,7 +7,6 @@ import {useTranslation} from '../../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../../utils/useSafeGoBack'
 import Button from '../../Button'
 import InfoSquare from '../../InfoSquare'
-import identityIconSvg from '../../images/identityIconSvg'
 import {chatMolecule} from '../atoms'
 
 function RerequestButtonOrMessage({
@@ -37,7 +36,6 @@ function RerequestButtonOrMessage({
           disabled={rerequestButtonDisabled}
           onPress={onRerequestPressed}
           variant="secondary"
-          beforeIcon={identityIconSvg}
           text={t('offer.rerequest')}
         />
       ) : rerequestText ? (

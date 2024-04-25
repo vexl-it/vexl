@@ -2,8 +2,7 @@ import {useNavigation} from '@react-navigation/native'
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtom, useAtomValue} from 'jotai'
 import {useState} from 'react'
-import {Stack, Text, XStack, getTokens} from 'tamagui'
-import tradeChecklistSvg from '../../../../../images/tradeChecklistSvg'
+import {Stack, Text, XStack} from 'tamagui'
 import {showVexlbotInitialMessageForAllChatsAtom} from '../../../../../state/chat/atoms/showVexlbotInitialMessageForAllChatsAtom'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import Button from '../../../../Button'
@@ -66,9 +65,6 @@ function TradeChecklistReminder(): JSX.Element | null {
       <Stack space="$4">
         {offerIsInPerson ? (
           <Button
-            beforeIcon={tradeChecklistSvg}
-            iconSize={24}
-            iconFill={getTokens().color.darkBrown.val}
             onPress={() => {
               navigation.navigate('TradeChecklistFlow', {
                 screen: 'AgreeOnTradeDetails',
@@ -82,7 +78,6 @@ function TradeChecklistReminder(): JSX.Element | null {
           />
         ) : (
           <Button
-            iconFill={getTokens().color.darkBrown.val}
             onPress={() => {
               navigation.navigate('TradeChecklistFlow', {
                 screen: 'AgreeOnTradeDetails',

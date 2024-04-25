@@ -49,13 +49,13 @@ export const SuggestQueryData = z.object({
 export type SuggestQueryData = z.TypeOf<typeof SuggestQueryData>
 
 export const GeocodeQueryData = z.object({
-  latitude: z
+  longitude: z
     .string()
     .default('10')
     // Not nice, well 🤷‍♂️... https://github.com/honojs/middleware/issues/98
     .transform((e) => +e)
     .pipe(z.number().min(-180).max(180)),
-  longitude: z
+  latitude: z
     .string()
     .default('10')
     // Not nice, well 🤷‍♂️... https://github.com/honojs/middleware/issues/98

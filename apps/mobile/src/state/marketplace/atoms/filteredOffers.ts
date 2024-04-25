@@ -179,12 +179,14 @@ const viewportToFilterByAtom = atom((get) => {
       latitudeDelta: selectedRegion.latitudeDelta,
       longitudeDelta: selectedRegion.longitudeDelta,
     })
+
   if (locationFilter) {
     return radiusToViewport({
       point: locationFilter,
       radius: locationFilter.radius,
     })
   }
+
   return undefined
 })
 

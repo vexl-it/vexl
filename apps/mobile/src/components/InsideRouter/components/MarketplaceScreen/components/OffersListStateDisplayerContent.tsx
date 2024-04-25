@@ -2,7 +2,6 @@ import {isNone} from 'fp-ts/Option'
 import {useAtomValue, useSetAtom} from 'jotai'
 import {useMemo} from 'react'
 import {ActivityIndicator} from 'react-native'
-import {SafeAreaView} from 'react-native-safe-area-context'
 import {Stack, XStack, getTokens} from 'tamagui'
 import {
   triggerOffersRefreshAtom,
@@ -17,10 +16,12 @@ import {
   productToBtcOffersIncludingLocationAtomsAtom,
   sthElseOffersIncludingLocationAtomsAtom,
 } from '../../../../../state/marketplace/atoms/filteredOffers'
-import marketplaceLayoutModeAtom from '../../../../../state/marketplace/atoms/map/marketplaceLayoutModeAtom'
+import {refocusMapActionAtom} from '../../../../../state/marketplace/atoms/map/focusedOffer'
 import ErrorListHeader from '../../../../ErrorListHeader'
+import MarketplaceMapContainer from '../../../../MarketplaceMapContainer'
 import OffersList from '../../../../OffersList'
 import ReencryptOffersSuggestion from '../../../../ReencryptOffersSuggestion'
+import ContainerWithTopBorderRadius from '../../ContainerWithTopBorderRadius'
 import AddListingTypeToOffersSuggestion from './AddListingTypeToOffersSuggestion'
 import BaseFilterDropdown from './BaseFilterDropdown'
 import EmptyListPlaceholder from './EmptyListPlaceholder'
@@ -34,7 +35,7 @@ function OffersListStateDisplayerContent(): JSX.Element {
   const loading = useAreOffersLoading()
   const error = useOffersLoadingError()
   const refreshOffers = useSetAtom(triggerOffersRefreshAtom)
-  const marketplaceLayoutMode = useAtomValue(marketplaceLayoutModeAtom)
+  const refocusMap = useSetAtom(refocusMapActionAtom)
   const baseFilter = useAtomValue(baseFilterAtom)
 
   const offersAtoms = useAtomValue(
@@ -72,40 +73,39 @@ function OffersListStateDisplayerContent(): JSX.Element {
   }
 
   return (
-    <Stack f={1} bc="$black" px="$2">
-      <SafeAreaView
-        style={{flex: 1}}
-        edges={marketplaceLayoutMode === 'list' ? ['top', 'right', 'left'] : []}
-      >
-        {marketplaceLayoutMode === 'list' && (
-          <Stack space="$2">
-            <BaseFilterDropdown />
-            <XStack space="$2">
-              <SearchOffers />
-              <FilterButton />
-            </XStack>
-          </Stack>
-        )}
-        {offersAtoms.length === 0 ? (
-          <>
-            <EmptyListPlaceholder
-              refreshing={loading}
-              onRefresh={refreshOffers}
-            />
-          </>
-        ) : (
-          <Stack f={1}>
-            <OffersList
-              ListHeaderComponent={ListHeaderComponent}
-              offersAtoms={offersAtoms}
-              // eslint-disable-next-line @typescript-eslint/no-misused-promises
-              onRefresh={refreshOffers}
-              refreshing={loading}
-            />
-          </Stack>
-        )}
-      </SafeAreaView>
-    </Stack>
+    <ContainerWithTopBorderRadius>
+      <Stack space="$4">
+        <Stack px="$2">
+          <BaseFilterDropdown
+            postSelectActions={() => {
+              refocusMap({focusAllOffers: false})
+            }}
+          />
+        </Stack>
+        <XStack space="$2" pb="$1">
+          <SearchOffers
+            postSearchActions={() => {
+              refocusMap({focusAllOffers: false})
+            }}
+          />
+          <FilterButton />
+        </XStack>
+      </Stack>
+      <MarketplaceMapContainer />
+      {offersAtoms.length === 0 ? (
+        <EmptyListPlaceholder refreshing={loading} onRefresh={refreshOffers} />
+      ) : (
+        <Stack f={1}>
+          <OffersList
+            ListHeaderComponent={ListHeaderComponent}
+            offersAtoms={offersAtoms}
+            // eslint-disable-next-line @typescript-eslint/no-misused-promises
+            onRefresh={refreshOffers}
+            refreshing={loading}
+          />
+        </Stack>
+      )}
+    </ContainerWithTopBorderRadius>
   )
 }
 

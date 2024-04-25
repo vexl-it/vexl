@@ -18,10 +18,6 @@ export const focusedOfferAtom = atom((get) => {
   return get(offersAtom).find((one) => one.offerInfo.offerId === id)
 })
 
-export const focusedOfferIsOfflineAtom = atom((get) => {
-  return get(focusedOfferAtom)?.offerInfo.publicPart.location.length === 0
-})
-
 export const refocusMapActionAtom = atom(
   null,
   (get, set, {focusAllOffers}: {focusAllOffers: boolean}) => {
@@ -62,6 +58,7 @@ export const refocusMapActionAtom = atom(
     }
 
     const offers = get(filteredOffersIgnoreLocationAtom)
+
     if (offers.length > 0) {
       const borderPoints = offers.flatMap((one) =>
         one.offerInfo.publicPart.location.flatMap(getOfferLocationBorderPoints)

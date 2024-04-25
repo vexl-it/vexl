@@ -36,7 +36,6 @@ import SetContactsScreen from '../SetContactsScreen'
 import TodoScreen from '../TodoScreen'
 import TosScreen from '../TosScreen'
 import TradeChecklistFlow from '../TradeChecklistFlow'
-import MarketplaceMapContainer from './components/MarketplaceMapContainer'
 import {
   useHandleNotificationsPermissionsRedirect,
   useHandlePostLoginFlowRedirect,
@@ -72,7 +71,6 @@ function RootNavigation(): JSX.Element {
 
   return (
     <>
-      <MarketplaceMapContainer />
       <Stack.Navigator
         screenOptions={{
           headerShown: false,

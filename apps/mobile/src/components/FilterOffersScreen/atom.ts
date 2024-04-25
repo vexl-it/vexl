@@ -24,10 +24,14 @@ import {
   offersFilterFromStorageAtom,
   offersFilterInitialState,
 } from '../../state/marketplace/atoms/filterAtoms'
+import {clearRegionAndRefocusActionAtom} from '../../state/marketplace/atoms/map/focusedOffer'
+import {animateToCoordinateActionAtom} from '../../state/marketplace/atoms/map/mapViewAtoms'
+import marketplaceLayoutModeAtom from '../../state/marketplace/atoms/map/marketplaceLayoutModeAtom'
 import {
   type BaseOffersFilter,
   type OffersFilter,
 } from '../../state/marketplace/domain'
+import getOfferLocationBorderPoints from '../../state/marketplace/utils/getOfferLocationBorderPoints'
 import getValueFromSetStateActionOfAtom from '../../utils/atomUtils/getValueFromSetStateActionOfAtom'
 import calculatePriceInFiatFromSats from '../../utils/calculatePriceInFiatFromSats'
 import calculatePriceInSats from '../../utils/calculatePriceInSats'
@@ -158,6 +162,8 @@ export const updateLocationStateAndPaymentMethodAtom = atom(
     set(locationStateAtom, (prev) =>
       prev?.includes(locationState) ? [] : [locationState]
     )
+
+    if (locationState === 'ONLINE') set(locationAtom, undefined)
 
     if (locationStateFromAtom?.includes(locationState)) {
       set(paymentMethodAtom, undefined)
@@ -398,6 +404,8 @@ export const baseFilterTempAtom = atom(
 )
 
 export const saveFilterActionAtom = atom(null, (get, set) => {
+  const marketplaceLayoutMode = get(marketplaceLayoutModeAtom)
+
   const newFilterValue: OffersFilter = {
     sort: get(sortingAtom),
     listingType: get(listingTypeAtom),
@@ -420,4 +428,11 @@ export const saveFilterActionAtom = atom(null, (get, set) => {
   }
 
   set(offersFilterFromStorageAtom, newFilterValue)
+
+  if (marketplaceLayoutMode === 'map') {
+    const location = get(locationAtom)
+    if (location)
+      set(animateToCoordinateActionAtom, getOfferLocationBorderPoints(location))
+    else set(clearRegionAndRefocusActionAtom)
+  }
 })

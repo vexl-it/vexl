@@ -9,6 +9,7 @@ import {useTranslation} from '../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 import Button from '../Button'
 import KeyboardAvoidingView from '../KeyboardAvoidingView'
+import MarketplaceMapContainer from '../MarketplaceMapContainer'
 import Screen from '../Screen'
 import OfferInfo from './components/OfferInfo'
 
@@ -40,6 +41,7 @@ function OfferDetailScreen({
 
   return (
     <RootContainer f={1} bc="$black">
+      <MarketplaceMapContainer />
       <KeyboardAvoidingView>
         {isSome(offer) ? (
           <OfferInfo navigation={navigation} offer={offer.value} />

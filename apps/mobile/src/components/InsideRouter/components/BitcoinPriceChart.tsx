@@ -2,7 +2,6 @@ import {useFocusEffect} from '@react-navigation/native'
 import {useAtomValue, useSetAtom} from 'jotai'
 import {useCallback} from 'react'
 import {ActivityIndicator, TouchableOpacity} from 'react-native'
-import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {Stack, Text, XStack, getTokens} from 'tamagui'
 import {
   btcPriceForSelectedCurrencyAtom,
@@ -14,7 +13,6 @@ import {preferencesAtom} from '../../../utils/preferences'
 
 function BitcoinPriceChart(): JSX.Element {
   const preferences = useAtomValue(preferencesAtom)
-  const insets = useSafeAreaInsets()
   const refreshBtcPrice = useSetAtom(refreshBtcPriceActionAtom)
   const selectedCurrency = useAtomValue(selectedCurrencyAtom)
   const btcPriceForSelectedCurrency = useAtomValue(
@@ -29,8 +27,8 @@ function BitcoinPriceChart(): JSX.Element {
 
   return (
     <Stack h="100%">
-      <Stack f={1} pt={insets.top} />
-      <XStack jc="space-between" alignItems="center" px="$6" py="$2">
+      <Stack f={1} />
+      <XStack jc="space-between" alignItems="center" px="$6" py="$1">
         <Stack />
         <TouchableOpacity
           onPress={() => {
@@ -45,13 +43,13 @@ function BitcoinPriceChart(): JSX.Element {
                   color={getTokens().color.main.val}
                 />
                 {!!btcPriceForSelectedCurrency.btcPrice && (
-                  <Text fos={28} ff="$heading" color="$yellowAccent1">
+                  <Text fos={20} ff="$heading" color="$yellowAccent1">
                     {btcPriceForSelectedCurrency.btcPrice}
                   </Text>
                 )}
               </XStack>
             ) : (
-              <Text fos={28} ff="$heading" color="$yellowAccent1">
+              <Text fos={20} ff="$heading" color="$yellowAccent1">
                 {btcPriceForSelectedCurrency?.state === 'error'
                   ? '-'
                   : btcPriceForSelectedCurrency?.btcPrice.toLocaleString(

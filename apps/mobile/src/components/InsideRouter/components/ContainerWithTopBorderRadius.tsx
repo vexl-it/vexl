@@ -1,33 +1,18 @@
 import {type ReactNode} from 'react'
-import {ScrollView, Stack, styled} from 'tamagui'
+import {ScrollView, Stack, type StackProps} from 'tamagui'
 import usePixelsFromBottomWhereTabsEnd from '../utils'
 
 export const CONTAINER_WITH_TOP_BORDER_RADIUS_TOP_PADDING = 24
 
-const StyledStack = styled(Stack, {
-  f: 1,
-  bg: '$black',
-  btlr: '$7',
-  btrr: '$7',
-  variants: {
-    withTopPadding: {
-      true: {
-        pt: '$6',
-      },
-    },
-  },
-})
-
-interface Props {
+interface Props extends StackProps {
   children: ReactNode
   scrollView?: boolean
-  withTopPadding?: boolean
 }
 
 function ContainerWithTopBorderRadius({
   children,
   scrollView,
-  withTopPadding,
+  ...props
 }: Props): JSX.Element {
   const tabBarEndsAt = usePixelsFromBottomWhereTabsEnd()
 
@@ -37,14 +22,18 @@ function ContainerWithTopBorderRadius({
         bg="$black"
         btlr="$7"
         btrr="$7"
-        pt={withTopPadding ? '$6' : '$0'}
+        pt="$6"
         contentContainerStyle={{paddingBottom: tabBarEndsAt + 25}}
       >
         {children}
       </ScrollView>
     )
   }
-  return <StyledStack withTopPadding={withTopPadding}>{children}</StyledStack>
+  return (
+    <Stack f={1} bc="$black" btlr="$7" btrr="$7" pt="$6" {...props}>
+      {children}
+    </Stack>
+  )
 }
 
 export default ContainerWithTopBorderRadius

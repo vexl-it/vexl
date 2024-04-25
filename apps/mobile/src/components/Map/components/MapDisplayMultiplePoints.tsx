@@ -1,3 +1,4 @@
+import {useFocusEffect} from '@react-navigation/native'
 import {
   longitudeDeltaToMeters,
   type Latitude,
@@ -11,7 +12,7 @@ import {
   type Atom,
   type WritableAtom,
 } from 'jotai'
-import {Fragment, useCallback, useEffect, useRef} from 'react'
+import {Fragment, useCallback, useRef} from 'react'
 import {Platform} from 'react-native'
 import MapView from 'react-native-map-clustering'
 import {
@@ -53,6 +54,7 @@ const mapStyle = {
   width: '100%',
   height: '100%',
   backgroundColor: 'black',
+  borderRadius: getTokens().radius[3].val,
 } as const
 
 function MMapView({
@@ -78,9 +80,11 @@ function MMapView({
     onMapReady?.()
   }, [onMapReady])
 
-  useEffect(() => {
-    setMapViewRef(ref.current ?? undefined)
-  }, [ref, setMapViewRef])
+  useFocusEffect(
+    useCallback(() => {
+      setMapViewRef(ref.current ?? undefined)
+    }, [ref, setMapViewRef])
+  )
 
   const onChangedDebounce = useDebounce(
     useCallback(

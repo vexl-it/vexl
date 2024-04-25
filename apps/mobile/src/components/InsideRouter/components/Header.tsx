@@ -1,11 +1,9 @@
 import {LinearGradient} from 'expo-linear-gradient'
-import {useAtomValue} from 'jotai'
 import {Stack, styled} from 'tamagui'
-import marketplaceLayoutModeAtom from '../../../state/marketplace/atoms/map/marketplaceLayoutModeAtom'
 import BitcoinPriceChart from './BitcoinPriceChart'
 import {CONTAINER_WITH_TOP_BORDER_RADIUS_TOP_PADDING} from './ContainerWithTopBorderRadius'
 
-const CHART_HEADER_HEIGHT_PX = 100
+const CHART_HEADER_HEIGHT_PX = 80
 
 const BackgroundImage = styled(LinearGradient, {
   w: '100%',
@@ -33,11 +31,6 @@ function BtcPriceHeader(): JSX.Element {
 }
 
 function Header(): JSX.Element | null {
-  const marketplaceLayoutMode = useAtomValue(marketplaceLayoutModeAtom)
-
-  if (marketplaceLayoutMode === 'map') {
-    return null
-  }
   return <BtcPriceHeader />
 }
 

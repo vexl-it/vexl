@@ -1,7 +1,10 @@
 import * as Http from '@effect/platform/HttpServer'
 import {Schema} from '@effect/schema'
 import * as S from '@effect/schema/Schema'
-import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
+import {
+  PublicKeyPemBase64E,
+  type PublicKeyPemBase64,
+} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {ecdsaVerify} from '@vexl-next/cryptography/src/operations/ecdsa'
 import {
   HEADER_HASH,
@@ -9,7 +12,6 @@ import {
   HEADER_SIGNATURE,
 } from '@vexl-next/rest-api/src/constants'
 import {Context, Effect, Layer} from 'effect'
-import {EnvironmentConstants, type Environment} from './EnvironmentLayer'
 
 export class InvalidSessionError extends S.TaggedError<InvalidSessionError>()(
   'InvalidSessionError',
@@ -36,10 +38,19 @@ export class RequestUserSession extends Context.Tag('UserSessionLayer')<
   UserSessionOnBE
 >() {}
 
+export class ServerUserSessionConfig extends Context.Tag(
+  'ServerUserSessionConfig'
+)<
+  ServerUserSessionConfig,
+  {
+    secretPublicKey: PublicKeyPemBase64
+  }
+>() {}
+
 export const validateUserSession: Effect.Effect<
   UserSessionOnBE,
   InvalidSessionError,
-  Environment | Http.request.ServerRequest
+  ServerUserSessionConfig | Http.request.ServerRequest
 > = Effect.gen(function* (_) {
   const headers = yield* _(
     Http.request.schemaHeaders(AuthHeaders),
@@ -50,7 +61,7 @@ export const validateUserSession: Effect.Effect<
 
   const challenge = `${headers[HEADER_PUBLIC_KEY]}${headers[HEADER_HASH]}`
 
-  const secretKey = yield* _(EnvironmentConstants.SECRET_KEY)
+  const {secretPublicKey} = yield* _(ServerUserSessionConfig)
 
   const valid = yield* _(
     Effect.try({
@@ -58,7 +69,7 @@ export const validateUserSession: Effect.Effect<
         ecdsaVerify({
           challenge,
           signature: headers[HEADER_SIGNATURE],
-          pubKey: secretKey,
+          pubKey: secretPublicKey,
         }),
       catch: () =>
         new InvalidSessionError({message: 'Error while validating session'}),

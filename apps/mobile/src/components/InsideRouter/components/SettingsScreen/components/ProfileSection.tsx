@@ -1,3 +1,4 @@
+import {useNavigation} from '@react-navigation/native'
 import {useAtomValue, useSetAtom} from 'jotai'
 import {TouchableOpacity} from 'react-native'
 import {Stack, Text, XStack, styled} from 'tamagui'
@@ -27,6 +28,7 @@ const GrayBackContainer = styled(XStack, {
 
 function ProfileSection(): JSX.Element {
   const {t} = useTranslation()
+  const navigation = useNavigation()
   const reachNumber = useAtomValue(reachNumberAtom)
   const setQrCodeDialogVisible = useSetAtom(qrCodeDialogVisibleAtom)
   const setQrScannerDialogVisible = useSetAtom(qrScannerDialogVisibleAtom)
@@ -37,14 +39,20 @@ function ProfileSection(): JSX.Element {
   return (
     <Stack ai="center" ml="$4" mr="$4">
       <XStack jc="space-between" als="stretch" mb="$7">
-        <GrayBackContainer>
-          <Stack w={24} h={24}>
-            <SvgImage source={reachIconSVG} />
-          </Stack>
-          <Text fos={16} ml="$2" col="$greyOnBlack">
-            {t('settings.yourReach', {number: reachNumber})}
-          </Text>
-        </GrayBackContainer>
+        <TouchableOpacity
+          onPress={() => {
+            navigation.navigate('SetContacts', {})
+          }}
+        >
+          <GrayBackContainer>
+            <Stack w={24} h={24}>
+              <SvgImage source={reachIconSVG} />
+            </Stack>
+            <Text fos={16} ml="$2" col="$greyOnBlack">
+              {t('settings.yourReach', {number: reachNumber})}
+            </Text>
+          </GrayBackContainer>
+        </TouchableOpacity>
         <XStack space="$2">
           <TouchableOpacity
             onPress={() => {

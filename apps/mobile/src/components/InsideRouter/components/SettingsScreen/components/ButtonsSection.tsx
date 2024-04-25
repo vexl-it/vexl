@@ -11,6 +11,7 @@ import {
   type ColorValue,
 } from 'react-native'
 import {Stack, XStack, getTokens} from 'tamagui'
+import chevronRightSvg from '../../../../../images/chevronRightSvg'
 import {useLogout} from '../../../../../state/useLogout'
 import {enableHiddenFeatures} from '../../../../../utils/environment'
 import {isUsingIos17AndAbove} from '../../../../../utils/isUsingIos17AndAbove'
@@ -53,6 +54,7 @@ interface ItemProps {
   text: string | JSX.Element
   icon: SvgString
   iconFill?: ColorValue
+  navigatesFurther?: boolean
   onPress: () => void
   children?: React.ReactNode
   hidden?: boolean
@@ -62,6 +64,7 @@ function Item({
   text,
   icon,
   iconFill,
+  navigatesFurther,
   onPress,
   children,
   hidden,
@@ -69,22 +72,30 @@ function Item({
   const tokens = getTokens()
   return !hidden ? (
     <TouchableWithoutFeedback onPress={onPress}>
-      <XStack ai="center" h={66} mx="$7">
-        <Stack w={24} h={24} mr="$4">
+      <XStack ai="center" jc="space-between" h={66} ml="$7" mr="$4">
+        <XStack f={1} ai="center">
+          <Stack w={24} h={24} mr="$4">
+            <SvgImage
+              stroke={!iconFill ? tokens.color.greyOnBlack.val : undefined}
+              fill={iconFill ?? 'none'}
+              source={icon}
+            />
+          </Stack>
+          {children ??
+            (typeof text === 'string' ? (
+              <Stack f={1}>
+                <ItemText>{text}</ItemText>
+              </Stack>
+            ) : (
+              text
+            ))}
+        </XStack>
+        {!!navigatesFurther && (
           <SvgImage
-            stroke={!iconFill ? tokens.color.greyOnBlack.val : undefined}
-            fill={iconFill ?? 'none'}
-            source={icon}
+            source={chevronRightSvg}
+            stroke={tokens.color.greyOnBlack.val}
           />
-        </Stack>
-        {children ??
-          (typeof text === 'string' ? (
-            <Stack f={1}>
-              <ItemText>{text}</ItemText>
-            </Stack>
-          ) : (
-            text
-          ))}
+        )}
       </XStack>
     </TouchableWithoutFeedback>
   ) : null
@@ -140,6 +151,7 @@ function ButtonsSection(): JSX.Element {
           {
             text: t('common.myOffers'),
             icon: profileIconSvg,
+            navigatesFurther: true,
             onPress: () => {
               navigation.navigate('MyOffers')
             },
@@ -149,6 +161,7 @@ function ButtonsSection(): JSX.Element {
           {
             text: t('settings.items.changeProfilePicture'),
             icon: imageIconSvg,
+            navigatesFurther: true,
             onPress: () => {
               navigation.navigate('ChangeProfilePicture')
             },
@@ -156,6 +169,7 @@ function ButtonsSection(): JSX.Element {
           {
             text: t('settings.items.editName'),
             icon: editIconSvg,
+            navigatesFurther: true,
             onPress: () => {
               navigation.navigate('EditName')
             },
@@ -164,6 +178,7 @@ function ButtonsSection(): JSX.Element {
             text: t('settings.items.changeLanguage'),
             icon: spokenLanguagesSvg,
             iconFill: getTokens().color.greyOnBlack.val,
+            navigatesFurther: true,
             onPress: changeLanguage,
           },
         ],
@@ -171,6 +186,7 @@ function ButtonsSection(): JSX.Element {
           {
             text: t('settings.items.contactsImported'),
             icon: contactIconSvg,
+            navigatesFurther: true,
             onPress: () => {
               navigation.navigate('SetContacts', {})
             },
@@ -186,11 +202,13 @@ function ButtonsSection(): JSX.Element {
                     : ''
                 }`,
                 icon: faceIdIconSvg,
+                navigatesFurther: true,
                 onPress: todo,
               },
               {
                 text: 'CZK',
                 icon: coinsIconSvg,
+                navigatesFurther: true,
                 onPress: () => {
                   setChangeCurrencyDialogVisible(true)
                 },
@@ -227,6 +245,7 @@ function ButtonsSection(): JSX.Element {
           {
             text: t('settings.items.termsAndPrivacy'),
             icon: termsIconSvg,
+            navigatesFurther: true,
             onPress: () => {
               navigation.navigate('TermsAndConditions')
             },
@@ -234,6 +253,7 @@ function ButtonsSection(): JSX.Element {
           {
             text: t('notifications.preferences.screenTitle'),
             icon: notificationsIconSvg,
+            navigatesFurther: true,
             onPress: () => {
               navigation.navigate('NotificationSettings')
             },
@@ -241,6 +261,7 @@ function ButtonsSection(): JSX.Element {
           {
             text: t('settings.items.faqs'),
             icon: questionIconSvg,
+            navigatesFurther: true,
             onPress: () => {
               navigation.navigate('Faqs')
             },
@@ -248,6 +269,7 @@ function ButtonsSection(): JSX.Element {
           {
             text: t('settings.items.reportIssue'),
             icon: customerSupportIconSvg,
+            navigatesFurther: true,
             onPress: () => {
               setReportIssueDialogVisible(true)
             },
@@ -255,6 +277,7 @@ function ButtonsSection(): JSX.Element {
           {
             text: t('settings.items.inAppLogs'),
             icon: cpuIconSvg,
+            navigatesFurther: true,
             onPress: () => {
               navigation.navigate('AppLogs')
             },

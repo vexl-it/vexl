@@ -39,10 +39,16 @@ function FaqsScreen({navigation}: Props): JSX.Element | null {
         ) : (
           <>
             <XStack ai="center" jc="space-between">
-              <Text col="$black" ff="$body600">
-                {t('faqs.faqs')}
-              </Text>
+              {/* this makes the text to be centered on screen */}
+              <Stack width={40} />
+              <Stack f={1} ai="center" jc="center">
+                <Text fos={18} col="$black" ff="$body600">
+                  {t('faqs.faqs')}
+                </Text>
+              </Stack>
               <IconButton
+                width={40}
+                height={40}
                 variant="light"
                 icon={closeSvg}
                 onPress={safeGoBack}
@@ -64,10 +70,11 @@ function FaqsScreen({navigation}: Props): JSX.Element | null {
               <TouchableWithoutFeedback
                 onPress={openUrl(pageContent?.url ?? '')}
               >
-                <Text ff="$body500" col="$greyOnWhite">
+                <Text fos={16} ff="$body500" col="$greyOnWhite">
                   <>
                     {pageContent?.textBefore}{' '}
                     <Text
+                      fos={16}
                       textDecorationLine="underline"
                       ff="$body700"
                       col="$greyOnWhite"
@@ -79,7 +86,7 @@ function FaqsScreen({navigation}: Props): JSX.Element | null {
                 </Text>
               </TouchableWithoutFeedback>
             ) : (
-              <Text ff="$body500" col="$greyOnWhite">
+              <Text fos={16} ff="$body500" col="$greyOnWhite">
                 {pageContent?.text}
               </Text>
             )}

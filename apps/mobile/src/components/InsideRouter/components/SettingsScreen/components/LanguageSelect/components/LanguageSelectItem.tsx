@@ -10,9 +10,9 @@ import {
 import RadioButton from '../../../../../../RadioButton'
 import {createIsLanguageSelectedAtom} from '../../../atoms'
 
-const languages = keys(supportedTranslations)
+const translations = keys(supportedTranslations)
 interface LanguageSelectItemProps {
-  language: (typeof languages)[number]
+  language: (typeof translations)[number]
 }
 
 function LanguageSelectItem({language}: LanguageSelectItemProps): JSX.Element {
@@ -34,6 +34,7 @@ function LanguageSelectItem({language}: LanguageSelectItemProps): JSX.Element {
             select(isSelected)
           }}
         />
+        <Text fos={18}>{supportedTranslations[language].flag}</Text>
         <Text
           col={isSelected ? '$black' : '$greyOnWhite'}
           fos={18}

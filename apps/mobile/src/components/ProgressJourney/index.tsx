@@ -1,4 +1,5 @@
 import {type ReactNode} from 'react'
+import {TouchableWithoutFeedback} from 'react-native'
 import {Stack, styled} from 'tamagui'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import Button from '../Button'
@@ -48,11 +49,16 @@ function ProgressJourney({
       <WhiteContainer noPadding>
         <Stack f={1} fg={0} fd="row" mx="$2" my="$3">
           {Array.from({length: numberOfPages}).map((_, index) => (
-            <BreadCrumb
+            <TouchableWithoutFeedback
               testID="breadcrumb"
               key={index}
-              active={index <= currentPage}
-            />
+              onPress={() => {
+                onPageChange(index)
+              }}
+              hitSlop={5}
+            >
+              <BreadCrumb active={index <= currentPage} />
+            </TouchableWithoutFeedback>
           ))}
         </Stack>
         <Stack f={1} m="$3">

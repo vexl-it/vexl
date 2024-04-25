@@ -18,7 +18,7 @@ export const changeLanguageActionAtom = atom(null, async (get, set) => {
           type: 'StepWithChildren',
           MainSectionComponent: LanguageSelect,
           positiveButtonText: t('common.change'),
-          negativeButtonText: t('common.back'),
+          negativeButtonText: t('common.close'),
         },
       ],
     }),

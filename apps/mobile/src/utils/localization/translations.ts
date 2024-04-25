@@ -44,6 +44,7 @@ export const dev = {
 } as const
 
 export const cs = {
+  flag: '🇨🇿',
   localeName: 'cs',
   ...unflatten<typeof csBase, typeof base>(csBase),
   termsOfUseMD: csTermsOfUse.termsOfUseText,
@@ -51,6 +52,7 @@ export const cs = {
 } as const
 
 export const de = {
+  flag: '🇩🇪',
   localeName: 'de',
   ...unflatten<typeof deBase, typeof base>(deBase),
   termsOfUseMD: deTermsOfUse.termsOfUseText,
@@ -58,6 +60,7 @@ export const de = {
 } as const
 
 export const en = {
+  flag: '🇬🇧',
   localeName: 'en',
   ...unflatten<typeof enBase, typeof base>(enBase),
   termsOfUseMD: enTermsOfUse.termsOfUseText,
@@ -65,6 +68,7 @@ export const en = {
 } as const
 
 export const fr = {
+  flag: '🇫🇷',
   localeName: 'fr',
   ...unflatten<typeof frBase, typeof base>(frBase),
   termsOfUseMD: frTermsOfUse.termsOfUseText,
@@ -72,6 +76,7 @@ export const fr = {
 } as const
 
 export const it = {
+  flag: '🇮🇹',
   localeName: 'it',
   ...unflatten<typeof itBase, typeof base>(itBase),
   termsOfUseMD: itTermsOfUse.termsOfUseText,
@@ -79,6 +84,7 @@ export const it = {
 } as const
 
 export const pt = {
+  flag: '🇵🇹',
   localeName: 'pt',
   ...unflatten<typeof ptBase, typeof base>(ptBase),
   termsOfUseMD: ptTermsOfUse.termsOfUseText,
@@ -86,6 +92,7 @@ export const pt = {
 } as const
 
 export const pl = {
+  flag: '🇵🇱',
   localeName: 'pl',
   ...unflatten<typeof plBase, typeof base>(plBase),
   termsOfUseMD: plTermsOfUse.termsOfUseText,
@@ -93,6 +100,7 @@ export const pl = {
 } as const
 
 export const es = {
+  flag: '🇪🇸',
   localeName: 'es',
   ...unflatten<typeof esBase, typeof base>(esBase),
   termsOfUseMD: esTermsOfUse.termsOfUseText,
@@ -100,6 +108,7 @@ export const es = {
 } as const
 
 export const sk = {
+  flag: '🇸🇰',
   ...unflatten<typeof skBase, typeof base>(skBase),
   localeName: 'sk',
   termsOfUseMD: skTermsOfUse.termsOfUseText,
@@ -107,6 +116,7 @@ export const sk = {
 } as const
 
 export const bg = {
+  flag: '🇧🇬',
   ...unflatten<typeof bgBase, typeof base>(bgBase),
   localeName: 'bg',
   termsOfUseMD: bgTermsOfUse.termsOfUseText,
@@ -114,6 +124,7 @@ export const bg = {
 } as const
 
 export const ja = {
+  flag: '🇯🇵',
   ...unflatten<typeof jaBase, typeof base>(jaBase),
   localeName: 'ja',
   termsOfUseMD: jaTermsOfUse.termsOfUseText,

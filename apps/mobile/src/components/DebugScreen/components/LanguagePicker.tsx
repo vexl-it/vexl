@@ -3,15 +3,15 @@ import {keys} from '@vexl-next/resources-utils/src/utils/keys'
 import {useSetAtom} from 'jotai'
 import {useState} from 'react'
 import {Text, YStack} from 'tamagui'
-import * as translations from '../../../utils/localization/translations'
+import * as allTranslations from '../../../utils/localization/translations'
 import {currentAppLanguageAtom} from '../../../utils/preferences'
 import Button from '../../Button'
 
-const languages = keys(translations)
+const translations = keys(allTranslations)
 
 function LanguagePicker(): JSX.Element {
   const [selectedLanguage, setSelectedLanguage] =
-    useState<(typeof languages)[number]>('en')
+    useState<(typeof translations)[number]>('en')
 
   const setCurrentAppLanguage = useSetAtom(currentAppLanguageAtom)
 
@@ -24,8 +24,12 @@ function LanguagePicker(): JSX.Element {
         selectedValue={selectedLanguage}
         onValueChange={setSelectedLanguage}
       >
-        {languages.map((language) => (
-          <Picker.Item key={language} label={language} value={language} />
+        {translations.map((translation) => (
+          <Picker.Item
+            key={translation}
+            label={translation}
+            value={translation}
+          />
         ))}
       </Picker>
       <Button

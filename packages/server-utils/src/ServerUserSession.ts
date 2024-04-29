@@ -45,7 +45,21 @@ export class ServerUserSessionConfig extends Context.Tag(
   {
     secretPublicKey: PublicKeyPemBase64
   }
->() {}
+>() {
+  static layer(
+    secretPublicKey: PublicKeyPemBase64
+  ): Layer.Layer<ServerUserSessionConfig> {
+    return Layer.succeed(ServerUserSessionConfig, {secretPublicKey})
+  }
+
+  static layerFromEffect<E, C>(
+    effect: Effect.Effect<PublicKeyPemBase64, E, C>
+  ): Layer.Layer<ServerUserSessionConfig, E, C> {
+    return Layer.unwrapEffect(
+      effect.pipe(Effect.map(ServerUserSessionConfig.layer))
+    )
+  }
+}
 
 export const validateUserSession: Effect.Effect<
   UserSessionOnBE,

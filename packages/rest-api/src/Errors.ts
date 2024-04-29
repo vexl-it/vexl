@@ -1,10 +1,10 @@
+import {Schema} from '@effect/schema'
 import {type AxiosError, type AxiosResponse} from 'axios'
-import {type ZodError} from 'zod'
 
 export interface UnexpectedApiResponseError {
   readonly _tag: 'UnexpectedApiResponseError'
   readonly data: any
-  readonly errors: ZodError
+  readonly errors: unknown
 }
 
 export interface BadStatusCodeError {
@@ -26,3 +26,15 @@ export interface NetworkError {
     | typeof AxiosError.ECONNABORTED
   readonly error: AxiosError
 }
+
+export class InternalServerError extends Schema.TaggedError<InternalServerError>(
+  'InternalServerError'
+)('InternalServerError', {
+  cause: Schema.Literal('ExternalApi', 'Unknown', 'BodyError').pipe(
+    Schema.optional({default: () => 'Unknown' as const})
+  ),
+}) {}
+
+export class NotFoundError extends Schema.TaggedError<NotFoundError>(
+  'NotFoundError'
+)('NotFoundError', {}) {}

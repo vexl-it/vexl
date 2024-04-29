@@ -34,7 +34,7 @@ export const ENV_PRESETS: {stageEnv: EnvPreset; prodEnv: EnvPreset} = {
     chatMs: ServiceUrl.parse('https://stage-chat.vexl.it'),
     offerMs: ServiceUrl.parse('https://stage-offer2.vexl.it'),
     locationMs: ServiceUrl.parse('https://stage-location.vexl.it'),
-    notificationMs: ServiceUrl.parse('https://notification.vexl.it'),
+    notificationMs: ServiceUrl.parse('https://stage-notification.vexl.it'),
   },
   prodEnv: {
     userMs: ServiceUrl.parse('https://user.vexl.it'),
@@ -42,7 +42,7 @@ export const ENV_PRESETS: {stageEnv: EnvPreset; prodEnv: EnvPreset} = {
     chatMs: ServiceUrl.parse('https://chat.vexl.it'),
     offerMs: ServiceUrl.parse('https://offer2.vexl.it'),
     locationMs: ServiceUrl.parse('https://location.vexl.it'),
-    notificationMs: ServiceUrl.parse('https://stage-notification.vexl.it'),
+    notificationMs: ServiceUrl.parse('https://notification.vexl.it'),
   },
 }
 

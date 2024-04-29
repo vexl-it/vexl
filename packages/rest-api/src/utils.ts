@@ -1,3 +1,4 @@
+import {Schema} from '@effect/schema'
 import Axios, {
   AxiosError,
   isAxiosError,
@@ -43,6 +44,28 @@ export function axiosCallWithValidation<T extends z.ZodType>(
       return TE.left<UnexpectedApiResponseError>({
         _tag: 'UnexpectedApiResponseError',
         errors: valid.error,
+        data: x,
+      })
+    })
+  )
+}
+
+export function axiosCallWithValidationSchema<I, O>(
+  axiosInstance: AxiosInstance,
+  config: AxiosRequestConfig,
+  responseValidation: Schema.Schema<I, O>
+): TE.TaskEither<
+  UnknownError | BadStatusCodeError | UnexpectedApiResponseError | NetworkError,
+  I
+> {
+  return pipe(
+    axiosCall(axiosInstance, config),
+    TE.chainW((x) => {
+      const valid = Schema.decodeUnknownEither(responseValidation)(x)
+      if (valid._tag === 'Right') return TE.right<never, I>(valid.right)
+      return TE.left<UnexpectedApiResponseError>({
+        _tag: 'UnexpectedApiResponseError',
+        errors: valid.left,
         data: x,
       })
     })
@@ -100,7 +123,7 @@ export function axiosCall(
   config: AxiosRequestConfig
 ): TE.TaskEither<
   UnknownError | BadStatusCodeError | UnexpectedApiResponseError | NetworkError,
-  void
+  unknown
 > {
   return pipe(
     TE.tryCatch(

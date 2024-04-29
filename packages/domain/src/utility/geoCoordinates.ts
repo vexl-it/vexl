@@ -1,10 +1,30 @@
+import {Schema} from '@effect/schema'
+import {Brand} from 'effect'
 import {z} from 'zod'
 
-export const Latitude = z.number().min(-90).max(90).brand<'latitude'>()
-export type Latitude = z.TypeOf<typeof Latitude>
+export const Latitude = z
+  .number()
+  .min(-90)
+  .max(90)
+  .transform((v) => Brand.nominal<typeof v & Brand.Brand<'Latitude'>>()(v))
+export const LatitudeE = Schema.Number.pipe(
+  Schema.greaterThanOrEqualTo(-90),
+  Schema.lessThanOrEqualTo(90),
+  Schema.brand('Latitude')
+)
+export type Latitude = Schema.Schema.Type<typeof LatitudeE>
 
-export const Longitude = z.number().min(-180).max(180).brand<'longitude'>()
-export type Longitude = z.TypeOf<typeof Longitude>
+export const Longitude = z
+  .number()
+  .min(-180)
+  .max(180)
+  .transform((v) => Brand.nominal<typeof v & Brand.Brand<'Longitude'>>()(v))
+export const LongitudeE = Schema.Number.pipe(
+  Schema.greaterThanOrEqualTo(-180),
+  Schema.lessThanOrEqualTo(180),
+  Schema.brand('Longitude')
+)
+export type Longitude = Schema.Schema.Type<typeof LongitudeE>
 
 export interface LatLong {
   latitude: Latitude
@@ -17,8 +37,16 @@ export interface Viewport {
   southwest: LatLong
 }
 
-export const Radius = z.number().min(0).brand<'radius'>()
-export type Radius = z.TypeOf<typeof Radius>
+export const Radius = z
+  .number()
+  .min(0)
+  .transform((v) => Brand.nominal<typeof v & Brand.Brand<'Radius'>>()(v))
+export const RadiusE = Schema.Number.pipe(
+  Schema.positive(),
+  Schema.brand('Radius')
+)
+export type Radius = Schema.Schema.Type<typeof RadiusE>
+
 export function calculateViewportRadius(viewport: {
   northeast: LatLong
   southwest: LatLong

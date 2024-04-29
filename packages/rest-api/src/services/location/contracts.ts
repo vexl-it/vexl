@@ -1,83 +1,79 @@
-import {LocationPlaceId} from '@vexl-next/domain/src/general/offers'
-import {Latitude, Longitude} from '@vexl-next/domain/src/utility/geoCoordinates'
-import {z} from 'zod'
+import {Schema} from '@effect/schema'
+import {LocationPlaceIdE} from '@vexl-next/domain/src/general/offers'
+import {
+  LatitudeE,
+  LongitudeE,
+} from '@vexl-next/domain/src/utility/geoCoordinates'
 
-export const GetLocationSuggestionsRequest = z.object({
-  count: z
-    .string()
-    .default('10')
-    // Not nice, well 🤷‍♂️... https://github.com/honojs/middleware/issues/98
-    .transform((e) => +e)
-    .pipe(z.number().int()),
-  phrase: z.string().min(1),
-  lang: z.string().min(2),
-})
-export type GetLocationSuggestionsRequest = z.TypeOf<
-  typeof GetLocationSuggestionsRequest
->
+export class GetLocationSuggestionsRequest extends Schema.Class<GetLocationSuggestionsRequest>(
+  'GetLocationSuggestionsRequest'
+)({
+  // count: Schema.NumberFromString.pipe(
+  //   Schema.int(),
+  //   Schema.positive(),
+  //   Schema.optional({default: () => 10})
+  // ),
+  phrase: Schema.String,
+  lang: Schema.String.pipe(Schema.minLength(2)),
+}) {}
 
-export const LocationData = z.object({
-  placeId: LocationPlaceId,
-  suggestFirstRow: z.string(),
-  suggestSecondRow: z.string(),
-  latitude: Latitude,
-  longitude: Longitude,
-  viewport: z.object({
-    northeast: z.object({
-      latitude: Latitude,
-      longitude: Longitude,
+export class LocationData extends Schema.Class<LocationData>('LocationData')({
+  placeId: LocationPlaceIdE,
+  suggestFirstRow: Schema.String,
+  suggestSecondRow: Schema.String,
+  latitude: LatitudeE,
+  longitude: LongitudeE,
+  viewport: Schema.Struct({
+    northeast: Schema.Struct({
+      latitude: LatitudeE,
+      longitude: LongitudeE,
     }),
-    southwest: z.object({
-      latitude: Latitude,
-      longitude: Longitude,
+    southwest: Schema.Struct({
+      latitude: LatitudeE,
+      longitude: LongitudeE,
     }),
   }),
-})
+}) {}
 
-export type LocationData = z.TypeOf<typeof LocationData>
-
-export const LocationSuggestion = z.object({
+export class LocationSuggestion extends Schema.Class<LocationSuggestion>(
+  'LocationSuggestion'
+)({
   userData: LocationData,
-})
+}) {}
 
-export type LocationSuggestion = z.TypeOf<typeof LocationSuggestion>
+export class GetLocationSuggestionsResponse extends Schema.Class<GetLocationSuggestionsResponse>(
+  'GetLocationSuggestionsResponse'
+)({
+  result: Schema.Array(LocationSuggestion),
+}) {}
 
-export const GetLocationSuggestionsResponse = z.object({
-  result: z.array(LocationSuggestion),
-})
-export type GetLocationSuggestionsResponse = z.TypeOf<
-  typeof GetLocationSuggestionsResponse
->
+export class GetGeocodedCoordinatesRequest extends Schema.Class<GetGeocodedCoordinatesRequest>(
+  'GetGeocodedCoordinatesRequest'
+)({
+  latitude: Schema.NumberFromString.pipe(Schema.compose(LatitudeE)),
+  longitude: Schema.NumberFromString.pipe(Schema.compose(LongitudeE)),
+  lang: Schema.String.pipe(Schema.minLength(2)),
+}) {}
 
-export const GetGeocodedCoordinatesRequest = z.object({
-  latitude: Latitude,
-  longitude: Longitude,
-  lang: z.string().min(2),
-})
-export type GetGeocodedCoordinatesRequest = z.TypeOf<
-  typeof GetGeocodedCoordinatesRequest
->
-
-export const GetGeocodedCoordinatesResponse = z.object({
-  placeId: LocationPlaceId,
-  address: z.string(),
-  latitude: Latitude,
-  longitude: Longitude,
-  viewport: z.object({
-    northeast: z.object({
-      latitude: Latitude,
-      longitude: Longitude,
+export class GetGeocodedCoordinatesResponse extends Schema.Class<GetGeocodedCoordinatesResponse>(
+  'GetGeocodedCoordinatesResponse'
+)({
+  placeId: LocationPlaceIdE,
+  address: Schema.String,
+  latitude: LatitudeE,
+  longitude: LongitudeE,
+  viewport: Schema.Struct({
+    northeast: Schema.Struct({
+      latitude: LatitudeE,
+      longitude: LongitudeE,
     }),
-    southwest: z.object({
-      latitude: Latitude,
-      longitude: Longitude,
+    southwest: Schema.Struct({
+      latitude: LatitudeE,
+      longitude: LongitudeE,
     }),
   }),
-})
-export type GetGeocodedCoordinatesResponse = z.TypeOf<
-  typeof GetGeocodedCoordinatesResponse
->
+}) {}
 
-export interface LocationNotFoundError {
-  _tag: 'LocationNotFoundError'
-}
+export class LocationNotFoundError extends Schema.TaggedError<LocationNotFoundError>(
+  'LocationNotFoundError'
+)('LocationNotFoundError', {}) {}

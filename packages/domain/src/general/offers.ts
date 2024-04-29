@@ -1,4 +1,6 @@
+import {Schema} from '@effect/schema'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
+import {Brand} from 'effect'
 import {randomUUID} from 'node:crypto'
 import {z} from 'zod'
 import {FcmToken} from '../utility/FcmToken.brand'
@@ -98,8 +100,16 @@ const OfferLocationDeprecated = z.object({
   city: z.string(),
 })
 
-export const LocationPlaceId = z.string().brand<'LocationPlaceId'>()
-export type LocationPlaceId = z.TypeOf<typeof LocationPlaceId>
+export const LocationPlaceId = z
+  .string()
+  .transform((v) =>
+    Brand.nominal<typeof v & Brand.Brand<'LocationPlaceId'>>()(v)
+  )
+export const LocationPlaceIdE = Schema.String.pipe(
+  Schema.brand('LocationPlaceId')
+)
+
+export type LocationPlaceId = Schema.Schema.Type<typeof LocationPlaceIdE>
 
 export const OfferLocation = z
   .unknown()

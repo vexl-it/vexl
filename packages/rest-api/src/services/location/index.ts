@@ -6,16 +6,16 @@ import {type PlatformName} from '../../PlatformName'
 import {type ServiceUrl} from '../../ServiceUrl.brand'
 import {type GetUserSessionCredentials} from '../../UserSessionCredentials.brand'
 import {
-  axiosCallWithValidation,
+  axiosCallWithValidationSchema,
   createAxiosInstanceWithAuthAndLogging,
   type LoggingFunction,
 } from '../../utils'
 import {
   GetGeocodedCoordinatesResponse,
   GetLocationSuggestionsResponse,
+  LocationNotFoundError,
   type GetGeocodedCoordinatesRequest,
   type GetLocationSuggestionsRequest,
-  type LocationNotFoundError,
 } from './contracts'
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
@@ -51,7 +51,7 @@ export function privateApi({
       signal?: GenericAbortSignal
     ) => {
       return pipe(
-        axiosCallWithValidation(
+        axiosCallWithValidationSchema(
           axiosInstance,
           {
             url: '/suggest',
@@ -64,9 +64,7 @@ export function privateApi({
         TE.mapLeft((e) => {
           if (e._tag === 'BadStatusCodeError') {
             if (e.response.status === 404) {
-              return {
-                _tag: 'LocationNotFoundError',
-              } satisfies LocationNotFoundError
+              return new LocationNotFoundError()
             }
           }
           return e
@@ -78,7 +76,7 @@ export function privateApi({
       signal?: AbortSignal
     ) => {
       return pipe(
-        axiosCallWithValidation(
+        axiosCallWithValidationSchema(
           axiosInstance,
           {
             url: '/geocode',
@@ -91,9 +89,7 @@ export function privateApi({
         TE.mapLeft((e) => {
           if (e._tag === 'BadStatusCodeError') {
             if (e.response.status === 404) {
-              return {
-                _tag: 'LocationNotFoundError',
-              } satisfies LocationNotFoundError
+              return new LocationNotFoundError()
             }
           }
           return e

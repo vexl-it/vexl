@@ -36,7 +36,6 @@ export const LocationSearchMolecule = molecule((_, getScope) => {
       return await pipe(
         get(privateApiAtom).location.getLocationSuggestions(
           {
-            count: 10,
             phrase: query,
             lang: getCurrentLocale(),
           },
@@ -52,7 +51,8 @@ export const LocationSearchMolecule = molecule((_, getScope) => {
     if (searchResults.state === 'loading') return []
     return pipe(
       searchResults.either,
-      E.getOrElseW(() => [])
+      E.getOrElseW(() => []),
+      (one) => [...one]
     )
   })
   const searchResultsAtomsAtom = splitAtom(searchResultsOrEmptyArrayAtom)

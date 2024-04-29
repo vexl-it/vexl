@@ -3,13 +3,15 @@
     "target": "ESNext",
     "module": "ESNext",
     "moduleResolution": "node",
-    "rootDir": "./src",
+    "rootDir": ".",
     "outDir": "./dist",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "noImplicitAny": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "checkJs": false,
+    "allowJs": true
   },
   "ts-node": {
     "esm": true,

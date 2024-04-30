@@ -10637,6 +10637,7 @@ __metadata:
     "@types/react": ~18.2.45
     "@types/react-dom": ^18
     "@types/seed-random": ^2
+    "@types/text-encoding": ^0
     "@types/url-parse": ^1
     "@types/uuid": ^9
     "@typescript-eslint/eslint-plugin": ^6.7.3
@@ -10734,6 +10735,7 @@ __metadata:
     seed-random: ^2.2.0
     set-operations: ^2.0.2
     tamagui: ^1.72.3
+    text-encoding: ^0.7.0
     ts-node: ^10.9.1
     typescript: ^5.3.0
     url-parse: ^1.5.10
@@ -28769,6 +28771,13 @@ __metadata:
     glob: ^7.1.4
     minimatch: ^3.0.4
   checksum: 3b34a3d77165a2cb82b34014b3aba93b1c4637a5011807557dc2f3da826c59975a5ccad765721c4648b39817e3472789f9b0fa98fc854c5c1c7a1e632aacdc28
+  languageName: node
+  linkType: hard
+
+"text-encoding@npm:^0.7.0":
+  version: 0.7.0
+  resolution: "text-encoding@npm:0.7.0"
+  checksum: b6109a843fb1b8748b32e1ecd6df74d370f46c13ac136bcb6ca15db70209bb0b8ec1f296ebb4b0dd9961150e205dcc044b89f8cf7657f6faef78c7569a2a81bc
   languageName: node
   linkType: hard
 

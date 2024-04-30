@@ -121,6 +121,7 @@
     "seed-random": "^2.2.0",
     "set-operations": "^2.0.2",
     "tamagui": "^1.72.3",
+    "text-encoding": "^0.7.0",
     "url-parse": "^1.5.10",
     "zod": "^3.22.3"
   },
@@ -139,6 +140,7 @@
     "@types/react": "~18.2.45",
     "@types/react-dom": "^18",
     "@types/seed-random": "^2",
+    "@types/text-encoding": "^0",
     "@types/url-parse": "^1",
     "@types/uuid": "^9",
     "@typescript-eslint/eslint-plugin": "^6.7.3",

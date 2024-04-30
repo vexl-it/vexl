@@ -6,6 +6,8 @@ import {type FirebaseMessagingTypes} from '@react-native-firebase/messaging'
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {sha256} from '@vexl-next/cryptography/src/operations/sha'
 import {type Chat} from '@vexl-next/domain/src/general/messaging'
+import {ChatNotificationData} from '@vexl-next/domain/src/general/notifications'
+import {Option} from 'effect'
 import {getDefaultStore} from 'jotai'
 import {useCallback} from 'react'
 import decodeNotificationPreviewAction from '../../state/chat/atoms/decodeChatNotificationPreviewActionAtom'
@@ -13,7 +15,6 @@ import {translationAtom} from '../localization/I18nProvider'
 import notEmpty from '../notEmpty'
 import reportError from '../reportError'
 import {useAppState} from '../useAppState'
-import {ChatNotificationData} from './ChatNotificationData'
 import {getChannelForMessages} from './notificationChannels'
 
 function generateGroupId(chat: {
@@ -28,14 +29,14 @@ const REQUEST_GROUP_ID = 'request-group-id'
 async function getRequestNotifications(): Promise<DisplayedNotification[]> {
   const displayedNotifications = await notifee.getDisplayedNotifications()
   return displayedNotifications.filter((notification) => {
-    const notificationDataVerification = ChatNotificationData.safeParse(
+    const notificationDataVerification = ChatNotificationData.parseUnkownOption(
       notification.notification.data
     )
-    if (!notificationDataVerification.success) {
+    if (notificationDataVerification._tag === 'None') {
       return false
     }
 
-    return notificationDataVerification.data.type === 'REQUEST_MESSAGING'
+    return notificationDataVerification.value.type === 'REQUEST_MESSAGING'
   })
 }
 
@@ -49,13 +50,13 @@ async function getNotificationsForChat({
   const displayedNotifications = await notifee.getDisplayedNotifications()
 
   return displayedNotifications.filter((notification) => {
-    const notificationDataVerification = ChatNotificationData.safeParse(
+    const notificationDataVerification = ChatNotificationData.parseUnkownOption(
       notification.notification.data
     )
-    if (!notificationDataVerification.success) {
+    if (notificationDataVerification._tag === 'None') {
       return false
     }
-    const notificationData = notificationDataVerification.data
+    const notificationData = notificationDataVerification.value
 
     return (
       notificationData.inbox === inbox && notificationData.sender === sender
@@ -66,10 +67,10 @@ async function getNotificationsForChat({
 export async function showChatNotification(
   remoteMessage: FirebaseMessagingTypes.RemoteMessage
 ): Promise<void> {
-  const notificationDataVerification = ChatNotificationData.safeParse(
+  const notificationDataVerification = ChatNotificationData.parseUnkownOption(
     remoteMessage.data
   )
-  if (!notificationDataVerification.success) {
+  if (!Option.isSome(notificationDataVerification)) {
     reportError(
       'warn',
       new Error('Unable to parse notification data for chat notification'),
@@ -78,7 +79,7 @@ export async function showChatNotification(
     return
   }
 
-  const notificationData = notificationDataVerification.data
+  const notificationData = notificationDataVerification.value
   if (
     notificationData.type === 'VERSION_UPDATE' ||
     notificationData.type === 'FCM_CYPHER_UPDATE'

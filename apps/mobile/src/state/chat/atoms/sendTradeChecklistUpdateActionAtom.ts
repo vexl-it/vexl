@@ -77,6 +77,9 @@ export default function createSubmitChecklistUpdateActionAtom(
           senderKeypair: chatWithMessages.chat.inbox.privateKey,
           receiverPublicKey: chatWithMessages.chat.otherSide.publicKey,
           message,
+          notificationApi: api.notification,
+          theirFcmCypher: chatWithMessages.chat.otherSideFcmCypher,
+          otherSideVersion: chatWithMessages.chat.otherSideVersion,
         })
       }),
       TE.map((message): ChatMessageWithState => {

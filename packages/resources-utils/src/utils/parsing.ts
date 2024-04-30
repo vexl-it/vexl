@@ -1,4 +1,5 @@
 import {toError, type BasicError} from '@vexl-next/domain/src/utility/errors'
+import {Effect} from 'effect'
 import * as E from 'fp-ts/Either'
 import {flow} from 'fp-ts/function'
 import {type TypeOf, type ZodError, type ZodType} from 'zod'
@@ -33,6 +34,7 @@ export type JsonParseError = BasicError<'JsonParseError'>
 export function parseJson(json: string): E.Either<JsonParseError, any> {
   return E.tryCatch(() => JSON.parse(json), toError('JsonParseError'))
 }
+
 export type JsonStringifyError = BasicError<'JsonStringifyError'>
 
 export function stringifyToJson(
@@ -48,4 +50,14 @@ export function stringifyToPrettyJson(
     () => JSON.stringify(data, null, 2),
     toError('JsonStringifyError')
   )
+}
+
+export function stringifyE(
+  data: unknown,
+  {pretty}: {pretty: boolean} | undefined = {pretty: false}
+): Effect.Effect<string, JsonStringifyError> {
+  return Effect.try({
+    try: () => (pretty ? JSON.stringify(data, null, 2) : JSON.stringify(data)),
+    catch: toError('JsonStringifyError'),
+  })
 }

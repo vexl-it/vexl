@@ -1,4 +1,5 @@
 import * as Sentry from '@sentry/react-native'
+import {initReportError} from '@vexl-next/resources-utils/src/reportErrorFromResourcesUtils'
 import {toExtraWithRemovedSensitiveData} from './removeSensitiveData'
 
 export type LogLvl = 'info' | 'warn' | 'error' | 'fatal'
@@ -48,3 +49,5 @@ function reportError(
 }
 
 export default reportError
+
+initReportError(reportError)

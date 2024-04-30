@@ -35,6 +35,8 @@ const sendRequestActionAtom = atom(
       TE.bind('message', ({encryptedToken}) =>
         sendMessagingRequest({
           text,
+          notificationApi: api.notification,
+          theirFcmCypher: originOffer.offerInfo.publicPart.fcmCypher,
           api: api.chat,
           fromKeypair: session.privateKey,
           myVersion: version,

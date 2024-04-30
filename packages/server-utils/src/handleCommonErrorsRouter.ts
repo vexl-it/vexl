@@ -8,7 +8,7 @@ import {
 import {type InvalidSessionError} from './ServerUserSession'
 import {type UrlParamsError} from './schemaUrlQuery'
 
-type CachedErrors =
+type ErrorsToCatch =
   | InvalidSessionError
   | Http.body.BodyError
   | ParseError
@@ -18,7 +18,7 @@ type CachedErrors =
   | UrlParamsError
 
 const handleCommonErrorsRouter = <C>(
-  r: Http.router.Router<CachedErrors, C>
+  r: Http.router.Router<ErrorsToCatch, C>
 ): Http.router.Router<Http.body.BodyError, C> =>
   Http.router.catchAll(r, (e) => {
     if (e._tag === 'InvalidSessionError') {

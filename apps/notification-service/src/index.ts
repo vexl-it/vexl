@@ -42,7 +42,7 @@ const AppLive = HttpLive.pipe(
   Layer.provide(
     Layer.effect(
       ServerUserSessionConfig,
-      EnvironmentConstants.SECRET_KEY.pipe(
+      EnvironmentConstants.SIGNATURE_PUBLIC_KEY.pipe(
         Effect.map((secretKey) => ({secretPublicKey: secretKey}))
       )
     )

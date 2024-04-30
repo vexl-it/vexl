@@ -56,7 +56,9 @@ const AppLive = HttpLive.pipe(
   Http.server.withLogAddress,
   Layer.provide(ServerLive),
   Layer.provide(
-    ServerUserSessionConfig.layerFromEffect(EnvironmentConstants.SECRET_PUBKEY)
+    ServerUserSessionConfig.layerFromEffect(
+      EnvironmentConstants.SIGNATURE_PUBLIC_KEY
+    )
   ),
   Layer.provide(
     Layer.unwrapEffect(

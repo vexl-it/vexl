@@ -15,11 +15,13 @@ import ProductAndOtherOfferColumns from './components/ProductAndOtherOfferColumn
 function OfferInfoPreview({
   isMine,
   offer,
+  onGrayBackground,
   negative,
   reduceDescriptionLength,
 }: {
   isMine?: boolean
   offer: OfferInfo
+  onGrayBackground?: boolean
   negative?: boolean
   reduceDescriptionLength?: boolean
 }): JSX.Element {
@@ -42,7 +44,7 @@ function OfferInfoPreview({
           <Stack
             ai="center"
             jc="center"
-            bc="$greyAccent5"
+            bc={onGrayBackground ? '$greyAccent3' : '$greyAccent5'}
             py="$2"
             px="$3"
             br="$3"

@@ -15,7 +15,6 @@ import {
 } from '../../../state/chat/utils/offerStates'
 import {createSingleOfferReportedFlagAtom} from '../../../state/marketplace/atoms/offersState'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
-import {friendLevelBannerPreferenceAtom} from '../../../utils/preferences'
 import randomName from '../../../utils/randomName'
 import {offerRerequestLimitDaysAtom} from '../../../utils/remoteConfig/atoms'
 import useSafeGoBack from '../../../utils/useSafeGoBack'
@@ -23,14 +22,12 @@ import Button from '../../Button'
 import ButtonWithPressTimeout from '../../ButtonWithPressTimeout'
 import CommonFriends from '../../CommonFriends'
 import IconButton from '../../IconButton'
-import Info from '../../Info'
 import InfoSquare from '../../InfoSquare'
 import OfferRequestTextInput from '../../OfferRequestTextInput'
 import OfferWithBubbleTip from '../../OfferWithBubbleTip'
 import ScreenTitle from '../../ScreenTitle'
 import closeSvg from '../../images/closeSvg'
 import {useReportOfferHandleUI} from '../api'
-import showCommonFriendsExplanationUIActionAtom from '../atoms'
 import flagSvg from '../images/flagSvg'
 import RerequestInfo from './RerequestInfo'
 
@@ -55,10 +52,6 @@ function OfferInfo({
     offerPublicKey: offer.offerInfo.publicPart.offerPublicKey,
   })
 
-  const showCommonFriendsExplanationUIAction = useSetAtom(
-    showCommonFriendsExplanationUIActionAtom
-  )
-
   const spokenLanguagesText = useMemo(
     () =>
       offer.offerInfo.publicPart.spokenLanguages
@@ -79,10 +72,6 @@ function OfferInfo({
 
     return canChatBeRequested(chatForOffer, offerRerequestLimitDays)
   }, [chatForOffer, offerRerequestLimitDays])
-
-  const onWhatDoesThisMeanPressed = useCallback(() => {
-    void showCommonFriendsExplanationUIAction({offer})
-  }, [showCommonFriendsExplanationUIAction, offer])
 
   const onRequestPressed = useCallback(() => {
     if (!text.trim()) return
@@ -115,12 +104,6 @@ function OfferInfo({
   const showRequestButton =
     !chatForOffer || requestPossibleInfo.canBeRerequested
 
-  const friendLevel = (() => {
-    if (offer.offerInfo.privatePart.friendLevel.includes('FIRST_DEGREE'))
-      return t('offer.directFriend')
-    return t('offer.friendOfFriend')
-  })()
-
   return (
     <Stack f={1} mx="$2" my="$4">
       <ScreenTitle text={t('offer.title')}>
@@ -135,21 +118,16 @@ function OfferInfo({
         )}
         <IconButton variant="dark" icon={closeSvg} onPress={goBack} />
       </ScreenTitle>
-      <ScrollView>
+      <ScrollView showsVerticalScrollIndicator={false}>
         <YStack space="$2" mb="$2">
           <OfferWithBubbleTip
             negative={!requestPossibleInfo.canBeRerequested}
             offer={offer}
           />
           <CommonFriends
-            variant="dark"
             contactsHashes={offer.offerInfo.privatePart.commonFriends}
-          />
-          <Info
-            visibleStateAtom={friendLevelBannerPreferenceAtom}
-            text={t('common.whatDoesThisMean', {term: friendLevel})}
-            actionButtonText={t('common.learnMore')}
-            onActionPress={onWhatDoesThisMeanPressed}
+            offer={offer}
+            variant="dark"
           />
           {offer.offerInfo.publicPart.spokenLanguages.length > 0 && (
             <InfoSquare>
@@ -167,34 +145,35 @@ function OfferInfo({
           )}
         </YStack>
       </ScrollView>
-
-      {showRequestButton ? (
-        <ButtonWithPressTimeout
-          disabled={!text.trim()}
-          onPress={onRequestPressed}
-          variant="secondary"
-          text={t('offer.sendRequest')}
-        />
-      ) : (
-        <>
-          {requestState === 'cancelled' || requestState === 'deleted' ? (
-            <RerequestInfo chat={chatForOffer} />
-          ) : (
-            <Button
-              onPress={() => {
-                if (!chatForOffer) return
-                navigation.navigate('ChatDetail', {
-                  otherSideKey: chatForOffer.chat.otherSide.publicKey,
-                  inboxKey:
-                    chatForOffer.chat.inbox.privateKey.publicKeyPemBase64,
-                })
-              }}
-              variant="primary"
-              text={t('offer.goToChat')}
-            />
-          )}
-        </>
-      )}
+      <Stack pt="$2">
+        {showRequestButton ? (
+          <ButtonWithPressTimeout
+            disabled={!text.trim()}
+            onPress={onRequestPressed}
+            variant="secondary"
+            text={t('offer.sendRequest')}
+          />
+        ) : (
+          <>
+            {requestState === 'cancelled' || requestState === 'deleted' ? (
+              <RerequestInfo chat={chatForOffer} />
+            ) : (
+              <Button
+                onPress={() => {
+                  if (!chatForOffer) return
+                  navigation.navigate('ChatDetail', {
+                    otherSideKey: chatForOffer.chat.otherSide.publicKey,
+                    inboxKey:
+                      chatForOffer.chat.inbox.privateKey.publicKeyPemBase64,
+                  })
+                }}
+                variant="primary"
+                text={t('offer.goToChat')}
+              />
+            )}
+          </>
+        )}
+      </Stack>
     </Stack>
   )
 }

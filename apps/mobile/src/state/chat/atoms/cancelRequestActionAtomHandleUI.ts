@@ -80,7 +80,7 @@ const cancelRequestActionAtomHandleUI = atom(
               positiveButtonText: t('messages.cancelRequestDialog.yes'),
             },
           ],
-          variant: 'info',
+          variant: 'danger',
         })
       ),
       TE.chainW(() => {

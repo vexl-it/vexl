@@ -49,6 +49,9 @@ export default function sendMessageActionAtom(
             api: api.chat,
             senderKeypair: chat.inbox.privateKey,
             receiverPublicKey: chat.otherSide.publicKey,
+            notificationApi: api.notification,
+            theirFcmCypher: chat.otherSideFcmCypher,
+            otherSideVersion: chat.otherSideVersion,
           })
         ),
         TE.match(

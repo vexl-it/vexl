@@ -63,6 +63,9 @@ export const sendUpdateNoticeMessageActionAtom = atom(
         senderKeypair: chat.chat.inbox.privateKey,
         receiverPublicKey: chat.chat.otherSide.publicKey,
         message: messageToSend,
+        notificationApi: api.notification,
+        theirFcmCypher: chat.chat.otherSideFcmCypher,
+        otherSideVersion: chat.chat.otherSideVersion,
       }),
       TE.map(() => {
         set(

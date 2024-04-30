@@ -61,6 +61,9 @@ export default function deleteChatActionAtom(
             senderKeypair: chat.inbox.privateKey,
             receiverPublicKey: chat.otherSide.publicKey,
             message: messageToSend,
+            theirFcmCypher: chat.otherSideFcmCypher,
+            notificationApi: api.notification,
+            otherSideVersion: chat.otherSideVersion,
           })
         : TE.right({}),
       TE.matchW(

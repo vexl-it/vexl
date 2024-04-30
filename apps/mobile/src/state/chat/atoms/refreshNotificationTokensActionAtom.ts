@@ -84,6 +84,9 @@ export const sendFcmCypherUpdateMessageActionAtom = atom(
             senderKeypair: chatWithMessages.chat.inbox.privateKey,
             receiverPublicKey: chatWithMessages.chat.otherSide.publicKey,
             message: messageToSend,
+            notificationApi: get(privateApiAtom).notification,
+            theirFcmCypher: chatWithMessages.chat.otherSideFcmCypher,
+            otherSideVersion: chatWithMessages.chat.otherSideVersion,
           })
         ),
         TE.map(({fcmTokenInfo}) => {

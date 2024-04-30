@@ -41,32 +41,37 @@ function OfferDetailScreen({
 
   return (
     <RootContainer f={1} bc="$black">
-      <MarketplaceMapContainer />
-      <KeyboardAvoidingView>
-        {isSome(offer) ? (
-          <OfferInfo navigation={navigation} offer={offer.value} />
-        ) : (
-          <YStack
-            f={1}
-            p="$2"
-            pt="0"
-            space="$5"
-            alignItems="center"
-            justifyContent="center"
-          >
-            <Text color="$white" fs={20} ff="$body600" textAlign="center">
-              {t('offer.offerNotFound')}
-            </Text>
-            <Button
-              size="small"
-              fullWidth
-              variant="primary"
-              onPress={safeGoBack}
-              text={t('common.back')}
-            />
-          </YStack>
-        )}
-      </KeyboardAvoidingView>
+      <>
+        {isSome(offer) &&
+          offer.value.offerInfo.publicPart.locationState.includes(
+            'IN_PERSON'
+          ) && <MarketplaceMapContainer />}
+        <KeyboardAvoidingView>
+          {isSome(offer) ? (
+            <OfferInfo navigation={navigation} offer={offer.value} />
+          ) : (
+            <YStack
+              f={1}
+              p="$2"
+              pt="0"
+              space="$5"
+              alignItems="center"
+              justifyContent="center"
+            >
+              <Text color="$white" fs={20} ff="$body600" textAlign="center">
+                {t('offer.offerNotFound')}
+              </Text>
+              <Button
+                size="small"
+                fullWidth
+                variant="primary"
+                onPress={safeGoBack}
+                text={t('common.back')}
+              />
+            </YStack>
+          )}
+        </KeyboardAvoidingView>
+      </>
     </RootContainer>
   )
 }

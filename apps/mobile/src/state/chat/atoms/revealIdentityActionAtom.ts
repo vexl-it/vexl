@@ -126,6 +126,9 @@ export default function revealIdentityActionAtom(
             senderKeypair: chat.inbox.privateKey,
             receiverPublicKey: chat.otherSide.publicKey,
             message,
+            notificationApi: api.notification,
+            theirFcmCypher: chat.otherSideFcmCypher,
+            otherSideVersion: chat.otherSideVersion,
           })
         ),
 

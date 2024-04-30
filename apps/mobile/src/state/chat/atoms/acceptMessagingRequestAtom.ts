@@ -54,12 +54,15 @@ const acceptMessagingRequestAtom = atom(
           text,
           approve,
           api: api.chat,
+          theirFcmCypher: chat.otherSideFcmCypher,
+          notificationApi: api.notification,
           fromKeypair: chat.inbox.privateKey,
           toPublicKey: chat.otherSide.publicKey,
           myVersion: version,
           myFcmCypher:
             myFcmCypher._tag === 'Some' ? myFcmCypher.value.cypher : undefined,
           lastReceivedFcmCypher: chat.otherSideFcmCypher,
+          otherSideVersion: chat.otherSideVersion,
         })
       ),
       TE.mapLeft((error) => {

@@ -1,12 +1,11 @@
+import {Schema} from '@effect/schema'
 import notifee, {EventType, type Notification} from '@notifee/react-native'
 import {useNavigation} from '@react-navigation/native'
-import * as E from 'fp-ts/Either'
-import {pipe} from 'fp-ts/function'
+import {ChatNotificationData} from '@vexl-next/domain/src/general/notifications'
+import {Either} from 'effect'
 import {atom, useStore} from 'jotai'
 import {useCallback, useEffect} from 'react'
-import {safeParse} from '../utils/fpUtils'
 import {isOnMessagesList, isOnSpecificChat} from '../utils/navigation'
-import {ChatNotificationData} from '../utils/notifications/ChatNotificationData'
 import {
   NEW_CONTACTS_TO_SYNC,
   NEW_OFFERS_IN_MARKETPLACE,
@@ -30,11 +29,11 @@ function useReactOnNotificationOpen(): (notification: Notification) => void {
       } else if (notification.data?.type === NEW_CONTACTS_TO_SYNC) {
         navigation.navigate('SetContacts', {})
       } else if (notification.data?.inbox && notification.data?.sender) {
-        pipe(
-          notification.data,
-          safeParse(ChatNotificationData),
-          E.match(
-            (l) => {
+        Schema.decodeUnknownEither(ChatNotificationData)(
+          notification.data
+        ).pipe(
+          Either.match({
+            onLeft: (l) => {
               reportError(
                 'error',
                 new Error('Error while opening chat from notification'),
@@ -46,7 +45,7 @@ function useReactOnNotificationOpen(): (notification: Notification) => void {
                 navigation.navigate('InsideTabs', {screen: 'Messages'})
               }
             },
-            (payload) => {
+            onRight: (payload) => {
               const keys = {
                 otherSideKey: payload.sender,
                 inboxKey: payload.inbox,
@@ -58,8 +57,8 @@ function useReactOnNotificationOpen(): (notification: Notification) => void {
 
               navigation.navigate('ChatDetail', keys)
               return 'ok'
-            }
-          )
+            },
+          })
         )
       }
     },

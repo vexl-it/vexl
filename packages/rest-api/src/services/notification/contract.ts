@@ -1,7 +1,10 @@
 import * as S from '@effect/schema/Schema'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
-import {FcmCypherE} from '@vexl-next/domain/src/general/notifications'
+import {
+  EncryptedNotificationPayload,
+  FcmCypherE,
+} from '@vexl-next/domain/src/general/notifications'
 import {z} from 'zod'
 
 export const GetPublicKeyResponse = z.object({
@@ -18,7 +21,7 @@ export class IssueNotificationRequest extends S.Class<IssueNotificationRequest>(
   'IssueNotificationRequest'
 )({
   fcmCypher: FcmCypherE,
-  messagePayload: S.String,
+  messagePayload: S.String.pipe(S.fromBrand(EncryptedNotificationPayload)),
 }) {}
 
 export class IssueNotificationResponse extends S.Class<IssueNotificationResponse>(

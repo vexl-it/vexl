@@ -22,7 +22,7 @@ const EnvironmentData = S.Struct({
   ),
   FCM_TOKEN_PUBLIC_KEY: PublicKeyPemBase64E,
   FCM_TOKEN_PRIVATE_KEY: PrivateKeyPemBase64E,
-  SECRET_KEY: PublicKeyPemBase64E,
+  SIGNATURE_PUBLIC_KEY: PublicKeyPemBase64E,
   FIREBASE_CREDENTIALS: S.parseJson({}),
 })
 

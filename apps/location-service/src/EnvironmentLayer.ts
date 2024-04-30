@@ -5,7 +5,7 @@ import {Effect, Layer} from 'effect'
 
 const EnvironmentData = Schema.Struct({
   GOOGLE_PLACES_API_KEY: Schema.String,
-  SECRET_PUBKEY: PublicKeyPemBase64E,
+  SIGNATURE_PUBLIC_KEY: PublicKeyPemBase64E,
   PORT: Schema.NumberFromString.pipe(
     Schema.int(),
     Schema.positive(),

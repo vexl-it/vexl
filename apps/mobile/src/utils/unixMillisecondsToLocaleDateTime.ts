@@ -13,12 +13,13 @@ export function setTimezoneOfUser(dateTime: DateTime): DateTime {
 }
 
 export default function unixMillisecondsToLocaleDateTime(
-  milisec: UnixMilliseconds
+  millis: UnixMilliseconds
 ): DateTime {
   if (!usersTimeZone) {
-    return DateTime.fromMillis(milisec)
+    return DateTime.fromMillis(millis)
   }
-  return DateTime.fromMillis(milisec, {zone: usersTimeZone}).setLocale(
+
+  return DateTime.fromMillis(millis, {zone: usersTimeZone}).setLocale(
     getCurrentLocale()
   )
 }

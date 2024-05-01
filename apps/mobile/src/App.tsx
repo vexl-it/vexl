@@ -10,6 +10,7 @@ import LoadingOverlayProvider from './components/LoadingOverlayProvider'
 import MaintenanceAndForceUpdateCheck from './components/MaintenanceAndForceUpdateCheck'
 import PreventScreenshots from './components/PreventScreenshots'
 import RootNavigation from './components/RootNavigation'
+import ToastNotification from './components/ToastNotification'
 import UploadingOfferProgressModal from './components/UploadingOfferProgressModal'
 import VersionMigrations from './components/VersionMigrations'
 import ThemeProvider from './utils/ThemeProvider'
@@ -50,6 +51,7 @@ function App(): JSX.Element {
           </MaintenanceAndForceUpdateCheck>
         </LoadingOverlayProvider>
         <AreYouSureDialog />
+        <ToastNotification />
       </NavigationContainer>
     </SafeAreaProvider>
   )

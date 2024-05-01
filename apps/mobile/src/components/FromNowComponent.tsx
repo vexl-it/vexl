@@ -1,8 +1,9 @@
 import {useNavigation} from '@react-navigation/native'
+import dayjs from 'dayjs'
+// import 'dayjs/locale/es'
 import {type DateTime} from 'luxon'
 import {useEffect, useState} from 'react'
 import {
-  getCurrentLocale,
   useTranslation,
   type TFunction,
 } from '../utils/localization/I18nProvider'
@@ -19,7 +20,8 @@ function getTimeToShow(date: DateTime, t: TFunction): string {
   if (Math.abs(date.diffNow(['seconds']).seconds) < 60) {
     return t('common.now')
   }
-  return date.toRelative({style: 'narrow', locale: getCurrentLocale()}) ?? ''
+
+  return dayjs().to(dayjs(date.toJSDate()))
 }
 
 function FromNowComponent({date}: {date: DateTime}): JSX.Element {

@@ -74,6 +74,7 @@
   "common.km": "km",
   "common.FIAT": "Fiat",
   "common.SATS": "SATS",
+  "common.copied": "Copied",
   "errorGettingSession.title": "Error starting Vexl",
   "errorGettingSession.text": "There was a problem loading your session ErrorCode: {{errorCode}}. Unable to start the app without erasing your data. Please contact support to try to resolve the issues or restart the app.",
   "errorGettingSession.contactSupport": "Contact support",

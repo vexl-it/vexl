@@ -10659,6 +10659,7 @@ __metadata:
     burnt: ^0.12.1
     compare-versions: ^6.1.0
     country-data: ^0.0.31
+    dayjs: ^1.11.11
     deep-equal: ^2.2.0
     effect: ^3.0.1
     entities: ~2.0.0
@@ -13963,6 +13964,13 @@ __metadata:
   version: 3.0.3
   resolution: "dateformat@npm:3.0.3"
   checksum: ca4911148abb09887bd9bdcd632c399b06f3ecad709a18eb594d289a1031982f441e08e281db77ffebcb2cbcbfa1ac578a7cbfbf8743f41009aa5adc1846ed34
+  languageName: node
+  linkType: hard
+
+"dayjs@npm:^1.11.11":
+  version: 1.11.11
+  resolution: "dayjs@npm:1.11.11"
+  checksum: 84788275aad8a87fee4f1ce4be08861df29687aae6b7b43dd65350118a37dda56772a3902f802cb2dc651dfed447a5a8df62d88f0fb900dba8333e411190a5d5
   languageName: node
   linkType: hard
 

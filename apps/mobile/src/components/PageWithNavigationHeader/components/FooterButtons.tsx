@@ -20,14 +20,14 @@ function FooterButtons(): JSX.Element | null {
     void dismissKeyboardAndResolveOnLayoutUpdate().then(onPress)
   }, [primaryFooterButtonState.onPress])
 
-  const onSecodaryButtonPress = useCallback(() => {
+  const onSecondaryButtonPress = useCallback(() => {
     const onPress = secondaryFooterButtonState.onPress
     if (!onPress) return
     void dismissKeyboardAndResolveOnLayoutUpdate().then(onPress)
   }, [secondaryFooterButtonState.onPress])
 
   return (
-    <XStack jc="space-around" space="$2">
+    <XStack jc="space-around" space="$2" pt="$1">
       {!primaryFooterButtonState.hidden && (
         <Button
           fullSize
@@ -43,7 +43,7 @@ function FooterButtons(): JSX.Element | null {
           fullSize
           disabled={secondaryFooterButtonState.disabled}
           size="medium"
-          onPress={onSecodaryButtonPress}
+          onPress={onSecondaryButtonPress}
           variant="secondary"
           text={secondaryFooterButtonState.text}
         />

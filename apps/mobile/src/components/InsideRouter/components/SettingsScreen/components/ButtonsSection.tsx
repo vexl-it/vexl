@@ -87,7 +87,7 @@ function Item({
                 <ItemText>{text}</ItemText>
               </Stack>
             ) : (
-              text
+              <Stack f={1}>{text}</Stack>
             ))}
         </XStack>
         {!!navigatesFurther && (

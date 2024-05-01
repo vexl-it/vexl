@@ -1,12 +1,14 @@
 import Clipboard from '@react-native-clipboard/clipboard'
 import {useMolecule} from 'bunshi/dist/react'
-import {useAtomValue} from 'jotai'
+import {useAtomValue, useSetAtom} from 'jotai'
 import {getTokens} from 'tamagui'
 import * as network from '../../../../../state/tradeChecklist/utils/network'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import Button from '../../../../Button'
+import {toastNotificationAtom} from '../../../../ToastNotification'
 import {chatMolecule} from '../../../atoms'
 import copySvg from '../../../images/copySvg'
+import checkIconSvg from '../../images/checkIconSvg'
 import VexlbotBubble from './VexlbotBubble'
 
 function TradeChecklistNetworkView(): JSX.Element | null {
@@ -16,6 +18,7 @@ function TradeChecklistNetworkView(): JSX.Element | null {
   const networkData = useAtomValue(tradeChecklistNetworkAtom)
   const otherSideData = useAtomValue(otherSideDataAtom)
   const networkDataToDisplay = network.getNetworkData(networkData)
+  const setToastNotification = useSetAtom(toastNotificationAtom)
 
   if (!networkDataToDisplay) return null
 
@@ -58,6 +61,10 @@ function TradeChecklistNetworkView(): JSX.Element | null {
               Clipboard.setString(
                 networkDataToDisplay.networkData.btcAddress ?? ''
               )
+              setToastNotification({
+                text: t('common.copied'),
+                icon: checkIconSvg,
+              })
             }}
             beforeIcon={copySvg}
             text={t('vexlbot.btcAddress')}

@@ -7,6 +7,9 @@ import * as translations from './translations'
 
 const {dev: devTranslation, ...prodTranslations} = translations
 
+// ⚠️⚠️
+// ⚠️ Warning: Remember to add language support also to useSetRelativeDateFormatting.ts when adding new language ⚠️
+// ⚠️⚠️
 export const supportedTranslations = {
   en: translations.en,
   de: translations.de,

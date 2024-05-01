@@ -7,11 +7,9 @@ import closeSvg from '../../../../images/closeSvg'
 import vexlbotSvg from '../../../images/vexlbotSvg'
 import checkIconSvg from '../../images/checkIconSvg'
 import clockIconSvg from '../../images/clockIconSvg'
-import editSvg from '../images/editSvg'
 
 interface Props {
   children?: ReactNode
-  onEditPress?: () => void
   status?: 'accepted' | 'pending'
   text?: string
   introText?: string
@@ -20,7 +18,6 @@ interface Props {
 
 function VexlbotBubble({
   children,
-  onEditPress,
   onCancelPress,
   text,
   introText,
@@ -76,11 +73,6 @@ function VexlbotBubble({
               {t('common.pending')}
             </Text>
           </XStack>
-        )}
-        {!!onEditPress && (
-          <TouchableOpacity onPress={onEditPress}>
-            <Image source={editSvg} />
-          </TouchableOpacity>
         )}
         {!!onCancelPress && (
           <TouchableOpacity onPress={onCancelPress}>

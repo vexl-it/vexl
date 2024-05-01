@@ -16,11 +16,16 @@ import {preferencesAtom} from '../../../../../utils/preferences'
 import Button from '../../../../Button'
 import {loadingOverlayDisplayedAtom} from '../../../../LoadingOverlayProvider'
 import {
+  toastNotificationAtom,
+  type ToastNotificationState,
+} from '../../../../ToastNotification'
+import {
   addAmountActionAtom,
   submitTradeChecklistUpdatesActionAtom,
 } from '../../../../TradeChecklistFlow/atoms/updatesToBeSentAtom'
 import {chatMolecule} from '../../../atoms'
 import copySvg from '../../../images/copySvg'
+import checkIconSvg from '../../images/checkIconSvg'
 import VexlbotBubble from './VexlbotBubble'
 
 function TradeChecklistAmountView(): JSX.Element | null {
@@ -50,6 +55,15 @@ function TradeChecklistAmountView(): JSX.Element | null {
   )
   const addAmount = useSetAtom(addAmountActionAtom)
   const btcPriceForTradeCurrency = useAtomValue(btcPriceForTradeCurrencyAtom)
+  const setToastNotification = useSetAtom(toastNotificationAtom)
+
+  const toastContent: ToastNotificationState = useMemo(
+    () => ({
+      text: t('common.copied'),
+      icon: checkIconSvg,
+    }),
+    [t]
+  )
 
   const btcPricePercentageDifference = useMemo(
     () =>
@@ -75,10 +89,28 @@ function TradeChecklistAmountView(): JSX.Element | null {
     submitTradeChecklistUpdates,
   ])
 
+  const onEditPress = useCallback(() => {
+    navigation.navigate('TradeChecklistFlow', {
+      screen: 'CalculateAmount',
+      params: {
+        amountData: {
+          ...amountData.received,
+          // on the side of receiver we need to map the type to custom but preserve it on side of creator (for edit trade price purposes)
+          tradePriceType:
+            amountData.received?.tradePriceType === 'your'
+              ? 'custom'
+              : amountData.received?.tradePriceType,
+        },
+      },
+      chatId,
+      inboxKey,
+    })
+  }, [amountData.received, chatId, inboxKey, navigation])
+
   if (!amountDataToDisplay?.amountData.btcAmount) return null
 
   const renderFooter = ((): JSX.Element | null => {
-    if (amountDataToDisplay.status === 'accepted') {
+    if (amountDataToDisplay.status !== 'pending') {
       return (
         <>
           {!!amountDataToDisplay.amountData.btcAmount && (
@@ -89,6 +121,7 @@ function TradeChecklistAmountView(): JSX.Element | null {
                 Clipboard.setString(
                   `${amountDataToDisplay.amountData.btcAmount}`
                 )
+                setToastNotification(toastContent)
               }}
               size="small"
               variant="primary"
@@ -110,6 +143,7 @@ function TradeChecklistAmountView(): JSX.Element | null {
                       : 0
                   }`
                 )
+                setToastNotification(toastContent)
               }}
               size="small"
               variant="primary"
@@ -124,6 +158,7 @@ function TradeChecklistAmountView(): JSX.Element | null {
                 Clipboard.setString(
                   `${amountDataToDisplay.amountData.fiatAmount}`
                 )
+                setToastNotification(toastContent)
               }}
               size="small"
               variant="primary"
@@ -139,14 +174,24 @@ function TradeChecklistAmountView(): JSX.Element | null {
       amountDataToDisplay.status === 'pending'
     ) {
       return (
-        <Button
-          fullWidth
-          disabled={!amountData?.received}
-          onPress={onAcceptButtonPress}
-          variant="secondary"
-          size="small"
-          text={t('common.accept')}
-        />
+        <XStack ai="center" jc="space-between" space="$2">
+          <Button
+            fullSize
+            disabled={!amountData?.received}
+            onPress={onEditPress}
+            variant="primary"
+            size="small"
+            text={t('common.change')}
+          />
+          <Button
+            fullSize
+            disabled={!amountData?.received}
+            onPress={onAcceptButtonPress}
+            variant="secondary"
+            size="small"
+            text={t('common.accept')}
+          />
+        </XStack>
       )
     }
 
@@ -161,28 +206,6 @@ function TradeChecklistAmountView(): JSX.Element | null {
           amountDataToDisplay.status === 'pending'
             ? undefined
             : amountDataToDisplay.status
-        }
-        onEditPress={
-          amountDataToDisplay.by === 'them' &&
-          amountDataToDisplay.status === 'pending'
-            ? () => {
-                navigation.navigate('TradeChecklistFlow', {
-                  screen: 'CalculateAmount',
-                  params: {
-                    amountData: {
-                      ...amountData.received,
-                      // on the side of receiver we need to map the type to custom but preserve it on side of creator (for edit trade price purposes)
-                      tradePriceType:
-                        amountData.received?.tradePriceType === 'your'
-                          ? 'custom'
-                          : amountData.received?.tradePriceType,
-                    },
-                  },
-                  chatId,
-                  inboxKey,
-                })
-              }
-            : undefined
         }
         introText={
           amountDataToDisplay.status !== 'accepted' &&

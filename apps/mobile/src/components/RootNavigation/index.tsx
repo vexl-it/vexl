@@ -11,6 +11,7 @@ import useHandleNotificationOpen from '../../state/useHandleNotificationOpen'
 import {useHandleReceivedNotifications} from '../../state/useHandleReceivedNotifications'
 import useHandleRefreshContactServiceAndOffers from '../../state/useHandleRefreshContactServiceAndOffers'
 import {useSetAppLanguageFromStore} from '../../state/useSetAppLanguageFromStore'
+import {useSetRelativeDateFormatting} from '../../state/useSetRelativeDateFormatting'
 import {useHandleDeepLink} from '../../utils/deepLinks'
 import {useHideInnactivityReminderNotificationsOnResume} from '../../utils/notifications/chatNotifications'
 import {useRefreshNotificationTokenOnResumeAssumeLoggedIn} from '../../utils/notifications/useRefreshNotificationTokenOnResumeAssumeLoggedIn'
@@ -59,6 +60,7 @@ function LoggedInHookGroup(): null {
   useRefreshContactsFromDeviceOnResume()
   useDecodePreviouslyUncompatibleMessagesOnMount()
   useSetAppLanguageFromStore()
+  useSetRelativeDateFormatting()
 
   return null
 }

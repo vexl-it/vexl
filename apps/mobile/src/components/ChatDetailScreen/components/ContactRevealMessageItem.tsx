@@ -15,10 +15,12 @@ import {useTranslation} from '../../../utils/localization/I18nProvider'
 import reportError from '../../../utils/reportError'
 import resolveLocalUri from '../../../utils/resolveLocalUri'
 import SvgImage from '../../Image'
+import {toastNotificationAtom} from '../../ToastNotification'
 import UserAvatar from '../../UserAvatar'
 import {chatMolecule} from '../atoms'
 import BigIconMessage from './BigIconMessage'
 import UserAvatarTouchableWrapper from './UserAvatarTouchableWrapper'
+import checkIconSvg from './images/checkIconSvg'
 
 function RevealedContactMessageItem({
   direction,
@@ -34,6 +36,7 @@ function RevealedContactMessageItem({
   const {otherSideDataAtom} = useMolecule(chatMolecule)
   const {image, userName} = useAtomValue(otherSideDataAtom)
   const addRevealedContact = useSetAtom(addContactWithUiFeedbackAtom)
+  const setToastNotification = useSetAtom(toastNotificationAtom)
 
   return (
     <BigIconMessage
@@ -45,6 +48,10 @@ function RevealedContactMessageItem({
         Clipboard.setString(
           message.message.deanonymizedUser?.fullPhoneNumber ?? ''
         )
+        setToastNotification({
+          text: t('common.copied'),
+          icon: checkIconSvg,
+        })
       }}
       onPress={() => {
         pipe(

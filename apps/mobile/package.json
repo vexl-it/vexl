@@ -55,6 +55,7 @@
     "burnt": "^0.12.1",
     "compare-versions": "^6.1.0",
     "country-data": "^0.0.31",
+    "dayjs": "^1.11.11",
     "deep-equal": "^2.2.0",
     "effect": "^3.0.1",
     "entities": "~2.0.0",

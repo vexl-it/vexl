@@ -23,10 +23,9 @@ import CancelSvg from '../images/cancelSvg'
 import sendSvg from '../images/sendSvg'
 import SendImageButton from './SendImageButton'
 
-const textInputInitialHeight = getTokens().space[10].val
-
 const styles = StyleSheet.create({
   textInput: {
+    height: 55,
     padding: 0,
     paddingLeft: getTokens().space[3].val,
     paddingRight: getTokens().space[2].val,
@@ -56,7 +55,10 @@ function ChatTextInput(): JSX.Element | null {
   const preferences = useAtomValue(preferencesAtom)
 
   const animatedStyle = useAnimatedStyle(() => {
-    return {opacity: withSpring(value || selectedImage ? 1 : 0)}
+    return {
+      marginRight: 5,
+      opacity: withSpring(value || selectedImage ? 1 : 0),
+    }
   }, [value, selectedImage])
 
   const sendText = useCallback(() => {
@@ -108,7 +110,7 @@ function ChatTextInput(): JSX.Element | null {
   return (
     <XStack space="$2" alignItems="center">
       {!!preferences.allowSendingImages && <SendImageButton />}
-      <Stack f={1} backgroundColor="$grey" borderRadius="$8">
+      <Stack f={1}>
         {!!replyToMessage && (
           <XStack
             borderRadius="$5"
@@ -129,7 +131,7 @@ function ChatTextInput(): JSX.Element | null {
                   ? otherSideData.userName
                   : t('common.you')}
               </Text>
-              <Text marginTop="$1" color="$main">
+              <Text fos={14} marginTop="$1" color="$main">
                 {truncate(replyToMessage.message.text, 100, '...')}
               </Text>
             </YStack>
@@ -155,35 +157,28 @@ function ChatTextInput(): JSX.Element | null {
             />
           </YStack>
         )}
-        <Stack
-          justifyContent="center"
-          minHeight={textInputInitialHeight}
-          py="$2"
-        >
-          <TextInput
-            multiline
-            textAlignVertical="center"
-            value={value}
-            onChangeText={setValue}
-            style={styles.textInput}
-            textColor="$white"
-            variant="greyOnBlack"
-            borderRadius="$8"
-            placeholder={t('messages.typeSomething')}
-            placeholderTextColor={getTokens().color.greyOnBlack.val}
-            rightElement={
-              <Animated.View style={animatedStyle}>
-                <IconButton
-                  oval
-                  variant="secondary"
-                  icon={sendSvg}
-                  iconFill={tokens.color.black.val}
-                  onPress={sendText}
-                />
-              </Animated.View>
-            }
-          />
-        </Stack>
+        <TextInput
+          multiline
+          textAlignVertical="center"
+          value={value}
+          onChangeText={setValue}
+          style={styles.textInput}
+          textColor="$white"
+          variant="greyOnBlack"
+          placeholder={t('messages.typeSomething')}
+          placeholderTextColor={getTokens().color.greyOnBlack.val}
+          rightElement={
+            <Animated.View style={animatedStyle}>
+              <IconButton
+                oval
+                variant="secondary"
+                icon={sendSvg}
+                iconFill={tokens.color.black.val}
+                onPress={sendText}
+              />
+            </Animated.View>
+          }
+        />
       </Stack>
     </XStack>
   )

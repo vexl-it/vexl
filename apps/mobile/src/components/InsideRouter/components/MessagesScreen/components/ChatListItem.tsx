@@ -107,9 +107,9 @@ function ChatListItem({dataAtom}: {dataAtom: Atom<ChatListData>}): JSX.Element {
                 />
                 {!!isUnread && (
                   <Stack
-                    w="$4"
-                    h="$4"
-                    borderRadius={8}
+                    w={12}
+                    h={12}
+                    borderRadius={6}
                     backgroundColor="$main"
                   />
                 )}

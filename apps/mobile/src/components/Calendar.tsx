@@ -5,6 +5,7 @@ import {
   type CalendarProps,
 } from 'react-native-calendars'
 import {type Theme} from 'react-native-calendars/src/types'
+import {getTokens} from 'tamagui'
 
 const styles = StyleSheet.create({
   header: {
@@ -14,20 +15,19 @@ const styles = StyleSheet.create({
 
 const calendarTheme: Theme = {
   calendarBackground: 'transparent',
-  dayTextColor: '#FFFFFF',
-  arrowColor: '#FFFFFF',
-  monthTextColor: '#FFFFFF',
-  selectedDayTextColor: '#FCCD6C',
+  dayTextColor: getTokens().color.white.val,
+  arrowColor: getTokens().color.white.val,
+  monthTextColor: getTokens().color.white.val,
+  selectedDayTextColor: getTokens().color.black.val,
   textDayFontWeight: '500',
   textMonthFontWeight: '500',
-  todayTextColor: '#FFFFFF',
-  agendaDayTextColor: '#FFFFFF',
-  textSectionTitleColor: '#FFFFFF',
+  todayTextColor: getTokens().color.white.val,
+  agendaDayTextColor: getTokens().color.white.val,
+  textSectionTitleColor: getTokens().color.white.val,
   textDayHeaderFontSize: 14,
   textDayFontSize: 14,
-  selectedDotColor: 'transparent',
-  selectedDayBackgroundColor: 'transparent',
-  textDisabledColor: '#A0A0AB',
+  selectedDayBackgroundColor: getTokens().color.main.val,
+  textDisabledColor: getTokens().color.greyAccent2.val,
 }
 
 export const REACT_NATIVE_CALENDARS_DATE_FORMAT = 'yyyy-MM-dd'

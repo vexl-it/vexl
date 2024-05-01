@@ -32,14 +32,16 @@ function ContactTypeAndCommonNumber({
         )}
       </Text>
       <Text color="$greyOnBlack">•</Text>
-      <Stack w={14} h={14}>
-        <Image source={friendsSvg} />
-      </Stack>
-      <Text color="$greyOnBlack">
-        {t('offer.numberOfCommon', {
-          number: numberOfCommonFriends,
-        })}
-      </Text>
+      <XStack ai="center" space="$1">
+        <Stack w={14} h={14}>
+          <Image source={friendsSvg} />
+        </Stack>
+        <Text color="$greyOnBlack">
+          {t('offer.numberOfCommon', {
+            number: numberOfCommonFriends,
+          })}
+        </Text>
+      </XStack>
     </XStack>
   )
 }

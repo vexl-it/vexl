@@ -22,11 +22,13 @@ import {useTranslation} from '../../../utils/localization/I18nProvider'
 import resolveLocalUri from '../../../utils/resolveLocalUri'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 import IconButton from '../../IconButton'
+import {toastNotificationAtom} from '../../ToastNotification'
 import {chatMolecule} from '../atoms'
 import copySvg from '../images/copySvg'
 import replyToSvg from '../images/replyToSvg'
 import formatChatTime from '../utils/formatChatTime'
 import {type MessagesListItem} from './MessageItem'
+import checkIconSvg from './images/checkIconSvg'
 
 const style = StyleSheet.create({
   image: {
@@ -128,6 +130,7 @@ function TextMessage({
   const setReplyToMessage = useSetAtom(replyToMessageAtom)
   const otherSideData = useAtomValue(otherSideDataAtom)
   const openImage = useSetAtom(openedImageUriAtom)
+  const setToastNotification = useSetAtom(toastNotificationAtom)
 
   const onPressResend = useCallback(() => {
     if (
@@ -150,8 +153,12 @@ function TextMessage({
   const onCopyPressed = useCallback(() => {
     if (messageItem.type !== 'message') return
     Clipboard.setString(messageItem.message.message.text)
+    setToastNotification({
+      text: t('common.copied'),
+      icon: checkIconSvg,
+    })
     hideExtended()
-  }, [messageItem, hideExtended])
+  }, [messageItem, setToastNotification, t, hideExtended])
 
   const onImagePressed = useCallback(() => {
     if (messageItem.type !== 'message') return

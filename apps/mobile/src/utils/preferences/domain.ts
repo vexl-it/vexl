@@ -1,4 +1,5 @@
 import {z} from 'zod'
+import {FiatOrSats} from '../../state/marketplace/domain'
 
 const NotificationPreferences = z.object({
   offer: z.boolean(),
@@ -21,6 +22,7 @@ export const Preferences = z.object({
   disableScreenshots: z.boolean().default(false),
   isDeveloper: z.boolean().default(false),
   appLanguage: z.string().optional(),
+  marketplaceFiatOrSatsCurrency: FiatOrSats.default('FIAT'),
 })
 
 export type Preferences = z.infer<typeof Preferences>

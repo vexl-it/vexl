@@ -23,6 +23,7 @@ function ContainerWithTopBorderRadius({
         btlr="$7"
         btrr="$7"
         pt="$6"
+        px="$1"
         contentContainerStyle={{paddingBottom: tabBarEndsAt + 25}}
       >
         {children}
@@ -30,7 +31,7 @@ function ContainerWithTopBorderRadius({
     )
   }
   return (
-    <Stack f={1} bc="$black" btlr="$7" btrr="$7" pt="$6" {...props}>
+    <Stack f={1} bc="$black" btlr="$7" btrr="$7" pt="$6" px="$1" {...props}>
       {children}
     </Stack>
   )

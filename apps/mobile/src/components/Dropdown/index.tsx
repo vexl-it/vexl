@@ -38,7 +38,7 @@ interface Props<T>
     DropdownProps<DropdownItemProps<T>>,
     'labelField' | 'valueField'
   > {
-  size?: 'medium' | 'large'
+  size?: 'small' | 'medium' | 'large'
   variant?: 'yellow' | 'grey'
   onClear?: () => void
   showClearButton?: boolean
@@ -59,7 +59,7 @@ export function Dropdown<T>({
       valueField="value"
       showsVerticalScrollIndicator={false}
       style={{
-        height: size === 'large' ? 56 : 48,
+        height: size === 'large' ? 56 : size === 'medium' ? 48 : 32,
         backgroundColor: getTokens().color.grey.val,
         borderRadius: getTokens().radius[4].val,
         paddingHorizontal: 12,
@@ -76,7 +76,7 @@ export function Dropdown<T>({
       itemTextStyle={{
         color: getTokens().color.white.val,
         fontWeight: '500',
-        fontSize: size === 'large' ? 18 : 16,
+        fontSize: size === 'large' ? 18 : size === 'medium' ? 16 : 14,
       }}
       selectedTextProps={{numberOfLines: 2, adjustsFontSizeToFit: true}}
       selectedTextStyle={{
@@ -85,7 +85,7 @@ export function Dropdown<T>({
             ? getTokens().color.main.val
             : getTokens().color.white.val,
         fontWeight: '500',
-        fontSize: size === 'large' ? 18 : 16,
+        fontSize: size === 'large' ? 18 : size === 'medium' ? 16 : 14,
         fontFamily: 'TTSatoshi500',
       }}
       placeholderStyle={{

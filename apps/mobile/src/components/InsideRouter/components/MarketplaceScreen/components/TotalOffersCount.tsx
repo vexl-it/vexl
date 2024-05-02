@@ -14,7 +14,7 @@ function TotalOffersCount({filteredOffersCount}: Props): JSX.Element {
   const totalCount = useAtomValue(offersToSeeInMarketplaceCountAtom)
 
   return (
-    <Stack als="flex-start" my="$2" mx="$2">
+    <Stack als="flex-start" my="$2">
       {marketplaceLayout === 'map' && (
         <Text ff="$body600" color="$greyOnBlack">
           {t('map.showingOnlyInPersonOffers')}

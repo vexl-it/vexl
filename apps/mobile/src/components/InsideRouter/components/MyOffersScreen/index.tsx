@@ -34,7 +34,7 @@ function MyOffersScreen({navigation}: Props): JSX.Element {
 
   return (
     <ContainerWithTopBorderRadius>
-      <Stack f={1} mx="$2">
+      <Stack f={1}>
         <Stack mx="$2">
           <Text ff="$heading" color="$white" fos={32}>
             {t('common.myOffers')}

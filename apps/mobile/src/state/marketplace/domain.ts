@@ -84,3 +84,6 @@ export const BaseOffersFilter = z.enum([
 ])
 
 export type BaseOffersFilter = z.TypeOf<typeof BaseOffersFilter>
+
+export const FiatOrSats = z.enum(['FIAT', 'SATS'])
+export type FiatOrSats = z.TypeOf<typeof FiatOrSats>

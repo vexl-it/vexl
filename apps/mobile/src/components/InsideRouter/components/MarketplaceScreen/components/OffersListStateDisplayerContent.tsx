@@ -25,6 +25,7 @@ import ContainerWithTopBorderRadius from '../../ContainerWithTopBorderRadius'
 import AddListingTypeToOffersSuggestion from './AddListingTypeToOffersSuggestion'
 import BaseFilterDropdown from './BaseFilterDropdown'
 import EmptyListPlaceholder from './EmptyListPlaceholder'
+import FiatSatsDropdown from './FiatSatsDropdown'
 import FilterButton from './FilterButton'
 import ImportNewContactsSuggestion from './ImportNewContactsSuggestion'
 import SearchOffers from './SearchOffers'
@@ -53,8 +54,17 @@ function OffersListStateDisplayerContent(): JSX.Element {
   const ListHeaderComponent = useMemo(() => {
     if (isNone(error))
       return (
-        <Stack>
-          <TotalOffersCount filteredOffersCount={offersAtoms.length} />
+        <Stack px="$1">
+          <XStack f={1} ai="center" jc="space-between">
+            <Stack f={1}>
+              <TotalOffersCount filteredOffersCount={offersAtoms.length} />
+            </Stack>
+            {baseFilter !== 'BTC_TO_CASH' && baseFilter !== 'CASH_TO_BTC' && (
+              <Stack f={1}>
+                <FiatSatsDropdown />
+              </Stack>
+            )}
+          </XStack>
           <ReencryptOffersSuggestion mt="$5" px="$0" />
           <ImportNewContactsSuggestion mt="$5" px="$0" />
           <AddListingTypeToOffersSuggestion mt="$5" px="$0" />
@@ -62,7 +72,7 @@ function OffersListStateDisplayerContent(): JSX.Element {
       )
 
     return <ErrorListHeader mt="$6" error={error.value} />
-  }, [error, offersAtoms.length])
+  }, [baseFilter, error, offersAtoms.length])
 
   if (offersAtoms.length === 0 && loading) {
     return (

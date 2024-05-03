@@ -64,7 +64,6 @@ import {askAreYouSureActionAtom} from '../../AreYouSureDialog'
 import {loadingOverlayDisplayedAtom} from '../../LoadingOverlayProvider'
 import {revealIdentityDialogUIAtom} from '../../RevealIdentityDialog/atoms'
 import ChatFeedbackDialogContent from '../components/ChatFeedbackDialogContent'
-import {deleteChatStep1Svg} from '../images/deleteChatSvg'
 import buildMessagesListData from '../utils/buildMessagesListData'
 
 type ChatUIMode = 'approval' | 'messages'
@@ -146,10 +145,6 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
               steps: [
                 {
                   type: 'StepWithText',
-                  image: {
-                    type: 'svgXml',
-                    svgXml: deleteChatStep1Svg,
-                  },
                   title: t('messages.deleteChatQuestion'),
                   description: t('messages.deleteChatExplanation1'),
                   negativeButtonText: t('common.back'),
@@ -157,10 +152,6 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
                 },
                 {
                   type: 'StepWithText',
-                  image: {
-                    type: 'svgXml',
-                    svgXml: deleteChatStep1Svg,
-                  },
                   title: t('common.youSure'),
                   description: t('messages.deleteChatExplanation2'),
                   negativeButtonText: t('common.nope'),
@@ -239,10 +230,6 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
         steps: [
           {
             type: 'StepWithText',
-            image: {
-              type: 'requiredImage',
-              image: require('../images/blockChat1.png'),
-            },
             title: t('messages.blockForewerQuestion'),
             description: t('messages.blockChatExplanation1'),
             negativeButtonText: t('common.nope'),
@@ -250,10 +237,6 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
           },
           {
             type: 'StepWithText',
-            image: {
-              type: 'requiredImage',
-              image: require('../images/blockChat1.png'),
-            },
             title: t('common.youSure'),
             description: t('messages.blockChatExplanation2'),
             negativeButtonText: t('common.nope'),

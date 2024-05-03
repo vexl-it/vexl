@@ -33,10 +33,6 @@ export function useReportOfferHandleUI(): (
           steps: [
             {
               type: 'StepWithText',
-              image: {
-                type: 'requiredImage',
-                image: require('./images/reportOffer.png'),
-              },
               title: t('offer.report.areYouSureTitle'),
               description: t('offer.report.areYouSureText'),
               positiveButtonText: t('offer.report.yes'),
@@ -72,10 +68,6 @@ export function useReportOfferHandleUI(): (
             steps: [
               {
                 type: 'StepWithText',
-                image: {
-                  type: 'requiredImage',
-                  image: require('./images/reportOfferSuccess.png'),
-                },
                 title: t('offer.report.thankYou'),
                 description: t('offer.report.inappropriateContentWasReported'),
                 positiveButtonText: t('common.continue'),

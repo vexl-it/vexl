@@ -10,12 +10,10 @@ import {ScrollView, StyleSheet, View} from 'react-native'
 import {Stack, Text, XStack, type ColorTokens} from 'tamagui'
 import AnimatedDialogWrapper from './AnimatedDialogWrapper'
 import Button from './Button'
-import {ImageUniversal, type ImageUniversalSourcePropType} from './Image'
 import Input, {type Props as VexlTextInputProps} from './Input'
 
 interface StepWithText {
   type: 'StepWithText'
-  image?: ImageUniversalSourcePropType
   title: string
   description?: string
   negativeButtonText?: string
@@ -139,12 +137,6 @@ function AreYouSureDialog(): JSX.Element | null {
           >
             {step.type === 'StepWithText' ? (
               <>
-                {!!step.image && (
-                  <ImageUniversal
-                    style={{maxWidth: '100%'}}
-                    source={step.image}
-                  />
-                )}
                 <Text fontFamily="$heading" fontSize={32} color="$black">
                   {step.title}
                 </Text>

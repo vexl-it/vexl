@@ -45,11 +45,13 @@ function FriendLevelCell({
             p="$4"
             br="$5"
           >
-            {!!selected && (
-              <Stack pos="absolute" left={8} top={8}>
+            <Stack pos="absolute" left={8} top={8}>
+              {selected ? (
                 <SvgImage source={checkmarkInCircleSvg} />
-              </Stack>
-            )}
+              ) : (
+                <Stack w={16} h={16} br={8} bw={1} borderColor="$greyAccent2" />
+              )}
+            </Stack>
             <SvgImage source={image} />
             <Stack pos="absolute" zi={100} top={16}>
               <UserAvatar

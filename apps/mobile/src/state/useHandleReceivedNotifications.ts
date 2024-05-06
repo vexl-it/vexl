@@ -3,23 +3,15 @@ import messaging, {
   type FirebaseMessagingTypes,
 } from '@react-native-firebase/messaging'
 import {useNavigation} from '@react-navigation/native'
-import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {
   ChatNotificationData,
   EncryptedNotificationData,
 } from '@vexl-next/domain/src/general/notifications'
-import {toFpTsOption} from '@vexl-next/resources-utils/src/effect-helpers/effectOptionToOption'
 import {decryptChatNotificationPayload} from '@vexl-next/resources-utils/src/notifications/notificationPayloadCrypto'
-import {safeParse} from '@vexl-next/resources-utils/src/utils/parsing'
 import {Effect, Option} from 'effect'
-import * as O from 'fp-ts/Option'
-import * as TE from 'fp-ts/TaskEither'
-import {pipe} from 'fp-ts/function'
 import {atom, useSetAtom, useStore} from 'jotai'
 import {useEffect} from 'react'
-import {isOnSpecificChat} from '../utils/navigation'
 import checkAndShowCreateOfferPrompt from '../utils/notifications/checkAndShowCreateOfferPrompt'
-import isChatMessageNotification from '../utils/notifications/isChatMessageNotification'
 import {
   CREATE_OFFER_PROMPT,
   NEW_CONNECTION,
@@ -31,6 +23,7 @@ import reportError from '../utils/reportError'
 import {fetchAndStoreMessagesForInboxAtom} from './chat/atoms/fetchNewMessagesActionAtom'
 import {updateAllOffersConnectionsActionAtom} from './connections/atom/offerToConnectionsAtom'
 import {getKeyHolderForFcmCypherActionAtom} from './notifications/fcmCypherToKeyHolderAtom'
+import processChatNotificationActionAtom from './notifications/processChatNotification'
 
 const decryptNotificationIfEncryptedActionAtom = atom(
   null,
@@ -119,61 +112,14 @@ export function useHandleReceivedNotifications(): void {
         return
       }
 
-      if (data.type && isChatMessageNotification(remoteMessage)) {
-        console.info('📳 Refreshing inbox')
-
-        pipe(
-          data,
-          ChatNotificationData.parseUnkownOption,
-          toFpTsOption,
-          O.match(
-            () => {
-              // Do not display. Can not parse inbox key or sender
-              reportError(
-                'warn',
-                new Error(
-                  'Received chat notification with invalid inbox key or sender key'
-                ),
-                {
-                  data,
-                }
-              )
-            },
-            ({inbox, sender}) => {
-              if (
-                isOnSpecificChat(navigation.getState(), {
-                  otherSideKey: sender,
-                  inboxKey: inbox,
-                })
-              )
-                return
-
-              void showUINotificationFromRemoteMessage(remoteMessage)
-            }
-          )
-        )
-
-        void pipe(
-          data.inbox,
-          safeParse(PublicKeyPemBase64),
-          TE.fromEither,
-          TE.chainTaskK((inbox) => fetchMessagesForInbox({key: inbox})),
-          TE.match(
-            (e) => {
-              reportError(
-                'error',
-                new Error('Error processing messaging notification'),
-                {
-                  e,
-                }
-              )
-            },
-            () => {
-              console.info('📳 Inbox refreshed successfully')
-            }
-          )
+      const chatMessageNotificationOption =
+        ChatNotificationData.parseUnkownOption(remoteMessage.data)
+      if (Option.isSome(chatMessageNotificationOption)) {
+        await store.set(
+          processChatNotificationActionAtom,
+          chatMessageNotificationOption.value,
+          navigation.getState()
         )()
-        return
       }
 
       await showUINotificationFromRemoteMessage(remoteMessage)

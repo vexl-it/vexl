@@ -50,7 +50,7 @@ function createCancelChatNotification({
   sender: PublicKeyPemBase64
 }): ChatNotificationData {
   return new ChatNotificationData({
-    version: '1',
+    version: '2',
     type: 'CANCEL_REQUEST_MESSAGING',
     sender,
     inbox,

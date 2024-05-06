@@ -9,13 +9,7 @@ import {
   useOffersLoadingError,
 } from '../../../../../state/marketplace'
 import {baseFilterAtom} from '../../../../../state/marketplace/atoms/filterAtoms'
-import {
-  btcToCashOffersIncludingLocationAtomsAtom,
-  btcToProductOffersIncludingLocationAtomsAtom,
-  cashToBtcOffersIncludingLocationAtomsAtom,
-  productToBtcOffersIncludingLocationAtomsAtom,
-  sthElseOffersIncludingLocationAtomsAtom,
-} from '../../../../../state/marketplace/atoms/filteredOffers'
+import {filteredOffersIncludingLocationFilterAtomsAtom} from '../../../../../state/marketplace/atoms/filteredOffers'
 import {refocusMapActionAtom} from '../../../../../state/marketplace/atoms/map/focusedOffer'
 import ErrorListHeader from '../../../../ErrorListHeader'
 import MarketplaceMapContainer from '../../../../MarketplaceMapContainer'
@@ -40,15 +34,7 @@ function OffersListStateDisplayerContent(): JSX.Element {
   const baseFilter = useAtomValue(baseFilterAtom)
 
   const offersAtoms = useAtomValue(
-    baseFilter === 'BTC_TO_CASH'
-      ? btcToCashOffersIncludingLocationAtomsAtom
-      : baseFilter === 'CASH_TO_BTC'
-      ? cashToBtcOffersIncludingLocationAtomsAtom
-      : baseFilter === 'BTC_TO_PRODUCT'
-      ? btcToProductOffersIncludingLocationAtomsAtom
-      : baseFilter === 'PRODUCT_TO_BTC'
-      ? productToBtcOffersIncludingLocationAtomsAtom
-      : sthElseOffersIncludingLocationAtomsAtom
+    filteredOffersIncludingLocationFilterAtomsAtom
   )
 
   const ListHeaderComponent = useMemo(() => {

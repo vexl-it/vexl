@@ -61,9 +61,9 @@ export const offersFilterTextFromStorageAtom = focusAtom(
 export const resetLocationFilterActionAtom = atom(null, (get, set) => {
   set(offersFilterFromStorageAtom, (old) => ({
     ...old,
-    location: undefined,
-    locationState: [],
-    paymentMethod: undefined,
+    location: offersFilterInitialState.location,
+    locationState: offersFilterInitialState.locationState,
+    paymentMethod: offersFilterInitialState.paymentMethod,
   }))
 })
 
@@ -129,7 +129,7 @@ export const baseFilterAtom = atom(
     const listingTypeFilter = get(listingTypeFilterAtom)
     const offerTypeFilter = get(offerTypeFilterAtom)
     if (listingTypeFilter === 'BITCOIN') {
-      if (offerTypeFilter === 'SELL') return 'BTC_TO_CASH'
+      if (offerTypeFilter === 'BUY') return 'BTC_TO_CASH'
       return 'CASH_TO_BTC'
     }
 
@@ -145,39 +145,29 @@ export const baseFilterAtom = atom(
     return undefined
   },
   (get, set, baseFilterValue: BaseOffersFilter | undefined) => {
-    const {filter} = get(offersFilterStorageAtom)
     if (baseFilterValue === 'BTC_TO_CASH') {
-      set(offersFilterStorageAtom, {
-        filter: {...filter, offerType: 'SELL', listingType: 'BITCOIN'},
-      })
+      set(offerTypeFilterAtom, 'BUY')
+      set(listingTypeFilterAtom, 'BITCOIN')
     }
 
     if (baseFilterValue === 'CASH_TO_BTC') {
-      set(offersFilterStorageAtom, {
-        filter: {...filter, offerType: 'BUY', listingType: 'BITCOIN'},
-      })
+      set(offerTypeFilterAtom, 'SELL')
+      set(listingTypeFilterAtom, 'BITCOIN')
     }
 
     if (baseFilterValue === 'BTC_TO_PRODUCT') {
-      set(offersFilterStorageAtom, {
-        filter: {...filter, offerType: 'BUY', listingType: 'PRODUCT'},
-      })
+      set(offerTypeFilterAtom, 'BUY')
+      set(listingTypeFilterAtom, 'PRODUCT')
     }
 
     if (baseFilterValue === 'PRODUCT_TO_BTC') {
-      set(offersFilterStorageAtom, {
-        filter: {...filter, offerType: 'SELL', listingType: 'PRODUCT'},
-      })
+      set(offerTypeFilterAtom, 'SELL')
+      set(listingTypeFilterAtom, 'PRODUCT')
     }
 
     if (baseFilterValue === 'STH_ELSE') {
-      set(offersFilterStorageAtom, {
-        filter: {
-          ...filter,
-          offerType: undefined,
-          listingType: 'OTHER',
-        },
-      })
+      set(offerTypeFilterAtom, undefined)
+      set(listingTypeFilterAtom, 'OTHER')
     }
   }
 )

@@ -169,7 +169,7 @@ const viewportToFilterByAtom = atom((get) => {
   const locationFilter = get(locationFilterAtom)
   const marketplaceLayout = get(marketplaceLayoutModeAtom)
 
-  if (selectedRegion && marketplaceLayout === 'map')
+  if (selectedRegion && marketplaceLayout === 'map') {
     return deltasToViewport({
       point: {
         ...selectedRegion,
@@ -179,6 +179,7 @@ const viewportToFilterByAtom = atom((get) => {
       latitudeDelta: selectedRegion.latitudeDelta,
       longitudeDelta: selectedRegion.longitudeDelta,
     })
+  }
 
   if (locationFilter) {
     return radiusToViewport({
@@ -196,11 +197,12 @@ export const filteredOffersIncludingLocationFilterAtom = atom((get) => {
 
   if (!viewportToFilterBy) return filteredOffers
 
-  // Do not filter if user zoomed to too big area
+  // Do not filter if user zoomed out too much
   if (
-    viewportToFilterBy.northeast.longitude -
-      viewportToFilterBy.southwest.longitude >
-    60
+    Math.abs(
+      viewportToFilterBy.northeast.longitude -
+        viewportToFilterBy.southwest.longitude
+    ) > 60
   )
     return filteredOffers
 
@@ -209,68 +211,6 @@ export const filteredOffersIncludingLocationFilterAtom = atom((get) => {
   )
 })
 
-export const btcToCashOffersIncludingLocationAtom = atom((get) => {
-  const offers = get(filteredOffersIncludingLocationFilterAtom)
-
-  return offers.filter(
-    (offer) =>
-      offer.offerInfo.publicPart.offerType === 'SELL' &&
-      (!offer.offerInfo.publicPart.listingType ||
-        offer.offerInfo.publicPart.listingType === 'BITCOIN')
-  )
-})
-
-export const cashToBtcOffersIncludingLocationAtom = atom((get) => {
-  const offers = get(filteredOffersIncludingLocationFilterAtom)
-
-  return offers.filter(
-    (offer) =>
-      offer.offerInfo.publicPart.offerType === 'BUY' &&
-      (!offer.offerInfo.publicPart.listingType ||
-        offer.offerInfo.publicPart.listingType === 'BITCOIN')
-  )
-})
-
-export const btcToProductOffersIncludingLocationAtom = atom((get) => {
-  const offers = get(filteredOffersIncludingLocationFilterAtom)
-
-  return offers.filter(
-    (offer) =>
-      offer.offerInfo.publicPart.offerType === 'BUY' &&
-      offer.offerInfo.publicPart.listingType === 'PRODUCT'
-  )
-})
-
-export const productToBtcOffersIncludingLocationAtom = atom((get) => {
-  const offers = get(filteredOffersIncludingLocationFilterAtom)
-
-  return offers.filter(
-    (offer) =>
-      offer.offerInfo.publicPart.offerType === 'SELL' &&
-      offer.offerInfo.publicPart.listingType === 'PRODUCT'
-  )
-})
-
-export const sthElseOffersIncludingLocationAtom = atom((get) => {
-  const offers = get(filteredOffersIncludingLocationFilterAtom)
-
-  return offers.filter(
-    (offer) => offer.offerInfo.publicPart.listingType === 'OTHER'
-  )
-})
-
-export const btcToCashOffersIncludingLocationAtomsAtom = splitAtom(
-  btcToCashOffersIncludingLocationAtom
-)
-export const cashToBtcOffersIncludingLocationAtomsAtom = splitAtom(
-  cashToBtcOffersIncludingLocationAtom
-)
-export const btcToProductOffersIncludingLocationAtomsAtom = splitAtom(
-  btcToProductOffersIncludingLocationAtom
-)
-export const productToBtcOffersIncludingLocationAtomsAtom = splitAtom(
-  productToBtcOffersIncludingLocationAtom
-)
-export const sthElseOffersIncludingLocationAtomsAtom = splitAtom(
-  sthElseOffersIncludingLocationAtom
+export const filteredOffersIncludingLocationFilterAtomsAtom = splitAtom(
+  filteredOffersIncludingLocationFilterAtom
 )

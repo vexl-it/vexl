@@ -16,10 +16,24 @@ export type Latitude = Schema.Schema.Type<typeof LatitudeE>
 
 export const Longitude = z
   .number()
-  .min(-180)
-  .max(180)
+  .transform((v) => {
+    const maxLongitude = 180
+    const minLongitude = -180
+    const range = maxLongitude - minLongitude
+    return ((((v - minLongitude) % range) + range) % range) + minLongitude
+  })
+  .refine((v) => v <= 180 && v >= -180)
   .transform((v) => Brand.nominal<typeof v & Brand.Brand<'Longitude'>>()(v))
-export const LongitudeE = Schema.Number.pipe(
+
+export const LongitudeE = Schema.transform(Schema.Number, Schema.Number, {
+  decode: (v): number => {
+    const maxLongitude = 180
+    const minLongitude = -180
+    const range = maxLongitude - minLongitude
+    return ((((v - minLongitude) % range) + range) % range) + minLongitude
+  },
+  encode: (v): number => v,
+}).pipe(
   Schema.greaterThanOrEqualTo(-180),
   Schema.lessThanOrEqualTo(180),
   Schema.brand('Longitude')

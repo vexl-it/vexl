@@ -426,6 +426,8 @@
   "notifications.REQUEST_MESSAGING.body": "You have received a new request.",
   "notifications.APPROVE_MESSAGING.title": "Request approved!",
   "notifications.APPROVE_MESSAGING.body": "Your request was approved.",
+  "notifications.TRADE_CHECKLIST_UPDATE.title": "{{them}}",
+  "notifications.TRADE_CHECKLIST_UPDATE.body": "{{them}} Updated trade checklist",
   "notifications.DISAPPROVE_MESSAGING.title": "Request denied",
   "notifications.DISAPPROVE_MESSAGING.body": "Your request was denied.",
   "notifications.DELETE_CHAT.title": "Chat deleted",

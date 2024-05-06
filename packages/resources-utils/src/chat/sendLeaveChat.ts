@@ -36,7 +36,7 @@ function createLeaveChatNotification({
   approve: boolean
 }): ChatNotificationData {
   return new ChatNotificationData({
-    version: '1',
+    version: '2',
     type: 'DELETE_CHAT',
     sender,
     inbox,

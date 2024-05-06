@@ -56,7 +56,7 @@ function createMessagingRequestNotification({
   sender: PublicKeyPemBase64
 }): ChatNotificationData {
   return new ChatNotificationData({
-    version: '1',
+    version: '2',
     type: 'REQUEST_MESSAGING',
     sender,
     inbox,

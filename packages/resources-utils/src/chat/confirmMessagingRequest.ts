@@ -61,7 +61,7 @@ function createApproveChatNotification({
   approve: boolean
 }): ChatNotificationData {
   return new ChatNotificationData({
-    version: '1',
+    version: '2',
     type: approve ? 'DISAPPROVE_MESSAGING' : 'APPROVE_MESSAGING',
     sender,
     inbox,

@@ -4,8 +4,6 @@ import {getDefaultStore} from 'jotai'
 import {translationAtom} from '../localization/I18nProvider'
 import {notificationPreferencesAtom} from '../preferences'
 import reportError from '../reportError'
-import {showChatNotification} from './chatNotifications'
-import isChatMessageNotification from './isChatMessageNotification'
 import {getDefaultChannel} from './notificationChannels'
 import {
   INACTIVITY_REMINDER,
@@ -37,6 +35,7 @@ export async function showUINotificationFromRemoteMessage(
     return
   }
 
+  // TODO check if this is really necessary
   if (!remoteMessage.data && !remoteMessage.notification) return
 
   if (!type) {
@@ -46,15 +45,7 @@ export async function showUINotificationFromRemoteMessage(
     return
   }
 
-  if (isChatMessageNotification(remoteMessage)) {
-    if (!notificationPreferences.chat) {
-      console.info(
-        'Received chat notification but chat notifications are disabled. Not showing notification.'
-      )
-      return
-    }
-    await showChatNotification(remoteMessage)
-  } else if (type === INACTIVITY_REMINDER) {
+  if (type === INACTIVITY_REMINDER) {
     if (!notificationPreferences.inactivityWarnings) {
       console.info(
         'Received inactivity reminder notification but INACTIVITY_REMINDER notifications are disabled. Not showing notification.'

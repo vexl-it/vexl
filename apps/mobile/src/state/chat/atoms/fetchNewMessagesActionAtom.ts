@@ -36,10 +36,11 @@ import {
   singleOfferAtom,
 } from '../../marketplace/atoms/offersState'
 import messagingStateAtom from '../atoms/messagingStateAtom'
-import {type ChatMessageWithState, type InboxInState} from '../domain'
+import {type InboxInState} from '../domain'
 import addMessagesToChats from '../utils/addMessagesToChats'
 import createNewChatsFromMessages from '../utils/createNewChatsFromFirstMessages'
 import replaceBase64UriWithImageFileUri from '../utils/replaceBase64UriWithImageFileUri'
+import {type ChatMessageWithState} from './../domain'
 import {sendUpdateNoticeMessageActionAtom} from './checkAndReportCurrentVersionToChatsActionAtom'
 import focusChatByInboxKeyAndSenderKey from './focusChatByInboxKeyAndSenderKey'
 import {sendFcmCypherUpdateMessageActionAtom} from './refreshNotificationTokensActionAtom'
@@ -319,7 +320,10 @@ function deletePulledMessagesReportLeft({
 export const fetchAndStoreMessagesForInboxAtom = atom<
   null,
   [{key: PublicKeyPemBase64}],
-  T.Task<InboxInState | undefined>
+  T.Task<
+    | {updatedInbox: InboxInState; newMessages: readonly ChatMessageWithState[]}
+    | undefined
+  >
 >(null, (get, set, params) => {
   const {key} = params
   const api = get(privateApiAtom)
@@ -327,7 +331,7 @@ export const fetchAndStoreMessagesForInboxAtom = atom<
 
   if (!inbox) {
     reportError(
-      'error',
+      'warn',
       new Error('Trying to refresh an inbox but inbox does not exist')
     )
     return T.of(undefined)
@@ -339,10 +343,15 @@ export const fetchAndStoreMessagesForInboxAtom = atom<
       get(singleOfferAtom(inbox.inbox.offerId))
     ),
     TE.matchEW(
-      (error) => {
+      (
+        error
+      ): T.Task<{
+        updatedInbox: InboxInState
+        newMessages: readonly ChatMessageWithState[]
+      }> => {
         if (error._tag === 'noMessages') {
           console.info('No new messages in inbox')
-          return T.of(inbox)
+          return T.of({updatedInbox: inbox, newMessages: []})
         }
 
         if (error._tag === 'inboxDoesNotExist') {
@@ -378,10 +387,13 @@ export const fetchAndStoreMessagesForInboxAtom = atom<
                 return true
               }
             ),
-            T.map(() => inbox)
+            T.map(() => ({updatedInbox: inbox, newMessages: []}))
           )
         }
-        return T.of(inbox)
+        return T.of({
+          updatedInbox: inbox,
+          newMessages: [] satisfies ChatMessageWithState[],
+        })
       },
       ({newMessages, updatedInbox}) => {
         set(
@@ -419,7 +431,7 @@ export const fetchAndStoreMessagesForInboxAtom = atom<
             api: api.chat,
             keyPair: updatedInbox.inbox.privateKey,
           }),
-          T.map(() => updatedInbox)
+          T.map(() => ({updatedInbox, newMessages}))
         )
       }
     )

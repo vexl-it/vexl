@@ -5,11 +5,11 @@ import picturePlaceholderSvg from '../../images/picturePlaceholderSvg'
 
 interface Props {
   imageUri: UriString | undefined
-
   name: string
+  variant: 'light' | 'dark'
 }
 
-function CommonFriendCell({imageUri, name}: Props): JSX.Element {
+function CommonFriendCell({imageUri, name, variant}: Props): JSX.Element {
   return (
     <XStack ai="center" mr="$3">
       {imageUri ? (
@@ -22,7 +22,7 @@ function CommonFriendCell({imageUri, name}: Props): JSX.Element {
           source={picturePlaceholderSvg}
         />
       )}
-      <Text ml="$2" col="$greyOnBlack" ff="$body500" fos={16}>
+      <Text ml="$2" col={variant === 'light' ? '$black' : '$white'} fos={16}>
         {name}
       </Text>
     </XStack>

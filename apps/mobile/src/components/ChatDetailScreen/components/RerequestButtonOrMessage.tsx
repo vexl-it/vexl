@@ -30,7 +30,7 @@ function RerequestButtonOrMessage({
     : null
 
   return (
-    <YStack space="$2">
+    <YStack space="$2" pt="$2">
       {rerequestInfo.canBeRerequested ? (
         <Button
           disabled={rerequestButtonDisabled}
@@ -44,7 +44,7 @@ function RerequestButtonOrMessage({
       {requestState === 'requested' && (
         <Button
           text={t('offer.cancelRequest')}
-          variant="primary"
+          variant="redDark"
           onPress={() => {
             void cancelRequest()?.then((success) => {
               if (success) safeGoBack()

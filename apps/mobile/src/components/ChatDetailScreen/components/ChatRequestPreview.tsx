@@ -33,15 +33,19 @@ function ChatRequestPreview({
 
   const commonFriendsSection = (
     <>
-      {!!commonConnectionsHashes && commonConnectionsHashes.length > 0 && (
-        <Stack mx="$-4">
-          <CommonFriends
-            hideCommonFriendsCount
-            contactsHashes={commonConnectionsHashes}
-            variant="light"
-          />
-        </Stack>
-      )}
+      {!!commonConnectionsHashes &&
+        !!offer &&
+        commonConnectionsHashes.length > 0 && (
+          <Stack mx="$-4">
+            <CommonFriends
+              hideCommonFriendsCount
+              hideInfo
+              contactsHashes={commonConnectionsHashes}
+              offer={offer}
+              variant="light"
+            />
+          </Stack>
+        )}
     </>
   )
 
@@ -88,7 +92,9 @@ function ChatRequestPreview({
             ? t('messages.yourOffer')
             : t('messages.theirOffer')}
         </Text>
-        {!!offer && <OfferInfoPreview offer={offer.offerInfo} />}
+        {!!offer && (
+          <OfferInfoPreview offer={offer.offerInfo} onGrayBackground />
+        )}
       </Stack>
     </>
   )

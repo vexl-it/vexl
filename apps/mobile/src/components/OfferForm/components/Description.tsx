@@ -35,13 +35,13 @@ function Description({
   const subtitle = useMemo(() => {
     if (listingType === 'PRODUCT') {
       return offerType === 'SELL'
-        ? t('offerForm.description.moreAboutYourItem')
-        : t('offerForm.description.whatAreYouLookingFor')
+        ? t('offerForm.description.whatAreYouLookingFor')
+        : t('offerForm.description.moreAboutYourItem')
     }
     if (listingType === 'OTHER') {
       return offerType === 'SELL'
-        ? t('offerForm.description.moreAboutYourOffer')
-        : t('offerForm.moreAboutYourRequest')
+        ? t('offerForm.description.tellSellersMoreAboutYourRequest')
+        : t('offerForm.description.tellBuyersMoreAboutYourOffer')
     }
     return t('offerForm.description.writeWhyPeopleShouldTake')
   }, [listingType, offerType, t])

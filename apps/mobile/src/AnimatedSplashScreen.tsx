@@ -57,7 +57,7 @@ function AnimatedSplashScreen({children}: Props): JSX.Element {
   useSetupRemoteConfig()
 
   useEffect(() => {
-    void loadSession({forceReload: true, showErrorAlert: true})
+    void loadSession({forceReload: true, showErrorAlert: true})()
     void subscribeToGeneralTopic()
   }, [])
 

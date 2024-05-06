@@ -2,19 +2,21 @@ import notifee, {
   AndroidGroupAlertBehavior,
   type DisplayedNotification,
 } from '@notifee/react-native'
-import {type FirebaseMessagingTypes} from '@react-native-firebase/messaging'
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {sha256} from '@vexl-next/cryptography/src/operations/sha'
 import {type Chat} from '@vexl-next/domain/src/general/messaging'
 import {ChatNotificationData} from '@vexl-next/domain/src/general/notifications'
-import {Option} from 'effect'
 import {getDefaultStore} from 'jotai'
 import {useCallback} from 'react'
-import decodeNotificationPreviewAction from '../../state/chat/atoms/decodeChatNotificationPreviewActionAtom'
+import {
+  type ChatMessageWithState,
+  type InboxInState,
+} from '../../state/chat/domain'
+import {generateRandomUserData} from '../../state/session/utils/generateRandomUserData'
 import {translationAtom} from '../localization/I18nProvider'
 import notEmpty from '../notEmpty'
-import reportError from '../reportError'
 import {useAppState} from '../useAppState'
+import {SystemChatNotificationData} from './SystemNotificationData.brand'
 import {getChannelForMessages} from './notificationChannels'
 
 function generateGroupId(chat: {
@@ -64,49 +66,56 @@ async function getNotificationsForChat({
   })
 }
 
-export async function showChatNotification(
-  remoteMessage: FirebaseMessagingTypes.RemoteMessage
-): Promise<void> {
-  const notificationDataVerification = ChatNotificationData.parseUnkownOption(
-    remoteMessage.data
+export async function showChatNotification({
+  newMessage,
+  inbox,
+}: {
+  newMessage: ChatMessageWithState
+  inbox: InboxInState
+}): Promise<void> {
+  const type = newMessage.message.messageType
+  const chat = inbox.chats.find(
+    (one) => one.chat.otherSide.publicKey === newMessage.message.senderPublicKey
   )
-  if (!Option.isSome(notificationDataVerification)) {
-    reportError(
-      'warn',
-      new Error('Unable to parse notification data for chat notification'),
-      {remoteMessage}
-    )
-    return
-  }
 
-  const notificationData = notificationDataVerification.value
+  const userName =
+    chat?.chat.otherSide.realLifeInfo?.userName ??
+    (chat ? generateRandomUserData(chat.chat.otherSide.publicKey) : undefined)
+      ?.userName
+
   if (
-    notificationData.type === 'VERSION_UPDATE' ||
-    notificationData.type === 'FCM_CYPHER_UPDATE'
+    type === 'VERSION_UPDATE' ||
+    type === 'FCM_CYPHER_UPDATE' ||
+    type === 'OFFER_DELETED' ||
+    type === 'INBOX_DELETED' ||
+    type === 'CANCEL_REQUEST_MESSAGING' ||
+    type === 'REQUIRES_NEWER_VERSION'
   ) {
     // DO not show notification in this case
     return
   }
-  if (notificationData.type === 'CANCEL_REQUEST_MESSAGING') return // No message displayed in this case
 
   const {t} = getDefaultStore().get(translationAtom)
 
-  const decodedPreview = await getDefaultStore().set(
-    decodeNotificationPreviewAction,
-    notificationData
-  )()
-
   const groupId =
-    notificationData.type === 'REQUEST_MESSAGING'
+    type === 'REQUEST_MESSAGING'
       ? REQUEST_GROUP_ID
-      : generateGroupId(notificationData)
+      : generateGroupId({
+          inbox: inbox.inbox.privateKey.publicKeyPemBase64,
+          sender: newMessage.message.senderPublicKey,
+        })
 
   await notifee.displayNotification({
-    title:
-      decodedPreview?.name ?? t(`notifications.${notificationData.type}.title`),
+    title: userName ?? t(`notifications.${type}.title`, {them: userName ?? ''}),
     body:
-      decodedPreview?.text ?? t(`notifications.${notificationData.type}.body`),
-    data: remoteMessage.data,
+      newMessage.message.text ??
+      t(`notifications.${type}.body`, {them: userName ?? ''}),
+    data: SystemChatNotificationData.encode(
+      new SystemChatNotificationData({
+        inbox: inbox.inbox.privateKey.publicKeyPemBase64,
+        sender: newMessage.message.senderPublicKey,
+      })
+    ),
     android: {
       groupId,
       channelId: await getChannelForMessages(),
@@ -116,7 +125,7 @@ export async function showChatNotification(
     },
   })
 
-  if (notificationData.type === 'REQUEST_MESSAGING') {
+  if (type === 'REQUEST_MESSAGING') {
     await notifee.displayNotification({
       id: groupId,
       title: t('notifications.groupNotificationRequest.title'),
@@ -134,9 +143,14 @@ export async function showChatNotification(
   } else {
     await notifee.displayNotification({
       id: groupId,
-      data: remoteMessage.data,
+      data: SystemChatNotificationData.encode(
+        new SystemChatNotificationData({
+          inbox: inbox.inbox.privateKey.publicKeyPemBase64,
+          sender: newMessage.message.senderPublicKey,
+        })
+      ),
       subtitle: t('notifications.groupNotificationChat.subtitle', {
-        userName: decodedPreview?.name ?? '[unknown]',
+        userName: userName ?? '[unknown]',
       }),
       android: {
         groupAlertBehavior: AndroidGroupAlertBehavior.CHILDREN,

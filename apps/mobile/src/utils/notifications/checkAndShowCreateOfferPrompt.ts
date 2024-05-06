@@ -30,7 +30,7 @@ export default async function checkAndShowCreateOfferPrompt(
     })
   }
 
-  if (!(await loadSession())) {
+  if (!(await loadSession()())) {
     console.info(
       'No session in storage. Skipping checkAndShowCreateOfferPrompt'
     )

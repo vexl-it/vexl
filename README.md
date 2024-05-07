@@ -11,9 +11,8 @@ Vexl is a mobile app giving its users a simple, accessible and safe way to trade
 ```
 yarn
 yarn turbo:build
-cd apps/mobile
 npx expo prebuild --clean
-npx expo run:ios
+npx expo start
 ```
 
 ## Help us translate the app

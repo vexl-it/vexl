@@ -8,7 +8,6 @@ import {
   normalizedContactsAtom,
   resolveAllContactsAsSeenActionAtom,
 } from '../../../../state/contacts/atom/contactsStore'
-import {areContactsPermissionsGranted} from '../../../../state/contacts/utils'
 import NormalizeContactsWithLoadingScreen from '../../../NormalizeContactsWithLoadingScreen'
 import WhiteContainer from '../../../WhiteContainer'
 import {ContactsSelectScope, contactSelectMolecule} from './atom'
@@ -45,7 +44,6 @@ function ContactsListSelect({
   useEffect(() => {
     return () => {
       resolveAllContactsAsSeen()
-      void areContactsPermissionsGranted()
     }
   }, [resolveAllContactsAsSeen])
 

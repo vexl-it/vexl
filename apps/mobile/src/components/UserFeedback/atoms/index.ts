@@ -46,12 +46,6 @@ export const feedbackMolecule = molecule((getMolecule, getScope) => {
     o.prop('finished')
   )
   const feedbackFlowFinishedAtom = atom<boolean>(false)
-  const submitTextCommentButtonDisabledAtom = atom((get) => {
-    return (
-      get(currentFeedbackPageAtom) === 'TEXT_COMMENT' &&
-      get(textCommentAtom).trim() === ''
-    )
-  })
 
   function createIsStarSelectedAtom(
     starOrderNumber: number
@@ -96,6 +90,13 @@ export const feedbackMolecule = molecule((getMolecule, getScope) => {
       const privateApi = get(privateApiAtom)
       const {formId, type, stars, objections, textComment} = get(feedbackAtom)
       const regionCode = get(regionCodeAtom)
+
+      if (
+        get(currentFeedbackPageAtom) === 'TEXT_COMMENT' &&
+        get(textCommentAtom).trim() === ''
+      ) {
+        return true
+      }
 
       return pipe(
         TE.Do,
@@ -184,7 +185,6 @@ export const feedbackMolecule = molecule((getMolecule, getScope) => {
     currentFeedbackPageAtom,
     submitChatFeedbackAndHandleUIAtom,
     submitOfferCreationFeedbackHandleUIAtom,
-    submitTextCommentButtonDisabledAtom,
     feedbackFlowFinishedAtom,
   }
 })

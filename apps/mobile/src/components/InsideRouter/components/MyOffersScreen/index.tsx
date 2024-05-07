@@ -8,7 +8,7 @@ import {
   myOffersSortedAtomsAtom,
 } from '../../../../state/marketplace/atoms/myOffers'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
-import Button from '../../../Button'
+import EmptyListWrapper from '../../../EmptyListWrapper'
 import OffersList from '../../../OffersList'
 import ReencryptOffersSuggestion from '../../../ReencryptOffersSuggestion'
 import ContainerWithTopBorderRadius from '../ContainerWithTopBorderRadius'
@@ -54,18 +54,23 @@ function MyOffersScreen({navigation}: Props): JSX.Element {
             <MyOffersSortingDropdown />
           </XStack>
         </Stack>
-        <Button
-          onPress={() => {
-            navigation.navigate('CreateOffer')
-          }}
-          size="medium"
-          text={t('myOffers.addNewOffer')}
-          variant="secondary"
-        />
-        <OffersList
-          ListHeaderComponent={ListHeaderComponent}
-          offersAtoms={myOffersSortedAtoms}
-        />
+        {myOffersSortedAtoms.length > 0 ? (
+          <OffersList
+            ListHeaderComponent={ListHeaderComponent}
+            offersAtoms={myOffersSortedAtoms}
+          />
+        ) : (
+          <EmptyListWrapper
+            buttonText={t('myOffers.addNewOffer')}
+            onButtonPress={() => {
+              navigation.navigate('CreateOffer')
+            }}
+          >
+            <Text textAlign="center" col="$greyOnWhite" fos={20} ff="$body600">
+              {t('myOffers.youHaveNotPostedAnyOffers')}
+            </Text>
+          </EmptyListWrapper>
+        )}
       </Stack>
     </ContainerWithTopBorderRadius>
   )

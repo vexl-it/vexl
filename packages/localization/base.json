@@ -866,6 +866,7 @@
   "contacts.loadingContacts": "Loading contacts to show.",
   "contacts.youHaveNotAllowedAccessToYourContacts": "You have not allowed us to access your contacts.",
   "contacts.didYouChangeYourMind": "Did you change your mind?",
+  "contacts.contactsSubmitted": "Contacts submitted",
   "migrations.migrating": "Updating vexl",
   "migration.contacts.problemTitle": "Problem with migration",
   "migration.contacts.problemText": "There was a discrepancies while migrating contacts. Old number of contacts: {{oldSize}}, new number of contacts {{newSize}}. We are trying to recover and save these contacts. Please check imported contacts and make sure all contacts are imported properly!"

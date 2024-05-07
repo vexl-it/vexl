@@ -76,14 +76,14 @@ function StickyHeader(): JSX.Element | null {
             {paymentMethodsText}
           </Text>
           {offer.offerInfo.publicPart.paymentMethod.includes('CASH') && (
-            <>
+            <XStack f={1} ai="center">
               <Bullet />
               <Text fontFamily="$body500" fos={14} color="$greyOnWhite">
                 {offer.offerInfo.publicPart.location
                   .map((one) => one.address)
                   .join(', ')}
               </Text>
-            </>
+            </XStack>
           )}
         </XStack>
       </YStack>

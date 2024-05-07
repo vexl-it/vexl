@@ -1,4 +1,4 @@
-import {FlashList} from '@shopify/flash-list'
+import {FlashList, type ContentStyle} from '@shopify/flash-list'
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
 import {type Atom} from 'jotai'
 import React, {useMemo, type ComponentProps} from 'react'
@@ -33,7 +33,7 @@ function OffersList({
 }: Props): JSX.Element {
   const bottomOffset = usePixelsFromBottomWhereTabsEnd()
 
-  const contentContainerStyle = useMemo(
+  const contentContainerStyle: ContentStyle = useMemo(
     () => ({
       paddingBottom: bottomOffset + Number(getTokens().space[5].val),
     }),

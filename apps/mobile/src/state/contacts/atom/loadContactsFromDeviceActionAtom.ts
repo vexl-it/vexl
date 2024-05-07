@@ -7,7 +7,7 @@ import reportError from '../../../utils/reportError'
 import {useAppState} from '../../../utils/useAppState'
 import {postLoginFinishedAtom} from '../../postLoginOnboarding'
 import {type ContactInfo, type StoredContact} from '../domain'
-import getContactsAndTryToResolveThePermissionsAlongTheWay from '../utils'
+import {getContactsAndTryToResolveThePermissionsAlongTheWay} from '../utils'
 import {storedContactsAtom} from './contactsStore'
 
 function filterNotStoredContacts(

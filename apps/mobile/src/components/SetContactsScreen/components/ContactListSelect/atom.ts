@@ -1,7 +1,7 @@
 import {safeParse} from '@vexl-next/resources-utils/src/utils/parsing'
 import {createScope, molecule} from 'bunshi/dist/react'
 import * as O from 'fp-ts/Option'
-import type * as T from 'fp-ts/Task'
+import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {atom, type Atom, type SetStateAction, type WritableAtom} from 'jotai'
@@ -20,6 +20,8 @@ import {deduplicateBy} from '../../../../utils/deduplicate'
 import {translationAtom} from '../../../../utils/localization/I18nProvider'
 import toE164PhoneNumberWithDefaultCountryCode from '../../../../utils/toE164PhoneNumberWithDefaultCountryCode'
 import {askAreYouSureActionAtom} from '../../../AreYouSureDialog'
+import checkIconSvg from '../../../ChatDetailScreen/components/images/checkIconSvg'
+import {toastNotificationAtom} from '../../../ToastNotification'
 import userSvg from '../../../images/userSvg'
 
 export const ContactsSelectScope = createScope<{
@@ -191,11 +193,24 @@ export const contactSelectMolecule = molecule((_, getScope) => {
   })
 
   const submitActionAtom = atom(null, (get, set): T.Task<boolean> => {
+    const {t} = get(translationAtom)
     const selectedNumbers = Array.from(get(selectedNumbersAtom))
-    return set(submitContactsActionAtom, {
-      numbersToImport: selectedNumbers,
-      normalizeAndImportAll: false,
-    })
+    return pipe(
+      set(submitContactsActionAtom, {
+        numbersToImport: selectedNumbers,
+        normalizeAndImportAll: false,
+      }),
+      T.map((result) => {
+        if (result) {
+          set(toastNotificationAtom, {
+            text: t('contacts.contactsSubmitted'),
+            icon: checkIconSvg,
+            hideAfterMillis: 2000,
+          })
+        }
+        return result
+      })
+    )
   })
 
   const addAndSelectContactWithUiFeedbackAtom = atom(

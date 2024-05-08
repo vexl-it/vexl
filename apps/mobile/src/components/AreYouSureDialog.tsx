@@ -154,7 +154,7 @@ function AreYouSureDialog(): JSX.Element | null {
                 <Text fos={18} col="$greyOnWhite" ff="$body500">
                   {step.description}
                 </Text>
-                <Text fos={18} col="$black" ff="$heading">
+                <Text fos={18} col="$black" ff="$body500">
                   {step.subtitle}
                 </Text>
                 <Input

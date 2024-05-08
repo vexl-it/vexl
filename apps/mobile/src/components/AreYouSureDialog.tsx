@@ -136,8 +136,8 @@ function AreYouSureDialog(): JSX.Element | null {
             }
           >
             {step.type === 'StepWithText' ? (
-              <>
-                <Text fontFamily="$heading" fontSize={32} color="$black">
+              <Stack space="$2">
+                <Text fontFamily="$heading" fontSize={24} color="$black">
                   {step.title}
                 </Text>
                 {!!step.description && (
@@ -145,10 +145,10 @@ function AreYouSureDialog(): JSX.Element | null {
                     {step.description}
                   </Text>
                 )}
-              </>
+              </Stack>
             ) : step.type === 'StepWithInput' ? (
-              <Stack space="$4">
-                <Text fos={28} col="$black" ff="$heading">
+              <Stack space="$2">
+                <Text fos={24} col="$black" ff="$heading">
                   {step.title}
                 </Text>
                 <Text fos={18} col="$greyOnWhite" ff="$body500">

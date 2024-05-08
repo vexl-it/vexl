@@ -15,7 +15,7 @@ import {contactSelectMolecule} from '../atom'
 function NiceJobHuntingSats(): JSX.Element {
   return (
     <Stack gap="$2">
-      <Text fontFamily="$heading" fontSize={32} color="$black">
+      <Text fontFamily="$heading" fontSize={24} color="$black">
         Nice job hunting sats!
       </Text>
       <Text color="$black">

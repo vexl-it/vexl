@@ -12,7 +12,7 @@ import {
 import headerStateAtom from '../../../PageWithNavigationHeader/state/headerStateAtom'
 import {
   areThereUpdatesToBeSentAtom,
-  clearUpdatesToBeSentActionAtom,
+  askAreYouSureAndClearUpdatesToBeSentActionAtom,
   submitTradeChecklistUpdatesActionAtom,
 } from '../../atoms/updatesToBeSentAtom'
 import Content from '../Content'
@@ -20,7 +20,7 @@ import OnlineOrInPersonTrade from './components/OnlineOrInPersonTrade'
 
 type Props = TradeChecklistStackScreenProps<'AgreeOnTradeDetails'>
 
-function AgreeOnTradeDetailsScreen(props: Props): JSX.Element {
+function AgreeOnTradeDetailsScreen({navigation}: Props): JSX.Element {
   const {t} = useTranslation()
   const offerForTradeChecklist = useAtomValue(fromChatAtoms.originOfferAtom)
   const areThereUpdatesToBeSent = useAtomValue(areThereUpdatesToBeSentAtom)
@@ -28,7 +28,9 @@ function AgreeOnTradeDetailsScreen(props: Props): JSX.Element {
     submitTradeChecklistUpdatesActionAtom
   )
   const store = useStore()
-  const clearUpdatesToBeSent = useSetAtom(clearUpdatesToBeSentActionAtom)
+  const askAreYouSureAndClearUpdatesToBeSent = useSetAtom(
+    askAreYouSureAndClearUpdatesToBeSentActionAtom
+  )
   const setHeaderState = useSetAtom(headerStateAtom)
 
   useFocusEffect(
@@ -50,11 +52,14 @@ function AgreeOnTradeDetailsScreen(props: Props): JSX.Element {
         }
         text={t('common.cancel')}
         onPress={() => {
-          clearUpdatesToBeSent()
-          props.navigation.navigate(
-            'ChatDetail',
-            store.get(fromChatAtoms.chatWithMessagesKeys)
-          )
+          void askAreYouSureAndClearUpdatesToBeSent()().then((success) => {
+            if (success) {
+              navigation.navigate(
+                'ChatDetail',
+                store.get(fromChatAtoms.chatWithMessagesKeys)
+              )
+            }
+          })
         }}
       />
       <SecondaryFooterButtonProxy
@@ -73,7 +78,7 @@ function AgreeOnTradeDetailsScreen(props: Props): JSX.Element {
         onPress={() => {
           void submitChangesAndSendMessage()().then((success) => {
             if (success) {
-              props.navigation.navigate(
+              navigation.navigate(
                 'ChatDetail',
                 store.get(fromChatAtoms.chatWithMessagesKeys)
               )

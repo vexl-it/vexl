@@ -105,43 +105,44 @@ function EmptyListPlaceholder({refreshing, onRefresh}: Props): JSX.Element {
   }
 
   if (filterActive) {
-    return resetFilterSuggestionVisible ? (
-      <MarketplaceSuggestion
-        mt="$4"
-        buttonText={t('offer.resetFilter')}
-        onButtonPress={resetFilterAndSaveIt}
-        onClosePress={() => {
-          setResetFilterSuggestionVisible(false)
-        }}
-        text={t('offer.noOffersToMatchFilter')}
-      />
-    ) : (
-      <EmptyListWrapper
-        buttonText={t('offer.resetFilter')}
-        onButtonPress={resetFilterAndSaveIt}
-        refreshEnabled
-        refreshing={refreshing}
-        onRefresh={onRefresh}
-      >
-        <Text
-          textAlign="center"
-          col="$greyOnWhite"
-          fos={20}
-          ff="$body600"
-          adjustsFontSizeToFit
-          numberOfLines={4}
-        >
-          {t('offer.createOfferNudge')}
-        </Text>
-        <Button
-          text={t('myOffers.addNewOffer')}
-          variant="secondary"
-          size="small"
-          onPress={() => {
-            navigation.navigate('CreateOffer')
-          }}
+    return (
+      <>
+        <MarketplaceSuggestion
+          mt="$4"
+          buttonText={t('offer.resetFilter')}
+          onButtonPress={resetFilterAndSaveIt}
+          text={t('offer.noOffersToMatchFilter')}
+          visibleStateAtom={resetFilterSuggestionVisibleAtom}
         />
-      </EmptyListWrapper>
+        {!resetFilterSuggestionVisible && (
+          <EmptyListWrapper
+            buttonText={t('offer.resetFilter')}
+            onButtonPress={resetFilterAndSaveIt}
+            refreshEnabled
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+          >
+            <Text
+              textAlign="center"
+              col="$greyOnWhite"
+              fos={20}
+              ff="$body600"
+              adjustsFontSizeToFit
+              numberOfLines={4}
+            >
+              {t('offer.createOfferNudge')}
+            </Text>
+            <Button
+              text={t('myOffers.addNewOffer')}
+              variant="secondary"
+              size="small"
+              onPress={() => {
+                navigation.navigate('CreateOffer')
+              }}
+            />
+          </EmptyListWrapper>
+        )}
+      </>
     )
   }
 

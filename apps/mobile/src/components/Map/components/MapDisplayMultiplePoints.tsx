@@ -61,12 +61,14 @@ function MMapView({
   children,
   refAtom,
   mapPadding,
+  inFocusMode,
   onMapReady,
   onRegionChangeComplete,
 }: {
   children: React.ReactNode
   refAtom?: WritableAtom<null, [v: MapView], void>
   mapPadding: EdgePadding
+  inFocusMode: boolean
   onMapReady?: () => void
   onRegionChangeComplete?: (region: Region, d: Details) => void
 }): JSX.Element {
@@ -100,13 +102,22 @@ function MMapView({
     <MapView
       ref={ref}
       initialRegion={europeRegion}
-      clusterColor={getTokens().color.main.val}
+      clusterColor={
+        inFocusMode
+          ? getTokens().color.greyAccent1.val
+          : getTokens().color.main.val
+      }
       customMapStyle={mapTheme}
       onMapLoaded={onMapLoaded}
+      layoutAnimationConf={{duration: 150}}
       minZoom={0}
       maxZoom={20}
       loadingBackgroundColor="#000000"
-      loadingIndicatorColor={getTokens().color.main.val}
+      loadingIndicatorColor={
+        inFocusMode
+          ? getTokens().color.greyAccent1.val
+          : getTokens().color.main.val
+      }
       clusteringEnabled
       loadingEnabled
       provider={PROVIDER_GOOGLE}
@@ -147,9 +158,12 @@ export default function MapDisplayMultiplePoints<T>({
     }
   )
 
+  const isInFocusMode = focusedPoints.length > 0
+
   return (
     <Stack w="100%" h="100%" position="relative">
       <MMapView
+        inFocusMode={isInFocusMode}
         refAtom={refAtom}
         mapPadding={mapPadding}
         onMapReady={onMapReady}
@@ -170,7 +184,12 @@ export default function MapDisplayMultiplePoints<T>({
               }}
             >
               <Stack w={28} h={28} alignItems="center" justifyContent="center">
-                <Stack w={8} h={8} borderRadius={4} bg="$main" />
+                <Stack
+                  w={8}
+                  h={8}
+                  borderRadius={4}
+                  bg={isInFocusMode ? '$greyOnBlack' : '$main'}
+                />
               </Stack>
             </Marker>
           )
@@ -179,6 +198,7 @@ export default function MapDisplayMultiplePoints<T>({
           return (
             <Fragment key={point.id}>
               <Marker
+                zIndex={999}
                 //  https://github.com/react-native-maps/react-native-maps/issues/4997
                 tracksViewChanges={Platform.OS === 'ios'}
                 image={markerImage}

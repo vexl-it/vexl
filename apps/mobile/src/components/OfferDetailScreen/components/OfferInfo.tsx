@@ -122,6 +122,7 @@ function OfferInfo({
         <YStack space="$2" mb="$2">
           <Stack mb="$2">
             <OfferWithBubbleTip
+              showListingType
               negative={!requestPossibleInfo.canBeRerequested}
               offer={offer}
             />

@@ -13,12 +13,14 @@ import ProductAndOtherOfferColumns from './components/ProductAndOtherOfferColumn
 // const BTC_PRAGUE_FRIEND_STAGE = '9c6r0q7LCn1oqES2pfqQDVQH91fY8ZHYcJKbJYOU7hE='
 
 function OfferInfoPreview({
+  showListingType,
   isMine,
   offer,
   onGrayBackground,
   negative,
   reduceDescriptionLength,
 }: {
+  showListingType?: boolean
   isMine?: boolean
   offer: OfferInfo
   onGrayBackground?: boolean
@@ -32,22 +34,22 @@ function OfferInfoPreview({
   // )
 
   return (
-    <Stack>
+    <Stack space="$2">
       {/* {(offer.privatePart.commonFriends.includes(BTC_PRAGUE_FRIEND) ||
         offer.privatePart.commonFriends.includes(BTC_PRAGUE_FRIEND_STAGE)) && (
         <Stack f={1} ai="center" jc="space-between">
           <SvgImage width={60} height={20} source={btcPragueLogoSvg} />
         </Stack>
       )} */}
-      <XStack ai="center" jc="space-between" mb="$3">
-        {!!offer.publicPart.listingType && (
+      <XStack ai="center" jc="space-between">
+        {!!(!!isMine || showListingType) && !!offer.publicPart.listingType && (
           <Stack
             ai="center"
             jc="center"
             bc={onGrayBackground ? '$greyAccent3' : '$greyAccent5'}
-            py="$2"
-            px="$3"
-            br="$3"
+            py="$1"
+            px="$2"
+            br="$2"
           >
             <Text fos={12} col="$greyOnWhite" ff="$body600">
               {t(`offerForm.${offer.publicPart.listingType}`)}
@@ -64,12 +66,12 @@ function OfferInfoPreview({
         )}
       </XStack>
       <XStack ai="flex-start" jc="space-between">
-        <XStack mb="$4">
+        <XStack mb="$1">
           <Text
             flex={1}
             numberOfLines={reduceDescriptionLength ? 5 : undefined}
             ellipsizeMode={reduceDescriptionLength ? 'tail' : undefined}
-            fos={20}
+            fos={18}
             color={negative ? '$greyOnBlack' : '$black'}
             ff="$body500"
           >

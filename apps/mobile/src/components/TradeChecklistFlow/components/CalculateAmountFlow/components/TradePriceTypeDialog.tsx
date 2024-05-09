@@ -58,7 +58,7 @@ function TradePriceTypeDialog(): JSX.Element | null {
                 </Stack>
                 {tradePriceType === 'live' ? (
                   <Text fos={16} ff="$body500" col="$greyOnBlack">
-                    {t('tradeChecklist.calculateAmount.sourceCoinGecko')}
+                    {t('tradeChecklist.calculateAmount.sourceYadio')}
                   </Text>
                 ) : (
                   <Stack />

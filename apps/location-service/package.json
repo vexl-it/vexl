@@ -1,6 +1,7 @@
 {
   "name": "@vexl-next/location-service",
   "main": "dist/index.js",
+  "type": "module",
   "scripts": {
     "test": "jest",
     "test:watch": "jest --watch",

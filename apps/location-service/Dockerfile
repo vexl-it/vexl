@@ -1,4 +1,4 @@
-FROM node:19-alpine as builder
+FROM node:19 as builder
 
 WORKDIR /app
 
@@ -11,9 +11,13 @@ RUN yarn build
 # RUN npx @sentry/wizard@latest -i sourcemaps
 
 
-FROM node:19-alpine as runner
+FROM node:19 as runner
 
 
-COPY --from=builder /app/apps/location-service/dist dist
+COPY --from=builder /app/apps/location-service/ /app/apps/location-service
+COPY --from=builder /app/node_modules /app/node_modules
+COPY --from=builder /app/package.json /app/package.json
 
-CMD ["node", "dist/index.js"]
+WORKDIR /app/apps/location-service
+
+CMD ["node", "dist/index.cjs"]

@@ -23,7 +23,7 @@ function VersionTextWithSecretDoor({
         {t('settings.version', {version})}
       </Text>
       <Text ta="center" fos={12} col="$greyAccent2">
-        {t('settings.btcPriceSourceCredit')}
+        {t('settings.btcPriceSourceCreditYadio')}
       </Text>
     </SecretDoor>
   )

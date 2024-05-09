@@ -77,18 +77,11 @@ function ChatInfoModal(): JSX.Element | null {
             <ChatRequestPreview mode="offerFirst" />
           </Stack>
           {!!enableHiddenFeatures && (
-            <>
-              <Text>
-                Last reported version: {chat.lastReportedVersion ?? 'none'} :
-                gotVersion: {chat.otherSideVersion ?? 'none'}
-              </Text>
-              <Text>
-                Last reported cypher:{' '}
-                {chat.lastReportedFcmToken?.cypher ?? 'none'} : gotFcmToken:{' '}
-                {chat.otherSideFcmCypher ?? 'none'}
-              </Text>
-              <Text>(this will NOT be visible in production)</Text>
-            </>
+            <Text>
+              Last reported: {chat.lastReportedVersion ?? 'none'} : gotVersion:{' '}
+              {chat.otherSideVersion ?? 'none'} (this will NOT be visible in
+              production)
+            </Text>
           )}
           <ButtonStack
             buttons={[

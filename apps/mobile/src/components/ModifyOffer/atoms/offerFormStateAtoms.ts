@@ -723,7 +723,9 @@ export const offerFormMolecule = molecule(() => {
     const offer = get(offerAtom)
     const belowProgressLeft = get(modifyOfferLoaderTitleAtom)
 
-    const targetValue = !offer.offerInfo.publicPart.active
+    const targetValue = !get(offerActiveAtom)
+
+    set(offerActiveAtom, targetValue)
 
     set(progressModal.show, {
       title: t('editOffer.editingYourOffer'),
@@ -748,6 +750,7 @@ export const offerFormMolecule = molecule(() => {
       }),
       TE.matchE(
         (e) => {
+          set(offerActiveAtom, !targetValue)
           set(progressModal.hide)
           showErrorAlert({
             title:

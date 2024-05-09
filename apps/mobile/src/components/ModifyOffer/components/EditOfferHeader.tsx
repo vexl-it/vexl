@@ -84,7 +84,9 @@ function EditOfferHeader({offer}: Props): JSX.Element {
                 variant="dark"
                 icon={offerActive ? pauseSvg : playSvg}
                 onPress={() => {
-                  void toggleOfferActivePress()()
+                  void toggleOfferActivePress()().then((success) => {
+                    if (success) safeGoBack()
+                  })
                 }}
               />
             </XStack>

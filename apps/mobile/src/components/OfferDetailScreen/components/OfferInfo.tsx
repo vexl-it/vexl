@@ -120,10 +120,12 @@ function OfferInfo({
       </ScreenTitle>
       <ScrollView showsVerticalScrollIndicator={false}>
         <YStack space="$2" mb="$2">
-          <OfferWithBubbleTip
-            negative={!requestPossibleInfo.canBeRerequested}
-            offer={offer}
-          />
+          <Stack mb="$2">
+            <OfferWithBubbleTip
+              negative={!requestPossibleInfo.canBeRerequested}
+              offer={offer}
+            />
+          </Stack>
           <CommonFriends
             contactsHashes={offer.offerInfo.privatePart.commonFriends}
             offer={offer}

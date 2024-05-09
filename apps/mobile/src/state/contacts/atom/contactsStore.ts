@@ -31,22 +31,21 @@ export const newContactsAtom = atom((get) =>
   get(storedContactsAtom).filter((contact) => !contact.flags.seen)
 )
 
-export const resolveAllContactsAsSeenActionAtom = atom(null, (get, set) => {
-  set(storedContactsAtom, (contacts) =>
-    contacts.map((contact) =>
-      contact.flags.seen
-        ? contact
-        : {
-            ...contact,
-            flags: {...contact.flags, seen: true},
-          }
+export const resolveAllContactsAsSeenActionAtom = atom(
+  (get) => get(storedContactsAtom).some((contact) => !contact.flags.seen),
+  (get, set) => {
+    set(storedContactsAtom, (contacts) =>
+      contacts.map((contact) =>
+        contact.flags.seen
+          ? contact
+          : {
+              ...contact,
+              flags: {...contact.flags, seen: true},
+            }
+      )
     )
-  )
-})
-
-export const areThereNewContactsAtom = atom((get) => {
-  return get(storedContactsAtom).some((contact) => !contact.flags.seen)
-})
+  }
+)
 
 export const normalizedContactsAtom = atom(
   (get): StoredContactWithComputedValues[] =>

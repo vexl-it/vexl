@@ -1,5 +1,4 @@
 import {useNavigation} from '@react-navigation/native'
-import {useAtom} from 'jotai'
 import {RefreshControl, ScrollView} from 'react-native'
 import {YStack} from 'tamagui'
 import {
@@ -23,12 +22,6 @@ function EmptyMarketplaceSuggestions({
   const {t} = useTranslation()
   const navigation = useNavigation()
   const tabBarEndsAt = usePixelsFromBottomWhereTabsEnd()
-  const [createOfferSuggestionVisible, setCreateOfferSuggestionVisible] =
-    useAtom(createOfferSuggestionVisibleAtom)
-  const [
-    addMoreContactsSuggestionVisible,
-    setAddMoreContactsSuggestionVisible,
-  ] = useAtom(addMoreContactsSuggestionVisibleAtom)
 
   return (
     <ScrollView
@@ -38,30 +31,22 @@ function EmptyMarketplaceSuggestions({
       contentContainerStyle={{paddingBottom: tabBarEndsAt + 25}}
     >
       <YStack mt="$4" space="$4">
-        {!!createOfferSuggestionVisible && (
-          <MarketplaceSuggestion
-            buttonText={t('myOffers.addNewOffer')}
-            onButtonPress={() => {
-              navigation.navigate('CreateOffer')
-            }}
-            onClosePress={() => {
-              setCreateOfferSuggestionVisible(false)
-            }}
-            text={t('suggestion.createYourFirstOffer')}
-          />
-        )}
-        {!!addMoreContactsSuggestionVisible && (
-          <MarketplaceSuggestion
-            buttonText={t('suggestion.addMoreContacts')}
-            onButtonPress={() => {
-              navigation.navigate('SetContacts', {})
-            }}
-            onClosePress={() => {
-              setAddMoreContactsSuggestionVisible(false)
-            }}
-            text={t('suggestion.noOffersFromOthersYet')}
-          />
-        )}
+        <MarketplaceSuggestion
+          buttonText={t('myOffers.addNewOffer')}
+          onButtonPress={() => {
+            navigation.navigate('CreateOffer')
+          }}
+          text={t('suggestion.createYourFirstOffer')}
+          visibleStateAtom={createOfferSuggestionVisibleAtom}
+        />
+        <MarketplaceSuggestion
+          buttonText={t('suggestion.addMoreContacts')}
+          onButtonPress={() => {
+            navigation.navigate('SetContacts', {})
+          }}
+          text={t('suggestion.noOffersFromOthersYet')}
+          visibleStateAtom={addMoreContactsSuggestionVisibleAtom}
+        />
         <ImportNewContactsSuggestion />
       </YStack>
     </ScrollView>

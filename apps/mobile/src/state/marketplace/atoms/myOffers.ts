@@ -27,11 +27,21 @@ export const myActiveOffersAtom = focusAtom(myOffersAtom, (optic) =>
   optic.filter((myOffer) => myOffer.offerInfo.publicPart.active)
 )
 
-export const isThereAnyOfferWithoutListingTypeAtom = focusAtom(
-  myOffersAtom,
-  (optic) => optic.find((myOffer) => !myOffer.offerInfo.publicPart.listingType)
-)
+export const displayAddListingTypeAtom = atom<boolean>(true)
 
-export const hideSuggestionToAddListingTypeToMyOffersAtom = atom<boolean>(false)
+export const shouldDisplaySuggestionToAddListingTypeAtom = atom(
+  (get) => {
+    const myOffers = get(myOffersAtom)
+    const displayAddListingType = get(displayAddListingTypeAtom)
+    const anyOfferWithoutListingType = myOffers.some(
+      (offer) => !offer.offerInfo.publicPart.listingType
+    )
+
+    return displayAddListingType && anyOfferWithoutListingType
+  },
+  (get, set, visible: boolean) => {
+    set(displayAddListingTypeAtom, visible)
+  }
+)
 
 export const selectedMyOffersSortingOptionAtom = atom<Sort>('NEWEST_OFFER')

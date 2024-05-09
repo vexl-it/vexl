@@ -1,3 +1,5 @@
+import {atom, useAtom, type WritableAtom} from 'jotai'
+import {useMemo} from 'react'
 import {TouchableOpacity} from 'react-native'
 import {getTokens, Stack, Text, XStack, YStack, type YStackProps} from 'tamagui'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
@@ -10,30 +12,43 @@ import vexlerAvatarSvg from '../images/vexlerAvatarSvg'
 
 interface Props extends YStackProps {
   buttonText: string
+  hideCloseButton?: boolean
   type?: 'warning' | 'info'
   onButtonPress: () => void
-  onClosePress?: () => void
   text: string
+  visibleStateAtom?: WritableAtom<boolean, [visible: boolean], void>
 }
 
 function MarketplaceSuggestion({
   buttonText,
+  hideCloseButton,
   onButtonPress,
-  onClosePress,
   type,
   text,
+  visibleStateAtom: nullableVisibleStateAtom,
   ...props
-}: Props): JSX.Element {
+}: Props): JSX.Element | null {
   const tokens = getTokens()
   const {t} = useTranslation()
+
+  const visibleStateAtom = useMemo(() => {
+    return nullableVisibleStateAtom ?? atom(true)
+  }, [nullableVisibleStateAtom])
+  const [isVisible, setIsVisible] = useAtom(visibleStateAtom)
+
+  if (!isVisible) return null
 
   return (
     <YStack px="$2" {...props}>
       <Stack mb="$2">
         <Stack pos="relative" bc="$white" py="$6" pl="$6" pr="$7" br="$5">
-          {!!onClosePress && (
+          {!hideCloseButton && (
             <Stack pos="absolute" right={8} top={8}>
-              <TouchableOpacity onPress={onClosePress}>
+              <TouchableOpacity
+                onPress={() => {
+                  setIsVisible(false)
+                }}
+              >
                 <Image
                   stroke={tokens.color.greyOnWhite.val}
                   source={closeSvg}

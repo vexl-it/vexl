@@ -48,7 +48,7 @@ function Description({
 
   return (
     <YStack>
-      <Text ff="$body600" fos={16} col="$greyOnBlack">
+      <Text ff="$body500" fos={16} col="$white">
         {subtitle}
       </Text>
       <Stack mt="$4" br="$4" p="$4" bc="$grey">
@@ -63,7 +63,7 @@ function Description({
         />
         <Stack ai="flex-end">
           <Text
-            col="$white"
+            col="$greyOnBlack"
             fos={16}
             ff="$body600"
           >{`${offerDescription.length}/${MAX_INPUT_LENGTH}`}</Text>

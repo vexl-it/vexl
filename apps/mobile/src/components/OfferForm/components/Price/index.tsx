@@ -81,7 +81,7 @@ function Price({
         )}
       </XStack>
       <Text
-        ff="$body600"
+        ff="$body500"
         mb="$4"
         col={!!singlePriceActive || inFilter ? '$white' : '$greyOnWhite'}
         fos={16}

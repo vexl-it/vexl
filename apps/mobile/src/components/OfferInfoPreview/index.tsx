@@ -56,15 +56,29 @@ function OfferInfoPreview({
             </Text>
           </Stack>
         )}
-        {!!isMine && !offer.publicPart.listingType && (
-          <XStack ai="center" space="$2">
-            <SvgImage source={infoSvg} fill={getTokens().color.red.val} />
-            <Text fos={12} col="$red" ff="$body600">
-              {t('offerForm.listingTypeNotSet')}
-            </Text>
-          </XStack>
-        )}
+        <XStack space="$1">
+          {isOfferExpired(offer.publicPart.expirationDate) && (
+            <SvgImage
+              stroke={getTokens().color.$greyOnBlack.val}
+              source={clockSvg}
+            />
+          )}
+          {!offer.publicPart.active && (
+            <SvgImage
+              stroke={getTokens().color.$greyOnBlack.val}
+              source={pauseSvg}
+            />
+          )}
+        </XStack>
       </XStack>
+      {!!isMine && !offer.publicPart.listingType && (
+        <XStack ai="center" space="$2" fs={1}>
+          <SvgImage source={infoSvg} fill={getTokens().color.red.val} />
+          <Text fos={12} col="$red" ff="$body600" numberOfLines={3}>
+            {t('offerForm.listingTypeNotSet')}
+          </Text>
+        </XStack>
+      )}
       <XStack ai="flex-start" jc="space-between">
         <XStack mb="$1">
           <Text
@@ -77,20 +91,6 @@ function OfferInfoPreview({
           >
             {offer.publicPart.offerDescription}
           </Text>
-          <XStack space="$1">
-            {isOfferExpired(offer.publicPart.expirationDate) && (
-              <SvgImage
-                stroke={getTokens().color.$greyOnBlack.val}
-                source={clockSvg}
-              />
-            )}
-            {!offer.publicPart.active && (
-              <SvgImage
-                stroke={getTokens().color.$greyOnBlack.val}
-                source={pauseSvg}
-              />
-            )}
-          </XStack>
         </XStack>
       </XStack>
       <XStack space="$1">

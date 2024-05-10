@@ -69,7 +69,7 @@ function PremiumOrDiscount({
         />
       </XStack>
       <Text
-        ff="$body600"
+        ff="$body500"
         mb="$4"
         col={feeState === 'WITH_FEE' ? '$white' : '$greyOnWhite'}
         fos={16}
@@ -86,7 +86,7 @@ function PremiumOrDiscount({
             setDetailVisible(true)
           }}
         >
-          <Text mr="$2" fos={16} ff="$body600" col="$greyOnWhite">
+          <Text mr="$2" fos={16} ff="$body500" col="$white">
             {t('offerForm.premiumOrDiscount.marketPrice')}
           </Text>
         </PremiumOrDiscountContent>

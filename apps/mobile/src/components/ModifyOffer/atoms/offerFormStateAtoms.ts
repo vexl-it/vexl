@@ -770,14 +770,16 @@ export const offerFormMolecule = molecule(() => {
             T.chain(() =>
               set(progressModal.hideDeffered, {
                 data: {
-                  title: t('editOffer.offerEditSuccess'),
+                  title: !targetValue
+                    ? t('editOffer.pausingOfferSuccess')
+                    : t('editOffer.offerEditSuccess'),
                   bottomText: t('editOffer.youCanCheckYourOffer'),
                   belowProgressLeft: targetValue
                     ? belowProgressLeft.doneText
-                    : t('editOffer.pausingOfferSuccess'),
+                    : t('editOffer.offerEditSuccess'),
                   indicateProgress: {type: 'done'},
                 },
-                delayMs: 2000,
+                delayMs: 1500,
               })
             ),
             T.map(() => true)

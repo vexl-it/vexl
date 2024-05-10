@@ -3,12 +3,12 @@ import {useAtomValue, type Atom} from 'jotai'
 import {useMemo, useState} from 'react'
 import {TouchableOpacity} from 'react-native'
 import {Stack, Text, YStack, getTokens} from 'tamagui'
+import chevronRightSvg from '../../../images/chevronRightSvg'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import Help from '../../Help'
 import SvgImage from '../../Image'
 import infoSvg from '../../images/infoSvg'
 import stayAnonymousSvg from '../../images/stayAnonymousSvg'
-import arrowRightSvg from '../images/arrowRightSvg'
 
 interface Props {
   feeAmountAtom: Atom<number>
@@ -35,7 +35,7 @@ function Info({
     } else if (absFeeAmount > sliderThreshold / 2) {
       return tokens.color.red.val
     } else {
-      return tokens.color.greyOnBlack.val
+      return tokens.color.white.val
     }
   }, [sliderThreshold, feeAmount, tokens.color])
 
@@ -99,8 +99,13 @@ function Info({
           <Stack fs={1} px="$2">
             <Text col={elementsColor}>{message}</Text>
           </Stack>
-          <Stack als="flex-end">
-            <SvgImage stroke={elementsColor} source={arrowRightSvg} />
+          <Stack als="center">
+            <SvgImage
+              width={20}
+              height={20}
+              stroke={elementsColor}
+              source={chevronRightSvg}
+            />
           </Stack>
         </Stack>
       </TouchableOpacity>

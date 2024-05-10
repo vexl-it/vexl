@@ -41,7 +41,7 @@ function PremiumOrDiscountSlider({
           fos={16}
           col={
             sliderValue >= 0
-              ? '$greyOnBlack'
+              ? '$white'
               : sliderValue < -sliderThreshold / 2
               ? '$red'
               : '$main'
@@ -57,7 +57,7 @@ function PremiumOrDiscountSlider({
         <Text
           col={
             sliderValue <= 0
-              ? '$greyOnBlack'
+              ? '$white'
               : sliderValue > sliderThreshold / 2
               ? '$red'
               : '$main'

@@ -4,7 +4,7 @@ import {atom} from 'jotai'
 import {z} from 'zod'
 import {atomWithParsedMmkvStorage} from '../../utils/atomUtils/atomWithParsedMmkvStorage'
 
-const fcmCypherToKeyHolderAtom = atomWithParsedMmkvStorage(
+export const fcmCypherToKeyHolderAtom = atomWithParsedMmkvStorage(
   'fcmCypherToKeyHolder',
   {data: {}},
   z.object({data: z.record(FcmCypher, PrivateKeyHolder)})
@@ -17,7 +17,9 @@ export const registerFcmCypherActionAtom = atom(
     set,
     {fcmCypher, keyHolder}: {fcmCypher: FcmCypher; keyHolder: PrivateKeyHolder}
   ): void => {
-    set(fcmCypherToKeyHolderAtom, (prev) => ({...prev, [fcmCypher]: keyHolder}))
+    set(fcmCypherToKeyHolderAtom, (prev) => ({
+      data: {...prev.data, [fcmCypher]: keyHolder},
+    }))
   }
 )
 

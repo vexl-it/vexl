@@ -47,7 +47,9 @@ const acceptMessagingRequestAtom = atom(
 
     return pipe(
       TE.Do,
-      TE.chainTaskK(() => set(generateMyFcmTokenInfoActionAtom)),
+      TE.chainTaskK(() =>
+        set(generateMyFcmTokenInfoActionAtom, undefined, chat.inbox.privateKey)
+      ),
       TE.bindTo('myFcmCypher'),
       TE.bindW('configmMessage', ({myFcmCypher}) =>
         confirmMessagingRequest({

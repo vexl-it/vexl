@@ -43,9 +43,9 @@ export function callWithNotificationService<
         '<',
         FE_VERSION_SUPPORTING_V2_NOTIFICATIONS
       )
-    )
+    ) {
       return f({...(fArgs as T), notificationServiceReady: false})
-
+    }
     return pipe(
       f({...(fArgs as T), notificationServiceReady: true}),
       TE.chainW((result) => {

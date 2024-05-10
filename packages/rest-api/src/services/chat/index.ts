@@ -151,7 +151,14 @@ export function privateApi({
       return pipe(
         axiosCallWithValidation(
           axiosInstance,
-          {method: 'post', url: '/inboxes/approval/request', data},
+          {
+            method: 'post',
+            url: '/inboxes/approval/request',
+            data,
+            params: {
+              notificationServiceReady: data.notificationServiceReady,
+            },
+          },
           RequestApprovalResponse
         ),
         TE.mapLeft((e) => {
@@ -177,7 +184,14 @@ export function privateApi({
       return pipe(
         axiosCallWithValidation(
           axiosInstance,
-          {method: 'post', url: '/inboxes/approval/cancel', data},
+          {
+            method: 'post',
+            url: '/inboxes/approval/cancel',
+            data,
+            params: {
+              notificationServiceReady: data.notificationServiceReady,
+            },
+          },
           CancelApprovalResponse
         ),
         TE.mapLeft((e) => {
@@ -202,13 +216,20 @@ export function privateApi({
         })
       )
     },
-    approveRequest(data: ApproveRequestRequest) {
+    approveRequest(originalData: ApproveRequestRequest) {
       return pipe(
-        addChallenge(data),
+        addChallenge(originalData),
         TE.chainW((data) =>
           axiosCallWithValidation(
             axiosInstance,
-            {method: 'post', url: '/inboxes/approval/confirm', data},
+            {
+              method: 'post',
+              url: '/inboxes/approval/confirm',
+              data,
+              params: {
+                notificationServiceReady: originalData.notificationServiceReady,
+              },
+            },
             ApproveRequestResponse
           )
         ),
@@ -244,9 +265,9 @@ export function privateApi({
         DeleteInboxesResponse
       )
     },
-    leaveChat(data: LeaveChatRequest) {
+    leaveChat(originalData: LeaveChatRequest) {
       return pipe(
-        addChallenge(data),
+        addChallenge(originalData),
         TE.map(({publicKey, ...data}) => ({
           ...data,
           senderPublicKey: publicKey,
@@ -254,7 +275,14 @@ export function privateApi({
         TE.chainW((data) =>
           axiosCallWithValidation(
             axiosInstance,
-            {method: 'post', url: '/inboxes/leave-chat', data},
+            {
+              method: 'post',
+              url: '/inboxes/leave-chat',
+              data,
+              params: {
+                notificationServiceReady: originalData.notificationServiceReady,
+              },
+            },
             LeaveChatResponse
           )
         ),
@@ -296,9 +324,9 @@ export function privateApi({
         })
       )
     },
-    sendMessage(data: SendMessageRequest) {
+    sendMessage(originalData: SendMessageRequest) {
       return pipe(
-        addChallenge(data),
+        addChallenge(originalData),
         TE.map(({publicKey, ...data}) => ({
           ...data,
           senderPublicKey: publicKey,
@@ -306,7 +334,14 @@ export function privateApi({
         TE.chainW((data) =>
           axiosCallWithValidation(
             axiosInstance,
-            {method: 'post', url: '/inboxes/messages', data},
+            {
+              method: 'post',
+              url: '/inboxes/messages',
+              data,
+              params: {
+                notificationServiceReady: originalData.notificationServiceReady,
+              },
+            },
             SendMessageResponse
           )
         ),

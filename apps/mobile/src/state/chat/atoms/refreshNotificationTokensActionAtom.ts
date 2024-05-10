@@ -66,7 +66,11 @@ export const sendFcmCypherUpdateMessageActionAtom = atom(
           return o
         }),
         T.bind('fcmTokenInfo', () =>
-          set(generateMyFcmTokenInfoActionAtom, notificationToken)
+          set(
+            generateMyFcmTokenInfoActionAtom,
+            notificationToken,
+            chatWithMessages.chat.inbox.privateKey
+          )
         ),
         T.bind('messageToSend', ({fcmTokenInfo}) =>
           T.of(

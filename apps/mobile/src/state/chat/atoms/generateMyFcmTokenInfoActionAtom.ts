@@ -1,3 +1,4 @@
+import {type PrivateKeyHolder} from '@vexl-next/cryptography/src/KeyHolder'
 import {type MyFcmTokenInfo} from '@vexl-next/domain/src/general/messaging'
 import {type FcmToken} from '@vexl-next/domain/src/utility/FcmToken.brand'
 import {encryptFcmForOffer} from '@vexl-next/resources-utils/src/notifications/encryptFcmForOffer'
@@ -8,12 +9,18 @@ import {pipe} from 'fp-ts/lib/function'
 import {atom} from 'jotai'
 import {getNotificationToken} from '../../../utils/notifications'
 import reportError from '../../../utils/reportError'
+import {registerFcmCypherActionAtom} from '../../notifications/fcmCypherToKeyHolderAtom'
 import {getOrFetchNotificationServerPublicKeyActionAtom} from '../../notifications/fcmServerPublicKeyStore'
 import {type ChatWithMessages} from '../domain'
 
 const generateMyFcmTokenInfoActionAtom = atom(
   null,
-  (get, set, fcmToken?: FcmToken): TO.TaskOption<MyFcmTokenInfo> => {
+  (
+    get,
+    set,
+    fcmToken: FcmToken | undefined,
+    keyHolder: PrivateKeyHolder
+  ): TO.TaskOption<MyFcmTokenInfo> => {
     return pipe(
       fcmToken ? T.of(fcmToken) : getNotificationToken(),
       T.bindTo('notificationToken'),
@@ -41,11 +48,16 @@ const generateMyFcmTokenInfoActionAtom = atom(
               )
               return TO.none
             },
-            (fcmCypher) =>
-              TO.some({
+            (fcmCypher) => {
+              set(registerFcmCypherActionAtom, {
+                fcmCypher,
+                keyHolder,
+              })
+              return TO.some({
                 cypher: fcmCypher,
                 token: notificationToken,
               } satisfies MyFcmTokenInfo)
+            }
           )
         )
       })

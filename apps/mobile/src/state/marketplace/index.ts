@@ -1,3 +1,4 @@
+import {type PrivateKeyHolder} from '@vexl-next/cryptography/src/KeyHolder'
 import {type ChatOrigin} from '@vexl-next/domain/src/general/messaging'
 import {
   type IntendedConnectionLevel,
@@ -327,6 +328,7 @@ export const createOfferAtom = atom<
       payloadPublic: OfferPublicPart
       intendedConnectionLevel: IntendedConnectionLevel
       onProgress?: (status: OfferEncryptionProgress) => void
+      offerKey: PrivateKeyHolder
     },
   ],
   TE.TaskEither<
@@ -352,6 +354,7 @@ export const createOfferAtom = atom<
         set(addFCMCypherToPublicPayloadActionAtom, {
           publicPart: payloadPublic,
           fcmToken: Option.fromNullable(fcmToken),
+          keyHolder: params.offerKey,
         })
       )
     ),
@@ -420,7 +423,10 @@ export const updateOfferAtom = atom<
       symmetricKey: SymmetricKey
       adminId: OfferAdminId
       intendedConnectionLevel: IntendedConnectionLevel
-    },
+    } & (
+      | {updateFcmCypher: false}
+      | {updateFcmCypher: true; offerKey: PrivateKeyHolder}
+    ),
   ],
   TE.TaskEither<
     | ApiErrorUpdatingOffer
@@ -439,14 +445,21 @@ export const updateOfferAtom = atom<
   return pipe(
     TE.Do,
     TE.bindW('fcmToken', () => pipe(getNotificationToken(), TE.fromTask)),
-    TE.bindW('publicPayloadWithNotificationToken', ({fcmToken}) =>
-      TE.fromTask(
+    TE.bindW('publicPayloadWithNotificationToken', ({fcmToken}) => {
+      if (!params.updateFcmCypher) {
+        return TE.right({
+          publicPart: payloadPublic,
+          tokenSuccessfullyAdded: false,
+        })
+      }
+      return TE.fromTask(
         set(addFCMCypherToPublicPayloadActionAtom, {
           publicPart: payloadPublic,
           fcmToken: Option.fromNullable(fcmToken),
+          keyHolder: params.offerKey,
         })
       )
-    ),
+    }),
     TE.bindW(
       'updateResult',
       ({publicPayloadWithNotificationToken: {publicPart}}) =>

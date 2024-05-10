@@ -6,6 +6,7 @@ import {Option} from 'effect'
 import {getDefaultStore} from 'jotai'
 import processChatNotificationActionAtom from '../../state/notifications/processChatNotification'
 import reportError from '../reportError'
+import decryptNotificationIfEncryptedActionAtom from './decryptNotificationIfEncryptedActionAtom'
 import {showDebugNotificationIfEnabled} from './showDebugNotificationIfEnabled'
 import {showUINotificationFromRemoteMessage} from './showUINotificationFromRemoteMessage'
 
@@ -13,15 +14,13 @@ export async function processBackgroundMessage(
   remoteMessage: FirebaseMessagingTypes.RemoteMessage
 ): Promise<void> {
   try {
-    console.info('📳 Background notification received', remoteMessage)
-    await showUINotificationFromRemoteMessage(remoteMessage)
+    const data = (
+      await getDefaultStore().set(
+        decryptNotificationIfEncryptedActionAtom,
+        remoteMessage.data
+      )
+    ).pipe(Option.getOrElse(() => remoteMessage.data))
 
-    void showDebugNotificationIfEnabled({
-      title: `Background notification received`,
-      body: `type: ${remoteMessage?.data?.type ?? '[empty]'}`,
-    })
-
-    const data = remoteMessage.data
     if (!data) {
       console.info(
         '📳 Nothing to process. Notification does not include any data'
@@ -29,14 +28,21 @@ export async function processBackgroundMessage(
       return
     }
 
-    const chatMessageNotificationOption =
-      ChatNotificationData.parseUnkownOption(remoteMessage.data)
-    if (Option.isSome(chatMessageNotificationOption)) {
-      await getDefaultStore().set(
-        processChatNotificationActionAtom,
-        chatMessageNotificationOption.value
-      )()
+    const chatNotificationDataOption =
+      ChatNotificationData.parseUnkownOption(data)
+    if (Option.isSome(chatNotificationDataOption)) {
+      await getDefaultStore().set(processChatNotificationActionAtom, data)()
+      return
     }
+
+    console.info('📳 Background notification received', remoteMessage)
+    if (!(data instanceof ChatNotificationData))
+      await showUINotificationFromRemoteMessage(data)
+
+    void showDebugNotificationIfEnabled({
+      title: `Background notification received`,
+      body: `type: ${remoteMessage?.data?.type ?? '[empty]'}`,
+    })
   } catch (error) {
     void showDebugNotificationIfEnabled({
       title: 'Error while processing notification on background',

@@ -202,15 +202,17 @@ const recreateInboxAndUpdateOfferAtom = atom(
           },
         })
       ),
-      TE.chainW(({publicKeyPemBase64}) => {
+      TE.chainW((keyHolder) => {
         return set(updateOfferAtom, {
           payloadPublic: {
             ...offerWithoutInbox.offerInfo.publicPart,
-            offerPublicKey: publicKeyPemBase64,
+            offerPublicKey: keyHolder.publicKeyPemBase64,
           },
           symmetricKey,
           adminId,
           intendedConnectionLevel,
+          updateFcmCypher: true,
+          offerKey: keyHolder,
         })
       }),
       TE.match(

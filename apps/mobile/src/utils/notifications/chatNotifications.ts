@@ -105,25 +105,46 @@ export async function showChatNotification({
           sender: newMessage.message.senderPublicKey,
         })
 
-  await notifee.displayNotification({
-    title: userName ?? t(`notifications.${type}.title`, {them: userName ?? ''}),
-    body:
-      newMessage.message.text ??
-      t(`notifications.${type}.body`, {them: userName ?? ''}),
-    data: SystemChatNotificationData.encode(
-      new SystemChatNotificationData({
-        inbox: inbox.inbox.privateKey.publicKeyPemBase64,
-        sender: newMessage.message.senderPublicKey,
-      })
-    ),
-    android: {
-      groupId,
-      channelId: await getChannelForMessages(),
-      pressAction: {
-        id: 'default',
+  if (type === 'MESSAGE') {
+    await notifee.displayNotification({
+      title:
+        userName ?? t(`notifications.${type}.title`, {them: userName ?? ''}),
+      body:
+        newMessage.message.text ??
+        t(`notifications.${type}.body`, {them: userName ?? ''}),
+      data: SystemChatNotificationData.encode(
+        new SystemChatNotificationData({
+          inbox: inbox.inbox.privateKey.publicKeyPemBase64,
+          sender: newMessage.message.senderPublicKey,
+        })
+      ),
+      android: {
+        groupId,
+        channelId: await getChannelForMessages(),
+        pressAction: {
+          id: 'default',
+        },
       },
-    },
-  })
+    })
+  } else {
+    await notifee.displayNotification({
+      title: t(`notifications.${type}.title`, {them: userName ?? ''}),
+      body: t(`notifications.${type}.body`, {them: userName ?? ''}),
+      data: SystemChatNotificationData.encode(
+        new SystemChatNotificationData({
+          inbox: inbox.inbox.privateKey.publicKeyPemBase64,
+          sender: newMessage.message.senderPublicKey,
+        })
+      ),
+      android: {
+        groupId,
+        channelId: await getChannelForMessages(),
+        pressAction: {
+          id: 'default',
+        },
+      },
+    })
+  }
 
   if (type === 'REQUEST_MESSAGING') {
     await notifee.displayNotification({

@@ -1,17 +1,11 @@
-import {Schema} from '@effect/schema'
-import messaging, {
-  type FirebaseMessagingTypes,
-} from '@react-native-firebase/messaging'
+import messaging from '@react-native-firebase/messaging'
 import {useNavigation} from '@react-navigation/native'
-import {
-  ChatNotificationData,
-  EncryptedNotificationData,
-} from '@vexl-next/domain/src/general/notifications'
-import {decryptChatNotificationPayload} from '@vexl-next/resources-utils/src/notifications/notificationPayloadCrypto'
-import {Effect, Option} from 'effect'
-import {atom, useSetAtom, useStore} from 'jotai'
+import {ChatNotificationData} from '@vexl-next/domain/src/general/notifications'
+import {Option} from 'effect'
+import {useSetAtom, useStore} from 'jotai'
 import {useEffect} from 'react'
 import checkAndShowCreateOfferPrompt from '../utils/notifications/checkAndShowCreateOfferPrompt'
+import decryptNotificationIfEncryptedActionAtom from '../utils/notifications/decryptNotificationIfEncryptedActionAtom'
 import {
   CREATE_OFFER_PROMPT,
   NEW_CONNECTION,
@@ -22,65 +16,7 @@ import {showUINotificationFromRemoteMessage} from '../utils/notifications/showUI
 import reportError from '../utils/reportError'
 import {fetchAndStoreMessagesForInboxAtom} from './chat/atoms/fetchNewMessagesActionAtom'
 import {updateAllOffersConnectionsActionAtom} from './connections/atom/offerToConnectionsAtom'
-import {getKeyHolderForFcmCypherActionAtom} from './notifications/fcmCypherToKeyHolderAtom'
 import processChatNotificationActionAtom from './notifications/processChatNotification'
-
-const decryptNotificationIfEncryptedActionAtom = atom(
-  null,
-  (
-    get,
-    set,
-    data: FirebaseMessagingTypes.RemoteMessage['data']
-  ): Promise<Option.Option<ChatNotificationData>> => {
-    if (!data) return Promise.resolve(Option.none())
-
-    return Effect.gen(function* (_) {
-      const notificationData = yield* _(
-        Schema.decodeUnknown(EncryptedNotificationData)(data)
-      )
-      const key = set(
-        getKeyHolderForFcmCypherActionAtom,
-        notificationData.targetCypher
-      )
-      if (!key) {
-        reportError(
-          'warn',
-          new Error(
-            'Error decrypting notification FCM - unable to find private key for cypher'
-          )
-        )
-        return Option.none()
-      }
-
-      const decrypted = yield* _(
-        decryptChatNotificationPayload(key.privateKeyPemBase64)(
-          notificationData.payload
-        )
-      )
-      return Option.some(decrypted)
-    }).pipe(
-      Effect.catchAll((e) => {
-        if (e._tag === 'CryptoError') {
-          reportError(
-            'warn',
-            new Error('Error decrypting notification payload'),
-            {e}
-          )
-        }
-        return Effect.succeed(Option.none())
-      }),
-      Effect.catchAllDefect((d) => {
-        reportError(
-          'warn',
-          new Error('Defect decrypting notification payload'),
-          {d}
-        )
-        return Effect.succeed(Option.none())
-      }),
-      Effect.runPromise
-    )
-  }
-)
 
 export function useHandleReceivedNotifications(): void {
   const navigation = useNavigation()
@@ -112,17 +48,27 @@ export function useHandleReceivedNotifications(): void {
         return
       }
 
-      const chatMessageNotificationOption =
-        ChatNotificationData.parseUnkownOption(remoteMessage.data)
-      if (Option.isSome(chatMessageNotificationOption)) {
+      const chatNotificationDataOption =
+        ChatNotificationData.parseUnkownOption(data)
+      if (Option.isSome(chatNotificationDataOption)) {
+        console.info(
+          `📳 Got notification ${JSON.stringify(
+            chatNotificationDataOption.value,
+            null,
+            2
+          )}`
+        )
         await store.set(
           processChatNotificationActionAtom,
-          chatMessageNotificationOption.value,
+          chatNotificationDataOption.value,
           navigation.getState()
         )()
+
+        return
       }
 
-      await showUINotificationFromRemoteMessage(remoteMessage)
+      if (!(data instanceof ChatNotificationData))
+        await showUINotificationFromRemoteMessage(data)
 
       if (data.type === NEW_CONNECTION) {
         console.info(

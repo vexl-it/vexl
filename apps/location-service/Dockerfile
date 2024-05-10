@@ -6,7 +6,7 @@ COPY . .
 
 WORKDIR /app/apps/location-service
 
-RUN yarn install
+RUN yarn workspaces focus @vexl-next/location-service
 RUN yarn build
 # RUN npx @sentry/wizard@latest -i sourcemaps
 

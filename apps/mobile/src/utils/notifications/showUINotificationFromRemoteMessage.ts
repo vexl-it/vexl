@@ -11,20 +11,20 @@ import {
 } from './notificationTypes'
 
 export async function showUINotificationFromRemoteMessage(
-  remoteMessage: FirebaseMessagingTypes.RemoteMessage
+  data: FirebaseMessagingTypes.RemoteMessage['data']
 ): Promise<void> {
   const {t} = getDefaultStore().get(translationAtom)
   const notificationPreferences = getDefaultStore().get(
     notificationPreferencesAtom
   )
 
-  const type = remoteMessage?.data?.type
+  const type = data?.type
 
   if (type === LOGGING_ON_DIFFERENT_DEVICE) {
     void notifee.displayNotification({
       title: t('notifications.loggingOnDifferentDevice.title'),
       body: t('notifications.loggingOnDifferentDevice.body'),
-      data: remoteMessage.data,
+      data,
       android: {
         channelId: await getDefaultChannel(),
         pressAction: {
@@ -35,12 +35,9 @@ export async function showUINotificationFromRemoteMessage(
     return
   }
 
-  // TODO check if this is really necessary
-  if (!remoteMessage.data && !remoteMessage.notification) return
-
   if (!type) {
     reportError('warn', new Error('Notification type is missing'), {
-      remoteMessage,
+      data,
     })
     return
   }
@@ -55,7 +52,7 @@ export async function showUINotificationFromRemoteMessage(
     await notifee.displayNotification({
       title: t(`notifications.INACTIVITY_REMINDER.title`),
       body: t(`notifications.INACTIVITY_REMINDER.body`),
-      data: remoteMessage.data,
+      data,
       android: {
         channelId: await getDefaultChannel(),
         pressAction: {

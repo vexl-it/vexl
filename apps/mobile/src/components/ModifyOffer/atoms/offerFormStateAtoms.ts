@@ -604,6 +604,7 @@ export const offerFormMolecule = molecule(() => {
               },
             })
           },
+          offerKey: key,
         })
       ),
       TE.chainFirstW(({key, createdOffer}) =>
@@ -747,6 +748,7 @@ export const offerFormMolecule = molecule(() => {
         intendedConnectionLevel: offer.ownershipInfo
           ? offer.ownershipInfo.intendedConnectionLevel
           : 'FIRST',
+        updateFcmCypher: false,
       }),
       TE.matchE(
         (e) => {
@@ -816,6 +818,7 @@ export const offerFormMolecule = molecule(() => {
         adminId: offer.ownershipInfo?.adminId ?? ('' as OfferAdminId),
         symmetricKey: offer.offerInfo.privatePart.symmetricKey,
         intendedConnectionLevel: intendedConnectionLevel ?? 'FIRST',
+        updateFcmCypher: false,
       }),
       TE.matchE(
         (e) => {

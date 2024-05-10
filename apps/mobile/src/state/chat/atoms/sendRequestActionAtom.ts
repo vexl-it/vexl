@@ -7,13 +7,13 @@ import {pipe} from 'fp-ts/function'
 import {atom} from 'jotai'
 import {privateApiAtom} from '../../../api'
 import {loadingOverlayDisplayedAtom} from '../../../components/LoadingOverlayProvider'
-import {version} from '../../../utils/environment'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
 import {getNotificationToken} from '../../../utils/notifications'
 import reportError from '../../../utils/reportError'
 import showErrorAlert from '../../../utils/showErrorAlert'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 import {sessionDataOrDummyAtom} from '../../session'
+import {version} from './../../../utils/environment'
 import {createUserInboxIfItDoesNotExistAtom} from './createUserInboxIfItDoesNotExistAtom'
 import generateMyFcmTokenInfoActionAtom from './generateMyFcmTokenInfoActionAtom'
 import upsertChatForTheirOfferActionAtom from './upsertChatForTheirOfferActionAtom'
@@ -29,7 +29,7 @@ const sendRequestActionAtom = atom(
     const session = get(sessionDataOrDummyAtom)
 
     return pipe(
-      set(generateMyFcmTokenInfoActionAtom),
+      set(generateMyFcmTokenInfoActionAtom, undefined, session.privateKey),
       TE.fromTask,
       TE.bindTo('encryptedToken'),
       TE.bind('message', ({encryptedToken}) =>
@@ -41,6 +41,7 @@ const sendRequestActionAtom = atom(
           fromKeypair: session.privateKey,
           myVersion: version,
           toPublicKey: originOffer.offerInfo.publicPart.offerPublicKey,
+          // TODO other side version
           myFcmCypher: O.toUndefined(encryptedToken)?.cypher,
           lastReceivedFcmCypher: originOffer.offerInfo.publicPart.fcmCypher,
         })

@@ -19,7 +19,6 @@ import {useShowLoadingOverlay} from '../../LoadingOverlayProvider'
 import ScreenTitle from '../../ScreenTitle'
 import {offerFormMolecule} from '../atoms/offerFormStateAtoms'
 import playSvg from '../images/playSvg'
-import trashSvg from '../images/trashSvg'
 
 interface Props {
   offer: Option<OneOfferInState>
@@ -63,8 +62,8 @@ function EditOfferHeader({offer}: Props): JSX.Element {
   }, [deleteOffer, loadingOverlay, safeGoBack, showAreYouSure, t])
 
   return (
-    <ScreenTitle text={t('editOffer.editOffer')}>
-      <Stack>
+    <Stack f={1} space="$4">
+      <ScreenTitle text={t('editOffer.editOffer')}>
         <XStack space="$2" mb="$4">
           {isSome(offer) && (
             <XStack ai="center" space="$2">
@@ -75,12 +74,14 @@ function EditOfferHeader({offer}: Props): JSX.Element {
               )}
               <IconButton
                 variant="dark"
-                icon={trashSvg}
+                icon={require('../images/trashIcon.png')}
                 onPress={() => {
                   void deleteOfferWithAreYouSure()
                 }}
               />
               <IconButton
+                iconWidth={25}
+                iconHeight={25}
                 variant="dark"
                 icon={offerActive ? pauseSvg : playSvg}
                 onPress={() => {
@@ -91,19 +92,24 @@ function EditOfferHeader({offer}: Props): JSX.Element {
               />
             </XStack>
           )}
-          <IconButton variant="dark" icon={closeSvg} onPress={safeGoBack} />
+          <IconButton
+            iconWidth={25}
+            iconHeight={25}
+            variant="dark"
+            icon={closeSvg}
+            onPress={safeGoBack}
+          />
         </XStack>
-
-        {!!offer && (
-          <XStack space="$2" ai="center" jc="flex-end">
-            <Stack h={12} w={12} br={12} bc={offerActive ? '$green' : '$red'} />
-            <Text col={offerActive ? '$green' : '$red'} fos={18} ff="$body500">
-              {offerActive ? t('editOffer.active') : t('editOffer.inactive')}
-            </Text>
-          </XStack>
-        )}
-      </Stack>
-    </ScreenTitle>
+      </ScreenTitle>
+      {!!offer && (
+        <XStack space="$2" ai="center" jc="flex-end" als="flex-start">
+          <Stack h={12} w={12} br={12} bc={offerActive ? '$green' : '$red'} />
+          <Text col={offerActive ? '$green' : '$red'} fos={18} ff="$body500">
+            {offerActive ? t('editOffer.active') : t('editOffer.inactive')}
+          </Text>
+        </XStack>
+      )}
+    </Stack>
   )
 }
 

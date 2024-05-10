@@ -10,6 +10,7 @@ import {
 import {REACT_NATIVE_CALENDARS_DATE_FORMAT} from '../../../Calendar'
 import DropdownSelectButton from '../../../DropdownSelectButton'
 import SvgImage from '../../../Image'
+import termsIconSvg from '../../../InsideRouter/components/SettingsScreen/images/termsIconSvg'
 import Switch from '../../../Switch'
 import clockSvg from '../../../images/clockSvg'
 import OfferExpirationModal from './components/OfferExpirationModal'
@@ -68,7 +69,7 @@ function Expiration({
         <Switch value={!!expirationDate} onValueChange={toggleExpirationDate} />
       </XStack>
       <Text
-        ff="$body600"
+        ff="$body500"
         fos={16}
         col={expirationDate ? '$white' : '$greyOnWhite'}
         mb="$4"
@@ -84,18 +85,24 @@ function Expiration({
             setOfferExpirationModalVisible(true)
           }}
         >
-          <Text
-            fos={18}
-            ff="$body600"
-            col={expirationDate ? '$main' : '$greyOnBlack'}
-          >
-            {expirationDate
-              ? DateTime.fromISO(expirationDate).toLocaleString(
-                  DateTime.DATE_FULL,
-                  {locale}
-                )
-              : t('offerForm.expiration.expirationDate')}
-          </Text>
+          <XStack ai="center" space="$2">
+            <SvgImage
+              source={termsIconSvg}
+              stroke={getTokens().color.main.val}
+            />
+            <Text
+              fos={18}
+              ff="$body500"
+              col={expirationDate ? '$main' : '$greyOnBlack'}
+            >
+              {expirationDate
+                ? DateTime.fromISO(expirationDate).toLocaleString(
+                    DateTime.DATE_FULL,
+                    {locale}
+                  )
+                : t('offerForm.expiration.expirationDate')}
+            </Text>
+          </XStack>
         </DropdownSelectButton>
       )}
       <OfferExpirationModal

@@ -4,7 +4,7 @@ import {pipe} from 'fp-ts/function'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useMemo, useState} from 'react'
 import {Alert, ScrollView} from 'react-native'
-import {Stack, Text, YStack} from 'tamagui'
+import {Stack, Text, XStack, YStack} from 'tamagui'
 import {type RootStackScreenProps} from '../../../navigationTypes'
 import {sendRequestHandleUIActionAtom} from '../../../state/chat/atoms/sendRequestActionAtom'
 import {type RequestState} from '../../../state/chat/domain'
@@ -108,16 +108,18 @@ function OfferInfo({
   return (
     <Stack f={1} mx="$2" my="$4">
       <ScreenTitle text={t('offer.title')}>
-        {!offer.flags.reported && (
-          <IconButton
-            variant="dark"
-            icon={flagSvg}
-            onPress={() => {
-              void reportOffer(offer.offerInfo.offerId)()
-            }}
-          />
-        )}
-        <IconButton variant="dark" icon={closeSvg} onPress={goBack} />
+        <XStack ai="center" space="$2">
+          {!offer.flags.reported && (
+            <IconButton
+              variant="dark"
+              icon={flagSvg}
+              onPress={() => {
+                void reportOffer(offer.offerInfo.offerId)()
+              }}
+            />
+          )}
+          <IconButton variant="dark" icon={closeSvg} onPress={goBack} />
+        </XStack>
       </ScreenTitle>
       <ScrollView showsVerticalScrollIndicator={false}>
         <YStack space="$2" mb="$2">

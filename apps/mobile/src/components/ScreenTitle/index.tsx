@@ -23,8 +23,8 @@ function ScreenTitle({
   ...props
 }: Props): JSX.Element {
   return (
-    <YStack mt="$2" bc="transparent" {...props}>
-      <XStack ai="flex-start" jc="space-between" mb="$5" space="$2">
+    <YStack mt="$2" bc="transparent" space="$4" pb="$1" {...props}>
+      <XStack ai="flex-start" jc="space-between" space="$2">
         <Stack fs={1}>
           <Text
             adjustsFontSizeToFit
@@ -37,7 +37,7 @@ function ScreenTitle({
           </Text>
         </Stack>
         {!!children && (
-          <XStack ai="center" space="$2">
+          <XStack ai="center" jc="space-between">
             {children}
           </XStack>
         )}

@@ -78,7 +78,7 @@ function OffersListStateDisplayerContent(): JSX.Element {
             }}
           />
         </Stack>
-        <XStack space="$2" pb="$1">
+        <XStack space="$2">
           <SearchOffers
             postSearchActions={() => {
               refocusMap({focusAllOffers: false})

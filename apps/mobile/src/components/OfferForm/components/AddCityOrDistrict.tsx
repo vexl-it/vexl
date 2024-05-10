@@ -19,7 +19,7 @@ function AddCityOrDistrict(props: TouchableWithoutFeedbackProps): JSX.Element {
             source={magnifyingGlass}
           />
         </Stack>
-        <Text ml="$4" ff="$body600" fos={18} col="$greyOnBlack">
+        <Text ml="$4" ff="$body500" fos={18} col="$greyOnBlack">
           {t('offerForm.location.addCityOrDistrict')}
         </Text>
       </XStack>

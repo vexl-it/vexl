@@ -13,8 +13,8 @@ function UploadingOfferProgressModal(): JSX.Element {
   return (
     <Modal animationType="fade" transparent visible={data.isVisible}>
       <Stack f={1} pb={bottom} jc="flex-end" bc="rgba(0,0,0,0.6)">
-        <Stack mb={bottom} p="$4" backgroundColor="$white" br="$4">
-          <Text col="$black" pb="$4" fos={24} ff="$heading">
+        <Stack mb="$3" p="$4" backgroundColor="$white" br="$4">
+          <Text col="$black" mb="$4" fos={24} ff="$heading">
             {data.title}
           </Text>
           <ProgressIndicator />

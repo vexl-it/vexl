@@ -58,6 +58,7 @@ const OfferPublicPartToEncrypt = z.object({
   groupUuids: z.array(z.string()),
   listingType: z.string().optional(),
   fcmCypher: FcmCypher.optional(),
+  authorClientVersion: z.string().optional(),
 })
 
 function convertLocationStateToOldVersion(

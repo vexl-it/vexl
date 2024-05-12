@@ -7,6 +7,7 @@ import {FcmToken} from '../utility/FcmToken.brand'
 import {IdNumeric} from '../utility/IdNumeric'
 import {IsoDatetimeString} from '../utility/IsoDatetimeString.brand'
 import {JSDateString} from '../utility/JSDateString.brand'
+import {SemverString} from '../utility/SmeverString.brand'
 import {UriString} from '../utility/UriString.brand'
 import {
   Latitude,
@@ -188,6 +189,7 @@ export const OfferPublicPart = z.object({
   groupUuids: z.array(z.string()),
   listingType: ListingType.optional(),
   fcmCypher: FcmCypher.optional(),
+  authorClientVersion: SemverString.optional(),
 })
 export type OfferPublicPart = z.TypeOf<typeof OfferPublicPart>
 

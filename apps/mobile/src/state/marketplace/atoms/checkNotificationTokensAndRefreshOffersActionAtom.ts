@@ -8,6 +8,7 @@ import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/lib/function'
 import {atom} from 'jotai'
 import {updateOfferAtom} from '..'
+import {version} from '../../../utils/environment'
 import {getNotificationToken} from '../../../utils/notifications'
 import {inboxesAtom} from '../../../utils/notifications/useRefreshNotificationTokenOnResumeAssumeLoggedIn'
 import reportError from '../../../utils/reportError'
@@ -36,7 +37,8 @@ const doesOfferNeedUpdateActionAtom = atom(
       !set(
         getKeyHolderForFcmCypherActionAtom,
         oneOffer.offerInfo.publicPart.fcmCypher
-      )
+      ) ||
+      oneOffer.offerInfo.publicPart.authorClientVersion !== version
   }
 )
 
@@ -90,7 +92,10 @@ const checkNotificationTokensAndRefreshOffersActionAtom = atom(
 
             return pipe(
               set(updateOfferAtom, {
-                payloadPublic: offer.offerInfo.publicPart,
+                payloadPublic: {
+                  ...offer.offerInfo.publicPart,
+                  authorClientVersion: version,
+                },
                 symmetricKey: offer.offerInfo.privatePart.symmetricKey,
                 adminId: offer.ownershipInfo.adminId,
                 intendedConnectionLevel:

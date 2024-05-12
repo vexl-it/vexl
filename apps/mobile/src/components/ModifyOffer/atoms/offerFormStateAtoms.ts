@@ -52,6 +52,7 @@ import {singleOfferAtom} from '../../../state/marketplace/atoms/offersState'
 import getValueFromSetStateActionOfAtom from '../../../utils/atomUtils/getValueFromSetStateActionOfAtom'
 import calculatePriceInFiatFromSats from '../../../utils/calculatePriceInFiatFromSats'
 import calculatePriceInSats from '../../../utils/calculatePriceInSats'
+import {version} from '../../../utils/environment'
 import getDefaultCurrency from '../../../utils/getDefaultCurrency'
 import {
   translationAtom,
@@ -591,6 +592,7 @@ export const offerFormMolecule = molecule(() => {
         set(createOfferAtom, {
           payloadPublic: {
             ...payloadPublic,
+            authorClientVersion: version,
             offerPublicKey: key.publicKeyPemBase64,
           },
           intendedConnectionLevel: intendedConnectionLevel ?? 'FIRST',

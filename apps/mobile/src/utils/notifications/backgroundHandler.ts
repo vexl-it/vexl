@@ -31,7 +31,10 @@ export async function processBackgroundMessage(
     const chatNotificationDataOption =
       ChatNotificationData.parseUnkownOption(data)
     if (Option.isSome(chatNotificationDataOption)) {
-      await getDefaultStore().set(processChatNotificationActionAtom, data)()
+      await getDefaultStore().set(
+        processChatNotificationActionAtom,
+        chatNotificationDataOption.value
+      )()
       return
     }
 

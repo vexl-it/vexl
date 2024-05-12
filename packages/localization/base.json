@@ -266,6 +266,7 @@
   "offer.priceIn": "Price in:",
   "offer.online": "Online",
   "offer.cash": "Cash",
+  "offer.thereAreNoOfferForSelectedCategory": "There are no offers for the selected category yet.",
   "termsOfUse.termsOfUse": "Terms of Use",
   "termsOfUse.privacyPolicy": "Privacy Policy",
   "termsOfUse.dontHaveTime": "Don’t have a time to read all this? Take a look on Frequently Asked Questions.",

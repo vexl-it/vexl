@@ -48,23 +48,25 @@ function ChatsList(): JSX.Element | null {
 
   if (elementAtoms.length === 0) {
     return (
-      <EmptyListWrapper
-        buttonText={t('messages.seeMarketplace')}
-        onButtonPress={() => {
-          navigation.navigate('InsideTabs', {
-            screen: 'Marketplace',
-          })
-        }}
-      >
-        <Stack space="$2">
-          <Text textAlign="center" col="$greyOnWhite" fos={20} ff="$body600">
-            {t('messages.youDontHaveAnyOpenChats')}
-          </Text>
-          <Text textAlign="center" fos={14} ta="center" col="$greyOnWhite">
-            {t('messages.startConversationByReactingToOffer')}
-          </Text>
-        </Stack>
-      </EmptyListWrapper>
+      <Stack f={1} pb={tabBarEndsAt}>
+        <EmptyListWrapper
+          buttonText={t('messages.seeMarketplace')}
+          onButtonPress={() => {
+            navigation.navigate('InsideTabs', {
+              screen: 'Marketplace',
+            })
+          }}
+        >
+          <Stack space="$2">
+            <Text textAlign="center" col="$greyOnWhite" fos={20} ff="$body600">
+              {t('messages.youDontHaveAnyOpenChats')}
+            </Text>
+            <Text textAlign="center" fos={14} ta="center" col="$greyOnWhite">
+              {t('messages.startConversationByReactingToOffer')}
+            </Text>
+          </Stack>
+        </EmptyListWrapper>
+      </Stack>
     )
   }
 

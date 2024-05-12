@@ -21,6 +21,7 @@ import {
   createOfferSuggestionVisibleAtom,
   resetFilterSuggestionVisibleAtom,
 } from '../../../../../state/marketplace/atoms/offerSuggestionVisible'
+import {areThereOffersToSeeInMarketplaceWithoutFiltersAtom} from '../../../../../state/marketplace/atoms/offersToSeeInMarketplace'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import Button from '../../../../Button'
 import EmptyListWrapper from '../../../../EmptyListWrapper'
@@ -37,7 +38,7 @@ interface Props {
 function EmptyListPlaceholder({refreshing, onRefresh}: Props): JSX.Element {
   const navigation = useNavigation()
   const {t} = useTranslation()
-  const refreshOffers = useSetAtom(triggerOffersRefreshAtom)
+
   const importedContactsCount = useAtomValue(importedContactsCountAtom)
   const filterActive = useAtomValue(isFilterActiveAtom)
   const marketplaceLayout = useAtomValue(marketplaceLayoutModeAtom)
@@ -45,22 +46,28 @@ function EmptyListPlaceholder({refreshing, onRefresh}: Props): JSX.Element {
     offersToSeeInMarketplaceCountAtom
   )
   const reachNumber = useAtomValue(reachNumberAtom)
-  const [minutesTillOffersDisplayed, setMinutesTillOffersDisplayed] = useAtom(
-    minutesTillOffersDisplayedAtom
-  )
-  const resetFilterInStorage = useSetAtom(resetFilterInStorageActionAtom)
-  const initializeMinutesTillOffersDisplayed = useSetAtom(
-    initializeMinutesTillOffersDisplayedActionAtom
-  )
   const createOfferSuggestionVisible = useAtomValue(
     createOfferSuggestionVisibleAtom
   )
   const addMoreContactsSuggestionVisible = useAtomValue(
     addMoreContactsSuggestionVisibleAtom
   )
+  const areThereOffersToSeeInMarketplaceWithoutFilters = useAtomValue(
+    areThereOffersToSeeInMarketplaceWithoutFiltersAtom
+  )
+
   const refocusMap = useSetAtom(refocusMapActionAtom)
+  const initializeMinutesTillOffersDisplayed = useSetAtom(
+    initializeMinutesTillOffersDisplayedActionAtom
+  )
+  const resetFilterInStorage = useSetAtom(resetFilterInStorageActionAtom)
+  const refreshOffers = useSetAtom(triggerOffersRefreshAtom)
+
   const [resetFilterSuggestionVisible, setResetFilterSuggestionVisible] =
     useAtom(resetFilterSuggestionVisibleAtom)
+  const [minutesTillOffersDisplayed, setMinutesTillOffersDisplayed] = useAtom(
+    minutesTillOffersDisplayedAtom
+  )
 
   function resetFilterAndSaveIt(): void {
     resetFilterInStorage()
@@ -118,7 +125,7 @@ function EmptyListPlaceholder({refreshing, onRefresh}: Props): JSX.Element {
           <EmptyListWrapper
             buttonText={t('offer.resetFilter')}
             onButtonPress={resetFilterAndSaveIt}
-            refreshEnabled
+            inScrollView
             refreshing={refreshing}
             onRefresh={onRefresh}
           >
@@ -157,7 +164,7 @@ function EmptyListPlaceholder({refreshing, onRefresh}: Props): JSX.Element {
         buttonText={t('suggestion.addMoreContacts')}
         refreshing={refreshing}
         onRefresh={onRefresh}
-        refreshEnabled
+        inScrollView
         onButtonPress={() => {
           navigation.navigate('SetContacts', {})
         }}
@@ -177,12 +184,16 @@ function EmptyListPlaceholder({refreshing, onRefresh}: Props): JSX.Element {
         buttonText={t('offer.emptyAction')}
         refreshing={refreshing}
         onRefresh={onRefresh}
-        refreshEnabled
+        inScrollView
         onButtonPress={() => {
           navigation.navigate('CreateOffer')
         }}
       >
-        {minutesTillOffersDisplayed > 0 ? (
+        {areThereOffersToSeeInMarketplaceWithoutFilters ? (
+          <Text textAlign="center" col="$greyOnWhite" fos={20} ff="$body600">
+            {t('offer.thereAreNoOfferForSelectedCategory')}
+          </Text>
+        ) : minutesTillOffersDisplayed > 0 ? (
           <Text textAlign="center" col="$greyOnWhite" fos={20} ff="$body600">
             {t('offer.offersAreLoadingAndShouldBeReady', {
               minutes: minutesTillOffersDisplayed,

@@ -11,6 +11,7 @@ import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import EmptyListWrapper from '../../../EmptyListWrapper'
 import OffersList from '../../../OffersList'
 import ReencryptOffersSuggestion from '../../../ReencryptOffersSuggestion'
+import usePixelsFromBottomWhereTabsEnd from '../../utils'
 import ContainerWithTopBorderRadius from '../ContainerWithTopBorderRadius'
 import MyOffersSortingDropdown from './components/MyOffersSortingDropdown'
 
@@ -31,6 +32,7 @@ function MyOffersScreen({navigation}: Props): JSX.Element {
 
   const myOffersSortedAtoms = useAtomValue(myOffersSortedAtomsAtom)
   const activeOffersCount = useAtomValue(myActiveOffers)
+  const tabBarEndsAt = usePixelsFromBottomWhereTabsEnd()
 
   return (
     <ContainerWithTopBorderRadius>
@@ -60,16 +62,23 @@ function MyOffersScreen({navigation}: Props): JSX.Element {
             offersAtoms={myOffersSortedAtoms}
           />
         ) : (
-          <EmptyListWrapper
-            buttonText={t('myOffers.addNewOffer')}
-            onButtonPress={() => {
-              navigation.navigate('CreateOffer')
-            }}
-          >
-            <Text textAlign="center" col="$greyOnWhite" fos={20} ff="$body600">
-              {t('myOffers.youHaveNotPostedAnyOffers')}
-            </Text>
-          </EmptyListWrapper>
+          <Stack f={1} pb={tabBarEndsAt}>
+            <EmptyListWrapper
+              buttonText={t('myOffers.addNewOffer')}
+              onButtonPress={() => {
+                navigation.navigate('CreateOffer')
+              }}
+            >
+              <Text
+                textAlign="center"
+                col="$greyOnWhite"
+                fos={20}
+                ff="$body600"
+              >
+                {t('myOffers.youHaveNotPostedAnyOffers')}
+              </Text>
+            </EmptyListWrapper>
+          </Stack>
         )}
       </Stack>
     </ContainerWithTopBorderRadius>

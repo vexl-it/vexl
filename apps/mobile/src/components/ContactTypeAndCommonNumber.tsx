@@ -22,21 +22,17 @@ function ContactTypeAndCommonNumber({
       justifyContent={center ? 'center' : 'flex-start'}
       alignItems="center"
     >
-      <Text color="$greyOnBlack">
-        {friendLevel.includes('FIRST_DEGREE') ? (
-          <Text>{t('offer.directFriend')}</Text>
-        ) : (
-          friendLevel.includes('SECOND_DEGREE') && (
-            <Text>{t('offer.friendOfFriend')}</Text>
-          )
-        )}
+      <Text col="$greyOnBlack">
+        {friendLevel.includes('FIRST_DEGREE')
+          ? t('offer.directFriend')
+          : friendLevel.includes('SECOND_DEGREE') && t('offer.friendOfFriend')}
       </Text>
-      <Text color="$greyOnBlack">•</Text>
+      <Text col="$greyOnBlack">•</Text>
       <XStack ai="center" space="$1">
         <Stack w={14} h={14}>
           <Image source={friendsSvg} />
         </Stack>
-        <Text color="$greyOnBlack">
+        <Text col="$greyOnBlack">
           {t('offer.numberOfCommon', {
             number: numberOfCommonFriends,
           })}

@@ -51,9 +51,9 @@ function OffersListStateDisplayerContent(): JSX.Element {
               </Stack>
             )}
           </XStack>
-          <ReencryptOffersSuggestion mt="$5" px="$0" />
-          <ImportNewContactsSuggestion mt="$5" px="$0" />
-          <AddListingTypeToOffersSuggestion mt="$5" px="$0" />
+          <ReencryptOffersSuggestion mb="$6" />
+          <ImportNewContactsSuggestion mb="$6" />
+          <AddListingTypeToOffersSuggestion mb="$6" />
         </Stack>
       )
 

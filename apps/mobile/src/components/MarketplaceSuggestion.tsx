@@ -2,13 +2,13 @@ import {atom, useAtom, type WritableAtom} from 'jotai'
 import {useMemo} from 'react'
 import {TouchableOpacity} from 'react-native'
 import {getTokens, Stack, Text, XStack, YStack, type YStackProps} from 'tamagui'
-import {useTranslation} from '../../../../../utils/localization/I18nProvider'
-import Button from '../../../../Button'
-import Image from '../../../../Image'
-import bubbleTipSvg from '../../../../images/bubbleTipSvg'
-import closeSvg from '../../../../images/closeSvg'
-import UserAvatar from '../../../../UserAvatar'
-import vexlerAvatarSvg from '../images/vexlerAvatarSvg'
+import {useTranslation} from '../utils/localization/I18nProvider'
+import Button from './Button'
+import Image from './Image'
+import bubbleTipSvg from './images/bubbleTipSvg'
+import closeSvg from './images/closeSvg'
+import vexlerAvatarSvg from './images/vexlerAvatarSvg'
+import UserAvatar from './UserAvatar'
 
 interface Props extends YStackProps {
   buttonText: string
@@ -39,27 +39,22 @@ function MarketplaceSuggestion({
   if (!isVisible) return null
 
   return (
-    <YStack px="$2" {...props}>
+    <YStack {...props}>
       <Stack mb="$2">
-        <Stack pos="relative" bc="$white" py="$6" pl="$6" pr="$7" br="$5">
-          {!hideCloseButton && (
-            <Stack pos="absolute" right={8} top={8}>
-              <TouchableOpacity
-                onPress={() => {
-                  setIsVisible(false)
-                }}
-              >
-                <Image
-                  stroke={tokens.color.greyOnWhite.val}
-                  source={closeSvg}
-                />
-              </TouchableOpacity>
-            </Stack>
-          )}
-          <Text col="$black" fos={20} ff="$body500">
+        <XStack bc="$white" p="$4" br="$5">
+          <Text fs={1} col="$black" fos={18} ff="$body500">
             {text}
           </Text>
-        </Stack>
+          {!hideCloseButton && (
+            <TouchableOpacity
+              onPress={() => {
+                setIsVisible(false)
+              }}
+            >
+              <Image stroke={tokens.color.greyOnWhite.val} source={closeSvg} />
+            </TouchableOpacity>
+          )}
+        </XStack>
         <Stack pos="absolute" b={-7} l={43}>
           <Image source={bubbleTipSvg} />
         </Stack>
@@ -71,7 +66,7 @@ function MarketplaceSuggestion({
             width={48}
             height={48}
           />
-          <Stack fs={1} ml="$2" jc="space-around">
+          <Stack fs={1} ml="$2" jc="center">
             <XStack fs={1} flexWrap="wrap">
               <Text col="$white" fos={16} ff="$body600">
                 {t('suggestion.vexl')}
@@ -99,12 +94,7 @@ function MarketplaceSuggestion({
                 </Text>
               )}
             </XStack>
-            <Text
-              adjustsFontSizeToFit
-              numberOfLines={2}
-              fos={12}
-              col="$greyOnBlack"
-            >
+            <Text adjustsFontSizeToFit numberOfLines={2} col="$greyOnBlack">
               {t('suggestion.yourAppGuide')}
             </Text>
           </Stack>

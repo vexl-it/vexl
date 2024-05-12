@@ -4,7 +4,7 @@ import {pipe} from 'fp-ts/function'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useMemo, useState} from 'react'
 import {Alert, ScrollView} from 'react-native'
-import {Stack, YStack} from 'tamagui'
+import {Stack, Text, YStack} from 'tamagui'
 import {type RootStackScreenProps} from '../../../navigationTypes'
 import {sendRequestHandleUIActionAtom} from '../../../state/chat/atoms/sendRequestActionAtom'
 import {type RequestState} from '../../../state/chat/domain'
@@ -14,6 +14,7 @@ import {
   getRequestState,
 } from '../../../state/chat/utils/offerStates'
 import {createSingleOfferReportedFlagAtom} from '../../../state/marketplace/atoms/offersState'
+import {enableHiddenFeatures} from '../../../utils/environment'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import randomName from '../../../utils/randomName'
 import {offerRerequestLimitDaysAtom} from '../../../utils/remoteConfig/atoms'
@@ -145,6 +146,12 @@ function OfferInfo({
           <InfoSquare>{t(`offer.requestStatus.${requestState}`)}</InfoSquare>
           {!!showRequestButton && (
             <OfferRequestTextInput text={text} onChange={setText} />
+          )}
+          {!!enableHiddenFeatures && (
+            <Text>
+              Author client version:{' '}
+              {offer.offerInfo.publicPart.authorClientVersion ?? 'no version'}
+            </Text>
           )}
         </YStack>
       </ScrollView>

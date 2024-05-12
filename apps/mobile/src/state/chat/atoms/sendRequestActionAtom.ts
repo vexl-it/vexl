@@ -41,7 +41,8 @@ const sendRequestActionAtom = atom(
           fromKeypair: session.privateKey,
           myVersion: version,
           toPublicKey: originOffer.offerInfo.publicPart.offerPublicKey,
-          // TODO other side version
+          otherSideVersion:
+            originOffer.offerInfo.publicPart.authorClientVersion,
           myFcmCypher: O.toUndefined(encryptedToken)?.cypher,
           lastReceivedFcmCypher: originOffer.offerInfo.publicPart.fcmCypher,
         })

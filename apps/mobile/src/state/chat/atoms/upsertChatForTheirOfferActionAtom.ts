@@ -34,7 +34,7 @@ function createNewChat({
     initialMessage.state === 'receivedButRequiresNewerVersion' ||
     initialMessage.state === 'received'
       ? initialMessage.message.myVersion
-      : undefined
+      : offer.offerInfo.publicPart.authorClientVersion
 
   const lastReportedVersion =
     initialMessage.state === 'sending' ||

@@ -24,8 +24,8 @@ import {
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import Button from '../../../../Button'
 import EmptyListWrapper from '../../../../EmptyListWrapper'
+import MarketplaceSuggestion from '../../../../MarketplaceSuggestion'
 import EmptyMarketplaceSuggestions from './EmptyMarketplaceSuggestions'
-import MarketplaceSuggestion from './MarketplaceSuggestion'
 
 const REACH_NUMBER_THRESHOLD = 30
 

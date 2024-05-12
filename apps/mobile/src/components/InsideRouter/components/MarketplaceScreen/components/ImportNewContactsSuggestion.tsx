@@ -2,7 +2,7 @@ import {useNavigation} from '@react-navigation/native'
 import {type YStackProps} from 'tamagui'
 import {resolveAllContactsAsSeenActionAtom} from '../../../../../state/contacts/atom/contactsStore'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
-import MarketplaceSuggestion from './MarketplaceSuggestion'
+import MarketplaceSuggestion from '../../../../MarketplaceSuggestion'
 
 function ImportNewContactsSuggestion(props: YStackProps): JSX.Element {
   const {t} = useTranslation()

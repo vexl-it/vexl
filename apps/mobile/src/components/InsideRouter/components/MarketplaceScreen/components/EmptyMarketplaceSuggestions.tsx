@@ -6,9 +6,9 @@ import {
   createOfferSuggestionVisibleAtom,
 } from '../../../../../state/marketplace/atoms/offerSuggestionVisible'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
+import MarketplaceSuggestion from '../../../../MarketplaceSuggestion'
 import usePixelsFromBottomWhereTabsEnd from '../../../utils'
 import ImportNewContactsSuggestion from './ImportNewContactsSuggestion'
-import MarketplaceSuggestion from './MarketplaceSuggestion'
 
 interface Props {
   refreshing: boolean
@@ -30,7 +30,7 @@ function EmptyMarketplaceSuggestions({
       }
       contentContainerStyle={{paddingBottom: tabBarEndsAt + 25}}
     >
-      <YStack mt="$4" space="$4">
+      <YStack mt="$4" space="$6">
         <MarketplaceSuggestion
           buttonText={t('myOffers.addNewOffer')}
           onButtonPress={() => {

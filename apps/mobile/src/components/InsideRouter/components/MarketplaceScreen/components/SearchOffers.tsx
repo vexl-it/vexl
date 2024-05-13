@@ -26,8 +26,8 @@ function SearchOffers({postSearchActions}: Props): JSX.Element {
   )
 
   function onInputValueChange(value: string): void {
-    setSearchText(value.trim())
-    setSearchTextWithDebounce(value)
+    setSearchText(value)
+    setSearchTextWithDebounce(value.trim())
   }
 
   return (

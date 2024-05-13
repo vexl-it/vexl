@@ -11,6 +11,7 @@ import {importedContactsCountAtom} from '../../../../../state/contacts/atom/cont
 import {triggerOffersRefreshAtom} from '../../../../../state/marketplace'
 import {
   isFilterActiveAtom,
+  isTextFilterActiveAtom,
   resetFilterInStorageActionAtom,
 } from '../../../../../state/marketplace/atoms/filterAtoms'
 import {offersToSeeInMarketplaceCountAtom} from '../../../../../state/marketplace/atoms/filteredOffersCountAtoms'
@@ -41,6 +42,7 @@ function EmptyListPlaceholder({refreshing, onRefresh}: Props): JSX.Element {
 
   const importedContactsCount = useAtomValue(importedContactsCountAtom)
   const filterActive = useAtomValue(isFilterActiveAtom)
+  const isTextFilterActive = useAtomValue(isTextFilterActiveAtom)
   const marketplaceLayout = useAtomValue(marketplaceLayoutModeAtom)
   const offersToSeeInMarketplaceCount = useAtomValue(
     offersToSeeInMarketplaceCountAtom
@@ -111,7 +113,7 @@ function EmptyListPlaceholder({refreshing, onRefresh}: Props): JSX.Element {
     )
   }
 
-  if (filterActive) {
+  if (filterActive || isTextFilterActive) {
     return (
       <>
         <MarketplaceSuggestion

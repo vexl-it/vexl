@@ -25,4 +25,3 @@ jobs:
       - name: Build on EAS
         run: eas build --platform android --profile stagingApk --non-interactive --no-wait
         working-directory: apps/mobile
-l

@@ -97,6 +97,10 @@ export const isFilterActiveAtom = atom((get) => {
   )
 })
 
+export const isTextFilterActiveAtom = atom(
+  (get) => !!get(offersFilterFromStorageAtom).text
+)
+
 export const resetFilterInStorageActionAtom = atom(null, (get, set) => {
   const {offerType, listingType, ...restOfOffersFilterInitialState} =
     offersFilterInitialState

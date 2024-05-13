@@ -1,4 +1,4 @@
-import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
+import {type OfferInfo} from '@vexl-next/domain/src/general/offers'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {atom} from 'jotai'
@@ -7,13 +7,12 @@ import {askAreYouSureActionAtom} from '../AreYouSureDialog'
 
 const showCommonFriendsExplanationUIActionAtom = atom(
   null,
-  async (get, set, params: {offer: OneOfferInState}) => {
+  async (get, set, offerInfo: OfferInfo) => {
     const {t} = get(translationAtom)
-    const {offer} = params
 
     const modalContent = (() => {
-      if (offer.offerInfo.privatePart.friendLevel.includes('FIRST_DEGREE')) {
-        if (offer.offerInfo.privatePart.commonFriends.length === 0) {
+      if (offerInfo.privatePart.friendLevel.includes('FIRST_DEGREE')) {
+        if (offerInfo.privatePart.commonFriends.length === 0) {
           return {
             title: t('offer.offerFromDirectFriend'),
             description: `${t('offer.youSeeThisOfferBecause')} ${t(

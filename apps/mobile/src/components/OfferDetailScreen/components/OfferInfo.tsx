@@ -16,34 +16,41 @@ import {
 import {createSingleOfferReportedFlagAtom} from '../../../state/marketplace/atoms/offersState'
 import {enableHiddenFeatures} from '../../../utils/environment'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
+import {friendLevelBannerPreferenceAtom} from '../../../utils/preferences'
 import randomName from '../../../utils/randomName'
 import {offerRerequestLimitDaysAtom} from '../../../utils/remoteConfig/atoms'
 import useSafeGoBack from '../../../utils/useSafeGoBack'
 import Button from '../../Button'
 import ButtonWithPressTimeout from '../../ButtonWithPressTimeout'
-import CommonFriends from '../../CommonFriends'
 import IconButton from '../../IconButton'
+import Info from '../../Info'
 import InfoSquare from '../../InfoSquare'
 import OfferRequestTextInput from '../../OfferRequestTextInput'
 import OfferWithBubbleTip from '../../OfferWithBubbleTip'
 import ScreenTitle from '../../ScreenTitle'
 import closeSvg from '../../images/closeSvg'
 import {useReportOfferHandleUI} from '../api'
+import showCommonFriendsExplanationUIActionAtom from '../atoms'
 import flagSvg from '../images/flagSvg'
 import RerequestInfo from './RerequestInfo'
 
 function OfferInfo({
   offer,
   navigation,
+  showCommonFriends,
 }: {
   offer: OneOfferInState
   navigation: RootStackScreenProps<'OfferDetail'>['navigation']
+  showCommonFriends?: boolean
 }): JSX.Element {
   const goBack = useSafeGoBack()
   const {t} = useTranslation()
   const reportOffer = useReportOfferHandleUI()
   const reportedFlagAtom = createSingleOfferReportedFlagAtom(
     offer.offerInfo.offerId
+  )
+  const showCommonFriendsExplanationUIAction = useSetAtom(
+    showCommonFriendsExplanationUIActionAtom
   )
   const flagOffer = useSetAtom(reportedFlagAtom)
   const submitRequest = useSetAtom(sendRequestHandleUIActionAtom)
@@ -73,6 +80,16 @@ function OfferInfo({
 
     return canChatBeRequested(chatForOffer, offerRerequestLimitDays)
   }, [chatForOffer, offerRerequestLimitDays])
+
+  const onWhatDoesThisMeanPressed = useCallback(() => {
+    void showCommonFriendsExplanationUIAction(offer.offerInfo)
+  }, [offer.offerInfo, showCommonFriendsExplanationUIAction])
+
+  const friendLevel = (() => {
+    if (offer.offerInfo.privatePart.friendLevel.includes('FIRST_DEGREE'))
+      return t('offer.directFriend')
+    return t('offer.friendOfFriend')
+  })()
 
   const onRequestPressed = useCallback(() => {
     if (!text.trim()) return
@@ -125,15 +142,17 @@ function OfferInfo({
         <YStack space="$2" mb="$2">
           <Stack mb="$2">
             <OfferWithBubbleTip
+              showCommonFriends
               showListingType
               negative={!requestPossibleInfo.canBeRerequested}
               offer={offer}
             />
           </Stack>
-          <CommonFriends
-            contactsHashes={offer.offerInfo.privatePart.commonFriends}
-            offer={offer}
-            variant="dark"
+          <Info
+            visibleStateAtom={friendLevelBannerPreferenceAtom}
+            text={t('common.whatDoesThisMean', {term: friendLevel})}
+            actionButtonText={t('common.learnMore')}
+            onActionPress={onWhatDoesThisMeanPressed}
           />
           {offer.offerInfo.publicPart.spokenLanguages.length > 0 && (
             <InfoSquare>
@@ -149,6 +168,10 @@ function OfferInfo({
           {!!showRequestButton && (
             <OfferRequestTextInput text={text} onChange={setText} />
           )}
+          {!showRequestButton &&
+            (requestState === 'cancelled' || requestState === 'deleted') && (
+              <RerequestInfo chat={chatForOffer} />
+            )}
           {!!enableHiddenFeatures && (
             <Text>
               Author client version:{' '}
@@ -165,26 +188,19 @@ function OfferInfo({
             variant="secondary"
             text={t('offer.sendRequest')}
           />
-        ) : (
-          <>
-            {requestState === 'cancelled' || requestState === 'deleted' ? (
-              <RerequestInfo chat={chatForOffer} />
-            ) : (
-              <Button
-                onPress={() => {
-                  if (!chatForOffer) return
-                  navigation.navigate('ChatDetail', {
-                    otherSideKey: chatForOffer.chat.otherSide.publicKey,
-                    inboxKey:
-                      chatForOffer.chat.inbox.privateKey.publicKeyPemBase64,
-                  })
-                }}
-                variant="primary"
-                text={t('offer.goToChat')}
-              />
-            )}
-          </>
-        )}
+        ) : requestState !== 'cancelled' && requestState !== 'deleted' ? (
+          <Button
+            onPress={() => {
+              if (!chatForOffer) return
+              navigation.navigate('ChatDetail', {
+                otherSideKey: chatForOffer.chat.otherSide.publicKey,
+                inboxKey: chatForOffer.chat.inbox.privateKey.publicKeyPemBase64,
+              })
+            }}
+            variant="primary"
+            text={t('offer.goToChat')}
+          />
+        ) : null}
       </Stack>
     </Stack>
   )

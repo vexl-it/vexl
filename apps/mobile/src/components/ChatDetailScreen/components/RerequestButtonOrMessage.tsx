@@ -2,11 +2,9 @@ import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React from 'react'
 import {YStack} from 'tamagui'
-import getRerequestPossibleInDaysText from '../../../utils/getRerequestPossibleInDaysText'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../../utils/useSafeGoBack'
 import Button from '../../Button'
-import InfoSquare from '../../InfoSquare'
 import {chatMolecule} from '../atoms'
 
 function RerequestButtonOrMessage({
@@ -25,22 +23,16 @@ function RerequestButtonOrMessage({
   const requestState = useAtomValue(requestStateAtom)
   const cancelRequest = useSetAtom(cancelRequestActionAtom)
 
-  const rerequestText = !rerequestInfo.canBeRerequested
-    ? getRerequestPossibleInDaysText(rerequestInfo.possibleInDays, t)
-    : null
-
   return (
     <YStack space="$2" pt="$2">
-      {rerequestInfo.canBeRerequested ? (
+      {!!rerequestInfo.canBeRerequested && (
         <Button
           disabled={rerequestButtonDisabled}
           onPress={onRerequestPressed}
           variant="secondary"
           text={t('offer.rerequest')}
         />
-      ) : rerequestText ? (
-        <InfoSquare>{rerequestText}</InfoSquare>
-      ) : null}
+      )}
       {requestState === 'requested' && (
         <Button
           text={t('offer.cancelRequest')}

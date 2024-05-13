@@ -112,7 +112,7 @@ export const refreshBtcPriceActionAtom = atom(
           set(btcPriceDataAtom, (prevState) => ({
             ...prevState,
             [currency]: {
-              btcPrice: btcPrice.BTC,
+              btcPrice: Math.round(btcPrice.BTC),
               state: 'success',
               lastRefreshAt: unixMillisecondsNow(),
             } satisfies BtcPriceDataWithState,

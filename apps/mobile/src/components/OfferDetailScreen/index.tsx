@@ -48,7 +48,11 @@ function OfferDetailScreen({
           ) && <MarketplaceMapContainer />}
         <KeyboardAvoidingView>
           {isSome(offer) ? (
-            <OfferInfo navigation={navigation} offer={offer.value} />
+            <OfferInfo
+              navigation={navigation}
+              offer={offer.value}
+              showCommonFriends
+            />
           ) : (
             <YStack
               f={1}

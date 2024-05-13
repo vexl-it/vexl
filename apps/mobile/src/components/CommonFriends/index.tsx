@@ -1,18 +1,14 @@
 import MaskedView from '@react-native-masked-view/masked-view'
 import {useNavigation} from '@react-navigation/native'
 import {LinearGradient} from 'expo-linear-gradient'
-import {useSetAtom, useStore} from 'jotai'
-import React, {useCallback, useMemo} from 'react'
+import {useStore} from 'jotai'
+import React, {useMemo} from 'react'
 import {Platform, ScrollView, StyleSheet, TouchableOpacity} from 'react-native'
-import {Stack, Text, XStack, YStack, getTokens} from 'tamagui'
-import {type OneOfferInState} from '../../../../../packages/domain/src/general/offers'
+import {Stack, XStack, YStack, getTokens} from 'tamagui'
+import {type OfferInfo} from '../../../../../packages/domain/src/general/offers'
 import chevronRightSvg from '../../images/chevronRightSvg'
 import createImportedContactsForHashesAtom from '../../state/contacts/atom/createImportedContactsForHashesAtom'
-import {useTranslation} from '../../utils/localization/I18nProvider'
-import {friendLevelBannerPreferenceAtom} from '../../utils/preferences'
 import Image from '../Image'
-import Info from '../Info'
-import showCommonFriendsExplanationUIActionAtom from '../OfferDetailScreen/atoms'
 import CommonFriendCell from './components/CommonFriendCell'
 
 const styles = StyleSheet.create({
@@ -22,42 +18,21 @@ const styles = StyleSheet.create({
 })
 
 interface Props {
-  contactsHashes: readonly string[]
-  hideCommonFriendsCount?: boolean
-  hideInfo?: boolean
-  offer: OneOfferInState
+  offerInfo: OfferInfo
   variant: 'light' | 'dark'
 }
 
-function CommonFriends({
-  hideCommonFriendsCount,
-  hideInfo,
-  contactsHashes,
-  offer,
-  variant,
-}: Props): JSX.Element | null {
-  const {t} = useTranslation()
+function CommonFriends({offerInfo, variant}: Props): JSX.Element | null {
   const tokens = getTokens()
   const store = useStore()
   const navigation = useNavigation()
   const commonFriends = useMemo(
-    () => store.get(createImportedContactsForHashesAtom(contactsHashes)),
-    [contactsHashes, store]
+    () =>
+      store.get(
+        createImportedContactsForHashesAtom(offerInfo.privatePart.commonFriends)
+      ),
+    [offerInfo.privatePart.commonFriends, store]
   )
-
-  const showCommonFriendsExplanationUIAction = useSetAtom(
-    showCommonFriendsExplanationUIActionAtom
-  )
-
-  const friendLevel = (() => {
-    if (offer.offerInfo.privatePart.friendLevel.includes('FIRST_DEGREE'))
-      return t('offer.directFriend')
-    return t('offer.friendOfFriend')
-  })()
-
-  const onWhatDoesThisMeanPressed = useCallback(() => {
-    void showCommonFriendsExplanationUIAction({offer})
-  }, [showCommonFriendsExplanationUIAction, offer])
 
   if (commonFriends.length === 0) return null
 
@@ -66,7 +41,9 @@ function CommonFriends({
       <TouchableOpacity
         disabled={commonFriends.length === 0}
         onPress={() => {
-          navigation.navigate('CommonFriends', {contactsHashes})
+          navigation.navigate('CommonFriends', {
+            contactsHashes: offerInfo.privatePart.commonFriends,
+          })
         }}
       >
         <XStack
@@ -79,13 +56,6 @@ function CommonFriends({
           py="$3"
         >
           <Stack fs={1}>
-            {!hideCommonFriendsCount && (
-              <Text col="$white" fos={14} mb="$2">
-                {t('commonFriends.commonFriendsCount', {
-                  commonFriendsCount: commonFriends.length,
-                })}
-              </Text>
-            )}
             {Platform.OS === 'ios' ? (
               <MaskedView
                 maskElement={
@@ -140,14 +110,6 @@ function CommonFriends({
           )}
         </XStack>
       </TouchableOpacity>
-      {!hideInfo && (
-        <Info
-          visibleStateAtom={friendLevelBannerPreferenceAtom}
-          text={t('common.whatDoesThisMean', {term: friendLevel})}
-          actionButtonText={t('common.learnMore')}
-          onActionPress={onWhatDoesThisMeanPressed}
-        />
-      )}
     </YStack>
   )
 }

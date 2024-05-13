@@ -2,9 +2,10 @@ import {useMolecule} from 'bunshi/dist/react'
 import * as T from 'fp-ts/Task'
 import {pipe} from 'fp-ts/function'
 import {useAtomValue, useSetAtom} from 'jotai'
-import {useCallback, useState} from 'react'
+import React, {useCallback, useState} from 'react'
 import {ScrollView} from 'react-native'
 import {Stack, YStack} from 'tamagui'
+import getRerequestPossibleInDaysText from '../../../utils/getRerequestPossibleInDaysText'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import randomName from '../../../utils/randomName'
 import useSafeGoBack from '../../../utils/useSafeGoBack'
@@ -47,6 +48,10 @@ function RequestScreen(): JSX.Element {
   const rerequestOffer = useSetAtom(rerequestOfferActionAtom)
 
   const [text, setText] = useState('')
+
+  const rerequestText = !canBeRerequested.canBeRerequested
+    ? getRerequestPossibleInDaysText(canBeRerequested.possibleInDays, t)
+    : null
 
   const onRerequestPressed = useCallback(() => {
     if (!canBeRerequested || !text.trim()) return
@@ -107,6 +112,7 @@ function RequestScreen(): JSX.Element {
             {!!canBeRerequested.canBeRerequested && (
               <OfferRequestTextInput text={text} onChange={setText} />
             )}
+            {!!rerequestText && <InfoSquare>{rerequestText}</InfoSquare>}
           </YStack>
         </YStack>
       </ScrollView>

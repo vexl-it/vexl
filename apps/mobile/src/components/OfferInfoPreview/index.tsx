@@ -3,6 +3,7 @@ import {Stack, Text, XStack, getTokens} from 'tamagui'
 import pauseSvg from '../../images/pauseSvg'
 import {isOfferExpired} from '../../utils/isOfferExpired'
 import {useTranslation} from '../../utils/localization/I18nProvider'
+import CommonFriends from '../CommonFriends'
 import SvgImage from '../Image'
 import clockSvg from '../images/clockSvg'
 import infoSvg from '../images/infoSvg'
@@ -19,6 +20,7 @@ function OfferInfoPreview({
   onGrayBackground,
   negative,
   reduceDescriptionLength,
+  showCommonFriends,
 }: {
   showListingType?: boolean
   isMine?: boolean
@@ -26,6 +28,7 @@ function OfferInfoPreview({
   onGrayBackground?: boolean
   negative?: boolean
   reduceDescriptionLength?: boolean
+  showCommonFriends?: boolean
 }): JSX.Element {
   const {t} = useTranslation()
   // const btcPragueLogoSvg = useMemo(
@@ -79,20 +82,23 @@ function OfferInfoPreview({
           </Text>
         </XStack>
       )}
-      <XStack ai="flex-start" jc="space-between">
-        <XStack mb="$1">
-          <Text
-            flex={1}
-            numberOfLines={reduceDescriptionLength ? 5 : undefined}
-            ellipsizeMode={reduceDescriptionLength ? 'tail' : undefined}
-            fos={18}
-            color={negative ? '$greyOnBlack' : '$black'}
-            ff="$body500"
-          >
-            {offer.publicPart.offerDescription}
-          </Text>
-        </XStack>
+      <XStack mb="$1">
+        <Text
+          flex={1}
+          numberOfLines={reduceDescriptionLength ? 5 : undefined}
+          ellipsizeMode={reduceDescriptionLength ? 'tail' : undefined}
+          fos={18}
+          color={negative ? '$greyOnBlack' : '$black'}
+          ff="$body500"
+        >
+          {offer.publicPart.offerDescription}
+        </Text>
       </XStack>
+      {!!showCommonFriends && (
+        <Stack py="$2">
+          <CommonFriends offerInfo={offer} variant="light" />
+        </Stack>
+      )}
       <XStack space="$1">
         {!offer.publicPart.listingType ||
         offer.publicPart.listingType === 'BITCOIN' ? (

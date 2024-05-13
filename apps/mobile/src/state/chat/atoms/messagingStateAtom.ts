@@ -18,6 +18,10 @@ const messagingStateAtom = focusAtom(messagingStateAtomStorageAtom, (o) =>
 )
 export default messagingStateAtom
 
+export const inboxesAtom = focusAtom(messagingStateAtom, (optic) =>
+  optic.elems().prop('inbox')
+)
+
 export const lastDecodedSemverAtom = focusAtom(
   messagingStateAtomStorageAtom,
   (o) => o.prop('lastDecodedSemver')

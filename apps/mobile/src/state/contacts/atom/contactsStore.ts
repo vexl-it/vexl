@@ -71,3 +71,14 @@ export const lastImportOfContactsAtom = focusAtom(contactsStoreAtom, (o) =>
 export const importedContactsCountAtom = atom(
   (get) => get(storedContactsAtom).filter((one) => one.flags.imported).length
 )
+
+export const eraseStoreActionAtom = atom(null, (get, set) => {
+  set(contactsStoreAtom, {contacts: [], lastImport: undefined})
+})
+
+export const eraseImportedContacts = atom(null, (get, set) => {
+  set(contactsStoreAtom, (o) => ({
+    contacts: o.contacts.filter((one) => one.flags.importedManually),
+    lastImport: undefined,
+  }))
+})

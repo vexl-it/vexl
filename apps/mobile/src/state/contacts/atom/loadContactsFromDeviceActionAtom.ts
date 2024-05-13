@@ -1,11 +1,8 @@
+import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/lib/function'
-import {atom, useSetAtom, useStore} from 'jotai'
-import {useCallback} from 'react'
-import {contactsMigratedAtom} from '../../../components/VersionMigrations/atoms'
+import {atom} from 'jotai'
 import reportError from '../../../utils/reportError'
-import {useAppState} from '../../../utils/useAppState'
-import {postLoginFinishedAtom} from '../../postLoginOnboarding'
 import {type ContactInfo, type StoredContact} from '../domain'
 import {getContactsAndTryToResolveThePermissionsAlongTheWay} from '../utils'
 import {storedContactsAtom} from './contactsStore'
@@ -25,60 +22,48 @@ function filterNotStoredContacts(
   }
 }
 
-const loadContactsFromDeviceActionAtom = atom(null, (get, set) => {
-  return pipe(
-    getContactsAndTryToResolveThePermissionsAlongTheWay(),
-    TE.map(filterNotStoredContacts(get(storedContactsAtom))),
-    TE.map((newContacts) => {
-      set(storedContactsAtom, (storedContacts) => [
-        ...storedContacts,
-        ...newContacts.map((newContact) => {
-          return {
-            info: newContact,
-            flags: {
-              seen: false,
-              imported: false,
-              importedManually: false,
-              invalidNumber: 'notTriedYet',
-            },
-            computedValues: undefined,
-          } satisfies StoredContact
-        }),
-      ])
-    }),
-    TE.match(
-      (e) => {
-        reportError(
-          'error',
-          new Error('Error while loading contacts from device'),
-          {e}
-        )
-        return false
-      },
-      () => {
-        return true
-      }
+const loadContactsFromDeviceActionAtom = atom(
+  null,
+  (get, set): T.Task<'success' | 'missingPermissions' | 'otherError'> => {
+    return pipe(
+      getContactsAndTryToResolveThePermissionsAlongTheWay(),
+      TE.map(filterNotStoredContacts(get(storedContactsAtom))),
+      TE.map((newContacts) => {
+        set(storedContactsAtom, (storedContacts) => [
+          ...storedContacts,
+          ...newContacts.map((newContact) => {
+            return {
+              info: newContact,
+              flags: {
+                seen: false,
+                imported: false,
+                importedManually: false,
+                invalidNumber: 'notTriedYet',
+              },
+              computedValues: undefined,
+            } satisfies StoredContact
+          }),
+        ])
+      }),
+      TE.matchE(
+        (e) => {
+          console.log(`Got error! ${e._tag}`)
+          if (e._tag === 'PermissionsNotGranted') {
+            return T.of('missingPermissions' as const)
+          }
+          reportError(
+            'error',
+            new Error('Error while loading contacts from device'),
+            {e}
+          )
+          return T.of('otherError')
+        },
+        () => {
+          return T.of('success')
+        }
+      )
     )
-  )
-})
+  }
+)
 
 export default loadContactsFromDeviceActionAtom
-
-export function useRefreshContactsFromDeviceOnResume(): void {
-  const store = useStore()
-  const loadContactsFromDevice = useSetAtom(loadContactsFromDeviceActionAtom)
-
-  useAppState(
-    useCallback(
-      (state) => {
-        if (
-          store.get(postLoginFinishedAtom) &&
-          store.get(contactsMigratedAtom) &&
-          state === 'active'
-        )
-          void loadContactsFromDevice()()
-      },
-      [loadContactsFromDevice, store]
-    )
-  )
-}

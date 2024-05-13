@@ -4,9 +4,8 @@ import {pipe} from 'fp-ts/function'
 import {atom} from 'jotai'
 import {privateApiAtom} from '../../../api'
 import {version} from '../../../utils/environment'
-import {inboxesAtom} from '../../../utils/notifications/useRefreshNotificationTokenOnResumeAssumeLoggedIn'
 import allChatsAtom from './allChatsAtom'
-import messagingStateAtom from './messagingStateAtom'
+import messagingStateAtom, {inboxesAtom} from './messagingStateAtom'
 import sendMessageToChatsInBatchActionAtom from './sendMessageToChatsInBatchActionAtom'
 
 const deleteAllInboxesActionAtom = atom(null, (get, set) => {

@@ -1,5 +1,5 @@
 import {useState} from 'react'
-import {Image} from 'react-native'
+import {Image, TouchableOpacity} from 'react-native'
 import {Stack, Text, XStack} from 'tamagui'
 import bigNameSvg from '../../../../images/bigNameSvg'
 import {type LoginStackScreenProps} from '../../../../navigationTypes'
@@ -48,16 +48,15 @@ function StartScreen({navigation}: Props): JSX.Element {
               <Text fos={18} ff="$body500" col="$greyOnBlack">
                 {t('loginFlow.start.touLabel')}{' '}
               </Text>
-              <Text
-                fontSize={18}
-                ff="$body600"
-                col="$white"
+              <TouchableOpacity
                 onPress={() => {
                   navigation.navigate('TermsAndConditions')
                 }}
               >
-                {t('loginFlow.start.termsOfUse')}
-              </Text>
+                <Text fontSize={18} ff="$body600" col="$white">
+                  {t('loginFlow.start.termsOfUse')}
+                </Text>
+              </TouchableOpacity>
             </XStack>
             <Switch value={touAgree} onValueChange={setTOUAgree} />
           </XStack>

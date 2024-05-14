@@ -64,51 +64,62 @@ function EditOfferHeader({offer}: Props): JSX.Element {
   return (
     <Stack f={1} space="$4">
       <ScreenTitle text={t('editOffer.editOffer')}>
-        <XStack space="$2" mb="$4">
-          {isSome(offer) && (
-            <XStack ai="center" space="$2">
-              {isOfferExpired(
-                offer.value.offerInfo?.publicPart?.expirationDate
-              ) && (
-                <Image source={clockSvg} stroke={getTokens().color.red.val} />
-              )}
-              <IconButton
-                variant="dark"
-                icon={require('../images/trashIcon.png')}
-                onPress={() => {
-                  void deleteOfferWithAreYouSure()
-                }}
+        <Stack>
+          <XStack space="$2" mb="$4">
+            {isSome(offer) && (
+              <XStack ai="center" space="$2">
+                {isOfferExpired(
+                  offer.value.offerInfo?.publicPart?.expirationDate
+                ) && (
+                  <Image source={clockSvg} stroke={getTokens().color.red.val} />
+                )}
+                <IconButton
+                  variant="dark"
+                  icon={require('../images/trashIcon.png')}
+                  onPress={() => {
+                    void deleteOfferWithAreYouSure()
+                  }}
+                />
+                <IconButton
+                  iconWidth={25}
+                  iconHeight={25}
+                  variant="dark"
+                  icon={offerActive ? pauseSvg : playSvg}
+                  onPress={() => {
+                    void toggleOfferActivePress()().then((success) => {
+                      if (success) safeGoBack()
+                    })
+                  }}
+                />
+              </XStack>
+            )}
+            <IconButton
+              iconWidth={25}
+              iconHeight={25}
+              variant="dark"
+              icon={closeSvg}
+              onPress={safeGoBack}
+            />
+          </XStack>
+          {!!offer && (
+            <XStack space="$2" ai="center" jc="flex-end" als="flex-end">
+              <Stack
+                h={12}
+                w={12}
+                br={12}
+                bc={offerActive ? '$green' : '$red'}
               />
-              <IconButton
-                iconWidth={25}
-                iconHeight={25}
-                variant="dark"
-                icon={offerActive ? pauseSvg : playSvg}
-                onPress={() => {
-                  void toggleOfferActivePress()().then((success) => {
-                    if (success) safeGoBack()
-                  })
-                }}
-              />
+              <Text
+                col={offerActive ? '$green' : '$red'}
+                fos={18}
+                ff="$body500"
+              >
+                {offerActive ? t('editOffer.active') : t('editOffer.inactive')}
+              </Text>
             </XStack>
           )}
-          <IconButton
-            iconWidth={25}
-            iconHeight={25}
-            variant="dark"
-            icon={closeSvg}
-            onPress={safeGoBack}
-          />
-        </XStack>
+        </Stack>
       </ScreenTitle>
-      {!!offer && (
-        <XStack space="$2" ai="center" jc="flex-end" als="flex-start">
-          <Stack h={12} w={12} br={12} bc={offerActive ? '$green' : '$red'} />
-          <Text col={offerActive ? '$green' : '$red'} fos={18} ff="$body500">
-            {offerActive ? t('editOffer.active') : t('editOffer.inactive')}
-          </Text>
-        </XStack>
-      )}
     </Stack>
   )
 }

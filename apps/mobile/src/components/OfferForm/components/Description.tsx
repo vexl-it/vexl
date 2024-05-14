@@ -10,7 +10,8 @@ import {
   type WritableAtom,
 } from 'jotai'
 import {useMemo} from 'react'
-import {Stack, Text, YStack} from 'tamagui'
+import {Platform} from 'react-native'
+import {Stack, Text, YStack, getTokens} from 'tamagui'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import Input from '../../Input'
 
@@ -60,6 +61,13 @@ function Description({
           variant="transparentOnGrey"
           value={offerDescription}
           onChangeText={setOfferDescription}
+          textColor="$main"
+          cursorColor={getTokens().color.main.val}
+          selectionColor={
+            Platform.OS === 'ios'
+              ? getTokens().color.main.val
+              : 'rgba(252, 205, 108, 0.3)'
+          }
         />
         <Stack ai="flex-end">
           <Text

@@ -25,8 +25,8 @@ function Content({
   const [checkboxValue, setCheckboxValue] = useAtom(checkboxValueAtom)
 
   return (
-    <Stack space="$4">
-      <Text fontFamily="$heading" fontSize={32} color="$black">
+    <Stack space="$2">
+      <Text fontFamily="$heading" fontSize={24} color="$black">
         {title}
       </Text>
       <Text fontSize={18} color="$greyOnWhite">

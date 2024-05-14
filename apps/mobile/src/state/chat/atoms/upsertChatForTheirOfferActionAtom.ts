@@ -4,6 +4,7 @@ import {
   type Inbox,
 } from '@vexl-next/domain/src/general/messaging'
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
+import {flow} from 'fp-ts/lib/function'
 import {atom} from 'jotai'
 import * as O from 'optics-ts'
 import {createEmptyTradeChecklistInState} from '../../tradeChecklist/domain'
@@ -13,23 +14,28 @@ import {
   type MessagingState,
 } from '../domain'
 import addMessageToChat from '../utils/addMessageToChat'
+import {type MyFcmTokenInfo} from './../../../../../../packages/domain/src/general/messaging'
 import focusChatForTheirOfferAtom from './focusChatForTheirOfferAtom'
+import {updateMyFcmTokenInfoInChat} from './generateMyFcmTokenInfoActionAtom'
 import messagingStateAtom from './messagingStateAtom'
 
 function createNewChat({
   inbox,
   initialMessage,
+  sentFcmTokenInfo,
   offer,
 }: {
   inbox: Inbox
   initialMessage: ChatMessageWithState
+  sentFcmTokenInfo?: MyFcmTokenInfo
   offer: OneOfferInState
 }): ChatWithMessages {
   const otherSideVersion =
     initialMessage.state === 'receivedButRequiresNewerVersion' ||
     initialMessage.state === 'received'
       ? initialMessage.message.myVersion
-      : undefined
+      : offer.offerInfo.publicPart.authorClientVersion
+
   const lastReportedVersion =
     initialMessage.state === 'sending' ||
     initialMessage.state === 'sendingError' ||
@@ -47,6 +53,7 @@ function createNewChat({
       },
       isUnread: false,
       showInfoBar: true,
+      lastReportedFcmToken: sentFcmTokenInfo,
       showVexlbotInitialMessage: true,
       showVexlbotNotifications: true,
       lastReportedVersion,
@@ -75,10 +82,12 @@ const upsertChatForTheirOfferActionAtom = atom(
     {
       inbox,
       initialMessage,
+      sentFcmTokenInfo,
       offer,
     }: {
       inbox: Inbox
       initialMessage: ChatMessageWithState
+      sentFcmTokenInfo?: MyFcmTokenInfo
       offer: OneOfferInState
     }
   ) => {
@@ -87,14 +96,22 @@ const upsertChatForTheirOfferActionAtom = atom(
       offerInfo: offer.offerInfo,
     })
     const existingChat = get(existingChatAtom)
+
     if (existingChat) {
-      set(existingChatAtom, addMessageToChat(initialMessage))
+      set(
+        existingChatAtom,
+        flow(
+          addMessageToChat(initialMessage),
+          updateMyFcmTokenInfoInChat(sentFcmTokenInfo)
+        )
+      )
       return existingChat.chat
     } else {
       const newChat = createNewChat({
         inbox,
         initialMessage,
         offer,
+        sentFcmTokenInfo,
       })
       set(messagingStateAtom, (old) =>
         O.set(

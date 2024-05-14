@@ -1,4 +1,5 @@
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
+import {parsePhoneNumber} from 'awesome-phonenumber'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {atom} from 'jotai'
@@ -25,6 +26,14 @@ import {
   storedContactsAtom,
 } from './contactsStore'
 
+function safeParsePhoneNumber(contactNumber: E164PhoneNumber): string {
+  try {
+    return parsePhoneNumber(contactNumber).number?.international ?? ''
+  } catch (err) {
+    return ''
+  }
+}
+
 const showCreateOrEditDialogAtom = atom(
   null,
   (
@@ -38,6 +47,7 @@ const showCreateOrEditDialogAtom = atom(
   ) => {
     const {t} = get(translationAtom)
     const {type, contactName, contactNumber} = params
+    const subtitle = safeParsePhoneNumber(contactNumber)
 
     return set(askAreYouSureActionAtom, {
       variant: 'info',
@@ -53,7 +63,7 @@ const showCreateOrEditDialogAtom = atom(
                   name: contactName,
                 })
               : t('addContactDialog.addThisPhoneNumber'),
-          subtitle: contactNumber,
+          subtitle,
           negativeButtonText:
             type === 'edit'
               ? t('addContactDialog.keepCurrent')

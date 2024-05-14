@@ -96,29 +96,38 @@ export type BlockInboxResponse = z.TypeOf<typeof BlockInboxResponse>
 export const RequestApprovalRequest = z.object({
   publicKey: PublicKeyPemBase64,
   message: z.string(),
+  notificationServiceReady: z.boolean(),
 })
 export type RequestApprovalRequest = z.TypeOf<typeof RequestApprovalRequest>
 
-export const RequestApprovalResponse = ServerMessageWithId.extend({})
+export const RequestApprovalResponse = ServerMessageWithId.extend({
+  notificationHandled: z.boolean(),
+})
 export type RequestApprovalResponse = z.TypeOf<typeof RequestApprovalResponse>
 
 export const CancelApprovalRequest = z.object({
   publicKey: PublicKeyPemBase64,
   message: z.string(),
+  notificationServiceReady: z.boolean(),
 })
 export type CancelApprovalRequest = z.TypeOf<typeof CancelApprovalRequest>
 
-export const CancelApprovalResponse = ServerMessageWithId.extend({})
+export const CancelApprovalResponse = ServerMessageWithId.extend({
+  notificationHandled: z.boolean(),
+})
 export type CancelApprovalResponse = z.TypeOf<typeof CancelApprovalResponse>
 
 export const ApproveRequestRequest = RequestBaseWithChallenge.extend({
   publicKeyToConfirm: PublicKeyPemBase64,
   message: z.string(),
   approve: z.boolean(),
+  notificationServiceReady: z.boolean(),
 })
 export type ApproveRequestRequest = z.TypeOf<typeof ApproveRequestRequest>
 
-export const ApproveRequestResponse = ServerMessageWithId.extend({})
+export const ApproveRequestResponse = ServerMessageWithId.extend({
+  notificationHandled: z.boolean(),
+})
 export type ApproveRequestResponse = z.TypeOf<typeof ApproveRequestResponse>
 
 export const DeleteInboxesRequest = z.object({
@@ -148,20 +157,26 @@ export const SendMessageRequest = z.object({
   message: z.string(),
   messageType: MessageType,
   messagePreview: z.string().optional(),
+  notificationServiceReady: z.boolean(),
 })
 export type SendMessageRequest = z.TypeOf<typeof SendMessageRequest>
 
-export const SendMessageResponse = ServerMessageWithId.extend({})
+export const SendMessageResponse = ServerMessageWithId.extend({
+  notificationHandled: z.boolean(),
+})
 export type SendMessageResponse = z.TypeOf<typeof SendMessageResponse>
 
 export const LeaveChatRequest = z.object({
   keyPair: PrivateKeyHolder,
   receiverPublicKey: PublicKeyPemBase64,
   message: z.string(),
+  notificationServiceReady: z.boolean(),
 })
 export type LeaveChatRequest = z.TypeOf<typeof LeaveChatRequest>
 
-export const LeaveChatResponse = ServerMessageWithId.extend({})
+export const LeaveChatResponse = ServerMessageWithId.extend({
+  notificationHandled: z.boolean(),
+})
 export type LeaveChatResponse = z.TypeOf<typeof LeaveChatResponse>
 
 export const MessageInBatch = z.object({
@@ -184,7 +199,11 @@ export const SendMessagesRequest = z.object({
 })
 export type SendMessagesRequest = z.TypeOf<typeof SendMessagesRequest>
 
-export const SendMessagesResponse = z.array(ServerMessageWithId)
+export const SendMessagesResponse = z.array(
+  ServerMessageWithId.extend({
+    notificationHandled: z.boolean(),
+  })
+)
 export type SendMessagesResponse = z.TypeOf<typeof SendMessagesResponse>
 
 export const CreateChallengeRequest = z.object({

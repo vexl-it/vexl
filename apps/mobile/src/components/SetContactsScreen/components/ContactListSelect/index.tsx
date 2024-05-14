@@ -1,7 +1,7 @@
 import {ScopeProvider, useMolecule} from 'bunshi/dist/react'
 import * as O from 'fp-ts/Option'
 import {useAtomValue, useSetAtom, useStore} from 'jotai'
-import {useEffect, useMemo, useState} from 'react'
+import React, {useEffect, useMemo, useState} from 'react'
 import {AppState} from 'react-native'
 import {Stack} from 'tamagui'
 import {
@@ -14,7 +14,7 @@ import {ContactsSelectScope, contactSelectMolecule} from './atom'
 import AddContactRow from './components/AddContactRow'
 import ContactsFilter from './components/ContactsFilter'
 import ContactsList from './components/ContactsList'
-import NothingFound from './components/NothingFound'
+import ContactsListEmpty from './components/ContactsListEmpty'
 import SearchBar from './components/SearchBar'
 
 interface Props {
@@ -55,7 +55,7 @@ function ContactsListSelect({
           {!!showFilter && <ContactsFilter />}
           {toDisplay.length > 0 && <ContactsList contacts={toDisplay} />}
           {toDisplay.length === 0 && !O.isSome(customContactToAdd) && (
-            <NothingFound />
+            <ContactsListEmpty />
           )}
           {toDisplay.length === 0 && O.isSome(customContactToAdd) && (
             <AddContactRow contact={customContactToAdd.value} />

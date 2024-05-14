@@ -4,10 +4,9 @@ import * as A from 'fp-ts/lib/Array'
 import * as T from 'fp-ts/lib/Task'
 import * as TE from 'fp-ts/lib/TaskEither'
 import {useSetAtom, useStore} from 'jotai'
-import {focusAtom} from 'jotai-optics'
 import {useCallback, useEffect} from 'react'
 import {usePrivateApiAssumeLoggedIn} from '../../api'
-import messagingStateAtom from '../../state/chat/atoms/messagingStateAtom'
+import {inboxesAtom} from '../../state/chat/atoms/messagingStateAtom'
 import checkNotificationTokensAndRefreshOffersActionAtom from '../../state/marketplace/atoms/checkNotificationTokensAndRefreshOffersActionAtom'
 import {storage} from '../fpMmkv'
 import reportError from '../reportError'
@@ -15,10 +14,6 @@ import {useAppState} from '../useAppState'
 import {getNotificationToken} from './index'
 
 const NOTIFICATION_TOKEN_CACHE_KEY = 'notificationToken'
-
-export const inboxesAtom = focusAtom(messagingStateAtom, (optic) =>
-  optic.elems().prop('inbox')
-)
 
 export function useRefreshNotificationTokenOnResumeAssumeLoggedIn(): void {
   const store = useStore()

@@ -1,7 +1,7 @@
 import {TouchableOpacity} from 'react-native'
-import {getTokens, Stack, Text, XStack} from 'tamagui'
+import {Stack, Text, XStack} from 'tamagui'
 import Image from './Image'
-import checkmarkSvg from './images/checkmarkSvg'
+import checkmarkInCircleSvg from './images/checkmarkInCircleSvg'
 
 export interface SelectableCellContentProps<T> {
   title: string
@@ -23,8 +23,6 @@ function SelectableCell<T>({
   subtitle,
   size = 'large',
 }: Props<T>): JSX.Element {
-  const tokens = getTokens()
-
   return (
     <TouchableOpacity
       onPress={() => {
@@ -37,20 +35,28 @@ function SelectableCell<T>({
         p={size === 'large' ? '$4' : '$3'}
         bg={selected ? '$darkBrown' : '$grey'}
       >
-        <XStack>
+        <XStack ai="flex-start" space="$2">
           {selected ? (
             <Image
-              width={size === 'large' ? 24 : 16}
-              height={size === 'large' ? 24 : 16}
-              source={checkmarkSvg}
-              stroke={tokens.color.main.val}
+              width={size === 'large' ? 20 : 16}
+              height={size === 'large' ? 20 : 16}
+              source={checkmarkInCircleSvg}
             />
           ) : (
-            <Stack w={17} />
+            <Stack
+              width={size === 'large' ? 20 : 16}
+              height={size === 'large' ? 20 : 16}
+              ai="center"
+              jc="center"
+              bw={1}
+              bc={selected ? '$main' : 'transparent'}
+              borderColor={selected ? '$main' : '$greyAccent2'}
+              br={20}
+            />
           )}
-          <Stack fs={1} ml="$2">
+          <Stack fs={1}>
             <Text
-              ff={size === 'large' ? '$body700' : '$body600'}
+              ff="$body600"
               fos={size === 'large' ? 18 : 14}
               col={selected ? '$main' : '$greyOnBlack'}
             >

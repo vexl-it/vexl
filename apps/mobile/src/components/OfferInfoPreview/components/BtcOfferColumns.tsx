@@ -81,8 +81,8 @@ function BtcOfferColumns({offer}: Props): JSX.Element {
           <InfoItemContainer>
             <Stack mb="$2">
               <SvgImage
-                height={24}
-                width={24}
+                height={20}
+                width={20}
                 fill={getTokens().color.greyOnWhite.val}
                 source={spokenLanguagesSvg}
               />
@@ -96,17 +96,17 @@ function BtcOfferColumns({offer}: Props): JSX.Element {
         <XStack mb="$2">
           {offer.publicPart.paymentMethod.includes('CASH') && (
             <Stack mx="$1">
-              <SvgImage source={mapTagSvg} />
+              <SvgImage height={20} width={20} source={mapTagSvg} />
             </Stack>
           )}
           {offer.publicPart.paymentMethod.includes('REVOLUT') && (
             <Stack mx="$1">
-              <SvgImage height={25} width={25} source={onlineTransferSvg} />
+              <SvgImage height={20} width={20} source={onlineTransferSvg} />
             </Stack>
           )}
           {offer.publicPart.paymentMethod.includes('BANK') && (
             <Stack mx="$1">
-              <SvgImage source={bankSvg} />
+              <SvgImage height={20} width={20} source={bankSvg} />
             </Stack>
           )}
         </XStack>

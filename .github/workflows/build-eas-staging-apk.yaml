@@ -16,7 +16,7 @@ jobs:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: yarn workspaces focus @vexl-next/mobile-app
       - name: Decode Google Service Account key
         env:
           GOOGLE_SERVICE_ACCOUNT: ${{ secrets.GOOGLE_SERVICE_ACCOUNT }}

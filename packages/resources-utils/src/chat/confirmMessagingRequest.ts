@@ -8,11 +8,17 @@ import {
   type ChatMessage,
   type ChatMessagePayload,
 } from '@vexl-next/domain/src/general/messaging'
+import {
+  ChatNotificationData,
+  type FcmCypher,
+} from '@vexl-next/domain/src/general/notifications'
 import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {now} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {type ChatPrivateApi} from '@vexl-next/rest-api/src/services/chat'
+import {type NotificationPrivateApi} from '@vexl-next/rest-api/src/services/notification'
 import * as TE from 'fp-ts/TaskEither'
 import {flow, pipe} from 'fp-ts/function'
+import {callWithNotificationService} from '../notifications/callWithNotificationService'
 import {type ExtractLeftTE} from '../utils/ExtractLeft'
 import {type JsonStringifyError, type ZodParseError} from '../utils/parsing'
 import {type ErrorEncryptingMessage} from './utils/chatCrypto'
@@ -23,11 +29,15 @@ function createApproveChatMessage({
   senderPublicKey,
   approve,
   myVersion,
+  myFcmCypher,
+  lastReceivedFcmCypher,
 }: {
   text: string
   senderPublicKey: PublicKeyPemBase64
   approve: boolean
   myVersion: SemverString
+  myFcmCypher?: FcmCypher
+  lastReceivedFcmCypher?: FcmCypher
 }): ChatMessage {
   return {
     uuid: generateChatMessageId(),
@@ -36,7 +46,26 @@ function createApproveChatMessage({
     time: now(),
     myVersion,
     senderPublicKey,
+    myFcmCypher,
+    lastReceivedFcmCypher,
   }
+}
+
+function createApproveChatNotification({
+  inbox,
+  sender,
+  approve,
+}: {
+  inbox: PublicKeyPemBase64
+  sender: PublicKeyPemBase64
+  approve: boolean
+}): ChatNotificationData {
+  return new ChatNotificationData({
+    version: '2',
+    type: approve ? 'DISAPPROVE_MESSAGING' : 'APPROVE_MESSAGING',
+    sender,
+    inbox,
+  })
 }
 
 export type ApiConfirmMessagingRequest = ExtractLeftTE<
@@ -50,6 +79,11 @@ export default function confirmMessagingRequest({
   api,
   approve,
   myVersion,
+  myFcmCypher,
+  lastReceivedFcmCypher,
+  theirFcmCypher,
+  otherSideVersion,
+  notificationApi,
 }: {
   text: string
   fromKeypair: PrivateKeyHolder
@@ -57,6 +91,11 @@ export default function confirmMessagingRequest({
   api: ChatPrivateApi
   approve: boolean
   myVersion: SemverString
+  myFcmCypher?: FcmCypher
+  lastReceivedFcmCypher?: FcmCypher
+  theirFcmCypher?: FcmCypher | undefined
+  otherSideVersion: SemverString | undefined
+  notificationApi: NotificationPrivateApi
 }): TE.TaskEither<
   | ApiConfirmMessagingRequest
   | JsonStringifyError
@@ -70,20 +109,29 @@ export default function confirmMessagingRequest({
       myVersion,
       senderPublicKey: fromKeypair.publicKeyPemBase64,
       approve,
+      myFcmCypher,
+      lastReceivedFcmCypher,
     }),
     TE.right,
     TE.chainFirstW(
       flow(
         messageToNetwork(toPublicKey),
         TE.chainFirstW((message) =>
-          pipe(
-            api.approveRequest({
-              message,
+          callWithNotificationService(api.approveRequest, {
+            message,
+            approve,
+            keyPair: fromKeypair,
+            publicKeyToConfirm: toPublicKey,
+          })({
+            notificationToSend: createApproveChatNotification({
+              inbox: toPublicKey,
               approve,
-              keyPair: fromKeypair,
-              publicKeyToConfirm: toPublicKey,
-            })
-          )
+              sender: fromKeypair.publicKeyPemBase64,
+            }),
+            fcmCypher: theirFcmCypher,
+            otherSideVersion,
+            notificationApi,
+          })
         )
       )
     )

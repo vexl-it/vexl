@@ -1,3 +1,4 @@
+import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {getDefaultStore} from 'jotai'
@@ -16,7 +17,7 @@ function logLoadSessionProgress(text: string): void {
   })
 }
 
-export async function loadSession(
+export function loadSession(
   {
     showErrorAlert,
     forceReload,
@@ -24,7 +25,7 @@ export async function loadSession(
     showErrorAlert: false,
     forceReload: false,
   }
-): Promise<boolean> {
+): T.Task<boolean> {
   const store = getDefaultStore()
   const sessionState = store.get(sessionHolderAtom).state
 
@@ -42,12 +43,12 @@ export async function loadSession(
     logLoadSessionProgress(
       `Skippign loadSession. Result: ${sessionState === 'loggedIn'}`
     )
-    return sessionState === 'loggedIn'
+    return T.of(sessionState === 'loggedIn')
   }
 
   console.info('🔑Trying to find session in storage')
   getDefaultStore().set(sessionHolderAtom, {state: 'loading'})
-  return await pipe(
+  return pipe(
     readSessionFromStorage({
       asyncStorageKey: SESSION_KEY,
       secretStorageKey: SECRET_TOKEN_KEY,
@@ -103,5 +104,5 @@ export async function loadSession(
         return true
       }
     )
-  )()
+  )
 }

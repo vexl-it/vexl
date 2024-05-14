@@ -92,6 +92,9 @@ const cancelRequestActionAtomHandleUI = atom(
           fromKeypair: chat.inbox.privateKey,
           toPublicKey: chat.otherSide.publicKey,
           myVersion: version,
+          theirFcmCypher: chat.otherSideFcmCypher,
+          notificationApi: api.notification,
+          otherSideVersion: chat.otherSideVersion,
         })
       }),
       TE.map((sentMessage): ChatMessageWithState => {

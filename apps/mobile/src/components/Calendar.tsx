@@ -28,6 +28,7 @@ const calendarTheme: Theme = {
   textDayFontSize: 14,
   selectedDayBackgroundColor: getTokens().color.main.val,
   textDisabledColor: getTokens().color.greyAccent2.val,
+  selectedDotColor: '#000000',
 }
 
 export const REACT_NATIVE_CALENDARS_DATE_FORMAT = 'yyyy-MM-dd'

@@ -52,6 +52,7 @@ import {singleOfferAtom} from '../../../state/marketplace/atoms/offersState'
 import getValueFromSetStateActionOfAtom from '../../../utils/atomUtils/getValueFromSetStateActionOfAtom'
 import calculatePriceInFiatFromSats from '../../../utils/calculatePriceInFiatFromSats'
 import calculatePriceInSats from '../../../utils/calculatePriceInSats'
+import {version} from '../../../utils/environment'
 import getDefaultCurrency from '../../../utils/getDefaultCurrency'
 import {
   translationAtom,
@@ -591,6 +592,7 @@ export const offerFormMolecule = molecule(() => {
         set(createOfferAtom, {
           payloadPublic: {
             ...payloadPublic,
+            authorClientVersion: version,
             offerPublicKey: key.publicKeyPemBase64,
           },
           intendedConnectionLevel: intendedConnectionLevel ?? 'FIRST',
@@ -604,6 +606,7 @@ export const offerFormMolecule = molecule(() => {
               },
             })
           },
+          offerKey: key,
         })
       ),
       TE.chainFirstW(({key, createdOffer}) =>
@@ -723,7 +726,9 @@ export const offerFormMolecule = molecule(() => {
     const offer = get(offerAtom)
     const belowProgressLeft = get(modifyOfferLoaderTitleAtom)
 
-    const targetValue = !offer.offerInfo.publicPart.active
+    const targetValue = !get(offerActiveAtom)
+
+    set(offerActiveAtom, targetValue)
 
     set(progressModal.show, {
       title: t('editOffer.editingYourOffer'),
@@ -745,9 +750,11 @@ export const offerFormMolecule = molecule(() => {
         intendedConnectionLevel: offer.ownershipInfo
           ? offer.ownershipInfo.intendedConnectionLevel
           : 'FIRST',
+        updateFcmCypher: false,
       }),
       TE.matchE(
         (e) => {
+          set(offerActiveAtom, !targetValue)
           set(progressModal.hide)
           showErrorAlert({
             title:
@@ -763,14 +770,16 @@ export const offerFormMolecule = molecule(() => {
             T.chain(() =>
               set(progressModal.hideDeffered, {
                 data: {
-                  title: t('editOffer.offerEditSuccess'),
+                  title: !targetValue
+                    ? t('editOffer.pausingOfferSuccess')
+                    : t('editOffer.offerEditSuccess'),
                   bottomText: t('editOffer.youCanCheckYourOffer'),
                   belowProgressLeft: targetValue
                     ? belowProgressLeft.doneText
-                    : t('editOffer.pausingOfferSuccess'),
+                    : t('editOffer.offerEditSuccess'),
                   indicateProgress: {type: 'done'},
                 },
-                delayMs: 2000,
+                delayMs: 1500,
               })
             ),
             T.map(() => true)
@@ -813,6 +822,7 @@ export const offerFormMolecule = molecule(() => {
         adminId: offer.ownershipInfo?.adminId ?? ('' as OfferAdminId),
         symmetricKey: offer.offerInfo.privatePart.symmetricKey,
         intendedConnectionLevel: intendedConnectionLevel ?? 'FIRST',
+        updateFcmCypher: false,
       }),
       TE.matchE(
         (e) => {

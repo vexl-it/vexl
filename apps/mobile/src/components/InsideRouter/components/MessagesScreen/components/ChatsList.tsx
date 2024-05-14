@@ -1,13 +1,15 @@
+import {useNavigation} from '@react-navigation/native'
 import {FlashList} from '@shopify/flash-list'
 import {useAtomValue, type Atom} from 'jotai'
 import {selectAtom, splitAtom} from 'jotai/utils'
-import {Text, YStack} from 'tamagui'
+import {Stack, Text} from 'tamagui'
 import messagingStateAtom from '../../../../../state/chat/atoms/messagingStateAtom'
 import {type ChatWithMessages} from '../../../../../state/chat/domain'
-import isChatActive from '../../../../../state/chat/utils/isChatActive'
+import chatShouldBeVisible from '../../../../../state/chat/utils/isChatActive'
 import atomKeyExtractor from '../../../../../utils/atomUtils/atomKeyExtractor'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import notEmpty from '../../../../../utils/notEmpty'
+import EmptyListWrapper from '../../../../EmptyListWrapper'
 import usePixelsFromBottomWhereTabsEnd from '../../../utils'
 import ChatListItem, {type ChatListData} from './ChatListItem'
 
@@ -16,7 +18,7 @@ const chatIdsAtom = selectAtom(messagingStateAtom, (inboxes): ChatListData[] =>
     .reduce<ChatWithMessages[]>((acc, one) => {
       return acc.concat(one.chats)
     }, [])
-    .filter(isChatActive)
+    .filter(chatShouldBeVisible)
     .map((one) => {
       if (one.messages.length === 0) return null
 
@@ -40,19 +42,31 @@ function renderItem({item}: {item: Atom<ChatListData>}): JSX.Element {
 
 function ChatsList(): JSX.Element | null {
   const {t} = useTranslation()
+  const navigation = useNavigation()
   const elementAtoms = useAtomValue(chatIdAtomsAtom)
   const tabBarEndsAt = usePixelsFromBottomWhereTabsEnd()
 
   if (elementAtoms.length === 0) {
     return (
-      <YStack space="$0" ai="center" py="$4" jc="center" f={1}>
-        <Text color="$white" fos={20} ff="$body600">
-          {t('messages.chatEmpty')}
-        </Text>
-        <Text mb="$4" color="$greyOnBlack">
-          {t('messages.chatEmptyExplanation')}
-        </Text>
-      </YStack>
+      <Stack f={1} pb={tabBarEndsAt}>
+        <EmptyListWrapper
+          buttonText={t('messages.seeMarketplace')}
+          onButtonPress={() => {
+            navigation.navigate('InsideTabs', {
+              screen: 'Marketplace',
+            })
+          }}
+        >
+          <Stack space="$2">
+            <Text textAlign="center" col="$greyOnWhite" fos={20} ff="$body600">
+              {t('messages.youDontHaveAnyOpenChats')}
+            </Text>
+            <Text textAlign="center" fos={14} ta="center" col="$greyOnWhite">
+              {t('messages.startConversationByReactingToOffer')}
+            </Text>
+          </Stack>
+        </EmptyListWrapper>
+      </Stack>
     )
   }
 

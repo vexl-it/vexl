@@ -47,7 +47,7 @@ function CommonFriendsScreen({
   )
 
   return (
-    <Screen customHorizontalPadding={16} bc="$white">
+    <Screen customHorizontalPadding={getTokens().space[1].val} bc="$white">
       <Stack f={1} mb="$2">
         <ScreenTitle
           text={t('commonFriends.commonFriends')}

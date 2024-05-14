@@ -2,18 +2,21 @@ import notifee, {
   AndroidGroupAlertBehavior,
   type DisplayedNotification,
 } from '@notifee/react-native'
-import {type FirebaseMessagingTypes} from '@react-native-firebase/messaging'
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {sha256} from '@vexl-next/cryptography/src/operations/sha'
 import {type Chat} from '@vexl-next/domain/src/general/messaging'
+import {ChatNotificationData} from '@vexl-next/domain/src/general/notifications'
 import {getDefaultStore} from 'jotai'
 import {useCallback} from 'react'
-import decodeNotificationPreviewAction from '../../state/chat/atoms/decodeChatNotificationPreviewActionAtom'
+import {
+  type ChatMessageWithState,
+  type InboxInState,
+} from '../../state/chat/domain'
+import {generateRandomUserData} from '../../state/session/utils/generateRandomUserData'
 import {translationAtom} from '../localization/I18nProvider'
 import notEmpty from '../notEmpty'
-import reportError from '../reportError'
 import {useAppState} from '../useAppState'
-import {ChatNotificationData} from './ChatNotificationData'
+import {SystemChatNotificationData} from './SystemNotificationData.brand'
 import {getChannelForMessages} from './notificationChannels'
 
 function generateGroupId(chat: {
@@ -28,14 +31,14 @@ const REQUEST_GROUP_ID = 'request-group-id'
 async function getRequestNotifications(): Promise<DisplayedNotification[]> {
   const displayedNotifications = await notifee.getDisplayedNotifications()
   return displayedNotifications.filter((notification) => {
-    const notificationDataVerification = ChatNotificationData.safeParse(
+    const notificationDataVerification = ChatNotificationData.parseUnkownOption(
       notification.notification.data
     )
-    if (!notificationDataVerification.success) {
+    if (notificationDataVerification._tag === 'None') {
       return false
     }
 
-    return notificationDataVerification.data.type === 'REQUEST_MESSAGING'
+    return notificationDataVerification.value.type === 'REQUEST_MESSAGING'
   })
 }
 
@@ -49,13 +52,13 @@ async function getNotificationsForChat({
   const displayedNotifications = await notifee.getDisplayedNotifications()
 
   return displayedNotifications.filter((notification) => {
-    const notificationDataVerification = ChatNotificationData.safeParse(
+    const notificationDataVerification = ChatNotificationData.parseUnkownOption(
       notification.notification.data
     )
-    if (!notificationDataVerification.success) {
+    if (notificationDataVerification._tag === 'None') {
       return false
     }
-    const notificationData = notificationDataVerification.data
+    const notificationData = notificationDataVerification.value
 
     return (
       notificationData.inbox === inbox && notificationData.sender === sender
@@ -63,56 +66,87 @@ async function getNotificationsForChat({
   })
 }
 
-export async function showChatNotification(
-  remoteMessage: FirebaseMessagingTypes.RemoteMessage
-): Promise<void> {
-  const notificationDataVerification = ChatNotificationData.safeParse(
-    remoteMessage.data
+export async function showChatNotification({
+  newMessage,
+  inbox,
+}: {
+  newMessage: ChatMessageWithState
+  inbox: InboxInState
+}): Promise<void> {
+  const type = newMessage.message.messageType
+  const chat = inbox.chats.find(
+    (one) => one.chat.otherSide.publicKey === newMessage.message.senderPublicKey
   )
-  if (!notificationDataVerification.success) {
-    reportError(
-      'warn',
-      new Error('Unable to parse notification data for chat notification'),
-      {remoteMessage}
-    )
-    return
-  }
 
-  const notificationData = notificationDataVerification.data
-  if (notificationData.type === 'VERSION_UPDATE') {
+  const userName =
+    chat?.chat.otherSide.realLifeInfo?.userName ??
+    (chat ? generateRandomUserData(chat.chat.otherSide.publicKey) : undefined)
+      ?.userName
+
+  if (
+    type === 'VERSION_UPDATE' ||
+    type === 'FCM_CYPHER_UPDATE' ||
+    type === 'OFFER_DELETED' ||
+    type === 'INBOX_DELETED' ||
+    type === 'CANCEL_REQUEST_MESSAGING' ||
+    type === 'REQUIRES_NEWER_VERSION'
+  ) {
     // DO not show notification in this case
     return
   }
-  if (notificationData.type === 'CANCEL_REQUEST_MESSAGING') return // No message displayed in this case
 
   const {t} = getDefaultStore().get(translationAtom)
 
-  const decodedPreview = await getDefaultStore().set(
-    decodeNotificationPreviewAction,
-    notificationData
-  )()
-
   const groupId =
-    notificationData.type === 'REQUEST_MESSAGING'
+    type === 'REQUEST_MESSAGING'
       ? REQUEST_GROUP_ID
-      : generateGroupId(notificationData)
+      : generateGroupId({
+          inbox: inbox.inbox.privateKey.publicKeyPemBase64,
+          sender: newMessage.message.senderPublicKey,
+        })
 
-  await notifee.displayNotification({
-    title:
-      decodedPreview?.name ?? t(`notifications.${notificationData.type}.title`),
-    body:
-      decodedPreview?.text ?? t(`notifications.${notificationData.type}.body`),
-    data: remoteMessage.data,
-    android: {
-      groupId,
-      channelId: await getChannelForMessages(),
-      pressAction: {
-        id: 'default',
+  if (type === 'MESSAGE') {
+    await notifee.displayNotification({
+      title:
+        userName ?? t(`notifications.${type}.title`, {them: userName ?? ''}),
+      body:
+        newMessage.message.text ??
+        t(`notifications.${type}.body`, {them: userName ?? ''}),
+      data: SystemChatNotificationData.encode(
+        new SystemChatNotificationData({
+          inbox: inbox.inbox.privateKey.publicKeyPemBase64,
+          sender: newMessage.message.senderPublicKey,
+        })
+      ),
+      android: {
+        groupId,
+        channelId: await getChannelForMessages(),
+        pressAction: {
+          id: 'default',
+        },
       },
-    },
-  })
+    })
+  } else {
+    await notifee.displayNotification({
+      title: t(`notifications.${type}.title`, {them: userName ?? ''}),
+      body: t(`notifications.${type}.body`, {them: userName ?? ''}),
+      data: SystemChatNotificationData.encode(
+        new SystemChatNotificationData({
+          inbox: inbox.inbox.privateKey.publicKeyPemBase64,
+          sender: newMessage.message.senderPublicKey,
+        })
+      ),
+      android: {
+        groupId,
+        channelId: await getChannelForMessages(),
+        pressAction: {
+          id: 'default',
+        },
+      },
+    })
+  }
 
-  if (notificationData.type === 'REQUEST_MESSAGING') {
+  if (type === 'REQUEST_MESSAGING') {
     await notifee.displayNotification({
       id: groupId,
       title: t('notifications.groupNotificationRequest.title'),
@@ -130,9 +164,14 @@ export async function showChatNotification(
   } else {
     await notifee.displayNotification({
       id: groupId,
-      data: remoteMessage.data,
+      data: SystemChatNotificationData.encode(
+        new SystemChatNotificationData({
+          inbox: inbox.inbox.privateKey.publicKeyPemBase64,
+          sender: newMessage.message.senderPublicKey,
+        })
+      ),
       subtitle: t('notifications.groupNotificationChat.subtitle', {
-        userName: decodedPreview?.name ?? '[unknown]',
+        userName: userName ?? '[unknown]',
       }),
       android: {
         groupAlertBehavior: AndroidGroupAlertBehavior.CHILDREN,

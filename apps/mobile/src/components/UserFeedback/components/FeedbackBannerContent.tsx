@@ -23,7 +23,6 @@ function FeedbackBannerContent({autoCloseWhenFinished}: Props): JSX.Element {
     starRatingAtom,
     currentFeedbackPageAtom,
     submitChatFeedbackAndHandleUIAtom,
-    submitTextCommentButtonDisabledAtom,
     feedbackFlowFinishedAtom,
   } = useMolecule(feedbackMolecule)
   const feedbackFlowFinished = useAtomValue(feedbackFlowFinishedAtom)
@@ -31,9 +30,6 @@ function FeedbackBannerContent({autoCloseWhenFinished}: Props): JSX.Element {
   const starRating = useAtomValue(starRatingAtom)
   const setChatFeedbackFinished = useSetAtom(chatFeedbackFinishedAtom)
   const submitChatFeedback = useSetAtom(submitChatFeedbackAndHandleUIAtom)
-  const submitTextCommentButtonDisabled = useAtomValue(
-    submitTextCommentButtonDisabledAtom
-  )
   const setNewOfferFeedbackDone = useSetAtom(newOfferFeedbackDoneAtom)
 
   const title = useMemo(() => {
@@ -97,7 +93,6 @@ function FeedbackBannerContent({autoCloseWhenFinished}: Props): JSX.Element {
         currentPage !== 'CHAT_RATING' &&
         currentPage !== 'OFFER_RATING' && (
           <Button
-            disabled={submitTextCommentButtonDisabled}
             onPress={() => {
               void submitChatFeedback()
             }}

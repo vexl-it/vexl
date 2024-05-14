@@ -9,9 +9,10 @@ import {atom, useSetAtom, useStore} from 'jotai'
 import {useCallback} from 'react'
 import {usePrivateApiAssumeLoggedIn} from '../api'
 import notEmpty from '../utils/notEmpty'
-import {inboxesAtom} from '../utils/notifications/useRefreshNotificationTokenOnResumeAssumeLoggedIn'
 import reportError from '../utils/reportError'
 import {useAppState} from '../utils/useAppState'
+import {inboxesAtom} from './chat/atoms/messagingStateAtom'
+import {useRefreshNotificationTokensForActiveChatsAssumeLogin} from './chat/atoms/refreshNotificationTokensActionAtom'
 import {createInboxAtom} from './chat/hooks/useCreateInbox'
 import {updateOfferAtom} from './marketplace'
 import checkNotificationTokensAndRefreshOffersActionAtom from './marketplace/atoms/checkNotificationTokensAndRefreshOffersActionAtom'
@@ -201,15 +202,17 @@ const recreateInboxAndUpdateOfferAtom = atom(
           },
         })
       ),
-      TE.chainW(({publicKeyPemBase64}) => {
+      TE.chainW((keyHolder) => {
         return set(updateOfferAtom, {
           payloadPublic: {
             ...offerWithoutInbox.offerInfo.publicPart,
-            offerPublicKey: publicKeyPemBase64,
+            offerPublicKey: keyHolder.publicKeyPemBase64,
           },
           symmetricKey,
           adminId,
           intendedConnectionLevel,
+          updateFcmCypher: true,
+          offerKey: keyHolder,
         })
       }),
       TE.match(
@@ -281,4 +284,5 @@ export default function useHandleRefreshContactServiceAndOffers(): void {
   useRefreshOffers()
   useCheckOfferInboxes()
   useCheckNotificationTokensAndRefreshOffers()
+  useRefreshNotificationTokensForActiveChatsAssumeLogin()
 }

@@ -117,6 +117,9 @@ export default function revealContactActionAtom(
           senderKeypair: chat.inbox.privateKey,
           receiverPublicKey: chat.otherSide.publicKey,
           message,
+          notificationApi: api.notification,
+          theirFcmCypher: chat.otherSideFcmCypher,
+          otherSideVersion: chat.otherSideVersion,
         }),
         TE.map(() => {
           const successMessage: ChatMessageWithState = {

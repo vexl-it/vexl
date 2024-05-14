@@ -13,7 +13,7 @@ export const InfoDivider = styled(Stack, {
 
 export const InfoText = styled(Text, {
   col: '$greyOnWhite',
-  fos: 14,
+  fos: 12,
   ff: '$body500',
   textAlign: 'center',
   mx: '$1',
@@ -28,5 +28,5 @@ export const PriceText = styled(InfoText, {
 })
 
 export const PriceBigger = styled(InfoText, {
-  fos: 20,
+  fos: 16,
 })

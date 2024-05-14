@@ -36,18 +36,34 @@ function updateChatVersion(
   }
 }
 
+function updateFcmToken(
+  message: ChatMessageWithState
+): (chat: ChatWithMessages) => ChatWithMessages {
+  return (chat) => {
+    if (message.state === 'received') {
+      return {
+        ...chat,
+        chat: {...chat.chat, otherSideFcmCypher: message.message.myFcmCypher},
+      }
+    }
+    return chat
+  }
+}
+
 export default function addMessageToChat(
   message: ChatMessageWithState
 ): (chat: ChatWithMessages) => ChatWithMessages {
   return flow(
     (chat) =>
-      message.message.messageType === 'VERSION_UPDATE'
+      message.message.messageType === 'VERSION_UPDATE' ||
+      message.message.messageType === 'FCM_CYPHER_UPDATE'
         ? chat
         : ({
             ...chat,
             messages: addMessageToMessagesArray(chat.messages)(message),
           } satisfies ChatWithMessages),
-    updateChatVersion(message)
+    updateChatVersion(message),
+    updateFcmToken(message)
   )
 }
 

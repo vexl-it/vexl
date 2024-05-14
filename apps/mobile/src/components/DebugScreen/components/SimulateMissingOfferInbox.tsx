@@ -14,7 +14,7 @@ import messagingStateAtom from '../../../state/chat/atoms/messagingStateAtom'
 import {createInboxAtom} from '../../../state/chat/hooks/useCreateInbox'
 import {createOfferAtom} from '../../../state/marketplace'
 import {myOffersAtom} from '../../../state/marketplace/atoms/myOffers'
-import {packageName} from '../../../utils/environment'
+import {packageName, version} from '../../../utils/environment'
 import Button from '../../Button'
 
 function SimulateMissingOfferInbox(): JSX.Element {
@@ -54,7 +54,9 @@ function SimulateMissingOfferInbox(): JSX.Element {
                 ...offer.offerInfo.publicPart,
                 offerPublicKey: key.publicKeyPemBase64,
                 offerDescription: `#${i} ${offer.offerInfo.publicPart.offerDescription}`,
+                authorClientVersion: version,
               },
+              offerKey: key,
               intendedConnectionLevel:
                 offer.ownershipInfo?.intendedConnectionLevel ?? 'FIRST',
               onProgress: (progress) => {

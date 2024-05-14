@@ -1,6 +1,5 @@
 import {useNavigation} from '@react-navigation/native'
 import dayjs from 'dayjs'
-// import 'dayjs/locale/es'
 import {type DateTime} from 'luxon'
 import {useEffect, useState} from 'react'
 import {

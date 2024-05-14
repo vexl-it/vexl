@@ -20,7 +20,19 @@ export function sendFirebaseMessage({
   return FirebaseMessagingLayer.pipe(
     Effect.flatMap((messaging) =>
       Effect.tryPromise({
-        try: async () => await messaging.send({token, data}),
+        try: async () =>
+          await messaging.send({
+            token,
+            data,
+            android: {priority: 'high'},
+            apns: {
+              payload: {
+                aps: {
+                  contentAvailable: true,
+                },
+              },
+            },
+          }),
         catch: () => new SendingNotificationError({tokenInvalid: false}),
       })
     ),

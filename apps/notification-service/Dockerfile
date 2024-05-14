@@ -7,7 +7,7 @@ COPY . .
 WORKDIR /app/apps/notification-service
 
 
-RUN yarn install
+RUN yarn workspaces focus @vexl-next/notification-service
 RUN yarn build
 
 

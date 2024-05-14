@@ -7,11 +7,17 @@ import {
   type ChatMessage,
   type ChatMessagePayload,
 } from '@vexl-next/domain/src/general/messaging'
+import {
+  ChatNotificationData,
+  type FcmCypher,
+} from '@vexl-next/domain/src/general/notifications'
 import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {now} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {type ChatPrivateApi} from '@vexl-next/rest-api/src/services/chat'
+import {type NotificationPrivateApi} from '@vexl-next/rest-api/src/services/notification'
 import * as TE from 'fp-ts/TaskEither'
 import {flow, pipe} from 'fp-ts/function'
+import {callWithNotificationService} from '../notifications/callWithNotificationService'
 import {type ExtractLeftTE} from '../utils/ExtractLeft'
 import {type JsonStringifyError, type ZodParseError} from '../utils/parsing'
 import {type ErrorEncryptingMessage} from './utils/chatCrypto'
@@ -36,6 +42,21 @@ function createCancelRequestChatMessage({
   }
 }
 
+function createCancelChatNotification({
+  inbox,
+  sender,
+}: {
+  inbox: PublicKeyPemBase64
+  sender: PublicKeyPemBase64
+}): ChatNotificationData {
+  return new ChatNotificationData({
+    version: '2',
+    type: 'CANCEL_REQUEST_MESSAGING',
+    sender,
+    inbox,
+  })
+}
+
 export type ApiErrorRequestMessaging = ExtractLeftTE<
   ReturnType<ChatPrivateApi['cancelRequestApproval']>
 >
@@ -46,12 +67,18 @@ export function sendCancelMessagingRequest({
   toPublicKey,
   api,
   myVersion,
+  theirFcmCypher,
+  otherSideVersion,
+  notificationApi,
 }: {
   text: string
   fromKeypair: PrivateKeyHolder
   toPublicKey: PublicKeyPemBase64
   api: ChatPrivateApi
   myVersion: SemverString
+  theirFcmCypher?: FcmCypher | undefined
+  otherSideVersion: SemverString | undefined
+  notificationApi: NotificationPrivateApi
 }): TE.TaskEither<
   | ApiErrorRequestMessaging
   | JsonStringifyError
@@ -70,7 +97,18 @@ export function sendCancelMessagingRequest({
       flow(
         messageToNetwork(toPublicKey),
         TE.chainW((message) =>
-          pipe(api.cancelRequestApproval({message, publicKey: toPublicKey}))
+          callWithNotificationService(api.cancelRequestApproval, {
+            message,
+            publicKey: toPublicKey,
+          })({
+            notificationToSend: createCancelChatNotification({
+              inbox: toPublicKey,
+              sender: fromKeypair.publicKeyPemBase64,
+            }),
+            otherSideVersion,
+            fcmCypher: theirFcmCypher,
+            notificationApi,
+          })
         )
       )
     )

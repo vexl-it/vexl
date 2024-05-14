@@ -7,9 +7,16 @@ import {
   type ChatMessagePayload,
   type ServerMessage,
 } from '@vexl-next/domain/src/general/messaging'
+import {
+  ChatNotificationData,
+  type FcmCypher,
+} from '@vexl-next/domain/src/general/notifications'
+import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {type ChatPrivateApi} from '@vexl-next/rest-api/src/services/chat'
+import {type NotificationPrivateApi} from '@vexl-next/rest-api/src/services/notification'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
+import {callWithNotificationService} from '../notifications/callWithNotificationService'
 import {type ExtractLeftTE} from '../utils/ExtractLeft'
 import {type JsonStringifyError, type ZodParseError} from '../utils/parsing'
 import {type ErrorEncryptingMessage} from './utils/chatCrypto'
@@ -20,16 +27,40 @@ export type SendMessageApiErrors = ExtractLeftTE<
   ReturnType<ChatPrivateApi['sendMessage']>
 >
 
+function createApproveChatNotification({
+  inbox,
+  preview,
+  sender,
+}: {
+  inbox: PublicKeyPemBase64
+  preview?: string | undefined
+  sender: PublicKeyPemBase64
+}): ChatNotificationData {
+  return new ChatNotificationData({
+    version: '2',
+    type: 'MESSAGE',
+    sender,
+    inbox,
+    preview,
+  })
+}
+
 export default function sendMessage({
   api,
   receiverPublicKey,
   message,
   senderKeypair,
+  theirFcmCypher,
+  notificationApi,
+  otherSideVersion,
 }: {
   api: ChatPrivateApi
   receiverPublicKey: PublicKeyPemBase64
   message: ChatMessage
   senderKeypair: PrivateKeyHolder
+  theirFcmCypher?: FcmCypher | undefined
+  notificationApi: NotificationPrivateApi
+  otherSideVersion: SemverString | undefined
 }): TE.TaskEither<
   | JsonStringifyError
   | ZodParseError<ChatMessagePayload>
@@ -45,15 +76,22 @@ export default function sendMessage({
       messagePreviewToNetwork(receiverPublicKey)(message)
     ),
     TE.chainW(({encryptedMessage, encryptedPreview}) =>
-      pipe(
-        api.sendMessage({
-          message: encryptedMessage,
-          messagePreview: encryptedPreview,
-          messageType: message.messageType,
-          receiverPublicKey,
-          keyPair: senderKeypair,
-        })
-      )
+      callWithNotificationService(api.sendMessage, {
+        message: encryptedMessage,
+        messagePreview: encryptedPreview,
+        messageType: message.messageType,
+        receiverPublicKey,
+        keyPair: senderKeypair,
+      })({
+        notificationToSend: createApproveChatNotification({
+          inbox: receiverPublicKey,
+          sender: senderKeypair.publicKeyPemBase64,
+          preview: encryptedPreview,
+        }),
+        fcmCypher: theirFcmCypher,
+        otherSideVersion,
+        notificationApi,
+      })
     )
   )
 }

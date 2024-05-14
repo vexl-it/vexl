@@ -3,6 +3,7 @@ import {Stack, Text, XStack, getTokens} from 'tamagui'
 import pauseSvg from '../../images/pauseSvg'
 import {isOfferExpired} from '../../utils/isOfferExpired'
 import {useTranslation} from '../../utils/localization/I18nProvider'
+import CommonFriends from '../CommonFriends'
 import SvgImage from '../Image'
 import clockSvg from '../images/clockSvg'
 import infoSvg from '../images/infoSvg'
@@ -13,17 +14,21 @@ import ProductAndOtherOfferColumns from './components/ProductAndOtherOfferColumn
 // const BTC_PRAGUE_FRIEND_STAGE = '9c6r0q7LCn1oqES2pfqQDVQH91fY8ZHYcJKbJYOU7hE='
 
 function OfferInfoPreview({
+  showListingType,
   isMine,
   offer,
   onGrayBackground,
   negative,
   reduceDescriptionLength,
+  showCommonFriends,
 }: {
+  showListingType?: boolean
   isMine?: boolean
   offer: OfferInfo
   onGrayBackground?: boolean
   negative?: boolean
   reduceDescriptionLength?: boolean
+  showCommonFriends?: boolean
 }): JSX.Element {
   const {t} = useTranslation()
   // const btcPragueLogoSvg = useMemo(
@@ -32,65 +37,68 @@ function OfferInfoPreview({
   // )
 
   return (
-    <Stack>
+    <Stack space="$2">
       {/* {(offer.privatePart.commonFriends.includes(BTC_PRAGUE_FRIEND) ||
         offer.privatePart.commonFriends.includes(BTC_PRAGUE_FRIEND_STAGE)) && (
         <Stack f={1} ai="center" jc="space-between">
           <SvgImage width={60} height={20} source={btcPragueLogoSvg} />
         </Stack>
       )} */}
-      <XStack ai="center" jc="space-between" mb="$3">
-        {!!offer.publicPart.listingType && (
+      <XStack ai="center" jc="space-between">
+        {!!(!!isMine || showListingType) && !!offer.publicPart.listingType && (
           <Stack
             ai="center"
             jc="center"
             bc={onGrayBackground ? '$greyAccent3' : '$greyAccent5'}
-            py="$2"
-            px="$3"
-            br="$3"
+            py="$1"
+            px="$2"
+            br="$2"
           >
             <Text fos={12} col="$greyOnWhite" ff="$body600">
               {t(`offerForm.${offer.publicPart.listingType}`)}
             </Text>
           </Stack>
         )}
-        {!!isMine && !offer.publicPart.listingType && (
-          <XStack ai="center" space="$2">
-            <SvgImage source={infoSvg} fill={getTokens().color.red.val} />
-            <Text fos={12} col="$red" ff="$body600">
-              {t('offerForm.listingTypeNotSet')}
-            </Text>
-          </XStack>
-        )}
-      </XStack>
-      <XStack ai="flex-start" jc="space-between">
-        <XStack mb="$4">
-          <Text
-            flex={1}
-            numberOfLines={reduceDescriptionLength ? 5 : undefined}
-            ellipsizeMode={reduceDescriptionLength ? 'tail' : undefined}
-            fos={20}
-            color={negative ? '$greyOnBlack' : '$black'}
-            ff="$body500"
-          >
-            {offer.publicPart.offerDescription}
-          </Text>
-          <XStack space="$1">
-            {isOfferExpired(offer.publicPart.expirationDate) && (
-              <SvgImage
-                stroke={getTokens().color.$greyOnBlack.val}
-                source={clockSvg}
-              />
-            )}
-            {!offer.publicPart.active && (
-              <SvgImage
-                stroke={getTokens().color.$greyOnBlack.val}
-                source={pauseSvg}
-              />
-            )}
-          </XStack>
+        <XStack space="$1">
+          {isOfferExpired(offer.publicPart.expirationDate) && (
+            <SvgImage
+              stroke={getTokens().color.$greyOnBlack.val}
+              source={clockSvg}
+            />
+          )}
+          {!offer.publicPart.active && (
+            <SvgImage
+              stroke={getTokens().color.$greyOnBlack.val}
+              source={pauseSvg}
+            />
+          )}
         </XStack>
       </XStack>
+      {!!isMine && !offer.publicPart.listingType && (
+        <XStack ai="center" space="$2" fs={1}>
+          <SvgImage source={infoSvg} fill={getTokens().color.red.val} />
+          <Text fos={12} col="$red" ff="$body600" numberOfLines={3}>
+            {t('offerForm.listingTypeNotSet')}
+          </Text>
+        </XStack>
+      )}
+      <XStack mb="$1">
+        <Text
+          flex={1}
+          numberOfLines={reduceDescriptionLength ? 5 : undefined}
+          ellipsizeMode={reduceDescriptionLength ? 'tail' : undefined}
+          fos={18}
+          color={negative ? '$greyOnBlack' : '$black'}
+          ff="$body500"
+        >
+          {offer.publicPart.offerDescription}
+        </Text>
+      </XStack>
+      {!!showCommonFriends && (
+        <Stack py="$2">
+          <CommonFriends offerInfo={offer} variant="light" />
+        </Stack>
+      )}
       <XStack space="$1">
         {!offer.publicPart.listingType ||
         offer.publicPart.listingType === 'BITCOIN' ? (

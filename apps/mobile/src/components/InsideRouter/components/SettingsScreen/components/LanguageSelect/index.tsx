@@ -30,7 +30,7 @@ function LanguageSelect(): JSX.Element {
         col="$black"
         my="$4"
         ff="$heading"
-        fos={28}
+        fos={24}
         numberOfLines={2}
         adjustsFontSizeToFit
       >

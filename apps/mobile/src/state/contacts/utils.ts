@@ -29,21 +29,27 @@ export function hashPhoneNumber(
   return hmacSign(hmacPassword)(normalizedPhoneNumber)
 }
 
-export default function getContactsAndTryToResolveThePermissionsAlongTheWay(): TE.TaskEither<
+export async function areContactsPermissionsGranted(): Promise<boolean> {
+  let contactsPermissions = await Contacts.getPermissionsAsync()
+  if (!contactsPermissions.granted) {
+    if (!contactsPermissions.canAskAgain) return false
+    contactsPermissions = await Contacts.requestPermissionsAsync()
+  }
+
+  return contactsPermissions.granted
+}
+
+export function getContactsAndTryToResolveThePermissionsAlongTheWay(): TE.TaskEither<
   PermissionsNotGranted | UnknownContactsError,
   ContactInfo[]
 > {
   return async () => {
     try {
-      let contactsPermissions = await Contacts.getPermissionsAsync()
-      if (!contactsPermissions.granted) {
-        if (!contactsPermissions.canAskAgain)
-          return E.left({_tag: 'PermissionsNotGranted'} as const)
-        contactsPermissions = await Contacts.requestPermissionsAsync()
-      }
+      const contactsPermissionsGranted = await areContactsPermissionsGranted()
 
-      if (!contactsPermissions.granted)
+      if (!contactsPermissionsGranted) {
         return E.left({_tag: 'PermissionsNotGranted'} as const)
+      }
 
       const measureAsyncCall = startMeasure(
         'Async call to get contacts - should not block'

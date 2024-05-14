@@ -1,6 +1,17 @@
-import {atom} from 'jotai'
+import * as T from 'fp-ts/Task'
+import {pipe} from 'fp-ts/lib/function'
+import {atom, useStore} from 'jotai'
 import {DateTime} from 'luxon'
-import {lastImportOfContactsAtom} from './atom/contactsStore'
+import {useCallback} from 'react'
+import {contactsMigratedAtom} from '../../components/VersionMigrations/atoms'
+import {useAppState} from '../../utils/useAppState'
+import {postLoginFinishedAtom} from '../postLoginOnboarding'
+import {
+  eraseImportedContacts,
+  lastImportOfContactsAtom,
+} from './atom/contactsStore'
+import loadContactsFromDeviceActionAtom from './atom/loadContactsFromDeviceActionAtom'
+import {submitContactsActionAtom} from './atom/submitContactsActionAtom'
 
 const TIME_SINCE_CONTACTS_IMPORT_THRESHOLD = 60
 
@@ -32,3 +43,36 @@ export const initializeMinutesTillOffersDisplayedActionAtom = atom(
     )
   }
 )
+
+export function useRefreshContactsFromDeviceOnResume(): void {
+  const store = useStore()
+
+  useAppState(
+    useCallback(
+      (state) => {
+        if (
+          store.get(postLoginFinishedAtom) &&
+          store.get(contactsMigratedAtom) &&
+          state === 'active'
+        )
+          void pipe(
+            store.set(loadContactsFromDeviceActionAtom),
+            T.chain((result) => {
+              if (
+                result === 'missingPermissions' &&
+                // Not needed when user did not imported contacts yet - there is nothing to erase
+                store.get(lastImportOfContactsAtom) !== undefined
+              ) {
+                store.set(eraseImportedContacts)
+                return store.set(submitContactsActionAtom, {
+                  normalizeAndImportAll: false,
+                })
+              }
+              return T.Do
+            })
+          )()
+      },
+      [store]
+    )
+  )
+}

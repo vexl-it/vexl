@@ -7,6 +7,7 @@ import ToastNotificationContent from './components/ToastNotificationContent'
 export interface ToastNotificationState {
   text: string
   icon: SvgString
+  hideAfterMillis?: number | undefined
 }
 export const toastNotificationAtom = atom<ToastNotificationState | null>(null)
 
@@ -15,9 +16,12 @@ function ToastNotification(): JSX.Element {
 
   useEffect(() => {
     if (state) {
-      const timeout = setTimeout(() => {
-        setState(null)
-      }, 1000)
+      const timeout = setTimeout(
+        () => {
+          setState(null)
+        },
+        state?.hideAfterMillis ?? 1000
+      )
 
       return () => {
         clearTimeout(timeout)

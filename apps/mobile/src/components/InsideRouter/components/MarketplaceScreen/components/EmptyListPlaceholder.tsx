@@ -1,8 +1,7 @@
 import {useNavigation} from '@react-navigation/native'
 import {useAtom, useAtomValue, useSetAtom} from 'jotai'
 import {useEffect} from 'react'
-import {RefreshControl, ScrollView} from 'react-native'
-import {Text, YStack} from 'tamagui'
+import {Text} from 'tamagui'
 import {reachNumberAtom} from '../../../../../state/connections/atom/connectionStateAtom'
 import {
   initializeMinutesTillOffersDisplayedActionAtom,
@@ -12,6 +11,7 @@ import {importedContactsCountAtom} from '../../../../../state/contacts/atom/cont
 import {triggerOffersRefreshAtom} from '../../../../../state/marketplace'
 import {
   isFilterActiveAtom,
+  isTextFilterActiveAtom,
   resetFilterInStorageActionAtom,
 } from '../../../../../state/marketplace/atoms/filterAtoms'
 import {offersToSeeInMarketplaceCountAtom} from '../../../../../state/marketplace/atoms/filteredOffersCountAtoms'
@@ -22,53 +22,14 @@ import {
   createOfferSuggestionVisibleAtom,
   resetFilterSuggestionVisibleAtom,
 } from '../../../../../state/marketplace/atoms/offerSuggestionVisible'
+import {areThereOffersToSeeInMarketplaceWithoutFiltersAtom} from '../../../../../state/marketplace/atoms/offersToSeeInMarketplace'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import Button from '../../../../Button'
-import Image from '../../../../Image'
-import anonymousAvatarSvg from '../../../../images/anonymousAvatarSvg'
-import usePixelsFromBottomWhereTabsEnd from '../../../utils'
+import EmptyListWrapper from '../../../../EmptyListWrapper'
+import MarketplaceSuggestion from '../../../../MarketplaceSuggestion'
 import EmptyMarketplaceSuggestions from './EmptyMarketplaceSuggestions'
-import MarketplaceSuggestion from './MarketplaceSuggestion'
 
 const REACH_NUMBER_THRESHOLD = 30
-
-interface EmptyListWrapperProps {
-  buttonText: string
-  children: React.ReactNode
-  onButtonPress: () => void
-  refreshing?: boolean
-  onRefresh?: () => void
-}
-
-function EmptyListWrapper({
-  buttonText,
-  children,
-  onButtonPress,
-  refreshing = false,
-  onRefresh,
-}: EmptyListWrapperProps): JSX.Element {
-  const tabBarEndsAt = usePixelsFromBottomWhereTabsEnd()
-
-  return (
-    <ScrollView
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-      }
-      contentContainerStyle={{paddingBottom: tabBarEndsAt + 25}}
-    >
-      <YStack f={1} ai="center" jc="center" py="$4" space="$4">
-        <Image source={anonymousAvatarSvg} />
-        {children}
-        <Button
-          text={buttonText}
-          variant="primary"
-          size="small"
-          onPress={onButtonPress}
-        />
-      </YStack>
-    </ScrollView>
-  )
-}
 
 interface Props {
   refreshing: boolean
@@ -78,30 +39,37 @@ interface Props {
 function EmptyListPlaceholder({refreshing, onRefresh}: Props): JSX.Element {
   const navigation = useNavigation()
   const {t} = useTranslation()
-  const refreshOffers = useSetAtom(triggerOffersRefreshAtom)
+
   const importedContactsCount = useAtomValue(importedContactsCountAtom)
   const filterActive = useAtomValue(isFilterActiveAtom)
+  const isTextFilterActive = useAtomValue(isTextFilterActiveAtom)
   const marketplaceLayout = useAtomValue(marketplaceLayoutModeAtom)
   const offersToSeeInMarketplaceCount = useAtomValue(
     offersToSeeInMarketplaceCountAtom
   )
   const reachNumber = useAtomValue(reachNumberAtom)
-  const [minutesTillOffersDisplayed, setMinutesTillOffersDisplayed] = useAtom(
-    minutesTillOffersDisplayedAtom
-  )
-  const resetFilterInStorage = useSetAtom(resetFilterInStorageActionAtom)
-  const initializeMinutesTillOffersDisplayed = useSetAtom(
-    initializeMinutesTillOffersDisplayedActionAtom
-  )
   const createOfferSuggestionVisible = useAtomValue(
     createOfferSuggestionVisibleAtom
   )
   const addMoreContactsSuggestionVisible = useAtomValue(
     addMoreContactsSuggestionVisibleAtom
   )
+  const areThereOffersToSeeInMarketplaceWithoutFilters = useAtomValue(
+    areThereOffersToSeeInMarketplaceWithoutFiltersAtom
+  )
+
   const refocusMap = useSetAtom(refocusMapActionAtom)
+  const initializeMinutesTillOffersDisplayed = useSetAtom(
+    initializeMinutesTillOffersDisplayedActionAtom
+  )
+  const resetFilterInStorage = useSetAtom(resetFilterInStorageActionAtom)
+  const refreshOffers = useSetAtom(triggerOffersRefreshAtom)
+
   const [resetFilterSuggestionVisible, setResetFilterSuggestionVisible] =
     useAtom(resetFilterSuggestionVisibleAtom)
+  const [minutesTillOffersDisplayed, setMinutesTillOffersDisplayed] = useAtom(
+    minutesTillOffersDisplayedAtom
+  )
 
   function resetFilterAndSaveIt(): void {
     resetFilterInStorage()
@@ -145,43 +113,45 @@ function EmptyListPlaceholder({refreshing, onRefresh}: Props): JSX.Element {
     )
   }
 
-  if (filterActive) {
-    return resetFilterSuggestionVisible ? (
-      <MarketplaceSuggestion
-        mt="$4"
-        buttonText={t('offer.resetFilter')}
-        onButtonPress={resetFilterAndSaveIt}
-        onClosePress={() => {
-          setResetFilterSuggestionVisible(false)
-        }}
-        text={t('offer.noOffersToMatchFilter')}
-      />
-    ) : (
-      <EmptyListWrapper
-        buttonText={t('offer.resetFilter')}
-        onButtonPress={resetFilterAndSaveIt}
-        refreshing={refreshing}
-        onRefresh={onRefresh}
-      >
-        <Text
-          textAlign="center"
-          col="$greyOnWhite"
-          fos={20}
-          ff="$body600"
-          adjustsFontSizeToFit
-          numberOfLines={4}
-        >
-          {t('offer.createOfferNudge')}
-        </Text>
-        <Button
-          text={t('myOffers.addNewOffer')}
-          variant="secondary"
-          size="small"
-          onPress={() => {
-            navigation.navigate('CreateOffer')
-          }}
+  if (filterActive || isTextFilterActive) {
+    return (
+      <>
+        <MarketplaceSuggestion
+          mt="$4"
+          buttonText={t('offer.resetFilter')}
+          onButtonPress={resetFilterAndSaveIt}
+          text={t('offer.noOffersToMatchFilter')}
+          visibleStateAtom={resetFilterSuggestionVisibleAtom}
         />
-      </EmptyListWrapper>
+        {!resetFilterSuggestionVisible && (
+          <EmptyListWrapper
+            buttonText={t('offer.resetFilter')}
+            onButtonPress={resetFilterAndSaveIt}
+            inScrollView
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+          >
+            <Text
+              textAlign="center"
+              col="$greyOnWhite"
+              fos={20}
+              ff="$body600"
+              adjustsFontSizeToFit
+              numberOfLines={4}
+            >
+              {t('offer.createOfferNudge')}
+            </Text>
+            <Button
+              text={t('myOffers.addNewOffer')}
+              variant="secondary"
+              size="small"
+              onPress={() => {
+                navigation.navigate('CreateOffer')
+              }}
+            />
+          </EmptyListWrapper>
+        )}
+      </>
     )
   }
 
@@ -196,6 +166,7 @@ function EmptyListPlaceholder({refreshing, onRefresh}: Props): JSX.Element {
         buttonText={t('suggestion.addMoreContacts')}
         refreshing={refreshing}
         onRefresh={onRefresh}
+        inScrollView
         onButtonPress={() => {
           navigation.navigate('SetContacts', {})
         }}
@@ -215,11 +186,16 @@ function EmptyListPlaceholder({refreshing, onRefresh}: Props): JSX.Element {
         buttonText={t('offer.emptyAction')}
         refreshing={refreshing}
         onRefresh={onRefresh}
+        inScrollView
         onButtonPress={() => {
           navigation.navigate('CreateOffer')
         }}
       >
-        {minutesTillOffersDisplayed > 0 ? (
+        {areThereOffersToSeeInMarketplaceWithoutFilters ? (
+          <Text textAlign="center" col="$greyOnWhite" fos={20} ff="$body600">
+            {t('offer.thereAreNoOfferForSelectedCategory')}
+          </Text>
+        ) : minutesTillOffersDisplayed > 0 ? (
           <Text textAlign="center" col="$greyOnWhite" fos={20} ff="$body600">
             {t('offer.offersAreLoadingAndShouldBeReady', {
               minutes: minutesTillOffersDisplayed,

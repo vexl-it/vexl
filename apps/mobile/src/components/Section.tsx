@@ -30,25 +30,21 @@ function Section({
 }: SectionProps): JSX.Element {
   return (
     <YStack mb="$4">
-      <XStack ai="center" jc="space-between" py="$4">
-        <XStack ai="center">
-          <Stack mr="$2">
-            <SvgImage
-              width={24}
-              height={24}
-              stroke={getTokens().color.white.val}
-              fill={imageFill ?? 'none'}
-              source={image}
-            />
-          </Stack>
-          <Stack fs={1}>
-            <Text ff="$body700" color="$white" fos={24}>
-              {title}
-            </Text>
-          </Stack>
-        </XStack>
+      <XStack ai="center" py="$4" space="$2">
+        <SvgImage
+          width={24}
+          height={24}
+          stroke={getTokens().color.white.val}
+          fill={imageFill ?? 'none'}
+          source={image}
+        />
+        <Stack fs={1}>
+          <Text ff="$body700" color="$white" fos={24}>
+            {title}
+          </Text>
+        </Stack>
         {!!mandatory && (
-          <Text fos={24} ff="$body700" color="$greyOnBlack">
+          <Text fos={24} ff="$body700" color="$white">
             *
           </Text>
         )}

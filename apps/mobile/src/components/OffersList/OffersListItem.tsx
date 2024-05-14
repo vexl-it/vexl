@@ -181,7 +181,7 @@ function OffersListItem({isFirst, offerAtom}: Props): JSX.Element {
   ])
 
   return (
-    <Stack mt="$6">
+    <Stack mt={isFirst ? '$0' : '$6'}>
       <OfferWithBubbleTip
         isMine={isMine}
         reduceDescriptionLength

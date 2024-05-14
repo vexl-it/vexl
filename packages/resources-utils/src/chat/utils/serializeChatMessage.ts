@@ -59,6 +59,8 @@ export default function serializeChatMessage(
       myVersion: message.myVersion,
       lastReceivedVersion: message.lastReceivedVersion,
       deanonymizedUser: deanonymizedUserToPayload(message),
+      myFcmCypher: message.myFcmCypher,
+      lastReceivedFcmCypher: message.lastReceivedFcmCypher,
     } satisfies ChatMessagePayload,
     safeParse(ChatMessagePayload),
     E.chainW(stringifyToJson)

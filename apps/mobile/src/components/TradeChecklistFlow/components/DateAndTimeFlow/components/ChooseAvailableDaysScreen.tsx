@@ -51,7 +51,7 @@ function ChooseAvailableDaysScreen({
             ...result,
             [unixMillisecondsToLocaleDateTime(dateTime.date).toFormat(
               REACT_NATIVE_CALENDARS_DATE_FORMAT
-            )]: {selected: true},
+            )]: {selected: true, marked: true},
           }
         },
         {}

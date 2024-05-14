@@ -69,7 +69,7 @@ function CurrentBtcPrice({
             color={getTokens().color.greyOnBlack.val}
           />
         ) : (
-          <Text fos={16} ff="$body500" col="$greyOnBlack" {...props}>
+          <Text fos={16} ff="$body500" col="$white" {...props}>
             {`1 BTC = ${
               customBtcPrice
                 ? customBtcPrice.toLocaleString(currentLocale)

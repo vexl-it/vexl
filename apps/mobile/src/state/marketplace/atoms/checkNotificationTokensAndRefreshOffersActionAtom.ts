@@ -8,23 +8,39 @@ import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/lib/function'
 import {atom} from 'jotai'
 import {updateOfferAtom} from '..'
+import {version} from '../../../utils/environment'
 import {getNotificationToken} from '../../../utils/notifications'
 import reportError from '../../../utils/reportError'
+import {inboxesAtom} from '../../chat/atoms/messagingStateAtom'
+import {getKeyHolderForFcmCypherActionAtom} from '../../notifications/fcmCypherToKeyHolderAtom'
 import {getOrFetchNotificationServerPublicKeyActionAtom} from '../../notifications/fcmServerPublicKeyStore'
 import {myOffersAtom} from './myOffers'
 
-function doesOfferNeedUpdate({
-  fcmToken,
-  publicKeyFromServer,
-}: {
-  fcmToken: FcmToken
-  publicKeyFromServer: PublicKeyPemBase64
-}): (oneOffer: MyOfferInState) => boolean {
-  return (oneOffer) =>
-    oneOffer.lastCommitedFcmToken !== fcmToken ||
-    extractPublicKeyFromCypher(oneOffer.offerInfo.publicPart.fcmCypher) !==
-      publicKeyFromServer
-}
+const doesOfferNeedUpdateActionAtom = atom(
+  null,
+  (
+    get,
+    set,
+    {
+      fcmToken,
+      publicKeyFromServer,
+    }: {
+      fcmToken: FcmToken
+      publicKeyFromServer: PublicKeyPemBase64
+    }
+  ): ((oneOffer: MyOfferInState) => boolean) => {
+    return (oneOffer) =>
+      oneOffer.lastCommitedFcmToken !== fcmToken ||
+      extractPublicKeyFromCypher(oneOffer.offerInfo.publicPart.fcmCypher) !==
+        publicKeyFromServer ||
+      !oneOffer.offerInfo.publicPart.fcmCypher ||
+      !set(
+        getKeyHolderForFcmCypherActionAtom,
+        oneOffer.offerInfo.publicPart.fcmCypher
+      ) ||
+      oneOffer.offerInfo.publicPart.authorClientVersion !== version
+  }
+)
 
 const checkNotificationTokensAndRefreshOffersActionAtom = atom(
   null,
@@ -33,6 +49,7 @@ const checkNotificationTokensAndRefreshOffersActionAtom = atom(
       '🦋 Notification tokens',
       'Checking notification tokens and refreshing offers'
     )
+
     void pipe(
       T.Do,
       T.bind('fcmToken', () => getNotificationToken()),
@@ -52,7 +69,7 @@ const checkNotificationTokensAndRefreshOffersActionAtom = atom(
         return pipe(
           get(myOffersAtom),
           A.filter(
-            doesOfferNeedUpdate({
+            set(doesOfferNeedUpdateActionAtom, {
               fcmToken,
               publicKeyFromServer: publicKeyFromServer.value,
             })
@@ -64,14 +81,27 @@ const checkNotificationTokensAndRefreshOffersActionAtom = atom(
             )
             return offers
           },
-          A.map((offer) =>
-            pipe(
+          A.map((offer) => {
+            const offerKeyHolder = get(inboxesAtom).find(
+              (one) =>
+                one.privateKey.publicKeyPemBase64 ===
+                offer.offerInfo.publicPart.offerPublicKey
+            )
+
+            if (!offerKeyHolder) return T.of(false)
+
+            return pipe(
               set(updateOfferAtom, {
-                payloadPublic: offer.offerInfo.publicPart,
+                payloadPublic: {
+                  ...offer.offerInfo.publicPart,
+                  authorClientVersion: version,
+                },
                 symmetricKey: offer.offerInfo.privatePart.symmetricKey,
                 adminId: offer.ownershipInfo.adminId,
                 intendedConnectionLevel:
                   offer.ownershipInfo.intendedConnectionLevel,
+                updateFcmCypher: true,
+                offerKey: offerKeyHolder.privateKey,
               }),
               TE.match(
                 (e) => {
@@ -91,7 +121,7 @@ const checkNotificationTokensAndRefreshOffersActionAtom = atom(
                 }
               )
             )
-          ),
+          }),
           A.sequence(T.ApplicativeSeq),
           T.map((a) => {
             const successCount = a.filter(Boolean).length

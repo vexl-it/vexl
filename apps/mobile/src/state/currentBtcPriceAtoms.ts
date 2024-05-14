@@ -1,14 +1,13 @@
 import {BtcPriceDataWithState} from '@vexl-next/domain/src/general/btcPrice'
 import {CurrencyCode} from '@vexl-next/domain/src/general/currency.brand'
 import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {AcceptedCurrency} from '@vexl-next/rest-api/src/services/btcPrice'
 import {pipe} from 'fp-ts/function'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
 import {atom, type Atom, type PrimitiveAtom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {z} from 'zod'
-import {publicApiAtom} from '../api'
+import {privateApiAtom} from '../api'
 import {atomWithParsedMmkvStorage} from '../utils/atomUtils/atomWithParsedMmkvStorage'
 import {currencies} from '../utils/localization/currency'
 import reportError from '../utils/reportError'
@@ -41,8 +40,11 @@ export function createBtcPriceForCurrencyAtom(
     const btcPriceData = get(btcPriceDataAtom)
 
     const currency = (() => {
-      if (typeof currencyStringOrAtom === 'string') return currencyStringOrAtom
-      return get(currencyStringOrAtom)
+      if (typeof currencyStringOrAtom === 'string') {
+        return currencyStringOrAtom
+      } else {
+        return get(currencyStringOrAtom)
+      }
     })()
 
     if (!currency) {
@@ -63,15 +65,13 @@ export const refreshBtcPriceActionAtom = atom(
     set,
     currencyStringOrAtom: CurrencyCode | Atom<CurrencyCode | undefined>
   ) => {
-    const api = get(publicApiAtom)
+    const api = get(privateApiAtom)
     const currency =
       (typeof currencyStringOrAtom === 'string'
         ? currencyStringOrAtom
         : get(currencyStringOrAtom)) ?? currencies.USD.code
 
     // TODO this can be done statically in constant. Should not be parsed every time.
-    const acceptedCurrency = AcceptedCurrency.safeParse(currency.toLowerCase())
-    if (!acceptedCurrency.success) return T.of(false)
 
     const fetchInfo = get(btcPriceDataAtom)[currency]
     if (
@@ -90,7 +90,7 @@ export const refreshBtcPriceActionAtom = atom(
     }))
 
     return pipe(
-      api.btcPrice(acceptedCurrency.data),
+      api.location.getExchangeRate({currency}),
       TE.matchW(
         (l) => {
           reportError('warn', new Error('Error while fetching btc price'), {
@@ -112,7 +112,7 @@ export const refreshBtcPriceActionAtom = atom(
           set(btcPriceDataAtom, (prevState) => ({
             ...prevState,
             [currency]: {
-              btcPrice,
+              btcPrice: Math.round(btcPrice.BTC),
               state: 'success',
               lastRefreshAt: unixMillisecondsNow(),
             } satisfies BtcPriceDataWithState,

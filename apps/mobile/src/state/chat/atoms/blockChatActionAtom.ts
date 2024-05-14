@@ -48,6 +48,9 @@ export default function blockChatActionAtom(
         senderKeypair: chat.inbox.privateKey,
         receiverPublicKey: chat.otherSide.publicKey,
         message: messageToSend,
+        notificationApi: api.notification,
+        theirFcmCypher: chat.otherSideFcmCypher,
+        otherSideVersion: chat.otherSideVersion,
       }),
       TE.matchW(
         (e): E.Either<typeof e, null> => {

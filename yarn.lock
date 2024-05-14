@@ -10791,6 +10791,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@vexl-next/resources-utils@workspace:packages/resources-utils"
   dependencies:
+    "@effect/schema": ^0.66.1
     "@vexl-next/cryptography": 0.0.0
     "@vexl-next/domain": 0.0.0
     "@vexl-next/eslint-config": 0.0.0
@@ -10798,7 +10799,9 @@ __metadata:
     "@vexl-next/rest-api": 0.0.0
     "@vexl-next/tsconfig": 0.0.0
     awesome-phonenumber: ^5.1.0
+    effect: ^3.0.1
     eslint: ^8.50.0
+    fast-check: ^3.17.1
     fp-ts: ^2.13.1
     jest: ^29.4.1
     js-base64: ^3.7.5

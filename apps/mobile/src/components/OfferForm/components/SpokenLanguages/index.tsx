@@ -54,7 +54,7 @@ function SpokenLanguagesComponent({
           setSpokenLanguageSelectVisible(true)
         }}
       >
-        <Text fos={18} ff="$body600" col="$greyOnBlack">
+        <Text fos={18} ff="$body500" col="$greyOnBlack">
           {t('offerForm.spokenLanguages.indicatePreferredLanguage')}
         </Text>
       </DropdownSelectButton>

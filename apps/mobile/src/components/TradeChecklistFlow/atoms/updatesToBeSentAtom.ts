@@ -20,7 +20,9 @@ import {
   tradeChecklistDataAtom,
 } from '../../../state/tradeChecklist/atoms/fromChatAtoms'
 import {updateTradeChecklistState} from '../../../state/tradeChecklist/utils'
+import {translationAtom} from '../../../utils/localization/I18nProvider'
 import reportError from '../../../utils/reportError'
+import {askAreYouSureActionAtom} from '../../AreYouSureDialog'
 import {loadingOverlayDisplayedAtom} from '../../LoadingOverlayProvider'
 
 const UPDATES_TO_BE_SENT_INITIAL_STATE = {}
@@ -35,9 +37,43 @@ export const areThereUpdatesToBeSentAtom = atom(
     !fastDeepEqual(get(updatesToBeSentAtom), UPDATES_TO_BE_SENT_INITIAL_STATE)
 )
 
-export const clearUpdatesToBeSentActionAtom = atom(null, (get, set) => {
+const clearUpdatesToBeSentActionAtom = atom(null, (get, set) => {
   set(updatesToBeSentAtom, UPDATES_TO_BE_SENT_INITIAL_STATE)
 })
+
+export const askAreYouSureAndClearUpdatesToBeSentActionAtom = atom(
+  null,
+  (get, set) => {
+    const {t} = get(translationAtom)
+    const areThereUpdatesToBeSent = get(areThereUpdatesToBeSentAtom)
+
+    if (!areThereUpdatesToBeSent) return T.of(true)
+
+    return pipe(
+      set(askAreYouSureActionAtom, {
+        variant: 'danger',
+        steps: [
+          {
+            type: 'StepWithText',
+            title: t('tradeChecklist.discardChanges'),
+            description: t('tradeChecklist.allChangesWillBeLost'),
+            positiveButtonText: t('common.discard'),
+            negativeButtonText: t('common.back'),
+          },
+        ],
+      }),
+      TE.match(
+        () => {
+          return false
+        },
+        () => {
+          set(clearUpdatesToBeSentActionAtom)
+          return true
+        }
+      )
+    )
+  }
+)
 
 export const dateAndTimePickUpdateToBeSentAtom = atom(
   (get) => get(updatesToBeSentAtom).dateAndTime?.picks?.dateTime

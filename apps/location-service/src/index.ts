@@ -7,6 +7,7 @@ import * as Http from '@effect/platform/HttpServer'
 import {OTLPTraceExporter} from '@opentelemetry/exporter-trace-otlp-http'
 import {BatchSpanProcessor} from '@opentelemetry/sdk-trace-node'
 import {
+  GetExchangeRateRequest,
   GetGeocodedCoordinatesRequest,
   GetLocationSuggestionsRequest,
 } from '@vexl-next/rest-api/src/services/location/contracts'
@@ -22,6 +23,7 @@ import {createServer} from 'http'
 import {Environment, EnvironmentConstants} from './EnvironmentLayer'
 import googleGeocode from './apis/googleGeocode'
 import {querySuggest} from './apis/googleSuggest.js'
+import {YadioCache, getExchangeRatePrice} from './apis/yadio'
 
 const ServerLive = Layer.unwrapEffect(
   EnvironmentConstants.PORT.pipe(
@@ -48,6 +50,17 @@ const HttpLive = Http.router.empty.pipe(
       Effect.provide(AuthenticatedSessionInRequestLive)
     )
   ),
+  Http.router.get(
+    '/btc-rate',
+    schemaUrlSearchParams(GetExchangeRateRequest).pipe(
+      Effect.flatMap(getExchangeRatePrice),
+      Effect.flatMap(Http.response.json),
+      Effect.provide(AuthenticatedSessionInRequestLive),
+      Effect.catchTag('GetExchangeRateError', (e) =>
+        Http.response.json(e, {status: 400})
+      )
+    )
+  ),
   handleCommonErrorsRouter
 )
 
@@ -55,6 +68,7 @@ const AppLive = HttpLive.pipe(
   Http.server.serve(Http.middleware.logger),
   Http.server.withLogAddress,
   Layer.provide(ServerLive),
+  Layer.provide(YadioCache.layer()),
   Layer.provide(
     ServerUserSessionConfig.layerFromEffect(
       EnvironmentConstants.SIGNATURE_PUBLIC_KEY

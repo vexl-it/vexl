@@ -31,22 +31,21 @@ export const newContactsAtom = atom((get) =>
   get(storedContactsAtom).filter((contact) => !contact.flags.seen)
 )
 
-export const resolveAllContactsAsSeenActionAtom = atom(null, (get, set) => {
-  set(storedContactsAtom, (contacts) =>
-    contacts.map((contact) =>
-      contact.flags.seen
-        ? contact
-        : {
-            ...contact,
-            flags: {...contact.flags, seen: true},
-          }
+export const resolveAllContactsAsSeenActionAtom = atom(
+  (get) => get(storedContactsAtom).some((contact) => !contact.flags.seen),
+  (get, set) => {
+    set(storedContactsAtom, (contacts) =>
+      contacts.map((contact) =>
+        contact.flags.seen
+          ? contact
+          : {
+              ...contact,
+              flags: {...contact.flags, seen: true},
+            }
+      )
     )
-  )
-})
-
-export const areThereNewContactsAtom = atom((get) => {
-  return get(storedContactsAtom).some((contact) => !contact.flags.seen)
-})
+  }
+)
 
 export const normalizedContactsAtom = atom(
   (get): StoredContactWithComputedValues[] =>
@@ -72,3 +71,14 @@ export const lastImportOfContactsAtom = focusAtom(contactsStoreAtom, (o) =>
 export const importedContactsCountAtom = atom(
   (get) => get(storedContactsAtom).filter((one) => one.flags.imported).length
 )
+
+export const eraseStoreActionAtom = atom(null, (get, set) => {
+  set(contactsStoreAtom, {contacts: [], lastImport: undefined})
+})
+
+export const eraseImportedContacts = atom(null, (get, set) => {
+  set(contactsStoreAtom, (o) => ({
+    contacts: o.contacts.filter((one) => one.flags.importedManually),
+    lastImport: undefined,
+  }))
+})

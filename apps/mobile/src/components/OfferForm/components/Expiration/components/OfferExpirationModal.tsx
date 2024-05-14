@@ -37,7 +37,7 @@ function OfferExpirationModal({
         ? {
             [`${DateTime.fromISO(expirationDate).toFormat(
               REACT_NATIVE_CALENDARS_DATE_FORMAT
-            )}`]: {selected: true},
+            )}`]: {selected: true, marked: true},
           }
         : undefined,
     [expirationDate]

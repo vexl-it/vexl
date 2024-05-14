@@ -11,9 +11,12 @@ import {
   type LoggingFunction,
 } from '../../utils'
 import {
+  GetExchangeRateError,
+  GetExchangeRateResponse,
   GetGeocodedCoordinatesResponse,
   GetLocationSuggestionsResponse,
   LocationNotFoundError,
+  type GetExchangeRateRequest,
   type GetGeocodedCoordinatesRequest,
   type GetLocationSuggestionsRequest,
 } from './contracts'
@@ -91,6 +94,29 @@ export function privateApi({
             if (e.response.status === 404) {
               return new LocationNotFoundError()
             }
+          }
+          return e
+        })
+      )
+    },
+    getExchangeRate: (
+      request: GetExchangeRateRequest,
+      signal?: AbortSignal
+    ) => {
+      return pipe(
+        axiosCallWithValidationSchema(
+          axiosInstance,
+          {
+            url: `/btc-rate`,
+            params: {currency: request.currency},
+            method: 'get',
+            ...(signal ? {signal} : {}),
+          },
+          GetExchangeRateResponse
+        ),
+        TE.mapLeft((e) => {
+          if (e._tag === 'BadStatusCodeError') {
+            return new GetExchangeRateError({reason: e.response.data.reason})
           }
           return e
         })

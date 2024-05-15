@@ -10744,6 +10744,35 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@vexl-next/notification-service@workspace:apps/notification-service":
+  version: 0.0.0-use.local
+  resolution: "@vexl-next/notification-service@workspace:apps/notification-service"
+  dependencies:
+    "@effect/experimental": ^0.15.8
+    "@effect/opentelemetry": ^0.32.0
+    "@effect/platform": ^0.49.3
+    "@effect/platform-node": ^0.46.3
+    "@effect/schema": ^0.66.1
+    "@opentelemetry/exporter-trace-otlp-http": ^0.50.0
+    "@opentelemetry/sdk-trace-node": ^1.23.0
+    "@opentelemetry/sdk-trace-web": ^1.23.0
+    "@types/text-encoding": ^0
+    "@vexl-next/cryptography": 0.0.0
+    "@vexl-next/eslint-config": 0.0.0
+    "@vexl-next/prettier-config": 0.0.0
+    "@vexl-next/rest-api": 0.0.0
+    "@vexl-next/server-utils": 0.0.0
+    "@vexl-next/tsconfig": 0.0.0
+    effect: ^3.0.1
+    esbuild: ^0.17.16
+    eslint: ^8.50.0
+    fast-check: ^3.17.1
+    firebase-admin: ^12.1.0
+    prettier: ^3.0.3
+    typescript: ^5.3.0
+  languageName: unknown
+  linkType: soft
+
 "@vexl-next/prettier-config@0.0.0, @vexl-next/prettier-config@workspace:tooling/prettier":
   version: 0.0.0-use.local
   resolution: "@vexl-next/prettier-config@workspace:tooling/prettier"
@@ -23545,35 +23574,6 @@ __metadata:
   checksum: 24c20b75ebfd526d8453084692720b49d111c63c0911f1b7447427829597841eef5a8ba3f6bb93d6654007b991c1f5cd85da2c907800e439e2e2ec6c2abd0fc0
   languageName: node
   linkType: hard
-
-"notification-service@workspace:apps/notification-service":
-  version: 0.0.0-use.local
-  resolution: "notification-service@workspace:apps/notification-service"
-  dependencies:
-    "@effect/experimental": ^0.15.8
-    "@effect/opentelemetry": ^0.32.0
-    "@effect/platform": ^0.49.3
-    "@effect/platform-node": ^0.46.3
-    "@effect/schema": ^0.66.1
-    "@opentelemetry/exporter-trace-otlp-http": ^0.50.0
-    "@opentelemetry/sdk-trace-node": ^1.23.0
-    "@opentelemetry/sdk-trace-web": ^1.23.0
-    "@types/text-encoding": ^0
-    "@vexl-next/cryptography": 0.0.0
-    "@vexl-next/eslint-config": 0.0.0
-    "@vexl-next/prettier-config": 0.0.0
-    "@vexl-next/rest-api": 0.0.0
-    "@vexl-next/server-utils": 0.0.0
-    "@vexl-next/tsconfig": 0.0.0
-    effect: ^3.0.1
-    esbuild: ^0.17.16
-    eslint: ^8.50.0
-    fast-check: ^3.17.1
-    firebase-admin: ^12.1.0
-    prettier: ^3.0.3
-    typescript: ^5.3.0
-  languageName: unknown
-  linkType: soft
 
 "npm-install-checks@npm:^6.0.0":
   version: 6.3.0

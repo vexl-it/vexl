@@ -3,8 +3,9 @@ import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useMemo, useState} from 'react'
-import {Alert, ScrollView} from 'react-native'
-import {Stack, Text, XStack, YStack} from 'tamagui'
+import {Alert} from 'react-native'
+import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view'
+import {Stack, Text, YStack} from 'tamagui'
 import {type RootStackScreenProps} from '../../../navigationTypes'
 import {sendRequestHandleUIActionAtom} from '../../../state/chat/atoms/sendRequestActionAtom'
 import {type RequestState} from '../../../state/chat/domain'
@@ -22,30 +23,47 @@ import {offerRerequestLimitDaysAtom} from '../../../utils/remoteConfig/atoms'
 import useSafeGoBack from '../../../utils/useSafeGoBack'
 import Button from '../../Button'
 import ButtonWithPressTimeout from '../../ButtonWithPressTimeout'
-import IconButton from '../../IconButton'
 import Info from '../../Info'
 import InfoSquare from '../../InfoSquare'
+import {MAP_SIZE} from '../../MarketplaceMap'
 import OfferRequestTextInput from '../../OfferRequestTextInput'
 import OfferWithBubbleTip from '../../OfferWithBubbleTip'
-import ScreenTitle from '../../ScreenTitle'
-import closeSvg from '../../images/closeSvg'
-import {useReportOfferHandleUI} from '../api'
 import showCommonFriendsExplanationUIActionAtom from '../atoms'
-import flagSvg from '../images/flagSvg'
 import RerequestInfo from './RerequestInfo'
+import Title from './Title'
+
+const SCROLL_EXTRA_OFFSET = 200
+
+function ContentContainer({
+  mapIsVisible,
+  children,
+}: {
+  mapIsVisible?: boolean
+  children: React.ReactElement | React.ReactElement[]
+}): JSX.Element {
+  return mapIsVisible ? (
+    <Stack>{children}</Stack>
+  ) : (
+    <KeyboardAwareScrollView
+      showsVerticalScrollIndicator={false}
+      extraHeight={SCROLL_EXTRA_OFFSET}
+    >
+      {children}
+    </KeyboardAwareScrollView>
+  )
+}
 
 function OfferInfo({
+  mapIsVisible,
   offer,
   navigation,
-  showCommonFriends,
 }: {
+  mapIsVisible?: boolean
   offer: OneOfferInState
   navigation: RootStackScreenProps<'OfferDetail'>['navigation']
-  showCommonFriends?: boolean
 }): JSX.Element {
   const goBack = useSafeGoBack()
   const {t} = useTranslation()
-  const reportOffer = useReportOfferHandleUI()
   const reportedFlagAtom = createSingleOfferReportedFlagAtom(
     offer.offerInfo.offerId
   )
@@ -124,21 +142,8 @@ function OfferInfo({
 
   return (
     <Stack f={1} mx="$2" my="$4">
-      <ScreenTitle text={t('offer.title')}>
-        <XStack ai="center" space="$2">
-          {!offer.flags.reported && (
-            <IconButton
-              variant="dark"
-              icon={flagSvg}
-              onPress={() => {
-                void reportOffer(offer.offerInfo.offerId)()
-              }}
-            />
-          )}
-          <IconButton variant="dark" icon={closeSvg} onPress={goBack} />
-        </XStack>
-      </ScreenTitle>
-      <ScrollView showsVerticalScrollIndicator={false}>
+      {!mapIsVisible && <Title offer={offer} />}
+      <ContentContainer mapIsVisible={mapIsVisible}>
         <YStack space="$2" mb="$2">
           <Stack mb="$2">
             <OfferWithBubbleTip
@@ -179,7 +184,7 @@ function OfferInfo({
             </Text>
           )}
         </YStack>
-      </ScrollView>
+      </ContentContainer>
       <Stack pt="$2">
         {showRequestButton ? (
           <ButtonWithPressTimeout
@@ -202,6 +207,8 @@ function OfferInfo({
           />
         ) : null}
       </Stack>
+      {/* Needed to map scroll animation work correctly */}
+      {!!mapIsVisible && <Stack h={MAP_SIZE + MAP_SIZE / 2} />}
     </Stack>
   )
 }

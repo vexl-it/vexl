@@ -17,6 +17,7 @@ const IssueNotificationRouteLive = Http.router.post(
     const fcmToken = yield* _(decodeFcmCypher(data.fcmCypher))
 
     const encryptedNotificationData = new EncryptedNotificationData({
+      id: EncryptedNotificationData.id(),
       payload: data.messagePayload,
       targetCypher: data.fcmCypher,
     })

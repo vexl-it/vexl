@@ -276,6 +276,7 @@ function DebugScreen(): JSX.Element {
                     })
                   }
                   await notifee.displayNotification({
+                    id: 'nnn',
                     title: `title ${Date.now()}`,
                     subtitle: 'some notification',
                     ios: {
@@ -297,6 +298,17 @@ function DebugScreen(): JSX.Element {
               onPress={() => {
                 void (async () => {
                   await notifee.cancelAllNotifications()
+                })()
+              }}
+            />
+            <Button
+              variant="primary"
+              size="small"
+              text="print all not"
+              onPress={() => {
+                void (async () => {
+                  const nots = await notifee.getDisplayedNotifications()
+                  console.log(JSON.stringify(nots, null, 2))
                 })()
               }}
             />

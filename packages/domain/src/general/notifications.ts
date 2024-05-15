@@ -2,6 +2,7 @@ import {type AST} from '@effect/schema'
 import * as S from '@effect/schema/Schema'
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
+import {randomUUID} from 'crypto'
 import {Brand} from 'effect'
 import {z} from 'zod'
 
@@ -84,9 +85,18 @@ export const EncryptedNotificationPayloadSchema = S.String.pipe(
   S.fromBrand(EncryptedNotificationPayload)
 )
 
+export const EncryptedNotificationDataId = S.UUID.pipe(
+  S.brand('EncryptedNotificationDataId')
+)
+
 export class EncryptedNotificationData extends S.TaggedClass<EncryptedNotificationData>(
   'EncryptedNotificationData'
 )('EncryptedNotificationData', {
+  id: EncryptedNotificationDataId,
   payload: EncryptedNotificationPayloadSchema,
   targetCypher: FcmCypherE,
-}) {}
+}) {
+  static id = (): S.Schema.Type<typeof EncryptedNotificationDataId> => {
+    return S.decodeSync(EncryptedNotificationDataId)(randomUUID())
+  }
+}

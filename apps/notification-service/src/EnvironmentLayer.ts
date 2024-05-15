@@ -24,6 +24,9 @@ const EnvironmentData = S.Struct({
   FCM_TOKEN_PRIVATE_KEY: PrivateKeyPemBase64E,
   SIGNATURE_PUBLIC_KEY: PublicKeyPemBase64E,
   FIREBASE_CREDENTIALS: S.parseJson({}),
+  IOS_APP_BUNDLE_ID: S.String.pipe(
+    S.optional({default: () => 'it.vexl.nextstaging'})
+  ),
 })
 
 export interface EnvironmentData

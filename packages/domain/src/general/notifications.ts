@@ -84,6 +84,10 @@ export const EncryptedNotificationPayloadSchema = S.String.pipe(
   S.fromBrand(EncryptedNotificationPayload)
 )
 
+export const EncryptedNotificationDataId = S.UUID.pipe(
+  S.brand('EncryptedNotificationDataId')
+)
+
 export class EncryptedNotificationData extends S.TaggedClass<EncryptedNotificationData>(
   'EncryptedNotificationData'
 )('EncryptedNotificationData', {

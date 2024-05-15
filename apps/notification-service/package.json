@@ -1,5 +1,5 @@
 {
-  "name": "notification-service",
+  "name": "@vexl-next/notification-service",
   "version": "0.0.0",
   "main": "index.js",
   "type": "module",
@@ -41,6 +41,7 @@
     "@vexl-next/cryptography": "0.0.0",
     "@vexl-next/rest-api": "0.0.0",
     "@vexl-next/server-utils": "0.0.0",
+    "dotenv": "^16.4.5",
     "effect": "^3.0.1",
     "fast-check": "^3.17.1",
     "firebase-admin": "^12.1.0"

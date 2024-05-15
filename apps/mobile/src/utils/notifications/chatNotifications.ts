@@ -8,6 +8,7 @@ import {type Chat} from '@vexl-next/domain/src/general/messaging'
 import {ChatNotificationData} from '@vexl-next/domain/src/general/notifications'
 import {getDefaultStore} from 'jotai'
 import {useCallback} from 'react'
+import {Platform} from 'react-native'
 import {
   type ChatMessageWithState,
   type InboxInState,
@@ -118,8 +119,13 @@ export async function showChatNotification({
           sender: newMessage.message.senderPublicKey,
         })
       ),
+      ios: {
+        threadId: groupId,
+      },
       android: {
         groupId,
+        lightUpScreen: true,
+        groupAlertBehavior: AndroidGroupAlertBehavior.CHILDREN,
         channelId: await getChannelForMessages(),
         pressAction: {
           id: 'default',
@@ -136,8 +142,13 @@ export async function showChatNotification({
           sender: newMessage.message.senderPublicKey,
         })
       ),
+      ios: {
+        threadId: groupId,
+      },
       android: {
         groupId,
+        groupAlertBehavior: AndroidGroupAlertBehavior.CHILDREN,
+        lightUpScreen: true,
         channelId: await getChannelForMessages(),
         pressAction: {
           id: 'default',
@@ -146,43 +157,39 @@ export async function showChatNotification({
     })
   }
 
-  if (type === 'REQUEST_MESSAGING') {
-    await notifee.displayNotification({
-      id: groupId,
-      title: t('notifications.groupNotificationRequest.title'),
-      subtitle: t('notifications.groupNotificationRequest.subtitle'),
-      android: {
-        groupAlertBehavior: AndroidGroupAlertBehavior.CHILDREN,
-        channelId: await getChannelForMessages(),
-        groupId,
-        groupSummary: true,
-        pressAction: {
-          id: 'default',
+  if (Platform.OS === 'android') {
+    if (type === 'REQUEST_MESSAGING') {
+      await notifee.displayNotification({
+        id: groupId,
+        title: t('notifications.groupNotificationRequest.title'),
+        subtitle: t('notifications.groupNotificationRequest.subtitle'),
+        android: {
+          groupAlertBehavior: AndroidGroupAlertBehavior.CHILDREN,
+          channelId: await getChannelForMessages(),
+          groupId,
+          groupSummary: true,
         },
-      },
-    })
-  } else {
-    await notifee.displayNotification({
-      id: groupId,
-      data: SystemChatNotificationData.encode(
-        new SystemChatNotificationData({
-          inbox: inbox.inbox.privateKey.publicKeyPemBase64,
-          sender: newMessage.message.senderPublicKey,
-        })
-      ),
-      subtitle: t('notifications.groupNotificationChat.subtitle', {
-        userName: userName ?? '[unknown]',
-      }),
-      android: {
-        groupAlertBehavior: AndroidGroupAlertBehavior.CHILDREN,
-        channelId: await getChannelForMessages(),
-        groupId,
-        groupSummary: true,
-        pressAction: {
-          id: 'default',
+      })
+    } else {
+      await notifee.displayNotification({
+        id: groupId,
+        data: SystemChatNotificationData.encode(
+          new SystemChatNotificationData({
+            inbox: inbox.inbox.privateKey.publicKeyPemBase64,
+            sender: newMessage.message.senderPublicKey,
+          })
+        ),
+        subtitle: t('notifications.groupNotificationChat.subtitle', {
+          userName: userName ?? '[unknown]',
+        }),
+        android: {
+          groupAlertBehavior: AndroidGroupAlertBehavior.CHILDREN,
+          channelId: await getChannelForMessages(),
+          groupId,
+          groupSummary: true,
         },
-      },
-    })
+      })
+    }
   }
 }
 

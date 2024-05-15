@@ -30,7 +30,7 @@ function EditNameScreen(): JSX.Element {
   return (
     <Screen customHorizontalPadding={tokens.space[2].val}>
       <KeyboardAvoidingView>
-        <ScreenTitle text={t('editName.editName')}>
+        <ScreenTitle text={t('editName.editName')} mb="$2">
           <IconButton variant="dark" icon={closeSvg} onPress={safeGoBack} />
         </ScreenTitle>
         <Stack f={1}>

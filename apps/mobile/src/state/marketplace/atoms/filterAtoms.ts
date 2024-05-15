@@ -19,7 +19,7 @@ export const offersFilterInitialState: OffersFilter = {
   spokenLanguages: [],
   amountBottomLimit: undefined,
   amountTopLimit: undefined,
-  offerType: 'SELL',
+  offerType: 'BUY',
   listingType: 'BITCOIN',
   singlePrice: undefined,
   text: undefined,

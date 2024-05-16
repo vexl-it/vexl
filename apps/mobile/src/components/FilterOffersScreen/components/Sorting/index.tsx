@@ -39,6 +39,10 @@ const dropdownRowsAtom = atom<Array<DropdownItemProps<Sort>>>((get) => {
       label: t('filterOffers.highestAmount'),
       value: 'HIGHEST_AMOUNT',
     },
+    {
+      label: t('filterOffers.mostConnections'),
+      value: 'MOST_CONNECTIONS',
+    },
   ]
 })
 

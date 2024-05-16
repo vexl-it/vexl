@@ -527,6 +527,7 @@
   "filterOffers.searchOffers": "Search offers",
   "filterOffers.offers": "Offers",
   "filterOffers.whatIsTheGoal": "What's the goal",
+  "filterOffers.mostConnections": "Most connections",
   "reuploadOffers.suggestionCell.title": "🚨 Some offers need to be reencrypted to be visible for others!",
   "reuploadOffers.suggestionCell.button": "Reencrypt offers",
   "reuploadOffers.progress.title": "Reencrypting your offers",

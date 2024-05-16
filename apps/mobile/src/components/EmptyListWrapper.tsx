@@ -1,5 +1,5 @@
 import {RefreshControl, ScrollView} from 'react-native'
-import {Stack, YStack} from 'tamagui'
+import {Stack, YStack, getTokens} from 'tamagui'
 import Button from './Button'
 import Image from './Image'
 import usePixelsFromBottomWhereTabsEnd from './InsideRouter/utils'
@@ -53,9 +53,17 @@ function EmptyListWrapper({
   return inScrollView ? (
     <ScrollView
       refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          tintColor={getTokens().color.greyAccent5.val}
+        />
       }
-      contentContainerStyle={{paddingBottom: tabBarEndsAt + 25}}
+      contentContainerStyle={{
+        flexGrow: 1,
+        justifyContent: 'center',
+        paddingBottom: tabBarEndsAt,
+      }}
     >
       <EmptyListContent buttonText={buttonText} onButtonPress={onButtonPress}>
         {children}

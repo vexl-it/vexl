@@ -1,7 +1,10 @@
-import {useSetAtom} from 'jotai'
-import {useMemo, useState} from 'react'
+import {useAtomValue, useSetAtom} from 'jotai'
+import {useEffect, useMemo, useState} from 'react'
 import {debounce} from 'tamagui'
-import {submitSearchActionAtom} from '../../../../../state/marketplace/atoms/filterAtoms'
+import {
+  searchTextAtom,
+  submitSearchActionAtom,
+} from '../../../../../state/marketplace/atoms/filterAtoms'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import Input from '../../../../Input'
 import magnifyingGlass from '../../../../images/magnifyingGlass'
@@ -12,9 +15,11 @@ interface Props {
 
 function SearchOffers({postSearchActions}: Props): JSX.Element {
   const {t} = useTranslation()
-  const [searchText, setSearchText] = useState('')
 
+  const searchTextFromStorage = useAtomValue(searchTextAtom)
   const submitSearch = useSetAtom(submitSearchActionAtom)
+
+  const [searchText, setSearchText] = useState<string | undefined>(undefined)
 
   const setSearchTextWithDebounce = useMemo(
     () =>
@@ -29,6 +34,12 @@ function SearchOffers({postSearchActions}: Props): JSX.Element {
     setSearchText(value)
     setSearchTextWithDebounce(value.trim())
   }
+
+  // it re-renders whole component one more time after debounce submitSearch
+  // but maybe this is the most readable solution
+  useEffect(() => {
+    setSearchText(searchTextFromStorage)
+  }, [searchTextFromStorage])
 
   return (
     <Input

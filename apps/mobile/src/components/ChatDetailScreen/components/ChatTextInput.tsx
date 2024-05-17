@@ -157,28 +157,30 @@ function ChatTextInput(): JSX.Element | null {
             />
           </YStack>
         )}
-        <TextInput
-          multiline
-          textAlignVertical="center"
-          value={value}
-          onChangeText={setValue}
-          style={styles.textInput}
-          textColor="$white"
-          variant="greyOnBlack"
-          placeholder={t('messages.typeSomething')}
-          placeholderTextColor={getTokens().color.greyOnBlack.val}
-          rightElement={
-            <Animated.View style={animatedStyle}>
-              <IconButton
-                oval
-                variant="secondary"
-                icon={sendSvg}
-                iconFill={tokens.color.black.val}
-                onPress={sendText}
-              />
-            </Animated.View>
-          }
-        />
+        <Stack pt="$1">
+          <TextInput
+            multiline
+            textAlignVertical="center"
+            value={value}
+            onChangeText={setValue}
+            style={styles.textInput}
+            textColor="$white"
+            variant="greyOnBlack"
+            placeholder={t('messages.typeSomething')}
+            placeholderTextColor={getTokens().color.greyOnBlack.val}
+            rightElement={
+              <Animated.View style={animatedStyle}>
+                <IconButton
+                  oval
+                  variant="secondary"
+                  icon={sendSvg}
+                  iconFill={tokens.color.black.val}
+                  onPress={sendText}
+                />
+              </Animated.View>
+            }
+          />
+        </Stack>
       </Stack>
     </XStack>
   )

@@ -83,9 +83,15 @@ export const revealIdentityDialogUIAtom = atom(
       }),
       TE.match(
         (e) => {
+          if (e._tag === 'UserDeclinedError' && type === 'REQUEST_REVEAL') {
+            set(imageSavedForFutureUseAtom, false)
+            set(usernameSavedForFutureUseAtom, false)
+          }
+
           if (e._tag === 'UserDeclinedError' && type === 'RESPOND_REVEAL') {
             return E.right('DISAPPROVE_REVEAL' as RevealMessageType)
           }
+
           return E.left(e)
         },
         () =>

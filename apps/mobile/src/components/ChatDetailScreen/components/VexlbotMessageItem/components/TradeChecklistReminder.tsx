@@ -2,6 +2,7 @@ import {useNavigation} from '@react-navigation/native'
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtom, useAtomValue} from 'jotai'
 import {useState} from 'react'
+import {TouchableOpacity} from 'react-native'
 import {Stack, Text, XStack} from 'tamagui'
 import {showVexlbotInitialMessageForAllChatsAtom} from '../../../../../state/chat/atoms/showVexlbotInitialMessageForAllChatsAtom'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
@@ -42,7 +43,8 @@ function TradeChecklistReminder(): JSX.Element | null {
   if (
     !showVexlbotNotificationsForCurrentChat ||
     !showVexlbotInitialMessageForCurrentChat ||
-    !showVexlbotInitialMessageForAllChats
+    !showVexlbotInitialMessageForAllChats ||
+    offerForChat?.offerInfo.publicPart.listingType === 'OTHER'
   )
     return null
 
@@ -90,18 +92,24 @@ function TradeChecklistReminder(): JSX.Element | null {
             text={t('vexlbot.openTradeChecklistOnline')}
           />
         )}
-        <XStack space="$2">
-          <Checkbox
-            size="small"
-            value={dontShowSwitchValue}
-            onChange={() => {
-              setDontShowSwitchValue(!dontShowSwitchValue)
-            }}
-          />
-          <Text fos={12} ff="$body500" col="$greyOnBlack">
-            {t('common.dontShowMeThisAgain')}
-          </Text>
-        </XStack>
+        <TouchableOpacity
+          onPress={() => {
+            setDontShowSwitchValue(!dontShowSwitchValue)
+          }}
+        >
+          <XStack space="$2">
+            <Checkbox
+              size="small"
+              value={dontShowSwitchValue}
+              onChange={() => {
+                setDontShowSwitchValue(!dontShowSwitchValue)
+              }}
+            />
+            <Text fos={12} ff="$body500" col="$greyOnBlack">
+              {t('common.dontShowMeThisAgain')}
+            </Text>
+          </XStack>
+        </TouchableOpacity>
       </Stack>
     </VexlbotBubble>
   )

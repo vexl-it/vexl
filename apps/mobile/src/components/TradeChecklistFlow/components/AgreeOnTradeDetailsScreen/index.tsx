@@ -65,15 +65,15 @@ function AgreeOnTradeDetailsScreen({navigation}: Props): JSX.Element {
       <SecondaryFooterButtonProxy
         disabled={
           !!offerForTradeChecklist?.offerInfo.publicPart.locationState.includes(
-            'ONLINE'
+            'IN_PERSON'
           ) && !areThereUpdatesToBeSent
         }
         text={
-          offerForTradeChecklist?.offerInfo.publicPart.locationState.includes(
-            'ONLINE'
-          ) && !areThereUpdatesToBeSent
-            ? t('tradeChecklist.acknowledgeAndContinue')
-            : t('common.send')
+          !!offerForTradeChecklist?.offerInfo.publicPart.locationState.includes(
+            'IN_PERSON'
+          ) || !!areThereUpdatesToBeSent
+            ? t('common.send')
+            : t('tradeChecklist.acknowledgeAndContinue')
         }
         onPress={() => {
           void submitChangesAndSendMessage()().then((success) => {

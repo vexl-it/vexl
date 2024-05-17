@@ -4,9 +4,7 @@ import React from 'react'
 import {Stack, Text} from 'tamagui'
 import {chatMolecule} from '../../atoms'
 import TradeChecklistAmountView from './components/TradeChecklistAmountView'
-import TradeChecklistContactRevealView from './components/TradeChecklistContactRevealView'
 import TradeChecklistDateAndTimeView from './components/TradeChecklistDateAndTimeView'
-import TradeChecklistIdentityRevealView from './components/TradeChecklistIdentityRevealView'
 import TradeChecklistMeetingLocationView from './components/TradeChecklistMeetingLocationView'
 import TradeChecklistNetworkView from './components/TradeChecklistNetworkView'
 import TradeChecklistReminder from './components/TradeChecklistReminder'
@@ -41,14 +39,6 @@ export default function VexlbotMessageItem({
 
   if (data.type === 'networkPreview') {
     return <TradeChecklistNetworkView />
-  }
-
-  if (data.type === 'identityRevealPreview') {
-    return <TradeChecklistIdentityRevealView />
-  }
-
-  if (data.type === 'contactRevealPreview') {
-    return <TradeChecklistContactRevealView />
   }
 
   return (

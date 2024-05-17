@@ -1,6 +1,7 @@
 import {type UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {useAtom, useAtomValue, useSetAtom, type PrimitiveAtom} from 'jotai'
 import {useEffect, type ReactNode} from 'react'
+import {TouchableOpacity} from 'react-native'
 import {Stack, Text, XStack} from 'tamagui'
 import {realUserImageAtom, realUserNameAtom} from '../../state/session'
 import {useTranslation} from '../../utils/localization/I18nProvider'
@@ -9,6 +10,7 @@ import TextInput from '../Input'
 import SelectProfilePicture from '../SelectProfilePicture'
 
 interface ContentProps {
+  checkboxDisabled?: boolean
   children: ReactNode
   title: string
   subtitle: string
@@ -16,6 +18,7 @@ interface ContentProps {
 }
 
 function Content({
+  checkboxDisabled,
   checkboxValueAtom,
   children,
   title,
@@ -33,17 +36,28 @@ function Content({
         {subtitle}
       </Text>
       {children}
-      <XStack ai="center" space="$2">
-        <Checkbox
-          value={checkboxValue}
-          onChange={() => {
-            setCheckboxValue(!checkboxValue)
-          }}
-        />
-        <Text fontSize={14} color="$greyOnWhite">
-          {t('messages.identityRevealDialog.saveForFutureUse')}
-        </Text>
-      </XStack>
+      <TouchableOpacity
+        disabled={checkboxDisabled}
+        onPress={() => {
+          setCheckboxValue(!checkboxValue)
+        }}
+      >
+        <XStack ai="center" space="$2">
+          <Checkbox
+            disabled={checkboxDisabled}
+            value={checkboxValue}
+            onChange={() => {
+              setCheckboxValue(!checkboxValue)
+            }}
+          />
+          <Text
+            fontSize={14}
+            color={checkboxDisabled ? '$greyOnBlack' : '$greyOnWhite'}
+          >
+            {t('messages.identityRevealDialog.saveForFutureUse')}
+          </Text>
+        </XStack>
+      </TouchableOpacity>
     </Stack>
   )
 }
@@ -69,6 +83,7 @@ export function UsernameDialogContent({
 
   return (
     <Content
+      checkboxDisabled={!revealIdentityUsername}
       checkboxValueAtom={usernameSavedForFutureUseAtom}
       title={t('messages.identityRevealDialog.username')}
       subtitle={t('messages.identityRevealDialog.inOrderToRevealIdentity')}
@@ -96,6 +111,7 @@ export function ImageDialogContent({
   const {t} = useTranslation()
   const realUserImage = useAtomValue(realUserImageAtom)
   const setRevealIdentityImageUri = useSetAtom(revealIdentityImageUriAtom)
+  const revealIdentityImageUri = useAtomValue(revealIdentityImageUriAtom)
 
   useEffect(() => {
     setRevealIdentityImageUri(realUserImage?.imageUri)
@@ -105,6 +121,7 @@ export function ImageDialogContent({
     <Content
       title={t('messages.identityRevealDialog.chooseYourPicture')}
       subtitle={t('messages.identityRevealDialog.selectPictureToBeUsed')}
+      checkboxDisabled={!revealIdentityImageUri}
       checkboxValueAtom={imageSavedForFutureUseAtom}
     >
       <Stack f={1} ai="center" jc="center">

@@ -16,7 +16,7 @@ import {chatMolecule} from '../atoms'
 import AcceptDeclineButtons from './AcceptDeclineButtons'
 import ChatHeader from './ChatHeader'
 import ChatRequestPreview from './ChatRequestPreview'
-import RerequestButtonOrMessage from './RerequestButtonOrMessage'
+import RerequestOrCancelButton from './RerequestOrCancelButton'
 
 function RequestScreen(): JSX.Element {
   const {
@@ -113,6 +113,32 @@ function RequestScreen(): JSX.Element {
               <OfferRequestTextInput text={text} onChange={setText} />
             )}
             {!!rerequestText && <InfoSquare>{rerequestText}</InfoSquare>}
+            {requestState === 'denied' && (
+              <>
+                <InfoSquare negative>
+                  {t(
+                    requestedByMe
+                      ? 'messages.deniedByThem'
+                      : 'messages.deniedByMe',
+                    {name: randomName(chat.id)}
+                  )}
+                </InfoSquare>
+                <RerequestOrCancelButton
+                  onRerequestPressed={onRerequestPressed}
+                  rerequestButtonDisabled={!text.trim()}
+                />
+              </>
+            )}
+            {requestState === 'cancelled' && (
+              <InfoSquare negative>
+                {t(
+                  'messages.messagePreviews.incoming.CANCEL_REQUEST_MESSAGING',
+                  {
+                    name: randomName(chat.id),
+                  }
+                )}
+              </InfoSquare>
+            )}
           </YStack>
         </YStack>
       </ScrollView>
@@ -120,7 +146,7 @@ function RequestScreen(): JSX.Element {
         {requestState === 'requested' &&
           (requestedByMe ? (
             <YStack space="$2">
-              <RerequestButtonOrMessage
+              <RerequestOrCancelButton
                 onRerequestPressed={onRerequestPressed}
                 rerequestButtonDisabled={!text.trim()}
               />
@@ -130,12 +156,7 @@ function RequestScreen(): JSX.Element {
           ))}
         {requestState === 'cancelled' && (
           <Stack space="$2">
-            <InfoSquare negative>
-              {t('messages.messagePreviews.incoming.CANCEL_REQUEST_MESSAGING', {
-                name: randomName(chat.id),
-              })}
-            </InfoSquare>
-            <RerequestButtonOrMessage
+            <RerequestOrCancelButton
               onRerequestPressed={onRerequestPressed}
               rerequestButtonDisabled={!text.trim()}
             />
@@ -151,20 +172,6 @@ function RequestScreen(): JSX.Element {
               }}
             />
           </Stack>
-        )}
-        {requestState === 'denied' && (
-          <YStack space="$2">
-            <InfoSquare negative>
-              {t(
-                requestedByMe ? 'messages.deniedByThem' : 'messages.deniedByMe',
-                {name: randomName(chat.id)}
-              )}
-            </InfoSquare>
-            <RerequestButtonOrMessage
-              onRerequestPressed={onRerequestPressed}
-              rerequestButtonDisabled={!text.trim()}
-            />
-          </YStack>
         )}
       </Stack>
     </>

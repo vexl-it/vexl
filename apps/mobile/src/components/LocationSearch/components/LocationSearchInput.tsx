@@ -21,7 +21,7 @@ function LoadingIndicator(): JSX.Element | null {
   const {isLoadingAtom} = useLocationSearchMolecule()
   const isLoading = useAtomValue(isLoadingAtom)
 
-  if (isLoading) return <Spinner ml="$1" />
+  if (isLoading) return <Spinner ml="$1" color="$greyOnBlack" />
   return null
 }
 

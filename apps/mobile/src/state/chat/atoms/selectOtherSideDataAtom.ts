@@ -9,14 +9,15 @@ import {randomNumberFromSeed} from '../../../utils/randomNumber'
 export default function selectOtherSideDataAtom(
   chatAtom: Atom<Chat>
 ): Atom<RealLifeInfo> {
-  return selectAtom(chatAtom, (chat) => {
-    return getOtherSideData(chat)
-  })
+  return selectAtom(chatAtom, getOtherSideData)
+}
+
+export function generateOtherSideSeed(chat: Chat): string {
+  return chat.otherSide.publicKey + chat.inbox.privateKey.publicKeyPemBase64
 }
 
 export function getOtherSideData(chat: Chat): RealLifeInfo {
-  const seed =
-    chat.otherSide.publicKey + chat.inbox.privateKey.publicKeyPemBase64
+  const seed = generateOtherSideSeed(chat)
   const image = avatarsSvg[randomNumberFromSeed(0, avatarsSvg.length - 1, seed)]
 
   return {

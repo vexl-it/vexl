@@ -1,3 +1,4 @@
+import {type ViewToken} from '@shopify/flash-list'
 import {type FriendLevel} from '@vexl-next/domain/src/general/offers'
 import {type UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {createScope, molecule} from 'bunshi/dist/react'
@@ -40,11 +41,11 @@ import {
 import connectionStateAtom, {
   createFriendLevelInfoAtom,
 } from '../../../state/connections/atom/connectionStateAtom'
+import {normalizedContactsAtom} from '../../../state/contacts/atom/contactsStore'
 import {createBtcPriceForCurrencyAtom} from '../../../state/currentBtcPriceAtoms'
 import {createFeedbackForChatAtom} from '../../../state/feedback/atoms'
 import {offerForChatOriginAtom} from '../../../state/marketplace/atoms/offersState'
 import {invalidUsernameUIFeedbackAtom} from '../../../state/session'
-import {otherSideDataAtom} from '../../../state/tradeChecklist/atoms/fromChatAtoms'
 import {getAmountData} from '../../../state/tradeChecklist/utils/amount'
 import * as dateAndTime from '../../../state/tradeChecklist/utils/dateAndTime'
 import * as MeetingLocation from '../../../state/tradeChecklist/utils/location'
@@ -104,6 +105,126 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
   const messagesListDataAtom = atom((get) =>
     buildMessagesListData(get(messagesAtom), get(tradeChecklistAtom))
   )
+
+  const otherSideDataAtom = selectOtherSideDataAtom(chatAtom)
+
+  const revealIdentityRequestMessageIndexAtom = atom<number | undefined>(
+    (get) => {
+      const messagesList = get(messagesListDataAtom)
+
+      return messagesList.findIndex(
+        (message, index) =>
+          message.type === 'message' &&
+          message.message.state === 'received' &&
+          (message.message.message.messageType === 'REQUEST_REVEAL' ||
+            message.message.message.tradeChecklistUpdate?.identity?.status ===
+              'REQUEST_REVEAL')
+      )
+    }
+  )
+
+  const isRevealIdentityMessageHiddenAtom = atom(false)
+
+  const contactRevealRequestMessageIndexAtom = atom<number | undefined>(
+    (get) => {
+      const messagesList = get(messagesListDataAtom)
+
+      return messagesList.findIndex(
+        (message, index) =>
+          message.type === 'message' &&
+          message.message.state === 'received' &&
+          (message.message.message.messageType === 'REQUEST_CONTACT_REVEAL' ||
+            message.message.message.tradeChecklistUpdate?.contact?.status ===
+              'REQUEST_REVEAL')
+      )
+    }
+  )
+
+  const isContactRevealMessageHiddenAtom = atom(false)
+
+  const handleIsRevealIdentityOrContactRevealMessageVisibleActionAtom = atom(
+    null,
+    (get, set, info: {viewableItems: ViewToken[]; changed: ViewToken[]}) => {
+      const {viewableItems} = info
+      const identityRevealStatus = get(identityRevealStatusAtom)
+      const contactRevealStatus = get(contactRevealStatusAtom)
+
+      const revealIdentityRequestMessageIndex = get(
+        revealIdentityRequestMessageIndexAtom
+      )
+      const contactRevealRequestMessageIndex = get(
+        contactRevealRequestMessageIndexAtom
+      )
+
+      if (identityRevealStatus === 'theyAsked') {
+        set(
+          isRevealIdentityMessageHiddenAtom,
+          !viewableItems.some(
+            (item) => item.index === revealIdentityRequestMessageIndex
+          )
+        )
+      }
+
+      if (contactRevealStatus === 'theyAsked') {
+        set(
+          isContactRevealMessageHiddenAtom,
+          !viewableItems.some(
+            (item) => item.index === contactRevealRequestMessageIndex
+          )
+        )
+      }
+    }
+  )
+
+  const isContactAlreadyInContactsListAtom = atom((get) => {
+    const normalizedContacts = get(normalizedContactsAtom)
+    const otherSideData = get(otherSideDataAtom)
+
+    return normalizedContacts.some(
+      (contact) =>
+        contact.computedValues.normalizedNumber ===
+        otherSideData.fullPhoneNumber
+    )
+  })
+
+  const identityRevealRequestMessageIdAtom = atom((get) => {
+    const messages = get(messagesAtom)
+
+    return messages.find(
+      (message) =>
+        message.state === 'sent' &&
+        (message.message.messageType === 'REQUEST_REVEAL' ||
+          (message.message.messageType === 'TRADE_CHECKLIST_UPDATE' &&
+            message.message.tradeChecklistUpdate?.identity?.status ===
+              'REQUEST_REVEAL'))
+    )?.message.uuid
+  })
+
+  const contactRevealRequestMessageIdAtom = atom((get) => {
+    const messages = get(messagesAtom)
+
+    return messages.find(
+      (message) =>
+        message.state === 'sent' &&
+        (message.message.messageType === 'REQUEST_CONTACT_REVEAL' ||
+          (message.message.messageType === 'TRADE_CHECKLIST_UPDATE' &&
+            message.message.tradeChecklistUpdate?.contact?.status ===
+              'REQUEST_REVEAL'))
+    )?.message.uuid
+  })
+
+  const contactRevealApproveMessageIdAtom = atom((get) => {
+    const messages = get(messagesAtom)
+
+    return messages.find(
+      (message) =>
+        message.message.messageType === 'APPROVE_CONTACT_REVEAL' ||
+        (message.message.messageType === 'TRADE_CHECKLIST_UPDATE' &&
+          message.message.tradeChecklistUpdate?.contact?.status ===
+            'APPROVE_REVEAL')
+    )?.message.uuid
+  })
+
   const messagesListAtomAtoms = splitAtom(messagesListDataAtom)
 
   const deleteChatAtom = deleteChatActionAtom(chatWithMessagesAtom)
@@ -909,7 +1030,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     requestMessageAtom: focusRequestMessageAtom(chatWithMessagesAtom),
     wasDeniedAtom: focusWasDeniedAtom(chatWithMessagesAtom),
     wasCancelledAtom: createIsCancelledAtom(chatWithMessagesAtom),
-    otherSideDataAtom: selectOtherSideDataAtom(chatAtom),
+    otherSideDataAtom,
     otherSideLeftAtom: focusOtherSideLeftAtom(chatWithMessagesAtom),
     identityRevealStatusAtom,
     contactRevealStatusAtom,
@@ -958,5 +1079,13 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     isDateAndTimePickedAtom,
     addEventToCalendarActionAtom,
     listingTypeIsOtherAtom,
+    revealIdentityRequestMessageIndexAtom,
+    isRevealIdentityMessageHiddenAtom,
+    isContactRevealMessageHiddenAtom,
+    handleIsRevealIdentityOrContactRevealMessageVisibleActionAtom,
+    isContactAlreadyInContactsListAtom,
+    identityRevealRequestMessageIdAtom,
+    contactRevealRequestMessageIdAtom,
+    contactRevealApproveMessageIdAtom,
   }
 })

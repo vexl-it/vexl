@@ -1,8 +1,20 @@
 import React from 'react'
 import {TouchableOpacity} from 'react-native'
 import {getTokens, Stack, Text, XStack, YStack} from 'tamagui'
+import Button from '../../Button'
 import Image from '../../Image'
 import copySvg from '../images/copySvg'
+
+interface Props {
+  isLatest: boolean
+  smallerText: string
+  biggerText?: string
+  bottomText?: string
+  onCopyToClipboardPress?: () => void
+  icon?: React.ReactNode
+  buttonText?: string | undefined
+  onButtonPress?: () => void
+}
 
 export default function BigIconMessage({
   isLatest,
@@ -11,16 +23,9 @@ export default function BigIconMessage({
   biggerText,
   onCopyToClipboardPress,
   icon,
-  onPress,
-}: {
-  isLatest: boolean
-  smallerText: string
-  biggerText?: string
-  bottomText?: string
-  onCopyToClipboardPress?: () => void
-  icon?: React.ReactNode
-  onPress?: () => void
-}): JSX.Element | null {
+  buttonText,
+  onButtonPress,
+}: Props): JSX.Element | null {
   return (
     <Stack mb={isLatest ? '$10' : '$4'}>
       <YStack my="$5" space="$4" alignItems="center">
@@ -41,17 +46,15 @@ export default function BigIconMessage({
           </XStack>
           {!!biggerText && (
             <XStack ai="center" jc="center" space="$1">
-              <TouchableOpacity disabled={!onPress} onPress={onPress}>
-                <Text
-                  mx="$4"
-                  textAlign="center"
-                  color="$white"
-                  fos={20}
-                  ff="$body500"
-                >
-                  {biggerText}
-                </Text>
-              </TouchableOpacity>
+              <Text
+                mx="$4"
+                textAlign="center"
+                color="$white"
+                fos={20}
+                ff="$body500"
+              >
+                {biggerText}
+              </Text>
               {!!onCopyToClipboardPress && (
                 <TouchableOpacity onPress={onCopyToClipboardPress}>
                   <Image fill={getTokens().color.white.val} source={copySvg} />
@@ -69,6 +72,16 @@ export default function BigIconMessage({
             >
               {bottomText}
             </Text>
+          )}
+          {!!buttonText && !!onButtonPress && (
+            <Stack mt="$2">
+              <Button
+                text={buttonText}
+                onPress={onButtonPress}
+                variant="secondary"
+                size="small"
+              />
+            </Stack>
           )}
         </YStack>
       </YStack>

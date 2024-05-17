@@ -1,15 +1,13 @@
 import {
   TouchableWithoutFeedback,
-  type StyleProp,
-  type ViewStyle,
+  type TouchableWithoutFeedbackProps,
 } from 'react-native'
 import {Stack, styled} from 'tamagui'
 import Image from '../Image'
 import checkedSvg from './image/checkedSvg'
 import uncheckedSvg from './image/uncheckedSvg'
 
-interface Props {
-  style?: StyleProp<ViewStyle>
+interface Props extends TouchableWithoutFeedbackProps {
   value: boolean
   onChange: (value: boolean) => void
   size?: 'small' | 'large' | '24x24'
@@ -35,19 +33,20 @@ const StackStyled = styled(Stack, {
 })
 
 function Checkbox({
-  style,
   value,
   onChange,
   size = 'large',
+  ...props
 }: Props): JSX.Element {
   return (
     <TouchableWithoutFeedback
       onPress={() => {
         onChange(!value)
       }}
+      {...props}
     >
       <StackStyled size={size}>
-        <Image source={value ? checkedSvg : uncheckedSvg} style={style} />
+        <Image source={value ? checkedSvg : uncheckedSvg} />
       </StackStyled>
     </TouchableWithoutFeedback>
   )

@@ -27,9 +27,9 @@ function MessagesScreen(): JSX.Element {
       <StickyHeader />
       <Stack f={1}>
         <MessagesList />
-      </Stack>
-      <Stack mb="$3">
-        <QuickActionBanner />
+        <Stack position="absolute" b={0} l={0} r={0}>
+          <QuickActionBanner />
+        </Stack>
       </Stack>
       {!!canSendMessages && (
         <Stack mx="$4" mb="$2">

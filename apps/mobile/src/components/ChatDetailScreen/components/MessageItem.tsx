@@ -164,7 +164,9 @@ function MessageItem({
     if (
       item.message.message.messageType === 'REQUEST_REVEAL' ||
       item.message.message.messageType === 'APPROVE_REVEAL' ||
-      item.message.message.messageType === 'DISAPPROVE_REVEAL'
+      item.message.message.messageType === 'DISAPPROVE_REVEAL' ||
+      (item.message.message.messageType === 'TRADE_CHECKLIST_UPDATE' &&
+        item.message.message.tradeChecklistUpdate?.identity)
     ) {
       return (
         <IdentityRevealMessageItem
@@ -178,7 +180,9 @@ function MessageItem({
     if (
       item.message.message.messageType === 'REQUEST_CONTACT_REVEAL' ||
       item.message.message.messageType === 'APPROVE_CONTACT_REVEAL' ||
-      item.message.message.messageType === 'DISAPPROVE_CONTACT_REVEAL'
+      item.message.message.messageType === 'DISAPPROVE_CONTACT_REVEAL' ||
+      (item.message.message.messageType === 'TRADE_CHECKLIST_UPDATE' &&
+        item.message.message.tradeChecklistUpdate?.contact)
     ) {
       return (
         <ContactRevealMessageItem

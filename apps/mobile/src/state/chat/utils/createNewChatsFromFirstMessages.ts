@@ -44,6 +44,16 @@ export default function createNewChatsFromFirstMessages({
             ? lastMessage.message.myVersion
             : undefined
 
+        const otherSideFcmCypher =
+          // If i received the message
+          lastMessage.state === 'received' ||
+          lastMessage.state === 'receivedButRequiresNewerVersion'
+            ? lastMessage.message.myFcmCypher
+            : // If the offer is theirs
+            !inboxOffer?.ownershipInfo?.adminId
+            ? inboxOffer?.offerInfo.publicPart.fcmCypher
+            : undefined
+
         return {
           chat: {
             inbox,
@@ -58,6 +68,7 @@ export default function createNewChatsFromFirstMessages({
             showVexlbotNotifications: true,
             otherSideVersion,
             lastReportedVersion,
+            otherSideFcmCypher,
           },
           tradeChecklist: {
             ...createEmptyTradeChecklistInState(),

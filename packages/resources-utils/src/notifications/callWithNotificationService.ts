@@ -1,21 +1,15 @@
-import {
-  type ChatNotificationData,
-  type FcmCypher,
-} from '@vexl-next/domain/src/general/notifications'
+import {type FcmCypher} from '@vexl-next/domain/src/general/notifications'
 import * as SemverString from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {type NotificationPrivateApi} from '@vexl-next/rest-api/src/services/notification'
 import * as E from 'fp-ts/Either'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/lib/function'
-import {effectToTaskEither} from '../effect-helpers/TaskEitherConverter'
 import reportErrorFromResourcesUtils from '../reportErrorFromResourcesUtils'
-import {encryptChatNotificationPayload} from './notificationPayloadCrypto'
 
 const FE_VERSION_SUPPORTING_V2_NOTIFICATIONS =
   SemverString.SemverString.parse('1.17.0')
 
 interface NotificationArgs {
-  notificationToSend: ChatNotificationData
   otherSideVersion?: SemverString.SemverString | undefined
   fcmCypher?: FcmCypher | undefined
   notificationApi: NotificationPrivateApi
@@ -29,12 +23,7 @@ export function callWithNotificationService<
   f: (arg: T) => TE.TaskEither<L, R>,
   fArgs: Omit<T, 'notificationServiceReady'>
 ): (args: NotificationArgs) => TE.TaskEither<L, R> {
-  return ({
-    notificationApi,
-    notificationToSend,
-    fcmCypher,
-    otherSideVersion,
-  }) => {
+  return ({notificationApi, fcmCypher, otherSideVersion}) => {
     // Do not try to issue notification if there is no fcmCypher or the other side does not support V2 notifications
     if (
       !fcmCypher ||
@@ -54,17 +43,9 @@ export function callWithNotificationService<
         }
 
         return pipe(
-          encryptChatNotificationPayload({
-            payload: notificationToSend,
-            publicKeyOfReceiver: notificationToSend.inbox,
+          notificationApi.issueNotification({
+            fcmCypher,
           }),
-          effectToTaskEither,
-          TE.chainW((encryptedPayload) =>
-            notificationApi.issueNotification({
-              messagePayload: encryptedPayload,
-              fcmCypher,
-            })
-          ),
           TE.match(
             (e) => {
               reportErrorFromResourcesUtils(

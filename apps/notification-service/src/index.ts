@@ -56,5 +56,9 @@ const NodeSdkLive = NodeSdk.layer(() => ({
   spanProcessor: new BatchSpanProcessor(new OTLPTraceExporter()),
 }))
 
-const program = Layer.launch(AppLive).pipe(Effect.provide(NodeSdkLive))
+const program = Layer.launch(AppLive).pipe(
+  Effect.provide(NodeSdkLive),
+  Effect.catchAllDefect((d) => Effect.logError('Defect in program', d)),
+  Effect.catchAll((e) => Effect.logError('Error in program', e))
+)
 NodeRuntime.runMain(program)

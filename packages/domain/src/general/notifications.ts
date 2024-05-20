@@ -66,7 +66,6 @@ export const ChatNotificationType = S.Literal(
 export class ChatNotificationData extends S.Class<ChatNotificationData>(
   'NotificationData'
 )({
-  version: S.Literal('1', '2').pipe(S.optional({default: () => '1' as const})),
   type: ChatNotificationType.pipe(orElseSchema('UNKNOWN')),
   inbox: PublicKeyPemBase64E,
   sender: PublicKeyPemBase64E,
@@ -75,22 +74,12 @@ export class ChatNotificationData extends S.Class<ChatNotificationData>(
   static parseUnkownOption = S.decodeUnknownOption(ChatNotificationData)
 }
 
-export type EncryptedNotificationPayload = string &
-  Brand.Brand<'EncryptedNotificationPayload'>
-export const EncryptedNotificationPayload =
-  Brand.nominal<EncryptedNotificationPayload>()
-
-export const EncryptedNotificationPayloadSchema = S.String.pipe(
-  S.fromBrand(EncryptedNotificationPayload)
-)
-
-export const EncryptedNotificationDataId = S.UUID.pipe(
-  S.brand('EncryptedNotificationDataId')
-)
-
-export class EncryptedNotificationData extends S.TaggedClass<EncryptedNotificationData>(
-  'EncryptedNotificationData'
-)('EncryptedNotificationData', {
-  payload: EncryptedNotificationPayloadSchema,
+export class NewChatMessageNoticeNotificationData extends S.TaggedClass<NewChatMessageNoticeNotificationData>(
+  'NewChatMessageNoticeNotificationData'
+)('NewChatMessageNoticeNotificationData', {
   targetCypher: FcmCypherE,
-}) {}
+}) {
+  static parseUnkownOption = S.decodeUnknownOption(
+    NewChatMessageNoticeNotificationData
+  )
+}

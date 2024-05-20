@@ -7,10 +7,7 @@ import {
   type ChatMessagePayload,
   type ServerMessage,
 } from '@vexl-next/domain/src/general/messaging'
-import {
-  ChatNotificationData,
-  type FcmCypher,
-} from '@vexl-next/domain/src/general/notifications'
+import {type FcmCypher} from '@vexl-next/domain/src/general/notifications'
 import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {type ChatPrivateApi} from '@vexl-next/rest-api/src/services/chat'
 import {type NotificationPrivateApi} from '@vexl-next/rest-api/src/services/notification'
@@ -26,24 +23,6 @@ import {messagePreviewToNetwork} from './utils/messagePreviewIO'
 export type SendMessageApiErrors = ExtractLeftTE<
   ReturnType<ChatPrivateApi['sendMessage']>
 >
-
-function createApproveChatNotification({
-  inbox,
-  preview,
-  sender,
-}: {
-  inbox: PublicKeyPemBase64
-  preview?: string | undefined
-  sender: PublicKeyPemBase64
-}): ChatNotificationData {
-  return new ChatNotificationData({
-    version: '2',
-    type: 'MESSAGE',
-    sender,
-    inbox,
-    preview,
-  })
-}
 
 export default function sendMessage({
   api,
@@ -83,11 +62,6 @@ export default function sendMessage({
         receiverPublicKey,
         keyPair: senderKeypair,
       })({
-        notificationToSend: createApproveChatNotification({
-          inbox: receiverPublicKey,
-          sender: senderKeypair.publicKeyPemBase64,
-          preview: encryptedPreview,
-        }),
         fcmCypher: theirFcmCypher,
         otherSideVersion,
         notificationApi,

@@ -1,6 +1,6 @@
 import * as Http from '@effect/platform/HttpServer'
 import {Schema} from '@effect/schema'
-import {EncryptedNotificationData} from '@vexl-next/domain/src/general/notifications'
+import {NewChatMessageNoticeNotificationData} from '@vexl-next/domain/src/general/notifications'
 import {
   IssueNotificationRequest,
   IssueNotificationResponse,
@@ -16,16 +16,15 @@ const IssueNotificationRouteLive = Http.router.post(
     const data = yield* _(Http.request.schemaBodyJson(IssueNotificationRequest))
     const fcmToken = yield* _(decodeFcmCypher(data.fcmCypher))
 
-    const encryptedNotificationData = new EncryptedNotificationData({
-      payload: data.messagePayload,
+    const chatNotificationData = new NewChatMessageNoticeNotificationData({
       targetCypher: data.fcmCypher,
     })
 
     yield* _(
       sendFirebaseMessage({
         token: fcmToken,
-        data: Schema.encodeSync(EncryptedNotificationData)(
-          encryptedNotificationData
+        data: Schema.encodeSync(NewChatMessageNoticeNotificationData)(
+          chatNotificationData
         ),
       })
     )

@@ -1,11 +1,10 @@
 import messaging from '@react-native-firebase/messaging'
 import {useNavigation} from '@react-navigation/native'
-import {ChatNotificationData} from '@vexl-next/domain/src/general/notifications'
+import {NewChatMessageNoticeNotificationData} from '@vexl-next/domain/src/general/notifications'
 import {Option} from 'effect'
 import {useSetAtom, useStore} from 'jotai'
 import {useEffect} from 'react'
 import checkAndShowCreateOfferPrompt from '../utils/notifications/checkAndShowCreateOfferPrompt'
-import decryptNotificationIfEncryptedActionAtom from '../utils/notifications/decryptNotificationIfEncryptedActionAtom'
 import {
   CREATE_OFFER_PROMPT,
   NEW_CONNECTION,
@@ -34,13 +33,19 @@ export function useHandleReceivedNotifications(): void {
         body: JSON.stringify(remoteMessage.data),
       })
 
-      const data = (
-        await store.set(
-          decryptNotificationIfEncryptedActionAtom,
+      const newChatMessageNoticeNotificationDataOption =
+        NewChatMessageNoticeNotificationData.parseUnkownOption(
           remoteMessage.data
         )
-      ).pipe(Option.getOrElse(() => remoteMessage.data))
+      if (Option.isSome(newChatMessageNoticeNotificationDataOption)) {
+        await store.set(
+          processChatNotificationActionAtom,
+          newChatMessageNoticeNotificationDataOption.value
+        )()
+        return
+      }
 
+      const data = remoteMessage.data
       if (!data) {
         console.info(
           '📳 Nothing to process. Notification does not include any data'
@@ -48,27 +53,7 @@ export function useHandleReceivedNotifications(): void {
         return
       }
 
-      const chatNotificationDataOption =
-        ChatNotificationData.parseUnkownOption(data)
-      if (Option.isSome(chatNotificationDataOption)) {
-        console.info(
-          `📳 Got notification ${JSON.stringify(
-            chatNotificationDataOption.value,
-            null,
-            2
-          )}`
-        )
-        await store.set(
-          processChatNotificationActionAtom,
-          chatNotificationDataOption.value,
-          navigation.getState()
-        )()
-
-        return
-      }
-
-      if (!(data instanceof ChatNotificationData))
-        await showUINotificationFromRemoteMessage(data)
+      await showUINotificationFromRemoteMessage(data)
 
       if (data.type === NEW_CONNECTION) {
         console.info(

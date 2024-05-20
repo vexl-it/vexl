@@ -7,10 +7,7 @@ import {
   type ChatMessagePayload,
   type ServerMessage,
 } from '@vexl-next/domain/src/general/messaging'
-import {
-  ChatNotificationData,
-  type FcmCypher,
-} from '@vexl-next/domain/src/general/notifications'
+import {type FcmCypher} from '@vexl-next/domain/src/general/notifications'
 import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {type ChatPrivateApi} from '@vexl-next/rest-api/src/services/chat'
 import {type NotificationPrivateApi} from '@vexl-next/rest-api/src/services/notification'
@@ -25,23 +22,6 @@ import {messageToNetwork} from './utils/messageIO'
 export type SendMessageApiErrors = ExtractLeftTE<
   ReturnType<ChatPrivateApi['sendMessage']>
 >
-
-function createLeaveChatNotification({
-  inbox,
-  sender,
-  approve,
-}: {
-  inbox: PublicKeyPemBase64
-  sender: PublicKeyPemBase64
-  approve: boolean
-}): ChatNotificationData {
-  return new ChatNotificationData({
-    version: '2',
-    type: 'DELETE_CHAT',
-    sender,
-    inbox,
-  })
-}
 
 export default function sendLeaveChat({
   api,
@@ -75,11 +55,6 @@ export default function sendLeaveChat({
         receiverPublicKey,
         keyPair: senderKeypair,
       })({
-        notificationToSend: createLeaveChatNotification({
-          inbox: receiverPublicKey,
-          sender: senderKeypair.publicKeyPemBase64,
-          approve: false,
-        }),
         notificationApi,
         fcmCypher: theirFcmCypher,
         otherSideVersion,

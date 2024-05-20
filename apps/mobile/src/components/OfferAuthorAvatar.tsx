@@ -85,10 +85,7 @@ function OfferAuthorAvatar({
           )}
           <Stack f={1} ml="$2">
             <UserNameWithSellingBuying
-              offerInfo={{
-                offerType: offerInfo.publicPart.offerType,
-                offerDirection: ownershipInfo ? 'myOffer' : 'theirOffer',
-              }}
+              offerInfo={offerInfo}
               userName={
                 chatForOffer?.otherSide?.realLifeInfo?.userName ??
                 randomName(offerInfo.offerId)

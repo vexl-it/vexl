@@ -13,7 +13,6 @@ import {hideNotificationsForChat} from '../../utils/notifications/chatNotificati
 import {useOnFocusAndAppState} from '../../utils/useFocusAndAppState'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 import IconButton from '../IconButton'
-import KeyboardAvoidingView from '../KeyboardAvoidingView'
 import Screen from '../Screen'
 import {ChatScope} from './atoms'
 import MessagesListOrApprovalPreview from './components/MessagesListOrApprovalPreview'
@@ -68,10 +67,8 @@ export default function ChatDetailScreen({
     )
 
   return (
-    <KeyboardAvoidingView>
-      <ScopeProvider scope={ChatScope} value={nonNullChatWithMessagesAtom}>
-        <MessagesListOrApprovalPreview />
-      </ScopeProvider>
-    </KeyboardAvoidingView>
+    <ScopeProvider scope={ChatScope} value={nonNullChatWithMessagesAtom}>
+      <MessagesListOrApprovalPreview />
+    </ScopeProvider>
   )
 }

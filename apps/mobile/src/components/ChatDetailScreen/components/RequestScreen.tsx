@@ -3,7 +3,7 @@ import * as T from 'fp-ts/Task'
 import {pipe} from 'fp-ts/function'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useState} from 'react'
-import {ScrollView} from 'react-native'
+import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view'
 import {Stack, YStack} from 'tamagui'
 import getRerequestPossibleInDaysText from '../../../utils/getRerequestPossibleInDaysText'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
@@ -17,6 +17,8 @@ import AcceptDeclineButtons from './AcceptDeclineButtons'
 import ChatHeader from './ChatHeader'
 import ChatRequestPreview from './ChatRequestPreview'
 import RerequestOrCancelButton from './RerequestOrCancelButton'
+
+const SCROLL_EXTRA_OFFSET = 250
 
 function RequestScreen(): JSX.Element {
   const {
@@ -83,7 +85,11 @@ function RequestScreen(): JSX.Element {
           requestIsClosed ? 'deleteChat' : requestedByMe ? null : 'block'
         }
       />
-      <ScrollView bounces={false}>
+      <KeyboardAwareScrollView
+        bounces={false}
+        showsVerticalScrollIndicator={false}
+        extraHeight={SCROLL_EXTRA_OFFSET}
+      >
         <YStack space="$6" f={1} mx="$4" my="$6">
           {!!offer && (
             <ChatRequestPreview showRequestMessage mode="commonFirst" />
@@ -114,20 +120,14 @@ function RequestScreen(): JSX.Element {
             )}
             {!!rerequestText && <InfoSquare>{rerequestText}</InfoSquare>}
             {requestState === 'denied' && (
-              <>
-                <InfoSquare negative>
-                  {t(
-                    requestedByMe
-                      ? 'messages.deniedByThem'
-                      : 'messages.deniedByMe',
-                    {name: randomName(chat.id)}
-                  )}
-                </InfoSquare>
-                <RerequestOrCancelButton
-                  onRerequestPressed={onRerequestPressed}
-                  rerequestButtonDisabled={!text.trim()}
-                />
-              </>
+              <InfoSquare negative>
+                {t(
+                  requestedByMe
+                    ? 'messages.deniedByThem'
+                    : 'messages.deniedByMe',
+                  {name: randomName(chat.id)}
+                )}
+              </InfoSquare>
             )}
             {requestState === 'cancelled' && (
               <InfoSquare negative>
@@ -141,8 +141,8 @@ function RequestScreen(): JSX.Element {
             )}
           </YStack>
         </YStack>
-      </ScrollView>
-      <Stack mx="$4" mb="$4">
+      </KeyboardAwareScrollView>
+      <Stack mx="$4">
         {requestState === 'requested' &&
           (requestedByMe ? (
             <YStack space="$2">
@@ -172,6 +172,12 @@ function RequestScreen(): JSX.Element {
               }}
             />
           </Stack>
+        )}
+        {requestState === 'denied' && (
+          <RerequestOrCancelButton
+            onRerequestPressed={onRerequestPressed}
+            rerequestButtonDisabled={!text.trim()}
+          />
         )}
       </Stack>
     </>

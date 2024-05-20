@@ -9,16 +9,30 @@ export function makeHealthServerLive({
 }: {
   port: number
 }): Layer.Layer<never, Http.error.ServeError, never> {
-  const HealtServerLive = NodeHttpServer.server.layer(() => createServer(), {
-    port,
-  })
-
-  const HealthHttpLive = Http.router.empty.pipe(
-    Http.router.get(
-      '*',
-      Effect.succeed(Http.response.text('ok', {status: 200}))
-    )
+  const HealtServerLive = NodeHttpServer.server.layer(
+    () => {
+      const server = createServer()
+      server.on('close', () => {
+        console.log('Closing health server!')
+      })
+      server.on('error', (error) => {
+        console.error('Health server error:', error)
+      })
+      return server
+    },
+    {
+      port,
+    }
   )
+
+  const HealthHttpLive = Http.router.empty
+    .pipe(
+      Http.router.get(
+        '*',
+        Effect.succeed(Http.response.text('ok', {status: 200}))
+      )
+    )
+    .pipe(Http.middleware.logger)
 
   const HealthAppLive = HealthHttpLive.pipe(
     Http.server.serve(),

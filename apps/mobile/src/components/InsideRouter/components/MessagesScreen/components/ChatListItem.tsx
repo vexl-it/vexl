@@ -98,10 +98,7 @@ function ChatListItem({dataAtom}: {dataAtom: Atom<ChatListData>}): JSX.Element {
                   center={false}
                   offerInfo={
                     chatInfo.origin.type !== 'unknown' && offer
-                      ? {
-                          offerType: offer.offerInfo.publicPart.offerType,
-                          offerDirection: chatInfo.origin.type,
-                        }
+                      ? offer.offerInfo
                       : undefined
                   }
                 />

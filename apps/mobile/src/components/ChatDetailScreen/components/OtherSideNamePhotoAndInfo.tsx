@@ -60,16 +60,7 @@ function OtherSideNamePhotoAndInfo({mode}: Props): JSX.Element {
         <UserNameWithSellingBuying
           userName={otherSideData.userName}
           center={mode === 'photoTop'}
-          offerInfo={
-            offer
-              ? {
-                  offerType: offer.offerInfo.publicPart.offerType,
-                  offerDirection: offer.ownershipInfo?.adminId
-                    ? 'myOffer'
-                    : 'theirOffer',
-                }
-              : undefined
-          }
+          offerInfo={offer ? offer.offerInfo : undefined}
         />
         <ContactTypeAndCommonNumber
           friendLevel={friendLevelInfo}

@@ -24,7 +24,6 @@ import {
 } from '../../../../../state/marketplace/atoms/offerSuggestionVisible'
 import {areThereOffersToSeeInMarketplaceWithoutFiltersAtom} from '../../../../../state/marketplace/atoms/offersToSeeInMarketplace'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
-import Button from '../../../../Button'
 import EmptyListWrapper from '../../../../EmptyListWrapper'
 import MarketplaceSuggestion from '../../../../MarketplaceSuggestion'
 import EmptyMarketplaceSuggestions from './EmptyMarketplaceSuggestions'
@@ -125,11 +124,13 @@ function EmptyListPlaceholder({refreshing, onRefresh}: Props): JSX.Element {
         />
         {!resetFilterSuggestionVisible && (
           <EmptyListWrapper
-            buttonText={t('offer.resetFilter')}
-            onButtonPress={resetFilterAndSaveIt}
             inScrollView
             refreshing={refreshing}
             onRefresh={onRefresh}
+            buttonText={t('myOffers.addNewOffer')}
+            onButtonPress={() => {
+              navigation.navigate('CreateOffer')
+            }}
           >
             <Text
               textAlign="center"
@@ -141,14 +142,6 @@ function EmptyListPlaceholder({refreshing, onRefresh}: Props): JSX.Element {
             >
               {t('offer.createOfferNudge')}
             </Text>
-            <Button
-              text={t('myOffers.addNewOffer')}
-              variant="secondary"
-              size="small"
-              onPress={() => {
-                navigation.navigate('CreateOffer')
-              }}
-            />
           </EmptyListWrapper>
         )}
       </>
@@ -163,10 +156,10 @@ function EmptyListPlaceholder({refreshing, onRefresh}: Props): JSX.Element {
       />
     ) : (
       <EmptyListWrapper
-        buttonText={t('suggestion.addMoreContacts')}
+        inScrollView
         refreshing={refreshing}
         onRefresh={onRefresh}
-        inScrollView
+        buttonText={t('suggestion.addMoreContacts')}
         onButtonPress={() => {
           navigation.navigate('SetContacts', {})
         }}
@@ -181,31 +174,49 @@ function EmptyListPlaceholder({refreshing, onRefresh}: Props): JSX.Element {
   }
 
   if (reachNumber >= REACH_NUMBER_THRESHOLD) {
-    return (
-      <EmptyListWrapper
-        buttonText={t('offer.emptyAction')}
-        refreshing={refreshing}
-        onRefresh={onRefresh}
-        inScrollView
-        onButtonPress={() => {
-          navigation.navigate('CreateOffer')
-        }}
-      >
-        {areThereOffersToSeeInMarketplaceWithoutFilters ? (
+    if (areThereOffersToSeeInMarketplaceWithoutFilters) {
+      return (
+        <EmptyListWrapper
+          inScrollView
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          buttonText={t('offer.emptyAction')}
+          onButtonPress={() => {
+            navigation.navigate('CreateOffer')
+          }}
+        >
           <Text textAlign="center" col="$greyOnWhite" fos={20} ff="$body600">
             {t('offer.thereAreNoOfferForSelectedCategory')}
           </Text>
-        ) : minutesTillOffersDisplayed > 0 ? (
+        </EmptyListWrapper>
+      )
+    }
+
+    if (minutesTillOffersDisplayed > 0) {
+      return (
+        <EmptyListWrapper
+          inScrollView
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+        >
           <Text textAlign="center" col="$greyOnWhite" fos={20} ff="$body600">
             {t('offer.offersAreLoadingAndShouldBeReady', {
               minutes: minutesTillOffersDisplayed,
             })}
           </Text>
-        ) : (
-          <Text textAlign="center" col="$greyOnWhite" fos={20} ff="$body600">
-            {t('offer.marketplaceEmpty')}
-          </Text>
-        )}
+        </EmptyListWrapper>
+      )
+    }
+
+    return (
+      <EmptyListWrapper
+        inScrollView
+        refreshing={refreshing}
+        onRefresh={onRefresh}
+      >
+        <Text textAlign="center" col="$greyOnWhite" fos={20} ff="$body600">
+          {t('offer.marketplaceEmpty')}
+        </Text>
       </EmptyListWrapper>
     )
   }

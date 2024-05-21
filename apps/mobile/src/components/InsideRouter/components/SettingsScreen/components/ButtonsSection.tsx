@@ -21,7 +21,6 @@ import openUrl from '../../../../../utils/openUrl'
 import {askAreYouSureActionAtom} from '../../../../AreYouSureDialog'
 import SvgImage from '../../../../Image'
 import spokenLanguagesSvg from '../../../../images/spokenLanguagesSvg'
-import profileIconSvg from '../../../images/profileIconSvg'
 import {changeLanguageActionAtom} from '../actionAtoms'
 import {
   changeCurrencyDialogVisibleAtom,
@@ -147,16 +146,6 @@ function ButtonsSection(): JSX.Element {
   const data: Array<Array<ItemProps | null>> = useMemo(
     () =>
       [
-        [
-          {
-            text: t('common.myOffers'),
-            icon: profileIconSvg,
-            navigatesFurther: true,
-            onPress: () => {
-              navigation.navigate('MyOffers')
-            },
-          },
-        ],
         [
           {
             text: t('settings.items.changeProfilePicture'),

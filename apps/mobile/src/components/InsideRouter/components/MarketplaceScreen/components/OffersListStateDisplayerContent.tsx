@@ -41,7 +41,7 @@ function OffersListStateDisplayerContent(): JSX.Element {
     if (isNone(error))
       return (
         <Stack px="$1">
-          <XStack f={1} ai="center" jc="space-between">
+          <XStack f={1} ai="center" jc="space-between" pb="$2">
             <Stack f={1}>
               <TotalOffersCount filteredOffersCount={offersAtoms.length} />
             </Stack>
@@ -78,7 +78,7 @@ function OffersListStateDisplayerContent(): JSX.Element {
             }}
           />
         </Stack>
-        <XStack space="$2">
+        <XStack space="$2" pb="$2">
           <SearchOffers
             postSearchActions={() => {
               refocusMap({focusAllOffers: false})

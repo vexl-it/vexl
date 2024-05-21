@@ -8,10 +8,7 @@ import {
   type ChatMessage,
   type ChatMessagePayload,
 } from '@vexl-next/domain/src/general/messaging'
-import {
-  ChatNotificationData,
-  type FcmCypher,
-} from '@vexl-next/domain/src/general/notifications'
+import {type FcmCypher} from '@vexl-next/domain/src/general/notifications'
 import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {now} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {type ChatPrivateApi} from '@vexl-next/rest-api/src/services/chat'
@@ -49,23 +46,6 @@ function createApproveChatMessage({
     myFcmCypher,
     lastReceivedFcmCypher,
   }
-}
-
-function createApproveChatNotification({
-  inbox,
-  sender,
-  approve,
-}: {
-  inbox: PublicKeyPemBase64
-  sender: PublicKeyPemBase64
-  approve: boolean
-}): ChatNotificationData {
-  return new ChatNotificationData({
-    version: '2',
-    type: approve ? 'DISAPPROVE_MESSAGING' : 'APPROVE_MESSAGING',
-    sender,
-    inbox,
-  })
 }
 
 export type ApiConfirmMessagingRequest = ExtractLeftTE<
@@ -123,11 +103,6 @@ export default function confirmMessagingRequest({
             keyPair: fromKeypair,
             publicKeyToConfirm: toPublicKey,
           })({
-            notificationToSend: createApproveChatNotification({
-              inbox: toPublicKey,
-              approve,
-              sender: fromKeypair.publicKeyPemBase64,
-            }),
             fcmCypher: theirFcmCypher,
             otherSideVersion,
             notificationApi,

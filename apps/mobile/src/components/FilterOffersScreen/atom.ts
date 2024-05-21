@@ -283,10 +283,6 @@ export const saveSelectedSpokenLanguagesActionAtom = atom(null, (get, set) => {
   set(spokenLanguagesAtom, get(selectedSpokenLanguagesAtom))
 })
 
-export const focusTextFilterAtom = atom<string | undefined>(
-  offersFilterInitialState.text
-)
-
 export const setOfferLocationActionAtom = atom(
   null,
   (get, set, locationSuggestion: LocationSuggestion) => {
@@ -325,12 +321,11 @@ const setConditionallyRenderedFilterElementsActionAtom = atom(
   }
 )
 
-const setAllFilterAtomsActionAtom = atom(
+const setFilterAtomsActionAtom = atom(
   null,
   (get, set, filterValue: OffersFilter) => {
     set(listingTypeAtom, filterValue.listingType)
     set(offerTypeAtom, filterValue.offerType)
-    set(focusTextFilterAtom, filterValue.text)
     set(sortingAtom, filterValue.sort)
     set(setConditionallyRenderedFilterElementsActionAtom, filterValue)
   }
@@ -341,7 +336,7 @@ export const initializeOffersFilterOnDisplayActionAtom = atom(
   (get, set) => {
     const filterFromStorage = get(offersFilterFromStorageAtom)
 
-    set(setAllFilterAtomsActionAtom, filterFromStorage)
+    set(setFilterAtomsActionAtom, filterFromStorage)
     set(
       calculateSatsValueOnFiatValueChangeActionAtom,
       String(filterFromStorage.singlePrice)
@@ -349,10 +344,11 @@ export const initializeOffersFilterOnDisplayActionAtom = atom(
   }
 )
 
-export const resetFilterAtom = atom(null, (get, set) => {
-  const {offerType, listingType, ...restOfOffersFilterInitialState} =
+export const resetFilterOmitTextFilterActionAtom = atom(null, (get, set) => {
+  const {offerType, listingType, text, ...restOfOffersFilterInitialState} =
     offersFilterInitialState
-  set(setAllFilterAtomsActionAtom, {
+
+  set(setFilterAtomsActionAtom, {
     listingType: get(listingTypeAtom),
     offerType: get(offerTypeAtom),
     ...restOfOffersFilterInitialState,
@@ -405,6 +401,7 @@ export const baseFilterTempAtom = atom(
 
 export const saveFilterActionAtom = atom(null, (get, set) => {
   const marketplaceLayoutMode = get(marketplaceLayoutModeAtom)
+  const {text} = get(offersFilterFromStorageAtom)
 
   const newFilterValue: OffersFilter = {
     sort: get(sortingAtom),
@@ -422,12 +419,11 @@ export const saveFilterActionAtom = atom(null, (get, set) => {
     spokenLanguages: get(spokenLanguagesAtom),
     amountBottomLimit: get(amountBottomLimitAtom),
     amountTopLimit: get(amountTopLimitAtom),
-    text: get(focusTextFilterAtom),
     singlePrice: get(singlePriceAtom),
     singlePriceCurrency: get(singlePriceCurrencyAtom),
   }
 
-  set(offersFilterFromStorageAtom, newFilterValue)
+  set(offersFilterFromStorageAtom, {...newFilterValue, text})
 
   if (marketplaceLayoutMode === 'map') {
     const location = get(locationAtom)

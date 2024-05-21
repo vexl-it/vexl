@@ -19,7 +19,7 @@ import userSvg from '../images/userSvg'
 import {
   initializeOffersFilterOnDisplayActionAtom,
   listingTypeAtom,
-  resetFilterAtom,
+  resetFilterOmitTextFilterActionAtom,
   saveFilterActionAtom,
   sortingAtom,
 } from './atom'
@@ -44,16 +44,18 @@ function FilterOffersScreen(): JSX.Element {
   const otherOffersFilterContent = useOtherOffersFilterContent()
   const listingType = useAtomValue(listingTypeAtom)
   const saveFilter = useSetAtom(saveFilterActionAtom)
-  const resetFilter = useSetAtom(resetFilterAtom)
+  const resetFilterOmitTextFilter = useSetAtom(
+    resetFilterOmitTextFilterActionAtom
+  )
   const initializeOffersFilterOnDisplay = useSetAtom(
     initializeOffersFilterOnDisplayActionAtom
   )
 
   const resetOfferForm = useCallback(() => {
-    resetFilter()
+    resetFilterOmitTextFilter()
     saveFilter()
     safeGoBack()
-  }, [resetFilter, safeGoBack, saveFilter])
+  }, [resetFilterOmitTextFilter, safeGoBack, saveFilter])
 
   function onFilterOffersClose(): void {
     safeGoBack()

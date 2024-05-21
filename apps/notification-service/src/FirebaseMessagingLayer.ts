@@ -43,7 +43,8 @@ export function sendFirebaseMessage({
       })
     )
   }).pipe(
-    Effect.tapError((e) => Effect.logInfo('Error while sending message', e))
+    Effect.tapError((e) => Effect.logInfo('Error while sending message', e)),
+    Effect.tapDefect((d) => Effect.logError('Defect while sending message', d))
   )
 }
 

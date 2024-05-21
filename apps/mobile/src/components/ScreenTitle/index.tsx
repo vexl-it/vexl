@@ -23,7 +23,7 @@ function ScreenTitle({
   ...props
 }: Props): JSX.Element {
   return (
-    <YStack mt="$2" bc="transparent" space="$4" pb="$1" {...props}>
+    <YStack bc="transparent" space="$4" pb="$1" {...props}>
       <XStack ai="flex-start" jc="space-between" space="$2">
         <Stack fs={1}>
           <Text

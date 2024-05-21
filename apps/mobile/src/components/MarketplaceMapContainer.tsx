@@ -153,7 +153,7 @@ function MarketplaceMapContainer(): JSX.Element | null {
 
   if (shouldShowMap) {
     return (
-      <Stack position="relative" pt="$2">
+      <Stack>
         <MarketplaceMapMemoized />
         <MapBarAndButtonMemoized />
       </Stack>

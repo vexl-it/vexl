@@ -1,5 +1,5 @@
 import {useAtomValue, type Atom} from 'jotai'
-import {Image, Stack, Text, XStack} from 'tamagui'
+import {Image, Stack, Text, XStack, getTokens} from 'tamagui'
 import {type StoredContactWithComputedValues} from '../../../../../state/contacts/domain'
 import SvgImage from '../../../../Image'
 import picturePlaceholderSvg from '../../../../images/picturePlaceholderSvg'
@@ -30,7 +30,12 @@ function ContactItem({contactAtom}: Props): JSX.Element {
             source={{uri: imageUri}}
           />
         ) : (
-          <SvgImage width={50} height={50} source={picturePlaceholderSvg} />
+          <SvgImage
+            width={50}
+            height={50}
+            source={picturePlaceholderSvg}
+            fill={getTokens().color.grey.val}
+          />
         )}
       </Stack>
       <Stack f={1} ml="$4" jc="space-between">

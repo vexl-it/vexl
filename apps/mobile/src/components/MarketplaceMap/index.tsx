@@ -14,16 +14,14 @@ import {mapRegionAtom} from '../../state/marketplace/atoms/mapRegionAtom'
 import MapDisplayMultiplePoints from '../Map/components/MapDisplayMultiplePoints'
 import {focusedPointsIdsAtom, mapPointsAtom} from './atoms'
 
+export const MAP_SIZE = Math.min(Dimensions.get('window').height / 3.25, 400)
+
 function MarketplaceMapSizeContainer({
   children,
 }: {
   children: React.ReactNode
 }): JSX.Element {
-  return (
-    <Stack h={Math.min(Dimensions.get('window').height / 3.25, 400)}>
-      {children}
-    </Stack>
-  )
+  return <Stack h={MAP_SIZE}>{children}</Stack>
 }
 
 export default function MarketplaceMap(): JSX.Element {

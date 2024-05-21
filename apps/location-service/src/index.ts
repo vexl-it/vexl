@@ -1,11 +1,9 @@
 import './sourcemapSupport'
 
 // import {registerSetryMiddleware} from './utils/sentry'
-import {NodeSdk} from '@effect/opentelemetry'
+import {DevTools} from '@effect/experimental'
 import {NodeHttpServer, NodeRuntime} from '@effect/platform-node'
 import * as Http from '@effect/platform/HttpServer'
-import {OTLPTraceExporter} from '@opentelemetry/exporter-trace-otlp-http'
-import {BatchSpanProcessor} from '@opentelemetry/sdk-trace-node'
 import {
   GetExchangeRateRequest,
   GetGeocodedCoordinatesRequest,
@@ -81,12 +79,38 @@ const AppLive = HttpLive.pipe(
       )
     )
   ),
+  Layer.provide(
+    Layer.unwrapEffect(
+      EnvironmentConstants.ENV.pipe(
+        Effect.flatMap((env) => {
+          if (env === 'development') {
+            return Effect.zipRight(
+              Effect.log(
+                'I am in development environment, registering dev tools'
+              ),
+              Effect.succeed(DevTools.layer())
+            )
+          } else {
+            return Effect.zipRight(
+              Effect.log(
+                'I am NOT in development environment, NOT registering dev tools'
+              ),
+              Effect.succeed(Layer.empty)
+            )
+          }
+        })
+      )
+    )
+  ),
   Layer.provide(Environment.Live)
 )
-const NodeSdkLive = NodeSdk.layer(() => ({
-  resource: {serviceName: 'Notification service'},
-  spanProcessor: new BatchSpanProcessor(new OTLPTraceExporter()),
-}))
+// const NodeSdkLive = NodeSdk.layer(() => ({
+//   resource: {serviceName: 'Notification service'},
+//   spanProcessor: new BatchSpanProcessor(new OTLPTraceExporter()),
+// }))
 
-const program = Layer.launch(AppLive).pipe(Effect.provide(NodeSdkLive))
+const program = Layer.launch(AppLive).pipe(
+  Effect.catchAllCause(Effect.logError)
+)
+// .pipe(Effect.provide(NodeSdkLive))
 NodeRuntime.runMain(program)

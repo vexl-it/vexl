@@ -1,9 +1,5 @@
-import {DevTools} from '@effect/experimental'
-import {NodeSdk} from '@effect/opentelemetry'
 import {NodeHttpServer, NodeRuntime} from '@effect/platform-node'
 import * as Http from '@effect/platform/HttpServer'
-import {OTLPTraceExporter} from '@opentelemetry/exporter-trace-otlp-http'
-import {BatchSpanProcessor} from '@opentelemetry/sdk-trace-node'
 import * as HealthServer from '@vexl-next/server-utils/src/HealthServer'
 import {ServerUserSessionConfig} from '@vexl-next/server-utils/src/ServerUserSession'
 import handleCommonErrorsRouter from '@vexl-next/server-utils/src/handleCommonErrorsRouter'
@@ -47,17 +43,17 @@ const AppLive = HttpLive.pipe(
       )
     )
   ),
-  Layer.provide(Environment.Live),
-  Layer.provide(DevTools.layer())
+  Layer.provide(Environment.Live)
+  // Layer.provide(DevTools.layer())
 )
 
-const NodeSdkLive = NodeSdk.layer(() => ({
-  resource: {serviceName: 'Notification service'},
-  spanProcessor: new BatchSpanProcessor(new OTLPTraceExporter()),
-}))
+// const NodeSdkLive = NodeSdk.layer(() => ({
+//   resource: {serviceName: 'Notification service'},
+//   spanProcessor: new BatchSpanProcessor(new OTLPTraceExporter()),
+// }))
 
 const program = Layer.launch(AppLive).pipe(
-  Effect.provide(NodeSdkLive),
+  // Effect.provide(NodeSdkLive),
   Effect.catchAllDefect((d) => Effect.logError('Defect in program', d)),
   Effect.catchAll((e) => Effect.logError('Error in program', e))
 )

@@ -1,6 +1,6 @@
-import {type OfferType} from '@vexl-next/domain/src/general/offers'
+import {type OfferInfo} from '@vexl-next/domain/src/general/offers'
 import React from 'react'
-import {styled, Text} from 'tamagui'
+import {Text, styled} from 'tamagui'
 import {useTranslation} from '../utils/localization/I18nProvider'
 
 const AfterNameBasicText = styled(Text, {
@@ -8,41 +8,47 @@ const AfterNameBasicText = styled(Text, {
   ff: '$body600',
 })
 
-function getOtherSideIsBuyingOrSelling({
-  offerType,
-  offerDirection,
-}: {
-  offerType: 'BUY' | 'SELL'
-  offerDirection: 'theirOffer' | 'myOffer'
-}): 'isSelling' | 'isBuying' {
-  if (offerDirection === 'myOffer') {
-    if (offerType === 'SELL') {
-      return 'isBuying'
+function getOtherSideIsBuyingOrSelling(
+  offerInfo: OfferInfo
+): 'isSelling' | 'isBuying' {
+  const {offerType, listingType} = offerInfo.publicPart
+  const isMyOffer = !!offerInfo.privatePart.adminId
+
+  if (listingType === 'BITCOIN') {
+    if (isMyOffer) {
+      if (offerType === 'SELL') {
+        return 'isBuying'
+      } else {
+        return 'isSelling'
+      }
     } else {
-      return 'isSelling'
+      if (offerType === 'SELL') {
+        return 'isSelling'
+      } else {
+        return 'isBuying'
+      }
     }
   } else {
-    if (offerType === 'SELL') {
-      return 'isSelling'
+    if (isMyOffer) {
+      if (offerType !== 'SELL') {
+        return 'isBuying'
+      } else {
+        return 'isSelling'
+      }
     } else {
-      return 'isBuying'
+      if (offerType !== 'SELL') {
+        return 'isSelling'
+      } else {
+        return 'isBuying'
+      }
     }
   }
 }
 
-function AfterNameText({
-  offerType,
-  offerDirection,
-}: {
-  offerType: OfferType
-  offerDirection: 'theirOffer' | 'myOffer'
-}): JSX.Element {
+function AfterNameText({offerInfo}: {offerInfo: OfferInfo}): JSX.Element {
   const {t} = useTranslation()
 
-  const buyingOrSelling = getOtherSideIsBuyingOrSelling({
-    offerType,
-    offerDirection,
-  })
+  const buyingOrSelling = getOtherSideIsBuyingOrSelling(offerInfo)
   const color = buyingOrSelling === 'isBuying' ? '$pink' : '$pastelGreen'
 
   return (
@@ -59,10 +65,7 @@ function UserNameWithSellingBuying({
 }: {
   userName: string
   center?: boolean
-  offerInfo?: {
-    offerType: OfferType
-    offerDirection: 'theirOffer' | 'myOffer'
-  }
+  offerInfo?: OfferInfo
 }): JSX.Element {
   const {t} = useTranslation()
   return (
@@ -74,7 +77,7 @@ function UserNameWithSellingBuying({
     >
       {userName}{' '}
       {offerInfo ? (
-        <AfterNameText {...offerInfo} />
+        <AfterNameText offerInfo={offerInfo} />
       ) : (
         <AfterNameBasicText color="$greyOnBlack">
           {t('messages.offerDeleted')}

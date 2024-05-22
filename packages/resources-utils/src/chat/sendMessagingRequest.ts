@@ -7,10 +7,7 @@ import {
   type ChatMessage,
   type ChatMessagePayload,
 } from '@vexl-next/domain/src/general/messaging'
-import {
-  ChatNotificationData,
-  type FcmCypher,
-} from '@vexl-next/domain/src/general/notifications'
+import {type FcmCypher} from '@vexl-next/domain/src/general/notifications'
 import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {now} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {type ChatPrivateApi} from '@vexl-next/rest-api/src/services/chat'
@@ -46,21 +43,6 @@ function createRequestChatMessage({
     myVersion,
     senderPublicKey,
   }
-}
-
-function createMessagingRequestNotification({
-  inbox,
-  sender,
-}: {
-  inbox: PublicKeyPemBase64
-  sender: PublicKeyPemBase64
-}): ChatNotificationData {
-  return new ChatNotificationData({
-    version: '2',
-    type: 'REQUEST_MESSAGING',
-    sender,
-    inbox,
-  })
 }
 
 export type ApiErrorRequestMessaging = ExtractLeftTE<
@@ -113,10 +95,6 @@ export function sendMessagingRequest({
             message,
             publicKey: toPublicKey,
           })({
-            notificationToSend: createMessagingRequestNotification({
-              inbox: toPublicKey,
-              sender: fromKeypair.publicKeyPemBase64,
-            }),
             fcmCypher: theirFcmCypher,
             otherSideVersion,
             notificationApi,

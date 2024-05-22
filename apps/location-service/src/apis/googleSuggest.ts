@@ -6,8 +6,7 @@ import {
 } from '@vexl-next/rest-api/src/services/location/contracts'
 import axios from 'axios'
 import {Effect} from 'effect'
-import {type Environment} from '../EnvironmentLayer'
-import env from '../environment'
+import {Environment} from '../EnvironmentLayer'
 
 interface GooglePlacesResponse {
   results: Array<{
@@ -42,6 +41,7 @@ export function querySuggest({
   Environment
 > {
   return Effect.gen(function* (_) {
+    const googlePlacesApikey = yield* _(Environment.GOOGLE_PLACES_API_KEY)
     const {
       data: {results},
     } = yield* _(
@@ -51,7 +51,7 @@ export function querySuggest({
           {
             params: {
               address: phrase,
-              key: env.GOOGLE_PLACES_API_KEY,
+              key: googlePlacesApikey,
               language: lang,
             },
           }

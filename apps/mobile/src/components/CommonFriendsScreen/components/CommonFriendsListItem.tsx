@@ -1,5 +1,5 @@
 import React, {useCallback} from 'react'
-import {Image, Stack, Text} from 'tamagui'
+import {getTokens, Image, Stack, Text} from 'tamagui'
 import {type StoredContactWithComputedValues} from '../../../state/contacts/domain'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import openUrl from '../../../utils/openUrl'
@@ -28,7 +28,12 @@ function CommonFriendsListItem({friend}: Props): JSX.Element {
           source={{uri: friend.info.imageUri}}
         />
       ) : (
-        <SvgImage width={50} height={50} source={picturePlaceholderSvg} />
+        <SvgImage
+          width={50}
+          height={50}
+          source={picturePlaceholderSvg}
+          fill={getTokens().color.grey.val}
+        />
       )}
       <Stack f={1} ml="$4" jc="space-between">
         <Text ff="$body500" fs={18} mb="$2" col="$black">

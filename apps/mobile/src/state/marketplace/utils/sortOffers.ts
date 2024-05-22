@@ -37,6 +37,12 @@ export default function sortOffers(
         b.offerInfo.publicPart.amountTopLimit -
         a.offerInfo.publicPart.amountTopLimit
       )
+    if (sort === 'MOST_CONNECTIONS') {
+      return (
+        b.offerInfo.privatePart.commonFriends.length -
+        a.offerInfo.privatePart.commonFriends.length
+      )
+    }
     // default ordering: NEWEST_OFFER
     return b.offerInfo.id - a.offerInfo.id
   })

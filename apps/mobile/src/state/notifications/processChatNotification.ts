@@ -1,6 +1,6 @@
 import notifee from '@notifee/react-native'
 import {type NavigationState} from '@react-navigation/native'
-import {type ChatNotificationData} from '@vexl-next/domain/src/general/notifications'
+import {type NewChatMessageNoticeNotificationData} from '@vexl-next/domain/src/general/notifications'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/lib/function'
@@ -11,16 +11,31 @@ import reportError from '../../utils/reportError'
 import {fetchAndStoreMessagesForInboxAtom} from '../chat/atoms/fetchNewMessagesActionAtom'
 import {unreadChatsCountAtom} from '../chat/atoms/unreadChatsCountAtom'
 import {loadSession} from '../session/loadSession'
+import {getKeyHolderForFcmCypherActionAtom} from './fcmCypherToKeyHolderAtom'
 
 const processChatNotificationActionAtom = atom(
   null,
   (
     get,
     set,
-    notification: ChatNotificationData,
+    notification: NewChatMessageNoticeNotificationData,
     navigation: NavigationState<any> | undefined = undefined
   ): T.Task<boolean> => {
     console.info('📳 Refreshing inbox')
+
+    const inbox = set(
+      getKeyHolderForFcmCypherActionAtom,
+      notification.targetCypher
+    )
+    if (!inbox) {
+      reportError(
+        'warn',
+        new Error(
+          'Error decrypting notification FCM - unable to find private key for cypher'
+        )
+      )
+      return T.of(false)
+    }
 
     return pipe(
       loadSession(),
@@ -33,7 +48,7 @@ const processChatNotificationActionAtom = atom(
         }
       ),
       TE.chainTaskK(() =>
-        set(fetchAndStoreMessagesForInboxAtom, {key: notification.inbox})
+        set(fetchAndStoreMessagesForInboxAtom, {key: inbox.publicKeyPemBase64})
       ),
       TE.map((updates) => {
         if (!updates) return false
@@ -44,8 +59,8 @@ const processChatNotificationActionAtom = atom(
           if (
             navigation &&
             isOnSpecificChat(navigation, {
-              otherSideKey: notification.sender,
-              inboxKey: notification.inbox,
+              otherSideKey: newMessage.message.senderPublicKey,
+              inboxKey: inbox.inbox.privateKey.publicKeyPemBase64,
             })
           )
             return

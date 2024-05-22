@@ -25,6 +25,7 @@ export const Sort = z.enum([
   'OLDEST_OFFER',
   'LOWEST_AMOUNT',
   'HIGHEST_AMOUNT',
+  'MOST_CONNECTIONS',
 ])
 export type Sort = z.TypeOf<typeof Sort>
 

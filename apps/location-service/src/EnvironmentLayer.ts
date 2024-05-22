@@ -6,6 +6,10 @@ import {Effect, Layer} from 'effect'
 const EnvironmentData = Schema.Struct({
   GOOGLE_PLACES_API_KEY: Schema.String,
   SIGNATURE_PUBLIC_KEY: PublicKeyPemBase64E,
+  ENV: Schema.compose(
+    Schema.String,
+    Schema.Literal('development', 'production')
+  ).pipe(Schema.optional({default: () => 'production' as const})),
   PORT: Schema.NumberFromString.pipe(
     Schema.int(),
     Schema.positive(),

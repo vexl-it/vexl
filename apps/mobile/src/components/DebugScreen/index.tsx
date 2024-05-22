@@ -1,3 +1,4 @@
+import notifee, {AndroidGroupAlertBehavior} from '@notifee/react-native'
 import Clipboard from '@react-native-clipboard/clipboard'
 import messaging from '@react-native-firebase/messaging'
 import {type Inbox} from '@vexl-next/domain/src/general/messaging'
@@ -9,7 +10,7 @@ import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {isLeft, isRight} from 'fp-ts/lib/Either'
 import {useAtomValue, useSetAtom, useStore} from 'jotai'
-import {Alert, ScrollView} from 'react-native'
+import {Alert, Platform, ScrollView} from 'react-native'
 import {Spacer, Text, YStack} from 'tamagui'
 import {apiEnv, privateApiAtom} from '../../api'
 import deleteAllInboxesActionAtom from '../../state/chat/atoms/deleteAllInboxesActionAtom'
@@ -42,6 +43,7 @@ import {
   version,
 } from '../../utils/environment'
 import {getNotificationToken} from '../../utils/notifications'
+import {getChannelForMessages} from '../../utils/notifications/notificationChannels'
 import {
   getShowDebugNotifications,
   setShowDebugNotifications,
@@ -252,6 +254,75 @@ function DebugScreen(): JSX.Element {
                     }
                   )
                 )()
+              }}
+            />
+            <Button
+              variant="primary"
+              size="small"
+              text="show not"
+              onPress={() => {
+                void (async () => {
+                  if (Platform.OS === 'android') {
+                    await notifee.displayNotification({
+                      id: 'some',
+                      title: 'summary',
+                      subtitle: 'some summary',
+                      android: {
+                        channelId: await getChannelForMessages(),
+                        groupSummary: true,
+                        groupId: 'some',
+                        groupAlertBehavior: AndroidGroupAlertBehavior.CHILDREN,
+                      },
+                    })
+                  }
+                  await notifee.displayNotification({
+                    id: 'nnn',
+                    title: `title ${Date.now()}`,
+                    subtitle: 'some notification',
+                    ios: {
+                      threadId: 'some',
+                    },
+                    android: {
+                      channelId: await getChannelForMessages(),
+                      groupId: 'some',
+                      groupAlertBehavior: AndroidGroupAlertBehavior.CHILDREN,
+                    },
+                  })
+                })()
+              }}
+            />
+            <Button
+              variant="primary"
+              size="small"
+              text="cancel all not"
+              onPress={() => {
+                void (async () => {
+                  await notifee.cancelAllNotifications()
+                })()
+              }}
+            />
+            <Button
+              variant="primary"
+              size="small"
+              text="print all not"
+              onPress={() => {
+                void (async () => {
+                  const nots = await notifee.getDisplayedNotifications()
+                  console.log(JSON.stringify(nots, null, 2))
+                })()
+              }}
+            />
+            <Button
+              variant="primary"
+              size="small"
+              text="Print lastUpdatedAtAtom"
+              onPress={() => {
+                Alert.alert(
+                  'Last updated at',
+                  `inState: ${store.get(
+                    lastUpdatedAtAtom
+                  )}, minimalDate: ${MINIMAL_DATE}`
+                )
               }}
             />
             <Button

@@ -4,7 +4,7 @@ import {SendingNotificationError} from '@vexl-next/rest-api/src/services/notific
 import {Effect, Layer} from 'effect'
 import {cert, initializeApp, type ServiceAccount} from 'firebase-admin/app'
 import {getMessaging, type Message} from 'firebase-admin/messaging'
-import {EnvironmentConstants} from './EnvironmentLayer'
+import {EnvironmentConstants, type Environment} from './EnvironmentLayer'
 
 export class FirebaseMessagingError extends Schema.TaggedError<FirebaseMessagingError>(
   'FirebaseMessagingError'
@@ -16,9 +16,15 @@ export function sendFirebaseMessage({
 }: Message & {
   token: FcmToken
   data: Record<string, string>
-}): Effect.Effect<string, SendingNotificationError, FirebaseMessagingLayer> {
-  return FirebaseMessagingLayer.pipe(
-    Effect.flatMap((messaging) =>
+}): Effect.Effect<
+  string,
+  SendingNotificationError,
+  FirebaseMessagingLayer | Environment
+> {
+  return Effect.gen(function* (_) {
+    const messaging = yield* _(FirebaseMessagingLayer)
+
+    return yield* _(
       Effect.tryPromise({
         try: async () =>
           await messaging.send({
@@ -35,8 +41,10 @@ export function sendFirebaseMessage({
           }),
         catch: () => new SendingNotificationError({tokenInvalid: false}),
       })
-    ),
-    Effect.tapError((e) => Effect.logInfo('Error while sending message', e))
+    )
+  }).pipe(
+    Effect.tapError((e) => Effect.logInfo('Error while sending message', e)),
+    Effect.tapDefect((d) => Effect.logError('Defect while sending message', d))
   )
 }
 

@@ -99,11 +99,7 @@ function CommonFriends({offerInfo, variant}: Props): JSX.Element | null {
           {commonFriends.length !== 0 && (
             <Stack ai="flex-end" jc="center">
               <Image
-                stroke={
-                  variant === 'light'
-                    ? tokens.color.black.val
-                    : tokens.color.greyOnBlack.val
-                }
+                stroke={tokens.color.greyOnBlack.val}
                 source={chevronRightSvg}
               />
             </Stack>

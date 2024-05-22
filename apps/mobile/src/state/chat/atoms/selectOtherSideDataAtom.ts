@@ -15,7 +15,8 @@ export default function selectOtherSideDataAtom(
 }
 
 export function getOtherSideData(chat: Chat): RealLifeInfo {
-  const seed = chat.otherSide.publicKey
+  const seed =
+    chat.otherSide.publicKey + chat.inbox.privateKey.publicKeyPemBase64
   const image = avatarsSvg[randomNumberFromSeed(0, avatarsSvg.length - 1, seed)]
 
   return {

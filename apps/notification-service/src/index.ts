@@ -1,9 +1,6 @@
 import {DevTools} from '@effect/experimental'
-import {NodeSdk} from '@effect/opentelemetry'
 import {NodeHttpServer, NodeRuntime} from '@effect/platform-node'
 import * as Http from '@effect/platform/HttpServer'
-import {OTLPTraceExporter} from '@opentelemetry/exporter-trace-otlp-http'
-import {BatchSpanProcessor} from '@opentelemetry/sdk-trace-node'
 import * as HealthServer from '@vexl-next/server-utils/src/HealthServer'
 import {ServerUserSessionConfig} from '@vexl-next/server-utils/src/ServerUserSession'
 import handleCommonErrorsRouter from '@vexl-next/server-utils/src/handleCommonErrorsRouter'
@@ -47,14 +44,38 @@ const AppLive = HttpLive.pipe(
       )
     )
   ),
-  Layer.provide(Environment.Live),
-  Layer.provide(DevTools.layer())
+  Layer.provide(
+    Layer.unwrapEffect(
+      EnvironmentConstants.ENV.pipe(
+        Effect.flatMap((env) => {
+          if (env === 'development') {
+            return Effect.zipRight(
+              Effect.log(
+                'I am in development environment, registering dev tools'
+              ),
+              Effect.succeed(DevTools.layer())
+            )
+          } else {
+            return Effect.zipRight(
+              Effect.log(
+                'I am NOT in development environment, NOT registering dev tools'
+              ),
+              Effect.succeed(Layer.empty)
+            )
+          }
+        })
+      )
+    )
+  ),
+  Layer.provide(Environment.Live)
 )
 
-const NodeSdkLive = NodeSdk.layer(() => ({
-  resource: {serviceName: 'Notification service'},
-  spanProcessor: new BatchSpanProcessor(new OTLPTraceExporter()),
-}))
+// const NodeSdkLive = NodeSdk.layer(() => ({
+//   resource: {serviceName: 'Notification service'},
+//   spanProcessor: new BatchSpanProcessor(new OTLPTraceExporter()),
+// }))
 
-const program = Layer.launch(AppLive).pipe(Effect.provide(NodeSdkLive))
+const program = Layer.launch(AppLive).pipe(
+  Effect.catchAllCause(Effect.logError)
+)
 NodeRuntime.runMain(program)

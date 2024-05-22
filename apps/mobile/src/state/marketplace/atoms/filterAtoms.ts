@@ -19,7 +19,7 @@ export const offersFilterInitialState: OffersFilter = {
   spokenLanguages: [],
   amountBottomLimit: undefined,
   amountTopLimit: undefined,
-  offerType: 'SELL',
+  offerType: 'BUY',
   listingType: 'BITCOIN',
   singlePrice: undefined,
   text: undefined,
@@ -37,25 +37,26 @@ export const offersFilterFromStorageAtom = focusAtom(
   (o) => o.prop('filter')
 )
 
-export const listingTypeFilterAtom = focusAtom(offersFilterStorageAtom, (o) =>
-  o.prop('filter').prop('listingType')
-)
-
-export const offerTypeFilterAtom = focusAtom(offersFilterStorageAtom, (o) =>
-  o.prop('filter').prop('offerType')
-)
-
-export const locationFilterAtom = focusAtom(offersFilterStorageAtom, (o) =>
-  o.prop('filter').prop('location')
-)
-
-export const singlePriceCurrencyAtom = focusAtom(offersFilterStorageAtom, (o) =>
-  o.prop('filter').prop('singlePriceCurrency')
-)
-
-export const offersFilterTextFromStorageAtom = focusAtom(
+export const listingTypeFilterAtom = focusAtom(
   offersFilterFromStorageAtom,
-  (o) => o.prop('text')
+  (o) => o.prop('listingType')
+)
+
+export const offerTypeFilterAtom = focusAtom(offersFilterFromStorageAtom, (o) =>
+  o.prop('offerType')
+)
+
+export const locationFilterAtom = focusAtom(offersFilterFromStorageAtom, (o) =>
+  o.prop('location')
+)
+
+export const singlePriceCurrencyAtom = focusAtom(
+  offersFilterFromStorageAtom,
+  (o) => o.prop('singlePriceCurrency')
+)
+
+export const searchTextAtom = focusAtom(offersFilterFromStorageAtom, (o) =>
+  o.prop('text')
 )
 
 export const resetLocationFilterActionAtom = atom(null, (get, set) => {
@@ -180,9 +181,9 @@ export const submitSearchActionAtom = atom(
   null,
   (get, set, text: string | undefined = undefined) => {
     if (!text) {
-      set(offersFilterTextFromStorageAtom, offersFilterInitialState.text)
+      set(searchTextAtom, offersFilterInitialState.text)
       return
     }
-    set(offersFilterTextFromStorageAtom, text)
+    set(searchTextAtom, text)
   }
 )

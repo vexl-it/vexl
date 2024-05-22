@@ -1,3 +1,4 @@
+import {type MaterialTopTabScreenProps} from '@react-navigation/material-top-tabs'
 import {
   type CompositeScreenProps,
   type NavigatorScreenParams,
@@ -21,6 +22,7 @@ import {
   type VerifyPhoneNumberResponse,
 } from '@vexl-next/rest-api/src/services/user/contracts'
 import {type ChatIds} from './state/chat/domain'
+import {type ContactsFilter} from './state/contacts/domain'
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type RootStackParamsList = {
@@ -53,7 +55,7 @@ export type RootStackParamsList = {
 
   TodoScreen: undefined
 
-  SetContacts: {showNew?: boolean}
+  SetContacts: {showNew?: boolean} | undefined
 
   CommonFriends: {contactsHashes: readonly string[]}
 
@@ -116,6 +118,19 @@ export type InsideTabParamsList = {
   Messages: undefined
   Settings: undefined
 }
+
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type ContactsTabParamsList = {
+  Submitted: {filter: ContactsFilter}
+  NonSubmitted: {filter: ContactsFilter}
+  New: {filter: ContactsFilter}
+}
+
+export type ContactsTabScreenProps<T extends keyof ContactsTabParamsList> =
+  CompositeScreenProps<
+    MaterialTopTabScreenProps<ContactsTabParamsList, T>,
+    RootStackScreenProps<keyof RootStackParamsList>
+  >
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type TradeChecklistStackParamsList = {

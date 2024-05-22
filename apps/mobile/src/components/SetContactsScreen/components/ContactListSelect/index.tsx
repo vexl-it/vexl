@@ -1,45 +1,68 @@
+import {
+  createMaterialTopTabNavigator,
+  type MaterialTopTabBarProps,
+} from '@react-navigation/material-top-tabs'
 import {ScopeProvider, useMolecule} from 'bunshi/dist/react'
-import * as O from 'fp-ts/Option'
-import {useAtomValue, useSetAtom, useStore} from 'jotai'
+import {useSetAtom, useStore} from 'jotai'
 import React, {useEffect, useMemo, useState} from 'react'
-import {AppState} from 'react-native'
-import {Stack} from 'tamagui'
+import {Stack, XStack} from 'tamagui'
+import {type ContactsTabParamsList} from '../../../../navigationTypes'
 import {
   normalizedContactsAtom,
   resolveAllContactsAsSeenActionAtom,
 } from '../../../../state/contacts/atom/contactsStore'
+import {useTranslation} from '../../../../utils/localization/I18nProvider'
+import useSafeGoBack from '../../../../utils/useSafeGoBack'
+import Button from '../../../Button'
 import NormalizeContactsWithLoadingScreen from '../../../NormalizeContactsWithLoadingScreen'
 import WhiteContainer from '../../../WhiteContainer'
 import {ContactsSelectScope, contactSelectMolecule} from './atom'
-import AddContactRow from './components/AddContactRow'
-import ContactsFilter from './components/ContactsFilter'
-import ContactsList from './components/ContactsList'
-import ContactsListEmpty from './components/ContactsListEmpty'
+import FilteredContacts from './components/FilteredContactsWithProvider'
 import SearchBar from './components/SearchBar'
 
-interface Props {
-  onContactsSubmitted: () => void
-  renderFooter: (args: {onSubmit: () => void}) => JSX.Element
-  showFilter?: boolean
-  showNewByDefault: boolean
+const Tab = createMaterialTopTabNavigator<ContactsTabParamsList>()
+
+function CustomTabBar({
+  state,
+  descriptors,
+  navigation,
+}: MaterialTopTabBarProps): JSX.Element {
+  return (
+    <XStack ai="center" space="$2" px="$4">
+      {state.routes.map((route, index) => {
+        // as any to solve ts error, that options does not exist
+        const {options} = descriptors[route.key] as any
+        const isFocused = state.index === index
+
+        return (
+          <Button
+            key={options.tabBarLabel}
+            onPress={() => {
+              navigation.navigate(route.name, route.params)
+            }}
+            variant={isFocused ? 'secondary' : 'blackOnDark'}
+            size="small"
+            text={options.tabBarLabel}
+          />
+        )
+      })}
+    </XStack>
+  )
 }
 
-function ContactsListSelect({
-  onContactsSubmitted,
-  renderFooter,
-  showFilter,
-}: Props): JSX.Element {
-  const {
-    searchTextAsCustomContactAtom,
-    contactsToDisplayAtomsAtom,
-    submitActionAtom,
-  } = useMolecule(contactSelectMolecule)
-  const customContactToAdd = useAtomValue(searchTextAsCustomContactAtom)
-  const toDisplay = useAtomValue(contactsToDisplayAtomsAtom)
+function ContactsListSelect(): JSX.Element {
+  const {t} = useTranslation()
+  const goBack = useSafeGoBack()
+  const {submitAllSelectedContactsActionAtom} = useMolecule(
+    contactSelectMolecule
+  )
+
   const resolveAllContactsAsSeen = useSetAtom(
     resolveAllContactsAsSeenActionAtom
   )
-  const submit = useSetAtom(submitActionAtom)
+  const submitAllSelectedContacts = useSetAtom(
+    submitAllSelectedContactsActionAtom
+  )
 
   useEffect(() => {
     return () => {
@@ -48,74 +71,84 @@ function ContactsListSelect({
   }, [resolveAllContactsAsSeen])
 
   return (
-    <NormalizeContactsWithLoadingScreen>
+    <>
       <WhiteContainer noPadding>
-        <Stack f={1} px="$4">
+        <Stack f={1}>
           <SearchBar />
-          {!!showFilter && <ContactsFilter />}
-          {toDisplay.length > 0 && <ContactsList contacts={toDisplay} />}
-          {toDisplay.length === 0 && !O.isSome(customContactToAdd) && (
-            <ContactsListEmpty />
-          )}
-          {toDisplay.length === 0 && O.isSome(customContactToAdd) && (
-            <AddContactRow contact={customContactToAdd.value} />
-          )}
+          <Tab.Navigator
+            screenOptions={{
+              animationEnabled: true,
+            }}
+            tabBar={CustomTabBar}
+          >
+            <Tab.Screen
+              name="NonSubmitted"
+              options={{
+                tabBarLabel: t('postLoginFlow.contactsList.nonSubmitted'),
+              }}
+              initialParams={{filter: 'nonSubmitted'}}
+              component={FilteredContacts}
+            />
+            <Tab.Screen
+              name="Submitted"
+              options={{tabBarLabel: t('postLoginFlow.contactsList.submitted')}}
+              initialParams={{filter: 'submitted'}}
+              component={FilteredContacts}
+            />
+            <Tab.Screen
+              name="New"
+              options={{tabBarLabel: t('postLoginFlow.contactsList.new')}}
+              initialParams={{filter: 'new'}}
+              component={FilteredContacts}
+            />
+          </Tab.Navigator>
         </Stack>
       </WhiteContainer>
-      {renderFooter({
-        onSubmit: () => {
-          void submit()().then((success) => {
-            if (success) onContactsSubmitted()
-          })
-        },
-      })}
-    </NormalizeContactsWithLoadingScreen>
+      <Stack pt="$2" bc="$black">
+        <Button
+          variant="secondary"
+          onPress={() => {
+            void submitAllSelectedContacts()().then((success) => {
+              if (success) goBack()
+            })
+          }}
+          fullWidth
+          text={t('common.submit')}
+        />
+      </Stack>
+    </>
   )
 }
 
-export function ContactListSelectWithProvider(props: Props): JSX.Element {
+export function ContactListSelectWithProvider(): JSX.Element {
+  const store = useStore()
   const [reloadContactsValue, setReloadContacts] = useState(0)
 
-  const store = useStore()
   const normalizedContacts = useMemo(() => {
     // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     reloadContactsValue
     return store.get(normalizedContactsAtom)
-  }, [store, reloadContactsValue])
-
-  useEffect(() => {
-    const listener = AppState.addEventListener('change', (event) => {
-      if (event === 'active') setReloadContacts((v) => v + 1)
-    })
-    return () => {
-      listener.remove()
-    }
-  }, [reloadContactsValue])
+  }, [reloadContactsValue, store])
 
   return (
     <ScopeProvider
       scope={ContactsSelectScope}
       value={{
         normalizedContacts,
-        initialFilters: {
-          showNew: props.showNewByDefault,
-          showNonSubmitted: false,
-          showSubmitted: false,
-        },
         reloadContacts: () => {
           setReloadContacts((v) => v + 1)
         },
       }}
     >
-      <ContactsListSelect {...props} />
+      <ContactsListSelect />
     </ScopeProvider>
   )
 }
 
-export default function ContactListWithLoadStep(props: Props): JSX.Element {
+export default function ContactListWithLoadStep(): JSX.Element {
   return (
     <NormalizeContactsWithLoadingScreen>
-      <ContactListSelectWithProvider {...props} />
+      <ContactListSelectWithProvider />
     </NormalizeContactsWithLoadingScreen>
   )
 }

@@ -63,11 +63,11 @@ export const submitContactsActionAtom = atom(
           )
           .filter(notEmpty)
       }),
-      TE.chainFirstW((contacts) =>
-        contactApi.importContacts({
+      TE.chainFirstW((contacts) => {
+        return contactApi.importContacts({
           contacts: contacts.map((one) => one.computedValues.hash),
         })
-      ),
+      }),
       TE.match(
         (e) => {
           if (e._tag !== 'NetworkError') {

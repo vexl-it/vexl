@@ -25,20 +25,18 @@ function ItemSeparatorComponent(): JSX.Element {
 
 function ContactsList({contacts}: Props): JSX.Element {
   return (
-    <Stack f={1} bg="$white">
-      <Stack pt="$2" f={1}>
-        <FlashList
-          estimatedItemSize={65}
-          showsHorizontalScrollIndicator={false}
-          showsVerticalScrollIndicator={false}
-          ListHeaderComponent={ListHeader}
-          ListFooterComponent={ListFooter}
-          data={contacts}
-          ItemSeparatorComponent={ItemSeparatorComponent}
-          keyExtractor={atomKeyExtractor}
-          renderItem={renderItem}
-        />
-      </Stack>
+    <Stack f={1} pt="$2">
+      <FlashList
+        estimatedItemSize={66}
+        showsHorizontalScrollIndicator={false}
+        showsVerticalScrollIndicator={false}
+        ListHeaderComponent={ListHeader}
+        ListFooterComponent={ListFooter}
+        data={contacts}
+        ItemSeparatorComponent={ItemSeparatorComponent}
+        keyExtractor={atomKeyExtractor}
+        renderItem={renderItem}
+      />
     </Stack>
   )
 }

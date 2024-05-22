@@ -6,17 +6,19 @@ import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {atom, type Atom, type SetStateAction, type WritableAtom} from 'jotai'
 import {splitAtom} from 'jotai/utils'
-import {matchSorter} from 'match-sorter'
+import {matchSorter, rankings} from 'match-sorter'
+import {type E164PhoneNumber} from '../../../../../../../packages/domain/src/general/E164PhoneNumber.brand'
 import {addContactToPhoneWithUIFeedbackAtom} from '../../../../state/contacts/atom/addContactToPhoneWithUIFeedbackAtom'
 import {storedContactsAtom} from '../../../../state/contacts/atom/contactsStore'
 import {submitContactsActionAtom} from '../../../../state/contacts/atom/submitContactsActionAtom'
 import {
   StoredContactWithComputedValues,
+  type ContactsFilter,
   type StoredContact,
 } from '../../../../state/contacts/domain'
 import {hashPhoneNumber} from '../../../../state/contacts/utils'
 import getValueFromSetStateActionOfAtom from '../../../../utils/atomUtils/getValueFromSetStateActionOfAtom'
-import {deduplicateBy} from '../../../../utils/deduplicate'
+import deduplicate, {deduplicateBy} from '../../../../utils/deduplicate'
 import {translationAtom} from '../../../../utils/localization/I18nProvider'
 import toE164PhoneNumberWithDefaultCountryCode from '../../../../utils/toE164PhoneNumberWithDefaultCountryCode'
 import {askAreYouSureActionAtom} from '../../../AreYouSureDialog'
@@ -26,34 +28,84 @@ import userSvg from '../../../images/userSvg'
 
 export const ContactsSelectScope = createScope<{
   normalizedContacts: StoredContactWithComputedValues[]
-  initialFilters: {
-    showSubmitted: boolean
-    showNonSubmitted: boolean
-    showNew: boolean
-  }
   reloadContacts: () => void
 }>({
-  normalizedContacts: [],
-  initialFilters: {
-    showSubmitted: false,
-    showNonSubmitted: false,
-    showNew: false,
-  },
   reloadContacts: () => {},
+  normalizedContacts: [],
 })
 
+const matchSorterKeys = ['info.name', 'info.numberToDisplay']
+const matchSorterThreshold = rankings.CONTAINS
+
 export const contactSelectMolecule = molecule((_, getScope) => {
+  const {normalizedContacts, reloadContacts} = getScope(ContactsSelectScope)
+
   const searchTextAtom = atom('')
-  const {normalizedContacts, initialFilters, reloadContacts} =
-    getScope(ContactsSelectScope)
+  const contactsFilterAtom = atom<ContactsFilter>('submitted')
 
-  const showSubmittedContactsAtom = atom<boolean>(initialFilters.showSubmitted)
-  const showNonSubmittedContactsAtom = atom<boolean>(
-    initialFilters.showNonSubmitted
+  const newContactsToDisplayAtom = atom((get) => {
+    const searchText = get(searchTextAtom)
+
+    const contactsToShow = deduplicateBy(
+      normalizedContacts.filter((one) => !one.flags.seen),
+      (one) => one.computedValues.normalizedNumber
+    )
+
+    return matchSorter(contactsToShow, searchText, {
+      keys: matchSorterKeys,
+      threshold: matchSorterThreshold,
+    })
+  })
+
+  const submittedContactsToDisplayAtom = atom((get) => {
+    const searchText = get(searchTextAtom)
+
+    const contactsToShow = deduplicateBy(
+      normalizedContacts.filter((one) => one.flags.imported),
+      (one) => one.computedValues.normalizedNumber
+    )
+
+    return matchSorter(contactsToShow, searchText, {
+      keys: matchSorterKeys,
+      threshold: matchSorterThreshold,
+    })
+  })
+
+  const nonSubmittedContactsToDisplayAtom = atom((get) => {
+    const searchText = get(searchTextAtom)
+
+    const contactsToShow = deduplicateBy(
+      normalizedContacts.filter((one) => !one.flags.imported && one.flags.seen),
+      (one) => one.computedValues.normalizedNumber
+    )
+
+    return matchSorter(contactsToShow, searchText, {
+      keys: matchSorterKeys,
+      threshold: matchSorterThreshold,
+    })
+  })
+
+  const _contactsToDisplayAtom = atom((get) => {
+    const contactsFilter = get(contactsFilterAtom)
+
+    return get(
+      contactsFilter === 'submitted'
+        ? submittedContactsToDisplayAtom
+        : contactsFilter === 'nonSubmitted'
+        ? nonSubmittedContactsToDisplayAtom
+        : newContactsToDisplayAtom
+    )
+  })
+
+  const newContactsToDisplayAtomsAtom = splitAtom(newContactsToDisplayAtom)
+  const submittedContactsToDisplayAtomsAtom = splitAtom(
+    submittedContactsToDisplayAtom
   )
-  const showNewContactsAtom = atom<boolean>(initialFilters.showNew)
+  const nonSubmittedContactsToDisplayAtomsAtom = splitAtom(
+    nonSubmittedContactsToDisplayAtom
+  )
 
-  const selectedNumbersAtom = atom(
+  const selectedSubmittedNumbersAtom = atom(
     new Set(
       normalizedContacts
         .filter((one) => one.flags.imported)
@@ -61,66 +113,76 @@ export const contactSelectMolecule = molecule((_, getScope) => {
     )
   )
 
-  const contactsToDisplayAtom = atom((get) => {
-    const showSubmittedContacts = get(showSubmittedContactsAtom)
-    const showNonSubmittedContacts = get(showNonSubmittedContactsAtom)
-    const showNewContacts = get(showNewContactsAtom)
-    const searchText = get(searchTextAtom)
-
-    const filterActive =
-      showNewContacts || showSubmittedContacts || showNonSubmittedContacts
-
-    const contactsToShow = deduplicateBy(
-      (() => {
-        if (!filterActive) return normalizedContacts
-
-        const toShow: StoredContactWithComputedValues[] = []
-        if (showNewContacts) {
-          toShow.push(...normalizedContacts.filter((one) => !one.flags.seen))
-        }
-        if (showSubmittedContacts) {
-          toShow.push(...normalizedContacts.filter((one) => one.flags.imported))
-        }
-        if (showNonSubmittedContacts) {
-          toShow.push(
-            ...normalizedContacts.filter((one) => !one.flags.imported)
-          )
-        }
-
-        return toShow
-      })(),
-      (one) => one.computedValues.normalizedNumber
+  const selectedNonSubmittedNumbersAtom = atom(
+    new Set(
+      normalizedContacts
+        .filter((one) => !one.flags.imported && one.flags.seen)
+        .map((one) => one.computedValues.normalizedNumber)
     )
+  )
 
-    const result = matchSorter(contactsToShow, searchText, {
-      keys: ['info.name', 'info.numberToDisplay'],
-    })
-    return result
+  const selectedNewNumbersAtom = atom(
+    new Set(
+      normalizedContacts
+        .filter((one) => !one.flags.seen)
+        .map((one) => one.computedValues.normalizedNumber)
+    )
+  )
+
+  const _allSelectedNumbersAtom = atom((get) => {
+    return new Set([
+      ...get(selectedSubmittedNumbersAtom),
+      ...get(selectedNonSubmittedNumbersAtom),
+      ...get(selectedNewNumbersAtom),
+    ])
   })
 
-  const contactsToDisplayAtomsAtom = splitAtom(contactsToDisplayAtom)
+  const selectedNumbersAtom = atom(
+    (get) => {
+      const contactsFilter = get(contactsFilterAtom)
+      return get(
+        contactsFilter === 'submitted'
+          ? selectedSubmittedNumbersAtom
+          : contactsFilter === 'nonSubmitted'
+          ? selectedNonSubmittedNumbersAtom
+          : selectedNewNumbersAtom
+      )
+    },
+    (get, set, numbers: SetStateAction<Set<E164PhoneNumber>>) => {
+      const contactsFilter = get(contactsFilterAtom)
 
-  const areThereAnyContactsToDisplayAtom = atom((get) => {
-    const contactsToDisplayAtom = get(contactsToDisplayAtomsAtom)
+      set(
+        contactsFilter === 'submitted'
+          ? selectedSubmittedNumbersAtom
+          : contactsFilter === 'nonSubmitted'
+          ? selectedNonSubmittedNumbersAtom
+          : selectedNewNumbersAtom,
+        numbers
+      )
+    }
+  )
 
-    return contactsToDisplayAtom.length !== 0
+  const areThereAnyContactsToDisplayForSelectedTabAtom = atom((get) => {
+    const contactsToDisplay = get(_contactsToDisplayAtom)
+
+    return contactsToDisplay.length !== 0
   })
 
   const selectAllAtom = atom(
     (get) => {
       const selectedNumbers = get(selectedNumbersAtom)
-      const contactsToDisplay = get(contactsToDisplayAtom)
+      const contactsToDisplay = get(_contactsToDisplayAtom)
       return !contactsToDisplay.some(
         (one) => !selectedNumbers.has(one.computedValues.normalizedNumber)
       )
     },
     (get, set, update: SetStateAction<boolean>) => {
-      const contactsToDisplay = get(contactsToDisplayAtom)
+      const contactsToDisplay = get(_contactsToDisplayAtom)
       const shouldSelectAll = getValueFromSetStateActionOfAtom(update)(() =>
         get(selectAllAtom)
       )
       set(selectedNumbersAtom, (value) => {
-        const newValue = new Set(value)
+        const newValue = new Set<E164PhoneNumber>(value)
         contactsToDisplay
           .map((one) => one.computedValues.normalizedNumber)
           .forEach(shouldSelectAll ? newValue.add : newValue.delete, newValue)
@@ -141,7 +203,7 @@ export const contactSelectMolecule = molecule((_, getScope) => {
   ): WritableAtom<boolean, [SetStateAction<boolean>], void> {
     return atom(
       (get) =>
-        get(selectedNumbersAtom).has(
+        get(_allSelectedNumbersAtom).has(
           get(contactAtom).computedValues.normalizedNumber
         ),
       (get, set, number: SetStateAction<boolean>) => {
@@ -159,6 +221,59 @@ export const contactSelectMolecule = molecule((_, getScope) => {
       }
     )
   }
+
+  const submitSingleContactActionAtom = atom(
+    null,
+    (get, set, contact: StoredContactWithComputedValues) => {
+      const selectedSubmittedNumbers = Array.from(
+        get(selectedSubmittedNumbersAtom)
+      )
+
+      return pipe(
+        set(submitContactsActionAtom, {
+          numbersToImport: deduplicate([
+            ...selectedSubmittedNumbers,
+            contact.computedValues.normalizedNumber,
+          ]),
+          normalizeAndImportAll: false,
+        })
+      )
+    }
+  )
+
+  const submitAllSelectedContactsActionAtom = atom(
+    null,
+    (get, set): T.Task<boolean> => {
+      const {t} = get(translationAtom)
+      const selectedSubmittedNumbers = Array.from(
+        get(selectedSubmittedNumbersAtom)
+      )
+      const selectedNonSubmittedNumbers = Array.from(
+        get(selectedNonSubmittedNumbersAtom)
+      )
+      const selectedNewNumbers = Array.from(get(selectedNewNumbersAtom))
+      return pipe(
+        set(submitContactsActionAtom, {
+          numbersToImport: deduplicate([
+            ...selectedSubmittedNumbers,
+            ...selectedNonSubmittedNumbers,
+            ...selectedNewNumbers,
+          ]),
+          normalizeAndImportAll: false,
+        }),
+        T.map((result) => {
+          if (result) {
+            set(toastNotificationAtom, {
+              text: t('contacts.contactsSubmitted'),
+              icon: checkIconSvg,
+              hideAfterMillis: 2000,
+            })
+          }
+          return result
+        })
+      )
+    }
+  )
 
   const searchTextAsCustomContactAtom = atom((get) => {
     const searchText = get(searchTextAtom)
@@ -189,27 +304,6 @@ export const contactSelectMolecule = molecule((_, getScope) => {
           } satisfies StoredContactWithComputedValues)
         )
       )
-    )
-  })
-
-  const submitActionAtom = atom(null, (get, set): T.Task<boolean> => {
-    const {t} = get(translationAtom)
-    const selectedNumbers = Array.from(get(selectedNumbersAtom))
-    return pipe(
-      set(submitContactsActionAtom, {
-        numbersToImport: selectedNumbers,
-        normalizeAndImportAll: false,
-      }),
-      T.map((result) => {
-        if (result) {
-          set(toastNotificationAtom, {
-            text: t('contacts.contactsSubmitted'),
-            icon: checkIconSvg,
-            hideAfterMillis: 2000,
-          })
-        }
-        return result
-      })
     )
   })
 
@@ -250,13 +344,6 @@ export const contactSelectMolecule = molecule((_, getScope) => {
             {...contact, info: {...contact.info, name: customName}},
           ])
 
-          set(selectedNumbersAtom, (val) => {
-            const newVal = new Set(val)
-            newVal.add(contact.computedValues.normalizedNumber)
-            return newVal
-          })
-          set(searchTextAtom, '')
-
           return customName
         }),
         TE.bindTo('customName'),
@@ -269,8 +356,9 @@ export const contactSelectMolecule = molecule((_, getScope) => {
             TE.fromTask
           )
         ),
-        TE.chainFirstTaskK(() => set(submitActionAtom)),
+        TE.chainFirstTaskK(() => set(submitSingleContactActionAtom, contact)),
         TE.chainFirstW(({addToPhoneSuccess, customName}) => {
+          set(searchTextAtom, '')
           reloadContacts()
           return set(askAreYouSureActionAtom, {
             steps: [
@@ -297,17 +385,18 @@ export const contactSelectMolecule = molecule((_, getScope) => {
 
   return {
     selectAllAtom,
-    contactsToDisplayAtom,
-    contactsToDisplayAtomsAtom,
     searchTextAtom,
     createSelectContactAtom,
     createIsNewContactAtom,
     searchTextAsCustomContactAtom,
     addAndSelectContactWithUiFeedbackAtom,
-    submitActionAtom,
-    showSubmittedContactsAtom,
-    showNonSubmittedContactsAtom,
-    showNewContactsAtom,
-    areThereAnyContactsToDisplayAtom,
+    contactsFilterAtom,
+    areThereAnyContactsToDisplayForSelectedTabAtom,
+    selectedNumbersAtom,
+    submitAllSelectedContactsActionAtom,
+    normalizedContacts,
+    nonSubmittedContactsToDisplayAtomsAtom,
+    submittedContactsToDisplayAtomsAtom,
+    newContactsToDisplayAtomsAtom,
   }
 })

@@ -10,6 +10,7 @@ import {
   importedContactsAtom,
   lastImportOfContactsAtom,
   normalizedContactsAtom,
+  storedContactsAtom,
 } from '../../../state/contacts/atom/contactsStore'
 import loadContactsFromDeviceActionAtom from '../../../state/contacts/atom/loadContactsFromDeviceActionAtom'
 import normalizeStoredContactsActionAtom from '../../../state/contacts/atom/normalizeStoredContactsActionAtom'
@@ -19,7 +20,6 @@ import {deduplicateBy} from '../../../utils/deduplicate'
 import reportError from '../../../utils/reportError'
 import {contactsMigratedAtom} from '../atoms'
 import {type MigrationProgress} from '../types'
-import {storedContactsAtom} from './../../../state/contacts/atom/contactsStore'
 
 const ContactNormalized = z.object({
   name: z.string(),

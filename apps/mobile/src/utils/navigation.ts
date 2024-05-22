@@ -30,7 +30,7 @@ export function safeNavigateBackOutsideReact():
   }
 }
 
-export function getActiveRouteNameOusideOfReact(): string | undefined {
+export function getActiveRouteNameOutsideOfReact(): string | undefined {
   if (!navigationRef.isReady()) {
     console.warn(
       'Trying to get active route name outside of react tree, but navigation ref is not ready yet.'

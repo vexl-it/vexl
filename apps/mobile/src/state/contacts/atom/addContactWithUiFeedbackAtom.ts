@@ -9,7 +9,7 @@ import {loadingOverlayDisplayedAtom} from '../../../components/LoadingOverlayPro
 import userSvg from '../../../components/images/userSvg'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
 import {
-  getActiveRouteNameOusideOfReact,
+  getActiveRouteNameOutsideOfReact,
   safeNavigateBackOutsideReact,
 } from '../../../utils/navigation'
 import showErrorAlert from '../../../utils/showErrorAlert'
@@ -264,7 +264,7 @@ export const addContactWithUiFeedbackAtom = atom(
   ) => {
     // if we are on the SetContacts screen, we should navigate back to the previous screen
     // to avoid not showing added contact in the list
-    if (getActiveRouteNameOusideOfReact() === 'SetContacts') {
+    if (getActiveRouteNameOutsideOfReact() === 'SetContacts') {
       safeNavigateBackOutsideReact()
     }
     const importedContacts = get(importedContactsAtom)

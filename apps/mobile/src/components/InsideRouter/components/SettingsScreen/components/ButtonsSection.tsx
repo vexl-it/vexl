@@ -177,7 +177,7 @@ function ButtonsSection(): JSX.Element {
             icon: contactIconSvg,
             navigatesFurther: true,
             onPress: () => {
-              navigation.navigate('SetContacts', {})
+              navigation.navigate('SetContacts')
             },
             children: <ContactsImportedTitle />,
           },

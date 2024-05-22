@@ -22,6 +22,8 @@ function filterNotStoredContacts(
   }
 }
 
+export const loadingContactsFromDeviceAtom = atom<boolean>(false)
+
 const loadContactsFromDeviceActionAtom = atom(
   null,
   (get, set): T.Task<'success' | 'missingPermissions' | 'otherError'> => {
@@ -47,7 +49,6 @@ const loadContactsFromDeviceActionAtom = atom(
       }),
       TE.matchE(
         (e) => {
-          console.log(`Got error! ${e._tag}`)
           if (e._tag === 'PermissionsNotGranted') {
             return T.of('missingPermissions' as const)
           }
@@ -56,6 +57,7 @@ const loadContactsFromDeviceActionAtom = atom(
             new Error('Error while loading contacts from device'),
             {e}
           )
+
           return T.of('otherError')
         },
         () => {

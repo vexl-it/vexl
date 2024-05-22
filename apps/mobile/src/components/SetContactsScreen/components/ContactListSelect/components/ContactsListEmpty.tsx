@@ -1,14 +1,20 @@
 import {useFocusEffect} from '@react-navigation/native'
+import {useSetAtom} from 'jotai'
 import React, {useCallback, useState} from 'react'
 import {Linking} from 'react-native'
 import {Stack, Text} from 'tamagui'
 import {areContactsPermissionsGranted} from '../../../../../state/contacts/utils'
+import wasLastRouteBeforeRedirectOnContactsScreenMmkvAtom from '../../../../../state/lastRouteMmkvAtom'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import EmptyListWrapper from '../../../../EmptyListWrapper'
 
 function ContactsListEmpty(): JSX.Element {
   const {t} = useTranslation()
   const [permissionsGranted, setPermissionsGranted] = useState(false)
+
+  const setWasLastRouteBeforeRedirectOnContactsScreen = useSetAtom(
+    wasLastRouteBeforeRedirectOnContactsScreenMmkvAtom
+  )
 
   const checkPermissions = useCallback(async () => {
     setPermissionsGranted(await areContactsPermissionsGranted())
@@ -26,7 +32,11 @@ function ContactsListEmpty(): JSX.Element {
       onButtonPress={
         !permissionsGranted
           ? () => {
-              void Linking.openSettings()
+              void Linking.openSettings().then(() => {
+                setWasLastRouteBeforeRedirectOnContactsScreen({
+                  value: true,
+                })
+              })
             }
           : undefined
       }

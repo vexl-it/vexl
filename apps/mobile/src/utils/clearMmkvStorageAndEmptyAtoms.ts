@@ -10,6 +10,7 @@ import {
   feedbacksForClosedChatsStorageAtom,
   newOfferFeedbackDoneStorageAtom,
 } from '../state/feedback/atoms'
+import wasLastRouteBeforeRedirectOnContactsScreenMmkvAtom from '../state/lastRouteMmkvAtom'
 import {offersMissingOnServerStorageAtom} from '../state/marketplace/atoms/offersMissingOnServer'
 import {offersStateAtom} from '../state/marketplace/atoms/offersState'
 import {postLoginFinishedStorageAtom} from '../state/postLoginOnboarding'
@@ -76,6 +77,9 @@ export default function clearMmkvStorageAndEmptyAtoms(): void {
   })
 
   getDefaultStore().set(vexlCalendarStorageAtom, {id: undefined})
+  getDefaultStore().set(wasLastRouteBeforeRedirectOnContactsScreenMmkvAtom, {
+    value: false,
+  })
 
   storage._storage.clearAll()
 }

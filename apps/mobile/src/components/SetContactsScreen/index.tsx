@@ -1,9 +1,13 @@
-import {useCallback} from 'react'
-import {Stack} from 'tamagui'
+import fastDeepEqual from 'fast-deep-equal'
+import {useAtomValue, useSetAtom} from 'jotai'
+import {memo, useEffect} from 'react'
+import {ActivityIndicator} from 'react-native'
+import {Stack, getTokens} from 'tamagui'
 import {type RootStackScreenProps} from '../../navigationTypes'
+import {loadingContactsFromDeviceAtom} from '../../state/contacts/atom/loadContactsFromDeviceActionAtom'
+import wasLastRouteBeforeRedirectOnContactsScreenMmkvAtom from '../../state/lastRouteMmkvAtom'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../utils/useSafeGoBack'
-import Button from '../Button'
 import IconButton from '../IconButton'
 import KeyboardAvoidingView from '../KeyboardAvoidingView'
 import Screen from '../Screen'
@@ -13,29 +17,19 @@ import ContactsListSelect from './components/ContactListSelect'
 
 type Props = RootStackScreenProps<'SetContacts'>
 
-function SetContactsScreen({
-  route: {
-    params: {showNew},
-  },
-}: Props): JSX.Element {
+function SetContactsScreen({route}: Props): JSX.Element {
   const goBack = useSafeGoBack()
   const {t} = useTranslation()
-
-  const renderButton = useCallback(
-    ({onSubmit}: {onSubmit: () => void}) => {
-      return (
-        <Stack mt="$2">
-          <Button
-            variant="secondary"
-            onPress={onSubmit}
-            fullWidth
-            text={t('common.submit')}
-          />
-        </Stack>
-      )
-    },
-    [t]
+  const loadingContactsFromDevice = useAtomValue(loadingContactsFromDeviceAtom)
+  const setWasLastRouteBeforeRedirectOnContactsScreen = useSetAtom(
+    wasLastRouteBeforeRedirectOnContactsScreenMmkvAtom
   )
+
+  useEffect(() => {
+    setWasLastRouteBeforeRedirectOnContactsScreen({
+      value: false,
+    })
+  }, [setWasLastRouteBeforeRedirectOnContactsScreen])
 
   return (
     <>
@@ -45,12 +39,16 @@ function SetContactsScreen({
             <IconButton variant="dark" icon={closeSvg} onPress={goBack} />
           </ScreenTitle>
           <Stack f={1} mx="$2">
-            <ContactsListSelect
-              showFilter
-              showNewByDefault={showNew ?? false}
-              onContactsSubmitted={goBack}
-              renderFooter={renderButton}
-            />
+            {loadingContactsFromDevice ? (
+              <Stack f={1} ai="center" jc="center">
+                <ActivityIndicator
+                  size="large"
+                  color={getTokens().color.main.val}
+                />
+              </Stack>
+            ) : (
+              <ContactsListSelect />
+            )}
           </Stack>
         </KeyboardAvoidingView>
       </Screen>
@@ -58,4 +56,4 @@ function SetContactsScreen({
   )
 }
 
-export default SetContactsScreen
+export default memo(SetContactsScreen, fastDeepEqual)

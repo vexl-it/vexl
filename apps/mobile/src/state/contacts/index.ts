@@ -10,7 +10,9 @@ import {
   eraseImportedContacts,
   lastImportOfContactsAtom,
 } from './atom/contactsStore'
-import loadContactsFromDeviceActionAtom from './atom/loadContactsFromDeviceActionAtom'
+import loadContactsFromDeviceActionAtom, {
+  loadingContactsFromDeviceAtom,
+} from './atom/loadContactsFromDeviceActionAtom'
 import {submitContactsActionAtom} from './atom/submitContactsActionAtom'
 
 const TIME_SINCE_CONTACTS_IMPORT_THRESHOLD = 60
@@ -54,9 +56,13 @@ export function useRefreshContactsFromDeviceOnResume(): void {
           store.get(postLoginFinishedAtom) &&
           store.get(contactsMigratedAtom) &&
           state === 'active'
-        )
+        ) {
           void pipe(
-            store.set(loadContactsFromDeviceActionAtom),
+            T.Do,
+            T.map(() => {
+              store.set(loadingContactsFromDeviceAtom, true)
+            }),
+            T.chain(() => store.set(loadContactsFromDeviceActionAtom)),
             T.chain((result) => {
               if (
                 result === 'missingPermissions' &&
@@ -69,8 +75,12 @@ export function useRefreshContactsFromDeviceOnResume(): void {
                 })
               }
               return T.Do
+            }),
+            T.map(() => {
+              store.set(loadingContactsFromDeviceAtom, false)
             })
           )()
+        }
       },
       [store]
     )

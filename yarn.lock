@@ -7786,9 +7786,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-navigation/material-top-tabs@npm:^6.6.2":
-  version: 6.6.2
-  resolution: "@react-navigation/material-top-tabs@npm:6.6.2"
+"@react-navigation/material-top-tabs@npm:^6.6.13":
+  version: 6.6.13
+  resolution: "@react-navigation/material-top-tabs@npm:6.6.13"
   dependencies:
     color: ^4.2.3
     warn-once: ^0.1.0
@@ -7798,7 +7798,7 @@ __metadata:
     react-native: "*"
     react-native-pager-view: ">= 4.0.0"
     react-native-tab-view: ">= 3.0.0"
-  checksum: 674a46d486b071e84f4b96164b7e23b6a354816b940e96b9107ee89531a748318f52454292f84d1fc56106ff48d4d20576c6fc882631dbc0a63f714091ecee91
+  checksum: a393645ee21d08487c94b11f3df79abd5b3302d15a6101c3f910f90abcfe40cdc68cbfb792bcdff0818e4ba898153c824d641c6121fdd373b0fe56973d11f16a
   languageName: node
   linkType: hard
 
@@ -11638,7 +11638,7 @@ __metadata:
     "@react-native-masked-view/masked-view": 0.3.0
     "@react-native-picker/picker": 2.6.1
     "@react-navigation/bottom-tabs": ^6.5.7
-    "@react-navigation/material-top-tabs": ^6.6.2
+    "@react-navigation/material-top-tabs": ^6.6.13
     "@react-navigation/native": ^6.0.16
     "@react-navigation/native-stack": ^6.9.4
     "@react-spring/native": ^9.6.1

@@ -1,6 +1,7 @@
+import {useFocusEffect} from '@react-navigation/native'
 import {useSetAtom} from 'jotai'
-import {useEffect, useState} from 'react'
-import {ActivityIndicator} from 'react-native'
+import {useCallback, useEffect, useState} from 'react'
+import {ActivityIndicator, AppState} from 'react-native'
 import {Stack, Text, getTokens} from 'tamagui'
 import normalizeStoredContactsActionAtom from '../../state/contacts/atom/normalizeStoredContactsActionAtom'
 import {useTranslation} from '../../utils/localization/I18nProvider'
@@ -18,7 +19,7 @@ export default function NormalizeContactsWithLoadingScreen({
   const normalizeStoredContacts = useSetAtom(normalizeStoredContactsActionAtom)
   const {t} = useTranslation()
 
-  useEffect(() => {
+  const normalize = useCallback(() => {
     void normalizeStoredContacts({
       onProgress: ({total, percentDone}) => {
         setState({
@@ -29,7 +30,19 @@ export default function NormalizeContactsWithLoadingScreen({
     })().then(() => {
       setState({done: true})
     })
-  }, [setState, normalizeStoredContacts])
+  }, [normalizeStoredContacts])
+
+  useEffect(() => {
+    const listener = AppState.addEventListener('change', (event) => {
+      if (event === 'active') normalize()
+    })
+
+    return () => {
+      listener.remove()
+    }
+  }, [normalize])
+
+  useFocusEffect(normalize)
 
   if (!state.done) {
     return (

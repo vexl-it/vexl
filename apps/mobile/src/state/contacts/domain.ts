@@ -70,3 +70,7 @@ export function hasComputedValues(
 ): contact is StoredContactWithComputedValues {
   return !!contact.computedValues
 }
+
+export const ContactsFilter = z.enum(['submitted', 'nonSubmitted', 'new'])
+
+export type ContactsFilter = z.TypeOf<typeof ContactsFilter>

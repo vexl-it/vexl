@@ -7,6 +7,7 @@ import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
 import {flow} from 'fp-ts/lib/function'
 import {atom} from 'jotai'
 import * as O from 'optics-ts'
+import {type MyFcmTokenInfo} from '../../../../../../packages/domain/src/general/messaging'
 import {createEmptyTradeChecklistInState} from '../../tradeChecklist/domain'
 import {
   type ChatMessageWithState,
@@ -14,7 +15,6 @@ import {
   type MessagingState,
 } from '../domain'
 import addMessageToChat from '../utils/addMessageToChat'
-import {type MyFcmTokenInfo} from './../../../../../../packages/domain/src/general/messaging'
 import focusChatForTheirOfferAtom from './focusChatForTheirOfferAtom'
 import {updateMyFcmTokenInfoInChat} from './generateMyFcmTokenInfoActionAtom'
 import messagingStateAtom from './messagingStateAtom'

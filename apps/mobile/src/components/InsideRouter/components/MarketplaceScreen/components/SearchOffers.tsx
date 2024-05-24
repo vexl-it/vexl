@@ -43,9 +43,13 @@ function SearchOffers({postSearchActions}: Props): JSX.Element {
 
   return (
     <Input
+      showClearButton={!!searchText}
       placeholder={t('filterOffers.searchOffers')}
       value={searchText}
       onChangeText={onInputValueChange}
+      onClearPress={() => {
+        onInputValueChange('')
+      }}
       icon={magnifyingGlass}
       size="medium"
       variant="greyOnBlack"

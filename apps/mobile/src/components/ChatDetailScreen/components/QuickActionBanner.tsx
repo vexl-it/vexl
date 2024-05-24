@@ -8,7 +8,9 @@ import {addContactWithUiFeedbackAtom} from '../../../state/contacts/atom/addCont
 import {hashPhoneNumber} from '../../../state/contacts/utils'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import reportError from '../../../utils/reportError'
+import useIsKeyboardShown from '../../../utils/useIsKeyboardShown'
 import useResetNavigationToMessagingScreen from '../../../utils/useResetNavigationToMessagingScreen'
+import useWillKeyboardShow from '../../../utils/useWillKeyboardShow'
 import Button from '../../Button'
 import IconButton from '../../IconButton'
 import {revealContactFromQuickActionBannerAtom} from '../../TradeChecklistFlow/atoms/revealContactAtoms'
@@ -17,6 +19,8 @@ import UserAvatar from '../../UserAvatar'
 import {chatMolecule} from '../atoms'
 import {useHideActionForMessage} from '../atoms/createHideActionForMessageMmkvAtom'
 import phoneSvg from '../images/phoneSvg'
+
+export const QUICK_ACTION_BANNER_HEIGHT_WITH_PADDING = 70
 
 function QuickActionBannerUi({
   leftElement,
@@ -41,9 +45,9 @@ function QuickActionBannerUi({
 
   return (
     <XStack
+      h={QUICK_ACTION_BANNER_HEIGHT_WITH_PADDING}
       space="$2"
       bc="$white"
-      py="$3"
       px="$4"
       ai="center"
       jc="space-between"
@@ -83,6 +87,8 @@ function QuickActionBannerUi({
 function QuickActionBanner(): JSX.Element | null {
   const {t} = useTranslation()
   const resetNavigationToMessagingScreen = useResetNavigationToMessagingScreen()
+  const isKeyboardShown = useIsKeyboardShown()
+  const willKeyboardShow = useWillKeyboardShow()
 
   const {
     lastMessageAtom,
@@ -98,6 +104,12 @@ function QuickActionBanner(): JSX.Element | null {
     contactRevealTriggeredFromTradeChecklistAtom,
     publicKeyPemBase64Atom,
     chatIdAtom,
+    isRevealIdentityMessageHiddenAtom,
+    isContactRevealMessageHiddenAtom,
+    isContactAlreadyInContactsListAtom,
+    identityRevealRequestMessageIdAtom,
+    contactRevealRequestMessageIdAtom,
+    contactRevealApproveMessageIdAtom,
   } = useMolecule(chatMolecule)
 
   const lastMessage = useAtomValue(lastMessageAtom)
@@ -124,14 +136,43 @@ function QuickActionBanner(): JSX.Element | null {
   const revealContactFromQuickActionBanner = useSetAtom(
     revealContactFromQuickActionBannerAtom
   )
+  const isRevealIdentityMessageHidden = useAtomValue(
+    isRevealIdentityMessageHiddenAtom
+  )
+  const isContactRevealMessageHidden = useAtomValue(
+    isContactRevealMessageHiddenAtom
+  )
+  const isContactAlreadyInContactsList = useAtomValue(
+    isContactAlreadyInContactsListAtom
+  )
+  const identityRevealRequestMessageId = useAtomValue(
+    identityRevealRequestMessageIdAtom
+  )
+  const contactRevealRequestMessageId = useAtomValue(
+    contactRevealRequestMessageIdAtom
+  )
+  const contactRevealApproveMessageId = useAtomValue(
+    contactRevealApproveMessageIdAtom
+  )
 
   const onBackToRequestPressed = useCallback(() => {
     setShowHistory(false)
   }, [setShowHistory])
 
-  const [isHidden, hide] = useHideActionForMessage(lastMessage?.message.uuid)
+  const [
+    identityRevealRequestedBannerHidden,
+    setIdentityRevealRequestedBannerHidden,
+  ] = useHideActionForMessage(identityRevealRequestMessageId)
+  const [
+    contactRevealRequestedBannerHidden,
+    setContactRevealRequestedBannerHidden,
+  ] = useHideActionForMessage(contactRevealRequestMessageId)
+  const [
+    contactRevealApprovedBannerHidden,
+    setContactRevealApprovedBannerHidden,
+  ] = useHideActionForMessage(contactRevealApproveMessageId)
 
-  if (!lastMessage || isHidden) return null
+  if (!lastMessage) return null
 
   if (requestState === 'requested') {
     return (
@@ -236,7 +277,12 @@ function QuickActionBanner(): JSX.Element | null {
     )
   }
 
-  if (identityRevealStatus === 'theyAsked') {
+  if (
+    identityRevealStatus === 'theyAsked' &&
+    isRevealIdentityMessageHidden &&
+    !willKeyboardShow &&
+    !isKeyboardShown
+  ) {
     return (
       <QuickActionBannerUi
         topText={t('messages.identityRevealRequest')}
@@ -257,7 +303,10 @@ function QuickActionBanner(): JSX.Element | null {
     )
   }
 
-  if (identityRevealStatus === 'iAsked') {
+  if (
+    !identityRevealRequestedBannerHidden &&
+    identityRevealStatus === 'iAsked'
+  ) {
     return (
       <QuickActionBannerUi
         topText={t('messages.identitySend.title')}
@@ -268,13 +317,13 @@ function QuickActionBanner(): JSX.Element | null {
           <UserAvatar width={48} height={48} userImage={otherSideData.image} />
         }
         onButtonPress={() => {
-          hide()
+          setIdentityRevealRequestedBannerHidden()
         }}
       />
     )
   }
 
-  if (contactRevealStatus === 'iAsked') {
+  if (!contactRevealRequestedBannerHidden && contactRevealStatus === 'iAsked') {
     return (
       <QuickActionBannerUi
         topText={t('messages.contactRevealSent.title')}
@@ -285,13 +334,18 @@ function QuickActionBanner(): JSX.Element | null {
           <UserAvatar width={48} height={48} userImage={otherSideData.image} />
         }
         onButtonPress={() => {
-          hide()
+          setContactRevealRequestedBannerHidden()
         }}
       />
     )
   }
 
-  if (contactRevealStatus === 'theyAsked') {
+  if (
+    contactRevealStatus === 'theyAsked' &&
+    isContactRevealMessageHidden &&
+    !willKeyboardShow &&
+    !isKeyboardShown
+  ) {
     return (
       <QuickActionBannerUi
         topText={t('messages.contactRevealRequest')}
@@ -312,7 +366,13 @@ function QuickActionBanner(): JSX.Element | null {
     )
   }
 
-  if (contactRevealStatus === 'shared') {
+  if (
+    !contactRevealApprovedBannerHidden &&
+    contactRevealStatus === 'shared' &&
+    !isContactAlreadyInContactsList &&
+    !willKeyboardShow &&
+    !isKeyboardShown
+  ) {
     return (
       <QuickActionBannerUi
         topText={t('messages.addUserToYourContacts', {
@@ -352,7 +412,7 @@ function QuickActionBanner(): JSX.Element | null {
               })
             }
           } finally {
-            hide()
+            setContactRevealApprovedBannerHidden()
           }
         }}
       />

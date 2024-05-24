@@ -3,6 +3,7 @@ import {useAtomValue, useSetAtom} from 'jotai'
 import {useCallback} from 'react'
 import {fetchAndStoreMessagesForInboxAtom} from '../../../state/chat/atoms/fetchNewMessagesActionAtom'
 import {useAppState} from '../../../utils/useAppState'
+import KeyboardAvoidingView from '../../KeyboardAvoidingView'
 import Screen from '../../Screen'
 import {chatMolecule} from '../atoms'
 import ChatInfoModal from './ChatInfoModal'
@@ -28,7 +29,13 @@ export default function MessagesListOrApprovalPreview(): JSX.Element {
   )
 
   const toRender =
-    chatUiMode === 'approval' ? <RequestScreen /> : <MessagesScreen />
+    chatUiMode === 'approval' ? (
+      <RequestScreen />
+    ) : (
+      <KeyboardAvoidingView>
+        <MessagesScreen />
+      </KeyboardAvoidingView>
+    )
 
   return (
     <>

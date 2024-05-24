@@ -13,7 +13,6 @@ import useSafeGoBack from '../../../utils/useSafeGoBack'
 import IconButton from '../../IconButton'
 import identityIconSvg from '../../images/identityIconSvg'
 import {chatMolecule} from '../atoms'
-import binSvg from '../images/binSvg'
 import phoneSvg from '../images/phoneSvg'
 import OtherSideNamePhotoAndInfo from './OtherSideNamePhotoAndInfo'
 
@@ -109,7 +108,7 @@ function Button({type}: {type: ButtonType}): JSX.Element | null {
   if (type === 'deleteChat')
     return (
       <IconButton
-        icon={binSvg}
+        icon={require('./images/trashIconRed.png')}
         variant="negative"
         onPress={() => {
           Keyboard.dismiss()

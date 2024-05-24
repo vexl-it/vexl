@@ -1,12 +1,15 @@
 import {useMolecule} from 'bunshi/dist/react'
-import {useAtomValue} from 'jotai'
-import React from 'react'
+import {useAtomValue, useSetAtom} from 'jotai'
+import React, {useMemo} from 'react'
 import {Image, Stack} from 'tamagui'
 import BlockIconSvg from '../../../images/blockIconSvg'
+import {generateOtherSideSeed} from '../../../state/chat/atoms/selectOtherSideDataAtom'
 import {type ChatMessageWithState} from '../../../state/chat/domain'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
-import resolveLocalUri from '../../../utils/resolveLocalUri'
+import {randomNumberFromSeed} from '../../../utils/randomNumber'
+import avatarsSvg from '../../AnonymousAvatar/images/avatarsSvg'
 import SvgImage from '../../Image'
+import {revealIdentityFromQuickActionBannerAtom} from '../../TradeChecklistFlow/atoms/revealIdentityAtoms'
 import UserAvatar from '../../UserAvatar'
 import {chatMolecule} from '../atoms'
 import BigIconMessage from './BigIconMessage'
@@ -22,71 +25,90 @@ function IdentityRevealMessageItem({
   direction: 'incoming' | 'outgoing'
 }): JSX.Element | null {
   const {t} = useTranslation()
-  const {otherSideDataAtom, identityRevealStatusAtom} =
-    useMolecule(chatMolecule)
-  const {image, userName} = useAtomValue(otherSideDataAtom)
+  const {
+    chatAtom,
+    identityRevealTriggeredFromTradeChecklistAtom,
+    identityRevealStatusAtom,
+    otherSideDataAtom,
+    revealIdentityWithUiFeedbackAtom,
+    publicKeyPemBase64Atom,
+    chatIdAtom,
+  } = useMolecule(chatMolecule)
+  const {image, userName, partialPhoneNumber} = useAtomValue(otherSideDataAtom)
+  const chat = useAtomValue(chatAtom)
+  const chatId = useAtomValue(chatIdAtom)
+  const inboxKey = useAtomValue(publicKeyPemBase64Atom)
   const identityRevealStatus = useAtomValue(identityRevealStatusAtom)
+  const revealIdentity = useSetAtom(revealIdentityWithUiFeedbackAtom)
+  const identityRevealTriggeredFromTradeChecklist = useAtomValue(
+    identityRevealTriggeredFromTradeChecklistAtom
+  )
+  const revealIdentityFromQuickActionBanner = useSetAtom(
+    revealIdentityFromQuickActionBannerAtom
+  )
+
+  const anonymousImage = useMemo(
+    () =>
+      avatarsSvg[
+        randomNumberFromSeed(
+          0,
+          avatarsSvg.length - 1,
+          generateOtherSideSeed(chat)
+        )
+      ],
+    [chat]
+  )
 
   if (
-    identityRevealStatus === 'denied' &&
-    message.message.messageType !== 'DISAPPROVE_REVEAL'
+    (message.message.messageType === 'REQUEST_REVEAL' ||
+      ((message.state === 'sent' || message.state === 'received') &&
+        message.message.tradeChecklistUpdate?.identity?.status ===
+          'REQUEST_REVEAL')) &&
+    identityRevealStatus !== 'notStarted'
   ) {
-    return null
-  }
-
-  if (
-    message.message.messageType === 'REQUEST_REVEAL' &&
-    (identityRevealStatus === 'iAsked' ||
-      identityRevealStatus === 'theyAsked' ||
-      (identityRevealStatus === 'shared' && message.state === 'received'))
-  ) {
-    if (identityRevealStatus === 'shared') {
-      return (
-        <BigIconMessage
-          isLatest={isLatest}
-          smallerText={t('messages.identityRevealed')}
-          biggerText={message.message.deanonymizedUser?.name ?? ''}
-          bottomText={message.message.deanonymizedUser?.partialPhoneNumber}
-          icon={
-            direction === 'incoming' && message.message.image ? (
-              <UserAvatarTouchableWrapper
-                userImageUri={resolveLocalUri(message.message.image)}
-              >
-                <Image
-                  height={80}
-                  width={80}
-                  borderRadius="$8"
-                  source={{uri: resolveLocalUri(message.message.image)}}
-                />
-              </UserAvatarTouchableWrapper>
-            ) : (
-              <UserAvatar height={80} width={80} userImage={image} />
-            )
-          }
-        />
-      )
-    }
-
     return (
       <BigIconMessage
         isLatest={isLatest}
         smallerText={t('messages.identityRevealRequest')}
         biggerText={t('messages.letsRevealIdentities')}
-        icon={<UserAvatar height={80} width={80} userImage={image} />}
+        icon={
+          <UserAvatar
+            height={80}
+            width={80}
+            // @ts-expect-error TODO: typescript error
+            userImage={{type: 'svgXml', svgXml: anonymousImage}}
+          />
+        }
+        buttonText={
+          identityRevealStatus === 'theyAsked' ? t('common.respond') : undefined
+        }
+        onButtonPress={
+          identityRevealStatus === 'theyAsked'
+            ? () => {
+                if (identityRevealTriggeredFromTradeChecklist) {
+                  void revealIdentityFromQuickActionBanner({chatId, inboxKey})
+                } else {
+                  void revealIdentity('RESPOND_REVEAL')
+                }
+              }
+            : undefined
+        }
       />
     )
   }
 
   if (
-    message.message.messageType === 'APPROVE_REVEAL' &&
-    message.state === 'received'
+    (message.state === 'received' || message.state === 'sent') &&
+    (message.message.messageType === 'APPROVE_REVEAL' ||
+      message.message.tradeChecklistUpdate?.identity?.status ===
+        'APPROVE_REVEAL')
   ) {
     return (
       <BigIconMessage
         isLatest={isLatest}
         smallerText={t('messages.identityRevealed')}
-        biggerText={message.message.deanonymizedUser?.name ?? ''}
-        bottomText={message.message.deanonymizedUser?.partialPhoneNumber}
+        biggerText={userName}
+        bottomText={partialPhoneNumber}
         icon={
           direction === 'incoming' && message.message.image ? (
             <UserAvatarTouchableWrapper userImageUri={message.message.image}>
@@ -105,7 +127,12 @@ function IdentityRevealMessageItem({
     )
   }
 
-  if (message.message.messageType === 'DISAPPROVE_REVEAL') {
+  if (
+    message.message.messageType === 'DISAPPROVE_REVEAL' ||
+    ((message.state === 'sent' || message.state === 'received') &&
+      message.message.tradeChecklistUpdate?.identity?.status ===
+        'DISAPPROVE_REVEAL')
+  ) {
     return (
       <BigIconMessage
         isLatest={isLatest}

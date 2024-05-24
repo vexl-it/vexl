@@ -3,6 +3,7 @@ import {type SvgString} from '@vexl-next/domain/src/utility/SvgString.brand'
 import avatarsSvg from '../../../components/AnonymousAvatar/images/avatarsSvg'
 import {randomNumberFromSeed} from '../../../utils/randomNumber'
 import resolveLocalUri from '../../../utils/resolveLocalUri'
+import {generateOtherSideSeed} from '../atoms/selectOtherSideDataAtom'
 import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
 
 function setRealLifeInfo(
@@ -39,7 +40,7 @@ export default function processIdentityRevealMessageIfAny(
               randomNumberFromSeed(
                 0,
                 avatarsSvg.length - 1,
-                identityRevealMessage.message.deanonymizedUser.name
+                generateOtherSideSeed(chat.chat)
               )
             ] as SvgString,
           },

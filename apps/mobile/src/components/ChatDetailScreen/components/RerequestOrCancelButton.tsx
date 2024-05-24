@@ -7,7 +7,7 @@ import useSafeGoBack from '../../../utils/useSafeGoBack'
 import Button from '../../Button'
 import {chatMolecule} from '../atoms'
 
-function RerequestButtonOrMessage({
+function RerequestOrCancelButton({
   onRerequestPressed,
   rerequestButtonDisabled,
 }: {
@@ -48,4 +48,4 @@ function RerequestButtonOrMessage({
   )
 }
 
-export default RerequestButtonOrMessage
+export default RerequestOrCancelButton

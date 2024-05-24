@@ -1,11 +1,15 @@
 import {type UriString} from '@vexl-next/domain/src/utility/UriString.brand'
-import {useAtomValue, useSetAtom, type PrimitiveAtom} from 'jotai'
-import {TouchableWithoutFeedback, View, useWindowDimensions} from 'react-native'
-import {Image, Stack} from 'tamagui'
+import {useAtom, useSetAtom, type PrimitiveAtom} from 'jotai'
+import {
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  useWindowDimensions,
+} from 'react-native'
+import {Image, Stack, getTokens} from 'tamagui'
 import {selectImageActionAtom} from '../state/selectImageActionAtom'
 import SvgImage from './Image'
-import MiniCameraSvg from './LoginFlow/components/PhotoScreen/images/miniCameraSvg'
 import selectIconSvg from './LoginFlow/components/PhotoScreen/images/selectIconSvg'
+import closeSvg from './images/closeSvg'
 
 interface Props {
   selectedImageUriAtom: PrimitiveAtom<UriString | undefined>
@@ -13,7 +17,7 @@ interface Props {
 
 function SelectProfilePicture({selectedImageUriAtom}: Props): JSX.Element {
   const selectImage = useSetAtom(selectImageActionAtom)
-  const selectedImageUri = useAtomValue(selectedImageUriAtom)
+  const [selectedImageUri, setSelectedImageUri] = useAtom(selectedImageUriAtom)
   const {width} = useWindowDimensions()
 
   return (
@@ -23,21 +27,41 @@ function SelectProfilePicture({selectedImageUriAtom}: Props): JSX.Element {
       }}
     >
       {selectedImageUri ? (
-        <View>
-          <Stack>
-            <Image
-              height={width / 2}
-              width={width / 2}
-              br="$10"
-              source={{
-                uri: selectedImageUri,
-              }}
-            />
-            <Stack pos="absolute" t="$-4" r="$-4" width={32} h={32} zi="$1">
-              <SvgImage source={MiniCameraSvg} />
+        <Stack>
+          <Image
+            height={width / 2}
+            width={width / 2}
+            br="$10"
+            source={{
+              uri: selectedImageUri,
+            }}
+          />
+          <Stack
+            pos="absolute"
+            t="$-3"
+            r="$-3"
+            width={32}
+            h={32}
+            zi="$1"
+            br={32}
+            bc="$main"
+          >
+            <Stack f={1} ai="center" jc="center">
+              <TouchableOpacity
+                onPress={() => {
+                  setSelectedImageUri(undefined)
+                }}
+              >
+                <SvgImage
+                  height={20}
+                  width={20}
+                  stroke={getTokens().color.blackAccent1.val}
+                  source={closeSvg}
+                />
+              </TouchableOpacity>
             </Stack>
           </Stack>
-        </View>
+        </Stack>
       ) : (
         <Stack w={128} h={128}>
           <SvgImage source={selectIconSvg} />

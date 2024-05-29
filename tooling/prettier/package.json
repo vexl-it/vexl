@@ -9,11 +9,13 @@
   },
   "dependencies": {
     "prettier": "^3.0.3",
-    "prettier-plugin-organize-imports": "^3.2.4"
+    "prettier-plugin-embed": "^0.4.15",
+    "prettier-plugin-organize-imports": "^3.2.4",
+    "prettier-plugin-sql": "^0.18.0"
   },
   "devDependencies": {
     "@vexl-next/tsconfig": "0.0.0",
-    "typescript": "^5.3.0"
+    "typescript": "^5.4.2"
   },
   "prettier": "./index.mjs"
 }

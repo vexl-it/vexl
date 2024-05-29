@@ -20,7 +20,7 @@
     "rimraf": "^4.4.0",
     "ts-jest": "^29.0.5",
     "ts-node": "^10.9.1",
-    "typescript": "^5.3.0"
+    "typescript": "^5.4.2"
   },
   "dependencies": {
     "@effect/schema": "^0.66.1",

@@ -16,8 +16,9 @@
     "turbo:check-code": "yarn turbo format lint typecheck",
     "utils:sync-translations": "yarn workspace @vexl-next/localizations utils:sync",
     "utils:add-translation": "yarn workspace @vexl-next/localizations utils:add",
-    "location-service:build-docker-image": "./scripts/build-image-location-service.sh",
-    "notification-service:build-docker-image": "./scripts/build-image-notification-service.sh",
+    "notification-service:build-docker-image": "./scripts/build-app-docker-image.sh notification-service",
+    "location-service:build-docker-image": "./scripts/build-app-docker-image.sh location-service",
+    "dashboard-app:build-docker-image": "./scripts/build-app-docker-image.sh dashboard-app",
     "postinstall": "manypkg check"
   },
   "private": true,

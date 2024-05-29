@@ -10,14 +10,14 @@ import {
 } from '@vexl-next/domain/src/general/offers'
 import {type ContactPrivateApi} from '@vexl-next/rest-api/src/services/contact'
 import {type OfferPrivateApi} from '@vexl-next/rest-api/src/services/offer'
-import {pipe} from 'fp-ts/function'
 import * as TE from 'fp-ts/TaskEither'
+import {pipe} from 'fp-ts/function'
 import {type ExtractLeftTE} from '../utils/ExtractLeft'
+import {type OfferEncryptionProgress} from './OfferEncryptionProgress'
 import decryptOffer, {
   type ErrorDecryptingOffer,
   type NonCompatibleOfferVersionError,
 } from './decryptOffer'
-import {type OfferEncryptionProgress} from './OfferEncryptionProgress'
 import {type ErrorConstructingPrivatePayloads} from './utils/constructPrivatePayloads'
 import encryptOfferPublicPayload, {
   type ErrorEncryptingPublicPart,

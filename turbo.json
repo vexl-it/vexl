@@ -13,11 +13,11 @@
       "outputMode": "new-only"
     },
     "lint": {
-      "dependsOn": ["^topo", "build"],
+      "dependsOn": ["^topo"],
       "outputs": ["node_modules/.cache/.eslintcache"]
     },
     "typecheck": {
-      "dependsOn": ["^topo", "build"],
+      "dependsOn": ["^topo"],
       "outputs": ["node_modules/.cache/tsbuildinfo.json"]
     },
     "clean": {

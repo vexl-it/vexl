@@ -1,6 +1,6 @@
 import {type CreateAxiosDefaults} from 'axios'
-import {pipe} from 'fp-ts/function'
 import * as TE from 'fp-ts/TaskEither'
+import {pipe} from 'fp-ts/function'
 import urlJoin from 'url-join'
 import {type PlatformName} from '../../PlatformName'
 import {type ServiceUrl} from '../../ServiceUrl.brand'
@@ -21,8 +21,8 @@ import {
   CreateChallengeResponse,
   CreateChallengesResponse,
   CreateInboxResponse,
-  DeleteInboxesResponse,
   DeleteInboxResponse,
+  DeleteInboxesResponse,
   DeletePulledMessagesResponse,
   LeaveChatResponse,
   RequestApprovalResponse,
@@ -36,8 +36,8 @@ import {
   type CreateChallengeRequest,
   type CreateChallengesRequest,
   type CreateInboxRequest,
-  type DeleteInboxesRequest,
   type DeleteInboxRequest,
+  type DeleteInboxesRequest,
   type DeletePulledMessagesRequest,
   type LeaveChatRequest,
   type OtherSideAccountDeleted,
@@ -47,9 +47,9 @@ import {
   type RequestCancelledError,
   type RequestNotFoundError,
   type RetrieveMessagesRequest,
-  type SenderUserInboxDoesNotExistError,
   type SendMessageRequest,
   type SendMessagesRequest,
+  type SenderUserInboxDoesNotExistError,
   type UpdateInboxRequest,
 } from './contracts'
 import {addChallengeToRequest} from './utils'

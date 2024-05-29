@@ -1,6 +1,6 @@
 import {type CreateAxiosDefaults} from 'axios'
-import {pipe} from 'fp-ts/function'
 import * as TE from 'fp-ts/TaskEither'
+import {pipe} from 'fp-ts/function'
 import urlJoin from 'url-join'
 import {type PlatformName} from '../../PlatformName'
 import {type ServiceUrl} from '../../ServiceUrl.brand'

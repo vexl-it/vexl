@@ -1,0 +1,45 @@
+import {Schema} from '@effect/schema'
+import {type ParseError} from '@effect/schema/ParseResult'
+import {type SqlError} from '@effect/sql/Error'
+import {Effect, Option} from 'effect'
+import {ContactConnectionId} from './ContactConnectionId'
+import {PgContactClient} from './layer'
+
+const decodeNumberOfUsersResult = Schema.decodeUnknown(
+  Schema.NonEmptyArray(
+    Schema.Struct({
+      count: Schema.compose(Schema.NumberFromString, Schema.Number),
+      maxId: Schema.compose(Schema.NumberFromString, ContactConnectionId),
+    })
+  )
+)
+export const queryNumberOfUsers = (
+  lastIdFetched: Option.Option<ContactConnectionId>
+): Effect.Effect<
+  {count: number; maxId: ContactConnectionId},
+  SqlError | ParseError,
+  PgContactClient
+> =>
+  PgContactClient.pipe(
+    Effect.flatMap(
+      (sql) => sql`
+        SELECT
+          count(*) AS "count",
+          max(a.id) "maxId"
+        FROM
+          (
+            SELECT
+              COUNT(*),
+              max(id) AS "id"
+            FROM
+              user_contact
+            WHERE
+              id > ${Option.getOrElse(lastIdFetched, () => 0)}
+            GROUP BY
+              hash_from
+          ) a
+      `
+    ),
+    Effect.flatMap(decodeNumberOfUsersResult),
+    Effect.map(([first]) => first)
+  )

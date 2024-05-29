@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "noImplicitAny": true,
+    "skipLibCheck": true,
+    "checkJs": false,
+    "allowJs": true,
+    "noEmit": true
+  },
+  "ts-node": {
+    "esm": true,
+    "experimentalSpecifierResolution": "node"
+  },
+  "lib": ["esnext"],
+  "exclude": ["vite.config.ts"],
+  "include": ["**.ts", "**.js"],
+  "references": [
+    {"path": "./server/tsconfig.json"},
+    {"path": "./vite.tsconfig.json"},
+    {"path": "./client/tsconfig.json"},
+    {"path": "./common/tsconfig.json"}
+  ]
+}

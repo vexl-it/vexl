@@ -1,17 +1,25 @@
 import {NodeHttpServer} from '@effect/platform-node'
 import * as Http from '@effect/platform/HttpServer'
-import {Effect, Layer} from 'effect'
+import {Config, Effect, Layer} from 'effect'
+import {type ConfigError} from 'effect/ConfigError'
 
 import {createServer} from 'http'
 
 export function makeHealthServerLive({
   port,
 }: {
-  port: number
-}): Layer.Layer<never, Http.error.ServeError, never> {
-  const HealtServerLive = NodeHttpServer.server.layer(() => createServer(), {
-    port,
-  })
+  port: number | Config.Config<number>
+}): Layer.Layer<never, Http.error.ServeError | ConfigError, never> {
+  const portEffect = Config.isConfig(port) ? port : Effect.succeed(port)
+
+  const HealtServerLive = portEffect.pipe(
+    Effect.map((port) =>
+      NodeHttpServer.server.layer(() => createServer(), {
+        port,
+      })
+    ),
+    Layer.unwrapEffect
+  )
 
   const HealthHttpLive = Http.router.empty.pipe(
     Http.router.get(
@@ -23,8 +31,12 @@ export function makeHealthServerLive({
   const HealthAppLive = HealthHttpLive.pipe(
     Http.server.serve(),
     Layer.provide(HealtServerLive),
-    Layer.provide(
-      Layer.effectDiscard(Effect.log(`Health server running on port ${port}`))
+    Layer.tap(() =>
+      portEffect.pipe(
+        Effect.flatMap((port) =>
+          Effect.log(`Health server running on port ${port}`)
+        )
+      )
     )
   )
 

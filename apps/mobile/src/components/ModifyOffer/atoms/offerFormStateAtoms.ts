@@ -29,6 +29,7 @@ import {
 } from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
 import {Uuid, generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {calculateViewportRadius} from '@vexl-next/domain/src/utility/geoCoordinates'
+import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {generateKeyPair} from '@vexl-next/resources-utils/src/utils/crypto'
 import {type LocationSuggestion} from '@vexl-next/rest-api/src/services/location/contracts'
 import * as E from 'fp-ts/Either'
@@ -61,6 +62,7 @@ import {
 import {currencies} from '../../../utils/localization/currency'
 import getDefaultSpokenLanguage from '../../../utils/localization/getDefaultSpokenLanguage'
 import notEmpty from '../../../utils/notEmpty'
+import checkNotificationPermissionsAndAskIfPossibleActionAtom from '../../../utils/notifications/checkAndAskForPermissionsActionAtom'
 import reportError from '../../../utils/reportError'
 import showErrorAlert from '../../../utils/showErrorAlert'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
@@ -577,16 +579,22 @@ export const offerFormMolecule = molecule(() => {
     const belowProgressLeft = get(modifyOfferLoaderTitleAtom)
     const payloadPublic = formatOfferPublicPart(get(offerFormAtom))
 
-    set(progressModal.show, {
-      title: t('offerForm.offerEncryption.encryptingYourOffer'),
-      belowProgressLeft: belowProgressLeft.loadingText,
-      bottomText: t('offerForm.offerEncryption.dontShutDownTheApp'),
-      indicateProgress: {type: 'intermediate'},
-    })
-
     return pipe(
-      generateKeyPair(),
-      TE.fromEither,
+      TE.Do,
+      TE.chainW(() =>
+        effectToTaskEither(
+          set(checkNotificationPermissionsAndAskIfPossibleActionAtom)
+        )
+      ),
+      TE.map(() => {
+        set(progressModal.show, {
+          title: t('offerForm.offerEncryption.encryptingYourOffer'),
+          belowProgressLeft: belowProgressLeft.loadingText,
+          bottomText: t('offerForm.offerEncryption.dontShutDownTheApp'),
+          indicateProgress: {type: 'intermediate'},
+        })
+      }),
+      TE.chainW(() => TE.fromEither(generateKeyPair())),
       TE.bindTo('key'),
       TE.bindW('createdOffer', ({key}) =>
         set(createOfferAtom, {
@@ -619,6 +627,8 @@ export const offerFormMolecule = molecule(() => {
       ),
       TE.matchEW(
         (e) => {
+          if (e._tag === 'NotificationPrompted') return T.of(false)
+
           set(progressModal.hide)
           if (e._tag !== 'NetworkError')
             reportError('error', new Error('Error while creating offer'), {e})

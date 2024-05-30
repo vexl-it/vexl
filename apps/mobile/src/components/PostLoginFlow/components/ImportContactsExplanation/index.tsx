@@ -5,6 +5,7 @@ import {Stack, Text} from 'tamagui'
 import {type PostLoginFlowScreenProps} from '../../../../navigationTypes'
 import {resolveAllContactsAsSeenActionAtom} from '../../../../state/contacts/atom/contactsStore'
 import {submitContactsActionAtom} from '../../../../state/contacts/atom/submitContactsActionAtom'
+import {useFinishPostLoginFlow} from '../../../../state/postLoginOnboarding'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import AnonymizationCaption from '../../../AnonymizationCaption/AnonymizationCaption'
 import {
@@ -24,6 +25,7 @@ export default function ImportContactsExplanationContent({
   const resolveAllContactsAsSeen = useSetAtom(
     resolveAllContactsAsSeenActionAtom
   )
+  const finishPostLoginFlow = useFinishPostLoginFlow()
 
   return (
     <WhiteContainer>
@@ -58,7 +60,8 @@ export default function ImportContactsExplanationContent({
               (success) => {
                 resolveAllContactsAsSeen()
                 setContactsLoading(false)
-                if (success) navigation.push('AllowNotificationsExplanation')
+                if (success) finishPostLoginFlow()
+                // if (success) navigation.push('AllowNotificationsExplanation')
               }
             )
           }}

@@ -1,7 +1,6 @@
 import {createNativeStackNavigator} from '@react-navigation/native-stack'
 import {type PostLoginStackParamsList} from '../../navigationTypes'
 import PageWithButtonAndProgressHeader from '../PageWithButtonAndProgressHeader'
-import AllowNotificationsExplanationScreen from './components/AllowNotificationsExplanationScreen'
 import ImportContactsExplanation from './components/ImportContactsExplanation'
 
 const Stack = createNativeStackNavigator<PostLoginStackParamsList>()
@@ -19,10 +18,10 @@ export default function PostLoginFlow(): JSX.Element {
           name="ImportContactsExplanation"
           component={ImportContactsExplanation}
         />
-        <Stack.Screen
+        {/* <Stack.Screen
           name="AllowNotificationsExplanation"
           component={AllowNotificationsExplanationScreen}
-        />
+        /> */}
       </Stack.Navigator>
     </PageWithButtonAndProgressHeader>
   )

@@ -29,7 +29,6 @@ import InsideScreen from '../InsideRouter'
 import LoginFlow from '../LoginFlow'
 import CreateOfferScreen from '../ModifyOffer/components/CreateOfferScreen'
 import EditOfferScreen from '../ModifyOffer/components/EditOfferScreen'
-import {NotificationPermissionsScreen} from '../NotificationPermissionsScreen'
 import NotificationSettingsScreen from '../NotificationSettingsScreen'
 import OfferDetailScreen from '../OfferDetailScreen'
 import PostLoginFlow from '../PostLoginFlow'
@@ -37,10 +36,7 @@ import SetContactsScreen from '../SetContactsScreen'
 import TodoScreen from '../TodoScreen'
 import TosScreen from '../TosScreen'
 import TradeChecklistFlow from '../TradeChecklistFlow'
-import {
-  useHandleNotificationsPermissionsRedirect,
-  useHandlePostLoginFlowRedirect,
-} from './utils'
+import {useHandlePostLoginFlowRedirect} from './utils'
 
 const Stack = createNativeStackNavigator<RootStackParamsList>()
 
@@ -49,7 +45,7 @@ function LoggedInHookGroup(): null {
   useHandleReceivedNotifications()
   useHandleNotificationOpen()
 
-  useHandleNotificationsPermissionsRedirect()
+  // useHandleNotificationsPermissionsRedirect()
   useHandlePostLoginFlowRedirect()
   useHandleRefreshContactServiceAndOffers()
   useSyncConnections()
@@ -97,10 +93,10 @@ function RootNavigation(): JSX.Element {
               name="CommonFriends"
               component={CommonFriendsScreen}
             />
-            <Stack.Screen
+            {/* <Stack.Screen
               name="NotificationPermissionsMissing"
               component={NotificationPermissionsScreen}
-            />
+            /> */}
             <Stack.Screen name="EditName" component={EditNameScreen} />
             <Stack.Screen
               name="ChangeProfilePicture"

@@ -3,13 +3,9 @@ import {pipe} from 'fp-ts/function'
 import {Stack, Text} from 'tamagui'
 import NotificationsSvg from '../../../../images/notificationsSvg'
 import {type PostLoginFlowScreenProps} from '../../../../navigationTypes'
-import useCreateInbox from '../../../../state/chat/hooks/useCreateInbox'
 import {useFinishPostLoginFlow} from '../../../../state/postLoginOnboarding'
-import {useSessionAssumeLoggedIn} from '../../../../state/session'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import {useRequestNotificationPermissions} from '../../../../utils/notifications'
-import reportError from '../../../../utils/reportError'
-import showErrorAlert from '../../../../utils/showErrorAlert'
 import SvgImage from '../../../Image'
 import {useShowLoadingOverlay} from '../../../LoadingOverlayProvider'
 import {
@@ -22,35 +18,9 @@ type Props = PostLoginFlowScreenProps<'AllowNotificationsExplanation'>
 
 function AllowNotificationsExplanationScreen({navigation}: Props): JSX.Element {
   const {t} = useTranslation()
-  const createInbox = useCreateInbox()
   const finishPostLoginFlow = useFinishPostLoginFlow()
-  const session = useSessionAssumeLoggedIn()
   const requestNotificationPermissions = useRequestNotificationPermissions()
   const loadingOverlay = useShowLoadingOverlay()
-
-  function onFinished(): void {
-    // TODO display loading
-    // TODO what if this fails? Use will be stuck on this screen.
-    void pipe(
-      createInbox({inbox: {privateKey: session.privateKey}}),
-      TE.match(
-        (e) => {
-          if (e._tag === 'ErrorInboxAlreadyExists') {
-            finishPostLoginFlow(true)
-            return
-          }
-          reportError('error', new Error('Error creating inbox'), {e})
-          showErrorAlert({
-            title: t('common.errorCreatingInbox'),
-            error: e,
-          })
-        },
-        () => {
-          finishPostLoginFlow(true)
-        }
-      )
-    )()
-  }
 
   function requestPermissions(): void {
     loadingOverlay.show()
@@ -59,11 +29,11 @@ function AllowNotificationsExplanationScreen({navigation}: Props): JSX.Element {
       TE.match(
         () => {
           loadingOverlay.hide()
-          onFinished()
+          finishPostLoginFlow()
         },
         () => {
           loadingOverlay.hide()
-          onFinished()
+          finishPostLoginFlow()
         }
       )
     )()
@@ -99,7 +69,7 @@ function AllowNotificationsExplanationScreen({navigation}: Props): JSX.Element {
         disabled={false}
         secondButton={{
           text: t('postLoginFlow.allowNotifications.cancel'),
-          onPress: onFinished,
+          onPress: finishPostLoginFlow,
         }}
       />
     </>

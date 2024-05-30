@@ -9,6 +9,7 @@ import {privateApiAtom} from '../../../api'
 import {loadingOverlayDisplayedAtom} from '../../../components/LoadingOverlayProvider'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
 import {getNotificationToken} from '../../../utils/notifications'
+import {checkNotificationPermissionsAndAskIfPossibleTEActionAtom} from '../../../utils/notifications/checkAndAskForPermissionsActionAtom'
 import reportError from '../../../utils/reportError'
 import showErrorAlert from '../../../utils/showErrorAlert'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
@@ -70,43 +71,46 @@ export const sendRequestHandleUIActionAtom = atom(
     const api = get(privateApiAtom)
     const session = get(sessionDataOrDummyAtom)
 
-    set(loadingOverlayDisplayedAtom, true)
-    set(createUserInboxIfItDoesNotExistAtom, session.privateKey)
-    return pipe(
-      pipe(
-        set(sendRequestActionAtom, {text, originOffer}),
-        TE.matchE(
-          (e) => {
-            if (e._tag === 'SenderUserInboxDoesNotExistError') {
-              reportError(
-                'warn',
-                new Error('Sender user inbox does not exist'),
-                {e}
-              )
+    const sendRequestHandleInboxMissing = pipe(
+      set(sendRequestActionAtom, {text, originOffer}),
+      TE.matchE(
+        (e) => {
+          if (e._tag === 'SenderUserInboxDoesNotExistError') {
+            reportError('warn', new Error('Sender user inbox does not exist'), {
+              e,
+            })
 
-              return pipe(
-                TE.Do,
-                TE.chainTaskK(getNotificationToken),
-                TE.chainW((token) =>
-                  pipe(
-                    api.chat.createInbox({
-                      token: token ?? undefined,
-                      keyPair: session.privateKey,
-                    }),
-                    TE.mapLeft(toBasicError('ApiErrorCreatingInbox'))
-                  )
-                ),
-                TE.chainW(() => set(sendRequestActionAtom, {text, originOffer}))
-              )
-            }
-
-            return TE.left(e)
-          },
-          (a) => {
-            return TE.right(a)
+            return pipe(
+              TE.Do,
+              TE.chainTaskK(getNotificationToken),
+              TE.chainW((token) =>
+                pipe(
+                  api.chat.createInbox({
+                    token: token ?? undefined,
+                    keyPair: session.privateKey,
+                  }),
+                  TE.mapLeft(toBasicError('ApiErrorCreatingInbox'))
+                )
+              ),
+              TE.chainW(() => set(sendRequestActionAtom, {text, originOffer}))
+            )
           }
-        )
-      ),
+
+          return TE.left(e)
+        },
+        (a) => {
+          return TE.right(a)
+        }
+      )
+    )
+
+    const sendRequestWithLoadingOverlay = pipe(
+      TE.Do,
+      TE.map(() => {
+        set(loadingOverlayDisplayedAtom, true)
+        set(createUserInboxIfItDoesNotExistAtom, session.privateKey)
+      }),
+      TE.chainW(() => sendRequestHandleInboxMissing),
       TE.mapLeft((e) => {
         if (e._tag === 'ApiErrorCreatingInbox') {
           reportError(
@@ -128,6 +132,14 @@ export const sendRequestHandleUIActionAtom = atom(
         set(loadingOverlayDisplayedAtom, false)
         return chat
       })
+    )
+
+    return pipe(
+      TE.Do,
+      TE.chainW(() =>
+        set(checkNotificationPermissionsAndAskIfPossibleTEActionAtom)
+      ),
+      TE.chainW(() => sendRequestWithLoadingOverlay)
     )
   }
 )

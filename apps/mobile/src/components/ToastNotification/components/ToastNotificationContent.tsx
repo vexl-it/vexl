@@ -13,7 +13,12 @@ function ToastNotificationContent(
     <Stack als="center" pos="absolute" t={height * 0.1}>
       <Animated.View entering={FadeInUp} exiting={FadeOutUp}>
         <XStack ai="center" space="$2" px="$4" py="$2" bc="$main" br="$4">
-          <SvgImage stroke={getTokens().color.black.val} source={state.icon} />
+          {!!state.icon && (
+            <SvgImage
+              stroke={getTokens().color.black.val}
+              source={state.icon}
+            />
+          )}
           <Text col="$black">{state.text}</Text>
         </XStack>
       </Animated.View>

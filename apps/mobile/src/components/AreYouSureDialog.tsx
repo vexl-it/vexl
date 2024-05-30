@@ -43,7 +43,7 @@ interface StepWithInput {
 
 type Step = StepWithText | StepWithChildren | StepWithInput
 
-type AreYouSureDialogAtomStepResult =
+export type AreYouSureDialogAtomStepResult =
   | {
       type: 'noResult'
     }
@@ -54,6 +54,7 @@ type AreYouSureDialogAtomStepResult =
 
 interface AreYouSureDialogState {
   variant: 'danger' | 'info'
+  makeSureOnDeny?: boolean
   steps: Step[]
   stepResults: AreYouSureDialogAtomStepResult[]
   currentStep: number
@@ -189,7 +190,12 @@ function AreYouSureDialog(): JSX.Element | null {
             fullSize
             variant={state.variant === 'danger' ? 'redDark' : 'primary'}
             onPress={() => {
-              if (
+              if (state.makeSureOnDeny) {
+                if (state.currentStep >= state.steps.length - 1) {
+                  state.onDismiss()
+                }
+                setState({...state, currentStep: state.currentStep + 1})
+              } else if (
                 step.type === 'StepWithChildren' &&
                 step.goBackOnNegativeButtonPress &&
                 state.currentStep > 0
@@ -207,7 +213,10 @@ function AreYouSureDialog(): JSX.Element | null {
           fullSize
           onPress={() => {
             if (!state) return
-            if (state.currentStep >= state.steps.length - 1) {
+            if (state.makeSureOnDeny) {
+              state.onPass(state.stepResults)
+              setState(null)
+            } else if (state.currentStep >= state.steps.length - 1) {
               state.onPass(state.stepResults)
               setState(null)
             } else {

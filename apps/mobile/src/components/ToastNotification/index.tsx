@@ -6,7 +6,7 @@ import ToastNotificationContent from './components/ToastNotificationContent'
 
 export interface ToastNotificationState {
   text: string
-  icon: SvgString
+  icon?: SvgString
   hideAfterMillis?: number | undefined
 }
 export const toastNotificationAtom = atom<ToastNotificationState | null>(null)

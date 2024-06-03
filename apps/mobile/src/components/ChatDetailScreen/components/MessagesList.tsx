@@ -8,7 +8,7 @@ import {chatMolecule} from '../atoms'
 import MessageItem, {type MessagesListItem} from './MessageItem'
 import {QUICK_ACTION_BANNER_HEIGHT_WITH_PADDING} from './QuickActionBanner'
 
-const LIST_ITEM_VISIBILITY_PERCENTAGE_THRESHOLD = 30
+const LIST_ITEM_VISIBILITY_PERCENTAGE_THRESHOLD = 0
 
 const contentStyle = StyleSheet.create({
   contentContainerStyle: {

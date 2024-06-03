@@ -16,7 +16,7 @@ import {version} from '../../../utils/environment'
 import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
 import addMessageToChat from '../utils/addMessageToChat'
 import createAccountDeletedMessage from '../utils/createAccountDeletedMessage'
-import {resetRealLifeInfo, resetTradeChecklist} from '../utils/resetData'
+import {resetTradeChecklist} from '../utils/resetData'
 import generateMyFcmTokenInfoActionAtom, {
   updateMyFcmTokenInfoInChat,
 } from './generateMyFcmTokenInfoActionAtom'
@@ -51,7 +51,7 @@ const acceptMessagingRequestAtom = atom(
         set(generateMyFcmTokenInfoActionAtom, undefined, chat.inbox.privateKey)
       ),
       TE.bindTo('myFcmCypher'),
-      TE.bindW('configmMessage', ({myFcmCypher}) =>
+      TE.bindW('configMessage', ({myFcmCypher}) =>
         confirmMessagingRequest({
           text,
           approve,
@@ -81,7 +81,7 @@ const acceptMessagingRequestAtom = atom(
 
         return error
       }),
-      TE.bind('message', ({configmMessage: message}) =>
+      TE.bind('message', ({configMessage: message}) =>
         TE.of({
           state: 'sent',
           message,
@@ -94,7 +94,7 @@ const acceptMessagingRequestAtom = atom(
             addMessageToChat(message),
             // Make sure to reset checklist. If they open chat again after rerequest, we don't want to show the checklist again
             resetTradeChecklist,
-            resetRealLifeInfo,
+            // resetRealLifeInfo,
             updateMyFcmTokenInfoInChat(O.toUndefined(myFcmCypher))
           )
         )

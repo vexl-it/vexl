@@ -19,10 +19,9 @@ import {privateApiAtom} from '../../../api'
 import {type ActionAtomType} from '../../../utils/atomUtils/ActionAtomType'
 import {type FocusAtomType} from '../../../utils/atomUtils/FocusAtomType'
 import {version} from '../../../utils/environment'
-import {deleteChatFiles} from '../../../utils/fsDirectories'
 import {removeFeedbackRecordActionAtom} from '../../feedback/atoms'
 import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
-import {resetRealLifeInfo, resetTradeChecklist} from '../utils/resetData'
+import {resetTradeChecklist} from '../utils/resetData'
 import shouldSendTerminationMessageToChat from '../utils/shouldSendTerminationMessageToChat'
 
 export default function deleteChatActionAtom(
@@ -85,10 +84,19 @@ export default function deleteChatActionAtom(
           state: 'sent',
         } as const
 
-        void deleteChatFiles(
-          chat.inbox.privateKey.publicKeyPemBase64,
-          chat.otherSide.publicKey
-        )
+        const identityRevealedOrDeclinedMessage =
+          chatWithMessages.messages.find(
+            (one) =>
+              one.message.messageType === 'APPROVE_REVEAL' ||
+              one.message.messageType === 'DISAPPROVE_REVEAL'
+          )
+
+        const phoneNumberRevealedOrDeclinedMessage =
+          chatWithMessages.messages.find(
+            (one) =>
+              one.message.messageType === 'APPROVE_CONTACT_REVEAL' ||
+              one.message.messageType === 'DISAPPROVE_CONTACT_REVEAL'
+          )
 
         set(removeFeedbackRecordActionAtom, chatWithMessages.chat.id)
 
@@ -102,10 +110,19 @@ export default function deleteChatActionAtom(
                 lastReportedVersion:
                   messageToSend.myVersion ?? old.chat.lastReportedVersion,
               },
-              messages: [successMessage],
+              // we want to keep the phone number message in chat history in case of re-request
+              messages: [
+                ...(identityRevealedOrDeclinedMessage
+                  ? [identityRevealedOrDeclinedMessage]
+                  : []),
+                ...(phoneNumberRevealedOrDeclinedMessage
+                  ? [phoneNumberRevealedOrDeclinedMessage]
+                  : []),
+                successMessage,
+              ],
             }),
-            resetTradeChecklist,
-            resetRealLifeInfo
+            resetTradeChecklist
+            // resetRealLifeInfo
           )
         )
         return successMessage

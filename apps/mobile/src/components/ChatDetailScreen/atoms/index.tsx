@@ -8,6 +8,7 @@ import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {
   atom,
+  type Atom,
   type PrimitiveAtom,
   type SetStateAction,
   type WritableAtom,
@@ -16,6 +17,7 @@ import {focusAtom} from 'jotai-optics'
 import {selectAtom, splitAtom} from 'jotai/utils'
 import {DateTime} from 'luxon'
 import {Alert} from 'react-native'
+import {type MessageType} from '../../../../../../packages/domain/src/general/messaging'
 import blockChatActionAtom from '../../../state/chat/atoms/blockChatActionAtom'
 import cancelRequestActionAtomHandleUI from '../../../state/chat/atoms/cancelRequestActionAtomHandleUI'
 import createCanChatBeRerequestedAtom from '../../../state/chat/atoms/createCanBeRerequestedAtom'
@@ -108,39 +110,55 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
 
   const otherSideDataAtom = selectOtherSideDataAtom(chatAtom)
 
-  const revealIdentityRequestMessageIndexAtom = atom<number | undefined>(
-    (get) => {
+  function createFindMessageIndexInListAtom({
+    direction,
+    messageType,
+  }: {
+    direction: 'received' | 'sent'
+    messageType: MessageType
+  }): Atom<number> {
+    return atom((get) => {
       const messagesList = get(messagesListDataAtom)
 
       return messagesList.findIndex(
         (message, index) =>
           message.type === 'message' &&
-          message.message.state === 'received' &&
-          (message.message.message.messageType === 'REQUEST_REVEAL' ||
+          message.message.state === direction &&
+          (message.message.message.messageType === messageType ||
             message.message.message.tradeChecklistUpdate?.identity?.status ===
-              'REQUEST_REVEAL')
+              messageType)
       )
-    }
-  )
+    })
+  }
 
-  const isRevealIdentityMessageHiddenAtom = atom(false)
+  const revealIdentityRequestSentMessageIndexAtom =
+    createFindMessageIndexInListAtom({
+      messageType: 'REQUEST_REVEAL',
+      direction: 'sent',
+    })
+  const isRevealIdentityRequestSentMessageHiddenAtom = atom(false)
 
-  const contactRevealRequestMessageIndexAtom = atom<number | undefined>(
-    (get) => {
-      const messagesList = get(messagesListDataAtom)
+  const revealIdentityRequestReceivedMessageIndexAtom =
+    createFindMessageIndexInListAtom({
+      messageType: 'REQUEST_REVEAL',
+      direction: 'received',
+    })
 
-      return messagesList.findIndex(
-        (message, index) =>
-          message.type === 'message' &&
-          message.message.state === 'received' &&
-          (message.message.message.messageType === 'REQUEST_CONTACT_REVEAL' ||
-            message.message.message.tradeChecklistUpdate?.contact?.status ===
-              'REQUEST_REVEAL')
-      )
-    }
-  )
+  const isRevealIdentityRequestReceivedMessageHiddenAtom = atom(false)
 
-  const isContactRevealMessageHiddenAtom = atom(false)
+  const contactRevealRequestReceivedMessageIndexAtom =
+    createFindMessageIndexInListAtom({
+      messageType: 'REQUEST_CONTACT_REVEAL',
+      direction: 'received',
+    })
+  const isContactRevealRequestReceivedMessageHiddenAtom = atom(false)
+
+  const contactRevealRequestSentMessageIndexAtom =
+    createFindMessageIndexInListAtom({
+      messageType: 'REQUEST_CONTACT_REVEAL',
+      direction: 'sent',
+    })
+  const isContactRevealRequestSentMessageHiddenAtom = atom(false)
 
   const handleIsRevealIdentityOrContactRevealMessageVisibleActionAtom = atom(
     null,
@@ -149,27 +167,51 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
       const identityRevealStatus = get(identityRevealStatusAtom)
       const contactRevealStatus = get(contactRevealStatusAtom)
 
-      const revealIdentityRequestMessageIndex = get(
-        revealIdentityRequestMessageIndexAtom
+      const revealIdentityRequestSentMessageIndex = get(
+        revealIdentityRequestSentMessageIndexAtom
       )
-      const contactRevealRequestMessageIndex = get(
-        contactRevealRequestMessageIndexAtom
+      const revealIdentityRequestReceivedMessageIndex = get(
+        revealIdentityRequestReceivedMessageIndexAtom
       )
+      const contactRevealRequestSentMessageIndex = get(
+        contactRevealRequestSentMessageIndexAtom
+      )
+      const contactRevealRequestReceivedMessageIndex = get(
+        contactRevealRequestReceivedMessageIndexAtom
+      )
+
+      if (identityRevealStatus === 'iAsked') {
+        set(
+          isRevealIdentityRequestSentMessageHiddenAtom,
+          !viewableItems.some(
+            (item) => item.index === revealIdentityRequestSentMessageIndex
+          )
+        )
+      }
 
       if (identityRevealStatus === 'theyAsked') {
         set(
-          isRevealIdentityMessageHiddenAtom,
+          isRevealIdentityRequestReceivedMessageHiddenAtom,
           !viewableItems.some(
-            (item) => item.index === revealIdentityRequestMessageIndex
+            (item) => item.index === revealIdentityRequestReceivedMessageIndex
+          )
+        )
+      }
+
+      if (contactRevealStatus === 'iAsked') {
+        set(
+          isContactRevealRequestSentMessageHiddenAtom,
+          !viewableItems.some(
+            (item) => item.index === contactRevealRequestSentMessageIndex
           )
         )
       }
 
       if (contactRevealStatus === 'theyAsked') {
         set(
-          isContactRevealMessageHiddenAtom,
+          isContactRevealRequestReceivedMessageHiddenAtom,
           !viewableItems.some(
-            (item) => item.index === contactRevealRequestMessageIndex
+            (item) => item.index === contactRevealRequestReceivedMessageIndex
           )
         )
       }
@@ -1079,9 +1121,12 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     isDateAndTimePickedAtom,
     addEventToCalendarActionAtom,
     listingTypeIsOtherAtom,
-    revealIdentityRequestMessageIndexAtom,
-    isRevealIdentityMessageHiddenAtom,
-    isContactRevealMessageHiddenAtom,
+    revealIdentityRequestReceivedMessageIndexAtom,
+    revealIdentityRequestSentMessageIndexAtom,
+    isRevealIdentityRequestReceivedMessageHiddenAtom,
+    isRevealIdentityRequestSentMessageHiddenAtom,
+    isContactRevealRequestReceivedMessageHiddenAtom,
+    isContactRevealRequestSentMessageHiddenAtom,
     handleIsRevealIdentityOrContactRevealMessageVisibleActionAtom,
     isContactAlreadyInContactsListAtom,
     identityRevealRequestMessageIdAtom,

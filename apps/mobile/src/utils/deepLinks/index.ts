@@ -14,7 +14,8 @@ import {parseJson, safeParse} from '../fpUtils'
 import {translationAtom, useTranslation} from '../localization/I18nProvider'
 import reportError from '../reportError'
 import showErrorAlert from '../showErrorAlert'
-import {LINK_TYPE_IMPORT_CONTACT} from './domain'
+import {LINK_TYPE_ENCRYPTED_URL, LINK_TYPE_IMPORT_CONTACT} from './domain'
+import {processEncryptedUrlActionAtom} from './encryptedUrl'
 
 type DynamicLink = FirebaseDynamicLinksTypes.DynamicLink
 
@@ -71,6 +72,7 @@ export const handleImportDeepContactActionAtom = atom(
 export function useHandleDeepLink(): void {
   const {t} = useTranslation()
   const handleImportDeepContact = useSetAtom(handleImportDeepContactActionAtom)
+  const processEncryptedUrl = useSetAtom(processEncryptedUrlActionAtom)
 
   const onLinkReceived = useCallback(
     (link: DynamicLink) => {
@@ -83,11 +85,16 @@ export function useHandleDeepLink(): void {
             void handleImportDeepContact(parsedUrl.query.data)()
           }
           break
+        case LINK_TYPE_ENCRYPTED_URL:
+          if (parsedUrl.query.data) {
+            processEncryptedUrl(parsedUrl.query.data)
+          }
+          break
         default:
           reportError('warn', new Error('Unknown deep link type'), {url})
       }
     },
-    [handleImportDeepContact]
+    [handleImportDeepContact, processEncryptedUrl]
   )
 
   useEffect(() => {

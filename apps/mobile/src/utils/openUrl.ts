@@ -5,23 +5,29 @@ import {translationAtom} from './localization/I18nProvider'
 
 export default function openUrl(
   url: string,
-  textToCopyInCaseOfFail?: string
+  textToCopyInCaseOfFail?: string,
+  copy?: {
+    errorTitle?: string
+    errorText?: string
+    errorCancelText?: string
+    errorCopyText?: string
+  }
 ): () => void {
   const {t} = getDefaultStore().get(translationAtom)
   return () => {
     void Linking.openURL(url).catch(() => {
       Alert.alert(
-        t('common.errorOpeningLink.message'),
-        t('common.errorOpeningLink.text'),
+        copy?.errorTitle ?? t('common.errorOpeningLink.message'),
+        copy?.errorText ?? t('common.errorOpeningLink.text'),
         [
           {
             style: 'cancel',
-            text: t('common.cancel'),
+            text: copy?.errorCancelText ?? t('common.cancel'),
             onPress: () => {},
           },
           {
             style: 'default',
-            text: t('common.errorOpeningLink.copy'),
+            text: copy?.errorCopyText ?? t('common.errorOpeningLink.copy'),
             onPress: () => {
               Clipboard.setString(textToCopyInCaseOfFail ?? url)
             },

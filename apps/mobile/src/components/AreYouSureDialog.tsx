@@ -7,7 +7,7 @@ import type * as TE from 'fp-ts/TaskEither'
 import {atom, useAtom, type WritableAtom} from 'jotai'
 import React, {useCallback, type ComponentType} from 'react'
 import {ScrollView, StyleSheet, View} from 'react-native'
-import {Stack, Text, XStack, type ColorTokens} from 'tamagui'
+import {Stack, Text, type ColorTokens} from 'tamagui'
 import AnimatedDialogWrapper from './AnimatedDialogWrapper'
 import Button from './Button'
 import Input, {type Props as VexlTextInputProps} from './Input'
@@ -55,6 +55,7 @@ export type AreYouSureDialogAtomStepResult =
 interface AreYouSureDialogState {
   variant: 'danger' | 'info'
   makeSureOnDeny?: boolean
+  buttonsDirection?: 'row' | 'column' | 'row-reverse' | 'column-reverse'
   steps: Step[]
   stepResults: AreYouSureDialogAtomStepResult[]
   currentStep: number
@@ -184,10 +185,20 @@ function AreYouSureDialog(): JSX.Element | null {
           </Stack>
         </View>
       </ScrollView>
-      <XStack space="$2" m="$2" height={60}>
+      <Stack
+        flexDirection={state?.buttonsDirection ?? 'row'}
+        space="$2"
+        m="$2"
+        height={state?.buttonsDirection?.startsWith('column') ? 120 : 60}
+      >
         {!!step.negativeButtonText && (
           <Button
             fullSize
+            size={
+              state?.buttonsDirection?.startsWith('column')
+                ? 'large'
+                : undefined
+            }
             variant={state.variant === 'danger' ? 'redDark' : 'primary'}
             onPress={() => {
               if (state.makeSureOnDeny) {
@@ -211,6 +222,9 @@ function AreYouSureDialog(): JSX.Element | null {
         )}
         <Button
           fullSize
+          size={
+            state?.buttonsDirection?.startsWith('column') ? 'large' : undefined
+          }
           onPress={() => {
             if (!state) return
             if (state.makeSureOnDeny) {
@@ -226,7 +240,7 @@ function AreYouSureDialog(): JSX.Element | null {
           variant={state.variant === 'danger' ? 'redLight' : 'secondary'}
           text={step.positiveButtonText}
         />
-      </XStack>
+      </Stack>
     </AnimatedDialogWrapper>
   )
 }

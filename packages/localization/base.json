@@ -891,5 +891,13 @@
   "notificationPrompt.explanation2.title": "Are you sure?",
   "notificationPrompt.explanation2.description": "Vexl REALLY relies on background notifications in order to work properly. Without notifications, you won’t get the best out of it.",
   "notificationPrompt.explanation2.positiveButton": "Allow",
-  "notificationPrompt.explanation2.negativeButton": "Deny"
+  "notificationPrompt.explanation2.negativeButton": "Deny",
+  "raffle.popup.title": "You beat the system!",
+  "raffle.popup.text": "Claim your KYC-free sats now!",
+  "raffle.popup.openApp": "Open lightning wallet",
+  "raffle.popup.copyInstead": "Copy lnurl instead",
+  "raffle.errorOpeningApp.title": "Error opening lnurl",
+  "raffle.errorOpeningApp.text": "Do you have lightinig wallet installed?",
+  "raffle.errorOpeningApp.button": "Copy lnurl",
+  "raffle.errorOpeningDeepLink": "Error opening deep link"
 }

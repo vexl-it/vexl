@@ -4,13 +4,13 @@ import * as T from 'fp-ts/Task'
 import {pipe} from 'fp-ts/function'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback} from 'react'
-import {StyleSheet} from 'react-native'
-import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view'
+import {ScrollView, StyleSheet} from 'react-native'
 import {Stack} from 'tamagui'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../../utils/useSafeGoBack'
 import Button from '../../Button'
 import IconButton from '../../IconButton'
+import KeyboardAvoidingView from '../../KeyboardAvoidingView'
 import OfferForm from '../../OfferForm'
 import ListingType from '../../OfferForm/components/ListingType'
 import OfferType from '../../OfferForm/components/OfferType'
@@ -31,8 +31,6 @@ const styles = StyleSheet.create({
     paddingBottom: 16,
   },
 })
-
-const SCROLL_EXTRA_OFFSET = 200
 
 function CreateOfferScreen(): JSX.Element {
   const safeGoBack = useSafeGoBack()
@@ -64,55 +62,54 @@ function CreateOfferScreen(): JSX.Element {
 
   return (
     <Screen>
-      <KeyboardAwareScrollView
-        contentContainerStyle={styles.contentStyles}
-        extraHeight={SCROLL_EXTRA_OFFSET}
-      >
-        <ScreenTitle text={t('offerForm.myNewOffer')} withBottomBorder>
-          <IconButton variant="dark" icon={closeSvg} onPress={safeGoBack} />
-        </ScreenTitle>
-        <Section title={t('offerForm.listingType')} image={listingTypeSvg}>
-          <ListingType
-            listingTypeAtom={listingTypeAtom}
-            updateListingTypeActionAtom={updateListingTypeActionAtom}
-          />
-        </Section>
-        {!!showBuySellField && (
-          <Section title={t('offerForm.iWantTo')} image={userSvg}>
-            <OfferType
+      <KeyboardAvoidingView>
+        <ScrollView contentContainerStyle={styles.contentStyles}>
+          <ScreenTitle text={t('offerForm.myNewOffer')} withBottomBorder>
+            <IconButton variant="dark" icon={closeSvg} onPress={safeGoBack} />
+          </ScreenTitle>
+          <Section title={t('offerForm.listingType')} image={listingTypeSvg}>
+            <ListingType
               listingTypeAtom={listingTypeAtom}
-              offerTypeAtom={offerTypeAtom}
+              updateListingTypeActionAtom={updateListingTypeActionAtom}
             />
           </Section>
-        )}
-        {!!showRestOfTheFields && (
-          <OfferForm
-            content={
-              listingType === 'BITCOIN'
-                ? btcOfferContent
-                : listingType === 'PRODUCT'
-                ? productOfferContent
-                : otherOfferContent
-            }
+          {!!showBuySellField && (
+            <Section title={t('offerForm.iWantTo')} image={userSvg}>
+              <OfferType
+                listingTypeAtom={listingTypeAtom}
+                offerTypeAtom={offerTypeAtom}
+              />
+            </Section>
+          )}
+          {!!showRestOfTheFields && (
+            <OfferForm
+              content={
+                listingType === 'BITCOIN'
+                  ? btcOfferContent
+                  : listingType === 'PRODUCT'
+                  ? productOfferContent
+                  : otherOfferContent
+              }
+            />
+          )}
+        </ScrollView>
+        <Stack px="$4" py="$4" bc="transparent">
+          <Button
+            text={t('offerForm.publishOffer')}
+            onPress={() => {
+              void pipe(
+                createOffer(),
+                T.map((success) => {
+                  if (success) {
+                    safeGoBack()
+                  }
+                })
+              )()
+            }}
+            variant="secondary"
           />
-        )}
-      </KeyboardAwareScrollView>
-      <Stack px="$4" py="$4" bc="transparent">
-        <Button
-          text={t('offerForm.publishOffer')}
-          onPress={() => {
-            void pipe(
-              createOffer(),
-              T.map((success) => {
-                if (success) {
-                  safeGoBack()
-                }
-              })
-            )()
-          }}
-          variant="secondary"
-        />
-      </Stack>
+        </Stack>
+      </KeyboardAvoidingView>
     </Screen>
   )
 }

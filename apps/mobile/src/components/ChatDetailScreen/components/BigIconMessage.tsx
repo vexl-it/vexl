@@ -30,19 +30,19 @@ export default function BigIconMessage({
     <Stack mb={isLatest ? '$10' : '$4'}>
       <YStack my="$5" space="$4" alignItems="center">
         {!!icon && icon}
-        <YStack>
-          <XStack alignItems="center">
-            <Stack flex={1} height={1} bc="$grey" />
+        <YStack ai="center">
+          <XStack alignItems="center" space="$2">
+            <Stack w={40} height={1} bc="$grey" />
             <Text
               textAlign="center"
-              mx="$5"
               color="$greyOnBlack"
               fontSize={14}
               fontFamily="$body500"
+              numberOfLines={2}
             >
               {smallerText}
             </Text>
-            <Stack flex={1} height={1} bc="$grey" />
+            <Stack w={40} height={1} bc="$grey" />
           </XStack>
           {!!biggerText && (
             <XStack ai="center" jc="center" space="$1">

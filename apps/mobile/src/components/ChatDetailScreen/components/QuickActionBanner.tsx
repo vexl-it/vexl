@@ -8,9 +8,7 @@ import {addContactWithUiFeedbackAtom} from '../../../state/contacts/atom/addCont
 import {hashPhoneNumber} from '../../../state/contacts/utils'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import reportError from '../../../utils/reportError'
-import useIsKeyboardShown from '../../../utils/useIsKeyboardShown'
 import useResetNavigationToMessagingScreen from '../../../utils/useResetNavigationToMessagingScreen'
-import useWillKeyboardShow from '../../../utils/useWillKeyboardShow'
 import Button from '../../Button'
 import IconButton from '../../IconButton'
 import {revealContactFromQuickActionBannerAtom} from '../../TradeChecklistFlow/atoms/revealContactAtoms'
@@ -87,8 +85,6 @@ function QuickActionBannerUi({
 function QuickActionBanner(): JSX.Element | null {
   const {t} = useTranslation()
   const resetNavigationToMessagingScreen = useResetNavigationToMessagingScreen()
-  const isKeyboardShown = useIsKeyboardShown()
-  const willKeyboardShow = useWillKeyboardShow()
 
   const {
     lastMessageAtom,
@@ -104,8 +100,10 @@ function QuickActionBanner(): JSX.Element | null {
     contactRevealTriggeredFromTradeChecklistAtom,
     publicKeyPemBase64Atom,
     chatIdAtom,
-    isRevealIdentityMessageHiddenAtom,
-    isContactRevealMessageHiddenAtom,
+    isRevealIdentityRequestReceivedMessageHiddenAtom,
+    isRevealIdentityRequestSentMessageHiddenAtom,
+    isContactRevealRequestReceivedMessageHiddenAtom,
+    isContactRevealRequestSentMessageHiddenAtom,
     isContactAlreadyInContactsListAtom,
     identityRevealRequestMessageIdAtom,
     contactRevealRequestMessageIdAtom,
@@ -136,11 +134,17 @@ function QuickActionBanner(): JSX.Element | null {
   const revealContactFromQuickActionBanner = useSetAtom(
     revealContactFromQuickActionBannerAtom
   )
-  const isRevealIdentityMessageHidden = useAtomValue(
-    isRevealIdentityMessageHiddenAtom
+  const isRevealIdentityRequestSentMessageHidden = useAtomValue(
+    isRevealIdentityRequestSentMessageHiddenAtom
   )
-  const isContactRevealMessageHidden = useAtomValue(
-    isContactRevealMessageHiddenAtom
+  const isRevealIdentityRequestReceivedMessageHidden = useAtomValue(
+    isRevealIdentityRequestReceivedMessageHiddenAtom
+  )
+  const isContactRevealRequestSentMessageHidden = useAtomValue(
+    isContactRevealRequestSentMessageHiddenAtom
+  )
+  const isContactRevealRequestReceivedMessageHidden = useAtomValue(
+    isContactRevealRequestReceivedMessageHiddenAtom
   )
   const isContactAlreadyInContactsList = useAtomValue(
     isContactAlreadyInContactsListAtom
@@ -279,9 +283,7 @@ function QuickActionBanner(): JSX.Element | null {
 
   if (
     identityRevealStatus === 'theyAsked' &&
-    isRevealIdentityMessageHidden &&
-    !willKeyboardShow &&
-    !isKeyboardShown
+    isRevealIdentityRequestReceivedMessageHidden
   ) {
     return (
       <QuickActionBannerUi
@@ -305,7 +307,8 @@ function QuickActionBanner(): JSX.Element | null {
 
   if (
     !identityRevealRequestedBannerHidden &&
-    identityRevealStatus === 'iAsked'
+    identityRevealStatus === 'iAsked' &&
+    isRevealIdentityRequestSentMessageHidden
   ) {
     return (
       <QuickActionBannerUi
@@ -323,7 +326,11 @@ function QuickActionBanner(): JSX.Element | null {
     )
   }
 
-  if (!contactRevealRequestedBannerHidden && contactRevealStatus === 'iAsked') {
+  if (
+    !contactRevealRequestedBannerHidden &&
+    contactRevealStatus === 'iAsked' &&
+    isContactRevealRequestSentMessageHidden
+  ) {
     return (
       <QuickActionBannerUi
         topText={t('messages.contactRevealSent.title')}
@@ -342,9 +349,7 @@ function QuickActionBanner(): JSX.Element | null {
 
   if (
     contactRevealStatus === 'theyAsked' &&
-    isContactRevealMessageHidden &&
-    !willKeyboardShow &&
-    !isKeyboardShown
+    isContactRevealRequestReceivedMessageHidden
   ) {
     return (
       <QuickActionBannerUi
@@ -369,9 +374,7 @@ function QuickActionBanner(): JSX.Element | null {
   if (
     !contactRevealApprovedBannerHidden &&
     contactRevealStatus === 'shared' &&
-    !isContactAlreadyInContactsList &&
-    !willKeyboardShow &&
-    !isKeyboardShown
+    !isContactAlreadyInContactsList
   ) {
     return (
       <QuickActionBannerUi

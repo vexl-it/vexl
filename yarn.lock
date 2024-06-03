@@ -10832,6 +10832,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/qrcode@npm:^1":
+  version: 1.5.5
+  resolution: "@types/qrcode@npm:1.5.5"
+  dependencies:
+    "@types/node": "*"
+  checksum: d92c1d3e77406bf13a03ec521b2ffb1ac99b2e6ea3a17cad670f2610f62e1293554c57e4074bb2fd4e9369f475f863b69e0ae8c543cb049c4a3c1b0c2d92522a
+  languageName: node
+  linkType: hard
+
 "@types/qs@npm:*":
   version: 6.9.7
   resolution: "@types/qs@npm:6.9.7"
@@ -11526,6 +11535,41 @@ __metadata:
 "@vexl-next/fix-brorand-for-expo@0.0.0, @vexl-next/fix-brorand-for-expo@workspace:packages/fix-brorand-for-expo":
   version: 0.0.0-use.local
   resolution: "@vexl-next/fix-brorand-for-expo@workspace:packages/fix-brorand-for-expo"
+  languageName: unknown
+  linkType: soft
+
+"@vexl-next/handy-scripts@workspace:tooling/handy-scripts":
+  version: 0.0.0-use.local
+  resolution: "@vexl-next/handy-scripts@workspace:tooling/handy-scripts"
+  dependencies:
+    "@effect/opentelemetry": ^0.32.0
+    "@effect/platform": ^0.49.3
+    "@effect/platform-node": ^0.46.3
+    "@effect/schema": ^0.66.1
+    "@types/qrcode": ^1
+    "@vexl-next/cryptography": 0.0.0
+    "@vexl-next/domain": 0.0.0
+    "@vexl-next/eslint-config": 0.0.0
+    "@vexl-next/prettier-config": 0.0.0
+    "@vexl-next/resources-utils": 0.0.0
+    "@vexl-next/rest-api": 0.0.0
+    "@vexl-next/server-utils": 0.0.0
+    "@vexl-next/tsconfig": 0.0.0
+    "@vitejs/plugin-react": ^4.3.0
+    axios: ^1.6.0
+    dayjs: ^1.11.11
+    dotenv: ^16.4.5
+    dynamic-import-polyfill: ^0.1.1
+    effect: ^3.0.1
+    esbuild: ^0.17.16
+    eslint: ^8.50.0
+    fast-check: ^3.17.1
+    prettier: ^3.0.3
+    qrcode: ^1.5.3
+    rimraf: ^4.4.0
+    serve-handler: ^6.1.5
+    ts-node: ^10.9.1
+    typescript: ^5.4.2
   languageName: unknown
   linkType: soft
 
@@ -26685,7 +26729,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"qrcode@npm:^1.5.1":
+"qrcode@npm:^1.5.1, qrcode@npm:^1.5.3":
   version: 1.5.3
   resolution: "qrcode@npm:1.5.3"
   dependencies:

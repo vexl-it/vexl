@@ -7,7 +7,11 @@ import React, {Alert, Dimensions, Linking} from 'react-native'
 import {Stack, Text, YStack} from 'tamagui'
 import parse from 'url-parse'
 import {handleImportDeepContactActionAtom} from '../../../../../utils/deepLinks'
-import {LINK_TYPE_IMPORT_CONTACT} from '../../../../../utils/deepLinks/domain'
+import {
+  LINK_TYPE_ENCRYPTED_URL,
+  LINK_TYPE_IMPORT_CONTACT,
+} from '../../../../../utils/deepLinks/domain'
+import {processEncryptedUrlActionAtom} from '../../../../../utils/deepLinks/encryptedUrl'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import Button from '../../../../Button'
 import {qrScannerDialogVisibleAtom} from '../atoms'
@@ -33,6 +37,7 @@ function QrScanner(): JSX.Element {
   const [isVisible, setVisible] = useAtom(qrScannerDialogVisibleAtom)
   const [error, setError] = useState<string | undefined>(undefined)
   const handleImportContact = useSetAtom(handleImportDeepContactActionAtom)
+  const processEncryptedUrl = useSetAtom(processEncryptedUrlActionAtom)
   const scanned = useRef(false)
   const [hasPermissions, setHasPermissions] = useState(false)
 
@@ -67,32 +72,42 @@ function QrScanner(): JSX.Element {
   }, [isVisible, requestPermissions])
 
   const onScanned = useCallback(
-    ({data}: {data: string}) => {
+    ({data: linkdata}: {data: string}) => {
       if (!isVisible || scanned.current) return
 
-      const parsed = parseDeepLink(data)
-      if (
-        !parsed ||
-        parsed.query.type !== LINK_TYPE_IMPORT_CONTACT ||
-        !parsed.query.data
-      ) {
+      const parsed = parseDeepLink(linkdata)
+      if (!parsed) {
+        setError(t('common.errorWhileReadingQrCode'))
+        return
+      }
+      const {type, data} = parsed.query
+
+      if (!type || !data) {
         setError(t('common.errorWhileReadingQrCode'))
         return
       }
 
-      void pipe(
-        handleImportContact(parsed.query.data),
-        T.map((success) => {
-          if (!success) {
-            setError(t('common.errorWhileReadingQrCode'))
-            return
-          }
-          setVisible(false)
-          scanned.current = true
-        })
-      )()
+      if (type === LINK_TYPE_IMPORT_CONTACT) {
+        void pipe(
+          handleImportContact(data),
+          T.map((success) => {
+            if (!success) {
+              setError(t('common.errorWhileReadingQrCode'))
+              return
+            }
+            setVisible(false)
+            scanned.current = true
+          })
+        )()
+      } else if (type === LINK_TYPE_ENCRYPTED_URL) {
+        setVisible(false) // // error hanled in processEncryptedUrl
+        scanned.current = true
+        void processEncryptedUrl(data)()
+      } else {
+        setError(t('common.errorWhileReadingQrCode'))
+      }
     },
-    [isVisible, handleImportContact, t, setVisible]
+    [isVisible, t, handleImportContact, setVisible, processEncryptedUrl]
   )
 
   const onClose = useCallback(() => {

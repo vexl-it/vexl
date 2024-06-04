@@ -87,7 +87,7 @@ export function useHandleDeepLink(): void {
           break
         case LINK_TYPE_ENCRYPTED_URL:
           if (parsedUrl.query.data) {
-            processEncryptedUrl(parsedUrl.query.data)
+            void processEncryptedUrl(parsedUrl.query.data)()
           }
           break
         default:

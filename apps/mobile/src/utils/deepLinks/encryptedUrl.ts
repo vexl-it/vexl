@@ -51,9 +51,8 @@ export const processEncryptedUrlActionAtom = atom(
         )
       )
 
-    void pipe(
+    return pipe(
       eciesDecrypt(privateKey.privateKeyPemBase64)(payload),
-
       TE.chainFirstTaskK(openAndProcessDialog),
       TE.matchW(
         (e) => {
@@ -62,11 +61,13 @@ export const processEncryptedUrlActionAtom = atom(
             e,
             payload,
           })
+          return false
         },
         (a) => {
           console.log('Success processing encrypted deep link')
+          return true
         }
       )
-    )()
+    )
   }
 )

@@ -110,17 +110,17 @@ export default {
           {
             'scheme': 'https',
             'host': 'vexl.it',
-            'pathPrefix': '/',
+            'pathPattern': '.*',
           },
           {
             'scheme': 'https',
             'host': 'link.vexl.it',
-            'pathPrefix': '/',
+            'pathPattern': '.*',
           },
           {
             'scheme': 'https',
             'host': 'nextlink.vexl.it',
-            'pathPrefix': '/',
+            'pathPattern': '.*',
           },
         ],
         category: ['BROWSABLE', 'DEFAULT'],

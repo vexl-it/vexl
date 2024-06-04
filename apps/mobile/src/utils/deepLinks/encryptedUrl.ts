@@ -38,10 +38,10 @@ export const processEncryptedUrlActionAtom = atom(
         }),
         TE.matchW(
           () => {
-            Clipboard.setString(payload.replace('ligthing:', ''))
+            Clipboard.setString(decrypted.replace(/^.*:/, ''))
           },
           () => {
-            const toCopyInCaseOfFail = payload.replace('ligthing:', '')
+            const toCopyInCaseOfFail = decrypted.replace(/^.*:/, '')
             openUrl(decrypted, toCopyInCaseOfFail, {
               errorTitle: t('raffle.errorOpeningApp.title'),
               errorText: t('raffle.errorOpeningApp.text'),
@@ -53,6 +53,7 @@ export const processEncryptedUrlActionAtom = atom(
 
     void pipe(
       eciesDecrypt(privateKey.privateKeyPemBase64)(payload),
+
       TE.chainFirstTaskK(openAndProcessDialog),
       TE.matchW(
         (e) => {

@@ -7,11 +7,12 @@ import {
   type PublicKeyPemBase64,
 } from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {eciesLegacyEncrypt} from '@vexl-next/cryptography/src/operations/eciesLegacy'
-import {Array, Chunk, Data, Effect, Stream, String, flow, pipe} from 'effect'
+import {Array, Data, Effect, String, flow, pipe} from 'effect'
 import {toFile} from 'qrcode'
 import {fileURLToPath} from 'url'
 
 const LIGHTNING_URL_PREFIX = 'lightning:'
+const CSV_DELIMITER = '\n'
 
 const privateKey = Schema.decode(PrivateKeyPemBase64E)(
   'LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JR0VBZ0VBTUJBR0J5cUdTTTQ5QWdFR0JTdUJCQUFLQkcwd2F3SUJBUVFndWIyTDJaMFd5YVhvSVZmaUk3b3IKUFZTK2JTOGpGUXpVaUxvUkNjT2N3MnFoUkFOQ0FBU1c2USs4NXRQQ3RjMDFMdU5nZUVMY3ZIZGlDbmErMThOdwpWanpVUXc2T3RvbDdvWW5BMUVzR2tWOUZqdUVURzJzSTBIdG1RQmk0eFlXT3VQVTdRYmNvCi0tLS0tRU5EIFBSSVZBVEUgS0VZLS0tLS0K'
@@ -80,26 +81,37 @@ export const program = Effect.gen(function* (_) {
 
   yield* _(filesystem.makeDirectory(outputQrcodeFolder))
 
-  const encryptedLinks = yield* _(
+  yield* _(Effect.log('Reading links from file and encrypting'))
+  const links = yield* _(
     filesystem.readFileString(csvFilePath),
-    Effect.map(flow(String.replaceAll(',', ''), String.split('\n'))),
-    Effect.map(Array.filter(Boolean)),
-    Stream.fromIterableEffect,
-    Stream.mapEffect(encryptlnurlToEncryptedDeepLink),
-    Stream.runCollect,
-    Effect.tap(
+    // Encrpt links
+    Effect.flatMap(
       flow(
-        Chunk.map((data, i) =>
-          generateQrcode(`${outputQrcodeFolder}/${i}.png`, data)
-        ),
-        Effect.all
+        String.split(CSV_DELIMITER),
+        Array.map(String.trim),
+        Array.filter(String.isNonEmpty),
+        Array.map(encryptlnurlToEncryptedDeepLink),
+        Effect.allWith({concurrency: 'unbounded'})
       )
-    ),
-    Effect.map(Chunk.join('\n')),
-    Effect.flatMap((val) => filesystem.writeFileString(outputFilePath, val))
+    )
   )
+  yield* _(Effect.log('Done'))
 
-  yield* _(Effect.log(encryptedLinks))
+  yield* _(Effect.log('Generating qrcodes'))
+  yield* _(
+    links,
+    Array.map((link, i) =>
+      generateQrcode(`${outputQrcodeFolder}/${i}.png`, link)
+    ),
+    Effect.allWith({concurrency: 'unbounded'})
+  )
+  yield* _(Effect.log('Done'))
+
+  yield* _(Effect.log('Writing output file'))
+  yield* _(
+    filesystem.writeFileString(outputFilePath, Array.join(links, CSV_DELIMITER))
+  )
+  yield* _(Effect.log('Done'))
 })
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {

@@ -13,6 +13,7 @@ import {Stack, Text, XStack, YStack, getTokens} from 'tamagui'
 import {useSessionAssumeLoggedIn} from '../../../state/session'
 import {version} from '../../../utils/environment'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
+import {checkNotificationPermissionsAndAskIfPossibleTEActionAtom} from '../../../utils/notifications/checkAndAskForPermissionsActionAtom'
 import {preferencesAtom} from '../../../utils/preferences'
 import IconButton from '../../IconButton'
 import Image from '../../Image'
@@ -51,6 +52,9 @@ function ChatTextInput(): JSX.Element | null {
   const clearExtraToSend = useSetAtom(clearExtraToSendActionAtom)
   const session = useSessionAssumeLoggedIn()
   const {t} = useTranslation()
+  const checkNotificationsAndAskIfPossible = useSetAtom(
+    checkNotificationPermissionsAndAskIfPossibleTEActionAtom
+  )
 
   const preferences = useAtomValue(preferencesAtom)
 
@@ -85,6 +89,7 @@ function ChatTextInput(): JSX.Element | null {
     setSelectedImage(undefined)
 
     void sendMessage(message)
+    void checkNotificationsAndAskIfPossible()()
   }, [
     value,
     selectedImage,
@@ -93,6 +98,7 @@ function ChatTextInput(): JSX.Element | null {
     setReplyToMessage,
     setSelectedImage,
     sendMessage,
+    checkNotificationsAndAskIfPossible,
   ])
 
   const imagePreviewLimits = useMemo(

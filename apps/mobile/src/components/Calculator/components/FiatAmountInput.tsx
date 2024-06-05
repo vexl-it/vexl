@@ -1,23 +1,17 @@
+import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue, useSetAtom, type PrimitiveAtom} from 'jotai'
 import {useRef, useState} from 'react'
 import {type TextInput} from 'react-native'
 import {Stack} from 'tamagui'
-import {Dropdown} from '../../../../Dropdown'
+import {Dropdown} from '../../Dropdown'
+import {tradeCalculatorMolecule} from '../../TradeCalculator/atoms'
+import AmountInput from '../../TradeCalculator/components/AmountInput'
+import CalculatedWithLiveRate from '../../TradeCalculator/components/CalculatedWithLiveRate'
+import {dropdownStyles} from '../../TradeCalculator/styles'
 import {
   fiatCurrenciesDropdownData,
   replaceNonDecimalCharsInInput,
-} from '../../../utils'
-import {
-  btcPriceCurrencyAtom,
-  btcPriceForOfferWithStateAtom,
-  calculateBtcValueOnFiatAmountChangeActionAtom,
-  ownPriceAtom,
-  tradePriceTypeAtom,
-  updateFiatCurrencyActionAtom,
-} from '../atoms'
-import {dropdownStyles} from '../styles'
-import AmountInput from './AmountInput'
-import CalculatedWithLiveRate from './CalculatedWithLiveRate'
+} from '../../TradeCalculator/utils'
 
 interface Props {
   automaticCalculationDisabled?: boolean
@@ -34,6 +28,15 @@ function FiatAmountInput({
 }: Props): JSX.Element {
   const ref = useRef<TextInput>(null)
   const [isFocused, setIsFocused] = useState<boolean>(false)
+
+  const {
+    calculateBtcValueOnFiatAmountChangeActionAtom,
+    btcPriceForOfferWithStateAtom,
+    updateFiatCurrencyActionAtom,
+    btcPriceCurrencyAtom,
+    tradePriceTypeAtom,
+    ownPriceAtom,
+  } = useMolecule(tradeCalculatorMolecule)
 
   const fiatValue = useAtomValue(fiatValueAtom)
   const calculateBtcValueOnFiatAmountChange = useSetAtom(

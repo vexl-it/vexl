@@ -1,3 +1,4 @@
+import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue} from 'jotai'
 import Animated, {
   Easing,
@@ -14,11 +15,11 @@ import {
   type ColorTokens,
   type StackProps,
 } from 'tamagui'
-import {useTranslation} from '../../../../../utils/localization/I18nProvider'
-import Image from '../../../../Image'
-import userSvg from '../../../../images/userSvg'
-import {tradePriceTypeAtom} from '../atoms'
-import snowflakeSvg from '../images/snowflakeSvg'
+import {useTranslation} from '../../../utils/localization/I18nProvider'
+import Image from '../../Image'
+import snowflakeSvg from '../../TradeChecklistFlow/components/CalculateAmountFlow/images/snowflakeSvg'
+import userSvg from '../../images/userSvg'
+import {tradeCalculatorMolecule} from '../atoms'
 
 interface AnimatedLiveIndicatorProps {
   color?: ColorTokens
@@ -56,6 +57,7 @@ function PriceTypeIndicator({
   ...props
 }: Props): JSX.Element {
   const {t} = useTranslation()
+  const {tradePriceTypeAtom} = useMolecule(tradeCalculatorMolecule)
   const tradePriceType = useAtomValue(tradePriceTypeAtom)
 
   return (

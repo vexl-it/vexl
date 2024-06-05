@@ -1,13 +1,21 @@
-import {useAtomValue} from 'jotai'
+import {type TradePriceType} from '@vexl-next/domain/src/general/tradeChecklist'
+import {useAtomValue, type PrimitiveAtom} from 'jotai'
 import {TouchableOpacity, type TouchableOpacityProps} from 'react-native'
 import {Stack, XStack, getTokens} from 'tamagui'
-import chevronDownSvg from '../../../../../../../images/chevronDownSvg'
-import Image from '../../../../../../Image'
-import {tradePriceTypeAtom} from '../../../atoms'
-import PriceTypeIndicator from '../../PriceTypeIndicator'
+import chevronDownSvg from '../../../images/chevronDownSvg'
+import Image from '../../Image'
+import PriceTypeIndicator from '../../TradeCalculator/components/PriceTypeIndicator'
 
-function SwitchTradePriceTypeButton(props: TouchableOpacityProps): JSX.Element {
+interface Props extends TouchableOpacityProps {
+  tradePriceTypeAtom: PrimitiveAtom<TradePriceType | undefined>
+}
+
+function SwitchTradePriceTypeButton({
+  tradePriceTypeAtom,
+  ...props
+}: Props): JSX.Element {
   const tradePriceType = useAtomValue(tradePriceTypeAtom)
+
   return (
     <TouchableOpacity {...props}>
       <XStack ai="center">

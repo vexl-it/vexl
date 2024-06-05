@@ -1,18 +1,19 @@
 import {type BtcOrSat} from '@vexl-next/domain/src/general/tradeChecklist'
-import {useAtomValue, useSetAtom, type PrimitiveAtom} from 'jotai'
+import {
+  useAtom,
+  useAtomValue,
+  useSetAtom,
+  type PrimitiveAtom,
+  type WritableAtom,
+} from 'jotai'
 import {useRef, useState} from 'react'
 import {StyleSheet, type TextInput} from 'react-native'
 import {Stack, getTokens} from 'tamagui'
-import {SATOSHIS_IN_BTC} from '../../../../../state/currentBtcPriceAtoms'
-import {Dropdown, type DropdownItemProps} from '../../../../Dropdown'
-import {replaceNonDecimalCharsInInput} from '../../../utils'
-import {
-  btcOrSatAtom,
-  calculateFiatValueOnBtcAmountChangeActionAtom,
-  switchBtcOrSatValueActionAtom,
-} from '../atoms'
-import AmountInput from './AmountInput'
-import CalculatedWithLiveRate from './CalculatedWithLiveRate'
+import {SATOSHIS_IN_BTC} from '../../../state/currentBtcPriceAtoms'
+import {Dropdown, type DropdownItemProps} from '../../Dropdown'
+import AmountInput from '../../TradeCalculator/components/AmountInput'
+import CalculatedWithLiveRate from '../../TradeCalculator/components/CalculatedWithLiveRate'
+import {replaceNonDecimalCharsInInput} from '../../TradeCalculator/utils'
 
 const styles = StyleSheet.create({
   dropdown: {
@@ -45,6 +46,7 @@ interface Props {
   automaticCalculationDisabled?: boolean
   editable?: boolean
   btcValueAtom: PrimitiveAtom<string>
+  btcOrSatsValueActionAtom: WritableAtom<BtcOrSat, [value: BtcOrSat], void>
 }
 
 const btcOrSatDropdownData: Array<DropdownItemProps<BtcOrSat>> =
@@ -57,13 +59,13 @@ function BtcAmountInput({
   automaticCalculationDisabled,
   btcValueAtom,
   editable = true,
+  btcOrSatsValueActionAtom,
 }: Props): JSX.Element {
   const ref = useRef<TextInput>(null)
   const [isFocused, setIsFocused] = useState<boolean>(false)
 
   const btcValue = useAtomValue(btcValueAtom)
-  const btcOrSat = useAtomValue(btcOrSatAtom)
-  const switchBtcOrSatValue = useSetAtom(switchBtcOrSatValueActionAtom)
+  const [btcOrSats, setBtcOrSats] = useAtom(btcOrSatsValueActionAtom)
   const calculateFiatValueOnBtcAmountChange = useSetAtom(
     calculateFiatValueOnBtcAmountChangeActionAtom
   )
@@ -83,7 +85,7 @@ function BtcAmountInput({
         ref.current?.focus()
       }}
       placeholder={
-        btcOrSat === 'BTC' ? BTC_INPUT_PLACEHOLDER : SATS_INPUT_PLACEHOLDER
+        btcOrSats === 'BTC' ? BTC_INPUT_PLACEHOLDER : SATS_INPUT_PLACEHOLDER
       }
       value={btcValue}
       onChangeText={(input) => {
@@ -96,10 +98,10 @@ function BtcAmountInput({
       <Stack>
         <Dropdown
           disable={!editable}
-          value={{value: btcOrSat, label: btcOrSat}}
+          value={{value: btcOrSats, label: btcOrSats}}
           data={btcOrSatDropdownData}
           onChange={(item) => {
-            switchBtcOrSatValue(item.value)
+            setBtcOrSats(item.value)
           }}
           style={styles.dropdown}
           containerStyle={styles.dropdownContainerStyle}

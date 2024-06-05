@@ -1,24 +1,36 @@
 import {useNavigation, type NavigationProp} from '@react-navigation/native'
-import {useAtom, useAtomValue, useSetAtom} from 'jotai'
+import {
+  useAtom,
+  useAtomValue,
+  useSetAtom,
+  type PrimitiveAtom,
+  type WritableAtom,
+} from 'jotai'
 import {TouchableOpacity} from 'react-native'
 import {Stack, Text, XStack, getTokens} from 'tamagui'
-import chevronRightSvg from '../../../../../../../images/chevronRightSvg'
-import {type TradeChecklistStackParamsList} from '../../../../../../../navigationTypes'
-import {useTranslation} from '../../../../../../../utils/localization/I18nProvider'
-import Image from '../../../../../../Image'
-import Switch from '../../../../../../Switch'
-import {
-  applyFeeOnFeeChangeActionAtom,
-  feeAmountAtom,
-  premiumOrDiscountEnabledAtom,
-} from '../../../atoms'
+import chevronRightSvg from '../../../images/chevronRightSvg'
+import {type TradeCalculatorStackParamsList} from '../../../navigationTypes'
+import {useTranslation} from '../../../utils/localization/I18nProvider'
+import Image from '../../Image'
+import Switch from '../../Switch'
 
-function PremiumOrDiscount(): JSX.Element {
+interface Props {
+  feeAmountAtom: PrimitiveAtom<number>
+  togglePremiumOrDiscountActionAtom: WritableAtom<boolean, [], void>
+  applyFeeOnFeeChangeActionAtom: WritableAtom<null, [feeAmount: number], void>
+}
+
+function PremiumOrDiscount({
+  feeAmountAtom,
+  togglePremiumOrDiscountActionAtom,
+  applyFeeOnFeeChangeActionAtom,
+}: Props): JSX.Element {
   const {t} = useTranslation()
-  const navigation: NavigationProp<TradeChecklistStackParamsList> =
+  const navigation: NavigationProp<TradeCalculatorStackParamsList> =
     useNavigation()
-  const [premiumOrDiscountEnabled, setPremiumOrDiscountEnabled] = useAtom(
-    premiumOrDiscountEnabledAtom
+
+  const [premiumOrDiscount, togglePremiumOrDiscount] = useAtom(
+    togglePremiumOrDiscountActionAtom
   )
   const feeAmount = useAtomValue(feeAmountAtom)
   const applyFeeOnFeeChange = useSetAtom(applyFeeOnFeeChangeActionAtom)
@@ -30,14 +42,14 @@ function PremiumOrDiscount(): JSX.Element {
           'tradeChecklist.calculateAmount.premiumOrDiscount'
         )}`}</Text>
         <Switch
-          value={premiumOrDiscountEnabled}
+          value={premiumOrDiscount}
           onChange={() => {
-            setPremiumOrDiscountEnabled(!premiumOrDiscountEnabled)
+            togglePremiumOrDiscount()
             applyFeeOnFeeChange(0)
           }}
         />
       </XStack>
-      {!!premiumOrDiscountEnabled && (
+      {!!premiumOrDiscount && (
         <TouchableOpacity
           onPress={() => {
             navigation.navigate('PremiumOrDiscount')

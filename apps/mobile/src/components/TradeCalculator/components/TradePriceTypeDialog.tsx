@@ -1,19 +1,15 @@
 import {useNavigation, type NavigationProp} from '@react-navigation/native'
+import {useMolecule} from 'bunshi/dist/react'
 import {useAtom, useAtomValue, useSetAtom} from 'jotai'
 import React from 'react'
 import {ScrollView, StyleSheet, View} from 'react-native'
 import {Stack, Text, XStack} from 'tamagui'
-import {type TradeChecklistStackParamsList} from '../../../../../navigationTypes'
-import {useTranslation} from '../../../../../utils/localization/I18nProvider'
-import AnimatedDialogWrapper from '../../../../AnimatedDialogWrapper'
-import Button from '../../../../Button'
-import CurrentBtcPrice from '../../../../CurrentBtcPrice'
-import {
-  btcPriceCurrencyAtom,
-  setFormDataBasedOnBtcPriceTypeActionAtom,
-  tradePriceTypeAtom,
-  tradePriceTypeDialogVisibleAtom,
-} from '../atoms'
+import {type TradeCalculatorStackParamsList} from '../../../navigationTypes'
+import {useTranslation} from '../../../utils/localization/I18nProvider'
+import AnimatedDialogWrapper from '../../AnimatedDialogWrapper'
+import Button from '../../Button'
+import CurrentBtcPrice from '../../CurrentBtcPrice'
+import {tradeCalculatorMolecule} from '../atoms'
 import PriceTypeIndicator from './PriceTypeIndicator'
 
 const styles = StyleSheet.create({
@@ -22,8 +18,14 @@ const styles = StyleSheet.create({
 
 function TradePriceTypeDialog(): JSX.Element | null {
   const {t} = useTranslation()
-  const navigation: NavigationProp<TradeChecklistStackParamsList> =
+  const navigation: NavigationProp<TradeCalculatorStackParamsList> =
     useNavigation()
+  const {
+    tradePriceTypeAtom,
+    btcPriceCurrencyAtom,
+    tradePriceTypeDialogVisibleAtom,
+    setFormDataBasedOnBtcPriceTypeActionAtom,
+  } = useMolecule(tradeCalculatorMolecule)
   const tradePriceType = useAtomValue(tradePriceTypeAtom)
   const [tradePriceTypeDialogVisible, setTradePriceTypeDialogVisible] = useAtom(
     tradePriceTypeDialogVisibleAtom

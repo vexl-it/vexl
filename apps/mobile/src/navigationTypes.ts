@@ -59,6 +59,12 @@ export type RootStackParamsList = {
 
   CommonFriends: {contactsHashes: readonly string[]}
 
+  TradeCalculatorFlow: NavigatorScreenParams<TradeCalculatorStackParamsList> & {
+    readonly amountData: AmountData | undefined
+  }
+
+  TradeCalculator: undefined
+
   NotificationSettings: undefined
 
   AppLogs: undefined
@@ -133,6 +139,13 @@ export type ContactsTabScreenProps<T extends keyof ContactsTabParamsList> =
   >
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type TradeCalculatorStackParamsList = {
+  TradeCalculator: undefined
+  SetYourOwnPrice: undefined
+  PremiumOrDiscount: undefined
+}
+
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type TradeChecklistStackParamsList = {
   AgreeOnTradeDetails: undefined
   ChooseAvailableDays: {
@@ -148,8 +161,6 @@ export type TradeChecklistStackParamsList = {
   CalculateAmount: {
     readonly amountData: AmountData | undefined
   }
-  SetYourOwnPrice: undefined
-  PremiumOrDiscount: undefined
   Network: {
     readonly networkData: NetworkData | undefined
   }

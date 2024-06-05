@@ -35,6 +35,8 @@ import PostLoginFlow from '../PostLoginFlow'
 import SetContactsScreen from '../SetContactsScreen'
 import TodoScreen from '../TodoScreen'
 import TosScreen from '../TosScreen'
+import TradeCalculatorFlow from '../TradeCalculator'
+import TradeCalculatorScreen from '../TradeCalculatorScreen'
 import TradeChecklistFlow from '../TradeChecklistFlow'
 import {useHandlePostLoginFlowRedirect} from './utils'
 
@@ -109,6 +111,18 @@ function RootNavigation(): JSX.Element {
                 presentation: 'containedTransparentModal',
               }}
               component={TradeChecklistFlow}
+            />
+            <Stack.Screen
+              name="TradeCalculator"
+              component={TradeCalculatorScreen}
+            />
+            <Stack.Screen
+              name="TradeCalculatorFlow"
+              options={{
+                animation: 'slide_from_bottom',
+                presentation: 'containedTransparentModal',
+              }}
+              component={TradeCalculatorFlow}
             />
           </Stack.Group>
         )}

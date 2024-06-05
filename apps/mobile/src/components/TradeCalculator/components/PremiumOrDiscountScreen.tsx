@@ -3,27 +3,26 @@ import {
   useNavigation,
   type NavigationProp,
 } from '@react-navigation/native'
+import {type OfferType} from '@vexl-next/domain/src/general/offers'
+import {useMolecule} from 'bunshi/dist/react'
 import {atom, useAtom, useAtomValue, useSetAtom} from 'jotai'
 import {useCallback} from 'react'
 import {Text} from 'tamagui'
-import {type TradeChecklistStackParamsList} from '../../../../../../navigationTypes'
-import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
-import useSafeGoBack from '../../../../../../utils/useSafeGoBack'
+import {type TradeChecklistStackParamsList} from '../../../navigationTypes'
+import {useTranslation} from '../../../utils/localization/I18nProvider'
+import useSafeGoBack from '../../../utils/useSafeGoBack'
 import {
   HeaderProxy,
   PrimaryFooterButtonProxy,
   SecondaryFooterButtonProxy,
-} from '../../../../../PageWithNavigationHeader'
-import PremiumOrDiscountContent from '../../../../../PremiumOrDiscountContent'
-import Content from '../../../Content'
-import {
-  applyFeeOnFeeChangeActionAtom,
-  feeAmountAtom,
-  offerTypeAtom,
-} from '../../atoms'
-import PriceTypeIndicator from '../PriceTypeIndicator'
+} from '../../PageWithNavigationHeader'
+import PremiumOrDiscountContent from '../../PremiumOrDiscountContent'
+import Content from '../../TradeChecklistFlow/components/Content'
+import {tradeCalculatorMolecule} from '../atoms'
+import PriceTypeIndicator from './PriceTypeIndicator'
 
 const tempFeeAmountAtom = atom<number>(0)
+const offerTypeAtom = atom<OfferType>('BUY')
 
 function PremiumOrDiscountScreen(): JSX.Element {
   const {t} = useTranslation()
@@ -31,6 +30,11 @@ function PremiumOrDiscountScreen(): JSX.Element {
   const navigation: NavigationProp<TradeChecklistStackParamsList> =
     useNavigation()
 
+  const {feeAmountAtom, applyFeeOnFeeChangeActionAtom} = useMolecule(
+    tradeCalculatorMolecule
+  )
+  // TODO: Rework this logic
+  // const offerType = useAtomValue(offerTypeAtom)
   const offerType = useAtomValue(offerTypeAtom)
   const feeAmount = useAtomValue(feeAmountAtom)
   const applyFeeOnFeeChange = useSetAtom(applyFeeOnFeeChangeActionAtom)

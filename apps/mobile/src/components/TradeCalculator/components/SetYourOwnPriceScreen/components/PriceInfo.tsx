@@ -1,15 +1,20 @@
+import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue} from 'jotai'
-import calculatePercentageDifference from '../../../../../../../utils/calculatePercentageDifference'
+import calculatePercentageDifference from '../../../../../utils/calculatePercentageDifference'
 import {
   getCurrentLocale,
   useTranslation,
-} from '../../../../../../../utils/localization/I18nProvider'
-import Info from '../../../../../../Info'
-import {btcPriceForOfferWithStateAtom, ownPriceAtom} from '../../../atoms'
+} from '../../../../../utils/localization/I18nProvider'
+import Info from '../../../../Info'
+import {tradeCalculatorMolecule} from '../../../atoms'
 
 function PriceInfo(): JSX.Element | null {
   const {t} = useTranslation()
   const locale = getCurrentLocale()
+
+  const {ownPriceAtom, btcPriceForOfferWithStateAtom} = useMolecule(
+    tradeCalculatorMolecule
+  )
 
   const ownPrice = Number(useAtomValue(ownPriceAtom)) ?? 0
   const btcPriceForOfferWithState = useAtomValue(btcPriceForOfferWithStateAtom)

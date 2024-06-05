@@ -1,22 +1,22 @@
 import {useFocusEffect} from '@react-navigation/native'
+import {useMolecule} from 'bunshi/dist/react'
 import {useAtom, useAtomValue, useSetAtom} from 'jotai'
 import {useCallback, useRef, useState} from 'react'
 import {type TextInput} from 'react-native'
 import {Stack} from 'tamagui'
-import {Dropdown} from '../../../../../../Dropdown'
-import {fiatCurrenciesDropdownData} from '../../../../../utils'
-import {
-  btcPriceCurrencyAtom,
-  btcPriceForOfferWithStateAtom,
-  ownPriceAtom,
-} from '../../../atoms'
+import {Dropdown} from '../../../../Dropdown'
+import {tradeCalculatorMolecule} from '../../../atoms'
 import {dropdownStyles} from '../../../styles'
+import {fiatCurrenciesDropdownData} from '../../../utils'
 import AmountInput from '../../AmountInput'
 
 function FiatOwnPriceInput(): JSX.Element {
   const ref = useRef<TextInput>(null)
 
   const [isFocused, setIsFocused] = useState<boolean>(false)
+
+  const {btcPriceForOfferWithStateAtom, btcPriceCurrencyAtom, ownPriceAtom} =
+    useMolecule(tradeCalculatorMolecule)
 
   const btcPriceForOfferWithState = useAtomValue(btcPriceForOfferWithStateAtom)
   const [currency, updateCurrency] = useAtom(btcPriceCurrencyAtom)

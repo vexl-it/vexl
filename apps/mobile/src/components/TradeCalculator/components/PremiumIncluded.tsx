@@ -1,10 +1,12 @@
+import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue} from 'jotai'
 import {Stack, Text} from 'tamagui'
-import {useTranslation} from '../../../../../utils/localization/I18nProvider'
-import {feeAmountAtom} from '../atoms'
+import {useTranslation} from '../../../utils/localization/I18nProvider'
+import {tradeCalculatorMolecule} from '../atoms'
 
 function PremiumIncluded(): JSX.Element | null {
   const {t} = useTranslation()
+  const {feeAmountAtom} = useMolecule(tradeCalculatorMolecule)
   const feeAmount = useAtomValue(feeAmountAtom)
 
   return feeAmount !== 0 ? (

@@ -82,6 +82,12 @@ function ContactsListSelect(): JSX.Element {
             tabBar={CustomTabBar}
           >
             <Tab.Screen
+              name="New"
+              options={{tabBarLabel: t('postLoginFlow.contactsList.new')}}
+              initialParams={{filter: 'new'}}
+              component={FilteredContacts}
+            />
+            <Tab.Screen
               name="NonSubmitted"
               options={{
                 tabBarLabel: t('postLoginFlow.contactsList.nonSubmitted'),
@@ -93,12 +99,6 @@ function ContactsListSelect(): JSX.Element {
               name="Submitted"
               options={{tabBarLabel: t('postLoginFlow.contactsList.submitted')}}
               initialParams={{filter: 'submitted'}}
-              component={FilteredContacts}
-            />
-            <Tab.Screen
-              name="New"
-              options={{tabBarLabel: t('postLoginFlow.contactsList.new')}}
-              initialParams={{filter: 'new'}}
               component={FilteredContacts}
             />
           </Tab.Navigator>

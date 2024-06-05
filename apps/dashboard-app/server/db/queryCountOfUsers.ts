@@ -9,14 +9,17 @@ const decodeNumberOfUsersResult = Schema.decodeUnknown(
   Schema.NonEmptyArray(
     Schema.Struct({
       count: Schema.compose(Schema.NumberFromString, Schema.Number),
-      maxId: Schema.compose(Schema.NumberFromString, ContactConnectionId),
+      maxId: Schema.OptionFromNullishOr(
+        Schema.compose(Schema.NumberFromString, ContactConnectionId),
+        undefined
+      ),
     })
   )
 )
 export const queryNumberOfUsers = (
   lastIdFetched: Option.Option<ContactConnectionId>
 ): Effect.Effect<
-  {count: number; maxId: ContactConnectionId},
+  {count: number; maxId: Option.Option<ContactConnectionId>},
   SqlError | ParseError,
   PgContactClient
 > =>

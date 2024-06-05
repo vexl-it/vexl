@@ -164,15 +164,6 @@ function ButtonsSection(): JSX.Element {
             },
           },
           {
-            text: t('settings.items.changeLanguage'),
-            icon: spokenLanguagesSvg,
-            iconFill: getTokens().color.greyOnBlack.val,
-            navigatesFurther: true,
-            onPress: changeLanguage,
-          },
-        ],
-        [
-          {
             text: t('settings.items.contactsImported'),
             icon: contactIconSvg,
             navigatesFurther: true,
@@ -180,64 +171,6 @@ function ButtonsSection(): JSX.Element {
               navigation.navigate('SetContacts')
             },
             children: <ContactsImportedTitle />,
-          },
-        ],
-        enableHiddenFeatures
-          ? [
-              {
-                text: `${t('settings.items.setPin')} ${
-                  Platform.OS === 'ios'
-                    ? ` / ${t('settings.items.faceId')}`
-                    : ''
-                }`,
-                icon: faceIdIconSvg,
-                navigatesFurther: true,
-                onPress: todo,
-              },
-              {
-                text: 'CZK',
-                icon: coinsIconSvg,
-                navigatesFurther: true,
-                onPress: () => {
-                  setChangeCurrencyDialogVisible(true)
-                },
-                children: <SelectedCurrencyTitle />,
-              },
-              {
-                text: t('settings.items.allowScreenshots'),
-                icon: imageIconSvg,
-                onPress: toggleScreenshotsDisabled,
-                children: <AllowScreenshots />,
-                // not working correctly for iOS 17 and above
-                hidden: isUsingIos17AndAbove(),
-              },
-            ]
-          : [
-              {
-                text: 'CZK',
-                icon: coinsIconSvg,
-                onPress: () => {
-                  setChangeCurrencyDialogVisible(true)
-                },
-                children: <SelectedCurrencyTitle />,
-              },
-              {
-                text: t('settings.items.allowScreenshots'),
-                icon: imageIconSvg,
-                onPress: toggleScreenshotsDisabled,
-                children: <AllowScreenshots />,
-                // not working correctly for iOS 17 and above
-                hidden: isUsingIos17AndAbove(),
-              },
-            ],
-        [
-          {
-            text: t('settings.items.termsAndPrivacy'),
-            icon: termsIconSvg,
-            navigatesFurther: true,
-            onPress: () => {
-              navigation.navigate('TermsAndConditions')
-            },
           },
           {
             text: t('notifications.preferences.screenTitle'),
@@ -248,11 +181,46 @@ function ButtonsSection(): JSX.Element {
             },
           },
           {
+            text: t('settings.items.allowScreenshots'),
+            icon: imageIconSvg,
+            onPress: toggleScreenshotsDisabled,
+            children: <AllowScreenshots />,
+            // not working correctly for iOS 17 and above
+            hidden: isUsingIos17AndAbove(),
+          },
+        ],
+        [
+          {
+            text: t('settings.items.changeLanguage'),
+            icon: spokenLanguagesSvg,
+            iconFill: getTokens().color.greyOnBlack.val,
+            navigatesFurther: true,
+            onPress: changeLanguage,
+          },
+          {
+            text: 'CZK',
+            icon: coinsIconSvg,
+            onPress: () => {
+              setChangeCurrencyDialogVisible(true)
+            },
+            children: <SelectedCurrencyTitle />,
+          },
+        ],
+        [
+          {
             text: t('settings.items.faqs'),
             icon: questionIconSvg,
             navigatesFurther: true,
             onPress: () => {
               navigation.navigate('Faqs')
+            },
+          },
+          {
+            text: t('settings.items.termsAndPrivacy'),
+            icon: termsIconSvg,
+            navigatesFurther: true,
+            onPress: () => {
+              navigation.navigate('TermsAndConditions')
             },
           },
           {
@@ -277,6 +245,16 @@ function ButtonsSection(): JSX.Element {
               {
                 text: t('settings.items.requestKnownData'),
                 icon: dataIconSvg,
+                onPress: todo,
+              },
+              {
+                text: `${t('settings.items.setPin')} ${
+                  Platform.OS === 'ios'
+                    ? ` / ${t('settings.items.faceId')}`
+                    : ''
+                }`,
+                icon: faceIdIconSvg,
+                navigatesFurther: true,
                 onPress: todo,
               },
             ]

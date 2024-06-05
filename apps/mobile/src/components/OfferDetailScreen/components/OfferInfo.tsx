@@ -18,7 +18,6 @@ import {createSingleOfferReportedFlagAtom} from '../../../state/marketplace/atom
 import {enableHiddenFeatures} from '../../../utils/environment'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {friendLevelBannerPreferenceAtom} from '../../../utils/preferences'
-import randomName from '../../../utils/randomName'
 import {offerRerequestLimitDaysAtom} from '../../../utils/remoteConfig/atoms'
 import useSafeGoBack from '../../../utils/useSafeGoBack'
 import Button from '../../Button'
@@ -77,14 +76,6 @@ function OfferInfo({
   const chatForOffer = useChatWithMessagesForOffer({
     offerPublicKey: offer.offerInfo.publicPart.offerPublicKey,
   })
-
-  const spokenLanguagesText = useMemo(
-    () =>
-      offer.offerInfo.publicPart.spokenLanguages
-        ?.map((lang) => t(`offerForm.spokenLanguages.${lang}`))
-        .join(', '),
-    [offer.offerInfo.publicPart.spokenLanguages, t]
-  )
 
   const requestState: RequestState = useMemo(
     () => (chatForOffer ? getRequestState(chatForOffer) : 'initial'),
@@ -159,16 +150,6 @@ function OfferInfo({
             actionButtonText={t('common.learnMore')}
             onActionPress={onWhatDoesThisMeanPressed}
           />
-          {offer.offerInfo.publicPart.spokenLanguages.length > 0 && (
-            <InfoSquare>
-              {t('offer.offerAuthorSpeaks', {
-                name:
-                  chatForOffer?.chat.otherSide?.realLifeInfo?.userName ??
-                  randomName(offer.offerInfo.offerId),
-                spokenLanguages: spokenLanguagesText,
-              })}
-            </InfoSquare>
-          )}
           <InfoSquare>{t(`offer.requestStatus.${requestState}`)}</InfoSquare>
           {!!showRequestButton && (
             <OfferRequestTextInput text={text} onChange={setText} />

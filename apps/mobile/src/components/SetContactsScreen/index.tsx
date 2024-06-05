@@ -1,11 +1,10 @@
 import fastDeepEqual from 'fast-deep-equal'
-import {useAtomValue, useSetAtom} from 'jotai'
-import {memo, useEffect} from 'react'
+import {useAtomValue} from 'jotai'
+import {memo} from 'react'
 import {ActivityIndicator} from 'react-native'
 import {Stack, getTokens} from 'tamagui'
 import {type RootStackScreenProps} from '../../navigationTypes'
 import {loadingContactsFromDeviceAtom} from '../../state/contacts/atom/loadContactsFromDeviceActionAtom'
-import wasLastRouteBeforeRedirectOnContactsScreenMmkvAtom from '../../state/lastRouteMmkvAtom'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 import IconButton from '../IconButton'
@@ -21,15 +20,6 @@ function SetContactsScreen({route}: Props): JSX.Element {
   const goBack = useSafeGoBack()
   const {t} = useTranslation()
   const loadingContactsFromDevice = useAtomValue(loadingContactsFromDeviceAtom)
-  const setWasLastRouteBeforeRedirectOnContactsScreen = useSetAtom(
-    wasLastRouteBeforeRedirectOnContactsScreenMmkvAtom
-  )
-
-  useEffect(() => {
-    setWasLastRouteBeforeRedirectOnContactsScreen({
-      value: false,
-    })
-  }, [setWasLastRouteBeforeRedirectOnContactsScreen])
 
   return (
     <>

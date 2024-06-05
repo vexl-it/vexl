@@ -4,6 +4,7 @@ import {useState} from 'react'
 import {Text, XStack, YStack} from 'tamagui'
 import {selectedCurrencyAtom} from '../../../../../../state/selectedCurrency'
 import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
+import {findCurrecnyByCode} from '../../../../../../utils/localization/currency'
 import RadioButton from '../../../../../RadioButton'
 import {changeCurrencyDialogVisibleAtom} from '../../atoms'
 import SettingsScreenDialog from '../SettingsScreenDialog'
@@ -22,6 +23,8 @@ function CurrencyItem({
   onButtonPress,
   title,
 }: CurrencyItemProps): JSX.Element {
+  const {flag} = findCurrecnyByCode(currency)
+
   return (
     <XStack
       ai="center"
@@ -37,7 +40,7 @@ function CurrencyItem({
         }}
       />
       <Text col={active ? '$black' : '$greyOnWhite'} fos={18} ff="$body500">
-        {title}
+        {flag} {title}
       </Text>
     </XStack>
   )

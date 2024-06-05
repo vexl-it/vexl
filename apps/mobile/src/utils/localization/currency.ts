@@ -371,3 +371,7 @@ export function formatCurrencyAmount(
   }
   return `${bigNumberToString(amount)} ${currency.symbol}`
 }
+
+export function findCurrecnyByCode(code: CurrencyCode): CurrencyInfo {
+  return currencies[code]
+}

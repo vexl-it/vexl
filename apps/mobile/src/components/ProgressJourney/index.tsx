@@ -1,6 +1,6 @@
-import {type ReactNode} from 'react'
+import {useCallback, type ReactNode} from 'react'
 import {TouchableWithoutFeedback} from 'react-native'
-import {Stack, styled} from 'tamagui'
+import {Stack, XStack, styled} from 'tamagui'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import Button from '../Button'
 import WhiteContainer from '../WhiteContainer'
@@ -44,6 +44,30 @@ function ProgressJourney({
 }: Props): JSX.Element {
   const {t} = useTranslation()
 
+  const onNextOrFinish = useCallback(() => {
+    if (currentPage === numberOfPages - 1) {
+      onFinish()
+    }
+    onPageChange(currentPage + 1)
+  }, [currentPage, numberOfPages, onFinish, onPageChange])
+
+  const onBackOrSkip = useCallback(() => {
+    if (withBackButton) {
+      if (currentPage === 0) onFinish()
+      else onPageChange(currentPage - 1)
+    } else {
+      if (currentPage === numberOfPages - 1) onFinish()
+      else onSkip()
+    }
+  }, [
+    currentPage,
+    numberOfPages,
+    onFinish,
+    onPageChange,
+    onSkip,
+    withBackButton,
+  ])
+
   return (
     <Stack f={1}>
       <WhiteContainer noPadding>
@@ -61,28 +85,37 @@ function ProgressJourney({
             </TouchableWithoutFeedback>
           ))}
         </Stack>
-        <Stack f={1} m="$3">
+        <Stack f={1} m="$3" position="relative">
           {children}
+          <XStack
+            f={1}
+            position="absolute"
+            top={0}
+            left={0}
+            bottom={0}
+            right={0}
+          >
+            <TouchableWithoutFeedback onPress={onBackOrSkip}>
+              <Stack f={1} />
+            </TouchableWithoutFeedback>
+            <TouchableWithoutFeedback onPress={onNextOrFinish}>
+              <Stack f={1} />
+            </TouchableWithoutFeedback>
+          </XStack>
         </Stack>
       </WhiteContainer>
       <Stack fd="row" my="$2">
         {withBackButton ? (
           <Button
             fullSize
-            onPress={
-              currentPage === 0
-                ? onFinish
-                : () => {
-                    onPageChange(currentPage - 1)
-                  }
-            }
+            onPress={onBackOrSkip}
             variant="primary"
             text={t(currentPage === 0 ? 'common.close' : 'common.back')}
           />
         ) : (
           <Button
             fullSize
-            onPress={currentPage === numberOfPages - 1 ? onFinish : onSkip}
+            onPress={onBackOrSkip}
             variant="primary"
             text={t('common.skip')}
           />
@@ -91,16 +124,14 @@ function ProgressJourney({
         {currentPage === numberOfPages - 1 ? (
           <Button
             fullSize
-            onPress={onFinish}
+            onPress={onNextOrFinish}
             variant="secondary"
             text={t(withBackButton ? 'common.done' : 'common.finish')}
           />
         ) : (
           <Button
             fullSize
-            onPress={() => {
-              onPageChange(currentPage + 1)
-            }}
+            onPress={onNextOrFinish}
             variant="secondary"
             text={t('common.next')}
           />

@@ -1,6 +1,7 @@
 import {useNavigation, useRoute} from '@react-navigation/native'
 import {useAtom} from 'jotai'
-import {useEffect} from 'react'
+import {useCallback} from 'react'
+import {useAppState} from '../utils/useAppState'
 import wasLastRouteBeforeRedirectOnContactsScreenMmkvAtom from './lastRouteMmkvAtom'
 
 export function useHandleRedirectToContactsScreen(): void {
@@ -11,17 +12,23 @@ export function useHandleRedirectToContactsScreen(): void {
     wasLastRouteBeforeRedirectOnContactsScreenMmkvAtom
   )
 
-  useEffect(() => {
-    if (value && activeRoute.name === 'Marketplace') {
-      console.info(
-        '👉 Redirect to Contacts screen after contacts permissions change'
-      )
-      navigation.navigate('SetContacts', {})
-    }
-  }, [
-    activeRoute.name,
-    navigation,
-    setWasLastRouteBeforeRedirectOnContactsScreen,
-    value,
-  ])
+  useAppState(
+    useCallback(
+      (state) => {
+        if (state === 'active' && value && activeRoute.name === 'Marketplace') {
+          console.info(
+            '👉 Redirect to Contacts screen after contacts permissions change'
+          )
+          navigation.navigate('SetContacts')
+          setWasLastRouteBeforeRedirectOnContactsScreen({value: false})
+        }
+      },
+      [
+        activeRoute.name,
+        navigation,
+        setWasLastRouteBeforeRedirectOnContactsScreen,
+        value,
+      ]
+    )
+  )
 }

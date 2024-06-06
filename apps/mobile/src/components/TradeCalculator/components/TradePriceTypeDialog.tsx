@@ -3,11 +3,11 @@ import {useAtom, useAtomValue, useSetAtom} from 'jotai'
 import React from 'react'
 import {ScrollView, StyleSheet, View} from 'react-native'
 import {Stack, Text, XStack} from 'tamagui'
-import {type TradeChecklistStackParamsList} from '../../../../../navigationTypes'
-import {useTranslation} from '../../../../../utils/localization/I18nProvider'
-import AnimatedDialogWrapper from '../../../../AnimatedDialogWrapper'
-import Button from '../../../../Button'
-import CurrentBtcPrice from '../../../../CurrentBtcPrice'
+import {type TradeChecklistStackParamsList} from '../../../navigationTypes'
+import {useTranslation} from '../../../utils/localization/I18nProvider'
+import AnimatedDialogWrapper from '../../AnimatedDialogWrapper'
+import Button from '../../Button'
+import CurrentBtcPrice from '../../CurrentBtcPrice'
 import {
   btcPriceCurrencyAtom,
   setFormDataBasedOnBtcPriceTypeActionAtom,

@@ -35,6 +35,7 @@ import PostLoginFlow from '../PostLoginFlow'
 import SetContactsScreen from '../SetContactsScreen'
 import TodoScreen from '../TodoScreen'
 import TosScreen from '../TosScreen'
+import TradeCalculatorRouter from '../TradeCalculatorRouter'
 import TradeChecklistFlow from '../TradeChecklistFlow'
 import {useHandlePostLoginFlowRedirect} from './utils'
 
@@ -98,6 +99,14 @@ function RootNavigation(): JSX.Element {
               component={NotificationPermissionsScreen}
             /> */}
             <Stack.Screen name="EditName" component={EditNameScreen} />
+            <Stack.Screen
+              name="TradeCalculatorFlow"
+              options={{
+                animation: 'slide_from_bottom',
+                presentation: 'containedTransparentModal',
+              }}
+              component={TradeCalculatorRouter}
+            />
             <Stack.Screen
               name="ChangeProfilePicture"
               component={ChangeProfilePictureScreen}

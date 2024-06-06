@@ -14,9 +14,9 @@ import {
   type ColorTokens,
   type StackProps,
 } from 'tamagui'
-import {useTranslation} from '../../../../../utils/localization/I18nProvider'
-import Image from '../../../../Image'
-import userSvg from '../../../../images/userSvg'
+import {useTranslation} from '../../../utils/localization/I18nProvider'
+import Image from '../../Image'
+import userSvg from '../../images/userSvg'
 import {tradePriceTypeAtom} from '../atoms'
 import snowflakeSvg from '../images/snowflakeSvg'
 
@@ -100,7 +100,7 @@ function PriceTypeIndicator({
             : '$green'
         }
       >
-        {tradePriceType === 'live'
+        {!tradePriceType || tradePriceType === 'live'
           ? t('tradeChecklist.calculateAmount.livePrice')
           : tradePriceType === 'frozen'
           ? t('tradeChecklist.calculateAmount.frozenPrice')

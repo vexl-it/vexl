@@ -1,49 +1,13 @@
 import {useFocusEffect} from '@react-navigation/native'
 import {atom, useAtomValue, useSetAtom} from 'jotai'
 import {useCallback} from 'react'
-import {StyleSheet} from 'react-native'
-import {
-  Directions,
-  Gesture,
-  GestureDetector,
-} from 'react-native-gesture-handler'
-import Animated, {FadeIn, runOnJS} from 'react-native-reanimated'
+import Animated, {FadeIn} from 'react-native-reanimated'
 import {Stack} from 'tamagui'
-import useSafeGoBack from '../../../utils/useSafeGoBack'
+import {backdropStyles} from '../../../utils/backdropStyles'
+import GoBackOnSwipeDown from '../../GoBackOnSwipeDown'
 import PageWithNavigationHeader from '../../PageWithNavigationHeader'
 
-const styles = StyleSheet.create({
-  backdrop: {
-    top: 0,
-    left: 0,
-    bottom: 0,
-    right: 0,
-    position: 'absolute',
-    backgroundColor: 'rgba(0, 0, 0, 0.55)',
-  },
-})
-
 export const isTradeChecklistFullScreenAtom = atom(false)
-
-function GoBackOnSwipeDown({
-  children,
-}: {
-  children: React.ReactNode
-}): JSX.Element {
-  const goBack = useSafeGoBack()
-
-  return (
-    <GestureDetector
-      gesture={Gesture.Fling()
-        .direction(Directions.DOWN)
-        .onEnd(() => {
-          runOnJS(goBack)()
-        })}
-    >
-      {children}
-    </GestureDetector>
-  )
-}
 
 export function useSetFullscreen(): void {
   const setFullscreen = useSetAtom(isTradeChecklistFullScreenAtom)
@@ -70,7 +34,10 @@ export default function TradeChecklistFlowPageContainer({
     <>
       {!isFullScreen && (
         <>
-          <Animated.View entering={FadeIn.delay(200)} style={styles.backdrop} />
+          <Animated.View
+            entering={FadeIn.delay(200)}
+            style={backdropStyles.backdrop}
+          />
           <Stack h={100} />
           <GoBackOnSwipeDown>
             <Stack bc="$black" pt="$2">

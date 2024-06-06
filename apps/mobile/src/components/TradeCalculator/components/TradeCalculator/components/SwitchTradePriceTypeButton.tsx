@@ -1,8 +1,8 @@
 import {useAtomValue} from 'jotai'
 import {TouchableOpacity, type TouchableOpacityProps} from 'react-native'
 import {Stack, XStack, getTokens} from 'tamagui'
-import chevronDownSvg from '../../../../../../../images/chevronDownSvg'
-import Image from '../../../../../../Image'
+import chevronDownSvg from '../../../../../images/chevronDownSvg'
+import Image from '../../../../Image'
 import {tradePriceTypeAtom} from '../../../atoms'
 import PriceTypeIndicator from '../../PriceTypeIndicator'
 

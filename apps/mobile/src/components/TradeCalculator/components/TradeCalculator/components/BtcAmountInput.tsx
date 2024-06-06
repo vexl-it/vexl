@@ -5,12 +5,12 @@ import {StyleSheet, type TextInput} from 'react-native'
 import {Stack, getTokens} from 'tamagui'
 import {SATOSHIS_IN_BTC} from '../../../../../state/currentBtcPriceAtoms'
 import {Dropdown, type DropdownItemProps} from '../../../../Dropdown'
-import {replaceNonDecimalCharsInInput} from '../../../utils'
 import {
   btcOrSatAtom,
   calculateFiatValueOnBtcAmountChangeActionAtom,
   switchBtcOrSatValueActionAtom,
-} from '../atoms'
+} from '../../../atoms'
+import {replaceNonDecimalCharsInInput} from '../../../utils'
 import AmountInput from './AmountInput'
 import CalculatedWithLiveRate from './CalculatedWithLiveRate'
 

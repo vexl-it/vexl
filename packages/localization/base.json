@@ -901,5 +901,6 @@
   "raffle.errorOpeningApp.title": "Error opening lnurl",
   "raffle.errorOpeningApp.text": "Do you have lightinig wallet installed?",
   "raffle.errorOpeningApp.button": "Copy lnurl",
-  "raffle.errorOpeningDeepLink": "Error opening deep link"
+  "raffle.errorOpeningDeepLink": "Error opening deep link",
+  "tradeCalculator.title": "Trade calculator"
 }

@@ -55,6 +55,8 @@ export type RootStackParamsList = {
 
   TodoScreen: undefined
 
+  TradeCalculatorFlow: NavigatorScreenParams<TradeCalculatorStackParamsList>
+
   SetContacts: {showNew?: boolean} | undefined
 
   CommonFriends: {contactsHashes: readonly string[]}
@@ -131,6 +133,21 @@ export type ContactsTabScreenProps<T extends keyof ContactsTabParamsList> =
     MaterialTopTabScreenProps<ContactsTabParamsList, T>,
     RootStackScreenProps<keyof RootStackParamsList>
   >
+
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type TradeCalculatorStackParamsList = {
+  TradeCalculator: undefined
+  PremiumOrDiscount: undefined
+  SetYourOwnPrice: undefined
+}
+
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type TradeCalculatorStackScreenProps<
+  T extends keyof TradeCalculatorStackParamsList,
+> = CompositeScreenProps<
+  NativeStackScreenProps<TradeCalculatorStackParamsList, T>,
+  RootStackScreenProps<keyof RootStackParamsList>
+>
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type TradeChecklistStackParamsList = {

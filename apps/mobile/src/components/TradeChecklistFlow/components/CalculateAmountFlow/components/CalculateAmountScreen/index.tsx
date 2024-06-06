@@ -1,6 +1,5 @@
 import {useAtomValue, useSetAtom, useStore} from 'jotai'
 import {useCallback, useEffect, useMemo} from 'react'
-import {Stack, XStack} from 'tamagui'
 import {type TradeChecklistStackScreenProps} from '../../../../../../navigationTypes'
 import {
   chatWithMessagesKeys,
@@ -9,7 +8,6 @@ import {
 import calculatePercentageDifference from '../../../../../../utils/calculatePercentageDifference'
 import {dismissKeyboardAndResolveOnLayoutUpdate} from '../../../../../../utils/dismissKeyboardPromise'
 import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
-import CurrentBtcPrice from '../../../../../CurrentBtcPrice'
 import Info from '../../../../../Info'
 import {loadingOverlayDisplayedAtom} from '../../../../../LoadingOverlayProvider'
 import {
@@ -17,27 +15,20 @@ import {
   PrimaryFooterButtonProxy,
   SecondaryFooterButtonProxy,
 } from '../../../../../PageWithNavigationHeader'
+import {
+  btcPriceForOfferWithStateAtom,
+  tradePriceTypeAtom,
+} from '../../../../../TradeCalculator/atoms'
+import TradeCalculator from '../../../../../TradeCalculator/components/TradeCalculator'
 import {submitTradeChecklistUpdatesActionAtom} from '../../../../atoms/updatesToBeSentAtom'
 import {useWasOpenFromAgreeOnTradeDetailsScreen} from '../../../../utils'
 import Content from '../../../Content'
 import {
-  btcInputValueAtom,
-  btcPriceCurrencyAtom,
-  btcPriceForOfferWithStateAtom,
-  calculateBtcValueAfterBtcPriceRefreshActionAtom,
-  fiatInputValueAtom,
   isOtherSideAmountDataNewerThanMineAtom,
   saveButtonDisabledAtom,
   saveLocalCalculatedAmountDataStateToMainStateActionAtom,
   syncDataWithChatStateActionAtom,
-  tradeBtcPriceAtom,
-  tradePriceTypeAtom,
-  tradePriceTypeDialogVisibleAtom,
 } from '../../atoms'
-import BtcAmountInput from '../../components/BtcAmountInput'
-import FiatAmountInput from '../../components/FiatAmountInput'
-import PremiumOrDiscount from './components/PremiumOrDiscount'
-import SwitchTradePriceTypeButton from './components/SwitchTradePriceTypeButton'
 
 type Props = TradeChecklistStackScreenProps<'CalculateAmount'>
 
@@ -55,9 +46,7 @@ function CalculateAmountScreen({
   const saveButtonDisabled = useAtomValue(saveButtonDisabledAtom)
   const tradePriceType = useAtomValue(tradePriceTypeAtom)
   const otherSideData = useAtomValue(otherSideDataAtom)
-  const setTradePriceTypeDialogVisible = useSetAtom(
-    tradePriceTypeDialogVisibleAtom
-  )
+
   const store = useStore()
   const shouldNavigateBackToChatOnSave =
     !useWasOpenFromAgreeOnTradeDetailsScreen()
@@ -70,9 +59,6 @@ function CalculateAmountScreen({
     submitTradeChecklistUpdatesActionAtom
   )
   const btcPriceForOfferWithState = useAtomValue(btcPriceForOfferWithStateAtom)
-  const calculateBtcValueAfterBtcPriceRefresh = useSetAtom(
-    calculateBtcValueAfterBtcPriceRefreshActionAtom
-  )
 
   const btcPricePercentageDifference = useMemo(() => {
     if (tradePriceType === 'custom' && amountData?.btcPrice)
@@ -120,45 +106,27 @@ function CalculateAmountScreen({
         title={t('tradeChecklist.calculateAmount.calculateAmount')}
       />
       <Content scrollable>
-        <Stack space="$4">
-          <XStack ai="center" jc="space-between">
-            <SwitchTradePriceTypeButton
-              onPress={() => {
-                setTradePriceTypeDialogVisible(true)
-              }}
-            />
-            <CurrentBtcPrice
-              disabled={tradePriceType !== 'live'}
-              currencyAtom={btcPriceCurrencyAtom}
-              customBtcPriceAtom={
-                tradePriceType !== 'live' ? tradeBtcPriceAtom : undefined
+        <TradeCalculator
+          onPremiumOrDiscountPress={() => {
+            navigation.navigate('PremiumOrDiscount')
+          }}
+        >
+          <Info
+            hideCloseButton
+            variant="yellow"
+            text={`${t(
+              'tradeChecklist.calculateAmount.choseToCalculateWithCustomPrice',
+              {
+                username: otherSideData.userName,
+                percentage: btcPricePercentageDifference,
               }
-              postRefreshActions={calculateBtcValueAfterBtcPriceRefresh}
-            />
-          </XStack>
-          {tradePriceType === 'custom' && (
-            <Info
-              hideCloseButton
-              variant="yellow"
-              text={`${t(
-                'tradeChecklist.calculateAmount.choseToCalculateWithCustomPrice',
-                {
-                  username: otherSideData.userName,
-                  percentage: btcPricePercentageDifference,
-                }
-              )} ${
-                btcPricePercentageDifference >= 0
-                  ? t('vexlbot.higherThanLivePrice')
-                  : t('vexlbot.lowerThanLivePrice')
-              }`}
-            />
-          )}
-          <Stack space="$2">
-            <BtcAmountInput btcValueAtom={btcInputValueAtom} />
-            <FiatAmountInput showSubtitle fiatValueAtom={fiatInputValueAtom} />
-          </Stack>
-          <PremiumOrDiscount />
-        </Stack>
+            )} ${
+              btcPricePercentageDifference >= 0
+                ? t('vexlbot.higherThanLivePrice')
+                : t('vexlbot.lowerThanLivePrice')
+            }`}
+          />
+        </TradeCalculator>
       </Content>
       <PrimaryFooterButtonProxy hidden />
       <SecondaryFooterButtonProxy

@@ -1,14 +1,15 @@
 import {useAtomValue, useSetAtom} from 'jotai'
-import {dismissKeyboardAndResolveOnLayoutUpdate} from '../../../../../../utils/dismissKeyboardPromise'
-import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
-import useSafeGoBack from '../../../../../../utils/useSafeGoBack'
+import {ScrollView} from 'react-native'
+import {Stack} from 'tamagui'
+import {dismissKeyboardAndResolveOnLayoutUpdate} from '../../../../utils/dismissKeyboardPromise'
+import {useTranslation} from '../../../../utils/localization/I18nProvider'
+import useSafeGoBack from '../../../../utils/useSafeGoBack'
 import {
   HeaderProxy,
   PrimaryFooterButtonProxy,
   SecondaryFooterButtonProxy,
-} from '../../../../../PageWithNavigationHeader'
-import SetYourOwnPrice from '../../../../../TradeCalculator/components/SetYourOwnPrice'
-import Content from '../../../Content'
+} from '../../../PageWithNavigationHeader'
+import SetYourOwnPrice from '../../../TradeCalculator/components/SetYourOwnPrice'
 import {
   ownPriceSaveButtonDisabledAtom,
   saveYourPriceActionAtom,
@@ -29,9 +30,11 @@ function SetYourOwnPriceScreen(): JSX.Element {
         onClose={goBack}
         title={t('tradeChecklist.calculateAmount.setYourOwnPrice')}
       />
-      <Content scrollable>
-        <SetYourOwnPrice />
-      </Content>
+      <Stack f={1} bc="$black" pb="$1">
+        <ScrollView showsVerticalScrollIndicator={false}>
+          <SetYourOwnPrice />
+        </ScrollView>
+      </Stack>
       <PrimaryFooterButtonProxy hidden />
       <SecondaryFooterButtonProxy
         disabled={ownPriceSaveButtonDisabled}

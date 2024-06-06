@@ -3,15 +3,15 @@ import {useAtom, useAtomValue, useSetAtom} from 'jotai'
 import {useCallback, useRef, useState} from 'react'
 import {type TextInput} from 'react-native'
 import {Stack} from 'tamagui'
-import {Dropdown} from '../../../../../../Dropdown'
-import {fiatCurrenciesDropdownData} from '../../../../../utils'
+import {Dropdown} from '../../../../Dropdown'
+import {dropdownStyles} from '../../../../TradeCalculator/styles'
 import {
   btcPriceCurrencyAtom,
   btcPriceForOfferWithStateAtom,
   ownPriceAtom,
 } from '../../../atoms'
-import {dropdownStyles} from '../../../styles'
-import AmountInput from '../../AmountInput'
+import {fiatCurrenciesDropdownData} from '../../../utils'
+import AmountInput from '../../TradeCalculator/components/AmountInput'
 
 function FiatOwnPriceInput(): JSX.Element {
   const ref = useRef<TextInput>(null)

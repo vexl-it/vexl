@@ -4,18 +4,18 @@ import {type TextInput} from 'react-native'
 import {Stack} from 'tamagui'
 import {Dropdown} from '../../../../Dropdown'
 import {
-  fiatCurrenciesDropdownData,
-  replaceNonDecimalCharsInInput,
-} from '../../../utils'
-import {
   btcPriceCurrencyAtom,
   btcPriceForOfferWithStateAtom,
   calculateBtcValueOnFiatAmountChangeActionAtom,
   ownPriceAtom,
   tradePriceTypeAtom,
   updateFiatCurrencyActionAtom,
-} from '../atoms'
-import {dropdownStyles} from '../styles'
+} from '../../../atoms'
+import {dropdownStyles} from '../../../styles'
+import {
+  fiatCurrenciesDropdownData,
+  replaceNonDecimalCharsInInput,
+} from '../../../utils'
 import AmountInput from './AmountInput'
 import CalculatedWithLiveRate from './CalculatedWithLiveRate'
 

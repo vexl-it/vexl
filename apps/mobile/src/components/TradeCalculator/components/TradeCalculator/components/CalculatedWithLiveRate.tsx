@@ -1,7 +1,7 @@
 import {useAtomValue} from 'jotai'
 import {Text} from 'tamagui'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
-import {tradePriceTypeAtom} from '../atoms'
+import {tradePriceTypeAtom} from '../../../atoms'
 
 function CalculatedWithLiveRate(): JSX.Element | null {
   const {t} = useTranslation()

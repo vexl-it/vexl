@@ -6,11 +6,11 @@ import {
   type TradeChecklistStackParamsList,
 } from '../../navigationTypes'
 import * as fromChatAtoms from '../../state/tradeChecklist/atoms/fromChatAtoms'
+import TradePriceTypeDialog from '../TradeCalculator/components/TradePriceTypeDialog'
 import AgreeOnTradeDetailsScreen from './components/AgreeOnTradeDetailsScreen'
 import CalculateAmountScreen from './components/CalculateAmountFlow/components/CalculateAmountScreen'
 import PremiumOrDiscountScreen from './components/CalculateAmountFlow/components/PremiumOrDiscountScreen'
 import SetYourOwnPriceScreen from './components/CalculateAmountFlow/components/SetYourOwnPriceScreen'
-import TradePriceTypeDialog from './components/CalculateAmountFlow/components/TradePriceTypeDialog'
 import AddTimeOptionsScreen from './components/DateAndTimeFlow/components/AddTimeOptionsScreen'
 import ChooseAvailableDaysScreen from './components/DateAndTimeFlow/components/ChooseAvailableDaysScreen'
 import PickDateFromSuggestionsScreen from './components/DateAndTimeFlow/components/PickDateFromSuggestionsScreen'

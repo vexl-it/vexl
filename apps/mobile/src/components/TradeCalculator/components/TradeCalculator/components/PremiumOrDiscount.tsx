@@ -1,22 +1,22 @@
-import {useNavigation, type NavigationProp} from '@react-navigation/native'
 import {useAtom, useAtomValue, useSetAtom} from 'jotai'
 import {TouchableOpacity} from 'react-native'
 import {Stack, Text, XStack, getTokens} from 'tamagui'
-import chevronRightSvg from '../../../../../../../images/chevronRightSvg'
-import {type TradeChecklistStackParamsList} from '../../../../../../../navigationTypes'
-import {useTranslation} from '../../../../../../../utils/localization/I18nProvider'
-import Image from '../../../../../../Image'
-import Switch from '../../../../../../Switch'
+import chevronRightSvg from '../../../../../images/chevronRightSvg'
+import {useTranslation} from '../../../../../utils/localization/I18nProvider'
+import Image from '../../../../Image'
+import Switch from '../../../../Switch'
 import {
   applyFeeOnFeeChangeActionAtom,
   feeAmountAtom,
   premiumOrDiscountEnabledAtom,
 } from '../../../atoms'
 
-function PremiumOrDiscount(): JSX.Element {
+interface Props {
+  onPremiumOrDiscountPress: () => void
+}
+
+function PremiumOrDiscount({onPremiumOrDiscountPress}: Props): JSX.Element {
   const {t} = useTranslation()
-  const navigation: NavigationProp<TradeChecklistStackParamsList> =
-    useNavigation()
   const [premiumOrDiscountEnabled, setPremiumOrDiscountEnabled] = useAtom(
     premiumOrDiscountEnabledAtom
   )
@@ -38,11 +38,7 @@ function PremiumOrDiscount(): JSX.Element {
         />
       </XStack>
       {!!premiumOrDiscountEnabled && (
-        <TouchableOpacity
-          onPress={() => {
-            navigation.navigate('PremiumOrDiscount')
-          }}
-        >
+        <TouchableOpacity onPress={onPremiumOrDiscountPress}>
           <XStack
             h={56}
             ai="center"

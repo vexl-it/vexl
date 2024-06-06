@@ -1,10 +1,10 @@
 import {useAtomValue} from 'jotai'
-import calculatePercentageDifference from '../../../../../../../utils/calculatePercentageDifference'
+import calculatePercentageDifference from '../../../../../utils/calculatePercentageDifference'
 import {
   getCurrentLocale,
   useTranslation,
-} from '../../../../../../../utils/localization/I18nProvider'
-import Info from '../../../../../../Info'
+} from '../../../../../utils/localization/I18nProvider'
+import Info from '../../../../Info'
 import {btcPriceForOfferWithStateAtom, ownPriceAtom} from '../../../atoms'
 
 function PriceInfo(): JSX.Element | null {

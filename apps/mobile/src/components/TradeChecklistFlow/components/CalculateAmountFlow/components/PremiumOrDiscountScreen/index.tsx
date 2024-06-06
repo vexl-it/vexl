@@ -14,14 +14,10 @@ import {
   PrimaryFooterButtonProxy,
   SecondaryFooterButtonProxy,
 } from '../../../../../PageWithNavigationHeader'
-import PremiumOrDiscountContent from '../../../../../PremiumOrDiscountContent'
+import {feeAmountAtom} from '../../../../../TradeCalculator/atoms'
+import PremiumOrDiscount from '../../../../../TradeCalculator/components/PremiumOrDiscount'
 import Content from '../../../Content'
-import {
-  applyFeeOnFeeChangeActionAtom,
-  feeAmountAtom,
-  offerTypeAtom,
-} from '../../atoms'
-import PriceTypeIndicator from '../PriceTypeIndicator'
+import {applyFeeOnFeeChangeActionAtom, offerTypeAtom} from '../../atoms'
 
 const tempFeeAmountAtom = atom<number>(0)
 
@@ -56,13 +52,10 @@ function PremiumOrDiscountScreen(): JSX.Element {
             ? t('offerForm.buyCheaperByUsingDiscount')
             : t('offerForm.sellFasterWithDiscount')}
         </Text>
-        <PremiumOrDiscountContent
-          proceedToDetailDisabled
-          feeAmountAtom={tempFeeAmountAtom}
+        <PremiumOrDiscount
           offerTypeAtom={offerTypeAtom}
-        >
-          <PriceTypeIndicator displayInGrayColor mr="$2" />
-        </PremiumOrDiscountContent>
+          tempFeeAmountAtom={tempFeeAmountAtom}
+        />
       </Content>
       <PrimaryFooterButtonProxy hidden />
       <SecondaryFooterButtonProxy

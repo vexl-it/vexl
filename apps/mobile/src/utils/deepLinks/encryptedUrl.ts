@@ -28,6 +28,8 @@ export const processEncryptedUrlActionAtom = atom(
           buttonsDirection: 'column-reverse',
           steps: [
             {
+              textAlign: 'center',
+              emojiTop: '🏆',
               type: 'StepWithText',
               title: t('raffle.popup.title'),
               description: t('raffle.popup.text'),

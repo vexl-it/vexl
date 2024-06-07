@@ -4,7 +4,7 @@ import dynamicLinks, {
 import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
-import {atom, useSetAtom} from 'jotai'
+import {atom, useStore} from 'jotai'
 import {useCallback, useEffect} from 'react'
 import parse from 'url-parse'
 import {addContactWithUiFeedbackAtom} from '../../state/contacts/atom/addContactWithUiFeedbackAtom'
@@ -71,8 +71,7 @@ export const handleImportDeepContactActionAtom = atom(
 
 export function useHandleDeepLink(): void {
   const {t} = useTranslation()
-  const handleImportDeepContact = useSetAtom(handleImportDeepContactActionAtom)
-  const processEncryptedUrl = useSetAtom(processEncryptedUrlActionAtom)
+  const store = useStore()
 
   const onLinkReceived = useCallback(
     (link: DynamicLink) => {
@@ -82,19 +81,25 @@ export function useHandleDeepLink(): void {
       switch (parsedUrl.query.type) {
         case LINK_TYPE_IMPORT_CONTACT:
           if (parsedUrl.query.data) {
-            void handleImportDeepContact(parsedUrl.query.data)()
+            void store.set(
+              handleImportDeepContactActionAtom,
+              parsedUrl.query.data
+            )()
           }
           break
         case LINK_TYPE_ENCRYPTED_URL:
           if (parsedUrl.query.data) {
-            void processEncryptedUrl(parsedUrl.query.data)()
+            void store.set(
+              processEncryptedUrlActionAtom,
+              parsedUrl.query.data
+            )()
           }
           break
         default:
           reportError('warn', new Error('Unknown deep link type'), {url})
       }
     },
-    [handleImportDeepContact, processEncryptedUrl]
+    [store]
   )
 
   useEffect(() => {

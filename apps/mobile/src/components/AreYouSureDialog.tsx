@@ -14,6 +14,8 @@ import Input, {type Props as VexlTextInputProps} from './Input'
 
 interface StepWithText {
   type: 'StepWithText'
+  textAlign?: 'center' | 'left' | 'right'
+  emojiTop?: string
   title: string
   description?: string
   negativeButtonText?: string
@@ -139,11 +141,25 @@ function AreYouSureDialog(): JSX.Element | null {
           >
             {step.type === 'StepWithText' ? (
               <Stack space="$2">
-                <Text fontFamily="$heading" fontSize={24} color="$black">
+                {!!step.emojiTop && (
+                  <Text fontSize={120} textAlign={step.textAlign ?? 'left'}>
+                    {step.emojiTop}
+                  </Text>
+                )}
+                <Text
+                  fontFamily="$heading"
+                  fontSize={24}
+                  color="$black"
+                  textAlign={step.textAlign ?? 'left'}
+                >
                   {step.title}
                 </Text>
                 {!!step.description && (
-                  <Text fontSize={18} color="$greyOnWhite">
+                  <Text
+                    fontSize={18}
+                    color="$greyOnWhite"
+                    textAlign={step.textAlign ?? 'left'}
+                  >
                     {step.description}
                   </Text>
                 )}

@@ -7,9 +7,11 @@ import {pipe} from 'fp-ts/function'
 import {atom, useStore} from 'jotai'
 import {useCallback, useEffect} from 'react'
 import parse from 'url-parse'
+import {z} from 'zod'
 import {addContactWithUiFeedbackAtom} from '../../state/contacts/atom/addContactWithUiFeedbackAtom'
 import {ImportContactFromLinkPayload} from '../../state/contacts/domain'
 import {hashPhoneNumber} from '../../state/contacts/utils'
+import {atomWithParsedMmkvStorage} from '../atomUtils/atomWithParsedMmkvStorage'
 import {parseJson, safeParse} from '../fpUtils'
 import {translationAtom, useTranslation} from '../localization/I18nProvider'
 import reportError from '../reportError'
@@ -69,6 +71,12 @@ export const handleImportDeepContactActionAtom = atom(
   }
 )
 
+export const lastInitialLinkStorageAtom = atomWithParsedMmkvStorage(
+  'lastInitialLink',
+  {lastLinkImported: null},
+  z.object({lastLinkImported: z.string().nullable()})
+)
+
 export function useHandleDeepLink(): void {
   const {t} = useTranslation()
   const store = useStore()
@@ -106,6 +114,17 @@ export function useHandleDeepLink(): void {
     dynamicLinks()
       .getInitialLink()
       .then((link) => {
+        const lastInitialLink = store.get(lastInitialLinkStorageAtom)
+
+        if (link !== null && lastInitialLink.lastLinkImported === link?.url) {
+          console.info('Ignoring initial link as it was opened before')
+          return
+        }
+
+        store.set(lastInitialLinkStorageAtom, {
+          lastLinkImported: link?.url ?? null,
+        })
+
         if (link) {
           onLinkReceived(link)
         }
@@ -122,5 +141,5 @@ export function useHandleDeepLink(): void {
         onLinkReceived(link)
       }
     })
-  }, [onLinkReceived, t])
+  }, [onLinkReceived, store, t])
 }

@@ -33,7 +33,7 @@ function Header(): JSX.Element | null {
           onPress={onBackButtonPress}
         />
       ) : (
-        <Stack />
+        <Stack w={40} />
       )}
       <Text fos={20} ff="$body600" col="$white">
         {headerState.title}
@@ -41,7 +41,7 @@ function Header(): JSX.Element | null {
       {headerState.onClose ? (
         <IconButton icon={closeSvg} onPress={onCloseButtonPress} />
       ) : (
-        <Stack />
+        <Stack w={40} />
       )}
     </XStack>
   ) : !headerState.hiddenAllTheWay ? (

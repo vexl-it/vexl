@@ -18,7 +18,7 @@ function TradeCalculatorScreen({navigation}: Props): JSX.Element {
 
   return (
     <>
-      <HeaderProxy onClose={goBack} title={t('tradeCalculator.title')} />
+      <HeaderProxy title={t('tradeCalculator.title')} />
       <Stack f={1} bc="$black" pb="$1">
         <ScrollView showsVerticalScrollIndicator={false}>
           <TradeCalculator

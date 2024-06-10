@@ -4,7 +4,6 @@ import {Stack} from 'tamagui'
 import {type TradeChecklistStackScreenProps} from '../../../../../../navigationTypes'
 import {chatWithMessagesKeys} from '../../../../../../state/tradeChecklist/atoms/fromChatAtoms'
 import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
-import useSafeGoBack from '../../../../../../utils/useSafeGoBack'
 import {loadingOverlayDisplayedAtom} from '../../../../../LoadingOverlayProvider'
 import {
   HeaderProxy,
@@ -34,7 +33,6 @@ function NetworkScreen({
   },
 }: Props): JSX.Element {
   const {t} = useTranslation()
-  const goBack = useSafeGoBack()
   const store = useStore()
   const saveLocalNetworkStateToMainState = useSetAtom(
     saveLocalNetworkStateToMainStateActionAtom
@@ -84,10 +82,7 @@ function NetworkScreen({
 
   return (
     <>
-      <HeaderProxy
-        onClose={goBack}
-        title={t('tradeChecklist.network.network')}
-      />
+      <HeaderProxy title={t('tradeChecklist.network.network')} />
       <Content scrollable>
         <SectionTitle
           text={t('tradeChecklist.network.network')}

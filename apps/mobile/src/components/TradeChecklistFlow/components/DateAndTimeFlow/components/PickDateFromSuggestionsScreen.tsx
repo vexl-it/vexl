@@ -37,23 +37,24 @@ function createOptionsFromChosenDays(
 }
 
 type Props = TradeChecklistStackScreenProps<'PickDateFromSuggestions'>
-export default function PickDateFromSuggestionsScreen(
-  props: Props
-): JSX.Element {
+
+export default function PickDateFromSuggestionsScreen({
+  navigation,
+  route: {
+    params: {chosenDays},
+  },
+}: Props): JSX.Element {
   const {t} = useTranslation()
 
   const itemsToShowAtoms = useAtomValueRefreshOnFocus(
     useCallback(
-      () =>
-        splitAtom(
-          atom(createOptionsFromChosenDays(props.route.params.chosenDays))
-        ),
-      [props.route.params.chosenDays]
+      () => splitAtom(atom(createOptionsFromChosenDays(chosenDays))),
+      [chosenDays]
     )
   )
 
   function onItemPress(data: AvailableDateTimeOption): void {
-    props.navigation.navigate('PickTimeFromSuggestions', {
+    navigation.navigate('PickTimeFromSuggestions', {
       chosenDay: data,
     })
   }
@@ -63,7 +64,7 @@ export default function PickDateFromSuggestionsScreen(
       <HeaderProxy
         title={t('tradeChecklist.dateAndTime.screenTitle')}
         onClose={() => {
-          props.navigation.navigate('AgreeOnTradeDetails')
+          navigation.navigate('AgreeOnTradeDetails')
         }}
       />
       <Content>
@@ -78,8 +79,8 @@ export default function PickDateFromSuggestionsScreen(
       <PrimaryFooterButtonProxy hidden />
       <SecondaryFooterButtonProxy
         onPress={() => {
-          props.navigation.navigate('ChooseAvailableDays', {
-            chosenDays: props.route.params.chosenDays,
+          navigation.navigate('ChooseAvailableDays', {
+            chosenDays,
           })
         }}
         text={t('tradeChecklist.dateAndTime.addDifferentTime')}

@@ -27,7 +27,6 @@ function SetYourOwnPriceScreen(): JSX.Element {
   return (
     <>
       <HeaderProxy
-        onClose={goBack}
         title={t('tradeChecklist.calculateAmount.setYourOwnPrice')}
       />
       <Stack f={1} bc="$black" pb="$1">

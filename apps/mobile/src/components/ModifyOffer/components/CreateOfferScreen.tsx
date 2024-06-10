@@ -9,7 +9,6 @@ import {Stack} from 'tamagui'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../../utils/useSafeGoBack'
 import Button from '../../Button'
-import IconButton from '../../IconButton'
 import KeyboardAvoidingView from '../../KeyboardAvoidingView'
 import OfferForm from '../../OfferForm'
 import ListingType from '../../OfferForm/components/ListingType'
@@ -17,7 +16,6 @@ import OfferType from '../../OfferForm/components/OfferType'
 import Screen from '../../Screen'
 import ScreenTitle from '../../ScreenTitle'
 import Section from '../../Section'
-import closeSvg from '../../images/closeSvg'
 import listingTypeSvg from '../../images/listingTypeSvg'
 import userSvg from '../../images/userSvg'
 import {offerFormMolecule} from '../atoms/offerFormStateAtoms'
@@ -64,9 +62,11 @@ function CreateOfferScreen(): JSX.Element {
     <Screen>
       <KeyboardAvoidingView>
         <ScrollView contentContainerStyle={styles.contentStyles}>
-          <ScreenTitle text={t('offerForm.myNewOffer')} withBottomBorder>
-            <IconButton variant="dark" icon={closeSvg} onPress={safeGoBack} />
-          </ScreenTitle>
+          <ScreenTitle
+            text={t('offerForm.myNewOffer')}
+            withBottomBorder
+            withBackButton
+          />
           <Section title={t('offerForm.listingType')} image={listingTypeSvg}>
             <ListingType
               listingTypeAtom={listingTypeAtom}

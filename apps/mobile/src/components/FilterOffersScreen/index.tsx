@@ -6,13 +6,11 @@ import {Stack, Text, XStack, getTokens} from 'tamagui'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 import Button from '../Button'
-import IconButton from '../IconButton'
 import SvgImage from '../Image'
 import FilterForm from '../OfferForm'
 import Screen from '../Screen'
 import ScreenTitle from '../ScreenTitle'
 import Section from '../Section'
-import closeSvg from '../images/closeSvg'
 import infoSvg from '../images/infoSvg'
 import sortingSvg from '../images/sortingSvg'
 import userSvg from '../images/userSvg'
@@ -57,10 +55,6 @@ function FilterOffersScreen(): JSX.Element {
     safeGoBack()
   }, [resetFilterOmitTextFilter, safeGoBack, saveFilter])
 
-  function onFilterOffersClose(): void {
-    safeGoBack()
-  }
-
   useFocusEffect(
     useCallback(() => {
       initializeOffersFilterOnDisplay()
@@ -69,18 +63,17 @@ function FilterOffersScreen(): JSX.Element {
 
   return (
     <Screen customHorizontalPadding={tokens.size[2].val}>
-      <ScreenTitle text={t('filterOffers.filterResults')} withBottomBorder>
+      <ScreenTitle
+        text={t('filterOffers.filterResults')}
+        withBottomBorder
+        withBackButton
+      >
         <XStack ai="center" space="$2">
           <Button
             onPress={resetOfferForm}
             size="small"
             variant="primary"
             text={t('common.reset')}
-          />
-          <IconButton
-            variant="dark"
-            icon={closeSvg}
-            onPress={onFilterOffersClose}
           />
         </XStack>
       </ScreenTitle>

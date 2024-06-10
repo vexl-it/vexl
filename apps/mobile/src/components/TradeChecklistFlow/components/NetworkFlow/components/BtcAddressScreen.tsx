@@ -43,10 +43,7 @@ function BtcAddressScreen(): JSX.Element {
 
   return (
     <>
-      <HeaderProxy
-        onClose={goBack}
-        title={t('tradeChecklist.btcAddress.btcAddress')}
-      />
+      <HeaderProxy title={t('tradeChecklist.btcAddress.btcAddress')} />
       <Content scrollable>
         <Stack mt="$6">
           <TextInput

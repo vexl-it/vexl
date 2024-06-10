@@ -38,7 +38,6 @@ function PremiumOrDiscountScreen(): JSX.Element {
     <>
       <HeaderProxy
         title={t('tradeChecklist.calculateAmount.premiumOrDiscount')}
-        onClose={goBack}
       />
       <Stack f={1} bc="$black" pb="$1">
         <ScrollView showsVerticalScrollIndicator={false}>

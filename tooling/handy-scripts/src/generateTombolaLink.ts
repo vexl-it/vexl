@@ -27,7 +27,7 @@ const generateLink = (payload: string): Effect.Effect<string> =>
     )}`
     const innerLinkEncoded = encodeURIComponent(innerLink)
 
-    return `https://link.vexl.it/?link=${innerLinkEncoded}&apn=it.vexl.next&isi=6448051657&ibi=it.vexl.next&efr=1`
+    return `https://link.vexl.it/?link=${innerLinkEncoded}&apn=it.vexl.next&isi=6448051657&ibi=it.vexl.next&efr=1&ifl=https%3A%2F%2Fvexl.it%2Fdownload`
   })
 
 export class EncryptingError extends Data.TaggedError('EncryptingError')<{

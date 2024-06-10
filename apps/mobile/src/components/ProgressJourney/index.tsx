@@ -94,6 +94,7 @@ function ProgressJourney({
             left={0}
             bottom={0}
             right={0}
+            mt="$10"
           >
             <TouchableWithoutFeedback onPress={onBackOrSkip}>
               <Stack f={1} />

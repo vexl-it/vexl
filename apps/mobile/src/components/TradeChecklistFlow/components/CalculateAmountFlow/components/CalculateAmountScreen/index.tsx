@@ -102,7 +102,6 @@ function CalculateAmountScreen({
   return (
     <>
       <HeaderProxy
-        onClose={navigation.goBack}
         title={t('tradeChecklist.calculateAmount.calculateAmount')}
       />
       <Content scrollable>

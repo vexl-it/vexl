@@ -4,15 +4,13 @@ import {DateTime} from 'luxon'
 import React, {useMemo} from 'react'
 import {Modal, ScrollView} from 'react-native'
 import {type MarkedDates} from 'react-native-calendars/src/types'
-import {useSafeAreaInsets} from 'react-native-safe-area-context'
-import {Stack, Text} from 'tamagui'
+import {Stack, Text, getTokens} from 'tamagui'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import Calendar, {
   REACT_NATIVE_CALENDARS_DATE_FORMAT,
 } from '../../../../Calendar'
-import IconButton from '../../../../IconButton'
+import Screen from '../../../../Screen'
 import ScreenTitle from '../../../../ScreenTitle'
-import closeSvg from '../../../../images/closeSvg'
 
 interface Props {
   expirationDateAtom: PrimitiveAtom<JSDateString | undefined>
@@ -23,7 +21,6 @@ function OfferExpirationModal({
   expirationDateAtom,
   offerExpirationModalVisibleAtom,
 }: Props): JSX.Element {
-  const {bottom, top} = useSafeAreaInsets()
   const {t} = useTranslation()
 
   const [expirationDate, setExpirationDate] = useAtom(expirationDateAtom)
@@ -49,19 +46,16 @@ function OfferExpirationModal({
       transparent
       visible={offerExpirationModalVisible}
     >
-      <Stack f={1} bc="$grey" px="$4" pb={bottom} pt={top}>
+      <Screen customHorizontalPadding={getTokens().space[2].val}>
         <ScreenTitle
           text={t('offerForm.expiration.offerExpirationDate')}
           textColor="$greyAccent5"
-        >
-          <IconButton
-            variant="dark"
-            icon={closeSvg}
-            onPress={() => {
-              setOfferExpirationModalVisible(false)
-            }}
-          />
-        </ScreenTitle>
+          onBackButtonPress={() => {
+            setOfferExpirationModalVisible(false)
+          }}
+          withBackButton
+          withBottomBorder
+        />
         <ScrollView showsVerticalScrollIndicator={false}>
           <Text col="$white" fos={16} ff="$body500">
             {t('offerForm.expiration.uponThisDate')}
@@ -76,7 +70,7 @@ function OfferExpirationModal({
             />
           </Stack>
         </ScrollView>
-      </Stack>
+      </Screen>
     </Modal>
   )
 }

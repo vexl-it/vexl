@@ -4,14 +4,11 @@ import {Stack} from 'tamagui'
 import {type RootStackScreenProps} from '../../navigationTypes'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import openUrl from '../../utils/openUrl'
-import useSafeGoBack from '../../utils/useSafeGoBack'
-import IconButton from '../IconButton'
 import Info from '../Info'
 import Markdown from '../Markdown'
 import Screen from '../Screen'
 import ScreenTitle from '../ScreenTitle'
 import Tabs from '../Tabs'
-import closeSvg from '../images/closeSvg'
 import FaqsRedirect from './components/FaqsRedirect'
 import useContent, {type TabType} from './useContent'
 
@@ -21,7 +18,6 @@ type Props = RootStackScreenProps<'TermsAndConditions'>
 
 function TosScreen({navigation}: Props): JSX.Element {
   const {t, isEnglish} = useTranslation()
-  const safeGoBack = useSafeGoBack()
   const content = useContent()
   const scrollViewRef = useRef<ScrollView>(null)
   const [activeTab, setActiveTab] = useState<TabType>('termsOfUse')
@@ -38,9 +34,7 @@ function TosScreen({navigation}: Props): JSX.Element {
 
   return (
     <Screen customHorizontalPadding={16}>
-      <ScreenTitle text={t('termsOfUse.termsOfUse')}>
-        <IconButton variant="dark" icon={closeSvg} onPress={safeGoBack} />
-      </ScreenTitle>
+      <ScreenTitle text={t('termsOfUse.termsOfUse')} withBackButton />
       <FaqsRedirect onPress={onFaqsPress} />
       <Stack h={16} />
       <Tabs activeTab={activeTab} tabs={content} onTabPress={setActiveTab} />

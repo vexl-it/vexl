@@ -9,12 +9,10 @@ import {
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 import Button from '../Button'
-import IconButton from '../IconButton'
 import Input from '../Input'
 import KeyboardAvoidingView from '../KeyboardAvoidingView'
 import Screen from '../Screen'
 import ScreenTitle from '../ScreenTitle'
-import closeSvg from '../images/closeSvg'
 
 function EditNameScreen(): JSX.Element {
   const {t} = useTranslation()
@@ -30,9 +28,7 @@ function EditNameScreen(): JSX.Element {
   return (
     <Screen customHorizontalPadding={tokens.space[2].val}>
       <KeyboardAvoidingView>
-        <ScreenTitle text={t('editName.editName')} mb="$2">
-          <IconButton variant="dark" icon={closeSvg} onPress={safeGoBack} />
-        </ScreenTitle>
+        <ScreenTitle text={t('editName.editName')} mb="$2" withBackButton />
         <Stack f={1}>
           <Input
             autoFocus

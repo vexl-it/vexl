@@ -10,13 +10,11 @@ import {Modal} from 'react-native'
 import {Stack, Text, XStack} from 'tamagui'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import Button from '../../../../Button'
-import IconButton from '../../../../IconButton'
 import Input from '../../../../Input'
 import KeyboardAvoidingView from '../../../../KeyboardAvoidingView'
 import {SLIDER_THRESHOLD} from '../../../../PremiumOrDiscountSlider'
 import Screen from '../../../../Screen'
 import ScreenTitle from '../../../../ScreenTitle'
-import closeSvg from '../../../../images/closeSvg'
 
 interface Props {
   feeAmountAtom: WritableAtom<number, [SetStateAction<number>], void>
@@ -73,10 +71,10 @@ function PremiumOrDiscountDetail({
           <Stack flex={1} space="$4">
             <ScreenTitle
               text={t('offerForm.premiumOrDiscount.premiumOrDiscount')}
+              onBackButtonPress={onClose}
               withBottomBorder
-            >
-              <IconButton variant="dark" icon={closeSvg} onPress={onClose} />
-            </ScreenTitle>
+              withBackButton
+            />
             <Text
               numberOfLines={2}
               adjustsFontSizeToFit

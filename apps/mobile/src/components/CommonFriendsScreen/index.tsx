@@ -52,6 +52,7 @@ function CommonFriendsScreen({
         <ScreenTitle
           text={t('commonFriends.commonFriends')}
           textColor="$black"
+          withBackButton
         />
         <FlashList
           estimatedItemSize={64}

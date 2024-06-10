@@ -6,11 +6,9 @@ import {realUserImageAtom} from '../../state/session'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 import Button from '../Button'
-import IconButton from '../IconButton'
 import Screen from '../Screen'
 import ScreenTitle from '../ScreenTitle'
 import SelectProfilePicture from '../SelectProfilePicture'
-import closeSvg from '../images/closeSvg'
 
 const selectedImageUriAtom = atom<UriString | undefined>(undefined)
 
@@ -30,9 +28,10 @@ function ChangeProfilePictureScreen(): JSX.Element {
 
   return (
     <Screen customHorizontalPadding={tokens.space[2].val}>
-      <ScreenTitle text={t('changeProfilePicture.changeProfilePicture')}>
-        <IconButton icon={closeSvg} onPress={safeGoBack} />
-      </ScreenTitle>
+      <ScreenTitle
+        text={t('changeProfilePicture.changeProfilePicture')}
+        withBackButton
+      />
       <Stack f={1} ai="center" jc="center">
         <SelectProfilePicture selectedImageUriAtom={selectedImageUriAtom} />
       </Stack>

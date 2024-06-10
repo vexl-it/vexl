@@ -7,12 +7,17 @@ import {
   type ColorTokens,
   type YStackProps,
 } from 'tamagui'
+import chevronLeftSvg from '../../images/chevronLeftSvg'
+import useSafeGoBack from '../../utils/useSafeGoBack'
+import IconButton from '../IconButton'
 
 interface Props extends YStackProps {
   children?: ReactNode
   text: string
   textColor?: ColorTokens
   withBottomBorder?: boolean
+  withBackButton?: boolean
+  onBackButtonPress?: () => void
 }
 
 function ScreenTitle({
@@ -20,12 +25,26 @@ function ScreenTitle({
   text,
   textColor,
   withBottomBorder = false,
+  withBackButton,
+  onBackButtonPress,
   ...props
 }: Props): JSX.Element {
+  const safeGoBack = useSafeGoBack()
+
   return (
     <YStack bc="transparent" space="$4" pb="$1" {...props}>
-      <XStack ai="flex-start" jc="space-between" space="$2">
-        <Stack fs={1}>
+      <XStack ai="flex-start" space="$4">
+        {!!withBackButton && (
+          <IconButton
+            variant="primary"
+            icon={chevronLeftSvg}
+            onPress={() => {
+              if (onBackButtonPress) onBackButtonPress()
+              else safeGoBack()
+            }}
+          />
+        )}
+        <Stack f={1} fs={1}>
           <Text
             adjustsFontSizeToFit
             numberOfLines={2}
@@ -37,7 +56,7 @@ function ScreenTitle({
           </Text>
         </Stack>
         {!!children && (
-          <XStack ai="center" jc="space-between">
+          <XStack f={1} ai="center" jc="flex-end">
             {children}
           </XStack>
         )}

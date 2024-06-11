@@ -30,16 +30,16 @@ export const syncCountOfUsersEffect = CountOfUsersState.pipe(
   Effect.flatMap(
     SubscriptionRef.updateEffect((value) =>
       Effect.gen(function* (_) {
-        const delta = yield* _(queryNumberOfUsers(value.lastIdFetched))
+        const delta = yield* _(queryNumberOfUsers(Option.none()))
 
-        // If there is no new delta, maxId will be none. In that case, use last id known
-        const lastIdFetched = delta.maxId.pipe(
-          Option.orElse(() => value.lastIdFetched)
-        )
+        // // If there is no new delta, maxId will be none. In that case, use last id known
+        // const lastIdFetched = delta.maxId.pipe(
+        //   Option.orElse(() => value.lastIdFetched)
+        // )
 
         return {
-          count: value.count + delta.count,
-          lastIdFetched,
+          count: delta.count,
+          lastIdFetched: Option.none(),
         }
       }).pipe(
         Effect.withSpan('Updating countOfUsersState', {

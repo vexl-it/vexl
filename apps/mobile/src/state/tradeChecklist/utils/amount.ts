@@ -2,6 +2,8 @@ import {type AmountData} from '@vexl-next/domain/src/general/tradeChecklist'
 import {UnixMilliseconds0} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import fastDeepEqual from 'fast-deep-equal'
 import calculatePercentageDifference from '../../../utils/calculatePercentageDifference'
+import {removeTrailingZerosFromNumberString} from '../../../utils/removeTrailingZerosFromNumberString'
+import {DECIMALS_FOR_BTC_VALUE} from '../../currentBtcPriceAtoms'
 import {type TradeChecklistInState} from '../domain'
 
 type AmountInState = TradeChecklistInState['amount']
@@ -76,4 +78,24 @@ export function amountSettled(data: AmountInState): boolean {
 
 export function amountPending(data: AmountInState): boolean {
   return getAmountData(data)?.status === 'pending'
+}
+
+export function applyFeeOnBtcAmount(
+  btcAmount: number,
+  feeAmount: number
+): number {
+  return btcAmount + btcAmount * (feeAmount / 100)
+}
+
+export function cancelFeeOnBtcAmount(
+  btcAmount: number,
+  feeAmount: number
+): number {
+  return btcAmount / (1 + feeAmount / 100)
+}
+
+export function formatBtcPrice(btcPrice: number): string {
+  return removeTrailingZerosFromNumberString(
+    btcPrice.toFixed(DECIMALS_FOR_BTC_VALUE)
+  )
 }

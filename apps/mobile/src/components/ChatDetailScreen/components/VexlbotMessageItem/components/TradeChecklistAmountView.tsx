@@ -6,7 +6,11 @@ import {useCallback, useMemo} from 'react'
 import {Stack, XStack, getTokens} from 'tamagui'
 import {SATOSHIS_IN_BTC} from '../../../../../state/currentBtcPriceAtoms'
 import * as amount from '../../../../../state/tradeChecklist/utils/amount'
-import {calculateBtcPricePercentageDifference} from '../../../../../state/tradeChecklist/utils/amount'
+import {
+  applyFeeOnBtcAmount,
+  calculateBtcPricePercentageDifference,
+  formatBtcPrice,
+} from '../../../../../state/tradeChecklist/utils/amount'
 import {
   getCurrentLocale,
   useTranslation,
@@ -74,6 +78,22 @@ function TradeChecklistAmountView(): JSX.Element | null {
     [amountDataToDisplay, btcPriceForTradeCurrency?.btcPrice]
   )
 
+  const btcAmount = useMemo(
+    () =>
+      amountDataToDisplay?.amountData.btcAmount
+        ? formatBtcPrice(
+            applyFeeOnBtcAmount(
+              amountDataToDisplay.amountData.btcAmount,
+              amountDataToDisplay.amountData.feeAmount ?? 0
+            )
+          )
+        : undefined,
+    [
+      amountDataToDisplay?.amountData.btcAmount,
+      amountDataToDisplay?.amountData.feeAmount,
+    ]
+  )
+
   const onAcceptButtonPress = useCallback(() => {
     if (amountData.received) {
       showLoadingOverlay(true)
@@ -113,14 +133,12 @@ function TradeChecklistAmountView(): JSX.Element | null {
     if (amountDataToDisplay.status !== 'pending') {
       return (
         <>
-          {!!amountDataToDisplay.amountData.btcAmount && (
+          {!!btcAmount && (
             <Button
               text="BTC"
               beforeIcon={copySvg}
               onPress={() => {
-                Clipboard.setString(
-                  `${amountDataToDisplay.amountData.btcAmount}`
-                )
+                Clipboard.setString(`${btcAmount}`)
                 setToastNotification(toastContent)
               }}
               size="small"
@@ -128,20 +146,13 @@ function TradeChecklistAmountView(): JSX.Element | null {
               iconFill={getTokens().color.main.val}
             />
           )}
-          {!!amountDataToDisplay.amountData.btcAmount && (
+          {!!btcAmount && (
             <Button
               text="SAT"
               beforeIcon={copySvg}
               onPress={() => {
                 Clipboard.setString(
-                  `${
-                    amountDataToDisplay.amountData.btcAmount
-                      ? Math.round(
-                          amountDataToDisplay.amountData.btcAmount *
-                            SATOSHIS_IN_BTC
-                        )
-                      : 0
-                  }`
+                  `${Math.round(Number(btcAmount) * SATOSHIS_IN_BTC)}`
                 )
                 setToastNotification(toastContent)
               }}
@@ -235,10 +246,7 @@ function TradeChecklistAmountView(): JSX.Element | null {
               amountDataToDisplay.by === 'me'
                 ? t('common.you')
                 : otherSideData.userName,
-            btcAmount:
-              amountDataToDisplay.amountData.btcAmount?.toLocaleString(
-                currentLocale
-              ),
+            btcAmount: Number(btcAmount)?.toLocaleString(currentLocale),
             fiatAmount:
               amountDataToDisplay.amountData.fiatAmount?.toLocaleString(
                 currentLocale

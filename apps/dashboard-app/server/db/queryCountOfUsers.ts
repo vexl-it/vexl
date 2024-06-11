@@ -32,7 +32,7 @@ export const queryNumberOfUsers = (
         FROM
           (
             SELECT
-              COUNT(*),
+              hash_from,
               max(id) AS "id"
             FROM
               user_contact

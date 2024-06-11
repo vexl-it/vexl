@@ -8,6 +8,10 @@ import {
   tradeChecklistAmountDataAtom,
   tradeOrOriginOfferCurrencyAtom,
 } from '../../../../../state/tradeChecklist/atoms/fromChatAtoms'
+import {
+  applyFeeOnBtcAmount,
+  formatBtcPrice,
+} from '../../../../../state/tradeChecklist/utils/amount'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import createChecklistItemStatusAtom from '../../../atoms/createChecklistItemStatusAtom'
 import {amountUpdateToBeSentAtom} from '../../../atoms/updatesToBeSentAtom'
@@ -60,18 +64,53 @@ function CalculateAmountCell(): JSX.Element {
   const sideNote = useMemo(() => {
     if (subtitle) return undefined
 
-    return amountUpdateToBeSent?.btcAmount
-      ? `${amountUpdateToBeSent.btcAmount} BTC`
-      : tradeChecklistAmountData.sent?.btcAmount
-      ? `${tradeChecklistAmountData.sent.btcAmount} BTC`
-      : tradeChecklistAmountData.received?.btcAmount
-      ? `${tradeChecklistAmountData.received.btcAmount} BTC`
-      : undefined
+    let btcAmount, feeAmount
+
+    if (amountUpdateToBeSent?.btcAmount) {
+      btcAmount = formatBtcPrice(
+        applyFeeOnBtcAmount(
+          amountUpdateToBeSent.btcAmount,
+          amountUpdateToBeSent.feeAmount ?? 0
+        )
+      )
+      feeAmount = amountUpdateToBeSent.feeAmount
+    } else if (tradeChecklistAmountData.sent?.btcAmount) {
+      btcAmount = formatBtcPrice(
+        applyFeeOnBtcAmount(
+          tradeChecklistAmountData.sent.btcAmount,
+          tradeChecklistAmountData.sent.feeAmount ?? 0
+        )
+      )
+      feeAmount = tradeChecklistAmountData.sent.feeAmount
+    } else if (tradeChecklistAmountData.received?.btcAmount) {
+      btcAmount = formatBtcPrice(
+        applyFeeOnBtcAmount(
+          tradeChecklistAmountData.received.btcAmount,
+          tradeChecklistAmountData.received.feeAmount ?? 0
+        )
+      )
+      feeAmount = tradeChecklistAmountData.received.feeAmount
+    } else {
+      return undefined
+    }
+
+    return (
+      `${btcAmount} BTC` +
+      (feeAmount !== 0
+        ? ` (${t(
+            'tradeChecklist.calculateAmount.includingAbbreviation'
+          )} ${feeAmount}% ${t('tradeChecklist.calculateAmount.fee')})`
+        : ``)
+    )
   }, [
     amountUpdateToBeSent?.btcAmount,
+    amountUpdateToBeSent?.feeAmount,
     subtitle,
+    t,
     tradeChecklistAmountData.received?.btcAmount,
+    tradeChecklistAmountData.received?.feeAmount,
     tradeChecklistAmountData.sent?.btcAmount,
+    tradeChecklistAmountData.sent?.feeAmount,
   ])
 
   const onPress = useCallback(() => {

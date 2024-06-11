@@ -815,6 +815,8 @@
   "tradeChecklist.dateAndTime.chooseTheDay": "Choose the day",
   "tradeChecklist.dateAndTime.selectTime": "Select time",
   "tradeChecklist.dateAndTime.addDifferentTime": "Add different date and time",
+  "tradeChecklist.calculateAmount.includingAbbreviation": "incl.",
+  "tradeChecklist.calculateAmount.fee": "fee",
   "tradeChecklist.calculateAmount.calculateAmount": "Calculate amount",
   "tradeChecklist.calculateAmount.livePrice": "Live price",
   "tradeChecklist.calculateAmount.frozenPrice": "Frozen price",

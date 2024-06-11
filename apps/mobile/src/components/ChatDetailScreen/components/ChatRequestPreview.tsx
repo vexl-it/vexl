@@ -37,7 +37,10 @@ function ChatRequestPreview({
         !!offer &&
         commonConnectionsHashes.length > 0 && (
           <Stack mx="$-4">
-            <CommonFriends offerInfo={offer.offerInfo} variant="light" />
+            <CommonFriends
+              commonConnectionsHashes={commonConnectionsHashes}
+              variant="light"
+            />
           </Stack>
         )}
     </>

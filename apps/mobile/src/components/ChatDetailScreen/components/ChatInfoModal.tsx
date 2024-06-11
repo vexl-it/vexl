@@ -72,7 +72,7 @@ function ChatInfoModal(): JSX.Element | null {
       topMargin={PHOTO_AND_INFO_PHOTO_TOP_HEIGHT + top}
     >
       <YStack px="$4" backgroundColor="$black" f={1}>
-        <ScrollView>
+        <ScrollView showsVerticalScrollIndicator={false}>
           <Stack mt="$4" mb="$7">
             <ChatRequestPreview mode="offerFirst" />
           </Stack>

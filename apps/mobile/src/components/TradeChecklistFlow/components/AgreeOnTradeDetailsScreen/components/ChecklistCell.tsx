@@ -43,6 +43,7 @@ function ChecklistCell({
         py="$5"
         br="$4"
         opacity={isDisabled ? 0.7 : 1}
+        space="$1"
       >
         <XStack ai="center" space="$4" f={1}>
           <StatusIndicator itemStatus={itemStatus} />
@@ -59,7 +60,7 @@ function ChecklistCell({
         </XStack>
         <XStack ai="center" space="$2">
           {!!sideNote && (
-            <Text fos={12} ff="$body500" col="$greyOnBlack">
+            <Text fos={12} ff="$body500" col="$greyOnBlack" numberOfLines={2}>
               {sideNote}
             </Text>
           )}

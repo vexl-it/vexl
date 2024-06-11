@@ -60,7 +60,7 @@ function PriceTypeIndicator({
 
   return (
     <XStack ai="center" space="$2" {...props}>
-      {tradePriceType === 'live' ? (
+      {!tradePriceType || tradePriceType === 'live' ? (
         <AnimatedLiveIndicator
           color={displayInGrayColor ? '$greyOnBlack' : '$main'}
         />

@@ -128,9 +128,10 @@ function CalculateAmountScreen({
               }}
             />
             <CurrentBtcPrice
+              disabled={tradePriceType !== 'live'}
               currencyAtom={btcPriceCurrencyAtom}
               customBtcPriceAtom={
-                tradePriceType === 'your' ? tradeBtcPriceAtom : undefined
+                tradePriceType !== 'live' ? tradeBtcPriceAtom : undefined
               }
               postRefreshActions={calculateBtcValueAfterBtcPriceRefresh}
             />

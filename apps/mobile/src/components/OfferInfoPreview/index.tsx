@@ -96,7 +96,10 @@ function OfferInfoPreview({
       </XStack>
       {!!showCommonFriends && (
         <Stack py="$2">
-          <CommonFriends offerInfo={offer} variant="light" />
+          <CommonFriends
+            commonConnectionsHashes={offer.privatePart.commonFriends}
+            variant="light"
+          />
         </Stack>
       )}
       <XStack space="$1">

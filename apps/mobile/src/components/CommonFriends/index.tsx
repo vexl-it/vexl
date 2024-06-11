@@ -5,7 +5,6 @@ import {useStore} from 'jotai'
 import React, {useMemo} from 'react'
 import {Platform, ScrollView, StyleSheet, TouchableOpacity} from 'react-native'
 import {Stack, XStack, YStack, getTokens} from 'tamagui'
-import {type OfferInfo} from '../../../../../packages/domain/src/general/offers'
 import chevronRightSvg from '../../images/chevronRightSvg'
 import createImportedContactsForHashesAtom from '../../state/contacts/atom/createImportedContactsForHashesAtom'
 import Image from '../Image'
@@ -18,20 +17,21 @@ const styles = StyleSheet.create({
 })
 
 interface Props {
-  offerInfo: OfferInfo
+  commonConnectionsHashes: string[]
   variant: 'light' | 'dark'
 }
 
-function CommonFriends({offerInfo, variant}: Props): JSX.Element | null {
+function CommonFriends({
+  commonConnectionsHashes,
+  variant,
+}: Props): JSX.Element | null {
   const tokens = getTokens()
   const store = useStore()
   const navigation = useNavigation()
   const commonFriends = useMemo(
     () =>
-      store.get(
-        createImportedContactsForHashesAtom(offerInfo.privatePart.commonFriends)
-      ),
-    [offerInfo.privatePart.commonFriends, store]
+      store.get(createImportedContactsForHashesAtom(commonConnectionsHashes)),
+    [commonConnectionsHashes, store]
   )
 
   if (commonFriends.length === 0) return null
@@ -42,7 +42,7 @@ function CommonFriends({offerInfo, variant}: Props): JSX.Element | null {
         disabled={commonFriends.length === 0}
         onPress={() => {
           navigation.navigate('CommonFriends', {
-            contactsHashes: offerInfo.privatePart.commonFriends,
+            contactsHashes: commonConnectionsHashes,
           })
         }}
       >

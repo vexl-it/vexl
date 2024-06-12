@@ -633,13 +633,6 @@ export const countries = [
     'colors': ['#4997D0', '#FFFFFF', '#FFD100', '#006847'],
   },
   {
-    'name': 'Guernsey',
-    'flag': '🇬🇬',
-    'code': 'GG',
-    'dialCode': '+44',
-    'colors': ['#FFFFFF', '#D21034', '#FFD100'],
-  },
-  {
     'name': 'Guinea',
     'flag': '🇬🇳',
     'code': 'GN',
@@ -745,13 +738,6 @@ export const countries = [
     'colors': ['#009A49', '#FFFFFF', '#FF7900'],
   },
   {
-    'name': 'Isle of Man',
-    'flag': '🇮🇲',
-    'code': 'IM',
-    'dialCode': '+44',
-    'colors': ['#CF142B', '#FFD100', '#FFFFFF'],
-  },
-  {
     'name': 'Israel',
     'flag': '🇮🇱',
     'code': 'IL',
@@ -778,13 +764,6 @@ export const countries = [
     'code': 'JP',
     'dialCode': '+81',
     'colors': ['#FFFFFF', '#BC002D'],
-  },
-  {
-    'name': 'Jersey',
-    'flag': '🇯🇪',
-    'code': 'JE',
-    'dialCode': '+44',
-    'colors': ['#FFFFFF', '#CF142B', '#FFD700'],
   },
   {
     'name': 'Jordan',

@@ -19,6 +19,7 @@ export const supportedTranslations = {
   bg: translations.bg,
   ja: translations.ja,
   es: translations.es,
+  pt: translations.pt,
 }
 
 // SETUP I18n

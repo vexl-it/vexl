@@ -815,6 +815,8 @@
   "tradeChecklist.dateAndTime.chooseTheDay": "Choose the day",
   "tradeChecklist.dateAndTime.selectTime": "Select time",
   "tradeChecklist.dateAndTime.addDifferentTime": "Add different date and time",
+  "tradeChecklist.calculateAmount.includingAbbreviation": "incl.",
+  "tradeChecklist.calculateAmount.fee": "fee",
   "tradeChecklist.calculateAmount.calculateAmount": "合計額",
   "tradeChecklist.calculateAmount.livePrice": "実勢価格",
   "tradeChecklist.calculateAmount.frozenPrice": "固定した価格",

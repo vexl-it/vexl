@@ -5,13 +5,13 @@ import {pubKeyToCountryPrefixChanges} from './pubKeyToCountry'
 import {CountriesToConnectionsCountState} from './pubKeysToConnectionsCount'
 
 function countByCountries(
-  pubKeyToCount: HashMap.HashMap<PublicKeyPemBase64, number>,
+  pubKeyToCount: HashMap.HashMap<PublicKeyPemBase64, {count: number}>,
   pubKeyToCountryPrefix: HashMap.HashMap<PublicKeyPemBase64, CountryPrefix>
 ): HashMap.HashMap<CountryPrefix, number> {
   return HashMap.reduce(
     pubKeyToCount,
     HashMap.empty<CountryPrefix, number>(),
-    (acc, count, pubKey) =>
+    (acc, {count}, pubKey) =>
       pipe(
         pubKeyToCountryPrefix,
         HashMap.get(pubKey),

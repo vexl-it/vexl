@@ -1,23 +1,23 @@
 import {Chunk, Effect, HashMap, Option, Sink, Stream} from 'effect'
 import {UserWithConnections} from '../../common/ServerMessage'
-import {usersSortedByAddedChanges} from './pubKeyToCountry'
-import {pubKeysToConnectionsChanges} from './pubKeysToConnectionsCount'
+import {pubKeyToCountryPrefixChanges} from './pubKeyToCountry'
+import {connectionsSortedByAddedChanges} from './pubKeysToConnectionsCount'
 
 export const last10usersChanges = Stream.zipLatest(
-  usersSortedByAddedChanges,
-  pubKeysToConnectionsChanges
+  pubKeyToCountryPrefixChanges,
+  connectionsSortedByAddedChanges
 ).pipe(
   Stream.mapEffect(([users, connections]) =>
-    Stream.fromIterable(users).pipe(
-      Stream.filterMap((user) =>
-        HashMap.get(connections, user.publicKey).pipe(
+    Stream.fromIterable(connections).pipe(
+      Stream.filterMap((connection) =>
+        HashMap.get(users, connection.publicKey).pipe(
           Option.map(
-            (connectionsCount) =>
+            (countryPrefix) =>
               new UserWithConnections({
-                pubKey: user.publicKey,
-                connectionsCount,
-                countryPrefix: user.countryPrefix,
-                receivedAt: user.receivedAt,
+                pubKey: connection.publicKey,
+                connectionsCount: connection.count,
+                countryPrefix,
+                receivedAt: connection.date,
               })
           )
         )

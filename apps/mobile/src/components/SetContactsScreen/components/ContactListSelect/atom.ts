@@ -113,12 +113,8 @@ export const contactSelectMolecule = molecule((_, getScope) => {
     )
   )
 
-  const selectedNonSubmittedNumbersAtom = atom(
-    new Set(
-      normalizedContacts
-        .filter((one) => !one.flags.imported && one.flags.seen)
-        .map((one) => one.computedValues.normalizedNumber)
-    )
+  const selectedNonSubmittedNumbersAtom = atom<Set<E164PhoneNumber>>(
+    new Set([])
   )
 
   const selectedNewNumbersAtom = atom(

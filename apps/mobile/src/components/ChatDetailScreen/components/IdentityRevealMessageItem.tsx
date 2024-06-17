@@ -18,11 +18,9 @@ import UserAvatarTouchableWrapper from './UserAvatarTouchableWrapper'
 function IdentityRevealMessageItem({
   message,
   isLatest,
-  direction,
 }: {
   message: ChatMessageWithState
   isLatest: boolean
-  direction: 'incoming' | 'outgoing'
 }): JSX.Element | null {
   const {t} = useTranslation()
   const {
@@ -110,13 +108,13 @@ function IdentityRevealMessageItem({
         biggerText={userName}
         bottomText={partialPhoneNumber}
         icon={
-          direction === 'incoming' && message.message.image ? (
-            <UserAvatarTouchableWrapper userImageUri={message.message.image}>
+          image.type === 'imageUri' ? (
+            <UserAvatarTouchableWrapper userImageUri={image.imageUri}>
               <Image
                 height={80}
                 width={80}
-                borderRadius="$8"
-                source={{uri: message.message.image}}
+                borderRadius="$4"
+                source={{uri: image.imageUri}}
               />
             </UserAvatarTouchableWrapper>
           ) : (

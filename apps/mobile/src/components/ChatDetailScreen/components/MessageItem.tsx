@@ -80,7 +80,7 @@ function MessageItem({
               backgroundColor="$darkRed"
               alignItems="center"
               justifyContent="center"
-              borderRadius="$7"
+              borderRadius="$4"
             >
               <Image width={35} height={35} source={BlockIconSvg} />
             </Stack>
@@ -172,7 +172,6 @@ function MessageItem({
         <IdentityRevealMessageItem
           message={item.message}
           isLatest={item.isLatest}
-          direction={direction}
         />
       )
     }
@@ -188,7 +187,6 @@ function MessageItem({
         <ContactRevealMessageItem
           message={item.message}
           isLatest={item.isLatest}
-          direction={direction}
         />
       )
     }

@@ -14,7 +14,6 @@ import {type MapValue, type MapValueWithRadius} from '../../../../Map/brands'
 import MapLocationWithRadiusSelect from '../../../../Map/components/MapLocationWithRadiusSelect'
 import Screen from '../../../../Screen'
 import ScreenTitle from '../../../../ScreenTitle'
-import closeSvg from '../../../../images/closeSvg'
 
 interface Props {
   locationSessionId: LocationSessionId
@@ -54,15 +53,13 @@ export default function SelectLocationFlowModal({
     >
       {!selectedFromList ? (
         <Screen customHorizontalPadding={16}>
-          <ScreenTitle text="">
-            <IconButton
-              variant="dark"
-              icon={closeSvg}
-              onPress={() => {
-                onSetVisible(false)
-              }}
-            />
-          </ScreenTitle>
+          <ScreenTitle
+            text=""
+            onBackButtonPress={() => {
+              onSetVisible(false)
+            }}
+            withBackButton
+          />
           <LocationSearch
             onPress={(v) => {
               setSelectedFromList({

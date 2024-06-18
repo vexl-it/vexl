@@ -25,11 +25,8 @@ import UserAvatarTouchableWrapper from './UserAvatarTouchableWrapper'
 import checkIconSvg from './images/checkIconSvg'
 
 function RevealedContactMessageItem({
-  direction,
   isLatest,
-  message,
 }: {
-  direction: 'incoming' | 'outgoing'
   isLatest: boolean
   message: ChatMessage
 }): JSX.Element {
@@ -66,7 +63,7 @@ function RevealedContactMessageItem({
         !isContactAlreadyInContactsList
           ? () => {
               pipe(
-                message.deanonymizedUser?.fullPhoneNumber,
+                fullPhoneNumber,
                 safeParse(E164PhoneNumber),
                 E.bindTo('normalizedNumber'),
                 E.bindW('hash', ({normalizedNumber}) =>
@@ -75,11 +72,9 @@ function RevealedContactMessageItem({
                 E.map(({normalizedNumber, hash}) => {
                   void addRevealedContact({
                     info: {
-                      name: message.deanonymizedUser?.fullPhoneNumber ?? '',
-                      numberToDisplay:
-                        message.deanonymizedUser?.fullPhoneNumber ?? '',
-                      rawNumber:
-                        message.deanonymizedUser?.fullPhoneNumber ?? '',
+                      name: fullPhoneNumber ?? '',
+                      numberToDisplay: fullPhoneNumber ?? '',
+                      rawNumber: fullPhoneNumber ?? '',
                     },
                     computedValues: {
                       hash,
@@ -103,14 +98,14 @@ function RevealedContactMessageItem({
           : undefined
       }
       icon={
-        direction === 'incoming' && image.type === 'imageUri' ? (
+        image.type === 'imageUri' ? (
           <UserAvatarTouchableWrapper
             userImageUri={resolveLocalUri(image.imageUri)}
           >
             <Image
               height={80}
               width={80}
-              borderRadius="$8"
+              borderRadius="$4"
               source={{uri: resolveLocalUri(image.imageUri)}}
             />
           </UserAvatarTouchableWrapper>
@@ -125,11 +120,9 @@ function RevealedContactMessageItem({
 function ContactRevealMessageItem({
   message,
   isLatest,
-  direction,
 }: {
   message: ChatMessageWithState
   isLatest: boolean
-  direction: 'incoming' | 'outgoing'
 }): JSX.Element | null {
   const {t} = useTranslation()
   const {
@@ -166,7 +159,20 @@ function ContactRevealMessageItem({
         smallerText={userName ?? ''}
         biggerText={t('messages.letsExchangeContacts')}
         bottomText={partialPhoneNumber}
-        icon={<UserAvatar height={80} width={80} userImage={image} />}
+        icon={
+          image.type === 'imageUri' ? (
+            <UserAvatarTouchableWrapper userImageUri={image.imageUri}>
+              <Image
+                height={80}
+                width={80}
+                borderRadius="$4"
+                source={{uri: image.imageUri}}
+              />
+            </UserAvatarTouchableWrapper>
+          ) : (
+            <UserAvatar height={80} width={80} userImage={image} />
+          )
+        }
         buttonText={
           contactRevealStatus === 'theyAsked' ? t('common.respond') : undefined
         }
@@ -189,7 +195,6 @@ function ContactRevealMessageItem({
   ) {
     return (
       <RevealedContactMessageItem
-        direction={direction}
         isLatest={isLatest}
         message={message.message}
       />

@@ -56,6 +56,9 @@ export const syncPubKeyToCountryEffect = PubKeyToCountryPrefixState.pipe(
         const newDataSinceLastFetch = yield* _(
           queryPubkeyToCountryPrefix(value.lastIdFetched)
         )
+
+        yield* _(Effect.log(`Got ${newDataSinceLastFetch.length} new users`))
+
         const lastIdFetched = pipe(
           Array.last(newDataSinceLastFetch),
           Option.map((a) => a.id),

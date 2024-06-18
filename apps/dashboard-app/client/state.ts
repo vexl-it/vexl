@@ -87,9 +87,10 @@ export const listenForChangesActionAtom = atom(null, (get, set) => {
         const lastUsers = get(lastUsersAtom)
 
         pipe(
-          Array.differenceWith<UserWithConnections>(
-            (a, b) => a.pubKey === b.pubKey
-          )(m.userWithConnections, lastUsers),
+          Array.difference<UserWithConnections>(
+            m.userWithConnections,
+            lastUsers
+          ),
           Array.head,
           Option.tap((u) => {
             set(showConffetiForUserActionAtom, u)

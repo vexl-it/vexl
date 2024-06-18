@@ -4,9 +4,6 @@ import {ScrollView} from 'react-native'
 import {getTokens, YStack} from 'tamagui'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import {notificationPreferencesAtom} from '../../utils/preferences'
-import useSafeGoBack from '../../utils/useSafeGoBack'
-import IconButton from '../IconButton'
-import closeSvg from '../images/closeSvg'
 import Screen from '../Screen'
 import ScreenTitle from '../ScreenTitle'
 import PreferenceItem from './components/PreferenceItem'
@@ -21,7 +18,6 @@ const notificationPreferencesToShow = [
 
 function NotificationSettingsScreen(): JSX.Element {
   const {t} = useTranslation()
-  const safeGoBack = useSafeGoBack()
 
   const contents = useMemo(() => {
     return notificationPreferencesToShow.map((one) => ({
@@ -33,9 +29,10 @@ function NotificationSettingsScreen(): JSX.Element {
 
   return (
     <Screen customHorizontalPadding={getTokens().space[2].val}>
-      <ScreenTitle text={t('notifications.preferences.screenTitle')}>
-        <IconButton variant="dark" icon={closeSvg} onPress={safeGoBack} />
-      </ScreenTitle>
+      <ScreenTitle
+        text={t('notifications.preferences.screenTitle')}
+        withBackButton
+      />
       <ScrollView>
         <YStack space={6}>
           {contents.map((one) => (

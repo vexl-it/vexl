@@ -2,10 +2,8 @@ import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
 import React from 'react'
 import {XStack} from 'tamagui'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
-import useSafeGoBack from '../../../utils/useSafeGoBack'
 import IconButton from '../../IconButton'
 import ScreenTitle from '../../ScreenTitle'
-import closeSvg from '../../images/closeSvg'
 import {useReportOfferHandleUI} from '../api'
 import flagSvg from '../images/flagSvg'
 
@@ -14,12 +12,21 @@ interface Props {
 }
 
 function Title({offer}: Props): JSX.Element {
-  const safeGoBack = useSafeGoBack()
   const {t} = useTranslation()
   const reportOffer = useReportOfferHandleUI()
 
   return (
-    <ScreenTitle text={t('offer.title')} bc="$black" pt="$2">
+    <ScreenTitle
+      text={t('offer.title')}
+      bc="$black"
+      py="$2"
+      px={
+        !offer.offerInfo.publicPart.locationState.includes('IN_PERSON')
+          ? '$0'
+          : '$2'
+      }
+      withBackButton
+    >
       <XStack ai="center" space="$2">
         {!offer.flags.reported && (
           <IconButton
@@ -30,7 +37,6 @@ function Title({offer}: Props): JSX.Element {
             }}
           />
         )}
-        <IconButton variant="dark" icon={closeSvg} onPress={safeGoBack} />
       </XStack>
     </ScreenTitle>
   )

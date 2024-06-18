@@ -5,9 +5,7 @@ import {Modal} from 'react-native'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {Stack} from 'tamagui'
 import {useTranslation} from '../../utils/localization/I18nProvider'
-import IconButton from '../IconButton'
 import ScreenTitle from '../ScreenTitle'
-import closeSvg from '../images/closeSvg'
 import {currenciesToDisplayAtomsAtom} from './atom'
 import CurrenciesList from './components/CurrenciesList'
 import NothingFound from './components/NothingFound'
@@ -45,9 +43,8 @@ function CurrencySelect({
           <ScreenTitle
             text={t('offerForm.selectCurrency')}
             textColor="$greyAccent5"
-          >
-            <IconButton variant="dark" icon={closeSvg} onPress={onClose} />
-          </ScreenTitle>
+            withBackButton
+          />
           <SearchBar />
         </Stack>
         {toDisplay.length > 0 && (

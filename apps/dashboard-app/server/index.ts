@@ -24,6 +24,7 @@ import {DebugSocketServerLive} from './socketServer/debugSocketServer'
 import {IncommingConnectionsStreamContext} from './socketServer/serverSocket'
 import {StaticServerLive} from './staticServer'
 import {UpdatesServerLive} from './updatesServer'
+import {HasingSalt} from './utils/hashPubKey'
 
 const HealthServerLive = makeHealthServerLive({port: healthServerPortConfig})
 
@@ -66,6 +67,7 @@ const program = Effect.gen(function* (_) {
       PubKeyToCountryPrefixState.Live,
       CountOfUsersState.Live,
       CountriesToConnectionsCountState.Live,
+      HasingSalt.Live,
       isRunningInDevConfig.pipe(
         Effect.map((isRunningInDev) =>
           isRunningInDev ? DevTools.layer() : Layer.empty

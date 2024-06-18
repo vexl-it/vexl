@@ -16,7 +16,6 @@ import Image from '../../Image'
 import {useShowLoadingOverlay} from '../../LoadingOverlayProvider'
 import ScreenTitle from '../../ScreenTitle'
 import clockSvg from '../../images/clockSvg'
-import closeSvg from '../../images/closeSvg'
 import {offerFormMolecule} from '../atoms/offerFormStateAtoms'
 import playSvg from '../images/playSvg'
 
@@ -63,7 +62,7 @@ function EditOfferHeader({offer}: Props): JSX.Element {
 
   return (
     <Stack f={1} space="$4">
-      <ScreenTitle text={t('editOffer.editOffer')}>
+      <ScreenTitle text={t('editOffer.editOffer')} withBackButton>
         <Stack>
           <XStack space="$2" mb="$4">
             {isSome(offer) && (
@@ -93,13 +92,6 @@ function EditOfferHeader({offer}: Props): JSX.Element {
                 />
               </XStack>
             )}
-            <IconButton
-              iconWidth={25}
-              iconHeight={25}
-              variant="dark"
-              icon={closeSvg}
-              onPress={safeGoBack}
-            />
           </XStack>
           {!!offer && (
             <XStack space="$2" ai="center" jc="flex-end" als="flex-end">

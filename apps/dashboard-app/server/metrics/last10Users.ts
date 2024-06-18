@@ -1,27 +1,35 @@
-import {Chunk, Effect, HashMap, Option, Sink, Stream} from 'effect'
+import {Chunk, Effect, HashMap, Option, Sink, Stream, pipe} from 'effect'
 import {UserWithConnections} from '../../common/ServerMessage'
-import {usersSortedByAddedChanges} from './pubKeyToCountry'
-import {pubKeysToConnectionsChanges} from './pubKeysToConnectionsCount'
+import {secureHash} from '../utils/hashPubKey'
+import {pubKeyToCountryPrefixChanges} from './pubKeyToCountry'
+import {connectionsSortedByAddedChanges} from './pubKeysToConnectionsCount'
 
 export const last10usersChanges = Stream.zipLatest(
-  usersSortedByAddedChanges,
-  pubKeysToConnectionsChanges
+  pubKeyToCountryPrefixChanges,
+  connectionsSortedByAddedChanges
 ).pipe(
   Stream.mapEffect(([users, connections]) =>
-    Stream.fromIterable(users).pipe(
-      Stream.filterMap((user) =>
-        HashMap.get(connections, user.publicKey).pipe(
-          Option.map(
-            (connectionsCount) =>
-              new UserWithConnections({
-                pubKey: user.publicKey,
-                connectionsCount,
-                countryPrefix: user.countryPrefix,
-                receivedAt: user.receivedAt,
-              })
-          )
+    Stream.fromIterable(connections).pipe(
+      Stream.filterMap((connection) =>
+        HashMap.get(users, connection.publicKey).pipe(
+          Option.map((countryPrefix) => ({
+            pubKey: connection.publicKey,
+            connectionsCount: connection.count,
+            countryPrefix,
+            receivedAt: connection.date,
+          }))
         )
       ),
+      Stream.mapEffect((user) =>
+        pipe(
+          secureHash(user.pubKey),
+          Effect.map(
+            (hash) => new UserWithConnections({...user, pubKey: hash})
+          ),
+          Effect.option
+        )
+      ),
+      Stream.filterMap((a) => a),
       Stream.take(10),
       Stream.runCollect,
       Effect.map(Chunk.toArray)

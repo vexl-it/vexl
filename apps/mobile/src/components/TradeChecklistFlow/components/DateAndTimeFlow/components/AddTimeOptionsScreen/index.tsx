@@ -90,9 +90,9 @@ function AddTimeOptionsScreen({navigation}: Props): JSX.Element {
         title={t('tradeChecklist.dateAndTime.screenTitle')}
         onClose={() => {
           if (shouldSendOnSubmit) {
-            navigation.navigate('AgreeOnTradeDetails')
-          } else {
             navigation.navigate('ChatDetail', store.get(chatWithMessagesKeys))
+          } else {
+            navigation.navigate('AgreeOnTradeDetails')
           }
         }}
       />

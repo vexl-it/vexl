@@ -36,16 +36,21 @@ export const queryPubkeysToConnections = ({
     Effect.flatMap(
       (sql) => sql`
         SELECT
-          public_key AS "publicKey",
-          count(user_contact.id) AS "count"
+          users.public_key AS "publicKey",
+          count(DISTINCT lvl1Users.id) + count(DISTINCT lvl2Users.id) AS "count"
         FROM
-          user_contact
-          INNER JOIN users ON user_contact.hash_from = users.hash
-        WHERE
-          user_contact.id <= ${maxId}
-          AND user_contact.id > ${someOrZero(minId)}
+          users
+          LEFT JOIN user_contact lvl1 ON lvl1.hash_from = users.hash
+          AND lvl1.id > ${someOrZero(minId)}
+          AND lvl1.id <= ${maxId}
+          LEFT JOIN users lvl1users ON concat('next:', lvl1.hash_to) = lvl1users.hash
+          LEFT JOIN user_contact lvl2 ON lvl1.hash_to = lvl2.hash_to
+          AND lvl2.hash_from != users.hash
+          LEFT JOIN users lvl2Users ON lvl2.hash_from = lvl2Users.hash
         GROUP BY
           users.public_key
+        HAVING
+          count(DISTINCT lvl1Users.id) + count(DISTINCT lvl2Users.id) > 0
       `
     ),
     Effect.flatMap(decodePubkeysToConnectionsQueryResult)

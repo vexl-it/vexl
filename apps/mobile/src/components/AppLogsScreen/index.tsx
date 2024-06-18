@@ -4,14 +4,11 @@ import {Alert} from 'react-native'
 import {Stack, Text, XStack} from 'tamagui'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import showErrorAlert from '../../utils/showErrorAlert'
-import useSafeGoBack from '../../utils/useSafeGoBack'
 import Button from '../Button'
-import IconButton from '../IconButton'
 import {loadingOverlayDisplayedAtom} from '../LoadingOverlayProvider'
 import Screen from '../Screen'
 import ScreenTitle from '../ScreenTitle'
 import Switch from '../Switch'
-import closeSvg from '../images/closeSvg'
 import {appLogsEmptyAtom} from './atoms'
 import LogsList from './components/LogsList'
 import saveLogsToDirectoryAndShare from './utils/saveLogsToDirectory'
@@ -26,7 +23,6 @@ function AppLogsScreen(): JSX.Element {
   const {t} = useTranslation()
   const [enabled, setEnabled] = useState(getCustomLoggingEnabled())
   const setLoading = useSetAtom(loadingOverlayDisplayedAtom)
-  const safeGoBack = useSafeGoBack()
   const isAppLogsEmpty = useAtomValue(appLogsEmptyAtom)
 
   const exportLogs = useCallback(() => {
@@ -73,19 +69,16 @@ function AppLogsScreen(): JSX.Element {
   return (
     <Screen>
       <Stack mx="$2" my="$4" f={1}>
-        <ScreenTitle text={t('AppLogs.title')}>
-          <>
-            <Switch
-              value={enabled}
-              onValueChange={(enabled) => {
-                setEnabled(enabled)
-                setCustomLoggingEnabled(enabled)
-                setupAppLogs()
-              }}
-              style={{marginRight: 5}}
-            />
-            <IconButton icon={closeSvg} onPress={safeGoBack} />
-          </>
+        <ScreenTitle text={t('AppLogs.title')} withBackButton>
+          <Switch
+            value={enabled}
+            onValueChange={(enabled) => {
+              setEnabled(enabled)
+              setCustomLoggingEnabled(enabled)
+              setupAppLogs()
+            }}
+            style={{marginRight: 5}}
+          />
         </ScreenTitle>
         <Text mb="$3" ff="$body600" color="$white">
           {t('AppLogs.warning')}

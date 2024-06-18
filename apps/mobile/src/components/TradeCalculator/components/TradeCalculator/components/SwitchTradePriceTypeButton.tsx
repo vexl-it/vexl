@@ -18,7 +18,7 @@ function SwitchTradePriceTypeButton(props: TouchableOpacityProps): JSX.Element {
             height={16}
             source={chevronDownSvg}
             stroke={
-              tradePriceType === 'live'
+              !tradePriceType || tradePriceType === 'live'
                 ? getTokens().color.main.val
                 : tradePriceType === 'frozen'
                 ? getTokens().color.pink.val

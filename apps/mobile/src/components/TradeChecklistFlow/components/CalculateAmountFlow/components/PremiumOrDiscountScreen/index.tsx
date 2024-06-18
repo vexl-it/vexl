@@ -1,12 +1,7 @@
-import {
-  useFocusEffect,
-  useNavigation,
-  type NavigationProp,
-} from '@react-navigation/native'
+import {useFocusEffect} from '@react-navigation/native'
 import {atom, useAtom, useAtomValue, useSetAtom} from 'jotai'
 import {useCallback} from 'react'
 import {Text} from 'tamagui'
-import {type TradeChecklistStackParamsList} from '../../../../../../navigationTypes'
 import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../../../../../utils/useSafeGoBack'
 import {
@@ -24,8 +19,6 @@ const tempFeeAmountAtom = atom<number>(0)
 function PremiumOrDiscountScreen(): JSX.Element {
   const {t} = useTranslation()
   const goBack = useSafeGoBack()
-  const navigation: NavigationProp<TradeChecklistStackParamsList> =
-    useNavigation()
 
   const offerType = useAtomValue(offerTypeAtom)
   const feeAmount = useAtomValue(feeAmountAtom)
@@ -42,9 +35,6 @@ function PremiumOrDiscountScreen(): JSX.Element {
     <>
       <HeaderProxy
         title={t('tradeChecklist.calculateAmount.premiumOrDiscount')}
-        onClose={() => {
-          navigation.navigate('AgreeOnTradeDetails')
-        }}
       />
       <Content scrollable>
         <Text fos={16} mt="$2" mb="$4" col="$greyOnBlack">

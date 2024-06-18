@@ -18,6 +18,7 @@ function openFromAgreeOnTradeDetailsScreenSelector(
   const agreeOnTradeDetailsIndex = routes.routes.findIndex(
     (one) => one.name === 'AgreeOnTradeDetails'
   )
+
   if (agreeOnTradeDetailsIndex === -1) return false
   return agreeOnTradeDetailsIndex <= routes.index
 }

@@ -7,15 +7,26 @@ import {
   TotalUsersCountMessage,
   type ServerMessage,
 } from '../../common/ServerMessage'
-import {countOfUsersChanges} from '../metrics/countOfUsers'
+import {
+  countOfUsersChanges,
+  type CountOfUsersState,
+} from '../metrics/countOfUsers'
 import {countriesToConnectionsCountChanges} from '../metrics/countryToConnectionCount'
 import {last10usersChanges} from '../metrics/last10Users'
 import {type PubKeyToCountryPrefixState} from '../metrics/pubKeyToCountry'
 import {type CountriesToConnectionsCountState} from '../metrics/pubKeysToConnectionsCount'
+import {type HasingSalt} from '../utils/hashPubKey'
 import encodeAndSendMessage from './encodeAndSendMessage'
 import {type SendingMessageError} from './utils'
 
-const changeMessagesToSendStream = Stream.mergeAll(
+const changeMessagesToSendStream = Stream.mergeAll<
+  ServerMessage,
+  never,
+  | PubKeyToCountryPrefixState
+  | CountriesToConnectionsCountState
+  | CountOfUsersState
+  | HasingSalt
+>(
   [
     last10usersChanges.pipe(
       Stream.map(
@@ -58,7 +69,10 @@ const listenAndSendUpdatesToConnection = (
 ): Effect.Effect<
   void,
   SendingMessageError,
-  PubKeyToCountryPrefixState | CountriesToConnectionsCountState
+  | PubKeyToCountryPrefixState
+  | CountriesToConnectionsCountState
+  | CountOfUsersState
+  | HasingSalt
 > => {
   const handleMessage = encodeAndSendMessage(connection)
 

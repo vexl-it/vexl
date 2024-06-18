@@ -26,7 +26,6 @@ function SetYourOwnPriceScreen(): JSX.Element {
   return (
     <>
       <HeaderProxy
-        onClose={goBack}
         title={t('tradeChecklist.calculateAmount.setYourOwnPrice')}
       />
       <Content scrollable>

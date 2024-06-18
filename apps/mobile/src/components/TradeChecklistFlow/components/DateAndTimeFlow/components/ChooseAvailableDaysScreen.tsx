@@ -65,12 +65,7 @@ function ChooseAvailableDaysScreen({
 
   return (
     <>
-      <HeaderProxy
-        onClose={() => {
-          navigation.navigate('AgreeOnTradeDetails')
-        }}
-        title={t('tradeChecklist.dateAndTime.screenTitle')}
-      />
+      <HeaderProxy title={t('tradeChecklist.dateAndTime.screenTitle')} />
       <Content scrollable>
         <Header
           title={t('tradeChecklist.dateAndTime.chooseAvailableDays')}

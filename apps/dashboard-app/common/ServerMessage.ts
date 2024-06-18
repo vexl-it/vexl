@@ -1,8 +1,8 @@
 import {Schema} from '@effect/schema'
-import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {CountryPrefixE} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {UnixMillisecondsE} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import DebugMessage from './DebugMessage'
+import {HashedPubKey} from './HashedPubKey'
 
 export class PongMessage extends Schema.TaggedClass<PongMessage>()(
   'PongMessage',
@@ -30,7 +30,7 @@ export class ConnectionsCountByCountryListMessage extends Schema.TaggedClass<Con
 export class UserWithConnections extends Schema.Class<UserWithConnections>(
   'UserWithConnections'
 )({
-  pubKey: PublicKeyPemBase64E,
+  pubKey: HashedPubKey,
   connectionsCount: Schema.Number,
   countryPrefix: CountryPrefixE,
   receivedAt: UnixMillisecondsE,

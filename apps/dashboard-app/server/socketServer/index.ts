@@ -7,8 +7,10 @@ import {
   ReceivedUnexpectedMessage,
   type ServerMessage,
 } from '../../common/ServerMessage'
+import {type CountOfUsersState} from '../metrics/countOfUsers'
 import {type PubKeyToCountryPrefixState} from '../metrics/pubKeyToCountry'
 import {type CountriesToConnectionsCountState} from '../metrics/pubKeysToConnectionsCount'
+import {type HasingSalt} from '../utils/hashPubKey'
 import encodeAndSendMessage from './encodeAndSendMessage'
 import listenAndSendUpdatesToConnections from './listenAndSendUpdatesToConnection'
 import {IncommingConnectionsStreamContext} from './serverSocket'
@@ -69,7 +71,10 @@ const handleClientConnection = (
 ): Effect.Effect<
   void,
   never,
-  PubKeyToCountryPrefixState | CountriesToConnectionsCountState
+  | PubKeyToCountryPrefixState
+  | CountriesToConnectionsCountState
+  | CountOfUsersState
+  | HasingSalt
 > =>
   Effect.gen(function* (_) {
     yield* _(Effect.log('New connection'))

@@ -12,6 +12,7 @@ import {
 } from 'react-native'
 import {Stack, XStack, getTokens} from 'tamagui'
 import chevronRightSvg from '../../../../../images/chevronRightSvg'
+import {selectedCurrencyAtom} from '../../../../../state/selectedCurrency'
 import {useLogout} from '../../../../../state/useLogout'
 import {enableHiddenFeatures} from '../../../../../utils/environment'
 import {isUsingIos17AndAbove} from '../../../../../utils/isUsingIos17AndAbove'
@@ -19,6 +20,7 @@ import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import notEmpty from '../../../../../utils/notEmpty'
 import openUrl from '../../../../../utils/openUrl'
 import {askAreYouSureActionAtom} from '../../../../AreYouSureDialog'
+import CurrencySelect from '../../../../CurrencySelect'
 import SvgImage from '../../../../Image'
 import spokenLanguagesSvg from '../../../../images/spokenLanguagesSvg'
 import {changeLanguageActionAtom} from '../actionAtoms'
@@ -44,7 +46,6 @@ import twitterIconSvg from '../images/twitterIconSvg'
 import webIconSvg from '../images/webIconSvg'
 import AllowScreenshots from './AllowScreenshots'
 import ItemText from './ButtonSectionItemText'
-import ChangeCurrency from './ChangeCurrency'
 import ContactsImportedTitle from './ContactsImportedTitle'
 import ReportIssue from './ReportIssue'
 import SelectedCurrencyTitle from './SelectedCurrencyTitle'
@@ -109,6 +110,7 @@ function ButtonsSection(): JSX.Element {
   const setChangeCurrencyDialogVisible = useSetAtom(
     changeCurrencyDialogVisibleAtom
   )
+  const setSelectedCurrency = useSetAtom(selectedCurrencyAtom)
   const toggleScreenshotsDisabled = useSetAtom(
     toggleScreenshotsDisabledActionAtom
   )
@@ -338,7 +340,13 @@ function ButtonsSection(): JSX.Element {
         </Fragment>
       ))}
       <ReportIssue />
-      <ChangeCurrency />
+      <CurrencySelect
+        selectedCurrencyCodeAtom={selectedCurrencyAtom}
+        onItemPress={(currency) => {
+          setSelectedCurrency(currency)
+        }}
+        visibleAtom={changeCurrencyDialogVisibleAtom}
+      />
     </Stack>
   )
 }

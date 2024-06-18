@@ -1,5 +1,5 @@
 import {type CurrencyCode} from '@vexl-next/domain/src/general/currency.brand'
-import {useAtomValue, type Atom, type WritableAtom} from 'jotai'
+import {useAtom, useAtomValue, type Atom, type PrimitiveAtom} from 'jotai'
 import React from 'react'
 import {Modal} from 'react-native'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
@@ -13,28 +13,21 @@ import SearchBar from './components/SearchBar'
 
 interface Props {
   selectedCurrencyCodeAtom: Atom<CurrencyCode | undefined>
-  onClose: () => void
-  updateCurrencyLimitsAtom: WritableAtom<
-    null,
-    [
-      {
-        currency: CurrencyCode
-      },
-    ],
-    boolean
-  >
-  visible: boolean
+  onItemPress: (currency: CurrencyCode) => void
+  visibleAtom: PrimitiveAtom<boolean>
 }
 
 function CurrencySelect({
   selectedCurrencyCodeAtom,
-  onClose,
-  updateCurrencyLimitsAtom,
-  visible,
-}: Props): JSX.Element {
+  onItemPress,
+  visibleAtom,
+}: Props): JSX.Element | null {
   const {t} = useTranslation()
+  const [visible, setVisible] = useAtom(visibleAtom)
   const toDisplay = useAtomValue(currenciesToDisplayAtomsAtom)
   const {bottom, top} = useSafeAreaInsets()
+
+  if (!visible) return null
 
   return (
     <Modal animationType="fade" transparent visible={visible}>
@@ -44,6 +37,9 @@ function CurrencySelect({
             text={t('offerForm.selectCurrency')}
             textColor="$greyAccent5"
             withBackButton
+            onBackButtonPress={() => {
+              setVisible(false)
+            }}
           />
           <SearchBar />
         </Stack>
@@ -51,8 +47,10 @@ function CurrencySelect({
           <CurrenciesList
             currencies={toDisplay}
             selectedCurrencyCodeAtom={selectedCurrencyCodeAtom}
-            onItemPress={onClose}
-            updateCurrencyLimitsAtom={updateCurrencyLimitsAtom}
+            onItemPress={(currency) => {
+              setVisible(false)
+              onItemPress(currency)
+            }}
           />
         )}
         {toDisplay.length === 0 && <NothingFound />}

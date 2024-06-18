@@ -2,50 +2,40 @@ import {
   type CurrencyCode,
   type CurrencyInfo,
 } from '@vexl-next/domain/src/general/currency.brand'
-import {useAtomValue, useSetAtom, type Atom, type WritableAtom} from 'jotai'
+import {useAtomValue, type Atom} from 'jotai'
 import {TouchableOpacity} from 'react-native'
 import {Stack, Text, XStack, getTokens} from 'tamagui'
+import {useTranslation} from '../../../utils/localization/I18nProvider'
 import Image from '../../Image'
 import checkmarkSvg from '../../images/checkmarkSvg'
 
 interface Props {
   currencyAtom: Atom<CurrencyInfo>
   selectedCurrencyCodeAtom: Atom<CurrencyCode | undefined>
-  onItemPress: () => void
-  updateCurrencyLimitsAtom: WritableAtom<
-    null,
-    [
-      {
-        currency: CurrencyCode
-      },
-    ],
-    boolean
-  >
+  onItemPress: (currency: CurrencyCode) => void
 }
 
 function CurrencySelectListItem({
   currencyAtom,
   selectedCurrencyCodeAtom,
   onItemPress,
-  updateCurrencyLimitsAtom,
 }: Props): JSX.Element {
+  const {t} = useTranslation()
   const tokens = getTokens()
   const currency = useAtomValue(currencyAtom)
   const selectedCurrencyCode = useAtomValue(selectedCurrencyCodeAtom)
-  const updateCurrencyLimits = useSetAtom(updateCurrencyLimitsAtom)
 
   return (
     <TouchableOpacity
       onPress={() => {
-        updateCurrencyLimits({currency: currency.code})
-        onItemPress()
+        onItemPress(currency.code)
       }}
     >
       <XStack ai="center" jc="space-between">
         <Stack my="$2">
           <XStack ai="center">
             <Text ff="$body500" col="$greyAccent5" fos={18}>
-              {`${currency.flag} ${currency.name}`}
+              {`${currency.flag} ${t(`currency.${currency.code}`)}`}
             </Text>
           </XStack>
           <XStack ai="center" space="$1">

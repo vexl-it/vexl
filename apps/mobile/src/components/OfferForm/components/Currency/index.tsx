@@ -1,6 +1,11 @@
 import {type CurrencyCode} from '@vexl-next/domain/src/general/offers'
-import {useAtomValue, type PrimitiveAtom, type WritableAtom} from 'jotai'
-import {useState} from 'react'
+import {
+  atom,
+  useAtomValue,
+  useSetAtom,
+  type PrimitiveAtom,
+  type WritableAtom,
+} from 'jotai'
 import {Stack, Text, XStack} from 'tamagui'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import {currencies} from '../../../../utils/localization/currency'
@@ -21,6 +26,8 @@ interface Props {
   >
 }
 
+const currencySelectVisibleAtom = atom<boolean>(false)
+
 function CurrencyComponent({
   currencyAtom,
   hideInFilter,
@@ -28,9 +35,8 @@ function CurrencyComponent({
 }: Props): JSX.Element | null {
   const {t} = useTranslation()
   const currency = useAtomValue(currencyAtom)
-
-  const [currencySelectVisible, setCurrencySelectVisible] =
-    useState<boolean>(false)
+  const setCurrencySelectVisible = useSetAtom(currencySelectVisibleAtom)
+  const updateCurrencyLimits = useSetAtom(updateCurrencyLimitsAtom)
 
   return (
     <Stack>
@@ -66,11 +72,10 @@ function CurrencyComponent({
       </DropdownSelectButton>
       <CurrencySelect
         selectedCurrencyCodeAtom={currencyAtom}
-        onClose={() => {
-          setCurrencySelectVisible(false)
+        onItemPress={(currency) => {
+          updateCurrencyLimits({currency})
         }}
-        updateCurrencyLimitsAtom={updateCurrencyLimitsAtom}
-        visible={currencySelectVisible}
+        visibleAtom={currencySelectVisibleAtom}
       />
     </Stack>
   )

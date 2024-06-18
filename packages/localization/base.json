@@ -768,6 +768,7 @@
   "messages.youHaveAlreadyTalked": "You have a message history with this user. Press to see more",
   "messages.requestPendingActionBar.top": "Chat is waiting for your approval",
   "messages.requestPendingActionBar.bottom": "Above is communication you had with the user so far",
+  "messages.youHaveAlreadyInteractedWithThisUser": "You have already interacted with this user regarding this offer. See full chat history below.",
   "messages.showFullChatHistory": "You have already interacted with this user regarding this offer. Tap to see chat history.",
   "messages.unableToRespondOfferRemoved.title": "Offer was removed",
   "messages.unableToRespondOfferRemoved.text": "Unable to send response. Offer has been deleted. Do you want to leave the chat?",

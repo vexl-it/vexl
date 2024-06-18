@@ -7,7 +7,9 @@ import ToastNotificationContent from './components/ToastNotificationContent'
 export interface ToastNotificationState {
   text: string
   icon?: SvgString
+  iconFill?: string
   hideAfterMillis?: number | undefined
+  showCloseButton?: boolean
 }
 export const toastNotificationAtom = atom<ToastNotificationState | null>(null)
 
@@ -31,7 +33,7 @@ function ToastNotification(): JSX.Element {
 
   return (
     // this view has to be present in tree
-    // without it existing animation on Toast will not work
+    // without it exiting animation on Toast will not work
     <Stack pos="absolute" alignSelf="center" top={-10}>
       {!!state && <ToastNotificationContent {...state} />}
     </Stack>

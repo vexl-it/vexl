@@ -2,10 +2,10 @@ import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {useAtomValue, useSetAtom} from 'jotai'
-import React, {useCallback, useMemo, useState} from 'react'
+import React, {useCallback, useEffect, useMemo, useState} from 'react'
 import {Alert} from 'react-native'
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view'
-import {Stack, Text, YStack} from 'tamagui'
+import {Stack, Text, YStack, getTokens} from 'tamagui'
 import {type RootStackScreenProps} from '../../../navigationTypes'
 import {sendRequestHandleUIActionAtom} from '../../../state/chat/atoms/sendRequestActionAtom'
 import {type RequestState} from '../../../state/chat/domain'
@@ -23,10 +23,11 @@ import useSafeGoBack from '../../../utils/useSafeGoBack'
 import Button from '../../Button'
 import ButtonWithPressTimeout from '../../ButtonWithPressTimeout'
 import Info from '../../Info'
-import InfoSquare from '../../InfoSquare'
 import {MAP_SIZE} from '../../MarketplaceMap'
 import OfferRequestTextInput from '../../OfferRequestTextInput'
 import OfferWithBubbleTip from '../../OfferWithBubbleTip'
+import {toastNotificationAtom} from '../../ToastNotification'
+import infoSvg from '../../images/infoSvg'
 import showCommonFriendsExplanationUIActionAtom from '../atoms'
 import RerequestInfo from './RerequestInfo'
 import Title from './Title'
@@ -71,6 +72,7 @@ function OfferInfo({
   )
   const flagOffer = useSetAtom(reportedFlagAtom)
   const submitRequest = useSetAtom(sendRequestHandleUIActionAtom)
+  const setToastNotification = useSetAtom(toastNotificationAtom)
   const [text, setText] = useState('')
   const offerRerequestLimitDays = useAtomValue(offerRerequestLimitDaysAtom)
   const chatForOffer = useChatWithMessagesForOffer({
@@ -131,6 +133,20 @@ function OfferInfo({
   const showRequestButton =
     !chatForOffer || requestPossibleInfo.canBeRerequested
 
+  useEffect(() => {
+    setToastNotification({
+      text: t(`offer.requestStatus.${requestState}`),
+      icon: infoSvg,
+      iconFill: getTokens().color.black.val,
+      showCloseButton: true,
+      hideAfterMillis: 3000,
+    })
+
+    return () => {
+      setToastNotification(null)
+    }
+  }, [requestState, setToastNotification, t])
+
   return (
     <Stack f={1} mx="$2" my="$4">
       {!mapIsVisible && <Title offer={offer} />}
@@ -150,7 +166,6 @@ function OfferInfo({
             actionButtonText={t('common.learnMore')}
             onActionPress={onWhatDoesThisMeanPressed}
           />
-          <InfoSquare>{t(`offer.requestStatus.${requestState}`)}</InfoSquare>
           {!!showRequestButton && (
             <OfferRequestTextInput text={text} onChange={setText} />
           )}

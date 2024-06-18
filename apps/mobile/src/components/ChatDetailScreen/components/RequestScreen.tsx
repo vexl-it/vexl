@@ -2,9 +2,9 @@ import {useMolecule} from 'bunshi/dist/react'
 import * as T from 'fp-ts/Task'
 import {pipe} from 'fp-ts/function'
 import {useAtomValue, useSetAtom} from 'jotai'
-import React, {useCallback, useState} from 'react'
+import React, {useCallback, useEffect, useMemo, useState} from 'react'
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view'
-import {Stack, YStack} from 'tamagui'
+import {Stack, YStack, getTokens} from 'tamagui'
 import getRerequestPossibleInDaysText from '../../../utils/getRerequestPossibleInDaysText'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import randomName from '../../../utils/randomName'
@@ -12,7 +12,9 @@ import useSafeGoBack from '../../../utils/useSafeGoBack'
 import Button from '../../Button'
 import InfoSquare from '../../InfoSquare'
 import OfferRequestTextInput from '../../OfferRequestTextInput'
+import {toastNotificationAtom} from '../../ToastNotification'
 import {chatMolecule} from '../atoms'
+import infoSvg from '../images/infoSvg'
 import AcceptDeclineButtons from './AcceptDeclineButtons'
 import ChatHeader from './ChatHeader'
 import ChatRequestPreview from './ChatRequestPreview'
@@ -48,6 +50,7 @@ function RequestScreen(): JSX.Element {
   const hasPreviousCommunication = useAtomValue(hasPreviousCommunicationAtom)
   const canBeRerequested = useAtomValue(canBeRerequestedAtom)
   const rerequestOffer = useSetAtom(rerequestOfferActionAtom)
+  const setToastNotification = useSetAtom(toastNotificationAtom)
 
   const [text, setText] = useState('')
 
@@ -76,6 +79,38 @@ function RequestScreen(): JSX.Element {
 
   const requestedByMe = requestMessage?.state === 'sent'
 
+  const previousCommunicationInfoMessage = useMemo(() => {
+    if (hasPreviousCommunication === 'interactionAfterDelete') {
+      return t('offer.requestStatus.deleted')
+    }
+
+    if (hasPreviousCommunication === 'firstInteraction' && !!requestedByMe) {
+      return t('messages.thisWillBeYourFirstInteraction')
+    }
+
+    if (hasPreviousCommunication === 'anotherInteractionWithHistory') {
+      return t('messages.youHaveAlreadyInteractedWithThisUser')
+    }
+
+    return undefined
+  }, [hasPreviousCommunication, requestedByMe, t])
+
+  useEffect(() => {
+    if (previousCommunicationInfoMessage) {
+      setToastNotification({
+        text: previousCommunicationInfoMessage,
+        icon: infoSvg,
+        iconFill: getTokens().color.black.val,
+        showCloseButton: true,
+        hideAfterMillis: 3000,
+      })
+    }
+
+    return () => {
+      setToastNotification(null)
+    }
+  }, [previousCommunicationInfoMessage, requestState, setToastNotification, t])
+
   return (
     <>
       <ChatHeader
@@ -101,15 +136,6 @@ function RequestScreen(): JSX.Element {
                 {t('messages.showFullChatHistory')}
               </InfoSquare>
             )}
-            {hasPreviousCommunication === 'interactionAfterDelete' && (
-              <InfoSquare>{t('offer.requestStatus.deleted')}</InfoSquare>
-            )}
-            {hasPreviousCommunication === 'firstInteraction' &&
-              !!requestedByMe && (
-                <InfoSquare>
-                  {t('messages.thisWillBeYourFirstInteraction')}
-                </InfoSquare>
-              )}
             {requestState === 'requested' && !!requestedByMe && (
               <InfoSquare>
                 {t('messages.wellLetYouKnowOnceUserAccepts')}

@@ -1,1 +1,1 @@
-export default `@media (max-width: 1000px)`
+export default `@media (max-width: 1400px)`

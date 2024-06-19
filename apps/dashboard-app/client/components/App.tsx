@@ -59,7 +59,11 @@ const CountContainer = styled.div`
   }
 `
 
-const BanerContainer = styled.div``
+const BanerContainer = styled.div`
+  ${mobileMediaQuery} {
+    max-width: 500px;
+  }
+`
 
 export default function App(): JSX.Element {
   const listenForChanges = useSetAtom(listenForChangesActionAtom)

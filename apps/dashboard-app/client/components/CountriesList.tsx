@@ -33,9 +33,9 @@ const Scroll = styled.div`
 
 const BottomSpacer = styled.div`
   height: 150px;
-  ${mobileMediaQuery} {
+  /* ${mobileMediaQuery} {
     display: none;
-  }
+  } */
 `
 
 const Container = styled.div`
@@ -54,6 +54,8 @@ const Container = styled.div`
   ${mobileMediaQuery} {
     position: relative;
     inset: auto;
+    max-height: max(70vh, 500px);
+    overflow: hidden;
   }
 `
 

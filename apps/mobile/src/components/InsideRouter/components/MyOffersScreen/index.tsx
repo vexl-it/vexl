@@ -66,7 +66,9 @@ function MyOffersScreen({navigation}: Props): JSX.Element {
             <EmptyListWrapper
               buttonText={t('myOffers.addNewOffer')}
               onButtonPress={() => {
-                navigation.navigate('CreateOffer')
+                navigation.navigate('CRUDOfferFlow', {
+                  screen: 'ListingAndOfferType',
+                })
               }}
             >
               <Text

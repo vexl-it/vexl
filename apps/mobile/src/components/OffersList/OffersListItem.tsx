@@ -47,9 +47,14 @@ function OffersListItem({isFirst, offerAtom}: Props): JSX.Element {
   }, [chatForOffer, rerequestLimitDays])
 
   const navigateToOffer = useCallback(() => {
-    navigation.navigate(isMine ? 'EditOffer' : 'OfferDetail', {
-      offerId: offer.offerInfo.offerId,
-    })
+    if (isMine) {
+      navigation.navigate('CRUDOfferFlow', {
+        offerId: offer.offerInfo.offerId,
+        screen: 'ListingAndOfferType',
+      })
+    } else {
+      navigation.navigate('OfferDetail', {offerId: offer.offerInfo.offerId})
+    }
   }, [isMine, navigation, offer.offerInfo.offerId])
 
   const navigateToChat = useCallback(() => {

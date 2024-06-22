@@ -9,7 +9,7 @@ import {
 } from '../../../../utils/localization/I18nProvider'
 import showErrorAlert from '../../../../utils/showErrorAlert'
 import {toCommonErrorMessage} from '../../../../utils/useCommonErrorMessages'
-import numberOfFriendsAtom from '../../../ModifyOffer/atoms/numberOfFriendsAtom'
+import numberOfFriendsAtom from '../../../CRUDOfferFlow/atoms/numberOfFriendsAtom'
 import firstDegreeFriendsSvg from '../../../images/firstDegreeFriendsSvg'
 import secondDegreeFriendsSvg from '../../../images/secondDegreeFriendsSvg'
 import FriendLevelCell from './components/FriendLevelCell'

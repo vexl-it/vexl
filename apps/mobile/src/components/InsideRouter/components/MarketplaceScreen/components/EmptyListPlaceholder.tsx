@@ -129,7 +129,9 @@ function EmptyListPlaceholder({refreshing, onRefresh}: Props): JSX.Element {
             onRefresh={onRefresh}
             buttonText={t('myOffers.addNewOffer')}
             onButtonPress={() => {
-              navigation.navigate('CreateOffer')
+              navigation.navigate('CRUDOfferFlow', {
+                screen: 'ListingAndOfferType',
+              })
             }}
           >
             <Text
@@ -182,7 +184,9 @@ function EmptyListPlaceholder({refreshing, onRefresh}: Props): JSX.Element {
           onRefresh={onRefresh}
           buttonText={t('offer.emptyAction')}
           onButtonPress={() => {
-            navigation.navigate('CreateOffer')
+            navigation.navigate('CRUDOfferFlow', {
+              screen: 'ListingAndOfferType',
+            })
           }}
         >
           <Text textAlign="center" col="$greyOnWhite" fos={20} ff="$body600">

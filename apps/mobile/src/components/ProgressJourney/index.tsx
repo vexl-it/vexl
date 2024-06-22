@@ -1,14 +1,13 @@
+import {atom, useAtomValue, type Atom} from 'jotai'
 import {useCallback, type ReactNode} from 'react'
 import {TouchableWithoutFeedback} from 'react-native'
 import {Stack, XStack, styled} from 'tamagui'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import Button from '../Button'
-import WhiteContainer from '../WhiteContainer'
 
 const BreadCrumb = styled(Stack, {
   h: 4,
   f: 1,
-  bg: '$backgroundBlack',
   mx: '$1',
   br: '$11',
   variants: {
@@ -20,29 +19,45 @@ const BreadCrumb = styled(Stack, {
         opacity: 0.2,
       },
     },
+    whiteBackground: {
+      true: {
+        bg: '$backgroundBlack',
+      },
+      false: {
+        bg: '$main',
+      },
+    },
   } as const,
 })
 
 export interface Props {
   numberOfPages: number
+  background?: 'white' | 'black'
   currentPage: number
   onPageChange: (newPageNumber: number) => void
   onFinish: () => void
   onSkip: () => void
   children: ReactNode
   withBackButton?: boolean
+  touchableOverlayDisabled?: boolean
+  nextButtonDisabledAtom?: Atom<boolean> | undefined
 }
 
 function ProgressJourney({
   numberOfPages,
+  background = 'white',
   currentPage,
   onPageChange,
   onFinish,
   onSkip,
   children,
   withBackButton,
+  touchableOverlayDisabled = false,
+  nextButtonDisabledAtom,
 }: Props): JSX.Element {
   const {t} = useTranslation()
+
+  const nextButtonDisabled = useAtomValue(nextButtonDisabledAtom ?? atom(false))
 
   const onNextOrFinish = useCallback(() => {
     if (currentPage === numberOfPages - 1) {
@@ -53,7 +68,7 @@ function ProgressJourney({
 
   const onBackOrSkip = useCallback(() => {
     if (withBackButton) {
-      if (currentPage === 0) onFinish()
+      if (currentPage === 0) onSkip()
       else onPageChange(currentPage - 1)
     } else {
       if (currentPage === numberOfPages - 1) onFinish()
@@ -70,7 +85,7 @@ function ProgressJourney({
 
   return (
     <Stack f={1}>
-      <WhiteContainer noPadding>
+      <Stack f={1} br="$5" bc={background === 'white' ? '$white' : '$black'}>
         <Stack f={1} fg={0} fd="row" mx="$2" my="$3">
           {Array.from({length: numberOfPages}).map((_, index) => (
             <TouchableWithoutFeedback
@@ -81,30 +96,35 @@ function ProgressJourney({
               }}
               hitSlop={5}
             >
-              <BreadCrumb active={index <= currentPage} />
+              <BreadCrumb
+                active={index <= currentPage}
+                whiteBackground={background === 'white'}
+              />
             </TouchableWithoutFeedback>
           ))}
         </Stack>
         <Stack f={1} m="$3" position="relative">
           {children}
-          <XStack
-            f={1}
-            position="absolute"
-            top={0}
-            left={0}
-            bottom={0}
-            right={0}
-            mt="$10"
-          >
-            <TouchableWithoutFeedback onPress={onBackOrSkip}>
-              <Stack f={1} />
-            </TouchableWithoutFeedback>
-            <TouchableWithoutFeedback onPress={onNextOrFinish}>
-              <Stack f={1} />
-            </TouchableWithoutFeedback>
-          </XStack>
+          {!touchableOverlayDisabled && (
+            <XStack
+              f={1}
+              position="absolute"
+              top={0}
+              left={0}
+              bottom={0}
+              right={0}
+              mt="$10"
+            >
+              <TouchableWithoutFeedback onPress={onBackOrSkip}>
+                <Stack f={1} />
+              </TouchableWithoutFeedback>
+              <TouchableWithoutFeedback onPress={onNextOrFinish}>
+                <Stack f={1} />
+              </TouchableWithoutFeedback>
+            </XStack>
+          )}
         </Stack>
-      </WhiteContainer>
+      </Stack>
       <Stack fd="row" my="$2">
         {withBackButton ? (
           <Button
@@ -132,6 +152,7 @@ function ProgressJourney({
         ) : (
           <Button
             fullSize
+            disabled={nextButtonDisabled}
             onPress={onNextOrFinish}
             variant="secondary"
             text={t('common.next')}

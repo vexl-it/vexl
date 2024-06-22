@@ -39,6 +39,7 @@ import {pipe} from 'fp-ts/function'
 import {focusAtom} from 'jotai-optics'
 import {splitAtom} from 'jotai/utils'
 import {Alert} from 'react-native'
+import {type CRUDOfferStackParamsList} from '../../../navigationTypes'
 import {createInboxAtom} from '../../../state/chat/hooks/useCreateInbox'
 import {
   createBtcPriceForCurrencyAtom,
@@ -66,6 +67,8 @@ import checkNotificationPermissionsAndAskIfPossibleActionAtom from '../../../uti
 import reportError from '../../../utils/reportError'
 import showErrorAlert from '../../../utils/showErrorAlert'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
+import {askAreYouSureActionAtom} from '../../AreYouSureDialog'
+import {loadingOverlayDisplayedAtom} from '../../LoadingOverlayProvider'
 import {offerProgressModalActionAtoms as progressModal} from '../../UploadingOfferProgressModal/atoms'
 import numberOfFriendsAtom from './numberOfFriendsAtom'
 
@@ -660,32 +663,52 @@ export const offerFormMolecule = molecule(() => {
     )
   })
 
-  const deleteOfferActionAtom = atom<null, [], T.Task<boolean>>(
-    null,
-    (get, set) => {
-      const {t} = get(translationAtom)
-      const offer = get(offerAtom)
+  const deleteOfferWithAreYouSureActionAtom = atom(null, (get, set) => {
+    const {t} = get(translationAtom)
+    const offer = get(offerAtom)
 
-      return pipe(
+    return pipe(
+      set(askAreYouSureActionAtom, {
+        variant: 'danger',
+        steps: [
+          {
+            type: 'StepWithText',
+            title: t('editOffer.deleteOffer'),
+            description: t('editOffer.deleteOfferDescription'),
+            positiveButtonText: t('common.yesDelete'),
+            negativeButtonText: t('common.nope'),
+          },
+        ],
+      }),
+      TE.map(() => {
+        set(loadingOverlayDisplayedAtom, true)
+      }),
+      TE.chainW(() =>
         set(deleteOffersActionAtom, {
           adminIds: [offer.ownershipInfo?.adminId].filter(notEmpty),
-        }),
-        TE.match(
-          (e) => {
+        })
+      ),
+      TE.match(
+        (e) => {
+          if (e._tag !== 'UserDeclinedError') {
             showErrorAlert({
               title:
                 toCommonErrorMessage(e, t) ?? t('editOffer.errorDeletingOffer'),
               error: e,
             })
-            return false
-          },
-          (result) => {
-            return result.success
           }
-        )
-      )
-    }
-  )
+          return false
+        },
+        (result) => {
+          return result.success
+        }
+      ),
+      T.map((value) => {
+        set(loadingOverlayDisplayedAtom, false)
+        return value
+      })
+    )
+  })
 
   const modifyOfferLoaderTitleAtom = atom((get) => {
     const {t} = get(translationAtom)
@@ -799,7 +822,7 @@ export const offerFormMolecule = molecule(() => {
     )
   })
 
-  const editOfferAtom = atom(null, (get, set) => {
+  const editOfferActionAtom = atom(null, (get, set) => {
     const {t} = get(translationAtom)
     const offer = get(offerAtom)
     const singlePriceActive = get(singlePriceActiveAtom)
@@ -865,37 +888,40 @@ export const offerFormMolecule = molecule(() => {
     )
   })
 
-  const setOfferFormActionAtom = atom(null, (get, set, offerId: OfferId) => {
-    const offer = get(singleOfferAtom(offerId))
+  const setOfferFormActionAtom = atom(
+    null,
+    (get, set, offerId: OfferId | undefined) => {
+      const offer = get(singleOfferAtom(offerId))
 
-    if (offer) {
-      const offerPublicPart = offer.offerInfo.publicPart
+      if (offer) {
+        const offerPublicPart = offer.offerInfo.publicPart
 
-      set(
-        calculateSatsValueOnFiatValueChangeActionAtom,
-        String(offer.offerInfo.publicPart.amountBottomLimit)
-      )
+        set(
+          calculateSatsValueOnFiatValueChangeActionAtom,
+          String(offer.offerInfo.publicPart.amountBottomLimit)
+        )
 
-      set(
-        singlePriceActiveAtom,
-        offerPublicPart.listingType !== 'BITCOIN' &&
-          offerPublicPart.amountBottomLimit !== 0 &&
-          offerPublicPart.amountTopLimit !== 0
-      )
+        set(
+          singlePriceActiveAtom,
+          offerPublicPart.listingType !== 'BITCOIN' &&
+            offerPublicPart.amountBottomLimit !== 0 &&
+            offerPublicPart.amountTopLimit !== 0
+        )
 
-      set(offerAtom, offer)
-      set(offerTypeAtom, offerPublicPart.offerType)
-      set(listingTypeAtom, offerPublicPart.listingType)
-      set(nullableOfferTypeAtom, offerPublicPart.offerType)
-      set(nullableCurrencyAtom, offerPublicPart.currency)
-      set(nullableAmountTopLimitAtom, offerPublicPart.amountTopLimit)
-      set(nullableAmountBottomLimitAtom, offerPublicPart.amountBottomLimit)
-      set(nullableBtcNetworkAtom, offerPublicPart.btcNetwork)
-      set(nullablePaymentMethodAtom, offerPublicPart.paymentMethod)
-      set(nullableLocationAtom, offerPublicPart.location)
-      set(nullableLocationStateAtom, offerPublicPart.locationState)
+        set(offerAtom, offer)
+        set(offerTypeAtom, offerPublicPart.offerType)
+        set(listingTypeAtom, offerPublicPart.listingType)
+        set(nullableOfferTypeAtom, offerPublicPart.offerType)
+        set(nullableCurrencyAtom, offerPublicPart.currency)
+        set(nullableAmountTopLimitAtom, offerPublicPart.amountTopLimit)
+        set(nullableAmountBottomLimitAtom, offerPublicPart.amountBottomLimit)
+        set(nullableBtcNetworkAtom, offerPublicPart.btcNetwork)
+        set(nullablePaymentMethodAtom, offerPublicPart.paymentMethod)
+        set(nullableLocationAtom, offerPublicPart.location)
+        set(nullableLocationStateAtom, offerPublicPart.locationState)
+      }
     }
-  })
+  )
 
   const resetOfferFormActionAtom = atom(null, (get, set) => {
     // we want to reset whole offer form except of chosen listing type
@@ -1028,16 +1054,83 @@ export const offerFormMolecule = molecule(() => {
     }
   )
 
+  const currentStepInOfferCreationAtom = atom<keyof CRUDOfferStackParamsList>(
+    'ListingAndOfferType'
+  )
+
+  const nextButtonInOfferModificationDisabledAtom = atom((get) => {
+    const currentStepInOfferCreation = get(currentStepInOfferCreationAtom)
+    const offerType = get(offerTypeAtom)
+    const listingType = get(listingTypeAtom)
+    const locationState = get(locationStateAtom)
+    const location = get(locationAtom)
+    const singlePriceActive = get(singlePriceActiveAtom)
+    const amountBottomLimit = get(amountBottomLimitAtom)
+    const currency = get(currencyAtom)
+
+    const noListingTypeOrOfferType =
+      currentStepInOfferCreation === 'ListingAndOfferType' &&
+      (!listingType || !offerType)
+
+    const noOfferDescription =
+      currentStepInOfferCreation === 'OfferDescription' &&
+      get(offerDescriptionAtom).trim() === ''
+
+    const noLocationForInPersonOffer =
+      currentStepInOfferCreation === 'LocationAndPaymentMethod' &&
+      locationState?.includes('IN_PERSON') &&
+      location?.length === 0
+
+    const priceNotFilled =
+      currentStepInOfferCreation === 'Price' &&
+      listingType !== 'BITCOIN' &&
+      singlePriceActive &&
+      amountBottomLimit === 0
+
+    const deliveryMethodNotFilled =
+      currentStepInOfferCreation === 'DeliveryMethod' &&
+      listingType === 'PRODUCT' &&
+      locationState?.length === 0
+
+    const pickupLocationNotFilled =
+      (currentStepInOfferCreation === 'DeliveryMethod' &&
+        listingType === 'PRODUCT' &&
+        locationState?.includes('IN_PERSON') &&
+        location?.length === 0) ??
+      false
+
+    const exceededLimit =
+      ((currentStepInOfferCreation === 'CurrencyAndAmount' ||
+        currentStepInOfferCreation === 'Price') &&
+        currency &&
+        listingType !== 'BITCOIN' &&
+        singlePriceActive &&
+        amountBottomLimit &&
+        amountBottomLimit > currencies[currency].maxAmount) ??
+      false
+
+    return (
+      (noListingTypeOrOfferType ||
+        noOfferDescription ||
+        priceNotFilled ||
+        deliveryMethodNotFilled ||
+        pickupLocationNotFilled ||
+        exceededLimit ||
+        noLocationForInPersonOffer) ??
+      false
+    )
+  })
+
   return {
     offerAtom,
     showBuySellFieldAtom,
     showRestOfTheFieldsAtom,
     offerFormAtom,
-    deleteOfferActionAtom,
+    deleteOfferWithAreYouSureActionAtom,
     intendedConnectionLevelAtom,
     modifyOfferLoaderTitleAtom,
     toggleOfferActiveAtom,
-    editOfferAtom,
+    editOfferActionAtom,
     createOfferActionAtom,
     currencyAtom,
     amountBottomLimitAtom,
@@ -1075,5 +1168,7 @@ export const offerFormMolecule = molecule(() => {
     changePriceCurrencyActionAtom,
     updateListingTypeActionAtom,
     updateBtcNetworkAtom,
+    currentStepInOfferCreationAtom,
+    nextButtonInOfferModificationDisabledAtom,
   }
 })

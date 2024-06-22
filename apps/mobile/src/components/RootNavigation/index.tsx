@@ -17,6 +17,7 @@ import {useHideInnactivityReminderNotificationsOnResume} from '../../utils/notif
 import {useRefreshNotificationTokenOnResumeAssumeLoggedIn} from '../../utils/notifications/useRefreshNotificationTokenOnResumeAssumeLoggedIn'
 import {showTextDebugButtonAtom} from '../../utils/preferences'
 import AppLogsScreen from '../AppLogsScreen'
+import CRUDOfferFlow from '../CRUDOfferFlow'
 import ChangeProfilePictureScreen from '../ChangeProfilePictureScreen/ChangeProfilePictureScreen'
 import ChatDetailScreen from '../ChatDetailScreen'
 import CommonFriendsScreen from '../CommonFriendsScreen'
@@ -27,8 +28,6 @@ import FaqsScreen from '../FaqScreen'
 import FilterOffersScreen from '../FilterOffersScreen'
 import InsideScreen from '../InsideRouter'
 import LoginFlow from '../LoginFlow'
-import CreateOfferScreen from '../ModifyOffer/components/CreateOfferScreen'
-import EditOfferScreen from '../ModifyOffer/components/EditOfferScreen'
 import NotificationSettingsScreen from '../NotificationSettingsScreen'
 import OfferDetailScreen from '../OfferDetailScreen'
 import PostLoginFlow from '../PostLoginFlow'
@@ -84,8 +83,7 @@ function RootNavigation(): JSX.Element {
             <Stack.Screen name="TodoScreen" component={TodoScreen} />
             <Stack.Screen name="PostLoginFlow" component={PostLoginFlow} />
             <Stack.Screen name="OfferDetail" component={OfferDetailScreen} />
-            <Stack.Screen name="CreateOffer" component={CreateOfferScreen} />
-            <Stack.Screen name="EditOffer" component={EditOfferScreen} />
+            <Stack.Screen name="CRUDOfferFlow" component={CRUDOfferFlow} />
             <Stack.Screen name="FilterOffers" component={FilterOffersScreen} />
             <Stack.Screen name="AppLogs" component={AppLogsScreen} />
             <Stack.Screen name="ChatDetail" component={ChatDetailScreen} />

@@ -35,8 +35,9 @@ export type RootStackParamsList = {
   TradeChecklistFlow: NavigatorScreenParams<TradeChecklistStackParamsList> &
     ChatIds
 
-  CreateOffer: undefined
-  EditOffer: {offerId: OfferId}
+  CRUDOfferFlow: NavigatorScreenParams<CRUDOfferStackParamsList> & {
+    offerId?: OfferId | undefined
+  }
   FilterOffers: undefined
   MyOffers: undefined
 
@@ -120,6 +121,24 @@ export type InsideTabParamsList = {
   Messages: undefined
   Settings: undefined
 }
+
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type CRUDOfferStackParamsList = {
+  ListingAndOfferType: undefined
+  CurrencyAndAmount: undefined
+  OfferDescription: undefined
+  LocationAndPaymentMethod: undefined
+  SpokenLanguagesNetworkAndFriendLevel: undefined
+  DeliveryMethod: undefined
+  Price: undefined
+}
+
+export type CRUDOfferStackScreenProps<
+  T extends keyof CRUDOfferStackParamsList,
+> = CompositeScreenProps<
+  NativeStackScreenProps<CRUDOfferStackParamsList, T>,
+  RootStackScreenProps<keyof RootStackParamsList>
+>
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type ContactsTabParamsList = {

@@ -131,7 +131,12 @@ function TabBar({state, navigation}: BottomTabBarProps): JSX.Element {
               {index === 1 && (
                 <TouchableWithoutFeedback
                   onPress={() => {
-                    navigation.navigate('CreateOffer')
+                    navigation.navigate('CRUDOfferFlow', {
+                      screen: 'ListingAndOfferType',
+                      params: {
+                        offerId: undefined,
+                      },
+                    })
                   }}
                 >
                   <Stack

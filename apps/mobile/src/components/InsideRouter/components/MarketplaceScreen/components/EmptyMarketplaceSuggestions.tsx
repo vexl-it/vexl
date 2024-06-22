@@ -34,7 +34,9 @@ function EmptyMarketplaceSuggestions({
         <MarketplaceSuggestion
           buttonText={t('myOffers.addNewOffer')}
           onButtonPress={() => {
-            navigation.navigate('CreateOffer')
+            navigation.navigate('CRUDOfferFlow', {
+              screen: 'ListingAndOfferType',
+            })
           }}
           text={t('suggestion.createYourFirstOffer')}
           visibleStateAtom={createOfferSuggestionVisibleAtom}

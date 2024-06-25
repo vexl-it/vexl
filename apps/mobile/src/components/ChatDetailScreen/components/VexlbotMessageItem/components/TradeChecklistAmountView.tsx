@@ -19,10 +19,8 @@ import {currencies} from '../../../../../utils/localization/currency'
 import {preferencesAtom} from '../../../../../utils/preferences'
 import Button from '../../../../Button'
 import {loadingOverlayDisplayedAtom} from '../../../../LoadingOverlayProvider'
-import {
-  toastNotificationAtom,
-  type ToastNotificationState,
-} from '../../../../ToastNotification'
+import {toastNotificationAtom} from '../../../../ToastNotification/atom'
+import {type ToastNotificationState} from '../../../../ToastNotification/domain'
 import {
   addAmountActionAtom,
   submitTradeChecklistUpdatesActionAtom,

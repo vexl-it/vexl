@@ -4,7 +4,8 @@ import Animated, {FadeInUp, FadeOutUp} from 'react-native-reanimated'
 import {Stack, Text, XStack, getTokens} from 'tamagui'
 import SvgImage from '../../Image'
 import closeSvg from '../../images/closeSvg'
-import {toastNotificationAtom, type ToastNotificationState} from '../index'
+import {toastNotificationAtom} from '../atom'
+import {type ToastNotificationState} from '../domain'
 
 function ToastNotificationContent({
   icon,
@@ -16,7 +17,7 @@ function ToastNotificationContent({
   const setToastNotification = useSetAtom(toastNotificationAtom)
 
   return (
-    <Stack als="center" w={width * 0.95} pos="absolute" t={height * 0.1}>
+    <Stack als="center" maw={width * 0.95} pos="absolute" t={height * 0.1}>
       <Animated.View entering={FadeInUp} exiting={FadeOutUp}>
         <XStack
           ai="center"
@@ -31,7 +32,7 @@ function ToastNotificationContent({
             <SvgImage
               width={16}
               height={16}
-              fill={iconFill}
+              fill={iconFill ?? 'none'}
               stroke={iconFill ? undefined : getTokens().color.black.val}
               source={icon}
             />

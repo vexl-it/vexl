@@ -23,7 +23,7 @@ import {translationAtom} from '../../../../utils/localization/I18nProvider'
 import toE164PhoneNumberWithDefaultCountryCode from '../../../../utils/toE164PhoneNumberWithDefaultCountryCode'
 import {askAreYouSureActionAtom} from '../../../AreYouSureDialog'
 import checkIconSvg from '../../../ChatDetailScreen/components/images/checkIconSvg'
-import {toastNotificationAtom} from '../../../ToastNotification'
+import {toastNotificationAtom} from '../../../ToastNotification/atom'
 import userSvg from '../../../images/userSvg'
 
 export const ContactsSelectScope = createScope<{

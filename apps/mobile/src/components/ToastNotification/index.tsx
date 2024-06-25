@@ -1,17 +1,8 @@
-import {atom, useAtom} from 'jotai'
+import {useAtom} from 'jotai'
 import {useEffect} from 'react'
 import {Stack} from 'tamagui'
-import {type SvgString} from '../../../../../packages/domain/src/utility/SvgString.brand'
+import {toastNotificationAtom} from './atom'
 import ToastNotificationContent from './components/ToastNotificationContent'
-
-export interface ToastNotificationState {
-  text: string
-  icon?: SvgString
-  iconFill?: string
-  hideAfterMillis?: number | undefined
-  showCloseButton?: boolean
-}
-export const toastNotificationAtom = atom<ToastNotificationState | null>(null)
 
 function ToastNotification(): JSX.Element {
   const [state, setState] = useAtom(toastNotificationAtom)

@@ -104,11 +104,11 @@ export default function createSubmitChecklistUpdateActionAtom(
                 tradeChecklistData.identity.received
               )
             : update.contact?.status === 'APPROVE_REVEAL'
-            ? processTradeChecklistContactRevealMessageIfAny(
-                tradeChecklistData.contact.received,
-                chatWithMessages.chat.otherSide.realLifeInfo
-              )
-            : undefined
+              ? processTradeChecklistContactRevealMessageIfAny(
+                  tradeChecklistData.contact.received,
+                  chatWithMessages.chat.otherSide.realLifeInfo
+                )
+              : undefined
         ) satisfies RealLifeInfo | undefined
 
         set(

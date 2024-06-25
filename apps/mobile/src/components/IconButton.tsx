@@ -107,12 +107,12 @@ function IconButton({
               ? variant === 'dark'
                 ? tokens.color.white.val
                 : variant === 'primary'
-                ? tokens.color.main.val
-                : variant === 'negative'
-                ? tokens.color.red.val
-                : variant === 'secondary'
-                ? tokens.color.darkBrown.val
-                : tokens.color.grey.val
+                  ? tokens.color.main.val
+                  : variant === 'negative'
+                    ? tokens.color.red.val
+                    : variant === 'secondary'
+                      ? tokens.color.darkBrown.val
+                      : tokens.color.grey.val
               : 'none'
           }
           fill={iconFill ?? 'none'}

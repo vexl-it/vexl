@@ -1,4 +1,4 @@
-import * as Http from '@effect/platform/HttpServer'
+import {HttpServerRequest} from '@effect/platform'
 import {Schema} from '@effect/schema'
 import * as S from '@effect/schema/Schema'
 import {
@@ -64,10 +64,10 @@ export class ServerUserSessionConfig extends Context.Tag(
 export const validateUserSession: Effect.Effect<
   UserSessionOnBE,
   InvalidSessionError,
-  ServerUserSessionConfig | Http.request.ServerRequest
+  ServerUserSessionConfig | HttpServerRequest.HttpServerRequest
 > = Effect.gen(function* (_) {
   const headers = yield* _(
-    Http.request.schemaHeaders(AuthHeaders),
+    HttpServerRequest.schemaHeaders(AuthHeaders),
     Effect.mapError(
       (e) => new InvalidSessionError({message: 'Missing required headers'})
     )

@@ -9,12 +9,9 @@ function ToastNotification(): JSX.Element {
 
   useEffect(() => {
     if (state) {
-      const timeout = setTimeout(
-        () => {
-          setState(null)
-        },
-        state?.hideAfterMillis ?? 1000
-      )
+      const timeout = setTimeout(() => {
+        setState(null)
+      }, state?.hideAfterMillis ?? 1000)
 
       return () => {
         clearTimeout(timeout)

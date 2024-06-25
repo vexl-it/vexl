@@ -47,8 +47,8 @@ function AmountOfTransaction({
       currency && currencies[currency].maxAmount <= 25000
         ? SLIDER_STEP_SMALL
         : currency && currencies[currency].maxAmount <= 250000
-        ? SLIDER_STEP_MEDIUM
-        : SLIDER_STEP_LARGE,
+          ? SLIDER_STEP_MEDIUM
+          : SLIDER_STEP_LARGE,
     [currency]
   )
   const SLIDER_MAX_VALUE = useMemo(

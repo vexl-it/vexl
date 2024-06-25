@@ -93,8 +93,8 @@ function EditOfferScreen({
                     !listingType || listingType === 'BITCOIN'
                       ? btcOfferContent
                       : listingType === 'PRODUCT'
-                      ? productOfferContent
-                      : otherOfferContent
+                        ? productOfferContent
+                        : otherOfferContent
                   }
                 />
               </>

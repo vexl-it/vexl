@@ -93,8 +93,8 @@ function FilterOffersScreen(): JSX.Element {
               listingType === 'OTHER'
                 ? otherOffersFilterContent
                 : listingType === 'PRODUCT'
-                ? productOffersFilterContent
-                : btcOffersFilterContent
+                  ? productOffersFilterContent
+                  : btcOffersFilterContent
             }
           />
         ) : (

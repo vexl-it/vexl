@@ -48,9 +48,9 @@ function generatePrivateKey(curve: Curve = defaultCurve): PrivateKeyHolder {
 }
 
 export {
+  generatePrivateKey,
+  importPrivateKey,
   PrivateKeyHolder,
   PrivateKeyPemBase64,
   PublicKeyPemBase64,
-  generatePrivateKey,
-  importPrivateKey,
 }

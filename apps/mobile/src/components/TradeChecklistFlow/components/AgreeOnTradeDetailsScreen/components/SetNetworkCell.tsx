@@ -26,8 +26,8 @@ function SetNetworkCell(): JSX.Element {
     networkUpdateToBeSent === 'LIGHTING' || btcNetworkInState === 'LIGHTING'
       ? t('tradeChecklist.network.lightning')
       : networkUpdateToBeSent === 'ON_CHAIN' || btcNetworkInState === 'ON_CHAIN'
-      ? t('tradeChecklist.network.onChain')
-      : undefined
+        ? t('tradeChecklist.network.onChain')
+        : undefined
 
   const onPress = useCallback(() => {
     navigation.navigate('Network', {

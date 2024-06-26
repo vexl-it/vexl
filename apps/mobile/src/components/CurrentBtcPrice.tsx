@@ -74,8 +74,8 @@ function CurrentBtcPrice({
               customBtcPrice
                 ? customBtcPrice.toLocaleString(currentLocale)
                 : btcPriceWithState?.state === 'error'
-                ? '-'
-                : btcPriceWithState?.btcPrice.toLocaleString(currentLocale)
+                  ? '-'
+                  : btcPriceWithState?.btcPrice.toLocaleString(currentLocale)
             } ${currency}`}
           </Text>
         )}

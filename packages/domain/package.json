@@ -15,18 +15,18 @@
     "@vexl-next/prettier-config": "0.0.0",
     "@vexl-next/tsconfig": "0.0.0",
     "eslint": "^8.50.0",
-    "prettier": "^3.0.3",
+    "prettier": "^3.3.2",
     "rimraf": "^4.4.0",
     "ts-node": "^10.9.1",
     "tsup": "^7.2.0",
-    "typescript": "^5.4.2"
+    "typescript": "^5.5.2"
   },
   "dependencies": {
-    "@effect/schema": "^0.66.1",
+    "@effect/schema": "^0.68.9",
     "@vexl-next/cryptography": "0.0.0",
     "awesome-phonenumber": "^5.1.0",
     "compare-versions": "^6.1.0",
-    "effect": "^3.0.1",
+    "effect": "^3.4.2",
     "fast-check": "^3.17.1",
     "fp-ts": "^2.13.1",
     "js-base64": "^3.7.5",

@@ -1,4 +1,8 @@
-import * as Http from '@effect/platform/HttpServer'
+import {
+  HttpRouter,
+  HttpServerRequest,
+  HttpServerResponse,
+} from '@effect/platform'
 import {Schema} from '@effect/schema'
 import {NewChatMessageNoticeNotificationData} from '@vexl-next/domain/src/general/notifications'
 import {
@@ -10,10 +14,12 @@ import {Effect} from 'effect'
 import {sendFirebaseMessage} from '../../FirebaseMessagingLayer'
 import {decodeFcmCypher} from './utils'
 
-const IssueNotificationRouteLive = Http.router.post(
+const IssueNotificationRouteLive = HttpRouter.post(
   '/issue-notification',
   Effect.gen(function* (_) {
-    const data = yield* _(Http.request.schemaBodyJson(IssueNotificationRequest))
+    const data = yield* _(
+      HttpServerRequest.schemaBodyJson(IssueNotificationRequest)
+    )
     const fcmToken = yield* _(decodeFcmCypher(data.fcmCypher))
 
     const chatNotificationData = new NewChatMessageNoticeNotificationData({
@@ -30,12 +36,13 @@ const IssueNotificationRouteLive = Http.router.post(
     )
   }).pipe(
     Effect.zipRight(
-      Http.response.json(new IssueNotificationResponse({success: true}))
+      HttpServerResponse.json(new IssueNotificationResponse({success: true}))
     ),
     Effect.provide(AuthenticatedSessionInRequestLive),
     Effect.catchTags({
-      InvalidFcmCypherError: (e) => Http.response.json(e, {status: 400}),
-      SendingNotificationError: (e) => Http.response.json(e, {status: 400}),
+      InvalidFcmCypherError: (e) => HttpServerResponse.json(e, {status: 400}),
+      SendingNotificationError: (e) =>
+        HttpServerResponse.json(e, {status: 400}),
     })
   )
 )

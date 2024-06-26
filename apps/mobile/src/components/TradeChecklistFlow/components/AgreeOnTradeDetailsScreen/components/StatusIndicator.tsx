@@ -26,8 +26,8 @@ function StatusIndicator({itemStatus}: Props): JSX.Element {
         ['readyToSend', 'pending'].includes(itemStatus)
           ? '$yellowAccent2'
           : itemStatus === 'warning'
-          ? '$pink'
-          : 'transparent'
+            ? '$pink'
+            : 'transparent'
       }
     >
       {['readyToSend', 'pending'].includes(itemStatus) ? (

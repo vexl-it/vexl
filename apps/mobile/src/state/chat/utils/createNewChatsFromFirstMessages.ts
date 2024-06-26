@@ -50,9 +50,9 @@ export default function createNewChatsFromFirstMessages({
           lastMessage.state === 'receivedButRequiresNewerVersion'
             ? lastMessage.message.myFcmCypher
             : // If the offer is theirs
-            !inboxOffer?.ownershipInfo?.adminId
-            ? inboxOffer?.offerInfo.publicPart.fcmCypher
-            : undefined
+              !inboxOffer?.ownershipInfo?.adminId
+              ? inboxOffer?.offerInfo.publicPart.fcmCypher
+              : undefined
 
         return {
           chat: {

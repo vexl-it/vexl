@@ -29,8 +29,8 @@ function FilteredContacts({
     filter === 'new'
       ? newContactsToDisplayAtomsAtom
       : filter === 'submitted'
-      ? submittedContactsToDisplayAtomsAtom
-      : nonSubmittedContactsToDisplayAtomsAtom
+        ? submittedContactsToDisplayAtomsAtom
+        : nonSubmittedContactsToDisplayAtomsAtom
   )
 
   const setContactsFilter = useSetAtom(contactsFilterAtom)

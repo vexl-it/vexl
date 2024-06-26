@@ -35,23 +35,23 @@ function TradeChecklistNetworkView(): JSX.Element | null {
               }
             )
           : networkDataToDisplay.networkData.btcAddress
-          ? t('vexlbot.setNetworkToOnChainWithBtcAddress', {
-              btcAddress: networkDataToDisplay.networkData.btcAddress,
-              username:
+            ? t('vexlbot.setNetworkToOnChainWithBtcAddress', {
+                btcAddress: networkDataToDisplay.networkData.btcAddress,
+                username:
+                  networkDataToDisplay.by === 'me'
+                    ? t('common.you')
+                    : otherSideData.userName,
+              })
+            : `${t('vexlbot.setNetworkToOnChainNoBtcAddress', {
+                username:
+                  networkDataToDisplay.by === 'me'
+                    ? `${t('common.you')}`
+                    : otherSideData.userName,
+              })} ${
                 networkDataToDisplay.by === 'me'
-                  ? t('common.you')
-                  : otherSideData.userName,
-            })
-          : `${t('vexlbot.setNetworkToOnChainNoBtcAddress', {
-              username:
-                networkDataToDisplay.by === 'me'
-                  ? `${t('common.you')}`
-                  : otherSideData.userName,
-            })} ${
-              networkDataToDisplay.by === 'me'
-                ? t('vexlbot.dontForgetToGenerateAddress')
-                : t('vexlbot.btcAddressWillBeProvided')
-            }`
+                  ? t('vexlbot.dontForgetToGenerateAddress')
+                  : t('vexlbot.btcAddressWillBeProvided')
+              }`
       }
     >
       {networkDataToDisplay.networkData.btcNetwork === 'ON_CHAIN' &&

@@ -2,8 +2,13 @@ import './sourcemapSupport'
 
 // import {registerSetryMiddleware} from './utils/sentry'
 import {DevTools} from '@effect/experimental'
+import {
+  HttpMiddleware,
+  HttpRouter,
+  HttpServer,
+  HttpServerResponse,
+} from '@effect/platform'
 import {NodeHttpServer, NodeRuntime} from '@effect/platform-node'
-import * as Http from '@effect/platform/HttpServer'
 import {
   GetExchangeRateRequest,
   GetGeocodedCoordinatesRequest,
@@ -25,37 +30,35 @@ import {YadioCache, getExchangeRatePrice} from './apis/yadio'
 
 const ServerLive = Layer.unwrapEffect(
   EnvironmentConstants.PORT.pipe(
-    Effect.map((port) =>
-      NodeHttpServer.server.layer(() => createServer(), {port})
-    )
+    Effect.map((port) => NodeHttpServer.layer(() => createServer(), {port}))
   )
 )
 
-const HttpLive = Http.router.empty.pipe(
-  Http.router.get(
+const HttpLive = HttpRouter.empty.pipe(
+  HttpRouter.get(
     '/suggest',
     schemaUrlSearchParams(GetLocationSuggestionsRequest).pipe(
       Effect.flatMap(querySuggest),
-      Effect.flatMap(Http.response.json),
+      Effect.flatMap(HttpServerResponse.json),
       Effect.provide(AuthenticatedSessionInRequestLive)
     )
   ),
-  Http.router.get(
+  HttpRouter.get(
     '/geocode',
     schemaUrlSearchParams(GetGeocodedCoordinatesRequest).pipe(
       Effect.flatMap(googleGeocode),
-      Effect.flatMap(Http.response.json),
+      Effect.flatMap(HttpServerResponse.json),
       Effect.provide(AuthenticatedSessionInRequestLive)
     )
   ),
-  Http.router.get(
+  HttpRouter.get(
     '/btc-rate',
     schemaUrlSearchParams(GetExchangeRateRequest).pipe(
       Effect.flatMap(getExchangeRatePrice),
-      Effect.flatMap(Http.response.json),
+      Effect.flatMap(HttpServerResponse.json),
       Effect.provide(AuthenticatedSessionInRequestLive),
       Effect.catchTag('GetExchangeRateError', (e) =>
-        Http.response.json(e, {status: 400})
+        HttpServerResponse.json(e, {status: 400})
       )
     )
   ),
@@ -63,8 +66,8 @@ const HttpLive = Http.router.empty.pipe(
 )
 
 const AppLive = HttpLive.pipe(
-  Http.server.serve(Http.middleware.logger),
-  Http.server.withLogAddress,
+  HttpServer.serve(HttpMiddleware.logger),
+  HttpServer.withLogAddress,
   Layer.provide(ServerLive),
   Layer.provide(YadioCache.layer()),
   Layer.provide(

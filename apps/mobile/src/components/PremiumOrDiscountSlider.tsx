@@ -32,8 +32,8 @@ function PremiumOrDiscountSlider({
         sliderValue === 0
           ? '$grey'
           : Math.abs(sliderValue) > sliderThreshold / 2
-          ? '$redAccent1'
-          : '$darkBrown'
+            ? '$redAccent1'
+            : '$darkBrown'
       }
     >
       <XStack f={1} jc="space-between" mb="$4">
@@ -43,8 +43,8 @@ function PremiumOrDiscountSlider({
             sliderValue >= 0
               ? '$white'
               : sliderValue < -sliderThreshold / 2
-              ? '$red'
-              : '$main'
+                ? '$red'
+                : '$main'
           }
           numberOfLines={2}
           adjustsFontSizeToFit
@@ -59,8 +59,8 @@ function PremiumOrDiscountSlider({
             sliderValue <= 0
               ? '$white'
               : sliderValue > sliderThreshold / 2
-              ? '$red'
-              : '$main'
+                ? '$red'
+                : '$main'
           }
           numberOfLines={2}
           adjustsFontSizeToFit

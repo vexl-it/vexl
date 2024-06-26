@@ -92,8 +92,8 @@ export const contactSelectMolecule = molecule((_, getScope) => {
       contactsFilter === 'submitted'
         ? submittedContactsToDisplayAtom
         : contactsFilter === 'nonSubmitted'
-        ? nonSubmittedContactsToDisplayAtom
-        : newContactsToDisplayAtom
+          ? nonSubmittedContactsToDisplayAtom
+          : newContactsToDisplayAtom
     )
   })
 
@@ -140,8 +140,8 @@ export const contactSelectMolecule = molecule((_, getScope) => {
         contactsFilter === 'submitted'
           ? selectedSubmittedNumbersAtom
           : contactsFilter === 'nonSubmitted'
-          ? selectedNonSubmittedNumbersAtom
-          : selectedNewNumbersAtom
+            ? selectedNonSubmittedNumbersAtom
+            : selectedNewNumbersAtom
       )
     },
     (get, set, numbers: SetStateAction<Set<E164PhoneNumber>>) => {
@@ -151,8 +151,8 @@ export const contactSelectMolecule = molecule((_, getScope) => {
         contactsFilter === 'submitted'
           ? selectedSubmittedNumbersAtom
           : contactsFilter === 'nonSubmitted'
-          ? selectedNonSubmittedNumbersAtom
-          : selectedNewNumbersAtom,
+            ? selectedNonSubmittedNumbersAtom
+            : selectedNewNumbersAtom,
         numbers
       )
     }

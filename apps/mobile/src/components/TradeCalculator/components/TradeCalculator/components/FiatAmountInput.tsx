@@ -64,8 +64,8 @@ function FiatAmountInput({
         tradePriceType === 'your'
           ? ownPrice
           : btcPriceForOfferWithState?.state === 'success'
-          ? `${btcPriceForOfferWithState.btcPrice}`
-          : '-'
+            ? `${btcPriceForOfferWithState.btcPrice}`
+            : '-'
       }
       value={fiatValue}
       onChangeText={(input) => {

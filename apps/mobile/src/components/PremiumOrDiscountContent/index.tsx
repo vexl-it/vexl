@@ -70,8 +70,8 @@ function PremiumOrDiscountContent({
                   feeAmount === 0
                     ? '$greyOnBlack'
                     : Math.abs(feeAmount) > SLIDER_THRESHOLD / 2
-                    ? '$red'
-                    : '$main'
+                      ? '$red'
+                      : '$main'
                 }
               >
                 {`${feeAmount > 0 ? '+' : '-'} ${Math.abs(feeAmount)} %`}

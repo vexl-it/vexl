@@ -100,8 +100,8 @@ function PremiumOrDiscountDetail({
                   Number(inputValue) === 0
                     ? '$greyOnBlack'
                     : Math.abs(Number(inputValue)) > SLIDER_THRESHOLD / 2
-                    ? '$red'
-                    : '$main'
+                      ? '$red'
+                      : '$main'
                 }
                 style={{
                   flex: 1,

@@ -87,8 +87,8 @@ function CreateOfferScreen(): JSX.Element {
                 listingType === 'BITCOIN'
                   ? btcOfferContent
                   : listingType === 'PRODUCT'
-                  ? productOfferContent
-                  : otherOfferContent
+                    ? productOfferContent
+                    : otherOfferContent
               }
             />
           )}

@@ -89,8 +89,8 @@ function Price({
         {inFilter
           ? t('filterOffers.filteredAccordingToValueInSats')
           : singlePriceActive
-          ? t('offerForm.thePriceIsFixedToFiat')
-          : t('offerForm.thisItemDoesNotHaveSetPrice')}
+            ? t('offerForm.thePriceIsFixedToFiat')
+            : t('offerForm.thisItemDoesNotHaveSetPrice')}
       </Text>
       {!!(!!singlePriceActive || inFilter) && (
         <PriceCalculator

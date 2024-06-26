@@ -176,10 +176,10 @@ function Button({
         variant === 'link'
           ? 'auto'
           : size === 'small'
-          ? 38
-          : size === 'medium'
-          ? 48
-          : 60,
+            ? 38
+            : size === 'medium'
+              ? 48
+              : 60,
       ...(fullWidth && {width: '100%'}),
       ...(fullSize && {flex: 1}),
     }),

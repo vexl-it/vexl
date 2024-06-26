@@ -210,8 +210,8 @@ function TextInput(
           variant === 'greyOnBlack'
             ? tokens.color.greyOnBlack.val
             : variant === 'transparentOnGrey'
-            ? tokens.color.greyOnBlack.val
-            : tokens.color.darkColorText.val
+              ? tokens.color.greyOnBlack.val
+              : tokens.color.darkColorText.val
         }
         // android selectionColor not reducing color opacity by default
         selectionColor={
@@ -220,12 +220,12 @@ function TextInput(
               ? 'rgba(252, 205, 108, 0.3)'
               : tokens.color.greyOnBlack.val
             : variant === 'transparentOnGrey'
-            ? Platform.OS === 'android'
-              ? 'rgba(175, 175, 175, 0.3)'
-              : tokens.color.greyOnBlack.val
-            : Platform.OS === 'android'
-            ? 'rgba(0, 0, 0, 0.3)'
-            : tokens.color.darkColorText.val
+              ? Platform.OS === 'android'
+                ? 'rgba(175, 175, 175, 0.3)'
+                : tokens.color.greyOnBlack.val
+              : Platform.OS === 'android'
+                ? 'rgba(0, 0, 0, 0.3)'
+                : tokens.color.darkColorText.val
         }
         size={size}
         variant={variant}

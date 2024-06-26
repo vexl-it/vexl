@@ -1,4 +1,4 @@
-import {ServerRequest} from '@effect/platform/Http/ServerRequest'
+import {HttpServerRequest} from '@effect/platform'
 import {Schema} from '@effect/schema'
 import {type ParseOptions} from '@effect/schema/AST'
 import {type ParseError} from '@effect/schema/ParseResult'
@@ -15,9 +15,13 @@ export const schemaUrlSearchParams = <
 >(
   schema: Schema.Schema<A, I, R>,
   options?: ParseOptions | undefined
-): Effect.Effect<A, ParseError | UrlParamsError, R | ServerRequest> => {
+): Effect.Effect<
+  A,
+  ParseError | UrlParamsError,
+  R | HttpServerRequest.HttpServerRequest
+> => {
   const parse = Schema.decodeUnknown(schema, options)
-  return ServerRequest.pipe(
+  return HttpServerRequest.HttpServerRequest.pipe(
     Effect.flatMap((req) =>
       Effect.try({
         try: () => {

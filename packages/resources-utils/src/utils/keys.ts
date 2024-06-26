@@ -5,7 +5,7 @@ export const keys = Object.keys as <T>(
     ? U extends string
       ? U
       : U extends number
-      ? `${U}`
-      : never
+        ? `${U}`
+        : never
     : never
 >

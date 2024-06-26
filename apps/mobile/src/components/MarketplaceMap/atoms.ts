@@ -12,11 +12,11 @@ export const mapPointsAtom = atom((get) => {
       filter.listingType === 'OTHER'
         ? one.offerInfo.publicPart.listingType === filter.listingType
         : filter.listingType === 'PRODUCT'
-        ? one.offerInfo.publicPart.offerType === filter.offerType &&
-          one.offerInfo.publicPart.listingType === filter.listingType
-        : (!one.offerInfo.publicPart.listingType ||
-            one.offerInfo.publicPart.listingType === filter.listingType) &&
-          one.offerInfo.publicPart.offerType === filter.offerType
+          ? one.offerInfo.publicPart.offerType === filter.offerType &&
+            one.offerInfo.publicPart.listingType === filter.listingType
+          : (!one.offerInfo.publicPart.listingType ||
+              one.offerInfo.publicPart.listingType === filter.listingType) &&
+            one.offerInfo.publicPart.offerType === filter.offerType
     )
     .flatMap((offer) => {
       const locations = offer.offerInfo.publicPart.location

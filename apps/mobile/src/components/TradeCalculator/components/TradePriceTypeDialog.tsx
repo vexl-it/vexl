@@ -75,10 +75,10 @@ function TradePriceTypeDialog(): JSX.Element | null {
                   {tradePriceType === 'live'
                     ? t('tradeChecklist.calculateAmount.youAreUsingLivePrice')
                     : tradePriceType === 'your'
-                    ? t('tradeChecklist.calculateAmount.youAreUsingYourPrice')
-                    : t(
-                        'tradeChecklist.calculateAmount.youAreUsingFrozenPrice'
-                      )}
+                      ? t('tradeChecklist.calculateAmount.youAreUsingYourPrice')
+                      : t(
+                          'tradeChecklist.calculateAmount.youAreUsingFrozenPrice'
+                        )}
                 </Text>
               </Stack>
               {tradePriceType === 'your' ? (

@@ -33,4 +33,4 @@ yarn expo run:android ## for android
 See [this guide](docs/how_to_help_transalte.md) for details.
 
 ## Other
-This project is tested with BrowserStack
+This project is tested with BrowserStack.

@@ -27,7 +27,7 @@ function PhoneNumberScreen({navigation}: Props): JSX.Element {
   const initPhoneVerification = useInitPhoneVerification()
 
   return (
-    <>
+    <Stack f={1} testID="phone-number-screen">
       <HeaderProxy showBackButton={true} progressNumber={2} />
       <WhiteContainerWithScroll>
         <Text
@@ -39,7 +39,7 @@ function PhoneNumberScreen({navigation}: Props): JSX.Element {
         >
           {t('loginFlow.phoneNumber.title')}
         </Text>
-        <Stack mt="$3">
+        <Stack mt="$3" testID="phone-number-screen-subtitle">
           <Text fos={14} col="$greyOnWhite">
             {t('loginFlow.phoneNumber.text')}
           </Text>
@@ -68,7 +68,7 @@ function PhoneNumberScreen({navigation}: Props): JSX.Element {
         }}
         text={t('common.continue')}
       />
-    </>
+    </Stack>
   )
 }
 

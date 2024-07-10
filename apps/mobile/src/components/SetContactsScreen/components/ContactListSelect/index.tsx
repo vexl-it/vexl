@@ -97,7 +97,10 @@ function ContactsListSelect(): JSX.Element {
             />
             <Tab.Screen
               name="Submitted"
-              options={{tabBarLabel: t('postLoginFlow.contactsList.submitted')}}
+              options={{
+                tabBarLabel: t('postLoginFlow.contactsList.submitted'),
+                tabBarTestID: 'submitted-contacts-tab',
+              }}
               initialParams={{filter: 'submitted'}}
               component={FilteredContacts}
             />

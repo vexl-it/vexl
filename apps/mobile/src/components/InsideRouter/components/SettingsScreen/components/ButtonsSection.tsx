@@ -58,6 +58,7 @@ interface ItemProps {
   onPress: () => void
   children?: React.ReactNode
   hidden?: boolean
+  testID?: string
 }
 
 function Item({
@@ -68,10 +69,11 @@ function Item({
   onPress,
   children,
   hidden,
+  testID,
 }: ItemProps): JSX.Element | null {
   const tokens = getTokens()
   return !hidden ? (
-    <TouchableWithoutFeedback onPress={onPress}>
+    <TouchableWithoutFeedback testID={testID} onPress={onPress}>
       <XStack ai="center" jc="space-between" h={66} ml="$7" mr="$4">
         <XStack f={1} ai="center">
           <Stack w={24} h={24} mr="$4">
@@ -166,6 +168,7 @@ function ButtonsSection(): JSX.Element {
             },
           },
           {
+            testID: 'contacts-management-button',
             text: t('settings.items.contactsImported'),
             icon: contactIconSvg,
             navigatesFurther: true,

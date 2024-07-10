@@ -17,7 +17,7 @@ function ListingAndOfferTypeScreen(): JSX.Element {
   const listingType = useAtomValue(listingTypeAtom)
 
   return (
-    <ScreenWrapper>
+    <ScreenWrapper testID="listing-type-and-offer-type-screen">
       <Section title={t('offerForm.listingType')} image={listingTypeSvg}>
         <ListingType
           listingTypeAtom={listingTypeAtom}

@@ -21,6 +21,7 @@ function AddContactRow({
 
   return (
     <TouchableOpacity
+      testID="add-contact-manually-button"
       style={{flex: 1}}
       onPress={() => {
         void addAndSelectContact(contact)

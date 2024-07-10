@@ -23,6 +23,7 @@ export interface Props {
   text?: string
   style?: StyleProp<ViewStyle>
 
+  testID?: string
   disabled?: boolean
   afterIcon?: SvgString
   beforeIcon?: SvgString
@@ -151,6 +152,7 @@ const TextStyled = styled(Text, {
 })
 
 function Button({
+  testID,
   variant,
   text,
   onPress,
@@ -176,10 +178,10 @@ function Button({
         variant === 'link'
           ? 'auto'
           : size === 'small'
-          ? 38
-          : size === 'medium'
-          ? 48
-          : 60,
+            ? 38
+            : size === 'medium'
+              ? 48
+              : 60,
       ...(fullWidth && {width: '100%'}),
       ...(fullSize && {flex: 1}),
     }),
@@ -209,6 +211,7 @@ function Button({
     // has to be wrapped in TouchableOpacity as tamagui does not support onPress action on
     // wrapped TouchableOpacity in styled as of v 1.11.1
     <TouchableOpacity
+      testID={testID}
       disabled={disabled}
       onPress={onPressInner}
       style={touchableStyles}

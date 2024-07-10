@@ -133,6 +133,7 @@ function ProgressJourney({
       <Stack fd="row" my="$2">
         {withBackButton ? (
           <Button
+            testID="progress-journey-close-back-button"
             fullSize
             onPress={onBackOrSkip}
             variant="primary"
@@ -140,6 +141,7 @@ function ProgressJourney({
           />
         ) : (
           <Button
+            testID="progress-journey-skip-button"
             fullSize
             onPress={onBackOrSkip}
             variant="primary"
@@ -149,6 +151,7 @@ function ProgressJourney({
         <Stack w="$1" />
         {currentPage === numberOfPages - 1 ? (
           <Button
+            testID="progress-journey-done-finish-button"
             fullSize
             onPress={onNextOrFinish}
             variant="secondary"
@@ -156,6 +159,7 @@ function ProgressJourney({
           />
         ) : (
           <Button
+            testID="progress-journey-next-button"
             fullSize
             disabled={nextButtonDisabled}
             onPress={onNextOrFinish}

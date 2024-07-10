@@ -54,6 +54,7 @@ function Description({
       </Text>
       <Stack mt="$4" br="$4" p="$4" bc="$grey">
         <Input
+          testID="offer-description-input"
           maxLength={MAX_INPUT_LENGTH}
           multiline
           textAlignVertical="top"

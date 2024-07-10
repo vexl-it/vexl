@@ -9,14 +9,17 @@ export default function useContent(): Array<TabProps<ListingType>> {
   return useMemo(
     () => [
       {
+        testID: 'listing-type-BITCOIN',
         title: t('offerForm.BITCOIN'),
         type: 'BITCOIN' as const,
       },
       {
+        testID: 'listing-type-PRODUCT',
         title: t('offerForm.PRODUCT'),
         type: 'PRODUCT' as const,
       },
       {
+        testID: 'listing-type-OTHER',
         title: t('offerForm.OTHER'),
         type: 'OTHER' as const,
       },

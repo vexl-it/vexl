@@ -1,5 +1,6 @@
 import {useSetAtom} from 'jotai'
 import {useEffect} from 'react'
+import {Stack} from 'tamagui'
 import {type LoginStackScreenProps} from '../../../../navigationTypes'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import LoaderView from '../../../LoaderView'
@@ -24,11 +25,11 @@ function SuccessLoginScreen({
   }, [finishLogin, phoneNumber, privateKey, verifyPhoneNumberResponse])
 
   return (
-    <>
+    <Stack f={1} testID="success-login-screen">
       <HeaderProxy showBackButton={false} progressNumber={2} hidden />
       <LoaderView text={t('loginFlow.verificationCode.success.title')} />
       <NextButtonProxy text={null} disabled={true} onPress={null} />
-    </>
+    </Stack>
   )
 }
 

@@ -201,6 +201,12 @@ export default {
         'organization': 'vexl',
       },
     ],
+    [
+      '@config-plugins/detox',
+      {
+        'subdomains': '*',
+      },
+    ],
     '@react-native-firebase/app',
     '@react-native-firebase/dynamic-links',
     './expo-plugins/disable-firebase-analytics.js',

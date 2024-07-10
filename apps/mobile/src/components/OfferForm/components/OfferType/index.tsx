@@ -23,21 +23,23 @@ function OfferTypeSection({
   const tabsContent: Array<TabProps<OfferType>> = useMemo(
     () => [
       {
+        testID: 'offer-type-SELL',
         title:
           !listingType || listingType === 'BITCOIN'
             ? t('offerForm.sellBitcoin')
             : listingType === 'PRODUCT'
-            ? t('offerForm.sellItem')
-            : t('offerForm.offer'),
+              ? t('offerForm.sellItem')
+              : t('offerForm.offer'),
         type: 'SELL',
       },
       {
+        testID: 'offer-type-BUY',
         title:
           !listingType || listingType === 'BITCOIN'
             ? t('offerForm.buyBitcoin')
             : listingType === 'PRODUCT'
-            ? t('offerForm.buyItem')
-            : t('offerForm.request'),
+              ? t('offerForm.buyItem')
+              : t('offerForm.request'),
         type: 'BUY',
       },
     ],
@@ -63,8 +65,8 @@ function OfferTypeSection({
         listingType === 'BITCOIN'
           ? offerType
           : offerType === 'BUY'
-          ? 'SELL'
-          : 'BUY'
+            ? 'SELL'
+            : 'BUY'
       )
     },
     [listingType, setOfferType]

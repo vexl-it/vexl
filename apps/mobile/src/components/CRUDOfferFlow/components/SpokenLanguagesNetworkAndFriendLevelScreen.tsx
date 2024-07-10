@@ -24,7 +24,7 @@ function SpokenLanguagesNetworkAndFriendLevelScreen(): JSX.Element {
   } = useMolecule(offerFormMolecule)
 
   return (
-    <ScreenWrapper>
+    <ScreenWrapper testID="spoken-languages-network-and-friend-level-screen">
       <Section
         title={t('offerForm.spokenLanguages.language')}
         image={spokenLanguagesSvg}

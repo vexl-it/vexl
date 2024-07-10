@@ -28,7 +28,7 @@ export default function ImportContactsExplanationContent({
   const finishPostLoginFlow = useFinishPostLoginFlow()
 
   return (
-    <WhiteContainer>
+    <WhiteContainer testID="import-contacts-explanation">
       <Stack f={1} jc="space-between">
         <HeaderProxy showBackButton={false} progressNumber={3} />
         <Stack f={1} ai="center" mb="$4">

@@ -18,7 +18,7 @@ function OfferDescriptionScreen(): JSX.Element {
   } = useMolecule(offerFormMolecule)
 
   return (
-    <ScreenWrapper>
+    <ScreenWrapper testID="offer-description-screen">
       <Section
         title={t('offerForm.description.description')}
         image={descriptionSvg}

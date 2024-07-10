@@ -1,4 +1,3 @@
-import {createAnimations} from '@tamagui/animations-moti'
 import {createMedia} from '@tamagui/react-native-media-driver'
 import {shorthands} from '@tamagui/shorthands'
 import {createFont, createTamagui, createTokens} from 'tamagui'
@@ -130,27 +129,6 @@ const size = {
   true: 10,
 }
 
-// animation types not working properly
-const animations: any = createAnimations({
-  bouncy: {
-    type: 'spring',
-    damping: 10,
-    mass: 0.9,
-    stiffness: 100,
-  },
-  lazy: {
-    type: 'spring',
-    damping: 20,
-    stiffness: 60,
-  },
-  quick: {
-    type: 'spring',
-    damping: 20,
-    mass: 1.2,
-    stiffness: 250,
-  },
-})
-
 const breakpoints = {
   sm: 400,
   md: 500,
@@ -171,7 +149,6 @@ export const tokens = createTokens({
 })
 
 const appConfig = createTamagui({
-  animations,
   fonts: {
     heading: headingFont,
     body: bodyFont400,

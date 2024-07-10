@@ -23,7 +23,7 @@ function LocationAndPaymentMethodScreen(): JSX.Element {
   const listingType = useAtomValue(listingTypeAtom)
 
   return (
-    <ScreenWrapper>
+    <ScreenWrapper testID="location-and-payment-method-screen">
       <Location
         randomizeLocation
         listingTypeAtom={listingTypeAtom}

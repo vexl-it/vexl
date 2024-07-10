@@ -4,13 +4,23 @@ import {
 } from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import type * as O from 'fp-ts/Option'
 import {useCallback, useMemo, useRef} from 'react'
-import {type StyleProp, type ViewStyle} from 'react-native'
+import {LogBox, type StyleProp, type ViewStyle} from 'react-native'
 import PhoneInput from 'react-native-phone-number-input'
 import {XStack} from 'tamagui'
 
 interface Props {
   onChange: (e164: O.Option<E164PhoneNumber>) => void
 }
+
+// needs to be disabled in order for Detox tests to work and warnings not blocking the tap actions
+// react-native-phone-number-input seems not to be maintained anymore, so no crash should happen
+// logs will appear in the console, but not in simulator as yellow box
+LogBox.ignoreLogs([
+  'Warning: Main: Support for defaultProps will be removed from function components in a future major release. Use JavaScript default parameters instead.',
+  'Warning: CountryModal: Support for defaultProps will be removed from function components in a future major release. Use JavaScript default parameters instead.',
+  'Warning: CountryPicker: Support for defaultProps will be removed from function components in a future major release. Use JavaScript default parameters instead.',
+  'Warning: Flag: Support for defaultProps will be removed from function components in a future major release. Use JavaScript default parameters instead.',
+])
 
 export default function PhoneNumberInput({onChange}: Props): JSX.Element {
   const ref = useRef<PhoneInput>(null)
@@ -83,6 +93,9 @@ export default function PhoneNumberInput({onChange}: Props): JSX.Element {
   return (
     <XStack bg="$greyAccent5" px="$3" br="$4" mx="$-4">
       <PhoneInput
+        textInputProps={{
+          testID: 'phone-number-input',
+        }}
         ref={ref}
         placeholder={' '}
         onChangeFormattedText={handleChangeFormatted}

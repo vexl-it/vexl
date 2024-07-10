@@ -1,13 +1,13 @@
-import {type ReactNode} from 'react'
-import {ScrollView} from 'tamagui'
+import {ScrollView, type ScrollViewProps} from 'tamagui'
 
-interface Props {
-  children: ReactNode
-}
-
-function ScreenWrapper({children}: Props): JSX.Element {
+function ScreenWrapper({children, ...props}: ScrollViewProps): JSX.Element {
   return (
-    <ScrollView f={1} bc="$black" showsVerticalScrollIndicator={false}>
+    <ScrollView
+      f={1}
+      bc="$black"
+      showsVerticalScrollIndicator={false}
+      {...props}
+    >
       {children}
     </ScrollView>
   )

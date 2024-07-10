@@ -21,7 +21,7 @@ function StartScreen({navigation}: Props): JSX.Element {
   const {t} = useTranslation()
 
   return (
-    <Stack f={1} bg="$darkColorText">
+    <Stack f={1} bg="$darkColorText" testID="start-screen">
       <HeaderProxy showBackButton={true} progressNumber={undefined} />
       <WhiteContainer>
         <Stack f={1} ai="center">
@@ -58,7 +58,11 @@ function StartScreen({navigation}: Props): JSX.Element {
                 </Text>
               </TouchableOpacity>
             </XStack>
-            <Switch value={touAgree} onValueChange={setTOUAgree} />
+            <Switch
+              testID="tos-switch"
+              value={touAgree}
+              onValueChange={setTOUAgree}
+            />
           </XStack>
         </XStack>
       </XStack>

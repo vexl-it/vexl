@@ -22,7 +22,7 @@ function CurrencyAndAmountScreen(): JSX.Element {
   } = useMolecule(offerFormMolecule)
 
   return (
-    <ScreenWrapper>
+    <ScreenWrapper testID="currency-and-amount-screen">
       <Section title={t('common.currency')} image={coinsSvg}>
         <Currency
           currencyAtom={currencyAtom}

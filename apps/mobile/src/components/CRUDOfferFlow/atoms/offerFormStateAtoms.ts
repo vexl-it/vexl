@@ -1073,27 +1073,28 @@ export const offerFormMolecule = molecule(() => {
       (!listingType || !offerType)
 
     const noOfferDescription =
-      currentStepInOfferCreation === 'OfferDescription' &&
+      currentStepInOfferCreation ===
+        'OfferDescriptionAndSpokenLanguagesScreen' &&
       get(offerDescriptionAtom).trim() === ''
 
     const noLocationForInPersonOffer =
-      currentStepInOfferCreation === 'LocationAndPaymentMethod' &&
+      currentStepInOfferCreation === 'LocationPaymentMethodAndNetworkScreen' &&
       locationState?.includes('IN_PERSON') &&
       location?.length === 0
 
     const priceNotFilled =
-      currentStepInOfferCreation === 'Price' &&
+      currentStepInOfferCreation === 'PriceScreen' &&
       listingType !== 'BITCOIN' &&
       singlePriceActive &&
       amountBottomLimit === 0
 
     const deliveryMethodNotFilled =
-      currentStepInOfferCreation === 'DeliveryMethod' &&
+      currentStepInOfferCreation === 'DeliveryMethodAndNetworkScreen' &&
       listingType === 'PRODUCT' &&
       locationState?.length === 0
 
     const pickupLocationNotFilled =
-      (currentStepInOfferCreation === 'DeliveryMethod' &&
+      (currentStepInOfferCreation === 'DeliveryMethodAndNetworkScreen' &&
         listingType === 'PRODUCT' &&
         locationState?.includes('IN_PERSON') &&
         location?.length === 0) ??
@@ -1101,7 +1102,7 @@ export const offerFormMolecule = molecule(() => {
 
     const exceededLimit =
       ((currentStepInOfferCreation === 'CurrencyAndAmount' ||
-        currentStepInOfferCreation === 'Price') &&
+        currentStepInOfferCreation === 'PriceScreen') &&
         currency &&
         listingType !== 'BITCOIN' &&
         singlePriceActive &&

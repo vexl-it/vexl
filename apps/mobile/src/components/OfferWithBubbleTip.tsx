@@ -16,6 +16,7 @@ export default function OfferWithBubbleTip({
   negative,
   onInfoRectPress,
   reduceDescriptionLength,
+  displayAsPreview,
 }: {
   showCommonFriends?: boolean
   showListingType?: boolean
@@ -25,6 +26,7 @@ export default function OfferWithBubbleTip({
   negative?: boolean
   onInfoRectPress?: () => void
   reduceDescriptionLength?: boolean
+  displayAsPreview?: boolean
 }): JSX.Element {
   const onPress = useCallback(() => {
     if (onInfoRectPress) onInfoRectPress()
@@ -48,7 +50,11 @@ export default function OfferWithBubbleTip({
         </Stack>
       </TouchableWithoutFeedback>
       <XStack ai="center" jc="space-between" mt="$2">
-        <OfferAuthorAvatar offer={offer} negative={negative ?? false} />
+        <OfferAuthorAvatar
+          displayAsPreview={displayAsPreview}
+          offer={offer}
+          negative={negative ?? false}
+        />
         {!!button && <Stack maw="60%">{button}</Stack>}
       </XStack>
     </Stack>

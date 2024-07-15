@@ -1,21 +1,20 @@
 import {useMolecule} from 'bunshi/dist/react'
 import {getTokens} from 'tamagui'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
-import FriendLevel from '../../OfferForm/components/FriendLevel'
-import Network from '../../OfferForm/components/Network'
+import Description from '../../OfferForm/components/Description'
 import SpokenLanguages from '../../OfferForm/components/SpokenLanguages'
 import Section from '../../Section'
-import friendLevelSvg from '../../images/friendLevelSvg'
-import networkSvg from '../../images/networkSvg'
 import spokenLanguagesSvg from '../../images/spokenLanguagesSvg'
 import {offerFormMolecule} from '../atoms/offerFormStateAtoms'
+import descriptionSvg from '../images/descriptionSvg'
 import ScreenWrapper from './ScreenWrapper'
 
-function SpokenLanguagesNetworkAndFriendLevelScreen(): JSX.Element {
+function OfferDescriptionAndSpokenLanguagesScreen(): JSX.Element {
   const {t} = useTranslation()
   const {
-    updateBtcNetworkAtom,
-    intendedConnectionLevelAtom,
+    offerDescriptionAtom,
+    listingTypeAtom,
+    offerTypeAtom,
     createIsThisLanguageSelectedAtom,
     spokenLanguagesAtomsAtom,
     removeSpokenLanguageActionAtom,
@@ -25,6 +24,16 @@ function SpokenLanguagesNetworkAndFriendLevelScreen(): JSX.Element {
 
   return (
     <ScreenWrapper>
+      <Section
+        title={t('offerForm.description.description')}
+        image={descriptionSvg}
+      >
+        <Description
+          offerDescriptionAtom={offerDescriptionAtom}
+          listingTypeAtom={listingTypeAtom}
+          offerTypeAtom={offerTypeAtom}
+        />
+      </Section>
       <Section
         title={t('offerForm.spokenLanguages.language')}
         image={spokenLanguagesSvg}
@@ -42,19 +51,8 @@ function SpokenLanguagesNetworkAndFriendLevelScreen(): JSX.Element {
           }
         />
       </Section>
-      <Section title={t('offerForm.network.network')} image={networkSvg}>
-        <Network btcNetworkAtom={updateBtcNetworkAtom} />
-      </Section>
-      <Section
-        title={t('offerForm.friendLevel.friendLevel')}
-        image={friendLevelSvg}
-      >
-        <FriendLevel
-          intendedConnectionLevelAtom={intendedConnectionLevelAtom}
-        />
-      </Section>
     </ScreenWrapper>
   )
 }
 
-export default SpokenLanguagesNetworkAndFriendLevelScreen
+export default OfferDescriptionAndSpokenLanguagesScreen

@@ -1,16 +1,19 @@
 import {useMolecule} from 'bunshi/dist/react'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import DeliveryMethod from '../../OfferForm/components/DeliveryMethod'
+import Network from '../../OfferForm/components/Network'
 import Section from '../../Section'
 import deliveryMethodSvg from '../../images/deliveryMethodSvg'
+import networkSvg from '../../images/networkSvg'
 import {offerFormMolecule} from '../atoms/offerFormStateAtoms'
 import ScreenWrapper from './ScreenWrapper'
 
-function DeliveryMethodScreen(): JSX.Element {
+function DeliveryMethodAndNetworkScreen(): JSX.Element {
   const {t} = useTranslation()
   const {
     locationAtom,
     locationStateAtom,
+    updateBtcNetworkAtom,
     updateLocationStateAndPaymentMethodAtom,
   } = useMolecule(offerFormMolecule)
 
@@ -26,8 +29,11 @@ function DeliveryMethodScreen(): JSX.Element {
           }
         />
       </Section>
+      <Section title={t('offerForm.network.network')} image={networkSvg}>
+        <Network btcNetworkAtom={updateBtcNetworkAtom} />
+      </Section>
     </ScreenWrapper>
   )
 }
 
-export default DeliveryMethodScreen
+export default DeliveryMethodAndNetworkScreen

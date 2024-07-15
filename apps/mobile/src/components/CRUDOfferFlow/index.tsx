@@ -14,35 +14,39 @@ import ScreenTitle from '../ScreenTitle'
 import EditOfferHeader from './EditOfferHeader'
 import {offerFormMolecule} from './atoms/offerFormStateAtoms'
 import CurrencyAndAmountScreen from './components/CurrencyAndAmountScreen'
-import DeliveryMethodScreen from './components/DeliveryMethodScreen'
+import DeliveryMethodAndNetworkScreen from './components/DeliveryMethodAndNetworkScreen'
+import FriendLevelScreen from './components/FriendLevelScreen'
 import ListingAndOfferTypeScreen from './components/ListingAndOfferTypeScreen'
-import LocationAndPaymentMethodScreen from './components/LocationAndPaymentMethodScreen'
-import OfferDescriptionScreen from './components/OfferDescriptionScreen'
+import LocationPaymentMethodAndNetworkScreen from './components/LocationPaymentMethodAndNetworkScreen'
+import OfferDescriptionAndSpokenLanguagesScreen from './components/OfferDescriptionAndSpokenLanguagesScreen'
 import PriceScreen from './components/PriceScreen'
-import SpokenLanguagesNetworkAndFriendLevelScreen from './components/SpokenLanguagesNetworkAndFriendLevelScreen'
+import SummaryScreen from './components/SummaryScreen'
 
 const btcOfferScreens: Array<keyof CRUDOfferStackParamsList> = [
   'ListingAndOfferType',
   'CurrencyAndAmount',
-  'LocationAndPaymentMethod',
-  'OfferDescription',
-  'SpokenLanguagesNetworkAndFriendLevel',
+  'LocationPaymentMethodAndNetworkScreen',
+  'OfferDescriptionAndSpokenLanguagesScreen',
+  'FriendLevelScreen',
+  'SummaryScreen',
 ]
 
 const productOfferScreens: Array<keyof CRUDOfferStackParamsList> = [
   'ListingAndOfferType',
-  'OfferDescription',
-  'Price',
-  'DeliveryMethod',
-  'SpokenLanguagesNetworkAndFriendLevel',
+  'PriceScreen',
+  'DeliveryMethodAndNetworkScreen',
+  'OfferDescriptionAndSpokenLanguagesScreen',
+  'FriendLevelScreen',
+  'SummaryScreen',
 ]
 
 const otherOfferScreens: Array<keyof CRUDOfferStackParamsList> = [
   'ListingAndOfferType',
-  'OfferDescription',
-  'Price',
-  'LocationAndPaymentMethod',
-  'SpokenLanguagesNetworkAndFriendLevel',
+  'PriceScreen',
+  'LocationPaymentMethodAndNetworkScreen',
+  'OfferDescriptionAndSpokenLanguagesScreen',
+  'FriendLevelScreen',
+  'SummaryScreen',
 ]
 
 const CRUDOfferStack = createNativeStackNavigator<CRUDOfferStackParamsList>()
@@ -124,13 +128,17 @@ function CRUDOfferFlow({route: {params}, navigation}: Props): JSX.Element {
           if (params.offerId) {
             void editOffer()().then((success) => {
               if (success) {
-                safeGoBack()
+                navigation.navigate('InsideTabs', {
+                  screen: 'MyOffers',
+                })
               }
             })
           } else {
             void createOffer()().then((success) => {
               if (success) {
-                safeGoBack()
+                navigation.navigate('InsideTabs', {
+                  screen: 'MyOffers',
+                })
               }
             })
           }
@@ -155,22 +163,26 @@ function CRUDOfferFlow({route: {params}, navigation}: Props): JSX.Element {
             component={CurrencyAndAmountScreen}
           />
           <CRUDOfferStack.Screen
-            name="LocationAndPaymentMethod"
-            component={LocationAndPaymentMethodScreen}
+            name="LocationPaymentMethodAndNetworkScreen"
+            component={LocationPaymentMethodAndNetworkScreen}
           />
           <CRUDOfferStack.Screen
-            name="OfferDescription"
-            component={OfferDescriptionScreen}
+            name="OfferDescriptionAndSpokenLanguagesScreen"
+            component={OfferDescriptionAndSpokenLanguagesScreen}
           />
           <CRUDOfferStack.Screen
-            name="SpokenLanguagesNetworkAndFriendLevel"
-            component={SpokenLanguagesNetworkAndFriendLevelScreen}
+            name="FriendLevelScreen"
+            component={FriendLevelScreen}
           />
           <CRUDOfferStack.Screen
-            name="DeliveryMethod"
-            component={DeliveryMethodScreen}
+            name="DeliveryMethodAndNetworkScreen"
+            component={DeliveryMethodAndNetworkScreen}
           />
-          <CRUDOfferStack.Screen name="Price" component={PriceScreen} />
+          <CRUDOfferStack.Screen
+            name="SummaryScreen"
+            component={SummaryScreen}
+          />
+          <CRUDOfferStack.Screen name="PriceScreen" component={PriceScreen} />
         </CRUDOfferStack.Navigator>
       </ProgressJourney>
     </PageWithButtonAndProgressHeader>

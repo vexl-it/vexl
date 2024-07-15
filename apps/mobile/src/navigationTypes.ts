@@ -126,11 +126,12 @@ export type InsideTabParamsList = {
 export type CRUDOfferStackParamsList = {
   ListingAndOfferType: undefined
   CurrencyAndAmount: undefined
-  OfferDescription: undefined
-  LocationAndPaymentMethod: undefined
-  SpokenLanguagesNetworkAndFriendLevel: undefined
-  DeliveryMethod: undefined
-  Price: undefined
+  OfferDescriptionAndSpokenLanguagesScreen: undefined
+  LocationPaymentMethodAndNetworkScreen: undefined
+  FriendLevelScreen: undefined
+  DeliveryMethodAndNetworkScreen: undefined
+  PriceScreen: undefined
+  SummaryScreen: undefined
 }
 
 export type CRUDOfferStackScreenProps<

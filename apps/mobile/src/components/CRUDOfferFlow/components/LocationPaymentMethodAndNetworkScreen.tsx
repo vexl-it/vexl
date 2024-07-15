@@ -2,15 +2,18 @@ import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue} from 'jotai'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import Location from '../../OfferForm/components/Location'
+import Network from '../../OfferForm/components/Network'
 import PaymentMethod from '../../OfferForm/components/PaymentMethod'
 import Section from '../../Section'
+import networkSvg from '../../images/networkSvg'
 import paymentMethodSvg from '../../images/paymentMethod'
 import {offerFormMolecule} from '../atoms/offerFormStateAtoms'
 import ScreenWrapper from './ScreenWrapper'
 
-function LocationAndPaymentMethodScreen(): JSX.Element {
+function LocationPaymentMethodAndNetworkScreen(): JSX.Element {
   const {t} = useTranslation()
   const {
+    updateBtcNetworkAtom,
     setOfferLocationActionAtom,
     locationAtom,
     locationStateAtom,
@@ -46,8 +49,11 @@ function LocationAndPaymentMethodScreen(): JSX.Element {
           />
         </Section>
       )}
+      <Section title={t('offerForm.network.network')} image={networkSvg}>
+        <Network btcNetworkAtom={updateBtcNetworkAtom} />
+      </Section>
     </ScreenWrapper>
   )
 }
 
-export default LocationAndPaymentMethodScreen
+export default LocationPaymentMethodAndNetworkScreen

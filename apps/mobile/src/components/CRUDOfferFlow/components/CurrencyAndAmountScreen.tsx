@@ -2,6 +2,7 @@ import {useMolecule} from 'bunshi/dist/react'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import AmountOfTransaction from '../../OfferForm/components/AmountOfTransaction'
 import Currency from '../../OfferForm/components/Currency'
+import Expiration from '../../OfferForm/components/Expiration'
 import PremiumOrDiscount from '../../OfferForm/components/PremiumOrDiscount'
 import Section from '../../Section'
 import amountOfTransactionSvg from '../../images/amountOfTransactionSvg'
@@ -17,6 +18,8 @@ function CurrencyAndAmountScreen(): JSX.Element {
     amountTopLimitAtom,
     amountBottomLimitAtom,
     offerTypeOrDummyValueAtom,
+    expirationDateAtom,
+    offerExpirationModalVisibleAtom,
     feeAmountAtom,
     feeStateAtom,
   } = useMolecule(offerFormMolecule)
@@ -43,6 +46,10 @@ function CurrencyAndAmountScreen(): JSX.Element {
         offerTypeAtom={offerTypeOrDummyValueAtom}
         feeAmountAtom={feeAmountAtom}
         feeStateAtom={feeStateAtom}
+      />
+      <Expiration
+        expirationDateAtom={expirationDateAtom}
+        offerExpirationModalVisibleAtom={offerExpirationModalVisibleAtom}
       />
     </ScreenWrapper>
   )

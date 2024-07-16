@@ -1,5 +1,4 @@
-import {atom, useAtomValue, type Atom} from 'jotai'
-import {useCallback, useMemo, type ReactNode} from 'react'
+import {useCallback, type ReactNode} from 'react'
 import {TouchableWithoutFeedback} from 'react-native'
 import {Stack, XStack, styled} from 'tamagui'
 import {useTranslation} from '../../utils/localization/I18nProvider'
@@ -40,7 +39,6 @@ export interface Props {
   children: ReactNode
   withBackButton?: boolean
   touchableOverlayDisabled?: boolean
-  nextButtonDisabledAtom?: Atom<boolean> | undefined
 }
 
 function ProgressJourney({
@@ -53,16 +51,8 @@ function ProgressJourney({
   children,
   withBackButton,
   touchableOverlayDisabled = false,
-  nextButtonDisabledAtom,
 }: Props): JSX.Element {
   const {t} = useTranslation()
-
-  const nextButtonDisabled = useAtomValue(
-    useMemo(
-      () => nextButtonDisabledAtom ?? atom(false),
-      [nextButtonDisabledAtom]
-    )
-  )
 
   const onNextOrFinish = useCallback(() => {
     if (currentPage === numberOfPages - 1) {
@@ -157,7 +147,6 @@ function ProgressJourney({
         ) : (
           <Button
             fullSize
-            disabled={nextButtonDisabled}
             onPress={onNextOrFinish}
             variant="secondary"
             text={t('common.next')}

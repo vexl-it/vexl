@@ -1,7 +1,7 @@
 import {createNativeStackNavigator} from '@react-navigation/native-stack'
 import {useMolecule} from 'bunshi/dist/react'
-import {useAtomValue, useSetAtom} from 'jotai'
-import {useCallback, useMemo, useState} from 'react'
+import {useAtomValue, useSetAtom, useStore} from 'jotai'
+import {useCallback, useState} from 'react'
 import {
   type CRUDOfferStackParamsList,
   type RootStackScreenProps,
@@ -22,7 +22,7 @@ import OfferDescriptionAndSpokenLanguagesScreen from './components/OfferDescript
 import PriceScreen from './components/PriceScreen'
 import SummaryScreen from './components/SummaryScreen'
 
-const btcOfferScreens: Array<keyof CRUDOfferStackParamsList> = [
+export const btcOfferScreens: Array<keyof CRUDOfferStackParamsList> = [
   'ListingAndOfferType',
   'CurrencyAndAmount',
   'LocationPaymentMethodAndNetworkScreen',
@@ -31,7 +31,7 @@ const btcOfferScreens: Array<keyof CRUDOfferStackParamsList> = [
   'SummaryScreen',
 ]
 
-const productOfferScreens: Array<keyof CRUDOfferStackParamsList> = [
+export const productOfferScreens: Array<keyof CRUDOfferStackParamsList> = [
   'ListingAndOfferType',
   'PriceScreen',
   'DeliveryMethodAndNetworkScreen',
@@ -40,7 +40,7 @@ const productOfferScreens: Array<keyof CRUDOfferStackParamsList> = [
   'SummaryScreen',
 ]
 
-const otherOfferScreens: Array<keyof CRUDOfferStackParamsList> = [
+export const otherOfferScreens: Array<keyof CRUDOfferStackParamsList> = [
   'ListingAndOfferType',
   'PriceScreen',
   'LocationPaymentMethodAndNetworkScreen',
@@ -58,48 +58,52 @@ function CRUDOfferFlow({route: {params}, navigation}: Props): JSX.Element {
   const [page, setPage] = useState(0)
   const safeGoBack = useSafeGoBack()
   const {
-    listingTypeAtom,
+    screensBasedOnListingTypeAtom,
     editOfferActionAtom,
     createOfferActionAtom,
-    nextButtonInOfferModificationDisabledAtom,
     currentStepInOfferCreationAtom,
+    emitAlertBasedOnCurrentStepIfAnyAtom,
+    dontAllowNavigationToNextStepAndReturnReasonAtom,
   } = useMolecule(offerFormMolecule)
+  const store = useStore()
 
-  const listingType = useAtomValue(listingTypeAtom)
+  const screensBasedOnListingType = useAtomValue(screensBasedOnListingTypeAtom)
+  const emitAlertBasedOnCurrentStepIfAny = useSetAtom(
+    emitAlertBasedOnCurrentStepIfAnyAtom
+  )
   const createOffer = useSetAtom(createOfferActionAtom)
   const editOffer = useSetAtom(editOfferActionAtom)
   const setCurrentStepInOfferCreation = useSetAtom(
     currentStepInOfferCreationAtom
   )
 
-  const screensBasedOnListingType = useMemo(
-    () =>
-      listingType === 'BITCOIN'
-        ? btcOfferScreens
-        : listingType === 'PRODUCT'
-        ? productOfferScreens
-        : listingType === 'OTHER'
-        ? otherOfferScreens
-        : [],
-    [listingType]
-  )
-
   const onPageChange = useCallback(
-    (pageIndex: number) => {
+    (prevOrNextPageIndex: number) => {
       const currentPage =
-        screensBasedOnListingType[pageIndex] ?? 'ListingAndOfferType'
-      setCurrentStepInOfferCreation(currentPage)
-      navigation.navigate('CRUDOfferFlow', {
-        screen: currentPage,
-        offerId: params.offerId,
-      })
-      setPage(pageIndex)
+        screensBasedOnListingType[prevOrNextPageIndex] ?? 'ListingAndOfferType'
+      if (
+        prevOrNextPageIndex < page ||
+        !store.get(dontAllowNavigationToNextStepAndReturnReasonAtom)
+      ) {
+        setCurrentStepInOfferCreation(currentPage)
+        navigation.navigate('CRUDOfferFlow', {
+          screen: currentPage,
+          offerId: params.offerId,
+        })
+        setPage(prevOrNextPageIndex)
+      } else {
+        emitAlertBasedOnCurrentStepIfAny()
+      }
     },
     [
+      dontAllowNavigationToNextStepAndReturnReasonAtom,
+      emitAlertBasedOnCurrentStepIfAny,
       navigation,
+      page,
       params.offerId,
       screensBasedOnListingType,
       setCurrentStepInOfferCreation,
+      store,
     ]
   )
 
@@ -119,7 +123,10 @@ function CRUDOfferFlow({route: {params}, navigation}: Props): JSX.Element {
         currentPage={page}
         numberOfPages={screensBasedOnListingType.length}
         onPageChange={(nextPageIndex) => {
-          if (nextPageIndex < screensBasedOnListingType.length) {
+          if (
+            screensBasedOnListingType.length === 0 ||
+            nextPageIndex < screensBasedOnListingType.length
+          ) {
             onPageChange(nextPageIndex)
           }
         }}
@@ -145,7 +152,6 @@ function CRUDOfferFlow({route: {params}, navigation}: Props): JSX.Element {
         }}
         background="black"
         touchableOverlayDisabled
-        nextButtonDisabledAtom={nextButtonInOfferModificationDisabledAtom}
       >
         <CRUDOfferStack.Navigator
           screenOptions={{

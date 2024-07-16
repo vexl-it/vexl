@@ -2,7 +2,7 @@ import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
 import {useAtomValue} from 'jotai'
 import {DateTime} from 'luxon'
 import {useMemo} from 'react'
-import {Stack, Text, XStack} from 'tamagui'
+import {Stack, Text} from 'tamagui'
 import {useChatForOffer} from '../state/chat/hooks/useChatForOffer'
 import createImportedContactsForHashesAtom from '../state/contacts/atom/createImportedContactsForHashesAtom'
 import {userDataRealOrAnonymizedAtom} from '../state/session'
@@ -10,9 +10,7 @@ import {useTranslation} from '../utils/localization/I18nProvider'
 import randomName from '../utils/randomName'
 import {setTimezoneOfUser} from '../utils/unixMillisecondsToLocaleDateTime'
 import {AnonymousAvatarFromSeed} from './AnonymousAvatar'
-import friendsSvg from './ChatDetailScreen/images/friendsSvg'
 import ContactTypeAndCommonNumber from './ContactTypeAndCommonNumber'
-import Image from './Image'
 import UserAvatar from './UserAvatar'
 import UserNameWithSellingBuying from './UserNameWithSellingBuying'
 
@@ -61,7 +59,7 @@ function OfferAuthorAvatar({
           height={48}
           seed={offerInfo.offerId}
         />
-        <Stack f={1} ml="$2">
+        <Stack flex={1} marginLeft="$2">
           <UserNameWithSellingBuying
             offerInfo={offerInfo}
             userName={
@@ -69,25 +67,6 @@ function OfferAuthorAvatar({
               randomName(offerInfo.offerId)
             }
           />
-          <XStack
-            flexWrap="wrap"
-            space="$1"
-            justifyContent="flex-start"
-            alignItems="center"
-          >
-            <Text color="$greyOnBlack">
-              {t('offerForm.summaryFriendLevelInfo')}
-            </Text>
-            <Text color="$greyOnBlack">•</Text>
-            <XStack alignItems="center" space="$1">
-              <Stack width={14} height={14}>
-                <Image source={friendsSvg} />
-              </Stack>
-              <Text color="$greyOnBlack">
-                {t('offerForm.summaryNumberOfCommonFriends')}
-              </Text>
-            </XStack>
-          </XStack>
         </Stack>
       </>
     )

@@ -39,6 +39,7 @@ import {pipe} from 'fp-ts/function'
 import {focusAtom} from 'jotai-optics'
 import {splitAtom} from 'jotai/utils'
 import {Alert} from 'react-native'
+import {btcOfferScreens, otherOfferScreens, productOfferScreens} from '..'
 import {type CRUDOfferStackParamsList} from '../../../navigationTypes'
 import {createInboxAtom} from '../../../state/chat/hooks/useCreateInbox'
 import {
@@ -1058,7 +1059,7 @@ export const offerFormMolecule = molecule(() => {
     'ListingAndOfferType'
   )
 
-  const nextButtonInOfferModificationDisabledAtom = atom((get) => {
+  const dontAllowNavigationToNextStepAndReturnReasonAtom = atom((get) => {
     const currentStepInOfferCreation = get(currentStepInOfferCreationAtom)
     const offerType = get(offerTypeAtom)
     const listingType = get(listingTypeAtom)
@@ -1068,19 +1069,29 @@ export const offerFormMolecule = molecule(() => {
     const amountBottomLimit = get(amountBottomLimitAtom)
     const currency = get(currencyAtom)
 
-    const noListingTypeOrOfferType =
-      currentStepInOfferCreation === 'ListingAndOfferType' &&
-      (!listingType || !offerType)
+    const noListingType =
+      currentStepInOfferCreation === 'ListingAndOfferType' && !listingType
+
+    if (noListingType) return 'errorListingTypeNotFilled'
+
+    const noOfferType =
+      currentStepInOfferCreation === 'ListingAndOfferType' && !offerType
+
+    if (noOfferType) return 'errorOfferTypeNotFilled'
 
     const noOfferDescription =
       currentStepInOfferCreation ===
         'OfferDescriptionAndSpokenLanguagesScreen' &&
       get(offerDescriptionAtom).trim() === ''
 
+    if (noOfferDescription) return 'errorDescriptionNotFilled'
+
     const noLocationForInPersonOffer =
       currentStepInOfferCreation === 'LocationPaymentMethodAndNetworkScreen' &&
       locationState?.includes('IN_PERSON') &&
       location?.length === 0
+
+    if (noLocationForInPersonOffer) return 'errorLocationNotFilled'
 
     const priceNotFilled =
       currentStepInOfferCreation === 'PriceScreen' &&
@@ -1088,10 +1099,14 @@ export const offerFormMolecule = molecule(() => {
       singlePriceActive &&
       amountBottomLimit === 0
 
+    if (priceNotFilled) return 'errorPriceNotFilled'
+
     const deliveryMethodNotFilled =
       currentStepInOfferCreation === 'DeliveryMethodAndNetworkScreen' &&
       listingType === 'PRODUCT' &&
       locationState?.length === 0
+
+    if (deliveryMethodNotFilled) return 'errorDeliveryMethodNotFilled'
 
     const pickupLocationNotFilled =
       (currentStepInOfferCreation === 'DeliveryMethodAndNetworkScreen' &&
@@ -1099,6 +1114,8 @@ export const offerFormMolecule = molecule(() => {
         locationState?.includes('IN_PERSON') &&
         location?.length === 0) ??
       false
+
+    if (pickupLocationNotFilled) return 'errorPickupLocationNotFilled'
 
     const exceededLimit =
       ((currentStepInOfferCreation === 'CurrencyAndAmount' ||
@@ -1110,16 +1127,28 @@ export const offerFormMolecule = molecule(() => {
         amountBottomLimit > currencies[currency].maxAmount) ??
       false
 
-    return (
-      (noListingTypeOrOfferType ||
-        noOfferDescription ||
-        priceNotFilled ||
-        deliveryMethodNotFilled ||
-        pickupLocationNotFilled ||
-        exceededLimit ||
-        noLocationForInPersonOffer) ??
-      false
-    )
+    if (exceededLimit) return 'errorExceededLimits'
+
+    return undefined
+  })
+
+  const emitAlertBasedOnCurrentStepIfAnyAtom = atom(null, (get) => {
+    const {t} = get(translationAtom)
+    const reason = get(dontAllowNavigationToNextStepAndReturnReasonAtom)
+
+    if (reason) Alert.alert(t(`offerForm.${reason}`))
+  })
+
+  const screensBasedOnListingTypeAtom = atom((get) => {
+    const listingType = get(listingTypeAtom)
+
+    return listingType === 'BITCOIN'
+      ? btcOfferScreens
+      : listingType === 'PRODUCT'
+      ? productOfferScreens
+      : listingType === 'OTHER'
+      ? otherOfferScreens
+      : []
   })
 
   return {
@@ -1170,6 +1199,8 @@ export const offerFormMolecule = molecule(() => {
     updateListingTypeActionAtom,
     updateBtcNetworkAtom,
     currentStepInOfferCreationAtom,
-    nextButtonInOfferModificationDisabledAtom,
+    dontAllowNavigationToNextStepAndReturnReasonAtom,
+    emitAlertBasedOnCurrentStepIfAnyAtom,
+    screensBasedOnListingTypeAtom,
   }
 })

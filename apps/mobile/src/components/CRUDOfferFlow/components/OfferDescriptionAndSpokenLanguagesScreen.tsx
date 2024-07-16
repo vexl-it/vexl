@@ -25,16 +25,6 @@ function OfferDescriptionAndSpokenLanguagesScreen(): JSX.Element {
   return (
     <ScreenWrapper>
       <Section
-        title={t('offerForm.description.description')}
-        image={descriptionSvg}
-      >
-        <Description
-          offerDescriptionAtom={offerDescriptionAtom}
-          listingTypeAtom={listingTypeAtom}
-          offerTypeAtom={offerTypeAtom}
-        />
-      </Section>
-      <Section
         title={t('offerForm.spokenLanguages.language')}
         image={spokenLanguagesSvg}
         imageFill={getTokens().color.white.val}
@@ -49,6 +39,16 @@ function OfferDescriptionAndSpokenLanguagesScreen(): JSX.Element {
           saveSelectedSpokenLanguagesActionAtom={
             saveSelectedSpokenLanguagesActionAtom
           }
+        />
+      </Section>
+      <Section
+        title={t('offerForm.description.description')}
+        image={descriptionSvg}
+      >
+        <Description
+          offerDescriptionAtom={offerDescriptionAtom}
+          listingTypeAtom={listingTypeAtom}
+          offerTypeAtom={offerTypeAtom}
         />
       </Section>
     </ScreenWrapper>

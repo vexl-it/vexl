@@ -1,0 +1,24 @@
+appId: it.vexl.nextstaging
+---
+- tapOn:
+    id: ${OFFER_DESCRIPTION}
+- tapOn:
+    id: '@progressJourney/nextButton'
+- tapOn:
+    id: '@progressJourney/nextButton'
+- tapOn:
+    id: '@progressJourney/nextButton'
+- doubleTapOn:
+    id: '@offerForm/descriptionInput'
+- eraseText
+- inputText: ${NEW_OFFER_DESCRIPTION}
+- tapOn:
+    id: '@progressJourney/nextButton'
+- tapOn:
+    id: '@progressJourney/nextButton'
+- tapOn:
+    id: '@progressJourney/doneFinishButton'
+- assertVisible:
+    id: ${NEW_OFFER_DESCRIPTION}
+- assertNotVisible:
+    id: ${OFFER_DESCRIPTION}

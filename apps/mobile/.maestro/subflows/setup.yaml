@@ -1,0 +1,8 @@
+appId: it.vexl.nextstaging
+---
+- launchApp:
+    clearState: true
+    arguments:
+      isE2E: 'true'
+# Expo Development Build Specific
+- runFlow: handleExpoDevBuildUI.yaml

@@ -69,7 +69,7 @@ function OffersListStateDisplayerContent(): JSX.Element {
   }
 
   return (
-    <ContainerWithTopBorderRadius>
+    <ContainerWithTopBorderRadius testID="@marketplaceScreen">
       <Stack space="$4">
         <Stack px="$2">
           <BaseFilterDropdown

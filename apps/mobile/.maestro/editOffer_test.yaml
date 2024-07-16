@@ -1,0 +1,25 @@
+appId: it.vexl.nextstaging
+env:
+  OFFER_DESCRIPTION: 'Maestro'
+  NEW_OFFER_DESCRIPTION: 'Maestro edited'
+---
+- runFlow: 'subflows/launchAppWithArguments.yaml'
+- runFlow: 'subflows/handleExpoDevBuildUI.yaml'
+- runFlow:
+    when:
+      visible:
+        id: '@progressJourney/skipButton'
+    file: 'subflows/loginFlow.yaml'
+- runFlow:
+    file: 'subflows/createOffer.yaml'
+    env:
+      OFFER_DESCRIPTION: ${OFFER_DESCRIPTION}
+- runFlow:
+    file: 'subflows/editOffer.yaml'
+    env:
+      OFFER_DESCRIPTION: ${OFFER_DESCRIPTION}
+      NEW_OFFER_DESCRIPTION: ${NEW_OFFER_DESCRIPTION}
+- runFlow:
+    file: 'subflows/deleteOffer.yaml'
+    env:
+      OFFER_DESCRIPTION: ${NEW_OFFER_DESCRIPTION}

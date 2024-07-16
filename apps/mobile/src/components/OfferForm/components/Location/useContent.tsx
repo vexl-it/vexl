@@ -9,10 +9,12 @@ export default function useContent(): Array<TabProps<LocationState>> {
   return useMemo(
     () => [
       {
+        testID: '@location/inPerson',
         title: t('offerForm.inPerson'),
         type: 'IN_PERSON',
       },
       {
+        testID: '@location/online',
         title: t('offerForm.online'),
         type: 'ONLINE',
       },

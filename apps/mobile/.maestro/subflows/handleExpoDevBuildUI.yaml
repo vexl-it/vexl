@@ -1,0 +1,37 @@
+appId: it.vexl.nextstaging
+---
+- runFlow:
+    when:
+      visible: 'Got back'
+    commands:
+      - tapOn: 'Got back'
+- runFlow:
+    when:
+      visible: 'Development servers'
+    commands:
+      - tapOn: 'Development servers'
+- runFlow:
+    when:
+      platform: 'ios'
+      visible: 'http://localhost:8081'
+    commands:
+      - tapOn: 'http://localhost:8081'
+- runFlow:
+    when:
+      platform: 'android'
+      visible: 'http://10.0.2.2:8081'
+    commands:
+      - tapOn: 'http://10.0.2.2:8081'
+- runFlow:
+    when:
+      visible: 'Got It'
+    commands:
+      - tapOn: 'Got It'
+- runFlow:
+    when:
+      visible: 'Toggle performance monitor'
+    commands:
+      - swipe:
+          from:
+            text: 'Vexl (stage)'
+          direction: DOWN

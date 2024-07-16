@@ -36,6 +36,7 @@ function CustomTabBar({
 
         return (
           <Button
+            testID={`@customTabBar/tab${route.name}`}
             key={options.tabBarLabel}
             onPress={() => {
               navigation.navigate(route.name, route.params)
@@ -83,7 +84,9 @@ function ContactsListSelect(): JSX.Element {
           >
             <Tab.Screen
               name="New"
-              options={{tabBarLabel: t('postLoginFlow.contactsList.new')}}
+              options={{
+                tabBarLabel: t('postLoginFlow.contactsList.new'),
+              }}
               initialParams={{filter: 'new'}}
               component={FilteredContacts}
             />
@@ -97,7 +100,9 @@ function ContactsListSelect(): JSX.Element {
             />
             <Tab.Screen
               name="Submitted"
-              options={{tabBarLabel: t('postLoginFlow.contactsList.submitted')}}
+              options={{
+                tabBarLabel: t('postLoginFlow.contactsList.submitted'),
+              }}
               initialParams={{filter: 'submitted'}}
               component={FilteredContacts}
             />

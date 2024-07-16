@@ -1,0 +1,8 @@
+appId: it.vexl.nextstaging
+onFlowStart:
+  - runFlow: 'subflows/setup.yaml'
+env:
+  PHONE_NUMBER: '776958958'
+  VERIFICATION_CODE: '222222'
+---
+- runFlow: 'subflows/loginFlow.yaml'

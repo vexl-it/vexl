@@ -1,0 +1,35 @@
+appId: it.vexl.nextstaging
+env:
+  PHONE_NUMBER: '+420778958958'
+---
+- runFlow: 'subflows/launchAppWithArguments.yaml'
+- runFlow: 'subflows/handleExpoDevBuildUI.yaml'
+- runFlow:
+    when:
+      visible:
+        id: '@progressJourney/skipButton'
+    file: 'subflows/loginFlow.yaml'
+- tapOn:
+    id: '@Settings/tabButton'
+- tapOn:
+    id: '@buttonsSection/contactsImportedButton'
+- tapOn:
+    id: '@searchBar/contactInput'
+- inputText: ${PHONE_NUMBER}
+- pressKey: Enter
+- tapOn:
+    id: '@addContactRow/addContactManuallyButton'
+- tapOn:
+    id: '@areYouSureDialog/positiveButton'
+- tapOn:
+    id: '@areYouSureDialog/negativeButton'
+- tapOn:
+    id: '@areYouSureDialog/positiveButton'
+- tapOn:
+    id: '@customTabBar/tabSubmitted'
+- assertVisible:
+    text: ${PHONE_NUMBER}
+- tapOn:
+    id: '@screenTitle/backButton'
+- tapOn:
+    id: '@Marketplace/tabButton'

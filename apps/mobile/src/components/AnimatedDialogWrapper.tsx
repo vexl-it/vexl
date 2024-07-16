@@ -44,7 +44,7 @@ function AnimatedDialogWrapper({
   )
 
   return (
-    <Stack position="absolute" t={0} l={0} r={0} b={0}>
+    <Stack testID="@animatedDialog" position="absolute" t={0} l={0} r={0} b={0}>
       <KeyboardAvoidingView>
         <Animated.View
           entering={FadeIn}

@@ -23,7 +23,7 @@ export default function ImportContactsExplanationContent(): JSX.Element {
   const finishPostLoginFlow = useFinishPostLoginFlow()
 
   return (
-    <WhiteContainer>
+    <WhiteContainer testID="@importContactsExplanationContent">
       <Stack f={1} jc="space-between">
         <HeaderProxy showBackButton={false} progressNumber={3} />
         <Stack f={1} ai="center" mb="$4">

@@ -1,0 +1,36 @@
+appId: it.vexl.nextstaging
+---
+- tapOn:
+    id: '@progressJourney/skipButton'
+- tapOn:
+    id: '@startScreen/TOUSwitch'
+- tapOn:
+    id: '@nextButton/secondaryButton'
+- tapOn:
+    id: '@phoneNumberInput'
+- inputText: ${PHONE_NUMBER}
+- tapOn:
+    id: '@nextButton/secondaryButton'
+- tapOn:
+    id: '@verificationCodeScreen/verificationCodeInput'
+- inputText: ${VERIFICATION_CODE}
+- tapOn:
+    id: '@nextButton/secondaryButton'
+- runFlow:
+    when:
+      visible:
+        id: '@areYouSureDialog/positiveButton'
+    commands:
+      - tapOn:
+          id: '@areYouSureDialog/positiveButton'
+- tapOn:
+    id: '@nextButton/secondaryButton'
+- runFlow:
+    when:
+      visible:
+        text: 'Allow'
+    commands:
+      - tapOn:
+          text: 'Allow'
+- assertVisible:
+    id: '@marketplaceScreen'

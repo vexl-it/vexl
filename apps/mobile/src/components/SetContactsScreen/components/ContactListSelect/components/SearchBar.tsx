@@ -48,6 +48,7 @@ function SearchBar(): JSX.Element {
       <XStack mt="$4" mb="$2">
         <Stack f={5} pr="$2">
           <TextInput
+            testID="@searchBar/contactInput"
             placeholder={t('postLoginFlow.contactsList.inputPlaceholder')}
             value={inputValue}
             onChangeText={onInputValueChange}

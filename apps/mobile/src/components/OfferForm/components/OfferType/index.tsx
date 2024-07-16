@@ -23,6 +23,7 @@ function OfferTypeSection({
   const tabsContent: Array<TabProps<OfferType>> = useMemo(
     () => [
       {
+        testID: '@offerType/sell',
         title:
           !listingType || listingType === 'BITCOIN'
             ? t('offerForm.sellBitcoin')
@@ -32,6 +33,7 @@ function OfferTypeSection({
         type: 'SELL',
       },
       {
+        testID: '@offerType/buy',
         title:
           !listingType || listingType === 'BITCOIN'
             ? t('offerForm.buyBitcoin')

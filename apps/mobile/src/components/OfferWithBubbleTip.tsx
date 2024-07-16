@@ -34,7 +34,10 @@ export default function OfferWithBubbleTip({
 
   return (
     <Stack>
-      <TouchableWithoutFeedback onPress={onPress}>
+      <TouchableWithoutFeedback
+        testID={offer.offerInfo.publicPart.offerDescription}
+        onPress={onPress}
+      >
         <Stack bg={negative ? '$grey' : '$white'} p="$4" br="$5">
           <OfferInfoPreview
             showCommonFriends={showCommonFriends}

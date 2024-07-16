@@ -91,6 +91,7 @@ function TabBar({state, navigation}: BottomTabBarProps): JSX.Element {
           return (
             <Fragment key={route.name}>
               <TouchableWithoutFeedback
+                testID={`@${route.name}/tabButton`}
                 onPress={() => {
                   onPress(route)
                 }}
@@ -130,6 +131,7 @@ function TabBar({state, navigation}: BottomTabBarProps): JSX.Element {
               </TouchableWithoutFeedback>
               {index === 1 && (
                 <TouchableWithoutFeedback
+                  testID="@createOffer/tabButton"
                   onPress={() => {
                     navigation.navigate('CRUDOfferFlow', {
                       screen: 'ListingAndOfferType',

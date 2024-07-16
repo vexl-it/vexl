@@ -47,6 +47,23 @@
         "ENV_PRESET": "prod"
       },
       "channel": "production-apk"
+    },
+    "build-and-maestro-test": {
+      "withoutCredentials": true,
+      "config": "build-and-maestro-test.yml",
+      "android": {
+        "buildType": "apk",
+        "image": "latest",
+        "resourceClass": "large"
+      },
+      "ios": {
+        "simulator": true,
+        "image": "latest",
+        "resourceClass": "large"
+      },
+      "env": {
+        "ENV_PRESET": "stage"
+      }
     }
   },
   "submit": {

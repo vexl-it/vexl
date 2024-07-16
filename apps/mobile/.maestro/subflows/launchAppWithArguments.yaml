@@ -1,0 +1,5 @@
+appId: it.vexl.nextstaging
+---
+- launchApp:
+    arguments:
+      isE2E: 'true'

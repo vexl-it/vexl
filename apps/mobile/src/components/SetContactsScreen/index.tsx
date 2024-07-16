@@ -19,7 +19,7 @@ function SetContactsScreen({route}: Props): JSX.Element {
 
   return (
     <>
-      <Screen>
+      <Screen testID="@setContactsScreen">
         <KeyboardAvoidingView>
           <ScreenTitle
             p="$2"

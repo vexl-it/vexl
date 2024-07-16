@@ -209,6 +209,7 @@ function AreYouSureDialog(): JSX.Element | null {
       >
         {!!step.negativeButtonText && (
           <Button
+            testID="@areYouSureDialog/negativeButton"
             fullSize
             size={
               state?.buttonsDirection?.startsWith('column')
@@ -237,6 +238,7 @@ function AreYouSureDialog(): JSX.Element | null {
           />
         )}
         <Button
+          testID="@areYouSureDialog/positiveButton"
           fullSize
           size={
             state?.buttonsDirection?.startsWith('column') ? 'large' : undefined

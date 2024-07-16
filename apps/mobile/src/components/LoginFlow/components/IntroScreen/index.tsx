@@ -20,7 +20,7 @@ function Intro({navigation}: Props): JSX.Element {
   const image = content[page]?.image
 
   return (
-    <Stack f={1}>
+    <Stack f={1} testID="@introFlow">
       <HeaderProxy hidden showBackButton={false} progressNumber={1} />
       <ProgressJourney
         currentPage={page}

@@ -58,9 +58,11 @@ interface ItemProps {
   onPress: () => void
   children?: React.ReactNode
   hidden?: boolean
+  testID?: string
 }
 
 function Item({
+  testID,
   text,
   icon,
   iconFill,
@@ -71,7 +73,7 @@ function Item({
 }: ItemProps): JSX.Element | null {
   const tokens = getTokens()
   return !hidden ? (
-    <TouchableWithoutFeedback onPress={onPress}>
+    <TouchableWithoutFeedback testID={testID} onPress={onPress}>
       <XStack ai="center" jc="space-between" h={66} ml="$7" mr="$4">
         <XStack f={1} ai="center">
           <Stack w={24} h={24} mr="$4">
@@ -150,6 +152,7 @@ function ButtonsSection(): JSX.Element {
       [
         [
           {
+            testID: '@buttonsSection/changeProfilePictureButton',
             text: t('settings.items.changeProfilePicture'),
             icon: imageIconSvg,
             navigatesFurther: true,
@@ -158,6 +161,7 @@ function ButtonsSection(): JSX.Element {
             },
           },
           {
+            testID: '@buttonsSection/editNameButton',
             text: t('settings.items.editName'),
             icon: editIconSvg,
             navigatesFurther: true,
@@ -166,6 +170,7 @@ function ButtonsSection(): JSX.Element {
             },
           },
           {
+            testID: '@buttonsSection/contactsImportedButton',
             text: t('settings.items.contactsImported'),
             icon: contactIconSvg,
             navigatesFurther: true,
@@ -175,6 +180,7 @@ function ButtonsSection(): JSX.Element {
             children: <ContactsImportedTitle />,
           },
           {
+            testID: '@buttonsSection/notificationPreferencesButton',
             text: t('notifications.preferences.screenTitle'),
             icon: notificationsIconSvg,
             navigatesFurther: true,
@@ -183,6 +189,7 @@ function ButtonsSection(): JSX.Element {
             },
           },
           {
+            testID: '@buttonsSection/allowScreenshotsButton',
             text: t('settings.items.allowScreenshots'),
             icon: imageIconSvg,
             onPress: toggleScreenshotsDisabled,
@@ -193,6 +200,7 @@ function ButtonsSection(): JSX.Element {
         ],
         [
           {
+            testID: '@buttonsSection/changeLanguageButton',
             text: t('settings.items.changeLanguage'),
             icon: spokenLanguagesSvg,
             iconFill: getTokens().color.greyOnBlack.val,
@@ -200,6 +208,7 @@ function ButtonsSection(): JSX.Element {
             onPress: changeLanguage,
           },
           {
+            testID: '@buttonsSection/changeCurrencyButton',
             text: 'CZK',
             icon: coinsIconSvg,
             onPress: () => {
@@ -210,6 +219,7 @@ function ButtonsSection(): JSX.Element {
         ],
         [
           {
+            testID: '@buttonsSection/faqsButton',
             text: t('settings.items.faqs'),
             icon: questionIconSvg,
             navigatesFurther: true,
@@ -218,6 +228,7 @@ function ButtonsSection(): JSX.Element {
             },
           },
           {
+            testID: '@buttonsSection/termsAndPrivacyButton',
             text: t('settings.items.termsAndPrivacy'),
             icon: termsIconSvg,
             navigatesFurther: true,
@@ -226,6 +237,7 @@ function ButtonsSection(): JSX.Element {
             },
           },
           {
+            testID: '@buttonsSection/reportIssueButton',
             text: t('settings.items.reportIssue'),
             icon: customerSupportIconSvg,
             navigatesFurther: true,
@@ -234,6 +246,7 @@ function ButtonsSection(): JSX.Element {
             },
           },
           {
+            testID: '@buttonsSection/inAppLogsButton',
             text: t('settings.items.inAppLogs'),
             icon: cpuIconSvg,
             navigatesFurther: true,
@@ -245,11 +258,13 @@ function ButtonsSection(): JSX.Element {
         enableHiddenFeatures
           ? [
               {
+                testID: '@buttonsSection/requestKnownDataButton',
                 text: t('settings.items.requestKnownData'),
                 icon: dataIconSvg,
                 onPress: todo,
               },
               {
+                testID: '@buttonsSection/setPinButton',
                 text: `${t('settings.items.setPin')} ${
                   Platform.OS === 'ios'
                     ? ` / ${t('settings.items.faceId')}`
@@ -263,6 +278,7 @@ function ButtonsSection(): JSX.Element {
           : null,
         [
           {
+            testID: '@buttonsSection/followUsOnTwitterButton',
             text: (
               <ItemText ff="$body500" col="$greyOnBlack">
                 {t('settings.items.followUsOn')}{' '}
@@ -275,6 +291,7 @@ function ButtonsSection(): JSX.Element {
             onPress: openUrl(t('settings.items.twitterUrl')),
           },
           {
+            testID: '@buttonsSection/readMoreOnMediumButton',
             text: (
               <ItemText ff="$body500" col="$greyOnBlack">
                 {t('settings.items.readMoreOn')}{' '}
@@ -287,6 +304,7 @@ function ButtonsSection(): JSX.Element {
             onPress: openUrl(t('settings.items.mediumUrl')),
           },
           {
+            testID: '@buttonsSection/learnMoreOnWebsiteButton',
             text: (
               <ItemText ff="$body500" col="$greyOnBlack">
                 {t('settings.items.learnMoreOn')}{' '}
@@ -301,6 +319,7 @@ function ButtonsSection(): JSX.Element {
         ],
         [
           {
+            testID: '@buttonsSection/deleteAccountButton',
             text: (
               <ItemText ff="$body500" col="$red">
                 {t('settings.items.deleteAccount')}

@@ -18,7 +18,7 @@ function ContactItem({contactAtom}: Props): JSX.Element {
   } = contact
 
   return (
-    <XStack ai="center">
+    <XStack testID="@contactItem" ai="center">
       <Stack>
         <IsNewIndicator contactAtom={contactAtom} />
         {imageUri ? (
@@ -42,7 +42,12 @@ function ContactItem({contactAtom}: Props): JSX.Element {
         <Text ff="$body500" fs={18} mb="$1" color="$black">
           {name}
         </Text>
-        <Text ff="$body600" col="$greyOnBlack" fos={14}>
+        <Text
+          testID="@contactItem/normalizedNumber"
+          ff="$body600"
+          col="$greyOnBlack"
+          fos={14}
+        >
           {normalizedNumber}
         </Text>
       </Stack>

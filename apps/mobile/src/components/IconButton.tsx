@@ -10,6 +10,7 @@ import {Stack, getTokens, styled} from 'tamagui'
 import Image from './Image'
 
 interface Props {
+  testID?: string
   width?: number
   height?: number
   borderRadius?: number
@@ -61,6 +62,7 @@ const PressableStyled = styled(Stack, {
 } as const)
 
 function IconButton({
+  testID,
   variant = 'dark',
   disabled,
   icon,
@@ -88,6 +90,7 @@ function IconButton({
     // has to be wrapped in TouchableOpacity as tamagui does not support onPress action on
     // wrapped TouchableOpacity in styled as of v 1.11.1
     <TouchableOpacity
+      testID={testID}
       disabled={disabled}
       onPress={onPressInner}
       style={touchableStyles}

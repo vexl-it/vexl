@@ -60,6 +60,7 @@ function EditOfferHeader({offerId}: Props): JSX.Element {
                   <Image source={clockSvg} stroke={getTokens().color.red.val} />
                 )}
                 <IconButton
+                  testID="@editOfferHeader/deleteOfferButton"
                   variant="dark"
                   icon={require('./images/trashIcon.png')}
                   onPress={() => {

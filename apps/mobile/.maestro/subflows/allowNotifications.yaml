@@ -1,0 +1,17 @@
+appId: it.vexl.nextstaging
+---
+- runFlow:
+    when:
+      visible:
+        id: '@areYouSureDialog/positiveButton'
+    commands:
+      - tapOn:
+          id: '@areYouSureDialog/positiveButton'
+      - tapOn: Allow
+- runFlow:
+    when:
+      visible:
+        id: '@progressJourney/doneFinishButton'
+    commands:
+      - tapOn:
+          id: '@progressJourney/doneFinishButton'

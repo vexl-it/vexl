@@ -36,6 +36,7 @@ function ScreenTitle({
       <XStack ai="flex-start" space="$4">
         {!!withBackButton && (
           <IconButton
+            testID="@screenTitle/backButton"
             variant="primary"
             icon={chevronLeftSvg}
             onPress={() => {

@@ -20,23 +20,25 @@ function AddContactRow({
   const addAndSelectContact = useSetAtom(addAndSelectContactWithUiFeedbackAtom)
 
   return (
-    <TouchableOpacity
-      style={{flex: 1}}
-      onPress={() => {
-        void addAndSelectContact(contact)
-      }}
-    >
-      <Stack f={1} ai="center" jc="center">
-        <Stack mb="$4">
-          <Image source={addSvg} />
+    <Stack flex={1} alignItems="center" justifyContent="center">
+      <TouchableOpacity
+        testID="@addContactRow/addContactManuallyButton"
+        onPress={() => {
+          void addAndSelectContact(contact)
+        }}
+      >
+        <Stack f={1} ai="center" jc="center">
+          <Stack mb="$4">
+            <Image source={addSvg} />
+          </Stack>
+          <Text col="$greyOnWhite">
+            {t('postLoginFlow.contactsList.addContactManually', {
+              number: contact.info.numberToDisplay,
+            })}
+          </Text>
         </Stack>
-        <Text col="$greyOnWhite">
-          {t('postLoginFlow.contactsList.addContactManually', {
-            number: contact.info.numberToDisplay,
-          })}
-        </Text>
-      </Stack>
-    </TouchableOpacity>
+      </TouchableOpacity>
+    </Stack>
   )
 }
 

@@ -58,6 +58,7 @@ function VerificationCodeScreen({
         </Text>
         <Stack my="$6">
           <TextInput
+            testID="@verificationCodeScreen/verificationCodeInput"
             keyboardType="number-pad"
             value={userCode}
             onChangeText={(v) => {

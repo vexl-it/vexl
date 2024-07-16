@@ -83,6 +83,9 @@ export default function PhoneNumberInput({onChange}: Props): JSX.Element {
   return (
     <XStack bg="$greyAccent5" px="$3" br="$4" mx="$-4">
       <PhoneInput
+        textInputProps={{
+          testID: '@phoneNumberInput',
+        }}
         ref={ref}
         placeholder={' '}
         onChangeFormattedText={handleChangeFormatted}

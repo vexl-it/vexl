@@ -13,3 +13,7 @@ This repository contains code for the Vexl mobile app. The app is built using Re
 5. Run `yarn install` to install dependencies.
 6. Run `yarn start` to start the development server.
 7. Open the app and select your computer as a host to download the js bundle from.
+
+## E2E Testing
+
+This app uses Maestro framework for UI testing, to install the tool follow [this guide](https://maestro.mobile.dev/getting-started/installing-maestro) and then just run `yarn start` and in new terminal window `yarn e2e:test`

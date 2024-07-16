@@ -1,0 +1,35 @@
+appId: it.vexl.nextstaging
+---
+- tapOn:
+    id: '@createOffer/tabButton'
+- tapOn:
+    id: '@listingType/bitcoin'
+- tapOn:
+    id: '@offerType/sell'
+- tapOn:
+    id: '@progressJourney/nextButton'
+- tapOn:
+    id: '@progressJourney/nextButton'
+- tapOn:
+    id: '@location/online'
+- tapOn:
+    id: '@progressJourney/nextButton'
+- tapOn:
+    id: '@offerForm/descriptionInput'
+- inputText: ${OFFER_DESCRIPTION}
+- tapOn:
+    id: '@progressJourney/nextButton'
+- tapOn:
+    id: '@progressJourney/nextButton'
+- tapOn:
+    id: '@progressJourney/doneFinishButton'
+- runFlow: allowNotifications.yaml
+- runFlow:
+    when:
+      visible:
+        id: '@progressJourney/doneFinishButton'
+    commands:
+      - tapOn:
+          id: '@progressJourney/doneFinishButton'
+- assertVisible:
+    id: ${OFFER_DESCRIPTION}

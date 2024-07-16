@@ -6,6 +6,7 @@ import {useTheme} from 'tamagui'
 import AnimatedSplashScreen from './AnimatedSplashScreen'
 import AreYouSureDialog from './components/AreYouSureDialog'
 import BadgeCountManager from './components/BadgeCountManager'
+import DisableLogBoxForTests from './components/DisableLogBoxForTests'
 import LoadingOverlayProvider from './components/LoadingOverlayProvider'
 import MaintenanceAndForceUpdateCheck from './components/MaintenanceAndForceUpdateCheck'
 import PreventScreenshots from './components/PreventScreenshots'
@@ -28,6 +29,7 @@ function App(): JSX.Element {
       <StatusBar style="light" />
       <BadgeCountManager />
       <PreventScreenshots />
+      <DisableLogBoxForTests />
       <NavigationContainer
         ref={navigationRef}
         theme={{

@@ -1,0 +1,10 @@
+appId: it.vexl.nextstaging
+---
+- tapOn:
+    id: ${OFFER_DESCRIPTION}
+- tapOn:
+    id: '@editOfferHeader/deleteOfferButton'
+- tapOn:
+    id: '@areYouSureDialog/positiveButton'
+- assertNotVisible:
+    id: ${OFFER_DESCRIPTION}

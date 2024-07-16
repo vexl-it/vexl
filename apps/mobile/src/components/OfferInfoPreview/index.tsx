@@ -84,6 +84,7 @@ function OfferInfoPreview({
       )}
       <XStack mb="$1">
         <Text
+          testID="@offerInfoPreview/offerDescriptionText"
           flex={1}
           numberOfLines={reduceDescriptionLength ? 5 : undefined}
           ellipsizeMode={reduceDescriptionLength ? 'tail' : undefined}

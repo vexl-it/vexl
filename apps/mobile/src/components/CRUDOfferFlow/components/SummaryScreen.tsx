@@ -26,15 +26,6 @@ function SummaryScreen(): JSX.Element {
             reduceDescriptionLength
             offer={offer}
           />
-          <Text
-            marginTop="$4"
-            ff="$body500"
-            mb="$4"
-            col="$greyOnWhite"
-            fos={16}
-          >
-            {`* ${t('offerForm.summaryAdditionalInfo')}`}
-          </Text>
         </Stack>
       </Section>
     </ScreenWrapper>

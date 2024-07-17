@@ -39,7 +39,6 @@ import {pipe} from 'fp-ts/function'
 import {focusAtom} from 'jotai-optics'
 import {splitAtom} from 'jotai/utils'
 import {Alert} from 'react-native'
-import {btcOfferScreens, otherOfferScreens, productOfferScreens} from '..'
 import {type CRUDOfferStackParamsList} from '../../../navigationTypes'
 import {createInboxAtom} from '../../../state/chat/hooks/useCreateInbox'
 import {
@@ -71,6 +70,11 @@ import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 import {askAreYouSureActionAtom} from '../../AreYouSureDialog'
 import {loadingOverlayDisplayedAtom} from '../../LoadingOverlayProvider'
 import {offerProgressModalActionAtoms as progressModal} from '../../UploadingOfferProgressModal/atoms'
+import {
+  btcOfferScreens,
+  otherOfferScreens,
+  productOfferScreens,
+} from '../domain'
 import numberOfFriendsAtom from './numberOfFriendsAtom'
 
 function getAtomWithNullableValueHandling<T, S>(

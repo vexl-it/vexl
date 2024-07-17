@@ -22,33 +22,6 @@ import OfferDescriptionAndSpokenLanguagesScreen from './components/OfferDescript
 import PriceScreen from './components/PriceScreen'
 import SummaryScreen from './components/SummaryScreen'
 
-export const btcOfferScreens: Array<keyof CRUDOfferStackParamsList> = [
-  'ListingAndOfferType',
-  'CurrencyAndAmount',
-  'LocationPaymentMethodAndNetworkScreen',
-  'OfferDescriptionAndSpokenLanguagesScreen',
-  'FriendLevelScreen',
-  'SummaryScreen',
-]
-
-export const productOfferScreens: Array<keyof CRUDOfferStackParamsList> = [
-  'ListingAndOfferType',
-  'PriceScreen',
-  'DeliveryMethodAndNetworkScreen',
-  'OfferDescriptionAndSpokenLanguagesScreen',
-  'FriendLevelScreen',
-  'SummaryScreen',
-]
-
-export const otherOfferScreens: Array<keyof CRUDOfferStackParamsList> = [
-  'ListingAndOfferType',
-  'PriceScreen',
-  'LocationPaymentMethodAndNetworkScreen',
-  'OfferDescriptionAndSpokenLanguagesScreen',
-  'FriendLevelScreen',
-  'SummaryScreen',
-]
-
 const CRUDOfferStack = createNativeStackNavigator<CRUDOfferStackParamsList>()
 
 type Props = RootStackScreenProps<'CRUDOfferFlow'>

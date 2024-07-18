@@ -3,8 +3,8 @@ import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {ecdsaSign} from '@vexl-next/cryptography/src/operations/ecdsa'
 import {E164PhoneNumberE} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
-import {verifyUserSecurity} from '@vexl-next/rest-api/src/apiSecurity'
-import {Effect, pipe} from 'effect'
+import {InvalidSignatureError} from '@vexl-next/rest-api/src/services/user/specification'
+import {Effect, Either, pipe} from 'effect'
 import {LoggedInUsersDbService} from '../../db/loggedInUsersDb'
 import {TwilioVerificationSid} from '../../utils/twilio'
 import {mockedReportNewUserToDashboard} from '../utils/mockedDashboardReportService'
@@ -28,8 +28,8 @@ beforeEach(() => {
   mockedReportNewUserToDashboard.mockClear()
 })
 
-describe('loginFlow', () => {
-  it('should generate proper user credentials', async () => {
+describe('verify challenge', () => {
+  it('Should throw an error when signature is not valid', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         createVerificationMock.mockReturnValueOnce(
@@ -63,7 +63,7 @@ describe('loginFlow', () => {
 
         const signedChallenge = pipe(
           ecdsaSign({
-            challenge: checkResponse.challenge,
+            challenge: checkResponse.challenge + 'aha',
             privateKey: keypair.privateKeyPemBase64,
           }),
           Schema.decodeSync(EcdsaSignature)
@@ -75,30 +75,22 @@ describe('loginFlow', () => {
               userPublicKey: keypair.publicKeyPemBase64,
               signature: signedChallenge,
             },
-          })
+          }),
+          Effect.either
         )
 
-        expect(verifyChallenge.hash).toBeDefined()
-        expect(verifyChallenge.signature).toBeDefined()
+        expect(verifyChallenge._tag).toEqual('Left')
+        if (Either.isLeft(verifyChallenge)) {
+          const parsedError = Schema.decodeUnknownEither(InvalidSignatureError)(
+            verifyChallenge.left.error
+          )
+          expect(parsedError._tag).toEqual('Right')
+        }
 
         const usersDb = yield* _(LoggedInUsersDbService)
-        expect(usersDb.insertUser).toHaveBeenCalledWith({
-          publicKey: keypair.publicKeyPemBase64,
-          countryPrefix: 420,
-        })
 
-        expect(mockedReportNewUserToDashboard).toHaveBeenCalledTimes(1)
-
-        expect(
-          (yield* _(
-            verifyUserSecurity({
-              hash: verifyChallenge.hash,
-              signature: verifyChallenge.signature,
-              'public-key': keypair.publicKeyPemBase64,
-            }),
-            Effect.either
-          ))._tag
-        ).toBe('Right')
+        expect(usersDb.insertUser).not.toBeCalled()
+        expect(mockedReportNewUserToDashboard).not.toBeCalled()
       })
     )
   })

@@ -13,7 +13,7 @@ import {ChallengeVerificationState, PhoneVerificationState} from '../domain'
 const PHONE_VERIFICATION_STATE_PREFIX = 'phoneVerificationState:'
 const CHALLENGE_VERIFICATION_STATE_PREFIX = 'challengeVerificationState:'
 
-interface LoginDbOperations {
+interface VerificationStateDbOperations {
   storePhoneVerificationState: (
     state: PhoneVerificationState
   ) => Effect.Effect<void, UnexpectedServerError>
@@ -41,12 +41,11 @@ interface LoginDbOperations {
   ) => Effect.Effect<void, UnexpectedServerError>
 }
 
-export class LoginDbService extends Context.Tag('LoginDbService')<
-  LoginDbService,
-  LoginDbOperations
->() {
+export class VerificationStateDbService extends Context.Tag(
+  'VerificationStateDbService'
+)<VerificationStateDbService, VerificationStateDbOperations>() {
   static readonly Live = Layer.effect(
-    LoginDbService,
+    VerificationStateDbService,
     Effect.gen(function* (_) {
       const redis = yield* _(RedisService)
       const storeVerificationState = redis.set(PhoneVerificationState)
@@ -55,7 +54,7 @@ export class LoginDbService extends Context.Tag('LoginDbService')<
       const storeChallengeState = redis.set(ChallengeVerificationState)
       const getChallengeState = redis.get(ChallengeVerificationState)
 
-      const toReturn: LoginDbOperations = {
+      const toReturn: VerificationStateDbOperations = {
         storePhoneVerificationState: (state) =>
           storeVerificationState(
             `${PHONE_VERIFICATION_STATE_PREFIX}${state.id}`,

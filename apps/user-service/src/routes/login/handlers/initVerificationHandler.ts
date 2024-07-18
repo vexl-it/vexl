@@ -13,7 +13,7 @@ import {Handler} from 'effect-http'
 import {loginCodeDummies, loginCodeDummyForAll} from '../../../configs'
 import {TwilioVerificationClient} from '../../../utils/twilio'
 import {VERIFICATION_EXPIRES_AFTER_MILIS} from '../constants'
-import {LoginDbService} from '../utils/db'
+import {VerificationStateDbService} from '../db/verificationStateDb'
 
 const generateVerificationId = (): PhoneNumberVerificationId =>
   Schema.decodeSync(PhoneNumberVerificationId)(
@@ -26,7 +26,7 @@ export const initVerificationHandler = Handler.make(
     makeEndpointEffect(
       Effect.gen(function* (_) {
         const twilio = yield* _(TwilioVerificationClient)
-        const loginDbService = yield* _(LoginDbService)
+        const loginDbService = yield* _(VerificationStateDbService)
         const expirationAt = unixMillisecondsFromNow(
           VERIFICATION_EXPIRES_AFTER_MILIS
         )

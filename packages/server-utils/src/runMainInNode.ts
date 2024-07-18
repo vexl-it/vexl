@@ -12,6 +12,8 @@ const logger = isRunningInProductionConfig.pipe(
 export const runMainInNode: RunMain = (effect, options) => {
   NodeRuntime.runMain(
     effect.pipe(
+      Effect.catchAll((error) => Effect.logFatal('Error', error)),
+      Effect.catchAllDefect((error) => Effect.logFatal('Defect', error)),
       Effect.provide(devToolsLayer(nodeEnvConfig)),
       Effect.provide(logger)
     ),

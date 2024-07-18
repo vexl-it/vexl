@@ -1145,10 +1145,10 @@ export const offerFormMolecule = molecule(() => {
     return listingType === 'BITCOIN'
       ? btcOfferScreens
       : listingType === 'PRODUCT'
-      ? productOfferScreens
-      : listingType === 'OTHER'
-      ? otherOfferScreens
-      : []
+        ? productOfferScreens
+        : listingType === 'OTHER'
+          ? otherOfferScreens
+          : []
   })
 
   return {

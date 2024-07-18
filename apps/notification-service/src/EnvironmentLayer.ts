@@ -3,7 +3,6 @@ import {
   PrivateKeyPemBase64E,
   PublicKeyPemBase64E,
 } from '@vexl-next/cryptography/src/KeyHolder/brands'
-import dotenv from 'dotenv'
 import {Effect, Layer} from 'effect'
 
 const EnvironmentData = S.Struct({
@@ -41,9 +40,7 @@ export class Environment extends Effect.Tag('Environment')<
 >() {
   static readonly Live = Layer.effect(
     Environment,
-    Effect.sync(() => {
-      dotenv.config()
-    }).pipe(Effect.flatMap(() => S.decodeUnknown(EnvironmentData)(process.env)))
+    S.decodeUnknown(EnvironmentData)(process.env)
   )
 }
 

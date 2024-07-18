@@ -77,7 +77,9 @@ export class GetGeocodedCoordinatesResponse extends Schema.Class<GetGeocodedCoor
 
 export class LocationNotFoundError extends Schema.TaggedError<LocationNotFoundError>(
   'LocationNotFoundError'
-)('LocationNotFoundError', {}) {}
+)('LocationNotFoundError', {
+  status: Schema.Literal(404),
+}) {}
 
 export class GetExchangeRateRequest extends Schema.Class<GetExchangeRateRequest>(
   'GetExchangeRateRequest'
@@ -95,4 +97,5 @@ export class GetExchangeRateError extends Schema.TaggedError<GetExchangeRateErro
   'GetExchangeRateError'
 )('GetExchangeRateError', {
   reason: Schema.Literal('YadioError'),
+  status: Schema.Literal(400),
 }) {}

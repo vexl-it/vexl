@@ -10,8 +10,8 @@
     "@vexl-next/tsconfig": "0.0.0",
     "esbuild": "^0.17.16",
     "eslint": "^8.50.0",
-    "prettier": "^3.0.3",
-    "typescript": "^5.4.2"
+    "prettier": "^3.3.2",
+    "typescript": "^5.5.2"
   },
   "eslintConfig": {
     "root": true,
@@ -25,16 +25,16 @@
     "format": "prettier --check \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json}\"",
     "typecheck": "tsc --noEmit",
     "build": "node esbuild.config.js",
-    "dev": "npx tsx src/index.ts",
+    "dev": "npx tsx -r dotenv/config src/index.ts",
     "dev:watch": "npx tsx --watch src/index.ts"
   },
   "prettier": "@vexl-next/prettier-config",
   "dependencies": {
-    "@effect/experimental": "^0.15.8",
-    "@effect/opentelemetry": "^0.32.0",
-    "@effect/platform": "^0.49.3",
-    "@effect/platform-node": "^0.46.3",
-    "@effect/schema": "^0.66.1",
+    "@effect/experimental": "^0.19.2",
+    "@effect/opentelemetry": "^0.34.38",
+    "@effect/platform": "^0.59.1",
+    "@effect/platform-node": "^0.54.2",
+    "@effect/schema": "^0.68.25",
     "@opentelemetry/exporter-trace-otlp-http": "^0.50.0",
     "@opentelemetry/sdk-trace-node": "^1.23.0",
     "@opentelemetry/sdk-trace-web": "^1.23.0",
@@ -42,7 +42,7 @@
     "@vexl-next/rest-api": "0.0.0",
     "@vexl-next/server-utils": "0.0.0",
     "dotenv": "^16.4.5",
-    "effect": "^3.0.1",
+    "effect": "^3.5.5",
     "fast-check": "^3.17.1",
     "firebase-admin": "^12.1.0"
   }

@@ -41,10 +41,10 @@ function DateAndTimeCell(): JSX.Element {
   const sideNote = tradeChecklistDateAndTimeData.received?.picks?.dateTime
     ? formatDateTime(tradeChecklistDateAndTimeData.received.picks.dateTime)
     : tradeChecklistDateAndTimeData.sent?.picks?.dateTime
-    ? formatDateTime(tradeChecklistDateAndTimeData.sent.picks.dateTime)
-    : dateAndTimePickUpdateToBeSent
-    ? formatDateTime(dateAndTimePickUpdateToBeSent)
-    : undefined
+      ? formatDateTime(tradeChecklistDateAndTimeData.sent.picks.dateTime)
+      : dateAndTimePickUpdateToBeSent
+        ? formatDateTime(dateAndTimePickUpdateToBeSent)
+        : undefined
 
   const onPress = useCallback(() => {
     if (DateAndTime.dateAndTimeSettled(tradeChecklistDateAndTimeData)) {

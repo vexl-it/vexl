@@ -9,6 +9,7 @@
   "scripts": {
     "turbo:clean": "turbo clean && rm -rf ./node_modules/.cache",
     "turbo:format": "turbo format --continue -- --cache --cache-location='node_modules/.cache/.prettiercache'",
+    "turbo:test": "turbo test --continue -- --cache --cache-location='node_modules/.cache/.prettiercache'",
     "turbo:format:fix": "turbo format --continue -- --write --cache --cache-location='node_modules/.cache/.prettiercache'",
     "turbo:lint": "turbo lint --continue -- --cache --cache-location 'node_modules/.cache/.eslintcache' && manypkg check",
     "turbo:lint:fix": "turbo lint --continue -- --fix --cache --cache-location 'node_modules/.cache/.eslintcache' && manypkg fix",
@@ -18,6 +19,7 @@
     "utils:add-translation": "yarn workspace @vexl-next/localizations utils:add",
     "notification-service:build-docker-image": "./scripts/build-app-docker-image.sh notification-service",
     "location-service:build-docker-image": "./scripts/build-app-docker-image.sh location-service",
+    "user-service:build-docker-image": "./scripts/build-app-docker-image.sh user-service",
     "dashboard-app:build-docker-image": "./scripts/build-app-docker-image.sh dashboard-app",
     "postinstall": "manypkg check"
   },
@@ -27,8 +29,8 @@
     "@types/jest": "^29.4.0",
     "@types/node": "^18.11.18",
     "eslint": "^8.50.0",
-    "prettier": "^3.0.3",
-    "tsx": "^4.10.3",
+    "prettier": "^3.3.2",
+    "tsx": "^4.16.0",
     "turbo": "^1.11.3"
   },
   "resolutions": {

@@ -3,6 +3,7 @@ import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumbe
 import {IsoDatetimeString} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
 import {RegionCode} from '@vexl-next/domain/src/utility/RegionCode.brand'
 import {type AxiosResponse} from 'axios'
+import {Brand} from 'effect'
 import z from 'zod'
 
 export interface InvalidPhoneNumber {
@@ -45,7 +46,14 @@ export interface InitPhoneNumberVerificationRequest {
   phoneNumber: E164PhoneNumber
 }
 
-export const VerificationId = z.number().int().min(0).brand<'VerificationId'>()
+export const VerificationId = z
+  .number()
+  .int()
+  .min(0)
+  .transform((v) =>
+    Brand.nominal<typeof v & Brand.Brand<'VerificationId'>>()(v)
+  )
+  .brand<'VerificationId'>()
 export type VerificationId = z.TypeOf<typeof VerificationId>
 
 export const InitPhoneNumberVerificationResponse = z.object({

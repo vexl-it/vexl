@@ -7,3 +7,10 @@ export function toFpTsOption<T>(option: Option.Option<T>): O.Option<T> {
   }
   return O.none
 }
+
+export function toEffectOption<T>(option: O.Option<T>): Option.Option<T> {
+  if (O.isSome(option)) {
+    return Option.some(option.value)
+  }
+  return Option.none()
+}

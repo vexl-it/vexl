@@ -82,7 +82,7 @@ export async function* runTests() {
 
   yield `Testing ECDSA`
   const signature = ecdsa.ecdsaSign({
-    privateKey: keypair1,
+    privateKey: keypair1.privateKeyPemBase64,
     challenge: dummySymetricKey,
   })
   if (
@@ -153,7 +153,7 @@ export async function* runBenchmark() {
   yield `ECDSA signing dummy phone number ${NUMBER_OF_GENERATIONS} times`
   for (let i = 0; i < NUMBER_OF_GENERATIONS; i++) {
     ecdsa.ecdsaSign({
-      privateKey: keypair1,
+      privateKey: keypair1.privateKeyPemBase64,
       challenge: dummySymetricKey,
     })
   }

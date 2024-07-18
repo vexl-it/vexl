@@ -3,7 +3,8 @@ import {PublicKeyPemBase64} from '../KeyHolder/brands'
 import {stripVersion} from '../versionWrapper'
 import {ecdsaSign, ecdsaVerify} from './ecdsa'
 
-const privateKey = generatePrivateKey()
+const {privateKeyPemBase64: privateKey, publicKeyPemBase64: pubKey} =
+  generatePrivateKey()
 
 it('Should successfully sign message and verify the message is signed', () => {
   const challenge = 'Random String'
@@ -17,7 +18,7 @@ it('Should successfully sign message and verify the message is signed', () => {
   const verified = ecdsaVerify({
     challenge,
     signature: stripVersion(signature),
-    pubKey: privateKey.publicKeyPemBase64,
+    pubKey,
   })
   expect(verified).toBe(true)
 })
@@ -50,7 +51,7 @@ it('Should not verify signature signed with different public key', () => {
   const challenge = 'Some message'
   const signature = ecdsaSign({
     challenge,
-    privateKey,
+    privateKey: privateKey.privateKeyPemBase64,
   })
 
   const verified = ecdsaVerify({

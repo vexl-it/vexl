@@ -1,6 +1,6 @@
 import {Schema} from '@effect/schema'
 import {type ParseError} from '@effect/schema/ParseResult'
-import {type SqlError} from '@effect/sql/Error'
+import {type SqlError} from '@effect/sql/SqlError'
 import {Effect, Option} from 'effect'
 import {ContactConnectionId} from './ContactConnectionId'
 import {PgContactClient} from './layer'

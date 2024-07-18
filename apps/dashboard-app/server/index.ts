@@ -1,8 +1,8 @@
 import 'dotenv/config'
 //
 import {DevTools} from '@effect/experimental'
-import {NodeRuntime} from '@effect/platform-node'
-import {makeHealthServerLive} from '@vexl-next/server-utils/src/HealthServer'
+import {healthServerLayer} from '@vexl-next/server-utils/src/HealthServer'
+import {runMainInNode} from '@vexl-next/server-utils/src/runMainInNode'
 import {Effect, Layer} from 'effect'
 import {
   dummyDataConfig,
@@ -26,7 +26,7 @@ import {StaticServerLive} from './staticServer'
 import {UpdatesServerLive} from './updatesServer'
 import {HasingSalt} from './utils/hashPubKey'
 
-const HealthServerLive = makeHealthServerLive({port: healthServerPortConfig})
+const HealthServerLive = healthServerLayer({port: healthServerPortConfig})
 
 const program = Effect.gen(function* (_) {
   yield* _(Effect.logInfo('Quering everyhting'))
@@ -81,4 +81,4 @@ const program = Effect.gen(function* (_) {
   )
 )
 
-NodeRuntime.runMain(program)
+runMainInNode(program)

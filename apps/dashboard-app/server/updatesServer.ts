@@ -1,5 +1,10 @@
+import {
+  HttpMiddleware,
+  HttpRouter,
+  HttpServer,
+  HttpServerResponse,
+} from '@effect/platform'
 import {NodeHttpServer} from '@effect/platform-node'
-import * as Http from '@effect/platform/HttpServer'
 import {Effect, Layer, PubSub, Stream} from 'effect'
 import {createServer} from 'http'
 import {updatesServerPortConfig} from './configs'
@@ -7,7 +12,7 @@ import {syncCountOfUsersEffect} from './metrics/countOfUsers'
 import {syncPubKeyToCountryEffect} from './metrics/pubKeyToCountry'
 import {syncCountriesToConnectionsEffect} from './metrics/pubKeysToConnectionsCount'
 
-const ServerLive = NodeHttpServer.server.layerConfig(() => createServer(), {
+const ServerLive = NodeHttpServer.layerConfig(() => createServer(), {
   port: updatesServerPortConfig,
 })
 
@@ -17,27 +22,27 @@ export const UpdatesServerLive = Layer.scopedDiscard(
       PubSub.bounded<'newUser' | 'newConnections'>(1)
     )
 
-    const RouterLive = Http.router.empty.pipe(
-      Http.router.post(
+    const RouterLive = HttpRouter.empty.pipe(
+      HttpRouter.post(
         '/new-user',
         Effect.gen(function* (_) {
           const published = yield* _(
             PubSub.publish(updateEventPubSub, 'newUser')
           )
           return published
-            ? Http.response.raw('accepted')
-            : Http.response.raw('Error', {status: 500})
+            ? HttpServerResponse.raw('accepted')
+            : HttpServerResponse.raw('Error', {status: 500})
         })
       ),
-      Http.router.post(
+      HttpRouter.post(
         '/new-connections',
         Effect.gen(function* (_) {
           const published = yield* _(
             PubSub.publish(updateEventPubSub, 'newConnections')
           )
           return published
-            ? Http.response.raw('accepted')
-            : Http.response.raw('Error', {status: 500})
+            ? HttpServerResponse.raw('accepted')
+            : HttpServerResponse.raw('Error', {status: 500})
         })
       )
     )
@@ -81,7 +86,7 @@ export const UpdatesServerLive = Layer.scopedDiscard(
 
     yield* _(
       RouterLive.pipe(
-        Http.server.serve(Http.middleware.logger),
+        HttpServer.serve(HttpMiddleware.logger),
         Layer.provide(ServerLive),
         Layer.tap((_) =>
           Effect.flatMap(updatesServerPortConfig, (p) =>

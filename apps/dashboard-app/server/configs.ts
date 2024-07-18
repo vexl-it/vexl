@@ -1,4 +1,4 @@
-import {type PgClientConfig} from '@effect/sql-pg/Client'
+import {type PgClientConfig} from '@effect/sql-pg/PgClient'
 import {Config} from 'effect'
 
 export const nodeEnvConfig = Config.string('NODE_ENV').pipe(
@@ -17,7 +17,9 @@ export const isRunningInDevConfig = nodeEnvConfig.pipe(
 export const clientServerPortConfig = Config.number('PORT')
 export const updatesServerPortConfig = Config.number('UPDATES_SERVER_PORT')
 export const socketServerPortConfig = Config.number('SOCKET_SERVER_PORT')
-export const healthServerPortConfig = Config.number('HEALTH_PORT')
+export const healthServerPortConfig = Config.option(
+  Config.number('HEALTH_PORT')
+)
 export const dummyDataConfig = Config.boolean('DUMMY_DATA').pipe(
   Config.withDefault(false)
 )

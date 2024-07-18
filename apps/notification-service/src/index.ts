@@ -1,9 +1,10 @@
 import {DevTools} from '@effect/experimental'
-import {NodeHttpServer, NodeRuntime} from '@effect/platform-node'
-import * as Http from '@effect/platform/HttpServer'
+import {HttpMiddleware, HttpRouter, HttpServer} from '@effect/platform'
+import {NodeHttpServer} from '@effect/platform-node'
 import * as HealthServer from '@vexl-next/server-utils/src/HealthServer'
 import {ServerUserSessionConfig} from '@vexl-next/server-utils/src/ServerUserSession'
 import handleCommonErrorsRouter from '@vexl-next/server-utils/src/handleCommonErrorsRouter'
+import {runMainInNode} from '@vexl-next/server-utils/src/runMainInNode'
 import {Effect, Layer} from 'effect'
 import {createServer} from 'http'
 import {Environment, EnvironmentConstants} from './EnvironmentLayer'
@@ -14,11 +15,11 @@ import IssueNotificationRouteLive from './routes/IssueNotificationRouteLive'
 const ServerLive = Layer.unwrapEffect(
   Effect.gen(function* (_) {
     const port = yield* _(EnvironmentConstants.PORT)
-    return NodeHttpServer.server.layer(() => createServer(), {port})
+    return NodeHttpServer.layer(() => createServer(), {port})
   })
 )
 
-const HttpLive = Http.router.empty.pipe(
+const HttpLive = HttpRouter.empty.pipe(
   GetKeyRouteLive,
   IssueNotificationRouteLive,
   handleCommonErrorsRouter
@@ -26,13 +27,13 @@ const HttpLive = Http.router.empty.pipe(
 
 const HealthServerLive = Layer.unwrapEffect(
   EnvironmentConstants.HEALTH_PORT.pipe(
-    Effect.map((port) => HealthServer.makeHealthServerLive({port}))
+    Effect.map((port) => HealthServer.healthServerLayer({port}))
   )
 )
 
 const AppLive = HttpLive.pipe(
-  Http.server.serve(Http.middleware.logger),
-  Http.server.withLogAddress,
+  HttpServer.serve(HttpMiddleware.logger),
+  HttpServer.withLogAddress,
   Layer.provide(ServerLive),
   Layer.provide(HealthServerLive),
   Layer.provide(FirebaseMessagingLayer.Live),
@@ -78,4 +79,4 @@ const AppLive = HttpLive.pipe(
 const program = Layer.launch(AppLive).pipe(
   Effect.catchAllCause(Effect.logError)
 )
-NodeRuntime.runMain(program)
+runMainInNode(program)

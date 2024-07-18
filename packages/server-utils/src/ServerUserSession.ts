@@ -1,4 +1,4 @@
-import * as Http from '@effect/platform/HttpServer'
+import {HttpServerRequest} from '@effect/platform'
 import {Schema} from '@effect/schema'
 import * as S from '@effect/schema/Schema'
 import {
@@ -6,12 +6,11 @@ import {
   type PublicKeyPemBase64,
 } from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {ecdsaVerify} from '@vexl-next/cryptography/src/operations/ecdsa'
-import {
-  HEADER_HASH,
-  HEADER_PUBLIC_KEY,
-  HEADER_SIGNATURE,
-} from '@vexl-next/rest-api/src/constants'
 import {Context, Effect, Layer} from 'effect'
+
+export const HEADER_PUBLIC_KEY = 'public-key'
+export const HEADER_HASH = 'hash'
+export const HEADER_SIGNATURE = 'signature'
 
 export class InvalidSessionError extends S.TaggedError<InvalidSessionError>()(
   'InvalidSessionError',
@@ -64,10 +63,10 @@ export class ServerUserSessionConfig extends Context.Tag(
 export const validateUserSession: Effect.Effect<
   UserSessionOnBE,
   InvalidSessionError,
-  ServerUserSessionConfig | Http.request.ServerRequest
+  ServerUserSessionConfig | HttpServerRequest.HttpServerRequest
 > = Effect.gen(function* (_) {
   const headers = yield* _(
-    Http.request.schemaHeaders(AuthHeaders),
+    HttpServerRequest.schemaHeaders(AuthHeaders),
     Effect.mapError(
       (e) => new InvalidSessionError({message: 'Missing required headers'})
     )

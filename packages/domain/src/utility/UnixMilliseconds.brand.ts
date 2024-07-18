@@ -27,6 +27,12 @@ export function unixMillisecondsNow(): UnixMilliseconds {
   return now()
 }
 
+export function unixMillisecondsFromNow(
+  milliseconds: number
+): UnixMilliseconds {
+  return UnixMilliseconds.parse(Date.now() + milliseconds)
+}
+
 export function unixMilliseconds(): UnixMilliseconds {
   return now()
 }

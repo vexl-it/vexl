@@ -6,6 +6,7 @@ const config = {
       'error',
       {'restrictDefaultExports': {'namespaceFrom': true, 'namedFrom': true}},
     ],
+
     // https://github.com/typescript-eslint/typescript-eslint/issues/2585
     '@typescript-eslint/no-redeclare': 'off',
     '@typescript-eslint/consistent-type-assertions': 'off',
@@ -18,13 +19,14 @@ const config = {
     //     'jsx': 'always',
     //   },
     // ],
+    // 'import/extensions': ['error', 'always'],
   },
   ignorePatterns: [
     '**/.eslintrc.cjs',
     '**/*.config.js',
     '**/*.config.cjs',
     '.next',
-    'dist',
+    'dist/*',
     'pnpm-lock.yaml',
   ],
 }

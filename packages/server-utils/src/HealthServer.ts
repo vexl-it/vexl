@@ -1,44 +1,50 @@
+import {
+  HttpRouter,
+  HttpServer,
+  HttpServerResponse,
+  type HttpServerError,
+} from '@effect/platform'
 import {NodeHttpServer} from '@effect/platform-node'
-import * as Http from '@effect/platform/HttpServer'
-import {Config, Effect, Layer} from 'effect'
+import {Config, Effect, Layer, Option} from 'effect'
 import {type ConfigError} from 'effect/ConfigError'
-
 import {createServer} from 'http'
 
-export function makeHealthServerLive({
-  port,
+// this is too complicated for what it does. I know ...
+export function healthServerLayer({
+  port: portConfig,
 }: {
-  port: number | Config.Config<number>
-}): Layer.Layer<never, Http.error.ServeError | ConfigError, never> {
-  const portEffect = Config.isConfig(port) ? port : Effect.succeed(port)
-
-  const HealtServerLive = portEffect.pipe(
-    Effect.map((port) =>
-      NodeHttpServer.server.layer(() => createServer(), {
-        port,
-      })
-    ),
-    Layer.unwrapEffect
-  )
-
-  const HealthHttpLive = Http.router.empty.pipe(
-    Http.router.get(
-      '*',
-      Effect.succeed(Http.response.text('ok', {status: 200}))
+  port: number | Config.Config<Option.Option<number>>
+}): Layer.Layer<never, HttpServerError.ServeError | ConfigError, never> {
+  return Effect.gen(function* (_) {
+    const portOption = yield* _(
+      Config.isConfig(portConfig)
+        ? portConfig
+        : Config.succeed(Option.some(portConfig))
     )
-  )
 
-  const HealthAppLive = HealthHttpLive.pipe(
-    Http.server.serve(),
-    Layer.provide(HealtServerLive),
-    Layer.tap(() =>
-      portEffect.pipe(
-        Effect.flatMap((port) =>
-          Effect.log(`Health server running on port ${port}`)
-        )
+    if (Option.isNone(portOption))
+      return Layer.tap(Layer.empty, () =>
+        Effect.log('Health server not running because port is not set')
+      )
+    const port = portOption.value
+
+    const HealtServerLive = NodeHttpServer.layer(() => createServer(), {
+      port,
+    })
+
+    const HealthHttpLive = HttpRouter.empty.pipe(
+      HttpRouter.get(
+        '*',
+        Effect.succeed(HttpServerResponse.text('ok', {status: 200}))
       )
     )
-  )
 
-  return HealthAppLive
+    const HealthAppLive = HealthHttpLive.pipe(
+      HttpServer.serve(),
+      Layer.provide(HealtServerLive),
+      Layer.tap(() => Effect.log(`Health server running on port ${port}`))
+    )
+
+    return HealthAppLive
+  }).pipe(Layer.unwrapEffect)
 }

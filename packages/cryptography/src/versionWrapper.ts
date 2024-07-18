@@ -14,8 +14,12 @@ function getFormattedVersionNumber(version: number): string {
   return versionNumberString
 }
 
-export function appendVersion(string: string, version: number): string {
-  return `${getFormattedVersionNumber(version)}.${string}`
+export function appendVersion(
+  string: string,
+  version: number,
+  type?: string
+): string {
+  return `${getFormattedVersionNumber(version)}.${string}${type ? `.${type}` : ''}`
 }
 
 export function parseStringWithVersion(b64: string): {

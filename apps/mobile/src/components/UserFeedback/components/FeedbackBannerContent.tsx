@@ -37,14 +37,14 @@ function FeedbackBannerContent({autoCloseWhenFinished}: Props): JSX.Element {
       ? currentPage === 'CHAT_RATING'
         ? t('messages.howWasTheTrade')
         : currentPage === 'OFFER_RATING'
-        ? t('messages.howWasCreatingNewOffer')
-        : currentPage === 'OBJECTIONS'
-        ? starRating >= POSITIVE_STAR_RATING_THRESHOLD
-          ? t('messages.whatWasGreatAboutIt')
-          : t('messages.anyProblems')
-        : starRating >= POSITIVE_STAR_RATING_THRESHOLD
-        ? t('messages.whatWorkedWellExactly')
-        : t('messages.whatWasWrongExactly')
+          ? t('messages.howWasCreatingNewOffer')
+          : currentPage === 'OBJECTIONS'
+            ? starRating >= POSITIVE_STAR_RATING_THRESHOLD
+              ? t('messages.whatWasGreatAboutIt')
+              : t('messages.anyProblems')
+            : starRating >= POSITIVE_STAR_RATING_THRESHOLD
+              ? t('messages.whatWorkedWellExactly')
+              : t('messages.whatWasWrongExactly')
       : t('common.thanks')
   }, [feedbackFlowFinished, currentPage, starRating, t])
 

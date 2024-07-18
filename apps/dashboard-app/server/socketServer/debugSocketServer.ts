@@ -22,6 +22,7 @@ import {
   TotalUsersCountMessage,
   UserWithConnections,
 } from '../../common/ServerMessage'
+import {type HasingSalt, secureHash} from '../utils/hashPubKey'
 import encodeAndSendMessage from './encodeAndSendMessage'
 import {IncommingConnectionsStreamContext} from './serverSocket'
 
@@ -45,7 +46,7 @@ const generateRandomUser = Effect.gen(function* (_) {
   const receivedAt = unixMillisecondsNow()
 
   return new UserWithConnections({
-    pubKey,
+    pubKey: yield* _(secureHash(pubKey)),
     connectionsCount: connections,
     countryPrefix,
     receivedAt,
@@ -64,7 +65,7 @@ const generateDummyCountriesScore = Effect.gen(function* (_) {
 
 const handleConnection = (
   c: WebSocket
-): Effect.Effect<void, ParseError, never> =>
+): Effect.Effect<void, ParseError, HasingSalt> =>
   Effect.gen(function* (_) {
     const usersRef = yield* _(
       [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],

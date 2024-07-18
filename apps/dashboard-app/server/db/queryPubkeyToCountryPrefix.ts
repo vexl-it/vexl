@@ -1,6 +1,6 @@
 import {Schema} from '@effect/schema'
 import {type ParseError} from '@effect/schema/ParseResult'
-import {type SqlError} from '@effect/sql/Error'
+import {type SqlError} from '@effect/sql/SqlError'
 import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {CountryPrefixE} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {Effect, Option} from 'effect'

@@ -34,7 +34,3 @@ export class InternalServerError extends Schema.TaggedError<InternalServerError>
     Schema.optional({default: () => 'Unknown' as const})
   ),
 }) {}
-
-export class NotFoundError extends Schema.TaggedError<NotFoundError>(
-  'NotFoundError'
-)('NotFoundError', {}) {}

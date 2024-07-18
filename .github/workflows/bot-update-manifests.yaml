@@ -19,6 +19,7 @@ on:
           # - all - not yet
           - dashboard-app
           - location-ms
+          - user-ms
           - notification-service
           - web-app
 

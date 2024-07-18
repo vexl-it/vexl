@@ -89,8 +89,8 @@ function Info({
             feeAmount === 0
               ? '$grey'
               : Math.abs(feeAmount) > sliderThreshold / 2
-              ? '$redAccent1'
-              : '$darkBrown'
+                ? '$redAccent1'
+                : '$darkBrown'
           }
         >
           <Stack als="flex-start">

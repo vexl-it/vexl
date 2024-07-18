@@ -269,7 +269,7 @@ export const finishLoginActionAtom = atom(
         E.tryCatch(
           () =>
             crypto.ecdsa.ecdsaSign({
-              privateKey,
+              privateKey: privateKey.privateKeyPemBase64,
               challenge: verifyPhoneNumberResponse.challenge,
             }),
 

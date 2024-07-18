@@ -67,7 +67,7 @@ export function privateApi({
         TE.mapLeft((e) => {
           if (e._tag === 'BadStatusCodeError') {
             if (e.response.status === 404) {
-              return new LocationNotFoundError()
+              return new LocationNotFoundError({status: 404})
             }
           }
           return e
@@ -92,7 +92,7 @@ export function privateApi({
         TE.mapLeft((e) => {
           if (e._tag === 'BadStatusCodeError') {
             if (e.response.status === 404) {
-              return new LocationNotFoundError()
+              return new LocationNotFoundError({status: 404})
             }
           }
           return e
@@ -116,7 +116,10 @@ export function privateApi({
         ),
         TE.mapLeft((e) => {
           if (e._tag === 'BadStatusCodeError') {
-            return new GetExchangeRateError({reason: e.response.data.reason})
+            return new GetExchangeRateError({
+              reason: e.response.data.reason,
+              status: 400,
+            })
           }
           return e
         })

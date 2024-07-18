@@ -1,0 +1,44 @@
+{
+  "name": "@vexl-next/generic-utils",
+  "version": "0.0.0",
+  "type": "module",
+  "main": "src/index",
+  "scripts": {
+    "clean": "rimraf .turbo node_modules",
+    "lint": "eslint '**/*.{js,ts,tsx,jsx,cjs,mjs}'",
+    "format": "prettier --check \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json}\"",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@vexl-next/eslint-config": "0.0.0",
+    "@vexl-next/prettier-config": "0.0.0",
+    "@vexl-next/tsconfig": "0.0.0",
+    "eslint": "^8.50.0",
+    "jest": "^29.7.0",
+    "prettier": "^3.3.2",
+    "rimraf": "^4.4.0",
+    "ts-jest": "^29.2.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.5.2"
+  },
+  "dependencies": {
+    "@effect/schema": "^0.68.25",
+    "@vexl-next/cryptography": "0.0.0",
+    "awesome-phonenumber": "^5.1.0",
+    "effect": "^3.5.5",
+    "fast-check": "^3.17.1",
+    "fp-ts": "^2.13.1",
+    "js-base64": "^3.7.5",
+    "just-truncate": "^2.2.0",
+    "luxon": "^3.3.0",
+    "match-sorter": "^6.3.4",
+    "zod": "^3.22.3"
+  },
+  "eslintConfig": {
+    "root": true,
+    "extends": [
+      "@vexl-next/eslint-config/index"
+    ]
+  },
+  "prettier": "@vexl-next/prettier-config"
+}

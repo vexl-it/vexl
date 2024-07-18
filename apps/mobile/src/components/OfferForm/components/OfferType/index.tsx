@@ -27,8 +27,8 @@ function OfferTypeSection({
           !listingType || listingType === 'BITCOIN'
             ? t('offerForm.sellBitcoin')
             : listingType === 'PRODUCT'
-            ? t('offerForm.sellItem')
-            : t('offerForm.offer'),
+              ? t('offerForm.sellItem')
+              : t('offerForm.offer'),
         type: 'SELL',
       },
       {
@@ -36,8 +36,8 @@ function OfferTypeSection({
           !listingType || listingType === 'BITCOIN'
             ? t('offerForm.buyBitcoin')
             : listingType === 'PRODUCT'
-            ? t('offerForm.buyItem')
-            : t('offerForm.request'),
+              ? t('offerForm.buyItem')
+              : t('offerForm.request'),
         type: 'BUY',
       },
     ],
@@ -63,8 +63,8 @@ function OfferTypeSection({
         listingType === 'BITCOIN'
           ? offerType
           : offerType === 'BUY'
-          ? 'SELL'
-          : 'BUY'
+            ? 'SELL'
+            : 'BUY'
       )
     },
     [listingType, setOfferType]

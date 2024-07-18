@@ -1,6 +1,6 @@
 import crypto from 'node:crypto'
 import {
-  type PrivateKeyHolder,
+  type PrivateKeyPemBase64,
   type PublicKeyPemBase64,
 } from '../KeyHolder/brands'
 
@@ -9,15 +9,13 @@ export function ecdsaSign({
   privateKey,
 }: {
   challenge: string
-  privateKey: PrivateKeyHolder
+  privateKey: PrivateKeyPemBase64
 }): string {
   const sign = crypto.createSign('sha256')
   sign.update(Buffer.from(challenge, 'utf8'))
   sign.end()
 
-  const signature = sign.sign(
-    Buffer.from(privateKey.privateKeyPemBase64, 'base64')
-  )
+  const signature = sign.sign(Buffer.from(privateKey, 'base64'))
   return trimBase64Der(signature).toString('base64')
 }
 

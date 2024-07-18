@@ -18,7 +18,7 @@ export function ecdsaSign(
     E.tryCatch(
       () =>
         crypto.ecdsa.ecdsaSign({
-          privateKey,
+          privateKey: privateKey.privateKeyPemBase64,
           challenge,
         }),
       toError('CryptoError', 'Error while signing challenge')

@@ -1,4 +1,4 @@
-import {make as makePgClient, type PgClient} from '@effect/sql-pg/Client'
+import {make as makePgClient, type PgClient} from '@effect/sql-pg/PgClient'
 import {Context, Effect, Layer} from 'effect'
 import {contactDatabaseConfig, userDatabaseConfig} from '../configs'
 

@@ -1,9 +1,16 @@
+import {Schema} from '@effect/schema'
 import {parsePhoneNumber} from 'awesome-phonenumber'
+import {Brand} from 'effect'
 import {z} from 'zod'
 import {type E164PhoneNumber} from '../general/E164PhoneNumber.brand'
 
-export const RegionCode = z.string().brand<'RegionCode'>()
-export type RegionCode = z.TypeOf<typeof RegionCode>
+export const RegionCodeE = Schema.NonEmpty.pipe(Schema.brand('RegionCode'))
+
+export const RegionCode = z
+  .string()
+  .transform((v) => Brand.nominal<typeof v & Brand.Brand<'RegionCode'>>()(v))
+
+export type RegionCode = Schema.Schema.Type<typeof RegionCodeE>
 
 export function phoneNumberToRegionCode(
   phoneNumber: E164PhoneNumber

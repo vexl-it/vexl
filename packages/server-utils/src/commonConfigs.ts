@@ -1,0 +1,65 @@
+import {Schema} from '@effect/schema'
+import {type PgClient} from '@effect/sql-pg'
+import {
+  PrivateKeyPemBase64E,
+  PublicKeyPemBase64E,
+} from '@vexl-next/cryptography/src/KeyHolder/brands'
+import {Config, ConfigError, Either} from 'effect'
+
+export const nodeEnvConfig = Config.string('NODE_ENV').pipe(
+  Config.withDefault('production'),
+  Config.validate({
+    message: "NODE_ENV must be one of 'development', or 'production' or 'test'",
+    validation: (x): x is 'production' | 'development' | 'test' =>
+      x === 'development' || x === 'production' || x === 'test',
+  })
+)
+
+export const isRunningInDevelopmentConfig = nodeEnvConfig.pipe(
+  Config.map((env) => env === 'development')
+)
+export const isRunningInTestConfig = nodeEnvConfig.pipe(
+  Config.map((env) => env === 'test')
+)
+export const isRunningInProductionConfig = nodeEnvConfig.pipe(
+  Config.map((env) => env === 'production')
+)
+
+export const portConfig = Config.number('PORT')
+export const healthServerPortConfig = Config.option(
+  Config.number('HEALTH_PORT')
+)
+
+export const databaseConfig = Config.unwrap<PgClient.PgClientConfig>({
+  url: Config.redacted('DB_URL'),
+  username: Config.string('DB_USER'),
+  password: Config.redacted('DB_PASSWORD'),
+})
+
+export const secretPublicKey = Config.string('SECRET_PUBLIC_KEY').pipe(
+  Config.mapOrFail((v) =>
+    Either.mapLeft(Schema.decodeEither(PublicKeyPemBase64E)(v), (e) =>
+      ConfigError.InvalidData(['SECRET_PUBLIC_KEY'], e.message)
+    )
+  )
+)
+
+export const secretPrivateKey = Config.string('SECRET_PRIVATE_KEY').pipe(
+  Config.mapOrFail((v) =>
+    Either.mapLeft(Schema.decodeEither(PrivateKeyPemBase64E)(v), (e) =>
+      ConfigError.InvalidData(['SECRET_PRIVATE_KEY'], e.message)
+    )
+  )
+)
+
+export const hmacKey = Config.string('SECRET_HMAC_KEY')
+export const easKey = Config.string('SECRET_EAS_KEY')
+
+export const cryptoConfig = {
+  publicKey: secretPublicKey,
+  privateKey: secretPrivateKey,
+  hmacKey,
+  easKey,
+}
+
+export const redisUrl = Config.string('REDIS_URL')

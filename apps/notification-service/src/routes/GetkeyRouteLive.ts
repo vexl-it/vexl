@@ -1,13 +1,15 @@
-import * as Http from '@effect/platform/HttpServer'
+import {HttpRouter, HttpServerResponse} from '@effect/platform'
 import {GetPublicKeyResponseE} from '@vexl-next/rest-api/src/services/notification/contract'
 import {Effect} from 'effect'
 import {EnvironmentConstants} from '../EnvironmentLayer'
 
-const GetKeyRouteLive = Http.router.get(
+const GetKeyRouteLive = HttpRouter.get(
   '/cypher-public-key',
   EnvironmentConstants.FCM_TOKEN_PUBLIC_KEY.pipe(
     Effect.flatMap((fcmToken) =>
-      Http.response.schemaJson(GetPublicKeyResponseE)({publicKey: fcmToken})
+      HttpServerResponse.schemaJson(GetPublicKeyResponseE)({
+        publicKey: fcmToken,
+      })
     )
     // Effect.provide(AuthenticatedSessionInRequestLive)
   )

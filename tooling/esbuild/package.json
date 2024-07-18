@@ -1,0 +1,32 @@
+{
+  "name": "@vexl-next/esbuild",
+  "version": "0.0.0",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "lint": "eslint .",
+    "format": "prettier --check \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json}\""
+  },
+  "dependencies": {
+    "esbuild": "^0.17.16",
+    "glob": "^11.0.0"
+  },
+  "files": [
+    "index.js"
+  ],
+  "devDependencies": {
+    "@vexl-next/eslint-config": "0.0.0",
+    "@vexl-next/prettier-config": "0.0.0",
+    "@vexl-next/tsconfig": "0.0.0",
+    "eslint": "^8.50.0",
+    "prettier": "^3.3.2",
+    "typescript": "^5.5.2"
+  },
+  "eslintConfig": {
+    "root": true,
+    "extends": [
+      "@vexl-next/eslint-config/index"
+    ]
+  },
+  "prettier": "@vexl-next/prettier-config"
+}

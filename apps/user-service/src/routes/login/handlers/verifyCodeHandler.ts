@@ -8,14 +8,14 @@ import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {Effect} from 'effect'
 import {Handler} from 'effect-http'
 import {TwilioVerificationClient} from '../../../utils/twilio'
+import {VerificationStateDbService} from '../db/verificationStateDb'
 import {type ChallengeVerificationState} from '../domain'
-import {LoginDbService} from '../utils/db'
 import {generateVerificationChallenge} from '../utils/generateVerificationChallenge'
 
 export const verifyCodeHandler = Handler.make(VerifyCodeEndpoint, (req) =>
   makeEndpointEffect(
     Effect.gen(function* (_) {
-      const loginDb = yield* _(LoginDbService)
+      const loginDb = yield* _(VerificationStateDbService)
       const loginData = yield* _(
         loginDb.retrievePhoneVerificationState(req.body.id)
       )

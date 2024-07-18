@@ -14,10 +14,12 @@ import {
   redisUrl,
 } from './configs'
 import DbLayer from './db/layer'
+import {LoggedInUsersDbService} from './db/loggedInUsersDb'
+import {VerificationStateDbService} from './routes/login/db/verificationStateDb'
 import {initVerificationHandler} from './routes/login/handlers/initVerificationHandler'
 import {verifyChallengeHandler} from './routes/login/handlers/verifyChallengeHandler'
 import {verifyCodeHandler} from './routes/login/handlers/verifyCodeHandler'
-import {LoginDbService} from './routes/login/utils/db'
+import {DashboardReportsService} from './routes/login/utils/DashboardReportsService'
 import {logoutUserHandler} from './routes/logoutUser'
 import {submitFeedbackHandler} from './routes/submitFeedback'
 import {FeedbackDbService} from './routes/submitFeedback/db'
@@ -34,16 +36,18 @@ export const app = RouterBuilder.make(UserApiSpecification).pipe(
 )
 
 const MainLive = Layer.mergeAll(
-  FeedbackDbService.Live.pipe(
-    Layer.provide(DbLayer),
-    Layer.provide(NodeContext.layer)
-  ),
+  FeedbackDbService.Live,
   TwilioVerificationClient.Live,
-  LoginDbService.Live,
+  VerificationStateDbService.Live,
+  LoggedInUsersDbService.Live,
+  DashboardReportsService.Live,
   ServerCrypto.layer(cryptoConfig),
-
   healthServerLayer({port: healthServerPortConfig})
-).pipe(Layer.provideMerge(RedisService.layer(redisUrl)))
+).pipe(
+  Layer.provideMerge(DbLayer),
+  Layer.provideMerge(RedisService.layer(redisUrl)),
+  Layer.provideMerge(NodeContext.layer)
+)
 
 export const httpServer = portConfig.pipe(
   Effect.flatMap((port) => NodeServer.listen({port})(app)),

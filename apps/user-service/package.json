@@ -44,6 +44,7 @@
     "effect-http-node": "^0.16.1",
     "fast-check": "^3.17.1",
     "ioredis": "^5.4.1",
+    "node-fetch": "^3.3.2",
     "twilio": "^5.2.1"
   },
   "devDependencies": {

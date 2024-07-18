@@ -9,5 +9,5 @@ export class NodeTestingApp extends Context.Tag('NodeTestingApp')<
   NodeTestingApp,
   Effect.Effect.Success<typeof nodeTestingAppEffect>
 >() {
-  static readonly layer = Layer.scoped(NodeTestingApp, nodeTestingAppEffect)
+  static readonly Live = Layer.scoped(NodeTestingApp, nodeTestingAppEffect)
 }

@@ -3,10 +3,14 @@ import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
 import {mockedRedisLayer} from '@vexl-next/server-utils/src/tests/mockedRedisLayer'
 import {Console, Effect, Layer, ManagedRuntime, type Scope} from 'effect'
 import {cryptoConfig} from '../../configs'
-import {LoginDbService} from '../../routes/login/utils/db'
+import {type LoggedInUsersDbService} from '../../db/loggedInUsersDb'
+import {VerificationStateDbService} from '../../routes/login/db/verificationStateDb'
+import {type DashboardReportsService} from '../../routes/login/utils/DashboardReportsService'
 import {type TwilioVerificationClient} from '../../utils/twilio'
+import {mockedDashboardReportService} from './mockedDashboardReportService'
 import {mockedFeedbackDbService} from './mockedFeedbackDbService'
 import {mockedTwilioLayer} from './mockedTwilioClient'
+import {mockedUsersDbService} from './mockedUsersDbService'
 import {NodeTestingApp} from './NodeTestingApp'
 
 export type MockedContexts =
@@ -14,15 +18,19 @@ export type MockedContexts =
   | RedisService
   | NodeTestingApp
   | ServerCrypto
+  | LoggedInUsersDbService
+  | DashboardReportsService
 
 const universalContext = Layer.mergeAll(
   mockedRedisLayer,
   ServerCrypto.layer(cryptoConfig)
 )
 
-const context = NodeTestingApp.layer.pipe(
+const context = NodeTestingApp.Live.pipe(
   Layer.provideMerge(mockedTwilioLayer),
-  Layer.provideMerge(LoginDbService.Live),
+  Layer.provideMerge(mockedUsersDbService),
+  Layer.provideMerge(VerificationStateDbService.Live),
+  Layer.provideMerge(mockedDashboardReportService),
   Layer.provideMerge(mockedFeedbackDbService),
   Layer.provideMerge(universalContext)
 )

@@ -12,7 +12,11 @@ import {
 import {feeAmountAtom} from '../../../../../TradeCalculator/atoms'
 import PremiumOrDiscount from '../../../../../TradeCalculator/components/PremiumOrDiscount'
 import Content from '../../../Content'
-import {applyFeeOnFeeChangeActionAtom, offerTypeAtom} from '../../atoms'
+import {
+  applyFeeOnFeeChangeActionAtom,
+  isMineOfferAtom,
+  offerTypeAtom,
+} from '../../atoms'
 
 const tempFeeAmountAtom = atom<number>(0)
 
@@ -20,10 +24,15 @@ function PremiumOrDiscountScreen(): JSX.Element {
   const {t} = useTranslation()
   const goBack = useSafeGoBack()
 
+  const isMineOffer = useAtomValue(isMineOfferAtom)
   const offerType = useAtomValue(offerTypeAtom)
   const feeAmount = useAtomValue(feeAmountAtom)
   const applyFeeOnFeeChange = useSetAtom(applyFeeOnFeeChangeActionAtom)
   const [tempFeeAmount, setTempFeeAmount] = useAtom(tempFeeAmountAtom)
+
+  const iAmTheBuyer =
+    (offerType === 'BUY' && isMineOffer) ||
+    (offerType === 'SELL' && !isMineOffer)
 
   useFocusEffect(
     useCallback(() => {
@@ -38,12 +47,12 @@ function PremiumOrDiscountScreen(): JSX.Element {
       />
       <Content scrollable>
         <Text fos={16} mt="$2" mb="$4" col="$greyOnBlack">
-          {offerType === 'BUY'
+          {iAmTheBuyer
             ? t('offerForm.buyCheaperByUsingDiscount')
             : t('offerForm.sellFasterWithDiscount')}
         </Text>
         <PremiumOrDiscount
-          offerTypeAtom={offerTypeAtom}
+          iAmTheBuyer={iAmTheBuyer}
           tempFeeAmountAtom={tempFeeAmountAtom}
         />
       </Content>

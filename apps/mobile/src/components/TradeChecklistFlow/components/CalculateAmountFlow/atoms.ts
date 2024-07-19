@@ -89,6 +89,11 @@ export const offerTypeAtom = atom((get) => {
   return offerForTradeChecklist?.offerInfo?.publicPart?.offerType
 })
 
+export const isMineOfferAtom = atom((get) => {
+  const offerForTradeChecklist = get(fromChatAtoms.originOfferAtom)
+  return !!offerForTradeChecklist?.ownershipInfo
+})
+
 export const saveButtonDisabledAtom = atom((get) => {
   const btcInputValue = get(btcInputValueAtom)
   const fiatInputValue = get(fiatInputValueAtom)

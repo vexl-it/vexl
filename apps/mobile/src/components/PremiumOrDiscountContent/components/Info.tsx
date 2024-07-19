@@ -1,4 +1,3 @@
-import {type OfferType} from '@vexl-next/domain/src/general/offers'
 import {useAtomValue, type Atom} from 'jotai'
 import {useMemo, useState} from 'react'
 import {TouchableOpacity} from 'react-native'
@@ -12,13 +11,13 @@ import stayAnonymousSvg from '../../images/stayAnonymousSvg'
 
 interface Props {
   feeAmountAtom: Atom<number>
-  offerTypeAtom: Atom<OfferType | undefined>
+  iAmTheBuyer: boolean
   sliderThreshold: number
 }
 
 function Info({
   feeAmountAtom,
-  offerTypeAtom,
+  iAmTheBuyer,
   sliderThreshold,
 }: Props): JSX.Element {
   const tokens = getTokens()
@@ -26,7 +25,6 @@ function Info({
   const [helpVisible, setHelpVisible] = useState<boolean>(false)
 
   const feeAmount = useAtomValue(feeAmountAtom)
-  const offerType = useAtomValue(offerTypeAtom)
 
   const elementsColor = useMemo(() => {
     const absFeeAmount = Math.abs(feeAmount)
@@ -43,7 +41,7 @@ function Info({
     const absFeeAmount = Math.abs(feeAmount)
     const halfThreshold = sliderThreshold / 2
 
-    if (offerType === 'BUY') {
+    if (iAmTheBuyer) {
       if (feeAmount === 0) {
         return t('offerForm.premiumOrDiscount.youBuyForTheActualMarketPrice')
       } else if (feeAmount > 0) {
@@ -70,7 +68,7 @@ function Info({
         return t('offerForm.premiumOrDiscount.youSellMuchFaster')
       }
     }
-  }, [offerType, sliderThreshold, feeAmount, t])
+  }, [feeAmount, sliderThreshold, iAmTheBuyer, t])
 
   return (
     <>
@@ -119,7 +117,7 @@ function Info({
       >
         <YStack space="$6">
           <Text fos={18} color="$greyOnWhite">
-            {offerType === 'BUY'
+            {iAmTheBuyer
               ? t('offerForm.premiumOrDiscount.influenceImpactOfYourBuyOffer')
               : t('offerForm.premiumOrDiscount.influenceImpactOfYourSellOffer')}
           </Text>

@@ -1,15 +1,14 @@
-import {type OfferType} from '@vexl-next/domain/src/general/offers'
-import {type Atom, type PrimitiveAtom} from 'jotai'
+import {type PrimitiveAtom} from 'jotai'
 import PremiumOrDiscountContent from '../../../PremiumOrDiscountContent'
 import PriceTypeIndicator from '../PriceTypeIndicator'
 
 interface Props {
+  iAmTheBuyer: boolean
   tempFeeAmountAtom: PrimitiveAtom<number>
-  offerTypeAtom: Atom<OfferType | undefined>
 }
 
 function PremiumOrDiscount({
-  offerTypeAtom,
+  iAmTheBuyer,
   tempFeeAmountAtom,
 }: Props): JSX.Element {
   return (
@@ -17,7 +16,7 @@ function PremiumOrDiscount({
       <PremiumOrDiscountContent
         proceedToDetailDisabled
         feeAmountAtom={tempFeeAmountAtom}
-        offerTypeAtom={offerTypeAtom}
+        iAmTheBuyer={iAmTheBuyer}
       >
         <PriceTypeIndicator displayInGrayColor mr="$2" />
       </PremiumOrDiscountContent>

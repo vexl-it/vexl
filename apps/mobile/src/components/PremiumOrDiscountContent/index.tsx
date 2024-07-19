@@ -1,11 +1,4 @@
-import {type OfferType} from '@vexl-next/domain/src/general/offers'
-import {
-  useAtom,
-  useAtomValue,
-  type Atom,
-  type SetStateAction,
-  type WritableAtom,
-} from 'jotai'
+import {useAtom, type SetStateAction, type WritableAtom} from 'jotai'
 import {type ReactNode} from 'react'
 import {TouchableOpacity} from 'react-native'
 import {Text, XStack, YStack} from 'tamagui'
@@ -18,7 +11,7 @@ import Info from './components/Info'
 interface CommonProps {
   children: ReactNode
   feeAmountAtom: WritableAtom<number, [SetStateAction<number>], void>
-  offerTypeAtom: Atom<OfferType | undefined>
+  iAmTheBuyer: boolean
 }
 
 type OptionalProps =
@@ -35,23 +28,23 @@ type Props = OptionalProps & CommonProps
 
 function PremiumOrDiscountContent({
   children,
+  iAmTheBuyer,
   feeAmountAtom,
-  offerTypeAtom,
   proceedToDetailDisabled,
   onProceedToDetailPress,
 }: Props): JSX.Element {
   const {t} = useTranslation()
-  const offerType = useAtomValue(offerTypeAtom)
   const [feeAmount, setFeeAmount] = useAtom(feeAmountAtom)
 
   const onSliderValueChange = (value: number[]): void => {
     setFeeAmount(value[0] ?? 0)
   }
+
   return (
     <YStack space="$2">
       <XStack f={1} ai="center" jc="space-between">
         <Text maxWidth="50%" mr="$4" fos={18} ff="$body600" col="$white">
-          {offerType === 'BUY'
+          {iAmTheBuyer
             ? t('offerForm.premiumOrDiscount.youBuyBtcFor')
             : t('offerForm.premiumOrDiscount.youSellBtcFor')}
         </Text>
@@ -81,14 +74,14 @@ function PremiumOrDiscountContent({
         </TouchableOpacity>
       </XStack>
       <PremiumOrDiscountSlider
-        offerTypeAtom={offerTypeAtom}
+        iAmTheBuyer={iAmTheBuyer}
         sliderThreshold={SLIDER_THRESHOLD}
         sliderValue={feeAmount}
         onValueChange={onSliderValueChange}
       />
       <Info
         feeAmountAtom={feeAmountAtom}
-        offerTypeAtom={offerTypeAtom}
+        iAmTheBuyer={iAmTheBuyer}
         sliderThreshold={SLIDER_THRESHOLD}
       />
     </YStack>

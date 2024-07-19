@@ -80,8 +80,8 @@ function PremiumOrDiscount({
       </Text>
       {feeState === 'WITH_FEE' && (
         <PremiumOrDiscountContent
+          iAmTheBuyer={offerType === 'BUY'}
           feeAmountAtom={feeAmountAtom}
-          offerTypeAtom={offerTypeAtom}
           onProceedToDetailPress={() => {
             setDetailVisible(true)
           }}

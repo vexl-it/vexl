@@ -1,5 +1,3 @@
-import {type OfferType} from '@vexl-next/domain/src/general/offers'
-import {useAtomValue, type Atom} from 'jotai'
 import {Stack, Text, XStack, getTokens} from 'tamagui'
 import {iosHapticFeedback} from '../utils/iosHapticFeedback'
 import {useTranslation} from '../utils/localization/I18nProvider'
@@ -8,21 +6,20 @@ import Slider from './Slider'
 export const SLIDER_THRESHOLD = 10
 
 interface Props {
+  iAmTheBuyer: boolean
   sliderThreshold: number
   sliderValue: number
   onValueChange: (_: number[]) => void
-  offerTypeAtom: Atom<OfferType | undefined>
 }
 
 function PremiumOrDiscountSlider({
+  iAmTheBuyer,
   sliderThreshold,
   onValueChange,
   sliderValue,
-  offerTypeAtom,
 }: Props): JSX.Element {
   const tokens = getTokens()
   const {t} = useTranslation()
-  const offerType = useAtomValue(offerTypeAtom)
 
   return (
     <Stack
@@ -50,7 +47,7 @@ function PremiumOrDiscountSlider({
           adjustsFontSizeToFit
           maxWidth="50%"
         >
-          {offerType === 'BUY'
+          {iAmTheBuyer
             ? t('offerForm.premiumOrDiscount.buyCheaply')
             : t('offerForm.premiumOrDiscount.sellFaster')}
         </Text>
@@ -66,7 +63,7 @@ function PremiumOrDiscountSlider({
           adjustsFontSizeToFit
           maxWidth="50%"
         >
-          {offerType === 'BUY'
+          {iAmTheBuyer
             ? t('offerForm.premiumOrDiscount.buyFaster')
             : t('offerForm.premiumOrDiscount.earnMore')}
         </Text>

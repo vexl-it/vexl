@@ -244,7 +244,10 @@ function TradeChecklistAmountView(): JSX.Element | null {
               amountDataToDisplay.by === 'me'
                 ? t('common.you')
                 : otherSideData.userName,
-            btcAmount: Number(btcAmount)?.toLocaleString(currentLocale),
+            btcAmount: Number(btcAmount)?.toLocaleString(currentLocale, {
+              minimumFractionDigits: btcAmount?.split('.')[1]?.length ?? 0,
+              maximumFractionDigits: btcAmount?.split('.')[1]?.length ?? 0,
+            }),
             fiatAmount:
               amountDataToDisplay.amountData.fiatAmount?.toLocaleString(
                 currentLocale

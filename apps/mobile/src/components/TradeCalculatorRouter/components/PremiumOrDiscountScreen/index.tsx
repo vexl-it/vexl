@@ -24,6 +24,7 @@ function PremiumOrDiscountScreen(): JSX.Element {
   const {t} = useTranslation()
   const goBack = useSafeGoBack()
 
+  const offerType = useAtomValue(offerTypeAtom)
   const feeAmount = useAtomValue(feeAmountAtom)
   const applyFeeOnFeeChange = useSetAtom(applyFeeOnFeeChangeActionAtom)
   const [tempFeeAmount, setTempFeeAmount] = useAtom(tempFeeAmountAtom)
@@ -47,8 +48,8 @@ function PremiumOrDiscountScreen(): JSX.Element {
               offerTypeAtom={offerTypeAtom}
             />
             <PremiumOrDiscount
+              iAmTheBuyer={offerType === 'BUY'}
               tempFeeAmountAtom={tempFeeAmountAtom}
-              offerTypeAtom={offerTypeAtom}
             />
           </Stack>
         </ScrollView>

@@ -93,20 +93,20 @@ function PriceTypeIndicator({
         col={
           displayInGrayColor
             ? '$greyOnBlack'
-            : tradePriceType === 'live'
-            ? '$main'
-            : tradePriceType === 'frozen'
-            ? '$pink'
-            : '$green'
+            : !tradePriceType || tradePriceType === 'live'
+              ? '$main'
+              : tradePriceType === 'frozen'
+                ? '$pink'
+                : '$green'
         }
       >
         {!tradePriceType || tradePriceType === 'live'
           ? t('tradeChecklist.calculateAmount.livePrice')
           : tradePriceType === 'frozen'
-          ? t('tradeChecklist.calculateAmount.frozenPrice')
-          : tradePriceType === 'custom'
-          ? t('tradeChecklist.calculateAmount.customPrice')
-          : t('tradeChecklist.calculateAmount.yourPrice')}
+            ? t('tradeChecklist.calculateAmount.frozenPrice')
+            : tradePriceType === 'custom'
+              ? t('tradeChecklist.calculateAmount.customPrice')
+              : t('tradeChecklist.calculateAmount.yourPrice')}
       </Text>
     </XStack>
   )

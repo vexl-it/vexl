@@ -80,18 +80,18 @@ export function amountPending(data: AmountInState): boolean {
   return getAmountData(data)?.status === 'pending'
 }
 
-export function applyFeeOnBtcAmount(
-  btcAmount: number,
+export function applyFeeOnNumberValue(
+  numberValue: number,
   feeAmount: number
 ): number {
-  return btcAmount + btcAmount * (feeAmount / 100)
+  return numberValue + numberValue * (feeAmount / 100)
 }
 
-export function cancelFeeOnBtcAmount(
-  btcAmount: number,
+export function cancelFeeOnNumberValue(
+  numberValue: number,
   feeAmount: number
 ): number {
-  return btcAmount / (1 + feeAmount / 100)
+  return numberValue / (1 + feeAmount / 100)
 }
 
 export function formatBtcPrice(btcPrice: number): string {

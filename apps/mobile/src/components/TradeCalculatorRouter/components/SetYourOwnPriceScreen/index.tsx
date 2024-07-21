@@ -9,11 +9,11 @@ import {
   PrimaryFooterButtonProxy,
   SecondaryFooterButtonProxy,
 } from '../../../PageWithNavigationHeader'
-import SetYourOwnPrice from '../../../TradeCalculator/components/SetYourOwnPrice'
 import {
   ownPriceSaveButtonDisabledAtom,
   saveYourPriceActionAtom,
-} from '../../atoms'
+} from '../../../TradeCalculator/atoms'
+import SetYourOwnPrice from '../../../TradeCalculator/components/SetYourOwnPrice'
 
 function SetYourOwnPriceScreen(): JSX.Element {
   const {t} = useTranslation()

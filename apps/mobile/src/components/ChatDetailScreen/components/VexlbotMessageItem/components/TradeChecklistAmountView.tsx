@@ -7,11 +7,6 @@ import {Stack, XStack, getTokens} from 'tamagui'
 import {SATOSHIS_IN_BTC} from '../../../../../state/currentBtcPriceAtoms'
 import * as amount from '../../../../../state/tradeChecklist/utils/amount'
 import {
-  applyFeeOnBtcAmount,
-  calculateBtcPricePercentageDifference,
-  formatBtcPrice,
-} from '../../../../../state/tradeChecklist/utils/amount'
-import {
   getCurrentLocale,
   useTranslation,
 } from '../../../../../utils/localization/I18nProvider'
@@ -38,8 +33,9 @@ function TradeChecklistAmountView(): JSX.Element | null {
     publicKeyPemBase64Atom,
     otherSideDataAtom,
     tradeChecklistAmountAtom,
-    btcPriceForTradeCurrencyAtom,
     tradeOrOriginOfferCurrencyAtom,
+    fiatValueToDisplayInVexlbotMessageAtom,
+    btcPricePercentageDifferenceToDisplayInVexlbotMessageAtom,
   } = useMolecule(chatMolecule)
   const tradeOrOriginOfferCurrency = useAtomValue(
     tradeOrOriginOfferCurrencyAtom
@@ -56,8 +52,11 @@ function TradeChecklistAmountView(): JSX.Element | null {
     submitTradeChecklistUpdatesActionAtom
   )
   const addAmount = useSetAtom(addAmountActionAtom)
-  const btcPriceForTradeCurrency = useAtomValue(btcPriceForTradeCurrencyAtom)
   const setToastNotification = useSetAtom(toastNotificationAtom)
+  const fiatAmount = useAtomValue(fiatValueToDisplayInVexlbotMessageAtom)
+  const btcPricePercentageDifference = useAtomValue(
+    btcPricePercentageDifferenceToDisplayInVexlbotMessageAtom
+  )
 
   const toastContent: ToastNotificationState = useMemo(
     () => ({
@@ -65,31 +64,6 @@ function TradeChecklistAmountView(): JSX.Element | null {
       icon: checkIconSvg,
     }),
     [t]
-  )
-
-  const btcPricePercentageDifference = useMemo(
-    () =>
-      calculateBtcPricePercentageDifference(
-        amountDataToDisplay,
-        btcPriceForTradeCurrency?.btcPrice
-      ),
-    [amountDataToDisplay, btcPriceForTradeCurrency?.btcPrice]
-  )
-
-  const btcAmount = useMemo(
-    () =>
-      amountDataToDisplay?.amountData.btcAmount
-        ? formatBtcPrice(
-            applyFeeOnBtcAmount(
-              amountDataToDisplay.amountData.btcAmount,
-              amountDataToDisplay.amountData.feeAmount ?? 0
-            )
-          )
-        : undefined,
-    [
-      amountDataToDisplay?.amountData.btcAmount,
-      amountDataToDisplay?.amountData.feeAmount,
-    ]
   )
 
   const onAcceptButtonPress = useCallback(() => {
@@ -131,12 +105,14 @@ function TradeChecklistAmountView(): JSX.Element | null {
     if (amountDataToDisplay.status !== 'pending') {
       return (
         <>
-          {!!btcAmount && (
+          {!!amountDataToDisplay.amountData.btcAmount && (
             <Button
               text="BTC"
               beforeIcon={copySvg}
               onPress={() => {
-                Clipboard.setString(`${btcAmount}`)
+                Clipboard.setString(
+                  `${amountDataToDisplay.amountData.btcAmount}`
+                )
                 setToastNotification(toastContent)
               }}
               size="small"
@@ -144,13 +120,13 @@ function TradeChecklistAmountView(): JSX.Element | null {
               iconFill={getTokens().color.main.val}
             />
           )}
-          {!!btcAmount && (
+          {!!amountDataToDisplay.amountData.btcAmount && (
             <Button
               text="SAT"
               beforeIcon={copySvg}
               onPress={() => {
                 Clipboard.setString(
-                  `${Math.round(Number(btcAmount) * SATOSHIS_IN_BTC)}`
+                  `${Math.round(Number(amountDataToDisplay.amountData.btcAmount) * SATOSHIS_IN_BTC)}`
                 )
                 setToastNotification(toastContent)
               }}
@@ -159,14 +135,12 @@ function TradeChecklistAmountView(): JSX.Element | null {
               iconFill={getTokens().color.main.val}
             />
           )}
-          {!!amountDataToDisplay.amountData.fiatAmount && (
+          {!!fiatAmount && (
             <Button
               text={currencies[tradeOrOriginOfferCurrency].code}
               beforeIcon={copySvg}
               onPress={() => {
-                Clipboard.setString(
-                  `${amountDataToDisplay.amountData.fiatAmount}`
-                )
+                Clipboard.setString(`${fiatAmount}`)
                 setToastNotification(toastContent)
               }}
               size="small"
@@ -244,14 +218,17 @@ function TradeChecklistAmountView(): JSX.Element | null {
               amountDataToDisplay.by === 'me'
                 ? t('common.you')
                 : otherSideData.userName,
-            btcAmount: Number(btcAmount)?.toLocaleString(currentLocale, {
-              minimumFractionDigits: btcAmount?.split('.')[1]?.length ?? 0,
-              maximumFractionDigits: btcAmount?.split('.')[1]?.length ?? 0,
+            btcAmount: Number(
+              amountDataToDisplay.amountData.btcAmount
+            )?.toLocaleString(currentLocale, {
+              minimumFractionDigits:
+                String(amountDataToDisplay.amountData.btcAmount).split('.')[1]
+                  ?.length ?? 0,
+              maximumFractionDigits:
+                String(amountDataToDisplay.amountData.btcAmount).split('.')[1]
+                  ?.length ?? 0,
             }),
-            fiatAmount:
-              amountDataToDisplay.amountData.fiatAmount?.toLocaleString(
-                currentLocale
-              ),
+            fiatAmount: fiatAmount?.toLocaleString(currentLocale),
             fiatCurrency: currencies[tradeOrOriginOfferCurrency].code,
             feeAmount: amountDataToDisplay.amountData.feeAmount,
             btcTradePrice:

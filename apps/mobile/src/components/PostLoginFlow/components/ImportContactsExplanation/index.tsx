@@ -2,7 +2,6 @@ import {useSetAtom} from 'jotai'
 import {useState} from 'react'
 import {Image} from 'react-native'
 import {Stack, Text} from 'tamagui'
-import {type PostLoginFlowScreenProps} from '../../../../navigationTypes'
 import {resolveAllContactsAsSeenActionAtom} from '../../../../state/contacts/atom/contactsStore'
 import {submitContactsActionAtom} from '../../../../state/contacts/atom/submitContactsActionAtom'
 import {useFinishPostLoginFlow} from '../../../../state/postLoginOnboarding'
@@ -14,11 +13,7 @@ import {
 } from '../../../PageWithButtonAndProgressHeader'
 import WhiteContainer from '../../../WhiteContainer'
 
-type Props = PostLoginFlowScreenProps<'ImportContactsExplanation'>
-
-export default function ImportContactsExplanationContent({
-  navigation,
-}: Props): JSX.Element {
+export default function ImportContactsExplanationContent(): JSX.Element {
   const {t} = useTranslation()
   const [contactsLoading, setContactsLoading] = useState(false)
   const submitContacts = useSetAtom(submitContactsActionAtom)

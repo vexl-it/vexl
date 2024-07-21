@@ -7,14 +7,10 @@ import {pipe} from 'fp-ts/lib/function'
 import {atom} from 'jotai'
 import getDefaultCurrency from '../../utils/getDefaultCurrency'
 import {
-  applyFeeOnTradePriceTypeChangeActionAtom,
   btcInputValueAtom,
   btcPriceForOfferWithStateAtom,
-  calculateBtcValueOnFiatAmountChangeActionAtom,
   calculateFiatValueOnBtcAmountChangeActionAtom,
   feeAmountAtom,
-  fiatInputValueAtom,
-  ownPriceAtom,
   premiumOrDiscountEnabledAtom,
   refreshCurrentBtcPriceActionAtom,
   selectedCurrencyCodeAtom,
@@ -24,22 +20,6 @@ import {
 
 export const listingTypeAtom = atom<ListingType | undefined>('BITCOIN')
 export const offerTypeAtom = atom<OfferType | undefined>('SELL')
-export const ownPriceSaveButtonDisabledAtom = atom((get) => !get(ownPriceAtom))
-
-export const saveYourPriceActionAtom = atom(null, (get, set) => {
-  const ownPrice = get(ownPriceAtom)
-
-  if (ownPrice) {
-    set(tradeBtcPriceAtom, Number(ownPrice))
-  }
-
-  set(calculateBtcValueOnFiatAmountChangeActionAtom, {
-    fiatAmount: get(fiatInputValueAtom),
-  })
-
-  set(tradePriceTypeAtom, 'your')
-  set(applyFeeOnTradePriceTypeChangeActionAtom)
-})
 
 export const resetTradeCalculatorStateActionAtom = atom(null, (get, set) => {
   return pipe(

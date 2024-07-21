@@ -93,7 +93,7 @@ function PriceTypeIndicator({
         col={
           displayInGrayColor
             ? '$greyOnBlack'
-            : tradePriceType === 'live'
+            : !tradePriceType || tradePriceType === 'live'
               ? '$main'
               : tradePriceType === 'frozen'
                 ? '$pink'

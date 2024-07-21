@@ -8,10 +8,6 @@ import {
   tradeChecklistAmountDataAtom,
   tradeOrOriginOfferCurrencyAtom,
 } from '../../../../../state/tradeChecklist/atoms/fromChatAtoms'
-import {
-  applyFeeOnBtcAmount,
-  formatBtcPrice,
-} from '../../../../../state/tradeChecklist/utils/amount'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import createChecklistItemStatusAtom from '../../../atoms/createChecklistItemStatusAtom'
 import {amountUpdateToBeSentAtom} from '../../../atoms/updatesToBeSentAtom'
@@ -67,28 +63,13 @@ function CalculateAmountCell(): JSX.Element {
     let btcAmount, feeAmount
 
     if (amountUpdateToBeSent?.btcAmount) {
-      btcAmount = formatBtcPrice(
-        applyFeeOnBtcAmount(
-          amountUpdateToBeSent.btcAmount,
-          amountUpdateToBeSent.feeAmount ?? 0
-        )
-      )
+      btcAmount = amountUpdateToBeSent.btcAmount
       feeAmount = amountUpdateToBeSent.feeAmount
     } else if (tradeChecklistAmountData.sent?.btcAmount) {
-      btcAmount = formatBtcPrice(
-        applyFeeOnBtcAmount(
-          tradeChecklistAmountData.sent.btcAmount,
-          tradeChecklistAmountData.sent.feeAmount ?? 0
-        )
-      )
+      btcAmount = tradeChecklistAmountData.sent.btcAmount
       feeAmount = tradeChecklistAmountData.sent.feeAmount
     } else if (tradeChecklistAmountData.received?.btcAmount) {
-      btcAmount = formatBtcPrice(
-        applyFeeOnBtcAmount(
-          tradeChecklistAmountData.received.btcAmount,
-          tradeChecklistAmountData.received.feeAmount ?? 0
-        )
-      )
+      btcAmount = tradeChecklistAmountData.received.btcAmount
       feeAmount = tradeChecklistAmountData.received.feeAmount
     } else {
       return undefined

@@ -4,7 +4,7 @@ import CurrentBtcPrice from '../../../CurrentBtcPrice'
 import {
   btcInputValueAtom,
   btcPriceCurrencyAtom,
-  calculateBtcValueAfterBtcPriceRefreshActionAtom,
+  calculateFiatValueAfterBtcPriceRefreshActionAtom,
   fiatInputValueAtom,
   tradeBtcPriceAtom,
   tradePriceTypeAtom,
@@ -28,8 +28,8 @@ function TradeCalculator({
   const setTradePriceTypeDialogVisible = useSetAtom(
     tradePriceTypeDialogVisibleAtom
   )
-  const calculateBtcValueAfterBtcPriceRefresh = useSetAtom(
-    calculateBtcValueAfterBtcPriceRefreshActionAtom
+  const calculateFiatValueAfterBtcPriceRefresh = useSetAtom(
+    calculateFiatValueAfterBtcPriceRefreshActionAtom
   )
 
   return (
@@ -46,7 +46,7 @@ function TradeCalculator({
           customBtcPriceAtom={
             tradePriceType !== 'live' ? tradeBtcPriceAtom : undefined
           }
-          postRefreshActions={calculateBtcValueAfterBtcPriceRefresh}
+          postRefreshActions={calculateFiatValueAfterBtcPriceRefresh}
         />
       </XStack>
       {tradePriceType === 'custom' && children}

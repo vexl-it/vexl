@@ -2,14 +2,17 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack'
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue, useSetAtom, useStore} from 'jotai'
 import {useCallback, useState} from 'react'
+import {StatusBar} from 'react-native'
+import {Stack} from 'tamagui'
 import {
   type CRUDOfferStackParamsList,
   type RootStackScreenProps,
 } from '../../navigationTypes'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../utils/useSafeGoBack'
-import PageWithButtonAndProgressHeader from '../PageWithButtonAndProgressHeader'
+import KeyboardAvoidingView from '../KeyboardAvoidingView'
 import ProgressJourney from '../ProgressJourney'
+import Screen from '../Screen'
 import ScreenTitle from '../ScreenTitle'
 import EditOfferHeader from './EditOfferHeader'
 import {offerFormMolecule} from './atoms/offerFormStateAtoms'
@@ -81,90 +84,98 @@ function CRUDOfferFlow({route: {params}, navigation}: Props): JSX.Element {
   )
 
   return (
-    <PageWithButtonAndProgressHeader>
-      {!params.offerId ? (
-        <ScreenTitle
-          text={t('offerForm.myNewOffer')}
-          withBottomBorder
-          withBackButton
-        />
-      ) : (
-        <EditOfferHeader offerId={params.offerId} />
-      )}
-      <ProgressJourney
-        withBackButton
-        currentPage={page}
-        numberOfPages={screensBasedOnListingType.length}
-        onPageChange={(nextPageIndex) => {
-          if (
-            screensBasedOnListingType.length === 0 ||
-            nextPageIndex < screensBasedOnListingType.length
-          ) {
-            onPageChange(nextPageIndex)
-          }
-        }}
-        onSkip={safeGoBack}
-        onFinish={() => {
-          if (params.offerId) {
-            void editOffer()().then((success) => {
-              if (success) {
-                navigation.navigate('InsideTabs', {
-                  screen: 'MyOffers',
+    <KeyboardAvoidingView>
+      <Screen>
+        <Stack style={{height: StatusBar.currentHeight ?? 0}} />
+        <Stack f={1} px="$2" pb="$2">
+          {!params.offerId ? (
+            <ScreenTitle
+              text={t('offerForm.myNewOffer')}
+              withBottomBorder
+              withBackButton
+            />
+          ) : (
+            <EditOfferHeader offerId={params.offerId} />
+          )}
+          <ProgressJourney
+            withBackButton
+            currentPage={page}
+            numberOfPages={screensBasedOnListingType.length}
+            onPageChange={(nextPageIndex) => {
+              if (
+                screensBasedOnListingType.length === 0 ||
+                nextPageIndex < screensBasedOnListingType.length
+              ) {
+                onPageChange(nextPageIndex)
+              }
+            }}
+            onSkip={safeGoBack}
+            onFinish={() => {
+              if (params.offerId) {
+                void editOffer()().then((success) => {
+                  if (success) {
+                    navigation.navigate('InsideTabs', {
+                      screen: 'MyOffers',
+                    })
+                  }
+                })
+              } else {
+                void createOffer()().then((success) => {
+                  if (success) {
+                    navigation.navigate('InsideTabs', {
+                      screen: 'MyOffers',
+                    })
+                  }
                 })
               }
-            })
-          } else {
-            void createOffer()().then((success) => {
-              if (success) {
-                navigation.navigate('InsideTabs', {
-                  screen: 'MyOffers',
-                })
-              }
-            })
-          }
-        }}
-        background="black"
-        touchableOverlayDisabled
-      >
-        <CRUDOfferStack.Navigator
-          screenOptions={{
-            headerShown: false,
-            presentation: 'card',
-          }}
-          initialRouteName="ListingAndOfferType"
-        >
-          <CRUDOfferStack.Screen
-            name="ListingAndOfferType"
-            component={ListingAndOfferTypeScreen}
-          />
-          <CRUDOfferStack.Screen
-            name="CurrencyAndAmount"
-            component={CurrencyAndAmountScreen}
-          />
-          <CRUDOfferStack.Screen
-            name="LocationPaymentMethodAndNetworkScreen"
-            component={LocationPaymentMethodAndNetworkScreen}
-          />
-          <CRUDOfferStack.Screen
-            name="OfferDescriptionAndSpokenLanguagesScreen"
-            component={OfferDescriptionAndSpokenLanguagesScreen}
-          />
-          <CRUDOfferStack.Screen
-            name="FriendLevelScreen"
-            component={FriendLevelScreen}
-          />
-          <CRUDOfferStack.Screen
-            name="DeliveryMethodAndNetworkScreen"
-            component={DeliveryMethodAndNetworkScreen}
-          />
-          <CRUDOfferStack.Screen
-            name="SummaryScreen"
-            component={SummaryScreen}
-          />
-          <CRUDOfferStack.Screen name="PriceScreen" component={PriceScreen} />
-        </CRUDOfferStack.Navigator>
-      </ProgressJourney>
-    </PageWithButtonAndProgressHeader>
+            }}
+            background="black"
+            touchableOverlayDisabled
+          >
+            <CRUDOfferStack.Navigator
+              screenOptions={{
+                headerShown: false,
+                presentation: 'card',
+              }}
+              initialRouteName="ListingAndOfferType"
+            >
+              <CRUDOfferStack.Screen
+                name="ListingAndOfferType"
+                component={ListingAndOfferTypeScreen}
+              />
+              <CRUDOfferStack.Screen
+                name="CurrencyAndAmount"
+                component={CurrencyAndAmountScreen}
+              />
+              <CRUDOfferStack.Screen
+                name="LocationPaymentMethodAndNetworkScreen"
+                component={LocationPaymentMethodAndNetworkScreen}
+              />
+              <CRUDOfferStack.Screen
+                name="OfferDescriptionAndSpokenLanguagesScreen"
+                component={OfferDescriptionAndSpokenLanguagesScreen}
+              />
+              <CRUDOfferStack.Screen
+                name="FriendLevelScreen"
+                component={FriendLevelScreen}
+              />
+              <CRUDOfferStack.Screen
+                name="DeliveryMethodAndNetworkScreen"
+                component={DeliveryMethodAndNetworkScreen}
+              />
+              <CRUDOfferStack.Screen
+                name="SummaryScreen"
+                component={SummaryScreen}
+              />
+              <CRUDOfferStack.Screen
+                name="PriceScreen"
+                component={PriceScreen}
+              />
+            </CRUDOfferStack.Navigator>
+          </ProgressJourney>
+        </Stack>
+      </Screen>
+    </KeyboardAvoidingView>
   )
 }
 

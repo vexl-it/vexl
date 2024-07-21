@@ -1,5 +1,5 @@
 import {useFocusEffect} from '@react-navigation/native'
-import {useAtom, useAtomValue, useSetAtom} from 'jotai'
+import {useAtom, useAtomValue} from 'jotai'
 import {useCallback, useRef, useState} from 'react'
 import {type TextInput} from 'react-native'
 import {Stack} from 'tamagui'
@@ -10,7 +10,10 @@ import {
   btcPriceForOfferWithStateAtom,
   ownPriceAtom,
 } from '../../../atoms'
-import {fiatCurrenciesDropdownData} from '../../../utils'
+import {
+  fiatCurrenciesDropdownData,
+  replaceNonDecimalCharsInInput,
+} from '../../../utils'
 import AmountInput from '../../TradeCalculator/components/AmountInput'
 
 function FiatOwnPriceInput(): JSX.Element {
@@ -20,7 +23,7 @@ function FiatOwnPriceInput(): JSX.Element {
 
   const btcPriceForOfferWithState = useAtomValue(btcPriceForOfferWithStateAtom)
   const [currency, updateCurrency] = useAtom(btcPriceCurrencyAtom)
-  const setOwnPrice = useSetAtom(ownPriceAtom)
+  const [ownPrice, setOwnPrice] = useAtom(ownPriceAtom)
 
   useFocusEffect(
     useCallback(() => {
@@ -47,7 +50,10 @@ function FiatOwnPriceInput(): JSX.Element {
           ? `${btcPriceForOfferWithState.btcPrice}`
           : '-'
       }
-      onChangeText={setOwnPrice}
+      value={ownPrice}
+      onChangeText={(input) => {
+        setOwnPrice(replaceNonDecimalCharsInInput(input))
+      }}
     >
       <Stack>
         <Dropdown

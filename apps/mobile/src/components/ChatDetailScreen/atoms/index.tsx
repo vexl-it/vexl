@@ -48,6 +48,7 @@ import {createBtcPriceForCurrencyAtom} from '../../../state/currentBtcPriceAtoms
 import {createFeedbackForChatAtom} from '../../../state/feedback/atoms'
 import {offerForChatOriginAtom} from '../../../state/marketplace/atoms/offersState'
 import {invalidUsernameUIFeedbackAtom} from '../../../state/session'
+import * as amount from '../../../state/tradeChecklist/utils/amount'
 import {getAmountData} from '../../../state/tradeChecklist/utils/amount'
 import * as dateAndTime from '../../../state/tradeChecklist/utils/dateAndTime'
 import * as MeetingLocation from '../../../state/tradeChecklist/utils/location'
@@ -1057,6 +1058,33 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     return offerForChat?.offerInfo?.publicPart?.listingType === 'OTHER'
   })
 
+  const fiatValueToDisplayInVexlbotMessageAtom = atom((get) => {
+    const amountData = get(tradeChecklistAmountAtom)
+    const amountDataToDisplay = amount.getAmountData(amountData)
+
+    return amountDataToDisplay?.amountData.fiatAmount
+      ? Math.round(
+          amount.applyFeeOnNumberValue(
+            amountDataToDisplay.amountData.fiatAmount,
+            amountDataToDisplay.amountData.feeAmount ?? 0
+          )
+        )
+      : undefined
+  })
+
+  const btcPricePercentageDifferenceToDisplayInVexlbotMessageAtom = atom(
+    (get) => {
+      const amountData = get(tradeChecklistAmountAtom)
+      const amountDataToDisplay = amount.getAmountData(amountData)
+      const btcPriceForTradeCurrency = get(btcPriceForTradeCurrencyAtom)
+
+      return amount.calculateBtcPricePercentageDifference(
+        amountDataToDisplay,
+        btcPriceForTradeCurrency?.btcPrice
+      )
+    }
+  )
+
   return {
     showModalAtom: atom<boolean>(false),
     chatAtom,
@@ -1132,5 +1160,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     identityRevealRequestMessageIdAtom,
     contactRevealRequestMessageIdAtom,
     contactRevealApproveMessageIdAtom,
+    fiatValueToDisplayInVexlbotMessageAtom,
+    btcPricePercentageDifferenceToDisplayInVexlbotMessageAtom,
   }
 })

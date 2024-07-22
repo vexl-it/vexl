@@ -913,7 +913,7 @@
   "vexlbot.btcAddressWillBeProvided": "BTC адресът ще ви бъде предоставен на срещата.",
   "vexlbot.btcAddress": "BTC адрес",
   "vexlbot.suggestedAmountOfTheDeal": "Сума на сделката: {{btcAmount}} BTC за {{fiatAmount}} {{fiatCurrency}}, включително {{feeAmount}}% такса.",
-  "vexlbot.settledAmountOfTheDeal": "{{username}} определи сумата на сделката: {{btcAmount}} за {{fiatAmount}} {{fiatCurrency}} при валутен курс 1 BTC = {{btcTradePrice}} {{fiatCurrency}}, включително {{feeAmount}}% такса.",
+  "vexlbot.settledAmountOfTheDeal": "{{username}} определи сумата на сделката: {{btcAmount}} BTC за {{fiatAmount}} {{fiatCurrency}} при валутен курс 1 BTC = {{btcTradePrice}} {{fiatCurrency}}, включително {{feeAmount}}% такса.",
   "vexlbot.higherThanLivePrice": "по-висока от текуща цена",
   "vexlbot.lowerThanLivePrice": "по-ниска от текуща цена",
   "vexlbot.allSetForTheMeeting": "Отлична работа! Всичко е готово за срещата 🎉",

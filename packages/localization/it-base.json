@@ -913,7 +913,7 @@
   "vexlbot.btcAddressWillBeProvided": "L'indirizzo BTC ti sarà fornito all'incontro.",
   "vexlbot.btcAddress": "Indirizzo BTC",
   "vexlbot.suggestedAmountOfTheDeal": "Importo dell'affare: {{btcAmount}} BTC per {{fiatAmount}} {{fiatCurrency}}, inclusa la commissione del {{feeAmount}}%.",
-  "vexlbot.settledAmountOfTheDeal": "{{username}} ha impostato l'importo dell'affare: {{btcAmount}} per {{fiatAmount}} {{fiatCurrency}} con il tasso di cambio 1 BTC = {{btcTradePrice}} {{fiatCurrency}}, inclusa la commissione del {{feeAmount}}%.",
+  "vexlbot.settledAmountOfTheDeal": "{{username}} ha impostato l'importo dell'affare: {{btcAmount}} BTC per {{fiatAmount}} {{fiatCurrency}} con il tasso di cambio 1 BTC = {{btcTradePrice}} {{fiatCurrency}}, inclusa la commissione del {{feeAmount}}%.",
   "vexlbot.higherThanLivePrice": "superiore al prezzo corrente",
   "vexlbot.lowerThanLivePrice": "inferiore al prezzo corrente",
   "vexlbot.allSetForTheMeeting": "Ottimo lavoro! Tutto impostato per la riunione 🎉",

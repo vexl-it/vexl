@@ -16,11 +16,11 @@
   },
   "dependencies": {
     "@effect/experimental": "^0.19.2",
-    "@effect/opentelemetry": "^0.34.38",
+    "@effect/opentelemetry": "^0.34.40",
     "@effect/platform": "^0.59.1",
     "@effect/platform-node": "^0.54.2",
     "@effect/schema": "^0.68.25",
-    "@opentelemetry/exporter-trace-otlp-http": "^0.50.0",
+    "@opentelemetry/exporter-trace-otlp-http": "^0.52.1",
     "@opentelemetry/sdk-trace-node": "^1.23.0",
     "@opentelemetry/sdk-trace-web": "^1.23.0",
     "@sentry/esbuild-plugin": "^2.10.2",

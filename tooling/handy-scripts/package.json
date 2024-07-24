@@ -9,7 +9,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@effect/opentelemetry": "^0.34.38",
+    "@effect/opentelemetry": "^0.34.40",
     "@effect/platform": "^0.59.1",
     "@effect/platform-node": "^0.54.2",
     "@effect/schema": "^0.68.25",

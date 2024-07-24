@@ -63,3 +63,10 @@ export const cryptoConfig = {
 }
 
 export const redisUrl = Config.string('REDIS_URL')
+
+export const tracingConfig = Config.option(
+  Config.unwrap({
+    serviceName: Config.string('SERVICE_NAME'),
+    otlpTraceExporterUrl: Config.string('OTLP_TRACE_EXPORTER_URL'),
+  })
+)

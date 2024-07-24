@@ -44,7 +44,7 @@ export class LoggedInUsersDbService extends Context.Tag(
           execute: (requests) => {
             return sql`
               INSERT INTO
-                logged_in_users ${sql.insert(requests)}
+                users ${sql.insert(requests)}
             `
           },
         })
@@ -55,7 +55,7 @@ export class LoggedInUsersDbService extends Context.Tag(
           Request: PublicKeyPemBase64E,
           execute: (requests) => {
             return sql`
-              DELETE FROM logged_in_users
+              DELETE FROM users
               WHERE
                 ${sql.in('public_key', requests)}
             `

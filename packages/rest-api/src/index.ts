@@ -16,6 +16,7 @@ export const EnvPreset = z.object({
   offerMs: ServiceUrl,
   locationMs: ServiceUrl,
   notificationMs: ServiceUrl,
+  btcExchangeRateMs: ServiceUrl,
 })
 export type EnvPreset = z.TypeOf<typeof EnvPreset>
 
@@ -35,6 +36,9 @@ export const ENV_PRESETS: {stageEnv: EnvPreset; prodEnv: EnvPreset} = {
     offerMs: ServiceUrl.parse('https://stage-offer2.vexl.it'),
     locationMs: ServiceUrl.parse('https://stage-location.vexl.it'),
     notificationMs: ServiceUrl.parse('https://stage-notification.vexl.it'),
+    btcExchangeRateMs: ServiceUrl.parse(
+      'https://stage-btc-exchange-rate.vexl.it'
+    ),
   },
   prodEnv: {
     userMs: ServiceUrl.parse('https://user.vexl.it'),
@@ -43,6 +47,7 @@ export const ENV_PRESETS: {stageEnv: EnvPreset; prodEnv: EnvPreset} = {
     offerMs: ServiceUrl.parse('https://offer2.vexl.it'),
     locationMs: ServiceUrl.parse('https://location.vexl.it'),
     notificationMs: ServiceUrl.parse('https://notification.vexl.it'),
+    btcExchangeRateMs: ServiceUrl.parse('https://btc-exchange-rate.vexl.it'),
   },
 }
 

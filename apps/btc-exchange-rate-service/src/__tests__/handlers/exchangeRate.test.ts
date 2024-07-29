@@ -1,5 +1,5 @@
 import {HttpClientRequest} from '@effect/platform'
-import {GetExchangeRateError} from '@vexl-next/rest-api/src/services/location/contracts'
+import {GetExchangeRateError} from '@vexl-next/rest-api/src/services/btcExchangeRate/contracts'
 import {createDummyAuthHeaders} from '@vexl-next/server-utils/src/tests/createDummyAuthHeaders'
 import {Effect, Either} from 'effect'
 import {getExhangeRatePriceMocked} from '../utils/mockedYadioLayer'

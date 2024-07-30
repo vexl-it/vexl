@@ -1,6 +1,7 @@
 import {
   ENV_PRESETS,
   PlatformName,
+  btcExchangeRate,
   chat,
   contact,
   location,
@@ -113,6 +114,12 @@ export const privateApiAtom = atom((get) => {
       platform,
       clientVersion: versionCode,
       url: apiEnv.notificationMs,
+      getUserSessionCredentials,
+    }),
+    btcExchangeRate: btcExchangeRate.privateApi({
+      platform,
+      clientVersion: versionCode,
+      url: apiEnv.btcExchangeRateMs,
       getUserSessionCredentials,
     }),
   }

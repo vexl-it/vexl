@@ -90,7 +90,7 @@ export const refreshBtcPriceActionAtom = atom(
     }))
 
     return pipe(
-      api.location.getExchangeRate({currency}),
+      api.btcExchangeRate.getExchangeRate({currency}),
       TE.matchW(
         (l) => {
           reportError('warn', new Error('Error while fetching btc price'), {

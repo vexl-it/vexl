@@ -1,5 +1,5 @@
 {
-  "name": "@vexl-next/btc-exchange-rate-service",
+  "name": "@vexl-next/exchange-rate-service",
   "main": "dist/index.js",
   "type": "module",
   "scripts": {

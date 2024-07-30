@@ -19,7 +19,7 @@
     "utils:add-translation": "yarn workspace @vexl-next/localizations utils:add",
     "notification-service:build-docker-image": "./scripts/build-app-docker-image.sh notification-service",
     "location-service:build-docker-image": "./scripts/build-app-docker-image.sh location-service",
-    "btc-exchange-rate-service:build-docker-image": "./scripts/build-app-docker-image.sh btc-exchange-rate-service",
+    "exchange-rate-service:build-docker-image": "./scripts/build-app-docker-image.sh exchange-rate-service",
     "user-service:build-docker-image": "./scripts/build-app-docker-image.sh user-service",
     "dashboard-app:build-docker-image": "./scripts/build-app-docker-image.sh dashboard-app",
     "postinstall": "manypkg check"

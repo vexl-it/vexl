@@ -11,7 +11,7 @@ export class GetLocationSuggestionsRequest extends Schema.Class<GetLocationSugge
   // count: Schema.NumberFromString.pipe(
   //   Schema.int(),
   //   Schema.positive(),
-  //   Schema.optional({default: () => 10})
+  //   Schema.optional({defaultWith: () => 10})
   // ),
   phrase: Schema.String,
   lang: Schema.String.pipe(Schema.minLength(2)),

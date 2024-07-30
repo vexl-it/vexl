@@ -4,7 +4,9 @@ import {Brand} from 'effect'
 import {z} from 'zod'
 import {type E164PhoneNumber} from '../general/E164PhoneNumber.brand'
 
-export const RegionCodeE = Schema.NonEmpty.pipe(Schema.brand('RegionCode'))
+export const RegionCodeE = Schema.NonEmptyString.pipe(
+  Schema.brand('RegionCode')
+)
 
 export const RegionCode = z
   .string()

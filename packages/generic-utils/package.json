@@ -19,14 +19,14 @@
     "rimraf": "^4.4.0",
     "ts-jest": "^29.2.0",
     "ts-node": "^10.9.1",
-    "typescript": "^5.5.2"
+    "typescript": "^5.5.4"
   },
   "dependencies": {
-    "@effect/schema": "^0.68.25",
+    "@effect/schema": "^0.70.0",
     "@vexl-next/cryptography": "0.0.0",
     "awesome-phonenumber": "^5.1.0",
-    "effect": "^3.5.5",
-    "fast-check": "^3.17.1",
+    "effect": "^3.6.0",
+    "fast-check": "^3.20.0",
     "fp-ts": "^2.13.1",
     "js-base64": "^3.7.5",
     "just-truncate": "^2.2.0",

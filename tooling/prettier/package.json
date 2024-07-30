@@ -15,7 +15,7 @@
   },
   "devDependencies": {
     "@vexl-next/tsconfig": "0.0.0",
-    "typescript": "^5.5.2"
+    "typescript": "^5.5.4"
   },
   "prettier": "./index.mjs"
 }

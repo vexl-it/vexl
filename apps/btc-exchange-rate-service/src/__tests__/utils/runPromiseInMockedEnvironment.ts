@@ -1,12 +1,13 @@
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
 import {Console, Effect, Layer, ManagedRuntime, type Scope} from 'effect'
 import {cryptoConfig} from '../../configs'
+import {type YadioService} from '../../utils/yadio'
 import {NodeTestingApp} from './NodeTestingApp'
 import {mockedYadioLayer} from './mockedYadioLayer'
 
-export type MockedContexts = NodeTestingApp | ServerCrypto
+export type MockedContexts = NodeTestingApp | ServerCrypto | YadioService
 
-const universalContext = Layer.mergeAll(ServerCrypto.layer(cryptoConfig))
+const universalContext = ServerCrypto.layer(cryptoConfig)
 
 const context = NodeTestingApp.layer.pipe(
   Layer.provideMerge(mockedYadioLayer),

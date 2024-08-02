@@ -136,7 +136,7 @@ export const DeletePrivatePartErrors = Schema.Union(
 )
 export const DeletePrivatePartEndpoint = Api.delete(
   'deletePrivatePart',
-  '/api/v2/offers/private-part',
+  '/api/v1/offers/private-part',
   {
     summary: 'Delete private part',
     description:

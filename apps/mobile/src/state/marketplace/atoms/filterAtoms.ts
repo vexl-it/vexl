@@ -29,7 +29,7 @@ export const offersFilterInitialState: OffersFilter = {
 export const offersFilterStorageAtom = atomWithParsedMmkvStorage(
   'offersFilter',
   {filter: offersFilterInitialState},
-  z.object({filter: OffersFilter})
+  z.object({filter: OffersFilter}).readonly()
 )
 
 export const offersFilterFromStorageAtom = focusAtom(

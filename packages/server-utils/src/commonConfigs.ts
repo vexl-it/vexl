@@ -34,6 +34,7 @@ export const databaseConfig = Config.unwrap<PgClient.PgClientConfig>({
   url: Config.redacted('DB_URL'),
   username: Config.string('DB_USER'),
   password: Config.redacted('DB_PASSWORD'),
+  debug: Config.boolean('DB_DEBUG').pipe(Config.withDefault(false)),
 })
 
 export const secretPublicKey = Config.string('SECRET_PUBLIC_KEY').pipe(
@@ -64,9 +65,16 @@ export const cryptoConfig = {
 
 export const redisUrl = Config.string('REDIS_URL')
 
-export const tracingConfig = Config.option(
+export const serviceNameConfig = Config.string('SERVICE_NAME')
+export const serviceVersionConfig = Config.string('SERVICE_VERSION')
+
+export const otlpTraceExporterUrlConfig = Config.option(
+  Config.string('OTLP_TRACE_EXPORTER_URL')
+)
+
+export const metricsConfig = Config.option(
   Config.unwrap({
-    serviceName: Config.string('SERVICE_NAME'),
-    otlpTraceExporterUrl: Config.string('OTLP_TRACE_EXPORTER_URL'),
+    prometheusPort: Config.number('PROMETHEUS_PORT'),
+    prometheusEndpoint: Config.string('PROMETHEUS_ENDPOINT'),
   })
 )

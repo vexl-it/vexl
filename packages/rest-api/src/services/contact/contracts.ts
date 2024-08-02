@@ -1,4 +1,5 @@
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
+import {HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {ConnectionLevel} from '@vexl-next/domain/src/general/offers'
 import {z} from 'zod'
 import {PageRequest, PageResponse} from '../../Pagination.brand'
@@ -70,7 +71,7 @@ export const FetchCommonConnectionsResponse = z.object({
   commonContacts: z.array(
     z.object({
       publicKey: PublicKeyPemBase64,
-      common: z.object({hashes: z.array(z.string())}),
+      common: z.object({hashes: z.array(HashedPhoneNumber)}),
     })
   ),
 })

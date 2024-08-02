@@ -11,8 +11,8 @@ import infoSvg from '../../../images/infoSvg'
 import useContent from './useContent'
 
 interface Props {
-  locationStateAtom: PrimitiveAtom<LocationState[] | undefined>
-  paymentMethodAtom: PrimitiveAtom<PaymentMethod[] | undefined>
+  locationStateAtom: PrimitiveAtom<readonly LocationState[] | undefined>
+  paymentMethodAtom: PrimitiveAtom<readonly PaymentMethod[] | undefined>
 }
 
 function PaymentMethodComponent({

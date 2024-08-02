@@ -19,7 +19,7 @@ interface Props {
   locationSessionId: LocationSessionId
   visible: boolean
   onSetVisible: (visible: boolean) => void
-  locationAtom: PrimitiveAtom<OfferLocation[] | undefined>
+  locationAtom: PrimitiveAtom<readonly OfferLocation[] | undefined>
   randomizeLocation?: boolean
 }
 

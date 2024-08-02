@@ -13,7 +13,7 @@ import {useSessionAssumeLoggedIn} from './session'
 export const postLoginFinishedStorageAtom = atomWithParsedMmkvStorage(
   'postLoginFinished1',
   {postLoginFinished: false},
-  z.object({postLoginFinished: z.boolean()})
+  z.object({postLoginFinished: z.boolean()}).readonly()
 )
 export const postLoginFinishedAtom = focusAtom(
   postLoginFinishedStorageAtom,

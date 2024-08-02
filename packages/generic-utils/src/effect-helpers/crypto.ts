@@ -6,6 +6,8 @@ import {
 import {
   aesGCMDecrypt,
   aesGCMEncrypt,
+  aesGCMIgnoreTagDecrypt,
+  aesGCMIgnoreTagEncrypt,
 } from '@vexl-next/cryptography/src/operations/aes'
 import {
   ecdsaSign,
@@ -20,7 +22,7 @@ import {randomBytes} from 'crypto'
 import {Effect} from 'effect'
 
 const ECIES_GTM_CYPHER_PREFIX = 'EciesGtm-' as const
-const AES_GTM_CYPHER_PREFIX = 'AesGtm-' as const
+const AES_GCM_CYPHER_PREFIX = 'AesGCm-' as const
 
 export class CryptoError extends Schema.TaggedError<CryptoError>('CryptoError')(
   'CryptoError',
@@ -179,16 +181,17 @@ export const hmacVerifyE =
 
 export const AesGtmCypher = Schema.String.pipe(
   Schema.nonEmpty(),
-  Schema.filter((v) => v.startsWith(AES_GTM_CYPHER_PREFIX)),
   Schema.brand('AesGtmCypher')
 )
 export type AesGtmCypher = Schema.Schema.Type<typeof AesGtmCypher>
 
 export const aesEncrpytE =
-  (password: string) =>
+  (password: string, legacy: boolean = false) =>
   (data: string): Effect.Effect<AesGtmCypher, CryptoError> =>
-    Effect.sync(() => aesGCMEncrypt({data, password})).pipe(
-      Effect.map((cypher) => `${AES_GTM_CYPHER_PREFIX}${cypher}`),
+    Effect.sync(() =>
+      (legacy ? aesGCMIgnoreTagEncrypt : aesGCMEncrypt)({data, password})
+    ).pipe(
+      Effect.map((cypher) => `${legacy ? '' : AES_GCM_CYPHER_PREFIX}${cypher}`),
       Effect.flatMap(Schema.decode(AesGtmCypher)),
       Effect.catchAllDefect(
         (e) =>
@@ -200,8 +203,7 @@ export const aesEncrpytE =
       Effect.catchTag('ParseError', (e) =>
         Effect.fail(
           new CryptoError({
-            message:
-              'Error while encrypting data with aes-gcm. Unable to normalize the cypher',
+            message: `Error while encrypting data with aes-gcm. Unable to normalize the cypher, legacy: ${legacy}`,
             error: e,
           })
         )
@@ -211,16 +213,18 @@ export const aesEncrpytE =
 export const aesDecrpytE =
   (password: string) =>
   (cypher: AesGtmCypher): Effect.Effect<string, CryptoError> =>
-    Effect.sync(() =>
-      aesGCMDecrypt({
-        data: cypher.replace(new RegExp(`^${AES_GTM_CYPHER_PREFIX}`), ''),
+    Effect.sync(() => {
+      const isLegacy = !cypher.startsWith(AES_GCM_CYPHER_PREFIX)
+
+      return (isLegacy ? aesGCMIgnoreTagDecrypt : aesGCMDecrypt)({
+        data: cypher.replace(new RegExp(`^${AES_GCM_CYPHER_PREFIX}`), ''),
         password,
       })
-    ).pipe(
+    }).pipe(
       Effect.catchAllDefect(
         (e) =>
           new CryptoError({
-            message: 'Unable to encrypt AES GCM cypher',
+            message: `Unable to encrypt AES GCM cypher, cypher: ${cypher}`,
             error: e,
           })
       )

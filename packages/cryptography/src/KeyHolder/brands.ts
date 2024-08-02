@@ -20,10 +20,12 @@ export const PublicKeyPemBase64 = z
 export const PublicKeyPemBase64E = S.String.pipe(S.brand('PublicKeyPemBase64'))
 export type PublicKeyPemBase64 = S.Schema.Type<typeof PublicKeyPemBase64E>
 
-export const PrivateKeyHolder = z.object({
-  publicKeyPemBase64: PublicKeyPemBase64,
-  privateKeyPemBase64: PrivateKeyPemBase64,
-})
+export const PrivateKeyHolder = z
+  .object({
+    publicKeyPemBase64: PublicKeyPemBase64,
+    privateKeyPemBase64: PrivateKeyPemBase64,
+  })
+  .readonly()
 
 export const PrivateKeyHolderE = S.Struct({
   publicKeyPemBase64: PublicKeyPemBase64E,

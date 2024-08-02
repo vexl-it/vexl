@@ -44,7 +44,7 @@ function toShadowStorageAtom<Value extends z.ZodObject<any>>(
     )
 }
 
-function getInitialValue<Value extends z.ZodObject<any>>({
+function getInitialValue<Value extends z.ZodReadonly<z.ZodObject<any>>>({
   key,
   zodType,
   defaultValue,
@@ -70,7 +70,9 @@ function getInitialValue<Value extends z.ZodObject<any>>({
   )
 }
 
-export function atomWithParsedMmkvStorage<Value extends z.ZodObject<any>>(
+export function atomWithParsedMmkvStorage<
+  Value extends z.ZodReadonly<z.ZodObject<any>>,
+>(
   key: string,
   defaultValue: z.TypeOf<Value>,
   zodType: Value,

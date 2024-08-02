@@ -4,24 +4,30 @@ import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.b
 import {FetchCommonConnectionsResponse} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {z} from 'zod'
 
-export const ConnectionsState = z.object({
-  lastUpdate: UnixMilliseconds,
-  firstLevel: z.array(PublicKeyPemBase64),
-  secondLevel: z.array(PublicKeyPemBase64),
-  commonFriends: FetchCommonConnectionsResponse,
-})
+export const ConnectionsState = z
+  .object({
+    lastUpdate: UnixMilliseconds,
+    firstLevel: z.array(PublicKeyPemBase64),
+    secondLevel: z.array(PublicKeyPemBase64),
+    commonFriends: FetchCommonConnectionsResponse,
+  })
+  .readonly()
 export type ConnectionsState = z.TypeOf<typeof ConnectionsState>
 
-export const OfferToConnectionsItem = z.object({
-  adminId: OfferAdminId,
-  symmetricKey: SymmetricKey,
-  connections: z.object({
-    firstLevel: z.array(PublicKeyPemBase64),
-    secondLevel: z.array(PublicKeyPemBase64).optional(),
-  }),
-})
+export const OfferToConnectionsItem = z
+  .object({
+    adminId: OfferAdminId,
+    symmetricKey: SymmetricKey,
+    connections: z.object({
+      firstLevel: z.array(PublicKeyPemBase64),
+      secondLevel: z.array(PublicKeyPemBase64).optional(),
+    }),
+  })
+  .readonly()
 export type OfferToConnectionsItem = z.TypeOf<typeof OfferToConnectionsItem>
 
-export const OfferToConnectionsItems = z.object({
-  offerToConnections: z.array(OfferToConnectionsItem),
-})
+export const OfferToConnectionsItems = z
+  .object({
+    offerToConnections: z.array(OfferToConnectionsItem),
+  })
+  .readonly()

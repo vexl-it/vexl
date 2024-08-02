@@ -1,5 +1,6 @@
 import MaskedView from '@react-native-masked-view/masked-view'
 import {useNavigation} from '@react-navigation/native'
+import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {LinearGradient} from 'expo-linear-gradient'
 import {useStore} from 'jotai'
 import React, {useMemo} from 'react'
@@ -17,7 +18,7 @@ const styles = StyleSheet.create({
 })
 
 interface Props {
-  commonConnectionsHashes: string[]
+  commonConnectionsHashes: readonly HashedPhoneNumber[]
   variant: 'light' | 'dark'
 }
 

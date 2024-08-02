@@ -19,7 +19,8 @@ on:
           # - all - not yet
           - dashboard-app
           - location-ms
-          - user-ms
+          - user-service
+          - offer-service
           - notification-service
           - web-app
 

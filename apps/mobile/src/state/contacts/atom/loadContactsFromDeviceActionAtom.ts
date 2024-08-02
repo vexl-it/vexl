@@ -8,7 +8,7 @@ import {getContactsAndTryToResolveThePermissionsAlongTheWay} from '../utils'
 import {storedContactsAtom} from './contactsStore'
 
 function filterNotStoredContacts(
-  storedContacts: StoredContact[]
+  storedContacts: readonly StoredContact[]
 ): (contactsFromDevice: ContactInfo[]) => ContactInfo[] {
   const storedContactsRawNumbersSet = new Set(
     storedContacts.map((c) => c.info.rawNumber)

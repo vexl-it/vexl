@@ -3,10 +3,12 @@ import {UnixMilliseconds0} from '@vexl-next/domain/src/utility/UnixMilliseconds.
 import {z} from 'zod'
 import unixMillisecondsToLocaleDateTime from '../unixMillisecondsToLocaleDateTime'
 
-export const MaintenanceConfig = z.object({
-  from: IsoDatetimeString,
-  to: IsoDatetimeString,
-})
+export const MaintenanceConfig = z
+  .object({
+    from: IsoDatetimeString,
+    to: IsoDatetimeString,
+  })
+  .readonly()
 
 export const NextForceUpdate = z
   .number()
@@ -21,11 +23,13 @@ export const OfferRerequestLimitDays = z
   .brand<'OfferRerequestLimitType'>()
 export type OfferRerequestLimitDays = z.TypeOf<typeof OfferRerequestLimitDays>
 
-export const RemoteConfig = z.object({
-  next__force_update: NextForceUpdate,
-  next__maintenance: MaintenanceConfig,
-  next__offer_rerequest_limit_days: OfferRerequestLimitDays,
-})
+export const RemoteConfig = z
+  .object({
+    next__force_update: NextForceUpdate,
+    next__maintenance: MaintenanceConfig,
+    next__offer_rerequest_limit_days: OfferRerequestLimitDays,
+  })
+  .readonly()
 export type RemoteConfig = z.TypeOf<typeof RemoteConfig>
 
 export const DEFAULT_REMOTE_CONFIG: RemoteConfig = {

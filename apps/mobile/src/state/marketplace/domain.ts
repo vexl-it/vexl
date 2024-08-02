@@ -1,3 +1,4 @@
+import {Schema} from '@effect/schema'
 import {
   BtcNetwork,
   CurrencyCode,
@@ -7,12 +8,14 @@ import {
   OfferLocation,
   OfferType,
   OneOfferInState,
+  OneOfferInStateE,
   PaymentMethod,
   Sort,
   SpokenLanguage,
 } from '@vexl-next/domain/src/general/offers'
 import {
   IsoDatetimeString,
+  IsoDatetimeStringE,
   MINIMAL_DATE,
 } from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
 import {type BasicError} from '@vexl-next/domain/src/utility/errors'
@@ -25,12 +28,21 @@ export type ApiErrorFetchingRemovedOffers =
 export type ApiErrorReportingOffer = BasicError<'ApiErrorReportingOffer'>
 export type ApiErrorDeletingOffer = BasicError<'ApiErrorDeletingOffer'>
 
-export const OffersState = z.object({
+export const OffersState = z
+  .object({
+    // changedName to force clients to refetch all offers after update of the offers location shape
+    lastUpdatedAt1: IsoDatetimeString.catch(() => MINIMAL_DATE),
+    offers: z.array(OneOfferInState),
+  })
+  .readonly()
+export const OffersStateE = Schema.Struct({
   // changedName to force clients to refetch all offers after update of the offers location shape
-  lastUpdatedAt1: IsoDatetimeString.catch(() => MINIMAL_DATE),
-  offers: z.array(OneOfferInState),
+  lastUpdatedAt1: IsoDatetimeStringE.pipe(
+    Schema.optional({default: () => MINIMAL_DATE})
+  ),
+  offers: Schema.Array(OneOfferInStateE),
 })
-export type OffersState = z.TypeOf<typeof OffersState>
+export type OffersState = Schema.Schema.Type<typeof OffersStateE>
 
 export interface InitialLoadingState {
   state: 'initial'
@@ -55,23 +67,25 @@ export type LoadingState =
   | ErrorLoadingState
   | InProgressLoadingState
 
-export const OffersFilter = z.object({
-  sort: Sort.optional(),
-  currency: CurrencyCode.optional(),
-  location: OfferLocation.optional().catch(() => undefined),
-  locationState: z.array(LocationState).optional(),
-  paymentMethod: z.array(PaymentMethod).optional(),
-  btcNetwork: z.array(BtcNetwork).optional(),
-  friendLevel: z.array(FriendLevel).optional(),
-  offerType: OfferType.optional(),
-  listingType: ListingType.optional(),
-  singlePrice: z.coerce.number().optional(),
-  singlePriceCurrency: CurrencyCode.optional(),
-  amountBottomLimit: z.coerce.number().optional(),
-  amountTopLimit: z.coerce.number().optional(),
-  spokenLanguages: z.array(SpokenLanguage).default([]),
-  text: z.string().optional(),
-})
+export const OffersFilter = z
+  .object({
+    sort: Sort.optional(),
+    currency: CurrencyCode.optional(),
+    location: OfferLocation.optional().catch(() => undefined),
+    locationState: z.array(LocationState).optional().readonly(),
+    paymentMethod: z.array(PaymentMethod).optional().readonly(),
+    btcNetwork: z.array(BtcNetwork).optional().readonly(),
+    friendLevel: z.array(FriendLevel).optional().readonly(),
+    offerType: OfferType.optional(),
+    listingType: ListingType.optional(),
+    singlePrice: z.coerce.number().optional(),
+    singlePriceCurrency: CurrencyCode.optional(),
+    amountBottomLimit: z.coerce.number().optional(),
+    amountTopLimit: z.coerce.number().optional(),
+    spokenLanguages: z.array(SpokenLanguage).default([]),
+    text: z.string().optional(),
+  })
+  .readonly()
 
 export type OffersFilter = z.TypeOf<typeof OffersFilter>
 

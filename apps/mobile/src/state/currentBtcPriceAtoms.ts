@@ -18,9 +18,11 @@ export const DECIMALS_FOR_BTC_VALUE = 8
 
 const FETCH_LIMIT = 10 * 60 * 1000 // 10 minutes
 
-const PriceDataStored = z.object({
-  data: z.record(CurrencyCode, BtcPriceDataWithState),
-})
+const PriceDataStored = z
+  .object({
+    data: z.record(CurrencyCode, BtcPriceDataWithState),
+  })
+  .readonly()
 type PriceDataStored = z.TypeOf<typeof PriceDataStored>
 
 const btcPriceMmkvAtom = atomWithParsedMmkvStorage(

@@ -41,11 +41,5 @@ export default Effect.flatMap(
     );
 
     CREATE UNIQUE index "form_id_IX" ON feedback_submit (form_id);
-
-    CREATE TABLE effect_sql_migrations (
-      migration_id integer NOT NULL PRIMARY KEY,
-      created_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
-      name text NOT NULL
-    );
   `
 )

@@ -1,4 +1,5 @@
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
+import {HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {
   hmacSign,
@@ -7,6 +8,7 @@ import {
 import * as Contacts from 'expo-contacts'
 import {SortTypes} from 'expo-contacts'
 import * as E from 'fp-ts/Either'
+import {pipe} from 'fp-ts/lib/function'
 import type * as TE from 'fp-ts/TaskEither'
 import {hmacPassword} from '../../utils/environment'
 import notEmpty from '../../utils/notEmpty'
@@ -25,8 +27,12 @@ export interface UnknownContactsError {
 
 export function hashPhoneNumber(
   normalizedPhoneNumber: E164PhoneNumber
-): E.Either<CryptoError, string> {
-  return hmacSign(hmacPassword)(normalizedPhoneNumber)
+): E.Either<CryptoError, HashedPhoneNumber> {
+  return pipe(
+    normalizedPhoneNumber,
+    hmacSign(hmacPassword),
+    E.map(HashedPhoneNumber.parse)
+  )
 }
 
 export async function areContactsPermissionsGranted(): Promise<boolean> {

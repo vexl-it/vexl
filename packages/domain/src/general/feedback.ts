@@ -51,12 +51,14 @@ export const FeedbackType = z.enum([
 ])
 export type FeedbackType = z.TypeOf<typeof FeedbackType>
 
-export const Feedback = z.object({
-  formId: FeedbackFormId,
-  type: FeedbackType,
-  stars: z.number(),
-  objections: z.array(ObjectionType),
-  textComment: z.string(),
-  finished: z.boolean().default(false),
-})
+export const Feedback = z
+  .object({
+    formId: FeedbackFormId,
+    type: FeedbackType,
+    stars: z.number(),
+    objections: z.array(ObjectionType),
+    textComment: z.string(),
+    finished: z.boolean().default(false),
+  })
+  .readonly()
 export type Feedback = z.TypeOf<typeof Feedback>

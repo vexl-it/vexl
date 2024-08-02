@@ -27,3 +27,7 @@ export function fromMilliseconds(
 ): IsoDatetimeString {
   return IsoDatetimeString.parse(DateTime.fromMillis(milliseconds).toISO())
 }
+
+export function fromJsDate(date: Date): IsoDatetimeString {
+  return IsoDatetimeString.parse(DateTime.fromJSDate(date).toISO())
+}

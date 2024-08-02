@@ -6,7 +6,7 @@ export const showVexlbotInitialMessageForAllChatsStorageAtom =
   atomWithParsedMmkvStorage(
     'showVexlbotInitialMessageForAllChats',
     {visible: true},
-    z.object({visible: z.boolean().default(true)})
+    z.object({visible: z.boolean().default(true)}).readonly()
   )
 
 export const showVexlbotInitialMessageForAllChatsAtom = focusAtom(

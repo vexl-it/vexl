@@ -38,8 +38,8 @@ interface Props {
     [locationSuggestionAtom: LocationSuggestion],
     void
   >
-  locationAtom: PrimitiveAtom<OfferLocation[] | undefined>
-  locationStateAtom: PrimitiveAtom<LocationState[] | undefined>
+  locationAtom: PrimitiveAtom<readonly OfferLocation[] | undefined>
+  locationStateAtom: PrimitiveAtom<readonly LocationState[] | undefined>
   toggleLocationActiveAtom: PrimitiveAtom<boolean | undefined>
   updateLocationStateAndPaymentMethodAtom: WritableAtom<
     null,

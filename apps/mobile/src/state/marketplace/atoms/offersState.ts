@@ -18,7 +18,7 @@ export const offersStateAtom = atomWithParsedMmkvStorage(
   'offers',
   {
     lastUpdatedAt1: MINIMAL_DATE,
-    offers: [] as OneOfferInState[],
+    offers: [],
   },
   OffersState
 )

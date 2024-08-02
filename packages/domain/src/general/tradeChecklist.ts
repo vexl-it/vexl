@@ -40,29 +40,36 @@ export const TradeChecklistItemStatus = z.enum([
 ])
 export type TradeChecklistItemStatus = z.TypeOf<typeof TradeChecklistItemStatus>
 
-export const TradeChecklistStateItemStatus = z.object({
-  status: TradeChecklistItemStatus,
-})
+export const TradeChecklistStateItemStatus = z
+  .object({
+    status: TradeChecklistItemStatus,
+  })
+  .readonly()
 export type TradeChecklistStateItemStatus = z.TypeOf<
   typeof TradeChecklistStateItemStatus
 >
 
-export const AvailableDateTimeOption = z.object({
-  date: UnixMilliseconds,
-  from: UnixMilliseconds,
-  to: UnixMilliseconds,
-})
+export const AvailableDateTimeOption = z
+  .object({
+    date: UnixMilliseconds,
+    from: UnixMilliseconds,
+    to: UnixMilliseconds,
+  })
+  .readonly()
 export type AvailableDateTimeOption = z.TypeOf<typeof AvailableDateTimeOption>
 
-export const PickedDateTimeOption = z.object({
-  dateTime: UnixMilliseconds,
-})
+export const PickedDateTimeOption = z
+  .object({
+    dateTime: UnixMilliseconds,
+  })
+  .readonly()
 export type PickedDateTimeOption = z.TypeOf<typeof PickedDateTimeOption>
 
 export const NetworkData = z.object({
   btcNetwork: BtcNetwork.optional(),
   btcAddress: BtcAddress.optional(),
 })
+
 export type NetworkData = z.TypeOf<typeof NetworkData>
 
 export const RevealStatus = z.enum([
@@ -70,6 +77,7 @@ export const RevealStatus = z.enum([
   'APPROVE_REVEAL',
   'DISAPPROVE_REVEAL',
 ])
+
 export type RevealStatus = z.TypeOf<typeof RevealStatus>
 
 export const IdentityReveal = z.object({
@@ -79,6 +87,7 @@ export const IdentityReveal = z.object({
   partialPhoneNumber: z.string().optional(),
   deanonymizedUser: DeanonymizedUser.optional(),
 })
+
 export type IdentityReveal = z.TypeOf<typeof IdentityReveal>
 
 export const ContactReveal = z.object({
@@ -116,39 +125,45 @@ export const DateTimeChatMessage = TradeChecklistMessageBase.extend({
 })
 export type DateTimeChatMessage = z.TypeOf<typeof DateTimeChatMessage>
 
-export const AmountChatMessage = TradeChecklistMessageBase.merge(AmountData)
+export const AmountChatMessage =
+  TradeChecklistMessageBase.merge(AmountData).readonly()
 export type AmountChatMessage = z.TypeOf<typeof AmountChatMessage>
 
-export const NetworkChatMessage = TradeChecklistMessageBase.merge(NetworkData)
+export const NetworkChatMessage =
+  TradeChecklistMessageBase.merge(NetworkData).readonly()
 export type NetworkChatMessage = z.TypeOf<typeof NetworkChatMessage>
 
 export const IdentityRevealChatMessage =
-  TradeChecklistMessageBase.merge(IdentityReveal)
+  TradeChecklistMessageBase.merge(IdentityReveal).readonly()
 export type IdentityRevealChatMessage = z.TypeOf<
   typeof IdentityRevealChatMessage
 >
 
 export const ContactRevealChatMessage =
-  TradeChecklistMessageBase.merge(ContactReveal)
+  TradeChecklistMessageBase.merge(ContactReveal).readonly()
 export type ContactRevealChatMessage = z.TypeOf<typeof ContactRevealChatMessage>
 
-export const MeetingLocationData = z.object({
-  placeId: LocationPlaceId.catch((e) => LocationPlaceId.parse(generateUuid())),
-  address: z.string(),
-  latitude: Latitude,
-  longitude: Longitude,
-  viewport: z.object({
-    northeast: z.object({
-      latitude: Latitude,
-      longitude: Longitude,
+export const MeetingLocationData = z
+  .object({
+    placeId: LocationPlaceId.catch((e) =>
+      LocationPlaceId.parse(generateUuid())
+    ),
+    address: z.string(),
+    latitude: Latitude,
+    longitude: Longitude,
+    viewport: z.object({
+      northeast: z.object({
+        latitude: Latitude,
+        longitude: Longitude,
+      }),
+      southwest: z.object({
+        latitude: Latitude,
+        longitude: Longitude,
+      }),
     }),
-    southwest: z.object({
-      latitude: Latitude,
-      longitude: Longitude,
-    }),
-  }),
-  note: z.string().optional(),
-})
+    note: z.string().optional(),
+  })
+  .readonly()
 export type MeetingLocationData = z.TypeOf<typeof MeetingLocationData>
 
 export const MeetingLocationChatMessage = TradeChecklistMessageBase.extend({
@@ -158,12 +173,14 @@ export type MeetingLocationChatMessage = z.TypeOf<
   typeof MeetingLocationChatMessage
 >
 
-export const TradeChecklistUpdate = z.object({
-  dateAndTime: DateTimeChatMessage.optional(),
-  location: MeetingLocationChatMessage.optional(),
-  amount: AmountChatMessage.optional(),
-  network: NetworkChatMessage.optional(),
-  identity: IdentityRevealChatMessage.optional(),
-  contact: ContactRevealChatMessage.optional(),
-})
+export const TradeChecklistUpdate = z
+  .object({
+    dateAndTime: DateTimeChatMessage.optional(),
+    location: MeetingLocationChatMessage.optional(),
+    amount: AmountChatMessage.optional(),
+    network: NetworkChatMessage.optional(),
+    identity: IdentityRevealChatMessage.optional(),
+    contact: ContactRevealChatMessage.optional(),
+  })
+  .readonly()
 export type TradeChecklistUpdate = z.TypeOf<typeof TradeChecklistUpdate>

@@ -1,8 +1,9 @@
 import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
+import {HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {IsoDatetimeString} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
 import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
+import {Array} from 'effect'
 import * as T from 'fp-ts/Task'
-import {difference} from 'fp-ts/lib/Array'
 import {pipe} from 'fp-ts/lib/function'
 import {getDefaultStore} from 'jotai'
 import {z} from 'zod'
@@ -21,15 +22,17 @@ import reportError from '../../../utils/reportError'
 import {contactsMigratedAtom} from '../atoms'
 import {type MigrationProgress} from '../types'
 
-const ContactNormalized = z.object({
-  name: z.string(),
-  label: z.string().optional(),
-  numberToDisplay: z.string(),
-  normalizedNumber: E164PhoneNumber,
-  imageUri: UriString.optional(),
-  fromContactList: z.boolean(),
-  hash: z.string(),
-})
+const ContactNormalized = z
+  .object({
+    name: z.string(),
+    label: z.string().optional(),
+    numberToDisplay: z.string(),
+    normalizedNumber: E164PhoneNumber,
+    imageUri: UriString.optional(),
+    fromContactList: z.boolean(),
+    hash: HashedPhoneNumber,
+  })
+  .readonly()
 type ContactNormalized = z.TypeOf<typeof ContactNormalized>
 
 const oldImportedContactsStorageAtom = atomWithParsedMmkvStorage(
@@ -38,10 +41,12 @@ const oldImportedContactsStorageAtom = atomWithParsedMmkvStorage(
     importedContacts: [],
     lastImport: undefined,
   },
-  z.object({
-    importedContacts: z.array(ContactNormalized),
-    lastImport: IsoDatetimeString.optional(),
-  })
+  z
+    .object({
+      importedContacts: z.array(ContactNormalized).readonly(),
+      lastImport: IsoDatetimeString.optional(),
+    })
+    .readonly()
 )
 
 function oldToNewContactManuallyImported(
@@ -79,7 +84,7 @@ function findNumbersThatWereNotMigrated(): Set<E164PhoneNumber> {
     .map((c) => c.computedValues.normalizedNumber)
 
   return new Set(
-    difference({equals: (a: E164PhoneNumber, b: E164PhoneNumber) => a === b})(
+    Array.differenceWith((a: E164PhoneNumber, b: E164PhoneNumber) => a === b)(
       importedContactsNumberBeforeMigration,
       importedContactsNumberAfterMigration
     )

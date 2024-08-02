@@ -10,7 +10,7 @@ import SvgImage from '../../Image'
 import closeSvg from '../../images/closeSvg'
 
 interface Props {
-  locations: OfferLocation[] | undefined
+  locations: readonly OfferLocation[] | undefined
   onLocationRemove: (location: OfferLocation) => void
 }
 

@@ -8,9 +8,11 @@ const migrationAtomStorage = atomWithParsedMmkvStorage(
   {
     contactsMigrated: false,
   },
-  z.object({
-    contactsMigrated: z.boolean().default(false),
-  })
+  z
+    .object({
+      contactsMigrated: z.boolean().default(false).readonly(),
+    })
+    .readonly()
 )
 
 export const contactsMigratedAtom = focusAtom(migrationAtomStorage, (o) =>

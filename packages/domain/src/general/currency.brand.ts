@@ -280,15 +280,17 @@ export const CurrencyCodeE = Schema.Literal(
 )
 export type CurrencyCode = z.TypeOf<typeof CurrencyCode>
 
-export const CurrencyInfo = z.object({
-  code: CurrencyCode,
-  flag: z.string().brand<'CurrencyFlag'>(),
-  name: z.string().brand<'CurrencyName'>(),
-  symbol: z.string().brand<'CurrencySymbol'>(),
-  maxAmount: z.number(),
-  position: z.enum(['before', 'after']),
-  countryCode: z.array(z.number()),
-})
+export const CurrencyInfo = z
+  .object({
+    code: CurrencyCode,
+    flag: z.string().brand<'CurrencyFlag'>(),
+    name: z.string().brand<'CurrencyName'>(),
+    symbol: z.string().brand<'CurrencySymbol'>(),
+    maxAmount: z.number(),
+    position: z.enum(['before', 'after']),
+    countryCode: z.array(z.number()),
+  })
+  .readonly()
 
 export type CurrencyInfo = z.TypeOf<typeof CurrencyInfo>
 

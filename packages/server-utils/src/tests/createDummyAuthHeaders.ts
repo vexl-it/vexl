@@ -1,9 +1,21 @@
 import {Schema} from '@effect/schema'
 import {importPrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
-import {PrivateKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
-import {E164PhoneNumberE} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
+import {
+  PrivateKeyPemBase64E,
+  type PublicKeyPemBase64,
+} from '@vexl-next/cryptography/src/KeyHolder/brands'
+import {
+  type E164PhoneNumber,
+  E164PhoneNumberE,
+} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
+import {
+  type CryptoError,
+  type EcdsaSignature,
+  type HmacHash,
+} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {Effect} from 'effect'
 import {generateUserAuthData} from '../generateUserAuthData'
+import {type ServerCrypto} from '../ServerCrypto'
 
 export const DUMMY_PHONE_NUMBER =
   Schema.decodeSync(E164PhoneNumberE)('+420777777777')
@@ -14,9 +26,31 @@ export const DUMMY_KEY = importPrivateKey({
   ),
 })
 
-export const createDummyAuthHeaders = generateUserAuthData({
+export const createDummyAuthHeadersForUser = ({
+  phoneNumber,
+  publicKey,
+}: {
+  phoneNumber: E164PhoneNumber
+  publicKey: PublicKeyPemBase64
+}): Effect.Effect<
+  {
+    'public-key': PublicKeyPemBase64
+    signature: EcdsaSignature
+    hash: HmacHash
+  },
+  CryptoError,
+  ServerCrypto
+> =>
+  generateUserAuthData({
+    phoneNumber,
+    publicKey,
+  }).pipe(
+    Effect.map((auth) => ({
+      ...auth,
+      'public-key': publicKey,
+    }))
+  )
+export const createDummyAuthHeaders = createDummyAuthHeadersForUser({
   phoneNumber: DUMMY_PHONE_NUMBER,
   publicKey: DUMMY_KEY.publicKeyPemBase64,
-}).pipe(
-  Effect.map((auth) => ({...auth, 'public-key': DUMMY_KEY.publicKeyPemBase64}))
-)
+})

@@ -12,10 +12,12 @@ import {type ConnectionsInfoForOffer} from './fetchContactsForOffer'
 export type ErrorConstructingPrivatePayloads =
   BasicError<'ErrorConstructingPrivatePayloads'>
 
-export const OfferPrivatePayloadToEncrypt = z.object({
-  toPublicKey: PublicKeyPemBase64,
-  payloadPrivate: OfferPrivatePart,
-})
+export const OfferPrivatePayloadToEncrypt = z
+  .object({
+    toPublicKey: PublicKeyPemBase64,
+    payloadPrivate: OfferPrivatePart,
+  })
+  .readonly()
 export type OfferPrivatePayloadToEncrypt = z.TypeOf<
   typeof OfferPrivatePayloadToEncrypt
 >

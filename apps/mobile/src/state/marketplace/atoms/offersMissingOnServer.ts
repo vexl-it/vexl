@@ -27,9 +27,11 @@ import {singleOfferAtom} from './offersState'
 export const offersMissingOnServerStorageAtom = atomWithParsedMmkvStorage(
   'offers-missing-on-server',
   {offerIds: []},
-  z.object({
-    offerIds: z.array(OfferId),
-  })
+  z
+    .object({
+      offerIds: z.array(OfferId),
+    })
+    .readonly()
 )
 
 export const unmarkOfferAsMissingActionAtom = atom(

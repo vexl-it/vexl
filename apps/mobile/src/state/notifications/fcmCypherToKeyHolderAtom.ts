@@ -7,7 +7,7 @@ import {atomWithParsedMmkvStorage} from '../../utils/atomUtils/atomWithParsedMmk
 export const fcmCypherToKeyHolderAtom = atomWithParsedMmkvStorage(
   'fcmCypherToKeyHolder',
   {data: {}},
-  z.object({data: z.record(FcmCypher, PrivateKeyHolder)})
+  z.object({data: z.record(FcmCypher, PrivateKeyHolder)}).readonly()
 )
 
 export const registerFcmCypherActionAtom = atom(

@@ -4,6 +4,7 @@ import {
   type TradePriceType,
 } from '@vexl-next/domain/src/general/tradeChecklist'
 import * as T from 'fp-ts/Task'
+import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {atom} from 'jotai'
 import {
@@ -17,6 +18,8 @@ import {
   cancelFeeOnNumberValue,
   formatBtcPrice,
 } from '../../state/tradeChecklist/utils/amount'
+import {translationAtom} from '../../utils/localization/I18nProvider'
+import {askAreYouSureActionAtom} from '../AreYouSureDialog'
 
 export const tradeBtcPriceAtom = atom<number>(0)
 export const tradePriceTypeDialogVisibleAtom = atom<boolean>(false)
@@ -275,3 +278,25 @@ export const updateFiatCurrencyActionAtom = atom(
     void set(refreshCurrentBtcPriceActionAtom)()
   }
 )
+
+export const liveTradePriceExplanationAtom = atom(null, (get, set) => {
+  const {t} = get(translationAtom)
+
+  return pipe(
+    set(askAreYouSureActionAtom, {
+      variant: 'info',
+      steps: [
+        {
+          type: 'StepWithText',
+          title: t('tradeCalculator.whatDoesLivePriceMean'),
+          description: t('tradeCalculator.yadioLivePriceExplanation'),
+          positiveButtonText: t('common.gotIt'),
+        },
+      ],
+    }),
+    TE.match(
+      () => {},
+      () => {}
+    )
+  )()
+})

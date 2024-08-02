@@ -1,7 +1,7 @@
 import {useNavigation, type NavigationProp} from '@react-navigation/native'
 import {useAtom, useAtomValue, useSetAtom} from 'jotai'
 import React from 'react'
-import {ScrollView, StyleSheet, View} from 'react-native'
+import {ScrollView, StyleSheet, TouchableOpacity, View} from 'react-native'
 import {Stack, Text, XStack} from 'tamagui'
 import {type TradeChecklistStackParamsList} from '../../../navigationTypes'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
@@ -10,6 +10,7 @@ import Button from '../../Button'
 import CurrentBtcPrice from '../../CurrentBtcPrice'
 import {
   btcPriceCurrencyAtom,
+  liveTradePriceExplanationAtom,
   setFormDataBasedOnBtcPriceTypeActionAtom,
   tradePriceTypeAtom,
   tradePriceTypeDialogVisibleAtom,
@@ -25,6 +26,9 @@ function TradePriceTypeDialog(): JSX.Element | null {
   const navigation: NavigationProp<TradeChecklistStackParamsList> =
     useNavigation()
   const tradePriceType = useAtomValue(tradePriceTypeAtom)
+  const setLiveTradePriceExplanationVisible = useSetAtom(
+    liveTradePriceExplanationAtom
+  )
   const [tradePriceTypeDialogVisible, setTradePriceTypeDialogVisible] = useAtom(
     tradePriceTypeDialogVisibleAtom
   )
@@ -57,9 +61,20 @@ function TradePriceTypeDialog(): JSX.Element | null {
                   <PriceTypeIndicator />
                 </Stack>
                 {tradePriceType === 'live' ? (
-                  <Text fos={16} ff="$body500" col="$greyOnBlack">
-                    {t('tradeChecklist.calculateAmount.sourceYadio')}
-                  </Text>
+                  <Stack ai="flex-end">
+                    <Text fos={16} ff="$body500" col="$greyOnBlack">
+                      {t('tradeChecklist.calculateAmount.sourceYadio')}
+                    </Text>
+                    <TouchableOpacity
+                      onPress={() => {
+                        void setLiveTradePriceExplanationVisible()
+                      }}
+                    >
+                      <Text color="$greyOnBlack" textDecorationLine="underline">
+                        {t('common.learnMore')}
+                      </Text>
+                    </TouchableOpacity>
+                  </Stack>
                 ) : (
                   <Stack />
                 )}

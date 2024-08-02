@@ -1038,5 +1038,7 @@
   "raffle.errorOpeningApp.text": "Do you have lightinig wallet installed?",
   "raffle.errorOpeningApp.button": "Copy lnurl",
   "raffle.errorOpeningDeepLink": "Error opening deep link",
-  "tradeCalculator.title": "Trade calculator"
+  "tradeCalculator.title": "Trade calculator",
+  "tradeCalculator.whatDoesLivePriceMean": "What does Live price mean?",
+  "tradeCalculator.yadioLivePriceExplanation": "Vexl sources BTC prices from Yadio.io, after 10 minutes, please refresh manually for the most up to date price."
 }

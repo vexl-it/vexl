@@ -74,7 +74,7 @@ export const handleImportDeepContactActionAtom = atom(
 export const lastInitialLinkStorageAtom = atomWithParsedMmkvStorage(
   'lastInitialLink',
   {lastLinkImported: null},
-  z.object({lastLinkImported: z.string().nullable()})
+  z.object({lastLinkImported: z.string().nullable()}).readonly()
 )
 
 export function useHandleDeepLink(): void {

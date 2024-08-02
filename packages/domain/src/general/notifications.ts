@@ -1,20 +1,9 @@
-import {type AST} from '@effect/schema'
 import * as S from '@effect/schema/Schema'
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
+import {orElseSchema} from '@vexl-next/generic-utils/src/effect-helpers/orElseSchema'
 import {Brand} from 'effect'
 import {z} from 'zod'
-
-export const orElseSchema =
-  <L extends AST.LiteralValue>(literal: L) =>
-  <A, I, R>(self: S.Schema<A, I, R>) =>
-    S.Union(
-      self,
-      S.transform(S.Unknown, S.Literal(literal), {
-        decode: () => literal,
-        encode: (literal) => literal,
-      })
-    )
 
 export const FcmCypher = z
   .string()

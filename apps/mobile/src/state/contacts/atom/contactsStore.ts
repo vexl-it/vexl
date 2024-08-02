@@ -10,10 +10,12 @@ import {StoredContact, type StoredContactWithComputedValues} from '../domain'
 export const contactsStoreAtom = atomWithParsedMmkvStorage(
   'storedContacts',
   {contacts: []},
-  z.object({
-    contacts: z.array(StoredContact),
-    lastImport: IsoDatetimeString.optional(),
-  })
+  z
+    .object({
+      contacts: z.array(StoredContact).readonly(),
+      lastImport: IsoDatetimeString.optional(),
+    })
+    .readonly()
 )
 
 export const storedContactsAtom = focusAtom(contactsStoreAtom, (o) =>

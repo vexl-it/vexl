@@ -12,7 +12,7 @@ export const createOfferSuggestionVisibleStorageAtom =
     {
       visible: true,
     },
-    z.object({visible: z.boolean().default(true)})
+    z.object({visible: z.boolean().default(true)}).readonly()
   )
 
 export const createOfferSuggestionVisibleAtom = focusAtom(

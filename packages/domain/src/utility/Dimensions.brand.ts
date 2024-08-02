@@ -6,8 +6,10 @@ export type Width = z.TypeOf<typeof Width>
 export const Height = z.number().brand('HeightDimension')
 export type Height = z.TypeOf<typeof Height>
 
-export const Dimensions = z.object({
-  width: Width,
-  height: Height,
-})
+export const Dimensions = z
+  .object({
+    width: Width,
+    height: Height,
+  })
+  .readonly()
 export type Dimensions = z.TypeOf<typeof Dimensions>

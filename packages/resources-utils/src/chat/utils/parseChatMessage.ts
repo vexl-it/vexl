@@ -50,16 +50,18 @@ export interface ErrorChatMessageRequiresNewerVersion {
   message: ChatMessageRequiringNewerVersion
 }
 
-const ChatMessageRequiringNewerVersionWithDefaults = z.object({
-  minimalRequiredVersion: SemverString,
-  senderPublicKey: PublicKeyPemBase64,
-  messageParsed: z.unknown(),
-  serverMessage: ServerMessage,
-  myVersion: SemverString.optional(),
-  time: UnixMilliseconds.catch(() => unixMillisecondsNow()),
-  uuid: ChatMessageId.catch(() => generateChatMessageId()),
-  text: z.literal('-').catch('-'),
-})
+const ChatMessageRequiringNewerVersionWithDefaults = z
+  .object({
+    minimalRequiredVersion: SemverString,
+    senderPublicKey: PublicKeyPemBase64,
+    messageParsed: z.unknown(),
+    serverMessage: ServerMessage,
+    myVersion: SemverString.optional(),
+    time: UnixMilliseconds.catch(() => unixMillisecondsNow()),
+    uuid: ChatMessageId.catch(() => generateChatMessageId()),
+    text: z.literal('-').catch('-'),
+  })
+  .readonly()
 
 function ensureCompatibleVersion({
   appVersion,

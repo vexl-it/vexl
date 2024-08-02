@@ -1,9 +1,24 @@
 import {Schema, type ParseResult} from '@effect/schema'
 import {type UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {Config, Context, Data, Effect, Layer, type ConfigError} from 'effect'
-import {Redis} from 'ioredis'
+import {
+  Array,
+  Config,
+  Context,
+  Data,
+  Duration,
+  Effect,
+  Layer,
+  type ConfigError,
+} from 'effect'
+import {catchAllDefect} from 'effect/Effect'
+import Redis from 'ioredis'
+import Redlock, {type Lock} from 'redlock'
 
 export class RedisError extends Data.TaggedError('RedisError')<{
+  originalError: unknown
+}> {}
+
+export class RedisLockError extends Data.TaggedError('RedisLockError')<{
   originalError: unknown
 }> {}
 
@@ -31,6 +46,12 @@ export interface RedisOperations {
   ) => Effect.Effect<void, ParseResult.ParseError | RedisError, R>
 
   delete: (key: string) => Effect.Effect<void, RedisError, never>
+  withLock: <A, E, R>(
+    program: Effect.Effect<A, E, R>
+  ) => (
+    resources: string[] | string,
+    duration?: Duration.DurationInput
+  ) => Effect.Effect<A, E | RedisLockError, R>
 }
 
 export class RedisService extends Context.Tag('RedisService')<
@@ -50,6 +71,53 @@ export class RedisService extends Context.Tag('RedisService')<
         const redisClient = yield* _(
           Effect.sync(() => new Redis(redisUrlUnwrapped))
         )
+
+        const redlock = yield* _(Effect.sync(() => new Redlock([redisClient])))
+
+        const acquireLockEffect = (
+          resources: string[] | string,
+          duration: Duration.DurationInput
+        ): Effect.Effect<Lock, RedisLockError> =>
+          Effect.promise(
+            async () =>
+              await redlock.acquire(
+                Array.isArray(resources) ? resources : [resources],
+                Duration.toMillis(duration)
+              )
+          ).pipe(
+            catchAllDefect((e) =>
+              Effect.zipRight(
+                Effect.logError(
+                  'Error while acquiring lock',
+                  e,
+                  resources,
+                  duration
+                ),
+                new RedisLockError({
+                  originalError: e,
+                })
+              )
+            )
+          )
+
+        const releaseLockEffect = (lock: Lock): Effect.Effect<void> =>
+          Effect.promise(async () => await redlock.release(lock)).pipe(
+            catchAllDefect((e) =>
+              Effect.zipRight(
+                Effect.logError('Error while releasing lock', e, lock.value),
+                Effect.void
+              )
+            )
+          )
+
+        const withLock: RedisOperations['withLock'] =
+          (program) =>
+          (resources, duration = '300 millis') =>
+            Effect.acquireUseRelease(
+              acquireLockEffect(resources, duration),
+              () => program,
+              releaseLockEffect
+            )
 
         const getString = (
           key: string
@@ -122,9 +190,21 @@ export class RedisService extends Context.Tag('RedisService')<
               )
           },
           delete: deleteKey,
+          withLock,
         }
 
         return toReturn
       })
     )
 }
+
+export const withRedisLock: <A, E, R>(
+  resources: string[] | string,
+  duration?: Duration.DurationInput
+) => (
+  program: Effect.Effect<A, E, R>
+) => Effect.Effect<A, E | RedisLockError, R | RedisService> =
+  (resources, duration) => (program) =>
+    RedisService.pipe(
+      Effect.flatMap((rs) => rs.withLock(program)(resources, duration))
+    )

@@ -33,11 +33,13 @@ import {
   type ZodParseError,
 } from '../utils/parsing'
 
-const OfferLocationDeprecated = z.object({
-  longitude: z.coerce.number().pipe(Longitude),
-  latitude: z.coerce.number().pipe(Latitude),
-  city: z.string(),
-})
+const OfferLocationDeprecated = z
+  .object({
+    longitude: z.coerce.number().pipe(Longitude),
+    latitude: z.coerce.number().pipe(Latitude),
+    city: z.string(),
+  })
+  .readonly()
 type OfferLocationDeprecated = z.TypeOf<typeof OfferLocationDeprecated>
 
 const OfferLocationStateDeprecated = z.enum(['IN_PERSON', 'ONLINE'])
@@ -62,18 +64,18 @@ function decryptedPayloadsToOffer({
   serverOffer: ServerOffer
   privatePayload: OfferPrivatePart
   publicPayload: OfferPublicPart
-}): E.Either<ZodParseError<OfferInfo>, OfferInfo> {
-  return pipe(
-    E.right({
-      id: serverOffer.id,
-      offerId: serverOffer.offerId,
-      privatePart: privatePayload,
-      publicPart: publicPayload,
-      createdAt: serverOffer.createdAt,
-      modifiedAt: serverOffer.modifiedAt,
-    }),
-    E.chainW(safeParse(OfferInfo))
-  )
+}): E.Either<
+  ZodParseError<z.infer<typeof OfferInfo>>,
+  z.infer<typeof OfferInfo>
+> {
+  return safeParse(OfferInfo)({
+    id: serverOffer.id,
+    offerId: serverOffer.offerId,
+    privatePart: privatePayload,
+    publicPart: publicPayload,
+    createdAt: serverOffer.createdAt,
+    modifiedAt: serverOffer.modifiedAt,
+  })
 }
 
 function decodeLocation(
@@ -135,7 +137,9 @@ export function decryptPrivatePart(
 ): (
   encrypted: PrivatePayloadEncrypted
 ) => TE.TaskEither<
-  CryptoError | JsonParseError | ZodParseError<OfferPrivatePart>,
+  | CryptoError
+  | JsonParseError
+  | ZodParseError<z.infer<typeof OfferPrivatePart>>,
   OfferPrivatePart
 > {
   return (privatePayload) =>

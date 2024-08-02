@@ -20,6 +20,7 @@ import {
   GetOffersForMeResponse,
   RefreshOfferResponse,
   RemovedOfferIdsResponse,
+  ReportOfferLimitReachedError,
   ReportOfferResponse,
   UpdateOfferResponse,
   type CreateNewOfferRequest,
@@ -30,7 +31,6 @@ import {
   type GetOffersForMeCreatedOrModifiedAfterRequest,
   type RefreshOfferRequest,
   type RemovedOfferIdsRequest,
-  type ReportOfferLimitReachedError,
   type ReportOfferRequest,
   type UpdateOfferRequest,
 } from './contracts'
@@ -187,9 +187,7 @@ export function privateApi({
         TE.mapLeft((e) => {
           if (e._tag === 'BadStatusCodeError') {
             if (e.response.data.code === '100108') {
-              return {
-                _tag: 'ReportOfferLimitReachedError',
-              } as ReportOfferLimitReachedError
+              return new ReportOfferLimitReachedError()
             }
           }
           return e

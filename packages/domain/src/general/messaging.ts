@@ -37,102 +37,117 @@ export const MessageType = z.enum([
 ])
 export type MessageType = z.TypeOf<typeof MessageType>
 
-export const ChatUserIdentity = z.object({
-  publicKey: PublicKeyPemBase64,
-  realLifeInfo: RealLifeInfo.optional(),
-})
+export const ChatUserIdentity = z
+  .object({
+    publicKey: PublicKeyPemBase64,
+    realLifeInfo: RealLifeInfo.optional(),
+  })
+  .readonly()
 export type ChatUserIdentity = z.TypeOf<typeof ChatUserIdentity>
 
 export const ChatMessageId = z.string().uuid().brand<'ChatMessageId'>()
 export type ChatMessageId = z.TypeOf<typeof ChatMessageId>
 
-export const RepliedToData = z.object({
-  text: z.string(),
-  messageAuthor: z.enum(['me', 'them']),
-  image: UriString.optional(),
-})
+export const RepliedToData = z
+  .object({
+    text: z.string(),
+    messageAuthor: z.enum(['me', 'them']),
+    image: UriString.optional(),
+  })
+  .readonly()
 export type RepliedToData = z.TypeOf<typeof RepliedToData>
 
-export const RepliedToDataPayload = z.object({
-  text: z.string(),
-  messageAuthor: z.enum(['me', 'them']),
-  image: Base64String.optional(),
-})
+export const RepliedToDataPayload = z
+  .object({
+    text: z.string(),
+    messageAuthor: z.enum(['me', 'them']),
+    image: Base64String.optional(),
+  })
+  .readonly()
 export type RepliedToDataPayload = z.TypeOf<typeof RepliedToDataPayload>
 
-export const ChatMessagePayload = z.object({
-  uuid: ChatMessageId,
-  text: z.string().optional(),
-  image: UriString.optional(),
-  repliedTo: RepliedToData.optional(),
-  time: UnixMilliseconds,
-  messageType: MessageType,
-  lastReceivedVersion: SemverString.optional(),
-  myVersion: SemverString.optional(),
-  tradeChecklistUpdate: TradeChecklistUpdate.optional(),
-  minimalRequiredVersion: SemverString.optional(),
-  deanonymizedUser: z
-    .object({
-      name: UserName,
-      imageBase64: Base64String.optional(),
-      partialPhoneNumber: z.string().optional(),
-      fullPhoneNumber: E164PhoneNumber.optional(),
-    })
-    .optional(),
-  myFcmCypher: FcmCypher.optional(),
-  lastReceivedFcmCypher: FcmCypher.optional(),
-})
+export const ChatMessagePayload = z
+  .object({
+    uuid: ChatMessageId,
+    text: z.string().optional(),
+    image: UriString.optional(),
+    repliedTo: RepliedToData.optional(),
+    time: UnixMilliseconds,
+    messageType: MessageType,
+    lastReceivedVersion: SemverString.optional(),
+    myVersion: SemverString.optional(),
+    tradeChecklistUpdate: TradeChecklistUpdate.optional(),
+    minimalRequiredVersion: SemverString.optional(),
+    deanonymizedUser: z
+      .object({
+        name: UserName,
+        imageBase64: Base64String.optional(),
+        partialPhoneNumber: z.string().optional(),
+        fullPhoneNumber: E164PhoneNumber.optional(),
+      })
+      .optional()
+      .readonly(),
+    myFcmCypher: FcmCypher.optional(),
+    lastReceivedFcmCypher: FcmCypher.optional(),
+  })
+  .readonly()
 export type ChatMessagePayload = z.TypeOf<typeof ChatMessagePayload>
 
 export function generateChatMessageId(): ChatMessageId {
   return ChatMessageId.parse(generateUuid())
 }
 
-export const ChatMessage = z.object({
-  uuid: ChatMessageId,
-  text: z.string(),
-  minimalRequiredVersion: SemverString.optional(),
-  time: UnixMilliseconds,
-  myVersion: SemverString.optional(),
+export const ChatMessage = z
+  .object({
+    uuid: ChatMessageId,
+    text: z.string(),
+    minimalRequiredVersion: SemverString.optional(),
+    time: UnixMilliseconds,
+    myVersion: SemverString.optional(),
 
-  /**
-   * Used only for messages  of type `VERSION_UPDATE`
-   */
-  lastReceivedVersion: SemverString.optional(),
-  forceShow: z.boolean().optional(),
+    /**
+     * Used only for messages  of type `VERSION_UPDATE`
+     */
+    lastReceivedVersion: SemverString.optional(),
+    forceShow: z.boolean().optional(),
 
-  image: UriString.optional(),
-  repliedTo: RepliedToData.optional(),
-  tradeChecklistUpdate: TradeChecklistUpdate.optional(),
-  deanonymizedUser: DeanonymizedUser.optional(),
-  senderPublicKey: PublicKeyPemBase64,
-  messageType: MessageType,
+    image: UriString.optional(),
+    repliedTo: RepliedToData.optional(),
+    tradeChecklistUpdate: TradeChecklistUpdate.optional(),
+    deanonymizedUser: DeanonymizedUser.optional(),
+    senderPublicKey: PublicKeyPemBase64,
+    messageType: MessageType,
 
-  myFcmCypher: FcmCypher.optional(),
-  lastReceivedFcmCypher: FcmCypher.optional(),
-})
+    myFcmCypher: FcmCypher.optional(),
+    lastReceivedFcmCypher: FcmCypher.optional(),
+  })
+  .readonly()
 export type ChatMessage = z.TypeOf<typeof ChatMessage>
 //
 
-export const Inbox = z.object({
-  privateKey: KeyHolder.PrivateKeyHolder,
-  offerId: OfferId.optional(),
-})
+export const Inbox = z
+  .object({
+    privateKey: KeyHolder.PrivateKeyHolder,
+    offerId: OfferId.optional(),
+  })
+  .readonly()
 export type Inbox = z.TypeOf<typeof Inbox>
 
-export const ChatOrigin = z.discriminatedUnion('type', [
-  z.object({
-    type: z.literal('myOffer'),
-    offerId: OfferId,
-    offer: OneOfferInState.optional(),
-  }),
-  z.object({
-    type: z.literal('theirOffer'),
-    offerId: OfferId,
-    offer: OneOfferInState.optional(),
-  }),
-  z.object({type: z.literal('unknown')}),
-])
+export const ChatOrigin = z
+  .discriminatedUnion('type', [
+    z.object({
+      type: z.literal('myOffer'),
+      offerId: OfferId,
+      offer: OneOfferInState.optional(),
+    }),
+    z.object({
+      type: z.literal('theirOffer'),
+      offerId: OfferId,
+      offer: OneOfferInState.optional(),
+    }),
+    z.object({type: z.literal('unknown')}),
+  ])
+  .readonly()
 export type ChatOrigin = z.TypeOf<typeof ChatOrigin>
 
 export const ChatId = z.string().uuid().brand<'chatId'>()

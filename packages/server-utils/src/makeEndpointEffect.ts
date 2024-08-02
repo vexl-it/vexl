@@ -1,10 +1,15 @@
 import {Schema} from '@effect/schema'
-import {type UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
+import {
+  type NotFoundError,
+  type UnexpectedServerError,
+} from '@vexl-next/domain/src/general/commonErrors'
 import {type ConfigError, Effect} from 'effect'
 import {HttpError} from 'effect-http'
 import {isTagged} from 'effect/Predicate'
-import {type ExpectedErrorHttpCode} from './HttpCodes'
 import {isRunningInTestConfig} from './commonConfigs'
+import {type ExpectedErrorHttpCode} from './HttpCodes'
+import {type RedisLockError} from './RedisService'
+import {type TransactionError} from './withDbTransaction'
 
 type ErrorBodyContent =
   | (any & {
@@ -16,7 +21,10 @@ type ErrorBodyContent =
 type HandlableErrors =
   | ConfigError.ConfigError
   | UnexpectedServerError
+  | NotFoundError
   | HttpError.HttpError
+  | RedisLockError
+  | TransactionError
 
 const makeEndpointEffect = <R, B, R2, C = never>(
   effect: Effect.Effect<
@@ -45,6 +53,15 @@ const makeEndpointEffect = <R, B, R2, C = never>(
             Effect.fail(HttpError.make(500, 'Internal server error'))
           )
         }
+
+        if (isTagged(error, 'NotFoundError')) {
+          return yield* _(Effect.fail(HttpError.make(404, 'Not found')))
+        }
+
+        if (isTagged(error, 'RedisLockError')) {
+          return yield* _(Effect.fail(HttpError.make(404, 'Not found')))
+        }
+
         if (isTagged(error, 'UnexpectedServerError')) {
           if (!isInTest)
             yield* _(Effect.logError('Got unexpected error in route', error))

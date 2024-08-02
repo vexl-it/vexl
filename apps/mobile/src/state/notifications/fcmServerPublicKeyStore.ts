@@ -21,10 +21,12 @@ export const notificationServerKeyStorageAtom = atomWithParsedMmkvStorage(
     publicKey: undefined,
     lastRefresh: UnixMilliseconds0,
   },
-  z.object({
-    publicKey: PublicKeyPemBase64.optional(),
-    lastRefresh: UnixMilliseconds,
-  })
+  z
+    .object({
+      publicKey: PublicKeyPemBase64.optional(),
+      lastRefresh: UnixMilliseconds,
+    })
+    .readonly()
 )
 
 export const getOrFetchNotificationServerPublicKeyActionAtom = atom(

@@ -1,14 +1,23 @@
+import {Schema} from '@effect/schema'
 import {
   compare as compareVersions,
   validate,
   type CompareOperator,
 } from 'compare-versions'
+import {Brand} from 'effect'
 import {z} from 'zod'
 
 export const SemverString = z
   .string()
   .refine(validate, 'Not a valid semver string')
-  .brand<'SemverString'>()
+  .transform((v) => {
+    return Brand.nominal<typeof v & Brand.Brand<'SemverString'>>()(v)
+  })
+
+export const SemverStringE = Schema.String.pipe(
+  Schema.filter(validate),
+  Schema.brand('SemverString')
+)
 
 export type SemverString = z.TypeOf<typeof SemverString>
 

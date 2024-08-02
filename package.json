@@ -21,6 +21,7 @@
     "location-service:build-docker-image": "./scripts/build-app-docker-image.sh location-service",
     "user-service:build-docker-image": "./scripts/build-app-docker-image.sh user-service",
     "dashboard-app:build-docker-image": "./scripts/build-app-docker-image.sh dashboard-app",
+    "offer-service:build-docker-image": "./scripts/build-app-docker-image.sh offer-service",
     "postinstall": "manypkg check"
   },
   "private": true,

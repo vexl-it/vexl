@@ -58,7 +58,7 @@ export const sortingAtom = atom<Sort | undefined>(undefined)
 
 export const intendedConnectionLevelAtom = atom<IntendedConnectionLevel>('ALL')
 
-export const locationStateAtom = atom<LocationState[] | undefined>(
+export const locationStateAtom = atom<readonly LocationState[] | undefined>(
   offersFilterInitialState.locationState
 )
 
@@ -67,14 +67,14 @@ export const locationAtom = atom<OfferLocation | undefined>(
 )
 
 export const locationArrayOfOneAtom = atom(
-  (get): OfferLocation[] | undefined => {
+  (get): readonly OfferLocation[] | undefined => {
     const location = get(locationAtom)
     if (location) {
       return [location]
     }
     return undefined
   },
-  (get, set, action: SetStateAction<OfferLocation[] | undefined>) => {
+  (get, set, action: SetStateAction<readonly OfferLocation[] | undefined>) => {
     const location = getValueFromSetStateActionOfAtom(action)(() =>
       get(locationArrayOfOneAtom)
     )
@@ -83,11 +83,11 @@ export const locationArrayOfOneAtom = atom(
   }
 )
 
-export const btcNetworkAtom = atom<BtcNetwork[] | undefined>(
+export const btcNetworkAtom = atom<readonly BtcNetwork[] | undefined>(
   offersFilterInitialState.btcNetwork
 )
 
-export const paymentMethodAtom = atom<PaymentMethod[] | undefined>(
+export const paymentMethodAtom = atom<readonly PaymentMethod[] | undefined>(
   offersFilterInitialState.paymentMethod
 )
 

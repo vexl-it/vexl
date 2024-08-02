@@ -5,9 +5,11 @@ import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsed
 const vexlCalendarStorageAtom = atomWithParsedMmkvStorage(
   'vexlCalendar',
   {id: undefined},
-  z.object({
-    id: z.string().optional(),
-  })
+  z
+    .object({
+      id: z.string().optional(),
+    })
+    .readonly()
 )
 
 export default vexlCalendarStorageAtom

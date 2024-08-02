@@ -22,6 +22,7 @@ import {
 } from 'jotai'
 
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
+import {HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {IdNumeric} from '@vexl-next/domain/src/utility/IdNumeric'
 import {
   IsoDatetimeString,
@@ -238,7 +239,10 @@ export const dummyOffer: OneOfferInState = {
     id: IdNumeric.parse(1),
     offerId: OfferId.parse(Uuid.parse(generateUuid())),
     privatePart: {
-      commonFriends: ['Mike', 'John'],
+      commonFriends: [
+        HashedPhoneNumber.parse('Mike'),
+        HashedPhoneNumber.parse('John'),
+      ],
       friendLevel: ['FIRST_DEGREE'],
       symmetricKey: SymmetricKey.parse('symmetricKey'),
     },
@@ -261,16 +265,16 @@ export const offerFormMolecule = molecule(() => {
   const nullableAmountBottomLimitAtom = atom<number | undefined>(
     dummyOffer.offerInfo.publicPart.amountBottomLimit
   )
-  const nullableBtcNetworkAtom = atom<BtcNetwork[] | undefined>(
+  const nullableBtcNetworkAtom = atom<readonly BtcNetwork[] | undefined>(
     dummyOffer.offerInfo.publicPart.btcNetwork
   )
-  const nullablePaymentMethodAtom = atom<PaymentMethod[] | undefined>(
+  const nullablePaymentMethodAtom = atom<readonly PaymentMethod[] | undefined>(
     dummyOffer.offerInfo.publicPart.paymentMethod
   )
-  const nullableLocationAtom = atom<OfferLocation[] | undefined>(
+  const nullableLocationAtom = atom<readonly OfferLocation[] | undefined>(
     dummyOffer.offerInfo.publicPart.location
   )
-  const nullableLocationStateAtom = atom<LocationState[] | undefined>(
+  const nullableLocationStateAtom = atom<readonly LocationState[] | undefined>(
     dummyOffer.offerInfo.publicPart.locationState
   )
 

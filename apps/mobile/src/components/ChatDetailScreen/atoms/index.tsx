@@ -737,7 +737,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     return get(createFriendLevelInfoAtom(get(chatAtom).otherSide.publicKey))
   })
 
-  const friendLevelInfoAtom = atom<FriendLevel[]>((get) => {
+  const friendLevelInfoAtom = atom<readonly FriendLevel[]>((get) => {
     const originOffer = get(offerForChatAtom)
 
     if (originOffer?.ownershipInfo?.adminId) {

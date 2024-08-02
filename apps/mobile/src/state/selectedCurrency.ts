@@ -42,7 +42,7 @@ export const selectedCurrencyStorageAtom = atomWithParsedMmkvStorage(
   {
     currency: defaultCurrency,
   },
-  z.object({currency: CurrencyCode})
+  z.object({currency: CurrencyCode}).readonly()
 )
 
 export const selectedCurrencyAtom = focusAtom(

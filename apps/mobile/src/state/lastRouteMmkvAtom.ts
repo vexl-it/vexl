@@ -7,9 +7,11 @@ const wasLastRouteBeforeRedirectOnContactsScreenMmkvAtom =
     {
       value: false,
     },
-    z.object({
-      value: z.boolean().default(false),
-    })
+    z
+      .object({
+        value: z.boolean().default(false),
+      })
+      .readonly()
   )
 
 export default wasLastRouteBeforeRedirectOnContactsScreenMmkvAtom

@@ -35,10 +35,12 @@ export interface SenderUserInboxDoesNotExistError {
   readonly _tag: 'SenderUserInboxDoesNotExistError'
 }
 
-export const SignedChallenge = z.object({
-  challenge: z.string(),
-  signature: z.string(),
-})
+export const SignedChallenge = z
+  .object({
+    challenge: z.string(),
+    signature: z.string(),
+  })
+  .readonly()
 export type SignedChallenge = z.TypeOf<typeof SignedChallenge>
 
 export const ServerMessageWithId = ServerMessage.extend({
@@ -52,17 +54,19 @@ const RequestBaseWithChallenge = z.object({
 
 export const UpdateInboxRequest = RequestBaseWithChallenge.extend({
   token: z.string().optional(),
-})
+}).readonly()
 export type UpdateInboxRequest = z.TypeOf<typeof UpdateInboxRequest>
 
-export const UpdateInboxResponse = z.object({
-  firebaseToken: z.string().optional(),
-})
+export const UpdateInboxResponse = z
+  .object({
+    firebaseToken: z.string().optional(),
+  })
+  .readonly()
 export type UpdateInboxResponse = z.TypeOf<typeof UpdateInboxResponse>
 
 export const CreateInboxRequest = RequestBaseWithChallenge.extend({
   token: z.string().optional(),
-})
+}).readonly()
 export type CreateInboxRequest = z.TypeOf<typeof CreateInboxRequest>
 
 export const CreateInboxResponse = NoContentResponse
@@ -87,17 +91,19 @@ export type DeletePulledMessagesResponse = z.TypeOf<
 export const BlockInboxRequest = RequestBaseWithChallenge.extend({
   publicKeyToBlock: PublicKeyPemBase64,
   block: z.boolean(),
-})
+}).readonly()
 export type BlockInboxRequest = z.TypeOf<typeof BlockInboxRequest>
 
 export const BlockInboxResponse = NoContentResponse
 export type BlockInboxResponse = z.TypeOf<typeof BlockInboxResponse>
 
-export const RequestApprovalRequest = z.object({
-  publicKey: PublicKeyPemBase64,
-  message: z.string(),
-  notificationServiceReady: z.boolean(),
-})
+export const RequestApprovalRequest = z
+  .object({
+    publicKey: PublicKeyPemBase64,
+    message: z.string(),
+    notificationServiceReady: z.boolean(),
+  })
+  .readonly()
 export type RequestApprovalRequest = z.TypeOf<typeof RequestApprovalRequest>
 
 export const RequestApprovalResponse = ServerMessageWithId.extend({

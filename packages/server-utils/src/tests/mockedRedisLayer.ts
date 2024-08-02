@@ -44,6 +44,8 @@ export const mockedRedisLayer = Layer.effect(
             )
           )
         ),
+
+      withLock: (effect) => () => effect,
     }
 
     return toReturn

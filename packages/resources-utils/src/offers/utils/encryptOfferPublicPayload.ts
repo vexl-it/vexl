@@ -19,53 +19,57 @@ import {booleanToString} from '../../utils/booleanString'
 import {aesGCMIgnoreTagEncrypt} from '../../utils/crypto'
 import {safeParse, stringifyToJson} from '../../utils/parsing'
 
-const OfferLocationDeprecated = z.object({
-  longitude: z.string(),
-  latitude: z.string(),
-  city: z.string(),
-})
+const OfferLocationDeprecated = z
+  .object({
+    longitude: z.string(),
+    latitude: z.string(),
+    city: z.string(),
+  })
+  .readonly()
 type OfferLocationDeprecated = z.TypeOf<typeof OfferLocationDeprecated>
 
 /**
  * Shape of the offer public part that is encrypted.
  * Handles backward compatibility
  */
-const OfferPublicPartToEncrypt = z.object({
-  offerPublicKey: PublicKeyPemBase64,
-  // TODO(#702): remove offer location backward compatibility
-  // location V2 -> location
-  location: z.array(z.string()),
-  locationV2: z.array(OfferLocation),
-  offerDescription: z.string(),
-  amountBottomLimit: z.coerce.string(),
-  amountTopLimit: z.coerce.string(),
-  feeState: z.string(),
-  feeAmount: z.coerce.string(),
-  // TODO: remove offer locationState backward compatibility
-  // locationState V2 -> locationState
-  locationState: z.string(),
-  locationStateV2: LocationStateToArray,
-  paymentMethod: z.array(z.string()),
-  btcNetwork: z.array(z.string()),
-  currency: z.string(),
-  offerType: z.string(),
-  spokenLanguages: z.array(z.string()).optional(),
-  expirationDate: JSDateString.optional(),
-  activePriceState: z.string(),
-  activePriceValue: z.coerce.string(),
-  activePriceCurrency: z.string(),
-  active: z.enum(['true', 'false']),
-  groupUuids: z.array(z.string()),
-  listingType: z.string().optional(),
-  fcmCypher: FcmCypher.optional(),
-  authorClientVersion: z.string().optional(),
-})
+const OfferPublicPartToEncrypt = z
+  .object({
+    offerPublicKey: PublicKeyPemBase64,
+    // TODO(#702): remove offer location backward compatibility
+    // location V2 -> location
+    location: z.array(z.string()),
+    locationV2: z.array(OfferLocation),
+    offerDescription: z.string(),
+    amountBottomLimit: z.coerce.string(),
+    amountTopLimit: z.coerce.string(),
+    feeState: z.string(),
+    feeAmount: z.coerce.string(),
+    // TODO: remove offer locationState backward compatibility
+    // locationState V2 -> locationState
+    locationState: z.string(),
+    locationStateV2: LocationStateToArray,
+    paymentMethod: z.array(z.string()),
+    btcNetwork: z.array(z.string()),
+    currency: z.string(),
+    offerType: z.string(),
+    spokenLanguages: z.array(z.string()).optional(),
+    expirationDate: JSDateString.optional(),
+    activePriceState: z.string(),
+    activePriceValue: z.coerce.string(),
+    activePriceCurrency: z.string(),
+    active: z.enum(['true', 'false']),
+    groupUuids: z.array(z.string()),
+    listingType: z.string().optional(),
+    fcmCypher: FcmCypher.optional(),
+    authorClientVersion: z.string().optional(),
+  })
+  .readonly()
 
 function convertLocationStateToOldVersion(
   publicPart: OfferPublicPart
 ): LocationState {
   if (publicPart.listingType === 'BITCOIN')
-    return publicPart.locationState[0] ?? 'IN_PERSON'
+    return publicPart.locationState[0] ?? ('IN_PERSON' as const)
 
   if (publicPart.listingType === 'OTHER' && publicPart.location.length === 0)
     return 'ONLINE'
@@ -86,6 +90,7 @@ function offerPublicPartToJsonString(
 ): E.Either<unknown, string> {
   return pipe(
     publicPart.location,
+    (a) => [...a],
     A.map(
       (oneLocation) =>
         ({

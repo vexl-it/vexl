@@ -1,4 +1,7 @@
+// TODO this should not exist
+import {Schema} from '@effect/schema'
 import {z} from 'zod'
 
-export const IdNumeric = z.number().int().min(0)
-export type IdNumeric = z.TypeOf<typeof IdNumeric>
+export const IdNumeric = z.number()
+export const IdNumericE = Schema.Number
+export type IdNumeric = Schema.Schema.Type<typeof IdNumericE>

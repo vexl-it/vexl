@@ -4,7 +4,7 @@ import {
 } from '@vexl-next/domain/src/general/offers'
 
 export default function sortOffers(
-  offers: OneOfferInState[],
+  offers: readonly OneOfferInState[],
   sort: Sort
 ): OneOfferInState[] {
   const toReturn = [...offers]

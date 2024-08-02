@@ -10,11 +10,13 @@ import {z} from 'zod'
 import {safeParse} from './fpUtils'
 import {PROFILE_PICTURE_DIRECTORY} from './fsDirectories'
 
-export const SelectedImage = z.object({
-  width: z.number().brand<'imageHeight'>(),
-  height: z.number().brand<'imageWidth'>(),
-  uri: UriString,
-})
+export const SelectedImage = z
+  .object({
+    width: z.number().brand<'imageHeight'>(),
+    height: z.number().brand<'imageWidth'>(),
+    uri: UriString,
+  })
+  .readonly()
 export type SelectedImage = z.TypeOf<typeof SelectedImage>
 
 export interface ImagePickerError {

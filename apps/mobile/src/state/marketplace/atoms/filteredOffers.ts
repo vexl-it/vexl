@@ -18,8 +18,8 @@ import {mapRegionAtom} from './mapRegionAtom'
 import {offersToSeeInMarketplaceAtom} from './offersToSeeInMarketplace'
 
 export default function areIncluded<T>(
-  elementsToLookFor: T[],
-  arrayToLookIn: T[]
+  elementsToLookFor: readonly T[],
+  arrayToLookIn: readonly T[]
 ): boolean {
   return elementsToLookFor.every((element) => arrayToLookIn.includes(element))
 }

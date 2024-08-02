@@ -43,7 +43,7 @@ export interface RequestCouldNotBeProcessedError {
 }
 
 export interface InitPhoneNumberVerificationRequest {
-  phoneNumber: E164PhoneNumber
+  readonly phoneNumber: E164PhoneNumber
 }
 
 export const VerificationId = z

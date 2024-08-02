@@ -23,6 +23,7 @@
   "dependencies": {
     "@effect/schema": "^0.68.25",
     "@vexl-next/cryptography": "0.0.0",
+    "@vexl-next/generic-utils": "0.0.0",
     "awesome-phonenumber": "^5.1.0",
     "compare-versions": "^6.1.0",
     "effect": "^3.5.5",

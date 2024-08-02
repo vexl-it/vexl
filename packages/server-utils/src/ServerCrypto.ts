@@ -83,6 +83,7 @@ export class ServerCrypto extends Context.Tag('ServerCrypto')<
         const decryptEciesWithServerKey = eciesGTMDecryptE(
           cryptoConfigUnwraped.privateKey
         )
+
         const encryptAesWithServerKey = aesEncrpytE(cryptoConfigUnwraped.easKey)
         const decryptAesWithServiceKey = aesDecrpytE(
           cryptoConfigUnwraped.easKey

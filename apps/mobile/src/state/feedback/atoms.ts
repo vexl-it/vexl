@@ -13,7 +13,7 @@ export const newOfferFeedbackDoneStorageAtom = atomWithParsedMmkvStorage(
   {
     newOfferFeedbackDone: false,
   },
-  z.object({newOfferFeedbackDone: z.boolean().default(false)})
+  z.object({newOfferFeedbackDone: z.boolean().default(false)}).readonly()
 )
 
 export const newOfferFeedbackDoneAtom = focusAtom(
@@ -24,7 +24,7 @@ export const newOfferFeedbackDoneAtom = focusAtom(
 export const feedbacksForClosedChatsStorageAtom = atomWithParsedMmkvStorage(
   'chatClosedFeedbacksAtom',
   {feedbacks: {}},
-  z.object({feedbacks: z.record(ChatId, Feedback)})
+  z.object({feedbacks: z.record(ChatId, Feedback)}).readonly()
 )
 
 export const feedbacksForClosedChatsAtom = focusAtom(

@@ -23,8 +23,8 @@ import SelectLocationFlowModal from './Location/components/SelectLocationFlowMod
 import LocationsList from './LocationsList'
 
 interface Props {
-  locationAtom: PrimitiveAtom<OfferLocation[] | undefined>
-  locationStateAtom: PrimitiveAtom<LocationState[] | undefined>
+  locationAtom: PrimitiveAtom<readonly OfferLocation[] | undefined>
+  locationStateAtom: PrimitiveAtom<readonly LocationState[] | undefined>
   randomizeLocation: boolean
   updateLocationStateAndPaymentMethodAtom: WritableAtom<
     null,

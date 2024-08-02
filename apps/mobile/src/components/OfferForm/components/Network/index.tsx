@@ -6,7 +6,7 @@ import useContent from './useContent'
 
 interface Props {
   btcNetworkAtom: WritableAtom<
-    BtcNetwork[] | undefined,
+    readonly BtcNetwork[] | undefined,
     [btcNetwork: BtcNetwork],
     void
   >

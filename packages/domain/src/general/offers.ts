@@ -1,22 +1,30 @@
 import {Schema} from '@effect/schema'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
-import {Brand} from 'effect'
+import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
+import {orElseSchema} from '@vexl-next/generic-utils/src/effect-helpers/orElseSchema'
+import {Array, Brand} from 'effect'
 import {randomUUID} from 'node:crypto'
 import {z} from 'zod'
-import {FcmToken} from '../utility/FcmToken.brand'
-import {IdNumeric} from '../utility/IdNumeric'
-import {IsoDatetimeString} from '../utility/IsoDatetimeString.brand'
-import {JSDateString} from '../utility/JSDateString.brand'
-import {SemverString} from '../utility/SmeverString.brand'
-import {UriString} from '../utility/UriString.brand'
+import {FcmToken, FcmTokenE} from '../utility/FcmToken.brand'
+import {IdNumeric, IdNumericE} from '../utility/IdNumeric'
+import {
+  IsoDatetimeString,
+  IsoDatetimeStringE,
+} from '../utility/IsoDatetimeString.brand'
+import {JSDateString, JSDateStringE} from '../utility/JSDateString.brand'
+import {SemverString, SemverStringE} from '../utility/SmeverString.brand'
+import {UriString, UriStringE} from '../utility/UriString.brand'
 import {
   Latitude,
+  LatitudeE,
   Longitude,
+  LongitudeE,
   Radius,
-  getDefaultRadius,
+  RadiusE,
 } from '../utility/geoCoordinates'
-import {CurrencyCode} from './currency.brand'
-import {FcmCypher} from './notifications'
+import {HashedPhoneNumber, HashedPhoneNumberE} from './HashedPhoneNumber.brand'
+import {CurrencyCode, CurrencyCodeE} from './currency.brand'
+import {FcmCypher, FcmCypherE} from './notifications'
 
 export const Sort = z.enum([
   'LOWEST_FEE_FIRST',
@@ -27,45 +35,81 @@ export const Sort = z.enum([
   'HIGHEST_AMOUNT',
   'MOST_CONNECTIONS',
 ])
+export const SortE = Schema.Literal(
+  'LOWEST_FEE_FIRST',
+  'HIGHEST_FEE',
+  'NEWEST_OFFER',
+  'OLDEST_OFFER',
+  'LOWEST_AMOUNT',
+  'HIGHEST_AMOUNT',
+  'MOST_CONNECTIONS'
+)
 export type Sort = z.TypeOf<typeof Sort>
 
-export const OfferId = z.string().min(1).brand<'OfferId'>()
-export type OfferId = z.TypeOf<typeof OfferId>
+export const OfferId = z
+  .string()
+  .min(1)
+  .transform((v) => {
+    return Brand.nominal<typeof v & Brand.Brand<'OfferId'>>()(v)
+  })
+export const OfferIdE = Schema.String.pipe(Schema.brand('OfferId'))
+export type OfferId = Schema.Schema.Type<typeof OfferIdE>
+export const newOfferId = (): OfferId =>
+  Schema.decodeSync(OfferIdE)(randomUUID())
 
-export const OfferAdminId = z.string().brand<'OfferAdminId'>()
-export type OfferAdminId = z.TypeOf<typeof OfferAdminId>
+export const OfferAdminId = z
+  .string()
+  .transform((v) => Brand.nominal<typeof v & Brand.Brand<'OfferAdminId'>>()(v))
+export const OfferAdminIdE = Schema.String.pipe(Schema.brand('OfferAdminId'))
+export type OfferAdminId = Schema.Schema.Type<typeof OfferAdminIdE>
 
 export function generateAdminId(): OfferAdminId {
-  return OfferAdminId.parse(randomUUID())
+  return Schema.decodeSync(OfferAdminIdE)(randomUUID())
 }
 
 export const LocationState = z.enum(['ONLINE', 'IN_PERSON'])
-export type LocationState = z.TypeOf<typeof LocationState>
+export const LocationStateE = Schema.Literal('ONLINE', 'IN_PERSON')
+export type LocationState = Schema.Schema.Type<typeof LocationStateE>
 
 export const PaymentMethod = z.enum(['CASH', 'REVOLUT', 'BANK'])
-export type PaymentMethod = z.TypeOf<typeof PaymentMethod>
+export const PaymentMethodE = Schema.Literal('CASH', 'REVOLUT', 'BANK')
+export type PaymentMethod = Schema.Schema.Type<typeof PaymentMethodE>
 
 export const FeeState = z.enum(['WITHOUT_FEE', 'WITH_FEE'])
-export type FeeState = z.TypeOf<typeof FeeState>
+export const FeeStateE = Schema.Literal('WITHOUT_FEE', 'WITH_FEE')
+export type FeeState = Schema.Schema.Type<typeof FeeStateE>
 
 export const BtcNetwork = z.enum(['LIGHTING', 'ON_CHAIN'])
-export type BtcNetwork = z.TypeOf<typeof BtcNetwork>
+export const BtcNetworkE = Schema.Literal('LIGHTING', 'ON_CHAIN')
+export type BtcNetwork = Schema.Schema.Type<typeof BtcNetworkE>
 
 export const OfferType = z.enum(['BUY', 'SELL'])
-export type OfferType = z.TypeOf<typeof OfferType>
+export const OfferTypeE = Schema.Literal('BUY', 'SELL')
+export type OfferType = Schema.Schema.Type<typeof OfferTypeE>
 
 export const ListingType = z.enum(['BITCOIN', 'PRODUCT', 'OTHER'])
-export type ListingType = z.TypeOf<typeof ListingType>
+export const ListingTypeE = Schema.Literal('BITCOIN', 'PRODUCT', 'OTHER')
+export type ListingType = Schema.Schema.Type<typeof ListingTypeE>
 
 export const DeliveryMethod = z.enum(['PICKUP', 'DELIVERY'])
-export type DeliveryMethod = z.TypeOf<typeof DeliveryMethod>
+export const DeliveryMethodE = Schema.Literal('PICKUP', 'DELIVERY')
+export type DeliveryMethod = Schema.Schema.Type<typeof DeliveryMethodE>
 
 export const SpokenLanguage = z
   .enum(['ENG', 'DEU', 'CZE', 'SVK', 'PRT', 'FRA', 'ITA', 'ESP', 'BG'])
   .default('ENG')
-export type SpokenLanguage = z.TypeOf<typeof SpokenLanguage>
-
-export {CurrencyCode}
+export const SpokenLanguageE = Schema.Literal(
+  'ENG',
+  'DEU',
+  'CZE',
+  'SVK',
+  'PRT',
+  'FRA',
+  'ITA',
+  'ESP',
+  'BG'
+).pipe(orElseSchema('ENG' as const))
+export type SpokenLanguage = Schema.Schema.Type<typeof SpokenLanguageE>
 
 export const FriendLevel = z.enum([
   'FIRST_DEGREE',
@@ -73,34 +117,62 @@ export const FriendLevel = z.enum([
   'GROUP',
   'NOT_SPECIFIED',
 ])
-export type FriendLevel = z.TypeOf<typeof FriendLevel>
+export const FriendLevelE = Schema.Literal(
+  'FIRST_DEGREE',
+  'SECOND_DEGREE',
+  'GROUP',
+  'NOT_SPECIFIED'
+)
+export type FriendLevel = Schema.Schema.Type<typeof FriendLevelE>
 
 export const ActivePriceState = z.enum([
   'NONE',
   'PRICE_IS_BELOW',
   'PRICE_IS_ABOVE',
 ])
-export type ActivePriceState = z.TypeOf<typeof ActivePriceState>
+export const ActivePriceStateE = Schema.Literal(
+  'NONE',
+  'PRICE_IS_BELOW',
+  'PRICE_IS_ABOVE'
+)
+export type ActivePriceState = Schema.Schema.Type<typeof ActivePriceStateE>
+
+export const BaseContactId = z
+  .number()
+  .int()
+  .min(0)
+  .transform((v) => {
+    return Brand.nominal<typeof v & Brand.Brand<'BaseContactId'>>()(v)
+  })
+export const BaseContactIdE = Schema.Int.pipe(
+  Schema.greaterThanOrEqualTo(0),
+  Schema.brand('BaseContactId')
+)
+export type BaseContactId = Schema.Schema.Type<typeof BaseContactIdE>
 
 export const BaseContact = z.object({
-  id: IdNumeric,
-  name: z.string(),
-  photoUri: UriString.optional(),
-  markedForUpload: z.boolean(),
+  id: BaseContactId.readonly(),
+  name: z.string().readonly(),
+  photoUri: UriString.optional().readonly(),
+  markedForUpload: z.boolean().readonly(),
 })
-export type BaseContact = z.TypeOf<typeof BaseContact>
+export const BaseContactE = Schema.Struct({
+  id: BaseContactIdE,
+  name: Schema.String,
+  photoUri: Schema.optional(UriStringE),
+  markedForUpload: Schema.Boolean,
+})
+export type BaseContact = Schema.Schema.Type<typeof BaseContactE>
 
 export const CommonFriend = z.object({
-  contactHash: z.string(),
-  contact: BaseContact.optional(),
+  contactHash: HashedPhoneNumber.readonly(),
+  contact: BaseContact.optional().readonly(),
 })
-export type CommonFriend = z.TypeOf<typeof CommonFriend>
-
-const OfferLocationDeprecated = z.object({
-  longitude: z.coerce.number().pipe(Longitude),
-  latitude: z.coerce.number().pipe(Latitude),
-  city: z.string(),
+export const CommonFriendE = Schema.Struct({
+  contactHash: HashedPhoneNumberE,
+  contact: Schema.optional(BaseContactE),
 })
+export type CommonFriend = Schema.Schema.Type<typeof CommonFriendE>
 
 export const LocationPlaceId = z
   .string()
@@ -114,32 +186,24 @@ export const LocationPlaceIdE = Schema.String.pipe(
 export type LocationPlaceId = Schema.Schema.Type<typeof LocationPlaceIdE>
 
 export const OfferLocation = z
-  .unknown()
-  .transform((previous) => {
-    const deprecatedLocationFormat = OfferLocationDeprecated.safeParse(previous)
-    if (deprecatedLocationFormat.success) {
-      return {
-        placeId: `old:${deprecatedLocationFormat.data.city}`,
-        latitude: deprecatedLocationFormat.data.latitude,
-        longitude: deprecatedLocationFormat.data.longitude,
-        radius: getDefaultRadius(deprecatedLocationFormat.data.latitude),
-        address: deprecatedLocationFormat.data.city,
-        shortAddress: deprecatedLocationFormat.data.city,
-      }
-    }
-    return previous
+  .object({
+    placeId: LocationPlaceId,
+    latitude: Latitude,
+    longitude: Longitude,
+    radius: Radius,
+    address: z.string(),
+    shortAddress: z.string(),
   })
-  .pipe(
-    z.object({
-      placeId: LocationPlaceId,
-      latitude: Latitude,
-      longitude: Longitude,
-      radius: Radius,
-      address: z.string(),
-      shortAddress: z.string(),
-    })
-  )
-export type OfferLocation = z.TypeOf<typeof OfferLocation>
+  .readonly()
+export const OfferLocationE = Schema.Struct({
+  placeId: LocationPlaceIdE,
+  latitude: LatitudeE,
+  longitude: LongitudeE,
+  radius: RadiusE,
+  address: Schema.String,
+  shortAddress: Schema.String,
+})
+export type OfferLocation = Schema.Schema.Type<typeof OfferLocationE>
 
 export const LocationStateToArray = z
   .unknown()
@@ -152,47 +216,106 @@ export const LocationStateToArray = z
   })
   .pipe(z.array(LocationState))
 
-export const SymmetricKey = z.string().brand<'SymmetricKey'>()
-export type SymmetricKey = z.TypeOf<typeof SymmetricKey>
+export const LocationStateToArrayE = Schema.transform(
+  Schema.Union(LocationStateE, Schema.Array(LocationStateE)),
+  Schema.Array(LocationStateE),
+  {
+    strict: false,
+    encode: (v) => v,
+    decode: (oldValue) => {
+      if (Array.isArray(oldValue)) {
+        return oldValue
+      }
+      return [oldValue]
+    },
+  }
+)
+
+export const SymmetricKey = z
+  .string()
+  .transform((v) => Brand.nominal<typeof v & Brand.Brand<'SymmetricKey'>>()(v))
+export const SymmetricKeyE = Schema.String.pipe(Schema.brand('SymmetricKey'))
+export type SymmetricKey = Schema.Schema.Type<typeof SymmetricKeyE>
 
 export const IntendedConnectionLevel = z.enum(['FIRST', 'ALL'])
-export type IntendedConnectionLevel = z.TypeOf<typeof IntendedConnectionLevel>
+export const IntendedConnectionLevelE = Schema.Literal('FIRST', 'ALL')
+export type IntendedConnectionLevel = Schema.Schema.Type<
+  typeof IntendedConnectionLevelE
+>
 
-export const OfferPrivatePart = z.object({
-  commonFriends: z.array(z.string()),
-  friendLevel: z.array(FriendLevel),
-  symmetricKey: SymmetricKey,
-  // For admin only
-  adminId: OfferAdminId.optional(),
-  intendedConnectionLevel: IntendedConnectionLevel.optional(),
+export const OfferPrivatePart = z
+  .object({
+    commonFriends: z.array(HashedPhoneNumber).readonly(),
+    friendLevel: z.array(FriendLevel).readonly(),
+    symmetricKey: SymmetricKey,
+    // For admin only
+    adminId: OfferAdminId.optional(),
+    intendedConnectionLevel: IntendedConnectionLevel.optional(),
+  })
+  .readonly()
+export const OfferPrivatePartE = Schema.Struct({
+  commonFriends: Schema.Array(HashedPhoneNumberE),
+  friendLevel: Schema.Array(FriendLevelE),
+  symmetricKey: SymmetricKeyE,
+  adminId: Schema.optional(OfferAdminIdE),
+  intendedConnectionLevel: Schema.optional(IntendedConnectionLevelE),
 })
-export type OfferPrivatePart = z.TypeOf<typeof OfferPrivatePart>
+export type OfferPrivatePart = Schema.Schema.Type<typeof OfferPrivatePartE>
 
-export const OfferPublicPart = z.object({
-  offerPublicKey: PublicKeyPemBase64,
-  location: z.array(OfferLocation).catch([]),
-  offerDescription: z.string(),
-  amountBottomLimit: z.coerce.number(),
-  amountTopLimit: z.coerce.number(),
-  feeState: FeeState,
-  feeAmount: z.coerce.number(),
-  locationState: LocationStateToArray.catch([]),
-  paymentMethod: z.array(PaymentMethod),
-  btcNetwork: z.array(BtcNetwork),
-  currency: CurrencyCode,
-  spokenLanguages: z.array(SpokenLanguage).default([]),
-  expirationDate: JSDateString.optional(),
-  offerType: OfferType,
-  activePriceState: ActivePriceState,
-  activePriceValue: z.coerce.number(),
-  activePriceCurrency: CurrencyCode,
-  active: z.boolean(),
-  groupUuids: z.array(z.string()),
-  listingType: ListingType.optional(),
-  fcmCypher: FcmCypher.optional(),
-  authorClientVersion: SemverString.optional(),
+export const OfferPublicPart = z
+  .object({
+    offerPublicKey: PublicKeyPemBase64,
+    location: z.array(OfferLocation).catch([]).readonly(),
+    offerDescription: z.string(),
+    amountBottomLimit: z.coerce.number(),
+    amountTopLimit: z.coerce.number(),
+    feeState: FeeState,
+    feeAmount: z.coerce.number(),
+    locationState: LocationStateToArray.catch([]).readonly(),
+    paymentMethod: z.array(PaymentMethod).readonly(),
+    btcNetwork: z.array(BtcNetwork).readonly(),
+    currency: CurrencyCode,
+    spokenLanguages: z.array(SpokenLanguage),
+    expirationDate: JSDateString.optional(),
+    offerType: OfferType,
+    activePriceState: ActivePriceState,
+    activePriceValue: z.coerce.number(),
+    activePriceCurrency: CurrencyCode,
+    active: z.boolean(),
+    groupUuids: z.array(z.string()).readonly(),
+    listingType: ListingType.optional(),
+    fcmCypher: FcmCypher.optional(),
+    authorClientVersion: SemverString.optional(),
+  })
+  .readonly()
+
+export const OfferPublicPartE = Schema.Struct({
+  offerPublicKey: PublicKeyPemBase64E,
+  location: Schema.Array(OfferLocationE),
+  offerDescription: Schema.String,
+  amountBottomLimit: Schema.Number,
+  amountTopLimit: Schema.Number,
+  feeState: FeeStateE,
+  feeAmount: Schema.Number,
+  locationState: LocationStateToArrayE,
+  paymentMethod: Schema.Array(PaymentMethodE),
+  btcNetwork: Schema.Array(BtcNetworkE),
+  currency: CurrencyCodeE,
+  spokenLanguages: Schema.Array(SpokenLanguageE)
+    // Otherwise split atom does not work...
+    .pipe(Schema.mutable),
+  expirationDate: Schema.optional(JSDateStringE),
+  offerType: OfferTypeE,
+  activePriceState: ActivePriceStateE,
+  activePriceValue: Schema.Number,
+  activePriceCurrency: CurrencyCodeE,
+  active: Schema.Boolean,
+  groupUuids: Schema.Array(Schema.String),
+  listingType: Schema.optional(ListingTypeE),
+  fcmCypher: Schema.optional(FcmCypherE),
+  authorClientVersion: Schema.optional(SemverStringE),
 })
-export type OfferPublicPart = z.TypeOf<typeof OfferPublicPart>
+export type OfferPublicPart = Schema.Schema.Type<typeof OfferPublicPartE>
 
 export const spokenLanguagesOptions: SpokenLanguage[] = [
   'ENG',
@@ -206,54 +329,103 @@ export const spokenLanguagesOptions: SpokenLanguage[] = [
   'BG',
 ]
 
-export const OfferInfo = z.object({
-  id: IdNumeric, // for ordering
-  offerId: OfferId,
-  privatePart: OfferPrivatePart,
-  publicPart: OfferPublicPart,
-  createdAt: IsoDatetimeString,
-  modifiedAt: IsoDatetimeString,
+export const OfferInfo = z
+  .object({
+    id: IdNumeric, // for ordering
+    offerId: OfferId,
+    privatePart: OfferPrivatePart,
+    publicPart: OfferPublicPart,
+    createdAt: IsoDatetimeString,
+    modifiedAt: IsoDatetimeString,
+  })
+  .readonly()
+export const OfferInfoE = Schema.Struct({
+  id: IdNumericE, // For ordering
+  offerId: OfferIdE,
+  privatePart: OfferPrivatePartE,
+  publicPart: OfferPublicPartE,
+  createdAt: IsoDatetimeStringE,
+  modifiedAt: IsoDatetimeStringE,
 })
 
-export type OfferInfo = z.TypeOf<typeof OfferInfo>
+export type OfferInfo = Schema.Schema.Type<typeof OfferInfoE>
 
 export const ConnectionLevel = z.enum(['FIRST', 'SECOND', 'ALL'])
-export type ConnectionLevel = z.TypeOf<typeof ConnectionLevel>
+export const ConnectionLevelE = Schema.Literal('FIRST', 'SECOND', 'ALL')
+export type ConnectionLevel = Schema.Schema.Type<typeof ConnectionLevelE>
 
-export const OfferFlags = z.object({
-  reported: z.boolean().default(false),
+export const OfferFlags = z
+  .object({
+    reported: z.boolean().default(false),
+  })
+  .readonly()
+export const OfferFlagsE = Schema.Struct({
+  reported: Schema.optional(Schema.Boolean, {default: () => false}),
 })
-export type OfferFlags = z.TypeOf<typeof OfferFlags>
+export type OfferFlags = Schema.Schema.Type<typeof OfferFlagsE>
 
-export const PrivatePayloadEncrypted = z
-  .string()
-  .brand<'PrivatePayloadEncrypted'>()
-export type PrivatePayloadEncrypted = z.TypeOf<typeof PrivatePayloadEncrypted>
-
-export const PublicPayloadEncrypted = z
-  .string()
-  .brand<'PublicPayloadEncrypted'>()
-export type PublicPayloadEncrypted = z.TypeOf<typeof PublicPayloadEncrypted>
-
-export const OwnershipInfo = z.object({
-  adminId: OfferAdminId,
-  intendedConnectionLevel: IntendedConnectionLevel,
+export const PrivatePayloadEncrypted = z.string().transform((v) => {
+  return Brand.nominal<typeof v & Brand.Brand<'PrivatePayloadEncrypted'>>()(v)
 })
+export const PrivatePayloadEncryptedE = Schema.String.pipe(
+  Schema.brand('PrivatePayloadEncrypted')
+)
+export type PrivatePayloadEncrypted = Schema.Schema.Type<
+  typeof PrivatePayloadEncryptedE
+>
 
-export type OwnershipInfo = z.TypeOf<typeof OwnershipInfo>
-
-export const OneOfferInState = z.object({
-  offerInfo: OfferInfo,
-  flags: OfferFlags,
-  lastCommitedFcmToken: FcmToken.optional(),
-  ownershipInfo: OwnershipInfo.optional(),
+export const PublicPayloadEncrypted = z.string().transform((v) => {
+  return Brand.nominal<typeof v & Brand.Brand<'PublicPayloadEncrypted'>>()(v)
 })
-export type OneOfferInState = z.TypeOf<typeof OneOfferInState>
+export const PublicPayloadEncryptedE = Schema.String.pipe(
+  Schema.brand('PublicPayloadEncrypted')
+)
+export type PublicPayloadEncrypted = Schema.Schema.Type<
+  typeof PublicPayloadEncryptedE
+>
 
-export const MyOfferInState = z.object({
-  offerInfo: OfferInfo,
-  flags: OfferFlags,
-  lastCommitedFcmToken: FcmToken.optional(),
-  ownershipInfo: OwnershipInfo,
+export const OwnershipInfo = z
+  .object({
+    adminId: OfferAdminId,
+    intendedConnectionLevel: IntendedConnectionLevel,
+  })
+  .readonly()
+export const OwnershipInfoE = Schema.Struct({
+  adminId: OfferAdminIdE,
+  intendedConnectionLevel: IntendedConnectionLevelE,
 })
-export type MyOfferInState = z.TypeOf<typeof MyOfferInState>
+export type OwnershipInfo = Schema.Schema.Type<typeof OwnershipInfoE>
+
+export const OneOfferInState = z
+  .object({
+    offerInfo: OfferInfo,
+    flags: OfferFlags,
+    lastCommitedFcmToken: FcmToken.optional(),
+    ownershipInfo: OwnershipInfo.optional(),
+  })
+  .readonly()
+export const OneOfferInStateE = Schema.Struct({
+  offerInfo: OfferInfoE,
+  flags: OfferFlagsE,
+  lastCommitedFcmToken: Schema.optional(FcmTokenE),
+  ownershipInfo: Schema.optional(OwnershipInfoE),
+})
+export type OneOfferInState = Schema.Schema.Type<typeof OneOfferInStateE>
+
+export const MyOfferInState = z
+  .object({
+    offerInfo: OfferInfo,
+    flags: OfferFlags,
+    lastCommitedFcmToken: FcmToken.optional(),
+    ownershipInfo: OwnershipInfo,
+  })
+  .readonly()
+export const MyOfferInStateE = Schema.Struct({
+  offerInfo: OfferInfoE,
+  flags: OfferFlagsE,
+  lastCommitedFcmToken: Schema.optional(FcmTokenE),
+  ownershipInfo: OwnershipInfoE,
+})
+export type MyOfferInState = Schema.Schema.Type<typeof MyOfferInStateE>
+
+export {CurrencyCode}

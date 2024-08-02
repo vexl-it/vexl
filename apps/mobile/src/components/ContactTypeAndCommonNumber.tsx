@@ -10,7 +10,7 @@ function ContactTypeAndCommonNumber({
   friendLevel,
   numberOfCommonFriends,
 }: {
-  friendLevel: FriendLevel[]
+  friendLevel: readonly FriendLevel[]
   numberOfCommonFriends: number
   center?: boolean
 }): JSX.Element {

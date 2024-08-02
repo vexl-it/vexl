@@ -7,9 +7,24 @@ on:
 
 jobs:
   build:
-    name: Lint code
+    name: Run jest tests on all packages
     timeout-minutes: 15
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15.2
+        env:
+          POSTGRES_DB: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: root
+          POSTGRES_HOST_AUTH_METHOD: trust
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
     steps:
       - name: Check out code
         uses: actions/checkout@v3
@@ -26,4 +41,6 @@ jobs:
         run: yarn
 
       - name: Run tests
+        env:
+          TEST_DB_HOST: "postgres"
         run: yarn turbo:test

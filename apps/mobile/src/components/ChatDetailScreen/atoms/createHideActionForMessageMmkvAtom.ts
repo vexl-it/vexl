@@ -5,9 +5,11 @@ import {useCallback, useMemo} from 'react'
 import {z} from 'zod'
 import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
 
-const HideForMessageAtomType = z.object({
-  hidden: z.boolean(),
-})
+const HideForMessageAtomType = z
+  .object({
+    hidden: z.boolean(),
+  })
+  .readonly()
 
 export default function createHideActionForMessageMmkvAtom(
   messageId: ChatMessageId

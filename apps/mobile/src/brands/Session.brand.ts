@@ -4,11 +4,13 @@ import {UserNameAndUriAvatar} from '@vexl-next/domain/src/general/UserNameAndAva
 import {UserSessionCredentials} from '@vexl-next/rest-api/src/UserSessionCredentials.brand'
 import {z} from 'zod'
 
-export const Session = z.object({
-  version: z.number().int().min(0),
-  realUserData: UserNameAndUriAvatar.optional(),
-  phoneNumber: E164PhoneNumber,
-  sessionCredentials: UserSessionCredentials,
-  privateKey: KeyHolder.PrivateKeyHolder,
-})
+export const Session = z
+  .object({
+    version: z.number().int().min(0),
+    realUserData: UserNameAndUriAvatar.optional(),
+    phoneNumber: E164PhoneNumber,
+    sessionCredentials: UserSessionCredentials,
+    privateKey: KeyHolder.PrivateKeyHolder,
+  })
+  .readonly()
 export type Session = z.TypeOf<typeof Session>

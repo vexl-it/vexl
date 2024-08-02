@@ -11,11 +11,10 @@ import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import SvgImage from '../../../../Image'
 import UserDataDisplay from '../../../../LoginFlow/components/AnonymizationAnimationScreen/components/UserDataDisplay'
 import cameraSvg from '../../../images/cameraSvg'
-import {qrCodeDialogVisibleAtom, qrScannerDialogVisibleAtom} from '../atoms'
+import {qrScannerDialogAtom} from '../atoms'
 import QRIconSVG from '../images/QRIconSVG'
 import reachIconSVG from '../images/reachIconSVG'
-import QrCode from './QrCode'
-import QrScanner from './QrScanner'
+import {qrCodeDialogAtom} from './QrCode'
 
 const GrayBackContainer = styled(XStack, {
   ai: 'center',
@@ -30,8 +29,8 @@ function ProfileSection(): JSX.Element {
   const {t} = useTranslation()
   const navigation = useNavigation()
   const reachNumber = useAtomValue(reachNumberAtom)
-  const setQrCodeDialogVisible = useSetAtom(qrCodeDialogVisibleAtom)
-  const setQrScannerDialogVisible = useSetAtom(qrScannerDialogVisibleAtom)
+  const setQrCodeDialogVisible = useSetAtom(qrCodeDialogAtom)
+  const setQrScannerDialogVisible = useSetAtom(qrScannerDialogAtom)
 
   const userDataRealOrAnonymized = useAtomValue(userDataRealOrAnonymizedAtom)
   const userPhoneNumber = useAtomValue(userPhoneNumberAtom)
@@ -56,7 +55,7 @@ function ProfileSection(): JSX.Element {
         <XStack space="$2">
           <TouchableOpacity
             onPress={() => {
-              setQrCodeDialogVisible(true)
+              void setQrCodeDialogVisible()
             }}
           >
             <GrayBackContainer>
@@ -67,7 +66,7 @@ function ProfileSection(): JSX.Element {
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => {
-              setQrScannerDialogVisible(true)
+              void setQrScannerDialogVisible()
             }}
           >
             <GrayBackContainer>
@@ -82,8 +81,6 @@ function ProfileSection(): JSX.Element {
       <Text ta="center" mt="$2" col="$greyOnBlack">
         {userPhoneNumber}
       </Text>
-      <QrCode />
-      <QrScanner />
     </Stack>
   )
 }

@@ -26,7 +26,6 @@ import spokenLanguagesSvg from '../../../../images/spokenLanguagesSvg'
 import {changeLanguageActionAtom} from '../actionAtoms'
 import {
   changeCurrencyDialogVisibleAtom,
-  reportIssueDialogVisibleAtom,
   toggleScreenshotsDisabledActionAtom,
 } from '../atoms'
 import coinsIconSvg from '../images/coinsIconSvg'
@@ -47,7 +46,7 @@ import webIconSvg from '../images/webIconSvg'
 import AllowScreenshots from './AllowScreenshots'
 import ItemText from './ButtonSectionItemText'
 import ContactsImportedTitle from './ContactsImportedTitle'
-import ReportIssue from './ReportIssue'
+import ReportIssue, {reportIssueDialogAtom} from './ReportIssue'
 import SelectedCurrencyTitle from './SelectedCurrencyTitle'
 
 interface ItemProps {
@@ -108,10 +107,10 @@ function ButtonsSection(): JSX.Element {
   const navigation = useNavigation()
   const logout = useLogout()
   const showAreYouSure = useSetAtom(askAreYouSureActionAtom)
-  const setReportIssueDialogVisible = useSetAtom(reportIssueDialogVisibleAtom)
   const setChangeCurrencyDialogVisible = useSetAtom(
     changeCurrencyDialogVisibleAtom
   )
+  const setReportIssueDialogVisible = useSetAtom(reportIssueDialogAtom)
   const setSelectedCurrency = useSetAtom(selectedCurrencyAtom)
   const toggleScreenshotsDisabled = useSetAtom(
     toggleScreenshotsDisabledActionAtom
@@ -241,9 +240,7 @@ function ButtonsSection(): JSX.Element {
             text: t('settings.items.reportIssue'),
             icon: customerSupportIconSvg,
             navigatesFurther: true,
-            onPress: () => {
-              setReportIssueDialogVisible(true)
-            },
+            onPress: setReportIssueDialogVisible,
           },
           {
             testID: '@buttonsSection/inAppLogsButton',

@@ -1,8 +1,8 @@
 import {Camera, CameraView} from 'expo-camera/next'
 import * as T from 'fp-ts/Task'
 import {pipe} from 'fp-ts/function'
-import {useAtom, useSetAtom} from 'jotai'
-import {useCallback, useEffect, useMemo, useRef, useState} from 'react'
+import {useSetAtom} from 'jotai'
+import {useCallback, useEffect, useRef, useState} from 'react'
 import React, {Alert, Dimensions, Linking} from 'react-native'
 import {Stack, Text, YStack} from 'tamagui'
 import parse from 'url-parse'
@@ -13,9 +13,8 @@ import {
 } from '../../../../../utils/deepLinks/domain'
 import {processEncryptedUrlActionAtom} from '../../../../../utils/deepLinks/encryptedUrl'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
+import {forceHideAskAreYouSureActionAtom} from '../../../../AreYouSureDialog'
 import Button from '../../../../Button'
-import {qrScannerDialogVisibleAtom} from '../atoms'
-import SettingsScreenDialog from './SettingsScreenDialog'
 
 function parseDeepLink(
   link: string
@@ -34,12 +33,14 @@ const scannerStyle = {
 
 function QrScanner(): JSX.Element {
   const {t} = useTranslation()
-  const [isVisible, setVisible] = useAtom(qrScannerDialogVisibleAtom)
   const [error, setError] = useState<string | undefined>(undefined)
   const handleImportContact = useSetAtom(handleImportDeepContactActionAtom)
   const processEncryptedUrl = useSetAtom(processEncryptedUrlActionAtom)
   const scanned = useRef(false)
   const [hasPermissions, setHasPermissions] = useState(false)
+  const forceHideAskAreYouSureDialog = useSetAtom(
+    forceHideAskAreYouSureActionAtom
+  )
 
   const requestPermissions = useCallback(async () => {
     if (!(await Camera.requestCameraPermissionsAsync()).canAskAgain) {
@@ -63,17 +64,15 @@ function QrScanner(): JSX.Element {
 
   useEffect(() => {
     void (async () => {
-      if (isVisible) {
-        await requestPermissions()
-        scanned.current = false
-        setError(undefined)
-      }
+      await requestPermissions()
+      scanned.current = false
+      setError(undefined)
     })()
-  }, [isVisible, requestPermissions])
+  }, [requestPermissions])
 
   const onScanned = useCallback(
     ({data: linkdata}: {data: string}) => {
-      if (!isVisible || scanned.current) return
+      if (scanned.current) return
 
       const parsed = parseDeepLink(linkdata)
       if (!parsed) {
@@ -95,37 +94,23 @@ function QrScanner(): JSX.Element {
               setError(t('common.errorWhileReadingQrCode'))
               return
             }
-            setVisible(false)
+            forceHideAskAreYouSureDialog()
             scanned.current = true
           })
         )()
       } else if (type === LINK_TYPE_ENCRYPTED_URL) {
-        setVisible(false) // // error hanled in processEncryptedUrl
+        forceHideAskAreYouSureDialog() // // error hanled in processEncryptedUrl
         scanned.current = true
         void processEncryptedUrl(data)()
       } else {
         setError(t('common.errorWhileReadingQrCode'))
       }
     },
-    [isVisible, t, handleImportContact, setVisible, processEncryptedUrl]
+    [t, handleImportContact, forceHideAskAreYouSureDialog, processEncryptedUrl]
   )
 
-  const onClose = useCallback(() => {
-    setVisible(false)
-  }, [setVisible])
-
-  const secondaryButton = useMemo(() => {
-    return {
-      text: t('common.close'),
-    }
-  }, [t])
-
   return (
-    <SettingsScreenDialog
-      onClose={onClose}
-      secondaryButton={secondaryButton}
-      visible={isVisible}
-    >
+    <Stack>
       <YStack space="$3" height={Dimensions.get('screen').height * 0.7}>
         {error ? (
           <Text
@@ -147,7 +132,7 @@ function QrScanner(): JSX.Element {
           </Text>
         )}
         {/* Unmount barCodeScanner if not visible as advised in official documentation */}
-        {!!isVisible && !!hasPermissions && (
+        {!!hasPermissions && (
           <Stack
             borderRadius="$4"
             flex={1}
@@ -176,7 +161,7 @@ function QrScanner(): JSX.Element {
           </YStack>
         )}
       </YStack>
-    </SettingsScreenDialog>
+    </Stack>
   )
 }
 

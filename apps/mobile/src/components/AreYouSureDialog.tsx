@@ -68,6 +68,9 @@ interface AreYouSureDialogState {
 const areYouSureDialogAtom = atom<AreYouSureDialogState | null>(null)
 
 export type UserDeclinedError = BasicError<'UserDeclinedError'>
+export const forceHideAskAreYouSureActionAtom = atom(null, (_, set) => {
+  set(areYouSureDialogAtom, null)
+})
 export const askAreYouSureActionAtom: WritableAtom<
   null,
   [
@@ -77,7 +80,7 @@ export const askAreYouSureActionAtom: WritableAtom<
     >,
   ],
   TE.TaskEither<UserDeclinedError, AreYouSureDialogAtomStepResult[]>
-> = atom(null, (get, set, state) => {
+> = atom(null, (_, set, state) => {
   return () =>
     new Promise((resolve) => {
       set(areYouSureDialogAtom, {

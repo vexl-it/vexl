@@ -1,27 +1,42 @@
-import {useAtom, useAtomValue} from 'jotai'
+import {pipe} from 'fp-ts/lib/function'
+import * as TE from 'fp-ts/TaskEither'
+import {atom, useAtomValue} from 'jotai'
 import SvgQRCode from 'react-native-qrcode-svg'
 import {Stack, Text, YStack} from 'tamagui'
-import {useTranslation} from '../../../../../utils/localization/I18nProvider'
-import {encodedUserDetailsUriAtom, qrCodeDialogVisibleAtom} from '../atoms'
-import SettingsScreenDialog from './SettingsScreenDialog'
+import {
+  translationAtom,
+  useTranslation,
+} from '../../../../../utils/localization/I18nProvider'
+import {askAreYouSureActionAtom} from '../../../../AreYouSureDialog'
+import {encodedUserDetailsUriAtom} from '../atoms'
+
+export const qrCodeDialogAtom = atom(null, (get, set) => {
+  const {t} = get(translationAtom)
+
+  return pipe(
+    set(askAreYouSureActionAtom, {
+      variant: 'info',
+      steps: [
+        {
+          type: 'StepWithChildren',
+          MainSectionComponent: QrCode,
+          positiveButtonText: t('common.gotIt'),
+        },
+      ],
+    }),
+    TE.match(
+      () => {},
+      () => {}
+    )
+  )()
+})
 
 function QrCode(): JSX.Element {
   const {t} = useTranslation()
-  const [qrCodeDialogVisible, setQrCodeDialogVisible] = useAtom(
-    qrCodeDialogVisibleAtom
-  )
   const encodedUserDetailsUri = useAtomValue(encodedUserDetailsUriAtom)
 
   return (
-    <SettingsScreenDialog
-      onClose={() => {
-        setQrCodeDialogVisible(false)
-      }}
-      secondaryButton={{
-        text: t('common.gotIt'),
-      }}
-      visible={qrCodeDialogVisible}
-    >
+    <Stack>
       <YStack ai="center" space="$4">
         <Stack height={350} ai="center" jc="center">
           <SvgQRCode
@@ -34,7 +49,7 @@ function QrCode(): JSX.Element {
           {t('qrCode.joinVexl')}
         </Text>
       </YStack>
-    </SettingsScreenDialog>
+    </Stack>
   )
 }
 

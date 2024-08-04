@@ -42,7 +42,10 @@ export function healthServerLayer({
     const HealthAppLive = HealthHttpLive.pipe(
       HttpServer.serve(),
       Layer.provide(HealtServerLive),
-      Layer.tap(() => Effect.log(`Health server running on port ${port}`))
+      Layer.tap(() => Effect.log(`Health server running on port ${port}`)),
+      Layer.provide(
+        Layer.span('Health server', {attributes: {port: portOption.value}})
+      )
     )
 
     return HealthAppLive

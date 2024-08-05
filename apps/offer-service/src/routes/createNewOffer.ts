@@ -72,7 +72,7 @@ export const createNewOffer = Handler.make(
         )
       }).pipe(
         withDbTransaction,
-        withOfferAdminActionRedisLock(security['public-key']),
+        withOfferAdminActionRedisLock(req.body.adminId),
         Effect.withSpan('createNewOffer'),
         Effect.zipLeft(
           Metric.increment(makeOfferCreatedCounter(req.body.countryPrefix))

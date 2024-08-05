@@ -39,7 +39,7 @@ export const deleteOffer = Handler.make(DeleteOfferEndpoint, (req, security) =>
       return null
     }).pipe(
       withDbTransaction,
-      withOfferAdminActionRedisLock(security['public-key'])
+      withOfferAdminActionRedisLock([...req.query.adminIds])
     ),
     Schema.Void
   )

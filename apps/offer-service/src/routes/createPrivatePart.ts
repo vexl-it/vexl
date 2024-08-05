@@ -59,7 +59,7 @@ export const createPrivatePart = Handler.make(
         return null
       }).pipe(
         withDbTransaction,
-        withOfferAdminActionRedisLock(security['public-key'])
+        withOfferAdminActionRedisLock(req.body.adminId)
       ),
       Schema.Void
     )

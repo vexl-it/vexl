@@ -79,7 +79,7 @@ export const updateOffer = Handler.make(UpdateOfferEndpoint, (req, security) =>
       )
     }).pipe(
       withDbTransaction,
-      withOfferAdminActionRedisLock(security['public-key']),
+      withOfferAdminActionRedisLock(req.body.adminId),
       Effect.zipLeft(Metric.increment(offerModifiedCounter))
     ),
     UpdateOfferErrors

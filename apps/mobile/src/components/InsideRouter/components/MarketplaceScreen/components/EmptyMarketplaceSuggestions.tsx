@@ -25,6 +25,7 @@ function EmptyMarketplaceSuggestions({
 
   return (
     <ScrollView
+      showsVerticalScrollIndicator={false}
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }

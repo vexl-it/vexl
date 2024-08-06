@@ -59,7 +59,7 @@ export type RootStackParamsList = {
 
   TradeCalculatorFlow: NavigatorScreenParams<TradeCalculatorStackParamsList>
 
-  SetContacts: {showNew?: boolean} | undefined
+  SetContacts: {filter?: ContactsFilter | undefined} | undefined
 
   CommonFriends: {contactsHashes: readonly HashedPhoneNumber[]}
 
@@ -147,6 +147,7 @@ export type ContactsTabParamsList = {
   Submitted: {filter: ContactsFilter}
   NonSubmitted: {filter: ContactsFilter}
   New: {filter: ContactsFilter}
+  All: {filter: ContactsFilter}
 }
 
 export type ContactsTabScreenProps<T extends keyof ContactsTabParamsList> =

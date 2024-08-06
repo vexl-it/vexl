@@ -3,24 +3,86 @@ import {
   type MaterialTopTabBarProps,
 } from '@react-navigation/material-top-tabs'
 import {ScopeProvider, useMolecule} from 'bunshi/dist/react'
-import {useSetAtom, useStore} from 'jotai'
+import {useAtomValue, useSetAtom, useStore} from 'jotai'
 import React, {useEffect, useMemo, useState} from 'react'
-import {Stack, XStack} from 'tamagui'
+import {getTokens, ScrollView, Stack, Text} from 'tamagui'
 import {type ContactsTabParamsList} from '../../../../navigationTypes'
 import {
   normalizedContactsAtom,
   resolveAllContactsAsSeenActionAtom,
 } from '../../../../state/contacts/atom/contactsStore'
+import {type ContactsFilter} from '../../../../state/contacts/domain'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../../../utils/useSafeGoBack'
 import Button from '../../../Button'
 import NormalizeContactsWithLoadingScreen from '../../../NormalizeContactsWithLoadingScreen'
 import WhiteContainer from '../../../WhiteContainer'
-import {ContactsSelectScope, contactSelectMolecule} from './atom'
+import {contactSelectMolecule, ContactsSelectScope} from './atom'
 import FilteredContacts from './components/FilteredContactsWithProvider'
 import SearchBar from './components/SearchBar'
 
 const Tab = createMaterialTopTabNavigator<ContactsTabParamsList>()
+
+function ContactsCountIndicator({
+  isFocused,
+  routeName,
+}: {
+  isFocused: boolean
+  routeName: string
+}): JSX.Element | null {
+  const {
+    newContactsToDisplayCountAtom,
+    submittedContactsToDisplayCountAtom,
+    nonSubmittedContactsToDisplayCountAtom,
+    allContactsWithSearchActiveToDisplayCountAtom,
+    displayContactsCountAtom,
+  } = useMolecule(contactSelectMolecule)
+
+  const displayContactsCount = useAtomValue(displayContactsCountAtom)
+  const newContactsToDisplayCount = useAtomValue(newContactsToDisplayCountAtom)
+  const submittedContactsToDisplayCount = useAtomValue(
+    submittedContactsToDisplayCountAtom
+  )
+  const nonSubmittedContactsToDisplayCount = useAtomValue(
+    nonSubmittedContactsToDisplayCountAtom
+  )
+  const allContactsWithSearchActiveToDisplayCount = useAtomValue(
+    allContactsWithSearchActiveToDisplayCountAtom
+  )
+
+  const contactsCount =
+    routeName === 'New'
+      ? newContactsToDisplayCount
+      : routeName === 'Submitted'
+        ? submittedContactsToDisplayCount
+        : routeName === 'NonSubmitted'
+          ? nonSubmittedContactsToDisplayCount
+          : allContactsWithSearchActiveToDisplayCount
+
+  return displayContactsCount ? (
+    <Stack
+      position="absolute"
+      top={-10}
+      right={-5}
+      px="$1"
+      py={2}
+      minWidth={20}
+      borderRadius="$2"
+      backgroundColor={isFocused ? '$grey' : '$main'}
+      alignItems="center"
+      justifyContent="center"
+      zi="$10"
+    >
+      <Text
+        fontSize={14}
+        fontFamily="$body500"
+        col={isFocused ? '$greyOnBlack' : '$darkBrown'}
+      >
+        {contactsCount}
+      </Text>
+    </Stack>
+  ) : null
+}
 
 function CustomTabBar({
   state,
@@ -28,30 +90,48 @@ function CustomTabBar({
   navigation,
 }: MaterialTopTabBarProps): JSX.Element {
   return (
-    <XStack ai="center" space="$2" px="$4">
-      {state.routes.map((route, index) => {
-        // as any to solve ts error, that options does not exist
-        const {options} = descriptors[route.key] as any
-        const isFocused = state.index === index
+    <Stack>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        space="$2"
+        contentContainerStyle={{
+          alignSelf: 'flex-start',
+          alignItems: 'center',
+          paddingHorizontal: getTokens().space[4].val,
+          paddingTop: getTokens().space[4].val,
+        }}
+      >
+        {state.routes.map((route, index) => {
+          // as any to solve ts error, that options does not exist
+          const {options} = descriptors[route.key] as any
+          const isFocused = state.index === index
 
-        return (
-          <Button
-            testID={`@customTabBar/tab${route.name}`}
-            key={options.tabBarLabel}
-            onPress={() => {
-              navigation.navigate(route.name, route.params)
-            }}
-            variant={isFocused ? 'secondary' : 'blackOnDark'}
-            size="small"
-            text={options.tabBarLabel}
-          />
-        )
-      })}
-    </XStack>
+          return (
+            <Stack key={options.tabBarLabel}>
+              <ContactsCountIndicator
+                isFocused={isFocused}
+                routeName={route.name}
+              />
+              <Button
+                key={options.tabBarLabel}
+                testID={`@customTabBar/tab${route.name}`}
+                onPress={() => {
+                  navigation.navigate(route.name, route.params)
+                }}
+                variant={isFocused ? 'secondary' : 'blackOnDark'}
+                size="small"
+                text={options.tabBarLabel}
+              />
+            </Stack>
+          )
+        })}
+      </ScrollView>
+    </Stack>
   )
 }
 
-function ContactsListSelect(): JSX.Element {
+function ContactsListSelect({filter}: {filter?: ContactsFilter}): JSX.Element {
   const {t} = useTranslation()
   const goBack = useSafeGoBack()
   const {submitAllSelectedContactsActionAtom} = useMolecule(
@@ -77,11 +157,20 @@ function ContactsListSelect(): JSX.Element {
         <Stack f={1}>
           <SearchBar />
           <Tab.Navigator
+            initialRouteName={filter === 'new' ? 'New' : 'All'}
             screenOptions={{
               animationEnabled: true,
             }}
             tabBar={CustomTabBar}
           >
+            <Tab.Screen
+              name="All"
+              options={{
+                tabBarLabel: t('postLoginFlow.contactsList.all'),
+              }}
+              initialParams={{filter: 'all'}}
+              component={FilteredContacts}
+            />
             <Tab.Screen
               name="New"
               options={{
@@ -125,7 +214,11 @@ function ContactsListSelect(): JSX.Element {
   )
 }
 
-export function ContactListSelectWithProvider(): JSX.Element {
+export function ContactListSelectWithProvider({
+  filter,
+}: {
+  filter?: ContactsFilter
+}): JSX.Element {
   const store = useStore()
   const [reloadContactsValue, setReloadContacts] = useState(0)
 
@@ -145,15 +238,19 @@ export function ContactListSelectWithProvider(): JSX.Element {
         },
       }}
     >
-      <ContactsListSelect />
+      <ContactsListSelect filter={filter} />
     </ScopeProvider>
   )
 }
 
-export default function ContactListWithLoadStep(): JSX.Element {
+export default function ContactListWithLoadStep({
+  filter,
+}: {
+  filter?: ContactsFilter
+}): JSX.Element {
   return (
     <NormalizeContactsWithLoadingScreen>
-      <ContactListSelectWithProvider />
+      <ContactListSelectWithProvider filter={filter} />
     </NormalizeContactsWithLoadingScreen>
   )
 }

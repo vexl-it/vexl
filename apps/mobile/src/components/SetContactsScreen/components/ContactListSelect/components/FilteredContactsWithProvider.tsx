@@ -10,7 +10,9 @@ import AddContactRow from './AddContactRow'
 import ContactsList from './ContactsList'
 import ContactsListEmpty from './ContactsListEmpty'
 
-type Props = ContactsTabScreenProps<'Submitted' | 'NonSubmitted' | 'New'>
+type Props = ContactsTabScreenProps<
+  'Submitted' | 'NonSubmitted' | 'New' | 'All'
+>
 
 function FilteredContacts({
   route: {
@@ -23,6 +25,7 @@ function FilteredContacts({
     newContactsToDisplayAtomsAtom,
     submittedContactsToDisplayAtomsAtom,
     nonSubmittedContactsToDisplayAtomsAtom,
+    allContactsWithSearchActiveToDisplayAtomsAtom,
   } = useMolecule(contactSelectMolecule)
   const customContactToAdd = useAtomValue(searchTextAsCustomContactAtom)
   const toDisplay = useAtomValue(
@@ -30,7 +33,9 @@ function FilteredContacts({
       ? newContactsToDisplayAtomsAtom
       : filter === 'submitted'
         ? submittedContactsToDisplayAtomsAtom
-        : nonSubmittedContactsToDisplayAtomsAtom
+        : filter === 'nonSubmitted'
+          ? nonSubmittedContactsToDisplayAtomsAtom
+          : allContactsWithSearchActiveToDisplayAtomsAtom
   )
 
   const setContactsFilter = useSetAtom(contactsFilterAtom)

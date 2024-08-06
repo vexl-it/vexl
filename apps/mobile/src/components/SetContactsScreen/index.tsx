@@ -13,7 +13,7 @@ import ContactsListSelect from './components/ContactListSelect'
 
 type Props = RootStackScreenProps<'SetContacts'>
 
-function SetContactsScreen({route}: Props): JSX.Element {
+function SetContactsScreen({route: {params}}: Props): JSX.Element {
   const {t} = useTranslation()
   const loadingContactsFromDevice = useAtomValue(loadingContactsFromDeviceAtom)
 
@@ -35,7 +35,7 @@ function SetContactsScreen({route}: Props): JSX.Element {
                 />
               </Stack>
             ) : (
-              <ContactsListSelect />
+              <ContactsListSelect filter={params?.filter} />
             )}
           </Stack>
         </KeyboardAvoidingView>

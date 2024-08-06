@@ -16,7 +16,17 @@ import {
 import {devToolsLayer} from './devToolsLayer'
 
 const logger = isRunningInProductionConfig.pipe(
-  Effect.map((inProd) => (inProd ? Logger.json : Logger.pretty)),
+  Effect.map((inProd) =>
+    Logger.replace(
+      Logger.defaultLogger,
+      inProd
+        ? Logger.jsonLogger.pipe(
+            Logger.withSpanAnnotations,
+            Logger.withConsoleLog
+          )
+        : Logger.prettyLogger()
+    )
+  ),
   Layer.unwrapEffect
 )
 

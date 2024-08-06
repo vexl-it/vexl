@@ -13,6 +13,7 @@ import {
   createDeleteAllPrivatePartsForAdminId,
   type DeleteAllPrivatePartsForAdminIdRequest,
 } from './queries/createDeleteAllPrivatePartsForAdminId'
+import {createDeleteOfferReportedRecordByReportedAtBefore} from './queries/createDeleteOfferReportedRecordByReportedAtBefore'
 import {
   createDeletePrivatePart,
   type DeletePrivatePartRequest,
@@ -113,6 +114,10 @@ export interface OfferDbOperations {
   deleteAllPrivatePartsForAdminId: (
     args: DeleteAllPrivatePartsForAdminIdRequest
   ) => Effect.Effect<void, UnexpectedServerError>
+
+  deleteOfferReportedRecordByReportedAtBefore: (
+    args: number
+  ) => Effect.Effect<void, UnexpectedServerError>
 }
 
 export class OfferDbService extends Context.Tag('OfferDbService')<
@@ -144,6 +149,9 @@ export class OfferDbService extends Context.Tag('OfferDbService')<
         deletePrivatePart: yield* _(createDeletePrivatePart),
         deleteAllPrivatePartsForAdminId: yield* _(
           createDeleteAllPrivatePartsForAdminId
+        ),
+        deleteOfferReportedRecordByReportedAtBefore: yield* _(
+          createDeleteOfferReportedRecordByReportedAtBefore
         ),
       }
     })

@@ -121,6 +121,8 @@ export const UpdateOfferEndpoint = Api.put('updateOffer', '/api/v2/offers', {
   })
 )
 
+export const CreatePrivatPartErrors = Schema.Union(DuplicatedPublicKeyError)
+
 export const CreatePrivatePartEndpoint = Api.post(
   'createPrivatePart',
   '/api/v2/offers/private-part',
@@ -128,7 +130,11 @@ export const CreatePrivatePartEndpoint = Api.post(
 ).pipe(
   Api.setSecurity(ServerSecurity),
   Api.setRequestBody(CreatePrivatePartRequestE),
-  Api.setResponseBody(CreatePrivatePartResponseE)
+  Api.setResponseBody(CreatePrivatePartResponseE),
+  Api.addResponse({
+    status: 400 as const,
+    body: DuplicatedPublicKeyError,
+  })
 )
 
 export const DeletePrivatePartErrors = Schema.Union(

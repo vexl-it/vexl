@@ -70,7 +70,7 @@ export const deletePrivatePart = Handler.make(
         return null
       }).pipe(
         withDbTransaction,
-        withOfferAdminActionRedisLock(security['public-key']),
+        withOfferAdminActionRedisLock([...req.body.adminIds]),
         withDbTransaction
       ),
       DeletePrivatePartErrors

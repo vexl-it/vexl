@@ -4,9 +4,11 @@ import {PgClient} from '@effect/sql-pg'
 import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {Array, Effect, flow, Option} from 'effect'
+import {reportLimitIntervalDaysConfig} from '../../../configs'
 
 export const createQueryNumberOfReportsForUser = Effect.gen(function* (_) {
   const sql = yield* _(PgClient.PgClient)
+  const reportLimitIntervalDays = yield* _(reportLimitIntervalDaysConfig)
 
   const QueryOffers = yield* _(
     SqlResolver.grouped('NumberOfReportsForUser', {
@@ -25,7 +27,14 @@ export const createQueryNumberOfReportsForUser = Effect.gen(function* (_) {
           FROM
             offer_reported_record
           WHERE
-            ${sql.in('user_public_key', query)}
+            ${sql.and([
+            sql.in('user_public_key', query),
+            sql`
+              reported_at >= (
+                now() - interval '1 DAY' * ${reportLimitIntervalDays}
+              )::date
+            `,
+          ])}
           GROUP BY
             user_public_key
         `

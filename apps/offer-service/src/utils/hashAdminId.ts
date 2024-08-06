@@ -7,7 +7,7 @@ import {type ConfigError, Effect} from 'effect'
 import {easKey} from '../configs'
 import {OfferAdminIdHashed} from '../db/OfferDbService/domain'
 
-const brandofferAdminIdHashed = Schema.decodeSync(OfferAdminIdHashed)
+const brandOfferAdminIdHashed = Schema.decodeSync(OfferAdminIdHashed)
 
 export const hashAdminId = (
   adminId: OfferAdminId
@@ -28,6 +28,6 @@ export const hashAdminId = (
           Effect.fail(new UnexpectedServerError({status: 500}))
         )
       ),
-      Effect.map(brandofferAdminIdHashed)
+      Effect.map(brandOfferAdminIdHashed)
     )
   })

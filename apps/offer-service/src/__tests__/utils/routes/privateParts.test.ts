@@ -14,6 +14,7 @@ import {
 } from '@vexl-next/domain/src/general/offers'
 import {
   CanNotDeletePrivatePartOfAuthor,
+  DuplicatedPublicKeyError,
   type CreateNewOfferRequest,
   type CreateNewOfferResponse,
 } from '@vexl-next/rest-api/src/services/offer/contracts'
@@ -123,6 +124,57 @@ describe('Create private part', () => {
         `)
 
         expect(privatePartInDb.at(0)).toBeTruthy()
+      })
+    )
+  })
+
+  it('Returns proper error when trying to create with duplicates', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const client = yield* _(NodeTestingApp)
+        const payloadPrivate = Schema.decodeSync(PrivatePayloadEncryptedE)(
+          'addedPrivatePayload'
+        )
+        const userPublicKey = generatePrivateKey().publicKeyPemBase64
+        const result = yield* _(
+          client.createPrivatePart(
+            {
+              body: {
+                adminId: offer1.adminId,
+                offerPrivateList: [
+                  {
+                    payloadPrivate,
+                    userPublicKey,
+                  },
+                  {
+                    payloadPrivate,
+                    userPublicKey,
+                  },
+                ],
+              },
+            },
+            HttpClientRequest.setHeaders(
+              yield* _(
+                createDummyAuthHeadersForUser({
+                  phoneNumber:
+                    Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
+                  publicKey: me.publicKeyPemBase64,
+                })
+              )
+            )
+          ),
+          Effect.either
+        )
+
+        expect(result._tag === 'Left')
+        if (result._tag === 'Left') {
+          expect(result.left).toHaveProperty('status', 400)
+          expect(
+            Schema.decodeUnknownEither(DuplicatedPublicKeyError)(
+              result.left.error
+            )
+          ).toHaveProperty('_tag', 'Right')
+        }
       })
     )
   })

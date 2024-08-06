@@ -1,7 +1,13 @@
-import {Schema} from '@effect/schema'
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
-import {CreatePrivatePartEndpoint} from '@vexl-next/rest-api/src/services/offer/specification'
+import {
+  DuplicatedPublicKeyError,
+  type ServerPrivatePart,
+} from '@vexl-next/rest-api/src/services/offer/contracts'
+import {
+  CreatePrivatePartEndpoint,
+  CreatePrivatPartErrors,
+} from '@vexl-next/rest-api/src/services/offer/specification'
 import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
 import {Array, Effect, Option} from 'effect'
@@ -10,12 +16,29 @@ import {OfferDbService} from '../db/OfferDbService'
 import {hashAdminId} from '../utils/hashAdminId'
 import {withOfferAdminActionRedisLock} from '../utils/withOfferAdminRedisLock'
 
+const isWithoutDuplicates = (
+  privateList: readonly ServerPrivatePart[]
+): boolean => {
+  const deduped = Array.dedupeWith<readonly ServerPrivatePart[]>(
+    (a, b) => a.userPublicKey === b.userPublicKey
+  )(privateList)
+
+  return Array.length(deduped) === Array.length(privateList)
+}
+
 export const createPrivatePart = Handler.make(
   CreatePrivatePartEndpoint,
-  (req, security) =>
+  (req) =>
     makeEndpointEffect(
       Effect.gen(function* (_) {
         const offerDbService = yield* _(OfferDbService)
+
+        if (!isWithoutDuplicates(req.body.offerPrivateList)) {
+          return yield* _(
+            Effect.fail(new DuplicatedPublicKeyError({status: 400}))
+          )
+        }
+
         const adminIdHashed = yield* _(hashAdminId(req.body.adminId))
 
         const offer = yield* _(
@@ -49,11 +72,14 @@ export const createPrivatePart = Handler.make(
         )
 
         yield* _(
-          Effect.forEach(req.body.offerPrivateList, (privatePart) =>
-            offerDbService.insertOfferPrivatePart({
-              ...privatePart,
-              offerId: offer.value.id,
-            })
+          Effect.forEach(
+            req.body.offerPrivateList,
+            (privatePart) =>
+              offerDbService.insertOfferPrivatePart({
+                ...privatePart,
+                offerId: offer.value.id,
+              }),
+            {batching: true}
           )
         )
         return null
@@ -61,6 +87,6 @@ export const createPrivatePart = Handler.make(
         withDbTransaction,
         withOfferAdminActionRedisLock(req.body.adminId)
       ),
-      Schema.Void
+      CreatePrivatPartErrors
     )
 )

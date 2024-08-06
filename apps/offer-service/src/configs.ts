@@ -19,7 +19,7 @@ export const expirationPeriodDaysConfig = Config.number(
   'EXPIRATION_PERIOD_DAYS'
 )
 export const offerReportFilterConfig = Config.number('OFFER_REPORT_FILTER')
-export const reportLimitIntervalDays = Config.number(
+export const reportLimitIntervalDaysConfig = Config.number(
   'REPORT_LIMIT_INTERVAL_DAYS'
 )
-export const reportLimitCount = Config.number('REPORT_LIMIT_COUNT')
+export const reportLimitCountConfig = Config.number('REPORT_LIMIT_COUNT')

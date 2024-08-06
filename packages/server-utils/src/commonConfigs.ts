@@ -78,3 +78,7 @@ export const metricsConfig = Config.option(
     prometheusEndpoint: Config.string('PROMETHEUS_ENDPOINT'),
   })
 )
+
+export const internalServerPortConfig = Config.option(
+  Config.number('INTERNAL_SERVER_PORT')
+)

@@ -39,7 +39,6 @@ export const createInsertOfferPrivatePart = Effect.gen(function* (_) {
     InsertOfferPrivateParts.execute,
     Effect.catchAll((e) =>
       Effect.zipRight(
-        // TODO find out if offer already exists and throw appropriatte error (with that id)
         Effect.logError('Error inserting offer private part', e),
         Effect.fail(new UnexpectedServerError({status: 500}))
       )

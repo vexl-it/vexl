@@ -15,6 +15,7 @@ import {
 } from './configs'
 import DbLayer from './db/layer'
 import {OfferDbService} from './db/OfferDbService'
+import {InternalServerLive} from './internalServer'
 import {createNewOffer} from './routes/createNewOffer'
 import {createPrivatePart} from './routes/createPrivatePart'
 import {deleteOffer} from './routes/deleteOffer'
@@ -43,11 +44,11 @@ export const app = RouterBuilder.make(OfferApiSpecification).pipe(
   setupLoggingMiddlewares
 )
 
-const MainLive = Layer.mergeAll(
-  ServerCrypto.layer(cryptoConfig),
-  healthServerLayer({port: healthServerPortConfig}),
-  OfferDbService.Live
-).pipe(
+const MainLive = Layer.empty.pipe(
+  Layer.provideMerge(InternalServerLive),
+  Layer.provideMerge(ServerCrypto.layer(cryptoConfig)),
+  Layer.provideMerge(healthServerLayer({port: healthServerPortConfig})),
+  Layer.provideMerge(OfferDbService.Live),
   Layer.provideMerge(DbLayer),
   Layer.provideMerge(RedisService.layer(redisUrl)),
   Layer.provideMerge(NodeContext.layer)

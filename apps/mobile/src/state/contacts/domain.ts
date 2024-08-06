@@ -81,6 +81,11 @@ export function hasComputedValues(
   return !!contact.computedValues
 }
 
-export const ContactsFilter = z.enum(['submitted', 'nonSubmitted', 'new'])
+export const ContactsFilter = z.enum([
+  'submitted',
+  'nonSubmitted',
+  'new',
+  'all',
+])
 
 export type ContactsFilter = z.TypeOf<typeof ContactsFilter>

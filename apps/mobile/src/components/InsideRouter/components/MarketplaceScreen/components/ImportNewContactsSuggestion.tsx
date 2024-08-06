@@ -12,7 +12,7 @@ function ImportNewContactsSuggestion(props: YStackProps): JSX.Element {
     <MarketplaceSuggestion
       buttonText={t('suggestion.importNow')}
       onButtonPress={() => {
-        navigation.navigate('SetContacts', {showNew: true})
+        navigation.navigate('SetContacts', {filter: 'new'})
       }}
       text={t('suggestion.importNewlyAddedContacts')}
       visibleStateAtom={resolveAllContactsAsSeenActionAtom}

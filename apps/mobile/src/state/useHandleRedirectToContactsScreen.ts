@@ -19,7 +19,7 @@ export function useHandleRedirectToContactsScreen(): void {
           console.info(
             '👉 Redirect to Contacts screen after contacts permissions change'
           )
-          navigation.navigate('SetContacts')
+          navigation.navigate('SetContacts', {filter: 'new'})
           setWasLastRouteBeforeRedirectOnContactsScreen({value: false})
         }
       },

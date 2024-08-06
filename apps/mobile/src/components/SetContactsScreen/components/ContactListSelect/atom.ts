@@ -41,7 +41,7 @@ export const contactSelectMolecule = molecule((_, getScope) => {
   const {normalizedContacts, reloadContacts} = getScope(ContactsSelectScope)
 
   const searchTextAtom = atom('')
-  const contactsFilterAtom = atom<ContactsFilter>('submitted')
+  const contactsFilterAtom = atom<ContactsFilter>('all')
 
   const newContactsToDisplayAtom = atom((get) => {
     const searchText = get(searchTextAtom)
@@ -85,6 +85,20 @@ export const contactSelectMolecule = molecule((_, getScope) => {
     })
   })
 
+  const allContactsWithSearchActiveToDisplayAtom = atom((get) => {
+    const searchText = get(searchTextAtom)
+
+    const normalizedNumbers = deduplicateBy(
+      normalizedContacts,
+      (one) => one.computedValues.normalizedNumber
+    )
+
+    return matchSorter(normalizedNumbers, searchText, {
+      keys: matchSorterKeys,
+      threshold: matchSorterThreshold,
+    })
+  })
+
   const _contactsToDisplayAtom = atom((get) => {
     const contactsFilter = get(contactsFilterAtom)
 
@@ -104,6 +118,24 @@ export const contactSelectMolecule = molecule((_, getScope) => {
   const nonSubmittedContactsToDisplayAtomsAtom = splitAtom(
     nonSubmittedContactsToDisplayAtom
   )
+  const allContactsWithSearchActiveToDisplayAtomsAtom = splitAtom(
+    allContactsWithSearchActiveToDisplayAtom
+  )
+
+  const newContactsToDisplayCountAtom = atom(
+    (get) => get(newContactsToDisplayAtomsAtom).length
+  )
+  const submittedContactsToDisplayCountAtom = atom(
+    (get) => get(submittedContactsToDisplayAtomsAtom).length
+  )
+  const nonSubmittedContactsToDisplayCountAtom = atom(
+    (get) => get(nonSubmittedContactsToDisplayAtomsAtom).length
+  )
+  const allContactsWithSearchActiveToDisplayCountAtom = atom(
+    (get) => get(allContactsWithSearchActiveToDisplayAtomsAtom).length
+  )
+
+  const displayContactsCountAtom = atom((get) => !!get(searchTextAtom))
 
   const selectedSubmittedNumbersAtom = atom(
     new Set(
@@ -137,11 +169,13 @@ export const contactSelectMolecule = molecule((_, getScope) => {
     (get) => {
       const contactsFilter = get(contactsFilterAtom)
       return get(
-        contactsFilter === 'submitted'
-          ? selectedSubmittedNumbersAtom
-          : contactsFilter === 'nonSubmitted'
-            ? selectedNonSubmittedNumbersAtom
-            : selectedNewNumbersAtom
+        contactsFilter === 'all'
+          ? _allSelectedNumbersAtom
+          : contactsFilter === 'submitted'
+            ? selectedSubmittedNumbersAtom
+            : contactsFilter === 'nonSubmitted'
+              ? selectedNonSubmittedNumbersAtom
+              : selectedNewNumbersAtom
       )
     },
     (get, set, numbers: SetStateAction<Set<E164PhoneNumber>>) => {
@@ -394,5 +428,11 @@ export const contactSelectMolecule = molecule((_, getScope) => {
     nonSubmittedContactsToDisplayAtomsAtom,
     submittedContactsToDisplayAtomsAtom,
     newContactsToDisplayAtomsAtom,
+    allContactsWithSearchActiveToDisplayAtomsAtom,
+    newContactsToDisplayCountAtom,
+    submittedContactsToDisplayCountAtom,
+    nonSubmittedContactsToDisplayCountAtom,
+    allContactsWithSearchActiveToDisplayCountAtom,
+    displayContactsCountAtom,
   }
 })

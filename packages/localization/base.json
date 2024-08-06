@@ -276,6 +276,7 @@
   "postLoginFlow.contactsList.submitted": "Submitted",
   "postLoginFlow.contactsList.new": "New",
   "postLoginFlow.contactsList.nonSubmitted": "Non-submitted",
+  "postLoginFlow.contactsList.all": "All",
   "postLoginFlow.allowNotifications.title": "Enable notifications",
   "postLoginFlow.allowNotifications.text": "Enabling notifications allows you to find out when others accept your request or you receive a message.",
   "postLoginFlow.allowNotifications.action": "Allow",

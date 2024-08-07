@@ -191,7 +191,10 @@ export const VerifyChallengeEndpoint = Api.post(
   })
 )
 
-export const LogoutUserEndpoint = Api.delete('logoutUser', '/user/me').pipe(
+export const LogoutUserEndpoint = Api.delete(
+  'logoutUser',
+  '/api/v1/user/me'
+).pipe(
   Api.setSecurity(ServerSecurity),
   Api.setResponseBody(Schema.String),
   Api.setResponseStatus(299 as const)

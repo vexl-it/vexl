@@ -3,6 +3,7 @@ import {z} from 'zod'
 
 export const CurrencyCode = z.enum([
   'AED',
+  'ALL',
   'ANG',
   'AOA',
   'ARS',
@@ -142,6 +143,7 @@ export const CurrencyCode = z.enum([
 
 export const CurrencyCodeE = Schema.Literal(
   'AED',
+  'ALL',
   'ANG',
   'AOA',
   'ARS',

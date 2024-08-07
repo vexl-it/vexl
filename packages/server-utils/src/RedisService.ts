@@ -117,6 +117,10 @@ export class RedisService extends Context.Tag('RedisService')<
               acquireLockEffect(resources, duration),
               () => program,
               releaseLockEffect
+            ).pipe(
+              Effect.withSpan('Redis lock', {
+                attributes: {resources, duration},
+              })
             )
 
         const getString = (
@@ -137,7 +141,8 @@ export class RedisService extends Context.Tag('RedisService')<
                 Effect.logError('Error while reading reddis', e, key),
                 Effect.fail(new RedisError({originalError: e}))
               )
-            )
+            ),
+            Effect.withSpan('Redis get', {attributes: {key}})
           )
 
         const setString = (
@@ -157,7 +162,8 @@ export class RedisService extends Context.Tag('RedisService')<
                 Effect.logError('Error while writing to reddis', e, key),
                 Effect.fail(new RedisError({originalError: e}))
               )
-            )
+            ),
+            Effect.withSpan('Redis set', {attributes: {key, value, expiresAt}})
           )
         }
 
@@ -169,9 +175,7 @@ export class RedisService extends Context.Tag('RedisService')<
                 cb(Effect.fail(new RedisError({originalError: err})))
               } else cb(Effect.succeed(Effect.void))
             })
-          })
-
-        // yield* _(Effect.addFinalizer(Effect.sync(() => redisClient.quit())) // TODO
+          }).pipe(Effect.withSpan('Redis delete', {attributes: {key}}))
 
         const toReturn: RedisOperations = {
           get: (schema) => {

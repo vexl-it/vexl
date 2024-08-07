@@ -14,7 +14,7 @@ import {
   type HmacHash,
 } from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {Effect} from 'effect'
-import {generateUserAuthData} from '../generateUserAuthData'
+import {generateUserAuthData, hashPhoneNumber} from '../generateUserAuthData'
 import {type ServerCrypto} from '../ServerCrypto'
 
 export const DUMMY_PHONE_NUMBER =
@@ -41,10 +41,13 @@ export const createDummyAuthHeadersForUser = ({
   CryptoError,
   ServerCrypto
 > =>
-  generateUserAuthData({
-    phoneNumber,
-    publicKey,
-  }).pipe(
+  hashPhoneNumber(phoneNumber).pipe(
+    Effect.flatMap((hashedPhoneNumber) =>
+      generateUserAuthData({
+        phoneNumberHashed: hashedPhoneNumber,
+        publicKey,
+      })
+    ),
     Effect.map((auth) => ({
       ...auth,
       'public-key': publicKey,

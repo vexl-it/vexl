@@ -1,7 +1,8 @@
 import {Schema} from '@effect/schema'
 import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
-import {E164PhoneNumberE} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
+import {CountryPrefixE} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {UnixMillisecondsE} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {HmacHash} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {
   PhoneNumberVerificationId,
   VerificationChallenge,
@@ -10,7 +11,8 @@ import {TwilioVerificationSid} from '../../utils/twilio'
 
 export const ChallengeVerificationState = Schema.Struct({
   publicKey: PublicKeyPemBase64E,
-  phoneNumber: E164PhoneNumberE,
+  countryPrefix: CountryPrefixE,
+  phoneNumber: HmacHash,
   expiresAt: UnixMillisecondsE,
   challenge: VerificationChallenge,
 })
@@ -24,14 +26,16 @@ export const PhoneVerificationState = Schema.Union(
     id: PhoneNumberVerificationId,
     type: Schema.Literal('twilioSmsVerification'),
     sid: TwilioVerificationSid,
-    phoneNumber: E164PhoneNumberE,
+    phoneNumber: HmacHash,
+    countryPrefix: CountryPrefixE,
     expiresAt: UnixMillisecondsE,
   }),
   Schema.Struct({
     id: PhoneNumberVerificationId,
     type: Schema.Literal('staticCodeVerification'),
     code: Schema.String,
-    phoneNumber: E164PhoneNumberE,
+    phoneNumber: HmacHash,
+    countryPrefix: CountryPrefixE,
     expiresAt: UnixMillisecondsE,
   })
 )

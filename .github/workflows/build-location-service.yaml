@@ -58,3 +58,5 @@ jobs:
             ghcr.io/vexl-it/location-service:latest
             ghcr.io/vexl-it/location-service:${{inputs.env}}-${{ github.sha }}
             ${{ steps.login-ecr.outputs.registry }}/location-service:${{inputs.env}}-${{ github.sha }}
+          build-args: |
+            SERVICE_VERSION=${{ github.sha }}

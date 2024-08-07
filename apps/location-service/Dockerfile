@@ -14,6 +14,11 @@ RUN yarn build
 FROM node:19 as runner
 
 
+ARG SERVICE_VERSION
+
+ENV SERVICE_VERSION=${SERVICE_VERSION}
+ENV SERVICE_NAME="Location service"
+
 COPY --from=builder /app/apps/location-service/ /app/apps/location-service
 COPY --from=builder /app/node_modules /app/node_modules
 COPY --from=builder /app/package.json /app/package.json

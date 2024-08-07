@@ -17,12 +17,14 @@ import userSvg from '../images/userSvg'
 import {
   initializeOffersFilterOnDisplayActionAtom,
   listingTypeAtom,
+  offerTypeAtom,
   resetFilterOmitTextFilterActionAtom,
   saveFilterActionAtom,
   sortingAtom,
 } from './atom'
 import BaseFilter from './components/BaseFilter'
 import Sorting from './components/Sorting'
+import useAllOffersFilterContent from './useAllOffersFilterContent'
 import useBtcOffersFilterContent from './useBtcOffersFilterContent'
 import useOtherOffersFilterContent from './useOtherOffersFilterContent'
 import useProductOffersFilterContent from './useProductOffersFilterContent'
@@ -40,7 +42,9 @@ function FilterOffersScreen(): JSX.Element {
   const btcOffersFilterContent = useBtcOffersFilterContent()
   const productOffersFilterContent = useProductOffersFilterContent()
   const otherOffersFilterContent = useOtherOffersFilterContent()
+  const allOffersFilterContent = useAllOffersFilterContent()
   const listingType = useAtomValue(listingTypeAtom)
+  const offerType = useAtomValue(offerTypeAtom)
   const saveFilter = useSetAtom(saveFilterActionAtom)
   const resetFilterOmitTextFilter = useSetAtom(
     resetFilterOmitTextFilterActionAtom
@@ -87,23 +91,25 @@ function FilterOffersScreen(): JSX.Element {
         <Section title={t('filterOffers.sorting')} image={sortingSvg}>
           <Sorting sortingAtom={sortingAtom} />
         </Section>
-        {listingType ? (
-          <FilterForm
-            content={
-              listingType === 'OTHER'
-                ? otherOffersFilterContent
-                : listingType === 'PRODUCT'
-                  ? productOffersFilterContent
-                  : btcOffersFilterContent
-            }
-          />
-        ) : (
+        {!listingType && !offerType ? (
           <XStack ai="center" jc="center" gap="$1">
             <SvgImage source={infoSvg} fill={tokens.color.white.val} />
             <Text col="white">
               {t('filterOffers.pleaseSelectListingTypeFirst')}
             </Text>
           </XStack>
+        ) : (
+          <FilterForm
+            content={
+              !listingType
+                ? allOffersFilterContent
+                : listingType === 'OTHER'
+                  ? otherOffersFilterContent
+                  : listingType === 'PRODUCT'
+                    ? productOffersFilterContent
+                    : btcOffersFilterContent
+            }
+          />
         )}
       </ScrollView>
       <Stack px="$4" py="$4" bc="transparent">

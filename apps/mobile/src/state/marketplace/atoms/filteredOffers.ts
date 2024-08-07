@@ -140,6 +140,55 @@ const filterProductAndOtherOffersAtom = atom((get) => {
   )
 })
 
+const filterOffersIgnoreListingTypeAtom = atom((get) => {
+  const offersToSeeInMarketplace = get(offersToSeeInMarketplaceAtom)
+  const filter = get(offersFilterFromStorageAtom)
+  const layoutMode = get(marketplaceLayoutModeAtom)
+
+  return offersToSeeInMarketplace.filter(
+    (offer) =>
+      (!filter.currency ||
+        filter.currency.includes(offer.offerInfo.publicPart.currency)) &&
+      (layoutMode === 'list' ||
+        offer.offerInfo.publicPart.location.length > 0) &&
+      (!filter.locationState ||
+        areIncluded(
+          filter.locationState,
+          offer.offerInfo.publicPart.locationState
+        )) &&
+      (!filter.paymentMethod ||
+        areIncluded(
+          filter.paymentMethod,
+          offer.offerInfo.publicPart.paymentMethod
+        )) &&
+      (!filter.btcNetwork ||
+        areIncluded(
+          filter.btcNetwork,
+          offer.offerInfo.publicPart.btcNetwork
+        )) &&
+      (!filter.friendLevel ||
+        (filter.friendLevel.includes('FIRST_DEGREE') &&
+        !filter.friendLevel.includes('SECOND_DEGREE')
+          ? areIncluded(
+              filter.friendLevel,
+              offer.offerInfo.privatePart.friendLevel
+            )
+          : true)) &&
+      (!filter.offerType ||
+        offer.offerInfo.publicPart.offerType === filter.offerType) &&
+      (!filter.amountTopLimit ||
+        offer.offerInfo.publicPart.amountBottomLimit <=
+          filter.amountTopLimit) &&
+      (!filter.amountBottomLimit ||
+        offer.offerInfo.publicPart.amountTopLimit >=
+          filter.amountBottomLimit) &&
+      (filter.spokenLanguages.length === 0 ||
+        filter.spokenLanguages.some((item) =>
+          offer.offerInfo.publicPart.spokenLanguages.includes(item)
+        ))
+  )
+})
+
 /**
  * Filtered offers by every filter except location
  */
@@ -147,8 +196,9 @@ export const filteredOffersIgnoreLocationAtom = atom((get) => {
   const filter = get(offersFilterFromStorageAtom)
   const textFilter = filter.text
 
-  const filtered =
-    filter.listingType === 'BITCOIN'
+  const filtered = !filter.listingType
+    ? get(filterOffersIgnoreListingTypeAtom)
+    : filter.listingType === 'BITCOIN'
       ? get(filterBtcOffersAtom)
       : get(filterProductAndOtherOffersAtom)
 

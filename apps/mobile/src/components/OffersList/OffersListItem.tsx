@@ -9,6 +9,7 @@ import {
   getRequestState,
 } from '../../state/chat/utils/offerStates'
 import {newOfferFeedbackDoneAtom} from '../../state/feedback/atoms'
+import {baseFilterAtom} from '../../state/marketplace/atoms/filterAtoms'
 import {isOfferExpired} from '../../utils/isOfferExpired'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import {preferencesAtom} from '../../utils/preferences'
@@ -30,6 +31,7 @@ function OffersListItem({isFirst, offerAtom}: Props): JSX.Element {
   const rerequestLimitDays = useAtomValue(offerRerequestLimitDaysAtom)
   const preferences = useAtomValue(preferencesAtom)
   const newOfferFeedbackDone = useAtomValue(newOfferFeedbackDoneAtom)
+  const baseFilter = useAtomValue(baseFilterAtom)
 
   const isMine = useMemo(
     () => !!offer.ownershipInfo?.adminId,
@@ -189,6 +191,9 @@ function OffersListItem({isFirst, offerAtom}: Props): JSX.Element {
     <Stack mt={isFirst ? '$0' : '$6'}>
       <OfferWithBubbleTip
         isMine={isMine}
+        showListingType={
+          baseFilter === 'ALL_SELLING_BTC' || baseFilter === 'ALL_BUYING_BTC'
+        }
         reduceDescriptionLength
         onInfoRectPress={content.onPress}
         negative={

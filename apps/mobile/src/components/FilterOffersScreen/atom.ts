@@ -19,7 +19,6 @@ import {
   refreshBtcPriceActionAtom,
 } from '../../state/currentBtcPriceAtoms'
 import {
-  listingTypeFilterAtom,
   offerTypeFilterAtom,
   offersFilterFromStorageAtom,
   offersFilterInitialState,
@@ -359,8 +358,9 @@ export const resetFilterOmitTextFilterActionAtom = atom(null, (get, set) => {
 
 export const baseFilterTempAtom = atom(
   (get): BaseOffersFilter => {
-    const listingType = get(listingTypeAtom) ?? get(listingTypeFilterAtom)
+    const listingType = get(listingTypeAtom)
     const offerType = get(offerTypeAtom) ?? get(offerTypeFilterAtom)
+
     if (listingType === 'BITCOIN') {
       if (offerType === 'SELL') return 'BTC_TO_CASH'
       return 'CASH_TO_BTC'
@@ -371,9 +371,16 @@ export const baseFilterTempAtom = atom(
       return 'BTC_TO_PRODUCT'
     }
 
-    return 'STH_ELSE'
+    if (listingType === 'OTHER') return 'STH_ELSE'
+
+    if (!listingType) {
+      if (offerType === 'SELL') return 'ALL_SELLING_BTC'
+      return 'ALL_BUYING_BTC'
+    }
+
+    return 'BTC_TO_CASH'
   },
-  (get, set, filterValue: BaseOffersFilter) => {
+  (_, set, filterValue: BaseOffersFilter) => {
     if (filterValue === 'BTC_TO_CASH') {
       set(listingTypeAtom, 'BITCOIN')
       set(offerTypeAtom, 'SELL')
@@ -397,6 +404,16 @@ export const baseFilterTempAtom = atom(
     if (filterValue === 'STH_ELSE') {
       set(listingTypeAtom, 'OTHER')
       set(offerTypeAtom, undefined)
+    }
+
+    if (filterValue === 'ALL_SELLING_BTC') {
+      set(listingTypeAtom, undefined)
+      set(offerTypeAtom, 'SELL')
+    }
+
+    if (filterValue === 'ALL_BUYING_BTC') {
+      set(listingTypeAtom, undefined)
+      set(offerTypeAtom, 'BUY')
     }
   }
 )

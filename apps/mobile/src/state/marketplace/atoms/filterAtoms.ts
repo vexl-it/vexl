@@ -121,6 +121,8 @@ export const baseFilterDropdownDataAtom: Atom<
     'BTC_TO_PRODUCT',
     'PRODUCT_TO_BTC',
     'STH_ELSE',
+    'ALL_SELLING_BTC',
+    'ALL_BUYING_BTC',
   ]
 
   return baseFilterOptions.map((option) => ({
@@ -147,9 +149,14 @@ export const baseFilterAtom = atom(
       return 'STH_ELSE'
     }
 
+    if (listingTypeFilter === undefined) {
+      if (offerTypeFilter === 'SELL') return 'ALL_SELLING_BTC'
+      return 'ALL_BUYING_BTC'
+    }
+
     return undefined
   },
-  (get, set, baseFilterValue: BaseOffersFilter | undefined) => {
+  (_, set, baseFilterValue: BaseOffersFilter | undefined) => {
     if (baseFilterValue === 'BTC_TO_CASH') {
       set(offerTypeFilterAtom, 'BUY')
       set(listingTypeFilterAtom, 'BITCOIN')
@@ -173,6 +180,16 @@ export const baseFilterAtom = atom(
     if (baseFilterValue === 'STH_ELSE') {
       set(offerTypeFilterAtom, undefined)
       set(listingTypeFilterAtom, 'OTHER')
+    }
+
+    if (baseFilterValue === 'ALL_SELLING_BTC') {
+      set(offerTypeFilterAtom, 'SELL')
+      set(listingTypeFilterAtom, undefined)
+    }
+
+    if (baseFilterValue === 'ALL_BUYING_BTC') {
+      set(offerTypeFilterAtom, 'BUY')
+      set(listingTypeFilterAtom, undefined)
     }
   }
 )

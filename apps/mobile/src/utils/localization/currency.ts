@@ -14,6 +14,15 @@ export const currencies = {
     maxAmount: 43800, // 10000 EUR * 4.38 (conversion rate)
     countryCode: [971],
   }),
+  'ALL': CurrencyInfo.parse({
+    code: 'ALL',
+    flag: '🇦🇱',
+    name: 'Albanian Lek',
+    symbol: 'L',
+    position: 'after',
+    maxAmount: 1240000, // 10000 EUR * 124 (conversion rate)
+    countryCode: [355],
+  }),
   'ANG': CurrencyInfo.parse({
     code: 'ANG',
     flag: '🇨🇼',

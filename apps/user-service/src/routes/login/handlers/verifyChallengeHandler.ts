@@ -1,6 +1,5 @@
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
-import {countryPrefixFromNumber} from '@vexl-next/domain/src/general/CountryPrefix.brand'
-import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
+import {type CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {type UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {
   type EcdsaSignature,
@@ -24,21 +23,13 @@ import {DashboardReportsService} from '../utils/DashboardReportsService'
 
 const insertUserIntoDb = (
   userPublicKey: PublicKeyPemBase64,
-  phoneNumber: E164PhoneNumber
+  countryPrefix: CountryPrefix
 ): Effect.Effect<void, UnexpectedServerError, LoggedInUsersDbService> =>
-  Effect.gen(function* (_) {
-    const usersDb = yield* _(LoggedInUsersDbService)
-    const countryPrefix = yield* _(
-      countryPrefixFromNumber(phoneNumber),
-      Effect.catchAll((e) =>
-        Effect.zipRight(
-          Effect.log('Unable to get country prefix from number', e.number),
-          Effect.succeed(undefined)
-        )
-      )
+  LoggedInUsersDbService.pipe(
+    Effect.flatMap((userDb) =>
+      userDb.insertUser({publicKey: userPublicKey, countryPrefix})
     )
-    yield* _(usersDb.insertUser({publicKey: userPublicKey, countryPrefix}))
-  })
+  )
 
 const verifySignature = (
   signature: EcdsaSignature,
@@ -75,7 +66,7 @@ export const verifyChallengeHandler = Handler.make(
 
         const authData = yield* _(
           generateUserAuthData({
-            phoneNumber: verificationState.phoneNumber,
+            phoneNumberHashed: verificationState.phoneNumber,
             publicKey: userPublicKey,
           }),
           Effect.catchTag('CryptoError', () =>
@@ -85,7 +76,9 @@ export const verifyChallengeHandler = Handler.make(
           )
         )
 
-        yield* _(insertUserIntoDb(userPublicKey, verificationState.phoneNumber))
+        yield* _(
+          insertUserIntoDb(userPublicKey, verificationState.countryPrefix)
+        )
         yield* _(
           DashboardReportsService,
           Effect.flatMap((dashboardReportsService) =>

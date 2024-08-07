@@ -1,4 +1,6 @@
 import {Schema} from '@effect/schema'
+import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
+import {countryPrefixFromNumber} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {fromMilliseconds} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
 import {unixMillisecondsFromNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {
@@ -7,6 +9,7 @@ import {
   InitVerificationErrors,
   PhoneNumberVerificationId,
 } from '@vexl-next/rest-api/src/services/user/specification'
+import {hashPhoneNumber} from '@vexl-next/server-utils/src/generateUserAuthData'
 import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {Effect, Option} from 'effect'
 import {Handler} from 'effect-http'
@@ -31,6 +34,30 @@ export const initVerificationHandler = Handler.make(
           VERIFICATION_EXPIRES_AFTER_MILIS
         )
 
+        const phoneNumberHashed = yield* _(
+          hashPhoneNumber(req.body.phoneNumber),
+          Effect.catchTag(
+            'CryptoError',
+            () =>
+              new UnexpectedServerError({
+                status: 500,
+                detail: 'Error while hasing phone number',
+              })
+          )
+        )
+
+        const countryPrefix = yield* _(
+          countryPrefixFromNumber(req.body.phoneNumber),
+          Effect.catchTag(
+            'UnknownCountryPrefix',
+            () =>
+              new UnexpectedServerError({
+                status: 500,
+                detail: 'Unknown country prefix',
+              })
+          )
+        )
+
         const dummyCodeForAll = yield* _(loginCodeDummyForAll)
 
         if (Option.isSome(dummyCodeForAll)) {
@@ -38,7 +65,8 @@ export const initVerificationHandler = Handler.make(
             type: 'staticCodeVerification' as const,
             id: generateVerificationId(),
             expiresAt: expirationAt,
-            phoneNumber: req.body.phoneNumber,
+            countryPrefix,
+            phoneNumber: phoneNumberHashed,
             code: dummyCodeForAll.value,
           }
 
@@ -62,7 +90,8 @@ export const initVerificationHandler = Handler.make(
             type: 'staticCodeVerification' as const,
             id: generateVerificationId(),
             expiresAt: expirationAt,
-            phoneNumber: req.body.phoneNumber,
+            phoneNumber: phoneNumberHashed,
+            countryPrefix,
             code: dummyNumbers.value.code,
           }
 
@@ -80,7 +109,8 @@ export const initVerificationHandler = Handler.make(
           id: generateVerificationId(),
           type: 'twilioSmsVerification' as const,
           expiresAt: expirationAt,
-          phoneNumber: req.body.phoneNumber,
+          phoneNumber: phoneNumberHashed,
+          countryPrefix,
           sid,
         }
 

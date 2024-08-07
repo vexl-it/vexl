@@ -58,7 +58,7 @@ export class ChatNotificationData extends S.Class<ChatNotificationData>(
   type: ChatNotificationType.pipe(orElseSchema('UNKNOWN')),
   inbox: PublicKeyPemBase64E,
   sender: PublicKeyPemBase64E,
-  preview: S.String.pipe(S.optional()),
+  preview: S.String.pipe(S.optional),
 }) {
   static parseUnkownOption = S.decodeUnknownOption(ChatNotificationData)
 }

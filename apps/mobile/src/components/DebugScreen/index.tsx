@@ -576,7 +576,8 @@ function DebugScreen(): JSX.Element {
                   .offer.deleteOffer({
                     adminIds: store
                       .get(myOffersAtom)
-                      .map((one) => one.ownershipInfo?.adminId),
+                      .map((one) => one.ownershipInfo?.adminId)
+                      .filter((one): one is NonNullable<typeof one> => !!one),
                   })()
                   .then(() => {
                     Alert.alert('done')

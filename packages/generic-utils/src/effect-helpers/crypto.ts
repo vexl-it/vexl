@@ -33,7 +33,7 @@ export class CryptoError extends Schema.TaggedError<CryptoError>('CryptoError')(
 ) {}
 
 export const EciesGTMECypher = Schema.String.pipe(
-  Schema.nonEmpty(),
+  Schema.nonEmptyString(),
   Schema.filter((v) => v.startsWith(ECIES_GTM_CYPHER_PREFIX)),
   Schema.brand('EciesGTMECypher')
 )
@@ -180,7 +180,7 @@ export const hmacVerifyE =
   }
 
 export const AesGtmCypher = Schema.String.pipe(
-  Schema.nonEmpty(),
+  Schema.nonEmptyString(),
   Schema.brand('AesGtmCypher')
 )
 export type AesGtmCypher = Schema.Schema.Type<typeof AesGtmCypher>

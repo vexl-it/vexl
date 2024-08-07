@@ -661,6 +661,8 @@
   "filterOffers.BTC_TO_PRODUCT": "I have BTC, I want a product",
   "filterOffers.PRODUCT_TO_BTC": "I have a product, I want BTC",
   "filterOffers.STH_ELSE": "I search for something else",
+  "filterOffers.ALL_SELLING_BTC": "All offers for selling BTC",
+  "filterOffers.ALL_BUYING_BTC": "All offers for buying BTC",
   "filterOffers.searchOffers": "Search offers",
   "filterOffers.offers": "Offers",
   "filterOffers.whatIsTheGoal": "What's the goal",

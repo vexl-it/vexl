@@ -52,6 +52,22 @@ export const sthElseOffersToSeeInMarketplaceCountAtom = atom((get) => {
   ).length
 })
 
+export const allOffersSellingBtcToSeeInMarketplaceCountAtom = atom((get) => {
+  const offers = get(offersToSeeInMarketplaceAtom)
+
+  return offers.filter(
+    (offer) => offer.offerInfo.publicPart.offerType === 'SELL'
+  ).length
+})
+
+export const allOffersBuyingBtcToSeeInMarketplaceCountAtom = atom((get) => {
+  const offers = get(offersToSeeInMarketplaceAtom)
+
+  return offers.filter(
+    (offer) => offer.offerInfo.publicPart.offerType === 'BUY'
+  ).length
+})
+
 export const offersToSeeInMarketplaceCountAtom = atom((get) => {
   const listingType = get(listingTypeFilterAtom)
   const offerType = get(offerTypeFilterAtom)
@@ -68,5 +84,15 @@ export const offersToSeeInMarketplaceCountAtom = atom((get) => {
     return get(btcToProductOffersToSeeInMarketplaceCountAtom)
   }
 
-  return get(sthElseOffersToSeeInMarketplaceCountAtom)
+  if (listingType === 'OTHER')
+    return get(sthElseOffersToSeeInMarketplaceCountAtom)
+
+  if (!listingType) {
+    if (offerType === 'SELL')
+      return get(allOffersSellingBtcToSeeInMarketplaceCountAtom)
+
+    return get(allOffersBuyingBtcToSeeInMarketplaceCountAtom)
+  }
+
+  return 0
 })

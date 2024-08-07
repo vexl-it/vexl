@@ -45,11 +45,14 @@ function OffersListStateDisplayerContent(): JSX.Element {
             <Stack f={1}>
               <TotalOffersCount filteredOffersCount={offersAtoms.length} />
             </Stack>
-            {baseFilter !== 'BTC_TO_CASH' && baseFilter !== 'CASH_TO_BTC' && (
-              <Stack f={1}>
-                <FiatSatsDropdown />
-              </Stack>
-            )}
+            {baseFilter !== 'BTC_TO_CASH' &&
+              baseFilter !== 'CASH_TO_BTC' &&
+              baseFilter !== 'ALL_SELLING_BTC' &&
+              baseFilter !== 'ALL_BUYING_BTC' && (
+                <Stack f={1}>
+                  <FiatSatsDropdown />
+                </Stack>
+              )}
           </XStack>
           <ReencryptOffersSuggestion mb="$6" />
           <ImportNewContactsSuggestion mb="$6" />

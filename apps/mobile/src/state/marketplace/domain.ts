@@ -95,6 +95,8 @@ export const BaseOffersFilter = z.enum([
   'BTC_TO_PRODUCT',
   'PRODUCT_TO_BTC',
   'STH_ELSE',
+  'ALL_SELLING_BTC',
+  'ALL_BUYING_BTC',
 ])
 
 export type BaseOffersFilter = z.TypeOf<typeof BaseOffersFilter>

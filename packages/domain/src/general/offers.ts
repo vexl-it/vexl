@@ -360,7 +360,7 @@ export const OfferFlags = z
   })
   .readonly()
 export const OfferFlagsE = Schema.Struct({
-  reported: Schema.optional(Schema.Boolean, {default: () => false}),
+  reported: Schema.optionalWith(Schema.Boolean, {default: () => false}),
 })
 export type OfferFlags = Schema.Schema.Type<typeof OfferFlagsE>
 

@@ -203,7 +203,7 @@ export const LoginGroup = ApiGroup.make('Login').pipe(
   ApiGroup.addEndpoint(VerifyChallengeEndpoint)
 )
 
-export const FeedbackFormId = Schema.NonEmpty.pipe(
+export const FeedbackFormId = Schema.NonEmptyString.pipe(
   Schema.brand('FeedbackFormId')
 )
 export type FeedbackFormId = Schema.Schema.Type<typeof FeedbackFormId>

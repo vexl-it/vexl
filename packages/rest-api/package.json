@@ -23,15 +23,15 @@
     "typescript": "^5.5.2"
   },
   "dependencies": {
-    "@effect/platform": "^0.59.1",
-    "@effect/schema": "^0.68.25",
+    "@effect/platform": "^0.61.4",
+    "@effect/schema": "^0.70.2",
     "@vexl-next/cryptography": "0.0.0",
     "@vexl-next/domain": "0.0.0",
     "@vexl-next/server-utils": "0.0.0",
     "axios": "^1.6.0",
-    "effect": "^3.5.5",
-    "effect-http": "^0.74.0",
-    "fast-check": "^3.17.1",
+    "effect": "^3.6.1",
+    "effect-http": "^0.77.3",
+    "fast-check": "^3.20.0",
     "fp-ts": "^2.13.1",
     "url-join": "^5.0.0",
     "zod": "^3.22.3"

@@ -38,7 +38,7 @@ export const OffersState = z
 export const OffersStateE = Schema.Struct({
   // changedName to force clients to refetch all offers after update of the offers location shape
   lastUpdatedAt1: IsoDatetimeStringE.pipe(
-    Schema.optional({default: () => MINIMAL_DATE})
+    Schema.optionalWith({default: () => MINIMAL_DATE})
   ),
   offers: Schema.Array(OneOfferInStateE),
 })

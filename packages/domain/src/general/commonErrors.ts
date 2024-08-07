@@ -8,7 +8,7 @@ export class InternalServerError extends Schema.TaggedError<InternalServerError>
   'InternalServerError'
 )('InternalServerError', {
   cause: Schema.Literal('ExternalApi', 'Unknown', 'BodyError').pipe(
-    Schema.optional({default: () => 'Unknown' as const})
+    Schema.optionalWith({default: () => 'Unknown' as const})
   ),
 }) {}
 

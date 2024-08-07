@@ -58,3 +58,5 @@ jobs:
             ghcr.io/vexl-it/notification-service:latest
             ghcr.io/vexl-it/notification-service:${{inputs.env}}-${{ github.sha }}
             ${{ steps.login-ecr.outputs.registry }}/notification-service:${{inputs.env}}-${{ github.sha }}
+          build-args: |
+            SERVICE_VERSION=${{ github.sha }}

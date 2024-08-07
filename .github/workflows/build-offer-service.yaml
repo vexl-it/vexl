@@ -58,3 +58,5 @@ jobs:
             ghcr.io/vexl-it/offer2-ms:latest
             ghcr.io/vexl-it/offer2-ms:${{inputs.env}}-${{ github.sha }}
             ${{ steps.login-ecr.outputs.registry }}/offer2-ms:${{inputs.env}}-${{ github.sha }}
+          build-args: |
+            SERVICE_VERSION=${{ github.sha }}

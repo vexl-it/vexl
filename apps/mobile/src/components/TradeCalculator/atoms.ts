@@ -254,22 +254,19 @@ export const refreshCurrentBtcPriceActionAtom = atom(null, (get, set) => {
   )
 })
 
-export const switchBtcOrSatValueActionAtom = atom(
-  null,
-  (get, set, value: BtcOrSat) => {
-    const btcValue = get(btcInputValueAtom)
+export const switchBtcOrSatValueActionAtom = atom(null, (get, set) => {
+  const btcValue = get(btcInputValueAtom)
 
-    set(btcOrSatAtom, value)
-    if (btcValue) {
-      set(
-        btcInputValueAtom,
-        value === 'BTC'
-          ? `${Number(btcValue) / SATOSHIS_IN_BTC}`
-          : `${Math.round(Number(btcValue) * SATOSHIS_IN_BTC)}`
-      )
-    }
+  set(btcOrSatAtom, (prev) => (prev === 'BTC' ? 'SAT' : 'BTC'))
+  if (btcValue) {
+    set(
+      btcInputValueAtom,
+      get(btcOrSatAtom) === 'BTC'
+        ? `${Number(btcValue) / SATOSHIS_IN_BTC}`
+        : `${Math.round(Number(btcValue) * SATOSHIS_IN_BTC)}`
+    )
   }
-)
+})
 
 export const updateFiatCurrencyActionAtom = atom(
   null,

@@ -1,34 +1,14 @@
-import {atom, useAtom, useAtomValue} from 'jotai'
+import {useAtom} from 'jotai'
 import React from 'react'
+import {TouchableOpacity} from 'react-native'
 import {Stack, Text, XStack, getTokens} from 'tamagui'
-import {type FiatOrSats} from '../../../../../state/marketplace/domain'
-import {
-  translationAtom,
-  useTranslation,
-} from '../../../../../utils/localization/I18nProvider'
+import chevronDownSvg from '../../../../../images/chevronDownSvg'
+import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import {marketplaceFiatOrSatsCurrencyAtom} from '../../../../../utils/preferences'
-import {Dropdown, type DropdownItemProps} from '../../../../Dropdown'
-
-const fiatOrSatsDropdownDataAtom = atom<Array<DropdownItemProps<FiatOrSats>>>(
-  (get) => {
-    const {t} = get(translationAtom)
-
-    return [
-      {
-        label: t('common.FIAT'),
-        value: 'FIAT',
-      },
-      {
-        label: t('common.SATS'),
-        value: 'SATS',
-      },
-    ]
-  }
-)
+import Image from '../../../../Image'
 
 function FiatSatsDropdown(): JSX.Element {
   const {t} = useTranslation()
-  const fiatOrSatsDropdownData = useAtomValue(fiatOrSatsDropdownDataAtom)
   const [marketplaceFiatOrSatsCurrency, setMarketplaceFiatOrSatsCurrency] =
     useAtom(marketplaceFiatOrSatsCurrencyAtom)
 
@@ -38,27 +18,30 @@ function FiatSatsDropdown(): JSX.Element {
         {t('offer.priceIn')}
       </Text>
       <Stack f={1}>
-        <Dropdown
-          containerStyle={{
-            backgroundColor: getTokens().color.grey.val,
-            borderRadius: getTokens().radius[4].val,
-            borderWidth: 0,
+        <TouchableOpacity
+          onPress={() => {
+            setMarketplaceFiatOrSatsCurrency(
+              marketplaceFiatOrSatsCurrency === 'FIAT' ? 'SATS' : 'FIAT'
+            )
           }}
-          selectedTextStyle={{
-            color: getTokens().color.greyOnBlack.val,
-            fontSize: 14,
-            fontFamily: 'TTSatoshi600',
-          }}
-          data={fiatOrSatsDropdownData}
-          onChange={(item) => {
-            if (item.value) setMarketplaceFiatOrSatsCurrency(item.value)
-          }}
-          value={{
-            value: marketplaceFiatOrSatsCurrency,
-            label: t(`common.${marketplaceFiatOrSatsCurrency}`),
-          }}
-          size="small"
-        />
+        >
+          <XStack
+            alignItems="center"
+            justifyContent="space-between"
+            backgroundColor="$grey"
+            borderRadius="$2"
+            paddingHorizontal="$2"
+            height={30}
+          >
+            <Text fontSize={14} fontFamily="$body600" color="$greyOnBlack">
+              {t(`common.${marketplaceFiatOrSatsCurrency}`)}
+            </Text>
+            <Image
+              source={chevronDownSvg}
+              stroke={getTokens().color.greyOnBlack.val}
+            />
+          </XStack>
+        </TouchableOpacity>
       </Stack>
     </XStack>
   )

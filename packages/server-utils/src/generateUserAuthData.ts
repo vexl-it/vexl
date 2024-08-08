@@ -18,10 +18,10 @@ export const hashPhoneNumber = (
     )
   )
 export const generateUserAuthData = ({
-  phoneNumber,
+  phoneNumberHashed,
   publicKey,
 }: {
-  phoneNumber: E164PhoneNumber
+  phoneNumberHashed: HmacHash
   publicKey: PublicKeyPemBase64
 }): Effect.Effect<
   {
@@ -32,8 +32,7 @@ export const generateUserAuthData = ({
   ServerCrypto
 > =>
   Effect.gen(function* (_) {
-    const hashedNumber = yield* _(hashPhoneNumber(phoneNumber))
-    const dataToSign = `${publicKey}${hashedNumber}`
+    const dataToSign = `${publicKey}${phoneNumberHashed}`
 
     const crypto = yield* _(ServerCrypto)
 
@@ -45,6 +44,6 @@ export const generateUserAuthData = ({
     )
     return {
       signature,
-      hash: hashedNumber,
+      hash: phoneNumberHashed,
     }
   })

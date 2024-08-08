@@ -44,6 +44,7 @@ export const verifyCodeHandler = Handler.make(VerifyCodeEndpoint, (req) =>
         publicKey: req.body.userPublicKey,
         phoneNumber: loginData.phoneNumber,
         expiresAt: loginData.expiresAt,
+        countryPrefix: loginData.countryPrefix,
         challenge: yield* _(generateVerificationChallenge()),
       } satisfies ChallengeVerificationState
 

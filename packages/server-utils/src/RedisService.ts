@@ -85,6 +85,12 @@ export class RedisService extends Context.Tag('RedisService')<
                 Duration.toMillis(duration)
               )
           ).pipe(
+            Effect.zipLeft(
+              Effect.logInfo('Acquired Reids lock', {
+                resources,
+                duration,
+              })
+            ),
             catchAllDefect((e) =>
               Effect.zipRight(
                 Effect.logError(
@@ -102,6 +108,9 @@ export class RedisService extends Context.Tag('RedisService')<
 
         const releaseLockEffect = (lock: Lock): Effect.Effect<void> =>
           Effect.promise(async () => await redlock.release(lock)).pipe(
+            Effect.zipLeft(
+              Effect.logInfo('Released Redis lock', lock.resources)
+            ),
             catchAllDefect((e) =>
               Effect.zipRight(
                 Effect.logError('Error while releasing lock', e, lock.value),

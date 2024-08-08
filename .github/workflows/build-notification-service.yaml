@@ -60,3 +60,4 @@ jobs:
             ${{ steps.login-ecr.outputs.registry }}/notification-service:${{inputs.env}}-${{ github.sha }}
           build-args: |
             SERVICE_VERSION=${{ github.sha }}
+            ENVIRONMENT=${{ github.env }}

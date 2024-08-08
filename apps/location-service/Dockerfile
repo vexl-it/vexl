@@ -15,9 +15,10 @@ FROM node:19 as runner
 
 
 ARG SERVICE_VERSION
+ARG ENVIRONMENT
 
 ENV SERVICE_VERSION=${SERVICE_VERSION}
-ENV SERVICE_NAME="Location service"
+ENV SERVICE_NAME="Location service - ${ENVIRONMENT}"
 
 COPY --from=builder /app/apps/location-service/ /app/apps/location-service
 COPY --from=builder /app/node_modules /app/node_modules

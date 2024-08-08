@@ -14,9 +14,10 @@ RUN yarn build
 FROM node:19 as runner
 
 ARG SERVICE_VERSION
+ARG ENVIRONMENT
 
 ENV SERVICE_VERSION=${SERVICE_VERSION}
-ENV SERVICE_NAME="User service"
+ENV SERVICE_NAME="User service - ${ENVIRONMENT}"
 
 COPY --from=builder /app/apps/user-service/ /app/apps/user-service
 COPY --from=builder /app/node_modules /app/node_modules

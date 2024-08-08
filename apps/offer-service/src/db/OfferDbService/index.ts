@@ -89,7 +89,7 @@ export interface OfferDbOperations {
 
   insertOfferPrivatePart: (
     args: InsertOfferPrivatePartRequest
-  ) => Effect.Effect<PrivatePartRecord, UnexpectedServerError>
+  ) => Effect.Effect<void, UnexpectedServerError>
 
   updateRefreshOffer: (
     args: UpdateRefreshOfferRequest

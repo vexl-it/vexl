@@ -8,7 +8,7 @@ import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {withRedisLock} from '@vexl-next/server-utils/src/RedisService'
 import {Effect, Metric, Option} from 'effect'
 import {Handler} from 'effect-http'
-import {reportLimitIntervalDaysConfig} from '../configs'
+import {reportLimitCountConfig} from '../configs'
 import {OfferDbService} from '../db/OfferDbService'
 import {makeOfferReportedCounter} from '../metrics'
 
@@ -16,7 +16,7 @@ export const reportOffer = Handler.make(ReportOfferEndpoint, (req, security) =>
   makeEndpointEffect(
     Effect.gen(function* (_) {
       const offerDbService = yield* _(OfferDbService)
-      const reportLimitCount = yield* _(reportLimitIntervalDaysConfig)
+      const reportLimitCount = yield* _(reportLimitCountConfig)
 
       const offerForMe = yield* _(
         offerDbService.queryOfferByPublicKeyAndOfferId({

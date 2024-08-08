@@ -1,13 +1,19 @@
+import Clipboard from '@react-native-clipboard/clipboard'
 import {pipe} from 'fp-ts/lib/function'
 import * as TE from 'fp-ts/TaskEither'
 import {atom, useSetAtom} from 'jotai'
+import {useMemo} from 'react'
+import {TouchableOpacity} from 'react-native'
 import {getTokens, Stack, Text, XStack} from 'tamagui'
 import {
   translationAtom,
   useTranslation,
 } from '../../../../../utils/localization/I18nProvider'
 import {askAreYouSureActionAtom} from '../../../../AreYouSureDialog'
+import checkIconSvg from '../../../../ChatDetailScreen/components/images/checkIconSvg'
 import Image from '../../../../Image'
+import {toastNotificationAtom} from '../../../../ToastNotification/atom'
+import {type ToastNotificationState} from '../../../../ToastNotification/domain'
 import {contactSupportActionAtom} from '../atoms'
 import emailIconSvg from '../images/emailIconSvg'
 
@@ -42,6 +48,15 @@ function ReportIssue(): JSX.Element {
 
   const supportEmail = t('settings.items.supportEmail')
   const contactSupport = useSetAtom(contactSupportActionAtom)
+  const setToastNotification = useSetAtom(toastNotificationAtom)
+
+  const toastContent: ToastNotificationState = useMemo(
+    () => ({
+      text: t('common.copied'),
+      icon: checkIconSvg,
+    }),
+    [t]
+  )
 
   return (
     <Stack space="$2" jc="flex-end">
@@ -62,9 +77,16 @@ function ReportIssue(): JSX.Element {
         <Stack ai="center" jc="center" bc="$greyAccent5" p="$3" br="$5">
           <Image stroke={tokens.color.greyOnWhite.val} source={emailIconSvg} />
         </Stack>
-        <Text fos={18} ff="$body500" col="$black">
-          {supportEmail}
-        </Text>
+        <TouchableOpacity
+          onPress={() => {
+            Clipboard.setString(supportEmail)
+            setToastNotification(toastContent)
+          }}
+        >
+          <Text fos={18} ff="$body500" col="$black">
+            {supportEmail}
+          </Text>
+        </TouchableOpacity>
       </XStack>
     </Stack>
   )

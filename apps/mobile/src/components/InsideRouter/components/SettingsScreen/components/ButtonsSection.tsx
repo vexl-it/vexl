@@ -46,7 +46,7 @@ import webIconSvg from '../images/webIconSvg'
 import AllowScreenshots from './AllowScreenshots'
 import ItemText from './ButtonSectionItemText'
 import ContactsImportedTitle from './ContactsImportedTitle'
-import ReportIssue, {reportIssueDialogAtom} from './ReportIssue'
+import {reportIssueDialogAtom} from './ReportIssue'
 import SelectedCurrencyTitle from './SelectedCurrencyTitle'
 
 interface ItemProps {
@@ -355,7 +355,6 @@ function ButtonsSection(): JSX.Element {
           {groupIndex !== data.length - 1 && <Stack h={16} />}
         </Fragment>
       ))}
-      <ReportIssue />
       <CurrencySelect
         selectedCurrencyCodeAtom={selectedCurrencyAtom}
         onItemPress={(currency) => {

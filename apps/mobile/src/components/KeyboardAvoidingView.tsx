@@ -2,8 +2,8 @@ import {type ReactNode} from 'react'
 import {
   Platform,
   KeyboardAvoidingView as RNKeyboardAvoidingView,
-  View,
 } from 'react-native'
+import {Stack} from 'tamagui'
 
 function KeyboardAvoidingView({children}: {children: ReactNode}): JSX.Element {
   return (
@@ -11,7 +11,7 @@ function KeyboardAvoidingView({children}: {children: ReactNode}): JSX.Element {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       style={{flex: 1}}
     >
-      <View style={{flex: 1}}>{children}</View>
+      <Stack flex={1}>{children}</Stack>
     </RNKeyboardAvoidingView>
   )
 }

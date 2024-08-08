@@ -1,6 +1,7 @@
 import {useCallback, type ReactNode} from 'react'
 import {TouchableWithoutFeedback} from 'react-native'
 import {Stack, XStack, styled} from 'tamagui'
+import {dismissKeyboardAndResolveOnLayoutUpdate} from '../../utils/dismissKeyboardPromise'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import Button from '../Button'
 
@@ -55,20 +56,24 @@ function ProgressJourney({
   const {t} = useTranslation()
 
   const onNextOrFinish = useCallback(() => {
-    if (currentPage === numberOfPages - 1) {
-      onFinish()
-    }
-    onPageChange(currentPage + 1)
+    void dismissKeyboardAndResolveOnLayoutUpdate().then(() => {
+      if (currentPage === numberOfPages - 1) {
+        onFinish()
+      }
+      onPageChange(currentPage + 1)
+    })
   }, [currentPage, numberOfPages, onFinish, onPageChange])
 
   const onBackOrSkip = useCallback(() => {
-    if (withBackButton) {
-      if (currentPage === 0) onSkip()
-      else onPageChange(currentPage - 1)
-    } else {
-      if (currentPage === numberOfPages - 1) onFinish()
-      else onSkip()
-    }
+    void dismissKeyboardAndResolveOnLayoutUpdate().then(() => {
+      if (withBackButton) {
+        if (currentPage === 0) onSkip()
+        else onPageChange(currentPage - 1)
+      } else {
+        if (currentPage === numberOfPages - 1) onFinish()
+        else onSkip()
+      }
+    })
   }, [
     currentPage,
     numberOfPages,

@@ -84,8 +84,8 @@ function CRUDOfferFlow({route: {params}, navigation}: Props): JSX.Element {
   )
 
   return (
-    <KeyboardAvoidingView>
-      <Screen>
+    <Screen>
+      <KeyboardAvoidingView>
         <Stack style={{height: StatusBar.currentHeight ?? 0}} />
         <Stack f={1} px="$2" pb="$2">
           {!params.offerId ? (
@@ -174,8 +174,8 @@ function CRUDOfferFlow({route: {params}, navigation}: Props): JSX.Element {
             </CRUDOfferStack.Navigator>
           </ProgressJourney>
         </Stack>
-      </Screen>
-    </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
+    </Screen>
   )
 }
 

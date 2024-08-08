@@ -5,7 +5,7 @@ import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {PrivatePayloadEncryptedE} from '@vexl-next/domain/src/general/offers'
 import {Effect, flow} from 'effect'
-import {PrivatePartRecord, PublicPartId} from '../domain'
+import {PublicPartId} from '../domain'
 
 export const InsertOfferPrivatePartRequest = Schema.Struct({
   userPublicKey: PublicKeyPemBase64E,
@@ -21,9 +21,8 @@ export const createInsertOfferPrivatePart = Effect.gen(function* (_) {
   const sql = yield* _(PgClient.PgClient)
 
   const InsertOfferPrivateParts = yield* _(
-    SqlResolver.ordered('InsertOfferPrivatePart', {
+    SqlResolver.void('InsertOfferPrivatePart', {
       Request: InsertOfferPrivatePartRequest,
-      Result: PrivatePartRecord,
       execute: (requests) => {
         return sql`
           INSERT INTO

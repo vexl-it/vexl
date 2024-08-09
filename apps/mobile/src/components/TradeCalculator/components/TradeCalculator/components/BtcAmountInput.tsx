@@ -1,10 +1,10 @@
-import {type BtcOrSat} from '@vexl-next/domain/src/general/tradeChecklist'
 import {useAtomValue, useSetAtom, type PrimitiveAtom} from 'jotai'
 import {useRef, useState} from 'react'
-import {StyleSheet, type TextInput} from 'react-native'
-import {Stack, getTokens} from 'tamagui'
+import {TouchableOpacity, type TextInput} from 'react-native'
+import {Stack, Text, XStack, getTokens} from 'tamagui'
+import chevronDownSvg from '../../../../../images/chevronDownSvg'
 import {SATOSHIS_IN_BTC} from '../../../../../state/currentBtcPriceAtoms'
-import {Dropdown, type DropdownItemProps} from '../../../../Dropdown'
+import Image from '../../../../Image'
 import {
   btcOrSatAtom,
   calculateFiatValueOnBtcAmountChangeActionAtom,
@@ -14,30 +14,6 @@ import {replaceNonDecimalCharsInInput} from '../../../utils'
 import AmountInput from './AmountInput'
 import CalculatedWithLiveRate from './CalculatedWithLiveRate'
 
-const styles = StyleSheet.create({
-  dropdown: {
-    width: 65,
-  },
-  dropdownContainerStyle: {
-    backgroundColor: getTokens().color.greyAccent1.val,
-    borderRadius: getTokens().radius[4].val,
-    width: 100,
-    borderWidth: 0,
-    paddingTop: 10,
-    paddingBottom: 10,
-  },
-  dropdownItemContainerStyle: {
-    borderRadius: getTokens().radius[4].val,
-  },
-  selectedTextStyle: {
-    color: getTokens().color.white.val,
-    fontWeight: '500',
-    fontSize: 18,
-    fontFamily: 'TTSatoshi500',
-  },
-})
-
-const btcOrSatOptions: BtcOrSat[] = ['BTC', 'SAT']
 const BTC_INPUT_PLACEHOLDER = '1'
 const SATS_INPUT_PLACEHOLDER = `${SATOSHIS_IN_BTC}`
 
@@ -46,12 +22,6 @@ interface Props {
   editable?: boolean
   btcValueAtom: PrimitiveAtom<string>
 }
-
-const btcOrSatDropdownData: Array<DropdownItemProps<BtcOrSat>> =
-  btcOrSatOptions.map((option) => ({
-    label: option,
-    value: option,
-  }))
 
 function BtcAmountInput({
   automaticCalculationDisabled,
@@ -94,18 +64,17 @@ function BtcAmountInput({
       }}
     >
       <Stack>
-        <Dropdown
-          disable={!editable}
-          value={{value: btcOrSat, label: btcOrSat}}
-          data={btcOrSatDropdownData}
-          onChange={(item) => {
-            switchBtcOrSatValue(item.value)
-          }}
-          style={styles.dropdown}
-          containerStyle={styles.dropdownContainerStyle}
-          itemContainerStyle={styles.dropdownItemContainerStyle}
-          selectedTextStyle={styles.selectedTextStyle}
-        />
+        <TouchableOpacity style={{width: 65}} onPress={switchBtcOrSatValue}>
+          <XStack space="$2">
+            <Text fontSize={18} color="$white" fontFamily="$body500">
+              {btcOrSat === 'BTC' ? 'BTC' : 'SAT'}
+            </Text>
+            <Image
+              source={chevronDownSvg}
+              stroke={getTokens().color.greyOnBlack.val}
+            />
+          </XStack>
+        </TouchableOpacity>
         {!isFocused && !!btcValue && !automaticCalculationDisabled && (
           <CalculatedWithLiveRate />
         )}

@@ -58,3 +58,6 @@ jobs:
             ghcr.io/vexl-it/dashboard-app:latest
             ghcr.io/vexl-it/dashboard-app:${{inputs.env}}-${{ github.sha }}
             ${{ steps.login-ecr.outputs.registry }}/dashboard-app:${{inputs.env}}-${{ github.sha }}
+          build-args: |
+            SERVICE_VERSION=${{ github.sha }}
+            ENVIRONMENT=${{ inputs.env }}

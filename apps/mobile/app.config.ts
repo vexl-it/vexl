@@ -84,6 +84,7 @@ export default {
       'CFBundleAllowMixedLocalizations': true,
       'NSLocationWhenInUseUsageDescription':
         'Vexl needs access to you location to show your position on the map. Location will never be share with anyone (even ourselves).',
+      // 'NSAppTransportSecurity': {'NSAllowsArbitraryLoads': true},
     },
     'googleServicesFile': extra.googleServicesInfoPlistFile,
     'associatedDomains': ['applinks:link.vexl.it', 'applinks:nextlink.vexl.it'],

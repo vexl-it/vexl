@@ -86,16 +86,9 @@ export class GetExchangeRateRequest extends Schema.Class<GetExchangeRateRequest>
 )({
   currency: Schema.Uppercase.pipe((a) => Schema.compose(a, CurrencyCodeE)),
 }) {}
-
 export class GetExchangeRateResponse extends Schema.Class<GetExchangeRateResponse>(
   'GetExchangeRateResponse'
 )({
-  BTC: Schema.Number,
-}) {}
-
-export class GetExchangeRateError extends Schema.TaggedError<GetExchangeRateError>(
-  'GetExchangeRateError'
-)('GetExchangeRateError', {
-  reason: Schema.Literal('YadioError'),
-  status: Schema.Literal(400),
+  status: Schema.Literal(301),
+  headers: Schema.Struct({Location: Schema.String}),
 }) {}

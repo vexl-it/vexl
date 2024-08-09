@@ -2,6 +2,7 @@ import {z} from 'zod'
 import {PlatformName} from './PlatformName'
 import {ServiceUrl} from './ServiceUrl.brand'
 import * as UserSessionCredentials from './UserSessionCredentials.brand'
+import * as btcExchangeRate from './services/btcExchangeRate'
 import * as chat from './services/chat'
 import * as contact from './services/contact'
 import * as location from './services/location'
@@ -28,7 +29,7 @@ export interface CredentialHeaders {
   signature: string
 }
 
-export {chat, contact, location, notification, offer, user}
+export {btcExchangeRate, chat, contact, location, notification, offer, user}
 
 export const ENV_PRESETS: {stageEnv: EnvPreset; prodEnv: EnvPreset} = {
   stageEnv: {

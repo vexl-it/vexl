@@ -1,6 +1,7 @@
 import {
   ENV_PRESETS,
   PlatformName,
+  btcExchangeRate,
   chat,
   contact,
   location,
@@ -11,6 +12,7 @@ import {
 } from '@vexl-next/rest-api'
 import {type UserSessionCredentials} from '@vexl-next/rest-api/src/UserSessionCredentials.brand'
 
+import {type BtcExchangeRatePrivateApi} from '@vexl-next/rest-api/src/services/btcExchangeRate'
 import {type ChatPrivateApi} from '@vexl-next/rest-api/src/services/chat'
 import {type ContactPrivateApi} from '@vexl-next/rest-api/src/services/contact'
 import {type LocationPrivateApi} from '@vexl-next/rest-api/src/services/location'
@@ -115,6 +117,12 @@ export const privateApiAtom = atom((get) => {
       url: apiEnv.notificationMs,
       getUserSessionCredentials,
     }),
+    btcExchangeRate: btcExchangeRate.privateApi({
+      platform,
+      clientVersion: versionCode,
+      url: apiEnv.notificationMs,
+      getUserSessionCredentials,
+    }),
   }
 })
 
@@ -125,6 +133,7 @@ export function usePrivateApiAssumeLoggedIn(): {
   user: UserPrivateApi
   location: LocationPrivateApi
   notification: NotificationPrivateApi
+  btcExchangeRate: BtcExchangeRatePrivateApi
 } {
   return useAtomValue(privateApiAtom)
 }

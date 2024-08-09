@@ -12,7 +12,6 @@ import {
   getLocationSuggestionHandler,
 } from './handlers'
 import {GoogleMapsService} from './utils/googleMapsApi'
-import {YadioService} from './utils/yadio'
 
 export const app = RouterBuilder.make(LocationServiceSpecification).pipe(
   RouterBuilder.handle(getExchangeRateHandler),
@@ -24,7 +23,6 @@ export const app = RouterBuilder.make(LocationServiceSpecification).pipe(
 
 const MainLive = Layer.mergeAll(
   ServerCrypto.layer(cryptoConfig),
-  YadioService.Live,
   GoogleMapsService.Live,
   healthServerLayer({port: healthServerPortConfig})
 )

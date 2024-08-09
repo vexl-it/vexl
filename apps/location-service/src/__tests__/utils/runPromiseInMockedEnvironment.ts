@@ -3,7 +3,6 @@ import {Console, Effect, Layer, ManagedRuntime, type Scope} from 'effect'
 import {cryptoConfig} from '../../configs'
 import {NodeTestingApp} from './NodeTestingApp'
 import {mockedGoogleMapLayer} from './mockedGoogleMapLayer'
-import {mockedYadioLayer} from './mockedYadioLayer'
 
 export type MockedContexts = NodeTestingApp | ServerCrypto
 
@@ -11,7 +10,6 @@ const universalContext = Layer.mergeAll(ServerCrypto.layer(cryptoConfig))
 
 const context = NodeTestingApp.layer.pipe(
   Layer.provideMerge(mockedGoogleMapLayer),
-  Layer.provideMerge(mockedYadioLayer),
   Layer.provideMerge(universalContext)
 )
 

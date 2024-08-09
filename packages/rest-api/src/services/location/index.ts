@@ -10,9 +10,8 @@ import {
   createAxiosInstanceWithAuthAndLogging,
   type LoggingFunction,
 } from '../../utils'
+import {GetExchangeRateResponse} from '../btcExchangeRate/contracts'
 import {
-  GetExchangeRateError,
-  GetExchangeRateResponse,
   GetGeocodedCoordinatesResponse,
   GetLocationSuggestionsResponse,
   LocationNotFoundError,
@@ -113,16 +112,7 @@ export function privateApi({
             ...(signal ? {signal} : {}),
           },
           GetExchangeRateResponse
-        ),
-        TE.mapLeft((e) => {
-          if (e._tag === 'BadStatusCodeError') {
-            return new GetExchangeRateError({
-              reason: e.response.data.reason,
-              status: 400,
-            })
-          }
-          return e
-        })
+        )
       )
     },
   }

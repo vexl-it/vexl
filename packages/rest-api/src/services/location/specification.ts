@@ -2,9 +2,7 @@ import {Schema} from '@effect/schema'
 import {Api} from 'effect-http'
 import {ServerSecurity} from '../../apiSecurity'
 import {
-  GetExchangeRateError,
   GetExchangeRateRequest,
-  GetExchangeRateResponse,
   GetGeocodedCoordinatesRequest,
   GetGeocodedCoordinatesResponse,
   GetLocationSuggestionsRequest,
@@ -40,18 +38,13 @@ export const GetGeocodedCoordinatesEndpoint = Api.get(
   })
 )
 
-export const getExchangeRateErrors = Schema.Union(GetExchangeRateError)
-export const GetExchangeRateEndpoint = Api.get(
-  'getExchangeRate',
-  '/btc-rate'
-).pipe(
+export const GetExchangeRateEndpoint = Api.get('getExchangeRate', '/btc-rate', {
+  description: 'Moved to separate service',
+}).pipe(
   Api.setRequestQuery(GetExchangeRateRequest),
-  Api.setResponseBody(GetExchangeRateResponse),
   Api.setSecurity(ServerSecurity),
-  Api.addResponse({
-    status: 400 as const,
-    body: GetExchangeRateError,
-  })
+  Api.setResponseHeaders(Schema.Struct({Location: Schema.String})),
+  Api.setResponseStatus(301 as const)
 )
 
 export const LocationServiceSpecification = Api.make({

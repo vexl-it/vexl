@@ -1,33 +1,20 @@
 import {Schema} from '@effect/schema'
 import {
   GetExchangeRateEndpoint,
-  getExchangeRateErrors,
   GetGeocodedCoordinatesEndpoint,
   GetGeocodedCoordinatesErrors,
   GetLocationSuggestionEndpoint,
 } from '@vexl-next/rest-api/src/services/location/specification'
 import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {makeRedirectHandler} from '@vexl-next/server-utils/src/makeRedirectHandler'
 import {Effect} from 'effect'
 import {Handler} from 'effect-http'
+import {btcExchangeRateUrlToRedirectToConfig} from '../configs'
 import {GoogleMapsService} from '../utils/googleMapsApi'
-import {YadioService} from '../utils/yadio'
 
-export const getExchangeRateHandler = Handler.make(
+export const getExchangeRateHandler = makeRedirectHandler(
   GetExchangeRateEndpoint,
-  (req) =>
-    makeEndpointEffect(
-      Effect.gen(function* (_) {
-        const yadio = yield* _(YadioService)
-        return yield* _(
-          yadio.getExchangeRatePrice({currency: req.query.currency})
-        )
-      }).pipe(
-        Effect.withSpan('getExchangeRateHandler', {
-          attributes: {currency: req.query.currency},
-        })
-      ),
-      getExchangeRateErrors
-    )
+  btcExchangeRateUrlToRedirectToConfig
 )
 
 export const getGeocodedCoordinatesRequest = Handler.make(

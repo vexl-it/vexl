@@ -92,7 +92,7 @@ export const refreshBtcPriceActionAtom = atom(
     }))
 
     return pipe(
-      api.location.getExchangeRate({currency}),
+      api.btcExchangeRate.getExchangeRate({currency}),
       TE.matchW(
         (l) => {
           reportError('warn', new Error('Error while fetching btc price'), {
@@ -114,7 +114,7 @@ export const refreshBtcPriceActionAtom = atom(
           set(btcPriceDataAtom, (prevState) => ({
             ...prevState,
             [currency]: {
-              btcPrice: Math.round(btcPrice.BTC),
+              btcPrice: Math.round(btcPrice?.BTC),
               state: 'success',
               lastRefreshAt: unixMillisecondsNow(),
             } satisfies BtcPriceDataWithState,

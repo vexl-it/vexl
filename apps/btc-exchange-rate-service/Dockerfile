@@ -13,6 +13,11 @@ RUN yarn build
 
 FROM node:19 as runner
 
+ARG SERVICE_VERSION
+ARG ENVIRONMENT
+
+ENV SERVICE_VERSION=${SERVICE_VERSION}
+ENV SERVICE_NAME="BTC exchange rate service - ${ENVIRONMENT}"
 
 COPY --from=builder /app/apps/btc-exchange-rate-service/ /app/apps/btc-exchange-rate-service
 COPY --from=builder /app/node_modules /app/node_modules

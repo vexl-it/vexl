@@ -5,6 +5,7 @@ import {
   btcInputValueAtom,
   btcPriceCurrencyAtom,
   calculateFiatValueAfterBtcPriceRefreshActionAtom,
+  currencySelectVisibleAtom,
   fiatInputValueAtom,
   tradeBtcPriceAtom,
   tradePriceTypeAtom,
@@ -52,7 +53,11 @@ function TradeCalculator({
       {tradePriceType === 'custom' && children}
       <Stack space="$2">
         <BtcAmountInput btcValueAtom={btcInputValueAtom} />
-        <FiatAmountInput showSubtitle fiatValueAtom={fiatInputValueAtom} />
+        <FiatAmountInput
+          currencySelectVisibleAtom={currencySelectVisibleAtom}
+          showSubtitle
+          fiatValueAtom={fiatInputValueAtom}
+        />
       </Stack>
       <PremiumOrDiscount onPremiumOrDiscountPress={onPremiumOrDiscountPress} />
     </Stack>

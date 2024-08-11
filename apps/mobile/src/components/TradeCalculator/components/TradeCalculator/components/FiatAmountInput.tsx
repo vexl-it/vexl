@@ -2,7 +2,8 @@ import {useAtomValue, useSetAtom, type PrimitiveAtom} from 'jotai'
 import {useRef, useState} from 'react'
 import {type TextInput} from 'react-native'
 import {Stack} from 'tamagui'
-import {Dropdown} from '../../../../Dropdown'
+import CurrencySelect from '../../../../CurrencySelect'
+import CurrencySelectButton from '../../../../CurrencySelectButton'
 import {
   btcPriceCurrencyAtom,
   btcPriceForOfferWithStateAtom,
@@ -11,16 +12,13 @@ import {
   tradePriceTypeAtom,
   updateFiatCurrencyActionAtom,
 } from '../../../atoms'
-import {dropdownStyles} from '../../../styles'
-import {
-  fiatCurrenciesDropdownData,
-  replaceNonDecimalCharsInInput,
-} from '../../../utils'
+import {replaceNonDecimalCharsInInput} from '../../../utils'
 import AmountInput from './AmountInput'
 import CalculatedWithLiveRate from './CalculatedWithLiveRate'
 
 interface Props {
   automaticCalculationDisabled?: boolean
+  currencySelectVisibleAtom: PrimitiveAtom<boolean>
   fiatValueAtom: PrimitiveAtom<string>
   showSubtitle?: boolean
   editable?: boolean
@@ -28,12 +26,14 @@ interface Props {
 
 function FiatAmountInput({
   automaticCalculationDisabled,
+  currencySelectVisibleAtom,
   fiatValueAtom,
   showSubtitle,
   editable = true,
 }: Props): JSX.Element {
   const ref = useRef<TextInput>(null)
   const [isFocused, setIsFocused] = useState<boolean>(false)
+  const setCurrencySelectVisible = useSetAtom(currencySelectVisibleAtom)
 
   const fiatValue = useAtomValue(fiatValueAtom)
   const calculateBtcValueOnFiatAmountChange = useSetAtom(
@@ -41,7 +41,6 @@ function FiatAmountInput({
   )
   const btcPriceForOfferWithState = useAtomValue(btcPriceForOfferWithStateAtom)
   const updateFiatCurrency = useSetAtom(updateFiatCurrencyActionAtom)
-  const currency = useAtomValue(btcPriceCurrencyAtom)
   const tradePriceType = useAtomValue(tradePriceTypeAtom)
   const ownPrice = useAtomValue(ownPriceAtom)
 
@@ -76,22 +75,22 @@ function FiatAmountInput({
       }}
     >
       <Stack>
-        <Dropdown
-          disable={!editable}
-          value={{value: currency, label: currency}}
-          data={fiatCurrenciesDropdownData}
-          onChange={(item) => {
-            updateFiatCurrency(item.value)
+        <CurrencySelectButton
+          disabled={!editable}
+          currencyAtom={btcPriceCurrencyAtom}
+          onPress={() => {
+            setCurrencySelectVisible(true)
           }}
-          style={dropdownStyles.dropdown}
-          containerStyle={dropdownStyles.dropdownContainerStyle}
-          itemContainerStyle={dropdownStyles.dropdownItemContainerStyle}
-          selectedTextStyle={dropdownStyles.selectedTextStyle}
         />
         {!isFocused && !!fiatValue && !automaticCalculationDisabled && (
           <CalculatedWithLiveRate />
         )}
       </Stack>
+      <CurrencySelect
+        selectedCurrencyCodeAtom={btcPriceCurrencyAtom}
+        onItemPress={updateFiatCurrency}
+        visibleAtom={currencySelectVisibleAtom}
+      />
     </AmountInput>
   )
 }

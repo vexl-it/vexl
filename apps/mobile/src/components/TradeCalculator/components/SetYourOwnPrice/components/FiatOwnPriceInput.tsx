@@ -1,19 +1,17 @@
 import {useFocusEffect} from '@react-navigation/native'
-import {useAtom, useAtomValue} from 'jotai'
+import {useAtom, useAtomValue, useSetAtom} from 'jotai'
 import {useCallback, useRef, useState} from 'react'
 import {type TextInput} from 'react-native'
 import {Stack} from 'tamagui'
-import {Dropdown} from '../../../../Dropdown'
-import {dropdownStyles} from '../../../../TradeCalculator/styles'
+import CurrencySelect from '../../../../CurrencySelect'
+import CurrencySelectButton from '../../../../CurrencySelectButton'
 import {
   btcPriceCurrencyAtom,
   btcPriceForOfferWithStateAtom,
+  currencySelectVisibleAtom,
   ownPriceAtom,
 } from '../../../atoms'
-import {
-  fiatCurrenciesDropdownData,
-  replaceNonDecimalCharsInInput,
-} from '../../../utils'
+import {replaceNonDecimalCharsInInput} from '../../../utils'
 import AmountInput from '../../TradeCalculator/components/AmountInput'
 
 function FiatOwnPriceInput(): JSX.Element {
@@ -22,7 +20,8 @@ function FiatOwnPriceInput(): JSX.Element {
   const [isFocused, setIsFocused] = useState<boolean>(false)
 
   const btcPriceForOfferWithState = useAtomValue(btcPriceForOfferWithStateAtom)
-  const [currency, updateCurrency] = useAtom(btcPriceCurrencyAtom)
+  const setCurrencySelectVisible = useSetAtom(currencySelectVisibleAtom)
+  const updateFiatCurrency = useSetAtom(btcPriceCurrencyAtom)
   const [ownPrice, setOwnPrice] = useAtom(ownPriceAtom)
 
   useFocusEffect(
@@ -56,18 +55,18 @@ function FiatOwnPriceInput(): JSX.Element {
       }}
     >
       <Stack>
-        <Dropdown
-          value={{value: currency, label: currency}}
-          data={fiatCurrenciesDropdownData}
-          onChange={(item) => {
-            updateCurrency(item.value)
+        <CurrencySelectButton
+          currencyAtom={btcPriceCurrencyAtom}
+          onPress={() => {
+            setCurrencySelectVisible(true)
           }}
-          style={dropdownStyles.dropdown}
-          containerStyle={dropdownStyles.dropdownContainerStyle}
-          itemContainerStyle={dropdownStyles.dropdownItemContainerStyle}
-          selectedTextStyle={dropdownStyles.selectedTextStyle}
         />
       </Stack>
+      <CurrencySelect
+        selectedCurrencyCodeAtom={btcPriceCurrencyAtom}
+        onItemPress={updateFiatCurrency}
+        visibleAtom={currencySelectVisibleAtom}
+      />
     </AmountInput>
   )
 }

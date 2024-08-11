@@ -1,4 +1,4 @@
-import {CurrencyCode} from '@vexl-next/domain/src/general/currency.brand'
+import {type CurrencyCode} from '@vexl-next/domain/src/general/currency.brand'
 import {
   useAtomValue,
   useSetAtom,
@@ -6,36 +6,11 @@ import {
   type WritableAtom,
 } from 'jotai'
 import {useRef, useState} from 'react'
-import {StyleSheet, type TextInput} from 'react-native'
-import {Stack, getTokens} from 'tamagui'
-import chevronDownSvg from '../../../../../images/chevronDownSvg'
-import {currencies} from '../../../../../utils/localization/currency'
-import {Dropdown, type DropdownItemProps} from '../../../../Dropdown'
-import Image from '../../../../Image'
+import {type TextInput} from 'react-native'
+import {Stack} from 'tamagui'
+import CurrencySelect from '../../../../CurrencySelect'
+import CurrencySelectButton from '../../../../CurrencySelectButton'
 import CalculatorInput from './CalculatorInput'
-
-const styles = StyleSheet.create({
-  dropdown: {
-    width: 65,
-  },
-  dropdownContainerStyle: {
-    backgroundColor: getTokens().color.greyAccent1.val,
-    borderRadius: getTokens().radius[4].val,
-    width: 90,
-    borderWidth: 0,
-    paddingTop: 10,
-    paddingBottom: 10,
-  },
-  dropdownItemContainerStyle: {
-    borderRadius: getTokens().radius[4].val,
-  },
-  selectedTextStyle: {
-    color: getTokens().color.main.val,
-    fontWeight: '500',
-    fontSize: 18,
-    fontFamily: 'TTSatoshi500',
-  },
-})
 
 interface Props {
   priceAtom: PrimitiveAtom<number | undefined>
@@ -50,26 +25,22 @@ interface Props {
     [currencyCode: CurrencyCode],
     void
   >
+  currencySelectVisibleAtom: PrimitiveAtom<boolean>
 }
-
-const fiatCurrenciesDropdownData: Array<DropdownItemProps<CurrencyCode>> =
-  Object.values(CurrencyCode.options).map((currency) => ({
-    label: currency,
-    value: currency,
-  }))
 
 function FiatInput({
   priceAtom,
   calculateSatsValueOnFiatValueChangeActionAtom,
   currencyAtom,
   changePriceCurrencyActionAtom,
+  currencySelectVisibleAtom,
 }: Props): JSX.Element {
   const ref = useRef<TextInput>(null)
 
   const [isFocused, setIsFocused] = useState<boolean>(false)
 
-  const currency = useAtomValue(currencyAtom) ?? currencies.USD.code
   const price = useAtomValue(priceAtom)
+  const setCurrencySelectVisible = useSetAtom(currencySelectVisibleAtom)
   const calculateSatsValueOnFiatValueChange = useSetAtom(
     calculateSatsValueOnFiatValueChangeActionAtom
   )
@@ -94,24 +65,18 @@ function FiatInput({
       }}
     >
       <Stack>
-        <Dropdown
-          value={{value: currency, label: currency}}
-          data={fiatCurrenciesDropdownData}
-          onChange={(item) => {
-            changePriceCurrency(item.value)
+        <CurrencySelectButton
+          currencyAtom={currencyAtom}
+          onPress={() => {
+            setCurrencySelectVisible(true)
           }}
-          style={styles.dropdown}
-          containerStyle={styles.dropdownContainerStyle}
-          itemContainerStyle={styles.dropdownItemContainerStyle}
-          selectedTextStyle={styles.selectedTextStyle}
-          renderRightIcon={() => (
-            <Image
-              source={chevronDownSvg}
-              stroke={getTokens().color.main.val}
-            />
-          )}
         />
       </Stack>
+      <CurrencySelect
+        selectedCurrencyCodeAtom={currencyAtom}
+        onItemPress={changePriceCurrency}
+        visibleAtom={currencySelectVisibleAtom}
+      />
     </CalculatorInput>
   )
 }

@@ -37,6 +37,8 @@ import calculatePriceInFiatFromSats from '../../utils/calculatePriceInFiatFromSa
 import calculatePriceInSats from '../../utils/calculatePriceInSats'
 import {currencies} from '../../utils/localization/currency'
 
+export const currencySelectVisibleAtom = atom<boolean>(false)
+
 export const listingTypeAtom = atom<ListingType | undefined>(
   offersFilterInitialState.listingType
 )

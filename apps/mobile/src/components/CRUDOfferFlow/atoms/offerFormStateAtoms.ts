@@ -278,6 +278,8 @@ export const offerFormMolecule = molecule(() => {
     dummyOffer.offerInfo.publicPart.locationState
   )
 
+  const currencySelectVisibleAtom = atom<boolean>(false)
+
   const showBuySellFieldAtom = atom<boolean>(
     (get) => get(nullableListingTypeAtom) !== undefined
   )
@@ -1142,9 +1144,17 @@ export const offerFormMolecule = molecule(() => {
 
   const emitAlertBasedOnCurrentStepIfAnyAtom = atom(null, (get) => {
     const {t} = get(translationAtom)
+    const currency = get(currencyAtom) ?? 'USD'
     const reason = get(dontAllowNavigationToNextStepAndReturnReasonAtom)
 
-    if (reason) Alert.alert(t(`offerForm.${reason}`))
+    if (reason === 'errorExceededLimits')
+      Alert.alert(
+        t(`offerForm.${reason}`, {
+          limit: currencies[currency].maxAmount,
+          currency,
+        })
+      )
+    else if (reason) Alert.alert(t(`offerForm.${reason}`))
   })
 
   const screensBasedOnListingTypeAtom = atom((get) => {
@@ -1210,5 +1220,6 @@ export const offerFormMolecule = molecule(() => {
     dontAllowNavigationToNextStepAndReturnReasonAtom,
     emitAlertBasedOnCurrentStepIfAnyAtom,
     screensBasedOnListingTypeAtom,
+    currencySelectVisibleAtom,
   }
 })

@@ -21,8 +21,6 @@ import {verifyChallengeHandler} from './routes/login/handlers/verifyChallengeHan
 import {verifyCodeHandler} from './routes/login/handlers/verifyCodeHandler'
 import {DashboardReportsService} from './routes/login/utils/DashboardReportsService'
 import {logoutUserHandler} from './routes/logoutUser'
-import {submitFeedbackHandler} from './routes/submitFeedback'
-import {FeedbackDbService} from './routes/submitFeedback/db'
 import {TwilioVerificationClient} from './utils/twilio'
 
 export const app = RouterBuilder.make(UserApiSpecification).pipe(
@@ -30,13 +28,11 @@ export const app = RouterBuilder.make(UserApiSpecification).pipe(
   RouterBuilder.handle(verifyCodeHandler),
   RouterBuilder.handle(verifyChallengeHandler),
   RouterBuilder.handle(logoutUserHandler),
-  RouterBuilder.handle(submitFeedbackHandler),
   RouterBuilder.build,
   setupLoggingMiddlewares
 )
 
 const MainLive = Layer.mergeAll(
-  FeedbackDbService.Live,
   TwilioVerificationClient.Live,
   VerificationStateDbService.Live,
   LoggedInUsersDbService.Live,

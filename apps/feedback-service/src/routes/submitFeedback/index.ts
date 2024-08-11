@@ -1,6 +1,6 @@
 import {Schema} from '@effect/schema'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
-import {SubmitFeedbackEndpoint} from '@vexl-next/rest-api/src/services/user/specification'
+import {SubmitFeedbackEndpoint} from '@vexl-next/rest-api/src/services/feedback/specification'
 import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {Effect} from 'effect'
 import {Handler} from 'effect-http'

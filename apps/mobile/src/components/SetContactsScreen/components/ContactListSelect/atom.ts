@@ -1,5 +1,6 @@
 import {safeParse} from '@vexl-next/resources-utils/src/utils/parsing'
 import {createScope, molecule} from 'bunshi/dist/react'
+import * as A from 'fp-ts/Array'
 import * as O from 'fp-ts/Option'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
@@ -413,6 +414,88 @@ export const contactSelectMolecule = molecule((_, getScope) => {
     }
   )
 
+  const editContactActionAtom = atom(
+    null,
+    (get, set, {contact}: {contact: StoredContactWithComputedValues}) => {
+      const {t} = get(translationAtom)
+      // to solve readonly issue
+      const contacts = [...get(storedContactsAtom)]
+
+      return pipe(
+        set(askAreYouSureActionAtom, {
+          variant: 'info',
+          steps: [
+            {
+              title: t('updateContactDialog.updateContact'),
+              description: t('updateContactDialog.description'),
+              subtitle: contact.computedValues.normalizedNumber,
+              negativeButtonText: t('common.cancel'),
+              positiveButtonText: t('common.save'),
+              type: 'StepWithInput',
+              textInputProps: {
+                autoFocus: true,
+                autoCorrect: false,
+                variant: 'greyOnWhite',
+                icon: userSvg,
+                placeholder: contact.info.name,
+              },
+            },
+          ],
+        }),
+        TE.map((result) =>
+          result[0]?.type === 'inputResult'
+            ? result[0].value
+            : contact.info.name
+        ),
+        TE.map((customName) =>
+          pipe(
+            contacts,
+            A.findIndex((one) => one.info.rawNumber === contact.info.rawNumber),
+            O.match(
+              () => contacts,
+              (index) =>
+                pipe(
+                  contacts,
+                  A.modifyAt(index, (one) => ({
+                    ...one,
+                    info: {...one.info, name: customName},
+                  })),
+                  O.getOrElse(() => contacts)
+                )
+            )
+          )
+        ),
+        TE.map((updatedContacts) => {
+          set(storedContactsAtom, updatedContacts)
+        }),
+        TE.chainFirstW(() => {
+          reloadContacts()
+          return set(askAreYouSureActionAtom, {
+            steps: [
+              {
+                type: 'StepWithText',
+                title: t('common.success'),
+                description: t(
+                  'updateContactDialog.contactSuccessfullyUpdated'
+                ),
+                positiveButtonText: t('common.close'),
+              },
+            ],
+            variant: 'info',
+          })
+        }),
+        TE.match(
+          () => {
+            // ignore, user canceled
+          },
+          () => {
+            // ignore, edit success
+          }
+        )
+      )()
+    }
+  )
+
   return {
     selectAllAtom,
     searchTextAtom,
@@ -434,5 +517,6 @@ export const contactSelectMolecule = molecule((_, getScope) => {
     nonSubmittedContactsToDisplayCountAtom,
     allContactsWithSearchActiveToDisplayCountAtom,
     displayContactsCountAtom,
+    editContactActionAtom,
   }
 })

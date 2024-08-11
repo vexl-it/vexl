@@ -4,7 +4,7 @@ import {RegionCodeE} from '@vexl-next/domain/src/utility/RegionCode.brand'
 import {
   FeedbackFormId,
   FeedbackType,
-} from '@vexl-next/rest-api/src/services/user/specification'
+} from '@vexl-next/rest-api/src/services/feedback/specification'
 import {Context, Effect, Layer} from 'effect'
 
 const FeedbackInsert = Schema.Struct({

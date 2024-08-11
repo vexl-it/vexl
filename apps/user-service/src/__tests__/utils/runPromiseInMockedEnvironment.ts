@@ -8,7 +8,6 @@ import {VerificationStateDbService} from '../../routes/login/db/verificationStat
 import {type DashboardReportsService} from '../../routes/login/utils/DashboardReportsService'
 import {type TwilioVerificationClient} from '../../utils/twilio'
 import {mockedDashboardReportService} from './mockedDashboardReportService'
-import {mockedFeedbackDbService} from './mockedFeedbackDbService'
 import {mockedTwilioLayer} from './mockedTwilioClient'
 import {mockedUsersDbService} from './mockedUsersDbService'
 import {NodeTestingApp} from './NodeTestingApp'
@@ -31,7 +30,6 @@ const context = NodeTestingApp.Live.pipe(
   Layer.provideMerge(mockedUsersDbService),
   Layer.provideMerge(VerificationStateDbService.Live),
   Layer.provideMerge(mockedDashboardReportService),
-  Layer.provideMerge(mockedFeedbackDbService),
   Layer.provideMerge(universalContext)
 )
 

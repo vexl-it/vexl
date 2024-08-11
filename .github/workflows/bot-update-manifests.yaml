@@ -23,6 +23,8 @@ on:
           - offer-service
           - notification-service
           - web-app
+          - feedback-service
+          - bitcoin-rate
 
 jobs:
   update-manifests:

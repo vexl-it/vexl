@@ -5,6 +5,7 @@ import * as UserSessionCredentials from './UserSessionCredentials.brand'
 import * as btcExchangeRate from './services/btcExchangeRate'
 import * as chat from './services/chat'
 import * as contact from './services/contact'
+import * as feedback from './services/feedback'
 import * as location from './services/location'
 import * as notification from './services/notification'
 import * as offer from './services/offer'
@@ -19,6 +20,7 @@ export const EnvPreset = z
     locationMs: ServiceUrl,
     notificationMs: ServiceUrl,
     btcExchangeRateMs: ServiceUrl,
+    feedbackMs: ServiceUrl,
   })
   .readonly()
 export type EnvPreset = z.TypeOf<typeof EnvPreset>
@@ -29,7 +31,16 @@ export interface CredentialHeaders {
   signature: string
 }
 
-export {btcExchangeRate, chat, contact, location, notification, offer, user}
+export {
+  btcExchangeRate,
+  chat,
+  contact,
+  feedback,
+  location,
+  notification,
+  offer,
+  user,
+}
 
 export const ENV_PRESETS: {stageEnv: EnvPreset; prodEnv: EnvPreset} = {
   stageEnv: {
@@ -42,6 +53,7 @@ export const ENV_PRESETS: {stageEnv: EnvPreset; prodEnv: EnvPreset} = {
     btcExchangeRateMs: ServiceUrl.parse(
       'https://stage-btc-exchange-rate.vexl.it'
     ),
+    feedbackMs: ServiceUrl.parse('https://stage-feedback.vexl.it'),
   },
   prodEnv: {
     userMs: ServiceUrl.parse('https://user.vexl.it'),
@@ -51,6 +63,7 @@ export const ENV_PRESETS: {stageEnv: EnvPreset; prodEnv: EnvPreset} = {
     locationMs: ServiceUrl.parse('https://location.vexl.it'),
     notificationMs: ServiceUrl.parse('https://notification.vexl.it'),
     btcExchangeRateMs: ServiceUrl.parse('https://btc-exchange-rate.vexl.it'),
+    feedbackMs: ServiceUrl.parse('https://feedback.vexl.it'),
   },
 }
 

@@ -101,7 +101,7 @@ export const feedbackMolecule = molecule((getMolecule, getScope) => {
       return pipe(
         TE.Do,
         TE.chainW(() =>
-          privateApi.user.submitFeedback({
+          privateApi.feedback.submitFeedback({
             formId,
             countryCode: regionCode,
             type: type === 'OFFER_RATING' ? 'trade' : 'create',

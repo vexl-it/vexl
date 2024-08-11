@@ -2,7 +2,6 @@ import {Schema} from '@effect/schema'
 import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {E164PhoneNumberE} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {IsoDatetimeStringE} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
-import {RegionCodeE} from '@vexl-next/domain/src/utility/RegionCode.brand'
 import {
   EcdsaSignature,
   HmacHash,
@@ -206,39 +205,7 @@ export const LoginGroup = ApiGroup.make('Login').pipe(
   ApiGroup.addEndpoint(VerifyChallengeEndpoint)
 )
 
-export const FeedbackFormId = Schema.NonEmptyString.pipe(
-  Schema.brand('FeedbackFormId')
-)
-export type FeedbackFormId = Schema.Schema.Type<typeof FeedbackFormId>
-
-export const FeedbackType = Schema.Literal('create', 'trade')
-export type FeedbackType = Schema.Schema.Type<typeof FeedbackType>
-
-export class SubmitFeedbackRequest extends Schema.Class<SubmitFeedbackRequest>(
-  'SubmitFeedbackRequest'
-)({
-  formId: FeedbackFormId,
-  type: FeedbackType,
-  stars: Schema.optional(
-    Schema.Int.pipe(Schema.lessThanOrEqualTo(5), Schema.greaterThanOrEqualTo(0))
-  ),
-  objections: Schema.optional(Schema.String),
-  textComment: Schema.optional(Schema.String),
-  countryCode: Schema.optional(RegionCodeE),
-}) {}
-
-export const SubmitFeedbackEndpoint = Api.post(
-  'submitFeedback',
-  '/api/v1/feedback/submit'
-).pipe(
-  Api.setSecurity(ServerSecurity),
-  // Api.setResponseBody(Schema.Void),
-  Api.setResponseStatus(200 as const),
-  Api.setRequestBody(SubmitFeedbackRequest)
-)
-
 export const UserApiSpecification = Api.make({title: 'User service'}).pipe(
   Api.addGroup(LoginGroup),
-  Api.addEndpoint(LogoutUserEndpoint),
-  Api.addEndpoint(SubmitFeedbackEndpoint)
+  Api.addEndpoint(LogoutUserEndpoint)
 )

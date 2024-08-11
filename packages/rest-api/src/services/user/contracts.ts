@@ -1,7 +1,6 @@
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {IsoDatetimeString} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
-import {RegionCode} from '@vexl-next/domain/src/utility/RegionCode.brand'
 import {type AxiosResponse} from 'axios'
 import {Brand} from 'effect'
 import z from 'zod'
@@ -126,14 +125,3 @@ export const GetCryptocurrencyDetailsResponse = z.object({
 export type GetCryptocurrencyDetailsResponse = z.TypeOf<
   typeof GetCryptocurrencyDetailsResponse
 >
-
-export const SubmitFeedbackRequest = z.object({
-  formId: z.string().min(1),
-  type: z.enum(['create', 'trade']),
-  stars: z.number().optional(),
-  objections: z.string().optional(),
-  textComment: z.string().optional(),
-  countryCode: RegionCode.optional(),
-})
-
-export type SubmitFeedbackRequest = z.TypeOf<typeof SubmitFeedbackRequest>

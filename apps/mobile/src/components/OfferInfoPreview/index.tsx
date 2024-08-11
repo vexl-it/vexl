@@ -91,6 +91,7 @@ function OfferInfoPreview({
           fos={18}
           color={negative ? '$greyOnBlack' : '$black'}
           ff="$body500"
+          selectable
         >
           {offer.publicPart.offerDescription}
         </Text>

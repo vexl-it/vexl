@@ -10,6 +10,7 @@ function PriceScreen(): JSX.Element {
     calculateSatsValueOnFiatValueChangeActionAtom,
     calculateFiatValueOnSatsValueChangeActionAtom,
     currencyAtom,
+    currencySelectVisibleAtom,
     satsValueAtom,
     toggleSinglePriceActiveAtom,
     changePriceCurrencyActionAtom,
@@ -31,6 +32,7 @@ function PriceScreen(): JSX.Element {
         satsValueAtom={satsValueAtom}
         toggleSinglePriceActiveAtom={toggleSinglePriceActiveAtom}
         changePriceCurrencyActionAtom={changePriceCurrencyActionAtom}
+        currencySelectVisibleAtom={currencySelectVisibleAtom}
       />
       <Expiration
         expirationDateAtom={expirationDateAtom}

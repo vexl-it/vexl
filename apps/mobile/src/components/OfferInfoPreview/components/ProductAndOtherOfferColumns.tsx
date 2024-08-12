@@ -18,9 +18,9 @@ function ProductAndOtherOfferColumns({offer}: Props): JSX.Element {
 
   return (
     <XStack f={1} space="$1">
+      <FiatOrSats offer={offer} />
       {offer.publicPart.listingType === 'PRODUCT' ? (
         <>
-          <FiatOrSats offer={offer} />
           <InfoItemContainer>
             <XStack mb="$2">
               {offer.publicPart.locationState.includes('IN_PERSON') && (

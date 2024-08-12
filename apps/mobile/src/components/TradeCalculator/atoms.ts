@@ -21,6 +21,7 @@ import {
 import {translationAtom} from '../../utils/localization/I18nProvider'
 import {askAreYouSureActionAtom} from '../AreYouSureDialog'
 
+export const currencySelectVisibleAtom = atom<boolean>(false)
 export const tradeBtcPriceAtom = atom<number>(0)
 export const tradePriceTypeDialogVisibleAtom = atom<boolean>(false)
 export const tradePriceTypeAtom = atom<TradePriceType | undefined>(undefined)

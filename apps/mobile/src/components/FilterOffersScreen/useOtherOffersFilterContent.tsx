@@ -15,6 +15,7 @@ import {
   calculateSatsValueOnFiatValueChangeActionAtom,
   changePriceCurrencyActionAtom,
   createIsThisLanguageSelectedAtom,
+  currencySelectVisibleAtom,
   intendedConnectionLevelAtom,
   listingTypeAtom,
   locationActiveAtom,
@@ -56,6 +57,7 @@ export default function useOtherOffersFilterContent(): Props[] {
             toggleSinglePriceActiveAtom={singlePriceActiveAtom}
             priceAtom={singlePriceAtom}
             changePriceCurrencyActionAtom={changePriceCurrencyActionAtom}
+            currencySelectVisibleAtom={currencySelectVisibleAtom}
           />
         ),
       },

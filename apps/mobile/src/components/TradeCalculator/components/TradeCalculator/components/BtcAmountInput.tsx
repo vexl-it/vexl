@@ -1,7 +1,7 @@
 import {useAtomValue, useSetAtom, type PrimitiveAtom} from 'jotai'
 import {useRef, useState} from 'react'
 import {TouchableOpacity, type TextInput} from 'react-native'
-import {Stack, Text, XStack, getTokens} from 'tamagui'
+import {getTokens, Stack, Text, XStack} from 'tamagui'
 import chevronDownSvg from '../../../../../images/chevronDownSvg'
 import {SATOSHIS_IN_BTC} from '../../../../../state/currentBtcPriceAtoms'
 import Image from '../../../../Image'
@@ -67,7 +67,7 @@ function BtcAmountInput({
         <TouchableOpacity style={{width: 65}} onPress={switchBtcOrSatValue}>
           <XStack space="$2">
             <Text fontSize={18} color="$white" fontFamily="$body500">
-              {btcOrSat === 'BTC' ? 'BTC' : 'SAT'}
+              {btcOrSat}
             </Text>
             <Image
               source={chevronDownSvg}

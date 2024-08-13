@@ -78,6 +78,7 @@
   "common.allowNow": "Позволи сега",
   "common.discard": "Откажи",
   "currency.AED": "United Arab Emirates Dirham",
+  "currency.ALL": "Albanian Lek",
   "currency.ANG": "Netherlands Antillean Guilder",
   "currency.AOA": "Angolan Kwanza",
   "currency.ARS": "Argentine Peso",
@@ -276,6 +277,7 @@
   "postLoginFlow.contactsList.submitted": "Изпратено",
   "postLoginFlow.contactsList.new": "Нов",
   "postLoginFlow.contactsList.nonSubmitted": "Неизпратено",
+  "postLoginFlow.contactsList.all": "All",
   "postLoginFlow.allowNotifications.title": "Разрешаване на известия",
   "postLoginFlow.allowNotifications.text": "Активирането на известията ви позволява да разберете кога другите приемат вашата заявка или получавате съобщение.",
   "postLoginFlow.allowNotifications.action": "Разреши",
@@ -659,6 +661,8 @@
   "filterOffers.BTC_TO_PRODUCT": "Имам BTC, искам продукт",
   "filterOffers.PRODUCT_TO_BTC": "Имам продукт, искам BTC",
   "filterOffers.STH_ELSE": "Търся нещо друго",
+  "filterOffers.ALL_SELLING_BTC": "All offers for selling BTC",
+  "filterOffers.ALL_BUYING_BTC": "All offers for buying BTC",
   "filterOffers.searchOffers": "Търси оферти",
   "filterOffers.offers": "Оферти",
   "filterOffers.whatIsTheGoal": "Каква е целта",
@@ -877,6 +881,9 @@
   "addContactDialog.dontShutDownTheApp": "Не изключвайте приложението. Може да отнеме известно време.",
   "addContactDialog.addToPhonesContacts": "Добавяне в контакти на телефона?",
   "addContactDialog.addContactDescription": "Запази контактите на {{name}} в твоя телефон за лесно възстановяване и запазване на връзката дори ако изтриете приложението или смените телефона си.",
+  "updateContactDialog.updateContact": "Update contact",
+  "updateContactDialog.description": "Would you like to change the name for this Vexl contact?",
+  "updateContactDialog.contactSuccessfullyUpdated": "Contact successfully updated",
   "qrScanner.title": "Сканирай QR код на друг потребител",
   "qrScanner.invalidQrCodeScanned": "Невалиден сканиран QR код",
   "qrScanner.missingCameraPermissions": "Липсват разрешения за камера",
@@ -1038,5 +1045,7 @@
   "raffle.errorOpeningApp.text": "Имате ли инсталиран порфейл за Светкавична мрежа?",
   "raffle.errorOpeningApp.button": "Копирай lnurl",
   "raffle.errorOpeningDeepLink": "Грешка при отваряне на дълбока връзка",
-  "tradeCalculator.title": "Trade calculator"
+  "tradeCalculator.title": "Trade calculator",
+  "tradeCalculator.whatDoesLivePriceMean": "What does Live price mean?",
+  "tradeCalculator.yadioLivePriceExplanation": "Vexl sources BTC prices from Yadio.io, after 10 minutes, please refresh manually for the most up to date price."
 }

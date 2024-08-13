@@ -78,6 +78,7 @@
   "common.allowNow": "Permitir agora",
   "common.discard": "Descartar",
   "currency.AED": "United Arab Emirates Dirham",
+  "currency.ALL": "Albanian Lek",
   "currency.ANG": "Netherlands Antillean Guilder",
   "currency.AOA": "Angolan Kwanza",
   "currency.ARS": "Argentine Peso",
@@ -276,6 +277,7 @@
   "postLoginFlow.contactsList.submitted": "Enviado",
   "postLoginFlow.contactsList.new": "Novo",
   "postLoginFlow.contactsList.nonSubmitted": "Não-enviado",
+  "postLoginFlow.contactsList.all": "All",
   "postLoginFlow.allowNotifications.title": "Permitir permissões de notificação",
   "postLoginFlow.allowNotifications.text": "A ativação das notificações permite-lhe saber quando outras pessoas aceitam as suas ofertas ou quando chegam mensagens.",
   "postLoginFlow.allowNotifications.action": "Permitir",
@@ -659,6 +661,8 @@
   "filterOffers.BTC_TO_PRODUCT": "Eu tenho BTC, quero um produto",
   "filterOffers.PRODUCT_TO_BTC": "Eu tenho um produto, quero BTC",
   "filterOffers.STH_ELSE": "Estou à procura de outra coisa",
+  "filterOffers.ALL_SELLING_BTC": "All offers for selling BTC",
+  "filterOffers.ALL_BUYING_BTC": "All offers for buying BTC",
   "filterOffers.searchOffers": "Procurar ofertas",
   "filterOffers.offers": "Ofertas",
   "filterOffers.whatIsTheGoal": "Qual é o objetivo",
@@ -877,6 +881,9 @@
   "addContactDialog.dontShutDownTheApp": "Não feche a app. Pode levar algum tempo.",
   "addContactDialog.addToPhonesContacts": "Adicionar aos contactos do telefone?",
   "addContactDialog.addContactDescription": "Save {{name}}'s contacts to your phone for easy recovery and staying connected, even if you delete the app or change phones.",
+  "updateContactDialog.updateContact": "Update contact",
+  "updateContactDialog.description": "Would you like to change the name for this Vexl contact?",
+  "updateContactDialog.contactSuccessfullyUpdated": "Contact successfully updated",
   "qrScanner.title": "Scanear código QR de outro utilizador",
   "qrScanner.invalidQrCodeScanned": "O código QR digitalizado é inválido",
   "qrScanner.missingCameraPermissions": "Permissões da câmara ausentes",
@@ -1038,5 +1045,7 @@
   "raffle.errorOpeningApp.text": "Do you have lightinig wallet installed?",
   "raffle.errorOpeningApp.button": "Copy lnurl",
   "raffle.errorOpeningDeepLink": "Error opening deep link",
-  "tradeCalculator.title": "Trade calculator"
+  "tradeCalculator.title": "Trade calculator",
+  "tradeCalculator.whatDoesLivePriceMean": "What does Live price mean?",
+  "tradeCalculator.yadioLivePriceExplanation": "Vexl sources BTC prices from Yadio.io, after 10 minutes, please refresh manually for the most up to date price."
 }

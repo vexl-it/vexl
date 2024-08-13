@@ -78,6 +78,7 @@
   "common.allowNow": "Permitir ahora",
   "common.discard": "Descartar",
   "currency.AED": "United Arab Emirates Dirham",
+  "currency.ALL": "Albanian Lek",
   "currency.ANG": "Netherlands Antillean Guilder",
   "currency.AOA": "Angolan Kwanza",
   "currency.ARS": "Argentine Peso",
@@ -276,6 +277,7 @@
   "postLoginFlow.contactsList.submitted": "Enviado",
   "postLoginFlow.contactsList.new": "Nuevo",
   "postLoginFlow.contactsList.nonSubmitted": "No enviado",
+  "postLoginFlow.contactsList.all": "All",
   "postLoginFlow.allowNotifications.title": "Permitir Notificaciones",
   "postLoginFlow.allowNotifications.text": "Activar las notificaciones te permite saber cuándo otros aceptan tus ofertas o cuándo llegan mensajes.",
   "postLoginFlow.allowNotifications.action": "Permitir",
@@ -659,6 +661,8 @@
   "filterOffers.BTC_TO_PRODUCT": "Tengo BTC, quiero un producto",
   "filterOffers.PRODUCT_TO_BTC": "Tengo un producto, quiero BTC",
   "filterOffers.STH_ELSE": "Busco otra cosa",
+  "filterOffers.ALL_SELLING_BTC": "All offers for selling BTC",
+  "filterOffers.ALL_BUYING_BTC": "All offers for buying BTC",
   "filterOffers.searchOffers": "Buscar ofertas",
   "filterOffers.offers": "Ofertas",
   "filterOffers.whatIsTheGoal": "Cuál es el objetivo",
@@ -877,6 +881,9 @@
   "addContactDialog.dontShutDownTheApp": "No cierres la aplicación. Puede tardar algún tiempo.",
   "addContactDialog.addToPhonesContacts": "Añadir a los contactos del teléfono?",
   "addContactDialog.addContactDescription": "Guardar los contactos de {{name}} en tu teléfono para recuperarlos fácilmente y seguir conectado, aunque eliminas la aplicación o cambias de teléfono.",
+  "updateContactDialog.updateContact": "Update contact",
+  "updateContactDialog.description": "Would you like to change the name for this Vexl contact?",
+  "updateContactDialog.contactSuccessfullyUpdated": "Contact successfully updated",
   "qrScanner.title": "Escanea el código QR de otro usuario",
   "qrScanner.invalidQrCodeScanned": "El código QR inválido",
   "qrScanner.missingCameraPermissions": "Faltan permisiones para la cámara",
@@ -1038,5 +1045,7 @@
   "raffle.errorOpeningApp.text": "Tienes la billetera lightning instalada?",
   "raffle.errorOpeningApp.button": "Copia lnurl",
   "raffle.errorOpeningDeepLink": "Error al abrir un enlace profundo",
-  "tradeCalculator.title": "Trade calculator"
+  "tradeCalculator.title": "Trade calculator",
+  "tradeCalculator.whatDoesLivePriceMean": "What does Live price mean?",
+  "tradeCalculator.yadioLivePriceExplanation": "Vexl sources BTC prices from Yadio.io, after 10 minutes, please refresh manually for the most up to date price."
 }

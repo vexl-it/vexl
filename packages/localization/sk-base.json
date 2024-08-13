@@ -78,6 +78,7 @@
   "common.allowNow": "Umožniť teraz",
   "common.discard": "Vyradiť",
   "currency.AED": "United Arab Emirates Dirham",
+  "currency.ALL": "Albanian Lek",
   "currency.ANG": "Netherlands Antillean Guilder",
   "currency.AOA": "Angolan Kwanza",
   "currency.ARS": "Argentine Peso",
@@ -276,6 +277,7 @@
   "postLoginFlow.contactsList.submitted": "Odoslané",
   "postLoginFlow.contactsList.new": "Nové",
   "postLoginFlow.contactsList.nonSubmitted": "Neodoslané",
+  "postLoginFlow.contactsList.all": "All",
   "postLoginFlow.allowNotifications.title": "Povoliť notifikácie",
   "postLoginFlow.allowNotifications.text": "Vďaka notifikáciam sa dozvieš, keď niekto prijme tvoju ponuku, alebo ti príde nová správa.",
   "postLoginFlow.allowNotifications.action": "Povoliť",
@@ -659,6 +661,8 @@
   "filterOffers.BTC_TO_PRODUCT": "Mám BTC, chcem produkt",
   "filterOffers.PRODUCT_TO_BTC": "Mám produkt, chcem BTC",
   "filterOffers.STH_ELSE": "Hľadám niečo iné",
+  "filterOffers.ALL_SELLING_BTC": "All offers for selling BTC",
+  "filterOffers.ALL_BUYING_BTC": "All offers for buying BTC",
   "filterOffers.searchOffers": "Vyhľadávanie ponúk",
   "filterOffers.offers": "Ponuky",
   "filterOffers.whatIsTheGoal": "Čo je cieľom",
@@ -877,6 +881,9 @@
   "addContactDialog.dontShutDownTheApp": "Aplikáciu nevypínaj. Môže to chvíľu trvať.",
   "addContactDialog.addToPhonesContacts": "Pridať do kontaktov v telefóne?",
   "addContactDialog.addContactDescription": "Ulož kontakt {{name}} do telefónu, aby si ho mohol ľahko obnoviť a zostať pripojený, aj keď aplikáciu vymažeš alebo zmeníš telefón.",
+  "updateContactDialog.updateContact": "Update contact",
+  "updateContactDialog.description": "Would you like to change the name for this Vexl contact?",
+  "updateContactDialog.contactSuccessfullyUpdated": "Contact successfully updated",
   "qrScanner.title": "Naskenuj QR kód iného používateľa.",
   "qrScanner.invalidQrCodeScanned": "Naskenovaný QR kód je chybný.",
   "qrScanner.missingCameraPermissions": "Chýbajúce povolenia pre fotoaparát.",
@@ -1038,5 +1045,7 @@
   "raffle.errorOpeningApp.text": "Máš nainštalovanú peňaženku lightinig?",
   "raffle.errorOpeningApp.button": "Skopíruj lnurl",
   "raffle.errorOpeningDeepLink": "Chyba pri otváraní prepojenia v rámci aplikácie",
-  "tradeCalculator.title": "Trade calculator"
+  "tradeCalculator.title": "Trade calculator",
+  "tradeCalculator.whatDoesLivePriceMean": "What does Live price mean?",
+  "tradeCalculator.yadioLivePriceExplanation": "Vexl sources BTC prices from Yadio.io, after 10 minutes, please refresh manually for the most up to date price."
 }

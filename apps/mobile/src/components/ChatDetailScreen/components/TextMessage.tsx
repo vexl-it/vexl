@@ -16,6 +16,7 @@ import {
   StyleSheet,
   TouchableWithoutFeedback,
 } from 'react-native'
+import Hyperlink from 'react-native-hyperlink'
 import {Stack, Text, XStack, YStack, getTokens} from 'tamagui'
 import getValueFromSetStateActionOfAtom from '../../../utils/atomUtils/getValueFromSetStateActionOfAtom'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
@@ -38,6 +39,10 @@ const style = StyleSheet.create({
   replyImage: {
     width: '100%',
     height: 50,
+  },
+  link: {
+    color: getTokens().color.main.val,
+    fontSize: 16,
   },
 })
 
@@ -249,16 +254,17 @@ function TextMessage({
                   </TouchableWithoutFeedback>
                 </YStack>
               )}
-
-              <Text
-                fontStyle={italic ? 'italic' : undefined}
-                selectable
-                fos={16}
-                fontFamily={italic ? undefined : '$body500'}
-                color={isMine ? '$black' : '$white'}
-              >
-                {messageText}
-              </Text>
+              <Hyperlink linkDefault linkStyle={style.link}>
+                <Text
+                  fontStyle={italic ? 'italic' : undefined}
+                  selectable
+                  fos={16}
+                  fontFamily={italic ? undefined : '$body500'}
+                  color={isMine ? '$black' : '$white'}
+                >
+                  {messageText}
+                </Text>
+              </Hyperlink>
             </Stack>
           </TouchableWithoutFeedback>
           {!!isExtended && (

@@ -12745,6 +12745,7 @@ __metadata:
     react-native-element-dropdown: 2.10.0
     react-native-flags: ^1.0.0
     react-native-gesture-handler: ~2.14.0
+    react-native-hyperlink: ^0.0.22
     react-native-keyboard-aware-scroll-view: ^0.9.5
     react-native-launch-arguments: ^4.0.2
     react-native-map-clustering: ^3.4.2
@@ -23694,6 +23695,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"linkify-it@npm:^4.0.1":
+  version: 4.0.1
+  resolution: "linkify-it@npm:4.0.1"
+  dependencies:
+    uc.micro: ^1.0.1
+  checksum: 3e0a29921269c14eb7ac6f5db2da68d4854ea9acca6e9014a323f75f2dd39b197ffab57c1fbd6a906ceb021aad3ee6d7ba7d0181236dd9630ffc452b392f7f71
+  languageName: node
+  linkType: hard
+
 "load-json-file@npm:^4.0.0":
   version: 4.0.0
   resolution: "load-json-file@npm:4.0.0"
@@ -28647,6 +28657,19 @@ __metadata:
   peerDependencies:
     react-native: ">=0.56"
   checksum: 9163368ebd935d897f6ea0f9e95c476aa7608080e3848bb6c6f85db01b9de3498d857795c84df5492d6511a55aebf89492860ac886b652a9a7a3efdb19913f87
+  languageName: node
+  linkType: hard
+
+"react-native-hyperlink@npm:^0.0.22":
+  version: 0.0.22
+  resolution: "react-native-hyperlink@npm:0.0.22"
+  dependencies:
+    linkify-it: ^4.0.1
+    mdurl: ^1.0.1
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: c459688c4d9541bc1be17bbed13d1ceac127097ac0a07013a7555a824821a630e76962c63e336cf77916d21f1cb703b8b5f0c98662e85eefe2055e7a7334c389
   languageName: node
   linkType: hard
 

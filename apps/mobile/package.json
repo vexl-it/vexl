@@ -102,6 +102,7 @@
     "react-native-element-dropdown": "2.10.0",
     "react-native-flags": "^1.0.0",
     "react-native-gesture-handler": "~2.14.0",
+    "react-native-hyperlink": "^0.0.22",
     "react-native-keyboard-aware-scroll-view": "^0.9.5",
     "react-native-launch-arguments": "^4.0.2",
     "react-native-map-clustering": "^3.4.2",

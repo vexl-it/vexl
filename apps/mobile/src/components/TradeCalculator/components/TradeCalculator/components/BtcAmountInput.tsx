@@ -1,4 +1,4 @@
-import {useAtomValue, useSetAtom, type PrimitiveAtom} from 'jotai'
+import {useAtom, useAtomValue, useSetAtom, type PrimitiveAtom} from 'jotai'
 import {useRef, useState} from 'react'
 import {TouchableOpacity, type TextInput} from 'react-native'
 import {getTokens, Stack, Text, XStack} from 'tamagui'
@@ -10,7 +10,11 @@ import {
   calculateFiatValueOnBtcAmountChangeActionAtom,
   switchBtcOrSatValueActionAtom,
 } from '../../../atoms'
-import {replaceNonDecimalCharsInInput} from '../../../utils'
+import {
+  addThousandsSeparatorSpacesToNumberInput,
+  removeThousandsSeparatorSpacesFromNumberInput,
+  replaceNonDecimalCharsInInput,
+} from '../../../utils'
 import AmountInput from './AmountInput'
 import CalculatedWithLiveRate from './CalculatedWithLiveRate'
 
@@ -31,7 +35,7 @@ function BtcAmountInput({
   const ref = useRef<TextInput>(null)
   const [isFocused, setIsFocused] = useState<boolean>(false)
 
-  const btcValue = useAtomValue(btcValueAtom)
+  const [btcValue, setBtcValue] = useAtom(btcValueAtom)
   const btcOrSat = useAtomValue(btcOrSatAtom)
   const switchBtcOrSatValue = useSetAtom(switchBtcOrSatValueActionAtom)
   const calculateFiatValueOnBtcAmountChange = useSetAtom(
@@ -45,9 +49,11 @@ function BtcAmountInput({
       isFocused={isFocused}
       onBlur={() => {
         setIsFocused(false)
+        setBtcValue(addThousandsSeparatorSpacesToNumberInput(btcValue))
       }}
       onFocus={() => {
         setIsFocused(true)
+        setBtcValue(removeThousandsSeparatorSpacesFromNumberInput(btcValue))
       }}
       onWrapperPress={() => {
         ref.current?.focus()

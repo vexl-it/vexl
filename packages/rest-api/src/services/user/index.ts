@@ -12,6 +12,7 @@ import {
   createAxiosInstanceWithAuthAndLogging,
   type LoggingFunction,
 } from '../../utils'
+import {type SubmitFeedbackRequest} from '../feedback/contracts'
 import {
   GetCryptocurrencyDetailsResponse,
   InitPhoneNumberVerificationResponse,
@@ -188,6 +189,14 @@ export function privateApi({
           return e
         })
       )
+    },
+
+    submitFeedback: (request: SubmitFeedbackRequest) => {
+      return axiosCall(axiosInstance, {
+        method: 'post',
+        url: `/feedback/submit`,
+        data: request,
+      })
     },
   }
 }

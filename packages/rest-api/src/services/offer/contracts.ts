@@ -26,6 +26,7 @@ import {
   UnixMilliseconds,
   UnixMillisecondsE,
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {Array} from 'effect'
 import {z} from 'zod'
 import {
   NoContentResponse,
@@ -167,7 +168,7 @@ export type CreateNewOfferResponse = Schema.Schema.Type<
 >
 
 export const RefreshOfferRequest = z.object({
-  adminIds: z.array(OfferAdminId),
+  adminIds: z.array(OfferAdminId).readonly(),
 })
 export const RefreshOfferRequestE = Schema.Struct({
   adminIds: Schema.Array(OfferAdminIdE),
@@ -188,7 +189,19 @@ export const DeleteOfferRequest = z
   })
   .readonly()
 export const DeleteOfferRequestE = Schema.Struct({
-  adminIds: Schema.compose(Schema.split(','), Schema.Array(OfferAdminIdE)),
+  adminIds: Schema.split(',').pipe(
+    Schema.compose(
+      Schema.transform(
+        Schema.Array(Schema.String),
+        Schema.Array(Schema.String),
+        {
+          encode: (a) => a,
+          decode: Array.dedupe,
+        }
+      )
+    ),
+    Schema.compose(Schema.Array(OfferAdminIdE))
+  ),
 })
 export type DeleteOfferRequest = Schema.Schema.Type<typeof DeleteOfferRequestE>
 

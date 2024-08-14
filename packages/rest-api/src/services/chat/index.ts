@@ -1,3 +1,5 @@
+import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
+import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {type CreateAxiosDefaults} from 'axios'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
@@ -11,8 +13,8 @@ import {
   type LoggingFunction,
 } from '../../utils'
 import {
-  type InboxDoesNotExist,
-  type NotPermittedToSendMessageToTargetInbox,
+  InboxDoesNotExistError,
+  NotPermittedToSendMessageToTargetInboxError,
 } from '../contact/contracts'
 import {
   ApproveRequestResponse,
@@ -58,13 +60,15 @@ import {addChallengeToRequest} from './utils'
 export function privateApi({
   platform,
   clientVersion,
+  clientSemver,
   url,
   getUserSessionCredentials,
   axiosConfig,
   loggingFunction,
 }: {
   platform: PlatformName
-  clientVersion: number
+  clientVersion: VersionCode
+  clientSemver: SemverString
   url: ServiceUrl
   getUserSessionCredentials: GetUserSessionCredentials
   axiosConfig?: Omit<CreateAxiosDefaults, 'baseURL'>
@@ -74,6 +78,7 @@ export function privateApi({
     getUserSessionCredentials,
     platform,
     clientVersion,
+    clientSemver,
     {
       ...axiosConfig,
       baseURL: urlJoin(url, '/api/v1'),
@@ -289,12 +294,10 @@ export function privateApi({
         TE.mapLeft((e) => {
           if (e._tag === 'BadStatusCodeError') {
             if (e.response.data.code === '100104') {
-              return {
-                _tag: 'notPermittedToSendMessageToTargetInbox',
-              } as NotPermittedToSendMessageToTargetInbox
+              return new NotPermittedToSendMessageToTargetInboxError()
             }
             if (e.response.data.code === '100101') {
-              return {_tag: 'inboxDoesNotExist'} as InboxDoesNotExist
+              return new InboxDoesNotExistError()
             }
           }
           return e
@@ -317,7 +320,7 @@ export function privateApi({
         TE.mapLeft((e) => {
           if (e._tag === 'BadStatusCodeError') {
             if (e.response.data.code === '100101') {
-              return {_tag: 'inboxDoesNotExist'} as InboxDoesNotExist
+              return new InboxDoesNotExistError()
             }
           }
           return e
@@ -348,12 +351,10 @@ export function privateApi({
         TE.mapLeft((e) => {
           if (e._tag === 'BadStatusCodeError') {
             if (e.response.data.code === '100101') {
-              return {_tag: 'inboxDoesNotExist'} as InboxDoesNotExist
+              return new InboxDoesNotExistError()
             }
             if (e.response.data.code === '100102') {
-              return {
-                _tag: 'notPermittedToSendMessageToTargetInbox',
-              } as NotPermittedToSendMessageToTargetInbox
+              return new NotPermittedToSendMessageToTargetInboxError()
             }
           }
           return e

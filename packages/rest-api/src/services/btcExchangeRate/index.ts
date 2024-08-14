@@ -1,3 +1,5 @@
+import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
+import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {type CreateAxiosDefaults} from 'axios'
 import {pipe} from 'fp-ts/function'
 import * as TE from 'fp-ts/TaskEither'
@@ -20,13 +22,15 @@ import {
 export function privateApi({
   platform,
   clientVersion,
+  clientSemver,
   url,
   getUserSessionCredentials,
   axiosConfig,
   loggingFunction,
 }: {
   platform: PlatformName
-  clientVersion: number
+  clientVersion: VersionCode
+  clientSemver: SemverString
   url: ServiceUrl
   getUserSessionCredentials: GetUserSessionCredentials
   axiosConfig?: Omit<CreateAxiosDefaults, 'baseURL'>
@@ -36,6 +40,7 @@ export function privateApi({
     getUserSessionCredentials,
     platform,
     clientVersion,
+    clientSemver,
     {
       ...axiosConfig,
       baseURL: urlJoin(url, '/'),

@@ -15,11 +15,11 @@
     "start": "node dist"
   },
   "dependencies": {
-    "@effect/experimental": "^0.22.1",
-    "@effect/opentelemetry": "^0.35.1",
-    "@effect/platform": "^0.61.4",
-    "@effect/platform-node": "^0.56.4",
-    "@effect/schema": "^0.70.2",
+    "@effect/experimental": "^0.22.6",
+    "@effect/opentelemetry": "^0.35.3",
+    "@effect/platform": "^0.61.8",
+    "@effect/platform-node": "^0.56.9",
+    "@effect/schema": "^0.70.4",
     "@opentelemetry/exporter-trace-otlp-http": "^0.52.1",
     "@opentelemetry/sdk-trace-node": "^1.23.0",
     "@opentelemetry/sdk-trace-web": "^1.23.0",
@@ -31,9 +31,9 @@
     "axios": "^1.6.0",
     "dotenv": "^16.4.5",
     "dynamic-import-polyfill": "^0.1.1",
-    "effect": "^3.6.1",
-    "effect-http": "^0.77.3",
-    "effect-http-node": "^0.17.6",
+    "effect": "^3.6.3",
+    "effect-http": "^0.77.4",
+    "effect-http-node": "^0.17.7",
     "fast-check": "^3.20.0"
   },
   "devDependencies": {

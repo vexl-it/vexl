@@ -1,6 +1,6 @@
+import {type OfferInfo} from '@vexl-next/domain/src/general/offers'
 import {useAtomValue} from 'jotai'
 import {useMemo} from 'react'
-import {type OfferInfo} from '../../../../../../packages/domain/src/general/offers'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {formatCurrencyAmount} from '../../../utils/localization/currency'
 import {marketplaceFiatOrSatsCurrencyAtom} from '../../../utils/preferences'

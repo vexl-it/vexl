@@ -28,8 +28,8 @@ import {
   type ErrorSigningChallenge,
 } from '@vexl-next/rest-api/src/services/chat/utils'
 import {
-  type InboxDoesNotExist,
-  type NotPermittedToSendMessageToTargetInbox,
+  type InboxDoesNotExistError,
+  type NotPermittedToSendMessageToTargetInboxError,
 } from '@vexl-next/rest-api/src/services/contact/contracts'
 import {z} from 'zod'
 import {
@@ -60,8 +60,8 @@ export const ChatMessageWithState = z
         | NetworkError
         | ErrorGeneratingChallenge
         | ErrorSigningChallenge
-        | InboxDoesNotExist
-        | NotPermittedToSendMessageToTargetInbox
+        | InboxDoesNotExistError
+        | NotPermittedToSendMessageToTargetInboxError
         | JsonStringifyError
         | ZodParseError<ChatMessagePayload>
         | ReadingFileError

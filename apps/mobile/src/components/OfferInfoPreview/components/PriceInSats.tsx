@@ -1,8 +1,8 @@
+import {type OfferInfo} from '@vexl-next/domain/src/general/offers'
 import {useAtomValue, useSetAtom} from 'jotai'
 import {useEffect, useMemo} from 'react'
 import {ActivityIndicator} from 'react-native'
 import {Stack, XStack, getTokens} from 'tamagui'
-import {type OfferInfo} from '../../../../../../packages/domain/src/general/offers'
 import {
   createBtcPriceForCurrencyAtom,
   refreshBtcPriceActionAtom,

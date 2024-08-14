@@ -28,7 +28,7 @@ const isWithoutDuplicates = (
 
 export const createPrivatePart = Handler.make(
   CreatePrivatePartEndpoint,
-  (req) =>
+  (req, s) =>
     makeEndpointEffect(
       Effect.gen(function* (_) {
         const offerDbService = yield* _(OfferDbService)

@@ -1,5 +1,6 @@
 import notifee, {AuthorizationStatus} from '@notifee/react-native'
 import {
+  UnixMilliseconds0,
   unixMillisecondsNow,
   type UnixMilliseconds,
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
@@ -13,7 +14,6 @@ import {Alert, Platform} from 'react-native'
 import NotificationSetting from 'react-native-open-notification'
 import {toastNotificationAtom} from '../../components/ToastNotification/atom'
 import {translationAtom} from '../localization/I18nProvider'
-import {UnixMilliseconds0} from './../../../../../packages/domain/src/utility/UnixMilliseconds.brand'
 import {askAreYouSureActionAtom} from './../../components/AreYouSureDialog'
 
 const ALLOW_ASKING_EVERY_MILLIS = 10 * 60 * 1000

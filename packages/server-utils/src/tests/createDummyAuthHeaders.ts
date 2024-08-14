@@ -8,10 +8,10 @@ import {
   type E164PhoneNumber,
   E164PhoneNumberE,
 } from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
+import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {
   type CryptoError,
   type EcdsaSignature,
-  type HmacHash,
 } from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {Effect} from 'effect'
 import {generateUserAuthData, hashPhoneNumber} from '../generateUserAuthData'
@@ -36,7 +36,7 @@ export const createDummyAuthHeadersForUser = ({
   {
     'public-key': PublicKeyPemBase64
     signature: EcdsaSignature
-    hash: HmacHash
+    hash: HashedPhoneNumber
   },
   CryptoError,
   ServerCrypto

@@ -1,5 +1,5 @@
+import {type OfferInfo} from '@vexl-next/domain/src/general/offers'
 import {atom} from 'jotai'
-import {type OfferInfo} from '../../../../../../packages/domain/src/general/offers'
 import {isOfferExpired} from '../../../utils/isOfferExpired'
 import {isDeveloperAtom} from '../../../utils/preferences'
 import reportError from '../../../utils/reportError'

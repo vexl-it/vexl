@@ -2,12 +2,12 @@ import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {
   generateChatId,
   type Inbox,
+  type MyFcmTokenInfo,
 } from '@vexl-next/domain/src/general/messaging'
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
 import {flow} from 'fp-ts/lib/function'
 import {atom} from 'jotai'
 import * as O from 'optics-ts'
-import {type MyFcmTokenInfo} from '../../../../../../packages/domain/src/general/messaging'
 import {createEmptyTradeChecklistInState} from '../../tradeChecklist/domain'
 import {
   type ChatMessageWithState,

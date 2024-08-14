@@ -1,3 +1,5 @@
+import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
+import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {type CreateAxiosDefaults} from 'axios'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
@@ -15,27 +17,30 @@ import {
   FetchCommonConnectionsResponse,
   FetchMyContactsResponse,
   ImportContactsResponse,
+  ImportListEmptyError,
   UserExistsResponse,
+  UserNotFoundError,
   type CreateUserRequest,
   type FetchCommonConnectionsRequest,
   type FetchMyContactsRequest,
   type ImportContactsRequest,
   type RefreshUserRequest,
   type UpdateFirebaseTokenRequest,
-  type UserNotFoundError,
 } from './contracts'
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function privateApi({
   platform,
   clientVersion,
+  clientSemver,
   url,
   getUserSessionCredentials,
   axiosConfig,
   loggingFunction,
 }: {
   platform: PlatformName
-  clientVersion: number
+  clientVersion: VersionCode
+  clientSemver: SemverString
   url: ServiceUrl
   getUserSessionCredentials: GetUserSessionCredentials
   axiosConfig?: Omit<CreateAxiosDefaults, 'baseURL'>
@@ -45,6 +50,7 @@ export function privateApi({
     getUserSessionCredentials,
     platform,
     clientVersion,
+    clientSemver,
     {
       ...axiosConfig,
       baseURL: urlJoin(url, '/api/v1'),
@@ -87,7 +93,7 @@ export function privateApi({
             e._tag === 'BadStatusCodeError' &&
             e.response.data.code === '100101'
           ) {
-            return {_tag: 'UserNotFoundError'}
+            return new UserNotFoundError()
           }
           return e
         })
@@ -120,7 +126,7 @@ export function privateApi({
         TE.mapLeft((e) => {
           if (e._tag === 'BadStatusCodeError') {
             if (e.response.data.code === '101102')
-              return {_tag: 'ImportListEmpty'} as const
+              return new ImportListEmptyError()
           }
           return e
         })

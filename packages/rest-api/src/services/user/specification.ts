@@ -8,6 +8,7 @@ import {
 } from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {Api, ApiGroup} from 'effect-http'
 import {ServerSecurity} from '../../apiSecurity'
+import {SubmitFeedbackRequest} from '../feedback/specification'
 
 export class PreviousCodeNotExpiredError extends Schema.TaggedError<PreviousCodeNotExpiredError>(
   'PreviousCodeNotExpiredError'
@@ -205,7 +206,21 @@ export const LoginGroup = ApiGroup.make('Login').pipe(
   ApiGroup.addEndpoint(VerifyChallengeEndpoint)
 )
 
+export const SubmitFeedbackEndpoint = Api.post(
+  'submitFeedback',
+  '/api/v1/feedback/submit',
+  {
+    description: 'Moved to separate service',
+  }
+).pipe(
+  Api.setRequestBody(SubmitFeedbackRequest),
+  Api.setSecurity(ServerSecurity),
+  Api.setResponseHeaders(Schema.Struct({Location: Schema.String})),
+  Api.setResponseStatus(308 as const)
+)
+
 export const UserApiSpecification = Api.make({title: 'User service'}).pipe(
   Api.addGroup(LoginGroup),
-  Api.addEndpoint(LogoutUserEndpoint)
+  Api.addEndpoint(LogoutUserEndpoint),
+  Api.addEndpoint(SubmitFeedbackEndpoint)
 )

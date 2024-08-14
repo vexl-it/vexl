@@ -31,7 +31,7 @@ describe('exchange rate', () => {
     )
   })
 
-  it('Returns 301 redirect on user', async () => {
+  it('Returns 301 redirect', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const client = yield* _(NodeTestingApp)

@@ -55,9 +55,9 @@ jobs:
           push: true
           provenance: false
           tags: |
-            ghcr.io/vexl-it/btc-exchange-rate-service:latest
-            ghcr.io/vexl-it/btc-exchange-rate-service:${{inputs.env}}-${{ github.sha }}
-            ${{ steps.login-ecr.outputs.registry }}/btc-exchange-rate-service:${{inputs.env}}-${{ github.sha }}
+            ghcr.io/vexl-it/bitcoin-rate-service:latest
+            ghcr.io/vexl-it/bitcoin-rate-service:${{inputs.env}}-${{ github.sha }}
+            ${{ steps.login-ecr.outputs.registry }}/bitcoin-rate-service:${{inputs.env}}-${{ github.sha }}
           build-args: |
             SERVICE_VERSION=${{ github.sha }}
             ENVIRONMENT=${{ inputs.env }}

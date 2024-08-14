@@ -17,7 +17,7 @@ import {atom} from 'jotai'
 import {apiEnv, platform, publicApiAtom} from '../../../../api'
 import {Session} from '../../../../brands/Session.brand'
 import {sessionAtom} from '../../../../state/session'
-import {versionCode} from '../../../../utils/environment'
+import {version, versionCode} from '../../../../utils/environment'
 import {safeParse} from '../../../../utils/fpUtils'
 import {translationAtom} from '../../../../utils/localization/I18nProvider'
 import {navigationRef} from '../../../../utils/navigation'
@@ -49,6 +49,7 @@ export const createUserAtContactMsActionAtom = atom(
     const contactApi = contact.privateApi({
       platform,
       clientVersion: versionCode,
+      clientSemver: version,
       url: apiEnv.contactMs,
       getUserSessionCredentials: () => credentials,
     })
@@ -172,6 +173,7 @@ const deleteUserAndResetFlowActionAtom = atom(
       TE.chain(() => {
         const userApi = user.privateApi({
           platform,
+          clientSemver: version,
           clientVersion: versionCode,
           url: apiEnv.userMs,
           getUserSessionCredentials: () => session.sessionCredentials,
@@ -318,6 +320,7 @@ export const finishLoginActionAtom = atom(
         const contactApi = contact.privateApi({
           platform,
           clientVersion: versionCode,
+          clientSemver: version,
           url: apiEnv.contactMs,
           getUserSessionCredentials: () => session.sessionCredentials,
         })

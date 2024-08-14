@@ -1,4 +1,5 @@
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
+import {type ConnectionLevel} from '@vexl-next/domain/src/general/offers'
 import {
   UnixMilliseconds,
   unixMillisecondsNow,
@@ -6,7 +7,6 @@ import {
 import {type ExtractLeftTE} from '@vexl-next/resources-utils/src/utils/ExtractLeft'
 import {MAX_PAGE_SIZE} from '@vexl-next/rest-api/src/Pagination.brand'
 import {type ContactPrivateApi} from '@vexl-next/rest-api/src/services/contact'
-import {type ConnectionLevel} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {sequenceS} from 'fp-ts/Apply'
 import type * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'

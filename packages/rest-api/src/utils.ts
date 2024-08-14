@@ -1,4 +1,6 @@
 import {Schema} from '@effect/schema'
+import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
+import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import Axios, {
   AxiosError,
   isAxiosError,
@@ -6,6 +8,7 @@ import Axios, {
   type AxiosRequestConfig,
   type CreateAxiosDefaults,
 } from 'axios'
+import {Option} from 'effect'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import type z from 'zod'
@@ -17,6 +20,7 @@ import {
 } from './Errors'
 import {type PlatformName} from './PlatformName'
 import {type GetUserSessionCredentials} from './UserSessionCredentials.brand'
+import {CommonHeaders} from './commonHeaders'
 import {
   HEADER_CLIENT_VERSION,
   HEADER_CRYPTO_VERSION,
@@ -215,21 +219,33 @@ function addLoggingInterceptor(
   )
 }
 
+const encodeCommonHeaders = Schema.encodeSync(CommonHeaders)
+
 export function createAxiosInstance(
   platform: PlatformName,
-  clientVersion: number,
+  clientVersion: VersionCode,
+  clientSemver: SemverString,
   axiosConfig?: CreateAxiosDefaults,
   loggingFunction: LoggingFunction | null = console.info
 ): AxiosInstance {
+  const commonHeaders = new CommonHeaders({
+    'User-Agent': {
+      _tag: 'VexlAppUserAgentHeader' as const,
+      platform,
+      versionCode: clientVersion,
+      semver: Option.some(clientSemver),
+    },
+    [HEADER_PLATFORM]: Option.some(platform),
+    [HEADER_CLIENT_VERSION]: Option.some(clientVersion),
+    [HEADER_CRYPTO_VERSION]: Option.some(2),
+  })
+
   const axios = Axios.create({
     timeout: DEFAULT_TIMEOUT_MS,
     ...axiosConfig,
     headers: {
       ...axiosConfig?.headers,
-      'User-Agent': `Vexl/${clientVersion} ${platform}`,
-      [HEADER_CRYPTO_VERSION]: '2',
-      [HEADER_PLATFORM]: platform,
-      [HEADER_CLIENT_VERSION]: clientVersion.toString(),
+      ...encodeCommonHeaders(commonHeaders),
     },
   })
   if (loggingFunction) addLoggingInterceptor(axios, loggingFunction)
@@ -239,13 +255,15 @@ export function createAxiosInstance(
 export function createAxiosInstanceWithAuthAndLogging(
   getUserSessionCredentials: GetUserSessionCredentials,
   platform: PlatformName,
-  clientVersion: number,
+  clientVersion: VersionCode,
+  clientSemver: SemverString,
   axiosConfig: CreateAxiosDefaults,
   loggingFunction: LoggingFunction | null = console.info
 ): AxiosInstance {
   const axiosInstance = createAxiosInstance(
     platform,
     clientVersion,
+    clientSemver,
     axiosConfig,
     loggingFunction
   )

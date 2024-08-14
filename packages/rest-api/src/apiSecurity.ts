@@ -1,16 +1,14 @@
 import {HttpServerRequest} from '@effect/platform'
 import {Schema} from '@effect/schema'
 import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
-import {
-  EcdsaSignature,
-  HmacHash,
-} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
+import {HashedPhoneNumberE} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
+import {EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
 import {Effect} from 'effect'
 import {HttpError, Security} from 'effect-http'
 
 export const SecurityHeaders = Schema.Struct({
-  hash: HmacHash,
+  hash: HashedPhoneNumberE,
   signature: EcdsaSignature,
   'public-key': PublicKeyPemBase64E,
 })

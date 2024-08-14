@@ -1,10 +1,10 @@
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
-import {type IntendedConnectionLevel} from '@vexl-next/domain/src/general/offers'
-import {type ContactPrivateApi} from '@vexl-next/rest-api/src/services/contact'
 import {
-  type ConnectionLevel,
-  type FetchCommonConnectionsResponse,
-} from '@vexl-next/rest-api/src/services/contact/contracts'
+  ConnectionLevel,
+  type IntendedConnectionLevel,
+} from '@vexl-next/domain/src/general/offers'
+import {type ContactPrivateApi} from '@vexl-next/rest-api/src/services/contact'
+import {type FetchCommonConnectionsResponse} from '@vexl-next/rest-api/src/services/contact/contracts'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {type ExtractLeftTE} from '../../utils/ExtractLeft'

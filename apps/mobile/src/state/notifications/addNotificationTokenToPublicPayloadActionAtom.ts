@@ -1,3 +1,4 @@
+import {type PrivateKeyHolder} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {type OfferPublicPart} from '@vexl-next/domain/src/general/offers'
 import {type FcmToken} from '@vexl-next/domain/src/utility/FcmToken.brand'
 import {encryptFcmForOffer} from '@vexl-next/resources-utils/src/notifications/encryptFcmForOffer'
@@ -6,7 +7,6 @@ import * as TO from 'fp-ts/TaskOption'
 import {type Option} from 'fp-ts/lib/Option'
 import {pipe} from 'fp-ts/lib/function'
 import {atom} from 'jotai'
-import {type PrivateKeyHolder} from './../../../../../packages/cryptography/src/KeyHolder/brands'
 import {registerFcmCypherActionAtom} from './fcmCypherToKeyHolderAtom'
 import {getOrFetchNotificationServerPublicKeyActionAtom} from './fcmServerPublicKeyStore'
 

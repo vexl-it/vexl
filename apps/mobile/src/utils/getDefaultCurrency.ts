@@ -1,6 +1,6 @@
+import {type CurrencyInfo} from '@vexl-next/domain/src/general/currency.brand'
 import {parsePhoneNumber} from 'awesome-phonenumber'
 import {getDefaultStore} from 'jotai'
-import {type CurrencyInfo} from '../../../../packages/domain/src/general/currency.brand'
 import {sessionDataOrDummyAtom} from '../state/session'
 import {currencies} from './localization/currency'
 

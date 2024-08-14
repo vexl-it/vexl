@@ -27,7 +27,7 @@ import {
 import {atom, useAtomValue} from 'jotai'
 import {Platform} from 'react-native'
 import {dummySession, sessionHolderAtom} from '../state/session'
-import {apiPreset, versionCode} from '../utils/environment'
+import {apiPreset, version, versionCode} from '../utils/environment'
 // import {ServiceUrl} from '@vexl-next/rest-api/src/ServiceUrl.brand'
 
 export const platform = PlatformName.parse(
@@ -53,6 +53,7 @@ export const apiEnv = getApiPreset()
 const _publicApiAtom = atom({
   user: user.publicApi({
     clientVersion: versionCode,
+    clientSemver: version,
     url: apiEnv.userMs,
     platform,
   }),
@@ -86,11 +87,13 @@ export const privateApiAtom = atom((get) => {
     contact: contact.privateApi({
       platform,
       clientVersion: versionCode,
+      clientSemver: version,
       url: apiEnv.contactMs,
       getUserSessionCredentials,
     }),
     offer: offer.privateApi({
       platform,
+      clientSemver: version,
       clientVersion: versionCode,
       url: apiEnv.offerMs,
       getUserSessionCredentials,
@@ -98,36 +101,42 @@ export const privateApiAtom = atom((get) => {
     chat: chat.privateApi({
       platform,
       clientVersion: versionCode,
+      clientSemver: version,
       url: apiEnv.chatMs,
       getUserSessionCredentials,
     }),
     user: user.privateApi({
       platform,
       clientVersion: versionCode,
+      clientSemver: version,
       url: apiEnv.userMs,
       getUserSessionCredentials,
     }),
     location: location.privateApi({
       platform,
       clientVersion: versionCode,
+      clientSemver: version,
       url: apiEnv.locationMs,
       getUserSessionCredentials,
     }),
     notification: notification.privateApi({
       platform,
       clientVersion: versionCode,
+      clientSemver: version,
       url: apiEnv.notificationMs,
       getUserSessionCredentials,
     }),
     btcExchangeRate: btcExchangeRate.privateApi({
       platform,
       clientVersion: versionCode,
+      clientSemver: version,
       url: apiEnv.btcExchangeRateMs,
       getUserSessionCredentials,
     }),
     feedback: feedback.privateApi({
       platform,
       clientVersion: versionCode,
+      clientSemver: version,
       url: apiEnv.feedbackMs,
       getUserSessionCredentials,
     }),

@@ -3,7 +3,7 @@ import {useTranslation, type TFunction} from './localization/I18nProvider'
 
 interface SomeError {
   _tag: string
-  code?: string
+  code?: string | number | undefined
 }
 
 export default function useCommonErrorMessages(

@@ -7,7 +7,8 @@
     "clean": "rimraf .turbo node_modules",
     "lint": "eslint '**/*.{js,ts,tsx,jsx,cjs,mjs}'",
     "format": "prettier --check \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json}\"",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "jest"
   },
   "devDependencies": {
     "@vexl-next/eslint-config": "0.0.0",
@@ -23,14 +24,14 @@
     "typescript": "^5.5.2"
   },
   "dependencies": {
-    "@effect/platform": "^0.61.4",
-    "@effect/schema": "^0.70.2",
+    "@effect/platform": "^0.61.8",
+    "@effect/schema": "^0.70.4",
     "@vexl-next/cryptography": "0.0.0",
     "@vexl-next/domain": "0.0.0",
     "@vexl-next/server-utils": "0.0.0",
     "axios": "^1.6.0",
-    "effect": "^3.6.1",
-    "effect-http": "^0.77.3",
+    "effect": "^3.6.3",
+    "effect-http": "^0.77.4",
     "fast-check": "^3.20.0",
     "fp-ts": "^2.13.1",
     "url-join": "^5.0.0",

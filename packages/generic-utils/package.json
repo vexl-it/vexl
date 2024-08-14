@@ -22,10 +22,10 @@
     "typescript": "^5.5.2"
   },
   "dependencies": {
-    "@effect/schema": "^0.70.2",
+    "@effect/schema": "^0.70.4",
     "@vexl-next/cryptography": "0.0.0",
     "awesome-phonenumber": "^5.1.0",
-    "effect": "^3.6.1",
+    "effect": "^3.6.3",
     "fast-check": "^3.20.0",
     "fp-ts": "^2.13.1",
     "js-base64": "^3.7.5",

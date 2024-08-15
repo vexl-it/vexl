@@ -392,15 +392,6 @@ export const currencies = {
     maxAmount: 280000, // 10000 EUR * 28 (approx. conversion rate)
     countryCode: [504],
   }),
-  'HRK': CurrencyInfo.parse({
-    code: 'HRK',
-    flag: '🇭🇷',
-    name: 'Croatian Kuna',
-    symbol: 'kn',
-    position: 'after',
-    maxAmount: 75000, // 10000 EUR * 7.5 (approx. conversion rate)
-    countryCode: [385],
-  }),
   'HTG': CurrencyInfo.parse({
     code: 'HTG',
     flag: '🇭🇹',

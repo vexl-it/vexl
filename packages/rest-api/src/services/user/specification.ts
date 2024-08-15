@@ -1,11 +1,9 @@
 import {Schema} from '@effect/schema'
 import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {E164PhoneNumberE} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
+import {HashedPhoneNumberE} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {IsoDatetimeStringE} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
-import {
-  EcdsaSignature,
-  HmacHash,
-} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
+import {EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {Api, ApiGroup} from 'effect-http'
 import {ServerSecurity} from '../../apiSecurity'
 import {SubmitFeedbackRequest} from '../feedback/specification'
@@ -129,7 +127,7 @@ export class VerifyChallengeRequest extends Schema.Class<VerifyChallengeRequest>
 export class VerifyChallengeResponse extends Schema.Class<VerifyChallengeResponse>(
   'VerifyChallengeResponse'
 )({
-  hash: HmacHash,
+  hash: HashedPhoneNumberE,
   signature: EcdsaSignature,
   challengeVerified: Schema.Literal(true),
 }) {}

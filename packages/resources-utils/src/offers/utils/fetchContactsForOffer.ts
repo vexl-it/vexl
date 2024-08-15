@@ -1,6 +1,6 @@
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {
-  ConnectionLevel,
+  type ConnectionLevel,
   type IntendedConnectionLevel,
 } from '@vexl-next/domain/src/general/offers'
 import {type ContactPrivateApi} from '@vexl-next/rest-api/src/services/contact'

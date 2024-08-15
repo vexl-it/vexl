@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "rootDir": "./src",
+    "rootDir": ".",
     "outDir": "./dist",
     "lib": ["ESNext"],
     "module": "ESNext",
@@ -23,5 +23,5 @@
     "noUncheckedIndexedAccess": true
   },
   "exclude": ["./dist/**", "./tests/**", "node_modules"],
-  "include": ["./src"]
+  "include": ["./src", "./jest.config.ts"]
 }

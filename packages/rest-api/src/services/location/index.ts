@@ -1,5 +1,5 @@
-import {SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
-import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
+import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
+import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {type CreateAxiosDefaults, type GenericAbortSignal} from 'axios'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'

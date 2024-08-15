@@ -1,8 +1,11 @@
+import {Schema} from '@effect/schema'
 import {ecdsa} from '@vexl-next/cryptography'
 import {
   PrivateKeyHolder,
   type PublicKeyPemBase64,
 } from '@vexl-next/cryptography/src/KeyHolder'
+import {SemverStringE} from '@vexl-next/domain/src/utility/SmeverString.brand'
+import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {
   parseJson,
   safeParse,
@@ -20,6 +23,12 @@ import {pipe} from 'fp-ts/lib/function'
 import type z from 'zod'
 
 const STORAGE_KEYPAIR_KEY = 'keypair'
+
+const apiMeta = {
+  clientVersion: Schema.decodeSync(VersionCode)(0),
+  clientSemver: Schema.decodeSync(SemverStringE)('0.0.1'),
+  platform: 'WEB' as const,
+}
 
 export function saveKeypair(keypair: PrivateKeyHolder): void {
   sessionStorage.setItem(STORAGE_KEYPAIR_KEY, JSON.stringify(keypair))
@@ -113,8 +122,7 @@ export function parseFormData<T extends z.ZodType>(
 export function createUserPublicApi(): userApi.UserPublicApi {
   return userApi.publicApi({
     url: getEnvPreset().userMs,
-    clientVersion: 130,
-    platform: 'WEB',
+    ...apiMeta,
   })
 }
 
@@ -128,14 +136,13 @@ export function createContactsPrivateApi({
   signature: string
 }): contactsApi.ContactPrivateApi {
   return contactsApi.privateApi({
-    clientVersion: 130,
     getUserSessionCredentials: () => ({
       hash,
       publicKey,
       signature,
     }),
-    platform: 'WEB',
     url: getEnvPreset().contactMs,
+    ...apiMeta,
   })
 }
 
@@ -149,13 +156,12 @@ export function createUserPrivateApi({
   signature: string
 }): userApi.UserPrivateApi {
   return userApi.privateApi({
-    clientVersion: 130,
     getUserSessionCredentials: () => ({
       hash,
       publicKey,
       signature,
     }),
-    platform: 'WEB',
     url: getEnvPreset().userMs,
+    ...apiMeta,
   })
 }

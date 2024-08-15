@@ -4623,7 +4623,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@effect/experimental@npm:^0.22.1, @effect/experimental@npm:^0.22.6":
+"@effect/experimental@npm:^0.22.6":
   version: 0.22.6
   resolution: "@effect/experimental@npm:0.22.6"
   dependencies:
@@ -4649,7 +4649,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@effect/opentelemetry@npm:^0.35.1, @effect/opentelemetry@npm:^0.35.3":
+"@effect/opentelemetry@npm:^0.35.3":
   version: 0.35.3
   resolution: "@effect/opentelemetry@npm:0.35.3"
   peerDependencies:
@@ -4687,7 +4687,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@effect/platform-node@npm:^0.56.4, @effect/platform-node@npm:^0.56.9":
+"@effect/platform-node@npm:^0.56.9":
   version: 0.56.9
   resolution: "@effect/platform-node@npm:0.56.9"
   dependencies:
@@ -4702,7 +4702,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@effect/platform@npm:^0.61.4, @effect/platform@npm:^0.61.8":
+"@effect/platform@npm:^0.61.8":
   version: 0.61.8
   resolution: "@effect/platform@npm:0.61.8"
   dependencies:
@@ -4715,7 +4715,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@effect/schema@npm:^0.70.2, @effect/schema@npm:^0.70.4":
+"@effect/schema@npm:^0.70.4":
   version: 0.70.4
   resolution: "@effect/schema@npm:0.70.4"
   dependencies:
@@ -4726,7 +4726,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@effect/sql-pg@npm:^0.8.3, @effect/sql-pg@npm:^0.8.7":
+"@effect/sql-pg@npm:^0.8.7":
   version: 0.8.7
   resolution: "@effect/sql-pg@npm:0.8.7"
   dependencies:
@@ -4740,7 +4740,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@effect/sql@npm:^0.8.3, @effect/sql@npm:^0.8.7":
+"@effect/sql@npm:^0.8.7":
   version: 0.8.7
   resolution: "@effect/sql@npm:0.8.7"
   dependencies:
@@ -12327,13 +12327,13 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@vexl-next/btc-exchange-rate-service@workspace:apps/btc-exchange-rate-service"
   dependencies:
-    "@effect/experimental": ^0.22.1
-    "@effect/opentelemetry": ^0.35.1
-    "@effect/platform": ^0.61.4
-    "@effect/platform-node": ^0.56.4
-    "@effect/schema": ^0.70.2
-    "@effect/sql": ^0.8.3
-    "@effect/sql-pg": ^0.8.3
+    "@effect/experimental": ^0.22.6
+    "@effect/opentelemetry": ^0.35.3
+    "@effect/platform": ^0.61.8
+    "@effect/platform-node": ^0.56.9
+    "@effect/schema": ^0.70.4
+    "@effect/sql": ^0.8.7
+    "@effect/sql-pg": ^0.8.7
     "@opentelemetry/exporter-trace-otlp-http": ^0.52.1
     "@opentelemetry/sdk-trace-node": ^1.23.0
     "@opentelemetry/sdk-trace-web": ^1.23.0
@@ -12351,9 +12351,9 @@ __metadata:
     "@vexl-next/server-utils": 0.0.0
     "@vexl-next/tsconfig": 0.0.0
     dotenv: ^16.4.5
-    effect: ^3.6.1
-    effect-http: ^0.77.3
-    effect-http-node: ^0.17.6
+    effect: ^3.6.3
+    effect-http: ^0.77.4
+    effect-http-node: ^0.17.7
     esbuild: ^0.17.16
     eslint: ^8.50.0
     fast-check: ^3.20.0
@@ -13301,6 +13301,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "account-deletion-website@workspace:apps/account-deletion-website"
   dependencies:
+    "@effect/schema": ^0.70.4
     "@remix-run/css-bundle": ^2.8.1
     "@remix-run/dev": ^2.8.1
     "@remix-run/express": ^2.8.1
@@ -13325,6 +13326,7 @@ __metadata:
     buffer: ^6.0.3
     cross-env: ^7.0.3
     crypto-browserify: ^3.12.0
+    effect: ^3.6.3
     eslint: ^8.50.0
     events: ^3.3.0
     express: ^4.19.2
@@ -17133,7 +17135,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"effect-http-node@npm:^0.17.6, effect-http-node@npm:^0.17.7":
+"effect-http-node@npm:^0.17.7":
   version: 0.17.7
   resolution: "effect-http-node@npm:0.17.7"
   dependencies:
@@ -17148,7 +17150,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"effect-http@npm:^0.77.3, effect-http@npm:^0.77.4":
+"effect-http@npm:^0.77.4":
   version: 0.77.4
   resolution: "effect-http@npm:0.77.4"
   peerDependencies:
@@ -17159,7 +17161,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"effect@npm:^3.6.1, effect@npm:^3.6.3":
+"effect@npm:^3.6.3":
   version: 3.6.3
   resolution: "effect@npm:3.6.3"
   checksum: 7d3498f5f4aab752a55d73ada475a38f8d18d4fa0a379673c25a14add2fab66a72ba88070a876ced7d4160366b0c9efb02c6cf6e761a8a0850e975927ea14164

@@ -120,7 +120,7 @@ export const privateApiAtom = atom((get) => {
     btcExchangeRate: btcExchangeRate.privateApi({
       platform,
       clientVersion: versionCode,
-      url: apiEnv.notificationMs,
+      url: apiEnv.btcExchangeRateMs,
       getUserSessionCredentials,
     }),
   }

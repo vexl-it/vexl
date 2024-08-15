@@ -35,6 +35,7 @@ export default function OfferWithBubbleTip({
   return (
     <Stack>
       <TouchableWithoutFeedback
+        disabled={!onInfoRectPress}
         testID={offer.offerInfo.publicPart.offerDescription}
         onPress={onPress}
       >

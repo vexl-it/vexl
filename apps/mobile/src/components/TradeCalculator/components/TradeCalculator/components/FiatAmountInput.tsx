@@ -76,7 +76,9 @@ function FiatAmountInput({
       onChangeText={(input) => {
         calculateBtcValueOnFiatAmountChange({
           automaticCalculationDisabled,
-          fiatAmount: replaceNonDecimalCharsInInput(input),
+          fiatAmount: replaceNonDecimalCharsInInput(
+            removeThousandsSeparatorSpacesFromNumberInput(input)
+          ),
         })
       }}
     >

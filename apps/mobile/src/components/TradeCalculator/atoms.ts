@@ -20,6 +20,10 @@ import {
 } from '../../state/tradeChecklist/utils/amount'
 import {translationAtom} from '../../utils/localization/I18nProvider'
 import {askAreYouSureActionAtom} from '../AreYouSureDialog'
+import {
+  addThousandsSeparatorSpacesToNumberInput,
+  removeThousandsSeparatorSpacesFromNumberInput,
+} from './utils'
 
 export const currencySelectVisibleAtom = atom<boolean>(false)
 export const tradeBtcPriceAtom = atom<number>(0)
@@ -56,21 +60,26 @@ export const btcPriceForOfferWithStateAtom =
 export const applyFeeOnFeeChangeActionAtom = atom(
   null,
   (get, set, newFee: number) => {
-    const fiatInputValue = Number(get(fiatInputValueAtom))
+    const fiatInputValue = Number(
+      removeThousandsSeparatorSpacesFromNumberInput(get(fiatInputValueAtom))
+    )
     const previousAppliedFee = get(feeAmountAtom)
 
-    if (get(fiatInputValueAtom)) {
-      const fiatValueWithoutPreviousFee = cancelFeeOnNumberValue(
-        fiatInputValue,
-        previousAppliedFee
-      )
-      const fiatValueWithNewFeeApplied = applyFeeOnNumberValue(
-        fiatValueWithoutPreviousFee,
-        newFee
-      )
+    const fiatValueWithoutPreviousFee = cancelFeeOnNumberValue(
+      fiatInputValue,
+      previousAppliedFee
+    )
+    const fiatValueWithNewFeeApplied = applyFeeOnNumberValue(
+      fiatValueWithoutPreviousFee,
+      newFee
+    )
 
-      set(fiatInputValueAtom, String(Math.round(fiatValueWithNewFeeApplied)))
-    }
+    set(
+      fiatInputValueAtom,
+      addThousandsSeparatorSpacesToNumberInput(
+        String(Math.round(fiatValueWithNewFeeApplied))
+      )
+    )
     set(feeAmountAtom, newFee)
   }
 )
@@ -86,21 +95,22 @@ export const saveYourPriceActionAtom = atom(null, (get, set) => {
   })
 
   set(tradePriceTypeAtom, 'your')
-  // set(applyFeeOnTradePriceTypeChangeActionAtom)
 })
 
 export const applyFeeOnTradePriceTypeChangeActionAtom = atom(
   null,
   (get, set) => {
-    const fiatInputValue = Number(get(fiatInputValueAtom))
+    const fiatInputValue = Number(
+      removeThousandsSeparatorSpacesFromNumberInput(get(fiatInputValueAtom))
+    )
     const feeAmount = get(feeAmountAtom)
 
-    if (get(fiatInputValueAtom)) {
-      set(
-        fiatInputValueAtom,
+    set(
+      fiatInputValueAtom,
+      addThousandsSeparatorSpacesToNumberInput(
         String(Math.round(applyFeeOnNumberValue(fiatInputValue, feeAmount)))
       )
-    }
+    )
   }
 )
 
@@ -220,15 +230,17 @@ export const calculateBtcValueOnFiatAmountChangeActionAtom = atom(
     }
 
     if (tradeBtcPrice) {
-      const btcAmount = Number(fiatAmount) / tradeBtcPrice
+      const adjustedFiatAmount = cancelFeeOnNumberValue(
+        Number(fiatAmount),
+        feeAmount
+      )
+      const btcAmount = adjustedFiatAmount / tradeBtcPrice
 
       set(
         btcInputValueAtom,
         btcOrSat === 'BTC'
-          ? formatBtcPrice(applyFeeOnNumberValue(btcAmount, feeAmount))
-          : `${Math.round(
-              applyFeeOnNumberValue(btcAmount, feeAmount) * SATOSHIS_IN_BTC
-            )}`
+          ? formatBtcPrice(btcAmount)
+          : `${Math.round(btcAmount * SATOSHIS_IN_BTC)}`
       )
     } else {
       set(btcInputValueAtom, '')

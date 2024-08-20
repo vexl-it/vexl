@@ -65,6 +65,7 @@ export const updateOffer = Handler.make(UpdateOfferEndpoint, (req, security) =>
         offerDb.queryOfferByPublicKeyAndOfferId({
           id: publicPartFromDb.offerId,
           userPublicKey: security['public-key'],
+          skipValidation: true,
         }),
         Effect.flatten,
         Effect.catchTag('NoSuchElementException', () =>

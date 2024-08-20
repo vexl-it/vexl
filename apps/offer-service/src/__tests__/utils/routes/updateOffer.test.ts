@@ -346,4 +346,57 @@ describe('Update offer', () => {
       })
     )
   })
+
+  it('Does not fail when updating expired or flagged offer', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const client = yield* _(NodeTestingApp)
+        const sql = yield* _(SqlClient.SqlClient)
+
+        yield* _(sql`
+          UPDATE offer_public
+          SET
+            refreshed_at = NOW() - INTERVAL '8 days',
+            report = 3
+          WHERE
+            offer_id = ${offer1.offerId}
+        `)
+
+        const result = yield* _(
+          client.updateOffer(
+            {
+              body: {
+                adminId: offer1.adminId,
+                payloadPublic: Schema.decodeUnknownSync(
+                  PublicPayloadEncryptedE
+                )('newPayloadPublic'),
+                offerPrivateList: [],
+              },
+            },
+            HttpClientRequest.setHeaders(
+              yield* _(
+                createDummyAuthHeadersForUser({
+                  phoneNumber:
+                    Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
+                  publicKey: me.publicKeyPemBase64,
+                })
+              )
+            )
+          ),
+          Effect.either
+        )
+
+        yield* _(sql`
+          UPDATE offer_public
+          SET
+            refreshed_at = NOW(),
+            report = 0
+          WHERE
+            offer_id = ${offer1.offerId}
+        `)
+
+        expect(result._tag).toBe('Right')
+      })
+    )
+  })
 })

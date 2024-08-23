@@ -10,7 +10,7 @@ export const createDeleteContactsByHashFrom = Effect.gen(function* (_) {
   const query = SqlSchema.void({
     Request: HashedPhoneNumberE,
     execute: (hash) => sql`
-      DELETE FROM user_contacts
+      DELETE FROM user_contact
       WHERE
         hash_from = ${hash}
     `,

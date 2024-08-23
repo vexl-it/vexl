@@ -1,14 +1,16 @@
 import {NodeContext} from '@effect/platform-node'
 import {UserApiSpecification} from '@vexl-next/rest-api/src/services/user/specification'
+import {DashboardReportsService} from '@vexl-next/server-utils/src/DashboardReportsService'
 import {healthServerLayer} from '@vexl-next/server-utils/src/HealthServer'
 import {setupLoggingMiddlewares} from '@vexl-next/server-utils/src/loggingMiddlewares'
 import {RedisService} from '@vexl-next/server-utils/src/RedisService'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
-import {Effect, Layer} from 'effect'
+import {Config, Effect, Layer, Option} from 'effect'
 import {RouterBuilder} from 'effect-http'
 import {NodeServer} from 'effect-http-node'
 import {
   cryptoConfig,
+  dashboardNewUserHookConfig,
   healthServerPortConfig,
   portConfig,
   redisUrl,
@@ -19,7 +21,6 @@ import {VerificationStateDbService} from './routes/login/db/verificationStateDb'
 import {initVerificationHandler} from './routes/login/handlers/initVerificationHandler'
 import {verifyChallengeHandler} from './routes/login/handlers/verifyChallengeHandler'
 import {verifyCodeHandler} from './routes/login/handlers/verifyCodeHandler'
-import {DashboardReportsService} from './routes/login/utils/DashboardReportsService'
 import {logoutUserHandler} from './routes/logoutUser'
 import {submitFeedbackHandler} from './routes/submitFeedback'
 import {TwilioVerificationClient} from './utils/twilio'
@@ -38,7 +39,10 @@ const MainLive = Layer.mergeAll(
   TwilioVerificationClient.Live,
   VerificationStateDbService.Live,
   LoggedInUsersDbService.Live,
-  DashboardReportsService.Live,
+  DashboardReportsService.make({
+    newUserHookOption: dashboardNewUserHookConfig,
+    contactsImportedHookConfig: Config.succeed(Option.none()),
+  }),
   ServerCrypto.layer(cryptoConfig),
   healthServerLayer({port: healthServerPortConfig})
 ).pipe(

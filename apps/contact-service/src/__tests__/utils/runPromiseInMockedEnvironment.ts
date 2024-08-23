@@ -1,7 +1,9 @@
 import {NodeContext} from '@effect/platform-node'
 import {type SqlClient} from '@effect/sql/SqlClient'
+import {type DashboardReportsService} from '@vexl-next/server-utils/src/DashboardReportsService'
 import {type RedisService} from '@vexl-next/server-utils/src/RedisService'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
+import {mockedDashboardReportsService} from '@vexl-next/server-utils/src/tests/mockedDashboardReportsService'
 import {mockedRedisLayer} from '@vexl-next/server-utils/src/tests/mockedRedisLayer'
 import {
   disposeTestDatabase,
@@ -9,7 +11,11 @@ import {
 } from '@vexl-next/server-utils/src/tests/testDb'
 import {Console, Effect, Layer, ManagedRuntime, type Scope} from 'effect'
 import {cryptoConfig} from '../../configs'
+import {ContactDbService} from '../../db/ContactDbService'
 import DbLayer from '../../db/layer'
+import {UserDbService} from '../../db/UserDbService'
+import {type FirebaseMessagingService} from '../../utils/notifications/FirebaseMessagingService'
+import {mockedFirebaseMessagingServiceLayer} from './mockedFirebaseMessagingService'
 import {NodeTestingApp} from './NodeTestingApp'
 
 export type MockedContexts =
@@ -17,6 +23,10 @@ export type MockedContexts =
   | NodeTestingApp
   | ServerCrypto
   | SqlClient
+  | UserDbService
+  | ContactDbService
+  | FirebaseMessagingService
+  | DashboardReportsService
 
 const universalContext = Layer.mergeAll(
   mockedRedisLayer,
@@ -25,6 +35,10 @@ const universalContext = Layer.mergeAll(
 
 const context = NodeTestingApp.Live.pipe(
   Layer.provideMerge(universalContext),
+  Layer.provideMerge(mockedDashboardReportsService),
+  Layer.provideMerge(UserDbService.Live),
+  Layer.provideMerge(ContactDbService.Live),
+  Layer.provideMerge(mockedFirebaseMessagingServiceLayer),
   Layer.provideMerge(DbLayer),
   Layer.provideMerge(NodeContext.layer)
 )

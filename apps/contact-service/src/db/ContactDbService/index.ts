@@ -10,8 +10,8 @@ import {
   type FindCommonFriendsResult,
 } from './queries/createFindCommonFriendsByOwnerHashAndPublicKeys'
 import {createFindContactsByHashFrom} from './queries/createFindContactsByHashFrom'
-import {createFindSecondLevelContactsPublicKeysByHashFrom} from './queries/createFindFirstLevelContactsPublicKeysByHashFrom'
-import {createFindFirstLevelContactsPublicKeysByHashFrom} from './queries/createFindSecondLevelContactsPublicKeysByHashFrom'
+import {createFindFirstLevelContactsPublicKeysByHashFrom} from './queries/createFindFirstLevelContactsPublicKeysByHashFrom'
+import {createFindSecondLevelContactsPublicKeysByHashFrom} from './queries/createFindSecondLevelContactsPublicKeysByHashFrom'
 import {
   createInsertContact,
   type InsertContactParams,

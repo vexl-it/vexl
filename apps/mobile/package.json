@@ -169,8 +169,8 @@
     "ts-node": "^10.9.1",
     "typescript": "^5.5.2"
   },
-  "ainstallConfig": {
-    "ahoistingLimits": "workspaces"
+  "installConfig": {
+    "hoistingLimits": "workspaces"
   },
   "prettier": "@vexl-next/prettier-config",
   "private": true

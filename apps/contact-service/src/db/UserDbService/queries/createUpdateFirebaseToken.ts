@@ -24,7 +24,7 @@ export const createUpdateFirebaseToken = Effect.gen(function* (_) {
     execute: (params) => sql`
       UPDATE users
       SET
-        firebase_token = ${params.firebaseToken ?? null},
+        firebase_token = ${params.firebaseToken ?? null}
       WHERE
         public_key = ${params.publicKey}
         AND hash = ${params.hash}

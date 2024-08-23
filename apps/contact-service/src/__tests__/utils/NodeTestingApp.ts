@@ -1,9 +1,9 @@
-import {OfferApiSpecification} from '@vexl-next/rest-api/src/services/offer/specification'
+import {ContactApiSpecification} from '@vexl-next/rest-api/src/services/contact/specification'
 import {Context, Layer, type Effect} from 'effect'
 import {NodeTesting} from 'effect-http-node'
 import {app} from '../../httpServer'
 
-const nodeTestingAppEffect = NodeTesting.make(app, OfferApiSpecification)
+const nodeTestingAppEffect = NodeTesting.make(app, ContactApiSpecification)
 
 export class NodeTestingApp extends Context.Tag('NodeTestingApp')<
   NodeTestingApp,

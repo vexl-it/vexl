@@ -4,10 +4,10 @@ import {ecdsaSign} from '@vexl-next/cryptography/src/operations/ecdsa'
 import {E164PhoneNumberE} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {verifyUserSecurity} from '@vexl-next/rest-api/src/apiSecurity'
+import {mockedReportNewUserCreated} from '@vexl-next/server-utils/src/tests/mockedDashboardReportsService'
 import {Effect, pipe} from 'effect'
 import {LoggedInUsersDbService} from '../../db/loggedInUsersDb'
 import {TwilioVerificationSid} from '../../utils/twilio'
-import {mockedReportNewUserToDashboard} from '../utils/mockedDashboardReportService'
 import {
   checkVerificationMock,
   createVerificationMock,
@@ -25,7 +25,7 @@ afterAll(disposeRuntime)
 beforeEach(() => {
   createVerificationMock.mockClear()
   checkVerificationMock.mockClear()
-  mockedReportNewUserToDashboard.mockClear()
+  mockedReportNewUserCreated.mockClear()
 })
 
 describe('loginFlow', () => {
@@ -87,7 +87,7 @@ describe('loginFlow', () => {
           countryPrefix: 420,
         })
 
-        expect(mockedReportNewUserToDashboard).toHaveBeenCalledTimes(1)
+        expect(mockedReportNewUserCreated).toHaveBeenCalledTimes(1)
 
         expect(
           (yield* _(

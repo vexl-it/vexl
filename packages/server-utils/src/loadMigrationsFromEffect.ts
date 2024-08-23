@@ -1,6 +1,5 @@
 import {type SqlClient, type SqlError} from '@effect/sql'
 import {type Loader, type ResolvedMigration} from '@effect/sql/Migrator'
-import {type Row} from '@effect/sql/SqlConnection'
 import {Array, Effect, Order, pipe} from 'effect'
 
 export const loadMigrationsFromEffect = (
@@ -8,7 +7,7 @@ export const loadMigrationsFromEffect = (
     name: string
     id: number
     migrationEffect: Effect.Effect<
-      readonly Row[],
+      unknown,
       SqlError.SqlError,
       SqlClient.SqlClient
     >

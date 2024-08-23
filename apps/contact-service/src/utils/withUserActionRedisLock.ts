@@ -1,4 +1,4 @@
-import {HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
+import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {withRedisLock} from '@vexl-next/server-utils/src/RedisService'
 
 export const withUserActionRedisLock = <A, E, R>(

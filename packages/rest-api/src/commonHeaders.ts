@@ -122,7 +122,7 @@ export const UserAgentHeaderFromString = Schema.transform(
 
 export class CommonHeaders extends Schema.Class<CommonHeaders>('CommonHeaders')(
   {
-    'User-Agent': UserAgentHeaderFromString,
+    'user-agent': UserAgentHeaderFromString,
     [HEADER_CLIENT_VERSION]: Schema.optionalWith(
       Schema.compose(Schema.NumberFromString, VersionCode),
       {as: 'Option'}
@@ -134,22 +134,22 @@ export class CommonHeaders extends Schema.Class<CommonHeaders>('CommonHeaders')(
   }
 ) {
   get clientVersionOrNone(): Option.Option<VersionCode> {
-    if (this['User-Agent']._tag === 'VexlAppUserAgentHeader') {
-      return Option.some(this['User-Agent'].versionCode)
+    if (this['user-agent']._tag === 'VexlAppUserAgentHeader') {
+      return Option.some(this['user-agent'].versionCode)
     }
     return this[HEADER_CLIENT_VERSION]
   }
 
   get clientSemverOrNone(): Option.Option<SemverString> {
-    if (this['User-Agent']._tag === 'VexlAppUserAgentHeader') {
-      return this['User-Agent'].semver
+    if (this['user-agent']._tag === 'VexlAppUserAgentHeader') {
+      return this['user-agent'].semver
     }
     return Option.none()
   }
 
   get clientPlatformOrNone(): Option.Option<PlatformName> {
-    if (this['User-Agent']._tag === 'VexlAppUserAgentHeader') {
-      return Option.some(this['User-Agent'].platform)
+    if (this['user-agent']._tag === 'VexlAppUserAgentHeader') {
+      return Option.some(this['user-agent'].platform)
     }
     return this[HEADER_PLATFORM]
   }

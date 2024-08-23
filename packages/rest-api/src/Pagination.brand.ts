@@ -28,8 +28,8 @@ export const PageResponse = z.object({
 })
 
 export const PageResponseE = Schema.Struct({
-  nextLink: Schema.optional(Schema.String),
-  prevLink: Schema.optional(Schema.String),
+  nextLink: Schema.Null,
+  prevLink: Schema.Null,
   currentPage: Schema.Int.pipe(Schema.greaterThanOrEqualTo(0)),
   currentPageSize: Schema.Int.pipe(Schema.greaterThanOrEqualTo(0)),
   pagesTotal: Schema.Int.pipe(Schema.greaterThanOrEqualTo(0)),

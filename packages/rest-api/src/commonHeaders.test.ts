@@ -3,10 +3,12 @@ import {CommonHeaders} from './commonHeaders'
 
 describe('User agent', () => {
   it('Decodes common headers properly', () => {
-    const valueToDecode = {'User-Agent': 'Vexl/222 (1.1.1) ANDROID'}
+    const valueToDecode: {readonly 'user-agent': string} = {
+      'user-agent': 'Vexl/222 (1.1.1) ANDROID',
+    }
 
     const decoded =
-      Schema.decodeSync(CommonHeaders)(valueToDecode)['User-Agent']
+      Schema.decodeUnknownSync(CommonHeaders)(valueToDecode)['user-agent']
 
     expect(decoded._tag).toBe('VexlAppUserAgentHeader')
     if (decoded._tag !== 'VexlAppUserAgentHeader') return // will not happen
@@ -17,10 +19,10 @@ describe('User agent', () => {
   })
 
   it('Decodes common headers properly when missing semver', () => {
-    const valueToDecode = {'User-Agent': 'Vexl/222 ANDROID'}
+    const valueToDecode = {'user-agent': 'Vexl/222 ANDROID'}
 
     const decoded =
-      Schema.decodeSync(CommonHeaders)(valueToDecode)['User-Agent']
+      Schema.decodeUnknownSync(CommonHeaders)(valueToDecode)['user-agent']
 
     expect(decoded._tag).toBe('VexlAppUserAgentHeader')
     if (decoded._tag !== 'VexlAppUserAgentHeader') return // will not happen
@@ -34,7 +36,7 @@ describe('User agent', () => {
     const valueToDecode = {}
 
     const decoded =
-      Schema.decodeUnknownSync(CommonHeaders)(valueToDecode)['User-Agent']
+      Schema.decodeUnknownSync(CommonHeaders)(valueToDecode)['user-agent']
 
     expect(decoded._tag).toBe('UnknownUserAgentHeader')
     if (decoded._tag !== 'UnknownUserAgentHeader') return // will not happen
@@ -43,11 +45,11 @@ describe('User agent', () => {
 
   it('Decodes as none when user agent in bad format', () => {
     const valueToDecode = {
-      'User-Agent': 'Firefox/1.0',
+      'user-agent': 'Firefox/1.0',
     }
 
     const decoded =
-      Schema.decodeSync(CommonHeaders)(valueToDecode)['User-Agent']
+      Schema.decodeUnknownSync(CommonHeaders)(valueToDecode)['user-agent']
     expect(decoded._tag).toBe('UnknownUserAgentHeader')
     if (decoded._tag !== 'UnknownUserAgentHeader') return // will not happen
 

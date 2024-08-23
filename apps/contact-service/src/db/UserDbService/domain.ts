@@ -10,11 +10,18 @@ export class UserRecord extends Schema.Class<UserRecord>('UserRecord')({
   id: UserRecordId,
   publicKey: PublicKeyPemBase64E,
   hash: HashedPhoneNumberE,
-  clientVersion: VersionCode,
-  firebaseToken: Schema.optionalWith(FcmTokenE, {as: 'Option'}),
-  refreshedAt: Schema.optionalWith(Schema.Date, {as: 'Option'}),
-  platform: Schema.optionalWith(PlatformNameE, {as: 'Option'}),
+  clientVersion: Schema.optionalWith(VersionCode, {
+    as: 'Option',
+    nullable: true,
+  }),
+  firebaseToken: Schema.optionalWith(FcmTokenE, {as: 'Option', nullable: true}),
+  refreshedAt: Schema.optionalWith(Schema.DateFromSelf, {
+    as: 'Option',
+    nullable: true,
+  }),
+  platform: Schema.optionalWith(PlatformNameE, {as: 'Option', nullable: true}),
   lastNewContentNotificaionSentAt: Schema.optionalWith(VersionCode, {
     as: 'Option',
+    nullable: true,
   }),
 }) {}

@@ -49,6 +49,8 @@ export const fetchMyContacts = Handler.make(
           pagesTotal: 1,
           itemsCount: combined.length,
           itemsCountTotal: combined.length,
+          nextLink: null,
+          prevLink: null,
         }
       }).pipe(
         Effect.withSpan('Fetch my contacts', {

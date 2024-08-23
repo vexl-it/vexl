@@ -16,5 +16,6 @@ export class UnexpectedServerError extends Schema.TaggedError<UnexpectedServerEr
   'UnexpectedServerError'
 )('UnexpectedServerError', {
   status: Schema.Literal(500),
+  cause: Schema.optional(Schema.Unknown),
   detail: Schema.optional(Schema.String),
 }) {}

@@ -1,21 +1,19 @@
 import {ImportListEmptyError} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {ImportContactsEndpoint} from '@vexl-next/rest-api/src/services/contact/specification'
+import {DashboardReportsService} from '@vexl-next/server-utils/src/DashboardReportsService'
 import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
 import {Array, Effect, pipe} from 'effect'
 import {Handler} from 'effect-http'
 import {ContactDbService} from '../../db/ContactDbService'
 import {withUserActionRedisLock} from '../../utils/withUserActionRedisLock'
+import {notifyOthersAboutNewUserForked} from './utils/notifyOthersAboutNewUser'
 
 export const importContacts = Handler.make(
   ImportContactsEndpoint,
   (req, security) =>
     makeEndpointEffect(
       Effect.gen(function* (_) {
-        if (!Array.isNonEmptyReadonlyArray(req.body.contacts)) {
-          return yield* _(Effect.fail(new ImportListEmptyError()))
-        }
-
         const contactDb = yield* _(ContactDbService)
         const contactsBefore = yield* _(
           contactDb.findContactsByHashFrom(security.hash)
@@ -40,8 +38,13 @@ export const importContacts = Handler.make(
         )
 
         const newContacts = Array.difference(contactsToInsert, contactsBefore)
-        // TODO - send push notification to new contacts
+
         yield* _(Effect.log('New contacts', newContacts))
+
+        yield* _(
+          DashboardReportsService,
+          Effect.flatMap((service) => service.reportContactsImported())
+        )
 
         return {
           imported: true,
@@ -50,7 +53,13 @@ export const importContacts = Handler.make(
       }).pipe(
         Effect.withSpan('Import contacts'),
         withDbTransaction,
-        withUserActionRedisLock(security.hash)
+        withUserActionRedisLock(security.hash),
+        Effect.zipLeft(
+          notifyOthersAboutNewUserForked({
+            importedHashes: req.body.contacts,
+            ownerHash: security.hash,
+          })
+        )
       ),
       ImportListEmptyError
     )

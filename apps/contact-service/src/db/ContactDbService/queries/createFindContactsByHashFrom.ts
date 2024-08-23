@@ -15,7 +15,7 @@ export const createFindContactsByHashFrom = Effect.gen(function* (_) {
       SELECT
         *
       FROM
-        user_contacts
+        user_contact
       WHERE
         hash_from = ${hash}
     `,

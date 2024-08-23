@@ -229,7 +229,7 @@ export function createAxiosInstance(
   loggingFunction: LoggingFunction | null = console.info
 ): AxiosInstance {
   const commonHeaders = new CommonHeaders({
-    'User-Agent': {
+    'user-agent': {
       _tag: 'VexlAppUserAgentHeader' as const,
       platform,
       versionCode: clientVersion,

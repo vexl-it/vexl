@@ -4,12 +4,12 @@ import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {Effect, Metric} from 'effect'
 import {Handler} from 'effect-http'
 import {UserDbService} from '../../db/UserDbService'
-import {userRefreshGauge} from '../../metrics'
+import {userRefreshCounter} from '../../metrics'
 
 export const refreshUser = Handler.make(RefreshUserEndpoint, (req, security) =>
   makeEndpointEffect(
     Effect.gen(function* (_) {
-      yield* _(Metric.increment(userRefreshGauge))
+      yield* _(Metric.increment(userRefreshCounter))
       const userDb = yield* _(UserDbService)
       yield* _(
         userDb.findUserByPublicKeyAndHash({
@@ -22,12 +22,14 @@ export const refreshUser = Handler.make(RefreshUserEndpoint, (req, security) =>
         )
       )
 
-      userDb.updateRefreshUser({
-        publicKey: security['public-key'],
-        hash: security.hash,
-        clientVersion: req.headers.clientVersionOrNone,
-        refreshedAt: new Date(),
-      })
+      yield* _(
+        userDb.updateRefreshUser({
+          publicKey: security['public-key'],
+          hash: security.hash,
+          clientVersion: req.headers.clientVersionOrNone,
+          refreshedAt: new Date(),
+        })
+      )
     }),
     UserNotFoundError
   )

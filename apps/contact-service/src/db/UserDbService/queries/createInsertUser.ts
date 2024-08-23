@@ -5,7 +5,8 @@ import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {HashedPhoneNumberE} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {FcmTokenE} from '@vexl-next/domain/src/utility/FcmToken.brand'
-import {VersionCode} from '@vexl-next/domain/src/utility/Versioncode.brand'
+import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
+import {PlatformNameE} from '@vexl-next/rest-api/src/PlatformName'
 import {Effect, flow} from 'effect'
 import {UserRecord} from '../domain'
 
@@ -14,6 +15,7 @@ export const CreateUserParams = Schema.Struct({
   hash: HashedPhoneNumberE,
   firebaseToken: Schema.optionalWith(FcmTokenE, {as: 'Option'}),
   clientVersion: Schema.optionalWith(VersionCode, {as: 'Option'}),
+  platform: Schema.optionalWith(PlatformNameE, {as: 'Option'}),
 })
 export type CreateUserParams = Schema.Schema.Type<typeof CreateUserParams>
 
@@ -31,6 +33,7 @@ export const createInsertUser = Effect.gen(function* (_) {
           hash: params.hash,
           firebaseToken: params.firebaseToken ?? null,
           clientVersion: params.clientVersion ?? null,
+          platform: params.platform ?? null,
           refreshedAt: new Date(),
           lastNewContentNotificationSentAt: null,
         },

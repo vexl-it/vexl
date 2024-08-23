@@ -72,8 +72,8 @@ export const DeleteUserEndpoint = Api.delete(
 
 export const ImportContactsErrors = Schema.Union(ImportListEmptyError)
 export const ImportContactsEndpoint = Api.post(
-  'deleteContacts',
-  '/api/v1/contacts/replace'
+  'importContacts',
+  '/api/v1/contacts/import/replace'
 ).pipe(
   Api.setSecurity(ServerSecurity),
   Api.setRequestBody(ImportContactsRequestE),
@@ -105,7 +105,7 @@ export const FetchCommonConnectionsEndpoint = Api.post(
   Api.setResponseBody(FetchCommonConnectionsResponseE)
 )
 
-const UserApiGroup = ApiGroup.make('Contact').pipe(
+const UserApiGroup = ApiGroup.make('User').pipe(
   ApiGroup.addEndpoint(CheckUserExistsEndpoint),
   ApiGroup.addEndpoint(CreateUserEndpoint),
   ApiGroup.addEndpoint(RefreshUserEndpoint),

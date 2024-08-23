@@ -1,11 +1,9 @@
 import {Schema} from '@effect/schema'
 import {FetchCommonConnectionsEndpoint} from '@vexl-next/rest-api/src/services/contact/specification'
 import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
-import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
 import {Array, Effect, pipe} from 'effect'
 import {Handler} from 'effect-http'
 import {ContactDbService} from '../../db/ContactDbService'
-import {withUserActionRedisLock} from '../../utils/withUserActionRedisLock'
 
 export const fetchCommonConnections = Handler.make(
   FetchCommonConnectionsEndpoint,
@@ -32,7 +30,7 @@ export const fetchCommonConnections = Handler.make(
             common: {hashes: oneContact.commonFriends},
           })),
         }
-      }).pipe(withDbTransaction, withUserActionRedisLock(security.hash)),
+      }),
       Schema.Void
     )
 )

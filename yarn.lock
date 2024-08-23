@@ -7454,11 +7454,11 @@ __metadata:
   linkType: hard
 
 "@notifee/react-native@npm:^7.8.0":
-  version: 7.8.0
-  resolution: "@notifee/react-native@npm:7.8.0"
+  version: 7.8.2
+  resolution: "@notifee/react-native@npm:7.8.2"
   peerDependencies:
     react-native: "*"
-  checksum: 800233c9505195046e918ee42a4b11d8e84cf1846ea4a0b52599e1a40181b2bbfcab09c64b445b5a7eed98c38556c97550bce32ed24a51ce05ccd8b65047548d
+  checksum: f3b3ea116653d4dc7b50f8124898f9e22567ae30306225841d2057bc9ce40d451b15436dff3e60e0e042ffd7f34338054b202cd2dc61c5dc5eab7676b625b9f9
   languageName: node
   linkType: hard
 
@@ -12410,6 +12410,7 @@ __metadata:
     esbuild: ^0.17.16
     eslint: ^8.50.0
     fast-check: ^3.20.0
+    firebase-admin: ^12.3.1
     glob: ^11.0.0
     ioredis: ^5.4.1
     jest: ^29.7.0
@@ -12589,13 +12590,13 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@vexl-next/feedback-service@workspace:apps/feedback-service"
   dependencies:
-    "@effect/experimental": ^0.22.1
-    "@effect/opentelemetry": ^0.35.1
-    "@effect/platform": ^0.61.4
-    "@effect/platform-node": ^0.56.4
-    "@effect/schema": ^0.70.2
-    "@effect/sql": ^0.8.3
-    "@effect/sql-pg": ^0.8.3
+    "@effect/experimental": ^0.22.6
+    "@effect/opentelemetry": ^0.35.3
+    "@effect/platform": ^0.61.8
+    "@effect/platform-node": ^0.56.9
+    "@effect/schema": ^0.70.4
+    "@effect/sql": ^0.8.7
+    "@effect/sql-pg": ^0.8.7
     "@opentelemetry/exporter-trace-otlp-http": ^0.52.1
     "@opentelemetry/sdk-trace-node": ^1.23.0
     "@opentelemetry/sdk-trace-web": ^1.23.0
@@ -12613,9 +12614,9 @@ __metadata:
     "@vexl-next/server-utils": 0.0.0
     "@vexl-next/tsconfig": 0.0.0
     dotenv: ^16.4.5
-    effect: ^3.6.1
-    effect-http: ^0.77.3
-    effect-http-node: ^0.17.6
+    effect: ^3.6.3
+    effect-http: ^0.77.4
+    effect-http-node: ^0.17.7
     esbuild: ^0.17.16
     eslint: ^8.50.0
     fast-check: ^3.20.0

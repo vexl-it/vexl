@@ -15,13 +15,10 @@ export const createDeleteUserByPublicKeyAndHash = Effect.gen(function* (_) {
       publicKey: PublicKeyPemBase64E,
     }),
     execute: (params) => sql`
-      SELECT
-        *
-      FROM
-        users
+      DELETE FROM users
       WHERE
-        hash = ${params.publicKey}
-        AND public_key = ${params.hash}
+        hash = ${params.hash}
+        AND public_key = ${params.publicKey}
     `,
   })
 

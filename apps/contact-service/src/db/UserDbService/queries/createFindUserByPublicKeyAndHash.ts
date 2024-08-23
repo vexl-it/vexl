@@ -22,8 +22,8 @@ export const createFindUserbyPublicKeyAndHash = Effect.gen(function* (_) {
       FROM
         users
       WHERE
-        hash = ${params.publicKey}
-        AND public_key = ${params.hash}
+        hash = ${params.hash}
+        AND public_key = ${params.publicKey}
     `,
   })
 

@@ -50,6 +50,7 @@ export const createUser = Handler.make(CreateUserEndpoint, (req, security) =>
           hash: security.hash,
           firebaseToken: Option.fromNullable(req.body.firebaseToken),
           clientVersion: req.headers.clientVersionOrNone,
+          platform: req.headers.clientPlatformOrNone,
         })
       )
     }).pipe(withDbTransaction, withUserActionRedisLock(security.hash)),

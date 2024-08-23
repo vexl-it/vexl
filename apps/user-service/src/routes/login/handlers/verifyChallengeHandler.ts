@@ -13,13 +13,13 @@ import {
   VerifyChallengeErrors,
   VerifyChallengeResponse,
 } from '@vexl-next/rest-api/src/services/user/specification'
+import {DashboardReportsService} from '@vexl-next/server-utils/src/DashboardReportsService'
 import {generateUserAuthData} from '@vexl-next/server-utils/src/generateUserAuthData'
 import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {Effect} from 'effect'
 import {Handler} from 'effect-http'
 import {LoggedInUsersDbService} from '../../../db/loggedInUsersDb'
 import {VerificationStateDbService} from '../db/verificationStateDb'
-import {DashboardReportsService} from '../utils/DashboardReportsService'
 
 const insertUserIntoDb = (
   userPublicKey: PublicKeyPemBase64,

@@ -1,4 +1,4 @@
-import {LocationServiceSpecification} from '@vexl-next/rest-api/src/services/location/specification'
+import {LocationApiSpecification} from '@vexl-next/rest-api/src/services/location/specification'
 import {healthServerLayer} from '@vexl-next/server-utils/src/HealthServer'
 import {setupLoggingMiddlewares} from '@vexl-next/server-utils/src/loggingMiddlewares'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
@@ -13,7 +13,7 @@ import {
 } from './handlers'
 import {GoogleMapsService} from './utils/googleMapsApi'
 
-export const app = RouterBuilder.make(LocationServiceSpecification).pipe(
+export const app = RouterBuilder.make(LocationApiSpecification).pipe(
   RouterBuilder.handle(getExchangeRateHandler),
   RouterBuilder.handle(getGeocodedCoordinatesRequest),
   RouterBuilder.handle(getLocationSuggestionHandler),

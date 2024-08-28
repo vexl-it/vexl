@@ -47,8 +47,9 @@ export const GetExchangeRateEndpoint = Api.get('getExchangeRate', '/btc-rate', {
   Api.setResponseStatus(301 as const)
 )
 
-export const LocationServiceSpecification = Api.make({
+export const LocationApiSpecification = Api.make({
   title: 'Location service',
+  version: '1.0.0',
 }).pipe(
   Api.addEndpoint(GetLocationSuggestionEndpoint),
   Api.addEndpoint(GetGeocodedCoordinatesEndpoint),

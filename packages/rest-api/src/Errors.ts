@@ -1,4 +1,8 @@
 import {Schema} from '@effect/schema'
+import {
+  ExpectedErrorHttpCode,
+  ServerErrorHttpCode,
+} from '@vexl-next/server-utils/src/HttpCodes'
 import {type AxiosError, type AxiosResponse} from 'axios'
 
 export interface UnexpectedApiResponseError {
@@ -27,10 +31,33 @@ export interface NetworkError {
   readonly error: AxiosError
 }
 
-export class InternalServerError extends Schema.TaggedError<InternalServerError>(
-  'InternalServerError'
-)('InternalServerError', {
-  cause: Schema.Literal('ExternalApi', 'Unknown', 'BodyError').pipe(
-    Schema.optionalWith({default: () => 'Unknown' as const})
-  ),
-}) {}
+export const CommonError = Schema.Struct({
+  cause: Schema.String,
+  side: Schema.Literal('client', 'server', 'unknown'),
+})
+
+export const ExpectedErrorBodyE = Schema.Struct({
+  ...CommonError.fields,
+  status: ExpectedErrorHttpCode,
+})
+
+export const ServerErrorBodyE = Schema.Struct({
+  ...CommonError.fields,
+  status: ServerErrorHttpCode,
+})
+
+export class UnauthorizedErrorE extends Schema.TaggedError<UnauthorizedErrorE>(
+  'UnauthorizedErrorE'
+)('UnauthorizedErrorE', ExpectedErrorBodyE) {}
+
+export class NotFoundErrorE extends Schema.TaggedError<NotFoundErrorE>(
+  'NotFoundErrorE'
+)('NotFoundErrorE', ExpectedErrorBodyE) {}
+
+export class UnexpectedApiResponseErrorE extends Schema.TaggedError<UnexpectedApiResponseErrorE>(
+  'UnexpectedApiResponseErrorE'
+)('UnexpectedApiResponseErrorE', ServerErrorBodyE) {}
+
+export class UnknownErrorE extends Schema.TaggedError<UnknownErrorE>(
+  'UnknownErrorE'
+)('UnknownErrorE', ServerErrorBodyE) {}

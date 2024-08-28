@@ -1,3 +1,4 @@
+import {Schema} from '@effect/schema'
 import {
   POSITIVE_STAR_RATING_THRESHOLD,
   generateFeedbackFormId,
@@ -7,6 +8,8 @@ import {
   type FeedbackType,
   type ObjectionType,
 } from '@vexl-next/domain/src/general/feedback'
+import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
+import {FeedbackFormId} from '@vexl-next/rest-api/src/services/feedback/contracts'
 import {createScope, molecule} from 'bunshi/dist/react'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
@@ -87,7 +90,7 @@ export const feedbackMolecule = molecule((getMolecule, getScope) => {
   const submitFeedbackAtom = atom(
     null,
     (get, set, isOfferCreationFeedback: boolean) => {
-      const privateApi = get(privateApiAtom)
+      const api = get(privateApiAtom)
       const {formId, type, stars, objections, textComment} = get(feedbackAtom)
       const regionCode = get(regionCodeAtom)
 
@@ -101,16 +104,22 @@ export const feedbackMolecule = molecule((getMolecule, getScope) => {
       return pipe(
         TE.Do,
         TE.chainW(() =>
-          privateApi.feedback.submitFeedback({
-            formId,
-            countryCode: regionCode,
-            type: type === 'OFFER_RATING' ? 'trade' : 'create',
-            ...(stars !== 0 && {stars}),
-            ...(!isOfferCreationFeedback &&
-              objections.length !== 0 && {objections: objections?.join(',')}),
-            ...(!isOfferCreationFeedback &&
-              textComment.trim() !== '' && {textComment}),
-          })
+          effectToTaskEither(
+            api.feedback.submitFeedback({
+              body: {
+                formId: Schema.decodeSync(FeedbackFormId)(formId),
+                countryCode: regionCode,
+                type: type === 'OFFER_RATING' ? 'trade' : 'create',
+                ...(stars !== 0 && {stars}),
+                ...(!isOfferCreationFeedback &&
+                  objections.length !== 0 && {
+                    objections: objections?.join(','),
+                  }),
+                ...(!isOfferCreationFeedback &&
+                  textComment.trim() !== '' && {textComment}),
+              },
+            })
+          )
         ),
         TE.match(
           (e) => {

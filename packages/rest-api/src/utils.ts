@@ -8,11 +8,18 @@ import Axios, {
   type AxiosRequestConfig,
   type CreateAxiosDefaults,
 } from 'axios'
-import {Option} from 'effect'
+import {Effect, Option} from 'effect'
+import {HttpError, type ClientError} from 'effect-http'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import type z from 'zod'
 import {
+  ExpectedErrorBodyE,
+  NotFoundErrorE,
+  ServerErrorBodyE,
+  UnauthorizedErrorE,
+  UnexpectedApiResponseErrorE,
+  UnknownErrorE,
   type BadStatusCodeError,
   type NetworkError,
   type UnexpectedApiResponseError,
@@ -281,3 +288,77 @@ export function createAxiosInstanceWithAuthAndLogging(
 
 export type ExtractLeftTE<T extends TE.TaskEither<any, any>> =
   T extends TE.TaskEither<infer L, unknown> ? L : never
+
+export const handleCommonErrorsEffect = <R, B, R2, C = never>(
+  effect: Effect.Effect<R, ClientError.ClientError<number>, C>,
+  expectedErrors: Schema.Schema<B, any, R2>
+): Effect.Effect<
+  R,
+  | NotFoundErrorE
+  | UnknownErrorE
+  | UnexpectedApiResponseErrorE
+  | UnauthorizedErrorE
+  | Schema.Schema.Type<Schema.Schema<B, any, R2>>,
+  C | R2
+> =>
+  effect.pipe(
+    Effect.catchAllDefect((e) => {
+      return Effect.fail(
+        new UnknownErrorE({
+          side: 'unknown',
+          cause: 'Critical error on endpoint',
+          status: 500,
+        })
+      )
+    }),
+    Effect.catchAll((e) =>
+      Effect.gen(function* (_) {
+        if (HttpError.isHttpError(e)) {
+          const {status, message, side, error} = e
+
+          if (expectedErrors) {
+            const decodedError = yield* _(
+              Schema.decodeUnknown(expectedErrors)(error)
+            )
+            return yield* _(Effect.fail(decodedError))
+          }
+
+          const errorBody = yield* _(
+            Schema.decodeUnknown(ExpectedErrorBodyE)({
+              side,
+              cause: message,
+              status,
+            })
+          )
+
+          if (status === 401) {
+            return yield* _(Effect.fail(new UnauthorizedErrorE(errorBody)))
+          }
+
+          if (status === 404) {
+            return yield* _(Effect.fail(new NotFoundErrorE(errorBody)))
+          }
+        }
+
+        const serverErrorBody = yield* _(
+          Schema.decodeUnknown(ServerErrorBodyE)({
+            side: e.side,
+            cause: e.message,
+            status: 500,
+          })
+        )
+
+        return yield* _(Effect.fail(new UnknownErrorE(serverErrorBody)))
+      }).pipe(
+        Effect.catchTag('ParseError', () =>
+          Effect.fail(
+            new UnexpectedApiResponseErrorE({
+              cause: 'UnexpectedApiResponse',
+              side: 'server',
+              status: 500,
+            })
+          )
+        )
+      )
+    )
+  )

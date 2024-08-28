@@ -1,81 +1,46 @@
 import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
-import {type CreateAxiosDefaults} from 'axios'
-import {pipe} from 'fp-ts/function'
-import * as TE from 'fp-ts/TaskEither'
-import urlJoin from 'url-join'
+import {createClientInstanceWithAuth} from '../../client'
 import {type PlatformName} from '../../PlatformName'
 import {type ServiceUrl} from '../../ServiceUrl.brand'
 import {type GetUserSessionCredentials} from '../../UserSessionCredentials.brand'
-import {
-  axiosCallWithValidationSchema,
-  createAxiosInstanceWithAuthAndLogging,
-  type LoggingFunction,
-} from '../../utils'
-import {
-  GetExchangeRateError,
-  GetExchangeRateResponse,
-  type GetExchangeRateRequest,
-} from './contracts'
+import {handleCommonErrorsEffect} from '../../utils'
+import {GetExchangeRateError, type GetExchangeRateRequest} from './contracts'
+import {BtcExchangeRateApiSpecification} from './specification'
+
+interface GetExchangeRateInput {
+  query: GetExchangeRateRequest
+}
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export function privateApi({
+export function api({
   platform,
   clientVersion,
   clientSemver,
   url,
   getUserSessionCredentials,
-  axiosConfig,
-  loggingFunction,
 }: {
   platform: PlatformName
   clientVersion: VersionCode
   clientSemver: SemverString
   url: ServiceUrl
   getUserSessionCredentials: GetUserSessionCredentials
-  axiosConfig?: Omit<CreateAxiosDefaults, 'baseURL'>
-  loggingFunction?: LoggingFunction | null
 }) {
-  const axiosInstance = createAxiosInstanceWithAuthAndLogging(
-    getUserSessionCredentials,
+  const client = createClientInstanceWithAuth(
+    BtcExchangeRateApiSpecification,
     platform,
     clientVersion,
     clientSemver,
-    {
-      ...axiosConfig,
-      baseURL: urlJoin(url, '/'),
-    },
-    loggingFunction
+    getUserSessionCredentials,
+    url
   )
 
   return {
-    getExchangeRate: (
-      request: GetExchangeRateRequest,
-      signal?: AbortSignal
-    ) => {
-      return pipe(
-        axiosCallWithValidationSchema(
-          axiosInstance,
-          {
-            url: `/btc-rate`,
-            params: {currency: request.currency},
-            method: 'get',
-            ...(signal ? {signal} : {}),
-          },
-          GetExchangeRateResponse
-        ),
-        TE.mapLeft((e) => {
-          if (e._tag === 'BadStatusCodeError') {
-            return new GetExchangeRateError({
-              reason: e.response.data.reason,
-              status: 400,
-            })
-          }
-          return e
-        })
-      )
-    },
+    getExchangeRate: (exchangeRateInput: GetExchangeRateInput) =>
+      handleCommonErrorsEffect(
+        client.getExchangeRate(exchangeRateInput),
+        GetExchangeRateError
+      ),
   }
 }
-
-export type BtcExchangeRatePrivateApi = ReturnType<typeof privateApi>
+export type BtcExchangeRateApi = ReturnType<typeof api>

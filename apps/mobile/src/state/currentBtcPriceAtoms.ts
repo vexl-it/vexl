@@ -1,9 +1,10 @@
 import {BtcPriceDataWithState} from '@vexl-next/domain/src/general/btcPrice'
 import {CurrencyCode} from '@vexl-next/domain/src/general/currency.brand'
 import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
+import {pipe} from 'fp-ts/lib/function'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
-import {pipe} from 'fp-ts/function'
 import {atom, type Atom, type PrimitiveAtom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {z} from 'zod'
@@ -92,7 +93,9 @@ export const refreshBtcPriceActionAtom = atom(
     }))
 
     return pipe(
-      api.btcExchangeRate.getExchangeRate({currency}),
+      effectToTaskEither(
+        api.btcExchangeRate.getExchangeRate({query: {currency}})
+      ),
       TE.matchW(
         (l) => {
           reportError('warn', new Error('Error while fetching btc price'), {

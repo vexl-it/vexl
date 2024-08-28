@@ -21,6 +21,7 @@ export const GetExchangeRateEndpoint = Api.get(
   })
 )
 
-export const BtcExchangeRateServiceSpecification = Api.make({
+export const BtcExchangeRateApiSpecification = Api.make({
   title: 'Btc exchange rate service',
+  version: '1.0.0',
 }).pipe(Api.addEndpoint(GetExchangeRateEndpoint))

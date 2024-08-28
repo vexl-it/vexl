@@ -4,7 +4,7 @@ import {RegionCodeE} from '@vexl-next/domain/src/utility/RegionCode.brand'
 import {
   FeedbackFormId,
   FeedbackType,
-} from '@vexl-next/rest-api/src/services/feedback/specification'
+} from '@vexl-next/rest-api/src/services/feedback/contracts'
 import {createDummyAuthHeaders} from '@vexl-next/server-utils/src/tests/createDummyAuthHeaders'
 import {Effect, Either} from 'effect'
 import {NodeTestingApp} from './utils/NodeTestingApp'
@@ -54,7 +54,7 @@ describe('Feedback redirect', () => {
           objections: 'testObjections',
           stars: 5,
           textComment: 'testTextComment',
-        } as const
+        }
 
         const response = yield* _(
           client.submitFeedback(

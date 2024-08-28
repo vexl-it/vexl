@@ -6,7 +6,7 @@ import {IsoDatetimeStringE} from '@vexl-next/domain/src/utility/IsoDatetimeStrin
 import {EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {Api, ApiGroup} from 'effect-http'
 import {ServerSecurity} from '../../apiSecurity'
-import {SubmitFeedbackRequest} from '../feedback/specification'
+import {SubmitFeedbackRequest} from '../feedback/contracts'
 
 export class PreviousCodeNotExpiredError extends Schema.TaggedError<PreviousCodeNotExpiredError>(
   'PreviousCodeNotExpiredError'

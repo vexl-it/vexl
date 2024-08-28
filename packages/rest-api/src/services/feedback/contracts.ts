@@ -1,13 +1,23 @@
-import {RegionCode} from '@vexl-next/domain/src/utility/RegionCode.brand'
-import z from 'zod'
+import {Schema} from '@effect/schema'
+import {RegionCodeE} from '@vexl-next/domain/src/utility/RegionCode.brand'
 
-export const SubmitFeedbackRequest = z.object({
-  formId: z.string().min(1),
-  type: z.enum(['create', 'trade']),
-  stars: z.number().optional(),
-  objections: z.string().optional(),
-  textComment: z.string().optional(),
-  countryCode: RegionCode.optional(),
-})
+export const FeedbackFormId = Schema.NonEmptyString.pipe(
+  Schema.brand('FeedbackFormId')
+)
+export type FeedbackFormId = Schema.Schema.Type<typeof FeedbackFormId>
 
-export type SubmitFeedbackRequest = z.TypeOf<typeof SubmitFeedbackRequest>
+export const FeedbackType = Schema.Literal('create', 'trade')
+export type FeedbackType = Schema.Schema.Type<typeof FeedbackType>
+
+export class SubmitFeedbackRequest extends Schema.Class<SubmitFeedbackRequest>(
+  'SubmitFeedbackRequest'
+)({
+  formId: FeedbackFormId,
+  type: FeedbackType,
+  stars: Schema.optional(
+    Schema.Int.pipe(Schema.lessThanOrEqualTo(5), Schema.greaterThanOrEqualTo(0))
+  ),
+  objections: Schema.optional(Schema.String),
+  textComment: Schema.optional(Schema.String),
+  countryCode: Schema.optional(RegionCodeE),
+}) {}

@@ -41,8 +41,8 @@ const style = StyleSheet.create({
     height: 50,
   },
   link: {
-    color: getTokens().color.main.val,
     fontSize: 16,
+    textDecorationLine: 'underline',
   },
 })
 
@@ -254,7 +254,17 @@ function TextMessage({
                   </TouchableWithoutFeedback>
                 </YStack>
               )}
-              <Hyperlink linkDefault linkStyle={style.link}>
+              <Hyperlink
+                linkDefault
+                linkStyle={[
+                  style.link,
+                  {
+                    color: isMine
+                      ? getTokens().color.black.val
+                      : getTokens().color.main.val,
+                  },
+                ]}
+              >
                 <Text
                   fontStyle={italic ? 'italic' : undefined}
                   selectable

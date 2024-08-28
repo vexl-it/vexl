@@ -4,12 +4,7 @@ import {NewChatMessageNoticeNotificationData} from '@vexl-next/domain/src/genera
 import {Option} from 'effect'
 import {useSetAtom, useStore} from 'jotai'
 import {useEffect} from 'react'
-import checkAndShowCreateOfferPrompt from '../utils/notifications/checkAndShowCreateOfferPrompt'
-import {
-  CREATE_OFFER_PROMPT,
-  NEW_CONNECTION,
-  NEW_CONTENT,
-} from '../utils/notifications/notificationTypes'
+import {NEW_CONNECTION} from '../utils/notifications/notificationTypes'
 import {showDebugNotificationIfEnabled} from '../utils/notifications/showDebugNotificationIfEnabled'
 import {showUINotificationFromRemoteMessage} from '../utils/notifications/showUINotificationFromRemoteMessage'
 import reportError from '../utils/reportError'
@@ -53,25 +48,14 @@ export function useHandleReceivedNotifications(): void {
         return
       }
 
-      await showUINotificationFromRemoteMessage(data)
+      const handled = await showUINotificationFromRemoteMessage(data)
+      if (handled) return
 
       if (data.type === NEW_CONNECTION) {
         console.info(
           '📳 Received notification about new user. Checking and updating offers accordingly.'
         )
         await updateOffersConnections({isInBackground: false})()
-        return
-      }
-
-      if (data.type === NEW_CONTENT) {
-        console.info(
-          'Received notification about new content. Doing nothing since this notification is meant to be displayed only if user is innactive.'
-        )
-        return
-      }
-
-      if (data.type === CREATE_OFFER_PROMPT) {
-        void checkAndShowCreateOfferPrompt(store)
         return
       }
 

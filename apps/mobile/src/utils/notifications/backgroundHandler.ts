@@ -4,8 +4,10 @@ import messaging, {
 import {NewChatMessageNoticeNotificationData} from '@vexl-next/domain/src/general/notifications'
 import {Option} from 'effect'
 import {getDefaultStore} from 'jotai'
+import {updateAllOffersConnectionsActionAtom} from '../../state/connections/atom/offerToConnectionsAtom'
 import processChatNotificationActionAtom from '../../state/notifications/processChatNotification'
 import reportError from '../reportError'
+import {NEW_CONNECTION} from './notificationTypes'
 import {showDebugNotificationIfEnabled} from './showDebugNotificationIfEnabled'
 import {showUINotificationFromRemoteMessage} from './showUINotificationFromRemoteMessage'
 
@@ -17,6 +19,7 @@ export async function processBackgroundMessage(
       title: `Background notification received`,
       body: `type: ${remoteMessage?.data?.type ?? '[empty]'}`,
     })
+    console.info('📳 Background notification received', remoteMessage)
 
     const newChatMessageNoticeNotificationDataOption =
       NewChatMessageNoticeNotificationData.parseUnkownOption(remoteMessage.data)
@@ -37,7 +40,13 @@ export async function processBackgroundMessage(
       return
     }
 
-    console.info('📳 Background notification received', remoteMessage)
+    if (data.type === NEW_CONNECTION) {
+      await getDefaultStore().set(updateAllOffersConnectionsActionAtom, {
+        isInBackground: true,
+      })()
+      return
+    }
+
     await showUINotificationFromRemoteMessage(data)
   } catch (error) {
     void showDebugNotificationIfEnabled({

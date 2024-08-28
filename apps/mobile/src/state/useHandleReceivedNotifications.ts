@@ -9,6 +9,7 @@ import {showDebugNotificationIfEnabled} from '../utils/notifications/showDebugNo
 import {showUINotificationFromRemoteMessage} from '../utils/notifications/showUINotificationFromRemoteMessage'
 import reportError from '../utils/reportError'
 import {fetchAndStoreMessagesForInboxAtom} from './chat/atoms/fetchNewMessagesActionAtom'
+import {syncConnectionsActionAtom} from './connections/atom/connectionStateAtom'
 import {updateAllOffersConnectionsActionAtom} from './connections/atom/offerToConnectionsAtom'
 import processChatNotificationActionAtom from './notifications/processChatNotification'
 
@@ -19,6 +20,7 @@ export function useHandleReceivedNotifications(): void {
   const updateOffersConnections = useSetAtom(
     updateAllOffersConnectionsActionAtom
   )
+  const syncConnections = useSetAtom(syncConnectionsActionAtom)
 
   useEffect(() => {
     return messaging().onMessage(async (remoteMessage) => {
@@ -55,6 +57,7 @@ export function useHandleReceivedNotifications(): void {
         console.info(
           '📳 Received notification about new user. Checking and updating offers accordingly.'
         )
+        await syncConnections()()
         await updateOffersConnections({isInBackground: false})()
         return
       }
@@ -63,5 +66,11 @@ export function useHandleReceivedNotifications(): void {
         type: data.type,
       })
     })
-  }, [fetchMessagesForInbox, navigation, store, updateOffersConnections])
+  }, [
+    fetchMessagesForInbox,
+    navigation,
+    store,
+    syncConnections,
+    updateOffersConnections,
+  ])
 }

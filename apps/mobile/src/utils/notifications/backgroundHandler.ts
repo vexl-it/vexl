@@ -4,6 +4,7 @@ import messaging, {
 import {NewChatMessageNoticeNotificationData} from '@vexl-next/domain/src/general/notifications'
 import {Option} from 'effect'
 import {getDefaultStore} from 'jotai'
+import {syncConnectionsActionAtom} from '../../state/connections/atom/connectionStateAtom'
 import {updateAllOffersConnectionsActionAtom} from '../../state/connections/atom/offerToConnectionsAtom'
 import processChatNotificationActionAtom from '../../state/notifications/processChatNotification'
 import reportError from '../reportError'
@@ -41,6 +42,7 @@ export async function processBackgroundMessage(
     }
 
     if (data.type === NEW_CONNECTION) {
+      await getDefaultStore().set(syncConnectionsActionAtom)()
       await getDefaultStore().set(updateAllOffersConnectionsActionAtom, {
         isInBackground: true,
       })()

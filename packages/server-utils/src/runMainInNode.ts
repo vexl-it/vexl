@@ -15,12 +15,42 @@ import {
 } from './commonConfigs'
 import {devToolsLayer} from './devToolsLayer'
 
+const stringifyCircular = (
+  obj: unknown,
+  whitespace?: number | string | undefined
+): string => {
+  try {
+    let cache: unknown[] = []
+    const retVal = JSON.stringify(
+      obj,
+      (_key, value) =>
+        typeof value === 'object' && value !== null
+          ? cache.includes(value)
+            ? undefined // circular reference
+            : cache.push(value) && value
+          : typeof value === 'bigint'
+            ? value.toString()
+            : value,
+      whitespace
+    )
+    ;(cache as any) = undefined
+    return retVal
+  } catch (e) {
+    return JSON.stringify(`Error while stringifying value to log`)
+  }
+}
+
+const jsonLoggerThatHandlesUnserializableValues = Logger.map(
+  Logger.structuredLogger,
+  stringifyCircular
+)
+
 const logger = isRunningInProductionConfig.pipe(
   Effect.map((inProd) =>
     Logger.replace(
       Logger.defaultLogger,
       inProd
-        ? Logger.jsonLogger.pipe(
+        ? jsonLoggerThatHandlesUnserializableValues.pipe(
             Logger.withSpanAnnotations,
             Logger.withConsoleLog
           )

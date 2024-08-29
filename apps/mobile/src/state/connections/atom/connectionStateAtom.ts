@@ -16,6 +16,7 @@ import {selectAtom} from 'jotai/utils'
 import {privateApiAtom} from '../../../api'
 import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
 import deduplicate from '../../../utils/deduplicate'
+import {showDebugNotificationIfEnabled} from '../../../utils/notifications/showDebugNotificationIfEnabled'
 import reportError from '../../../utils/reportError'
 import {ConnectionsState} from '../domain'
 
@@ -70,6 +71,10 @@ export const syncConnectionsActionAtom = atom(
       TE.bindW('lastUpdate', () => TE.right(updateStarted)),
       TE.match(
         (e) => {
+          void showDebugNotificationIfEnabled({
+            title: 'Error while syncing connections',
+            body: e._tag,
+          })
           if (e._tag === 'NetworkError') {
             // TODO let user know somehow
             return false
@@ -82,6 +87,10 @@ export const syncConnectionsActionAtom = atom(
           return false
         },
         (data) => {
+          void showDebugNotificationIfEnabled({
+            title: 'Connections synced',
+            body: `Finished syncing connections in ${unixMillisecondsNow() - updateStarted} ms`,
+          })
           set(connectionStateAtom, data)
           return true
         }

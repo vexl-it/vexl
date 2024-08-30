@@ -9,10 +9,10 @@ import {
   InvalidSignatureError,
   UnableToGenerateSignatureError,
   type VerificationChallenge,
-  VerifyChallengeEndpoint,
   VerifyChallengeErrors,
   VerifyChallengeResponse,
-} from '@vexl-next/rest-api/src/services/user/specification'
+} from '@vexl-next/rest-api/src/services/user/contracts'
+import {VerifyChallengeEndpoint} from '@vexl-next/rest-api/src/services/user/specification'
 import {DashboardReportsService} from '@vexl-next/server-utils/src/DashboardReportsService'
 import {generateUserAuthData} from '@vexl-next/server-utils/src/generateUserAuthData'
 import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'

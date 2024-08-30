@@ -4,7 +4,7 @@ import {E164PhoneNumberE} from '@vexl-next/domain/src/general/E164PhoneNumber.br
 import {
   UnableToVerifySmsCodeError,
   VerifyCodeErrors,
-} from '@vexl-next/rest-api/src/services/user/specification'
+} from '@vexl-next/rest-api/src/services/user/contracts'
 import {Effect, Either} from 'effect'
 import {
   checkVerificationMock,

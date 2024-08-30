@@ -19,3 +19,11 @@ export class GetExchangeRateError extends Schema.TaggedError<GetExchangeRateErro
   reason: Schema.Literal('YadioError'),
   status: Schema.Literal(400),
 }) {}
+
+export const GetExchangeRateInput = Schema.Struct({
+  query: GetExchangeRateRequest,
+})
+
+export type GetExchangeRateInput = Schema.Schema.Type<
+  typeof GetExchangeRateInput
+>

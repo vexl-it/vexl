@@ -19,7 +19,7 @@ import {
 } from '@vexl-next/domain/src/general/tradeChecklist'
 import {type LocationSuggestion} from '@vexl-next/rest-api/src/services/location/contracts'
 import {
-  type InitPhoneNumberVerificationResponse,
+  type InitPhoneVerificationResponse,
   type VerifyPhoneNumberResponse,
 } from '@vexl-next/rest-api/src/services/user/contracts'
 import {type ChatIds} from './state/chat/domain'
@@ -91,7 +91,7 @@ export type LoginStackParamsList = {
   }
   VerificationCode: {
     readonly phoneNumber: E164PhoneNumber
-    readonly initPhoneVerificationResponse: InitPhoneNumberVerificationResponse
+    readonly initPhoneVerificationResponse: InitPhoneVerificationResponse
   }
 }
 

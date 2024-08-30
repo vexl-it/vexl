@@ -17,10 +17,9 @@ import {
 import {ENV_PRESETS, type EnvPreset} from '@vexl-next/rest-api'
 import * as contactsApi from '@vexl-next/rest-api/src/services/contact'
 import * as userApi from '@vexl-next/rest-api/src/services/user'
+import {Effect} from 'effect'
 import * as E from 'fp-ts/lib/Either'
-import * as TE from 'fp-ts/lib/TaskEither'
 import {pipe} from 'fp-ts/lib/function'
-import type z from 'zod'
 
 const STORAGE_KEYPAIR_KEY = 'keypair'
 
@@ -103,24 +102,24 @@ interface ErrorParsingFormData {
   _tag: 'ErrorParsingFormData'
 }
 
-export function parseFormData<T extends z.ZodType>(
-  zodType: T
-): (request: Request) => TE.TaskEither<ErrorParsingFormData, z.TypeOf<T>> {
+export function parseFormData<T extends Schema.Schema<any>>(
+  schemaType: T
+): (
+  request: Request
+) => Effect.Effect<Schema.Schema.Type<T>, ErrorParsingFormData, never> {
   return (request: Request) =>
-    TE.tryCatch(
-      async () => {
+    Effect.tryPromise({
+      try: async () => {
         const formData = await request.formData()
         const object = Object.fromEntries(formData)
-        return zodType.parse(object)
+        return Schema.decodeSync(schemaType)(object)
       },
-      (e) => ({
-        _tag: 'ErrorParsingFormData',
-      })
-    )
+      catch: (e) => ({_tag: 'ErrorParsingFormData'}),
+    })
 }
 
-export function createUserPublicApi(): userApi.UserPublicApi {
-  return userApi.publicApi({
+export function createUserPublicApi(): userApi.UserApi {
+  return userApi.api({
     url: getEnvPreset().userMs,
     ...apiMeta,
   })
@@ -154,8 +153,8 @@ export function createUserPrivateApi({
   hash: string
   publicKey: PublicKeyPemBase64
   signature: string
-}): userApi.UserPrivateApi {
-  return userApi.privateApi({
+}): userApi.UserApi {
+  return userApi.api({
     getUserSessionCredentials: () => ({
       hash,
       publicKey,

@@ -1,14 +1,14 @@
+import {Schema} from '@effect/schema'
 import {type ActionFunction} from '@remix-run/node'
 import {Form, Link, json, useActionData, useParams} from '@remix-run/react'
-import {
-  PublicKeyPemBase64,
-  type PrivateKeyHolder,
-} from '@vexl-next/cryptography/src/KeyHolder'
+import {type PrivateKeyHolder} from '@vexl-next/cryptography/src/KeyHolder'
+import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
+import {EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
+import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import * as E from 'fp-ts/lib/Either'
 import * as TE from 'fp-ts/lib/TaskEither'
 import {pipe} from 'fp-ts/lib/function'
 import {useEffect, useState} from 'react'
-import {z} from 'zod'
 import LoadingAwareSubmitButton from '../LoadingAwareSubmitButton'
 import {
   createUserPublicApi,
@@ -83,19 +83,24 @@ export default function printSession(): JSX.Element {
 
 export const action: ActionFunction = async ({request}) => {
   return await pipe(
-    request,
-    parseFormData(
-      z.object({signature: z.string(), pubKey: PublicKeyPemBase64})
+    effectToTaskEither(
+      parseFormData(
+        Schema.Struct({signature: EcdsaSignature, pubKey: PublicKeyPemBase64E})
+      )(request)
     ),
     TE.bindW('verificationResult', ({pubKey, signature}) =>
-      createUserPublicApi().verifyChallenge({
-        signature,
-        userPublicKey: pubKey,
-      })
+      effectToTaskEither(
+        createUserPublicApi().verifyChallenge({
+          body: {
+            signature,
+            userPublicKey: pubKey,
+          },
+        })
+      )
     ),
     TE.matchW(
       (e) => {
-        if (e._tag === 'VerificationNotFound') {
+        if (e._tag === 'InvalidVerificationError') {
           return json({
             error: 'Verification expired. Please start over.',
           })

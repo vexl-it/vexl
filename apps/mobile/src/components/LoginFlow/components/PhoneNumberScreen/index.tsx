@@ -1,6 +1,7 @@
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
-import * as E from 'fp-ts/Either'
+import {Effect} from 'effect'
 import * as O from 'fp-ts/Option'
+import {useSetAtom} from 'jotai'
 import {useState} from 'react'
 import {Alert} from 'react-native'
 import {Stack, Text} from 'tamagui'
@@ -13,7 +14,7 @@ import {
   NextButtonProxy,
 } from '../../../PageWithButtonAndProgressHeader'
 import {WhiteContainerWithScroll} from '../../../WhiteContainer'
-import {useInitPhoneVerification} from '../../api/initPhoneVerification'
+import {initPhoneVerificationAtom} from '../../api/initPhoneVerificationAtom'
 import PhoneNumberInput from './components/PhoneNumberInput'
 
 type Props = LoginStackScreenProps<'PhoneNumber'>
@@ -24,7 +25,7 @@ function PhoneNumberScreen({navigation}: Props): JSX.Element {
     O.none
   )
   const loadingOverlay = useShowLoadingOverlay()
-  const initPhoneVerification = useInitPhoneVerification()
+  const initPhoneVerification = useSetAtom(initPhoneVerificationAtom)
 
   return (
     <Stack flex={1} testID="@phoneNumberScreen">
@@ -51,22 +52,24 @@ function PhoneNumberScreen({navigation}: Props): JSX.Element {
       </WhiteContainerWithScroll>
       <NextButtonProxy
         disabled={phoneNumber._tag === 'None'}
+        text={t('common.continue')}
         onPress={() => {
           if (phoneNumber._tag !== 'Some') return
 
           loadingOverlay.show()
-          void initPhoneVerification({phoneNumber: phoneNumber.value})()
-            .then(
-              E.match(Alert.alert, (result) => {
+          initPhoneVerification({body: {phoneNumber: phoneNumber.value}}).pipe(
+            Effect.match({
+              onFailure: Alert.alert,
+              onSuccess(value) {
                 navigation.navigate('VerificationCode', {
                   phoneNumber: phoneNumber.value,
-                  initPhoneVerificationResponse: result,
+                  initPhoneVerificationResponse: value,
                 })
-              })
-            )
-            .finally(loadingOverlay.hide)
+              },
+            }),
+            Effect.tap(loadingOverlay.hide)
+          )
         }}
-        text={t('common.continue')}
       />
     </Stack>
   )

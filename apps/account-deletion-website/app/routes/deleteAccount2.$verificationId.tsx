@@ -1,12 +1,13 @@
+import {Schema} from '@effect/schema'
 import {json, redirect, type ActionFunction} from '@remix-run/node'
 import {Form, Link, useActionData, useParams} from '@remix-run/react'
 import * as crypto from '@vexl-next/cryptography'
-import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
-import {VerificationId} from '@vexl-next/rest-api/src/services/user/contracts'
+import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
+import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
+import {PhoneNumberVerificationId} from '@vexl-next/rest-api/src/services/user/contracts'
 import * as TE from 'fp-ts/lib/TaskEither'
 import {pipe} from 'fp-ts/lib/function'
 import {useEffect, useState} from 'react'
-import {z} from 'zod'
 import LoadingAwareSubmitButton from '../LoadingAwareSubmitButton'
 import {createUserPublicApi, parseFormData, saveKeyPair} from '../utils'
 
@@ -66,29 +67,39 @@ export default function deleteAccount2(): JSX.Element {
 
 export const action: ActionFunction = async ({request}) => {
   return await pipe(
-    request,
-    parseFormData(
-      z.object({
-        code: z.string(),
-        pubKey: PublicKeyPemBase64,
-        verificationId: z.coerce.number().pipe(VerificationId),
-        debugData: z.coerce.boolean().default(false),
-      })
+    TE.Do,
+    TE.chainW(() =>
+      effectToTaskEither(
+        parseFormData(
+          Schema.Struct({
+            code: Schema.String,
+            pubKey: PublicKeyPemBase64E,
+            verificationId: PhoneNumberVerificationId,
+            debugData: Schema.optionalWith(Schema.Boolean, {
+              default: () => false,
+            }),
+          })
+        )(request)
+      )
     ),
     TE.bindTo('data'),
     TE.bindW('result', ({data: {verificationId, code, pubKey}}) =>
-      createUserPublicApi().verifyPhoneNumber({
-        id: verificationId,
-        code,
-        userPublicKey: pubKey,
-      })
+      effectToTaskEither(
+        createUserPublicApi().verifyPhoneNumber({
+          body: {
+            id: verificationId,
+            code,
+            userPublicKey: pubKey,
+          },
+        })
+      )
     ),
     TE.matchW(
       (left) => {
         if (left._tag === 'ErrorParsingFormData') {
           return json({error: 'Fill in the code, please.'})
         }
-        if (left._tag === 'VerificationNotFound') {
+        if (left._tag === 'VerificationNotFoundError') {
           return json({error: 'Bad verification code.'})
         }
         return json({

@@ -4,7 +4,7 @@ import {unixMillisecondsFromNow} from '@vexl-next/domain/src/utility/UnixMillise
 import {
   VerificationNotFoundError,
   type PhoneNumberVerificationId,
-} from '@vexl-next/rest-api/src/services/user/specification'
+} from '@vexl-next/rest-api/src/services/user/contracts'
 import {RedisService} from '@vexl-next/server-utils/src/RedisService'
 import {Context, Effect, Layer} from 'effect'
 import {VERIFICATION_EXPIRES_AFTER_MILIS} from '../constants'

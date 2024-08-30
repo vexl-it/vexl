@@ -20,10 +20,7 @@ import {type FeedbackApi} from '@vexl-next/rest-api/src/services/feedback'
 import {type LocationPrivateApi} from '@vexl-next/rest-api/src/services/location'
 import {type NotificationPrivateApi} from '@vexl-next/rest-api/src/services/notification'
 import {type OfferPrivateApi} from '@vexl-next/rest-api/src/services/offer'
-import {
-  type UserPrivateApi,
-  type UserPublicApi,
-} from '@vexl-next/rest-api/src/services/user'
+import {type UserApi} from '@vexl-next/rest-api/src/services/user'
 import {atom, useAtomValue} from 'jotai'
 import {Platform} from 'react-native'
 import {dummySession, sessionHolderAtom} from '../state/session'
@@ -51,7 +48,7 @@ export const apiEnv = getApiPreset()
 // }
 
 const _publicApiAtom = atom({
-  user: user.publicApi({
+  user: user.api({
     clientVersion: versionCode,
     clientSemver: version,
     url: apiEnv.userMs,
@@ -61,7 +58,7 @@ const _publicApiAtom = atom({
 
 export const publicApiAtom = atom((get) => get(_publicApiAtom))
 
-export function useUserPublicApi(): UserPublicApi {
+export function useUserPublicApi(): UserApi {
   return useAtomValue(publicApiAtom).user
 }
 
@@ -105,7 +102,7 @@ export const privateApiAtom = atom((get) => {
       url: apiEnv.chatMs,
       getUserSessionCredentials,
     }),
-    user: user.privateApi({
+    user: user.api({
       platform,
       clientVersion: versionCode,
       clientSemver: version,
@@ -147,7 +144,7 @@ export function usePrivateApiAssumeLoggedIn(): {
   contact: ContactPrivateApi
   offer: OfferPrivateApi
   chat: ChatPrivateApi
-  user: UserPrivateApi
+  user: UserApi
   location: LocationPrivateApi
   notification: NotificationPrivateApi
   btcExchangeRate: BtcExchangeRateApi

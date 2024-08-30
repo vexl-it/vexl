@@ -6,7 +6,7 @@ import {UnixMillisecondsE} from '@vexl-next/domain/src/utility/UnixMilliseconds.
 import {
   PhoneNumberVerificationId,
   VerificationChallenge,
-} from '@vexl-next/rest-api/src/services/user/specification'
+} from '@vexl-next/rest-api/src/services/user/contracts'
 import {TwilioVerificationSid} from '../../utils/twilio'
 
 export const ChallengeVerificationState = Schema.Struct({

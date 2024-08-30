@@ -1,9 +1,10 @@
+import {Schema} from '@effect/schema'
 import {json, type ActionFunction} from '@remix-run/node'
 import {Form, redirect, useActionData} from '@remix-run/react'
-import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
+import {E164PhoneNumberE} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
+import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import * as TE from 'fp-ts/lib/TaskEither'
 import {pipe} from 'fp-ts/lib/function'
-import {z} from 'zod'
 import LoadingAwareSubmitButton from '../LoadingAwareSubmitButton'
 import {createUserPublicApi, parseFormData} from '../utils'
 
@@ -36,19 +37,28 @@ export default function deleteAccount1(): JSX.Element {
 
 export const action: ActionFunction = async ({request}) => {
   return await pipe(
-    request,
-    parseFormData(z.object({phoneNumber: E164PhoneNumber})),
-    TE.chainW(createUserPublicApi().initPhoneVerification),
+    TE.Do,
+    TE.chainW(() =>
+      effectToTaskEither(
+        parseFormData(Schema.Struct({phoneNumber: E164PhoneNumberE}))(request)
+      )
+    ),
+    TE.chainW(({phoneNumber}) =>
+      effectToTaskEither(
+        createUserPublicApi().initPhoneVerification({body: {phoneNumber}})
+      )
+    ),
+    (a) => a,
     TE.matchW(
       (e) => {
         if (
           e._tag === 'ErrorParsingFormData' ||
-          e._tag === 'InvalidPhoneNumber'
+          e._tag === 'UnableToSendVerificationSmsError'
         ) {
           return json({error: 'Invalid phone number.'})
         }
 
-        if (e._tag === 'PreviousCodeNotExpired')
+        if (e._tag === 'PreviousCodeNotExpiredError')
           return json({
             error:
               'Previous verification still in progress. Wait 5 minutes and try again.',

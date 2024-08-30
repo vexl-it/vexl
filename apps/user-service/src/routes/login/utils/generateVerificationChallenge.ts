@@ -1,6 +1,6 @@
 import {Schema} from '@effect/schema'
 import {generateChallenge} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
-import {VerificationChallenge} from '@vexl-next/rest-api/src/services/user/specification'
+import {VerificationChallenge} from '@vexl-next/rest-api/src/services/user/contracts'
 import {Effect} from 'effect'
 
 export const generateVerificationChallenge =

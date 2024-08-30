@@ -5,12 +5,8 @@ import {type PlatformName} from '../../PlatformName'
 import {type ServiceUrl} from '../../ServiceUrl.brand'
 import {type GetUserSessionCredentials} from '../../UserSessionCredentials.brand'
 import {handleCommonErrorsEffect} from '../../utils'
-import {GetExchangeRateError, type GetExchangeRateRequest} from './contracts'
+import {GetExchangeRateError, type GetExchangeRateInput} from './contracts'
 import {BtcExchangeRateApiSpecification} from './specification'
-
-interface GetExchangeRateInput {
-  query: GetExchangeRateRequest
-}
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function api({
@@ -26,14 +22,14 @@ export function api({
   url: ServiceUrl
   getUserSessionCredentials: GetUserSessionCredentials
 }) {
-  const client = createClientInstanceWithAuth(
-    BtcExchangeRateApiSpecification,
+  const client = createClientInstanceWithAuth({
+    api: BtcExchangeRateApiSpecification,
     platform,
     clientVersion,
     clientSemver,
     getUserSessionCredentials,
-    url
-  )
+    url,
+  })
 
   return {
     getExchangeRate: (exchangeRateInput: GetExchangeRateInput) =>

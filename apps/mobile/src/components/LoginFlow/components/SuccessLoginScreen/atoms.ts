@@ -1,13 +1,17 @@
+import {Schema} from '@effect/schema'
 import * as crypto from '@vexl-next/cryptography/src'
 import {type KeyHolder} from '@vexl-next/cryptography/src'
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
+import {EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
+import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {contact, user} from '@vexl-next/rest-api/src'
 import {type UserSessionCredentials} from '@vexl-next/rest-api/src/UserSessionCredentials.brand'
 import {type CreateUserRequest} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {
-  type VerifyChallengeRequest,
+  type VerifyChallengeInput,
   type VerifyPhoneNumberResponse,
 } from '@vexl-next/rest-api/src/services/user/contracts'
+import {Effect} from 'effect'
 import * as E from 'fp-ts/Either'
 import * as O from 'fp-ts/Option'
 import * as T from 'fp-ts/Task'
@@ -73,49 +77,42 @@ export const createUserAtContactMsActionAtom = atom(
 
 export const verifyChallengeActionAtom = atom(
   null,
-  (get, set, params: VerifyChallengeRequest) => {
+  (get, set, verifyChallengeInput: VerifyChallengeInput) => {
     const {t} = get(translationAtom)
     const publicUser = get(publicApiAtom).user
 
-    return pipe(
-      publicUser.verifyChallenge(params),
-      TE.mapLeft((l) => {
-        switch (l._tag) {
-          case 'VerificationNotFound':
-            return t('loginFlow.verificationCode.errors.verificationNotFound')
-          case 'UserNotFound':
-            return t('loginFlow.verificationCode.errors.userAlreadyExists')
-          case 'SignatureCouldNotBeGenerated':
-            return t(
-              'loginFlow.verificationCode.errors.challengeCouldNotBeGenerated'
-            )
-          case 'PublicKeyOrHashInvalid':
-            reportError(
-              'error',
-              new Error('Public key or hash invalid while verifying challenge'),
-              {l}
-            )
-            return t(
-              'loginFlow.verificationCode.errors.challengeCouldNotBeGenerated'
-            )
-          case 'UnexpectedApiResponseError':
-            reportError(
-              'error',
-              new Error('Unexpected api response while verifying challenge'),
-              {l}
-            )
-            return t('common.unexpectedServerResponse')
-          case 'NetworkError':
-            return toCommonErrorMessage(l, t) ?? t('common.unknownError')
-          case 'UnknownError':
-          case 'BadStatusCodeError':
-            reportError(
-              'error',
-              new Error('Bad status code while verifying challenge'),
-              {l}
-            )
-            return t('common.unknownError')
-        }
+    return publicUser.verifyChallenge(verifyChallengeInput).pipe(
+      Effect.catchTags({
+        VerificationNotFoundError: () =>
+          Effect.fail(
+            t('loginFlow.verificationCode.errors.verificationNotFound')
+          ),
+        UnableToGenerateSignatureError: () =>
+          Effect.fail(
+            t('loginFlow.verificationCode.errors.challengeCouldNotBeGenerated')
+          ),
+        InvalidSignatureError: (e) => {
+          reportError(
+            'error',
+            new Error('Public key or hash invalid while verifying challenge'),
+            {e}
+          )
+          return Effect.fail(
+            t('loginFlow.verificationCode.errors.challengeCouldNotBeGenerated')
+          )
+        },
+        UnexpectedApiResponseErrorE: (e) => {
+          reportError(
+            'error',
+            new Error('Unexpected api response while verifying challenge'),
+            {e}
+          )
+          return Effect.fail(t('common.unexpectedServerResponse'))
+        },
+      }),
+      Effect.catchAll((e) => {
+        reportError('error', new Error('Error while verifying challenge'), {e})
+        return Effect.fail(t('common.unknownError'))
       })
     )
   }
@@ -171,7 +168,7 @@ const deleteUserAndResetFlowActionAtom = atom(
     await pipe(
       TE.Do,
       TE.chain(() => {
-        const userApi = user.privateApi({
+        const userApi = user.api({
           platform,
           clientSemver: version,
           clientVersion: versionCode,
@@ -179,7 +176,7 @@ const deleteUserAndResetFlowActionAtom = atom(
           getUserSessionCredentials: () => session.sessionCredentials,
         })
 
-        return userApi.deleteUser()
+        return effectToTaskEither(userApi.deleteUser())
       }),
       TE.match(
         (e) => {
@@ -285,13 +282,16 @@ export const finishLoginActionAtom = atom(
           }
         )
       ),
-      (a) => a,
       TE.fromEither,
       TE.bindW('verifyChallengeResponse', ({privateKey, signature}) =>
-        set(verifyChallengeActionAtom, {
-          userPublicKey: privateKey.publicKeyPemBase64,
-          signature,
-        })
+        effectToTaskEither(
+          set(verifyChallengeActionAtom, {
+            body: {
+              userPublicKey: privateKey.publicKeyPemBase64,
+              signature: Schema.decodeSync(EcdsaSignature)(signature),
+            },
+          })
+        )
       ),
       TE.chainW(({verifyChallengeResponse}) => {
         return pipe(

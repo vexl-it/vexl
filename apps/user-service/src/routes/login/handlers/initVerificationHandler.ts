@@ -5,10 +5,10 @@ import {fromMilliseconds} from '@vexl-next/domain/src/utility/IsoDatetimeString.
 import {unixMillisecondsFromNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {
   InitPhoneVerificationResponse,
-  InitVerificationEndpoint,
   InitVerificationErrors,
   PhoneNumberVerificationId,
-} from '@vexl-next/rest-api/src/services/user/specification'
+} from '@vexl-next/rest-api/src/services/user/contracts'
+import {InitVerificationEndpoint} from '@vexl-next/rest-api/src/services/user/specification'
 import {hashPhoneNumber} from '@vexl-next/server-utils/src/generateUserAuthData'
 import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {Effect, Option} from 'effect'

@@ -4,7 +4,7 @@ import {
   UnableToSendVerificationSmsError,
   UnableToVerifySmsCodeError,
   VerificationNotFoundError,
-} from '@vexl-next/rest-api/src/services/user/specification'
+} from '@vexl-next/rest-api/src/services/user/contracts'
 import {Context, Effect, Layer, Match} from 'effect'
 import Twilio from 'twilio'
 import {twilioConfig} from '../configs'

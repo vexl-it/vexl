@@ -1,7 +1,9 @@
 import * as crypto from '@vexl-next/cryptography'
+import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {parsePhoneNumber} from 'awesome-phonenumber'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
+import {useSetAtom} from 'jotai'
 import {DateTime} from 'luxon'
 import {useState} from 'react'
 import {Alert, TouchableWithoutFeedback} from 'react-native'
@@ -16,7 +18,7 @@ import {
   NextButtonProxy,
 } from '../../../PageWithButtonAndProgressHeader'
 import {WhiteContainerWithScroll} from '../../../WhiteContainer'
-import {useVerifyPhoneNumber} from '../../api/verifyPhoneNumber'
+import {verifyPhoneNumberAtom} from '../../api/verifyPhoneNumberAtom'
 import Countdown from './components/Countdown'
 
 type Props = LoginStackScreenProps<'VerificationCode'>
@@ -30,7 +32,7 @@ function VerificationCodeScreen({
   const safeGoBack = useSafeGoBack()
   const [userCode, setUserCode] = useState('')
   const [countdownFinished, setCountdownFinished] = useState(false)
-  const verifyPhoneNumber = useVerifyPhoneNumber()
+  const verifyPhoneNumber = useSetAtom(verifyPhoneNumberAtom)
   const {t} = useTranslation()
   const loadingOverlay = useShowLoadingOverlay()
 
@@ -99,11 +101,15 @@ function VerificationCodeScreen({
             TE.right,
             TE.bindTo('privateKey'),
             TE.bind('verifyPhoneNumberResponse', ({privateKey}) =>
-              verifyPhoneNumber({
-                code: userCode,
-                id: initPhoneVerificationResponse.verificationId,
-                userPublicKey: privateKey.publicKeyPemBase64,
-              })
+              effectToTaskEither(
+                verifyPhoneNumber({
+                  body: {
+                    code: userCode,
+                    id: initPhoneVerificationResponse.verificationId,
+                    userPublicKey: privateKey.publicKeyPemBase64,
+                  },
+                })
+              )
             ),
             TE.match(
               (t) => {

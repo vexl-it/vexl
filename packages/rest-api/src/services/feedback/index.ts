@@ -6,12 +6,8 @@ import {type PlatformNameE} from '../../PlatformName'
 import {type ServiceUrl} from '../../ServiceUrl.brand'
 import {type GetUserSessionCredentials} from '../../UserSessionCredentials.brand'
 import {handleCommonErrorsEffect} from '../../utils'
-import {type SubmitFeedbackRequest} from './contracts'
+import {type SubmitFeedbackInput} from './contracts'
 import {FeedbackApiSpecification} from './specification'
-
-interface SubmitFeedbackInput {
-  body: SubmitFeedbackRequest
-}
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function api({
@@ -27,20 +23,20 @@ export function api({
   url: ServiceUrl
   getUserSessionCredentials: GetUserSessionCredentials
 }) {
-  const client = createClientInstanceWithAuth(
-    FeedbackApiSpecification,
+  const client = createClientInstanceWithAuth({
+    api: FeedbackApiSpecification,
     platform,
     clientVersion,
     clientSemver,
     getUserSessionCredentials,
-    url
-  )
+    url,
+  })
 
   return {
     submitFeedback: (submitFeedbackInput: SubmitFeedbackInput) =>
       handleCommonErrorsEffect(
         client.submitFeedback(submitFeedbackInput),
-        Schema.Void
+        Schema.Undefined
       ),
   }
 }

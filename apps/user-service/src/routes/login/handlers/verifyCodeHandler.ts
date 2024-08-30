@@ -1,9 +1,9 @@
 import {
   UnableToVerifySmsCodeError,
-  VerifyCodeEndpoint,
   VerifyCodeErrors,
   VerifyPhoneNumberResponse,
-} from '@vexl-next/rest-api/src/services/user/specification'
+} from '@vexl-next/rest-api/src/services/user/contracts'
+import {VerifyCodeEndpoint} from '@vexl-next/rest-api/src/services/user/specification'
 import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {Effect} from 'effect'
 import {Handler} from 'effect-http'

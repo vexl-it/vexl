@@ -25,15 +25,26 @@ const encodeCommonHeaders = Schema.encodeSync(CommonHeaders)
 // - set logging on the client
 // - set timeout on the client
 
-export function createClientInstanceWithAuth<A extends Api.Api.Any>(
-  api: A,
-  platform: PlatformName,
-  clientVersion: VersionCode,
-  clientSemver: SemverString,
-  getUserSessionCredentials: GetUserSessionCredentials,
+export interface ClientProps<A> {
+  api: A
+  platform: PlatformName
+  clientVersion: VersionCode
+  clientSemver: SemverString
+  getUserSessionCredentials?: GetUserSessionCredentials
   url: ServiceUrl
-): Client.Client<A> {
-  const credentials = getUserSessionCredentials()
+}
+
+export function createClientInstanceWithAuth<A extends Api.Api.Any>({
+  api,
+  platform,
+  clientVersion,
+  clientSemver,
+  getUserSessionCredentials,
+  url,
+}: ClientProps<A>): Client.Client<A> {
+  const credentials = getUserSessionCredentials
+    ? getUserSessionCredentials()
+    : undefined
 
   const commonHeaders = new CommonHeaders({
     'user-agent': {
@@ -47,19 +58,17 @@ export function createClientInstanceWithAuth<A extends Api.Api.Any>(
     [HEADER_CRYPTO_VERSION]: Option.some(2),
   })
 
-  const authHeaders = {
-    [HEADER_PUBLIC_KEY]: credentials.publicKey,
-    [HEADER_SIGNATURE]: credentials.signature,
-    [HEADER_HASH]: credentials.hash,
-  }
-
   return Client.make(api, {
     baseUrl: url,
     httpClient: HttpClient.fetch.pipe(
       HttpClient.mapRequest(
         HttpClientRequest.setHeaders({
           ...encodeCommonHeaders(commonHeaders),
-          ...authHeaders,
+          ...(credentials && {
+            [HEADER_PUBLIC_KEY]: credentials.publicKey,
+            [HEADER_SIGNATURE]: credentials.signature,
+            [HEADER_HASH]: credentials.hash,
+          }),
         })
       )
     ),

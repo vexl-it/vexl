@@ -1,3 +1,4 @@
+import {Schema} from '@effect/schema'
 import {type ActionFunction} from '@remix-run/node'
 import {
   Form,
@@ -7,16 +8,15 @@ import {
   useActionData,
   useParams,
 } from '@remix-run/react'
-import {
-  PublicKeyPemBase64,
-  type PrivateKeyHolder,
-} from '@vexl-next/cryptography/src/KeyHolder'
+import {type PrivateKeyHolder} from '@vexl-next/cryptography/src/KeyHolder'
+import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
+import {EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
+import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import * as E from 'fp-ts/lib/Either'
 import * as T from 'fp-ts/lib/Task'
 import * as TE from 'fp-ts/lib/TaskEither'
 import {pipe} from 'fp-ts/lib/function'
 import {useEffect, useState} from 'react'
-import {z} from 'zod'
 import LoadingAwareSubmitButton from '../LoadingAwareSubmitButton'
 import {
   createContactsPrivateApi,
@@ -96,15 +96,26 @@ export default function deleteAccount3(): JSX.Element {
 
 export const action: ActionFunction = async ({request}) => {
   return await pipe(
-    request,
-    parseFormData(
-      z.object({signature: z.string(), pubKey: PublicKeyPemBase64})
+    TE.Do,
+    TE.chainW(() =>
+      effectToTaskEither(
+        parseFormData(
+          Schema.Struct({
+            signature: EcdsaSignature,
+            pubKey: PublicKeyPemBase64E,
+          })
+        )(request)
+      )
     ),
     TE.bindW('verificationResult', ({pubKey, signature}) =>
-      createUserPublicApi().verifyChallenge({
-        signature,
-        userPublicKey: pubKey,
-      })
+      effectToTaskEither(
+        createUserPublicApi().verifyChallenge({
+          body: {
+            signature,
+            userPublicKey: pubKey,
+          },
+        })
+      )
     ),
     TE.map(({verificationResult, pubKey}) => ({
       contactsPrivateApi: createContactsPrivateApi({
@@ -124,10 +135,12 @@ export const action: ActionFunction = async ({request}) => {
         T.chain(() => contactsPrivateApi.deleteUser())
       )
     }),
-    TE.chainFirstTaskK(({userPrivateApi}) => userPrivateApi.deleteUser()),
+    TE.chainFirstTaskK(({userPrivateApi}) =>
+      effectToTaskEither(userPrivateApi.deleteUser())
+    ),
     TE.matchW(
       (e) => {
-        if (e._tag === 'VerificationNotFound') {
+        if (e._tag === 'VerificationNotFoundError') {
           return json({
             error: 'Verification expired. Please start over.',
           })
@@ -140,3 +153,53 @@ export const action: ActionFunction = async ({request}) => {
     )
   )()
 }
+
+// return Effect.gen(function* (_) {
+//   const parsedFormData = yield* _(
+//     parseFormData(
+//       Schema.Struct({signature: EcdsaSignature, pubKey: PublicKeyPemBase64E})
+//     )(request)
+//   )
+
+//   const verificationResult = yield* _(
+//     createUserPublicApi().verifyChallenge({
+//       body: {
+//         signature: parsedFormData.signature,
+//         userPublicKey: parsedFormData.pubKey,
+//       },
+//     })
+//   )
+
+//   const apis = {
+//     contactsPrivateApi: createContactsPrivateApi({
+//       hash: verificationResult.hash,
+//       publicKey: parsedFormData.pubKey,
+//       signature: verificationResult.signature,
+//     }),
+//     userPrivateApi: createUserPrivateApi({
+//       hash: verificationResult.hash,
+//       publicKey: parsedFormData.pubKey,
+//       signature: verificationResult.signature,
+//     }),
+//   }
+
+//   yield* _(
+//     taskEitherToEffect(
+//       apis.contactsPrivateApi.createUser({firebaseToken: null})
+//     )
+//   )
+
+//   yield* _(apis.userPrivateApi.deleteUser())
+// }).pipe(
+//   Effect.catchAll((e) => {
+//     if (e._tag === 'VerificationNotFound') {
+//       return json({
+//         error: 'Verification expired. Please start over.',
+//       })
+//     }
+//     return json({
+//       error: 'Unnexpected error happended. Please try again or start over.',
+//     })
+//   }),
+//   Effect.map(() => ({redirect: '/deleteAccount4'}))
+// )

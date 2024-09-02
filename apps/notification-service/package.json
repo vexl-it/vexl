@@ -43,6 +43,8 @@
     "@vexl-next/server-utils": "0.0.0",
     "dotenv": "^16.4.5",
     "effect": "^3.6.3",
+    "effect-http": "^0.77.4",
+    "effect-http-node": "^0.17.7",
     "fast-check": "^3.20.0",
     "firebase-admin": "^12.3.1"
   }

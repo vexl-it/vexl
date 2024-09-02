@@ -1,3 +1,4 @@
+import {Schema} from '@effect/schema'
 import * as S from '@effect/schema/Schema'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
@@ -28,12 +29,19 @@ export class IssueNotificationResponse extends S.Class<IssueNotificationResponse
 
 export class InvalidFcmCypherError extends S.TaggedError<InvalidFcmCypherError>()(
   'InvalidFcmCypherError',
-  {}
+  {
+    status: Schema.optionalWith(Schema.Literal(400), {
+      default: () => 400 as const,
+    }),
+  }
 ) {}
 
-export class SendingNotificationError extends S.TaggedError<InvalidFcmCypherError>()(
+export class SendingNotificationError extends S.TaggedError<SendingNotificationError>()(
   'SendingNotificationError',
   {
     tokenInvalid: S.Boolean,
+    status: Schema.optionalWith(Schema.Literal(400), {
+      default: () => 400 as const,
+    }),
   }
 ) {}

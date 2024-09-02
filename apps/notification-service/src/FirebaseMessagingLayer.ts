@@ -1,14 +1,10 @@
 import {Schema} from '@effect/schema'
 import {type FcmToken} from '@vexl-next/domain/src/utility/FcmToken.brand'
 import {SendingNotificationError} from '@vexl-next/rest-api/src/services/notification/contract'
-import {Effect, Layer} from 'effect'
+import {Effect, Layer, type ConfigError} from 'effect'
 import {cert, initializeApp, type ServiceAccount} from 'firebase-admin/app'
 import {getMessaging, type Message} from 'firebase-admin/messaging'
-import {EnvironmentConstants, type Environment} from './EnvironmentLayer'
-
-export class FirebaseMessagingError extends Schema.TaggedError<FirebaseMessagingError>(
-  'FirebaseMessagingError'
-)('FirebaseMessagingError', {}) {}
+import {firebaseCredentialsConfig} from './configs'
 
 export function sendFirebaseMessage({
   token,
@@ -18,8 +14,8 @@ export function sendFirebaseMessage({
   data: Record<string, string>
 }): Effect.Effect<
   string,
-  SendingNotificationError,
-  FirebaseMessagingLayer | Environment
+  SendingNotificationError | ConfigError.ConfigError,
+  FirebaseMessagingLayer
 > {
   return Effect.gen(function* (_) {
     const messaging = yield* _(FirebaseMessagingLayer)
@@ -44,7 +40,8 @@ export function sendFirebaseMessage({
     )
   }).pipe(
     Effect.tapError((e) => Effect.logInfo('Error while sending message', e)),
-    Effect.tapDefect((d) => Effect.logError('Defect while sending message', d))
+    Effect.tapDefect((d) => Effect.logError('Defect while sending message', d)),
+    Effect.withSpan('Sending notification', {attributes: {token, data}})
   )
 }
 
@@ -63,9 +60,7 @@ export class FirebaseMessagingLayer extends Effect.Tag('FirebaseMessaging')<
   static readonly Live = Layer.effect(
     FirebaseMessagingLayer,
     Effect.gen(function* (_) {
-      const firebaseCredentials = yield* _(
-        EnvironmentConstants.FIREBASE_CREDENTIALS
-      )
+      const firebaseCredentials = yield* _(firebaseCredentialsConfig)
       yield* _(
         Effect.try({
           try: () =>

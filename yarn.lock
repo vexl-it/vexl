@@ -12930,6 +12930,8 @@ __metadata:
     "@vexl-next/tsconfig": 0.0.0
     dotenv: ^16.4.5
     effect: ^3.6.3
+    effect-http: ^0.77.4
+    effect-http-node: ^0.17.7
     esbuild: ^0.17.16
     eslint: ^8.50.0
     fast-check: ^3.20.0

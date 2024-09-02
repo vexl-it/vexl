@@ -9,14 +9,14 @@ import {
   type FcmToken,
 } from '@vexl-next/domain/src/utility/FcmToken.brand'
 import {InvalidFcmCypherError} from '@vexl-next/rest-api/src/services/notification/contract'
-import {Effect} from 'effect'
-import {EnvironmentConstants, type Environment} from '../../EnvironmentLayer'
+import {Effect, type ConfigError} from 'effect'
+import {fcmTokenPrivateKeyConfig} from '../../configs'
 
 export function decodeFcmCypher(
   fcmCypher: FcmCypher
-): Effect.Effect<FcmToken, InvalidFcmCypherError, Environment> {
+): Effect.Effect<FcmToken, InvalidFcmCypherError | ConfigError.ConfigError> {
   return Effect.gen(function* (_) {
-    const privateKey = yield* _(EnvironmentConstants.FCM_TOKEN_PRIVATE_KEY)
+    const privateKey = yield* _(fcmTokenPrivateKeyConfig)
     const cypher = extractCypherFromFcmCypher(fcmCypher)
 
     if (!cypher) {
@@ -29,7 +29,7 @@ export function decodeFcmCypher(
       Effect.tryPromise({
         try: async () =>
           await eciesLegacy.eciesLegacyDecrypt({data: cypher, privateKey}),
-        catch: (e) => {
+        catch: () => {
           return new InvalidFcmCypherError()
         },
       }),

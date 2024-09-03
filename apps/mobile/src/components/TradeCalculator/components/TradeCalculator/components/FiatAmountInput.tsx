@@ -24,7 +24,7 @@ interface Props {
   automaticCalculationDisabled?: boolean
   currencySelectVisibleAtom: PrimitiveAtom<boolean>
   fiatValueAtom: PrimitiveAtom<string>
-  showSubtitle?: boolean
+  showPremiumInfoMessage?: boolean
   editable?: boolean
 }
 
@@ -32,7 +32,7 @@ function FiatAmountInput({
   automaticCalculationDisabled,
   currencySelectVisibleAtom,
   fiatValueAtom,
-  showSubtitle,
+  showPremiumInfoMessage,
   editable = true,
 }: Props): JSX.Element {
   const ref = useRef<TextInput>(null)
@@ -51,7 +51,7 @@ function FiatAmountInput({
   return (
     <AmountInput
       ref={ref}
-      showSubtitle={showSubtitle}
+      showPremiumInfoMessage={showPremiumInfoMessage}
       isFocused={isFocused}
       loading={btcPriceForOfferWithState?.state === 'loading'}
       onBlur={() => {

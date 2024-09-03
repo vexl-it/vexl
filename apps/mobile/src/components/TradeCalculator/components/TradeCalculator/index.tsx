@@ -54,8 +54,8 @@ function TradeCalculator({
       <Stack space="$2">
         <BtcAmountInput btcValueAtom={btcInputValueAtom} />
         <FiatAmountInput
+          showPremiumInfoMessage
           currencySelectVisibleAtom={currencySelectVisibleAtom}
-          showSubtitle
           fiatValueAtom={fiatInputValueAtom}
         />
       </Stack>

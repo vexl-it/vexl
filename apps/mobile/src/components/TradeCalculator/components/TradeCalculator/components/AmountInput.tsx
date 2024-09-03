@@ -34,11 +34,18 @@ interface Props extends TextInputProps {
   children: ReactNode
   loading?: boolean
   onWrapperPress?: () => void
-  showSubtitle?: boolean
+  showPremiumInfoMessage?: boolean
 }
 
 function AmountInput(
-  {children, isFocused, loading, onWrapperPress, showSubtitle, ...props}: Props,
+  {
+    children,
+    isFocused,
+    loading,
+    onWrapperPress,
+    showPremiumInfoMessage,
+    ...props
+  }: Props,
   ref: Ref<RNTextInput>
 ): JSX.Element {
   const inputRef: Ref<RNTextInput> = useRef(null)
@@ -49,50 +56,51 @@ function AmountInput(
 
   return (
     <TouchableWithoutFeedback onPress={onWrapperPress}>
-      <XStack
-        h={65}
-        ai="center"
-        jc="space-between"
-        bc="$grey"
-        boc={isFocused ? '$yellowAccent2' : 'transparent'}
-        bw={2}
-        px="$4"
-        py="$3"
-        br="$4"
-      >
-        {children}
-        <Stack w="60%">
-          {loading ? (
-            <Stack als="flex-end">
-              <ActivityIndicator
-                size="small"
-                color={getTokens().color.greyAccent2.val}
+      <>
+        <XStack
+          h={65}
+          ai="center"
+          jc="space-between"
+          bc="$grey"
+          boc={isFocused ? '$yellowAccent2' : 'transparent'}
+          bw={2}
+          px="$4"
+          py="$3"
+          br="$4"
+        >
+          {children}
+          <Stack fs={1} maxWidth="60%">
+            {loading ? (
+              <Stack als="flex-end">
+                <ActivityIndicator
+                  size="small"
+                  color={getTokens().color.greyAccent2.val}
+                />
+              </Stack>
+            ) : (
+              <InputStyled
+                ref={inputRef}
+                placeholderTextColor={getTokens().color.greyAccent1.val}
+                keyboardType="decimal-pad"
+                numberOfLines={1}
+                textAlign="right"
+                selectTextOnFocus
+                textColor={isFocused ? '$main' : '$white'}
+                selectionColor={
+                  isFocused
+                    ? getTokens().color.yellowAccent1.val
+                    : getTokens().color.white.val
+                }
+                focusStyle={{
+                  textColor: '$main',
+                }}
+                {...props}
               />
-            </Stack>
-          ) : (
-            <InputStyled
-              ref={inputRef}
-              placeholderTextColor={getTokens().color.greyAccent1.val}
-              keyboardType="decimal-pad"
-              numberOfLines={1}
-              textAlign="right"
-              selectTextOnFocus
-              textColor={isFocused ? '$main' : '$white'}
-              selectionColor={
-                isFocused
-                  ? getTokens().color.yellowAccent1.val
-                  : getTokens().color.white.val
-              }
-              focusStyle={{
-                textColor: '$main',
-              }}
-              {...props}
-            />
-          )}
-
-          {!!showSubtitle && <PremiumIncluded />}
-        </Stack>
-      </XStack>
+            )}
+          </Stack>
+        </XStack>
+        {!!showPremiumInfoMessage && <PremiumIncluded />}
+      </>
     </TouchableWithoutFeedback>
   )
 }

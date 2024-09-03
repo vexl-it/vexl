@@ -18,7 +18,7 @@ import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {atom} from 'jotai'
-import {apiEnv, platform, publicApiAtom} from '../../../../api'
+import {apiAtom, apiEnv, platform} from '../../../../api'
 import {Session} from '../../../../brands/Session.brand'
 import {sessionAtom} from '../../../../state/session'
 import {version, versionCode} from '../../../../utils/environment'
@@ -62,11 +62,11 @@ export const createUserAtContactMsActionAtom = atom(
       contactApi.createUser(request),
       TE.mapLeft((l) => {
         switch (l._tag) {
-          case 'UnexpectedApiResponseError':
+          case 'UnexpectedApiResponseErrorAxios':
             return t('common.unexpectedServerResponse')
           case 'NetworkError':
             return toCommonErrorMessage(l, t) ?? t('common.unknownError')
-          case 'UnknownError':
+          case 'UnknownErrorAxios':
           case 'BadStatusCodeError':
             return t('common.unknownError')
         }
@@ -79,7 +79,7 @@ export const verifyChallengeActionAtom = atom(
   null,
   (get, set, verifyChallengeInput: VerifyChallengeInput) => {
     const {t} = get(translationAtom)
-    const publicUser = get(publicApiAtom).user
+    const publicUser = get(apiAtom).user
 
     return publicUser.verifyChallenge(verifyChallengeInput).pipe(
       Effect.catchTags({
@@ -101,7 +101,7 @@ export const verifyChallengeActionAtom = atom(
             t('loginFlow.verificationCode.errors.challengeCouldNotBeGenerated')
           )
         },
-        UnexpectedApiResponseErrorE: (e) => {
+        UnexpectedApiResponseError: (e) => {
           reportError(
             'error',
             new Error('Unexpected api response while verifying challenge'),

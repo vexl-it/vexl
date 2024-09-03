@@ -2,14 +2,14 @@ import {generateSignedChallengeBatch} from '@vexl-next/resources-utils/src/chat/
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {atom} from 'jotai'
-import {privateApiAtom} from '../../../api'
+import {apiAtom} from '../../../api'
 import {version} from '../../../utils/environment'
 import allChatsAtom from './allChatsAtom'
 import messagingStateAtom, {inboxesAtom} from './messagingStateAtom'
 import sendMessageToChatsInBatchActionAtom from './sendMessageToChatsInBatchActionAtom'
 
 const deleteAllInboxesActionAtom = atom(null, (get, set) => {
-  const api = get(privateApiAtom)
+  const api = get(apiAtom)
   const inboxes = get(inboxesAtom)
   const chats = get(allChatsAtom).flat()
 

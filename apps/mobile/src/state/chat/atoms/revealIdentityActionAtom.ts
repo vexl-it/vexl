@@ -18,7 +18,7 @@ import {
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {atom} from 'jotai'
-import {privateApiAtom} from '../../../api'
+import {apiAtom} from '../../../api'
 import {type ActionAtomType} from '../../../utils/atomUtils/ActionAtomType'
 import {type FocusAtomType} from '../../../utils/atomUtils/FocusAtomType'
 import {version} from '../../../utils/environment'
@@ -88,7 +88,7 @@ export default function revealIdentityActionAtom(
       }
 
       const {phoneNumber} = get(sessionDataOrDummyAtom)
-      const api = get(privateApiAtom)
+      const api = get(apiAtom)
       const anonymizedUserData = get(anonymizedUserDataAtom)
 
       const anonymizedPhoneNumber = anonymizePhoneNumber(phoneNumber)

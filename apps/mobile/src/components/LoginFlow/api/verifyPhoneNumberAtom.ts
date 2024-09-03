@@ -1,14 +1,14 @@
 import {type VerifyPhoneNumberInput} from '@vexl-next/rest-api/src/services/user/contracts'
 import {Effect} from 'effect'
 import {atom} from 'jotai'
-import {publicApiAtom} from '../../../api'
+import {apiAtom} from '../../../api'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
 import reportError from '../../../utils/reportError'
 
 export const verifyPhoneNumberAtom = atom(
   null,
   (get, _, inputRequest: VerifyPhoneNumberInput) => {
-    const userApi = get(publicApiAtom).user
+    const userApi = get(apiAtom).user
     const {t} = get(translationAtom)
 
     return userApi.verifyPhoneNumber(inputRequest).pipe(
@@ -21,7 +21,7 @@ export const verifyPhoneNumberAtom = atom(
           Effect.fail(
             t('loginFlow.verificationCode.errors.challengeCouldNotBeGenerated')
           ),
-        UnexpectedApiResponseErrorE: (e) => {
+        UnexpectedApiResponseError: (e) => {
           reportError(
             'error',
             new Error('Unexpected api response while verifying phone number'),

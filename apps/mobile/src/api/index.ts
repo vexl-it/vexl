@@ -47,21 +47,6 @@ export const apiEnv = getApiPreset()
 //   chatMs: ServiceUrl.parse('http://localhost:8001'),
 // }
 
-const _publicApiAtom = atom({
-  user: user.api({
-    clientVersion: versionCode,
-    clientSemver: version,
-    url: apiEnv.userMs,
-    platform,
-  }),
-})
-
-export const publicApiAtom = atom((get) => get(_publicApiAtom))
-
-export function useUserPublicApi(): UserApi {
-  return useAtomValue(publicApiAtom).user
-}
-
 const sessionCredentialsAtom = atom<UserSessionCredentials>((get) => {
   const session = get(sessionHolderAtom)
   if (session.state !== 'loggedIn') {
@@ -74,7 +59,7 @@ const sessionCredentialsAtom = atom<UserSessionCredentials>((get) => {
   return session.session.sessionCredentials
 })
 
-export const privateApiAtom = atom((get) => {
+export const apiAtom = atom((get) => {
   function getUserSessionCredentials(): UserSessionCredentials {
     const session = get(sessionCredentialsAtom)
     return session
@@ -150,5 +135,5 @@ export function usePrivateApiAssumeLoggedIn(): {
   btcExchangeRate: BtcExchangeRateApi
   feedback: FeedbackApi
 } {
-  return useAtomValue(privateApiAtom)
+  return useAtomValue(apiAtom)
 }

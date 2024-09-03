@@ -42,7 +42,7 @@ export function useRefreshUserOnContactService(): void {
                   '🦋 Network error refreshing user. Not logging out.',
                   e
                 )
-              } else if (e._tag === 'UnknownError') {
+              } else if (e._tag === 'UnknownErrorAxios') {
                 reportError(
                   'warn',
                   new Error('Unknown error refreshing user. Not logging out.'),
@@ -52,7 +52,7 @@ export function useRefreshUserOnContactService(): void {
                   '🦋 🚨 Unknown error refreshing user. Not logging out.',
                   e._tag
                 )
-              } else if (e._tag === 'UnexpectedApiResponseError') {
+              } else if (e._tag === 'UnexpectedApiResponseErrorAxios') {
                 reportError(
                   'warn',
                   new Error(

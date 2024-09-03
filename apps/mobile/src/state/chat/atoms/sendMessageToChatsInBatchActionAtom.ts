@@ -11,7 +11,7 @@ import * as RNEA from 'fp-ts/ReadonlyNonEmptyArray'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {atom} from 'jotai'
-import {privateApiAtom} from '../../../api'
+import {apiAtom} from '../../../api'
 import notEmpty from '../../../utils/notEmpty'
 import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
 import addMessageToChat from '../utils/addMessageToChat'
@@ -67,7 +67,7 @@ const sendMessageToChatsInBatchActionAtom = atom(
       TE.right,
       TE.chainFirstW((inboxes) =>
         sendMessagesBatch({
-          api: get(privateApiAtom).chat,
+          api: get(apiAtom).chat,
           inboxes: inboxes.map((oneInbox) => ({
             ...oneInbox,
             messages: oneInbox.messages

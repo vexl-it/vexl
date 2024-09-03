@@ -15,7 +15,7 @@ import * as E from 'fp-ts/Either'
 import * as TE from 'fp-ts/TaskEither'
 import {flow, pipe} from 'fp-ts/function'
 import {atom} from 'jotai'
-import {privateApiAtom} from '../../../api'
+import {apiAtom} from '../../../api'
 import {type ActionAtomType} from '../../../utils/atomUtils/ActionAtomType'
 import {type FocusAtomType} from '../../../utils/atomUtils/FocusAtomType'
 import {version} from '../../../utils/environment'
@@ -39,7 +39,7 @@ export default function deleteChatActionAtom(
   return atom(null, (get, set, {text}) => {
     const chatWithMessages = get(chatWithMessagesAtom)
     const {chat} = chatWithMessages
-    const api = get(privateApiAtom)
+    const api = get(apiAtom)
 
     const shouldSendMessage =
       shouldSendTerminationMessageToChat(chatWithMessages)

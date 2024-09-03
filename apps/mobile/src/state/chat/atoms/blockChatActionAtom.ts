@@ -11,7 +11,7 @@ import * as E from 'fp-ts/Either'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {atom} from 'jotai'
-import {privateApiAtom} from '../../../api'
+import {apiAtom} from '../../../api'
 import {type ActionAtomType} from '../../../utils/atomUtils/ActionAtomType'
 import {type FocusAtomType} from '../../../utils/atomUtils/FocusAtomType'
 import {version} from '../../../utils/environment'
@@ -31,7 +31,7 @@ export default function blockChatActionAtom(
 > {
   return atom(null, (get, set, {text}) => {
     const {chat} = get(chatWithMessagesAtom)
-    const api = get(privateApiAtom)
+    const api = get(apiAtom)
 
     const messageToSend: ChatMessage = {
       text,

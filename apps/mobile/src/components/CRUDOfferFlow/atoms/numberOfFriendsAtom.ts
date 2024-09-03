@@ -7,7 +7,7 @@ import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {atom} from 'jotai'
-import {privateApiAtom} from '../../../api'
+import {apiAtom} from '../../../api'
 
 const numberOfFriendsStorageAtom = atom<
   E.Either<
@@ -23,7 +23,7 @@ const numberOfFriendsStorageAtom = atom<
 const numberOfFriendsAtom = atom(
   (get) => get(numberOfFriendsStorageAtom),
   (get, set) => {
-    const api = get(privateApiAtom)
+    const api = get(apiAtom)
 
     void pipe(
       sequenceS(TE.ApplicativeSeq)({

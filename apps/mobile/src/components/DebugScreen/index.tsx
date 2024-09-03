@@ -12,7 +12,7 @@ import {isLeft, isRight} from 'fp-ts/lib/Either'
 import {useAtomValue, useSetAtom, useStore} from 'jotai'
 import {Alert, Platform, ScrollView} from 'react-native'
 import {Spacer, Text, YStack} from 'tamagui'
-import {apiEnv, privateApiAtom} from '../../api'
+import {apiAtom, apiEnv} from '../../api'
 import deleteAllInboxesActionAtom from '../../state/chat/atoms/deleteAllInboxesActionAtom'
 import fetchMessagesForAllInboxesAtom from '../../state/chat/atoms/fetchNewMessagesActionAtom'
 import messagingStateAtom from '../../state/chat/atoms/messagingStateAtom'
@@ -211,7 +211,7 @@ function DebugScreen(): JSX.Element {
                   getNewOffersAndDecrypt({
                     keyPair: session.privateKey,
                     modifiedAt: MINIMAL_DATE,
-                    offersApi: store.get(privateApiAtom).offer,
+                    offersApi: store.get(apiAtom).offer,
                   }),
                   TE.matchW(
                     (error) => {
@@ -555,7 +555,7 @@ function DebugScreen(): JSX.Element {
                   TE.chainW((fcmToken) =>
                     fetchAndEncryptFcmForOffer({
                       fcmToken,
-                      notificationApi: store.get(privateApiAtom).notification,
+                      notificationApi: store.get(apiAtom).notification,
                     })
                   ),
                   TE.map((one) => {
@@ -572,7 +572,7 @@ function DebugScreen(): JSX.Element {
               text="Simulate offers deleted from server"
               onPress={() => {
                 void store
-                  .get(privateApiAtom)
+                  .get(apiAtom)
                   .offer.deleteOffer({
                     adminIds: store
                       .get(myOffersAtom)

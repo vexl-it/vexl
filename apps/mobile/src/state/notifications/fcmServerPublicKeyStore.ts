@@ -9,7 +9,7 @@ import * as TO from 'fp-ts/TaskOption'
 import {pipe} from 'fp-ts/lib/function'
 import {atom} from 'jotai'
 import {z} from 'zod'
-import {privateApiAtom} from '../../api'
+import {apiAtom} from '../../api'
 import {atomWithParsedMmkvStorage} from '../../utils/atomUtils/atomWithParsedMmkvStorage'
 import reportError from '../../utils/reportError'
 
@@ -37,7 +37,7 @@ export const getOrFetchNotificationServerPublicKeyActionAtom = atom(
       return TO.fromNullable(publicKey)
     }
     return pipe(
-      get(privateApiAtom).notification.getNotificationPublicKey(),
+      get(apiAtom).notification.getNotificationPublicKey(),
       TE.matchE(
         (e) => {
           // Do not report network errors

@@ -8,7 +8,7 @@ import {atom} from 'jotai'
 import {splitAtom} from 'jotai/utils'
 import {randomUUID} from 'node:crypto'
 import {z} from 'zod'
-import {privateApiAtom} from '../../api'
+import {apiAtom} from '../../api'
 import {loadableEither} from '../../utils/atomUtils/loadableEither'
 import {getCurrentLocale} from '../../utils/localization/I18nProvider'
 
@@ -34,7 +34,7 @@ export const LocationSearchMolecule = molecule((_, getScope) => {
       if (query.trim() === '') return await TE.right([])()
 
       return await pipe(
-        get(privateApiAtom).location.getLocationSuggestions(
+        get(apiAtom).location.getLocationSuggestions(
           {
             phrase: query,
             lang: getCurrentLocale(),

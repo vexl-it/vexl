@@ -3,7 +3,7 @@ import {parsePhoneNumber} from 'awesome-phonenumber'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {atom} from 'jotai'
-import {privateApiAtom} from '../../../api'
+import {apiAtom} from '../../../api'
 import {askAreYouSureActionAtom} from '../../../components/AreYouSureDialog'
 import {loadingOverlayDisplayedAtom} from '../../../components/LoadingOverlayProvider'
 import userSvg from '../../../components/images/userSvg'
@@ -148,7 +148,7 @@ const editExistingContact = atom(
 const importContactActionAtom = atom(
   null,
   (get, set, newContact: StoredContactWithComputedValues) => {
-    const contactApi = get(privateApiAtom).contact
+    const contactApi = get(apiAtom).contact
 
     return pipe(
       TE.Do,

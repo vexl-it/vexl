@@ -16,7 +16,7 @@ import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/lib/function'
 import {atom, useSetAtom} from 'jotai'
 import {useCallback} from 'react'
-import {privateApiAtom} from '../../../api'
+import {apiAtom} from '../../../api'
 import {version} from '../../../utils/environment'
 import {getNotificationToken} from '../../../utils/notifications'
 import reportError from '../../../utils/reportError'
@@ -84,11 +84,11 @@ export const sendFcmCypherUpdateMessageActionAtom = atom(
         TE.fromTask,
         TE.bind('sentMessage', ({messageToSend}) =>
           sendMessage({
-            api: get(privateApiAtom).chat,
+            api: get(apiAtom).chat,
             senderKeypair: chatWithMessages.chat.inbox.privateKey,
             receiverPublicKey: chatWithMessages.chat.otherSide.publicKey,
             message: messageToSend,
-            notificationApi: get(privateApiAtom).notification,
+            notificationApi: get(apiAtom).notification,
             theirFcmCypher: chatWithMessages.chat.otherSideFcmCypher,
             otherSideVersion: chatWithMessages.chat.otherSideVersion,
           })

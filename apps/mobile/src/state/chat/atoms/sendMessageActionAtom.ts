@@ -9,7 +9,7 @@ import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {atom} from 'jotai'
 import {InteractionManager} from 'react-native'
-import {privateApiAtom} from '../../../api'
+import {apiAtom} from '../../../api'
 import {type ActionAtomType} from '../../../utils/atomUtils/ActionAtomType'
 import {type FocusAtomType} from '../../../utils/atomUtils/FocusAtomType'
 import {version} from '../../../utils/environment'
@@ -26,7 +26,7 @@ export default function sendMessageActionAtom(
   chatWithMessagesAtom: FocusAtomType<ChatWithMessages>
 ): SendMessageAtom {
   return atom(null, (get, set, message) => {
-    const api = get(privateApiAtom)
+    const api = get(apiAtom)
 
     set(
       chatWithMessagesAtom,

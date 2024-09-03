@@ -5,7 +5,7 @@ import * as O from 'fp-ts/Option'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {atom} from 'jotai'
-import {privateApiAtom} from '../../../api'
+import {apiAtom} from '../../../api'
 import {loadingOverlayDisplayedAtom} from '../../../components/LoadingOverlayProvider'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
 import {getNotificationToken} from '../../../utils/notifications'
@@ -26,7 +26,7 @@ const sendRequestActionAtom = atom(
     set,
     {text, originOffer}: {text: string; originOffer: OneOfferInState}
   ) => {
-    const api = get(privateApiAtom)
+    const api = get(apiAtom)
     const session = get(sessionDataOrDummyAtom)
 
     return pipe(
@@ -68,7 +68,7 @@ export const sendRequestHandleUIActionAtom = atom(
     {text, originOffer}: {text: string; originOffer: OneOfferInState}
   ) => {
     const {t} = get(translationAtom)
-    const api = get(privateApiAtom)
+    const api = get(apiAtom)
     const session = get(sessionDataOrDummyAtom)
 
     const sendRequestHandleInboxMissing = pipe(

@@ -8,7 +8,7 @@ import * as TE from 'fp-ts/TaskEither'
 import {atom, type Atom, type PrimitiveAtom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {z} from 'zod'
-import {privateApiAtom} from '../api'
+import {apiAtom} from '../api'
 import {atomWithParsedMmkvStorage} from '../utils/atomUtils/atomWithParsedMmkvStorage'
 import {currencies} from '../utils/localization/currency'
 import reportError from '../utils/reportError'
@@ -68,7 +68,7 @@ export const refreshBtcPriceActionAtom = atom(
     set,
     currencyStringOrAtom: CurrencyCode | Atom<CurrencyCode | undefined>
   ) => {
-    const api = get(privateApiAtom)
+    const api = get(apiAtom)
     const currency =
       (typeof currencyStringOrAtom === 'string'
         ? currencyStringOrAtom

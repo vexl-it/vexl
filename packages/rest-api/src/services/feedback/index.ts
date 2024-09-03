@@ -1,4 +1,3 @@
-import {Schema} from '@effect/schema'
 import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {createClientInstanceWithAuth} from '../../client'
@@ -34,10 +33,7 @@ export function api({
 
   return {
     submitFeedback: (submitFeedbackInput: SubmitFeedbackInput) =>
-      handleCommonErrorsEffect(
-        client.submitFeedback(submitFeedbackInput),
-        Schema.Undefined
-      ),
+      handleCommonErrorsEffect(client.submitFeedback(submitFeedbackInput)),
   }
 }
 

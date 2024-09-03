@@ -19,7 +19,7 @@ import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
 import {flow, pipe} from 'fp-ts/function'
 import {atom} from 'jotai'
-import {privateApiAtom} from '../../../api'
+import {apiAtom} from '../../../api'
 import {type ActionAtomType} from '../../../utils/atomUtils/ActionAtomType'
 import {type FocusAtomType} from '../../../utils/atomUtils/FocusAtomType'
 import {version} from '../../../utils/environment'
@@ -47,7 +47,7 @@ export default function createSubmitChecklistUpdateActionAtom(
   >
 > {
   return atom(null, (get, set, update: TradeChecklistUpdate) => {
-    const api = get(privateApiAtom)
+    const api = get(apiAtom)
     const chatWithMessages = get(chatWithMessagesAtom)
     const tradeChecklistData = get(tradeChecklistDataAtom)
 

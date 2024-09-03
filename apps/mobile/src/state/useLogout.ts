@@ -4,7 +4,7 @@ import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/
 import * as O from 'fp-ts/Option'
 import {atom, useSetAtom} from 'jotai'
 import {useCallback} from 'react'
-import {privateApiAtom} from '../api'
+import {apiAtom} from '../api'
 import {loadingOverlayDisplayedAtom} from '../components/LoadingOverlayProvider'
 import clearMmkvStorageAndEmptyAtoms from '../utils/clearMmkvStorageAndEmptyAtoms'
 import {deleteAllFiles} from '../utils/fsDirectories'
@@ -51,12 +51,10 @@ export const logoutActionAtom = atom(null, async (get, set) => {
     await failSilently(set(deleteAllInboxesActionAtom)())
 
     // contact service
-    await failSilently(get(privateApiAtom).contact.deleteUser()())
+    await failSilently(get(apiAtom).contact.deleteUser()())
 
     // User service
-    await failSilently(
-      effectToTaskEither(get(privateApiAtom).user.deleteUser())()
-    )
+    await failSilently(effectToTaskEither(get(apiAtom).user.deleteUser())())
 
     // Notification badge
     await failSilently(notifee.setBadgeCount(0))

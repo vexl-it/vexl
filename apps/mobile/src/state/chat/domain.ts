@@ -21,7 +21,7 @@ import {
   type BadStatusCodeError,
   type NetworkError,
   type UnexpectedApiResponseError,
-  type UnknownError,
+  type UnknownErrorAxios,
 } from '@vexl-next/rest-api/src/Errors'
 import {
   type ErrorGeneratingChallenge,
@@ -56,7 +56,7 @@ export const ChatMessageWithState = z
         | ErrorEncryptingMessage
         | UnexpectedApiResponseError
         | BadStatusCodeError
-        | UnknownError
+        | UnknownErrorAxios
         | NetworkError
         | ErrorGeneratingChallenge
         | ErrorSigningChallenge

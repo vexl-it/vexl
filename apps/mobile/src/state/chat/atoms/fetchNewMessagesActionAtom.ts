@@ -25,7 +25,7 @@ import {flow, pipe} from 'fp-ts/function'
 import {group} from 'group-items'
 import {atom, type SetStateAction, type WritableAtom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
-import {privateApiAtom} from '../../../api'
+import {apiAtom} from '../../../api'
 import {version} from '../../../utils/environment'
 import {getNotificationToken} from '../../../utils/notifications'
 import reportError from '../../../utils/reportError'
@@ -326,7 +326,7 @@ export const fetchAndStoreMessagesForInboxAtom = atom<
   >
 >(null, (get, set, params) => {
   const {key} = params
-  const api = get(privateApiAtom)
+  const api = get(apiAtom)
   const inbox = get(focusInboxInMessagingStateAtom(key))
 
   if (!inbox) {

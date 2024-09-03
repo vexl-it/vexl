@@ -13,7 +13,7 @@ import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {atom, type Atom} from 'jotai'
 import {selectAtom} from 'jotai/utils'
-import {privateApiAtom} from '../../../api'
+import {apiAtom} from '../../../api'
 import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
 import deduplicate from '../../../utils/deduplicate'
 import {showDebugNotificationIfEnabled} from '../../../utils/notifications/showDebugNotificationIfEnabled'
@@ -53,7 +53,7 @@ function fetchContacts(
 export const syncConnectionsActionAtom = atom(
   null,
   (get, set): T.Task<boolean> => {
-    const api = get(privateApiAtom)
+    const api = get(apiAtom)
 
     console.log('🦋 Refreshing connections state')
     const updateStarted = unixMillisecondsNow()

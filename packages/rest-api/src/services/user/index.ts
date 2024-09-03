@@ -1,13 +1,15 @@
-import {Schema} from '@effect/schema'
 import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {type CreateAxiosDefaults} from 'axios'
-import urlJoin from 'url-join'
 import {type PlatformName} from '../../PlatformName'
-import {ServiceUrl} from '../../ServiceUrl.brand'
+import {type ServiceUrl} from '../../ServiceUrl.brand'
 import {type GetUserSessionCredentials} from '../../UserSessionCredentials.brand'
 import {createClientInstanceWithAuth} from '../../client'
-import {handleCommonErrorsEffect, type LoggingFunction} from '../../utils'
+import {
+  handleCommonAndExpectedErrorsEffect,
+  handleCommonErrorsEffect,
+  type LoggingFunction,
+} from '../../utils'
 import {UserApiSpecification} from './specification'
 
 import {type SubmitFeedbackInput} from '../feedback/contracts'
@@ -44,32 +46,28 @@ export function api({
     clientVersion,
     clientSemver,
     getUserSessionCredentials,
-    url: ServiceUrl.parse(urlJoin(url, '/api/v1')),
+    url,
   })
 
   return {
     initPhoneVerification: (initVerificationInput: InitVerificationInput) =>
-      handleCommonErrorsEffect(
+      handleCommonAndExpectedErrorsEffect(
         client.initVerification(initVerificationInput),
         InitVerificationErrors
       ),
     verifyPhoneNumber: (verifyPhoneNumberInput: VerifyPhoneNumberInput) =>
-      handleCommonErrorsEffect(
+      handleCommonAndExpectedErrorsEffect(
         client.verifyCode(verifyPhoneNumberInput),
         VerifyCodeErrors
       ),
     verifyChallenge: (verifyChallengeInput: VerifyChallengeInput) =>
-      handleCommonErrorsEffect(
+      handleCommonAndExpectedErrorsEffect(
         client.verifyChallenge(verifyChallengeInput),
         VerifyChallengeErrors
       ),
-    deleteUser: () =>
-      handleCommonErrorsEffect(client.logoutUser({}), Schema.Undefined),
+    deleteUser: () => handleCommonErrorsEffect(client.logoutUser({})),
     submitFeedback: (submitFeedbackInput: SubmitFeedbackInput) =>
-      handleCommonErrorsEffect(
-        client.submitFeedback(submitFeedbackInput),
-        Schema.Undefined
-      ),
+      handleCommonErrorsEffect(client.submitFeedback(submitFeedbackInput)),
   }
 }
 

@@ -5,7 +5,7 @@ import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {atom, useSetAtom} from 'jotai'
 import * as O from 'optics-ts'
-import {privateApiAtom} from '../../../api'
+import {apiAtom} from '../../../api'
 import {getNotificationToken} from '../../../utils/notifications'
 import messagingStateAtom from '../atoms/messagingStateAtom'
 import {
@@ -31,7 +31,7 @@ export const createInboxAtom = atom<
   [{inbox: Inbox}],
   TE.TaskEither<ApiErrorCreatingInbox | ErrorInboxAlreadyExists, InboxInState>
 >(null, (get, set, params) => {
-  const api = get(privateApiAtom)
+  const api = get(apiAtom)
   const {inbox} = params
   const messagingStateOptic = O.optic<MessagingState>()
   const oneInboxPrism = focusOneInbox(inbox.privateKey.privateKeyPemBase64)(

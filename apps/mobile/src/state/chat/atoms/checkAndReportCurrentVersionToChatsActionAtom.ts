@@ -13,7 +13,7 @@ import * as TE from 'fp-ts/TaskEither'
 import {flow, pipe} from 'fp-ts/lib/function'
 import {atom, useSetAtom} from 'jotai'
 import {useEffect} from 'react'
-import {privateApiAtom} from '../../../api'
+import {apiAtom} from '../../../api'
 import {type FocusAtomType} from '../../../utils/atomUtils/FocusAtomType'
 import {version} from '../../../utils/environment'
 import reportError from '../../../utils/reportError'
@@ -56,7 +56,7 @@ export const sendUpdateNoticeMessageActionAtom = atom(
       chat: chat.chat,
     })
 
-    const api = get(privateApiAtom)
+    const api = get(apiAtom)
     return pipe(
       sendMessage({
         api: api.chat,

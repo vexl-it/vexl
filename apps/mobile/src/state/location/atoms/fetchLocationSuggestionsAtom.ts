@@ -6,7 +6,7 @@ import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {atom} from 'jotai'
-import {privateApiAtom} from '../../../api'
+import {apiAtom} from '../../../api'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
 import reportError from '../../../utils/reportError'
 import showErrorAlert from '../../../utils/showErrorAlert'
@@ -15,7 +15,7 @@ import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 export const fetchLocationSuggestionsAtom = atom(
   null,
   (get, set, request: GetLocationSuggestionsRequest) => {
-    const api = get(privateApiAtom)
+    const api = get(apiAtom)
     const {t} = get(translationAtom)
 
     return pipe(

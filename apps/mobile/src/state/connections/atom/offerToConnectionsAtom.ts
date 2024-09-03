@@ -13,7 +13,7 @@ import {pipe} from 'fp-ts/function'
 import {atom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {splitAtom} from 'jotai/utils'
-import {privateApiAtom} from '../../../api'
+import {apiAtom} from '../../../api'
 import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
 import notEmpty from '../../../utils/notEmpty'
 import {showDebugNotificationIfEnabled} from '../../../utils/notifications/showDebugNotificationIfEnabled'
@@ -92,7 +92,7 @@ export const updateAllOffersConnectionsActionAtom = atom(
     }>
   > => {
     const connectionState = get(connectionStateAtom)
-    const api = get(privateApiAtom)
+    const api = get(apiAtom)
     const stopProcessingAfter: UnixMilliseconds | undefined = isInBackground
       ? UnixMilliseconds.parse(unixMillisecondsNow() + BACKGROUND_TIME_LIMIT_MS)
       : undefined

@@ -42,10 +42,6 @@ export function createClientInstanceWithAuth<A extends Api.Api.Any>({
   getUserSessionCredentials,
   url,
 }: ClientProps<A>): Client.Client<A> {
-  const credentials = getUserSessionCredentials
-    ? getUserSessionCredentials()
-    : undefined
-
   const commonHeaders = new CommonHeaders({
     'user-agent': {
       _tag: 'VexlAppUserAgentHeader' as const,
@@ -64,10 +60,10 @@ export function createClientInstanceWithAuth<A extends Api.Api.Any>({
       HttpClient.mapRequest(
         HttpClientRequest.setHeaders({
           ...encodeCommonHeaders(commonHeaders),
-          ...(credentials && {
-            [HEADER_PUBLIC_KEY]: credentials.publicKey,
-            [HEADER_SIGNATURE]: credentials.signature,
-            [HEADER_HASH]: credentials.hash,
+          ...(getUserSessionCredentials && {
+            [HEADER_PUBLIC_KEY]: getUserSessionCredentials().publicKey,
+            [HEADER_SIGNATURE]: getUserSessionCredentials().signature,
+            [HEADER_HASH]: getUserSessionCredentials().hash,
           }),
         })
       )

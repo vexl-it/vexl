@@ -5,8 +5,8 @@ import {
 } from '@vexl-next/server-utils/src/HttpCodes'
 import {type AxiosError, type AxiosResponse} from 'axios'
 
-export interface UnexpectedApiResponseError {
-  readonly _tag: 'UnexpectedApiResponseError'
+export interface UnexpectedApiResponseErrorAxios {
+  readonly _tag: 'UnexpectedApiResponseErrorAxios'
   readonly data: any
   readonly errors: unknown
 }
@@ -16,8 +16,8 @@ export interface BadStatusCodeError {
   readonly response: AxiosResponse<any, any>
 }
 
-export interface UnknownError {
-  readonly _tag: 'UnknownError'
+export interface UnknownErrorAxios {
+  readonly _tag: 'UnknownErrorAxios'
   readonly error: unknown
 }
 
@@ -31,33 +31,50 @@ export interface NetworkError {
   readonly error: AxiosError
 }
 
-export const CommonError = Schema.Struct({
-  cause: Schema.String,
-  side: Schema.Literal('client', 'server', 'unknown'),
-})
-
-export const ExpectedErrorBodyE = Schema.Struct({
-  ...CommonError.fields,
+export class UnauthorizedError extends Schema.TaggedError<UnauthorizedError>(
+  'UnauthorizedError'
+)('UnauthorizedError', {
+  cause: Schema.Unknown,
   status: ExpectedErrorHttpCode,
-})
+  message: Schema.optionalWith(Schema.String, {
+    default: () => 'Unauthorized error',
+  }),
+}) {}
 
-export const ServerErrorBodyE = Schema.Struct({
-  ...CommonError.fields,
+export class NotFoundError extends Schema.TaggedError<NotFoundError>(
+  'NotFoundError'
+)('NotFoundError', {
+  cause: Schema.Unknown,
+  status: ExpectedErrorHttpCode,
+  message: Schema.optionalWith(Schema.String, {
+    default: () => 'Not found error',
+  }),
+}) {}
+
+export class UnexpectedApiResponseError extends Schema.TaggedError<UnexpectedApiResponseError>(
+  'UnexpectedApiResponseError'
+)('UnexpectedApiResponseError', {
+  cause: Schema.Unknown,
   status: ServerErrorHttpCode,
-})
+  message: Schema.optionalWith(Schema.String, {
+    default: () => 'Unexpected api response error',
+  }),
+}) {}
 
-export class UnauthorizedErrorE extends Schema.TaggedError<UnauthorizedErrorE>(
-  'UnauthorizedErrorE'
-)('UnauthorizedErrorE', ExpectedErrorBodyE) {}
+export class UnknownClientError extends Schema.TaggedError<UnknownClientError>(
+  'UnknownClientError'
+)('UnknownClientError', {
+  cause: Schema.Unknown,
+  message: Schema.optionalWith(Schema.String, {
+    default: () => 'Unknown client error',
+  }),
+}) {}
 
-export class NotFoundErrorE extends Schema.TaggedError<NotFoundErrorE>(
-  'NotFoundErrorE'
-)('NotFoundErrorE', ExpectedErrorBodyE) {}
-
-export class UnexpectedApiResponseErrorE extends Schema.TaggedError<UnexpectedApiResponseErrorE>(
-  'UnexpectedApiResponseErrorE'
-)('UnexpectedApiResponseErrorE', ServerErrorBodyE) {}
-
-export class UnknownErrorE extends Schema.TaggedError<UnknownErrorE>(
-  'UnknownErrorE'
-)('UnknownErrorE', ServerErrorBodyE) {}
+export class UnknownServerError extends Schema.TaggedError<UnknownServerError>(
+  'UnknownServerError'
+)('UnknownServerError', {
+  cause: Schema.Unknown,
+  message: Schema.optionalWith(Schema.String, {
+    default: () => 'Unknown server error',
+  }),
+}) {}

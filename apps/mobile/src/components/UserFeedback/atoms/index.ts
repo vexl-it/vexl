@@ -16,7 +16,7 @@ import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {atom, type SetStateAction, type WritableAtom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
-import {privateApiAtom} from '../../../api'
+import {apiAtom} from '../../../api'
 import {regionCodeAtom} from '../../../state/session'
 import getValueFromSetStateActionOfAtom from '../../../utils/atomUtils/getValueFromSetStateActionOfAtom'
 import reportError from '../../../utils/reportError'
@@ -90,7 +90,7 @@ export const feedbackMolecule = molecule((getMolecule, getScope) => {
   const submitFeedbackAtom = atom(
     null,
     (get, set, isOfferCreationFeedback: boolean) => {
-      const api = get(privateApiAtom)
+      const api = get(apiAtom)
       const {formId, type, stars, objections, textComment} = get(feedbackAtom)
       const regionCode = get(regionCodeAtom)
 

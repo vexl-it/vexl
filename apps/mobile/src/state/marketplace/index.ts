@@ -41,7 +41,7 @@ import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {atom, useAtomValue} from 'jotai'
 import {useMemo} from 'react'
-import {privateApiAtom} from '../../api'
+import {apiAtom} from '../../api'
 import deduplicate from '../../utils/deduplicate'
 import getCountryPrefix from '../../utils/getCountryCode'
 import notEmpty from '../../utils/notEmpty'
@@ -64,7 +64,7 @@ import {
 } from './atoms/offersState'
 
 export const triggerOffersRefreshAtom = atom(null, async (get, set) => {
-  const api = get(privateApiAtom)
+  const api = get(apiAtom)
   const session = get(sessionDataOrDummyAtom)
 
   const updateStartedAt = isoNow()
@@ -273,7 +273,7 @@ export const triggerOffersRefreshAtom = atom(null, async (get, set) => {
     A.map((one) =>
       pipe(
         updateOwnerPrivatePayload({
-          api: get(privateApiAtom).offer,
+          api: get(apiAtom).offer,
           ownerCredentials: session.privateKey,
           symmetricKey: one.offerInfo.privatePart.symmetricKey,
           adminId: one.ownershipInfo.adminId,
@@ -342,7 +342,7 @@ export const createOfferAtom = atom<
     OneOfferInState
   >
 >(null, (get, set, params) => {
-  const api = get(privateApiAtom)
+  const api = get(apiAtom)
   const session = get(sessionDataOrDummyAtom)
   const {payloadPublic, intendedConnectionLevel, onProgress} = params
 
@@ -438,7 +438,7 @@ export const updateOfferAtom = atom<
     OneOfferInState
   >
 >(null, (get, set, params) => {
-  const api = get(privateApiAtom)
+  const api = get(apiAtom)
   const session = get(sessionDataOrDummyAtom)
   const {payloadPublic, symmetricKey, adminId, intendedConnectionLevel} = params
 
@@ -510,7 +510,7 @@ export const deleteOffersActionAtom = atom<
   >
 >(null, (get, set, params) => {
   const {adminIds: adminIdsToDelete} = params
-  const api = get(privateApiAtom)
+  const api = get(apiAtom)
   const offers = get(offersAtom)
 
   return pipe(

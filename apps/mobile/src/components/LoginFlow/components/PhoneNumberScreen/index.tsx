@@ -57,18 +57,19 @@ function PhoneNumberScreen({navigation}: Props): JSX.Element {
           if (phoneNumber._tag !== 'Some') return
 
           loadingOverlay.show()
-          initPhoneVerification({body: {phoneNumber: phoneNumber.value}}).pipe(
-            Effect.match({
-              onFailure: Alert.alert,
-              onSuccess(value) {
-                navigation.navigate('VerificationCode', {
-                  phoneNumber: phoneNumber.value,
-                  initPhoneVerificationResponse: value,
-                })
-              },
-            }),
-            Effect.tap(loadingOverlay.hide)
+          void Effect.runPromise(
+            initPhoneVerification({body: {phoneNumber: phoneNumber.value}})
           )
+            .then((value) => {
+              navigation.navigate('VerificationCode', {
+                phoneNumber: phoneNumber.value,
+                initPhoneVerificationResponse: value,
+              })
+            })
+            .catch((e) => {
+              Alert.alert(e.cause.failure)
+            })
+            .finally(loadingOverlay.hide)
         }}
       />
     </Stack>

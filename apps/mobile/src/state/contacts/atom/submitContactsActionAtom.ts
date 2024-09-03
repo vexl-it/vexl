@@ -5,7 +5,7 @@ import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/lib/function'
 import {atom} from 'jotai'
 import {Alert} from 'react-native'
-import {privateApiAtom} from '../../../api'
+import {apiAtom} from '../../../api'
 import {loadingOverlayDisplayedAtom} from '../../../components/LoadingOverlayProvider'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
 import notEmpty from '../../../utils/notEmpty'
@@ -32,7 +32,7 @@ export const submitContactsActionAtom = atom(
       numbersToImport?: E164PhoneNumber[]
     }
   ) => {
-    const contactApi = get(privateApiAtom).contact
+    const contactApi = get(apiAtom).contact
     const {t} = get(translationAtom)
 
     set(loadingOverlayDisplayedAtom, true)

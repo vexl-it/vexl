@@ -4,7 +4,7 @@ import {
 } from '@vexl-next/rest-api/src/services/user/contracts'
 import {Effect} from 'effect'
 import {atom} from 'jotai'
-import {privateApiAtom} from '../../../api'
+import {apiAtom} from '../../../api'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
 import reportError from '../../../utils/reportError'
 
@@ -16,7 +16,7 @@ export const initPhoneVerificationAtom = atom(
     inputRequest: InitVerificationInput
   ): Effect.Effect<InitPhoneVerificationResponse, string, never> => {
     const {t} = get(translationAtom)
-    const api = get(privateApiAtom)
+    const api = get(apiAtom)
 
     return api.user.initPhoneVerification(inputRequest).pipe(
       Effect.catchTags({
@@ -30,7 +30,7 @@ export const initPhoneVerificationAtom = atom(
             `${t('loginFlow.phoneNumber.errors.unableToSendVerificationSms')}: ${e.reason}`
           )
         },
-        UnexpectedApiResponseErrorE: (e) => {
+        UnexpectedApiResponseError: (e) => {
           reportError(
             'error',
             new Error(

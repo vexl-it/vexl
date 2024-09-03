@@ -12,7 +12,7 @@ import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/lib/function'
 import {atom} from 'jotai'
 import {z} from 'zod'
-import {privateApiAtom} from '../../../api'
+import {apiAtom} from '../../../api'
 import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
 import getCountryPrefix from '../../../utils/getCountryCode'
 import reportError from '../../../utils/reportError'
@@ -70,7 +70,7 @@ const reencryptOneOfferActionAtom = atom(
       onProgress,
     }: {offer: MyOfferInState; onProgress: (p: OfferEncryptionProgress) => void}
   ) => {
-    const api = get(privateApiAtom)
+    const api = get(apiAtom)
     const session = get(sessionDataOrDummyAtom)
     const offerAtom = singleOfferAtom(offer.offerInfo.offerId)
 

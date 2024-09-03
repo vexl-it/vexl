@@ -14,7 +14,7 @@ import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {atom} from 'jotai'
 import {Alert} from 'react-native'
-import {privateApiAtom} from '../../../api'
+import {apiAtom} from '../../../api'
 import {
   askAreYouSureActionAtom,
   type UserDeclinedError,
@@ -64,7 +64,7 @@ const cancelRequestActionAtomHandleUI = atom(
       })
 
     const {chat} = chatWithMessages
-    const api = get(privateApiAtom)
+    const api = get(apiAtom)
     const {t} = get(translationAtom)
 
     return pipe(

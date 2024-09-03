@@ -14,7 +14,7 @@ import * as O from 'fp-ts/Option'
 import * as TE from 'fp-ts/TaskEither'
 import {flow, pipe} from 'fp-ts/function'
 import {atom, type PrimitiveAtom} from 'jotai'
-import {privateApiAtom} from '../../../api'
+import {apiAtom} from '../../../api'
 import {version} from '../../../utils/environment'
 import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
 import addMessageToChat from '../utils/addMessageToChat'
@@ -45,7 +45,7 @@ const acceptMessagingRequestAtom = atom(
     | ErrorEncryptingMessage,
     ChatMessageWithState
   > => {
-    const api = get(privateApiAtom)
+    const api = get(apiAtom)
     const {chat} = get(chatAtom)
 
     return pipe(

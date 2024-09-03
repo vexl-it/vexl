@@ -4,7 +4,7 @@ import {createClientInstanceWithAuth} from '../../client'
 import {type PlatformName} from '../../PlatformName'
 import {type ServiceUrl} from '../../ServiceUrl.brand'
 import {type GetUserSessionCredentials} from '../../UserSessionCredentials.brand'
-import {handleCommonErrorsEffect} from '../../utils'
+import {handleCommonAndExpectedErrorsEffect} from '../../utils'
 import {GetExchangeRateError, type GetExchangeRateInput} from './contracts'
 import {BtcExchangeRateApiSpecification} from './specification'
 
@@ -33,7 +33,7 @@ export function api({
 
   return {
     getExchangeRate: (exchangeRateInput: GetExchangeRateInput) =>
-      handleCommonErrorsEffect(
+      handleCommonAndExpectedErrorsEffect(
         client.getExchangeRate(exchangeRateInput),
         GetExchangeRateError
       ),

@@ -10,7 +10,6 @@ import {
   LocationNotFoundError,
 } from './contracts'
 
-export const getLocationSuggestionErrors = Schema.Union(LocationNotFoundError)
 export const GetLocationSuggestionEndpoint = Api.get(
   'getLocationSuggestion',
   '/suggest'
@@ -24,7 +23,6 @@ export const GetLocationSuggestionEndpoint = Api.get(
   })
 )
 
-export const GetGeocodedCoordinatesErrors = Schema.Union(LocationNotFoundError)
 export const GetGeocodedCoordinatesEndpoint = Api.get(
   'getGeocodedCoordinates',
   '/geocode'

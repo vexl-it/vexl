@@ -1,4 +1,5 @@
 import {Latitude, Longitude} from '@vexl-next/domain/src/utility/geoCoordinates'
+import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import * as E from 'fp-ts/Either'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/lib/function'
@@ -11,7 +12,7 @@ import MapView, {
 } from 'react-native-maps'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {Stack, Text} from 'tamagui'
-import {usePrivateApiAssumeLoggedIn} from '../../../api'
+import {apiAtom} from '../../../api'
 import {loadableEither} from '../../../utils/atomUtils/loadableEither'
 import {
   getCurrentLocale,
@@ -45,7 +46,7 @@ function useAtoms({
   onPick: (place: MapValue | null) => void
   initialRegion: Region
 }) {
-  const {location} = usePrivateApiAssumeLoggedIn()
+  const api = useAtomValue(apiAtom)
 
   return useMemo(() => {
     const selectedRegionAtom = atom<Region>(initialRegion)
@@ -58,13 +59,17 @@ function useAtoms({
 
           onPick(null) // loading
           return await pipe(
-            location.getGeocodedCoordinates(
-              {
-                lang: getCurrentLocale(),
-                latitude: Latitude.parse(region.latitude),
-                longitude: Longitude.parse(region.longitude),
-              },
-              signal
+            effectToTaskEither(
+              api.location.getGeocodedCoordinates(
+                {
+                  query: {
+                    lang: getCurrentLocale(),
+                    latitude: Latitude.parse(region.latitude),
+                    longitude: Longitude.parse(region.longitude),
+                  },
+                },
+                signal
+              )
             ),
             TE.map((data) => {
               onPick(data)
@@ -74,7 +79,7 @@ function useAtoms({
         })
       ),
     }
-  }, [location, initialRegion, onPick])
+  }, [initialRegion, onPick, api.location])
 }
 
 function PickedLocationText({

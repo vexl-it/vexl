@@ -1,8 +1,8 @@
 import {Schema} from '@effect/schema'
+import {GetGeocodedCoordinatesErrors} from '@vexl-next/rest-api/src/services/location/contracts'
 import {
   GetExchangeRateEndpoint,
   GetGeocodedCoordinatesEndpoint,
-  GetGeocodedCoordinatesErrors,
   GetLocationSuggestionEndpoint,
 } from '@vexl-next/rest-api/src/services/location/specification'
 import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'

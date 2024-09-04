@@ -81,6 +81,8 @@ export class LocationNotFoundError extends Schema.TaggedError<LocationNotFoundEr
   status: Schema.Literal(404),
 }) {}
 
+export const GetGeocodedCoordinatesErrors = Schema.Union(LocationNotFoundError)
+
 export class GetExchangeRateRequest extends Schema.Class<GetExchangeRateRequest>(
   'GetExchangeRateRequest'
 )({
@@ -92,3 +94,19 @@ export class GetExchangeRateResponse extends Schema.Class<GetExchangeRateRespons
   status: Schema.Literal(301),
   headers: Schema.Struct({Location: Schema.String}),
 }) {}
+
+export const GetLocationSuggestionsInput = Schema.Struct({
+  query: GetLocationSuggestionsRequest,
+})
+
+export type GetLocationSuggestionsInput = Schema.Schema.Type<
+  typeof GetLocationSuggestionsInput
+>
+
+export const GetGeocodedCoordinatesInput = Schema.Struct({
+  query: GetGeocodedCoordinatesRequest,
+})
+
+export type GetGeocodedCoordinatesInput = Schema.Schema.Type<
+  typeof GetGeocodedCoordinatesInput
+>

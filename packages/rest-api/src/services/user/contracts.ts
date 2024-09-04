@@ -80,34 +80,6 @@ export type InitPhoneNumberVerificationResponse = z.TypeOf<
   typeof InitPhoneNumberVerificationResponse
 >
 
-// export const VerifyPhoneNumberRequest = z.object({
-//   id: VerificationId,
-//   code: z.string().min(1),
-//   userPublicKey: PublicKeyPemBase64,
-// })
-// export type VerifyPhoneNumberRequest = z.TypeOf<typeof VerifyPhoneNumberRequest>
-
-// export const VerifyPhoneNumberResponse = z.object({
-//   challenge: z.string().min(1),
-//   phoneVerified: z.boolean(),
-// })
-// export type VerifyPhoneNumberResponse = z.TypeOf<
-//   typeof VerifyPhoneNumberResponse
-// >
-
-// export const VerifyChallengeRequest = z.object({
-//   userPublicKey: PublicKeyPemBase64,
-//   signature: z.string().min(1),
-// })
-// export type VerifyChallengeRequest = z.TypeOf<typeof VerifyChallengeRequest>
-
-// export const VerifyChallengeResponse = z.object({
-//   hash: z.string().min(1),
-//   signature: z.string().min(1),
-//   challengeVerified: z.boolean(),
-// })
-// export type VerifyChallengeResponse = z.TypeOf<typeof VerifyChallengeResponse>
-
 export const ExportDataResponse = z.object({
   pdfFile: z.string().min(1),
 })

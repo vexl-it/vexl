@@ -1,3 +1,4 @@
+import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {type LocationSuggestion} from '@vexl-next/rest-api/src/services/location/contracts'
 import {createScope, molecule, type MoleculeOrInterface} from 'bunshi'
 import {useMolecule} from 'bunshi/dist/react'
@@ -34,12 +35,16 @@ export const LocationSearchMolecule = molecule((_, getScope) => {
       if (query.trim() === '') return await TE.right([])()
 
       return await pipe(
-        get(apiAtom).location.getLocationSuggestions(
-          {
-            phrase: query,
-            lang: getCurrentLocale(),
-          },
-          signal
+        effectToTaskEither(
+          get(apiAtom).location.getLocationSuggestions(
+            {
+              query: {
+                phrase: query,
+                lang: getCurrentLocale(),
+              },
+            },
+            signal
+          )
         ),
         TE.map((one) => one.result)
       )()

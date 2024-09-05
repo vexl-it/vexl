@@ -9,4 +9,4 @@ export const UriString = z
     return Brand.nominal<typeof v & Brand.Brand<'UriString'>>()(v)
   })
 export const UriStringE = Schema.String.pipe(Schema.brand('UriString'))
-export type UriString = z.TypeOf<typeof UriString>
+export type UriString = Schema.Schema.Type<typeof UriStringE>

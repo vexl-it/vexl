@@ -1,39 +1,64 @@
+import {Schema} from '@effect/schema'
 import {
   PrivateKeyHolder,
   PublicKeyPemBase64,
 } from '@vexl-next/cryptography/src/KeyHolder'
 import {
+  PrivateKeyHolderE,
+  PublicKeyPemBase64E,
+} from '@vexl-next/cryptography/src/KeyHolder/brands'
+import {
   MessageType,
+  MessageTypeE,
   ServerMessage,
+  ServerMessageE,
 } from '@vexl-next/domain/src/general/messaging'
-import {IdNumeric} from '@vexl-next/domain/src/utility/IdNumeric'
-import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {IdNumeric, IdNumericE} from '@vexl-next/domain/src/utility/IdNumeric'
+import {
+  UnixMilliseconds,
+  UnixMillisecondsE,
+} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {z} from 'zod'
-import {NoContentResponse} from '../../NoContentResponse.brand'
+import {
+  NoContentResponse,
+  NoContentResponseE,
+} from '../../NoContentResponse.brand'
 
-export interface RequestCancelledError {
-  readonly _tag: 'RequestCancelledError'
-}
+export class RequestCancelledError extends Schema.TaggedError<RequestCancelledError>(
+  'RequestCancelledError'
+)('RequestCancelledError', {
+  status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
+}) {}
 
-export interface RequestNotFoundError {
-  readonly _tag: 'RequestNotFoundError'
-}
+export class RequestNotFoundError extends Schema.TaggedError<RequestNotFoundError>(
+  'RequestNotFoundError'
+)('RequestNotFoundError', {
+  status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
+}) {}
 
-export interface RequestAlreadyApprovedError {
-  readonly _tag: 'RequestAlreadyApprovedError'
-}
+export class RequestAlreadyApprovedError extends Schema.TaggedError<RequestAlreadyApprovedError>(
+  'RequestAlreadyApprovedError'
+)('RequestAlreadyApprovedError', {
+  status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
+}) {}
 
-export interface OtherSideAccountDeleted {
-  readonly _tag: 'OtherSideAccountDeleted'
-}
+export class OtherSideAccountDeleted extends Schema.TaggedError<OtherSideAccountDeleted>(
+  'OtherSideAccountDeleted'
+)('OtherSideAccountDeleted', {
+  status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
+}) {}
 
-export interface ReceiverOfferInboxDoesNotExistError {
-  readonly _tag: 'ReceiverOfferInboxDoesNotExistError'
-}
+export class ReceiverOfferInboxDoesNotExistError extends Schema.TaggedError<ReceiverOfferInboxDoesNotExistError>(
+  'ReceiverOfferInboxDoesNotExistError'
+)('ReceiverOfferInboxDoesNotExistError', {
+  status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
+}) {}
 
-export interface SenderUserInboxDoesNotExistError {
-  readonly _tag: 'SenderUserInboxDoesNotExistError'
-}
+export class SenderUserInboxDoesNotExistError extends Schema.TaggedError<SenderUserInboxDoesNotExistError>(
+  'SenderUserInboxDoesNotExistError'
+)('SenderUserInboxDoesNotExistError', {
+  status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
+}) {}
 
 export const SignedChallenge = z
   .object({
@@ -41,61 +66,108 @@ export const SignedChallenge = z
     signature: z.string(),
   })
   .readonly()
-export type SignedChallenge = z.TypeOf<typeof SignedChallenge>
+
+export const SignedChallengeE = Schema.Struct({
+  challenge: Schema.String,
+  signature: Schema.String,
+})
+export type SignedChallenge = Schema.Schema.Type<typeof SignedChallengeE>
 
 export const ServerMessageWithId = ServerMessage.extend({
   id: IdNumeric,
 })
-export type ServerMessageWithId = z.TypeOf<typeof ServerMessageWithId>
+export const ServerMessageWithIdE = Schema.Struct({
+  ...ServerMessageE.fields,
+  id: IdNumericE,
+})
+export type ServerMessageWithId = Schema.Schema.Type<
+  typeof ServerMessageWithIdE
+>
 
 const RequestBaseWithChallenge = z.object({
   keyPair: PrivateKeyHolder,
+})
+const RequestBaseWithChallengeE = Schema.Struct({
+  keyPair: PrivateKeyHolderE,
 })
 
 export const UpdateInboxRequest = RequestBaseWithChallenge.extend({
   token: z.string().optional(),
 }).readonly()
-export type UpdateInboxRequest = z.TypeOf<typeof UpdateInboxRequest>
+
+export const UpdateInboxRequestE = Schema.Struct({
+  ...RequestBaseWithChallengeE.fields,
+  token: Schema.optional(Schema.String),
+})
+export type UpdateInboxRequest = Schema.Schema.Type<typeof UpdateInboxRequestE>
 
 export const UpdateInboxResponse = z
   .object({
     firebaseToken: z.string().optional(),
   })
   .readonly()
-export type UpdateInboxResponse = z.TypeOf<typeof UpdateInboxResponse>
+export const UpdateInboxResponseE = Schema.Struct({
+  firebaseToken: Schema.optional(Schema.String),
+})
+export type UpdateInboxResponse = Schema.Schema.Type<
+  typeof UpdateInboxResponseE
+>
 
 export const CreateInboxRequest = RequestBaseWithChallenge.extend({
   token: z.string().optional(),
 }).readonly()
-export type CreateInboxRequest = z.TypeOf<typeof CreateInboxRequest>
+export const CreateInboxRequestE = Schema.Struct({
+  ...RequestBaseWithChallengeE.fields,
+  token: Schema.optional(Schema.String),
+})
+export type CreateInboxRequest = Schema.Schema.Type<typeof CreateInboxRequestE>
 
 export const CreateInboxResponse = NoContentResponse
-export type CreateInboxResponse = z.TypeOf<typeof CreateInboxResponse>
+export const CreateInboxResponseE = NoContentResponseE
+export type CreateInboxResponse = Schema.Schema.Type<
+  typeof CreateInboxResponseE
+>
 
 export const DeleteInboxRequest = RequestBaseWithChallenge.extend({})
-export type DeleteInboxRequest = z.TypeOf<typeof DeleteInboxRequest>
+export const DeleteInboxRequestE = Schema.Struct({
+  ...RequestBaseWithChallengeE.fields,
+})
+export type DeleteInboxRequest = Schema.Schema.Type<typeof DeleteInboxRequestE>
 
 export const DeleteInboxResponse = NoContentResponse
-export type DeleteInboxResponse = z.TypeOf<typeof DeleteInboxResponse>
+export const DeleteInboxResponseE = NoContentResponseE
+export type DeleteInboxResponse = Schema.Schema.Type<
+  typeof DeleteInboxResponseE
+>
 
 export const DeletePulledMessagesRequest = RequestBaseWithChallenge.extend({})
-export type DeletePulledMessagesRequest = z.TypeOf<
-  typeof DeletePulledMessagesRequest
+export const DeletePulledMessagesRequestE = Schema.Struct({
+  ...RequestBaseWithChallengeE.fields,
+})
+export type DeletePulledMessagesRequest = Schema.Schema.Type<
+  typeof DeletePulledMessagesRequestE
 >
 
 export const DeletePulledMessagesResponse = NoContentResponse
-export type DeletePulledMessagesResponse = z.TypeOf<
-  typeof DeletePulledMessagesResponse
+export const DeletePulledMessagesResponseE = NoContentResponseE
+export type DeletePulledMessagesResponse = Schema.Schema.Type<
+  typeof DeletePulledMessagesResponseE
 >
 
 export const BlockInboxRequest = RequestBaseWithChallenge.extend({
   publicKeyToBlock: PublicKeyPemBase64,
   block: z.boolean(),
 }).readonly()
-export type BlockInboxRequest = z.TypeOf<typeof BlockInboxRequest>
+export const BlockInboxRequestE = Schema.Struct({
+  ...RequestBaseWithChallengeE.fields,
+  publicKeyToBlock: PublicKeyPemBase64E,
+  block: Schema.Boolean,
+})
+export type BlockInboxRequest = Schema.Schema.Type<typeof BlockInboxRequestE>
 
 export const BlockInboxResponse = NoContentResponse
-export type BlockInboxResponse = z.TypeOf<typeof BlockInboxResponse>
+export const BlockInboxResponseE = NoContentResponseE
+export type BlockInboxResponse = Schema.Schema.Type<typeof BlockInboxResponseE>
 
 export const RequestApprovalRequest = z
   .object({
@@ -104,24 +176,50 @@ export const RequestApprovalRequest = z
     notificationServiceReady: z.boolean(),
   })
   .readonly()
-export type RequestApprovalRequest = z.TypeOf<typeof RequestApprovalRequest>
+export const RequestApprovalRequestE = Schema.Struct({
+  publicKey: PublicKeyPemBase64E,
+  message: Schema.String,
+  notificationServiceReady: Schema.Boolean,
+})
+export type RequestApprovalRequest = Schema.Schema.Type<
+  typeof RequestApprovalRequestE
+>
 
 export const RequestApprovalResponse = ServerMessageWithId.extend({
   notificationHandled: z.boolean(),
 })
-export type RequestApprovalResponse = z.TypeOf<typeof RequestApprovalResponse>
+export const RequestApprovalResponseE = Schema.Struct({
+  ...ServerMessageWithIdE.fields,
+  notificationHandled: Schema.Boolean,
+})
+export type RequestApprovalResponse = Schema.Schema.Type<
+  typeof RequestApprovalResponseE
+>
 
 export const CancelApprovalRequest = z.object({
   publicKey: PublicKeyPemBase64,
   message: z.string(),
   notificationServiceReady: z.boolean(),
 })
-export type CancelApprovalRequest = z.TypeOf<typeof CancelApprovalRequest>
+export const CancelApprovalRequestE = Schema.Struct({
+  publicKey: PublicKeyPemBase64E,
+  message: Schema.String,
+  notificationServiceReady: Schema.Boolean,
+})
+export type CancelApprovalRequest = Schema.Schema.Type<
+  typeof CancelApprovalRequestE
+>
 
 export const CancelApprovalResponse = ServerMessageWithId.extend({
   notificationHandled: z.boolean(),
 })
-export type CancelApprovalResponse = z.TypeOf<typeof CancelApprovalResponse>
+export const CancelApprovalResponseE = Schema.Struct({
+  ...ServerMessageWithIdE.fields,
+  notificationHandled: Schema.Boolean,
+})
+export type CancelApprovalResponse = Schema.Schema.Type<
+  typeof CancelApprovalResponseE
+>
 
 export const ApproveRequestRequest = RequestBaseWithChallenge.extend({
   publicKeyToConfirm: PublicKeyPemBase64,
@@ -129,12 +227,27 @@ export const ApproveRequestRequest = RequestBaseWithChallenge.extend({
   approve: z.boolean(),
   notificationServiceReady: z.boolean(),
 })
-export type ApproveRequestRequest = z.TypeOf<typeof ApproveRequestRequest>
+export const ApproveRequestRequestE = Schema.Struct({
+  ...RequestBaseWithChallengeE.fields,
+  publicKeyToConfirm: PublicKeyPemBase64E,
+  message: Schema.String,
+  approve: Schema.Boolean,
+  notificationServiceReady: Schema.Boolean,
+})
+export type ApproveRequestRequest = Schema.Schema.Type<
+  typeof ApproveRequestRequestE
+>
 
 export const ApproveRequestResponse = ServerMessageWithId.extend({
   notificationHandled: z.boolean(),
 })
-export type ApproveRequestResponse = z.TypeOf<typeof ApproveRequestResponse>
+export const ApproveRequestResponseE = Schema.Struct({
+  ...ServerMessageWithIdE.fields,
+  notificationHandled: Schema.Boolean,
+})
+export type ApproveRequestResponse = Schema.Schema.Type<
+  typeof ApproveRequestResponseE
+>
 
 export const DeleteInboxesRequest = z.object({
   dataForRemoval: z.array(
@@ -144,18 +257,41 @@ export const DeleteInboxesRequest = z.object({
     })
   ),
 })
-export type DeleteInboxesRequest = z.TypeOf<typeof DeleteInboxesRequest>
+export const DeleteInboxesRequestE = Schema.Struct({
+  dataForRemoval: Schema.Array(
+    Schema.Struct({
+      publicKey: PublicKeyPemBase64E,
+      signedChallenge: SignedChallengeE,
+    })
+  ),
+})
+export type DeleteInboxesRequest = Schema.Schema.Type<
+  typeof DeleteInboxesRequestE
+>
 
 export const DeleteInboxesResponse = NoContentResponse
-export type DeleteInboxesResponse = z.TypeOf<typeof DeleteInboxesResponse>
+export const DeleteInboxesResponseE = NoContentResponseE
+export type DeleteInboxesResponse = Schema.Schema.Type<
+  typeof DeleteInboxesResponseE
+>
 
 export const RetrieveMessagesRequest = RequestBaseWithChallenge.extend({})
-export type RetrieveMessagesRequest = z.TypeOf<typeof RetrieveMessagesRequest>
+export const RetrieveMessagesRequestE = Schema.Struct({
+  ...RequestBaseWithChallengeE.fields,
+})
+export type RetrieveMessagesRequest = Schema.Schema.Type<
+  typeof RetrieveMessagesRequestE
+>
 
 export const RetrieveMessagesResponse = z.object({
   messages: z.array(ServerMessageWithId),
 })
-export type RetrieveMessagesResponse = z.TypeOf<typeof RetrieveMessagesResponse>
+export const RetrieveMessagesResponseE = Schema.Struct({
+  messages: Schema.Array(ServerMessageWithIdE),
+})
+export type RetrieveMessagesResponse = Schema.Schema.Type<
+  typeof RetrieveMessagesResponseE
+>
 
 export const SendMessageRequest = z.object({
   keyPair: PrivateKeyHolder,
@@ -165,12 +301,26 @@ export const SendMessageRequest = z.object({
   messagePreview: z.string().optional(),
   notificationServiceReady: z.boolean(),
 })
-export type SendMessageRequest = z.TypeOf<typeof SendMessageRequest>
+export const SendMessageRequestE = Schema.Struct({
+  keyPair: PrivateKeyHolderE,
+  receiverPublicKey: PublicKeyPemBase64E,
+  message: Schema.String,
+  messageType: MessageTypeE,
+  messagePreview: Schema.optional(Schema.String),
+  notificationServiceReady: Schema.Boolean,
+})
+export type SendMessageRequest = Schema.Schema.Type<typeof SendMessageRequestE>
 
 export const SendMessageResponse = ServerMessageWithId.extend({
   notificationHandled: z.boolean(),
 })
-export type SendMessageResponse = z.TypeOf<typeof SendMessageResponse>
+export const SendMessageResponseE = Schema.Struct({
+  ...ServerMessageWithIdE.fields,
+  notificationHandled: Schema.Boolean,
+})
+export type SendMessageResponse = Schema.Schema.Type<
+  typeof SendMessageResponseE
+>
 
 export const LeaveChatRequest = z.object({
   keyPair: PrivateKeyHolder,
@@ -178,12 +328,22 @@ export const LeaveChatRequest = z.object({
   message: z.string(),
   notificationServiceReady: z.boolean(),
 })
-export type LeaveChatRequest = z.TypeOf<typeof LeaveChatRequest>
+export const LeaveChatRequestE = Schema.Struct({
+  keyPair: PrivateKeyHolderE,
+  receiverPublicKey: PublicKeyPemBase64E,
+  message: Schema.String,
+  notificationServiceReady: Schema.Boolean,
+})
+export type LeaveChatRequest = Schema.Schema.Type<typeof LeaveChatRequestE>
 
 export const LeaveChatResponse = ServerMessageWithId.extend({
   notificationHandled: z.boolean(),
 })
-export type LeaveChatResponse = z.TypeOf<typeof LeaveChatResponse>
+export const LeaveChatResponseE = Schema.Struct({
+  ...ServerMessageWithIdE.fields,
+  notificationHandled: Schema.Boolean,
+})
+export type LeaveChatResponse = Schema.Schema.Type<typeof LeaveChatResponseE>
 
 export const MessageInBatch = z.object({
   receiverPublicKey: PublicKeyPemBase64,
@@ -191,41 +351,81 @@ export const MessageInBatch = z.object({
   messageType: MessageType,
   messagePreview: z.string().optional(),
 })
-export type MessageInBatch = z.TypeOf<typeof MessageInBatch>
+export const MessageInBatchE = Schema.Struct({
+  receiverPublicKey: PublicKeyPemBase64E,
+  message: Schema.String,
+  messageType: MessageTypeE,
+  messagePreview: Schema.optional(Schema.String),
+})
+export type MessageInBatch = Schema.Schema.Type<typeof MessageInBatchE>
 
 export const InboxInBatch = z.object({
   senderPublicKey: PublicKeyPemBase64,
   messages: z.array(MessageInBatch),
   signedChallenge: SignedChallenge,
 })
-export type InboxInBatch = z.TypeOf<typeof InboxInBatch>
+export const InboxInBatchE = Schema.Struct({
+  senderPublicKey: PublicKeyPemBase64E,
+  messages: Schema.Array(MessageInBatchE),
+  signedChallenge: SignedChallengeE,
+})
+export type InboxInBatch = Schema.Schema.Type<typeof InboxInBatchE>
 
 export const SendMessagesRequest = z.object({
   data: z.array(InboxInBatch),
 })
-export type SendMessagesRequest = z.TypeOf<typeof SendMessagesRequest>
+export const SendMessagesRequestE = Schema.Struct({
+  data: Schema.Array(InboxInBatchE),
+})
+export type SendMessagesRequest = Schema.Schema.Type<
+  typeof SendMessagesRequestE
+>
 
 export const SendMessagesResponse = z.array(
   ServerMessageWithId.extend({
     notificationHandled: z.boolean(),
   })
 )
-export type SendMessagesResponse = z.TypeOf<typeof SendMessagesResponse>
+export const SendMessagesResponseE = Schema.Array(
+  Schema.Struct({
+    ...ServerMessageWithIdE.fields,
+    notificationHandled: Schema.Boolean,
+  })
+)
+export type SendMessagesResponse = Schema.Schema.Type<
+  typeof SendMessagesResponse
+>
 
 export const CreateChallengeRequest = z.object({
   publicKey: PublicKeyPemBase64,
 })
-export type CreateChallengeRequest = z.TypeOf<typeof CreateChallengeRequest>
+export const CreateChallengeRequestE = Schema.Struct({
+  publicKey: PublicKeyPemBase64E,
+})
+export type CreateChallengeRequest = Schema.Schema.Type<
+  typeof CreateChallengeRequestE
+>
 export const CreateChallengeResponse = z.object({
   challenge: z.string(),
   expiration: UnixMilliseconds,
 })
-export type CreateChallengeResponse = z.TypeOf<typeof CreateChallengeResponse>
+export const CreateChallengeResponseE = Schema.Struct({
+  challenge: Schema.String,
+  expiration: UnixMillisecondsE,
+})
+export type CreateChallengeResponse = Schema.Schema.Type<
+  typeof CreateChallengeResponseE
+>
 
 export const CreateChallengesRequest = z.object({
   publicKeys: z.array(PublicKeyPemBase64),
 })
-export type CreateChallengesRequest = z.TypeOf<typeof CreateChallengesRequest>
+export const CreateChallengesRequestE = Schema.Struct({
+  publicKeys: Schema.Array(PublicKeyPemBase64E),
+})
+export type CreateChallengesRequest = Schema.Schema.Type<
+  typeof CreateChallengesRequestE
+>
 
 export const CreateChallengesResponse = z.object({
   challenges: z.array(
@@ -236,10 +436,15 @@ export const CreateChallengesResponse = z.object({
   ),
   expiration: UnixMilliseconds,
 })
-export type CreateChallengesResponse = z.TypeOf<typeof CreateChallengesResponse>
-
-export const ExportMyDataRequest = z.any()
-export type ExportMyDataRequest = z.TypeOf<typeof ExportMyDataRequest>
-
-export const ExportMyDataResponse = z.object({pdfFile: z.string()})
-export type ExportMyDataResponse = z.TypeOf<typeof ExportMyDataResponse>
+export const CreateChallengesResponseE = Schema.Struct({
+  challenges: Schema.Array(
+    Schema.Struct({
+      publicKey: PublicKeyPemBase64E,
+      challenge: Schema.String,
+    })
+  ),
+  expiration: UnixMillisecondsE,
+})
+export type CreateChallengesResponse = Schema.Schema.Type<
+  typeof CreateChallengeResponseE
+>

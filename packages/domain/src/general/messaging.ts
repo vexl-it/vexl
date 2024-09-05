@@ -1,19 +1,28 @@
+import {Schema} from '@effect/schema'
 import {KeyHolder} from '@vexl-next/cryptography/src'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
+import {
+  PrivateKeyHolderE,
+  PublicKeyPemBase64E,
+} from '@vexl-next/cryptography/src/KeyHolder/brands'
+import {Brand} from 'effect'
 import {z} from 'zod'
-import {Base64String} from '../utility/Base64String.brand'
-import {FcmToken} from '../utility/FcmToken.brand'
-import {SemverString} from '../utility/SmeverString.brand'
-import {UnixMilliseconds} from '../utility/UnixMilliseconds.brand'
-import {UriString} from '../utility/UriString.brand'
+import {Base64String, Base64StringE} from '../utility/Base64String.brand'
+import {FcmToken, FcmTokenE} from '../utility/FcmToken.brand'
+import {SemverString, SemverStringE} from '../utility/SmeverString.brand'
+import {
+  UnixMilliseconds,
+  UnixMillisecondsE,
+} from '../utility/UnixMilliseconds.brand'
+import {UriString, UriStringE} from '../utility/UriString.brand'
 import {Uuid, generateUuid} from '../utility/Uuid.brand'
-import {DeanonymizedUser} from './DeanonymizedUser'
-import {E164PhoneNumber} from './E164PhoneNumber.brand'
-import {UserName} from './UserName.brand'
-import {RealLifeInfo} from './UserNameAndAvatar.brand'
-import {FcmCypher} from './notifications'
-import {OfferId, OneOfferInState} from './offers'
-import {TradeChecklistUpdate} from './tradeChecklist'
+import {DeanonymizedUser, DeanonymizedUserE} from './DeanonymizedUser'
+import {E164PhoneNumber, E164PhoneNumberE} from './E164PhoneNumber.brand'
+import {UserName, UserNameE} from './UserName.brand'
+import {RealLifeInfo, RealLifeInfoE} from './UserNameAndAvatar.brand'
+import {FcmCypher, FcmCypherE} from './notifications'
+import {OfferId, OfferIdE, OneOfferInState, OneOfferInStateE} from './offers'
+import {TradeChecklistUpdate, TradeChecklistUpdateE} from './tradeChecklist'
 
 export const MessageType = z.enum([
   'MESSAGE',
@@ -35,7 +44,27 @@ export const MessageType = z.enum([
   'VERSION_UPDATE',
   'FCM_CYPHER_UPDATE',
 ])
-export type MessageType = z.TypeOf<typeof MessageType>
+export const MessageTypeE = Schema.Literal(
+  'MESSAGE',
+  'REQUEST_REVEAL',
+  'APPROVE_REVEAL',
+  'DISAPPROVE_REVEAL',
+  'REQUEST_MESSAGING',
+  'APPROVE_MESSAGING',
+  'DISAPPROVE_MESSAGING',
+  'CANCEL_REQUEST_MESSAGING',
+  'DELETE_CHAT',
+  'BLOCK_CHAT',
+  'OFFER_DELETED',
+  'INBOX_DELETED',
+  'APPROVE_CONTACT_REVEAL',
+  'DISAPPROVE_CONTACT_REVEAL',
+  'REQUEST_CONTACT_REVEAL',
+  'TRADE_CHECKLIST_UPDATE',
+  'VERSION_UPDATE',
+  'FCM_CYPHER_UPDATE'
+)
+export type MessageType = Schema.Schema.Type<typeof MessageTypeE>
 
 export const ChatUserIdentity = z
   .object({
@@ -43,10 +72,18 @@ export const ChatUserIdentity = z
     realLifeInfo: RealLifeInfo.optional(),
   })
   .readonly()
-export type ChatUserIdentity = z.TypeOf<typeof ChatUserIdentity>
+export const ChatUserIdentityE = Schema.Struct({
+  publicKey: PublicKeyPemBase64E,
+  realLifeInfo: Schema.optional(RealLifeInfoE),
+})
+export type ChatUserIdentity = Schema.Schema.Type<typeof ChatUserIdentityE>
 
-export const ChatMessageId = z.string().uuid().brand<'ChatMessageId'>()
-export type ChatMessageId = z.TypeOf<typeof ChatMessageId>
+export const ChatMessageId = z
+  .string()
+  .uuid()
+  .transform((v) => Brand.nominal<typeof v & Brand.Brand<'ChatMessageId'>>()(v))
+export const ChatMessageIdE = Schema.UUID.pipe(Schema.brand('ChatMessageId'))
+export type ChatMessageId = Schema.Schema.Type<typeof ChatMessageIdE>
 
 export const RepliedToData = z
   .object({
@@ -55,7 +92,12 @@ export const RepliedToData = z
     image: UriString.optional(),
   })
   .readonly()
-export type RepliedToData = z.TypeOf<typeof RepliedToData>
+export const RepliedToDataE = Schema.Struct({
+  text: Schema.String,
+  messageAuthor: Schema.Literal('me', 'them'),
+  image: Schema.optional(UriStringE),
+})
+export type RepliedToData = Schema.Schema.Type<typeof RepliedToDataE>
 
 export const RepliedToDataPayload = z
   .object({
@@ -64,7 +106,15 @@ export const RepliedToDataPayload = z
     image: Base64String.optional(),
   })
   .readonly()
-export type RepliedToDataPayload = z.TypeOf<typeof RepliedToDataPayload>
+export const RepliedToDataPayloadE = Schema.Struct({
+  text: Schema.String,
+  messageAuthor: Schema.Literal('me', 'them'),
+  image: Base64StringE,
+})
+
+export type RepliedToDataPayload = Schema.Schema.Type<
+  typeof RepliedToDataPayloadE
+>
 
 export const ChatMessagePayload = z
   .object({
@@ -91,7 +141,30 @@ export const ChatMessagePayload = z
     lastReceivedFcmCypher: FcmCypher.optional(),
   })
   .readonly()
-export type ChatMessagePayload = z.TypeOf<typeof ChatMessagePayload>
+
+export const ChatMessagePayloadE = Schema.Struct({
+  uuid: ChatMessageIdE,
+  text: Schema.optional(Schema.String),
+  image: Schema.optional(UriStringE),
+  repliedTo: Schema.optional(RepliedToDataE),
+  time: UnixMillisecondsE,
+  messageType: MessageTypeE,
+  lastReceivedVersion: Schema.optional(SemverStringE),
+  myVersion: Schema.optional(SemverStringE),
+  tradeChecklistUpdate: Schema.optional(TradeChecklistUpdateE),
+  minimalRequiredVersion: Schema.optional(SemverStringE),
+  deanonymizedUser: Schema.optional(
+    Schema.Struct({
+      name: UserNameE,
+      imageBase64: Schema.optional(Base64StringE),
+      partialPhoneNumber: Schema.optional(Schema.String),
+      fullPhoneNumber: Schema.optional(E164PhoneNumberE),
+    })
+  ),
+  myFcmCypher: Schema.optional(FcmCypherE),
+  lastReceivedFcmCypher: Schema.optional(FcmCypherE),
+})
+export type ChatMessagePayload = Schema.Schema.Type<typeof ChatMessagePayloadE>
 
 export function generateChatMessageId(): ChatMessageId {
   return ChatMessageId.parse(generateUuid())
@@ -122,7 +195,31 @@ export const ChatMessage = z
     lastReceivedFcmCypher: FcmCypher.optional(),
   })
   .readonly()
-export type ChatMessage = z.TypeOf<typeof ChatMessage>
+
+const ChatMessageE = Schema.Struct({
+  uuid: ChatMessageIdE,
+  text: Schema.String,
+  minimalRequiredVersion: Schema.optional(SemverStringE),
+  time: UnixMillisecondsE,
+  myVersion: Schema.optional(SemverStringE),
+
+  /**
+   * Used only for messages  of type `VERSION_UPDATE`
+   */
+  lastReceivedVersion: Schema.optional(SemverStringE),
+  forceShow: Schema.optional(Schema.Boolean),
+
+  image: Schema.optional(UriStringE),
+  repliedTo: Schema.optional(RepliedToDataE),
+  tradeChecklistUpdate: Schema.optional(TradeChecklistUpdateE),
+  deanonymizedUser: Schema.optional(DeanonymizedUserE),
+  senderPublicKey: PublicKeyPemBase64E,
+  messageType: MessageTypeE,
+  myFcmCypher: Schema.optional(FcmCypherE),
+  lastReceivedFcmCypher: Schema.optional(FcmCypherE),
+})
+
+export type ChatMessage = Schema.Schema.Type<typeof ChatMessageE>
 //
 
 export const Inbox = z
@@ -131,7 +228,11 @@ export const Inbox = z
     offerId: OfferId.optional(),
   })
   .readonly()
-export type Inbox = z.TypeOf<typeof Inbox>
+export const InboxE = Schema.Struct({
+  privateKey: PrivateKeyHolderE,
+  offerId: Schema.optional(OfferIdE),
+})
+export type Inbox = Schema.Schema.Type<typeof InboxE>
 
 export const ChatOrigin = z
   .discriminatedUnion('type', [
@@ -148,23 +249,53 @@ export const ChatOrigin = z
     z.object({type: z.literal('unknown')}),
   ])
   .readonly()
-export type ChatOrigin = z.TypeOf<typeof ChatOrigin>
 
-export const ChatId = z.string().uuid().brand<'chatId'>()
-export type ChatId = z.TypeOf<typeof ChatId>
+export const ChatOriginE = Schema.Union(
+  Schema.Struct({
+    type: Schema.Literal('myOffer'),
+    offerId: OfferIdE,
+    offer: Schema.optional(OneOfferInStateE),
+  }),
+  Schema.Struct({
+    type: Schema.Literal('theirOffer'),
+    offerId: OfferIdE,
+    offer: Schema.optional(OneOfferInStateE),
+  }),
+  Schema.Struct({type: Schema.Literal('unknown')})
+)
+export type ChatOrigin = Schema.Schema.Type<typeof ChatOriginE>
+
+export const ChatId = z
+  .string()
+  .uuid()
+  .transform((v) => Brand.nominal<typeof v & Brand.Brand<'ChatId'>>()(v))
+
+export const ChatIdE = Schema.String.pipe(Schema.brand('ChatId'))
+export type ChatId = Schema.Schema.Type<typeof ChatIdE>
 
 export function generateChatId(): ChatId {
   return ChatId.parse(Uuid.parse(generateUuid()))
 }
 
-export const CalendarEventId = z.string().brand<'calendarEventId'>()
-export type CalendarEventId = z.TypeOf<typeof CalendarEventId>
+export const CalendarEventId = z
+  .string()
+  .transform((v) =>
+    Brand.nominal<typeof v & Brand.Brand<'CalendarEventId'>>()(v)
+  )
+export const CalendarEventIdE = Schema.String.pipe(
+  Schema.brand('CalendarEventId')
+)
+export type CalendarEventId = Schema.Schema.Type<typeof CalendarEventIdE>
 
 export const MyFcmTokenInfo = z.object({
   token: FcmToken,
   cypher: FcmCypher,
 })
-export type MyFcmTokenInfo = z.TypeOf<typeof MyFcmTokenInfo>
+export const MyFcmTokenInfoE = Schema.Struct({
+  token: FcmTokenE,
+  cypher: FcmCypherE,
+})
+export type MyFcmTokenInfo = Schema.Schema.Type<typeof MyFcmTokenInfoE>
 
 export const Chat = z.object({
   id: ChatId,
@@ -181,13 +312,36 @@ export const Chat = z.object({
   otherSideFcmCypher: FcmCypher.optional(),
   lastReportedFcmToken: MyFcmTokenInfo.optional(),
 })
-export type Chat = z.TypeOf<typeof Chat>
+export const ChatE = Schema.Struct({
+  id: ChatIdE,
+  inbox: InboxE,
+  origin: ChatOriginE,
+  otherSide: ChatUserIdentityE,
+  isUnread: Schema.optionalWith(Schema.Boolean, {default: () => true}),
+  showInfoBar: Schema.optionalWith(Schema.Boolean, {default: () => true}),
+  showVexlbotNotifications: Schema.optionalWith(Schema.Boolean, {
+    default: () => true,
+  }),
+  showVexlbotInitialMessage: Schema.optionalWith(Schema.Boolean, {
+    default: () => true,
+  }),
+  tradeChecklistCalendarEventId: Schema.optional(CalendarEventIdE),
+  otherSideVersion: Schema.optional(SemverStringE),
+  lastReportedVersion: Schema.optional(SemverStringE),
+  otherSideFcmCypher: Schema.optional(FcmCypherE),
+  lastReportedFcmToken: Schema.optional(MyFcmTokenInfoE),
+})
+export type Chat = Schema.Schema.Type<typeof ChatE>
 
 export const ServerMessage = z.object({
   message: z.string(),
   senderPublicKey: PublicKeyPemBase64,
 })
-export type ServerMessage = z.TypeOf<typeof ServerMessage>
+export const ServerMessageE = Schema.Struct({
+  message: Schema.String,
+  senderPublicKey: PublicKeyPemBase64E,
+})
+export type ServerMessage = Schema.Schema.Type<typeof ServerMessageE>
 
 export const ChatMessageRequiringNewerVersion = z.object({
   uuid: ChatMessageId,
@@ -204,6 +358,23 @@ export const ChatMessageRequiringNewerVersion = z.object({
   myFcmCypher: FcmCypher.optional(),
   lastReceivedFcmCypher: FcmCypher.optional(),
 })
-export type ChatMessageRequiringNewerVersion = z.infer<
-  typeof ChatMessageRequiringNewerVersion
+
+export const ChatMessageRequiringNewerVersionE = Schema.Struct({
+  uuid: ChatMessageIdE,
+  messageType: Schema.Literal('REQUIRES_NEWER_VERSION'),
+  serverMessage: ServerMessageE,
+  myVersion: Schema.optional(SemverStringE),
+  minimalRequiredVersion: SemverStringE,
+  time: UnixMillisecondsE,
+  senderPublicKey: PublicKeyPemBase64E,
+  messageParsed: Schema.optional(Schema.Unknown),
+  text: Schema.Literal('-'),
+  deanonymizedUser: Schema.optional(Schema.Undefined),
+  image: Schema.optional(Schema.Undefined),
+  myFcmCypher: Schema.optional(FcmCypherE),
+  lastReceivedFcmCypher: Schema.optional(FcmCypherE),
+})
+
+export type ChatMessageRequiringNewerVersion = Schema.Schema.Type<
+  typeof ChatMessageRequiringNewerVersionE
 >

@@ -1,13 +1,29 @@
+import {Schema} from '@effect/schema'
 import {z} from 'zod'
-import {BtcAddress} from '../utility/BtcAddress.brand'
-import {UnixMilliseconds} from '../utility/UnixMilliseconds.brand'
-import {UriString} from '../utility/UriString.brand'
+import {BtcAddress, BtcAddressE} from '../utility/BtcAddress.brand'
+import {
+  UnixMilliseconds,
+  UnixMillisecondsE,
+} from '../utility/UnixMilliseconds.brand'
+import {UriString, UriStringE} from '../utility/UriString.brand'
 import {generateUuid} from '../utility/Uuid.brand'
-import {Latitude, Longitude} from '../utility/geoCoordinates'
-import {DeanonymizedUser} from './DeanonymizedUser'
-import {E164PhoneNumber} from './E164PhoneNumber.brand'
-import {UserName} from './UserName.brand'
-import {BtcNetwork, CurrencyCode, LocationPlaceId} from './offers'
+import {
+  Latitude,
+  LatitudeE,
+  Longitude,
+  LongitudeE,
+} from '../utility/geoCoordinates'
+import {DeanonymizedUser, DeanonymizedUserE} from './DeanonymizedUser'
+import {E164PhoneNumber, E164PhoneNumberE} from './E164PhoneNumber.brand'
+import {UserName, UserNameE} from './UserName.brand'
+import {CurrencyCodeE} from './currency.brand'
+import {
+  BtcNetwork,
+  BtcNetworkE,
+  CurrencyCode,
+  LocationPlaceId,
+  LocationPlaceIdE,
+} from './offers'
 
 /**
  * TODO move to apps/mobile
@@ -38,15 +54,46 @@ export const TradeChecklistItemStatus = z.enum([
    */
   'initial',
 ])
-export type TradeChecklistItemStatus = z.TypeOf<typeof TradeChecklistItemStatus>
+export const TradeChecklistItemStatusE = Schema.Literal(
+  /**
+   * Ready to be sent to the other side
+   */
+  'readyToSend',
+  /**
+   * Waiting for response from the other side
+   */
+  'pending',
+  /**
+   * Other side accepted the item
+   */
+  'accepted',
+  /**
+   * Other side suggestion is in conflict with yours
+   */
+  'warning',
+  /**
+   * Other side declined reveal identity or phone number
+   */
+  'declined',
+  /**
+   * Initial state
+   */
+  'initial'
+)
+export type TradeChecklistItemStatus = Schema.Schema.Type<
+  typeof TradeChecklistItemStatusE
+>
 
 export const TradeChecklistStateItemStatus = z
   .object({
     status: TradeChecklistItemStatus,
   })
   .readonly()
-export type TradeChecklistStateItemStatus = z.TypeOf<
-  typeof TradeChecklistStateItemStatus
+export const TradeChecklistStateItemStateE = Schema.Struct({
+  status: TradeChecklistItemStatusE,
+})
+export type TradeChecklistStateItemStatus = Schema.Schema.Type<
+  typeof TradeChecklistStateItemStateE
 >
 
 export const AvailableDateTimeOption = z
@@ -56,20 +103,35 @@ export const AvailableDateTimeOption = z
     to: UnixMilliseconds,
   })
   .readonly()
-export type AvailableDateTimeOption = z.TypeOf<typeof AvailableDateTimeOption>
+export const AvailableDateTimeOptionE = Schema.Struct({
+  date: UnixMillisecondsE,
+  from: UnixMillisecondsE,
+  to: UnixMillisecondsE,
+})
+export type AvailableDateTimeOption = Schema.Schema.Type<
+  typeof AvailableDateTimeOptionE
+>
 
 export const PickedDateTimeOption = z
   .object({
     dateTime: UnixMilliseconds,
   })
   .readonly()
-export type PickedDateTimeOption = z.TypeOf<typeof PickedDateTimeOption>
+export const PickedDateTimeOptionE = Schema.Struct({
+  dateTime: UnixMillisecondsE,
+})
+export type PickedDateTimeOption = Schema.Schema.Type<
+  typeof PickedDateTimeOptionE
+>
 
 export const NetworkData = z.object({
   btcNetwork: BtcNetwork.optional(),
   btcAddress: BtcAddress.optional(),
 })
-
+export const NetworkDataE = Schema.Struct({
+  btcNetwork: Schema.optional(BtcNetworkE),
+  btcAddress: Schema.optional(BtcAddressE),
+})
 export type NetworkData = z.TypeOf<typeof NetworkData>
 
 export const RevealStatus = z.enum([
@@ -77,8 +139,12 @@ export const RevealStatus = z.enum([
   'APPROVE_REVEAL',
   'DISAPPROVE_REVEAL',
 ])
-
-export type RevealStatus = z.TypeOf<typeof RevealStatus>
+export const RevealStatusE = Schema.Literal(
+  'REQUEST_REVEAL',
+  'APPROVE_REVEAL',
+  'DISAPPROVE_REVEAL'
+)
+export type RevealStatus = Schema.Schema.Type<typeof RevealStatusE>
 
 export const IdentityReveal = z.object({
   status: RevealStatus.optional(),
@@ -87,20 +153,37 @@ export const IdentityReveal = z.object({
   partialPhoneNumber: z.string().optional(),
   deanonymizedUser: DeanonymizedUser.optional(),
 })
-
-export type IdentityReveal = z.TypeOf<typeof IdentityReveal>
+export const IdentityRevealE = Schema.Struct({
+  status: Schema.optional(RevealStatusE),
+  image: Schema.optional(UriStringE),
+  name: Schema.optional(UserNameE),
+  partialPhoneNumber: Schema.optional(Schema.String),
+  deanonymizedUser: Schema.optional(DeanonymizedUserE),
+})
+export type IdentityReveal = Schema.Schema.Type<typeof IdentityRevealE>
 
 export const ContactReveal = z.object({
   status: RevealStatus.optional(),
   fullPhoneNumber: E164PhoneNumber.optional(),
 })
-export type ContactReveal = z.TypeOf<typeof ContactReveal>
+export const ContactRevealE = Schema.Struct({
+  status: Schema.optional(RevealStatusE),
+  fullPhoneNumber: Schema.optional(E164PhoneNumberE),
+})
+export type ContactReveal = Schema.Schema.Type<typeof ContactRevealE>
 
 export const TradePriceType = z.enum(['live', 'custom', 'frozen', 'your'])
-export type TradePriceType = z.TypeOf<typeof TradePriceType>
+export const TradePriceTypeE = Schema.Literal(
+  'live',
+  'custom',
+  'frozen',
+  'your'
+)
+export type TradePriceType = Schema.Schema.Type<typeof TradePriceTypeE>
 
 export const BtcOrSat = z.enum(['BTC', 'SAT'])
-export type BtcOrSat = z.TypeOf<typeof BtcOrSat>
+export const BtcOrSatE = Schema.Literal('BTC', 'SAT')
+export type BtcOrSat = Schema.Schema.Type<typeof BtcOrSatE>
 
 export const AmountData = z.object({
   tradePriceType: TradePriceType.optional(),
@@ -110,38 +193,80 @@ export const AmountData = z.object({
   feeAmount: z.coerce.number().optional(),
   currency: CurrencyCode.optional(),
 })
-export type AmountData = z.TypeOf<typeof AmountData>
+export const AmountDataE = Schema.Struct({
+  tradePriceType: Schema.optional(TradePriceTypeE),
+  btcPrice: Schema.optional(Schema.Number),
+  btcAmount: Schema.optional(Schema.Number),
+  fiatAmount: Schema.optional(Schema.Number),
+  feeAmount: Schema.optional(Schema.Number),
+  currency: Schema.optional(CurrencyCodeE),
+}) // Needed for the zod definition to work properly
+export type AmountData = Schema.Schema.Type<typeof AmountDataE>
 
-export const TradeChecklistMessageBase = z.object({
+const TradeChecklistMessageBase = z.object({
   timestamp: UnixMilliseconds,
 })
-export type TradeChecklistMessageBase = z.TypeOf<
-  typeof TradeChecklistMessageBase
+export const TradeChecklistMessageBaseE = Schema.Struct({
+  timestamp: UnixMillisecondsE,
+})
+export type TradeChecklistMessageBase = Schema.Schema.Type<
+  typeof TradeChecklistMessageBaseE
 >
 
 export const DateTimeChatMessage = TradeChecklistMessageBase.extend({
   suggestions: z.array(AvailableDateTimeOption).optional(),
   picks: PickedDateTimeOption.optional(),
+}).readonly()
+export const DateTimeChatMessageE = Schema.Struct({
+  ...TradeChecklistMessageBaseE.fields,
+  suggestions: Schema.optional(
+    Schema.Array(AvailableDateTimeOptionE).pipe(
+      // Weird zod schema error here. This fixes it...
+      Schema.mutable
+    )
+  ),
+  picks: Schema.optional(PickedDateTimeOptionE),
 })
-export type DateTimeChatMessage = z.TypeOf<typeof DateTimeChatMessage>
+export type DateTimeChatMessage = Schema.Schema.Type<
+  typeof DateTimeChatMessageE
+>
 
 export const AmountChatMessage =
   TradeChecklistMessageBase.merge(AmountData).readonly()
-export type AmountChatMessage = z.TypeOf<typeof AmountChatMessage>
+export const AmountChatMessageE = Schema.Struct({
+  ...TradeChecklistMessageBaseE.fields,
+  ...AmountDataE.fields,
+})
+export type AmountChatMessage = Schema.Schema.Type<typeof AmountChatMessageE>
 
 export const NetworkChatMessage =
   TradeChecklistMessageBase.merge(NetworkData).readonly()
-export type NetworkChatMessage = z.TypeOf<typeof NetworkChatMessage>
+export const NetworkChatMessageE = Schema.Struct({
+  ...TradeChecklistMessageBaseE.fields,
+  ...NetworkDataE.fields,
+})
+export type NetworkChatMessage = Schema.Schema.Type<typeof NetworkChatMessageE>
 
 export const IdentityRevealChatMessage =
   TradeChecklistMessageBase.merge(IdentityReveal).readonly()
-export type IdentityRevealChatMessage = z.TypeOf<
-  typeof IdentityRevealChatMessage
+
+export const IdentityRevealChatMessageE = Schema.Struct({
+  ...TradeChecklistMessageBaseE.fields,
+  ...IdentityRevealE.fields,
+})
+export type IdentityRevealChatMessage = Schema.Schema.Type<
+  typeof IdentityRevealChatMessageE
 >
 
 export const ContactRevealChatMessage =
   TradeChecklistMessageBase.merge(ContactReveal).readonly()
-export type ContactRevealChatMessage = z.TypeOf<typeof ContactRevealChatMessage>
+export const ContactRevealChatMessageE = Schema.Struct({
+  ...TradeChecklistMessageBaseE.fields,
+  ...ContactRevealE.fields,
+})
+export type ContactRevealChatMessage = Schema.Schema.Type<
+  typeof ContactRevealChatMessageE
+>
 
 export const MeetingLocationData = z
   .object({
@@ -164,13 +289,36 @@ export const MeetingLocationData = z
     note: z.string().optional(),
   })
   .readonly()
-export type MeetingLocationData = z.TypeOf<typeof MeetingLocationData>
+export const MeetingLocationDataE = Schema.Struct({
+  placeId: LocationPlaceIdE, // TODO do we need to generate uuid in catch here?
+  address: Schema.String,
+  latitude: LatitudeE,
+  longitude: LongitudeE,
+  viewport: Schema.Struct({
+    northeast: Schema.Struct({
+      latitude: LatitudeE,
+      longitude: LongitudeE,
+    }),
+    southwest: Schema.Struct({
+      latitude: LatitudeE,
+      longitude: LongitudeE,
+    }),
+  }),
+  note: Schema.optional(Schema.String),
+})
+export type MeetingLocationData = Schema.Schema.Type<
+  typeof MeetingLocationDataE
+>
 
 export const MeetingLocationChatMessage = TradeChecklistMessageBase.extend({
   data: MeetingLocationData,
 })
-export type MeetingLocationChatMessage = z.TypeOf<
-  typeof MeetingLocationChatMessage
+export const MeetingLocationChatMessageE = Schema.Struct({
+  ...TradeChecklistMessageBaseE.fields,
+  data: MeetingLocationDataE,
+})
+export type MeetingLocationChatMessage = Schema.Schema.Type<
+  typeof MeetingLocationChatMessageE
 >
 
 export const TradeChecklistUpdate = z
@@ -183,4 +331,16 @@ export const TradeChecklistUpdate = z
     contact: ContactRevealChatMessage.optional(),
   })
   .readonly()
-export type TradeChecklistUpdate = z.TypeOf<typeof TradeChecklistUpdate>
+
+export const TradeChecklistUpdateE = Schema.Struct({
+  dateAndTime: Schema.optional(DateTimeChatMessageE),
+  location: Schema.optional(MeetingLocationChatMessageE),
+  amount: Schema.optional(AmountChatMessageE),
+  network: Schema.optional(NetworkChatMessageE),
+  identity: Schema.optional(IdentityRevealChatMessageE),
+  contact: Schema.optional(ContactRevealChatMessageE),
+})
+
+export type TradeChecklistUpdate = Schema.Schema.Type<
+  typeof TradeChecklistUpdateE
+>

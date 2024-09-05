@@ -20,6 +20,7 @@ function OtherSideNamePhotoAndInfo({mode}: Props): JSX.Element {
     otherSideLeftAtom,
     canSendMessagesAtom,
     commonConnectionsCountAtom,
+    commonConnectionsHashesAtom,
     friendLevelInfoAtom,
   } = useMolecule(chatMolecule)
 
@@ -27,6 +28,7 @@ function OtherSideNamePhotoAndInfo({mode}: Props): JSX.Element {
   const otherSideData = useAtomValue(otherSideDataAtom)
   const otherSideLeft = useAtomValue(otherSideLeftAtom)
   const canSendMessages = useAtomValue(canSendMessagesAtom)
+  const commonConnectionsHashes = useAtomValue(commonConnectionsHashesAtom)
   const commonConnectionsCount = useAtomValue(commonConnectionsCountAtom)
   const friendLevelInfo = useAtomValue(friendLevelInfoAtom)
 
@@ -63,6 +65,7 @@ function OtherSideNamePhotoAndInfo({mode}: Props): JSX.Element {
           offerInfo={offer ? offer.offerInfo : undefined}
         />
         <ContactTypeAndCommonNumber
+          contactsHashes={commonConnectionsHashes}
           friendLevel={friendLevelInfo}
           numberOfCommonFriends={commonConnectionsCount}
           center={mode === 'photoTop'}

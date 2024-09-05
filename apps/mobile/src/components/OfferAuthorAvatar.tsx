@@ -116,6 +116,7 @@ function OfferAuthorAvatar({
               }
             />
             <ContactTypeAndCommonNumber
+              contactsHashes={offerInfo.privatePart.commonFriends}
               friendLevel={offerInfo.privatePart.friendLevel ?? []}
               numberOfCommonFriends={commonFriends.length}
             />

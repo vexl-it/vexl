@@ -1,168 +1,109 @@
+import {Schema} from '@effect/schema'
 import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
-import {type CreateAxiosDefaults} from 'axios'
-import * as TE from 'fp-ts/TaskEither'
-import {pipe} from 'fp-ts/function'
-import urlJoin from 'url-join'
+import {Option} from 'effect'
 import {type PlatformName} from '../../PlatformName'
 import {type ServiceUrl} from '../../ServiceUrl.brand'
 import {type GetUserSessionCredentials} from '../../UserSessionCredentials.brand'
+import {createClientInstanceWithAuth} from '../../client'
+import {CommonHeaders} from '../../commonHeaders'
 import {
-  axiosCall,
-  axiosCallWithValidation,
-  createAxiosInstanceWithAuthAndLogging,
-  type LoggingFunction,
+  handleCommonAndExpectedErrorsEffect,
+  handleCommonErrorsEffect,
 } from '../../utils'
 import {
-  FetchCommonConnectionsResponse,
-  FetchMyContactsResponse,
-  ImportContactsResponse,
-  ImportListEmptyError,
-  UserExistsResponse,
+  type CheckUserExistsInput,
+  type CreateUserInput,
+  type FetchCommonConnectionsInput,
+  type FetchMyContactsInput,
+  ImportContactsErrors,
+  type ImportContactsInput,
+  type RefreshUserInput,
+  type UpdateFirebaseTokenInput,
   UserNotFoundError,
-  type CreateUserRequest,
-  type FetchCommonConnectionsRequest,
-  type FetchMyContactsRequest,
-  type ImportContactsRequest,
-  type RefreshUserRequest,
-  type UpdateFirebaseTokenRequest,
 } from './contracts'
+import {ContactApiSpecification} from './specification'
+import { HEADER_PLATFORM, HEADER_CLIENT_VERSION, HEADER_CRYPTO_VERSION } from '../../constants'
+
+const encodeCommonHeaders = Schema.encodeSync(CommonHeaders)
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export function privateApi({
+export function api({
   platform,
   clientVersion,
   clientSemver,
   url,
   getUserSessionCredentials,
-  axiosConfig,
-  loggingFunction,
 }: {
   platform: PlatformName
   clientVersion: VersionCode
   clientSemver: SemverString
   url: ServiceUrl
   getUserSessionCredentials: GetUserSessionCredentials
-  axiosConfig?: Omit<CreateAxiosDefaults, 'baseURL'>
-  loggingFunction?: LoggingFunction | null
 }) {
-  const axiosInstance = createAxiosInstanceWithAuthAndLogging(
-    getUserSessionCredentials,
+  const client = createClientInstanceWithAuth({
+    api: ContactApiSpecification,
     platform,
     clientVersion,
     clientSemver,
-    {
-      ...axiosConfig,
-      baseURL: urlJoin(url, '/api/v1'),
+    getUserSessionCredentials,
+    url,
+  })
+
+  const commonHeaders = new CommonHeaders({
+    'user-agent': {
+      _tag: 'VexlAppUserAgentHeader' as const,
+      platform,
+      versionCode: clientVersion,
+      semver: Option.some(clientSemver),
     },
-    loggingFunction
-  )
+    [HEADER_PLATFORM]: Option.some(platform),
+    [HEADER_CLIENT_VERSION]: Option.some(clientVersion) ?? 10,
+    [HEADER_CRYPTO_VERSION]: Option.some(2),
+  })
 
   return {
-    checkUserExists: ({
-      notifyExistingUserAboutLogin,
-    }: {
-      notifyExistingUserAboutLogin: boolean
-    }) => {
-      return axiosCallWithValidation(
-        axiosInstance,
-        {
-          method: 'post',
-          'url': '/users/check-exists',
-          params: {notifyExistingUserAboutLogin},
-        },
-        UserExistsResponse
-      )
-    },
-    createUser: (request: CreateUserRequest) => {
-      return axiosCall(axiosInstance, {
-        method: 'post',
-        url: '/users',
-        data: request,
-      })
-    },
-    refreshUser: (request: RefreshUserRequest) => {
-      return pipe(
-        axiosCall(axiosInstance, {
-          method: 'post',
-          url: '/users/refresh',
-          data: request,
+    checkUserExists: (checkUserExistsInput: CheckUserExistsInput) =>
+      handleCommonErrorsEffect(client.checkUserExists(checkUserExistsInput)),
+    createUser: (createUserInput: CreateUserInput) =>
+      handleCommonErrorsEffect(
+        client.createUser({
+          body: createUserInput.body,
+          headers: encodeCommonHeaders(commonHeaders),
+        })
+      ),
+    refreshUser: (refreshUserInput: RefreshUserInput) =>
+      handleCommonAndExpectedErrorsEffect(
+        client.refreshUser({
+          body: refreshUserInput.body,
+          headers: encodeCommonHeaders(commonHeaders),
         }),
-        TE.mapLeft((e): typeof e | UserNotFoundError => {
-          if (
-            e._tag === 'BadStatusCodeError' &&
-            e.response.data.code === '100101'
-          ) {
-            return new UserNotFoundError()
-          }
-          return e
+        UserNotFoundError
+      ),
+    updateFirebaseToken: (updateFirebaseTokenInput: UpdateFirebaseTokenInput) =>
+      handleCommonErrorsEffect(
+        client.updateFirebaseToken({
+          body: updateFirebaseTokenInput.body,
+          headers: encodeCommonHeaders(commonHeaders),
         })
-      )
-    },
-    updateFirebaseToken: (request: UpdateFirebaseTokenRequest) => {
-      return axiosCall(axiosInstance, {
-        method: 'put',
-        url: '/users',
-        data: request,
-      })
-    },
+      ),
     deleteUser: () => {
-      return axiosCall(axiosInstance, {
-        method: 'delete',
-        url: '/users/me',
-      })
+      handleCommonErrorsEffect(client.deleteUser({}))
     },
-    importContacts: (request: ImportContactsRequest) => {
-      return pipe(
-        axiosCallWithValidation(
-          axiosInstance,
-          {
-            method: 'post',
-            url: '/contacts/import/replace',
-            data: request,
-          },
-          ImportContactsResponse
-        ),
-        TE.mapLeft((e) => {
-          if (e._tag === 'BadStatusCodeError') {
-            if (e.response.data.code === '101102')
-              return new ImportListEmptyError()
-          }
-          return e
-        })
-      )
-    },
-    fetchMyContacts: (request: FetchMyContactsRequest) => {
-      return pipe(
-        axiosCallWithValidation(
-          axiosInstance,
-          {
-            method: 'get',
-            url: '/contacts/me',
-            params: {
-              level: request.level,
-              page: request.page,
-              limit: request.limit,
-            },
-          },
-          FetchMyContactsResponse
-        )
-      )
-    },
-    fetchCommonConnections: (request: FetchCommonConnectionsRequest) => {
-      return pipe(
-        axiosCallWithValidation(
-          axiosInstance,
-          {
-            method: 'post',
-            url: '/contacts/common',
-            data: request,
-          },
-          FetchCommonConnectionsResponse
-        )
-      )
-    },
+    importContacts: (importContactsInput: ImportContactsInput) =>
+      handleCommonAndExpectedErrorsEffect(
+        client.importContacts(importContactsInput),
+        ImportContactsErrors
+      ),
+    fetchMyContacts: (fetchMyContactsInput: FetchMyContactsInput) =>
+      handleCommonErrorsEffect(client.fetchMyContacts(fetchMyContactsInput)),
+    fetchCommonConnections: (
+      fetchCommonConnectionsInput: FetchCommonConnectionsInput
+    ) =>
+      handleCommonErrorsEffect(
+        client.fetchCommonConnections(fetchCommonConnectionsInput)
+      ),
   }
 }
 
-export type ContactPrivateApi = ReturnType<typeof privateApi>
+export type ContactApi = ReturnType<typeof api>

@@ -1,23 +1,10 @@
 import {Schema} from '@effect/schema'
-import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
-import {
-  HashedPhoneNumber,
-  HashedPhoneNumberE,
-} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
-import {
-  ConnectionLevel,
-  ConnectionLevelE,
-} from '@vexl-next/domain/src/general/offers'
-import {FcmToken, FcmTokenE} from '@vexl-next/domain/src/utility/FcmToken.brand'
+import {HashedPhoneNumberE} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
+import {ConnectionLevelE} from '@vexl-next/domain/src/general/offers'
+import {FcmTokenE} from '@vexl-next/domain/src/utility/FcmToken.brand'
 import {BooleanfromString} from '@vexl-next/generic-utils/src/effect-helpers/BooleanFromString'
-import {z} from 'zod'
-import {
-  PageRequest,
-  PageRequestE,
-  PageResponse,
-  PageResponseE,
-} from '../../Pagination.brand'
+import {PageRequestE, PageResponseE} from '../../Pagination.brand'
 
 export class InboxDoesNotExistError extends Schema.TaggedError<ImportListEmptyError>(
   'inboxDoesNotExist'
@@ -47,82 +34,48 @@ export class UserNotFoundError extends Schema.TaggedError<UserNotFoundError>(
   code: Schema.optionalWith(Schema.Literal(100101), {default: () => 100101}),
 }) {}
 
-export const CreateUserRequest = z
-  .object({
-    firebaseToken: FcmToken.optional(),
-  })
-  .readonly()
-
-export const CreateUserRequestE = Schema.Struct({
+export const CreateUserRequest = Schema.Struct({
   firebaseToken: Schema.NullOr(FcmTokenE),
 })
+export type CreateUserRequest = Schema.Schema.Type<typeof CreateUserRequest>
 
-export type CreateUserRequest = Schema.Schema.Type<typeof CreateUserRequestE>
-
-export const RefreshUserRequest = z
-  .object({
-    offersAlive: z.boolean(),
-  })
-  .readonly()
-export const RefreshUserRequestE = Schema.Struct({
+export const RefreshUserRequest = Schema.Struct({
   offersAlive: Schema.Boolean,
 })
-export type RefreshUserRequest = Schema.Schema.Type<typeof RefreshUserRequestE>
+export type RefreshUserRequest = Schema.Schema.Type<typeof RefreshUserRequest>
 
-export const UpdateFirebaseTokenRequest = z
-  .object({
-    firebaseToken: z.string().nullable(),
-  })
-  .readonly()
-export const UpdateFirebaseTokenRequestE = Schema.Struct({
+export const UpdateFirebaseTokenRequest = Schema.Struct({
   firebaseToken: Schema.NullOr(FcmTokenE),
 })
 export type UpdateFirebaseTokenRequest = Schema.Schema.Type<
-  typeof UpdateFirebaseTokenRequestE
+  typeof UpdateFirebaseTokenRequest
 >
 
-const ImportContactsRequest = z
-  .object({
-    contacts: z.array(HashedPhoneNumber).readonly(),
-  })
-  .readonly()
-export const ImportContactsRequestE = Schema.Struct({
+export const ImportContactsRequest = Schema.Struct({
   contacts: Schema.Array(HashedPhoneNumberE),
 })
 export type ImportContactsRequest = Schema.Schema.Type<
-  typeof ImportContactsRequestE
+  typeof ImportContactsRequest
 >
 
-export const ImportContactsResponse = z
-  .object({
-    imported: z.boolean(),
-    message: z.string().optional(),
-  })
-  .readonly()
-export const ImportContactsResponseE = Schema.Struct({
+export const ImportContactsResponse = Schema.Struct({
   imported: Schema.Boolean,
   message: Schema.optional(Schema.String),
 })
 
 export type ImportContactsResponse = Schema.Schema.Type<
-  typeof ImportContactsResponseE
+  typeof ImportContactsResponse
 >
 
-export const FetchMyContactsRequest = PageRequest.extend({
-  level: ConnectionLevel,
-}).readonly()
-export const FetchMyContactsRequestE = Schema.Struct({
+export const FetchMyContactsRequest = Schema.Struct({
   ...PageRequestE.fields,
   level: ConnectionLevelE,
 })
 export type FetchMyContactsRequest = Schema.Schema.Type<
-  typeof FetchMyContactsRequestE
+  typeof FetchMyContactsRequest
 >
 
-export const FetchMyContactsResponse = PageResponse.extend({
-  items: z.array(z.object({publicKey: PublicKeyPemBase64})).readonly(),
-}).readonly()
-export const FetchMyContactsResponseE = Schema.Struct({
+export const FetchMyContactsResponse = Schema.Struct({
   ...PageResponseE.fields,
   items: Schema.Array(
     Schema.Struct({
@@ -131,36 +84,17 @@ export const FetchMyContactsResponseE = Schema.Struct({
   ),
 })
 export type FetchMyContactsResponse = Schema.Schema.Type<
-  typeof FetchMyContactsResponseE
+  typeof FetchMyContactsResponse
 >
 
-export const FetchCommonConnectionsRequest = z
-  .object({
-    publicKeys: z.array(PublicKeyPemBase64).readonly(),
-  })
-  .readonly()
-export const FetchCommonConnectionsRequestE = Schema.Struct({
+export const FetchCommonConnectionsRequest = Schema.Struct({
   publicKeys: Schema.Array(PublicKeyPemBase64E),
 })
 export type FetchCommonConnectionsRequest = Schema.Schema.Type<
-  typeof FetchCommonConnectionsRequestE
+  typeof FetchCommonConnectionsRequest
 >
 
-export const FetchCommonConnectionsResponse = z
-  .object({
-    commonContacts: z
-      .array(
-        z
-          .object({
-            publicKey: PublicKeyPemBase64,
-            common: z.object({hashes: z.array(HashedPhoneNumber)}).readonly(),
-          })
-          .readonly()
-      )
-      .readonly(),
-  })
-  .readonly()
-export const FetchCommonConnectionsResponseE = Schema.Struct({
+export const FetchCommonConnectionsResponse = Schema.Struct({
   commonContacts: Schema.Array(
     Schema.Struct({
       publicKey: PublicKeyPemBase64E,
@@ -171,18 +105,59 @@ export const FetchCommonConnectionsResponseE = Schema.Struct({
   ),
 })
 export type FetchCommonConnectionsResponse = Schema.Schema.Type<
-  typeof FetchCommonConnectionsResponseE
+  typeof FetchCommonConnectionsResponse
 >
 
 export const CheckUserExistsRequest = Schema.Struct({
   notifyExistingUserAboutLogin: BooleanfromString,
 })
 
-export const UserExistsResponse = z.object({
-  exists: z.boolean(),
-})
-export const UserExistsResponseE = Schema.Struct({
+export const UserExistsResponse = Schema.Struct({
   exists: Schema.Boolean,
 })
+export type UserExistsResponse = Schema.Schema.Type<typeof UserExistsResponse>
 
-export type UserExistsResponse = Schema.Schema.Type<typeof UserExistsResponseE>
+export const ImportContactsErrors = Schema.Union(ImportListEmptyError)
+
+export const CheckUserExistsInput = Schema.Struct({
+  query: CheckUserExistsRequest,
+})
+export type CheckUserExistsInput = Schema.Schema.Type<
+  typeof CheckUserExistsInput
+>
+
+export const CreateUserInput = Schema.Struct({
+  body: CreateUserRequest,
+})
+export type CreateUserInput = Schema.Schema.Type<typeof CreateUserInput>
+
+export const RefreshUserInput = Schema.Struct({
+  body: RefreshUserRequest,
+})
+export type RefreshUserInput = Schema.Schema.Type<typeof RefreshUserInput>
+
+export const UpdateFirebaseTokenInput = Schema.Struct({
+  body: UpdateFirebaseTokenRequest,
+})
+export type UpdateFirebaseTokenInput = Schema.Schema.Type<
+  typeof UpdateFirebaseTokenInput
+>
+
+export const ImportContactsInput = Schema.Struct({
+  body: ImportContactsRequest,
+})
+export type ImportContactsInput = Schema.Schema.Type<typeof ImportContactsInput>
+
+export const FetchMyContactsInput = Schema.Struct({
+  query: FetchMyContactsRequest,
+})
+export type FetchMyContactsInput = Schema.Schema.Type<
+  typeof FetchMyContactsInput
+>
+
+export const FetchCommonConnectionsInput = Schema.Struct({
+  body: FetchCommonConnectionsRequest,
+})
+export type FetchCommonConnectionsInput = Schema.Schema.Type<
+  typeof FetchCommonConnectionsInput
+>

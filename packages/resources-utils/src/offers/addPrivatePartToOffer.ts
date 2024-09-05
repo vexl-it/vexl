@@ -1,10 +1,11 @@
 import {type OfferAdminId} from '@vexl-next/domain/src/general/offers'
-import {type OfferPrivateApi} from '@vexl-next/rest-api/src/services/offer'
+import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
 import * as A from 'fp-ts/Array'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
-import {type ExtractLeftTE} from '../utils/ExtractLeft'
+import {effectToTaskEither} from '../effect-helpers/TaskEitherConverter'
+import {type ExtractRightFromEffect} from '../utils/ExtractLeft'
 import flattenTaskOfEithers from '../utils/flattenTaskOfEithers'
 import {type OfferPrivatePayloadToEncrypt} from './utils/constructPrivatePayloads'
 import {
@@ -12,8 +13,8 @@ import {
   type PrivatePartEncryptionError,
 } from './utils/encryptPrivatePart'
 
-export type ApiErrorAddingPrivateParts = ExtractLeftTE<
-  ReturnType<OfferPrivateApi['createPrivatePart']>
+export type ApiErrorAddingPrivateParts = ExtractRightFromEffect<
+  ReturnType<OfferApi['createPrivatePart']>
 >
 
 export function addPrivatePartsToOffer({
@@ -23,7 +24,7 @@ export function addPrivatePartsToOffer({
 }: {
   adminId: OfferAdminId
   privateParts: OfferPrivatePayloadToEncrypt[]
-  api: OfferPrivateApi
+  api: OfferApi
 }): TE.TaskEither<ApiErrorAddingPrivateParts, PrivatePartEncryptionError[]> {
   return pipe(
     privateParts,
@@ -32,7 +33,9 @@ export function addPrivatePartsToOffer({
     flattenTaskOfEithers,
     TE.fromTask,
     TE.chainFirstW(({rights}) =>
-      api.createPrivatePart({offerPrivateList: rights, adminId})
+      effectToTaskEither(
+        api.createPrivatePart({body: {offerPrivateList: rights, adminId}})
+      )
     ),
     TE.map(({lefts}) => lefts)
   )

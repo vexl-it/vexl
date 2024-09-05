@@ -1,20 +1,19 @@
-import {Schema} from '@effect/schema'
 import {Api, ApiGroup} from 'effect-http'
 import {ServerSecurity} from '../../apiSecurity'
 import {CommonHeaders} from '../../commonHeaders'
 import {
   CheckUserExistsRequest,
-  CreateUserRequestE,
-  FetchCommonConnectionsRequestE,
-  FetchCommonConnectionsResponseE,
-  FetchMyContactsRequestE,
-  FetchMyContactsResponseE,
-  ImportContactsRequestE,
-  ImportContactsResponseE,
+  CreateUserRequest,
+  FetchCommonConnectionsRequest,
+  FetchCommonConnectionsResponse,
+  FetchMyContactsRequest,
+  FetchMyContactsResponse,
+  ImportContactsRequest,
+  ImportContactsResponse,
   ImportListEmptyError,
-  RefreshUserRequestE,
-  UpdateFirebaseTokenRequestE,
-  UserExistsResponseE,
+  RefreshUserRequest,
+  UpdateFirebaseTokenRequest,
+  UserExistsResponse,
   UserNotFoundError,
 } from './contracts'
 
@@ -24,13 +23,13 @@ export const CheckUserExistsEndpoint = Api.post(
 ).pipe(
   Api.setSecurity(ServerSecurity),
   Api.setRequestQuery(CheckUserExistsRequest),
-  Api.setResponseBody(UserExistsResponseE)
+  Api.setResponseBody(UserExistsResponse)
 )
 
 export const CreateUserEndpoint = Api.post('createUser', '/api/v1/users').pipe(
   Api.setSecurity(ServerSecurity),
   Api.setRequestHeaders(CommonHeaders),
-  Api.setRequestBody(CreateUserRequestE),
+  Api.setRequestBody(CreateUserRequest),
   Api.setResponse({
     status: 201,
   })
@@ -42,7 +41,7 @@ export const RefreshUserEndpoint = Api.post(
 ).pipe(
   Api.setSecurity(ServerSecurity),
   Api.setRequestHeaders(CommonHeaders),
-  Api.setRequestBody(RefreshUserRequestE),
+  Api.setRequestBody(RefreshUserRequest),
   Api.addResponse({
     status: 404,
     body: UserNotFoundError,
@@ -54,7 +53,7 @@ export const UpdateFirebaseTokenEndpoint = Api.put(
 ).pipe(
   Api.setSecurity(ServerSecurity),
   Api.setRequestHeaders(CommonHeaders),
-  Api.setRequestBody(UpdateFirebaseTokenRequestE),
+  Api.setRequestBody(UpdateFirebaseTokenRequest),
   Api.setResponse({
     status: 200,
   })
@@ -70,16 +69,15 @@ export const DeleteUserEndpoint = Api.delete(
   })
 )
 
-export const ImportContactsErrors = Schema.Union(ImportListEmptyError)
 export const ImportContactsEndpoint = Api.post(
   'importContacts',
   '/api/v1/contacts/import/replace'
 ).pipe(
   Api.setSecurity(ServerSecurity),
-  Api.setRequestBody(ImportContactsRequestE),
+  Api.setRequestBody(ImportContactsRequest),
   Api.setResponse({
     status: 200,
-    body: ImportContactsResponseE,
+    body: ImportContactsResponse,
   }),
   Api.addResponse({
     status: 400,
@@ -92,8 +90,8 @@ export const FetchMyContactsEndpoint = Api.get(
   '/api/v1/contacts/me'
 ).pipe(
   Api.setSecurity(ServerSecurity),
-  Api.setRequestQuery(FetchMyContactsRequestE),
-  Api.setResponseBody(FetchMyContactsResponseE)
+  Api.setRequestQuery(FetchMyContactsRequest),
+  Api.setResponseBody(FetchMyContactsResponse)
 )
 
 export const FetchCommonConnectionsEndpoint = Api.post(
@@ -101,8 +99,8 @@ export const FetchCommonConnectionsEndpoint = Api.post(
   '/api/v1/contacts/common'
 ).pipe(
   Api.setSecurity(ServerSecurity),
-  Api.setRequestBody(FetchCommonConnectionsRequestE),
-  Api.setResponseBody(FetchCommonConnectionsResponseE)
+  Api.setRequestBody(FetchCommonConnectionsRequest),
+  Api.setResponseBody(FetchCommonConnectionsResponse)
 )
 
 const UserApiGroup = ApiGroup.make('User').pipe(

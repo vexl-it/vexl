@@ -339,6 +339,8 @@ export const OfferInfo = z
     modifiedAt: IsoDatetimeString,
   })
   .readonly()
+export type OfferInfo = Schema.Schema.Type<typeof OfferInfoE>
+
 export const OfferInfoE = Schema.Struct({
   id: IdNumericE, // For ordering
   offerId: OfferIdE,
@@ -347,8 +349,7 @@ export const OfferInfoE = Schema.Struct({
   createdAt: IsoDatetimeStringE,
   modifiedAt: IsoDatetimeStringE,
 })
-
-export type OfferInfo = Schema.Schema.Type<typeof OfferInfoE>
+export type OfferInfoE = Schema.Schema.Type<typeof OfferInfoE>
 
 export const ConnectionLevel = z.enum(['FIRST', 'SECOND', 'ALL'])
 export const ConnectionLevelE = Schema.Literal('FIRST', 'SECOND', 'ALL')

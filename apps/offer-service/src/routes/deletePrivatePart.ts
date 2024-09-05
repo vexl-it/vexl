@@ -1,8 +1,8 @@
-import {CanNotDeletePrivatePartOfAuthor} from '@vexl-next/rest-api/src/services/offer/contracts'
 import {
-  DeletePrivatePartEndpoint,
+  CanNotDeletePrivatePartOfAuthor,
   DeletePrivatePartErrors,
-} from '@vexl-next/rest-api/src/services/offer/specification'
+} from '@vexl-next/rest-api/src/services/offer/contracts'
+import {DeletePrivatePartEndpoint} from '@vexl-next/rest-api/src/services/offer/specification'
 import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
 import {Array, Effect, flow, Option, pipe} from 'effect'

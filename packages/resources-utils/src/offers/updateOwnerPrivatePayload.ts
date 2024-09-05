@@ -5,10 +5,11 @@ import {
   type SymmetricKey,
 } from '@vexl-next/domain/src/general/offers'
 import {type NoContentResponse} from '@vexl-next/rest-api/src/NoContentResponse.brand'
-import {type OfferPrivateApi} from '@vexl-next/rest-api/src/services/offer'
+import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
-import {type ExtractLeftTE} from '../utils/ExtractLeft'
+import {effectToTaskEither} from '../effect-helpers/TaskEitherConverter'
+import {type ExtractRightFromEffect} from '../utils/ExtractLeft'
 import {constructAndEncryptPrivatePayloadForOwner} from './constructPrivatePayloadForOwner'
 import {type PrivatePartEncryptionError} from './utils/encryptPrivatePart'
 
@@ -19,14 +20,14 @@ export default function updateOwnerPrivatePayload({
   adminId,
   intendedConnectionLevel,
 }: {
-  api: OfferPrivateApi
+  api: OfferApi
   ownerCredentials: PrivateKeyHolder
   symmetricKey: SymmetricKey
   adminId: OfferAdminId
   intendedConnectionLevel: IntendedConnectionLevel
 }): TE.TaskEither<
   | PrivatePartEncryptionError
-  | ExtractLeftTE<ReturnType<OfferPrivateApi['createPrivatePart']>>,
+  | ExtractRightFromEffect<ReturnType<OfferApi['createPrivatePart']>>,
   NoContentResponse
 > {
   return pipe(
@@ -37,10 +38,14 @@ export default function updateOwnerPrivatePayload({
       intendedConnectionLevel,
     }),
     TE.chainW((payload) =>
-      api.createPrivatePart({
-        adminId,
-        offerPrivateList: [payload],
-      })
+      effectToTaskEither(
+        api.createPrivatePart({
+          body: {
+            adminId,
+            offerPrivateList: [payload],
+          },
+        })
+      )
     )
   )
 }

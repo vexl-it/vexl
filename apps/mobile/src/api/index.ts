@@ -19,7 +19,7 @@ import {type ContactPrivateApi} from '@vexl-next/rest-api/src/services/contact'
 import {type FeedbackApi} from '@vexl-next/rest-api/src/services/feedback'
 import {type LocationApi} from '@vexl-next/rest-api/src/services/location'
 import {type NotificationPrivateApi} from '@vexl-next/rest-api/src/services/notification'
-import {type OfferPrivateApi} from '@vexl-next/rest-api/src/services/offer'
+import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
 import {type UserApi} from '@vexl-next/rest-api/src/services/user'
 import {atom, useAtomValue} from 'jotai'
 import {Platform} from 'react-native'
@@ -66,14 +66,14 @@ export const apiAtom = atom((get) => {
   }
 
   return {
-    contact: contact.privateApi({
+    contact: contact.api({
       platform,
       clientVersion: versionCode,
       clientSemver: version,
       url: apiEnv.contactMs,
       getUserSessionCredentials,
     }),
-    offer: offer.privateApi({
+    offer: offer.api({
       platform,
       clientSemver: version,
       clientVersion: versionCode,
@@ -127,7 +127,7 @@ export const apiAtom = atom((get) => {
 
 export function usePrivateApiAssumeLoggedIn(): {
   contact: ContactPrivateApi
-  offer: OfferPrivateApi
+  offer: OfferApi
   chat: ChatPrivateApi
   user: UserApi
   location: LocationApi

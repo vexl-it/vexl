@@ -1,4 +1,7 @@
-import {type ChatMessagePayload} from '@vexl-next/domain/src/general/messaging'
+import {
+  type ChatMessage,
+  type ChatMessagePayload,
+} from '@vexl-next/domain/src/general/messaging'
 import confirmMessagingRequest, {
   type ApiConfirmMessagingRequest,
 } from '@vexl-next/resources-utils/src/chat/confirmMessagingRequest'
@@ -83,8 +86,8 @@ const acceptMessagingRequestAtom = atom(
       }),
       TE.bind('message', ({configMessage: message}) =>
         TE.of({
-          state: 'sent',
-          message,
+          state: 'sent' as const,
+          message: message satisfies ChatMessage,
         } satisfies ChatMessageWithState)
       ),
       TE.map(({message, myFcmCypher}) => {

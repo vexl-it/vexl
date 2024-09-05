@@ -1,8 +1,12 @@
+import {Schema} from '@effect/schema'
 import {z} from 'zod'
-import {SvgStringOrImageUri} from '../utility/SvgStringOrImageUri.brand'
-import {UriString} from '../utility/UriString.brand'
-import {E164PhoneNumber} from './E164PhoneNumber.brand'
-import {UserName} from './UserName.brand'
+import {
+  SvgStringOrImageUri,
+  SvgStringOrImageUriE,
+} from '../utility/SvgStringOrImageUri.brand'
+import {UriString, UriStringE} from '../utility/UriString.brand'
+import {E164PhoneNumber, E164PhoneNumberE} from './E164PhoneNumber.brand'
+import {UserName, UserNameE} from './UserName.brand'
 
 export const UserNameAndUriAvatar = z
   .object({
@@ -16,7 +20,19 @@ export const UserNameAndUriAvatar = z
       .readonly(),
   })
   .readonly()
-export type UserNameAndUriAvatar = z.TypeOf<typeof UserNameAndUriAvatar>
+
+export const UserNameAndUriAvatarE = Schema.Struct({
+  userName: Schema.optional(UserNameE),
+  image: Schema.optional(
+    Schema.Struct({
+      type: Schema.Literal('imageUri'),
+      imageUri: UriStringE,
+    })
+  ),
+})
+export type UserNameAndUriAvatar = Schema.Schema.Type<
+  typeof UserNameAndUriAvatarE
+>
 
 export const RealLifeInfo = z
   .object({
@@ -26,4 +42,11 @@ export const RealLifeInfo = z
     fullPhoneNumber: E164PhoneNumber.optional(),
   })
   .readonly()
-export type RealLifeInfo = z.TypeOf<typeof RealLifeInfo>
+
+export const RealLifeInfoE = Schema.Struct({
+  userName: UserNameE,
+  image: SvgStringOrImageUriE,
+  partialPhoneNumber: Schema.optional(Schema.String),
+  fullPhoneNumber: Schema.optional(E164PhoneNumberE),
+})
+export type RealLifeInfo = Schema.Schema.Type<typeof RealLifeInfoE>

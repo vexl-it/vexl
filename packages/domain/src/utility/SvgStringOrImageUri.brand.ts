@@ -1,6 +1,7 @@
+import {Schema} from '@effect/schema'
 import {z} from 'zod'
-import {SvgString} from './SvgString.brand'
-import {UriString} from './UriString.brand'
+import {SvgString, SvgStringE} from './SvgString.brand'
+import {UriString, UriStringE} from './UriString.brand'
 
 export const SvgStringOrImageUri = z.custom<
   | {
@@ -20,7 +21,20 @@ export const SvgStringOrImageUri = z.custom<
   }
   return false
 })
-export type SvgStringOrImageUri = z.TypeOf<typeof SvgStringOrImageUri>
+
+export const SvgStringOrImageUriE = Schema.Union(
+  Schema.Struct({
+    type: Schema.Literal('imageUri'),
+    imageUri: UriStringE,
+  }),
+  Schema.Struct({
+    type: Schema.Literal('svgXml'),
+    svgXml: SvgStringE,
+  })
+)
+export type SvgStringOrImageUri = Schema.Schema.Type<
+  typeof SvgStringOrImageUriE
+>
 
 export function fromImageUri(imageUri: UriString): SvgStringOrImageUri {
   return SvgStringOrImageUri.parse({

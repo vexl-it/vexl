@@ -35,14 +35,14 @@ import cpuIconSvg from '../images/cpuIconSvg'
 import customerSupportIconSvg from '../images/customerSupportIconSvg'
 import dataIconSvg from '../images/dataIconSvg'
 import faceIdIconSvg from '../images/faceIdIconSvg'
+import glassesSvg from '../images/glassesSvg'
 import imageIconSvg from '../images/imageIconSvg'
-import mediumIconSvg from '../images/mediumIconSvg'
 import notificationsIconSvg from '../images/notificationsIconSvg'
 import questionIconSvg from '../images/questionIconSvg'
 import termsIconSvg from '../images/termsIconSvg'
 import trashIconSvg from '../images/trashIconSvg'
-import twitterIconSvg from '../images/twitterIconSvg'
 import webIconSvg from '../images/webIconSvg'
+import xSvg from '../images/xIconSvg'
 import AllowScreenshots from './AllowScreenshots'
 import ItemText from './ButtonSectionItemText'
 import ContactsImportedTitle from './ContactsImportedTitle'
@@ -280,12 +280,12 @@ function ButtonsSection(): JSX.Element {
               <ItemText ff="$body500" col="$greyOnBlack">
                 {t('settings.items.followUsOn')}{' '}
                 <ItemText ff="$body500" col="$white">
-                  {t('settings.items.twitter')}
+                  {t('settings.items.X')}
                 </ItemText>
               </ItemText>
             ),
-            icon: twitterIconSvg,
-            onPress: openUrl(t('settings.items.twitterUrl')),
+            icon: xSvg,
+            onPress: openUrl(t('settings.items.XUrl')),
           },
           {
             testID: '@buttonsSection/readMoreOnMediumButton',
@@ -293,12 +293,12 @@ function ButtonsSection(): JSX.Element {
               <ItemText ff="$body500" col="$greyOnBlack">
                 {t('settings.items.readMoreOn')}{' '}
                 <ItemText ff="$body500" col="$white">
-                  {t('settings.items.medium')}
+                  {t('settings.items.ourBlog')}
                 </ItemText>
               </ItemText>
             ),
-            icon: mediumIconSvg,
-            onPress: openUrl(t('settings.items.mediumUrl')),
+            icon: glassesSvg,
+            onPress: openUrl(t('settings.items.ourBlogUrl')),
           },
           {
             testID: '@buttonsSection/learnMoreOnWebsiteButton',

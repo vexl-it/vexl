@@ -2,10 +2,8 @@ import {
   NotFoundError,
   UnexpectedServerError,
 } from '@vexl-next/domain/src/general/commonErrors'
-import {
-  UpdateOfferEndpoint,
-  UpdateOfferErrors,
-} from '@vexl-next/rest-api/src/services/offer/specification'
+import {UpdateOfferErrors} from '@vexl-next/rest-api/src/services/offer/contracts'
+import {UpdateOfferEndpoint} from '@vexl-next/rest-api/src/services/offer/specification'
 import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
 import {Array, Effect, Metric} from 'effect'

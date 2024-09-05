@@ -1,205 +1,99 @@
 import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
-import {type CreateAxiosDefaults} from 'axios'
-import * as TE from 'fp-ts/TaskEither'
-import {pipe} from 'fp-ts/function'
-import urlJoin from 'url-join'
 import {type PlatformName} from '../../PlatformName'
 import {type ServiceUrl} from '../../ServiceUrl.brand'
 import {type GetUserSessionCredentials} from '../../UserSessionCredentials.brand'
+import {createClientInstanceWithAuth} from '../../client'
 import {
-  axiosCallWithValidation,
-  createAxiosInstanceWithAuthAndLogging,
-  type LoggingFunction,
+  handleCommonAndExpectedErrorsEffect,
+  handleCommonErrorsEffect,
 } from '../../utils'
 import {
-  CreateNewOfferResponse,
-  CreatePrivatePartResponse,
-  DeleteOfferResponse,
-  DeletePrivatePartResponse,
-  GetOfferByIdsResponse,
-  GetOffersForMeCreatedOrModifiedAfterResponse,
-  GetOffersForMeResponse,
-  RefreshOfferResponse,
-  RemovedOfferIdsResponse,
-  ReportOfferLimitReachedError,
-  ReportOfferResponse,
-  UpdateOfferResponse,
-  type CreateNewOfferRequest,
-  type CreatePrivatePartRequest,
-  type DeleteOfferRequest,
-  type DeletePrivatePartRequest,
-  type GetOffersByIdsRequest,
-  type GetOffersForMeCreatedOrModifiedAfterRequest,
-  type RefreshOfferRequest,
-  type RemovedOfferIdsRequest,
-  type ReportOfferRequest,
-  type UpdateOfferRequest,
+  CreateNewOfferErrors,
+  type CreateNewOfferInput,
+  CreatePrivatePartErrors,
+  type CreatePrivatePartInput,
+  type DeleteOfferInput,
+  DeletePrivatePartErrors,
+  type DeletePrivatePartInput,
+  type GetOffersByIdsInput,
+  type GetOffersForMeModifiedOrCreatedAfterInput,
+  type GetRemovedOffersInput,
+  type RefreshOfferInput,
+  ReportOfferEndpointErrors,
+  type ReportOfferInput,
+  UpdateOfferErrors,
+  type UpdateOfferInput,
 } from './contracts'
+import {OfferApiSpecification} from './specification'
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export function privateApi({
+export function api({
   platform,
   clientVersion,
   clientSemver,
   url,
   getUserSessionCredentials,
-  axiosConfig,
-  loggingFunction,
 }: {
   platform: PlatformName
   clientVersion: VersionCode
   clientSemver: SemverString
   url: ServiceUrl
   getUserSessionCredentials: GetUserSessionCredentials
-  axiosConfig?: Omit<CreateAxiosDefaults, 'baseURL'>
-  loggingFunction?: LoggingFunction | null
 }) {
-  const axiosInstance = createAxiosInstanceWithAuthAndLogging(
-    getUserSessionCredentials,
+  const client = createClientInstanceWithAuth({
+    api: OfferApiSpecification,
     platform,
     clientVersion,
     clientSemver,
-    {
-      ...axiosConfig,
-      baseURL: urlJoin(url, '/api'),
-    },
-    loggingFunction
-  )
+    getUserSessionCredentials,
+    url,
+  })
 
   return {
-    getOffersByIds: (request: GetOffersByIdsRequest) =>
-      axiosCallWithValidation(
-        axiosInstance,
-        {
-          method: 'get',
-          url: '/v2/offers',
-          params: {offerIds: request.ids.join(',')},
-        },
-        GetOfferByIdsResponse
-      ),
-    getOffersForMe: () => {
-      return axiosCallWithValidation(
-        axiosInstance,
-        {
-          method: 'get',
-          url: '/v2/offers/me',
-        },
-        GetOffersForMeResponse
-      )
-    },
+    getOffersByIds: (getOffersByIdsInput: GetOffersByIdsInput) =>
+      handleCommonErrorsEffect(client.getOffersByIds(getOffersByIdsInput)),
+    getOffersForMe: () => handleCommonErrorsEffect(client.getOffersForMe({})),
     getOffersForMeModifiedOrCreatedAfter: (
-      request: GetOffersForMeCreatedOrModifiedAfterRequest
-    ) => {
-      return axiosCallWithValidation(
-        axiosInstance,
-        {
-          method: 'get',
-          url: '/v2/offers/me/modified',
-          params: request,
-        },
-        GetOffersForMeCreatedOrModifiedAfterResponse
-      )
-    },
-    createNewOffer: (request: CreateNewOfferRequest) => {
-      return axiosCallWithValidation(
-        axiosInstance,
-        {
-          method: 'post',
-          url: '/v2/offers',
-          data: request,
-        },
-        CreateNewOfferResponse
-      )
-    },
-    refreshOffer: (request: RefreshOfferRequest) => {
-      return axiosCallWithValidation(
-        axiosInstance,
-        {
-          method: 'post',
-          url: '/v2/offers/refresh',
-          data: request,
-        },
-        RefreshOfferResponse
-      )
-    },
-    deleteOffer: (request: DeleteOfferRequest) => {
-      return axiosCallWithValidation(
-        axiosInstance,
-        {
-          method: 'delete',
-          url: '/v1/offers',
-          params: {adminIds: request.adminIds.join(',')},
-        },
-        DeleteOfferResponse
-      )
-    },
-    updateOffer: (request: UpdateOfferRequest) => {
-      return axiosCallWithValidation(
-        axiosInstance,
-        {
-          method: 'put',
-          url: '/v2/offers',
-          data: request,
-        },
-        UpdateOfferResponse
-      )
-    },
-    createPrivatePart: (request: CreatePrivatePartRequest) => {
-      return axiosCallWithValidation(
-        axiosInstance,
-        {
-          method: 'post',
-          url: '/v2/offers/private-part',
-          data: request,
-        },
-        CreatePrivatePartResponse
-      )
-    },
-    deletePrivatePart: (request: DeletePrivatePartRequest) => {
-      return axiosCallWithValidation(
-        axiosInstance,
-        {
-          method: 'delete',
-          url: '/v1/offers/private-part',
-          data: request,
-        },
-        DeletePrivatePartResponse
-      )
-    },
-    getRemovedOffers: (request: RemovedOfferIdsRequest) => {
-      return axiosCallWithValidation(
-        axiosInstance,
-        {
-          method: 'post',
-          url: '/v1/offers/not-exist',
-          data: request,
-        },
-        RemovedOfferIdsResponse
-      )
-    },
-    reportOffer: (request: ReportOfferRequest) => {
-      return pipe(
-        axiosCallWithValidation(
-          axiosInstance,
-          {
-            method: 'post',
-            url: '/v1/offers/report',
-            data: request,
-          },
-          ReportOfferResponse
-        ),
-        TE.mapLeft((e) => {
-          if (e._tag === 'BadStatusCodeError') {
-            if (e.response.data.code === '100108') {
-              return new ReportOfferLimitReachedError()
-            }
-          }
-          return e
-        })
-      )
-    },
+      getOffersForMeModifiedOrCreatedAfterInput: GetOffersForMeModifiedOrCreatedAfterInput
+    ) =>
+      handleCommonErrorsEffect(
+        client.getOffersForMeModifiedOrCreatedAfter(
+          getOffersForMeModifiedOrCreatedAfterInput
+        )
+      ),
+    createNewOffer: (createNewOfferInput: CreateNewOfferInput) =>
+      handleCommonAndExpectedErrorsEffect(
+        client.createNewOffer(createNewOfferInput),
+        CreateNewOfferErrors
+      ),
+    refreshOffer: (refreshOfferInput: RefreshOfferInput) =>
+      handleCommonErrorsEffect(client.refreshOffer(refreshOfferInput)),
+    deleteOffer: (deleteOfferInput: DeleteOfferInput) =>
+      handleCommonErrorsEffect(client.deleteOffer(deleteOfferInput)),
+    updateOffer: (updateOfferInpu: UpdateOfferInput) =>
+      handleCommonAndExpectedErrorsEffect(
+        client.updateOffer(updateOfferInpu),
+        UpdateOfferErrors
+      ),
+    createPrivatePart: (createPrivatePartInput: CreatePrivatePartInput) =>
+      handleCommonAndExpectedErrorsEffect(
+        client.createPrivatePart(createPrivatePartInput),
+        CreatePrivatePartErrors
+      ),
+    deletePrivatePart: (deletePrivatePartInput: DeletePrivatePartInput) =>
+      handleCommonAndExpectedErrorsEffect(
+        client.deletePrivatePart(deletePrivatePartInput),
+        DeletePrivatePartErrors
+      ),
+    getRemovedOffers: (getRemovedOffersInput: GetRemovedOffersInput) =>
+      handleCommonErrorsEffect(client.getRemovedOffers(getRemovedOffersInput)),
+    reportOffer: (reportOfferInput: ReportOfferInput) =>
+      handleCommonAndExpectedErrorsEffect(
+        client.reportOffer(reportOfferInput),
+        ReportOfferEndpointErrors
+      ),
   }
 }
 
-export type OfferPrivateApi = ReturnType<typeof privateApi>
+export type OfferApi = ReturnType<typeof api>

@@ -105,15 +105,15 @@ const checkNotificationTokensAndRefreshOffersActionAtom = atom(
               }),
               TE.match(
                 (e) => {
-                  if (e._tag !== 'NetworkError') {
-                    reportError(
-                      'error',
-                      new Error(
-                        'Error while updating offer with new notification token'
-                      ),
-                      {e}
-                    )
-                  }
+                  // if (e._tag !== 'NetworkError') {
+                  reportError(
+                    'error',
+                    new Error(
+                      'Error while updating offer with new notification token'
+                    ),
+                    {e}
+                  )
+                  // }
                   return false
                 },
                 () => {

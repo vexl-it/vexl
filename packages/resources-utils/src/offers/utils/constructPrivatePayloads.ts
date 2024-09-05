@@ -1,6 +1,9 @@
+import {Schema} from '@effect/schema'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
+import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {
   OfferPrivatePart,
+  OfferPrivatePartE,
   type SymmetricKey,
 } from '@vexl-next/domain/src/general/offers'
 import {toError, type BasicError} from '@vexl-next/domain/src/utility/errors'
@@ -20,6 +23,14 @@ export const OfferPrivatePayloadToEncrypt = z
   .readonly()
 export type OfferPrivatePayloadToEncrypt = z.TypeOf<
   typeof OfferPrivatePayloadToEncrypt
+>
+
+export const OfferPrivatePayloadToEncryptE = Schema.Struct({
+  toPublicKey: PublicKeyPemBase64E,
+  payloadPrivate: OfferPrivatePartE,
+})
+export type OfferPrivatePayloadToEncryptE = Schema.Schema.Type<
+  typeof OfferPrivatePayloadToEncryptE
 >
 
 // TODO test this function

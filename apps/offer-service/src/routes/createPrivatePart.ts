@@ -1,13 +1,11 @@
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
 import {
+  CreatePrivatePartErrors,
   DuplicatedPublicKeyError,
   type ServerPrivatePart,
 } from '@vexl-next/rest-api/src/services/offer/contracts'
-import {
-  CreatePrivatePartEndpoint,
-  CreatePrivatPartErrors,
-} from '@vexl-next/rest-api/src/services/offer/specification'
+import {CreatePrivatePartEndpoint} from '@vexl-next/rest-api/src/services/offer/specification'
 import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
 import {Array, Effect, Option} from 'effect'
@@ -87,6 +85,6 @@ export const createPrivatePart = Handler.make(
         withDbTransaction,
         withOfferAdminActionRedisLock(req.body.adminId)
       ),
-      CreatePrivatPartErrors
+      CreatePrivatePartErrors
     )
 )

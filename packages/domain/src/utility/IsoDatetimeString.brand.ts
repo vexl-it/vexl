@@ -9,13 +9,14 @@ export const IsoDatetimeString = z
   .transform((v) =>
     Brand.nominal<typeof v & Brand.Brand<'IsoDatetimeString'>>()(v)
   )
+export type IsoDatetimeString = z.TypeOf<typeof IsoDatetimeString>
 
 export const IsoDatetimeStringE = Schema.String.pipe(
   Schema.filter((isoString) => DateTime.fromISO(String(isoString)).isValid),
   Schema.brand('IsoDatetimeString')
 )
+export type IsoDatetimeStringE = Schema.Schema.Type<typeof IsoDatetimeStringE>
 
-export type IsoDatetimeString = z.TypeOf<typeof IsoDatetimeString>
 export const MINIMAL_DATE = IsoDatetimeString.parse('1970-01-01T00:00:00.000Z')
 
 export function isoNow(): IsoDatetimeString {

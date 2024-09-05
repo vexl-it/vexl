@@ -172,15 +172,15 @@ export const updateAllOffersConnectionsActionAtom = atom(
                   {error}
                 )
               }
-              if (error._tag === 'NetworkError') {
-                reportError(
-                  'info',
-                  new Error(
-                    'Unable to update offer connections due to network error'
-                  ),
-                  {error}
-                )
-              }
+              // if (error._tag === 'NetworkError') {
+              //   reportError(
+              //     'info',
+              //     new Error(
+              //       'Unable to update offer connections due to network error'
+              //     ),
+              //     {error}
+              //   )
+              // }
               reportError(
                 'warn',
                 new Error('Unable to update offer connections'),

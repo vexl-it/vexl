@@ -10,6 +10,7 @@ import {
   type SymmetricKey,
 } from '@vexl-next/domain/src/general/offers'
 import {isoNow} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
+import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {type OfferEncryptionProgress} from '@vexl-next/resources-utils/src/offers/OfferEncryptionProgress'
 import createNewOfferForMyContacts, {
   type ApiErrorWhileCreatingOffer,
@@ -31,8 +32,9 @@ import {type ErrorEncryptingPublicPart} from '@vexl-next/resources-utils/src/off
 import {type PrivatePartEncryptionError} from '@vexl-next/resources-utils/src/offers/utils/encryptPrivatePart'
 import {type ApiErrorFetchingContactsForOffer} from '@vexl-next/resources-utils/src/offers/utils/fetchContactsForOffer'
 import {type ErrorGeneratingSymmetricKey} from '@vexl-next/resources-utils/src/offers/utils/generateSymmetricKey'
-import {type OfferPrivateApi} from '@vexl-next/rest-api/src/services/offer'
-import {type ExtractLeftTE} from '@vexl-next/rest-api/src/utils'
+import {type ExtractRightFromEffect} from '@vexl-next/resources-utils/src/utils/ExtractLeft'
+import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
+import {Array, Either, pipe as effectPipe} from 'effect'
 import * as A from 'fp-ts/Array'
 import * as E from 'fp-ts/Either'
 import * as Option from 'fp-ts/Option'
@@ -42,7 +44,6 @@ import {pipe} from 'fp-ts/function'
 import {atom, useAtomValue} from 'jotai'
 import {useMemo} from 'react'
 import {apiAtom} from '../../api'
-import deduplicate from '../../utils/deduplicate'
 import getCountryPrefix from '../../utils/getCountryCode'
 import notEmpty from '../../utils/notEmpty'
 import {getNotificationToken} from '../../utils/notifications'
@@ -73,23 +74,25 @@ export const triggerOffersRefreshAtom = atom(null, async (get, set) => {
   console.log('🦋 Refreshing offers')
 
   await pipe(
-    getNewOffersAndDecrypt({
-      offersApi: api.offer,
-      modifiedAt: get(lastUpdatedAtAtom),
-      keyPair: session.privateKey,
-    }),
+    effectToTaskEither(
+      getNewOffersAndDecrypt({
+        offersApi: api.offer,
+        modifiedAt: get(lastUpdatedAtAtom),
+        keyPair: session.privateKey,
+      })
+    ),
     TE.bindTo('newOffers'),
     TE.bindW('removedOffers', () =>
       pipe(
         offerIds.length > 0
-          ? api.offer.getRemovedOffers({offerIds})
+          ? effectToTaskEither(api.offer.getRemovedOffers({body: {offerIds}}))
           : TE.right({offerIds: [] as OfferId[]}),
         TE.matchW(
           (error) => {
-            if (error._tag !== 'NetworkError')
-              reportError('error', new Error('Error fetching removed offers'), {
-                error,
-              })
+            // if (error._tag !== 'NetworkError')
+            reportError('error', new Error('Error fetching removed offers'), {
+              error,
+            })
             return [] as OfferId[]
           },
           (result) => result.offerIds
@@ -99,31 +102,29 @@ export const triggerOffersRefreshAtom = atom(null, async (get, set) => {
     ),
     TE.matchW(
       (error) => {
-        if (error._tag !== 'NetworkError')
-          reportError('error', new Error('Error fetching offers'), {error})
+        // if (error._tag !== 'NetworkError')
+        reportError('error', new Error('Error fetching offers'), {error})
         set(loadingStateAtom, {state: 'error', error})
       },
       ({newOffers: decryptingResults, removedOffers}) => {
-        pipe(
-          decryptingResults,
-          A.filter(E.isLeft),
-          A.map((one) => one.left),
-          A.match(
-            () => {
+        effectPipe(
+          Array.filterMap(decryptingResults, Either.getLeft),
+          Array.match({
+            onEmpty: () => {
               // Is ok, all offers decrypted ok
             },
-            (error) => {
-              const criticalErrors = error.filter(
+            onNonEmpty(self) {
+              const criticalErrors = self.filter(
                 (one) => one._tag !== 'NonCompatibleOfferVersionError'
               )
               if (criticalErrors.length > 0)
                 reportError(
                   'error',
                   new Error('Error while decrypting offers'),
-                  {error}
+                  {self}
                 )
 
-              const nonCompatibleErrors = error.filter(
+              const nonCompatibleErrors = self.filter(
                 (one) => one._tag === 'NonCompatibleOfferVersionError'
               )
               if (nonCompatibleErrors.length > 0) {
@@ -131,20 +132,18 @@ export const triggerOffersRefreshAtom = atom(null, async (get, set) => {
                   `Skipping ${nonCompatibleErrors.length} offers because they are not compatible.`
                 )
               }
-            }
-          )
+            },
+          })
         )
 
-        const fetchedOffers = pipe(
-          decryptingResults,
-          A.filter(E.isRight),
-          A.map((one) => one.right)
+        const fetchedOffers = effectPipe(
+          Array.filterMap(decryptingResults, Either.getRight)
+        )
+        const allOffersIds = effectPipe(
+          [...get(offersIdsAtom), ...fetchedOffers.map((one) => one.offerId)],
+          Array.dedupe
         )
 
-        const allOffersIds = deduplicate([
-          ...get(offersIdsAtom),
-          ...fetchedOffers.map((one) => one.offerId),
-        ])
         const oldOffers = get(offersAtom)
 
         pipe(
@@ -433,7 +432,7 @@ export const updateOfferAtom = atom<
     | ErrorEncryptingPublicPart
     | ErrorDecryptingOffer
     | PrivatePartEncryptionError
-    | ExtractLeftTE<ReturnType<OfferPrivateApi['createPrivatePart']>>
+    | ExtractRightFromEffect<ReturnType<OfferApi['createPrivatePart']>>
     | NonCompatibleOfferVersionError,
     OneOfferInState
   >
@@ -505,7 +504,7 @@ export const deleteOffersActionAtom = atom<
   null,
   [{adminIds: OfferAdminId[]}],
   TE.TaskEither<
-    ExtractLeftTE<ReturnType<OfferPrivateApi['deleteOffer']>>,
+    ExtractRightFromEffect<ReturnType<OfferApi['deleteOffer']>>,
     {success: true}
   >
 >(null, (get, set, params) => {
@@ -515,7 +514,11 @@ export const deleteOffersActionAtom = atom<
 
   return pipe(
     TE.Do,
-    TE.chainFirstW(() => api.offer.deleteOffer({adminIds: adminIdsToDelete})),
+    TE.chainFirstW(() =>
+      effectToTaskEither(
+        api.offer.deleteOffer({query: {adminIds: adminIdsToDelete}})
+      )
+    ),
     TE.match(
       (left) => {
         reportError('error', new Error('Error while deleting offers'), {left})

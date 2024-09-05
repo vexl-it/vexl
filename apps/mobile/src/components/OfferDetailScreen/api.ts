@@ -1,4 +1,5 @@
 import {type OfferId} from '@vexl-next/domain/src/general/offers'
+import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import type * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
@@ -42,9 +43,13 @@ export function useReportOfferHandleUI(): (
         }),
         TE.chainW(() => {
           loadingOverlay.show()
-          return api.offer.reportOffer({
-            offerId,
-          })
+          return effectToTaskEither(
+            api.offer.reportOffer({
+              body: {
+                offerId,
+              },
+            })
+          )
         }),
         TE.mapLeft((e) => {
           if (e._tag === 'ReportOfferLimitReachedError') {

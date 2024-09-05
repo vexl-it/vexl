@@ -1,9 +1,7 @@
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {newOfferId} from '@vexl-next/domain/src/general/offers'
-import {
-  CreateNewOfferEndpoint,
-  CreateNewOfferErrors,
-} from '@vexl-next/rest-api/src/services/offer/specification'
+import {CreateNewOfferErrors} from '@vexl-next/rest-api/src/services/offer/contracts'
+import {CreateNewOfferEndpoint} from '@vexl-next/rest-api/src/services/offer/specification'
 import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
 import {Effect, Metric} from 'effect'

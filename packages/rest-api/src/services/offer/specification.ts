@@ -1,33 +1,33 @@
-import {Schema} from '@effect/schema'
 import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
 import {Api} from 'effect-http'
 import {ServerSecurity} from '../../apiSecurity'
 import {
   CanNotDeletePrivatePartOfAuthor,
-  CreateNewOfferRequestE,
-  CreateNewOfferResponseE,
-  CreatePrivatePartRequestE,
-  CreatePrivatePartResponseE,
-  DeleteOfferRequestE,
-  DeleteOfferResponseE,
-  DeletePrivatePartRequestE,
-  DeletePrivatePartResponseE,
+  CreateNewOfferErrors,
+  CreateNewOfferRequest,
+  CreateNewOfferResponse,
+  CreatePrivatePartRequest,
+  CreatePrivatePartResponse,
+  DeleteOfferRequest,
+  DeleteOfferResponse,
+  DeletePrivatePartRequest,
+  DeletePrivatePartResponse,
   DuplicatedPublicKeyError,
-  GetOfferByIdsResponseE,
-  GetOffersByIdsRequestE,
-  GetOffersForMeCreatedOrModifiedAfterRequestE,
-  GetOffersForMeCreatedOrModifiedAfterResponseE,
-  GetOffersForMeResponseE,
-  MissingOwnerPrivatePartError,
-  RefreshOfferRequestE,
-  RefreshOfferResponseE,
-  RemovedOfferIdsRequestE,
-  RemovedOfferIdsResponseE,
-  ReportOfferLimitReachedError,
-  ReportOfferRequestE,
-  ReportOfferResponseE,
-  UpdateOfferRequestE,
-  UpdateOfferResponseE,
+  GetOfferByIdsResponse,
+  GetOffersByIdsRequest,
+  GetOffersForMeCreatedOrModifiedAfterRequest,
+  GetOffersForMeCreatedOrModifiedAfterResponse,
+  GetOffersForMeResponse,
+  RefreshOfferRequest,
+  RefreshOfferResponse,
+  RemovedOfferIdsRequest,
+  RemovedOfferIdsResponse,
+  ReportOfferEndpointErrors,
+  ReportOfferRequest,
+  ReportOfferResponse,
+  UpdateOfferErrors,
+  UpdateOfferRequest,
+  UpdateOfferResponse,
 } from './contracts'
 
 export const GetOffersByIdsEndpint = Api.get(
@@ -36,8 +36,8 @@ export const GetOffersByIdsEndpint = Api.get(
   {summary: 'Get offers by ids'}
 ).pipe(
   Api.setSecurity(ServerSecurity),
-  Api.setRequestQuery(GetOffersByIdsRequestE),
-  Api.setResponseBody(GetOfferByIdsResponseE)
+  Api.setRequestQuery(GetOffersByIdsRequest),
+  Api.setResponseBody(GetOfferByIdsResponse)
 )
 
 export const GetOffersForMeEndpoint = Api.get(
@@ -46,7 +46,7 @@ export const GetOffersForMeEndpoint = Api.get(
   {summary: 'Get offers for me'}
 ).pipe(
   Api.setSecurity(ServerSecurity),
-  Api.setResponseBody(GetOffersForMeResponseE)
+  Api.setResponseBody(GetOffersForMeResponse)
 )
 
 export const GetOffersForMeModifiedOrCreatedAfterEndpoint = Api.get(
@@ -55,13 +55,8 @@ export const GetOffersForMeModifiedOrCreatedAfterEndpoint = Api.get(
   {summary: 'Get offers for me modified or created after'}
 ).pipe(
   Api.setSecurity(ServerSecurity),
-  Api.setRequestQuery(GetOffersForMeCreatedOrModifiedAfterRequestE),
-  Api.setResponseBody(GetOffersForMeCreatedOrModifiedAfterResponseE)
-)
-
-export const CreateNewOfferErrors = Schema.Union(
-  MissingOwnerPrivatePartError,
-  DuplicatedPublicKeyError
+  Api.setRequestQuery(GetOffersForMeCreatedOrModifiedAfterRequest),
+  Api.setResponseBody(GetOffersForMeCreatedOrModifiedAfterResponse)
 )
 
 export const CreateNewOfferEndpoint = Api.post(
@@ -70,8 +65,8 @@ export const CreateNewOfferEndpoint = Api.post(
   {summary: 'Create offer'}
 ).pipe(
   Api.setSecurity(ServerSecurity),
-  Api.setRequestBody(CreateNewOfferRequestE),
-  Api.setResponseBody(CreateNewOfferResponseE),
+  Api.setRequestBody(CreateNewOfferRequest),
+  Api.setResponseBody(CreateNewOfferResponse),
   Api.addResponse({
     status: 400 as const,
     body: CreateNewOfferErrors,
@@ -84,8 +79,8 @@ export const RefreshOfferEndpoint = Api.post(
   {summary: 'Refresh offer'}
 ).pipe(
   Api.setSecurity(ServerSecurity),
-  Api.setRequestBody(RefreshOfferRequestE),
-  Api.setResponseBody(RefreshOfferResponseE),
+  Api.setRequestBody(RefreshOfferRequest),
+  Api.setResponseBody(RefreshOfferResponse),
   Api.addResponse({
     status: 404 as const,
     body: NotFoundError,
@@ -96,21 +91,16 @@ export const DeleteOfferEndpoint = Api.delete('deleteOffer', '/api/v1/offers', {
   summary: 'Delete offer',
 }).pipe(
   Api.setSecurity(ServerSecurity),
-  Api.setRequestQuery(DeleteOfferRequestE),
-  Api.setResponseBody(DeleteOfferResponseE)
-)
-
-export const UpdateOfferErrors = Schema.Union(
-  MissingOwnerPrivatePartError,
-  DuplicatedPublicKeyError
+  Api.setRequestQuery(DeleteOfferRequest),
+  Api.setResponseBody(DeleteOfferResponse)
 )
 
 export const UpdateOfferEndpoint = Api.put('updateOffer', '/api/v2/offers', {
   summary: 'Update offer',
 }).pipe(
   Api.setSecurity(ServerSecurity),
-  Api.setRequestBody(UpdateOfferRequestE),
-  Api.setResponseBody(UpdateOfferResponseE),
+  Api.setRequestBody(UpdateOfferRequest),
+  Api.setResponseBody(UpdateOfferResponse),
   Api.addResponse({
     status: 400 as const,
     body: UpdateOfferErrors,
@@ -121,25 +111,20 @@ export const UpdateOfferEndpoint = Api.put('updateOffer', '/api/v2/offers', {
   })
 )
 
-export const CreatePrivatPartErrors = Schema.Union(DuplicatedPublicKeyError)
-
 export const CreatePrivatePartEndpoint = Api.post(
   'createPrivatePart',
   '/api/v2/offers/private-part',
   {summary: 'Create private part'}
 ).pipe(
   Api.setSecurity(ServerSecurity),
-  Api.setRequestBody(CreatePrivatePartRequestE),
-  Api.setResponseBody(CreatePrivatePartResponseE),
+  Api.setRequestBody(CreatePrivatePartRequest),
+  Api.setResponseBody(CreatePrivatePartResponse),
   Api.addResponse({
     status: 400 as const,
     body: DuplicatedPublicKeyError,
   })
 )
 
-export const DeletePrivatePartErrors = Schema.Union(
-  CanNotDeletePrivatePartOfAuthor
-)
 export const DeletePrivatePartEndpoint = Api.delete(
   'deletePrivatePart',
   '/api/v1/offers/private-part',
@@ -150,8 +135,8 @@ export const DeletePrivatePartEndpoint = Api.delete(
   }
 ).pipe(
   Api.setSecurity(ServerSecurity),
-  Api.setRequestBody(DeletePrivatePartRequestE),
-  Api.setResponseBody(DeletePrivatePartResponseE),
+  Api.setRequestBody(DeletePrivatePartRequest),
+  Api.setResponseBody(DeletePrivatePartResponse),
   Api.addResponse({
     status: 400 as const,
     body: CanNotDeletePrivatePartOfAuthor,
@@ -164,21 +149,18 @@ export const GetRemovedOffersEndpoint = Api.post(
   {summary: 'Get removed offers'}
 ).pipe(
   Api.setSecurity(ServerSecurity),
-  Api.setRequestBody(RemovedOfferIdsRequestE),
-  Api.setResponseBody(RemovedOfferIdsResponseE)
+  Api.setRequestBody(RemovedOfferIdsRequest),
+  Api.setResponseBody(RemovedOfferIdsResponse)
 )
 
-export const ReportOfferEndpointErrors = Schema.Union(
-  ReportOfferLimitReachedError
-)
 export const ReportOfferEndpoint = Api.post(
   'reportOffer',
   '/api/v1/offers/report',
   {summary: 'Report offer'}
 ).pipe(
   Api.setSecurity(ServerSecurity),
-  Api.setRequestBody(ReportOfferRequestE),
-  Api.setResponseBody(ReportOfferResponseE),
+  Api.setRequestBody(ReportOfferRequest),
+  Api.setResponseBody(ReportOfferResponse),
   Api.addResponse({
     status: 400 as const,
     body: ReportOfferEndpointErrors,

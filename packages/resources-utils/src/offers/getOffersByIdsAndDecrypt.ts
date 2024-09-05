@@ -1,46 +1,45 @@
-import {type PrivateKeyHolder} from '@vexl-next/cryptography/src/KeyHolder'
+import {type PrivateKeyHolderE} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {
   type OfferId,
-  type OfferInfo,
+  type OfferInfoE,
 } from '@vexl-next/domain/src/general/offers'
-import {type OfferPrivateApi} from '@vexl-next/rest-api/src/services/offer'
-import * as A from 'fp-ts/Array'
-import type * as E from 'fp-ts/Either'
-import * as T from 'fp-ts/Task'
-import * as TE from 'fp-ts/TaskEither'
-import {flow, pipe} from 'fp-ts/function'
-import {type ExtractLeftTE} from '../utils/ExtractLeft'
+import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
+import {Array, Effect, flow, type Either} from 'effect'
+import {taskEitherToEffect} from '../effect-helpers/TaskEitherConverter'
+import {type ExtractRightFromEffect} from '../utils/ExtractLeft'
 import decryptOffer, {
   type ErrorDecryptingOffer,
   type NonCompatibleOfferVersionError,
 } from './decryptOffer'
 
-export type ApiErrorWhileFetchingOffers = ExtractLeftTE<
-  ReturnType<OfferPrivateApi['getOffersByIds']>
+export type ApiErrorWhileFetchingOffers = ExtractRightFromEffect<
+  ReturnType<OfferApi['getOffersByIds']>
 >
 
 export default function getOffersByIdsAndDecrypt({
   ids,
-  offerApi,
+  offersApi,
   keyPair,
 }: {
   ids: OfferId[]
-  offerApi: OfferPrivateApi
-  keyPair: PrivateKeyHolder
-}): TE.TaskEither<
-  ApiErrorWhileFetchingOffers,
+  offersApi: OfferApi
+  keyPair: PrivateKeyHolderE
+}): Effect.Effect<
   Array<
-    E.Either<ErrorDecryptingOffer | NonCompatibleOfferVersionError, OfferInfo>
-  >
+    Either.Either<
+      OfferInfoE,
+      ErrorDecryptingOffer | NonCompatibleOfferVersionError
+    >
+  >,
+  ApiErrorWhileFetchingOffers
 > {
-  return pipe(
-    offerApi.getOffersByIds({ids}),
-    TE.chainW(
-      flow(
-        A.map(decryptOffer(keyPair)),
-        A.sequence(T.ApplicativePar),
-        TE.fromTask
+  const decrypt = flow(decryptOffer(keyPair), taskEitherToEffect)
+
+  return offersApi
+    .getOffersByIds({query: {ids}})
+    .pipe(
+      Effect.flatMap(
+        flow(Array.map(decrypt), Array.map(Effect.either), Effect.all)
       )
     )
-  )
 }

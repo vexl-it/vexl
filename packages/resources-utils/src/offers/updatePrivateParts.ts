@@ -5,13 +5,14 @@ import {
 } from '@vexl-next/domain/src/general/offers'
 import {type UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {type FetchCommonConnectionsResponse} from '@vexl-next/rest-api/src/services/contact/contracts'
-import {type OfferPrivateApi} from '@vexl-next/rest-api/src/services/offer'
+import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
 import * as A from 'fp-ts/Array'
 import * as E from 'fp-ts/Either'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
 import {flow, pipe} from 'fp-ts/function'
-import {type ExtractLeftTE} from '../utils/ExtractLeft'
+import {effectToTaskEither} from '../effect-helpers/TaskEitherConverter'
+import {type ExtractRightFromEffect} from '../utils/ExtractLeft'
 import {deduplicate, subtractArrays} from '../utils/array'
 import flattenTaskOfEithers from '../utils/flattenTaskOfEithers'
 import constructPrivatePayloads, {
@@ -48,11 +49,11 @@ export default function updatePrivateParts({
   adminId: OfferAdminId
   symmetricKey: SymmetricKey
   stopProcessingAfter?: UnixMilliseconds
-  api: OfferPrivateApi
+  api: OfferApi
 }): TE.TaskEither<
   | ErrorConstructingPrivatePayloads
-  | ExtractLeftTE<ReturnType<OfferPrivateApi['createPrivatePart']>>
-  | ExtractLeftTE<ReturnType<OfferPrivateApi['deletePrivatePart']>>,
+  | ExtractRightFromEffect<ReturnType<OfferApi['createPrivatePart']>>
+  | ExtractRightFromEffect<ReturnType<OfferApi['deletePrivatePart']>>,
   {
     encryptionErrors: PrivatePartEncryptionError[]
     timeLimitReachedErrors: TimeLimitReachedError[]
@@ -138,18 +139,26 @@ export default function updatePrivateParts({
     ),
     TE.chainFirstW(({privateParts}) => {
       return privateParts.length > 0
-        ? api.createPrivatePart({
-            adminId,
-            offerPrivateList: privateParts,
-          })
+        ? effectToTaskEither(
+            api.createPrivatePart({
+              body: {
+                adminId,
+                offerPrivateList: privateParts,
+              },
+            })
+          )
         : (TE.right('ok') as TE.TaskEither<never, any>)
     }),
     TE.chainFirstW(({privateParts}) => {
       return removedConnections.length > 0
-        ? api.deletePrivatePart({
-            adminIds: [adminId],
-            publicKeys: removedConnections,
-          })
+        ? effectToTaskEither(
+            api.deletePrivatePart({
+              body: {
+                adminIds: [adminId],
+                publicKeys: removedConnections,
+              },
+            })
+          )
         : (TE.right('ok') as TE.TaskEither<never, any>)
     }),
     TE.map(({encryptionErrors, timeLimitReachedErrors}) => {

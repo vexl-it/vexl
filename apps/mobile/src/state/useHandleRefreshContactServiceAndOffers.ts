@@ -1,4 +1,5 @@
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
+import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {generateKeyPair} from '@vexl-next/resources-utils/src/utils/crypto'
 import * as A from 'fp-ts/Array'
 import {isNonEmpty} from 'fp-ts/Array'
@@ -134,7 +135,9 @@ export function useRefreshOffers(): void {
             isNonEmpty,
             () => ({_tag: 'noOffersToRefresh'}) as const
           ),
-          TE.chainW((adminIds) => api.offer.refreshOffer({adminIds})),
+          TE.chainW((adminIds) =>
+            effectToTaskEither(api.offer.refreshOffer({body: {adminIds}}))
+          ),
           TE.map((offerIdsOnServer) => {
             const offerIdsOnDevice = myOffers.map(
               (one) => one.offerInfo.offerId

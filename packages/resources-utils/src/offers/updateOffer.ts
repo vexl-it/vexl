@@ -6,10 +6,11 @@ import {
   type OfferPublicPart,
   type SymmetricKey,
 } from '@vexl-next/domain/src/general/offers'
-import {type OfferPrivateApi} from '@vexl-next/rest-api/src/services/offer'
+import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
-import {type ExtractLeftTE} from '../utils/ExtractLeft'
+import {effectToTaskEither} from '../effect-helpers/TaskEitherConverter'
+import {type ExtractRightFromEffect} from '../utils/ExtractLeft'
 import decryptOffer, {
   type ErrorDecryptingOffer,
   type NonCompatibleOfferVersionError,
@@ -20,8 +21,8 @@ import encryptOfferPublicPayload, {
 } from './utils/encryptOfferPublicPayload'
 import {type PrivatePartEncryptionError} from './utils/encryptPrivatePart'
 
-export type ApiErrorUpdatingOffer = ExtractLeftTE<
-  ReturnType<OfferPrivateApi['updateOffer']>
+export type ApiErrorUpdatingOffer = ExtractRightFromEffect<
+  ReturnType<OfferApi['updateOffer']>
 >
 export default function updateOffer({
   offerApi,
@@ -31,7 +32,7 @@ export default function updateOffer({
   ownerKeypair,
   intendedConnectionLevel,
 }: {
-  offerApi: OfferPrivateApi
+  offerApi: OfferApi
   adminId: OfferAdminId
   publicPayload: OfferPublicPart
   symmetricKey: SymmetricKey
@@ -41,7 +42,7 @@ export default function updateOffer({
   | ApiErrorUpdatingOffer
   | ErrorEncryptingPublicPart
   | PrivatePartEncryptionError
-  | ExtractLeftTE<ReturnType<OfferPrivateApi['createPrivatePart']>>
+  | ExtractRightFromEffect<ReturnType<OfferApi['createPrivatePart']>>
   | ErrorDecryptingOffer
   | NonCompatibleOfferVersionError,
   OfferInfo
@@ -53,11 +54,15 @@ export default function updateOffer({
     ),
     TE.chainW((encryptedPayload) =>
       pipe(
-        offerApi.updateOffer({
-          adminId,
-          payloadPublic: encryptedPayload,
-          offerPrivateList: [],
-        }),
+        effectToTaskEither(
+          offerApi.updateOffer({
+            body: {
+              adminId,
+              payloadPublic: encryptedPayload,
+              offerPrivateList: [],
+            },
+          })
+        ),
         TE.chainW(decryptOffer(ownerKeypair))
       )
     ),

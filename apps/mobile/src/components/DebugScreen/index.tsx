@@ -3,12 +3,13 @@ import Clipboard from '@react-native-clipboard/clipboard'
 import messaging from '@react-native-firebase/messaging'
 import {type Inbox} from '@vexl-next/domain/src/general/messaging'
 import {MINIMAL_DATE} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
+import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {fetchAndEncryptFcmForOffer} from '@vexl-next/resources-utils/src/notifications/encryptFcmForOffer'
 import getNewOffersAndDecrypt from '@vexl-next/resources-utils/src/offers/getNewOffersAndDecrypt'
+import {Array, Either, pipe as effectPipe} from 'effect'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
-import {isLeft, isRight} from 'fp-ts/lib/Either'
 import {useAtomValue, useSetAtom, useStore} from 'jotai'
 import {Alert, Platform, ScrollView} from 'react-native'
 import {Spacer, Text, YStack} from 'tamagui'
@@ -208,11 +209,13 @@ function DebugScreen(): JSX.Element {
               text="Test get all offers and alert number"
               onPress={() => {
                 void pipe(
-                  getNewOffersAndDecrypt({
-                    keyPair: session.privateKey,
-                    modifiedAt: MINIMAL_DATE,
-                    offersApi: store.get(apiAtom).offer,
-                  }),
+                  effectToTaskEither(
+                    getNewOffersAndDecrypt({
+                      keyPair: session.privateKey,
+                      modifiedAt: MINIMAL_DATE,
+                      offersApi: store.get(apiAtom).offer,
+                    })
+                  ),
                   TE.matchW(
                     (error) => {
                       Alert.alert('error', JSON.stringify(error, null, 2), [
@@ -226,12 +229,13 @@ function DebugScreen(): JSX.Element {
                       ])
                     },
                     (result) => {
-                      const errors = result
-                        .filter(isLeft)
-                        .map((one) => one.left)
-                      const success = result
-                        .filter(isRight)
-                        .map((one) => one.right)
+                      const errors = effectPipe(
+                        Array.filterMap(result, Either.getLeft)
+                      )
+                      const success = effectPipe(
+                        Array.filterMap(result, Either.getRight)
+                      )
+
                       Alert.alert(
                         'success',
                         `done got: ${success.length} success and ${errors.length} errors`,
@@ -571,14 +575,16 @@ function DebugScreen(): JSX.Element {
               size="small"
               text="Simulate offers deleted from server"
               onPress={() => {
-                void store
-                  .get(apiAtom)
-                  .offer.deleteOffer({
-                    adminIds: store
-                      .get(myOffersAtom)
-                      .map((one) => one.ownershipInfo?.adminId)
-                      .filter((one): one is NonNullable<typeof one> => !!one),
-                  })()
+                void effectToTaskEither(
+                  store.get(apiAtom).offer.deleteOffer({
+                    query: {
+                      adminIds: store
+                        .get(myOffersAtom)
+                        .map((one) => one.ownershipInfo?.adminId)
+                        .filter((one): one is NonNullable<typeof one> => !!one),
+                    },
+                  })
+                )()
                   .then(() => {
                     Alert.alert('done')
                   })

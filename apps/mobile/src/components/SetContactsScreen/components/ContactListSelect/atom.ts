@@ -86,7 +86,7 @@ export const contactSelectMolecule = molecule((_, getScope) => {
     })
   })
 
-  const allContactsWithSearchActiveToDisplayAtom = atom((get) => {
+  const allContactsToDisplayAtom = atom((get) => {
     const searchText = get(searchTextAtom)
 
     const normalizedNumbers = deduplicateBy(
@@ -108,7 +108,9 @@ export const contactSelectMolecule = molecule((_, getScope) => {
         ? submittedContactsToDisplayAtom
         : contactsFilter === 'nonSubmitted'
           ? nonSubmittedContactsToDisplayAtom
-          : newContactsToDisplayAtom
+          : contactsFilter === 'new'
+            ? newContactsToDisplayAtom
+            : allContactsToDisplayAtom
     )
   })
 
@@ -119,9 +121,7 @@ export const contactSelectMolecule = molecule((_, getScope) => {
   const nonSubmittedContactsToDisplayAtomsAtom = splitAtom(
     nonSubmittedContactsToDisplayAtom
   )
-  const allContactsWithSearchActiveToDisplayAtomsAtom = splitAtom(
-    allContactsWithSearchActiveToDisplayAtom
-  )
+  const allContactsToDisplayAtomsAtom = splitAtom(allContactsToDisplayAtom)
 
   const newContactsToDisplayCountAtom = atom(
     (get) => get(newContactsToDisplayAtomsAtom).length
@@ -132,65 +132,18 @@ export const contactSelectMolecule = molecule((_, getScope) => {
   const nonSubmittedContactsToDisplayCountAtom = atom(
     (get) => get(nonSubmittedContactsToDisplayAtomsAtom).length
   )
-  const allContactsWithSearchActiveToDisplayCountAtom = atom(
-    (get) => get(allContactsWithSearchActiveToDisplayAtomsAtom).length
+  const allContactsToDisplayCountAtom = atom(
+    (get) => get(allContactsToDisplayAtomsAtom).length
   )
 
   const displayContactsCountAtom = atom((get) => !!get(searchTextAtom))
 
-  const selectedSubmittedNumbersAtom = atom(
-    new Set(
-      normalizedContacts
-        .filter((one) => one.flags.imported)
-        .map((one) => one.computedValues.normalizedNumber)
-    )
-  )
-
-  const selectedNonSubmittedNumbersAtom = atom<Set<E164PhoneNumber>>(
-    new Set([])
-  )
-
-  const selectedNewNumbersAtom = atom(
-    new Set(
-      normalizedContacts
-        .filter((one) => !one.flags.seen)
-        .map((one) => one.computedValues.normalizedNumber)
-    )
-  )
-
-  const _allSelectedNumbersAtom = atom((get) => {
-    return new Set([
-      ...get(selectedSubmittedNumbersAtom),
-      ...get(selectedNonSubmittedNumbersAtom),
-      ...get(selectedNewNumbersAtom),
-    ])
-  })
-
   const selectedNumbersAtom = atom(
-    (get) => {
-      const contactsFilter = get(contactsFilterAtom)
-      return get(
-        contactsFilter === 'all'
-          ? _allSelectedNumbersAtom
-          : contactsFilter === 'submitted'
-            ? selectedSubmittedNumbersAtom
-            : contactsFilter === 'nonSubmitted'
-              ? selectedNonSubmittedNumbersAtom
-              : selectedNewNumbersAtom
-      )
-    },
-    (get, set, numbers: SetStateAction<Set<E164PhoneNumber>>) => {
-      const contactsFilter = get(contactsFilterAtom)
-
-      set(
-        contactsFilter === 'submitted'
-          ? selectedSubmittedNumbersAtom
-          : contactsFilter === 'nonSubmitted'
-            ? selectedNonSubmittedNumbersAtom
-            : selectedNewNumbersAtom,
-        numbers
-      )
-    }
+    new Set(
+      normalizedContacts
+        .filter((one) => one.flags.imported || !one.flags.seen)
+        .map((one) => one.computedValues.normalizedNumber)
+    )
   )
 
   const areThereAnyContactsToDisplayForSelectedTabAtom = atom((get) => {
@@ -212,6 +165,7 @@ export const contactSelectMolecule = molecule((_, getScope) => {
       const shouldSelectAll = getValueFromSetStateActionOfAtom(update)(() =>
         get(selectAllAtom)
       )
+
       set(selectedNumbersAtom, (value) => {
         const newValue = new Set<E164PhoneNumber>(value)
         contactsToDisplay
@@ -234,12 +188,12 @@ export const contactSelectMolecule = molecule((_, getScope) => {
   ): WritableAtom<boolean, [SetStateAction<boolean>], void> {
     return atom(
       (get) =>
-        get(_allSelectedNumbersAtom).has(
+        get(selectedNumbersAtom).has(
           get(contactAtom).computedValues.normalizedNumber
         ),
-      (get, set, number: SetStateAction<boolean>) => {
+      (get, set, isSelected: SetStateAction<boolean>) => {
         const contactNumber = get(contactAtom).computedValues.normalizedNumber
-        const selected = getValueFromSetStateActionOfAtom(number)(() =>
+        const selected = getValueFromSetStateActionOfAtom(isSelected)(() =>
           get(selectedNumbersAtom).has(contactNumber)
         )
 
@@ -256,14 +210,12 @@ export const contactSelectMolecule = molecule((_, getScope) => {
   const submitSingleContactActionAtom = atom(
     null,
     (get, set, contact: StoredContactWithComputedValues) => {
-      const selectedSubmittedNumbers = Array.from(
-        get(selectedSubmittedNumbersAtom)
-      )
+      const selectedNumbers = Array.from(get(selectedNumbersAtom))
 
       return pipe(
         set(submitContactsActionAtom, {
           numbersToImport: deduplicate([
-            ...selectedSubmittedNumbers,
+            ...selectedNumbers,
             contact.computedValues.normalizedNumber,
           ]),
           normalizeAndImportAll: false,
@@ -276,20 +228,10 @@ export const contactSelectMolecule = molecule((_, getScope) => {
     null,
     (get, set): T.Task<boolean> => {
       const {t} = get(translationAtom)
-      const selectedSubmittedNumbers = Array.from(
-        get(selectedSubmittedNumbersAtom)
-      )
-      const selectedNonSubmittedNumbers = Array.from(
-        get(selectedNonSubmittedNumbersAtom)
-      )
-      const selectedNewNumbers = Array.from(get(selectedNewNumbersAtom))
+      const selectedNumbers = Array.from(get(selectedNumbersAtom))
       return pipe(
         set(submitContactsActionAtom, {
-          numbersToImport: deduplicate([
-            ...selectedSubmittedNumbers,
-            ...selectedNonSubmittedNumbers,
-            ...selectedNewNumbers,
-          ]),
+          numbersToImport: deduplicate(selectedNumbers),
           normalizeAndImportAll: false,
         }),
         T.map((result) => {
@@ -511,11 +453,11 @@ export const contactSelectMolecule = molecule((_, getScope) => {
     nonSubmittedContactsToDisplayAtomsAtom,
     submittedContactsToDisplayAtomsAtom,
     newContactsToDisplayAtomsAtom,
-    allContactsWithSearchActiveToDisplayAtomsAtom,
+    allContactsToDisplayAtomsAtom,
     newContactsToDisplayCountAtom,
     submittedContactsToDisplayCountAtom,
     nonSubmittedContactsToDisplayCountAtom,
-    allContactsWithSearchActiveToDisplayCountAtom,
+    allContactsToDisplayCountAtom,
     displayContactsCountAtom,
     editContactActionAtom,
   }

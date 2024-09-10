@@ -25,7 +25,7 @@ function FilteredContacts({
     newContactsToDisplayAtomsAtom,
     submittedContactsToDisplayAtomsAtom,
     nonSubmittedContactsToDisplayAtomsAtom,
-    allContactsWithSearchActiveToDisplayAtomsAtom,
+    allContactsToDisplayAtomsAtom,
   } = useMolecule(contactSelectMolecule)
   const customContactToAdd = useAtomValue(searchTextAsCustomContactAtom)
   const toDisplay = useAtomValue(
@@ -35,7 +35,7 @@ function FilteredContacts({
         ? submittedContactsToDisplayAtomsAtom
         : filter === 'nonSubmitted'
           ? nonSubmittedContactsToDisplayAtomsAtom
-          : allContactsWithSearchActiveToDisplayAtomsAtom
+          : allContactsToDisplayAtomsAtom
   )
 
   const setContactsFilter = useSetAtom(contactsFilterAtom)

@@ -34,7 +34,7 @@ function ContactsCountIndicator({
     newContactsToDisplayCountAtom,
     submittedContactsToDisplayCountAtom,
     nonSubmittedContactsToDisplayCountAtom,
-    allContactsWithSearchActiveToDisplayCountAtom,
+    allContactsToDisplayCountAtom,
     displayContactsCountAtom,
   } = useMolecule(contactSelectMolecule)
 
@@ -46,9 +46,7 @@ function ContactsCountIndicator({
   const nonSubmittedContactsToDisplayCount = useAtomValue(
     nonSubmittedContactsToDisplayCountAtom
   )
-  const allContactsWithSearchActiveToDisplayCount = useAtomValue(
-    allContactsWithSearchActiveToDisplayCountAtom
-  )
+  const allContactsToDisplayCount = useAtomValue(allContactsToDisplayCountAtom)
 
   const contactsCount =
     routeName === 'New'
@@ -57,7 +55,7 @@ function ContactsCountIndicator({
         ? submittedContactsToDisplayCount
         : routeName === 'NonSubmitted'
           ? nonSubmittedContactsToDisplayCount
-          : allContactsWithSearchActiveToDisplayCount
+          : allContactsToDisplayCount
 
   return displayContactsCount ? (
     <Stack

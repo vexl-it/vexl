@@ -27,7 +27,6 @@ import {translationAtom} from '../../../../utils/localization/I18nProvider'
 import {navigationRef} from '../../../../utils/navigation'
 import reportError from '../../../../utils/reportError'
 import showErrorAlert from '../../../../utils/showErrorAlert'
-import {toCommonErrorMessage} from '../../../../utils/useCommonErrorMessages'
 import {askAreYouSureActionAtom} from '../../../AreYouSureDialog'
 import {contactsMigratedAtom} from '../../../VersionMigrations/atoms'
 
@@ -50,7 +49,7 @@ export const createUserAtContactMsActionAtom = atom(
     }: {request: CreateUserRequest; credentials: UserSessionCredentials}
   ) => {
     const {t} = get(translationAtom)
-    const contactApi = contact.privateApi({
+    const contactApi = contact.api({
       platform,
       clientVersion: versionCode,
       clientSemver: version,
@@ -59,15 +58,16 @@ export const createUserAtContactMsActionAtom = atom(
     })
 
     return pipe(
-      contactApi.createUser(request),
+      effectToTaskEither(contactApi.createUser({body: request})),
       TE.mapLeft((l) => {
         switch (l._tag) {
-          case 'UnexpectedApiResponseErrorAxios':
-            return t('common.unexpectedServerResponse')
-          case 'NetworkError':
-            return toCommonErrorMessage(l, t) ?? t('common.unknownError')
-          case 'UnknownErrorAxios':
-          case 'BadStatusCodeError':
+          // case 'UnexpectedApiResponseErrorAxios':
+          //   return t('common.unexpectedServerResponse')
+          // case 'NetworkError':
+          //   return toCommonErrorMessage(l, t) ?? t('common.unknownError')
+          case 'UnknownClientError':
+          case 'UnknownServerError':
+          case 'NotFoundError':
             return t('common.unknownError')
         }
       })
@@ -317,7 +317,7 @@ export const finishLoginActionAtom = atom(
       }),
       TE.bindTo('session'),
       TE.bindW('userExists', ({session}) => {
-        const contactApi = contact.privateApi({
+        const contactApi = contact.api({
           platform,
           clientVersion: versionCode,
           clientSemver: version,
@@ -325,7 +325,11 @@ export const finishLoginActionAtom = atom(
           getUserSessionCredentials: () => session.sessionCredentials,
         })
 
-        return contactApi.checkUserExists({notifyExistingUserAboutLogin: true})
+        return effectToTaskEither(
+          contactApi.checkUserExists({
+            query: {notifyExistingUserAboutLogin: true},
+          })
+        )
       }),
       TE.match(
         (e) => {

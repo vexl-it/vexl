@@ -1,4 +1,5 @@
 import messaging from '@react-native-firebase/messaging'
+import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {pipe} from 'fp-ts/function'
 import * as A from 'fp-ts/lib/Array'
 import * as T from 'fp-ts/lib/Task'
@@ -38,7 +39,9 @@ export function useRefreshNotificationTokenOnResumeAssumeLoggedIn(): void {
       else storage._storage.delete(NOTIFICATION_TOKEN_CACHE_KEY)
 
       void pipe(
-        api.contact.updateFirebaseToken({firebaseToken: newToken}),
+        effectToTaskEither(
+          api.contact.updateFirebaseToken({body: {firebaseToken: newToken}})
+        ),
         TE.match(
           (e) => {
             reportError(

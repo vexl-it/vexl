@@ -32,18 +32,23 @@ export function useRefreshUserOnContactService(): void {
 
         console.info('🦋 Refreshing user')
         void pipe(
-          api.contact.refreshUser({offersAlive: true}),
+          effectToTaskEither(
+            api.contact.refreshUser({body: {offersAlive: true}})
+          ),
           TE.match(
             (e) => {
               if (e._tag === 'UserNotFoundError') {
                 console.warn('🦋 🚨 User to refresh not found. Logging out')
                 void logout()
-              } else if (e._tag === 'NetworkError') {
-                console.warn(
-                  '🦋 Network error refreshing user. Not logging out.',
-                  e
-                )
-              } else if (e._tag === 'UnknownErrorAxios') {
+                // } else if (e._tag === 'NetworkError') {
+                //   console.warn(
+                //     '🦋 Network error refreshing user. Not logging out.',
+                //     e
+                //   )
+              } else if (
+                e._tag === 'UnknownClientError' ||
+                e._tag === 'UnknownServerError'
+              ) {
                 reportError(
                   'warn',
                   new Error('Unknown error refreshing user. Not logging out.'),
@@ -53,7 +58,7 @@ export function useRefreshUserOnContactService(): void {
                   '🦋 🚨 Unknown error refreshing user. Not logging out.',
                   e._tag
                 )
-              } else if (e._tag === 'UnexpectedApiResponseErrorAxios') {
+              } else if (e._tag === 'UnexpectedApiResponseError') {
                 reportError(
                   'warn',
                   new Error(
@@ -65,10 +70,8 @@ export function useRefreshUserOnContactService(): void {
                   '🦋 🚨 UnexpectedApiResponseError error refreshing user. Not logging out.',
                   e._tag
                 )
-              } else if (e._tag === 'BadStatusCodeError') {
-                const codeStartsWith4XX = e.response.status
-                  .toString()
-                  .startsWith('4')
+              } else if (e._tag === 'NotFoundError') {
+                const codeStartsWith4XX = e.status.toString().startsWith('4')
                 if (codeStartsWith4XX) {
                   console.warn('🦋 🚨 Bad status code while refreshing user')
                   reportError(
@@ -93,7 +96,7 @@ export function useRefreshUserOnContactService(): void {
                 reportError(
                   'error',
                   new Error('Uncaught error refreshing user. Not logging out.'),
-                  e
+                  {e}
                 )
                 console.error(
                   '🦋 🚨 UnexpectedApiResponseError error refreshing user. Not logging out.',

@@ -1,9 +1,16 @@
 import {Schema} from '@effect/schema'
-import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
-import {HashedPhoneNumberE} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
+import {
+  PublicKeyPemBase64,
+  PublicKeyPemBase64E,
+} from '@vexl-next/cryptography/src/KeyHolder/brands'
+import {
+  HashedPhoneNumber,
+  HashedPhoneNumberE,
+} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {ConnectionLevelE} from '@vexl-next/domain/src/general/offers'
 import {FcmTokenE} from '@vexl-next/domain/src/utility/FcmToken.brand'
 import {BooleanfromString} from '@vexl-next/generic-utils/src/effect-helpers/BooleanFromString'
+import {z} from 'zod'
 import {PageRequestE, PageResponseE} from '../../Pagination.brand'
 
 export class InboxDoesNotExistError extends Schema.TaggedError<ImportListEmptyError>(
@@ -75,7 +82,7 @@ export type FetchMyContactsRequest = Schema.Schema.Type<
   typeof FetchMyContactsRequest
 >
 
-export const FetchMyContactsResponse = Schema.Struct({
+export const FetchMyContactsResponseE = Schema.Struct({
   ...PageResponseE.fields,
   items: Schema.Array(
     Schema.Struct({
@@ -84,7 +91,7 @@ export const FetchMyContactsResponse = Schema.Struct({
   ),
 })
 export type FetchMyContactsResponse = Schema.Schema.Type<
-  typeof FetchMyContactsResponse
+  typeof FetchMyContactsResponseE
 >
 
 export const FetchCommonConnectionsRequest = Schema.Struct({
@@ -94,7 +101,24 @@ export type FetchCommonConnectionsRequest = Schema.Schema.Type<
   typeof FetchCommonConnectionsRequest
 >
 
-export const FetchCommonConnectionsResponse = Schema.Struct({
+export const FetchCommonConnectionsResponse = z
+  .object({
+    commonContacts: z
+      .array(
+        z
+          .object({
+            publicKey: PublicKeyPemBase64,
+            common: z
+              .object({hashes: z.array(HashedPhoneNumber).readonly()})
+              .readonly(),
+          })
+          .readonly()
+      )
+      .readonly(),
+  })
+  .readonly()
+
+export const FetchCommonConnectionsResponseE = Schema.Struct({
   commonContacts: Schema.Array(
     Schema.Struct({
       publicKey: PublicKeyPemBase64E,
@@ -105,7 +129,7 @@ export const FetchCommonConnectionsResponse = Schema.Struct({
   ),
 })
 export type FetchCommonConnectionsResponse = Schema.Schema.Type<
-  typeof FetchCommonConnectionsResponse
+  typeof FetchCommonConnectionsResponseE
 >
 
 export const CheckUserExistsRequest = Schema.Struct({

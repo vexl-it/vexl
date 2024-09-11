@@ -5,9 +5,9 @@ import {
   CheckUserExistsRequest,
   CreateUserRequest,
   FetchCommonConnectionsRequest,
-  FetchCommonConnectionsResponse,
+  FetchCommonConnectionsResponseE,
   FetchMyContactsRequest,
-  FetchMyContactsResponse,
+  FetchMyContactsResponseE,
   ImportContactsRequest,
   ImportContactsResponse,
   ImportListEmptyError,
@@ -91,7 +91,7 @@ export const FetchMyContactsEndpoint = Api.get(
 ).pipe(
   Api.setSecurity(ServerSecurity),
   Api.setRequestQuery(FetchMyContactsRequest),
-  Api.setResponseBody(FetchMyContactsResponse)
+  Api.setResponseBody(FetchMyContactsResponseE)
 )
 
 export const FetchCommonConnectionsEndpoint = Api.post(
@@ -100,7 +100,7 @@ export const FetchCommonConnectionsEndpoint = Api.post(
 ).pipe(
   Api.setSecurity(ServerSecurity),
   Api.setRequestBody(FetchCommonConnectionsRequest),
-  Api.setResponseBody(FetchCommonConnectionsResponse)
+  Api.setResponseBody(FetchCommonConnectionsResponseE)
 )
 
 const UserApiGroup = ApiGroup.make('User').pipe(

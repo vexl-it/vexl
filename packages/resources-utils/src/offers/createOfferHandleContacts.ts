@@ -8,7 +8,7 @@ import {
   type OfferPublicPart,
   type SymmetricKey,
 } from '@vexl-next/domain/src/general/offers'
-import {type ContactPrivateApi} from '@vexl-next/rest-api/src/services/contact'
+import {type ContactApi} from '@vexl-next/rest-api/src/services/contact'
 import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
@@ -55,7 +55,7 @@ export default function createNewOfferForMyContacts({
   onProgress,
 }: {
   offerApi: OfferApi
-  contactApi: ContactPrivateApi
+  contactApi: ContactApi
   publicPart: OfferPublicPart
   ownerKeyPair: PrivateKeyHolder
   countryPrefix: CountryPrefix

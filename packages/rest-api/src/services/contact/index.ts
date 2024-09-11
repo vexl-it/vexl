@@ -1,7 +1,6 @@
 import {Schema} from '@effect/schema'
 import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
-import {Option} from 'effect'
 import {type PlatformName} from '../../PlatformName'
 import {type ServiceUrl} from '../../ServiceUrl.brand'
 import {type GetUserSessionCredentials} from '../../UserSessionCredentials.brand'
@@ -23,9 +22,8 @@ import {
   UserNotFoundError,
 } from './contracts'
 import {ContactApiSpecification} from './specification'
-import { HEADER_PLATFORM, HEADER_CLIENT_VERSION, HEADER_CRYPTO_VERSION } from '../../constants'
 
-const encodeCommonHeaders = Schema.encodeSync(CommonHeaders)
+const decodeCommonHeaders = Schema.decodeSync(CommonHeaders)
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function api({
@@ -50,17 +48,9 @@ export function api({
     url,
   })
 
-  const commonHeaders = new CommonHeaders({
-    'user-agent': {
-      _tag: 'VexlAppUserAgentHeader' as const,
-      platform,
-      versionCode: clientVersion,
-      semver: Option.some(clientSemver),
-    },
-    [HEADER_PLATFORM]: Option.some(platform),
-    [HEADER_CLIENT_VERSION]: Option.some(clientVersion) ?? 10,
-    [HEADER_CRYPTO_VERSION]: Option.some(2),
-  })
+  const commonHeaders = {
+    'user-agent': `Vexl/${clientVersion} (${clientSemver}) ${platform}`,
+  }
 
   return {
     checkUserExists: (checkUserExistsInput: CheckUserExistsInput) =>
@@ -69,14 +59,14 @@ export function api({
       handleCommonErrorsEffect(
         client.createUser({
           body: createUserInput.body,
-          headers: encodeCommonHeaders(commonHeaders),
+          headers: decodeCommonHeaders(commonHeaders),
         })
       ),
     refreshUser: (refreshUserInput: RefreshUserInput) =>
       handleCommonAndExpectedErrorsEffect(
         client.refreshUser({
           body: refreshUserInput.body,
-          headers: encodeCommonHeaders(commonHeaders),
+          headers: decodeCommonHeaders(commonHeaders),
         }),
         UserNotFoundError
       ),
@@ -84,12 +74,10 @@ export function api({
       handleCommonErrorsEffect(
         client.updateFirebaseToken({
           body: updateFirebaseTokenInput.body,
-          headers: encodeCommonHeaders(commonHeaders),
+          headers: decodeCommonHeaders(commonHeaders),
         })
       ),
-    deleteUser: () => {
-      handleCommonErrorsEffect(client.deleteUser({}))
-    },
+    deleteUser: () => handleCommonErrorsEffect(client.deleteUser({})),
     importContacts: (importContactsInput: ImportContactsInput) =>
       handleCommonAndExpectedErrorsEffect(
         client.importContacts(importContactsInput),

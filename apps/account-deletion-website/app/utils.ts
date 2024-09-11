@@ -133,8 +133,8 @@ export function createContactsPrivateApi({
   hash: string
   publicKey: PublicKeyPemBase64
   signature: string
-}): contactsApi.ContactPrivateApi {
-  return contactsApi.privateApi({
+}): contactsApi.ContactApi {
+  return contactsApi.api({
     getUserSessionCredentials: () => ({
       hash,
       publicKey,

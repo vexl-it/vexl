@@ -4,7 +4,7 @@ import {
   type OfferAdminId,
   type SymmetricKey,
 } from '@vexl-next/domain/src/general/offers'
-import {type ContactPrivateApi} from '@vexl-next/rest-api/src/services/contact'
+import {type ContactApi} from '@vexl-next/rest-api/src/services/contact'
 import {type ServerPrivatePart} from '@vexl-next/rest-api/src/services/offer/contracts'
 import * as A from 'fp-ts/Array'
 import * as T from 'fp-ts/Task'
@@ -32,7 +32,7 @@ export function fetchInfoAndGeneratePrivatePayloads({
   ownerCredentials,
   onProgress,
 }: {
-  contactApi: ContactPrivateApi
+  contactApi: ContactApi
   intendedConnectionLevel: IntendedConnectionLevel
   symmetricKey: SymmetricKey
   ownerCredentials: PrivateKeyHolder

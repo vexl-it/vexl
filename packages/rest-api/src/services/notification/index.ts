@@ -1,101 +1,48 @@
 import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
-import {type CreateAxiosDefaults} from 'axios'
-import * as TE from 'fp-ts/TaskEither'
-import {pipe} from 'fp-ts/function'
-import urlJoin from 'url-join'
 import {type PlatformName} from '../../PlatformName'
 import {type ServiceUrl} from '../../ServiceUrl.brand'
 import {type GetUserSessionCredentials} from '../../UserSessionCredentials.brand'
+import {createClientInstanceWithAuth} from '../../client'
 import {
-  axiosCallWithValidation,
-  axiosCallWithValidationSchema,
-  createAxiosInstanceWithAuthAndLogging,
-  type ExtractLeftTE,
-  type LoggingFunction,
+  handleCommonAndExpectedErrorsEffect,
+  handleCommonErrorsEffect,
 } from '../../utils'
-import {
-  GetPublicKeyResponse,
-  InvalidFcmCypherError,
-  IssueNotificationResponse,
-  SendingNotificationError,
-  type IssueNotificationRequest,
-} from './contract'
+import {IssueNotificationErrors, type IssueNotificationInput} from './contract'
+import {NotificationApiSpecification} from './specification'
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export function privateApi({
+export function api({
   platform,
   clientVersion,
   clientSemver,
   url,
   getUserSessionCredentials,
-  axiosConfig,
-  loggingFunction,
 }: {
   platform: PlatformName
   clientVersion: VersionCode
   clientSemver: SemverString
   url: ServiceUrl
   getUserSessionCredentials: GetUserSessionCredentials
-  axiosConfig?: Omit<CreateAxiosDefaults, 'baseURL'>
-  loggingFunction?: LoggingFunction | null
 }) {
-  const axiosInstance = createAxiosInstanceWithAuthAndLogging(
-    getUserSessionCredentials,
+  const client = createClientInstanceWithAuth({
+    api: NotificationApiSpecification,
     platform,
     clientVersion,
     clientSemver,
-    {
-      ...axiosConfig,
-      baseURL: urlJoin(url, '/'),
-    },
-    loggingFunction
-  )
+    getUserSessionCredentials,
+    url,
+  })
 
   return {
-    getNotificationPublicKey: () => {
-      return pipe(
-        axiosCallWithValidation(
-          axiosInstance,
-          {
-            url: '/cypher-public-key',
-            method: 'get',
-          },
-          GetPublicKeyResponse
-        )
-      )
-    },
-
-    issueNotification(request: IssueNotificationRequest) {
-      return pipe(
-        axiosCallWithValidationSchema(
-          axiosInstance,
-          {
-            url: '/issue-notification',
-            method: 'post',
-            data: request,
-          },
-          IssueNotificationResponse
-        ),
-        TE.mapLeft((e) => {
-          if (e._tag === 'BadStatusCodeError' && e.response.status === 400) {
-            // TODO this can be written in a better way using schema unions. Let's keep it like this for now
-            if (e.response.data._tag === 'InvalidFcmCypherError')
-              return new InvalidFcmCypherError()
-            if (e.response.data._tag === 'SendingNotificationError')
-              return new SendingNotificationError({
-                tokenInvalid: e.response.data.tokenInvalid === true,
-              })
-          }
-          return e
-        })
-      )
-    },
+    getNotificationPublicKey: () =>
+      handleCommonErrorsEffect(client.getNotificationPublicKey({})),
+    issueNotification: (issueNotificationInput: IssueNotificationInput) =>
+      handleCommonAndExpectedErrorsEffect(
+        client.issueNotification(issueNotificationInput),
+        IssueNotificationErrors
+      ),
   }
 }
 
-export type NotificationPrivateApi = ReturnType<typeof privateApi>
-
-export type ApiErrorFetchNotificationToken = ExtractLeftTE<
-  ReturnType<NotificationPrivateApi['getNotificationPublicKey']>
->
+export type NotificationApi = ReturnType<typeof api>

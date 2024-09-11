@@ -1,19 +1,13 @@
 import {Schema} from '@effect/schema'
 import * as S from '@effect/schema/Schema'
-import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {FcmCypherE} from '@vexl-next/domain/src/general/notifications'
-import {z} from 'zod'
 
-export const GetPublicKeyResponse = z.object({
-  publicKey: PublicKeyPemBase64,
-})
-
-export const GetPublicKeyResponseE = S.Struct({
+export const GetPublicKeyResponse = S.Struct({
   publicKey: PublicKeyPemBase64E,
 })
 
-export type GetPublicKeyResponse = S.Schema.Type<typeof GetPublicKeyResponseE>
+export type GetPublicKeyResponse = S.Schema.Type<typeof GetPublicKeyResponse>
 
 export class IssueNotificationRequest extends S.Class<IssueNotificationRequest>(
   'IssueNotificationRequest'
@@ -45,3 +39,15 @@ export class SendingNotificationError extends S.TaggedError<SendingNotificationE
     }),
   }
 ) {}
+
+export const IssueNotificationErrors = Schema.Union(
+  InvalidFcmCypherError,
+  SendingNotificationError
+)
+
+export const IssueNotificationInput = Schema.Struct({
+  body: IssueNotificationRequest,
+})
+export type IssueNotificationInput = Schema.Schema.Type<
+  typeof IssueNotificationInput
+>

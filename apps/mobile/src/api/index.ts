@@ -18,7 +18,7 @@ import {type ChatPrivateApi} from '@vexl-next/rest-api/src/services/chat'
 import {type ContactApi} from '@vexl-next/rest-api/src/services/contact'
 import {type FeedbackApi} from '@vexl-next/rest-api/src/services/feedback'
 import {type LocationApi} from '@vexl-next/rest-api/src/services/location'
-import {type NotificationPrivateApi} from '@vexl-next/rest-api/src/services/notification'
+import {type NotificationApi} from '@vexl-next/rest-api/src/services/notification'
 import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
 import {type UserApi} from '@vexl-next/rest-api/src/services/user'
 import {atom, useAtomValue} from 'jotai'
@@ -101,7 +101,7 @@ export const apiAtom = atom((get) => {
       url: apiEnv.locationMs,
       getUserSessionCredentials,
     }),
-    notification: notification.privateApi({
+    notification: notification.api({
       platform,
       clientVersion: versionCode,
       clientSemver: version,
@@ -131,7 +131,7 @@ export function usePrivateApiAssumeLoggedIn(): {
   chat: ChatPrivateApi
   user: UserApi
   location: LocationApi
-  notification: NotificationPrivateApi
+  notification: NotificationApi
   btcExchangeRate: BtcExchangeRateApi
   feedback: FeedbackApi
 } {

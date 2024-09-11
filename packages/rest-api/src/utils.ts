@@ -294,9 +294,6 @@ export function createAxiosInstanceWithAuthAndLogging(
   return axiosInstance
 }
 
-export type ExtractLeftTE<T extends TE.TaskEither<any, any>> =
-  T extends TE.TaskEither<infer L, unknown> ? L : never
-
 export const handleCommonErrorsEffect = <R, C = never>(
   effect: Effect.Effect<R, ClientError.ClientError<number>, C>
 ): Effect.Effect<

@@ -1,14 +1,15 @@
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {FcmCypher} from '@vexl-next/domain/src/general/notifications'
 import {type FcmToken} from '@vexl-next/domain/src/utility/FcmToken.brand'
-import {type NotificationPrivateApi} from '@vexl-next/rest-api/src/services/notification'
+import {type NotificationApi} from '@vexl-next/rest-api/src/services/notification'
 import * as TE from 'fp-ts/lib/TaskEither'
 import {pipe} from 'fp-ts/lib/function'
-import {type ExtractLeftTE} from '../utils/ExtractLeft'
+import {effectToTaskEither} from '../effect-helpers/TaskEitherConverter'
+import {type ExtractRightFromEffect} from '../utils/ExtractLeft'
 import {eciesEncrypt, type CryptoError} from '../utils/crypto'
 
-export type ApiErrorFetchNotificationToken = ExtractLeftTE<
-  ReturnType<NotificationPrivateApi['getNotificationPublicKey']>
+export type ApiErrorFetchNotificationToken = ExtractRightFromEffect<
+  ReturnType<NotificationApi['getNotificationPublicKey']>
 >
 
 export function fetchAndEncryptFcmForOffer({
@@ -16,10 +17,10 @@ export function fetchAndEncryptFcmForOffer({
   notificationApi,
 }: {
   fcmToken: FcmToken
-  notificationApi: NotificationPrivateApi
+  notificationApi: NotificationApi
 }): TE.TaskEither<CryptoError | ApiErrorFetchNotificationToken, FcmCypher> {
   return pipe(
-    notificationApi.getNotificationPublicKey(),
+    effectToTaskEither(notificationApi.getNotificationPublicKey()),
     TE.chainW(({publicKey}) => encryptFcmForOffer({publicKey, fcmToken}))
   )
 }

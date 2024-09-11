@@ -1,5 +1,5 @@
 import {NodeContext} from '@effect/platform-node'
-import {NotificationServiceSpecification} from '@vexl-next/rest-api/src/services/notification/specification'
+import {NotificationApiSpecification} from '@vexl-next/rest-api/src/services/notification/specification'
 import {
   cryptoConfig,
   healthServerPortConfig,
@@ -15,7 +15,7 @@ import {FirebaseMessagingLayer} from './FirebaseMessagingLayer'
 import {getCypherPublicKeyHandler} from './routes/getCypherPublicKeyHandler'
 import {IssueNotifcationHandler} from './routes/IssueNotificationRouteLive'
 
-export const app = RouterBuilder.make(NotificationServiceSpecification).pipe(
+export const app = RouterBuilder.make(NotificationApiSpecification).pipe(
   RouterBuilder.handle(IssueNotifcationHandler),
   RouterBuilder.handle(getCypherPublicKeyHandler),
   RouterBuilder.build,

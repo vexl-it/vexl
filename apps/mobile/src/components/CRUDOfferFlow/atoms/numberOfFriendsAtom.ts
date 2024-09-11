@@ -1,6 +1,7 @@
-import {type ExtractLeftTE} from '@vexl-next/resources-utils/src/utils/ExtractLeft'
+import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
+import {type ExtractRightFromEffect} from '@vexl-next/resources-utils/src/utils/ExtractLeft'
 import {MAX_PAGE_SIZE} from '@vexl-next/rest-api/src/Pagination.brand'
-import {type ContactPrivateApi} from '@vexl-next/rest-api/src/services/contact'
+import {type ContactApi} from '@vexl-next/rest-api/src/services/contact'
 import {sequenceS} from 'fp-ts/Apply'
 import * as E from 'fp-ts/Either'
 import * as T from 'fp-ts/Task'
@@ -12,7 +13,7 @@ import {apiAtom} from '../../../api'
 const numberOfFriendsStorageAtom = atom<
   E.Either<
     | {_tag: 'friendsNotLoaded'}
-    | ExtractLeftTE<ReturnType<ContactPrivateApi['fetchMyContacts']>>,
+    | ExtractRightFromEffect<ReturnType<ContactApi['fetchMyContacts']>>,
     {
       firstLevelFriendsCount: number
       secondLevelFriendsCount: number
@@ -27,16 +28,24 @@ const numberOfFriendsAtom = atom(
 
     void pipe(
       sequenceS(TE.ApplicativeSeq)({
-        firstLevel: api.contact.fetchMyContacts({
-          page: 0,
-          limit: MAX_PAGE_SIZE,
-          level: 'FIRST',
-        }),
-        secondLevel: api.contact.fetchMyContacts({
-          page: 0,
-          limit: MAX_PAGE_SIZE,
-          level: 'ALL',
-        }),
+        firstLevel: effectToTaskEither(
+          api.contact.fetchMyContacts({
+            query: {
+              page: 0,
+              limit: MAX_PAGE_SIZE,
+              level: 'FIRST',
+            },
+          })
+        ),
+        secondLevel: effectToTaskEither(
+          api.contact.fetchMyContacts({
+            query: {
+              page: 0,
+              limit: MAX_PAGE_SIZE,
+              level: 'ALL',
+            },
+          })
+        ),
       }),
       TE.map((result) => {
         return {

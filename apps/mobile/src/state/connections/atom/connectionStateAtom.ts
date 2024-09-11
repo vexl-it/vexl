@@ -4,9 +4,10 @@ import {
   UnixMilliseconds,
   unixMillisecondsNow,
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {type ExtractLeftTE} from '@vexl-next/resources-utils/src/utils/ExtractLeft'
+import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
+import {type ExtractRightFromEffect} from '@vexl-next/resources-utils/src/utils/ExtractLeft'
 import {MAX_PAGE_SIZE} from '@vexl-next/rest-api/src/Pagination.brand'
-import {type ContactPrivateApi} from '@vexl-next/rest-api/src/services/contact'
+import {type ContactApi} from '@vexl-next/rest-api/src/services/contact'
 import {sequenceS} from 'fp-ts/Apply'
 import type * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
@@ -35,17 +36,21 @@ export default connectionStateAtom
 
 function fetchContacts(
   level: ConnectionLevel,
-  api: ContactPrivateApi
+  api: ContactApi
 ): TE.TaskEither<
-  ExtractLeftTE<ReturnType<ContactPrivateApi['fetchMyContacts']>>,
+  ExtractRightFromEffect<ReturnType<ContactApi['fetchMyContacts']>>,
   PublicKeyPemBase64[]
 > {
   return pipe(
-    api.fetchMyContacts({
-      level,
-      page: 0,
-      limit: MAX_PAGE_SIZE,
-    }),
+    effectToTaskEither(
+      api.fetchMyContacts({
+        query: {
+          level,
+          page: 0,
+          limit: MAX_PAGE_SIZE,
+        },
+      })
+    ),
     TE.map((one) => one.items.map((oneItem) => oneItem.publicKey))
   )
 }
@@ -64,9 +69,13 @@ export const syncConnectionsActionAtom = atom(
         secondLevel: fetchContacts('SECOND', api.contact),
       }),
       TE.bindW('commonFriends', ({firstLevel, secondLevel}) =>
-        api.contact.fetchCommonConnections({
-          publicKeys: deduplicate([...firstLevel, ...secondLevel]),
-        })
+        effectToTaskEither(
+          api.contact.fetchCommonConnections({
+            body: {
+              publicKeys: deduplicate([...firstLevel, ...secondLevel]),
+            },
+          })
+        )
       ),
       TE.bindW('lastUpdate', () => TE.right(updateStarted)),
       TE.match(
@@ -75,10 +84,10 @@ export const syncConnectionsActionAtom = atom(
             title: 'Error while syncing connections',
             body: e._tag,
           })
-          if (e._tag === 'NetworkError') {
-            // TODO let user know somehow
-            return false
-          }
+          // if (e._tag === 'NetworkError') {
+          //   // TODO let user know somehow
+          //   return false
+          // }
           reportError(
             'warn',
             new Error('Unable to refresh connections state'),

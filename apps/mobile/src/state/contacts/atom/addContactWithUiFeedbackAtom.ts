@@ -1,4 +1,5 @@
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
+import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {parsePhoneNumber} from 'awesome-phonenumber'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
@@ -157,12 +158,16 @@ const importContactActionAtom = atom(
         return v
       }),
       TE.chainFirstW(() =>
-        contactApi.importContacts({
-          contacts: [
-            newContact.computedValues.hash,
-            ...get(importedContactsHashesAtom),
-          ],
-        })
+        effectToTaskEither(
+          contactApi.importContacts({
+            body: {
+              contacts: [
+                newContact.computedValues.hash,
+                ...get(importedContactsHashesAtom),
+              ],
+            },
+          })
+        )
       ),
       TE.map(() => {
         set(storedContactsAtom, (contacts) => [

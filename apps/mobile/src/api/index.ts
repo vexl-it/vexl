@@ -15,7 +15,7 @@ import {type UserSessionCredentials} from '@vexl-next/rest-api/src/UserSessionCr
 
 import {type BtcExchangeRateApi} from '@vexl-next/rest-api/src/services/btcExchangeRate'
 import {type ChatPrivateApi} from '@vexl-next/rest-api/src/services/chat'
-import {type ContactPrivateApi} from '@vexl-next/rest-api/src/services/contact'
+import {type ContactApi} from '@vexl-next/rest-api/src/services/contact'
 import {type FeedbackApi} from '@vexl-next/rest-api/src/services/feedback'
 import {type LocationApi} from '@vexl-next/rest-api/src/services/location'
 import {type NotificationPrivateApi} from '@vexl-next/rest-api/src/services/notification'
@@ -126,7 +126,7 @@ export const apiAtom = atom((get) => {
 })
 
 export function usePrivateApiAssumeLoggedIn(): {
-  contact: ContactPrivateApi
+  contact: ContactApi
   offer: OfferApi
   chat: ChatPrivateApi
   user: UserApi

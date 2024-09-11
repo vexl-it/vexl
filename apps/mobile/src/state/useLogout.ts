@@ -51,7 +51,7 @@ export const logoutActionAtom = atom(null, async (get, set) => {
     await failSilently(set(deleteAllInboxesActionAtom)())
 
     // contact service
-    await failSilently(get(apiAtom).contact.deleteUser()())
+    await failSilently(effectToTaskEither(get(apiAtom).contact.deleteUser())())
 
     // User service
     await failSilently(effectToTaskEither(get(apiAtom).user.deleteUser())())

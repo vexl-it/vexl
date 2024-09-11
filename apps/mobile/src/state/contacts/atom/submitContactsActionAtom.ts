@@ -1,5 +1,6 @@
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {IsoDatetimeString} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
+import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/lib/function'
@@ -9,7 +10,6 @@ import {apiAtom} from '../../../api'
 import {loadingOverlayDisplayedAtom} from '../../../components/LoadingOverlayProvider'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
 import notEmpty from '../../../utils/notEmpty'
-import reportError from '../../../utils/reportError'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 import {syncConnectionsActionAtom} from '../../connections/atom/connectionStateAtom'
 import {updateAllOffersConnectionsActionAtom} from '../../connections/atom/offerToConnectionsAtom'
@@ -64,17 +64,21 @@ export const submitContactsActionAtom = atom(
           .filter(notEmpty)
       }),
       TE.chainFirstW((contacts) => {
-        return contactApi.importContacts({
-          contacts: contacts.map((one) => one.computedValues.hash),
-        })
+        return effectToTaskEither(
+          contactApi.importContacts({
+            body: {
+              contacts: contacts.map((one) => one.computedValues.hash),
+            },
+          })
+        )
       }),
       TE.match(
         (e) => {
-          if (e._tag !== 'NetworkError') {
-            reportError('error', new Error('error while submitting contacts'), {
-              e,
-            })
-          }
+          // if (e._tag !== 'NetworkError') {
+          //   reportError('error', new Error('error while submitting contacts'), {
+          //     e,
+          //   })
+          // }
 
           Alert.alert(toCommonErrorMessage(e, t) ?? t('common.unknownError'))
           return false

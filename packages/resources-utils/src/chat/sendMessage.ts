@@ -10,7 +10,7 @@ import {
 import {type FcmCypher} from '@vexl-next/domain/src/general/notifications'
 import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {type ChatPrivateApi} from '@vexl-next/rest-api/src/services/chat'
-import {type NotificationPrivateApi} from '@vexl-next/rest-api/src/services/notification'
+import {type NotificationApi} from '@vexl-next/rest-api/src/services/notification'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {callWithNotificationService} from '../notifications/callWithNotificationService'
@@ -38,7 +38,7 @@ export default function sendMessage({
   message: ChatMessage
   senderKeypair: PrivateKeyHolder
   theirFcmCypher?: FcmCypher | undefined
-  notificationApi: NotificationPrivateApi
+  notificationApi: NotificationApi
   otherSideVersion: SemverString | undefined
 }): TE.TaskEither<
   | JsonStringifyError

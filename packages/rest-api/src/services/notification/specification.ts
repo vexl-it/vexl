@@ -2,7 +2,7 @@ import {Schema} from '@effect/schema'
 import {Api} from 'effect-http'
 import {ServerSecurity} from '../../apiSecurity'
 import {
-  GetPublicKeyResponseE,
+  GetPublicKeyResponse,
   InvalidFcmCypherError,
   IssueNotificationRequest,
   IssueNotificationResponse,
@@ -30,9 +30,9 @@ export const IssueNotificationEndpoint = Api.post(
 export const GetNotificationPublicKeyEndpoint = Api.get(
   'getNotificationPublicKey',
   '/cypher-public-key'
-).pipe(Api.setResponseBody(GetPublicKeyResponseE))
+).pipe(Api.setResponseBody(GetPublicKeyResponse))
 
-export const NotificationServiceSpecification = Api.make({
+export const NotificationApiSpecification = Api.make({
   title: 'Notification service',
 }).pipe(
   Api.addEndpoint(IssueNotificationEndpoint),

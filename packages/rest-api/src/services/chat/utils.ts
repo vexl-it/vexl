@@ -3,11 +3,12 @@ import {
   type PrivateKeyHolder,
   type PublicKeyPemBase64,
 } from '@vexl-next/cryptography/src/KeyHolder'
+import {type ExtractLeftTE} from '@vexl-next/resources-utils/src/utils/ExtractLeft'
 import {type AxiosInstance} from 'axios'
 import * as E from 'fp-ts/Either'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
-import {axiosCallWithValidation, type ExtractLeftTE} from '../../utils'
+import {axiosCallWithValidation} from '../../utils'
 import {CreateChallengeResponse, type SignedChallenge} from './contracts'
 
 export type ErrorGeneratingChallenge = ExtractLeftTE<

@@ -1,9 +1,10 @@
 import {type FcmCypher} from '@vexl-next/domain/src/general/notifications'
 import * as SemverString from '@vexl-next/domain/src/utility/SmeverString.brand'
-import {type NotificationPrivateApi} from '@vexl-next/rest-api/src/services/notification'
+import {type NotificationApi} from '@vexl-next/rest-api/src/services/notification'
 import * as E from 'fp-ts/Either'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/lib/function'
+import {effectToTaskEither} from '../effect-helpers/TaskEitherConverter'
 import reportErrorFromResourcesUtils from '../reportErrorFromResourcesUtils'
 
 const FE_VERSION_SUPPORTING_V2_NOTIFICATIONS =
@@ -12,7 +13,7 @@ const FE_VERSION_SUPPORTING_V2_NOTIFICATIONS =
 interface NotificationArgs {
   otherSideVersion?: SemverString.SemverString | undefined
   fcmCypher?: FcmCypher | undefined
-  notificationApi: NotificationPrivateApi
+  notificationApi: NotificationApi
 }
 
 export function callWithNotificationService<
@@ -43,9 +44,13 @@ export function callWithNotificationService<
         }
 
         return pipe(
-          notificationApi.issueNotification({
-            fcmCypher,
-          }),
+          effectToTaskEither(
+            notificationApi.issueNotification({
+              body: {
+                fcmCypher,
+              },
+            })
+          ),
           TE.match(
             (e) => {
               reportErrorFromResourcesUtils(

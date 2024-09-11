@@ -11,7 +11,7 @@ import {type FcmCypher} from '@vexl-next/domain/src/general/notifications'
 import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {now} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {type ChatPrivateApi} from '@vexl-next/rest-api/src/services/chat'
-import {type NotificationPrivateApi} from '@vexl-next/rest-api/src/services/notification'
+import {type NotificationApi} from '@vexl-next/rest-api/src/services/notification'
 import * as TE from 'fp-ts/TaskEither'
 import {flow, pipe} from 'fp-ts/function'
 import {callWithNotificationService} from '../notifications/callWithNotificationService'
@@ -60,7 +60,7 @@ export function sendCancelMessagingRequest({
   myVersion: SemverString
   theirFcmCypher?: FcmCypher | undefined
   otherSideVersion: SemverString | undefined
-  notificationApi: NotificationPrivateApi
+  notificationApi: NotificationApi
 }): TE.TaskEither<
   | ApiErrorRequestMessaging
   | JsonStringifyError

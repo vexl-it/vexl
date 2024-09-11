@@ -1,13 +1,20 @@
 import {DevTools} from '@effect/experimental'
 import {NodeSocket} from '@effect/platform-node'
-import {type Config, type ConfigError, Effect, Layer} from 'effect'
+import {type Config, type ConfigError, Effect, Layer, Option} from 'effect'
+import {disableDevToolsInDevelopmentConfig} from './commonConfigs'
 
 export const devToolsLayer = (
   envConfig: Config.Config<'production' | 'development' | 'test'>
 ): Layer.Layer<never, ConfigError.ConfigError, never> =>
   Layer.unwrapEffect(
-    envConfig.pipe(
-      Effect.flatMap((env) => {
+    Effect.all([envConfig, disableDevToolsInDevelopmentConfig]).pipe(
+      Effect.flatMap(([env, disableDevTools]) => {
+        if (Option.getOrElse(disableDevTools, () => false)) {
+          return Effect.zipRight(
+            Effect.log('Dev tools disabled by config DISABLE_DEV_TOOLS = true'),
+            Effect.succeed(Layer.empty)
+          )
+        }
         if (env === 'development') {
           return Effect.zipRight(
             Effect.log(

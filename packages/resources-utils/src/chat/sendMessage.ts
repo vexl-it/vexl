@@ -60,6 +60,7 @@ export default function sendMessage({
         messagePreview: encryptedPreview,
         messageType: message.messageType,
         receiverPublicKey,
+        senderPublicKey: senderKeypair.publicKeyPemBase64,
         keyPair: senderKeypair,
       })({
         fcmCypher: theirFcmCypher,

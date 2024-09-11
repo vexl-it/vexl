@@ -75,7 +75,7 @@ export const sendRequestHandleUIActionAtom = atom(
       set(sendRequestActionAtom, {text, originOffer}),
       TE.matchE(
         (e) => {
-          if (e._tag === 'SenderUserInboxDoesNotExistError') {
+          if (e._tag === 'SenderInboxDoesNotExistError') {
             reportError('warn', new Error('Sender user inbox does not exist'), {
               e,
             })

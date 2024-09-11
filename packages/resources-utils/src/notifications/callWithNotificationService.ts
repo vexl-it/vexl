@@ -17,7 +17,7 @@ interface NotificationArgs {
 }
 
 export function callWithNotificationService<
-  T extends {notificationServiceReady: boolean} & object,
+  T extends object,
   L,
   R extends {notificationHandled: boolean},
 >(

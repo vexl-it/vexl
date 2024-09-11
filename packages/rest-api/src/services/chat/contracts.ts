@@ -1,12 +1,6 @@
 import {Schema} from '@effect/schema'
-import {
-  PrivateKeyHolder,
-  PublicKeyPemBase64,
-} from '@vexl-next/cryptography/src/KeyHolder'
-import {
-  PrivateKeyHolderE,
-  PublicKeyPemBase64E,
-} from '@vexl-next/cryptography/src/KeyHolder/brands'
+import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
+import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {
   MessageType,
   MessageTypeE,
@@ -18,58 +12,107 @@ import {
   UnixMilliseconds,
   UnixMillisecondsE,
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {BooleanFromString} from '@vexl-next/generic-utils/src/effect-helpers/BooleanFromString'
+import {EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
+import {Brand} from 'effect'
 import {z} from 'zod'
 import {
   NoContentResponse,
   NoContentResponseE,
 } from '../../NoContentResponse.brand'
+import {
+  ForbiddenMessageTypeError,
+  InboxDoesNotExistError,
+  NotPermittedToSendMessageToTargetInboxError,
+} from '../contact/contracts'
+
+export const NotificationServiceReadyQueryParams = Schema.Struct({
+  notificationServiceReady: BooleanFromString,
+})
 
 export class RequestCancelledError extends Schema.TaggedError<RequestCancelledError>(
   'RequestCancelledError'
 )('RequestCancelledError', {
   status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
+  code: Schema.optionalWith(Schema.Literal('100106'), {
+    default: () => '100106',
+  }),
 }) {}
 
 export class RequestNotFoundError extends Schema.TaggedError<RequestNotFoundError>(
   'RequestNotFoundError'
 )('RequestNotFoundError', {
   status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
+  code: Schema.optionalWith(Schema.Literal('100104'), {
+    default: () => '100104',
+  }),
 }) {}
 
-export class RequestAlreadyApprovedError extends Schema.TaggedError<RequestAlreadyApprovedError>(
-  'RequestAlreadyApprovedError'
-)('RequestAlreadyApprovedError', {
+export class RequestNotPendingError extends Schema.TaggedError<RequestNotPendingError>(
+  'RequestNotPendingError'
+)('RequestNotPendingError', {
   status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
+  code: Schema.optionalWith(Schema.Literal('100153'), {
+    default: () => '100153',
+  }),
 }) {}
 
 export class OtherSideAccountDeleted extends Schema.TaggedError<OtherSideAccountDeleted>(
   'OtherSideAccountDeleted'
 )('OtherSideAccountDeleted', {
+  code: Schema.optionalWith(Schema.Literal('100101'), {
+    default: () => '100101',
+  }),
   status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
 }) {}
 
-export class ReceiverOfferInboxDoesNotExistError extends Schema.TaggedError<ReceiverOfferInboxDoesNotExistError>(
-  'ReceiverOfferInboxDoesNotExistError'
-)('ReceiverOfferInboxDoesNotExistError', {
+export class ReceiverInboxDoesNotExistError extends Schema.TaggedError<ReceiverInboxDoesNotExistError>(
+  'ReceiverInboxDoesNotExistError'
+)('ReceiverInboxDoesNotExistError', {
+  status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
+  code: Schema.optionalWith(Schema.Literal('100101'), {
+    default: () => '100101',
+  }),
+}) {}
+
+export class SenderInboxDoesNotExistError extends Schema.TaggedError<SenderInboxDoesNotExistError>(
+  'SenderInboxDoesNotExistError'
+)('SenderInboxDoesNotExistError', {
+  status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
+  code: Schema.optionalWith(Schema.Literal('100107'), {
+    default: () => '100107',
+  }),
+}) {}
+
+export class RequestMessagingNotAllowedError extends Schema.TaggedError<RequestMessagingNotAllowedError>(
+  'RequestMessagingNotAllowedError'
+)('RequestMessagingNotAllowedError', {
   status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
 }) {}
 
-export class SenderUserInboxDoesNotExistError extends Schema.TaggedError<SenderUserInboxDoesNotExistError>(
-  'SenderUserInboxDoesNotExistError'
-)('SenderUserInboxDoesNotExistError', {
+export class InvalidChallengeError extends Schema.TaggedError<InvalidChallengeError>(
+  'InvalidChallengeError'
+)('InvalidChallengeError', {
   status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
 }) {}
+
+export const ChatChallenge = z
+  .string()
+  .transform((v) => Brand.nominal<typeof v & Brand.Brand<'ChatChallenge'>>()(v))
+
+export const ChatChallengeE = Schema.String.pipe(Schema.brand('ChatChallenge'))
+export type ChatChallenge = Schema.Schema.Type<typeof ChatChallengeE>
 
 export const SignedChallenge = z
   .object({
-    challenge: z.string(),
+    challenge: ChatChallenge,
     signature: z.string(),
   })
   .readonly()
 
 export const SignedChallengeE = Schema.Struct({
-  challenge: Schema.String,
-  signature: Schema.String,
+  challenge: ChatChallengeE,
+  signature: EcdsaSignature,
 })
 export type SignedChallenge = Schema.Schema.Type<typeof SignedChallengeE>
 
@@ -84,12 +127,17 @@ export type ServerMessageWithId = Schema.Schema.Type<
   typeof ServerMessageWithIdE
 >
 
-const RequestBaseWithChallenge = z.object({
-  keyPair: PrivateKeyHolder,
+export const RequestBaseWithChallenge = z.object({
+  publicKey: PublicKeyPemBase64,
+  signedChallenge: SignedChallenge,
 })
-const RequestBaseWithChallengeE = Schema.Struct({
-  keyPair: PrivateKeyHolderE,
+export const RequestBaseWithChallengeE = Schema.Struct({
+  publicKey: PublicKeyPemBase64E,
+  signedChallenge: SignedChallengeE,
 })
+export type RequestBaseWithChallenge = Schema.Schema.Type<
+  typeof RequestBaseWithChallengeE
+>
 
 export const UpdateInboxRequest = RequestBaseWithChallenge.extend({
   token: z.string().optional(),
@@ -128,6 +176,12 @@ export type CreateInboxResponse = Schema.Schema.Type<
   typeof CreateInboxResponseE
 >
 
+export const DeleteInboxErrors = Schema.Union(
+  InvalidChallengeError,
+  InboxDoesNotExistError
+)
+export type DeleteInboxErrors = Schema.Schema.Type<typeof DeleteInboxErrors>
+
 export const DeleteInboxRequest = RequestBaseWithChallenge.extend({})
 export const DeleteInboxRequestE = Schema.Struct({
   ...RequestBaseWithChallengeE.fields,
@@ -138,6 +192,14 @@ export const DeleteInboxResponse = NoContentResponse
 export const DeleteInboxResponseE = NoContentResponseE
 export type DeleteInboxResponse = Schema.Schema.Type<
   typeof DeleteInboxResponseE
+>
+
+export const DeletePulledMessagesErrors = Schema.Union(
+  InboxDoesNotExistError,
+  InvalidChallengeError
+)
+export type DeletePulledMessagesErrors = Schema.Schema.Type<
+  typeof DeletePulledMessagesErrors
 >
 
 export const DeletePulledMessagesRequest = RequestBaseWithChallenge.extend({})
@@ -154,6 +216,13 @@ export type DeletePulledMessagesResponse = Schema.Schema.Type<
   typeof DeletePulledMessagesResponseE
 >
 
+export const BlockInboxErrors = Schema.Union(
+  ReceiverInboxDoesNotExistError,
+  SenderInboxDoesNotExistError,
+  InvalidChallengeError
+)
+export type BlockInboxErrors = Schema.Schema.Type<typeof BlockInboxErrors>
+
 export const BlockInboxRequest = RequestBaseWithChallenge.extend({
   publicKeyToBlock: PublicKeyPemBase64,
   block: z.boolean(),
@@ -161,7 +230,7 @@ export const BlockInboxRequest = RequestBaseWithChallenge.extend({
 export const BlockInboxRequestE = Schema.Struct({
   ...RequestBaseWithChallengeE.fields,
   publicKeyToBlock: PublicKeyPemBase64E,
-  block: Schema.Boolean,
+  // block: Schema.Boolean, // not used inside the app
 })
 export type BlockInboxRequest = Schema.Schema.Type<typeof BlockInboxRequestE>
 
@@ -173,13 +242,18 @@ export const RequestApprovalRequest = z
   .object({
     publicKey: PublicKeyPemBase64,
     message: z.string(),
-    notificationServiceReady: z.boolean(),
   })
   .readonly()
+
+export const RequestApprovalErrors = Schema.Union(
+  ReceiverInboxDoesNotExistError,
+  SenderInboxDoesNotExistError,
+  RequestMessagingNotAllowedError
+)
+
 export const RequestApprovalRequestE = Schema.Struct({
   publicKey: PublicKeyPemBase64E,
   message: Schema.String,
-  notificationServiceReady: Schema.Boolean,
 })
 export type RequestApprovalRequest = Schema.Schema.Type<
   typeof RequestApprovalRequestE
@@ -196,15 +270,23 @@ export type RequestApprovalResponse = Schema.Schema.Type<
   typeof RequestApprovalResponseE
 >
 
+export const CancelRequestApprovalErrors = Schema.Union(
+  RequestNotPendingError,
+  ReceiverInboxDoesNotExistError,
+  SenderInboxDoesNotExistError,
+  InvalidChallengeError
+)
+export type CancelRequestApprovalErrors = Schema.Schema.Type<
+  typeof CancelRequestApprovalErrors
+>
+
 export const CancelApprovalRequest = z.object({
   publicKey: PublicKeyPemBase64,
   message: z.string(),
-  notificationServiceReady: z.boolean(),
 })
 export const CancelApprovalRequestE = Schema.Struct({
   publicKey: PublicKeyPemBase64E,
   message: Schema.String,
-  notificationServiceReady: Schema.Boolean,
 })
 export type CancelApprovalRequest = Schema.Schema.Type<
   typeof CancelApprovalRequestE
@@ -221,18 +303,28 @@ export type CancelApprovalResponse = Schema.Schema.Type<
   typeof CancelApprovalResponseE
 >
 
+export const ApproveRequestErrors = Schema.Union(
+  InvalidChallengeError,
+  RequestCancelledError,
+  RequestNotFoundError,
+  RequestNotPendingError,
+  ReceiverInboxDoesNotExistError,
+  SenderInboxDoesNotExistError
+)
+export type ApproveRequestErrors = Schema.Schema.Type<
+  typeof ApproveRequestErrors
+>
+
 export const ApproveRequestRequest = RequestBaseWithChallenge.extend({
   publicKeyToConfirm: PublicKeyPemBase64,
   message: z.string(),
   approve: z.boolean(),
-  notificationServiceReady: z.boolean(),
 })
 export const ApproveRequestRequestE = Schema.Struct({
   ...RequestBaseWithChallengeE.fields,
   publicKeyToConfirm: PublicKeyPemBase64E,
   message: Schema.String,
   approve: Schema.Boolean,
-  notificationServiceReady: Schema.Boolean,
 })
 export type ApproveRequestRequest = Schema.Schema.Type<
   typeof ApproveRequestRequestE
@@ -275,6 +367,11 @@ export type DeleteInboxesResponse = Schema.Schema.Type<
   typeof DeleteInboxesResponseE
 >
 
+export const RetrieveMessagesErrors = Schema.Union(
+  InboxDoesNotExistError,
+  InvalidChallengeError
+)
+
 export const RetrieveMessagesRequest = RequestBaseWithChallenge.extend({})
 export const RetrieveMessagesRequestE = Schema.Struct({
   ...RequestBaseWithChallengeE.fields,
@@ -294,20 +391,20 @@ export type RetrieveMessagesResponse = Schema.Schema.Type<
 >
 
 export const SendMessageRequest = z.object({
-  keyPair: PrivateKeyHolder,
+  senderPublicKey: PublicKeyPemBase64,
+  signedChallenge: SignedChallenge,
   receiverPublicKey: PublicKeyPemBase64,
   message: z.string(),
   messageType: MessageType,
   messagePreview: z.string().optional(),
-  notificationServiceReady: z.boolean(),
 })
 export const SendMessageRequestE = Schema.Struct({
-  keyPair: PrivateKeyHolderE,
+  signedChallenge: SignedChallengeE,
+  senderPublicKey: PublicKeyPemBase64E,
   receiverPublicKey: PublicKeyPemBase64E,
   message: Schema.String,
   messageType: MessageTypeE,
   messagePreview: Schema.optional(Schema.String),
-  notificationServiceReady: Schema.Boolean,
 })
 export type SendMessageRequest = Schema.Schema.Type<typeof SendMessageRequestE>
 
@@ -322,17 +419,24 @@ export type SendMessageResponse = Schema.Schema.Type<
   typeof SendMessageResponseE
 >
 
+export const LeaveChatErrors = Schema.Union(
+  InvalidChallengeError,
+  ReceiverInboxDoesNotExistError,
+  SenderInboxDoesNotExistError,
+  NotPermittedToSendMessageToTargetInboxError
+)
+
 export const LeaveChatRequest = z.object({
-  keyPair: PrivateKeyHolder,
+  senderPublicKey: PublicKeyPemBase64,
+  signedChallenge: SignedChallenge,
   receiverPublicKey: PublicKeyPemBase64,
   message: z.string(),
-  notificationServiceReady: z.boolean(),
 })
 export const LeaveChatRequestE = Schema.Struct({
-  keyPair: PrivateKeyHolderE,
+  senderPublicKey: PublicKeyPemBase64E,
+  signedChallenge: SignedChallengeE,
   receiverPublicKey: PublicKeyPemBase64E,
   message: Schema.String,
-  notificationServiceReady: Schema.Boolean,
 })
 export type LeaveChatRequest = Schema.Schema.Type<typeof LeaveChatRequestE>
 
@@ -371,6 +475,14 @@ export const InboxInBatchE = Schema.Struct({
 })
 export type InboxInBatch = Schema.Schema.Type<typeof InboxInBatchE>
 
+export const SendMessageErrors = Schema.Union(
+  ReceiverInboxDoesNotExistError,
+  SenderInboxDoesNotExistError,
+  NotPermittedToSendMessageToTargetInboxError,
+  ForbiddenMessageTypeError,
+  InvalidChallengeError
+)
+
 export const SendMessagesRequest = z.object({
   data: z.array(InboxInBatch),
 })
@@ -405,12 +517,13 @@ export const CreateChallengeRequestE = Schema.Struct({
 export type CreateChallengeRequest = Schema.Schema.Type<
   typeof CreateChallengeRequestE
 >
+
 export const CreateChallengeResponse = z.object({
-  challenge: z.string(),
+  challenge: ChatChallenge,
   expiration: UnixMilliseconds,
 })
 export const CreateChallengeResponseE = Schema.Struct({
-  challenge: Schema.String,
+  challenge: ChatChallengeE,
   expiration: UnixMillisecondsE,
 })
 export type CreateChallengeResponse = Schema.Schema.Type<
@@ -427,20 +540,26 @@ export type CreateChallengesRequest = Schema.Schema.Type<
   typeof CreateChallengesRequestE
 >
 
-export const CreateChallengesResponse = z.object({
-  challenges: z.array(
-    z.object({
-      publicKey: PublicKeyPemBase64,
-      challenge: z.string(),
-    })
-  ),
-  expiration: UnixMilliseconds,
-})
+export const CreateChallengesResponse = z
+  .object({
+    challenges: z
+      .array(
+        z
+          .object({
+            publicKey: PublicKeyPemBase64,
+            challenge: ChatChallenge,
+          })
+          .readonly()
+      )
+      .readonly(),
+    expiration: UnixMilliseconds,
+  })
+  .readonly()
 export const CreateChallengesResponseE = Schema.Struct({
   challenges: Schema.Array(
     Schema.Struct({
       publicKey: PublicKeyPemBase64E,
-      challenge: Schema.String,
+      challenge: ChatChallengeE,
     })
   ),
   expiration: UnixMillisecondsE,

@@ -9,7 +9,7 @@ import {
 } from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {ConnectionLevelE} from '@vexl-next/domain/src/general/offers'
 import {FcmTokenE} from '@vexl-next/domain/src/utility/FcmToken.brand'
-import {BooleanfromString} from '@vexl-next/generic-utils/src/effect-helpers/BooleanFromString'
+import {BooleanFromString} from '@vexl-next/generic-utils/src/effect-helpers/BooleanFromString'
 import {EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {z} from 'zod'
 import {PageRequestE, PageResponseE} from '../../Pagination.brand'
@@ -18,14 +18,24 @@ export class InboxDoesNotExistError extends Schema.TaggedError<InboxDoesNotExist
   'inboxDoesNotExist'
 )('inboxDoesNotExist', {
   status: Schema.optionalWith(Schema.Literal(404), {default: () => 404}),
-  code: Schema.optionalWith(Schema.Literal(100101), {default: () => 100101}),
+  code: Schema.optionalWith(Schema.Literal('100101'), {
+    default: () => '100101',
+  }),
 }) {}
 
 export class NotPermittedToSendMessageToTargetInboxError extends Schema.TaggedError<NotPermittedToSendMessageToTargetInboxError>(
   'notPermittedToSendMessageToTargetInbox'
 )('notPermittedToSendMessageToTargetInbox', {
   status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
-  code: Schema.optionalWith(Schema.Literal(100104), {default: () => 100104}),
+  code: Schema.optionalWith(Schema.Literal('100104'), {
+    default: () => '100104',
+  }),
+}) {}
+
+export class ForbiddenMessageTypeError extends Schema.TaggedError<ForbiddenMessageTypeError>(
+  'ForbiddenMessageTypeError'
+)('ForbiddenMessageTypeError', {
+  status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
 }) {}
 
 export class InitialImportContactsQuotaReachedError extends Schema.TaggedError<InitialImportContactsQuotaReachedError>(
@@ -44,7 +54,9 @@ export class UserNotFoundError extends Schema.TaggedError<UserNotFoundError>(
   'UserNotFoundError'
 )('UserNotFoundError', {
   status: Schema.optionalWith(Schema.Literal(404), {default: () => 404}),
-  code: Schema.optionalWith(Schema.Literal(100101), {default: () => 100101}),
+  code: Schema.optionalWith(Schema.Literal('100101'), {
+    default: () => '100101',
+  }),
 }) {}
 
 export const CreateUserRequest = Schema.Struct({
@@ -139,7 +151,7 @@ export type FetchCommonConnectionsResponse = Schema.Schema.Type<
 >
 
 export const CheckUserExistsRequest = Schema.Struct({
-  notifyExistingUserAboutLogin: BooleanfromString,
+  notifyExistingUserAboutLogin: BooleanFromString,
 })
 
 export const UserExistsResponse = Schema.Struct({

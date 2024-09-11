@@ -106,18 +106,30 @@ export class RedisService extends Context.Tag('RedisService')<
             )
           )
 
-        const releaseLockEffect = (lock: Lock): Effect.Effect<void> =>
-          Effect.promise(async () => await redlock.release(lock)).pipe(
+        const releaseLockEffect = (lock: Lock): Effect.Effect<void> => {
+          const now = Date.now()
+          if (lock.expiration < now) {
+            return Effect.logWarning(
+              `Attempted to release an expired lock. Lock time of ${lock.resources.join()} should be increased`,
+              {
+                resources: lock.expiration,
+                overExpirationMillis: now - lock.expiration,
+              }
+            )
+          }
+
+          return Effect.promise(async () => await redlock.release(lock)).pipe(
             Effect.zipLeft(
               Effect.logInfo('Released Redis lock', lock.resources)
             ),
             catchAllDefect((e) =>
               Effect.zipRight(
-                Effect.logError('Error while releasing lock', e, lock.value),
+                Effect.logError('Error while releasing lock', e, lock),
                 Effect.void
               )
             )
           )
+        }
 
         const withLock: RedisOperations['withLock'] =
           (program) =>

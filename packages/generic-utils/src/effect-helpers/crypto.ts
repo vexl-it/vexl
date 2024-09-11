@@ -18,6 +18,7 @@ import {
   eciesGTMEncrypt,
 } from '@vexl-next/cryptography/src/operations/ecies'
 import * as hmac from '@vexl-next/cryptography/src/operations/hmac'
+import {sha256} from '@vexl-next/cryptography/src/operations/sha'
 import {randomBytes} from 'crypto'
 import {Effect} from 'effect'
 
@@ -229,3 +230,14 @@ export const aesDecrpytE =
           })
       )
     )
+
+export const hashSha256 = (data: string): Effect.Effect<string, CryptoError> =>
+  Effect.sync(() => sha256(data)).pipe(
+    Effect.catchAllDefect(
+      (e) =>
+        new CryptoError({
+          message: `Unable to hash data with sha256, data: ${data}`,
+          error: e,
+        })
+    )
+  )

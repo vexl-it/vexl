@@ -86,3 +86,7 @@ export const internalServerPortConfig = Config.option(
 export const memoryDebugIntervalMsConfig = Config.option(
   Config.number('MEMORY_DEBUG_INTERVAL_MS')
 )
+
+export const disableDevToolsInDevelopmentConfig = Config.option(
+  Config.boolean('DISABLE_DEV_TOOLS')
+)

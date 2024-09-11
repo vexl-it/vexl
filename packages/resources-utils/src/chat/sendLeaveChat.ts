@@ -53,6 +53,7 @@ export default function sendLeaveChat({
       callWithNotificationService(api.leaveChat, {
         message: encrypted,
         receiverPublicKey,
+        senderPublicKey: senderKeypair.publicKeyPemBase64,
         keyPair: senderKeypair,
       })({
         notificationApi,

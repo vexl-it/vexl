@@ -110,7 +110,7 @@ function OfferInfo({
       submitRequest({text, originOffer: offer}),
       TE.match(
         (e) => {
-          if (e._tag === 'ReceiverOfferInboxDoesNotExistError') {
+          if (e._tag === 'ReceiverInboxDoesNotExistError') {
             Alert.alert(t('common.error'), t('offer.offerNotFound'), [
               {
                 text: t('common.close'),

@@ -67,7 +67,6 @@ export default function blockChatActionAtom(
       ),
       TE.chainW(() =>
         api.chat.blockInbox({
-          block: true,
           keyPair: chat.inbox.privateKey,
           publicKeyToBlock: chat.otherSide.publicKey,
         })

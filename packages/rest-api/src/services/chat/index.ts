@@ -1,3 +1,5 @@
+import {Schema} from '@effect/schema'
+import {type PrivateKeyHolder} from '@vexl-next/cryptography/src/KeyHolder'
 import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {type CreateAxiosDefaults} from 'axios'
@@ -21,16 +23,24 @@ import {
   BlockInboxResponse,
   CancelApprovalResponse,
   CreateChallengeResponse,
+  CreateChallengeResponseE,
   CreateChallengesResponse,
+  CreateChallengesResponseE,
   CreateInboxResponse,
   DeleteInboxResponse,
   DeleteInboxesResponse,
   DeletePulledMessagesResponse,
   LeaveChatResponse,
+  OtherSideAccountDeleted,
+  ReceiverInboxDoesNotExistError,
   RequestApprovalResponse,
+  RequestCancelledError,
+  RequestNotFoundError,
+  RequestNotPendingError,
   RetrieveMessagesResponse,
   SendMessageResponse,
   SendMessagesResponse,
+  SenderInboxDoesNotExistError,
   UpdateInboxResponse,
   type ApproveRequestRequest,
   type BlockInboxRequest,
@@ -42,16 +52,10 @@ import {
   type DeleteInboxesRequest,
   type DeletePulledMessagesRequest,
   type LeaveChatRequest,
-  type OtherSideAccountDeleted,
-  type ReceiverOfferInboxDoesNotExistError,
-  type RequestAlreadyApprovedError,
   type RequestApprovalRequest,
-  type RequestCancelledError,
-  type RequestNotFoundError,
   type RetrieveMessagesRequest,
   type SendMessageRequest,
   type SendMessagesRequest,
-  type SenderUserInboxDoesNotExistError,
   type UpdateInboxRequest,
 } from './contracts'
 import {addChallengeToRequest} from './utils'
@@ -88,11 +92,18 @@ export function privateApi({
 
   const addChallenge = addChallengeToRequest(axiosInstance)
 
+  type RequestWithGeneratableChallenge<T> = Omit<
+    T,
+    'publicKey' | 'signedChallenge'
+  > & {
+    keyPair: PrivateKeyHolder
+  }
+
   return {
     // ----------------------
     // 👇 Inbox
     // ----------------------
-    updateInbox(data: UpdateInboxRequest) {
+    updateInbox(data: RequestWithGeneratableChallenge<UpdateInboxRequest>) {
       return pipe(
         addChallenge(data),
         TE.chainW((data) =>
@@ -104,7 +115,7 @@ export function privateApi({
         )
       )
     },
-    createInbox(data: CreateInboxRequest) {
+    createInbox(data: RequestWithGeneratableChallenge<CreateInboxRequest>) {
       return pipe(
         addChallenge(data),
         TE.chainW((data) =>
@@ -116,7 +127,7 @@ export function privateApi({
         )
       )
     },
-    deleteInbox(data: DeleteInboxRequest) {
+    deleteInbox(data: RequestWithGeneratableChallenge<DeleteInboxRequest>) {
       return pipe(
         addChallenge(data),
         TE.chainW((data) =>
@@ -128,7 +139,9 @@ export function privateApi({
         )
       )
     },
-    deletePulledMessages(data: DeletePulledMessagesRequest) {
+    deletePulledMessages(
+      data: RequestWithGeneratableChallenge<DeletePulledMessagesRequest>
+    ) {
       return pipe(
         addChallenge(data),
         TE.chainW((data) =>
@@ -140,7 +153,7 @@ export function privateApi({
         )
       )
     },
-    blockInbox(data: BlockInboxRequest) {
+    blockInbox(data: RequestWithGeneratableChallenge<BlockInboxRequest>) {
       return pipe(
         addChallenge(data),
         TE.chainW((data) =>
@@ -160,25 +173,18 @@ export function privateApi({
             method: 'post',
             url: '/inboxes/approval/request',
             data,
-            params: {
-              notificationServiceReady: data.notificationServiceReady,
-            },
           },
           RequestApprovalResponse
         ),
         TE.mapLeft((e) => {
           if (e._tag === 'BadStatusCodeError') {
             if (e.response.data.code === '100101') {
-              return {
-                _tag: 'ReceiverOfferInboxDoesNotExistError',
-              } as ReceiverOfferInboxDoesNotExistError
+              return new ReceiverInboxDoesNotExistError()
             }
           }
           if (e._tag === 'BadStatusCodeError') {
             if (e.response.data.code === '100107') {
-              return {
-                _tag: 'SenderUserInboxDoesNotExistError',
-              } as SenderUserInboxDoesNotExistError
+              return new SenderInboxDoesNotExistError()
             }
           }
           return e
@@ -193,35 +199,28 @@ export function privateApi({
             method: 'post',
             url: '/inboxes/approval/cancel',
             data,
-            params: {
-              notificationServiceReady: data.notificationServiceReady,
-            },
           },
           CancelApprovalResponse
         ),
         TE.mapLeft((e) => {
           if (e._tag === 'BadStatusCodeError') {
             if (e.response.data.code === '100104') {
-              return {
-                _tag: 'RequestNotFoundError',
-              } as RequestNotFoundError
+              return new RequestNotFoundError()
             }
             if (e.response.data.code === '100153') {
-              return {
-                _tag: 'RequestAlreadyApprovedError',
-              } as RequestAlreadyApprovedError
+              return new RequestNotPendingError()
             }
             if (e.response.data.code === '100101') {
-              return {
-                _tag: 'OtherSideAccountDeleted',
-              } as OtherSideAccountDeleted
+              return new OtherSideAccountDeleted()
             }
           }
           return e
         })
       )
     },
-    approveRequest(originalData: ApproveRequestRequest) {
+    approveRequest(
+      originalData: RequestWithGeneratableChallenge<ApproveRequestRequest>
+    ) {
       return pipe(
         addChallenge(originalData),
         TE.chainW((data) =>
@@ -231,9 +230,6 @@ export function privateApi({
               method: 'post',
               url: '/inboxes/approval/confirm',
               data,
-              params: {
-                notificationServiceReady: originalData.notificationServiceReady,
-              },
             },
             ApproveRequestResponse
           )
@@ -241,22 +237,16 @@ export function privateApi({
         TE.mapLeft((e) => {
           if (e._tag === 'BadStatusCodeError') {
             if (e.response.data.code === '100106') {
-              return {_tag: 'RequestCancelledError'} as RequestCancelledError
+              return new RequestCancelledError()
             }
             if (e.response.data.code === '100104') {
-              return {
-                _tag: 'RequestNotFoundError',
-              } as RequestNotFoundError
+              return new RequestNotFoundError()
             }
             if (e.response.data.code === '100153') {
-              return {
-                _tag: 'RequestAlreadyApprovedError',
-              } as RequestAlreadyApprovedError
+              return new RequestNotPendingError()
             }
             if (e.response.data.code === '100101') {
-              return {
-                _tag: 'OtherSideAccountDeleted',
-              } as OtherSideAccountDeleted
+              return new OtherSideAccountDeleted()
             }
           }
           return e
@@ -270,7 +260,7 @@ export function privateApi({
         DeleteInboxesResponse
       )
     },
-    leaveChat(originalData: LeaveChatRequest) {
+    leaveChat(originalData: RequestWithGeneratableChallenge<LeaveChatRequest>) {
       return pipe(
         addChallenge(originalData),
         TE.map(({publicKey, ...data}) => ({
@@ -284,9 +274,6 @@ export function privateApi({
               method: 'post',
               url: '/inboxes/leave-chat',
               data,
-              params: {
-                notificationServiceReady: originalData.notificationServiceReady,
-              },
             },
             LeaveChatResponse
           )
@@ -307,7 +294,9 @@ export function privateApi({
     // ----------------------
     // 👇 Message
     // ----------------------
-    retrieveMessages(data: RetrieveMessagesRequest) {
+    retrieveMessages(
+      data: RequestWithGeneratableChallenge<RetrieveMessagesRequest>
+    ) {
       return pipe(
         addChallenge(data),
         TE.chainW((data) =>
@@ -327,13 +316,18 @@ export function privateApi({
         })
       )
     },
-    sendMessage(originalData: SendMessageRequest) {
+    sendMessage(
+      originalData: RequestWithGeneratableChallenge<SendMessageRequest>
+    ) {
       return pipe(
         addChallenge(originalData),
-        TE.map(({publicKey, ...data}) => ({
-          ...data,
-          senderPublicKey: publicKey,
-        })),
+        TE.map(
+          ({publicKey, ...data}) =>
+            ({
+              ...data,
+              senderPublicKey: publicKey,
+            }) satisfies SendMessageRequest
+        ),
         TE.chainW((data) =>
           axiosCallWithValidation(
             axiosInstance,
@@ -341,9 +335,6 @@ export function privateApi({
               method: 'post',
               url: '/inboxes/messages',
               data,
-              params: {
-                notificationServiceReady: originalData.notificationServiceReady,
-              },
             },
             SendMessageResponse
           )
@@ -372,17 +363,23 @@ export function privateApi({
     // 👇 Challenge
     // ----------------------
     createChallenge(data: CreateChallengeRequest) {
-      return axiosCallWithValidation(
-        axiosInstance,
-        {method: 'POST', url: '/challenges', data},
-        CreateChallengeResponse
+      return pipe(
+        axiosCallWithValidation(
+          axiosInstance,
+          {method: 'POST', url: '/challenges', data},
+          CreateChallengeResponse
+        ),
+        TE.map((one) => Schema.decodeSync(CreateChallengeResponseE)(one))
       )
     },
     createChallengeBatch(data: CreateChallengesRequest) {
-      return axiosCallWithValidation(
-        axiosInstance,
-        {method: 'POST', url: '/challenges/batch', data},
-        CreateChallengesResponse
+      return pipe(
+        axiosCallWithValidation(
+          axiosInstance,
+          {method: 'POST', url: '/challenges/batch', data},
+          CreateChallengesResponse
+        ),
+        TE.map((one) => Schema.decodeSync(CreateChallengesResponseE)(one))
       )
     },
   }

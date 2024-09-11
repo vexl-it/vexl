@@ -18,33 +18,42 @@ import {
   UnixMilliseconds,
   UnixMillisecondsE,
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {BooleanFromString} from '@vexl-next/generic-utils/src/effect-helpers/BooleanFromString'
 import {z} from 'zod'
 import {
   NoContentResponse,
   NoContentResponseE,
 } from '../../NoContentResponse.brand'
 
+export const NotificationServiceReadyQueryParams = Schema.Struct({
+  notificationServiceReady: BooleanFromString,
+})
+
 export class RequestCancelledError extends Schema.TaggedError<RequestCancelledError>(
   'RequestCancelledError'
 )('RequestCancelledError', {
   status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
+  code: Schema.optionalWith(Schema.Literal(100106), {default: () => 100106}),
 }) {}
 
 export class RequestNotFoundError extends Schema.TaggedError<RequestNotFoundError>(
   'RequestNotFoundError'
 )('RequestNotFoundError', {
   status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
+  code: Schema.optionalWith(Schema.Literal(100104), {default: () => 100104}),
 }) {}
 
 export class RequestAlreadyApprovedError extends Schema.TaggedError<RequestAlreadyApprovedError>(
   'RequestAlreadyApprovedError'
 )('RequestAlreadyApprovedError', {
   status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
+  code: Schema.optionalWith(Schema.Literal(100153), {default: () => 100153}),
 }) {}
 
 export class OtherSideAccountDeleted extends Schema.TaggedError<OtherSideAccountDeleted>(
   'OtherSideAccountDeleted'
 )('OtherSideAccountDeleted', {
+  code: Schema.optionalWith(Schema.Literal(100101), {default: () => 100101}),
   status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
 }) {}
 
@@ -52,12 +61,14 @@ export class ReceiverOfferInboxDoesNotExistError extends Schema.TaggedError<Rece
   'ReceiverOfferInboxDoesNotExistError'
 )('ReceiverOfferInboxDoesNotExistError', {
   status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
+  code: Schema.optionalWith(Schema.Literal(100101), {default: () => 100101}),
 }) {}
 
 export class SenderUserInboxDoesNotExistError extends Schema.TaggedError<SenderUserInboxDoesNotExistError>(
   'SenderUserInboxDoesNotExistError'
 )('SenderUserInboxDoesNotExistError', {
   status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
+  code: Schema.optionalWith(Schema.Literal(100107), {default: () => 100107}),
 }) {}
 
 export const SignedChallenge = z
@@ -176,6 +187,7 @@ export const RequestApprovalRequest = z
     notificationServiceReady: z.boolean(),
   })
   .readonly()
+
 export const RequestApprovalRequestE = Schema.Struct({
   publicKey: PublicKeyPemBase64E,
   message: Schema.String,

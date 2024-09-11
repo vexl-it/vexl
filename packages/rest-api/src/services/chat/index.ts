@@ -27,10 +27,16 @@ import {
   DeleteInboxesResponse,
   DeletePulledMessagesResponse,
   LeaveChatResponse,
+  OtherSideAccountDeleted,
+  ReceiverOfferInboxDoesNotExistError,
+  RequestAlreadyApprovedError,
   RequestApprovalResponse,
+  RequestCancelledError,
+  RequestNotFoundError,
   RetrieveMessagesResponse,
   SendMessageResponse,
   SendMessagesResponse,
+  SenderUserInboxDoesNotExistError,
   UpdateInboxResponse,
   type ApproveRequestRequest,
   type BlockInboxRequest,
@@ -42,16 +48,10 @@ import {
   type DeleteInboxesRequest,
   type DeletePulledMessagesRequest,
   type LeaveChatRequest,
-  type OtherSideAccountDeleted,
-  type ReceiverOfferInboxDoesNotExistError,
-  type RequestAlreadyApprovedError,
   type RequestApprovalRequest,
-  type RequestCancelledError,
-  type RequestNotFoundError,
   type RetrieveMessagesRequest,
   type SendMessageRequest,
   type SendMessagesRequest,
-  type SenderUserInboxDoesNotExistError,
   type UpdateInboxRequest,
 } from './contracts'
 import {addChallengeToRequest} from './utils'
@@ -169,16 +169,12 @@ export function privateApi({
         TE.mapLeft((e) => {
           if (e._tag === 'BadStatusCodeError') {
             if (e.response.data.code === '100101') {
-              return {
-                _tag: 'ReceiverOfferInboxDoesNotExistError',
-              } as ReceiverOfferInboxDoesNotExistError
+              return new ReceiverOfferInboxDoesNotExistError()
             }
           }
           if (e._tag === 'BadStatusCodeError') {
             if (e.response.data.code === '100107') {
-              return {
-                _tag: 'SenderUserInboxDoesNotExistError',
-              } as SenderUserInboxDoesNotExistError
+              return new SenderUserInboxDoesNotExistError()
             }
           }
           return e
@@ -202,19 +198,13 @@ export function privateApi({
         TE.mapLeft((e) => {
           if (e._tag === 'BadStatusCodeError') {
             if (e.response.data.code === '100104') {
-              return {
-                _tag: 'RequestNotFoundError',
-              } as RequestNotFoundError
+              return new RequestNotFoundError()
             }
             if (e.response.data.code === '100153') {
-              return {
-                _tag: 'RequestAlreadyApprovedError',
-              } as RequestAlreadyApprovedError
+              return new RequestAlreadyApprovedError()
             }
             if (e.response.data.code === '100101') {
-              return {
-                _tag: 'OtherSideAccountDeleted',
-              } as OtherSideAccountDeleted
+              return new OtherSideAccountDeleted()
             }
           }
           return e
@@ -241,22 +231,16 @@ export function privateApi({
         TE.mapLeft((e) => {
           if (e._tag === 'BadStatusCodeError') {
             if (e.response.data.code === '100106') {
-              return {_tag: 'RequestCancelledError'} as RequestCancelledError
+              return new RequestCancelledError()
             }
             if (e.response.data.code === '100104') {
-              return {
-                _tag: 'RequestNotFoundError',
-              } as RequestNotFoundError
+              return new RequestNotFoundError()
             }
             if (e.response.data.code === '100153') {
-              return {
-                _tag: 'RequestAlreadyApprovedError',
-              } as RequestAlreadyApprovedError
+              return new RequestAlreadyApprovedError()
             }
             if (e.response.data.code === '100101') {
-              return {
-                _tag: 'OtherSideAccountDeleted',
-              } as OtherSideAccountDeleted
+              return new OtherSideAccountDeleted()
             }
           }
           return e

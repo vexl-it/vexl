@@ -1,7 +1,7 @@
 import {ParseResult, Schema} from '@effect/schema'
 import {Effect} from 'effect'
 
-export const BooleanfromString = Schema.transformOrFail(
+export const BooleanFromString = Schema.transformOrFail(
   Schema.String,
   Schema.Boolean,
   {

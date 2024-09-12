@@ -10,6 +10,7 @@ import {apiAtom} from '../../../api'
 import {loadingOverlayDisplayedAtom} from '../../../components/LoadingOverlayProvider'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
 import notEmpty from '../../../utils/notEmpty'
+import reportError from '../../../utils/reportError'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 import {syncConnectionsActionAtom} from '../../connections/atom/connectionStateAtom'
 import {updateAllOffersConnectionsActionAtom} from '../../connections/atom/offerToConnectionsAtom'
@@ -74,11 +75,11 @@ export const submitContactsActionAtom = atom(
       }),
       TE.match(
         (e) => {
-          // if (e._tag !== 'NetworkError') {
-          //   reportError('error', new Error('error while submitting contacts'), {
-          //     e,
-          //   })
-          // }
+          if (e._tag !== 'NetworkError') {
+            reportError('error', new Error('error while submitting contacts'), {
+              e,
+            })
+          }
 
           Alert.alert(toCommonErrorMessage(e, t) ?? t('common.unknownError'))
           return false

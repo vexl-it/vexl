@@ -14,13 +14,14 @@ import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import type z from 'zod'
 import {
+  NetworkError,
   NotFoundError,
   UnauthorizedError,
   UnexpectedApiResponseError,
   UnknownClientError,
   UnknownServerError,
   type BadStatusCodeError,
-  type NetworkError,
+  type NetworkErrorAxios,
   type UnexpectedApiResponseErrorAxios,
   type UnknownErrorAxios,
 } from './Errors'
@@ -46,7 +47,7 @@ export function axiosCallWithValidation<T extends z.ZodType>(
   | UnknownErrorAxios
   | BadStatusCodeError
   | UnexpectedApiResponseErrorAxios
-  | NetworkError,
+  | NetworkErrorAxios,
   z.output<T>
 > {
   return pipe(
@@ -71,7 +72,7 @@ export function axiosCallWithValidationSchema<I, O>(
   | UnknownErrorAxios
   | BadStatusCodeError
   | UnexpectedApiResponseErrorAxios
-  | NetworkError,
+  | NetworkErrorAxios,
   I
 > {
   return pipe(
@@ -141,7 +142,7 @@ export function axiosCall(
   | UnknownErrorAxios
   | BadStatusCodeError
   | UnexpectedApiResponseErrorAxios
-  | NetworkError,
+  | NetworkErrorAxios,
   unknown
 > {
   return pipe(
@@ -164,10 +165,10 @@ export function axiosCall(
             ].includes(error.code ?? '')
           ) {
             return {
-              _tag: 'NetworkError',
+              _tag: 'NetworkErrorAxios',
               code: error.code,
               error: stripSensitiveHeadersFromError(error),
-            } as NetworkError
+            } as NetworkErrorAxios
           }
         }
         return {
@@ -299,6 +300,7 @@ export const handleCommonErrorsEffect = <R, C = never>(
 ): Effect.Effect<
   R,
   | HttpError.HttpError
+  | NetworkError
   | NotFoundError
   | UnknownClientError
   | UnknownServerError
@@ -306,8 +308,19 @@ export const handleCommonErrorsEffect = <R, C = never>(
   C
 > =>
   effect.pipe(
+    Effect.timeout(DEFAULT_TIMEOUT_MS),
     Effect.catchAll((e) =>
       Effect.gen(function* (_) {
+        if (e._tag === 'TimeoutException') {
+          return yield* _(
+            Effect.fail(
+              new NetworkError({
+                message: e.message,
+                cause: e,
+              })
+            )
+          )
+        }
         if (HttpError.isHttpError(e.error)) {
           const {status, message} = e.error
 
@@ -367,6 +380,7 @@ export const handleCommonAndExpectedErrorsEffect = <R, B, R2, C = never>(
   | UnknownServerError
   | UnexpectedApiResponseError
   | UnauthorizedError
+  | NetworkError
   | Schema.Schema.Type<Schema.Schema<B, any, R2>>,
   C | R2
 > =>

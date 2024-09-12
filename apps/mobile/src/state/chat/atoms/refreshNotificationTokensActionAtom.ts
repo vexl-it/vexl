@@ -102,7 +102,7 @@ export const sendFcmCypherUpdateMessageActionAtom = atom(
         }),
         TE.matchW(
           (e) => {
-            if (e._tag !== 'NetworkError') {
+            if (e._tag !== 'NetworkErrorAxios') {
               reportError(
                 'error',
                 new Error('Error while refreshing fcm cypher'),

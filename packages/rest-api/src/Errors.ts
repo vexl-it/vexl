@@ -21,8 +21,8 @@ export interface UnknownErrorAxios {
   readonly error: unknown
 }
 
-export interface NetworkError {
-  readonly _tag: 'NetworkError'
+export interface NetworkErrorAxios {
+  readonly _tag: 'NetworkErrorAxios'
   readonly code:
     | typeof AxiosError.ERR_NETWORK
     | typeof AxiosError.ERR_CANCELED
@@ -30,6 +30,15 @@ export interface NetworkError {
     | typeof AxiosError.ECONNABORTED
   readonly error: AxiosError
 }
+
+export class NetworkError extends Schema.TaggedError<NetworkError>(
+  'NetworkError'
+)('NetworkError', {
+  cause: Schema.Unknown,
+  message: Schema.optionalWith(Schema.String, {
+    default: () => 'Network error',
+  }),
+}) {}
 
 export class UnauthorizedError extends Schema.TaggedError<UnauthorizedError>(
   'UnauthorizedError'

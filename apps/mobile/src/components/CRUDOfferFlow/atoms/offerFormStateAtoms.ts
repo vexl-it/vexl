@@ -65,6 +65,7 @@ import {currencies} from '../../../utils/localization/currency'
 import getDefaultSpokenLanguage from '../../../utils/localization/getDefaultSpokenLanguage'
 import notEmpty from '../../../utils/notEmpty'
 import checkNotificationPermissionsAndAskIfPossibleActionAtom from '../../../utils/notifications/checkAndAskForPermissionsActionAtom'
+import reportError from '../../../utils/reportError'
 import showErrorAlert from '../../../utils/showErrorAlert'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 import {askAreYouSureActionAtom} from '../../AreYouSureDialog'
@@ -643,8 +644,8 @@ export const offerFormMolecule = molecule(() => {
           if (e._tag === 'NotificationPrompted') return T.of(false)
 
           set(progressModal.hide)
-          // if (e._tag !== 'NetworkError')
-          //   reportError('error', new Error('Error while creating offer'), {e})
+          if (e._tag !== 'NetworkError')
+            reportError('error', new Error('Error while creating offer'), {e})
           showErrorAlert({
             title:
               toCommonErrorMessage(e, t) ?? t('offerForm.errorCreatingOffer'),

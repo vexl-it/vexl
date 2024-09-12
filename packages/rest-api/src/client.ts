@@ -17,8 +17,6 @@ import {type PlatformName} from './PlatformName'
 import {type ServiceUrl} from './ServiceUrl.brand'
 import {type GetUserSessionCredentials} from './UserSessionCredentials.brand'
 
-// const DEFAULT_TIMEOUT_MS = 60_000 // Up timeout to 1 minute
-
 const encodeCommonHeaders = Schema.encodeSync(CommonHeaders)
 
 // TODO:

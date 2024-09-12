@@ -89,10 +89,10 @@ export const triggerOffersRefreshAtom = atom(null, async (get, set) => {
           : TE.right({offerIds: [] as OfferId[]}),
         TE.matchW(
           (error) => {
-            // if (error._tag !== 'NetworkError')
-            reportError('error', new Error('Error fetching removed offers'), {
-              error,
-            })
+            if (error._tag !== 'NetworkError')
+              reportError('error', new Error('Error fetching removed offers'), {
+                error,
+              })
             return [] as OfferId[]
           },
           (result) => result.offerIds
@@ -102,8 +102,8 @@ export const triggerOffersRefreshAtom = atom(null, async (get, set) => {
     ),
     TE.matchW(
       (error) => {
-        // if (error._tag !== 'NetworkError')
-        reportError('error', new Error('Error fetching offers'), {error})
+        if (error._tag !== 'NetworkError')
+          reportError('error', new Error('Error fetching offers'), {error})
         set(loadingStateAtom, {state: 'error', error})
       },
       ({newOffers: decryptingResults, removedOffers}) => {

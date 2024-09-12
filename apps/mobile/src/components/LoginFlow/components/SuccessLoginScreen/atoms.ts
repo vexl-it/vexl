@@ -27,6 +27,7 @@ import {translationAtom} from '../../../../utils/localization/I18nProvider'
 import {navigationRef} from '../../../../utils/navigation'
 import reportError from '../../../../utils/reportError'
 import showErrorAlert from '../../../../utils/showErrorAlert'
+import {toCommonErrorMessage} from '../../../../utils/useCommonErrorMessages'
 import {askAreYouSureActionAtom} from '../../../AreYouSureDialog'
 import {contactsMigratedAtom} from '../../../VersionMigrations/atoms'
 
@@ -63,8 +64,8 @@ export const createUserAtContactMsActionAtom = atom(
         switch (l._tag) {
           // case 'UnexpectedApiResponseErrorAxios':
           //   return t('common.unexpectedServerResponse')
-          // case 'NetworkError':
-          //   return toCommonErrorMessage(l, t) ?? t('common.unknownError')
+          case 'NetworkError':
+            return toCommonErrorMessage(l, t) ?? t('common.unknownError')
           case 'UnknownClientError':
           case 'UnknownServerError':
           case 'NotFoundError':

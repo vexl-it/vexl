@@ -12,6 +12,7 @@ import {atom} from 'jotai'
 import {z} from 'zod'
 import {apiAtom} from '../../api'
 import {atomWithParsedMmkvStorage} from '../../utils/atomUtils/atomWithParsedMmkvStorage'
+import reportError from '../../utils/reportError'
 
 const FCM_TOKEN_CACHE_MILIS = 1000 * 60 * 60 * 24 // 24h
 
@@ -41,13 +42,13 @@ export const getOrFetchNotificationServerPublicKeyActionAtom = atom(
       TE.matchE(
         (e) => {
           // Do not report network errors
-          // if (e._tag !== 'NetworkError') {
-          //   reportError(
-          //     'warn',
-          //     new Error('Erro while refreshing notification server key'),
-          //     {e}
-          //   )
-          // }
+          if (e._tag !== 'NetworkError') {
+            reportError(
+              'warn',
+              new Error('Erro while refreshing notification server key'),
+              {e}
+            )
+          }
           return TO.fromNullable(publicKey)
         },
         ({publicKey}) => {

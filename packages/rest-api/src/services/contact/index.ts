@@ -9,6 +9,7 @@ import {CommonHeaders} from '../../commonHeaders'
 import {
   handleCommonAndExpectedErrorsEffect,
   handleCommonErrorsEffect,
+  type LoggingFunction,
 } from '../../utils'
 import {
   type CheckUserExistsInput,
@@ -32,12 +33,16 @@ export function api({
   clientSemver,
   url,
   getUserSessionCredentials,
+  signal,
+  loggingFunction,
 }: {
   platform: PlatformName
   clientVersion: VersionCode
   clientSemver: SemverString
   url: ServiceUrl
   getUserSessionCredentials: GetUserSessionCredentials
+  signal?: AbortSignal
+  loggingFunction?: LoggingFunction | null
 }) {
   const client = createClientInstanceWithAuth({
     api: ContactApiSpecification,
@@ -46,6 +51,8 @@ export function api({
     clientSemver,
     getUserSessionCredentials,
     url,
+    signal,
+    loggingFunction,
   })
 
   const commonHeaders = {

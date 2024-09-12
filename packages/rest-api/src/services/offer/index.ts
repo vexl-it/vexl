@@ -7,6 +7,7 @@ import {createClientInstanceWithAuth} from '../../client'
 import {
   handleCommonAndExpectedErrorsEffect,
   handleCommonErrorsEffect,
+  type LoggingFunction,
 } from '../../utils'
 import {
   CreateNewOfferErrors,
@@ -34,12 +35,16 @@ export function api({
   clientSemver,
   url,
   getUserSessionCredentials,
+  signal,
+  loggingFunction,
 }: {
   platform: PlatformName
   clientVersion: VersionCode
   clientSemver: SemverString
   url: ServiceUrl
   getUserSessionCredentials: GetUserSessionCredentials
+  signal?: AbortSignal
+  loggingFunction?: LoggingFunction | null
 }) {
   const client = createClientInstanceWithAuth({
     api: OfferApiSpecification,
@@ -48,6 +53,8 @@ export function api({
     clientSemver,
     getUserSessionCredentials,
     url,
+    signal,
+    loggingFunction,
   })
 
   return {

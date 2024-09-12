@@ -7,6 +7,7 @@ import {createClientInstanceWithAuth} from '../../client'
 import {
   handleCommonAndExpectedErrorsEffect,
   handleCommonErrorsEffect,
+  type LoggingFunction,
 } from '../../utils'
 import {
   GetGeocodedCoordinatesErrors,
@@ -22,12 +23,16 @@ export function api({
   clientSemver,
   url,
   getUserSessionCredentials,
+  signal,
+  loggingFunction,
 }: {
   platform: PlatformName
   clientVersion: VersionCode
   clientSemver: SemverString
   url: ServiceUrl
   getUserSessionCredentials: GetUserSessionCredentials
+  signal?: AbortSignal
+  loggingFunction?: LoggingFunction | null
 }) {
   return {
     getLocationSuggestions: (
@@ -43,6 +48,7 @@ export function api({
           getUserSessionCredentials,
           url,
           signal,
+          loggingFunction,
         }).getLocationSuggestion(getLocationSuggestionsInput)
       ),
     getGeocodedCoordinates: (
@@ -58,6 +64,7 @@ export function api({
           getUserSessionCredentials,
           url,
           signal,
+          loggingFunction,
         }).getGeocodedCoordinates(getGeocodedCoordinatesInput),
         GetGeocodedCoordinatesErrors
       ),

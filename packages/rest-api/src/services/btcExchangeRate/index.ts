@@ -4,7 +4,10 @@ import {createClientInstanceWithAuth} from '../../client'
 import {type PlatformName} from '../../PlatformName'
 import {type ServiceUrl} from '../../ServiceUrl.brand'
 import {type GetUserSessionCredentials} from '../../UserSessionCredentials.brand'
-import {handleCommonAndExpectedErrorsEffect} from '../../utils'
+import {
+  handleCommonAndExpectedErrorsEffect,
+  type LoggingFunction,
+} from '../../utils'
 import {GetExchangeRateError, type GetExchangeRateInput} from './contracts'
 import {BtcExchangeRateApiSpecification} from './specification'
 
@@ -15,12 +18,16 @@ export function api({
   clientSemver,
   url,
   getUserSessionCredentials,
+  signal,
+  loggingFunction,
 }: {
   platform: PlatformName
   clientVersion: VersionCode
   clientSemver: SemverString
   url: ServiceUrl
   getUserSessionCredentials: GetUserSessionCredentials
+  signal?: AbortSignal
+  loggingFunction?: LoggingFunction | null
 }) {
   const client = createClientInstanceWithAuth({
     api: BtcExchangeRateApiSpecification,
@@ -29,6 +36,8 @@ export function api({
     clientSemver,
     getUserSessionCredentials,
     url,
+    signal,
+    loggingFunction,
   })
 
   return {

@@ -40,11 +40,11 @@ export function useRefreshUserOnContactService(): void {
               if (e._tag === 'UserNotFoundError') {
                 console.warn('🦋 🚨 User to refresh not found. Logging out')
                 void logout()
-                // } else if (e._tag === 'NetworkError') {
-                //   console.warn(
-                //     '🦋 Network error refreshing user. Not logging out.',
-                //     e
-                //   )
+              } else if (e._tag === 'NetworkError') {
+                console.warn(
+                  '🦋 Network error refreshing user. Not logging out.',
+                  e
+                )
               } else if (
                 e._tag === 'UnknownClientError' ||
                 e._tag === 'UnknownServerError'

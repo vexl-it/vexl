@@ -84,10 +84,10 @@ export const syncConnectionsActionAtom = atom(
             title: 'Error while syncing connections',
             body: e._tag,
           })
-          // if (e._tag === 'NetworkError') {
-          //   // TODO let user know somehow
-          //   return false
-          // }
+          if (e._tag === 'NetworkError') {
+            // TODO let user know somehow
+            return false
+          }
           reportError(
             'warn',
             new Error('Unable to refresh connections state'),

@@ -9,7 +9,7 @@ import {useAtomValue, useStore} from 'jotai'
 import {useState} from 'react'
 import {Alert} from 'react-native'
 import {Text, YStack} from 'tamagui'
-import {usePrivateApiAssumeLoggedIn} from '../../../api'
+import {apiAtom} from '../../../api'
 import messagingStateAtom from '../../../state/chat/atoms/messagingStateAtom'
 import {createInboxAtom} from '../../../state/chat/hooks/useCreateInbox'
 import {createOfferAtom} from '../../../state/marketplace'
@@ -22,7 +22,6 @@ function SimulateMissingOfferInbox(): JSX.Element {
   const [selectedOffer, setSelectedOffer] = useState<OneOfferInState | null>(
     offers[0] ?? null
   )
-  const api = usePrivateApiAssumeLoggedIn()
   const store = useStore()
 
   async function deleteInboxOnServer(offer: OneOfferInState): Promise<void> {
@@ -33,7 +32,9 @@ function SimulateMissingOfferInbox(): JSX.Element {
       Alert.alert('No inbox for that offer found in state')
       return
     }
-    await api.chat.deleteInbox({keyPair: inbox.inbox.privateKey})()
+    await store
+      .get(apiAtom)
+      .chat.deleteInbox({keyPair: inbox.inbox.privateKey})()
   }
 
   function cloneOffer10x(offer: OneOfferInState): T.Task<null> {

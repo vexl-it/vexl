@@ -6,13 +6,13 @@ import {
 import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
 import {Array, Effect, flow, type Either} from 'effect'
 import {taskEitherToEffect} from '../effect-helpers/TaskEitherConverter'
-import {type ExtractRightFromEffect} from '../utils/ExtractLeft'
+import {type ExtractErrorFromEffect} from '../utils/ExtractErrorFromEffect'
 import decryptOffer, {
   type ErrorDecryptingOffer,
   type NonCompatibleOfferVersionError,
 } from './decryptOffer'
 
-export type ApiErrorWhileFetchingOffers = ExtractRightFromEffect<
+export type ApiErrorWhileFetchingOffers = ExtractErrorFromEffect<
   ReturnType<OfferApi['getOffersByIds']>
 >
 

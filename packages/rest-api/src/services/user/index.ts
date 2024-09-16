@@ -26,7 +26,6 @@ export interface UserApiProps {
   platform: PlatformName
   clientVersion: VersionCode
   clientSemver: SemverString
-  signal?: AbortSignal
   loggingFunction?: LoggingFunction | null
   getUserSessionCredentials?: GetUserSessionCredentials
 }
@@ -38,7 +37,6 @@ export function api({
   clientVersion,
   clientSemver,
   getUserSessionCredentials,
-  signal,
   loggingFunction,
 }: UserApiProps) {
   const client = createClientInstanceWithAuth({
@@ -48,7 +46,6 @@ export function api({
     clientSemver,
     getUserSessionCredentials,
     url,
-    signal,
     loggingFunction,
   })
 

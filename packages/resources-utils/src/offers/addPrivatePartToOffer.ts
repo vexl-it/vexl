@@ -5,7 +5,7 @@ import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {effectToTaskEither} from '../effect-helpers/TaskEitherConverter'
-import {type ExtractRightFromEffect} from '../utils/ExtractLeft'
+import {type ExtractErrorFromEffect} from '../utils/ExtractErrorFromEffect'
 import flattenTaskOfEithers from '../utils/flattenTaskOfEithers'
 import {type OfferPrivatePayloadToEncrypt} from './utils/constructPrivatePayloads'
 import {
@@ -13,7 +13,7 @@ import {
   type PrivatePartEncryptionError,
 } from './utils/encryptPrivatePart'
 
-export type ApiErrorAddingPrivateParts = ExtractRightFromEffect<
+export type ApiErrorAddingPrivateParts = ExtractErrorFromEffect<
   ReturnType<OfferApi['createPrivatePart']>
 >
 

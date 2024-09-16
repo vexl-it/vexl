@@ -12,7 +12,7 @@ import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
 import {flow, pipe} from 'fp-ts/function'
 import {effectToTaskEither} from '../effect-helpers/TaskEitherConverter'
-import {type ExtractRightFromEffect} from '../utils/ExtractLeft'
+import {type ExtractErrorFromEffect} from '../utils/ExtractErrorFromEffect'
 import {deduplicate, subtractArrays} from '../utils/array'
 import flattenTaskOfEithers from '../utils/flattenTaskOfEithers'
 import constructPrivatePayloads, {
@@ -52,8 +52,8 @@ export default function updatePrivateParts({
   api: OfferApi
 }): TE.TaskEither<
   | ErrorConstructingPrivatePayloads
-  | ExtractRightFromEffect<ReturnType<OfferApi['createPrivatePart']>>
-  | ExtractRightFromEffect<ReturnType<OfferApi['deletePrivatePart']>>,
+  | ExtractErrorFromEffect<ReturnType<OfferApi['createPrivatePart']>>
+  | ExtractErrorFromEffect<ReturnType<OfferApi['deletePrivatePart']>>,
   {
     encryptionErrors: PrivatePartEncryptionError[]
     timeLimitReachedErrors: TimeLimitReachedError[]

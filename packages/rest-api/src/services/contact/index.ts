@@ -33,7 +33,6 @@ export function api({
   clientSemver,
   url,
   getUserSessionCredentials,
-  signal,
   loggingFunction,
 }: {
   platform: PlatformName
@@ -41,7 +40,6 @@ export function api({
   clientSemver: SemverString
   url: ServiceUrl
   getUserSessionCredentials: GetUserSessionCredentials
-  signal?: AbortSignal
   loggingFunction?: LoggingFunction | null
 }) {
   const client = createClientInstanceWithAuth({
@@ -51,7 +49,6 @@ export function api({
     clientSemver,
     getUserSessionCredentials,
     url,
-    signal,
     loggingFunction,
   })
 

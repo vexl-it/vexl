@@ -6,7 +6,7 @@ import {pipe} from 'fp-ts/function'
 import {useStore} from 'jotai'
 import {useCallback} from 'react'
 import {Alert} from 'react-native'
-import {usePrivateApiAssumeLoggedIn} from '../../api'
+import {apiAtom} from '../../api'
 import {createSingleOfferReportedFlagAtom} from '../../state/marketplace/atoms/offersState'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import showErrorAlert from '../../utils/showErrorAlert'
@@ -18,7 +18,6 @@ import {useShowLoadingOverlay} from '../LoadingOverlayProvider'
 export function useReportOfferHandleUI(): (
   offerId: OfferId
 ) => T.Task<boolean> {
-  const api = usePrivateApiAssumeLoggedIn()
   const {t} = useTranslation()
   const store = useStore()
   const safeGoBack = useSafeGoBack()
@@ -44,7 +43,7 @@ export function useReportOfferHandleUI(): (
         TE.chainW(() => {
           loadingOverlay.show()
           return effectToTaskEither(
-            api.offer.reportOffer({
+            store.get(apiAtom).offer.reportOffer({
               body: {
                 offerId,
               },
@@ -91,6 +90,6 @@ export function useReportOfferHandleUI(): (
         )
       )
     },
-    [store, t, loadingOverlay, api.offer, safeGoBack]
+    [loadingOverlay, safeGoBack, store, t]
   )
 }

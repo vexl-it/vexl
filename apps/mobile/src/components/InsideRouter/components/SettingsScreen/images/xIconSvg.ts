@@ -1,9 +1,16 @@
 import {stringToSvgStringRuntimeError} from '../../../../Image'
 
 const xIconSvg =
-  stringToSvgStringRuntimeError(`<?xml version="1.0" encoding="UTF-8"?>
-<svg version="1.1" xmlns="http://www.w3.org/2000/svg">
- <path d="M178.57 127.15 290.27 0h-26.46l-97.03 110.38L89.34 0H0l117.13 166.93L0 300.25h26.46l102.4-116.59 81.8 116.59h89.34M36.01 19.54H76.66l187.13 262.13h-40.66"/>
-</svg>`)
+  stringToSvgStringRuntimeError(`<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_13983_2116)">
+<path d="M18.3263 2.05505H21.6998L14.3297 10.4785L23 21.941H16.2112L10.894 14.9891L4.80995 21.941H1.43443L9.31743 12.9311L1 2.05505H7.96111L12.7674 8.40939L18.3263 2.05505ZM17.1423 19.9218H19.0116L6.94539 3.96819H4.93946L17.1423 19.9218Z" fill="#AFAFAF"/>
+</g>
+<defs>
+<clipPath id="clip0_13983_2116">
+<rect width="24" height="24" fill="white"/>
+</clipPath>
+</defs>
+</svg>
+`)
 
 export default xIconSvg

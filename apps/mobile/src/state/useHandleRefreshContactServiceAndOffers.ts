@@ -6,9 +6,9 @@ import {isNonEmpty} from 'fp-ts/Array'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
-import {atom, useSetAtom, useStore} from 'jotai'
+import {atom, useAtomValue, useSetAtom, useStore} from 'jotai'
 import {useCallback} from 'react'
-import {usePrivateApiAssumeLoggedIn} from '../api'
+import {apiAtom} from '../api'
 import notEmpty from '../utils/notEmpty'
 import reportError from '../utils/reportError'
 import {useAppState} from '../utils/useAppState'
@@ -22,8 +22,8 @@ import {offersMissingOnServerAtom} from './marketplace/atoms/offersMissingOnServ
 import {useLogout} from './useLogout'
 
 export function useRefreshUserOnContactService(): void {
-  const api = usePrivateApiAssumeLoggedIn()
   const logout = useLogout()
+  const store = useStore()
 
   useAppState(
     useCallback(
@@ -33,7 +33,7 @@ export function useRefreshUserOnContactService(): void {
         console.info('🦋 Refreshing user')
         void pipe(
           effectToTaskEither(
-            api.contact.refreshUser({body: {offersAlive: true}})
+            store.get(apiAtom).contact.refreshUser({body: {offersAlive: true}})
           ),
           TE.match(
             (e) => {
@@ -110,14 +110,14 @@ export function useRefreshUserOnContactService(): void {
           )
         )()
       },
-      [api.contact, logout]
+      [logout, store]
     )
   )
 }
 
 export function useRefreshOffers(): void {
   const store = useStore()
-  const api = usePrivateApiAssumeLoggedIn()
+  const api = useAtomValue(apiAtom)
 
   useAppState(
     useCallback(

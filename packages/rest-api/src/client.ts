@@ -124,7 +124,9 @@ export function createClientInstanceWithAuth<A extends Api.Api.Any>({
                   } "${request.url ?? ''}". Status: ${status}`,
                   {status}
                 )
-              } catch (e) {}
+              } catch (e) {
+                console.error('🚨 Error logging success response')
+              }
             }
 
             return response
@@ -147,7 +149,9 @@ export function createClientInstanceWithAuth<A extends Api.Api.Any>({
                     status,
                   }
                 )
-              } catch (e) {}
+              } catch (e) {
+                console.error('🚨 Error logging redirect response')
+              }
             }
 
             return response
@@ -170,7 +174,9 @@ export function createClientInstanceWithAuth<A extends Api.Api.Any>({
                     status,
                   }
                 )
-              } catch (e) {}
+              } catch (e) {
+                console.error('🚨 Error logging client error response')
+              }
             }
 
             return response
@@ -193,7 +199,9 @@ export function createClientInstanceWithAuth<A extends Api.Api.Any>({
                     status,
                   }
                 )
-              } catch (e) {}
+              } catch (e) {
+                console.error('🚨 Error logging server error response')
+              }
             }
 
             return response

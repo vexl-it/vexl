@@ -13,15 +13,7 @@ import {
 } from '@vexl-next/rest-api'
 import {type UserSessionCredentials} from '@vexl-next/rest-api/src/UserSessionCredentials.brand'
 
-import {type BtcExchangeRateApi} from '@vexl-next/rest-api/src/services/btcExchangeRate'
-import {type ChatPrivateApi} from '@vexl-next/rest-api/src/services/chat'
-import {type ContactApi} from '@vexl-next/rest-api/src/services/contact'
-import {type FeedbackApi} from '@vexl-next/rest-api/src/services/feedback'
-import {type LocationApi} from '@vexl-next/rest-api/src/services/location'
-import {type NotificationApi} from '@vexl-next/rest-api/src/services/notification'
-import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
-import {type UserApi} from '@vexl-next/rest-api/src/services/user'
-import {atom, useAtomValue} from 'jotai'
+import {atom} from 'jotai'
 import {Platform} from 'react-native'
 import {dummySession, sessionHolderAtom} from '../state/session'
 import {apiPreset, version, versionCode} from '../utils/environment'
@@ -124,16 +116,3 @@ export const apiAtom = atom((get) => {
     }),
   }
 })
-
-export function usePrivateApiAssumeLoggedIn(): {
-  contact: ContactApi
-  offer: OfferApi
-  chat: ChatPrivateApi
-  user: UserApi
-  location: LocationApi
-  notification: NotificationApi
-  btcExchangeRate: BtcExchangeRateApi
-  feedback: FeedbackApi
-} {
-  return useAtomValue(apiAtom)
-}

@@ -1,5 +1,5 @@
 import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
-import {type ExtractRightFromEffect} from '@vexl-next/resources-utils/src/utils/ExtractLeft'
+import {type ExtractErrorFromEffect} from '@vexl-next/resources-utils/src/utils/ExtractErrorFromEffect'
 import {MAX_PAGE_SIZE} from '@vexl-next/rest-api/src/Pagination.brand'
 import {type ContactApi} from '@vexl-next/rest-api/src/services/contact'
 import {sequenceS} from 'fp-ts/Apply'
@@ -13,7 +13,7 @@ import {apiAtom} from '../../../api'
 const numberOfFriendsStorageAtom = atom<
   E.Either<
     | {_tag: 'friendsNotLoaded'}
-    | ExtractRightFromEffect<ReturnType<ContactApi['fetchMyContacts']>>,
+    | ExtractErrorFromEffect<ReturnType<ContactApi['fetchMyContacts']>>,
     {
       firstLevelFriendsCount: number
       secondLevelFriendsCount: number

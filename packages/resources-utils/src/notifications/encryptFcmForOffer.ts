@@ -2,13 +2,13 @@ import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {FcmCypher} from '@vexl-next/domain/src/general/notifications'
 import {type FcmToken} from '@vexl-next/domain/src/utility/FcmToken.brand'
 import {type NotificationApi} from '@vexl-next/rest-api/src/services/notification'
-import * as TE from 'fp-ts/lib/TaskEither'
 import {pipe} from 'fp-ts/lib/function'
+import * as TE from 'fp-ts/lib/TaskEither'
 import {effectToTaskEither} from '../effect-helpers/TaskEitherConverter'
-import {type ExtractRightFromEffect} from '../utils/ExtractLeft'
 import {eciesEncrypt, type CryptoError} from '../utils/crypto'
+import {type ExtractErrorFromEffect} from '../utils/ExtractErrorFromEffect'
 
-export type ApiErrorFetchNotificationToken = ExtractRightFromEffect<
+export type ApiErrorFetchNotificationToken = ExtractErrorFromEffect<
   ReturnType<NotificationApi['getNotificationPublicKey']>
 >
 

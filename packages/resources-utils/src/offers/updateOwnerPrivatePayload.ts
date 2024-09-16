@@ -9,7 +9,7 @@ import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {effectToTaskEither} from '../effect-helpers/TaskEitherConverter'
-import {type ExtractRightFromEffect} from '../utils/ExtractLeft'
+import {type ExtractErrorFromEffect} from '../utils/ExtractErrorFromEffect'
 import {constructAndEncryptPrivatePayloadForOwner} from './constructPrivatePayloadForOwner'
 import {type PrivatePartEncryptionError} from './utils/encryptPrivatePart'
 
@@ -27,7 +27,7 @@ export default function updateOwnerPrivatePayload({
   intendedConnectionLevel: IntendedConnectionLevel
 }): TE.TaskEither<
   | PrivatePartEncryptionError
-  | ExtractRightFromEffect<ReturnType<OfferApi['createPrivatePart']>>,
+  | ExtractErrorFromEffect<ReturnType<OfferApi['createPrivatePart']>>,
   NoContentResponse
 > {
   return pipe(

@@ -32,7 +32,7 @@ import {type ErrorEncryptingPublicPart} from '@vexl-next/resources-utils/src/off
 import {type PrivatePartEncryptionError} from '@vexl-next/resources-utils/src/offers/utils/encryptPrivatePart'
 import {type ApiErrorFetchingContactsForOffer} from '@vexl-next/resources-utils/src/offers/utils/fetchContactsForOffer'
 import {type ErrorGeneratingSymmetricKey} from '@vexl-next/resources-utils/src/offers/utils/generateSymmetricKey'
-import {type ExtractRightFromEffect} from '@vexl-next/resources-utils/src/utils/ExtractLeft'
+import {type ExtractErrorFromEffect} from '@vexl-next/resources-utils/src/utils/ExtractErrorFromEffect'
 import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
 import {Array, Either, pipe as effectPipe} from 'effect'
 import * as A from 'fp-ts/Array'
@@ -432,7 +432,7 @@ export const updateOfferAtom = atom<
     | ErrorEncryptingPublicPart
     | ErrorDecryptingOffer
     | PrivatePartEncryptionError
-    | ExtractRightFromEffect<ReturnType<OfferApi['createPrivatePart']>>
+    | ExtractErrorFromEffect<ReturnType<OfferApi['createPrivatePart']>>
     | NonCompatibleOfferVersionError,
     OneOfferInState
   >
@@ -504,7 +504,7 @@ export const deleteOffersActionAtom = atom<
   null,
   [{adminIds: OfferAdminId[]}],
   TE.TaskEither<
-    ExtractRightFromEffect<ReturnType<OfferApi['deleteOffer']>>,
+    ExtractErrorFromEffect<ReturnType<OfferApi['deleteOffer']>>,
     {success: true}
   >
 >(null, (get, set, params) => {

@@ -6,7 +6,7 @@ import * as T from 'fp-ts/lib/Task'
 import * as TE from 'fp-ts/lib/TaskEither'
 import {useSetAtom, useStore} from 'jotai'
 import {useCallback, useEffect} from 'react'
-import {usePrivateApiAssumeLoggedIn} from '../../api'
+import {apiAtom} from '../../api'
 import {inboxesAtom} from '../../state/chat/atoms/messagingStateAtom'
 import checkNotificationTokensAndRefreshOffersActionAtom from '../../state/marketplace/atoms/checkNotificationTokensAndRefreshOffersActionAtom'
 import {storage} from '../fpMmkv'
@@ -18,7 +18,6 @@ const NOTIFICATION_TOKEN_CACHE_KEY = 'notificationToken'
 
 export function useRefreshNotificationTokenOnResumeAssumeLoggedIn(): void {
   const store = useStore()
-  const api = usePrivateApiAssumeLoggedIn()
   const checkNotificationTokensAndRefreshOffers = useSetAtom(
     checkNotificationTokensAndRefreshOffersActionAtom
   )
@@ -40,7 +39,9 @@ export function useRefreshNotificationTokenOnResumeAssumeLoggedIn(): void {
 
       void pipe(
         effectToTaskEither(
-          api.contact.updateFirebaseToken({body: {firebaseToken: newToken}})
+          store
+            .get(apiAtom)
+            .contact.updateFirebaseToken({body: {firebaseToken: newToken}})
         ),
         TE.match(
           (e) => {
@@ -62,7 +63,7 @@ export function useRefreshNotificationTokenOnResumeAssumeLoggedIn(): void {
         store.get(inboxesAtom),
         A.map((inbox) =>
           pipe(
-            api.chat.updateInbox({
+            store.get(apiAtom).chat.updateInbox({
               token: newToken ?? undefined,
               keyPair: inbox.privateKey,
             }),
@@ -89,7 +90,7 @@ export function useRefreshNotificationTokenOnResumeAssumeLoggedIn(): void {
     })()
 
     checkNotificationTokensAndRefreshOffers()
-  }, [store, checkNotificationTokensAndRefreshOffers, api])
+  }, [checkNotificationTokensAndRefreshOffers, store])
 
   useEffect(() => {
     return messaging().onTokenRefresh(() => {

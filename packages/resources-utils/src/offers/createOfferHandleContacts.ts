@@ -13,7 +13,7 @@ import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {effectToTaskEither} from '../effect-helpers/TaskEitherConverter'
-import {type ExtractRightFromEffect} from '../utils/ExtractLeft'
+import {type ExtractErrorFromEffect} from '../utils/ExtractErrorFromEffect'
 import {type OfferEncryptionProgress} from './OfferEncryptionProgress'
 import decryptOffer, {
   type ErrorDecryptingOffer,
@@ -33,7 +33,7 @@ import generateSymmetricKey, {
 } from './utils/generateSymmetricKey'
 import {fetchInfoAndGeneratePrivatePayloads} from './utils/offerPrivatePayload'
 
-export type ApiErrorWhileCreatingOffer = ExtractRightFromEffect<
+export type ApiErrorWhileCreatingOffer = ExtractErrorFromEffect<
   ReturnType<OfferApi['createNewOffer']>
 >
 

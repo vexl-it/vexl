@@ -11,7 +11,6 @@ const {dev: devTranslation, ...prodTranslations} = translations
 // ⚠️ Warning: Remember to add language support also to useSetRelativeDateFormatting.ts when adding new language ⚠️
 // ⚠️⚠️
 export const supportedTranslations = {
-  ...(isStaging ? {dev: translations.dev} : {}),
   en: translations.en,
   de: translations.de,
   cs: translations.cs,

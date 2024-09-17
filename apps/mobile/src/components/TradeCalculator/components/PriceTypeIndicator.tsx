@@ -1,51 +1,11 @@
 import {useAtomValue} from 'jotai'
-import Animated, {
-  Easing,
-  useAnimatedStyle,
-  useSharedValue,
-  withRepeat,
-  withTiming,
-} from 'react-native-reanimated'
-import {
-  Stack,
-  Text,
-  XStack,
-  getTokens,
-  type ColorTokens,
-  type StackProps,
-} from 'tamagui'
+import {Text, XStack, getTokens, type StackProps} from 'tamagui'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
+import {AnimatedLiveIndicator} from '../../AnimatedLiveIndicator'
 import Image from '../../Image'
 import userSvg from '../../images/userSvg'
 import {tradePriceTypeAtom} from '../atoms'
 import snowflakeSvg from '../images/snowflakeSvg'
-
-interface AnimatedLiveIndicatorProps {
-  color?: ColorTokens
-}
-
-function AnimatedLiveIndicator({
-  color,
-}: AnimatedLiveIndicatorProps): JSX.Element {
-  const opacity = useSharedValue(0)
-
-  opacity.value = withRepeat(
-    withTiming(1, {
-      duration: 1000,
-      easing: Easing.ease,
-    }),
-    -1,
-    true
-  )
-
-  const animatedStyle = useAnimatedStyle(() => ({opacity: opacity.value}), [])
-
-  return (
-    <Animated.View style={animatedStyle}>
-      <Stack h={8} w={8} bc={color} br="$5" />
-    </Animated.View>
-  )
-}
 
 interface Props extends StackProps {
   displayInGrayColor?: boolean

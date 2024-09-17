@@ -1,15 +1,22 @@
 import {useFocusEffect} from '@react-navigation/native'
+import {pipe} from 'fp-ts/lib/function'
+import * as TE from 'fp-ts/TaskEither'
 import {useAtomValue, useSetAtom} from 'jotai'
 import {useCallback} from 'react'
-import {ActivityIndicator, TouchableOpacity} from 'react-native'
+import {ActivityIndicator, Linking, TouchableOpacity} from 'react-native'
 import {Stack, Text, XStack, getTokens} from 'tamagui'
 import {
   btcPriceForSelectedCurrencyAtom,
   refreshBtcPriceActionAtom,
 } from '../../../state/currentBtcPriceAtoms'
 import {selectedCurrencyAtom} from '../../../state/selectedCurrency'
-import {getCurrentLocale} from '../../../utils/localization/I18nProvider'
+import {
+  getCurrentLocale,
+  useTranslation,
+} from '../../../utils/localization/I18nProvider'
 import {preferencesAtom} from '../../../utils/preferences'
+import {AnimatedLiveIndicator} from '../../AnimatedLiveIndicator'
+import {askAreYouSureActionAtom} from '../../AreYouSureDialog'
 
 function BitcoinPriceChart(): JSX.Element {
   const preferences = useAtomValue(preferencesAtom)
@@ -18,6 +25,9 @@ function BitcoinPriceChart(): JSX.Element {
   const btcPriceForSelectedCurrency = useAtomValue(
     btcPriceForSelectedCurrencyAtom
   )
+  const askAreYouSureAction = useSetAtom(askAreYouSureActionAtom)
+
+  const {t} = useTranslation()
 
   useFocusEffect(
     useCallback(() => {
@@ -33,9 +43,34 @@ function BitcoinPriceChart(): JSX.Element {
         <TouchableOpacity
           onPress={() => {
             void refreshBtcPrice(selectedCurrencyAtom)()
+            void pipe(
+              askAreYouSureAction({
+                variant: 'info',
+                steps: [
+                  {
+                    type: 'StepWithText',
+                    title: t('btcPricePopup.titleRate'),
+                    description: t('btcPricePopup.description'),
+                    positiveButtonText: t('common.learnMore'),
+                    negativeButtonText: t('common.close'),
+                  },
+                ],
+              }),
+              TE.match(
+                () => {},
+                () => {
+                  void Linking.openURL(t('btcPricePopup.url'))
+                }
+              )
+            )()
           }}
         >
           <XStack>
+            {btcPriceForSelectedCurrency?.state === 'success' && (
+              <Stack mr="$1">
+                <AnimatedLiveIndicator color="$main" />
+              </Stack>
+            )}
             {btcPriceForSelectedCurrency?.state === 'loading' ? (
               <XStack space="$2" mr="$2">
                 <ActivityIndicator

@@ -1,8 +1,13 @@
 import {useNavigation} from '@react-navigation/native'
-import {type StyleProp, type ViewStyle} from 'react-native'
+import {pipe} from 'fp-ts/lib/function'
+import * as TE from 'fp-ts/TaskEither'
+import {useSetAtom} from 'jotai'
+import {Linking, type StyleProp, type ViewStyle} from 'react-native'
+import {TouchableWithoutFeedback} from 'react-native-gesture-handler'
 import {Text} from 'tamagui'
 import {version} from '../../../../../utils/environment'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
+import {askAreYouSureActionAtom} from '../../../../AreYouSureDialog'
 import SecretDoor from '../../../../SecretDoor'
 
 function VersionTextWithSecretDoor({
@@ -13,6 +18,8 @@ function VersionTextWithSecretDoor({
   const {t} = useTranslation()
   const navigation = useNavigation()
 
+  const askAreYouSureAction = useSetAtom(askAreYouSureActionAtom)
+
   return (
     <SecretDoor
       onSecretDoorOpen={() => {
@@ -22,9 +29,34 @@ function VersionTextWithSecretDoor({
       <Text ta="center" fos={14} col="$greyOnBlack">
         {t('settings.version', {version})}
       </Text>
-      <Text ta="center" fos={12} col="$greyAccent2">
-        {t('settings.btcPriceSourceCreditYadio')}
-      </Text>
+      <TouchableWithoutFeedback
+        onPress={() => {
+          void pipe(
+            askAreYouSureAction({
+              variant: 'info',
+              steps: [
+                {
+                  type: 'StepWithText',
+                  title: t('btcPricePopup.titleRate'),
+                  description: t('btcPricePopup.description'),
+                  positiveButtonText: t('common.learnMore'),
+                  negativeButtonText: t('common.close'),
+                },
+              ],
+            }),
+            TE.match(
+              () => {},
+              () => {
+                void Linking.openURL(t('btcPricePopup.url'))
+              }
+            )
+          )()
+        }}
+      >
+        <Text ta="center" fos={12} col="$greyAccent2">
+          {t('settings.btcPriceSourceCreditYadio')}
+        </Text>
+      </TouchableWithoutFeedback>
     </SecretDoor>
   )
 }

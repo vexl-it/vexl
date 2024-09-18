@@ -4,9 +4,10 @@ import {
   Radius,
   longitudeDeltaToKilometers,
 } from '@vexl-next/domain/src/utility/geoCoordinates'
-import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
+import {type ExtractErrorFromEffect} from '@vexl-next/resources-utils/src/utils/ExtractErrorFromEffect'
+import {type GetGeocodedCoordinatesResponse} from '@vexl-next/rest-api/src/services/location/contracts'
+import {Effect, Either, Exit, Fiber} from 'effect'
 import * as E from 'fp-ts/Either'
-import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/lib/function'
 import {atom, useAtomValue, useSetAtom} from 'jotai'
 import {useMemo} from 'react'
@@ -15,7 +16,10 @@ import MapView, {PROVIDER_GOOGLE, type Region} from 'react-native-maps'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {Stack, Text, getTokens} from 'tamagui'
 import {apiAtom} from '../../../api'
-import {loadableEither} from '../../../utils/atomUtils/loadableEither'
+import {
+  type UnknownLoadingError,
+  loadableEffectEither,
+} from '../../../utils/atomUtils/loadableEither'
 import {
   getCurrentLocale,
   useTranslation,
@@ -77,44 +81,73 @@ function useAtoms({
           ) / 10
         )
       }),
-      getGeocodedRegion: loadableEither(
-        atom(async (get, {signal}) => {
-          const region = get(selectedRegionAtom)
+      getGeocodedRegion: loadableEffectEither(
+        atom(
+          async (
+            get,
+            {signal}
+          ): Promise<
+            Either.Either<
+              GetGeocodedCoordinatesResponse,
+              | ExtractErrorFromEffect<
+                  ReturnType<typeof api.location.getGeocodedCoordinates>
+                >
+              | UnknownLoadingError
+            >
+          > => {
+            const region = get(selectedRegionAtom)
 
-          onPick(null) // loading
-          return await pipe(
-            effectToTaskEither(
-              api.location.getGeocodedCoordinates(
-                {
+            onPick(null) // loading
+            const fiber = Effect.runFork(
+              api.location
+                .getGeocodedCoordinates({
                   query: {
                     lang: getCurrentLocale(),
                     latitude: Latitude.parse(region.latitude),
                     longitude: Longitude.parse(region.longitude),
                   },
-                },
-                signal
-              )
-            ),
-            TE.map((data) => {
-              const {width} = Dimensions.get('window')
-              const usedWidthWithoutPadding = (width - circleMargin * 2) / width
+                })
+                .pipe(
+                  Effect.map((data) => {
+                    const {width} = Dimensions.get('window')
+                    const usedWidthWithoutPadding =
+                      (width - circleMargin * 2) / width
 
-              onPick({
-                ...data,
-                latitude: Latitude.parse(region.latitude),
-                longitude: Longitude.parse(region.longitude),
-                radius: Radius.parse(
-                  (Math.abs(region.longitudeDelta) * usedWidthWithoutPadding) /
-                    2
-                ),
-              })
-              return data
-            })
-          )()
-        })
+                    onPick({
+                      ...data,
+                      latitude: Latitude.parse(region.latitude),
+                      longitude: Longitude.parse(region.longitude),
+                      radius: Radius.parse(
+                        (Math.abs(region.longitudeDelta) *
+                          usedWidthWithoutPadding) /
+                          2
+                      ),
+                    })
+                    return data
+                  }),
+                  Effect.either
+                )
+            )
+
+            signal.onabort = () => {
+              Effect.runFork(Fiber.interruptFork(fiber))
+            }
+
+            const exit = await Effect.runPromise(Fiber.await(fiber))
+
+            if (Exit.isSuccess(exit)) {
+              return exit.value
+            }
+
+            return Either.left({
+              _tag: 'UnknownLoadingError',
+              error: exit.cause,
+            } as UnknownLoadingError)
+          }
+        )
       ),
     }
-  }, [initialRegion, onPick, api.location])
+  }, [api, initialRegion, onPick])
 }
 
 function PickedLocationText({

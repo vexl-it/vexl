@@ -1,7 +1,8 @@
 import {Latitude, Longitude} from '@vexl-next/domain/src/utility/geoCoordinates'
-import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
+import {type ExtractErrorFromEffect} from '@vexl-next/resources-utils/src/utils/ExtractErrorFromEffect'
+import {type GetGeocodedCoordinatesResponse} from '@vexl-next/rest-api/src/services/location/contracts'
+import {Effect, Either, Exit, Fiber} from 'effect'
 import * as E from 'fp-ts/Either'
-import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/lib/function'
 import {atom, useAtomValue, useSetAtom} from 'jotai'
 import {useMemo} from 'react'
@@ -13,7 +14,10 @@ import MapView, {
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {Stack, Text} from 'tamagui'
 import {apiAtom} from '../../../api'
-import {loadableEither} from '../../../utils/atomUtils/loadableEither'
+import {
+  loadableEffectEither,
+  type UnknownLoadingError,
+} from '../../../utils/atomUtils/loadableEither'
 import {
   getCurrentLocale,
   useTranslation,
@@ -53,33 +57,60 @@ function useAtoms({
 
     return {
       selectedRegionAtom,
-      getGeocodedRegion: loadableEither(
-        atom(async (get, {signal}) => {
-          const region = get(selectedRegionAtom)
+      getGeocodedRegion: loadableEffectEither(
+        atom(
+          async (
+            get,
+            {signal}
+          ): Promise<
+            Either.Either<
+              GetGeocodedCoordinatesResponse,
+              | ExtractErrorFromEffect<
+                  ReturnType<typeof api.location.getGeocodedCoordinates>
+                >
+              | UnknownLoadingError
+            >
+          > => {
+            const region = get(selectedRegionAtom)
 
-          onPick(null) // loading
-          return await pipe(
-            effectToTaskEither(
-              api.location.getGeocodedCoordinates(
-                {
+            onPick(null) // loading
+            const fiber = Effect.runFork(
+              api.location
+                .getGeocodedCoordinates({
                   query: {
                     lang: getCurrentLocale(),
                     latitude: Latitude.parse(region.latitude),
                     longitude: Longitude.parse(region.longitude),
                   },
-                },
-                signal
-              )
-            ),
-            TE.map((data) => {
-              onPick(data)
-              return data
-            })
-          )()
-        })
+                })
+                .pipe(
+                  Effect.map((data) => {
+                    onPick(data)
+                    return data
+                  }),
+                  Effect.either
+                )
+            )
+
+            signal.onabort = () => {
+              Effect.runFork(Fiber.interruptFork(fiber))
+            }
+
+            const exit = await Effect.runPromise(Fiber.await(fiber))
+
+            if (Exit.isSuccess(exit)) {
+              return exit.value
+            }
+
+            return Either.left({
+              _tag: 'UnknownLoadingError',
+              error: exit.cause,
+            } as UnknownLoadingError)
+          }
+        )
       ),
     }
-  }, [initialRegion, onPick, api.location])
+  }, [api, initialRegion, onPick])
 }
 
 function PickedLocationText({

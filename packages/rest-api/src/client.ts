@@ -7,7 +7,7 @@ import {
 import {Schema} from '@effect/schema'
 import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
-import {Effect, Option} from 'effect'
+import {Option} from 'effect'
 import {Client, type Api} from 'effect-http'
 import {CommonHeaders} from './commonHeaders'
 import {
@@ -49,7 +49,6 @@ export interface ClientProps<A> {
   clientSemver: SemverString
   getUserSessionCredentials?: GetUserSessionCredentials
   url: ServiceUrl
-  signal?: AbortSignal
   loggingFunction?: LoggingFunction | null
 }
 
@@ -60,7 +59,6 @@ export function createClientInstanceWithAuth<A extends Api.Api.Any>({
   clientSemver,
   getUserSessionCredentials,
   url,
-  signal,
   loggingFunction,
 }: ClientProps<A>): Client.Client<A> {
   const commonHeaders = new CommonHeaders({
@@ -208,12 +206,6 @@ export function createClientInstanceWithAuth<A extends Api.Api.Any>({
           },
           orElse: (response) => response,
         })
-      ),
-      HttpClient.transform(
-        Effect.locallyWith(
-          HttpClient.currentFetchOptions,
-          (currentFetchOptions) => ({...currentFetchOptions, signal})
-        )
       )
     ),
   })

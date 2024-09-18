@@ -1,16 +1,19 @@
-import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
+import {type ExtractErrorFromEffect} from '@vexl-next/resources-utils/src/utils/ExtractErrorFromEffect'
 import {type LocationSuggestion} from '@vexl-next/rest-api/src/services/location/contracts'
 import {createScope, molecule, type MoleculeOrInterface} from 'bunshi'
 import {useMolecule} from 'bunshi/dist/react'
+import {Effect, Either, Exit, Fiber} from 'effect'
 import * as E from 'fp-ts/Either'
-import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/lib/function'
 import {atom} from 'jotai'
 import {splitAtom} from 'jotai/utils'
 import {randomUUID} from 'node:crypto'
 import {z} from 'zod'
 import {apiAtom} from '../../api'
-import {loadableEither} from '../../utils/atomUtils/loadableEither'
+import {
+  loadableEffectEither,
+  type UnknownLoadingError,
+} from '../../utils/atomUtils/loadableEither'
 import {getCurrentLocale} from '../../utils/localization/I18nProvider'
 
 export const LocationSessionId = z.string().uuid().brand<'LocationSessionId'>()
@@ -29,26 +32,56 @@ export const LocationSearchMolecule = molecule((_, getScope) => {
 
   const searchQueryAtom = atom('')
 
-  const searchResultsAtom = loadableEither(
-    atom(async (get, {signal}) => {
-      const query = get(searchQueryAtom)
-      if (query.trim() === '') return await TE.right([])()
+  const searchResultsAtom = loadableEffectEither(
+    atom(
+      async (
+        get,
+        {signal}
+      ): Promise<
+        Either.Either<
+          readonly LocationSuggestion[],
+          | ExtractErrorFromEffect<
+              ReturnType<typeof api.location.getLocationSuggestions>
+            >
+          | UnknownLoadingError
+        >
+      > => {
+        const api = get(apiAtom)
+        const query = get(searchQueryAtom)
+        if (query.trim() === '') return Either.right([])
 
-      return await pipe(
-        effectToTaskEither(
-          get(apiAtom).location.getLocationSuggestions(
-            {
+        const fiber = Effect.runFork(
+          api.location
+            .getLocationSuggestions({
               query: {
                 phrase: query,
                 lang: getCurrentLocale(),
               },
-            },
-            signal
-          )
-        ),
-        TE.map((one) => one.result)
-      )()
-    })
+            })
+            .pipe(
+              Effect.map((one) => {
+                return one.result
+              }),
+              Effect.either
+            )
+        )
+
+        signal.onabort = () => {
+          Effect.runFork(Fiber.interruptFork(fiber))
+        }
+
+        const exit = await Effect.runPromise(Fiber.await(fiber))
+
+        if (Exit.isSuccess(exit)) {
+          return exit.value
+        }
+
+        return Either.left({
+          _tag: 'UnknownLoadingError',
+          error: exit.cause,
+        } as UnknownLoadingError)
+      }
+    )
   )
 
   const searchResultsOrEmptyArrayAtom = atom((get): LocationSuggestion[] => {

@@ -36,8 +36,7 @@ export function api({
 }) {
   return {
     getLocationSuggestions: (
-      getLocationSuggestionsInput: GetLocationSuggestionsInput,
-      signal?: AbortSignal
+      getLocationSuggestionsInput: GetLocationSuggestionsInput
     ) =>
       handleCommonErrorsEffect(
         createClientInstanceWithAuth({
@@ -47,13 +46,11 @@ export function api({
           clientSemver,
           getUserSessionCredentials,
           url,
-          signal,
           loggingFunction,
         }).getLocationSuggestion(getLocationSuggestionsInput)
       ),
     getGeocodedCoordinates: (
-      getGeocodedCoordinatesInput: GetGeocodedCoordinatesInput,
-      signal?: AbortSignal
+      getGeocodedCoordinatesInput: GetGeocodedCoordinatesInput
     ) =>
       handleCommonAndExpectedErrorsEffect(
         createClientInstanceWithAuth({
@@ -63,7 +60,6 @@ export function api({
           clientSemver,
           getUserSessionCredentials,
           url,
-          signal,
           loggingFunction,
         }).getGeocodedCoordinates(getGeocodedCoordinatesInput),
         GetGeocodedCoordinatesErrors

@@ -19,6 +19,7 @@ import {
 export const QueryOfferByPublicKeyAndOfferIdRequest = Schema.Struct({
   userPublicKey: PublicKeyPemBase64E,
   id: OfferIdE,
+  skipValidation: Schema.optional(Schema.Boolean),
 })
 export type QueryOfferByPublicKeyAndOfferIdRequest = Schema.Schema.Type<
   typeof QueryOfferByPublicKeyAndOfferIdRequest
@@ -49,8 +50,12 @@ export const createQueryOfferByPublicKeyAndOfferId = Effect.gen(function* (_) {
               sql.and([
                 sql`offer_public.offer_id = ${one.id}`,
                 sql`offer_private.user_public_key = ${one.userPublicKey}`,
-                offerNotExpired(sql, expirationPeriodDays),
-                offerNotFlagged(sql, offerReportFilter),
+                one.skipValidation
+                  ? 'true'
+                  : offerNotExpired(sql, expirationPeriodDays),
+                one.skipValidation
+                  ? 'true'
+                  : offerNotFlagged(sql, offerReportFilter),
               ])
             )
           )}

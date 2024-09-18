@@ -304,7 +304,11 @@
   "settings.items.followUsOn": "Seguici su",
   "settings.items.twitter": "Twitter",
   "settings.items.twitterUrl": "https://twitter.com/vexl",
+  "settings.items.X": "X",
+  "settings.items.XUrl": "https://x.com/vexl",
   "settings.items.readMoreOn": "Per saperne di più su",
+  "settings.items.ourBlog": "Our blog",
+  "settings.items.ourBlogUrl": "https://blog.vexl.it/",
   "settings.items.medium": "Media",
   "settings.items.mediumUrl": "https://blog.vexl.it",
   "settings.items.learnMoreOn": "Per saperne di più su",
@@ -1047,5 +1051,9 @@
   "raffle.errorOpeningDeepLink": "Errore nell'apertura del link",
   "tradeCalculator.title": "Calcolatrice dell'operazione",
   "tradeCalculator.whatDoesLivePriceMean": "Cosa significa prezzo corrente?",
-  "tradeCalculator.yadioLivePriceExplanation": "Per determinare il prezzo di BTC Vexl utilizza i dati di Yadio.io, dopo 10 minuti ti preghiamo di aggiornare il prezzo manualmente per avere il prezzo più aggiornato."
+  "tradeCalculator.yadioLivePriceExplanation": "Per determinare il prezzo di BTC Vexl utilizza i dati di Yadio.io, dopo 10 minuti ti preghiamo di aggiornare il prezzo manualmente per avere il prezzo più aggiornato.",
+  "btcPricePopup.titlePrice": "Live BTC Price",
+  "btcPricePopup.titleRate": "BTC Exchange rate",
+  "btcPricePopup.description": "Vexl sources BTC price from Yadio.io. It is refreshed every 10-20 minutes.",
+  "btcPricePopup.url": "https://Yadio.io/info.html"
 }

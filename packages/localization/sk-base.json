@@ -304,7 +304,11 @@
   "settings.items.followUsOn": "Sleduj nás na",
   "settings.items.twitter": "",
   "settings.items.twitterUrl": "",
+  "settings.items.X": "X",
+  "settings.items.XUrl": "https://x.com/vexl",
   "settings.items.readMoreOn": "Prečítaj si viac na",
+  "settings.items.ourBlog": "Our blog",
+  "settings.items.ourBlogUrl": "https://blog.vexl.it/",
   "settings.items.medium": "",
   "settings.items.mediumUrl": "",
   "settings.items.learnMoreOn": "Viac sa dozvieš na",
@@ -1047,5 +1051,9 @@
   "raffle.errorOpeningDeepLink": "Chyba pri otváraní prepojenia v rámci aplikácie",
   "tradeCalculator.title": "Trade calculator",
   "tradeCalculator.whatDoesLivePriceMean": "What does Live price mean?",
-  "tradeCalculator.yadioLivePriceExplanation": "Vexl sources BTC prices from Yadio.io, after 10 minutes, please refresh manually for the most up to date price."
+  "tradeCalculator.yadioLivePriceExplanation": "Vexl sources BTC prices from Yadio.io, after 10 minutes, please refresh manually for the most up to date price.",
+  "btcPricePopup.titlePrice": "Live BTC Price",
+  "btcPricePopup.titleRate": "BTC Exchange rate",
+  "btcPricePopup.description": "Vexl sources BTC price from Yadio.io. It is refreshed every 10-20 minutes.",
+  "btcPricePopup.url": "https://Yadio.io/info.html"
 }

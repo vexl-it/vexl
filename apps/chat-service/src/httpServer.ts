@@ -1,5 +1,5 @@
 import {NodeContext} from '@effect/platform-node'
-import {ChatApiSpecification} from '@vexl-next/rest-api/src/services/chat/ChatApiSpecification'
+import {ChatApiSpecification} from '@vexl-next/rest-api/src/services/chat/specification'
 import {healthServerLayer} from '@vexl-next/server-utils/src/HealthServer'
 import {setupLoggingMiddlewares} from '@vexl-next/server-utils/src/loggingMiddlewares'
 import {RedisService} from '@vexl-next/server-utils/src/RedisService'

@@ -67,8 +67,8 @@ function BitcoinPriceChart(): JSX.Element {
         >
           <XStack>
             {btcPriceForSelectedCurrency?.state === 'success' && (
-              <Stack mr="$1">
-                <AnimatedLiveIndicator color="$main" />
+              <Stack justifyContent="center" mr="$1">
+                <AnimatedLiveIndicator color="$yellowAccent1" />
               </Stack>
             )}
             {btcPriceForSelectedCurrency?.state === 'loading' ? (

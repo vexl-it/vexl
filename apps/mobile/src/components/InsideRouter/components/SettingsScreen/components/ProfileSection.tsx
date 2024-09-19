@@ -37,22 +37,31 @@ function ProfileSection(): JSX.Element {
 
   return (
     <Stack ai="center" ml="$4" mr="$4">
-      <XStack jc="space-between" als="stretch" mb="$7">
-        <TouchableOpacity
-          onPress={() => {
-            navigation.navigate('SetContacts', {})
-          }}
-        >
-          <GrayBackContainer>
-            <Stack w={24} h={24}>
-              <SvgImage source={reachIconSVG} />
-            </Stack>
-            <Text fos={16} ml="$2" col="$greyOnBlack">
-              {t('settings.yourReach', {number: reachNumber})}
-            </Text>
-          </GrayBackContainer>
-        </TouchableOpacity>
-        <XStack space="$2">
+      <XStack jc="space-between" mb="$7" space="$2">
+        <Stack f={3}>
+          <TouchableOpacity
+            onPress={() => {
+              navigation.navigate('SetContacts', {})
+            }}
+          >
+            <GrayBackContainer>
+              <Stack w={24} h={24}>
+                <SvgImage source={reachIconSVG} />
+              </Stack>
+              <Text
+                fs={1}
+                fos={16}
+                ml="$2"
+                col="$greyOnBlack"
+                numberOfLines={1}
+                adjustsFontSizeToFit
+              >
+                {t('settings.yourReach', {number: reachNumber})}
+              </Text>
+            </GrayBackContainer>
+          </TouchableOpacity>
+        </Stack>
+        <XStack f={1} space="$2">
           <TouchableOpacity
             onPress={() => {
               void setQrCodeDialogVisible()

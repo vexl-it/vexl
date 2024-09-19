@@ -147,6 +147,27 @@ describe('Delete offer', () => {
       })
     )
   })
+  it('Does not fail when deleting offers using empty adminIds', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const me = generatePrivateKey()
+        const authHeaders = yield* _(
+          createDummyAuthHeadersForUser({
+            phoneNumber: Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
+            publicKey: me.publicKeyPemBase64,
+          })
+        )
+
+        const api = yield* _(NodeTestingApp)
+        yield* _(
+          api.deleteOffer(
+            {query: {adminIds: []}},
+            HttpClientRequest.setHeaders(authHeaders)
+          )
+        )
+      })
+    )
+  })
   it('Does not fail when deleting non existing offers', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {

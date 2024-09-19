@@ -24,7 +24,7 @@ export const hashAdminId = (
       encrypt(adminId),
       Effect.catchAll((e) =>
         Effect.zipRight(
-          Effect.logError('Error while hasing adminid', e),
+          Effect.logError('Error while hashing adminid', e),
           Effect.fail(new UnexpectedServerError({status: 500}))
         )
       ),

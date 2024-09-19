@@ -145,7 +145,11 @@ export const DeleteOfferRequest = Schema.Struct({
         Schema.Array(Schema.String),
         {
           encode: (a) => a,
-          decode: Array.dedupe,
+          decode: (a) => {
+            if (a.length === 1 && a[0] === '') return []
+
+            return Array.dedupe(a)
+          },
         }
       )
     ),

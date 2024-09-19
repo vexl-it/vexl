@@ -23,7 +23,7 @@ export const withOfferAdminActionRedisLock =
     Effect.all(
       pipe(
         Array.isArray(offerAdminId) ? offerAdminId : [offerAdminId],
-        Array.map((a) => hashAdminId(a))
+        Array.map(hashAdminId)
       )
     ).pipe(
       Effect.map((hashedIds) =>

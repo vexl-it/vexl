@@ -1,19 +1,16 @@
 import {Schema} from '@effect/schema'
 import {
-  POSITIVE_STAR_RATING_THRESHOLD,
   generateFeedbackFormId,
   objectionTypeNegativeOptions,
   objectionTypePositiveOptions,
+  POSITIVE_STAR_RATING_THRESHOLD,
   type Feedback,
   type FeedbackType,
   type ObjectionType,
 } from '@vexl-next/domain/src/general/feedback'
-import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {FeedbackFormId} from '@vexl-next/rest-api/src/services/feedback/contracts'
 import {createScope, molecule} from 'bunshi/dist/react'
-import * as T from 'fp-ts/Task'
-import * as TE from 'fp-ts/TaskEither'
-import {pipe} from 'fp-ts/function'
+import {Effect} from 'effect'
 import {atom, type SetStateAction, type WritableAtom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {apiAtom} from '../../../api'
@@ -24,6 +21,7 @@ import reportError from '../../../utils/reportError'
 export function generateInitialFeedback(type: FeedbackType): Feedback {
   return {
     type,
+    currentPage: type,
     formId: generateFeedbackFormId(),
     stars: 0,
     objections: [],
@@ -44,7 +42,9 @@ export const feedbackMolecule = molecule((getMolecule, getScope) => {
   )
   const textCommentAtom = focusAtom(feedbackAtom, (o) => o.prop('textComment'))
   const formIdAtom = focusAtom(feedbackAtom, (o) => o.prop('formId'))
-  const currentFeedbackPageAtom = focusAtom(feedbackAtom, (o) => o.prop('type'))
+  const currentFeedbackPageAtom = focusAtom(feedbackAtom, (o) =>
+    o.prop('currentPage')
+  )
   const chatFeedbackFinishedAtom = focusAtom(feedbackAtom, (o) =>
     o.prop('finished')
   )
@@ -87,7 +87,7 @@ export const feedbackMolecule = molecule((getMolecule, getScope) => {
     )
   }
 
-  const submitFeedbackAtom = atom(
+  const submitFeedbackActionAtom = atom(
     null,
     (get, set, isOfferCreationFeedback: boolean) => {
       const api = get(apiAtom)
@@ -98,89 +98,74 @@ export const feedbackMolecule = molecule((getMolecule, getScope) => {
         get(currentFeedbackPageAtom) === 'TEXT_COMMENT' &&
         get(textCommentAtom).trim() === ''
       ) {
-        return true
+        return Effect.runFork(Effect.void)
       }
 
-      return pipe(
-        TE.Do,
-        TE.chainW(() =>
-          effectToTaskEither(
-            api.feedback.submitFeedback({
-              body: {
-                formId: Schema.decodeSync(FeedbackFormId)(formId),
-                countryCode: regionCode,
-                type: type === 'OFFER_RATING' ? 'trade' : 'create',
-                ...(stars !== 0 && {stars}),
-                ...(!isOfferCreationFeedback &&
-                  objections.length !== 0 && {
-                    objections: objections?.join(','),
-                  }),
-                ...(!isOfferCreationFeedback &&
-                  textComment.trim() !== '' && {textComment}),
-              },
-            })
-          )
-        ),
-        TE.match(
-          (e) => {
-            reportError('error', new Error('Error sending feedback'), {e})
-            return false
+      return api.feedback
+        .submitFeedback({
+          body: {
+            formId: Schema.decodeSync(FeedbackFormId)(formId),
+            countryCode: regionCode,
+            type: type === 'CHAT_RATING' ? 'trade' : 'create',
+            ...(stars !== 0 && {stars}),
+            ...(!isOfferCreationFeedback &&
+              objections.length !== 0 && {
+                objections: objections?.join(','),
+              }),
+            ...(!isOfferCreationFeedback &&
+              textComment.trim() !== '' && {textComment}),
           },
-          () => {
-            return true
-          }
+        })
+        .pipe(
+          Effect.catchAll((e) =>
+            Effect.sync(() => {
+              reportError('error', new Error('Error sending feedback'), {e})
+            })
+          ),
+          Effect.runFork
         )
-      )()
     }
   )
 
-  const submitOfferCreationFeedbackHandleUIAtom = atom(null, (get, set) => {
-    return pipe(
-      T.Do,
-      T.map((r) => {
-        set(feedbackFlowFinishedAtom, true)
-        return r
-      }),
-      T.map(() => set(submitFeedbackAtom, false))
-    )()
-  })
+  const submitOfferCreationFeedbackHandleUIActionAtom = atom(
+    null,
+    (get, set) => {
+      set(feedbackFlowFinishedAtom, true)
+      set(submitFeedbackActionAtom, true)
+    }
+  )
 
-  const submitChatFeedbackAndHandleUIAtom = atom(null, (get, set) => {
-    const {type, stars, objections} = get(feedbackAtom)
+  const submitChatFeedbackAndHandleUIActionAtom = atom(null, (get, set) => {
+    const {stars, objections} = get(feedbackAtom)
+    const currentPage = get(currentFeedbackPageAtom)
 
-    return pipe(
-      TE.Do,
-      TE.map((r) => {
-        if (type === 'TEXT_COMMENT') {
-          set(feedbackFlowFinishedAtom, true)
-        }
+    set(submitFeedbackActionAtom, false)
 
-        if (type === 'CHAT_RATING') {
-          // we have to filter out previous objections if rating changed from positive -> negative and opposite
-          if (
-            (stars > POSITIVE_STAR_RATING_THRESHOLD &&
-              objections.some((objection) =>
-                objectionTypeNegativeOptions.includes(objection)
-              )) ||
-            (stars < POSITIVE_STAR_RATING_THRESHOLD &&
-              objections.some((objection) =>
-                objectionTypePositiveOptions.includes(objection)
-              ))
-          ) {
-            set(selectedObjectionsAtom, [])
-          }
+    if (currentPage === 'TEXT_COMMENT') {
+      set(feedbackFlowFinishedAtom, true)
+    }
 
-          set(currentFeedbackPageAtom, 'OBJECTIONS')
-        }
+    if (currentPage === 'CHAT_RATING') {
+      // we have to filter out previous objections if rating changed from positive -> negative and opposite
+      if (
+        (stars > POSITIVE_STAR_RATING_THRESHOLD &&
+          objections.some((objection) =>
+            objectionTypeNegativeOptions.includes(objection)
+          )) ||
+        (stars < POSITIVE_STAR_RATING_THRESHOLD &&
+          objections.some((objection) =>
+            objectionTypePositiveOptions.includes(objection)
+          ))
+      ) {
+        set(selectedObjectionsAtom, [])
+      }
 
-        if (type === 'OBJECTIONS') {
-          set(currentFeedbackPageAtom, 'TEXT_COMMENT')
-        }
+      set(currentFeedbackPageAtom, 'OBJECTIONS')
+    }
 
-        return r
-      }),
-      TE.map(() => set(submitFeedbackAtom, false))
-    )()
+    if (currentPage === 'OBJECTIONS') {
+      set(currentFeedbackPageAtom, 'TEXT_COMMENT')
+    }
   })
 
   return {
@@ -192,8 +177,8 @@ export const feedbackMolecule = molecule((getMolecule, getScope) => {
     formIdAtom,
     textCommentAtom,
     currentFeedbackPageAtom,
-    submitChatFeedbackAndHandleUIAtom,
-    submitOfferCreationFeedbackHandleUIAtom,
+    submitChatFeedbackAndHandleUIActionAtom,
+    submitOfferCreationFeedbackHandleUIActionAtom,
     feedbackFlowFinishedAtom,
   }
 })

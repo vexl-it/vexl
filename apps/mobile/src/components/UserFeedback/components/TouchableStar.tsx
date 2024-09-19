@@ -15,15 +15,15 @@ function TouchableStar({starOrderNumber}: Props): JSX.Element {
   const {
     createIsStarSelectedAtom,
     currentFeedbackPageAtom,
-    submitChatFeedbackAndHandleUIAtom,
-    submitOfferCreationFeedbackHandleUIAtom,
+    submitChatFeedbackAndHandleUIActionAtom,
+    submitOfferCreationFeedbackHandleUIActionAtom,
   } = useMolecule(feedbackMolecule)
   const currentPage = useAtomValue(currentFeedbackPageAtom)
   const submitChatFeedbackAndHandleUI = useSetAtom(
-    submitChatFeedbackAndHandleUIAtom
+    submitChatFeedbackAndHandleUIActionAtom
   )
   const submitOfferCreationFeedbackHandleUI = useSetAtom(
-    submitOfferCreationFeedbackHandleUIAtom
+    submitOfferCreationFeedbackHandleUIActionAtom
   )
   const [isSelected, select] = useAtom(
     useMemo(
@@ -37,9 +37,9 @@ function TouchableStar({starOrderNumber}: Props): JSX.Element {
       onPress={() => {
         select(!isSelected)
         if (currentPage === 'OFFER_RATING') {
-          void submitOfferCreationFeedbackHandleUI()
+          submitOfferCreationFeedbackHandleUI()
         } else {
-          void submitChatFeedbackAndHandleUI()
+          submitChatFeedbackAndHandleUI()
         }
       }}
     >

@@ -2,8 +2,11 @@ import crypto from 'node:crypto'
 import {defaultCurve, type Curve} from './Curve.brand'
 import {
   PrivateKeyHolder,
+  PrivateKeyHolderE,
   PrivateKeyPemBase64,
+  PrivateKeyPemBase64E,
   PublicKeyPemBase64,
+  PublicKeyPemBase64E,
 } from './brands'
 import {
   privateRawToPem,
@@ -51,6 +54,9 @@ export {
   generatePrivateKey,
   importPrivateKey,
   PrivateKeyHolder,
+  PrivateKeyHolderE,
   PrivateKeyPemBase64,
+  PrivateKeyPemBase64E,
   PublicKeyPemBase64,
+  PublicKeyPemBase64E,
 }

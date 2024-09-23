@@ -1,3 +1,4 @@
+import {Schema} from '@effect/schema'
 import {KeyHolder} from '@vexl-next/cryptography'
 import {z} from 'zod'
 
@@ -9,7 +10,14 @@ export const UserSessionCredentials = z
     signature: z.string(),
   })
   .readonly()
+export const UserSessionCredentialsE = Schema.Struct({
+  publicKey: KeyHolder.PublicKeyPemBase64E,
+  hash: Schema.String,
+  signature: Schema.String,
+})
 
-export type UserSessionCredentials = z.TypeOf<typeof UserSessionCredentials>
+export type UserSessionCredentials = Schema.Schema.Type<
+  typeof UserSessionCredentialsE
+>
 
 export type GetUserSessionCredentials = () => UserSessionCredentials

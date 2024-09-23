@@ -1,3 +1,4 @@
+import {Effect} from 'effect'
 import {useSetAtom} from 'jotai'
 import {useEffect} from 'react'
 import {Stack} from 'tamagui'
@@ -21,7 +22,9 @@ function SuccessLoginScreen({
   const finishLogin = useSetAtom(finishLoginActionAtom)
 
   useEffect(() => {
-    void finishLogin({verifyPhoneNumberResponse, privateKey, phoneNumber})
+    Effect.runFork(
+      finishLogin({verifyPhoneNumberResponse, privateKey, phoneNumber})
+    )
   }, [finishLogin, phoneNumber, privateKey, verifyPhoneNumberResponse])
 
   return (

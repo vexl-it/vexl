@@ -1,5 +1,6 @@
 import {POSITIVE_STAR_RATING_THRESHOLD} from '@vexl-next/domain/src/general/feedback'
 import {useMolecule} from 'bunshi/dist/react'
+import {Effect} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import {useEffect, useMemo} from 'react'
 import {Stack, Text} from 'tamagui'
@@ -93,7 +94,7 @@ function FeedbackBannerContent({autoCloseWhenFinished}: Props): JSX.Element {
         currentPage !== 'CHAT_RATING' &&
         currentPage !== 'OFFER_RATING' && (
           <Button
-            onPress={submitChatFeedback}
+            onPress={() => Effect.runFork(submitChatFeedback())}
             variant="primary"
             text={
               currentPage === 'TEXT_COMMENT'

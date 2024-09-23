@@ -1,4 +1,5 @@
 import {useMolecule} from 'bunshi/dist/react'
+import {Effect} from 'effect'
 import {useAtom, useAtomValue, useSetAtom} from 'jotai'
 import {useMemo} from 'react'
 import {TouchableOpacity} from 'react-native'
@@ -37,9 +38,9 @@ function TouchableStar({starOrderNumber}: Props): JSX.Element {
       onPress={() => {
         select(!isSelected)
         if (currentPage === 'OFFER_RATING') {
-          submitOfferCreationFeedbackHandleUI()
+          Effect.runFork(submitOfferCreationFeedbackHandleUI())
         } else {
-          submitChatFeedbackAndHandleUI()
+          Effect.runFork(submitChatFeedbackAndHandleUI())
         }
       }}
     >

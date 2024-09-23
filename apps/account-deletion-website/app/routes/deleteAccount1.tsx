@@ -48,7 +48,6 @@ export const action: ActionFunction = async ({request}) => {
         createUserPublicApi().initPhoneVerification({body: {phoneNumber}})
       )
     ),
-    (a) => a,
     TE.matchW(
       (e) => {
         if (

@@ -98,7 +98,7 @@ export const feedbackMolecule = molecule((getMolecule, getScope) => {
         get(currentFeedbackPageAtom) === 'TEXT_COMMENT' &&
         get(textCommentAtom).trim() === ''
       ) {
-        return Effect.runFork(Effect.void)
+        return Effect.void
       }
 
       return api.feedback
@@ -121,8 +121,7 @@ export const feedbackMolecule = molecule((getMolecule, getScope) => {
             Effect.sync(() => {
               reportError('error', new Error('Error sending feedback'), {e})
             })
-          ),
-          Effect.runFork
+          )
         )
     }
   )
@@ -130,8 +129,11 @@ export const feedbackMolecule = molecule((getMolecule, getScope) => {
   const submitOfferCreationFeedbackHandleUIActionAtom = atom(
     null,
     (get, set) => {
-      set(feedbackFlowFinishedAtom, true)
-      set(submitFeedbackActionAtom, true)
+      return Effect.gen(function* (_) {
+        set(feedbackFlowFinishedAtom, true)
+
+        yield* _(set(submitFeedbackActionAtom, true))
+      })
     }
   )
 
@@ -139,33 +141,35 @@ export const feedbackMolecule = molecule((getMolecule, getScope) => {
     const {stars, objections} = get(feedbackAtom)
     const currentPage = get(currentFeedbackPageAtom)
 
-    set(submitFeedbackActionAtom, false)
+    return Effect.gen(function* (_) {
+      yield* _(set(submitFeedbackActionAtom, false))
 
-    if (currentPage === 'TEXT_COMMENT') {
-      set(feedbackFlowFinishedAtom, true)
-    }
-
-    if (currentPage === 'CHAT_RATING') {
-      // we have to filter out previous objections if rating changed from positive -> negative and opposite
-      if (
-        (stars > POSITIVE_STAR_RATING_THRESHOLD &&
-          objections.some((objection) =>
-            objectionTypeNegativeOptions.includes(objection)
-          )) ||
-        (stars < POSITIVE_STAR_RATING_THRESHOLD &&
-          objections.some((objection) =>
-            objectionTypePositiveOptions.includes(objection)
-          ))
-      ) {
-        set(selectedObjectionsAtom, [])
+      if (currentPage === 'TEXT_COMMENT') {
+        set(feedbackFlowFinishedAtom, true)
       }
 
-      set(currentFeedbackPageAtom, 'OBJECTIONS')
-    }
+      if (currentPage === 'CHAT_RATING') {
+        // we have to filter out previous objections if rating changed from positive -> negative and opposite
+        if (
+          (stars > POSITIVE_STAR_RATING_THRESHOLD &&
+            objections.some((objection) =>
+              objectionTypeNegativeOptions.includes(objection)
+            )) ||
+          (stars < POSITIVE_STAR_RATING_THRESHOLD &&
+            objections.some((objection) =>
+              objectionTypePositiveOptions.includes(objection)
+            ))
+        ) {
+          set(selectedObjectionsAtom, [])
+        }
 
-    if (currentPage === 'OBJECTIONS') {
-      set(currentFeedbackPageAtom, 'TEXT_COMMENT')
-    }
+        set(currentFeedbackPageAtom, 'OBJECTIONS')
+      }
+
+      if (currentPage === 'OBJECTIONS') {
+        set(currentFeedbackPageAtom, 'TEXT_COMMENT')
+      }
+    })
   })
 
   return {

@@ -1,33 +1,25 @@
 import {Schema} from '@effect/schema'
-import * as crypto from '@vexl-next/cryptography/src'
 import {type KeyHolder} from '@vexl-next/cryptography/src'
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
-import {EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
-import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
-import {contact, user} from '@vexl-next/rest-api/src'
-import {type UserSessionCredentials} from '@vexl-next/rest-api/src/UserSessionCredentials.brand'
-import {type CreateUserRequest} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {
-  type VerifyChallengeInput,
-  type VerifyPhoneNumberResponse,
-} from '@vexl-next/rest-api/src/services/user/contracts'
-import {Effect} from 'effect'
-import * as E from 'fp-ts/Either'
+  EcdsaSignature,
+  ecdsaSignE,
+} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
+import {taskEitherToEffect} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
+import {contact, user} from '@vexl-next/rest-api/src'
+import {UnknownClientError} from '@vexl-next/rest-api/src/Errors'
+import {type VerifyPhoneNumberResponse} from '@vexl-next/rest-api/src/services/user/contracts'
+import {Effect, Match} from 'effect'
 import * as O from 'fp-ts/Option'
-import * as T from 'fp-ts/Task'
-import * as TE from 'fp-ts/TaskEither'
-import {pipe} from 'fp-ts/function'
 import {atom} from 'jotai'
 import {apiAtom, apiEnv, platform} from '../../../../api'
-import {Session} from '../../../../brands/Session.brand'
+import {type Session, SessionE} from '../../../../brands/Session.brand'
 import {sessionAtom} from '../../../../state/session'
 import {version, versionCode} from '../../../../utils/environment'
-import {safeParse} from '../../../../utils/fpUtils'
 import {translationAtom} from '../../../../utils/localization/I18nProvider'
 import {navigationRef} from '../../../../utils/navigation'
 import reportError from '../../../../utils/reportError'
 import showErrorAlert from '../../../../utils/showErrorAlert'
-import {toCommonErrorMessage} from '../../../../utils/useCommonErrorMessages'
 import {askAreYouSureActionAtom} from '../../../AreYouSureDialog'
 import {contactsMigratedAtom} from '../../../VersionMigrations/atoms'
 
@@ -38,86 +30,6 @@ function resetNavigationToIntroScreen(): void {
     navigationRef.navigate('LoginFlow', {screen: 'PhoneNumber'})
   }
 }
-
-export const createUserAtContactMsActionAtom = atom(
-  null,
-  (
-    get,
-    set,
-    {
-      request,
-      credentials,
-    }: {request: CreateUserRequest; credentials: UserSessionCredentials}
-  ) => {
-    const {t} = get(translationAtom)
-    const contactApi = contact.api({
-      platform,
-      clientVersion: versionCode,
-      clientSemver: version,
-      url: apiEnv.contactMs,
-      getUserSessionCredentials: () => credentials,
-    })
-
-    return pipe(
-      effectToTaskEither(contactApi.createUser({body: request})),
-      TE.mapLeft((l) => {
-        switch (l._tag) {
-          // case 'UnexpectedApiResponseErrorAxios':
-          //   return t('common.unexpectedServerResponse')
-          case 'NetworkError':
-            return toCommonErrorMessage(l, t) ?? t('common.unknownError')
-          case 'UnknownClientError':
-          case 'UnknownServerError':
-          case 'NotFoundError':
-            return t('common.unknownError')
-        }
-      })
-    )
-  }
-)
-
-export const verifyChallengeActionAtom = atom(
-  null,
-  (get, set, verifyChallengeInput: VerifyChallengeInput) => {
-    const {t} = get(translationAtom)
-    const publicUser = get(apiAtom).user
-
-    return publicUser.verifyChallenge(verifyChallengeInput).pipe(
-      Effect.catchTags({
-        VerificationNotFoundError: () =>
-          Effect.fail(
-            t('loginFlow.verificationCode.errors.verificationNotFound')
-          ),
-        UnableToGenerateSignatureError: () =>
-          Effect.fail(
-            t('loginFlow.verificationCode.errors.challengeCouldNotBeGenerated')
-          ),
-        InvalidSignatureError: (e) => {
-          reportError(
-            'error',
-            new Error('Public key or hash invalid while verifying challenge'),
-            {e}
-          )
-          return Effect.fail(
-            t('loginFlow.verificationCode.errors.challengeCouldNotBeGenerated')
-          )
-        },
-        UnexpectedApiResponseError: (e) => {
-          reportError(
-            'error',
-            new Error('Unexpected api response while verifying challenge'),
-            {e}
-          )
-          return Effect.fail(t('common.unexpectedServerResponse'))
-        },
-      }),
-      Effect.catchAll((e) => {
-        reportError('error', new Error('Error while verifying challenge'), {e})
-        return Effect.fail(t('common.unknownError'))
-      })
-    )
-  }
-)
 
 const handleUserCreationActionAtom = atom(
   null,
@@ -131,121 +43,62 @@ const handleUserCreationActionAtom = atom(
     }
   ) => {
     const startedAt = Date.now()
+    const contactApi = contact.api({
+      platform,
+      clientVersion: versionCode,
+      clientSemver: version,
+      url: apiEnv.contactMs,
+      getUserSessionCredentials: () => session.sessionCredentials,
+    })
 
-    return pipe(
-      TE.Do,
-      TE.chainFirstW(() =>
-        set(createUserAtContactMsActionAtom, {
-          request: {firebaseToken: null},
-          credentials: session.sessionCredentials,
+    return contactApi.createUser({body: {firebaseToken: null}}).pipe(
+      Effect.tapError((e) => {
+        reportError('error', new Error('Error creating user at contact MS'), {
+          e,
         })
-      ),
-      TE.match(
-        (e) => {
-          reportError('error', new Error('Error creating user at contact MS'), {
-            e,
-          })
-          resetNavigationToIntroScreen()
-          return false
-        },
-        () => {
-          const leftToWait = TARGET_TIME_MILLISECONDS - (Date.now() - startedAt)
-          if (leftToWait > 0)
-            setTimeout(() => {
-              set(sessionAtom, O.some(session))
-            }, leftToWait)
-          else set(sessionAtom, O.some(session))
 
-          return true
-        }
-      )
-    )()
+        resetNavigationToIntroScreen()
+
+        return Effect.fail(e)
+      }),
+      Effect.tap(() => {
+        const leftToWait = TARGET_TIME_MILLISECONDS - (Date.now() - startedAt)
+        if (leftToWait > 0)
+          setTimeout(() => {
+            set(sessionAtom, O.some(session))
+          }, leftToWait)
+        else set(sessionAtom, O.some(session))
+      })
+    )
   }
 )
 
 const deleteUserAndResetFlowActionAtom = atom(
   null,
-  async (get, set, {session}: {session: Session}) => {
-    await pipe(
-      TE.Do,
-      TE.chain(() => {
-        const userApi = user.api({
-          platform,
-          clientSemver: version,
-          clientVersion: versionCode,
-          url: apiEnv.userMs,
-          getUserSessionCredentials: () => session.sessionCredentials,
-        })
-
-        return effectToTaskEither(userApi.deleteUser())
-      }),
-      TE.match(
-        (e) => {
-          reportError('error', new Error('Error deleting user in onboarding'), {
-            e,
-          })
-          return false
-        },
-        () => {
-          return true
-        }
-      ),
-      T.map(resetNavigationToIntroScreen)
-    )()
-  }
-)
-
-const handleUserExistsUIActionAtom = atom(
-  null,
-  (
-    get,
-    set,
-    {
-      userExists,
-      session,
-    }: {
-      userExists: boolean
-      session: Session
-    }
-  ) => {
-    const {t} = get(translationAtom)
-
-    if (userExists) {
-      return pipe(
-        set(askAreYouSureActionAtom, {
-          variant: 'info',
-          steps: [
-            {
-              type: 'StepWithText',
-              title: t('loginFlow.userAlreadyExists'),
-              description: t('loginFlow.phoneNumberPreviouslyRegistered'),
-              negativeButtonText: t('common.cancel'),
-              positiveButtonText: t('common.continue'),
-            },
-          ],
-        }),
-        TE.match(
-          () => {
-            void set(deleteUserAndResetFlowActionAtom, {session})
-          },
-          () => {
-            void set(handleUserCreationActionAtom, {
-              session,
-            })
-          }
-        )
-      )()
-    }
-
-    return set(handleUserCreationActionAtom, {
-      session,
+  (get, set, {session}: {session: Session}) => {
+    const userApi = user.api({
+      platform,
+      clientSemver: version,
+      clientVersion: versionCode,
+      url: apiEnv.userMs,
+      getUserSessionCredentials: () => session.sessionCredentials,
     })
+
+    return userApi.deleteUser().pipe(
+      Effect.tapError((e) => {
+        reportError('error', new Error('Error deleting user in onboarding'), {
+          e,
+        })
+        return Effect.fail(e)
+      }),
+      Effect.andThen(resetNavigationToIntroScreen)
+    )
   }
 )
 
 export const finishLoginActionAtom = atom(
   null,
-  async (
+  (
     get,
     set,
     {
@@ -259,99 +112,188 @@ export const finishLoginActionAtom = atom(
     }
   ) => {
     const {t} = get(translationAtom)
+    const publicUser = get(apiAtom).user
 
     set(contactsMigratedAtom, true)
 
-    await pipe(
-      E.right(privateKey),
-      E.bindTo('privateKey'),
-      E.bindW('signature', ({privateKey}) =>
-        E.tryCatch(
-          () =>
-            crypto.ecdsa.ecdsaSign({
-              privateKey: privateKey.privateKeyPemBase64,
-              challenge: verifyPhoneNumberResponse.challenge,
-            }),
-
-          (error) => {
-            reportError(
-              'error',
-              new Error('error while signing login challenge'),
-              {error}
-            )
-            return t('common.cryptoError')
-          }
+    return Effect.gen(function* (_) {
+      const signature = yield* _(
+        ecdsaSignE(privateKey.privateKeyPemBase64)(
+          verifyPhoneNumberResponse.challenge
         )
-      ),
-      TE.fromEither,
-      TE.bindW('verifyChallengeResponse', ({privateKey, signature}) =>
-        effectToTaskEither(
-          set(verifyChallengeActionAtom, {
-            body: {
-              userPublicKey: privateKey.publicKeyPemBase64,
-              signature: Schema.decodeSync(EcdsaSignature)(signature),
-            },
-          })
-        )
-      ),
-      TE.chainW(({verifyChallengeResponse}) => {
-        return pipe(
-          E.right<never, Zod.input<typeof Session>>({
-            version: 1,
-            sessionCredentials: {
-              publicKey: privateKey.publicKeyPemBase64,
-              hash: verifyChallengeResponse.hash,
-              signature: verifyChallengeResponse.signature,
-            },
-            phoneNumber,
-            privateKey,
-          }),
-          E.chainW(safeParse(Session)),
-          E.mapLeft((error) => {
-            reportError('error', new Error('Error while creating session'), {
-              error,
-            })
-            return t('common.unknownError')
-          }),
-          TE.fromEither
-        )
-      }),
-      TE.bindTo('session'),
-      TE.bindW('userExists', ({session}) => {
-        const contactApi = contact.api({
-          platform,
-          clientVersion: versionCode,
-          clientSemver: version,
-          url: apiEnv.contactMs,
-          getUserSessionCredentials: () => session.sessionCredentials,
-        })
-
-        return effectToTaskEither(
-          contactApi.checkUserExists({
-            query: {notifyExistingUserAboutLogin: true},
-          })
-        )
-      }),
-      TE.match(
-        (e) => {
-          reportError(
-            'error',
-            new Error('Error when creating user session on login'),
-            {e}
-          )
-          showErrorAlert({
-            title: t('common.unknownError'),
-            error: e,
-          })
-          resetNavigationToIntroScreen()
-        },
-        ({userExists, session}) => {
-          return set(handleUserExistsUIActionAtom, {
-            session,
-            userExists: userExists.exists,
-          })
-        }
       )
-    )()
+
+      const verifiedChallengeResponse = yield* _(
+        publicUser.verifyChallenge({
+          body: {
+            userPublicKey: privateKey.publicKeyPemBase64,
+            signature: Schema.decodeSync(EcdsaSignature)(signature),
+          },
+        })
+      )
+
+      const session = yield* _(
+        Schema.decode(SessionE)({
+          version: 1,
+          sessionCredentials: {
+            publicKey: privateKey.publicKeyPemBase64,
+            hash: verifiedChallengeResponse.hash,
+            signature: verifiedChallengeResponse.signature,
+          },
+          phoneNumber,
+          privateKey,
+        })
+      ).pipe(
+        Effect.catchTag('ParseError', (e) =>
+          Effect.fail(
+            new UnknownClientError({
+              message:
+                'Erro while parsing session data. Unable to normalize the session',
+              cause: e,
+            })
+          )
+        )
+      )
+
+      const contactApi = contact.api({
+        platform,
+        clientVersion: versionCode,
+        clientSemver: version,
+        url: apiEnv.contactMs,
+        getUserSessionCredentials: () => session.sessionCredentials,
+      })
+
+      const userExists = yield* _(
+        contactApi.checkUserExists({
+          query: {notifyExistingUserAboutLogin: true},
+        })
+      )
+
+      if (userExists.exists) {
+        yield* _(
+          taskEitherToEffect(
+            set(askAreYouSureActionAtom, {
+              variant: 'info',
+              steps: [
+                {
+                  type: 'StepWithText',
+                  title: t('loginFlow.userAlreadyExists'),
+                  description: t('loginFlow.phoneNumberPreviouslyRegistered'),
+                  negativeButtonText: t('common.cancel'),
+                  positiveButtonText: t('common.continue'),
+                },
+              ],
+            })
+          )
+        ).pipe(
+          Effect.matchEffect({
+            onSuccess: () =>
+              set(handleUserCreationActionAtom, {
+                session,
+              }),
+            onFailure: () => set(deleteUserAndResetFlowActionAtom, {session}),
+          })
+        )
+      } else {
+        yield* _(
+          set(handleUserCreationActionAtom, {
+            session,
+          })
+        )
+      }
+    }).pipe(
+      Effect.catchAll((e) => {
+        Match.type<typeof e>().pipe(
+          Match.tag('VerificationNotFoundError', (e) =>
+            Effect.sync(() => {
+              reportError('error', new Error('Verification not found'), {e})
+              showErrorAlert({
+                title: t(
+                  'loginFlow.verificationCode.errors.verificationNotFound'
+                ),
+                error: e,
+              })
+            })
+          ),
+          Match.tag('UnableToGenerateSignatureError', (e) =>
+            Effect.sync(() => {
+              reportError('error', new Error('Unable to generate signature'), {
+                e,
+              })
+              showErrorAlert({
+                title: t(
+                  'loginFlow.verificationCode.errors.challengeCouldNotBeGenerated'
+                ),
+              })
+            })
+          ),
+          Match.tag('InvalidSignatureError', (e) =>
+            Effect.sync(() => {
+              reportError(
+                'error',
+                new Error(
+                  'Public key or hash invalid while verifying challenge'
+                ),
+                {e}
+              )
+              showErrorAlert({
+                title: t(
+                  'loginFlow.verificationCode.errors.challengeCouldNotBeGenerated'
+                ),
+              })
+            })
+          ),
+          Match.tag('InvalidVerificationError', (e) =>
+            Effect.sync(() => {
+              reportError('error', new Error('Invalid verification error.'), {
+                e,
+              })
+              showErrorAlert({
+                title: t(
+                  'loginFlow.verificationCode.errors.verificationExpired'
+                ),
+              })
+            })
+          ),
+          Match.tag('CryptoError', (e) =>
+            Effect.sync(() => {
+              reportError('error', new Error('Crypto error.'), {
+                e,
+              })
+              showErrorAlert({
+                title: t('common.cryptoError'),
+              })
+            })
+          ),
+          Match.tag('NetworkError', (e) => {
+            showErrorAlert({
+              title: t(`common.${e._tag}`),
+              error: e,
+            })
+          }),
+          Match.tag(
+            'HttpError',
+            'UnknownClientError',
+            'UnknownServerError',
+            'NotFoundError',
+            'UnauthorizedError',
+            'UnexpectedApiResponseError',
+            (e) =>
+              Effect.sync(() => {
+                reportError('error', new Error(e._tag), {e})
+                showErrorAlert({
+                  title: t(`common.${e._tag}`),
+                  error: e,
+                })
+              })
+          ),
+          Match.exhaustive
+        )
+
+        resetNavigationToIntroScreen()
+
+        return Effect.void
+      })
+    )
   }
 )

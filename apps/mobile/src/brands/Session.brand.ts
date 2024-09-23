@@ -1,7 +1,17 @@
+import {Schema} from '@effect/schema'
 import {KeyHolder} from '@vexl-next/cryptography'
-import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
-import {UserNameAndUriAvatar} from '@vexl-next/domain/src/general/UserNameAndAvatar.brand'
-import {UserSessionCredentials} from '@vexl-next/rest-api/src/UserSessionCredentials.brand'
+import {
+  E164PhoneNumber,
+  E164PhoneNumberE,
+} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
+import {
+  UserNameAndUriAvatar,
+  UserNameAndUriAvatarE,
+} from '@vexl-next/domain/src/general/UserNameAndAvatar.brand'
+import {
+  UserSessionCredentials,
+  UserSessionCredentialsE,
+} from '@vexl-next/rest-api/src/UserSessionCredentials.brand'
 import {z} from 'zod'
 
 export const Session = z
@@ -13,4 +23,12 @@ export const Session = z
     privateKey: KeyHolder.PrivateKeyHolder,
   })
   .readonly()
-export type Session = z.TypeOf<typeof Session>
+
+export const SessionE = Schema.Struct({
+  version: Schema.Int.pipe(Schema.greaterThanOrEqualTo(0)),
+  realUserData: Schema.optional(UserNameAndUriAvatarE),
+  phoneNumber: E164PhoneNumberE,
+  sessionCredentials: UserSessionCredentialsE,
+  privateKey: KeyHolder.PrivateKeyHolderE,
+})
+export type Session = Schema.Schema.Type<typeof SessionE>

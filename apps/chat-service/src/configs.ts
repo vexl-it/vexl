@@ -31,3 +31,7 @@ export const newContentNotificationAfterConfig = Config.number(
 export const dashboardContactsImportedHookConfig = Config.option(
   Config.string('DASHBOARD_CONTACTS_IMPORTED_HOOK')
 )
+
+export const challengeExpirationMinutesConfig = Config.number(
+  'CHALLENGE_EXPIRATION_MINUTES'
+)

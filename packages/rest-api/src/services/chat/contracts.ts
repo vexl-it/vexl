@@ -19,6 +19,7 @@ import {
   UnixMillisecondsE,
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {BooleanFromString} from '@vexl-next/generic-utils/src/effect-helpers/BooleanFromString'
+import {Brand} from 'effect'
 import {z} from 'zod'
 import {
   NoContentResponse,
@@ -407,6 +408,13 @@ export const SendMessagesResponseE = Schema.Array(
 export type SendMessagesResponse = Schema.Schema.Type<
   typeof SendMessagesResponse
 >
+
+export const ChatChallenge = z
+  .string()
+  .transform((v) => Brand.nominal<typeof v & Brand.Brand<'ChatChallenge'>>()(v))
+
+export const ChatChallengeE = Schema.String.pipe(Schema.brand('ChatChallenge'))
+export type ChatChallenge = Schema.Schema.Type<typeof ChatChallengeE>
 
 export const CreateChallengeRequest = z.object({
   publicKey: PublicKeyPemBase64,

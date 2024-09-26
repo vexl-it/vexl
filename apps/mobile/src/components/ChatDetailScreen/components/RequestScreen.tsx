@@ -84,7 +84,7 @@ function RequestScreen(): JSX.Element {
       return t('offer.requestStatus.deleted')
     }
 
-    if (hasPreviousCommunication === 'firstInteraction' && !!requestedByMe) {
+    if (hasPreviousCommunication === 'firstInteraction' && !requestIsClosed) {
       return t('messages.thisWillBeYourFirstInteraction')
     }
 
@@ -93,7 +93,7 @@ function RequestScreen(): JSX.Element {
     }
 
     return undefined
-  }, [hasPreviousCommunication, requestedByMe, t])
+  }, [hasPreviousCommunication, requestIsClosed, t])
 
   useEffect(() => {
     if (previousCommunicationInfoMessage) {

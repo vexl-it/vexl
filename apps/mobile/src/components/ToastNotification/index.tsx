@@ -22,7 +22,13 @@ function ToastNotification(): JSX.Element {
   return (
     // this view has to be present in tree
     // without it exiting animation on Toast will not work
-    <Stack pos="absolute" alignSelf="center" top={-10}>
+    <Stack
+      pos="absolute"
+      alignSelf="center"
+      left={0}
+      right={0}
+      {...(state?.position === 'bottom' ? {bottom: -10} : {top: -10})}
+    >
       {!!state && <ToastNotificationContent {...state} />}
     </Stack>
   )

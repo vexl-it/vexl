@@ -12,12 +12,19 @@ function ToastNotificationContent({
   iconFill,
   text,
   showCloseButton,
+  position,
 }: ToastNotificationState): JSX.Element | null {
-  const {height, width} = useWindowDimensions()
+  const {height} = useWindowDimensions()
   const setToastNotification = useSetAtom(toastNotificationAtom)
 
   return (
-    <Stack als="center" maw={width * 0.95} pos="absolute" t={height * 0.1}>
+    <Stack
+      f={1}
+      px="$2"
+      {...(position === 'bottom'
+        ? {bottom: height * 0.1}
+        : {top: height * 0.1})}
+    >
       <Animated.View entering={FadeInUp} exiting={FadeOutUp}>
         <XStack
           ai="center"

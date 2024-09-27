@@ -27,6 +27,7 @@ import {checkUserExists} from './routes/user/checkUserExists'
 import {createUser} from './routes/user/createUser'
 import {deleteUser} from './routes/user/deleteUser'
 import {refreshUser} from './routes/user/refreshUser'
+import {updateBadOwnerHash} from './routes/user/updateBadOwnerHash'
 import {updateFirebaseToken} from './routes/user/updateFirebaseToken'
 import {FirebaseMessagingService} from './utils/notifications/FirebaseMessagingService'
 
@@ -39,6 +40,7 @@ export const app = RouterBuilder.make(ContactApiSpecification).pipe(
   RouterBuilder.handle(importContacts),
   RouterBuilder.handle(fetchMyContacts),
   RouterBuilder.handle(fetchCommonConnections),
+  RouterBuilder.handle(updateBadOwnerHash),
   RouterBuilder.build,
   setupLoggingMiddlewares
 )

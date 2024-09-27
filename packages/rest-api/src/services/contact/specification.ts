@@ -13,6 +13,9 @@ import {
   ImportContactsResponseE,
   ImportListEmptyError,
   RefreshUserRequestE,
+  UpdateBadOwnerHashErrors,
+  UpdateBadOwnerHashRequest,
+  UpdateBadOwnerHashResponseE,
   UpdateFirebaseTokenRequestE,
   UserExistsResponseE,
   UserNotFoundError,
@@ -105,12 +108,26 @@ export const FetchCommonConnectionsEndpoint = Api.post(
   Api.setResponseBody(FetchCommonConnectionsResponseE)
 )
 
+export const UpdateBadOwnerHashEndpoint = Api.post(
+  'updateBadOwnerHash',
+  '/api/v1/update-bad-owner-hash'
+).pipe(
+  Api.setSecurity(ServerSecurity),
+  Api.setRequestBody(UpdateBadOwnerHashRequest),
+  Api.setResponseBody(UpdateBadOwnerHashResponseE),
+  Api.addResponse({
+    status: 400,
+    body: UpdateBadOwnerHashErrors,
+  })
+)
+
 const UserApiGroup = ApiGroup.make('User').pipe(
   ApiGroup.addEndpoint(CheckUserExistsEndpoint),
   ApiGroup.addEndpoint(CreateUserEndpoint),
   ApiGroup.addEndpoint(RefreshUserEndpoint),
   ApiGroup.addEndpoint(UpdateFirebaseTokenEndpoint),
-  ApiGroup.addEndpoint(DeleteUserEndpoint)
+  ApiGroup.addEndpoint(DeleteUserEndpoint),
+  ApiGroup.addEndpoint(UpdateBadOwnerHashEndpoint)
 )
 
 const ContactApiGroup = ApiGroup.make('Contact').pipe(

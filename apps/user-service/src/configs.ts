@@ -50,3 +50,6 @@ export const dashboardNewUserHookConfig = Config.option(
 export const feedbackServiceUrlToRedirectToConfig = Config.string(
   'FEEDBACK_URL_TO_REDIRECT_TO'
 )
+
+export const oldHmacKeyUsedForHashingNumbersConfig =
+  Config.string('OLD_HMAC_KEY')

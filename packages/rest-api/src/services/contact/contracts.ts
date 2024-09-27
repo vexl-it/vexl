@@ -11,6 +11,7 @@ import {
 } from '@vexl-next/domain/src/general/offers'
 import {FcmToken, FcmTokenE} from '@vexl-next/domain/src/utility/FcmToken.brand'
 import {BooleanfromString} from '@vexl-next/generic-utils/src/effect-helpers/BooleanFromString'
+import {EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {z} from 'zod'
 import {
   PageRequest,
@@ -186,3 +187,52 @@ export const UserExistsResponseE = Schema.Struct({
 })
 
 export type UserExistsResponse = Schema.Schema.Type<typeof UserExistsResponseE>
+
+export const HashDataWithValidation = Schema.Struct({})
+
+export const HashWithSignature = Schema.Struct({
+  hash: HashedPhoneNumberE,
+  signature: EcdsaSignature,
+})
+
+export class UnableToVerifySignatureError extends Schema.TaggedError<UnableToVerifySignatureError>(
+  'UnableToVerifySignatureError'
+)(
+  'UnableToVerifySignatureError',
+  {
+    status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
+  },
+  {
+    description:
+      'Is thrown when updateBadOwnerHashRequest includes data that can not be verified against the signature...',
+  }
+) {}
+
+export const UpdateBadOwnerHashErrors = Schema.Union(
+  UnableToVerifySignatureError
+)
+
+export const UpdateBadOwnerHashRequest = Schema.Struct({
+  publicKey: PublicKeyPemBase64E,
+  oldData: HashWithSignature,
+  newData: HashWithSignature,
+  removePreviousUser: Schema.optionalWith(Schema.Boolean, {
+    default: () => false,
+  }),
+})
+export type UpdateBadOwnerHashRequest = Schema.Schema.Type<
+  typeof UpdateBadOwnerHashRequest
+>
+
+export const UpdateBadOwnerHashResponse = z.object({
+  updated: z.boolean(),
+  willDeleteExistingUserIfRan: z.literal(true).optional(),
+})
+
+export const UpdateBadOwnerHashResponseE = Schema.Struct({
+  updated: Schema.Boolean,
+  willDeleteExistingUserIfRan: Schema.optional(Schema.Literal(true)),
+})
+export type UpdateBadOwnerHashResponse = Schema.Schema.Type<
+  typeof UpdateBadOwnerHashResponseE
+>

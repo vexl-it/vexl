@@ -7,6 +7,10 @@ import {EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/crypto
 import {Api, ApiGroup} from 'effect-http'
 import {ServerSecurity} from '../../apiSecurity'
 import {SubmitFeedbackRequest} from '../feedback/specification'
+import {
+  RegenerateSessionCredentialsRequest,
+  RegenerateSessionCredentialsResponseE,
+} from './contracts'
 
 export class PreviousCodeNotExpiredError extends Schema.TaggedError<PreviousCodeNotExpiredError>(
   'PreviousCodeNotExpiredError'
@@ -59,6 +63,14 @@ export class UnableToGenerateSignatureError extends Schema.TaggedError<UnableToG
 )('UnableToGenerateSignatureError', {
   code: Schema.Literal('100105'), // TODO deprecated api
   status: Schema.Literal(400),
+}) {}
+
+export class NumberDoesNotMatchOldHashError extends Schema.TaggedError<NumberDoesNotMatchOldHashError>(
+  'NumberDoesNotMatchOldHashError'
+)('NumberDoesNotMatchOldHashError', {
+  status: Schema.optionalWith(Schema.Literal(400), {
+    default: () => 400 as const,
+  }),
 }) {}
 
 export class VerificationNotFoundError extends Schema.TaggedError<VerificationNotFoundError>(
@@ -217,8 +229,28 @@ export const SubmitFeedbackEndpoint = Api.post(
   Api.setResponseStatus(308 as const)
 )
 
+export const RegenerateSessionCredentialsErrors = Schema.Union(
+  NumberDoesNotMatchOldHashError,
+  UnableToGenerateSignatureError
+)
+
+export const RegenerateSessionCredentialsEndpoint = Api.post(
+  'regenerateSessionCredentials',
+  '/api/v1/regenerate-session-credentials'
+).pipe(
+  Api.setRequestBody(RegenerateSessionCredentialsRequest),
+  Api.setResponseBody(RegenerateSessionCredentialsResponseE),
+  Api.setResponseStatus(200 as const),
+  Api.setSecurity(ServerSecurity),
+  Api.addResponse({
+    status: 400 as const,
+    body: RegenerateSessionCredentialsErrors,
+  })
+)
+
 export const UserApiSpecification = Api.make({title: 'User service'}).pipe(
   Api.addGroup(LoginGroup),
   Api.addEndpoint(LogoutUserEndpoint),
-  Api.addEndpoint(SubmitFeedbackEndpoint)
+  Api.addEndpoint(SubmitFeedbackEndpoint),
+  Api.addEndpoint(RegenerateSessionCredentialsEndpoint)
 )

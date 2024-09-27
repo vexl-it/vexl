@@ -18,6 +18,8 @@ import {
   FetchMyContactsResponse,
   ImportContactsResponse,
   ImportListEmptyError,
+  UnableToVerifySignatureError,
+  UpdateBadOwnerHashResponse,
   UserExistsResponse,
   UserNotFoundError,
   type CreateUserRequest,
@@ -25,6 +27,7 @@ import {
   type FetchMyContactsRequest,
   type ImportContactsRequest,
   type RefreshUserRequest,
+  type UpdateBadOwnerHashRequest,
   type UpdateFirebaseTokenRequest,
 } from './contracts'
 
@@ -160,6 +163,26 @@ export function privateApi({
           },
           FetchCommonConnectionsResponse
         )
+      )
+    },
+    updateBadOwnerHash: (request: UpdateBadOwnerHashRequest) => {
+      return pipe(
+        axiosCallWithValidation(
+          axiosInstance,
+          {
+            method: 'post',
+            url: '/update-bad-owner-hash',
+            data: request,
+          },
+          UpdateBadOwnerHashResponse
+        ),
+        TE.mapLeft((e) => {
+          if (e._tag === 'BadStatusCodeError') {
+            if (e.response.data._tag === 'UnableToVerifySignatureError')
+              return new UnableToVerifySignatureError()
+          }
+          return e
+        })
       )
     },
   }

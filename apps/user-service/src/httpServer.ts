@@ -22,6 +22,7 @@ import {initVerificationHandler} from './routes/login/handlers/initVerificationH
 import {verifyChallengeHandler} from './routes/login/handlers/verifyChallengeHandler'
 import {verifyCodeHandler} from './routes/login/handlers/verifyCodeHandler'
 import {logoutUserHandler} from './routes/logoutUser'
+import {regenerateCredentialsHandler} from './routes/regenerateSessionCredentials'
 import {submitFeedbackHandler} from './routes/submitFeedback'
 import {TwilioVerificationClient} from './utils/twilio'
 
@@ -31,6 +32,7 @@ export const app = RouterBuilder.make(UserApiSpecification).pipe(
   RouterBuilder.handle(verifyChallengeHandler),
   RouterBuilder.handle(logoutUserHandler),
   RouterBuilder.handle(submitFeedbackHandler),
+  RouterBuilder.handle(regenerateCredentialsHandler),
   RouterBuilder.build,
   setupLoggingMiddlewares
 )

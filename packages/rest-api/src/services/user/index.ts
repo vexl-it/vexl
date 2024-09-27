@@ -9,7 +9,10 @@ import {
   handleCommonErrorsEffect,
   type LoggingFunction,
 } from '../../utils'
-import {UserApiSpecification} from './specification'
+import {
+  RegenerateSessionCredentialsErrors,
+  UserApiSpecification,
+} from './specification'
 
 import {type SubmitFeedbackInput} from '../feedback/contracts'
 import {
@@ -17,6 +20,7 @@ import {
   VerifyChallengeErrors,
   VerifyCodeErrors,
   type InitVerificationInput,
+  type RegenerateSessionCredentialsRequest,
   type VerifyChallengeInput,
   type VerifyPhoneNumberInput,
 } from './contracts'
@@ -68,6 +72,11 @@ export function api({
     deleteUser: () => handleCommonErrorsEffect(client.logoutUser({})),
     submitFeedback: (submitFeedbackInput: SubmitFeedbackInput) =>
       handleCommonErrorsEffect(client.submitFeedback(submitFeedbackInput)),
+    regenerateSessionCredentials: (args: RegenerateSessionCredentialsRequest) =>
+      handleCommonAndExpectedErrorsEffect(
+        client.regenerateSessionCredentials({body: args}),
+        RegenerateSessionCredentialsErrors
+      ),
   }
 }
 

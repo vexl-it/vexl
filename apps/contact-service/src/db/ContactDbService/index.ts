@@ -16,6 +16,10 @@ import {
   createInsertContact,
   type InsertContactParams,
 } from './queries/createSaveContact'
+import {
+  createUpdateContactsHashFrom,
+  type UpdateContactsHashFromQuery,
+} from './queries/createUpdateContactsHashFrom'
 
 export interface ContactDbOperations {
   deleteContactsByHashFrom: (
@@ -41,6 +45,10 @@ export interface ContactDbOperations {
   findCommonFriends: (
     args: FindCommonFriendsParams
   ) => Effect.Effect<readonly FindCommonFriendsResult[], UnexpectedServerError>
+
+  updateContactHashFrom: (
+    args: UpdateContactsHashFromQuery
+  ) => Effect.Effect<void, UnexpectedServerError>
 }
 
 export class ContactDbService extends Context.Tag('ContactDbService')<
@@ -63,6 +71,8 @@ export class ContactDbService extends Context.Tag('ContactDbService')<
         createFindCommonFriendsByOwnerHashAndPublicKeys
       )
 
+      const updateContactHashFrom = yield* _(createUpdateContactsHashFrom)
+
       return {
         deleteContactsByHashFrom,
         findContactsByHashFrom,
@@ -70,6 +80,7 @@ export class ContactDbService extends Context.Tag('ContactDbService')<
         findFirstLevelContactsPublicKeysByHashFrom,
         findSecondLevelContactsPublicKeysByHashFrom,
         findCommonFriends,
+        updateContactHashFrom,
       }
     })
   )

@@ -6,6 +6,10 @@ import {
   InitPhoneVerificationRequest,
   InitPhoneVerificationResponse,
   InitVerificationErrors,
+  NumberDoesNotMatchOldHashError,
+  RegenerateSessionCredentialsRequest,
+  RegenerateSessionCredentialsResponse,
+  UnableToGenerateSignatureError,
   VerifyChallengeErrors,
   VerifyChallengeRequest,
   VerifyChallengeResponse,
@@ -81,8 +85,28 @@ export const SubmitFeedbackEndpoint = Api.post(
   Api.setResponseStatus(308 as const)
 )
 
+export const RegenerateSessionCredentialsErrors = Schema.Union(
+  NumberDoesNotMatchOldHashError,
+  UnableToGenerateSignatureError
+)
+
+export const RegenerateSessionCredentialsEndpoint = Api.post(
+  'regenerateSessionCredentials',
+  '/api/v1/regenerate-session-credentials'
+).pipe(
+  Api.setRequestBody(RegenerateSessionCredentialsRequest),
+  Api.setResponseBody(RegenerateSessionCredentialsResponse),
+  Api.setResponseStatus(200 as const),
+  Api.setSecurity(ServerSecurity),
+  Api.addResponse({
+    status: 400 as const,
+    body: RegenerateSessionCredentialsErrors,
+  })
+)
+
 export const UserApiSpecification = Api.make({title: 'User service'}).pipe(
   Api.addGroup(LoginGroup),
   Api.addEndpoint(LogoutUserEndpoint),
-  Api.addEndpoint(SubmitFeedbackEndpoint)
+  Api.addEndpoint(SubmitFeedbackEndpoint),
+  Api.addEndpoint(RegenerateSessionCredentialsEndpoint)
 )

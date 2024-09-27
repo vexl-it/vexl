@@ -10,6 +10,7 @@ import {
 import {ConnectionLevelE} from '@vexl-next/domain/src/general/offers'
 import {FcmTokenE} from '@vexl-next/domain/src/utility/FcmToken.brand'
 import {BooleanfromString} from '@vexl-next/generic-utils/src/effect-helpers/BooleanFromString'
+import {EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {z} from 'zod'
 import {PageRequestE, PageResponseE} from '../../Pagination.brand'
 
@@ -184,4 +185,47 @@ export const FetchCommonConnectionsInput = Schema.Struct({
 })
 export type FetchCommonConnectionsInput = Schema.Schema.Type<
   typeof FetchCommonConnectionsInput
+>
+export const HashDataWithValidation = Schema.Struct({})
+
+export const HashWithSignature = Schema.Struct({
+  hash: HashedPhoneNumberE,
+  signature: EcdsaSignature,
+})
+
+export class UnableToVerifySignatureError extends Schema.TaggedError<UnableToVerifySignatureError>(
+  'UnableToVerifySignatureError'
+)(
+  'UnableToVerifySignatureError',
+  {
+    status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
+  },
+  {
+    description:
+      'Is thrown when updateBadOwnerHashRequest includes data that can not be verified against the signature...',
+  }
+) {}
+
+export const UpdateBadOwnerHashErrors = Schema.Union(
+  UnableToVerifySignatureError
+)
+
+export const UpdateBadOwnerHashRequest = Schema.Struct({
+  publicKey: PublicKeyPemBase64E,
+  oldData: HashWithSignature,
+  newData: HashWithSignature,
+  removePreviousUser: Schema.optionalWith(Schema.Boolean, {
+    default: () => false,
+  }),
+})
+export type UpdateBadOwnerHashRequest = Schema.Schema.Type<
+  typeof UpdateBadOwnerHashRequest
+>
+
+export const UpdateBadOwnerHashResponse = Schema.Struct({
+  updated: Schema.Boolean,
+  willDeleteExistingUserIfRan: Schema.optional(Schema.Literal(true)),
+})
+export type UpdateBadOwnerHashResponse = Schema.Schema.Type<
+  typeof UpdateBadOwnerHashResponse
 >

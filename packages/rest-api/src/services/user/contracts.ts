@@ -1,5 +1,5 @@
 import {Schema} from '@effect/schema'
-import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
+import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder'
 import {
   E164PhoneNumberE,
   type E164PhoneNumber,
@@ -12,7 +12,7 @@ import {
 import {EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {type AxiosResponse} from 'axios'
 import {Brand} from 'effect'
-import z from 'zod'
+import {z} from 'zod'
 
 export interface InvalidPhoneNumber {
   _tag: 'InvalidPhoneNumber'
@@ -163,6 +163,14 @@ export class InitPhoneVerificationRequest extends Schema.Class<InitPhoneVerifica
   phoneNumber: E164PhoneNumberE,
 }) {}
 
+export class NumberDoesNotMatchOldHashError extends Schema.TaggedError<NumberDoesNotMatchOldHashError>(
+  'NumberDoesNotMatchOldHashError'
+)('NumberDoesNotMatchOldHashError', {
+  status: Schema.optionalWith(Schema.Literal(400), {
+    default: () => 400 as const,
+  }),
+}) {}
+
 export const PhoneNumberVerificationId = Schema.Int.pipe(
   Schema.greaterThan(0),
   Schema.brand('PhoneNumberVerificationId')
@@ -256,4 +264,20 @@ export const VerifyChallengeInput = Schema.Struct({
 
 export type VerifyChallengeInput = Schema.Schema.Type<
   typeof VerifyChallengeInput
+>
+
+export const RegenerateSessionCredentialsRequest = Schema.Struct({
+  myPhoneNumber: E164PhoneNumberE,
+})
+
+export type RegenerateSessionCredentialsRequest = Schema.Schema.Type<
+  typeof RegenerateSessionCredentialsRequest
+>
+
+export const RegenerateSessionCredentialsResponse = Schema.Struct({
+  hash: HashedPhoneNumberE,
+  signature: EcdsaSignature,
+})
+export type RegenerateSessionCredentialsResponse = Schema.Schema.Type<
+  typeof RegenerateSessionCredentialsResponse
 >

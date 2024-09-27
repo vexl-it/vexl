@@ -1,3 +1,4 @@
+import {Schema} from '@effect/schema'
 import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {type CreateAxiosDefaults} from 'axios'
@@ -18,6 +19,7 @@ import {type SubmitFeedbackRequest} from '../feedback/contracts'
 import {
   GetCryptocurrencyDetailsResponse,
   InitPhoneNumberVerificationResponse,
+  RegenerateSessionCredentialsResponse,
   VerifyChallengeResponse,
   VerifyPhoneNumberResponse,
   type ChallengeCouldNotBeGenerated,
@@ -26,6 +28,7 @@ import {
   type InvalidPhoneNumber,
   type PreviousCodeNotExpired,
   type PublicKeyOrHashInvalid,
+  type RegenerateSessionCredentialsRequest,
   type SignatureCouldNotBeGenerated,
   type UserAlreadyExists,
   type UserNotFound,
@@ -33,6 +36,7 @@ import {
   type VerifyChallengeRequest,
   type VerifyPhoneNumberRequest,
 } from './contracts'
+import {RegenerateSessionCredentialsErrors} from './specification'
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function publicApi({
@@ -205,6 +209,30 @@ export function privateApi({
         url: `/feedback/submit`,
         data: request,
       })
+    },
+    regenerateSessionCredentials: (
+      request: RegenerateSessionCredentialsRequest
+    ) => {
+      return pipe(
+        axiosCallWithValidation(
+          axiosInstance,
+          {
+            method: 'post',
+            url: `/regenerate-session-credentials`,
+            data: request,
+          },
+          RegenerateSessionCredentialsResponse
+        ),
+        TE.mapLeft((e) => {
+          if (e._tag === 'BadStatusCodeError') {
+            const errorEither = Schema.decodeEither(
+              RegenerateSessionCredentialsErrors
+            )(e.response.data)
+            if (errorEither._tag === 'Right') return errorEither.right
+          }
+          return e
+        })
+      )
     },
   }
 }

@@ -1,6 +1,15 @@
+import {Schema} from '@effect/schema'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
-import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
+import {
+  E164PhoneNumberE,
+  type E164PhoneNumber,
+} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
+import {
+  HashedPhoneNumber,
+  HashedPhoneNumberE,
+} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {IsoDatetimeString} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
+import {EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {type AxiosResponse} from 'axios'
 import {Brand} from 'effect'
 import z from 'zod'
@@ -124,4 +133,25 @@ export const GetCryptocurrencyDetailsResponse = z.object({
 })
 export type GetCryptocurrencyDetailsResponse = z.TypeOf<
   typeof GetCryptocurrencyDetailsResponse
+>
+
+export const RegenerateSessionCredentialsRequest = Schema.Struct({
+  myPhoneNumber: E164PhoneNumberE,
+})
+
+export type RegenerateSessionCredentialsRequest = Schema.Schema.Type<
+  typeof RegenerateSessionCredentialsRequest
+>
+
+export const RegenerateSessionCredentialsResponse = z.object({
+  hash: HashedPhoneNumber,
+  signature: z.string(),
+})
+
+export const RegenerateSessionCredentialsResponseE = Schema.Struct({
+  hash: HashedPhoneNumberE,
+  signature: EcdsaSignature,
+})
+export type RegenerateSessionCredentialsResponse = Schema.Schema.Type<
+  typeof RegenerateSessionCredentialsResponseE
 >

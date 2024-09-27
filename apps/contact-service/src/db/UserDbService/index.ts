@@ -31,6 +31,10 @@ import {
   type UpdateRefreshUserParams,
 } from './queries/createUpdateRefreshUser'
 import {createUpdateSetRefreshedAtToNull} from './queries/createUpdateSetRefreshedAtToNull'
+import {
+  createUpdateUserHash,
+  type UpdateUserHashParams,
+} from './queries/createUpdateUserHash'
 
 export interface UserDbOperations {
   insertUser: (
@@ -82,6 +86,10 @@ export interface UserDbOperations {
   updateSetRefreshedAtToNull: (
     args: FcmToken
   ) => Effect.Effect<void, UnexpectedServerError>
+
+  updateUserHash: (
+    args: UpdateUserHashParams
+  ) => Effect.Effect<void, UnexpectedServerError>
 }
 
 export class UserDbService extends Context.Tag('UserDbService')<
@@ -124,6 +132,8 @@ export class UserDbService extends Context.Tag('UserDbService')<
         createFindFirebaseTokensForNewContentNotification
       )
 
+      const updateUserHash = yield* _(createUpdateUserHash)
+
       return {
         insertUser,
         findUserByHash,
@@ -137,6 +147,7 @@ export class UserDbService extends Context.Tag('UserDbService')<
         findFirebaseTokensOfInactiveUsers,
         updateSetRefreshedAtToNull,
         findFirebaseTokensForNewContentNotification,
+        updateUserHash,
       }
     })
   )

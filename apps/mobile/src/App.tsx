@@ -9,6 +9,7 @@ import BadgeCountManager from './components/BadgeCountManager'
 import DisableLogBoxForTests from './components/DisableLogBoxForTests'
 import LoadingOverlayProvider from './components/LoadingOverlayProvider'
 import MaintenanceAndForceUpdateCheck from './components/MaintenanceAndForceUpdateCheck'
+import PhoneNumberHashBugMigration from './components/PhoneNumberHashBugMigration'
 import PreventScreenshots from './components/PreventScreenshots'
 import RootNavigation from './components/RootNavigation'
 import ToastNotification from './components/ToastNotification'
@@ -45,9 +46,11 @@ function App(): JSX.Element {
         <LoadingOverlayProvider>
           <MaintenanceAndForceUpdateCheck>
             <VersionMigrations>
-              <GestureHandlerRootView style={{flex: 1}}>
-                <RootNavigation />
-              </GestureHandlerRootView>
+              <PhoneNumberHashBugMigration>
+                <GestureHandlerRootView style={{flex: 1}}>
+                  <RootNavigation />
+                </GestureHandlerRootView>
+              </PhoneNumberHashBugMigration>
             </VersionMigrations>
             <UploadingOfferProgressModal />
           </MaintenanceAndForceUpdateCheck>

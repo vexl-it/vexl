@@ -19,6 +19,8 @@ import {
   ImportContactsErrors,
   type ImportContactsInput,
   type RefreshUserInput,
+  UpdateBadOwnerHashErrors,
+  type UpdateBadOwnerHashRequest,
   type UpdateFirebaseTokenInput,
   UserNotFoundError,
 } from './contracts'
@@ -94,6 +96,11 @@ export function api({
     ) =>
       handleCommonErrorsEffect(
         client.fetchCommonConnections(fetchCommonConnectionsInput)
+      ),
+    updateBadOwnerHash: (args: UpdateBadOwnerHashRequest) =>
+      handleCommonAndExpectedErrorsEffect(
+        client.updateBadOwnerHash({body: args}),
+        UpdateBadOwnerHashErrors
       ),
   }
 }

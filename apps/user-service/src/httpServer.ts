@@ -17,6 +17,7 @@ import {
 } from './configs'
 import DbLayer from './db/layer'
 import {LoggedInUsersDbService} from './db/loggedInUsersDb'
+import {reportGaugesLayer} from './metrics'
 import {VerificationStateDbService} from './routes/login/db/verificationStateDb'
 import {initVerificationHandler} from './routes/login/handlers/initVerificationHandler'
 import {verifyChallengeHandler} from './routes/login/handlers/verifyChallengeHandler'
@@ -45,6 +46,7 @@ const MainLive = Layer.mergeAll(
     newUserHookOption: dashboardNewUserHookConfig,
     contactsImportedHookConfig: Config.succeed(Option.none()),
   }),
+  reportGaugesLayer,
   ServerCrypto.layer(cryptoConfig),
   healthServerLayer({port: healthServerPortConfig})
 ).pipe(

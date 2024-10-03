@@ -10,7 +10,7 @@ import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {isLeft, isRight} from 'fp-ts/lib/Either'
 import {useAtomValue, useSetAtom, useStore} from 'jotai'
-import {Alert, Platform, ScrollView} from 'react-native'
+import {Alert, Platform, ScrollView, Share} from 'react-native'
 import {Spacer, Text, YStack} from 'tamagui'
 import {apiEnv, privateApiAtom} from '../../api'
 import deleteAllInboxesActionAtom from '../../state/chat/atoms/deleteAllInboxesActionAtom'
@@ -602,6 +602,19 @@ function DebugScreen(): JSX.Element {
           <SimulateMissingOfferInbox />
           <Preferences />
           <AfterInteractionTaskDemo />
+
+          <Button
+            variant="primary"
+            size="small"
+            text="Share offer state"
+            onPress={() => {
+              const offersState = store.get(offersStateAtom)
+              const offersStateJson = JSON.stringify(offersState)
+              void Share.share({message: offersStateJson}).catch((err) => {
+                alert(err.message)
+              })
+            }}
+          />
         </ScrollView>
         <Button variant="secondary" text="back" onPress={safeGoBack} />
       </WhiteContainer>

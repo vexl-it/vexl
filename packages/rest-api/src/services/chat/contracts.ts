@@ -19,6 +19,7 @@ import {
   UnixMillisecondsE,
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {BooleanFromString} from '@vexl-next/generic-utils/src/effect-helpers/BooleanFromString'
+import {EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {Brand} from 'effect'
 import {z} from 'zod'
 import {
@@ -72,16 +73,23 @@ export class SenderUserInboxDoesNotExistError extends Schema.TaggedError<SenderU
   code: Schema.optionalWith(Schema.Literal(100107), {default: () => 100107}),
 }) {}
 
+export const ChatChallenge = z
+  .string()
+  .transform((v) => Brand.nominal<typeof v & Brand.Brand<'ChatChallenge'>>()(v))
+
+export const ChatChallengeE = Schema.String.pipe(Schema.brand('ChatChallenge'))
+export type ChatChallenge = Schema.Schema.Type<typeof ChatChallengeE>
+
 export const SignedChallenge = z
   .object({
-    challenge: z.string(),
+    challenge: ChatChallenge,
     signature: z.string(),
   })
   .readonly()
 
 export const SignedChallengeE = Schema.Struct({
-  challenge: Schema.String,
-  signature: Schema.String,
+  challenge: ChatChallengeE,
+  signature: EcdsaSignature,
 })
 export type SignedChallenge = Schema.Schema.Type<typeof SignedChallengeE>
 
@@ -409,13 +417,6 @@ export type SendMessagesResponse = Schema.Schema.Type<
   typeof SendMessagesResponse
 >
 
-export const ChatChallenge = z
-  .string()
-  .transform((v) => Brand.nominal<typeof v & Brand.Brand<'ChatChallenge'>>()(v))
-
-export const ChatChallengeE = Schema.String.pipe(Schema.brand('ChatChallenge'))
-export type ChatChallenge = Schema.Schema.Type<typeof ChatChallengeE>
-
 export const CreateChallengeRequest = z.object({
   publicKey: PublicKeyPemBase64,
 })
@@ -425,12 +426,13 @@ export const CreateChallengeRequestE = Schema.Struct({
 export type CreateChallengeRequest = Schema.Schema.Type<
   typeof CreateChallengeRequestE
 >
+
 export const CreateChallengeResponse = z.object({
   challenge: z.string(),
   expiration: UnixMilliseconds,
 })
 export const CreateChallengeResponseE = Schema.Struct({
-  challenge: Schema.String,
+  challenge: ChatChallengeE,
   expiration: UnixMillisecondsE,
 })
 export type CreateChallengeResponse = Schema.Schema.Type<

@@ -15,8 +15,11 @@ import {
 } from './configs'
 import DbLayer from './db/layer'
 import {internalServerLive} from './internalServer'
+import {createChallenge} from './routes/createChallenge'
+import {ChatChallengeService} from './utils/ChatChallengeService'
 
 export const app = RouterBuilder.make(ChatApiSpecification).pipe(
+  RouterBuilder.handle(createChallenge),
   RouterBuilder.build,
   setupLoggingMiddlewares
 )
@@ -24,7 +27,8 @@ export const app = RouterBuilder.make(ChatApiSpecification).pipe(
 const MainLive = Layer.mergeAll(
   internalServerLive,
   ServerCrypto.layer(cryptoConfig),
-  healthServerLayer({port: healthServerPortConfig})
+  healthServerLayer({port: healthServerPortConfig}),
+  ChatChallengeService.Live
 ).pipe(
   Layer.provideMerge(DbLayer),
   Layer.provideMerge(RedisService.layer(redisUrl)),

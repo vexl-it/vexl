@@ -31,3 +31,5 @@ export const newContentNotificationAfterConfig = Config.number(
 export const dashboardContactsImportedHookConfig = Config.option(
   Config.string('DASHBOARD_CONTACTS_IMPORTED_HOOK')
 )
+
+export const importContactsQuotaConfig = Config.number('IMPORT_CONTACTS_QUOTA')

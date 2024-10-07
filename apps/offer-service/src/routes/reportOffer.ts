@@ -32,6 +32,7 @@ export const reportOffer = Handler.make(ReportOfferEndpoint, (req, security) =>
       const numberOfReportsForUser = yield* _(
         offerDbService.queryNumberOfReportsForUser(security['public-key'])
       )
+
       if (numberOfReportsForUser >= reportLimitCount) {
         return yield* _(Effect.fail(new ReportOfferLimitReachedError()))
       }

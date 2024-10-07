@@ -1,5 +1,7 @@
 import {HttpClientRequest} from '@effect/platform'
+import {Schema} from '@effect/schema'
 import {SqlClient} from '@effect/sql'
+import {ImportContactsQuotaReachedError} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {mockedReportContactsImported} from '@vexl-next/server-utils/src/tests/mockedDashboardReportsService'
 import {Array, Effect, Logger, LogLevel, Order, pipe} from 'effect'
 import {sendMessageMock} from '../../mockedFirebaseMessagingService'
@@ -154,6 +156,92 @@ describe('Import contacts', () => {
             },
             HttpClientRequest.setHeaders(me.authHeaders)
           )
+        )
+      })
+    )
+  })
+
+  it('Should be able to import less or equal contacts number specified in quota (for this case mocked to 10 in mocked service)', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const me = networkOne[0]
+        const contactsToImport = yield* _(
+          Effect.all([
+            generateKeysAndHasheForNumber('+420733333006'),
+            generateKeysAndHasheForNumber('+420733333007'),
+            generateKeysAndHasheForNumber('+420733333008'),
+            generateKeysAndHasheForNumber('+420733333009'),
+            generateKeysAndHasheForNumber('+420733333010'),
+            generateKeysAndHasheForNumber('+420733333011'),
+            generateKeysAndHasheForNumber('+420733333012'),
+            generateKeysAndHasheForNumber('+420733333013'),
+            generateKeysAndHasheForNumber('+420733333014'),
+            generateKeysAndHasheForNumber('+420733333015'),
+          ])
+        )
+
+        const app = yield* _(NodeTestingApp)
+        yield* _(
+          app.importContacts(
+            {
+              body: {contacts: contactsToImport.map((c) => c.hashedNumber)},
+            },
+            HttpClientRequest.setHeaders(me.authHeaders)
+          )
+        )
+      })
+    )
+  })
+
+  it('Should NOT be able to import more contacts number than specified in quota (for this case mocked to 10 in mocked service)', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const me = networkOne[0]
+        const contactsToImport = yield* _(
+          Effect.all([
+            generateKeysAndHasheForNumber('+420733333016'),
+            generateKeysAndHasheForNumber('+420733333017'),
+            generateKeysAndHasheForNumber('+420733333018'),
+            generateKeysAndHasheForNumber('+420733333019'),
+            generateKeysAndHasheForNumber('+420733333020'),
+            generateKeysAndHasheForNumber('+420733333021'),
+            generateKeysAndHasheForNumber('+420733333022'),
+            generateKeysAndHasheForNumber('+420733333023'),
+            generateKeysAndHasheForNumber('+420733333024'),
+            generateKeysAndHasheForNumber('+420733333025'),
+            generateKeysAndHasheForNumber('+420733333026'),
+          ])
+        )
+
+        const app = yield* _(NodeTestingApp)
+        yield* _(
+          app.importContacts(
+            {
+              body: {contacts: contactsToImport.map((c) => c.hashedNumber)},
+            },
+            HttpClientRequest.setHeaders(me.authHeaders)
+          )
+        ).pipe(
+          Effect.tap(() =>
+            Effect.fail(
+              new Error(
+                'User should not be able to import more contacts than quota'
+              )
+            )
+          ),
+          Effect.catchTag('ClientError', (e) => {
+            const error = Schema.decodeUnknownSync(
+              ImportContactsQuotaReachedError
+            )(e.error)
+
+            if (error._tag === 'ImportContactsQuotaReachedError') {
+              return Effect.succeed(Effect.void)
+            }
+
+            return Effect.fail(
+              new Error('Other error than expected quota error in test')
+            )
+          })
         )
       })
     )

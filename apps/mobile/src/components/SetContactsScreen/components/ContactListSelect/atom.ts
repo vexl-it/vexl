@@ -207,23 +207,6 @@ export const contactSelectMolecule = molecule((_, getScope) => {
     )
   }
 
-  const submitSingleContactActionAtom = atom(
-    null,
-    (get, set, contact: StoredContactWithComputedValues) => {
-      const selectedNumbers = Array.from(get(selectedNumbersAtom))
-
-      return pipe(
-        set(submitContactsActionAtom, {
-          numbersToImport: deduplicate([
-            ...selectedNumbers,
-            contact.computedValues.normalizedNumber,
-          ]),
-          normalizeAndImportAll: false,
-        })
-      )
-    }
-  )
-
   const submitAllSelectedContactsActionAtom = atom(
     null,
     (get, set): T.Task<boolean> => {
@@ -329,29 +312,49 @@ export const contactSelectMolecule = molecule((_, getScope) => {
             TE.fromTask
           )
         ),
-        TE.chainFirstTaskK(() => set(submitSingleContactActionAtom, contact)),
-        TE.chainFirstW(({addToPhoneSuccess, customName}) => {
-          set(searchTextAtom, '')
-          reloadContacts()
-          return set(askAreYouSureActionAtom, {
-            steps: [
-              {
-                type: 'StepWithText',
-                title: t('addContactDialog.contactAdded'),
-                description: t(
-                  addToPhoneSuccess
-                    ? 'addContactDialog.youHaveAddedContactToVexlAndPhoneContacts'
-                    : 'addContactDialog.youHaveAddedContactToVexlContacts',
+        // I know this is sh*t, but should be soon rewritten to Effect
+        TE.bindW('submitContactsSuccess', () =>
+          pipe(
+            set(submitContactsActionAtom, {
+              numbersToImport: deduplicate([
+                ...Array.from(get(selectedNumbersAtom)),
+                contact.computedValues.normalizedNumber,
+              ]),
+              normalizeAndImportAll: false,
+            }),
+            TE.fromTask
+          )
+        ),
+        TE.chainFirstW(
+          ({submitContactsSuccess, addToPhoneSuccess, customName}) => {
+            set(searchTextAtom, '')
+            reloadContacts()
+
+            if (submitContactsSuccess) {
+              return set(askAreYouSureActionAtom, {
+                steps: [
                   {
-                    contactName: customName,
-                  }
-                ),
-                positiveButtonText: t('common.niceWithExclamationMark'),
-              },
-            ],
-            variant: 'info',
-          })
-        })
+                    type: 'StepWithText',
+                    title: t('addContactDialog.contactAdded'),
+                    description: t(
+                      addToPhoneSuccess
+                        ? 'addContactDialog.youHaveAddedContactToVexlAndPhoneContacts'
+                        : 'addContactDialog.youHaveAddedContactToVexlContacts',
+                      {
+                        contactName: customName,
+                      }
+                    ),
+                    positiveButtonText: t('common.niceWithExclamationMark'),
+                  },
+                ],
+                variant: 'info',
+              })
+            }
+
+            // and also this is sh*t
+            return TE.right(undefined)
+          }
+        )
       )()
     }
   )

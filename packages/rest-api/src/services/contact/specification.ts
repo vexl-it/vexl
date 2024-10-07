@@ -8,9 +8,9 @@ import {
   FetchCommonConnectionsResponseE,
   FetchMyContactsRequest,
   FetchMyContactsResponseE,
+  ImportContactsErrors,
   ImportContactsRequest,
   ImportContactsResponse,
-  ImportListEmptyError,
   RefreshUserRequest,
   UpdateBadOwnerHashErrors,
   UpdateBadOwnerHashRequest,
@@ -84,7 +84,7 @@ export const ImportContactsEndpoint = Api.post(
   }),
   Api.addResponse({
     status: 400,
-    body: ImportListEmptyError,
+    body: ImportContactsErrors,
   })
 )
 

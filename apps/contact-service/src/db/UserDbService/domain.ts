@@ -24,4 +24,7 @@ export class UserRecord extends Schema.Class<UserRecord>('UserRecord')({
     as: 'Option',
     nullable: true,
   }),
+  initialImportDone: Schema.optionalWith(Schema.Boolean, {
+    default: () => false,
+  }),
 }) {}

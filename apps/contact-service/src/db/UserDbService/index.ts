@@ -35,6 +35,10 @@ import {
   createUpdateUserHash,
   type UpdateUserHashParams,
 } from './queries/createUpdateUserHash'
+import {
+  createUpdateUserInitialImportDone,
+  type UpdateUserInitialImportDoneParams,
+} from './queries/createUpdateUserInitialImportDone'
 
 export interface UserDbOperations {
   insertUser: (
@@ -90,6 +94,10 @@ export interface UserDbOperations {
   updateUserHash: (
     args: UpdateUserHashParams
   ) => Effect.Effect<void, UnexpectedServerError>
+
+  updateUserInitialImportDone: (
+    args: UpdateUserInitialImportDoneParams
+  ) => Effect.Effect<void, UnexpectedServerError>
 }
 
 export class UserDbService extends Context.Tag('UserDbService')<
@@ -134,6 +142,10 @@ export class UserDbService extends Context.Tag('UserDbService')<
 
       const updateUserHash = yield* _(createUpdateUserHash)
 
+      const updateUserInitialImportDone = yield* _(
+        createUpdateUserInitialImportDone
+      )
+
       return {
         insertUser,
         findUserByHash,
@@ -148,6 +160,7 @@ export class UserDbService extends Context.Tag('UserDbService')<
         updateSetRefreshedAtToNull,
         findFirebaseTokensForNewContentNotification,
         updateUserHash,
+        updateUserInitialImportDone,
       }
     })
   )

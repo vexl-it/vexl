@@ -5,6 +5,7 @@ import {databaseConfig} from '../configs'
 import initialMigraiton from './migrations/0001_initial'
 import remove_next_prefix_and_old_users_and_connections from './migrations/0002_remove_next_prefix_and_old_users_and_connections'
 import make_version_in_users_table_nullable from './migrations/0003_make_version_in_users_table_nullable'
+import add_initial_import_done_column_to_users_table from './migrations/0004_add_initial_import_done_column_to_users_table'
 
 const migrations = [
   {
@@ -21,6 +22,11 @@ const migrations = [
     id: 3,
     name: 'make_version_in_users_table_nullable',
     migrationEffect: make_version_in_users_table_nullable,
+  },
+  {
+    id: 4,
+    name: 'add_initial_import_done_column_to_users_table',
+    migrationEffect: add_initial_import_done_column_to_users_table,
   },
 ] as const
 

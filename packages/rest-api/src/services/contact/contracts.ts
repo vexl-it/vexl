@@ -14,7 +14,7 @@ import {EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/crypto
 import {z} from 'zod'
 import {PageRequestE, PageResponseE} from '../../Pagination.brand'
 
-export class InboxDoesNotExistError extends Schema.TaggedError<ImportListEmptyError>(
+export class InboxDoesNotExistError extends Schema.TaggedError<InboxDoesNotExistError>(
   'inboxDoesNotExist'
 )('inboxDoesNotExist', {
   status: Schema.optionalWith(Schema.Literal(404), {default: () => 404}),
@@ -28,11 +28,16 @@ export class NotPermittedToSendMessageToTargetInboxError extends Schema.TaggedEr
   code: Schema.optionalWith(Schema.Literal(100104), {default: () => 100104}),
 }) {}
 
-export class ImportListEmptyError extends Schema.TaggedError<ImportListEmptyError>(
-  'ImportListEmptyError'
-)('ImportListEmpty', {
+export class InitialImportContactsQuotaReachedError extends Schema.TaggedError<InitialImportContactsQuotaReachedError>(
+  'InitialImportContactsQuotaReachedError'
+)('InitialImportContactsQuotaReachedError', {
   status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
-  code: Schema.optionalWith(Schema.Literal(101102), {default: () => 101102}),
+}) {}
+
+export class ImportContactsQuotaReachedError extends Schema.TaggedError<ImportContactsQuotaReachedError>(
+  'ImportContactsQuotaReachedError'
+)('ImportContactsQuotaReachedError', {
+  status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
 }) {}
 
 export class UserNotFoundError extends Schema.TaggedError<UserNotFoundError>(
@@ -142,7 +147,10 @@ export const UserExistsResponse = Schema.Struct({
 })
 export type UserExistsResponse = Schema.Schema.Type<typeof UserExistsResponse>
 
-export const ImportContactsErrors = Schema.Union(ImportListEmptyError)
+export const ImportContactsErrors = Schema.Union(
+  InitialImportContactsQuotaReachedError,
+  ImportContactsQuotaReachedError
+)
 
 export const CheckUserExistsInput = Schema.Struct({
   query: CheckUserExistsRequest,

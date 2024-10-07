@@ -1,4 +1,5 @@
-import {ImportListEmptyError} from '@vexl-next/rest-api/src/services/contact/contracts'
+import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
+import {ImportContactsErrors} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {ImportContactsEndpoint} from '@vexl-next/rest-api/src/services/contact/specification'
 import {DashboardReportsService} from '@vexl-next/server-utils/src/DashboardReportsService'
 import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
@@ -7,6 +8,7 @@ import {Array, Effect, pipe} from 'effect'
 import {Handler} from 'effect-http'
 import {ContactDbService} from '../../db/ContactDbService'
 import {withUserActionRedisLock} from '../../utils/withUserActionRedisLock'
+import {ImportContactsQuotaService} from './importContactsQuotaService'
 import {notifyOthersAboutNewUserForked} from './utils/notifyOthersAboutNewUser'
 
 export const importContacts = Handler.make(
@@ -15,11 +17,17 @@ export const importContacts = Handler.make(
     makeEndpointEffect(
       Effect.gen(function* (_) {
         const contactDb = yield* _(ContactDbService)
-        const contactsBefore = yield* _(
-          contactDb.findContactsByHashFrom(security.hash)
-        )
+        const importContactsQuotaService = yield* _(ImportContactsQuotaService)
 
-        yield* _(contactDb.deleteContactsByHashFrom(security.hash))
+        const contactsBefore = yield* _(
+          contactDb.findContactsByHashFrom(security.hash),
+          Effect.map(
+            Array.map((contact) => ({
+              hashFrom: contact.hashFrom,
+              hashTo: contact.hashTo,
+            }))
+          )
+        )
 
         const contactsToInsert = pipe(
           req.body.contacts,
@@ -31,15 +39,29 @@ export const importContacts = Handler.make(
           }))
         )
 
+        const newContacts = Array.differenceWith<{
+          hashFrom: HashedPhoneNumber
+          hashTo: HashedPhoneNumber
+        }>((a, b) => a.hashFrom === b.hashFrom && a.hashTo === b.hashTo)(
+          contactsToInsert,
+          contactsBefore
+        )
+
+        yield* _(contactDb.deleteContactsByHashFrom(security.hash))
+
         yield* _(
           Effect.forEach(contactsToInsert, contactDb.insertContact, {
             batching: true,
           })
         )
 
-        const newContacts = Array.difference(contactsToInsert, contactsBefore)
-
         yield* _(Effect.log('New contacts', newContacts))
+
+        yield* _(
+          importContactsQuotaService.checkAndIncrementImportContactsQuota(
+            security.hash
+          )(newContacts.length)
+        )
 
         yield* _(
           DashboardReportsService,
@@ -61,6 +83,6 @@ export const importContacts = Handler.make(
           })
         )
       ),
-      ImportListEmptyError
+      ImportContactsErrors
     )
 )

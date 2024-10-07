@@ -4,6 +4,7 @@ import {parsePhoneNumber} from 'awesome-phonenumber'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {atom} from 'jotai'
+import {Alert} from 'react-native'
 import {apiAtom} from '../../../api'
 import {askAreYouSureActionAtom} from '../../../components/AreYouSureDialog'
 import {loadingOverlayDisplayedAtom} from '../../../components/LoadingOverlayProvider'
@@ -242,6 +243,11 @@ const createContact = atom(
         (e) => {
           if (e._tag === 'UserDeclinedError') {
             // ignore user closed the dialog
+            return
+          }
+
+          if (e._tag === 'ImportContactsQuotaReachedError') {
+            Alert.alert(t('contacts.importContactsQuotaReachedError'))
             return
           }
 

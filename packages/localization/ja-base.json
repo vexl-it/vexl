@@ -336,6 +336,7 @@
   "settings.items.language.pl": "Polish",
   "settings.items.language.bg": "ブルガリア語",
   "settings.items.language.ja": "Japanese",
+  "settings.items.language.nl": "Dutch",
   "settings.noLogoutExplanation": "ログアウトが見つかりませんか？そのようなことはありません。\nしかし、アカウントを削除することはできます。",
   "settings.support": "Vexlが気に入ったら、ビットコインでの寄付をしてくれたら、サービスの改善に大く役立ちますよ！",
   "settings.version": "Vexl アプリバージョン: {{version}}",

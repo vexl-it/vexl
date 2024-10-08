@@ -336,6 +336,7 @@
   "settings.items.language.pl": "Polština",
   "settings.items.language.bg": "Bulharština",
   "settings.items.language.ja": "Japonština",
+  "settings.items.language.nl": "Dutch",
   "settings.noLogoutExplanation": "Chceš se odhlásit? Taková možnost ve Vexlu není - můžeš ale smazat svůj účet.",
   "settings.support": "Pokud se ti Vexl líbí a chceš nás podpořit, budeme rádi za jakýkoli příspěvek v Bitcoinu.",
   "settings.version": "Verze aplikace Vexl: {{version}}",

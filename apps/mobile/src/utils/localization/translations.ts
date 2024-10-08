@@ -23,6 +23,9 @@ import itTermsOfUse from '@vexl-next/localization/it-termsOfUse.json'
 import jaBase from '@vexl-next/localization/ja-base.json'
 import jaPrivacyPolicyDev from '@vexl-next/localization/ja-privacyPolicy.json'
 import jaTermsOfUse from '@vexl-next/localization/ja-termsOfUse.json'
+import nlBase from '@vexl-next/localization/nl-base.json'
+import nlPrivacyPolicyDev from '@vexl-next/localization/nl-privacyPolicy.json'
+import nlTermsOfUse from '@vexl-next/localization/nl-termsOfUse.json'
 import plBase from '@vexl-next/localization/pl-base.json'
 import plPrivacyPolicyDev from '@vexl-next/localization/pl-privacyPolicy.json'
 import plTermsOfUse from '@vexl-next/localization/pl-termsOfUse.json'
@@ -129,4 +132,12 @@ export const ja = {
   localeName: 'ja',
   termsOfUseMD: jaTermsOfUse.termsOfUseText,
   privacyPolicyMD: jaPrivacyPolicyDev.privacyPolicyText,
+} as const
+
+export const nl = {
+  flag: '🇳🇱',
+  ...unflatten<typeof nlBase, typeof base>(nlBase),
+  localeName: 'nl',
+  termsOfUseMD: nlTermsOfUse.termsOfUseText,
+  privacyPolicyMD: nlPrivacyPolicyDev.privacyPolicyText,
 } as const

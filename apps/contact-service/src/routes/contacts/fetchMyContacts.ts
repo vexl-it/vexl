@@ -36,7 +36,11 @@ export const fetchMyContacts = Handler.make(
           Effect.sync(() =>
             pipe(
               Array.dedupe([...firstLevelContacts, ...secondLevelContacts]),
-              Array.map((publicKey) => ({publicKey}))
+              Array.map((publicKey) => ({publicKey})),
+              // HOTFIX - remove owner public key from the list of returned contacts
+              Array.filter(
+                ({publicKey}) => publicKey !== security['public-key']
+              )
             )
           ),
           Effect.withSpan('Deduplicating public keys')

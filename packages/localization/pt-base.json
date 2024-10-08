@@ -336,6 +336,7 @@
   "settings.items.language.pl": "Polaco",
   "settings.items.language.bg": "Búlgaro",
   "settings.items.language.ja": "﻿Japonês",
+  "settings.items.language.nl": "Dutch",
   "settings.noLogoutExplanation": "Não consegue encontrar o logout? Não existe tal coisa.\nMas pode apagar a sua conta.",
   "settings.support": "Se gostas do Vexl, apoia a sua melhoria enviando algum bitcoin como donativo!",
   "settings.version": "Versão da aplicação Vexl: {{version}}",

@@ -336,6 +336,7 @@
   "settings.items.language.pl": "Полски",
   "settings.items.language.bg": "Български",
   "settings.items.language.ja": "Японски",
+  "settings.items.language.nl": "Dutch",
   "settings.noLogoutExplanation": "Не можете да намерите излизане? Няма такова нещо.\nНо можете да изтриете акаунта си.",
   "settings.support": "Ако харесвате Vexl, подкрепете подобрението му, като изпратите малко биткойн като дарение!",
   "settings.version": "Vexl версия на приложение: {{version}}",

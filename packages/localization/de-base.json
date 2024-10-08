@@ -336,6 +336,7 @@
   "settings.items.language.pl": "Polnisch",
   "settings.items.language.bg": "Bulgarisch",
   "settings.items.language.ja": "Japanisch",
+  "settings.items.language.nl": "Dutch",
   "settings.noLogoutExplanation": "Du kannst die Abmeldung nicht finden? So etwas gibt es nicht. Aber du kannst dein Konto löschen.",
   "settings.support": "Wenn du Vexl magst, unterstütze deine Verbesserung, indem du ein paar Bitcoin als Spende schickst!",
   "settings.version": "Vexl App Version: {{version}}",

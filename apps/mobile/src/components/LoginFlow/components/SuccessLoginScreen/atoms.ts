@@ -272,7 +272,6 @@ export const finishLoginActionAtom = atom(
             })
           }),
           Match.tag(
-            'HttpError',
             'UnknownClientError',
             'UnknownServerError',
             'NotFoundError',

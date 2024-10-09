@@ -9,7 +9,11 @@ import Axios, {
   type CreateAxiosDefaults,
 } from 'axios'
 import {Effect, Option} from 'effect'
-import {HttpError, type ClientError} from 'effect-http'
+import {type ClientError} from 'effect-http'
+import {
+  isServerSideError,
+  type ClientErrorServerSide,
+} from 'effect-http/ClientError'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import type z from 'zod'
@@ -295,11 +299,11 @@ export function createAxiosInstanceWithAuthAndLogging(
   return axiosInstance
 }
 
-export const handleCommonErrorsEffect = <R, C = never>(
+const handleErrorsEffect = <R, C = never>(
   effect: Effect.Effect<R, ClientError.ClientError<number>, C>
 ): Effect.Effect<
   R,
-  | HttpError.HttpError
+  | ClientErrorServerSide
   | NetworkError
   | NotFoundError
   | UnknownClientError
@@ -321,34 +325,33 @@ export const handleCommonErrorsEffect = <R, C = never>(
             )
           )
         }
-        if (HttpError.isHttpError(e.error)) {
-          const {status, message} = e.error
 
-          if (status === 401) {
+        if (isServerSideError(e)) {
+          if (e.status === 401) {
             return yield* _(
               Effect.fail(
                 new UnauthorizedError({
-                  status,
-                  message,
+                  status: e.status,
+                  message: e.message,
                   cause: e.error,
                 })
               )
             )
           }
 
-          if (status === 404) {
+          if (e.status === 404) {
             return yield* _(
               Effect.fail(
                 new NotFoundError({
-                  status,
-                  message,
+                  status: e.status,
+                  message: e.message,
                   cause: e.error,
                 })
               )
             )
           }
 
-          return yield* _(Effect.fail(e.error))
+          return yield* _(Effect.fail(e))
         }
 
         return yield* _(
@@ -370,6 +373,27 @@ export const handleCommonErrorsEffect = <R, C = never>(
     })
   )
 
+export const handleCommonErrorsEffect = <R, C = never>(
+  effect: Effect.Effect<R, ClientError.ClientError<number>, C>
+): Effect.Effect<
+  R,
+  | NetworkError
+  | NotFoundError
+  | UnknownClientError
+  | UnknownServerError
+  | UnauthorizedError,
+  C
+> =>
+  handleErrorsEffect(effect).pipe(
+    Effect.catchTag('ClientError', (error) =>
+      Effect.fail(
+        new UnknownClientError({
+          cause: error,
+        })
+      )
+    )
+  )
+
 export const handleCommonAndExpectedErrorsEffect = <R, B, R2, C = never>(
   effect: Effect.Effect<R, ClientError.ClientError<number>, C>,
   expectedErrors: Schema.Schema<B, any, R2>
@@ -384,13 +408,13 @@ export const handleCommonAndExpectedErrorsEffect = <R, B, R2, C = never>(
   | Schema.Schema.Type<Schema.Schema<B, any, R2>>,
   C | R2
 > =>
-  handleCommonErrorsEffect(effect).pipe(
+  handleErrorsEffect(effect).pipe(
     Effect.catchIf(
-      (error) => error._tag === 'HttpError',
+      (error) => error._tag === 'ClientError' && isServerSideError(error),
       (error) =>
         Effect.gen(function* (_) {
           const decodedError = yield* _(
-            Schema.decodeUnknown(expectedErrors)(error)
+            Schema.decodeUnknown(expectedErrors)(error.error)
           )
           return yield* _(Effect.fail(decodedError))
         })

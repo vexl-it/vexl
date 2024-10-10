@@ -23,6 +23,7 @@ import {reportGaguesLayer} from './metrics'
 import {fetchCommonConnections} from './routes/contacts/fetchCommonConnections'
 import {fetchMyContacts} from './routes/contacts/fetchMyContacts'
 import {importContacts} from './routes/contacts/importContacts'
+import {ImportContactsQuotaService} from './routes/contacts/importContactsQuotaService'
 import {checkUserExists} from './routes/user/checkUserExists'
 import {createUser} from './routes/user/createUser'
 import {deleteUser} from './routes/user/deleteUser'
@@ -62,7 +63,8 @@ const MainLive = Layer.mergeAll(
       contactsImportedHookConfig: dashboardContactsImportedHookConfig,
       newUserHookOption: Config.succeed(Option.none()),
     })
-  )
+  ),
+  Layer.provideMerge(ImportContactsQuotaService.Live)
 )
 
 export const httpServer = portConfig.pipe(

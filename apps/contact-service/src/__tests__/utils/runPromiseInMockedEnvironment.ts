@@ -14,8 +14,10 @@ import {cryptoConfig} from '../../configs'
 import {ContactDbService} from '../../db/ContactDbService'
 import DbLayer from '../../db/layer'
 import {UserDbService} from '../../db/UserDbService'
+import {type ImportContactsQuotaService} from '../../routes/contacts/importContactsQuotaService'
 import {type FirebaseMessagingService} from '../../utils/notifications/FirebaseMessagingService'
 import {mockedFirebaseMessagingServiceLayer} from './mockedFirebaseMessagingService'
+import {mockedImportContactsQuotaService} from './mockedImportContactsQuotaService'
 import {NodeTestingApp} from './NodeTestingApp'
 
 export type MockedContexts =
@@ -27,6 +29,7 @@ export type MockedContexts =
   | ContactDbService
   | FirebaseMessagingService
   | DashboardReportsService
+  | ImportContactsQuotaService
 
 const universalContext = Layer.mergeAll(
   mockedRedisLayer,
@@ -35,6 +38,7 @@ const universalContext = Layer.mergeAll(
 
 const context = NodeTestingApp.Live.pipe(
   Layer.provideMerge(universalContext),
+  Layer.provideMerge(mockedImportContactsQuotaService),
   Layer.provideMerge(mockedDashboardReportsService),
   Layer.provideMerge(UserDbService.Live),
   Layer.provideMerge(ContactDbService.Live),

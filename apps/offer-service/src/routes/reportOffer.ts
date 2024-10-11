@@ -6,11 +6,11 @@ import {
 import {ReportOfferEndpoint} from '@vexl-next/rest-api/src/services/offer/specification'
 import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {withRedisLock} from '@vexl-next/server-utils/src/RedisService'
-import {Effect, Metric, Option} from 'effect'
+import {Effect, Option} from 'effect'
 import {Handler} from 'effect-http'
 import {reportLimitCountConfig} from '../configs'
 import {OfferDbService} from '../db/OfferDbService'
-import {makeOfferReportedCounter} from '../metrics'
+import {reportOfferReported} from '../metrics'
 
 export const reportOffer = Handler.make(ReportOfferEndpoint, (req, security) =>
   makeEndpointEffect(
@@ -45,9 +45,7 @@ export const reportOffer = Handler.make(ReportOfferEndpoint, (req, security) =>
       return null
     }).pipe(
       withRedisLock(`reportOffer:${security['public-key']}`),
-      Effect.zipLeft(
-        Metric.incrementBy(makeOfferReportedCounter(req.body.offerId), 1)
-      )
+      Effect.zipLeft(reportOfferReported(req.body.offerId))
     ),
     ReportOfferEndpointErrors
   )

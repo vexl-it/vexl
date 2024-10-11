@@ -1,6 +1,8 @@
 import {NodeContext} from '@effect/platform-node'
 import {type SqlClient} from '@effect/sql/SqlClient'
+import {type MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
+import {mockedMetricsClientService} from '@vexl-next/server-utils/src/tests/mockedMetricsClientService'
 import {
   disposeTestDatabase,
   setupTestDatabase,
@@ -16,10 +18,12 @@ export type MockedContexts =
   | NodeTestingApp
   | SqlClient
   | FeedbackDbService
+  | MetricsClientService
 
 const context = NodeTestingApp.Live.pipe(
   Layer.provideMerge(FeedbackDbService.Live),
   Layer.provideMerge(DbLayer),
+  Layer.provideMerge(mockedMetricsClientService),
   Layer.provideMerge(ServerCrypto.layer(cryptoConfig)),
   Layer.provideMerge(NodeContext.layer)
 )

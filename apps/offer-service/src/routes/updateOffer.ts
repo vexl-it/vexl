@@ -6,10 +6,10 @@ import {UpdateOfferErrors} from '@vexl-next/rest-api/src/services/offer/contract
 import {UpdateOfferEndpoint} from '@vexl-next/rest-api/src/services/offer/specification'
 import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
-import {Array, Effect, Metric} from 'effect'
+import {Array, Effect} from 'effect'
 import {Handler} from 'effect-http'
 import {OfferDbService} from '../db/OfferDbService'
-import {offerModifiedCounter} from '../metrics'
+import {reportOfferModified} from '../metrics'
 import {hashAdminId} from '../utils/hashAdminId'
 import {offerPartsToServerOffer} from '../utils/offerPartsToServerOffer'
 import {validatePrivatePartsWhenSavingAll} from '../utils/validatePrivatePartsWhenSavingAll'
@@ -79,7 +79,7 @@ export const updateOffer = Handler.make(UpdateOfferEndpoint, (req, security) =>
     }).pipe(
       withDbTransaction,
       withOfferAdminActionRedisLock(req.body.adminId),
-      Effect.zipLeft(Metric.increment(offerModifiedCounter))
+      Effect.zipLeft(reportOfferModified())
     ),
     UpdateOfferErrors
   )

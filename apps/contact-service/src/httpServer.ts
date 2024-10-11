@@ -3,6 +3,7 @@ import {ContactApiSpecification} from '@vexl-next/rest-api/src/services/contact/
 import {DashboardReportsService} from '@vexl-next/server-utils/src/DashboardReportsService'
 import {healthServerLayer} from '@vexl-next/server-utils/src/HealthServer'
 import {setupLoggingMiddlewares} from '@vexl-next/server-utils/src/loggingMiddlewares'
+import {MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
 import {RedisService} from '@vexl-next/server-utils/src/RedisService'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
 import {Config, Effect, Layer, Option} from 'effect'
@@ -56,6 +57,7 @@ const MainLive = Layer.mergeAll(
   Layer.provideMerge(UserDbService.Live),
   Layer.provideMerge(DbLayer),
   Layer.provideMerge(RedisService.layer(redisUrl)),
+  Layer.provideMerge(MetricsClientService.layer(redisUrl)),
   Layer.provideMerge(NodeContext.layer),
   Layer.provideMerge(
     DashboardReportsService.make({

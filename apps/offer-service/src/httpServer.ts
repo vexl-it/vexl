@@ -2,6 +2,7 @@ import {NodeContext} from '@effect/platform-node'
 import {OfferApiSpecification} from '@vexl-next/rest-api/src/services/offer/specification'
 import {healthServerLayer} from '@vexl-next/server-utils/src/HealthServer'
 import {setupLoggingMiddlewares} from '@vexl-next/server-utils/src/loggingMiddlewares'
+import {MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
 import {RedisService} from '@vexl-next/server-utils/src/RedisService'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
 import {Effect, Layer} from 'effect'
@@ -51,6 +52,7 @@ const MainLive = Layer.empty.pipe(
   Layer.provideMerge(OfferDbService.Live),
   Layer.provideMerge(DbLayer),
   Layer.provideMerge(RedisService.layer(redisUrl)),
+  Layer.provideMerge(MetricsClientService.layer(redisUrl)),
   Layer.provideMerge(NodeContext.layer)
 )
 

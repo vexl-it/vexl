@@ -2,10 +2,10 @@ import {Schema} from '@effect/schema'
 import {DeleteOfferEndpoint} from '@vexl-next/rest-api/src/services/offer/specification'
 import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
-import {Effect, Metric} from 'effect'
+import {Effect} from 'effect'
 import {Handler} from 'effect-http'
 import {OfferDbService} from '../db/OfferDbService'
-import {offerPublicPartDeletedCounter} from '../metrics'
+import {reportOfferPublicPartDeleted} from '../metrics'
 import {hashAdminId} from '../utils/hashAdminId'
 import {withOfferAdminActionRedisLock} from '../utils/withOfferAdminRedisLock'
 
@@ -32,9 +32,7 @@ export const deleteOffer = Handler.make(DeleteOfferEndpoint, (req, security) =>
         })
       )
 
-      yield* _(
-        Metric.incrementBy(offerPublicPartDeletedCounter, hashedAdminId.length)
-      )
+      yield* _(reportOfferPublicPartDeleted())
 
       return null
     }).pipe(

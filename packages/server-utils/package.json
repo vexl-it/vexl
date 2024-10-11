@@ -40,6 +40,7 @@
     "fast-check": "^3.20.0",
     "ioredis": "^5.4.1",
     "luxon": "^3.3.0",
+    "redis-smq": "8.0.0-rc.24",
     "redlock": "^5.0.0-beta.2"
   },
   "eslintConfig": {

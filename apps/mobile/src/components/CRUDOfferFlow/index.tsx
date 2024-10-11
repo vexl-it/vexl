@@ -1,6 +1,6 @@
 import {createNativeStackNavigator} from '@react-navigation/native-stack'
 import {useMolecule} from 'bunshi/dist/react'
-import {useAtomValue, useSetAtom, useStore} from 'jotai'
+import {useAtomValue, useSetAtom} from 'jotai'
 import {useCallback, useState} from 'react'
 import {StatusBar} from 'react-native'
 import {Stack} from 'tamagui'
@@ -41,11 +41,13 @@ function CRUDOfferFlow({route: {params}, navigation}: Props): JSX.Element {
     emitAlertBasedOnCurrentStepIfAnyAtom,
     dontAllowNavigationToNextStepAndReturnReasonAtom,
   } = useMolecule(offerFormMolecule)
-  const store = useStore()
 
   const screensBasedOnListingType = useAtomValue(screensBasedOnListingTypeAtom)
   const emitAlertBasedOnCurrentStepIfAny = useSetAtom(
     emitAlertBasedOnCurrentStepIfAnyAtom
+  )
+  const dontAllowNavigationToNextStepAndReturnReason = useAtomValue(
+    dontAllowNavigationToNextStepAndReturnReasonAtom
   )
   const createOffer = useSetAtom(createOfferActionAtom)
   const editOffer = useSetAtom(editOfferActionAtom)
@@ -59,7 +61,7 @@ function CRUDOfferFlow({route: {params}, navigation}: Props): JSX.Element {
         screensBasedOnListingType[prevOrNextPageIndex] ?? 'ListingAndOfferType'
       if (
         prevOrNextPageIndex < page ||
-        !store.get(dontAllowNavigationToNextStepAndReturnReasonAtom)
+        !dontAllowNavigationToNextStepAndReturnReason
       ) {
         setCurrentStepInOfferCreation(currentPage)
         navigation.navigate('CRUDOfferFlow', {
@@ -72,14 +74,13 @@ function CRUDOfferFlow({route: {params}, navigation}: Props): JSX.Element {
       }
     },
     [
-      dontAllowNavigationToNextStepAndReturnReasonAtom,
+      dontAllowNavigationToNextStepAndReturnReason,
       emitAlertBasedOnCurrentStepIfAny,
       navigation,
       page,
       params.offerId,
       screensBasedOnListingType,
       setCurrentStepInOfferCreation,
-      store,
     ]
   )
 

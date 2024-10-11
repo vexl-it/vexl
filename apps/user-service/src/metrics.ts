@@ -1,21 +1,40 @@
 import {SqlClient} from '@effect/sql'
 import {type CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
-import {Effect, Layer, Metric} from 'effect'
+import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
+import {MetricsMessage} from '@vexl-next/server-utils/src/metrics/domain'
+import {type MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
+import {reportMetricForked} from '@vexl-next/server-utils/src/metrics/reportMetricForked'
+import {Effect, Layer} from 'effect'
 
-export const makeUserLoggedInCounter = (
+const USER_LOGGED_IN = 'USER_LOGGED_IN' as const
+const NUMBER_OF_USERS = 'NUMBER_OF_USERS' as const
+
+export const reportUserLoggedIn = (
   countryPrefix: CountryPrefix
-): Metric.Metric.Counter<number> => {
-  return Metric.counter('analytics.users.user_logged_in', {
-    description: 'How many users logged in',
-  }).pipe(Metric.tagged('countryPrefix', String(countryPrefix)))
-}
+): Effect.Effect<void, never, MetricsClientService> =>
+  reportMetricForked(
+    new MetricsMessage({
+      uuid: generateUuid(),
+      timestamp: new Date(),
+      name: USER_LOGGED_IN,
+      attributes: {countryPrefix},
+    })
+  )
 
-export const numberOfUsersGauge = Metric.gauge(
-  'analytics.users.number_of_users',
-  {description: 'Number of users'}
-)
+export const reportTotalNumberOfUsers = (
+  numberOfUsers: number
+): Effect.Effect<void, never, MetricsClientService> =>
+  reportMetricForked(
+    new MetricsMessage({
+      uuid: generateUuid(),
+      timestamp: new Date(),
+      name: NUMBER_OF_USERS,
+      value: numberOfUsers,
+      type: 'Total',
+    })
+  )
 
-export const reportGaugesLayer = Layer.effectDiscard(
+export const reportMetricsLayer = Layer.effectDiscard(
   Effect.gen(function* (_) {
     const sql = yield* _(SqlClient.SqlClient)
 
@@ -29,7 +48,7 @@ export const reportGaugesLayer = Layer.effectDiscard(
       Effect.flatMap((v) =>
         Effect.zipRight(
           Effect.logInfo(`Reporting number of logged users ${v}`),
-          Metric.set(numberOfUsersGauge, v)
+          reportTotalNumberOfUsers(v)
         )
       ),
       Effect.withSpan('Query number of users')

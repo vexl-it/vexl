@@ -16,10 +16,10 @@ import {VerifyChallengeEndpoint} from '@vexl-next/rest-api/src/services/user/spe
 import {DashboardReportsService} from '@vexl-next/server-utils/src/DashboardReportsService'
 import {generateUserAuthData} from '@vexl-next/server-utils/src/generateUserAuthData'
 import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
-import {Effect, Metric} from 'effect'
+import {Effect} from 'effect'
 import {Handler} from 'effect-http'
 import {LoggedInUsersDbService} from '../../../db/loggedInUsersDb'
-import {makeUserLoggedInCounter} from '../../../metrics'
+import {reportUserLoggedIn} from '../../../metrics'
 import {VerificationStateDbService} from '../db/verificationStateDb'
 
 const insertUserIntoDb = (
@@ -90,11 +90,7 @@ export const verifyChallengeHandler = Handler.make(
           loginDb.deleteChallengeVerificationState(req.body.userPublicKey)
         )
 
-        yield* _(
-          Metric.increment(
-            makeUserLoggedInCounter(verificationState.countryPrefix)
-          )
-        )
+        yield* _(reportUserLoggedIn(verificationState.countryPrefix))
 
         return new VerifyChallengeResponse({
           ...authData,

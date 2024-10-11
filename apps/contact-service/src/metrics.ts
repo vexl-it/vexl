@@ -1,33 +1,66 @@
 import {SqlClient} from '@effect/sql'
-import {Effect, Layer, Metric} from 'effect'
+import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
+import {MetricsMessage} from '@vexl-next/server-utils/src/metrics/domain'
+import {type MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
+import {reportMetricForked} from '@vexl-next/server-utils/src/metrics/reportMetricForked'
+import {Effect, Layer} from 'effect'
 
-export const countactsCountUniqueUsersGauge = Metric.gauge(
-  'analytics.contacts.count_unique_users2',
-  {
-    description: 'Number of unique users',
-  }
-)
+const CONT_OF_UNIQUE_USERS = 'COUNT_OF_UNIQUE_USERS' as const
+const COUNT_OF_UNIQUE_CONTACTS = 'COUNT_OF_UNIQUE_CONTACTS' as const
+const COUNT_OF_CONNECTIONS = 'COUNT_OF_CONNECTIONS' as const
+const USER_REFRESH = 'USER_REFRESH' as const
 
-export const uniqueContactsGauge = Metric.gauge(
-  'analytics.contacts.count_unique_contacts_2',
-  {
-    description: 'Number of unique contacts',
-  }
-)
+export const reportCountOfUniqueUsers = (
+  count: number
+): Effect.Effect<void, never, MetricsClientService> =>
+  reportMetricForked(
+    new MetricsMessage({
+      uuid: generateUuid(),
+      timestamp: new Date(),
+      name: CONT_OF_UNIQUE_USERS,
+      value: count,
+      type: 'Total',
+    })
+  )
 
-export const countOfConnectionsGauge = Metric.gauge(
-  'analytics.contacts.count_of_connections',
-  {
-    description: 'Total number of connections',
-  }
-)
+export const reportCountOfUniqueContacts = (
+  count: number
+): Effect.Effect<void, never, MetricsClientService> =>
+  reportMetricForked(
+    new MetricsMessage({
+      uuid: generateUuid(),
+      timestamp: new Date(),
+      name: COUNT_OF_UNIQUE_CONTACTS,
+      value: count,
+      type: 'Total',
+    })
+  )
 
-export const userRefreshCounter = Metric.counter(
-  'analytics.contacts.user_refresh',
-  {
-    description: 'Increments when user calls /refresh endpoint',
-  }
-)
+export const reportCountOfConnections = (
+  count: number
+): Effect.Effect<void, never, MetricsClientService> =>
+  reportMetricForked(
+    new MetricsMessage({
+      uuid: generateUuid(),
+      timestamp: new Date(),
+      name: COUNT_OF_CONNECTIONS,
+      value: count,
+      type: 'Total',
+    })
+  )
+
+export const reportUserRefresh = (): Effect.Effect<
+  void,
+  never,
+  MetricsClientService
+> =>
+  reportMetricForked(
+    new MetricsMessage({
+      uuid: generateUuid(),
+      timestamp: new Date(),
+      name: USER_REFRESH,
+    })
+  )
 
 export const reportGaguesLayer = Layer.effectDiscard(
   Effect.gen(function* (_) {
@@ -50,7 +83,7 @@ export const reportGaguesLayer = Layer.effectDiscard(
       Effect.flatMap((v) =>
         Effect.zipRight(
           Effect.logInfo(`Reporting number of unique users: ${v}`),
-          Metric.set(countactsCountUniqueUsersGauge, v)
+          reportCountOfUniqueUsers(v)
         )
       ),
       Effect.withSpan('Query number of unique users')
@@ -73,7 +106,7 @@ export const reportGaguesLayer = Layer.effectDiscard(
       Effect.flatMap((v) =>
         Effect.zipRight(
           Effect.logInfo(`Reporting number of unique contacts: ${v}`),
-          Metric.set(uniqueContactsGauge, v)
+          reportCountOfUniqueContacts(v)
         )
       ),
       Effect.withSpan('Query number of unique contacts')
@@ -89,7 +122,7 @@ export const reportGaguesLayer = Layer.effectDiscard(
       Effect.flatMap((v) =>
         Effect.zipRight(
           Effect.logInfo(`Reporting number of connections: ${v}`),
-          Metric.set(countOfConnectionsGauge, v)
+          reportCountOfConnections(v)
         )
       ),
       Effect.withSpan('Query number of connections')

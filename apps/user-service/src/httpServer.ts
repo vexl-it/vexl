@@ -3,6 +3,7 @@ import {UserApiSpecification} from '@vexl-next/rest-api/src/services/user/specif
 import {DashboardReportsService} from '@vexl-next/server-utils/src/DashboardReportsService'
 import {healthServerLayer} from '@vexl-next/server-utils/src/HealthServer'
 import {setupLoggingMiddlewares} from '@vexl-next/server-utils/src/loggingMiddlewares'
+import {MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
 import {RedisService} from '@vexl-next/server-utils/src/RedisService'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
 import {Config, Effect, Layer, Option} from 'effect'
@@ -17,7 +18,7 @@ import {
 } from './configs'
 import DbLayer from './db/layer'
 import {LoggedInUsersDbService} from './db/loggedInUsersDb'
-import {reportGaugesLayer} from './metrics'
+import {reportMetricsLayer} from './metrics'
 import {VerificationStateDbService} from './routes/login/db/verificationStateDb'
 import {initVerificationHandler} from './routes/login/handlers/initVerificationHandler'
 import {verifyChallengeHandler} from './routes/login/handlers/verifyChallengeHandler'
@@ -46,11 +47,12 @@ const MainLive = Layer.mergeAll(
     newUserHookOption: dashboardNewUserHookConfig,
     contactsImportedHookConfig: Config.succeed(Option.none()),
   }),
-  reportGaugesLayer,
+  reportMetricsLayer,
   ServerCrypto.layer(cryptoConfig),
   healthServerLayer({port: healthServerPortConfig})
 ).pipe(
   Layer.provideMerge(DbLayer),
+  Layer.provideMerge(MetricsClientService.layer(redisUrl)),
   Layer.provideMerge(RedisService.layer(redisUrl)),
   Layer.provideMerge(NodeContext.layer)
 )

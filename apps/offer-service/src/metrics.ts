@@ -1,28 +1,62 @@
 import {type CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {type OfferId} from '@vexl-next/domain/src/general/offers'
-import {Metric} from 'effect'
+import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
+import {MetricsMessage} from '@vexl-next/server-utils/src/metrics/domain'
+import {type MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
+import {reportMetricForked} from '@vexl-next/server-utils/src/metrics/reportMetricForked'
+import {type Effect} from 'effect'
 
-export const offerPublicPartDeletedCounter = Metric.counter(
-  'analytics.offers.deletion.public_part',
-  {
-    description: 'How many offers was deleted (public parts - for each owner)',
-  }
-)
+const OFFER_PUBLIC_PART_DELETED = 'OFFER_PUBLIC_PART_DELETED' as const
+const OFFER_MODIFIED = 'OFFER_MODIFIED' as const
+const OFFER_CREATED = 'OFFER_CREATED' as const
+const OFFER_REPORTED = 'OFFER_REPORTED' as const
 
-export const offerModifiedCounter = Metric.counter('analytics.offers.update', {
-  description: 'How many offers was modified.',
-})
+export const reportOfferPublicPartDeleted = (): Effect.Effect<
+  void,
+  never,
+  MetricsClientService
+> =>
+  reportMetricForked(
+    new MetricsMessage({
+      uuid: generateUuid(),
+      timestamp: new Date(),
+      name: OFFER_PUBLIC_PART_DELETED,
+    })
+  )
 
-export const makeOfferCreatedCounter = (
+export const reportOfferModified = (): Effect.Effect<
+  void,
+  never,
+  MetricsClientService
+> =>
+  reportMetricForked(
+    new MetricsMessage({
+      uuid: generateUuid(),
+      timestamp: new Date(),
+      name: OFFER_MODIFIED,
+    })
+  )
+
+export const reportOfferCreated = (
   countryPrefix: CountryPrefix
-): Metric.Metric.Counter<number> =>
-  Metric.counter('analytics.offers.created', {
-    description: 'How many offers were created',
-  }).pipe(Metric.tagged('countryPrefix', String(countryPrefix)))
+): Effect.Effect<void, never, MetricsClientService> =>
+  reportMetricForked(
+    new MetricsMessage({
+      uuid: generateUuid(),
+      timestamp: new Date(),
+      name: OFFER_CREATED,
+      attributes: {countryPrefix},
+    })
+  )
 
-export const makeOfferReportedCounter = (
+export const reportOfferReported = (
   offerId: OfferId
-): Metric.Metric.Counter<number> =>
-  Metric.counter('analytics.offers.reported', {
-    description: 'How many times was offer reported',
-  }).pipe(Metric.tagged('offerId', String(offerId)))
+): Effect.Effect<void, never, MetricsClientService> =>
+  reportMetricForked(
+    new MetricsMessage({
+      uuid: generateUuid(),
+      timestamp: new Date(),
+      name: OFFER_REPORTED,
+      attributes: {offerId},
+    })
+  )

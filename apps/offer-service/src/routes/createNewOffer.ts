@@ -4,10 +4,10 @@ import {CreateNewOfferErrors} from '@vexl-next/rest-api/src/services/offer/contr
 import {CreateNewOfferEndpoint} from '@vexl-next/rest-api/src/services/offer/specification'
 import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
-import {Effect, Metric} from 'effect'
+import {Effect} from 'effect'
 import {Handler} from 'effect-http'
 import {OfferDbService} from '../db/OfferDbService'
-import {makeOfferCreatedCounter} from '../metrics'
+import {reportOfferCreated} from '../metrics'
 import {hashAdminId} from '../utils/hashAdminId'
 import {offerPartsToServerOffer} from '../utils/offerPartsToServerOffer'
 import {validatePrivatePartsWhenSavingAll} from '../utils/validatePrivatePartsWhenSavingAll'
@@ -72,9 +72,7 @@ export const createNewOffer = Handler.make(
         withDbTransaction,
         withOfferAdminActionRedisLock(req.body.adminId),
         Effect.withSpan('createNewOffer'),
-        Effect.zipLeft(
-          Metric.increment(makeOfferCreatedCounter(req.body.countryPrefix))
-        )
+        Effect.zipLeft(reportOfferCreated(req.body.countryPrefix))
       ),
       CreateNewOfferErrors
     )

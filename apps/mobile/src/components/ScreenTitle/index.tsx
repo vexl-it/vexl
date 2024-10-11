@@ -45,10 +45,10 @@ function ScreenTitle({
             }}
           />
         )}
-        <Stack f={1} fs={1}>
+        <Stack f={1}>
           <Text
             adjustsFontSizeToFit
-            numberOfLines={2}
+            numberOfLines={1}
             col={textColor ?? '$white'}
             fontSize={32}
             ff="$heading"
@@ -57,7 +57,7 @@ function ScreenTitle({
           </Text>
         </Stack>
         {!!children && (
-          <XStack f={1} ai="center" jc="flex-end">
+          <XStack ai="center" jc="flex-end">
             {children}
           </XStack>
         )}

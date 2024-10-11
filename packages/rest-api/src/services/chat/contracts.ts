@@ -73,6 +73,12 @@ export class SenderUserInboxDoesNotExistError extends Schema.TaggedError<SenderU
   code: Schema.optionalWith(Schema.Literal(100107), {default: () => 100107}),
 }) {}
 
+export class InvalidChallengeError extends Schema.TaggedError<InvalidChallengeError>(
+  'InvalidChallengeError'
+)('InvalidChallengeError', {
+  status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
+}) {}
+
 export const ChatChallenge = z
   .string()
   .transform((v) => Brand.nominal<typeof v & Brand.Brand<'ChatChallenge'>>()(v))
@@ -104,12 +110,17 @@ export type ServerMessageWithId = Schema.Schema.Type<
   typeof ServerMessageWithIdE
 >
 
-const RequestBaseWithChallenge = z.object({
-  keyPair: PrivateKeyHolder,
+export const RequestBaseWithChallenge = z.object({
+  publicKey: PublicKeyPemBase64,
+  signedChallenge: SignedChallenge,
 })
-const RequestBaseWithChallengeE = Schema.Struct({
-  keyPair: PrivateKeyHolderE,
+export const RequestBaseWithChallengeE = Schema.Struct({
+  publicKey: PublicKeyPemBase64E,
+  signedChallenge: SignedChallengeE,
 })
+export type RequestBaseWithChallenge = Schema.Schema.Type<
+  typeof RequestBaseWithChallengeE
+>
 
 export const UpdateInboxRequest = RequestBaseWithChallenge.extend({
   token: z.string().optional(),

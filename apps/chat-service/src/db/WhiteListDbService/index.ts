@@ -1,0 +1,60 @@
+import {type UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
+import {Context, Effect, Layer, type Option} from 'effect'
+import {type WhitelistRecord, type WhitelistRecordId} from './domain'
+import {createDeleteWhitelistRecord} from './queries/createDeleteWhitelistRecord'
+import {
+  createFindWhitelistRecordBySenderAndReceiver,
+  type FindWhitelistRecordBySenderAndReceiverParams,
+} from './queries/createFindWhitelistRecordBySenderAndReceiver'
+import {
+  createInsertWhitelistRecord,
+  type InsertWhitelistRecordParams,
+} from './queries/createInsertWhitelistRecord'
+import {
+  createUpdateWhitelistRecordState,
+  type UpdateWhitelistRecordParams,
+} from './queries/createUpdateWhitelistRecordState'
+
+export interface WhitelistDbOperations {
+  deleteWhitelistRecord: (
+    params: WhitelistRecordId
+  ) => Effect.Effect<void, UnexpectedServerError>
+
+  findWhitelistRecordBySenderAndReceiver: (
+    params: FindWhitelistRecordBySenderAndReceiverParams
+  ) => Effect.Effect<Option.Option<WhitelistRecord>, UnexpectedServerError>
+
+  insertWhitelistRecord: (
+    params: InsertWhitelistRecordParams
+  ) => Effect.Effect<void, UnexpectedServerError>
+
+  updateWhitelistRecordState: (
+    params: UpdateWhitelistRecordParams
+  ) => Effect.Effect<void, UnexpectedServerError>
+}
+
+export class WhitelistDbService extends Context.Tag('WhitelistDbService')<
+  WhitelistDbService,
+  WhitelistDbOperations
+>() {
+  static readonly Live = Layer.effect(
+    WhitelistDbService,
+    Effect.gen(function* (_) {
+      const deleteWhitelistRecord = yield* _(createDeleteWhitelistRecord)
+      const findWhitelistRecordBySenderAndReceiver = yield* _(
+        createFindWhitelistRecordBySenderAndReceiver
+      )
+      const insertWhitelistRecord = yield* _(createInsertWhitelistRecord)
+      const updateWhitelistRecordState = yield* _(
+        createUpdateWhitelistRecordState
+      )
+
+      return {
+        deleteWhitelistRecord,
+        findWhitelistRecordBySenderAndReceiver,
+        insertWhitelistRecord,
+        updateWhitelistRecordState,
+      }
+    })
+  )
+}

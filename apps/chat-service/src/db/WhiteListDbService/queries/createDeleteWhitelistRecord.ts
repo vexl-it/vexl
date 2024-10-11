@@ -1,18 +1,18 @@
 import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
-import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {Effect, flow} from 'effect'
+import {WhitelistRecordId} from '../domain'
 
-export const createDeleteInboxByPublicKey = Effect.gen(function* (_) {
+export const createDeleteWhitelistRecord = Effect.gen(function* (_) {
   const sql = yield* _(PgClient.PgClient)
 
   const query = SqlSchema.void({
-    Request: PublicKeyPemBase64E,
+    Request: WhitelistRecordId,
     execute: (params) => sql`
-      DELETE FROM inbox
+      DELETE FROM white_list
       WHERE
-        public_key = ${params}
+        id = ${params}
     `,
   })
 
@@ -20,10 +20,10 @@ export const createDeleteInboxByPublicKey = Effect.gen(function* (_) {
     query,
     Effect.catchAll((e) =>
       Effect.zipRight(
-        Effect.logError('Error in deleteInboxByPublicKey', e),
+        Effect.logError('Error in deleteWhitelistRecord', e),
         Effect.fail(new UnexpectedServerError({status: 500}))
       )
     ),
-    Effect.withSpan('deleteInboxByPublicKey query')
+    Effect.withSpan('deleteWhitelistRecord query')
   )
 })

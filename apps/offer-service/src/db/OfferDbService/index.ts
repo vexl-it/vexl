@@ -50,6 +50,10 @@ import {
   type UpdateOfferPublicPayloadRequest,
 } from './queries/createUpdateOfferPublicPayload'
 import {
+  createUpdateOfferPublicPayloadModifiedNow,
+  type UpdateOfferPublicPayloadModifiedNowRequest,
+} from './queries/createUpdateOfferPublicPayloadModifiedNow'
+import {
   createUpdateRefreshOffer,
   type UpdateRefreshOfferRequest,
 } from './queries/createUpdateRefreshOffer'
@@ -103,6 +107,10 @@ export interface OfferDbOperations {
     args: UpdateOfferPublicPayloadRequest
   ) => Effect.Effect<void, UnexpectedServerError>
 
+  updateOfferPublicPartModifiedNow: (
+    args: UpdateOfferPublicPayloadModifiedNowRequest
+  ) => Effect.Effect<void, UnexpectedServerError>
+
   deletePublicPart: (
     args: DeletePublicPartRequest
   ) => Effect.Effect<void, UnexpectedServerError>
@@ -145,6 +153,9 @@ export class OfferDbService extends Context.Tag('OfferDbService')<
         updateReportOffer: yield* _(createUpdateReportOffer),
         updateRefreshOffer: yield* _(createUpdateRefreshOffer),
         updateOfferPublicPayload: yield* _(createUpdateOfferPublicPayload),
+        updateOfferPublicPartModifiedNow: yield* _(
+          createUpdateOfferPublicPayloadModifiedNow
+        ),
         deletePublicPart: yield* _(createDeletePublicPart),
         deletePrivatePart: yield* _(createDeletePrivatePart),
         deleteAllPrivatePartsForAdminId: yield* _(

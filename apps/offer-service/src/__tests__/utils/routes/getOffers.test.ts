@@ -114,6 +114,13 @@ beforeAll(async () => {
         )),
         adminId: request2.adminId,
       }
+
+      const sql = yield* _(SqlClient.SqlClient)
+      yield* _(sql`
+        UPDATE offer_private
+        SET
+          created_at = now() - interval '10 day';
+      `)
     })
   )
 })
@@ -435,6 +442,83 @@ describe('Get offers for me modified or expired after', () => {
             modified_at = NOW()
           WHERE
             offer_id = ${offer2.offerId};
+        `)
+
+        expect(offers.offers.map((o) => o.offerId).join()).toEqual(
+          [offer2.offerId].join()
+        )
+      })
+    )
+  })
+
+  it('Returns offers for me that have public parts not modified after but private parts were uploaded after', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const sql = yield* _(SqlClient.SqlClient)
+
+        yield* _(sql`
+          UPDATE offer_public
+          SET
+            modified_at = NOW() - INTERVAL '2 days'
+          WHERE
+            offer_id = ${offer1.offerId};
+        `)
+        yield* _(sql`
+          UPDATE offer_public
+          SET
+            modified_at = NOW() - INTERVAL '2 days'
+          WHERE
+            offer_id = ${offer2.offerId};
+        `)
+
+        yield* _(sql`
+          UPDATE offer_private
+          SET
+            created_at = NOW()
+          WHERE
+            id IN (
+              SELECT
+                offer_private.id
+              FROM
+                offer_public
+                LEFT JOIN offer_private ON offer_public.id = offer_private.offer_id
+              WHERE
+                offer_public.offer_id = ${offer2.offerId}
+            )
+        `)
+
+        const client = yield* _(NodeTestingApp)
+        const offers = yield* _(
+          client.getOffersForMeModifiedOrCreatedAfter(
+            {
+              query: {
+                modifiedAt: fromJsDate(dayjs().subtract(0, 'days').toDate()),
+              },
+            },
+            HttpClientRequest.setHeaders(
+              yield* _(
+                createDummyAuthHeadersForUser({
+                  phoneNumber:
+                    Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
+                  publicKey: user1.publicKeyPemBase64,
+                })
+              )
+            )
+          )
+        )
+
+        yield* _(sql`
+          UPDATE offer_public
+          SET
+            modified_at = NOW()
+          WHERE
+            offer_id = ${offer2.offerId};
+        `)
+
+        yield* _(sql`
+          UPDATE offer_private
+          SET
+            created_at = now() - interval '10 day';
         `)
 
         expect(offers.offers.map((o) => o.offerId).join()).toEqual(

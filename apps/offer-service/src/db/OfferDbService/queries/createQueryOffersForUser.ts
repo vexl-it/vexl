@@ -44,7 +44,10 @@ export const createQueryOffersForUser = Effect.gen(function* (_) {
             Array.map(query, (oneU) =>
               sql.and([
                 sql`offer_private.user_public_key = ${oneU.userPublicKey}`,
-                sql`offer_public.modified_at >= ${oneU.modifiedAt}::date`,
+                sql.or([
+                  sql`offer_public.modified_at >= ${oneU.modifiedAt}::date`,
+                  sql`offer_private.created_at >= ${oneU.modifiedAt}::date`,
+                ]),
                 offerNotExpired(sql, expirationPeriodDays),
                 offerNotFlagged(sql, offerReportFilter),
               ])

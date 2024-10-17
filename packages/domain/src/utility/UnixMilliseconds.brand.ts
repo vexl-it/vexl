@@ -1,6 +1,6 @@
 import {Schema} from '@effect/schema'
 import {Brand} from 'effect'
-import {type DateTime} from 'luxon'
+import {DateTime} from 'luxon'
 import {z} from 'zod'
 
 export const UnixMillisecondsE = Schema.Number.pipe(
@@ -41,4 +41,10 @@ export const UnixMilliseconds0 = UnixMilliseconds.parse(0)
 
 export function fromDateTime(dateTime: DateTime): UnixMilliseconds {
   return UnixMilliseconds.parse(dateTime.valueOf())
+}
+
+export function getNextMidnightOnSelectedDate(date: Date): UnixMilliseconds {
+  return UnixMilliseconds.parse(
+    DateTime.fromJSDate(date).endOf('day').toMillis()
+  )
 }

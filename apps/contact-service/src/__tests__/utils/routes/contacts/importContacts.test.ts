@@ -1,7 +1,18 @@
 import {HttpClientRequest} from '@effect/platform'
+import {Schema} from '@effect/schema'
 import {SqlClient} from '@effect/sql'
+import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
+import {
+  ImportContactsQuotaReachedError,
+  InitialImportContactsQuotaReachedError,
+} from '@vexl-next/rest-api/src/services/contact/contracts'
+import {RedisService} from '@vexl-next/server-utils/src/RedisService'
 import {mockedReportContactsImported} from '@vexl-next/server-utils/src/tests/mockedDashboardReportsService'
-import {Array, Effect, Logger, LogLevel, Order, pipe} from 'effect'
+import {Array, Effect, Either, Logger, LogLevel, Order, pipe} from 'effect'
+import {
+  createQuotaRecordKey,
+  ImportContactsQuotaRecord,
+} from '../../../../routes/contacts/importContactsQuotaService'
 import {sendMessageMock} from '../../mockedFirebaseMessagingService'
 import {NodeTestingApp} from '../../NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../runPromiseInMockedEnvironment'
@@ -155,6 +166,403 @@ describe('Import contacts', () => {
             HttpClientRequest.setHeaders(me.authHeaders)
           )
         )
+      })
+    )
+  })
+
+  it('Initial import should accept number of contacts lower than quota', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const redis = yield* _(RedisService)
+        const me = yield* _(generateKeysAndHasheForNumber('+420733222222'))
+        const quotaRecordKey = createQuotaRecordKey(me.hashedNumber)
+
+        yield* _(redis.set(ImportContactsQuotaRecord)(quotaRecordKey, 0))
+
+        const contactsToImport = yield* _(
+          Effect.all([
+            // 0
+            generateKeysAndHasheForNumber('+420733333006'),
+            generateKeysAndHasheForNumber('+420733333007'),
+            generateKeysAndHasheForNumber('+420733333008'),
+            generateKeysAndHasheForNumber('+420733333009'),
+            generateKeysAndHasheForNumber('+420733333010'),
+            generateKeysAndHasheForNumber('+420733333011'),
+            generateKeysAndHasheForNumber('+420733333012'),
+            generateKeysAndHasheForNumber('+420733333013'),
+            generateKeysAndHasheForNumber('+420733333014'),
+            generateKeysAndHasheForNumber('+420733333015'),
+            // 10
+            generateKeysAndHasheForNumber('+420733333016'),
+            generateKeysAndHasheForNumber('+420733333017'),
+            generateKeysAndHasheForNumber('+420733333018'),
+            generateKeysAndHasheForNumber('+420733333019'),
+            generateKeysAndHasheForNumber('+420733333020'),
+            generateKeysAndHasheForNumber('+420733333021'),
+            generateKeysAndHasheForNumber('+420733333022'),
+            generateKeysAndHasheForNumber('+420733333023'),
+            generateKeysAndHasheForNumber('+420733333024'),
+            generateKeysAndHasheForNumber('+420733333025'),
+          ])
+        )
+        const app = yield* _(NodeTestingApp)
+
+        const commonHeaders = Schema.decodeSync(CommonHeaders)({
+          'user-agent': 'Vexl/1 (1.0.0) ANDROID',
+        })
+
+        yield* _(
+          app.createUser(
+            {
+              body: {
+                firebaseToken: me.firebaseToken,
+              },
+              headers: commonHeaders,
+            },
+            HttpClientRequest.setHeaders(me.authHeaders)
+          )
+        )
+
+        const response = yield* _(
+          app.importContacts(
+            {
+              body: {contacts: contactsToImport.map((c) => c.hashedNumber)},
+            },
+            HttpClientRequest.setHeaders(me.authHeaders)
+          ),
+          Effect.either
+        )
+
+        expect(response._tag).toEqual('Right')
+      })
+    )
+  })
+
+  it('Initial import for new user should not accept more contacts than specified in initial import quota', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const redis = yield* _(RedisService)
+        const me = yield* _(generateKeysAndHasheForNumber('+420733111111'))
+        const quotaRecordKey = createQuotaRecordKey(me.hashedNumber)
+
+        yield* _(redis.set(ImportContactsQuotaRecord)(quotaRecordKey, 0))
+
+        const contactsToImport = yield* _(
+          Effect.all([
+            // 0
+            generateKeysAndHasheForNumber('+420733333006'),
+            generateKeysAndHasheForNumber('+420733333007'),
+            generateKeysAndHasheForNumber('+420733333008'),
+            generateKeysAndHasheForNumber('+420733333009'),
+            generateKeysAndHasheForNumber('+420733333010'),
+            generateKeysAndHasheForNumber('+420733333011'),
+            generateKeysAndHasheForNumber('+420733333012'),
+            generateKeysAndHasheForNumber('+420733333013'),
+            generateKeysAndHasheForNumber('+420733333014'),
+            generateKeysAndHasheForNumber('+420733333015'),
+            // 10
+            generateKeysAndHasheForNumber('+420733333016'),
+            generateKeysAndHasheForNumber('+420733333017'),
+            generateKeysAndHasheForNumber('+420733333018'),
+            generateKeysAndHasheForNumber('+420733333019'),
+            generateKeysAndHasheForNumber('+420733333020'),
+            generateKeysAndHasheForNumber('+420733333021'),
+            generateKeysAndHasheForNumber('+420733333022'),
+            generateKeysAndHasheForNumber('+420733333023'),
+            generateKeysAndHasheForNumber('+420733333024'),
+            generateKeysAndHasheForNumber('+420733333025'),
+            // 20
+            generateKeysAndHasheForNumber('+420733333026'),
+          ])
+        )
+        const app = yield* _(NodeTestingApp)
+
+        const commonHeaders = Schema.decodeSync(CommonHeaders)({
+          'user-agent': 'Vexl/1 (1.0.0) ANDROID',
+        })
+
+        yield* _(
+          app.createUser(
+            {
+              body: {
+                firebaseToken: me.firebaseToken,
+              },
+              headers: commonHeaders,
+            },
+            HttpClientRequest.setHeaders(me.authHeaders)
+          )
+        )
+
+        const response = yield* _(
+          app.importContacts(
+            {
+              body: {contacts: contactsToImport.map((c) => c.hashedNumber)},
+            },
+            HttpClientRequest.setHeaders(me.authHeaders)
+          ),
+          Effect.either
+        )
+
+        expect(response._tag).toEqual('Left')
+        if (!Either.isLeft(response)) return
+        expect(
+          Schema.decodeUnknownEither(InitialImportContactsQuotaReachedError)(
+            response.left.error
+          )._tag
+        ).toEqual('Right')
+      })
+    )
+  })
+
+  it('Should be able to add amount of contacts specified in quota after initial import is done', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const redis = yield* _(RedisService)
+        const me = yield* _(generateKeysAndHasheForNumber('+420733333333'))
+        const quotaRecordKey = createQuotaRecordKey(me.hashedNumber)
+        const sql = yield* _(SqlClient.SqlClient)
+
+        yield* _(redis.set(ImportContactsQuotaRecord)(quotaRecordKey, 0))
+
+        const contactsToImport = yield* _(
+          Effect.all([
+            // 0
+            generateKeysAndHasheForNumber('+420733333006'),
+            generateKeysAndHasheForNumber('+420733333007'),
+            generateKeysAndHasheForNumber('+420733333008'),
+            generateKeysAndHasheForNumber('+420733333009'),
+            generateKeysAndHasheForNumber('+420733333010'),
+            generateKeysAndHasheForNumber('+420733333011'),
+            generateKeysAndHasheForNumber('+420733333012'),
+            generateKeysAndHasheForNumber('+420733333013'),
+            generateKeysAndHasheForNumber('+420733333014'),
+            generateKeysAndHasheForNumber('+420733333015'),
+            // 10
+            generateKeysAndHasheForNumber('+420733333016'),
+            generateKeysAndHasheForNumber('+420733333017'),
+            generateKeysAndHasheForNumber('+420733333018'),
+            generateKeysAndHasheForNumber('+420733333019'),
+            generateKeysAndHasheForNumber('+420733333020'),
+            generateKeysAndHasheForNumber('+420733333021'),
+            generateKeysAndHasheForNumber('+420733333022'),
+            generateKeysAndHasheForNumber('+420733333023'),
+            generateKeysAndHasheForNumber('+420733333024'),
+            generateKeysAndHasheForNumber('+420733333025'),
+          ])
+        )
+        const app = yield* _(NodeTestingApp)
+
+        const commonHeaders = Schema.decodeSync(CommonHeaders)({
+          'user-agent': 'Vexl/1 (1.0.0) ANDROID',
+        })
+
+        yield* _(
+          app.createUser(
+            {
+              body: {
+                firebaseToken: me.firebaseToken,
+              },
+              headers: commonHeaders,
+            },
+            HttpClientRequest.setHeaders(me.authHeaders)
+          )
+        )
+
+        const initialImportDoneDefaultValue = yield* _(sql`
+          SELECT
+            initial_import_done
+          FROM
+            users
+          WHERE
+            public_key = ${me.authHeaders['public-key']}
+        `)
+
+        expect(initialImportDoneDefaultValue[0]).toHaveProperty(
+          'initialImportDone',
+          false
+        )
+
+        const response = yield* _(
+          app.importContacts(
+            {
+              body: {contacts: contactsToImport.map((c) => c.hashedNumber)},
+            },
+            HttpClientRequest.setHeaders(me.authHeaders)
+          ),
+          Effect.either
+        )
+
+        expect(response._tag).toEqual('Right')
+
+        const updatedImportDoneValue = yield* _(sql`
+          SELECT
+            initial_import_done
+          FROM
+            users
+          WHERE
+            public_key = ${me.authHeaders['public-key']}
+        `)
+
+        expect(updatedImportDoneValue[0]).toHaveProperty(
+          'initialImportDone',
+          true
+        )
+
+        const contactsToImportAfterInitialImport = yield* _(
+          Effect.all([
+            generateKeysAndHasheForNumber('+420733333027'),
+            generateKeysAndHasheForNumber('+420733333028'),
+            generateKeysAndHasheForNumber('+420733333029'),
+            generateKeysAndHasheForNumber('+420733333030'),
+            generateKeysAndHasheForNumber('+420733333031'),
+            generateKeysAndHasheForNumber('+420733333032'),
+            generateKeysAndHasheForNumber('+420733333033'),
+            generateKeysAndHasheForNumber('+420733333034'),
+            generateKeysAndHasheForNumber('+420733333035'),
+            generateKeysAndHasheForNumber('+420733333036'),
+          ])
+        )
+
+        const successResponse = yield* _(
+          app.importContacts(
+            {
+              body: {
+                contacts: contactsToImportAfterInitialImport.map(
+                  (c) => c.hashedNumber
+                ),
+              },
+            },
+            HttpClientRequest.setHeaders(me.authHeaders)
+          ),
+          Effect.either
+        )
+
+        expect(successResponse._tag).toEqual('Right')
+
+        const moreContactsToImportThatExceedQuota = yield* _(
+          Effect.all([
+            // 0
+            generateKeysAndHasheForNumber('+420733333037'),
+            generateKeysAndHasheForNumber('+420733333038'),
+            generateKeysAndHasheForNumber('+420733333039'),
+            generateKeysAndHasheForNumber('+420733333040'),
+            generateKeysAndHasheForNumber('+420733333041'),
+          ])
+        )
+
+        const failedResponse = yield* _(
+          app.importContacts(
+            {
+              body: {
+                contacts: moreContactsToImportThatExceedQuota.map(
+                  (c) => c.hashedNumber
+                ),
+              },
+            },
+            HttpClientRequest.setHeaders(me.authHeaders)
+          ),
+          Effect.either
+        )
+
+        expect(failedResponse._tag).toEqual('Left')
+        if (!Either.isLeft(failedResponse)) return
+        expect(
+          Schema.decodeUnknownEither(ImportContactsQuotaReachedError)(
+            failedResponse.left.error
+          )._tag
+        ).toEqual('Right')
+      })
+    )
+  })
+
+  it('Should not increase limit and meet quota when importing the same phone numbers again', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const redis = yield* _(RedisService)
+        const me = yield* _(generateKeysAndHasheForNumber('+420733444444'))
+        const quotaRecordKey = createQuotaRecordKey(me.hashedNumber)
+
+        yield* _(redis.set(ImportContactsQuotaRecord)(quotaRecordKey, 0))
+
+        const contactsToImport = yield* _(
+          Effect.all([generateKeysAndHasheForNumber('+420733333006')])
+        )
+        const app = yield* _(NodeTestingApp)
+
+        const commonHeaders = Schema.decodeSync(CommonHeaders)({
+          'user-agent': 'Vexl/1 (1.0.0) ANDROID',
+        })
+
+        yield* _(
+          app.createUser(
+            {
+              body: {
+                firebaseToken: me.firebaseToken,
+              },
+              headers: commonHeaders,
+            },
+            HttpClientRequest.setHeaders(me.authHeaders)
+          )
+        )
+
+        const response = yield* _(
+          app.importContacts(
+            {
+              body: {contacts: contactsToImport.map((c) => c.hashedNumber)},
+            },
+            HttpClientRequest.setHeaders(me.authHeaders)
+          ),
+          Effect.either
+        )
+
+        expect(response._tag).toEqual('Right')
+
+        const contactsToImportAfterInitialImport = yield* _(
+          Effect.all([
+            generateKeysAndHasheForNumber('+420733333027'),
+            generateKeysAndHasheForNumber('+420733333028'),
+            generateKeysAndHasheForNumber('+420733333029'),
+            generateKeysAndHasheForNumber('+420733333030'),
+            generateKeysAndHasheForNumber('+420733333031'),
+            generateKeysAndHasheForNumber('+420733333032'),
+            generateKeysAndHasheForNumber('+420733333033'),
+            generateKeysAndHasheForNumber('+420733333034'),
+            generateKeysAndHasheForNumber('+420733333035'),
+            generateKeysAndHasheForNumber('+420733333036'),
+          ])
+        )
+
+        const successResponse = yield* _(
+          app.importContacts(
+            {
+              body: {
+                contacts: contactsToImportAfterInitialImport.map(
+                  (c) => c.hashedNumber
+                ),
+              },
+            },
+            HttpClientRequest.setHeaders(me.authHeaders)
+          ),
+          Effect.either
+        )
+
+        expect(successResponse._tag).toEqual('Right')
+
+        const secondSuccessResponse = yield* _(
+          app.importContacts(
+            {
+              body: {
+                contacts: contactsToImportAfterInitialImport.map(
+                  (c) => c.hashedNumber
+                ),
+              },
+            },
+            HttpClientRequest.setHeaders(me.authHeaders)
+          ),
+          Effect.either
+        )
+
+        expect(secondSuccessResponse._tag).toEqual('Right')
       })
     )
   })

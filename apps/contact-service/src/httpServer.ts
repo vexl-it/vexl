@@ -24,6 +24,7 @@ import {reportGaguesLayer} from './metrics'
 import {fetchCommonConnections} from './routes/contacts/fetchCommonConnections'
 import {fetchMyContacts} from './routes/contacts/fetchMyContacts'
 import {importContacts} from './routes/contacts/importContacts'
+import {ImportContactsQuotaService} from './routes/contacts/importContactsQuotaService'
 import {checkUserExists} from './routes/user/checkUserExists'
 import {createUser} from './routes/user/createUser'
 import {deleteUser} from './routes/user/deleteUser'
@@ -54,6 +55,7 @@ const MainLive = Layer.mergeAll(
 ).pipe(
   Layer.provideMerge(FirebaseMessagingService.Live),
   Layer.provideMerge(ContactDbService.Live),
+  Layer.provideMerge(ImportContactsQuotaService.Live),
   Layer.provideMerge(UserDbService.Live),
   Layer.provideMerge(DbLayer),
   Layer.provideMerge(RedisService.layer(redisUrl)),

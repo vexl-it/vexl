@@ -148,7 +148,7 @@ export const finishLoginActionAtom = atom(
           Effect.fail(
             new UnknownClientError({
               message:
-                'Erro while parsing session data. Unable to normalize the session',
+                'Error while parsing session data. Unable to normalize the session',
               cause: e,
             })
           )

@@ -75,6 +75,14 @@ export const submitContactsActionAtom = atom(
       }),
       TE.match(
         (e) => {
+          if (e._tag === 'InitialImportContactsQuotaReachedError') {
+            Alert.alert(t('contacts.initialImportContactsQuotaReachedError'))
+            return false
+          }
+          if (e._tag === 'ImportContactsQuotaReachedError') {
+            Alert.alert(t('contacts.importContactsQuotaReachedError'))
+            return false
+          }
           if (e._tag !== 'NetworkError') {
             reportError('error', new Error('error while submitting contacts'), {
               e,

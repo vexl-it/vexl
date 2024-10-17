@@ -107,10 +107,6 @@ function CustomTabBar({
 
           return (
             <Stack key={options.tabBarLabel}>
-              <ContactsCountIndicator
-                isFocused={isFocused}
-                routeName={route.name}
-              />
               <Button
                 key={options.tabBarLabel}
                 testID={`@customTabBar/tab${route.name}`}
@@ -120,6 +116,10 @@ function CustomTabBar({
                 variant={isFocused ? 'secondary' : 'blackOnDark'}
                 size="small"
                 text={options.tabBarLabel}
+              />
+              <ContactsCountIndicator
+                isFocused={isFocused}
+                routeName={route.name}
               />
             </Stack>
           )

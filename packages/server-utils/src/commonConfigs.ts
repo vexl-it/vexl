@@ -82,3 +82,7 @@ export const metricsConfig = Config.option(
 export const internalServerPortConfig = Config.option(
   Config.number('INTERNAL_SERVER_PORT')
 )
+
+export const memoryDebugIntervalMsConfig = Config.option(
+  Config.number('MEMORY_DEBUG_INTERVAL_MS')
+)

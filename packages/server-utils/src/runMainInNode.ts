@@ -7,6 +7,7 @@ import {BatchSpanProcessor} from '@opentelemetry/sdk-trace-base'
 import {Effect, Layer, Logger} from 'effect'
 import {
   isRunningInProductionConfig,
+  memoryDebugIntervalMsConfig,
   metricsConfig,
   nodeEnvConfig,
   otlpTraceExporterUrlConfig,
@@ -14,6 +15,7 @@ import {
   serviceVersionConfig,
 } from './commonConfigs'
 import {devToolsLayer} from './devToolsLayer'
+import {makeMemoryDebugLayer} from './makeMemoryDebugLayer'
 
 const stringifyCircular = (
   obj: unknown,
@@ -57,6 +59,13 @@ const logger = isRunningInProductionConfig.pipe(
         : Logger.prettyLogger()
     )
   ),
+  Layer.unwrapEffect
+)
+
+const memoryDebugLayer = memoryDebugIntervalMsConfig.pipe(
+  Effect.flatten,
+  Effect.map((interval) => makeMemoryDebugLayer(interval)),
+  Effect.catchTag('NoSuchElementException', () => Effect.succeed(Layer.empty)),
   Layer.unwrapEffect
 )
 
@@ -119,6 +128,7 @@ export const runMainInNode: RunMain = (effect, options) => {
     effect.pipe(
       Effect.catchAll((error) => Effect.logFatal('Error', error)),
       Effect.catchAllDefect((error) => Effect.logFatal('Defect', error)),
+      Effect.provide(memoryDebugLayer),
       Effect.provide(NodeSdkLive),
       Effect.provide(devToolsLayer(nodeEnvConfig)),
       Effect.provide(logger)

@@ -15,7 +15,6 @@ import {
   CreateInboxResponseE,
   DeleteInboxRequestE,
   DeleteInboxResponseE,
-  InvalidChallengeError,
   LeaveChatRequestE,
   LeaveChatResponseE,
   NotificationServiceReadyQueryParams,
@@ -89,8 +88,7 @@ export const BlockInboxEndpoint = Api.put(
 
 export const RequestApprovalErrors = Schema.Union(
   ReceiverOfferInboxDoesNotExistError,
-  SenderUserInboxDoesNotExistError,
-  InvalidChallengeError
+  SenderUserInboxDoesNotExistError
 )
 
 export const RequestApprovalEndpoint = Api.post(

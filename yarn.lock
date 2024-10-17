@@ -4805,6 +4805,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@effect/platform@npm:^0.61.8":
+  version: 0.61.8
+  resolution: "@effect/platform@npm:0.61.8"
+  dependencies:
+    find-my-way-ts: ^0.1.5
+    multipasta: ^0.2.2
+  peerDependencies:
+    "@effect/schema": ^0.70.4
+    effect: ^3.6.3
+  checksum: c580c413ad559e908acd128149dc7228744616299ada452538f9ed2b880cb9b8a42ede17080b42242356dfd0b833a98ca9ffd367f41db6bf568a9f0dfb986500
+  languageName: node
+  linkType: hard
+
 "@effect/platform@npm:^0.62.3":
   version: 0.62.3
   resolution: "@effect/platform@npm:0.62.3"

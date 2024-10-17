@@ -17,6 +17,7 @@ import {
 import DbLayer from './db/layer'
 import {OfferDbService} from './db/OfferDbService'
 import {InternalServerLive} from './internalServer'
+import {reportMetricsLayer} from './metrics'
 import {createNewOffer} from './routes/createNewOffer'
 import {createPrivatePart} from './routes/createPrivatePart'
 import {deleteOffer} from './routes/deleteOffer'
@@ -46,6 +47,7 @@ export const app = RouterBuilder.make(OfferApiSpecification).pipe(
 )
 
 const MainLive = Layer.empty.pipe(
+  Layer.provideMerge(reportMetricsLayer),
   Layer.provideMerge(InternalServerLive),
   Layer.provideMerge(ServerCrypto.layer(cryptoConfig)),
   Layer.provideMerge(healthServerLayer({port: healthServerPortConfig})),

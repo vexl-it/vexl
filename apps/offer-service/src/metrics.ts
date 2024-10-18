@@ -138,7 +138,7 @@ export const reportTotalBuyOffersExpired = ({
   )
 
 const OffersStatsQueryResult = Schema.Struct({
-  countryPrefix: Schema.optional(CountryPrefixE),
+  countryPrefix: Schema.Union(CountryPrefixE, Schema.Null),
   buy: Schema.Int,
   sell: Schema.Int,
 })
@@ -208,11 +208,11 @@ export const reportMetricsLayer = Layer.effectDiscard(
         pipe(
           Array.map(listOfCountries, (one) => [
             reportTotalBuyOffers({
-              countryPrefix: one.countryPrefix,
+              countryPrefix: one.countryPrefix ?? undefined,
               value: one.buy,
             }),
             reportTotalSellOffers({
-              countryPrefix: one.countryPrefix,
+              countryPrefix: one.countryPrefix ?? undefined,
               value: one.sell,
             }),
           ]),
@@ -228,11 +228,11 @@ export const reportMetricsLayer = Layer.effectDiscard(
         pipe(
           Array.map(listOfCountries, (one) => [
             reportTotalBuyOffersExpired({
-              countryPrefix: one.countryPrefix,
+              countryPrefix: one.countryPrefix ?? undefined,
               value: one.buy,
             }),
             reportTotalSellOffersExpired({
-              countryPrefix: one.countryPrefix,
+              countryPrefix: one.countryPrefix ?? undefined,
               value: one.sell,
             }),
           ]),

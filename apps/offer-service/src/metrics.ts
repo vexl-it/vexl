@@ -155,12 +155,12 @@ const queryOffersStats = SqlClient.SqlClient.pipe(
             CASE
               WHEN offer_public.offer_type = 'BUY' THEN 1
             END
-          ) AS buy,
+          )::int AS buy,
           COUNT(
             CASE
               WHEN offer_public.offer_type = 'SELL' THEN 1
             END
-          ) AS sell
+          )::int AS sell
         FROM
           offer_public
         WHERE
@@ -184,12 +184,12 @@ const queryExpiredOffersStats = SqlClient.SqlClient.pipe(
             CASE
               WHEN offer_public.offer_type = 'BUY' THEN 1
             END
-          ) AS buy,
+          )::int AS buy,
           COUNT(
             CASE
               WHEN offer_public.offer_type = 'SELL' THEN 1
             END
-          ) AS sell
+          )::int AS sell
         FROM
           offer_public
         WHERE

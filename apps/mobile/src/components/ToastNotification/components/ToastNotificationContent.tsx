@@ -28,7 +28,7 @@ function ToastNotificationContent({
       <Animated.View entering={FadeInUp} exiting={FadeOutUp}>
         <XStack
           ai="center"
-          jc="space-between"
+          jc={showCloseButton ? 'space-between' : undefined}
           space="$2"
           px="$2"
           py="$2"
@@ -44,9 +44,11 @@ function ToastNotificationContent({
               source={icon}
             />
           )}
-          <Text flexShrink={1} col="$black">
-            {text}
-          </Text>
+          <Stack f={1} alignItems="center">
+            <Text flexShrink={1} col="$black">
+              {text}
+            </Text>
+          </Stack>
           {!!showCloseButton && (
             <TouchableOpacity
               onPress={() => {

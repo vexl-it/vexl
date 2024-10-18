@@ -138,7 +138,7 @@ export const reportTotalBuyOffersExpired = ({
   )
 
 const OffersStatsQueryResult = Schema.Struct({
-  countryPrefix: CountryPrefixE,
+  countryPrefix: Schema.optional(CountryPrefixE),
   buy: Schema.Int,
   sell: Schema.Int,
 })

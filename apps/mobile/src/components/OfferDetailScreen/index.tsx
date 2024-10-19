@@ -2,6 +2,7 @@ import {LinearGradient} from 'expo-linear-gradient'
 import {isSome} from 'fp-ts/Option'
 import {useSetAtom} from 'jotai'
 import React, {useEffect} from 'react'
+import {Platform} from 'react-native'
 import Animated, {
   Extrapolation,
   interpolate,
@@ -115,6 +116,9 @@ function OfferDetailScreen({
                 <Title offer={offer.value} />
                 <Animated.ScrollView
                   overScrollMode="always"
+                  contentContainerStyle={{
+                    paddingBottom: Platform.OS === 'ios' ? MAP_SIZE : 0,
+                  }}
                   style={{
                     backgroundColor: getTokens().color.black.val,
                   }}

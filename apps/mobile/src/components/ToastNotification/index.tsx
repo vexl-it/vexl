@@ -8,14 +8,12 @@ function ToastNotification(): JSX.Element {
   const [state, setState] = useAtom(toastNotificationAtom)
 
   useEffect(() => {
-    if (state) {
-      const timeout = setTimeout(() => {
-        setState(null)
-      }, state?.hideAfterMillis ?? 1000)
+    const timeout = setTimeout(() => {
+      setState({...state, visible: false})
+    }, state?.hideAfterMillis ?? 1000)
 
-      return () => {
-        clearTimeout(timeout)
-      }
+    return () => {
+      clearTimeout(timeout)
     }
   }, [setState, state])
 
@@ -29,7 +27,7 @@ function ToastNotification(): JSX.Element {
       right={0}
       {...(state?.position === 'bottom' ? {bottom: -10} : {top: -10})}
     >
-      {!!state && <ToastNotificationContent {...state} />}
+      {state.visible ? <ToastNotificationContent {...state} /> : <></>}
     </Stack>
   )
 }

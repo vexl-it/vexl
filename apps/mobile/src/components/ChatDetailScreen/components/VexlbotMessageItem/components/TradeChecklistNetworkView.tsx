@@ -62,6 +62,7 @@ function TradeChecklistNetworkView(): JSX.Element | null {
                 networkDataToDisplay.networkData.btcAddress ?? ''
               )
               setToastNotification({
+                visible: true,
                 text: t('common.copied'),
                 icon: checkIconSvg,
               })

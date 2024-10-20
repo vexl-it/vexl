@@ -220,6 +220,7 @@ export const contactSelectMolecule = molecule((_, getScope) => {
         T.map((result) => {
           if (result) {
             set(toastNotificationAtom, {
+              visible: true,
               text: t('contacts.contactsSubmitted'),
               icon: checkIconSvg,
               hideAfterMillis: 2000,

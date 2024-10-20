@@ -33,6 +33,8 @@ import RerequestInfo from './RerequestInfo'
 import Title from './Title'
 
 const SCROLL_EXTRA_OFFSET = 200
+const EXTRA_MARGIN = 70
+const BUTTON_HEIGHT_PLUS_EXTRA_MARGIN = 60 + EXTRA_MARGIN
 
 function ContentContainer({
   mapIsVisible,
@@ -135,17 +137,20 @@ function OfferInfo({
 
   useEffect(() => {
     setToastNotification({
+      visible: true,
       text: t(`offer.requestStatus.${requestState}`),
       icon: infoSvg,
       iconFill: getTokens().color.black.val,
       showCloseButton: true,
       hideAfterMillis: 3000,
+      position: mapIsVisible ? 'top' : 'bottom',
+      bottomMargin: mapIsVisible ? 0 : BUTTON_HEIGHT_PLUS_EXTRA_MARGIN,
     })
 
     return () => {
-      setToastNotification(null)
+      setToastNotification((prev) => ({...prev, visible: false}))
     }
-  }, [requestState, setToastNotification, t])
+  }, [mapIsVisible, requestState, setToastNotification, t])
 
   return (
     <Stack f={1} mx="$2" my="$4">

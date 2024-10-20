@@ -52,6 +52,7 @@ function ReportIssue(): JSX.Element {
 
   const toastContent: ToastNotificationState = useMemo(
     () => ({
+      visible: true,
       text: t('common.copied'),
       icon: checkIconSvg,
     }),

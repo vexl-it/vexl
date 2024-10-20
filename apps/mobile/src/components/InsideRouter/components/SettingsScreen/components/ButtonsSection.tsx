@@ -179,15 +179,6 @@ function ButtonsSection(): JSX.Element {
             children: <ContactsImportedTitle />,
           },
           {
-            testID: '@buttonsSection/notificationPreferencesButton',
-            text: t('notifications.preferences.screenTitle'),
-            icon: notificationsIconSvg,
-            navigatesFurther: true,
-            onPress: () => {
-              navigation.navigate('NotificationSettings')
-            },
-          },
-          {
             testID: '@buttonsSection/allowScreenshotsButton',
             text: t('settings.items.allowScreenshots'),
             icon: imageIconSvg,
@@ -195,6 +186,15 @@ function ButtonsSection(): JSX.Element {
             children: <AllowScreenshots />,
             // not working correctly for iOS 17 and above
             hidden: isUsingIos17AndAbove(),
+          },
+          {
+            testID: '@buttonsSection/notificationPreferencesButton',
+            text: t('notifications.preferences.screenTitle'),
+            icon: notificationsIconSvg,
+            navigatesFurther: true,
+            onPress: () => {
+              navigation.navigate('NotificationSettings')
+            },
           },
         ],
         [
@@ -346,7 +346,7 @@ function ButtonsSection(): JSX.Element {
             {group.map((item, itemIndex) => (
               <Fragment key={itemIndex}>
                 {!!item && <Item {...item} />}
-                {itemIndex !== group.length - 1 && (
+                {itemIndex !== group.length - 1 && !item?.hidden && (
                   <Stack h={2} bg="$grey" als="stretch" ml="$7" />
                 )}
               </Fragment>

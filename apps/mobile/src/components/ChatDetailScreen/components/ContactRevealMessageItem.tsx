@@ -50,6 +50,7 @@ function RevealedContactMessageItem({
       onCopyToClipboardPress={() => {
         Clipboard.setString(fullPhoneNumber ?? '')
         setToastNotification({
+          visible: true,
           text: t('common.copied'),
           icon: checkIconSvg,
         })

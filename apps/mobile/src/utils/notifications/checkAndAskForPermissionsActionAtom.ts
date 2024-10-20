@@ -131,6 +131,7 @@ const checkNotificationPermissionsAndAskIfPossibleActionAtom = atom(
           Effect.flatMap(() =>
             Effect.sync(() => {
               set(toastNotificationAtom, {
+                visible: true,
                 text: t('notificationPrompt.successMessage'),
               })
             })

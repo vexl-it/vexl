@@ -1,6 +1,11 @@
 import {useSetAtom} from 'jotai'
 import {TouchableOpacity, useWindowDimensions} from 'react-native'
-import Animated, {FadeInUp, FadeOutUp} from 'react-native-reanimated'
+import Animated, {
+  FadeInDown,
+  FadeInUp,
+  FadeOutDown,
+  FadeOutUp,
+} from 'react-native-reanimated'
 import {Stack, Text, XStack, getTokens} from 'tamagui'
 import SvgImage from '../../Image'
 import closeSvg from '../../images/closeSvg'
@@ -13,6 +18,8 @@ function ToastNotificationContent({
   text,
   showCloseButton,
   position,
+  bottomMargin,
+  topMargin,
 }: ToastNotificationState): JSX.Element | null {
   const {height} = useWindowDimensions()
   const setToastNotification = useSetAtom(toastNotificationAtom)
@@ -22,10 +29,13 @@ function ToastNotificationContent({
       f={1}
       px="$2"
       {...(position === 'bottom'
-        ? {bottom: height * 0.1}
-        : {top: height * 0.1})}
+        ? {bottom: bottomMargin ?? height * 0.1}
+        : {top: topMargin ?? height * 0.1})}
     >
-      <Animated.View entering={FadeInUp} exiting={FadeOutUp}>
+      <Animated.View
+        entering={position === 'bottom' ? FadeInDown : FadeInUp}
+        exiting={position === 'bottom' ? FadeOutDown : FadeOutUp}
+      >
         <XStack
           ai="center"
           jc={showCloseButton ? 'space-between' : undefined}
@@ -52,7 +62,7 @@ function ToastNotificationContent({
           {!!showCloseButton && (
             <TouchableOpacity
               onPress={() => {
-                setToastNotification(null)
+                setToastNotification((prev) => ({...prev, visible: false}))
               }}
             >
               <SvgImage

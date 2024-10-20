@@ -159,6 +159,7 @@ function TextMessage({
     if (messageItem.type !== 'message') return
     Clipboard.setString(messageItem.message.message.text)
     setToastNotification({
+      visible: true,
       text: t('common.copied'),
       icon: checkIconSvg,
     })

@@ -5,6 +5,10 @@ import {Context, Effect, Layer} from 'effect'
 import {type ContactRecord} from './domain'
 import {createDeleteContactsByHashFrom} from './queries/createDeleteContactsByHashFrom'
 import {
+  createDeleteContactsByHashFromAndHashTo,
+  type DeleteContactsByHashFromAndHashToQuery,
+} from './queries/createDeleteContactsByHashFromAndHashTo'
+import {
   createFindCommonFriendsByOwnerHashAndPublicKeys,
   type FindCommonFriendsParams,
   type FindCommonFriendsResult,
@@ -24,6 +28,10 @@ import {
 export interface ContactDbOperations {
   deleteContactsByHashFrom: (
     hash: HashedPhoneNumber
+  ) => Effect.Effect<void, UnexpectedServerError>
+
+  deleteContactsByHashFromAndHashTo: (
+    args: DeleteContactsByHashFromAndHashToQuery
   ) => Effect.Effect<void, UnexpectedServerError>
 
   findContactsByHashFrom: (
@@ -59,6 +67,9 @@ export class ContactDbService extends Context.Tag('ContactDbService')<
     ContactDbService,
     Effect.gen(function* (_) {
       const deleteContactsByHashFrom = yield* _(createDeleteContactsByHashFrom)
+      const deleteContactsByHashFromAndHashTo = yield* _(
+        createDeleteContactsByHashFromAndHashTo
+      )
       const findContactsByHashFrom = yield* _(createFindContactsByHashFrom)
       const insertContact = yield* _(createInsertContact)
       const findFirstLevelContactsPublicKeysByHashFrom = yield* _(
@@ -75,6 +86,7 @@ export class ContactDbService extends Context.Tag('ContactDbService')<
 
       return {
         deleteContactsByHashFrom,
+        deleteContactsByHashFromAndHashTo,
         findContactsByHashFrom,
         insertContact,
         findFirstLevelContactsPublicKeysByHashFrom,

@@ -1035,6 +1035,8 @@
   "contacts.youHaveNotAllowedAccessToYourContacts": "U heeft ons geen toegang gegeven tot uw contacten.",
   "contacts.didYouChangeYourMind": "Heb je van gedachten veranderd?",
   "contacts.contactsSubmitted": "Contacten ingediend",
+  "contacts.initialImportContactsQuotaReachedError": "You have reached the limit of contacts that can be imported when creating an account. Please select fewer contacts in settings and try again.",
+  "contacts.importContactsQuotaReachedError": "You have reached the limit of contacts that you can import today. Please try again later.",
   "migrations.migrating": "Bijwerken Vexl",
   "migration.contacts.problemTitle": "Problemen met migratie",
   "migration.contacts.problemText": "Er waren verschillen tijdens het migreren van contacten. Het oude aantal contacten: {{oldSize}}, nieuw aantal contacten {{newSize}}. We proberen deze contacten te herstellen en op te slaan. Controleer de geïmporteerde contacten en zorg ervoor dat alle contacten goed geïmporteerd zijn!",

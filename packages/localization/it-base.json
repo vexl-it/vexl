@@ -1035,6 +1035,8 @@
   "contacts.youHaveNotAllowedAccessToYourContacts": "Non ci hai dato il permesso di accedere ai tuoi contatti.",
   "contacts.didYouChangeYourMind": "Hai cambiato idea?",
   "contacts.contactsSubmitted": "Contatti inviati",
+  "contacts.initialImportContactsQuotaReachedError": "You have reached the limit of contacts that can be imported when creating an account. Please select fewer contacts in settings and try again.",
+  "contacts.importContactsQuotaReachedError": "You have reached the limit of contacts that you can import today. Please try again later.",
   "migrations.migrating": "Aggiornamento vexl",
   "migration.contacts.problemTitle": "Problema con la migrazione",
   "migration.contacts.problemText": "C'era una discrepanza durante la migrazione dei contatti. Il precedente numero di contatti è {{oldSize}}, il nuovo numero di contatti è {{newSize}}. Stiamo cercando di recuperare e salvare questi contatti. Controlla i contatti importati e assicurarsi che tutti i contatti siano importati correttamente!",

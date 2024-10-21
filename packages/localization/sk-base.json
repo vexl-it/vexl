@@ -1035,6 +1035,8 @@
   "contacts.youHaveNotAllowedAccessToYourContacts": "Nepovolil si nám prístup k tvojim kontaktom.",
   "contacts.didYouChangeYourMind": "Rozmyslel si si to?",
   "contacts.contactsSubmitted": "Predložené kontakty",
+  "contacts.initialImportContactsQuotaReachedError": "You have reached the limit of contacts that can be imported when creating an account. Please select fewer contacts in settings and try again.",
+  "contacts.importContactsQuotaReachedError": "You have reached the limit of contacts that you can import today. Please try again later.",
   "migrations.migrating": "Aktualizácia vexl",
   "migration.contacts.problemTitle": "Problém s migráciou",
   "migration.contacts.problemText": "Pri migrácii kontaktov sa vyskytli nezrovnalosti. Starý počet kontaktov:{{oldSize}} nový počet kontaktov{{newSize}}. Snažíme sa tieto kontakty obnoviť a uložiť. Skontrolujte importované kontakty a uistite sa, že sú všetky kontakty importované správne!",

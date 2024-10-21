@@ -60,6 +60,7 @@ function TradeChecklistAmountView(): JSX.Element | null {
 
   const toastContent: ToastNotificationState = useMemo(
     () => ({
+      visible: true,
       text: t('common.copied'),
       icon: checkIconSvg,
     }),

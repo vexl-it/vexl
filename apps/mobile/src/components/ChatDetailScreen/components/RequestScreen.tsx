@@ -98,6 +98,7 @@ function RequestScreen(): JSX.Element {
   useEffect(() => {
     if (previousCommunicationInfoMessage) {
       setToastNotification({
+        visible: true,
         text: previousCommunicationInfoMessage,
         icon: infoSvg,
         iconFill: getTokens().color.black.val,
@@ -107,7 +108,7 @@ function RequestScreen(): JSX.Element {
     }
 
     return () => {
-      setToastNotification(null)
+      setToastNotification((prev) => ({...prev, visible: false}))
     }
   }, [previousCommunicationInfoMessage, requestState, setToastNotification, t])
 

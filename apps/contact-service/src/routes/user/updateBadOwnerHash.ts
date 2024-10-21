@@ -102,6 +102,13 @@ export const updateBadOwnerHash = Handler.make(
           })
         )
 
+        yield* _(
+          contactDb.deleteContactsByHashFromAndHashTo({
+            hashFrom: req.body.newData.hash,
+            hashTo: req.body.newData.hash,
+          })
+        )
+
         return {
           updated: true,
         }

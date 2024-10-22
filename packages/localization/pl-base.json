@@ -1035,6 +1035,8 @@
   "contacts.youHaveNotAllowedAccessToYourContacts": "Nie pozwoliłeś nam na dostęp do swoich kontaktów.",
   "contacts.didYouChangeYourMind": "Zmieniłeś zdanie?",
   "contacts.contactsSubmitted": "Kontakty wysłane",
+  "contacts.initialImportContactsQuotaReachedError": "You have reached the limit of contacts that can be imported when creating an account. Please select fewer contacts in settings and try again.",
+  "contacts.importContactsQuotaReachedError": "You have reached the limit of contacts that you can import today. Please try again later.",
   "migrations.migrating": "Aktualizowanie vexl",
   "migration.contacts.problemTitle": "Problem z migracją",
   "migration.contacts.problemText": "Podczas migracji kontaktów wystąpiły rozbieżności. Stara liczba kontaktów: {{oldSize}}, nowa liczba kontaktów {{newSize}}. Próbujemy odzyskać i zapisać te kontakty. Sprawdź zaimportowane kontakty i upewnij się, że wszystkie kontakty są prawidłowo zaimportowane!",

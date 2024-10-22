@@ -1035,6 +1035,8 @@
   "contacts.youHaveNotAllowedAccessToYourContacts": "Не ни позволихте да получим достъп до вашите контакти.",
   "contacts.didYouChangeYourMind": "Променихте ли намеренията си?",
   "contacts.contactsSubmitted": "Контактите бяха предоставени",
+  "contacts.initialImportContactsQuotaReachedError": "You have reached the limit of contacts that can be imported when creating an account. Please select fewer contacts in settings and try again.",
+  "contacts.importContactsQuotaReachedError": "You have reached the limit of contacts that you can import today. Please try again later.",
   "migrations.migrating": "Актуализира vexl",
   "migration.contacts.problemTitle": "Проблем с миграцията",
   "migration.contacts.problemText": "Има разминавания при мигриране на контактите. Стар брой контакти: {{oldSize}}, нов брой контакти {{newSize}}. Опитваме се да възстановим и запазим тези контакти. Моля проверете импортираните контакти и се уверете, че всички контакти са импортирани правилно!",

@@ -1035,6 +1035,8 @@
   "contacts.youHaveNotAllowedAccessToYourContacts": "Nepovolili jste nám přístup k vašim kontaktům.",
   "contacts.didYouChangeYourMind": "Změnil jsi názor?",
   "contacts.contactsSubmitted": "Kontakty nastaveny",
+  "contacts.initialImportContactsQuotaReachedError": "You have reached the limit of contacts that can be imported when creating an account. Please select fewer contacts in settings and try again.",
+  "contacts.importContactsQuotaReachedError": "You have reached the limit of contacts that you can import today. Please try again later.",
   "migrations.migrating": "Aktualizace Vexlu",
   "migration.contacts.problemTitle": "Problém s migrací",
   "migration.contacts.problemText": "Při migraci kontaktů došlo k problému. Starý počet kontaktů: {{oldSize}}, nový počet kontaktů {{newSize}}. Snažíme se obnovit a uložit tyto kontakty. Zkontrolujte prosím importované kontakty a ujistěte se, že všechny kontakty jsou importovány správně!",

@@ -22,6 +22,8 @@ import {
 import {updateTradeChecklistState} from '../../../state/tradeChecklist/utils'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
 import reportError from '../../../utils/reportError'
+import showErrorAlert from '../../../utils/showErrorAlert'
+import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 import {askAreYouSureActionAtom} from '../../AreYouSureDialog'
 import {loadingOverlayDisplayedAtom} from '../../LoadingOverlayProvider'
 
@@ -190,6 +192,7 @@ export const addMeetingLocationActionAtom = atom(
 export const submitTradeChecklistUpdatesActionAtom = atom(
   null,
   (get, set): T.Task<boolean> => {
+    const {t} = get(translationAtom)
     const submitTradeChecklistUpdateAtom =
       createSubmitChecklistUpdateActionAtom(chatWithMessagesAtom)
 
@@ -202,6 +205,13 @@ export const submitTradeChecklistUpdatesActionAtom = atom(
       set(submitTradeChecklistUpdateAtom, get(updatesToBeSentAtom)),
       TE.match(
         (e) => {
+          showErrorAlert({
+            title:
+              toCommonErrorMessage(e, get(translationAtom).t) ??
+              t('common.unknownError'),
+            error: e,
+          })
+
           reportError(
             'error',
             new Error('Error submitting trade checklist update'),

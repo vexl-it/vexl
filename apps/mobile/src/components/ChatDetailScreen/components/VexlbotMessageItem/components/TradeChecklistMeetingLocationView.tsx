@@ -9,6 +9,7 @@ import {
 import Button from '../../../../Button'
 import termsIconSvg from '../../../../InsideRouter/components/SettingsScreen/images/termsIconSvg'
 import {chatMolecule} from '../../../atoms'
+import TradeChecklistMessageWrapper from './TradeChecklistMessageWrapper'
 import VexlbotBubble from './VexlbotBubble'
 
 function getTextForVexlbot({
@@ -87,35 +88,37 @@ export default function TradeChecklistMeetingLocationView(): JSX.Element | null 
     MeetingLocation.getPendingSuggestion(meetingLocationData)
   if (pendingSuggestion) {
     return (
-      <VexlbotBubble
-        status="pending"
-        text={getTextForVexlbot({
-          by: pendingSuggestion.by,
-          address: pendingSuggestion.data.data.address,
-          note: pendingSuggestion.data.data.note,
-          otherSideUsername: otherSideData.userName,
-          t,
-        })}
-      >
-        {pendingSuggestion.by === 'them' && (
-          <Button
-            onPress={() => {
-              const chat = store.get(chatAtom)
-              navigation.navigate('TradeChecklistFlow', {
-                chatId: chat.id,
-                inboxKey: chat.inbox.privateKey.publicKeyPemBase64,
-                screen: 'LocationMapPreview',
-                params: {
-                  selectedLocation: pendingSuggestion.data.data,
-                },
-              })
-            }}
-            variant="secondary"
-            size="small"
-            text={t('common.respond')}
-          />
-        )}
-      </VexlbotBubble>
+      <TradeChecklistMessageWrapper>
+        <VexlbotBubble
+          status="pending"
+          text={getTextForVexlbot({
+            by: pendingSuggestion.by,
+            address: pendingSuggestion.data.data.address,
+            note: pendingSuggestion.data.data.note,
+            otherSideUsername: otherSideData.userName,
+            t,
+          })}
+        >
+          {pendingSuggestion.by === 'them' && (
+            <Button
+              onPress={() => {
+                const chat = store.get(chatAtom)
+                navigation.navigate('TradeChecklistFlow', {
+                  chatId: chat.id,
+                  inboxKey: chat.inbox.privateKey.publicKeyPemBase64,
+                  screen: 'LocationMapPreview',
+                  params: {
+                    selectedLocation: pendingSuggestion.data.data,
+                  },
+                })
+              }}
+              variant="secondary"
+              size="small"
+              text={t('common.respond')}
+            />
+          )}
+        </VexlbotBubble>
+      </TradeChecklistMessageWrapper>
     )
   }
 

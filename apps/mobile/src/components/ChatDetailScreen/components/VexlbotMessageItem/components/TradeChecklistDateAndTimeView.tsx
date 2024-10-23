@@ -6,6 +6,7 @@ import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import Button from '../../../../Button'
 import termsIconSvg from '../../../../InsideRouter/components/SettingsScreen/images/termsIconSvg'
 import {chatMolecule} from '../../../atoms'
+import TradeChecklistMessageWrapper from './TradeChecklistMessageWrapper'
 import VexlbotBubble from './VexlbotBubble'
 
 export default function TradeChecklistDateAndTimeView(): JSX.Element | null {
@@ -25,22 +26,24 @@ export default function TradeChecklistDateAndTimeView(): JSX.Element | null {
   const pick = dateAndTime.getPick(dateAndTimeData)
   if (pick) {
     return (
-      <VexlbotBubble
-        status="accepted"
-        text={`${t('vexlbot.yourMeetingIsOn')}\n${dateAndTime.toStringWithTime(
-          pick.pick.dateTime
-        )}`}
-      >
-        <Button
-          onPress={() => {
-            void addEventToCalendar()()
-          }}
-          beforeIcon={termsIconSvg}
-          size="small"
-          variant="primary"
-          text={t('vexlbot.addEventToCalendar')}
-        />
-      </VexlbotBubble>
+      <TradeChecklistMessageWrapper>
+        <VexlbotBubble
+          status="accepted"
+          text={`${t('vexlbot.yourMeetingIsOn')}\n${dateAndTime.toStringWithTime(
+            pick.pick.dateTime
+          )}`}
+        >
+          <Button
+            onPress={() => {
+              void addEventToCalendar()()
+            }}
+            beforeIcon={termsIconSvg}
+            size="small"
+            variant="primary"
+            text={t('vexlbot.addEventToCalendar')}
+          />
+        </VexlbotBubble>
+      </TradeChecklistMessageWrapper>
     )
   }
 

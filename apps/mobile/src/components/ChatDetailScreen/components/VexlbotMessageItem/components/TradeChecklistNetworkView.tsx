@@ -9,6 +9,7 @@ import {toastNotificationAtom} from '../../../../ToastNotification/atom'
 import {chatMolecule} from '../../../atoms'
 import copySvg from '../../../images/copySvg'
 import checkIconSvg from '../../images/checkIconSvg'
+import TradeChecklistMessageWrapper from './TradeChecklistMessageWrapper'
 import VexlbotBubble from './VexlbotBubble'
 
 function TradeChecklistNetworkView(): JSX.Element | null {
@@ -23,58 +24,60 @@ function TradeChecklistNetworkView(): JSX.Element | null {
   if (!networkDataToDisplay) return null
 
   return (
-    <VexlbotBubble
-      text={
-        networkDataToDisplay.networkData.btcNetwork === 'LIGHTING'
-          ? t(
-              networkDataToDisplay.by === 'me'
-                ? 'vexlbot.setNetworkToLightningByMe'
-                : 'vexlbot.setNetworkToLightningByThem',
-              {
-                username: otherSideData.userName,
-              }
-            )
-          : networkDataToDisplay.networkData.btcAddress
-            ? t('vexlbot.setNetworkToOnChainWithBtcAddress', {
-                btcAddress: networkDataToDisplay.networkData.btcAddress,
-                username:
-                  networkDataToDisplay.by === 'me'
-                    ? t('common.you')
-                    : otherSideData.userName,
-              })
-            : `${t('vexlbot.setNetworkToOnChainNoBtcAddress', {
-                username:
-                  networkDataToDisplay.by === 'me'
-                    ? `${t('common.you')}`
-                    : otherSideData.userName,
-              })} ${
+    <TradeChecklistMessageWrapper>
+      <VexlbotBubble
+        text={
+          networkDataToDisplay.networkData.btcNetwork === 'LIGHTING'
+            ? t(
                 networkDataToDisplay.by === 'me'
-                  ? t('vexlbot.dontForgetToGenerateAddress')
-                  : t('vexlbot.btcAddressWillBeProvided')
-              }`
-      }
-    >
-      {networkDataToDisplay.networkData.btcNetwork === 'ON_CHAIN' &&
-        !!networkDataToDisplay.networkData.btcAddress && (
-          <Button
-            onPress={() => {
-              Clipboard.setString(
-                networkDataToDisplay.networkData.btcAddress ?? ''
+                  ? 'vexlbot.setNetworkToLightningByMe'
+                  : 'vexlbot.setNetworkToLightningByThem',
+                {
+                  username: otherSideData.userName,
+                }
               )
-              setToastNotification({
-                visible: true,
-                text: t('common.copied'),
-                icon: checkIconSvg,
-              })
-            }}
-            beforeIcon={copySvg}
-            text={t('vexlbot.btcAddress')}
-            size="small"
-            variant="primary"
-            iconFill={getTokens().color.main.val}
-          />
-        )}
-    </VexlbotBubble>
+            : networkDataToDisplay.networkData.btcAddress
+              ? t('vexlbot.setNetworkToOnChainWithBtcAddress', {
+                  btcAddress: networkDataToDisplay.networkData.btcAddress,
+                  username:
+                    networkDataToDisplay.by === 'me'
+                      ? t('common.you')
+                      : otherSideData.userName,
+                })
+              : `${t('vexlbot.setNetworkToOnChainNoBtcAddress', {
+                  username:
+                    networkDataToDisplay.by === 'me'
+                      ? `${t('common.you')}`
+                      : otherSideData.userName,
+                })} ${
+                  networkDataToDisplay.by === 'me'
+                    ? t('vexlbot.dontForgetToGenerateAddress')
+                    : t('vexlbot.btcAddressWillBeProvided')
+                }`
+        }
+      >
+        {networkDataToDisplay.networkData.btcNetwork === 'ON_CHAIN' &&
+          !!networkDataToDisplay.networkData.btcAddress && (
+            <Button
+              onPress={() => {
+                Clipboard.setString(
+                  networkDataToDisplay.networkData.btcAddress ?? ''
+                )
+                setToastNotification({
+                  visible: true,
+                  text: t('common.copied'),
+                  icon: checkIconSvg,
+                })
+              }}
+              beforeIcon={copySvg}
+              text={t('vexlbot.btcAddress')}
+              size="small"
+              variant="primary"
+              iconFill={getTokens().color.main.val}
+            />
+          )}
+      </VexlbotBubble>
+    </TradeChecklistMessageWrapper>
   )
 }
 

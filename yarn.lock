@@ -12869,6 +12869,7 @@ __metadata:
     "@opentelemetry/sdk-trace-web": ^1.23.0
     "@types/text-encoding": ^0
     "@vexl-next/cryptography": 0.0.0
+    "@vexl-next/esbuild": 0.0.0
     "@vexl-next/eslint-config": 0.0.0
     "@vexl-next/prettier-config": 0.0.0
     "@vexl-next/rest-api": 0.0.0

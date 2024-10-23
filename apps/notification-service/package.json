@@ -39,6 +39,7 @@
     "@opentelemetry/sdk-trace-node": "^1.23.0",
     "@opentelemetry/sdk-trace-web": "^1.23.0",
     "@vexl-next/cryptography": "0.0.0",
+    "@vexl-next/esbuild": "0.0.0",
     "@vexl-next/rest-api": "0.0.0",
     "@vexl-next/server-utils": "0.0.0",
     "dotenv": "^16.4.5",

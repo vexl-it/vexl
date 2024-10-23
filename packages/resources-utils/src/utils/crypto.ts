@@ -1,3 +1,4 @@
+import {Schema} from '@effect/schema'
 import * as crypto from '@vexl-next/cryptography'
 import {type KeyHolder} from '@vexl-next/cryptography'
 import {
@@ -5,23 +6,27 @@ import {
   type PrivateKeyPemBase64,
 } from '@vexl-next/cryptography/src/KeyHolder'
 import {toError, type BasicError} from '@vexl-next/domain/src/utility/errors'
+import {EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {createHash} from 'crypto'
 import * as E from 'fp-ts/Either'
+import {pipe} from 'fp-ts/lib/function'
 import * as TE from 'fp-ts/TaskEither'
-
 export type CryptoError = BasicError<'CryptoError'>
 
 export function ecdsaSign(
   privateKey: PrivateKeyHolder
-): (challenge: string) => E.Either<CryptoError, string> {
+): (challenge: string) => E.Either<CryptoError, EcdsaSignature> {
   return (challenge: string) =>
-    E.tryCatch(
-      () =>
-        crypto.ecdsa.ecdsaSign({
-          privateKey: privateKey.privateKeyPemBase64,
-          challenge,
-        }),
-      toError('CryptoError', 'Error while signing challenge')
+    pipe(
+      E.tryCatch(
+        () =>
+          crypto.ecdsa.ecdsaSign({
+            privateKey: privateKey.privateKeyPemBase64,
+            challenge,
+          }),
+        toError('CryptoError', 'Error while signing challenge')
+      ),
+      E.map(Schema.decodeSync(EcdsaSignature))
     )
 }
 

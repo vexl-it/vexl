@@ -9,7 +9,7 @@ import {
 } from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {ConnectionLevelE} from '@vexl-next/domain/src/general/offers'
 import {FcmTokenE} from '@vexl-next/domain/src/utility/FcmToken.brand'
-import {BooleanfromString} from '@vexl-next/generic-utils/src/effect-helpers/BooleanFromString'
+import {BooleanFromString} from '@vexl-next/generic-utils/src/effect-helpers/BooleanFromString'
 import {EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {z} from 'zod'
 import {PageRequestE, PageResponseE} from '../../Pagination.brand'
@@ -139,7 +139,7 @@ export type FetchCommonConnectionsResponse = Schema.Schema.Type<
 >
 
 export const CheckUserExistsRequest = Schema.Struct({
-  notifyExistingUserAboutLogin: BooleanfromString,
+  notifyExistingUserAboutLogin: BooleanFromString,
 })
 
 export const UserExistsResponse = Schema.Struct({

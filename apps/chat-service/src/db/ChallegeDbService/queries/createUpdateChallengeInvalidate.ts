@@ -11,7 +11,7 @@ export const createUpdateChallengeInvalidate = Effect.gen(function* (_) {
     SqlResolver.void('updateChallengeInvalidate', {
       Request: ChatChallengeE,
       execute: (params) => sql`
-        UPDATE challange
+        UPDATE challenge
         SET
           valid = FALSE
         WHERE

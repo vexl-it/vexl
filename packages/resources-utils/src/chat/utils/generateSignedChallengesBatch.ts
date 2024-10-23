@@ -5,8 +5,8 @@ import {
 import {toError, type BasicError} from '@vexl-next/domain/src/utility/errors'
 import {type ChatPrivateApi} from '@vexl-next/rest-api/src/services/chat'
 import {type SignedChallenge} from '@vexl-next/rest-api/src/services/chat/contracts'
-import * as A from 'fp-ts/Array'
 import * as O from 'fp-ts/Option'
+import * as RA from 'fp-ts/ReadonlyArray'
 import * as TE from 'fp-ts/TaskEither'
 import {flow, pipe} from 'fp-ts/function'
 import {type ExtractLeftTE} from '../../utils/ExtractLeft'
@@ -46,7 +46,7 @@ export function generateSignedChallengeBatch(
       TE.map((one) => one.challenges),
       TE.chainW(
         flow(
-          A.map((challenge) =>
+          RA.map((challenge) =>
             pipe(
               selectKeyPair(keyPairs)(challenge.publicKey),
               TE.fromOption(
@@ -68,10 +68,12 @@ export function generateSignedChallengeBatch(
               }))
             )
           ),
-          A.sequence(TE.ApplicativePar),
+          RA.sequence(TE.ApplicativePar),
           TE.mapLeft(toError('ErrorGeneratingSignedChallengeBatch'))
         )
-      )
+      ),
+      // Readonly workaround
+      TE.map((one) => [...one])
     )
   }
 }

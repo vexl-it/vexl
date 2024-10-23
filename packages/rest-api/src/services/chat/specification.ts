@@ -1,6 +1,7 @@
 import {Schema} from '@effect/schema'
 import {Api, ApiGroup} from 'effect-http'
 import {ServerSecurity} from '../../apiSecurity'
+import {CommonHeaders} from '../../commonHeaders'
 import {
   InboxDoesNotExistError,
   NotPermittedToSendMessageToTargetInboxError,
@@ -14,12 +15,16 @@ import {
   CancelApprovalResponseE,
   CreateChallengeRequestE,
   CreateChallengeResponseE,
+  CreateChallengesRequestE,
+  CreateChallengesResponseE,
   CreateInboxRequestE,
   CreateInboxResponseE,
   DeleteInboxesRequestE,
   DeleteInboxesResponseE,
   DeleteInboxRequestE,
   DeleteInboxResponseE,
+  DeletePulledMessagesRequestE,
+  DeletePulledMessagesResponseE,
   InvalidChallengeError,
   LeaveChatRequestE,
   LeaveChatResponseE,
@@ -59,10 +64,14 @@ export const CreateInboxEndpoint = Api.post(
   Api.setSecurity(ServerSecurity),
   Api.setResponseStatus(200 as const),
   Api.setRequestBody(CreateInboxRequestE),
+  Api.setRequestHeaders(CommonHeaders),
   Api.setResponseBody(CreateInboxResponseE)
 )
 
-export const DeleteInboxErrors = Schema.Union(InvalidChallengeError)
+export const DeleteInboxErrors = Schema.Union(
+  InvalidChallengeError,
+  InboxDoesNotExistError
+)
 export type DeleteInboxErrors = Schema.Schema.Type<typeof DeleteInboxErrors>
 
 export const DeleteInboxEndpoint = Api.delete(
@@ -93,8 +102,8 @@ export const DeletePulledMessagesEndpoint = Api.delete(
 ).pipe(
   Api.setSecurity(ServerSecurity),
   Api.setResponseStatus(200 as const),
-  Api.setRequestBody(DeleteInboxRequestE),
-  Api.setResponseBody(DeleteInboxResponseE),
+  Api.setRequestBody(DeletePulledMessagesRequestE),
+  Api.setResponseBody(DeletePulledMessagesResponseE),
   Api.addResponse({
     status: 400,
     body: DeletePulledMessagesErrors,
@@ -258,7 +267,6 @@ export const SendMessageEndpoint = Api.post(
 ).pipe(
   Api.setSecurity(ServerSecurity),
   Api.setResponseStatus(200 as const),
-
   Api.setRequestBody(SendMessageRequestE),
   Api.setResponseBody(SendMessageResponseE),
   Api.addResponse({
@@ -296,8 +304,8 @@ export const CreateChallengeBatchEndpoint = Api.post(
 ).pipe(
   Api.setSecurity(ServerSecurity),
   Api.setResponseStatus(200 as const),
-  Api.setRequestBody(CreateChallengeRequestE),
-  Api.setResponseBody(CreateChallengeResponseE)
+  Api.setRequestBody(CreateChallengesRequestE),
+  Api.setResponseBody(CreateChallengesResponseE)
 )
 
 const InboxesApiGroup = ApiGroup.make('Inboxes').pipe(
@@ -309,7 +317,8 @@ const InboxesApiGroup = ApiGroup.make('Inboxes').pipe(
   ApiGroup.addEndpoint(CancelRequestApprovalEndpoint),
   ApiGroup.addEndpoint(ApproveRequestEndpoint),
   ApiGroup.addEndpoint(DeleteInboxesEndpoint),
-  ApiGroup.addEndpoint(LeaveChatEndpoint)
+  ApiGroup.addEndpoint(LeaveChatEndpoint),
+  ApiGroup.addEndpoint(DeletePulledMessagesEndpoint)
 )
 
 const MessagesApiGroup = ApiGroup.make('Messages').pipe(

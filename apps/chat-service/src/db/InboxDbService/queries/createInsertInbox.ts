@@ -1,12 +1,16 @@
 import {Schema} from '@effect/schema'
 import {SqlResolver} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
-import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
+import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
+import {PlatformNameE} from '@vexl-next/rest-api/src/PlatformName'
 import {Effect, flow} from 'effect'
+import {PublicKeyHashed} from '../../domain'
 
 export const InsertInboxParams = Schema.Struct({
-  publicKey: PublicKeyPemBase64E,
+  publicKey: PublicKeyHashed,
+  platform: Schema.optionalWith(PlatformNameE, {as: 'Option'}),
+  clientVersion: Schema.optionalWith(VersionCode, {as: 'Option'}),
 })
 export type InsertInboxParams = Schema.Schema.Type<typeof InsertInboxParams>
 
@@ -18,7 +22,13 @@ export const createInsertInbox = Effect.gen(function* (_) {
       Request: InsertInboxParams,
       execute: (params) => sql`
         INSERT INTO
-          inbox ${sql.insert(params)}
+          inbox ${sql.insert(
+          params.map((one) => ({
+            ...one,
+            platform: one.platform ?? null,
+            clientVersion: one.clientVersion ?? null,
+          }))
+        )}
       `,
     })
   )

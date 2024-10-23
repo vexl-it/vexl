@@ -28,8 +28,8 @@ export const createFindWhitelistRecordBySenderAndReceiver = Effect.gen(
         FROM
           white_list w
         WHERE
-          w.inbox_id = ${params.sender}
-          AND w.public_key = ${params.receiver}
+          w.inbox_id = ${params.receiver}
+          AND w.public_key = ${params.sender}
       `,
     })
 

@@ -7,6 +7,10 @@ import {
   type DeleteWhitelistRecordBySenderAndReceiverParams,
 } from './queries/createDeleteWhitelistRecordBySenderAndReceiver'
 import {
+  createDeleteWhitelistRecordsWhereInboxIsReceiverOrSender,
+  type DeleteWhitelistRecordsWhereInboxIsReceiverOrSenderParams,
+} from './queries/createDeleteWhitelistRecordsWhereInboxIsReceiverOrSender'
+import {
   createFindWhitelistRecordBySenderAndReceiver,
   type FindWhitelistRecordBySenderAndReceiverParams,
 } from './queries/createFindWhitelistRecordBySenderAndReceiver'
@@ -31,6 +35,10 @@ export interface WhitelistDbOperations {
   findWhitelistRecordBySenderAndReceiver: (
     params: FindWhitelistRecordBySenderAndReceiverParams
   ) => Effect.Effect<Option.Option<WhitelistRecord>, UnexpectedServerError>
+
+  deleteWhitelistRecordsWhereInboxIsReceiverOrSender: (
+    params: DeleteWhitelistRecordsWhereInboxIsReceiverOrSenderParams
+  ) => Effect.Effect<void, UnexpectedServerError>
 
   insertWhitelistRecord: (
     params: InsertWhitelistRecordParams
@@ -60,12 +68,17 @@ export class WhitelistDbService extends Context.Tag('WhitelistDbService')<
         createUpdateWhitelistRecordState
       )
 
+      const deleteWhitelistRecordsWhereInboxIsReceiverOrSender = yield* _(
+        createDeleteWhitelistRecordsWhereInboxIsReceiverOrSender
+      )
+
       return {
         deleteWhitelistRecord,
         findWhitelistRecordBySenderAndReceiver,
         insertWhitelistRecord,
         updateWhitelistRecordState,
         deleteWhitelistRecordBySenderAndReceiver,
+        deleteWhitelistRecordsWhereInboxIsReceiverOrSender,
       }
     })
   )

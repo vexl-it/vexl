@@ -204,7 +204,6 @@ export const RequestApprovalRequest = z
   .object({
     publicKey: PublicKeyPemBase64,
     message: z.string(),
-    notificationServiceReady: z.boolean(),
   })
   .readonly()
 
@@ -230,12 +229,10 @@ export type RequestApprovalResponse = Schema.Schema.Type<
 export const CancelApprovalRequest = z.object({
   publicKey: PublicKeyPemBase64,
   message: z.string(),
-  notificationServiceReady: z.boolean(),
 })
 export const CancelApprovalRequestE = Schema.Struct({
   publicKey: PublicKeyPemBase64E,
   message: Schema.String,
-  notificationServiceReady: Schema.Boolean,
 })
 export type CancelApprovalRequest = Schema.Schema.Type<
   typeof CancelApprovalRequestE
@@ -262,7 +259,6 @@ export const ApproveRequestRequestE = Schema.Struct({
   publicKeyToConfirm: PublicKeyPemBase64E,
   message: Schema.String,
   approve: Schema.Boolean,
-  notificationServiceReady: Schema.Boolean,
 })
 export type ApproveRequestRequest = Schema.Schema.Type<
   typeof ApproveRequestRequestE
@@ -328,7 +324,6 @@ export const SendMessageRequest = RequestBaseWithChallenge.extend({
   message: z.string(),
   messageType: MessageType,
   messagePreview: z.string().optional(),
-  notificationServiceReady: z.boolean(),
 })
 export const SendMessageRequestE = Schema.Struct({
   ...RequestBaseWithChallengeE.fields,
@@ -336,7 +331,6 @@ export const SendMessageRequestE = Schema.Struct({
   message: Schema.String,
   messageType: MessageTypeE,
   messagePreview: Schema.optional(Schema.String),
-  notificationServiceReady: Schema.Boolean,
 })
 export type SendMessageRequest = Schema.Schema.Type<typeof SendMessageRequestE>
 
@@ -433,7 +427,7 @@ export type CreateChallengeRequest = Schema.Schema.Type<
 >
 
 export const CreateChallengeResponse = z.object({
-  challenge: z.string(),
+  challenge: ChatChallenge,
   expiration: UnixMilliseconds,
 })
 export const CreateChallengeResponseE = Schema.Struct({
@@ -454,20 +448,26 @@ export type CreateChallengesRequest = Schema.Schema.Type<
   typeof CreateChallengesRequestE
 >
 
-export const CreateChallengesResponse = z.object({
-  challenges: z.array(
-    z.object({
-      publicKey: PublicKeyPemBase64,
-      challenge: z.string(),
-    })
-  ),
-  expiration: UnixMilliseconds,
-})
+export const CreateChallengesResponse = z
+  .object({
+    challenges: z
+      .array(
+        z
+          .object({
+            publicKey: PublicKeyPemBase64,
+            challenge: ChatChallenge,
+          })
+          .readonly()
+      )
+      .readonly(),
+    expiration: UnixMilliseconds,
+  })
+  .readonly()
 export const CreateChallengesResponseE = Schema.Struct({
   challenges: Schema.Array(
     Schema.Struct({
       publicKey: PublicKeyPemBase64E,
-      challenge: Schema.String,
+      challenge: ChatChallengeE,
     })
   ),
   expiration: UnixMillisecondsE,

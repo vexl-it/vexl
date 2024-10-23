@@ -2,8 +2,9 @@ import {InvalidChallengeError} from '@vexl-next/rest-api/src/services/chat/contr
 import {CreateInboxEndpoint} from '@vexl-next/rest-api/src/services/chat/specification'
 import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
-import {Effect} from 'effect'
+import {Effect, Option} from 'effect'
 import {Handler} from 'effect-http'
+import {hashPublicKey} from '../../db/domain'
 import {InboxDbService} from '../../db/InboxDbService'
 import {validateChallengeInBody} from '../../utils/validateChallengeInBody'
 import {withInboxActionRedisLock} from '../../utils/withInboxActionRedisLock'
@@ -14,11 +15,24 @@ export const createInbox = Handler.make(CreateInboxEndpoint, (req) =>
       yield* _(validateChallengeInBody(req.body))
 
       const inboxService = yield* _(InboxDbService)
+      const hashedPublicKey = yield* _(hashPublicKey(req.body.publicKey))
+
+      const existingInbox = yield* _(
+        inboxService.findInboxByPublicKey(hashedPublicKey)
+      )
+      if (Option.isSome(existingInbox)) {
+        return {}
+      }
+
       yield* _(
         inboxService.insertInbox({
-          publicKey: req.body.publicKey,
+          publicKey: hashedPublicKey,
+          clientVersion: req.headers.clientVersionOrNone,
+          platform: req.headers.clientPlatformOrNone,
         })
       )
+
+      return {}
     }).pipe(withInboxActionRedisLock(req.body.publicKey), withDbTransaction),
     InvalidChallengeError
   )

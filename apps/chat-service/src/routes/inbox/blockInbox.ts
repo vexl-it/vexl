@@ -37,6 +37,8 @@ export const blockInbox = Handler.make(BlockInboxEndpoint, (req) =>
           state: 'BLOCKED',
         })
       )
+
+      return {}
     }).pipe(withInboxActionRedisLock(req.body.publicKey), withDbTransaction),
     BlockInboxErrors
   )

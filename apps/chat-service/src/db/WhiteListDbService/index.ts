@@ -3,6 +3,10 @@ import {Context, Effect, Layer, type Option} from 'effect'
 import {type WhitelistRecord, type WhitelistRecordId} from './domain'
 import {createDeleteWhitelistRecord} from './queries/createDeleteWhitelistRecord'
 import {
+  createDeleteWhitelistRecordBySenderAndReceiver,
+  type DeleteWhitelistRecordBySenderAndReceiverParams,
+} from './queries/createDeleteWhitelistRecordBySenderAndReceiver'
+import {
   createFindWhitelistRecordBySenderAndReceiver,
   type FindWhitelistRecordBySenderAndReceiverParams,
 } from './queries/createFindWhitelistRecordBySenderAndReceiver'
@@ -18,6 +22,10 @@ import {
 export interface WhitelistDbOperations {
   deleteWhitelistRecord: (
     params: WhitelistRecordId
+  ) => Effect.Effect<void, UnexpectedServerError>
+
+  deleteWhitelistRecordBySenderAndReceiver: (
+    params: DeleteWhitelistRecordBySenderAndReceiverParams
   ) => Effect.Effect<void, UnexpectedServerError>
 
   findWhitelistRecordBySenderAndReceiver: (
@@ -41,6 +49,9 @@ export class WhitelistDbService extends Context.Tag('WhitelistDbService')<
     WhitelistDbService,
     Effect.gen(function* (_) {
       const deleteWhitelistRecord = yield* _(createDeleteWhitelistRecord)
+      const deleteWhitelistRecordBySenderAndReceiver = yield* _(
+        createDeleteWhitelistRecordBySenderAndReceiver
+      )
       const findWhitelistRecordBySenderAndReceiver = yield* _(
         createFindWhitelistRecordBySenderAndReceiver
       )
@@ -54,6 +65,7 @@ export class WhitelistDbService extends Context.Tag('WhitelistDbService')<
         findWhitelistRecordBySenderAndReceiver,
         insertWhitelistRecord,
         updateWhitelistRecordState,
+        deleteWhitelistRecordBySenderAndReceiver,
       }
     })
   )

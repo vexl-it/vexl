@@ -1,12 +1,6 @@
 import {Schema} from '@effect/schema'
-import {
-  PrivateKeyHolder,
-  PublicKeyPemBase64,
-} from '@vexl-next/cryptography/src/KeyHolder'
-import {
-  PrivateKeyHolderE,
-  PublicKeyPemBase64E,
-} from '@vexl-next/cryptography/src/KeyHolder/brands'
+import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
+import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {
   MessageType,
   MessageTypeE,
@@ -45,9 +39,9 @@ export class RequestNotFoundError extends Schema.TaggedError<RequestNotFoundErro
   code: Schema.optionalWith(Schema.Literal(100104), {default: () => 100104}),
 }) {}
 
-export class RequestAlreadyApprovedError extends Schema.TaggedError<RequestAlreadyApprovedError>(
-  'RequestAlreadyApprovedError'
-)('RequestAlreadyApprovedError', {
+export class RequestNotPendingError extends Schema.TaggedError<RequestNotPendingError>(
+  'RequestNotPendingError'
+)('RequestNotPendingError', {
   status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
   code: Schema.optionalWith(Schema.Literal(100153), {default: () => 100153}),
 }) {}
@@ -71,6 +65,12 @@ export class SenderUserInboxDoesNotExistError extends Schema.TaggedError<SenderU
 )('SenderUserInboxDoesNotExistError', {
   status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
   code: Schema.optionalWith(Schema.Literal(100107), {default: () => 100107}),
+}) {}
+
+export class RequestMessagingNotAllowedError extends Schema.TaggedError<RequestMessagingNotAllowedError>(
+  'RequestMessagingNotAllowedError'
+)('RequestMessagingNotAllowedError', {
+  status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
 }) {}
 
 export class InvalidChallengeError extends Schema.TaggedError<InvalidChallengeError>(
@@ -211,7 +211,6 @@ export const RequestApprovalRequest = z
 export const RequestApprovalRequestE = Schema.Struct({
   publicKey: PublicKeyPemBase64E,
   message: Schema.String,
-  notificationServiceReady: Schema.Boolean,
 })
 export type RequestApprovalRequest = Schema.Schema.Type<
   typeof RequestApprovalRequestE
@@ -257,7 +256,6 @@ export const ApproveRequestRequest = RequestBaseWithChallenge.extend({
   publicKeyToConfirm: PublicKeyPemBase64,
   message: z.string(),
   approve: z.boolean(),
-  notificationServiceReady: z.boolean(),
 })
 export const ApproveRequestRequestE = Schema.Struct({
   ...RequestBaseWithChallengeE.fields,
@@ -325,8 +323,7 @@ export type RetrieveMessagesResponse = Schema.Schema.Type<
   typeof RetrieveMessagesResponseE
 >
 
-export const SendMessageRequest = z.object({
-  keyPair: PrivateKeyHolder,
+export const SendMessageRequest = RequestBaseWithChallenge.extend({
   receiverPublicKey: PublicKeyPemBase64,
   message: z.string(),
   messageType: MessageType,
@@ -334,7 +331,7 @@ export const SendMessageRequest = z.object({
   notificationServiceReady: z.boolean(),
 })
 export const SendMessageRequestE = Schema.Struct({
-  keyPair: PrivateKeyHolderE,
+  ...RequestBaseWithChallengeE.fields,
   receiverPublicKey: PublicKeyPemBase64E,
   message: Schema.String,
   messageType: MessageTypeE,
@@ -354,17 +351,14 @@ export type SendMessageResponse = Schema.Schema.Type<
   typeof SendMessageResponseE
 >
 
-export const LeaveChatRequest = z.object({
-  keyPair: PrivateKeyHolder,
+export const LeaveChatRequest = RequestBaseWithChallenge.extend({
   receiverPublicKey: PublicKeyPemBase64,
   message: z.string(),
-  notificationServiceReady: z.boolean(),
 })
 export const LeaveChatRequestE = Schema.Struct({
-  keyPair: PrivateKeyHolderE,
+  ...RequestBaseWithChallengeE.fields,
   receiverPublicKey: PublicKeyPemBase64E,
   message: Schema.String,
-  notificationServiceReady: Schema.Boolean,
 })
 export type LeaveChatRequest = Schema.Schema.Type<typeof LeaveChatRequestE>
 

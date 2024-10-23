@@ -9,6 +9,7 @@ export type WhitelistRecordId = Schema.Schema.Type<typeof WhitelistRecordId>
 
 export const WhiteListState = Schema.Literal(
   'APROVED',
+  'DISAPROVED',
   'BLOCKED',
   'WAITING',
   'CANCELED'

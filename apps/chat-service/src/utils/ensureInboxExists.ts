@@ -1,18 +1,10 @@
-import {Schema} from '@effect/schema'
-import {
-  type PublicKeyPemBase64,
-  PublicKeyPemBase64E,
-} from '@vexl-next/cryptography/src/KeyHolder'
+import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {type UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
+import {InboxDoesNotExistError} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {Effect} from 'effect'
 import {InboxDbService} from '../db/InboxDbService'
 import {type InboxRecord} from '../db/InboxDbService/domain'
-
-export class InboxDoesNotExistError extends Schema.TaggedError<InboxDoesNotExistError>(
-  'InboxDoesNotExistError'
-)('InboxDoesNotExistError', {
-  publicKey: PublicKeyPemBase64E,
-}) {}
+import {hashPublicKey} from '../db/domain'
 
 export const ensureInboxExists = (
   publicKey: PublicKeyPemBase64
@@ -21,11 +13,17 @@ export const ensureInboxExists = (
   InboxDoesNotExistError | UnexpectedServerError,
   InboxDbService
 > =>
-  InboxDbService.pipe(
-    Effect.flatMap((inboxDb) => inboxDb.findInboxByPublicKey(publicKey)),
-    Effect.flatten,
-    Effect.catchTag(
-      'NoSuchElementException',
-      () => new InboxDoesNotExistError({publicKey})
+  Effect.gen(function* (_) {
+    const inboxDb = yield* _(InboxDbService)
+
+    const publicKeyEncrypted = yield* _(hashPublicKey(publicKey))
+
+    return yield* _(
+      inboxDb.findInboxByPublicKey(publicKeyEncrypted),
+      Effect.flatten,
+      Effect.catchTag(
+        'NoSuchElementException',
+        () => new InboxDoesNotExistError()
+      )
     )
-  )
+  })

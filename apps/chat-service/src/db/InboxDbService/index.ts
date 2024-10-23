@@ -1,6 +1,6 @@
-import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {type UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {Context, Effect, Layer, type Option} from 'effect'
+import {type PublicKeyHashed} from '../domain'
 import {type InboxRecord} from './domain'
 import {createDeleteInboxByPublicKey} from './queries/createDeleteInboxByPublicKey'
 import {createFindInboxByPublicKey} from './queries/createFindInboxByPublicKey'
@@ -11,11 +11,11 @@ import {
 
 export interface InboxDbOperations {
   deleteInboxByPublicKey: (
-    args: PublicKeyPemBase64
+    args: PublicKeyHashed
   ) => Effect.Effect<void, UnexpectedServerError>
 
   findInboxByPublicKey: (
-    args: PublicKeyPemBase64
+    args: PublicKeyHashed
   ) => Effect.Effect<Option.Option<InboxRecord>, UnexpectedServerError>
 
   insertInbox: (

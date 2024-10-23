@@ -5,7 +5,11 @@ import {type MessageRecord, type MessageRecordId} from './domain'
 import {createDeleteAllMessagesByInboxId} from './query/createDeleteAllMessagesByInboxId'
 import {createDeletePulledMessagesMessagesByInboxId} from './query/createDeletePulledMessagesByInboxId'
 import {createFindMessagesByInboxId} from './query/createFindMessagesByInboxId'
-import {createUpdateMessageAsPulledByInboxId} from './query/createUpdateMessageAsPulledByInboxId'
+import {
+  createInsertMessageForInbox,
+  type InsertMessageForInboxParams,
+} from './query/createInsertMessageForInbox'
+import {createUpdateMessageAsPulledByMessageRecord} from './query/createUpdateMessageAsPulledByMessageRecord'
 
 export interface MessagesDbOperations {
   deleteAllMessagesByInboxId: (
@@ -20,7 +24,11 @@ export interface MessagesDbOperations {
     args: InboxRecordId
   ) => Effect.Effect<readonly MessageRecord[], UnexpectedServerError>
 
-  updateMessageAsPulledByInboxRecord: (
+  insertMessageForInbox: (
+    args: InsertMessageForInboxParams
+  ) => Effect.Effect<MessageRecord, UnexpectedServerError>
+
+  updateMessageAsPulledByMessageRecord: (
     args: MessageRecordId
   ) => Effect.Effect<void, UnexpectedServerError>
 }
@@ -39,15 +47,18 @@ export class MessagesDbService extends Context.Tag('MessagesDbService')<
         createDeletePulledMessagesMessagesByInboxId
       )
       const findMessagesByInboxId = yield* _(createFindMessagesByInboxId)
-      const updateMessageAsPulledByInboxRecord = yield* _(
-        createUpdateMessageAsPulledByInboxId
+      const updateMessageAsPulledByMessageRecord = yield* _(
+        createUpdateMessageAsPulledByMessageRecord
       )
+
+      const insertMessageForInbox = yield* _(createInsertMessageForInbox)
 
       return {
         deleteAllMessagesByInboxId,
         deletePulledMessagesByInboxId,
         findMessagesByInboxId,
-        updateMessageAsPulledByInboxRecord,
+        updateMessageAsPulledByMessageRecord,
+        insertMessageForInbox,
       }
     })
   )

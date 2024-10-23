@@ -29,10 +29,10 @@ import {
   LeaveChatResponse,
   OtherSideAccountDeleted,
   ReceiverOfferInboxDoesNotExistError,
-  RequestAlreadyApprovedError,
   RequestApprovalResponse,
   RequestCancelledError,
   RequestNotFoundError,
+  RequestNotPendingError,
   RetrieveMessagesResponse,
   SendMessageResponse,
   SendMessagesResponse,
@@ -201,7 +201,7 @@ export function privateApi({
               return new RequestNotFoundError()
             }
             if (e.response.data.code === '100153') {
-              return new RequestAlreadyApprovedError()
+              return new RequestNotPendingError()
             }
             if (e.response.data.code === '100101') {
               return new OtherSideAccountDeleted()
@@ -237,7 +237,7 @@ export function privateApi({
               return new RequestNotFoundError()
             }
             if (e.response.data.code === '100153') {
-              return new RequestAlreadyApprovedError()
+              return new RequestNotPendingError()
             }
             if (e.response.data.code === '100101') {
               return new OtherSideAccountDeleted()

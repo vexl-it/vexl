@@ -6,25 +6,30 @@ import {
   NotPermittedToSendMessageToTargetInboxError,
 } from '../contact/contracts'
 import {
+  ApproveRequestRequestE,
+  ApproveRequestResponseE,
   BlockInboxRequestE,
   BlockInboxResponseE,
+  CancelApprovalRequestE,
   CancelApprovalResponseE,
   CreateChallengeRequestE,
   CreateChallengeResponseE,
   CreateInboxRequestE,
   CreateInboxResponseE,
+  DeleteInboxesRequestE,
+  DeleteInboxesResponseE,
   DeleteInboxRequestE,
   DeleteInboxResponseE,
+  InvalidChallengeError,
   LeaveChatRequestE,
   LeaveChatResponseE,
-  NotificationServiceReadyQueryParams,
-  OtherSideAccountDeleted,
   ReceiverOfferInboxDoesNotExistError,
-  RequestAlreadyApprovedError,
   RequestApprovalRequestE,
   RequestApprovalResponseE,
   RequestCancelledError,
+  RequestMessagingNotAllowedError,
   RequestNotFoundError,
+  RequestNotPendingError,
   RetrieveMessagesRequestE,
   RetrieveMessagesResponseE,
   SenderUserInboxDoesNotExistError,
@@ -36,10 +41,11 @@ import {
   UpdateInboxResponseE,
 } from './contracts'
 
-export const UpdateInboxEndpoint = Api.put(
-  'updateInbox',
-  '/api/v1/inboxes'
-).pipe(
+export const UpdateInboxEndpoint = Api.put('updateInbox', '/api/v1/inboxes', {
+  deprecated: true,
+  description:
+    'Not needed anymore since chat service does not sent fcm messages and does not collect fcm tokens anymore',
+}).pipe(
   Api.setSecurity(ServerSecurity),
   Api.setResponseStatus(200 as const),
   Api.setRequestBody(UpdateInboxRequestE),
@@ -56,6 +62,9 @@ export const CreateInboxEndpoint = Api.post(
   Api.setResponseBody(CreateInboxResponseE)
 )
 
+export const DeleteInboxErrors = Schema.Union(InvalidChallengeError)
+export type DeleteInboxErrors = Schema.Schema.Type<typeof DeleteInboxErrors>
+
 export const DeleteInboxEndpoint = Api.delete(
   'deleteInbox',
   '/api/v1/inboxes'
@@ -63,8 +72,20 @@ export const DeleteInboxEndpoint = Api.delete(
   Api.setSecurity(ServerSecurity),
   Api.setResponseStatus(200 as const),
   Api.setRequestBody(DeleteInboxRequestE),
-  Api.setResponseBody(DeleteInboxResponseE)
+  Api.setResponseBody(DeleteInboxResponseE),
+  Api.addResponse({
+    status: 400,
+    body: DeleteInboxErrors,
+  })
 )
+
+export const DeletePulledMessagesErrors = Schema.Union(
+  InboxDoesNotExistError,
+  InvalidChallengeError
+)
+export type DeletePulledMessagesErrors = Schema.Schema.Type<
+  typeof DeletePulledMessagesErrors
+>
 
 export const DeletePulledMessagesEndpoint = Api.delete(
   'deletePulledMessages',
@@ -73,8 +94,19 @@ export const DeletePulledMessagesEndpoint = Api.delete(
   Api.setSecurity(ServerSecurity),
   Api.setResponseStatus(200 as const),
   Api.setRequestBody(DeleteInboxRequestE),
-  Api.setResponseBody(DeleteInboxResponseE)
+  Api.setResponseBody(DeleteInboxResponseE),
+  Api.addResponse({
+    status: 400,
+    body: DeletePulledMessagesErrors,
+  })
 )
+
+export const BlockInboxErrors = Schema.Union(
+  ReceiverOfferInboxDoesNotExistError,
+  SenderUserInboxDoesNotExistError,
+  InvalidChallengeError
+)
+export type BlockInboxErrors = Schema.Schema.Type<typeof BlockInboxErrors>
 
 export const BlockInboxEndpoint = Api.put(
   'blockInboxEndpoint',
@@ -83,12 +115,17 @@ export const BlockInboxEndpoint = Api.put(
   Api.setSecurity(ServerSecurity),
   Api.setResponseStatus(200 as const),
   Api.setRequestBody(BlockInboxRequestE),
-  Api.setResponseBody(BlockInboxResponseE)
+  Api.setResponseBody(BlockInboxResponseE),
+  Api.addResponse({
+    status: 400,
+    body: BlockInboxErrors,
+  })
 )
 
 export const RequestApprovalErrors = Schema.Union(
   ReceiverOfferInboxDoesNotExistError,
-  SenderUserInboxDoesNotExistError
+  SenderUserInboxDoesNotExistError,
+  RequestMessagingNotAllowedError
 )
 
 export const RequestApprovalEndpoint = Api.post(
@@ -97,7 +134,6 @@ export const RequestApprovalEndpoint = Api.post(
 ).pipe(
   Api.setSecurity(ServerSecurity),
   Api.setResponseStatus(200 as const),
-  Api.setRequestQuery(NotificationServiceReadyQueryParams),
   Api.setRequestBody(RequestApprovalRequestE),
   Api.setResponseBody(RequestApprovalResponseE),
   Api.addResponse({
@@ -106,11 +142,16 @@ export const RequestApprovalEndpoint = Api.post(
   })
 )
 
-const CancelRequestApprovalErrors = Schema.Union(
+export const CancelRequestApprovalErrors = Schema.Union(
   RequestNotFoundError,
-  RequestAlreadyApprovedError,
-  OtherSideAccountDeleted
+  RequestNotPendingError,
+  ReceiverOfferInboxDoesNotExistError,
+  SenderUserInboxDoesNotExistError,
+  InvalidChallengeError
 )
+export type CancelRequestApprovalErrors = Schema.Schema.Type<
+  typeof CancelRequestApprovalErrors
+>
 
 export const CancelRequestApprovalEndpoint = Api.post(
   'cancelRequestApproval',
@@ -118,7 +159,7 @@ export const CancelRequestApprovalEndpoint = Api.post(
 ).pipe(
   Api.setSecurity(ServerSecurity),
   Api.setResponseStatus(200 as const),
-  Api.setRequestQuery(NotificationServiceReadyQueryParams),
+  Api.setRequestBody(CancelApprovalRequestE),
   Api.setResponseBody(CancelApprovalResponseE),
   Api.addResponse({
     status: 400,
@@ -126,12 +167,17 @@ export const CancelRequestApprovalEndpoint = Api.post(
   })
 )
 
-const ApproveRequestErrors = Schema.Union(
+export const ApproveRequestErrors = Schema.Union(
+  InvalidChallengeError,
   RequestCancelledError,
   RequestNotFoundError,
-  RequestAlreadyApprovedError,
-  OtherSideAccountDeleted
+  RequestNotPendingError,
+  ReceiverOfferInboxDoesNotExistError,
+  SenderUserInboxDoesNotExistError
 )
+export type ApproveRequestErrors = Schema.Schema.Type<
+  typeof ApproveRequestErrors
+>
 
 export const ApproveRequestEndpoint = Api.post(
   'approveRequest',
@@ -139,9 +185,8 @@ export const ApproveRequestEndpoint = Api.post(
 ).pipe(
   Api.setSecurity(ServerSecurity),
   Api.setResponseStatus(200 as const),
-  Api.setRequestQuery(NotificationServiceReadyQueryParams),
-  Api.setRequestBody(RequestApprovalRequestE),
-  Api.setResponseBody(CancelApprovalResponseE),
+  Api.setRequestBody(ApproveRequestRequestE),
+  Api.setResponseBody(ApproveRequestResponseE),
   Api.addResponse({
     status: 400,
     body: ApproveRequestErrors,
@@ -154,13 +199,15 @@ export const DeleteInboxesEndpoint = Api.delete(
 ).pipe(
   Api.setSecurity(ServerSecurity),
   Api.setResponseStatus(200 as const),
-  Api.setRequestBody(DeleteInboxRequestE),
-  Api.setResponseBody(DeleteInboxResponseE)
+  Api.setRequestBody(DeleteInboxesRequestE),
+  Api.setResponseBody(DeleteInboxesResponseE)
 )
 
 export const LeaveChatErrors = Schema.Union(
-  NotPermittedToSendMessageToTargetInboxError,
-  InboxDoesNotExistError
+  InvalidChallengeError,
+  ReceiverOfferInboxDoesNotExistError,
+  SenderUserInboxDoesNotExistError,
+  NotPermittedToSendMessageToTargetInboxError
 )
 
 export const LeaveChatEndpoint = Api.post(
@@ -169,7 +216,7 @@ export const LeaveChatEndpoint = Api.post(
 ).pipe(
   Api.setSecurity(ServerSecurity),
   Api.setResponseStatus(200 as const),
-  Api.setRequestQuery(NotificationServiceReadyQueryParams),
+
   Api.setRequestBody(LeaveChatRequestE),
   Api.setResponseBody(LeaveChatResponseE),
   Api.addResponse({
@@ -178,7 +225,10 @@ export const LeaveChatEndpoint = Api.post(
   })
 )
 
-export const RetrieveMessagesErrors = Schema.Union(InboxDoesNotExistError)
+export const RetrieveMessagesErrors = Schema.Union(
+  InboxDoesNotExistError,
+  InvalidChallengeError
+)
 
 export const RetrieveMessagesEndpoint = Api.put(
   'retrieveMessages',
@@ -186,7 +236,7 @@ export const RetrieveMessagesEndpoint = Api.put(
 ).pipe(
   Api.setSecurity(ServerSecurity),
   Api.setResponseStatus(200 as const),
-  Api.setRequestQuery(NotificationServiceReadyQueryParams),
+
   Api.setRequestBody(RetrieveMessagesRequestE),
   Api.setResponseBody(RetrieveMessagesResponseE),
   Api.addResponse({
@@ -196,8 +246,10 @@ export const RetrieveMessagesEndpoint = Api.put(
 )
 
 export const SendMessageErrors = Schema.Union(
-  InboxDoesNotExistError,
-  NotPermittedToSendMessageToTargetInboxError
+  ReceiverOfferInboxDoesNotExistError,
+  SenderUserInboxDoesNotExistError,
+  NotPermittedToSendMessageToTargetInboxError,
+  InvalidChallengeError
 )
 
 export const SendMessageEndpoint = Api.post(
@@ -206,7 +258,7 @@ export const SendMessageEndpoint = Api.post(
 ).pipe(
   Api.setSecurity(ServerSecurity),
   Api.setResponseStatus(200 as const),
-  Api.setRequestQuery(NotificationServiceReadyQueryParams),
+
   Api.setRequestBody(SendMessageRequestE),
   Api.setResponseBody(SendMessageResponseE),
   Api.addResponse({
@@ -224,7 +276,6 @@ export const SendMessagesEndpoint = Api.post(
 ).pipe(
   Api.setSecurity(ServerSecurity),
   Api.setResponseStatus(200 as const),
-  Api.setRequestQuery(NotificationServiceReadyQueryParams),
   Api.setRequestBody(SendMessagesRequestE),
   Api.setResponseBody(SendMessagesResponseE)
 )

@@ -3,7 +3,7 @@ import {useNavigation} from '@react-navigation/native'
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue, useSetAtom} from 'jotai'
 import {useCallback, useMemo} from 'react'
-import {Stack, XStack, getTokens} from 'tamagui'
+import {XStack, getTokens} from 'tamagui'
 import {SATOSHIS_IN_BTC} from '../../../../../state/currentBtcPriceAtoms'
 import * as amount from '../../../../../state/tradeChecklist/utils/amount'
 import {
@@ -23,6 +23,7 @@ import {
 import {chatMolecule} from '../../../atoms'
 import copySvg from '../../../images/copySvg'
 import checkIconSvg from '../../images/checkIconSvg'
+import TradeChecklistMessageWrapper from './TradeChecklistMessageWrapper'
 import VexlbotBubble from './VexlbotBubble'
 
 function TradeChecklistAmountView(): JSX.Element | null {
@@ -183,7 +184,7 @@ function TradeChecklistAmountView(): JSX.Element | null {
   })()
 
   return (
-    <Stack>
+    <TradeChecklistMessageWrapper>
       <VexlbotBubble
         status={
           amountDataToDisplay.by === 'them' &&
@@ -243,7 +244,7 @@ function TradeChecklistAmountView(): JSX.Element | null {
           {renderFooter}
         </XStack>
       </VexlbotBubble>
-    </Stack>
+    </TradeChecklistMessageWrapper>
   )
 }
 

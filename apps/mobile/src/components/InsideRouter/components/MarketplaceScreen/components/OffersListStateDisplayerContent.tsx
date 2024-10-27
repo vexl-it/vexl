@@ -2,6 +2,14 @@ import {isNone} from 'fp-ts/Option'
 import {useAtomValue, useSetAtom} from 'jotai'
 import {useMemo} from 'react'
 import {ActivityIndicator} from 'react-native'
+import Animated, {
+  Extrapolation,
+  interpolate,
+  useAnimatedScrollHandler,
+  useAnimatedStyle,
+  useSharedValue,
+} from 'react-native-reanimated'
+import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {Stack, XStack, getTokens} from 'tamagui'
 import {
   triggerOffersRefreshAtom,
@@ -12,6 +20,7 @@ import {baseFilterAtom} from '../../../../../state/marketplace/atoms/filterAtoms
 import {filteredOffersIncludingLocationFilterAtomsAtom} from '../../../../../state/marketplace/atoms/filteredOffers'
 import {refocusMapActionAtom} from '../../../../../state/marketplace/atoms/map/focusedOffer'
 import ErrorListHeader from '../../../../ErrorListHeader'
+import {MAP_SIZE} from '../../../../MarketplaceMap'
 import MarketplaceMapContainer from '../../../../MarketplaceMapContainer'
 import OffersList from '../../../../OffersList'
 import ReencryptOffersSuggestion from '../../../../ReencryptOffersSuggestion'
@@ -27,11 +36,41 @@ import TotalOffersCount from './TotalOffersCount'
 
 function OffersListStateDisplayerContent(): JSX.Element {
   const tokens = getTokens()
+  const insets = useSafeAreaInsets()
   const loading = useAreOffersLoading()
   const error = useOffersLoadingError()
   const refreshOffers = useSetAtom(triggerOffersRefreshAtom)
   const refocusMap = useSetAtom(refocusMapActionAtom)
   const baseFilter = useAtomValue(baseFilterAtom)
+
+  const scrollY = useSharedValue(0)
+  const handleScroll = useAnimatedScrollHandler((event) => {
+    scrollY.value = event.contentOffset.y
+  })
+
+  const opacityAnim = useAnimatedStyle(() => {
+    return {
+      opacity: interpolate(
+        scrollY.value,
+        [0, MAP_SIZE - insets.top / 0.9],
+        [1, 0],
+        Extrapolation.CLAMP
+      ),
+    }
+  })
+
+  const scaleAnim = useAnimatedStyle(() => {
+    return {
+      transform: [
+        {
+          scale: interpolate(scrollY.value, [-50, 0], [1.3, 1], {
+            extrapolateLeft: 'extend',
+            extrapolateRight: 'clamp',
+          }),
+        },
+      ],
+    }
+  })
 
   const offersAtoms = useAtomValue(
     filteredOffersIncludingLocationFilterAtomsAtom
@@ -40,28 +79,48 @@ function OffersListStateDisplayerContent(): JSX.Element {
   const ListHeaderComponent = useMemo(() => {
     if (isNone(error))
       return (
-        <Stack px="$1">
-          <XStack f={1} ai="center" jc="space-between" pb="$2">
-            <Stack f={1}>
-              <TotalOffersCount filteredOffersCount={offersAtoms.length} />
-            </Stack>
-            {baseFilter !== 'BTC_TO_CASH' &&
-              baseFilter !== 'CASH_TO_BTC' &&
-              baseFilter !== 'ALL_SELLING_BTC' &&
-              baseFilter !== 'ALL_BUYING_BTC' && (
+        <Stack>
+          <Animated.View style={[opacityAnim, scaleAnim]}>
+            <MarketplaceMapContainer />
+          </Animated.View>
+          {offersAtoms.length > 0 ? (
+            <Stack px="$1">
+              <XStack f={1} ai="center" jc="space-between" pb="$2">
                 <Stack f={1}>
-                  <FiatSatsDropdown />
+                  <TotalOffersCount filteredOffersCount={offersAtoms.length} />
                 </Stack>
-              )}
-          </XStack>
-          <ReencryptOffersSuggestion mb="$6" />
-          <ImportNewContactsSuggestion mb="$6" />
-          <AddListingTypeToOffersSuggestion mb="$6" />
+                {baseFilter !== 'BTC_TO_CASH' &&
+                  baseFilter !== 'CASH_TO_BTC' &&
+                  baseFilter !== 'ALL_SELLING_BTC' &&
+                  baseFilter !== 'ALL_BUYING_BTC' && (
+                    <Stack f={1}>
+                      <FiatSatsDropdown />
+                    </Stack>
+                  )}
+              </XStack>
+              <ReencryptOffersSuggestion mb="$6" />
+              <ImportNewContactsSuggestion mb="$6" />
+              <AddListingTypeToOffersSuggestion mb="$6" />
+            </Stack>
+          ) : (
+            <EmptyListPlaceholder
+              refreshing={loading}
+              onRefresh={refreshOffers}
+            />
+          )}
         </Stack>
       )
 
     return <ErrorListHeader mt="$6" error={error.value} />
-  }, [baseFilter, error, offersAtoms.length])
+  }, [
+    baseFilter,
+    error,
+    loading,
+    offersAtoms.length,
+    opacityAnim,
+    refreshOffers,
+    scaleAnim,
+  ])
 
   if (offersAtoms.length === 0 && loading) {
     return (
@@ -90,20 +149,16 @@ function OffersListStateDisplayerContent(): JSX.Element {
           <FilterButton />
         </XStack>
       </Stack>
-      <MarketplaceMapContainer />
-      {offersAtoms.length === 0 ? (
-        <EmptyListPlaceholder refreshing={loading} onRefresh={refreshOffers} />
-      ) : (
-        <Stack f={1}>
-          <OffersList
-            ListHeaderComponent={ListHeaderComponent}
-            offersAtoms={offersAtoms}
-            // eslint-disable-next-line @typescript-eslint/no-misused-promises
-            onRefresh={refreshOffers}
-            refreshing={loading}
-          />
-        </Stack>
-      )}
+      <Stack f={1}>
+        <OffersList
+          ListHeaderComponent={ListHeaderComponent}
+          offersAtoms={offersAtoms}
+          // eslint-disable-next-line @typescript-eslint/no-misused-promises
+          onRefresh={refreshOffers}
+          refreshing={loading}
+          onScroll={handleScroll}
+        />
+      </Stack>
     </ContainerWithTopBorderRadius>
   )
 }

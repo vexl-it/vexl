@@ -11,7 +11,7 @@
   "common.selectAll": "Selecionar tudo",
   "common.cancel": "Cancelar",
   "common.unknownError": "Erro desconhecido",
-  "common.NetworkError": "Network error. Please check your internet connection and try again.",
+  "common.NetworkError": "Erro de rede. Por favor, verifique a sua conexão de internet e tente novamente.",
   "common.UnauthorizedError": "We couldn't authorize your request. Please contact our support.",
   "common.UnexpectedApiResponseError": "Something went wrong while processing your request. Please try again later or contact support if the problem persists.",
   "common.NotFoundError": "We couldn’t find what you’re looking for. Please try again later or contact support if the problem persists.",

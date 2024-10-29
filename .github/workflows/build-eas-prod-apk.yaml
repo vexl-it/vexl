@@ -1,4 +1,6 @@
 name: "[Build] production APK"
+run-name: "Run on commit ${github.sha}"
+
 on: workflow_dispatch
 jobs:
   build:

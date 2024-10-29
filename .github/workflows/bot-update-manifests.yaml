@@ -1,4 +1,5 @@
 name: "[Bot] update manifests"
+run-name: "Run update manifest env: ${inputs.env}, backend: ${inputs.backend} on commit ${github.sha}"
 
 on:
   workflow_dispatch:

@@ -1,4 +1,6 @@
 name: "[Release] build eas production"
+run-name: "Run on commit ${github.sha}"
+
 on: workflow_dispatch
 jobs:
   build:

@@ -1,5 +1,5 @@
 name: "[Test] run jest tests (unit and integration)"
-run-name: "Run on commit ${github.sha}"
+run-name: "Run on commit ${{github.sha}}"
 
 on:
   pull_request:

@@ -1,5 +1,5 @@
 name: "[Build] location-service docker image"
-run-name: "Run on commit ${github.sha} for environment ${inputs.env}"
+run-name: "Run on commit ${{github.sha}} for environment ${{inputs.env}}"
 
 permissions:
   packages: write

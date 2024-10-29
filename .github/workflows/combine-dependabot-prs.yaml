@@ -1,5 +1,5 @@
 name: "Combine Dependabot PRs"
-run-name: "Run with inputs: branchPrefix: ${inputs.branchPrefix}, mustBeGreen: ${inputs.mustBeGreen}, combineBranchName: ${inputs.combineBranchName}, ignoreLabel: ${inputs.ignoreLabel}"
+run-name: "Run with inputs: branchPrefix: ${{inputs.branchPrefix}}, mustBeGreen: ${{inputs.mustBeGreen}}, combineBranchName: ${{inputs.combineBranchName}}, ignoreLabel: ${{inputs.ignoreLabel}}"
 # Controls when the action will run - in this case triggered manually
 on:
   workflow_dispatch:

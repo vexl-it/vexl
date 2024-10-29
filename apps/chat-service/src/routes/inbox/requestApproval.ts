@@ -47,7 +47,7 @@ const canSendRequest = ({
     if (
       whitelistRecord.state === 'CANCELED' ||
       whitelistRecord.state === 'WAITING' ||
-      whitelistRecord.state === 'DISAPROVED'
+      whitelistRecord.state === 'DISAPPROVED'
     ) {
       const requestTimeoutDays = yield* _(requestTimeoutDaysConfig)
       const canBeRequestedAgainFrom = dayjs(whitelistRecord.date).add(

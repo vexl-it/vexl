@@ -55,7 +55,7 @@ export const approveRequest = Handler.make(ApproveRequestEndpoint, (req) =>
         yield* _(
           whitelistDb.updateWhitelistRecordState({
             id: whitelistRecord.id,
-            state: 'APROVED',
+            state: 'APPROVED',
           })
         )
         // make sure to insert the other way around!
@@ -63,7 +63,7 @@ export const approveRequest = Handler.make(ApproveRequestEndpoint, (req) =>
           whitelistDb.insertWhitelistRecord({
             receiver: senderInbox.id,
             sender: receiverInbox.publicKey,
-            state: 'APROVED',
+            state: 'APPROVED',
           })
         )
       } else {
@@ -71,7 +71,7 @@ export const approveRequest = Handler.make(ApproveRequestEndpoint, (req) =>
         yield* _(
           whitelistDb.updateWhitelistRecordState({
             id: whitelistRecord.id,
-            state: 'DISAPROVED',
+            state: 'DISAPPROVED',
           })
         )
 

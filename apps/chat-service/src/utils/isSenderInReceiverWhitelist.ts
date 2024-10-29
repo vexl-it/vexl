@@ -25,7 +25,7 @@ export const isSenderInReceiverWhitelist = ({
     )
 
     if (Option.isNone(whitelistRecord)) return false
-    if (whitelistRecord.value.state === 'APROVED') return true
+    if (whitelistRecord.value.state === 'APPROVED') return true
     return false
   })
 

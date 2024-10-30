@@ -27,8 +27,8 @@ export class NotPermittedToSendMessageToTargetInboxError extends Schema.TaggedEr
   'notPermittedToSendMessageToTargetInbox'
 )('notPermittedToSendMessageToTargetInbox', {
   status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
-  code: Schema.optionalWith(Schema.Literal('100104'), {
-    default: () => '100104',
+  code: Schema.optionalWith(Schema.Literal('100102'), {
+    default: () => '100102',
   }),
 }) {}
 

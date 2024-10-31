@@ -1,4 +1,5 @@
 import {Schema} from '@effect/schema'
+import {metricsQueueNameConfig} from '@vexl-next/server-utils/src/commonConfigs'
 import {
   setupRedisSmqConnection,
   type SettingUpRedisSmqConnectionError,
@@ -40,22 +41,26 @@ export class MetricsConsumerService extends Context.Tag(
     Layer.scoped(
       MetricsConsumerService,
       Effect.gen(function* (_) {
+        const queueName = yield* _(metricsQueueNameConfig)
+
         yield* _(Effect.log('Configuring redis smq'))
         yield* _(setupRedisSmqConnection(redisUrl))
 
-        yield* _(Effect.log('Ensuring queue exists'))
+        yield* _(Effect.log(`Ensuring queue exists. Queue name: ${queueName}`))
         const queue = new Queue()
 
         yield* _(Effect.addFinalizer(() => silentlyShutdownQueue(queue)))
-        yield* _(ensureMetricsQueueExists(queue))
+        yield* _(ensureMetricsQueueExists(queue, queueName))
         yield* _(Effect.log('Queue ensured'))
 
         const consumer = new Consumer()
         yield* _(Effect.addFinalizer(() => silentlyShutdownConsumer(consumer)))
         yield* _(startConsumer(consumer))
 
-        yield* _(registerMessageHandler(consumer, messageHandler))
-        yield* _(Effect.log('Registered message handler'))
+        yield* _(registerMessageHandler(consumer, queueName, messageHandler))
+        yield* _(
+          Effect.log(`Registered message handler: Queue name: ${queueName}`)
+        )
 
         return {queue, consumer}
       })

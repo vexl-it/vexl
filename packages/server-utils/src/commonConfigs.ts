@@ -90,3 +90,5 @@ export const memoryDebugIntervalMsConfig = Config.option(
 export const disableDevToolsInDevelopmentConfig = Config.option(
   Config.boolean('DISABLE_DEV_TOOLS')
 )
+
+export const metricsQueueNameConfig = Config.string('METRICS_QUEUE_NAME')

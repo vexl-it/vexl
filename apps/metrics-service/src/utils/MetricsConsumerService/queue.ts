@@ -1,4 +1,3 @@
-import {METRICS_QUEUE_NAME} from '@vexl-next/server-utils/src/metrics/domain'
 import {Effect} from 'effect'
 import {EQueueDeliveryModel, EQueueType, type Queue} from 'redis-smq'
 import {ErrorSettingUpConsumer} from './ErrorSettingUpConsumer'
@@ -23,12 +22,13 @@ const checkQueueExists = (
   })
 
 const createMetricsQueue = (
-  queue: Queue
+  queue: Queue,
+  queueName: string
 ): Effect.Effect<void, ErrorSettingUpConsumer> =>
   // eslint-disable-next-line @typescript-eslint/no-invalid-void-type
   Effect.async<void, ErrorSettingUpConsumer>((cb) => {
     queue.save(
-      METRICS_QUEUE_NAME,
+      queueName,
       EQueueType.FIFO_QUEUE,
       EQueueDeliveryModel.POINT_TO_POINT,
       (err) => {
@@ -49,15 +49,16 @@ const createMetricsQueue = (
   })
 
 export const ensureMetricsQueueExists = (
-  queue: Queue
+  queue: Queue,
+  queueName: string
 ): Effect.Effect<void, ErrorSettingUpConsumer, never> =>
   Effect.gen(function* (_) {
-    if (yield* _(checkQueueExists(METRICS_QUEUE_NAME, queue))) {
-      yield* _(Effect.log('Queue already exists'))
+    if (yield* _(checkQueueExists(queueName, queue))) {
+      yield* _(Effect.log(`Queue (name: ${queueName}) already exists`))
       return
     }
-    yield* _(createMetricsQueue(queue))
-    yield* _(Effect.log('Queue created'))
+    yield* _(createMetricsQueue(queue, queueName))
+    yield* _(Effect.log(`Queue (name: ${queueName}) created`))
   })
 
 export const silentlyShutdownQueue = (queue: Queue): Effect.Effect<void> =>

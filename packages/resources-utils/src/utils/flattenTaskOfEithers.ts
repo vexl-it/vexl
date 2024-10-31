@@ -3,7 +3,7 @@ import * as A from 'fp-ts/ReadonlyArray'
 import * as T from 'fp-ts/Task'
 import {flow, pipe} from 'fp-ts/function'
 
-export default function flattenTaskOfEithers<L, R>(
+export function flattenTaskOfEithers<L, R>(
   taskOfEithers: T.Task<ReadonlyArray<E.Either<L, R>>>
 ): T.Task<{lefts: L[]; rights: R[]}> {
   return pipe(
@@ -30,3 +30,5 @@ export default function flattenTaskOfEithers<L, R>(
     )
   )
 }
+
+export default flattenTaskOfEithers

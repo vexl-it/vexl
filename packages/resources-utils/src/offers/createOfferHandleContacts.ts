@@ -32,6 +32,7 @@ import generateSymmetricKey, {
   type ErrorGeneratingSymmetricKey,
 } from './utils/generateSymmetricKey'
 import {fetchInfoAndGeneratePrivatePayloads} from './utils/offerPrivatePayload'
+import {sendOfferToNetworkBatchPrivateParts} from './utils/sendOfferToNetworkBatchPrivateParts'
 
 export type ApiErrorWhileCreatingOffer = ExtractErrorFromEffect<
   ReturnType<OfferApi['createNewOffer']>
@@ -96,8 +97,9 @@ export default function createNewOfferForMyContacts({
       if (onProgress) onProgress({type: 'SENDING_OFFER_TO_NETWORK'})
       return pipe(
         effectToTaskEither(
-          offerApi.createNewOffer({
-            body: {
+          sendOfferToNetworkBatchPrivateParts({
+            offerApi,
+            offerData: {
               offerPrivateList: privatePayloads.privateParts,
               countryPrefix,
               payloadPublic: encryptedPublic,

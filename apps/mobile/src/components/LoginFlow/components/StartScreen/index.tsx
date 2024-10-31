@@ -3,6 +3,7 @@ import {Image, TouchableOpacity} from 'react-native'
 import {Stack, Text, XStack} from 'tamagui'
 import bigNameSvg from '../../../../images/bigNameSvg'
 import {type LoginStackScreenProps} from '../../../../navigationTypes'
+import clearMmkvStorageAndEmptyAtoms from '../../../../utils/clearMmkvStorageAndEmptyAtoms'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import SVGImage from '../../../Image'
 import {
@@ -69,6 +70,8 @@ function StartScreen({navigation}: Props): JSX.Element {
       <NextButtonProxy
         disabled={!touAgree}
         onPress={() => {
+          // Lets make sure the device is fresh and clean before proceeding with login
+          clearMmkvStorageAndEmptyAtoms()
           navigation.navigate('PhoneNumber')
         }}
         text={t('common.continue')}

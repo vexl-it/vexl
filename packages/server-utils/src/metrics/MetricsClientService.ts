@@ -68,8 +68,7 @@ export class MetricsClientService extends Context.Tag('MetricsClientService')<
           message: MetricsMessage
         ): Effect.Effect<void, ReportingMetricsError> =>
           message.toProducibleMessage().pipe(
-            Effect.catchTag(
-              'ParseError',
+            Effect.catchAll(
               (error) =>
                 new ReportingMetricsError({
                   cause: error,

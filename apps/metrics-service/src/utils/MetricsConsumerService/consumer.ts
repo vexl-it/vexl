@@ -1,4 +1,3 @@
-import {METRICS_QUEUE_NAME} from '@vexl-next/server-utils/src/metrics/domain'
 import {Effect, Runtime} from 'effect'
 import {type Consumer, type IMessageTransferable} from 'redis-smq'
 import {ErrorSettingUpConsumer} from '.'
@@ -34,6 +33,7 @@ export const silentlyShutdownConsumer = (
 
 export const registerMessageHandler = <E, R>(
   consumer: Consumer,
+  queueName: string,
   handler: (message: IMessageTransferable) => Effect.Effect<void, E, R>
 ): Effect.Effect<void, ErrorSettingUpConsumer, R> =>
   Effect.gen(function* (_) {
@@ -43,7 +43,7 @@ export const registerMessageHandler = <E, R>(
       // eslint-disable-next-line @typescript-eslint/no-invalid-void-type
       Effect.async<void, ErrorSettingUpConsumer>((cb) => {
         consumer.consume(
-          METRICS_QUEUE_NAME,
+          queueName,
           (message, consumedCallback) => {
             runFork(
               handler(message).pipe(

@@ -1,10 +1,9 @@
 import {Schema} from '@effect/schema'
 import {type ParseError} from '@effect/schema/ParseResult'
 import {UuidE} from '@vexl-next/domain/src/utility/Uuid.brand'
-import {Effect} from 'effect'
+import {type ConfigError, Effect} from 'effect'
 import {type IMessageTransferable, ProducibleMessage} from 'redis-smq'
-
-export const METRICS_QUEUE_NAME = 'metrics' as const
+import {metricsQueueNameConfig} from '../commonConfigs'
 
 export class MetricsMessage extends Schema.Class<MetricsMessage>(
   'MetricsMessage'
@@ -34,16 +33,23 @@ export class MetricsMessage extends Schema.Class<MetricsMessage>(
     return MetricsMessage.decodeUnknwon(message.body)
   }
 
-  toProducibleMessage(): Effect.Effect<ProducibleMessage, ParseError> {
-    return MetricsMessage.encode(this).pipe(
-      Effect.flatMap((encodedBody) =>
+  toProducibleMessage(): Effect.Effect<
+    ProducibleMessage,
+    ParseError | ConfigError.ConfigError
+  > {
+    const encodeMetricsMessage = MetricsMessage.encode(this)
+    return Effect.gen(function* (_) {
+      const encodedBody = yield* _(encodeMetricsMessage)
+      const queueName = yield* _(metricsQueueNameConfig)
+
+      return yield* _(
         Effect.sync(() => {
           const message = new ProducibleMessage()
-          message.setBody(encodedBody).setQueue(METRICS_QUEUE_NAME)
+          message.setBody(encodedBody).setQueue(queueName)
           return message
         })
       )
-    )
+    })
   }
 }
 export class ReportingMetricsError extends Schema.TaggedError<ReportingMetricsError>(

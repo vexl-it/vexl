@@ -1,4 +1,3 @@
-import {type ExtractErrorFromEffect} from '@vexl-next/resources-utils/src/utils/ExtractErrorFromEffect'
 import {type LocationSuggestion} from '@vexl-next/rest-api/src/services/location/contracts'
 import {createScope, molecule, type MoleculeOrInterface} from 'bunshi'
 import {useMolecule} from 'bunshi/dist/react'
@@ -40,7 +39,7 @@ export const LocationSearchMolecule = molecule((_, getScope) => {
       ): Promise<
         Either.Either<
           readonly LocationSuggestion[],
-          | ExtractErrorFromEffect<
+          | Effect.Effect.Error<
               ReturnType<typeof api.location.getLocationSuggestions>
             >
           | UnknownLoadingError

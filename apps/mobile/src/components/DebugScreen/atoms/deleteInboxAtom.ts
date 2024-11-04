@@ -1,6 +1,5 @@
 import {type KeyHolder} from '@vexl-next/cryptography'
-import * as TE from 'fp-ts/TaskEither'
-import {pipe} from 'fp-ts/function'
+import {Effect} from 'effect'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
 
@@ -9,16 +8,11 @@ const deleteInboxActionAtom = atom(
   (get, set, keyPair: KeyHolder.PrivateKeyHolder) => {
     const api = get(apiAtom)
 
-    return pipe(
-      api.chat.deleteInbox({keyPair}),
-      TE.match(
-        () => {
-          return false
-        },
-        () => {
-          return true
-        }
-      )
+    return api.chat.deleteInbox({keyPair}).pipe(
+      Effect.match({
+        onFailure: () => false,
+        onSuccess: () => true,
+      })
     )
   }
 )

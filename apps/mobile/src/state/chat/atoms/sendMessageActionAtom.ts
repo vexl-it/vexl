@@ -4,6 +4,7 @@ import {
 } from '@vexl-next/domain/src/general/messaging'
 import {now} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import sendMessage from '@vexl-next/resources-utils/src/chat/sendMessage'
+import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
@@ -44,21 +45,23 @@ export default function sendMessageActionAtom(
         TE.Do,
         TE.chainTaskK(() => replaceImageFileUrisWithBase64(message)),
         TE.chainW((m) =>
-          sendMessage({
-            message: m,
-            api: api.chat,
-            senderKeypair: chat.inbox.privateKey,
-            receiverPublicKey: chat.otherSide.publicKey,
-            notificationApi: api.notification,
-            theirFcmCypher: chat.otherSideFcmCypher,
-            otherSideVersion: chat.otherSideVersion,
-          })
+          effectToTaskEither(
+            sendMessage({
+              message: m,
+              api: api.chat,
+              senderKeypair: chat.inbox.privateKey,
+              receiverPublicKey: chat.otherSide.publicKey,
+              notificationApi: api.notification,
+              theirFcmCypher: chat.otherSideFcmCypher,
+              otherSideVersion: chat.otherSideVersion,
+            })
+          )
         ),
         TE.match(
           (e): ChatMessageWithState => {
             if (
-              e._tag === 'inboxDoesNotExist' ||
-              e._tag === 'notPermittedToSendMessageToTargetInbox'
+              e._tag === 'ReceiverInboxDoesNotExistError' ||
+              e._tag === 'NotPermittedToSendMessageToTargetInbox'
             ) {
               return {
                 state: 'received',

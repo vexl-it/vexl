@@ -1,6 +1,7 @@
 import {type PrivateKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {type Inbox} from '@vexl-next/domain/src/general/messaging'
 import {toBasicError} from '@vexl-next/domain/src/utility/errors'
+import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {atom, useSetAtom} from 'jotai'
@@ -48,10 +49,12 @@ export const createInboxAtom = atom<
     TE.chainTaskK(getNotificationToken),
     TE.chainW((token) =>
       pipe(
-        api.chat.createInbox({
-          token: token ?? undefined,
-          keyPair: inbox.privateKey,
-        }),
+        effectToTaskEither(
+          api.chat.createInbox({
+            token: token ?? undefined,
+            keyPair: inbox.privateKey,
+          })
+        ),
         TE.mapLeft(toBasicError('ApiErrorCreatingInbox'))
       )
     ),

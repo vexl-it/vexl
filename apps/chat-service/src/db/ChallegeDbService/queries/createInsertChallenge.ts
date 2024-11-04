@@ -3,11 +3,11 @@ import {SqlResolver} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
-import {ChatChallengeE} from '@vexl-next/rest-api/src/services/chat/contracts'
+import {ChatChallenge} from '@vexl-next/rest-api/src/services/chat/contracts'
 import {Effect, flow} from 'effect'
 
 const InsertChallengeParams = Schema.Struct({
-  challenge: ChatChallengeE,
+  challenge: ChatChallenge,
   publicKey: PublicKeyPemBase64E,
   createdAt: Schema.optionalWith(Schema.DateFromSelf, {
     default: () => new Date(),

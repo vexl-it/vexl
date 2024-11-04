@@ -1,5 +1,4 @@
 import {Latitude, Longitude} from '@vexl-next/domain/src/utility/geoCoordinates'
-import {type ExtractErrorFromEffect} from '@vexl-next/resources-utils/src/utils/ExtractErrorFromEffect'
 import {type GetGeocodedCoordinatesResponse} from '@vexl-next/rest-api/src/services/location/contracts'
 import {Effect, Either, Exit, Fiber} from 'effect'
 import * as E from 'fp-ts/Either'
@@ -65,7 +64,7 @@ function useAtoms({
           ): Promise<
             Either.Either<
               GetGeocodedCoordinatesResponse,
-              | ExtractErrorFromEffect<
+              | Effect.Effect.Error<
                   ReturnType<typeof api.location.getGeocodedCoordinates>
                 >
               | UnknownLoadingError

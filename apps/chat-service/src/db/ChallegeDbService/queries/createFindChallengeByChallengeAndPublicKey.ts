@@ -2,13 +2,13 @@ import {Schema} from '@effect/schema'
 import {SqlClient, SqlSchema} from '@effect/sql'
 import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
-import {ChatChallengeE} from '@vexl-next/rest-api/src/services/chat/contracts'
+import {ChatChallenge} from '@vexl-next/rest-api/src/services/chat/contracts'
 import {Effect, flow} from 'effect'
 import {challengeExpirationMinutesConfig} from '../../../configs'
 import {ChallengeRecord} from '../domain'
 
 export const FindChallengeByChallengeAndPublicKey = Schema.Struct({
-  challenge: ChatChallengeE,
+  challenge: ChatChallenge,
   publicKey: PublicKeyPemBase64E,
 })
 export type FindChallengeByChallengeAndPublicKey = Schema.Schema.Type<

@@ -1,6 +1,7 @@
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
 import {toBasicError} from '@vexl-next/domain/src/utility/errors'
 import {sendMessagingRequest} from '@vexl-next/resources-utils/src/chat/sendMessagingRequest'
+import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import * as O from 'fp-ts/Option'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
@@ -34,19 +35,21 @@ const sendRequestActionAtom = atom(
       TE.fromTask,
       TE.bindTo('encryptedToken'),
       TE.bind('message', ({encryptedToken}) =>
-        sendMessagingRequest({
-          text,
-          notificationApi: api.notification,
-          theirFcmCypher: originOffer.offerInfo.publicPart.fcmCypher,
-          api: api.chat,
-          fromKeypair: session.privateKey,
-          myVersion: version,
-          toPublicKey: originOffer.offerInfo.publicPart.offerPublicKey,
-          otherSideVersion:
-            originOffer.offerInfo.publicPart.authorClientVersion,
-          myFcmCypher: O.toUndefined(encryptedToken)?.cypher,
-          lastReceivedFcmCypher: originOffer.offerInfo.publicPart.fcmCypher,
-        })
+        effectToTaskEither(
+          sendMessagingRequest({
+            text,
+            notificationApi: api.notification,
+            theirFcmCypher: originOffer.offerInfo.publicPart.fcmCypher,
+            api: api.chat,
+            fromKeypair: session.privateKey,
+            myVersion: version,
+            toPublicKey: originOffer.offerInfo.publicPart.offerPublicKey,
+            otherSideVersion:
+              originOffer.offerInfo.publicPart.authorClientVersion,
+            myFcmCypher: O.toUndefined(encryptedToken)?.cypher,
+            lastReceivedFcmCypher: originOffer.offerInfo.publicPart.fcmCypher,
+          })
+        )
       ),
       TE.map(({message, encryptedToken}) =>
         set(upsertChatForTheirOfferActionAtom, {
@@ -85,10 +88,12 @@ export const sendRequestHandleUIActionAtom = atom(
               TE.chainTaskK(getNotificationToken),
               TE.chainW((token) =>
                 pipe(
-                  api.chat.createInbox({
-                    token: token ?? undefined,
-                    keyPair: session.privateKey,
-                  }),
+                  effectToTaskEither(
+                    api.chat.createInbox({
+                      token: token ?? undefined,
+                      keyPair: session.privateKey,
+                    })
+                  ),
                   TE.mapLeft(toBasicError('ApiErrorCreatingInbox'))
                 )
               ),

@@ -16,7 +16,8 @@ import retrieveMessages, {
   type ApiErrorRetrievingMessages,
 } from '@vexl-next/resources-utils/src/chat/retrieveMessages'
 import {type ErrorChatMessageRequiresNewerVersion} from '@vexl-next/resources-utils/src/chat/utils/parseChatMessage'
-import {type ChatPrivateApi} from '@vexl-next/rest-api/src/services/chat'
+import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
+import {type ChatApi} from '@vexl-next/rest-api/src/services/chat'
 import * as A from 'fp-ts/Array'
 import * as E from 'fp-ts/Either'
 import * as T from 'fp-ts/Task'
@@ -195,7 +196,7 @@ export interface NoMessagesLeft {
 }
 
 function refreshInbox(
-  api: ChatPrivateApi
+  api: ChatApi
 ): (
   getInbox: () => InboxInState,
   inboxOffer?: OneOfferInState
@@ -205,11 +206,13 @@ function refreshInbox(
 > {
   return (getInbox, inboxOffer) =>
     pipe(
-      retrieveMessages({
-        api,
-        currentAppVersion: version,
-        inboxKeypair: getInbox().inbox.privateKey,
-      }),
+      effectToTaskEither(
+        retrieveMessages({
+          api,
+          currentAppVersion: version,
+          inboxKeypair: getInbox().inbox.privateKey,
+        })
+      ),
       TE.map((one) => {
         const incompatibleMessagesError = one.errors.filter(
           (
@@ -301,11 +304,11 @@ function deletePulledMessagesReportLeft({
   api,
   keyPair,
 }: {
-  api: ChatPrivateApi
+  api: ChatApi
   keyPair: PrivateKeyHolder
 }): T.Task<void> {
   return pipe(
-    api.deletePulledMessages({keyPair}),
+    effectToTaskEither(api.deletePulledMessages({keyPair})),
     TE.match(
       (error) => {
         reportError('error', new Error('Error deleting pulled messages'), {
@@ -354,7 +357,7 @@ export const fetchAndStoreMessagesForInboxAtom = atom<
           return T.of({updatedInbox: inbox, newMessages: []})
         }
 
-        if (error._tag === 'inboxDoesNotExist') {
+        if (error._tag === 'InboxDoesNotExist') {
           reportError(
             'warn',
             new Error(
@@ -366,10 +369,12 @@ export const fetchAndStoreMessagesForInboxAtom = atom<
             getNotificationToken(),
             TE.fromTask,
             TE.chainW((token) =>
-              api.chat.createInbox({
-                token: token ?? undefined,
-                keyPair: inbox.inbox.privateKey,
-              })
+              effectToTaskEither(
+                api.chat.createInbox({
+                  token: token ?? undefined,
+                  keyPair: inbox.inbox.privateKey,
+                })
+              )
             ),
             TE.match(
               (e) => {

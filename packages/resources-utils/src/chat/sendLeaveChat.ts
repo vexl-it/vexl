@@ -9,18 +9,17 @@ import {
 } from '@vexl-next/domain/src/general/messaging'
 import {type FcmCypher} from '@vexl-next/domain/src/general/notifications'
 import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
-import {type ChatPrivateApi} from '@vexl-next/rest-api/src/services/chat'
+import {type ChatApi} from '@vexl-next/rest-api/src/services/chat'
 import {type NotificationApi} from '@vexl-next/rest-api/src/services/notification'
-import * as TE from 'fp-ts/TaskEither'
-import {pipe} from 'fp-ts/function'
+import {Effect} from 'effect'
+import {taskEitherToEffect} from '../effect-helpers/TaskEitherConverter'
 import {callWithNotificationService} from '../notifications/callWithNotificationService'
-import {type ExtractLeftTE} from '../utils/ExtractLeft'
 import {type JsonStringifyError, type ZodParseError} from '../utils/parsing'
 import {type ErrorEncryptingMessage} from './utils/chatCrypto'
 import {messageToNetwork} from './utils/messageIO'
 
-export type SendMessageApiErrors = ExtractLeftTE<
-  ReturnType<ChatPrivateApi['sendMessage']>
+export type SendMessageApiErrors = Effect.Effect.Error<
+  ReturnType<ChatApi['sendMessage']>
 >
 
 export default function sendLeaveChat({
@@ -32,26 +31,28 @@ export default function sendLeaveChat({
   otherSideVersion,
   notificationApi,
 }: {
-  api: ChatPrivateApi
+  api: ChatApi
   receiverPublicKey: PublicKeyPemBase64
   message: ChatMessage
   senderKeypair: PrivateKeyHolder
   theirFcmCypher?: FcmCypher | undefined
   otherSideVersion: SemverString | undefined
   notificationApi: NotificationApi
-}): TE.TaskEither<
+}): Effect.Effect<
+  ServerMessage,
   | ZodParseError<ChatMessagePayload>
   | JsonStringifyError
   | ErrorEncryptingMessage
-  | SendMessageApiErrors,
-  ServerMessage
+  | SendMessageApiErrors
 > {
-  return pipe(
-    message,
-    messageToNetwork(receiverPublicKey),
-    TE.chainW((encrypted) =>
+  return Effect.gen(function* (_) {
+    const encryptedMessage = yield* _(
+      taskEitherToEffect(messageToNetwork(receiverPublicKey)(message))
+    )
+
+    yield* _(
       callWithNotificationService(api.leaveChat, {
-        message: encrypted,
+        message: encryptedMessage,
         receiverPublicKey,
         senderPublicKey: senderKeypair.publicKeyPemBase64,
         keyPair: senderKeypair,
@@ -61,5 +62,10 @@ export default function sendLeaveChat({
         otherSideVersion,
       })
     )
-  )
+
+    return {
+      message: encryptedMessage,
+      senderPublicKey: senderKeypair.publicKeyPemBase64,
+    }
+  })
 }

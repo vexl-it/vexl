@@ -5,8 +5,9 @@ import {
 import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import sendMessage from '@vexl-next/resources-utils/src/chat/sendMessage'
 import {type ErrorEncryptingMessage} from '@vexl-next/resources-utils/src/chat/utils/chatCrypto'
-import {type ExtractLeftTE} from '@vexl-next/resources-utils/src/utils/ExtractLeft'
-import {type ChatPrivateApi} from '@vexl-next/rest-api/src/services/chat'
+import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
+import {type ChatApi} from '@vexl-next/rest-api/src/services/chat'
+import {type Effect} from 'effect'
 import * as E from 'fp-ts/Either'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
@@ -24,8 +25,8 @@ export default function blockChatActionAtom(
   [{text: string}],
   TE.TaskEither<
     | ErrorEncryptingMessage
-    | ExtractLeftTE<ReturnType<ChatPrivateApi['blockInbox']>>
-    | ExtractLeftTE<ReturnType<typeof sendMessage>>,
+    | Effect.Effect.Error<ReturnType<ChatApi['blockInbox']>>
+    | Effect.Effect.Error<ReturnType<typeof sendMessage>>,
     ChatMessageWithState
   >
 > {
@@ -43,20 +44,23 @@ export default function blockChatActionAtom(
     }
 
     return pipe(
-      sendMessage({
-        api: api.chat,
-        senderKeypair: chat.inbox.privateKey,
-        receiverPublicKey: chat.otherSide.publicKey,
-        message: messageToSend,
-        notificationApi: api.notification,
-        theirFcmCypher: chat.otherSideFcmCypher,
-        otherSideVersion: chat.otherSideVersion,
-      }),
+      effectToTaskEither(
+        sendMessage({
+          api: api.chat,
+          senderKeypair: chat.inbox.privateKey,
+          receiverPublicKey: chat.otherSide.publicKey,
+          message: messageToSend,
+          notificationApi: api.notification,
+          theirFcmCypher: chat.otherSideFcmCypher,
+          otherSideVersion: chat.otherSideVersion,
+        })
+      ),
       TE.matchW(
         (e): E.Either<typeof e, null> => {
           if (
-            e._tag === 'inboxDoesNotExist' ||
-            e._tag === 'notPermittedToSendMessageToTargetInbox'
+            e._tag === 'SenderInboxDoesNotExistError' ||
+            e._tag === 'ReceiverInboxDoesNotExistError' ||
+            e._tag === 'NotPermittedToSendMessageToTargetInbox'
           ) {
             return E.right(null)
           }
@@ -66,10 +70,12 @@ export default function blockChatActionAtom(
         () => E.right(null)
       ),
       TE.chainW(() =>
-        api.chat.blockInbox({
-          keyPair: chat.inbox.privateKey,
-          publicKeyToBlock: chat.otherSide.publicKey,
-        })
+        effectToTaskEither(
+          api.chat.blockInbox({
+            keyPair: chat.inbox.privateKey,
+            publicKeyToBlock: chat.otherSide.publicKey,
+          })
+        )
       ),
       TE.map((): ChatMessageWithState => {
         const successMessage = {

@@ -7,10 +7,10 @@ import {
   type SymmetricKey,
 } from '@vexl-next/domain/src/general/offers'
 import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
+import {type Effect} from 'effect'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {effectToTaskEither} from '../effect-helpers/TaskEitherConverter'
-import {type ExtractErrorFromEffect} from '../utils/ExtractErrorFromEffect'
 import decryptOffer, {
   type ErrorDecryptingOffer,
   type NonCompatibleOfferVersionError,
@@ -21,7 +21,7 @@ import encryptOfferPublicPayload, {
 } from './utils/encryptOfferPublicPayload'
 import {type PrivatePartEncryptionError} from './utils/encryptPrivatePart'
 
-export type ApiErrorUpdatingOffer = ExtractErrorFromEffect<
+export type ApiErrorUpdatingOffer = Effect.Effect.Error<
   ReturnType<OfferApi['updateOffer']>
 >
 export default function updateOffer({
@@ -42,7 +42,7 @@ export default function updateOffer({
   | ApiErrorUpdatingOffer
   | ErrorEncryptingPublicPart
   | PrivatePartEncryptionError
-  | ExtractErrorFromEffect<ReturnType<OfferApi['createPrivatePart']>>
+  | Effect.Effect.Error<ReturnType<OfferApi['createPrivatePart']>>
   | ErrorDecryptingOffer
   | NonCompatibleOfferVersionError,
   OfferInfo

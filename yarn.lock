@@ -13086,7 +13086,6 @@ __metadata:
     "@vexl-next/prettier-config": 0.0.0
     "@vexl-next/server-utils": 0.0.0
     "@vexl-next/tsconfig": 0.0.0
-    axios: ^1.7.4
     effect: ^3.6.3
     effect-http: ^0.77.4
     eslint: ^8.50.0

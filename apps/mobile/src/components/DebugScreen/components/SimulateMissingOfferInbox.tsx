@@ -1,6 +1,7 @@
 import {Picker} from '@react-native-picker/picker'
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
 import {generateKeyPair} from '@vexl-next/resources-utils/src/utils/crypto'
+import {Effect} from 'effect'
 import * as A from 'fp-ts/Array'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
@@ -32,9 +33,9 @@ function SimulateMissingOfferInbox(): JSX.Element {
       Alert.alert('No inbox for that offer found in state')
       return
     }
-    await store
-      .get(apiAtom)
-      .chat.deleteInbox({keyPair: inbox.inbox.privateKey})()
+    await Effect.runPromise(
+      store.get(apiAtom).chat.deleteInbox({keyPair: inbox.inbox.privateKey})
+    )
   }
 
   function cloneOffer10x(offer: OneOfferInState): T.Task<null> {

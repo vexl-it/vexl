@@ -9,6 +9,7 @@ import {type FcmToken} from '@vexl-next/domain/src/utility/FcmToken.brand'
 import {SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {now} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import sendMessage from '@vexl-next/resources-utils/src/chat/sendMessage'
+import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import * as A from 'fp-ts/Array'
 import * as O from 'fp-ts/Option'
 import * as T from 'fp-ts/Task'
@@ -83,15 +84,17 @@ export const sendFcmCypherUpdateMessageActionAtom = atom(
         ),
         TE.fromTask,
         TE.bind('sentMessage', ({messageToSend}) =>
-          sendMessage({
-            api: get(apiAtom).chat,
-            senderKeypair: chatWithMessages.chat.inbox.privateKey,
-            receiverPublicKey: chatWithMessages.chat.otherSide.publicKey,
-            message: messageToSend,
-            notificationApi: get(apiAtom).notification,
-            theirFcmCypher: chatWithMessages.chat.otherSideFcmCypher,
-            otherSideVersion: chatWithMessages.chat.otherSideVersion,
-          })
+          effectToTaskEither(
+            sendMessage({
+              api: get(apiAtom).chat,
+              senderKeypair: chatWithMessages.chat.inbox.privateKey,
+              receiverPublicKey: chatWithMessages.chat.otherSide.publicKey,
+              message: messageToSend,
+              notificationApi: get(apiAtom).notification,
+              theirFcmCypher: chatWithMessages.chat.otherSideFcmCypher,
+              otherSideVersion: chatWithMessages.chat.otherSideVersion,
+            })
+          )
         ),
         TE.map(({fcmTokenInfo}) => {
           const chatAtom = focusChatByInboxKeyAndSenderKey({
@@ -102,7 +105,7 @@ export const sendFcmCypherUpdateMessageActionAtom = atom(
         }),
         TE.matchW(
           (e) => {
-            if (e._tag !== 'NetworkErrorAxios') {
+            if (e._tag !== 'NetworkError') {
               reportError(
                 'error',
                 new Error('Error while refreshing fcm cypher'),

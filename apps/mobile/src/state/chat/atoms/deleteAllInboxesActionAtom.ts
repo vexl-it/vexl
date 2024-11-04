@@ -1,10 +1,7 @@
 import {generateChatMessageId} from '@vexl-next/domain/src/general/messaging'
 import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import sendMessage from '@vexl-next/resources-utils/src/chat/sendMessage'
-import {
-  effectToTaskEither,
-  taskEitherToEffect,
-} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
+import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {Array, Effect} from 'effect'
 import {pipe} from 'fp-ts/function'
 import {atom} from 'jotai'
@@ -40,7 +37,6 @@ const deleteAllInboxesActionAtom = atom(null, (get, set) => {
           notificationApi: api.notification,
           otherSideVersion: oneChat.chat.otherSideVersion,
         }),
-        taskEitherToEffect,
         Effect.ignoreLogged
       )
     }),
@@ -51,7 +47,6 @@ const deleteAllInboxesActionAtom = atom(null, (get, set) => {
           api.chat.deleteInbox({
             keyPair: oneInbox.privateKey,
           }),
-          taskEitherToEffect,
           Effect.ignoreLogged
         )
       )

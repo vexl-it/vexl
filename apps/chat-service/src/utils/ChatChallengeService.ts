@@ -6,8 +6,7 @@ import {
   generateChallenge,
 } from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {
-  ChatChallengeE,
-  type ChatChallenge,
+  ChatChallenge,
   type SignedChallenge,
 } from '@vexl-next/rest-api/src/services/chat/contracts'
 import {
@@ -19,7 +18,7 @@ import {Context, Effect, Layer, Option} from 'effect'
 import {ChallengeDbService} from '../db/ChallegeDbService'
 
 export const generateRandomChatChallenge = generateChallenge().pipe(
-  Effect.flatMap(Schema.decode(ChatChallengeE)),
+  Effect.flatMap(Schema.decode(ChatChallenge)),
   Effect.catchAll((e) =>
     Effect.zipRight(
       Effect.log('Error while normalizing challenge', e),

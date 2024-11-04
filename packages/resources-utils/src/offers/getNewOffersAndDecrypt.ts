@@ -4,13 +4,12 @@ import {type IsoDatetimeStringE} from '@vexl-next/domain/src/utility/IsoDatetime
 import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
 import {Array, Effect, type Either, flow} from 'effect'
 import {taskEitherToEffect} from '../effect-helpers/TaskEitherConverter'
-import {type ExtractErrorFromEffect} from '../utils/ExtractErrorFromEffect'
 import decryptOffer, {
   type ErrorDecryptingOffer,
   type NonCompatibleOfferVersionError,
 } from './decryptOffer'
 
-export type ApiErrorFetchingOffers = ExtractErrorFromEffect<
+export type ApiErrorFetchingOffers = Effect.Effect.Error<
   ReturnType<OfferApi['getOffersForMeModifiedOrCreatedAfter']>
 >
 

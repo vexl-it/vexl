@@ -3,33 +3,6 @@ import {
   ExpectedErrorHttpCode,
   ServerErrorHttpCode,
 } from '@vexl-next/server-utils/src/HttpCodes'
-import {type AxiosError, type AxiosResponse} from 'axios'
-
-export interface UnexpectedApiResponseErrorAxios {
-  readonly _tag: 'UnexpectedApiResponseErrorAxios'
-  readonly data: any
-  readonly errors: unknown
-}
-
-export interface BadStatusCodeError {
-  readonly _tag: 'BadStatusCodeError'
-  readonly response: AxiosResponse<any, any>
-}
-
-export interface UnknownErrorAxios {
-  readonly _tag: 'UnknownErrorAxios'
-  readonly error: unknown
-}
-
-export interface NetworkErrorAxios {
-  readonly _tag: 'NetworkErrorAxios'
-  readonly code:
-    | typeof AxiosError.ERR_NETWORK
-    | typeof AxiosError.ERR_CANCELED
-    | typeof AxiosError.ETIMEDOUT
-    | typeof AxiosError.ECONNABORTED
-  readonly error: AxiosError
-}
 
 export class NetworkError extends Schema.TaggedError<NetworkError>(
   'NetworkError'

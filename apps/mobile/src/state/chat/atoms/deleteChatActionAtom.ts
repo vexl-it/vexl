@@ -7,13 +7,14 @@ import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMillisecond
 import sendLeaveChat from '@vexl-next/resources-utils/src/chat/sendLeaveChat'
 import {type SendMessageApiErrors} from '@vexl-next/resources-utils/src/chat/sendMessage'
 import {type ErrorEncryptingMessage} from '@vexl-next/resources-utils/src/chat/utils/chatCrypto'
+import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {
   type JsonStringifyError,
   type ZodParseError,
 } from '@vexl-next/resources-utils/src/utils/parsing'
+import {flow, pipe, type Effect} from 'effect'
 import * as E from 'fp-ts/Either'
 import * as TE from 'fp-ts/TaskEither'
-import {flow, pipe} from 'fp-ts/function'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
 import {type ActionAtomType} from '../../../utils/atomUtils/ActionAtomType'
@@ -55,21 +56,26 @@ export default function deleteChatActionAtom(
 
     return pipe(
       shouldSendMessage
-        ? sendLeaveChat({
-            api: api.chat,
-            senderKeypair: chat.inbox.privateKey,
-            receiverPublicKey: chat.otherSide.publicKey,
-            message: messageToSend,
-            theirFcmCypher: chat.otherSideFcmCypher,
-            notificationApi: api.notification,
-            otherSideVersion: chat.otherSideVersion,
-          })
-        : TE.right({}),
+        ? effectToTaskEither(
+            sendLeaveChat({
+              api: api.chat,
+              senderKeypair: chat.inbox.privateKey,
+              receiverPublicKey: chat.otherSide.publicKey,
+              message: messageToSend,
+              theirFcmCypher: chat.otherSideFcmCypher,
+              notificationApi: api.notification,
+              otherSideVersion: chat.otherSideVersion,
+            })
+          )
+        : // eslint-disable-next-line @typescript-eslint/ban-types
+          TE.right<Effect.Effect.Error<ReturnType<typeof sendLeaveChat>>, {}>(
+            {}
+          ),
       TE.matchW(
         (e): E.Either<typeof e, null> => {
           if (
-            e._tag === 'inboxDoesNotExist' ||
-            e._tag === 'notPermittedToSendMessageToTargetInbox'
+            e._tag === 'ReceiverInboxDoesNotExistError' ||
+            e._tag === 'NotPermittedToSendMessageToTargetInbox'
           ) {
             return E.right(null)
           }

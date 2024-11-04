@@ -2,46 +2,24 @@ import {Schema} from '@effect/schema'
 import {type PrivateKeyHolder} from '@vexl-next/cryptography/src/KeyHolder'
 import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
-import {type CreateAxiosDefaults} from 'axios'
-import * as TE from 'fp-ts/TaskEither'
-import {pipe} from 'fp-ts/function'
-import urlJoin from 'url-join'
+import {Effect} from 'effect'
 import {type PlatformName} from '../../PlatformName'
 import {type ServiceUrl} from '../../ServiceUrl.brand'
 import {type GetUserSessionCredentials} from '../../UserSessionCredentials.brand'
+import {createClientInstanceWithAuth} from '../../client'
+import {CommonHeaders} from '../../commonHeaders'
 import {
-  axiosCallWithValidation,
-  createAxiosInstanceWithAuthAndLogging,
+  handleCommonAndExpectedErrorsEffect,
+  handleCommonErrorsEffect,
   type LoggingFunction,
 } from '../../utils'
 import {
-  InboxDoesNotExistError,
-  NotPermittedToSendMessageToTargetInboxError,
-} from '../contact/contracts'
-import {
-  ApproveRequestResponse,
-  BlockInboxResponse,
-  CancelApprovalResponse,
-  CreateChallengeResponse,
-  CreateChallengeResponseE,
-  CreateChallengesResponse,
-  CreateChallengesResponseE,
-  CreateInboxResponse,
-  DeleteInboxResponse,
-  DeleteInboxesResponse,
-  DeletePulledMessagesResponse,
-  LeaveChatResponse,
-  OtherSideAccountDeleted,
-  ReceiverInboxDoesNotExistError,
-  RequestApprovalResponse,
-  RequestCancelledError,
-  RequestNotFoundError,
-  RequestNotPendingError,
-  RetrieveMessagesResponse,
-  SendMessageResponse,
-  SendMessagesResponse,
-  SenderInboxDoesNotExistError,
-  UpdateInboxResponse,
+  ApproveRequestErrors,
+  CancelRequestApprovalErrors,
+  LeaveChatErrors,
+  RequestApprovalErrors,
+  RetrieveMessagesErrors,
+  SendMessageErrors,
   type ApproveRequestRequest,
   type BlockInboxRequest,
   type CancelApprovalRequest,
@@ -58,16 +36,18 @@ import {
   type SendMessagesRequest,
   type UpdateInboxRequest,
 } from './contracts'
+import {ChatApiSpecification} from './specification'
 import {addChallengeToRequest} from './utils'
 
+const decodeCommonHeaders = Schema.decodeSync(CommonHeaders)
+
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export function privateApi({
+export function api({
   platform,
   clientVersion,
   clientSemver,
   url,
   getUserSessionCredentials,
-  axiosConfig,
   loggingFunction,
 }: {
   platform: PlatformName
@@ -75,22 +55,23 @@ export function privateApi({
   clientSemver: SemverString
   url: ServiceUrl
   getUserSessionCredentials: GetUserSessionCredentials
-  axiosConfig?: Omit<CreateAxiosDefaults, 'baseURL'>
   loggingFunction?: LoggingFunction | null
 }) {
-  const axiosInstance = createAxiosInstanceWithAuthAndLogging(
-    getUserSessionCredentials,
+  const client = createClientInstanceWithAuth({
+    api: ChatApiSpecification,
     platform,
     clientVersion,
     clientSemver,
-    {
-      ...axiosConfig,
-      baseURL: urlJoin(url, '/api/v1'),
-    },
-    loggingFunction
-  )
+    getUserSessionCredentials,
+    url,
+    loggingFunction,
+  })
 
-  const addChallenge = addChallengeToRequest(axiosInstance)
+  const commonHeaders = {
+    'user-agent': `Vexl/${clientVersion} (${clientSemver}) ${platform}`,
+  }
+
+  const addChallenge = addChallengeToRequest(client)
 
   type RequestWithGeneratableChallenge<T> = Omit<
     T,
@@ -103,286 +84,134 @@ export function privateApi({
     // ----------------------
     // 👇 Inbox
     // ----------------------
-    updateInbox(data: RequestWithGeneratableChallenge<UpdateInboxRequest>) {
-      return pipe(
-        addChallenge(data),
-        TE.chainW((data) =>
-          axiosCallWithValidation(
-            axiosInstance,
-            {method: 'put', url: '/inboxes', data},
-            UpdateInboxResponse
+    updateInbox: (
+      updateInboxRequest: RequestWithGeneratableChallenge<UpdateInboxRequest>
+    ) =>
+      addChallenge(updateInboxRequest).pipe(
+        Effect.flatMap((body) =>
+          handleCommonErrorsEffect(client.updateInbox({body}))
+        )
+      ),
+    createInbox: (
+      createInboxRequest: RequestWithGeneratableChallenge<CreateInboxRequest>
+    ) =>
+      addChallenge(createInboxRequest).pipe(
+        Effect.flatMap((body) =>
+          handleCommonErrorsEffect(
+            client.createInbox({
+              body,
+              headers: decodeCommonHeaders(commonHeaders),
+            })
           )
         )
-      )
-    },
-    createInbox(data: RequestWithGeneratableChallenge<CreateInboxRequest>) {
-      return pipe(
-        addChallenge(data),
-        TE.chainW((data) =>
-          axiosCallWithValidation(
-            axiosInstance,
-            {method: 'post', url: '/inboxes', data},
-            CreateInboxResponse
+      ),
+    deleteInbox: (
+      deleteInboxRequest: RequestWithGeneratableChallenge<DeleteInboxRequest>
+    ) =>
+      addChallenge(deleteInboxRequest).pipe(
+        Effect.flatMap((body) =>
+          handleCommonErrorsEffect(client.deleteInbox({body}))
+        )
+      ),
+    deletePulledMessages: (
+      deletePulledMessagesRequest: RequestWithGeneratableChallenge<DeletePulledMessagesRequest>
+    ) =>
+      addChallenge(deletePulledMessagesRequest).pipe(
+        Effect.flatMap((body) =>
+          handleCommonErrorsEffect(client.deletePulledMessages({body}))
+        )
+      ),
+    blockInbox: (
+      blockInboxRequest: RequestWithGeneratableChallenge<BlockInboxRequest>
+    ) =>
+      addChallenge(blockInboxRequest).pipe(
+        Effect.flatMap((body) =>
+          handleCommonErrorsEffect(client.blockInbox({body}))
+        )
+      ),
+    requestApproval: (requestApprovalRequest: RequestApprovalRequest) =>
+      handleCommonAndExpectedErrorsEffect(
+        client.requestApproval({body: requestApprovalRequest}),
+        RequestApprovalErrors
+      ),
+    cancelRequestApproval: (cancelApprovalRequest: CancelApprovalRequest) =>
+      handleCommonAndExpectedErrorsEffect(
+        client.cancelRequestApproval({body: cancelApprovalRequest}),
+        CancelRequestApprovalErrors
+      ),
+    approveRequest: (
+      approveRequestRequest: RequestWithGeneratableChallenge<ApproveRequestRequest>
+    ) =>
+      addChallenge(approveRequestRequest).pipe(
+        Effect.flatMap((body) =>
+          handleCommonAndExpectedErrorsEffect(
+            client.approveRequest({body}),
+            ApproveRequestErrors
           )
         )
-      )
-    },
-    deleteInbox(data: RequestWithGeneratableChallenge<DeleteInboxRequest>) {
-      return pipe(
-        addChallenge(data),
-        TE.chainW((data) =>
-          axiosCallWithValidation(
-            axiosInstance,
-            {method: 'delete', url: '/inboxes', data},
-            DeleteInboxResponse
+      ),
+    deleteInboxes: (deleteInboxesRequest: DeleteInboxesRequest) =>
+      handleCommonErrorsEffect(
+        client.deleteInboxes({body: deleteInboxesRequest})
+      ),
+    leaveChat: (
+      leaveChatRequest: RequestWithGeneratableChallenge<LeaveChatRequest>
+    ) =>
+      addChallenge(leaveChatRequest).pipe(
+        Effect.flatMap((body) =>
+          handleCommonAndExpectedErrorsEffect(
+            client.leaveChat({body}),
+            LeaveChatErrors
           )
         )
-      )
-    },
-    deletePulledMessages(
-      data: RequestWithGeneratableChallenge<DeletePulledMessagesRequest>
-    ) {
-      return pipe(
-        addChallenge(data),
-        TE.chainW((data) =>
-          axiosCallWithValidation(
-            axiosInstance,
-            {method: 'delete', url: '/inboxes/messages', data},
-            DeletePulledMessagesResponse
-          )
-        )
-      )
-    },
-    blockInbox(data: RequestWithGeneratableChallenge<BlockInboxRequest>) {
-      return pipe(
-        addChallenge(data),
-        TE.chainW((data) =>
-          axiosCallWithValidation(
-            axiosInstance,
-            {method: 'put', url: '/inboxes/block', data},
-            BlockInboxResponse
-          )
-        )
-      )
-    },
-    requestApproval(data: RequestApprovalRequest) {
-      return pipe(
-        axiosCallWithValidation(
-          axiosInstance,
-          {
-            method: 'post',
-            url: '/inboxes/approval/request',
-            data,
-          },
-          RequestApprovalResponse
-        ),
-        TE.mapLeft((e) => {
-          if (e._tag === 'BadStatusCodeError') {
-            if (e.response.data.code === '100101') {
-              return new ReceiverInboxDoesNotExistError()
-            }
-          }
-          if (e._tag === 'BadStatusCodeError') {
-            if (e.response.data.code === '100107') {
-              return new SenderInboxDoesNotExistError()
-            }
-          }
-          return e
-        })
-      )
-    },
-    cancelRequestApproval(data: CancelApprovalRequest) {
-      return pipe(
-        axiosCallWithValidation(
-          axiosInstance,
-          {
-            method: 'post',
-            url: '/inboxes/approval/cancel',
-            data,
-          },
-          CancelApprovalResponse
-        ),
-        TE.mapLeft((e) => {
-          if (e._tag === 'BadStatusCodeError') {
-            if (e.response.data.code === '100104') {
-              return new RequestNotFoundError()
-            }
-            if (e.response.data.code === '100153') {
-              return new RequestNotPendingError()
-            }
-            if (e.response.data.code === '100101') {
-              return new OtherSideAccountDeleted()
-            }
-          }
-          return e
-        })
-      )
-    },
-    approveRequest(
-      originalData: RequestWithGeneratableChallenge<ApproveRequestRequest>
-    ) {
-      return pipe(
-        addChallenge(originalData),
-        TE.chainW((data) =>
-          axiosCallWithValidation(
-            axiosInstance,
-            {
-              method: 'post',
-              url: '/inboxes/approval/confirm',
-              data,
-            },
-            ApproveRequestResponse
-          )
-        ),
-        TE.mapLeft((e) => {
-          if (e._tag === 'BadStatusCodeError') {
-            if (e.response.data.code === '100106') {
-              return new RequestCancelledError()
-            }
-            if (e.response.data.code === '100104') {
-              return new RequestNotFoundError()
-            }
-            if (e.response.data.code === '100153') {
-              return new RequestNotPendingError()
-            }
-            if (e.response.data.code === '100101') {
-              return new OtherSideAccountDeleted()
-            }
-          }
-          return e
-        })
-      )
-    },
-    deleteInboxes(data: DeleteInboxesRequest) {
-      return axiosCallWithValidation(
-        axiosInstance,
-        {method: 'delete', url: '/inboxes/batch', data},
-        DeleteInboxesResponse
-      )
-    },
-    leaveChat(originalData: RequestWithGeneratableChallenge<LeaveChatRequest>) {
-      return pipe(
-        addChallenge(originalData),
-        TE.map(({publicKey, ...data}) => ({
-          ...data,
-          senderPublicKey: publicKey,
-        })),
-        TE.chainW((data) =>
-          axiosCallWithValidation(
-            axiosInstance,
-            {
-              method: 'post',
-              url: '/inboxes/leave-chat',
-              data,
-            },
-            LeaveChatResponse
-          )
-        ),
-        TE.mapLeft((e) => {
-          if (e._tag === 'BadStatusCodeError') {
-            if (e.response.data.code === '100104') {
-              return new NotPermittedToSendMessageToTargetInboxError()
-            }
-            if (e.response.data.code === '100101') {
-              return new InboxDoesNotExistError()
-            }
-          }
-          return e
-        })
-      )
-    },
+      ),
     // ----------------------
     // 👇 Message
     // ----------------------
-    retrieveMessages(
-      data: RequestWithGeneratableChallenge<RetrieveMessagesRequest>
-    ) {
-      return pipe(
-        addChallenge(data),
-        TE.chainW((data) =>
-          axiosCallWithValidation(
-            axiosInstance,
-            {method: 'put', url: '/inboxes/messages', data},
-            RetrieveMessagesResponse
+    retrieveMessages: (
+      retrieveMessagesRequest: RequestWithGeneratableChallenge<RetrieveMessagesRequest>
+    ) =>
+      addChallenge(retrieveMessagesRequest).pipe(
+        Effect.flatMap((body) =>
+          handleCommonAndExpectedErrorsEffect(
+            client.retrieveMessages({
+              body,
+              headers: decodeCommonHeaders(commonHeaders),
+            }),
+            RetrieveMessagesErrors
           )
-        ),
-        TE.mapLeft((e) => {
-          if (e._tag === 'BadStatusCodeError') {
-            if (e.response.data.code === '100101') {
-              return new InboxDoesNotExistError()
-            }
-          }
-          return e
-        })
-      )
-    },
-    sendMessage(
-      originalData: RequestWithGeneratableChallenge<SendMessageRequest>
-    ) {
-      return pipe(
-        addChallenge(originalData),
-        TE.map(
-          ({publicKey, ...data}) =>
-            ({
-              ...data,
-              senderPublicKey: publicKey,
-            }) satisfies SendMessageRequest
-        ),
-        TE.chainW((data) =>
-          axiosCallWithValidation(
-            axiosInstance,
-            {
-              method: 'post',
-              url: '/inboxes/messages',
-              data,
-            },
-            SendMessageResponse
+        )
+      ),
+    sendMessage: (
+      sendMessageRequest: RequestWithGeneratableChallenge<SendMessageRequest>
+    ) =>
+      addChallenge(sendMessageRequest).pipe(
+        Effect.flatMap((body) =>
+          handleCommonAndExpectedErrorsEffect(
+            client.sendMessage({
+              body,
+            }),
+            SendMessageErrors
           )
-        ),
-        TE.mapLeft((e) => {
-          if (e._tag === 'BadStatusCodeError') {
-            if (e.response.data.code === '100101') {
-              return new InboxDoesNotExistError()
-            }
-            if (e.response.data.code === '100102') {
-              return new NotPermittedToSendMessageToTargetInboxError()
-            }
-          }
-          return e
-        })
-      )
-    },
-    sendMessages(data: SendMessagesRequest) {
-      return axiosCallWithValidation(
-        axiosInstance,
-        {method: 'post', url: '/inboxes/messages/batch', data},
-        SendMessagesResponse
-      )
-    },
+        )
+      ),
+    sendMessages: (sendMessagesRequest: SendMessagesRequest) =>
+      handleCommonAndExpectedErrorsEffect(
+        client.sendMessages({body: sendMessagesRequest}),
+        SendMessageErrors
+      ),
     // ----------------------
     // 👇 Challenge
     // ----------------------
-    createChallenge(data: CreateChallengeRequest) {
-      return pipe(
-        axiosCallWithValidation(
-          axiosInstance,
-          {method: 'POST', url: '/challenges', data},
-          CreateChallengeResponse
-        ),
-        TE.map((one) => Schema.decodeSync(CreateChallengeResponseE)(one))
-      )
-    },
-    createChallengeBatch(data: CreateChallengesRequest) {
-      return pipe(
-        axiosCallWithValidation(
-          axiosInstance,
-          {method: 'POST', url: '/challenges/batch', data},
-          CreateChallengesResponse
-        ),
-        TE.map((one) => Schema.decodeSync(CreateChallengesResponseE)(one))
-      )
-    },
+    createChallenge: (createChallengeRequest: CreateChallengeRequest) =>
+      handleCommonErrorsEffect(
+        client.createChallenge({body: createChallengeRequest})
+      ),
+    createChallengeBatch: (createChallengesRequest: CreateChallengesRequest) =>
+      handleCommonErrorsEffect(
+        client.createChallengeBatch({body: createChallengesRequest})
+      ),
   }
 }
 
-export type ChatPrivateApi = ReturnType<typeof privateApi>
+export type ChatApi = ReturnType<typeof api>

@@ -68,7 +68,7 @@ describe('Block inbox', () => {
         const client = yield* _(NodeTestingApp)
 
         yield* _(
-          client.blockInboxEndpoint(
+          client.blockInbox(
             {
               body: yield* _(
                 user2.inbox1.addChallenge({
@@ -109,7 +109,7 @@ describe('Block inbox', () => {
         const client = yield* _(NodeTestingApp)
 
         const shouldBeRejectedResponse = yield* _(
-          client.blockInboxEndpoint(
+          client.blockInbox(
             {
               body: yield* _(
                 addChallengeForKey(
@@ -138,7 +138,7 @@ describe('Block inbox', () => {
         const client = yield* _(NodeTestingApp)
 
         const shouldBeRejectedResponse = yield* _(
-          client.blockInboxEndpoint(
+          client.blockInbox(
             {
               body: yield* _(
                 user2.inbox1.addChallenge({

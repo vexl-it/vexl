@@ -1,7 +1,7 @@
 import {SqlResolver} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
-import {ChatChallengeE} from '@vexl-next/rest-api/src/services/chat/contracts'
+import {ChatChallenge} from '@vexl-next/rest-api/src/services/chat/contracts'
 import {Effect, flow} from 'effect'
 
 export const createUpdateChallengeInvalidate = Effect.gen(function* (_) {
@@ -9,7 +9,7 @@ export const createUpdateChallengeInvalidate = Effect.gen(function* (_) {
 
   const resolver = yield* _(
     SqlResolver.void('updateChallengeInvalidate', {
-      Request: ChatChallengeE,
+      Request: ChatChallenge,
       execute: (params) => sql`
         UPDATE challenge
         SET

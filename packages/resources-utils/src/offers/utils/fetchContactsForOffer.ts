@@ -5,10 +5,10 @@ import {
 } from '@vexl-next/domain/src/general/offers'
 import {type ContactApi} from '@vexl-next/rest-api/src/services/contact'
 import {type FetchCommonConnectionsResponse} from '@vexl-next/rest-api/src/services/contact/contracts'
+import {type Effect} from 'effect'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {effectToTaskEither} from '../../effect-helpers/TaskEitherConverter'
-import {type ExtractErrorFromEffect} from '../../utils/ExtractErrorFromEffect'
 
 function fetchFriendsPublicKeys({
   lvl,
@@ -17,7 +17,7 @@ function fetchFriendsPublicKeys({
   lvl: ConnectionLevel
   api: ContactApi
 }): TE.TaskEither<
-  ExtractErrorFromEffect<ReturnType<ContactApi['fetchMyContacts']>>,
+  Effect.Effect.Error<ReturnType<ContactApi['fetchMyContacts']>>,
   PublicKeyPemBase64[]
 > {
   return pipe(
@@ -40,7 +40,7 @@ export interface ConnectionsInfoForOffer {
   commonFriends: FetchCommonConnectionsResponse
 }
 
-export type ApiErrorFetchingContactsForOffer = ExtractErrorFromEffect<
+export type ApiErrorFetchingContactsForOffer = Effect.Effect.Error<
   ReturnType<ContactApi['fetchMyContacts' | 'fetchCommonConnections']>
 >
 

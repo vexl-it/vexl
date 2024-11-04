@@ -3,7 +3,7 @@ import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {HashedPhoneNumberE} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {FcmTokenE} from '@vexl-next/domain/src/utility/FcmToken.brand'
 import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
-import {PlatformNameE} from '@vexl-next/rest-api/src/PlatformName'
+import {PlatformName} from '@vexl-next/rest-api/src/PlatformName'
 
 export const UserRecordId = Schema.BigInt.pipe(Schema.brand('UserRecordId'))
 export class UserRecord extends Schema.Class<UserRecord>('UserRecord')({
@@ -19,7 +19,7 @@ export class UserRecord extends Schema.Class<UserRecord>('UserRecord')({
     as: 'Option',
     nullable: true,
   }),
-  platform: Schema.optionalWith(PlatformNameE, {as: 'Option', nullable: true}),
+  platform: Schema.optionalWith(PlatformName, {as: 'Option', nullable: true}),
   lastNewContentNotificaionSentAt: Schema.optionalWith(VersionCode, {
     as: 'Option',
     nullable: true,

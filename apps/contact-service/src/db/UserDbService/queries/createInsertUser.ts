@@ -6,7 +6,7 @@ import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {HashedPhoneNumberE} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {FcmTokenE} from '@vexl-next/domain/src/utility/FcmToken.brand'
 import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
-import {PlatformNameE} from '@vexl-next/rest-api/src/PlatformName'
+import {PlatformName} from '@vexl-next/rest-api/src/PlatformName'
 import {Effect, flow} from 'effect'
 import {UserRecord} from '../domain'
 
@@ -15,7 +15,7 @@ export const CreateUserParams = Schema.Struct({
   hash: HashedPhoneNumberE,
   firebaseToken: Schema.optionalWith(FcmTokenE, {as: 'Option'}),
   clientVersion: Schema.optionalWith(VersionCode, {as: 'Option'}),
-  platform: Schema.optionalWith(PlatformNameE, {as: 'Option'}),
+  platform: Schema.optionalWith(PlatformName, {as: 'Option'}),
 })
 export type CreateUserParams = Schema.Schema.Type<typeof CreateUserParams>
 

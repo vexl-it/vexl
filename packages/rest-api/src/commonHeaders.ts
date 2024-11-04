@@ -5,7 +5,7 @@ import {
 } from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {Array, Either, Number, Option, String} from 'effect'
-import {type PlatformName, PlatformNameE} from './PlatformName'
+import {PlatformName} from './PlatformName'
 import {
   HEADER_CLIENT_VERSION,
   HEADER_CRYPTO_VERSION,
@@ -15,7 +15,7 @@ import {
 export const VexlAppUserAgentHeader = Schema.TaggedStruct(
   'VexlAppUserAgentHeader' as const,
   {
-    platform: PlatformNameE,
+    platform: PlatformName,
     versionCode: VersionCode,
     semver: Schema.optionalWith(SemverStringE, {as: 'Option'}),
   }
@@ -78,7 +78,7 @@ export const UserAgentHeaderFromString = Schema.transform(
       }
 
       if (Option.isSome(second) && Option.isSome(third)) {
-        const platform = Schema.decodeUnknownEither(PlatformNameE)(third.value)
+        const platform = Schema.decodeUnknownEither(PlatformName)(third.value)
         if (Either.isLeft(platform)) {
           return {
             _tag: 'UnknownUserAgentHeader' as const,
@@ -96,7 +96,7 @@ export const UserAgentHeaderFromString = Schema.transform(
       }
 
       if (Option.isSome(second)) {
-        const platform = Schema.decodeUnknownEither(PlatformNameE)(second.value)
+        const platform = Schema.decodeUnknownEither(PlatformName)(second.value)
         if (Either.isLeft(platform)) {
           return {
             _tag: 'UnknownUserAgentHeader' as const,
@@ -127,7 +127,7 @@ export class CommonHeaders extends Schema.Class<CommonHeaders>('CommonHeaders')(
       Schema.compose(Schema.NumberFromString, VersionCode),
       {as: 'Option'}
     ),
-    [HEADER_PLATFORM]: Schema.optionalWith(PlatformNameE, {as: 'Option'}),
+    [HEADER_PLATFORM]: Schema.optionalWith(PlatformName, {as: 'Option'}),
     [HEADER_CRYPTO_VERSION]: Schema.optionalWith(Schema.NumberFromString, {
       as: 'Option',
     }),

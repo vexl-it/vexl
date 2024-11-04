@@ -1,4 +1,4 @@
-import {z} from 'zod'
+import {Schema} from '@effect/schema'
 import {PlatformName} from './PlatformName'
 import {ServiceUrl} from './ServiceUrl.brand'
 import * as UserSessionCredentials from './UserSessionCredentials.brand'
@@ -11,19 +11,17 @@ import * as notification from './services/notification'
 import * as offer from './services/offer'
 import * as user from './services/user'
 
-export const EnvPreset = z
-  .object({
-    userMs: ServiceUrl,
-    contactMs: ServiceUrl,
-    chatMs: ServiceUrl,
-    offerMs: ServiceUrl,
-    locationMs: ServiceUrl,
-    notificationMs: ServiceUrl,
-    btcExchangeRateMs: ServiceUrl,
-    feedbackMs: ServiceUrl,
-  })
-  .readonly()
-export type EnvPreset = z.TypeOf<typeof EnvPreset>
+export const EnvPreset = Schema.Struct({
+  userMs: ServiceUrl,
+  contactMs: ServiceUrl,
+  chatMs: ServiceUrl,
+  offerMs: ServiceUrl,
+  locationMs: ServiceUrl,
+  notificationMs: ServiceUrl,
+  btcExchangeRateMs: ServiceUrl,
+  feedbackMs: ServiceUrl,
+})
+export type EnvPreset = Schema.Schema.Type<typeof EnvPreset>
 
 export interface CredentialHeaders {
   publicKey: string
@@ -44,26 +42,32 @@ export {
 
 export const ENV_PRESETS: {stageEnv: EnvPreset; prodEnv: EnvPreset} = {
   stageEnv: {
-    userMs: ServiceUrl.parse('https://stage-user.vexl.it'),
-    contactMs: ServiceUrl.parse('https://stage-contact.vexl.it'),
-    chatMs: ServiceUrl.parse('https://stage-chat.vexl.it'),
-    offerMs: ServiceUrl.parse('https://stage-offer2.vexl.it'),
-    locationMs: ServiceUrl.parse('https://stage-location.vexl.it'),
-    notificationMs: ServiceUrl.parse('https://stage-notification.vexl.it'),
-    btcExchangeRateMs: ServiceUrl.parse(
+    userMs: Schema.decodeSync(ServiceUrl)('https://stage-user.vexl.it'),
+    contactMs: Schema.decodeSync(ServiceUrl)('https://stage-contact.vexl.it'),
+    chatMs: Schema.decodeSync(ServiceUrl)('https://stage-chat.vexl.it'),
+    offerMs: Schema.decodeSync(ServiceUrl)('https://stage-offer2.vexl.it'),
+    locationMs: Schema.decodeSync(ServiceUrl)('https://stage-location.vexl.it'),
+    notificationMs: Schema.decodeSync(ServiceUrl)(
+      'https://stage-notification.vexl.it'
+    ),
+    btcExchangeRateMs: Schema.decodeSync(ServiceUrl)(
       'https://stage-btc-exchange-rate.vexl.it'
     ),
-    feedbackMs: ServiceUrl.parse('https://stage-feedback.vexl.it'),
+    feedbackMs: Schema.decodeSync(ServiceUrl)('https://stage-feedback.vexl.it'),
   },
   prodEnv: {
-    userMs: ServiceUrl.parse('https://user.vexl.it'),
-    contactMs: ServiceUrl.parse('https://contact.vexl.it'),
-    chatMs: ServiceUrl.parse('https://chat.vexl.it'),
-    offerMs: ServiceUrl.parse('https://offer2.vexl.it'),
-    locationMs: ServiceUrl.parse('https://location.vexl.it'),
-    notificationMs: ServiceUrl.parse('https://notification.vexl.it'),
-    btcExchangeRateMs: ServiceUrl.parse('https://btc-exchange-rate.vexl.it'),
-    feedbackMs: ServiceUrl.parse('https://feedback.vexl.it'),
+    userMs: Schema.decodeSync(ServiceUrl)('https://user.vexl.it'),
+    contactMs: Schema.decodeSync(ServiceUrl)('https://contact.vexl.it'),
+    chatMs: Schema.decodeSync(ServiceUrl)('https://chat.vexl.it'),
+    offerMs: Schema.decodeSync(ServiceUrl)('https://offer2.vexl.it'),
+    locationMs: Schema.decodeSync(ServiceUrl)('https://location.vexl.it'),
+    notificationMs: Schema.decodeSync(ServiceUrl)(
+      'https://notification.vexl.it'
+    ),
+    btcExchangeRateMs: Schema.decodeSync(ServiceUrl)(
+      'https://btc-exchange-rate.vexl.it'
+    ),
+    feedbackMs: Schema.decodeSync(ServiceUrl)('https://feedback.vexl.it'),
   },
 }
 

@@ -5,9 +5,9 @@ import {
   unixMillisecondsNow,
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
-import {type ExtractErrorFromEffect} from '@vexl-next/resources-utils/src/utils/ExtractErrorFromEffect'
 import {MAX_PAGE_SIZE} from '@vexl-next/rest-api/src/Pagination.brand'
 import {type ContactApi} from '@vexl-next/rest-api/src/services/contact'
+import {type Effect} from 'effect'
 import {sequenceS} from 'fp-ts/Apply'
 import type * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
@@ -38,7 +38,7 @@ function fetchContacts(
   level: ConnectionLevel,
   api: ContactApi
 ): TE.TaskEither<
-  ExtractErrorFromEffect<ReturnType<ContactApi['fetchMyContacts']>>,
+  Effect.Effect.Error<ReturnType<ContactApi['fetchMyContacts']>>,
   PublicKeyPemBase64[]
 > {
   return pipe(

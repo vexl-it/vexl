@@ -63,10 +63,12 @@ export function useRefreshNotificationTokenOnResumeAssumeLoggedIn(): void {
         store.get(inboxesAtom),
         A.map((inbox) =>
           pipe(
-            store.get(apiAtom).chat.updateInbox({
-              token: newToken ?? undefined,
-              keyPair: inbox.privateKey,
-            }),
+            effectToTaskEither(
+              store.get(apiAtom).chat.updateInbox({
+                token: newToken ?? undefined,
+                keyPair: inbox.privateKey,
+              })
+            ),
             TE.match(
               (e) => {
                 reportError('error', new Error('Error while updating inbox'), {

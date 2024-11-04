@@ -3,44 +3,44 @@ import {ServerSecurity} from '../../apiSecurity'
 import {CommonHeaders} from '../../commonHeaders'
 import {
   ApproveRequestErrors,
-  ApproveRequestRequestE,
-  ApproveRequestResponseE,
+  ApproveRequestRequest,
+  ApproveRequestResponse,
   BlockInboxErrors,
-  BlockInboxRequestE,
-  BlockInboxResponseE,
-  CancelApprovalRequestE,
-  CancelApprovalResponseE,
+  BlockInboxRequest,
+  BlockInboxResponse,
+  CancelApprovalRequest,
+  CancelApprovalResponse,
   CancelRequestApprovalErrors,
-  CreateChallengeRequestE,
-  CreateChallengeResponseE,
-  CreateChallengesRequestE,
-  CreateChallengesResponseE,
-  CreateInboxRequestE,
-  CreateInboxResponseE,
+  CreateChallengeRequest,
+  CreateChallengeResponse,
+  CreateChallengesRequest,
+  CreateChallengesResponse,
+  CreateInboxRequest,
+  CreateInboxResponse,
   DeleteInboxErrors,
-  DeleteInboxesRequestE,
-  DeleteInboxesResponseE,
-  DeleteInboxRequestE,
-  DeleteInboxResponseE,
+  DeleteInboxesRequest,
+  DeleteInboxesResponse,
+  DeleteInboxRequest,
+  DeleteInboxResponse,
   DeletePulledMessagesErrors,
-  DeletePulledMessagesRequestE,
-  DeletePulledMessagesResponseE,
+  DeletePulledMessagesRequest,
+  DeletePulledMessagesResponse,
   LeaveChatErrors,
-  LeaveChatRequestE,
-  LeaveChatResponseE,
+  LeaveChatRequest,
+  LeaveChatResponse,
   RequestApprovalErrors,
-  RequestApprovalRequestE,
-  RequestApprovalResponseE,
+  RequestApprovalRequest,
+  RequestApprovalResponse,
   RetrieveMessagesErrors,
-  RetrieveMessagesRequestE,
-  RetrieveMessagesResponseE,
+  RetrieveMessagesRequest,
+  RetrieveMessagesResponse,
   SendMessageErrors,
-  SendMessageRequestE,
-  SendMessageResponseE,
-  SendMessagesRequestE,
-  SendMessagesResponseE,
-  UpdateInboxRequestE,
-  UpdateInboxResponseE,
+  SendMessageRequest,
+  SendMessageResponse,
+  SendMessagesRequest,
+  SendMessagesResponse,
+  UpdateInboxRequest,
+  UpdateInboxResponse,
 } from './contracts'
 
 export const UpdateInboxEndpoint = Api.put('updateInbox', '/api/v1/inboxes', {
@@ -50,8 +50,8 @@ export const UpdateInboxEndpoint = Api.put('updateInbox', '/api/v1/inboxes', {
 }).pipe(
   Api.setSecurity(ServerSecurity),
   Api.setResponseStatus(200 as const),
-  Api.setRequestBody(UpdateInboxRequestE),
-  Api.setResponseBody(UpdateInboxResponseE)
+  Api.setRequestBody(UpdateInboxRequest),
+  Api.setResponseBody(UpdateInboxResponse)
 )
 
 export const CreateInboxEndpoint = Api.post(
@@ -60,9 +60,9 @@ export const CreateInboxEndpoint = Api.post(
 ).pipe(
   Api.setSecurity(ServerSecurity),
   Api.setResponseStatus(200 as const),
-  Api.setRequestBody(CreateInboxRequestE),
+  Api.setRequestBody(CreateInboxRequest),
   Api.setRequestHeaders(CommonHeaders),
-  Api.setResponseBody(CreateInboxResponseE)
+  Api.setResponseBody(CreateInboxResponse)
 )
 
 export const DeleteInboxEndpoint = Api.delete(
@@ -71,8 +71,8 @@ export const DeleteInboxEndpoint = Api.delete(
 ).pipe(
   Api.setSecurity(ServerSecurity),
   Api.setResponseStatus(200 as const),
-  Api.setRequestBody(DeleteInboxRequestE),
-  Api.setResponseBody(DeleteInboxResponseE),
+  Api.setRequestBody(DeleteInboxRequest),
+  Api.setResponseBody(DeleteInboxResponse),
   Api.addResponse({
     status: 400,
     body: DeleteInboxErrors,
@@ -85,8 +85,8 @@ export const DeletePulledMessagesEndpoint = Api.delete(
 ).pipe(
   Api.setSecurity(ServerSecurity),
   Api.setResponseStatus(200 as const),
-  Api.setRequestBody(DeletePulledMessagesRequestE),
-  Api.setResponseBody(DeletePulledMessagesResponseE),
+  Api.setRequestBody(DeletePulledMessagesRequest),
+  Api.setResponseBody(DeletePulledMessagesResponse),
   Api.addResponse({
     status: 400,
     body: DeletePulledMessagesErrors,
@@ -94,13 +94,13 @@ export const DeletePulledMessagesEndpoint = Api.delete(
 )
 
 export const BlockInboxEndpoint = Api.put(
-  'blockInboxEndpoint',
+  'blockInbox',
   '/api/v1/inboxes/block'
 ).pipe(
   Api.setSecurity(ServerSecurity),
   Api.setResponseStatus(200 as const),
-  Api.setRequestBody(BlockInboxRequestE),
-  Api.setResponseBody(BlockInboxResponseE),
+  Api.setRequestBody(BlockInboxRequest),
+  Api.setResponseBody(BlockInboxResponse),
   Api.addResponse({
     status: 400,
     body: BlockInboxErrors,
@@ -113,8 +113,8 @@ export const RequestApprovalEndpoint = Api.post(
 ).pipe(
   Api.setSecurity(ServerSecurity),
   Api.setResponseStatus(200 as const),
-  Api.setRequestBody(RequestApprovalRequestE),
-  Api.setResponseBody(RequestApprovalResponseE),
+  Api.setRequestBody(RequestApprovalRequest),
+  Api.setResponseBody(RequestApprovalResponse),
   Api.addResponse({
     status: 400,
     body: RequestApprovalErrors,
@@ -127,8 +127,8 @@ export const CancelRequestApprovalEndpoint = Api.post(
 ).pipe(
   Api.setSecurity(ServerSecurity),
   Api.setResponseStatus(200 as const),
-  Api.setRequestBody(CancelApprovalRequestE),
-  Api.setResponseBody(CancelApprovalResponseE),
+  Api.setRequestBody(CancelApprovalRequest),
+  Api.setResponseBody(CancelApprovalResponse),
   Api.addResponse({
     status: 400,
     body: CancelRequestApprovalErrors,
@@ -141,8 +141,8 @@ export const ApproveRequestEndpoint = Api.post(
 ).pipe(
   Api.setSecurity(ServerSecurity),
   Api.setResponseStatus(200 as const),
-  Api.setRequestBody(ApproveRequestRequestE),
-  Api.setResponseBody(ApproveRequestResponseE),
+  Api.setRequestBody(ApproveRequestRequest),
+  Api.setResponseBody(ApproveRequestResponse),
   Api.addResponse({
     status: 400,
     body: ApproveRequestErrors,
@@ -156,8 +156,8 @@ export const DeleteInboxesEndpoint = Api.delete(
 ).pipe(
   Api.setSecurity(ServerSecurity),
   Api.setResponseStatus(200 as const),
-  Api.setRequestBody(DeleteInboxesRequestE),
-  Api.setResponseBody(DeleteInboxesResponseE)
+  Api.setRequestBody(DeleteInboxesRequest),
+  Api.setResponseBody(DeleteInboxesResponse)
 )
 
 export const LeaveChatEndpoint = Api.post(
@@ -167,8 +167,8 @@ export const LeaveChatEndpoint = Api.post(
   Api.setSecurity(ServerSecurity),
   Api.setResponseStatus(200 as const),
 
-  Api.setRequestBody(LeaveChatRequestE),
-  Api.setResponseBody(LeaveChatResponseE),
+  Api.setRequestBody(LeaveChatRequest),
+  Api.setResponseBody(LeaveChatResponse),
   Api.addResponse({
     status: 400,
     body: LeaveChatErrors,
@@ -182,8 +182,8 @@ export const RetrieveMessagesEndpoint = Api.put(
   Api.setSecurity(ServerSecurity),
   Api.setResponseStatus(200 as const),
   Api.setRequestHeaders(CommonHeaders),
-  Api.setRequestBody(RetrieveMessagesRequestE),
-  Api.setResponseBody(RetrieveMessagesResponseE),
+  Api.setRequestBody(RetrieveMessagesRequest),
+  Api.setResponseBody(RetrieveMessagesResponse),
   Api.addResponse({
     status: 400,
     body: RetrieveMessagesErrors,
@@ -196,8 +196,8 @@ export const SendMessageEndpoint = Api.post(
 ).pipe(
   Api.setSecurity(ServerSecurity),
   Api.setResponseStatus(200 as const),
-  Api.setRequestBody(SendMessageRequestE),
-  Api.setResponseBody(SendMessageResponseE),
+  Api.setRequestBody(SendMessageRequest),
+  Api.setResponseBody(SendMessageResponse),
   Api.addResponse({
     status: 400,
     body: SendMessageErrors,
@@ -213,8 +213,8 @@ export const SendMessagesEndpoint = Api.post(
 ).pipe(
   Api.setSecurity(ServerSecurity),
   Api.setResponseStatus(200 as const),
-  Api.setRequestBody(SendMessagesRequestE),
-  Api.setResponseBody(SendMessagesResponseE),
+  Api.setRequestBody(SendMessagesRequest),
+  Api.setResponseBody(SendMessagesResponse),
   Api.addResponse({
     status: 400,
     body: SendMessageErrors,
@@ -227,8 +227,8 @@ export const CreateChallengeEndpoint = Api.post(
 ).pipe(
   Api.setSecurity(ServerSecurity),
   Api.setResponseStatus(200 as const),
-  Api.setRequestBody(CreateChallengeRequestE),
-  Api.setResponseBody(CreateChallengeResponseE)
+  Api.setRequestBody(CreateChallengeRequest),
+  Api.setResponseBody(CreateChallengeResponse)
 )
 
 export const CreateChallengeBatchEndpoint = Api.post(
@@ -237,8 +237,8 @@ export const CreateChallengeBatchEndpoint = Api.post(
 ).pipe(
   Api.setSecurity(ServerSecurity),
   Api.setResponseStatus(200 as const),
-  Api.setRequestBody(CreateChallengesRequestE),
-  Api.setResponseBody(CreateChallengesResponseE)
+  Api.setRequestBody(CreateChallengesRequest),
+  Api.setResponseBody(CreateChallengesResponse)
 )
 
 const InboxesApiGroup = ApiGroup.make('Inboxes').pipe(

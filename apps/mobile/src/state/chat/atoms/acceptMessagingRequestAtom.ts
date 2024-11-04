@@ -6,6 +6,7 @@ import confirmMessagingRequest, {
   type ApiConfirmMessagingRequest,
 } from '@vexl-next/resources-utils/src/chat/confirmMessagingRequest'
 import {type ErrorEncryptingMessage} from '@vexl-next/resources-utils/src/chat/utils/chatCrypto'
+import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {
   type JsonStringifyError,
   type ZodParseError,
@@ -55,23 +56,27 @@ const acceptMessagingRequestAtom = atom(
       ),
       TE.bindTo('myFcmCypher'),
       TE.bindW('configMessage', ({myFcmCypher}) =>
-        confirmMessagingRequest({
-          text,
-          approve,
-          api: api.chat,
-          theirFcmCypher: chat.otherSideFcmCypher,
-          notificationApi: api.notification,
-          fromKeypair: chat.inbox.privateKey,
-          toPublicKey: chat.otherSide.publicKey,
-          myVersion: version,
-          myFcmCypher:
-            myFcmCypher._tag === 'Some' ? myFcmCypher.value.cypher : undefined,
-          lastReceivedFcmCypher: chat.otherSideFcmCypher,
-          otherSideVersion: chat.otherSideVersion,
-        })
+        effectToTaskEither(
+          confirmMessagingRequest({
+            text,
+            approve,
+            api: api.chat,
+            theirFcmCypher: chat.otherSideFcmCypher,
+            notificationApi: api.notification,
+            fromKeypair: chat.inbox.privateKey,
+            toPublicKey: chat.otherSide.publicKey,
+            myVersion: version,
+            myFcmCypher:
+              myFcmCypher._tag === 'Some'
+                ? myFcmCypher.value.cypher
+                : undefined,
+            lastReceivedFcmCypher: chat.otherSideFcmCypher,
+            otherSideVersion: chat.otherSideVersion,
+          })
+        )
       ),
       TE.mapLeft((error) => {
-        if (error._tag === 'OtherSideAccountDeleted') {
+        if (error._tag === 'ReceiverInboxDoesNotExistError') {
           set(
             chatAtom,
             addMessageToChat(

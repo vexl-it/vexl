@@ -278,7 +278,7 @@ describe('Request approval', () => {
         )
 
         yield* _(
-          client.blockInboxEndpoint(
+          client.blockInbox(
             {
               body: yield* _(
                 user2.inbox1.addChallenge({

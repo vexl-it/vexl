@@ -12,11 +12,11 @@ import {FcmTokenE} from '@vexl-next/domain/src/utility/FcmToken.brand'
 import {BooleanFromString} from '@vexl-next/generic-utils/src/effect-helpers/BooleanFromString'
 import {EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {z} from 'zod'
-import {PageRequestE, PageResponseE} from '../../Pagination.brand'
+import {PageRequest, PageResponse} from '../../Pagination.brand'
 
 export class InboxDoesNotExistError extends Schema.TaggedError<InboxDoesNotExistError>(
-  'inboxDoesNotExist'
-)('inboxDoesNotExist', {
+  'InboxDoesNotExist'
+)('InboxDoesNotExist', {
   status: Schema.optionalWith(Schema.Literal(404), {default: () => 404}),
   code: Schema.optionalWith(Schema.Literal('100101'), {
     default: () => '100101',
@@ -24,8 +24,8 @@ export class InboxDoesNotExistError extends Schema.TaggedError<InboxDoesNotExist
 }) {}
 
 export class NotPermittedToSendMessageToTargetInboxError extends Schema.TaggedError<NotPermittedToSendMessageToTargetInboxError>(
-  'notPermittedToSendMessageToTargetInbox'
-)('notPermittedToSendMessageToTargetInbox', {
+  'NotPermittedToSendMessageToTargetInbox'
+)('NotPermittedToSendMessageToTargetInbox', {
   status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
   code: Schema.optionalWith(Schema.Literal('100102'), {
     default: () => '100102',
@@ -93,7 +93,7 @@ export type ImportContactsResponse = Schema.Schema.Type<
 >
 
 export const FetchMyContactsRequest = Schema.Struct({
-  ...PageRequestE.fields,
+  ...PageRequest.fields,
   level: ConnectionLevelE,
 })
 export type FetchMyContactsRequest = Schema.Schema.Type<
@@ -101,7 +101,7 @@ export type FetchMyContactsRequest = Schema.Schema.Type<
 >
 
 export const FetchMyContactsResponseE = Schema.Struct({
-  ...PageResponseE.fields,
+  ...PageResponse.fields,
   items: Schema.Array(
     Schema.Struct({
       publicKey: PublicKeyPemBase64E,

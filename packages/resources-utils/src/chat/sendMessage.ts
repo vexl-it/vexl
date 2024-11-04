@@ -9,19 +9,18 @@ import {
 } from '@vexl-next/domain/src/general/messaging'
 import {type FcmCypher} from '@vexl-next/domain/src/general/notifications'
 import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
-import {type ChatPrivateApi} from '@vexl-next/rest-api/src/services/chat'
+import {type ChatApi} from '@vexl-next/rest-api/src/services/chat'
 import {type NotificationApi} from '@vexl-next/rest-api/src/services/notification'
-import * as TE from 'fp-ts/TaskEither'
-import {pipe} from 'fp-ts/function'
+import {Effect} from 'effect'
+import {taskEitherToEffect} from '../effect-helpers/TaskEitherConverter'
 import {callWithNotificationService} from '../notifications/callWithNotificationService'
-import {type ExtractLeftTE} from '../utils/ExtractLeft'
 import {type JsonStringifyError, type ZodParseError} from '../utils/parsing'
 import {type ErrorEncryptingMessage} from './utils/chatCrypto'
 import {messageToNetwork} from './utils/messageIO'
 import {messagePreviewToNetwork} from './utils/messagePreviewIO'
 
-export type SendMessageApiErrors = ExtractLeftTE<
-  ReturnType<ChatPrivateApi['sendMessage']>
+export type SendMessageApiErrors = Effect.Effect.Error<
+  ReturnType<ChatApi['sendMessage']>
 >
 
 export default function sendMessage({
@@ -33,28 +32,29 @@ export default function sendMessage({
   notificationApi,
   otherSideVersion,
 }: {
-  api: ChatPrivateApi
+  api: ChatApi
   receiverPublicKey: PublicKeyPemBase64
   message: ChatMessage
   senderKeypair: PrivateKeyHolder
   theirFcmCypher?: FcmCypher | undefined
   notificationApi: NotificationApi
   otherSideVersion: SemverString | undefined
-}): TE.TaskEither<
+}): Effect.Effect<
+  ServerMessage,
+  | ErrorEncryptingMessage
+  | SendMessageApiErrors
   | JsonStringifyError
   | ZodParseError<ChatMessagePayload>
-  | ErrorEncryptingMessage
-  | SendMessageApiErrors,
-  ServerMessage
 > {
-  return pipe(
-    message,
-    messageToNetwork(receiverPublicKey),
-    TE.bindTo('encryptedMessage'),
-    TE.bindW('encryptedPreview', () =>
-      messagePreviewToNetwork(receiverPublicKey)(message)
-    ),
-    TE.chainW(({encryptedMessage, encryptedPreview}) =>
+  return Effect.gen(function* (_) {
+    const encryptedMessage = yield* _(
+      taskEitherToEffect(messageToNetwork(receiverPublicKey)(message))
+    )
+    const encryptedPreview = yield* _(
+      taskEitherToEffect(messagePreviewToNetwork(receiverPublicKey)(message))
+    )
+
+    yield* _(
       callWithNotificationService(api.sendMessage, {
         message: encryptedMessage,
         messagePreview: encryptedPreview,
@@ -68,5 +68,10 @@ export default function sendMessage({
         notificationApi,
       })
     )
-  )
+
+    return {
+      message: encryptedMessage,
+      senderPublicKey: senderKeypair.publicKeyPemBase64,
+    }
+  })
 }

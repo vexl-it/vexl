@@ -6,10 +6,10 @@ import {
 } from '@vexl-next/domain/src/general/offers'
 import {type NoContentResponse} from '@vexl-next/rest-api/src/NoContentResponse.brand'
 import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
+import {type Effect} from 'effect'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {effectToTaskEither} from '../effect-helpers/TaskEitherConverter'
-import {type ExtractErrorFromEffect} from '../utils/ExtractErrorFromEffect'
 import {constructAndEncryptPrivatePayloadForOwner} from './constructPrivatePayloadForOwner'
 import {type PrivatePartEncryptionError} from './utils/encryptPrivatePart'
 
@@ -27,7 +27,7 @@ export default function updateOwnerPrivatePayload({
   intendedConnectionLevel: IntendedConnectionLevel
 }): TE.TaskEither<
   | PrivatePartEncryptionError
-  | ExtractErrorFromEffect<ReturnType<OfferApi['createPrivatePart']>>,
+  | Effect.Effect.Error<ReturnType<OfferApi['createPrivatePart']>>,
   NoContentResponse
 > {
   return pipe(

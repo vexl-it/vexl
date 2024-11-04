@@ -3,13 +3,14 @@ import {
   type PublicKeyPemBase64,
 } from '@vexl-next/cryptography/src/KeyHolder'
 import {toError, type BasicError} from '@vexl-next/domain/src/utility/errors'
-import {type ChatPrivateApi} from '@vexl-next/rest-api/src/services/chat'
+import {type ChatApi} from '@vexl-next/rest-api/src/services/chat'
 import {type SignedChallenge} from '@vexl-next/rest-api/src/services/chat/contracts'
+import {type Effect} from 'effect'
 import * as O from 'fp-ts/Option'
 import * as RA from 'fp-ts/ReadonlyArray'
 import * as TE from 'fp-ts/TaskEither'
 import {flow, pipe} from 'fp-ts/function'
-import {type ExtractLeftTE} from '../../utils/ExtractLeft'
+import {effectToTaskEither} from '../../effect-helpers/TaskEitherConverter'
 import {ecdsaSign} from '../../utils/crypto'
 
 function selectKeyPair(
@@ -25,12 +26,12 @@ function selectKeyPair(
 
 export type ErrorGeneratingSignedChallengeBatch =
   BasicError<'ErrorGeneratingSignedChallengeBatch'>
-export type ApiErrorsGeneratingChallengeBatch = ExtractLeftTE<
-  ReturnType<ChatPrivateApi['createChallengeBatch']>
+export type ApiErrorsGeneratingChallengeBatch = Effect.Effect.Error<
+  ReturnType<ChatApi['createChallengeBatch']>
 >
 
 export function generateSignedChallengeBatch(
-  chatApi: ChatPrivateApi
+  chatApi: ChatApi
 ): (
   keyPairs: PrivateKeyHolder[]
 ) => TE.TaskEither<
@@ -40,9 +41,11 @@ export function generateSignedChallengeBatch(
   return (keyPairs) => {
     if (keyPairs.length === 0) return TE.right([])
     return pipe(
-      chatApi.createChallengeBatch({
-        publicKeys: keyPairs.map((k) => k.publicKeyPemBase64),
-      }),
+      effectToTaskEither(
+        chatApi.createChallengeBatch({
+          publicKeys: keyPairs.map((k) => k.publicKeyPemBase64),
+        })
+      ),
       TE.map((one) => one.challenges),
       TE.chainW(
         flow(

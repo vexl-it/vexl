@@ -12,22 +12,24 @@ import {
   type ChatMessagePayload,
 } from '@vexl-next/domain/src/general/messaging'
 import {type BasicError} from '@vexl-next/domain/src/utility/errors'
+import {type CryptoError} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {type ErrorEncryptingMessage} from '@vexl-next/resources-utils/src/chat/utils/chatCrypto'
 import {
   type JsonStringifyError,
   type ZodParseError,
 } from '@vexl-next/resources-utils/src/utils/parsing'
 import {
-  type BadStatusCodeError,
   type NetworkError,
   type UnexpectedApiResponseError,
-  type UnknownErrorAxios,
 } from '@vexl-next/rest-api/src/Errors'
 import {
-  type ErrorGeneratingChallenge,
   type ErrorSigningChallenge,
-} from '@vexl-next/rest-api/src/services/chat/utils'
+  type InvalidChallengeError,
+  type SenderInboxDoesNotExistError,
+} from '@vexl-next/rest-api/src/services/chat/contracts'
+import {type ErrorGeneratingChallenge} from '@vexl-next/rest-api/src/services/chat/utils'
 import {
+  type ForbiddenMessageTypeError,
   type InboxDoesNotExistError,
   type NotPermittedToSendMessageToTargetInboxError,
 } from '@vexl-next/rest-api/src/services/contact/contracts'
@@ -55,16 +57,18 @@ export const ChatMessageWithState = z
       error: z.custom<
         | ErrorEncryptingMessage
         | UnexpectedApiResponseError
-        | BadStatusCodeError
-        | UnknownErrorAxios
         | NetworkError
         | ErrorGeneratingChallenge
         | ErrorSigningChallenge
+        | InvalidChallengeError
         | InboxDoesNotExistError
         | NotPermittedToSendMessageToTargetInboxError
         | JsonStringifyError
         | ZodParseError<ChatMessagePayload>
         | ReadingFileError
+        | SenderInboxDoesNotExistError
+        | ForbiddenMessageTypeError
+        | CryptoError
       >((one) => !!(one as any)._tag),
     }),
     z.object({state: z.literal('sent'), message: ChatMessage}),

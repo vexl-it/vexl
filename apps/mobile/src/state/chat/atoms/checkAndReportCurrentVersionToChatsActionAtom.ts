@@ -7,6 +7,7 @@ import {
 import {SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {now} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import sendMessage from '@vexl-next/resources-utils/src/chat/sendMessage'
+import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import * as A from 'fp-ts/Array'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
@@ -58,15 +59,17 @@ export const sendUpdateNoticeMessageActionAtom = atom(
 
     const api = get(apiAtom)
     return pipe(
-      sendMessage({
-        api: api.chat,
-        senderKeypair: chat.chat.inbox.privateKey,
-        receiverPublicKey: chat.chat.otherSide.publicKey,
-        message: messageToSend,
-        notificationApi: api.notification,
-        theirFcmCypher: chat.chat.otherSideFcmCypher,
-        otherSideVersion: chat.chat.otherSideVersion,
-      }),
+      effectToTaskEither(
+        sendMessage({
+          api: api.chat,
+          senderKeypair: chat.chat.inbox.privateKey,
+          receiverPublicKey: chat.chat.otherSide.publicKey,
+          message: messageToSend,
+          notificationApi: api.notification,
+          theirFcmCypher: chat.chat.otherSideFcmCypher,
+          otherSideVersion: chat.chat.otherSideVersion,
+        })
+      ),
       TE.map(() => {
         set(
           chatAtom,
@@ -79,8 +82,8 @@ export const sendUpdateNoticeMessageActionAtom = atom(
       }),
       TE.getOrElse((error) => {
         if (
-          error._tag === 'NetworkErrorAxios' ||
-          error._tag === 'inboxDoesNotExist'
+          error._tag === 'NetworkError' ||
+          error._tag === 'ReceiverInboxDoesNotExistError'
         ) {
           return T.of(false)
         }

@@ -11,6 +11,7 @@ import sendMessage, {
   type SendMessageApiErrors,
 } from '@vexl-next/resources-utils/src/chat/sendMessage'
 import {type ErrorEncryptingMessage} from '@vexl-next/resources-utils/src/chat/utils/chatCrypto'
+import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {
   type JsonStringifyError,
   type ZodParseError,
@@ -71,17 +72,19 @@ export default function createSubmitChecklistUpdateActionAtom(
           }) as ChatMessage
       ),
       TE.fromTask,
-      TE.chainFirstW((message) => {
-        return sendMessage({
-          api: api.chat,
-          senderKeypair: chatWithMessages.chat.inbox.privateKey,
-          receiverPublicKey: chatWithMessages.chat.otherSide.publicKey,
-          message,
-          notificationApi: api.notification,
-          theirFcmCypher: chatWithMessages.chat.otherSideFcmCypher,
-          otherSideVersion: chatWithMessages.chat.otherSideVersion,
-        })
-      }),
+      TE.chainFirstW((message) =>
+        effectToTaskEither(
+          sendMessage({
+            api: api.chat,
+            senderKeypair: chatWithMessages.chat.inbox.privateKey,
+            receiverPublicKey: chatWithMessages.chat.otherSide.publicKey,
+            message,
+            notificationApi: api.notification,
+            theirFcmCypher: chatWithMessages.chat.otherSideFcmCypher,
+            otherSideVersion: chatWithMessages.chat.otherSideVersion,
+          })
+        )
+      ),
       TE.map((message): ChatMessageWithState => {
         const successMessage: ChatMessageWithState = {
           message: {

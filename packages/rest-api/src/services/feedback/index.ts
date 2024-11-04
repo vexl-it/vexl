@@ -1,7 +1,7 @@
 import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {createClientInstanceWithAuth} from '../../client'
-import {type PlatformNameE} from '../../PlatformName'
+import {type PlatformName} from '../../PlatformName'
 import {type ServiceUrl} from '../../ServiceUrl.brand'
 import {type GetUserSessionCredentials} from '../../UserSessionCredentials.brand'
 import {handleCommonErrorsEffect, type LoggingFunction} from '../../utils'
@@ -17,7 +17,7 @@ export function api({
   getUserSessionCredentials,
   loggingFunction,
 }: {
-  platform: PlatformNameE
+  platform: PlatformName
   clientVersion: VersionCode
   clientSemver: SemverString
   url: ServiceUrl

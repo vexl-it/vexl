@@ -13,13 +13,14 @@ import {
 } from '@vexl-next/rest-api'
 import {type UserSessionCredentials} from '@vexl-next/rest-api/src/UserSessionCredentials.brand'
 
+import {Schema} from '@effect/schema'
 import {atom} from 'jotai'
 import {Platform} from 'react-native'
 import {dummySession, sessionHolderAtom} from '../state/session'
 import {apiPreset, version, versionCode} from '../utils/environment'
 // import {ServiceUrl} from '@vexl-next/rest-api/src/ServiceUrl.brand'
 
-export const platform = PlatformName.parse(
+export const platform = Schema.decodeSync(PlatformName)(
   Platform.OS === 'ios' ? 'IOS' : 'ANDROID'
 )
 
@@ -72,7 +73,7 @@ export const apiAtom = atom((get) => {
       url: apiEnv.offerMs,
       getUserSessionCredentials,
     }),
-    chat: chat.privateApi({
+    chat: chat.api({
       platform,
       clientVersion: versionCode,
       clientSemver: version,

@@ -11,12 +11,11 @@ import {
 import {type FcmCypher} from '@vexl-next/domain/src/general/notifications'
 import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {now} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {type ChatPrivateApi} from '@vexl-next/rest-api/src/services/chat'
+import {type ChatApi} from '@vexl-next/rest-api/src/services/chat'
 import {type NotificationApi} from '@vexl-next/rest-api/src/services/notification'
-import * as TE from 'fp-ts/TaskEither'
-import {flow, pipe} from 'fp-ts/function'
+import {Effect} from 'effect'
+import {taskEitherToEffect} from '../effect-helpers/TaskEitherConverter'
 import {callWithNotificationService} from '../notifications/callWithNotificationService'
-import {type ExtractLeftTE} from '../utils/ExtractLeft'
 import {type JsonStringifyError, type ZodParseError} from '../utils/parsing'
 import {type ErrorEncryptingMessage} from './utils/chatCrypto'
 import {messageToNetwork} from './utils/messageIO'
@@ -48,8 +47,8 @@ function createApproveChatMessage({
   }
 }
 
-export type ApiConfirmMessagingRequest = ExtractLeftTE<
-  ReturnType<ChatPrivateApi['approveRequest']>
+export type ApiConfirmMessagingRequest = Effect.Effect.Error<
+  ReturnType<ChatApi['approveRequest']>
 >
 
 export default function confirmMessagingRequest({
@@ -68,7 +67,7 @@ export default function confirmMessagingRequest({
   text: string
   fromKeypair: PrivateKeyHolder
   toPublicKey: PublicKeyPemBase64
-  api: ChatPrivateApi
+  api: ChatApi
   approve: boolean
   myVersion: SemverString
   myFcmCypher?: FcmCypher
@@ -76,39 +75,40 @@ export default function confirmMessagingRequest({
   theirFcmCypher?: FcmCypher | undefined
   otherSideVersion: SemverString | undefined
   notificationApi: NotificationApi
-}): TE.TaskEither<
+}): Effect.Effect<
+  ChatMessage,
   | ApiConfirmMessagingRequest
   | JsonStringifyError
   | ZodParseError<ChatMessagePayload>
-  | ErrorEncryptingMessage,
-  ChatMessage
+  | ErrorEncryptingMessage
 > {
-  return pipe(
-    createApproveChatMessage({
+  return Effect.gen(function* (_) {
+    const approvedMessage = createApproveChatMessage({
       text,
       myVersion,
       senderPublicKey: fromKeypair.publicKeyPemBase64,
       approve,
       myFcmCypher,
       lastReceivedFcmCypher,
-    }),
-    TE.right,
-    TE.chainFirstW(
-      flow(
-        messageToNetwork(toPublicKey),
-        TE.chainFirstW((message) =>
-          callWithNotificationService(api.approveRequest, {
-            message,
-            approve,
-            keyPair: fromKeypair,
-            publicKeyToConfirm: toPublicKey,
-          })({
-            fcmCypher: theirFcmCypher,
-            otherSideVersion,
-            notificationApi,
-          })
-        )
-      )
+    })
+
+    const message = yield* _(
+      taskEitherToEffect(messageToNetwork(toPublicKey)(approvedMessage))
     )
-  )
+
+    yield* _(
+      callWithNotificationService(api.approveRequest, {
+        message,
+        approve,
+        keyPair: fromKeypair,
+        publicKeyToConfirm: toPublicKey,
+      })({
+        fcmCypher: theirFcmCypher,
+        otherSideVersion,
+        notificationApi,
+      })
+    )
+
+    return approvedMessage
+  })
 }

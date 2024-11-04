@@ -3,13 +3,13 @@ import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
-import {PlatformNameE} from '@vexl-next/rest-api/src/PlatformName'
+import {PlatformName} from '@vexl-next/rest-api/src/PlatformName'
 import {Effect, flow} from 'effect'
 import {InboxRecordId} from '../domain'
 
 const UpdateInboxMetadataParams = Schema.Struct({
   id: InboxRecordId,
-  platform: Schema.optionalWith(PlatformNameE, {as: 'Option'}),
+  platform: Schema.optionalWith(PlatformName, {as: 'Option'}),
   clientVersion: Schema.optionalWith(VersionCode, {as: 'Option'}),
 })
 export type UpdateInboxMetadataParams = Schema.Schema.Type<

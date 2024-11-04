@@ -1,11 +1,11 @@
 import {type OfferAdminId} from '@vexl-next/domain/src/general/offers'
 import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
+import {type Effect} from 'effect'
 import * as A from 'fp-ts/Array'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {effectToTaskEither} from '../effect-helpers/TaskEitherConverter'
-import {type ExtractErrorFromEffect} from '../utils/ExtractErrorFromEffect'
 import flattenTaskOfEithers from '../utils/flattenTaskOfEithers'
 import {type OfferPrivatePayloadToEncrypt} from './utils/constructPrivatePayloads'
 import {
@@ -13,7 +13,7 @@ import {
   type PrivatePartEncryptionError,
 } from './utils/encryptPrivatePart'
 
-export type ApiErrorAddingPrivateParts = ExtractErrorFromEffect<
+export type ApiErrorAddingPrivateParts = Effect.Effect.Error<
   ReturnType<OfferApi['createPrivatePart']>
 >
 

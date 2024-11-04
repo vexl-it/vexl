@@ -9,6 +9,7 @@ import sendMessage, {
   type SendMessageApiErrors,
 } from '@vexl-next/resources-utils/src/chat/sendMessage'
 import {type ErrorEncryptingMessage} from '@vexl-next/resources-utils/src/chat/utils/chatCrypto'
+import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {
   type JsonStringifyError,
   type ZodParseError,
@@ -112,15 +113,17 @@ export default function revealContactActionAtom(
       }
 
       return pipe(
-        sendMessage({
-          api: api.chat,
-          senderKeypair: chat.inbox.privateKey,
-          receiverPublicKey: chat.otherSide.publicKey,
-          message,
-          notificationApi: api.notification,
-          theirFcmCypher: chat.otherSideFcmCypher,
-          otherSideVersion: chat.otherSideVersion,
-        }),
+        effectToTaskEither(
+          sendMessage({
+            api: api.chat,
+            senderKeypair: chat.inbox.privateKey,
+            receiverPublicKey: chat.otherSide.publicKey,
+            message,
+            notificationApi: api.notification,
+            theirFcmCypher: chat.otherSideFcmCypher,
+            otherSideVersion: chat.otherSideVersion,
+          })
+        ),
         TE.map(() => {
           const successMessage: ChatMessageWithState = {
             message,

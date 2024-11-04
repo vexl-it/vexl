@@ -525,7 +525,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
 
               return false
             }
-            if (e._tag !== 'NetworkErrorAxios')
+            if (e._tag !== 'NetworkError')
               reportError('error', new Error('Error sending identityReveal'), {
                 e,
               })
@@ -606,7 +606,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
               })
               return false
             }
-            if (e._tag !== 'NetworkErrorAxios')
+            if (e._tag !== 'NetworkError')
               reportError('error', new Error('Error sending contact reveal'), {
                 e,
               })

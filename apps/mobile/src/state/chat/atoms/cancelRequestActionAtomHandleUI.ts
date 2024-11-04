@@ -3,12 +3,13 @@ import {type OfferInfo} from '@vexl-next/domain/src/general/offers'
 import {type BasicError} from '@vexl-next/domain/src/utility/errors'
 import {sendCancelMessagingRequest} from '@vexl-next/resources-utils/src/chat/sendCancelMessagingRequest'
 import {type ErrorEncryptingMessage} from '@vexl-next/resources-utils/src/chat/utils/chatCrypto'
-import {type ExtractLeftTE} from '@vexl-next/resources-utils/src/utils/ExtractLeft'
+import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {
   type JsonStringifyError,
   type ZodParseError,
 } from '@vexl-next/resources-utils/src/utils/parsing'
-import {type ChatPrivateApi} from '@vexl-next/rest-api/src/services/chat'
+import {type ChatApi} from '@vexl-next/rest-api/src/services/chat'
+import {type Effect} from 'effect'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
@@ -31,8 +32,8 @@ import createAccountDeletedMessage from '../utils/createAccountDeletedMessage'
 import focusChatByInboxKeyAndSenderKey from './focusChatByInboxKeyAndSenderKey'
 
 type ChatNotFoundError = BasicError<'ChatNotFoundError'>
-type CancelRequestApprovalErrors = ExtractLeftTE<
-  ReturnType<ChatPrivateApi['cancelRequestApproval']>
+type CancelRequestApprovalErrors = Effect.Effect.Error<
+  ReturnType<ChatApi['cancelRequestApproval']>
 >
 
 const cancelRequestActionAtomHandleUI = atom(
@@ -86,16 +87,18 @@ const cancelRequestActionAtomHandleUI = atom(
       TE.chainW(() => {
         set(loadingOverlayDisplayedAtom, true)
 
-        return sendCancelMessagingRequest({
-          api: api.chat,
-          text,
-          fromKeypair: chat.inbox.privateKey,
-          toPublicKey: chat.otherSide.publicKey,
-          myVersion: version,
-          theirFcmCypher: chat.otherSideFcmCypher,
-          notificationApi: api.notification,
-          otherSideVersion: chat.otherSideVersion,
-        })
+        return effectToTaskEither(
+          sendCancelMessagingRequest({
+            api: api.chat,
+            text,
+            fromKeypair: chat.inbox.privateKey,
+            toPublicKey: chat.otherSide.publicKey,
+            myVersion: version,
+            theirFcmCypher: chat.otherSideFcmCypher,
+            notificationApi: api.notification,
+            otherSideVersion: chat.otherSideVersion,
+          })
+        )
       }),
       TE.map((sentMessage): ChatMessageWithState => {
         const successMessage = {
@@ -109,7 +112,7 @@ const cancelRequestActionAtomHandleUI = atom(
         if (error._tag === 'UserDeclinedError') {
           return error
         }
-        if (error._tag === 'OtherSideAccountDeleted') {
+        if (error._tag === 'ReceiverInboxDoesNotExistError') {
           set(
             chatAtom,
             addMessageToChat(

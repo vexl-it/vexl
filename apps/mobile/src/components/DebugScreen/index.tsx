@@ -6,7 +6,7 @@ import {MINIMAL_DATE} from '@vexl-next/domain/src/utility/IsoDatetimeString.bran
 import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {fetchAndEncryptFcmForOffer} from '@vexl-next/resources-utils/src/notifications/encryptFcmForOffer'
 import getNewOffersAndDecrypt from '@vexl-next/resources-utils/src/offers/getNewOffersAndDecrypt'
-import {Array, Either, pipe as effectPipe} from 'effect'
+import {Array, Effect, Either, pipe as effectPipe} from 'effect'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
@@ -477,18 +477,18 @@ function DebugScreen(): JSX.Element {
               variant="primary"
               size="small"
               text="Delete user inbox"
-              onPress={() => {
-                void pipe(
-                  deleteInbox(session.privateKey),
-                  T.map((result) => {
+              onPress={() =>
+                deleteInbox(session.privateKey).pipe(
+                  Effect.tap((result) => {
                     if (result) {
                       Alert.alert('done')
                     } else {
                       Alert.alert('error')
                     }
-                  })
-                )()
-              }}
+                  }),
+                  Effect.runFork
+                )
+              }
             />
 
             <Button

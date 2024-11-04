@@ -1,13 +1,10 @@
 import {type PrivateKeyHolder} from '@vexl-next/cryptography/src/KeyHolder'
 import {type ChatMessage} from '@vexl-next/domain/src/general/messaging'
 import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
-import {type ChatPrivateApi} from '@vexl-next/rest-api/src/services/chat'
-import * as A from 'fp-ts/Array'
-import * as T from 'fp-ts/Task'
-import * as TE from 'fp-ts/TaskEither'
-import {flow, pipe} from 'fp-ts/function'
-import {type ExtractLeftTE} from '../utils/ExtractLeft'
-import flattenTaskOfEithers from '../utils/flattenTaskOfEithers'
+import {type ChatApi} from '@vexl-next/rest-api/src/services/chat'
+import {Array, Effect, Either, pipe} from 'effect'
+import {flow} from 'fp-ts/function'
+import {taskEitherToEffect} from '../effect-helpers/TaskEitherConverter'
 import {type ErrorDecryptingMessage} from './utils/chatCrypto'
 import {messageFromNetwork} from './utils/messageIO'
 import {
@@ -15,19 +12,19 @@ import {
   type ErrorParsingChatMessage,
 } from './utils/parseChatMessage'
 
-export type ApiErrorRetrievingMessages = ExtractLeftTE<
-  ReturnType<ChatPrivateApi['retrieveMessages']>
+export type ApiErrorRetrievingMessages = Effect.Effect.Error<
+  ReturnType<ChatApi['retrieveMessages']>
 >
+
 export default function retrieveMessages({
   api,
   inboxKeypair,
   currentAppVersion,
 }: {
-  api: ChatPrivateApi
+  api: ChatApi
   inboxKeypair: PrivateKeyHolder
   currentAppVersion: SemverString
-}): TE.TaskEither<
-  ApiErrorRetrievingMessages,
+}): Effect.Effect<
   {
     errors: Array<
       | ErrorDecryptingMessage
@@ -35,22 +32,27 @@ export default function retrieveMessages({
       | ErrorChatMessageRequiresNewerVersion
     >
     messages: ChatMessage[]
-  }
+  },
+  ApiErrorRetrievingMessages
 > {
-  return pipe(
-    api.retrieveMessages({keyPair: inboxKeypair}),
-    TE.map((r) => r.messages),
-    TE.chainTaskK(
+  return api.retrieveMessages({keyPair: inboxKeypair}).pipe(
+    Effect.map((r) => r.messages),
+    Effect.flatMap(
       flow(
-        A.map(
-          messageFromNetwork({
-            privateKey: inboxKeypair,
-            appVersion: currentAppVersion,
-          })
+        Array.map((message) =>
+          taskEitherToEffect(
+            messageFromNetwork({
+              privateKey: inboxKeypair,
+              appVersion: currentAppVersion,
+            })(message)
+          )
         ),
-        A.sequence(T.ApplicativePar),
-        flattenTaskOfEithers,
-        T.map(({lefts, rights}) => ({errors: lefts, messages: rights}))
+        Array.map(Effect.either),
+        Effect.all,
+        Effect.map((eithers) => ({
+          errors: pipe(Array.filterMap(eithers, Either.getLeft)),
+          messages: pipe(Array.filterMap(eithers, Either.getRight)),
+        }))
       )
     )
   )

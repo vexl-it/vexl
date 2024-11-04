@@ -5,15 +5,8 @@ import {
   type E164PhoneNumber,
 } from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {HashedPhoneNumberE} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
-import {
-  IsoDatetimeString,
-  IsoDatetimeStringE,
-} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
+import {IsoDatetimeStringE} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
 import {EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
-import {type AxiosResponse} from 'axios'
-import {Brand} from 'effect'
-import {z} from 'zod'
-
 export interface InvalidPhoneNumber {
   _tag: 'InvalidPhoneNumber'
 }
@@ -54,41 +47,12 @@ export interface InitPhoneNumberVerificationRequest {
   readonly phoneNumber: E164PhoneNumber
 }
 
-export const VerificationId = z
-  .number()
-  .int()
-  .min(0)
-  .transform((v) =>
-    Brand.nominal<typeof v & Brand.Brand<'VerificationId'>>()(v)
-  )
-  .brand<'VerificationId'>()
-export type VerificationId = z.TypeOf<typeof VerificationId>
-
-export const VerificationIdE = Schema.Number.pipe(
+export const VerificationId = Schema.Number.pipe(
   Schema.int(),
   Schema.greaterThanOrEqualTo(0),
   Schema.brand('VerificationId')
 )
-export type VerificationIdE = Schema.Schema.Type<typeof VerificationId>
-
-export const InitPhoneNumberVerificationResponse = z.object({
-  verificationId: VerificationId,
-  expirationAt: IsoDatetimeString,
-})
-
-export type InitPhoneNumberVerificationResponse = z.TypeOf<
-  typeof InitPhoneNumberVerificationResponse
->
-
-export const ExportDataResponse = z.object({
-  pdfFile: z.string().min(1),
-})
-export type ExportDataResponse = z.TypeOf<typeof ExportDataResponse>
-
-export interface InvalidPhoneNumberResponse {
-  _tag: 'InvalidPhoneNumberResponse'
-  response: AxiosResponse
-}
+export type VerificationId = Schema.Schema.Type<typeof VerificationId>
 
 export class PreviousCodeNotExpiredError extends Schema.TaggedError<PreviousCodeNotExpiredError>(
   'PreviousCodeNotExpiredError'

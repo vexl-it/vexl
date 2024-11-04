@@ -38,7 +38,7 @@ function AcceptDeclineButtons({
               Alert.alert(t('offer.requestWasCancelledByOtherSide'))
             } else if (e._tag === 'RequestNotFoundError') {
               Alert.alert(t('offer.requestNotFound'))
-            } else if (e._tag === 'OtherSideAccountDeleted') {
+            } else if (e._tag === 'ReceiverInboxDoesNotExistError') {
               Alert.alert(t('offer.otherSideAccountDeleted'))
             } else {
               showErrorAlert({

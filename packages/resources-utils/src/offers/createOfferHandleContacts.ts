@@ -10,10 +10,10 @@ import {
 } from '@vexl-next/domain/src/general/offers'
 import {type ContactApi} from '@vexl-next/rest-api/src/services/contact'
 import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
+import {type Effect} from 'effect'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {effectToTaskEither} from '../effect-helpers/TaskEitherConverter'
-import {type ExtractErrorFromEffect} from '../utils/ExtractErrorFromEffect'
 import {type OfferEncryptionProgress} from './OfferEncryptionProgress'
 import decryptOffer, {
   type ErrorDecryptingOffer,
@@ -34,7 +34,7 @@ import generateSymmetricKey, {
 import {fetchInfoAndGeneratePrivatePayloads} from './utils/offerPrivatePayload'
 import {sendOfferToNetworkBatchPrivateParts} from './utils/sendOfferToNetworkBatchPrivateParts'
 
-export type ApiErrorWhileCreatingOffer = ExtractErrorFromEffect<
+export type ApiErrorWhileCreatingOffer = Effect.Effect.Error<
   ReturnType<OfferApi['createNewOffer']>
 >
 

@@ -19,12 +19,10 @@ export const InsertMetricsParams = Schema.Struct({
   timestamp: Schema.Date,
   type: Schema.Literal('Increment', 'Total'),
   attributes: Schema.optional(
-    Schema.parseJson(
-      Schema.Record({
-        key: Schema.String,
-        value: Schema.Union(Schema.String, Schema.Number, Schema.Boolean),
-      })
-    )
+    Schema.Record({
+      key: Schema.String,
+      value: Schema.Union(Schema.String, Schema.Number, Schema.Boolean),
+    })
   ),
 })
 
@@ -37,10 +35,16 @@ export const createInsertMetricRecord = Effect.gen(function* (_) {
     Request: InsertMetricsParams,
     execute: (params) => sql`
       INSERT INTO
-        "metrics" ${sql.insert({
-        ...params,
-        attributes: params.attributes ?? null,
-      })}
+        "metrics" (name, UUID, value, timestamp, type, attributes)
+      VALUES
+        (
+          ${params.name},
+          ${params.uuid},
+          ${params.value},
+          ${params.timestamp},
+          ${params.type},
+          ${sql.json(params.attributes)}::jsonb
+        )
     `,
   })
 

@@ -4,6 +4,7 @@ import {MetricsMessage} from '@vexl-next/server-utils/src/metrics/domain'
 import {type MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
 import {reportMetricForked} from '@vexl-next/server-utils/src/metrics/reportMetricForked'
 import {Effect, Layer} from 'effect'
+import {inactivityNotificationAfterDaysConfig} from './configs'
 
 const CONT_OF_UNIQUE_USERS = 'COUNT_OF_UNIQUE_USERS' as const
 const COUNT_OF_UNIQUE_CONTACTS = 'COUNT_OF_UNIQUE_CONTACTS' as const
@@ -153,3 +154,28 @@ export const reportGaguesLayer = Layer.effectDiscard(
     )
   })
 )
+
+export const queryAndReportNumberOfInnactiveUsers = Effect.gen(function* (_) {
+  const inactivityNotificationAfterDays = yield* _(
+    inactivityNotificationAfterDaysConfig
+  )
+  const sql = yield* _(SqlClient.SqlClient)
+  return sql`
+    SELECT
+      count(*)
+    FROM
+      users
+    WHERE
+      refreshed_at IS NULL
+      OR refreshed_at < now() - interval '${inactivityNotificationAfterDays} day'
+  `.pipe(
+    Effect.map((one) => Number(one[0].count)),
+    Effect.flatMap((v) =>
+      Effect.zipRight(
+        Effect.logInfo(`Reporting number of innactive users: ${v}`),
+        reportCountOfUniqueContacts(v)
+      )
+    ),
+    Effect.withSpan('Query number of inactive users')
+  )
+})

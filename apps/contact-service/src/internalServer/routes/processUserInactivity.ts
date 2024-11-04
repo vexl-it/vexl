@@ -4,6 +4,7 @@ import dayjs from 'dayjs'
 import {Array, Effect, flow} from 'effect'
 import {inactivityNotificationAfterDaysConfig} from '../../configs'
 import {UserDbService} from '../../db/UserDbService'
+import {queryAndReportNumberOfInnactiveUsers} from '../../metrics'
 import {sendNotificationToAllHandleNonExistingTokens} from '../../utils/notifications'
 
 export const processUserInactivity = Effect.gen(function* (_) {
@@ -63,6 +64,9 @@ export const processUserInactivity = Effect.gen(function* (_) {
       {batching: true}
     )
   )
+
+  yield* _(Effect.logInfo('Reporting number of inactive users'))
+  yield* _(queryAndReportNumberOfInnactiveUsers)
 }).pipe(
   withRedisLock('processUserInactivity', 10_000),
   Effect.tapError((e) =>

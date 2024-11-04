@@ -3,12 +3,18 @@ import {loadMigrationsFromEffect} from '@vexl-next/server-utils/src/loadMigratio
 import {Config, Layer, String} from 'effect'
 import {databaseConfig} from '../configs'
 import initialMigraiton from './migrations/0001_initial'
+import fixBadAttributesFormat from './migrations/0002_fix_bad_attributes_format'
 
 const migrations = [
   {
     id: 1,
     name: 'initial',
     migrationEffect: initialMigraiton,
+  },
+  {
+    id: 2,
+    name: 'fix bad attributes format',
+    migrationEffect: fixBadAttributesFormat,
   },
 ] as const
 

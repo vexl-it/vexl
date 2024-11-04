@@ -1,13 +1,19 @@
-import {SqlClient} from '@effect/sql'
-import {type CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
+import {Schema} from '@effect/schema'
+import {SqlClient, SqlSchema} from '@effect/sql'
+import {
+  type CountryPrefix,
+  CountryPrefixE,
+} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {MetricsMessage} from '@vexl-next/server-utils/src/metrics/domain'
 import {type MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
 import {reportMetricForked} from '@vexl-next/server-utils/src/metrics/reportMetricForked'
-import {Effect, Layer} from 'effect'
+import {Array, Effect, Layer, pipe} from 'effect'
+import {type ReadonlyArray} from 'effect/Array'
 
 const USER_LOGGED_IN = 'USER_LOGGED_IN' as const
-const NUMBER_OF_USERS = 'NUMBER_OF_USERS' as const
+const NUMBER_OF_USERS = 'NUMBER_OF_USERS_BY_COUNTRY' as const
+const NUMBER_OF_USERS_ALL_COUNTRIES = 'NUMBER_OF_USERS' as const
 
 export const reportUserLoggedIn = (
   countryPrefix: CountryPrefix
@@ -22,32 +28,67 @@ export const reportUserLoggedIn = (
   )
 
 export const reportTotalNumberOfUsers = (
-  numberOfUsers: number
+  dataToReport: ReadonlyArray<{count: number; countryPrefix: CountryPrefix}>
 ): Effect.Effect<void, never, MetricsClientService> =>
-  reportMetricForked(
-    new MetricsMessage({
-      uuid: generateUuid(),
-      timestamp: new Date(),
-      name: NUMBER_OF_USERS,
-      value: numberOfUsers,
-      type: 'Total',
-    })
-  )
+  Effect.gen(function* (_) {
+    yield* _(
+      dataToReport,
+      Array.map((data) =>
+        reportMetricForked(
+          new MetricsMessage({
+            uuid: generateUuid(),
+            timestamp: new Date(),
+            name: NUMBER_OF_USERS,
+            value: data.count,
+            attributes: {countryPrefix: data.countryPrefix},
+            type: 'Total',
+          })
+        )
+      ),
+      Effect.all
+    )
+
+    const totalNumberOfUsers = pipe(
+      dataToReport,
+      Array.map((data) => data.count),
+      Array.reduce(0, (acc, v) => acc + v)
+    )
+    yield* _(
+      reportMetricForked(
+        new MetricsMessage({
+          uuid: generateUuid(),
+          timestamp: new Date(),
+          name: NUMBER_OF_USERS_ALL_COUNTRIES,
+          value: totalNumberOfUsers,
+          type: 'Total',
+        })
+      )
+    )
+  })
 
 export const reportMetricsLayer = Layer.effectDiscard(
   Effect.gen(function* (_) {
     const sql = yield* _(SqlClient.SqlClient)
 
-    const queryNumberOfUsers = sql`
-      SELECT
-        count(*) AS COUNT
-      FROM
-        users
-    `.pipe(
-      Effect.map((one) => Number(one[0].count)),
+    const queryNumberOfUsers = SqlSchema.findAll({
+      Request: Schema.Null,
+      Result: Schema.Struct({
+        count: Schema.Number,
+        countryPrefix: CountryPrefixE,
+      }),
+      execute: () => sql`
+        SELECT
+          count(*) AS "count",
+          country_prefix AS "countryPrefix"
+        FROM
+          users
+        GROUP BY
+          country_prefix
+      `,
+    })(null).pipe(
       Effect.flatMap((v) =>
         Effect.zipRight(
-          Effect.logInfo(`Reporting number of logged users ${v}`),
+          Effect.logInfo(`Reporting number of logged users`, v),
           reportTotalNumberOfUsers(v)
         )
       ),

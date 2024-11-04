@@ -17,13 +17,7 @@ const main = pipe(
           uuid,
           timestamp: new Date(),
           name: 'Test metric',
-        })
-      ),
-      reportMetricForked(
-        new MetricsMessage({
-          uuid,
-          timestamp: new Date(),
-          name: 'Test metric',
+          attributes: {key: 'value'},
         })
       ),
     ])

@@ -16,6 +16,7 @@ import {
   PriceBigger,
   PriceText,
 } from '../columnsStyles'
+import {formatLocationForColumns} from '../utils'
 
 interface Props {
   offer: OfferInfo
@@ -114,9 +115,7 @@ function BtcOfferColumns({offer}: Props): JSX.Element {
           {offer.publicPart.paymentMethod
             .map((method) => {
               if (method === 'CASH') {
-                return offer.publicPart.location
-                  .map((one) => one.shortAddress)
-                  .join(', ')
+                return formatLocationForColumns(offer.publicPart.location)
               }
               if (method === 'REVOLUT') {
                 return t('offer.revolut')

@@ -25,7 +25,7 @@ function ToastNotification(): JSX.Element {
       alignSelf="center"
       left={0}
       right={0}
-      {...(state?.position === 'bottom' ? {bottom: -10} : {top: -10})}
+      {...(state?.position === 'top' ? {top: -10} : {bottom: -10})}
     >
       {state.visible ? <ToastNotificationContent {...state} /> : <></>}
     </Stack>

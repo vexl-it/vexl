@@ -143,8 +143,7 @@ function OfferInfo({
       iconFill: getTokens().color.black.val,
       showCloseButton: true,
       hideAfterMillis: 3000,
-      position: mapIsVisible ? 'top' : 'bottom',
-      bottomMargin: mapIsVisible ? 0 : BUTTON_HEIGHT_PLUS_EXTRA_MARGIN,
+      bottomMargin: !mapIsVisible ? BUTTON_HEIGHT_PLUS_EXTRA_MARGIN : undefined,
     })
 
     return () => {

@@ -16,9 +16,18 @@ const OFFER_MODIFIED = 'OFFER_MODIFIED' as const
 const OFFER_CREATED = 'OFFER_CREATED' as const
 const OFFER_REPORTED = 'OFFER_REPORTED' as const
 const TOTAL_BUY_OFFERS = 'TOTAL_BUY_OFFERS' as const
+const TOTAL_BUY_OFFERS_ACROSS_ALL = 'TOTAL_BUY_OFFERS_ACROSS_ALL' as const
 const TOTAL_SELL_OFFERS = 'TOTAL_SELL_OFFERS' as const
+const TOTAL_SELL_OFFERS_ACROSS_ALL = 'TOTAL_SELL_OFFERS_ACROSS_ALL' as const
+const TOTAL_OFFERS_ACROSS_ALL = 'TOTAL_OFFERS_ACROSS_ALL' as const
 const TOTAL_SELL_OFFERS_EXPIRED = 'TOTAL_SELL_OFFERS_EXPIRED' as const
+const TOTAL_SELL_OFFERS_EXPIRED_ACROSS_ALL =
+  'TOTAL_SELL_OFFERS_EXPIRED_ACROSS_ALL' as const
 const TOTAL_BUY_OFFERS_EXPIRED = 'TOTAL_BUY_OFFERS_EXPIRED' as const
+const TOTAL_BUY_OFFERS_EXPIRED_ACROSS_ALL =
+  'TOTAL_BUY_OFFERS_EXPIRED_ACROSS_ALL' as const
+const TOTAL_OFFERS_EXPIRED_ACROSS_ALL =
+  'TOTAL_OFFERS_EXPIRED_ACROSS_ALL' as const
 
 export const reportOfferPublicPartDeleted = (): Effect.Effect<
   void,
@@ -103,6 +112,48 @@ export const reportTotalSellOffers = ({
     })
   )
 
+export const reportTotalSellOffersAcrossAll = ({
+  value,
+}: {
+  value: number
+}): Effect.Effect<void, never, MetricsClientService> =>
+  reportMetricForked(
+    new MetricsMessage({
+      uuid: generateUuid(),
+      timestamp: new Date(),
+      name: TOTAL_SELL_OFFERS_ACROSS_ALL,
+      value,
+    })
+  )
+
+export const reportTotalBuyOffersAcrossAll = ({
+  value,
+}: {
+  value: number
+}): Effect.Effect<void, never, MetricsClientService> =>
+  reportMetricForked(
+    new MetricsMessage({
+      uuid: generateUuid(),
+      timestamp: new Date(),
+      name: TOTAL_BUY_OFFERS_ACROSS_ALL,
+      value,
+    })
+  )
+
+export const reportTotalOffersAcrossAll = ({
+  value,
+}: {
+  value: number
+}): Effect.Effect<void, never, MetricsClientService> =>
+  reportMetricForked(
+    new MetricsMessage({
+      uuid: generateUuid(),
+      timestamp: new Date(),
+      name: TOTAL_OFFERS_ACROSS_ALL,
+      value,
+    })
+  )
+
 export const reportTotalSellOffersExpired = ({
   countryPrefix,
   value,
@@ -133,6 +184,48 @@ export const reportTotalBuyOffersExpired = ({
       timestamp: new Date(),
       name: TOTAL_BUY_OFFERS_EXPIRED,
       attributes: {countryPrefix: countryPrefix ?? 'none'},
+      value,
+    })
+  )
+
+export const reportTotalSellOffersExpiredAcrossAll = ({
+  value,
+}: {
+  value: number
+}): Effect.Effect<void, never, MetricsClientService> =>
+  reportMetricForked(
+    new MetricsMessage({
+      uuid: generateUuid(),
+      timestamp: new Date(),
+      name: TOTAL_SELL_OFFERS_EXPIRED_ACROSS_ALL,
+      value,
+    })
+  )
+
+export const reportTotalBuyOffersExpiredAcrossAll = ({
+  value,
+}: {
+  value: number
+}): Effect.Effect<void, never, MetricsClientService> =>
+  reportMetricForked(
+    new MetricsMessage({
+      uuid: generateUuid(),
+      timestamp: new Date(),
+      name: TOTAL_BUY_OFFERS_EXPIRED_ACROSS_ALL,
+      value,
+    })
+  )
+
+export const reportTotalOffersExpiredAcrossAll = ({
+  value,
+}: {
+  value: number
+}): Effect.Effect<void, never, MetricsClientService> =>
+  reportMetricForked(
+    new MetricsMessage({
+      uuid: generateUuid(),
+      timestamp: new Date(),
+      name: TOTAL_OFFERS_EXPIRED_ACROSS_ALL,
       value,
     })
   )
@@ -217,6 +310,29 @@ export const reportMetricsLayer = Layer.effectDiscard(
             }),
           ]),
           Array.flatten,
+          Array.appendAll([
+            // Sum of all buy
+            pipe(
+              listOfCountries,
+              Array.map((one) => one.buy),
+              Array.reduce(0, (a, b) => a + b),
+              (v) => reportTotalBuyOffersAcrossAll({value: v})
+            ),
+            // Sum of all sell
+            pipe(
+              listOfCountries,
+              Array.map((one) => one.sell),
+              Array.reduce(0, (a, b) => a + b),
+              (v) => reportTotalSellOffersAcrossAll({value: v})
+            ),
+            // Sum of all
+            pipe(
+              listOfCountries,
+              Array.map((one) => one.sell + one.buy),
+              Array.reduce(0, (a, b) => a + b),
+              (v) => reportTotalOffersAcrossAll({value: v})
+            ),
+          ]),
           Effect.all
         )
       ),
@@ -226,7 +342,8 @@ export const reportMetricsLayer = Layer.effectDiscard(
     const queryAndReportExpiredOffers = queryExpiredOffersStats.pipe(
       Effect.flatMap((listOfCountries) =>
         pipe(
-          Array.map(listOfCountries, (one) => [
+          listOfCountries,
+          Array.map((one) => [
             reportTotalBuyOffersExpired({
               countryPrefix: one.countryPrefix ?? undefined,
               value: one.buy,
@@ -237,6 +354,29 @@ export const reportMetricsLayer = Layer.effectDiscard(
             }),
           ]),
           Array.flatten,
+          Array.appendAll([
+            // Sum of all buy
+            pipe(
+              listOfCountries,
+              Array.map((one) => one.buy),
+              Array.reduce(0, (a, b) => a + b),
+              (v) => reportTotalBuyOffersExpiredAcrossAll({value: v})
+            ),
+            // Sum of all sell
+            pipe(
+              listOfCountries,
+              Array.map((one) => one.sell),
+              Array.reduce(0, (a, b) => a + b),
+              (v) => reportTotalSellOffersExpiredAcrossAll({value: v})
+            ),
+            // Sum of all
+            pipe(
+              listOfCountries,
+              Array.map((one) => one.sell + one.buy),
+              Array.reduce(0, (a, b) => a + b),
+              (v) => reportTotalOffersExpiredAcrossAll({value: v})
+            ),
+          ]),
           Effect.all
         )
       ),

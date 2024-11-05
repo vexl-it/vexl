@@ -28,13 +28,13 @@ function ToastNotificationContent({
     <Stack
       f={1}
       px="$2"
-      {...(position === 'bottom'
-        ? {bottom: bottomMargin ?? height * 0.1}
-        : {top: topMargin ?? height * 0.1})}
+      {...(position === 'top'
+        ? {top: topMargin ?? height * 0.1}
+        : {bottom: bottomMargin ?? height * 0.15})}
     >
       <Animated.View
-        entering={position === 'bottom' ? FadeInDown : FadeInUp}
-        exiting={position === 'bottom' ? FadeOutDown : FadeOutUp}
+        entering={position === 'top' ? FadeInUp : FadeInDown}
+        exiting={position === 'top' ? FadeOutUp : FadeOutDown}
       >
         <XStack
           ai="center"

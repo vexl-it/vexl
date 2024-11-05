@@ -43,7 +43,7 @@ export const createInsertMetricRecord = Effect.gen(function* (_) {
           ${params.value},
           ${params.timestamp},
           ${params.type},
-          ${sql.json(params.attributes)}::jsonb
+          ${sql.json(params.attributes ?? null)}::jsonb
         )
     `,
   })

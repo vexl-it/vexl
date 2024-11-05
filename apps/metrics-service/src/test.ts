@@ -20,6 +20,13 @@ const main = pipe(
           attributes: {key: 'value'},
         })
       ),
+      reportMetricForked(
+        new MetricsMessage({
+          uuid: generateUuid(),
+          timestamp: new Date(),
+          name: 'Test metric2',
+        })
+      ),
     ])
   }),
   Effect.flatMap(() => Effect.sleep(1_000)),

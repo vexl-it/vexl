@@ -6,12 +6,17 @@ import {
   type GetGeocodedCoordinatesRequest,
 } from '@vexl-next/rest-api/src/services/location/contracts'
 import axios from 'axios'
-import {Effect} from 'effect'
+import {Array, Effect, Option, pipe} from 'effect'
 
 interface GoogleGeocodeResponse {
   results: Array<{
     place_id: string
     formatted_address: string
+    address_components: Array<{
+      long_name: string
+      short_name: string
+      types: string[]
+    }>
     geometry: {
       location: {
         lat: number
@@ -30,6 +35,24 @@ interface GoogleGeocodeResponse {
     }
   }>
 }
+
+// Just keep this just in case. Might be useful
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const findTypeInAddressComponents = (
+  type: string,
+  components: Array<{
+    long_name: string
+    short_name: string
+    types: string[]
+  }>
+): string | undefined =>
+  pipe(
+    Array.findFirst(components, (oneComponent) =>
+      oneComponent.types.includes(type)
+    ),
+    Option.map((one) => one.long_name),
+    Option.getOrElse(() => undefined)
+  )
 
 export const googleGeocode =
   (apiKey: string) =>

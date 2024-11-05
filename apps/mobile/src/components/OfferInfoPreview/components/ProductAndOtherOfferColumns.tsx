@@ -7,6 +7,7 @@ import pickupSvg from '../../images/pickupSvg'
 import spokenLanguagesSvg from '../../images/spokenLanguagesSvg'
 import mapTagSvg from '../../InsideRouter/components/MarketplaceScreen/images/mapTagSvg'
 import {InfoDivider, InfoItemContainer, InfoText} from '../columnsStyles'
+import {formatLocationForColumns} from '../utils'
 import FiatOrSats from './FiatOrSats'
 
 interface Props {
@@ -78,9 +79,7 @@ function ProductAndOtherOfferColumns({offer}: Props): JSX.Element {
               <SvgImage source={mapTagSvg} />
             </Stack>
             <InfoText>
-              {offer.publicPart.location
-                .map((one) => one.shortAddress)
-                .join(', ')}
+              {formatLocationForColumns(offer.publicPart.location)}
             </InfoText>
           </InfoItemContainer>
         </>

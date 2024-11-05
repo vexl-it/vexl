@@ -1,60 +1,66 @@
-import {generateSignedChallengeBatch} from '@vexl-next/resources-utils/src/chat/utils/generateSignedChallengesBatch'
-import * as TE from 'fp-ts/TaskEither'
+import {generateChatMessageId} from '@vexl-next/domain/src/general/messaging'
+import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import sendMessage from '@vexl-next/resources-utils/src/chat/sendMessage'
+import {
+  effectToTaskEither,
+  taskEitherToEffect,
+} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
+import {Array, Effect} from 'effect'
 import {pipe} from 'fp-ts/function'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
 import {version} from '../../../utils/environment'
+import shouldSendTerminationMessageToChat from '../utils/shouldSendTerminationMessageToChat'
 import allChatsAtom from './allChatsAtom'
 import messagingStateAtom, {inboxesAtom} from './messagingStateAtom'
-import sendMessageToChatsInBatchActionAtom from './sendMessageToChatsInBatchActionAtom'
 
 const deleteAllInboxesActionAtom = atom(null, (get, set) => {
   const api = get(apiAtom)
   const inboxes = get(inboxesAtom)
   const chats = get(allChatsAtom).flat()
 
-  const sendDeleteInboxRequest = pipe(
-    inboxes.map((one) => one.privateKey),
-    generateSignedChallengeBatch(api.chat),
-    TE.chainFirstW((challenges) =>
-      api.chat.deleteInboxes({
-        dataForRemoval: challenges.map((one) => ({
-          publicKey: one.publicKey,
-          signedChallenge: {
-            challenge: one.challenge.challenge,
-            signature: one.challenge.signature,
-          },
-        })),
-      })
-    )
-  )
-
-  const sendMessageInBatch = set(sendMessageToChatsInBatchActionAtom, {
-    chats,
-    isTerminationMessage: true,
-    messageData: {
-      text: 'Inbox deleted',
-      messageType: 'INBOX_DELETED',
-      myVersion: version,
-    },
-  })
-
   return pipe(
-    TE.Do,
-    TE.chainFirstTaskK(() =>
-      pipe(
-        sendMessageInBatch,
-        TE.match(
-          () => {},
-          () => {}
+    // SEND INBOX DELETED MESSAGES
+    Array.map(chats, (oneChat) => {
+      if (!shouldSendTerminationMessageToChat(oneChat)) return Effect.void
+      return pipe(
+        sendMessage({
+          api: api.chat,
+          receiverPublicKey: oneChat.chat.otherSide.publicKey,
+          message: {
+            uuid: generateChatMessageId(),
+            text: 'Inbox deleted',
+            messageType: 'INBOX_DELETED' as const,
+            time: unixMillisecondsNow(),
+            senderPublicKey: oneChat.chat.inbox.privateKey.publicKeyPemBase64,
+            myVersion: version,
+          },
+          senderKeypair: oneChat.chat.inbox.privateKey,
+          theirFcmCypher: oneChat.chat.otherSideFcmCypher,
+          notificationApi: api.notification,
+          otherSideVersion: oneChat.chat.otherSideVersion,
+        }),
+        taskEitherToEffect,
+        Effect.ignoreLogged
+      )
+    }),
+    // DELETE INBOXES
+    Array.appendAll(
+      Array.map(inboxes, (oneInbox) =>
+        pipe(
+          api.chat.deleteInbox({
+            keyPair: oneInbox.privateKey,
+          }),
+          taskEitherToEffect,
+          Effect.ignoreLogged
         )
       )
     ),
-    TE.chainW(() => sendDeleteInboxRequest),
-    TE.map((r) => {
+    Effect.all,
+    Effect.andThen(() => {
       set(messagingStateAtom, [])
-      return r
-    })
+    }),
+    effectToTaskEither
   )
 })
 

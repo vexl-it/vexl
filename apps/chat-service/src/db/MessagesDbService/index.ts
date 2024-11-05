@@ -3,6 +3,7 @@ import {Context, Effect, Layer} from 'effect'
 import {type InboxRecordId} from '../InboxDbService/domain'
 import {type MessageRecord, type MessageRecordId} from './domain'
 import {createDeleteAllMessagesByInboxId} from './query/createDeleteAllMessagesByInboxId'
+import {createDeleteExpiredMessages} from './query/createDeleteExpiredMessages'
 import {createDeletePulledMessagesMessagesByInboxId} from './query/createDeletePulledMessagesByInboxId'
 import {createFindMessagesByInboxId} from './query/createFindMessagesByInboxId'
 import {
@@ -19,6 +20,8 @@ export interface MessagesDbOperations {
   deletePulledMessagesByInboxId: (
     args: InboxRecordId
   ) => Effect.Effect<void, UnexpectedServerError>
+
+  deleteExpiredMessages: () => Effect.Effect<void, UnexpectedServerError>
 
   findMessagesByInboxId: (
     args: InboxRecordId
@@ -43,6 +46,7 @@ export class MessagesDbService extends Context.Tag('MessagesDbService')<
       const deleteAllMessagesByInboxId = yield* _(
         createDeleteAllMessagesByInboxId
       )
+      const deleteExpiredMessages = yield* _(createDeleteExpiredMessages)
       const deletePulledMessagesByInboxId = yield* _(
         createDeletePulledMessagesMessagesByInboxId
       )
@@ -59,6 +63,7 @@ export class MessagesDbService extends Context.Tag('MessagesDbService')<
         findMessagesByInboxId,
         updateMessageAsPulledByMessageRecord,
         insertMessageForInbox,
+        deleteExpiredMessages,
       }
     })
   )

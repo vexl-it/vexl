@@ -13,7 +13,12 @@ import {
   NotPermittedToSendMessageToTargetInboxError,
 } from '@vexl-next/rest-api/src/services/contact/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
+import dayjs from 'dayjs'
 import {Effect} from 'effect'
+import {
+  messageExpirationLowerLimitDaysConfig,
+  messageExpirationUpperLimitDaysConfig,
+} from '../../configs'
 import {addChallengeForKey} from '../utils/addChallengeForKey'
 import {createMockedUser, type MockedUser} from '../utils/createMockedUser'
 import {NodeTestingApp} from '../utils/NodeTestingApp'
@@ -113,6 +118,49 @@ describe('Send message', () => {
         )
 
         expect(messagesReceived2.messages.length).toBe(0)
+      })
+    )
+  })
+
+  it('Sets expires_at properly when sending a message', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const client = yield* _(NodeTestingApp)
+
+        const messageToSend = (yield* _(
+          user1.addChallengeForMainInbox({
+            message: 'someMessageABC',
+            messageType: 'MESSAGE' as const,
+            receiverPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
+          })
+        )) satisfies SendMessageRequest
+
+        yield* _(
+          client.sendMessage(
+            {
+              body: messageToSend,
+            },
+            HttpClientRequest.setHeaders(user1.authHeaders)
+          )
+        )
+
+        const sql = yield* _(SqlClient.SqlClient)
+        const messages = yield* _(sql`
+          SELECT
+            *
+          FROM
+            message
+          WHERE
+            message = 'someMessageABC'
+        `)
+        const expiresAt = new Date(messages[0].expiresAt as any)
+        expect(messages[0].expiresAt).not.toBeNull()
+
+        const lowerLimit = yield* _(messageExpirationLowerLimitDaysConfig)
+        const upperLimit = yield* _(messageExpirationUpperLimitDaysConfig)
+
+        dayjs(expiresAt).isAfter(dayjs().add(lowerLimit - 1, 'days'))
+        dayjs(expiresAt).isBefore(dayjs().add(upperLimit + 1, 'days'))
       })
     )
   })

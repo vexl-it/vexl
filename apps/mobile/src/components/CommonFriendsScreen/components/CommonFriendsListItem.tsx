@@ -1,9 +1,10 @@
 import React, {useCallback} from 'react'
-import {getTokens, Image, Stack, Text} from 'tamagui'
+import {getTokens, Stack, Text} from 'tamagui'
 import {type StoredContactWithComputedValues} from '../../../state/contacts/domain'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import openUrl from '../../../utils/openUrl'
 import Button from '../../Button'
+import ContactPictureImage from '../../ContactPictureImage'
 import SvgImage from '../../Image'
 import picturePlaceholderSvg from '../../images/picturePlaceholderSvg'
 
@@ -19,22 +20,21 @@ function CommonFriendsListItem({friend}: Props): JSX.Element {
 
   return (
     <Stack fd="row" ai="center">
-      {friend.info.imageUri ? (
-        <Image
-          width={50}
-          height={50}
-          br="$5"
-          resizeMode="cover"
-          source={{uri: friend.info.imageUri}}
-        />
-      ) : (
-        <SvgImage
-          width={50}
-          height={50}
-          source={picturePlaceholderSvg}
-          fill={getTokens().color.grey.val}
-        />
-      )}
+      <ContactPictureImage
+        width={50}
+        height={50}
+        br="$5"
+        resizeMode="cover"
+        contactId={friend.info.nonUniqueContactId}
+        fallback={
+          <SvgImage
+            width={50}
+            height={50}
+            source={picturePlaceholderSvg}
+            fill={getTokens().color.grey.val}
+          />
+        }
+      />
       <Stack f={1} ml="$4" jc="space-between">
         <Text ff="$body500" fs={18} mb="$2" col="$black">
           {friend.info.name}

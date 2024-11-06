@@ -74,7 +74,7 @@ function CommonFriends({
                     <CommonFriendCell
                       key={friend.computedValues.hash}
                       name={friend.info.name}
-                      imageUri={friend.info.imageUri}
+                      contactId={friend.info.nonUniqueContactId}
                       variant={variant}
                     />
                   ))}
@@ -90,7 +90,7 @@ function CommonFriends({
                   <CommonFriendCell
                     key={`${friend.computedValues.hash} - ${friend.info.name}`}
                     name={friend.info.name}
-                    imageUri={friend.info.imageUri}
+                    contactId={friend.info.nonUniqueContactId}
                     variant={variant}
                   />
                 ))}

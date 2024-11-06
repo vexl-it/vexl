@@ -1,5 +1,9 @@
-import * as T from 'fp-ts/Task'
-import * as TE from 'fp-ts/TaskEither'
+import {
+  effectToTask,
+  taskEitherToEffect,
+} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
+import {Array, Effect, HashMap, Option} from 'effect'
+import type * as T from 'fp-ts/Task'
 import {pipe} from 'fp-ts/lib/function'
 import {atom} from 'jotai'
 import reportError from '../../../utils/reportError'
@@ -27,14 +31,38 @@ export const loadingContactsFromDeviceAtom = atom<boolean>(false)
 const loadContactsFromDeviceActionAtom = atom(
   null,
   (get, set): T.Task<'success' | 'missingPermissions' | 'otherError'> => {
-    return pipe(
-      getContactsAndTryToResolveThePermissionsAlongTheWay(),
-      TE.map(filterNotStoredContacts(get(storedContactsAtom))),
-      TE.map((newContacts) => {
-        set(storedContactsAtom, (storedContacts) => [
-          ...storedContacts,
-          ...newContacts.map((newContact) => {
-            return {
+    return Effect.gen(function* (_) {
+      const contactsFromDevice = yield* _(
+        getContactsAndTryToResolveThePermissionsAlongTheWay(),
+        taskEitherToEffect
+      )
+      const storedContacts = get(storedContactsAtom)
+
+      const contactsFromDeviceHashMap = HashMap.fromIterable(
+        Array.map(contactsFromDevice, (c) => [c.rawNumber, c])
+      )
+
+      const updatedStoredContacts = Array.map(
+        storedContacts,
+        (storedContact) =>
+          ({
+            ...storedContact,
+            info: pipe(
+              HashMap.get(
+                contactsFromDeviceHashMap,
+                storedContact.info.rawNumber
+              ),
+              Option.getOrElse(() => storedContact.info)
+            ),
+          }) satisfies StoredContact
+      )
+
+      const newContactsToStore = pipe(
+        contactsFromDevice,
+        filterNotStoredContacts(get(storedContactsAtom)),
+        Array.map(
+          (newContact) =>
+            ({
               info: newContact,
               flags: {
                 seen: false,
@@ -43,27 +71,26 @@ const loadContactsFromDeviceActionAtom = atom(
                 invalidNumber: 'notTriedYet',
               },
               computedValues: undefined,
-            } satisfies StoredContact
-          }),
-        ])
-      }),
-      TE.matchE(
-        (e) => {
-          if (e._tag === 'PermissionsNotGranted') {
-            return T.of('missingPermissions' as const)
-          }
-          reportError(
-            'error',
-            new Error('Error while loading contacts from device'),
-            {e}
-          )
-
-          return T.of('otherError')
-        },
-        () => {
-          return T.of('success')
-        }
+            }) satisfies StoredContact
+        )
       )
+
+      set(storedContactsAtom, [...updatedStoredContacts, ...newContactsToStore])
+      return 'success' as const
+    }).pipe(
+      Effect.catchAll((e) => {
+        if (e._tag === 'PermissionsNotGranted') {
+          return Effect.succeed('missingPermissions' as const)
+        }
+        reportError(
+          'error',
+          new Error('Error while loading contacts from device'),
+          {e}
+        )
+
+        return Effect.succeed('otherError' as const)
+      }),
+      effectToTask
     )
   }
 )

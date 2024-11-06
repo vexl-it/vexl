@@ -3,13 +3,20 @@ import {HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber
 import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {z} from 'zod'
 
+export const NonUniqueContactId = z.string().brand('NonUniqueContactId')
+export type NonUniqueContactId = z.TypeOf<typeof NonUniqueContactId>
+
 export const ContactInfo = z
   .object({
     name: z.string(),
     label: z.string().optional(),
+    // optional to not fail when migrating from older versions of vexl where this was not present
+    // IMPORTANT: THIS IS NOT AN UNIQUE ID, contact can have multiple numbers for all those numbers this will be same
+    // Use rawNumber for unique id (or normalized number)
+    // TODO make the contactId property required at ContactPictureImage, CommonFriendCell
+    nonUniqueContactId: NonUniqueContactId.optional(),
     numberToDisplay: z.string(),
     rawNumber: z.string(),
-    imageUri: UriString.optional(),
   })
   .readonly()
 export type ContactInfo = z.TypeOf<typeof ContactInfo>

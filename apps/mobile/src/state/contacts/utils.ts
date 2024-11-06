@@ -1,6 +1,5 @@
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
-import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {
   hmacSign,
   type CryptoError,
@@ -13,7 +12,7 @@ import type * as TE from 'fp-ts/TaskEither'
 import {hmacPassword} from '../../utils/environment'
 import notEmpty from '../../utils/notEmpty'
 import {startMeasure} from '../../utils/reportTime'
-import {type ContactInfo} from './domain'
+import {NonUniqueContactId, type ContactInfo} from './domain'
 // import toE164PhoneNumberWithDefaultCountryCode from '../../utils/toE164PhoneNumberWithDefaultCountryCode'
 
 export interface PermissionsNotGranted {
@@ -74,14 +73,11 @@ export function getContactsAndTryToResolveThePermissionsAlongTheWay(): TE.TaskEi
                 if (!number.number) return null
 
                 return {
+                  nonUniqueContactId: NonUniqueContactId.parse(contact.id),
                   name: contact.name ?? number.number,
                   label: number.label,
                   numberToDisplay: number.number,
                   rawNumber: number.number,
-                  imageUri:
-                    contact.imageAvailable && contact.image
-                      ? UriString.parse(contact.image.uri)
-                      : undefined,
                 } satisfies ContactInfo
               })
               .filter(notEmpty) ?? []

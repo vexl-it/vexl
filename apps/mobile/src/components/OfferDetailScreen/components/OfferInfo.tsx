@@ -5,6 +5,7 @@ import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useEffect, useMemo, useState} from 'react'
 import {Alert} from 'react-native'
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view'
+import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {Stack, Text, YStack, getTokens} from 'tamagui'
 import {type RootStackScreenProps} from '../../../navigationTypes'
 import {sendRequestHandleUIActionAtom} from '../../../state/chat/atoms/sendRequestActionAtom'
@@ -33,8 +34,6 @@ import RerequestInfo from './RerequestInfo'
 import Title from './Title'
 
 const SCROLL_EXTRA_OFFSET = 200
-const EXTRA_MARGIN = 70
-const BUTTON_HEIGHT_PLUS_EXTRA_MARGIN = 60 + EXTRA_MARGIN
 
 function ContentContainer({
   mapIsVisible,
@@ -65,6 +64,8 @@ function OfferInfo({
   navigation: RootStackScreenProps<'OfferDetail'>['navigation']
 }): JSX.Element {
   const goBack = useSafeGoBack()
+  const {bottom} = useSafeAreaInsets()
+  const toastBottomMargin = bottom + getTokens().space[5].val
   const {t} = useTranslation()
   const reportedFlagAtom = createSingleOfferReportedFlagAtom(
     offer.offerInfo.offerId
@@ -143,13 +144,13 @@ function OfferInfo({
       iconFill: getTokens().color.black.val,
       showCloseButton: true,
       hideAfterMillis: 3000,
-      bottomMargin: !mapIsVisible ? BUTTON_HEIGHT_PLUS_EXTRA_MARGIN : undefined,
+      bottomMargin: mapIsVisible ? toastBottomMargin : undefined,
     })
 
     return () => {
       setToastNotification((prev) => ({...prev, visible: false}))
     }
-  }, [mapIsVisible, requestState, setToastNotification, t])
+  }, [mapIsVisible, requestState, setToastNotification, t, toastBottomMargin])
 
   return (
     <Stack f={1} mx="$2" my="$4">

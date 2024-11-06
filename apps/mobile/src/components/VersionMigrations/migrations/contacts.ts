@@ -58,7 +58,6 @@ function oldToNewContactManuallyImported(
       label: oldContact.label,
       numberToDisplay: oldContact.numberToDisplay,
       rawNumber: oldContact.numberToDisplay,
-      imageUri: oldContact.imageUri,
     },
     computedValues: {
       normalizedNumber: oldContact.normalizedNumber,

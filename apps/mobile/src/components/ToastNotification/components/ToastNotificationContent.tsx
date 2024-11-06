@@ -6,9 +6,11 @@ import Animated, {
   FadeOutDown,
   FadeOutUp,
 } from 'react-native-reanimated'
+import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {Stack, Text, XStack, getTokens} from 'tamagui'
 import SvgImage from '../../Image'
 import closeSvg from '../../images/closeSvg'
+import {TAB_BAR_HEIGHT_PX} from '../../InsideRouter/components/TabBar'
 import {toastNotificationAtom} from '../atom'
 import {type ToastNotificationState} from '../domain'
 
@@ -21,6 +23,9 @@ function ToastNotificationContent({
   bottomMargin,
   topMargin,
 }: ToastNotificationState): JSX.Element | null {
+  const {bottom} = useSafeAreaInsets()
+  const bottomDefaultOffset =
+    bottom + TAB_BAR_HEIGHT_PX + getTokens().space[5].val
   const {height} = useWindowDimensions()
   const setToastNotification = useSetAtom(toastNotificationAtom)
 
@@ -30,7 +35,7 @@ function ToastNotificationContent({
       px="$2"
       {...(position === 'top'
         ? {top: topMargin ?? height * 0.1}
-        : {bottom: bottomMargin ?? height * 0.15})}
+        : {bottom: bottomMargin ?? bottomDefaultOffset})}
     >
       <Animated.View
         entering={position === 'top' ? FadeInUp : FadeInDown}

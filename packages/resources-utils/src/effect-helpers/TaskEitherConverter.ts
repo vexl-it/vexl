@@ -38,3 +38,7 @@ export function taskEitherToEffect<L, R>(
 ): Effect.Effect<R, L> {
   return Effect.promise(taskEither).pipe(Effect.flatMap(eitherToEfect))
 }
+
+export function taskToEffect<A>(task: T.Task<A>): Effect.Effect<A, never> {
+  return Effect.promise(task)
+}

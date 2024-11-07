@@ -1,6 +1,8 @@
+import {countryPrefixFromNumber} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
 import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {generateKeyPair} from '@vexl-next/resources-utils/src/utils/crypto'
+import {Effect} from 'effect'
 import * as A from 'fp-ts/Array'
 import {isNonEmpty} from 'fp-ts/Array'
 import * as T from 'fp-ts/Task'
@@ -19,6 +21,7 @@ import {updateOfferAtom} from './marketplace'
 import checkNotificationTokensAndRefreshOffersActionAtom from './marketplace/atoms/checkNotificationTokensAndRefreshOffersActionAtom'
 import {myOffersAtom} from './marketplace/atoms/myOffers'
 import {offersMissingOnServerAtom} from './marketplace/atoms/offersMissingOnServer'
+import {sessionDataOrDummyAtom} from './session'
 import {useLogout} from './useLogout'
 
 export function useRefreshUserOnContactService(): void {
@@ -31,12 +34,25 @@ export function useRefreshUserOnContactService(): void {
         if (state !== 'active') return
 
         console.info('🦋 Refreshing user')
-        void pipe(
-          effectToTaskEither(
-            store.get(apiAtom).contact.refreshUser({body: {offersAlive: true}})
-          ),
-          TE.match(
-            (e) => {
+
+        Effect.gen(function* (_) {
+          const countryPrefix = yield* _(
+            store.get(sessionDataOrDummyAtom).phoneNumber,
+            countryPrefixFromNumber,
+            Effect.option
+          )
+
+          yield* _(
+            store.get(apiAtom).contact.refreshUser({
+              body: {
+                offersAlive: true,
+                countryPrefix,
+              },
+            })
+          )
+        }).pipe(
+          Effect.match({
+            onFailure: (e) => {
               if (e._tag === 'UserNotFoundError') {
                 console.warn('🦋 🚨 User to refresh not found. Logging out')
                 void logout()
@@ -103,12 +119,15 @@ export function useRefreshUserOnContactService(): void {
                   {e}
                 )
               }
+              return Effect.void
             },
-            () => {
+            onSuccess: () => {
               console.log('🦋 User refreshed')
-            }
-          )
-        )()
+              return Effect.void
+            },
+          }),
+          Effect.runFork
+        )
       },
       [logout, store]
     )

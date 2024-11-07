@@ -3,6 +3,7 @@ import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
+import {CountryPrefixE} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {HashedPhoneNumberE} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {Effect, flow} from 'effect'
@@ -11,6 +12,7 @@ export const UpdateRefreshUserParams = Schema.Struct({
   publicKey: PublicKeyPemBase64E,
   hash: HashedPhoneNumberE,
   clientVersion: Schema.optionalWith(VersionCode, {as: 'Option'}),
+  countryPrefix: Schema.optionalWith(CountryPrefixE, {as: 'Option'}),
   refreshedAt: Schema.Date,
 })
 export type UpdateRefreshUserParams = Schema.Schema.Type<
@@ -25,8 +27,9 @@ export const createUpdateRefreshUser = Effect.gen(function* (_) {
     execute: (params) => sql`
       UPDATE users
       SET
-        client_version = ${params.clientVersion ?? `client_version`},
-        refreshed_at = ${params.refreshedAt}
+        client_version = ${params.clientVersion ?? null},
+        refreshed_at = ${params.refreshedAt},
+        country_prefix = ${params.countryPrefix ?? null}
       WHERE
         public_key = ${params.publicKey}
         AND hash = ${params.hash}

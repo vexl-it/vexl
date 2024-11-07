@@ -7,6 +7,7 @@ import remove_next_prefix_and_old_users_and_connections from './migrations/0002_
 import make_version_in_users_table_nullable from './migrations/0003_make_version_in_users_table_nullable'
 import add_initial_import_done_column_to_users_table from './migrations/0004_add_initial_import_done_column_to_users_table'
 import add_unique_constraint_to_user_contact from './migrations/0004_add_unique_constraint_to_user_contact'
+import add_country_prefix_to_users_table from './migrations/0005_add_country_prefix_to_users_table'
 
 const migrations = [
   {
@@ -33,6 +34,11 @@ const migrations = [
     id: 5,
     name: 'add_unique_constraint_to_user_contact',
     migrationEffect: add_unique_constraint_to_user_contact,
+  },
+  {
+    id: 6,
+    name: 'add_country_prefix_to_users_table',
+    migrationEffect: add_country_prefix_to_users_table,
   },
 ] as const
 

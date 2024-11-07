@@ -3,6 +3,7 @@ import {
   PublicKeyPemBase64,
   PublicKeyPemBase64E,
 } from '@vexl-next/cryptography/src/KeyHolder/brands'
+import {CountryPrefixE} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {
   HashedPhoneNumber,
   HashedPhoneNumberE,
@@ -66,6 +67,9 @@ export type CreateUserRequest = Schema.Schema.Type<typeof CreateUserRequest>
 
 export const RefreshUserRequest = Schema.Struct({
   offersAlive: Schema.Boolean,
+  countryPrefix: Schema.optionalWith(CountryPrefixE, {
+    as: 'Option',
+  }),
 })
 export type RefreshUserRequest = Schema.Schema.Type<typeof RefreshUserRequest>
 

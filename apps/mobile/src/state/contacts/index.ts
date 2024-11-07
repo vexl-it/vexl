@@ -72,6 +72,7 @@ export function useRefreshContactsFromDeviceOnResume(): void {
                 store.set(eraseImportedContacts)
                 return store.set(submitContactsActionAtom, {
                   normalizeAndImportAll: false,
+                  numbersToImport: [],
                 })
               }
               return T.Do

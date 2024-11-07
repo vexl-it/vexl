@@ -101,6 +101,7 @@ describe('create user', () => {
             {
               body: {
                 contacts: [Schema.decodeSync(HashedPhoneNumberE)('someHash')],
+                replace: true,
               },
             },
             HttpClientRequest.setHeaders({

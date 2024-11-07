@@ -1,8 +1,11 @@
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {IsoDatetimeString} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
-import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
+import {
+  effectToTask,
+  taskToEffect,
+} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
+import {Array, Effect, HashSet, Ref} from 'effect'
 import * as T from 'fp-ts/Task'
-import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/lib/function'
 import {atom} from 'jotai'
 import {Alert} from 'react-native'
@@ -23,15 +26,18 @@ import {
 import loadContactsFromDeviceActionAtom from './loadContactsFromDeviceActionAtom'
 import normalizeStoredContactsActionAtom from './normalizeStoredContactsActionAtom'
 
+const CONTACT_IMPORT_BATCHES = 1000
+
 export const submitContactsActionAtom = atom(
   null,
   (
     get,
     set,
-    params: {
-      normalizeAndImportAll: boolean
-      numbersToImport?: E164PhoneNumber[]
-    }
+    params:
+      | {
+          normalizeAndImportAll: true
+        }
+      | {normalizeAndImportAll: false; numbersToImport: E164PhoneNumber[]}
   ) => {
     const contactApi = get(apiAtom).contact
     const {t} = get(translationAtom)
@@ -44,90 +50,142 @@ export const submitContactsActionAtom = atom(
       T.map(() => undefined)
     )
 
-    return pipe(
-      params.normalizeAndImportAll ? normalizeStoredContacts : T.Do,
-      TE.fromTask,
-      TE.map(() => {
-        const allContacts = get(normalizedContactsAtom)
+    return Effect.gen(function* (_) {
+      if (params.normalizeAndImportAll) {
+        yield* _(normalizeStoredContacts, taskToEffect)
+      }
 
-        if (!params.numbersToImport) {
-          return allContacts
-        }
-        return params.numbersToImport
-          .map(
-            (oneNumberToImport): StoredContactWithComputedValues | undefined =>
-              allContacts.find(
-                (oneContact) =>
-                  oneContact.computedValues.normalizedNumber ===
-                  oneNumberToImport
-              )
-          )
-          .filter(notEmpty)
-      }),
-      TE.chainFirstW((contacts) => {
-        return effectToTaskEither(
-          contactApi.importContacts({
-            body: {
-              contacts: contacts.map((one) => one.computedValues.hash),
-            },
-          })
+      const allContacts = get(normalizedContactsAtom)
+
+      const numbersToImport = !params.normalizeAndImportAll
+        ? params.numbersToImport
+        : allContacts.map((one) => one.computedValues.normalizedNumber)
+
+      const contactsThatShouldBeRemovedFromImport = HashSet.fromIterable(
+        allContacts.filter(
+          (one) =>
+            one.flags.imported &&
+            !numbersToImport.includes(one.computedValues.normalizedNumber)
         )
-      }),
-      TE.match(
-        (e) => {
-          if (e._tag === 'InitialImportContactsQuotaReachedError') {
-            Alert.alert(t('contacts.initialImportContactsQuotaReachedError'))
-            return false
-          }
-          if (e._tag === 'ImportContactsQuotaReachedError') {
-            Alert.alert(t('contacts.importContactsQuotaReachedError'))
-            return false
-          }
-          if (e._tag !== 'NetworkError') {
-            reportError('error', new Error('error while submitting contacts'), {
-              e,
-            })
-          }
+      )
 
-          Alert.alert(toCommonErrorMessage(e, t) ?? t('common.unknownError'))
-          return false
-        },
-        (contacts) => {
-          const importedNumbers = new Set(
-            contacts.map((one) => one.computedValues.normalizedNumber)
+      const contactsThatShouldBeImported = numbersToImport
+        .map((oneNumberToImport): StoredContactWithComputedValues | undefined =>
+          allContacts.find(
+            (oneContact) =>
+              oneContact.computedValues.normalizedNumber === oneNumberToImport
           )
+        )
+        .filter(notEmpty)
 
-          set(storedContactsAtom, (storedContact) =>
-            storedContact.map((oneContact) =>
-              oneContact.computedValues &&
-              importedNumbers.has(oneContact.computedValues?.normalizedNumber)
-                ? {
-                    ...oneContact,
-                    flags: {
-                      ...oneContact.flags,
-                      imported: true,
-                    },
-                  }
-                : {...oneContact, flags: {...oneContact.flags, imported: false}}
+      const newContactsToImport =
+        // IF there are no contacts to remove, we can do an incremental import
+        HashSet.size(contactsThatShouldBeRemovedFromImport) > 0
+          ? contactsThatShouldBeImported
+          : contactsThatShouldBeImported.filter((one) => !one.flags.imported)
+
+      const importedNumbersSoFarRef = yield* _(
+        Ref.make(HashSet.empty<E164PhoneNumber>())
+      )
+      yield* _(
+        pipe(
+          newContactsToImport,
+          Array.chunksOf(CONTACT_IMPORT_BATCHES),
+          Array.map((chunkToImport, i) => {
+            const replace =
+              i === 0 && HashSet.size(contactsThatShouldBeRemovedFromImport) > 0
+            return contactApi
+              .importContacts({
+                body: {
+                  contacts: chunkToImport.map((one) => one.computedValues.hash),
+                  replace,
+                },
+              })
+              .pipe(
+                Effect.zipLeft(
+                  Ref.update(
+                    importedNumbersSoFarRef,
+                    HashSet.union(
+                      chunkToImport.map(
+                        (one) => one.computedValues.normalizedNumber
+                      )
+                    )
+                  )
+                )
+              )
+          }),
+          Effect.all,
+          Effect.ensuring(
+            Ref.get(importedNumbersSoFarRef).pipe(
+              Effect.flatMap((importedNumbers) => {
+                set(storedContactsAtom, (storedContact) =>
+                  storedContact.map((oneContact) => {
+                    if (!oneContact.computedValues)
+                      return {
+                        ...oneContact,
+                        flags: {...oneContact.flags, imported: false},
+                      }
+
+                    if (
+                      HashSet.has(
+                        importedNumbers,
+                        oneContact.computedValues.normalizedNumber
+                      )
+                    )
+                      return {
+                        ...oneContact,
+                        flags: {...oneContact.flags, imported: true},
+                      }
+                    return {
+                      ...oneContact,
+                      flags: {...oneContact.flags, imported: false},
+                    }
+                  })
+                )
+                void set(syncConnectionsActionAtom)()
+
+                void set(updateAllOffersConnectionsActionAtom, {
+                  isInBackground: false,
+                })()
+                return Effect.void
+              })
             )
           )
+        )
+      )
 
-          set(
-            lastImportOfContactsAtom,
-            IsoDatetimeString.parse(new Date().toISOString())
-          )
-
-          void set(syncConnectionsActionAtom)()
-          void set(updateAllOffersConnectionsActionAtom, {
-            isInBackground: false,
-          })()
-          return true
+      set(
+        lastImportOfContactsAtom,
+        IsoDatetimeString.parse(new Date().toISOString())
+      )
+    }).pipe(
+      Effect.tapError((e) => {
+        if (e._tag === 'InitialImportContactsQuotaReachedError') {
+          Alert.alert(t('contacts.initialImportContactsQuotaReachedError'))
+          return Effect.void
         }
-      ),
-      T.map((v) => {
+        if (e._tag === 'ImportContactsQuotaReachedError') {
+          Alert.alert(t('contacts.importContactsQuotaReachedError'))
+          return Effect.void
+        }
+        if (e._tag !== 'NetworkError') {
+          reportError('error', new Error('error while submitting contacts'), {
+            e,
+          })
+        }
+
+        Alert.alert(toCommonErrorMessage(e, t) ?? t('common.unknownError'))
+        return Effect.void
+      }),
+      Effect.match({
+        onFailure: () => false,
+        onSuccess: () => true,
+      }),
+      Effect.tap(() => {
         set(loadingOverlayDisplayedAtom, false)
-        return v
-      })
+        return Effect.void
+      }),
+      effectToTask
     )
   }
 )

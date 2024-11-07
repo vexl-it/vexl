@@ -25,9 +25,12 @@ import {
 let networkOne: [DummyUser, ...DummyUser[]]
 let networkTwo: [DummyUser, ...DummyUser[]]
 
-beforeAll(async () => {
+beforeEach(async () => {
   await runPromiseInMockedEnvironment(
     Effect.gen(function* (_) {
+      const sql = yield* _(SqlClient.SqlClient)
+      yield* _(sql`DELETE FROM user_contact`)
+      yield* _(sql`DELETE FROM users`)
       networkOne = yield* _(
         Effect.all([
           generateKeysAndHasheForNumber('+420733333001'),
@@ -93,7 +96,10 @@ describe('Import contacts', () => {
         yield* _(
           app.importContacts(
             {
-              body: {contacts: Array.map(myNewContacts, (c) => c.hashedNumber)},
+              body: {
+                contacts: Array.map(myNewContacts, (c) => c.hashedNumber),
+                replace: true,
+              },
             },
             HttpClientRequest.setHeaders(me.authHeaders)
           )
@@ -115,6 +121,55 @@ describe('Import contacts', () => {
     )
   })
 
+  it('Imports contacts to the database and does not replace the existing contacts when replace is false', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const me = networkOne[0]
+        const myNewContacts = networkTwo.slice(1, 3)
+
+        const sql = yield* _(SqlClient.SqlClient)
+        const myOldContactsFromDb = yield* _(sql`
+          SELECT
+            *
+          FROM
+            user_contact
+          WHERE
+            hash_from = ${me.hashedNumber}
+        `)
+
+        expect(myOldContactsFromDb).toHaveLength(networkOne.length - 1)
+
+        const app = yield* _(NodeTestingApp)
+        yield* _(
+          app.importContacts(
+            {
+              body: {
+                contacts: Array.map(myNewContacts, (c) => c.hashedNumber),
+                replace: false,
+              },
+            },
+            HttpClientRequest.setHeaders(me.authHeaders)
+          )
+        )
+
+        const myContactsFromDb = yield* _(sql`
+          SELECT
+            *
+          FROM
+            user_contact
+          WHERE
+            hash_from = ${me.hashedNumber}
+        `)
+
+        expect(mockedReportContactsImported).toHaveBeenCalledTimes(1)
+
+        expect(myContactsFromDb).toHaveLength(
+          myNewContacts.length + myOldContactsFromDb.length
+        )
+      })
+    )
+  })
+
   it('Filters duplicities and author hash', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
@@ -131,7 +186,10 @@ describe('Import contacts', () => {
         yield* _(
           app.importContacts(
             {
-              body: {contacts: Array.map(myNewContacts, (c) => c.hashedNumber)},
+              body: {
+                contacts: Array.map(myNewContacts, (c) => c.hashedNumber),
+                replace: true,
+              },
             },
             HttpClientRequest.setHeaders(me.authHeaders)
           )
@@ -161,7 +219,7 @@ describe('Import contacts', () => {
         yield* _(
           app.importContacts(
             {
-              body: {contacts: []},
+              body: {contacts: [], replace: true},
             },
             HttpClientRequest.setHeaders(me.authHeaders)
           )
@@ -226,7 +284,10 @@ describe('Import contacts', () => {
         const response = yield* _(
           app.importContacts(
             {
-              body: {contacts: contactsToImport.map((c) => c.hashedNumber)},
+              body: {
+                contacts: contactsToImport.map((c) => c.hashedNumber),
+                replace: true,
+              },
             },
             HttpClientRequest.setHeaders(me.authHeaders)
           ),
@@ -296,7 +357,10 @@ describe('Import contacts', () => {
         const response = yield* _(
           app.importContacts(
             {
-              body: {contacts: contactsToImport.map((c) => c.hashedNumber)},
+              body: {
+                contacts: contactsToImport.map((c) => c.hashedNumber),
+                replace: true,
+              },
             },
             HttpClientRequest.setHeaders(me.authHeaders)
           ),
@@ -385,7 +449,10 @@ describe('Import contacts', () => {
         const response = yield* _(
           app.importContacts(
             {
-              body: {contacts: contactsToImport.map((c) => c.hashedNumber)},
+              body: {
+                contacts: contactsToImport.map((c) => c.hashedNumber),
+                replace: true,
+              },
             },
             HttpClientRequest.setHeaders(me.authHeaders)
           ),
@@ -430,6 +497,7 @@ describe('Import contacts', () => {
                 contacts: contactsToImportAfterInitialImport.map(
                   (c) => c.hashedNumber
                 ),
+                replace: true,
               },
             },
             HttpClientRequest.setHeaders(me.authHeaders)
@@ -457,6 +525,7 @@ describe('Import contacts', () => {
                 contacts: moreContactsToImportThatExceedQuota.map(
                   (c) => c.hashedNumber
                 ),
+                replace: true,
               },
             },
             HttpClientRequest.setHeaders(me.authHeaders)
@@ -508,7 +577,10 @@ describe('Import contacts', () => {
         const response = yield* _(
           app.importContacts(
             {
-              body: {contacts: contactsToImport.map((c) => c.hashedNumber)},
+              body: {
+                contacts: contactsToImport.map((c) => c.hashedNumber),
+                replace: true,
+              },
             },
             HttpClientRequest.setHeaders(me.authHeaders)
           ),
@@ -539,6 +611,7 @@ describe('Import contacts', () => {
                 contacts: contactsToImportAfterInitialImport.map(
                   (c) => c.hashedNumber
                 ),
+                replace: true,
               },
             },
             HttpClientRequest.setHeaders(me.authHeaders)
@@ -555,6 +628,7 @@ describe('Import contacts', () => {
                 contacts: contactsToImportAfterInitialImport.map(
                   (c) => c.hashedNumber
                 ),
+                replace: true,
               },
             },
             HttpClientRequest.setHeaders(me.authHeaders)
@@ -588,7 +662,7 @@ describe('Notification', () => {
         yield* _(
           app.importContacts(
             {
-              body: {contacts: []},
+              body: {contacts: [], replace: true},
             },
             HttpClientRequest.setHeaders(me.authHeaders)
           )
@@ -609,6 +683,7 @@ describe('Notification', () => {
             {
               body: {
                 contacts: Array.map(contactsToImport, (c) => c.hashedNumber),
+                replace: true,
               },
             },
             HttpClientRequest.setHeaders(me.authHeaders)

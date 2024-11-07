@@ -49,6 +49,7 @@ describe('delete user', () => {
             {
               body: {
                 contacts: [Schema.decodeSync(HashedPhoneNumberE)('someHash')],
+                replace: true,
               },
             },
             HttpClientRequest.setHeaders({

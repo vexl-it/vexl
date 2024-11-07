@@ -29,9 +29,11 @@ export const importContacts = Handler.make(
           )
         )
 
-        const contactsToInsert = pipe(
+        const contactsReceived = pipe(
           req.body.contacts,
+          // Do not allow importing myself
           Array.filter((a) => a !== security.hash),
+          // Do not allow importing duplicates
           Array.dedupe,
           Array.map((contact) => ({
             hashFrom: security.hash,
@@ -43,11 +45,16 @@ export const importContacts = Handler.make(
           hashFrom: HashedPhoneNumber
           hashTo: HashedPhoneNumber
         }>((a, b) => a.hashFrom === b.hashFrom && a.hashTo === b.hashTo)(
-          contactsToInsert,
+          contactsReceived,
           contactsBefore
         )
 
-        yield* _(contactDb.deleteContactsByHashFrom(security.hash))
+        const contactsToInsert = req.body.replace
+          ? contactsReceived
+          : newContacts
+
+        if (req.body.replace)
+          yield* _(contactDb.deleteContactsByHashFrom(security.hash))
 
         yield* _(
           Effect.forEach(contactsToInsert, contactDb.insertContact, {
@@ -55,7 +62,7 @@ export const importContacts = Handler.make(
           })
         )
 
-        yield* _(Effect.log('New contacts', newContacts))
+        yield* _(Effect.log('New contacts. Notifying', newContacts))
 
         yield* _(
           importContactsQuotaService.checkAndIncrementImportContactsQuota(
@@ -69,19 +76,24 @@ export const importContacts = Handler.make(
         )
 
         return {
-          imported: true,
-          message: 'ok',
+          toReturn: {
+            imported: true as const,
+            message: 'ok' as const,
+          },
+          newContacts: Array.map(newContacts, (o) => o.hashTo),
         }
       }).pipe(
         Effect.withSpan('Import contacts'),
         withDbTransaction,
         withUserActionRedisLock(security.hash),
-        Effect.zipLeft(
+        Effect.tap(({newContacts}) =>
+          // Need to do this after the DB transaction is committed
           notifyOthersAboutNewUserForked({
-            importedHashes: req.body.contacts,
+            importedHashes: newContacts,
             ownerHash: security.hash,
           })
-        )
+        ),
+        Effect.map(({toReturn}) => toReturn)
       ),
       ImportContactsErrors
     )

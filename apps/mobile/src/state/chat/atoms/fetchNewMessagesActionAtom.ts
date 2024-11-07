@@ -42,6 +42,7 @@ import addMessagesToChats from '../utils/addMessagesToChats'
 import createNewChatsFromMessages from '../utils/createNewChatsFromFirstMessages'
 import replaceBase64UriWithImageFileUri from '../utils/replaceBase64UriWithImageFileUri'
 import {type ChatMessageWithState} from './../domain'
+import {checkAndDeleteOldChatsDataActionAtom} from './checkAndDeleteOldChatsDataActionAtom'
 import {sendUpdateNoticeMessageActionAtom} from './checkAndReportCurrentVersionToChatsActionAtom'
 import focusChatByInboxKeyAndSenderKey from './focusChatByInboxKeyAndSenderKey'
 import {sendFcmCypherUpdateMessageActionAtom} from './refreshNotificationTokensActionAtom'
@@ -458,9 +459,23 @@ const fetchMessagesForAllInboxesAtom = atom(null, (get, set) => {
   return pipe(
     get(messagingStateAtom),
     A.map((inbox) =>
-      set(fetchAndStoreMessagesForInboxAtom, {
-        key: inbox.inbox.privateKey.publicKeyPemBase64,
-      })
+      pipe(
+        T.Do,
+        T.chain(() =>
+          set(fetchAndStoreMessagesForInboxAtom, {
+            key: inbox.inbox.privateKey.publicKeyPemBase64,
+          })
+        ),
+        T.map((values) => {
+          if (values) {
+            set(checkAndDeleteOldChatsDataActionAtom, {
+              key: values?.updatedInbox.inbox.privateKey.publicKeyPemBase64,
+            })
+          }
+
+          return values
+        })
+      )
     ),
     T.sequenceSeqArray,
     T.map(() => {

@@ -47,7 +47,6 @@ import getCountryPrefix from '../../utils/getCountryCode'
 import notEmpty from '../../utils/notEmpty'
 import {getNotificationToken} from '../../utils/notifications'
 import reportError from '../../utils/reportError'
-import messagingStateAtom from '../chat/atoms/messagingStateAtom'
 import offerToConnectionsAtom, {
   upsertOfferToConnectionsActionAtom,
 } from '../connections/atom/offerToConnectionsAtom'
@@ -542,24 +541,6 @@ export const deleteOffersActionAtom = atom<
           )
         )
 
-        // Only when deleting one offer
-        if (adminIdsToDelete.length === 1) {
-          // Delete inbox if there are no open chats
-          const offer = offers.find(
-            (offer) =>
-              offer.ownershipInfo?.adminId &&
-              adminIdsToDelete.includes(offer.ownershipInfo.adminId)
-          )
-          set(messagingStateAtom, (prev) =>
-            prev.filter(
-              (one) =>
-                !(
-                  one.inbox.offerId === offer?.offerInfo.offerId &&
-                  one.chats.length === 0
-                )
-            )
-          )
-        }
         return E.right({success: true} as const)
       }
     )

@@ -42,7 +42,7 @@ import addMessagesToChats from '../utils/addMessagesToChats'
 import createNewChatsFromMessages from '../utils/createNewChatsFromFirstMessages'
 import replaceBase64UriWithImageFileUri from '../utils/replaceBase64UriWithImageFileUri'
 import {type ChatMessageWithState} from './../domain'
-import {checkAndDeleteOldChatsDataActionAtom} from './checkAndDeleteOldChatsDataActionAtom'
+import {checkAndDeleteOldChatsAndDataActionAtom} from './checkAndDeleteOldChatsAndDataActionAtom'
 import {sendUpdateNoticeMessageActionAtom} from './checkAndReportCurrentVersionToChatsActionAtom'
 import focusChatByInboxKeyAndSenderKey from './focusChatByInboxKeyAndSenderKey'
 import {sendFcmCypherUpdateMessageActionAtom} from './refreshNotificationTokensActionAtom'
@@ -468,7 +468,7 @@ const fetchMessagesForAllInboxesAtom = atom(null, (get, set) => {
         ),
         T.map((values) => {
           if (values) {
-            set(checkAndDeleteOldChatsDataActionAtom, {
+            set(checkAndDeleteOldChatsAndDataActionAtom, {
               key: values?.updatedInbox.inbox.privateKey.publicKeyPemBase64,
             })
           }

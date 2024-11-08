@@ -2,6 +2,7 @@ import {pipe} from 'fp-ts/function'
 import {useSetAtom} from 'jotai'
 import {useCallback} from 'react'
 import {Stack, Text} from 'tamagui'
+import {checkAndDeleteEmptyInboxesWithoutOfferAtom} from '../../../../state/chat/atoms/checkAndDeleteEmptyInboxesWithoutOfferAtom'
 import fetchMessagesForAllInboxesAtom from '../../../../state/chat/atoms/fetchNewMessagesActionAtom'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import {useAppState} from '../../../../utils/useAppState'
@@ -11,13 +12,19 @@ import ChatsList from './components/ChatsList'
 function MessagesScreen(): JSX.Element {
   const {t} = useTranslation()
   const fetchNewMessages = useSetAtom(fetchMessagesForAllInboxesAtom)
+  const checkAndDeleteEmptyInboxesWithoutOffer = useSetAtom(
+    checkAndDeleteEmptyInboxesWithoutOfferAtom
+  )
 
   useAppState(
     useCallback(
       (state) => {
-        if (state === 'active') void pipe(fetchNewMessages())()
+        if (state === 'active')
+          void pipe(fetchNewMessages())().then(
+            checkAndDeleteEmptyInboxesWithoutOffer
+          )
       },
-      [fetchNewMessages]
+      [checkAndDeleteEmptyInboxesWithoutOffer, fetchNewMessages]
     )
   )
 

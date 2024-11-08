@@ -3,11 +3,12 @@ import {atom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {DateTime} from 'luxon'
 import removeFile from '../../../utils/removeFile'
+import chatShouldBeVisible from '../utils/isChatActive'
 import messagingStateAtom from './messagingStateAtom'
 
 const ONE_MONTH_IN_MS = 1000 * 60 * 60 * 24 * 30
 
-export const checkAndDeleteOldChatsDataActionAtom = atom(
+export const checkAndDeleteOldChatsAndDataActionAtom = atom(
   null,
   (_, set, {key}: {key: PublicKeyPemBase64}) => {
     const inbox = focusAtom(messagingStateAtom, (optic) =>
@@ -17,16 +18,12 @@ export const checkAndDeleteOldChatsDataActionAtom = atom(
     set(inbox, (prev) => ({
       ...prev,
       chats: prev.chats.filter((oneChat) => {
-        const isChatDeletedAndExpired = oneChat.messages.some(
-          (message) =>
-            (message.message.messageType === 'DELETE_CHAT' ||
-              message.message.messageType === 'INBOX_DELETED' ||
-              message.message.messageType === 'CANCEL_REQUEST_MESSAGING' ||
-              message.message.messageType === 'BLOCK_CHAT' ||
-              message.message.messageType === 'DISAPPROVE_MESSAGING' ||
-              message.message.messageType === 'OFFER_DELETED') &&
-            message.message.time + ONE_MONTH_IN_MS < DateTime.now().toMillis()
-        )
+        const lastMessage = oneChat.messages.at(-1)
+        const isChatDeletedAndExpired =
+          !lastMessage ||
+          (!chatShouldBeVisible(oneChat) &&
+            lastMessage.message.time + ONE_MONTH_IN_MS <
+              DateTime.now().toMillis())
 
         if (
           isChatDeletedAndExpired &&

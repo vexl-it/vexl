@@ -1,5 +1,4 @@
-import {Schema} from '@effect/schema'
-import {Config, Effect} from 'effect'
+import {Config, Effect, Schema} from 'effect'
 
 export {
   cryptoConfig,

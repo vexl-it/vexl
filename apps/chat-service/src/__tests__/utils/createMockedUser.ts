@@ -1,5 +1,4 @@
 import {HttpClientRequest} from '@effect/platform'
-import {Schema} from '@effect/schema'
 import {
   generatePrivateKey,
   type PrivateKeyHolder,
@@ -14,7 +13,7 @@ import {
 import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {type ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
 import {createDummyAuthHeadersForUser} from '@vexl-next/server-utils/src/tests/createDummyAuthHeaders'
-import {Effect} from 'effect'
+import {Effect, Schema} from 'effect'
 import {type ClientError} from 'effect-http'
 import {addChallengeForKey} from './addChallengeForKey'
 import {NodeTestingApp} from './NodeTestingApp'

@@ -1,5 +1,4 @@
-import {Schema} from '@effect/schema'
-import {Effect, HashMap, Layer, Ref} from 'effect'
+import {Effect, HashMap, Layer, Ref, Schema} from 'effect'
 import {
   RecordDoesNotExistsReddisError,
   type RedisOperations,

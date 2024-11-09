@@ -1,5 +1,4 @@
-import * as S from '@effect/schema/Schema'
-import {Brand} from 'effect'
+import {Brand, Schema} from 'effect'
 import {z} from 'zod'
 
 export const PrivateKeyPemBase64 = z
@@ -7,18 +6,20 @@ export const PrivateKeyPemBase64 = z
   .transform((v) =>
     Brand.nominal<typeof v & Brand.Brand<'PrivateKeyPemBase64'>>()(v)
   )
-export const PrivateKeyPemBase64E = S.String.pipe(
-  S.brand('PrivateKeyPemBase64')
+export const PrivateKeyPemBase64E = Schema.String.pipe(
+  Schema.brand('PrivateKeyPemBase64')
 )
-export type PrivateKeyPemBase64 = S.Schema.Type<typeof PrivateKeyPemBase64E>
+export type PrivateKeyPemBase64 = typeof PrivateKeyPemBase64E.Type
 
 export const PublicKeyPemBase64 = z
   .string()
   .transform((v) =>
     Brand.nominal<typeof v & Brand.Brand<'PublicKeyPemBase64'>>()(v)
   )
-export const PublicKeyPemBase64E = S.String.pipe(S.brand('PublicKeyPemBase64'))
-export type PublicKeyPemBase64 = S.Schema.Type<typeof PublicKeyPemBase64E>
+export const PublicKeyPemBase64E = Schema.String.pipe(
+  Schema.brand('PublicKeyPemBase64')
+)
+export type PublicKeyPemBase64 = typeof PublicKeyPemBase64E.Type
 
 export const PrivateKeyHolder = z
   .object({
@@ -27,10 +28,10 @@ export const PrivateKeyHolder = z
   })
   .readonly()
 
-export const PrivateKeyHolderE = S.Struct({
+export const PrivateKeyHolderE = Schema.Struct({
   publicKeyPemBase64: PublicKeyPemBase64E,
   privateKeyPemBase64: PrivateKeyPemBase64E,
 })
 
 export type PrivateKeyHolder = z.TypeOf<typeof PrivateKeyHolder>
-export type PrivateKeyHolderE = S.Schema.Type<typeof PrivateKeyHolderE>
+export type PrivateKeyHolderE = typeof PrivateKeyHolderE.Type

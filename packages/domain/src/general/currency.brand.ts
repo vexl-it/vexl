@@ -1,4 +1,4 @@
-import {Schema} from '@effect/schema'
+import {Schema} from 'effect'
 import {z} from 'zod'
 
 export const CurrencyCode = z.enum([

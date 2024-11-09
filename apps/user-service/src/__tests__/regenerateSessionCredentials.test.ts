@@ -1,5 +1,4 @@
 import {HttpClientRequest} from '@effect/platform'
-import {Schema} from '@effect/schema'
 import {
   generatePrivateKey,
   type PublicKeyPemBase64,
@@ -15,7 +14,7 @@ import {
 } from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {verifyUserSecurity} from '@vexl-next/rest-api/src/apiSecurity'
 import {generateUserAuthData} from '@vexl-next/server-utils/src/generateUserAuthData'
-import {Effect} from 'effect'
+import {Effect, Schema} from 'effect'
 import {cryptoConfig, oldHmacKeyUsedForHashingNumbersConfig} from '../configs'
 import {NodeTestingApp} from './utils/NodeTestingApp'
 import {

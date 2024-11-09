@@ -1,9 +1,8 @@
-import {Schema} from '@effect/schema'
 import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {HashedPhoneNumberE} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
-import {Effect, flow} from 'effect'
+import {Effect, flow, Schema} from 'effect'
 
 const DeleteContactsByHashFromAndHashToQuery = Schema.Struct({
   hashFrom: HashedPhoneNumberE,

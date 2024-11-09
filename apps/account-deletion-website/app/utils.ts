@@ -1,4 +1,3 @@
-import {Schema} from '@effect/schema'
 import {ecdsa} from '@vexl-next/cryptography'
 import {
   PrivateKeyHolder,
@@ -17,7 +16,7 @@ import {
 import {ENV_PRESETS, type EnvPreset} from '@vexl-next/rest-api'
 import * as contactsApi from '@vexl-next/rest-api/src/services/contact'
 import * as userApi from '@vexl-next/rest-api/src/services/user'
-import {Effect} from 'effect'
+import {Effect, Schema} from 'effect'
 import * as E from 'fp-ts/lib/Either'
 import {pipe} from 'fp-ts/lib/function'
 

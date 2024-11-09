@@ -1,4 +1,3 @@
-import {Schema, type ParseResult} from '@effect/schema'
 import {type UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {
   Array,
@@ -8,7 +7,9 @@ import {
   Duration,
   Effect,
   Layer,
+  Schema,
   type ConfigError,
+  type ParseResult,
 } from 'effect'
 import {catchAllDefect} from 'effect/Effect'
 import Redis from 'ioredis'

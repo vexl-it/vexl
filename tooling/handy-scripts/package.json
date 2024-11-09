@@ -5,14 +5,14 @@
   "scripts": {
     "clean": "rimraf ./dist",
     "format": "prettier --check \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json}\"",
+    "format:fix": "prettier --write \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json}\"",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@effect/opentelemetry": "^0.35.3",
-    "@effect/platform": "^0.62.3",
-    "@effect/platform-node": "^0.56.9",
-    "@effect/schema": "^0.70.4",
+    "@effect/opentelemetry": "^0.39.12",
+    "@effect/platform": "^0.69.19",
+    "@effect/platform-node": "^0.64.21",
     "@vexl-next/cryptography": "0.0.0",
     "@vexl-next/domain": "0.0.0",
     "@vexl-next/resources-utils": "0.0.0",
@@ -22,7 +22,7 @@
     "dayjs": "^1.11.11",
     "dotenv": "^16.4.5",
     "dynamic-import-polyfill": "^0.1.1",
-    "effect": "^3.6.3",
+    "effect": "^3.10.12",
     "fast-check": "^3.20.0",
     "qrcode": "^1.5.3",
     "serve-handler": "^6.1.5"

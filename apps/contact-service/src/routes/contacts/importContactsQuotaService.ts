@@ -1,4 +1,3 @@
-import {Schema} from '@effect/schema'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {getNextMidnightOnSelectedDate} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
@@ -7,7 +6,7 @@ import {
   InitialImportContactsQuotaReachedError,
 } from '@vexl-next/rest-api/src/services/contact/contracts'
 import {RedisService} from '@vexl-next/server-utils/src/RedisService'
-import {Context, Effect, Layer} from 'effect'
+import {Context, Effect, Layer, Schema} from 'effect'
 import {DateTime} from 'luxon'
 import {
   importContactsCountQuotaConfig,

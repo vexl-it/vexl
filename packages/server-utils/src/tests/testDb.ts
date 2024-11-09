@@ -1,6 +1,6 @@
 import {PgClient} from '@effect/sql-pg'
 import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
-import {Config, Console, Effect, Option, Redacted} from 'effect'
+import {Config, Console, Effect, Layer, Option, Redacted} from 'effect'
 
 const testDbConfig = Config.unwrap({
   host: Config.string('TEST_DB_HOST'),
@@ -15,7 +15,10 @@ const keepDbConfig = Config.boolean('TEST_KEEP_DB').pipe(
   Config.withDefault(false)
 )
 
-const testServicePgClient = PgClient.layer(testDbConfig)
+const testServicePgClient = testDbConfig.pipe(
+  Effect.map((config) => PgClient.layer(config)),
+  Layer.unwrapEffect
+)
 
 // I know, this is not pretty, but we are doing this for tests so it's fine...
 // If you the reader feel like this is not fine, create a context and a layer that

@@ -1,10 +1,9 @@
-import {Schema} from '@effect/schema'
 import {E164PhoneNumberE} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {
   InitVerificationErrors,
   UnableToSendVerificationSmsError,
 } from '@vexl-next/rest-api/src/services/user/contracts'
-import {Effect} from 'effect'
+import {Effect, Schema} from 'effect'
 import {
   checkVerificationMock,
   createVerificationMock,

@@ -1,5 +1,4 @@
 import {HttpClientRequest} from '@effect/platform'
-import {Schema} from '@effect/schema'
 import {SqlClient} from '@effect/sql'
 import {RegionCodeE} from '@vexl-next/domain/src/utility/RegionCode.brand'
 import {
@@ -7,7 +6,7 @@ import {
   FeedbackType,
 } from '@vexl-next/rest-api/src/services/feedback/contracts'
 import {createDummyAuthHeaders} from '@vexl-next/server-utils/src/tests/createDummyAuthHeaders'
-import {Effect, Either} from 'effect'
+import {Effect, Either, Schema} from 'effect'
 import {NodeTestingApp} from './utils/NodeTestingApp'
 import {
   disposeRuntime,

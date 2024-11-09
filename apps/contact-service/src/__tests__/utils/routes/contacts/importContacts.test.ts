@@ -1,5 +1,4 @@
 import {HttpClientRequest} from '@effect/platform'
-import {Schema} from '@effect/schema'
 import {SqlClient} from '@effect/sql'
 import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {
@@ -8,7 +7,16 @@ import {
 } from '@vexl-next/rest-api/src/services/contact/contracts'
 import {RedisService} from '@vexl-next/server-utils/src/RedisService'
 import {mockedReportContactsImported} from '@vexl-next/server-utils/src/tests/mockedDashboardReportsService'
-import {Array, Effect, Either, Logger, LogLevel, Order, pipe} from 'effect'
+import {
+  Array,
+  Effect,
+  Either,
+  Logger,
+  LogLevel,
+  Order,
+  pipe,
+  Schema,
+} from 'effect'
 import {
   createQuotaRecordKey,
   ImportContactsQuotaRecord,

@@ -1,10 +1,16 @@
-import {Schema} from '@effect/schema'
 import {metricsQueueNameConfig} from '@vexl-next/server-utils/src/commonConfigs'
 import {
   setupRedisSmqConnection,
   type SettingUpRedisSmqConnectionError,
 } from '@vexl-next/server-utils/src/metrics/setupRedisSmqConnection'
-import {Context, Effect, Layer, type Config, type ConfigError} from 'effect'
+import {
+  Context,
+  Effect,
+  Layer,
+  Schema,
+  type Config,
+  type ConfigError,
+} from 'effect'
 import {Consumer, Queue, type IMessageTransferable} from 'redis-smq'
 import {
   registerMessageHandler,

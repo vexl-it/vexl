@@ -1,4 +1,4 @@
-import {Schema} from '@effect/schema'
+import {Schema} from 'effect'
 import {z} from 'zod'
 import {SvgString, SvgStringE} from './SvgString.brand'
 import {UriString, UriStringE} from './UriString.brand'

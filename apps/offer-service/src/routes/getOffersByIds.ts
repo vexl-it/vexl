@@ -1,7 +1,6 @@
-import {Schema} from '@effect/schema'
 import {GetOffersByIdsEndpint} from '@vexl-next/rest-api/src/services/offer/specification'
 import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
-import {Array, Effect, flow, Option} from 'effect'
+import {Array, Effect, flow, Option, Schema} from 'effect'
 import {Handler} from 'effect-http'
 import {OfferDbService} from '../db/OfferDbService'
 import {offerPartsToServerOffer} from '../utils/offerPartsToServerOffer'

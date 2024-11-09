@@ -1,5 +1,5 @@
-import {Schema} from '@effect/schema'
 import {UuidE} from '@vexl-next/domain/src/utility/Uuid.brand'
+import {Schema} from 'effect'
 
 export const MetricRecordId = Schema.BigInt.pipe(Schema.brand('MetricRecordId'))
 export type MetricRecordId = Schema.Schema.Type<typeof MetricRecordId>

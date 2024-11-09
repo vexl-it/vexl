@@ -1,5 +1,4 @@
 import {HttpClientRequest} from '@effect/platform'
-import {Schema} from '@effect/schema'
 import {SqlClient} from '@effect/sql'
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
@@ -14,7 +13,7 @@ import {
 } from '@vexl-next/rest-api/src/services/contact/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import dayjs from 'dayjs'
-import {Effect} from 'effect'
+import {Effect, Schema} from 'effect'
 import {
   messageExpirationLowerLimitDaysConfig,
   messageExpirationUpperLimitDaysConfig,

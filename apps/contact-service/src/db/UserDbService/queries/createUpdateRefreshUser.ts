@@ -1,4 +1,3 @@
-import {Schema} from '@effect/schema'
 import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
@@ -6,7 +5,7 @@ import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {CountryPrefixE} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {HashedPhoneNumberE} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
-import {Effect, flow} from 'effect'
+import {Effect, flow, Schema} from 'effect'
 
 export const UpdateRefreshUserParams = Schema.Struct({
   publicKey: PublicKeyPemBase64E,

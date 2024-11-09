@@ -1,8 +1,7 @@
-import {Schema} from '@effect/schema'
 import {SqlClient, SqlSchema} from '@effect/sql'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {MessageTypeE} from '@vexl-next/domain/src/general/messaging'
-import {Effect, flow} from 'effect'
+import {Effect, flow, Schema} from 'effect'
 import {
   messageExpirationLowerLimitDaysConfig,
   messageExpirationUpperLimitDaysConfig,

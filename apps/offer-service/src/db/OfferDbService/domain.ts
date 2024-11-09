@@ -1,4 +1,3 @@
-import {Schema} from '@effect/schema'
 import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {CountryPrefixE} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {
@@ -7,6 +6,7 @@ import {
   PrivatePayloadEncryptedE,
   PublicPayloadEncryptedE,
 } from '@vexl-next/domain/src/general/offers'
+import {Schema} from 'effect'
 
 export const OfferAdminIdHashed = Schema.String.pipe(
   Schema.brand('OfferAdminIdHashed')

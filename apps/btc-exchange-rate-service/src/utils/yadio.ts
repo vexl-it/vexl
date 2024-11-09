@@ -1,4 +1,3 @@
-import {Schema} from '@effect/schema'
 import {type CurrencyCode} from '@vexl-next/domain/src/general/currency.brand'
 import {
   GetExchangeRateError,
@@ -6,7 +5,7 @@ import {
   GetExchangeRateResponse,
 } from '@vexl-next/rest-api/src/services/btcExchangeRate/contracts'
 import axios from 'axios'
-import {Cache, Context, Duration, Effect, Layer} from 'effect'
+import {Cache, Context, Duration, Effect, Layer, Schema} from 'effect'
 
 const fetchExchangePrice = (
   currency: CurrencyCode

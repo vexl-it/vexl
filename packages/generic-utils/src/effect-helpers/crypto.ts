@@ -1,4 +1,3 @@
-import {Schema} from '@effect/schema'
 import {
   type PrivateKeyPemBase64,
   type PublicKeyPemBase64,
@@ -20,7 +19,7 @@ import {
 import * as hmac from '@vexl-next/cryptography/src/operations/hmac'
 import {sha256} from '@vexl-next/cryptography/src/operations/sha'
 import {randomBytes} from 'crypto'
-import {Effect} from 'effect'
+import {Effect, Schema} from 'effect'
 
 const ECIES_GTM_CYPHER_PREFIX = 'EciesGtm-' as const
 const AES_GCM_CYPHER_PREFIX = 'AesGCm-' as const

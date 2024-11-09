@@ -1,4 +1,4 @@
-import {Schema} from '@effect/schema'
+import {Schema} from 'effect'
 import {Base64} from 'js-base64'
 import {z} from 'zod'
 export const Base64String = z

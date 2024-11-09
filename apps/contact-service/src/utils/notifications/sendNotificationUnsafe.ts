@@ -1,6 +1,5 @@
-import {Schema} from '@effect/schema'
 import {type FcmToken} from '@vexl-next/domain/src/utility/FcmToken.brand'
-import {Array, Effect} from 'effect'
+import {Array, Effect, Schema} from 'effect'
 import {FirebaseMessagingService} from './FirebaseMessagingService'
 import {createFirebaseNotificationRequest} from './createFirebaseNotificationRequestBase'
 import {

@@ -1,4 +1,3 @@
-import {Schema} from '@effect/schema'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {
@@ -19,7 +18,7 @@ import {
   hashPhoneNumber,
 } from '@vexl-next/server-utils/src/generateUserAuthData'
 import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
-import {Effect} from 'effect'
+import {Effect, Schema} from 'effect'
 import {Handler} from 'effect-http'
 import {oldHmacKeyUsedForHashingNumbersConfig} from '../configs'
 

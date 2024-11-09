@@ -1,4 +1,3 @@
-import {Schema} from '@effect/schema'
 import {
   PublicKeyPemBase64,
   PublicKeyPemBase64E,
@@ -12,6 +11,7 @@ import {ConnectionLevelE} from '@vexl-next/domain/src/general/offers'
 import {FcmTokenE} from '@vexl-next/domain/src/utility/FcmToken.brand'
 import {BooleanFromString} from '@vexl-next/generic-utils/src/effect-helpers/BooleanFromString'
 import {EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
+import {Schema} from 'effect'
 import {z} from 'zod'
 import {PageRequest, PageResponse} from '../../Pagination.brand'
 

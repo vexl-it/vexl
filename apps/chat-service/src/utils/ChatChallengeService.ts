@@ -1,4 +1,3 @@
-import {Schema} from '@effect/schema'
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {
@@ -14,7 +13,7 @@ import {
   type RedisLockError,
   type RedisService,
 } from '@vexl-next/server-utils/src/RedisService'
-import {Context, Effect, Layer, Option} from 'effect'
+import {Context, Effect, Layer, Option, Schema} from 'effect'
 import {ChallengeDbService} from '../db/ChallegeDbService'
 
 export const generateRandomChatChallenge = generateChallenge().pipe(

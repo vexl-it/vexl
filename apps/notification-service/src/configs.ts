@@ -1,9 +1,8 @@
-import {Schema} from '@effect/schema'
 import {
   PrivateKeyPemBase64E,
   PublicKeyPemBase64E,
 } from '@vexl-next/cryptography/src/KeyHolder/brands'
-import {Config, Effect} from 'effect'
+import {Config, Effect, Schema} from 'effect'
 
 export const fcmTokenPublicKeyConfig = Config.string(
   'FCM_TOKEN_PUBLIC_KEY'

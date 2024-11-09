@@ -1,9 +1,8 @@
-import {Schema} from '@effect/schema'
 import {
   type NotFoundError,
   type UnexpectedServerError,
 } from '@vexl-next/domain/src/general/commonErrors'
-import {type ConfigError, Effect} from 'effect'
+import {type ConfigError, Effect, Schema} from 'effect'
 import {HttpError} from 'effect-http'
 import {isTagged} from 'effect/Predicate'
 import {isRunningInTestConfig} from './commonConfigs'

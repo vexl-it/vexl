@@ -1,9 +1,8 @@
-import {Schema} from '@effect/schema'
 import {PgClient} from '@effect/sql-pg'
 import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {OfferIdE} from '@vexl-next/domain/src/general/offers'
-import {Effect} from 'effect'
+import {Effect, Schema} from 'effect'
 import {expirationPeriodDaysConfig} from '../../../configs'
 import {offerNotExpired} from '../utils'
 

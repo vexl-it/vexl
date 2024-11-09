@@ -1,8 +1,7 @@
-import {Effect} from 'effect'
+import {Effect, Schema} from 'effect'
 import {runPromiseInMockedEnvironment} from '../utils/runPromiseInMockedEnvironment'
 
 import {HttpClientRequest} from '@effect/platform'
-import {Schema} from '@effect/schema'
 import {SqlClient} from '@effect/sql'
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'

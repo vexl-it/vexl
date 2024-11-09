@@ -1,8 +1,7 @@
-import {Schema} from '@effect/schema'
-import {type ParseError} from '@effect/schema/ParseResult'
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {hmacSign} from '@vexl-next/cryptography/src/operations/hmac'
-import {Array, Context, Effect, Layer, Random} from 'effect'
+import {Array, Context, Effect, Layer, Random, Schema} from 'effect'
+import {type ParseError} from 'effect/ParseResult'
 import {HashedPubKey} from '../../common/HashedPubKey'
 
 const generateRandomSalt = (length: number): Effect.Effect<string> =>

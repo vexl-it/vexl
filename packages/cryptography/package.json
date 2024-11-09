@@ -9,14 +9,14 @@
     "clean": "rimraf .turbo node_modules",
     "lint": "eslint .",
     "format": "prettier --check \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json}\"",
+    "format:fix": "prettier --write \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json}\"",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@craftzdog/react-native-buffer": "^6.0.5",
-    "@effect/schema": "^0.70.4",
     "@noble/secp256k1": "^2.0.0",
     "asn1.js": "^5.4.1",
-    "effect": "^3.6.3",
+    "effect": "^3.10.12",
     "fast-check": "^3.20.0",
     "fp-ts": "^2.13.1",
     "react-native-get-random-values": "^1.8.0",

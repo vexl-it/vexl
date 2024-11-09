@@ -1,7 +1,6 @@
-import {Schema} from '@effect/schema'
 import {FetchMyContactsEndpoint} from '@vexl-next/rest-api/src/services/contact/specification'
 import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
-import {Array, Effect, pipe} from 'effect'
+import {Array, Effect, pipe, Schema} from 'effect'
 import {Handler} from 'effect-http'
 import {ContactDbService} from '../../db/ContactDbService'
 

@@ -1,4 +1,4 @@
-import {Schema} from '@effect/schema'
+import {Schema} from 'effect'
 
 const FirebaseErrorCode = Schema.Union(
   Schema.String,

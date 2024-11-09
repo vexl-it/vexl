@@ -1,4 +1,3 @@
-import {Schema} from '@effect/schema'
 import {importPrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {
   PrivateKeyPemBase64E,
@@ -13,7 +12,7 @@ import {
   type CryptoError,
   type EcdsaSignature,
 } from '@vexl-next/generic-utils/src/effect-helpers/crypto'
-import {Effect} from 'effect'
+import {Effect, Schema} from 'effect'
 import {generateUserAuthData, hashPhoneNumber} from '../generateUserAuthData'
 import {type ServerCrypto} from '../ServerCrypto'
 

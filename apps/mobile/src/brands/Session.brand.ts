@@ -1,4 +1,3 @@
-import {Schema} from '@effect/schema'
 import {KeyHolder} from '@vexl-next/cryptography'
 import {
   E164PhoneNumber,
@@ -12,6 +11,7 @@ import {
   UserSessionCredentials,
   UserSessionCredentialsE,
 } from '@vexl-next/rest-api/src/UserSessionCredentials.brand'
+import {Schema} from 'effect'
 import {z} from 'zod'
 
 export const Session = z

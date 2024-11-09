@@ -1,4 +1,3 @@
-import {Schema} from '@effect/schema'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {
@@ -7,6 +6,7 @@ import {
   type SymmetricKey,
 } from '@vexl-next/domain/src/general/offers'
 import {toError, type BasicError} from '@vexl-next/domain/src/utility/errors'
+import {Schema} from 'effect'
 import * as E from 'fp-ts/Either'
 import {z} from 'zod'
 import {keys} from '../../utils/keys'

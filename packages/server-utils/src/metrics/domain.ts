@@ -1,7 +1,6 @@
-import {Schema} from '@effect/schema'
-import {type ParseError} from '@effect/schema/ParseResult'
 import {UuidE} from '@vexl-next/domain/src/utility/Uuid.brand'
-import {type ConfigError, Effect} from 'effect'
+import {type ConfigError, Effect, Schema} from 'effect'
+import {type ParseError} from 'effect/ParseResult'
 import {type IMessageTransferable, ProducibleMessage} from 'redis-smq'
 import {metricsQueueNameConfig} from '../commonConfigs'
 

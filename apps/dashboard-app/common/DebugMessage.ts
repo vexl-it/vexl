@@ -1,4 +1,4 @@
-import {Schema} from '@effect/schema'
+import {Schema} from 'effect'
 
 export default class DebugMessage extends Schema.TaggedClass<DebugMessage>(
   'DebugMessage'

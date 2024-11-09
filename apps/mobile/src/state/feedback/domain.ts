@@ -1,6 +1,6 @@
-import {Schema} from '@effect/schema'
 import {Feedback, FeedbackE} from '@vexl-next/domain/src/general/feedback'
 import {ChatId, ChatIdE} from '@vexl-next/domain/src/general/messaging'
+import {Schema} from 'effect'
 import {z} from 'zod'
 
 export const ChatToFeedbackItem = z

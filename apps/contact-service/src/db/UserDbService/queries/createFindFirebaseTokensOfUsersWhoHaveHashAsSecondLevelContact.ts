@@ -1,10 +1,9 @@
-import {Schema} from '@effect/schema'
 import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {HashedPhoneNumberE} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {FcmTokenE} from '@vexl-next/domain/src/utility/FcmToken.brand'
-import {Array, Effect, flow} from 'effect'
+import {Array, Effect, flow, Schema} from 'effect'
 
 export const createFindFirebaseTokensOfUsersWhoHaveHashAsSecondLevelContactParams =
   Schema.Struct({

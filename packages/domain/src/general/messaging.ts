@@ -1,11 +1,10 @@
-import {Schema} from '@effect/schema'
 import {KeyHolder} from '@vexl-next/cryptography/src'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {
   PrivateKeyHolderE,
   PublicKeyPemBase64E,
 } from '@vexl-next/cryptography/src/KeyHolder/brands'
-import {Brand} from 'effect'
+import {Brand, Schema} from 'effect'
 import {z} from 'zod'
 import {Base64String, Base64StringE} from '../utility/Base64String.brand'
 import {FcmToken, FcmTokenE} from '../utility/FcmToken.brand'

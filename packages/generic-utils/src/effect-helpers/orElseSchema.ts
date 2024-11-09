@@ -1,7 +1,8 @@
-import {Schema, type AST} from '@effect/schema'
+import {Schema} from 'effect'
+import {type LiteralValue} from 'effect/SchemaAST'
 
 export const orElseSchema =
-  <L extends AST.LiteralValue>(literal: L) =>
+  <L extends LiteralValue>(literal: L) =>
   <A, I, R>(self: Schema.Schema<A, I, R>) =>
     Schema.Union(
       self,

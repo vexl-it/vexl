@@ -1,4 +1,4 @@
-import {Schema} from '@effect/schema'
+import {Schema} from 'effect'
 import {z} from 'zod'
 import {E164PhoneNumber, E164PhoneNumberE} from './E164PhoneNumber.brand'
 import {UserName, UserNameE} from './UserName.brand'

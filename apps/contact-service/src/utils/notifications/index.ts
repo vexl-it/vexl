@@ -1,7 +1,6 @@
-import {Schema} from '@effect/schema'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {type FcmToken} from '@vexl-next/domain/src/utility/FcmToken.brand'
-import {Array, Effect, pipe} from 'effect'
+import {Array, Effect, pipe, Schema} from 'effect'
 import {type MessagingTopicResponse} from 'firebase-admin/messaging'
 import {UserDbService} from '../../db/UserDbService'
 import {createFirebaseNotificationRequest} from './createFirebaseNotificationRequestBase'

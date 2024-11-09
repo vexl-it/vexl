@@ -1,6 +1,6 @@
 import {NodeSdk} from '@effect/opentelemetry'
 import {NodeRuntime} from '@effect/platform-node'
-import {type RunMain} from '@effect/platform/Runtime'
+import {type Teardown} from '@effect/platform/Runtime'
 import {PrometheusExporter} from '@opentelemetry/exporter-prometheus'
 import {OTLPTraceExporter} from '@opentelemetry/exporter-trace-otlp-http'
 import {BatchSpanProcessor} from '@opentelemetry/sdk-trace-base'
@@ -123,7 +123,14 @@ const NodeSdkLive = Effect.gen(function* (_) {
   }))
 }).pipe(Layer.unwrapEffect)
 
-export const runMainInNode: RunMain = (effect, options) => {
+export const runMainInNode = <A, E>(
+  effect: Effect.Effect<A, E>,
+  options?: {
+    readonly disableErrorReporting?: boolean | undefined
+    readonly disablePrettyLogger?: boolean | undefined
+    readonly teardown?: Teardown | undefined
+  }
+): void => {
   NodeRuntime.runMain(
     effect.pipe(
       Effect.catchAll((error) => Effect.logFatal('Error', error)),

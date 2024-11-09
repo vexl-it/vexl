@@ -1,6 +1,5 @@
-import {Schema} from '@effect/schema'
 import {E164PhoneNumberE} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
-import {Config, ConfigError, Either, String} from 'effect'
+import {Config, ConfigError, Either, Schema, String} from 'effect'
 
 export {
   cryptoConfig,

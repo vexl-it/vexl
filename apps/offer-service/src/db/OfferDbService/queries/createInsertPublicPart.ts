@@ -1,4 +1,3 @@
-import {Schema} from '@effect/schema'
 import {SqlResolver} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
@@ -9,7 +8,7 @@ import {
   OfferTypeE,
   PublicPayloadEncryptedE,
 } from '@vexl-next/domain/src/general/offers'
-import {Array, Effect, flow} from 'effect'
+import {Array, Effect, flow, Schema} from 'effect'
 import {OfferAdminIdHashed, PublicPartRecord} from '../domain'
 
 export const InsertPublicPartRequest = Schema.Struct({

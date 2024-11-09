@@ -1,10 +1,10 @@
-import {Schema} from '@effect/schema'
 import {CurrencyCodeE} from '@vexl-next/domain/src/general/currency.brand'
 import {LocationPlaceIdE} from '@vexl-next/domain/src/general/offers'
 import {
   LatitudeE,
   LongitudeE,
 } from '@vexl-next/domain/src/utility/geoCoordinates'
+import {Schema} from 'effect'
 
 export class GetLocationSuggestionsRequest extends Schema.Class<GetLocationSuggestionsRequest>(
   'GetLocationSuggestionsRequest'

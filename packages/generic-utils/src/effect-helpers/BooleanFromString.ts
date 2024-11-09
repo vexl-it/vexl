@@ -1,5 +1,4 @@
-import {ParseResult, Schema} from '@effect/schema'
-import {Effect} from 'effect'
+import {Effect, ParseResult, Schema} from 'effect'
 
 export const BooleanFromString = Schema.transformOrFail(
   Schema.String,

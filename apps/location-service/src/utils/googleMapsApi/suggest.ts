@@ -1,11 +1,10 @@
-import {Schema} from '@effect/schema'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {
   GetLocationSuggestionsResponse,
   type GetLocationSuggestionsRequest,
 } from '@vexl-next/rest-api/src/services/location/contracts'
 import axios from 'axios'
-import {Effect} from 'effect'
+import {Effect, Schema} from 'effect'
 
 interface GooglePlacesResponse {
   results: Array<{

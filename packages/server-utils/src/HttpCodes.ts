@@ -1,4 +1,4 @@
-import {Schema} from '@effect/schema'
+import {Schema} from 'effect'
 
 export const SuccessHttpCode = Schema.Literal(200, 201, 202)
 export const RedirectHttpCode = Schema.Literal(301, 302, 303, 307, 308)

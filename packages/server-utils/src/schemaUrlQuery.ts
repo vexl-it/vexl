@@ -1,8 +1,7 @@
 import {HttpServerRequest} from '@effect/platform'
-import {Schema} from '@effect/schema'
-import {type ParseOptions} from '@effect/schema/AST'
-import {type ParseError} from '@effect/schema/ParseResult'
-import {Effect} from 'effect'
+import {Effect, Schema} from 'effect'
+import {type ParseError} from 'effect/ParseResult'
+import {type ParseOptions} from 'effect/SchemaAST'
 
 export class UrlParamsError extends Schema.TaggedError<UrlParamsError>(
   'UrlParamsError'

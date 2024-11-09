@@ -1,4 +1,3 @@
-import {Schema} from '@effect/schema'
 import {NewChatMessageNoticeNotificationData} from '@vexl-next/domain/src/general/notifications'
 import {
   InvalidFcmCypherError,
@@ -7,7 +6,7 @@ import {
 } from '@vexl-next/rest-api/src/services/notification/contract'
 import {IssueNotificationEndpoint} from '@vexl-next/rest-api/src/services/notification/specification'
 import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
-import {Effect} from 'effect'
+import {Effect, Schema} from 'effect'
 import {Handler} from 'effect-http'
 import {sendFirebaseMessage} from '../../FirebaseMessagingLayer'
 import {decodeFcmCypher} from './utils'

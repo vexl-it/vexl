@@ -1,4 +1,3 @@
-import {Schema} from '@effect/schema'
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {
@@ -9,7 +8,7 @@ import {
   type CryptoError,
   type EcdsaSignature,
 } from '@vexl-next/generic-utils/src/effect-helpers/crypto'
-import {Effect} from 'effect'
+import {Effect, Schema} from 'effect'
 import {ServerCrypto} from './ServerCrypto'
 
 export const hashPhoneNumber = (

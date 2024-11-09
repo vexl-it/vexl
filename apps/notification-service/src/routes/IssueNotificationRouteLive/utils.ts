@@ -1,4 +1,3 @@
-import {decode} from '@effect/schema/Schema'
 import {eciesLegacy} from '@vexl-next/cryptography/src/index'
 import {
   extractCypherFromFcmCypher,
@@ -9,7 +8,7 @@ import {
   type FcmToken,
 } from '@vexl-next/domain/src/utility/FcmToken.brand'
 import {InvalidFcmCypherError} from '@vexl-next/rest-api/src/services/notification/contract'
-import {Effect, type ConfigError} from 'effect'
+import {Effect, Schema, type ConfigError} from 'effect'
 import {fcmTokenPrivateKeyConfig} from '../../configs'
 
 export function decodeFcmCypher(
@@ -33,7 +32,7 @@ export function decodeFcmCypher(
           return new InvalidFcmCypherError()
         },
       }),
-      Effect.flatMap(decode(FcmTokenE)),
+      Effect.flatMap(Schema.decode(FcmTokenE)),
       Effect.catchTag('ParseError', () => {
         return new InvalidFcmCypherError()
       })

@@ -1,4 +1,3 @@
-import {Schema} from '@effect/schema'
 import {SqlClient, SqlSchema} from '@effect/sql'
 import {
   type CountryPrefix,
@@ -8,7 +7,7 @@ import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {MetricsMessage} from '@vexl-next/server-utils/src/metrics/domain'
 import {type MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
 import {reportMetricForked} from '@vexl-next/server-utils/src/metrics/reportMetricForked'
-import {Array, Effect, Layer, pipe} from 'effect'
+import {Array, Effect, Layer, pipe, Schema} from 'effect'
 import {type ReadonlyArray} from 'effect/Array'
 
 const USER_LOGGED_IN = 'USER_LOGGED_IN' as const

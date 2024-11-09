@@ -1,5 +1,4 @@
-import {Schema} from '@effect/schema'
-import {Either} from 'effect'
+import {Either, Schema} from 'effect'
 
 export const expectErrorResponse =
   (ResponseErrorSchema: Schema.Schema<any>) =>

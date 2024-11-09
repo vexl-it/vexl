@@ -1,6 +1,5 @@
-import {Schema} from '@effect/schema'
 import {parsePhoneNumber} from 'awesome-phonenumber'
-import {Brand} from 'effect'
+import {Brand, Schema} from 'effect'
 import {z} from 'zod'
 import {type E164PhoneNumber} from '../general/E164PhoneNumber.brand'
 

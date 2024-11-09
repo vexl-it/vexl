@@ -1,8 +1,7 @@
-import {type Schema} from '@effect/schema'
 import {SqlResolver} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
-import {Array, Effect, flow} from 'effect'
+import {Array, Effect, flow, type Schema} from 'effect'
 import {OfferAdminIdHashed, PublicPartRecord} from '../domain'
 
 export const QueryOfferByAdminIdRequest = OfferAdminIdHashed

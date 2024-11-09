@@ -1,4 +1,4 @@
-import {Schema} from '@effect/schema'
+import {Schema} from 'effect'
 import {z} from 'zod'
 import {BtcAddress, BtcAddressE} from '../utility/BtcAddress.brand'
 import {

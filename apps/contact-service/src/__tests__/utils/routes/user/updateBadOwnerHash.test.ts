@@ -2,12 +2,11 @@ import {
   generatePrivateKey,
   type PublicKeyPemBase64,
 } from '@vexl-next/cryptography/src/KeyHolder'
-import {Array, Effect} from 'effect'
+import {Array, Effect, Schema} from 'effect'
 import {NodeTestingApp} from '../../NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../runPromiseInMockedEnvironment'
 
 import {HttpClientRequest} from '@effect/platform'
-import {Schema} from '@effect/schema'
 import {SqlClient} from '@effect/sql'
 import {E164PhoneNumberE} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {

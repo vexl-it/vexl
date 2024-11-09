@@ -13,7 +13,7 @@ import {
 } from '@vexl-next/rest-api'
 import {type UserSessionCredentials} from '@vexl-next/rest-api/src/UserSessionCredentials.brand'
 
-import {Schema} from '@effect/schema'
+import {Schema} from 'effect'
 import {atom} from 'jotai'
 import {Platform} from 'react-native'
 import {dummySession, sessionHolderAtom} from '../state/session'

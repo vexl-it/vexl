@@ -1,11 +1,10 @@
-import {Schema} from '@effect/schema'
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {ecdsaSign} from '@vexl-next/cryptography/src/operations/ecdsa'
 import {E164PhoneNumberE} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {InvalidSignatureError} from '@vexl-next/rest-api/src/services/user/contracts'
 import {mockedReportNewUserCreated} from '@vexl-next/server-utils/src/tests/mockedDashboardReportsService'
-import {Effect, Either, pipe} from 'effect'
+import {Effect, Either, pipe, Schema} from 'effect'
 import {LoggedInUsersDbService} from '../../db/loggedInUsersDb'
 import {TwilioVerificationSid} from '../../utils/twilio'
 import {

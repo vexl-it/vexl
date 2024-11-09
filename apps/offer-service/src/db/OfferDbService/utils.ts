@@ -1,7 +1,7 @@
-import {Schema} from '@effect/schema'
 import {type PgClient} from '@effect/sql-pg'
 import {type Fragment} from '@effect/sql/Statement'
 import {OfferTypeE} from '@vexl-next/domain/src/general/offers'
+import {Schema} from 'effect'
 import {OfferParts} from './domain'
 
 export const offerSelect = (sql: PgClient.PgClient): Fragment => sql`

@@ -1,4 +1,3 @@
-import {Schema} from '@effect/schema'
 import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder'
 import {
   E164PhoneNumberE,
@@ -7,6 +6,7 @@ import {
 import {HashedPhoneNumberE} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {IsoDatetimeStringE} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
 import {EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
+import {Schema} from 'effect'
 export interface InvalidPhoneNumber {
   _tag: 'InvalidPhoneNumber'
 }

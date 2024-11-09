@@ -1,4 +1,3 @@
-import {Schema} from '@effect/schema'
 import {type CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {
   Array,
@@ -9,6 +8,7 @@ import {
   Option,
   Order,
   Schedule,
+  Schema,
   Stream,
   pipe,
 } from 'effect'

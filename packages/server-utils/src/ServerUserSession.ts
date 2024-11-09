@@ -1,28 +1,26 @@
 import {HttpServerRequest} from '@effect/platform'
-import {Schema} from '@effect/schema'
-import * as S from '@effect/schema/Schema'
 import {
   PublicKeyPemBase64E,
   type PublicKeyPemBase64,
 } from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {ecdsaVerify} from '@vexl-next/cryptography/src/operations/ecdsa'
-import {Context, Effect, Layer} from 'effect'
+import {Context, Effect, Layer, Schema} from 'effect'
 
 export const HEADER_PUBLIC_KEY = 'public-key'
 export const HEADER_HASH = 'hash'
 export const HEADER_SIGNATURE = 'signature'
 
-export class InvalidSessionError extends S.TaggedError<InvalidSessionError>()(
+export class InvalidSessionError extends Schema.TaggedError<InvalidSessionError>()(
   'InvalidSessionError',
   {
-    message: S.String,
+    message: Schema.String,
   }
 ) {}
 
-const AuthHeaders = S.Struct({
+const AuthHeaders = Schema.Struct({
   [HEADER_PUBLIC_KEY]: PublicKeyPemBase64E,
-  [HEADER_HASH]: S.String,
-  [HEADER_SIGNATURE]: S.String,
+  [HEADER_HASH]: Schema.String,
+  [HEADER_SIGNATURE]: Schema.String,
 })
 
 export class UserSessionOnBE extends Schema.TaggedClass<UserSessionOnBE>()(

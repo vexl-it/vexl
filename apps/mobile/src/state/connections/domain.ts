@@ -1,4 +1,3 @@
-import {Schema} from '@effect/schema'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {OfferAdminId, SymmetricKey} from '@vexl-next/domain/src/general/offers'
@@ -10,6 +9,7 @@ import {
   FetchCommonConnectionsResponse,
   FetchCommonConnectionsResponseE,
 } from '@vexl-next/rest-api/src/services/contact/contracts'
+import {Schema} from 'effect'
 import {z} from 'zod'
 
 export const ConnectionsState = z

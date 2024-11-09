@@ -1,5 +1,5 @@
-import {Schema} from '@effect/schema'
 import {KeyHolder} from '@vexl-next/cryptography'
+import {Schema} from 'effect'
 import {z} from 'zod'
 
 // TODO refine properties

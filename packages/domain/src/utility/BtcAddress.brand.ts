@@ -1,5 +1,4 @@
-import {Schema} from '@effect/schema'
-import {Brand} from 'effect'
+import {Brand, Schema} from 'effect'
 import {z} from 'zod'
 
 const btcAddressRegex = /^(bc1|[13])[a-zA-HJ-NP-Z0-9]{25,59}$/

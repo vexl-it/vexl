@@ -1,9 +1,8 @@
-import {Schema} from '@effect/schema'
 import {SqlClient, SqlSchema} from '@effect/sql'
 import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {ChatChallenge} from '@vexl-next/rest-api/src/services/chat/contracts'
-import {Effect, flow} from 'effect'
+import {Effect, flow, Schema} from 'effect'
 import {challengeExpirationMinutesConfig} from '../../../configs'
 import {ChallengeRecord} from '../domain'
 

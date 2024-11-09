@@ -6,9 +6,7 @@ export const GetPublicKeyResponse = Schema.Struct({
   publicKey: PublicKeyPemBase64E,
 })
 
-export type GetPublicKeyResponse = Schema.Schema.Type<
-  typeof GetPublicKeyResponse
->
+export type GetPublicKeyResponse = typeof GetPublicKeyResponse.Type
 
 export class IssueNotificationRequest extends Schema.Class<IssueNotificationRequest>(
   'IssueNotificationRequest'
@@ -49,6 +47,4 @@ export const IssueNotificationErrors = Schema.Union(
 export const IssueNotificationInput = Schema.Struct({
   body: IssueNotificationRequest,
 })
-export type IssueNotificationInput = Schema.Schema.Type<
-  typeof IssueNotificationInput
->
+export type IssueNotificationInput = typeof IssueNotificationInput.Type

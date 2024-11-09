@@ -12,9 +12,7 @@ import {lookupTwilioError} from './twilioErrors'
 export const TwilioVerificationSid = Schema.String.pipe(
   Schema.brand('TwilioVerificationSid')
 )
-export type TwilioVerificationSid = Schema.Schema.Type<
-  typeof TwilioVerificationSid
->
+export type TwilioVerificationSid = typeof TwilioVerificationSid.Type
 const decodeVerificationSid = Schema.decode(TwilioVerificationSid)
 
 export interface TwilioOperations {

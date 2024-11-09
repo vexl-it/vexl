@@ -14,9 +14,7 @@ const InsertChallengeParams = Schema.Struct({
   valid: Schema.optionalWith(Schema.Boolean, {default: () => true}),
 })
 
-export type InsertChallengeParams = Schema.Schema.Type<
-  typeof InsertChallengeParams
->
+export type InsertChallengeParams = typeof InsertChallengeParams.Type
 
 export const createInsertChallenge = Effect.gen(function* (_) {
   const sql = yield* _(PgClient.PgClient)

@@ -1,13 +1,11 @@
 import {SqlResolver} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
-import {Array, Effect, flow, type Schema} from 'effect'
+import {Array, Effect, flow} from 'effect'
 import {OfferAdminIdHashed, PublicPartRecord} from '../domain'
 
 export const QueryOfferByAdminIdRequest = OfferAdminIdHashed
-export type QueryOfferByAdminIdRequest = Schema.Schema.Type<
-  typeof QueryOfferByAdminIdRequest
->
+export type QueryOfferByAdminIdRequest = typeof QueryOfferByAdminIdRequest.Type
 
 export const createQueryPublicPartByAdminId = Effect.gen(function* (_) {
   const sql = yield* _(PgClient.PgClient)

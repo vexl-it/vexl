@@ -11,9 +11,7 @@ const UpdateInboxMetadataParams = Schema.Struct({
   platform: Schema.optionalWith(PlatformName, {as: 'Option'}),
   clientVersion: Schema.optionalWith(VersionCode, {as: 'Option'}),
 })
-export type UpdateInboxMetadataParams = Schema.Schema.Type<
-  typeof UpdateInboxMetadataParams
->
+export type UpdateInboxMetadataParams = typeof UpdateInboxMetadataParams.Type
 
 export const createUpdateInboxMetadata = Effect.gen(function* (_) {
   const sql = yield* _(PgClient.PgClient)

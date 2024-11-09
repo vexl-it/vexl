@@ -16,8 +16,6 @@ export const UserSessionCredentialsE = Schema.Struct({
   signature: Schema.String,
 })
 
-export type UserSessionCredentials = Schema.Schema.Type<
-  typeof UserSessionCredentialsE
->
+export type UserSessionCredentials = typeof UserSessionCredentialsE.Type
 
 export type GetUserSessionCredentials = () => UserSessionCredentials

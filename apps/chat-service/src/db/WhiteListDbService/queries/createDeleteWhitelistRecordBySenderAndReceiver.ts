@@ -9,9 +9,8 @@ export const DeleteWhitelistRecordBySenderAndReceiverParams = Schema.Struct({
   sender: PublicKeyHashed,
   receiver: InboxRecordId,
 })
-export type DeleteWhitelistRecordBySenderAndReceiverParams = Schema.Schema.Type<
-  typeof DeleteWhitelistRecordBySenderAndReceiverParams
->
+export type DeleteWhitelistRecordBySenderAndReceiverParams =
+  typeof DeleteWhitelistRecordBySenderAndReceiverParams.Type
 
 export const createDeleteWhitelistRecordBySenderAndReceiver = Effect.gen(
   function* (_) {

@@ -9,9 +9,7 @@ const PubKeyToConnectionsRow = Schema.Struct({
   publicKey: PublicKeyPemBase64E,
   count: Schema.NumberFromString,
 })
-export type PubKeyToConnectionsRow = Schema.Schema.Type<
-  typeof PubKeyToConnectionsRow
->
+export type PubKeyToConnectionsRow = typeof PubKeyToConnectionsRow.Type
 
 const decodePubkeysToConnectionsQueryResult = Schema.decodeUnknown(
   Schema.Array(PubKeyToConnectionsRow)

@@ -9,9 +9,7 @@ export const InsertDeadMetricsParams = Schema.Struct({
   accepted_at: Schema.DateFromSelf,
 })
 
-export type InsertDeadMetricsParams = Schema.Schema.Type<
-  typeof InsertDeadMetricsParams
->
+export type InsertDeadMetricsParams = typeof InsertDeadMetricsParams.Type
 
 export const createInsertDeadMetricRecord = Effect.gen(function* (_) {
   const sql = yield* _(PgClient.PgClient)

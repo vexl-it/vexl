@@ -43,35 +43,27 @@ export type ServerOffer = Schema.Schema.Type<typeof ServerOffer>
 export const GetOffersByIdsRequest = Schema.Struct({
   ids: Schema.compose(Schema.split(','), Schema.Array(OfferIdE)),
 })
-export type GetOffersByIdsRequest = Schema.Schema.Type<
-  typeof GetOffersByIdsRequest
->
+export type GetOffersByIdsRequest = typeof GetOffersByIdsRequest.Type
 
 export const GetOfferByIdsResponse = Schema.Array(ServerOffer)
-export type GetOfferByIdsResponse = Schema.Schema.Type<
-  typeof GetOfferByIdsResponse
->
+export type GetOfferByIdsResponse = typeof GetOfferByIdsResponse.Type
 
 export const GetOffersForMeResponse = Schema.Struct({
   offers: Schema.Array(ServerOffer),
 })
-export type GetOffersForMeResponse = Schema.Schema.Type<
-  typeof GetOffersForMeResponse
->
+export type GetOffersForMeResponse = typeof GetOffersForMeResponse.Type
 
 export const GetOffersForMeCreatedOrModifiedAfterRequest = Schema.Struct({
   modifiedAt: IsoDatetimeStringE,
 })
-export type GetOffersForMeCreatedOrModifiedAfterRequest = Schema.Schema.Type<
-  typeof GetOffersForMeCreatedOrModifiedAfterRequest
->
+export type GetOffersForMeCreatedOrModifiedAfterRequest =
+  typeof GetOffersForMeCreatedOrModifiedAfterRequest.Type
 
 export const GetOffersForMeCreatedOrModifiedAfterResponse = Schema.Struct({
   offers: Schema.Array(ServerOffer),
 })
-export type GetOffersForMeCreatedOrModifiedAfterResponse = Schema.Schema.Type<
-  typeof GetOffersForMeCreatedOrModifiedAfterResponse
->
+export type GetOffersForMeCreatedOrModifiedAfterResponse =
+  typeof GetOffersForMeCreatedOrModifiedAfterResponse.Type
 
 export const ServerPrivatePart = Schema.Struct({
   userPublicKey: PublicKeyPemBase64E,
@@ -87,17 +79,13 @@ export const CreateNewOfferRequest = Schema.Struct({
   adminId: OfferAdminIdE,
   offerId: Schema.optional(OfferIdE),
 })
-export type CreateNewOfferRequest = Schema.Schema.Type<
-  typeof CreateNewOfferRequest
->
+export type CreateNewOfferRequest = typeof CreateNewOfferRequest.Type
 
 export const CreateNewOfferResponse = Schema.Struct({
   adminId: OfferAdminIdE, // TODO is this really necessary? Shouldn't client generate it and store it?
   ...ServerOffer.fields,
 })
-export type CreateNewOfferResponse = Schema.Schema.Type<
-  typeof CreateNewOfferResponse
->
+export type CreateNewOfferResponse = typeof CreateNewOfferResponse.Type
 
 export const RefreshOfferRequest = Schema.Struct({
   adminIds: Schema.Array(OfferAdminIdE),
@@ -105,9 +93,7 @@ export const RefreshOfferRequest = Schema.Struct({
 export type RefreshOfferRequest = Schema.Schema.Type<typeof RefreshOfferRequest>
 
 export const RefreshOfferResponse = Schema.Array(OfferIdE)
-export type RefreshOfferResponse = Schema.Schema.Type<
-  typeof RefreshOfferResponse
->
+export type RefreshOfferResponse = typeof RefreshOfferResponse.Type
 
 export const DeleteOfferRequest = Schema.Struct({
   adminIds: Schema.split(',').pipe(
@@ -137,9 +123,7 @@ export const OfferPrivateListItem = Schema.Struct({
   userPublicKey: PublicKeyPemBase64E,
   payloadPrivate: PrivatePayloadEncryptedE,
 })
-export type OfferPrivateListItem = Schema.Schema.Type<
-  typeof OfferPrivateListItem
->
+export type OfferPrivateListItem = typeof OfferPrivateListItem.Type
 
 export const UpdateOfferRequest = Schema.Struct({
   adminId: OfferAdminIdE,
@@ -155,15 +139,11 @@ export const CreatePrivatePartRequest = Schema.Struct({
   adminId: OfferAdminIdE,
   offerPrivateList: Schema.Array(ServerPrivatePart),
 })
-export type CreatePrivatePartRequest = Schema.Schema.Type<
-  typeof CreatePrivatePartRequest
->
+export type CreatePrivatePartRequest = typeof CreatePrivatePartRequest.Type
 
 export const CreatePrivatePartResponse = NoContentResponse
 
-export type CreatePrivatePartResponse = Schema.Schema.Type<
-  typeof CreatePrivatePartResponse
->
+export type CreatePrivatePartResponse = typeof CreatePrivatePartResponse.Type
 
 export class CanNotDeletePrivatePartOfAuthor extends Schema.TaggedError<CanNotDeletePrivatePartOfAuthor>(
   'CanNotDeletePrivatePartOfAuthor'
@@ -175,26 +155,18 @@ export const DeletePrivatePartRequest = Schema.Struct({
   adminIds: Schema.Array(OfferAdminIdE),
   publicKeys: Schema.Array(PublicKeyPemBase64E),
 })
-export type DeletePrivatePartRequest = Schema.Schema.Type<
-  typeof DeletePrivatePartRequest
->
+export type DeletePrivatePartRequest = typeof DeletePrivatePartRequest.Type
 
 export const DeletePrivatePartResponse = NoContentResponse
-export type DeletePrivatePartResponse = Schema.Schema.Type<
-  typeof DeletePrivatePartResponse
->
+export type DeletePrivatePartResponse = typeof DeletePrivatePartResponse.Type
 
 export const RemovedOfferIdsRequest = Schema.Struct({
   offerIds: Schema.Array(OfferIdE),
 })
-export type RemovedOfferIdsRequest = Schema.Schema.Type<
-  typeof RemovedOfferIdsRequest
->
+export type RemovedOfferIdsRequest = typeof RemovedOfferIdsRequest.Type
 
 export const RemovedOfferIdsResponse = RemovedOfferIdsRequest
-export type RemovedOfferIdsResponse = Schema.Schema.Type<
-  typeof RemovedOfferIdsRequest
->
+export type RemovedOfferIdsResponse = typeof RemovedOfferIdsRequest.Type
 
 export const ReportOfferRequest = Schema.Struct({
   offerId: OfferIdE,
@@ -235,9 +207,8 @@ export type GetOffersByIdsInput = Schema.Schema.Type<typeof GetOffersByIdsInput>
 export const GetOffersForMeModifiedOrCreatedAfterInput = Schema.Struct({
   query: GetOffersForMeCreatedOrModifiedAfterRequest,
 })
-export type GetOffersForMeModifiedOrCreatedAfterInput = Schema.Schema.Type<
-  typeof GetOffersForMeModifiedOrCreatedAfterInput
->
+export type GetOffersForMeModifiedOrCreatedAfterInput =
+  typeof GetOffersForMeModifiedOrCreatedAfterInput.Type
 
 export const CreateNewOfferInput = Schema.Struct({
   body: CreateNewOfferRequest,
@@ -262,23 +233,17 @@ export type UpdateOfferInput = Schema.Schema.Type<typeof UpdateOfferInput>
 export const CreatePrivatePartInput = Schema.Struct({
   body: CreatePrivatePartRequest,
 })
-export type CreatePrivatePartInput = Schema.Schema.Type<
-  typeof CreatePrivatePartInput
->
+export type CreatePrivatePartInput = typeof CreatePrivatePartInput.Type
 
 export const DeletePrivatePartInput = Schema.Struct({
   body: DeletePrivatePartRequest,
 })
-export type DeletePrivatePartInput = Schema.Schema.Type<
-  typeof DeletePrivatePartInput
->
+export type DeletePrivatePartInput = typeof DeletePrivatePartInput.Type
 
 export const GetRemovedOffersInput = Schema.Struct({
   body: RemovedOfferIdsRequest,
 })
-export type GetRemovedOffersInput = Schema.Schema.Type<
-  typeof GetRemovedOffersInput
->
+export type GetRemovedOffersInput = typeof GetRemovedOffersInput.Type
 
 export const ReportOfferInput = Schema.Struct({
   body: ReportOfferRequest,

@@ -20,9 +20,8 @@ export const QueryOfferByPublicKeyAndOfferIdRequest = Schema.Struct({
   id: OfferIdE,
   skipValidation: Schema.optional(Schema.Boolean),
 })
-export type QueryOfferByPublicKeyAndOfferIdRequest = Schema.Schema.Type<
-  typeof QueryOfferByPublicKeyAndOfferIdRequest
->
+export type QueryOfferByPublicKeyAndOfferIdRequest =
+  typeof QueryOfferByPublicKeyAndOfferIdRequest.Type
 
 export const createQueryOfferByPublicKeyAndOfferId = Effect.gen(function* (_) {
   const sql = yield* _(PgClient.PgClient)

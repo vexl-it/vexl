@@ -9,9 +9,8 @@ const UpdateContactsHashFromQuery = Schema.Struct({
   newHashFrom: HashedPhoneNumberE,
 })
 
-export type UpdateContactsHashFromQuery = Schema.Schema.Type<
-  typeof UpdateContactsHashFromQuery
->
+export type UpdateContactsHashFromQuery =
+  typeof UpdateContactsHashFromQuery.Type
 
 export const createUpdateContactsHashFrom = Effect.gen(function* (_) {
   const sql = yield* _(PgClient.PgClient)

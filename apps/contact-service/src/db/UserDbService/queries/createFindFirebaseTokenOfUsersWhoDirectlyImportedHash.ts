@@ -9,9 +9,8 @@ export const FindTokensOfUsersWhoDirectlyImportedHashParams = Schema.Struct({
   userHash: HashedPhoneNumberE,
   importedHashes: Schema.Array(HashedPhoneNumberE),
 })
-export type FindTokensOfUsersWhoDirectlyImportedHashParams = Schema.Schema.Type<
-  typeof FindTokensOfUsersWhoDirectlyImportedHashParams
->
+export type FindTokensOfUsersWhoDirectlyImportedHashParams =
+  typeof FindTokensOfUsersWhoDirectlyImportedHashParams.Type
 
 export const createFindTokensOfUsersWhoDirectlyImportedHash = Effect.gen(
   function* (_) {

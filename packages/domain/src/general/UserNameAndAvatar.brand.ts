@@ -30,9 +30,7 @@ export const UserNameAndUriAvatarE = Schema.Struct({
     })
   ),
 })
-export type UserNameAndUriAvatar = Schema.Schema.Type<
-  typeof UserNameAndUriAvatarE
->
+export type UserNameAndUriAvatar = typeof UserNameAndUriAvatarE.Type
 
 export const RealLifeInfo = z
   .object({

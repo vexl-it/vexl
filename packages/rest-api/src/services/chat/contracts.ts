@@ -101,9 +101,7 @@ export const RequestBaseWithChallenge = Schema.Struct({
   publicKey: PublicKeyPemBase64E,
   signedChallenge: SignedChallenge,
 })
-export type RequestBaseWithChallenge = Schema.Schema.Type<
-  typeof RequestBaseWithChallenge
->
+export type RequestBaseWithChallenge = typeof RequestBaseWithChallenge.Type
 
 export const UpdateInboxRequest = Schema.Struct({
   ...RequestBaseWithChallenge.fields,
@@ -143,21 +141,17 @@ export const DeletePulledMessagesErrors = Schema.Union(
   InboxDoesNotExistError,
   InvalidChallengeError
 )
-export type DeletePulledMessagesErrors = Schema.Schema.Type<
-  typeof DeletePulledMessagesErrors
->
+export type DeletePulledMessagesErrors = typeof DeletePulledMessagesErrors.Type
 
 export const DeletePulledMessagesRequest = Schema.Struct({
   ...RequestBaseWithChallenge.fields,
 })
-export type DeletePulledMessagesRequest = Schema.Schema.Type<
-  typeof DeletePulledMessagesRequest
->
+export type DeletePulledMessagesRequest =
+  typeof DeletePulledMessagesRequest.Type
 
 export const DeletePulledMessagesResponse = NoContentResponse
-export type DeletePulledMessagesResponse = Schema.Schema.Type<
-  typeof DeletePulledMessagesResponse
->
+export type DeletePulledMessagesResponse =
+  typeof DeletePulledMessagesResponse.Type
 
 export const BlockInboxErrors = Schema.Union(
   ReceiverInboxDoesNotExistError,
@@ -186,17 +180,13 @@ export const RequestApprovalRequest = Schema.Struct({
   publicKey: PublicKeyPemBase64E,
   message: Schema.String,
 })
-export type RequestApprovalRequest = Schema.Schema.Type<
-  typeof RequestApprovalRequest
->
+export type RequestApprovalRequest = typeof RequestApprovalRequest.Type
 
 export const RequestApprovalResponse = Schema.Struct({
   ...ServerMessageWithId.fields,
   notificationHandled: Schema.Boolean,
 })
-export type RequestApprovalResponse = Schema.Schema.Type<
-  typeof RequestApprovalResponse
->
+export type RequestApprovalResponse = typeof RequestApprovalResponse.Type
 
 export const CancelRequestApprovalErrors = Schema.Union(
   RequestNotPendingError,
@@ -204,25 +194,20 @@ export const CancelRequestApprovalErrors = Schema.Union(
   SenderInboxDoesNotExistError,
   InvalidChallengeError
 )
-export type CancelRequestApprovalErrors = Schema.Schema.Type<
-  typeof CancelRequestApprovalErrors
->
+export type CancelRequestApprovalErrors =
+  typeof CancelRequestApprovalErrors.Type
 
 export const CancelApprovalRequest = Schema.Struct({
   publicKey: PublicKeyPemBase64E,
   message: Schema.String,
 })
-export type CancelApprovalRequest = Schema.Schema.Type<
-  typeof CancelApprovalRequest
->
+export type CancelApprovalRequest = typeof CancelApprovalRequest.Type
 
 export const CancelApprovalResponse = Schema.Struct({
   ...ServerMessageWithId.fields,
   notificationHandled: Schema.Boolean,
 })
-export type CancelApprovalResponse = Schema.Schema.Type<
-  typeof CancelApprovalResponse
->
+export type CancelApprovalResponse = typeof CancelApprovalResponse.Type
 
 export const ApproveRequestErrors = Schema.Union(
   InvalidChallengeError,
@@ -232,9 +217,7 @@ export const ApproveRequestErrors = Schema.Union(
   ReceiverInboxDoesNotExistError,
   SenderInboxDoesNotExistError
 )
-export type ApproveRequestErrors = Schema.Schema.Type<
-  typeof ApproveRequestErrors
->
+export type ApproveRequestErrors = typeof ApproveRequestErrors.Type
 
 export const ApproveRequestRequest = Schema.Struct({
   ...RequestBaseWithChallenge.fields,
@@ -242,17 +225,13 @@ export const ApproveRequestRequest = Schema.Struct({
   message: Schema.String,
   approve: Schema.Boolean,
 })
-export type ApproveRequestRequest = Schema.Schema.Type<
-  typeof ApproveRequestRequest
->
+export type ApproveRequestRequest = typeof ApproveRequestRequest.Type
 
 export const ApproveRequestResponse = Schema.Struct({
   ...ServerMessageWithId.fields,
   notificationHandled: Schema.Boolean,
 })
-export type ApproveRequestResponse = Schema.Schema.Type<
-  typeof ApproveRequestResponse
->
+export type ApproveRequestResponse = typeof ApproveRequestResponse.Type
 
 export const DeleteInboxesRequest = Schema.Struct({
   dataForRemoval: Schema.Array(
@@ -262,14 +241,10 @@ export const DeleteInboxesRequest = Schema.Struct({
     })
   ),
 })
-export type DeleteInboxesRequest = Schema.Schema.Type<
-  typeof DeleteInboxesRequest
->
+export type DeleteInboxesRequest = typeof DeleteInboxesRequest.Type
 
 export const DeleteInboxesResponse = NoContentResponse
-export type DeleteInboxesResponse = Schema.Schema.Type<
-  typeof DeleteInboxesResponse
->
+export type DeleteInboxesResponse = typeof DeleteInboxesResponse.Type
 
 export const RetrieveMessagesErrors = Schema.Union(
   InboxDoesNotExistError,
@@ -279,16 +254,12 @@ export const RetrieveMessagesErrors = Schema.Union(
 export const RetrieveMessagesRequest = Schema.Struct({
   ...RequestBaseWithChallenge.fields,
 })
-export type RetrieveMessagesRequest = Schema.Schema.Type<
-  typeof RetrieveMessagesRequest
->
+export type RetrieveMessagesRequest = typeof RetrieveMessagesRequest.Type
 
 export const RetrieveMessagesResponse = Schema.Struct({
   messages: Schema.Array(ServerMessageWithId),
 })
-export type RetrieveMessagesResponse = Schema.Schema.Type<
-  typeof RetrieveMessagesResponse
->
+export type RetrieveMessagesResponse = typeof RetrieveMessagesResponse.Type
 
 export const SendMessageRequest = Schema.Struct({
   signedChallenge: SignedChallenge,
@@ -361,31 +332,23 @@ export const SendMessagesResponse = Schema.Array(
     notificationHandled: Schema.Boolean,
   })
 )
-export type SendMessagesResponse = Schema.Schema.Type<
-  typeof SendMessagesResponse
->
+export type SendMessagesResponse = typeof SendMessagesResponse.Type
 
 export const CreateChallengeRequest = Schema.Struct({
   publicKey: PublicKeyPemBase64E,
 })
-export type CreateChallengeRequest = Schema.Schema.Type<
-  typeof CreateChallengeRequest
->
+export type CreateChallengeRequest = typeof CreateChallengeRequest.Type
 
 export const CreateChallengeResponse = Schema.Struct({
   challenge: ChatChallenge,
   expiration: UnixMillisecondsE,
 })
-export type CreateChallengeResponse = Schema.Schema.Type<
-  typeof CreateChallengeResponse
->
+export type CreateChallengeResponse = typeof CreateChallengeResponse.Type
 
 export const CreateChallengesRequest = Schema.Struct({
   publicKeys: Schema.Array(PublicKeyPemBase64E),
 })
-export type CreateChallengesRequest = Schema.Schema.Type<
-  typeof CreateChallengesRequest
->
+export type CreateChallengesRequest = typeof CreateChallengesRequest.Type
 
 export const CreateChallengesResponse = Schema.Struct({
   challenges: Schema.Array(
@@ -396,6 +359,4 @@ export const CreateChallengesResponse = Schema.Struct({
   ),
   expiration: UnixMillisecondsE,
 })
-export type CreateChallengesResponse = Schema.Schema.Type<
-  typeof CreateChallengeResponse
->
+export type CreateChallengesResponse = typeof CreateChallengeResponse.Type

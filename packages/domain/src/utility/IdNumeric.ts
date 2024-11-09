@@ -1,5 +1,5 @@
 // TODO this should not exist
-import {Schema} from '@effect/schema'
+import {Schema} from 'effect'
 import {z} from 'zod'
 
 export const IdNumeric = z.number()

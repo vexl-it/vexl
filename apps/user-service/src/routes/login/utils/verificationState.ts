@@ -1,6 +1,6 @@
-import {Schema} from '@effect/schema'
 import {E164PhoneNumberE} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {UnixMillisecondsE} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {Schema} from 'effect'
 import {TwilioVerificationSid} from '../../../utils/twilio'
 
 export const ChallengeVerificationState = Schema.Struct({

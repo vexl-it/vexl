@@ -1,5 +1,5 @@
-import {Schema} from '@effect/schema'
 import {HashedPhoneNumberE} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
+import {Schema} from 'effect'
 
 export const ContactRecordId = Schema.BigInt.pipe(
   Schema.brand('ContactRecordId')

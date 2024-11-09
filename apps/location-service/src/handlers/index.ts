@@ -1,4 +1,3 @@
-import {Schema} from '@effect/schema'
 import {GetGeocodedCoordinatesErrors} from '@vexl-next/rest-api/src/services/location/contracts'
 import {
   GetExchangeRateEndpoint,
@@ -7,7 +6,7 @@ import {
 } from '@vexl-next/rest-api/src/services/location/specification'
 import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {makeRedirectHandler} from '@vexl-next/server-utils/src/makeRedirectHandler'
-import {Effect} from 'effect'
+import {Effect, Schema} from 'effect'
 import {Handler} from 'effect-http'
 import {btcExchangeRateUrlToRedirectToConfig} from '../configs'
 import {GoogleMapsService} from '../utils/googleMapsApi'

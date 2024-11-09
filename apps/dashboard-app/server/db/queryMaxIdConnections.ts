@@ -1,5 +1,4 @@
-import {Schema} from '@effect/schema'
-import {Effect} from 'effect'
+import {Effect, Schema} from 'effect'
 import {ContactConnectionId} from './ContactConnectionId'
 import {PgContactClient} from './layer'
 

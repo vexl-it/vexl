@@ -1,4 +1,3 @@
-import {Schema} from '@effect/schema'
 import {
   BtcNetwork,
   CurrencyCode,
@@ -20,6 +19,7 @@ import {
 } from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
 import {type BasicError} from '@vexl-next/domain/src/utility/errors'
 import {type ApiErrorFetchingOffers} from '@vexl-next/resources-utils/src/offers/getNewOffersAndDecrypt'
+import {Schema} from 'effect'
 import {z} from 'zod'
 
 export type ApiErrorFetchingRemovedOffers =

@@ -1,4 +1,3 @@
-import {Schema} from '@effect/schema'
 import {type KeyHolder} from '@vexl-next/cryptography/src'
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {
@@ -9,7 +8,7 @@ import {taskEitherToEffect} from '@vexl-next/resources-utils/src/effect-helpers/
 import {contact, user} from '@vexl-next/rest-api/src'
 import {UnknownClientError} from '@vexl-next/rest-api/src/Errors'
 import {type VerifyPhoneNumberResponse} from '@vexl-next/rest-api/src/services/user/contracts'
-import {Effect, Match} from 'effect'
+import {Effect, Match, Schema} from 'effect'
 import * as O from 'fp-ts/Option'
 import {atom} from 'jotai'
 import {apiAtom, apiEnv, platform} from '../../../../api'

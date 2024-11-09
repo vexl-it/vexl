@@ -1,4 +1,4 @@
-import {Schema} from '@effect/schema'
+import {Schema} from 'effect'
 import {PublicKeyHashed} from '../domain'
 import {InboxRecordId} from '../InboxDbService/domain'
 

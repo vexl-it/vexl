@@ -1,5 +1,4 @@
-import {Schema} from '@effect/schema'
-import {Effect, type Config, type ConfigError} from 'effect'
+import {Effect, Schema, type Config, type ConfigError} from 'effect'
 import {Configuration, type IRedisSMQConfigRequired} from 'redis-smq'
 import {ERedisConfigClient} from 'redis-smq-common'
 

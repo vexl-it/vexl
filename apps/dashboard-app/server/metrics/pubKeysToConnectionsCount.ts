@@ -1,4 +1,3 @@
-import {Schema} from '@effect/schema'
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {
@@ -13,6 +12,7 @@ import {
   Layer,
   Option,
   Order,
+  Schema,
   Stream,
   SubscriptionRef,
 } from 'effect'

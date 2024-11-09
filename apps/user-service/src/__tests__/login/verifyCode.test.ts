@@ -1,11 +1,10 @@
-import {Schema} from '@effect/schema'
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {E164PhoneNumberE} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {
   UnableToVerifySmsCodeError,
   VerifyCodeErrors,
 } from '@vexl-next/rest-api/src/services/user/contracts'
-import {Effect, Either} from 'effect'
+import {Effect, Either, Schema} from 'effect'
 import {
   checkVerificationMock,
   createVerificationMock,

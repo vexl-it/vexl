@@ -1,4 +1,3 @@
-import {Schema} from '@effect/schema'
 import {SqlClient, SqlSchema} from '@effect/sql'
 import {
   CountryPrefixE,
@@ -9,7 +8,7 @@ import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {MetricsMessage} from '@vexl-next/server-utils/src/metrics/domain'
 import {type MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
 import {reportMetricForked} from '@vexl-next/server-utils/src/metrics/reportMetricForked'
-import {Array, Effect, Layer, pipe} from 'effect'
+import {Array, Effect, Layer, pipe, Schema} from 'effect'
 
 const OFFER_PUBLIC_PART_DELETED = 'OFFER_PUBLIC_PART_DELETED' as const
 const OFFER_MODIFIED = 'OFFER_MODIFIED' as const

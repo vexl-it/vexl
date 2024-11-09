@@ -1,8 +1,8 @@
-import {Schema} from '@effect/schema'
 import {
   ExpectedErrorHttpCode,
   ServerErrorHttpCode,
 } from '@vexl-next/server-utils/src/HttpCodes'
+import {Schema} from 'effect'
 
 export class NetworkError extends Schema.TaggedError<NetworkError>(
   'NetworkError'

@@ -1,10 +1,9 @@
-import {Schema} from '@effect/schema'
 import {type PgClient} from '@effect/sql-pg'
 import {
   PrivateKeyPemBase64E,
   PublicKeyPemBase64E,
 } from '@vexl-next/cryptography/src/KeyHolder/brands'
-import {Config, ConfigError, Either} from 'effect'
+import {Config, ConfigError, Either, Schema} from 'effect'
 
 export const nodeEnvConfig = Config.string('NODE_ENV').pipe(
   Config.withDefault('production'),

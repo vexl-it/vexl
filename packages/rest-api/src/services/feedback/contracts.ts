@@ -1,5 +1,5 @@
-import {Schema} from '@effect/schema'
 import {RegionCodeE} from '@vexl-next/domain/src/utility/RegionCode.brand'
+import {Schema} from 'effect'
 
 export const FeedbackFormId = Schema.NonEmptyString.pipe(
   Schema.brand('FeedbackFormId')

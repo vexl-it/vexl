@@ -1,6 +1,5 @@
-import {Schema} from '@effect/schema'
 import {parsePhoneNumber} from 'awesome-phonenumber'
-import {Brand, Option} from 'effect'
+import {Brand, Option, Schema} from 'effect'
 import * as O from 'fp-ts/lib/Option'
 import {z} from 'zod'
 

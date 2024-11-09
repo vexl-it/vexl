@@ -1,4 +1,3 @@
-import {Schema} from '@effect/schema'
 import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {
   MessageTypeE,
@@ -8,6 +7,7 @@ import {IdNumericE} from '@vexl-next/domain/src/utility/IdNumeric'
 import {UnixMillisecondsE} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {BooleanFromString} from '@vexl-next/generic-utils/src/effect-helpers/BooleanFromString'
 import {EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
+import {Schema} from 'effect'
 import {NoContentResponse} from '../../NoContentResponse.brand'
 import {
   ForbiddenMessageTypeError,

@@ -1,4 +1,3 @@
-import {Schema} from '@effect/schema'
 import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {CountryPrefixE} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {HashedPhoneNumberE} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
@@ -7,6 +6,7 @@ import {
   PhoneNumberVerificationId,
   VerificationChallenge,
 } from '@vexl-next/rest-api/src/services/user/contracts'
+import {Schema} from 'effect'
 import {TwilioVerificationSid} from '../../utils/twilio'
 
 export const ChallengeVerificationState = Schema.Struct({

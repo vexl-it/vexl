@@ -1,8 +1,8 @@
-import {Schema} from '@effect/schema'
 import {
   SvgString,
   SvgStringE,
 } from '@vexl-next/domain/src/utility/SvgString.brand'
+import {Schema} from 'effect'
 import {z} from 'zod'
 
 export const ToastNotificationState = z

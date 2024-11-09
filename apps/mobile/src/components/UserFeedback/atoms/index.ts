@@ -1,4 +1,3 @@
-import {Schema} from '@effect/schema'
 import {
   generateFeedbackFormId,
   objectionTypeNegativeOptions,
@@ -10,7 +9,7 @@ import {
 } from '@vexl-next/domain/src/general/feedback'
 import {FeedbackFormId} from '@vexl-next/rest-api/src/services/feedback/contracts'
 import {createScope, molecule} from 'bunshi/dist/react'
-import {Effect} from 'effect'
+import {Effect, Schema} from 'effect'
 import {atom, type SetStateAction, type WritableAtom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {apiAtom} from '../../../api'

@@ -1,10 +1,9 @@
-import {Schema} from '@effect/schema'
 import {
   type SemverString,
   SemverStringE,
 } from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
-import {Array, Either, Number, Option, String} from 'effect'
+import {Array, Either, Number, Option, Schema, String} from 'effect'
 import {PlatformName} from './PlatformName'
 import {
   HEADER_CLIENT_VERSION,

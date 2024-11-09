@@ -1,6 +1,5 @@
-import {Schema} from '@effect/schema'
 import {SqlClient} from '@effect/sql'
-import {Effect} from 'effect'
+import {Effect, Schema} from 'effect'
 
 export class TransactionError extends Schema.TaggedError<TransactionError>(
   'TransactionError'

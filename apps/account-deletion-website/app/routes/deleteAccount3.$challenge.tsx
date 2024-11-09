@@ -1,4 +1,3 @@
-import {Schema} from '@effect/schema'
 import {type ActionFunction} from '@remix-run/node'
 import {
   Form,
@@ -12,6 +11,7 @@ import {type PrivateKeyHolder} from '@vexl-next/cryptography/src/KeyHolder'
 import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
+import {Schema} from 'effect'
 import * as E from 'fp-ts/lib/Either'
 import * as T from 'fp-ts/lib/Task'
 import * as TE from 'fp-ts/lib/TaskEither'

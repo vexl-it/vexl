@@ -1,4 +1,4 @@
-import {Schema} from '@effect/schema'
+import {Schema} from 'effect'
 import DebugMessage from './DebugMessage'
 
 export class PingMessage extends Schema.TaggedClass<PingMessage>()(

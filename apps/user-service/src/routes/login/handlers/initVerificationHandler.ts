@@ -1,4 +1,3 @@
-import {Schema} from '@effect/schema'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {countryPrefixFromNumber} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {fromMilliseconds} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
@@ -11,7 +10,7 @@ import {
 import {InitVerificationEndpoint} from '@vexl-next/rest-api/src/services/user/specification'
 import {hashPhoneNumber} from '@vexl-next/server-utils/src/generateUserAuthData'
 import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
-import {Effect, Option} from 'effect'
+import {Effect, Option, Schema} from 'effect'
 import {Handler} from 'effect-http'
 import {loginCodeDummies, loginCodeDummyForAll} from '../../../configs'
 import {TwilioVerificationClient} from '../../../utils/twilio'

@@ -1,10 +1,9 @@
-import * as S from '@effect/schema/Schema'
-import {Brand} from 'effect'
+import {Brand, Schema} from 'effect'
 import {z} from 'zod'
 
 export const FcmToken = z
   .string()
   .transform((v) => Brand.nominal<typeof v & Brand.Brand<'FcmToken'>>()(v))
-export const FcmTokenE = S.String.pipe(S.brand('FcmToken'))
+export const FcmTokenE = Schema.String.pipe(Schema.brand('FcmToken'))
 
-export type FcmToken = S.Schema.Type<typeof FcmTokenE>
+export type FcmToken = Schema.Schema.Type<typeof FcmTokenE>

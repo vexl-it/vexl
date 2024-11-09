@@ -1,5 +1,4 @@
-import {Schema} from '@effect/schema'
-import {Effect, flow, pipe} from 'effect'
+import {Effect, flow, pipe, Schema} from 'effect'
 import {type WebSocket} from 'ws'
 import {ServerMessage} from '../../common/ServerMessage'
 import {SendingMessageError, sendMessageToSocket} from './utils'

@@ -1,12 +1,11 @@
 import {HttpClientRequest} from '@effect/platform'
-import {Schema} from '@effect/schema'
 import {
   LatitudeE,
   LongitudeE,
 } from '@vexl-next/domain/src/utility/geoCoordinates'
 import {LocationNotFoundError} from '@vexl-next/rest-api/src/services/location/contracts'
 import {createDummyAuthHeaders} from '@vexl-next/server-utils/src/tests/createDummyAuthHeaders'
-import {Effect, Either} from 'effect'
+import {Effect, Either, Schema} from 'effect'
 import {queryGeocodeMock} from '../utils/mockedGoogleMapLayer'
 import {NodeTestingApp} from '../utils/NodeTestingApp'
 import {

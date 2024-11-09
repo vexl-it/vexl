@@ -1,4 +1,3 @@
-import {Schema} from '@effect/schema'
 import * as crypto from '@vexl-next/cryptography'
 import {type KeyHolder} from '@vexl-next/cryptography'
 import {
@@ -8,6 +7,7 @@ import {
 import {toError, type BasicError} from '@vexl-next/domain/src/utility/errors'
 import {EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {createHash} from 'crypto'
+import {Schema} from 'effect'
 import * as E from 'fp-ts/Either'
 import {pipe} from 'fp-ts/lib/function'
 import * as TE from 'fp-ts/TaskEither'

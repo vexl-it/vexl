@@ -1,4 +1,3 @@
-import {Schema} from '@effect/schema'
 import {jest} from '@jest/globals'
 import {LocationPlaceIdE} from '@vexl-next/domain/src/general/offers'
 import {
@@ -9,7 +8,7 @@ import {
   GetGeocodedCoordinatesResponse,
   GetLocationSuggestionsResponse,
 } from '@vexl-next/rest-api/src/services/location/contracts'
-import {Effect, Layer} from 'effect'
+import {Effect, Layer, Schema} from 'effect'
 import {
   type GoogleMapsOperations,
   GoogleMapsService,

@@ -1,4 +1,4 @@
-import {Schema} from '@effect/schema'
+import {Schema} from 'effect'
 
 export const PlatformName = Schema.Literal('CLI', 'ANDROID', 'IOS', 'WEB')
 

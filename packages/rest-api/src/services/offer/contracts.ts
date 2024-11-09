@@ -1,4 +1,3 @@
-import {Schema} from '@effect/schema'
 import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {CountryPrefixE} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {
@@ -11,7 +10,7 @@ import {
 import {IdNumericE} from '@vexl-next/domain/src/utility/IdNumeric'
 import {IsoDatetimeStringE} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
 import {UnixMillisecondsE} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {Array} from 'effect'
+import {Array, Schema} from 'effect'
 import {NoContentResponse} from '../../NoContentResponse.brand'
 
 export class ReportOfferLimitReachedError extends Schema.TaggedError<ReportOfferLimitReachedError>(

@@ -1,4 +1,4 @@
-import {Schema} from '@effect/schema'
+import {Schema} from 'effect'
 
 export const PageRequest = Schema.Struct({
   page: Schema.NumberFromString.pipe(

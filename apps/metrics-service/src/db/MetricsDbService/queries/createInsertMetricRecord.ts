@@ -1,9 +1,8 @@
-import {Schema} from '@effect/schema'
 import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {UuidE} from '@vexl-next/domain/src/utility/Uuid.brand'
-import {Effect, flow} from 'effect'
+import {Effect, flow, Schema} from 'effect'
 
 export class MessageWithUuidAlreadyStoredError extends Schema.TaggedError<MessageWithUuidAlreadyStoredError>(
   'MessageWithUuidAlreadyStoredError'

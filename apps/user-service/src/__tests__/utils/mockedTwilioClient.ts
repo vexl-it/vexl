@@ -1,6 +1,5 @@
-import {Schema} from '@effect/schema'
 import {jest} from '@jest/globals'
-import {Effect, Layer} from 'effect'
+import {Effect, Layer, Schema} from 'effect'
 import {
   type TwilioOperations,
   TwilioVerificationClient,

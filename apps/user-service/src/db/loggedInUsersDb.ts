@@ -1,4 +1,3 @@
-import {Schema} from '@effect/schema'
 import {SqlClient, SqlResolver} from '@effect/sql'
 import {
   type PublicKeyPemBase64,
@@ -6,7 +5,7 @@ import {
 } from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {CountryPrefixE} from '@vexl-next/domain/src/general/CountryPrefix.brand'
-import {Context, Effect, flow, Layer} from 'effect'
+import {Context, Effect, flow, Layer, Schema} from 'effect'
 
 const UserRecordId = Schema.String.pipe(Schema.brand('UserRecordId'))
 export type UserRecordId = Schema.Schema.Type<typeof UserRecordId>

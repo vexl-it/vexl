@@ -1,6 +1,6 @@
-import {Schema} from '@effect/schema'
 import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {PlatformName} from '@vexl-next/rest-api/src/PlatformName'
+import {Schema} from 'effect'
 import {PublicKeyHashed} from '../domain'
 
 export const InboxRecordId = Schema.BigInt.pipe(Schema.brand('InboxRecordId'))

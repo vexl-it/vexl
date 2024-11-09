@@ -1,5 +1,5 @@
-import {Schema} from '@effect/schema'
 import {MessageTypeE} from '@vexl-next/domain/src/general/messaging'
+import {Schema} from 'effect'
 import {PublicKeyEncrypted} from '../domain'
 import {InboxRecordId} from '../InboxDbService/domain'
 

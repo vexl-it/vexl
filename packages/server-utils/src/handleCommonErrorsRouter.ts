@@ -3,12 +3,12 @@ import {
   type HttpBody,
   type HttpServerError,
 } from '@effect/platform'
-import {type ParseError} from '@effect/schema/ParseResult'
 import {
   type InternalServerError,
   type NotFoundError,
 } from '@vexl-next/domain/src/general/commonErrors'
 import {Effect} from 'effect'
+import {type ParseError} from 'effect/ParseResult'
 import {type InvalidSessionError} from './ServerUserSession'
 import {type UrlParamsError} from './schemaUrlQuery'
 

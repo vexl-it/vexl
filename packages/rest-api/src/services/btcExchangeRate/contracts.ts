@@ -1,5 +1,5 @@
-import {Schema} from '@effect/schema'
 import {CurrencyCodeE} from '@vexl-next/domain/src/general/currency.brand'
+import {Schema} from 'effect'
 
 export class GetExchangeRateRequest extends Schema.Class<GetExchangeRateRequest>(
   'GetExchangeRateRequest'

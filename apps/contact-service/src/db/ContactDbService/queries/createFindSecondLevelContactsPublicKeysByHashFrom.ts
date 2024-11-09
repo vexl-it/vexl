@@ -1,10 +1,9 @@
-import {Schema} from '@effect/schema'
 import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {HashedPhoneNumberE} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
-import {Array, Effect, flow} from 'effect'
+import {Array, Effect, flow, Schema} from 'effect'
 
 export const createFindSecondLevelContactsPublicKeysByHashFrom = Effect.gen(
   function* (_) {

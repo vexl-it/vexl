@@ -1,5 +1,4 @@
-import {Schema} from '@effect/schema'
-import {Brand} from 'effect'
+import {Brand, Schema} from 'effect'
 import {z} from 'zod'
 
 export const SvgString = z

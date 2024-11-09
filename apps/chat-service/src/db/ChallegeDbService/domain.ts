@@ -1,6 +1,6 @@
-import {Schema} from '@effect/schema'
 import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {ChatChallenge} from '@vexl-next/rest-api/src/services/chat/contracts'
+import {Schema} from 'effect'
 
 export const ChallengeRecordId = Schema.BigInt.pipe(
   Schema.brand('ChallengeRecordId')

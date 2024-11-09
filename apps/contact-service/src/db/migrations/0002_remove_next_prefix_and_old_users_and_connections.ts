@@ -1,7 +1,6 @@
-import {Schema} from '@effect/schema'
 import {SqlClient, SqlError} from '@effect/sql'
 import {HashedPhoneNumberE} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
-import {Array, Effect} from 'effect'
+import {Array, Effect, Schema} from 'effect'
 
 export default Effect.gen(function* (_) {
   const sql = yield* _(SqlClient.SqlClient)

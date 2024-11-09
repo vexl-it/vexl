@@ -7,6 +7,7 @@
     "clean": "rimraf .turbo node_modules",
     "lint": "eslint '**/*.{js,ts,tsx,jsx,cjs,mjs}'",
     "format": "prettier --check \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json}\"",
+    "format:fix": "prettier --write \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json}\"",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
@@ -21,12 +22,11 @@
     "typescript": "^5.5.2"
   },
   "dependencies": {
-    "@effect/schema": "^0.70.4",
     "@vexl-next/cryptography": "0.0.0",
     "@vexl-next/generic-utils": "0.0.0",
     "awesome-phonenumber": "^5.1.0",
     "compare-versions": "^6.1.0",
-    "effect": "^3.6.3",
+    "effect": "^3.10.12",
     "fast-check": "^3.20.0",
     "fp-ts": "^2.13.1",
     "js-base64": "^3.7.5",

@@ -1,4 +1,3 @@
-import {Schema} from '@effect/schema'
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
@@ -9,7 +8,7 @@ import {
   hashSha256,
 } from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {type ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
-import {type ConfigError, Effect} from 'effect'
+import {type ConfigError, Effect, Schema} from 'effect'
 import {easKey} from '../configs'
 
 export const PublicKeyHashed = Schema.String.pipe(

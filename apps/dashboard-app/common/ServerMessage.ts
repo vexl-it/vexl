@@ -1,6 +1,6 @@
-import {Schema} from '@effect/schema'
 import {CountryPrefixE} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {UnixMillisecondsE} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {Schema} from 'effect'
 import DebugMessage from './DebugMessage'
 import {HashedPubKey} from './HashedPubKey'
 

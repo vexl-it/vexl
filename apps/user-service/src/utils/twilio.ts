@@ -1,11 +1,10 @@
-import {Schema} from '@effect/schema'
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {
   UnableToSendVerificationSmsError,
   UnableToVerifySmsCodeError,
   VerificationNotFoundError,
 } from '@vexl-next/rest-api/src/services/user/contracts'
-import {Context, Effect, Layer, Match} from 'effect'
+import {Context, Effect, Layer, Match, Schema} from 'effect'
 import Twilio from 'twilio'
 import {twilioConfig} from '../configs'
 import {lookupTwilioError} from './twilioErrors'

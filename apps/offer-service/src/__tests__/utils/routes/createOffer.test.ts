@@ -1,5 +1,4 @@
 import {HttpClientRequest} from '@effect/platform'
-import {Schema} from '@effect/schema'
 import {SqlClient} from '@effect/sql'
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {CountryPrefixE} from '@vexl-next/domain/src/general/CountryPrefix.brand'
@@ -16,7 +15,7 @@ import {
   type CreateNewOfferRequest,
 } from '@vexl-next/rest-api/src/services/offer/contracts'
 import {createDummyAuthHeadersForUser} from '@vexl-next/server-utils/src/tests/createDummyAuthHeaders'
-import {Effect, Either} from 'effect'
+import {Effect, Either, Schema} from 'effect'
 import {NodeTestingApp} from '../NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../runPromiseInMockedEnvironment'
 

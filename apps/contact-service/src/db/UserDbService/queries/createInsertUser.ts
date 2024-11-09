@@ -1,4 +1,3 @@
-import {Schema} from '@effect/schema'
 import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
@@ -7,7 +6,7 @@ import {HashedPhoneNumberE} from '@vexl-next/domain/src/general/HashedPhoneNumbe
 import {FcmTokenE} from '@vexl-next/domain/src/utility/FcmToken.brand'
 import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {PlatformName} from '@vexl-next/rest-api/src/PlatformName'
-import {Effect, flow} from 'effect'
+import {Effect, flow, Schema} from 'effect'
 import {UserRecord} from '../domain'
 
 export const CreateUserParams = Schema.Struct({

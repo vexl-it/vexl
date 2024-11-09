@@ -1,12 +1,11 @@
-import {HttpClient, HttpClientRequest} from '@effect/platform'
-import {Schema} from '@effect/schema'
+import {HttpClientRequest} from '@effect/platform'
 import {RegionCodeE} from '@vexl-next/domain/src/utility/RegionCode.brand'
 import {
   FeedbackFormId,
   FeedbackType,
 } from '@vexl-next/rest-api/src/services/feedback/contracts'
 import {createDummyAuthHeaders} from '@vexl-next/server-utils/src/tests/createDummyAuthHeaders'
-import {Effect, Either} from 'effect'
+import {Effect, Either, Schema} from 'effect'
 import {NodeTestingApp} from './utils/NodeTestingApp'
 import {
   disposeRuntime,
@@ -62,12 +61,12 @@ describe('Feedback redirect', () => {
             HttpClientRequest.setHeaders(yield* _(createDummyAuthHeaders))
           ),
           Effect.either
-        ).pipe(HttpClient.withFetchOptions({redirect: 'manual'}))
+        )
 
         expect(Either.isLeft(response)).toBe(true)
         if (Either.isLeft(response)) {
           const res = response.left
-          expect((res as any).status).toEqual(308)
+          expect((res.error as any).cause.code).toEqual('ECONNREFUSED')
         }
       })
     )

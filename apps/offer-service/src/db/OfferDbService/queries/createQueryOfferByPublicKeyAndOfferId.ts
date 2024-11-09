@@ -1,10 +1,9 @@
-import {Schema} from '@effect/schema'
 import {SqlResolver} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {OfferIdE} from '@vexl-next/domain/src/general/offers'
-import {Array, Effect, flow} from 'effect'
+import {Array, Effect, flow, Schema} from 'effect'
 import {
   expirationPeriodDaysConfig,
   offerReportFilterConfig,

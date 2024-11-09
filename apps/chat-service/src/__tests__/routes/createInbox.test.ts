@@ -1,5 +1,4 @@
 import {HttpClientRequest} from '@effect/platform'
-import {Schema} from '@effect/schema'
 import {SqlClient} from '@effect/sql'
 import {
   generatePrivateKey,
@@ -12,7 +11,7 @@ import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {InvalidChallengeError} from '@vexl-next/rest-api/src/services/chat/contracts'
 import {createDummyAuthHeadersForUser} from '@vexl-next/server-utils/src/tests/createDummyAuthHeaders'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
-import {Effect} from 'effect'
+import {Effect, Schema} from 'effect'
 import {hashPublicKey} from '../../db/domain'
 import {addChallengeForKey} from '../utils/addChallengeForKey'
 import {NodeTestingApp} from '../utils/NodeTestingApp'

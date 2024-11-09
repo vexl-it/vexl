@@ -1,8 +1,7 @@
-import * as S from '@effect/schema/Schema'
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {orElseSchema} from '@vexl-next/generic-utils/src/effect-helpers/orElseSchema'
-import {Brand} from 'effect'
+import {Brand, Schema as S} from 'effect'
 import {z} from 'zod'
 
 export const FcmCypher = z

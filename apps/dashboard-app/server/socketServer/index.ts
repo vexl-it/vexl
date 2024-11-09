@@ -1,5 +1,4 @@
-import {Schema} from '@effect/schema'
-import {Data, Effect, Layer, Match, Stream, flow, pipe} from 'effect'
+import {Data, Effect, Layer, Match, Schema, Stream, flow, pipe} from 'effect'
 import {type RawData, type WebSocket} from 'ws'
 import {ClientMessage} from '../../common/ClientMessage'
 import {

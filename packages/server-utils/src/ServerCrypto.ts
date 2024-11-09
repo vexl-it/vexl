@@ -1,4 +1,3 @@
-import {Schema, type ParseResult} from '@effect/schema'
 import {
   type PrivateKeyPemBase64,
   type PublicKeyPemBase64,
@@ -18,7 +17,16 @@ import {
   type EciesGTMECypher,
   type HmacHash,
 } from '@vexl-next/generic-utils/src/effect-helpers/crypto'
-import {Config, Context, Effect, flow, Layer, type ConfigError} from 'effect'
+import {
+  Config,
+  Context,
+  Effect,
+  flow,
+  Layer,
+  Schema,
+  type ConfigError,
+  type ParseResult,
+} from 'effect'
 
 export interface ServerCryptoOperations {
   encryptECIES: <A, I, R>(

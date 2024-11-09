@@ -1,13 +1,12 @@
 import {FileSystem} from '@effect/platform'
 import {NodeFileSystem, NodeRuntime} from '@effect/platform-node'
-import {Schema} from '@effect/schema'
 import {importKeyPair} from '@vexl-next/cryptography/src/KeyHolder'
 import {
   PrivateKeyPemBase64E,
   type PublicKeyPemBase64,
 } from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {eciesLegacyEncrypt} from '@vexl-next/cryptography/src/operations/eciesLegacy'
-import {Array, Data, Effect, String, flow, pipe} from 'effect'
+import {Array, Data, Effect, Schema, String, flow, pipe} from 'effect'
 import {toFile} from 'qrcode'
 import {fileURLToPath} from 'url'
 

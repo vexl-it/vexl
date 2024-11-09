@@ -1,4 +1,4 @@
-import {Schema} from '@effect/schema'
+import {Schema} from 'effect'
 import {PlatformName} from './PlatformName'
 import {ServiceUrl} from './ServiceUrl.brand'
 import * as UserSessionCredentials from './UserSessionCredentials.brand'

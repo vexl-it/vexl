@@ -1,4 +1,3 @@
-import {Schema} from '@effect/schema'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {
   GetGeocodedCoordinatesResponse,
@@ -6,7 +5,7 @@ import {
   type GetGeocodedCoordinatesRequest,
 } from '@vexl-next/rest-api/src/services/location/contracts'
 import axios from 'axios'
-import {Array, Effect, Option, pipe} from 'effect'
+import {Array, Effect, Option, pipe, Schema} from 'effect'
 
 interface GoogleGeocodeResponse {
   results: Array<{

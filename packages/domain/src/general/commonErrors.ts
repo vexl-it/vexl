@@ -1,4 +1,4 @@
-import {Schema} from '@effect/schema'
+import {Schema} from 'effect'
 
 export class NotFoundError extends Schema.TaggedError<NotFoundError>(
   'NotFoundError'

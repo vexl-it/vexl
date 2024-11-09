@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-invalid-void-type */
 import {NodeContext} from '@effect/platform-node'
-import {type ParseError} from '@effect/schema/ParseResult'
 import {type UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {healthServerLayer} from '@vexl-next/server-utils/src/HealthServer'
 import {MetricsMessage} from '@vexl-next/server-utils/src/metrics/domain'
 import {Effect, Layer} from 'effect'
+import {type ParseError} from 'effect/ParseResult'
 import {type IMessageTransferable} from 'redis-smq'
 import {healthServerPortConfig, redisUrl} from './configs'
 import DbLayer from './db/layer'

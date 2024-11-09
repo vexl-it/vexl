@@ -1,15 +1,16 @@
-import {Schema} from '@effect/schema'
-import {type ParseError} from '@effect/schema/ParseResult'
+// import {type ParseError} from 'effect/ParseResult'
 import {
   Chunk,
   Data,
   Effect,
   Option,
   Schedule,
+  Schema,
   Stream,
   pipe,
   type Scope,
 } from 'effect'
+import {type ParseError} from 'effect/ParseResult'
 import {ServerMessage} from '../../common/ServerMessage'
 import {ClientMessage, PingMessage} from './../../common/ClientMessage'
 

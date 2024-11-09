@@ -1,8 +1,7 @@
-import {Schema} from '@effect/schema'
 import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
-import {Effect, flow} from 'effect'
+import {Effect, flow, Schema} from 'effect'
 import {WhitelistRecordId, WhiteListState} from '../domain'
 
 export const UpdateWhitelistRecordParams = Schema.Struct({

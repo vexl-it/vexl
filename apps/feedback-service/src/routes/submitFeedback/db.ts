@@ -1,11 +1,10 @@
-import {Schema} from '@effect/schema'
 import {SqlClient, SqlResolver} from '@effect/sql'
 import {RegionCodeE} from '@vexl-next/domain/src/utility/RegionCode.brand'
 import {
   FeedbackFormId,
   FeedbackType,
 } from '@vexl-next/rest-api/src/services/feedback/contracts'
-import {Context, Effect, Layer} from 'effect'
+import {Context, Effect, Layer, Schema} from 'effect'
 
 const FeedbackInsert = Schema.Struct({
   formId: FeedbackFormId,

@@ -1,8 +1,7 @@
-import {Effect} from 'effect'
+import {Effect, Schema} from 'effect'
 import {runPromiseInMockedEnvironment} from '../utils/runPromiseInMockedEnvironment'
 
 import {HttpClientRequest} from '@effect/platform'
-import {Schema} from '@effect/schema'
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {type SendMessageRequest} from '@vexl-next/rest-api/src/services/chat/contracts'

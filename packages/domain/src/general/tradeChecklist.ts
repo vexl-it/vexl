@@ -80,9 +80,7 @@ export const TradeChecklistItemStatusE = Schema.Literal(
    */
   'initial'
 )
-export type TradeChecklistItemStatus = Schema.Schema.Type<
-  typeof TradeChecklistItemStatusE
->
+export type TradeChecklistItemStatus = typeof TradeChecklistItemStatusE.Type
 
 export const TradeChecklistStateItemStatus = z
   .object({
@@ -92,9 +90,8 @@ export const TradeChecklistStateItemStatus = z
 export const TradeChecklistStateItemStateE = Schema.Struct({
   status: TradeChecklistItemStatusE,
 })
-export type TradeChecklistStateItemStatus = Schema.Schema.Type<
-  typeof TradeChecklistStateItemStateE
->
+export type TradeChecklistStateItemStatus =
+  typeof TradeChecklistStateItemStateE.Type
 
 export const AvailableDateTimeOption = z
   .object({
@@ -108,9 +105,7 @@ export const AvailableDateTimeOptionE = Schema.Struct({
   from: UnixMillisecondsE,
   to: UnixMillisecondsE,
 })
-export type AvailableDateTimeOption = Schema.Schema.Type<
-  typeof AvailableDateTimeOptionE
->
+export type AvailableDateTimeOption = typeof AvailableDateTimeOptionE.Type
 
 export const PickedDateTimeOption = z
   .object({
@@ -120,9 +115,7 @@ export const PickedDateTimeOption = z
 export const PickedDateTimeOptionE = Schema.Struct({
   dateTime: UnixMillisecondsE,
 })
-export type PickedDateTimeOption = Schema.Schema.Type<
-  typeof PickedDateTimeOptionE
->
+export type PickedDateTimeOption = typeof PickedDateTimeOptionE.Type
 
 export const NetworkData = z.object({
   btcNetwork: BtcNetwork.optional(),
@@ -209,9 +202,7 @@ const TradeChecklistMessageBase = z.object({
 export const TradeChecklistMessageBaseE = Schema.Struct({
   timestamp: UnixMillisecondsE,
 })
-export type TradeChecklistMessageBase = Schema.Schema.Type<
-  typeof TradeChecklistMessageBaseE
->
+export type TradeChecklistMessageBase = typeof TradeChecklistMessageBaseE.Type
 
 export const DateTimeChatMessage = TradeChecklistMessageBase.extend({
   suggestions: z.array(AvailableDateTimeOption).optional(),
@@ -227,9 +218,7 @@ export const DateTimeChatMessageE = Schema.Struct({
   ),
   picks: Schema.optional(PickedDateTimeOptionE),
 })
-export type DateTimeChatMessage = Schema.Schema.Type<
-  typeof DateTimeChatMessageE
->
+export type DateTimeChatMessage = typeof DateTimeChatMessageE.Type
 
 export const AmountChatMessage =
   TradeChecklistMessageBase.merge(AmountData).readonly()
@@ -254,9 +243,7 @@ export const IdentityRevealChatMessageE = Schema.Struct({
   ...TradeChecklistMessageBaseE.fields,
   ...IdentityRevealE.fields,
 })
-export type IdentityRevealChatMessage = Schema.Schema.Type<
-  typeof IdentityRevealChatMessageE
->
+export type IdentityRevealChatMessage = typeof IdentityRevealChatMessageE.Type
 
 export const ContactRevealChatMessage =
   TradeChecklistMessageBase.merge(ContactReveal).readonly()
@@ -264,9 +251,7 @@ export const ContactRevealChatMessageE = Schema.Struct({
   ...TradeChecklistMessageBaseE.fields,
   ...ContactRevealE.fields,
 })
-export type ContactRevealChatMessage = Schema.Schema.Type<
-  typeof ContactRevealChatMessageE
->
+export type ContactRevealChatMessage = typeof ContactRevealChatMessageE.Type
 
 export const MeetingLocationData = z
   .object({
@@ -306,9 +291,7 @@ export const MeetingLocationDataE = Schema.Struct({
   }),
   note: Schema.optional(Schema.String),
 })
-export type MeetingLocationData = Schema.Schema.Type<
-  typeof MeetingLocationDataE
->
+export type MeetingLocationData = typeof MeetingLocationDataE.Type
 
 export const MeetingLocationChatMessage = TradeChecklistMessageBase.extend({
   data: MeetingLocationData,
@@ -317,9 +300,7 @@ export const MeetingLocationChatMessageE = Schema.Struct({
   ...TradeChecklistMessageBaseE.fields,
   data: MeetingLocationDataE,
 })
-export type MeetingLocationChatMessage = Schema.Schema.Type<
-  typeof MeetingLocationChatMessageE
->
+export type MeetingLocationChatMessage = typeof MeetingLocationChatMessageE.Type
 
 export const TradeChecklistUpdate = z
   .object({
@@ -341,6 +322,4 @@ export const TradeChecklistUpdateE = Schema.Struct({
   contact: Schema.optional(ContactRevealChatMessageE),
 })
 
-export type TradeChecklistUpdate = Schema.Schema.Type<
-  typeof TradeChecklistUpdateE
->
+export type TradeChecklistUpdate = typeof TradeChecklistUpdateE.Type

@@ -27,9 +27,7 @@ export const UnknownUserAgentHeader = Schema.TaggedStruct(
     userAgent: Schema.optionalWith(Schema.String, {as: 'Option'}),
   }
 )
-export type UnknownUserAgentHeader = Schema.Schema.Type<
-  typeof UnknownUserAgentHeader
->
+export type UnknownUserAgentHeader = typeof UnknownUserAgentHeader.Type
 
 export const UserAgentHeader = Schema.Union(
   VexlAppUserAgentHeader,

@@ -16,9 +16,8 @@ export const InsertMessageForInboxParams = Schema.Struct({
   type: MessageTypeE,
   inboxId: InboxRecordId,
 })
-export type InsertMessageForInboxParams = Schema.Schema.Type<
-  typeof InsertMessageForInboxParams
->
+export type InsertMessageForInboxParams =
+  typeof InsertMessageForInboxParams.Type
 
 const generateExpiresAt = (lowerLimit: number, upperLimit: number): Date => {
   const toExpireAfterDays = Math.floor(

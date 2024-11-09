@@ -9,9 +9,7 @@ export const DeletePrivatePartRequest = Schema.Struct({
   forPublicKey: PublicKeyPemBase64E,
   offerId: PublicPartId,
 })
-export type DeletePrivatePartRequest = Schema.Schema.Type<
-  typeof DeletePrivatePartRequest
->
+export type DeletePrivatePartRequest = typeof DeletePrivatePartRequest.Type
 
 export const createDeletePrivatePart = Effect.gen(function* (_) {
   const sql = yield* _(PgClient.PgClient)

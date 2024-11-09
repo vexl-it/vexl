@@ -11,9 +11,7 @@ export const UpdateFirebaseTokenParams = Schema.Struct({
   hash: HashedPhoneNumberE,
   firebaseToken: Schema.optionalWith(FcmTokenE, {as: 'Option'}),
 })
-export type UpdateFirebaseTokenParams = Schema.Schema.Type<
-  typeof UpdateFirebaseTokenParams
->
+export type UpdateFirebaseTokenParams = typeof UpdateFirebaseTokenParams.Type
 
 export const createUpdateFirebaseToken = Effect.gen(function* (_) {
   const sql = yield* _(PgClient.PgClient)

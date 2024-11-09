@@ -14,9 +14,7 @@ export const UpdateRefreshUserParams = Schema.Struct({
   countryPrefix: Schema.optionalWith(CountryPrefixE, {as: 'Option'}),
   refreshedAt: Schema.Date,
 })
-export type UpdateRefreshUserParams = Schema.Schema.Type<
-  typeof UpdateRefreshUserParams
->
+export type UpdateRefreshUserParams = typeof UpdateRefreshUserParams.Type
 
 export const createUpdateRefreshUser = Effect.gen(function* (_) {
   const sql = yield* _(PgClient.PgClient)

@@ -29,9 +29,8 @@ export const OfferPrivatePayloadToEncryptE = Schema.Struct({
   toPublicKey: PublicKeyPemBase64E,
   payloadPrivate: OfferPrivatePartE,
 })
-export type OfferPrivatePayloadToEncryptE = Schema.Schema.Type<
-  typeof OfferPrivatePayloadToEncryptE
->
+export type OfferPrivatePayloadToEncryptE =
+  typeof OfferPrivatePayloadToEncryptE.Type
 
 // TODO test this function
 export default function constructPrivatePayloads({

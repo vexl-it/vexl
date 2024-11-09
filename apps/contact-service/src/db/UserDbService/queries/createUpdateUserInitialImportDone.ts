@@ -8,9 +8,8 @@ export const UpdateUserInitialImportDoneParams = Schema.Struct({
   hash: HashedPhoneNumberE,
   initialImportDone: Schema.Boolean,
 })
-export type UpdateUserInitialImportDoneParams = Schema.Schema.Type<
-  typeof UpdateUserInitialImportDoneParams
->
+export type UpdateUserInitialImportDoneParams =
+  typeof UpdateUserInitialImportDoneParams.Type
 
 export const createUpdateUserInitialImportDone = Effect.gen(function* (_) {
   const sql = yield* _(PgClient.PgClient)

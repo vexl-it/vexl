@@ -238,9 +238,7 @@ export type SymmetricKey = Schema.Schema.Type<typeof SymmetricKeyE>
 
 export const IntendedConnectionLevel = z.enum(['FIRST', 'ALL'])
 export const IntendedConnectionLevelE = Schema.Literal('FIRST', 'ALL')
-export type IntendedConnectionLevel = Schema.Schema.Type<
-  typeof IntendedConnectionLevelE
->
+export type IntendedConnectionLevel = typeof IntendedConnectionLevelE.Type
 
 export const OfferPrivatePart = z
   .object({
@@ -370,9 +368,7 @@ export const PrivatePayloadEncrypted = z.string().transform((v) => {
 export const PrivatePayloadEncryptedE = Schema.String.pipe(
   Schema.brand('PrivatePayloadEncrypted')
 )
-export type PrivatePayloadEncrypted = Schema.Schema.Type<
-  typeof PrivatePayloadEncryptedE
->
+export type PrivatePayloadEncrypted = typeof PrivatePayloadEncryptedE.Type
 
 export const PublicPayloadEncrypted = z.string().transform((v) => {
   return Brand.nominal<typeof v & Brand.Brand<'PublicPayloadEncrypted'>>()(v)
@@ -380,9 +376,7 @@ export const PublicPayloadEncrypted = z.string().transform((v) => {
 export const PublicPayloadEncryptedE = Schema.String.pipe(
   Schema.brand('PublicPayloadEncrypted')
 )
-export type PublicPayloadEncrypted = Schema.Schema.Type<
-  typeof PublicPayloadEncryptedE
->
+export type PublicPayloadEncrypted = typeof PublicPayloadEncryptedE.Type
 
 export const OwnershipInfo = z
   .object({

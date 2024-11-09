@@ -9,9 +9,8 @@ const DeleteContactsByHashFromAndHashToQuery = Schema.Struct({
   hashTo: HashedPhoneNumberE,
 })
 
-export type DeleteContactsByHashFromAndHashToQuery = Schema.Schema.Type<
-  typeof DeleteContactsByHashFromAndHashToQuery
->
+export type DeleteContactsByHashFromAndHashToQuery =
+  typeof DeleteContactsByHashFromAndHashToQuery.Type
 
 export const createDeleteContactsByHashFromAndHashTo = Effect.gen(
   function* (_) {

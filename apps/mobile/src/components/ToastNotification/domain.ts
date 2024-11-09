@@ -31,6 +31,4 @@ export const ToastNotificationStateE = Schema.Struct({
   topMargin: Schema.optional(Schema.Number),
 })
 
-export type ToastNotificationState = Schema.Schema.Type<
-  typeof ToastNotificationStateE
->
+export type ToastNotificationState = typeof ToastNotificationStateE.Type

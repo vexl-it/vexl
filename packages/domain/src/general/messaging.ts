@@ -111,9 +111,7 @@ export const RepliedToDataPayloadE = Schema.Struct({
   image: Base64StringE,
 })
 
-export type RepliedToDataPayload = Schema.Schema.Type<
-  typeof RepliedToDataPayloadE
->
+export type RepliedToDataPayload = typeof RepliedToDataPayloadE.Type
 
 export const ChatMessagePayload = z
   .object({
@@ -374,6 +372,5 @@ export const ChatMessageRequiringNewerVersionE = Schema.Struct({
   lastReceivedFcmCypher: Schema.optional(FcmCypherE),
 })
 
-export type ChatMessageRequiringNewerVersion = Schema.Schema.Type<
-  typeof ChatMessageRequiringNewerVersionE
->
+export type ChatMessageRequiringNewerVersion =
+  typeof ChatMessageRequiringNewerVersionE.Type

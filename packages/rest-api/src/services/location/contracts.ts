@@ -99,14 +99,12 @@ export const GetLocationSuggestionsInput = Schema.Struct({
   query: GetLocationSuggestionsRequest,
 })
 
-export type GetLocationSuggestionsInput = Schema.Schema.Type<
-  typeof GetLocationSuggestionsInput
->
+export type GetLocationSuggestionsInput =
+  typeof GetLocationSuggestionsInput.Type
 
 export const GetGeocodedCoordinatesInput = Schema.Struct({
   query: GetGeocodedCoordinatesRequest,
 })
 
-export type GetGeocodedCoordinatesInput = Schema.Schema.Type<
-  typeof GetGeocodedCoordinatesInput
->
+export type GetGeocodedCoordinatesInput =
+  typeof GetGeocodedCoordinatesInput.Type

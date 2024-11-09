@@ -18,9 +18,7 @@ export const InsertPublicPartRequest = Schema.Struct({
   payloadPublic: PublicPayloadEncryptedE,
   countryPrefix: CountryPrefixE,
 })
-export type InsertPublicPartRequest = Schema.Schema.Type<
-  typeof InsertPublicPartRequest
->
+export type InsertPublicPartRequest = typeof InsertPublicPartRequest.Type
 
 export const createInsertPublicPart = Effect.gen(function* (_) {
   const sql = yield* _(PgClient.PgClient)

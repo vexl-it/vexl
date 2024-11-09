@@ -24,6 +24,4 @@ export const GetExchangeRateInput = Schema.Struct({
   query: GetExchangeRateRequest,
 })
 
-export type GetExchangeRateInput = Schema.Schema.Type<
-  typeof GetExchangeRateInput
->
+export type GetExchangeRateInput = typeof GetExchangeRateInput.Type

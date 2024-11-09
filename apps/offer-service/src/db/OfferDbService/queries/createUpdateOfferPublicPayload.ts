@@ -12,9 +12,8 @@ export const UpdateOfferPublicPayloadRequest = Schema.Struct({
   adminId: OfferAdminIdHashed,
   payloadPublic: PublicPayloadEncryptedE,
 })
-export type UpdateOfferPublicPayloadRequest = Schema.Schema.Type<
-  typeof UpdateOfferPublicPayloadRequest
->
+export type UpdateOfferPublicPayloadRequest =
+  typeof UpdateOfferPublicPayloadRequest.Type
 
 export const createUpdateOfferPublicPayload = Effect.gen(function* (_) {
   const sql = yield* _(PgClient.PgClient)

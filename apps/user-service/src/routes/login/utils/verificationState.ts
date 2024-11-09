@@ -8,9 +8,7 @@ export const ChallengeVerificationState = Schema.Struct({
   expiresAt: UnixMillisecondsE,
 })
 
-export type ChallengeVerificationState = Schema.Schema.Type<
-  typeof ChallengeVerificationState
->
+export type ChallengeVerificationState = typeof ChallengeVerificationState.Type
 
 export const PhoneVerificationState = Schema.Union(
   Schema.Struct({
@@ -27,6 +25,4 @@ export const PhoneVerificationState = Schema.Union(
   })
 )
 
-export type PhoneVerificationState = Schema.Schema.Type<
-  typeof PhoneVerificationState
->
+export type PhoneVerificationState = typeof PhoneVerificationState.Type

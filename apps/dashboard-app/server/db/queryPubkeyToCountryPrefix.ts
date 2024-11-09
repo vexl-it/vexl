@@ -8,9 +8,7 @@ import {PgUserClient} from './layer'
 export const PubKeyToCountryPrefixId = Schema.Number.pipe(
   Schema.brand('PubKeyToCountryPrefixId')
 )
-export type PubKeyToCountryPrefixId = Schema.Schema.Type<
-  typeof PubKeyToCountryPrefixId
->
+export type PubKeyToCountryPrefixId = typeof PubKeyToCountryPrefixId.Type
 
 export class UserRow extends Schema.Class<UserRow>('UserRow')({
   id: Schema.compose(Schema.NumberFromString, PubKeyToCountryPrefixId),

@@ -8,9 +8,7 @@ export const UpdateUserHashParams = Schema.Struct({
   oldHash: HashedPhoneNumberE,
   newHash: HashedPhoneNumberE,
 })
-export type UpdateUserHashParams = Schema.Schema.Type<
-  typeof UpdateUserHashParams
->
+export type UpdateUserHashParams = typeof UpdateUserHashParams.Type
 
 export const createUpdateUserHash = Effect.gen(function* (_) {
   const sql = yield* _(PgClient.PgClient)

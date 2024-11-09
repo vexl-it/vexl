@@ -9,17 +9,13 @@ export const FindCommonFriendsParams = Schema.Struct({
   ownerHash: HashedPhoneNumberE,
   publicKeys: Schema.Array(PublicKeyPemBase64E),
 })
-export type FindCommonFriendsParams = Schema.Schema.Type<
-  typeof FindCommonFriendsParams
->
+export type FindCommonFriendsParams = typeof FindCommonFriendsParams.Type
 
 export const FindCommonFriendsResult = Schema.Struct({
   publicKey: PublicKeyPemBase64E,
   commonFriends: Schema.Array(HashedPhoneNumberE),
 })
-export type FindCommonFriendsResult = Schema.Schema.Type<
-  typeof FindCommonFriendsResult
->
+export type FindCommonFriendsResult = typeof FindCommonFriendsResult.Type
 
 export const createFindCommonFriendsByOwnerHashAndPublicKeys = Effect.gen(
   function* (_) {

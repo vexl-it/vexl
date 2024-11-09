@@ -12,9 +12,8 @@ export const InsertWhitelistRecordParams = Schema.Struct({
   state: WhiteListState,
 })
 
-export type InsertWhitelistRecordParams = Schema.Schema.Type<
-  typeof InsertWhitelistRecordParams
->
+export type InsertWhitelistRecordParams =
+  typeof InsertWhitelistRecordParams.Type
 
 export const createInsertWhitelistRecord = Effect.gen(function* (_) {
   const sql = yield* _(PgClient.PgClient)

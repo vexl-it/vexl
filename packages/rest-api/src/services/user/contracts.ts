@@ -139,9 +139,7 @@ export const PhoneNumberVerificationId = Schema.Int.pipe(
   Schema.greaterThan(0),
   Schema.brand('PhoneNumberVerificationId')
 )
-export type PhoneNumberVerificationId = Schema.Schema.Type<
-  typeof PhoneNumberVerificationId
->
+export type PhoneNumberVerificationId = typeof PhoneNumberVerificationId.Type
 
 export class InitPhoneVerificationResponse extends Schema.Class<InitPhoneVerificationResponse>(
   'InitPhoneVerificationResponse'
@@ -161,9 +159,7 @@ export class VerifyPhoneNumberRequest extends Schema.Class<VerifyPhoneNumberRequ
 export const VerificationChallenge = Schema.String.pipe(
   Schema.brand('VerificationChallenge')
 )
-export type VerificationChallenge = Schema.Schema.Type<
-  typeof VerificationChallenge
->
+export type VerificationChallenge = typeof VerificationChallenge.Type
 
 export class VerifyPhoneNumberResponse extends Schema.Class<VerifyPhoneNumberResponse>(
   'VerifyPhoneNumberResponse'
@@ -210,38 +206,30 @@ export const InitVerificationInput = Schema.Struct({
   body: InitPhoneVerificationRequest,
 })
 
-export type InitVerificationInput = Schema.Schema.Type<
-  typeof InitVerificationInput
->
+export type InitVerificationInput = typeof InitVerificationInput.Type
 
 export const VerifyPhoneNumberInput = Schema.Struct({
   body: VerifyPhoneNumberRequest,
 })
 
-export type VerifyPhoneNumberInput = Schema.Schema.Type<
-  typeof VerifyPhoneNumberInput
->
+export type VerifyPhoneNumberInput = typeof VerifyPhoneNumberInput.Type
 
 export const VerifyChallengeInput = Schema.Struct({
   body: VerifyChallengeRequest,
 })
 
-export type VerifyChallengeInput = Schema.Schema.Type<
-  typeof VerifyChallengeInput
->
+export type VerifyChallengeInput = typeof VerifyChallengeInput.Type
 
 export const RegenerateSessionCredentialsRequest = Schema.Struct({
   myPhoneNumber: E164PhoneNumberE,
 })
 
-export type RegenerateSessionCredentialsRequest = Schema.Schema.Type<
-  typeof RegenerateSessionCredentialsRequest
->
+export type RegenerateSessionCredentialsRequest =
+  typeof RegenerateSessionCredentialsRequest.Type
 
 export const RegenerateSessionCredentialsResponse = Schema.Struct({
   hash: HashedPhoneNumberE,
   signature: EcdsaSignature,
 })
-export type RegenerateSessionCredentialsResponse = Schema.Schema.Type<
-  typeof RegenerateSessionCredentialsResponse
->
+export type RegenerateSessionCredentialsResponse =
+  typeof RegenerateSessionCredentialsResponse.Type

@@ -12,9 +12,8 @@ export const InsertOfferPrivatePartRequest = Schema.Struct({
   offerId: PublicPartId,
 })
 
-export type InsertOfferPrivatePartRequest = Schema.Schema.Type<
-  typeof InsertOfferPrivatePartRequest
->
+export type InsertOfferPrivatePartRequest =
+  typeof InsertOfferPrivatePartRequest.Type
 
 export const createInsertOfferPrivatePart = Effect.gen(function* (_) {
   const sql = yield* _(PgClient.PgClient)

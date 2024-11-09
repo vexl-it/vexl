@@ -6,9 +6,7 @@ import {Effect, flow, Schema} from 'effect'
 import {OfferAdminIdHashed} from '../domain'
 
 export const UpdateRefreshOfferRequest = OfferAdminIdHashed
-export type UpdateRefreshOfferRequest = Schema.Schema.Type<
-  typeof UpdateRefreshOfferRequest
->
+export type UpdateRefreshOfferRequest = typeof UpdateRefreshOfferRequest.Type
 
 export const createUpdateRefreshOffer = Effect.gen(function* (_) {
   const sql = yield* _(PgClient.PgClient)

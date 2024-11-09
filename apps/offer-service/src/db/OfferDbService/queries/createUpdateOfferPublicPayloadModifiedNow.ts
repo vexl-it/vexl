@@ -8,9 +8,8 @@ export const UpdateOfferPublicPayloadModifiedNowRequest = Schema.Struct({
   offerId: OfferIdE,
   adminId: OfferAdminIdHashed,
 })
-export type UpdateOfferPublicPayloadModifiedNowRequest = Schema.Schema.Type<
-  typeof UpdateOfferPublicPayloadModifiedNowRequest
->
+export type UpdateOfferPublicPayloadModifiedNowRequest =
+  typeof UpdateOfferPublicPayloadModifiedNowRequest.Type
 
 export const createUpdateOfferPublicPayloadModifiedNow = Effect.gen(
   function* (_) {

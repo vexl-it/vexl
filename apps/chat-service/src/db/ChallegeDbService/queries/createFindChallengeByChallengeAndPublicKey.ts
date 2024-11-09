@@ -10,9 +10,8 @@ export const FindChallengeByChallengeAndPublicKey = Schema.Struct({
   challenge: ChatChallenge,
   publicKey: PublicKeyPemBase64E,
 })
-export type FindChallengeByChallengeAndPublicKey = Schema.Schema.Type<
-  typeof FindChallengeByChallengeAndPublicKey
->
+export type FindChallengeByChallengeAndPublicKey =
+  typeof FindChallengeByChallengeAndPublicKey.Type
 
 export const createFindChallengeByChallengeAndPublicKey = Effect.gen(
   function* (_) {

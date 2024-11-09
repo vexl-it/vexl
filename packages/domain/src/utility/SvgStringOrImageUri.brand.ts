@@ -32,9 +32,7 @@ export const SvgStringOrImageUriE = Schema.Union(
     svgXml: SvgStringE,
   })
 )
-export type SvgStringOrImageUri = Schema.Schema.Type<
-  typeof SvgStringOrImageUriE
->
+export type SvgStringOrImageUri = typeof SvgStringOrImageUriE.Type
 
 export function fromImageUri(imageUri: UriString): SvgStringOrImageUri {
   return SvgStringOrImageUri.parse({

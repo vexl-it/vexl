@@ -76,34 +76,26 @@ export type RefreshUserRequest = Schema.Schema.Type<typeof RefreshUserRequest>
 export const UpdateFirebaseTokenRequest = Schema.Struct({
   firebaseToken: Schema.NullOr(FcmTokenE),
 })
-export type UpdateFirebaseTokenRequest = Schema.Schema.Type<
-  typeof UpdateFirebaseTokenRequest
->
+export type UpdateFirebaseTokenRequest = typeof UpdateFirebaseTokenRequest.Type
 
 export const ImportContactsRequest = Schema.Struct({
   contacts: Schema.Array(HashedPhoneNumberE),
   replace: Schema.optionalWith(Schema.Boolean, {default: () => true}),
 })
-export type ImportContactsRequest = Schema.Schema.Type<
-  typeof ImportContactsRequest
->
+export type ImportContactsRequest = typeof ImportContactsRequest.Type
 
 export const ImportContactsResponse = Schema.Struct({
   imported: Schema.Boolean,
   message: Schema.optional(Schema.String),
 })
 
-export type ImportContactsResponse = Schema.Schema.Type<
-  typeof ImportContactsResponse
->
+export type ImportContactsResponse = typeof ImportContactsResponse.Type
 
 export const FetchMyContactsRequest = Schema.Struct({
   ...PageRequest.fields,
   level: ConnectionLevelE,
 })
-export type FetchMyContactsRequest = Schema.Schema.Type<
-  typeof FetchMyContactsRequest
->
+export type FetchMyContactsRequest = typeof FetchMyContactsRequest.Type
 
 export const FetchMyContactsResponseE = Schema.Struct({
   ...PageResponse.fields,
@@ -113,16 +105,13 @@ export const FetchMyContactsResponseE = Schema.Struct({
     })
   ),
 })
-export type FetchMyContactsResponse = Schema.Schema.Type<
-  typeof FetchMyContactsResponseE
->
+export type FetchMyContactsResponse = typeof FetchMyContactsResponseE.Type
 
 export const FetchCommonConnectionsRequest = Schema.Struct({
   publicKeys: Schema.Array(PublicKeyPemBase64E),
 })
-export type FetchCommonConnectionsRequest = Schema.Schema.Type<
-  typeof FetchCommonConnectionsRequest
->
+export type FetchCommonConnectionsRequest =
+  typeof FetchCommonConnectionsRequest.Type
 
 export const FetchCommonConnectionsResponse = z
   .object({
@@ -151,9 +140,8 @@ export const FetchCommonConnectionsResponseE = Schema.Struct({
     })
   ),
 })
-export type FetchCommonConnectionsResponse = Schema.Schema.Type<
-  typeof FetchCommonConnectionsResponseE
->
+export type FetchCommonConnectionsResponse =
+  typeof FetchCommonConnectionsResponseE.Type
 
 export const CheckUserExistsRequest = Schema.Struct({
   notifyExistingUserAboutLogin: BooleanFromString,
@@ -172,9 +160,7 @@ export const ImportContactsErrors = Schema.Union(
 export const CheckUserExistsInput = Schema.Struct({
   query: CheckUserExistsRequest,
 })
-export type CheckUserExistsInput = Schema.Schema.Type<
-  typeof CheckUserExistsInput
->
+export type CheckUserExistsInput = typeof CheckUserExistsInput.Type
 
 export const CreateUserInput = Schema.Struct({
   body: CreateUserRequest,
@@ -189,9 +175,7 @@ export type RefreshUserInput = Schema.Schema.Type<typeof RefreshUserInput>
 export const UpdateFirebaseTokenInput = Schema.Struct({
   body: UpdateFirebaseTokenRequest,
 })
-export type UpdateFirebaseTokenInput = Schema.Schema.Type<
-  typeof UpdateFirebaseTokenInput
->
+export type UpdateFirebaseTokenInput = typeof UpdateFirebaseTokenInput.Type
 
 export const ImportContactsInput = Schema.Struct({
   body: ImportContactsRequest,
@@ -201,16 +185,13 @@ export type ImportContactsInput = Schema.Schema.Type<typeof ImportContactsInput>
 export const FetchMyContactsInput = Schema.Struct({
   query: FetchMyContactsRequest,
 })
-export type FetchMyContactsInput = Schema.Schema.Type<
-  typeof FetchMyContactsInput
->
+export type FetchMyContactsInput = typeof FetchMyContactsInput.Type
 
 export const FetchCommonConnectionsInput = Schema.Struct({
   body: FetchCommonConnectionsRequest,
 })
-export type FetchCommonConnectionsInput = Schema.Schema.Type<
-  typeof FetchCommonConnectionsInput
->
+export type FetchCommonConnectionsInput =
+  typeof FetchCommonConnectionsInput.Type
 export const HashDataWithValidation = Schema.Struct({})
 
 export const HashWithSignature = Schema.Struct({
@@ -243,14 +224,10 @@ export const UpdateBadOwnerHashRequest = Schema.Struct({
     default: () => false,
   }),
 })
-export type UpdateBadOwnerHashRequest = Schema.Schema.Type<
-  typeof UpdateBadOwnerHashRequest
->
+export type UpdateBadOwnerHashRequest = typeof UpdateBadOwnerHashRequest.Type
 
 export const UpdateBadOwnerHashResponse = Schema.Struct({
   updated: Schema.Boolean,
   willDeleteExistingUserIfRan: Schema.optional(Schema.Literal(true)),
 })
-export type UpdateBadOwnerHashResponse = Schema.Schema.Type<
-  typeof UpdateBadOwnerHashResponse
->
+export type UpdateBadOwnerHashResponse = typeof UpdateBadOwnerHashResponse.Type

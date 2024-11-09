@@ -10,9 +10,8 @@ export const FindWhitelistRecordBySenderAndReceiverParams = Schema.Struct({
   sender: PublicKeyHashed,
   receiver: InboxRecordId,
 })
-export type FindWhitelistRecordBySenderAndReceiverParams = Schema.Schema.Type<
-  typeof FindWhitelistRecordBySenderAndReceiverParams
->
+export type FindWhitelistRecordBySenderAndReceiverParams =
+  typeof FindWhitelistRecordBySenderAndReceiverParams.Type
 
 export const createFindWhitelistRecordBySenderAndReceiver = Effect.gen(
   function* (_) {

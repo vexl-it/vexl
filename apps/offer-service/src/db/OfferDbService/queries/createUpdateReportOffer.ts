@@ -10,9 +10,7 @@ export const UpdateReportOfferRequest = Schema.Struct({
   offerId: OfferIdE,
   userPublicKey: PublicKeyPemBase64E,
 })
-export type UpdateReportOfferRequest = Schema.Schema.Type<
-  typeof UpdateReportOfferRequest
->
+export type UpdateReportOfferRequest = typeof UpdateReportOfferRequest.Type
 
 export const createUpdateReportOffer = Effect.gen(function* (_) {
   const sql = yield* _(PgClient.PgClient)

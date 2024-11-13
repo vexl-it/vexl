@@ -1,6 +1,6 @@
 import {type HttpServerRequest, type HttpServerResponse} from '@effect/platform'
 import {type Default} from '@effect/platform/HttpApp'
-import {type ConfigError, Effect, pipe} from 'effect'
+import {Effect, pipe, type ConfigError} from 'effect'
 import {Middlewares} from 'effect-http'
 import {isRunningInTestConfig} from './commonConfigs'
 

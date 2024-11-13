@@ -1,8 +1,8 @@
 import {NodeContext} from '@effect/platform-node'
 import {type SqlClient} from '@effect/sql/SqlClient'
-import {type MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
 import {type RedisService} from '@vexl-next/server-utils/src/RedisService'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
+import {type MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
 import {mockedMetricsClientService} from '@vexl-next/server-utils/src/tests/mockedMetricsClientService'
 import {mockedRedisLayer} from '@vexl-next/server-utils/src/tests/mockedRedisLayer'
 import {
@@ -11,8 +11,8 @@ import {
 } from '@vexl-next/server-utils/src/tests/testDb'
 import {Console, Effect, Layer, ManagedRuntime, type Scope} from 'effect'
 import {cryptoConfig} from '../../configs'
-import DbLayer from '../../db/layer'
 import {OfferDbService} from '../../db/OfferDbService'
+import DbLayer from '../../db/layer'
 import {NodeTestingApp} from './NodeTestingApp'
 
 export type MockedContexts =

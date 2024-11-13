@@ -1,7 +1,7 @@
 import {jest} from '@jest/globals'
 import {GetExchangeRateResponse} from '@vexl-next/rest-api/src/services/btcExchangeRate/contracts'
 import {Effect, Layer} from 'effect'
-import {type YadioOperations, YadioService} from '../../utils/yadio'
+import {YadioService, type YadioOperations} from '../../utils/yadio'
 
 export const getExhangeRatePriceMocked = jest.fn<
   YadioOperations['getExchangeRatePrice']

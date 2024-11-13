@@ -18,7 +18,7 @@ export async function processBackgroundMessage(
   try {
     void showDebugNotificationIfEnabled({
       title: `Background notification received`,
-      body: `type: ${remoteMessage?.data?.type ?? '[empty]'}`,
+      body: `type: ${typeof remoteMessage?.data?.type === 'string' ? remoteMessage.data.type : typeof remoteMessage?.data?.type === 'object' ? JSON.stringify(remoteMessage.data.tyoe) : '[empty]'}`,
     })
     console.info('📳 Background notification received', remoteMessage)
 

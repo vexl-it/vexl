@@ -5,9 +5,9 @@ import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {CountryPrefixE} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {E164PhoneNumberE} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {
+  PrivatePayloadEncryptedE,
   generateAdminId,
   newOfferId,
-  PrivatePayloadEncryptedE,
   type PrivatePayloadEncrypted,
   type PublicPayloadEncrypted,
 } from '@vexl-next/domain/src/general/offers'

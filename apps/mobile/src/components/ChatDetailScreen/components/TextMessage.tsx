@@ -233,7 +233,7 @@ function TextMessage({
                     (message.state === 'sent' &&
                       message.message.repliedTo.messageAuthor === 'me')
                       ? t('common.you')
-                      : otherSideData?.userName ?? 'them'}
+                      : (otherSideData?.userName ?? 'them')}
                   </Text>
                   <Text marginTop="$1" color="$main">
                     {message.message.repliedTo.text}

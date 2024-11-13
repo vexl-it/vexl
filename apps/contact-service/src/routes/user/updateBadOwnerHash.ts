@@ -8,9 +8,9 @@ import {
   type UpdateBadOwnerHashRequest,
 } from '@vexl-next/rest-api/src/services/contact/contracts'
 import {UpdateBadOwnerHashEndpoint} from '@vexl-next/rest-api/src/services/contact/specification'
-import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {withRedisLock} from '@vexl-next/server-utils/src/RedisService'
 import {type ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
+import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
 import {Effect, Option} from 'effect'
 import {Handler} from 'effect-http'

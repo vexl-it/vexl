@@ -1,6 +1,6 @@
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
-import {type UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
+import {type UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {Context, Effect, Layer} from 'effect'
 import {type ContactRecord} from './domain'
 import {createDeleteContactsByHashFrom} from './queries/createDeleteContactsByHashFrom'

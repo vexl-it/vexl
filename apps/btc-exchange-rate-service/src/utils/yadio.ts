@@ -1,8 +1,8 @@
 import {type CurrencyCode} from '@vexl-next/domain/src/general/currency.brand'
 import {
   GetExchangeRateError,
-  type GetExchangeRateRequest,
   GetExchangeRateResponse,
+  type GetExchangeRateRequest,
 } from '@vexl-next/rest-api/src/services/btcExchangeRate/contracts'
 import axios from 'axios'
 import {Cache, Context, Duration, Effect, Layer, Schema} from 'effect'

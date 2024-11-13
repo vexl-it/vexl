@@ -4,8 +4,8 @@ import {
   type PublicKeyPemBase64,
 } from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {
-  type E164PhoneNumber,
   E164PhoneNumberE,
+  type E164PhoneNumber,
 } from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {
@@ -13,8 +13,8 @@ import {
   type EcdsaSignature,
 } from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {Effect, Schema} from 'effect'
-import {generateUserAuthData, hashPhoneNumber} from '../generateUserAuthData'
 import {type ServerCrypto} from '../ServerCrypto'
+import {generateUserAuthData, hashPhoneNumber} from '../generateUserAuthData'
 
 export const DUMMY_PHONE_NUMBER =
   Schema.decodeSync(E164PhoneNumberE)('+420777777777')

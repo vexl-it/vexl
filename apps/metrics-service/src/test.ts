@@ -1,6 +1,6 @@
 import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
-import {MetricsMessage} from '@vexl-next/server-utils/src/metrics/domain'
 import {MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
+import {MetricsMessage} from '@vexl-next/server-utils/src/metrics/domain'
 import {reportMetricForked} from '@vexl-next/server-utils/src/metrics/reportMetricForked'
 import {runMainInNode} from '@vexl-next/server-utils/src/runMainInNode'
 import {Effect, pipe} from 'effect'

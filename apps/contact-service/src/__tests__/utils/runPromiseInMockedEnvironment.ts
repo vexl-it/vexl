@@ -1,9 +1,9 @@
 import {NodeContext} from '@effect/platform-node'
 import {type SqlClient} from '@effect/sql/SqlClient'
 import {type DashboardReportsService} from '@vexl-next/server-utils/src/DashboardReportsService'
-import {type MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
 import {type RedisService} from '@vexl-next/server-utils/src/RedisService'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
+import {type MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
 import {mockedDashboardReportsService} from '@vexl-next/server-utils/src/tests/mockedDashboardReportsService'
 import {mockedMetricsClientService} from '@vexl-next/server-utils/src/tests/mockedMetricsClientService'
 import {mockedRedisLayer} from '@vexl-next/server-utils/src/tests/mockedRedisLayer'
@@ -14,12 +14,12 @@ import {
 import {Console, Effect, Layer, ManagedRuntime, type Scope} from 'effect'
 import {cryptoConfig} from '../../configs'
 import {ContactDbService} from '../../db/ContactDbService'
-import DbLayer from '../../db/layer'
 import {UserDbService} from '../../db/UserDbService'
+import DbLayer from '../../db/layer'
 import {ImportContactsQuotaService} from '../../routes/contacts/importContactsQuotaService'
 import {type FirebaseMessagingService} from '../../utils/notifications/FirebaseMessagingService'
-import {mockedFirebaseMessagingServiceLayer} from './mockedFirebaseMessagingService'
 import {NodeTestingApp} from './NodeTestingApp'
+import {mockedFirebaseMessagingServiceLayer} from './mockedFirebaseMessagingService'
 
 export type MockedContexts =
   | RedisService

@@ -1,7 +1,7 @@
 import {UuidE} from '@vexl-next/domain/src/utility/Uuid.brand'
-import {type ConfigError, Effect, Schema} from 'effect'
+import {Effect, Schema, type ConfigError} from 'effect'
 import {type ParseError} from 'effect/ParseResult'
-import {type IMessageTransferable, ProducibleMessage} from 'redis-smq'
+import {ProducibleMessage, type IMessageTransferable} from 'redis-smq'
 import {metricsQueueNameConfig} from '../commonConfigs'
 
 export class MetricsMessage extends Schema.Class<MetricsMessage>(

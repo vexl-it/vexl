@@ -12,9 +12,9 @@ import {VerificationStateDbService} from '../../routes/login/db/verificationStat
 import {type TwilioVerificationClient} from '../../utils/twilio'
 
 import {type MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
+import {NodeTestingApp} from './NodeTestingApp'
 import {mockedTwilioLayer} from './mockedTwilioClient'
 import {mockedUsersDbService} from './mockedUsersDbService'
-import {NodeTestingApp} from './NodeTestingApp'
 
 export type MockedContexts =
   | TwilioVerificationClient

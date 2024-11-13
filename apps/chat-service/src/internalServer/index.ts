@@ -1,6 +1,6 @@
 import {HttpRouter} from '@effect/platform'
-import {internalServerPortConfig} from '@vexl-next/server-utils/src/commonConfigs'
 import {makeInternalServer} from '@vexl-next/server-utils/src/InternalServer'
+import {internalServerPortConfig} from '@vexl-next/server-utils/src/commonConfigs'
 import {cleanInvalidChallenges} from './routes/cleanInvalidChallenges'
 import {clearExpiredMessages} from './routes/clearExpiredMessages'
 

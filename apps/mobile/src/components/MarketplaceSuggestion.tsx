@@ -1,14 +1,14 @@
 import {atom, useAtom, type WritableAtom} from 'jotai'
 import {useMemo} from 'react'
 import {TouchableOpacity} from 'react-native'
-import {Stack, Text, XStack, YStack, getTokens, type YStackProps} from 'tamagui'
+import {getTokens, Stack, Text, XStack, YStack, type YStackProps} from 'tamagui'
 import {useTranslation} from '../utils/localization/I18nProvider'
 import Button from './Button'
 import Image from './Image'
-import UserAvatar from './UserAvatar'
 import bubbleTipSvg from './images/bubbleTipSvg'
 import closeSvg from './images/closeSvg'
 import vexlerAvatarSvg from './images/vexlerAvatarSvg'
+import UserAvatar from './UserAvatar'
 
 interface Props extends YStackProps {
   buttonText: string

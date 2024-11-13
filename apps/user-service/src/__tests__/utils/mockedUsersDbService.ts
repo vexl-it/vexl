@@ -2,8 +2,8 @@ import {jest} from '@jest/globals'
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {Effect, HashMap, Layer, Ref} from 'effect'
 import {
-  type LoggedInUsersDbOperations,
   LoggedInUsersDbService,
+  type LoggedInUsersDbOperations,
   type UserInsert,
 } from '../../db/loggedInUsersDb'
 

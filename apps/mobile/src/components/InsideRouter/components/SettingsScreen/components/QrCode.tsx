@@ -1,5 +1,5 @@
-import {pipe} from 'fp-ts/lib/function'
 import * as TE from 'fp-ts/TaskEither'
+import {pipe} from 'fp-ts/lib/function'
 import {atom, useAtomValue} from 'jotai'
 import SvgQRCode from 'react-native-qrcode-svg'
 import {Stack, Text, YStack} from 'tamagui'

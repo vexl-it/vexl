@@ -33,7 +33,7 @@ import {type PrivatePartEncryptionError} from '@vexl-next/resources-utils/src/of
 import {type ApiErrorFetchingContactsForOffer} from '@vexl-next/resources-utils/src/offers/utils/fetchContactsForOffer'
 import {type ErrorGeneratingSymmetricKey} from '@vexl-next/resources-utils/src/offers/utils/generateSymmetricKey'
 import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
-import {Array, type Effect, Either, pipe as effectPipe} from 'effect'
+import {Array, Either, pipe as effectPipe, type Effect} from 'effect'
 import * as A from 'fp-ts/Array'
 import * as E from 'fp-ts/Either'
 import * as Option from 'fp-ts/Option'
@@ -388,7 +388,7 @@ export const createOfferAtom = atom<
           },
           lastCommitedFcmToken:
             publicPayloadWithNotificationToken.tokenSuccessfullyAdded
-              ? fcmToken ?? undefined
+              ? (fcmToken ?? undefined)
               : undefined,
           flags: {
             reported: false,
@@ -478,7 +478,7 @@ export const updateOfferAtom = atom<
           },
           lastCommitedFcmToken:
             publicPayloadWithNotificationToken.tokenSuccessfullyAdded
-              ? fcmToken ?? undefined
+              ? (fcmToken ?? undefined)
               : undefined,
           ownershipInfo: {
             adminId,

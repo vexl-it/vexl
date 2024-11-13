@@ -1,7 +1,7 @@
 import {NodeContext} from '@effect/platform-node'
 import {type SqlClient} from '@effect/sql/SqlClient'
-import {type MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
+import {type MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
 import {mockedMetricsClientService} from '@vexl-next/server-utils/src/tests/mockedMetricsClientService'
 import {
   disposeTestDatabase,

@@ -4,8 +4,8 @@ import {
   ReportOfferLimitReachedError,
 } from '@vexl-next/rest-api/src/services/offer/contracts'
 import {ReportOfferEndpoint} from '@vexl-next/rest-api/src/services/offer/specification'
-import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {withRedisLock} from '@vexl-next/server-utils/src/RedisService'
+import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {Effect, Option} from 'effect'
 import {Handler} from 'effect-http'
 import {reportLimitCountConfig} from '../configs'

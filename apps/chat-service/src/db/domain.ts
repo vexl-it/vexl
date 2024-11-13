@@ -8,7 +8,7 @@ import {
   hashSha256,
 } from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {type ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
-import {type ConfigError, Effect, Schema} from 'effect'
+import {Effect, Schema, type ConfigError} from 'effect'
 import {easKey} from '../configs'
 
 export const PublicKeyHashed = Schema.String.pipe(

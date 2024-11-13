@@ -1,5 +1,5 @@
 import {Headers, HttpServerRequest, HttpServerResponse} from '@effect/platform'
-import {Array, Effect, Option, pipe, String, type Config} from 'effect'
+import {Array, Effect, Option, String, pipe, type Config} from 'effect'
 import {type ApiEndpoint, type Handler} from 'effect-http'
 import {makeRaw} from 'effect-http/Handler'
 

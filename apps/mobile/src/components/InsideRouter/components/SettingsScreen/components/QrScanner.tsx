@@ -1,4 +1,4 @@
-import {Camera, CameraView} from 'expo-camera/next'
+import {Camera, CameraView} from 'expo-camera'
 import * as T from 'fp-ts/Task'
 import {pipe} from 'fp-ts/function'
 import {useSetAtom} from 'jotai'

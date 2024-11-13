@@ -1,6 +1,6 @@
 import {HttpRouter, HttpServerResponse} from '@effect/platform'
-import {internalServerPortConfig} from '@vexl-next/server-utils/src/commonConfigs'
 import {makeInternalServer} from '@vexl-next/server-utils/src/InternalServer'
+import {internalServerPortConfig} from '@vexl-next/server-utils/src/commonConfigs'
 import {Effect} from 'effect'
 import {processNewContentNotifications} from './routes/processNewContentNotifications'
 import {processUserInactivity} from './routes/processUserInactivity'

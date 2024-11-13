@@ -1,5 +1,5 @@
-import {type UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
+import {type UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {CreateUserEndpoint} from '@vexl-next/rest-api/src/services/contact/specification'
 import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'

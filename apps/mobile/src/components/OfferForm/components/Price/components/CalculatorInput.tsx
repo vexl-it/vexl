@@ -5,21 +5,19 @@ import {
   type ReactNode,
   type Ref,
 } from 'react'
-import {
-  TextInput as RNTextInput,
-  TouchableWithoutFeedback,
-  type TextInputProps,
-} from 'react-native'
-import {Stack, XStack, getTokens, styled} from 'tamagui'
+import {TouchableWithoutFeedback} from 'react-native'
+import {Input, Stack, XStack, getTokens, styled, type InputProps} from 'tamagui'
 
-const InputStyled = styled(RNTextInput, {
+const InputStyled = styled(Input, {
   f: 1,
   ff: '$body500',
+  borderWidth: 0,
+  height: '100%',
   fos: 18,
   color: '$main',
 } as const)
 
-interface Props extends TextInputProps {
+interface Props extends InputProps {
   children: ReactNode
   isFocused: boolean
   onWrapperPress: () => void
@@ -27,13 +25,10 @@ interface Props extends TextInputProps {
 
 function CalculatorInput(
   {children, isFocused, onWrapperPress, ...props}: Props,
-  ref: Ref<RNTextInput>
+  ref: Ref<Input>
 ): JSX.Element {
-  const inputRef: Ref<RNTextInput> = useRef(null)
-  useImperativeHandle<RNTextInput | null, RNTextInput | null>(
-    ref,
-    () => inputRef.current
-  )
+  const inputRef: Ref<Input> = useRef(null)
+  useImperativeHandle<Input | null, Input | null>(ref, () => inputRef.current)
 
   return (
     <TouchableWithoutFeedback onPress={onWrapperPress}>
@@ -65,4 +60,4 @@ function CalculatorInput(
   )
 }
 
-export default forwardRef<RNTextInput, Props>(CalculatorInput)
+export default forwardRef<Input, Props>(CalculatorInput)

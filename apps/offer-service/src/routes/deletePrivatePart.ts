@@ -5,7 +5,7 @@ import {
 import {DeletePrivatePartEndpoint} from '@vexl-next/rest-api/src/services/offer/specification'
 import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
-import {Array, Effect, flow, Option, pipe} from 'effect'
+import {Array, Effect, Option, flow, pipe} from 'effect'
 import {Handler} from 'effect-http'
 import {OfferDbService} from '../db/OfferDbService'
 import {hashAdminId} from '../utils/hashAdminId'

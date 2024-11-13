@@ -11,8 +11,8 @@ import {
 import {createDummyAuthHeadersForUser} from '@vexl-next/server-utils/src/tests/createDummyAuthHeaders'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {Effect, Schema} from 'effect'
-import {createMockedUser, type MockedUser} from '../utils/createMockedUser'
 import {NodeTestingApp} from '../utils/NodeTestingApp'
+import {createMockedUser, type MockedUser} from '../utils/createMockedUser'
 import {runPromiseInMockedEnvironment} from '../utils/runPromiseInMockedEnvironment'
 
 let user1: MockedUser

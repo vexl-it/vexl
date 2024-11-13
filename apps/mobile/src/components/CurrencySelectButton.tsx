@@ -1,5 +1,5 @@
 import {type CurrencyCode} from '@vexl-next/domain/src/general/currency.brand'
-import {type Atom, useAtomValue} from 'jotai'
+import {useAtomValue, type Atom} from 'jotai'
 import {TouchableOpacity, type TouchableOpacityProps} from 'react-native'
 import {Text, XStack, getTokens} from 'tamagui'
 import chevronDownSvg from '../images/chevronDownSvg'

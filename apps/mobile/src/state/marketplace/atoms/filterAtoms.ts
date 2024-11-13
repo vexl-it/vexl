@@ -4,8 +4,8 @@ import {z} from 'zod'
 import {type DropdownItemProps} from '../../../components/Dropdown'
 import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
 import getDefaultCurrency from '../../../utils/getDefaultCurrency'
-import {translationAtom} from '../../../utils/localization/I18nProvider'
 import {currencies} from '../../../utils/localization/currency'
+import {translationAtom} from '../../../utils/localization/I18nProvider'
 import {OffersFilter, type BaseOffersFilter} from '../domain'
 
 export const offersFilterInitialState: OffersFilter = {

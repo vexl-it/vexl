@@ -7,8 +7,8 @@ import {Effect, Layer} from 'effect'
 import {type ParseError} from 'effect/ParseResult'
 import {type IMessageTransferable} from 'redis-smq'
 import {healthServerPortConfig, redisUrl} from './configs'
-import DbLayer from './db/layer'
 import {MetricsDbService} from './db/MetricsDbService'
+import DbLayer from './db/layer'
 import {MetricsConsumerService} from './utils/MetricsConsumerService/index'
 
 const consumeMessage = (

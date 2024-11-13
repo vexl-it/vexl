@@ -5,8 +5,8 @@ import {NodeTestingApp} from '../../NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../runPromiseInMockedEnvironment'
 import {
   createAndImportUsersFromNetwork,
-  type DummyUser,
   generateKeysAndHasheForNumber,
+  type DummyUser,
 } from './utils'
 
 let networkOne: [DummyUser, ...DummyUser[]]

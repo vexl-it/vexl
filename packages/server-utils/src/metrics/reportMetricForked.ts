@@ -1,6 +1,6 @@
 import {Effect} from 'effect'
-import {type MetricsMessage} from './domain'
 import {MetricsClientService} from './MetricsClientService'
+import {type MetricsMessage} from './domain'
 
 export const reportMetricForked = (
   metricMessage: MetricsMessage

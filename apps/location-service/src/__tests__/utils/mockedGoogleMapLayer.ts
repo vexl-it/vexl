@@ -10,8 +10,8 @@ import {
 } from '@vexl-next/rest-api/src/services/location/contracts'
 import {Effect, Layer, Schema} from 'effect'
 import {
-  type GoogleMapsOperations,
   GoogleMapsService,
+  type GoogleMapsOperations,
 } from '../../utils/googleMapsApi'
 
 export const queryGeocodeMock = jest.fn<GoogleMapsOperations['queryGeocode']>(

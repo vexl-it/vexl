@@ -1,16 +1,16 @@
 import {
-  type CancelApprovalResponse,
   CancelRequestApprovalErrors,
   RequestNotPendingError,
+  type CancelApprovalResponse,
 } from '@vexl-next/rest-api/src/services/chat/contracts'
 import {CancelRequestApprovalEndpoint} from '@vexl-next/rest-api/src/services/chat/specification'
 import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
 import {Effect} from 'effect'
 import {Handler} from 'effect-http'
-import {encryptPublicKey} from '../../db/domain'
 import {MessagesDbService} from '../../db/MessagesDbService'
 import {WhitelistDbService} from '../../db/WhiteListDbService'
+import {encryptPublicKey} from '../../db/domain'
 import {findAndEnsureReceiverAndSenderInbox} from '../../utils/findAndEnsureReceiverAndSenderInbox'
 import {withInboxActionRedisLock} from '../../utils/withInboxActionRedisLock'
 

@@ -1,8 +1,8 @@
 import {Effect, HashMap, Layer, Ref, Schema} from 'effect'
 import {
   RecordDoesNotExistsReddisError,
-  type RedisOperations,
   RedisService,
+  type RedisOperations,
 } from '../RedisService'
 
 export const mockedRedisLayer = Layer.effect(

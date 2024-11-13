@@ -1,10 +1,10 @@
 import Clipboard from '@react-native-clipboard/clipboard'
-import {pipe} from 'fp-ts/lib/function'
 import * as TE from 'fp-ts/TaskEither'
+import {pipe} from 'fp-ts/lib/function'
 import {atom, useSetAtom} from 'jotai'
 import {useMemo} from 'react'
 import {TouchableOpacity} from 'react-native'
-import {getTokens, Stack, Text, XStack} from 'tamagui'
+import {Stack, Text, XStack, getTokens} from 'tamagui'
 import {
   translationAtom,
   useTranslation,

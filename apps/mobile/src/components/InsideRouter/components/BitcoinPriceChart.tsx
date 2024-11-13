@@ -1,6 +1,6 @@
 import {useFocusEffect} from '@react-navigation/native'
-import {pipe} from 'fp-ts/lib/function'
 import * as TE from 'fp-ts/TaskEither'
+import {pipe} from 'fp-ts/lib/function'
 import {useAtomValue, useSetAtom} from 'jotai'
 import {useCallback} from 'react'
 import {ActivityIndicator, Linking, TouchableOpacity} from 'react-native'

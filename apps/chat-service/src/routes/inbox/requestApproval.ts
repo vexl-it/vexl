@@ -1,14 +1,14 @@
 import {type UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {
   RequestApprovalErrors,
-  type RequestApprovalResponse,
   RequestMessagingNotAllowedError,
+  type RequestApprovalResponse,
 } from '@vexl-next/rest-api/src/services/chat/contracts'
 import {RequestApprovalEndpoint} from '@vexl-next/rest-api/src/services/chat/specification'
 import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
 import dayjs from 'dayjs'
-import {type ConfigError, Effect, Option} from 'effect'
+import {Effect, Option, type ConfigError} from 'effect'
 import {Handler} from 'effect-http'
 import {requestTimeoutDaysConfig} from '../../configs'
 import {type InboxRecord} from '../../db/InboxDbService/domain'

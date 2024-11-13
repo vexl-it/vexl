@@ -5,17 +5,14 @@ import {
   type ReactNode,
   type Ref,
 } from 'react'
-import {
-  ActivityIndicator,
-  TextInput as RNTextInput,
-  TouchableWithoutFeedback,
-  type TextInputProps,
-} from 'react-native'
-import {Stack, XStack, getTokens, styled} from 'tamagui'
+import {ActivityIndicator, TouchableWithoutFeedback} from 'react-native'
+import {Input, Stack, XStack, getTokens, styled, type InputProps} from 'tamagui'
 import PremiumIncluded from './PremiumIncluded'
 
-const InputStyled = styled(RNTextInput, {
+const InputStyled = styled(Input, {
   f: 1,
+  borderWidth: 0,
+  height: '100%',
   ff: '$body500',
   fos: 18,
   variants: {
@@ -29,7 +26,7 @@ const InputStyled = styled(RNTextInput, {
   } as const,
 })
 
-interface Props extends TextInputProps {
+interface Props extends InputProps {
   isFocused?: boolean
   children: ReactNode
   loading?: boolean
@@ -46,13 +43,10 @@ function AmountInput(
     showPremiumInfoMessage,
     ...props
   }: Props,
-  ref: Ref<RNTextInput>
+  ref: Ref<Input>
 ): JSX.Element {
-  const inputRef: Ref<RNTextInput> = useRef(null)
-  useImperativeHandle<RNTextInput | null, RNTextInput | null>(
-    ref,
-    () => inputRef.current
-  )
+  const inputRef: Ref<Input> = useRef(null)
+  useImperativeHandle<Input | null, Input | null>(ref, () => inputRef.current)
 
   return (
     <TouchableWithoutFeedback onPress={onWrapperPress}>
@@ -105,4 +99,4 @@ function AmountInput(
   )
 }
 
-export default forwardRef<RNTextInput, Props>(AmountInput)
+export default forwardRef<Input, Props>(AmountInput)

@@ -7,19 +7,16 @@ import {
   type ReactNode,
   type Ref,
 } from 'react'
+import {Platform, TouchableOpacity} from 'react-native'
 import {
-  Platform,
-  TextInput as RNTextInput,
-  TouchableOpacity,
-  type TextInputProps,
-} from 'react-native'
-import {
+  Input,
   Stack,
   Text,
   XStack,
   getTokens,
   styled,
   type ColorTokens,
+  type InputProps,
   type XStackProps,
 } from 'tamagui'
 import Image from './Image'
@@ -55,8 +52,10 @@ const RootContainer = styled(XStack, {
   } as const,
 })
 
-const InputStyled = styled(RNTextInput, {
+const InputStyled = styled(Input, {
   f: 1,
+  borderWidth: 0,
+  height: '100%',
   ff: '$body500',
   variants: {
     size: {
@@ -120,7 +119,7 @@ const StyledText = styled(Text, {
   } as const,
 })
 
-export interface Props extends Omit<TextInputProps, 'style'> {
+export interface Props extends Omit<InputProps, 'style'> {
   icon?: SvgString
   leftText?: string
   rightText?: string
@@ -157,14 +156,11 @@ function TextInput(
     numberOfLines,
     ...restProps
   }: Props,
-  ref: Ref<RNTextInput>
+  ref: Ref<Input>
 ): JSX.Element {
   const tokens = getTokens()
-  const inputRef: Ref<RNTextInput> = useRef(null)
-  useImperativeHandle<RNTextInput | null, RNTextInput | null>(
-    ref,
-    () => inputRef.current
-  )
+  const inputRef: Ref<Input> = useRef(null)
+  useImperativeHandle<Input | null, Input | null>(ref, () => inputRef.current)
 
   return (
     <RootContainer
@@ -263,4 +259,4 @@ function TextInput(
   )
 }
 
-export default forwardRef<RNTextInput, Props>(TextInput)
+export default forwardRef<Input, Props>(TextInput)

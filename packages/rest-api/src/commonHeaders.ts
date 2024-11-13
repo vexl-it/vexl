@@ -1,6 +1,6 @@
 import {
-  type SemverString,
   SemverStringE,
+  type SemverString,
 } from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {Array, Either, Number, Option, Schema, String} from 'effect'

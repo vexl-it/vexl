@@ -1,7 +1,7 @@
 import {SqlClient} from '@effect/sql'
 import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
-import {MetricsMessage} from '@vexl-next/server-utils/src/metrics/domain'
 import {type MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
+import {MetricsMessage} from '@vexl-next/server-utils/src/metrics/domain'
 import {reportMetricForked} from '@vexl-next/server-utils/src/metrics/reportMetricForked'
 import {Effect, Layer} from 'effect'
 import {inactivityNotificationAfterDaysConfig} from './configs'

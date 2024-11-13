@@ -2,9 +2,9 @@ import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {type UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {NotPermittedToSendMessageToTargetInboxError} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {Effect, Option} from 'effect'
-import {hashPublicKey} from '../db/domain'
 import {type InboxRecordId} from '../db/InboxDbService/domain'
 import {WhitelistDbService} from '../db/WhiteListDbService'
+import {hashPublicKey} from '../db/domain'
 
 export const isSenderInReceiverWhitelist = ({
   sender,

@@ -1,8 +1,8 @@
 import {type UriString} from '@vexl-next/domain/src/utility/UriString.brand'
+import {pipe} from 'fp-ts/function'
 import * as O from 'fp-ts/Option'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
-import {pipe} from 'fp-ts/function'
 import {atom, type PrimitiveAtom} from 'jotai'
 import {Alert} from 'react-native'
 import {

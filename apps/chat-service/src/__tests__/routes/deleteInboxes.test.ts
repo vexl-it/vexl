@@ -5,9 +5,9 @@ import {InboxDoesNotExistError} from '@vexl-next/rest-api/src/services/contact/c
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {Effect} from 'effect'
 import {hashPublicKey} from '../../db/domain'
+import {NodeTestingApp} from '../utils/NodeTestingApp'
 import {addChallengeForKey} from '../utils/addChallengeForKey'
 import {createMockedUser, type MockedUser} from '../utils/createMockedUser'
-import {NodeTestingApp} from '../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../utils/runPromiseInMockedEnvironment'
 
 let user1: MockedUser

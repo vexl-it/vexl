@@ -1,8 +1,8 @@
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {type UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {
-  SenderInboxDoesNotExistError,
   SendMessageErrors,
+  SenderInboxDoesNotExistError,
   type MessageInBatch,
   type ReceiverInboxDoesNotExistError,
   type SendMessageResponse,

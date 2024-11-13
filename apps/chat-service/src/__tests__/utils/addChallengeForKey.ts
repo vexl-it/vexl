@@ -5,9 +5,9 @@ import {
 } from '@vexl-next/cryptography/src/KeyHolder'
 import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {
+  ecdsaSignE,
   type CryptoError,
   type EcdsaSignature,
-  ecdsaSignE,
 } from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {type SignedChallenge} from '@vexl-next/rest-api/src/services/chat/contracts'
 import {Effect} from 'effect'

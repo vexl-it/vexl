@@ -9,8 +9,8 @@ import Animated, {
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {Stack, Text, XStack, getTokens} from 'tamagui'
 import SvgImage from '../../Image'
-import closeSvg from '../../images/closeSvg'
 import {TAB_BAR_HEIGHT_PX} from '../../InsideRouter/components/TabBar'
+import closeSvg from '../../images/closeSvg'
 import {toastNotificationAtom} from '../atom'
 import {type ToastNotificationState} from '../domain'
 

@@ -10,6 +10,9 @@ import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.bran
 import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {Context, Effect, Layer, Option, Schema, type Scope} from 'effect'
 import {Client, type Api} from 'effect-http'
+import {type PlatformName} from './PlatformName'
+import {type ServiceUrl} from './ServiceUrl.brand'
+import {type GetUserSessionCredentials} from './UserSessionCredentials.brand'
 import {CommonHeaders} from './commonHeaders'
 import {
   HEADER_CLIENT_VERSION,
@@ -19,9 +22,6 @@ import {
   HEADER_PUBLIC_KEY,
   HEADER_SIGNATURE,
 } from './constants'
-import {type PlatformName} from './PlatformName'
-import {type ServiceUrl} from './ServiceUrl.brand'
-import {type GetUserSessionCredentials} from './UserSessionCredentials.brand'
 import {type LoggingFunction} from './utils'
 
 const encodeCommonHeaders = Schema.encodeSync(CommonHeaders)

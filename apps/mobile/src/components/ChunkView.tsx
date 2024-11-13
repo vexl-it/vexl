@@ -19,7 +19,7 @@ export default function ChunkView({
 
   const childrenChunk = reachedEndRef.current
     ? children
-    : children?.slice(0, BATCH_SIZE * batchIndex) ?? null
+    : (children?.slice(0, BATCH_SIZE * batchIndex) ?? null)
 
   const loadNextBatch = useCallback(
     (timeout: number = 5) => {

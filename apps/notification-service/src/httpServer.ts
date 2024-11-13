@@ -1,19 +1,19 @@
 import {NodeContext} from '@effect/platform-node'
 import {NotificationApiSpecification} from '@vexl-next/rest-api/src/services/notification/specification'
+import {healthServerLayer} from '@vexl-next/server-utils/src/HealthServer'
+import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
 import {
   cryptoConfig,
   healthServerPortConfig,
   portConfig,
 } from '@vexl-next/server-utils/src/commonConfigs'
-import {healthServerLayer} from '@vexl-next/server-utils/src/HealthServer'
 import {setupLoggingMiddlewares} from '@vexl-next/server-utils/src/loggingMiddlewares'
-import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
 import {Effect, Layer} from 'effect'
 import {RouterBuilder} from 'effect-http'
 import {NodeServer} from 'effect-http-node'
 import {FirebaseMessagingLayer} from './FirebaseMessagingLayer'
-import {getCypherPublicKeyHandler} from './routes/getCypherPublicKeyHandler'
 import {IssueNotifcationHandler} from './routes/IssueNotificationRouteLive'
+import {getCypherPublicKeyHandler} from './routes/getCypherPublicKeyHandler'
 
 export const app = RouterBuilder.make(NotificationApiSpecification).pipe(
   RouterBuilder.handle(IssueNotifcationHandler),

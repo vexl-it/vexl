@@ -1,7 +1,7 @@
 import {SqlClient, SqlSchema} from '@effect/sql'
 import {
-  type CountryPrefix,
   CountryPrefixE,
+  type CountryPrefix,
 } from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {MetricsMessage} from '@vexl-next/server-utils/src/metrics/domain'

@@ -33,7 +33,7 @@ export const i18n = new I18n(
         ...supportedTranslations,
       }
 )
-i18n.locale = isStaging ? 'en_dev' : getLocales().at(0)?.languageTag ?? 'en'
+i18n.locale = isStaging ? 'en_dev' : (getLocales().at(0)?.languageTag ?? 'en')
 i18n.defaultLocale = 'en_dev'
 i18n.enableFallback = true
 

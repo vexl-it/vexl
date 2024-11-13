@@ -4,8 +4,8 @@ import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {type SendMessageRequest} from '@vexl-next/rest-api/src/services/chat/contracts'
 import {Effect, Schema} from 'effect'
 import {clearExpiredMessages} from '../../internalServer/routes/clearExpiredMessages'
-import {createMockedUser, type MockedUser} from '../utils/createMockedUser'
 import {NodeTestingApp} from '../utils/NodeTestingApp'
+import {createMockedUser, type MockedUser} from '../utils/createMockedUser'
 import {runPromiseInMockedEnvironment} from '../utils/runPromiseInMockedEnvironment'
 
 let user1: MockedUser

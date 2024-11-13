@@ -88,6 +88,15 @@ export default {
     },
     'googleServicesFile': extra.googleServicesInfoPlistFile,
     'associatedDomains': ['applinks:link.vexl.it', 'applinks:nextlink.vexl.it'],
+    'privacyManifests': {
+      'NSPrivacyAccessedAPITypes': [
+        {
+          'NSPrivacyAccessedAPIType':
+            'NSPrivacyAccessedAPICategoryUserDefaults',
+          'NSPrivacyAccessedAPITypeReasons': ['CA92.1'],
+        },
+      ],
+    },
   },
   'android': {
     'versionCode': VERSION_CODE,

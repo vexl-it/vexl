@@ -38,7 +38,7 @@ function CurrencySelectListItem({
               {`${currency.flag} ${t(`currency.${currency.code}`)}`}
             </Text>
           </XStack>
-          <XStack ai="center" space="$1">
+          <XStack ai="center" gap="$1">
             <Text col="$greyAccent3">{currency.symbol}</Text>
             <Text col="$greyAccent3" fos={6}>
               ●

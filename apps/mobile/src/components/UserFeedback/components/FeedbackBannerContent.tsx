@@ -73,8 +73,8 @@ function FeedbackBannerContent({autoCloseWhenFinished}: Props): JSX.Element {
   ])
 
   return (
-    <Stack space="$4">
-      <Stack ai="center" space="$4">
+    <Stack gap="$4">
+      <Stack ai="center" gap="$4">
         <Text fos={18} ff="$body700" col="$white">
           {title}
         </Text>

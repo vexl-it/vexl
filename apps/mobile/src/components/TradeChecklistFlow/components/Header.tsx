@@ -7,7 +7,7 @@ interface Props {
 
 function Header({title, subtitle}: Props): JSX.Element {
   return (
-    <Stack space="$2" mt="$4" maw="80%">
+    <Stack gap="$2" mt="$4" maw="80%">
       <Text fos={24} ff="$heading" col="$white">
         {title}
       </Text>

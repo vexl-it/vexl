@@ -68,7 +68,7 @@ function PremiumOrDiscountDetail({
     <Modal animationType="fade" transparent visible={visible}>
       <Screen customHorizontalPadding={16}>
         <KeyboardAvoidingView>
-          <Stack flex={1} space="$4">
+          <Stack flex={1} gap="$4">
             <ScreenTitle
               text={t('offerForm.premiumOrDiscount.premiumOrDiscount')}
               onBackButtonPress={onClose}

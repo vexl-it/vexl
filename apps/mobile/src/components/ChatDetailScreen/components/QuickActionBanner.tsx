@@ -44,7 +44,7 @@ function QuickActionBannerUi({
   return (
     <XStack
       h={QUICK_ACTION_BANNER_HEIGHT_WITH_PADDING}
-      space="$2"
+      gap="$2"
       bc="$white"
       px="$4"
       ai="center"

@@ -34,7 +34,7 @@ function TradeCalculator({
   )
 
   return (
-    <Stack space="$4">
+    <Stack gap="$4">
       <XStack ai="center" jc="space-between">
         <SwitchTradePriceTypeButton
           onPress={() => {
@@ -51,7 +51,7 @@ function TradeCalculator({
         />
       </XStack>
       {tradePriceType === 'custom' && children}
-      <Stack space="$2">
+      <Stack gap="$2">
         <BtcAmountInput btcValueAtom={btcInputValueAtom} />
         <FiatAmountInput
           showPremiumInfoMessage

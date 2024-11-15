@@ -27,7 +27,7 @@ function FooterButtons(): JSX.Element | null {
   }, [secondaryFooterButtonState.onPress])
 
   return (
-    <XStack jc="space-around" space="$2" pt="$1">
+    <XStack jc="space-around" gap="$2" pt="$1">
       {!primaryFooterButtonState.hidden && (
         <Button
           fullSize

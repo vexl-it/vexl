@@ -27,7 +27,7 @@ function StackButton({
   return (
     <TouchableOpacity disabled={displaySwitch} onPress={onPress}>
       <XStack ai="center" jc="space-between" px="$4" py="$4">
-        <XStack space="$3" ai="center">
+        <XStack gap="$3" ai="center">
           <Image
             stroke={
               isNegative

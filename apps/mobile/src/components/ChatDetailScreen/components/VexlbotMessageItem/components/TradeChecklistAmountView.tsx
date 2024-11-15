@@ -158,7 +158,7 @@ function TradeChecklistAmountView(): JSX.Element | null {
       amountDataToDisplay.status === 'pending'
     ) {
       return (
-        <XStack ai="center" jc="space-between" space="$2">
+        <XStack ai="center" jc="space-between" gap="$2">
           <Button
             fullSize
             disabled={!amountData?.received}

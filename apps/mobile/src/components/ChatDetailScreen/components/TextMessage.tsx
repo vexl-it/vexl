@@ -201,7 +201,7 @@ function TextMessage({
         <XStack
           flex={1}
           flexDirection={!isMine ? 'row' : 'row-reverse'}
-          space="$2"
+          gap="$2"
           alignItems="center"
         >
           <TouchableWithoutFeedback style={{flex: 1}} onPress={toggleExtended}>

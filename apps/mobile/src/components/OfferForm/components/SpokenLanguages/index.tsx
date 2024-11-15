@@ -58,7 +58,7 @@ function SpokenLanguagesComponent({
           {t('offerForm.spokenLanguages.indicatePreferredLanguage')}
         </Text>
       </DropdownSelectButton>
-      <XStack ai="center" mt="$4" flexWrap="wrap" space="$2">
+      <XStack ai="center" mt="$4" flexWrap="wrap" gap="$2">
         {spokenLanguagesAtoms.map((spokenLanguageAtom) => (
           <Stack key={atomKeyExtractor(spokenLanguageAtom)} mt="$2">
             <OfferFormSpokenLanguageCell

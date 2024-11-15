@@ -82,7 +82,7 @@ export default function LocationMapSelect({
         initialValue={initialValue}
         onPick={setPickedValue}
         topChildren={
-          <YStack marginVertical="$2" marginHorizontal="$4" space="$4">
+          <YStack marginVertical="$2" marginHorizontal="$4" gap="$4">
             <IconButton
               variant="primary"
               icon={backButtonSvg}
@@ -91,7 +91,7 @@ export default function LocationMapSelect({
           </YStack>
         }
         bottomChildren={
-          <YStack margin="$2" space="$2">
+          <YStack margin="$2" gap="$2">
             <Input
               onChangeText={setNote}
               placeholder={t('tradeChecklist.location.addNote')}

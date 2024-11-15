@@ -44,7 +44,7 @@ function ToastNotificationContent({
         <XStack
           ai="center"
           jc={showCloseButton ? 'space-between' : undefined}
-          space="$2"
+          gap="$2"
           px="$2"
           py="$2"
           bc="$main"

@@ -38,7 +38,7 @@ function CommonFriends({
   if (commonFriends.length === 0) return null
 
   return (
-    <YStack space="$2">
+    <YStack gap="$2">
       <TouchableOpacity
         disabled={commonFriends.length === 0}
         onPress={() => {

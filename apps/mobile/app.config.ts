@@ -97,6 +97,9 @@ export default {
         },
       ],
     },
+    'entitlements': {
+      'aps-environment': 'development',
+    },
   },
   'android': {
     'versionCode': VERSION_CODE,

@@ -57,7 +57,7 @@ function Item<T>({
         >
           {item.title}
         </Text>
-        <XStack space="$2" ai="center">
+        <XStack gap="$2" ai="center">
           {!!item.rightText && (
             <Text fos={12} ff="$body500" color="$greyOnBlack">
               {item.rightText}

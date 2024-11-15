@@ -32,8 +32,8 @@ function ScreenTitle({
   const safeGoBack = useSafeGoBack()
 
   return (
-    <YStack bc="transparent" space="$4" pb="$1" {...props}>
-      <XStack ai="flex-start" space="$4">
+    <YStack bc="transparent" gap="$4" pb="$1" {...props}>
+      <XStack ai="flex-start" gap="$4">
         {!!withBackButton && (
           <IconButton
             testID="@screenTitle/backButton"

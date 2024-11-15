@@ -111,7 +111,7 @@ function QrScanner(): JSX.Element {
 
   return (
     <Stack>
-      <YStack space="$3" height={Dimensions.get('screen').height * 0.7}>
+      <YStack gap="$3" height={Dimensions.get('screen').height * 0.7}>
         {error ? (
           <Text
             fontSize={20}
@@ -143,7 +143,7 @@ function QrScanner(): JSX.Element {
           </Stack>
         )}
         {!hasPermissions && (
-          <YStack space="$3" f={1} alignItems="center" justifyContent="center">
+          <YStack gap="$3" f={1} alignItems="center" justifyContent="center">
             <Text
               fontSize={20}
               fontFamily="$body500"

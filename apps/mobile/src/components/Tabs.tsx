@@ -16,7 +16,7 @@ interface Props<T> {
 
 function Tabs<T>({activeTab, onTabPress, tabs}: Props<T>): JSX.Element {
   return (
-    <XStack ai="center" br="$5" bg="$grey" p="$1" space="$1">
+    <XStack ai="center" br="$5" bg="$grey" p="$1" gap="$1">
       {tabs.map((tab) => (
         <TouchableOpacity
           testID={tab.testID}

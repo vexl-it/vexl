@@ -49,7 +49,7 @@ const ZoomedImage = gestureHandlerRootHOC(() => {
       <XStack
         pos="absolute"
         ai="center"
-        space="$2"
+        gap="$2"
         top={top}
         right="$4"
         zIndex="$100"

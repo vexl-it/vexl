@@ -24,7 +24,7 @@ function RerequestOrCancelButton({
   const cancelRequest = useSetAtom(cancelRequestActionAtom)
 
   return (
-    <YStack space="$2" pt="$2">
+    <YStack gap="$2" pt="$2">
       {!!rerequestInfo.canBeRerequested && (
         <Button
           disabled={rerequestButtonDisabled}

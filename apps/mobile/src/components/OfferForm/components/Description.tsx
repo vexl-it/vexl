@@ -55,10 +55,9 @@ function Description({
       <Stack mt="$4" br="$4" p="$4" bc="$grey">
         <Input
           testID="@offerForm/descriptionInput"
+          verticalAlign="top"
           maxLength={MAX_INPUT_LENGTH}
-          multiline
-          textAlignVertical="top"
-          numberOfLines={5}
+          rows={5}
           variant="transparentOnGrey"
           value={offerDescription}
           onChangeText={setOfferDescription}

@@ -60,7 +60,7 @@ function ReportIssue(): JSX.Element {
   )
 
   return (
-    <Stack space="$2" jc="flex-end">
+    <Stack gap="$2" jc="flex-end">
       <Text
         col="$black"
         my="$4"

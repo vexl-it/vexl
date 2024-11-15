@@ -39,7 +39,7 @@ function PriceCalculator({
   currencySelectVisibleAtom,
 }: Props): JSX.Element {
   return (
-    <YStack space="$2">
+    <YStack gap="$2">
       <Stack als="flex-end">
         <CurrentBtcPrice currencyAtom={currencyAtom} />
       </Stack>

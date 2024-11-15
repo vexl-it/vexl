@@ -104,7 +104,7 @@ function SimulateMissingOfferInbox(): JSX.Element {
   }
 
   return (
-    <YStack space="$2">
+    <YStack gap="$2">
       <Text color="$black" fos={25}>
         Simulate missing offer inbox
       </Text>

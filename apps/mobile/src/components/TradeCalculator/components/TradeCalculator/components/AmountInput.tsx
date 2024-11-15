@@ -76,7 +76,7 @@ function AmountInput(
                 ref={inputRef}
                 placeholderTextColor={getTokens().color.greyAccent1.val}
                 keyboardType="decimal-pad"
-                numberOfLines={1}
+                rows={1}
                 textAlign="right"
                 selectTextOnFocus
                 textColor={isFocused ? '$main' : '$white'}

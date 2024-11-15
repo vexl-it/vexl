@@ -92,7 +92,7 @@ function CustomTabBar({
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        space="$2"
+        gap="$2"
         contentContainerStyle={{
           alignSelf: 'flex-start',
           alignItems: 'center',

@@ -17,7 +17,7 @@ function Network({btcNetworkAtom}: Props): JSX.Element | null {
   const [btcNetwork, setBtcNetwork] = useAtom(btcNetworkAtom)
 
   return (
-    <YStack space="$2">
+    <YStack gap="$2">
       {content.map((cell) => (
         <SelectableCell
           key={cell.type}

@@ -57,7 +57,7 @@ function ChatsList(): JSX.Element | null {
             })
           }}
         >
-          <Stack space="$2">
+          <Stack gap="$2">
             <Text textAlign="center" col="$greyOnWhite" fos={20} ff="$body600">
               {t('messages.youDontHaveAnyOpenChats')}
             </Text>

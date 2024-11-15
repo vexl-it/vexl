@@ -27,7 +27,7 @@ function Title({offer}: Props): JSX.Element {
       }
       withBackButton
     >
-      <XStack ai="center" space="$2">
+      <XStack ai="center" gap="$2">
         {!offer.flags.reported && (
           <IconButton
             variant="dark"

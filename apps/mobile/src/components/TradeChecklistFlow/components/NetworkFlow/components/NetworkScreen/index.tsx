@@ -89,7 +89,7 @@ function NetworkScreen({
           icon={networkSvg}
           mt="$4"
         />
-        <Stack space="$6">
+        <Stack gap="$6">
           <LightningOrOnChain />
           <BtcAddress />
         </Stack>

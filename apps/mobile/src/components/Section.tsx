@@ -30,7 +30,7 @@ function Section({
 }: SectionProps): JSX.Element {
   return (
     <YStack mb="$4">
-      <XStack ai="center" py="$4" space="$2">
+      <XStack ai="center" py="$4" gap="$2">
         <SvgImage
           width={24}
           height={24}

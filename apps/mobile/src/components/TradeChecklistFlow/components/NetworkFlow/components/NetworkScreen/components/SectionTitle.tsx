@@ -9,7 +9,7 @@ interface Props extends StackProps {
 
 function SectionTitle({icon, text, ...props}: Props): JSX.Element {
   return (
-    <XStack ai="center" space="$2" mb="$4" {...props}>
+    <XStack ai="center" gap="$2" mb="$4" {...props}>
       <Image
         source={icon}
         width={24}

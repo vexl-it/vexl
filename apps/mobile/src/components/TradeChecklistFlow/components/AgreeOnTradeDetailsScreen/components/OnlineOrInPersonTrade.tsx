@@ -22,7 +22,7 @@ function OnlineOrInPersonTrade(): JSX.Element {
 
   return (
     <>
-      <Stack space="$3">
+      <Stack gap="$3">
         <Stack als="center">
           <Image
             height={90}

@@ -115,7 +115,7 @@ function Info({
         title={t('offerForm.premiumOrDiscount.premiumOrDiscountExplained')}
         image={stayAnonymousSvg}
       >
-        <YStack space="$6">
+        <YStack gap="$6">
           <Text fos={18} color="$greyOnWhite">
             {iAmTheBuyer
               ? t('offerForm.premiumOrDiscount.influenceImpactOfYourBuyOffer')

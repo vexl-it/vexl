@@ -20,8 +20,8 @@ function TextComment(): JSX.Element {
           placeholderTextColor={getTokens().color.greyOnBlack.val}
           maxLength={MAX_INPUT_LENGTH}
           multiline
-          textAlignVertical="top"
-          numberOfLines={10}
+          verticalAlign="top"
+          rows={10}
           variant="transparentOnGrey"
           value={textComment}
           onChangeText={setTextComment}

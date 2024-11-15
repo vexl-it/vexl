@@ -67,7 +67,7 @@ function BtcAddressScreen(): JSX.Element {
             }}
           />
           {!!displayParsingError && (
-            <XStack ai="center" space="$2" mt="$2" ml="$2">
+            <XStack ai="center" gap="$2" mt="$2" ml="$2">
               <Image source={infoSvg} fill={getTokens().color.red.val} />
               <Text col="$red" fos={14} ff="$body500">
                 {t('tradeChecklist.network.invalidBtcAddress')}

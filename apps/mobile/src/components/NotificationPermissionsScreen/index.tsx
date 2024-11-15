@@ -37,7 +37,7 @@ export function NotificationPermissionsScreen(): JSX.Element {
           )}`}
         </Text>
       </WhiteContainer>
-      <XStack space="$2" mb="$2" mt="$4">
+      <XStack gap="$2" mb="$2" mt="$4">
         <Button
           fullSize
           onPress={() => {

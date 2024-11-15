@@ -14,7 +14,7 @@ function Objections(): JSX.Element {
   const starRating = useAtomValue(starRatingAtom)
 
   return (
-    <XStack fw="wrap" ai="center" jc="center" space="$2">
+    <XStack fw="wrap" ai="center" jc="center" gap="$2">
       {starRating >= POSITIVE_STAR_RATING_THRESHOLD
         ? objectionTypePositiveOptions.map((objection) => (
             <ObjectionCell key={objection} objection={objection} />

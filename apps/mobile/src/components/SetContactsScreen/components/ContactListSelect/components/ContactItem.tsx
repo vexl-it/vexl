@@ -58,7 +58,7 @@ function ContactItem({contactAtom}: Props): JSX.Element {
           {normalizedNumber}
         </Text>
       </Stack>
-      <XStack space="$2">
+      <XStack gap="$2">
         <IconButton
           variant="primary"
           height={32}

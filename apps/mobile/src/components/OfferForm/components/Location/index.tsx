@@ -90,7 +90,7 @@ function LocationComponent({
   }
 
   return (
-    <YStack space="$2" mb="$4">
+    <YStack gap="$2" mb="$4">
       <XStack ai="center" jc="space-between" py="$4">
         <XStack f={1} ai="center" mr="$1">
           <Stack mr="$2">
@@ -133,7 +133,7 @@ function LocationComponent({
         (listingType === 'OTHER' && !!locationActive) ||
         locationState?.includes('IN_PERSON')
       ) && (
-        <YStack space="$2">
+        <YStack gap="$2">
           {!!(!location || (location && location.length < 3)) && (
             <AddCityOrDistrict
               onPress={() => {
@@ -177,7 +177,7 @@ function LocationComponent({
           title={t('offerForm.location.whatToWatchOutForOnline')}
           image={anonymousCounterpartSvg}
         >
-          <YStack space="$6">
+          <YStack gap="$6">
             <Text fos={18} color="$greyOnWhite">
               {t('offerForm.location.moneySentByRandomPerson')}
             </Text>

@@ -69,7 +69,7 @@ function ChatRequestPreview({
           px="$4"
           py="$4"
           bg="$darkRed"
-          space="$2"
+          gap="$2"
         >
           <Image source={flagSvg} stroke={tokens.color.red.val} />
           <Text fos={16} col="$red">
@@ -108,7 +108,7 @@ function ChatRequestPreview({
         pt="$6"
         pb="$2"
         px="$6"
-        space="$4"
+        gap="$4"
       >
         {!!offer?.flags.reported && (
           <XStack
@@ -117,7 +117,7 @@ function ChatRequestPreview({
             px="$4"
             py="$4"
             bg="$darkRed"
-            space="$2"
+            gap="$2"
           >
             <Image source={flagSvg} stroke={tokens.color.red.val} />
             <Text fos={16} col="$red">
@@ -127,12 +127,12 @@ function ChatRequestPreview({
         )}
         {!!showRequestMessage && requestMessageSection}
         {mode === 'commonFirst' ? (
-          <YStack space="$4">
+          <YStack gap="$4">
             {commonFriendsSection}
             {offerInfoPreviewSection}
           </YStack>
         ) : (
-          <Stack space="$4">
+          <Stack gap="$4">
             {offerInfoPreviewSection}
             {commonFriendsSection}
           </Stack>

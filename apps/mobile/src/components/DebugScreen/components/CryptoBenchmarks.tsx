@@ -58,7 +58,7 @@ export default function CryptoBenchmarks(): JSX.Element {
   }
 
   return (
-    <YStack space="$2">
+    <YStack gap="$2">
       <Text fos={20} color="$black">
         For each crypto operation, we run {NUMBER_OF_GENERATIONS} iterations and
         measure the time

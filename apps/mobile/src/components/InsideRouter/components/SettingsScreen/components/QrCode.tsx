@@ -37,7 +37,7 @@ function QrCode(): JSX.Element {
 
   return (
     <Stack>
-      <YStack ai="center" space="$4">
+      <YStack ai="center" gap="$4">
         <Stack height={350} ai="center" jc="center">
           <SvgQRCode
             size={300}

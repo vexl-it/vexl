@@ -51,7 +51,7 @@ function CurrencyComponent({
         }}
       >
         {currency ? (
-          <XStack ai="center" space="$1">
+          <XStack ai="center" gap="$1">
             <Text ff="$body500" fos={18} col="$main">
               {currencies[currency].symbol}
             </Text>

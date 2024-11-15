@@ -41,7 +41,7 @@ function Info({
       br="$4"
     >
       <XStack ai="center" justifyContent="space-between">
-        <XStack f={1} space="$2" ai="center" mr="$1">
+        <XStack f={1} gap="$2" ai="center" mr="$1">
           <SvgImage
             fill={
               variant === 'pink' ? tokens.color.pink.val : tokens.color.main.val

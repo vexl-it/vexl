@@ -25,7 +25,7 @@ function ContactTypeAndCommonNumber({
   return (
     <XStack
       flexWrap="wrap"
-      space="$1"
+      gap="$1"
       justifyContent={center ? 'center' : 'flex-start'}
       alignItems="center"
     >
@@ -35,7 +35,7 @@ function ContactTypeAndCommonNumber({
           : friendLevel.includes('SECOND_DEGREE') && t('offer.friendOfFriend')}
       </Text>
       <Text col="$greyOnBlack">•</Text>
-      <XStack ai="center" space="$1">
+      <XStack ai="center" gap="$1">
         <Stack w={14} h={14}>
           <Image source={friendsSvg} />
         </Stack>

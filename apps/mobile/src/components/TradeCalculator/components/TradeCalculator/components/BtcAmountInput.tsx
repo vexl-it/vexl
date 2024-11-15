@@ -71,7 +71,7 @@ function BtcAmountInput({
     >
       <Stack>
         <TouchableOpacity style={{width: 65}} onPress={switchBtcOrSatValue}>
-          <XStack space="$2">
+          <XStack gap="$2">
             <Text fontSize={18} color="$white" fontFamily="$body500">
               {btcOrSat}
             </Text>

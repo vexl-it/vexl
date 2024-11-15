@@ -8,7 +8,7 @@ interface Props {
 function getBtcPragueLogoSvg({darkBackground}: Props): SvgString {
   const fill = darkBackground ? '#FFFFFF' : '#1F142C'
   return stringToSvgStringRuntimeError(`<svg id="Vrstva_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-    viewBox="0 0 126 44" xml:space="preserve">
+    viewBox="0 0 126 44" xml:gap="preserve">
     <g>
     <defs>
     <rect id="SVGID_1_" y="0" width="125.6" height="44"/>

@@ -126,12 +126,12 @@ function RequestScreen(): JSX.Element {
         showsVerticalScrollIndicator={false}
         extraHeight={SCROLL_EXTRA_OFFSET}
       >
-        <YStack space="$6" f={1} mx="$4" my="$6">
+        <YStack gap="$6" f={1} mx="$4" my="$6">
           {!!offer && (
             <ChatRequestPreview showRequestMessage mode="commonFirst" />
           )}
 
-          <YStack space="$2">
+          <YStack gap="$2">
             {hasPreviousCommunication === 'anotherInteractionWithHistory' && (
               <InfoSquare onPress={onHistoryPress}>
                 {t('messages.showFullChatHistory')}
@@ -172,7 +172,7 @@ function RequestScreen(): JSX.Element {
       <Stack mx="$4">
         {requestState === 'requested' &&
           (requestedByMe ? (
-            <YStack space="$2">
+            <YStack gap="$2">
               <RerequestOrCancelButton
                 onRerequestPressed={onRerequestPressed}
                 rerequestButtonDisabled={!text.trim()}
@@ -182,7 +182,7 @@ function RequestScreen(): JSX.Element {
             <AcceptDeclineButtons />
           ))}
         {requestState === 'cancelled' && (
-          <Stack space="$2">
+          <Stack gap="$2">
             <RerequestOrCancelButton
               onRerequestPressed={onRerequestPressed}
               rerequestButtonDisabled={!text.trim()}

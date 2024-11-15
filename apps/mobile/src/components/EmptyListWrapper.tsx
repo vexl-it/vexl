@@ -17,7 +17,7 @@ function EmptyListContent({
   onButtonPress,
 }: ContentProps): JSX.Element {
   return (
-    <YStack f={1} ai="center" jc="center" py="$4" space="$4">
+    <YStack f={1} ai="center" jc="center" py="$4" gap="$4">
       <Stack ai="center" jc="center" p="$2" bc="$grey" br="$6">
         <Image source={anonymousAvatarHappyNoBackgroundSvg} />
       </Stack>

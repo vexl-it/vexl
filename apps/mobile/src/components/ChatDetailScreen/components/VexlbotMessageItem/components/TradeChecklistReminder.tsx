@@ -64,7 +64,7 @@ function TradeChecklistReminder(): JSX.Element | null {
         {name: otherSideData.userName}
       )}
     >
-      <Stack space="$4">
+      <Stack gap="$4">
         {offerIsInPerson ? (
           <Button
             onPress={() => {
@@ -97,7 +97,7 @@ function TradeChecklistReminder(): JSX.Element | null {
             setDontShowSwitchValue(!dontShowSwitchValue)
           }}
         >
-          <XStack space="$2">
+          <XStack gap="$2">
             <Checkbox
               size="small"
               value={dontShowSwitchValue}

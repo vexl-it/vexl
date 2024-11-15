@@ -41,7 +41,7 @@ function ContactsListEmpty(): JSX.Element {
           : undefined
       }
     >
-      <Stack space="$2">
+      <Stack gap="$2">
         <Text textAlign="center" col="$greyOnWhite" fos={20} ff="$body600">
           {!permissionsGranted
             ? t('contacts.youHaveNotAllowedAccessToYourContacts')

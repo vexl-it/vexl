@@ -42,7 +42,7 @@ function StartScreen({navigation}: Props): JSX.Element {
         </Stack>
       </WhiteContainer>
       <XStack ai="center" py="$4" px="$5" br="$5" my="$3" bc="$backgroundBlack">
-        <XStack ai="center" space="$2">
+        <XStack ai="center" gap="$2">
           <SVGImage source={notepadSvg} />
           <XStack f={1} ai="center" jc="space-between">
             <XStack fs={1} ai="center" fw="wrap">

@@ -87,7 +87,7 @@ function AppLogsScreen(): JSX.Element {
         <Stack f={1} my="$1">
           <LogsList />
         </Stack>
-        <XStack space="$2">
+        <XStack gap="$2">
           <Button
             fullSize
             size="small"

@@ -47,7 +47,7 @@ function CalculatorInput(
           <InputStyled
             ref={inputRef}
             keyboardType="decimal-pad"
-            numberOfLines={1}
+            rows={1}
             textAlign="left"
             selectTextOnFocus
             selectionColor={getTokens().color.yellowAccent1.val}

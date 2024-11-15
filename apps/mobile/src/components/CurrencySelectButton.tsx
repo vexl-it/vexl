@@ -15,7 +15,7 @@ function CurrencySelectButton({currencyAtom, ...props}: Props): JSX.Element {
 
   return (
     <TouchableOpacity style={{width: 65}} {...props}>
-      <XStack space="$2">
+      <XStack gap="$2">
         <Text fontSize={18} color="$white" fontFamily="$body500">
           {currency ?? currencies.USD.code}
         </Text>

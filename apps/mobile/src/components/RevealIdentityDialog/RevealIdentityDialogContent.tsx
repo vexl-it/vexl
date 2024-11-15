@@ -28,7 +28,7 @@ function Content({
   const [checkboxValue, setCheckboxValue] = useAtom(checkboxValueAtom)
 
   return (
-    <Stack space="$2">
+    <Stack gap="$2">
       <Text fontFamily="$heading" fontSize={24} color="$black">
         {title}
       </Text>
@@ -42,7 +42,7 @@ function Content({
           setCheckboxValue(!checkboxValue)
         }}
       >
-        <XStack ai="center" space="$2">
+        <XStack ai="center" gap="$2">
           <Checkbox
             disabled={checkboxDisabled}
             value={checkboxValue}

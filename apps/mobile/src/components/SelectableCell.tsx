@@ -35,7 +35,7 @@ function SelectableCell<T>({
         p={size === 'large' ? '$4' : '$3'}
         bg={selected ? '$darkBrown' : '$grey'}
       >
-        <XStack ai="flex-start" space="$2">
+        <XStack ai="flex-start" gap="$2">
           {selected ? (
             <Image
               width={size === 'large' ? 20 : 16}

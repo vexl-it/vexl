@@ -15,7 +15,7 @@ function ForceUpdateScreen(): JSX.Element {
   const {t} = useTranslation()
   return (
     <Screen>
-      <YStack p="$2" f={1} space="$2">
+      <YStack p="$2" f={1} gap="$2">
         <WhiteContainer>
           <Stack f={1} jc="center" ai="center">
             <Image

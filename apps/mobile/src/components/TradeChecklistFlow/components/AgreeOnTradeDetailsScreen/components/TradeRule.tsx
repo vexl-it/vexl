@@ -7,7 +7,7 @@ interface Props {
 
 function TradeRule({ruleNumber, title}: Props): JSX.Element {
   return (
-    <XStack ai="center" space="$4">
+    <XStack ai="center" gap="$4">
       <Stack ai="center" jc="center" h={40} w={40} bc="$grey" br="$5">
         <Text fos={18} ff="$body500" col="$greyOnBlack">
           {ruleNumber}

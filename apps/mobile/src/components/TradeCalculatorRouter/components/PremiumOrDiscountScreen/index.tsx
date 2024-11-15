@@ -42,7 +42,7 @@ function PremiumOrDiscountScreen(): JSX.Element {
       />
       <Stack f={1} bc="$black" pb="$1">
         <ScrollView showsVerticalScrollIndicator={false}>
-          <Stack pt="$4" space="$4">
+          <Stack pt="$4" gap="$4">
             <OfferTypeSection
               listingTypeAtom={listingTypeAtom}
               offerTypeAtom={offerTypeAtom}

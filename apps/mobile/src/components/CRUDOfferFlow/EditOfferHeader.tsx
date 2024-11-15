@@ -44,16 +44,16 @@ function EditOfferHeader({offerId}: Props): JSX.Element {
   )
 
   return (
-    <Stack space="$4">
+    <Stack gap="$4">
       <ScreenTitle
         text={t('editOffer.editOffer')}
         withBackButton
         withBottomBorder
       >
         <Stack>
-          <XStack space="$2" mb="$4">
+          <XStack gap="$2" mb="$4">
             {isSome(offer) && (
-              <XStack ai="center" space="$2">
+              <XStack ai="center" gap="$2">
                 {isOfferExpired(
                   offer.value.offerInfo?.publicPart?.expirationDate
                 ) && (
@@ -84,7 +84,7 @@ function EditOfferHeader({offerId}: Props): JSX.Element {
             )}
           </XStack>
           {!!offer && (
-            <XStack space="$2" ai="center" jc="flex-end" als="flex-end">
+            <XStack gap="$2" ai="center" jc="flex-end" als="flex-end">
               <Stack
                 h={12}
                 w={12}

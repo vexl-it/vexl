@@ -37,7 +37,7 @@ function BtcOfferColumns({offer}: Props): JSX.Element {
   }, [offer.publicPart.amountBottomLimit])
 
   return (
-    <XStack f={1} space="$1">
+    <XStack f={1} gap="$1">
       <InfoItemContainer>
         {offer.publicPart.amountBottomLimit > 0 ? (
           <PriceText>

@@ -42,7 +42,7 @@ function EditNameScreen(): JSX.Element {
             }}
           />
         </Stack>
-        <Stack pb="$3" space="$2">
+        <Stack pb="$3" gap="$2">
           <Button
             onPress={() => {
               const parsedUserName = UserName.safeParse(name.trim())

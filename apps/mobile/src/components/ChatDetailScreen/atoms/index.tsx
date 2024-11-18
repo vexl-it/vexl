@@ -21,6 +21,7 @@ import {Alert} from 'react-native'
 import blockChatActionAtom from '../../../state/chat/atoms/blockChatActionAtom'
 import cancelRequestActionAtomHandleUI from '../../../state/chat/atoms/cancelRequestActionAtomHandleUI'
 import createCanChatBeRerequestedAtom from '../../../state/chat/atoms/createCanBeRerequestedAtom'
+import {createCanSendMessagesAtom} from '../../../state/chat/atoms/createCanSendMessagesAtom'
 import createIsCancelledAtom from '../../../state/chat/atoms/createIsCancelledAtom'
 import {createOtherSideSupportsTradingChecklistAtom} from '../../../state/chat/atoms/createOtherSideSupportTradingChecklistAtom'
 import {createRequestStateAtom} from '../../../state/chat/atoms/createRequestStateAtom'
@@ -464,19 +465,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     return 'messages'
   })
 
-  const canSendMessagesAtom = selectAtom(messagesAtom, (o) => {
-    const lastMessage = o.at(-1)
-
-    return !(
-      (lastMessage?.state === 'received' &&
-        lastMessage.message.messageType === 'INBOX_DELETED') ||
-      lastMessage?.message.messageType === 'DELETE_CHAT' ||
-      lastMessage?.message.messageType === 'REQUEST_MESSAGING' ||
-      lastMessage?.message.messageType === 'CANCEL_REQUEST_MESSAGING' ||
-      lastMessage?.message.messageType === 'DISAPPROVE_MESSAGING' ||
-      lastMessage?.message.messageType === 'BLOCK_CHAT'
-    )
-  })
+  const canSendMessagesAtom = createCanSendMessagesAtom(messagesAtom)
 
   const revealIdentityAtom = revealIdentityActionAtom(chatWithMessagesAtom)
   const revealContactAtom = revealContactActionAtom(chatWithMessagesAtom)

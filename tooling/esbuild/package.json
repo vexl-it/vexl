@@ -18,7 +18,7 @@
     "@vexl-next/eslint-config": "0.0.0",
     "@vexl-next/prettier-config": "0.0.0",
     "@vexl-next/tsconfig": "0.0.0",
-    "eslint": "^8.50.0",
+    "eslint": "^8.57.1",
     "prettier": "^3.3.2",
     "typescript": "^5.6.3"
   },

@@ -35,7 +35,7 @@ function MessagesScreen(): JSX.Element {
       <ChatHeader
         mode={showModal ? 'photoTop' : 'photoLeft'}
         leftButton={showModal ? 'closeModal' : 'back'}
-        rightButton="tradeChecklist"
+        rightButton={canSendMessages ? 'tradeChecklist' : null}
         onPressMiddle={() => {
           setShowModal((v) => !v)
         }}

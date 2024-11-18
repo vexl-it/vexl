@@ -14,6 +14,9 @@ import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {atom} from 'jotai'
+import {focusAtom} from 'jotai-optics'
+import {Alert} from 'react-native'
+import {createCanSendMessagesAtom} from '../../../state/chat/atoms/createCanSendMessagesAtom'
 import createSubmitChecklistUpdateActionAtom from '../../../state/chat/atoms/sendTradeChecklistUpdateActionAtom'
 import {
   chatWithMessagesAtom,
@@ -195,6 +198,18 @@ export const submitTradeChecklistUpdatesActionAtom = atom(
     const {t} = get(translationAtom)
     const submitTradeChecklistUpdateAtom =
       createSubmitChecklistUpdateActionAtom(chatWithMessagesAtom)
+
+    const canSendMessagesAtom = createCanSendMessagesAtom(
+      focusAtom(chatWithMessagesAtom, (s) => s.prop('messages'))
+    )
+
+    if (!get(canSendMessagesAtom)) {
+      Alert.alert(
+        t('tradeChecklist.cannotSendMessages'),
+        t('tradeChecklist.cannotSendMessagesDescription')
+      )
+      return T.of(false)
+    }
 
     const updatesToBeSent = get(updatesToBeSentAtom)
     if (Object.keys(updatesToBeSent).length === 0) return T.of(true) // No updates to be sent

@@ -947,6 +947,8 @@
   "tradeChecklist.agreeOnTradeDetails": "Agree on trade details",
   "tradeChecklist.thisDealIsFullyOnline": "This deal is fully online. Be careful and consider risks. Meeting in person is always safer.",
   "tradeChecklist.readMoreInFullArticle": "Read more in full article",
+  "tradeChecklist.cannotSendMessages": "Can not send trade checklist update.",
+  "tradeChecklist.cannotSendMessagesDescription": "The other side has left the chat or removed their account",
   "tradeChecklist.tradeOnlyWithPeopleYouKnow": "Trade online only with people you know.",
   "tradeChecklist.alwaysMoneyBeforeBtc": "Always money before BTC.",
   "tradeChecklist.watchOutForSuspiciousBehaviour": "Watch out for suspicious behaviour.",

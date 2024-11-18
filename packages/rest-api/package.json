@@ -22,7 +22,7 @@
     "rimraf": "^4.4.0",
     "ts-jest": "^29.2.0",
     "ts-node": "^10.9.1",
-    "typescript": "~5.3.3"
+    "typescript": "^5.6.3"
   },
   "dependencies": {
     "@effect/platform": "^0.69.19",

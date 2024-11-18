@@ -8,6 +8,8 @@ const COMMIT_HASH = process.env.EAS_BUILD_GIT_COMMIT_HASH ?? 'local'
 // // check if version is valid
 // SemverString.parse(VERSION)
 
+console.log('Building the app with preset:', process.env.NODE_ENV)
+
 const presets = {
   stage: {
     enableHiddenFeatures: true,
@@ -98,7 +100,8 @@ export default {
       ],
     },
     'entitlements': {
-      'aps-environment': 'development',
+      'aps-environment':
+        process.env.NODE_ENV === 'development' ? 'development' : 'production',
     },
   },
   'android': {

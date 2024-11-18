@@ -77,7 +77,7 @@
     "rimraf": "^4.4.0",
     "ts-jest": "^29.2.0",
     "ts-node": "^10.9.1",
-    "typescript": "~5.3.3",
+    "typescript": "^5.6.3",
     "vite": "^5.2.14"
   },
   "prettier": "@vexl-next/prettier-config"

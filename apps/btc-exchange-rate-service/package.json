@@ -65,7 +65,7 @@
     "ts-node": "^10.9.1",
     "tsc-alias": "^1.8.10",
     "tsx": "^4.16.0",
-    "typescript": "~5.3.3"
+    "typescript": "^5.6.3"
   },
   "prettier": "@vexl-next/prettier-config"
 }

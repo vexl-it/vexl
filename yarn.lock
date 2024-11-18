@@ -9887,7 +9887,7 @@ __metadata:
     ts-node: ^10.9.1
     tsc-alias: ^1.8.10
     tsx: ^4.16.0
-    typescript: ~5.3.3
+    typescript: ^5.6.3
   languageName: unknown
   linkType: soft
 
@@ -9942,7 +9942,7 @@ __metadata:
     tsc-alias: ^1.8.10
     tsx: ^4.16.0
     twilio: ^5.2.1
-    typescript: ~5.3.3
+    typescript: ^5.6.3
   languageName: unknown
   linkType: soft
 
@@ -9997,7 +9997,7 @@ __metadata:
     tsc-alias: ^1.8.10
     tsx: ^4.16.0
     twilio: ^5.2.1
-    typescript: ~5.3.3
+    typescript: ^5.6.3
   languageName: unknown
   linkType: soft
 
@@ -10021,7 +10021,7 @@ __metadata:
     rimraf: ^4.4.0
     ts-jest: ^29.2.0
     ts-node: ^10.9.1
-    typescript: ~5.3.3
+    typescript: ^5.6.3
     zod: ^3.22.3
   languageName: unknown
   linkType: soft
@@ -10085,7 +10085,7 @@ __metadata:
     serve-handler: ^6.1.5
     ts-jest: ^29.2.0
     ts-node: ^10.9.1
-    typescript: ~5.3.3
+    typescript: ^5.6.3
     vite: ^5.2.14
     ws: ^8.17.1
   languageName: unknown
@@ -10114,7 +10114,7 @@ __metadata:
     prettier: ^3.3.2
     rimraf: ^4.4.0
     ts-node: ^10.9.1
-    typescript: ~5.3.3
+    typescript: ^5.6.3
     zod: ^3.22.3
   languageName: unknown
   linkType: soft
@@ -10130,7 +10130,7 @@ __metadata:
     eslint: ^8.50.0
     glob: ^11.0.0
     prettier: ^3.3.2
-    typescript: ~5.3.3
+    typescript: ^5.6.3
   languageName: unknown
   linkType: soft
 
@@ -10151,7 +10151,7 @@ __metadata:
     eslint-plugin-react: ^7.33.2
     eslint-plugin-react-hooks: ^4.6.0
     prettier: ^3.3.2
-    typescript: ~5.3.3
+    typescript: ^5.6.3
   languageName: unknown
   linkType: soft
 
@@ -10200,7 +10200,7 @@ __metadata:
     ts-node: ^10.9.1
     tsc-alias: ^1.8.10
     tsx: ^4.16.0
-    typescript: ~5.3.3
+    typescript: ^5.6.3
   languageName: unknown
   linkType: soft
 
@@ -10232,7 +10232,7 @@ __metadata:
     rimraf: ^4.4.0
     ts-jest: ^29.2.0
     ts-node: ^10.9.1
-    typescript: ~5.3.3
+    typescript: ^5.6.3
     zod: ^3.22.3
   languageName: unknown
   linkType: soft
@@ -10267,7 +10267,7 @@ __metadata:
     rimraf: ^4.4.0
     serve-handler: ^6.1.5
     ts-node: ^10.9.1
-    typescript: ~5.3.3
+    typescript: ^5.6.3
   languageName: unknown
   linkType: soft
 
@@ -10315,7 +10315,7 @@ __metadata:
     rimraf: ^4.4.0
     ts-jest: ^29.2.0
     ts-node: ^10.9.1
-    typescript: ~5.3.3
+    typescript: ^5.6.3
   languageName: unknown
   linkType: soft
 
@@ -10371,7 +10371,7 @@ __metadata:
     tsc-alias: ^1.8.10
     tsx: ^4.16.0
     twilio: ^5.2.1
-    typescript: ~5.3.3
+    typescript: ^5.6.3
   languageName: unknown
   linkType: soft
 
@@ -10526,7 +10526,7 @@ __metadata:
     tamagui: ^1.116.14
     text-encoding: ^0.7.0
     ts-node: ^10.9.1
-    typescript: ~5.3.3
+    typescript: ^5.6.3
     url-parse: ^1.5.10
     zod: ^3.22.3
   languageName: unknown
@@ -10560,7 +10560,7 @@ __metadata:
     fast-check: ^3.20.0
     firebase-admin: ^12.3.1
     prettier: ^3.3.2
-    typescript: ~5.3.3
+    typescript: ^5.6.3
   languageName: unknown
   linkType: soft
 
@@ -10613,7 +10613,7 @@ __metadata:
     ts-node: ^10.9.1
     tsc-alias: ^1.8.10
     tsx: ^4.16.0
-    typescript: ~5.3.3
+    typescript: ^5.6.3
   languageName: unknown
   linkType: soft
 
@@ -10626,7 +10626,7 @@ __metadata:
     prettier-plugin-embed: ^0.4.15
     prettier-plugin-organize-imports: ^3.2.4
     prettier-plugin-sql: ^0.18.0
-    typescript: ~5.3.3
+    typescript: ^5.6.3
   languageName: unknown
   linkType: soft
 
@@ -10654,7 +10654,7 @@ __metadata:
     react-native-builder-bob: ^0.20.0
     release-it: ^15.0.0
     rimraf: ^4.4.0
-    typescript: ~5.3.3
+    typescript: ^5.6.3
   peerDependencies:
     react: "*"
     react-native: "*"
@@ -10686,7 +10686,7 @@ __metadata:
     rimraf: ^4.4.0
     ts-jest: ^29.2.0
     ts-node: ^10.9.1
-    typescript: ~5.3.3
+    typescript: ^5.6.3
     zod: ^3.22.3
   languageName: unknown
   linkType: soft
@@ -10713,7 +10713,7 @@ __metadata:
     rimraf: ^4.4.0
     ts-jest: ^29.2.0
     ts-node: ^10.9.1
-    typescript: ~5.3.3
+    typescript: ^5.6.3
     url-join: ^5.0.0
     zod: ^3.22.3
   languageName: unknown
@@ -10751,7 +10751,7 @@ __metadata:
     redlock: ^5.0.0-beta.2
     rimraf: ^4.4.0
     ts-jest: ^29.2.0
-    typescript: ~5.3.3
+    typescript: ^5.6.3
   languageName: unknown
   linkType: soft
 
@@ -10808,7 +10808,7 @@ __metadata:
     tsc-alias: ^1.8.10
     tsx: ^4.16.0
     twilio: ^5.2.1
-    typescript: ~5.3.3
+    typescript: ^5.6.3
   languageName: unknown
   linkType: soft
 
@@ -10964,7 +10964,7 @@ __metadata:
     react: 18.2.0
     react-dom: 18.2.0
     stream-browserify: ^3.0.0
-    typescript: ~5.3.3
+    typescript: ^5.6.3
     util: ^0.12.5
     vite: ^5.2.14
     vite-plugin-node-polyfills: ^0.21.0
@@ -29552,16 +29552,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:~5.3.3":
-  version: 5.3.3
-  resolution: "typescript@npm:5.3.3"
-  bin:
-    tsc: bin/tsc
-    tsserver: bin/tsserver
-  checksum: 2007ccb6e51bbbf6fde0a78099efe04dc1c3dfbdff04ca3b6a8bc717991862b39fd6126c0c3ebf2d2d98ac5e960bcaa873826bb2bb241f14277034148f41f6a2
-  languageName: node
-  linkType: hard
-
 "typescript@patch:typescript@^4.6.4 || ^5.2.2#~builtin<compat/typescript>, typescript@patch:typescript@^5.6.3#~builtin<compat/typescript>":
   version: 5.6.3
   resolution: "typescript@patch:typescript@npm%3A5.6.3#~builtin<compat/typescript>::version=5.6.3&hash=1f5320"
@@ -29569,16 +29559,6 @@ __metadata:
     tsc: bin/tsc
     tsserver: bin/tsserver
   checksum: ade87bce2363ee963eed0e4ca8a312ea02c81873ebd53609bc3f6dc0a57f6e61ad7e3fb8cbb7f7ab8b5081cbee801b023f7c4823ee70b1c447eae050e6c7622b
-  languageName: node
-  linkType: hard
-
-"typescript@patch:typescript@~5.3.3#~builtin<compat/typescript>":
-  version: 5.3.3
-  resolution: "typescript@patch:typescript@npm%3A5.3.3#~builtin<compat/typescript>::version=5.3.3&hash=1f5320"
-  bin:
-    tsc: bin/tsc
-    tsserver: bin/tsserver
-  checksum: f61375590b3162599f0f0d5b8737877ac0a7bc52761dbb585d67e7b8753a3a4c42d9a554c4cc929f591ffcf3a2b0602f65ae3ce74714fd5652623a816862b610
   languageName: node
   linkType: hard
 

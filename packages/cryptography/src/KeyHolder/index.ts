@@ -51,12 +51,12 @@ function generatePrivateKey(curve: Curve = defaultCurve): PrivateKeyHolder {
 }
 
 export {
+  generatePrivateKey,
+  importPrivateKey,
   PrivateKeyHolder,
   PrivateKeyHolderE,
   PrivateKeyPemBase64,
   PrivateKeyPemBase64E,
   PublicKeyPemBase64,
   PublicKeyPemBase64E,
-  generatePrivateKey,
-  importPrivateKey,
 }

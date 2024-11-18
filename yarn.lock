@@ -9234,13 +9234,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:^17.0.31":
-  version: 17.0.45
-  resolution: "@types/node@npm:17.0.45"
-  checksum: aa04366b9103b7d6cfd6b2ef64182e0eaa7d4462c3f817618486ea0422984c51fc69fd0d436eae6c9e696ddfdbec9ccaa27a917f7c2e8c75c5d57827fe3d95e8
-  languageName: node
-  linkType: hard
-
 "@types/node@npm:^18.0.0, @types/node@npm:^18.11.18":
   version: 18.19.64
   resolution: "@types/node@npm:18.19.64"
@@ -10509,7 +10502,7 @@ __metadata:
     react-native-phone-number-input: ^2.1.0
     react-native-qrcode-svg: ^6.2.0
     react-native-quick-base64: ^2.0.8
-    react-native-quick-crypto: ^0.6.1
+    react-native-quick-crypto: 0.7.6
     react-native-reanimated: ~3.10.1
     react-native-safe-area-context: 4.10.5
     react-native-screens: 3.31.1
@@ -12043,7 +12036,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"browserify-cipher@npm:^1.0.0":
+"browserify-cipher@npm:^1.0.0, browserify-cipher@npm:^1.0.1":
   version: 1.0.1
   resolution: "browserify-cipher@npm:1.0.1"
   dependencies:
@@ -12077,7 +12070,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"browserify-sign@npm:^4.0.0":
+"browserify-sign@npm:^4.0.0, browserify-sign@npm:^4.2.3":
   version: 4.2.3
   resolution: "browserify-sign@npm:4.2.3"
   dependencies:
@@ -13539,7 +13532,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"create-ecdh@npm:^4.0.0":
+"create-ecdh@npm:^4.0.0, create-ecdh@npm:^4.0.4":
   version: 4.0.4
   resolution: "create-ecdh@npm:4.0.4"
   dependencies:
@@ -13688,6 +13681,26 @@ __metadata:
     randombytes: ^2.0.0
     randomfill: ^1.0.3
   checksum: c1609af82605474262f3eaa07daa0b2140026bd264ab316d4bf1170272570dbe02f0c49e29407fe0d3634f96c507c27a19a6765fb856fed854a625f9d15618e2
+  languageName: node
+  linkType: hard
+
+"crypto-browserify@npm:^3.11.0":
+  version: 3.12.1
+  resolution: "crypto-browserify@npm:3.12.1"
+  dependencies:
+    browserify-cipher: ^1.0.1
+    browserify-sign: ^4.2.3
+    create-ecdh: ^4.0.4
+    create-hash: ^1.2.0
+    create-hmac: ^1.1.7
+    diffie-hellman: ^5.0.3
+    hash-base: ~3.0.4
+    inherits: ^2.0.4
+    pbkdf2: ^3.1.2
+    public-encrypt: ^4.0.3
+    randombytes: ^2.1.0
+    randomfill: ^1.0.4
+  checksum: 4e643dd5acfff80fbe2cc567feb75a22d726cc4df34772c988f326976c3c1ee1f8a611a33498dab11568cff3e134f0bd44a0e1f4c216585e5877ab5327cdb6fc
   languageName: node
   linkType: hard
 
@@ -14369,7 +14382,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"diffie-hellman@npm:^5.0.0":
+"diffie-hellman@npm:^5.0.0, diffie-hellman@npm:^5.0.3":
   version: 5.0.3
   resolution: "diffie-hellman@npm:5.0.3"
   dependencies:
@@ -18124,7 +18137,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"hash-base@npm:~3.0":
+"hash-base@npm:~3.0, hash-base@npm:~3.0.4":
   version: 3.0.4
   resolution: "hash-base@npm:3.0.4"
   dependencies:
@@ -25148,7 +25161,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"public-encrypt@npm:^4.0.0":
+"public-encrypt@npm:^4.0.0, public-encrypt@npm:^4.0.3":
   version: 4.0.3
   resolution: "public-encrypt@npm:4.0.3"
   dependencies:
@@ -25366,7 +25379,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"randomfill@npm:^1.0.3":
+"randomfill@npm:^1.0.3, randomfill@npm:^1.0.4":
   version: 1.0.4
   resolution: "randomfill@npm:1.0.4"
   dependencies:
@@ -25802,19 +25815,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-quick-base64@npm:2.0.5":
-  version: 2.0.5
-  resolution: "react-native-quick-base64@npm:2.0.5"
-  dependencies:
-    base64-js: ^1.5.1
-  peerDependencies:
-    react: "*"
-    react-native: "*"
-  checksum: 964599ad68d54dd741357850c72b4a5e08f247fa294590f18866896662107b734b6810703fdd972560cee8087095f14f06fc6ef69944c59c41dbbd885a7832bb
-  languageName: node
-  linkType: hard
-
-"react-native-quick-base64@npm:^2.0.8":
+"react-native-quick-base64@npm:^2.0.5, react-native-quick-base64@npm:^2.0.8":
   version: 2.1.2
   resolution: "react-native-quick-base64@npm:2.1.2"
   dependencies:
@@ -25826,69 +25827,35 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-quick-base64@patch:react-native-quick-base64@npm%3A2.0.5#./.yarn/patches/react-native-quick-base64-npm-2.0.5-8355f57fab.patch::locator=vexl-next%40workspace%3A.":
-  version: 2.0.5
-  resolution: "react-native-quick-base64@patch:react-native-quick-base64@npm%3A2.0.5#./.yarn/patches/react-native-quick-base64-npm-2.0.5-8355f57fab.patch::version=2.0.5&hash=e9a5e1&locator=vexl-next%40workspace%3A."
+"react-native-quick-crypto@npm:0.7.6":
+  version: 0.7.6
+  resolution: "react-native-quick-crypto@npm:0.7.6"
   dependencies:
-    base64-js: ^1.5.1
+    "@craftzdog/react-native-buffer": ^6.0.5
+    events: ^3.3.0
+    readable-stream: ^4.5.2
+    string_decoder: ^1.3.0
+    util: ^0.12.5
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: f07f3d5003997a9048f8cd9f225a37165b4f2dee63b8ee6c6f8c4c41a256198472d1329e653afec981e5cbada265c0b578c9a885454a7bbeec70a5734b26776e
+  checksum: 4143a960c861f0133bba4773737141319d42aa18c814f967635d7852129644925cfd05685337627f130712542d1d3d747851707416817d570558baaf308d35cb
   languageName: node
   linkType: hard
 
-"react-native-quick-crypto@npm:0.6.1":
-  version: 0.6.1
-  resolution: "react-native-quick-crypto@npm:0.6.1"
+"react-native-quick-crypto@patch:react-native-quick-crypto@npm%3A0.7.6#./.yarn/patches/react-native-quick-crypto-npm-0.7.6-b57c066106.patch::locator=vexl-next%40workspace%3A.":
+  version: 0.7.6
+  resolution: "react-native-quick-crypto@patch:react-native-quick-crypto@npm%3A0.7.6#./.yarn/patches/react-native-quick-crypto-npm-0.7.6-b57c066106.patch::version=0.7.6&hash=3ed3ec&locator=vexl-next%40workspace%3A."
   dependencies:
     "@craftzdog/react-native-buffer": ^6.0.5
-    "@types/node": ^17.0.31
-    crypto-browserify: ^3.12.0
     events: ^3.3.0
-    react-native-quick-base64: ^2.0.5
-    stream-browserify: ^3.0.0
+    readable-stream: ^4.5.2
     string_decoder: ^1.3.0
+    util: ^0.12.5
   peerDependencies:
     react: "*"
-    react-native: ">=0.71.0"
-  checksum: 47b227c74cef0c9630ce7e91fe2153bcf2492f3fae175352818ca2278779f28c2932611df44cb8a18cb290da6d73aa3a927bcea56c3a9a4a51db6a7f4f72ac4d
-  languageName: node
-  linkType: hard
-
-"react-native-quick-crypto@patch:react-native-quick-crypto@npm%3A0.6.1#./.yarn/patches/react-native-quick-crypto-npm-0.6.1-02196a3db2.patch::version=0.6.1&hash=206c92&locator=vexl-next%40workspace%3A.":
-  version: 0.6.1
-  resolution: "react-native-quick-crypto@patch:react-native-quick-crypto@npm%3A0.6.1#./.yarn/patches/react-native-quick-crypto-npm-0.6.1-02196a3db2.patch::version=0.6.1&hash=bd29bd&locator=vexl-next%40workspace%3A."
-  dependencies:
-    "@craftzdog/react-native-buffer": ^6.0.5
-    "@types/node": ^17.0.31
-    crypto-browserify: ^3.12.0
-    events: ^3.3.0
-    react-native-quick-base64: ^2.0.5
-    stream-browserify: ^3.0.0
-    string_decoder: ^1.3.0
-  peerDependencies:
-    react: "*"
-    react-native: ">=0.71.0"
-  checksum: 4a10c48f226731873a8d265e789c53eb08077930a96e285a508e9fc65300455037d3fe1558e8ee42b9456278f079f3f0c0bfb2404198949cce3a7b61d2e98aef
-  languageName: node
-  linkType: hard
-
-"react-native-quick-crypto@patch:react-native-quick-crypto@patch%3Areact-native-quick-crypto@npm%253A0.6.1%23./.yarn/patches/react-native-quick-crypto-npm-0.6.1-02196a3db2.patch%3A%3Aversion=0.6.1&hash=206c92&locator=vexl-next%2540workspace%253A.#./.yarn/patches/react-native-quick-crypto-patch-8ba5266875.patch::locator=vexl-next%40workspace%3A.":
-  version: 0.6.1
-  resolution: "react-native-quick-crypto@patch:react-native-quick-crypto@patch%3Areact-native-quick-crypto@npm%253A0.6.1%23./.yarn/patches/react-native-quick-crypto-npm-0.6.1-02196a3db2.patch%3A%3Aversion=0.6.1&hash=bd29bd&locator=vexl-next%2540workspace%253A.#./.yarn/patches/react-native-quick-crypto-patch-8ba5266875.patch::version=0.6.1&hash=47638b&locator=vexl-next%40workspace%3A."
-  dependencies:
-    "@craftzdog/react-native-buffer": ^6.0.5
-    "@types/node": ^17.0.31
-    crypto-browserify: ^3.12.0
-    events: ^3.3.0
-    react-native-quick-base64: ^2.0.5
-    stream-browserify: ^3.0.0
-    string_decoder: ^1.3.0
-  peerDependencies:
-    react: "*"
-    react-native: ">=0.71.0"
-  checksum: 322da93f2ced6c9d972695f5508798e9c6368435608e9931d2153c322f1d84ce5e1d3d782632334f2baa9b380181d6f1dc5629d9d52f389bc0aa3da65abe7f22
+    react-native: "*"
+  checksum: 24e73dd7b204ddfedb5bce6400449a3f05581f5fce6b3e9fd6228481bed6e4511c0186ad6a6eff5f13ce76806f061c39209040147791465117ff23f1b678e8c0
   languageName: node
   linkType: hard
 
@@ -26363,6 +26330,19 @@ __metadata:
     string_decoder: ~1.1.1
     util-deprecate: ~1.0.1
   checksum: 65645467038704f0c8aaf026a72fbb588a9e2ef7a75cd57a01702ee9db1c4a1e4b03aaad36861a6a0926546a74d174149c8c207527963e0c2d3eee2f37678a42
+  languageName: node
+  linkType: hard
+
+"readable-stream@npm:^4.5.2":
+  version: 4.5.2
+  resolution: "readable-stream@npm:4.5.2"
+  dependencies:
+    abort-controller: ^3.0.0
+    buffer: ^6.0.3
+    events: ^3.3.0
+    process: ^0.11.10
+    string_decoder: ^1.3.0
+  checksum: c4030ccff010b83e4f33289c535f7830190773e274b3fcb6e2541475070bdfd69c98001c3b0cb78763fc00c8b62f514d96c2b10a8bd35d5ce45203a25fa1d33a
   languageName: node
   linkType: hard
 

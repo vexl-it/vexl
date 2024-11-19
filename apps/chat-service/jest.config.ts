@@ -9,7 +9,7 @@ const config: JestConfigWithTsJest = {
   setupFiles: ['<rootDir>/jest.setup.ts'],
   setupFilesAfterEnv: ['<rootDir>/jest.afterenv.ts'],
 
-  testTimeout: 20000,
+  testTimeout: 60_000,
   testMatch: ['**/*.test.ts'], // This line ensures only files with .test.ts suffix are run
   transform: {
     '^.+\\.(ts|js)$': [

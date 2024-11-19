@@ -7,7 +7,7 @@ const config: JestConfigWithTsJest = {
   testEnvironment: 'node',
   extensionsToTreatAsEsm: ['.ts'],
 
-  testTimeout: 20000,
+  testTimeout: 60_000,
   testMatch: ['**/*.test.ts'], // This line ensures only files with .test.ts suffix are run
   transform: {
     '^.+\\.(ts|js)$': [

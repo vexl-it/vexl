@@ -9,4 +9,4 @@ beforeAll(async () => {
 
 afterAll(async () => {
   await disposeRuntime()
-})
+}, 60_000)

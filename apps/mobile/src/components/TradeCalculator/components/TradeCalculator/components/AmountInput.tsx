@@ -63,7 +63,7 @@ function AmountInput(
           br="$4"
         >
           {children}
-          <Stack fs={1} maxWidth="60%">
+          <Stack fs={1} flex={1} maxWidth="60%" my="$-3">
             {loading ? (
               <Stack als="flex-end">
                 <ActivityIndicator

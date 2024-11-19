@@ -78,11 +78,13 @@ export const submitContactsActionAtom = atom(
         )
         .filter(notEmpty)
 
-      const newContactsToImport =
-        // IF there are no contacts to remove, we can do an incremental import
-        HashSet.size(contactsThatShouldBeRemovedFromImport) > 0
-          ? contactsThatShouldBeImported
-          : contactsThatShouldBeImported.filter((one) => !one.flags.imported)
+      const doIncrementalUpdate =
+        // If there are no contacts to remove, we can do an incremental import
+        HashSet.size(contactsThatShouldBeRemovedFromImport) === 0
+
+      const newContactsToImport = doIncrementalUpdate
+        ? contactsThatShouldBeImported.filter((one) => !one.flags.imported)
+        : contactsThatShouldBeImported
 
       const importedNumbersSoFarRef = yield* _(
         Ref.make(HashSet.empty<E164PhoneNumber>())
@@ -118,8 +120,8 @@ export const submitContactsActionAtom = atom(
           Effect.ensuring(
             Ref.get(importedNumbersSoFarRef).pipe(
               Effect.flatMap((importedNumbers) => {
-                set(storedContactsAtom, (storedContact) =>
-                  storedContact.map((oneContact) => {
+                set(storedContactsAtom, (storedContacts) =>
+                  storedContacts.map((oneContact) => {
                     if (!oneContact.computedValues)
                       return {
                         ...oneContact,
@@ -136,9 +138,18 @@ export const submitContactsActionAtom = atom(
                         ...oneContact,
                         flags: {...oneContact.flags, imported: true},
                       }
+
                     return {
                       ...oneContact,
-                      flags: {...oneContact.flags, imported: false},
+                      flags: {
+                        ...oneContact.flags,
+                        // If we were doing imcremental update,
+                        // Make sure to perserve the imported flag
+                        // otherwise we will erase all already imported contacts
+                        imported: doIncrementalUpdate
+                          ? oneContact.flags.imported
+                          : false,
+                      },
                     }
                   })
                 )

@@ -127,7 +127,6 @@ export const runMainInNode = <A, E>(
   effect: Effect.Effect<A, E>,
   options?: {
     readonly disableErrorReporting?: boolean | undefined
-    readonly disablePrettyLogger?: boolean | undefined
     readonly teardown?: Teardown | undefined
   }
 ): void => {
@@ -140,6 +139,6 @@ export const runMainInNode = <A, E>(
       Effect.provide(devToolsLayer(nodeEnvConfig)),
       Effect.provide(logger)
     ),
-    options
+    {disablePrettyLogger: true}
   )
 }

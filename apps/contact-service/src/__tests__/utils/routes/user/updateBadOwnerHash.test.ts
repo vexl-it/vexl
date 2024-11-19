@@ -191,7 +191,6 @@ beforeEach(async () => {
           {
             body: {
               contacts: hashesToImport,
-              replace: true,
             },
           },
           HttpClientRequest.setHeaders(authHeadersOld)
@@ -203,7 +202,6 @@ beforeEach(async () => {
           {
             body: {
               contacts: hashesToImport,
-              replace: true,
             },
           },
           HttpClientRequest.setHeaders(authHeadersNew)

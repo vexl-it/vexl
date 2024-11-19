@@ -80,7 +80,6 @@ export type UpdateFirebaseTokenRequest = typeof UpdateFirebaseTokenRequest.Type
 
 export const ImportContactsRequest = Schema.Struct({
   contacts: Schema.Array(HashedPhoneNumberE),
-  replace: Schema.optionalWith(Schema.Boolean, {default: () => true}),
 })
 export type ImportContactsRequest = typeof ImportContactsRequest.Type
 

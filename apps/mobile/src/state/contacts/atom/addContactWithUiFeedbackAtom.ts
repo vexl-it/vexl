@@ -22,7 +22,11 @@ import {
   type StoredContactWithComputedValues,
 } from '../domain'
 import {addContactToPhoneWithUIFeedbackAtom} from './addContactToPhoneWithUIFeedbackAtom'
-import {importedContactsAtom, storedContactsAtom} from './contactsStore'
+import {
+  importedContactsAtom,
+  importedContactsHashesAtom,
+  storedContactsAtom,
+} from './contactsStore'
 
 function safeParsePhoneNumber(contactNumber: E164PhoneNumber): string {
   try {
@@ -158,8 +162,10 @@ const importContactActionAtom = atom(
         effectToTaskEither(
           contactApi.importContacts({
             body: {
-              contacts: [newContact.computedValues.hash],
-              replace: false,
+              contacts: [
+                newContact.computedValues.hash,
+                ...get(importedContactsHashesAtom),
+              ],
             },
           })
         )

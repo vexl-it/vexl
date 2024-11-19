@@ -65,7 +65,6 @@ export const createAndImportUsersFromNetwork = (
               Array.map((u) => u.hashedNumber),
               Array.filter((h) => h !== user.hashedNumber)
             ),
-            replace: true,
           },
         },
         HttpClientRequest.setHeaders(user.authHeaders)

@@ -54,8 +54,10 @@ function Description({
       </Text>
       <Stack mt="$4" br="$4" p="$4" bc="$grey">
         <Input
-          testID="@offerForm/descriptionInput"
+          multiline
+          tag="textarea"
           verticalAlign="top"
+          testID="@offerForm/descriptionInput"
           maxLength={MAX_INPUT_LENGTH}
           rows={5}
           variant="transparentOnGrey"

@@ -16,11 +16,12 @@ function TextComment(): JSX.Element {
     <Stack w="100%" height={150} px="$2" pb="$2" br="$4" bc="$grey">
       <Stack f={1}>
         <Input
+          tag="textarea"
+          multiline
+          verticalAlign="top"
           placeholder={t('messages.typeSomething')}
           placeholderTextColor={getTokens().color.greyOnBlack.val}
           maxLength={MAX_INPUT_LENGTH}
-          multiline
-          verticalAlign="top"
           rows={10}
           variant="transparentOnGrey"
           value={textComment}

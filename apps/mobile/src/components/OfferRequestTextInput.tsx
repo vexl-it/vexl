@@ -22,6 +22,9 @@ function OfferRequestTextInput({
 
   return (
     <TextInput
+      multiline
+      tag="textarea"
+      verticalAlign="top"
       style={style.textInput}
       value={text}
       onChangeText={onChange}

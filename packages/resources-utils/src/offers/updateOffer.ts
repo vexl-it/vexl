@@ -54,15 +54,14 @@ export default function updateOffer({
     ),
     TE.chainW((encryptedPayload) =>
       pipe(
-        effectToTaskEither(
-          offerApi.updateOffer({
-            body: {
-              adminId,
-              payloadPublic: encryptedPayload,
-              offerPrivateList: [],
-            },
-          })
-        ),
+        offerApi.updateOffer({
+          body: {
+            adminId,
+            payloadPublic: encryptedPayload,
+            offerPrivateList: [],
+          },
+        }),
+        effectToTaskEither,
         TE.chainW(decryptOffer(ownerKeypair))
       )
     ),

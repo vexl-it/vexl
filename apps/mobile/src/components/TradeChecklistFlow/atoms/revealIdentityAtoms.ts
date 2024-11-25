@@ -6,10 +6,8 @@ import {pipe} from 'fp-ts/function'
 import {atom} from 'jotai'
 import {type ChatIds} from '../../../state/chat/domain'
 import anonymizePhoneNumber from '../../../state/chat/utils/anonymizePhoneNumber'
-import {
-  anonymizedUserDataAtom,
-  sessionDataOrDummyAtom,
-} from '../../../state/session'
+import {sessionDataOrDummyAtom} from '../../../state/session'
+import {anonymizedUserDataAtom} from '../../../state/session/userDataAtoms'
 import * as fromChatAtoms from '../../../state/tradeChecklist/atoms/fromChatAtoms'
 import {tradeChecklistDataAtom} from '../../../state/tradeChecklist/atoms/fromChatAtoms'
 import {revealIdentityDialogUIAtom} from '../../RevealIdentityDialog/atoms'

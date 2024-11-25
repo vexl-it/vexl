@@ -2,15 +2,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import {captureException} from '@sentry/react-native'
 import {KeyHolder} from '@vexl-next/cryptography'
 import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
-import {type UserName} from '@vexl-next/domain/src/general/UserName.brand'
-import {
-  type RealLifeInfo,
-  type UserNameAndUriAvatar,
-} from '@vexl-next/domain/src/general/UserNameAndAvatar.brand'
-import {
-  phoneNumberToRegionCode,
-  type RegionCode,
-} from '@vexl-next/domain/src/utility/RegionCode.brand'
 import * as SecretStorage from 'expo-secure-store'
 import * as O from 'fp-ts/Option'
 import * as TE from 'fp-ts/TaskEither'
@@ -22,14 +13,10 @@ import {
   type SetStateAction,
   type WritableAtom,
 } from 'jotai'
-import {focusAtom} from 'jotai-optics'
 import {Session} from '../../brands/Session.brand'
-import {askAreYouSureActionAtom} from '../../components/AreYouSureDialog'
 import getValueFromSetStateActionOfAtom from '../../utils/atomUtils/getValueFromSetStateActionOfAtom'
-import {translationAtom} from '../../utils/localization/I18nProvider'
 import {replaceAll} from '../../utils/replaceAll'
 import {SECRET_TOKEN_KEY, SESSION_KEY} from './sessionKeys'
-import {generateRandomUserData} from './utils/generateRandomUserData'
 import writeSessionToStorage from './utils/writeSessionToStorage'
 
 // duplicated code but we can not remove cyclic dependency otherwise
@@ -171,90 +158,6 @@ export const sessionDataOrDummyAtom = atom(
     set(sessionAtom, O.some(newValue))
   }
 )
-
-export const anonymizedUserDataAtom = atom((get) => {
-  const {privateKey} = get(sessionDataOrDummyAtom)
-  return generateRandomUserData(privateKey?.publicKeyPemBase64)
-})
-
-export const realUserDataAtom = focusAtom(sessionDataOrDummyAtom, (p) =>
-  p.prop('realUserData')
-)
-
-export const userDataRealOrAnonymizedAtom = atom<RealLifeInfo>((get) => {
-  const real = get(realUserDataAtom)
-  const anonymized = get(anonymizedUserDataAtom)
-
-  return {
-    userName: real?.userName ?? anonymized.userName,
-    image: real?.image ?? anonymized.image,
-  }
-})
-
-export const userPhoneNumberAtom = focusAtom(sessionDataOrDummyAtom, (p) =>
-  p.prop('phoneNumber')
-)
-
-export const realUserNameAtom = atom(
-  (get): UserName | undefined => {
-    return get(realUserDataAtom)?.userName
-  },
-  (get, set, update: SetStateAction<UserName | undefined>) => {
-    const newValue = getValueFromSetStateActionOfAtom(update)(
-      () => get(realUserDataAtom)?.userName
-    )
-
-    set(realUserDataAtom, (old): UserNameAndUriAvatar => {
-      return {...old, userName: newValue}
-    })
-  }
-)
-
-export const invalidUsernameUIFeedbackAtom = atom(null, async (get, set) => {
-  const {t} = get(translationAtom)
-
-  return await pipe(
-    set(askAreYouSureActionAtom, {
-      steps: [
-        {
-          type: 'StepWithText',
-          title: t('editName.invalidUsername'),
-          description: t('loginFlow.name.nameValidationError'),
-          positiveButtonText: t('common.close'),
-        },
-      ],
-      variant: 'danger',
-    })
-  )()
-})
-
-export const realUserImageAtom = atom(
-  (get): UserNameAndUriAvatar['image'] | undefined => {
-    return get(realUserDataAtom)?.image
-  },
-  (
-    get,
-    set,
-    update: SetStateAction<UserNameAndUriAvatar['image'] | undefined>
-  ) => {
-    const newValue = getValueFromSetStateActionOfAtom(update)(
-      () => get(realUserDataAtom)?.image
-    )
-
-    set(realUserDataAtom, (old): UserNameAndUriAvatar => {
-      return {...old, image: newValue}
-    })
-  }
-)
-
-export const areRealUserDataSet = atom((get) => {
-  const {userName, image} = get(realUserDataAtom) ?? {}
-  return !!userName && !!image
-})
-
-export const regionCodeAtom = atom<RegionCode | undefined>((get) => {
-  return phoneNumberToRegionCode(get(sessionDataOrDummyAtom).phoneNumber)
-})
 
 // --------- hooks ---------
 export function useSessionAssumeLoggedIn(): Session {

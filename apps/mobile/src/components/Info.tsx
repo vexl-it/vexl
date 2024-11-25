@@ -64,7 +64,14 @@ function Info({
               setIsVisible(false)
             }}
           >
-            <SvgImage stroke={tokens.color.pink.val} source={closeSvg} />
+            <SvgImage
+              stroke={
+                variant === 'pink'
+                  ? tokens.color.pink.val
+                  : tokens.color.main.val
+              }
+              source={closeSvg}
+            />
           </TouchableOpacity>
         )}
       </XStack>

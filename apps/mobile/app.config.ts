@@ -54,6 +54,7 @@ export default {
   'icon': extra.icon,
   'userInterfaceStyle': 'light',
   'jsEngine': 'hermes',
+  'scheme': 'app.vexl.it',
   'platforms': ['ios', 'android'],
   'splash': {
     'image': './assets/splash.png',
@@ -87,7 +88,12 @@ export default {
       // 'NSAppTransportSecurity': {'NSAllowsArbitraryLoads': true},
     },
     'googleServicesFile': extra.googleServicesInfoPlistFile,
-    'associatedDomains': ['applinks:link.vexl.it', 'applinks:nextlink.vexl.it'],
+    'associatedDomains': [
+      'applinks:vexl.it',
+      'applinks:app.vexl.it',
+      'applinks:link.vexl.it',
+      'applinks:nextlink.vexl.it',
+    ],
     'privacyManifests': {
       'NSPrivacyAccessedAPITypes': [
         {
@@ -128,12 +134,22 @@ export default {
           },
           {
             'scheme': 'https',
+            'host': 'app.vexl.it',
+            'pathPattern': '.*',
+          },
+          {
+            'scheme': 'https',
             'host': 'link.vexl.it',
             'pathPattern': '.*',
           },
           {
             'scheme': 'https',
             'host': 'nextlink.vexl.it',
+            'pathPattern': '.*',
+          },
+          {
+            'scheme': 'https',
+            'host': 'link.2.vexl.it',
             'pathPattern': '.*',
           },
         ],

@@ -65,6 +65,7 @@ import {currencies} from '../../../utils/localization/currency'
 import getDefaultSpokenLanguage from '../../../utils/localization/getDefaultSpokenLanguage'
 import notEmpty from '../../../utils/notEmpty'
 import checkNotificationPermissionsAndAskIfPossibleActionAtom from '../../../utils/notifications/checkAndAskForPermissionsActionAtom'
+import {preferencesAtom} from '../../../utils/preferences'
 import reportError from '../../../utils/reportError'
 import showErrorAlert from '../../../utils/showErrorAlert'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
@@ -591,6 +592,7 @@ export const offerFormMolecule = molecule(() => {
 
     const intendedConnectionLevel = get(intendedConnectionLevelAtom)
     const belowProgressLeft = get(modifyOfferLoaderTitleAtom)
+    const {goldenAvatarType} = get(preferencesAtom)
     const payloadPublic = formatOfferPublicPart(get(offerFormAtom))
 
     return pipe(
@@ -616,6 +618,7 @@ export const offerFormMolecule = molecule(() => {
             ...payloadPublic,
             authorClientVersion: version,
             offerPublicKey: key.publicKeyPemBase64,
+            goldenAvatarType,
           },
           intendedConnectionLevel: intendedConnectionLevel ?? 'FIRST',
           onProgress: (progress) => {

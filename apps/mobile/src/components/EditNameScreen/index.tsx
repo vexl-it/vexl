@@ -5,7 +5,7 @@ import {Stack, getTokens} from 'tamagui'
 import {
   invalidUsernameUIFeedbackAtom,
   realUserNameAtom,
-} from '../../state/session'
+} from '../../state/session/userDataAtoms'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 import Button from '../Button'

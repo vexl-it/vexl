@@ -141,44 +141,46 @@ function OfferDetailScreen({
           )}
         {isSome(offer) ? (
           <Stack f={1}>
-            <Stack
-              position="absolute"
-              top={0}
-              left={0}
-              right={0}
-              height={insets.top}
-              backgroundColor="black"
-              zIndex="$10"
-            />
             {offer.value.offerInfo.publicPart.location.length > 0 ? (
-              <Animated.ScrollView
-                ref={animatedRef}
-                overScrollMode="always"
-                scrollEventThrottle={16}
-                contentContainerStyle={{
-                  paddingTop: MAP_SIZE + HEADER_HEIGHT,
-                }}
-                style={{
-                  backgroundColor: getTokens().color.black.val,
-                }}
-                onScroll={handleScroll}
-                showsVerticalScrollIndicator={false}
-              >
-                <Animated.View
-                  onLayout={(event: LayoutChangeEvent) => {
-                    'worklet'
-                    layoutY.value = event.nativeEvent.layout.y
-                  }}
-                  style={[stickyHeader, styles.titleContainer]}
-                >
-                  <Title offer={offer.value} />
-                </Animated.View>
-                <OfferInfo
-                  mapIsVisible
-                  navigation={navigation}
-                  offer={offer.value}
+              <>
+                <Stack
+                  position="absolute"
+                  top={0}
+                  left={0}
+                  right={0}
+                  height={insets.top}
+                  backgroundColor="black"
+                  zIndex="$10"
                 />
-              </Animated.ScrollView>
+                <Animated.ScrollView
+                  ref={animatedRef}
+                  overScrollMode="always"
+                  scrollEventThrottle={16}
+                  contentContainerStyle={{
+                    paddingTop: MAP_SIZE + HEADER_HEIGHT,
+                  }}
+                  style={{
+                    backgroundColor: getTokens().color.black.val,
+                  }}
+                  onScroll={handleScroll}
+                  showsVerticalScrollIndicator={false}
+                >
+                  <Animated.View
+                    onLayout={(event: LayoutChangeEvent) => {
+                      'worklet'
+                      layoutY.value = event.nativeEvent.layout.y
+                    }}
+                    style={[stickyHeader, styles.titleContainer]}
+                  >
+                    <Title offer={offer.value} />
+                  </Animated.View>
+                  <OfferInfo
+                    mapIsVisible
+                    navigation={navigation}
+                    offer={offer.value}
+                  />
+                </Animated.ScrollView>
+              </>
             ) : (
               <OfferInfo navigation={navigation} offer={offer.value} />
             )}

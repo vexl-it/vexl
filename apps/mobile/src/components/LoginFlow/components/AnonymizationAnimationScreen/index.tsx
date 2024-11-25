@@ -40,7 +40,7 @@ function AnonymizationAnimationScreen({
   const anonymizedUserData = useMemo<RealLifeInfo>(
     () =>
       RealLifeInfo.parse({
-        image: fromSvgString(getAvatarSvg(randomNumber(0, 3))),
+        image: fromSvgString(getAvatarSvg({avatarIndex: randomNumber(0, 3)})),
         userName: randomName(),
       }),
     []

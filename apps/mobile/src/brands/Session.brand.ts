@@ -31,4 +31,4 @@ export const SessionE = Schema.Struct({
   sessionCredentials: UserSessionCredentialsE,
   privateKey: KeyHolder.PrivateKeyHolderE,
 })
-export type Session = Schema.Schema.Type<typeof SessionE>
+export type Session = typeof SessionE.Type

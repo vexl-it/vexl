@@ -7,6 +7,7 @@ import {generateOtherSideSeed} from '../../../state/chat/atoms/selectOtherSideDa
 import {type ChatMessageWithState} from '../../../state/chat/domain'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {randomNumberFromSeed} from '../../../utils/randomNumber'
+import avatarsGoldenGlassesAndBackgroundSvg from '../../AnonymousAvatar/images/avatarsGoldenGlassesAndBackgroundSvg'
 import avatarsSvg from '../../AnonymousAvatar/images/avatarsSvg'
 import SvgImage from '../../Image'
 import {revealIdentityFromQuickActionBannerAtom} from '../../TradeChecklistFlow/atoms/revealIdentityAtoms'
@@ -31,10 +32,12 @@ function IdentityRevealMessageItem({
     revealIdentityWithUiFeedbackAtom,
     publicKeyPemBase64Atom,
     chatIdAtom,
+    offerForChatAtom,
   } = useMolecule(chatMolecule)
   const {image, userName, partialPhoneNumber} = useAtomValue(otherSideDataAtom)
   const chat = useAtomValue(chatAtom)
   const chatId = useAtomValue(chatIdAtom)
+  const offer = useAtomValue(offerForChatAtom)
   const inboxKey = useAtomValue(publicKeyPemBase64Atom)
   const identityRevealStatus = useAtomValue(identityRevealStatusAtom)
   const revealIdentity = useSetAtom(revealIdentityWithUiFeedbackAtom)
@@ -44,17 +47,22 @@ function IdentityRevealMessageItem({
   const revealIdentityFromQuickActionBanner = useSetAtom(
     revealIdentityFromQuickActionBannerAtom
   )
+  const anonymousAvatars =
+    offer?.offerInfo.publicPart.goldenAvatarType === 'BACKGROUND_AND_GLASSES' &&
+    !offer.ownershipInfo?.adminId
+      ? avatarsGoldenGlassesAndBackgroundSvg
+      : avatarsSvg
 
   const anonymousImage = useMemo(
     () =>
-      avatarsSvg[
+      anonymousAvatars[
         randomNumberFromSeed(
           0,
-          avatarsSvg.length - 1,
+          anonymousAvatars.length - 1,
           generateOtherSideSeed(chat)
         )
       ],
-    [chat]
+    [anonymousAvatars, chat]
   )
 
   if (

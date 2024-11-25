@@ -6,7 +6,10 @@ import {pipe} from 'fp-ts/function'
 import * as TE from 'fp-ts/TaskEither'
 import {atom, type PrimitiveAtom} from 'jotai'
 import {type RevealMessageType} from '../../state/chat/atoms/revealIdentityActionAtom'
-import {realUserImageAtom, realUserNameAtom} from '../../state/session'
+import {
+  realUserImageAtom,
+  realUserNameAtom,
+} from '../../state/session/userDataAtoms'
 import {translationAtom} from '../../utils/localization/I18nProvider'
 import {askAreYouSureActionAtom} from '../AreYouSureDialog'
 import {

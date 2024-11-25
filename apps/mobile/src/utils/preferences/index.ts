@@ -52,3 +52,7 @@ export const marketplaceFiatOrSatsCurrencyAtom = focusAtom(
   preferencesAtom,
   (o) => o.prop('marketplaceFiatOrSatsCurrency')
 )
+
+export const goldenAvatarTypeAtom = focusAtom(preferencesAtom, (o) =>
+  o.prop('goldenAvatarType')
+)

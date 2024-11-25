@@ -1,8 +1,11 @@
+import {useAtomValue} from 'jotai'
 import {RefreshControl, ScrollView} from 'react-native'
 import {Stack, YStack, getTokens} from 'tamagui'
+import {goldenAvatarTypeAtom} from '../utils/preferences'
 import Button from './Button'
 import Image from './Image'
 import usePixelsFromBottomWhereTabsEnd from './InsideRouter/utils'
+import anonymousAvatarHappyGoldenGlassesNoBackgroundSvg from './images/anonymousAvatarHappyGoldenGlassesNoBackgroundSvg'
 import anonymousAvatarHappyNoBackgroundSvg from './images/anonymousAvatarHappyNoBackgroundSvg'
 
 interface ContentProps {
@@ -16,10 +19,18 @@ function EmptyListContent({
   buttonText,
   onButtonPress,
 }: ContentProps): JSX.Element {
+  const goldenAvatarType = useAtomValue(goldenAvatarTypeAtom)
+
   return (
     <YStack f={1} ai="center" jc="center" py="$4" gap="$4">
       <Stack ai="center" jc="center" p="$2" bc="$grey" br="$6">
-        <Image source={anonymousAvatarHappyNoBackgroundSvg} />
+        <Image
+          source={
+            goldenAvatarType
+              ? anonymousAvatarHappyGoldenGlassesNoBackgroundSvg
+              : anonymousAvatarHappyNoBackgroundSvg
+          }
+        />
       </Stack>
       {children}
       {!!buttonText && !!onButtonPress && (

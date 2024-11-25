@@ -1,13 +1,15 @@
-import {atom, useAtom, type WritableAtom} from 'jotai'
+import {atom, useAtom, useAtomValue, type WritableAtom} from 'jotai'
 import {useMemo} from 'react'
 import {TouchableOpacity} from 'react-native'
 import {getTokens, Stack, Text, XStack, YStack, type YStackProps} from 'tamagui'
 import {useTranslation} from '../utils/localization/I18nProvider'
+import {goldenAvatarTypeAtom} from '../utils/preferences'
 import Button from './Button'
 import Image from './Image'
+import anonymousAvatarHappyGoldenGlassesNoBackgroundSvg from './images/anonymousAvatarHappyGoldenGlassesNoBackgroundSvg'
+import anonymousAvatarHappyNoBackgroundSvg from './images/anonymousAvatarHappyNoBackgroundSvg'
 import bubbleTipSvg from './images/bubbleTipSvg'
 import closeSvg from './images/closeSvg'
-import vexlerAvatarSvg from './images/vexlerAvatarSvg'
 import UserAvatar from './UserAvatar'
 
 interface Props extends YStackProps {
@@ -35,6 +37,7 @@ function MarketplaceSuggestion({
     return nullableVisibleStateAtom ?? atom(true)
   }, [nullableVisibleStateAtom])
   const [isVisible, setIsVisible] = useAtom(visibleStateAtom)
+  const goldenAvatarType = useAtomValue(goldenAvatarTypeAtom)
 
   if (!isVisible) return null
 
@@ -62,7 +65,12 @@ function MarketplaceSuggestion({
       <XStack jc="space-between">
         <XStack f={1} mr="$2">
           <UserAvatar
-            userImage={{type: 'svgXml', svgXml: vexlerAvatarSvg}}
+            userImage={{
+              type: 'svgXml',
+              svgXml: goldenAvatarType
+                ? anonymousAvatarHappyGoldenGlassesNoBackgroundSvg
+                : anonymousAvatarHappyNoBackgroundSvg,
+            }}
             width={48}
             height={48}
           />

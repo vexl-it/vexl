@@ -1,5 +1,6 @@
 import {type RealLifeInfo} from '@vexl-next/domain/src/general/UserNameAndAvatar.brand'
 import {type SvgString} from '@vexl-next/domain/src/utility/SvgString.brand'
+import avatarsGoldenGlassesAndBackgroundSvg from '../../../components/AnonymousAvatar/images/avatarsGoldenGlassesAndBackgroundSvg'
 import avatarsSvg from '../../../components/AnonymousAvatar/images/avatarsSvg'
 import {randomNumberFromSeed} from '../../../utils/randomNumber'
 import resolveLocalUri from '../../../utils/resolveLocalUri'
@@ -27,6 +28,15 @@ export default function processIdentityRevealMessageIfAny(
   return (chat) => {
     if (!identityRevealMessage?.message.deanonymizedUser?.name) return chat
 
+    const goldenAvatarType =
+      chat.chat.origin.type === 'theirOffer'
+        ? chat.chat.origin.offer?.offerInfo.publicPart.goldenAvatarType
+        : undefined
+    const anonymousAvatars =
+      goldenAvatarType === 'BACKGROUND_AND_GLASSES'
+        ? avatarsGoldenGlassesAndBackgroundSvg
+        : avatarsSvg
+
     const realLifeInfo: RealLifeInfo = {
       userName: identityRevealMessage.message.deanonymizedUser.name,
       image: identityRevealMessage.message.image
@@ -36,10 +46,10 @@ export default function processIdentityRevealMessageIfAny(
           }
         : {
             type: 'svgXml',
-            svgXml: avatarsSvg[
+            svgXml: anonymousAvatars[
               randomNumberFromSeed(
                 0,
-                avatarsSvg.length - 1,
+                anonymousAvatars.length - 1,
                 generateOtherSideSeed(chat.chat)
               )
             ] as SvgString,

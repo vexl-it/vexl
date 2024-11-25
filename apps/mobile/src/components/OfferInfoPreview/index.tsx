@@ -91,7 +91,7 @@ function OfferInfoPreview({
           fos={18}
           color={negative ? '$greyOnBlack' : '$black'}
           ff="$body500"
-          selectable
+          userSelect="text"
           selectionColor={getTokens().color.main.val}
         >
           {offer.publicPart.offerDescription}

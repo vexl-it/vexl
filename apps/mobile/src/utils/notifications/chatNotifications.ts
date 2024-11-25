@@ -78,11 +78,22 @@ export async function showChatNotification({
   const chat = inbox.chats.find(
     (one) => one.chat.otherSide.publicKey === newMessage.message.senderPublicKey
   )
+  const chatOrigin =
+    chat?.chat.origin.type === 'myOffer' ||
+    chat?.chat.origin.type === 'theirOffer'
+      ? chat.chat.origin
+      : undefined
 
   const userName =
     chat?.chat.otherSide.realLifeInfo?.userName ??
-    (chat ? generateRandomUserData(chat.chat.otherSide.publicKey) : undefined)
-      ?.userName
+    (chat
+      ? generateRandomUserData({
+          seed: chat.chat.otherSide.publicKey,
+          goldenAvatarType:
+            chatOrigin?.offer?.offerInfo.publicPart.goldenAvatarType,
+        })
+      : undefined
+    )?.userName
 
   if (
     type === 'VERSION_UPDATE' ||

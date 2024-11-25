@@ -62,7 +62,9 @@ function PhotoScreen({
               userName,
               image: selectedImageUri
                 ? fromImageUri(selectedImageUri)
-                : fromSvgString(getAvatarSvg(randomNumber(0, 3))),
+                : fromSvgString(
+                    getAvatarSvg({avatarIndex: randomNumber(0, 3)})
+                  ),
             }),
           })
         }}

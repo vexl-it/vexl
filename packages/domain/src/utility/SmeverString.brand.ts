@@ -18,7 +18,7 @@ export const SemverStringE = Schema.String.pipe(
   Schema.brand('SemverString')
 )
 
-export type SemverString = z.TypeOf<typeof SemverString>
+export type SemverString = typeof SemverStringE.Type
 
 export function compare(
   a: SemverString

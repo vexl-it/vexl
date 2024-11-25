@@ -13,6 +13,7 @@ import useResetNavigationToMessagingScreen from '../../../utils/useResetNavigati
 import AnimatedModal from '../../AnimatedModal'
 import {useReportOfferHandleUI} from '../../OfferDetailScreen/api'
 import flagSvg from '../../OfferDetailScreen/images/flagSvg'
+import ParticipatedInMeetup from '../../ParticipatedInMeetup'
 import IdentityIconSvg from '../../images/identityIconSvg'
 import {chatMolecule} from '../atoms'
 import vexlbotNotificationsSvg from '../images/vexlbotNotificationsSvg'
@@ -90,6 +91,12 @@ function ChatInfoModal(): JSX.Element | null {
               <Text>(this will NOT be visible in production)</Text>
             </>
           )}
+          {chat.origin.type === 'theirOffer' &&
+            !!offerForChat?.offerInfo.publicPart.goldenAvatarType && (
+              <Stack mb="$7">
+                <ParticipatedInMeetup />
+              </Stack>
+            )}
           <ButtonStack
             buttons={[
               ...(canSendMessages && identityRevealStatus === 'notStarted'

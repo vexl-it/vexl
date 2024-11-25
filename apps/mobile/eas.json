@@ -16,6 +16,16 @@
       },
       "channel": "staging"
     },
+    "development-simulator": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "env": {
+        "ENV_PRESET": "stage"
+      },
+      "ios": {
+        "simulator": true
+      }
+    },
     "stagingApk": {
       "android": {
         "credentialsSource": "remote",

@@ -6,10 +6,12 @@ import {reachNumberAtom} from '../../../../../state/connections/atom/connectionS
 import {
   userDataRealOrAnonymizedAtom,
   userPhoneNumberAtom,
-} from '../../../../../state/session'
+} from '../../../../../state/session/userDataAtoms'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
+import {preferencesAtom} from '../../../../../utils/preferences'
 import SvgImage from '../../../../Image'
 import UserDataDisplay from '../../../../LoginFlow/components/AnonymizationAnimationScreen/components/UserDataDisplay'
+import ParticipatedInMeetup from '../../../../ParticipatedInMeetup'
 import cameraSvg from '../../../images/cameraSvg'
 import {qrScannerDialogAtom} from '../atoms'
 import QRIconSVG from '../images/QRIconSVG'
@@ -31,6 +33,7 @@ function ProfileSection(): JSX.Element {
   const reachNumber = useAtomValue(reachNumberAtom)
   const setQrCodeDialogVisible = useSetAtom(qrCodeDialogAtom)
   const setQrScannerDialogVisible = useSetAtom(qrScannerDialogAtom)
+  const preferences = useAtomValue(preferencesAtom)
 
   const userDataRealOrAnonymized = useAtomValue(userDataRealOrAnonymizedAtom)
   const userPhoneNumber = useAtomValue(userPhoneNumberAtom)
@@ -90,6 +93,7 @@ function ProfileSection(): JSX.Element {
       <Text ta="center" mt="$2" col="$greyOnBlack">
         {userPhoneNumber}
       </Text>
+      {!!preferences.goldenAvatarType && <ParticipatedInMeetup />}
     </Stack>
   )
 }

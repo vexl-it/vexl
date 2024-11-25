@@ -240,6 +240,14 @@ export const IntendedConnectionLevel = z.enum(['FIRST', 'ALL'])
 export const IntendedConnectionLevelE = Schema.Literal('FIRST', 'ALL')
 export type IntendedConnectionLevel = typeof IntendedConnectionLevelE.Type
 
+export const GoldenAvatarType = z
+  .enum(['BACKGROUND_AND_GLASSES'])
+  .catch('BACKGROUND_AND_GLASSES')
+export const GoldenAvatarTypeE = Schema.Literal('BACKGROUND_AND_GLASSES').pipe(
+  orElseSchema('BACKGROUND_AND_GLASSES' as const)
+)
+export type GoldenAvatarType = typeof GoldenAvatarTypeE.Type
+
 export const OfferPrivatePart = z
   .object({
     commonFriends: z.array(HashedPhoneNumber).readonly(),
@@ -283,6 +291,7 @@ export const OfferPublicPart = z
     listingType: ListingType.optional(),
     fcmCypher: FcmCypher.optional(),
     authorClientVersion: SemverString.optional(),
+    goldenAvatarType: GoldenAvatarType.optional(),
   })
   .readonly()
 
@@ -311,6 +320,7 @@ export const OfferPublicPartE = Schema.Struct({
   listingType: Schema.optional(ListingTypeE),
   fcmCypher: Schema.optional(FcmCypherE),
   authorClientVersion: Schema.optional(SemverStringE),
+  goldenAvatarType: Schema.optional(GoldenAvatarTypeE),
 })
 export type OfferPublicPart = Schema.Schema.Type<typeof OfferPublicPartE>
 

@@ -42,7 +42,7 @@ export const OffersStateE = Schema.Struct({
   ),
   offers: Schema.Array(OneOfferInStateE),
 })
-export type OffersState = Schema.Schema.Type<typeof OffersStateE>
+export type OffersState = typeof OffersStateE.Type
 
 export interface InitialLoadingState {
   state: 'initial'
@@ -102,4 +102,5 @@ export const BaseOffersFilter = z.enum([
 export type BaseOffersFilter = z.TypeOf<typeof BaseOffersFilter>
 
 export const FiatOrSats = z.enum(['FIAT', 'SATS'])
-export type FiatOrSats = z.TypeOf<typeof FiatOrSats>
+export const FiatOrSatsE = Schema.Literal('FIAT', 'SATS')
+export type FiatOrSats = typeof FiatOrSatsE.Type

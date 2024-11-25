@@ -5,8 +5,9 @@ import {useMemo} from 'react'
 import {Stack, Text} from 'tamagui'
 import {useChatForOffer} from '../state/chat/hooks/useChatForOffer'
 import createImportedContactsForHashesAtom from '../state/contacts/atom/createImportedContactsForHashesAtom'
-import {userDataRealOrAnonymizedAtom} from '../state/session'
+import {userDataRealOrAnonymizedAtom} from '../state/session/userDataAtoms'
 import {useTranslation} from '../utils/localization/I18nProvider'
+import {goldenAvatarTypeAtom} from '../utils/preferences'
 import randomName from '../utils/randomName'
 import {setTimezoneOfUser} from '../utils/unixMillisecondsToLocaleDateTime'
 import {AnonymousAvatarFromSeed} from './AnonymousAvatar'
@@ -27,6 +28,7 @@ function OfferAuthorAvatar({
     offerPublicKey: offerInfo.publicPart.offerPublicKey,
   })
   const userData = useAtomValue(userDataRealOrAnonymizedAtom)
+  const goldenAvatarType = useAtomValue(goldenAvatarTypeAtom)
   const {t} = useTranslation()
   const commonFriends = useAtomValue(
     useMemo(
@@ -58,6 +60,7 @@ function OfferAuthorAvatar({
           width={48}
           height={48}
           seed={offerInfo.offerId}
+          goldenAvatarType={goldenAvatarType}
         />
         <Stack flex={1} marginLeft="$2">
           <UserNameWithSellingBuying
@@ -105,6 +108,7 @@ function OfferAuthorAvatar({
               width={48}
               height={48}
               seed={offerInfo.offerId}
+              goldenAvatarType={offerInfo.publicPart.goldenAvatarType}
             />
           )}
           <Stack f={1} ml="$2">

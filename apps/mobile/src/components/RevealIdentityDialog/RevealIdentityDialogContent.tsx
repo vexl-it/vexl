@@ -3,7 +3,10 @@ import {useAtom, useAtomValue, useSetAtom, type PrimitiveAtom} from 'jotai'
 import {useEffect, type ReactNode} from 'react'
 import {TouchableOpacity} from 'react-native'
 import {Stack, Text, XStack} from 'tamagui'
-import {realUserImageAtom, realUserNameAtom} from '../../state/session'
+import {
+  realUserImageAtom,
+  realUserNameAtom,
+} from '../../state/session/userDataAtoms'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import Checkbox from '../Checkbox'
 import TextInput from '../Input'

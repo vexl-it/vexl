@@ -1,7 +1,7 @@
 // import {SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 
 const VERSION_CODE = 211
-const VERSION = '1.17.0'
+const VERSION = '1.23.5'
 const ENV_PRESET = process.env.ENV_PRESET
 const COMMIT_HASH = process.env.EAS_BUILD_GIT_COMMIT_HASH ?? 'local'
 
@@ -54,6 +54,7 @@ export default {
   'icon': extra.icon,
   'userInterfaceStyle': 'light',
   'jsEngine': 'hermes',
+  'scheme': 'app.vexl.it',
   'platforms': ['ios', 'android'],
   'splash': {
     'image': './assets/splash.png',
@@ -87,7 +88,12 @@ export default {
       // 'NSAppTransportSecurity': {'NSAllowsArbitraryLoads': true},
     },
     'googleServicesFile': extra.googleServicesInfoPlistFile,
-    'associatedDomains': ['applinks:link.vexl.it', 'applinks:nextlink.vexl.it'],
+    'associatedDomains': [
+      'applinks:vexl.it',
+      'applinks:app.vexl.it',
+      'applinks:link.vexl.it',
+      'applinks:nextlink.vexl.it',
+    ],
     'privacyManifests': {
       'NSPrivacyAccessedAPITypes': [
         {
@@ -128,12 +134,22 @@ export default {
           },
           {
             'scheme': 'https',
+            'host': 'app.vexl.it',
+            'pathPattern': '.*',
+          },
+          {
+            'scheme': 'https',
             'host': 'link.vexl.it',
             'pathPattern': '.*',
           },
           {
             'scheme': 'https',
             'host': 'nextlink.vexl.it',
+            'pathPattern': '.*',
+          },
+          {
+            'scheme': 'https',
+            'host': 'link.2.vexl.it',
             'pathPattern': '.*',
           },
         ],

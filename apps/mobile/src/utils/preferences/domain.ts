@@ -1,5 +1,10 @@
+import {
+  GoldenAvatarType,
+  GoldenAvatarTypeE,
+} from '@vexl-next/domain/src/general/offers'
+import {Schema} from 'effect'
 import {z} from 'zod'
-import {FiatOrSats} from '../../state/marketplace/domain'
+import {FiatOrSats, FiatOrSatsE} from '../../state/marketplace/domain'
 
 const NotificationPreferences = z
   .object({
@@ -12,6 +17,16 @@ const NotificationPreferences = z
     marketing: z.boolean(),
   })
   .readonly()
+
+const NotificationPreferencesE = Schema.Struct({
+  offer: Schema.Boolean,
+  chat: Schema.Boolean,
+  marketplace: Schema.Boolean,
+  newOfferInMarketplace: Schema.Boolean,
+  newPhoneContacts: Schema.Boolean,
+  inactivityWarnings: Schema.Boolean,
+  marketing: Schema.Boolean,
+})
 
 export const Preferences = z
   .object({
@@ -27,7 +42,41 @@ export const Preferences = z
     appLanguage: z.string().optional(),
     showOfferDetail: z.boolean().optional().default(false),
     marketplaceFiatOrSatsCurrency: FiatOrSats.default('FIAT'),
+    goldenAvatarType: GoldenAvatarType.optional(),
   })
   .readonly()
 
-export type Preferences = z.infer<typeof Preferences>
+export const PreferencesE = Schema.Struct({
+  disableOfferRerequestLimit: Schema.optionalWith(Schema.Boolean, {
+    default: () => false,
+  }),
+  allowSendingImages: Schema.optionalWith(Schema.Boolean, {
+    default: () => false,
+  }),
+  notificationPreferences: NotificationPreferencesE,
+  enableNewOffersNotificationDevMode: Schema.optionalWith(Schema.Boolean, {
+    default: () => false,
+  }),
+  showFriendLevelBanner: Schema.optionalWith(Schema.Boolean, {
+    default: () => false,
+  }),
+  offerFeedbackEnabled: Schema.optionalWith(Schema.Boolean, {
+    default: () => false,
+  }),
+  showTextDebugButton: Schema.optionalWith(Schema.Boolean, {
+    default: () => false,
+  }),
+  disableScreenshots: Schema.optionalWith(Schema.Boolean, {
+    default: () => false,
+  }),
+  isDeveloper: Schema.optionalWith(Schema.Boolean, {
+    default: () => false,
+  }),
+  appLanguage: Schema.optional(Schema.String),
+  marketplaceFiatOrSatsCurrency: Schema.optionalWith(FiatOrSatsE, {
+    default: () => 'FIAT',
+  }),
+  goldenAvatarType: Schema.optional(GoldenAvatarTypeE),
+})
+
+export type Preferences = typeof PreferencesE.Type

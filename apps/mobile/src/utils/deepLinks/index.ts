@@ -2,22 +2,36 @@ import dynamicLinks, {
   type FirebaseDynamicLinksTypes,
 } from '@react-native-firebase/dynamic-links'
 import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
+import {
+  SemverStringE,
+  compare as compareSemver,
+} from '@vexl-next/domain/src/utility/SmeverString.brand'
+import {Effect, type ParseResult, Schema} from 'effect'
+import * as Linking from 'expo-linking'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {atom, useStore} from 'jotai'
 import {useCallback, useEffect} from 'react'
+import {Alert} from 'react-native'
 import parse from 'url-parse'
 import {z} from 'zod'
 import {addContactWithUiFeedbackAtom} from '../../state/contacts/atom/addContactWithUiFeedbackAtom'
 import {ImportContactFromLinkPayload} from '../../state/contacts/domain'
 import {hashPhoneNumber} from '../../state/contacts/utils'
 import {atomWithParsedMmkvStorage} from '../atomUtils/atomWithParsedMmkvStorage'
+import {version as appVersion} from '../environment'
 import {parseJson, safeParse} from '../fpUtils'
 import {translationAtom, useTranslation} from '../localization/I18nProvider'
+import {goldenAvatarTypeAtom} from '../preferences'
 import reportError from '../reportError'
 import showErrorAlert from '../showErrorAlert'
-import {LINK_TYPE_ENCRYPTED_URL, LINK_TYPE_IMPORT_CONTACT} from './domain'
+import {
+  LINK_TYPE_ENCRYPTED_URL,
+  LINK_TYPE_GOLDEN_GLASSES,
+  LINK_TYPE_IMPORT_CONTACT,
+} from './domain'
 import {processEncryptedUrlActionAtom} from './encryptedUrl'
+import {handleGoldenGlassesDeepLinkActionAtom} from './goldenGlassesUrl'
 
 type DynamicLink = FirebaseDynamicLinksTypes.DynamicLink
 
@@ -142,4 +156,80 @@ export function useHandleDeepLink(): void {
       }
     })
   }, [onLinkReceived, store, t])
+}
+
+function isLinkVersionSupported(
+  linkVersion: string | string[] | undefined
+): Effect.Effect<boolean, ParseResult.ParseError, never> {
+  return Effect.gen(function* (_) {
+    const linkSemverVersion = yield* _(
+      Schema.decodeUnknown(SemverStringE)(linkVersion)
+    )
+
+    return compareSemver(appVersion)('>=', linkSemverVersion)
+  })
+}
+
+export function useHandleDeepLinkV2(): void {
+  const store = useStore()
+  const {t} = store.get(translationAtom)
+  const url = Linking.useURL()
+  const goldenAvatarType = store.get(goldenAvatarTypeAtom)
+  const lastInitialLink = store.get(lastInitialLinkStorageAtom)
+
+  const onLinkReceived = useCallback(() => {
+    if (url) {
+      if (lastInitialLink.lastLinkImported === url) {
+        console.info('Ignoring initial link as it was opened before')
+        return
+      }
+
+      const {hostname, queryParams} = Linking.parse(url)
+
+      switch (hostname) {
+        case 'app.vexl.it':
+          pipe(
+            Effect.gen(function* (_) {
+              const isLinkSupported = yield* _(
+                isLinkVersionSupported(queryParams?.version)
+              )
+
+              if (!isLinkSupported) {
+                Alert.alert(t('linking.linkNotSupportedPleaseUpdate'))
+                return
+              }
+
+              if (
+                queryParams?.link === LINK_TYPE_GOLDEN_GLASSES &&
+                !goldenAvatarType
+              ) {
+                return yield* _(
+                  store.set(handleGoldenGlassesDeepLinkActionAtom),
+                  Effect.tap(() => {
+                    store.set(lastInitialLinkStorageAtom, {
+                      lastLinkImported: url,
+                    })
+                  })
+                )
+              }
+            }),
+            Effect.catchAll((e) => {
+              reportError('warn', new Error('Unknown deep link format'), {url})
+              showErrorAlert({
+                title: t('linking.wrongLinkFormatReceived', {link: url}),
+                error: e,
+              })
+              return Effect.void
+            }),
+            Effect.runFork
+          )
+
+          break
+        default:
+          reportError('warn', new Error('Unknown deep link type'), {url})
+      }
+    }
+  }, [goldenAvatarType, lastInitialLink.lastLinkImported, store, t, url])
+
+  useEffect(onLinkReceived, [onLinkReceived])
 }

@@ -20,6 +20,7 @@ export const deleteUser = Handler.make(DeleteUserEndpoint, (_, security) =>
           publicKey: security['public-key'],
         })
       )
+      return {}
     }).pipe(withDbTransaction, withUserActionRedisLock(security.hash)),
     Schema.Void
   )

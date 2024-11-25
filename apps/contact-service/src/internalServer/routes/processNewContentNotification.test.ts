@@ -1,11 +1,11 @@
 import {SqlClient} from '@effect/sql'
 import {Array, Effect, Logger, LogLevel, Order, pipe} from 'effect'
-import {sendMessageMock} from '../../__tests__/utils/mockedFirebaseMessagingService'
 import {
   createAndImportUsersFromNetwork,
   generateKeysAndHasheForNumber,
   type DummyUser,
-} from '../../__tests__/utils/routes/contacts/utils'
+} from '../../__tests__/routes/contacts/utils'
+import {sendMessageMock} from '../../__tests__/utils/mockedFirebaseMessagingService'
 import {runPromiseInMockedEnvironment} from '../../__tests__/utils/runPromiseInMockedEnvironment'
 import {processNewContentNotifications} from './processNewContentNotifications'
 

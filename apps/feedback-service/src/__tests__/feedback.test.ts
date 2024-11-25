@@ -8,14 +8,7 @@ import {
 import {createDummyAuthHeaders} from '@vexl-next/server-utils/src/tests/createDummyAuthHeaders'
 import {Effect, Either, Schema} from 'effect'
 import {NodeTestingApp} from './utils/NodeTestingApp'
-import {
-  disposeRuntime,
-  runPromiseInMockedEnvironment,
-  startRuntime,
-} from './utils/runPromiseInMockedEnvironment'
-
-beforeAll(startRuntime)
-afterAll(disposeRuntime)
+import {runPromiseInMockedEnvironment} from './utils/runPromiseInMockedEnvironment'
 
 describe('Feedback service test', () => {
   it('should submit feedback', async () => {

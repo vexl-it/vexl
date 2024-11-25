@@ -20,10 +20,10 @@ import {
 import {
   ImportContactsQuotaRecord,
   createQuotaRecordKey,
-} from '../../../../routes/contacts/importContactsQuotaService'
-import {NodeTestingApp} from '../../NodeTestingApp'
-import {sendMessageMock} from '../../mockedFirebaseMessagingService'
-import {runPromiseInMockedEnvironment} from '../../runPromiseInMockedEnvironment'
+} from '../../../routes/contacts/importContactsQuotaService'
+import {NodeTestingApp} from '../../utils/NodeTestingApp'
+import {sendMessageMock} from '../../utils/mockedFirebaseMessagingService'
+import {runPromiseInMockedEnvironment} from '../../utils/runPromiseInMockedEnvironment'
 import {
   createAndImportUsersFromNetwork,
   generateKeysAndHasheForNumber,

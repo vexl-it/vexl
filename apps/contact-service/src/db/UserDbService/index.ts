@@ -107,6 +107,7 @@ export class UserDbService extends Context.Tag('UserDbService')<
   static readonly Live = Layer.effect(
     UserDbService,
     Effect.gen(function* (_) {
+      yield* _(Effect.log('Debug log', 'Initializing UserDbService', 'START'))
       const insertUser = yield* _(createInsertUser)
       const findUserByHash = yield* _(createFindUserByHash)
       const findUserByPublicKeyAndHash = yield* _(
@@ -145,6 +146,7 @@ export class UserDbService extends Context.Tag('UserDbService')<
       const updateUserInitialImportDone = yield* _(
         createUpdateUserInitialImportDone
       )
+      yield* _(Effect.log('Debug log', 'Initializing UserDbService', 'Done'))
 
       return {
         insertUser,

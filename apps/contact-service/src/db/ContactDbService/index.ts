@@ -66,6 +66,9 @@ export class ContactDbService extends Context.Tag('ContactDbService')<
   static readonly Live = Layer.effect(
     ContactDbService,
     Effect.gen(function* (_) {
+      yield* _(
+        Effect.log('Debug log', 'Initializing ContactDB Service', 'START')
+      )
       const deleteContactsByHashFrom = yield* _(createDeleteContactsByHashFrom)
       const deleteContactsByHashFromAndHashTo = yield* _(
         createDeleteContactsByHashFromAndHashTo
@@ -84,6 +87,9 @@ export class ContactDbService extends Context.Tag('ContactDbService')<
 
       const updateContactHashFrom = yield* _(createUpdateContactsHashFrom)
 
+      yield* _(
+        Effect.log('Debug log', 'Initializing ContactDB Service', 'DONE')
+      )
       return {
         deleteContactsByHashFrom,
         deleteContactsByHashFromAndHashTo,

@@ -36,6 +36,13 @@ export class DashboardReportsService extends Context.Tag(
     Layer.effect(
       DashboardReportsService,
       Effect.gen(function* (_) {
+        yield* _(
+          Effect.log(
+            'Debug log',
+            'Initializing Metrics client service',
+            'START'
+          )
+        )
         const dashboardNewUserHookOption = yield* _(newUserHookOption)
         const contactsImportedHookOption = yield* _(contactsImportedHookConfig)
 
@@ -79,6 +86,10 @@ export class DashboardReportsService extends Context.Tag(
                 'No dashboard hook set in. Not reporting to dashboard'
               ),
           }
+        )
+
+        yield* _(
+          Effect.log('Debug log', 'Initializing Metrics client service', 'DONE')
         )
 
         return {

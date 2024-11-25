@@ -71,5 +71,6 @@ const MainLive = Layer.mergeAll(
 
 export const httpServer = portConfig.pipe(
   Effect.flatMap((port) => NodeServer.listen({port})(app)),
+  Effect.tap(() => Effect.log('Debug log', 'Server started', 'DONE')),
   Effect.provide(MainLive)
 )

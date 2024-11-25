@@ -31,6 +31,13 @@ export class MetricsClientService extends Context.Tag('MetricsClientService')<
     Layer.scoped(
       MetricsClientService,
       Effect.gen(function* (_) {
+        yield* _(
+          Effect.log(
+            'Debug log',
+            'Initializing Metrics client service',
+            'START'
+          )
+        )
         yield* _(setupRedisSmqConnection(redisUrlConfig))
 
         const runningProducer = yield* _(
@@ -104,6 +111,9 @@ export class MetricsClientService extends Context.Tag('MetricsClientService')<
             Effect.withSpan('reportMetric', {attributes: {message}})
           )
 
+        yield* _(
+          Effect.log('Debug log', 'Initializing Metrics client service', 'DONE')
+        )
         return {reportMetric}
       })
     )

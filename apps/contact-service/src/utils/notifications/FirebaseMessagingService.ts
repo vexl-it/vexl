@@ -21,6 +21,9 @@ export const createMessaging = (
 ): Effect.Effect<FirebaseMessagingOperations, FirebaseInitializationError> =>
   Effect.gen(function* (_) {
     yield* _(
+      Effect.log('Debug log', 'Initializing Firebase Messaging', 'START')
+    )
+    yield* _(
       Effect.try({
         try: () =>
           initializeApp({
@@ -34,6 +37,7 @@ export const createMessaging = (
       })
     )
     const messaging = getMessaging()
+    yield* _(Effect.log('Debug log', 'Initializing Firebase Messaging', 'DONE'))
     return {
       sendEachForMulticast: messaging.sendEachForMulticast.bind(messaging),
       sendToTopic: messaging.sendToTopic.bind(messaging),

@@ -83,6 +83,9 @@ export class ServerCrypto extends Context.Tag('ServerCrypto')<
     Layer.effect(
       ServerCrypto,
       Effect.gen(function* (_) {
+        yield* _(
+          Effect.log('Debug log', 'Initializing Server crypto service', 'START')
+        )
         const cryptoConfigUnwraped = yield* _(Config.unwrap(cryptoConfig))
 
         const encryptEciesWithServerKey = eciesGTMEncryptE(
@@ -102,6 +105,10 @@ export class ServerCrypto extends Context.Tag('ServerCrypto')<
         )
         const ecdsaVerifyWithServerKey = ecdsaVerifyE(
           cryptoConfigUnwraped.publicKey
+        )
+
+        yield* _(
+          Effect.log('Debug log', 'Initializing Server crypto service', 'DONE')
         )
 
         return {
@@ -129,5 +136,5 @@ export class ServerCrypto extends Context.Tag('ServerCrypto')<
           },
         }
       })
-    )
+    ).pipe(Layer.tap(() => Effect.log('ServerCrypto service started')))
 }

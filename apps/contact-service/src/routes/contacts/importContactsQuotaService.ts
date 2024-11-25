@@ -42,10 +42,17 @@ export class ImportContactsQuotaService extends Context.Tag(
   static readonly Live = Layer.effect(
     ImportContactsQuotaService,
     Effect.gen(function* (_) {
+      yield* _(
+        Effect.log(
+          'Debug log',
+          'Initializing Import Contacts quota Service',
+          'START'
+        )
+      )
       const redis = yield* _(RedisService)
       const userDb = yield* _(UserDbService)
 
-      return {
+      const toReturn: ImportContactsQuotaOperations = {
         checkAndIncrementImportContactsQuota:
           (hashedPhoneNumber) => (numberOfNewImportedContacts) =>
             Effect.gen(function* (_) {
@@ -151,6 +158,16 @@ export class ImportContactsQuotaService extends Context.Tag(
               )
             ),
       }
+
+      yield* _(
+        Effect.log(
+          'Debug log',
+          'Initializing Import Contacts quota Service',
+          'DONE'
+        )
+      )
+
+      return toReturn
     })
   )
 }

@@ -1,6 +1,5 @@
 import {NodeSdk} from '@effect/opentelemetry'
 import {NodeRuntime} from '@effect/platform-node'
-import {type Teardown} from '@effect/platform/Runtime'
 import {PrometheusExporter} from '@opentelemetry/exporter-prometheus'
 import {OTLPTraceExporter} from '@opentelemetry/exporter-trace-otlp-http'
 import {BatchSpanProcessor} from '@opentelemetry/sdk-trace-base'
@@ -123,23 +122,19 @@ const NodeSdkLive = Effect.gen(function* (_) {
   }))
 }).pipe(Layer.unwrapEffect)
 
-export const runMainInNode = <A, E>(
-  effect: Effect.Effect<A, E>,
-  options?: {
-    readonly disableErrorReporting?: boolean | undefined
-    readonly disablePrettyLogger?: boolean | undefined
-    readonly teardown?: Teardown | undefined
-  }
-): void => {
+export const runMainInNode = <A, E>(effect: Effect.Effect<A, E>): void => {
   NodeRuntime.runMain(
     effect.pipe(
-      Effect.catchAll((error) => Effect.logFatal('Error', error)),
-      Effect.catchAllDefect((error) => Effect.logFatal('Defect', error)),
       Effect.provide(memoryDebugLayer),
       Effect.provide(NodeSdkLive),
       Effect.provide(devToolsLayer(nodeEnvConfig)),
-      Effect.provide(logger)
+      Effect.provide(logger),
+      Effect.tapError((error) => Effect.logError('Error', error)),
+      Effect.tapDefect((error) => Effect.logError('Defect', error))
     ),
-    options
+    {
+      disableErrorReporting: false,
+      disablePrettyLogger: true,
+    }
   )
 }

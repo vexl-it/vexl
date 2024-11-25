@@ -65,6 +65,7 @@ export class RedisService extends Context.Tag('RedisService')<
     Layer.effect(
       RedisService,
       Effect.gen(function* (_) {
+        yield* _(Effect.log('Debug log', 'Initializing RedisService', 'START'))
         const redisUrlUnwrapped = Config.isConfig(redisUrl)
           ? yield* _(redisUrl)
           : redisUrl
@@ -219,6 +220,7 @@ export class RedisService extends Context.Tag('RedisService')<
           withLock,
         }
 
+        yield* _(Effect.log('Debug log', 'Initializing RedisService', 'DONE'))
         return toReturn
       })
     )

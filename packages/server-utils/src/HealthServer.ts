@@ -16,6 +16,9 @@ export function healthServerLayer({
   port: number | Config.Config<Option.Option<number>>
 }): Layer.Layer<never, HttpServerError.ServeError | ConfigError, never> {
   return Effect.gen(function* (_) {
+    yield* _(
+      Effect.log('Debug log', 'Initializing Health server service', 'START')
+    )
     const portOption = yield* _(
       Config.isConfig(portConfig)
         ? portConfig
@@ -48,6 +51,9 @@ export function healthServerLayer({
       )
     )
 
+    yield* _(
+      Effect.log('Debug log', 'Initializing Health server service', 'DONE')
+    )
     return HealthAppLive
   }).pipe(Layer.unwrapEffect)
 }

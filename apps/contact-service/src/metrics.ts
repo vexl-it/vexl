@@ -65,6 +65,9 @@ export const reportUserRefresh = (): Effect.Effect<
 
 export const reportGaguesLayer = Layer.effectDiscard(
   Effect.gen(function* (_) {
+    yield* _(
+      Effect.log('Debug log', 'Initializing metrics reporting service', 'START')
+    )
     const sql = yield* _(SqlClient.SqlClient)
 
     const queryNumberOfUniqueUsersEffect = sql`
@@ -151,6 +154,10 @@ export const reportGaguesLayer = Layer.effectDiscard(
       Effect.forever,
       Effect.withSpan('Report gauges'),
       Effect.fork
+    )
+
+    yield* _(
+      Effect.log('Debug log', 'Initializing metrics reporting service', 'DONE')
     )
   })
 )

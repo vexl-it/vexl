@@ -42,19 +42,39 @@ const migrations = [
   },
 ] as const
 
-const SqlLive = databaseConfig.pipe(
-  Effect.map((config) =>
-    PgClient.layer({
-      ...config,
-      transformQueryNames: String.camelToSnake,
-      transformResultNames: String.snakeToCamel,
+const SqlLive = Layer.effectDiscard(
+  Effect.log('Debug log', 'Initializing  sql layer', 'START')
+).pipe(
+  Layer.flatMap(() =>
+    databaseConfig.pipe(
+      Effect.map((config) =>
+        PgClient.layer({
+          debug: true,
+          ...config,
+          transformQueryNames: String.camelToSnake,
+          transformResultNames: String.snakeToCamel,
+        })
+      ),
+      Layer.unwrapEffect
+    )
+  ),
+  Layer.tap(() => Effect.log('Debug log', 'Initializing  sql layer', 'DONE'))
+)
+
+const MigratorLive = Layer.effectDiscard(
+  Effect.log('Debug log', 'Initializing  migration layer', 'START')
+).pipe(
+  Layer.flatMap(() =>
+    PgMigrator.layer({
+      loader: loadMigrationsFromEffect(migrations),
     })
   ),
-  Layer.unwrapEffect
+  Layer.tap(() =>
+    Effect.log('Debug log', 'Initializing  migration layer', 'DONE')
+  )
 )
-const MigratorLive = PgMigrator.layer({
-  loader: loadMigrationsFromEffect(migrations),
-}).pipe(Layer.provide(SqlLive))
 
-const DbLayer = Layer.mergeAll(SqlLive, MigratorLive)
+const DbLayer = MigratorLive.pipe(Layer.provideMerge(SqlLive)).pipe(
+  Layer.tap(() => Effect.log('Debug log', 'DB layers', 'DONE'))
+)
 export default DbLayer

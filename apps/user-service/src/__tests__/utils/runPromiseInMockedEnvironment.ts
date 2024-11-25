@@ -40,9 +40,11 @@ const context = NodeTestingApp.Live.pipe(
 )
 
 const runtime = ManagedRuntime.make(context)
+let runtimeReady = false
 
 export const startRuntime = async (): Promise<void> => {
   await runtime.runPromise(Console.log('Initialized the test environment'))
+  runtimeReady = true
 }
 export const disposeRuntime = async (): Promise<void> => {
   await Effect.runPromise(
@@ -50,18 +52,21 @@ export const disposeRuntime = async (): Promise<void> => {
       Console.log('Disposed test environment')
     )
   )
+  runtimeReady = false
 }
 
 export const runPromiseInMockedEnvironment = async (
   effectToRun: Effect.Effect<void, any, MockedContexts | Scope.Scope>
 ): Promise<void> => {
+  if (!runtimeReady) throw new Error('Runtime is not ready')
   await runtime.runPromise(
     effectToRun.pipe(
       Effect.scoped,
       Effect.catchAll((e) => {
-        console.warn(e)
-        expect(e).toBe('Error in test')
-        return Console.error('Error in test', e)
+        return Effect.zipRight(
+          Effect.logError('Error in test', e),
+          Effect.fail(e)
+        )
       })
     )
   )

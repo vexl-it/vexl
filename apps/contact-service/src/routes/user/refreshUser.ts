@@ -31,6 +31,7 @@ export const refreshUser = Handler.make(RefreshUserEndpoint, (req, security) =>
           refreshedAt: new Date(),
         })
       )
+      return {}
     }),
     UserNotFoundError
   )

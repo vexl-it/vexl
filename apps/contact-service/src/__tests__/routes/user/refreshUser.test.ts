@@ -1,10 +1,11 @@
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
-import {Effect, Schema} from 'effect'
-import {NodeTestingApp} from '../../NodeTestingApp'
-import {runPromiseInMockedEnvironment} from '../../runPromiseInMockedEnvironment'
+import {Effect, Option, Schema} from 'effect'
+import {NodeTestingApp} from '../../utils/NodeTestingApp'
+import {runPromiseInMockedEnvironment} from '../../utils/runPromiseInMockedEnvironment'
 
 import {HttpClientRequest} from '@effect/platform'
 import {SqlClient} from '@effect/sql'
+import {CountryPrefixE} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {E164PhoneNumberE} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {FcmTokenE} from '@vexl-next/domain/src/utility/FcmToken.brand'
 import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
@@ -42,16 +43,17 @@ beforeAll(async () => {
     })
   )
 })
-
-describe('updateFirebaseToken', () => {
-  it('Updates firebase token in database', async () => {
+describe('Refresh user', () => {
+  it('Refreshses user in database (refreshedAt clientVersion, and countryPrefix)', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const sql = yield* _(SqlClient.SqlClient)
         yield* _(sql`
           UPDATE users
           SET
-            firebase_token = NULL
+            refreshed_at = NULL,
+            client_version = NULL,
+            country_prefix = NULL
           WHERE
             public_key = ${keys.publicKeyPemBase64}
         `)
@@ -63,10 +65,13 @@ describe('updateFirebaseToken', () => {
         )
         const app = yield* _(NodeTestingApp)
         yield* _(
-          app.updateFirebaseToken(
+          app.refreshUser(
             {
               body: {
-                firebaseToken: Schema.decodeSync(FcmTokenE)('newToken'),
+                offersAlive: true,
+                countryPrefix: Option.some(
+                  Schema.decodeSync(CountryPrefixE)(420)
+                ),
               },
               headers: Schema.decodeSync(CommonHeaders)({
                 'user-agent': 'Vexl/2 (1.0.0) ANDROID',
@@ -84,7 +89,9 @@ describe('updateFirebaseToken', () => {
           WHERE
             public_key = ${keys.publicKeyPemBase64}
         `)
-        expect(userInDb[0]).toHaveProperty('firebaseToken', 'newToken')
+        expect(userInDb[0]).toHaveProperty('clientVersion', 2)
+        expect(userInDb[0]).toHaveProperty('refreshedAt', expect.any(Date))
+        expect(userInDb[0]).toHaveProperty('countryPrefix', 420)
       })
     )
   })
@@ -99,10 +106,11 @@ describe('updateFirebaseToken', () => {
         )
         const app = yield* _(NodeTestingApp)
         const result = yield* _(
-          app.updateFirebaseToken(
+          app.refreshUser(
             {
               body: {
-                firebaseToken: Schema.decodeSync(FcmTokenE)('newToken'),
+                offersAlive: true,
+                countryPrefix: Option.none(),
               },
               headers: Schema.decodeSync(CommonHeaders)({
                 'user-agent': 'Vexl/2 (1.0.0) ANDROID',

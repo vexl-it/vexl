@@ -1,6 +1,7 @@
 import {Api, ApiGroup} from 'effect-http'
 import {ServerSecurity} from '../../apiSecurity'
 import {CommonHeaders} from '../../commonHeaders'
+import {NoContentResponse} from '../../NoContentResponse.brand'
 import {
   CheckUserExistsRequest,
   CreateUserRequest,
@@ -35,6 +36,7 @@ export const CreateUserEndpoint = Api.post('createUser', '/api/v1/users').pipe(
   Api.setRequestBody(CreateUserRequest),
   Api.setResponse({
     status: 201,
+    body: NoContentResponse,
   })
 )
 
@@ -44,6 +46,7 @@ export const RefreshUserEndpoint = Api.post(
 ).pipe(
   Api.setSecurity(ServerSecurity),
   Api.setRequestHeaders(CommonHeaders),
+  Api.setResponseBody(NoContentResponse),
   Api.setRequestBody(RefreshUserRequest),
   Api.addResponse({
     status: 404,
@@ -59,6 +62,7 @@ export const UpdateFirebaseTokenEndpoint = Api.put(
   Api.setRequestBody(UpdateFirebaseTokenRequest),
   Api.setResponse({
     status: 200,
+    body: NoContentResponse,
   })
 )
 
@@ -69,6 +73,7 @@ export const DeleteUserEndpoint = Api.delete(
   Api.setSecurity(ServerSecurity),
   Api.setResponse({
     status: 200,
+    body: NoContentResponse,
   })
 )
 

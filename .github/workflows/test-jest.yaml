@@ -13,12 +13,11 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: postgres:15.2
+        image: postgres:16
         env:
           POSTGRES_DB: postgres
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: root
-          POSTGRES_HOST_AUTH_METHOD: trust
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -41,7 +40,16 @@ jobs:
       - name: Install dependencies
         run: yarn
 
+      - name: Wait for PostgreSQL to be ready
+        run: |
+          for i in {1..30}; do
+            pg_isready -h localhost -p 5432 && echo "Pg is ready" && break
+            echo "Waiting for PostgreSQL to be ready..."
+            sleep 2
+          done
+          pg_isready -h localhost -p 5432 || { echo "PostgreSQL failed to start"; exit 1; }
+
       - name: Run tests
         env:
-          TEST_DB_HOST: "postgres"
+          TEST_DB_HOST: "localhost"
         run: yarn turbo:test

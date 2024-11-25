@@ -1,8 +1,8 @@
 import {HttpClientRequest} from '@effect/platform'
 import {MAX_PAGE_SIZE} from '@vexl-next/rest-api/src/Pagination.brand'
 import {Array, Effect, Order, pipe} from 'effect'
-import {NodeTestingApp} from '../../NodeTestingApp'
-import {runPromiseInMockedEnvironment} from '../../runPromiseInMockedEnvironment'
+import {NodeTestingApp} from '../../utils/NodeTestingApp'
+import {runPromiseInMockedEnvironment} from '../../utils/runPromiseInMockedEnvironment'
 import {
   createAndImportUsersFromNetwork,
   generateKeysAndHasheForNumber,

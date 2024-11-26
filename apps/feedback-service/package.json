@@ -3,8 +3,8 @@
   "main": "dist/index.js",
   "type": "module",
   "scripts": {
-    "test": "TEST_DB_HOST=localhost yarn jest",
-    "test:watch": "NODE_OPTIONS=--experimental-vm-modules yarn jest --watch",
+    "test": "yarn jest",
+    "test:watch": "yarn jest --watch",
     "build": "yarn typecheck && yarn build:esbuild",
     "build:esbuild": "node esbuild.config.js",
     "typecheck": "tsc --noEmit",

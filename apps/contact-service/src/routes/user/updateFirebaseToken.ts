@@ -29,6 +29,7 @@ export const updateFirebaseToken = Handler.make(
             firebaseToken: Option.fromNullable(req.body.firebaseToken),
           })
         )
+        return {}
       }),
       UserNotFoundError
     )

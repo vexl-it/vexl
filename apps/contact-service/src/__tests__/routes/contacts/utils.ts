@@ -6,7 +6,7 @@ import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {hashPhoneNumber} from '@vexl-next/server-utils/src/generateUserAuthData'
 import {createDummyAuthHeadersForUser} from '@vexl-next/server-utils/src/tests/createDummyAuthHeaders'
 import {Array, Effect, pipe, Schema} from 'effect'
-import {NodeTestingApp} from '../../NodeTestingApp'
+import {NodeTestingApp} from '../../utils/NodeTestingApp'
 
 const commonHeaders = Schema.decodeSync(CommonHeaders)({
   'user-agent': 'Vexl/1 (1.0.0) ANDROID',

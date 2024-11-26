@@ -52,6 +52,7 @@ export const createUser = Handler.make(CreateUserEndpoint, (req, security) =>
           platform: req.headers.clientPlatformOrNone,
         })
       )
+      return {}
     }).pipe(withDbTransaction, withUserActionRedisLock(security.hash)),
     Schema.Void
   )

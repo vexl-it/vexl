@@ -1,7 +1,7 @@
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {Effect, Schema} from 'effect'
-import {NodeTestingApp} from '../../NodeTestingApp'
-import {runPromiseInMockedEnvironment} from '../../runPromiseInMockedEnvironment'
+import {NodeTestingApp} from '../../utils/NodeTestingApp'
+import {runPromiseInMockedEnvironment} from '../../utils/runPromiseInMockedEnvironment'
 
 import {HttpClientRequest} from '@effect/platform'
 import {SqlClient} from '@effect/sql'

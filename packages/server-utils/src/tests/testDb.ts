@@ -3,7 +3,7 @@ import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {Config, Console, Effect, Layer, Option, Redacted} from 'effect'
 
 const testDbConfig = Config.unwrap({
-  host: Config.string('TEST_DB_HOST'),
+  host: Config.withDefault(Config.string('TEST_DB_HOST'), 'localhost'),
   port: Config.number('TEST_DB_PORT'),
   username: Config.string('TEST_DB_USER'),
   password: Config.redacted('TEST_DB_PASSWORD'),
@@ -16,8 +16,22 @@ const keepDbConfig = Config.boolean('TEST_KEEP_DB').pipe(
 )
 
 const testServicePgClient = testDbConfig.pipe(
-  Effect.map((config) => PgClient.layer(config)),
-  Layer.unwrapEffect
+  Effect.map((config) =>
+    PgClient.layer({
+      url: Redacted.make(
+        `postgresql://${config.host}:${config.port}/${config.database}`
+      ),
+      username: config.username,
+      password: config.password,
+      debug: config.debug,
+    })
+  ),
+  Layer.unwrapEffect,
+  Layer.tapError((e) =>
+    Effect.flatMap(testDbConfig, (config) =>
+      Effect.logInfo('Failed to connect the test database', config, e)
+    )
+  )
 )
 
 // I know, this is not pretty, but we are doing this for tests so it's fine...

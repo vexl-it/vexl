@@ -1,7 +1,7 @@
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {Effect, Schema} from 'effect'
-import {NodeTestingApp} from '../../NodeTestingApp'
-import {runPromiseInMockedEnvironment} from '../../runPromiseInMockedEnvironment'
+import {NodeTestingApp} from '../../utils/NodeTestingApp'
+import {runPromiseInMockedEnvironment} from '../../utils/runPromiseInMockedEnvironment'
 
 import {HttpClientRequest} from '@effect/platform'
 import {SqlClient} from '@effect/sql'
@@ -9,7 +9,7 @@ import {E164PhoneNumberE} from '@vexl-next/domain/src/general/E164PhoneNumber.br
 import {FcmTokenE} from '@vexl-next/domain/src/utility/FcmToken.brand'
 import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {createDummyAuthHeadersForUser} from '@vexl-next/server-utils/src/tests/createDummyAuthHeaders'
-import {sendMessageMock} from '../../mockedFirebaseMessagingService'
+import {sendMessageMock} from '../../utils/mockedFirebaseMessagingService'
 
 const keys = generatePrivateKey()
 const phoneNumber = Schema.decodeSync(E164PhoneNumberE)('+420733333333')

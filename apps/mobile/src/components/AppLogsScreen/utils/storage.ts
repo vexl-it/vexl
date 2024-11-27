@@ -1,7 +1,7 @@
 /**
  * We don't use atoms here to make it at least somewhat performant. We assume storing 1_000 log lines
  */
-import {storage} from '../../../utils/fpMmkv'
+import {storage} from '../../../utils/mmkv/fpMmkv'
 
 export const LOGS_KEY = 'logs'
 export const IS_CUSTOM_LOGGKING_ENABLED_KEY = 'logs_enabled'

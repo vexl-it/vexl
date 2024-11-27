@@ -17,7 +17,7 @@ import {postLoginFinishedStorageAtom} from '../state/postLoginOnboarding'
 import {selectedCurrencyStorageAtom} from '../state/selectedCurrency'
 import vexlCalendarStorageAtom from '../state/tradeChecklist/atoms/vexlCalendarStorageAtom'
 import {lastInitialLinkStorageAtom} from './deepLinks'
-import {storage} from './fpMmkv'
+import {storage} from './mmkv/fpMmkv'
 import {preferencesAtom} from './preferences'
 
 export default function clearMmkvStorageAndEmptyAtoms(): void {

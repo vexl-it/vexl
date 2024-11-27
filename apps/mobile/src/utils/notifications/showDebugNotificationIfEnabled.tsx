@@ -1,7 +1,7 @@
 import notifee, {AndroidImportance} from '@notifee/react-native'
 import {getOrElse} from 'fp-ts/Either'
 import {pipe} from 'fp-ts/lib/function'
-import {storage} from '../fpMmkv'
+import {storage} from '../mmkv/fpMmkv'
 
 const DEBUG_NOTIFICATIONS_ENABLED_KEY = 'debugNotificationsEnabled'
 

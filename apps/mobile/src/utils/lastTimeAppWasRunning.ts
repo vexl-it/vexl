@@ -5,7 +5,7 @@ import {
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import * as E from 'fp-ts/Either'
 import {pipe} from 'fp-ts/function'
-import {storage} from './fpMmkv'
+import {storage} from './mmkv/fpMmkv'
 
 const LAST_TIME_APP_WAS_RUNNING_KEY = 'lastTimeAppWasRunning'
 

@@ -20,7 +20,7 @@ import {ImportContactFromLinkPayload} from '../../state/contacts/domain'
 import {hashPhoneNumber} from '../../state/contacts/utils'
 import {atomWithParsedMmkvStorage} from '../atomUtils/atomWithParsedMmkvStorage'
 import {version as appVersion} from '../environment'
-import {parseJson, safeParse} from '../fpUtils'
+import {parseJsonFp, safeParse} from '../fpUtils'
 import {translationAtom, useTranslation} from '../localization/I18nProvider'
 import {goldenAvatarTypeAtom} from '../preferences'
 import reportError from '../reportError'
@@ -40,7 +40,7 @@ export const handleImportDeepContactActionAtom = atom(
   (get, set, contactJsonString: string) => {
     const {t} = get(translationAtom)
     return pipe(
-      parseJson(contactJsonString),
+      parseJsonFp(contactJsonString),
       TE.fromEither,
       TE.chainEitherKW(safeParse(ImportContactFromLinkPayload)),
       TE.bindTo('payload'),

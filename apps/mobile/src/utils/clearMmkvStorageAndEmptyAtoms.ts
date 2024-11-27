@@ -61,6 +61,7 @@ export default function clearMmkvStorageAndEmptyAtoms(): void {
       newPhoneContacts: true,
       offer: true,
     },
+    showOfferDetail: false,
     enableNewOffersNotificationDevMode: false,
     showFriendLevelBanner: true,
     offerFeedbackEnabled: false,

@@ -1,3 +1,4 @@
+import Clipboard from '@react-native-clipboard/clipboard'
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
@@ -18,7 +19,10 @@ import {
 import {createSingleOfferReportedFlagAtom} from '../../../state/marketplace/atoms/offersState'
 import {enableHiddenFeatures} from '../../../utils/environment'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
-import {friendLevelBannerPreferenceAtom} from '../../../utils/preferences'
+import {
+  friendLevelBannerPreferenceAtom,
+  preferencesAtom,
+} from '../../../utils/preferences'
 import {offerRerequestLimitDaysAtom} from '../../../utils/remoteConfig/atoms'
 import useSafeGoBack from '../../../utils/useSafeGoBack'
 import Button from '../../Button'
@@ -81,6 +85,7 @@ function OfferInfo({
   const chatForOffer = useChatWithMessagesForOffer({
     offerPublicKey: offer.offerInfo.publicPart.offerPublicKey,
   })
+  const preferences = useAtomValue(preferencesAtom)
 
   const requestState: RequestState = useMemo(
     () => (chatForOffer ? getRequestState(chatForOffer) : 'initial'),
@@ -178,10 +183,14 @@ function OfferInfo({
             (requestState === 'cancelled' || requestState === 'deleted') && (
               <RerequestInfo chat={chatForOffer} />
             )}
-          {!!enableHiddenFeatures && (
-            <Text>
-              Author client version:{' '}
-              {offer.offerInfo.publicPart.authorClientVersion ?? 'no version'}
+          {!!(!!enableHiddenFeatures || preferences.showOfferDetail) && (
+            <Text
+              onPress={() => {
+                Clipboard.setString(JSON.stringify(offer, null, 2))
+                Alert.alert(t('common.copied'))
+              }}
+            >
+              {JSON.stringify(offer, null, 2)}
             </Text>
           )}
         </YStack>

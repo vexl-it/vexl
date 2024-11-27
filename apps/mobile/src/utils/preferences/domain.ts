@@ -25,6 +25,7 @@ export const Preferences = z
     disableScreenshots: z.boolean().default(false),
     isDeveloper: z.boolean().default(false),
     appLanguage: z.string().optional(),
+    showOfferDetail: z.boolean().optional().default(false),
     marketplaceFiatOrSatsCurrency: FiatOrSats.default('FIAT'),
   })
   .readonly()

@@ -16,6 +16,7 @@ export const preferencesAtom = atomWithParsedMmkvStorage(
       newPhoneContacts: true,
       offer: true,
     },
+    showOfferDetail: false,
     enableNewOffersNotificationDevMode: false,
     showFriendLevelBanner: true,
     offerFeedbackEnabled: false,

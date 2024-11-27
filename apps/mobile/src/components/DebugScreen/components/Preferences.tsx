@@ -11,6 +11,7 @@ const preferencesToEdit = [
   'offerFeedbackEnabled',
   'showTextDebugButton',
   'isDeveloper',
+  'showOfferDetail',
 ] as const
 
 function Preferences(): JSX.Element {

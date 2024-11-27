@@ -72,9 +72,18 @@ export function getContactsAndTryToResolveThePermissionsAlongTheWay(): TE.TaskEi
               ?.map((number) => {
                 if (!number.number) return null
 
+                const name =
+                  contact.name ??
+                  (!!contact.firstName || !!contact.lastName
+                    ? [contact.firstName, contact.lastName]
+                        .filter(Boolean)
+                        .join(' ')
+                    : undefined) ??
+                  number.number
+
                 return {
                   nonUniqueContactId: NonUniqueContactId.parse(contact.id),
-                  name: contact.name ?? number.number,
+                  name,
                   label: number.label,
                   numberToDisplay: number.number,
                   rawNumber: number.number,

@@ -3,9 +3,9 @@ import {pipe} from 'fp-ts/function'
 import {Session} from '../../../brands/Session.brand'
 import {
   aesDecrypt,
-  getItemFromAsyncStorage,
-  getItemFromSecretStorage,
-  parseJson,
+  getItemFromAsyncStorageFp,
+  getItemFromSecretStorageFp,
+  parseJsonFp,
   safeParse,
   type CryptoError,
   type ErrorReadingFromAsyncStorage,
@@ -31,13 +31,13 @@ export default function readSessionFromStorage({
   Session
 > {
   return pipe(
-    getItemFromAsyncStorage(asyncStorageKey),
+    getItemFromAsyncStorageFp(asyncStorageKey),
     TE.bindTo('encryptedSessionJson'),
-    TE.bindW('secretToken', () => getItemFromSecretStorage(secretStorageKey)),
+    TE.bindW('secretToken', () => getItemFromSecretStorageFp(secretStorageKey)),
     TE.chainW(({encryptedSessionJson, secretToken}) =>
       aesDecrypt(encryptedSessionJson, secretToken)
     ),
-    TE.chainEitherKW(parseJson),
+    TE.chainEitherKW(parseJsonFp),
     TE.chainEitherKW(safeParse(Session))
   )
 }

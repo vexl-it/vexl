@@ -13,6 +13,13 @@ export function effectToTaskEither<L, R>(
   }
 }
 
+export function effectToEither<L, R>(
+  effect: Effect.Effect<R, L>
+): E.Either<L, R> {
+  const result = Effect.runSync(effect.pipe(Effect.either))
+  return result._tag === 'Right' ? E.right(result.right) : E.left(result.left)
+}
+
 export function effectToTask<A>(
   effect: Effect.Effect<A, never, never>
 ): T.Task<A> {

@@ -3,28 +3,14 @@ import {pipe} from 'fp-ts/function'
 import {MMKV} from 'react-native-mmkv'
 import {type z} from 'zod'
 import {
-  parseJson,
+  parseJsonFp,
   safeParse,
   stringifyToJson,
   type JsonParseError,
   type JsonStringifyError,
   type ZodParseError,
-} from './fpUtils'
-
-export interface ReadingFromStoreError {
-  readonly _tag: 'ReadingFromStoreError'
-  readonly error: unknown
-}
-
-export interface WritingToStoreError {
-  readonly _tag: 'WritingToStoreError'
-  readonly error: unknown
-}
-
-export interface ValueNotSet {
-  readonly _tag: 'ValueNotSet'
-}
-
+} from '../fpUtils'
+import {ReadingFromStoreError, ValueNotSet, WritingToStoreError} from './domain'
 export interface FpMMKV {
   _storage: MMKV
   set: (key: string) => (value: string) => E.Either<WritingToStoreError, true>
@@ -59,7 +45,7 @@ function createFpMMKV(storage: MMKV): FpMMKV {
           storage.set(key, value)
           return true
         },
-        (e) => ({_tag: 'WritingToStoreError', error: e}) as const
+        (e) => new WritingToStoreError({cause: e})
       )
   }
 
@@ -67,11 +53,11 @@ function createFpMMKV(storage: MMKV): FpMMKV {
     return pipe(
       E.tryCatch(
         () => storage.getString(key),
-        (e) => ({_tag: 'ReadingFromStoreError', error: e}) as const
+        (e) => new ReadingFromStoreError({cause: e})
       ),
       E.filterOrElseW(
         (x): x is NonNullable<typeof x> => x !== null && x !== undefined,
-        () => ({_tag: 'ValueNotSet'}) as const
+        () => new ValueNotSet()
       )
     )
   }
@@ -81,7 +67,7 @@ function createFpMMKV(storage: MMKV): FpMMKV {
   }
 
   function getJSON(key: string): ReturnType<FpMMKV['getJSON']> {
-    return pipe(get(key), E.chainW(parseJson))
+    return pipe(get(key), E.chainW(parseJsonFp))
   }
 
   const getVerified = <T extends z.ZodType>(

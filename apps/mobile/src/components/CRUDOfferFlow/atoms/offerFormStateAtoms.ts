@@ -980,7 +980,10 @@ export const offerFormMolecule = molecule(() => {
       if (currentBtcPrice) {
         set(
           satsValueAtom,
-          calculatePriceInSats({price: priceNumber, currentBtcPrice}) ?? 0
+          calculatePriceInSats({
+            price: priceNumber,
+            currentBtcPrice: currentBtcPrice.BTC,
+          }) ?? 0
         )
       }
     }
@@ -1005,7 +1008,7 @@ export const offerFormMolecule = molecule(() => {
           amountBottomLimitAtom,
           calculatePriceInFiatFromSats({
             satsNumber,
-            currentBtcPrice,
+            currentBtcPrice: currentBtcPrice.BTC,
           })
         )
       }

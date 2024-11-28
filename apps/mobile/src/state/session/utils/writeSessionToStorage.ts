@@ -3,8 +3,8 @@ import {pipe} from 'fp-ts/function'
 import {type Session} from '../../../brands/Session.brand'
 import {
   aesEncrypt,
-  saveItemToAsyncStorage,
-  saveItemToSecretStorage,
+  saveItemToAsyncStorageFp,
+  saveItemToSecretStorageFp,
   stringifyToJson,
   type CryptoError,
   type ErrorWritingToStore,
@@ -27,9 +27,9 @@ export default function writeSessionToStorage(
         TE.right(session),
         TE.chainEitherKW(stringifyToJson),
         TE.chainW(aesEncrypt(session.privateKey.privateKeyPemBase64)),
-        TE.chainFirstW(saveItemToAsyncStorage(asyncStorageKey)),
+        TE.chainFirstW(saveItemToAsyncStorageFp(asyncStorageKey)),
         TE.chainFirstW(() =>
-          saveItemToSecretStorage(secretStorageKey)(
+          saveItemToSecretStorageFp(secretStorageKey)(
             session.privateKey.privateKeyPemBase64
           )
         )

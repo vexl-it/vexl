@@ -1069,7 +1069,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
 
       return amount.calculateBtcPricePercentageDifference(
         amountDataToDisplay,
-        btcPriceForTradeCurrency?.btcPrice
+        btcPriceForTradeCurrency?.btcPrice?.BTC
       )
     }
   )

@@ -53,7 +53,7 @@ function PriceInSats({offer}: Props): JSX.Element {
               {bigNumberToString(
                 calculatePriceInSats({
                   price: offer.publicPart.amountTopLimit,
-                  currentBtcPrice: btcPriceWithState?.btcPrice ?? 0,
+                  currentBtcPrice: btcPriceWithState?.btcPrice?.BTC ?? 0,
                 })
               )}
             </PriceBigger>

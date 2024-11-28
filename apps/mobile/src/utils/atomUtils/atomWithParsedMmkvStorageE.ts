@@ -68,7 +68,7 @@ function getInitialValue<Value extends Schema.Schema<any, any, never>>({
   )
 }
 
-export function atomWithParsedMmkvStorage<
+export function atomWithParsedMmkvStorageE<
   Value extends Schema.Schema<any, any, never>,
 >(
   key: string,

@@ -59,7 +59,7 @@ export function loadSession(
           `Error while loading session ${JSON.stringify(left)}`
         )
 
-        if (left._tag === 'storeEmpty') {
+        if (left._tag === 'StoreEmpty') {
           console.info('🔑 No session in storage. User is logged out')
           getDefaultStore().set(sessionHolderAtom, {state: 'loggedOut'})
           return false

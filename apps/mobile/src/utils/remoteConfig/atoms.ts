@@ -3,7 +3,7 @@ import * as E from 'fp-ts/Either'
 import {pipe} from 'fp-ts/function'
 import {atom} from 'jotai'
 import {AppState} from 'react-native'
-import {parseJson, safeParse} from '../fpUtils'
+import {parseJsonFp, safeParse} from '../fpUtils'
 import {preferencesAtom} from '../preferences'
 import reportError from '../reportError'
 import {
@@ -39,7 +39,7 @@ remoteConfigAtom.onMount = (set) => {
     // eslint-disable-next-line @typescript-eslint/naming-convention
     const next__maintenance = pipe(
       remoteConfig().getString('next__maintenance'),
-      parseJson,
+      parseJsonFp,
       E.chainW(safeParse(MaintenanceConfig)),
       E.getOrElse((e) => {
         reportError(
@@ -54,7 +54,7 @@ remoteConfigAtom.onMount = (set) => {
     // eslint-disable-next-line @typescript-eslint/naming-convention
     const next__offer_rerequest_limit_days = pipe(
       remoteConfig().getString('next__offer_rerequest_limit_days'),
-      parseJson,
+      parseJsonFp,
       E.chainW(safeParse(OfferRerequestLimitDays)),
       E.getOrElse((e) => {
         reportError(

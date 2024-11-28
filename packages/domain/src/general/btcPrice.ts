@@ -1,26 +1,26 @@
-import {z} from 'zod'
-import {UnixMilliseconds} from '../utility/UnixMilliseconds.brand'
+import {Schema} from 'effect'
+import {UnixMillisecondsE} from '../utility/UnixMilliseconds.brand'
 
-export const BtcPrice = z.number().positive().brand('BtcPrice')
-export type BtcPrice = z.TypeOf<typeof BtcPrice>
+const BtcPriceFetched = Schema.Struct({
+  BTC: Schema.Number,
+  lastUpdatedAt: Schema.optionalWith(UnixMillisecondsE, {as: 'Option'}),
+})
 
-export const BtcPriceDataWithState = z
-  .discriminatedUnion('state', [
-    z.object({
-      state: z.literal('loading'),
-      btcPrice: z.number().optional(),
-    }),
-    z.object({
-      state: z.literal('success'),
-      btcPrice: z.number(),
-      lastRefreshAt: UnixMilliseconds,
-    }),
-    z.object({
-      state: z.literal('error'),
-      btcPrice: z.number().optional(),
-      error: z.unknown(),
-    }),
-  ])
-  .readonly()
+export const BtcPriceDataWithState = Schema.Union(
+  Schema.Struct({
+    state: Schema.Literal('loading'),
+    btcPrice: Schema.optional(BtcPriceFetched),
+  }),
+  Schema.Struct({
+    state: Schema.Literal('success'),
+    btcPrice: BtcPriceFetched,
+    lastRefreshAt: UnixMillisecondsE,
+  }),
+  Schema.Struct({
+    state: Schema.Literal('error'),
+    btcPrice: Schema.optional(BtcPriceFetched),
+    error: Schema.Unknown,
+  })
+)
 
-export type BtcPriceDataWithState = z.TypeOf<typeof BtcPriceDataWithState>
+export type BtcPriceDataWithState = typeof BtcPriceDataWithState.Type

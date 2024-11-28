@@ -12,7 +12,7 @@ import {addContactWithUiFeedbackAtom} from '../../state/contacts/atom/addContact
 import {ImportContactFromLinkPayload} from '../../state/contacts/domain'
 import {hashPhoneNumber} from '../../state/contacts/utils'
 import {atomWithParsedMmkvStorage} from '../atomUtils/atomWithParsedMmkvStorage'
-import {parseJson, safeParse} from '../fpUtils'
+import {parseJsonFp, safeParse} from '../fpUtils'
 import {translationAtom, useTranslation} from '../localization/I18nProvider'
 import reportError from '../reportError'
 import showErrorAlert from '../showErrorAlert'
@@ -26,7 +26,7 @@ export const handleImportDeepContactActionAtom = atom(
   (get, set, contactJsonString: string) => {
     const {t} = get(translationAtom)
     return pipe(
-      parseJson(contactJsonString),
+      parseJsonFp(contactJsonString),
       TE.fromEither,
       TE.chainEitherKW(safeParse(ImportContactFromLinkPayload)),
       TE.bindTo('payload'),

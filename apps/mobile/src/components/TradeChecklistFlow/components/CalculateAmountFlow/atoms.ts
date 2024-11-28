@@ -119,7 +119,7 @@ export const syncDataWithChatStateActionAtom = atom(
         set(tradeBtcPriceAtom, (prev) =>
           initialDataToSet?.tradePriceType !== 'live'
             ? (initialDataToSet?.btcPrice ?? prev)
-            : (get(btcPriceForOfferWithStateAtom)?.btcPrice ?? prev)
+            : (get(btcPriceForOfferWithStateAtom)?.btcPrice?.BTC ?? prev)
         )
         set(btcInputValueAtom, String(initialDataToSet?.btcAmount ?? ''))
 

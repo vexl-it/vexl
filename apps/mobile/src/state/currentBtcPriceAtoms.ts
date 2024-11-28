@@ -1,15 +1,18 @@
 import {BtcPriceDataWithState} from '@vexl-next/domain/src/general/btcPrice'
-import {CurrencyCode} from '@vexl-next/domain/src/general/currency.brand'
+import {
+  type CurrencyCode,
+  CurrencyCodeE,
+} from '@vexl-next/domain/src/general/currency.brand'
 import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
+import {Schema} from 'effect'
 import {pipe} from 'fp-ts/lib/function'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
 import {atom, type Atom, type PrimitiveAtom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
-import {z} from 'zod'
 import {apiAtom} from '../api'
-import {atomWithParsedMmkvStorage} from '../utils/atomUtils/atomWithParsedMmkvStorage'
+import {atomWithParsedMmkvStorageE} from '../utils/atomUtils/atomWithParsedMmkvStorageE'
 import {currencies} from '../utils/localization/currency'
 import reportError from '../utils/reportError'
 import {selectedCurrencyAtom} from './selectedCurrency'
@@ -19,16 +22,16 @@ export const DECIMALS_FOR_BTC_VALUE = 8
 
 const FETCH_LIMIT = 10 * 60 * 1000 // 10 minutes
 
-const PriceDataStored = z
-  .object({
-    data: z.record(CurrencyCode, BtcPriceDataWithState),
-  })
-  .readonly()
-type PriceDataStored = z.TypeOf<typeof PriceDataStored>
+const PriceDataStored = Schema.Struct({
+  data: Schema.partial(
+    Schema.Record({key: CurrencyCodeE, value: BtcPriceDataWithState})
+  ),
+})
+type PriceDataStored = typeof PriceDataStored.Type
 
-const btcPriceMmkvAtom = atomWithParsedMmkvStorage(
+const btcPriceMmkvAtom = atomWithParsedMmkvStorageE(
   'brcPrice',
-  {data: {}},
+  {data: {} as Record<CurrencyCode, BtcPriceDataWithState>},
   PriceDataStored
 )
 
@@ -105,7 +108,7 @@ export const refreshBtcPriceActionAtom = atom(
           set(btcPriceDataAtom, (prevState) => ({
             ...prevState,
             [currency]: {
-              btcPrice: prevState[currency]?.btcPrice ?? 0,
+              btcPrice: prevState[currency]?.btcPrice,
               state: 'error',
               error: l,
             },
@@ -117,7 +120,7 @@ export const refreshBtcPriceActionAtom = atom(
           set(btcPriceDataAtom, (prevState) => ({
             ...prevState,
             [currency]: {
-              btcPrice: Math.round(btcPrice?.BTC),
+              btcPrice: {...btcPrice, BTC: btcPrice.BTC},
               state: 'success',
               lastRefreshAt: unixMillisecondsNow(),
             } satisfies BtcPriceDataWithState,

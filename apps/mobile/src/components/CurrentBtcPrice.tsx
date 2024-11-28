@@ -1,4 +1,5 @@
 import {type CurrencyCode} from '@vexl-next/domain/src/general/offers'
+import {unixMillisecondsToPretty} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {
   atom,
   useAtomValue,
@@ -8,12 +9,15 @@ import {
 } from 'jotai'
 import {useEffect, useMemo} from 'react'
 import {ActivityIndicator, TouchableOpacity} from 'react-native'
-import {Text, XStack, getTokens, type TextProps} from 'tamagui'
+import {Text, XStack, YStack, getTokens, type TextProps} from 'tamagui'
 import {
   createBtcPriceForCurrencyAtom,
   refreshBtcPriceActionAtom,
 } from '../state/currentBtcPriceAtoms'
-import {getCurrentLocale} from '../utils/localization/I18nProvider'
+import {
+  getCurrentLocale,
+  useTranslation,
+} from '../utils/localization/I18nProvider'
 import {currencies} from '../utils/localization/currency'
 import {preferencesAtom} from '../utils/preferences'
 
@@ -54,6 +58,7 @@ function CurrentBtcPrice({
     postRefreshActions,
     refreshBtcPrice,
   ])
+  const {t} = useTranslation()
 
   return (
     <TouchableOpacity
@@ -69,15 +74,28 @@ function CurrentBtcPrice({
             color={getTokens().color.greyOnBlack.val}
           />
         ) : (
-          <Text fos={16} ff="$body500" col="$white" {...props}>
-            {`1 BTC = ${
-              customBtcPrice
-                ? customBtcPrice.toLocaleString(currentLocale)
-                : btcPriceWithState?.state === 'error'
-                  ? '-'
-                  : btcPriceWithState?.btcPrice.toLocaleString(currentLocale)
-            } ${currency}`}
-          </Text>
+          <YStack>
+            <Text fos={16} ff="$body500" col="$white" {...props}>
+              {`1 BTC = ${
+                customBtcPrice
+                  ? customBtcPrice.toLocaleString(currentLocale)
+                  : btcPriceWithState?.state === 'error'
+                    ? '-'
+                    : btcPriceWithState?.btcPrice.BTC.toLocaleString(
+                        currentLocale
+                      )
+              } ${currency}`}
+            </Text>
+            {!customBtcPrice &&
+              btcPriceWithState?.btcPrice?.lastUpdatedAt?._tag === 'Some' && (
+                <Text>
+                  {t('common.lastUpdated')}: $
+                  {unixMillisecondsToPretty(
+                    btcPriceWithState.btcPrice.lastUpdatedAt.value
+                  )()}
+                </Text>
+              )}
+          </YStack>
         )}
       </XStack>
     </TouchableOpacity>

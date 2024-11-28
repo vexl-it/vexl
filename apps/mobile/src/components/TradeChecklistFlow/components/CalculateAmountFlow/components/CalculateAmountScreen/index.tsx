@@ -64,7 +64,7 @@ function CalculateAmountScreen({
     if (tradePriceType === 'custom' && amountData?.btcPrice)
       return calculatePercentageDifference(
         amountData.btcPrice,
-        btcPriceForOfferWithState?.btcPrice
+        btcPriceForOfferWithState?.btcPrice?.BTC
       )
 
     return 0

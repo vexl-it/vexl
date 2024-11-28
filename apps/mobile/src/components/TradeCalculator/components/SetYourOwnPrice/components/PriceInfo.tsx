@@ -16,7 +16,7 @@ function PriceInfo(): JSX.Element | null {
 
   const percentageDifference = calculatePercentageDifference(
     ownPrice,
-    btcPriceForOfferWithState?.btcPrice
+    btcPriceForOfferWithState?.btcPrice?.BTC
   )
 
   return ownPrice > 0 && percentageDifference !== 0 ? (

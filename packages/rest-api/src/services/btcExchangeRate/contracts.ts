@@ -1,4 +1,5 @@
 import {CurrencyCodeE} from '@vexl-next/domain/src/general/currency.brand'
+import {UnixMillisecondsE} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {Schema} from 'effect'
 
 export class GetExchangeRateRequest extends Schema.Class<GetExchangeRateRequest>(
@@ -11,6 +12,7 @@ export class GetExchangeRateResponse extends Schema.Class<GetExchangeRateRespons
   'GetExchangeRateResponse'
 )({
   BTC: Schema.Number,
+  lastUpdatedAt: Schema.optionalWith(UnixMillisecondsE, {as: 'Option'}),
 }) {}
 
 export class GetExchangeRateError extends Schema.TaggedError<GetExchangeRateError>(

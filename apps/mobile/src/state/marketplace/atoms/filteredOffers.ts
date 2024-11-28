@@ -93,7 +93,8 @@ const filterProductAndOtherOffersAtom = atom((get) => {
     btcPriceWithStateForFilterCurrency.state !== 'loading'
       ? calculatePriceInSats({
           price: filter.singlePrice,
-          currentBtcPrice: btcPriceWithStateForFilterCurrency.btcPrice ?? 0,
+          currentBtcPrice:
+            btcPriceWithStateForFilterCurrency.btcPrice?.BTC ?? 0,
         })
       : null
 
@@ -131,7 +132,7 @@ const filterProductAndOtherOffersAtom = atom((get) => {
           currentBtcPrice:
             get(
               createBtcPriceForCurrencyAtom(offer.offerInfo.publicPart.currency)
-            )?.btcPrice ?? 0,
+            )?.btcPrice?.BTC ?? 0,
         }) ?? 0) <= filterPriceInSats) &&
       (filter.spokenLanguages.length === 0 ||
         filter.spokenLanguages.some((item) =>

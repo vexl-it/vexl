@@ -1,7 +1,8 @@
 import {HttpClientRequest} from '@effect/platform'
+import {UnixMilliseconds0} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {GetExchangeRateError} from '@vexl-next/rest-api/src/services/btcExchangeRate/contracts'
 import {createDummyAuthHeaders} from '@vexl-next/server-utils/src/tests/createDummyAuthHeaders'
-import {Effect, Either} from 'effect'
+import {Effect, Either, Option} from 'effect'
 import {NodeTestingApp} from '../utils/NodeTestingApp'
 import {getExhangeRatePriceMocked} from '../utils/mockedYadioLayer'
 import {
@@ -37,7 +38,12 @@ describe('exchange rate', () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const client = yield* _(NodeTestingApp)
-        getExhangeRatePriceMocked.mockReturnValueOnce(Effect.succeed({BTC: 30}))
+        getExhangeRatePriceMocked.mockReturnValueOnce(
+          Effect.succeed({
+            BTC: 30,
+            lastUpdatedAt: Option.some(UnixMilliseconds0),
+          })
+        )
 
         const response = yield* _(
           client.getExchangeRate(
@@ -48,7 +54,10 @@ describe('exchange rate', () => {
           )
         )
 
-        expect(response).toEqual({BTC: 30})
+        expect(response).toEqual({
+          BTC: 30,
+          lastUpdatedAt: Option.some(UnixMilliseconds0),
+        })
       })
     )
   })

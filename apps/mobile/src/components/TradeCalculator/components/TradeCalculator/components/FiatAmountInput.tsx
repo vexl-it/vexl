@@ -69,7 +69,7 @@ function FiatAmountInput({
         tradePriceType === 'your'
           ? ownPrice
           : btcPriceForOfferWithState?.state === 'success'
-            ? `${btcPriceForOfferWithState.btcPrice}`
+            ? `${btcPriceForOfferWithState.btcPrice.BTC}`
             : '-'
       }
       value={fiatValue}

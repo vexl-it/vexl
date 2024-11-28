@@ -1,3 +1,4 @@
+import dayjs from 'dayjs'
 import {Brand, Schema} from 'effect'
 import {DateTime} from 'luxon'
 import {z} from 'zod'
@@ -47,3 +48,9 @@ export function getNextMidnightOnSelectedDate(date: Date): UnixMilliseconds {
     DateTime.fromJSDate(date).endOf('day').toMillis()
   )
 }
+
+export const unixMillisecondsToPretty =
+  (unixMilliseconds: UnixMilliseconds) =>
+  (template?: string): string => {
+    return dayjs(unixMilliseconds).format(template ?? 'lll')
+  }

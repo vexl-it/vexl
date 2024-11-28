@@ -1,11 +1,16 @@
 import {type CurrencyCode} from '@vexl-next/domain/src/general/currency.brand'
+import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {
   GetExchangeRateError,
-  GetExchangeRateResponse,
   type GetExchangeRateRequest,
+  type GetExchangeRateResponse,
 } from '@vexl-next/rest-api/src/services/btcExchangeRate/contracts'
 import axios from 'axios'
-import {Cache, Context, Duration, Effect, Layer, Schema} from 'effect'
+import {Cache, Context, Duration, Effect, Layer, Option, Schema} from 'effect'
+
+const YadioResponse = Schema.Struct({
+  BTC: Schema.Number,
+})
 
 const fetchExchangePrice = (
   currency: CurrencyCode
@@ -18,7 +23,11 @@ const fetchExchangePrice = (
       return new GetExchangeRateError({reason: 'YadioError', status: 400})
     },
   }).pipe(
-    Effect.flatMap(Schema.decode(GetExchangeRateResponse)),
+    Effect.flatMap(Schema.decodeUnknown(YadioResponse)),
+    Effect.map((one) => ({
+      BTC: one.BTC,
+      lastUpdatedAt: Option.some(unixMillisecondsNow()),
+    })),
     Effect.catchTag('ParseError', (e) =>
       Effect.zipLeft(
         new GetExchangeRateError({reason: 'YadioError', status: 400}),

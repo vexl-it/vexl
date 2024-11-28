@@ -11,6 +11,7 @@ import 'dayjs/locale/pl'
 import 'dayjs/locale/pt'
 import 'dayjs/locale/sk'
 import duration from 'dayjs/plugin/duration'
+import localizedFormat from 'dayjs/plugin/localizedFormat'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import {useAtomValue} from 'jotai'
 import {useEffect} from 'react'
@@ -23,6 +24,7 @@ export function useSetRelativeDateFormatting(): void {
     // setup dayjs
     dayjs.locale(i18n.locale === 'dev' ? 'en' : i18n.locale)
     dayjs.extend(relativeTime)
+    dayjs.extend(localizedFormat)
     dayjs.extend(duration)
   }, [i18n.locale])
 }

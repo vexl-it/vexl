@@ -46,7 +46,7 @@ function FiatOwnPriceInput(): JSX.Element {
       }}
       placeholder={
         btcPriceForOfferWithState?.state === 'success'
-          ? `${btcPriceForOfferWithState.btcPrice}`
+          ? `${btcPriceForOfferWithState.btcPrice.BTC}`
           : '-'
       }
       value={ownPrice}

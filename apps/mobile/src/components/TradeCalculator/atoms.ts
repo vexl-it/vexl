@@ -123,7 +123,7 @@ export const setFormDataBasedOnBtcPriceTypeActionAtom = atom(
         set(tradePriceTypeAtom, tradePriceType)
         set(
           tradeBtcPriceAtom,
-          (prev) => get(btcPriceForOfferWithStateAtom)?.btcPrice ?? prev
+          (prev) => get(btcPriceForOfferWithStateAtom)?.btcPrice?.BTC ?? prev
         )
       })
     )
@@ -141,9 +141,9 @@ export const calculateFiatValueAfterBtcPriceRefreshActionAtom = atom(
       const btcOrSat = get(btcOrSatAtom)
       const btcValue =
         btcOrSat === 'SAT' ? btcInputValue / SATOSHIS_IN_BTC : btcInputValue
-      const fiatAmount = btcValue * refreshedBtcPrice
+      const fiatAmount = btcValue * refreshedBtcPrice.BTC
 
-      set(tradeBtcPriceAtom, (prev) => refreshedBtcPrice ?? prev)
+      set(tradeBtcPriceAtom, (prev) => refreshedBtcPrice.BTC ?? prev)
 
       set(
         fiatInputValueAtom,
@@ -257,7 +257,7 @@ export const refreshCurrentBtcPriceActionAtom = atom(null, (get, set) => {
     T.map(() => {
       set(
         tradeBtcPriceAtom,
-        (prev) => get(btcPriceForOfferWithStateAtom)?.btcPrice ?? prev
+        (prev) => get(btcPriceForOfferWithStateAtom)?.btcPrice?.BTC ?? prev
       )
       // we need to recalculate fiat amount based on new btc price
       set(calculateFiatValueOnBtcAmountChangeActionAtom, {

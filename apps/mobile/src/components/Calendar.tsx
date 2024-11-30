@@ -21,7 +21,7 @@ const calendarTheme: Theme = {
   selectedDayTextColor: getTokens().color.black.val,
   textDayFontWeight: '500',
   textMonthFontWeight: '500',
-  todayTextColor: getTokens().color.white.val,
+  todayTextColor: getTokens().color.main.val,
   agendaDayTextColor: getTokens().color.white.val,
   textSectionTitleColor: getTokens().color.white.val,
   textDayHeaderFontSize: 14,

@@ -91,7 +91,12 @@ export function fetchInfoAndGeneratePrivatePayloads({
                     })
                   return v
                 }),
-                TE.chainW(() => encryptPrivatePart(one))
+                TE.chainW(() => {
+                  console.log(
+                    `Encrypting private part to ${i}: ${one.toPublicKey}, ${JSON.stringify(one, null, 2)}`
+                  )
+                  return encryptPrivatePart(one)
+                })
               )
             ),
             NEA.sequence(T.ApplicativeSeq),

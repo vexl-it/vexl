@@ -78,6 +78,7 @@ export default function createNewOfferForMyContacts({
     TE.bindW('symmetricKey', () => TE.fromEither(generateSymmetricKey())),
     TE.bindW('encryptedPublic', ({symmetricKey}) => {
       if (onProgress) onProgress({type: 'CONSTRUCTING_PUBLIC_PAYLOAD'})
+      console.log('Encrypting public payload')
       return encryptOfferPublicPayload({
         offerPublicPart: publicPart,
         symmetricKey,

@@ -25,6 +25,7 @@ export const sendOfferToNetworkBatchPrivateParts = ({
   }
 }): ReturnType<OfferApi['createNewOffer']> =>
   Effect.gen(function* (_) {
+    console.log('Sending offers to network')
     const privatePartsBatches = Array.chunksOf(
       offerData.offerPrivateList,
       PRIVATE_PARTS_BATCH_SIZE

@@ -24,10 +24,11 @@ import {useWasOpenFromAgreeOnTradeDetailsScreen} from '../../../utils'
 import {useSetFullscreen} from '../../TradeChecklistFlowPageContainer'
 
 type Props = TradeChecklistStackScreenProps<'LocationMapSelect'>
+
 export default function LocationMapSelect({
   navigation,
   route: {
-    params: {selectedLocation},
+    params: {searchQuery, selectedLocation},
   },
   navigation: {goBack},
 }: Props): JSX.Element {
@@ -46,7 +47,7 @@ export default function LocationMapSelect({
 
   const [pickedValue, setPickedValue] =
     useState<GetGeocodedCoordinatesResponse | null>(null)
-  const [note, setNote] = useState('')
+  const [note, setNote] = useState(searchQuery)
 
   const stageMeetingLocation = useSetAtom(addMeetingLocationActionAtom)
 
@@ -93,6 +94,7 @@ export default function LocationMapSelect({
         bottomChildren={
           <YStack margin="$2" gap="$2">
             <Input
+              value={note}
               onChangeText={setNote}
               placeholder={t('tradeChecklist.location.addNote')}
               variant="black"

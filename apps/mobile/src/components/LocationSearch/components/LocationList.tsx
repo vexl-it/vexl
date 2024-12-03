@@ -9,19 +9,33 @@ import {useLocationSearchMolecule} from '../molecule'
 import LocationCell from './LocationListItem'
 
 interface Props {
-  onPress: (data: LocationSuggestion) => void
+  onPress: ({
+    locationData,
+    searchQuery,
+  }: {
+    locationData: LocationSuggestion
+    searchQuery: string
+  }) => void
 }
 
 function LocationsList({onPress}: Props): JSX.Element {
   const {t} = useTranslation()
-  const {searchResultsAtomsAtom} = useLocationSearchMolecule()
+  const {searchResultsAtomsAtom, searchQueryAtom} = useLocationSearchMolecule()
+  const searchQuery = useAtomValue(searchQueryAtom)
   const searchResultsAtoms = useAtomValue(searchResultsAtomsAtom)
 
   const renderItem = useCallback(
     ({item}: {item: Atom<LocationSuggestion>}): JSX.Element => {
-      return <LocationCell atom={item} onPress={onPress} />
+      return (
+        <LocationCell
+          atom={item}
+          onPress={(locationData) => {
+            onPress({locationData, searchQuery})
+          }}
+        />
+      )
     },
-    [onPress]
+    [onPress, searchQuery]
   )
 
   return (

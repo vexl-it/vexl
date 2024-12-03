@@ -6,7 +6,13 @@ import LocationSearchInput from './components/LocationSearchInput'
 import {LocationSearchScope, type LocationSessionId} from './molecule'
 
 interface Props {
-  onPress: (locationData: LocationSuggestion) => void
+  onPress: ({
+    locationData,
+    searchQuery,
+  }: {
+    locationData: LocationSuggestion
+    searchQuery: string
+  }) => void
   sessionId: LocationSessionId
 }
 

@@ -9324,37 +9324,37 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sentry-internal/feedback@npm:7.100.1":
-  version: 7.100.1
-  resolution: "@sentry-internal/feedback@npm:7.100.1"
+"@sentry-internal/feedback@npm:7.119.1":
+  version: 7.119.1
+  resolution: "@sentry-internal/feedback@npm:7.119.1"
   dependencies:
-    "@sentry/core": 7.100.1
-    "@sentry/types": 7.100.1
-    "@sentry/utils": 7.100.1
-  checksum: bec12d98fc6d3f8f44ce47c2d8b6455c23fb72db0bd00c682ae9e586a3b496d3f6b8b1227190fcd87c8fc263a622275f87af5c470a002182a671eb5212669aa4
+    "@sentry/core": 7.119.1
+    "@sentry/types": 7.119.1
+    "@sentry/utils": 7.119.1
+  checksum: 12e29e896f590ae437744311ff921f8cd912b4e9c7b5d13be574badc908364ee493548907473f1957ffdcdc7a399141d7b8723aa402a70bdf59bbd929258af37
   languageName: node
   linkType: hard
 
-"@sentry-internal/replay-canvas@npm:7.100.1":
-  version: 7.100.1
-  resolution: "@sentry-internal/replay-canvas@npm:7.100.1"
+"@sentry-internal/replay-canvas@npm:7.119.1":
+  version: 7.119.1
+  resolution: "@sentry-internal/replay-canvas@npm:7.119.1"
   dependencies:
-    "@sentry/core": 7.100.1
-    "@sentry/replay": 7.100.1
-    "@sentry/types": 7.100.1
-    "@sentry/utils": 7.100.1
-  checksum: a9eb4890fab2ffb96ed96a5b3c17f521460b7b6caa930f4531500bc29661a4a70869b61ada57d592f6f918d86b2dcd77d0c8ef5d702e9eed5115b1d9e02e4810
+    "@sentry/core": 7.119.1
+    "@sentry/replay": 7.119.1
+    "@sentry/types": 7.119.1
+    "@sentry/utils": 7.119.1
+  checksum: cb9058a67f268b7b08373744c84281ec19f2106932f604ecb14fdc1860d26a8ed0f7ef3e4db09ec30e15af5ed46d34f05babf2e39b2b42b39c3659d268c5a45f
   languageName: node
   linkType: hard
 
-"@sentry-internal/tracing@npm:7.100.1":
-  version: 7.100.1
-  resolution: "@sentry-internal/tracing@npm:7.100.1"
+"@sentry-internal/tracing@npm:7.119.1":
+  version: 7.119.1
+  resolution: "@sentry-internal/tracing@npm:7.119.1"
   dependencies:
-    "@sentry/core": 7.100.1
-    "@sentry/types": 7.100.1
-    "@sentry/utils": 7.100.1
-  checksum: 0c732b63fee2278efebd369f5dc4b0b03adfb9f873c6ada7717a97afe3bbdf8362e4497e985db58d99fd51c8e8d8c8b876e8532a466da0b4278e607450b9c114
+    "@sentry/core": 7.119.1
+    "@sentry/types": 7.119.1
+    "@sentry/utils": 7.119.1
+  checksum: 766fcb7903d69c6289e543f971039972b7bcde790f7277cce82f244cb7da6b0f8f32f7396018e8cb43eb8976d1682aae23f40e7c110b01ca3549df56df4df831
   languageName: node
   linkType: hard
 
@@ -9369,18 +9369,26 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sentry/browser@npm:7.100.1":
-  version: 7.100.1
-  resolution: "@sentry/browser@npm:7.100.1"
+"@sentry/babel-plugin-component-annotate@npm:2.20.1":
+  version: 2.20.1
+  resolution: "@sentry/babel-plugin-component-annotate@npm:2.20.1"
+  checksum: 5fecba8c7915693fec811bb06ff0441f28496f6b12e811337a08996a7aa13a13a069c9f9ed28bac95be89d03b422a68d7236ab3376c161edbe051cb0ad2a0193
+  languageName: node
+  linkType: hard
+
+"@sentry/browser@npm:7.119.1":
+  version: 7.119.1
+  resolution: "@sentry/browser@npm:7.119.1"
   dependencies:
-    "@sentry-internal/feedback": 7.100.1
-    "@sentry-internal/replay-canvas": 7.100.1
-    "@sentry-internal/tracing": 7.100.1
-    "@sentry/core": 7.100.1
-    "@sentry/replay": 7.100.1
-    "@sentry/types": 7.100.1
-    "@sentry/utils": 7.100.1
-  checksum: a77b5a4ee93626270c4db1558474936577acd9aeadae7204056be4fb0ce155ed9dfc98f6e0060773c7c2e58d70f9e5f925a92137833f8bcd523c258ff9467875
+    "@sentry-internal/feedback": 7.119.1
+    "@sentry-internal/replay-canvas": 7.119.1
+    "@sentry-internal/tracing": 7.119.1
+    "@sentry/core": 7.119.1
+    "@sentry/integrations": 7.119.1
+    "@sentry/replay": 7.119.1
+    "@sentry/types": 7.119.1
+    "@sentry/utils": 7.119.1
+  checksum: c4659c6dba099bd48f452c0cc87d2d16b3a2c4cfb59300da257bde4cf0d6928cc7e79543e2c0e8fcb1c7c9d9b00bd61e6a0c2eaefa48d4be33fef1f3d6a7dd75
   languageName: node
   linkType: hard
 
@@ -9407,9 +9415,23 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@sentry/cli-darwin@npm:2.37.0":
+  version: 2.37.0
+  resolution: "@sentry/cli-darwin@npm:2.37.0"
+  conditions: os=darwin
+  languageName: node
+  linkType: hard
+
 "@sentry/cli-linux-arm64@npm:2.25.2":
   version: 2.25.2
   resolution: "@sentry/cli-linux-arm64@npm:2.25.2"
+  conditions: (os=linux | os=freebsd) & cpu=arm64
+  languageName: node
+  linkType: hard
+
+"@sentry/cli-linux-arm64@npm:2.37.0":
+  version: 2.37.0
+  resolution: "@sentry/cli-linux-arm64@npm:2.37.0"
   conditions: (os=linux | os=freebsd) & cpu=arm64
   languageName: node
   linkType: hard
@@ -9421,9 +9443,23 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@sentry/cli-linux-arm@npm:2.37.0":
+  version: 2.37.0
+  resolution: "@sentry/cli-linux-arm@npm:2.37.0"
+  conditions: (os=linux | os=freebsd) & cpu=arm
+  languageName: node
+  linkType: hard
+
 "@sentry/cli-linux-i686@npm:2.25.2":
   version: 2.25.2
   resolution: "@sentry/cli-linux-i686@npm:2.25.2"
+  conditions: (os=linux | os=freebsd) & (cpu=x86 | cpu=ia32)
+  languageName: node
+  linkType: hard
+
+"@sentry/cli-linux-i686@npm:2.37.0":
+  version: 2.37.0
+  resolution: "@sentry/cli-linux-i686@npm:2.37.0"
   conditions: (os=linux | os=freebsd) & (cpu=x86 | cpu=ia32)
   languageName: node
   linkType: hard
@@ -9435,9 +9471,23 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@sentry/cli-linux-x64@npm:2.37.0":
+  version: 2.37.0
+  resolution: "@sentry/cli-linux-x64@npm:2.37.0"
+  conditions: (os=linux | os=freebsd) & cpu=x64
+  languageName: node
+  linkType: hard
+
 "@sentry/cli-win32-i686@npm:2.25.2":
   version: 2.25.2
   resolution: "@sentry/cli-win32-i686@npm:2.25.2"
+  conditions: os=win32 & (cpu=x86 | cpu=ia32)
+  languageName: node
+  linkType: hard
+
+"@sentry/cli-win32-i686@npm:2.37.0":
+  version: 2.37.0
+  resolution: "@sentry/cli-win32-i686@npm:2.37.0"
   conditions: os=win32 & (cpu=x86 | cpu=ia32)
   languageName: node
   linkType: hard
@@ -9449,7 +9499,51 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sentry/cli@npm:2.25.2, @sentry/cli@npm:^2.22.3":
+"@sentry/cli-win32-x64@npm:2.37.0":
+  version: 2.37.0
+  resolution: "@sentry/cli-win32-x64@npm:2.37.0"
+  conditions: os=win32 & cpu=x64
+  languageName: node
+  linkType: hard
+
+"@sentry/cli@npm:2.37.0":
+  version: 2.37.0
+  resolution: "@sentry/cli@npm:2.37.0"
+  dependencies:
+    "@sentry/cli-darwin": 2.37.0
+    "@sentry/cli-linux-arm": 2.37.0
+    "@sentry/cli-linux-arm64": 2.37.0
+    "@sentry/cli-linux-i686": 2.37.0
+    "@sentry/cli-linux-x64": 2.37.0
+    "@sentry/cli-win32-i686": 2.37.0
+    "@sentry/cli-win32-x64": 2.37.0
+    https-proxy-agent: ^5.0.0
+    node-fetch: ^2.6.7
+    progress: ^2.0.3
+    proxy-from-env: ^1.1.0
+    which: ^2.0.2
+  dependenciesMeta:
+    "@sentry/cli-darwin":
+      optional: true
+    "@sentry/cli-linux-arm":
+      optional: true
+    "@sentry/cli-linux-arm64":
+      optional: true
+    "@sentry/cli-linux-i686":
+      optional: true
+    "@sentry/cli-linux-x64":
+      optional: true
+    "@sentry/cli-win32-i686":
+      optional: true
+    "@sentry/cli-win32-x64":
+      optional: true
+  bin:
+    sentry-cli: bin/sentry-cli
+  checksum: 92e88688b5148e5abed2cc253290008da89029c5816d7f1bdb5fbed035305c0bcfb5f49e4976ff8ced5fbb876d28e655eef838d32c7a388d3582654ff67d65e0
+  languageName: node
+  linkType: hard
+
+"@sentry/cli@npm:^2.22.3":
   version: 2.25.2
   resolution: "@sentry/cli@npm:2.25.2"
   dependencies:
@@ -9486,13 +9580,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sentry/core@npm:7.100.1":
-  version: 7.100.1
-  resolution: "@sentry/core@npm:7.100.1"
+"@sentry/core@npm:7.119.0":
+  version: 7.119.0
+  resolution: "@sentry/core@npm:7.119.0"
   dependencies:
-    "@sentry/types": 7.100.1
-    "@sentry/utils": 7.100.1
-  checksum: deea8ee3c639385d2dfbe97f46db15ba4b1b06b45ddad825a38dce90718119da684b85c08ddb3c5a84bb027fe71c5fff9de93a2caf506344cf60a5894fe39410
+    "@sentry/types": 7.119.0
+    "@sentry/utils": 7.119.0
+  checksum: 29d9282c9555c64e60d587260ebf1957e4939cc43617a38da4f5fd67723dcf68dad6d5c1d221e75576cf77c0bc0f3362c47ee856193aac120001583186f17e04
+  languageName: node
+  linkType: hard
+
+"@sentry/core@npm:7.119.1":
+  version: 7.119.1
+  resolution: "@sentry/core@npm:7.119.1"
+  dependencies:
+    "@sentry/types": 7.119.1
+    "@sentry/utils": 7.119.1
+  checksum: cb2c9006bc22bd4039f7a13972b96725f18270bc3342c98c40f8f631c1c29033d93f2169305b0f8e9c695afad39a3b03f03c6caa4ac85e4bb85292f74e73c9bd
   languageName: node
   linkType: hard
 
@@ -9517,26 +9621,38 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sentry/hub@npm:7.100.1":
-  version: 7.100.1
-  resolution: "@sentry/hub@npm:7.100.1"
+"@sentry/hub@npm:7.119.0":
+  version: 7.119.0
+  resolution: "@sentry/hub@npm:7.119.0"
   dependencies:
-    "@sentry/core": 7.100.1
-    "@sentry/types": 7.100.1
-    "@sentry/utils": 7.100.1
-  checksum: e25721ea4bc8b3ed5a965e617a726854d2fa99761c83139e3eb64be0f53cbd8f1a418da5ec851d359510e62971ead4722411fd13d4ac892759a7dd337dc2a86c
+    "@sentry/core": 7.119.0
+    "@sentry/types": 7.119.0
+    "@sentry/utils": 7.119.0
+  checksum: f4c4fc77a7c3f8e161b86e807c999d078127cafa93407b6f7eac68fbd469902097241b5620aed1b08544767fa5f444ca2f7c70891df682fb265ac0efb50842e5
   languageName: node
   linkType: hard
 
-"@sentry/integrations@npm:7.100.1":
-  version: 7.100.1
-  resolution: "@sentry/integrations@npm:7.100.1"
+"@sentry/integrations@npm:7.119.0":
+  version: 7.119.0
+  resolution: "@sentry/integrations@npm:7.119.0"
   dependencies:
-    "@sentry/core": 7.100.1
-    "@sentry/types": 7.100.1
-    "@sentry/utils": 7.100.1
+    "@sentry/core": 7.119.0
+    "@sentry/types": 7.119.0
+    "@sentry/utils": 7.119.0
     localforage: ^1.8.1
-  checksum: 9389c1f67361bf3d33beb5f819ff212b5ac49faacb3a6de176767f7d2056a06db7a0a1d6a568438adec0dd0567d3931bfaa4947b9aa04e4ca1d25a273a0c6b6c
+  checksum: c256f81e7c6983c5bbf6cd9bcf867e96798b285c53aad053a6d1bc4cc0491588042c7c6eca9d5a79d2661d53bc725ad26d56ee2b6631b6249f2332bd1e4a28d9
+  languageName: node
+  linkType: hard
+
+"@sentry/integrations@npm:7.119.1":
+  version: 7.119.1
+  resolution: "@sentry/integrations@npm:7.119.1"
+  dependencies:
+    "@sentry/core": 7.119.1
+    "@sentry/types": 7.119.1
+    "@sentry/utils": 7.119.1
+    localforage: ^1.8.1
+  checksum: 68d3fa08e9f9584394ff8c15b2d49348867a289642c956649d78c06cc1e91e4d9b90c418f8f3ffd0c4554a472663f97a677e8a1897c80189ee862bcf6d1f2a61
   languageName: node
   linkType: hard
 
@@ -9568,18 +9684,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sentry/react-native@npm:5.19.1":
-  version: 5.19.1
-  resolution: "@sentry/react-native@npm:5.19.1"
+"@sentry/react-native@npm:^5.36.0":
+  version: 5.36.0
+  resolution: "@sentry/react-native@npm:5.36.0"
   dependencies:
-    "@sentry/browser": 7.100.1
-    "@sentry/cli": 2.25.2
-    "@sentry/core": 7.100.1
-    "@sentry/hub": 7.100.1
-    "@sentry/integrations": 7.100.1
-    "@sentry/react": 7.100.1
-    "@sentry/types": 7.100.1
-    "@sentry/utils": 7.100.1
+    "@sentry/babel-plugin-component-annotate": 2.20.1
+    "@sentry/browser": 7.119.1
+    "@sentry/cli": 2.37.0
+    "@sentry/core": 7.119.1
+    "@sentry/hub": 7.119.0
+    "@sentry/integrations": 7.119.0
+    "@sentry/react": 7.119.1
+    "@sentry/types": 7.119.1
+    "@sentry/utils": 7.119.1
   peerDependencies:
     expo: ">=49.0.0"
     react: ">=17.0.0"
@@ -9589,41 +9706,48 @@ __metadata:
       optional: true
   bin:
     sentry-expo-upload-sourcemaps: scripts/expo-upload-sourcemaps.js
-  checksum: aeaa875c193b7a44fd633c8b7c40bde135cbe5421f3c778bdcfa415fad3237d50aa7f710d30f72a9726be6d3d7215e6af852f4d97a0552ba2d218c98f6abcc9c
+  checksum: bacc131566c83fddb22d5ff79f68648116f20eef556628734e7c51d8e5683a49e451176639ea2586cb8ac6a514242678338cb96f32ded854aa3dc43dbe97f3f2
   languageName: node
   linkType: hard
 
-"@sentry/react@npm:7.100.1":
-  version: 7.100.1
-  resolution: "@sentry/react@npm:7.100.1"
+"@sentry/react@npm:7.119.1":
+  version: 7.119.1
+  resolution: "@sentry/react@npm:7.119.1"
   dependencies:
-    "@sentry/browser": 7.100.1
-    "@sentry/core": 7.100.1
-    "@sentry/types": 7.100.1
-    "@sentry/utils": 7.100.1
+    "@sentry/browser": 7.119.1
+    "@sentry/core": 7.119.1
+    "@sentry/types": 7.119.1
+    "@sentry/utils": 7.119.1
     hoist-non-react-statics: ^3.3.2
   peerDependencies:
     react: 15.x || 16.x || 17.x || 18.x
-  checksum: dd3ece5a99ea580d5d438b6f6bdd5f82608f61fe8a669d112358ca50434730cccdc7c7199cadcc72c485a32e23c4879a10bfd337c18cf8737d6e487f8e2198a6
+  checksum: 7c70927a93d679afe854f3d92809acab5270c7377f2c6368be19ddb8f08f3272791a6ee689513b68951042f5d36c3283f803dfe6dadc0ad65970e96d2f63dd7f
   languageName: node
   linkType: hard
 
-"@sentry/replay@npm:7.100.1":
-  version: 7.100.1
-  resolution: "@sentry/replay@npm:7.100.1"
+"@sentry/replay@npm:7.119.1":
+  version: 7.119.1
+  resolution: "@sentry/replay@npm:7.119.1"
   dependencies:
-    "@sentry-internal/tracing": 7.100.1
-    "@sentry/core": 7.100.1
-    "@sentry/types": 7.100.1
-    "@sentry/utils": 7.100.1
-  checksum: fc914a6c842615be01a26abf79bb5a7970fcf2147d3766fbe3de9284fde258ada0873356d330b8bb17f0fc21b49d25794916eef9dde12de3824f2459bc79ba84
+    "@sentry-internal/tracing": 7.119.1
+    "@sentry/core": 7.119.1
+    "@sentry/types": 7.119.1
+    "@sentry/utils": 7.119.1
+  checksum: 85fec3e01466e16c8b34c06799f8a256ad301de90d61498349f9aebedeeb6b3069d27247143abee78183c2389232a2e4ce2b60eeedcff6615d1425e1d4322f9a
   languageName: node
   linkType: hard
 
-"@sentry/types@npm:7.100.1":
-  version: 7.100.1
-  resolution: "@sentry/types@npm:7.100.1"
-  checksum: 8ab9766b1f643d8301ff1b9daeb6892a9b3820c9865bb8b8aeca2bb1e9644abed6603a7c70c4247d4f9d8d6d19849baedd1591b6494ba4f651a0068921e7195f
+"@sentry/types@npm:7.119.0":
+  version: 7.119.0
+  resolution: "@sentry/types@npm:7.119.0"
+  checksum: ffb8dcaf1d5c96defe860e663553511e602cd6bfbe63b0c3fd8cba5ec1c3ea9ad47597527f4d9ef314ba1b11bccf89c4d6f50435df7cbfb92f5a398c6c261f0b
+  languageName: node
+  linkType: hard
+
+"@sentry/types@npm:7.119.1":
+  version: 7.119.1
+  resolution: "@sentry/types@npm:7.119.1"
+  checksum: b04d54e168d57c9d7661caac0c2763200e956b18cb2103e72ec843bc4355ccb9a18f558e0542395b93667ab63b9745f680ed623d6e6148775e85a55a024bd40d
   languageName: node
   linkType: hard
 
@@ -9634,12 +9758,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sentry/utils@npm:7.100.1":
-  version: 7.100.1
-  resolution: "@sentry/utils@npm:7.100.1"
+"@sentry/utils@npm:7.119.0":
+  version: 7.119.0
+  resolution: "@sentry/utils@npm:7.119.0"
   dependencies:
-    "@sentry/types": 7.100.1
-  checksum: 63a087eaad139315f36fcf1330fce2e2dbc967d9ce4a118f81144d755366a8ac2ed639c558d2406803ea3da4a58541b1ccb37d1fea46a00a0983da4d68e3c965
+    "@sentry/types": 7.119.0
+  checksum: 900d5062cc92d9dbbeadd3ac2202da99ba648a78707fdbf878ff0d5eec52fc9d5484d63c281d3a1e7a6151999a5a45a1709ffc5d602e545ddb547182483831d0
+  languageName: node
+  linkType: hard
+
+"@sentry/utils@npm:7.119.1":
+  version: 7.119.1
+  resolution: "@sentry/utils@npm:7.119.1"
+  dependencies:
+    "@sentry/types": 7.119.1
+  checksum: cdde755040c3314a4ea842a753bdf676a957478083de14e68232a1fd0f64a5b1cbfe44a223eb53e3fee93fa8a431bcd3ce0f4c6ce43ad464374217716c00a6a3
   languageName: node
   linkType: hard
 
@@ -11583,13 +11716,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:^17.0.31":
-  version: 17.0.45
-  resolution: "@types/node@npm:17.0.45"
-  checksum: aa04366b9103b7d6cfd6b2ef64182e0eaa7d4462c3f817618486ea0422984c51fc69fd0d436eae6c9e696ddfdbec9ccaa27a917f7c2e8c75c5d57827fe3d95e8
-  languageName: node
-  linkType: hard
-
 "@types/node@npm:^18.11.18":
   version: 18.18.7
   resolution: "@types/node@npm:18.18.7"
@@ -12755,7 +12881,7 @@ __metadata:
     "@react-navigation/native": ^6.0.16
     "@react-navigation/native-stack": ^6.9.4
     "@react-spring/native": ^9.6.1
-    "@sentry/react-native": 5.19.1
+    "@sentry/react-native": ^5.36.0
     "@shopify/flash-list": 1.6.3
     "@shopify/react-native-skia": 0.1.221
     "@tamagui/animations-moti": ^1.72.3
@@ -12798,6 +12924,7 @@ __metadata:
     burnt: ^0.12.1
     compare-versions: ^6.1.0
     country-data: ^0.0.31
+    crypto-browserify: ^3.12.1
     dayjs: ^1.11.11
     deep-equal: ^2.2.3
     effect: ^3.10.12
@@ -12863,7 +12990,7 @@ __metadata:
     react-native-phone-number-input: ^2.1.0
     react-native-qrcode-svg: ^6.2.0
     react-native-quick-base64: ^2.0.8
-    react-native-quick-crypto: ^0.6.1
+    react-native-quick-crypto: 0.7.7
     react-native-reanimated: ~3.6.2
     react-native-safe-area-context: 4.8.2
     react-native-screens: ~3.29.0
@@ -13813,6 +13940,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"asn1.js@npm:^4.10.1":
+  version: 4.10.1
+  resolution: "asn1.js@npm:4.10.1"
+  dependencies:
+    bn.js: ^4.0.0
+    inherits: ^2.0.1
+    minimalistic-assert: ^1.0.0
+  checksum: 9289a1a55401238755e3142511d7b8f6fc32f08c86ff68bd7100da8b6c186179dd6b14234fba2f7f6099afcd6758a816708485efe44bc5b2a6ec87d9ceeddbb5
+  languageName: node
+  linkType: hard
+
 "asn1.js@npm:^5.2.0, asn1.js@npm:^5.4.1":
   version: 5.4.1
   resolution: "asn1.js@npm:5.4.1"
@@ -14492,7 +14630,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"browserify-aes@npm:^1.0.0, browserify-aes@npm:^1.0.4":
+"browserify-aes@npm:^1.0.0, browserify-aes@npm:^1.0.4, browserify-aes@npm:^1.2.0":
   version: 1.2.0
   resolution: "browserify-aes@npm:1.2.0"
   dependencies:
@@ -14506,7 +14644,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"browserify-cipher@npm:^1.0.0":
+"browserify-cipher@npm:^1.0.0, browserify-cipher@npm:^1.0.1":
   version: 1.0.1
   resolution: "browserify-cipher@npm:1.0.1"
   dependencies:
@@ -14553,6 +14691,24 @@ __metadata:
     readable-stream: ^3.6.2
     safe-buffer: ^5.2.1
   checksum: b622730c0fc183328c3a1c9fdaaaa5118821ed6822b266fa6b0375db7e20061ebec87301d61931d79b9da9a96ada1cab317fce3c68f233e5e93ed02dbb35544c
+  languageName: node
+  linkType: hard
+
+"browserify-sign@npm:^4.2.3":
+  version: 4.2.3
+  resolution: "browserify-sign@npm:4.2.3"
+  dependencies:
+    bn.js: ^5.2.1
+    browserify-rsa: ^4.1.0
+    create-hash: ^1.2.0
+    create-hmac: ^1.1.7
+    elliptic: ^6.5.5
+    hash-base: ~3.0
+    inherits: ^2.0.4
+    parse-asn1: ^5.1.7
+    readable-stream: ^2.3.8
+    safe-buffer: ^5.2.1
+  checksum: 403a8061d229ae31266670345b4a7c00051266761d2c9bbeb68b1a9bcb05f68143b16110cf23a171a5d6716396a1f41296282b3e73eeec0a1871c77f0ff4ee6b
   languageName: node
   linkType: hard
 
@@ -16090,7 +16246,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"create-ecdh@npm:^4.0.0":
+"create-ecdh@npm:^4.0.0, create-ecdh@npm:^4.0.4":
   version: 4.0.4
   resolution: "create-ecdh@npm:4.0.4"
   dependencies:
@@ -16239,6 +16395,26 @@ __metadata:
     randombytes: ^2.0.0
     randomfill: ^1.0.3
   checksum: c1609af82605474262f3eaa07daa0b2140026bd264ab316d4bf1170272570dbe02f0c49e29407fe0d3634f96c507c27a19a6765fb856fed854a625f9d15618e2
+  languageName: node
+  linkType: hard
+
+"crypto-browserify@npm:^3.12.1":
+  version: 3.12.1
+  resolution: "crypto-browserify@npm:3.12.1"
+  dependencies:
+    browserify-cipher: ^1.0.1
+    browserify-sign: ^4.2.3
+    create-ecdh: ^4.0.4
+    create-hash: ^1.2.0
+    create-hmac: ^1.1.7
+    diffie-hellman: ^5.0.3
+    hash-base: ~3.0.4
+    inherits: ^2.0.4
+    pbkdf2: ^3.1.2
+    public-encrypt: ^4.0.3
+    randombytes: ^2.1.0
+    randomfill: ^1.0.4
+  checksum: 4e643dd5acfff80fbe2cc567feb75a22d726cc4df34772c988f326976c3c1ee1f8a611a33498dab11568cff3e134f0bd44a0e1f4c216585e5877ab5327cdb6fc
   languageName: node
   linkType: hard
 
@@ -16970,7 +17146,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"diffie-hellman@npm:^5.0.0":
+"diffie-hellman@npm:^5.0.0, diffie-hellman@npm:^5.0.3":
   version: 5.0.3
   resolution: "diffie-hellman@npm:5.0.3"
   dependencies:
@@ -17273,6 +17449,21 @@ __metadata:
     minimalistic-assert: ^1.0.1
     minimalistic-crypto-utils: ^1.0.1
   checksum: e912349b883e694bfe65005214237a470c9a098a6ba36fd24396d0ab07feb399920c0738aeed1aed6cf5dca9c64fd479e212faed3a75c9d81453671ef0de5157
+  languageName: node
+  linkType: hard
+
+"elliptic@npm:^6.5.5":
+  version: 6.6.1
+  resolution: "elliptic@npm:6.6.1"
+  dependencies:
+    bn.js: ^4.11.9
+    brorand: ^1.1.0
+    hash.js: ^1.0.0
+    hmac-drbg: ^1.0.1
+    inherits: ^2.0.4
+    minimalistic-assert: ^1.0.1
+    minimalistic-crypto-utils: ^1.0.1
+  checksum: 27b14a52f68bbbc0720da259f712cb73e953f6d2047958cd02fb0d0ade2e83849dc39fb4af630889c67df8817e24237428cf59c4f4c07700f755b401149a7375
   languageName: node
   linkType: hard
 
@@ -20939,6 +21130,16 @@ __metadata:
     readable-stream: ^3.6.0
     safe-buffer: ^5.2.0
   checksum: 26b7e97ac3de13cb23fc3145e7e3450b0530274a9562144fc2bf5c1e2983afd0e09ed7cc3b20974ba66039fad316db463da80eb452e7373e780cbee9a0d2f2dc
+  languageName: node
+  linkType: hard
+
+"hash-base@npm:~3.0, hash-base@npm:~3.0.4":
+  version: 3.0.5
+  resolution: "hash-base@npm:3.0.5"
+  dependencies:
+    inherits: ^2.0.4
+    safe-buffer: ^5.2.1
+  checksum: 6a82675a5de2ea9347501bbe655a2334950c7ec972fd9810ae9529e06aeab8f7e8ef68fc2112e5e6f0745561a7e05326efca42ad59bb5fd116537f5f8b0a216d
   languageName: node
   linkType: hard
 
@@ -27091,6 +27292,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"parse-asn1@npm:^5.1.7":
+  version: 5.1.7
+  resolution: "parse-asn1@npm:5.1.7"
+  dependencies:
+    asn1.js: ^4.10.1
+    browserify-aes: ^1.2.0
+    evp_bytestokey: ^1.0.3
+    hash-base: ~3.0
+    pbkdf2: ^3.1.2
+    safe-buffer: ^5.2.1
+  checksum: 93c7194c1ed63a13e0b212d854b5213ad1aca0ace41c66b311e97cca0519cf9240f79435a0306a3b412c257f0ea3f1953fd0d9549419a0952c9e995ab361fd6c
+  languageName: node
+  linkType: hard
+
 "parse-entities@npm:^4.0.0":
   version: 4.0.1
   resolution: "parse-entities@npm:4.0.1"
@@ -27342,7 +27557,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pbkdf2@npm:^3.0.3":
+"pbkdf2@npm:^3.0.3, pbkdf2@npm:^3.1.2":
   version: 3.1.2
   resolution: "pbkdf2@npm:3.1.2"
   dependencies:
@@ -28265,7 +28480,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"public-encrypt@npm:^4.0.0":
+"public-encrypt@npm:^4.0.0, public-encrypt@npm:^4.0.3":
   version: 4.0.3
   resolution: "public-encrypt@npm:4.0.3"
   dependencies:
@@ -28486,7 +28701,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"randombytes@npm:^2.0.0, randombytes@npm:^2.0.1, randombytes@npm:^2.0.5":
+"randombytes@npm:^2.0.0, randombytes@npm:^2.0.1, randombytes@npm:^2.0.5, randombytes@npm:^2.1.0":
   version: 2.1.0
   resolution: "randombytes@npm:2.1.0"
   dependencies:
@@ -28495,7 +28710,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"randomfill@npm:^1.0.3":
+"randomfill@npm:^1.0.3, randomfill@npm:^1.0.4":
   version: 1.0.4
   resolution: "randomfill@npm:1.0.4"
   dependencies:
@@ -28966,57 +29181,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-quick-crypto@npm:0.6.1":
-  version: 0.6.1
-  resolution: "react-native-quick-crypto@npm:0.6.1"
+"react-native-quick-crypto@npm:0.7.7":
+  version: 0.7.7
+  resolution: "react-native-quick-crypto@npm:0.7.7"
   dependencies:
     "@craftzdog/react-native-buffer": ^6.0.5
-    "@types/node": ^17.0.31
-    crypto-browserify: ^3.12.0
     events: ^3.3.0
-    react-native-quick-base64: ^2.0.5
-    stream-browserify: ^3.0.0
+    readable-stream: ^4.5.2
     string_decoder: ^1.3.0
+    util: ^0.12.5
   peerDependencies:
     react: "*"
-    react-native: ">=0.71.0"
-  checksum: 47b227c74cef0c9630ce7e91fe2153bcf2492f3fae175352818ca2278779f28c2932611df44cb8a18cb290da6d73aa3a927bcea56c3a9a4a51db6a7f4f72ac4d
-  languageName: node
-  linkType: hard
-
-"react-native-quick-crypto@patch:react-native-quick-crypto@npm%3A0.6.1#./.yarn/patches/react-native-quick-crypto-npm-0.6.1-02196a3db2.patch::version=0.6.1&hash=206c92&locator=vexl-next%40workspace%3A.":
-  version: 0.6.1
-  resolution: "react-native-quick-crypto@patch:react-native-quick-crypto@npm%3A0.6.1#./.yarn/patches/react-native-quick-crypto-npm-0.6.1-02196a3db2.patch::version=0.6.1&hash=bd29bd&locator=vexl-next%40workspace%3A."
-  dependencies:
-    "@craftzdog/react-native-buffer": ^6.0.5
-    "@types/node": ^17.0.31
-    crypto-browserify: ^3.12.0
-    events: ^3.3.0
-    react-native-quick-base64: ^2.0.5
-    stream-browserify: ^3.0.0
-    string_decoder: ^1.3.0
-  peerDependencies:
-    react: "*"
-    react-native: ">=0.71.0"
-  checksum: 4a10c48f226731873a8d265e789c53eb08077930a96e285a508e9fc65300455037d3fe1558e8ee42b9456278f079f3f0c0bfb2404198949cce3a7b61d2e98aef
-  languageName: node
-  linkType: hard
-
-"react-native-quick-crypto@patch:react-native-quick-crypto@patch%3Areact-native-quick-crypto@npm%253A0.6.1%23./.yarn/patches/react-native-quick-crypto-npm-0.6.1-02196a3db2.patch%3A%3Aversion=0.6.1&hash=206c92&locator=vexl-next%2540workspace%253A.#./.yarn/patches/react-native-quick-crypto-patch-8ba5266875.patch::locator=vexl-next%40workspace%3A.":
-  version: 0.6.1
-  resolution: "react-native-quick-crypto@patch:react-native-quick-crypto@patch%3Areact-native-quick-crypto@npm%253A0.6.1%23./.yarn/patches/react-native-quick-crypto-npm-0.6.1-02196a3db2.patch%3A%3Aversion=0.6.1&hash=bd29bd&locator=vexl-next%2540workspace%253A.#./.yarn/patches/react-native-quick-crypto-patch-8ba5266875.patch::version=0.6.1&hash=47638b&locator=vexl-next%40workspace%3A."
-  dependencies:
-    "@craftzdog/react-native-buffer": ^6.0.5
-    "@types/node": ^17.0.31
-    crypto-browserify: ^3.12.0
-    events: ^3.3.0
-    react-native-quick-base64: ^2.0.5
-    stream-browserify: ^3.0.0
-    string_decoder: ^1.3.0
-  peerDependencies:
-    react: "*"
-    react-native: ">=0.71.0"
-  checksum: 322da93f2ced6c9d972695f5508798e9c6368435608e9931d2153c322f1d84ce5e1d3d782632334f2baa9b380181d6f1dc5629d9d52f389bc0aa3da65abe7f22
+    react-native: "*"
+  checksum: 92974b2dd3113bf6021699c43e462abbbffea17021ce57f637526f5d387de1c89834467bc3b30fba59887854f7dcbb9c42a97fda88fe31cf1acb80b06a82a287
   languageName: node
   linkType: hard
 
@@ -29544,7 +29721,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"readable-stream@npm:^2.0.0":
+"readable-stream@npm:^2.0.0, readable-stream@npm:^2.3.8":
   version: 2.3.8
   resolution: "readable-stream@npm:2.3.8"
   dependencies:
@@ -29567,6 +29744,19 @@ __metadata:
     string_decoder: ^1.1.1
     util-deprecate: ^1.0.1
   checksum: d4ea81502d3799439bb955a3a5d1d808592cf3133350ed352aeaa499647858b27b1c4013984900238b0873ec8d0d8defce72469fb7a83e61d53f5ad61cb80dc8
+  languageName: node
+  linkType: hard
+
+"readable-stream@npm:^4.5.2":
+  version: 4.5.2
+  resolution: "readable-stream@npm:4.5.2"
+  dependencies:
+    abort-controller: ^3.0.0
+    buffer: ^6.0.3
+    events: ^3.3.0
+    process: ^0.11.10
+    string_decoder: ^1.3.0
+  checksum: c4030ccff010b83e4f33289c535f7830190773e274b3fcb6e2541475070bdfd69c98001c3b0cb78763fc00c8b62f514d96c2b10a8bd35d5ce45203a25fa1d33a
   languageName: node
   linkType: hard
 

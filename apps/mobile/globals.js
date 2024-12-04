@@ -1,2 +1,6 @@
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+/* eslint-disable @typescript-eslint/no-var-requires */
+
+const {install} = require('react-native-quick-crypto')
 global.TextEncoder = require('text-encoding').TextEncoder
+
+install()

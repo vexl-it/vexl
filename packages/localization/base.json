@@ -947,6 +947,7 @@
   "vexlbot.setDateAndTime": "Set date and time",
   "vexlbot.addEventToCalendar": "Add event to calendar",
   "vexlbot.updateCalendarEventLocation": "Update calendar event location",
+  "vexlbot.copyAddressInfo": "Copy address info",
   "tradeChecklist.agreeOnTradeDetails": "Agree on trade details",
   "tradeChecklist.thisDealIsFullyOnline": "This deal is fully online. Be careful and consider risks. Meeting in person is always safer.",
   "tradeChecklist.readMoreInFullArticle": "Read more in full article",

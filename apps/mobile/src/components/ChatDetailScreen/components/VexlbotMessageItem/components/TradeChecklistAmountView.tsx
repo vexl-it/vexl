@@ -103,9 +103,9 @@ function TradeChecklistAmountView(): JSX.Element | null {
   if (!amountDataToDisplay?.amountData.btcAmount) return null
 
   const renderFooter = ((): JSX.Element | null => {
-    if (amountDataToDisplay.status !== 'pending') {
-      return (
-        <>
+    return (
+      <Stack f={1} gap="$2">
+        <XStack ai="center" jc="space-between">
           {!!amountDataToDisplay.amountData.btcAmount && (
             <Button
               text="BTC"
@@ -149,37 +149,30 @@ function TradeChecklistAmountView(): JSX.Element | null {
               iconFill={getTokens().color.main.val}
             />
           )}
-        </>
-      )
-    }
-
-    if (
-      amountDataToDisplay.by === 'them' &&
-      amountDataToDisplay.status === 'pending'
-    ) {
-      return (
-        <XStack ai="center" jc="space-between" gap="$2">
-          <Button
-            fullSize
-            disabled={!amountData?.received}
-            onPress={onEditPress}
-            variant="primary"
-            size="small"
-            text={t('common.change')}
-          />
-          <Button
-            fullSize
-            disabled={!amountData?.received}
-            onPress={onAcceptButtonPress}
-            variant="secondary"
-            size="small"
-            text={t('common.accept')}
-          />
         </XStack>
-      )
-    }
-
-    return null
+        {amountDataToDisplay.by === 'them' &&
+          amountDataToDisplay.status === 'pending' && (
+            <XStack ai="center" jc="space-between" gap="$2">
+              <Button
+                fullSize
+                disabled={!amountData?.received}
+                onPress={onEditPress}
+                variant="primary"
+                size="small"
+                text={t('common.change')}
+              />
+              <Button
+                fullSize
+                disabled={!amountData?.received}
+                onPress={onAcceptButtonPress}
+                variant="secondary"
+                size="small"
+                text={t('common.accept')}
+              />
+            </XStack>
+          )}
+      </Stack>
+    )
   })()
 
   return (

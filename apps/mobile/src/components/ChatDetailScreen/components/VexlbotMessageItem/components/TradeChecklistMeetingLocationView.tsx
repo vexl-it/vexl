@@ -1,6 +1,9 @@
+import Clipboard from '@react-native-clipboard/clipboard'
 import {useNavigation} from '@react-navigation/native'
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue, useSetAtom, useStore} from 'jotai'
+import {useMemo} from 'react'
+import {getTokens, Stack} from 'tamagui'
 import * as MeetingLocation from '../../../../../state/tradeChecklist/utils/location'
 import {
   useTranslation,
@@ -8,7 +11,11 @@ import {
 } from '../../../../../utils/localization/I18nProvider'
 import Button from '../../../../Button'
 import termsIconSvg from '../../../../InsideRouter/components/SettingsScreen/images/termsIconSvg'
+import {toastNotificationAtom} from '../../../../ToastNotification/atom'
+import {type ToastNotificationState} from '../../../../ToastNotification/domain'
 import {chatMolecule} from '../../../atoms'
+import copySvg from '../../../images/copySvg'
+import checkIconSvg from '../../images/checkIconSvg'
 import VexlbotBubble from './VexlbotBubble'
 
 function getTextForVexlbot({
@@ -50,6 +57,16 @@ export default function TradeChecklistMeetingLocationView(): JSX.Element | null 
   const addEventToCalendar = useSetAtom(addEventToCalendarActionAtom)
   const isDateAndTimePicked = useAtomValue(isDateAndTimePickedAtom)
   const calendarEventId = useAtomValue(calendarEventIdAtom)
+  const setToastNotification = useSetAtom(toastNotificationAtom)
+
+  const toastContent: ToastNotificationState = useMemo(
+    () => ({
+      visible: true,
+      text: t('common.copied'),
+      icon: checkIconSvg,
+    }),
+    [t]
+  )
 
   const agreedOn = MeetingLocation.getAgreed(meetingLocationData)
   if (agreedOn) {
@@ -64,21 +81,36 @@ export default function TradeChecklistMeetingLocationView(): JSX.Element | null 
           t,
         })}
       >
-        {!!isDateAndTimePicked && (
+        <Stack gap="$2">
           <Button
+            text={t('vexlbot.copyAddressInfo')}
+            beforeIcon={copySvg}
             onPress={() => {
-              void addEventToCalendar()()
+              Clipboard.setString(
+                `${agreedOn.data.data.note}, ${agreedOn.data.data.address}`
+              )
+              setToastNotification(toastContent)
             }}
-            beforeIcon={termsIconSvg}
             size="small"
             variant="primary"
-            text={
-              calendarEventId
-                ? t('vexlbot.updateCalendarEventLocation')
-                : t('vexlbot.addEventToCalendar')
-            }
+            iconFill={getTokens().color.main.val}
           />
-        )}
+          {!!isDateAndTimePicked && (
+            <Button
+              onPress={() => {
+                void addEventToCalendar()()
+              }}
+              beforeIcon={termsIconSvg}
+              size="small"
+              variant="primary"
+              text={
+                calendarEventId
+                  ? t('vexlbot.updateCalendarEventLocation')
+                  : t('vexlbot.addEventToCalendar')
+              }
+            />
+          )}
+        </Stack>
       </VexlbotBubble>
     )
   }
@@ -97,24 +129,39 @@ export default function TradeChecklistMeetingLocationView(): JSX.Element | null 
           t,
         })}
       >
-        {pendingSuggestion.by === 'them' && (
+        <Stack gap="$2">
           <Button
+            text={t('vexlbot.copyAddressInfo')}
+            beforeIcon={copySvg}
             onPress={() => {
-              const chat = store.get(chatAtom)
-              navigation.navigate('TradeChecklistFlow', {
-                chatId: chat.id,
-                inboxKey: chat.inbox.privateKey.publicKeyPemBase64,
-                screen: 'LocationMapPreview',
-                params: {
-                  selectedLocation: pendingSuggestion.data.data,
-                },
-              })
+              Clipboard.setString(
+                `${pendingSuggestion.data.data.note}, ${pendingSuggestion.data.data.address}`
+              )
+              setToastNotification(toastContent)
             }}
-            variant="secondary"
             size="small"
-            text={t('common.respond')}
+            variant="primary"
+            iconFill={getTokens().color.main.val}
           />
-        )}
+          {pendingSuggestion.by === 'them' && (
+            <Button
+              onPress={() => {
+                const chat = store.get(chatAtom)
+                navigation.navigate('TradeChecklistFlow', {
+                  chatId: chat.id,
+                  inboxKey: chat.inbox.privateKey.publicKeyPemBase64,
+                  screen: 'LocationMapPreview',
+                  params: {
+                    selectedLocation: pendingSuggestion.data.data,
+                  },
+                })
+              }}
+              variant="secondary"
+              size="small"
+              text={t('common.respond')}
+            />
+          )}
+        </Stack>
       </VexlbotBubble>
     )
   }

@@ -33,6 +33,7 @@ import FilterButton from './FilterButton'
 import ImportNewContactsSuggestion from './ImportNewContactsSuggestion'
 import SearchOffers from './SearchOffers'
 import TotalOffersCount from './TotalOffersCount'
+import VexlCooSuggestion from './VexlCooSuggestion'
 
 function OffersListStateDisplayerContent(): JSX.Element {
   const tokens = getTokens()
@@ -98,6 +99,7 @@ function OffersListStateDisplayerContent(): JSX.Element {
                     </Stack>
                   )}
               </XStack>
+              <VexlCooSuggestion mb="$6" />
               <ReencryptOffersSuggestion mb="$6" />
               <ImportNewContactsSuggestion mb="$6" />
               <AddListingTypeToOffersSuggestion mb="$6" />

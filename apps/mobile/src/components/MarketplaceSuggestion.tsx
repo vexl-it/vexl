@@ -42,7 +42,7 @@ function MarketplaceSuggestion({
     <YStack {...props}>
       <Stack mb="$2">
         <XStack bc="$white" p="$4" br="$5">
-          <Text fs={1} col="$black" fos={18} ff="$body500">
+          <Text f={1} fs={1} col="$black" fos={18} ff="$body500">
             {text}
           </Text>
           {!hideCloseButton && (

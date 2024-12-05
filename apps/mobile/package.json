@@ -35,7 +35,7 @@
     "@react-navigation/native": "^6.0.16",
     "@react-navigation/native-stack": "^6.9.4",
     "@react-spring/native": "^9.6.1",
-    "@sentry/react-native": "6.4.0",
+    "@sentry/react-native": "^5.19.1",
     "@shopify/flash-list": "1.6.3",
     "@shopify/react-native-skia": "0.1.221",
     "@tamagui/animations-moti": "^1.72.3",

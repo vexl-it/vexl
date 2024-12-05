@@ -10,9 +10,9 @@ import {Stack, getTokens} from 'tamagui'
 import {useIsSessionLoaded} from './state/session'
 import {loadSession} from './state/session/loadSession'
 import {subscribeToGeneralTopic} from './utils/notifications'
-import useSetupRemoteConfig from './utils/remoteConfig/useSetupRemoteConfig'
 import reportError from './utils/reportError'
 import useLoadFonts from './utils/useLoadFonts'
+import useSetupVersionServiceState from './utils/versionService/useSetupVersionServiceState'
 
 interface Props {
   children: React.ReactNode
@@ -54,7 +54,7 @@ function AnimatedSplashScreen({children}: Props): JSX.Element {
     useState(false)
   const [fontsLoaded] = useLoadFonts()
   const sessionLoaded = useIsSessionLoaded()
-  useSetupRemoteConfig()
+  useSetupVersionServiceState()
 
   useEffect(() => {
     void loadSession({forceReload: true, showErrorAlert: true})()

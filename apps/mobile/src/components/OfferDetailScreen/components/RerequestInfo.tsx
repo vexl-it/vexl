@@ -3,7 +3,7 @@ import React, {useMemo} from 'react'
 import {type ChatWithMessages} from '../../../state/chat/domain'
 import {canChatBeRequested} from '../../../state/chat/utils/offerStates'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
-import {offerRerequestLimitDaysAtom} from '../../../utils/remoteConfig/atoms'
+import {offerRerequestLimitDaysAtom} from '../../../utils/versionService/atoms'
 import InfoSquare from '../../InfoSquare'
 
 function RerequestInfo({chat}: {chat: ChatWithMessages}): JSX.Element | null {

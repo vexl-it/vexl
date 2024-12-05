@@ -1,8 +1,10 @@
 import {Schema} from 'effect'
 import {Api, ApiGroup} from 'effect-http'
 import {ServerSecurity} from '../../apiSecurity'
+import {CommonHeaders} from '../../commonHeaders'
 import {SubmitFeedbackRequest} from '../feedback/contracts'
 import {
+  GetVersionServiceInfoResponse,
   InitPhoneVerificationRequest,
   InitPhoneVerificationResponse,
   InitVerificationErrors,
@@ -104,9 +106,19 @@ export const RegenerateSessionCredentialsEndpoint = Api.post(
   })
 )
 
+export const GetVersionServiceInfoEndpoint = Api.get(
+  'getVersionServiceInfo',
+  '/api/v1/version-service-info'
+).pipe(
+  Api.setRequestHeaders(CommonHeaders),
+  Api.setResponseBody(GetVersionServiceInfoResponse),
+  Api.setResponseStatus(200 as const)
+)
+
 export const UserApiSpecification = Api.make({title: 'User service'}).pipe(
   Api.addGroup(LoginGroup),
   Api.addEndpoint(LogoutUserEndpoint),
   Api.addEndpoint(SubmitFeedbackEndpoint),
-  Api.addEndpoint(RegenerateSessionCredentialsEndpoint)
+  Api.addEndpoint(RegenerateSessionCredentialsEndpoint),
+  Api.addEndpoint(GetVersionServiceInfoEndpoint)
 )

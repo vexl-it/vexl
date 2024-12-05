@@ -60,7 +60,6 @@ import AfterInteractionTaskDemo from './components/AfterInteractionTaskDemo'
 import CryptoBenchmarks from './components/CryptoBenchmarks'
 import LanguagePicker from './components/LanguagePicker'
 import Preferences from './components/Preferences'
-import RemoteConfigView from './components/RemoteConfigView'
 import SimulateMissingOfferInbox from './components/SimulateMissingOfferInbox'
 
 // const ContentScroll = styled(ScrollView, {
@@ -131,8 +130,6 @@ function DebugScreen(): JSX.Element {
             <Text color="$black">
               apiEnv: {JSON.stringify(apiEnv, null, 2)}
             </Text>
-            <Spacer />
-            <RemoteConfigView />
             <Spacer />
             <LanguagePicker />
             <Spacer />

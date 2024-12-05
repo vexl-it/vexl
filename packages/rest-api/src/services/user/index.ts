@@ -14,6 +14,8 @@ import {
   UserApiSpecification,
 } from './specification'
 
+import {Schema} from 'effect'
+import {CommonHeaders} from '../../commonHeaders'
 import {type SubmitFeedbackInput} from '../feedback/contracts'
 import {
   InitVerificationErrors,
@@ -53,6 +55,10 @@ export function api({
     loggingFunction,
   })
 
+  const commonHeaders = Schema.decodeSync(CommonHeaders)({
+    'user-agent': `Vexl/${clientVersion} (${clientSemver}) ${platform}`,
+  })
+
   return {
     initPhoneVerification: (initVerificationInput: InitVerificationInput) =>
       handleCommonAndExpectedErrorsEffect(
@@ -76,6 +82,12 @@ export function api({
       handleCommonAndExpectedErrorsEffect(
         client.regenerateSessionCredentials({body: args}),
         RegenerateSessionCredentialsErrors
+      ),
+    getVersionServiceInfo: () =>
+      handleCommonErrorsEffect(
+        client.getVersionServiceInfo({
+          headers: commonHeaders,
+        })
       ),
   }
 }

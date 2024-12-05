@@ -23,8 +23,8 @@ import {
   friendLevelBannerPreferenceAtom,
   preferencesAtom,
 } from '../../../utils/preferences'
-import {offerRerequestLimitDaysAtom} from '../../../utils/remoteConfig/atoms'
 import useSafeGoBack from '../../../utils/useSafeGoBack'
+import {offerRerequestLimitDaysAtom} from '../../../utils/versionService/atoms'
 import Button from '../../Button'
 import ButtonWithPressTimeout from '../../ButtonWithPressTimeout'
 import Info from '../../Info'

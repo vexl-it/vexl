@@ -19,6 +19,7 @@ import {
 import DbLayer from './db/layer'
 import {LoggedInUsersDbService} from './db/loggedInUsersDb'
 import {reportMetricsLayer} from './metrics'
+import {getVersionServiceInfoHandler} from './routes/getVersionServiceInfo'
 import {VerificationStateDbService} from './routes/login/db/verificationStateDb'
 import {initVerificationHandler} from './routes/login/handlers/initVerificationHandler'
 import {verifyChallengeHandler} from './routes/login/handlers/verifyChallengeHandler'
@@ -35,6 +36,7 @@ export const app = RouterBuilder.make(UserApiSpecification).pipe(
   RouterBuilder.handle(logoutUserHandler),
   RouterBuilder.handle(submitFeedbackHandler),
   RouterBuilder.handle(regenerateCredentialsHandler),
+  RouterBuilder.handle(getVersionServiceInfoHandler),
   RouterBuilder.build,
   setupLoggingMiddlewares
 )

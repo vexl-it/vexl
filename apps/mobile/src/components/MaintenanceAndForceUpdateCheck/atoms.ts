@@ -1,17 +1,20 @@
 import {atom} from 'jotai'
 import {DateTime} from 'luxon'
-import {versionCode} from '../../utils/environment'
-import {remoteConfigAtom} from '../../utils/remoteConfig/atoms'
+import {versionServiceAtom} from '../../utils/versionService/atoms'
 
 export const shouldDisplayForceUpdateScreenAtom = atom((get) => {
-  return versionCode <= get(remoteConfigAtom).next__force_update
+  return get(versionServiceAtom).requestForceUpdate
 })
 
 export const shouldDisplayMaintenanceScreenAtom = atom((get) => {
-  const {from, to} = get(remoteConfigAtom).next__maintenance
+  const {maintenanceUntil} = get(versionServiceAtom)
 
-  const fromDate = DateTime.fromISO(from)
-  const toDate = DateTime.fromISO(to)
+  if (!maintenanceUntil) {
+    return false
+  }
+
+  const fromDate = DateTime.fromMillis(maintenanceUntil.start)
+  const toDate = DateTime.fromMillis(maintenanceUntil.end)
   if (!fromDate.isValid || !toDate.isValid) {
     return false
   }

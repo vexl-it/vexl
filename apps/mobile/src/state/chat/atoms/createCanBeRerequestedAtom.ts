@@ -1,5 +1,5 @@
 import {atom, type Atom} from 'jotai'
-import {offerRerequestLimitDaysAtom} from '../../../utils/remoteConfig/atoms'
+import {offerRerequestLimitDaysAtom} from '../../../utils/versionService/atoms'
 import {canChatBeRequested} from '../utils/offerStates'
 import {type ChatWithMessagesAtom} from './focusChatWithMessagesAtom'
 

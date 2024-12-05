@@ -28,7 +28,6 @@
     "@react-native-firebase/app": "^18.4.0",
     "@react-native-firebase/dynamic-links": "^18.4.0",
     "@react-native-firebase/messaging": "^18.4.0",
-    "@react-native-firebase/remote-config": "^18.4.0",
     "@react-native-masked-view/masked-view": "0.3.0",
     "@react-native-picker/picker": "2.6.1",
     "@react-navigation/bottom-tabs": "^6.5.7",

@@ -5,6 +5,7 @@ import {
 } from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {HashedPhoneNumberE} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {IsoDatetimeStringE} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
+import {UnixMillisecondsE} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {Schema} from 'effect'
 export interface InvalidPhoneNumber {
@@ -233,3 +234,15 @@ export const RegenerateSessionCredentialsResponse = Schema.Struct({
 })
 export type RegenerateSessionCredentialsResponse =
   typeof RegenerateSessionCredentialsResponse.Type
+
+export const GetVersionServiceInfoResponse = Schema.Struct({
+  requestForceUpdate: Schema.Boolean,
+  offerRerequestLimitDays: Schema.Int.pipe(Schema.positive()),
+  maintenanceUntil: Schema.optionalWith(
+    Schema.Struct({
+      start: UnixMillisecondsE,
+      end: UnixMillisecondsE,
+    }),
+    {as: 'Option'}
+  ),
+})

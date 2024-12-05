@@ -5641,16 +5641,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-native-firebase/remote-config@npm:^18.4.0":
-  version: 18.9.0
-  resolution: "@react-native-firebase/remote-config@npm:18.9.0"
-  peerDependencies:
-    "@react-native-firebase/analytics": 18.9.0
-    "@react-native-firebase/app": 18.9.0
-  checksum: d923918e3c61b4929ff317a49de38a55f6439ca0fe0f1bdd03fd28676047959b0370394194c9f5fb7713987432a01dd0ab8eaeb3b65f8435710619cf9a0b097c
-  languageName: node
-  linkType: hard
-
 "@react-native-masked-view/masked-view@npm:0.3.1":
   version: 0.3.1
   resolution: "@react-native-masked-view/masked-view@npm:0.3.1"
@@ -10385,7 +10375,6 @@ __metadata:
     "@react-native-firebase/app": ^18.4.0
     "@react-native-firebase/dynamic-links": ^18.4.0
     "@react-native-firebase/messaging": ^18.4.0
-    "@react-native-firebase/remote-config": ^18.4.0
     "@react-native-masked-view/masked-view": 0.3.1
     "@react-native-picker/picker": 2.7.5
     "@react-navigation/bottom-tabs": ^6.5.7

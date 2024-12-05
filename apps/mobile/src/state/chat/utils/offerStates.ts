@@ -1,5 +1,4 @@
 import {DateTime} from 'luxon'
-import {type OfferRerequestLimitDays} from '../../../utils/remoteConfig/domain'
 import unixMillisecondsToLocaleDateTime from '../../../utils/unixMillisecondsToLocaleDateTime'
 import {type ChatWithMessages, type RequestState} from '../domain'
 
@@ -34,7 +33,7 @@ export function getRequestState(chat?: ChatWithMessages): RequestState {
 
 export function canChatBeRequested(
   chat: ChatWithMessages,
-  limitDays: OfferRerequestLimitDays
+  limitDays: number
 ):
   | {canBeRerequested: true}
   | {canBeRerequested: false; possibleInDays?: number} {

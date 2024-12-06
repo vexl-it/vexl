@@ -1,4 +1,5 @@
 import {type TradeChecklistUpdate} from '@vexl-next/domain/src/general/tradeChecklist'
+import {type UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {type TradeChecklistInState} from './domain'
 
 export function updateTradeChecklistState(
@@ -66,4 +67,28 @@ export function updateTradeChecklistState(
         state.contact?.received,
     },
   })
+}
+
+export function checkIfAgreedByMe({
+  agreed,
+  messageTimestamp,
+}: {
+  agreed: {by: 'me' | 'them'; timestamp: UnixMilliseconds} | {by: 'none'}
+  messageTimestamp: UnixMilliseconds
+}): boolean {
+  return agreed.by === 'me' && messageTimestamp === agreed.timestamp
+}
+
+export function checkIfAgreedByThem({
+  agreed,
+  messageTimestamp,
+}: {
+  agreed: {by: 'me' | 'them'; timestamp: UnixMilliseconds} | {by: 'none'}
+  messageTimestamp: UnixMilliseconds
+}): boolean {
+  return (
+    agreed.by === 'them' &&
+    agreed.timestamp &&
+    messageTimestamp > agreed.timestamp
+  )
 }

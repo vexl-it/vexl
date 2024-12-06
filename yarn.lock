@@ -10426,6 +10426,7 @@ __metadata:
     burnt: ^0.12.1
     compare-versions: ^6.1.0
     country-data: ^0.0.31
+    crypto-browserify: ^3.12.0
     dayjs: ^1.11.11
     deep-equal: ^2.2.3
     effect: ^3.10.12
@@ -10492,7 +10493,7 @@ __metadata:
     react-native-phone-number-input: ^2.1.0
     react-native-qrcode-svg: ^6.2.0
     react-native-quick-base64: ^2.0.8
-    react-native-quick-crypto: 0.7.6
+    react-native-quick-crypto: 0.7.8
     react-native-reanimated: ~3.10.1
     react-native-safe-area-context: 4.10.5
     react-native-screens: 3.31.1
@@ -25836,9 +25837,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-quick-crypto@npm:0.7.6":
-  version: 0.7.6
-  resolution: "react-native-quick-crypto@npm:0.7.6"
+"react-native-quick-crypto@npm:0.7.8":
+  version: 0.7.8
+  resolution: "react-native-quick-crypto@npm:0.7.8"
   dependencies:
     "@craftzdog/react-native-buffer": ^6.0.5
     events: ^3.3.0
@@ -25848,23 +25849,7 @@ __metadata:
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: 4143a960c861f0133bba4773737141319d42aa18c814f967635d7852129644925cfd05685337627f130712542d1d3d747851707416817d570558baaf308d35cb
-  languageName: node
-  linkType: hard
-
-"react-native-quick-crypto@patch:react-native-quick-crypto@npm%3A0.7.6#./.yarn/patches/react-native-quick-crypto-npm-0.7.6-b57c066106.patch::locator=vexl-next%40workspace%3A.":
-  version: 0.7.6
-  resolution: "react-native-quick-crypto@patch:react-native-quick-crypto@npm%3A0.7.6#./.yarn/patches/react-native-quick-crypto-npm-0.7.6-b57c066106.patch::version=0.7.6&hash=3ed3ec&locator=vexl-next%40workspace%3A."
-  dependencies:
-    "@craftzdog/react-native-buffer": ^6.0.5
-    events: ^3.3.0
-    readable-stream: ^4.5.2
-    string_decoder: ^1.3.0
-    util: ^0.12.5
-  peerDependencies:
-    react: "*"
-    react-native: "*"
-  checksum: 24e73dd7b204ddfedb5bce6400449a3f05581f5fce6b3e9fd6228481bed6e4511c0186ad6a6eff5f13ce76806f061c39209040147791465117ff23f1b678e8c0
+  checksum: 7256edecb564ce0836d24653f446a0d1d5246fd425cba0359dc46c56c3b57f0a7323a75dbdae04f11531e336910b70dd2fbb8559d2c31d0e16e60dbc1946442c
   languageName: node
   linkType: hard
 

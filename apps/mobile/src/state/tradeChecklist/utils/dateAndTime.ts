@@ -12,9 +12,30 @@ import {type TradeChecklistInState} from '../domain'
 
 type DateAndTimeInState = TradeChecklistInState['dateAndTime']
 
-export function getPick(
+export function getLatestMessageTimestamp(
   data: DateAndTimeInState
-): {by: 'me' | 'them'; pick: PickedDateTimeOption} | undefined {
+): UnixMilliseconds | undefined {
+  const sentTimestamp = data.sent?.timestamp ?? UnixMilliseconds0
+  const receivedTimestamp = data.received?.timestamp ?? UnixMilliseconds0
+
+  if (sentTimestamp > receivedTimestamp) {
+    return sentTimestamp
+  }
+
+  if (receivedTimestamp > sentTimestamp) {
+    return receivedTimestamp
+  }
+
+  return undefined
+}
+
+export function getPick(data: DateAndTimeInState):
+  | {
+      by: 'me' | 'them'
+      pick: PickedDateTimeOption
+      timestampt: UnixMilliseconds
+    }
+  | undefined {
   // For pick to be valid. There always need to be suggestions sent before
   if (!data.sent || !data.received) return undefined
 
@@ -31,7 +52,7 @@ export function getPick(
       ({from, to}) => from <= sentPick.dateTime && sentPick.dateTime <= to
     )
     if (sentPickIsInSuggestions) {
-      return {by: 'me', pick: sentPick}
+      return {by: 'me', pick: sentPick, timestampt: sentTimestamp}
     }
     return undefined
   }
@@ -42,7 +63,7 @@ export function getPick(
         from <= receivedPick.dateTime && receivedPick.dateTime <= to
     )
     if (receivedPickIsInSuggestions) {
-      return {by: 'them', pick: receivedPick}
+      return {by: 'them', pick: receivedPick, timestampt: receivedTimestamp}
     }
     return undefined
   }

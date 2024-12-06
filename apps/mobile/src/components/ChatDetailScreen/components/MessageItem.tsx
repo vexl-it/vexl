@@ -17,8 +17,11 @@ import IdentityRevealMessageItem from './IdentityRevealMessageItem'
 import MessageIncompatibleItem from './MessageIncompatibleItem'
 import TextMessage from './TextMessage'
 import VexlBotMessageItem from './VexlbotMessageItem'
-import VexlbotNextActionSuggestion from './VexlbotMessageItem/components/VexlbotNextActionSuggestion'
-import {type VexlBotMessageData} from './VexlbotMessageItem/domain'
+import TradeChecklistAmountView from './VexlbotMessageItem/components/TradeChecklistAmountView'
+import TradeChecklistDateAndTimeView from './VexlbotMessageItem/components/TradeChecklistDateAndTimeView'
+import TradeChecklistMeetingLocationView from './VexlbotMessageItem/components/TradeChecklistMeetingLocationView'
+import TradeChecklistNetworkView from './VexlbotMessageItem/components/TradeChecklistNetworkView'
+import {type TradingChecklistSuggestion} from './VexlbotMessageItem/domain'
 
 export type MessagesListItem =
   | {
@@ -44,7 +47,7 @@ export type MessagesListItem =
   | {
       type: 'vexlBot'
       key: string
-      data: VexlBotMessageData
+      data: TradingChecklistSuggestion
       isLast?: boolean
     }
 
@@ -54,9 +57,16 @@ function MessageItem({
   itemAtom: Atom<MessagesListItem>
 }): JSX.Element | null {
   const item = useAtomValue(itemAtom)
-  const {chatFeedbackAtom, otherSideDataAtom} = useMolecule(chatMolecule)
+  const {
+    chatFeedbackAtom,
+    otherSideDataAtom,
+    otherSideSupportsTradingChecklistAtom,
+  } = useMolecule(chatMolecule)
   const {t} = useTranslation()
   const {userName, image} = useAtomValue(otherSideDataAtom)
+  const otherSideSupportsTradingChecklist = useAtomValue(
+    otherSideSupportsTradingChecklistAtom
+  )
 
   if (item.type === 'message') {
     if (item.message.state === 'receivedButRequiresNewerVersion') {
@@ -191,7 +201,22 @@ function MessageItem({
       )
     }
 
-    if (item.message.message.messageType === 'TRADE_CHECKLIST_UPDATE') {
+    if (
+      item.message.message.messageType === 'TRADE_CHECKLIST_UPDATE' &&
+      otherSideSupportsTradingChecklist
+    ) {
+      if (item.message.message.tradeChecklistUpdate?.dateAndTime) {
+        return <TradeChecklistDateAndTimeView message={item.message} />
+      }
+      if (item.message.message.tradeChecklistUpdate?.location) {
+        return <TradeChecklistMeetingLocationView message={item.message} />
+      }
+      if (item.message.message.tradeChecklistUpdate?.amount) {
+        return <TradeChecklistAmountView message={item.message} />
+      }
+      if (item.message.message.tradeChecklistUpdate?.network) {
+        return <TradeChecklistNetworkView message={item.message} />
+      }
       return null
     }
 
@@ -202,7 +227,6 @@ function MessageItem({
     return (
       <>
         <VexlBotMessageItem data={item.data} />
-        {!!item.isLast && <VexlbotNextActionSuggestion />}
       </>
     )
   }

@@ -17,12 +17,16 @@ function MeetingLocationCell(): JSX.Element {
   )
 
   const onPress = useCallback(() => {
-    const pendingSuggestion = MeetingLocation.getPendingSuggestion(
-      tradeChecklistLocationData
-    )
-    if (pendingSuggestion?.by === 'them') {
+    const lastLocationDataMessage =
+      MeetingLocation.getLatestMeetingLocationDataMessage(
+        tradeChecklistLocationData
+      )
+    if (
+      lastLocationDataMessage?.by === 'them' &&
+      lastLocationDataMessage.status === 'pending'
+    ) {
       navigation.navigate('LocationMapPreview', {
-        selectedLocation: pendingSuggestion.data.data,
+        selectedLocation: lastLocationDataMessage.locationData.data,
       })
     } else {
       navigation.navigate('LocationSearch')

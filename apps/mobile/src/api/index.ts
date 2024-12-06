@@ -42,6 +42,7 @@ export const apiEnv = getApiPreset()
 
 const sessionCredentialsAtom = atom<UserSessionCredentials>((get) => {
   const session = get(sessionHolderAtom)
+
   if (session.state !== 'loggedIn') {
     console.warn(
       '👀 User is not logged in. Using dummy session. But user should be logged out.'

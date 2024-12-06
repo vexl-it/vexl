@@ -4,6 +4,7 @@ import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue, useSetAtom} from 'jotai'
 import {useCallback, useMemo} from 'react'
 import {Stack, XStack, getTokens} from 'tamagui'
+import {type ChatMessageWithState} from '../../../../../state/chat/domain'
 import {SATOSHIS_IN_BTC} from '../../../../../state/currentBtcPriceAtoms'
 import * as amount from '../../../../../state/tradeChecklist/utils/amount'
 import {
@@ -24,8 +25,13 @@ import {chatMolecule} from '../../../atoms'
 import copySvg from '../../../images/copySvg'
 import checkIconSvg from '../../images/checkIconSvg'
 import VexlbotBubble from './VexlbotBubble'
+import VexlbotNextActionSuggestion from './VexlbotNextActionSuggestion'
 
-function TradeChecklistAmountView(): JSX.Element | null {
+interface Props {
+  message: ChatMessageWithState
+}
+
+function TradeChecklistAmountView({message}: Props): JSX.Element | null {
   const {t} = useTranslation()
   const navigation = useNavigation()
   const {
@@ -34,7 +40,6 @@ function TradeChecklistAmountView(): JSX.Element | null {
     otherSideDataAtom,
     tradeChecklistAmountAtom,
     tradeOrOriginOfferCurrencyAtom,
-    fiatValueToDisplayInVexlbotMessageAtom,
     btcPricePercentageDifferenceToDisplayInVexlbotMessageAtom,
   } = useMolecule(chatMolecule)
   const tradeOrOriginOfferCurrency = useAtomValue(
@@ -44,7 +49,7 @@ function TradeChecklistAmountView(): JSX.Element | null {
   const currentLocale = preferences.appLanguage ?? getCurrentLocale()
   const amountData = useAtomValue(tradeChecklistAmountAtom)
   const otherSideData = useAtomValue(otherSideDataAtom)
-  const amountDataToDisplay = amount.getAmountData(amountData)
+  const latestAmountDataMessage = amount.getLatestAmountDataMessage(amountData)
   const chatId = useAtomValue(chatIdAtom)
   const inboxKey = useAtomValue(publicKeyPemBase64Atom)
   const showLoadingOverlay = useSetAtom(loadingOverlayDisplayedAtom)
@@ -53,7 +58,7 @@ function TradeChecklistAmountView(): JSX.Element | null {
   )
   const addAmount = useSetAtom(addAmountActionAtom)
   const setToastNotification = useSetAtom(toastNotificationAtom)
-  const fiatAmount = useAtomValue(fiatValueToDisplayInVexlbotMessageAtom)
+  // const fiatAmount = useAtomValue(fiatValueToDisplayInVexlbotMessageAtom)
   const btcPricePercentageDifference = useAtomValue(
     btcPricePercentageDifferenceToDisplayInVexlbotMessageAtom
   )
@@ -100,144 +105,166 @@ function TradeChecklistAmountView(): JSX.Element | null {
     })
   }, [amountData.received, chatId, inboxKey, navigation])
 
-  if (!amountDataToDisplay?.amountData.btcAmount) return null
+  if (!latestAmountDataMessage?.amountData.btcAmount) return null
 
-  const renderFooter = ((): JSX.Element | null => {
-    return (
-      <Stack f={1} gap="$2">
-        <XStack ai="center" jc="space-between">
-          {!!amountDataToDisplay.amountData.btcAmount && (
-            <Button
-              text="BTC"
-              beforeIcon={copySvg}
-              onPress={() => {
-                Clipboard.setString(
-                  `${amountDataToDisplay.amountData.btcAmount}`
-                )
-                setToastNotification(toastContent)
-              }}
-              size="small"
-              variant="primary"
-              iconFill={getTokens().color.main.val}
-            />
-          )}
-          {!!amountDataToDisplay.amountData.btcAmount && (
-            <Button
-              text="SAT"
-              beforeIcon={copySvg}
-              onPress={() => {
-                Clipboard.setString(
-                  `${Math.round(Number(amountDataToDisplay.amountData.btcAmount) * SATOSHIS_IN_BTC)}`
-                )
-                setToastNotification(toastContent)
-              }}
-              size="small"
-              variant="primary"
-              iconFill={getTokens().color.main.val}
-            />
-          )}
-          {!!fiatAmount && (
-            <Button
-              text={currencies[tradeOrOriginOfferCurrency].code}
-              beforeIcon={copySvg}
-              onPress={() => {
-                Clipboard.setString(`${fiatAmount}`)
-                setToastNotification(toastContent)
-              }}
-              size="small"
-              variant="primary"
-              iconFill={getTokens().color.main.val}
-            />
-          )}
-        </XStack>
-        {amountDataToDisplay.by === 'them' &&
-          amountDataToDisplay.status === 'pending' && (
-            <XStack ai="center" jc="space-between" gap="$2">
-              <Button
-                fullSize
-                disabled={!amountData?.received}
-                onPress={onEditPress}
-                variant="primary"
-                size="small"
-                text={t('common.change')}
-              />
-              <Button
-                fullSize
-                disabled={!amountData?.received}
-                onPress={onAcceptButtonPress}
-                variant="secondary"
-                size="small"
-                text={t('common.accept')}
-              />
-            </XStack>
-          )}
-      </Stack>
+  if (
+    (message.state === 'sent' || message.state === 'received') &&
+    message.message.messageType === 'TRADE_CHECKLIST_UPDATE' &&
+    message.message.tradeChecklistUpdate?.amount
+  ) {
+    const fiatAmount = amount.applyFeeOnNumberValue(
+      message.message.tradeChecklistUpdate.amount.fiatAmount ?? 0,
+      message.message.tradeChecklistUpdate.amount.feeAmount ?? 0
     )
-  })()
 
-  return (
-    <Stack>
-      <VexlbotBubble
-        status={
-          amountDataToDisplay.by === 'them' &&
-          amountDataToDisplay.status === 'pending'
-            ? undefined
-            : amountDataToDisplay.status
-        }
-        introText={
-          amountDataToDisplay.status !== 'accepted' &&
-          amountDataToDisplay.by === 'them' &&
-          (amountDataToDisplay.amountData.tradePriceType === 'custom' ||
-            amountDataToDisplay.amountData.tradePriceType === 'your' ||
-            amountDataToDisplay.amountData.tradePriceType === 'frozen')
-            ? `${t(
-                'tradeChecklist.calculateAmount.choseToCalculateWithCustomPrice',
-                {
-                  username: otherSideData.userName,
-                  percentage: Math.abs(btcPricePercentageDifference),
-                }
-              )} ${
-                btcPricePercentageDifference >= 0
-                  ? t('vexlbot.higherThanLivePrice')
-                  : t('vexlbot.lowerThanLivePrice')
-              }`
-            : undefined
-        }
-        text={t(
-          amountDataToDisplay.status === 'pending'
-            ? 'vexlbot.settledAmountOfTheDeal'
-            : 'vexlbot.suggestedAmountOfTheDeal',
-          {
-            username:
-              amountDataToDisplay.by === 'me'
-                ? t('common.you')
-                : otherSideData.userName,
-            btcAmount: Number(
-              amountDataToDisplay.amountData.btcAmount
-            )?.toLocaleString(currentLocale, {
-              minimumFractionDigits:
-                String(amountDataToDisplay.amountData.btcAmount).split('.')[1]
-                  ?.length ?? 0,
-              maximumFractionDigits:
-                String(amountDataToDisplay.amountData.btcAmount).split('.')[1]
-                  ?.length ?? 0,
-            }),
-            fiatAmount: fiatAmount?.toLocaleString(currentLocale),
-            fiatCurrency: currencies[tradeOrOriginOfferCurrency].code,
-            feeAmount: amountDataToDisplay.amountData.feeAmount,
-            btcTradePrice:
-              amountDataToDisplay.amountData.btcPrice?.toLocaleString(
-                currentLocale
-              ),
+    const isMessageOutdated =
+      message.message.tradeChecklistUpdate.amount.timestamp !==
+      latestAmountDataMessage.amountData.timestamp
+
+    const renderFooter = ((): JSX.Element | null => {
+      return (
+        <Stack f={1} gap="$2">
+          <XStack ai="center" jc="space-between">
+            {!!message.message.tradeChecklistUpdate.amount.btcAmount && (
+              <Button
+                text="BTC"
+                beforeIcon={copySvg}
+                onPress={() => {
+                  Clipboard.setString(
+                    `${message.message.tradeChecklistUpdate?.amount?.btcAmount}`
+                  )
+                  setToastNotification(toastContent)
+                }}
+                size="small"
+                variant="primary"
+                iconFill={getTokens().color.main.val}
+              />
+            )}
+            {!!message.message.tradeChecklistUpdate.amount.btcAmount && (
+              <Button
+                text="SAT"
+                beforeIcon={copySvg}
+                onPress={() => {
+                  Clipboard.setString(
+                    `${Math.round(Number(message.message.tradeChecklistUpdate?.amount?.btcAmount) * SATOSHIS_IN_BTC)}`
+                  )
+                  setToastNotification(toastContent)
+                }}
+                size="small"
+                variant="primary"
+                iconFill={getTokens().color.main.val}
+              />
+            )}
+            {!!fiatAmount && (
+              <Button
+                text={currencies[tradeOrOriginOfferCurrency].code}
+                beforeIcon={copySvg}
+                onPress={() => {
+                  Clipboard.setString(`${fiatAmount}`)
+                  setToastNotification(toastContent)
+                }}
+                size="small"
+                variant="primary"
+                iconFill={getTokens().color.main.val}
+              />
+            )}
+          </XStack>
+          {!isMessageOutdated &&
+            latestAmountDataMessage.by === 'them' &&
+            latestAmountDataMessage.status === 'pending' && (
+              <XStack ai="center" jc="space-between" gap="$2">
+                <Button
+                  fullSize
+                  disabled={!amountData?.received}
+                  onPress={onEditPress}
+                  variant="primary"
+                  size="small"
+                  text={t('common.change')}
+                />
+                <Button
+                  fullSize
+                  disabled={!amountData?.received}
+                  onPress={onAcceptButtonPress}
+                  variant="secondary"
+                  size="small"
+                  text={t('common.accept')}
+                />
+              </XStack>
+            )}
+        </Stack>
+      )
+    })()
+
+    return (
+      <>
+        <VexlbotBubble
+          status={
+            isMessageOutdated ? 'outdated' : latestAmountDataMessage.status
           }
-        )}
-      >
-        <XStack f={1} ai="center" jc="space-between">
-          {renderFooter}
-        </XStack>
-      </VexlbotBubble>
-    </Stack>
-  )
+          introText={
+            latestAmountDataMessage.status === 'pending' &&
+            latestAmountDataMessage.by === 'them' &&
+            (latestAmountDataMessage.amountData.tradePriceType === 'custom' ||
+              latestAmountDataMessage.amountData.tradePriceType === 'your' ||
+              latestAmountDataMessage.amountData.tradePriceType === 'frozen')
+              ? `${t(
+                  'tradeChecklist.calculateAmount.choseToCalculateWithCustomPrice',
+                  {
+                    username: otherSideData.userName,
+                    percentage: Math.abs(btcPricePercentageDifference),
+                  }
+                )} ${
+                  btcPricePercentageDifference >= 0
+                    ? t('vexlbot.higherThanLivePrice')
+                    : t('vexlbot.lowerThanLivePrice')
+                }`
+              : undefined
+          }
+          text={t(
+            // vexlbot.settledAmountOfTheDeal and vexlbot.suggestedAmountOfTheDeal are accidentally swapped in translation file
+            latestAmountDataMessage.status === 'pending' || isMessageOutdated
+              ? 'vexlbot.settledAmountOfTheDeal'
+              : 'vexlbot.suggestedAmountOfTheDeal',
+            {
+              username:
+                message.state === 'sent'
+                  ? t('common.you')
+                  : otherSideData.userName,
+              btcAmount: Number(
+                message.message.tradeChecklistUpdate.amount.btcAmount
+              )?.toLocaleString(currentLocale, {
+                minimumFractionDigits:
+                  String(
+                    message.message.tradeChecklistUpdate.amount.btcAmount
+                  ).split('.')[1]?.length ?? 0,
+                maximumFractionDigits:
+                  String(
+                    message.message.tradeChecklistUpdate.amount.btcAmount
+                  ).split('.')[1]?.length ?? 0,
+              }),
+              fiatAmount: fiatAmount?.toLocaleString(currentLocale),
+              fiatCurrency: currencies[tradeOrOriginOfferCurrency].code,
+              feeAmount: message.message.tradeChecklistUpdate.amount.feeAmount,
+              btcTradePrice:
+                message.message.tradeChecklistUpdate.amount.btcAmount?.toLocaleString(
+                  currentLocale
+                ),
+            }
+          )}
+        >
+          <XStack f={1} ai="center" jc="space-between">
+            {renderFooter}
+          </XStack>
+        </VexlbotBubble>
+        {!isMessageOutdated &&
+          latestAmountDataMessage.status === 'accepted' && (
+            <VexlbotNextActionSuggestion />
+          )}
+      </>
+    )
+  }
+
+  return null
 }
 
 export default TradeChecklistAmountView

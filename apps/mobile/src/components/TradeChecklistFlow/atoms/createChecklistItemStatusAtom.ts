@@ -130,9 +130,17 @@ export default function createChecklistItemStatusAtom(
 
     if (item === 'MEETING_LOCATION') {
       if (updates.location) return 'readyToSend'
-      if (MeetingLocation.getAgreed(tradeChecklistData.location))
+      if (
+        MeetingLocation.getLatestMeetingLocationDataMessage(
+          tradeChecklistData.location
+        )?.status === 'accepted'
+      )
         return 'accepted'
-      if (MeetingLocation.getPendingSuggestion(tradeChecklistData.location))
+      if (
+        MeetingLocation.getLatestMeetingLocationDataMessage(
+          tradeChecklistData.location
+        )?.status === 'pending'
+      )
         return 'pending'
       return 'initial'
     }

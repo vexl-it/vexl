@@ -50,7 +50,7 @@ import {createFeedbackForChatAtom} from '../../../state/feedback/atoms'
 import {offerForChatOriginAtom} from '../../../state/marketplace/atoms/offersState'
 import {invalidUsernameUIFeedbackAtom} from '../../../state/session/userDataAtoms'
 import * as amount from '../../../state/tradeChecklist/utils/amount'
-import {getAmountData} from '../../../state/tradeChecklist/utils/amount'
+import {getLatestAmountDataMessage} from '../../../state/tradeChecklist/utils/amount'
 import * as dateAndTime from '../../../state/tradeChecklist/utils/dateAndTime'
 import * as MeetingLocation from '../../../state/tradeChecklist/utils/location'
 import getValueFromSetStateActionOfAtom from '../../../utils/atomUtils/getValueFromSetStateActionOfAtom'
@@ -107,7 +107,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
   )
 
   const messagesListDataAtom = atom((get) =>
-    buildMessagesListData(get(messagesAtom), get(tradeChecklistAtom))
+    buildMessagesListData(get(messagesAtom))
   )
 
   const otherSideDataAtom = selectOtherSideDataAtom(chatAtom)
@@ -931,7 +931,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
 
   const tradeOrOriginOfferCurrencyAtom = atom((get) => {
     const originOffer = get(offerForChatAtom)
-    const tradeChecklistAmountData = getAmountData(
+    const tradeChecklistAmountData = getLatestAmountDataMessage(
       get(tradeChecklistAmountAtom)
     )
 
@@ -958,7 +958,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     (get, set): T.Task<boolean> => {
       const {t} = get(translationAtom)
       const calendarEventId = get(calendarEventIdAtom)
-      const agreedOn = MeetingLocation.getAgreed(
+      const agreedData = MeetingLocation.getLatestMeetingLocationDataMessage(
         get(tradeChecklistMeetingLocationAtom)
       )
       const dateAndTimeData = get(tradeChecklistDateAndTimeAtom)
@@ -972,8 +972,8 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
         title: t('tradeChecklist.vexlMeetingEventTitle', {
           name: get(otherSideDataAtom).userName,
         }),
-        location: agreedOn?.data.data?.address,
-        notes: agreedOn?.data.data.note ?? '',
+        location: agreedData?.locationData.data?.address,
+        notes: agreedData?.locationData.data.note ?? '',
       }
 
       set(loadingOverlayDisplayedAtom, true)
@@ -985,7 +985,6 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
             createCalendarIfNotExistsAndTryToResolvePermissionsAlongTheWayActionAtom
           )
         ),
-        (a) => a,
         TE.bindW('createEventActionResult', ({calendarId}) =>
           createCalendarEvent({
             calendarEventId,
@@ -1047,24 +1046,24 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     return offerForChat?.offerInfo?.publicPart?.listingType === 'OTHER'
   })
 
-  const fiatValueToDisplayInVexlbotMessageAtom = atom((get) => {
-    const amountData = get(tradeChecklistAmountAtom)
-    const amountDataToDisplay = amount.getAmountData(amountData)
+  // const fiatValueToDisplayInVexlbotMessageAtom = atom((get) => {
+  //   const amountData = get(tradeChecklistAmountAtom)
+  //   const amountDataToDisplay = amount.getAmountData(amountData)
 
-    return amountDataToDisplay?.amountData.fiatAmount
-      ? Math.round(
-          amount.applyFeeOnNumberValue(
-            amountDataToDisplay.amountData.fiatAmount,
-            amountDataToDisplay.amountData.feeAmount ?? 0
-          )
-        )
-      : undefined
-  })
+  //   return amountDataToDisplay?.amountData.fiatAmount
+  //     ? Math.round(
+  //         amount.applyFeeOnNumberValue(
+  //           amountDataToDisplay.amountData.fiatAmount,
+  //           amountDataToDisplay.amountData.feeAmount ?? 0
+  //         )
+  //       )
+  //     : undefined
+  // })
 
   const btcPricePercentageDifferenceToDisplayInVexlbotMessageAtom = atom(
     (get) => {
       const amountData = get(tradeChecklistAmountAtom)
-      const amountDataToDisplay = amount.getAmountData(amountData)
+      const amountDataToDisplay = amount.getLatestAmountDataMessage(amountData)
       const btcPriceForTradeCurrency = get(btcPriceForTradeCurrencyAtom)
 
       return amount.calculateBtcPricePercentageDifference(
@@ -1149,7 +1148,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     identityRevealRequestMessageIdAtom,
     contactRevealRequestMessageIdAtom,
     contactRevealApproveMessageIdAtom,
-    fiatValueToDisplayInVexlbotMessageAtom,
+    // fiatValueToDisplayInVexlbotMessageAtom,
     btcPricePercentageDifferenceToDisplayInVexlbotMessageAtom,
   }
 })

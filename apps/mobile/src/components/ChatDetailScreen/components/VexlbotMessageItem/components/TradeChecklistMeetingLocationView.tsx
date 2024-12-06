@@ -1,10 +1,13 @@
 import Clipboard from '@react-native-clipboard/clipboard'
 import {useNavigation} from '@react-navigation/native'
+import {UnixMilliseconds0} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue, useSetAtom, useStore} from 'jotai'
 import {useMemo} from 'react'
 import {getTokens, Stack} from 'tamagui'
+import {type ChatMessageWithState} from '../../../../../state/chat/domain'
 import * as MeetingLocation from '../../../../../state/tradeChecklist/utils/location'
+import {getLocationAgreedBy} from '../../../../../state/tradeChecklist/utils/location'
 import {
   useTranslation,
   type TFunction,
@@ -19,28 +22,44 @@ import checkIconSvg from '../../images/checkIconSvg'
 import VexlbotBubble from './VexlbotBubble'
 
 function getTextForVexlbot({
+  agreed,
   by,
   otherSideUsername,
   note,
   address,
   t,
 }: {
+  agreed: boolean
   by: 'me' | 'them'
   otherSideUsername: string
   address: string
   note?: string
   t: TFunction
 }): string {
-  return `${
-    by === 'me'
-      ? t('tradeChecklist.location.youSetMeetingLocation')
-      : t('tradeChecklist.location.themSetMeetingLocation', {
-          them: otherSideUsername,
-        })
-  } \n${address}${note ? `\n${note}` : ''}`
+  return agreed
+    ? `${
+        by === 'me'
+          ? t('tradeChecklist.location.youAgreedToMeetingLocation')
+          : t('tradeChecklist.location.themAgreedToMeetingLocation', {
+              them: otherSideUsername,
+            })
+      } \n${address}${note ? `\n${note}` : ''}`
+    : `${
+        by === 'me'
+          ? t('tradeChecklist.location.youSetMeetingLocation')
+          : t('tradeChecklist.location.themSetMeetingLocation', {
+              them: otherSideUsername,
+            })
+      } \n${address}${note ? `\n${note}` : ''}`
 }
 
-export default function TradeChecklistMeetingLocationView(): JSX.Element | null {
+interface Props {
+  message: ChatMessageWithState
+}
+
+export default function TradeChecklistMeetingLocationView({
+  message,
+}: Props): JSX.Element | null {
   const {t} = useTranslation()
   const {
     addEventToCalendarActionAtom,
@@ -68,100 +87,133 @@ export default function TradeChecklistMeetingLocationView(): JSX.Element | null 
     [t]
   )
 
-  const agreedOn = MeetingLocation.getAgreed(meetingLocationData)
-  if (agreedOn) {
-    return (
-      <VexlbotBubble
-        status="accepted"
-        text={getTextForVexlbot({
-          by: agreedOn.by,
-          address: agreedOn.data.data.address,
-          note: agreedOn.data.data.note,
-          otherSideUsername: otherSideData.userName,
-          t,
-        })}
-      >
-        <Stack gap="$2">
-          <Button
-            text={t('vexlbot.copyAddressInfo')}
-            beforeIcon={copySvg}
-            onPress={() => {
-              Clipboard.setString(
-                `${agreedOn.data.data.note}, ${agreedOn.data.data.address}`
-              )
-              setToastNotification(toastContent)
-            }}
-            size="small"
-            variant="primary"
-            iconFill={getTokens().color.main.val}
-          />
-          {!!isDateAndTimePicked && (
+  if (
+    (message.state === 'sent' || message.state === 'received') &&
+    message.message.messageType === 'TRADE_CHECKLIST_UPDATE' &&
+    message.message.tradeChecklistUpdate?.location
+  ) {
+    const agreed = getLocationAgreedBy(meetingLocationData)
+
+    const agreedByMe =
+      agreed.by === 'me' &&
+      message.message.tradeChecklistUpdate.location.timestamp ===
+        agreed.timestamp
+
+    // as we are keeping message history for checklist we need to set the last confirmation message as the agreed one
+    // as after other side confirms the location, this message is added to messages list as new one
+    // that's why message.message.tradeChecklistUpdate.location.timestamp > agreed.timestamp
+    const agreedByThem =
+      agreed.by === 'them' &&
+      agreed.timestamp &&
+      message.message.tradeChecklistUpdate.location.timestamp > agreed.timestamp
+
+    if (agreedByMe || agreedByThem) {
+      return (
+        <VexlbotBubble
+          status="accepted"
+          text={getTextForVexlbot({
+            agreed: true,
+            by: agreed.by,
+            address: message.message.tradeChecklistUpdate.location.data.address,
+            note: message.message.tradeChecklistUpdate.location.data.note,
+            otherSideUsername: otherSideData.userName,
+            t,
+          })}
+        >
+          <Stack gap="$2">
             <Button
+              text={t('vexlbot.copyAddressInfo')}
+              beforeIcon={copySvg}
               onPress={() => {
-                void addEventToCalendar()()
+                Clipboard.setString(
+                  `${message.message.tradeChecklistUpdate?.location?.data.note}, ${message.message.tradeChecklistUpdate?.location?.data.address}`
+                )
+                setToastNotification(toastContent)
               }}
-              beforeIcon={termsIconSvg}
               size="small"
               variant="primary"
-              text={
-                calendarEventId
-                  ? t('vexlbot.updateCalendarEventLocation')
-                  : t('vexlbot.addEventToCalendar')
-              }
+              iconFill={getTokens().color.main.val}
             />
-          )}
-        </Stack>
-      </VexlbotBubble>
-    )
-  }
+            {!!isDateAndTimePicked && (
+              <Button
+                onPress={() => {
+                  void addEventToCalendar()()
+                }}
+                beforeIcon={termsIconSvg}
+                size="small"
+                variant="primary"
+                text={
+                  calendarEventId
+                    ? t('vexlbot.updateCalendarEventLocation')
+                    : t('vexlbot.addEventToCalendar')
+                }
+              />
+            )}
+          </Stack>
+        </VexlbotBubble>
+      )
+    }
 
-  const pendingSuggestion =
-    MeetingLocation.getPendingSuggestion(meetingLocationData)
-  if (pendingSuggestion) {
+    const pendingSuggestion =
+      MeetingLocation.getPendingSuggestion(meetingLocationData)
+
+    const isOutdated =
+      !pendingSuggestion ||
+      message.message.tradeChecklistUpdate.location?.timestamp <
+        (pendingSuggestion?.data.timestamp ?? UnixMilliseconds0)
+
     return (
       <VexlbotBubble
-        status="pending"
+        status={isOutdated ? 'outdated' : 'pending'}
         text={getTextForVexlbot({
-          by: pendingSuggestion.by,
-          address: pendingSuggestion.data.data.address,
-          note: pendingSuggestion.data.data.note,
+          agreed: false,
+          by: message.state === 'sent' ? 'me' : 'them',
+          address: message.message.tradeChecklistUpdate.location.data.address,
+          note: message.message.tradeChecklistUpdate.location.data.note,
           otherSideUsername: otherSideData.userName,
           t,
         })}
       >
-        <Stack gap="$2">
-          <Button
-            text={t('vexlbot.copyAddressInfo')}
-            beforeIcon={copySvg}
-            onPress={() => {
-              Clipboard.setString(
-                `${pendingSuggestion.data.data.note}, ${pendingSuggestion.data.data.address}`
-              )
-              setToastNotification(toastContent)
-            }}
-            size="small"
-            variant="primary"
-            iconFill={getTokens().color.main.val}
-          />
-          {pendingSuggestion.by === 'them' && (
+        {!isOutdated && (
+          <Stack gap="$2">
             <Button
+              text={t('vexlbot.copyAddressInfo')}
+              beforeIcon={copySvg}
               onPress={() => {
-                const chat = store.get(chatAtom)
-                navigation.navigate('TradeChecklistFlow', {
-                  chatId: chat.id,
-                  inboxKey: chat.inbox.privateKey.publicKeyPemBase64,
-                  screen: 'LocationMapPreview',
-                  params: {
-                    selectedLocation: pendingSuggestion.data.data,
-                  },
-                })
+                Clipboard.setString(
+                  `${message.message.tradeChecklistUpdate?.location?.data.note}, ${message.message.tradeChecklistUpdate?.location?.data.address}`
+                )
+                setToastNotification(toastContent)
               }}
-              variant="secondary"
               size="small"
-              text={t('common.respond')}
+              variant="primary"
+              iconFill={getTokens().color.main.val}
             />
-          )}
-        </Stack>
+            {message.state === 'received' && (
+              <Button
+                onPress={() => {
+                  const chat = store.get(chatAtom)
+                  const location =
+                    message.message.tradeChecklistUpdate?.location?.data
+
+                  if (location) {
+                    navigation.navigate('TradeChecklistFlow', {
+                      chatId: chat.id,
+                      inboxKey: chat.inbox.privateKey.publicKeyPemBase64,
+                      screen: 'LocationMapPreview',
+                      params: {
+                        selectedLocation: location,
+                      },
+                    })
+                  }
+                }}
+                variant="secondary"
+                size="small"
+                text={t('common.respond')}
+              />
+            )}
+          </Stack>
+        )}
       </VexlbotBubble>
     )
   }

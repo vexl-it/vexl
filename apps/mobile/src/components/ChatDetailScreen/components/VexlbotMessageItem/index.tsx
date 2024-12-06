@@ -5,7 +5,6 @@ import {Stack, Text} from 'tamagui'
 import {chatMolecule} from '../../atoms'
 import TradeChecklistAmountView from './components/TradeChecklistAmountView'
 import TradeChecklistDateAndTimeView from './components/TradeChecklistDateAndTimeView'
-import TradeChecklistMeetingLocationView from './components/TradeChecklistMeetingLocationView'
 import TradeChecklistNetworkView from './components/TradeChecklistNetworkView'
 import TradeChecklistReminder from './components/TradeChecklistReminder'
 import {type VexlBotMessageData} from './domain'
@@ -30,7 +29,7 @@ export default function VexlbotMessageItem({
   }
 
   if (data.type === 'meetingLocationPreview') {
-    return <TradeChecklistMeetingLocationView />
+    return null
   }
 
   if (data.type === 'amountPreview') {

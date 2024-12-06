@@ -17,6 +17,7 @@ import IdentityRevealMessageItem from './IdentityRevealMessageItem'
 import MessageIncompatibleItem from './MessageIncompatibleItem'
 import TextMessage from './TextMessage'
 import VexlBotMessageItem from './VexlbotMessageItem'
+import TradeChecklistMeetingLocationView from './VexlbotMessageItem/components/TradeChecklistMeetingLocationView'
 import VexlbotNextActionSuggestion from './VexlbotMessageItem/components/VexlbotNextActionSuggestion'
 import {type VexlBotMessageData} from './VexlbotMessageItem/domain'
 
@@ -192,6 +193,9 @@ function MessageItem({
     }
 
     if (item.message.message.messageType === 'TRADE_CHECKLIST_UPDATE') {
+      if (item.message.message.tradeChecklistUpdate?.location) {
+        return <TradeChecklistMeetingLocationView message={item.message} />
+      }
       return null
     }
 

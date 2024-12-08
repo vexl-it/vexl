@@ -4,7 +4,7 @@ import {
 } from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import * as O from 'fp-ts/Option'
 import {getDefaultStore} from 'jotai'
-import {regionCodeAtom} from '../state/session'
+import {regionCodeAtom} from '../state/session/userDataAtoms'
 
 export default function toE164PhoneNumberWithDefaultCountryCode(
   number: string,

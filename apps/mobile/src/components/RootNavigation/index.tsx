@@ -12,7 +12,7 @@ import {useHandleReceivedNotifications} from '../../state/useHandleReceivedNotif
 import useHandleRefreshContactServiceAndOffers from '../../state/useHandleRefreshContactServiceAndOffers'
 import {useSetAppLanguageFromStore} from '../../state/useSetAppLanguageFromStore'
 import {useSetRelativeDateFormatting} from '../../state/useSetRelativeDateFormatting'
-import {useHandleDeepLink} from '../../utils/deepLinks'
+import {useHandleDeepLink, useHandleDeepLinkV2} from '../../utils/deepLinks'
 import {useHideInnactivityReminderNotificationsOnResume} from '../../utils/notifications/chatNotifications'
 import {useRefreshNotificationTokenOnResumeAssumeLoggedIn} from '../../utils/notifications/useRefreshNotificationTokenOnResumeAssumeLoggedIn'
 import {showTextDebugButtonAtom} from '../../utils/preferences'
@@ -27,6 +27,9 @@ import EditNameScreen from '../EditNameScreen'
 import FaqsScreen from '../FaqScreen'
 import FilterOffersScreen from '../FilterOffersScreen'
 import InsideScreen from '../InsideRouter'
+import GoldenAvatarAnimation, {
+  showGoldenAvatarAnimationAtom,
+} from '../InsideRouter/components/GoldenAvatarAnimation'
 import LoginFlow from '../LoginFlow'
 import NotificationSettingsScreen from '../NotificationSettingsScreen'
 import OfferDetailScreen from '../OfferDetailScreen'
@@ -50,6 +53,7 @@ function LoggedInHookGroup(): null {
   useHandleRefreshContactServiceAndOffers()
   useSyncConnections()
   useHandleDeepLink()
+  useHandleDeepLinkV2()
   useCheckAndReportCurrrentVersionToChatsActionAtom()
 
   useHideInnactivityReminderNotificationsOnResume()
@@ -66,6 +70,7 @@ const LoggedInHookGroupMemoized = memo(LoggedInHookGroup)
 function RootNavigation(): JSX.Element {
   const isLoggedIn = useIsUserLoggedIn()
   const showTextDebugButton = useAtomValue(showTextDebugButtonAtom)
+  const showGoldenAvatarAnimation = useAtomValue(showGoldenAvatarAnimationAtom)
 
   return (
     <>
@@ -129,6 +134,7 @@ function RootNavigation(): JSX.Element {
       </Stack.Navigator>
       {!!showTextDebugButton && <DevTranslationFloatingButton />}
       {!!isLoggedIn && <LoggedInHookGroupMemoized />}
+      {!!isLoggedIn && !!showGoldenAvatarAnimation && <GoldenAvatarAnimation />}
     </>
   )
 }

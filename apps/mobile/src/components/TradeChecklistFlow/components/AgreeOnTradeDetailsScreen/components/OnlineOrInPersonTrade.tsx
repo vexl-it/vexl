@@ -4,8 +4,10 @@ import {Stack, Text} from 'tamagui'
 import * as fromChatAtoms from '../../../../../state/tradeChecklist/atoms/fromChatAtoms'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import openUrl from '../../../../../utils/openUrl'
+import {goldenAvatarTypeAtom} from '../../../../../utils/preferences'
 import Image from '../../../../Image'
 import Info from '../../../../Info'
+import anonymousAvatarHappyGoldenGlassesNoBackgroundSvg from '../../../../images/anonymousAvatarHappyGoldenGlassesNoBackgroundSvg'
 import anonymousAvatarHappyNoBackgroundSvg from '../../../../images/anonymousAvatarHappyNoBackgroundSvg'
 import AnonymizationNotice from '../../AnonymizationNotice'
 import CalculateAmountCell from './CalculateAmountCell'
@@ -19,16 +21,17 @@ import TradeRule from './TradeRule'
 function OnlineOrInPersonTrade(): JSX.Element {
   const {t} = useTranslation()
   const offerForTradeChecklist = useAtomValue(fromChatAtoms.originOfferAtom)
+  const goldenAvatarType = useAtomValue(goldenAvatarTypeAtom)
+  const anonymousAvatar =
+    goldenAvatarType === 'BACKGROUND_AND_GLASSES'
+      ? anonymousAvatarHappyGoldenGlassesNoBackgroundSvg
+      : anonymousAvatarHappyNoBackgroundSvg
 
   return (
     <>
       <Stack gap="$3">
         <Stack als="center">
-          <Image
-            height={90}
-            width={90}
-            source={anonymousAvatarHappyNoBackgroundSvg}
-          />
+          <Image height={90} width={90} source={anonymousAvatar} />
         </Stack>
         <Text textAlign="center" ff="$heading" fos={18}>
           {t('tradeChecklist.agreeOnTradeDetails')}

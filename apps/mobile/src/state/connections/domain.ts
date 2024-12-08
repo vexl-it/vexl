@@ -26,7 +26,7 @@ export const ConnectionsStateE = Schema.Struct({
   secondLevel: Schema.Array(PublicKeyPemBase64E),
   commonFriends: FetchCommonConnectionsResponseE,
 })
-export type ConnectionsState = Schema.Schema.Type<typeof ConnectionsStateE>
+export type ConnectionsState = typeof ConnectionsStateE.Type
 
 export const OfferToConnectionsItem = z
   .object({

@@ -2,6 +2,13 @@ import dynamicLinks, {
   type FirebaseDynamicLinksTypes,
 } from '@react-native-firebase/dynamic-links'
 import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
+import {
+  type SemverString,
+  SemverStringE,
+  compare as compareSemver,
+} from '@vexl-next/domain/src/utility/SmeverString.brand'
+import {Effect, type ParseResult, Schema} from 'effect'
+import * as Linking from 'expo-linking'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {atom, useStore} from 'jotai'
@@ -14,10 +21,16 @@ import {hashPhoneNumber} from '../../state/contacts/utils'
 import {atomWithParsedMmkvStorage} from '../atomUtils/atomWithParsedMmkvStorage'
 import {parseJson, safeParse} from '../fpUtils'
 import {translationAtom, useTranslation} from '../localization/I18nProvider'
+import {goldenAvatarTypeAtom} from '../preferences'
 import reportError from '../reportError'
 import showErrorAlert from '../showErrorAlert'
-import {LINK_TYPE_ENCRYPTED_URL, LINK_TYPE_IMPORT_CONTACT} from './domain'
+import {
+  LINK_TYPE_ENCRYPTED_URL,
+  LINK_TYPE_GOLDEN_GLASSES,
+  LINK_TYPE_IMPORT_CONTACT,
+} from './domain'
 import {processEncryptedUrlActionAtom} from './encryptedUrl'
+import {handleGoldenGlassesDeepLinkActionAtom} from './goldenGlassesUrl'
 
 type DynamicLink = FirebaseDynamicLinksTypes.DynamicLink
 
@@ -142,4 +155,75 @@ export function useHandleDeepLink(): void {
       }
     })
   }, [onLinkReceived, store, t])
+}
+
+const GOLDEN_GLASSES_SUPPORTED_APP_VERSION =
+  Schema.decodeSync(SemverStringE)('1.23.5')
+
+function isLinkVersionSupported(
+  linkVersion: string | string[] | undefined,
+  targetVersion: SemverString
+): Effect.Effect<boolean, ParseResult.ParseError, never> {
+  return Effect.gen(function* (_) {
+    const linkSemverVersion = yield* _(
+      Schema.decodeUnknown(SemverStringE)(linkVersion)
+    )
+
+    return compareSemver(linkSemverVersion)('>=', targetVersion)
+  })
+}
+
+export function useHandleDeepLinkV2(): void {
+  const store = useStore()
+  const url = Linking.useURL()
+  const goldenAvatarType = store.get(goldenAvatarTypeAtom)
+  const lastInitialLink = store.get(lastInitialLinkStorageAtom)
+
+  const onLinkReceived = useCallback(() => {
+    if (url) {
+      if (lastInitialLink.lastLinkImported === url) {
+        console.info('Ignoring initial link as it was opened before')
+        return
+      }
+
+      const {hostname, queryParams} = Linking.parse(url)
+
+      switch (hostname) {
+        case 'app.vexl.it':
+          pipe(
+            Effect.gen(function* (_) {
+              const isVersionSupported = yield* _(
+                isLinkVersionSupported(
+                  queryParams?.version,
+                  GOLDEN_GLASSES_SUPPORTED_APP_VERSION
+                )
+              )
+
+              if (
+                isVersionSupported &&
+                queryParams?.link === LINK_TYPE_GOLDEN_GLASSES &&
+                !goldenAvatarType
+              ) {
+                return yield* _(
+                  store.set(handleGoldenGlassesDeepLinkActionAtom),
+                  Effect.tap(() => {
+                    store.set(lastInitialLinkStorageAtom, {
+                      lastLinkImported: url,
+                    })
+                  })
+                )
+              }
+            }),
+            Effect.runFork
+          )
+
+          break
+        default:
+          if (!__DEV__)
+            reportError('warn', new Error('Unknown deep link type'), {url})
+      }
+    }
+  }, [goldenAvatarType, lastInitialLink.lastLinkImported, store, url])
+
+  useEffect(onLinkReceived, [onLinkReceived])
 }

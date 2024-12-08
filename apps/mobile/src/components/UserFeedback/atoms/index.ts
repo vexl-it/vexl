@@ -13,7 +13,7 @@ import {Effect, Schema} from 'effect'
 import {atom, type SetStateAction, type WritableAtom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {apiAtom} from '../../../api'
-import {regionCodeAtom} from '../../../state/session'
+import {regionCodeAtom} from '../../../state/session/userDataAtoms'
 import getValueFromSetStateActionOfAtom from '../../../utils/atomUtils/getValueFromSetStateActionOfAtom'
 import reportError from '../../../utils/reportError'
 

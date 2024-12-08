@@ -48,7 +48,7 @@ import {normalizedContactsAtom} from '../../../state/contacts/atom/contactsStore
 import {createBtcPriceForCurrencyAtom} from '../../../state/currentBtcPriceAtoms'
 import {createFeedbackForChatAtom} from '../../../state/feedback/atoms'
 import {offerForChatOriginAtom} from '../../../state/marketplace/atoms/offersState'
-import {invalidUsernameUIFeedbackAtom} from '../../../state/session'
+import {invalidUsernameUIFeedbackAtom} from '../../../state/session/userDataAtoms'
 import * as amount from '../../../state/tradeChecklist/utils/amount'
 import {getAmountData} from '../../../state/tradeChecklist/utils/amount'
 import * as dateAndTime from '../../../state/tradeChecklist/utils/dateAndTime'

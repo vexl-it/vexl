@@ -6,7 +6,7 @@ import {type ImportContactFromLinkPayload} from '../../../../state/contacts/doma
 import {
   userDataRealOrAnonymizedAtom,
   userPhoneNumberAtom,
-} from '../../../../state/session'
+} from '../../../../state/session/userDataAtoms'
 import {screenshotsDisabledAtom} from '../../../../state/showYouDidNotAllowScreenshotsActionAtom'
 import getValueFromSetStateActionOfAtom from '../../../../utils/atomUtils/getValueFromSetStateActionOfAtom'
 import {version} from '../../../../utils/environment'

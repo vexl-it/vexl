@@ -62,6 +62,7 @@ const OfferPublicPartToEncrypt = z
     listingType: z.string().optional(),
     fcmCypher: FcmCypher.optional(),
     authorClientVersion: z.string().optional(),
+    goldenAvatarType: z.string().optional(),
   })
   .readonly()
 

@@ -72,7 +72,7 @@ function FilterOffersScreen(): JSX.Element {
         withBottomBorder
         withBackButton
       >
-        <XStack ai="center" gap="$2">
+        <XStack ai="center" space="$2">
           <Button
             onPress={resetOfferForm}
             size="small"

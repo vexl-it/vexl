@@ -85,7 +85,7 @@ function Expiration({
             setOfferExpirationModalVisible(true)
           }}
         >
-          <XStack ai="center" gap="$2">
+          <XStack ai="center" space="$2">
             <SvgImage
               source={termsIconSvg}
               stroke={getTokens().color.main.val}

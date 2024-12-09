@@ -1,10 +1,10 @@
 import {NodeContext} from '@effect/platform-node'
 import {OfferApiSpecification} from '@vexl-next/rest-api/src/services/offer/specification'
 import {healthServerLayer} from '@vexl-next/server-utils/src/HealthServer'
-import {RedisService} from '@vexl-next/server-utils/src/RedisService'
-import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
 import {setupLoggingMiddlewares} from '@vexl-next/server-utils/src/loggingMiddlewares'
 import {MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
+import {RedisService} from '@vexl-next/server-utils/src/RedisService'
+import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
 import {Effect, Layer} from 'effect'
 import {RouterBuilder} from 'effect-http'
 import {NodeServer} from 'effect-http-node'
@@ -14,8 +14,8 @@ import {
   portConfig,
   redisUrl,
 } from './configs'
-import {OfferDbService} from './db/OfferDbService'
 import DbLayer from './db/layer'
+import {OfferDbService} from './db/OfferDbService'
 import {InternalServerLive} from './internalServer'
 import {reportMetricsLayer} from './metrics'
 import {createNewOffer} from './routes/createNewOffer'

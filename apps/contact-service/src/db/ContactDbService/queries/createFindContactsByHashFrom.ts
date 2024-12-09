@@ -1,7 +1,7 @@
 import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
-import {HashedPhoneNumberE} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
+import {HashedPhoneNumberE} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {Effect, flow} from 'effect'
 import {ContactRecord} from '../domain'
 

@@ -22,7 +22,7 @@ import {
   TotalUsersCountMessage,
   UserWithConnections,
 } from '../../common/ServerMessage'
-import {secureHash, type HasingSalt} from '../utils/hashPubKey'
+import {type HasingSalt, secureHash} from '../utils/hashPubKey'
 import encodeAndSendMessage from './encodeAndSendMessage'
 import {IncommingConnectionsStreamContext} from './serverSocket'
 

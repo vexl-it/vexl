@@ -62,7 +62,7 @@ export default function LocationMapPreview({
       <MapSingleLocationDisplay
         mapPadding={{top: 40, bottom: 40, left: 0, right: 0}}
         topChildren={
-          <YStack marginVertical="$2" marginHorizontal="$4" gap="$4">
+          <YStack marginVertical="$2" marginHorizontal="$4" space="$4">
             <IconButton
               variant="primary"
               icon={backButtonSvg}

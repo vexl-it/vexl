@@ -114,7 +114,7 @@ function ChatTextInput(): JSX.Element | null {
   }, [clearExtraToSend])
 
   return (
-    <XStack gap="$2" alignItems="center">
+    <XStack space="$2" alignItems="center">
       {!!preferences.allowSendingImages && <SendImageButton />}
       <Stack f={1}>
         {!!replyToMessage && (
@@ -150,7 +150,7 @@ function ChatTextInput(): JSX.Element | null {
             margin="$3"
             padding="$3"
             backgroundColor="$yellowAccent2"
-            gap="$2"
+            space="$2"
             alignItems="flex-start"
           >
             <XStack alignSelf="stretch" justifyContent="space-between">
@@ -165,7 +165,8 @@ function ChatTextInput(): JSX.Element | null {
         )}
         <Stack pt="$1">
           <TextInput
-            tag="textarea"
+            multiline
+            textAlignVertical="center"
             value={value}
             onChangeText={setValue}
             style={styles.textInput}

@@ -21,9 +21,9 @@ import {
   Config,
   Context,
   Effect,
+  flow,
   Layer,
   Schema,
-  flow,
   type ConfigError,
   type ParseResult,
 } from 'effect'

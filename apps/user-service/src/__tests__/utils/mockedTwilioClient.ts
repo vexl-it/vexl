@@ -1,9 +1,9 @@
 import {jest} from '@jest/globals'
 import {Effect, Layer, Schema} from 'effect'
 import {
+  type TwilioOperations,
   TwilioVerificationClient,
   TwilioVerificationSid,
-  type TwilioOperations,
 } from '../../utils/twilio'
 
 export const createVerificationMock = jest.fn(

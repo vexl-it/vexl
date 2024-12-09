@@ -25,7 +25,7 @@ function FeedbackBanner({
   if (chatFeedbackFinished) return null
 
   return (
-    <Stack pos="relative" p="$4" br="$4" bc="$blackAccent1" mb="$8" gap="$4">
+    <Stack pos="relative" p="$4" br="$4" bc="$blackAccent1" mb="$8" space="$4">
       <XStack ai="flex-start" jc="space-between">
         <BannerBackButton />
         <FeedbackAvatar />

@@ -114,7 +114,7 @@ function DebugScreen(): JSX.Element {
     <Screen>
       <WhiteContainer>
         <ScrollView>
-          <YStack gap="$2">
+          <YStack space="$2">
             <Text color="$black" fos={20} ff="$heading">
               Debug screen
             </Text>

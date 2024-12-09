@@ -41,7 +41,7 @@ function PremiumOrDiscountContent({
   }
 
   return (
-    <YStack gap="$2">
+    <YStack space="$2">
       <XStack f={1} ai="center" jc="space-between">
         <Text maxWidth="50%" mr="$4" fos={18} ff="$body600" col="$white">
           {iAmTheBuyer

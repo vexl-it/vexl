@@ -16,8 +16,8 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {Stack, Text, getTokens} from 'tamagui'
 import {apiAtom} from '../../../api'
 import {
-  loadableEffectEither,
   type UnknownLoadingError,
+  loadableEffectEither,
 } from '../../../utils/atomUtils/loadableEither'
 import {
   getCurrentLocale,

@@ -82,7 +82,7 @@ function ChatListItem({dataAtom}: {dataAtom: Atom<ChatListData>}): JSX.Element {
             />
           )}
         >
-          <XStack gap="$2" ai="center" bc="$black">
+          <XStack space="$2" ai="center" bc="$black">
             <Stack h={48} w={48}>
               <UserAvatar
                 grayScale={isAvatarGray}

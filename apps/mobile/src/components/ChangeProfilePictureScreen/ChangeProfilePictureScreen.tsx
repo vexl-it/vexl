@@ -35,7 +35,7 @@ function ChangeProfilePictureScreen(): JSX.Element {
       <Stack f={1} ai="center" jc="center">
         <SelectProfilePicture selectedImageUriAtom={selectedImageUriAtom} />
       </Stack>
-      <XStack gap="$2">
+      <XStack space="$2">
         <Button
           fullSize
           onPress={() => {

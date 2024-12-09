@@ -37,7 +37,7 @@ function OfferInfoPreview({
   // )
 
   return (
-    <Stack gap="$2">
+    <Stack space="$2">
       {/* {(offer.privatePart.commonFriends.includes(BTC_PRAGUE_FRIEND) ||
         offer.privatePart.commonFriends.includes(BTC_PRAGUE_FRIEND_STAGE)) && (
         <Stack f={1} ai="center" jc="space-between">
@@ -59,7 +59,7 @@ function OfferInfoPreview({
             </Text>
           </Stack>
         )}
-        <XStack gap="$1">
+        <XStack space="$1">
           {isOfferExpired(offer.publicPart.expirationDate) && (
             <SvgImage
               stroke={getTokens().color.$greyOnBlack.val}
@@ -75,7 +75,7 @@ function OfferInfoPreview({
         </XStack>
       </XStack>
       {!!isMine && !offer.publicPart.listingType && (
-        <XStack ai="center" gap="$2" fs={1}>
+        <XStack ai="center" space="$2" fs={1}>
           <SvgImage source={infoSvg} fill={getTokens().color.red.val} />
           <Text fos={12} col="$red" ff="$body600" numberOfLines={3}>
             {t('offerForm.listingTypeNotSet')}
@@ -105,7 +105,7 @@ function OfferInfoPreview({
           />
         </Stack>
       )}
-      <XStack gap="$1">
+      <XStack space="$1">
         {!offer.publicPart.listingType ||
         offer.publicPart.listingType === 'BITCOIN' ? (
           <BtcOfferColumns offer={offer} />

@@ -1,7 +1,7 @@
 import {MessageTypeE} from '@vexl-next/domain/src/general/messaging'
 import {Schema} from 'effect'
-import {InboxRecordId} from '../InboxDbService/domain'
 import {PublicKeyEncrypted} from '../domain'
+import {InboxRecordId} from '../InboxDbService/domain'
 
 export const MessageRecordId = Schema.BigInt.pipe(
   Schema.brand('MessageRecordId')

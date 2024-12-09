@@ -127,14 +127,16 @@ export const handleCommonAndExpectedErrorsEffect = <R, B, R2, C = never>(
   C | R2
 > =>
   handleErrorsEffect(effect).pipe(
-    Effect.catchTag('ClientError', (error) => {
-      return Effect.gen(function* (_) {
-        const decodedError = yield* _(
-          Schema.decodeUnknown(expectedErrors)(error.error)
-        )
-        return yield* _(Effect.fail(decodedError))
-      })
-    }),
+    Effect.catchIf(
+      (error) => error._tag === 'ClientError' && isServerSideError(error),
+      (error) =>
+        Effect.gen(function* (_) {
+          const decodedError = yield* _(
+            Schema.decodeUnknown(expectedErrors)(error.error)
+          )
+          return yield* _(Effect.fail(decodedError))
+        })
+    ),
     Effect.catchTag('ParseError', () =>
       Effect.fail(
         new UnexpectedApiResponseError({

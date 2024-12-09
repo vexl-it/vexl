@@ -1,7 +1,7 @@
 import {BtcExchangeRateApiSpecification} from '@vexl-next/rest-api/src/services/btcExchangeRate/specification'
 import {healthServerLayer} from '@vexl-next/server-utils/src/HealthServer'
-import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
 import {setupLoggingMiddlewares} from '@vexl-next/server-utils/src/loggingMiddlewares'
+import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
 import {Effect, Layer} from 'effect'
 import {RouterBuilder} from 'effect-http'
 import {NodeServer} from 'effect-http-node'

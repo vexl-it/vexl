@@ -3,8 +3,8 @@ import {
   type PublicKeyPemBase64,
 } from '@vexl-next/cryptography/src/KeyHolder'
 import {
-  ecdsaSignE,
   type CryptoError,
+  ecdsaSignE,
 } from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {Effect} from 'effect'
 import {type Client} from 'effect-http'

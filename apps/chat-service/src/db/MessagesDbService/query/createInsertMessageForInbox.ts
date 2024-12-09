@@ -1,13 +1,13 @@
 import {SqlClient, SqlSchema} from '@effect/sql'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {MessageTypeE} from '@vexl-next/domain/src/general/messaging'
-import {Effect, Schema, flow} from 'effect'
+import {Effect, flow, Schema} from 'effect'
 import {
   messageExpirationLowerLimitDaysConfig,
   messageExpirationUpperLimitDaysConfig,
 } from '../../../configs'
-import {InboxRecordId} from '../../InboxDbService/domain'
 import {PublicKeyEncrypted} from '../../domain'
+import {InboxRecordId} from '../../InboxDbService/domain'
 import {MessageRecord} from '../domain'
 
 export const InsertMessageForInboxParams = Schema.Struct({

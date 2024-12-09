@@ -40,7 +40,7 @@ function BtcPriceHeader(): JSX.Element {
               })
             }}
           >
-            <XStack ai="center" gap="$1" br="$2" py="$1" px="$1">
+            <XStack ai="center" space="$1" br="$2" py="$1" px="$1">
               <Image
                 source={calculatorSvg}
                 stroke={getTokens().color.main.val}

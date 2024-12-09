@@ -57,7 +57,7 @@ function AcceptDeclineButtons({
   }
 
   return (
-    <XStack gap="$4">
+    <XStack space="$4">
       <Button
         onPress={approve(false)}
         fullSize

@@ -1,7 +1,7 @@
 import {parsePhoneNumber} from 'awesome-phonenumber'
 import {Brand, Effect, Schema} from 'effect'
 import {z} from 'zod'
-import {E164PhoneNumberE, type E164PhoneNumber} from './E164PhoneNumber.brand'
+import {type E164PhoneNumber, E164PhoneNumberE} from './E164PhoneNumber.brand'
 
 export const CountryPrefixE = Schema.Number.pipe(Schema.brand('CountryPrefix'))
 export const CountryPrefix = z

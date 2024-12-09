@@ -28,10 +28,10 @@ export default function BigIconMessage({
 }: Props): JSX.Element | null {
   return (
     <Stack mb={isLatest ? '$10' : '$4'}>
-      <YStack my="$5" gap="$4" alignItems="center">
+      <YStack my="$5" space="$4" alignItems="center">
         {!!icon && icon}
         <YStack ai="center">
-          <XStack alignItems="center" gap="$2">
+          <XStack alignItems="center" space="$2">
             <Stack w={40} height={1} bc="$grey" />
             <Text
               textAlign="center"
@@ -45,7 +45,7 @@ export default function BigIconMessage({
             <Stack w={40} height={1} bc="$grey" />
           </XStack>
           {!!biggerText && (
-            <XStack ai="center" jc="center" gap="$1">
+            <XStack ai="center" jc="center" space="$1">
               <Text
                 mx="$4"
                 textAlign="center"

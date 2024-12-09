@@ -150,7 +150,7 @@ function Button({type}: {type: ButtonType}): JSX.Element | null {
 
   if (type === 'tradeChecklist')
     return (
-      <XStack gap="$1">
+      <XStack space="$1">
         {identityRevealStatus === 'notStarted' && (
           <IconButton
             icon={identityIconSvg}

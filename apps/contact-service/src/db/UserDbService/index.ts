@@ -1,6 +1,6 @@
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
-import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {type UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
+import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {type FcmToken} from '@vexl-next/domain/src/utility/FcmToken.brand'
 import {Context, Effect, Layer, type Option} from 'effect'
 import {type UserRecord} from './domain'

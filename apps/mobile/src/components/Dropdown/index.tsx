@@ -95,7 +95,7 @@ export function Dropdown<T>({
       }}
       renderRightIcon={() =>
         !props.disable ? (
-          <XStack ai="center" gap="$2">
+          <XStack ai="center" space="$2">
             {typeof value !== 'string' && value?.value && showClearButton ? (
               <TouchableWithoutFeedback onPress={onClear} hitSlop={5}>
                 <Stack>

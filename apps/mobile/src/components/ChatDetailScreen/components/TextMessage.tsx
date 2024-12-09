@@ -201,7 +201,7 @@ function TextMessage({
         <XStack
           flex={1}
           flexDirection={!isMine ? 'row' : 'row-reverse'}
-          gap="$2"
+          space="$2"
           alignItems="center"
         >
           <TouchableWithoutFeedback style={{flex: 1}} onPress={toggleExtended}>
@@ -233,7 +233,7 @@ function TextMessage({
                     (message.state === 'sent' &&
                       message.message.repliedTo.messageAuthor === 'me')
                       ? t('common.you')
-                      : (otherSideData?.userName ?? 'them')}
+                      : otherSideData?.userName ?? 'them'}
                   </Text>
                   <Text marginTop="$1" color="$main">
                     {message.message.repliedTo.text}

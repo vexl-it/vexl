@@ -1,4 +1,4 @@
-import {Camera, CameraView} from 'expo-camera'
+import {Camera, CameraView} from 'expo-camera/next'
 import * as T from 'fp-ts/Task'
 import {pipe} from 'fp-ts/function'
 import {useSetAtom} from 'jotai'
@@ -111,7 +111,7 @@ function QrScanner(): JSX.Element {
 
   return (
     <Stack>
-      <YStack gap="$3" height={Dimensions.get('screen').height * 0.7}>
+      <YStack space="$3" height={Dimensions.get('screen').height * 0.7}>
         {error ? (
           <Text
             fontSize={20}
@@ -143,7 +143,7 @@ function QrScanner(): JSX.Element {
           </Stack>
         )}
         {!hasPermissions && (
-          <YStack gap="$3" f={1} alignItems="center" justifyContent="center">
+          <YStack space="$3" f={1} alignItems="center" justifyContent="center">
             <Text
               fontSize={20}
               fontFamily="$body500"

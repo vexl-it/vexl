@@ -1,12 +1,12 @@
-import {HttpClientRequest} from '@effect/platform'
-import {SqlClient} from '@effect/sql'
-import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
+import { HttpClientRequest } from "@effect/platform";
+import { SqlClient } from "@effect/sql";
+import { CommonHeaders } from "@vexl-next/rest-api/src/commonHeaders";
 import {
   ImportContactsQuotaReachedError,
   InitialImportContactsQuotaReachedError,
-} from '@vexl-next/rest-api/src/services/contact/contracts'
-import {RedisService} from '@vexl-next/server-utils/src/RedisService'
-import {mockedReportContactsImported} from '@vexl-next/server-utils/src/tests/mockedDashboardReportsService'
+} from "@vexl-next/rest-api/src/services/contact/contracts";
+import { RedisService } from "@vexl-next/server-utils/src/RedisService";
+import { mockedReportContactsImported } from "@vexl-next/server-utils/src/tests/mockedDashboardReportsService";
 import {
   Array,
   Effect,
@@ -16,54 +16,53 @@ import {
   Order,
   Schema,
   pipe,
-} from 'effect'
+} from "effect";
 import {
   ImportContactsQuotaRecord,
   createQuotaRecordKey,
-} from '../../../routes/contacts/importContactsQuotaService'
-import {NodeTestingApp} from '../../utils/NodeTestingApp'
-import {sendMessageMock} from '../../utils/mockedFirebaseMessagingService'
-import {runPromiseInMockedEnvironment} from '../../utils/runPromiseInMockedEnvironment'
+} from "../../../routes/contacts/importContactsQuotaService";
+import { NodeTestingApp } from "../../utils/NodeTestingApp";
+import { sendMessageMock } from "../../utils/mockedFirebaseMessagingService";
+import { runPromiseInMockedEnvironment } from "../../utils/runPromiseInMockedEnvironment";
 import {
   createAndImportUsersFromNetwork,
   generateKeysAndHasheForNumber,
   type DummyUser,
-} from './utils'
-
-let networkOne: [DummyUser, ...DummyUser[]]
-let networkTwo: [DummyUser, ...DummyUser[]]
+} from "./utils";
+let networkOne: [DummyUser, ...DummyUser[]];
+let networkTwo: [DummyUser, ...DummyUser[]];
 
 beforeEach(async () => {
   await runPromiseInMockedEnvironment(
     Effect.gen(function* (_) {
-      const sql = yield* _(SqlClient.SqlClient)
-      yield* _(sql`DELETE FROM user_contact`)
-      yield* _(sql`DELETE FROM users`)
+      const sql = yield* _(SqlClient.SqlClient);
+      yield* _(sql`DELETE FROM user_contact`);
+      yield* _(sql`DELETE FROM users`);
       networkOne = yield* _(
         Effect.all([
-          generateKeysAndHasheForNumber('+420733333001'),
-          generateKeysAndHasheForNumber('+420733333002'),
-          generateKeysAndHasheForNumber('+420733333003'),
-          generateKeysAndHasheForNumber('+420733333004'),
-          generateKeysAndHasheForNumber('+420733333005'),
+          generateKeysAndHasheForNumber("+420733333001"),
+          generateKeysAndHasheForNumber("+420733333002"),
+          generateKeysAndHasheForNumber("+420733333003"),
+          generateKeysAndHasheForNumber("+420733333004"),
+          generateKeysAndHasheForNumber("+420733333005"),
         ])
-      )
+      );
 
       yield* _(
         Effect.forEach(networkOne, (oneUser) =>
           createAndImportUsersFromNetwork(oneUser, networkOne)
         )
-      )
+      );
 
       networkTwo = yield* _(
         Effect.all([
-          generateKeysAndHasheForNumber('+420733333101'),
-          generateKeysAndHasheForNumber('+420733333102'),
-          generateKeysAndHasheForNumber('+420733333106'),
-          generateKeysAndHasheForNumber('+420733333107'),
-          generateKeysAndHasheForNumber('+420733333108'),
+          generateKeysAndHasheForNumber("+420733333101"),
+          generateKeysAndHasheForNumber("+420733333102"),
+          generateKeysAndHasheForNumber("+420733333106"),
+          generateKeysAndHasheForNumber("+420733333107"),
+          generateKeysAndHasheForNumber("+420733333108"),
         ])
-      )
+      );
 
       yield* _(
         Effect.forEach(networkTwo, (twoUser) =>
@@ -72,23 +71,23 @@ beforeEach(async () => {
             ...networkOne,
           ])
         )
-      )
+      );
     }).pipe(Logger.withMinimumLogLevel(LogLevel.None))
-  )
-})
+  );
+});
 
-describe('Import contacts', () => {
+describe("Import contacts", () => {
   beforeEach(() => {
-    mockedReportContactsImported.mockClear()
-  })
+    mockedReportContactsImported.mockClear();
+  });
 
-  it('Imports contacts to the database and replaces existing contacts', async () => {
+  it("Imports contacts to the database and replaces existing contacts", async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
-        const me = networkOne[0]
-        const myNewContacts = networkOne.slice(1, 3)
+        const me = networkOne[0];
+        const myNewContacts = networkOne.slice(1, 3);
 
-        const sql = yield* _(SqlClient.SqlClient)
+        const sql = yield* _(SqlClient.SqlClient);
         const myOldContactsFromDb = yield* _(sql`
           SELECT
             *
@@ -96,11 +95,11 @@ describe('Import contacts', () => {
             user_contact
           WHERE
             hash_from = ${me.hashedNumber}
-        `)
+        `);
 
-        expect(myOldContactsFromDb).toHaveLength(networkOne.length - 1)
+        expect(myOldContactsFromDb).toHaveLength(networkOne.length - 1);
 
-        const app = yield* _(NodeTestingApp)
+        const app = yield* _(NodeTestingApp);
         yield* _(
           app.importContacts(
             {
@@ -111,7 +110,7 @@ describe('Import contacts', () => {
             },
             HttpClientRequest.setHeaders(me.authHeaders)
           )
-        )
+        );
 
         const myContactsFromDb = yield* _(sql`
           SELECT
@@ -120,22 +119,22 @@ describe('Import contacts', () => {
             user_contact
           WHERE
             hash_from = ${me.hashedNumber}
-        `)
+        `);
 
-        expect(mockedReportContactsImported).toHaveBeenCalledTimes(1)
+        expect(mockedReportContactsImported).toHaveBeenCalledTimes(1);
 
-        expect(myContactsFromDb).toHaveLength(myNewContacts.length)
+        expect(myContactsFromDb).toHaveLength(myNewContacts.length);
       })
-    )
-  })
+    );
+  });
 
-  it('Imports contacts to the database and does not replace the existing contacts when replace is false', async () => {
+  it("Imports contacts to the database and does not replace the existing contacts when replace is false", async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
-        const me = networkOne[0]
-        const myNewContacts = networkTwo.slice(1, 3)
+        const me = networkOne[0];
+        const myNewContacts = networkTwo.slice(1, 3);
 
-        const sql = yield* _(SqlClient.SqlClient)
+        const sql = yield* _(SqlClient.SqlClient);
         const myOldContactsFromDb = yield* _(sql`
           SELECT
             *
@@ -143,11 +142,11 @@ describe('Import contacts', () => {
             user_contact
           WHERE
             hash_from = ${me.hashedNumber}
-        `)
+        `);
 
-        expect(myOldContactsFromDb).toHaveLength(networkOne.length - 1)
+        expect(myOldContactsFromDb).toHaveLength(networkOne.length - 1);
 
-        const app = yield* _(NodeTestingApp)
+        const app = yield* _(NodeTestingApp);
         yield* _(
           app.importContacts(
             {
@@ -158,7 +157,7 @@ describe('Import contacts', () => {
             },
             HttpClientRequest.setHeaders(me.authHeaders)
           )
-        )
+        );
 
         const myContactsFromDb = yield* _(sql`
           SELECT
@@ -167,30 +166,30 @@ describe('Import contacts', () => {
             user_contact
           WHERE
             hash_from = ${me.hashedNumber}
-        `)
+        `);
 
-        expect(mockedReportContactsImported).toHaveBeenCalledTimes(1)
+        expect(mockedReportContactsImported).toHaveBeenCalledTimes(1);
 
         expect(myContactsFromDb).toHaveLength(
           myNewContacts.length + myOldContactsFromDb.length
-        )
+        );
       })
-    )
-  })
+    );
+  });
 
-  it('Filters duplicities and author hash', async () => {
+  it("Filters duplicities and author hash", async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
-        const me = networkOne[0]
+        const me = networkOne[0];
         const myNewContacts = [
           ...networkOne.slice(1, 3),
           ...networkOne.slice(1, 3),
           me,
-        ]
+        ];
 
-        const sql = yield* _(SqlClient.SqlClient)
+        const sql = yield* _(SqlClient.SqlClient);
 
-        const app = yield* _(NodeTestingApp)
+        const app = yield* _(NodeTestingApp);
         yield* _(
           app.importContacts(
             {
@@ -201,7 +200,7 @@ describe('Import contacts', () => {
             },
             HttpClientRequest.setHeaders(me.authHeaders)
           )
-        )
+        );
 
         const myContactsFromDb = yield* _(sql`
           SELECT
@@ -210,72 +209,72 @@ describe('Import contacts', () => {
             user_contact
           WHERE
             hash_from = ${me.hashedNumber}
-        `)
+        `);
 
-        expect(myContactsFromDb).toHaveLength(2)
+        expect(myContactsFromDb).toHaveLength(2);
       })
-    )
-  })
+    );
+  });
 
-  it('Does not return error when when contact array is empty just empties the imports', async () => {
+  it("Does not return error when when contact array is empty just empties the imports", async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
-        const me = networkOne[0]
+        const me = networkOne[0];
 
-        const app = yield* _(NodeTestingApp)
+        const app = yield* _(NodeTestingApp);
         // first reset user
         yield* _(
           app.importContacts(
             {
-              body: {contacts: [], replace: true},
+              body: { contacts: [], replace: true },
             },
             HttpClientRequest.setHeaders(me.authHeaders)
           )
-        )
+        );
       })
-    )
-  })
+    );
+  });
 
-  it('Initial import should accept number of contacts lower than quota', async () => {
+  it("Initial import should accept number of contacts lower than quota", async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
-        const redis = yield* _(RedisService)
-        const me = yield* _(generateKeysAndHasheForNumber('+420733222222'))
-        const quotaRecordKey = createQuotaRecordKey(me.hashedNumber)
+        const redis = yield* _(RedisService);
+        const me = yield* _(generateKeysAndHasheForNumber("+420733222222"));
+        const quotaRecordKey = createQuotaRecordKey(me.hashedNumber);
 
-        yield* _(redis.set(ImportContactsQuotaRecord)(quotaRecordKey, 0))
+        yield* _(redis.set(ImportContactsQuotaRecord)(quotaRecordKey, 0));
 
         const contactsToImport = yield* _(
           Effect.all([
             // 0
-            generateKeysAndHasheForNumber('+420733333006'),
-            generateKeysAndHasheForNumber('+420733333007'),
-            generateKeysAndHasheForNumber('+420733333008'),
-            generateKeysAndHasheForNumber('+420733333009'),
-            generateKeysAndHasheForNumber('+420733333010'),
-            generateKeysAndHasheForNumber('+420733333011'),
-            generateKeysAndHasheForNumber('+420733333012'),
-            generateKeysAndHasheForNumber('+420733333013'),
-            generateKeysAndHasheForNumber('+420733333014'),
-            generateKeysAndHasheForNumber('+420733333015'),
+            generateKeysAndHasheForNumber("+420733333006"),
+            generateKeysAndHasheForNumber("+420733333007"),
+            generateKeysAndHasheForNumber("+420733333008"),
+            generateKeysAndHasheForNumber("+420733333009"),
+            generateKeysAndHasheForNumber("+420733333010"),
+            generateKeysAndHasheForNumber("+420733333011"),
+            generateKeysAndHasheForNumber("+420733333012"),
+            generateKeysAndHasheForNumber("+420733333013"),
+            generateKeysAndHasheForNumber("+420733333014"),
+            generateKeysAndHasheForNumber("+420733333015"),
             // 10
-            generateKeysAndHasheForNumber('+420733333016'),
-            generateKeysAndHasheForNumber('+420733333017'),
-            generateKeysAndHasheForNumber('+420733333018'),
-            generateKeysAndHasheForNumber('+420733333019'),
-            generateKeysAndHasheForNumber('+420733333020'),
-            generateKeysAndHasheForNumber('+420733333021'),
-            generateKeysAndHasheForNumber('+420733333022'),
-            generateKeysAndHasheForNumber('+420733333023'),
-            generateKeysAndHasheForNumber('+420733333024'),
-            generateKeysAndHasheForNumber('+420733333025'),
+            generateKeysAndHasheForNumber("+420733333016"),
+            generateKeysAndHasheForNumber("+420733333017"),
+            generateKeysAndHasheForNumber("+420733333018"),
+            generateKeysAndHasheForNumber("+420733333019"),
+            generateKeysAndHasheForNumber("+420733333020"),
+            generateKeysAndHasheForNumber("+420733333021"),
+            generateKeysAndHasheForNumber("+420733333022"),
+            generateKeysAndHasheForNumber("+420733333023"),
+            generateKeysAndHasheForNumber("+420733333024"),
+            generateKeysAndHasheForNumber("+420733333025"),
           ])
-        )
-        const app = yield* _(NodeTestingApp)
+        );
+        const app = yield* _(NodeTestingApp);
 
         const commonHeaders = Schema.decodeSync(CommonHeaders)({
-          'user-agent': 'Vexl/1 (1.0.0) ANDROID',
-        })
+          "user-agent": "Vexl/1 (1.0.0) ANDROID",
+        });
 
         yield* _(
           app.createUser(
@@ -287,7 +286,7 @@ describe('Import contacts', () => {
             },
             HttpClientRequest.setHeaders(me.authHeaders)
           )
-        )
+        );
 
         const response = yield* _(
           app.importContacts(
@@ -300,55 +299,55 @@ describe('Import contacts', () => {
             HttpClientRequest.setHeaders(me.authHeaders)
           ),
           Effect.either
-        )
+        );
 
-        expect(response._tag).toEqual('Right')
+        expect(response._tag).toEqual("Right");
       })
-    )
-  })
+    );
+  });
 
-  it('Initial import for new user should not accept more contacts than specified in initial import quota', async () => {
+  it("Initial import for new user should not accept more contacts than specified in initial import quota", async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
-        const redis = yield* _(RedisService)
-        const me = yield* _(generateKeysAndHasheForNumber('+420733111111'))
-        const quotaRecordKey = createQuotaRecordKey(me.hashedNumber)
+        const redis = yield* _(RedisService);
+        const me = yield* _(generateKeysAndHasheForNumber("+420733111111"));
+        const quotaRecordKey = createQuotaRecordKey(me.hashedNumber);
 
-        yield* _(redis.set(ImportContactsQuotaRecord)(quotaRecordKey, 0))
+        yield* _(redis.set(ImportContactsQuotaRecord)(quotaRecordKey, 0));
 
         const contactsToImport = yield* _(
           Effect.all([
             // 0
-            generateKeysAndHasheForNumber('+420733333006'),
-            generateKeysAndHasheForNumber('+420733333007'),
-            generateKeysAndHasheForNumber('+420733333008'),
-            generateKeysAndHasheForNumber('+420733333009'),
-            generateKeysAndHasheForNumber('+420733333010'),
-            generateKeysAndHasheForNumber('+420733333011'),
-            generateKeysAndHasheForNumber('+420733333012'),
-            generateKeysAndHasheForNumber('+420733333013'),
-            generateKeysAndHasheForNumber('+420733333014'),
-            generateKeysAndHasheForNumber('+420733333015'),
+            generateKeysAndHasheForNumber("+420733333006"),
+            generateKeysAndHasheForNumber("+420733333007"),
+            generateKeysAndHasheForNumber("+420733333008"),
+            generateKeysAndHasheForNumber("+420733333009"),
+            generateKeysAndHasheForNumber("+420733333010"),
+            generateKeysAndHasheForNumber("+420733333011"),
+            generateKeysAndHasheForNumber("+420733333012"),
+            generateKeysAndHasheForNumber("+420733333013"),
+            generateKeysAndHasheForNumber("+420733333014"),
+            generateKeysAndHasheForNumber("+420733333015"),
             // 10
-            generateKeysAndHasheForNumber('+420733333016'),
-            generateKeysAndHasheForNumber('+420733333017'),
-            generateKeysAndHasheForNumber('+420733333018'),
-            generateKeysAndHasheForNumber('+420733333019'),
-            generateKeysAndHasheForNumber('+420733333020'),
-            generateKeysAndHasheForNumber('+420733333021'),
-            generateKeysAndHasheForNumber('+420733333022'),
-            generateKeysAndHasheForNumber('+420733333023'),
-            generateKeysAndHasheForNumber('+420733333024'),
-            generateKeysAndHasheForNumber('+420733333025'),
+            generateKeysAndHasheForNumber("+420733333016"),
+            generateKeysAndHasheForNumber("+420733333017"),
+            generateKeysAndHasheForNumber("+420733333018"),
+            generateKeysAndHasheForNumber("+420733333019"),
+            generateKeysAndHasheForNumber("+420733333020"),
+            generateKeysAndHasheForNumber("+420733333021"),
+            generateKeysAndHasheForNumber("+420733333022"),
+            generateKeysAndHasheForNumber("+420733333023"),
+            generateKeysAndHasheForNumber("+420733333024"),
+            generateKeysAndHasheForNumber("+420733333025"),
             // 20
-            generateKeysAndHasheForNumber('+420733333026'),
+            generateKeysAndHasheForNumber("+420733333026"),
           ])
-        )
-        const app = yield* _(NodeTestingApp)
+        );
+        const app = yield* _(NodeTestingApp);
 
         const commonHeaders = Schema.decodeSync(CommonHeaders)({
-          'user-agent': 'Vexl/1 (1.0.0) ANDROID',
-        })
+          "user-agent": "Vexl/1 (1.0.0) ANDROID",
+        });
 
         yield* _(
           app.createUser(
@@ -360,7 +359,7 @@ describe('Import contacts', () => {
             },
             HttpClientRequest.setHeaders(me.authHeaders)
           )
-        )
+        );
 
         const response = yield* _(
           app.importContacts(
@@ -373,60 +372,60 @@ describe('Import contacts', () => {
             HttpClientRequest.setHeaders(me.authHeaders)
           ),
           Effect.either
-        )
+        );
 
-        expect(response._tag).toEqual('Left')
-        if (!Either.isLeft(response)) return
+        expect(response._tag).toEqual("Left");
+        if (!Either.isLeft(response)) return;
         expect(
           Schema.decodeUnknownEither(InitialImportContactsQuotaReachedError)(
             response.left.error
           )._tag
-        ).toEqual('Right')
+        ).toEqual("Right");
       })
-    )
-  })
+    );
+  });
 
-  it('Should be able to add amount of contacts specified in quota after initial import is done', async () => {
+  it("Should be able to add amount of contacts specified in quota after initial import is done", async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
-        const redis = yield* _(RedisService)
-        const me = yield* _(generateKeysAndHasheForNumber('+420733333333'))
-        const quotaRecordKey = createQuotaRecordKey(me.hashedNumber)
-        const sql = yield* _(SqlClient.SqlClient)
+        const redis = yield* _(RedisService);
+        const me = yield* _(generateKeysAndHasheForNumber("+420733333333"));
+        const quotaRecordKey = createQuotaRecordKey(me.hashedNumber);
+        const sql = yield* _(SqlClient.SqlClient);
 
-        yield* _(redis.set(ImportContactsQuotaRecord)(quotaRecordKey, 0))
+        yield* _(redis.set(ImportContactsQuotaRecord)(quotaRecordKey, 0));
 
         const contactsToImport = yield* _(
           Effect.all([
             // 0
-            generateKeysAndHasheForNumber('+420733333006'),
-            generateKeysAndHasheForNumber('+420733333007'),
-            generateKeysAndHasheForNumber('+420733333008'),
-            generateKeysAndHasheForNumber('+420733333009'),
-            generateKeysAndHasheForNumber('+420733333010'),
-            generateKeysAndHasheForNumber('+420733333011'),
-            generateKeysAndHasheForNumber('+420733333012'),
-            generateKeysAndHasheForNumber('+420733333013'),
-            generateKeysAndHasheForNumber('+420733333014'),
-            generateKeysAndHasheForNumber('+420733333015'),
+            generateKeysAndHasheForNumber("+420733333006"),
+            generateKeysAndHasheForNumber("+420733333007"),
+            generateKeysAndHasheForNumber("+420733333008"),
+            generateKeysAndHasheForNumber("+420733333009"),
+            generateKeysAndHasheForNumber("+420733333010"),
+            generateKeysAndHasheForNumber("+420733333011"),
+            generateKeysAndHasheForNumber("+420733333012"),
+            generateKeysAndHasheForNumber("+420733333013"),
+            generateKeysAndHasheForNumber("+420733333014"),
+            generateKeysAndHasheForNumber("+420733333015"),
             // 10
-            generateKeysAndHasheForNumber('+420733333016'),
-            generateKeysAndHasheForNumber('+420733333017'),
-            generateKeysAndHasheForNumber('+420733333018'),
-            generateKeysAndHasheForNumber('+420733333019'),
-            generateKeysAndHasheForNumber('+420733333020'),
-            generateKeysAndHasheForNumber('+420733333021'),
-            generateKeysAndHasheForNumber('+420733333022'),
-            generateKeysAndHasheForNumber('+420733333023'),
-            generateKeysAndHasheForNumber('+420733333024'),
-            generateKeysAndHasheForNumber('+420733333025'),
+            generateKeysAndHasheForNumber("+420733333016"),
+            generateKeysAndHasheForNumber("+420733333017"),
+            generateKeysAndHasheForNumber("+420733333018"),
+            generateKeysAndHasheForNumber("+420733333019"),
+            generateKeysAndHasheForNumber("+420733333020"),
+            generateKeysAndHasheForNumber("+420733333021"),
+            generateKeysAndHasheForNumber("+420733333022"),
+            generateKeysAndHasheForNumber("+420733333023"),
+            generateKeysAndHasheForNumber("+420733333024"),
+            generateKeysAndHasheForNumber("+420733333025"),
           ])
-        )
-        const app = yield* _(NodeTestingApp)
+        );
+        const app = yield* _(NodeTestingApp);
 
         const commonHeaders = Schema.decodeSync(CommonHeaders)({
-          'user-agent': 'Vexl/1 (1.0.0) ANDROID',
-        })
+          "user-agent": "Vexl/1 (1.0.0) ANDROID",
+        });
 
         yield* _(
           app.createUser(
@@ -438,7 +437,7 @@ describe('Import contacts', () => {
             },
             HttpClientRequest.setHeaders(me.authHeaders)
           )
-        )
+        );
 
         const initialImportDoneDefaultValue = yield* _(sql`
           SELECT
@@ -446,13 +445,13 @@ describe('Import contacts', () => {
           FROM
             users
           WHERE
-            public_key = ${me.authHeaders['public-key']}
-        `)
+            public_key = ${me.authHeaders["public-key"]}
+        `);
 
         expect(initialImportDoneDefaultValue[0]).toHaveProperty(
-          'initialImportDone',
+          "initialImportDone",
           false
-        )
+        );
 
         const response = yield* _(
           app.importContacts(
@@ -465,9 +464,9 @@ describe('Import contacts', () => {
             HttpClientRequest.setHeaders(me.authHeaders)
           ),
           Effect.either
-        )
+        );
 
-        expect(response._tag).toEqual('Right')
+        expect(response._tag).toEqual("Right");
 
         const updatedImportDoneValue = yield* _(sql`
           SELECT
@@ -475,28 +474,28 @@ describe('Import contacts', () => {
           FROM
             users
           WHERE
-            public_key = ${me.authHeaders['public-key']}
-        `)
+            public_key = ${me.authHeaders["public-key"]}
+        `);
 
         expect(updatedImportDoneValue[0]).toHaveProperty(
-          'initialImportDone',
+          "initialImportDone",
           true
-        )
+        );
 
         const contactsToImportAfterInitialImport = yield* _(
           Effect.all([
-            generateKeysAndHasheForNumber('+420733333027'),
-            generateKeysAndHasheForNumber('+420733333028'),
-            generateKeysAndHasheForNumber('+420733333029'),
-            generateKeysAndHasheForNumber('+420733333030'),
-            generateKeysAndHasheForNumber('+420733333031'),
-            generateKeysAndHasheForNumber('+420733333032'),
-            generateKeysAndHasheForNumber('+420733333033'),
-            generateKeysAndHasheForNumber('+420733333034'),
-            generateKeysAndHasheForNumber('+420733333035'),
-            generateKeysAndHasheForNumber('+420733333036'),
+            generateKeysAndHasheForNumber("+420733333027"),
+            generateKeysAndHasheForNumber("+420733333028"),
+            generateKeysAndHasheForNumber("+420733333029"),
+            generateKeysAndHasheForNumber("+420733333030"),
+            generateKeysAndHasheForNumber("+420733333031"),
+            generateKeysAndHasheForNumber("+420733333032"),
+            generateKeysAndHasheForNumber("+420733333033"),
+            generateKeysAndHasheForNumber("+420733333034"),
+            generateKeysAndHasheForNumber("+420733333035"),
+            generateKeysAndHasheForNumber("+420733333036"),
           ])
-        )
+        );
 
         const successResponse = yield* _(
           app.importContacts(
@@ -511,20 +510,20 @@ describe('Import contacts', () => {
             HttpClientRequest.setHeaders(me.authHeaders)
           ),
           Effect.either
-        )
+        );
 
-        expect(successResponse._tag).toEqual('Right')
+        expect(successResponse._tag).toEqual("Right");
 
         const moreContactsToImportThatExceedQuota = yield* _(
           Effect.all([
             // 0
-            generateKeysAndHasheForNumber('+420733333037'),
-            generateKeysAndHasheForNumber('+420733333038'),
-            generateKeysAndHasheForNumber('+420733333039'),
-            generateKeysAndHasheForNumber('+420733333040'),
-            generateKeysAndHasheForNumber('+420733333041'),
+            generateKeysAndHasheForNumber("+420733333037"),
+            generateKeysAndHasheForNumber("+420733333038"),
+            generateKeysAndHasheForNumber("+420733333039"),
+            generateKeysAndHasheForNumber("+420733333040"),
+            generateKeysAndHasheForNumber("+420733333041"),
           ])
-        )
+        );
 
         const failedResponse = yield* _(
           app.importContacts(
@@ -539,36 +538,36 @@ describe('Import contacts', () => {
             HttpClientRequest.setHeaders(me.authHeaders)
           ),
           Effect.either
-        )
+        );
 
-        expect(failedResponse._tag).toEqual('Left')
-        if (!Either.isLeft(failedResponse)) return
+        expect(failedResponse._tag).toEqual("Left");
+        if (!Either.isLeft(failedResponse)) return;
         expect(
           Schema.decodeUnknownEither(ImportContactsQuotaReachedError)(
             failedResponse.left.error
           )._tag
-        ).toEqual('Right')
+        ).toEqual("Right");
       })
-    )
-  })
+    );
+  });
 
-  it('Should not increase limit and meet quota when importing the same phone numbers again', async () => {
+  it("Should not increase limit and meet quota when importing the same phone numbers again", async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
-        const redis = yield* _(RedisService)
-        const me = yield* _(generateKeysAndHasheForNumber('+420733444444'))
-        const quotaRecordKey = createQuotaRecordKey(me.hashedNumber)
+        const redis = yield* _(RedisService);
+        const me = yield* _(generateKeysAndHasheForNumber("+420733444444"));
+        const quotaRecordKey = createQuotaRecordKey(me.hashedNumber);
 
-        yield* _(redis.set(ImportContactsQuotaRecord)(quotaRecordKey, 0))
+        yield* _(redis.set(ImportContactsQuotaRecord)(quotaRecordKey, 0));
 
         const contactsToImport = yield* _(
-          Effect.all([generateKeysAndHasheForNumber('+420733333006')])
-        )
-        const app = yield* _(NodeTestingApp)
+          Effect.all([generateKeysAndHasheForNumber("+420733333006")])
+        );
+        const app = yield* _(NodeTestingApp);
 
         const commonHeaders = Schema.decodeSync(CommonHeaders)({
-          'user-agent': 'Vexl/1 (1.0.0) ANDROID',
-        })
+          "user-agent": "Vexl/1 (1.0.0) ANDROID",
+        });
 
         yield* _(
           app.createUser(
@@ -580,7 +579,7 @@ describe('Import contacts', () => {
             },
             HttpClientRequest.setHeaders(me.authHeaders)
           )
-        )
+        );
 
         const response = yield* _(
           app.importContacts(
@@ -593,24 +592,24 @@ describe('Import contacts', () => {
             HttpClientRequest.setHeaders(me.authHeaders)
           ),
           Effect.either
-        )
+        );
 
-        expect(response._tag).toEqual('Right')
+        expect(response._tag).toEqual("Right");
 
         const contactsToImportAfterInitialImport = yield* _(
           Effect.all([
-            generateKeysAndHasheForNumber('+420733333027'),
-            generateKeysAndHasheForNumber('+420733333028'),
-            generateKeysAndHasheForNumber('+420733333029'),
-            generateKeysAndHasheForNumber('+420733333030'),
-            generateKeysAndHasheForNumber('+420733333031'),
-            generateKeysAndHasheForNumber('+420733333032'),
-            generateKeysAndHasheForNumber('+420733333033'),
-            generateKeysAndHasheForNumber('+420733333034'),
-            generateKeysAndHasheForNumber('+420733333035'),
-            generateKeysAndHasheForNumber('+420733333036'),
+            generateKeysAndHasheForNumber("+420733333027"),
+            generateKeysAndHasheForNumber("+420733333028"),
+            generateKeysAndHasheForNumber("+420733333029"),
+            generateKeysAndHasheForNumber("+420733333030"),
+            generateKeysAndHasheForNumber("+420733333031"),
+            generateKeysAndHasheForNumber("+420733333032"),
+            generateKeysAndHasheForNumber("+420733333033"),
+            generateKeysAndHasheForNumber("+420733333034"),
+            generateKeysAndHasheForNumber("+420733333035"),
+            generateKeysAndHasheForNumber("+420733333036"),
           ])
-        )
+        );
 
         const successResponse = yield* _(
           app.importContacts(
@@ -625,9 +624,9 @@ describe('Import contacts', () => {
             HttpClientRequest.setHeaders(me.authHeaders)
           ),
           Effect.either
-        )
+        );
 
-        expect(successResponse._tag).toEqual('Right')
+        expect(successResponse._tag).toEqual("Right");
 
         const secondSuccessResponse = yield* _(
           app.importContacts(
@@ -642,49 +641,49 @@ describe('Import contacts', () => {
             HttpClientRequest.setHeaders(me.authHeaders)
           ),
           Effect.either
-        )
+        );
 
-        expect(secondSuccessResponse._tag).toEqual('Right')
+        expect(secondSuccessResponse._tag).toEqual("Right");
       })
-    )
-  })
-})
+    );
+  });
+});
 
-describe('Notification', () => {
+describe("Notification", () => {
   beforeEach(async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
-        yield* _(Effect.sleep(200))
-        sendMessageMock.mockClear()
+        yield* _(Effect.sleep(200));
+        sendMessageMock.mockClear();
       })
-    )
-  })
+    );
+  });
 
-  it('Notifies other users about new user', async () => {
+  it("Notifies other users about new user", async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
-        const me = networkOne[0]
+        const me = networkOne[0];
 
-        const app = yield* _(NodeTestingApp)
+        const app = yield* _(NodeTestingApp);
 
         yield* _(
           app.importContacts(
             {
-              body: {contacts: [], replace: true},
+              body: { contacts: [], replace: true },
             },
             HttpClientRequest.setHeaders(me.authHeaders)
           )
-        )
+        );
 
-        yield* _(Effect.sleep(200))
-        expect(sendMessageMock).not.toHaveBeenCalled()
+        yield* _(Effect.sleep(200));
+        expect(sendMessageMock).not.toHaveBeenCalled();
 
-        sendMessageMock.mockClear()
+        sendMessageMock.mockClear();
 
         const contactsToImport = Array.filter(
           [...networkOne],
           (one) => one.hashedNumber !== me.hashedNumber
-        )
+        );
 
         yield* _(
           app.importContacts(
@@ -696,24 +695,24 @@ describe('Notification', () => {
             },
             HttpClientRequest.setHeaders(me.authHeaders)
           )
-        )
+        );
 
-        yield* _(Effect.sleep(200))
+        yield* _(Effect.sleep(200));
 
-        const call = sendMessageMock.mock.calls[0][0]
+        const call = sendMessageMock.mock.calls[0][0];
 
         expect(
-          pipe(call.tokens, Array.sort(Order.string), Array.join(','))
+          pipe(call.tokens, Array.sort(Order.string), Array.join(","))
         ).toBe(
           pipe(
             [...networkOne, ...networkTwo],
             Array.filter((one) => one.firebaseToken !== me.firebaseToken),
             Array.map((c) => c.firebaseToken),
             Array.sort(Order.string),
-            Array.join(',')
+            Array.join(",")
           )
-        )
+        );
       })
-    )
-  })
-})
+    );
+  });
+});

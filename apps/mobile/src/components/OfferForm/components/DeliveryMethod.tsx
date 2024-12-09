@@ -57,8 +57,8 @@ function DeliveryMethodComponent({
   }
 
   return (
-    <YStack gap="$5">
-      <YStack gap="$2">
+    <YStack space="$5">
+      <YStack space="$2">
         <SelectableCell
           selected={locationState?.includes('IN_PERSON') ?? false}
           onPress={() => {
@@ -69,7 +69,7 @@ function DeliveryMethodComponent({
           type="PICKUP"
         />
         {!!locationState?.includes('IN_PERSON') && (
-          <YStack gap="$1">
+          <YStack space="$1">
             {!!(!locations || (locations && locations.length < 3)) && (
               <AddCityOrDistrict
                 onPress={() => {
@@ -84,7 +84,7 @@ function DeliveryMethodComponent({
           </YStack>
         )}
       </YStack>
-      <YStack gap="$2">
+      <YStack space="$2">
         <SelectableCell
           selected={locationState?.includes('ONLINE') ?? false}
           onPress={() => {

@@ -7,16 +7,19 @@ import {
   type ReactNode,
   type Ref,
 } from 'react'
-import {Platform, TouchableOpacity} from 'react-native'
 import {
-  Input,
+  Platform,
+  TextInput as RNTextInput,
+  TouchableOpacity,
+  type TextInputProps,
+} from 'react-native'
+import {
   Stack,
   Text,
   XStack,
   getTokens,
   styled,
   type ColorTokens,
-  type InputProps,
   type XStackProps,
 } from 'tamagui'
 import Image from './Image'
@@ -52,10 +55,8 @@ const RootContainer = styled(XStack, {
   } as const,
 })
 
-const InputStyled = styled(Input, {
+const InputStyled = styled(RNTextInput, {
   f: 1,
-  borderWidth: 0,
-  height: '100%',
   ff: '$body500',
   variants: {
     size: {
@@ -119,7 +120,7 @@ const StyledText = styled(Text, {
   } as const,
 })
 
-export interface Props extends Omit<InputProps, 'style'> {
+export interface Props extends Omit<TextInputProps, 'style'> {
   icon?: SvgString
   leftText?: string
   rightText?: string
@@ -133,6 +134,8 @@ export interface Props extends Omit<InputProps, 'style'> {
   variant?: 'greyOnWhite' | 'greyOnBlack' | 'transparentOnGrey' | 'black'
   rightElement?: ReactNode
   borderRadius?: ComponentProps<typeof RootContainer>['borderRadius']
+  numberOfLines?: ComponentProps<typeof InputStyled>['numberOfLines']
+  multiline?: ComponentProps<typeof InputStyled>['multiline']
 }
 
 function TextInput(
@@ -150,13 +153,18 @@ function TextInput(
     variant = 'greyOnWhite',
     rightElement,
     borderRadius,
+    multiline,
+    numberOfLines,
     ...restProps
   }: Props,
-  ref: Ref<Input>
+  ref: Ref<RNTextInput>
 ): JSX.Element {
   const tokens = getTokens()
-  const inputRef: Ref<Input> = useRef(null)
-  useImperativeHandle<Input | null, Input | null>(ref, () => inputRef.current)
+  const inputRef: Ref<RNTextInput> = useRef(null)
+  useImperativeHandle<RNTextInput | null, RNTextInput | null>(
+    ref,
+    () => inputRef.current
+  )
 
   return (
     <RootContainer
@@ -193,7 +201,10 @@ function TextInput(
         </Stack>
       )}
       <InputStyled
+        multiline={multiline}
         ref={inputRef}
+        textAlignVertical={numberOfLines ? 'top' : 'center'}
+        numberOfLines={numberOfLines}
         placeholderTextColor={tokens.color.greyOnBlack.val}
         cursorColor={
           variant === 'greyOnBlack'
@@ -252,4 +263,4 @@ function TextInput(
   )
 }
 
-export default forwardRef<Input, Props>(TextInput)
+export default forwardRef<RNTextInput, Props>(TextInput)

@@ -5,7 +5,7 @@ import {
   type GetGeocodedCoordinatesRequest,
 } from '@vexl-next/rest-api/src/services/location/contracts'
 import axios from 'axios'
-import {Array, Effect, Option, Schema, pipe} from 'effect'
+import {Array, Effect, Option, pipe, Schema} from 'effect'
 
 interface GoogleGeocodeResponse {
   results: Array<{

@@ -2,15 +2,15 @@ import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {type CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {type UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {
-  ecdsaVerifyE,
   type EcdsaSignature,
+  ecdsaVerifyE,
 } from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {
   InvalidSignatureError,
   UnableToGenerateSignatureError,
+  type VerificationChallenge,
   VerifyChallengeErrors,
   VerifyChallengeResponse,
-  type VerificationChallenge,
 } from '@vexl-next/rest-api/src/services/user/contracts'
 import {VerifyChallengeEndpoint} from '@vexl-next/rest-api/src/services/user/specification'
 import {DashboardReportsService} from '@vexl-next/server-utils/src/DashboardReportsService'

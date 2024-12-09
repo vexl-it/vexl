@@ -1,12 +1,12 @@
 import {type UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {type OfferAdminId} from '@vexl-next/domain/src/general/offers'
 import {
-  withRedisLock,
   type RedisLockError,
   type RedisService,
+  withRedisLock,
 } from '@vexl-next/server-utils/src/RedisService'
 import {type ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
-import {Array, Effect, pipe, type ConfigError} from 'effect'
+import {Array, type ConfigError, Effect, pipe} from 'effect'
 import {hashAdminId} from './hashAdminId'
 
 export const withOfferAdminActionRedisLock =

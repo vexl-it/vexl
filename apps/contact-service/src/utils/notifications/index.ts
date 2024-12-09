@@ -7,8 +7,8 @@ import {createFirebaseNotificationRequest} from './createFirebaseNotificationReq
 import {IssuingNotificationFirebaseError} from './domain'
 import {FirebaseMessagingService} from './FirebaseMessagingService'
 import {
-  sendNotifications,
   type IssueNotificationResult,
+  sendNotifications,
 } from './sendNotificationUnsafe'
 
 export class ErrorIssuingFirebaseNotification extends Schema.TaggedError<ErrorIssuingFirebaseNotification>(

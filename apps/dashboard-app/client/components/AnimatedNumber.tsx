@@ -18,7 +18,7 @@ export default function AnimatedNumber({
   }))
 
   useEffect(() => {
-    void setSpringProps.start({number: n, delay: 200})
+    setSpringProps.start({number: n, delay: 200})
   }, [n, setSpringProps])
 
   return (

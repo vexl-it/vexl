@@ -134,7 +134,7 @@ function OffersListStateDisplayerContent(): JSX.Element {
 
   return (
     <ContainerWithTopBorderRadius testID="@marketplaceScreen">
-      <Stack gap="$4">
+      <Stack space="$4">
         <Stack px="$2">
           <BaseFilterDropdown
             postSelectActions={() => {
@@ -142,7 +142,7 @@ function OffersListStateDisplayerContent(): JSX.Element {
             }}
           />
         </Stack>
-        <XStack gap="$2" pb="$2">
+        <XStack space="$2" pb="$2">
           <SearchOffers
             postSearchActions={() => {
               refocusMap({focusAllOffers: false})

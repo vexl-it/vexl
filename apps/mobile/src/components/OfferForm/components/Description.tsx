@@ -59,7 +59,9 @@ function Description({
           verticalAlign="top"
           testID="@offerForm/descriptionInput"
           maxLength={MAX_INPUT_LENGTH}
-          rows={5}
+          multiline
+          textAlignVertical="top"
+          numberOfLines={5}
           variant="transparentOnGrey"
           value={offerDescription}
           onChangeText={setOfferDescription}

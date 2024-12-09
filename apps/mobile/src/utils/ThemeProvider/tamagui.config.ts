@@ -159,7 +159,7 @@ const appConfig = createTamagui({
   },
   themes: {
     vexl: {
-      // background: tokens.color.main,
+      background: tokens.color.main,
       color: tokens.color.lightColorText,
     },
   },

@@ -5,11 +5,11 @@ import {
   VerifyCodeErrors,
 } from '@vexl-next/rest-api/src/services/user/contracts'
 import {Effect, Either, Schema} from 'effect'
-import {NodeTestingApp} from '../utils/NodeTestingApp'
 import {
   checkVerificationMock,
   createVerificationMock,
 } from '../utils/mockedTwilioClient'
+import {NodeTestingApp} from '../utils/NodeTestingApp'
 import {
   disposeRuntime,
   runPromiseInMockedEnvironment,

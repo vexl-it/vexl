@@ -1,5 +1,5 @@
 import {type CurrencyCode} from '@vexl-next/domain/src/general/currency.brand'
-import {useAtomValue, type Atom} from 'jotai'
+import {type Atom, useAtomValue} from 'jotai'
 import {TouchableOpacity, type TouchableOpacityProps} from 'react-native'
 import {Text, XStack, getTokens} from 'tamagui'
 import chevronDownSvg from '../images/chevronDownSvg'
@@ -15,7 +15,7 @@ function CurrencySelectButton({currencyAtom, ...props}: Props): JSX.Element {
 
   return (
     <TouchableOpacity style={{width: 65}} {...props}>
-      <XStack gap="$2">
+      <XStack space="$2">
         <Text fontSize={18} color="$white" fontFamily="$body500">
           {currency ?? currencies.USD.code}
         </Text>

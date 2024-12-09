@@ -10,7 +10,7 @@ function LightningOrOnChain(): JSX.Element {
   const [btcNetwork, setBtcNetwork] = useAtom(btcNetworkAtom)
 
   return (
-    <Stack gap="$2">
+    <Stack space="$2">
       <SelectableCell<BtcNetwork>
         selected={btcNetwork === 'LIGHTING'}
         onPress={setBtcNetwork}

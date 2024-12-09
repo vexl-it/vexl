@@ -57,11 +57,9 @@ function getActiveRoute(route: NavigationState<any>): any | null {
 }
 
 export function isOnSpecificChat(
-  state: NavigationState<any> | undefined,
+  state: NavigationState<any>,
   keys: RootStackParamsList['ChatDetail']
 ): boolean {
-  if (!state) return false
-
   try {
     const activeRoute = getActiveRoute(state)
     if (!activeRoute) return false
@@ -86,11 +84,7 @@ export function getChatIdOfChatOnCurrentScreenIfAny(
   )
 }
 
-export function isOnMessagesList(
-  state: NavigationState<any> | undefined
-): boolean {
-  if (!state) return false
-
+export function isOnMessagesList(state: NavigationState<any>): boolean {
   try {
     const activeRoute = getActiveRoute(state)
     return activeRoute.name === 'Messages'

@@ -28,7 +28,8 @@ function OfferRequestTextInput({
       style={style.textInput}
       value={text}
       onChangeText={onChange}
-      rows={5}
+      multiline
+      numberOfLines={5}
       variant="greyOnBlack"
       placeholder={t('offer.inputPlaceholder')}
       placeholderTextColor={getTokens().color.greyOnBlack.val}

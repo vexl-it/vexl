@@ -13,7 +13,7 @@ function FiatSatsDropdown(): JSX.Element {
     useAtom(marketplaceFiatOrSatsCurrencyAtom)
 
   return (
-    <XStack f={1} ai="center" gap="$2">
+    <XStack f={1} ai="center" space="$2">
       <Text ff="$body600" color="$greyOnBlack">
         {t('offer.priceIn')}
       </Text>

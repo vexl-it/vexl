@@ -284,10 +284,10 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     const chat = get(chatAtom)
     const connectionState = get(connectionStateAtom)
     return offer?.ownershipInfo
-      ? (connectionState.commonFriends.commonContacts.find(
+      ? connectionState.commonFriends.commonContacts.find(
           (contact) => contact.publicKey === chat.otherSide.publicKey
-        )?.common.hashes ?? [])
-      : (offer?.offerInfo.privatePart.commonFriends ?? [])
+        )?.common.hashes ?? []
+      : offer?.offerInfo.privatePart.commonFriends ?? []
   })
 
   const commonConnectionsCountAtom = selectAtom(

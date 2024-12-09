@@ -1,28 +1,28 @@
 import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {Schema} from 'effect'
-import {createClientInstanceWithAuth} from '../../client'
-import {CommonHeaders} from '../../commonHeaders'
 import {type PlatformName} from '../../PlatformName'
 import {type ServiceUrl} from '../../ServiceUrl.brand'
 import {type GetUserSessionCredentials} from '../../UserSessionCredentials.brand'
+import {createClientInstanceWithAuth} from '../../client'
+import {CommonHeaders} from '../../commonHeaders'
 import {
   handleCommonAndExpectedErrorsEffect,
   handleCommonErrorsEffect,
   type LoggingFunction,
 } from '../../utils'
 import {
-  ImportContactsErrors,
-  UpdateBadOwnerHashErrors,
-  UserNotFoundError,
   type CheckUserExistsInput,
   type CreateUserInput,
   type FetchCommonConnectionsInput,
   type FetchMyContactsInput,
+  ImportContactsErrors,
   type ImportContactsInput,
   type RefreshUserInput,
+  UpdateBadOwnerHashErrors,
   type UpdateBadOwnerHashRequest,
   type UpdateFirebaseTokenInput,
+  UserNotFoundError,
 } from './contracts'
 import {ContactApiSpecification} from './specification'
 

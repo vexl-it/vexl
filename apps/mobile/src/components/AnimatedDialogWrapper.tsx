@@ -62,7 +62,7 @@ function AnimatedDialogWrapper({
             pr={insets.right}
             pb={insets.bottom}
             flex={1}
-            gap="$2"
+            space="$2"
           >
             {children}
           </YStack>

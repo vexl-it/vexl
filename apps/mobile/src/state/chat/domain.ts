@@ -69,7 +69,7 @@ export const ChatMessageWithState = z
         | SenderInboxDoesNotExistError
         | ForbiddenMessageTypeError
         | CryptoError
-      >((one) => !!one._tag),
+      >((one) => !!(one as any)._tag),
     }),
     z.object({state: z.literal('sent'), message: ChatMessage}),
   ])

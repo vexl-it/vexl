@@ -188,7 +188,7 @@ function OfferDetailScreen({
             f={1}
             p="$2"
             pt="0"
-            gap="$5"
+            space="$5"
             alignItems="center"
             justifyContent="center"
           >

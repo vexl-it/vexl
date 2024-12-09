@@ -161,7 +161,7 @@ function OfferInfo({
     <Stack f={1} mx="$2" my="$4">
       {!mapIsVisible && <Title offer={offer} />}
       <ContentContainer mapIsVisible={mapIsVisible}>
-        <YStack gap="$2" mb="$2">
+        <YStack space="$2" mb="$2">
           <Stack mb="$2">
             <OfferWithBubbleTip
               showCommonFriends

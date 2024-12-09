@@ -1,10 +1,10 @@
 import {
+  type Config,
+  type ConfigError,
   Context,
   Effect,
   Layer,
   Option,
-  type Config,
-  type ConfigError,
 } from 'effect'
 
 const callWebhookPost = (url: string): Effect.Effect<void, Error> =>

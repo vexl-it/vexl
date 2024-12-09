@@ -1,6 +1,6 @@
 import {useFocusEffect} from '@react-navigation/native'
-import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/lib/function'
+import * as TE from 'fp-ts/TaskEither'
 import {useAtomValue, useSetAtom} from 'jotai'
 import {useCallback} from 'react'
 import {ActivityIndicator, Linking, TouchableOpacity} from 'react-native'
@@ -72,7 +72,7 @@ function BitcoinPriceChart(): JSX.Element {
               </Stack>
             )}
             {btcPriceForSelectedCurrency?.state === 'loading' ? (
-              <XStack gap="$2" mr="$2">
+              <XStack space="$2" mr="$2">
                 <ActivityIndicator
                   size="small"
                   color={getTokens().color.main.val}

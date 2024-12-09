@@ -2,12 +2,12 @@ import {
   type NotFoundError,
   type UnexpectedServerError,
 } from '@vexl-next/domain/src/general/commonErrors'
-import {Effect, Schema, type ConfigError} from 'effect'
+import {type ConfigError, Effect, Schema} from 'effect'
 import {HttpError} from 'effect-http'
 import {isTagged} from 'effect/Predicate'
+import {isRunningInTestConfig} from './commonConfigs'
 import {type ExpectedErrorHttpCode} from './HttpCodes'
 import {type RedisLockError} from './RedisService'
-import {isRunningInTestConfig} from './commonConfigs'
 import {type TransactionError} from './withDbTransaction'
 
 type ErrorBodyContent =

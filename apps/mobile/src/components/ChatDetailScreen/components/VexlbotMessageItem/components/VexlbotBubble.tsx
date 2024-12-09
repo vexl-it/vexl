@@ -32,10 +32,10 @@ function VexlbotBubble({
       br="$6"
       backgroundColor="$grey"
       p="$3"
-      gap="$2"
+      space="$2"
     >
       <XStack ai="stretch" jc="space-between">
-        <XStack ai="center" gap="$2">
+        <XStack ai="center" space="$2">
           <Image width={24} height={24} source={vexlbotSvg} />
           <XStack>
             <Text fos={16} ff="$body600" col="$white">
@@ -48,7 +48,7 @@ function VexlbotBubble({
         </XStack>
         {status === 'accepted' && (
           <XStack
-            gap="$1"
+            space="$1"
             br="$3"
             px="$2"
             backgroundColor="$main"
@@ -62,7 +62,7 @@ function VexlbotBubble({
         )}
         {status === 'pending' && (
           <XStack
-            gap="$1"
+            space="$1"
             br="$3"
             px="$2"
             backgroundColor="$yellowAccent2"
@@ -85,7 +85,7 @@ function VexlbotBubble({
           </TouchableOpacity>
         )}
       </XStack>
-      <Stack gap="$2">
+      <Stack space="$2">
         {!!introText && (
           <Text fos={16} ff="$body500" col="$greyOnWhite">
             {introText}

@@ -37,7 +37,7 @@ function ProfileSection(): JSX.Element {
 
   return (
     <Stack ai="center" ml="$4" mr="$4">
-      <XStack jc="space-between" mb="$7" gap="$2">
+      <XStack jc="space-between" mb="$7" space="$2">
         <Stack f={3}>
           <TouchableOpacity
             onPress={() => {
@@ -61,7 +61,7 @@ function ProfileSection(): JSX.Element {
             </GrayBackContainer>
           </TouchableOpacity>
         </Stack>
-        <XStack f={1} gap="$2">
+        <XStack f={1} space="$2">
           <TouchableOpacity
             onPress={() => {
               void setQrCodeDialogVisible()

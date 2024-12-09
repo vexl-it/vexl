@@ -5,19 +5,21 @@ import {
   type ReactNode,
   type Ref,
 } from 'react'
-import {TouchableWithoutFeedback} from 'react-native'
-import {Input, Stack, XStack, getTokens, styled, type InputProps} from 'tamagui'
+import {
+  TextInput as RNTextInput,
+  TouchableWithoutFeedback,
+  type TextInputProps,
+} from 'react-native'
+import {Stack, XStack, getTokens, styled} from 'tamagui'
 
-const InputStyled = styled(Input, {
+const InputStyled = styled(RNTextInput, {
   f: 1,
   ff: '$body500',
-  borderWidth: 0,
-  height: '100%',
   fos: 18,
   color: '$main',
 } as const)
 
-interface Props extends InputProps {
+interface Props extends TextInputProps {
   children: ReactNode
   isFocused: boolean
   onWrapperPress: () => void
@@ -25,10 +27,13 @@ interface Props extends InputProps {
 
 function CalculatorInput(
   {children, isFocused, onWrapperPress, ...props}: Props,
-  ref: Ref<Input>
+  ref: Ref<RNTextInput>
 ): JSX.Element {
-  const inputRef: Ref<Input> = useRef(null)
-  useImperativeHandle<Input | null, Input | null>(ref, () => inputRef.current)
+  const inputRef: Ref<RNTextInput> = useRef(null)
+  useImperativeHandle<RNTextInput | null, RNTextInput | null>(
+    ref,
+    () => inputRef.current
+  )
 
   return (
     <TouchableWithoutFeedback onPress={onWrapperPress}>
@@ -47,7 +52,7 @@ function CalculatorInput(
           <InputStyled
             ref={inputRef}
             keyboardType="decimal-pad"
-            rows={1}
+            numberOfLines={1}
             textAlign="left"
             selectTextOnFocus
             selectionColor={getTokens().color.yellowAccent1.val}
@@ -60,4 +65,4 @@ function CalculatorInput(
   )
 }
 
-export default forwardRef<Input, Props>(CalculatorInput)
+export default forwardRef<RNTextInput, Props>(CalculatorInput)

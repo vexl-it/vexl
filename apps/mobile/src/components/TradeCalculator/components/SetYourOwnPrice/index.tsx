@@ -5,8 +5,8 @@ import PriceInfo from './components/PriceInfo'
 
 function SetYourOwnPrice(): JSX.Element {
   return (
-    <Stack gap="$4">
-      <Stack gap="$2">
+    <Stack space="$4">
+      <Stack space="$2">
         <BtcOwnPriceInput />
         <FiatOwnPriceInput />
       </Stack>

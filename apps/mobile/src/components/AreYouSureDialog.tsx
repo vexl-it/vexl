@@ -143,7 +143,7 @@ function AreYouSureDialog(): JSX.Element | null {
             }
           >
             {step.type === 'StepWithText' ? (
-              <Stack gap="$2">
+              <Stack space="$2">
                 {!!step.emojiTop && (
                   <Text fontSize={120} textAlign={step.textAlign ?? 'left'}>
                     {step.emojiTop}
@@ -168,7 +168,7 @@ function AreYouSureDialog(): JSX.Element | null {
                 )}
               </Stack>
             ) : step.type === 'StepWithInput' ? (
-              <Stack gap="$2">
+              <Stack space="$2">
                 <Text fos={24} col="$black" ff="$heading">
                   {step.title}
                 </Text>
@@ -206,7 +206,7 @@ function AreYouSureDialog(): JSX.Element | null {
       </ScrollView>
       <Stack
         flexDirection={state?.buttonsDirection ?? 'row'}
-        gap="$2"
+        space="$2"
         m="$2"
         height={state?.buttonsDirection?.startsWith('column') ? 120 : 60}
       >

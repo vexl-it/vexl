@@ -9,8 +9,8 @@ import Animated, {
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {Stack, Text, XStack, getTokens} from 'tamagui'
 import SvgImage from '../../Image'
-import {TAB_BAR_HEIGHT_PX} from '../../InsideRouter/components/TabBar'
 import closeSvg from '../../images/closeSvg'
+import {TAB_BAR_HEIGHT_PX} from '../../InsideRouter/components/TabBar'
 import {toastNotificationAtom} from '../atom'
 import {type ToastNotificationState} from '../domain'
 
@@ -44,7 +44,7 @@ function ToastNotificationContent({
         <XStack
           ai="center"
           jc={showCloseButton ? 'space-between' : undefined}
-          gap="$2"
+          space="$2"
           px="$2"
           py="$2"
           bc="$main"

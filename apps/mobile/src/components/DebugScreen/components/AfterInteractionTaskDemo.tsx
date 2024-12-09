@@ -59,7 +59,7 @@ export default function AfterInteractionTaskDemo(): JSX.Element {
   }, [])
 
   return (
-    <YStack gap="$2" my="$2">
+    <YStack space="$2" my="$2">
       <Text color="$black">
         Test extensive calculation that updates UI. (Calculating 2000 hmacs)
       </Text>

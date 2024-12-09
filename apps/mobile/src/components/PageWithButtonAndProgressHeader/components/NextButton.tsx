@@ -25,7 +25,7 @@ function NextButton(): JSX.Element | null {
   if (!nextButtonState.text) return null
 
   return (
-    <XStack py="$1" mt="$2" gap="$2">
+    <XStack py="$1" mt="$2" space="$2">
       <XStack f={1}>
         {!!nextButtonState.secondButton && (
           <Button

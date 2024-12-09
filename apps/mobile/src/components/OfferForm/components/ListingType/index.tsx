@@ -37,7 +37,7 @@ function ListingTypeSection({
   return (
     <Stack>
       {!!inEditOffer && !listingType && (
-        <XStack ai="center" gap="$2" mb="$2">
+        <XStack ai="center" space="$2" mb="$2">
           <SvgImage source={infoSvg} fill={getTokens().color.red.val} />
           <Text fos={12} col="$red" ff="$body600">
             {t('offerForm.errorListingTypeNotFilled')}

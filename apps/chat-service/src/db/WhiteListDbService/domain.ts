@@ -1,6 +1,6 @@
 import {Schema} from 'effect'
-import {InboxRecordId} from '../InboxDbService/domain'
 import {PublicKeyHashed} from '../domain'
+import {InboxRecordId} from '../InboxDbService/domain'
 
 export const WhitelistRecordId = Schema.BigInt.pipe(
   Schema.brand('WhitelistRecordId')

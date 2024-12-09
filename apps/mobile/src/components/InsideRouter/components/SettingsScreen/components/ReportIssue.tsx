@@ -1,10 +1,10 @@
 import Clipboard from '@react-native-clipboard/clipboard'
-import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/lib/function'
+import * as TE from 'fp-ts/TaskEither'
 import {atom, useSetAtom} from 'jotai'
 import {useMemo} from 'react'
 import {TouchableOpacity} from 'react-native'
-import {Stack, Text, XStack, getTokens} from 'tamagui'
+import {getTokens, Stack, Text, XStack} from 'tamagui'
 import {
   translationAtom,
   useTranslation,
@@ -60,7 +60,7 @@ function ReportIssue(): JSX.Element {
   )
 
   return (
-    <Stack gap="$2" jc="flex-end">
+    <Stack space="$2" jc="flex-end">
       <Text
         col="$black"
         my="$4"

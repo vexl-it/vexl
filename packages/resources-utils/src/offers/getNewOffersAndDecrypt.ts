@@ -2,7 +2,7 @@ import {type PrivateKeyHolderE} from '@vexl-next/cryptography/src/KeyHolder/bran
 import {type OfferInfoE} from '@vexl-next/domain/src/general/offers'
 import {type IsoDatetimeStringE} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
 import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
-import {Array, Effect, flow, type Either} from 'effect'
+import {Array, Effect, type Either, flow} from 'effect'
 import {taskEitherToEffect} from '../effect-helpers/TaskEitherConverter'
 import decryptOffer, {
   type ErrorDecryptingOffer,

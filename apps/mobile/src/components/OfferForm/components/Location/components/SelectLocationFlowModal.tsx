@@ -79,7 +79,7 @@ export default function SelectLocationFlowModal({
             initialValue={selectedFromList}
             onPick={setPickedLocation}
             topChildren={
-              <YStack marginVertical="$2" marginHorizontal="$4" gap="$4">
+              <YStack marginVertical="$2" marginHorizontal="$4" space="$4">
                 <IconButton
                   variant="primary"
                   icon={backButtonSvg}

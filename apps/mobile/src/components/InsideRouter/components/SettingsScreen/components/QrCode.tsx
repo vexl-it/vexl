@@ -1,5 +1,5 @@
-import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/lib/function'
+import * as TE from 'fp-ts/TaskEither'
 import {atom, useAtomValue} from 'jotai'
 import SvgQRCode from 'react-native-qrcode-svg'
 import {Stack, Text, YStack} from 'tamagui'
@@ -37,7 +37,7 @@ function QrCode(): JSX.Element {
 
   return (
     <Stack>
-      <YStack ai="center" gap="$4">
+      <YStack ai="center" space="$4">
         <Stack height={350} ai="center" jc="center">
           <SvgQRCode
             size={300}

@@ -19,7 +19,7 @@ function PriceTypeIndicator({
   const tradePriceType = useAtomValue(tradePriceTypeAtom)
 
   return (
-    <XStack ai="center" gap="$2" {...props}>
+    <XStack ai="center" space="$2" {...props}>
       {!tradePriceType || tradePriceType === 'live' ? (
         <AnimatedLiveIndicator
           color={displayInGrayColor ? '$greyOnBlack' : '$main'}

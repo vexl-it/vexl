@@ -18,7 +18,7 @@ function ProductAndOtherOfferColumns({offer}: Props): JSX.Element {
   const {t} = useTranslation()
 
   return (
-    <XStack f={1} gap="$1">
+    <XStack f={1} space="$1">
       <FiatOrSats offer={offer} />
       {offer.publicPart.listingType === 'PRODUCT' ? (
         <>

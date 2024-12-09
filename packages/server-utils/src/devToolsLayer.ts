@@ -1,6 +1,6 @@
 import {DevTools} from '@effect/experimental'
 import {NodeSocket} from '@effect/platform-node'
-import {Effect, Layer, Option, type Config, type ConfigError} from 'effect'
+import {type Config, type ConfigError, Effect, Layer, Option} from 'effect'
 import {disableDevToolsInDevelopmentConfig} from './commonConfigs'
 
 export const devToolsLayer = (

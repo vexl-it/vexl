@@ -5,9 +5,9 @@ import {
   SenderInboxDoesNotExistError,
 } from '@vexl-next/rest-api/src/services/chat/contracts'
 import {Effect} from 'effect'
+import {hashPublicKey} from '../db/domain'
 import {InboxDbService} from '../db/InboxDbService'
 import {type InboxRecord} from '../db/InboxDbService/domain'
-import {hashPublicKey} from '../db/domain'
 
 export const findAndEnsureReceiverAndSenderInbox = ({
   receiver,

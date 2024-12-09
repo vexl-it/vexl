@@ -177,7 +177,7 @@ function TabBar({state, navigation}: BottomTabBarProps): JSX.Element {
                 borderWidth={1}
                 borderColor="$greyAccent1"
                 br="$6"
-                gap="$2"
+                space="$2"
               >
                 <Text fos={14} ff="$body600">
                   {marketplaceLayoutMode === 'map'

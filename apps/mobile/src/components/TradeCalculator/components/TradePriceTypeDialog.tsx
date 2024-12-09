@@ -47,7 +47,7 @@ function TradePriceTypeDialog(): JSX.Element | null {
     >
       <ScrollView style={styles.flip}>
         <View style={styles.flip}>
-          <Stack gap="$2" mb="$4" bc="$blackAccent1">
+          <Stack space="$2" mb="$4" bc="$blackAccent1">
             <Stack px="$4" br="$4" mx="$2" py="$5" bc="$white">
               <XStack ai="center" jc="space-between">
                 <Stack
@@ -79,7 +79,7 @@ function TradePriceTypeDialog(): JSX.Element | null {
                   <Stack />
                 )}
               </XStack>
-              <Stack gap="$2" py="$4">
+              <Stack space="$2" py="$4">
                 <CurrentBtcPrice
                   currencyAtom={btcPriceCurrencyAtom}
                   fos={24}

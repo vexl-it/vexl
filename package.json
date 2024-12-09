@@ -39,7 +39,6 @@
     "turbo": "^1.11.3"
   },
   "resolutions": {
-    "crypto-browserify@^3.12.0": "patch:crypto-browserify@npm%3A3.12.0#./.yarn/patches/crypto-browserify-npm-3.12.0-bed454fef0.patch",
-    "react-native-quick-crypto@0.7.6": "patch:react-native-quick-crypto@npm%3A0.7.6#./.yarn/patches/react-native-quick-crypto-npm-0.7.6-b57c066106.patch"
+    "crypto-browserify@^3.12.0": "patch:crypto-browserify@npm%3A3.12.0#./.yarn/patches/crypto-browserify-npm-3.12.0-bed454fef0.patch"
   }
 }

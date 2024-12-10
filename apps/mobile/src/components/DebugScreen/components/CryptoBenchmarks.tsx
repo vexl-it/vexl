@@ -7,7 +7,12 @@ import {useEffect, useState} from 'react'
 import {Platform} from 'react-native'
 import {Text, YStack} from 'tamagui'
 import Button from '../../Button'
-import {NUMBER_OF_GENERATIONS, runBenchmark, runTests} from '../utils'
+import {
+  NUMBER_OF_GENERATIONS,
+  runBenchmark,
+  runTests,
+  simulateEncrypting5000Offers,
+} from '../utils'
 
 function createDummyImplementation(
   msDelay: number
@@ -84,6 +89,17 @@ export default function CryptoBenchmarks(): JSX.Element {
         }}
         variant="secondary"
         text="Run tests"
+        size="small"
+      />
+      <Button
+        // eslint-disable-next-line @typescript-eslint/no-misused-promises
+        onPress={async () => {
+          setText('')
+          const generator = simulateEncrypting5000Offers()
+          await printGenerator(generator)
+        }}
+        variant="secondary"
+        text="Run 5000 offers encryption"
         size="small"
       />
       <Button

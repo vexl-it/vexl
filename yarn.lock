@@ -9910,7 +9910,6 @@ __metadata:
     esbuild: ^0.17.16
     eslint: ^8.57.1
     fast-check: ^3.20.0
-    firebase-admin: ^12.3.1
     glob: ^11.0.0
     ioredis: ^5.4.1
     jest: ^29.7.0
@@ -10338,7 +10337,6 @@ __metadata:
     esbuild: ^0.17.16
     eslint: ^8.57.1
     fast-check: ^3.20.0
-    firebase-admin: ^12.3.1
     glob: ^11.0.0
     ioredis: ^5.4.1
     jest: ^29.7.0

@@ -9,6 +9,14 @@ import {
   eciesLegacyEncrypt,
 } from '@vexl-next/cryptography/src/operations/eciesLegacy'
 import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
+import {
+  type OfferAdminId,
+  type SymmetricKey,
+} from '@vexl-next/domain/src/general/offers'
+import {eitherToEfect} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
+import {type OfferPrivatePayloadToEncrypt} from '@vexl-next/resources-utils/src/offers/utils/constructPrivatePayloads'
+import {Array, Effect} from 'effect'
+import {pipe} from 'fp-ts/lib/function'
 import {hashPhoneNumber} from '../../../state/contacts/utils'
 
 const dummyPrivatePart = `"privatePart": {"commonFriends": [MEEe3tRp7bx+hRA7osU/x+hhMVy6PiAfBR3Gu2r+MEEe3tRp7bx+hRA7osU/x+hhMVy6PiAfBR3Gu2r+MEEe3tRp7bx+hRA7osU/x+hhMVy6PiAfBR3Gu2r+MEEe3tRp7bx+hRA7osU/x+hhMVy6PiAfBR3Gu2r+MEEe3tRp7bx+hRA7osU/x+hhMVy6PiAfBR3Gu2r+MEEe3tRp7bx+hRA7osU/x+hhMVy6PiAfBR3Gu2r+MEEe3tRp7bx+hRA7osU/x+hhMVy6PiAfBR3Gu2r+MEEe3tRp7bx+hRA7osU/x+hhMVy6PiAfBR3Gu2r+],"friendLevel": ["NOT_SPECIFIED"],"symmetricKey": "MEEe3tRp7bx+hRA7osU/x+hhMVy6PiAfBR3Gu2r+RG0="},`
@@ -167,4 +175,45 @@ export async function* runBenchmark() {
   yield `Took ${msToString(Date.now() - nowMs)}`
 
   yield `Done in ${msToString(Date.now() - startedAt)}!`
+}
+
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+export async function* simulateEncrypting5000Offers() {
+  const dummyPhoneNumbers = pipe(
+    [
+      '+420733333001',
+      '+420733333002',
+      '+420733333003',
+      '+420733333004',
+      '+420733333005',
+    ] as E164PhoneNumber[],
+    Array.map((one) => eitherToEfect(hashPhoneNumber(one))),
+    Effect.all,
+    Effect.runSync
+  )
+
+  const privatePartToEncrypt: OfferPrivatePayloadToEncrypt = {
+    toPublicKey: generatePrivateKey().publicKeyPemBase64,
+    payloadPrivate: {
+      commonFriends: dummyPhoneNumbers,
+      friendLevel: ['SECOND_DEGREE' as const],
+      symmetricKey: 'symmetricKey' as SymmetricKey,
+      adminId: 'adminId' as OfferAdminId,
+      intendedConnectionLevel: 'ALL' as const,
+    },
+  }
+
+  const start = Date.now()
+  yield 'Starting encryption'
+  yield 'Progress printed every 250th encryption'
+
+  for (let i = 0; i < 5000; i++) {
+    if (i % 250 === 0) yield `encrypting ${i} / 5000`
+    await eciesLegacy.eciesLegacyEncrypt({
+      publicKey: privatePartToEncrypt.toPublicKey,
+      data: JSON.stringify(privatePartToEncrypt.payloadPrivate),
+    })
+  }
+
+  yield `done in ${msToString(Date.now() - start)}`
 }

@@ -10493,7 +10493,7 @@ __metadata:
     react-native-phone-number-input: ^2.1.0
     react-native-qrcode-svg: ^6.2.0
     react-native-quick-base64: ^2.0.8
-    react-native-quick-crypto: 0.7.8
+    react-native-quick-crypto: 0.7.9
     react-native-reanimated: ~3.10.1
     react-native-safe-area-context: 4.10.5
     react-native-screens: 3.31.1
@@ -25837,9 +25837,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-quick-crypto@npm:0.7.8":
-  version: 0.7.8
-  resolution: "react-native-quick-crypto@npm:0.7.8"
+"react-native-quick-crypto@npm:0.7.9":
+  version: 0.7.9
+  resolution: "react-native-quick-crypto@npm:0.7.9"
   dependencies:
     "@craftzdog/react-native-buffer": ^6.0.5
     events: ^3.3.0
@@ -25849,7 +25849,7 @@ __metadata:
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: 7256edecb564ce0836d24653f446a0d1d5246fd425cba0359dc46c56c3b57f0a7323a75dbdae04f11531e336910b70dd2fbb8559d2c31d0e16e60dbc1946442c
+  checksum: 36700ff430b3e04e8462a9e082e222aaf030343f2c5020aebac88a02a3d3a94e09bdd1a9436a0fe906056b8f0817685a5c371f436349a0c01ae8a169fa07b980
   languageName: node
   linkType: hard
 

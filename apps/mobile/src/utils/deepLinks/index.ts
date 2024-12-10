@@ -226,7 +226,9 @@ export function useHandleDeepLinkV2(): void {
 
           break
         default:
-          reportError('warn', new Error('Unknown deep link type'), {url})
+          // do not report exp+vexl:// links that open the app in DEV mode
+          if (!__DEV__)
+            reportError('warn', new Error('Unknown deep link type'), {url})
       }
     }
   }, [goldenAvatarType, lastInitialLink.lastLinkImported, store, t, url])

@@ -10,7 +10,7 @@ import {getOtherSideData} from '../../chat/atoms/selectOtherSideDataAtom'
 import type {ChatIds, ChatWithMessages} from '../../chat/domain'
 import {dummyChatWithMessages} from '../../chat/domain'
 import {offerForChatOriginAtom} from '../../marketplace/atoms/offersState'
-import {getAmountData} from '../utils/amount'
+import {getLatestAmountDataMessage} from '../utils/amount'
 
 export const parentChatAtomAtom = atom<FocusAtomType<ChatWithMessages>>(
   atom(dummyChatWithMessages)
@@ -83,7 +83,7 @@ export const originOfferAtom = atom<OneOfferInState | undefined>((get) => {
 
 export const tradeOrOriginOfferCurrencyAtom = atom((get) => {
   const originOffer = get(originOfferAtom)
-  const tradeChecklistAmountData = getAmountData(
+  const tradeChecklistAmountData = getLatestAmountDataMessage(
     get(tradeChecklistAmountDataAtom)
   )
 

@@ -199,6 +199,7 @@ export type TradeChecklistStackParamsList = {
   }
   LocationMapSelect: {
     readonly selectedLocation: LocationSuggestion
+    readonly searchQuery: string
   }
   LocationSearch: undefined
 }

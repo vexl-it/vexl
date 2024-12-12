@@ -49,7 +49,7 @@ function DateAndTimeCell(): JSX.Element {
   const onPress = useCallback(() => {
     if (DateAndTime.dateAndTimeSettled(tradeChecklistDateAndTimeData)) {
       navigation.navigate('ChooseAvailableDays', {
-        chosenDays: tradeChecklistDateAndTimeData.sent?.suggestions,
+        chosenDateTimes: tradeChecklistDateAndTimeData.sent?.suggestions,
       })
       return
     }
@@ -58,11 +58,11 @@ function DateAndTimeCell(): JSX.Element {
       tradeChecklistDateAndTimeData.received?.suggestions
     if (receivedSuggestions && receivedSuggestions.length > 0) {
       navigation.navigate('PickDateFromSuggestions', {
-        chosenDays: receivedSuggestions,
+        chosenDateTimes: receivedSuggestions,
       })
     } else {
       navigation.navigate('ChooseAvailableDays', {
-        chosenDays: tradeChecklistDateAndTimeData.sent?.suggestions,
+        chosenDateTimes: tradeChecklistDateAndTimeData.sent?.suggestions,
       })
     }
   }, [navigation, tradeChecklistDateAndTimeData])

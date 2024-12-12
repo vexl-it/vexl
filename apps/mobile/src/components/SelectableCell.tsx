@@ -11,12 +11,14 @@ export interface SelectableCellContentProps<T> {
 export interface Props<T> extends SelectableCellContentProps<T> {
   fullWidth?: boolean
   selected: boolean
+  disabled?: boolean
   onPress: (_: T) => void
   size?: 'small' | 'large'
 }
 function SelectableCell<T>({
   fullWidth = true,
   selected,
+  disabled,
   title,
   type,
   onPress,
@@ -25,6 +27,7 @@ function SelectableCell<T>({
 }: Props<T>): JSX.Element {
   return (
     <TouchableOpacity
+      disabled={disabled}
       onPress={() => {
         onPress(type)
       }}
@@ -58,7 +61,7 @@ function SelectableCell<T>({
             <Text
               ff="$body600"
               fos={size === 'large' ? 18 : 14}
-              col={selected ? '$main' : '$greyOnBlack'}
+              col={selected ? '$main' : '$white'}
             >
               {title}
             </Text>

@@ -33,7 +33,7 @@ const calendarTheme: Theme = {
 
 export const REACT_NATIVE_CALENDARS_DATE_FORMAT = 'yyyy-MM-dd'
 
-const defaultMinDate = DateTime.now().toFormat(
+export const defaultMinDate = DateTime.now().toFormat(
   REACT_NATIVE_CALENDARS_DATE_FORMAT
 )
 

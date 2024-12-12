@@ -1,63 +1,88 @@
 import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {useAtom} from 'jotai'
+import {useAtomValue, useSetAtom} from 'jotai'
 import {DateTime} from 'luxon'
-import {useMemo} from 'react'
+import React, {useMemo} from 'react'
+import {getTokens} from 'tamagui'
 import unixMillisecondsToLocaleDateTime from '../../../../../../../utils/unixMillisecondsToLocaleDateTime'
 import {Dropdown, type DropdownItemProps} from '../../../../../../Dropdown'
-import {createTimeOptionAtomForTimeFromDropdown} from '../../../atoms'
+import {
+  availableDateTimesFromAtom,
+  manageAvailableDateTimesActionAtom,
+} from '../../../atoms'
 
 interface Props {
   availableDateTimeFrom: UnixMilliseconds
 }
 
-function TimeFromDropdown({availableDateTimeFrom}: Props): JSX.Element {
-  const [availableFromTimestamp, setAvailableFromTimestamp] = useAtom(
-    useMemo(
-      () => createTimeOptionAtomForTimeFromDropdown(availableDateTimeFrom),
-      [availableDateTimeFrom]
+function createTimeOptionsFromData(
+  availableDateTimeFrom: UnixMilliseconds,
+  alreadySelectedDateTimesFrom: UnixMilliseconds[]
+): Array<DropdownItemProps<UnixMilliseconds>> {
+  const options: Array<DropdownItemProps<UnixMilliseconds>> = []
+
+  for (let i = 0; i < 24; i++) {
+    const timeOptionMillis = UnixMilliseconds.parse(
+      unixMillisecondsToLocaleDateTime(availableDateTimeFrom)
+        .startOf('day')
+        .plus({hour: i})
+        .toMillis()
     )
+
+    if (
+      !alreadySelectedDateTimesFrom.includes(timeOptionMillis) &&
+      timeOptionMillis > DateTime.now().toMillis()
+    ) {
+      const timeOptionString = unixMillisecondsToLocaleDateTime(
+        timeOptionMillis
+      ).toLocaleString(DateTime.TIME_SIMPLE)
+
+      options.push({
+        label: timeOptionString,
+        value: timeOptionMillis,
+      })
+    }
+  }
+
+  return options
+}
+
+function TimeFromDropdown({availableDateTimeFrom}: Props): JSX.Element {
+  const availableDateTimesFrom = useAtomValue(availableDateTimesFromAtom)
+  const manageAvailableDateTimes = useSetAtom(
+    manageAvailableDateTimesActionAtom
   )
 
-  const timeOptionsFrom: Array<DropdownItemProps<UnixMilliseconds>> =
-    useMemo(() => {
-      const options: Array<DropdownItemProps<UnixMilliseconds>> = []
-
-      for (let i = 0; i < 24; i++) {
-        const timeOptionMillis = UnixMilliseconds.parse(
-          unixMillisecondsToLocaleDateTime(availableDateTimeFrom)
-            .startOf('day')
-            .plus({hour: i})
-            .toMillis()
-        )
-        const timeOptionString = unixMillisecondsToLocaleDateTime(
-          timeOptionMillis
-        ).toLocaleString(DateTime.TIME_SIMPLE)
-
-        options.push({
-          label: timeOptionString,
-          value: timeOptionMillis,
-        })
-      }
-
-      return options
-    }, [availableDateTimeFrom])
+  const timeOptionsFrom: Array<DropdownItemProps<UnixMilliseconds>> = useMemo(
+    () =>
+      createTimeOptionsFromData(availableDateTimeFrom, availableDateTimesFrom),
+    [availableDateTimeFrom, availableDateTimesFrom]
+  )
 
   const selectedLabel = useMemo(
     () =>
-      timeOptionsFrom.find((option) => option.value === availableFromTimestamp)
-        ?.label,
-    [availableFromTimestamp, timeOptionsFrom]
+      unixMillisecondsToLocaleDateTime(availableDateTimeFrom).toLocaleString(
+        DateTime.TIME_SIMPLE
+      ),
+    [availableDateTimeFrom]
   )
 
   return (
     <Dropdown
       onChange={(item) => {
-        if (item.value) setAvailableFromTimestamp(item.value)
+        manageAvailableDateTimes({
+          newTimestamp: item.value,
+          previousTimestamp: availableDateTimeFrom,
+        })
       }}
-      value={{value: availableFromTimestamp, label: selectedLabel ?? ''}}
+      value={{
+        value: availableDateTimeFrom,
+        label: selectedLabel,
+      }}
       data={timeOptionsFrom}
+      placeholder={selectedLabel}
+      placeholderStyle={{color: getTokens().color.white.val}}
     />
   )
 }
 
-export default TimeFromDropdown
+export default React.memo(TimeFromDropdown)

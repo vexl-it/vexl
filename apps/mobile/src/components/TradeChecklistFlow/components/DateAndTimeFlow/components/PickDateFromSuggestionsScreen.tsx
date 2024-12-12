@@ -15,24 +15,44 @@ import {
 } from '../../../../PageWithNavigationHeader'
 import Content from '../../Content'
 import Header from '../../Header'
+import {checkIsOldDateTimeMessage, convertDateTimesToNewFormat} from '../utils'
 import OptionsList, {type Item as OptionItem} from './OptionsList'
 
 function createOptionsFromChosenDays(
   days: AvailableDateTimeOption[]
 ): Array<OptionItem<AvailableDateTimeOption>> {
-  return days.map((day) => ({
+  const uniqueDates: AvailableDateTimeOption[] = []
+  // TODO: remove this logic once all devices update to new checklist DateTime format
+  const isOldChecklistDateTimeMessage = checkIsOldDateTimeMessage(days)
+
+  days.forEach((day) => {
+    if (uniqueDates.some((uniqueDay) => uniqueDay.date === day.date)) return
+
+    uniqueDates.push(day)
+  })
+
+  const daysOptions = isOldChecklistDateTimeMessage
+    ? convertDateTimesToNewFormat(days)
+    : days
+
+  return uniqueDates.map((day) => ({
     data: day,
     key: day.date.toString(),
+    outdated: day.date < DateTime.now().startOf('day').toMillis(),
     title: unixMillisecondsToLocaleDateTime(day.date).toLocaleString({
-      weekday: 'short',
+      weekday: 'long',
       day: 'numeric',
-      month: 'numeric',
+      month: 'long',
+      year: 'numeric',
     }),
-    rightText: `${unixMillisecondsToLocaleDateTime(day.from).toLocaleString(
-      DateTime.TIME_SIMPLE
-    )} - ${unixMillisecondsToLocaleDateTime(day.to).toLocaleString(
-      DateTime.TIME_SIMPLE
-    )}`,
+    rightText: daysOptions
+      .filter((d) => d.date === day.date)
+      .map((d) =>
+        unixMillisecondsToLocaleDateTime(d.to).toLocaleString(
+          DateTime.TIME_SIMPLE
+        )
+      )
+      .join(', '),
   }))
 }
 
@@ -41,21 +61,22 @@ type Props = TradeChecklistStackScreenProps<'PickDateFromSuggestions'>
 export default function PickDateFromSuggestionsScreen({
   navigation,
   route: {
-    params: {chosenDays},
+    params: {chosenDateTimes},
   },
 }: Props): JSX.Element {
   const {t} = useTranslation()
 
   const itemsToShowAtoms = useAtomValueRefreshOnFocus(
     useCallback(
-      () => splitAtom(atom(createOptionsFromChosenDays(chosenDays))),
-      [chosenDays]
+      () => splitAtom(atom(createOptionsFromChosenDays(chosenDateTimes))),
+      [chosenDateTimes]
     )
   )
 
-  function onItemPress(data: AvailableDateTimeOption): void {
+  function onItemPress(pickedOption: AvailableDateTimeOption): void {
     navigation.navigate('PickTimeFromSuggestions', {
-      chosenDay: data,
+      pickedOption,
+      chosenDateTimes,
     })
   }
 
@@ -80,7 +101,7 @@ export default function PickDateFromSuggestionsScreen({
       <SecondaryFooterButtonProxy
         onPress={() => {
           navigation.navigate('ChooseAvailableDays', {
-            chosenDays,
+            chosenDateTimes,
           })
         }}
         text={t('tradeChecklist.dateAndTime.addDifferentTime')}

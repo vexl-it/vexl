@@ -4,36 +4,46 @@ import {splitAtom} from 'jotai/utils'
 import {DateTime} from 'luxon'
 import {useMemo} from 'react'
 import unixMillisecondsToLocaleDateTime from '../../../../../../utils/unixMillisecondsToLocaleDateTime'
+import {
+  checkIsOldDateTimeMessage,
+  convertDateTimesToNewFormat,
+} from '../../utils'
 import type {Item as OptionsListItem} from '../OptionsList'
 
 function generateHoursList(
+  fromOptions: AvailableDateTimeOption[],
   forOption: AvailableDateTimeOption
 ): Array<OptionsListItem<DateTime>> {
-  const from = unixMillisecondsToLocaleDateTime(forOption.from).startOf('hour')
-  const to = unixMillisecondsToLocaleDateTime(forOption.to).startOf('hour')
+  // TODO: remove this logic once all devices update to new checklist DateTime format
+  const isOldChecklistDateTimeMessage = checkIsOldDateTimeMessage(fromOptions)
+  const from = isOldChecklistDateTimeMessage
+    ? convertDateTimesToNewFormat(fromOptions)
+    : fromOptions
+  const optionsToShow = from
+    .filter((option) => option.date === forOption.date)
+    .map((option) => unixMillisecondsToLocaleDateTime(option.to))
 
-  const hoursInBetween = to.diff(from).as('hours')
-
-  return Array(hoursInBetween)
-    .fill(0)
-    .map((_, index) => {
-      const dateTime = from.plus({hours: index})
-      return {
-        data: dateTime,
-        key: dateTime.toString(),
-        title: dateTime.toLocaleString(DateTime.TIME_SIMPLE),
-        selected: false,
-      }
-    })
+  return optionsToShow.map((option, index) => {
+    return {
+      data: option,
+      key: option.toString(),
+      outdated: option.toMillis() < DateTime.now().toMillis(),
+      title: option.toLocaleString(DateTime.TIME_SIMPLE),
+      selected: false,
+    }
+  })
 }
 
-export function useState(chosenDay: AvailableDateTimeOption): {
+export function useState(
+  chosenDayTimes: AvailableDateTimeOption[],
+  pickedOption: AvailableDateTimeOption
+): {
   itemsAtoms: Array<Atom<OptionsListItem<DateTime>>>
   selectItem: (val: DateTime) => void
   selectedItem: OptionsListItem<DateTime> | undefined
 } {
   const atoms = useMemo(() => {
-    const initialValue = generateHoursList(chosenDay)
+    const initialValue = generateHoursList(chosenDayTimes, pickedOption)
 
     const itemAtoms = atom(initialValue)
     const selectItemActionAtom = atom(null, (get, set, item: DateTime) => {
@@ -58,7 +68,7 @@ export function useState(chosenDay: AvailableDateTimeOption): {
       selectItemActionAtom,
       selectedItemAtom,
     }
-  }, [chosenDay])
+  }, [chosenDayTimes, pickedOption])
 
   return {
     itemsAtoms: useAtomValue(atoms.itemsAtomsAtom),

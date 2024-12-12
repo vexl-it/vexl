@@ -18,7 +18,7 @@ function ParticipatedInMeetup(): JSX.Element {
     >
       <Image height={50} width={60} source={goldenGlassesSvg} />
       <Text fontFamily="$heading" color="$main">
-        {t('settings.participatedInMeetup')}
+        {t('settings.joinedMeetup')}
       </Text>
     </Stack>
   )

@@ -320,7 +320,7 @@ function GoldenAvatarAnimation(): JSX.Element | null {
           style={[{alignSelf: 'center'}, descriptionOpacityAnimation]}
         >
           <Text textAlign="center" ff="$heading" fos={18} col="$white">
-            {t('goldenGlasses.forMeetupParticipation')}
+            {t('goldenGlasses.forJoiningMeetup')}
           </Text>
         </Animated.View>
       </Stack>

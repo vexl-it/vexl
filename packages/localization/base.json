@@ -347,6 +347,7 @@
   "settings.logoutDialog.description": "Are you sure you want to delete your account? This action cannot be undone",
   "settings.screenshotsNotAllowed": "Screenshots Not Allowed",
   "settings.otherUserDisabledScreenshots": "You have disabled app screenshots.",
+  "settings.joinedMeetup": "Joined a meetup",
   "settings.participatedInMeetup": "Participated in a meetup",
   "offer.title": "Offer",
   "offer.cashOnly": "Cash only",
@@ -1077,6 +1078,7 @@
   "goldenGlasses.youReceived": "You received",
   "goldenGlasses.goldenGlasses": "Golden glasses",
   "goldenGlasses.forMeetupParticipation": "for meetup participation",
+  "goldenGlasses.forJoiningMeetup": "for joining a meetup",
   "goldenGlasses.thisUserReceivedGoldenGlassesAfterMeetup": "This user received golden glasses after Vexl meetup participation.",
   "linking.wrongLinkFormatReceived": "Wrong link format received. Link {{link}} seems to be invalid. Check the link and try again.",
   "linking.linkNotSupportedPleaseUpdate": "Link not supported. Please update your app to the latest version."

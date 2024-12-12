@@ -1,95 +1,209 @@
 import {type AvailableDateTimeOption} from '@vexl-next/domain/src/general/tradeChecklist'
 import {
   fromDateTime,
-  unixMillisecondsNow,
   type UnixMilliseconds,
+  UnixMillisecondsE,
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {atom, type SetStateAction, type WritableAtom} from 'jotai'
-import {DateTime} from 'luxon'
+import {Array as ArrayE, Schema} from 'effect'
+import {atom, type WritableAtom} from 'jotai'
+import {DateTime, type DateTimeUnit} from 'luxon'
 import {type DateData} from 'react-native-calendars'
 import addToSortedArray from '../../../../utils/addToSortedArray'
-import getValueFromSetStateActionOfAtom from '../../../../utils/atomUtils/getValueFromSetStateActionOfAtom'
-import unixMillisecondsToLocaleDateTime from '../../../../utils/unixMillisecondsToLocaleDateTime'
+import {
+  checkIsOldDateTimeMessage,
+  convertDateTimesToNewFormat,
+  createAvailableDateTimeEntry,
+} from './utils'
 
 export const availableDateTimesAtom = atom<AvailableDateTimeOption[]>([])
+export const availableDateTimesFromAtom = atom<UnixMilliseconds[]>([])
 
-export function createTimeOptionAtomForTimeToDropdown(
-  timestampTo: UnixMilliseconds
-): WritableAtom<UnixMilliseconds, [SetStateAction<UnixMilliseconds>], void> {
-  return atom(
-    (get) =>
-      get(availableDateTimesAtom).find(
-        (dateTime) => dateTime.to === timestampTo
-      )?.to ?? unixMillisecondsNow(),
-    (get, set, selectedTimeTo: SetStateAction<UnixMilliseconds>) => {
-      const availableDateTimes = get(availableDateTimesAtom)
-      const selectedDateTime = getValueFromSetStateActionOfAtom(selectedTimeTo)(
-        () =>
-          get(availableDateTimesAtom).find(
-            (dateTime) => dateTime.to === selectedTimeTo
-          )?.to ?? unixMillisecondsNow()
+export const setAvailableDateTimesFromActionAtom = atom(
+  (get) => get(availableDateTimesFromAtom),
+  (get, set, availableDateTimes: AvailableDateTimeOption[]) => {
+    const dateTimesFrom: UnixMilliseconds[] = []
+
+    availableDateTimes.forEach((dateTime) => {
+      if (dateTimesFrom.includes(dateTime.from)) return
+
+      dateTimesFrom.push(dateTime.from)
+    })
+
+    set(
+      availableDateTimesFromAtom,
+      dateTimesFrom.sort((t1, t2) => t1 - t2)
+    )
+  }
+)
+
+export const setAvailableDateTimesActionAtom = atom(
+  null,
+  (get, set, dateTimes: AvailableDateTimeOption[]) => {
+    // we need to convert already opened DateTime suggestions from previous versions of checklist
+    const isOldChecklistDateTimeMessage = checkIsOldDateTimeMessage(dateTimes)
+
+    if (isOldChecklistDateTimeMessage) {
+      const convertedDateTimes = convertDateTimesToNewFormat(dateTimes)
+
+      set(availableDateTimesAtom, convertedDateTimes)
+      set(setAvailableDateTimesFromActionAtom, convertedDateTimes)
+    } else {
+      set(availableDateTimesAtom, dateTimes)
+      set(setAvailableDateTimesFromActionAtom, dateTimes)
+    }
+  }
+)
+
+export const removeAvailableDateTimeActionAtom = atom(
+  null,
+  (
+    get,
+    set,
+    {timestamp, unit}: {timestamp: UnixMilliseconds; unit: DateTimeUnit}
+  ) => {
+    set(availableDateTimesAtom, (prev) =>
+      prev.filter(
+        (entry) =>
+          !DateTime.fromMillis(entry.date).hasSame(
+            DateTime.fromMillis(timestamp),
+            unit
+          )
       )
+    )
+  }
+)
 
-      const dateTimeToChange = availableDateTimes.find((dateTime) =>
-        unixMillisecondsToLocaleDateTime(dateTime.to).hasSame(
-          unixMillisecondsToLocaleDateTime(selectedDateTime),
-          'day'
+export const uniqueAvailableDatesAtom = atom((get) => {
+  const uniqueDates: UnixMilliseconds[] = []
+  const availableDateTimesFrom = get(availableDateTimesFromAtom)
+
+  availableDateTimesFrom.forEach((entry) => {
+    const dateAlereadyAdded = uniqueDates.some(
+      (date) =>
+        DateTime.fromMillis(date).toFormat('yyyy-MM-dd') ===
+        DateTime.fromMillis(entry).toFormat('yyyy-MM-dd')
+    )
+
+    if (dateAlereadyAdded) return
+
+    uniqueDates.push(entry)
+  })
+
+  return uniqueDates.sort((ts1, ts2) => ts1 - ts2)
+})
+
+export const isThereAnyOutdatedDateTimeAtom = atom((get) => {
+  const availableDateTimes = get(availableDateTimesAtom)
+
+  return availableDateTimes.some(
+    (dateTime) => dateTime.to < DateTime.now().toMillis()
+  )
+})
+
+export const manageAvailableDateTimesActionAtom = atom(
+  null,
+  (
+    get,
+    set,
+    {
+      newTimestamp,
+      previousTimestamp,
+    }: {newTimestamp?: UnixMilliseconds; previousTimestamp?: UnixMilliseconds}
+  ) => {
+    const availableDateTimesFrom = get(availableDateTimesFromAtom)
+
+    if (
+      newTimestamp &&
+      previousTimestamp &&
+      availableDateTimesFrom.some((entry) => entry === previousTimestamp)
+    ) {
+      set(availableDateTimesFromAtom, (prev) =>
+        ArrayE.replace(
+          prev,
+          prev.findIndex((entry) => entry === previousTimestamp),
+          newTimestamp
         )
       )
 
-      set(
-        availableDateTimesAtom,
-        availableDateTimes.map((dateTime) =>
-          dateTime.to === dateTimeToChange?.to
-            ? {...dateTime, to: selectedDateTime}
-            : dateTime
-        )
+      set(removeAvailableDateTimeActionAtom, {
+        timestamp: previousTimestamp,
+        unit: 'hour',
+      })
+    } else if (
+      newTimestamp &&
+      availableDateTimesFrom.some((entry) => entry === newTimestamp)
+    ) {
+      set(availableDateTimesFromAtom, (prev) =>
+        prev.filter((entry) => entry !== newTimestamp)
+      )
+    } else if (previousTimestamp) {
+      set(availableDateTimesFromAtom, (prev) =>
+        prev.filter((entry) => entry !== previousTimestamp)
+      )
+      set(removeAvailableDateTimeActionAtom, {
+        timestamp: previousTimestamp,
+        unit: 'hour',
+      })
+    } else if (newTimestamp) {
+      set(availableDateTimesFromAtom, (prev) =>
+        addToSortedArray(prev, (t1, t2) => t1 - t2)(newTimestamp)
       )
     }
-  )
-}
+  }
+)
 
-export function createTimeOptionAtomForTimeFromDropdown(
+export const addTimeOptionForAvailableDateActionAtom = atom(
+  null,
+  (get, set, date: UnixMilliseconds) => {
+    const availableDateTimesFrom = get(availableDateTimesFromAtom)
+    const selectedDate = DateTime.fromMillis(date).startOf('day')
+
+    const availableDateTimesToAddTo = availableDateTimesFrom
+      .filter((entry) =>
+        DateTime.fromMillis(entry).startOf('day').equals(selectedDate)
+      )
+      .map((entry) => entry)
+
+    const maxAvailableDateTimeInDay = Schema.decodeSync(UnixMillisecondsE)(
+      Math.max(...availableDateTimesToAddTo)
+    )
+
+    set(manageAvailableDateTimesActionAtom, {
+      newTimestamp: Schema.decodeSync(UnixMillisecondsE)(
+        DateTime.fromMillis(maxAvailableDateTimeInDay)
+          .plus({hour: 1})
+          .toMillis()
+      ),
+    })
+  }
+)
+
+export function createIsTimeOptionSelectedAtom(
   timestamp: UnixMilliseconds
-): WritableAtom<UnixMilliseconds, [SetStateAction<UnixMilliseconds>], void> {
+): WritableAtom<boolean, [UnixMilliseconds], void> {
   return atom(
     (get) =>
-      get(availableDateTimesAtom).find(
-        (dateTime) => dateTime.from === timestamp
-      )?.from ?? unixMillisecondsNow(),
-    (get, set, selectedTimeFrom: SetStateAction<UnixMilliseconds>) => {
+      get(availableDateTimesAtom).some((dateTime) => dateTime.to === timestamp),
+    (get, set, newTimestamp: UnixMilliseconds) => {
       const availableDateTimes = get(availableDateTimesAtom)
-      const selectedDateTime = getValueFromSetStateActionOfAtom(
-        selectedTimeFrom
-      )(
-        () =>
-          get(availableDateTimesAtom).find(
-            (dateTime) => dateTime.from === selectedTimeFrom
-          )?.from ?? unixMillisecondsNow()
+      const isTimestampInAvailableDateTimes = availableDateTimes.some(
+        (dateTime) => dateTime.to === newTimestamp
       )
 
-      const dateTimeToChange = availableDateTimes.find((dateTime) =>
-        unixMillisecondsToLocaleDateTime(dateTime.from).hasSame(
-          unixMillisecondsToLocaleDateTime(selectedDateTime),
-          'day'
+      if (isTimestampInAvailableDateTimes) {
+        set(
+          availableDateTimesAtom,
+          availableDateTimes.filter((dateTime) => dateTime.to !== newTimestamp)
         )
-      )
-
-      set(
-        availableDateTimesAtom,
-        availableDateTimes.map((dateTime) =>
-          dateTime.from === dateTimeToChange?.from
-            ? {
-                ...dateTime,
-                from: selectedDateTime,
-                to:
-                  dateTime.to < selectedDateTime
-                    ? selectedDateTime
-                    : dateTime.to,
-              }
-            : dateTime
+      } else {
+        set(
+          availableDateTimesAtom,
+          addToSortedArray(
+            availableDateTimes,
+            (t1, t2) => t1.to - t2.to
+          )(createAvailableDateTimeEntry(newTimestamp))
         )
-      )
+      }
     }
   )
 }
@@ -103,38 +217,41 @@ export const handleAvailableDaysChangeActionAtom = atom(
       day: day.day,
     })
     const millis = fromDateTime(dateTime)
-    const availableDateTimes = get(availableDateTimesAtom)
+    const availableDateTimesFrom = get(availableDateTimesFromAtom)
 
-    if (availableDateTimes.some((dateTime) => dateTime.date === millis)) {
-      set(
-        availableDateTimesAtom,
-        availableDateTimes.filter(
-          (availableDateTime) => availableDateTime.date !== millis
+    if (
+      availableDateTimesFrom.some((entry) =>
+        DateTime.fromMillis(entry).hasSame(dateTime, 'day')
+      )
+    ) {
+      set(availableDateTimesFromAtom, (prev) =>
+        prev.filter(
+          (entry) => !DateTime.fromMillis(entry).hasSame(dateTime, 'day')
         )
       )
+      set(removeAvailableDateTimeActionAtom, {timestamp: millis, unit: 'day'})
     } else {
-      set(
-        availableDateTimesAtom,
-        addToSortedArray(
-          availableDateTimes,
-          (t1, t2) => t1.date - t2.date
-        )({
-          from: fromDateTime(dateTime.startOf('day').plus({hour: 12})),
-          to: fromDateTime(dateTime.startOf('day').plus({hour: 13})),
-          date: millis,
-        })
-      )
+      if (DateTime.now().hasSame(DateTime.fromMillis(millis), 'day')) {
+        const newTimestamp = Schema.decodeSync(UnixMillisecondsE)(
+          DateTime.now().startOf('hour').plus({hour: 1}).toMillis()
+        )
+        set(manageAvailableDateTimesActionAtom, {newTimestamp})
+      } else {
+        const newTimestamp = Schema.decodeSync(UnixMillisecondsE)(
+          DateTime.fromMillis(millis).set({hour: 12}).toMillis()
+        )
+        set(manageAvailableDateTimesActionAtom, {newTimestamp})
+      }
     }
   }
 )
 
 export const removeTimestampFromAvailableAtom = atom(
   null,
-  (get, set, date: UnixMilliseconds) => {
-    const availableDateTimes = get(availableDateTimesAtom)
-    set(
-      availableDateTimesAtom,
-      availableDateTimes.filter((dateTime) => dateTime.date !== date)
-    )
+  (get, set, timestamp: UnixMilliseconds) => {
+    set(removeAvailableDateTimeActionAtom, {timestamp, unit: 'hour'})
+    set(manageAvailableDateTimesActionAtom, {
+      previousTimestamp: timestamp,
+    })
   }
 )

@@ -124,17 +124,28 @@ export default {
     'googleServicesFile': './creds/google-services.json',
     'intentFilters': [
       {
+        // NDEF_DISCOVERED nfc action is not supported by expo app config
+        // wee need to change it in expo-plugin after
+        // from android.intent.action.NDEF_DISCOVERED -> android.nfc.action.NDEF_DISCOVERED
+        // see: expo-plugins/android-manifest-nfc-action-plugin.js
+        'action': 'NDEF_DISCOVERED',
+        'autoVerify': true,
+        'data': [
+          {
+            'scheme': 'https',
+            'host': 'app.vexl.it',
+            'pathPattern': '/link/.*',
+          },
+        ],
+        'category': ['DEFAULT'],
+      },
+      {
         'action': 'VIEW',
         'autoVerify': true,
         'data': [
           {
             'scheme': 'https',
             'host': 'vexl.it',
-            'pathPattern': '.*',
-          },
-          {
-            'scheme': 'https',
-            'host': 'app.vexl.it',
             'pathPattern': '.*',
           },
           {
@@ -147,16 +158,11 @@ export default {
             'host': 'nextlink.vexl.it',
             'pathPattern': '.*',
           },
-          {
-            'scheme': 'https',
-            'host': 'link.2.vexl.it',
-            'pathPattern': '.*',
-          },
         ],
         category: ['BROWSABLE', 'DEFAULT'],
       },
     ],
-    permissions: ['READ_CONTACTS', 'READ_CALENDAR', 'WRITE_CALENDAR'],
+    permissions: ['READ_CONTACTS', 'READ_CALENDAR', 'WRITE_CALENDAR', 'NFC'],
   },
   'locales': {
     'bg': '../../packages/localization/bg-infoPlist.json',
@@ -235,6 +241,7 @@ export default {
     '@react-native-firebase/dynamic-links',
     './expo-plugins/disable-firebase-analytics.js',
     './expo-plugins/setup-headless-background-message-processing-ios.js',
+    './expo-plugins/android-manifest-nfc-action-plugin.js',
     'expo-font',
     'expo-secure-store',
     'expo-camera',

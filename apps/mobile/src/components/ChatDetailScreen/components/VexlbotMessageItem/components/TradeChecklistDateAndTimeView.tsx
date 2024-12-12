@@ -1,6 +1,7 @@
 import {useNavigation} from '@react-navigation/native'
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue, useSetAtom, useStore} from 'jotai'
+import {DateTime} from 'luxon'
 import {type ChatMessageWithState} from '../../../../../state/chat/domain'
 import * as dateAndTime from '../../../../../state/tradeChecklist/utils/dateAndTime'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
@@ -82,7 +83,17 @@ export default function TradeChecklistDateAndTimeView({
               number: suggestions.length,
             }
           )}\n${suggestions
-            .map((one) => dateAndTime.toStringWithRange(one))
+            .map((one) =>
+              // TODO: remove this in future once everybody
+              // updates to new DateTime checklist system
+              // use toStringWithTime(one.to)
+              DateTime.fromMillis(one.to).diff(
+                DateTime.fromMillis(one.from),
+                'hours'
+              ).hours >= 1
+                ? dateAndTime.toStringWithRange(one)
+                : dateAndTime.toStringWithTime(one.to)
+            )
             .join('\n')}`}
         >
           {message.state === 'received' && !isMessageOutdated && (
@@ -94,7 +105,7 @@ export default function TradeChecklistDateAndTimeView({
                   inboxKey: chat.inbox.privateKey.publicKeyPemBase64,
                   screen: 'PickDateFromSuggestions',
                   params: {
-                    chosenDays: suggestions,
+                    chosenDateTimes: suggestions,
                   },
                 })
               }}

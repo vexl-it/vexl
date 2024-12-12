@@ -58,7 +58,7 @@ function SelectableCell<T>({
             <Text
               ff="$body600"
               fos={size === 'large' ? 18 : 14}
-              col={selected ? '$main' : '$greyOnBlack'}
+              col={selected ? '$main' : '$white'}
             >
               {title}
             </Text>

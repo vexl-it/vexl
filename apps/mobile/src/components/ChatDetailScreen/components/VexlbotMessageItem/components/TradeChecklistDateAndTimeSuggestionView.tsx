@@ -32,7 +32,7 @@ function TradeChecklistDateAndTimeSuggestionView(): JSX.Element | null {
             chatId,
             inboxKey,
             params: {
-              chosenDays: tradeChecklistDateAndTimeData.sent?.suggestions,
+              chosenDateTimes: tradeChecklistDateAndTimeData.sent?.suggestions,
             },
           })
         }}

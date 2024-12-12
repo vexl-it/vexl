@@ -1,9 +1,10 @@
 import {useAtomValue, type Atom} from 'jotai'
 import React, {useCallback} from 'react'
 import {FlatList, TouchableWithoutFeedback} from 'react-native'
-import {Text, XStack} from 'tamagui'
-import chevronRightSvg from '../../../../../images/chevronRightSvg'
+import {Stack, Text, XStack} from 'tamagui'
 import {tokens} from '../../../../../utils/ThemeProvider/tamagui.config'
+
+import chevronRightSvg from '../../../../../images/chevronRightSvg'
 import atomKeyExtractor from '../../../../../utils/atomUtils/atomKeyExtractor'
 import Image from '../../../../Image'
 import selectedCheckSvg from '../images/selectedCheckSvg'
@@ -42,6 +43,7 @@ function Item<T>({
     >
       <XStack
         mt="$2"
+        gap="$2"
         ai="center"
         jc="space-between"
         bc="$grey"
@@ -49,28 +51,34 @@ function Item<T>({
         py="$5"
         br="$4"
       >
-        <Text
-          h={24}
-          color={selected ? '$main' : '$white'}
-          fos={16}
-          ff="$body600"
-        >
-          {item.title}
-        </Text>
-        <XStack gap="$2" ai="center">
+        <Stack fs={1} gap="$2">
+          <Text
+            h={24}
+            color={selected ? '$main' : '$white'}
+            fos={16}
+            ff="$body600"
+          >
+            {item.title}
+          </Text>
           {!!item.rightText && (
-            <Text fos={12} ff="$body500" color="$greyOnBlack">
+            <Text
+              fos={12}
+              ff="$body500"
+              color="$greyOnBlack"
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
               {item.rightText}
             </Text>
           )}
-          {!!selected && <Image source={selectedCheckSvg}></Image>}
-          {!!showChevron && (
-            <Image
-              stroke={tokens.color.greyOnBlack.val}
-              source={chevronRightSvg}
-            />
-          )}
-        </XStack>
+        </Stack>
+        {!!showChevron && (
+          <Image
+            stroke={tokens.color.greyOnBlack.val}
+            source={chevronRightSvg}
+          />
+        )}
+        {!!selected && <Image source={selectedCheckSvg}></Image>}
       </XStack>
     </TouchableWithoutFeedback>
   )

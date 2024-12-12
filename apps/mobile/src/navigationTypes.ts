@@ -175,13 +175,14 @@ export type TradeCalculatorStackScreenProps<
 export type TradeChecklistStackParamsList = {
   AgreeOnTradeDetails: undefined
   ChooseAvailableDays: {
-    readonly chosenDays: AvailableDateTimeOption[] | undefined
+    readonly chosenDateTimes: AvailableDateTimeOption[] | undefined
   }
   PickDateFromSuggestions: {
-    readonly chosenDays: AvailableDateTimeOption[]
+    readonly chosenDateTimes: AvailableDateTimeOption[]
   }
   PickTimeFromSuggestions: {
-    readonly chosenDay: AvailableDateTimeOption
+    readonly pickedOption: AvailableDateTimeOption
+    readonly chosenDateTimes: AvailableDateTimeOption[]
   }
   AddTimeOptions: undefined
   CalculateAmount: {

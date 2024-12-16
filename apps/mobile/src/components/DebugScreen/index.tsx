@@ -61,6 +61,7 @@ import CryptoBenchmarks from './components/CryptoBenchmarks'
 import LanguagePicker from './components/LanguagePicker'
 import Preferences from './components/Preferences'
 import SimulateMissingOfferInbox from './components/SimulateMissingOfferInbox'
+import MmkvAtomTest from './components/mmkvAtomTest'
 
 // const ContentScroll = styled(ScrollView, {
 //   marginBottom: '$2',
@@ -605,6 +606,7 @@ function DebugScreen(): JSX.Element {
           <SimulateMissingOfferInbox />
           <Preferences />
           <AfterInteractionTaskDemo />
+          <MmkvAtomTest />
         </ScrollView>
         <Button variant="secondary" text="back" onPress={safeGoBack} />
       </WhiteContainer>

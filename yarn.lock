@@ -9851,7 +9851,6 @@ __metadata:
     "@vexl-next/rest-api": 0.0.0
     "@vexl-next/server-utils": 0.0.0
     "@vexl-next/tsconfig": 0.0.0
-    axios: ^1.7.8
     dotenv: ^16.4.5
     effect: ^3.10.12
     effect-http: ^0.82.0
@@ -10086,7 +10085,7 @@ __metadata:
     "@vexl-next/tsconfig": 0.0.0
     awesome-phonenumber: ^5.1.0
     compare-versions: ^6.1.0
-    dayjs: ^1.11.13
+    dayjs: ^1.11.11
     effect: ^3.10.12
     eslint: ^8.57.1
     fast-check: ^3.20.0
@@ -11553,17 +11552,6 @@ __metadata:
     form-data: ^4.0.0
     proxy-from-env: ^1.1.0
   checksum: 882d4fe0ec694a07c7f5c1f68205eb6dc5a62aecdb632cc7a4a3d0985188ce3030e0b277e1a8260ac3f194d314ae342117660a151fabffdc5081ca0b5a8b47fe
-  languageName: node
-  linkType: hard
-
-"axios@npm:^1.7.8":
-  version: 1.7.8
-  resolution: "axios@npm:1.7.8"
-  dependencies:
-    follow-redirects: ^1.15.6
-    form-data: ^4.0.0
-    proxy-from-env: ^1.1.0
-  checksum: 3d21652faf8e29fb36c47517d2872bb5e2285127a24f5c53ce23082c4eac7f5a88de84dd49d4a1a83068e5301dcfd9067b41e5fbd00b0d20ab7b0a843559273d
   languageName: node
   linkType: hard
 
@@ -13937,7 +13925,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dayjs@npm:^1.11.11, dayjs@npm:^1.11.13, dayjs@npm:^1.11.9, dayjs@npm:^1.8.15":
+"dayjs@npm:^1.11.11, dayjs@npm:^1.11.9, dayjs@npm:^1.8.15":
   version: 1.11.13
   resolution: "dayjs@npm:1.11.13"
   checksum: f388db88a6aa93956c1f6121644e783391c7b738b73dbc54485578736565c8931bdfba4bb94e9b1535c6e509c97d5deb918bbe1ae6b34358d994de735055cca9

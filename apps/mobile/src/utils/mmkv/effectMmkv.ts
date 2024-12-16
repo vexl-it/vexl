@@ -3,7 +3,7 @@ import {MMKV} from 'react-native-mmkv'
 import {JsonParseError, JsonStringifyError} from '../fpUtils'
 import {ReadingFromStoreError, ValueNotSet, WritingToStoreError} from './domain'
 
-export interface FpMMKV {
+export interface EffectMmkv {
   _storage: MMKV
   set: (
     key: string
@@ -34,10 +34,17 @@ export interface FpMMKV {
     | ReadingFromStoreError
     | ParseResult.ParseError
   >
+
+  saveVerified: <T extends Schema.Schema.AnyNoContext>(
+    key: string,
+    schema: T
+  ) => (
+    value: Schema.Schema.Type<T>
+  ) => Either.Either<void, WritingToStoreError | ParseResult.ParseError>
 }
 
-function createFpMMKV(storage: MMKV): FpMMKV {
-  function set(key: string): ReturnType<FpMMKV['set']> {
+function createEffectMmkv(storage: MMKV): EffectMmkv {
+  function set(key: string): ReturnType<EffectMmkv['set']> {
     return (value) =>
       Either.try({
         try: () => {
@@ -47,7 +54,7 @@ function createFpMMKV(storage: MMKV): FpMMKV {
       })
   }
 
-  function get(key: string): ReturnType<FpMMKV['get']> {
+  function get(key: string): ReturnType<EffectMmkv['get']> {
     return Either.try({
       try: () => storage.getString(key),
       catch: (e) => new ReadingFromStoreError({cause: e}),
@@ -63,7 +70,7 @@ function createFpMMKV(storage: MMKV): FpMMKV {
     Schema.encodeEither(Schema.parseJson(Schema.Unknown)),
     Either.mapLeft((cause) => new JsonStringifyError({cause}))
   )
-  function setJSON(key: string): ReturnType<FpMMKV['setJSON']> {
+  function setJSON(key: string): ReturnType<EffectMmkv['setJSON']> {
     return (value) => toJson(value).pipe(Either.flatMap(set(key)))
   }
 
@@ -71,11 +78,11 @@ function createFpMMKV(storage: MMKV): FpMMKV {
     Schema.decodeEither(Schema.parseJson(Schema.Unknown)),
     Either.mapLeft((cause) => new JsonParseError({cause}))
   )
-  function getJSON(key: string): ReturnType<FpMMKV['getJSON']> {
+  function getJSON(key: string): ReturnType<EffectMmkv['getJSON']> {
     return get(key).pipe(Either.flatMap(fromJson))
   }
 
-  const getVerified = <T extends Schema.Schema<any, any, never>>(
+  const getVerified = <T extends Schema.Schema<any>>(
     key: string,
     schema: T
   ): Either.Either<
@@ -85,7 +92,18 @@ function createFpMMKV(storage: MMKV): FpMMKV {
     | ValueNotSet
     | ReadingFromStoreError
     | ParseResult.ParseError
-  > => getJSON(key).pipe(Either.flatMap(Schema.decodeUnknownEither(schema)))
+  > =>
+    get(key).pipe(Either.flatMap(Schema.decodeEither(Schema.parseJson(schema))))
+
+  const saveVerified =
+    <T extends Schema.Schema.AnyNoContext>(key: string, schema: T) =>
+    (
+      value: Schema.Schema.Type<T>
+    ): Either.Either<void, WritingToStoreError | ParseResult.ParseError> => {
+      return Schema.encodeEither(Schema.parseJson(schema))(value).pipe(
+        Either.flatMap(set(key))
+      )
+    }
 
   return {
     _storage: storage,
@@ -94,7 +112,8 @@ function createFpMMKV(storage: MMKV): FpMMKV {
     setJSON,
     getJSON,
     getVerified,
+    saveVerified,
   }
 }
 
-export const storage = createFpMMKV(new MMKV())
+export const storage = createEffectMmkv(new MMKV())

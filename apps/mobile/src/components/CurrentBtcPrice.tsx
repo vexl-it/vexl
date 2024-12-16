@@ -89,7 +89,7 @@ function CurrentBtcPrice({
             {!customBtcPrice &&
               btcPriceWithState?.btcPrice?.lastUpdatedAt?._tag === 'Some' && (
                 <Text>
-                  {t('common.lastUpdated')}: $
+                  {t('common.lastUpdated')}:{' '}
                   {unixMillisecondsToPretty(
                     btcPriceWithState.btcPrice.lastUpdatedAt.value
                   )()}

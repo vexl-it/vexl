@@ -1,21 +1,48 @@
-import {Either, Schema, pipe} from 'effect'
+import {Either, Schema, pipe, type ParseResult} from 'effect'
 import {atom, type PrimitiveAtom} from 'jotai'
 import {InteractionManager} from 'react-native'
+import {type WritingToStoreError} from '../mmkv/domain'
 import {storage} from '../mmkv/effectMmkv'
 import reportError from '../reportError'
 import getValueFromSetStateActionOfAtom from './getValueFromSetStateActionOfAtom'
 
-const AUTHOR_ID_KEY = '___author_id'
+const AUTHOR_ID_KEY = '___author_id' as const
 
-export type AtomWithParsedMmkvStorage<
-  Value extends Schema.Schema<any, any, never>,
-> = PrimitiveAtom<Schema.Schema.Type<Value>>
+const AuthorKeySchema: Schema.Schema.AnyNoContext = Schema.Struct({
+  [AUTHOR_ID_KEY]: Schema.String,
+})
 
-function toShadowStorageAtom<Value extends Schema.Schema<any, any, never>>(
+const saveWithAuthorKey = <S extends Schema.Schema<any, object, never>>({
+  schema,
+  authorKey,
+  value,
+  key,
+}: {
+  schema: S & Schema.Schema.AnyNoContext
+  authorKey: string
+  value: Schema.Schema.Type<S>
   key: string
+}): Either.Either<void, WritingToStoreError | ParseResult.ParseError> => {
+  const schemaNoContext: Schema.Schema.AnyNoContext = schema
+
+  const schemaWithAuthorKey: Schema.Schema.AnyNoContext = Schema.extend(
+    AuthorKeySchema satisfies Schema.Schema.AnyNoContext
+  )(schemaNoContext)
+
+  const valueToSave: typeof schemaWithAuthorKey.Type = {
+    ...value,
+    [AUTHOR_ID_KEY]: authorKey,
+  }
+
+  return storage.saveVerified(key, schemaWithAuthorKey)(valueToSave)
+}
+
+function toShadowStorageAtom<S extends Schema.Schema.AnyNoContext>(
+  key: string,
+  schema: S
 ): (
-  baseAtom: PrimitiveAtom<Schema.Schema.Type<Value>>
-) => PrimitiveAtom<Schema.Schema.Type<Value>> {
+  baseAtom: PrimitiveAtom<Schema.Schema.Type<S>>
+) => PrimitiveAtom<Schema.Schema.Type<S>> {
   return (baseAtom) =>
     atom(
       (get) => get(baseAtom),
@@ -27,8 +54,12 @@ function toShadowStorageAtom<Value extends Schema.Schema<any, any, never>>(
 
         void InteractionManager.runAfterInteractions(() => {
           pipe(
-            {...newValue, [AUTHOR_ID_KEY]: baseAtom.toString()},
-            storage.setJSON(key),
+            saveWithAuthorKey({
+              schema,
+              authorKey: baseAtom.toString(),
+              value: newValue,
+              key,
+            }),
             Either.getOrElse((l) => {
               reportError(
                 'warn',
@@ -42,17 +73,17 @@ function toShadowStorageAtom<Value extends Schema.Schema<any, any, never>>(
     )
 }
 
-function getInitialValue<Value extends Schema.Schema<any, any, never>>({
+function getInitialValue<S extends Schema.Schema<any, object, never>>({
   key,
   schema,
   defaultValue,
 }: {
-  schema: Value
+  schema: S
   key: string
-  defaultValue: Schema.Schema.Type<Value>
-}): Schema.Schema.Type<Value> {
+  defaultValue: Schema.Schema.Type<S>
+}): Schema.Schema.Type<S> {
   return pipe(
-    storage.getVerified<Value>(key, schema),
+    storage.getVerified(key, schema),
     Either.getOrElse((l) => {
       if (l._tag !== 'ValueNotSet') {
         reportError(
@@ -68,16 +99,15 @@ function getInitialValue<Value extends Schema.Schema<any, any, never>>({
   )
 }
 
-export function atomWithParsedMmkvStorageE<
-  Value extends Schema.Schema<any, any, never>,
->(
+export function atomWithParsedMmkvStorageE<S extends Schema.Struct.Fields>(
   key: string,
-  defaultValue: Schema.Schema.Type<Value>,
-  schema: Value,
+  defaultValue: Schema.Schema.Type<Schema.Struct<S>>,
+  struct: Schema.Struct<S> & Schema.Schema.AnyNoContext,
   debugLabel?: string
-): PrimitiveAtom<Schema.Schema.Type<Value>> {
+): PrimitiveAtom<Schema.Schema.Type<Schema.Struct<S>>> {
+  const schema = Schema.asSchema(struct)
   const coreAtom = atom(getInitialValue({key, schema, defaultValue}))
-  const mmkvAtom = pipe(coreAtom, toShadowStorageAtom(key))
+  const mmkvAtom = pipe(coreAtom, toShadowStorageAtom(key, schema))
 
   mmkvAtom.debugLabel = `${
     debugLabel ?? ''
@@ -100,18 +130,15 @@ export function atomWithParsedMmkvStorageE<
 
         void InteractionManager.runAfterInteractions(() => {
           pipe(
-            storage.getJSON(key),
+            storage.getVerified(key, AuthorKeySchema),
             Either.filterOrLeft(
-              (value) => (value as any)[AUTHOR_ID_KEY] !== coreAtom.toString(),
+              (value) => value[AUTHOR_ID_KEY] !== coreAtom.toString(),
               () =>
                 ({
                   _tag: 'authoredByThisAtom',
                 }) as const
             ),
-            Either.map((value) => {
-              const {[AUTHOR_ID_KEY]: _, ...rest} = value as any
-              return rest
-            }),
+            Either.flatMap(() => storage.getVerified(key, schema)),
             Either.flatMap(decodeValue),
             Either.match({
               onLeft: (e) => {

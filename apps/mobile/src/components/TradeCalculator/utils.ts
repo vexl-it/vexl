@@ -3,6 +3,10 @@ export function replaceNonDecimalCharsInInput(input: string): string {
     return '0'
   }
 
+  if (input.startsWith('0') && input !== '0' && !input.includes('.')) {
+    return input.replace(/^0+/, '')
+  }
+
   return input
 }
 

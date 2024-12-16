@@ -10,7 +10,7 @@ import clockIconSvg from '../../images/clockIconSvg'
 
 interface Props {
   children?: ReactNode
-  status?: 'accepted' | 'pending'
+  status?: 'accepted' | 'pending' | 'outdated'
   text?: string
   introText?: string
   onCancelPress?: () => void
@@ -68,9 +68,33 @@ function VexlbotBubble({
             backgroundColor="$yellowAccent2"
             alignItems="center"
           >
-            <Image source={clockIconSvg}></Image>
+            <Image
+              height={12}
+              width={12}
+              source={clockIconSvg}
+              stroke={getTokens().color.$main.val}
+            ></Image>
             <Text fos={12} ff="$body500" color="$main">
               {t('common.pending')}
+            </Text>
+          </XStack>
+        )}
+        {status === 'outdated' && (
+          <XStack
+            gap="$1"
+            br="$3"
+            px="$2"
+            backgroundColor="$greyAccent1"
+            alignItems="center"
+          >
+            <Image
+              height={12}
+              width={12}
+              source={closeSvg}
+              stroke={getTokens().color.$greyAccent3.val}
+            ></Image>
+            <Text fos={12} ff="$body500" color="$greyAccent3">
+              {t('common.outdated')}
             </Text>
           </XStack>
         )}

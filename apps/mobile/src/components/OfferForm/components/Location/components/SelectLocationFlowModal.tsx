@@ -61,13 +61,13 @@ export default function SelectLocationFlowModal({
             withBackButton
           />
           <LocationSearch
-            onPress={(v) => {
+            onPress={({locationData}) => {
               setSelectedFromList({
-                placeId: v.userData.placeId,
-                address: `${v.userData.suggestFirstRow}, ${v.userData.suggestSecondRow}`,
-                latitude: v.userData.latitude,
-                longitude: v.userData.longitude,
-                viewport: v.userData.viewport,
+                placeId: locationData.userData.placeId,
+                address: `${locationData.userData.suggestFirstRow}, ${locationData.userData.suggestSecondRow}`,
+                latitude: locationData.userData.latitude,
+                longitude: locationData.userData.longitude,
+                viewport: locationData.userData.viewport,
               })
             }}
             sessionId={locationSessionId}

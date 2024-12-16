@@ -4,30 +4,3 @@ export interface TradingChecklistSuggestion {
   type: 'tradeChecklistSuggestion'
   date: UnixMilliseconds
 }
-
-export interface TradingChecklistDateAndTimePreview {
-  type: 'dateAndTimePreview'
-  date: UnixMilliseconds
-}
-
-export interface TradingChecklistMeetingLocationPreview {
-  type: 'meetingLocationPreview'
-  date: UnixMilliseconds
-}
-
-export interface TradingChecklistAmountPreview {
-  type: 'amountPreview'
-  date: UnixMilliseconds
-}
-
-export interface TradingChecklistNetworkPreview {
-  type: 'networkPreview'
-  date: UnixMilliseconds
-}
-
-export type VexlBotMessageData =
-  | TradingChecklistSuggestion
-  | TradingChecklistDateAndTimePreview
-  | TradingChecklistMeetingLocationPreview
-  | TradingChecklistAmountPreview
-  | TradingChecklistNetworkPreview

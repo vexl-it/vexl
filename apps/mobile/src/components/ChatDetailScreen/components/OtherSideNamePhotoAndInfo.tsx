@@ -1,11 +1,13 @@
 import {useMolecule} from 'bunshi/dist/react'
-import {useAtomValue} from 'jotai'
+import {useAtomValue, useSetAtom} from 'jotai'
+import {TouchableOpacity} from 'react-native'
 import {Stack, YStack} from 'tamagui'
+import resolveLocalUri from '../../../utils/resolveLocalUri'
 import ContactTypeAndCommonNumber from '../../ContactTypeAndCommonNumber'
+import {showGoldenAvatarInfoModalActionAton} from '../../GoldenAvatar/atoms'
 import UserAvatar from '../../UserAvatar'
 import UserNameWithSellingBuying from '../../UserNameWithSellingBuying'
 import {chatMolecule} from '../atoms'
-import UserAvatarTouchableWrapper from './UserAvatarTouchableWrapper'
 
 interface Props {
   mode: 'photoTop' | 'photoLeft'
@@ -16,12 +18,14 @@ export const PHOTO_AND_INFO_PHOTO_TOP_HEIGHT = 81 + 16
 function OtherSideNamePhotoAndInfo({mode}: Props): JSX.Element {
   const {
     offerForChatAtom,
+    openedImageUriAtom,
     otherSideDataAtom,
     otherSideLeftAtom,
     canSendMessagesAtom,
     commonConnectionsCountAtom,
     commonConnectionsHashesAtom,
     friendLevelInfoAtom,
+    otherSideGoldenAvatarTypeAtom,
   } = useMolecule(chatMolecule)
 
   const offer = useAtomValue(offerForChatAtom)
@@ -31,6 +35,18 @@ function OtherSideNamePhotoAndInfo({mode}: Props): JSX.Element {
   const commonConnectionsHashes = useAtomValue(commonConnectionsHashesAtom)
   const commonConnectionsCount = useAtomValue(commonConnectionsCountAtom)
   const friendLevelInfo = useAtomValue(friendLevelInfoAtom)
+
+  const setOpenedImageUri = useSetAtom(openedImageUriAtom)
+  const showGoldenAvatarInfoModal = useSetAtom(
+    showGoldenAvatarInfoModalActionAton
+  )
+  const otherSideGoldenAvatarType = useAtomValue(otherSideGoldenAvatarTypeAtom)
+
+  const noImageUri =
+    otherSideData.image.type === 'imageUri' && !otherSideData.image.imageUri
+  const noGoldenAvatarType =
+    !otherSideGoldenAvatarType ||
+    (!offer?.ownershipInfo && !offer?.offerInfo.publicPart.goldenAvatarType)
 
   return (
     <Stack
@@ -43,12 +59,18 @@ function OtherSideNamePhotoAndInfo({mode}: Props): JSX.Element {
         h={40}
         {...(mode === 'photoTop' ? {marginBottom: '$1'} : {marginRight: '$2'})}
       >
-        <UserAvatarTouchableWrapper
-          userImageUri={
-            otherSideData.image.type === 'imageUri'
-              ? otherSideData.image.imageUri
-              : undefined
-          }
+        <TouchableOpacity
+          disabled={noImageUri || noGoldenAvatarType}
+          onPress={() => {
+            if (otherSideData.image.type === 'imageUri')
+              setOpenedImageUri(resolveLocalUri(otherSideData.image.imageUri))
+            else if (
+              !!otherSideGoldenAvatarType ||
+              (!offer?.ownershipInfo &&
+                offer?.offerInfo.publicPart.goldenAvatarType)
+            )
+              showGoldenAvatarInfoModal()
+          }}
         >
           <UserAvatar
             grayScale={otherSideLeft || !canSendMessages}
@@ -56,7 +78,7 @@ function OtherSideNamePhotoAndInfo({mode}: Props): JSX.Element {
             width={40}
             height={40}
           />
-        </UserAvatarTouchableWrapper>
+        </TouchableOpacity>
       </Stack>
       <YStack f={1}>
         <UserNameWithSellingBuying

@@ -5,7 +5,7 @@ import encryptOfferPublicPayload from '@vexl-next/resources-utils/src/offers/uti
 import {Array, Effect, pipe} from 'effect'
 import {atom} from 'jotai'
 import {apiAtom} from '../../api'
-import {showGoldenAvatarAnimationAtom} from '../../components/InsideRouter/components/GoldenAvatarAnimation'
+import {showGoldenAvatarAnimationAtom} from '../../components/GoldenAvatar'
 import {loadingOverlayDisplayedAtom} from '../../components/LoadingOverlayProvider'
 import {myOffersAtom} from '../../state/marketplace/atoms/myOffers'
 import {sessionDataOrDummyAtom} from '../../state/session'

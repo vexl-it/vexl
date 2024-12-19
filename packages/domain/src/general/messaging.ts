@@ -20,7 +20,14 @@ import {E164PhoneNumber, E164PhoneNumberE} from './E164PhoneNumber.brand'
 import {UserName, UserNameE} from './UserName.brand'
 import {RealLifeInfo, RealLifeInfoE} from './UserNameAndAvatar.brand'
 import {FcmCypher, FcmCypherE} from './notifications'
-import {OfferId, OfferIdE, OneOfferInState, OneOfferInStateE} from './offers'
+import {
+  GoldenAvatarType,
+  GoldenAvatarTypeE,
+  OfferId,
+  OfferIdE,
+  OneOfferInState,
+  OneOfferInStateE,
+} from './offers'
 import {TradeChecklistUpdate, TradeChecklistUpdateE} from './tradeChecklist'
 
 export const MessageType = z.enum([
@@ -68,11 +75,13 @@ export type MessageType = Schema.Schema.Type<typeof MessageTypeE>
 export const ChatUserIdentity = z
   .object({
     publicKey: PublicKeyPemBase64,
+    goldenAvatarType: GoldenAvatarType.optional(),
     realLifeInfo: RealLifeInfo.optional(),
   })
   .readonly()
 export const ChatUserIdentityE = Schema.Struct({
   publicKey: PublicKeyPemBase64E,
+  goldenAvatarType: Schema.optional(GoldenAvatarTypeE),
   realLifeInfo: Schema.optional(RealLifeInfoE),
 })
 export type ChatUserIdentity = Schema.Schema.Type<typeof ChatUserIdentityE>
@@ -123,6 +132,7 @@ export const ChatMessagePayload = z
     messageType: MessageType,
     lastReceivedVersion: SemverString.optional(),
     myVersion: SemverString.optional(),
+    goldenAvatarType: GoldenAvatarType.optional(),
     tradeChecklistUpdate: TradeChecklistUpdate.optional(),
     minimalRequiredVersion: SemverString.optional(),
     deanonymizedUser: z
@@ -148,6 +158,7 @@ export const ChatMessagePayloadE = Schema.Struct({
   messageType: MessageTypeE,
   lastReceivedVersion: Schema.optional(SemverStringE),
   myVersion: Schema.optional(SemverStringE),
+  goldenAvatarType: Schema.optional(GoldenAvatarTypeE),
   tradeChecklistUpdate: Schema.optional(TradeChecklistUpdateE),
   minimalRequiredVersion: Schema.optional(SemverStringE),
   deanonymizedUser: Schema.optional(
@@ -174,6 +185,7 @@ export const ChatMessage = z
     minimalRequiredVersion: SemverString.optional(),
     time: UnixMilliseconds,
     myVersion: SemverString.optional(),
+    goldenAvatarType: GoldenAvatarType.optional(),
 
     /**
      * Used only for messages  of type `VERSION_UPDATE`
@@ -199,6 +211,7 @@ const ChatMessageE = Schema.Struct({
   minimalRequiredVersion: Schema.optional(SemverStringE),
   time: UnixMillisecondsE,
   myVersion: Schema.optional(SemverStringE),
+  goldenAvatarType: Schema.optional(GoldenAvatarTypeE),
 
   /**
    * Used only for messages  of type `VERSION_UPDATE`

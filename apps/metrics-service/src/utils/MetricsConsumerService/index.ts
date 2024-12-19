@@ -49,7 +49,7 @@ export class MetricsConsumerService extends Context.Tag(
       Effect.gen(function* (_) {
         const queueName = yield* _(metricsQueueNameConfig)
 
-        yield* _(Effect.log('Configuring redis smq'))
+        yield* _(Effect.log(`Configuring redis smq`, yield* _(redisUrl)))
         yield* _(setupRedisSmqConnection(redisUrl))
 
         yield* _(Effect.log(`Ensuring queue exists. Queue name: ${queueName}`))

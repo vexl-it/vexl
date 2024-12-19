@@ -9,7 +9,7 @@ import {Effect, Either, Exit, Fiber} from 'effect'
 import * as E from 'fp-ts/Either'
 import {pipe} from 'fp-ts/lib/function'
 import {atom, useAtomValue, useSetAtom} from 'jotai'
-import {useMemo} from 'react'
+import React, {useMemo, useRef} from 'react'
 import {Dimensions} from 'react-native'
 import MapView, {PROVIDER_GOOGLE, type Region} from 'react-native-maps'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
@@ -25,6 +25,7 @@ import {
 } from '../../../utils/localization/I18nProvider'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 import Image from '../../Image'
+import Slider from '../../Slider'
 import {type MapValue, type MapValueWithRadius} from '../brands'
 import pinSvg from '../img/pinSvg'
 import radiusRingSvg from '../img/radiusRingSvg'
@@ -69,8 +70,12 @@ function useAtoms({
     return {
       selectedRegionAtom,
       selectedRegionRadiusAtom: atom<string>((get) => {
+        const {width} = Dimensions.get('window')
+        const usedWidthWithoutPadding = (width - circleMargin * 2) / width
+
         const selectedRegion = get(selectedRegionAtom)
-        const radiusLongitudeDeg = selectedRegion.longitudeDelta / 2
+        const radiusLongitudeDeg =
+          (selectedRegion.longitudeDelta * usedWidthWithoutPadding) / 2
         return Intl.NumberFormat(getCurrentLocale()).format(
           Math.round(
             longitudeDeltaToKilometers(
@@ -165,7 +170,7 @@ function PickedLocationText({
   return geocodingState.state === 'loading' ? (
     <Text>{t('common.loading')}...</Text>
   ) : (
-    <>
+    <React.Fragment>
       <Text
         ta="center"
         color={E.isLeft(geocodingState.either) ? '$red' : '$white'}
@@ -187,8 +192,31 @@ function PickedLocationText({
           radius,
         })}
       </Text>
-    </>
+    </React.Fragment>
   )
+}
+
+function calculateZoom(
+  latitude: number,
+  latitudeDelta: number,
+  longitudeDelta: number,
+  minDelta = 0.001,
+  maxDelta = 50
+): number {
+  // Adjust longitudeDelta based on latitude
+  const adjustedLongitudeDelta =
+    longitudeDelta * Math.cos((latitude * Math.PI) / 180)
+
+  // Determine the effective delta
+  const effectiveDelta = Math.max(latitudeDelta, adjustedLongitudeDelta)
+
+  // Clamp the delta within minDelta and maxDelta
+  const clampedDelta = Math.max(minDelta, Math.min(effectiveDelta, maxDelta))
+
+  // Normalize and calculate zoom
+  const zoom = 99 - ((clampedDelta - minDelta) / (maxDelta - minDelta)) * 99
+
+  return Math.round(zoom) // Round to nearest integer
 }
 
 export default function MapLocationWithRadiusSelect({
@@ -199,9 +227,20 @@ export default function MapLocationWithRadiusSelect({
   ...restProps
 }: Props): JSX.Element {
   const safeAreaInsets = useSafeAreaInsets()
+  const mapRef = useRef<MapView>(null)
   const initialRegion = useMemo(
     () => mapValueToRegion(initialValue),
     [initialValue]
+  )
+
+  const initialZoom = useMemo(
+    () =>
+      calculateZoom(
+        initialRegion.latitude,
+        initialRegion.latitudeDelta,
+        initialRegion.longitudeDelta
+      ),
+    [initialRegion]
   )
 
   const atoms = useAtoms({
@@ -209,17 +248,23 @@ export default function MapLocationWithRadiusSelect({
     onPick,
   })
   const setRegion = useSetAtom(atoms.selectedRegionAtom)
+  const {width, height} = useMemo(() => Dimensions.get('window'), [])
 
   return (
     <Stack position="relative" {...restProps} backgroundColor="$black">
       <MapView
+        ref={mapRef}
         mapPadding={mapPaddings}
         provider={PROVIDER_GOOGLE}
         customMapStyle={mapTheme}
         style={mapStyle}
         toolbarEnabled={false}
         onRegionChangeComplete={(region) => {
-          setRegion(region)
+          void mapRef.current
+            ?.coordinateForPoint({x: width / 2, y: height / 2})
+            .then((v) => {
+              setRegion({...region, ...v})
+            })
         }}
         region={initialRegion}
       />
@@ -293,7 +338,22 @@ export default function MapLocationWithRadiusSelect({
         >
           <Stack>{topChildren}</Stack>
           <Stack pointerEvents="none" flex={1}></Stack>
-          <Stack>{bottomChildren}</Stack>
+          <Stack pointerEvents="unset">
+            <Stack mb="$4" mx="$4">
+              <Slider
+                value={initialZoom}
+                step={0.2}
+                onValueChange={(v) => {
+                  mapRef.current?.setCamera({
+                    zoom: v[0],
+                  })
+                }}
+                maximumValue={16}
+                minimumValue={7}
+              />
+            </Stack>
+            {bottomChildren}
+          </Stack>
         </Stack>
       </Stack>
     </Stack>

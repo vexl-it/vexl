@@ -32,6 +32,14 @@ export default function createNewChatsFromFirstMessages({
         const lastMessage = messages.at(-1)
         if (!lastMessage) return undefined
 
+        const goldenAvatarType =
+          lastMessage.state === 'received' &&
+          lastMessage.message.goldenAvatarType
+            ? lastMessage.message.goldenAvatarType
+            : undefined
+
+        console.log(`Last message: ${JSON.stringify(lastMessage, null, 2)}`)
+
         const otherSideVersion =
           lastMessage.state === 'receivedButRequiresNewerVersion' ||
           lastMessage.state === 'received'
@@ -60,7 +68,7 @@ export default function createNewChatsFromFirstMessages({
             origin: inbox.offerId
               ? {type: 'myOffer', offerId: inbox.offerId, offer: inboxOffer}
               : {type: 'unknown'},
-            otherSide: {publicKey: senderPublicKey},
+            otherSide: {publicKey: senderPublicKey, goldenAvatarType},
             id: generateChatId(),
             isUnread: true,
             showInfoBar: true,

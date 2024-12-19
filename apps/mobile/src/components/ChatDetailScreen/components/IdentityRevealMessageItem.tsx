@@ -1,12 +1,14 @@
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useMemo} from 'react'
+import {TouchableOpacity} from 'react-native'
 import {Image, Stack} from 'tamagui'
 import BlockIconSvg from '../../../images/blockIconSvg'
 import {generateOtherSideSeed} from '../../../state/chat/atoms/selectOtherSideDataAtom'
 import {type ChatMessageWithState} from '../../../state/chat/domain'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {randomNumberFromSeed} from '../../../utils/randomNumber'
+import resolveLocalUri from '../../../utils/resolveLocalUri'
 import avatarsGoldenGlassesAndBackgroundSvg from '../../AnonymousAvatar/images/avatarsGoldenGlassesAndBackgroundSvg'
 import avatarsSvg from '../../AnonymousAvatar/images/avatarsSvg'
 import SvgImage from '../../Image'
@@ -14,7 +16,6 @@ import {revealIdentityFromQuickActionBannerAtom} from '../../TradeChecklistFlow/
 import UserAvatar from '../../UserAvatar'
 import {chatMolecule} from '../atoms'
 import BigIconMessage from './BigIconMessage'
-import UserAvatarTouchableWrapper from './UserAvatarTouchableWrapper'
 
 function IdentityRevealMessageItem({
   message,
@@ -33,6 +34,7 @@ function IdentityRevealMessageItem({
     publicKeyPemBase64Atom,
     chatIdAtom,
     offerForChatAtom,
+    openedImageUriAtom,
   } = useMolecule(chatMolecule)
   const {image, userName, partialPhoneNumber} = useAtomValue(otherSideDataAtom)
   const chat = useAtomValue(chatAtom)
@@ -47,9 +49,13 @@ function IdentityRevealMessageItem({
   const revealIdentityFromQuickActionBanner = useSetAtom(
     revealIdentityFromQuickActionBannerAtom
   )
+  const setOpenedImageUri = useSetAtom(openedImageUriAtom)
+
   const anonymousAvatars =
-    offer?.offerInfo.publicPart.goldenAvatarType === 'BACKGROUND_AND_GLASSES' &&
-    !offer.ownershipInfo?.adminId
+    (offer?.offerInfo.publicPart.goldenAvatarType ===
+      'BACKGROUND_AND_GLASSES' &&
+      !offer.ownershipInfo?.adminId) ||
+    !!chat.otherSide.goldenAvatarType
       ? avatarsGoldenGlassesAndBackgroundSvg
       : avatarsSvg
 
@@ -117,14 +123,18 @@ function IdentityRevealMessageItem({
         bottomText={partialPhoneNumber}
         icon={
           image.type === 'imageUri' ? (
-            <UserAvatarTouchableWrapper userImageUri={image.imageUri}>
+            <TouchableOpacity
+              onPress={() => {
+                setOpenedImageUri(resolveLocalUri(image.imageUri))
+              }}
+            >
               <Image
                 height={80}
                 width={80}
                 borderRadius="$4"
                 source={{uri: image.imageUri}}
               />
-            </UserAvatarTouchableWrapper>
+            </TouchableOpacity>
           ) : (
             <UserAvatar height={80} width={80} userImage={image} />
           )

@@ -16,7 +16,6 @@ import {offersStateAtom} from '../state/marketplace/atoms/offersState'
 import {postLoginFinishedStorageAtom} from '../state/postLoginOnboarding'
 import {selectedCurrencyStorageAtom} from '../state/selectedCurrency'
 import vexlCalendarStorageAtom from '../state/tradeChecklist/atoms/vexlCalendarStorageAtom'
-import {lastInitialLinkStorageAtom} from './deepLinks'
 import {storage} from './mmkv/fpMmkv'
 import {preferencesAtom} from './preferences'
 
@@ -81,10 +80,6 @@ export default function clearMmkvStorageAndEmptyAtoms(): void {
   getDefaultStore().set(vexlCalendarStorageAtom, {id: undefined})
   getDefaultStore().set(wasLastRouteBeforeRedirectOnContactsScreenMmkvAtom, {
     value: false,
-  })
-
-  getDefaultStore().set(lastInitialLinkStorageAtom, {
-    lastLinkImported: null,
   })
 
   storage._storage.clearAll()

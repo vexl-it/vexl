@@ -85,6 +85,10 @@ export const handleImportDeepContactActionAtom = atom(
   }
 )
 
+// ⚠️⚠️
+// this atom is not cleared when user logs out, we need to keep track of the last link
+// to not handle it after logging in automatically again as Linking state cannot be cleared
+// ⚠️⚠️
 export const lastInitialLinkStorageAtom = atomWithParsedMmkvStorage(
   'lastInitialLink',
   {lastLinkImported: null},
@@ -170,7 +174,7 @@ function isLinkVersionSupported(
   })
 }
 
-export function useHandleDeepLinkV2(): void {
+export function useHandleUniversalAndAppLinks(): void {
   const store = useStore()
   const {t} = store.get(translationAtom)
   const url = Linking.useURL()

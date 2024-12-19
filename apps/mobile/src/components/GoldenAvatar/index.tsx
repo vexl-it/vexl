@@ -13,11 +13,11 @@ import Animated, {
 } from 'react-native-reanimated'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {getTokens, Stack, Text} from 'tamagui'
-import {useTranslation} from '../../../../utils/localization/I18nProvider'
-import Button from '../../../Button'
-import IconButton from '../../../IconButton'
-import Image from '../../../Image'
-import closeSvg from '../../../images/closeSvg'
+import {useTranslation} from '../../utils/localization/I18nProvider'
+import Button from '../Button'
+import IconButton from '../IconButton'
+import Image from '../Image'
+import closeSvg from '../images/closeSvg'
 import avatarBackgroundSvg from './images/avatarBackgroundSvg'
 import avatarGlassesSvg from './images/avatarGlassesSvg'
 import avatarSvg1 from './images/avatarSvg1'
@@ -33,7 +33,7 @@ export const forceHideGoldenAvatarAnimationActionAtom = atom(null, (_, set) => {
   set(showGoldenAvatarAnimationAtom, false)
 })
 
-function GoldenAvatarAnimation(): JSX.Element | null {
+function GoldenAvatar(): JSX.Element | null {
   const {t} = useTranslation()
   const {height, width} = useWindowDimensions()
   const insets = useSafeAreaInsets()
@@ -103,7 +103,7 @@ function GoldenAvatarAnimation(): JSX.Element | null {
 
   useEffect(() => {
     if (showGoldenAvatarAnimation)
-      sharedOpacity.value = withTiming(0.8, {duration: 1500}, () => {
+      sharedOpacity.value = withTiming(0.8, {duration: 750}, () => {
         shapeOneTranslateY.value = withTiming(0, {
           duration: 1750,
           easing: Easing.bounce,
@@ -133,11 +133,11 @@ function GoldenAvatarAnimation(): JSX.Element | null {
           },
           () => {
             avatarBackgroundOpacity.value = withDelay(
-              200,
+              100,
               withTiming(
                 1,
                 {
-                  duration: 800,
+                  duration: 400,
                 },
                 () => {
                   regularAvatarRotation.value = withDelay(
@@ -146,25 +146,25 @@ function GoldenAvatarAnimation(): JSX.Element | null {
                       withTiming(
                         1,
                         {
-                          duration: 700,
+                          duration: 350,
                           easing: Easing.linear,
                         },
                         () => {
                           goldenAvatarRotation.value = withTiming(
                             1,
                             {
-                              duration: 700,
+                              duration: 500,
                               easing: Easing.linear,
                             },
                             () => {
                               sharedStarScale.value = withDelay(
-                                500,
-                                withTiming(0.8, {duration: 300}, () => {
+                                250,
+                                withTiming(0.8, {duration: 150}, () => {
                                   descriptionOpacity.value = withTiming(1, {
-                                    duration: 1500,
+                                    duration: 750,
                                   })
                                   continueButtonOpacity.value = withTiming(1, {
-                                    duration: 1500,
+                                    duration: 750,
                                   })
                                 })
                               )
@@ -235,7 +235,7 @@ function GoldenAvatarAnimation(): JSX.Element | null {
       />
       <Stack mb="$4" zIndex={1001}>
         <Animated.View style={[descriptionOpacityAnimation]}>
-          <Text textAlign="center" fontFamily="$body600" fos={14} col="$white">
+          <Text textAlign="center" ff="$heading" fos={18} col="$white">
             {t('goldenGlasses.youReceived')}
           </Text>
         </Animated.View>
@@ -345,4 +345,4 @@ function GoldenAvatarAnimation(): JSX.Element | null {
   )
 }
 
-export default GoldenAvatarAnimation
+export default GoldenAvatar

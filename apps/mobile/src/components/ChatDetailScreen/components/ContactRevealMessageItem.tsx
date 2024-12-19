@@ -6,6 +6,7 @@ import * as E from 'fp-ts/Either'
 import {pipe} from 'fp-ts/function'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React from 'react'
+import {TouchableOpacity} from 'react-native'
 import {Image, Stack} from 'tamagui'
 import blockPhoneNumberRevealSvg from '../../../images/blockPhoneNumberRevealSvg'
 import {type ChatMessageWithState} from '../../../state/chat/domain'
@@ -15,13 +16,13 @@ import {safeParse} from '../../../utils/fpUtils'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import reportError from '../../../utils/reportError'
 import resolveLocalUri from '../../../utils/resolveLocalUri'
+import {showGoldenAvatarInfoModalActionAton} from '../../GoldenAvatar/atoms'
 import SvgImage from '../../Image'
 import {toastNotificationAtom} from '../../ToastNotification/atom'
 import {revealContactFromQuickActionBannerAtom} from '../../TradeChecklistFlow/atoms/revealContactAtoms'
 import UserAvatar from '../../UserAvatar'
 import {chatMolecule} from '../atoms'
 import BigIconMessage from './BigIconMessage'
-import UserAvatarTouchableWrapper from './UserAvatarTouchableWrapper'
 import checkIconSvg from './images/checkIconSvg'
 
 function RevealedContactMessageItem({
@@ -32,13 +33,22 @@ function RevealedContactMessageItem({
 }): JSX.Element {
   const {t} = useTranslation()
 
-  const {otherSideDataAtom, isContactAlreadyInContactsListAtom} =
-    useMolecule(chatMolecule)
+  const {
+    offerForChatAtom,
+    openedImageUriAtom,
+    otherSideDataAtom,
+    isContactAlreadyInContactsListAtom,
+  } = useMolecule(chatMolecule)
+  const offer = useAtomValue(offerForChatAtom)
   const {image, userName, fullPhoneNumber} = useAtomValue(otherSideDataAtom)
   const addRevealedContact = useSetAtom(addContactWithUiFeedbackAtom)
   const setToastNotification = useSetAtom(toastNotificationAtom)
   const isContactAlreadyInContactsList = useAtomValue(
     isContactAlreadyInContactsListAtom
+  )
+  const setOpenedImageUri = useSetAtom(openedImageUriAtom)
+  const showGoldenAvatarInfoModal = useSetAtom(
+    showGoldenAvatarInfoModalActionAton
   )
 
   return (
@@ -100,8 +110,10 @@ function RevealedContactMessageItem({
       }
       icon={
         image.type === 'imageUri' ? (
-          <UserAvatarTouchableWrapper
-            userImageUri={resolveLocalUri(image.imageUri)}
+          <TouchableOpacity
+            onPress={() => {
+              setOpenedImageUri(resolveLocalUri(image.imageUri))
+            }}
           >
             <Image
               height={80}
@@ -109,9 +121,14 @@ function RevealedContactMessageItem({
               borderRadius="$4"
               source={{uri: resolveLocalUri(image.imageUri)}}
             />
-          </UserAvatarTouchableWrapper>
+          </TouchableOpacity>
         ) : (
-          <UserAvatar height={80} width={80} userImage={image} />
+          <TouchableOpacity
+            disabled={!offer?.offerInfo.publicPart.goldenAvatarType}
+            onPress={showGoldenAvatarInfoModal}
+          >
+            <UserAvatar height={80} width={80} userImage={image} />
+          </TouchableOpacity>
         )
       }
     />
@@ -127,6 +144,7 @@ function ContactRevealMessageItem({
 }): JSX.Element | null {
   const {t} = useTranslation()
   const {
+    openedImageUriAtom,
     otherSideDataAtom,
     contactRevealStatusAtom,
     contactRevealTriggeredFromTradeChecklistAtom,
@@ -146,6 +164,7 @@ function ContactRevealMessageItem({
   const revealContactFromQuickActionBanner = useSetAtom(
     revealContactFromQuickActionBannerAtom
   )
+  const setOpenedImageUri = useSetAtom(openedImageUriAtom)
 
   if (
     (message.message.messageType === 'REQUEST_CONTACT_REVEAL' ||
@@ -162,14 +181,18 @@ function ContactRevealMessageItem({
         bottomText={partialPhoneNumber}
         icon={
           image.type === 'imageUri' ? (
-            <UserAvatarTouchableWrapper userImageUri={image.imageUri}>
+            <TouchableOpacity
+              onPress={() => {
+                setOpenedImageUri(resolveLocalUri(image.imageUri))
+              }}
+            >
               <Image
                 height={80}
                 width={80}
                 borderRadius="$4"
                 source={{uri: image.imageUri}}
               />
-            </UserAvatarTouchableWrapper>
+            </TouchableOpacity>
           ) : (
             <UserAvatar height={80} width={80} userImage={image} />
           )

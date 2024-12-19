@@ -1,6 +1,7 @@
+import * as Haptics from 'expo-haptics'
 import {atom, useAtomValue, useSetAtom} from 'jotai'
 import {useEffect} from 'react'
-import {useWindowDimensions} from 'react-native'
+import {Platform, useWindowDimensions, Vibration} from 'react-native'
 import Animated, {
   Easing,
   interpolate,
@@ -100,6 +101,38 @@ function GoldenAvatar(): JSX.Element | null {
   const continueButtonOpacityAnimation = useAnimatedStyle(() => ({
     opacity: continueButtonOpacity.value,
   }))
+
+  useEffect(() => {
+    setTimeout(() => {
+      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy)
+    }, 1300)
+    setTimeout(() => {
+      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy)
+    }, 1400)
+    setTimeout(() => {
+      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
+    }, 1500)
+    setTimeout(() => {
+      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy)
+    }, 1700)
+    setTimeout(() => {
+      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
+    }, 1900)
+    setTimeout(() => {
+      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
+    }, 2000)
+    setTimeout(() => {
+      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
+    }, 2200)
+
+    setTimeout(() => {
+      if (Platform.OS === 'ios') {
+        Vibration.vibrate() // Default short vibration for iOS
+      } else {
+        Vibration.vibrate(300) // 300ms vibration for Android
+      }
+    }, 2800)
+  }, [])
 
   useEffect(() => {
     if (showGoldenAvatarAnimation)

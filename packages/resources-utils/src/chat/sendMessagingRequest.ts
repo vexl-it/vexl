@@ -8,6 +8,7 @@ import {
   type ChatMessagePayload,
 } from '@vexl-next/domain/src/general/messaging'
 import {type FcmCypher} from '@vexl-next/domain/src/general/notifications'
+import {type GoldenAvatarType} from '@vexl-next/domain/src/general/offers'
 import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {now} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {type ChatApi} from '@vexl-next/rest-api/src/services/chat'
@@ -25,12 +26,14 @@ function createRequestChatMessage({
   myFcmCypher,
   lastReceivedFcmCypher,
   myVersion,
+  goldenAvatarType,
 }: {
   text: string
   myFcmCypher?: FcmCypher
   lastReceivedFcmCypher?: FcmCypher
   senderPublicKey: PublicKeyPemBase64
   myVersion: SemverString
+  goldenAvatarType?: GoldenAvatarType
 }): ChatMessage {
   return {
     uuid: generateChatMessageId(),
@@ -41,6 +44,7 @@ function createRequestChatMessage({
     time: now(),
     myVersion,
     senderPublicKey,
+    goldenAvatarType,
   }
 }
 
@@ -59,6 +63,7 @@ export function sendMessagingRequest({
   theirFcmCypher,
   notificationApi,
   otherSideVersion,
+  goldenAvatarType,
 }: {
   text: string
   fromKeypair: PrivateKeyHolder
@@ -70,6 +75,7 @@ export function sendMessagingRequest({
   theirFcmCypher?: FcmCypher | undefined
   notificationApi: NotificationApi
   otherSideVersion?: SemverString | undefined
+  goldenAvatarType?: GoldenAvatarType
 }): Effect.Effect<
   ChatMessage,
   | ApiErrorRequestMessaging
@@ -84,10 +90,15 @@ export function sendMessagingRequest({
       myVersion,
       myFcmCypher,
       lastReceivedFcmCypher,
+      goldenAvatarType,
     })
 
     const message = yield* _(
       taskEitherToEffect(messageToNetwork(toPublicKey)(requestChatMessage))
+    )
+
+    console.log(
+      `Sending message: ${JSON.stringify(requestChatMessage, null, 2)}`
     )
 
     yield* _(

@@ -139,6 +139,7 @@ export function chatMessagePayloadToChatMessage(
       : undefined,
     senderPublicKey,
     myVersion: payload.myVersion,
+    goldenAvatarType: payload.goldenAvatarType,
     lastReceivedVersion: payload.lastReceivedVersion,
     tradeChecklistUpdate: payload.tradeChecklistUpdate,
     myFcmCypher: payload.myFcmCypher,

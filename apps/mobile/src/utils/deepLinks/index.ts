@@ -174,16 +174,22 @@ function isLinkVersionSupported(
   })
 }
 
+export const lastUniversalOrAppLinkStorageAtom = atomWithParsedMmkvStorage(
+  'lastUniversalOrAppLink',
+  {lastUniversalOrAppLinkImported: null},
+  z.object({lastUniversalOrAppLinkImported: z.string().nullable()}).readonly()
+)
+
 export function useHandleUniversalAndAppLinks(): void {
   const store = useStore()
   const {t} = store.get(translationAtom)
   const url = Linking.useURL()
   const goldenAvatarType = store.get(goldenAvatarTypeAtom)
-  const lastInitialLink = store.get(lastInitialLinkStorageAtom)
+  const lastUniversalOrAppLink = store.get(lastUniversalOrAppLinkStorageAtom)
 
   const onLinkReceived = useCallback(() => {
     if (url) {
-      if (lastInitialLink.lastLinkImported === url) {
+      if (lastUniversalOrAppLink.lastUniversalOrAppLinkImported === url) {
         console.info('Ignoring initial link as it was opened before')
         return
       }
@@ -210,8 +216,8 @@ export function useHandleUniversalAndAppLinks(): void {
                 return yield* _(
                   store.set(handleGoldenGlassesDeepLinkActionAtom),
                   Effect.tap(() => {
-                    store.set(lastInitialLinkStorageAtom, {
-                      lastLinkImported: url,
+                    store.set(lastUniversalOrAppLinkStorageAtom, {
+                      lastUniversalOrAppLinkImported: url,
                     })
                   })
                 )
@@ -235,7 +241,13 @@ export function useHandleUniversalAndAppLinks(): void {
             reportError('warn', new Error('Unknown deep link type'), {url})
       }
     }
-  }, [goldenAvatarType, lastInitialLink.lastLinkImported, store, t, url])
+  }, [
+    goldenAvatarType,
+    lastUniversalOrAppLink.lastUniversalOrAppLinkImported,
+    store,
+    t,
+    url,
+  ])
 
   useEffect(onLinkReceived, [onLinkReceived])
 }

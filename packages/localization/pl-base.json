@@ -84,6 +84,7 @@
   "common.copied": "Skopiowano",
   "common.allowNow": "Pozwól teraz",
   "common.discard": "Odrzuć",
+  "common.lastUpdated": "Last updated",
   "currency.AED": "Dirham Zjednoczonych Emiratów Arabskich",
   "currency.ALL": "Lek albański",
   "currency.ANG": "Gulden antylski",
@@ -347,6 +348,8 @@
   "settings.logoutDialog.description": "Czy na pewno chcesz usunąć swoje konto? Tej czynności nie można cofnąć",
   "settings.screenshotsNotAllowed": "Brak uprawnień do tworzenia zrzutów ekranu",
   "settings.otherUserDisabledScreenshots": "Wyłączono zrzuty ekranu aplikacji.",
+  "settings.joinedMeetup": "Joined a meetup",
+  "settings.participatedInMeetup": "Participated in a meetup",
   "offer.title": "Oferta",
   "offer.cashOnly": "Tylko gotówka",
   "offer.onlineOnly": "Tylko online",
@@ -1071,5 +1074,13 @@
   "btcPricePopup.titlePrice": "Kurs BTC na żywo",
   "btcPricePopup.titleRate": "Kurs wymiany BTC",
   "btcPricePopup.description": "Vexl pobiera kurs BTC od Yadio.io. Jest odświeżany co 10-20 minut.",
-  "btcPricePopup.url": "https://Yadio.io/info.html"
+  "btcPricePopup.url": "https://Yadio.io/info.html",
+  "goldenGlasses.errorSettingRewardForParticipationOnMeetup": "Error setting reward for participation on meetup. Please contact support.",
+  "goldenGlasses.youReceived": "You received",
+  "goldenGlasses.goldenGlasses": "Golden glasses",
+  "goldenGlasses.forMeetupParticipation": "for meetup participation",
+  "goldenGlasses.forJoiningMeetup": "for joining a meetup",
+  "goldenGlasses.thisUserReceivedGoldenGlassesAfterMeetup": "This user received golden glasses after Vexl meetup participation.",
+  "linking.wrongLinkFormatReceived": "Wrong link format received. Link {{link}} seems to be invalid. Check the link and try again.",
+  "linking.linkNotSupportedPleaseUpdate": "Link not supported. Please update your app to the latest version."
 }

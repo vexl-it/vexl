@@ -57,6 +57,7 @@ export default function serializeChatMessage(
       minimalRequiredVersion: message.minimalRequiredVersion,
       tradeChecklistUpdate: message.tradeChecklistUpdate,
       myVersion: message.myVersion,
+      goldenAvatarType: message.goldenAvatarType,
       lastReceivedVersion: message.lastReceivedVersion,
       deanonymizedUser: deanonymizedUserToPayload(message),
       myFcmCypher: message.myFcmCypher,

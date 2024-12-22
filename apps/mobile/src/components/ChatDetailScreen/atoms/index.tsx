@@ -112,6 +112,10 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
 
   const otherSideDataAtom = selectOtherSideDataAtom(chatAtom)
 
+  const otherSideGoldenAvatarTypeAtom = focusAtom(chatAtom, (o) =>
+    o.prop('otherSide').prop('goldenAvatarType')
+  )
+
   function createFindMessageIndexInListAtom({
     direction,
     messageType,
@@ -1151,5 +1155,6 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     contactRevealApproveMessageIdAtom,
     fiatValueToDisplayInVexlbotMessageAtom,
     btcPricePercentageDifferenceToDisplayInVexlbotMessageAtom,
+    otherSideGoldenAvatarTypeAtom,
   }
 })

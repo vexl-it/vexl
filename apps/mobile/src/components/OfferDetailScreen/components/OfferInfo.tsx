@@ -170,12 +170,6 @@ function OfferInfo({
               offer={offer}
             />
           </Stack>
-          {!!offer.offerInfo.publicPart.goldenAvatarType && (
-            <Info
-              text={t('goldenGlasses.thisUserReceivedGoldenGlassesAfterMeetup')}
-              variant="yellow"
-            />
-          )}
           <Info
             visibleStateAtom={friendLevelBannerPreferenceAtom}
             text={t('common.whatDoesThisMean', {term: friendLevel})}

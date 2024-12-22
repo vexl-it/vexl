@@ -1,7 +1,8 @@
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
-import {useAtomValue} from 'jotai'
+import {useAtomValue, useSetAtom} from 'jotai'
 import {DateTime} from 'luxon'
 import {useMemo} from 'react'
+import {TouchableOpacity} from 'react-native'
 import {Stack, Text} from 'tamagui'
 import {useChatForOffer} from '../state/chat/hooks/useChatForOffer'
 import createImportedContactsForHashesAtom from '../state/contacts/atom/createImportedContactsForHashesAtom'
@@ -12,6 +13,7 @@ import randomName from '../utils/randomName'
 import {setTimezoneOfUser} from '../utils/unixMillisecondsToLocaleDateTime'
 import {AnonymousAvatarFromSeed} from './AnonymousAvatar'
 import ContactTypeAndCommonNumber from './ContactTypeAndCommonNumber'
+import {showGoldenAvatarInfoModalActionAton} from './GoldenAvatar/atoms'
 import UserAvatar from './UserAvatar'
 import UserNameWithSellingBuying from './UserNameWithSellingBuying'
 
@@ -38,6 +40,9 @@ function OfferAuthorAvatar({
         ),
       [offerInfo.privatePart.commonFriends]
     )
+  )
+  const showGoldenAvatarInfoModal = useSetAtom(
+    showGoldenAvatarInfoModalActionAton
   )
 
   const buyingOrSellingText = (() => {
@@ -103,13 +108,18 @@ function OfferAuthorAvatar({
               grayScale={negative ?? false}
             />
           ) : (
-            <AnonymousAvatarFromSeed
-              grayScale={negative ?? false}
-              width={48}
-              height={48}
-              seed={offerInfo.offerId}
-              goldenAvatarType={offerInfo.publicPart.goldenAvatarType}
-            />
+            <TouchableOpacity
+              disabled={!offerInfo.publicPart.goldenAvatarType}
+              onPress={showGoldenAvatarInfoModal}
+            >
+              <AnonymousAvatarFromSeed
+                grayScale={negative ?? false}
+                width={48}
+                height={48}
+                seed={offerInfo.offerId}
+                goldenAvatarType={offerInfo.publicPart.goldenAvatarType}
+              />
+            </TouchableOpacity>
           )}
           <Stack f={1} ml="$2">
             <UserNameWithSellingBuying

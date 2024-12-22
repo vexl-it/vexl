@@ -19,10 +19,11 @@ export function generateOtherSideSeed(chat: Chat): string {
 
 export function getOtherSideData(chat: Chat): RealLifeInfo {
   const seed = generateOtherSideSeed(chat)
+
   const goldenAvatarType =
     chat.origin.type === 'theirOffer'
       ? chat.origin.offer?.offerInfo.publicPart.goldenAvatarType
-      : undefined
+      : chat.otherSide.goldenAvatarType
   const avatars =
     goldenAvatarType === 'BACKGROUND_AND_GLASSES'
       ? avatarsGoldenGlassesAndBackgroundSvg

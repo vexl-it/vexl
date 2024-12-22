@@ -11,6 +11,7 @@ import {loadingOverlayDisplayedAtom} from '../../../components/LoadingOverlayPro
 import {translationAtom} from '../../../utils/localization/I18nProvider'
 import {getNotificationToken} from '../../../utils/notifications'
 import {checkNotificationPermissionsAndAskIfPossibleTEActionAtom} from '../../../utils/notifications/checkAndAskForPermissionsActionAtom'
+import {goldenAvatarTypeAtom} from '../../../utils/preferences'
 import reportError from '../../../utils/reportError'
 import showErrorAlert from '../../../utils/showErrorAlert'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
@@ -29,6 +30,9 @@ const sendRequestActionAtom = atom(
   ) => {
     const api = get(apiAtom)
     const session = get(sessionDataOrDummyAtom)
+    const goldenAvatarType = get(goldenAvatarTypeAtom)
+
+    console.log(`Golden avatar type: ${goldenAvatarType}`)
 
     return pipe(
       set(generateMyFcmTokenInfoActionAtom, undefined, session.privateKey),
@@ -48,6 +52,7 @@ const sendRequestActionAtom = atom(
               originOffer.offerInfo.publicPart.authorClientVersion,
             myFcmCypher: O.toUndefined(encryptedToken)?.cypher,
             lastReceivedFcmCypher: originOffer.offerInfo.publicPart.fcmCypher,
+            goldenAvatarType,
           })
         )
       ),

@@ -31,19 +31,9 @@ function OfferInfoPreview({
   showCommonFriends?: boolean
 }): JSX.Element {
   const {t} = useTranslation()
-  // const btcPragueLogoSvg = useMemo(
-  //   () => getBtcPragueLogoSvg({darkBackground: negative}),
-  //   [negative]
-  // )
 
   return (
     <Stack gap="$2">
-      {/* {(offer.privatePart.commonFriends.includes(BTC_PRAGUE_FRIEND) ||
-        offer.privatePart.commonFriends.includes(BTC_PRAGUE_FRIEND_STAGE)) && (
-        <Stack f={1} ai="center" jc="space-between">
-          <SvgImage width={60} height={20} source={btcPragueLogoSvg} />
-        </Stack>
-      )} */}
       <XStack ai="center" jc="space-between">
         {!!(!!isMine || showListingType) && !!offer.publicPart.listingType && (
           <Stack

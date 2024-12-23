@@ -169,31 +169,37 @@ export default function MapDisplayMultiplePoints<T>({
         onMapReady={onMapReady}
         onRegionChangeComplete={onRegionChangeComplete}
       >
-        {notFocusedPoints.map((point) => {
-          return (
-            <Marker
-              key={point.id}
-              // https://github.com/react-native-maps/react-native-maps/issues/4997
-              tracksViewChanges={Platform.OS === 'ios'}
-              coordinate={{
-                latitude: point.latitude,
-                longitude: point.longitude,
-              }}
-              onPress={() => {
-                onPointPress(point)
-              }}
-            >
-              <Stack w={28} h={28} alignItems="center" justifyContent="center">
+        {!isInFocusMode &&
+          notFocusedPoints.map((point) => {
+            return (
+              <Marker
+                key={point.id}
+                // https://github.com/react-native-maps/react-native-maps/issues/4997
+                tracksViewChanges={Platform.OS === 'ios'}
+                coordinate={{
+                  latitude: point.latitude,
+                  longitude: point.longitude,
+                }}
+                onPress={() => {
+                  onPointPress(point)
+                }}
+              >
                 <Stack
-                  w={8}
-                  h={8}
-                  borderRadius={4}
-                  bg={isInFocusMode ? '$greyOnBlack' : '$main'}
-                />
-              </Stack>
-            </Marker>
-          )
-        })}
+                  w={28}
+                  h={28}
+                  alignItems="center"
+                  justifyContent="center"
+                >
+                  <Stack
+                    w={8}
+                    h={8}
+                    borderRadius={4}
+                    bg={isInFocusMode ? '$greyOnBlack' : '$main'}
+                  />
+                </Stack>
+              </Marker>
+            )
+          })}
         {focusedPoints.map((point) => {
           return (
             <Fragment key={point.id}>

@@ -77,7 +77,7 @@ export default function addMessagesToChats(
             one.state === 'receivedButRequiresNewerVersion'
         )
 
-        const isOnlyMetadataUpdate = !messages.some(
+        const isOnlyMetadataUpdate = !messagesToAddToThisChat.some(
           (one) =>
             one.message.messageType !== 'VERSION_UPDATE' &&
             one.message.messageType !== 'FCM_CYPHER_UPDATE'

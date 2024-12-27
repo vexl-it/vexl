@@ -31,7 +31,7 @@ export default function processIdentityRevealMessageIfAny(
     const goldenAvatarType =
       chat.chat.origin.type === 'theirOffer'
         ? chat.chat.origin.offer?.offerInfo.publicPart.goldenAvatarType
-        : undefined
+        : chat.chat.otherSide.goldenAvatarType
     const anonymousAvatars =
       goldenAvatarType === 'BACKGROUND_AND_GLASSES'
         ? avatarsGoldenGlassesAndBackgroundSvg

@@ -1,0 +1,86 @@
+diff --git a/dist/cjs/src/config/configuration.js b/dist/cjs/src/config/configuration.js
+index 931dc907869d752956e5c81557da63bc5e13ccc4..de456c2acb73c3125b5cafedb482a538ee63e187 100644
+--- a/dist/cjs/src/config/configuration.js
++++ b/dist/cjs/src/config/configuration.js
+@@ -9,11 +9,27 @@ const logger_js_1 = __importDefault(require("./logger.js"));
+ const messages_js_1 = __importDefault(require("./messages/messages.js"));
+ const namespace_js_1 = __importDefault(require("./namespace.js"));
+ const redis_js_1 = __importDefault(require("./redis.js"));
++function parseRedisConfigFromUrl() {
++    const url = new URL(process.env.REDIS_URL)
++        return {
++            client: 'ioredis',
++            options: {
++            scheme: url.protocol.replace(':', ''),
++            username: url.username,
++            password: url.password,
++            host: url.hostname,
++            port: url.port,
++        }
++    }
++}
+ class Configuration {
+     constructor(config) {
+         this.config = this.parseConfiguration(config);
+     }
+-    static getSetConfig(config = {}) {
++    static getSetConfig(configParam) {
++        const config ={
++            redis: parseRedisConfigFromUrl(),
++        }
+         if (!Configuration.instance) {
+             Configuration.instance = new Configuration(config);
+         }
+@@ -23,6 +39,7 @@ class Configuration {
+         Configuration.instance = null;
+     }
+     getConfig() {
++        console.log('Redis config: ', JSON.stringify(this.config, null, 2));
+         return this.config;
+     }
+     parseConfiguration(config) {
+diff --git a/dist/esm/src/config/configuration.js b/dist/esm/src/config/configuration.js
+index 1dc89b35846f443500b179246846a841e74ec133..bde4d1944105cec07ee05f7964bdcfb789851e77 100644
+--- a/dist/esm/src/config/configuration.js
++++ b/dist/esm/src/config/configuration.js
+@@ -3,13 +3,31 @@ import Logger from './logger.js';
+ import Messages from './messages/messages.js';
+ import Namespace from './namespace.js';
+ import Redis from './redis.js';
++
++function parseRedisConfigFromUrl() {
++    const url = new URL(process.env.REDIS_URL)
++        return {
++            client: 'ioredis',
++            options: {
++            scheme: url.protocol.replace(':', ''),
++            username: url.username,
++            password: url.password,
++            host: url.hostname,
++            port: url.port,
++        }
++    }
++}
++
+ export class Configuration {
+     static instance = null;
+     config;
+     constructor(config) {
+         this.config = this.parseConfiguration(config);
+     }
+-    static getSetConfig(config = {}) {
++    static getSetConfig(configParam) {
++        const config ={
++            redis: parseRedisConfigFromUrl(),
++        }
+         if (!Configuration.instance) {
+             Configuration.instance = new Configuration(config);
+         }
+@@ -19,6 +37,7 @@ export class Configuration {
+         Configuration.instance = null;
+     }
+     getConfig() {
++        console.log('Redis config: ', JSON.stringify(this.config, null, 2));
+         return this.config;
+     }
+     parseConfiguration(config) {

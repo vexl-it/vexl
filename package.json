@@ -39,6 +39,7 @@
     "turbo": "^1.11.3"
   },
   "resolutions": {
-    "crypto-browserify@^3.12.0": "patch:crypto-browserify@npm%3A3.12.0#./.yarn/patches/crypto-browserify-npm-3.12.0-bed454fef0.patch"
+    "crypto-browserify@^3.12.0": "patch:crypto-browserify@npm%3A3.12.0#./.yarn/patches/crypto-browserify-npm-3.12.0-bed454fef0.patch",
+    "redis-smq@8.0.0-rc.24": "patch:redis-smq@npm%3A8.0.0-rc.24#./.yarn/patches/redis-smq-npm-8.0.0-rc.24-4f93254f0b.patch"
   }
 }

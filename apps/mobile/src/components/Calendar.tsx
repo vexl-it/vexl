@@ -21,7 +21,7 @@ const calendarTheme: Theme = {
   selectedDayTextColor: getTokens().color.black.val,
   textDayFontWeight: '500',
   textMonthFontWeight: '500',
-  todayTextColor: getTokens().color.white.val,
+  todayTextColor: getTokens().color.main.val,
   agendaDayTextColor: getTokens().color.white.val,
   textSectionTitleColor: getTokens().color.white.val,
   textDayHeaderFontSize: 14,
@@ -33,7 +33,7 @@ const calendarTheme: Theme = {
 
 export const REACT_NATIVE_CALENDARS_DATE_FORMAT = 'yyyy-MM-dd'
 
-const defaultMinDate = DateTime.now().toFormat(
+export const defaultMinDate = DateTime.now().toFormat(
   REACT_NATIVE_CALENDARS_DATE_FORMAT
 )
 

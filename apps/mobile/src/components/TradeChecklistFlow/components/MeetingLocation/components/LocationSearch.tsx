@@ -17,9 +17,10 @@ export default function LocationMapSearch({navigation}: Props): JSX.Element {
       <Content>
         <LocationSearch
           sessionId={newLocationSessionId()}
-          onPress={(data) => {
+          onPress={({locationData, searchQuery}) => {
             navigation.navigate('LocationMapSelect', {
-              selectedLocation: data,
+              selectedLocation: locationData,
+              searchQuery,
             })
           }}
         />

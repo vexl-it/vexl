@@ -1,6 +1,5 @@
 import {
   type AmountData,
-  type AvailableDateTimeOption,
   type ContactReveal,
   type IdentityReveal,
   type MeetingLocationData,
@@ -29,6 +28,7 @@ import showErrorAlert from '../../../utils/showErrorAlert'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 import {askAreYouSureActionAtom} from '../../AreYouSureDialog'
 import {loadingOverlayDisplayedAtom} from '../../LoadingOverlayProvider'
+import {availableDateTimesAtom} from '../components/DateAndTimeFlow/atoms'
 
 const UPDATES_TO_BE_SENT_INITIAL_STATE = {}
 
@@ -101,18 +101,17 @@ export const tradeChecklistWithUpdatesMergedAtom = atom((get) => {
   })
 })
 
-export const addDateAndTimeSuggestionsActionAtom = atom(
-  null,
-  (get, set, suggestions: AvailableDateTimeOption[]) => {
-    set(updatesToBeSentAtom, (updates) => ({
-      ...updates,
-      dateAndTime: {
-        suggestions,
-        timestamp: unixMillisecondsNow(),
-      },
-    }))
-  }
-)
+export const addDateAndTimeSuggestionsActionAtom = atom(null, (get, set) => {
+  const suggestions = get(availableDateTimesAtom)
+
+  set(updatesToBeSentAtom, (updates) => ({
+    ...updates,
+    dateAndTime: {
+      suggestions,
+      timestamp: unixMillisecondsNow(),
+    },
+  }))
+})
 
 export const saveDateTimePickActionAtom = atom(
   null,

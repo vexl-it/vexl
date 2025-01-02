@@ -28,14 +28,17 @@ type Props = TradeChecklistStackScreenProps<'PickTimeFromSuggestions'>
 function PickTimeFromSuggestions({
   navigation,
   route: {
-    params: {chosenDay},
+    params: {chosenDateTimes, pickedOption},
   },
 }: Props): JSX.Element {
   const {t} = useTranslation()
   const store = useStore()
 
   const shouldSendOnSubmit = !useWasOpenFromAgreeOnTradeDetailsScreen()
-  const {selectItem, selectedItem, itemsAtoms} = useState(chosenDay)
+  const {selectItem, selectedItem, itemsAtoms} = useState(
+    chosenDateTimes,
+    pickedOption
+  )
   const showLoadingOverlay = useSetAtom(loadingOverlayDisplayedAtom)
   const saveDateTimePick = useSetAtom(saveDateTimePickActionAtom)
   const submitTradeChecklistUpdates = useSetAtom(
@@ -81,7 +84,9 @@ function PickTimeFromSuggestions({
   return (
     <>
       <HeaderProxy
-        title={unixMillisecondsToLocaleDateTime(chosenDay.date).toLocaleString({
+        title={unixMillisecondsToLocaleDateTime(
+          pickedOption.date
+        ).toLocaleString({
           day: 'numeric',
           month: 'numeric',
           weekday: 'short',

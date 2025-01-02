@@ -1,6 +1,7 @@
 import {useNavigation, type NavigationProp} from '@react-navigation/native'
-import {type AvailableDateTimeOption} from '@vexl-next/domain/src/general/tradeChecklist'
-import {useAtom, useSetAtom} from 'jotai'
+import {type UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {useAtomValue, useSetAtom} from 'jotai'
+import {DateTime} from 'luxon'
 import {useEffect, useMemo} from 'react'
 import {type MarkedDates} from 'react-native-calendars/src/types'
 import {Stack} from 'tamagui'
@@ -11,6 +12,7 @@ import {
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import unixMillisecondsToLocaleDateTime from '../../../../../utils/unixMillisecondsToLocaleDateTime'
 import Calendar, {
+  defaultMinDate,
   REACT_NATIVE_CALENDARS_DATE_FORMAT,
 } from '../../../../Calendar'
 import {
@@ -22,22 +24,26 @@ import {MINIMUM_AVAILABLE_DAYS_THRESHOLD} from '../../../utils'
 import Content from '../../Content'
 import Header from '../../Header'
 import {
-  availableDateTimesAtom,
+  anyAvailableDateLowerThanTodayAtom,
   handleAvailableDaysChangeActionAtom,
+  setAvailableDateTimesActionAtom,
+  uniqueAvailableDatesAtom,
 } from '../atoms'
 
 type Props = TradeChecklistStackScreenProps<'ChooseAvailableDays'>
 
 function ChooseAvailableDaysScreen({
   route: {
-    params: {chosenDays},
+    params: {chosenDateTimes},
   },
 }: Props): JSX.Element {
   const {t} = useTranslation()
   const navigation: NavigationProp<TradeChecklistStackParamsList> =
     useNavigation()
-  const [availableDateTimes, setAvailableDateTimes] = useAtom(
-    availableDateTimesAtom
+  const setAvailableDateTimes = useSetAtom(setAvailableDateTimesActionAtom)
+  const uniqueAvailableDates = useAtomValue(uniqueAvailableDatesAtom)
+  const anyAvailableDateLowerThanToday = useAtomValue(
+    anyAvailableDateLowerThanTodayAtom
   )
   const handleAvailableDaysChange = useSetAtom(
     handleAvailableDaysChangeActionAtom
@@ -45,23 +51,23 @@ function ChooseAvailableDaysScreen({
 
   const markedDates: MarkedDates = useMemo(
     () =>
-      availableDateTimes.reduce(
-        (result: MarkedDates, dateTime: AvailableDateTimeOption) => {
+      uniqueAvailableDates.reduce(
+        (result: MarkedDates, date: UnixMilliseconds) => {
           return {
             ...result,
-            [unixMillisecondsToLocaleDateTime(dateTime.date).toFormat(
+            [unixMillisecondsToLocaleDateTime(date).toFormat(
               REACT_NATIVE_CALENDARS_DATE_FORMAT
             )]: {selected: true, marked: true},
           }
         },
         {}
       ),
-    [availableDateTimes]
+    [uniqueAvailableDates]
   )
 
   useEffect(() => {
-    setAvailableDateTimes(chosenDays ?? [])
-  }, [chosenDays, setAvailableDateTimes])
+    setAvailableDateTimes(chosenDateTimes ?? [])
+  }, [chosenDateTimes, setAvailableDateTimes])
 
   return (
     <>
@@ -73,14 +79,24 @@ function ChooseAvailableDaysScreen({
         />
         <Stack f={1} my="$6">
           <Calendar
+            disableAllTouchEventsForDisabledDays={false}
             markedDates={markedDates}
             onDayPress={handleAvailableDaysChange}
+            minDate={
+              anyAvailableDateLowerThanToday
+                ? DateTime.fromMillis(
+                    Math.min(...uniqueAvailableDates)
+                  ).toFormat(REACT_NATIVE_CALENDARS_DATE_FORMAT)
+                : defaultMinDate
+            }
           />
         </Stack>
       </Content>
       <PrimaryFooterButtonProxy hidden />
       <SecondaryFooterButtonProxy
-        disabled={availableDateTimes.length < MINIMUM_AVAILABLE_DAYS_THRESHOLD}
+        disabled={
+          uniqueAvailableDates.length < MINIMUM_AVAILABLE_DAYS_THRESHOLD
+        }
         text={t('common.continue')}
         onPress={() => {
           navigation.navigate('AddTimeOptions')

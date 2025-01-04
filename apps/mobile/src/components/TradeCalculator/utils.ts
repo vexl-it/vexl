@@ -36,3 +36,11 @@ export function removeThousandsSeparatorSpacesFromNumberInput(
     return input
   }
 }
+
+export function convertFiatValueToNumber(fiatValue: string): number {
+  try {
+    return Number(removeThousandsSeparatorSpacesFromNumberInput(fiatValue))
+  } catch (e) {
+    return 0
+  }
+}

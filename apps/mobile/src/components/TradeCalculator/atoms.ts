@@ -22,7 +22,7 @@ import {translationAtom} from '../../utils/localization/I18nProvider'
 import {askAreYouSureActionAtom} from '../AreYouSureDialog'
 import {
   addThousandsSeparatorSpacesToNumberInput,
-  removeThousandsSeparatorSpacesFromNumberInput,
+  convertFiatValueToNumber,
 } from './utils'
 
 export const currencySelectVisibleAtom = atom<boolean>(false)
@@ -60,9 +60,7 @@ export const btcPriceForOfferWithStateAtom =
 export const applyFeeOnFeeChangeActionAtom = atom(
   null,
   (get, set, newFee: number) => {
-    const fiatInputValue = Number(
-      removeThousandsSeparatorSpacesFromNumberInput(get(fiatInputValueAtom))
-    )
+    const fiatInputValue = convertFiatValueToNumber(get(fiatInputValueAtom))
     const previousAppliedFee = get(feeAmountAtom)
 
     const fiatValueWithoutPreviousFee = cancelFeeOnNumberValue(
@@ -100,9 +98,7 @@ export const saveYourPriceActionAtom = atom(null, (get, set) => {
 export const applyFeeOnTradePriceTypeChangeActionAtom = atom(
   null,
   (get, set) => {
-    const fiatInputValue = Number(
-      removeThousandsSeparatorSpacesFromNumberInput(get(fiatInputValueAtom))
-    )
+    const fiatInputValue = convertFiatValueToNumber(get(fiatInputValueAtom))
     const feeAmount = get(feeAmountAtom)
 
     set(

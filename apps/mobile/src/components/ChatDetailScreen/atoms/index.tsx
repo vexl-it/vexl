@@ -1046,20 +1046,6 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     return offerForChat?.offerInfo?.publicPart?.listingType === 'OTHER'
   })
 
-  // const fiatValueToDisplayInVexlbotMessageAtom = atom((get) => {
-  //   const amountData = get(tradeChecklistAmountAtom)
-  //   const amountDataToDisplay = amount.getAmountData(amountData)
-
-  //   return amountDataToDisplay?.amountData.fiatAmount
-  //     ? Math.round(
-  //         amount.applyFeeOnNumberValue(
-  //           amountDataToDisplay.amountData.fiatAmount,
-  //           amountDataToDisplay.amountData.feeAmount ?? 0
-  //         )
-  //       )
-  //     : undefined
-  // })
-
   const btcPricePercentageDifferenceToDisplayInVexlbotMessageAtom = atom(
     (get) => {
       const amountData = get(tradeChecklistAmountAtom)

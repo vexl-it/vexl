@@ -130,7 +130,7 @@ function TradePriceTypeDialog(): JSX.Element | null {
               <Button
                 onPress={() => {
                   setTradePriceTypeDialogVisible(false)
-                  void setFormDataBasedOnBtcPriceType('live')()
+                  setFormDataBasedOnBtcPriceType('live')
                 }}
                 variant="primary"
                 text={t('tradeChecklist.calculateAmount.setLivePrice')}
@@ -139,7 +139,7 @@ function TradePriceTypeDialog(): JSX.Element | null {
             {tradePriceType !== 'frozen' && (
               <Button
                 onPress={() => {
-                  void setFormDataBasedOnBtcPriceType('frozen')()
+                  setFormDataBasedOnBtcPriceType('frozen')
                   setTradePriceTypeDialogVisible(false)
                 }}
                 variant="primary"

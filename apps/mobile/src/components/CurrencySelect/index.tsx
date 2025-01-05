@@ -41,7 +41,7 @@ function CurrencySelect({
               setVisible(false)
             }}
           />
-          <SearchBar />
+          <SearchBar autoFocus />
         </Stack>
         {toDisplay.length > 0 && (
           <CurrenciesList

@@ -69,6 +69,7 @@ export default function clearMmkvStorageAndEmptyAtoms(): void {
     disableScreenshots: false,
     isDeveloper: false,
     marketplaceFiatOrSatsCurrency: 'FIAT',
+    showVexlSearchForCooSuggestion: true,
   })
 
   getDefaultStore().set(feedbacksForClosedChatsStorageAtom, {feedbacks: {}})

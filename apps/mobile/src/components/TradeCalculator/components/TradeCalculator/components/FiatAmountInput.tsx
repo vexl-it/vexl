@@ -9,6 +9,7 @@ import {
   btcPriceForOfferWithStateAtom,
   calculateBtcValueOnFiatAmountChangeActionAtom,
   ownPriceAtom,
+  selectedCurrencyCodeForOwnPriceAtom,
   tradePriceTypeAtom,
   updateFiatCurrencyActionAtom,
 } from '../../../atoms'
@@ -85,7 +86,11 @@ function FiatAmountInput({
       <Stack>
         <CurrencySelectButton
           disabled={!editable}
-          currencyAtom={btcPriceCurrencyAtom}
+          currencyAtom={
+            tradePriceType !== 'your'
+              ? btcPriceCurrencyAtom
+              : selectedCurrencyCodeForOwnPriceAtom
+          }
           onPress={() => {
             setCurrencySelectVisible(true)
           }}
@@ -95,7 +100,11 @@ function FiatAmountInput({
         )}
       </Stack>
       <CurrencySelect
-        selectedCurrencyCodeAtom={btcPriceCurrencyAtom}
+        selectedCurrencyCodeAtom={
+          tradePriceType !== 'your'
+            ? btcPriceCurrencyAtom
+            : selectedCurrencyCodeForOwnPriceAtom
+        }
         onItemPress={updateFiatCurrency}
         visibleAtom={currencySelectVisibleAtom}
       />

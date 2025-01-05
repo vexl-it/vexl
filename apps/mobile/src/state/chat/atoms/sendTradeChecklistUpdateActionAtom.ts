@@ -33,7 +33,7 @@ import processTradeChecklistContactRevealMessageIfAny from '../utils/processTrad
 import processTradeChecklistIdentityRevealMessageIfAny from '../utils/processTradeChecklistIdentityRevealMessageIfAny'
 import {replaceIdentityImageFileUriWithBase64} from '../utils/replaceImageFileUrisWithBase64'
 
-const MINIMAL_REQUIRED_VERSION = SemverString.parse('1.24.0')
+const MINIMAL_REQUIRED_VERSION = SemverString.parse('1.25.0')
 
 export default function createSubmitChecklistUpdateActionAtom(
   chatWithMessagesAtom: FocusAtomType<ChatWithMessages>

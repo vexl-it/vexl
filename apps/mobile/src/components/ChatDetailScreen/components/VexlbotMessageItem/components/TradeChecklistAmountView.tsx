@@ -58,7 +58,6 @@ function TradeChecklistAmountView({message}: Props): JSX.Element | null {
   )
   const addAmount = useSetAtom(addAmountActionAtom)
   const setToastNotification = useSetAtom(toastNotificationAtom)
-  // const fiatAmount = useAtomValue(fiatValueToDisplayInVexlbotMessageAtom)
   const btcPricePercentageDifference = useAtomValue(
     btcPricePercentageDifferenceToDisplayInVexlbotMessageAtom
   )
@@ -121,80 +120,6 @@ function TradeChecklistAmountView({message}: Props): JSX.Element | null {
       message.message.tradeChecklistUpdate.amount.timestamp !==
       latestAmountDataMessage.amountData.timestamp
 
-    const renderFooter = ((): JSX.Element | null => {
-      return (
-        <Stack f={1} gap="$2">
-          <XStack ai="center" jc="space-between">
-            {!!message.message.tradeChecklistUpdate.amount.btcAmount && (
-              <Button
-                text="BTC"
-                beforeIcon={copySvg}
-                onPress={() => {
-                  Clipboard.setString(
-                    `${message.message.tradeChecklistUpdate?.amount?.btcAmount}`
-                  )
-                  setToastNotification(toastContent)
-                }}
-                size="small"
-                variant="primary"
-                iconFill={getTokens().color.main.val}
-              />
-            )}
-            {!!message.message.tradeChecklistUpdate.amount.btcAmount && (
-              <Button
-                text="SAT"
-                beforeIcon={copySvg}
-                onPress={() => {
-                  Clipboard.setString(
-                    `${Math.round(Number(message.message.tradeChecklistUpdate?.amount?.btcAmount) * SATOSHIS_IN_BTC)}`
-                  )
-                  setToastNotification(toastContent)
-                }}
-                size="small"
-                variant="primary"
-                iconFill={getTokens().color.main.val}
-              />
-            )}
-            {!!fiatAmount && (
-              <Button
-                text={currencies[tradeOrOriginOfferCurrency].code}
-                beforeIcon={copySvg}
-                onPress={() => {
-                  Clipboard.setString(`${fiatAmount}`)
-                  setToastNotification(toastContent)
-                }}
-                size="small"
-                variant="primary"
-                iconFill={getTokens().color.main.val}
-              />
-            )}
-          </XStack>
-          {!isMessageOutdated &&
-            latestAmountDataMessage.by === 'them' &&
-            latestAmountDataMessage.status === 'pending' && (
-              <XStack ai="center" jc="space-between" gap="$2">
-                <Button
-                  fullSize
-                  disabled={!amountData?.received}
-                  onPress={onEditPress}
-                  variant="primary"
-                  size="small"
-                  text={t('common.change')}
-                />
-                <Button
-                  fullSize
-                  disabled={!amountData?.received}
-                  onPress={onAcceptButtonPress}
-                  variant="secondary"
-                  size="small"
-                  text={t('common.accept')}
-                />
-              </XStack>
-            )}
-        </Stack>
-      )
-    })()
-
     return (
       <>
         <VexlbotBubble
@@ -252,9 +177,75 @@ function TradeChecklistAmountView({message}: Props): JSX.Element | null {
             }
           )}
         >
-          <XStack f={1} ai="center" jc="space-between">
-            {renderFooter}
-          </XStack>
+          <Stack f={1} gap="$2">
+            <XStack ai="center" jc="space-between">
+              {!!message.message.tradeChecklistUpdate.amount.btcAmount && (
+                <Button
+                  text="BTC"
+                  beforeIcon={copySvg}
+                  onPress={() => {
+                    Clipboard.setString(
+                      `${message.message.tradeChecklistUpdate?.amount?.btcAmount}`
+                    )
+                    setToastNotification(toastContent)
+                  }}
+                  size="small"
+                  variant="primary"
+                  iconFill={getTokens().color.main.val}
+                />
+              )}
+              {!!message.message.tradeChecklistUpdate.amount.btcAmount && (
+                <Button
+                  text="SAT"
+                  beforeIcon={copySvg}
+                  onPress={() => {
+                    Clipboard.setString(
+                      `${Math.round(Number(message.message.tradeChecklistUpdate?.amount?.btcAmount) * SATOSHIS_IN_BTC)}`
+                    )
+                    setToastNotification(toastContent)
+                  }}
+                  size="small"
+                  variant="primary"
+                  iconFill={getTokens().color.main.val}
+                />
+              )}
+              {!!fiatAmount && (
+                <Button
+                  text={currencies[tradeOrOriginOfferCurrency].code}
+                  beforeIcon={copySvg}
+                  onPress={() => {
+                    Clipboard.setString(`${fiatAmount}`)
+                    setToastNotification(toastContent)
+                  }}
+                  size="small"
+                  variant="primary"
+                  iconFill={getTokens().color.main.val}
+                />
+              )}
+            </XStack>
+            {!isMessageOutdated &&
+              latestAmountDataMessage.by === 'them' &&
+              latestAmountDataMessage.status === 'pending' && (
+                <XStack ai="center" jc="space-between" gap="$2">
+                  <Button
+                    fullSize
+                    disabled={!amountData?.received}
+                    onPress={onEditPress}
+                    variant="primary"
+                    size="small"
+                    text={t('common.change')}
+                  />
+                  <Button
+                    fullSize
+                    disabled={!amountData?.received}
+                    onPress={onAcceptButtonPress}
+                    variant="secondary"
+                    size="small"
+                    text={t('common.accept')}
+                  />
+                </XStack>
+              )}
+          </Stack>
         </VexlbotBubble>
         {!isMessageOutdated &&
           latestAmountDataMessage.status === 'accepted' && (

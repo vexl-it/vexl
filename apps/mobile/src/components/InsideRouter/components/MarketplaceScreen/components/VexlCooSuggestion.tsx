@@ -1,15 +1,13 @@
-import {atom} from 'jotai'
 import {type YStackProps} from 'tamagui'
 import {useSessionAssumeLoggedIn} from '../../../../../state/session'
 import openUrl from '../../../../../utils/openUrl'
+import {showVexlSearchForCooSuggestionAtom} from '../../../../../utils/preferences'
 import MarketplaceSuggestion from '../../../../MarketplaceSuggestion'
 
 const text = `Vexl hledá COO!  🔥
 
 Myslíš, že na to máš?
 Pošli nám CV na COO@vexl.it  👀`
-
-const visibleAtom = atom(true)
 
 function VexlCooSuggestion(props: YStackProps): JSX.Element | null {
   const session = useSessionAssumeLoggedIn()
@@ -30,7 +28,7 @@ function VexlCooSuggestion(props: YStackProps): JSX.Element | null {
         )()
       }}
       text={text}
-      visibleStateAtom={visibleAtom}
+      visibleStateAtom={showVexlSearchForCooSuggestionAtom}
       {...props}
     />
   )

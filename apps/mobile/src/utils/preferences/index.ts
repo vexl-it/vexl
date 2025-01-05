@@ -24,6 +24,7 @@ export const preferencesAtom = atomWithParsedMmkvStorage(
     disableScreenshots: false,
     isDeveloper: false,
     marketplaceFiatOrSatsCurrency: 'FIAT',
+    showVexlSearchForCooSuggestion: true,
   },
   Preferences
 )
@@ -55,4 +56,9 @@ export const marketplaceFiatOrSatsCurrencyAtom = focusAtom(
 
 export const goldenAvatarTypeAtom = focusAtom(preferencesAtom, (o) =>
   o.prop('goldenAvatarType')
+)
+
+export const showVexlSearchForCooSuggestionAtom = focusAtom(
+  preferencesAtom,
+  (o) => o.prop('showVexlSearchForCooSuggestion')
 )

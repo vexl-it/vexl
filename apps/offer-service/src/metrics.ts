@@ -385,7 +385,7 @@ const queryTotalOffersFlagged = Effect.gen(function* (_) {
 
 const OfferVisibilityPerCountryQueryResult = Schema.Struct({
   countryPrefix: CountryPrefixE,
-  value: Schema.NumberFromString,
+  value: Schema.Number,
 })
 
 const queryMeanOfferVisibilityPerCountry = Effect.gen(function* (_) {
@@ -401,15 +401,15 @@ const queryMeanOfferVisibilityPerCountry = Effect.gen(function* (_) {
       execute: () => sql`
         SELECT
           country_prefix,
-          AVG(offer_count) AS value
+          round(AVG(offer_count))::Integer AS value
         FROM
           (
             SELECT
               op.country_prefix,
               COUNT(op.offer_id) AS offer_count
             FROM
-              offer2.public.offer_private
-              LEFT JOIN public.offer_public op ON offer_private.offer_id = op.id
+              offer_private
+              LEFT JOIN offer_public op ON offer_private.offer_id = op.id
             WHERE
               op.country_prefix IS NOT NULL
               AND op.refreshed_at >= (
@@ -441,18 +441,20 @@ const queryMedianOfferVisibilityPerCountry = Effect.gen(function* (_) {
       execute: () => sql`
         SELECT
           country_prefix,
-          PERCENTILE_CONT(0.5) WITHIN GROUP (
-            ORDER BY
-              offer_count
-          ) AS value
+          round(
+            PERCENTILE_CONT(0.5) WITHIN GROUP (
+              ORDER BY
+                offer_count
+            )
+          )::Integer AS value
         FROM
           (
             SELECT
               op.country_prefix,
               COUNT(op.offer_id) AS offer_count
             FROM
-              offer2.public.offer_private
-              LEFT JOIN public.offer_public op ON offer_private.offer_id = op.id
+              public.offer_private
+              LEFT JOIN offer_public op ON offer_private.offer_id = op.id
             WHERE
               op.country_prefix IS NOT NULL
               AND op.refreshed_at >= (

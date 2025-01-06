@@ -8,7 +8,7 @@ import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {MetricsMessage} from '@vexl-next/server-utils/src/metrics/domain'
 import {type MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
 import {reportMetricForked} from '@vexl-next/server-utils/src/metrics/reportMetricForked'
-import {Array, Effect, Layer, pipe, Schema} from 'effect'
+import {Array, Effect, Layer, Option, pipe, Schema} from 'effect'
 import {expirationPeriodDaysConfig, offerReportFilterConfig} from './configs'
 
 const OFFER_PUBLIC_PART_DELETED = 'OFFER_PUBLIC_PART_DELETED' as const
@@ -28,6 +28,9 @@ const TOTAL_BUY_OFFERS_EXPIRED_ACROSS_ALL =
   'TOTAL_BUY_OFFERS_EXPIRED_ACROSS_ALL' as const
 const TOTAL_OFFERS_EXPIRED_ACROSS_ALL =
   'TOTAL_OFFERS_EXPIRED_ACROSS_ALL' as const
+
+const TOTAL_OFFERS_FLAGGED_ACROSS_ALL =
+  'TOTAL_OFFERS_FLAGGED_ACROSS_ALL' as const
 
 const MEAN_OFFER_VISIBILITY_PER_COUNTRY =
   'MEAN_OFFER_VISIBILITY_PER_COUNTRY' as const
@@ -235,6 +238,20 @@ export const reportTotalOffersExpiredAcrossAll = ({
     })
   )
 
+export const reportTotalOffersFlaggedAcrossAll = ({
+  value,
+}: {
+  value: number
+}): Effect.Effect<void, never, MetricsClientService> =>
+  reportMetricForked(
+    new MetricsMessage({
+      uuid: generateUuid(),
+      timestamp: new Date(),
+      name: TOTAL_OFFERS_FLAGGED_ACROSS_ALL,
+      value,
+    })
+  )
+
 const OffersStatsQueryResult = Schema.Struct({
   countryPrefix: Schema.Union(CountryPrefixE, Schema.Null),
   buy: Schema.Int,
@@ -304,8 +321,11 @@ const queryOffersStats = SqlClient.SqlClient.pipe(
   )
 )
 
-const queryExpiredOffersStats = SqlClient.SqlClient.pipe(
-  Effect.flatMap((sql) =>
+const queryExpiredOffersStats = Effect.gen(function* (_) {
+  const sql = yield* _(SqlClient.SqlClient)
+  const expirationPeriodDays = yield* _(expirationPeriodDaysConfig)
+
+  const result = yield* _(
     SqlSchema.findAll({
       Request: Schema.Null,
       Result: OffersStatsQueryResult,
@@ -325,17 +345,47 @@ const queryExpiredOffersStats = SqlClient.SqlClient.pipe(
         FROM
           offer_public
         WHERE
-          refreshed_at < now() - interval '30 day'
+          refreshed_at < now() - interval '1 day' * ${expirationPeriodDays}
         GROUP BY
           country_prefix;
       `,
     })(null)
   )
-)
+  return result
+})
+
+const QueryTotalOffersFlagged = Schema.Struct({
+  flagged: Schema.NumberFromString,
+})
+
+const queryTotalOffersFlagged = Effect.gen(function* (_) {
+  const sql = yield* _(SqlClient.SqlClient)
+  const offerReportFilter = yield* _(offerReportFilterConfig)
+
+  const result = yield* _(
+    SqlSchema.findOne({
+      Request: Schema.Null,
+      Result: QueryTotalOffersFlagged,
+      execute: () => sql`
+        SELECT
+          COUNT(*) AS flagged
+        FROM
+          offer_public
+        WHERE
+          report >= ${offerReportFilter}
+      `,
+    })(null)
+  )
+  return pipe(
+    result,
+    Option.map((one) => one.flagged),
+    Option.getOrElse(() => 0)
+  )
+})
 
 const OfferVisibilityPerCountryQueryResult = Schema.Struct({
   countryPrefix: CountryPrefixE,
-  value: Schema.Number,
+  value: Schema.NumberFromString,
 })
 
 const queryMeanOfferVisibilityPerCountry = Effect.gen(function* (_) {
@@ -541,6 +591,11 @@ export const reportMetricsLayer = Layer.effectDiscard(
       ),
     ]).pipe(Effect.withSpan('queryAndReportOfferVisibility'))
 
+    const queryAndReportTotalOffersFlagged = queryTotalOffersFlagged.pipe(
+      Effect.flatMap((v) => reportTotalOffersFlaggedAcrossAll({value: v})),
+      Effect.withSpan('queryAndReportTotalOffersFlagged')
+    )
+
     yield* _(
       Effect.zip(
         Effect.logInfo('Reporting metrics'),
@@ -548,6 +603,7 @@ export const reportMetricsLayer = Layer.effectDiscard(
           queryAndReportOffers,
           queryAndReportExpiredOffers,
           queryAndReportOfferVisibility,
+          queryAndReportTotalOffersFlagged,
         ])
       ),
       Effect.tapError((e) => Effect.logError(`Error reporting metrics`, e)),

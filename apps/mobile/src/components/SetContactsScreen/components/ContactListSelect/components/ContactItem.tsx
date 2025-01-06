@@ -34,7 +34,7 @@ function ContactItem({contactAtom}: Props): JSX.Element {
           width={50}
           height={50}
           br="$5"
-          resizeMode="cover"
+          objectFit="cover"
           fallback={
             <SvgImage
               width={50}

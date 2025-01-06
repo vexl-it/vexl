@@ -106,7 +106,7 @@ function CustomTabBar({
           const isFocused = state.index === index
 
           return (
-            <Stack key={options.tabBarLabel}>
+            <Stack key={options.tabBarLabel} mr="$2">
               <Button
                 key={options.tabBarLabel}
                 testID={`@customTabBar/tab${route.name}`}
@@ -212,7 +212,7 @@ function ContactsListSelect({filter}: {filter?: ContactsFilter}): JSX.Element {
   )
 }
 
-export function ContactListSelectWithProvider({
+function ContactListSelectWithProviderComponent({
   filter,
 }: {
   filter?: ContactsFilter
@@ -240,6 +240,11 @@ export function ContactListSelectWithProvider({
     </ScopeProvider>
   )
 }
+
+// This rerenders in PROD only therefore needs memo
+export const ContactListSelectWithProvider = React.memo(
+  ContactListSelectWithProviderComponent
+)
 
 export default function ContactListWithLoadStep({
   filter,

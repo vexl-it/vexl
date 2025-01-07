@@ -60,9 +60,8 @@ export const btcPriceCurrencyAtom = atom(
 export const btcPriceForOfferWithStateAtom =
   createBtcPriceForCurrencyAtom(btcPriceCurrencyAtom)
 
-export const btcPriceForSelectedOwnCurrencyAtom = createBtcPriceForCurrencyAtom(
-  selectedCurrencyCodeForOwnPriceAtom
-)
+export const btcPriceForSelectedOwnCurrencyWithStateAtom =
+  createBtcPriceForCurrencyAtom(selectedCurrencyCodeForOwnPriceAtom)
 
 export const applyFeeOnFeeChangeActionAtom = atom(
   null,
@@ -171,8 +170,8 @@ export const calculateFiatValueOnBtcAmountChangeActionAtom = atom(
     )
     const selectedCurrencyCode = get(selectedCurrencyCodeAtom)
     const btcPriceForOfferWithState = get(btcPriceForOfferWithStateAtom)
-    const btcPriceForSelectedOwnCurrency = get(
-      btcPriceForSelectedOwnCurrencyAtom
+    const btcPriceForSelectedOwnCurrencyWithState = get(
+      btcPriceForSelectedOwnCurrencyWithStateAtom
     )
 
     set(btcInputValueAtom, btcAmount)
@@ -190,7 +189,7 @@ export const calculateFiatValueOnBtcAmountChangeActionAtom = atom(
       if (
         tradePriceType === 'your' &&
         selectedCurrencyCodeForOwnPrice !== selectedCurrencyCode &&
-        btcPriceForSelectedOwnCurrency?.btcPrice &&
+        btcPriceForSelectedOwnCurrencyWithState?.btcPrice &&
         btcPriceForOfferWithState?.btcPrice
       ) {
         const numberValue =
@@ -208,7 +207,7 @@ export const calculateFiatValueOnBtcAmountChangeActionAtom = atom(
             Math.round(
               applyFeeOnNumberValue(
                 btcAmountForOwnPriceCurrencyCode *
-                  btcPriceForSelectedOwnCurrency.btcPrice.BTC,
+                  btcPriceForSelectedOwnCurrencyWithState.btcPrice.BTC,
                 feeAmount
               )
             )
@@ -257,8 +256,8 @@ export const calculateBtcValueOnFiatAmountChangeActionAtom = atom(
     )
     const selectedCurrencyCode = get(selectedCurrencyCodeAtom)
     const btcPriceForOfferWithState = get(btcPriceForOfferWithStateAtom)
-    const btcPriceForSelectedOwnCurrency = get(
-      btcPriceForSelectedOwnCurrencyAtom
+    const btcPriceForSelectedOwnCurrencyWithState = get(
+      btcPriceForSelectedOwnCurrencyWithStateAtom
     )
 
     set(fiatInputValueAtom, fiatAmount)
@@ -276,7 +275,7 @@ export const calculateBtcValueOnFiatAmountChangeActionAtom = atom(
       if (
         tradePriceType === 'your' &&
         selectedCurrencyCodeForOwnPrice !== selectedCurrencyCode &&
-        btcPriceForSelectedOwnCurrency?.btcPrice &&
+        btcPriceForSelectedOwnCurrencyWithState?.btcPrice &&
         btcPriceForOfferWithState?.btcPrice
       ) {
         const adjustedFiatAmount = cancelFeeOnNumberValue(
@@ -284,7 +283,8 @@ export const calculateBtcValueOnFiatAmountChangeActionAtom = atom(
           feeAmount
         )
         const btcAmountForSelectedCurrencyCode =
-          adjustedFiatAmount / btcPriceForSelectedOwnCurrency.btcPrice.BTC
+          adjustedFiatAmount /
+          btcPriceForSelectedOwnCurrencyWithState.btcPrice.BTC
         const fiatAmountForOwnPriceCurrency =
           btcAmountForSelectedCurrencyCode *
           btcPriceForOfferWithState.btcPrice.BTC
@@ -357,13 +357,17 @@ export const updateFiatCurrencyActionAtom = atom(
     const tradePriceType = get(tradePriceTypeAtom)
 
     if (tradePriceType === 'your') {
-      set(selectedCurrencyCodeForOwnPriceAtom, currency)
-      set(refreshBtcPriceActionAtom, currency)
+      void pipe(
+        set(refreshBtcPriceActionAtom, currency),
+        T.map(() => {
+          set(selectedCurrencyCodeForOwnPriceAtom, currency)
+          void set(refreshCurrentBtcPriceActionAtom)()
+        })
+      )()
     } else {
       set(selectedCurrencyCodeAtom, currency)
+      void set(refreshCurrentBtcPriceActionAtom)()
     }
-
-    void set(refreshCurrentBtcPriceActionAtom)()
   }
 )
 

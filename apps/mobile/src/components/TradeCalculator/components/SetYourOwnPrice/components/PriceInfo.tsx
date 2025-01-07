@@ -25,8 +25,8 @@ function PriceInfo(): JSX.Element | null {
       hideCloseButton
       text={t(
         percentageDifference >= 0
-          ? 'tradeChecklist.setYourOwnPrice.ourNewBtcPriceIsHigher'
-          : 'tradeChecklist.setYourOwnPrice.ourNewBtcPriceIsLower',
+          ? 'tradeChecklist.setYourOwnPrice.yourProposedBtcPriceIsHigher'
+          : 'tradeChecklist.setYourOwnPrice.yourProposedBtcPriceIsLower',
         {
           percentage: Math.abs(Number(percentageDifference)).toLocaleString(
             locale,

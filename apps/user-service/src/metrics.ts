@@ -72,7 +72,7 @@ export const reportMetricsLayer = Layer.effectDiscard(
     const queryNumberOfUsers = SqlSchema.findAll({
       Request: Schema.Null,
       Result: Schema.Struct({
-        count: Schema.Number,
+        count: Schema.NumberFromString,
         countryPrefix: CountryPrefixE,
       }),
       execute: () => sql`

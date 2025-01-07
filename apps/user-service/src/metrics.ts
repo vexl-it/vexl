@@ -27,7 +27,10 @@ export const reportUserLoggedIn = (
   )
 
 export const reportTotalNumberOfUsers = (
-  dataToReport: ReadonlyArray<{count: number; countryPrefix: CountryPrefix}>
+  dataToReport: ReadonlyArray<{
+    count: number
+    countryPrefix?: CountryPrefix | null
+  }>
 ): Effect.Effect<void, never, MetricsClientService> =>
   Effect.gen(function* (_) {
     yield* _(
@@ -39,7 +42,7 @@ export const reportTotalNumberOfUsers = (
             timestamp: new Date(),
             name: NUMBER_OF_USERS,
             value: data.count,
-            attributes: {countryPrefix: data.countryPrefix},
+            attributes: {countryPrefix: data.countryPrefix ?? 'none'},
             type: 'Total',
           })
         )
@@ -73,7 +76,7 @@ export const reportMetricsLayer = Layer.effectDiscard(
       Request: Schema.Null,
       Result: Schema.Struct({
         count: Schema.NumberFromString,
-        countryPrefix: CountryPrefixE,
+        countryPrefix: Schema.Union(CountryPrefixE, Schema.Null),
       }),
       execute: () => sql`
         SELECT

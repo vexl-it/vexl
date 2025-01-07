@@ -338,7 +338,7 @@ export default function MapLocationWithRadiusSelect({
         >
           <Stack>{topChildren}</Stack>
           <Stack pointerEvents="none" flex={1}></Stack>
-          <Stack pointerEvents="unset">
+          <Stack>
             <Stack mb="$4" mx="$4">
               <Slider
                 value={initialZoom}

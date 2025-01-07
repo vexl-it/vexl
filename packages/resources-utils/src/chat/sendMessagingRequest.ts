@@ -97,10 +97,6 @@ export function sendMessagingRequest({
       taskEitherToEffect(messageToNetwork(toPublicKey)(requestChatMessage))
     )
 
-    console.log(
-      `Sending message: ${JSON.stringify(requestChatMessage, null, 2)}`
-    )
-
     yield* _(
       callWithNotificationService(api.requestApproval, {
         message,

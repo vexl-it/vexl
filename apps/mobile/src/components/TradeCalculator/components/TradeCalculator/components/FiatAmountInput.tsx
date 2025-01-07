@@ -7,6 +7,7 @@ import CurrencySelectButton from '../../../../CurrencySelectButton'
 import {
   btcPriceCurrencyAtom,
   btcPriceForOfferWithStateAtom,
+  btcPriceForSelectedOwnCurrencyWithStateAtom,
   calculateBtcValueOnFiatAmountChangeActionAtom,
   ownPriceAtom,
   selectedCurrencyCodeForOwnPriceAtom,
@@ -45,6 +46,9 @@ function FiatAmountInput({
     calculateBtcValueOnFiatAmountChangeActionAtom
   )
   const btcPriceForOfferWithState = useAtomValue(btcPriceForOfferWithStateAtom)
+  const btcPriceForSelectedOwnCurrencyWithState = useAtomValue(
+    btcPriceForSelectedOwnCurrencyWithStateAtom
+  )
   const updateFiatCurrency = useSetAtom(updateFiatCurrencyActionAtom)
   const tradePriceType = useAtomValue(tradePriceTypeAtom)
   const ownPrice = useAtomValue(ownPriceAtom)
@@ -54,7 +58,11 @@ function FiatAmountInput({
       ref={ref}
       showPremiumInfoMessage={showPremiumInfoMessage}
       isFocused={isFocused}
-      loading={btcPriceForOfferWithState?.state === 'loading'}
+      loading={
+        tradePriceType === 'your'
+          ? btcPriceForSelectedOwnCurrencyWithState?.state === 'loading'
+          : btcPriceForOfferWithState?.state === 'loading'
+      }
       onBlur={() => {
         setIsFocused(false)
         setFiatValue(addThousandsSeparatorSpacesToNumberInput(fiatValue))

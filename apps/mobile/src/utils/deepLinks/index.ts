@@ -22,6 +22,7 @@ import {atomWithParsedMmkvStorage} from '../atomUtils/atomWithParsedMmkvStorage'
 import {version as appVersion} from '../environment'
 import {parseJsonFp, safeParse} from '../fpUtils'
 import {translationAtom, useTranslation} from '../localization/I18nProvider'
+import {navigationRef} from '../navigation'
 import {goldenAvatarTypeAtom} from '../preferences'
 import reportError from '../reportError'
 import showErrorAlert from '../showErrorAlert'
@@ -182,9 +183,12 @@ export function useHandleUniversalAndAppLinks(): void {
   const url = Linking.useURL()
   const goldenAvatarType = store.get(goldenAvatarTypeAtom)
   const lastUniversalOrAppLink = store.get(lastUniversalOrAppLinkStorageAtom)
+  const passedImportContacts = navigationRef
+    .getState()
+    ?.routeNames?.includes('InsideTabs')
 
   const onLinkReceived = useCallback(() => {
-    if (url) {
+    if (url && passedImportContacts) {
       if (lastUniversalOrAppLink.lastUniversalOrAppLinkImported === url) {
         console.info('Ignoring initial link as it was opened before')
         return
@@ -240,6 +244,7 @@ export function useHandleUniversalAndAppLinks(): void {
   }, [
     goldenAvatarType,
     lastUniversalOrAppLink.lastUniversalOrAppLinkImported,
+    passedImportContacts,
     store,
     t,
     url,

@@ -183,9 +183,10 @@ export function useHandleUniversalAndAppLinks(): void {
   const url = Linking.useURL()
   const goldenAvatarType = store.get(goldenAvatarTypeAtom)
   const lastUniversalOrAppLink = store.get(lastUniversalOrAppLinkStorageAtom)
-  const passedImportContacts = navigationRef
-    .getState()
-    ?.routeNames?.includes('InsideTabs')
+  const navigationState = navigationRef.getState()
+  const passedImportContacts =
+    navigationState?.routeNames?.includes('InsideTabs') ||
+    navigationState?.routes?.some((route) => route.name === 'InsideTabs')
 
   const onLinkReceived = useCallback(() => {
     if (url && passedImportContacts) {

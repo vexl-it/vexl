@@ -1007,6 +1007,8 @@
   "tradeChecklist.calculateAmount.transactionLimitForSelectedCurrency": "Transaction limit in fiat for selected currency is {{amount}} {{currency}}.",
   "tradeChecklist.setYourOwnPrice.ourNewBtcPriceIsHigher": "Our new BTC price is {{percentage}}% higher than live market price.",
   "tradeChecklist.setYourOwnPrice.ourNewBtcPriceIsLower": "Our new BTC price is {{percentage}}% lower than live market price.",
+  "tradeChecklist.setYourOwnPrice.yourProposedBtcPriceIsHigher": "Your proposed BTC price is {{percentage}}% higher than live market price.",
+  "tradeChecklist.setYourOwnPrice.yourProposedBtcPriceIsLower": "Your proposed BTC price is {{percentage}}% lower than live market price.",
   "tradeChecklist.network.network": "Mtandao",
   "tradeChecklist.network.youWillGenerateQrCode": "You’ll generate QR code from your wallet right on the meeting for transferring BTC.",
   "tradeChecklist.network.pasteBtcAddress": "Paste the BTC address (optional)",

@@ -1007,6 +1007,8 @@
   "tradeChecklist.calculateAmount.transactionLimitForSelectedCurrency": "Limit transakcií vo fiat mene pre vybranú menu je {{amount}} {{currency}}.",
   "tradeChecklist.setYourOwnPrice.ourNewBtcPriceIsHigher": "Naša nová cena BTC je o {{percentage}}% vyššia ako aktuálna trhová cena.",
   "tradeChecklist.setYourOwnPrice.ourNewBtcPriceIsLower": "Naša nová cena BTC je o {{percentage}}% nižšia ako aktuálna trhová cena.",
+  "tradeChecklist.setYourOwnPrice.yourProposedBtcPriceIsHigher": "Your proposed BTC price is {{percentage}}% higher than live market price.",
+  "tradeChecklist.setYourOwnPrice.yourProposedBtcPriceIsLower": "Your proposed BTC price is {{percentage}}% lower than live market price.",
   "tradeChecklist.network.network": "Sieť",
   "tradeChecklist.network.youWillGenerateQrCode": "Priamo na stretnutí si vygenerujete QR kód zo svojej peňaženky na prevod BTC.",
   "tradeChecklist.network.pasteBtcAddress": "Vlož BTC adresu (voliteľné)",

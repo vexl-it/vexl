@@ -1007,6 +1007,8 @@
   "tradeChecklist.calculateAmount.transactionLimitForSelectedCurrency": "Transactielimiet in fiat voor de geselecteerde valuta is {{amount}} {{currency}}.",
   "tradeChecklist.setYourOwnPrice.ourNewBtcPriceIsHigher": "Onze nieuwe BTC-prijs is {{percentage}}% hoger dan de marktprijs.",
   "tradeChecklist.setYourOwnPrice.ourNewBtcPriceIsLower": "Onze nieuwe BTC-prijs is {{percentage}}% lager dan de live marktprijs.",
+  "tradeChecklist.setYourOwnPrice.yourProposedBtcPriceIsHigher": "Your proposed BTC price is {{percentage}}% higher than live market price.",
+  "tradeChecklist.setYourOwnPrice.yourProposedBtcPriceIsLower": "Your proposed BTC price is {{percentage}}% lower than live market price.",
   "tradeChecklist.network.network": "Netwerk",
   "tradeChecklist.network.youWillGenerateQrCode": "Je hebt het netwerk ingesteld op lighting. Je genereert rechtsreeks QR-code van je portemonnee op de vergadering voor het overzetten van BTC.",
   "tradeChecklist.network.pasteBtcAddress": "Plak het BTC-adres (optioneel)",

@@ -8,16 +8,24 @@ export const mapPointsAtom = atom((get) => {
   const {filter} = get(offersFilterStorageAtom)
 
   return offers
-    .filter((one) =>
-      filter.listingType === 'OTHER'
-        ? one.offerInfo.publicPart.listingType === filter.listingType
-        : filter.listingType === 'PRODUCT'
-          ? one.offerInfo.publicPart.offerType === filter.offerType &&
-            one.offerInfo.publicPart.listingType === filter.listingType
-          : (!one.offerInfo.publicPart.listingType ||
-              one.offerInfo.publicPart.listingType === filter.listingType) &&
-            one.offerInfo.publicPart.offerType === filter.offerType
-    )
+    .filter((one) => {
+      if (filter.listingType === 'OTHER') {
+        return one.offerInfo.publicPart.listingType === filter.listingType
+      }
+      if (filter.listingType === 'PRODUCT') {
+        return (
+          one.offerInfo.publicPart.offerType === filter.offerType &&
+          one.offerInfo.publicPart.listingType === filter.listingType
+        )
+      }
+
+      return (
+        (!one.offerInfo.publicPart.listingType ||
+          !filter.listingType ||
+          one.offerInfo.publicPart.listingType === filter.listingType) &&
+        one.offerInfo.publicPart.offerType === filter.offerType
+      )
+    })
     .flatMap((offer) => {
       const locations = offer.offerInfo.publicPart.location
       return locations.map((one) => {

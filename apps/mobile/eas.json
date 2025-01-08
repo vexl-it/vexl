@@ -29,7 +29,8 @@
     "stagingApk": {
       "android": {
         "credentialsSource": "remote",
-        "buildType": "apk"
+        "buildType": "apk",
+        "resourceClass": "large"
       },
       "env": {
         "ENV_PRESET": "stage"

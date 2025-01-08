@@ -1007,6 +1007,8 @@
   "tradeChecklist.calculateAmount.transactionLimitForSelectedCurrency": "O limite de transação em fiat para a moeda selecionada é {{amount}} {{currency}}.",
   "tradeChecklist.setYourOwnPrice.ourNewBtcPriceIsHigher": "Our new BTC price is {{percentage}}% higher than live market price.",
   "tradeChecklist.setYourOwnPrice.ourNewBtcPriceIsLower": "Our new BTC price is {{percentage}}% lower than live market price.",
+  "tradeChecklist.setYourOwnPrice.yourProposedBtcPriceIsHigher": "Your proposed BTC price is {{percentage}}% higher than live market price.",
+  "tradeChecklist.setYourOwnPrice.yourProposedBtcPriceIsLower": "Your proposed BTC price is {{percentage}}% lower than live market price.",
   "tradeChecklist.network.network": "Rede",
   "tradeChecklist.network.youWillGenerateQrCode": "You’ll generate QR code from your wallet right on the meeting for transferring BTC.",
   "tradeChecklist.network.pasteBtcAddress": "Colar o endereço BTC (opcional)",

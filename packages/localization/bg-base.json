@@ -1007,6 +1007,8 @@
   "tradeChecklist.calculateAmount.transactionLimitForSelectedCurrency": "Лимитът на транзакцията във фиат за избраната валута е {{amount}} {{currency}}.",
   "tradeChecklist.setYourOwnPrice.ourNewBtcPriceIsHigher": "Нашата нова цена на BTC e {{percentage}}% по-висока от текущата пазарна цена.",
   "tradeChecklist.setYourOwnPrice.ourNewBtcPriceIsLower": "Нашата нова цена на BTC e {{percentage}}% по-ниска от текущата пазарна цена.",
+  "tradeChecklist.setYourOwnPrice.yourProposedBtcPriceIsHigher": "Your proposed BTC price is {{percentage}}% higher than live market price.",
+  "tradeChecklist.setYourOwnPrice.yourProposedBtcPriceIsLower": "Your proposed BTC price is {{percentage}}% lower than live market price.",
   "tradeChecklist.network.network": "Мрежа",
   "tradeChecklist.network.youWillGenerateQrCode": "Ще генерирате QR код от портфейла си направо на срещата за прехвърляне на BTC.",
   "tradeChecklist.network.pasteBtcAddress": "Постави BTC адрес (по избор)",

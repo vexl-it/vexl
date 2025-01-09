@@ -4,6 +4,7 @@ import {healthServerLayer} from '@vexl-next/server-utils/src/HealthServer'
 import {RedisService} from '@vexl-next/server-utils/src/RedisService'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
 import {setupLoggingMiddlewares} from '@vexl-next/server-utils/src/loggingMiddlewares'
+import {MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
 import {Effect, Layer} from 'effect'
 import {RouterBuilder} from 'effect-http'
 import {NodeServer} from 'effect-http-node'
@@ -19,6 +20,7 @@ import {MessagesDbService} from './db/MessagesDbService'
 import {WhitelistDbService} from './db/WhiteListDbService'
 import DbLayer from './db/layer'
 import {internalServerLive} from './internalServer'
+import {reportMetricsLayer} from './metrics'
 import {createChallenge} from './routes/challenges/createChalenge'
 import {createChallenges} from './routes/challenges/createChallenges'
 import {approveRequest} from './routes/inbox/approveReqest'
@@ -62,6 +64,7 @@ export const app = RouterBuilder.make(ChatApiSpecification).pipe(
 
 const MainLive = Layer.mergeAll(
   internalServerLive,
+  reportMetricsLayer,
   ServerCrypto.layer(cryptoConfig),
   healthServerLayer({port: healthServerPortConfig}),
   ChatChallengeService.Live
@@ -75,6 +78,7 @@ const MainLive = Layer.mergeAll(
     )
   ),
   Layer.provideMerge(DbLayer),
+  Layer.provideMerge(MetricsClientService.layer(redisUrl)),
   Layer.provideMerge(RedisService.layer(redisUrl)),
   Layer.provideMerge(NodeContext.layer)
 )

@@ -18,6 +18,7 @@ import {
 } from '@vexl-next/server-utils/src/RedisService'
 import {type ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
 import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {type MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
 import {Array, Effect, pipe, type ConfigError} from 'effect'
 import {Handler} from 'effect-http'
@@ -25,6 +26,7 @@ import {InboxDbService} from '../../db/InboxDbService'
 import {MessagesDbService} from '../../db/MessagesDbService'
 import {type WhitelistDbService} from '../../db/WhiteListDbService'
 import {encryptPublicKey, hashPublicKey} from '../../db/domain'
+import {reportMessageSent} from '../../metrics'
 import {findAndEnsureReceiverInbox} from '../../utils/findAndEnsureReceiverInbox'
 import {forbiddenMessageTypes} from '../../utils/forbiddenMessageTypes'
 import {ensureSenderInReceiverWhitelist} from '../../utils/isSenderInReceiverWhitelist'
@@ -47,6 +49,7 @@ const sendMessage = (
   | InboxDbService
   | ServerCrypto
   | RedisService
+  | MetricsClientService
 > =>
   Effect.gen(function* (_) {
     const receiverInbox = yield* _(
@@ -80,7 +83,10 @@ const sendMessage = (
       senderPublicKey,
       notificationHandled: false,
     } satisfies SendMessageResponse
-  }).pipe(withInboxActionRedisLock(message.receiverPublicKey)) // TODO lock two inboxes
+  }).pipe(
+    withInboxActionRedisLock(message.receiverPublicKey),
+    Effect.zipLeft(reportMessageSent(1))
+  ) // TODO lock two inboxes
 
 export const sendMessages = Handler.make(SendMessagesEndpoint, (req) =>
   makeEndpointEffect(

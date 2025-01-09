@@ -11,6 +11,7 @@ import {Handler} from 'effect-http'
 import {MessagesDbService} from '../../db/MessagesDbService'
 import {WhitelistDbService} from '../../db/WhiteListDbService'
 import {encryptPublicKey} from '../../db/domain'
+import {reportMessageSent, reportRequestCanceled} from '../../metrics'
 import {findAndEnsureReceiverAndSenderInbox} from '../../utils/findAndEnsureReceiverAndSenderInbox'
 import {withInboxActionRedisLock} from '../../utils/withInboxActionRedisLock'
 
@@ -62,6 +63,9 @@ export const cancelRequest = Handler.make(
             type: 'CANCEL_REQUEST_MESSAGING',
           })
         )
+
+        yield* _(reportMessageSent(1))
+        yield* _(reportRequestCanceled(1))
 
         return {
           id: Number(sentMessage.id),

@@ -10,6 +10,7 @@ import {Handler} from 'effect-http'
 import {MessagesDbService} from '../../db/MessagesDbService'
 import {WhitelistDbService} from '../../db/WhiteListDbService'
 import {encryptPublicKey} from '../../db/domain'
+import {reportChatClosed, reportMessageSent} from '../../metrics'
 import {findAndEnsureReceiverAndSenderInbox} from '../../utils/findAndEnsureReceiverAndSenderInbox'
 import {ensureSenderInReceiverWhitelist} from '../../utils/isSenderInReceiverWhitelist'
 import {validateChallengeInBody} from '../../utils/validateChallengeInBody'
@@ -68,6 +69,8 @@ export const leaveChat = Handler.make(LeaveChatEndpoint, (req) =>
           type: 'DELETE_CHAT',
         })
       )
+      yield* _(reportMessageSent(1))
+      yield* _(reportChatClosed(1))
 
       return {
         id: Number(sentMessage.id),

@@ -21,7 +21,7 @@ export interface MessagesDbOperations {
     args: InboxRecordId
   ) => Effect.Effect<void, UnexpectedServerError>
 
-  deleteExpiredMessages: () => Effect.Effect<void, UnexpectedServerError>
+  deleteExpiredMessages: () => Effect.Effect<number, UnexpectedServerError>
 
   findMessagesByInboxId: (
     args: InboxRecordId

@@ -15,6 +15,7 @@ import {type InboxRecord} from '../../db/InboxDbService/domain'
 import {MessagesDbService} from '../../db/MessagesDbService'
 import {WhitelistDbService} from '../../db/WhiteListDbService'
 import {encryptPublicKey} from '../../db/domain'
+import {reportMessageSent, reportRequestSent} from '../../metrics'
 import {findAndEnsureReceiverAndSenderInbox} from '../../utils/findAndEnsureReceiverAndSenderInbox'
 import {withInboxActionRedisLock} from '../../utils/withInboxActionRedisLock'
 
@@ -104,6 +105,9 @@ export const requestApproval = Handler.make(
             type: 'REQUEST_MESSAGING',
           })
         )
+
+        yield* _(reportMessageSent(1))
+        yield* _(reportRequestSent(1))
 
         return {
           id: Number(insertedMessage.id),

@@ -2,7 +2,9 @@ import {NodeContext} from '@effect/platform-node'
 import {type SqlClient} from '@effect/sql/SqlClient'
 import {type RedisService} from '@vexl-next/server-utils/src/RedisService'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
+import {type MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
 import {mockedDashboardReportsService} from '@vexl-next/server-utils/src/tests/mockedDashboardReportsService'
+import {mockedMetricsClientService} from '@vexl-next/server-utils/src/tests/mockedMetricsClientService'
 import {mockedRedisLayer} from '@vexl-next/server-utils/src/tests/mockedRedisLayer'
 import {
   disposeTestDatabase,
@@ -27,6 +29,7 @@ export type MockedContexts =
   | InboxDbService
   | MessagesDbService
   | WhitelistDbService
+  | MetricsClientService
 
 const universalContext = Layer.mergeAll(
   mockedRedisLayer,
@@ -35,6 +38,7 @@ const universalContext = Layer.mergeAll(
 
 const context = NodeTestingApp.Live.pipe(
   Layer.provideMerge(ChatChallengeService.Live),
+  Layer.provideMerge(mockedMetricsClientService),
   Layer.provideMerge(
     Layer.mergeAll(
       ChallengeDbService.Live,

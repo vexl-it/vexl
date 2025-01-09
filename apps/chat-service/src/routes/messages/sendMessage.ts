@@ -10,6 +10,7 @@ import {Effect} from 'effect'
 import {Handler} from 'effect-http'
 import {MessagesDbService} from '../../db/MessagesDbService'
 import {encryptPublicKey} from '../../db/domain'
+import {reportMessageSent} from '../../metrics'
 import {findAndEnsureReceiverAndSenderInbox} from '../../utils/findAndEnsureReceiverAndSenderInbox'
 import {forbiddenMessageTypes} from '../../utils/forbiddenMessageTypes'
 import {ensureSenderInReceiverWhitelist} from '../../utils/isSenderInReceiverWhitelist'
@@ -64,6 +65,7 @@ export const sendMessage = Handler.make(SendMessageEndpoint, (req) =>
     SendMessageErrors
   ).pipe(
     withInboxActionRedisLock(req.body.receiverPublicKey),
-    withDbTransaction
+    withDbTransaction,
+    Effect.zipLeft(reportMessageSent(1))
   )
 )

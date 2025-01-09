@@ -13,6 +13,11 @@ import {Handler} from 'effect-http'
 import {MessagesDbService} from '../../db/MessagesDbService'
 import {WhitelistDbService} from '../../db/WhiteListDbService'
 import {encryptPublicKey} from '../../db/domain'
+import {
+  reportMessageSent,
+  reportRequestApproved,
+  reportRequestRejected,
+} from '../../metrics'
 import {findAndEnsureReceiverAndSenderInbox} from '../../utils/findAndEnsureReceiverAndSenderInbox'
 import {validateChallengeInBody} from '../../utils/validateChallengeInBody'
 import {withInboxActionRedisLock} from '../../utils/withInboxActionRedisLock'
@@ -66,6 +71,8 @@ export const approveRequest = Handler.make(ApproveRequestEndpoint, (req) =>
             state: 'APPROVED',
           })
         )
+
+        yield* _(reportRequestApproved(1))
       } else {
         // Not approved
         yield* _(
@@ -82,6 +89,7 @@ export const approveRequest = Handler.make(ApproveRequestEndpoint, (req) =>
             sender: receiverInbox.publicKey,
           })
         )
+        yield* _(reportRequestRejected(0))
       }
 
       const encryptedSenderPublicKey = yield* _(
@@ -105,7 +113,8 @@ export const approveRequest = Handler.make(ApproveRequestEndpoint, (req) =>
       } satisfies ApproveRequestResponse
     }).pipe(
       withInboxActionRedisLock(req.body.publicKey, req.body.publicKeyToConfirm),
-      withDbTransaction
+      withDbTransaction,
+      Effect.zipLeft(reportMessageSent(1))
     ),
     ApproveRequestErrors
   )

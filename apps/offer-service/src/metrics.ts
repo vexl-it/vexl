@@ -361,6 +361,7 @@ const QueryTotalOffersFlagged = Schema.Struct({
 const queryTotalOffersFlagged = Effect.gen(function* (_) {
   const sql = yield* _(SqlClient.SqlClient)
   const offerReportFilter = yield* _(offerReportFilterConfig)
+  const expirationPeriodDays = yield* _(expirationPeriodDaysConfig)
 
   const result = yield* _(
     SqlSchema.findOne({
@@ -373,6 +374,9 @@ const queryTotalOffersFlagged = Effect.gen(function* (_) {
           offer_public
         WHERE
           report >= ${offerReportFilter}
+          AND refreshed_at >= (
+            now() - interval '1 DAY' * ${expirationPeriodDays}
+          )::date
       `,
     })(null)
   )

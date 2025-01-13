@@ -35,7 +35,7 @@ index 931dc907869d752956e5c81557da63bc5e13ccc4..de456c2acb73c3125b5cafedb482a538
          Configuration.instance = null;
      }
      getConfig() {
-+        console.log('Redis config: ', JSON.stringify(this.config, null, 2));
++        //console.log('Redis config: ', JSON.stringify(this.config, null, 2));
          return this.config;
      }
      parseConfiguration(config) {
@@ -80,7 +80,7 @@ index 1dc89b35846f443500b179246846a841e74ec133..bde4d1944105cec07ee05f7964bdcfb7
          Configuration.instance = null;
      }
      getConfig() {
-+        console.log('Redis config: ', JSON.stringify(this.config, null, 2));
++        //console.log('Redis config: ', JSON.stringify(this.config, null, 2));
          return this.config;
      }
      parseConfiguration(config) {

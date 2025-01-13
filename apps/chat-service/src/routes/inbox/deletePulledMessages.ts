@@ -8,6 +8,7 @@ import {Handler} from 'effect-http'
 import {InboxDbService} from '../../db/InboxDbService'
 import {MessagesDbService} from '../../db/MessagesDbService'
 import {hashPublicKey} from '../../db/domain'
+import {reportMessageFetchedAndRemoved} from '../../metrics'
 import {validateChallengeInBody} from '../../utils/validateChallengeInBody'
 import {withInboxActionRedisLock} from '../../utils/withInboxActionRedisLock'
 
@@ -31,7 +32,10 @@ export const deletePulledMessages = Handler.make(
         )
 
         const messagesService = yield* _(MessagesDbService)
-        yield* _(messagesService.deletePulledMessagesByInboxId(inboxRecord.id))
+        yield* _(
+          messagesService.deletePulledMessagesByInboxId(inboxRecord.id),
+          Effect.tap(reportMessageFetchedAndRemoved)
+        )
 
         return null
       }).pipe(withInboxActionRedisLock(req.body.publicKey), withDbTransaction),

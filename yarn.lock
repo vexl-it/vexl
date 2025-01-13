@@ -26477,13 +26477,13 @@ __metadata:
 
 "redis-smq@patch:redis-smq@npm%3A8.0.0-rc.24#./.yarn/patches/redis-smq-npm-8.0.0-rc.24-4f93254f0b.patch::locator=vexl-next%40workspace%3A.":
   version: 8.0.0-rc.24
-  resolution: "redis-smq@patch:redis-smq@npm%3A8.0.0-rc.24#./.yarn/patches/redis-smq-npm-8.0.0-rc.24-4f93254f0b.patch::version=8.0.0-rc.24&hash=a8b7b0&locator=vexl-next%40workspace%3A."
+  resolution: "redis-smq@patch:redis-smq@npm%3A8.0.0-rc.24#./.yarn/patches/redis-smq-npm-8.0.0-rc.24-4f93254f0b.patch::version=8.0.0-rc.24&hash=0ac15d&locator=vexl-next%40workspace%3A."
   dependencies:
     cron-parser: 4.7.1
     lodash: 4.17.21
     redis-smq-common: 3.0.0-rc.15
     uuid: 9.0.0
-  checksum: e4ea768650b2deca5219eddba5c01b75c751de3b0babe23d8c329e4f1f216dea3e173bf3a07f4958323b9660daa64a13d00cedec7e5ee3504cdc8246a8dd0e6f
+  checksum: bc227a31d31de73fe85c5daa3e0610b6a2f49f6f252e5f1ba5b30e40852e8cc56e456a854236f0400568994270aea745eb69befee3b67d0f5c1b28f89f74fb46
   languageName: node
   linkType: hard
 

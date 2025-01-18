@@ -2,6 +2,7 @@ import {type CurrencyCode} from '@vexl-next/domain/src/general/offers'
 import {useAtom, useAtomValue, type PrimitiveAtom} from 'jotai'
 import {DateTime} from 'luxon'
 import {useCallback, useEffect, useMemo, useState} from 'react'
+import {getFontScaleSync} from 'react-native-device-info'
 import {Stack, Text, XStack, getTokens} from 'tamagui'
 import {iosHapticFeedback} from '../../../../utils/iosHapticFeedback'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
@@ -33,6 +34,7 @@ function AmountOfTransaction({
 }: Props): JSX.Element | null {
   const {t} = useTranslation()
   const tokens = getTokens()
+  const fontScale = getFontScaleSync()
 
   const [amountTopLimit, setAmountTopLimit] = useAtom(amountTopLimitAtom)
   const [amountBottomLimit, setAmountBottomLimit] = useAtom(
@@ -123,7 +125,13 @@ function AmountOfTransaction({
     amountBottomLimit !== undefined &&
     amountTopLimit !== undefined ? (
     <>
-      <XStack ai="center" mb="$2" justifyContent="space-around">
+      <Stack
+        flexDirection={fontScale > 1 ? 'column' : 'row'}
+        ai="center"
+        mb="$2"
+        justifyContent="space-around"
+        gap={fontScale > 1 ? '$2' : 0}
+      >
         <LimitInput
           currencyAtom={currencyAtom}
           onChangeText={(value) => {
@@ -141,7 +149,7 @@ function AmountOfTransaction({
           }}
           value={String(inputMax)}
         />
-      </XStack>
+      </Stack>
       <Stack bc="$grey" px="$2" py="$6" br="$4">
         <Slider
           maximumValue={SLIDER_MAX_VALUE}

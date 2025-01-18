@@ -74,7 +74,7 @@ function PaymentMethodComponent({
   }
 
   return (
-    <XStack gap="$2" ai="center">
+    <XStack gap="$2" ai="center" flexWrap="wrap">
       {content.ONLINE.map((method) => (
         <SelectableCell
           key={method.type}

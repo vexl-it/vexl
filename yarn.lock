@@ -10476,6 +10476,7 @@ __metadata:
     react-native: 0.74.5
     react-native-calendars: ^1.1301.0
     react-native-color-matrix-image-filters: ^6.0.3
+    react-native-device-info: ^14.0.2
     react-native-draggable: ^3.3.0
     react-native-element-dropdown: 2.10.0
     react-native-flags: ^1.0.0
@@ -25614,6 +25615,15 @@ __metadata:
     react-native: "*"
     react-native-web: "*"
   checksum: e808169b45c5e8021462a6914f7c3fb28e84ae8d58097ed7b3418fee41efa2bc44012abc09ff3f3bd6ee14427b9efe1b0f8d8b3a19cc01325b2f2cd0137d5d00
+  languageName: node
+  linkType: hard
+
+"react-native-device-info@npm:^14.0.2":
+  version: 14.0.2
+  resolution: "react-native-device-info@npm:14.0.2"
+  peerDependencies:
+    react-native: "*"
+  checksum: c1825a31514f0de08947de7876a361e53b3449fc84e34aace9b881a77f7ecf85e58b3c04eaa8b46c5d4d1fb911d95a73b229d2b98c5bce61bc5be5b89e071ec9
   languageName: node
   linkType: hard
 

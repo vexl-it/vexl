@@ -38,8 +38,6 @@ export default function createNewChatsFromFirstMessages({
             ? lastMessage.message.goldenAvatarType
             : undefined
 
-        console.log(`Last message: ${JSON.stringify(lastMessage, null, 2)}`)
-
         const otherSideVersion =
           lastMessage.state === 'receivedButRequiresNewerVersion' ||
           lastMessage.state === 'received'

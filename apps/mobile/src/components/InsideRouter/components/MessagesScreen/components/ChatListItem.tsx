@@ -113,11 +113,11 @@ function ChatListItem({dataAtom}: {dataAtom: Atom<ChatListData>}): JSX.Element {
               </XStack>
               <XStack jc="space-between">
                 <Text
+                  f={1}
+                  numberOfLines={1}
                   color="$greyOnBlack"
                   fos={16}
-                  numberOfLines={1}
-                  flex={1}
-                  ellipsizeMode="clip"
+                  ellipsizeMode="tail"
                   mr="$3"
                 >
                   <MessagePreview

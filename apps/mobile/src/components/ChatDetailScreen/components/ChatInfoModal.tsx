@@ -2,6 +2,7 @@ import {useNavigation} from '@react-navigation/native'
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtom, useAtomValue, useSetAtom} from 'jotai'
 import {Alert, ScrollView} from 'react-native'
+import {getFontScaleSync} from 'react-native-device-info'
 import {SlideInDown, SlideOutDown} from 'react-native-reanimated'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {Stack, Text, YStack, getTokens} from 'tamagui'
@@ -39,6 +40,7 @@ function ChatInfoModal(): JSX.Element | null {
     chatAtom,
     listingTypeIsOtherAtom,
   } = useMolecule(chatMolecule)
+  const fontScale = getFontScaleSync()
   const [showModal, setShowModal] = useAtom(showModalAtom)
   const {top} = useSafeAreaInsets()
   const {t} = useTranslation()
@@ -70,7 +72,7 @@ function ChatInfoModal(): JSX.Element | null {
     <AnimatedModal
       entering={SlideInDown}
       exiting={SlideOutDown}
-      topMargin={PHOTO_AND_INFO_PHOTO_TOP_HEIGHT + top}
+      topMargin={PHOTO_AND_INFO_PHOTO_TOP_HEIGHT * fontScale + top}
     >
       <YStack px="$4" backgroundColor="$black" f={1}>
         <ScrollView showsVerticalScrollIndicator={false}>

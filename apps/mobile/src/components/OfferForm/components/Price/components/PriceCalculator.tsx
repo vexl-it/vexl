@@ -43,38 +43,40 @@ function PriceCalculator({
       <Stack als="flex-end">
         <CurrentBtcPrice currencyAtom={currencyAtom} />
       </Stack>
-      <FiatInput
-        priceAtom={priceAtom}
-        calculateSatsValueOnFiatValueChangeActionAtom={
-          calculateSatsValueOnFiatValueChangeActionAtom
-        }
-        currencyAtom={currencyAtom}
-        changePriceCurrencyActionAtom={changePriceCurrencyActionAtom}
-        currencySelectVisibleAtom={currencySelectVisibleAtom}
-      />
-      <SatsInput
-        calculateFiatValueOnSatsValueChangeActionAtom={
-          calculateFiatValueOnSatsValueChangeActionAtom
-        }
-        satsValueAtom={satsValueAtom}
-      />
-      <Stack
-        als="center"
-        pos="absolute"
-        br="$4"
-        bc="$grey"
-        boc="$yellowAccent1"
-        p="$2"
-        bw={2}
-        zi={999}
-        top={65}
-      >
-        <SvgImage
-          width={24}
-          height={24}
-          stroke={getTokens().color.yellowAccent1.val}
-          source={arrowsSvg}
+      <Stack gap="$2" pos="relative">
+        <FiatInput
+          priceAtom={priceAtom}
+          calculateSatsValueOnFiatValueChangeActionAtom={
+            calculateSatsValueOnFiatValueChangeActionAtom
+          }
+          currencyAtom={currencyAtom}
+          changePriceCurrencyActionAtom={changePriceCurrencyActionAtom}
+          currencySelectVisibleAtom={currencySelectVisibleAtom}
         />
+        <SatsInput
+          calculateFiatValueOnSatsValueChangeActionAtom={
+            calculateFiatValueOnSatsValueChangeActionAtom
+          }
+          satsValueAtom={satsValueAtom}
+        />
+        <Stack
+          als="center"
+          pos="absolute"
+          br="$4"
+          bc="$grey"
+          boc="$yellowAccent1"
+          p="$2"
+          bw={2}
+          zi={999}
+          top={35}
+        >
+          <SvgImage
+            width={24}
+            height={24}
+            stroke={getTokens().color.yellowAccent1.val}
+            source={arrowsSvg}
+          />
+        </Stack>
       </Stack>
     </YStack>
   )

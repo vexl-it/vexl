@@ -58,7 +58,7 @@ function Item<T>({
       >
         <Stack fs={1} gap="$2">
           <Text
-            h={24}
+            mih={24}
             color={
               selected ? '$main' : item.outdated ? '$greyAccent1' : '$white'
             }

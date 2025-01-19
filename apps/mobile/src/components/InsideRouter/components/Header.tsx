@@ -1,6 +1,7 @@
 import {useNavigation} from '@react-navigation/native'
 import {LinearGradient} from 'expo-linear-gradient'
 import {TouchableOpacity} from 'react-native'
+import {getFontScaleSync} from 'react-native-device-info'
 import {Stack, XStack, getTokens, styled} from 'tamagui'
 import Image from '../../Image'
 import BitcoinPriceChart from './BitcoinPriceChart'
@@ -18,9 +19,10 @@ const BackgroundImage = styled(LinearGradient, {
 
 function BtcPriceHeader(): JSX.Element {
   const navigation = useNavigation()
+  const fontScale = getFontScaleSync()
 
   return (
-    <Stack h={CHART_HEADER_HEIGHT_PX}>
+    <Stack h={CHART_HEADER_HEIGHT_PX * fontScale}>
       <Stack
         bg="$black"
         pos="absolute"

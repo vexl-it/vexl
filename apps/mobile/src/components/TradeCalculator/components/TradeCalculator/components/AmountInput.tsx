@@ -6,6 +6,7 @@ import {
   type Ref,
 } from 'react'
 import {ActivityIndicator, TouchableWithoutFeedback} from 'react-native'
+import {getFontScaleSync} from 'react-native-device-info'
 import {Input, Stack, XStack, getTokens, styled, type InputProps} from 'tamagui'
 import PremiumIncluded from './PremiumIncluded'
 
@@ -45,6 +46,7 @@ function AmountInput(
   }: Props,
   ref: Ref<Input>
 ): JSX.Element {
+  const fontScale = getFontScaleSync()
   const inputRef: Ref<Input> = useRef(null)
   useImperativeHandle<Input | null, Input | null>(ref, () => inputRef.current)
 
@@ -52,7 +54,7 @@ function AmountInput(
     <TouchableWithoutFeedback onPress={onWrapperPress}>
       <>
         <XStack
-          h={65}
+          h={65 * fontScale}
           ai="center"
           jc="space-between"
           bc="$grey"
@@ -63,7 +65,7 @@ function AmountInput(
           br="$4"
         >
           {children}
-          <Stack fs={1} flex={1} maxWidth="60%" my="$-3">
+          <Stack flex={1} my="$-3">
             {loading ? (
               <Stack als="flex-end">
                 <ActivityIndicator

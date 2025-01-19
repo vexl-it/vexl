@@ -7,7 +7,7 @@ import BitcoinPriceChart from './BitcoinPriceChart'
 import {CONTAINER_WITH_TOP_BORDER_RADIUS_TOP_PADDING} from './ContainerWithTopBorderRadius'
 import calculatorSvg from './MarketplaceScreen/images/calculatorSvg'
 
-const CHART_HEADER_HEIGHT_PX = 90
+const CHART_HEADER_HEIGHT_PX = 95
 
 const BackgroundImage = styled(LinearGradient, {
   w: '100%',

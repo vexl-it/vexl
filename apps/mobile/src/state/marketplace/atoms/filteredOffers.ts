@@ -233,10 +233,12 @@ const viewportToFilterByAtom = atom((get) => {
   }
 
   if (locationFilter) {
-    return radiusToViewport({
-      point: locationFilter,
-      radius: locationFilter.radius,
-    })
+    return radiusToViewport(
+      locationFilter.map((one) => ({
+        point: {latitude: one.latitude, longitude: one.longitude},
+        radius: one.radius,
+      }))
+    )
   }
 
   return undefined

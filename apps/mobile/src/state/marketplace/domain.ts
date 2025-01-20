@@ -71,7 +71,10 @@ export const OffersFilter = z
   .object({
     sort: Sort.optional(),
     currency: CurrencyCode.optional(),
-    location: OfferLocation.optional().catch(() => undefined),
+    location: z
+      .array(OfferLocation)
+      .optional()
+      .catch(() => []),
     locationState: z.array(LocationState).optional().readonly(),
     paymentMethod: z.array(PaymentMethod).optional().readonly(),
     btcNetwork: z.array(BtcNetwork).optional().readonly(),

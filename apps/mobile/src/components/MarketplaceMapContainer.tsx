@@ -69,6 +69,7 @@ function MapBarAndButton(): JSX.Element | null {
   const isCurrentRouteOfferDetail = useIsCurrentRouteOfferDetail()
   const clearAndRefocus = useSetAtom(clearRegionAndRefocusActionAtom)
   const locationFilter = useAtomValue(locationFilterAtom)
+  const justOneLocation = locationFilter?.at(-1)
 
   // const setMapRegion = useSetAtom(mapRegionAtom)
   // const animateToRegion = useSetAtom(animateToRegionActionAtom)
@@ -107,8 +108,8 @@ function MapBarAndButton(): JSX.Element | null {
             size="small"
             onPress={clearAndRefocus}
             text={
-              locationFilter
-                ? t('map.resetTo', {name: locationFilter.address})
+              locationFilter?.length === 1 && justOneLocation
+                ? t('map.resetTo', {name: justOneLocation.address})
                 : t('map.reset')
             }
           />

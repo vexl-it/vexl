@@ -25,7 +25,6 @@ import {preferencesAtom} from './preferences'
 
 export default function clearMmkvStorageAndEmptyAtoms(): void {
   // TODO:#110 find a better way how to clear the state
-
   getDefaultStore().set(messagingStateAtomStorageAtom, {messagingState: []})
   getDefaultStore().set(connectionStateAtom, {
     lastUpdate: UnixMilliseconds.parse(0),

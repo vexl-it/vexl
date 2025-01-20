@@ -1,4 +1,5 @@
 import {type OfferId} from '@vexl-next/domain/src/general/offers'
+import {type LatLong} from '@vexl-next/domain/src/utility/geoCoordinates'
 import {atom} from 'jotai'
 import europeRegion from '../../../../components/Map/utils/europeRegion'
 import getOfferLocationBorderPoints from '../../utils/getOfferLocationBorderPoints'
@@ -50,10 +51,22 @@ export const refocusMapActionAtom = atom(
 
     const locationFilter = get(locationFilterAtom)
     if (locationFilter) {
-      set(
-        animateToCoordinateActionAtom,
-        getOfferLocationBorderPoints(locationFilter)
-      )
+      const oneLocation = locationFilter[0]
+      const coordinates: LatLong[] = locationFilter.map((one) => ({
+        latitude: one.latitude,
+        longitude: one.longitude,
+      }))
+
+      if (coordinates.length === 1 && oneLocation) {
+        // this should avoid zooming too much on filtered location if there is only one
+        set(
+          animateToCoordinateActionAtom,
+          getOfferLocationBorderPoints(oneLocation)
+        )
+        return
+      }
+
+      set(animateToCoordinateActionAtom, coordinates)
       return
     }
 

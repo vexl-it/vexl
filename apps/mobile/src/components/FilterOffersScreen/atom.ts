@@ -63,24 +63,18 @@ export const locationStateAtom = atom<readonly LocationState[] | undefined>(
   offersFilterInitialState.locationState
 )
 
-export const locationAtom = atom<OfferLocation | undefined>(
+export const locationAtom = atom<OfferLocation[] | undefined>(
   offersFilterInitialState.location
 )
 
 export const locationArrayOfOneAtom = atom(
-  (get): readonly OfferLocation[] | undefined => {
-    const location = get(locationAtom)
-    if (location) {
-      return [location]
-    }
-    return undefined
-  },
+  (get): readonly OfferLocation[] | undefined => get(locationAtom),
   (get, set, action: SetStateAction<readonly OfferLocation[] | undefined>) => {
     const location = getValueFromSetStateActionOfAtom(action)(() =>
       get(locationArrayOfOneAtom)
     )
     if (!location || location.length === 0) set(locationAtom, undefined)
-    else set(locationAtom, location.at(-1))
+    else set(locationAtom, [...location])
   }
 )
 
@@ -290,17 +284,20 @@ export const saveSelectedSpokenLanguagesActionAtom = atom(null, (get, set) => {
 export const setOfferLocationActionAtom = atom(
   null,
   (get, set, locationSuggestion: LocationSuggestion) => {
-    set(locationAtom, {
-      placeId: locationSuggestion.userData.placeId,
-      address:
-        locationSuggestion.userData.suggestFirstRow +
-        ', ' +
-        locationSuggestion.userData.suggestSecondRow,
-      shortAddress: locationSuggestion.userData.suggestFirstRow,
-      latitude: locationSuggestion.userData.latitude,
-      longitude: locationSuggestion.userData.longitude,
-      radius: calculateViewportRadius(locationSuggestion.userData.viewport),
-    })
+    set(locationAtom, (prev) => [
+      ...(prev ?? []),
+      {
+        placeId: locationSuggestion.userData.placeId,
+        address:
+          locationSuggestion.userData.suggestFirstRow +
+          ', ' +
+          locationSuggestion.userData.suggestSecondRow,
+        shortAddress: locationSuggestion.userData.suggestFirstRow,
+        latitude: locationSuggestion.userData.latitude,
+        longitude: locationSuggestion.userData.longitude,
+        radius: calculateViewportRadius(locationSuggestion.userData.viewport),
+      },
+    ])
   }
 )
 
@@ -449,8 +446,23 @@ export const saveFilterActionAtom = atom(null, (get, set) => {
 
   if (marketplaceLayoutMode === 'map') {
     const location = get(locationAtom)
-    if (location)
-      set(animateToCoordinateActionAtom, getOfferLocationBorderPoints(location))
-    else set(clearRegionAndRefocusActionAtom)
+
+    if (location) {
+      const oneLocation = location[0]
+      const coordinates = location.map((one) => ({
+        latitude: one.latitude,
+        longitude: one.longitude,
+      }))
+
+      if (coordinates.length === 1 && oneLocation) {
+        // this should avoid zooming too much on filtered location if there is only one
+        set(
+          animateToCoordinateActionAtom,
+          getOfferLocationBorderPoints(oneLocation)
+        )
+      } else {
+        set(animateToCoordinateActionAtom, coordinates)
+      }
+    } else set(clearRegionAndRefocusActionAtom)
   }
 })

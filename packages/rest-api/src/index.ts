@@ -5,6 +5,7 @@ import * as UserSessionCredentials from './UserSessionCredentials.brand'
 import * as btcExchangeRate from './services/btcExchangeRate'
 import * as chat from './services/chat'
 import * as contact from './services/contact'
+import * as content from './services/content'
 import * as feedback from './services/feedback'
 import * as location from './services/location'
 import * as notification from './services/notification'
@@ -20,6 +21,7 @@ export const EnvPreset = Schema.Struct({
   notificationMs: ServiceUrl,
   btcExchangeRateMs: ServiceUrl,
   feedbackMs: ServiceUrl,
+  contentMs: ServiceUrl,
 })
 export type EnvPreset = Schema.Schema.Type<typeof EnvPreset>
 
@@ -33,6 +35,7 @@ export {
   btcExchangeRate,
   chat,
   contact,
+  content,
   feedback,
   location,
   notification,
@@ -54,6 +57,7 @@ export const ENV_PRESETS: {stageEnv: EnvPreset; prodEnv: EnvPreset} = {
       'https://stage-btc-exchange-rate.vexl.it'
     ),
     feedbackMs: Schema.decodeSync(ServiceUrl)('https://stage-feedback.vexl.it'),
+    contentMs: Schema.decodeSync(ServiceUrl)('https://stage-content.vexl.it'),
   },
   prodEnv: {
     userMs: Schema.decodeSync(ServiceUrl)('https://user.vexl.it'),
@@ -68,6 +72,7 @@ export const ENV_PRESETS: {stageEnv: EnvPreset; prodEnv: EnvPreset} = {
       'https://btc-exchange-rate.vexl.it'
     ),
     feedbackMs: Schema.decodeSync(ServiceUrl)('https://feedback.vexl.it'),
+    contentMs: Schema.decodeSync(ServiceUrl)('https://content.vexl.it'),
   },
 }
 

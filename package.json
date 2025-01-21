@@ -25,6 +25,7 @@
     "dashboard-app:build-docker-image": "./scripts/build-app-docker-image.sh dashboard-app",
     "offer-service:build-docker-image": "./scripts/build-app-docker-image.sh offer-service",
     "metrics-service:build-docker-image": "./scripts/build-app-docker-image.sh metrics-service",
+    "content-service:build-docker-image": "./scripts/build-app-docker-image.sh content-service",
     "postinstall": "manypkg check"
   },
   "private": true,

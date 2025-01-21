@@ -16,6 +16,7 @@ interface Props extends YStackProps {
   text: string
   textColor?: ColorTokens
   withBottomBorder?: boolean
+  allowMultipleLines?: boolean
   withBackButton?: boolean
   onBackButtonPress?: () => void
 }
@@ -25,6 +26,7 @@ function ScreenTitle({
   text,
   textColor,
   withBottomBorder = false,
+  allowMultipleLines = false,
   withBackButton,
   onBackButtonPress,
   ...props
@@ -47,8 +49,8 @@ function ScreenTitle({
         )}
         <Stack f={1}>
           <Text
-            adjustsFontSizeToFit
-            numberOfLines={1}
+            adjustsFontSizeToFit={!allowMultipleLines}
+            numberOfLines={allowMultipleLines ? undefined : 1}
             col={textColor ?? '$white'}
             fontSize={32}
             ff="$heading"

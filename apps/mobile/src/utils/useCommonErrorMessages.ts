@@ -1,7 +1,7 @@
 import {AxiosError} from 'axios'
 import {useTranslation, type TFunction} from './localization/I18nProvider'
 
-interface SomeError {
+export interface SomeError {
   _tag: string
   code?: string | number | undefined
 }

@@ -34,6 +34,7 @@ import contactIconSvg from '../images/contactIconSvg'
 import cpuIconSvg from '../images/cpuIconSvg'
 import customerSupportIconSvg from '../images/customerSupportIconSvg'
 import dataIconSvg from '../images/dataIconSvg'
+import eventsAndClubsSvg from '../images/eventsAndClubsSvg'
 import faceIdIconSvg from '../images/faceIdIconSvg'
 import glassesSvg from '../images/glassesSvg'
 import imageIconSvg from '../images/imageIconSvg'
@@ -149,6 +150,16 @@ function ButtonsSection(): JSX.Element {
   const data: Array<Array<ItemProps | null>> = useMemo(
     () =>
       [
+        [
+          {
+            testID: '@buttonsSection/eventsAndClubsButton',
+            text: t('settings.items.eventsAndClubs'),
+            icon: eventsAndClubsSvg,
+            onPress: () => {
+              navigation.navigate('EventsAndClubs')
+            },
+          },
+        ],
         [
           {
             testID: '@buttonsSection/changeProfilePictureButton',

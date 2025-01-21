@@ -27,6 +27,7 @@ import CommonFriendsScreen from '../CommonFriendsScreen'
 import DebugScreen from '../DebugScreen'
 import DevTranslationFloatingButton from '../DevTranslationFloatingButtons'
 import EditNameScreen from '../EditNameScreen'
+import EventsAndClubsScreen from '../EventsAndClubsScreen'
 import FaqsScreen from '../FaqScreen'
 import FilterOffersScreen from '../FilterOffersScreen'
 import GoldenAvatarAnimation, {
@@ -96,6 +97,10 @@ function RootNavigation(): JSX.Element {
             <Stack.Screen name="AppLogs" component={AppLogsScreen} />
             <Stack.Screen name="ChatDetail" component={ChatDetailScreen} />
             <Stack.Screen name="SetContacts" component={SetContactsScreen} />
+            <Stack.Screen
+              name="EventsAndClubs"
+              component={EventsAndClubsScreen}
+            />
             <Stack.Screen
               name="CommonFriends"
               component={CommonFriendsScreen}

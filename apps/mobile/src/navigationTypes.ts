@@ -68,7 +68,22 @@ export type RootStackParamsList = {
   AppLogs: undefined
 
   DebugScreen: undefined
+
+  EventsAndClubs: undefined
 }
+
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type EventsAndClubsParamsList = {
+  events: undefined
+  clubs: undefined
+}
+
+export type EventsAndClubsTabsScreenProps<
+  T extends keyof EventsAndClubsParamsList,
+> = CompositeScreenProps<
+  MaterialTopTabScreenProps<EventsAndClubsParamsList, T>,
+  RootStackScreenProps<keyof RootStackParamsList>
+>
 
 export type RootStackScreenProps<T extends keyof RootStackParamsList> =
   NativeStackScreenProps<RootStackParamsList, T>

@@ -4,6 +4,7 @@ import {
   btcExchangeRate,
   chat,
   contact,
+  content,
   feedback,
   location,
   notification,
@@ -114,6 +115,13 @@ export const apiAtom = atom((get) => {
       clientVersion: versionCode,
       clientSemver: version,
       url: apiEnv.feedbackMs,
+      getUserSessionCredentials,
+    }),
+    content: content.api({
+      platform,
+      clientVersion: versionCode,
+      clientSemver: version,
+      url: apiEnv.contentMs,
       getUserSessionCredentials,
     }),
   }

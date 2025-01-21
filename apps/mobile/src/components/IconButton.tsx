@@ -17,6 +17,7 @@ interface Props {
   disabled?: boolean
   icon: SvgString
   iconFill?: ColorValue
+  iconStroke?: ColorValue
   onPress: () => void
   style?: StyleProp<ViewStyle>
   variant?: 'dark' | 'light' | 'primary' | 'negative' | 'secondary' | 'plain'
@@ -66,6 +67,7 @@ function IconButton({
   variant = 'dark',
   disabled,
   icon,
+  iconStroke,
   iconFill,
   onPress,
   borderRadius,
@@ -106,7 +108,8 @@ function IconButton({
           width={iconWidth ?? 20}
           height={iconHeight ?? 20}
           stroke={
-            !iconFill
+            iconStroke ??
+            (!iconFill
               ? variant === 'dark'
                 ? tokens.color.white.val
                 : variant === 'primary'
@@ -116,7 +119,7 @@ function IconButton({
                     : variant === 'secondary'
                       ? tokens.color.darkBrown.val
                       : tokens.color.grey.val
-              : 'none'
+              : 'none')
           }
           fill={iconFill ?? 'none'}
           source={icon}

@@ -10,6 +10,7 @@
   "common.deselectAll": "Desmarcar tudo",
   "common.selectAll": "Selecionar tudo",
   "common.cancel": "Cancelar",
+  "common.tryAgain": "Try again",
   "common.unknownError": "Erro desconhecido",
   "common.NetworkError": "Erro de rede. Por favor, verifique a sua conexão de internet e tente novamente.",
   "common.UnauthorizedError": "We couldn't authorize your request. Please contact our support.",
@@ -299,6 +300,7 @@
   "postLoginFlow.allowNotifications.errors.notAvailableOnEmulator": "As notificações não estão disponíveis no emulador",
   "postLoginFlow.allowNotifications.vexlCantBeUsedWithoutNotifications": "A aplicação Vexl não pode ser utilizada sem esta permissão.",
   "settings.yourReach": "O seu alcance: {{number}} vexlers",
+  "settings.items.eventsAndClubs": "Events and clubs",
   "settings.items.changeProfilePicture": "Alterar a imagem de perfil",
   "settings.items.editName": "Editar nome",
   "settings.items.changeLanguage": "Alterar Idioma",
@@ -1094,5 +1096,12 @@
   "goldenGlasses.userJoinedOneOfOurChosenVexlMeetups": "This user joined one of our chosen Vexl meetups!",
   "goldenGlasses.goAndTryToFindYours": "Go and try to find yours at",
   "linking.wrongLinkFormatReceived": "Wrong link format received. Link {{link}} seems to be invalid. Check the link and try again.",
-  "linking.linkNotSupportedPleaseUpdate": "Link not supported. Please update your app to the latest version."
+  "linking.linkNotSupportedPleaseUpdate": "Link not supported. Please update your app to the latest version.",
+  "clubs.commingSoon": "Stay tuned, clubs are comming soon! 👀",
+  "eventsAndClubs.title": "Events and clubs",
+  "events.title": "Events",
+  "clubs.title": "Clubs",
+  "events.upcomingEvents": "Upcoming events",
+  "events.pastEvents": "Past events",
+  "events.noEvents": "No events"
 }

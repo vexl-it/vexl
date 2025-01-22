@@ -4,7 +4,7 @@ import {fromSvgString} from '@vexl-next/domain/src/utility/SvgStringOrImageUri.b
 import {getRandomAvatarSvgFromSeed} from '../../../components/AnonymousAvatar'
 import randomName from '../../../utils/randomName'
 
-// Should this be done based on the privatek key?
+// Should this be done based on the private key?
 export function generateRandomUserData({
   seed,
   goldenAvatarType,

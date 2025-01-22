@@ -9,13 +9,14 @@ import {ChatNotificationData} from '@vexl-next/domain/src/general/notifications'
 import {getDefaultStore} from 'jotai'
 import {useCallback} from 'react'
 import {Platform} from 'react-native'
+import {generateOtherSideSeed} from '../../state/chat/atoms/selectOtherSideDataAtom'
 import {
   type ChatMessageWithState,
   type InboxInState,
 } from '../../state/chat/domain'
-import {generateRandomUserData} from '../../state/session/utils/generateRandomUserData'
 import {translationAtom} from '../localization/I18nProvider'
 import notEmpty from '../notEmpty'
+import randomName from '../randomName'
 import {useAppState} from '../useAppState'
 import {SystemChatNotificationData} from './SystemNotificationData.brand'
 import {getChannelForMessages} from './notificationChannels'
@@ -78,22 +79,10 @@ export async function showChatNotification({
   const chat = inbox.chats.find(
     (one) => one.chat.otherSide.publicKey === newMessage.message.senderPublicKey
   )
-  const chatOrigin =
-    chat?.chat.origin.type === 'myOffer' ||
-    chat?.chat.origin.type === 'theirOffer'
-      ? chat.chat.origin
-      : undefined
 
   const userName =
     chat?.chat.otherSide.realLifeInfo?.userName ??
-    (chat
-      ? generateRandomUserData({
-          seed: chat.chat.otherSide.publicKey,
-          goldenAvatarType:
-            chatOrigin?.offer?.offerInfo.publicPart.goldenAvatarType,
-        })
-      : undefined
-    )?.userName
+    (chat ? randomName(generateOtherSideSeed(chat?.chat)) : undefined)
 
   if (
     type === 'VERSION_UPDATE' ||

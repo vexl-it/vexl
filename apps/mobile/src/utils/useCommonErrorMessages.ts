@@ -1,9 +1,9 @@
-import {AxiosError} from 'axios'
 import {useTranslation, type TFunction} from './localization/I18nProvider'
 
 export interface SomeError {
   _tag: string
   code?: string | number | undefined
+  cause?: unknown
 }
 
 export default function useCommonErrorMessages(
@@ -20,24 +20,16 @@ export function toCommonErrorMessage(
 ): string | null {
   if (!error) return null
 
-  if (error._tag === 'NetworkError') {
-    if (error?.code === AxiosError.ERR_NETWORK)
-      return t('common.networkErrors.errNetwork')
-    if (error?.code === AxiosError.ERR_CANCELED)
-      return t('common.networkErrors.errCanceled')
-    if (error?.code === AxiosError.ETIMEDOUT)
-      return t('common.networkErrors.etimedout')
-    if (error?.code === AxiosError.ECONNABORTED)
-      return t('common.networkErrors.econnaborted')
+  if (
+    error._tag === 'NetworkError' ||
+    error._tag === 'NotFoundError' ||
+    error._tag === 'UnauthorizedError' ||
+    error._tag === 'UnexpectedApiResponseError' ||
+    error._tag === 'UnknownClientError' ||
+    error._tag === 'UnknownServerError'
+  ) {
+    return t(`common.${error._tag}`)
   }
 
-  if (error._tag === 'UnexpectedApiResponseError') {
-    return t('common.errorCreatingInbox')
-  }
-
-  if (error._tag === 'UnknownError') {
-    return t('common.unknownError')
-  }
-
-  return null
+  return t('common.unknownError')
 }

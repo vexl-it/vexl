@@ -265,6 +265,7 @@
   "loginFlow.verificationCode.errors.UserNotFound": "Pengguna tidak dapat ditemukan. Coba untuk kirim ulang kode.",
   "loginFlow.verificationCode.errors.SignatureCouldNotBeGenerated": "Tanda tangan tidak dapat dihasilkan. Coba lagi nanti",
   "loginFlow.verificationCode.errors.PublicKeyOrHashInvalid": "Kunci publik atau hash tidak sah. Coba lagi nanti",
+  "loginFlow.verificationCode.errors.UnableToVerifySmsCodeError": "Invalid verification code. Please try again.",
   "loginFlow.verificationCode.success.title": "Phone number verified.\nLet’s import your contacts.",
   "loginFlow.verificationCode.success.errorWhileParsingSessionForInternalState": "Kesalahan ketika menyimpan pengguna",
   "loginFlow.importContacts.title": "Sekarang, mari cari temanmu!",

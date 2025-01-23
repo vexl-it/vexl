@@ -265,6 +265,7 @@
   "loginFlow.verificationCode.errors.UserNotFound": "Потребителят не е открит. Опитай пак да изпратиш кода.",
   "loginFlow.verificationCode.errors.SignatureCouldNotBeGenerated": "Неуспешно генериране на подпис. Опитай отново по-късно",
   "loginFlow.verificationCode.errors.PublicKeyOrHashInvalid": "Невалиден публичен ключ или хаш. Опитай пак по-късно",
+  "loginFlow.verificationCode.errors.UnableToVerifySmsCodeError": "Invalid verification code. Please try again.",
   "loginFlow.verificationCode.success.title": "Телефонният номер е потвърден.\nНека импортираме вашите контакти.",
   "loginFlow.verificationCode.success.errorWhileParsingSessionForInternalState": "Грешка при запазване на потребител",
   "loginFlow.importContacts.title": "Хайде сега да намерим твоите приятели!",

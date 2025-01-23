@@ -265,6 +265,7 @@
   "loginFlow.verificationCode.errors.UserNotFound": "Користувача не знайдено. Спробуйте ще раз надіслати код.",
   "loginFlow.verificationCode.errors.SignatureCouldNotBeGenerated": "Signature could not be generated. Try again later",
   "loginFlow.verificationCode.errors.PublicKeyOrHashInvalid": "Public key or hash invalid. Try again later",
+  "loginFlow.verificationCode.errors.UnableToVerifySmsCodeError": "Invalid verification code. Please try again.",
   "loginFlow.verificationCode.success.title": "Phone number verified.\nLet’s import your contacts.",
   "loginFlow.verificationCode.success.errorWhileParsingSessionForInternalState": "Error while saving user",
   "loginFlow.importContacts.title": "Now, let’s find your friends!",

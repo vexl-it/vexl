@@ -265,6 +265,7 @@
   "loginFlow.verificationCode.errors.UserNotFound": "Uživatel nebyl nalezen. Zkus kód odeslat znovu.",
   "loginFlow.verificationCode.errors.SignatureCouldNotBeGenerated": "Podpis se nepodařilo vygenerovat. Zkus to znovu později",
   "loginFlow.verificationCode.errors.PublicKeyOrHashInvalid": "Veřejný klíč nebo hash je neplatný. Zkus to znovu později.",
+  "loginFlow.verificationCode.errors.UnableToVerifySmsCodeError": "Invalid verification code. Please try again.",
   "loginFlow.verificationCode.success.title": "Telefonní číslo ověřeno.\nPojďme nahrát vaše kontakty.",
   "loginFlow.verificationCode.success.errorWhileParsingSessionForInternalState": "Chyba při ukládání uživatele",
   "loginFlow.importContacts.title": "Pojďme nyní najít tvoje přátele!",

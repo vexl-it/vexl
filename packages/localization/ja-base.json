@@ -265,6 +265,7 @@
   "loginFlow.verificationCode.errors.UserNotFound": "ユーザーが見つかりません。コードを再送信してください。",
   "loginFlow.verificationCode.errors.SignatureCouldNotBeGenerated": "署名を生成できませんでした。後で再試行してください。",
   "loginFlow.verificationCode.errors.PublicKeyOrHashInvalid": "公開キーまたはハッシュが無効です。後で再試行してください。",
+  "loginFlow.verificationCode.errors.UnableToVerifySmsCodeError": "Invalid verification code. Please try again.",
   "loginFlow.verificationCode.success.title": "電話番号の確認ができました。\nプロフィールを設定しましょう。",
   "loginFlow.verificationCode.success.errorWhileParsingSessionForInternalState": "ユーザーを保存中にエラーが発生しました",
   "loginFlow.importContacts.title": "さあ、友達を見つけましょう！",

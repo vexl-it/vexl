@@ -265,6 +265,7 @@
   "loginFlow.verificationCode.errors.UserNotFound": "Usuario no encontrado. Intenta reenviar el código.",
   "loginFlow.verificationCode.errors.SignatureCouldNotBeGenerated": "No se ha podido generar la firma. Inténtalo más tarde",
   "loginFlow.verificationCode.errors.PublicKeyOrHashInvalid": "Clave pública o hash no válidos. Inténtalo más tarde",
+  "loginFlow.verificationCode.errors.UnableToVerifySmsCodeError": "Invalid verification code. Please try again.",
   "loginFlow.verificationCode.success.title": "Número de teléfono verificado.\nVamos a importar tus contactos.",
   "loginFlow.verificationCode.success.errorWhileParsingSessionForInternalState": "Error al guardar usuario",
   "loginFlow.importContacts.title": "Ahora, vamos a encontrar a tus amigos!",

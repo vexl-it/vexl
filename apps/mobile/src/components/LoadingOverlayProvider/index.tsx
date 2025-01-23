@@ -1,7 +1,7 @@
 import {atom, useAtomValue, useSetAtom} from 'jotai'
 import {useMemo, type ReactNode} from 'react'
-import {ActivityIndicator} from 'react-native'
-import {Stack, getTokens, styled} from 'tamagui'
+import {Stack, styled} from 'tamagui'
+import VexlActivityIndicator from './VexlActivityIndicator'
 
 const RootContainer = styled(Stack, {
   pos: 'absolute',
@@ -22,13 +22,12 @@ export const loadingOverlayDisplayedAtom = atom(false)
 
 function LoadingOverlayProvider({children}: Props): JSX.Element {
   const isDisplayed = useAtomValue(loadingOverlayDisplayedAtom)
-  const tokens = getTokens()
   return (
     <>
       {children}
       {!!isDisplayed && (
         <RootContainer>
-          <ActivityIndicator size="large" color={tokens.color.main.val} />
+          <VexlActivityIndicator size="large" bc="$main" />
         </RootContainer>
       )}
     </>

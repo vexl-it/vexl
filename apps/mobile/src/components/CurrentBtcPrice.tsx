@@ -8,7 +8,7 @@ import {
   type PrimitiveAtom,
 } from 'jotai'
 import {useEffect, useMemo} from 'react'
-import {ActivityIndicator, TouchableOpacity} from 'react-native'
+import {TouchableOpacity} from 'react-native'
 import {Text, XStack, YStack, getTokens, type TextProps} from 'tamagui'
 import {
   createBtcPriceForCurrencyAtom,
@@ -20,6 +20,7 @@ import {
 } from '../utils/localization/I18nProvider'
 import {currencies} from '../utils/localization/currency'
 import {preferencesAtom} from '../utils/preferences'
+import VexlActivityIndicator from './LoadingOverlayProvider/VexlActivityIndicator'
 
 interface Props extends TextProps {
   customBtcPriceAtom?: PrimitiveAtom<number> | undefined
@@ -70,9 +71,9 @@ function CurrentBtcPrice({
     >
       <XStack ai="center">
         {btcPriceWithState?.state === 'loading' ? (
-          <ActivityIndicator
+          <VexlActivityIndicator
             size="small"
-            color={getTokens().color.greyOnBlack.val}
+            bc={getTokens().color.greyOnBlack.val}
           />
         ) : (
           <YStack>

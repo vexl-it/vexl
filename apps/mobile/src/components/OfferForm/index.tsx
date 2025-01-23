@@ -1,14 +1,14 @@
 import React, {Fragment} from 'react'
-import {ActivityIndicator} from 'react-native'
 import {getTokens, Stack} from 'tamagui'
 import ChunkView from '../ChunkView'
+import VexlActivityIndicator from '../LoadingOverlayProvider/VexlActivityIndicator'
 import Section, {type Props} from '../Section'
 
 function LoaderComponent(): JSX.Element {
   const tokens = getTokens()
   return (
     <Stack pt="$8">
-      <ActivityIndicator size="large" color={tokens.color.main.val} />
+      <VexlActivityIndicator size="large" bc={tokens.color.main.val} />
     </Stack>
   )
 }

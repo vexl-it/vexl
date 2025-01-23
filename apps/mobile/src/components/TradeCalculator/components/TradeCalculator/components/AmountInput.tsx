@@ -5,9 +5,10 @@ import {
   type ReactNode,
   type Ref,
 } from 'react'
-import {ActivityIndicator, TouchableWithoutFeedback} from 'react-native'
+import {TouchableWithoutFeedback} from 'react-native'
 import {getFontScaleSync} from 'react-native-device-info'
 import {Input, Stack, XStack, getTokens, styled, type InputProps} from 'tamagui'
+import VexlActivityIndicator from '../../../../LoadingOverlayProvider/VexlActivityIndicator'
 import PremiumIncluded from './PremiumIncluded'
 
 const InputStyled = styled(Input, {
@@ -68,9 +69,9 @@ function AmountInput(
           <Stack flex={1} my="$-3">
             {loading ? (
               <Stack als="flex-end">
-                <ActivityIndicator
+                <VexlActivityIndicator
                   size="small"
-                  color={getTokens().color.greyAccent2.val}
+                  bc={getTokens().color.greyAccent2.val}
                 />
               </Stack>
             ) : (

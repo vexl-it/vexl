@@ -1,10 +1,11 @@
 import {useFocusEffect} from '@react-navigation/native'
 import {useSetAtom} from 'jotai'
 import {useCallback, useEffect, useState} from 'react'
-import {ActivityIndicator, AppState} from 'react-native'
+import {AppState} from 'react-native'
 import {Stack, Text, getTokens} from 'tamagui'
 import normalizeStoredContactsActionAtom from '../../state/contacts/atom/normalizeStoredContactsActionAtom'
 import {useTranslation} from '../../utils/localization/I18nProvider'
+import VexlActivityIndicator from '../LoadingOverlayProvider/VexlActivityIndicator'
 import WhiteContainer from '../WhiteContainer'
 
 export default function NormalizeContactsWithLoadingScreen({
@@ -48,7 +49,7 @@ export default function NormalizeContactsWithLoadingScreen({
     return (
       <WhiteContainer>
         <Stack alignItems="center" justifyContent="center" flex={1}>
-          <ActivityIndicator size="large" color={getTokens().color.main.val} />
+          <VexlActivityIndicator size="large" bc={getTokens().color.main.val} />
           {!!state.progress && (
             <Text color="black">{t('contacts.loadingContacts')}</Text>
           )}

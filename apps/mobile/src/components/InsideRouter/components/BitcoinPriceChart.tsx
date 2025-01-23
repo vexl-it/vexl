@@ -4,7 +4,7 @@ import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/lib/function'
 import {useAtomValue, useSetAtom} from 'jotai'
 import {useCallback} from 'react'
-import {ActivityIndicator, Linking, TouchableOpacity} from 'react-native'
+import {Linking, TouchableOpacity} from 'react-native'
 import {Stack, Text, XStack, YStack, getTokens} from 'tamagui'
 import {
   btcPriceForSelectedCurrencyAtom,
@@ -18,6 +18,7 @@ import {
 import {preferencesAtom} from '../../../utils/preferences'
 import {AnimatedLiveIndicator} from '../../AnimatedLiveIndicator'
 import {askAreYouSureActionAtom} from '../../AreYouSureDialog'
+import VexlActivityIndicator from '../../LoadingOverlayProvider/VexlActivityIndicator'
 
 function BitcoinPriceChart(): JSX.Element {
   const preferences = useAtomValue(preferencesAtom)
@@ -75,9 +76,10 @@ function BitcoinPriceChart(): JSX.Element {
               )}
               {btcPriceForSelectedCurrency?.state === 'loading' ? (
                 <XStack gap="$2" mr="$2">
-                  <ActivityIndicator
+                  <VexlActivityIndicator
                     size="small"
-                    color={getTokens().color.main.val}
+                    bc={getTokens().color.main.val}
+                    mb="$2"
                   />
                   {!!btcPriceForSelectedCurrency.btcPrice && (
                     <Text fos={20} ff="$heading" color="$yellowAccent1">

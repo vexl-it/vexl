@@ -1,7 +1,6 @@
 import {isNone} from 'fp-ts/Option'
 import {useAtomValue, useSetAtom} from 'jotai'
 import {useMemo} from 'react'
-import {ActivityIndicator} from 'react-native'
 import Animated, {
   Extrapolation,
   interpolate,
@@ -20,6 +19,7 @@ import {baseFilterAtom} from '../../../../../state/marketplace/atoms/filterAtoms
 import {filteredOffersIncludingLocationFilterAtomsAtom} from '../../../../../state/marketplace/atoms/filteredOffers'
 import {refocusMapActionAtom} from '../../../../../state/marketplace/atoms/map/focusedOffer'
 import ErrorListHeader from '../../../../ErrorListHeader'
+import VexlActivityIndicator from '../../../../LoadingOverlayProvider/VexlActivityIndicator'
 import {MAP_SIZE} from '../../../../MarketplaceMap'
 import MarketplaceMapContainer from '../../../../MarketplaceMapContainer'
 import OffersList from '../../../../OffersList'
@@ -127,7 +127,7 @@ function OffersListStateDisplayerContent(): JSX.Element {
   if (offersAtoms.length === 0 && loading) {
     return (
       <Stack f={1} ai="center" jc="center" pt="$5">
-        <ActivityIndicator color={tokens.color.main.val} size="large" />
+        <VexlActivityIndicator bc={tokens.color.main.val} size="large" />
       </Stack>
     )
   }

@@ -1,7 +1,6 @@
 import {type OfferInfo} from '@vexl-next/domain/src/general/offers'
 import {useAtomValue, useSetAtom} from 'jotai'
 import {useEffect, useMemo} from 'react'
-import {ActivityIndicator} from 'react-native'
 import {Stack, XStack, getTokens} from 'tamagui'
 import {
   createBtcPriceForCurrencyAtom,
@@ -10,6 +9,7 @@ import {
 import {bigNumberToString} from '../../../utils/bigNumberToString'
 import calculatePriceInSats from '../../../utils/calculatePriceInSats'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
+import VexlActivityIndicator from '../../LoadingOverlayProvider/VexlActivityIndicator'
 import {
   InfoDivider,
   InfoItemContainer,
@@ -44,9 +44,9 @@ function PriceInSats({offer}: Props): JSX.Element {
         </Stack>
         <Stack f={1} ai="center" jc="center">
           {btcPriceWithState?.state === 'loading' ? (
-            <ActivityIndicator
+            <VexlActivityIndicator
               size="small"
-              color={getTokens().color.greyOnBlack.val}
+              bc={getTokens().color.greyOnBlack.val}
             />
           ) : (
             <PriceBigger>

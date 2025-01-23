@@ -1,12 +1,12 @@
 import fastDeepEqual from 'fast-deep-equal'
 import {useAtomValue} from 'jotai'
 import {memo} from 'react'
-import {ActivityIndicator} from 'react-native'
 import {Stack, getTokens} from 'tamagui'
 import {type RootStackScreenProps} from '../../navigationTypes'
 import {loadingContactsFromDeviceAtom} from '../../state/contacts/atom/loadContactsFromDeviceActionAtom'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import KeyboardAvoidingView from '../KeyboardAvoidingView'
+import VexlActivityIndicator from '../LoadingOverlayProvider/VexlActivityIndicator'
 import Screen from '../Screen'
 import ScreenTitle from '../ScreenTitle'
 import ContactsListSelect from './components/ContactListSelect'
@@ -29,9 +29,9 @@ function SetContactsScreen({route: {params}}: Props): JSX.Element {
           <Stack f={1} mx="$2">
             {loadingContactsFromDevice ? (
               <Stack f={1} ai="center" jc="center">
-                <ActivityIndicator
+                <VexlActivityIndicator
                   size="large"
-                  color={getTokens().color.main.val}
+                  bc={getTokens().color.main.val}
                 />
               </Stack>
             ) : (

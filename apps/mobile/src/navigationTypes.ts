@@ -29,7 +29,7 @@ import {type ContactsFilter} from './state/contacts/domain'
 export type RootStackParamsList = {
   LoginFlow: NavigatorScreenParams<LoginStackParamsList>
 
-  PostLoginFlow: NavigatorScreenParams<PostLoginStackParamsList>
+  PostLoginFlow: NavigatorScreenParams<PostLoginFlowStackParamsList>
 
   InsideTabs: NavigatorScreenParams<InsideTabParamsList>
 
@@ -70,6 +70,8 @@ export type RootStackParamsList = {
   DebugScreen: undefined
 
   EventsAndClubs: undefined
+
+  JoinClubFlow: NavigatorScreenParams<JoinClubFlowParamsList>
 }
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
@@ -117,18 +119,20 @@ export type LoginStackScreenProps<T extends keyof LoginStackParamsList> =
   >
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type PostLoginStackParamsList = {
-  ImportContactsExplanation: undefined
+export type PostLoginFlowStackParamsList = {
+  ImportContactsExplanationScreen: undefined
   ImportContacts: undefined
   AllowNotificationsExplanation: undefined
+  FindOffersInVexlClubsScreen: undefined
 }
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type PostLoginFlowScreenProps<T extends keyof PostLoginStackParamsList> =
-  CompositeScreenProps<
-    NativeStackScreenProps<PostLoginStackParamsList, T>,
-    RootStackScreenProps<keyof RootStackParamsList>
-  >
+export type PostLoginFlowStackScreenProps<
+  T extends keyof PostLoginFlowStackParamsList,
+> = CompositeScreenProps<
+  NativeStackScreenProps<PostLoginFlowStackParamsList, T>,
+  RootStackScreenProps<keyof RootStackParamsList>
+>
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type InsideTabParamsList = {
@@ -225,6 +229,18 @@ export type TradeChecklistStackScreenProps<
   T extends keyof TradeChecklistStackParamsList,
 > = CompositeScreenProps<
   NativeStackScreenProps<TradeChecklistStackParamsList, T>,
+  RootStackScreenProps<keyof RootStackParamsList>
+>
+
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type JoinClubFlowParamsList = {
+  ScanClubQrCodeScreen: undefined
+}
+
+export type JoinClubFlowStackScreenProps<
+  T extends keyof JoinClubFlowParamsList,
+> = CompositeScreenProps<
+  NativeStackScreenProps<JoinClubFlowParamsList, T>,
   RootStackScreenProps<keyof RootStackParamsList>
 >
 

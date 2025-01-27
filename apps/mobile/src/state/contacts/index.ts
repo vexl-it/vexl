@@ -1,4 +1,5 @@
 import * as T from 'fp-ts/Task'
+import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/lib/function'
 import {atom, useStore} from 'jotai'
 import {DateTime} from 'luxon'
@@ -58,25 +59,30 @@ export function useRefreshContactsFromDeviceOnResume(): void {
           state === 'active'
         ) {
           void pipe(
-            T.Do,
-            T.map(() => {
+            TE.Do,
+            TE.map(() => {
               store.set(loadingContactsFromDeviceAtom, true)
             }),
-            T.chain(() => store.set(loadContactsFromDeviceActionAtom)),
-            T.chain((result) => {
-              if (
-                result === 'missingPermissions' &&
-                // Not needed when user did not imported contacts yet - there is nothing to erase
-                store.get(lastImportOfContactsAtom) !== undefined
-              ) {
-                store.set(eraseImportedContacts)
-                return store.set(submitContactsActionAtom, {
-                  normalizeAndImportAll: false,
-                  numbersToImport: [],
-                })
+            TE.chainW(() => store.set(loadContactsFromDeviceActionAtom)),
+            TE.match(
+              (e) => {
+                if (
+                  e._tag === 'PermissionsNotGranted' &&
+                  store.get(lastImportOfContactsAtom) !== undefined
+                ) {
+                  store.set(eraseImportedContacts)
+                  return store.set(submitContactsActionAtom, {
+                    normalizeAndImportAll: false,
+                    numbersToImport: [],
+                  })
+                }
+
+                return T.of('success' as const)
+              },
+              () => {
+                return T.of('success' as const)
               }
-              return T.Do
-            }),
+            ),
             T.map(() => {
               store.set(loadingContactsFromDeviceAtom, false)
             })

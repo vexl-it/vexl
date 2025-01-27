@@ -2,6 +2,7 @@ import {useSetAtom} from 'jotai'
 import {useState} from 'react'
 import {Image} from 'react-native'
 import {Stack, Text} from 'tamagui'
+import {type PostLoginFlowStackScreenProps} from '../../../../navigationTypes'
 import {resolveAllContactsAsSeenActionAtom} from '../../../../state/contacts/atom/contactsStore'
 import {submitContactsActionAtom} from '../../../../state/contacts/atom/submitContactsActionAtom'
 import {useFinishPostLoginFlow} from '../../../../state/postLoginOnboarding'
@@ -13,7 +14,11 @@ import {
 } from '../../../PageWithButtonAndProgressHeader'
 import WhiteContainer from '../../../WhiteContainer'
 
-export default function ImportContactsExplanationContent(): JSX.Element {
+type Props = PostLoginFlowStackScreenProps<'ImportContactsExplanationScreen'>
+
+export default function ImportContactsExplanationScreen({
+  navigation,
+}: Props): JSX.Element {
   const {t} = useTranslation()
   const [contactsLoading, setContactsLoading] = useState(false)
   const submitContacts = useSetAtom(submitContactsActionAtom)
@@ -23,7 +28,7 @@ export default function ImportContactsExplanationContent(): JSX.Element {
   const finishPostLoginFlow = useFinishPostLoginFlow()
 
   return (
-    <WhiteContainer testID="@importContactsExplanationContent">
+    <WhiteContainer testID="@importContactsExplanationScreen">
       <Stack f={1} jc="space-between">
         <HeaderProxy showBackButton={false} progressNumber={3} />
         <Stack f={1} ai="center" mb="$4">
@@ -52,10 +57,13 @@ export default function ImportContactsExplanationContent(): JSX.Element {
           onPress={() => {
             setContactsLoading(true)
             void submitContacts({normalizeAndImportAll: true})().then(
-              (success) => {
+              (result) => {
                 resolveAllContactsAsSeen()
                 setContactsLoading(false)
-                if (success) finishPostLoginFlow()
+                if (result === 'success') finishPostLoginFlow()
+                if (result === 'permissionsNotGranted') {
+                  navigation.navigate('FindOffersInVexlClubsScreen')
+                }
                 // if (success) navigation.push('AllowNotificationsExplanation')
               }
             )

@@ -2,7 +2,7 @@ import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {Stack, Text} from 'tamagui'
 import NotificationsSvg from '../../../../images/notificationsSvg'
-import {type PostLoginFlowScreenProps} from '../../../../navigationTypes'
+import {type PostLoginFlowStackScreenProps} from '../../../../navigationTypes'
 import {useFinishPostLoginFlow} from '../../../../state/postLoginOnboarding'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import {useRequestNotificationPermissions} from '../../../../utils/notifications'
@@ -14,7 +14,7 @@ import {
 } from '../../../PageWithButtonAndProgressHeader'
 import WhiteContainer from '../../../WhiteContainer'
 
-type Props = PostLoginFlowScreenProps<'AllowNotificationsExplanation'>
+type Props = PostLoginFlowStackScreenProps<'AllowNotificationsExplanation'>
 
 function AllowNotificationsExplanationScreen({navigation}: Props): JSX.Element {
   const {t} = useTranslation()

@@ -4,6 +4,7 @@ import notificationsSvg from '../../images/notificationsSvg'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import anonymousCounterpartSvg from '../images/anonymousCounterpartSvg'
 import stayAnonymousSvg from '../images/stayAnonymousSvg'
+import vexlClubsSvg from '../images/vexlClubsSvg'
 import faq1Svg from './images/faq1Svg'
 import faq5Svg from './images/faq5Svg'
 import faq6Svg from './images/faq6Svg'
@@ -15,6 +16,7 @@ export type FaqType =
   | 'HOW_CAN_I_MAKE_SURE'
   | 'HOW_CAN_I_ENSURE'
   | 'HOW_CAN_YOU_ENSURE'
+  | 'WHAT_ARE_VEXL_CLUBS'
   | 'HOW_DO_I_CONTACT_VEXL'
 
 interface CommonProps {
@@ -83,6 +85,12 @@ export default function useContent(): Props[] {
       svg: faq6Svg,
       title: t('faqs.howCanYouEnsure'),
       text: t('faqs.vexlIsDesigned'),
+    },
+    {
+      type: 'WHAT_ARE_VEXL_CLUBS',
+      svg: vexlClubsSvg,
+      title: t('faqs.whatAreVexlClubsAndWhyShouldIJoin'),
+      text: t('faqs.clubsConnectYouWithBroaderNetwork'),
     },
     {
       type: 'HOW_DO_I_CONTACT_VEXL',

@@ -226,7 +226,7 @@ export const contactSelectMolecule = molecule((_, getScope) => {
               hideAfterMillis: 2000,
             })
           }
-          return result
+          return result === 'success'
         })
       )
     }

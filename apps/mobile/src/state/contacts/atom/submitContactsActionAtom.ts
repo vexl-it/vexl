@@ -2,10 +2,10 @@ import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumbe
 import {IsoDatetimeString} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
 import {
   effectToTask,
-  taskToEffect,
+  taskEitherToEffect,
 } from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {Array, Effect, HashSet, Ref} from 'effect'
-import * as T from 'fp-ts/Task'
+import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/lib/function'
 import {atom} from 'jotai'
 import {Alert} from 'react-native'
@@ -46,13 +46,12 @@ export const submitContactsActionAtom = atom(
 
     const normalizeStoredContacts = pipe(
       set(loadContactsFromDeviceActionAtom),
-      T.chain(() => set(normalizeStoredContactsActionAtom)),
-      T.map(() => undefined)
+      TE.chainFirstTaskK(() => set(normalizeStoredContactsActionAtom))
     )
 
     return Effect.gen(function* (_) {
       if (params.normalizeAndImportAll) {
-        yield* _(normalizeStoredContacts, taskToEffect)
+        yield* _(normalizeStoredContacts, taskEitherToEffect)
       }
 
       const allContacts = get(normalizedContactsAtom)
@@ -190,18 +189,24 @@ export const submitContactsActionAtom = atom(
           Alert.alert(t('contacts.importContactsQuotaReachedError'))
           return Effect.void
         }
-        if (e._tag !== 'NetworkError') {
+        if (e._tag !== 'NetworkError' && e._tag !== 'PermissionsNotGranted') {
           reportError('error', new Error('error while submitting contacts'), {
             e,
           })
         }
 
-        Alert.alert(toCommonErrorMessage(e, t) ?? t('common.unknownError'))
+        if (e._tag !== 'PermissionsNotGranted')
+          Alert.alert(toCommonErrorMessage(e, t) ?? t('common.unknownError'))
+
         return Effect.void
       }),
       Effect.match({
-        onFailure: () => false,
-        onSuccess: () => true,
+        onFailure: (e) => {
+          if (e._tag === 'PermissionsNotGranted')
+            return 'permissionsNotGranted' as const
+          return 'otherError' as const
+        },
+        onSuccess: () => 'success' as const,
       }),
       Effect.tap(() => {
         set(loadingOverlayDisplayedAtom, false)

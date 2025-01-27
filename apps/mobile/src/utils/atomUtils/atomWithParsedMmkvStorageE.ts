@@ -7,6 +7,7 @@ import reportError from '../reportError'
 import getValueFromSetStateActionOfAtom from './getValueFromSetStateActionOfAtom'
 
 const AUTHOR_ID_KEY = '___author_id' as const
+export const CLEAR_STORAGE_KEY = '__clear_storage'
 
 const AuthorKeySchema: Schema.Schema.AnyNoContext = Schema.Struct({
   [AUTHOR_ID_KEY]: Schema.String,
@@ -126,6 +127,14 @@ export function atomWithParsedMmkvStorageE<S extends Schema.Struct.Fields>(
 
     const listener = storage._storage.addOnValueChangedListener(
       (changedKey) => {
+        if (changedKey !== CLEAR_STORAGE_KEY) {
+          console.log(
+            `MMKV value for key '${key}' was deleted. Setting atom to default value`
+          )
+          setAtom(defaultValue)
+          return
+        }
+
         if (changedKey !== key) return
 
         void InteractionManager.runAfterInteractions(() => {

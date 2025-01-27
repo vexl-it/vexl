@@ -9,6 +9,7 @@ import reportError from '../reportError'
 import getValueFromSetStateActionOfAtom from './getValueFromSetStateActionOfAtom'
 
 const AUTHOR_ID_KEY = '___author_id'
+const CLEAR_STORAGE_KEY = '__clear_storage'
 
 export type AtomWithParsedMmkvStorage<Value extends z.ZodObject<any>> =
   PrimitiveAtom<z.TypeOf<Value>>
@@ -97,6 +98,14 @@ export function atomWithParsedMmkvStorage<
 
     const listener = storage._storage.addOnValueChangedListener(
       (changedKey) => {
+        if (changedKey === CLEAR_STORAGE_KEY) {
+          console.log(
+            `MMKV value for key '${key}' was deleted. Setting atom to default value`
+          )
+          setAtom(defaultValue)
+          return
+        }
+
         if (changedKey !== key) return
 
         void InteractionManager.runAfterInteractions(() => {

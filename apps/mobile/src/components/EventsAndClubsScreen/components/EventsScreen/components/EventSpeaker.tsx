@@ -28,7 +28,7 @@ export default function EventSpeaker({
           source={{uri: speaker.imageUrl.value}}
         />
       )}
-      <Text color="$greyOnBlack" ff="$body400" fontSize={12}>
+      <Text color="$greyOnBlack" ff="$body600" fontSize={12}>
         {speaker.name}
       </Text>
     </XStack>

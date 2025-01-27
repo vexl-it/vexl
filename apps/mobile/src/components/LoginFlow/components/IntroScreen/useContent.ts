@@ -1,6 +1,7 @@
 import {type SvgString} from '@vexl-next/domain/src/utility/SvgString.brand'
 import {type ImageSourcePropType} from 'react-native'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
+import vexlClubsSvg from '../../../images/vexlClubsSvg'
 import {image1, image2} from './images/svgs'
 
 export default function useContent(): Array<{
@@ -14,6 +15,10 @@ export default function useContent(): Array<{
     {
       svg: image1,
       title: t('loginFlow.intro.title1'),
+    },
+    {
+      svg: vexlClubsSvg,
+      title: t('loginFlow.intro.vexlClubs'),
     },
     {
       svg: image2,

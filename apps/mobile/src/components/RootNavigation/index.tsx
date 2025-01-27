@@ -34,6 +34,7 @@ import GoldenAvatarAnimation, {
   showGoldenAvatarAnimationAtom,
 } from '../GoldenAvatar'
 import InsideScreen from '../InsideRouter'
+import JoinClubFlow from '../JoinClubFlow'
 import LoginFlow from '../LoginFlow'
 import NotificationSettingsScreen from '../NotificationSettingsScreen'
 import OfferDetailScreen from '../OfferDetailScreen'
@@ -130,6 +131,7 @@ function RootNavigation(): JSX.Element {
               }}
               component={TradeChecklistFlow}
             />
+            <Stack.Screen name="JoinClubFlow" component={JoinClubFlow} />
           </Stack.Group>
         )}
         <Stack.Screen

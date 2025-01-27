@@ -1,9 +1,10 @@
 import {createNativeStackNavigator} from '@react-navigation/native-stack'
-import {type PostLoginStackParamsList} from '../../navigationTypes'
+import {type PostLoginFlowStackParamsList} from '../../navigationTypes'
 import PageWithButtonAndProgressHeader from '../PageWithButtonAndProgressHeader'
-import ImportContactsExplanation from './components/ImportContactsExplanation'
+import FindOffersInVexlClubsScreen from './components/FindOffersInVexlClubsScreen'
+import ImportContactsExplanationScreen from './components/ImportContactsExplanation'
 
-const Stack = createNativeStackNavigator<PostLoginStackParamsList>()
+const Stack = createNativeStackNavigator<PostLoginFlowStackParamsList>()
 
 export default function PostLoginFlow(): JSX.Element {
   return (
@@ -15,8 +16,12 @@ export default function PostLoginFlow(): JSX.Element {
         }}
       >
         <Stack.Screen
-          name="ImportContactsExplanation"
-          component={ImportContactsExplanation}
+          name="ImportContactsExplanationScreen"
+          component={ImportContactsExplanationScreen}
+        />
+        <Stack.Screen
+          name="FindOffersInVexlClubsScreen"
+          component={FindOffersInVexlClubsScreen}
         />
         {/* <Stack.Screen
           name="AllowNotificationsExplanation"

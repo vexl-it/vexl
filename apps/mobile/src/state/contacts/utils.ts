@@ -35,13 +35,25 @@ export function hashPhoneNumber(
 }
 
 export async function areContactsPermissionsGranted(): Promise<boolean> {
-  let contactsPermissions = await Contacts.getPermissionsAsync()
-  if (!contactsPermissions.granted) {
-    if (!contactsPermissions.canAskAgain) return false
-    contactsPermissions = await Contacts.requestPermissionsAsync()
+  try {
+    let contactsPermissions = await Contacts.getPermissionsAsync()
+    if (!contactsPermissions.granted) {
+      if (!contactsPermissions.canAskAgain) return false
+      contactsPermissions = await Contacts.requestPermissionsAsync()
+    }
+    return contactsPermissions.granted
+  } catch (e) {
+    // TODO: check this with update to EXPO SDK 52
+    // Contacts.requestPermissionsAsync() throws an error when the user denies the permission on iOS
+    if (
+      e instanceof Error &&
+      'code' in e &&
+      e.code === 'E_CONTACTS_ERROR_UNKNOWN'
+    ) {
+      return false
+    }
   }
-
-  return contactsPermissions.granted
+  return false
 }
 
 export function getContactsAndTryToResolveThePermissionsAlongTheWay(): TE.TaskEither<

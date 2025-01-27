@@ -26,7 +26,7 @@ function NextButton(): JSX.Element | null {
 
   return (
     <XStack py="$1" mt="$2" gap="$2">
-      <XStack f={1}>
+      <XStack f={1} gap="$2">
         {!!nextButtonState.secondButton && (
           <Button
             testID="@nextButton/primaryButton"

@@ -17,13 +17,18 @@ export default function EventItem({atom}: {atom: Atom<ListData>}): JSX.Element {
   if (data.type === 'header') {
     return (
       <YStack pb="$3" backgroundColor="black">
-        <Text color="white" fontWeight={600} fontSize={24}>
+        <Text color="white" fontFamily="$body600" fontSize={24}>
           {data.value === 'future'
             ? t('events.upcomingEvents')
             : t('events.pastEvents')}
         </Text>
         {!!data.emptySection && (
-          <Text fontSize={14} fontWeight={500} mt="$2" color="$greyOnBlack">
+          <Text
+            fontSize={14}
+            fontFamily="$body400"
+            mt="$2"
+            color="$greyOnBlack"
+          >
             {t('events.noEvents')}
           </Text>
         )}
@@ -44,14 +49,14 @@ export default function EventItem({atom}: {atom: Atom<ListData>}): JSX.Element {
       p="$3"
     >
       <YStack gap="$2" flex={1}>
-        <Text fontSize={12} color="$greyOnBlack" ff="$body400">
+        <Text fontSize={12} color="$greyOnBlack" ff="$body500">
           <EventDate
             startDate={data.event.startDate}
             endDate={data.event.endDate}
           />{' '}
           {BULLET} {data.event.venue.replaceAll('/ /g', '\u00A0')}
         </Text>
-        <Text fontSize={15} ff="$body400" color="white">
+        <Text fontSize={15} ff="$body600" color="white">
           {data.event.name}
         </Text>
         <XStack gap="$2" alignItems="flex-start" justifyContent="flex-start">

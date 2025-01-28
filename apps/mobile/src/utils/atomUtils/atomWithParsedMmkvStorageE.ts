@@ -127,10 +127,8 @@ export function atomWithParsedMmkvStorageE<S extends Schema.Struct.Fields>(
 
     const listener = storage._storage.addOnValueChangedListener(
       (changedKey) => {
-        if (changedKey !== CLEAR_STORAGE_KEY) {
-          console.log(
-            `MMKV value for key '${key}' was deleted. Setting atom to default value`
-          )
+        if (changedKey === CLEAR_STORAGE_KEY) {
+          console.info(`Setting MMKV atom with key '${key}' to default value`)
           setAtom(defaultValue)
           return
         }

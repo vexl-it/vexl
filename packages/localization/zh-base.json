@@ -343,6 +343,7 @@
   "settings.items.language.bg": "保加利亚文",
   "settings.items.language.ja": "日文",
   "settings.items.language.nl": "荷兰文",
+  "settings.items.language.sw": "Swahili",
   "settings.noLogoutExplanation": "找不到登出？没有这种东西。\n但您可以删除您的账号。",
   "settings.support": "如果您喜欢使用 Vexl，请通过捐赠一些比特币来支持它的改进！",
   "settings.version": "Vexl 应用程序版本为：{{version}}",

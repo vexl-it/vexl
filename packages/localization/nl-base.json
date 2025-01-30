@@ -343,6 +343,7 @@
   "settings.items.language.bg": "Bulgaars",
   "settings.items.language.ja": "Japans",
   "settings.items.language.nl": "Nederlands",
+  "settings.items.language.sw": "Swahili",
   "settings.noLogoutExplanation": "Kan je je afmelden niet vinden? Er is zoiets niet.\nMaar je kunt je account verwijderen.",
   "settings.support": "Als u Vexl leuk vindt, ondersteun dan de verbetering door wat bitcoin als donatie te sturen!",
   "settings.version": "Vexl app versie: {{version}}",

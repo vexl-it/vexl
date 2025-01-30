@@ -343,6 +343,7 @@
   "settings.items.language.bg": "Bulgarian",
   "settings.items.language.ja": "Japanese",
   "settings.items.language.nl": "Dutch",
+  "settings.items.language.sw": "Swahili",
   "settings.noLogoutExplanation": "Tidak menemukan keluar? Tidak ada hal seperti itu.\nNamun, kamu dapat menghapus akunmu.",
   "settings.support": "Jika kamu menyukai Vexl, dukung peningkatannya dengan mengirimkan sedikit bitcoin sebagai donasi!",
   "settings.version": "Versi Vexl App: {{version}}",

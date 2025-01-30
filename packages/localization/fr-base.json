@@ -343,6 +343,7 @@
   "settings.items.language.bg": "Bulgare",
   "settings.items.language.ja": "Japonais",
   "settings.items.language.nl": "Dutch",
+  "settings.items.language.sw": "Swahili",
   "settings.noLogoutExplanation": "Vous ne trouvez pas la déconnexion ? Cela n'existe pas.\nMais vous pouvez supprimer votre compte.",
   "settings.support": "Si vous aimez Vexl, soutenez son développement en envoyant quelques bitcoins en guise de don !",
   "settings.version": "Version de l'application Vexl : {{version}}",

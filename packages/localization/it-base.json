@@ -343,6 +343,7 @@
   "settings.items.language.bg": "Bulgaro",
   "settings.items.language.ja": "Giapponese",
   "settings.items.language.nl": "Olandese",
+  "settings.items.language.sw": "Swahili",
   "settings.noLogoutExplanation": "Non riuscite a trovare il logout? Non esiste.\nMa puoi cancellare il tuo account.",
   "settings.support": "Se ti piace Vexl, sostieni il suo miglioramento inviando qualche bitcoin come donazione!",
   "settings.version": "Versione dell'app Vexl: {{version}}",

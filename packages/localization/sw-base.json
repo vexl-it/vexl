@@ -343,6 +343,7 @@
   "settings.items.language.bg": "Bulgarian",
   "settings.items.language.ja": "Japanese",
   "settings.items.language.nl": "Dutch",
+  "settings.items.language.sw": "Swahili",
   "settings.noLogoutExplanation": "Huwezi kupata chaguo la kutoka? Hakuna kitu kama hicho.\nLakini unaweza kufuta akaunti yako.",
   "settings.support": "Ikiwa unapenda Vexl, saidia kuboresha kwa kuchangia bitcoin kama mchango!",
   "settings.version": "Toleo la App ya Vexl: {{version}}",

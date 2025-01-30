@@ -36,6 +36,9 @@ import ptTermsOfUse from '@vexl-next/localization/pt-termsOfUse.json'
 import skBase from '@vexl-next/localization/sk-base.json'
 import skPrivacyPolicyDev from '@vexl-next/localization/sk-privacyPolicy.json'
 import skTermsOfUse from '@vexl-next/localization/sk-termsOfUse.json'
+import swBase from '@vexl-next/localization/sw-base.json'
+import swPrivacyPolicyDev from '@vexl-next/localization/sw-privacyPolicy.json'
+import swTermsOfUse from '@vexl-next/localization/sw-termsOfUse.json'
 import termsOfUse from '@vexl-next/localization/termsOfUse.json'
 import {unflatten} from 'flat'
 
@@ -140,4 +143,12 @@ export const nl = {
   localeName: 'nl',
   termsOfUseMD: nlTermsOfUse.termsOfUseText,
   privacyPolicyMD: nlPrivacyPolicyDev.privacyPolicyText,
+} as const
+
+export const sw = {
+  flag: '🇳🇱',
+  ...unflatten<typeof swBase, typeof base>(swBase),
+  localeName: 'sw',
+  termsOfUseMD: swTermsOfUse.termsOfUseText,
+  privacyPolicyMD: swPrivacyPolicyDev.privacyPolicyText,
 } as const

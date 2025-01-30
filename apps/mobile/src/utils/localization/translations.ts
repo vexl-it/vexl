@@ -146,7 +146,7 @@ export const nl = {
 } as const
 
 export const sw = {
-  flag: '🇳🇱',
+  flag: '🇰🇪',
   ...unflatten<typeof swBase, typeof base>(swBase),
   localeName: 'sw',
   termsOfUseMD: swTermsOfUse.termsOfUseText,

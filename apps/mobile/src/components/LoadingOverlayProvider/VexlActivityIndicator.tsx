@@ -6,10 +6,11 @@ import Animated, {
   withSequence,
   withTiming,
 } from 'react-native-reanimated'
-import {Stack, type StackProps, XStack} from 'tamagui'
+import {Stack, type StackProps, Text, XStack, YStack} from 'tamagui'
 
 interface Props extends StackProps {
   size: 'small' | 'medium' | 'large'
+  description?: string
 }
 
 function DotObject({size, ...props}: Props): JSX.Element {
@@ -37,7 +38,11 @@ function DotObject({size, ...props}: Props): JSX.Element {
   )
 }
 
-function VexlActivityIndicator({size, ...props}: Props): JSX.Element {
+function VexlActivityIndicator({
+  description,
+  size,
+  ...props
+}: Props): JSX.Element {
   const translateY1 = useSharedValue(0)
   const translateY2 = useSharedValue(0)
   const translateY3 = useSharedValue(0)
@@ -85,17 +90,24 @@ function VexlActivityIndicator({size, ...props}: Props): JSX.Element {
   }))
 
   return (
-    <XStack ai="center" gap={size === 'large' ? '$2' : '$1'}>
-      <Animated.View style={animatedStyle1}>
-        <DotObject size={size} {...props} />
-      </Animated.View>
-      <Animated.View style={animatedStyle2}>
-        <DotObject size={size} {...props} />
-      </Animated.View>
-      <Animated.View style={animatedStyle3}>
-        <DotObject size={size} {...props} />
-      </Animated.View>
-    </XStack>
+    <YStack ai="center" gap={size === 'large' ? '$6' : '$4'}>
+      <XStack ai="center" gap={size === 'large' ? '$2' : '$1'}>
+        <Animated.View style={animatedStyle1}>
+          <DotObject size={size} {...props} />
+        </Animated.View>
+        <Animated.View style={animatedStyle2}>
+          <DotObject size={size} {...props} />
+        </Animated.View>
+        <Animated.View style={animatedStyle3}>
+          <DotObject size={size} {...props} />
+        </Animated.View>
+      </XStack>
+      {!!description && (
+        <Text fos={size === 'large' ? 14 : 12} ff="$body500" col="$grey">
+          {description}
+        </Text>
+      )}
+    </YStack>
   )
 }
 

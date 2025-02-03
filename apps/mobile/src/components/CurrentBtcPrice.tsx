@@ -63,7 +63,6 @@ function CurrentBtcPrice({
 
   return (
     <TouchableOpacity
-      style={{flex: 1, alignItems: 'flex-end'}}
       disabled={disabled}
       onPress={() => {
         void refreshBtcPrice(currency)().then(postRefreshActions)

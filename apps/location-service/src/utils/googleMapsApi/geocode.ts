@@ -35,6 +35,8 @@ interface GoogleGeocodeResponse {
   }>
 }
 
+const regionRegex = /(?: region| kraj)/gi
+
 // Just keep this just in case. Might be useful
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const findTypeInAddressComponents = (
@@ -49,7 +51,7 @@ const findTypeInAddressComponents = (
     Array.findFirst(components, (oneComponent) =>
       oneComponent.types.includes(type)
     ),
-    Option.map((one) => one.long_name),
+    Option.map((one) => one.short_name),
     Option.getOrElse(() => undefined)
   )
 
@@ -92,11 +94,43 @@ export const googleGeocode =
       const firstHit = response.data.results.at(0)
       if (!firstHit) return yield* _(new LocationNotFoundError({status: 404}))
 
+      yield* _(
+        Effect.log(
+          'Got geocode response',
+          firstHit.address_components.map(
+            (one) => `${one.short_name} - ${one.types.join(', ')}`
+          )
+        )
+      )
+
+      const country = findTypeInAddressComponents(
+        'country',
+        firstHit.address_components
+      )
+
+      const first = firstHit.address_components.at(0)?.short_name
+
+      const lvl1 = (() => {
+        const lvl1 = findTypeInAddressComponents(
+          'administrative_area_level_1',
+          firstHit.address_components
+        )
+        if (!lvl1) return ''
+        if (country === 'CZ' || country === 'SK') {
+          return lvl1.replace(regionRegex, '')
+        }
+        return lvl1
+      })()
+
+      const address = lvl1
+        ? `${first}, ${lvl1} - ${country}`
+        : firstHit.formatted_address.replace(/^[\d\s]*/, '')
+
       return yield* _(
         Schema.decode(GetGeocodedCoordinatesResponse)({
           placeId: firstHit.place_id,
           // Remove postal code from the start as per #865
-          address: firstHit.formatted_address.replace(/^[\d\s]*/, ''),
+          address,
           latitude: firstHit.geometry.location.lat,
           longitude: firstHit.geometry.location.lng,
           viewport: {

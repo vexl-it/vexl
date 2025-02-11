@@ -5,6 +5,10 @@ import {RedisService} from '@vexl-next/server-utils/src/RedisService'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
 import {setupLoggingMiddlewares} from '@vexl-next/server-utils/src/loggingMiddlewares'
 import {MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
+import {ChallengeService} from '@vexl-next/server-utils/src/services/challenge/ChallengeService'
+import {ChallengeDbService} from '@vexl-next/server-utils/src/services/challenge/db/ChallegeDbService'
+import {createChallenge} from '@vexl-next/server-utils/src/services/challenge/routes/createChalenge'
+import {createChallenges} from '@vexl-next/server-utils/src/services/challenge/routes/createChallenges'
 import {Effect, Layer} from 'effect'
 import {RouterBuilder} from 'effect-http'
 import {NodeServer} from 'effect-http-node'
@@ -22,19 +26,31 @@ import {createNewOffer} from './routes/createNewOffer'
 import {createPrivatePart} from './routes/createPrivatePart'
 import {deleteOffer} from './routes/deleteOffer'
 import {deletePrivatePart} from './routes/deletePrivatePart'
+import {getClubOffersByIds} from './routes/getClubOffersByIds'
+import {getClubOffersForMe} from './routes/getClubOffersForMe'
+import {getClubOffersForMeModifiedOrCreatedAfter} from './routes/getClubOffersForMeModifiedOrCreatedAfter'
 import {getOffersByIds} from './routes/getOffersByIds'
 import {getOffersForMe} from './routes/getOffersForMe'
 import {getOffersForMeModifiedOrCreatedAfter} from './routes/getOffersForMeModifiedOrCreatedAfter'
+import {getRemovedClubOffers} from './routes/getRemovedClubOffers'
 import {getRemovedOffers} from './routes/getRemovedOffers'
 import {refreshOffer} from './routes/refreshOffer'
 import {reportOffer} from './routes/reportOffer'
 import {updateOffer} from './routes/updateOffer'
 
 export const app = RouterBuilder.make(OfferApiSpecification).pipe(
+  // challenges
+  RouterBuilder.handle(createChallenge),
+  RouterBuilder.handle(createChallenges),
+  // offers
   RouterBuilder.handle(getOffersByIds),
+  RouterBuilder.handle(getClubOffersByIds),
   RouterBuilder.handle(getOffersForMe),
+  RouterBuilder.handle(getClubOffersForMe),
   RouterBuilder.handle(getOffersForMeModifiedOrCreatedAfter),
+  RouterBuilder.handle(getClubOffersForMeModifiedOrCreatedAfter),
   RouterBuilder.handle(getRemovedOffers),
+  RouterBuilder.handle(getRemovedClubOffers),
   RouterBuilder.handle(reportOffer),
   RouterBuilder.handle(createNewOffer),
   RouterBuilder.handle(refreshOffer),
@@ -50,6 +66,8 @@ const MainLive = Layer.empty.pipe(
   Layer.provideMerge(reportMetricsLayer),
   Layer.provideMerge(InternalServerLive),
   Layer.provideMerge(ServerCrypto.layer(cryptoConfig)),
+  Layer.provideMerge(ChallengeService.Live),
+  Layer.provideMerge(ChallengeDbService.Live),
   Layer.provideMerge(healthServerLayer({port: healthServerPortConfig})),
   Layer.provideMerge(OfferDbService.Live),
   Layer.provideMerge(DbLayer),

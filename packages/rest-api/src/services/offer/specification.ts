@@ -1,4 +1,5 @@
 import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
+import {ChallengeApiGroup} from '@vexl-next/server-utils/src/services/challenge/specification'
 import {Api} from 'effect-http'
 import {ServerSecurity} from '../../apiSecurity'
 import {
@@ -13,6 +14,9 @@ import {
   DeletePrivatePartRequest,
   DeletePrivatePartResponse,
   DuplicatedPublicKeyError,
+  GetClubOffersByIdsRequest,
+  GetClubOffersForMeCreatedOrModifiedAfterRequest,
+  GetClubOffersForMeRequest,
   GetOfferByIdsResponse,
   GetOffersByIdsRequest,
   GetOffersForMeCreatedOrModifiedAfterRequest,
@@ -20,6 +24,7 @@ import {
   GetOffersForMeResponse,
   RefreshOfferRequest,
   RefreshOfferResponse,
+  RemovedClubOfferIdsRequest,
   RemovedOfferIdsRequest,
   RemovedOfferIdsResponse,
   ReportOfferEndpointErrors,
@@ -40,12 +45,32 @@ export const GetOffersByIdsEndpint = Api.get(
   Api.setResponseBody(GetOfferByIdsResponse)
 )
 
+export const GetClubOffersByIdsEndpint = Api.post(
+  'getClubOffersByIds',
+  '/api/v2/clubOffers',
+  {summary: 'Get club offers by ids'}
+).pipe(
+  Api.setSecurity(ServerSecurity),
+  Api.setRequestBody(GetClubOffersByIdsRequest),
+  Api.setResponseBody(GetOfferByIdsResponse)
+)
+
 export const GetOffersForMeEndpoint = Api.get(
   'getOffersForMe',
   '/api/v2/offers/me',
   {summary: 'Get offers for me'}
 ).pipe(
   Api.setSecurity(ServerSecurity),
+  Api.setResponseBody(GetOffersForMeResponse)
+)
+
+export const GetClubOffersForMeEndpoint = Api.post(
+  'getClubOffersForMe',
+  '/api/v2/clubOffers/me',
+  {summary: 'Get club offers for me'}
+).pipe(
+  Api.setSecurity(ServerSecurity),
+  Api.setRequestBody(GetClubOffersForMeRequest),
   Api.setResponseBody(GetOffersForMeResponse)
 )
 
@@ -56,6 +81,16 @@ export const GetOffersForMeModifiedOrCreatedAfterEndpoint = Api.get(
 ).pipe(
   Api.setSecurity(ServerSecurity),
   Api.setRequestQuery(GetOffersForMeCreatedOrModifiedAfterRequest),
+  Api.setResponseBody(GetOffersForMeCreatedOrModifiedAfterResponse)
+)
+
+export const GetClubOffersForMeModifiedOrCreatedAfterEndpoint = Api.post(
+  'getClubOffersForMeModifiedOrCreatedAfter',
+  '/api/v2/clubOffers/me/modified',
+  {summary: 'Get club offers for me modified or created after'}
+).pipe(
+  Api.setSecurity(ServerSecurity),
+  Api.setRequestBody(GetClubOffersForMeCreatedOrModifiedAfterRequest),
   Api.setResponseBody(GetOffersForMeCreatedOrModifiedAfterResponse)
 )
 
@@ -153,6 +188,16 @@ export const GetRemovedOffersEndpoint = Api.post(
   Api.setResponseBody(RemovedOfferIdsResponse)
 )
 
+export const GetRemovedClubOffersEndpoint = Api.post(
+  'getRemovedClubOffers',
+  '/api/v1/clubOffers/not-exist',
+  {summary: 'Get removed club offers'}
+).pipe(
+  Api.setSecurity(ServerSecurity),
+  Api.setRequestBody(RemovedClubOfferIdsRequest),
+  Api.setResponseBody(RemovedOfferIdsResponse)
+)
+
 export const ReportOfferEndpoint = Api.post(
   'reportOffer',
   '/api/v1/offers/report',
@@ -176,8 +221,11 @@ export const OfferApiSpecification = Api.make({
   version: '1.0.0',
 }).pipe(
   Api.addEndpoint(GetOffersByIdsEndpint),
+  Api.addEndpoint(GetClubOffersByIdsEndpint),
   Api.addEndpoint(GetOffersForMeEndpoint),
+  Api.addEndpoint(GetClubOffersForMeEndpoint),
   Api.addEndpoint(GetOffersForMeModifiedOrCreatedAfterEndpoint),
+  Api.addEndpoint(GetClubOffersForMeModifiedOrCreatedAfterEndpoint),
   Api.addEndpoint(CreateNewOfferEndpoint),
   Api.addEndpoint(RefreshOfferEndpoint),
   Api.addEndpoint(DeleteOfferEndpoint),
@@ -185,5 +233,7 @@ export const OfferApiSpecification = Api.make({
   Api.addEndpoint(CreatePrivatePartEndpoint),
   Api.addEndpoint(DeletePrivatePartEndpoint),
   Api.addEndpoint(GetRemovedOffersEndpoint),
-  Api.addEndpoint(ReportOfferEndpoint)
+  Api.addEndpoint(GetRemovedClubOffersEndpoint),
+  Api.addEndpoint(ReportOfferEndpoint),
+  Api.addGroup(ChallengeApiGroup)
 )

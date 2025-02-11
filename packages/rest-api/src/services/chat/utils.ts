@@ -6,10 +6,13 @@ import {
   ecdsaSignE,
   type CryptoError,
 } from '@vexl-next/generic-utils/src/effect-helpers/crypto'
+import {
+  type ErrorSigningChallenge,
+  type SignedChallenge,
+} from '@vexl-next/server-utils/src/services/challenge/contracts'
 import {Effect} from 'effect'
 import {type Client} from 'effect-http'
 import {handleCommonErrorsEffect} from '../../utils'
-import {type ErrorSigningChallenge, type SignedChallenge} from './contracts'
 import {type ChatApiSpecification} from './specification'
 
 export type ErrorGeneratingChallenge = Effect.Effect.Error<

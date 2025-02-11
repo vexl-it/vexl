@@ -1,17 +1,19 @@
 import {SqlResolver} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
-import {ChatChallenge} from '@vexl-next/rest-api/src/services/chat/contracts'
 import {Effect, flow} from 'effect'
+import {Challenge} from '../../../contracts'
 
-export const createDeleteChallenge = Effect.gen(function* (_) {
+export const createUpdateChallengeInvalidate = Effect.gen(function* (_) {
   const sql = yield* _(PgClient.PgClient)
 
   const resolver = yield* _(
-    SqlResolver.void('deleteChallenge', {
-      Request: ChatChallenge,
+    SqlResolver.void('updateChallengeInvalidate', {
+      Request: Challenge,
       execute: (params) => sql`
-        DELETE FROM challenge
+        UPDATE challenge
+        SET
+          valid = FALSE
         WHERE
           ${sql.in('challenge', params)}
       `,
@@ -22,10 +24,10 @@ export const createDeleteChallenge = Effect.gen(function* (_) {
     resolver.execute,
     Effect.catchAll((e) =>
       Effect.zipRight(
-        Effect.logError('Error in deleteChallenge', e),
+        Effect.logError('Error in updateChallengeInvalidate', e),
         Effect.fail(new UnexpectedServerError({status: 500}))
       )
     ),
-    Effect.withSpan('deleteChallenge query')
+    Effect.withSpan('updateChallengeInvalidate query')
   )
 })

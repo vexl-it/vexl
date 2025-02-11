@@ -1,3 +1,4 @@
+import {ChallengeApiGroup} from '@vexl-next/server-utils/src/services/challenge/specification'
 import {Api, ApiGroup} from 'effect-http'
 import {ServerSecurity} from '../../apiSecurity'
 import {CommonHeaders} from '../../commonHeaders'
@@ -11,10 +12,6 @@ import {
   CancelApprovalRequest,
   CancelApprovalResponse,
   CancelRequestApprovalErrors,
-  CreateChallengeRequest,
-  CreateChallengeResponse,
-  CreateChallengesRequest,
-  CreateChallengesResponse,
   CreateInboxRequest,
   CreateInboxResponse,
   DeleteInboxErrors,
@@ -221,26 +218,6 @@ export const SendMessagesEndpoint = Api.post(
   })
 )
 
-export const CreateChallengeEndpoint = Api.post(
-  'createChallenge',
-  '/api/v1/challenges'
-).pipe(
-  Api.setSecurity(ServerSecurity),
-  Api.setResponseStatus(200 as const),
-  Api.setRequestBody(CreateChallengeRequest),
-  Api.setResponseBody(CreateChallengeResponse)
-)
-
-export const CreateChallengeBatchEndpoint = Api.post(
-  'createChallengeBatch',
-  '/api/v1/challenges/batch'
-).pipe(
-  Api.setSecurity(ServerSecurity),
-  Api.setResponseStatus(200 as const),
-  Api.setRequestBody(CreateChallengesRequest),
-  Api.setResponseBody(CreateChallengesResponse)
-)
-
 const InboxesApiGroup = ApiGroup.make('Inboxes').pipe(
   ApiGroup.addEndpoint(UpdateInboxEndpoint),
   ApiGroup.addEndpoint(CreateInboxEndpoint),
@@ -258,11 +235,6 @@ const MessagesApiGroup = ApiGroup.make('Messages').pipe(
   ApiGroup.addEndpoint(RetrieveMessagesEndpoint),
   ApiGroup.addEndpoint(SendMessageEndpoint),
   ApiGroup.addEndpoint(SendMessagesEndpoint)
-)
-
-const ChallengeApiGroup = ApiGroup.make('Challenges').pipe(
-  ApiGroup.addEndpoint(CreateChallengeEndpoint),
-  ApiGroup.addEndpoint(CreateChallengeBatchEndpoint)
 )
 
 export const ChatApiSpecification = Api.make({

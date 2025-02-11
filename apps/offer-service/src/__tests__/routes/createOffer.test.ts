@@ -16,8 +16,8 @@ import {
 } from '@vexl-next/rest-api/src/services/offer/contracts'
 import {createDummyAuthHeadersForUser} from '@vexl-next/server-utils/src/tests/createDummyAuthHeaders'
 import {Effect, Either, Schema} from 'effect'
-import {NodeTestingApp} from '../NodeTestingApp'
-import {runPromiseInMockedEnvironment} from '../runPromiseInMockedEnvironment'
+import {NodeTestingApp} from '../utils/NodeTestingApp'
+import {runPromiseInMockedEnvironment} from '../utils/runPromiseInMockedEnvironment'
 
 describe('createOffer', () => {
   it('Creates a new offer', async () => {

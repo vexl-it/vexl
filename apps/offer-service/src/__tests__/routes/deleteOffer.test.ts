@@ -13,8 +13,8 @@ import {type SecurityHeaders} from '@vexl-next/rest-api/src/apiSecurity'
 import {type CreateNewOfferRequest} from '@vexl-next/rest-api/src/services/offer/contracts'
 import {createDummyAuthHeadersForUser} from '@vexl-next/server-utils/src/tests/createDummyAuthHeaders'
 import {Effect, Schema} from 'effect'
-import {NodeTestingApp} from '../NodeTestingApp'
-import {runPromiseInMockedEnvironment} from '../runPromiseInMockedEnvironment'
+import {NodeTestingApp} from '../utils/NodeTestingApp'
+import {runPromiseInMockedEnvironment} from '../utils/runPromiseInMockedEnvironment'
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const createOffer = (authHeaders: SecurityHeaders) =>

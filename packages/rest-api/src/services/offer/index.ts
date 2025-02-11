@@ -19,8 +19,12 @@ import {
   type CreatePrivatePartInput,
   type DeleteOfferInput,
   type DeletePrivatePartInput,
+  type GetClubOffersByIdsInput,
+  type GetClubOffersForMeInput,
+  type GetClubOffersForMeModifiedOrCreatedAfterInput,
   type GetOffersByIdsInput,
   type GetOffersForMeModifiedOrCreatedAfterInput,
+  type GetRemovedClubOffersInput,
   type GetRemovedOffersInput,
   type RefreshOfferInput,
   type ReportOfferInput,
@@ -57,13 +61,29 @@ export function api({
   return {
     getOffersByIds: (getOffersByIdsInput: GetOffersByIdsInput) =>
       handleCommonErrorsEffect(client.getOffersByIds(getOffersByIdsInput)),
+    getClubOffersByIds: (getClubOffersByIdsInput: GetClubOffersByIdsInput) =>
+      handleCommonErrorsEffect(
+        client.getClubOffersByIds(getClubOffersByIdsInput)
+      ),
     getOffersForMe: () => handleCommonErrorsEffect(client.getOffersForMe({})),
+    getClubOffersForMe: (getClubOffersForMeInput: GetClubOffersForMeInput) =>
+      handleCommonErrorsEffect(
+        client.getClubOffersForMe(getClubOffersForMeInput)
+      ),
     getOffersForMeModifiedOrCreatedAfter: (
       getOffersForMeModifiedOrCreatedAfterInput: GetOffersForMeModifiedOrCreatedAfterInput
     ) =>
       handleCommonErrorsEffect(
         client.getOffersForMeModifiedOrCreatedAfter(
           getOffersForMeModifiedOrCreatedAfterInput
+        )
+      ),
+    getClubOffersForMeModifiedOrCreatedAfter: (
+      getClubOffersForMeModifiedOrCreatedAfterInput: GetClubOffersForMeModifiedOrCreatedAfterInput
+    ) =>
+      handleCommonErrorsEffect(
+        client.getClubOffersForMeModifiedOrCreatedAfter(
+          getClubOffersForMeModifiedOrCreatedAfterInput
         )
       ),
     createNewOffer: (createNewOfferInput: CreateNewOfferInput) =>
@@ -92,6 +112,12 @@ export function api({
       ),
     getRemovedOffers: (getRemovedOffersInput: GetRemovedOffersInput) =>
       handleCommonErrorsEffect(client.getRemovedOffers(getRemovedOffersInput)),
+    getRemovedClubOffers: (
+      getRemovedClubOffersInput: GetRemovedClubOffersInput
+    ) =>
+      handleCommonErrorsEffect(
+        client.getRemovedClubOffers(getRemovedClubOffersInput)
+      ),
     reportOffer: (reportOfferInput: ReportOfferInput) =>
       handleCommonAndExpectedErrorsEffect(
         client.reportOffer(reportOfferInput),

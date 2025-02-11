@@ -4,7 +4,7 @@ import {
 } from '@vexl-next/cryptography/src/KeyHolder'
 import {toError, type BasicError} from '@vexl-next/domain/src/utility/errors'
 import {type ChatApi} from '@vexl-next/rest-api/src/services/chat'
-import {type SignedChallenge} from '@vexl-next/rest-api/src/services/chat/contracts'
+import {type SignedChallenge} from '@vexl-next/server-utils/src/services/challenge/contracts'
 import {type Effect} from 'effect'
 import * as O from 'fp-ts/Option'
 import * as RA from 'fp-ts/ReadonlyArray'

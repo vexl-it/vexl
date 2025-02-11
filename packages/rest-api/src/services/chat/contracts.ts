@@ -6,7 +6,12 @@ import {
 import {IdNumericE} from '@vexl-next/domain/src/utility/IdNumeric'
 import {UnixMillisecondsE} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {BooleanFromString} from '@vexl-next/generic-utils/src/effect-helpers/BooleanFromString'
-import {EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
+import {
+  Challenge,
+  InvalidChallengeError,
+  RequestBaseWithChallenge,
+  SignedChallenge,
+} from '@vexl-next/server-utils/src/services/challenge/contracts'
 import {Schema} from 'effect'
 import {NoContentResponse} from '../../NoContentResponse.brand'
 import {
@@ -70,38 +75,11 @@ export class RequestMessagingNotAllowedError extends Schema.TaggedError<RequestM
   status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
 }) {}
 
-export class InvalidChallengeError extends Schema.TaggedError<InvalidChallengeError>(
-  'InvalidChallengeError'
-)('InvalidChallengeError', {
-  status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
-}) {}
-
-export class ErrorSigningChallenge extends Schema.TaggedError<ErrorSigningChallenge>(
-  'ErrorSigningChallenge'
-)('ErrorSigningChallenge', {
-  status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
-}) {}
-
-export const ChatChallenge = Schema.String.pipe(Schema.brand('ChatChallenge'))
-export type ChatChallenge = Schema.Schema.Type<typeof ChatChallenge>
-
-export const SignedChallenge = Schema.Struct({
-  challenge: ChatChallenge,
-  signature: EcdsaSignature,
-})
-export type SignedChallenge = Schema.Schema.Type<typeof SignedChallenge>
-
 export const ServerMessageWithId = Schema.Struct({
   ...ServerMessageE.fields,
   id: IdNumericE,
 })
 export type ServerMessageWithId = Schema.Schema.Type<typeof ServerMessageWithId>
-
-export const RequestBaseWithChallenge = Schema.Struct({
-  publicKey: PublicKeyPemBase64E,
-  signedChallenge: SignedChallenge,
-})
-export type RequestBaseWithChallenge = typeof RequestBaseWithChallenge.Type
 
 export const UpdateInboxRequest = Schema.Struct({
   ...RequestBaseWithChallenge.fields,
@@ -340,7 +318,7 @@ export const CreateChallengeRequest = Schema.Struct({
 export type CreateChallengeRequest = typeof CreateChallengeRequest.Type
 
 export const CreateChallengeResponse = Schema.Struct({
-  challenge: ChatChallenge,
+  challenge: Challenge,
   expiration: UnixMillisecondsE,
 })
 export type CreateChallengeResponse = typeof CreateChallengeResponse.Type
@@ -354,7 +332,7 @@ export const CreateChallengesResponse = Schema.Struct({
   challenges: Schema.Array(
     Schema.Struct({
       publicKey: PublicKeyPemBase64E,
-      challenge: ChatChallenge,
+      challenge: Challenge,
     })
   ),
   expiration: UnixMillisecondsE,

@@ -5,6 +5,10 @@ import {RedisService} from '@vexl-next/server-utils/src/RedisService'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
 import {setupLoggingMiddlewares} from '@vexl-next/server-utils/src/loggingMiddlewares'
 import {MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
+import {ChallengeService} from '@vexl-next/server-utils/src/services/challenge/ChallengeService'
+import {ChallengeDbService} from '@vexl-next/server-utils/src/services/challenge/db/ChallegeDbService'
+import {createChallenge} from '@vexl-next/server-utils/src/services/challenge/routes/createChalenge'
+import {createChallenges} from '@vexl-next/server-utils/src/services/challenge/routes/createChallenges'
 import {Effect, Layer} from 'effect'
 import {RouterBuilder} from 'effect-http'
 import {NodeServer} from 'effect-http-node'
@@ -14,15 +18,12 @@ import {
   portConfig,
   redisUrl,
 } from './configs'
-import {ChallengeDbService} from './db/ChallegeDbService'
 import {InboxDbService} from './db/InboxDbService'
 import {MessagesDbService} from './db/MessagesDbService'
 import {WhitelistDbService} from './db/WhiteListDbService'
 import DbLayer from './db/layer'
-import {internalServerLive} from './internalServer'
+import {InternalServerLive} from './internalServer'
 import {reportMetricsLayer} from './metrics'
-import {createChallenge} from './routes/challenges/createChalenge'
-import {createChallenges} from './routes/challenges/createChallenges'
 import {approveRequest} from './routes/inbox/approveReqest'
 import {blockInbox} from './routes/inbox/blockInbox'
 import {cancelRequest} from './routes/inbox/cancelRequest'
@@ -36,7 +37,6 @@ import {updateInbox} from './routes/inbox/updateInbox'
 import {retrieveMessages} from './routes/messages/retrieveMessages'
 import {sendMessage} from './routes/messages/sendMessage'
 import {sendMessages} from './routes/messages/sendMessages'
-import {ChatChallengeService} from './utils/ChatChallengeService'
 
 export const app = RouterBuilder.make(ChatApiSpecification).pipe(
   // challenges
@@ -63,11 +63,11 @@ export const app = RouterBuilder.make(ChatApiSpecification).pipe(
 )
 
 const MainLive = Layer.mergeAll(
-  internalServerLive,
+  InternalServerLive,
   reportMetricsLayer,
   ServerCrypto.layer(cryptoConfig),
   healthServerLayer({port: healthServerPortConfig}),
-  ChatChallengeService.Live
+  ChallengeService.Live
 ).pipe(
   Layer.provideMerge(
     Layer.mergeAll(

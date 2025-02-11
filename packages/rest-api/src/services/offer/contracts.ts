@@ -10,6 +10,7 @@ import {
 import {IdNumericE} from '@vexl-next/domain/src/utility/IdNumeric'
 import {IsoDatetimeStringE} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
 import {UnixMillisecondsE} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {RequestBaseWithChallenge} from '@vexl-next/server-utils/src/services/challenge/contracts'
 import {Array, Schema} from 'effect'
 import {NoContentResponse} from '../../NoContentResponse.brand'
 
@@ -45,6 +46,12 @@ export const GetOffersByIdsRequest = Schema.Struct({
 })
 export type GetOffersByIdsRequest = typeof GetOffersByIdsRequest.Type
 
+export const GetClubOffersByIdsRequest = Schema.Struct({
+  ids: Schema.compose(Schema.split(','), Schema.Array(OfferIdE)),
+  ...RequestBaseWithChallenge.fields,
+})
+export type GetClubOffersByIdsRequest = typeof GetClubOffersByIdsRequest.Type
+
 export const GetOfferByIdsResponse = Schema.Array(ServerOffer)
 export type GetOfferByIdsResponse = typeof GetOfferByIdsResponse.Type
 
@@ -53,11 +60,23 @@ export const GetOffersForMeResponse = Schema.Struct({
 })
 export type GetOffersForMeResponse = typeof GetOffersForMeResponse.Type
 
+export const GetClubOffersForMeRequest = Schema.Struct({
+  ...RequestBaseWithChallenge.fields,
+})
+export type GetClubOffersForMeRequest = typeof GetClubOffersForMeRequest.Type
+
 export const GetOffersForMeCreatedOrModifiedAfterRequest = Schema.Struct({
   modifiedAt: IsoDatetimeStringE,
 })
 export type GetOffersForMeCreatedOrModifiedAfterRequest =
   typeof GetOffersForMeCreatedOrModifiedAfterRequest.Type
+
+export const GetClubOffersForMeCreatedOrModifiedAfterRequest = Schema.Struct({
+  ...RequestBaseWithChallenge.fields,
+  modifiedAt: IsoDatetimeStringE,
+})
+export type GetClubOffersForMeCreatedOrModifiedAfterRequest =
+  typeof GetClubOffersForMeCreatedOrModifiedAfterRequest.Type
 
 export const GetOffersForMeCreatedOrModifiedAfterResponse = Schema.Struct({
   offers: Schema.Array(ServerOffer),
@@ -165,6 +184,12 @@ export const RemovedOfferIdsRequest = Schema.Struct({
 })
 export type RemovedOfferIdsRequest = typeof RemovedOfferIdsRequest.Type
 
+export const RemovedClubOfferIdsRequest = Schema.Struct({
+  ...RequestBaseWithChallenge.fields,
+  offerIds: Schema.Array(OfferIdE),
+})
+export type RemovedClubOfferIdsRequest = typeof RemovedClubOfferIdsRequest.Type
+
 export const RemovedOfferIdsResponse = RemovedOfferIdsRequest
 export type RemovedOfferIdsResponse = typeof RemovedOfferIdsRequest.Type
 
@@ -204,11 +229,31 @@ export const GetOffersByIdsInput = Schema.Struct({
 })
 export type GetOffersByIdsInput = Schema.Schema.Type<typeof GetOffersByIdsInput>
 
+export const GetClubOffersByIdsInput = Schema.Struct({
+  body: GetClubOffersByIdsRequest,
+})
+export type GetClubOffersByIdsInput = Schema.Schema.Type<
+  typeof GetClubOffersByIdsInput
+>
+
+export const GetClubOffersForMeInput = Schema.Struct({
+  body: GetClubOffersForMeRequest,
+})
+export type GetClubOffersForMeInput = Schema.Schema.Type<
+  typeof GetClubOffersForMeInput
+>
+
 export const GetOffersForMeModifiedOrCreatedAfterInput = Schema.Struct({
   query: GetOffersForMeCreatedOrModifiedAfterRequest,
 })
 export type GetOffersForMeModifiedOrCreatedAfterInput =
   typeof GetOffersForMeModifiedOrCreatedAfterInput.Type
+
+export const GetClubOffersForMeModifiedOrCreatedAfterInput = Schema.Struct({
+  body: GetClubOffersForMeCreatedOrModifiedAfterRequest,
+})
+export type GetClubOffersForMeModifiedOrCreatedAfterInput =
+  typeof GetClubOffersForMeModifiedOrCreatedAfterInput.Type
 
 export const CreateNewOfferInput = Schema.Struct({
   body: CreateNewOfferRequest,
@@ -244,6 +289,11 @@ export const GetRemovedOffersInput = Schema.Struct({
   body: RemovedOfferIdsRequest,
 })
 export type GetRemovedOffersInput = typeof GetRemovedOffersInput.Type
+
+export const GetRemovedClubOffersInput = Schema.Struct({
+  body: RemovedClubOfferIdsRequest,
+})
+export type GetRemovedClubOffersInput = typeof GetRemovedClubOffersInput.Type
 
 export const ReportOfferInput = Schema.Struct({
   body: ReportOfferRequest,

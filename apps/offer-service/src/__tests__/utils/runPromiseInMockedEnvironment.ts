@@ -3,6 +3,8 @@ import {type SqlClient} from '@effect/sql/SqlClient'
 import {type RedisService} from '@vexl-next/server-utils/src/RedisService'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
 import {type MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
+import {ChallengeService} from '@vexl-next/server-utils/src/services/challenge/ChallengeService'
+import {ChallengeDbService} from '@vexl-next/server-utils/src/services/challenge/db/ChallegeDbService'
 import {mockedMetricsClientService} from '@vexl-next/server-utils/src/tests/mockedMetricsClientService'
 import {mockedRedisLayer} from '@vexl-next/server-utils/src/tests/mockedRedisLayer'
 import {
@@ -22,6 +24,7 @@ export type MockedContexts =
   | OfferDbService
   | SqlClient
   | MetricsClientService
+  | ChallengeDbService
 
 const universalContext = Layer.mergeAll(
   mockedRedisLayer,
@@ -29,8 +32,10 @@ const universalContext = Layer.mergeAll(
 )
 
 const context = NodeTestingApp.Live.pipe(
+  Layer.provideMerge(ChallengeService.Live),
   Layer.provideMerge(universalContext),
   Layer.provideMerge(OfferDbService.Live),
+  Layer.provideMerge(ChallengeDbService.Live),
   Layer.provideMerge(mockedMetricsClientService),
   Layer.provideMerge(DbLayer),
   Layer.provideMerge(NodeContext.layer)

@@ -2,6 +2,7 @@ import {DeleteInboxErrors} from '@vexl-next/rest-api/src/services/chat/contracts
 import {DeleteInboxEndpoint} from '@vexl-next/rest-api/src/services/chat/specification'
 import {InboxDoesNotExistError} from '@vexl-next/rest-api/src/services/contact/contracts'
 import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {validateChallengeInBody} from '@vexl-next/server-utils/src/services/challenge/utils/validateChallengeInBody'
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
 import {Effect} from 'effect'
 import {Handler} from 'effect-http'
@@ -9,7 +10,6 @@ import {InboxDbService} from '../../db/InboxDbService'
 import {MessagesDbService} from '../../db/MessagesDbService'
 import {WhitelistDbService} from '../../db/WhiteListDbService'
 import {hashPublicKey} from '../../db/domain'
-import {validateChallengeInBody} from '../../utils/validateChallengeInBody'
 import {withInboxActionRedisLock} from '../../utils/withInboxActionRedisLock'
 
 export const deleteInbox = Handler.make(DeleteInboxEndpoint, (req) =>

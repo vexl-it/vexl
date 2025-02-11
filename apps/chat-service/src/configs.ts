@@ -16,9 +16,6 @@ export {
 } from '@vexl-next/server-utils/src/commonConfigs'
 
 export const requestTimeoutDaysConfig = Config.number('REQUEST_TIMEOUT_DAYS')
-export const challengeExpirationMinutesConfig = Config.number(
-  'CHALLENGE_EXPIRATION_MINUTES'
-)
 
 export const messageExpirationLowerLimitDaysConfig = Config.number(
   'MESSAGE_EXPIRATION_LOWER_LIMIT_DAYS'

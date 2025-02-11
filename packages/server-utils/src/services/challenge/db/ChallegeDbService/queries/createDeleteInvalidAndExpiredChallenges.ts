@@ -1,7 +1,7 @@
 import {PgClient} from '@effect/sql-pg'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {Effect} from 'effect'
-import {challengeExpirationMinutesConfig} from '../../../configs'
+import {challengeExpirationMinutesConfig} from '../configs'
 
 export const createDeleteInvalidAndExpiredChallenges = Effect.gen(
   function* (_) {

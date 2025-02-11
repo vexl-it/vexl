@@ -8,7 +8,7 @@ import {E164PhoneNumberE} from '@vexl-next/domain/src/general/E164PhoneNumber.br
 import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {type EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
-import {InvalidChallengeError} from '@vexl-next/rest-api/src/services/chat/contracts'
+import {InvalidChallengeError} from '@vexl-next/server-utils/src/services/challenge/contracts'
 import {createDummyAuthHeadersForUser} from '@vexl-next/server-utils/src/tests/createDummyAuthHeaders'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {Effect, Schema} from 'effect'

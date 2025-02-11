@@ -19,8 +19,8 @@ import {
 } from '@vexl-next/rest-api/src/services/offer/contracts'
 import {createDummyAuthHeadersForUser} from '@vexl-next/server-utils/src/tests/createDummyAuthHeaders'
 import {Effect, Schema} from 'effect'
-import {NodeTestingApp} from '../NodeTestingApp'
-import {runPromiseInMockedEnvironment} from '../runPromiseInMockedEnvironment'
+import {NodeTestingApp} from '../utils/NodeTestingApp'
+import {runPromiseInMockedEnvironment} from '../utils/runPromiseInMockedEnvironment'
 
 const user1 = generatePrivateKey()
 const user2 = generatePrivateKey()

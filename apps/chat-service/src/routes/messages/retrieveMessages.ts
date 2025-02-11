@@ -1,6 +1,7 @@
 import {RetrieveMessagesErrors} from '@vexl-next/rest-api/src/services/chat/contracts'
 import {RetrieveMessagesEndpoint} from '@vexl-next/rest-api/src/services/chat/specification'
 import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {validateChallengeInBody} from '@vexl-next/server-utils/src/services/challenge/utils/validateChallengeInBody'
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
 import {Array, Effect, Option, pipe} from 'effect'
 import {Handler} from 'effect-http'
@@ -8,7 +9,6 @@ import {InboxDbService} from '../../db/InboxDbService'
 import {MessagesDbService} from '../../db/MessagesDbService'
 import {decryptPublicKey} from '../../db/domain'
 import {ensureInboxExists} from '../../utils/ensureInboxExists'
-import {validateChallengeInBody} from '../../utils/validateChallengeInBody'
 
 export const retrieveMessages = Handler.make(RetrieveMessagesEndpoint, (req) =>
   makeEndpointEffect(

@@ -137,6 +137,7 @@ export class OfferDbService extends Context.Tag('OfferDbService')<
     Effect.gen(function* (_) {
       return {
         queryOffersForUser: yield* _(createQueryOffersForUser),
+        queryClubOffersForUser: yield* _(createQueryOffersForUser),
         queryOfferByPublicKeyAndOfferId: yield* _(
           createQueryOfferByPublicKeyAndOfferId
         ),

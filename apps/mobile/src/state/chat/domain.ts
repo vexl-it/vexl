@@ -22,17 +22,17 @@ import {
   type NetworkError,
   type UnexpectedApiResponseError,
 } from '@vexl-next/rest-api/src/Errors'
-import {
-  type ErrorSigningChallenge,
-  type InvalidChallengeError,
-  type SenderInboxDoesNotExistError,
-} from '@vexl-next/rest-api/src/services/chat/contracts'
+import {type SenderInboxDoesNotExistError} from '@vexl-next/rest-api/src/services/chat/contracts'
 import {type ErrorGeneratingChallenge} from '@vexl-next/rest-api/src/services/chat/utils'
 import {
   type ForbiddenMessageTypeError,
   type InboxDoesNotExistError,
   type NotPermittedToSendMessageToTargetInboxError,
 } from '@vexl-next/rest-api/src/services/contact/contracts'
+import {
+  type ErrorSigningChallenge,
+  type InvalidChallengeError,
+} from '@vexl-next/server-utils/src/services/challenge/contracts'
 import {z} from 'zod'
 import {
   createEmptyTradeChecklistInState,

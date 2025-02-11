@@ -12,8 +12,8 @@ import {
   type InboxInBatch,
   type MessageInBatch,
   type ServerMessageWithId,
-  type SignedChallenge,
 } from '@vexl-next/rest-api/src/services/chat/contracts'
+import {type SignedChallenge} from '@vexl-next/server-utils/src/services/challenge/contracts'
 import {Array, Effect, pipe} from 'effect'
 import * as A from 'fp-ts/Array'
 import * as O from 'fp-ts/Option'

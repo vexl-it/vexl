@@ -5,6 +5,7 @@ import {
 import {SendMessageEndpoint} from '@vexl-next/rest-api/src/services/chat/specification'
 import {ForbiddenMessageTypeError} from '@vexl-next/rest-api/src/services/contact/contracts'
 import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {validateChallengeInBody} from '@vexl-next/server-utils/src/services/challenge/utils/validateChallengeInBody'
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
 import {Effect} from 'effect'
 import {Handler} from 'effect-http'
@@ -14,7 +15,6 @@ import {reportMessageSent} from '../../metrics'
 import {findAndEnsureReceiverAndSenderInbox} from '../../utils/findAndEnsureReceiverAndSenderInbox'
 import {forbiddenMessageTypes} from '../../utils/forbiddenMessageTypes'
 import {ensureSenderInReceiverWhitelist} from '../../utils/isSenderInReceiverWhitelist'
-import {validateChallengeInBody} from '../../utils/validateChallengeInBody'
 import {withInboxActionRedisLock} from '../../utils/withInboxActionRedisLock'
 
 export const sendMessage = Handler.make(SendMessageEndpoint, (req) =>

@@ -4,6 +4,7 @@ import {
 } from '@vexl-next/rest-api/src/services/chat/contracts'
 import {LeaveChatEndpoint} from '@vexl-next/rest-api/src/services/chat/specification'
 import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {validateChallengeInBody} from '@vexl-next/server-utils/src/services/challenge/utils/validateChallengeInBody'
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
 import {Effect} from 'effect'
 import {Handler} from 'effect-http'
@@ -13,7 +14,6 @@ import {encryptPublicKey} from '../../db/domain'
 import {reportChatClosed, reportMessageSent} from '../../metrics'
 import {findAndEnsureReceiverAndSenderInbox} from '../../utils/findAndEnsureReceiverAndSenderInbox'
 import {ensureSenderInReceiverWhitelist} from '../../utils/isSenderInReceiverWhitelist'
-import {validateChallengeInBody} from '../../utils/validateChallengeInBody'
 import {withInboxActionRedisLock} from '../../utils/withInboxActionRedisLock'
 
 export const leaveChat = Handler.make(LeaveChatEndpoint, (req) =>

@@ -1,15 +1,15 @@
 import {unixMillisecondsFromNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {CreateChallengeEndpoint} from '@vexl-next/rest-api/src/services/chat/specification'
 import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {Effect, Schema} from 'effect'
 import {Handler} from 'effect-http'
-import {challengeExpirationMinutesConfig} from '../../configs'
-import {ChatChallengeService} from '../../utils/ChatChallengeService'
+import {ChallengeService} from '../ChallengeService'
+import {challengeExpirationMinutesConfig} from '../db/ChallegeDbService/configs'
+import {CreateChallengeEndpoint} from '../specification'
 
 export const createChallenge = Handler.make(CreateChallengeEndpoint, (req) =>
   makeEndpointEffect(
     Effect.gen(function* (_) {
-      const challengeService = yield* _(ChatChallengeService)
+      const challengeService = yield* _(ChallengeService)
       const publicKey = req.body.publicKey
       const expirationMinutes = yield* _(challengeExpirationMinutesConfig)
 

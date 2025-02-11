@@ -3,6 +3,8 @@ import {type SqlClient} from '@effect/sql/SqlClient'
 import {type RedisService} from '@vexl-next/server-utils/src/RedisService'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
 import {type MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
+import {ChallengeService} from '@vexl-next/server-utils/src/services/challenge/ChallengeService'
+import {ChallengeDbService} from '@vexl-next/server-utils/src/services/challenge/db/ChallegeDbService'
 import {mockedDashboardReportsService} from '@vexl-next/server-utils/src/tests/mockedDashboardReportsService'
 import {mockedMetricsClientService} from '@vexl-next/server-utils/src/tests/mockedMetricsClientService'
 import {mockedRedisLayer} from '@vexl-next/server-utils/src/tests/mockedRedisLayer'
@@ -12,12 +14,10 @@ import {
 } from '@vexl-next/server-utils/src/tests/testDb'
 import {Console, Effect, Layer, ManagedRuntime, type Scope} from 'effect'
 import {cryptoConfig} from '../../configs'
-import {ChallengeDbService} from '../../db/ChallegeDbService'
 import {InboxDbService} from '../../db/InboxDbService'
 import {MessagesDbService} from '../../db/MessagesDbService'
 import {WhitelistDbService} from '../../db/WhiteListDbService'
 import DbLayer from '../../db/layer'
-import {ChatChallengeService} from '../../utils/ChatChallengeService'
 import {NodeTestingApp} from './NodeTestingApp'
 
 export type MockedContexts =
@@ -37,7 +37,7 @@ const universalContext = Layer.mergeAll(
 )
 
 const context = NodeTestingApp.Live.pipe(
-  Layer.provideMerge(ChatChallengeService.Live),
+  Layer.provideMerge(ChallengeService.Live),
   Layer.provideMerge(mockedMetricsClientService),
   Layer.provideMerge(
     Layer.mergeAll(

@@ -4,6 +4,7 @@ import {YStack} from 'tamagui'
 import {
   addMoreContactsSuggestionVisibleAtom,
   createOfferSuggestionVisibleAtom,
+  joinVexlClubsSuggestionVisibleAtom,
 } from '../../../../../state/marketplace/atoms/offerSuggestionVisible'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import MarketplaceSuggestion from '../../../../MarketplaceSuggestion'
@@ -49,6 +50,16 @@ function EmptyMarketplaceSuggestions({
           }}
           text={t('suggestion.noOffersFromOthersYet')}
           visibleStateAtom={addMoreContactsSuggestionVisibleAtom}
+        />
+        <MarketplaceSuggestion
+          buttonText={t('suggestion.whatAreClubs')}
+          onButtonPress={() => {
+            navigation.navigate('Faqs', {
+              pageType: 'WHAT_ARE_VEXL_CLUBS',
+            })
+          }}
+          text={t('suggestion.yourReachIsTooLow')}
+          visibleStateAtom={joinVexlClubsSuggestionVisibleAtom}
         />
         <ImportNewContactsSuggestion />
       </YStack>

@@ -22,6 +22,7 @@ import {
   type InitPhoneVerificationResponse,
   type VerifyPhoneNumberResponse,
 } from '@vexl-next/rest-api/src/services/user/contracts'
+import {type FaqType} from './components/FaqScreen/useContent'
 import {type ChatIds} from './state/chat/domain'
 import {type ContactsFilter} from './state/contacts/domain'
 
@@ -50,7 +51,11 @@ export type RootStackParamsList = {
 
   TermsAndConditions: undefined
 
-  Faqs: undefined
+  Faqs:
+    | {
+        pageType?: FaqType | undefined
+      }
+    | undefined
 
   EditName: undefined
   ChangeProfilePicture: undefined

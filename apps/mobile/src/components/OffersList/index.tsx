@@ -6,8 +6,7 @@ import {
 } from '@shopify/flash-list'
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
 import {type Atom} from 'jotai'
-import React, {useMemo, type ComponentProps} from 'react'
-import {type FlatList} from 'react-native'
+import React, {useMemo} from 'react'
 import Animated from 'react-native-reanimated'
 import {getTokens} from 'tamagui'
 import atomKeyExtractor from '../../utils/atomUtils/atomKeyExtractor'
@@ -17,7 +16,6 @@ import OffersListItem from './OffersListItem'
 export interface Props
   extends Omit<FlashListProps<Atom<OneOfferInState>>, 'renderItem' | 'data'> {
   readonly offersAtoms: Array<Atom<OneOfferInState>>
-  ListHeaderComponent?: ComponentProps<typeof FlatList>['ListHeaderComponent']
 }
 
 function renderItem(
@@ -36,6 +34,7 @@ function OffersList({
   refreshing,
   offersAtoms,
   ListHeaderComponent,
+  ListFooterComponent,
   ...props
 }: Props): JSX.Element {
   const bottomOffset = usePixelsFromBottomWhereTabsEnd()
@@ -50,6 +49,7 @@ function OffersList({
   return (
     <AnimatedFlashList
       ListHeaderComponent={ListHeaderComponent}
+      ListFooterComponent={ListFooterComponent}
       estimatedItemSize={151}
       showsVerticalScrollIndicator={false}
       contentContainerStyle={contentContainerStyle}

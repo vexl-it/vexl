@@ -1,3 +1,4 @@
+import {useNavigation} from '@react-navigation/native'
 import {isNone} from 'fp-ts/Option'
 import {useAtomValue, useSetAtom} from 'jotai'
 import {useMemo} from 'react'
@@ -18,10 +19,13 @@ import {
 import {baseFilterAtom} from '../../../../../state/marketplace/atoms/filterAtoms'
 import {filteredOffersIncludingLocationFilterAtomsAtom} from '../../../../../state/marketplace/atoms/filteredOffers'
 import {refocusMapActionAtom} from '../../../../../state/marketplace/atoms/map/focusedOffer'
+import {joinVexlClubsSuggestionVisibleAtom} from '../../../../../state/marketplace/atoms/offerSuggestionVisible'
+import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import ErrorListHeader from '../../../../ErrorListHeader'
 import VexlActivityIndicator from '../../../../LoadingOverlayProvider/VexlActivityIndicator'
 import {MAP_SIZE} from '../../../../MarketplaceMap'
 import MarketplaceMapContainer from '../../../../MarketplaceMapContainer'
+import MarketplaceSuggestion from '../../../../MarketplaceSuggestion'
 import OffersList from '../../../../OffersList'
 import ReencryptOffersSuggestion from '../../../../ReencryptOffersSuggestion'
 import ContainerWithTopBorderRadius from '../../ContainerWithTopBorderRadius'
@@ -33,6 +37,26 @@ import FilterButton from './FilterButton'
 import ImportNewContactsSuggestion from './ImportNewContactsSuggestion'
 import SearchOffers from './SearchOffers'
 import TotalOffersCount from './TotalOffersCount'
+
+function ListFooterComponent(): JSX.Element {
+  const {t} = useTranslation()
+  const navigation = useNavigation()
+
+  return (
+    <Stack mt="$4">
+      <MarketplaceSuggestion
+        buttonText={t('suggestion.whatAreClubs')}
+        onButtonPress={() => {
+          navigation.navigate('Faqs', {
+            pageType: 'WHAT_ARE_VEXL_CLUBS',
+          })
+        }}
+        text={t('suggestion.lookingForMoreoffers')}
+        visibleStateAtom={joinVexlClubsSuggestionVisibleAtom}
+      />
+    </Stack>
+  )
+}
 
 function OffersListStateDisplayerContent(): JSX.Element {
   const tokens = getTokens()
@@ -152,6 +176,7 @@ function OffersListStateDisplayerContent(): JSX.Element {
       <Stack f={1}>
         <OffersList
           ListHeaderComponent={ListHeaderComponent}
+          ListFooterComponent={ListFooterComponent}
           offersAtoms={offersAtoms}
           // eslint-disable-next-line @typescript-eslint/no-misused-promises
           onRefresh={refreshOffers}

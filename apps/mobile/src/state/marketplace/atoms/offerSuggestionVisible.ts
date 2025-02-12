@@ -5,6 +5,7 @@ import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsed
 
 export const addMoreContactsSuggestionVisibleAtom = atom<boolean>(true)
 export const resetFilterSuggestionVisibleAtom = atom<boolean>(true)
+export const joinVexlClubsSuggestionVisibleAtom = atom<boolean>(true)
 
 export const createOfferSuggestionVisibleStorageAtom =
   atomWithParsedMmkvStorage(

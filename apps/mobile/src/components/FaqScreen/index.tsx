@@ -15,11 +15,13 @@ import useContent from './useContent'
 
 type Props = RootStackScreenProps<'Faqs'>
 
-function FaqsScreen({navigation}: Props): JSX.Element | null {
+function FaqsScreen({navigation, route: {params}}: Props): JSX.Element | null {
   const {t} = useTranslation()
   const safeGoBack = useSafeGoBack()
   const content = useContent()
-  const [page, setPage] = useState<number>(0)
+  const pageType = params?.pageType
+  const pageIndex = pageType ? content.findIndex((c) => c.type === pageType) : 0
+  const [page, setPage] = useState<number>(pageIndex)
 
   const pageContent = content[page]
 

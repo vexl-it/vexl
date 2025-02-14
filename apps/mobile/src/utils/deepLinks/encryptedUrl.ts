@@ -1,6 +1,7 @@
 import Clipboard from '@react-native-clipboard/clipboard'
 import {KeyHolder} from '@vexl-next/cryptography'
 import {PrivateKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
+import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import type * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/lib/function'
@@ -38,6 +39,7 @@ export const processEncryptedUrlActionAtom = atom(
             },
           ],
         }),
+        effectToTaskEither,
         TE.matchW(
           () => {
             Clipboard.setString(decrypted.replace(/^.*:/, ''))

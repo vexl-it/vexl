@@ -23,7 +23,10 @@ export function stringToSvgStringRuntimeError(s: string): SvgString {
   )
 }
 
-type Props = (RNImageProps | (Omit<XmlProps, 'xml'> & {source: SvgString})) & {
+export type Props = (
+  | RNImageProps
+  | (Omit<XmlProps, 'xml'> & {source: SvgString})
+) & {
   grayScale?: boolean
 }
 export default function Image({source, ...props}: Props): JSX.Element {
@@ -40,7 +43,7 @@ export type ImageUniversalSourcePropType =
   | SvgStringOrImageUri
   | {type: 'requiredImage'; image: ImageSourcePropType}
 
-interface ImageUniversalProps {
+export interface ImageUniversalProps {
   source: ImageUniversalSourcePropType
   width?: number
   height?: number

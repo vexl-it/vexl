@@ -74,12 +74,6 @@ export class UserNotFoundError extends Schema.TaggedError<UserNotFoundError>(
   }),
 }) {}
 
-export class UserNotClubMemberError extends Schema.TaggedError<UserNotClubMemberError>(
-  'UserNotClubMemberError'
-)('UserNotClubMemberError', {
-  status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
-}) {}
-
 export const CreateUserRequest = Schema.Struct({
   firebaseToken: Schema.NullOr(FcmTokenE),
   expoToken: Schema.optionalWith(Schema.NullOr(ExpoNotificationTokenE), {
@@ -524,4 +518,21 @@ export type GetClubContactsResponse = typeof GetClubContactsResponse.Type
 export const GetClubContactsErrors = Schema.Union(
   NotFoundError,
   InvalidChallengeError
+)
+
+export const GetClubInfoByAccessCodeRequest = Schema.Struct({
+  ...RequestBaseWithChallenge.fields,
+  code: ClubCode,
+})
+
+export type GetClubInfoByAccessCodeRequest =
+  typeof GetClubInfoByAccessCodeRequest.Type
+
+export const GetClubInfoByAccessCodeResponse = Schema.Struct({
+  club: ClubInfo,
+})
+
+export const GetClubInfoByAccessCodeErrors = Schema.Union(
+  InvalidChallengeError,
+  NotFoundError
 )

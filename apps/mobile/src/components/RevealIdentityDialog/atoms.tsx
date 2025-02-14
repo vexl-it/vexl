@@ -1,6 +1,7 @@
 import {UserName} from '@vexl-next/domain/src/general/UserName.brand'
 import {toBasicError} from '@vexl-next/domain/src/utility/errors'
 import {type UriString} from '@vexl-next/domain/src/utility/UriString.brand'
+import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import * as E from 'fp-ts/Either'
 import {pipe} from 'fp-ts/function'
 import * as TE from 'fp-ts/TaskEither'
@@ -84,6 +85,7 @@ export const revealIdentityDialogUIAtom = atom(
         ],
         variant: 'info',
       }),
+      effectToTaskEither,
       TE.match(
         (e) => {
           if (e._tag === 'UserDeclinedError' && type === 'REQUEST_REVEAL') {

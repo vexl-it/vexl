@@ -4,10 +4,7 @@ import {
   unixMillisecondsNow,
   type UnixMilliseconds,
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {
-  effectToTaskEither,
-  taskEitherToEffect,
-} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
+import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {Effect} from 'effect'
 import {atom, type Getter, type Setter} from 'jotai'
 import {Alert, Platform} from 'react-native'
@@ -108,7 +105,6 @@ const checkNotificationPermissionsAndAskIfPossibleActionAtom = atom(
       ) {
         return yield* _(
           showDialog,
-          taskEitherToEffect,
           Effect.flatMap(() => requestPermissions),
           Effect.catchTag('UserDeclined', () =>
             Effect.zipRight(

@@ -1,4 +1,5 @@
 import {type OfferInfo} from '@vexl-next/domain/src/general/offers'
+import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {atom} from 'jotai'
@@ -41,6 +42,7 @@ const showCommonFriendsExplanationUIActionAtom = atom(
         steps: [{...modalContent, type: 'StepWithText'}],
         variant: 'info',
       }),
+      effectToTaskEither,
       TE.match(
         () => {
           return false

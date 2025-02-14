@@ -29,6 +29,9 @@ import {
   GetClubContactsErrors,
   GetClubContactsRequest,
   GetClubContactsResponse,
+  GetClubInfoByAccessCodeErrors,
+  GetClubInfoByAccessCodeRequest,
+  GetClubInfoByAccessCodeResponse,
   GetClubInfoErrors,
   GetClubInfoRequest,
   GetClubInfoResponse,
@@ -311,13 +314,25 @@ export const ListClubLinksEndpoint = Api.post(
 
 export const GetClubContactsEndpoint = Api.post(
   'getClubContacts',
-  '/api/v1/contacts/club'
+  '/api/v1/clubs/member/get-contacts'
 ).pipe(
   Api.setRequestBody(GetClubContactsRequest),
   Api.setResponseBody(GetClubContactsResponse),
   Api.addResponse({
     status: 400,
     body: GetClubContactsErrors,
+  })
+)
+
+export const GetClubInfoByAccessCodeEndpoint = Api.post(
+  'getClubInfoByAccessCode',
+  '/api/v1/clubs/member/get-info-by-access-code'
+).pipe(
+  Api.setRequestBody(GetClubInfoByAccessCodeRequest),
+  Api.setResponseBody(GetClubInfoByAccessCodeResponse),
+  Api.addResponse({
+    status: 400,
+    body: GetClubInfoByAccessCodeErrors,
   })
 )
 
@@ -353,7 +368,7 @@ const ClubsMemberApiGroup = ApiGroup.make('ClubsMember', {
   ApiGroup.addEndpoint(JoinClubEndpoint),
   ApiGroup.addEndpoint(LeaveClubEndpoint),
   ApiGroup.addEndpoint(GetClubContactsEndpoint),
-  ApiGroup.addEndpoint(LeaveClubEndpoint)
+  ApiGroup.addEndpoint(GetClubInfoByAccessCodeEndpoint)
 )
 
 const ClubsModeratorApiGroup = ApiGroup.make('ClubsModerator', {

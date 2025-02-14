@@ -86,7 +86,7 @@ const cancelRequestActionAtomHandleUI = atom(
             },
           ],
           variant: 'danger',
-        })
+        }).pipe(effectToTaskEither)
       ),
       TE.chainW(() => {
         set(loadingOverlayDisplayedAtom, true)

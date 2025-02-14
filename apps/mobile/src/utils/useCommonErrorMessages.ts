@@ -1,3 +1,5 @@
+import {DataAndTypeElementsDeepLinkError} from './deepLinks/parseDeepLink'
+import {ImagePickerError} from './imagePickers'
 import {useTranslation, type TFunction} from './localization/I18nProvider'
 
 export interface SomeError {
@@ -26,7 +28,9 @@ export function toCommonErrorMessage(
     error._tag === 'UnauthorizedError' ||
     error._tag === 'UnexpectedApiResponseError' ||
     error._tag === 'UnknownClientError' ||
-    error._tag === 'UnknownServerError'
+    error._tag === 'UnknownServerError' ||
+    error._tag === DataAndTypeElementsDeepLinkError._tag ||
+    error._tag === ImagePickerError._tag
   ) {
     return t(`common.${error._tag}`)
   }

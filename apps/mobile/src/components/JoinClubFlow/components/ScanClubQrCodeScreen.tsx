@@ -1,15 +1,20 @@
+import {useMolecule} from 'bunshi/dist/react'
 import {Effect} from 'effect'
 import {CameraView} from 'expo-camera'
 import {useSetAtom} from 'jotai'
-import {useEffect, useState} from 'react'
-import {useWindowDimensions} from 'react-native'
+import {useEffect, useRef, useState} from 'react'
+import {Alert, useWindowDimensions} from 'react-native'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import Svg, {Mask, Rect} from 'react-native-svg'
 import {getTokens, Stack, Text, YStack} from 'tamagui'
+import {type JoinClubFlowStackScreenProps} from '../../../navigationTypes'
 import {handleCameraPermissionsActionAtom} from '../../../utils/handleCameraPermissions'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import Button from '../../Button'
+import {accessCodeMolecule} from '../atoms'
 import Header from './Header'
+
+type Props = JoinClubFlowStackScreenProps<'ScanClubQrCodeScreen'>
 
 const scannerStyle = {
   // On android camera view will be resized to fit the whole camera preview. That will result in
@@ -18,12 +23,16 @@ const scannerStyle = {
   flex: 1,
 }
 
-function ScanClubQrCodeScreen(): JSX.Element {
+function ScanClubQrCodeScreen({navigation}: Props): JSX.Element {
   const {t} = useTranslation()
+  const scanned = useRef(false)
   const {top, bottom} = useSafeAreaInsets()
   const {height} = useWindowDimensions()
   const [permissionsGranted, setPermissionsGranted] = useState(false)
+
+  const {handleCodeScannedActionAtom} = useMolecule(accessCodeMolecule)
   const handleCameraPermissions = useSetAtom(handleCameraPermissionsActionAtom)
+  const handleCodeScanned = useSetAtom(handleCodeScannedActionAtom)
 
   useEffect(() => {
     void (async () => {
@@ -54,13 +63,32 @@ function ScanClubQrCodeScreen(): JSX.Element {
           <Button
             variant="secondary"
             text={t('clubs.enterClubAccessCode')}
-            onPress={() => {}}
+            onPress={() => {
+              navigation.navigate('FillClubAccessCodeScreen')
+            }}
           />
-          <Button
-            variant="primary"
-            text={t('clubs.uploadFromDevice')}
-            onPress={() => {}}
-          />
+          {!!__DEV__ && (
+            <Button
+              variant="primary"
+              text={t('clubs.uploadFromDevice')}
+              onPress={() => {
+                Alert.alert(`Todo`)
+                // TODO: function is ready but Camera.scanFromURLAsync(image.uri) in getClubQrCodeFromDeviceImageLibraryActionAtom
+                // is throwing error for valid QR code.
+                // Check after update to expo SDK 52 and updating library
+
+                // void Effect.runPromise(
+                //   getClubQrCodeFromDeviceImageLibrary()
+                // ).then((success) => {
+                //   if (success) {
+                //     navigation.navigate('InsideTabs', {
+                //       screen: 'Marketplace',
+                //     })
+                //   }
+                // })
+              }}
+            />
+          )}
         </YStack>
         {!!permissionsGranted && (
           <Stack
@@ -69,7 +97,23 @@ function ScanClubQrCodeScreen(): JSX.Element {
             overflow="hidden"
             position="relative"
           >
-            <CameraView style={scannerStyle} onBarcodeScanned={() => {}} />
+            <CameraView
+              style={scannerStyle}
+              onBarcodeScanned={(data) => {
+                if (scanned.current) return
+
+                void Effect.runPromise(handleCodeScanned(data)).then(
+                  (success) => {
+                    scanned.current = true
+                    if (success) {
+                      navigation.navigate('InsideTabs', {
+                        screen: 'Marketplace',
+                      })
+                    }
+                  }
+                )
+              }}
+            />
           </Stack>
         )}
         <Svg
@@ -96,7 +140,7 @@ function ScanClubQrCodeScreen(): JSX.Element {
           <Rect
             width="100%"
             height="100%"
-            fill="rgba(16, 16, 16, 0.9)"
+            fill="rgba(16, 16, 16, 0.95)"
             mask="url(#mask)"
           />
           <Rect

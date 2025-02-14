@@ -1,3 +1,4 @@
+import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {useMolecule} from 'bunshi/dist/react'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
@@ -5,7 +6,7 @@ import {useSetAtom} from 'jotai'
 import {useCallback} from 'react'
 import {Alert} from 'react-native'
 import {getTokens} from 'tamagui'
-import {getImageFromGalleryAndTryToResolveThePermissionsAlongTheWay} from '../../../utils/imagePickers'
+import {getImageFromGalleryResolvePermissionsAndMoveItToInternalDirectory} from '../../../utils/imagePickers'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import showErrorAlert from '../../../utils/showErrorAlert'
 import IconButton from '../../IconButton'
@@ -20,10 +21,11 @@ function SendImageButton(): JSX.Element {
   const selectImage = useCallback(
     () =>
       pipe(
-        getImageFromGalleryAndTryToResolveThePermissionsAlongTheWay({
+        getImageFromGalleryResolvePermissionsAndMoveItToInternalDirectory({
           saveTo: 'cache',
           aspect: undefined,
         }),
+        effectToTaskEither,
         TE.map((uri) => {
           setSelectedImage(uri)
         }),

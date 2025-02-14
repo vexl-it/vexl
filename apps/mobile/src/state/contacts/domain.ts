@@ -1,6 +1,8 @@
+import {ClubCode} from '@vexl-next/domain/src/general/clubs'
 import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
+import {Schema} from 'effect'
 import {z} from 'zod'
 
 export const NonUniqueContactId = z.string().brand('NonUniqueContactId')
@@ -96,3 +98,11 @@ export const ContactsFilter = z.enum([
 ])
 
 export type ContactsFilter = z.TypeOf<typeof ContactsFilter>
+
+export const JoinClubFromLinkPayload = Schema.Struct({
+  code: ClubCode,
+})
+
+export type JoinClubFromLinkPayload = Schema.Schema.Type<
+  typeof JoinClubFromLinkPayload
+>

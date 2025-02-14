@@ -8,6 +8,7 @@ import {
   type TradeChecklistUpdate,
 } from '@vexl-next/domain/src/general/tradeChecklist'
 import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {pipe} from 'effect'
 import fastDeepEqual from 'fast-deep-equal'
 import * as T from 'fp-ts/Task'
@@ -67,6 +68,7 @@ export const askAreYouSureAndClearUpdatesToBeSentActionAtom = atom(
           },
         ],
       }),
+      effectToTaskEither,
       TE.match(
         () => {
           return false

@@ -1,4 +1,3 @@
-import {type PrivateKeyHolder} from '@vexl-next/cryptography/src/KeyHolder'
 import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {Effect, Schema} from 'effect'
@@ -12,6 +11,10 @@ import {
   handleCommonErrorsEffect,
   type LoggingFunction,
 } from '../../utils'
+import {
+  addChallengeToRequest,
+  type RequestWithGeneratableChallenge,
+} from '../utils/addChallengeToRequest'
 import {
   ApproveRequestErrors,
   CancelRequestApprovalErrors,
@@ -36,7 +39,6 @@ import {
   type UpdateInboxRequest,
 } from './contracts'
 import {ChatApiSpecification} from './specification'
-import {addChallengeToRequest} from './utils'
 
 const decodeCommonHeaders = Schema.decodeSync(CommonHeaders)
 
@@ -71,13 +73,6 @@ export function api({
   }
 
   const addChallenge = addChallengeToRequest(client)
-
-  type RequestWithGeneratableChallenge<T> = Omit<
-    T,
-    'publicKey' | 'signedChallenge'
-  > & {
-    keyPair: PrivateKeyHolder
-  }
 
   return {
     // ----------------------

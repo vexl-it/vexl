@@ -1,3 +1,4 @@
+import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import * as T from 'fp-ts/Task'
 import {pipe} from 'fp-ts/function'
 import {useAtomValue, useSetAtom, useStore} from 'jotai'
@@ -67,7 +68,7 @@ function AddTimeOptionsScreen({navigation}: Props): JSX.Element {
               positiveButtonText: t('common.ok'),
             },
           ],
-        })
+        }).pipe(effectToTaskEither)
       )()
     } else {
       addDateAndTimeSuggestions()

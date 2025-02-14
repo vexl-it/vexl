@@ -69,14 +69,14 @@ function CustomTabBar(props: MaterialTopTabBarProps): JSX.Element {
         <Tab
           active={navigation.getState().index === EVENTS_TAB_INDEX}
           onPress={() => {
-            navigation.navigate('events')
+            navigation.navigate('Events')
           }}
           title={t('events.title')}
         />
         <Tab
           active={navigation.getState().index === CLUBS_TAB_INDEX}
           onPress={() => {
-            navigation.navigate('clubs')
+            navigation.navigate('Clubs')
           }}
           title={t('clubs.title')}
         />

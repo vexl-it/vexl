@@ -4,7 +4,6 @@ import {
   EcdsaSignature,
   ecdsaSignE,
 } from '@vexl-next/generic-utils/src/effect-helpers/crypto'
-import {taskEitherToEffect} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {contact, user} from '@vexl-next/rest-api/src'
 import {UnknownClientError} from '@vexl-next/rest-api/src/Errors'
 import {type VerifyPhoneNumberResponse} from '@vexl-next/rest-api/src/services/user/contracts'
@@ -172,20 +171,18 @@ export const finishLoginActionAtom = atom(
 
       if (userExists.exists) {
         yield* _(
-          taskEitherToEffect(
-            set(askAreYouSureActionAtom, {
-              variant: 'info',
-              steps: [
-                {
-                  type: 'StepWithText',
-                  title: t('loginFlow.userAlreadyExists'),
-                  description: t('loginFlow.phoneNumberPreviouslyRegistered'),
-                  negativeButtonText: t('common.cancel'),
-                  positiveButtonText: t('common.continue'),
-                },
-              ],
-            })
-          )
+          set(askAreYouSureActionAtom, {
+            variant: 'info',
+            steps: [
+              {
+                type: 'StepWithText',
+                title: t('loginFlow.userAlreadyExists'),
+                description: t('loginFlow.phoneNumberPreviouslyRegistered'),
+                negativeButtonText: t('common.cancel'),
+                positiveButtonText: t('common.continue'),
+              },
+            ],
+          })
         ).pipe(
           Effect.matchEffect({
             onSuccess: () =>

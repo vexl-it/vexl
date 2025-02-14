@@ -74,15 +74,15 @@ export type RootStackParamsList = {
 
   DebugScreen: undefined
 
-  EventsAndClubs: undefined
+  EventsAndClubs: NavigatorScreenParams<EventsAndClubsParamsList>
 
   JoinClubFlow: NavigatorScreenParams<JoinClubFlowParamsList>
 }
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type EventsAndClubsParamsList = {
-  events: undefined
-  clubs: undefined
+  Events: undefined
+  Clubs: undefined
 }
 
 export type EventsAndClubsTabsScreenProps<
@@ -240,6 +240,7 @@ export type TradeChecklistStackScreenProps<
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type JoinClubFlowParamsList = {
   ScanClubQrCodeScreen: undefined
+  FillClubAccessCodeScreen: undefined
 }
 
 export type JoinClubFlowStackScreenProps<

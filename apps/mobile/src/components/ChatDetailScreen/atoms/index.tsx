@@ -2,6 +2,7 @@ import {type ViewToken} from '@shopify/flash-list'
 import {type MessageType} from '@vexl-next/domain/src/general/messaging'
 import {type FriendLevel} from '@vexl-next/domain/src/general/offers'
 import {type UriString} from '@vexl-next/domain/src/utility/UriString.brand'
+import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {createScope, molecule} from 'bunshi/dist/react'
 import * as E from 'fp-ts/Either'
 import * as T from 'fp-ts/Task'
@@ -328,7 +329,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
                 },
               ],
               variant: 'info',
-            }),
+            }).pipe(effectToTaskEither),
         TE.map((val) => {
           set(loadingOverlayDisplayedAtom, true)
           return val
@@ -382,6 +383,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
           ],
           variant: 'info',
         }),
+        effectToTaskEither,
         TE.match(
           () => {},
           () => {}
@@ -414,6 +416,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
         ],
         variant: 'danger',
       }),
+      effectToTaskEither,
       TE.map((val) => {
         set(loadingOverlayDisplayedAtom, true)
         return val
@@ -564,6 +567,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
           steps: [{...modalContent, type: 'StepWithText'}],
           variant: 'info',
         }),
+        effectToTaskEither,
         TE.map((val) => {
           set(loadingOverlayDisplayedAtom, true)
           return val
@@ -1013,7 +1017,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
               },
             ],
             variant: 'info',
-          })
+          }).pipe(effectToTaskEither)
         ),
         TE.match(
           (e) => {

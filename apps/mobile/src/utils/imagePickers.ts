@@ -1,33 +1,32 @@
-import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
+import {
+  UriString,
+  UriStringE,
+} from '@vexl-next/domain/src/utility/UriString.brand'
 import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
+import {Effect, Schema} from 'effect'
 import * as FileSystem from 'expo-file-system'
 import * as ImagePicker from 'expo-image-picker'
-import * as E from 'fp-ts/Either'
-import * as TE from 'fp-ts/TaskEither'
-import {pipe} from 'fp-ts/function'
 import urlJoin from 'url-join'
-import {z} from 'zod'
-import {safeParse} from './fpUtils'
 import {PROFILE_PICTURE_DIRECTORY} from './fsDirectories'
 
-export const SelectedImage = z
-  .object({
-    width: z.number().brand<'imageHeight'>(),
-    height: z.number().brand<'imageWidth'>(),
-    uri: UriString,
-  })
-  .readonly()
-export type SelectedImage = z.TypeOf<typeof SelectedImage>
+export const SelectedImage = Schema.Struct({
+  width: Schema.Number.pipe(Schema.brand('imageWidth')),
+  height: Schema.Number.pipe(Schema.brand('imageHeight')),
+  uri: UriStringE,
+})
+export type SelectedImage = typeof SelectedImage.Type
 
-export interface ImagePickerError {
-  _tag: 'imagePickerError'
-  reason:
-    | 'PermissionsNotGranted'
-    | 'UnknownError'
-    | 'NothingSelected'
-    | 'FileError'
-  error?: unknown
-}
+export class ImagePickerError extends Schema.TaggedError<ImagePickerError>(
+  'ImagePickerError'
+)('ImagePickerError', {
+  reason: Schema.Literal(
+    'PermissionsNotGranted',
+    'UnknownError',
+    'NothingSelected',
+    'FileError'
+  ),
+  error: Schema.optional(Schema.Unknown),
+}) {}
 
 export function moveImageToInternalDirectory({
   imagePath,
@@ -37,9 +36,9 @@ export function moveImageToInternalDirectory({
   imagePath: UriString
   mode: 'cache' | 'documents'
   directory?: string
-}): TE.TaskEither<ImagePickerError, UriString> {
-  return TE.tryCatch(
-    async (): Promise<UriString> => {
+}): Effect.Effect<UriString, ImagePickerError> {
+  return Effect.tryPromise({
+    try: async () => {
       const rootDirectory =
         mode === 'cache'
           ? FileSystem.cacheDirectory
@@ -67,157 +66,202 @@ export function moveImageToInternalDirectory({
       await FileSystem.copyAsync({from: imagePath, to: path})
       return path
     },
-    (e) => ({_tag: 'imagePickerError', reason: 'FileError', error: e}) as const
+    catch(error) {
+      return new ImagePickerError({reason: 'FileError', error})
+    },
+  })
+}
+
+export function getImageFromGalleryAndTryToResolveThePermissionsAlongTheWay({
+  aspect,
+}: {
+  aspect?: [number, number] | undefined
+}): Effect.Effect<SelectedImage, ImagePickerError> {
+  return Effect.tryPromise(async () => {
+    const libraryPermissions =
+      await ImagePicker.getMediaLibraryPermissionsAsync()
+
+    if (!libraryPermissions.granted && !libraryPermissions.canAskAgain) {
+      return Effect.fail(
+        new ImagePickerError({
+          reason: 'PermissionsNotGranted',
+        })
+      )
+    }
+
+    if (!libraryPermissions.granted) {
+      const permissionsResult =
+        await ImagePicker.requestMediaLibraryPermissionsAsync()
+      if (!permissionsResult.granted)
+        return Effect.fail(
+          new ImagePickerError({
+            reason: 'PermissionsNotGranted',
+          })
+        )
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect,
+      quality: 1,
+      base64: true,
+      allowsMultipleSelection: false,
+    })
+
+    if (result.canceled)
+      return Effect.fail(new ImagePickerError({reason: 'NothingSelected'}))
+
+    const selectedImage = result.assets?.[0]
+
+    if (!selectedImage?.uri)
+      return Effect.fail(
+        new ImagePickerError({
+          reason: 'UnknownError',
+          error: new Error('Uri of the selected image is null'),
+        })
+      )
+
+    return Effect.succeed(
+      Schema.decodeSync(SelectedImage)({
+        uri: Schema.decodeSync(UriStringE)(selectedImage.uri),
+        width: selectedImage.width,
+        height: selectedImage.height,
+      })
+    )
+  }).pipe(
+    Effect.catchTag('UnknownException', (e) =>
+      Effect.fail(
+        new ImagePickerError({
+          reason: 'UnknownError',
+          error: new Error('Unknown error when selecting image'),
+        })
+      )
+    ),
+    Effect.flatten
   )
 }
 
 export function getImageFromCameraAndTryToResolveThePermissionsAlongTheWay({
-  saveTo,
   aspect,
 }: {
-  saveTo: 'cache' | 'documents'
   aspect?: [number, number] | undefined
-}): TE.TaskEither<ImagePickerError, SelectedImage> {
-  return async () => {
-    try {
-      const cameraPermissions =
-        await ImagePicker.requestCameraPermissionsAsync()
-      if (!cameraPermissions.granted && cameraPermissions.canAskAgain) {
-        return E.left({
-          _tag: 'imagePickerError',
+}): Effect.Effect<SelectedImage, ImagePickerError> {
+  return Effect.tryPromise(async () => {
+    const cameraPermissions = await ImagePicker.requestCameraPermissionsAsync()
+
+    if (!cameraPermissions.granted && !cameraPermissions.canAskAgain) {
+      return Effect.fail(
+        new ImagePickerError({
           reason: 'PermissionsNotGranted',
         })
-      }
-      if (!cameraPermissions.granted) {
-        const permissionsResult = await ImagePicker.getCameraPermissionsAsync()
-        if (!permissionsResult.granted)
-          return E.left({
-            _tag: 'imagePickerError',
+      )
+    }
+
+    if (!cameraPermissions.granted) {
+      const permissionsResult = await ImagePicker.getCameraPermissionsAsync()
+      if (!permissionsResult.granted)
+        return Effect.fail(
+          new ImagePickerError({
             reason: 'PermissionsNotGranted',
           })
-      }
-      const {assets, canceled} = await ImagePicker.launchCameraAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect,
-        quality: 1,
-        allowsMultipleSelection: false,
-      })
+        )
+    }
 
-      if (canceled)
-        return E.left({_tag: 'imagePickerError', reason: 'NothingSelected'})
-      const selectedImage = assets?.[0]
+    const {assets, canceled} = await ImagePicker.launchCameraAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect,
+      quality: 1,
+      allowsMultipleSelection: false,
+    })
 
-      if (!selectedImage?.uri)
-        return E.left({
-          _tag: 'imagePickerError',
+    if (canceled)
+      return Effect.fail(new ImagePickerError({reason: 'NothingSelected'}))
+    const selectedImage = assets?.[0]
+
+    if (!selectedImage?.uri)
+      return Effect.fail(
+        new ImagePickerError({
           reason: 'UnknownError',
           error: new Error('Uri of the selected image is null'),
         })
+      )
 
-      return await pipe(
-        moveImageToInternalDirectory({
-          imagePath: UriString.parse(selectedImage.uri),
-          mode: saveTo,
-          directory: PROFILE_PICTURE_DIRECTORY,
-        }),
-        TE.chainEitherKW((uri) => {
-          return safeParse(SelectedImage)({
-            uri,
-            width: selectedImage.width,
-            height: selectedImage.height,
-          })
-        }),
-        TE.mapLeft((error) => {
-          if (error._tag === 'ParseError') {
-            return {
-              _tag: 'imagePickerError',
-              reason: 'UnknownError',
-              error,
-            } as const
-          }
-          return error
+    return Effect.succeed(
+      Schema.decodeSync(SelectedImage)({
+        uri: Schema.decodeSync(UriStringE)(selectedImage.uri),
+        width: selectedImage.width,
+        height: selectedImage.height,
+      })
+    )
+  }).pipe(
+    Effect.catchTag('UnknownException', (e) =>
+      Effect.fail(
+        new ImagePickerError({
+          reason: 'UnknownError',
+          error: new Error('Unknown error when selecting image'),
         })
-      )()
-    } catch (error) {
-      return E.left({_tag: 'imagePickerError', reason: 'UnknownError', error})
-    }
-  }
+      )
+    ),
+    Effect.flatten
+  )
 }
 
-export function getImageFromGalleryAndTryToResolveThePermissionsAlongTheWay({
+export function getImageFromCameraResolvePermissionsAndMoveItToInternalDirectory({
   saveTo,
   aspect,
 }: {
   saveTo: 'cache' | 'documents'
   aspect?: [number, number] | undefined
-}): TE.TaskEither<ImagePickerError, SelectedImage> {
-  return async () => {
-    try {
-      const libraryPermissions =
-        await ImagePicker.getMediaLibraryPermissionsAsync(true)
-      if (!libraryPermissions.granted && !libraryPermissions.canAskAgain) {
-        return E.left({
-          _tag: 'imagePickerError',
-          reason: 'PermissionsNotGranted',
-        })
-      }
-      if (!libraryPermissions.granted) {
-        const permissionsResult =
-          await ImagePicker.requestMediaLibraryPermissionsAsync()
-        if (!permissionsResult.granted)
-          return E.left({
-            _tag: 'imagePickerError',
-            reason: 'PermissionsNotGranted',
-          })
-      }
-
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
+}): Effect.Effect<SelectedImage, ImagePickerError> {
+  return Effect.gen(function* (_) {
+    const selectedImage = yield* _(
+      getImageFromCameraAndTryToResolveThePermissionsAlongTheWay({
         aspect,
-        quality: 1,
-        base64: true,
-        allowsMultipleSelection: false,
       })
+    )
 
-      if (result.canceled)
-        return E.left({_tag: 'imagePickerError', reason: 'NothingSelected'})
-      const selectedImage = result.assets?.[0]
+    const path = yield* _(
+      moveImageToInternalDirectory({
+        imagePath: UriString.parse(selectedImage.uri),
+        mode: saveTo,
+        directory: PROFILE_PICTURE_DIRECTORY,
+      })
+    )
 
-      if (!selectedImage?.uri)
-        return E.left({
-          _tag: 'imagePickerError',
-          reason: 'UnknownError',
-          error: new Error('Uri of the selected image is null'),
-        })
-
-      return await pipe(
-        moveImageToInternalDirectory({
-          imagePath: UriString.parse(selectedImage.uri),
-          mode: saveTo,
-          directory: PROFILE_PICTURE_DIRECTORY,
-        }),
-        TE.chainEitherKW((uri) => {
-          return safeParse(SelectedImage)({
-            uri,
-            width: selectedImage.width,
-            height: selectedImage.height,
-          })
-        }),
-        TE.mapLeft((error) => {
-          if (error._tag === 'ParseError') {
-            return {
-              _tag: 'imagePickerError',
-              reason: 'UnknownError',
-              error,
-            } as const
-          }
-          return error
-        })
-      )()
-    } catch (error) {
-      return E.left({_tag: 'imagePickerError', reason: 'UnknownError', error})
+    return {
+      ...selectedImage,
+      uri: path,
     }
-  }
+  })
+}
+
+export function getImageFromGalleryResolvePermissionsAndMoveItToInternalDirectory({
+  saveTo,
+  aspect,
+}: {
+  saveTo: 'cache' | 'documents'
+  aspect?: [number, number] | undefined
+}): Effect.Effect<SelectedImage, ImagePickerError> {
+  return Effect.gen(function* (_) {
+    const selectedImage = yield* _(
+      getImageFromGalleryAndTryToResolveThePermissionsAlongTheWay({
+        aspect,
+      })
+    )
+
+    const path = yield* _(
+      moveImageToInternalDirectory({
+        imagePath: UriString.parse(selectedImage.uri),
+        mode: saveTo,
+        directory: PROFILE_PICTURE_DIRECTORY,
+      })
+    )
+
+    return {
+      ...selectedImage,
+      uri: path,
+    }
+  })
 }

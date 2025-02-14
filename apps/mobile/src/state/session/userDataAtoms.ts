@@ -7,6 +7,7 @@ import {
   phoneNumberToRegionCode,
   type RegionCode,
 } from '@vexl-next/domain/src/utility/RegionCode.brand'
+import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {pipe} from 'effect'
 import {atom, type SetStateAction} from 'jotai'
 import {focusAtom} from 'jotai-optics'
@@ -97,7 +98,7 @@ export const invalidUsernameUIFeedbackAtom = atom(null, async (get, set) => {
         },
       ],
       variant: 'danger',
-    })
+    }).pipe(effectToTaskEither)
   )()
 })
 

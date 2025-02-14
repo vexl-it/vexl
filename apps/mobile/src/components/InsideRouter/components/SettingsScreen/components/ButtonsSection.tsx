@@ -1,5 +1,6 @@
 import {useNavigation} from '@react-navigation/native'
 import {type SvgString} from '@vexl-next/domain/src/utility/SvgString.brand'
+import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {useSetAtom} from 'jotai'
@@ -143,6 +144,7 @@ function ButtonsSection(): JSX.Element {
           },
         ],
       }),
+      effectToTaskEither,
       TE.map(logout)
     )()
   }, [showAreYouSure, t, logout])
@@ -156,7 +158,9 @@ function ButtonsSection(): JSX.Element {
             text: t('settings.items.eventsAndClubs'),
             icon: eventsAndClubsSvg,
             onPress: () => {
-              navigation.navigate('EventsAndClubs')
+              navigation.navigate('EventsAndClubs', {
+                screen: 'Events',
+              })
             },
           },
         ],

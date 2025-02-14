@@ -11,6 +11,7 @@ import Animated, {
 } from 'react-native-reanimated'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {Stack, XStack, getTokens} from 'tamagui'
+import {minutesTillOffersDisplayedAtom} from '../../../../../state/contacts'
 import {
   triggerOffersRefreshAtom,
   useAreOffersLoading,
@@ -43,6 +44,11 @@ function ListFooterComponent(): JSX.Element | null {
   const {t} = useTranslation()
   const navigation = useNavigation()
   const showClubsFlow = useAtomValue(showClubsFlowAtom)
+  const minutesTillOffersDisplayed = useAtomValue(
+    minutesTillOffersDisplayedAtom
+  )
+
+  if (minutesTillOffersDisplayed >= 0) return null
 
   return showClubsFlow ? (
     <Stack mt="$4">

@@ -525,3 +525,20 @@ export const GetClubContactsErrors = Schema.Union(
   NotFoundError,
   InvalidChallengeError
 )
+
+export const GetClubInfoByAccessCodeRequest = Schema.Struct({
+  ...RequestBaseWithChallenge.fields,
+  code: ClubCode,
+})
+
+export type GetClubInfoByAccessCodeRequest =
+  typeof GetClubInfoByAccessCodeRequest.Type
+
+export const GetClubInfoByAccessCodeResponse = Schema.Struct({
+  club: ClubInfo,
+})
+
+export const GetClubInfoByAccessCodeErrors = Schema.Union(
+  InvalidChallengeError,
+  NotFoundError
+)

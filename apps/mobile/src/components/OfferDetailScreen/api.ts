@@ -40,6 +40,7 @@ export function useReportOfferHandleUI(): (
             },
           ],
         }),
+        effectToTaskEither,
         TE.chainW(() => {
           loadingOverlay.show()
           return effectToTaskEither(
@@ -67,17 +68,21 @@ export function useReportOfferHandleUI(): (
           loadingOverlay.hide()
         }),
         TE.chainFirstTaskK(() => {
-          return store.set(askAreYouSureActionAtom, {
-            variant: 'info',
-            steps: [
-              {
-                type: 'StepWithText',
-                title: t('offer.report.thankYou'),
-                description: t('offer.report.inappropriateContentWasReported'),
-                positiveButtonText: t('common.continue'),
-              },
-            ],
-          })
+          return store
+            .set(askAreYouSureActionAtom, {
+              variant: 'info',
+              steps: [
+                {
+                  type: 'StepWithText',
+                  title: t('offer.report.thankYou'),
+                  description: t(
+                    'offer.report.inappropriateContentWasReported'
+                  ),
+                  positiveButtonText: t('common.continue'),
+                },
+              ],
+            })
+            .pipe(effectToTaskEither)
         }),
         TE.match(
           () => {

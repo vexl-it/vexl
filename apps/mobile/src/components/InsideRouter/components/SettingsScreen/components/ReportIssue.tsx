@@ -1,4 +1,5 @@
 import Clipboard from '@react-native-clipboard/clipboard'
+import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/lib/function'
 import {atom, useSetAtom} from 'jotai'
@@ -33,6 +34,7 @@ export const reportIssueDialogAtom = atom(null, (get, set) => {
         },
       ],
     }),
+    effectToTaskEither,
     TE.match(
       () => {},
       () => {

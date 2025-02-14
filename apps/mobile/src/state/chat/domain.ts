@@ -23,12 +23,12 @@ import {
   type UnexpectedApiResponseError,
 } from '@vexl-next/rest-api/src/Errors'
 import {type SenderInboxDoesNotExistError} from '@vexl-next/rest-api/src/services/chat/contracts'
-import {type ErrorGeneratingChallenge} from '@vexl-next/rest-api/src/services/chat/utils'
 import {
   type ForbiddenMessageTypeError,
   type InboxDoesNotExistError,
   type NotPermittedToSendMessageToTargetInboxError,
 } from '@vexl-next/rest-api/src/services/contact/contracts'
+import {type ErrorGeneratingChallenge} from '@vexl-next/rest-api/src/services/utils/addChallengeToRequest'
 import {
   type ErrorSigningChallenge,
   type InvalidChallengeError,

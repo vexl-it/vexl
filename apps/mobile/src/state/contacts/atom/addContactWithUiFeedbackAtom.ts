@@ -99,6 +99,7 @@ const editExistingContact = atom(
         contactName: existingContact.info.name,
         contactNumber: existingContact.computedValues.normalizedNumber,
       }),
+      effectToTaskEither,
       TE.map((dialogActionResult) =>
         dialogActionResult[0]?.type === 'inputResult'
           ? dialogActionResult[0].value
@@ -129,7 +130,7 @@ const editExistingContact = atom(
             },
           ],
           variant: 'info',
-        })
+        }).pipe(effectToTaskEither)
       ),
       TE.match(
         () => {
@@ -192,6 +193,7 @@ const createContact = atom(
         contactNumber: newContact.computedValues.normalizedNumber,
         contactName: newContact.info.name,
       }),
+      effectToTaskEither,
       TE.map((dialogActionResult) =>
         dialogActionResult[0]?.type === 'inputResult'
           ? dialogActionResult[0].value
@@ -231,7 +233,7 @@ const createContact = atom(
             },
           ],
           variant: 'info',
-        })
+        }).pipe(effectToTaskEither)
       }),
       TE.match(
         (e) => {

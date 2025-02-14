@@ -1,3 +1,4 @@
+import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {pipe} from 'fp-ts/lib/function'
 import * as TE from 'fp-ts/TaskEither'
 import {atom, type SetStateAction, type WritableAtom} from 'jotai'
@@ -90,6 +91,7 @@ export const qrScannerDialogAtom = atom(null, (get, set) => {
         },
       ],
     }),
+    effectToTaskEither,
     TE.match(
       () => {},
       () => {}

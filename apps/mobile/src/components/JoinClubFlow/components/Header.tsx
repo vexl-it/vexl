@@ -7,7 +7,7 @@ function Header(props: StackProps): JSX.Element {
   const goBack = useSafeGoBack()
 
   return (
-    <Stack ai="flex-start" {...props}>
+    <Stack ai="flex-start" mx="$4" {...props}>
       <IconButton icon={backButtonSvg} variant="dark" onPress={goBack} />
     </Stack>
   )

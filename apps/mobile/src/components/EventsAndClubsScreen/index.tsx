@@ -41,12 +41,12 @@ export default function EventsAndClubsScreen(): JSX.Element {
         >
           <Tab.Screen
             options={{tabBarLabel: 'events'}}
-            name="events"
+            name="Events"
             component={EventsScreen}
           />
           <Tab.Screen
             options={{tabBarLabel: 'clubs'}}
-            name="clubs"
+            name="Clubs"
             component={ClubsScreen}
           />
         </Tab.Navigator>

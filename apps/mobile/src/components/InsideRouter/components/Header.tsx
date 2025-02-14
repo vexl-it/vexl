@@ -52,7 +52,9 @@ function BtcPriceHeader(): JSX.Element {
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => {
-              navigation.navigate('EventsAndClubs')
+              navigation.navigate('EventsAndClubs', {
+                screen: 'Events',
+              })
             }}
           >
             <XStack ai="center" gap="$1" br="$2" py="$1" px="$1">

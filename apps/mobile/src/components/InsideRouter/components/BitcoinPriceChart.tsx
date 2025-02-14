@@ -1,5 +1,6 @@
 import {useFocusEffect} from '@react-navigation/native'
 import {unixMillisecondsToPretty} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/lib/function'
 import {useAtomValue, useSetAtom} from 'jotai'
@@ -59,6 +60,7 @@ function BitcoinPriceChart(): JSX.Element {
                     },
                   ],
                 }),
+                effectToTaskEither,
                 TE.match(
                   () => {},
                   () => {

@@ -1,3 +1,4 @@
+import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {atom} from 'jotai'
@@ -22,6 +23,7 @@ export const changeLanguageActionAtom = atom(null, async (get, set) => {
         },
       ],
     }),
+    effectToTaskEither,
     TE.match(
       () => {},
       () => {

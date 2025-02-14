@@ -2,20 +2,21 @@ import {
   toBasicError,
   type BasicError,
 } from '@vexl-next/domain/src/utility/errors'
-import * as E from 'fp-ts/Either'
-import type * as TE from 'fp-ts/TaskEither'
+import {Effect, Either} from 'effect'
 import {atom, useAtom, type WritableAtom} from 'jotai'
 import React, {useCallback, type ComponentType} from 'react'
 import {ScrollView, StyleSheet, View} from 'react-native'
 import {Stack, Text, type ColorTokens} from 'tamagui'
 import AnimatedDialogWrapper from './AnimatedDialogWrapper'
 import Button from './Button'
+import {ImageUniversal, type ImageUniversalProps} from './Image'
 import Input, {type Props as VexlTextInputProps} from './Input'
 
 interface StepWithText {
   type: 'StepWithText'
   textAlign?: 'center' | 'left' | 'right'
   emojiTop?: string
+  imageSource?: ImageUniversalProps['source']
   title: string
   description?: string
   negativeButtonText?: string
@@ -79,31 +80,30 @@ export const askAreYouSureActionAtom: WritableAtom<
       'onPass' | 'onDismiss' | 'currentStep' | 'stepResults'
     >,
   ],
-  TE.TaskEither<UserDeclinedError, AreYouSureDialogAtomStepResult[]>
+  Effect.Effect<AreYouSureDialogAtomStepResult[], UserDeclinedError>
 > = atom(null, (_, set, state) => {
-  return () =>
-    new Promise((resolve) => {
-      set(areYouSureDialogAtom, {
-        ...state,
-        currentStep: 0,
-        stepResults: state.steps.map((step) =>
-          step.type === 'StepWithInput' && step.defaultValue
-            ? ({
-                type: 'inputResult',
-                value: step.defaultValue,
-              } as const)
-            : ({type: 'noResult'} as const)
-        ),
-        onPass: (result) => {
-          resolve(E.right(result))
-        },
-        onDismiss: () => {
-          resolve(
-            E.left(toBasicError('UserDeclinedError')(new Error('Declined')))
-          )
-        },
-      })
+  return Effect.async((resolve) => {
+    set(areYouSureDialogAtom, {
+      ...state,
+      currentStep: 0,
+      stepResults: state.steps.map((step) =>
+        step.type === 'StepWithInput' && step.defaultValue
+          ? ({
+              type: 'inputResult',
+              value: step.defaultValue,
+            } as const)
+          : ({type: 'noResult'} as const)
+      ),
+      onPass: (result) => {
+        resolve(Either.right(result))
+      },
+      onDismiss: () => {
+        resolve(
+          Either.left(toBasicError('UserDeclinedError')(new Error('Declined')))
+        )
+      },
     })
+  })
 })
 
 const styles = StyleSheet.create({
@@ -144,6 +144,17 @@ function AreYouSureDialog(): JSX.Element | null {
           >
             {step.type === 'StepWithText' ? (
               <Stack gap="$2">
+                {!!step.imageSource && (
+                  <Stack
+                    als="center"
+                    width={140}
+                    height={140}
+                    borderRadius={24}
+                    my="$4"
+                  >
+                    <ImageUniversal source={step.imageSource} />
+                  </Stack>
+                )}
                 {!!step.emojiTop && (
                   <Text fontSize={120} textAlign={step.textAlign ?? 'left'}>
                     {step.emojiTop}

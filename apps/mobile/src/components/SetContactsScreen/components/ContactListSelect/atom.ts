@@ -1,4 +1,5 @@
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
+import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {safeParse} from '@vexl-next/resources-utils/src/utils/parsing'
 import {createScope, molecule} from 'bunshi/dist/react'
 import * as A from 'fp-ts/Array'
@@ -290,6 +291,7 @@ export const contactSelectMolecule = molecule((_, getScope) => {
             },
           ],
         }),
+        effectToTaskEither,
         TE.map((result) =>
           result[0]?.type === 'inputResult'
             ? result[0].value
@@ -349,7 +351,7 @@ export const contactSelectMolecule = molecule((_, getScope) => {
                   },
                 ],
                 variant: 'info',
-              })
+              }).pipe(effectToTaskEither)
             }
 
             // and also this is sh*t
@@ -388,6 +390,7 @@ export const contactSelectMolecule = molecule((_, getScope) => {
             },
           ],
         }),
+        effectToTaskEither,
         TE.map((result) =>
           result[0]?.type === 'inputResult'
             ? result[0].value
@@ -428,7 +431,7 @@ export const contactSelectMolecule = molecule((_, getScope) => {
               },
             ],
             variant: 'info',
-          })
+          }).pipe(effectToTaskEither)
         }),
         TE.match(
           () => {

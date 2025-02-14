@@ -1,4 +1,5 @@
 import {type UriString} from '@vexl-next/domain/src/utility/UriString.brand'
+import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {pipe} from 'fp-ts/function'
 import * as O from 'fp-ts/Option'
 import * as T from 'fp-ts/Task'
@@ -6,8 +7,8 @@ import * as TE from 'fp-ts/TaskEither'
 import {atom, type PrimitiveAtom} from 'jotai'
 import {Alert} from 'react-native'
 import {
-  getImageFromCameraAndTryToResolveThePermissionsAlongTheWay,
-  getImageFromGalleryAndTryToResolveThePermissionsAlongTheWay,
+  getImageFromCameraResolvePermissionsAndMoveItToInternalDirectory,
+  getImageFromGalleryResolvePermissionsAndMoveItToInternalDirectory,
   type ImagePickerError,
 } from '../utils/imagePickers'
 import {type FileSystemError} from '../utils/internalStorage'
@@ -23,7 +24,7 @@ const reportAndTranslateErrorsAtom = atom<
   const {error} = params
   const {t} = get(translationAtom)
 
-  if (error._tag === 'imagePickerError') {
+  if (error._tag === 'ImagePickerError') {
     switch (error.reason) {
       case 'PermissionsNotGranted':
         return t('loginFlow.photo.permissionsNotGranted')
@@ -47,14 +48,15 @@ export const selectImageActionAtom = atom(
         text: t('loginFlow.photo.gallery'),
         onPress: () => {
           void pipe(
-            getImageFromGalleryAndTryToResolveThePermissionsAlongTheWay({
+            getImageFromGalleryResolvePermissionsAndMoveItToInternalDirectory({
               saveTo: 'documents',
               aspect: [1, 1],
             }),
+            effectToTaskEither,
             TE.match(
               (e) => {
                 if (
-                  e._tag === 'imagePickerError' &&
+                  e._tag === 'ImagePickerError' &&
                   e.reason === 'NothingSelected'
                 ) {
                   return O.none
@@ -91,10 +93,11 @@ export const selectImageActionAtom = atom(
         text: t('loginFlow.photo.camera'),
         onPress: () => {
           void pipe(
-            getImageFromCameraAndTryToResolveThePermissionsAlongTheWay({
+            getImageFromCameraResolvePermissionsAndMoveItToInternalDirectory({
               saveTo: 'documents',
               aspect: [1, 1],
             }),
+            effectToTaskEither,
             TE.match(
               (e) => {
                 showErrorAlert({

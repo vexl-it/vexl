@@ -1,6 +1,6 @@
 import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
-import {Schema} from 'effect'
+import {Effect, Schema} from 'effect'
 import {createClientInstanceWithAuth} from '../../client'
 import {CommonHeaders} from '../../commonHeaders'
 import {type PlatformName} from '../../PlatformName'
@@ -12,8 +12,14 @@ import {
   type LoggingFunction,
 } from '../../utils'
 import {
+  addChallengeToRequest,
+  type RequestWithGeneratableChallenge,
+} from '../utils/addChallengeToRequest'
+import {
   GetClubContactsErrors,
+  GetClubInfoByAccessCodeErrors,
   ImportContactsErrors,
+  JoinClubErrors,
   UpdateBadOwnerHashErrors,
   UserNotFoundError,
   type CheckUserExistsInput,
@@ -21,7 +27,9 @@ import {
   type FetchCommonConnectionsInput,
   type FetchMyContactsInput,
   type GetClubContactsRequest,
+  type GetClubInfoByAccessCodeRequest,
   type ImportContactsInput,
+  type JoinClubRequest,
   type RefreshUserInput,
   type UpdateBadOwnerHashRequest,
   type UpdateNotificationTokenRequest,
@@ -55,6 +63,8 @@ export function api({
     url,
     loggingFunction,
   })
+
+  const addChallenge = addChallengeToRequest(client)
 
   const commonHeaders = {
     'user-agent': `Vexl/${clientVersion} (${clientSemver}) ${platform}`,
@@ -104,10 +114,40 @@ export function api({
         client.updateBadOwnerHash({body: args}),
         UpdateBadOwnerHashErrors
       ),
-    getClubContacts: (args: GetClubContactsRequest) =>
-      handleCommonAndExpectedErrorsEffect(
-        client.getClubContacts({body: args}),
-        GetClubContactsErrors
+    getClubContacts: (
+      getClubContactsRequest: RequestWithGeneratableChallenge<GetClubContactsRequest>
+    ) =>
+      addChallenge(getClubContactsRequest).pipe(
+        Effect.flatMap((body) =>
+          handleCommonAndExpectedErrorsEffect(
+            client.getClubContacts({body}),
+            GetClubContactsErrors
+          )
+        )
+      ),
+    joinClub: (
+      joinClubRequest: RequestWithGeneratableChallenge<JoinClubRequest>
+    ) =>
+      addChallenge(joinClubRequest).pipe(
+        Effect.flatMap((body) =>
+          handleCommonAndExpectedErrorsEffect(
+            client.joinClub({
+              body,
+            }),
+            JoinClubErrors
+          )
+        )
+      ),
+    getClubInfoByAccessCode: (
+      getClubInfoByAccessCodeRequest: RequestWithGeneratableChallenge<GetClubInfoByAccessCodeRequest>
+    ) =>
+      addChallenge(getClubInfoByAccessCodeRequest).pipe(
+        Effect.flatMap((body) =>
+          handleCommonAndExpectedErrorsEffect(
+            client.getClubInfoByAccessCode({body}),
+            GetClubInfoByAccessCodeErrors
+          )
+        )
       ),
   }
 }

@@ -180,8 +180,8 @@ export const finishLoginActionAtom = atom(
                   type: 'StepWithText',
                   title: t('loginFlow.userAlreadyExists'),
                   description: t('loginFlow.phoneNumberPreviouslyRegistered'),
-                  negativeButtonText: t('common.cancel'),
-                  positiveButtonText: t('common.continue'),
+                  negativeButtonText: t('common.noThanks'),
+                  positiveButtonText: t('clubs.stepInside'),
                 },
               ],
             })

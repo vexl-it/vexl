@@ -6,10 +6,13 @@ import {useWindowDimensions} from 'react-native'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import Svg, {Mask, Rect} from 'react-native-svg'
 import {getTokens, Stack, Text, YStack} from 'tamagui'
+import {type JoinClubFlowStackScreenProps} from '../../../navigationTypes'
 import {handleCameraPermissionsActionAtom} from '../../../utils/handleCameraPermissions'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import Button from '../../Button'
 import Header from './Header'
+
+type Props = JoinClubFlowStackScreenProps<'ScanClubQrCodeScreen'>
 
 const scannerStyle = {
   // On android camera view will be resized to fit the whole camera preview. That will result in
@@ -18,7 +21,7 @@ const scannerStyle = {
   flex: 1,
 }
 
-function ScanClubQrCodeScreen(): JSX.Element {
+function ScanClubQrCodeScreen({navigation}: Props): JSX.Element {
   const {t} = useTranslation()
   const {top, bottom} = useSafeAreaInsets()
   const {height} = useWindowDimensions()
@@ -54,7 +57,9 @@ function ScanClubQrCodeScreen(): JSX.Element {
           <Button
             variant="secondary"
             text={t('clubs.enterClubAccessCode')}
-            onPress={() => {}}
+            onPress={() => {
+              navigation.navigate('FillClubAccessCodeScreen')
+            }}
           />
           <Button
             variant="primary"

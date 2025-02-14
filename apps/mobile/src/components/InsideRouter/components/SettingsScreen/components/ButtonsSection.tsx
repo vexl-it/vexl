@@ -156,7 +156,9 @@ function ButtonsSection(): JSX.Element {
             text: t('settings.items.eventsAndClubs'),
             icon: eventsAndClubsSvg,
             onPress: () => {
-              navigation.navigate('EventsAndClubs')
+              navigation.navigate('EventsAndClubs', {
+                screen: 'Events',
+              })
             },
           },
         ],

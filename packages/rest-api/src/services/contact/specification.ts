@@ -292,8 +292,7 @@ const ClubsMemberApiGroup = ApiGroup.make('ClubsMember', {
   ApiGroup.addEndpoint(GetClubInfoEndpoint),
   ApiGroup.addEndpoint(JoinClubEndpoint),
   ApiGroup.addEndpoint(LeaveClubEndpoint),
-  ApiGroup.addEndpoint(GetClubContactsEndpoint),
-  ApiGroup.addEndpoint(LeaveClubEndpoint)
+  ApiGroup.addEndpoint(GetClubContactsEndpoint)
 )
 
 export const ContactApiSpecification = Api.make({

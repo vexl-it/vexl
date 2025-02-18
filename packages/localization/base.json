@@ -846,6 +846,7 @@
   "messages.youDontHaveAnyOpenChats": "You don't have any open chats yet.",
   "messages.startConversationByReactingToOffer": "Start a conversation by reacting to an offer.",
   "messages.seeMarketplace": "See marketplace",
+  "messages.areYouSureYouWantToDeleteChat": "Are you sure you want to delete this chat? All messages will be lost.",
   "progressBar.ENCRYPTING_PRIVATE_PAYLOADS": "{{percentDone}}% done",
   "progressBar.FETCHING_CONTACTS": "",
   "progressBar.CONSTRUCTING_PRIVATE_PAYLOADS": "Constructing private payloads",

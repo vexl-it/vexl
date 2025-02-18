@@ -14,6 +14,10 @@ import {translationAtom} from '../../../../utils/localization/I18nProvider'
 import reportError from '../../../../utils/reportError'
 import showErrorAlert from '../../../../utils/showErrorAlert'
 import {toCommonErrorMessage} from '../../../../utils/useCommonErrorMessages'
+import {
+  askAreYouSureActionAtom,
+  type AreYouSureDialogAtomStepResult,
+} from '../../../AreYouSureDialog'
 import {loadingOverlayDisplayedAtom} from '../../../LoadingOverlayProvider'
 
 export const deleteChatFromListActionAtom = atom(
@@ -24,7 +28,12 @@ export const deleteChatFromListActionAtom = atom(
     {
       otherSideKey,
       inboxKey,
-    }: {otherSideKey: PublicKeyPemBase64; inboxKey: PublicKeyPemBase64}
+      skipAsk,
+    }: {
+      otherSideKey: PublicKeyPemBase64
+      inboxKey: PublicKeyPemBase64
+      skipAsk: boolean
+    }
   ) => {
     const {t} = get(translationAtom)
     const chatWithMessagesAtom: ChatWithMessagesAtom =
@@ -41,21 +50,37 @@ export const deleteChatFromListActionAtom = atom(
     const deleteChatAtom = deleteChatActionAtom(nonNullChatWithMessagesAtom)
 
     return pipe(
-      TE.Do,
-      TE.map(() => {
+      skipAsk
+        ? TE.right([{type: 'noResult'}] as AreYouSureDialogAtomStepResult[])
+        : set(askAreYouSureActionAtom, {
+            variant: 'danger',
+            steps: [
+              {
+                type: 'StepWithText',
+                title: t('messages.deleteChat'),
+                description: t('messages.areYouSureYouWantToDeleteChat'),
+                positiveButtonText: t('common.yes'),
+                negativeButtonText: t('common.cancel'),
+              },
+            ],
+          }),
+      TE.map((val) => {
         set(loadingOverlayDisplayedAtom, true)
+        return val
       }),
-      TE.chain(() => set(deleteChatAtom, {text: 'deleting chat'})),
+      TE.chainW(() => set(deleteChatAtom, {text: 'deleting chat'})),
       TE.match(
         (e) => {
-          reportError('error', new Error('Error deleting chat'), {
-            e,
-          })
+          if (e._tag !== 'UserDeclinedError') {
+            reportError('error', new Error('Error deleting chat'), {
+              e,
+            })
 
-          showErrorAlert({
-            title: toCommonErrorMessage(e, t) ?? t('common.unknownError'),
-            error: e,
-          })
+            showErrorAlert({
+              title: toCommonErrorMessage(e, t) ?? t('common.unknownError'),
+              error: e,
+            })
+          }
           return false
         },
         () => {

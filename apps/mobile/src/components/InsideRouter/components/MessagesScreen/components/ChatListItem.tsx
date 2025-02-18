@@ -31,19 +31,12 @@ function ChatListItem({dataAtom}: {dataAtom: Atom<ChatListData>}): JSX.Element {
     isUnreadAtom,
     otherSideInfoAtom,
     otherSideLeftAtom,
-    isAvatarGrayAtom,
   } = useMemo(() => {
     const chatInfoAtom = selectAtom(dataAtom, (data) => data.chat)
     const lastMessageAtom = selectAtom(dataAtom, (data) => data.lastMessage)
     const isUnreadAtom = selectAtom(dataAtom, (data) => data.chat.isUnread)
-    const otherSideLeftAtom = selectAtom(
-      dataAtom,
-      (data) =>
-        data.lastMessage.state === 'received' &&
-        data.lastMessage.message.messageType === 'DELETE_CHAT'
-    )
     const otherSideInfoAtom = selectOtherSideDataAtom(chatInfoAtom)
-    const isAvatarGrayAtom = selectAtom(dataAtom, ({lastMessage}) =>
+    const otherSideLeftAtom = selectAtom(dataAtom, ({lastMessage}) =>
       ['DELETE_CHAT', 'BLOCK_CHAT', 'INBOX_DELETED'].includes(
         lastMessage.message.messageType
       )
@@ -55,17 +48,15 @@ function ChatListItem({dataAtom}: {dataAtom: Atom<ChatListData>}): JSX.Element {
       isUnreadAtom,
       otherSideLeftAtom,
       otherSideInfoAtom,
-      isAvatarGrayAtom,
     }
   }, [dataAtom])
 
   const chatInfo = useAtomValue(chatInfoAtom)
   const isUnread = useAtomValue(isUnreadAtom)
   const {userName, image: userAvatar} = useAtomValue(otherSideInfoAtom)
-  const isAvatarGray = useAtomValue(isAvatarGrayAtom)
+  const otherSideLeft = useAtomValue(otherSideLeftAtom)
   const offer = useOfferForChatOrigin(chatInfo.origin)
   const deleteChatFromList = useSetAtom(deleteChatFromListActionAtom)
-  const otherSideLeft = useAtomValue(otherSideLeftAtom)
 
   return (
     <TouchableOpacity
@@ -79,26 +70,23 @@ function ChatListItem({dataAtom}: {dataAtom: Atom<ChatListData>}): JSX.Element {
       <Stack mt="$6" br="$2">
         <Swipeable
           ref={swipeableRef}
-          renderRightActions={
-            otherSideLeft
-              ? () => (
-                  <ChatListItemRightSwipeActions
-                    onPress={() => {
-                      void deleteChatFromList({
-                        otherSideKey: chatInfo.otherSide.publicKey,
-                        inboxKey: chatInfo.inbox.privateKey.publicKeyPemBase64,
-                      })
-                      swipeableRef.current?.close()
-                    }}
-                  />
-                )
-              : undefined
-          }
+          renderRightActions={() => (
+            <ChatListItemRightSwipeActions
+              onPress={() => {
+                void deleteChatFromList({
+                  otherSideKey: chatInfo.otherSide.publicKey,
+                  inboxKey: chatInfo.inbox.privateKey.publicKeyPemBase64,
+                  skipAsk: otherSideLeft,
+                })
+                swipeableRef.current?.close()
+              }}
+            />
+          )}
         >
           <XStack gap="$2" ai="center" bc="$black">
             <Stack h={48} w={48}>
               <UserAvatar
-                grayScale={isAvatarGray}
+                grayScale={otherSideLeft}
                 userImage={userAvatar}
                 width={48}
                 height={48}

@@ -240,7 +240,6 @@ export default {
     '@react-native-firebase/app',
     '@react-native-firebase/dynamic-links',
     './expo-plugins/disable-firebase-analytics.js',
-    './expo-plugins/setup-headless-background-message-processing-ios.js',
     './expo-plugins/android-manifest-nfc-action-plugin.js',
     'expo-font',
     'expo-secure-store',

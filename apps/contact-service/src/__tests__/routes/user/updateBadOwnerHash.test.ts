@@ -13,7 +13,7 @@ import {
   HashedPhoneNumberE,
   type HashedPhoneNumber,
 } from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
-import {FcmTokenE} from '@vexl-next/domain/src/utility/FcmToken.brand'
+import {ExpoNotificationTokenE} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {
   EcdsaSignature,
   hmacSignE,
@@ -144,7 +144,8 @@ beforeEach(async () => {
         app.createUser(
           {
             body: {
-              firebaseToken: Schema.decodeSync(FcmTokenE)('someToken'),
+              firebaseToken: null,
+              expoToken: Schema.decodeSync(ExpoNotificationTokenE)('someToken'),
             },
             headers: Schema.decodeSync(CommonHeaders)({
               'user-agent': 'Vexl/1 (1.0.0) ANDROID',
@@ -160,7 +161,8 @@ beforeEach(async () => {
         app.createUser(
           {
             body: {
-              firebaseToken: Schema.decodeSync(FcmTokenE)('someToken'),
+              firebaseToken: null,
+              expoToken: Schema.decodeSync(ExpoNotificationTokenE)('someToken'),
             },
             headers: Schema.decodeSync(CommonHeaders)({
               'user-agent': 'Vexl/1 (1.0.0) ANDROID',

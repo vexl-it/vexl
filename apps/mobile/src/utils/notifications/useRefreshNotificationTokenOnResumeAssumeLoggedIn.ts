@@ -1,5 +1,5 @@
-import messaging from '@react-native-firebase/messaging'
 import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
+import * as Notifications from 'expo-notifications'
 import {pipe} from 'fp-ts/function'
 import * as A from 'fp-ts/lib/Array'
 import * as T from 'fp-ts/lib/Task'
@@ -12,6 +12,7 @@ import checkNotificationTokensAndRefreshOffersActionAtom from '../../state/marke
 import {storage} from '../mmkv/fpMmkv'
 import reportError from '../reportError'
 import {useAppState} from '../useAppState'
+
 import {getNotificationToken} from './index'
 
 const NOTIFICATION_TOKEN_CACHE_KEY = 'notificationToken'
@@ -41,7 +42,7 @@ export function useRefreshNotificationTokenOnResumeAssumeLoggedIn(): void {
         effectToTaskEither(
           store
             .get(apiAtom)
-            .contact.updateFirebaseToken({body: {firebaseToken: newToken}})
+            .contact.updateNotificationToken({body: {expoToken: newToken}})
         ),
         TE.match(
           (e) => {
@@ -77,7 +78,7 @@ export function useRefreshNotificationTokenOnResumeAssumeLoggedIn(): void {
               },
               () => {
                 console.info(
-                  '📳 Updated firebase token of the inbox',
+                  '📳 Updated notification token of the inbox',
                   inbox.privateKey.publicKeyPemBase64
                 )
               }
@@ -86,7 +87,7 @@ export function useRefreshNotificationTokenOnResumeAssumeLoggedIn(): void {
         ),
         T.sequenceArray,
         T.map(() => {
-          console.info('📳 Finished updating firebase token of inboxes')
+          console.info('📳 Finished updating notification token of inboxes')
         })
       )()
     })()
@@ -95,10 +96,13 @@ export function useRefreshNotificationTokenOnResumeAssumeLoggedIn(): void {
   }, [checkNotificationTokensAndRefreshOffers, store])
 
   useEffect(() => {
-    return messaging().onTokenRefresh(() => {
+    const sub = Notifications.addPushTokenListener(() => {
       console.info('📳 Received notification token refresh event')
       refreshToken()
     })
+    return () => {
+      Notifications.removePushTokenSubscription(sub)
+    }
   }, [refreshToken])
 
   useAppState(

@@ -11,7 +11,7 @@ import reportError from '../../utils/reportError'
 import {fetchAndStoreMessagesForInboxAtom} from '../chat/atoms/fetchNewMessagesActionAtom'
 import {unreadChatsCountAtom} from '../chat/atoms/unreadChatsCountAtom'
 import {loadSession} from '../session/loadSession'
-import {getKeyHolderForFcmCypherActionAtom} from './fcmCypherToKeyHolderAtom'
+import {getKeyHolderForNotificationCypherActionAtom} from './fcmCypherToKeyHolderAtom'
 
 const processChatNotificationActionAtom = atom(
   null,
@@ -24,7 +24,7 @@ const processChatNotificationActionAtom = atom(
     console.info('📳 Refreshing inbox')
 
     const inbox = set(
-      getKeyHolderForFcmCypherActionAtom,
+      getKeyHolderForNotificationCypherActionAtom,
       notification.targetCypher
     )
     if (!inbox) {

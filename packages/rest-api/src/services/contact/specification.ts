@@ -17,6 +17,7 @@ import {
   UpdateBadOwnerHashRequest,
   UpdateBadOwnerHashResponse,
   UpdateFirebaseTokenRequest,
+  UpdateNotificationTokenRequest,
   UserExistsResponse,
   UserNotFoundError,
 } from './contracts'
@@ -60,6 +61,19 @@ export const UpdateFirebaseTokenEndpoint = Api.put(
   Api.setSecurity(ServerSecurity),
   Api.setRequestHeaders(CommonHeaders),
   Api.setRequestBody(UpdateFirebaseTokenRequest),
+  Api.setResponse({
+    status: 200,
+    body: NoContentResponse,
+  })
+)
+
+export const UpdateNotificationTokenEndpoint = Api.put(
+  'updateNotificationToken',
+  '/api/v1/users/notification-token'
+).pipe(
+  Api.setSecurity(ServerSecurity),
+  Api.setRequestHeaders(CommonHeaders),
+  Api.setRequestBody(UpdateNotificationTokenRequest),
   Api.setResponse({
     status: 200,
     body: NoContentResponse,
@@ -129,6 +143,7 @@ const UserApiGroup = ApiGroup.make('User').pipe(
   ApiGroup.addEndpoint(CreateUserEndpoint),
   ApiGroup.addEndpoint(RefreshUserEndpoint),
   ApiGroup.addEndpoint(UpdateFirebaseTokenEndpoint),
+  ApiGroup.addEndpoint(UpdateNotificationTokenEndpoint),
   ApiGroup.addEndpoint(DeleteUserEndpoint),
   ApiGroup.addEndpoint(UpdateBadOwnerHashEndpoint)
 )

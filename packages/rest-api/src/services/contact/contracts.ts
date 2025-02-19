@@ -8,6 +8,7 @@ import {
   HashedPhoneNumberE,
 } from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {ConnectionLevelE} from '@vexl-next/domain/src/general/offers'
+import {ExpoNotificationTokenE} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {FcmTokenE} from '@vexl-next/domain/src/utility/FcmToken.brand'
 import {BooleanFromString} from '@vexl-next/generic-utils/src/effect-helpers/BooleanFromString'
 import {EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
@@ -62,6 +63,9 @@ export class UserNotFoundError extends Schema.TaggedError<UserNotFoundError>(
 
 export const CreateUserRequest = Schema.Struct({
   firebaseToken: Schema.NullOr(FcmTokenE),
+  expoToken: Schema.optionalWith(Schema.NullOr(ExpoNotificationTokenE), {
+    default: () => null,
+  }),
 })
 export type CreateUserRequest = Schema.Schema.Type<typeof CreateUserRequest>
 
@@ -77,6 +81,12 @@ export const UpdateFirebaseTokenRequest = Schema.Struct({
   firebaseToken: Schema.NullOr(FcmTokenE),
 })
 export type UpdateFirebaseTokenRequest = typeof UpdateFirebaseTokenRequest.Type
+
+export const UpdateNotificationTokenRequest = Schema.Struct({
+  expoToken: Schema.NullOr(ExpoNotificationTokenE),
+})
+export type UpdateNotificationTokenRequest =
+  typeof UpdateNotificationTokenRequest.Type
 
 export const ImportContactsRequest = Schema.Struct({
   contacts: Schema.Array(HashedPhoneNumberE),

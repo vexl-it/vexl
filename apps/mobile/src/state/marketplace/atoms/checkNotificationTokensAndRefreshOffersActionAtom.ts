@@ -1,7 +1,7 @@
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
-import {extractPublicKeyFromCypher} from '@vexl-next/domain/src/general/notifications'
 import {type MyOfferInState} from '@vexl-next/domain/src/general/offers'
-import {type FcmToken} from '@vexl-next/domain/src/utility/FcmToken.brand'
+import {type ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
+import {extractPartsOfNotificationCypher} from '@vexl-next/resources-utils/src/notifications/notificationTokenActions'
 import * as A from 'fp-ts/Array'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
@@ -12,7 +12,7 @@ import {version} from '../../../utils/environment'
 import {getNotificationToken} from '../../../utils/notifications'
 import reportError from '../../../utils/reportError'
 import {inboxesAtom} from '../../chat/atoms/messagingStateAtom'
-import {getKeyHolderForFcmCypherActionAtom} from '../../notifications/fcmCypherToKeyHolderAtom'
+import {getKeyHolderForNotificationCypherActionAtom} from '../../notifications/fcmCypherToKeyHolderAtom'
 import {getOrFetchNotificationServerPublicKeyActionAtom} from '../../notifications/fcmServerPublicKeyStore'
 import {myOffersAtom} from './myOffers'
 
@@ -22,23 +22,34 @@ const doesOfferNeedUpdateActionAtom = atom(
     get,
     set,
     {
-      fcmToken,
+      expoNotificationToken,
       publicKeyFromServer,
     }: {
-      fcmToken: FcmToken
+      expoNotificationToken: ExpoNotificationToken
       publicKeyFromServer: PublicKeyPemBase64
     }
   ): ((oneOffer: MyOfferInState) => boolean) => {
-    return (oneOffer) =>
-      oneOffer.lastCommitedFcmToken !== fcmToken ||
-      extractPublicKeyFromCypher(oneOffer.offerInfo.publicPart.fcmCypher) !==
-        publicKeyFromServer ||
-      !oneOffer.offerInfo.publicPart.fcmCypher ||
-      !set(
-        getKeyHolderForFcmCypherActionAtom,
-        oneOffer.offerInfo.publicPart.fcmCypher
-      ) ||
-      oneOffer.offerInfo.publicPart.authorClientVersion !== version
+    return (oneOffer) => {
+      // No fcm cypher in offer, update it because fcmToken is clearly defined (no need to handle if fcm token)
+      if (!oneOffer.offerInfo.publicPart.fcmCypher) return true
+
+      const partsOfTheCypher = extractPartsOfNotificationCypher({
+        notificationCypher: oneOffer.offerInfo.publicPart.fcmCypher,
+      })
+      // Cypher not valid, update it pls
+      if (!partsOfTheCypher) return true
+
+      return (
+        oneOffer.lastCommitedFcmToken !== expoNotificationToken ||
+        partsOfTheCypher.serverPublicKey !== publicKeyFromServer ||
+        !oneOffer.offerInfo.publicPart.fcmCypher ||
+        !set(
+          getKeyHolderForNotificationCypherActionAtom,
+          oneOffer.offerInfo.publicPart.fcmCypher
+        ) ||
+        oneOffer.offerInfo.publicPart.authorClientVersion !== version
+      )
+    }
   }
 )
 
@@ -52,13 +63,13 @@ const checkNotificationTokensAndRefreshOffersActionAtom = atom(
 
     void pipe(
       T.Do,
-      T.bind('fcmToken', () => getNotificationToken()),
+      T.bind('notificationToken', () => getNotificationToken()),
       T.bind('publicKeyFromServer', () =>
         set(getOrFetchNotificationServerPublicKeyActionAtom)
       ),
-      T.chain(({fcmToken, publicKeyFromServer}) => {
+      T.chain(({notificationToken, publicKeyFromServer}) => {
         // There is nothing to update
-        if (publicKeyFromServer._tag === 'None' || !fcmToken) {
+        if (publicKeyFromServer._tag === 'None' || !notificationToken) {
           console.info(
             '🦋 Notification tokens',
             'Unable to refresh public key or fcm token not saved'
@@ -70,7 +81,7 @@ const checkNotificationTokensAndRefreshOffersActionAtom = atom(
           get(myOffersAtom),
           A.filter(
             set(doesOfferNeedUpdateActionAtom, {
-              fcmToken,
+              expoNotificationToken: notificationToken,
               publicKeyFromServer: publicKeyFromServer.value,
             })
           ),

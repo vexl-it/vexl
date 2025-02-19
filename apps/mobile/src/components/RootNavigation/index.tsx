@@ -50,6 +50,7 @@ const Stack = createNativeStackNavigator<RootStackParamsList>()
 
 function LoggedInHookGroup(): null {
   useRefreshNotificationTokenOnResumeAssumeLoggedIn()
+  // useSetupPushNotifications()
   useHandleReceivedNotifications()
   useHandleNotificationOpen()
 

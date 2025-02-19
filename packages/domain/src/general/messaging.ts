@@ -7,7 +7,10 @@ import {
 import {Brand, Schema} from 'effect'
 import {z} from 'zod'
 import {Base64String, Base64StringE} from '../utility/Base64String.brand'
-import {FcmToken, FcmTokenE} from '../utility/FcmToken.brand'
+import {
+  ExpoNotificationToken,
+  ExpoNotificationTokenE,
+} from '../utility/ExpoNotificationToken.brand'
 import {SemverString, SemverStringE} from '../utility/SmeverString.brand'
 import {
   UnixMilliseconds,
@@ -19,7 +22,10 @@ import {DeanonymizedUser, DeanonymizedUserE} from './DeanonymizedUser'
 import {E164PhoneNumber, E164PhoneNumberE} from './E164PhoneNumber.brand'
 import {UserName, UserNameE} from './UserName.brand'
 import {RealLifeInfo, RealLifeInfoE} from './UserNameAndAvatar.brand'
-import {FcmCypher, FcmCypherE} from './notifications'
+import {
+  NotificationCypher,
+  NotificationCypherE,
+} from './notifications/NotificationCypher.brand'
 import {
   GoldenAvatarType,
   GoldenAvatarTypeE,
@@ -144,8 +150,8 @@ export const ChatMessagePayload = z
       })
       .optional()
       .readonly(),
-    myFcmCypher: FcmCypher.optional(),
-    lastReceivedFcmCypher: FcmCypher.optional(),
+    myFcmCypher: NotificationCypher.optional(),
+    lastReceivedFcmCypher: NotificationCypher.optional(),
   })
   .readonly()
 
@@ -169,8 +175,8 @@ export const ChatMessagePayloadE = Schema.Struct({
       fullPhoneNumber: Schema.optional(E164PhoneNumberE),
     })
   ),
-  myFcmCypher: Schema.optional(FcmCypherE),
-  lastReceivedFcmCypher: Schema.optional(FcmCypherE),
+  myFcmCypher: Schema.optional(NotificationCypherE),
+  lastReceivedFcmCypher: Schema.optional(NotificationCypherE),
 })
 export type ChatMessagePayload = Schema.Schema.Type<typeof ChatMessagePayloadE>
 
@@ -200,8 +206,8 @@ export const ChatMessage = z
     senderPublicKey: PublicKeyPemBase64,
     messageType: MessageType,
 
-    myFcmCypher: FcmCypher.optional(),
-    lastReceivedFcmCypher: FcmCypher.optional(),
+    myFcmCypher: NotificationCypher.optional(),
+    lastReceivedFcmCypher: NotificationCypher.optional(),
   })
   .readonly()
 
@@ -225,8 +231,8 @@ const ChatMessageE = Schema.Struct({
   deanonymizedUser: Schema.optional(DeanonymizedUserE),
   senderPublicKey: PublicKeyPemBase64E,
   messageType: MessageTypeE,
-  myFcmCypher: Schema.optional(FcmCypherE),
-  lastReceivedFcmCypher: Schema.optional(FcmCypherE),
+  myFcmCypher: Schema.optional(NotificationCypherE),
+  lastReceivedFcmCypher: Schema.optional(NotificationCypherE),
 })
 
 export type ChatMessage = Schema.Schema.Type<typeof ChatMessageE>
@@ -298,12 +304,12 @@ export const CalendarEventIdE = Schema.String.pipe(
 export type CalendarEventId = Schema.Schema.Type<typeof CalendarEventIdE>
 
 export const MyFcmTokenInfo = z.object({
-  token: FcmToken,
-  cypher: FcmCypher,
+  token: ExpoNotificationToken,
+  cypher: NotificationCypher,
 })
 export const MyFcmTokenInfoE = Schema.Struct({
-  token: FcmTokenE,
-  cypher: FcmCypherE,
+  token: ExpoNotificationTokenE,
+  cypher: NotificationCypherE,
 })
 export type MyFcmTokenInfo = Schema.Schema.Type<typeof MyFcmTokenInfoE>
 
@@ -319,7 +325,7 @@ export const Chat = z.object({
   tradeChecklistCalendarEventId: CalendarEventId.optional(),
   otherSideVersion: SemverString.optional(),
   lastReportedVersion: SemverString.optional(),
-  otherSideFcmCypher: FcmCypher.optional(),
+  otherSideFcmCypher: NotificationCypher.optional(),
   lastReportedFcmToken: MyFcmTokenInfo.optional(),
 })
 export const ChatE = Schema.Struct({
@@ -338,7 +344,7 @@ export const ChatE = Schema.Struct({
   tradeChecklistCalendarEventId: Schema.optional(CalendarEventIdE),
   otherSideVersion: Schema.optional(SemverStringE),
   lastReportedVersion: Schema.optional(SemverStringE),
-  otherSideFcmCypher: Schema.optional(FcmCypherE),
+  otherSideFcmCypher: Schema.optional(NotificationCypherE),
   lastReportedFcmToken: Schema.optional(MyFcmTokenInfoE),
 })
 export type Chat = Schema.Schema.Type<typeof ChatE>
@@ -365,8 +371,8 @@ export const ChatMessageRequiringNewerVersion = z.object({
   text: z.literal('-'),
   deanonymizedUser: z.undefined(),
   image: z.undefined(),
-  myFcmCypher: FcmCypher.optional(),
-  lastReceivedFcmCypher: FcmCypher.optional(),
+  myFcmCypher: NotificationCypher.optional(),
+  lastReceivedFcmCypher: NotificationCypher.optional(),
 })
 
 export const ChatMessageRequiringNewerVersionE = Schema.Struct({
@@ -381,8 +387,8 @@ export const ChatMessageRequiringNewerVersionE = Schema.Struct({
   text: Schema.Literal('-'),
   deanonymizedUser: Schema.optional(Schema.Undefined),
   image: Schema.optional(Schema.Undefined),
-  myFcmCypher: Schema.optional(FcmCypherE),
-  lastReceivedFcmCypher: Schema.optional(FcmCypherE),
+  myFcmCypher: Schema.optional(NotificationCypherE),
+  lastReceivedFcmCypher: Schema.optional(NotificationCypherE),
 })
 
 export type ChatMessageRequiringNewerVersion =

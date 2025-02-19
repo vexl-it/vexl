@@ -1,8 +1,7 @@
-import messaging, {
-  type FirebaseMessagingTypes,
-} from '@react-native-firebase/messaging'
 import {NewChatMessageNoticeNotificationData} from '@vexl-next/domain/src/general/notifications'
 import {Option} from 'effect'
+import * as Notifications from 'expo-notifications'
+import * as TaskManager from 'expo-task-manager'
 import {getDefaultStore} from 'jotai'
 import {syncConnectionsActionAtom} from '../../state/connections/atom/connectionStateAtom'
 import {updateAllOffersConnectionsActionAtom} from '../../state/connections/atom/offerToConnectionsAtom'
@@ -12,18 +11,29 @@ import {NEW_CONNECTION} from './notificationTypes'
 import {showDebugNotificationIfEnabled} from './showDebugNotificationIfEnabled'
 import {showUINotificationFromRemoteMessage} from './showUINotificationFromRemoteMessage'
 
-export async function processBackgroundMessage(
-  remoteMessage: FirebaseMessagingTypes.RemoteMessage
-): Promise<void> {
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
+}
+
+export async function processBackgroundMessage(data: unknown): Promise<void> {
   try {
+    console.log('NOTIFICATION - background')
+    if (!isRecord(data)) {
+      void showDebugNotificationIfEnabled({
+        title: `Background notification received`,
+        body: `Data is not an object...`,
+      })
+      return
+    }
+
     void showDebugNotificationIfEnabled({
       title: `Background notification received`,
-      body: `type: ${typeof remoteMessage?.data?.type === 'string' ? remoteMessage.data.type : typeof remoteMessage?.data?.type === 'object' ? JSON.stringify(remoteMessage.data.tyoe) : '[empty]'}`,
+      body: `type: ${typeof data?.type === 'string' ? data.type : data?.type === 'object' ? JSON.stringify(data.type) : '[empty]'}`,
     })
-    console.info('📳 Background notification received', remoteMessage)
+    console.info('📳 Background notification received', JSON.stringify(data))
 
     const newChatMessageNoticeNotificationDataOption =
-      NewChatMessageNoticeNotificationData.parseUnkownOption(remoteMessage.data)
+      NewChatMessageNoticeNotificationData.parseUnkownOption(data)
     if (Option.isSome(newChatMessageNoticeNotificationDataOption)) {
       await getDefaultStore().set(
         processChatNotificationActionAtom,
@@ -31,8 +41,6 @@ export async function processBackgroundMessage(
       )()
       return
     }
-
-    const data = remoteMessage.data
 
     if (!data) {
       console.info(
@@ -65,9 +73,19 @@ export async function processBackgroundMessage(
   }
 }
 
-function setupBackgroundMessaging(): void {
+const BACKGROUND_NOTIFICATION_TASK = 'BACKGROUND-NOTIFICATION-TASK'
+
+TaskManager.defineTask(
+  BACKGROUND_NOTIFICATION_TASK,
+  ({data, error, executionInfo}) => {
+    // TODO active? Prevent running twice
+    void processBackgroundMessage(data)
+  }
+)
+
+async function setupBackgroundMessaging(): Promise<void> {
   try {
-    messaging().setBackgroundMessageHandler(processBackgroundMessage)
+    await Notifications.registerTaskAsync(BACKGROUND_NOTIFICATION_TASK)
     console.log('📳 Registered background message handler')
   } catch (error) {
     reportError(
@@ -80,4 +98,4 @@ function setupBackgroundMessaging(): void {
   }
 }
 
-setupBackgroundMessaging()
+void setupBackgroundMessaging()

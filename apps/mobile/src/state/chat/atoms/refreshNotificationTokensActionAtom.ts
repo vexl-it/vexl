@@ -4,8 +4,8 @@ import {
   type ChatMessage,
   type MyFcmTokenInfo,
 } from '@vexl-next/domain/src/general/messaging'
-import {type FcmCypher} from '@vexl-next/domain/src/general/notifications'
-import {type FcmToken} from '@vexl-next/domain/src/utility/FcmToken.brand'
+import {type NotificationCypher} from '@vexl-next/domain/src/general/notifications/NotificationCypher.brand'
+import {type ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {now} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import sendMessage from '@vexl-next/resources-utils/src/chat/sendMessage'
@@ -35,7 +35,7 @@ const FCM_TOKEN_UPDATE_MESSAGE_MINIMAL_VERSION = SemverString.parse('1.13.1')
 function createFcmCypherUpdateMessage(
   senderPublicKey: PublicKeyPemBase64,
   info?: MyFcmTokenInfo,
-  lastReceivedFcmCypher?: FcmCypher
+  lastReceivedFcmCypher?: NotificationCypher
 ): ChatMessage {
   return {
     uuid: generateChatMessageId(),
@@ -55,7 +55,7 @@ export const sendFcmCypherUpdateMessageActionAtom = atom(
   (
     get,
     set,
-    notificationToken?: FcmToken
+    notificationToken?: ExpoNotificationToken
   ): ((chatWithMessages: ChatWithMessages) => T.Task<boolean>) => {
     return (chatWithMessages) => {
       return pipe(
@@ -91,7 +91,7 @@ export const sendFcmCypherUpdateMessageActionAtom = atom(
               receiverPublicKey: chatWithMessages.chat.otherSide.publicKey,
               message: messageToSend,
               notificationApi: get(apiAtom).notification,
-              theirFcmCypher: chatWithMessages.chat.otherSideFcmCypher,
+              theirNotificationCypher: chatWithMessages.chat.otherSideFcmCypher,
               otherSideVersion: chatWithMessages.chat.otherSideVersion,
             })
           )
@@ -132,7 +132,7 @@ export const sendFcmCypherUpdateMessageActionAtom = atom(
 )
 
 function doesOtherSideNeedsToBeNotifiedAboutTokenChange(
-  notificationToken?: FcmToken
+  notificationToken?: ExpoNotificationToken
 ): (chat: ChatWithMessages) => boolean {
   return (chatWithMessages) => {
     if (!isChatOpen(chatWithMessages)) return false

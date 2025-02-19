@@ -1,31 +1,38 @@
 import {PrivateKeyHolder} from '@vexl-next/cryptography/src/KeyHolder/index'
-import {FcmCypher} from '@vexl-next/domain/src/general/notifications'
+import {NotificationCypher} from '@vexl-next/domain/src/general/notifications/NotificationCypher.brand'
 import {atom} from 'jotai'
 import {z} from 'zod'
 import {atomWithParsedMmkvStorage} from '../../utils/atomUtils/atomWithParsedMmkvStorage'
 
-export const fcmCypherToKeyHolderAtom = atomWithParsedMmkvStorage(
+export const notificationCypherToKeyHolderAtom = atomWithParsedMmkvStorage(
   'fcmCypherToKeyHolder',
   {data: {}},
-  z.object({data: z.record(FcmCypher, PrivateKeyHolder)}).readonly()
+  z.object({data: z.record(NotificationCypher, PrivateKeyHolder)}).readonly()
 )
 
-export const registerFcmCypherActionAtom = atom(
+export const registerNotificationCypherActionAtom = atom(
   null,
   (
     get,
     set,
-    {fcmCypher, keyHolder}: {fcmCypher: FcmCypher; keyHolder: PrivateKeyHolder}
+    {
+      notificationCypher,
+      keyHolder,
+    }: {notificationCypher: NotificationCypher; keyHolder: PrivateKeyHolder}
   ): void => {
-    set(fcmCypherToKeyHolderAtom, (prev) => ({
-      data: {...prev.data, [fcmCypher]: keyHolder},
+    set(notificationCypherToKeyHolderAtom, (prev) => ({
+      data: {...prev.data, [notificationCypher]: keyHolder},
     }))
   }
 )
 
-export const getKeyHolderForFcmCypherActionAtom = atom(
+export const getKeyHolderForNotificationCypherActionAtom = atom(
   null,
-  (get, set, fcmCypher: FcmCypher): PrivateKeyHolder | undefined => {
-    return get(fcmCypherToKeyHolderAtom).data[fcmCypher]
+  (
+    get,
+    set,
+    notificationCypher: NotificationCypher
+  ): PrivateKeyHolder | undefined => {
+    return get(notificationCypherToKeyHolderAtom).data[notificationCypher]
   }
 )

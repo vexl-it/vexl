@@ -1,5 +1,5 @@
 import notifee from '@notifee/react-native'
-import {type FirebaseMessagingTypes} from '@react-native-firebase/messaging'
+import {type Notification} from 'expo-notifications'
 import {getDefaultStore} from 'jotai'
 import {translationAtom} from '../localization/I18nProvider'
 import {notificationPreferencesAtom} from '../preferences'
@@ -14,7 +14,7 @@ import {
 } from './notificationTypes'
 
 export async function showUINotificationFromRemoteMessage(
-  data: FirebaseMessagingTypes.RemoteMessage['data']
+  data: Notification['request']['content']['data']
 ): Promise<boolean> {
   const {t} = getDefaultStore().get(translationAtom)
   const notificationPreferences = getDefaultStore().get(

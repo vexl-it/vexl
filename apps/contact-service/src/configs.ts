@@ -42,3 +42,5 @@ export const importContactsCountQuotaConfig = Config.number(
 export const importContactsResetAfterDaysQuotaConfig = Config.number(
   'IMPORT_CONTACTS_RESET_AFTER_DAYS_QUOTA'
 )
+
+export const expoAccessToken = Config.string('EXPO_ACCESS_TOKEN')

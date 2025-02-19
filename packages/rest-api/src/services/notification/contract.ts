@@ -1,5 +1,6 @@
 import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
-import {FcmCypherE} from '@vexl-next/domain/src/general/notifications'
+import {FcmCypherE} from '@vexl-next/domain/src/general/notifications/index'
+import {NotificationCypherE} from '@vexl-next/domain/src/general/notifications/NotificationCypher.brand'
 import {Schema} from 'effect'
 
 export const GetPublicKeyResponse = Schema.Struct({
@@ -11,7 +12,9 @@ export type GetPublicKeyResponse = typeof GetPublicKeyResponse.Type
 export class IssueNotificationRequest extends Schema.Class<IssueNotificationRequest>(
   'IssueNotificationRequest'
 )({
-  fcmCypher: FcmCypherE,
+  // Once we depreciate old version remove fcm cypher and make notification cypher mandatory!
+  fcmCypher: Schema.optional(FcmCypherE),
+  notificationCypher: Schema.optional(NotificationCypherE),
 }) {}
 
 export class IssueNotificationResponse extends Schema.Class<IssueNotificationResponse>(
@@ -22,6 +25,15 @@ export class IssueNotificationResponse extends Schema.Class<IssueNotificationRes
 
 export class InvalidFcmCypherError extends Schema.TaggedError<InvalidFcmCypherError>()(
   'InvalidFcmCypherError',
+  {
+    status: Schema.optionalWith(Schema.Literal(400), {
+      default: () => 400 as const,
+    }),
+  }
+) {}
+
+export class InvalidNotificationCypherError extends Schema.TaggedError<InvalidNotificationCypherError>()(
+  'InvalidNotificationCypherError',
   {
     status: Schema.optionalWith(Schema.Literal(400), {
       default: () => 400 as const,
@@ -41,7 +53,8 @@ export class SendingNotificationError extends Schema.TaggedError<SendingNotifica
 
 export const IssueNotificationErrors = Schema.Union(
   InvalidFcmCypherError,
-  SendingNotificationError
+  SendingNotificationError,
+  InvalidNotificationCypherError
 )
 
 export const IssueNotificationInput = Schema.Struct({

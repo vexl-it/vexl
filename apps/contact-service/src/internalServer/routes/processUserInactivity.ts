@@ -1,11 +1,12 @@
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {withRedisLock} from '@vexl-next/server-utils/src/RedisService'
 import dayjs from 'dayjs'
-import {Array, Effect, flow} from 'effect'
+import {Array, Effect, Either, Option} from 'effect'
+import {isNotNull} from 'effect/Predicate'
 import {inactivityNotificationAfterDaysConfig} from '../../configs'
 import {UserDbService} from '../../db/UserDbService'
 import {queryAndReportNumberOfInnactiveUsers} from '../../metrics'
-import {sendNotificationToAllHandleNonExistingTokens} from '../../utils/notifications'
+import {issueNotificationsToTokens} from '../../utils/issueNotificationsToTokens'
 
 export const processUserInactivity = Effect.gen(function* (_) {
   const userDb = yield* _(UserDbService)
@@ -31,25 +32,27 @@ export const processUserInactivity = Effect.gen(function* (_) {
     Effect.log('Notifying inactive users', {count: usersToNotify.length})
   )
 
-  const successfullySentToTokens = yield* _(
-    sendNotificationToAllHandleNonExistingTokens({
+  const {firebase, expo} = yield* _(
+    issueNotificationsToTokens({
       type: 'INACTIVITY_REMINDER',
       tokens: usersToNotify,
     }),
-    Effect.map(
-      flow(
-        Array.filter((e) => e.success),
-        Array.map((one) => one.token)
-      )
-    ),
     Effect.withSpan('Sending inactivity notification', {
       attributes: {count: usersToNotify.length},
     })
   )
 
+  const firebaseCount = Either.isRight(firebase)
+    ? firebase.right.filter((one) => one.success).length
+    : 0
+  const expoCount = Either.isRight(expo)
+    ? expo.right.filter((one) => one.status === 'ok').length
+    : 0
+
   yield* _(
     Effect.log('Sent inactivity notification', {
-      count: successfullySentToTokens.length,
+      firebaseCount,
+      expoCount,
       total: usersToNotify.length,
     })
   )
@@ -59,7 +62,15 @@ export const processUserInactivity = Effect.gen(function* (_) {
   )
   yield* _(
     Effect.forEach(
-      successfullySentToTokens,
+      // TODO only those that received it
+      usersToNotify
+        .map(
+          (one) =>
+            Option.getOrNull(one.expoToken) ??
+            Option.getOrNull(one.firebaseToken)
+        )
+        .filter(isNotNull),
+
       userDb.updateSetRefreshedAtToNull,
       {batching: true}
     )

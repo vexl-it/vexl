@@ -1,12 +1,11 @@
 import {eciesLegacy} from '@vexl-next/cryptography/src/index'
-import {
-  extractCypherFromFcmCypher,
-  type FcmCypher,
-} from '@vexl-next/domain/src/general/notifications'
+import {type FcmCypher} from '@vexl-next/domain/src/general/notifications'
+import {NotificationCypherE} from '@vexl-next/domain/src/general/notifications/NotificationCypher.brand'
 import {
   FcmTokenE,
   type FcmToken,
 } from '@vexl-next/domain/src/utility/FcmToken.brand'
+import {extractPartsOfNotificationCypher} from '@vexl-next/resources-utils/src/notifications/notificationTokenActions'
 import {InvalidFcmCypherError} from '@vexl-next/rest-api/src/services/notification/contract'
 import {Effect, Schema, type ConfigError} from 'effect'
 import {fcmTokenPrivateKeyConfig} from '../../configs'
@@ -16,9 +15,10 @@ export function decodeFcmCypher(
 ): Effect.Effect<FcmToken, InvalidFcmCypherError | ConfigError.ConfigError> {
   return Effect.gen(function* (_) {
     const privateKey = yield* _(fcmTokenPrivateKeyConfig)
-    const cypher = extractCypherFromFcmCypher(fcmCypher)
+    const notificationCypher = Schema.decodeSync(NotificationCypherE)(fcmCypher)
+    const data = extractPartsOfNotificationCypher({notificationCypher})
 
-    if (!cypher) {
+    if (!data?.cypher) {
       return yield* _(new InvalidFcmCypherError())
     }
 
@@ -27,7 +27,7 @@ export function decodeFcmCypher(
     return yield* _(
       Effect.tryPromise({
         try: async () =>
-          await eciesLegacy.eciesLegacyDecrypt({data: cypher, privateKey}),
+          await eciesLegacy.eciesLegacyDecrypt({data: data.cypher, privateKey}),
         catch: () => {
           return new InvalidFcmCypherError()
         },

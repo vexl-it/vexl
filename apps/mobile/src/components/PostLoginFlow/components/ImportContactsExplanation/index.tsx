@@ -1,4 +1,4 @@
-import {useSetAtom} from 'jotai'
+import {useAtomValue, useSetAtom} from 'jotai'
 import {useState} from 'react'
 import {Image} from 'react-native'
 import {Stack, Text} from 'tamagui'
@@ -7,6 +7,7 @@ import {resolveAllContactsAsSeenActionAtom} from '../../../../state/contacts/ato
 import {submitContactsActionAtom} from '../../../../state/contacts/atom/submitContactsActionAtom'
 import {useFinishPostLoginFlow} from '../../../../state/postLoginOnboarding'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
+import {showClubsFlowAtom} from '../../../../utils/preferences'
 import AnonymizationCaption from '../../../AnonymizationCaption/AnonymizationCaption'
 import {
   HeaderProxy,
@@ -26,6 +27,7 @@ export default function ImportContactsExplanationScreen({
     resolveAllContactsAsSeenActionAtom
   )
   const finishPostLoginFlow = useFinishPostLoginFlow()
+  const showClubsFlow = useAtomValue(showClubsFlowAtom)
 
   return (
     <WhiteContainer testID="@importContactsExplanationScreen">
@@ -60,10 +62,10 @@ export default function ImportContactsExplanationScreen({
               (result) => {
                 resolveAllContactsAsSeen()
                 setContactsLoading(false)
-                if (result === 'success') finishPostLoginFlow()
-                if (result === 'permissionsNotGranted') {
+                if (showClubsFlow && result === 'permissionsNotGranted') {
                   navigation.navigate('FindOffersInVexlClubsScreen')
                 }
+                if (!showClubsFlow || result) finishPostLoginFlow()
                 // if (success) navigation.push('AllowNotificationsExplanation')
               }
             )

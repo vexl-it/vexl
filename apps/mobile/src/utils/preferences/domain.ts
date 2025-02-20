@@ -44,6 +44,7 @@ export const Preferences = z
     marketplaceFiatOrSatsCurrency: FiatOrSats.default('FIAT'),
     goldenAvatarType: GoldenAvatarType.optional(),
     showVexlSearchForCooSuggestion: z.boolean().default(true),
+    showClubsFlow: z.boolean().default(false),
   })
   .readonly()
 
@@ -80,6 +81,9 @@ export const PreferencesE = Schema.Struct({
   goldenAvatarType: Schema.optional(GoldenAvatarTypeE),
   showVexlSearchForCooSuggestion: Schema.optionalWith(Schema.Boolean, {
     default: () => true,
+  }),
+  showClubsFlow: Schema.optionalWith(Schema.Boolean, {
+    default: () => false,
   }),
 })
 

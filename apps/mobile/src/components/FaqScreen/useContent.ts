@@ -1,7 +1,9 @@
 import {type SvgString} from '@vexl-next/domain/src/utility/SvgString.brand'
+import {useAtomValue} from 'jotai'
 import anonymizationNoticeSvg from '../../images/anonymizationNoticeSvg'
 import notificationsSvg from '../../images/notificationsSvg'
 import {useTranslation} from '../../utils/localization/I18nProvider'
+import {showClubsFlowAtom} from '../../utils/preferences'
 import anonymousCounterpartSvg from '../images/anonymousCounterpartSvg'
 import stayAnonymousSvg from '../images/stayAnonymousSvg'
 import vexlClubsSvg from '../images/vexlClubsSvg'
@@ -44,6 +46,7 @@ type Props = ConditionalProps & CommonProps
 
 export default function useContent(): Props[] {
   const {t} = useTranslation()
+  const showClubsFlow = useAtomValue(showClubsFlowAtom)
 
   return [
     {
@@ -86,12 +89,16 @@ export default function useContent(): Props[] {
       title: t('faqs.howCanYouEnsure'),
       text: t('faqs.vexlIsDesigned'),
     },
-    {
-      type: 'WHAT_ARE_VEXL_CLUBS',
-      svg: vexlClubsSvg,
-      title: t('faqs.whatAreVexlClubsAndWhyShouldIJoin'),
-      text: t('faqs.clubsConnectYouWithBroaderNetwork'),
-    },
+    ...(showClubsFlow
+      ? ([
+          {
+            type: 'WHAT_ARE_VEXL_CLUBS',
+            svg: vexlClubsSvg,
+            title: t('faqs.whatAreVexlClubsAndWhyShouldIJoin'),
+            text: t('faqs.clubsConnectYouWithBroaderNetwork'),
+          },
+        ] as Props[])
+      : []),
     {
       type: 'HOW_DO_I_CONTACT_VEXL',
       svg: notificationsSvg,

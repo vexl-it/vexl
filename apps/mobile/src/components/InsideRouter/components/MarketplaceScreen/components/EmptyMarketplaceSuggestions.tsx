@@ -1,4 +1,5 @@
 import {useNavigation} from '@react-navigation/native'
+import {useAtomValue} from 'jotai'
 import {RefreshControl, ScrollView} from 'react-native'
 import {YStack} from 'tamagui'
 import {
@@ -7,6 +8,7 @@ import {
   joinVexlClubsSuggestionVisibleAtom,
 } from '../../../../../state/marketplace/atoms/offerSuggestionVisible'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
+import {showClubsFlowAtom} from '../../../../../utils/preferences'
 import MarketplaceSuggestion from '../../../../MarketplaceSuggestion'
 import usePixelsFromBottomWhereTabsEnd from '../../../utils'
 import ImportNewContactsSuggestion from './ImportNewContactsSuggestion'
@@ -23,6 +25,7 @@ function EmptyMarketplaceSuggestions({
   const {t} = useTranslation()
   const navigation = useNavigation()
   const tabBarEndsAt = usePixelsFromBottomWhereTabsEnd()
+  const showClubsFlow = useAtomValue(showClubsFlowAtom)
 
   return (
     <ScrollView
@@ -51,16 +54,18 @@ function EmptyMarketplaceSuggestions({
           text={t('suggestion.noOffersFromOthersYet')}
           visibleStateAtom={addMoreContactsSuggestionVisibleAtom}
         />
-        <MarketplaceSuggestion
-          buttonText={t('suggestion.whatAreClubs')}
-          onButtonPress={() => {
-            navigation.navigate('Faqs', {
-              pageType: 'WHAT_ARE_VEXL_CLUBS',
-            })
-          }}
-          text={t('suggestion.yourReachIsTooLow')}
-          visibleStateAtom={joinVexlClubsSuggestionVisibleAtom}
-        />
+        {!!showClubsFlow && (
+          <MarketplaceSuggestion
+            buttonText={t('suggestion.whatAreClubs')}
+            onButtonPress={() => {
+              navigation.navigate('Faqs', {
+                pageType: 'WHAT_ARE_VEXL_CLUBS',
+              })
+            }}
+            text={t('suggestion.yourReachIsTooLow')}
+            visibleStateAtom={joinVexlClubsSuggestionVisibleAtom}
+          />
+        )}
         <ImportNewContactsSuggestion />
       </YStack>
     </ScrollView>

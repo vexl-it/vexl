@@ -5,9 +5,13 @@ import {
   type GetGeocodedCoordinatesRequest,
 } from '@vexl-next/rest-api/src/services/location/contracts'
 import axios from 'axios'
-import {Array, Effect, Option, Schema, pipe} from 'effect'
+import {Array, Effect, Option, Schema, String, pipe} from 'effect'
 
 interface GoogleGeocodeResponse {
+  plus_code: {
+    compound_code: string
+    global_code: string
+  }
   results: Array<{
     place_id: string
     formatted_address: string
@@ -35,7 +39,7 @@ interface GoogleGeocodeResponse {
   }>
 }
 
-const regionRegex = /(?: region| kraj)/gi
+// const regionRegex = /(?: region| kraj)/gi
 
 // Just keep this just in case. Might be useful
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -54,6 +58,11 @@ const findTypeInAddressComponents = (
     Option.map((one) => one.short_name),
     Option.getOrElse(() => undefined)
   )
+
+const compoundCodeContainsCity = (
+  compoundCode: string,
+  city: string | undefined
+): boolean => (city ? String.includes(city)(compoundCode) : false)
 
 export const googleGeocode =
   (apiKey: string) =>
@@ -108,23 +117,41 @@ export const googleGeocode =
         firstHit.address_components
       )
 
-      const first = firstHit.address_components.at(0)?.short_name
+      // 3FF2+M4H Praha, Česko
+      const compoundCode = response.data.plus_code.compound_code
+      // Praha, Česko
+      const cityAndState = compoundCode.split(' ').slice(1).join(' ')
+      // Praha - CZ
+      const cityAndStateShorten = cityAndState.replace(
+        /,([^,]*)$/,
+        ` - ${country}`
+      )
+      const cityOrPartOfTheCity = firstHit.address_components.at(0)?.short_name
+      const finalAddress = compoundCodeContainsCity(
+        compoundCode,
+        cityOrPartOfTheCity
+      )
+        ? // Karlovy Vary - CZ
+          cityAndStateShorten
+        : // Vinohrady, Praha - CZ
+          `${cityOrPartOfTheCity}, ${cityAndStateShorten}`
 
-      const lvl1 = (() => {
-        const lvl1 = findTypeInAddressComponents(
-          'administrative_area_level_1',
-          firstHit.address_components
-        )
-        if (!lvl1) return ''
-        if (country === 'CZ' || country === 'SK') {
-          return lvl1.replace(regionRegex, '')
-        }
-        return lvl1
-      })()
+      // const lvl1 = (() => {
+      //   const lvl1 = findTypeInAddressComponents(
+      //     'administrative_area_level_1',
+      //     firstHit.address_components
+      //   )
+      //   if (!lvl1) return ''
+      //   if (country === 'CZ' || country === 'SK') {
+      //     return lvl1.replace(regionRegex, '')
+      //   }
+      //   return lvl1
+      // })()
 
-      const address = lvl1
-        ? `${first}, ${lvl1} - ${country}`
-        : firstHit.formatted_address.replace(/^[\d\s]*/, '')
+      const address =
+        country && cityOrPartOfTheCity
+          ? finalAddress
+          : firstHit.formatted_address.replace(/^[\d\s]*/, '')
 
       return yield* _(
         Schema.decode(GetGeocodedCoordinatesResponse)({

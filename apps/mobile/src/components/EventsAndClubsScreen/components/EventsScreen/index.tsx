@@ -59,6 +59,7 @@ export default function EventsScreen(): JSX.Element {
 
       {!!areThereEventsToShow && (
         <FlashList
+          showsVerticalScrollIndicator={false}
           stickyHeaderIndices={stickyHeadersIndicies}
           estimatedItemSize={112}
           data={listDataAtoms}

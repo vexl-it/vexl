@@ -18,6 +18,9 @@ export const WebflowEventItem = Schema.Struct({
       default: () => [],
     }),
     slug: Schema.String,
+    'golden-glasses': Schema.optionalWith(Schema.Boolean, {
+      default: () => false,
+    }),
   }),
 })
 export type WebflowEventItem = typeof WebflowEventItem.Type

@@ -80,6 +80,7 @@ const webflowEventsToResponse = ({
               (one) => one.url
             ),
           })),
+        goldenGlasses: event.fieldData['golden-glasses'],
       }) satisfies Event
   )
 }

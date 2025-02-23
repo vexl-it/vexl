@@ -1,8 +1,9 @@
 import {useAtomValue, type Atom} from 'jotai'
-import {Linking} from 'react-native'
+import {Linking, Platform} from 'react-native'
 import {Text, XStack, YStack} from 'tamagui'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import Image from '../../../../Image'
+import goldenGlassesNoStarSvg from '../images/goldenGlassesNoStarSvg'
 import outLeadSvg from '../images/outLeadSvg'
 import {type ListData} from '../state'
 import EventDate from './EventDate'
@@ -57,6 +58,16 @@ export default function EventItem({atom}: {atom: Atom<ListData>}): JSX.Element {
           {BULLET} {data.event.venue.replaceAll('/ /g', '\u00A0')}
         </Text>
         <Text fontSize={15} ff="$body600" color="white">
+          {!!data.event.goldenGlasses && (
+            <>
+              <Image
+                height={Platform.OS === 'ios' ? 14 : 10}
+                width={26}
+                source={goldenGlassesNoStarSvg}
+              />{' '}
+              {BULLET}{' '}
+            </>
+          )}
           {data.event.name}
         </Text>
         <XStack gap="$2" alignItems="flex-start" justifyContent="flex-start">

@@ -16,6 +16,7 @@ export const Event = Schema.Struct({
   name: Schema.String,
   venue: Schema.String,
   speakers: Schema.Array(Speaker),
+  goldenGlasses: Schema.optionalWith(Schema.Boolean, {default: () => false}),
 })
 export type Event = typeof Event.Type
 

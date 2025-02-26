@@ -15,12 +15,16 @@ export default function ContactPictureImage({
   ...props
 }: Props): JSX.Element | null {
   const [imageUri, setImageUri] = useState<string | null>(null)
+
   useEffect(() => {
     if (!contactId) return
+
+    setImageUri(null)
 
     void getContactByIdAsync(contactId)
       .then((contact) => {
         const contactImageUri = contact?.image?.uri
+
         if (contactImageUri) {
           setImageUri(contactImageUri)
         }

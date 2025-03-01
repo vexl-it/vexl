@@ -20,7 +20,9 @@ import {
   deleteOfferToConnectionsAtom,
   upsertOfferToConnectionsActionAtom,
 } from '../../connections/atom/offerToConnectionsAtom'
+import {myStoredClubsAtom} from '../../contacts/atom/clubsStore'
 import {sessionDataOrDummyAtom} from '../../session'
+import getClubConnectionsForUuids from '../utils/getClubsConnectionsForUuids'
 import {myOffersAtom} from './myOffers'
 import {singleOfferAtom} from './offersState'
 
@@ -73,6 +75,12 @@ const reencryptOneOfferActionAtom = atom(
     const api = get(apiAtom)
     const session = get(sessionDataOrDummyAtom)
     const offerAtom = singleOfferAtom(offer.offerInfo.offerId)
+    const myStoredClubs = get(myStoredClubsAtom)
+    const clubsUuids = get(offerAtom)?.offerInfo.publicPart.clubsUuids
+    const clubsConnections = getClubConnectionsForUuids({
+      clubsUuids: clubsUuids ? [...clubsUuids] : [],
+      myStoredClubs,
+    })
 
     return pipe(
       createNewOfferForMyContacts({
@@ -83,6 +91,7 @@ const reencryptOneOfferActionAtom = atom(
         intendedConnectionLevel: offer.ownershipInfo.intendedConnectionLevel,
         ownerKeyPair: session.privateKey,
         onProgress,
+        clubsConnections,
       }),
       TE.map((r) => {
         if (r.encryptionErrors.length > 0) {

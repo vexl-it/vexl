@@ -1,4 +1,7 @@
-import {type PrivateKeyHolder} from '@vexl-next/cryptography/src/KeyHolder'
+import {
+  type PrivateKeyHolder,
+  type PublicKeyPemBase64,
+} from '@vexl-next/cryptography/src/KeyHolder'
 import {type CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {
   generateAdminId,
@@ -53,6 +56,7 @@ export default function createNewOfferForMyContacts({
   ownerKeyPair,
   countryPrefix,
   intendedConnectionLevel,
+  clubsConnections,
   onProgress,
 }: {
   offerApi: OfferApi
@@ -61,6 +65,7 @@ export default function createNewOfferForMyContacts({
   ownerKeyPair: PrivateKeyHolder
   countryPrefix: CountryPrefix
   intendedConnectionLevel: IntendedConnectionLevel
+  clubsConnections: PublicKeyPemBase64[]
   onProgress?: (status: OfferEncryptionProgress) => void
 }): TE.TaskEither<
   | ApiErrorFetchingContactsForOffer
@@ -89,6 +94,7 @@ export default function createNewOfferForMyContacts({
         intendedConnectionLevel,
         contactApi,
         ownerCredentials: ownerKeyPair,
+        clubsConnections,
         onProgress,
         adminId,
       })

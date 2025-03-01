@@ -1,4 +1,7 @@
-import {type PrivateKeyHolder} from '@vexl-next/cryptography/src/KeyHolder'
+import {
+  type PrivateKeyHolder,
+  type PublicKeyPemBase64,
+} from '@vexl-next/cryptography/src/KeyHolder'
 import {
   type IntendedConnectionLevel,
   type OfferAdminId,
@@ -28,12 +31,14 @@ import fetchContactsForOffer, {
   type ApiErrorFetchingContactsForOffer,
   type ConnectionsInfoForOffer,
 } from './fetchContactsForOffer'
+
 export function fetchInfoAndGeneratePrivatePayloads({
   contactApi,
   intendedConnectionLevel,
   symmetricKey,
   adminId,
   ownerCredentials,
+  clubsConnections,
   onProgress,
 }: {
   contactApi: ContactApi
@@ -41,6 +46,7 @@ export function fetchInfoAndGeneratePrivatePayloads({
   symmetricKey: SymmetricKey
   ownerCredentials: PrivateKeyHolder
   adminId: OfferAdminId
+  clubsConnections: PublicKeyPemBase64[]
   onProgress?: ((state: OfferEncryptionProgress) => void) | undefined
 }): TE.TaskEither<
   ApiErrorFetchingContactsForOffer | ErrorConstructingPrivatePayloads,
@@ -62,7 +68,11 @@ export function fetchInfoAndGeneratePrivatePayloads({
         TE.Do,
         TE.chainW(() =>
           TE.fromEither(
-            constructPrivatePayloads({connectionsInfo, symmetricKey})
+            constructPrivatePayloads({
+              connectionsInfo,
+              symmetricKey,
+              clubsConnections,
+            })
           )
         ),
         TE.map(

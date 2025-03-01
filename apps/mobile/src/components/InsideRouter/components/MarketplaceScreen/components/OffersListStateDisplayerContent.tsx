@@ -1,4 +1,5 @@
 import {useNavigation} from '@react-navigation/native'
+import {Effect} from 'effect'
 import {isNone} from 'fp-ts/Option'
 import {useAtomValue, useSetAtom} from 'jotai'
 import {useMemo} from 'react'
@@ -137,7 +138,9 @@ function OffersListStateDisplayerContent(): JSX.Element {
           ) : (
             <EmptyListPlaceholder
               refreshing={loading}
-              onRefresh={refreshOffers}
+              onRefresh={() => {
+                void Effect.runPromise(refreshOffers())
+              }}
             />
           )}
         </Stack>

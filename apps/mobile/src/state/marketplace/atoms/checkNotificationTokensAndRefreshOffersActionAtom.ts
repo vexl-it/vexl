@@ -1,6 +1,7 @@
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {type MyOfferInState} from '@vexl-next/domain/src/general/offers'
 import {type ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
+import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {extractPartsOfNotificationCypher} from '@vexl-next/resources-utils/src/notifications/notificationTokenActions'
 import {Option} from 'effect'
 import * as A from 'fp-ts/Array'
@@ -133,6 +134,7 @@ const checkNotificationTokensAndRefreshOffersActionAtom = atom(
                 updateFcmCypher: true,
                 offerKey: offerKeyHolder.privateKey,
               }),
+              effectToTaskEither,
               TE.match(
                 (e) => {
                   if (e._tag !== 'NetworkError') {

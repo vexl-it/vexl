@@ -110,6 +110,8 @@ export const btcPriceForOfferWithCurrencyAtom = createBtcPriceForCurrencyAtom(
 
 export const locationActiveAtom = atom<boolean | undefined>(true)
 
+export const showClubOffersAtom = atom<boolean | undefined>(false)
+
 export const updateBtcNetworkAtom = atom(
   (get) => get(btcNetworkAtom),
   (get, set, btcNetwork: BtcNetwork) => {
@@ -328,6 +330,7 @@ const setFilterAtomsActionAtom = atom(
     set(listingTypeAtom, filterValue.listingType)
     set(offerTypeAtom, filterValue.offerType)
     set(sortingAtom, filterValue.sort)
+    set(showClubOffersAtom, filterValue.showClubOffers)
     set(setConditionallyRenderedFilterElementsActionAtom, filterValue)
   }
 )
@@ -440,6 +443,7 @@ export const saveFilterActionAtom = atom(null, (get, set) => {
     amountTopLimit: get(amountTopLimitAtom),
     singlePrice: get(singlePriceAtom),
     singlePriceCurrency: get(singlePriceCurrencyAtom),
+    showClubOffers: get(showClubOffersAtom),
   }
 
   set(offersFilterFromStorageAtom, {...newFilterValue, text})

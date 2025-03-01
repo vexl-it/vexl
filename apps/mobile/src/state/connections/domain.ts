@@ -35,6 +35,7 @@ export const OfferToConnectionsItem = z
     connections: z.object({
       firstLevel: z.array(PublicKeyPemBase64),
       secondLevel: z.array(PublicKeyPemBase64).optional(),
+      clubs: z.array(PublicKeyPemBase64).optional(),
     }),
   })
   .readonly()

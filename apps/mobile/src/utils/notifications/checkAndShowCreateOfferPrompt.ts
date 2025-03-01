@@ -1,4 +1,5 @@
 import notifee from '@notifee/react-native'
+import {Effect} from 'effect'
 import {type getDefaultStore} from 'jotai'
 import {triggerOffersRefreshAtom} from '../../state/marketplace'
 import {myOffersAtom} from '../../state/marketplace/atoms/myOffers'
@@ -54,7 +55,7 @@ export default async function checkAndShowCreateOfferPrompt(
     return
   }
 
-  await store.set(triggerOffersRefreshAtom)
+  await Effect.runPromise(store.set(triggerOffersRefreshAtom))
 
   const offersInMarketplace = store.get(offersToSeeInMarketplaceAtom)
   if (offersInMarketplace.length <= 0) {

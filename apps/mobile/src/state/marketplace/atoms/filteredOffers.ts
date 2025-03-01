@@ -71,7 +71,10 @@ const filterBtcOffersAtom = atom((get) => {
       (filter.spokenLanguages.length === 0 ||
         filter.spokenLanguages.some((item) =>
           offer.offerInfo.publicPart.spokenLanguages.includes(item)
-        ))
+        )) &&
+      (!filter.showClubOffers ||
+        (offer.offerInfo.publicPart.clubsUuids &&
+          offer.offerInfo.publicPart.clubsUuids.length > 0))
   )
 })
 
@@ -137,7 +140,10 @@ const filterProductAndOtherOffersAtom = atom((get) => {
       (filter.spokenLanguages.length === 0 ||
         filter.spokenLanguages.some((item) =>
           offer.offerInfo.publicPart.spokenLanguages.includes(item)
-        ))
+        )) &&
+      (!filter.showClubOffers ||
+        (offer.offerInfo.publicPart.clubsUuids &&
+          offer.offerInfo.publicPart.clubsUuids.length > 0))
   )
 })
 
@@ -186,7 +192,10 @@ const filterOffersIgnoreListingTypeAtom = atom((get) => {
       (filter.spokenLanguages.length === 0 ||
         filter.spokenLanguages.some((item) =>
           offer.offerInfo.publicPart.spokenLanguages.includes(item)
-        ))
+        )) &&
+      (!filter.showClubOffers ||
+        (offer.offerInfo.publicPart.clubsUuids &&
+          offer.offerInfo.publicPart.clubsUuids.length > 0))
   )
 })
 

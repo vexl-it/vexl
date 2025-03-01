@@ -25,6 +25,7 @@ import {
   RadiusE,
 } from '../utility/geoCoordinates'
 import {HashedPhoneNumber, HashedPhoneNumberE} from './HashedPhoneNumber.brand'
+import {ClubUuid, ClubUuidE} from './clubs'
 import {CurrencyCode, CurrencyCodeE} from './currency.brand'
 import {
   NotificationCypher,
@@ -119,13 +120,13 @@ export type SpokenLanguage = Schema.Schema.Type<typeof SpokenLanguageE>
 export const FriendLevel = z.enum([
   'FIRST_DEGREE',
   'SECOND_DEGREE',
-  'GROUP',
+  'CLUB',
   'NOT_SPECIFIED',
 ])
 export const FriendLevelE = Schema.Literal(
   'FIRST_DEGREE',
   'SECOND_DEGREE',
-  'GROUP',
+  'CLUB',
   'NOT_SPECIFIED'
 )
 export type FriendLevel = Schema.Schema.Type<typeof FriendLevelE>
@@ -298,17 +299,20 @@ export const OfferPublicPart = z
     fcmCypher: NotificationCypher.optional(),
     authorClientVersion: SemverString.optional(),
     goldenAvatarType: GoldenAvatarType.optional(),
+    clubsUuids: z.array(ClubUuid).optional().readonly(),
   })
   .readonly()
+
+const CoalesecedNumber = Schema.Union(Schema.Number, Schema.NumberFromString)
 
 export const OfferPublicPartE = Schema.Struct({
   offerPublicKey: PublicKeyPemBase64E,
   location: Schema.Array(OfferLocationE),
   offerDescription: Schema.String,
-  amountBottomLimit: Schema.Number,
-  amountTopLimit: Schema.Number,
+  amountBottomLimit: CoalesecedNumber,
+  amountTopLimit: CoalesecedNumber,
   feeState: FeeStateE,
-  feeAmount: Schema.Number,
+  feeAmount: CoalesecedNumber,
   locationState: LocationStateToArrayE,
   paymentMethod: Schema.Array(PaymentMethodE),
   btcNetwork: Schema.Array(BtcNetworkE),
@@ -319,7 +323,7 @@ export const OfferPublicPartE = Schema.Struct({
   expirationDate: Schema.optional(JSDateStringE),
   offerType: OfferTypeE,
   activePriceState: ActivePriceStateE,
-  activePriceValue: Schema.Number,
+  activePriceValue: CoalesecedNumber,
   activePriceCurrency: CurrencyCodeE,
   active: Schema.Boolean,
   groupUuids: Schema.Array(Schema.String),
@@ -327,6 +331,7 @@ export const OfferPublicPartE = Schema.Struct({
   fcmCypher: Schema.optional(NotificationCypherE),
   authorClientVersion: Schema.optional(SemverStringE),
   goldenAvatarType: Schema.optional(GoldenAvatarTypeE),
+  clubsUuids: Schema.optional(Schema.Array(ClubUuidE)),
 })
 export type OfferPublicPart = Schema.Schema.Type<typeof OfferPublicPartE>
 

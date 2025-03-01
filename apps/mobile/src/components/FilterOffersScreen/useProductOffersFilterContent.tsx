@@ -1,6 +1,8 @@
 import {useMemo} from 'react'
 import {getTokens} from 'tamagui'
 import {useTranslation} from '../../utils/localization/I18nProvider'
+import clubsSvg from '../CRUDOfferFlow/images/clubsSvg'
+import ClubsComponent from '../OfferForm/components/Clubs'
 import DeliveryMethod from '../OfferForm/components/DeliveryMethod'
 import FriendLevel from '../OfferForm/components/FriendLevel'
 import Network from '../OfferForm/components/Network'
@@ -16,6 +18,7 @@ import {
   calculateSatsValueOnFiatValueChangeActionAtom,
   changePriceCurrencyActionAtom,
   createIsThisLanguageSelectedAtom,
+  createSelectClubInFilterAtom,
   currencySelectVisibleAtom,
   intendedConnectionLevelAtom,
   locationArrayOfOneAtom,
@@ -103,6 +106,16 @@ export default function useProductOffersFilterContent(): Props[] {
           <FriendLevel
             hideSubtitle
             intendedConnectionLevelAtom={intendedConnectionLevelAtom}
+          />
+        ),
+      },
+      {
+        title: t('clubs.vexlClubs'),
+        image: clubsSvg,
+        children: (
+          <ClubsComponent
+            displayFaqsLink={false}
+            createSelectClubAtom={createSelectClubInFilterAtom}
           />
         ),
       },

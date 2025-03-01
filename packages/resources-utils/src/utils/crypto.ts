@@ -5,12 +5,16 @@ import {
   type PrivateKeyPemBase64,
 } from '@vexl-next/cryptography/src/KeyHolder'
 import {toError, type BasicError} from '@vexl-next/domain/src/utility/errors'
-import {EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
+import {
+  CryptoError as CryptoErrorE,
+  EcdsaSignature,
+} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {createHash} from 'crypto'
-import {Schema} from 'effect'
+import {Effect, Schema} from 'effect'
 import * as E from 'fp-ts/Either'
 import {pipe} from 'fp-ts/lib/function'
 import * as TE from 'fp-ts/TaskEither'
+
 export type CryptoError = BasicError<'CryptoError'>
 
 export function ecdsaSign(
@@ -30,6 +34,21 @@ export function ecdsaSign(
     )
 }
 
+export function eciesDecryptE(
+  privateKey: PrivateKeyPemBase64
+): (data: string) => Effect.Effect<string, CryptoErrorE> {
+  return (data) =>
+    Effect.tryPromise({
+      try: async () =>
+        await crypto.eciesLegacy.eciesLegacyDecrypt({data, privateKey}),
+      catch: (error) =>
+        new CryptoErrorE({
+          message: 'Error while decrypting data',
+          error,
+        }),
+    })
+}
+
 export function eciesDecrypt(
   privateKey: PrivateKeyPemBase64
 ): (data: string) => TE.TaskEither<CryptoError, string> {
@@ -40,6 +59,24 @@ export function eciesDecrypt(
       },
       toError('CryptoError', 'Error while decrypting data')
     )
+}
+
+export function eciesEncryptE(
+  publicKey: KeyHolder.PublicKeyPemBase64
+): (data: string) => Effect.Effect<string, CryptoErrorE> {
+  return (data) =>
+    Effect.tryPromise({
+      try: async () =>
+        await crypto.eciesLegacy.eciesLegacyEncrypt({
+          data,
+          publicKey,
+        }),
+      catch: (error) =>
+        new CryptoErrorE({
+          message: 'Error while encrypting data',
+          error,
+        }),
+    })
 }
 
 export function eciesEncrypt(
@@ -58,24 +95,32 @@ export function eciesEncrypt(
 
 export function aesGCMIgnoreTagDecrypt(
   password: string
-): (data: string) => TE.TaskEither<CryptoError, string> {
+): (data: string) => Effect.Effect<string, CryptoErrorE> {
   return (data) =>
-    TE.tryCatch(
-      async () => {
-        return crypto.aes.aesGCMIgnoreTagDecrypt({data, password})
+    Effect.tryPromise({
+      try: async () => crypto.aes.aesGCMIgnoreTagDecrypt({data, password}),
+      catch(error) {
+        return new CryptoErrorE({
+          message: 'Error while decrypting data',
+          error,
+        })
       },
-      toError('CryptoError', 'Error while decrypting data')
-    )
+    })
 }
 
 export function aesGCMIgnoreTagEncrypt(
   password: string
-): (data: string) => TE.TaskEither<CryptoError, string> {
+): (data: string) => Effect.Effect<string, CryptoErrorE> {
   return (data) =>
-    TE.tryCatch(
-      async () => crypto.aes.aesGCMIgnoreTagEncrypt({data, password}),
-      toError('CryptoError', 'Error while encrypting data')
-    )
+    Effect.tryPromise({
+      try: async () => crypto.aes.aesGCMIgnoreTagEncrypt({data, password}),
+      catch(error) {
+        return new CryptoErrorE({
+          message: 'Error while encrypting data',
+          error,
+        })
+      },
+    })
 }
 
 export function hmacSign(

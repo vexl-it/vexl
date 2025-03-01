@@ -1,3 +1,4 @@
+import {ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {
   BtcNetwork,
   CurrencyCode,
@@ -87,6 +88,7 @@ export const OffersFilter = z
     amountTopLimit: z.coerce.number().optional(),
     spokenLanguages: z.array(SpokenLanguage).default([]),
     text: z.string().optional(),
+    clubsUuids: z.array(ClubUuid).default([]),
   })
   .readonly()
 

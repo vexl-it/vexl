@@ -145,14 +145,13 @@ function AreYouSureDialog(): JSX.Element | null {
             {step.type === 'StepWithText' ? (
               <Stack gap="$2">
                 {!!step.imageSource && (
-                  <Stack
-                    als="center"
-                    width={140}
-                    height={140}
-                    borderRadius={24}
-                    my="$4"
-                  >
-                    <ImageUniversal source={step.imageSource} />
+                  <Stack als="center" my="$4">
+                    <ImageUniversal
+                      width={140}
+                      height={140}
+                      style={{borderRadius: 24}}
+                      source={step.imageSource}
+                    />
                   </Stack>
                 )}
                 {!!step.emojiTop && (

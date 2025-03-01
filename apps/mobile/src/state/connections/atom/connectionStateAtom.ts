@@ -7,18 +7,19 @@ import {
 import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {MAX_PAGE_SIZE} from '@vexl-next/rest-api/src/Pagination.brand'
 import {type ContactApi} from '@vexl-next/rest-api/src/services/contact'
-import {type Effect} from 'effect'
+import {Array, Either, Option, type Effect} from 'effect'
 import {sequenceS} from 'fp-ts/Apply'
 import type * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {atom, type Atom} from 'jotai'
-import {selectAtom} from 'jotai/utils'
 import {apiAtom} from '../../../api'
+import {clubsWithMembersAtom} from '../../../components/CRUDOfferFlow/atoms/clubsWithMembersAtom'
 import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
 import deduplicate from '../../../utils/deduplicate'
 import {showDebugNotificationIfEnabled} from '../../../utils/notifications/showDebugNotificationIfEnabled'
 import reportError from '../../../utils/reportError'
+import {myStoredClubsAtom} from '../../contacts/atom/clubsStore'
 import {ConnectionsState} from '../domain'
 
 const connectionStateAtom = atomWithParsedMmkvStorage(
@@ -110,15 +111,30 @@ export const syncConnectionsActionAtom = atom(
   }
 )
 
-export const reachNumberAtom = selectAtom(
-  connectionStateAtom,
-  (connectionState) => {
-    return deduplicate([
-      ...connectionState.firstLevel,
-      ...connectionState.secondLevel,
-    ]).length
-  }
-)
+export const reachNumberAtom = atom((get) => {
+  const clubsWithMembers = get(clubsWithMembersAtom)
+  const connectionState = get(connectionStateAtom)
+
+  const firstAndSecondLevelConnections = deduplicate([
+    ...connectionState.firstLevel,
+    ...connectionState.secondLevel,
+  ])
+  const myStoredClubs = get(myStoredClubsAtom)
+  const myPubKeysInClubs = Object.values(myStoredClubs).map(
+    (key) => key.publicKeyPemBase64
+  )
+  const clubsConnections = Either.isRight(clubsWithMembers)
+    ? clubsWithMembers.right.flatMap((club) =>
+        Option.isSome(club.members)
+          ? Array.difference(club.members.value, myPubKeysInClubs)
+          : []
+      )
+    : []
+
+  // deduplicate to be double sure, even if we should not have duplicates here
+  return deduplicate([...firstAndSecondLevelConnections, ...clubsConnections])
+    .length
+})
 
 export function createFriendLevelInfoAtom(
   publicKey: PublicKeyPemBase64

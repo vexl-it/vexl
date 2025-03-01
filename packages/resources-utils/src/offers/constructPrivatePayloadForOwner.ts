@@ -5,7 +5,7 @@ import {
   type SymmetricKey,
 } from '@vexl-next/domain/src/general/offers'
 import {type ServerPrivatePart} from '@vexl-next/rest-api/src/services/offer/contracts'
-import type * as TE from 'fp-ts/TaskEither'
+import {type Effect} from 'effect'
 import {type OfferPrivatePayloadToEncrypt} from './utils/constructPrivatePayloads'
 import {
   encryptPrivatePart,
@@ -47,7 +47,7 @@ export function constructAndEncryptPrivatePayloadForOwner({
   ownerCredentials: PrivateKeyHolder
   symmetricKey: SymmetricKey
   adminId: OfferAdminId
-}): TE.TaskEither<PrivatePartEncryptionError, ServerPrivatePart> {
+}): Effect.Effect<ServerPrivatePart, PrivatePartEncryptionError> {
   return encryptPrivatePart(
     constructPrivatePayloadForOwner({
       ownerCredentials,

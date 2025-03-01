@@ -1,3 +1,4 @@
+import {Effect} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import {type YStackProps} from 'tamagui'
 import {areThereMissingOffersOnServerAtom} from '../../state/marketplace/atoms/offersMissingOnServer'
@@ -20,7 +21,7 @@ export default function ReencryptOffersSuggestion(
     <MarketplaceSuggestion
       buttonText={t('reuploadOffers.suggestionCell.button')}
       onButtonPress={() => {
-        void reencryptMissingOffers()()
+        void Effect.runPromise(reencryptMissingOffers())
       }}
       type="warning"
       text={t('reuploadOffers.suggestionCell.title')}

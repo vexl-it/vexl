@@ -1,60 +1,39 @@
 import {type KeyHolder} from '@vexl-next/cryptography'
-import {type PrivateKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {
-  LocationPlaceId,
-  OfferInfo,
-  OfferPrivatePart,
-  OfferPublicPart,
-  type OfferLocation,
-  type PrivatePayloadEncrypted,
+  LocationStateE,
+  OfferInfoE,
+  OfferLocationE,
+  OfferPrivatePartE,
+  OfferPublicPartE,
+  type OfferInfo,
+  type OfferPrivatePart,
+  type OfferPublicPart,
 } from '@vexl-next/domain/src/general/offers'
-import {toError, type BasicError} from '@vexl-next/domain/src/utility/errors'
 import {
-  Latitude,
-  Longitude,
-  getDefaultRadius,
-} from '@vexl-next/domain/src/utility/geoCoordinates'
-import {type ServerOffer} from '@vexl-next/rest-api/src/services/offer/contracts'
-import * as A from 'fp-ts/Array'
-import * as E from 'fp-ts/Either'
-import * as TE from 'fp-ts/TaskEither'
-import {flow, pipe} from 'fp-ts/function'
-import {z} from 'zod'
-import {stringToBoolean} from '../utils/booleanString'
-import {
-  aesGCMIgnoreTagDecrypt,
-  eciesDecrypt,
-  type CryptoError,
-} from '../utils/crypto'
-import {
-  parseJson,
-  safeParse,
-  type JsonParseError,
-  type ZodParseError,
-} from '../utils/parsing'
+  compare,
+  SemverStringE,
+} from '@vexl-next/domain/src/utility/SmeverString.brand'
+import {BooleanFromString} from '@vexl-next/generic-utils/src/effect-helpers/BooleanFromString'
+import {ServerOffer} from '@vexl-next/rest-api/src/services/offer/contracts'
+import {Effect, Either, Schema} from 'effect'
+import {type ParseError} from 'effect/ParseResult'
+import {pipe} from 'fp-ts/function'
+import {aesGCMIgnoreTagDecrypt, eciesDecryptE} from '../utils/crypto'
 
-const OfferLocationDeprecated = z
-  .object({
-    longitude: z.coerce.number().pipe(Longitude),
-    latitude: z.coerce.number().pipe(Latitude),
-    city: z.string(),
-  })
-  .readonly()
-type OfferLocationDeprecated = z.TypeOf<typeof OfferLocationDeprecated>
+export class DecryptingOfferError extends Schema.TaggedError<DecryptingOfferError>(
+  'DecryptingOfferError'
+)('DecryptingOfferError', {
+  cause: Schema.Unknown,
+  message: Schema.String,
+  serverOffer: ServerOffer,
+}) {}
 
-const OfferLocationStateDeprecated = z.enum(['IN_PERSON', 'ONLINE'])
-type OfferLocationStateDeprecated = z.TypeOf<
-  typeof OfferLocationStateDeprecated
->
-
-export interface ErrorDecryptingOffer
-  extends BasicError<'ErrorDecryptingOffer'> {
-  serverOffer: ServerOffer
-}
-
-export interface NonCompatibleOfferVersionError {
-  _tag: 'NonCompatibleOfferVersionError'
-}
+export class NonCompatibleOfferVersionError extends Schema.TaggedError<NonCompatibleOfferVersionError>(
+  'NonCompatibleOfferVersionError'
+)('NonCompatibleOfferVersionError', {
+  cause: Schema.Unknown,
+  message: Schema.String,
+}) {}
 
 function decryptedPayloadsToOffer({
   serverOffer,
@@ -64,145 +43,160 @@ function decryptedPayloadsToOffer({
   serverOffer: ServerOffer
   privatePayload: OfferPrivatePart
   publicPayload: OfferPublicPart
-}): E.Either<
-  ZodParseError<z.infer<typeof OfferInfo>>,
-  z.infer<typeof OfferInfo>
-> {
-  return safeParse(OfferInfo)({
-    id: serverOffer.id,
-    offerId: serverOffer.offerId,
-    privatePart: privatePayload,
-    publicPart: publicPayload,
-    createdAt: serverOffer.createdAt,
-    modifiedAt: serverOffer.modifiedAt,
-  })
+}): Effect.Effect<Either.Either<OfferInfoE, ParseError>> {
+  return pipe(
+    Schema.decode(OfferInfoE)({
+      id: serverOffer.id,
+      offerId: serverOffer.offerId,
+      privatePart: privatePayload,
+      publicPart: publicPayload,
+      createdAt: serverOffer.createdAt,
+      modifiedAt: serverOffer.modifiedAt,
+    }),
+    Effect.either
+  )
 }
 
-function decodeLocation(
-  offerJson: any
-): E.Either<JsonParseError | ZodParseError<OfferLocationDeprecated>, unknown> {
-  if (offerJson.locationV2)
-    return E.right({...offerJson, location: offerJson.locationV2})
+const OfferPublicPartIncludingLegacyPropsToDecrypt = Schema.Struct({
+  ...OfferPublicPartE.fields,
+  active: BooleanFromString,
+  location: Schema.Unknown,
+  locationV2: Schema.Array(OfferLocationE),
+  locationState: LocationStateE,
+  locationStateV2: Schema.Array(LocationStateE),
+})
 
-  return pipe(
-    offerJson,
-    E.right,
-    E.map((one) => one.location ?? []),
-    E.chainW(
-      flow(
-        A.map((oneLocationRaw: unknown) => {
-          if (typeof oneLocationRaw === 'string') {
-            return pipe(
-              parseJson(oneLocationRaw),
-              E.chainW(safeParse(OfferLocationDeprecated)),
-              E.map((oneLocation) => {
-                return {
-                  placeId: LocationPlaceId.parse(oneLocation.city),
-                  longitude: oneLocation.longitude,
-                  latitude: oneLocation.latitude,
-                  shortAddress: oneLocation.city,
-                  address: oneLocation.city,
-                  radius: getDefaultRadius(oneLocation.latitude),
-                } satisfies OfferLocation
-              })
-            )
-          }
+const OfferPublicPayloadUnion = Schema.Union(
+  OfferPublicPartIncludingLegacyPropsToDecrypt,
+  OfferPublicPartE
+)
 
-          return E.right(oneLocationRaw)
-        }),
-        A.sequence(E.Applicative)
+const firstSupportedSemverString = Schema.decodeSync(SemverStringE)('1.16.0')
+const isSupportedOfferVersion = (
+  offerStrign: string
+): Effect.Effect<boolean, ParseError> =>
+  pipe(
+    offerStrign,
+    Schema.decodeUnknown(
+      Schema.parseJson(
+        Schema.Struct({
+          authorClientVersion: SemverStringE,
+        })
       )
     ),
-    E.map((location) => ({...offerJson, location}))
+    Effect.map(({authorClientVersion}) => {
+      return compare(authorClientVersion)('>=', firstSupportedSemverString)
+    })
   )
-}
-
-function decodeLocationState(
-  offerJson: any
-): E.Either<ZodParseError<OfferLocationStateDeprecated>, unknown> {
-  if (offerJson.locationStateV2)
-    return E.right({...offerJson, locationState: offerJson.locationStateV2})
-
-  return pipe(
-    offerJson,
-    E.right,
-    E.map((one) => one.locationState ?? []),
-    E.chainW(safeParse(OfferLocationStateDeprecated)),
-    E.map((locationState) => ({...offerJson, locationState: [locationState]}))
-  )
-}
-
-export function decryptPrivatePart(
-  privateKey: PrivateKeyPemBase64
-): (
-  encrypted: PrivatePayloadEncrypted
-) => TE.TaskEither<
-  | CryptoError
-  | JsonParseError
-  | ZodParseError<z.infer<typeof OfferPrivatePart>>,
-  OfferPrivatePart
-> {
-  return (privatePayload) =>
-    pipe(
-      TE.right(privatePayload.substring(1)),
-      TE.chainW(eciesDecrypt(privateKey)),
-      TE.chainEitherKW(parseJson),
-      TE.chainEitherKW(safeParse(OfferPrivatePart))
-    )
-}
 
 // TODO write unit test for this function
 export default function decryptOffer(
   privateKey: KeyHolder.PrivateKeyHolder
 ): (
   serverOffer: ServerOffer
-) => TE.TaskEither<
-  ErrorDecryptingOffer | NonCompatibleOfferVersionError,
-  OfferInfo
+) => Effect.Effect<
+  OfferInfo,
+  DecryptingOfferError | NonCompatibleOfferVersionError
 > {
   return (serverOffer: ServerOffer) => {
-    if (
-      serverOffer.publicPayload.at(0) !== '0' ||
-      serverOffer.privatePayload.at(0) !== '0'
-    ) {
-      return TE.left({
-        _tag: 'NonCompatibleOfferVersionError',
-      })
-    }
+    return Effect.gen(function* (_) {
+      if (
+        serverOffer.publicPayload.at(0) !== '0' ||
+        serverOffer.privatePayload.at(0) !== '0' ||
+        !isSupportedOfferVersion
+      ) {
+        return yield* _(
+          Effect.fail(
+            new NonCompatibleOfferVersionError({
+              message: 'Non compatible offer version',
+              cause: new Error('Non compatible offer version'),
+            })
+          )
+        )
+      }
 
-    return pipe(
-      TE.right(serverOffer),
-      TE.bindTo('serverOffer'),
-      TE.bindW('privatePayload', ({serverOffer}) => {
-        return pipe(
-          TE.right(serverOffer.privatePayload.substring(1)),
-          TE.chainW(eciesDecrypt(privateKey.privateKeyPemBase64)),
-          TE.chainEitherKW(parseJson),
-          TE.chainEitherKW(safeParse(OfferPrivatePart))
+      const privatePayload = yield* _(
+        Effect.succeed(serverOffer.privatePayload.substring(1)),
+        Effect.flatMap(eciesDecryptE(privateKey.privateKeyPemBase64)),
+        Effect.flatMap(
+          Schema.decodeUnknown(Schema.parseJson(OfferPrivatePartE))
+        ),
+        Effect.either
+      )
+
+      if (Either.isLeft(privatePayload)) {
+        return yield* _(
+          Effect.fail(
+            new DecryptingOfferError({
+              message: 'Error while decrypting offer',
+              cause: privatePayload.left,
+              serverOffer,
+            })
+          )
         )
-      }),
-      TE.bindW('publicPayload', ({privatePayload, serverOffer}) => {
-        return pipe(
-          TE.right(serverOffer.publicPayload.substring(1)),
-          TE.chainW(aesGCMIgnoreTagDecrypt(privatePayload.symmetricKey)),
-          TE.chainEitherKW(parseJson),
-          TE.map((one) => ({
-            ...one,
-            active: stringToBoolean(one.active),
-          })),
-          TE.chainEitherKW(decodeLocation),
-          TE.chainEitherKW(decodeLocationState),
-          TE.chainEitherKW(safeParse(OfferPublicPart))
+      }
+
+      const publicPayload = yield* _(
+        Effect.succeed(serverOffer.publicPayload.substring(1)),
+        Effect.flatMap(
+          aesGCMIgnoreTagDecrypt(privatePayload.right.symmetricKey)
+        ),
+        Effect.flatMap(
+          Schema.decodeUnknown(Schema.parseJson(OfferPublicPayloadUnion))
+        ),
+        Effect.map((offerPublicPart) => {
+          if (
+            Schema.is(OfferPublicPartIncludingLegacyPropsToDecrypt)(
+              offerPublicPart
+            )
+          ) {
+            const {locationV2, locationStateV2, ...rest} = offerPublicPart
+
+            return {
+              ...rest,
+              location: locationV2,
+              locationState: locationStateV2,
+            } satisfies OfferPublicPart
+          }
+
+          return offerPublicPart
+        }),
+        Effect.either
+      )
+
+      if (Either.isLeft(publicPayload)) {
+        return yield* _(
+          Effect.fail(
+            new DecryptingOfferError({
+              message: 'Error while decrypting offer',
+              cause: publicPayload.left,
+              serverOffer,
+            })
+          )
         )
-      }),
-      TE.chainEitherKW(decryptedPayloadsToOffer),
-      TE.mapLeft((error) => ({
-        ...toError(
-          'ErrorDecryptingOffer',
-          'Error while decrypting offer'
-        )(error),
-        serverOffer,
-      }))
-    )
+      }
+
+      const offer = yield* _(
+        decryptedPayloadsToOffer({
+          serverOffer,
+          privatePayload: privatePayload.right,
+          publicPayload: publicPayload.right,
+        })
+      )
+
+      if (Either.isLeft(offer)) {
+        return yield* _(
+          Effect.fail(
+            new DecryptingOfferError({
+              message: 'Error while decrypting offer',
+              cause: offer.left,
+              serverOffer,
+            })
+          )
+        )
+      }
+
+      return offer.right
+    })
   }
 }

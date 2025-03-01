@@ -16,6 +16,7 @@ import {
 import {molecule} from 'bunshi/dist/react'
 import {
   atom,
+  type Atom,
   type PrimitiveAtom,
   type SetStateAction,
   type WritableAtom,
@@ -23,6 +24,7 @@ import {
 
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
+import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {IdNumeric} from '@vexl-next/domain/src/utility/IdNumeric'
 import {
   IsoDatetimeString,
@@ -30,18 +32,17 @@ import {
 } from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
 import {Uuid, generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {calculateViewportRadius} from '@vexl-next/domain/src/utility/geoCoordinates'
-import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
+import {eitherToEffect} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {generateKeyPair} from '@vexl-next/resources-utils/src/utils/crypto'
 import {type LocationSuggestion} from '@vexl-next/rest-api/src/services/location/contracts'
+import {Effect, pipe} from 'effect'
 import * as E from 'fp-ts/Either'
-import * as T from 'fp-ts/Task'
-import * as TE from 'fp-ts/TaskEither'
-import {pipe} from 'fp-ts/function'
 import {focusAtom} from 'jotai-optics'
 import {splitAtom} from 'jotai/utils'
 import {Alert} from 'react-native'
 import {type CRUDOfferStackParamsList} from '../../../navigationTypes'
 import {createInboxAtom} from '../../../state/chat/hooks/useCreateInbox'
+import {myStoredClubsAtom} from '../../../state/contacts/atom/clubsStore'
 import {
   createBtcPriceForCurrencyAtom,
   refreshBtcPriceActionAtom,
@@ -52,6 +53,7 @@ import {
   updateOfferAtom,
 } from '../../../state/marketplace'
 import {singleOfferAtom} from '../../../state/marketplace/atoms/offersState'
+import getClubConnectionsForUuids from '../../../state/marketplace/utils/getClubsConnectionsForUuids'
 import getValueFromSetStateActionOfAtom from '../../../utils/atomUtils/getValueFromSetStateActionOfAtom'
 import calculatePriceInFiatFromSats from '../../../utils/calculatePriceInFiatFromSats'
 import calculatePriceInSats from '../../../utils/calculatePriceInSats'
@@ -77,6 +79,7 @@ import {
   otherOfferScreens,
   productOfferScreens,
 } from '../domain'
+import {type ClubWithMembers} from './clubsWithMembersAtom'
 import numberOfFriendsAtom from './numberOfFriendsAtom'
 
 function getAtomWithNullableValueHandling<T, S>(
@@ -225,6 +228,7 @@ export function createOfferDummyPublicPart(): OfferPublicPart {
     activePriceCurrency: defaultCurrency.code ?? currencies.USD.code,
     active: true,
     groupUuids: [],
+    clubsUuids: [],
   }
 }
 
@@ -277,6 +281,9 @@ export const offerFormMolecule = molecule(() => {
   )
   const nullableLocationStateAtom = atom<readonly LocationState[] | undefined>(
     dummyOffer.offerInfo.publicPart.locationState
+  )
+  const nullableClubsUuidsAtom = atom<readonly ClubUuid[] | undefined>(
+    dummyOffer.offerInfo.publicPart.clubsUuids
   )
 
   const currencySelectVisibleAtom = atom<boolean>(false)
@@ -467,6 +474,37 @@ export const offerFormMolecule = molecule(() => {
         .prop('intendedConnectionLevel') ?? 'FIRST'
   )
 
+  const selectedClubsUuidsAtom = getAtomWithNullableValueHandling(
+    nullableClubsUuidsAtom,
+    offerFormAtom,
+    'clubsUuids'
+  )
+
+  function createSelectClubAtom(
+    clubWithMembersAtom: Atom<ClubWithMembers>
+  ): WritableAtom<boolean, [SetStateAction<boolean>], void> {
+    return atom(
+      (get) =>
+        get(selectedClubsUuidsAtom)?.includes(
+          get(clubWithMembersAtom).club.uuid
+        ) ?? false,
+      (get, set, isSelected: SetStateAction<boolean>) => {
+        const club = get(clubWithMembersAtom)
+
+        const selected = getValueFromSetStateActionOfAtom(isSelected)(
+          () => get(selectedClubsUuidsAtom)?.includes(club.club.uuid) ?? false
+        )
+
+        set(selectedClubsUuidsAtom, (value) => {
+          const newValue = new Set(value)
+          if (selected) newValue.add(club.club.uuid)
+          else newValue.delete(club.club.uuid)
+          return Array.from(newValue)
+        })
+      }
+    )
+  }
+
   const updateBtcNetworkAtom = atom(
     (get) => get(btcNetworkAtom),
     (get, set, btcNetwork: BtcNetwork) => {
@@ -576,151 +614,155 @@ export const offerFormMolecule = molecule(() => {
 
   const offerExpirationModalVisibleAtom = atom<boolean>(false)
 
-  const createOfferActionAtom = atom(null, (get, set): T.Task<boolean> => {
-    const {t} = get(translationAtom)
-    const singlePriceActive = get(singlePriceActiveAtom)
+  const createOfferActionAtom = atom(
+    null,
+    (get, set): Effect.Effect<boolean> => {
+      const {t} = get(translationAtom)
+      const singlePriceActive = get(singlePriceActiveAtom)
 
-    if (
-      !checkConditionsToCreateOfferAreMetAndAlertIfNot({
-        offerForm: get(offerFormAtom),
-        singlePriceActive,
-        t,
+      if (
+        !checkConditionsToCreateOfferAreMetAndAlertIfNot({
+          offerForm: get(offerFormAtom),
+          singlePriceActive,
+          t,
+        })
+      ) {
+        return Effect.succeed(false)
+      }
+
+      const intendedConnectionLevel = get(intendedConnectionLevelAtom)
+      const myStoredClubs = get(myStoredClubsAtom)
+      const clubsUuids = get(selectedClubsUuidsAtom)
+      const belowProgressLeft = get(modifyOfferLoaderTitleAtom)
+      const {goldenAvatarType} = get(preferencesAtom)
+      const payloadPublic = formatOfferPublicPart(get(offerFormAtom))
+      const clubsConnections = getClubConnectionsForUuids({
+        clubsUuids: clubsUuids ? [...clubsUuids] : [],
+        myStoredClubs,
       })
-    ) {
-      return T.of(false)
-    }
 
-    const intendedConnectionLevel = get(intendedConnectionLevelAtom)
-    const belowProgressLeft = get(modifyOfferLoaderTitleAtom)
-    const {goldenAvatarType} = get(preferencesAtom)
-    const payloadPublic = formatOfferPublicPart(get(offerFormAtom))
+      return Effect.gen(function* (_) {
+        yield* _(set(checkNotificationPermissionsAndAskIfPossibleActionAtom))
 
-    return pipe(
-      TE.Do,
-      TE.chainW(() =>
-        effectToTaskEither(
-          set(checkNotificationPermissionsAndAskIfPossibleActionAtom)
-        )
-      ),
-      TE.map(() => {
         set(progressModal.show, {
           title: t('offerForm.offerEncryption.encryptingYourOffer'),
           belowProgressLeft: belowProgressLeft.loadingText,
           bottomText: t('offerForm.offerEncryption.dontShutDownTheApp'),
           indicateProgress: {type: 'intermediate'},
         })
-      }),
-      TE.chainW(() => TE.fromEither(generateKeyPair())),
-      TE.bindTo('key'),
-      TE.bindW('createdOffer', ({key}) =>
-        set(createOfferAtom, {
-          payloadPublic: {
-            ...payloadPublic,
-            authorClientVersion: version,
-            offerPublicKey: key.publicKeyPemBase64,
-            goldenAvatarType,
-          },
-          intendedConnectionLevel: intendedConnectionLevel ?? 'FIRST',
-          onProgress: (progress) => {
-            set(progressModal.showStep, {
-              progress,
-              textData: {
-                title: t('offerForm.offerEncryption.encryptingYourOffer'),
-                belowProgressLeft: belowProgressLeft.loadingText,
-                bottomText: t('offerForm.offerEncryption.dontShutDownTheApp'),
-              },
-            })
-          },
-          offerKey: key,
-        })
-      ),
-      TE.chainFirstW(({key, createdOffer}) =>
+
+        const key = yield* _(eitherToEffect(generateKeyPair()))
+
+        const createdOffer = yield* _(
+          set(createOfferAtom, {
+            payloadPublic: {
+              ...payloadPublic,
+              authorClientVersion: version,
+              offerPublicKey: key.publicKeyPemBase64,
+              goldenAvatarType,
+              clubsUuids,
+            },
+            clubsConnections,
+            intendedConnectionLevel: intendedConnectionLevel ?? 'FIRST',
+            onProgress: (progress) => {
+              set(progressModal.showStep, {
+                progress,
+                textData: {
+                  title: t('offerForm.offerEncryption.encryptingYourOffer'),
+                  belowProgressLeft: belowProgressLeft.loadingText,
+                  bottomText: t('offerForm.offerEncryption.dontShutDownTheApp'),
+                },
+              })
+            },
+            offerKey: key,
+          })
+        )
+
         set(createInboxAtom, {
           inbox: {
             privateKey: key,
             offerId: createdOffer.offerInfo.offerId,
           },
         })
-      ),
-      TE.matchEW(
-        (e) => {
-          if (e._tag === 'NotificationPrompted') return T.of(false)
 
-          set(progressModal.hide)
-          if (e._tag !== 'NetworkError')
-            reportError('error', new Error('Error while creating offer'), {e})
-          showErrorAlert({
-            title:
-              toCommonErrorMessage(e, t) ?? t('offerForm.errorCreatingOffer'),
-            error: e,
+        yield* _(
+          set(progressModal.hideDeffered, {
+            data: {
+              title: t('offerForm.offerEncryption.doneOfferPoster'),
+              bottomText: t(
+                'offerForm.offerEncryption.yourFriendsAndFriendsOfFriends'
+              ),
+              belowProgressLeft: belowProgressLeft.doneText,
+              belowProgressRight: t('progressBar.DONE'),
+              indicateProgress: {type: 'progress', percentage: 100},
+            },
+            delayMs: 3000,
           })
-          return T.of(false)
-        },
-        () => {
-          return pipe(
-            set(progressModal.hideDeffered, {
-              data: {
-                title: t('offerForm.offerEncryption.doneOfferPoster'),
-                bottomText: t(
-                  'offerForm.offerEncryption.yourFriendsAndFriendsOfFriends'
-                ),
-                belowProgressLeft: belowProgressLeft.doneText,
-                belowProgressRight: t('progressBar.DONE'),
-                indicateProgress: {type: 'progress', percentage: 100},
-              },
-              delayMs: 3000,
-            }),
-            T.map(() => true)
-          )
-        }
+        )
+      }).pipe(
+        Effect.match({
+          onSuccess: () => true,
+          onFailure: (e) => {
+            set(progressModal.hide)
+
+            if (e._tag === 'NotificationPrompted') return false
+
+            if (e._tag !== 'NetworkError')
+              reportError('error', new Error('Error while creating offer'), {e})
+
+            showErrorAlert({
+              title:
+                toCommonErrorMessage(e, t) ?? t('offerForm.errorCreatingOffer'),
+              error: e,
+            })
+
+            return false
+          },
+        })
       )
-    )
-  })
+    }
+  )
 
   const deleteOfferWithAreYouSureActionAtom = atom(null, (get, set) => {
     const {t} = get(translationAtom)
     const offer = get(offerAtom)
 
-    return pipe(
-      set(askAreYouSureActionAtom, {
-        variant: 'danger',
-        steps: [
-          {
-            type: 'StepWithText',
-            title: t('editOffer.deleteOffer'),
-            description: t('editOffer.deleteOfferDescription'),
-            positiveButtonText: t('common.yesDelete'),
-            negativeButtonText: t('common.nope'),
-          },
-        ],
-      }),
-      effectToTaskEither,
-      TE.map(() => {
-        set(loadingOverlayDisplayedAtom, true)
-      }),
-      TE.chainW(() =>
+    return Effect.gen(function* (_) {
+      yield* _(
+        set(askAreYouSureActionAtom, {
+          variant: 'danger',
+          steps: [
+            {
+              type: 'StepWithText',
+              title: t('editOffer.deleteOffer'),
+              description: t('editOffer.deleteOfferDescription'),
+              positiveButtonText: t('common.yesDelete'),
+              negativeButtonText: t('common.nope'),
+            },
+          ],
+        })
+      )
+
+      set(loadingOverlayDisplayedAtom, true)
+
+      yield* _(
         set(deleteOffersActionAtom, {
           adminIds: [offer.ownershipInfo?.adminId].filter(notEmpty),
         })
-      ),
-      TE.match(
-        (e) => {
-          if (e._tag !== 'UserDeclinedError') {
-            showErrorAlert({
-              title:
-                toCommonErrorMessage(e, t) ?? t('editOffer.errorDeletingOffer'),
-              error: e,
-            })
-          }
-          return false
-        },
-        (result) => {
-          return result.success
-        }
-      ),
-      T.map((value) => {
-        set(loadingOverlayDisplayedAtom, false)
-        return value
+      )
+
+      set(loadingOverlayDisplayedAtom, false)
+
+      return true
+    }).pipe(
+      Effect.catchTag('UserDeclinedError', (e) => {
+        showErrorAlert({
+          title:
+            toCommonErrorMessage(e, t) ?? t('editOffer.errorDeletingOffer'),
+          error: e,
+        })
+
+        return Effect.succeed(false)
       })
     )
   })
@@ -787,21 +829,41 @@ export const offerFormMolecule = molecule(() => {
       indicateProgress: {type: 'intermediate'},
     })
 
-    return pipe(
-      set(updateOfferAtom, {
-        payloadPublic: {
-          ...offer.offerInfo.publicPart,
-          active: targetValue,
-        },
-        adminId: offer.ownershipInfo?.adminId ?? ('' as OfferAdminId),
-        symmetricKey: offer.offerInfo.privatePart.symmetricKey,
-        intendedConnectionLevel: offer.ownershipInfo
-          ? offer.ownershipInfo.intendedConnectionLevel
-          : 'FIRST',
-        updateFcmCypher: false,
-      }),
-      TE.matchE(
-        (e) => {
+    return Effect.gen(function* (_) {
+      yield* _(
+        set(updateOfferAtom, {
+          payloadPublic: {
+            ...offer.offerInfo.publicPart,
+            active: targetValue,
+          },
+          adminId: offer.ownershipInfo?.adminId ?? ('' as OfferAdminId),
+          symmetricKey: offer.offerInfo.privatePart.symmetricKey,
+          intendedConnectionLevel: offer.ownershipInfo
+            ? offer.ownershipInfo.intendedConnectionLevel
+            : 'FIRST',
+          updateFcmCypher: false,
+        })
+      )
+
+      yield* _(
+        set(progressModal.hideDeffered, {
+          data: {
+            title: !targetValue
+              ? t('editOffer.pausingOfferSuccess')
+              : t('editOffer.offerEditSuccess'),
+            bottomText: t('editOffer.youCanCheckYourOffer'),
+            belowProgressLeft: targetValue
+              ? belowProgressLeft.doneText
+              : t('editOffer.offerEditSuccess'),
+            indicateProgress: {type: 'done'},
+          },
+          delayMs: 1500,
+        })
+      )
+    }).pipe(
+      Effect.match({
+        onSuccess: () => true,
+        onFailure: (e) => {
           set(offerActiveAtom, !targetValue)
           set(progressModal.hide)
           showErrorAlert({
@@ -810,30 +872,10 @@ export const offerFormMolecule = molecule(() => {
               t('editOffer.offerUnableToChangeOfferActivation'),
             error: e,
           })
-          return T.of(false)
+
+          return false
         },
-        () => {
-          return pipe(
-            T.Do,
-            T.chain(() =>
-              set(progressModal.hideDeffered, {
-                data: {
-                  title: !targetValue
-                    ? t('editOffer.pausingOfferSuccess')
-                    : t('editOffer.offerEditSuccess'),
-                  bottomText: t('editOffer.youCanCheckYourOffer'),
-                  belowProgressLeft: targetValue
-                    ? belowProgressLeft.doneText
-                    : t('editOffer.offerEditSuccess'),
-                  indicateProgress: {type: 'done'},
-                },
-                delayMs: 1500,
-              })
-            ),
-            T.map(() => true)
-          )
-        }
-      )
+      })
     )
   })
 
@@ -852,7 +894,7 @@ export const offerFormMolecule = molecule(() => {
         t,
       })
     ) {
-      return T.of(false)
+      return Effect.succeed(false)
     }
 
     const payloadPublic = formatOfferPublicPart(get(offerFormAtom))
@@ -864,42 +906,43 @@ export const offerFormMolecule = molecule(() => {
       indicateProgress: {type: 'intermediate'},
     })
 
-    return pipe(
-      set(updateOfferAtom, {
-        payloadPublic,
-        adminId: offer.ownershipInfo?.adminId ?? ('' as OfferAdminId),
-        symmetricKey: offer.offerInfo.privatePart.symmetricKey,
-        intendedConnectionLevel: intendedConnectionLevel ?? 'FIRST',
-        updateFcmCypher: false,
-      }),
-      TE.matchE(
-        (e) => {
+    return Effect.gen(function* (_) {
+      yield* _(
+        set(updateOfferAtom, {
+          payloadPublic,
+          adminId: offer.ownershipInfo?.adminId ?? ('' as OfferAdminId),
+          symmetricKey: offer.offerInfo.privatePart.symmetricKey,
+          intendedConnectionLevel: intendedConnectionLevel ?? 'FIRST',
+          updateFcmCypher: false,
+        })
+      )
+
+      yield* _(
+        set(progressModal.hideDeffered, {
+          data: {
+            title: t('editOffer.offerEditSuccess'),
+            bottomText: t('editOffer.youCanCheckYourOffer'),
+            belowProgressLeft: belowProgressLeft.doneText,
+            indicateProgress: {type: 'done'},
+          },
+          delayMs: 2000,
+        })
+      )
+    }).pipe(
+      Effect.match({
+        onSuccess: () => true,
+        onFailure: (e) => {
           set(progressModal.hide)
+
           showErrorAlert({
             title:
               toCommonErrorMessage(e, t) ?? t('editOffer.errorEditingOffer'),
             error: e,
           })
-          return T.of(false)
+
+          return false
         },
-        () => {
-          return pipe(
-            T.Do,
-            T.chain(() =>
-              set(progressModal.hideDeffered, {
-                data: {
-                  title: t('editOffer.offerEditSuccess'),
-                  bottomText: t('editOffer.youCanCheckYourOffer'),
-                  belowProgressLeft: belowProgressLeft.doneText,
-                  indicateProgress: {type: 'done'},
-                },
-                delayMs: 2000,
-              })
-            ),
-            T.map(() => true)
-          )
-        }
-      )
+      })
     )
   })
 
@@ -934,6 +977,7 @@ export const offerFormMolecule = molecule(() => {
         set(nullablePaymentMethodAtom, offerPublicPart.paymentMethod)
         set(nullableLocationAtom, offerPublicPart.location)
         set(nullableLocationStateAtom, offerPublicPart.locationState)
+        set(nullableClubsUuidsAtom, offerPublicPart.clubsUuids)
       }
     }
   )
@@ -962,6 +1006,7 @@ export const offerFormMolecule = molecule(() => {
       nullableLocationStateAtom,
       dummyOffer.offerInfo.publicPart.locationState
     )
+    set(nullableClubsUuidsAtom, dummyOffer.offerInfo.publicPart.clubsUuids)
   })
 
   const btcPriceForOfferWithCurrencyAtom =
@@ -1228,5 +1273,6 @@ export const offerFormMolecule = molecule(() => {
     emitAlertBasedOnCurrentStepIfAnyAtom,
     screensBasedOnListingTypeAtom,
     currencySelectVisibleAtom,
+    createSelectClubAtom,
   }
 })

@@ -3,6 +3,7 @@ import {
   UnixMilliseconds,
   unixMillisecondsNow,
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import updatePrivateParts from '@vexl-next/resources-utils/src/offers/updatePrivateParts'
 import {subtractArrays} from '@vexl-next/resources-utils/src/utils/array'
 import * as A from 'fp-ts/Array'
@@ -19,10 +20,12 @@ import notEmpty from '../../../utils/notEmpty'
 import {showDebugNotificationIfEnabled} from '../../../utils/notifications/showDebugNotificationIfEnabled'
 import reportError from '../../../utils/reportError'
 import {startMeasure} from '../../../utils/reportTime'
+import {myStoredClubsAtom} from '../../contacts/atom/clubsStore'
 import {
   offersStateAtom,
   singleOfferByAdminIdAtom,
 } from '../../marketplace/atoms/offersState'
+import getClubConnectionsForUuids from '../../marketplace/utils/getClubsConnectionsForUuids'
 import {OfferToConnectionsItems, type OfferToConnectionsItem} from '../domain'
 import connectionStateAtom from './connectionStateAtom'
 
@@ -91,6 +94,7 @@ export const updateAllOffersConnectionsActionAtom = atom(
       readonly success: boolean
     }>
   > => {
+    const myStoredClubs = get(myStoredClubsAtom)
     const connectionState = get(connectionStateAtom)
     const api = get(apiAtom)
     const stopProcessingAfter: UnixMilliseconds | undefined = isInBackground
@@ -117,9 +121,16 @@ export const updateAllOffersConnectionsActionAtom = atom(
       offerToConnectionsAtoms,
       A.mapWithIndex((i, oneOfferAtom) => {
         const oneOfferConections = get(oneOfferAtom)
+        const offer = get(singleOfferByAdminIdAtom(oneOfferConections.adminId))
+        const clubsUuids = offer?.offerInfo.publicPart.clubsUuids
+          ? [...offer.offerInfo.publicPart.clubsUuids]
+          : []
+        const targetClubConnections = getClubConnectionsForUuids({
+          clubsUuids,
+          myStoredClubs,
+        })
         const intendedConnectionLevel =
-          get(singleOfferByAdminIdAtom(oneOfferConections.adminId))
-            ?.ownershipInfo?.intendedConnectionLevel ?? 'ALL'
+          offer?.ownershipInfo?.intendedConnectionLevel ?? 'ALL'
 
         let endOneOfferUpdateMeasure: () => void = () => {}
         return pipe(
@@ -139,21 +150,24 @@ export const updateAllOffersConnectionsActionAtom = atom(
             return E.left({_tag: 'SkippedBecauseTimeLimitReached'} as const)
           }),
           TE.chainW(() =>
-            updatePrivateParts({
-              currentConnections: oneOfferConections.connections,
-              targetConnections: {
-                firstLevel: connectionState.firstLevel,
-                secondLevel:
-                  intendedConnectionLevel === 'ALL'
-                    ? connectionState.secondLevel
-                    : [],
-              },
-              adminId: oneOfferConections.adminId,
-              symmetricKey: oneOfferConections.symmetricKey,
-              commonFriends: connectionState.commonFriends,
-              stopProcessingAfter,
-              api: api.offer,
-            })
+            effectToTaskEither(
+              updatePrivateParts({
+                currentConnections: oneOfferConections.connections,
+                targetConnections: {
+                  firstLevel: connectionState.firstLevel,
+                  secondLevel:
+                    intendedConnectionLevel === 'ALL'
+                      ? connectionState.secondLevel
+                      : [],
+                  clubs: targetClubConnections,
+                },
+                adminId: oneOfferConections.adminId,
+                symmetricKey: oneOfferConections.symmetricKey,
+                commonFriends: connectionState.commonFriends,
+                stopProcessingAfter,
+                api: api.offer,
+              })
+            )
           ),
           TE.map((v) => {
             endOneOfferUpdateMeasure()
@@ -213,7 +227,8 @@ export const updateAllOffersConnectionsActionAtom = atom(
                       offerToConnectionsAtoms.length
                     } did not update fully due to time limit reached. Total connections updated: ${
                       newConnections.firstLevel.length +
-                      (newConnections.secondLevel?.length ?? 0)
+                      (newConnections.secondLevel?.length ?? 0) +
+                      (newConnections.clubs?.length ?? 0)
                     }. Total connections skipped: ${String(
                       timeLimitReachedErrors.length
                     )}.`
@@ -238,6 +253,16 @@ export const updateAllOffersConnectionsActionAtom = atom(
                           [
                             ...(val.connections.secondLevel ?? []),
                             ...(newConnections.secondLevel ?? []),
+                          ],
+                          removedConnections
+                        )
+                      : undefined,
+                  clubs:
+                    clubsUuids.length > 0
+                      ? subtractArrays(
+                          [
+                            ...(val.connections.clubs ?? []),
+                            ...(newConnections.clubs ?? []),
                           ],
                           removedConnections
                         )

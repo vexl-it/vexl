@@ -11,11 +11,10 @@ import {
 import {Effect, Schema} from 'effect'
 import * as SecretStore from 'expo-secure-store'
 import * as E from 'fp-ts/Either'
-import type * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
 import {flow} from 'fp-ts/function'
 import {Image} from 'react-native'
-import {type ZodError, type z} from 'zod'
+import {type z, type ZodError} from 'zod'
 import {type GettingImageSizeError} from '../state/chat/utils/replaceBase64UriWithImageFileUri'
 
 export class JsonParseError extends Schema.TaggedError<JsonParseError>(
@@ -234,15 +233,6 @@ export function stringifyToJson(
     () => JSON.stringify(data),
     (e) => new JsonStringifyError({cause: e})
   )
-}
-
-export function delayInPipeT<V>(milis: number): (val: V) => T.Task<V> {
-  return (val) => async () =>
-    await new Promise((resolve) =>
-      setTimeout(() => {
-        resolve(val)
-      }, milis)
-    )
 }
 
 export function getImageSize(

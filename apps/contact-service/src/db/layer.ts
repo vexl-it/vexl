@@ -8,6 +8,7 @@ import make_version_in_users_table_nullable from './migrations/0003_make_version
 import add_initial_import_done_column_to_users_table from './migrations/0004_add_initial_import_done_column_to_users_table'
 import add_unique_constraint_to_user_contact from './migrations/0004_add_unique_constraint_to_user_contact'
 import add_country_prefix_to_users_table from './migrations/0005_add_country_prefix_to_users_table'
+import add_table_for_clubs from './migrations/0006_add_table_for_clubs'
 
 const migrations = [
   {
@@ -39,6 +40,11 @@ const migrations = [
     id: 6,
     name: 'add_country_prefix_to_users_table',
     migrationEffect: add_country_prefix_to_users_table,
+  },
+  {
+    id: 7,
+    name: 'add_table_for_clubs',
+    migrationEffect: add_table_for_clubs,
   },
 ] as const
 

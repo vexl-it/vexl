@@ -292,6 +292,7 @@ export const OfferPublicPart = z
     fcmCypher: FcmCypher.optional(),
     authorClientVersion: SemverString.optional(),
     goldenAvatarType: GoldenAvatarType.optional(),
+    clubsPublicKeys: z.array(PublicKeyPemBase64).optional().readonly(),
   })
   .readonly()
 
@@ -321,6 +322,7 @@ export const OfferPublicPartE = Schema.Struct({
   fcmCypher: Schema.optional(FcmCypherE),
   authorClientVersion: Schema.optional(SemverStringE),
   goldenAvatarType: Schema.optional(GoldenAvatarTypeE),
+  clubsPublicKeys: Schema.optional(Schema.Array(PublicKeyPemBase64E)),
 })
 export type OfferPublicPart = Schema.Schema.Type<typeof OfferPublicPartE>
 

@@ -698,6 +698,8 @@
   "filterOffers.offers": "Offers",
   "filterOffers.whatIsTheGoal": "What's the goal",
   "filterOffers.mostConnections": "Most connections",
+  "filterOffers.showVexlClubsOffers": "Show Vexl Clubs offers",
+  "filterOffers.vexlClubsConnectYouToOffers": "Vexl Clubs connect you to offers beyond your usual friends circle.",
   "reuploadOffers.suggestionCell.title": "🚨 Some offers need to be reencrypted to be visible for others!",
   "reuploadOffers.suggestionCell.button": "Reencrypt offers",
   "reuploadOffers.progress.title": "Reencrypting your offers",

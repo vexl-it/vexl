@@ -1,14 +1,23 @@
 import {useMolecule} from 'bunshi/dist/react'
+import {useAtomValue} from 'jotai'
+import {type CRUDOfferStackScreenProps} from '../../../navigationTypes'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
+import ClubsComponent from '../../OfferForm/components/Clubs'
 import FriendLevel from '../../OfferForm/components/FriendLevel'
 import Section from '../../Section'
 import friendLevelSvg from '../../images/friendLevelSvg'
+import {clubsWithMembersAtomsAtom} from '../atoms/clubsWithMembersAtom'
 import {offerFormMolecule} from '../atoms/offerFormStateAtoms'
+import clubsSvg from '../images/clubsSvg'
 import ScreenWrapper from './ScreenWrapper'
 
-function FriendLevelScreen(): JSX.Element {
+type Props = CRUDOfferStackScreenProps<'FriendLevelScreen'>
+
+function FriendLevelScreen({navigation}: Props): JSX.Element {
   const {t} = useTranslation()
-  const {intendedConnectionLevelAtom} = useMolecule(offerFormMolecule)
+  const {intendedConnectionLevelAtom, createSelectClubAtom} =
+    useMolecule(offerFormMolecule)
+  const clubsWithMembersAtoms = useAtomValue(clubsWithMembersAtomsAtom)
 
   return (
     <ScreenWrapper>
@@ -20,6 +29,15 @@ function FriendLevelScreen(): JSX.Element {
           intendedConnectionLevelAtom={intendedConnectionLevelAtom}
         />
       </Section>
+      {clubsWithMembersAtoms.length > 0 && (
+        <Section title={t('clubs.vexlClubs')} image={clubsSvg}>
+          <ClubsComponent
+            displayFaqsLink
+            createSelectClubAtom={createSelectClubAtom}
+            navigation={navigation}
+          />
+        </Section>
+      )}
     </ScreenWrapper>
   )
 }

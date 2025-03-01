@@ -1,4 +1,5 @@
 import {useNavigation} from '@react-navigation/native'
+import {Effect} from 'effect'
 import {isNone} from 'fp-ts/Option'
 import {useAtomValue, useSetAtom} from 'jotai'
 import {useMemo} from 'react'
@@ -141,7 +142,9 @@ function OffersListStateDisplayerContent(): JSX.Element {
               <VexlNewsSuggestions />
               <EmptyListPlaceholder
                 refreshing={loading}
-                onRefresh={refreshOffers}
+                onRefresh={() => {
+                  void Effect.runPromise(refreshOffers())
+                }}
               />
             </>
           )}
@@ -192,7 +195,9 @@ function OffersListStateDisplayerContent(): JSX.Element {
           ListFooterComponent={ListFooterComponent}
           offersAtoms={offersAtoms}
           // eslint-disable-next-line @typescript-eslint/no-misused-promises
-          onRefresh={refreshOffers}
+          onRefresh={() => {
+            void Effect.runPromise(refreshOffers())
+          }}
           refreshing={loading}
           onScroll={handleScroll}
         />

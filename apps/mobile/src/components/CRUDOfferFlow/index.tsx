@@ -1,5 +1,6 @@
 import {createNativeStackNavigator} from '@react-navigation/native-stack'
 import {useMolecule} from 'bunshi/dist/react'
+import {Effect} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import {useCallback, useState} from 'react'
 import {StatusBar} from 'react-native'
@@ -113,7 +114,7 @@ function CRUDOfferFlow({route: {params}, navigation}: Props): JSX.Element {
             onSkip={safeGoBack}
             onFinish={() => {
               if (params.offerId) {
-                void editOffer()().then((success) => {
+                void Effect.runPromise(editOffer()).then((success) => {
                   if (success) {
                     navigation.navigate('InsideTabs', {
                       screen: 'MyOffers',
@@ -121,7 +122,7 @@ function CRUDOfferFlow({route: {params}, navigation}: Props): JSX.Element {
                   }
                 })
               } else {
-                void createOffer()().then((success) => {
+                void Effect.runPromise(createOffer()).then((success) => {
                   if (success) {
                     navigation.navigate('InsideTabs', {
                       screen: 'MyOffers',

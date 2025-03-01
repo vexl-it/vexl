@@ -163,7 +163,7 @@ export const submitContactsActionAtom = atom(
                     }
                   })
                 )
-                void set(syncConnectionsActionAtom)()
+                void Effect.runPromise(set(syncConnectionsActionAtom))
 
                 void set(updateAllOffersConnectionsActionAtom, {
                   isInBackground: false,

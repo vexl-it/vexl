@@ -4,7 +4,7 @@ import {
   NewClubConnectionNotificationData,
   NewSocialNetworkConnectionNotificationData,
 } from '@vexl-next/domain/src/general/notifications'
-import {Option, Schema} from 'effect'
+import {Effect, Option, Schema} from 'effect'
 import * as Notifications from 'expo-notifications'
 import * as TaskManager from 'expo-task-manager'
 import {getDefaultStore} from 'jotai'
@@ -92,7 +92,7 @@ export async function processBackgroundMessage(
       )
     )
     if (isNewSocialNetworkConnectionNotification) {
-      await getDefaultStore().set(syncConnectionsActionAtom)()
+      await Effect.runPromise(getDefaultStore().set(syncConnectionsActionAtom))
       await getDefaultStore().set(updateAllOffersConnectionsActionAtom, {
         isInBackground: true,
       })()

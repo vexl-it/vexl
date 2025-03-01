@@ -1,16 +1,28 @@
 import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder'
-import {Schema} from 'effect'
+import {Brand, Schema} from 'effect'
 import {randomUUID} from 'node:crypto'
+import {z} from 'zod'
 import {ExpoNotificationTokenE} from '../utility/ExpoNotificationToken.brand'
 import {UriStringE} from '../utility/UriString.brand'
 
-export const ClubUuid = Schema.UUID.pipe(Schema.brand('ClubUuid'))
-export type ClubUuid = Schema.Schema.Type<typeof ClubUuid>
+export class ClubKeyNotFoundInInnerStateError extends Schema.TaggedError<ClubKeyNotFoundInInnerStateError>(
+  'ClubKeyNotFoundInInnerStateError'
+)('ClubKeyNotFoundInInnerStateError', {
+  cause: Schema.Unknown,
+}) {}
+
+export const ClubUuid = z
+  .string()
+  .uuid()
+  .transform((v) => Brand.nominal<typeof v & Brand.Brand<'ClubUuid'>>()(v))
+export const ClubUuidE = Schema.UUID.pipe(Schema.brand('ClubUuid'))
+export type ClubUuid = Schema.Schema.Type<typeof ClubUuidE>
+
 export const generateClubUuid = (): ClubUuid =>
-  Schema.decodeSync(ClubUuid)(randomUUID())
+  Schema.decodeSync(ClubUuidE)(randomUUID())
 
 export const ClubInfo = Schema.Struct({
-  uuid: ClubUuid,
+  uuid: ClubUuidE,
   name: Schema.String,
   description: Schema.optionalWith(Schema.String, {as: 'Option'}),
   membersCountLimit: Schema.Number,

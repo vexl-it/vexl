@@ -3,8 +3,11 @@ import {
   UnixMilliseconds,
   unixMillisecondsNow,
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import updatePrivateParts from '@vexl-next/resources-utils/src/offers/updatePrivateParts'
+import {type ClubIdWithMembers} from '@vexl-next/resources-utils/src/offers/utils/fetchClubsInfoForOffer'
 import {subtractArrays} from '@vexl-next/resources-utils/src/utils/array'
+import {Either, Option} from 'effect'
 import * as A from 'fp-ts/Array'
 import * as E from 'fp-ts/Either'
 import * as T from 'fp-ts/Task'
@@ -14,6 +17,7 @@ import {atom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {splitAtom} from 'jotai/utils'
 import {apiAtom} from '../../../api'
+import {clubsWithMembersAtom} from '../../../components/CRUDOfferFlow/atoms/clubsWithMembersAtom'
 import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
 import notEmpty from '../../../utils/notEmpty'
 import {showDebugNotificationIfEnabled} from '../../../utils/notifications/showDebugNotificationIfEnabled'
@@ -117,9 +121,24 @@ export const updateAllOffersConnectionsActionAtom = atom(
       offerToConnectionsAtoms,
       A.mapWithIndex((i, oneOfferAtom) => {
         const oneOfferConections = get(oneOfferAtom)
+        const offer = get(singleOfferByAdminIdAtom(oneOfferConections.adminId))
+
+        const clubIdsToEncryptFor = offer?.ownershipInfo?.intendedClubs
+        const clubsWithMembers = get(clubsWithMembersAtom)
+        const clubsData = Either.isRight(clubsWithMembers)
+          ? clubsWithMembers.right
+          : []
+        const targetClubIdWithMembersArray = clubsData
+          .filter((one) => clubIdsToEncryptFor?.includes(one.club.uuid))
+          .map(
+            ({club, members}) =>
+              ({
+                clubUuid: club.uuid,
+                items: Option.isSome(members) ? members.value : [],
+              }) satisfies ClubIdWithMembers
+          )
         const intendedConnectionLevel =
-          get(singleOfferByAdminIdAtom(oneOfferConections.adminId))
-            ?.ownershipInfo?.intendedConnectionLevel ?? 'ALL'
+          offer?.ownershipInfo?.intendedConnectionLevel ?? 'ALL'
 
         let endOneOfferUpdateMeasure: () => void = () => {}
         return pipe(
@@ -139,21 +158,24 @@ export const updateAllOffersConnectionsActionAtom = atom(
             return E.left({_tag: 'SkippedBecauseTimeLimitReached'} as const)
           }),
           TE.chainW(() =>
-            updatePrivateParts({
-              currentConnections: oneOfferConections.connections,
-              targetConnections: {
-                firstLevel: connectionState.firstLevel,
-                secondLevel:
-                  intendedConnectionLevel === 'ALL'
-                    ? connectionState.secondLevel
-                    : [],
-              },
-              adminId: oneOfferConections.adminId,
-              symmetricKey: oneOfferConections.symmetricKey,
-              commonFriends: connectionState.commonFriends,
-              stopProcessingAfter,
-              api: api.offer,
-            })
+            effectToTaskEither(
+              updatePrivateParts({
+                currentConnections: oneOfferConections.connections,
+                targetConnections: {
+                  firstLevel: connectionState.firstLevel,
+                  secondLevel:
+                    intendedConnectionLevel === 'ALL'
+                      ? connectionState.secondLevel
+                      : [],
+                },
+                adminId: oneOfferConections.adminId,
+                symmetricKey: oneOfferConections.symmetricKey,
+                commonFriends: connectionState.commonFriends,
+                stopProcessingAfter,
+                api: api.offer,
+                targetClubIdWithMembers: targetClubIdWithMembersArray,
+              })
+            )
           ),
           TE.map((v) => {
             endOneOfferUpdateMeasure()
@@ -213,7 +235,8 @@ export const updateAllOffersConnectionsActionAtom = atom(
                       offerToConnectionsAtoms.length
                     } did not update fully due to time limit reached. Total connections updated: ${
                       newConnections.firstLevel.length +
-                      (newConnections.secondLevel?.length ?? 0)
+                      (newConnections.secondLevel?.length ?? 0) +
+                      (newConnections.clubs?.length ?? 0)
                     }. Total connections skipped: ${String(
                       timeLimitReachedErrors.length
                     )}.`
@@ -238,6 +261,16 @@ export const updateAllOffersConnectionsActionAtom = atom(
                           [
                             ...(val.connections.secondLevel ?? []),
                             ...(newConnections.secondLevel ?? []),
+                          ],
+                          removedConnections
+                        )
+                      : undefined,
+                  clubs:
+                    clubIdsToEncryptFor && clubIdsToEncryptFor.length > 0
+                      ? subtractArrays(
+                          [
+                            ...(val.connections.clubs ?? []),
+                            ...(newConnections.clubs ?? []),
                           ],
                           removedConnections
                         )

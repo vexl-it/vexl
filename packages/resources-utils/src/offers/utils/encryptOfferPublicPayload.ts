@@ -1,70 +1,18 @@
-import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
-import {FcmCypher} from '@vexl-next/domain/src/general/notifications'
 import {
-  LocationStateToArray,
-  OfferLocation,
-  PublicPayloadEncrypted,
+  LocationStateToArrayE,
+  OfferLocationE,
+  OfferPublicPartE,
+  PublicPayloadEncryptedE,
   type LocationState,
   type OfferPublicPart,
+  type PublicPayloadEncrypted,
   type SymmetricKey,
 } from '@vexl-next/domain/src/general/offers'
-import {JSDateString} from '@vexl-next/domain/src/utility/JSDateString.brand'
-import {toError, type BasicError} from '@vexl-next/domain/src/utility/errors'
-import * as A from 'fp-ts/Array'
-import * as E from 'fp-ts/Either'
-import * as TE from 'fp-ts/TaskEither'
+import {type BasicError} from '@vexl-next/domain/src/utility/errors'
+import {Array, Effect, flow, Schema} from 'effect'
 import {pipe} from 'fp-ts/function'
-import {z} from 'zod'
-import {booleanToString} from '../../utils/booleanString'
 import {aesGCMIgnoreTagEncrypt} from '../../utils/crypto'
-import {safeParse, stringifyToJson} from '../../utils/parsing'
-
-const OfferLocationDeprecated = z
-  .object({
-    longitude: z.string(),
-    latitude: z.string(),
-    city: z.string(),
-  })
-  .readonly()
-type OfferLocationDeprecated = z.TypeOf<typeof OfferLocationDeprecated>
-
-/**
- * Shape of the offer public part that is encrypted.
- * Handles backward compatibility
- */
-const OfferPublicPartToEncrypt = z
-  .object({
-    offerPublicKey: PublicKeyPemBase64,
-    // TODO(#702): remove offer location backward compatibility
-    // location V2 -> location
-    location: z.array(z.string()),
-    locationV2: z.array(OfferLocation),
-    offerDescription: z.string(),
-    amountBottomLimit: z.coerce.string(),
-    amountTopLimit: z.coerce.string(),
-    feeState: z.string(),
-    feeAmount: z.coerce.string(),
-    // TODO: remove offer locationState backward compatibility
-    // locationState V2 -> locationState
-    locationState: z.string(),
-    locationStateV2: LocationStateToArray,
-    paymentMethod: z.array(z.string()),
-    btcNetwork: z.array(z.string()),
-    currency: z.string(),
-    offerType: z.string(),
-    spokenLanguages: z.array(z.string()).optional(),
-    expirationDate: JSDateString.optional(),
-    activePriceState: z.string(),
-    activePriceValue: z.coerce.string(),
-    activePriceCurrency: z.string(),
-    active: z.enum(['true', 'false']),
-    groupUuids: z.array(z.string()),
-    listingType: z.string().optional(),
-    fcmCypher: FcmCypher.optional(),
-    authorClientVersion: z.string().optional(),
-    goldenAvatarType: z.string().optional(),
-  })
-  .readonly()
+import {stringifyE} from '../../utils/parsing'
 
 function convertLocationStateToOldVersion(
   publicPart: OfferPublicPart
@@ -86,40 +34,27 @@ function convertLocationStateToOldVersion(
   return 'IN_PERSON'
 }
 
-function offerPublicPartToJsonString(
-  publicPart: OfferPublicPart
-): E.Either<unknown, string> {
-  return pipe(
-    publicPart.location,
-    (a) => [...a],
-    A.map(
-      (oneLocation) =>
-        ({
-          longitude: String(oneLocation.longitude),
-          latitude: String(oneLocation.latitude),
-          city: oneLocation.shortAddress,
-        }) satisfies OfferLocationDeprecated
-    ),
-    A.map(stringifyToJson),
-    A.sequence(E.Applicative),
-    E.map((location) => ({
-      ...publicPart,
-      active: booleanToString(publicPart.active),
-      location,
-      // TODO(#702): remove offer location backward compatibility
-      // location V2 -> location
-      locationV2: publicPart.location,
-      locationState: convertLocationStateToOldVersion(publicPart),
-      // TODO: remove offer locationState backward compatibility
-      // locationState V2 -> locationState
-      locationStateV2: publicPart.locationState,
-    })),
-    E.chainW(safeParse(OfferPublicPartToEncrypt)),
-    E.chainW(stringifyToJson)
-  )
-}
+export class PublicPartEncryptionError extends Schema.TaggedError<PublicPartEncryptionError>(
+  'PublicPartEncryptionError'
+)('PublicPartEncryptionError', {
+  message: Schema.optional(Schema.String),
+  cause: Schema.Unknown,
+}) {}
 
 export type ErrorEncryptingPublicPart = BasicError<'ErrorEncryptingPublicPart'>
+
+const OfferPublicPartIncludingLegacyPropsToEncrypt = Schema.Struct({
+  ...OfferPublicPartE.fields,
+  active: Schema.Literal('true', 'false'),
+  location: Schema.Array(Schema.String),
+  locationV2: Schema.Array(OfferLocationE),
+  locationState: Schema.String,
+  locationStateV2: LocationStateToArrayE,
+})
+
+type OfferPublicPartIncludingLegacyPropsToEncrypt = Schema.Schema.Type<
+  typeof OfferPublicPartIncludingLegacyPropsToEncrypt
+>
 
 export default function encryptOfferPublicPayload({
   offerPublicPart,
@@ -127,14 +62,46 @@ export default function encryptOfferPublicPayload({
 }: {
   offerPublicPart: OfferPublicPart
   symmetricKey: SymmetricKey
-}): TE.TaskEither<ErrorEncryptingPublicPart, PublicPayloadEncrypted> {
+}): Effect.Effect<PublicPayloadEncrypted, PublicPartEncryptionError> {
+  const legacyLocations = pipe(
+    Effect.succeed(offerPublicPart.location),
+    Effect.map(
+      flow(
+        Array.map((one) => ({
+          longitude: String(one.longitude),
+          latitude: String(one.latitude),
+          city: one.shortAddress,
+        })),
+        Array.map((one) => stringifyE(one)),
+        Effect.all
+      )
+    ),
+    Effect.flatten,
+    Effect.runSync
+  )
+
   return pipe(
-    offerPublicPart,
-    offerPublicPartToJsonString,
-    TE.fromEither,
-    TE.chainW(aesGCMIgnoreTagEncrypt(symmetricKey)),
-    TE.map((encrypted) => `0${encrypted}`),
-    TE.chainEitherKW(safeParse(PublicPayloadEncrypted)),
-    TE.mapLeft(toError('ErrorEncryptingPublicPart'))
+    Effect.succeed(offerPublicPart),
+    Effect.map((publicPart) => {
+      return {
+        ...publicPart,
+        active: publicPart.active ? 'true' : 'false',
+        location: legacyLocations,
+        locationV2: publicPart.location,
+        locationState: convertLocationStateToOldVersion(publicPart),
+        locationStateV2: publicPart.locationState,
+      } satisfies OfferPublicPartIncludingLegacyPropsToEncrypt
+    }),
+    Effect.flatMap(
+      Schema.encode(
+        Schema.parseJson(OfferPublicPartIncludingLegacyPropsToEncrypt)
+      )
+    ),
+    Effect.flatMap(aesGCMIgnoreTagEncrypt(symmetricKey)),
+    Effect.map((encrypted) => `0${encrypted}`),
+    Effect.map(flow(Schema.decode(PublicPayloadEncryptedE), Effect.runSync)),
+    Effect.mapError(
+      (e) => new PublicPartEncryptionError({message: e.message, cause: e.cause})
+    )
   )
 }

@@ -1,16 +1,24 @@
 import {SymmetricKey} from '@vexl-next/domain/src/general/offers'
-import {toError, type BasicError} from '@vexl-next/domain/src/utility/errors'
-import * as E from 'fp-ts/Either'
+import {Effect, Schema} from 'effect'
 import crypto from 'node:crypto'
 
-export type ErrorGeneratingSymmetricKey =
-  BasicError<'GeneratingSymmetricKeyError'>
-export default function generateSymmetricKey(): E.Either<
-  ErrorGeneratingSymmetricKey,
-  SymmetricKey
+export class SymmetricKeyGenerationError extends Schema.TaggedError<SymmetricKeyGenerationError>(
+  'SymmetricKeyGenerationError'
+)('SymmetricKeyGenerationError', {
+  cause: Schema.Unknown,
+  message: Schema.String,
+}) {}
+
+export default function generateSymmetricKey(): Effect.Effect<
+  SymmetricKey,
+  SymmetricKeyGenerationError
 > {
-  return E.tryCatch(
-    () => SymmetricKey.parse(crypto.randomBytes(32).toString('base64')),
-    toError('GeneratingSymmetricKeyError')
-  )
+  return Effect.try({
+    try: () => SymmetricKey.parse(crypto.randomBytes(32).toString('base64')),
+    catch: (e) =>
+      new SymmetricKeyGenerationError({
+        cause: e,
+        message: 'Error generating symmetric key',
+      }),
+  })
 }

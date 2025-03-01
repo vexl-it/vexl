@@ -1,19 +1,21 @@
 import {KeyHolder} from '@vexl-next/cryptography'
-import {ClubUuid} from '@vexl-next/domain/src/general/clubs'
+import {ClubUuidE, type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {Schema} from 'effect'
 import {focusAtom} from 'jotai-optics'
 import {atomWithParsedMmkvStorageE} from '../../../utils/atomUtils/atomWithParsedMmkvStorageE'
 
 const ClubsDataStored = Schema.Struct({
-  data: Schema.Record({key: ClubUuid, value: KeyHolder.PrivateKeyHolderE}),
+  data: Schema.Record({key: ClubUuidE, value: KeyHolder.PrivateKeyHolderE}),
 })
 
 type ClubsDataStored = typeof ClubsDataStored.Type
 
-export const clubsStoreAtom = atomWithParsedMmkvStorageE(
+const myClubsStorageAtom = atomWithParsedMmkvStorageE(
   'storedClubs',
   {data: {} as Record<ClubUuid, KeyHolder.PrivateKeyHolder>},
   ClubsDataStored
 )
 
-export const storedClubsAtom = focusAtom(clubsStoreAtom, (o) => o.prop('data'))
+export const myStoredClubsAtom = focusAtom(myClubsStorageAtom, (o) =>
+  o.prop('data')
+)

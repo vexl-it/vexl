@@ -18,6 +18,7 @@ import {
 import {
   GetClubContactsErrors,
   GetClubInfoByAccessCodeErrors,
+  GetClubInfoErrors,
   ImportContactsErrors,
   JoinClubErrors,
   UpdateBadOwnerHashErrors,
@@ -28,6 +29,7 @@ import {
   type FetchMyContactsInput,
   type GetClubContactsRequest,
   type GetClubInfoByAccessCodeRequest,
+  type GetClubInfoRequest,
   type ImportContactsInput,
   type JoinClubRequest,
   type RefreshUserInput,
@@ -147,6 +149,17 @@ export function api({
               body,
             }),
             JoinClubErrors
+          )
+        )
+      ),
+    getClubInfo: (
+      getClubInfoRequest: RequestWithGeneratableChallenge<GetClubInfoRequest>
+    ) =>
+      addChallenge(getClubInfoRequest).pipe(
+        Effect.flatMap((body) =>
+          handleCommonAndExpectedErrorsEffect(
+            client.getClubInfo({body}),
+            GetClubInfoErrors
           )
         )
       ),

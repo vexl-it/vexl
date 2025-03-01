@@ -1,38 +1,8 @@
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
-import {
-  type ConnectionLevel,
-  type IntendedConnectionLevel,
-} from '@vexl-next/domain/src/general/offers'
+import {type IntendedConnectionLevel} from '@vexl-next/domain/src/general/offers'
 import {type ContactApi} from '@vexl-next/rest-api/src/services/contact'
 import {type FetchCommonConnectionsResponse} from '@vexl-next/rest-api/src/services/contact/contracts'
-import {type Effect} from 'effect'
-import * as TE from 'fp-ts/TaskEither'
-import {pipe} from 'fp-ts/function'
-import {effectToTaskEither} from '../../effect-helpers/TaskEitherConverter'
-
-function fetchFriendsPublicKeys({
-  lvl,
-  api,
-}: {
-  lvl: ConnectionLevel
-  api: ContactApi
-}): TE.TaskEither<
-  Effect.Effect.Error<ReturnType<ContactApi['fetchMyContacts']>>,
-  PublicKeyPemBase64[]
-> {
-  return pipe(
-    effectToTaskEither(
-      api.fetchMyContacts({
-        query: {
-          level: lvl,
-          page: 0,
-          limit: 1000000,
-        },
-      })
-    ),
-    TE.map((res) => res.items.map((one) => one.publicKey))
-  )
-}
+import {Array, Effect} from 'effect'
 
 export interface ConnectionsInfoForOffer {
   firstDegreeConnections: PublicKeyPemBase64[]
@@ -50,32 +20,52 @@ export default function fetchContactsForOffer({
 }: {
   contactApi: ContactApi
   intendedConnectionLevel: IntendedConnectionLevel
-}): TE.TaskEither<ApiErrorFetchingContactsForOffer, ConnectionsInfoForOffer> {
-  return pipe(
-    TE.Do,
-    TE.bindW('firstDegreeConnections', () =>
-      fetchFriendsPublicKeys({lvl: 'FIRST', api: contactApi})
-    ),
-    TE.bindW('secondDegreeConnections', () =>
-      intendedConnectionLevel === 'FIRST'
-        ? TE.right([])
-        : fetchFriendsPublicKeys({lvl: 'SECOND', api: contactApi})
-    ),
-    TE.bindW(
-      'commonFriends',
-      ({firstDegreeConnections, secondDegreeConnections}) =>
-        effectToTaskEither(
-          contactApi.fetchCommonConnections({
-            body: {
-              publicKeys: Array.from(
-                new Set<PublicKeyPemBase64>([
-                  ...firstDegreeConnections,
-                  ...secondDegreeConnections,
-                ])
-              ),
-            },
-          })
-        )
+}): Effect.Effect<ConnectionsInfoForOffer, ApiErrorFetchingContactsForOffer> {
+  return Effect.gen(function* (_) {
+    const firstDegreeConnections = yield* _(
+      contactApi.fetchMyContacts({
+        query: {
+          level: 'FIRST',
+          page: 0,
+          limit: 1000000,
+        },
+      }),
+      Effect.map(({items}) => items),
+      Effect.map(Array.map((connection) => connection.publicKey))
     )
-  )
+
+    const secondDegreeConnections =
+      intendedConnectionLevel === 'FIRST'
+        ? []
+        : yield* _(
+            contactApi.fetchMyContacts({
+              query: {
+                level: 'SECOND',
+                page: 0,
+                limit: 1000000,
+              },
+            }),
+            Effect.map(({items}) => items),
+            Effect.map(Array.map((connection) => connection.publicKey))
+          )
+
+    const commonFriends = yield* _(
+      contactApi.fetchCommonConnections({
+        body: {
+          publicKeys: Array.fromIterable(
+            new Set<PublicKeyPemBase64>([
+              ...firstDegreeConnections,
+              ...secondDegreeConnections,
+            ])
+          ),
+        },
+      })
+    )
+
+    return {
+      firstDegreeConnections,
+      secondDegreeConnections,
+      commonFriends,
+    } satisfies ConnectionsInfoForOffer
+  })
 }

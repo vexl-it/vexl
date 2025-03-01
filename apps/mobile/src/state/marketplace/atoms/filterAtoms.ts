@@ -24,6 +24,7 @@ export const offersFilterInitialState: OffersFilter = {
   singlePrice: undefined,
   text: undefined,
   singlePriceCurrency: getDefaultCurrency().code ?? currencies.USD.code,
+  clubsUuids: [],
 }
 
 export const offersFilterStorageAtom = atomWithParsedMmkvStorage(

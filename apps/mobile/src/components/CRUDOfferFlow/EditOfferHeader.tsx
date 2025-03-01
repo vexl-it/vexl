@@ -1,6 +1,7 @@
 import {useFocusEffect} from '@react-navigation/native'
 import {type OfferId} from '@vexl-next/domain/src/general/offers'
 import {useMolecule} from 'bunshi/dist/react'
+import {Effect} from 'effect'
 import {isSome} from 'fp-ts/Option'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback} from 'react'
@@ -64,7 +65,7 @@ function EditOfferHeader({offerId}: Props): JSX.Element {
                   variant="dark"
                   icon={require('./images/trashIcon.png')}
                   onPress={() => {
-                    void deleteOffer()().then((success) => {
+                    void Effect.runPromise(deleteOffer()).then((success) => {
                       if (success) safeGoBack()
                     })
                   }}
@@ -75,9 +76,11 @@ function EditOfferHeader({offerId}: Props): JSX.Element {
                   variant="dark"
                   icon={offerActive ? pauseSvg : playSvg}
                   onPress={() => {
-                    void toggleOfferActivePress()().then((success) => {
-                      if (success) safeGoBack()
-                    })
+                    void Effect.runPromise(toggleOfferActivePress()).then(
+                      (success) => {
+                        if (success) safeGoBack()
+                      }
+                    )
                   }}
                 />
               </XStack>

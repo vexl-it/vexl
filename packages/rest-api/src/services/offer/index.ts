@@ -10,6 +10,7 @@ import {
   handleCommonErrorsEffect,
   type LoggingFunction,
 } from '../../utils'
+import {type CreateChallengeRequest} from '../chat/contracts'
 import {
   CreateNewOfferErrors,
   CreatePrivatePartErrors,
@@ -132,6 +133,13 @@ export function api({
       handleCommonAndExpectedErrorsEffect(
         client.reportOffer(reportOfferInput),
         ReportOfferEndpointErrors
+      ),
+    // ----------------------
+    // 👇 Challenge
+    // ----------------------
+    createChallenge: (createChallengeRequest: CreateChallengeRequest) =>
+      handleCommonErrorsEffect(
+        client.createChallenge({body: createChallengeRequest})
       ),
   }
 }

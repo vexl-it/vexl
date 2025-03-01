@@ -1,5 +1,6 @@
 import {Picker} from '@react-native-picker/picker'
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
+import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {generateKeyPair} from '@vexl-next/resources-utils/src/utils/crypto'
 import {Effect} from 'effect'
 import * as A from 'fp-ts/Array'
@@ -51,24 +52,27 @@ function SimulateMissingOfferInbox(): JSX.Element {
           TE.fromEither,
           TE.bindTo('key'),
           TE.bindW('createdOffer', ({key}) =>
-            store.set(createOfferAtom, {
-              payloadPublic: {
-                ...offer.offerInfo.publicPart,
-                offerPublicKey: key.publicKeyPemBase64,
-                offerDescription: `#${i} ${offer.offerInfo.publicPart.offerDescription}`,
-                authorClientVersion: version,
-              },
-              offerKey: key,
-              intendedConnectionLevel:
-                offer.ownershipInfo?.intendedConnectionLevel ?? 'FIRST',
-              onProgress: (progress) => {
-                console.log(
-                  `Creating offer ${i + 1}/ 10, progress: ${JSON.stringify(
-                    progress
-                  )}`
-                )
-              },
-            })
+            effectToTaskEither(
+              store.set(createOfferAtom, {
+                payloadPublic: {
+                  ...offer.offerInfo.publicPart,
+                  offerPublicKey: key.publicKeyPemBase64,
+                  offerDescription: `#${i} ${offer.offerInfo.publicPart.offerDescription}`,
+                  authorClientVersion: version,
+                },
+                offerKey: key,
+                intendedClubs: [],
+                intendedConnectionLevel:
+                  offer.ownershipInfo?.intendedConnectionLevel ?? 'FIRST',
+                onProgress: (progress) => {
+                  console.log(
+                    `Creating offer ${i + 1}/ 10, progress: ${JSON.stringify(
+                      progress
+                    )}`
+                  )
+                },
+              })
+            )
           ),
           TE.chainFirstW(({key, createdOffer}) =>
             store.set(createInboxAtom, {

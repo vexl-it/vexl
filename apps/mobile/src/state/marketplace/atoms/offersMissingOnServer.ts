@@ -3,12 +3,8 @@ import {
   type MyOfferInState,
 } from '@vexl-next/domain/src/general/offers'
 import {type OfferEncryptionProgress} from '@vexl-next/resources-utils/src/offers/OfferEncryptionProgress'
-import createNewOfferForMyContacts from '@vexl-next/resources-utils/src/offers/createOfferHandleContacts'
-import * as A from 'fp-ts/Array'
-import * as E from 'fp-ts/Either'
-import * as RA from 'fp-ts/ReadonlyArray'
-import * as T from 'fp-ts/Task'
-import * as TE from 'fp-ts/TaskEither'
+import createNewOfferForMyContacts from '@vexl-next/resources-utils/src/offers/createNewOfferForMyContacts'
+import {Array, Effect} from 'effect'
 import {pipe} from 'fp-ts/lib/function'
 import {atom} from 'jotai'
 import {z} from 'zod'
@@ -20,6 +16,7 @@ import {
   deleteOfferToConnectionsAtom,
   upsertOfferToConnectionsActionAtom,
 } from '../../connections/atom/offerToConnectionsAtom'
+import {myStoredClubsAtom} from '../../contacts/atom/clubsStore'
 import {sessionDataOrDummyAtom} from '../../session'
 import {myOffersAtom} from './myOffers'
 import {singleOfferAtom} from './offersState'
@@ -72,7 +69,9 @@ const reencryptOneOfferActionAtom = atom(
   ) => {
     const api = get(apiAtom)
     const session = get(sessionDataOrDummyAtom)
+    const myStoredClubs = get(myStoredClubsAtom)
     const offerAtom = singleOfferAtom(offer.offerInfo.offerId)
+    const intendedClubs = get(offerAtom)?.ownershipInfo?.intendedClubs ?? []
 
     return pipe(
       createNewOfferForMyContacts({
@@ -83,8 +82,10 @@ const reencryptOneOfferActionAtom = atom(
         intendedConnectionLevel: offer.ownershipInfo.intendedConnectionLevel,
         ownerKeyPair: session.privateKey,
         onProgress,
+        myStoredClubs,
+        intendedClubs: [...intendedClubs],
       }),
-      TE.map((r) => {
+      Effect.map((r) => {
         if (r.encryptionErrors.length > 0) {
           reportError('error', new Error('Error while encrypting offer'), {
             excryptionErrors: r.encryptionErrors,
@@ -143,33 +144,32 @@ export const reencryptOffersMissingOnServerActionAtom = atom(
 
     return pipe(
       offersToReupload,
-      A.mapWithIndex((index, one) =>
-        set(reencryptOneOfferActionAtom, {
-          offer: one,
-          onProgress: (progress) => {
-            if (onProgress)
-              onProgress({
-                offerEncryptionProgress: progress,
-                processingIndex: index,
-                totalToProcess: offersToReupload.length,
-              })
-          },
-        })
+      Array.map((one, index) =>
+        pipe(
+          set(reencryptOneOfferActionAtom, {
+            offer: one,
+            onProgress: (progress) => {
+              if (onProgress)
+                onProgress({
+                  offerEncryptionProgress: progress,
+                  processingIndex: index,
+                  totalToProcess: offersToReupload.length,
+                })
+            },
+          }),
+          Effect.either
+        )
       ),
-      T.sequenceSeqArray,
-      T.map((results) => {
-        const errors = results.filter(E.isLeft).map((one) => one.left)
+      Effect.all,
+      Effect.map((results) => {
+        const errors = Array.getLefts(results)
         if (errors.length > 0)
           reportError('error', new Error('Error while reencrypting offers'), {
             errors,
           })
 
         return {
-          reuploaded: pipe(
-            results,
-            RA.filter(E.isRight),
-            RA.map((one) => one.right)
-          ),
+          reuploaded: Array.getRights(results),
           errors,
         }
       })

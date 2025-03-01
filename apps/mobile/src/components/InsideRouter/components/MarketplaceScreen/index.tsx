@@ -1,3 +1,4 @@
+import {Effect} from 'effect'
 import {useSetAtom} from 'jotai'
 import {useCallback} from 'react'
 import {triggerOffersRefreshAtom} from '../../../../state/marketplace'
@@ -14,7 +15,7 @@ function MarketplaceScreen(): JSX.Element {
     useCallback(
       (state) => {
         if (state === 'active') {
-          void refreshOffers()
+          void Effect.runPromise(refreshOffers())
         }
       },
       [refreshOffers]

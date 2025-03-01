@@ -2,7 +2,7 @@ import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {orElseSchema} from '@vexl-next/generic-utils/src/effect-helpers/orElseSchema'
 import {Brand, Schema as S, Schema} from 'effect'
 import {z} from 'zod'
-import {ClubUuid} from '../clubs'
+import {ClubUuidE} from '../clubs'
 import {NotificationCypherE} from './NotificationCypher.brand'
 
 export const FcmCypher = z
@@ -61,7 +61,7 @@ export class NewChatMessageNoticeNotificationData extends S.TaggedClass<NewChatM
 export class NewClubConnectionNotificationData extends Schema.Class<NewClubConnectionNotificationData>(
   'NewClubConnectionNotificationData'
 )({
-  clubUuids: Schema.parseJson(Schema.Array(ClubUuid)),
+  clubUuids: Schema.parseJson(Schema.Array(ClubUuidE)),
 }) {
   toData = (): Record<string, string> =>
     Schema.encodeSync(NewClubConnectionNotificationData)(this)
@@ -88,7 +88,7 @@ export class AdmitedToClubNetworkNotificationData extends Schema.Class<AdmitedTo
 export class ClubDeactivatedNotificationData extends Schema.Class<ClubDeactivatedNotificationData>(
   'ClubDeactivatedNotificationData'
 )({
-  clubUuid: ClubUuid,
+  clubUuid: ClubUuidE,
   reason: Schema.Literal('EXPIRED', 'FLAGGED', 'OTHER'),
 }) {
   toData = (): Record<string, string> =>

@@ -1,4 +1,5 @@
 import {useNavigation} from '@react-navigation/native'
+import {Effect} from 'effect'
 import {useAtom, useAtomValue, useSetAtom} from 'jotai'
 import {useEffect} from 'react'
 import {Text} from 'tamagui'
@@ -32,7 +33,7 @@ const REACH_NUMBER_THRESHOLD = 30
 
 interface Props {
   refreshing: boolean
-  onRefresh?: () => Promise<void>
+  onRefresh?: () => void
 }
 
 function EmptyListPlaceholder({refreshing, onRefresh}: Props): JSX.Element {
@@ -81,7 +82,7 @@ function EmptyListPlaceholder({refreshing, onRefresh}: Props): JSX.Element {
         if (minutesTillOffersDisplayed > 0) {
           setMinutesTillOffersDisplayed(minutesTillOffersDisplayed - 1)
         }
-        void refreshOffers()
+        void Effect.runPromise(refreshOffers())
       }, 60000)
 
       return () => {

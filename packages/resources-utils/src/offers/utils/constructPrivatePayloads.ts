@@ -5,15 +5,18 @@ import {
   OfferPrivatePartE,
   type SymmetricKey,
 } from '@vexl-next/domain/src/general/offers'
-import {toError, type BasicError} from '@vexl-next/domain/src/utility/errors'
-import {Schema} from 'effect'
-import * as E from 'fp-ts/Either'
+import {Effect, Schema} from 'effect'
 import {z} from 'zod'
 import {keys} from '../../utils/keys'
+import {type ClubIdWithMembers} from './fetchClubsInfoForOffer'
 import {type ConnectionsInfoForOffer} from './fetchContactsForOffer'
 
-export type ErrorConstructingPrivatePayloads =
-  BasicError<'ErrorConstructingPrivatePayloads'>
+export class PrivatePayloadsConstructionError extends Schema.TaggedError<PrivatePayloadsConstructionError>(
+  'PrivatePayloadsConstructionError'
+)('PrivatePayloadsConstructionError', {
+  message: Schema.optional(Schema.String),
+  cause: Schema.Unknown,
+}) {}
 
 export const OfferPrivatePayloadToEncrypt = z
   .object({
@@ -39,18 +42,23 @@ export default function constructPrivatePayloads({
     secondDegreeConnections,
     commonFriends,
   },
+  clubIdWithMembers,
   symmetricKey,
 }: {
   connectionsInfo: ConnectionsInfoForOffer
+  clubIdWithMembers: ClubIdWithMembers[]
   symmetricKey: SymmetricKey
-}): E.Either<ErrorConstructingPrivatePayloads, OfferPrivatePayloadToEncrypt[]> {
-  return E.tryCatch(
-    () => {
+}): Effect.Effect<
+  OfferPrivatePayloadToEncrypt[],
+  PrivatePayloadsConstructionError
+> {
+  return Effect.try({
+    try: () => {
       // First we need to find out friend levels for each connection.
       // We can do that by iterating over firstDegreeFriends and secondDegreeFriends
       const friendLevel: Record<
         PublicKeyPemBase64,
-        Set<'FIRST_DEGREE' | 'SECOND_DEGREE'>
+        Set<'FIRST_DEGREE' | 'SECOND_DEGREE' | 'CLUB'>
       > = {}
       for (const firstDegreeFriendPublicKey of firstDegreeConnections) {
         friendLevel[firstDegreeFriendPublicKey] = new Set(['FIRST_DEGREE'])
@@ -63,23 +71,39 @@ export default function constructPrivatePayloads({
         else friendLevel[secondDegreeFriendPublicKey]?.add('SECOND_DEGREE')
       }
 
+      // There will be no duplicates but to keep code consistent
+      for (const clubFriendPublicKey of clubIdWithMembers.flatMap(
+        (club) => club.items
+      )) {
+        if (!friendLevel[clubFriendPublicKey])
+          friendLevel[clubFriendPublicKey] = new Set(['CLUB'])
+        else friendLevel[clubFriendPublicKey]?.add('CLUB')
+      }
+
       return keys(friendLevel).map((key) => {
         const friendLevelValue = friendLevel[key]
         return {
           toPublicKey: key,
           payloadPrivate: {
-            commonFriends:
-              commonFriends.commonContacts.find((one) => one.publicKey === key)
-                ?.common?.hashes ?? [],
+            commonFriends: !friendLevelValue?.has('CLUB')
+              ? (commonFriends.commonContacts.find(
+                  (one) => one.publicKey === key
+                )?.common?.hashes ?? [])
+              : [],
             friendLevel: friendLevelValue ? Array.from(friendLevelValue) : [],
             symmetricKey,
+            ...(friendLevelValue?.has('CLUB') && {
+              clubId: clubIdWithMembers.find((club) => club.items.includes(key))
+                ?.clubUuid,
+            }),
           },
         }
       })
     },
-    toError(
-      'ErrorConstructingPrivatePayloads',
-      'Failed to construct private parts'
-    )
-  )
+    catch: (e) =>
+      new PrivatePayloadsConstructionError({
+        message: 'Failed to construct private parts',
+        cause: e,
+      }),
+  })
 }

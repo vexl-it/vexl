@@ -28,6 +28,7 @@ import {createClub} from './routes/clubs/admin/createClub'
 import {generateClubInviteLink} from './routes/clubs/admin/generateClubInviteLink'
 import {listClubs} from './routes/clubs/admin/listClubs'
 import {modifyClub} from './routes/clubs/admin/modifyClub'
+import {fetchClubContacts} from './routes/clubs/fetchClubContacts'
 import {fetchCommonConnections} from './routes/contacts/fetchCommonConnections'
 import {fetchMyContacts} from './routes/contacts/fetchMyContacts'
 import {importContacts} from './routes/contacts/importContacts'
@@ -54,6 +55,7 @@ export const app = RouterBuilder.make(ContactApiSpecification).pipe(
   RouterBuilder.handle(generateClubInviteLink),
   RouterBuilder.handle(listClubs),
   RouterBuilder.handle(modifyClub),
+  RouterBuilder.handle(fetchClubContacts),
   RouterBuilder.build,
   setupLoggingMiddlewares
 )
@@ -66,6 +68,8 @@ const MainLive = Layer.mergeAll(
 ).pipe(
   Layer.provideMerge(FirebaseMessagingService.Live),
   Layer.provideMerge(ContactDbService.Live),
+  Layer.provideMerge(ClubsDbService.Live),
+  Layer.provideMerge(ClubMembersDbService.Live),
   Layer.provideMerge(ImportContactsQuotaService.Live),
   Layer.provideMerge(UserDbService.Live),
   Layer.provideMerge(ClubsDbService.Live),

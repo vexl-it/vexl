@@ -4,6 +4,7 @@ import {TouchableOpacity} from 'react-native'
 import {getFontScaleSync} from 'react-native-device-info'
 import {Stack, XStack, getTokens, styled} from 'tamagui'
 import Image from '../../Image'
+import eventsAndClubsYellowIconSvg from '../../images/EventsAndClubsYellowIcon'
 import BitcoinPriceChart from './BitcoinPriceChart'
 import {CONTAINER_WITH_TOP_BORDER_RADIUS_TOP_PADDING} from './ContainerWithTopBorderRadius'
 import calculatorSvg from './MarketplaceScreen/images/calculatorSvg'
@@ -34,7 +35,7 @@ function BtcPriceHeader(): JSX.Element {
         <BackgroundImage colors={['rgba(252, 205, 108, 0)', '#FCCD6C']} />
       </Stack>
       <XStack f={1} ai="flex-end" jc="space-between">
-        <Stack mb="$1" ml="$3">
+        <XStack gap="$0" alignItems="center" mb="$1" ml="$3">
           <TouchableOpacity
             onPress={() => {
               navigation.navigate('TradeCalculatorFlow', {
@@ -49,7 +50,19 @@ function BtcPriceHeader(): JSX.Element {
               />
             </XStack>
           </TouchableOpacity>
-        </Stack>
+          <TouchableOpacity
+            onPress={() => {
+              navigation.navigate('EventsAndClubs')
+            }}
+          >
+            <XStack ai="center" gap="$1" br="$2" py="$1" px="$1">
+              <Image
+                source={eventsAndClubsYellowIconSvg}
+                stroke={getTokens().color.main.val}
+              />
+            </XStack>
+          </TouchableOpacity>
+        </XStack>
         <BitcoinPriceChart />
       </XStack>
     </Stack>

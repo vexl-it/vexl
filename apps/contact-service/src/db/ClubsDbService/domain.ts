@@ -1,4 +1,5 @@
 import {ClubUuid} from '@vexl-next/domain/src/general/clubs'
+import {UriStringE} from '@vexl-next/domain/src/utility/UriString.brand'
 import {Schema} from 'effect'
 
 // Club table schema
@@ -10,8 +11,8 @@ export class ClubDbRecord extends Schema.Class<ClubDbRecord>('ClubDbRecord')({
   name: Schema.String,
   description: Schema.optionalWith(Schema.String, {as: 'Option'}),
   membersCountLimit: Schema.Number,
-  clubImageUrl: Schema.String,
-  validUntil: Schema.Date,
+  clubImageUrl: UriStringE,
+  validUntil: Schema.DateFromSelf,
 }) {}
 
 // Club invitation link table schema

@@ -13,6 +13,9 @@ import {
 } from '@vexl-next/server-utils/src/tests/testDb'
 import {Console, Effect, Layer, ManagedRuntime, type Scope} from 'effect'
 import {cryptoConfig} from '../../configs'
+import {ClubInvitationLinkDbService} from '../../db/ClubInvitationLinkDbService'
+import {ClubMembersDbService} from '../../db/ClubMemberDbService'
+import {ClubsDbService} from '../../db/ClubsDbService'
 import {ContactDbService} from '../../db/ContactDbService'
 import {UserDbService} from '../../db/UserDbService'
 import DbLayer from '../../db/layer'
@@ -32,6 +35,9 @@ export type MockedContexts =
   | DashboardReportsService
   | MetricsClientService
   | ImportContactsQuotaService
+  | ClubsDbService
+  | ClubMembersDbService
+  | ClubInvitationLinkDbService
 
 const universalContext = Layer.mergeAll(ServerCrypto.layer(cryptoConfig))
 
@@ -43,6 +49,9 @@ const context = NodeTestingApp.Live.pipe(
   Layer.provideMerge(UserDbService.Live),
   Layer.provideMerge(mockedMetricsClientService),
   Layer.provideMerge(ContactDbService.Live),
+  Layer.provideMerge(ClubsDbService.Live),
+  Layer.provideMerge(ClubMembersDbService.Live),
+  Layer.provideMerge(ClubInvitationLinkDbService.Live),
   Layer.provideMerge(mockedFirebaseMessagingServiceLayer),
   Layer.provideMerge(DbLayer),
   Layer.provideMerge(NodeContext.layer)

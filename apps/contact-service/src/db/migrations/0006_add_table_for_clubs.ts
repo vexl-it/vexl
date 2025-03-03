@@ -12,7 +12,7 @@ export default Effect.flatMap(
       description text,
       members_count_limit integer NOT NULL,
       club_image_url text,
-      valid_until date NOT NULL
+      valid_until TIMESTAMP WITH TIME ZONE NOT NULL
     );
 
     CREATE INDEX "club_uuid_ix" ON club ("uuid");

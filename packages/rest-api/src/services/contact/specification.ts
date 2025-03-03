@@ -3,15 +3,27 @@ import {ServerSecurity} from '../../apiSecurity'
 import {CommonHeaders} from '../../commonHeaders'
 import {NoContentResponse} from '../../NoContentResponse.brand'
 import {
+  AdminTokenParams,
   CheckUserExistsRequest,
+  CreateClubErrors,
+  CreateClubRequest,
+  CreateClubResponse,
   CreateUserRequest,
   FetchCommonConnectionsRequest,
   FetchCommonConnectionsResponseE,
   FetchMyContactsRequest,
   FetchMyContactsResponseE,
+  GenerateInviteLinkForAdminErrors,
+  GenerateInviteLinkForAdminRequest,
+  GenerateInviteLinkForAdminResponse,
   ImportContactsErrors,
   ImportContactsRequest,
   ImportContactsResponse,
+  ListClubsErrors,
+  ListClubsResponse,
+  ModifyClubErrors,
+  ModifyClubRequest,
+  ModifyClubResponse,
   RefreshUserRequest,
   UpdateBadOwnerHashErrors,
   UpdateBadOwnerHashRequest,
@@ -124,6 +136,57 @@ export const UpdateBadOwnerHashEndpoint = Api.post(
   })
 )
 
+export const CreateClubEndpoint = Api.post(
+  'createClub',
+  '/api/v1/clubs/admin'
+).pipe(
+  Api.setRequestQuery(AdminTokenParams),
+  Api.setRequestBody(CreateClubRequest),
+  Api.setResponseBody(CreateClubResponse),
+  Api.addResponse({
+    status: 400,
+    body: CreateClubErrors,
+  })
+)
+
+export const ModfiyClubEndpoint = Api.put(
+  'modifyClub',
+  '/api/v1/clubs/admin'
+).pipe(
+  Api.setRequestQuery(AdminTokenParams),
+  Api.setRequestBody(ModifyClubRequest),
+  Api.setResponseBody(ModifyClubResponse),
+  Api.addResponse({
+    status: 400,
+    body: ModifyClubErrors,
+  })
+)
+
+export const GenerateClubInviteLinkForAdminEndpoint = Api.put(
+  'generateClubInviteLinkForAdmin',
+  '/api/v1/clubs/admin/generate-admin-link'
+).pipe(
+  Api.setRequestQuery(AdminTokenParams),
+  Api.setRequestBody(GenerateInviteLinkForAdminRequest),
+  Api.setResponseBody(GenerateInviteLinkForAdminResponse),
+  Api.addResponse({
+    status: 400,
+    body: GenerateInviteLinkForAdminErrors,
+  })
+)
+
+export const ListClubsEndpoint = Api.get(
+  'listClubs',
+  '/api/v1/clubs/admin'
+).pipe(
+  Api.setRequestQuery(AdminTokenParams),
+  Api.setResponseBody(ListClubsResponse),
+  Api.addResponse({
+    status: 400,
+    body: ListClubsErrors,
+  })
+)
+
 const UserApiGroup = ApiGroup.make('User').pipe(
   ApiGroup.addEndpoint(CheckUserExistsEndpoint),
   ApiGroup.addEndpoint(CreateUserEndpoint),
@@ -139,7 +202,20 @@ const ContactApiGroup = ApiGroup.make('Contact').pipe(
   ApiGroup.addEndpoint(FetchCommonConnectionsEndpoint)
 )
 
+const ClubsAdminApiGroup = ApiGroup.make('ClubsAdmin', {
+  description: 'Clubs managment for admins',
+}).pipe(
+  ApiGroup.addEndpoint(CreateClubEndpoint),
+  ApiGroup.addEndpoint(ModfiyClubEndpoint),
+  ApiGroup.addEndpoint(GenerateClubInviteLinkForAdminEndpoint),
+  ApiGroup.addEndpoint(ListClubsEndpoint)
+)
+
 export const ContactApiSpecification = Api.make({
   title: 'Contact service',
   version: '1.0.0',
-}).pipe(Api.addGroup(UserApiGroup), Api.addGroup(ContactApiGroup))
+}).pipe(
+  Api.addGroup(UserApiGroup),
+  Api.addGroup(ContactApiGroup),
+  Api.addGroup(ClubsAdminApiGroup)
+)

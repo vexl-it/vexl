@@ -2,7 +2,9 @@ import {Schema} from 'effect'
 
 export class NotFoundError extends Schema.TaggedError<NotFoundError>(
   'NotFoundError'
-)('NotFoundError', {}) {}
+)('NotFoundError', {
+  status: Schema.optionalWith(Schema.Literal(404), {default: () => 404}),
+}) {}
 
 export class InternalServerError extends Schema.TaggedError<InternalServerError>(
   'InternalServerError'

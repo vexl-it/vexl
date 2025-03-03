@@ -14,6 +14,7 @@ import {
   createInsertClub,
   type InsertClubParams,
 } from './queries/createInsertClub'
+import {createListClubs} from './queries/createListClubs'
 import {
   createUpdateClub,
   type UpdateClubParams,
@@ -35,6 +36,7 @@ export interface ClubsDbOperations {
   updateClub: (
     params: UpdateClubParams
   ) => Effect.Effect<ClubDbRecord, UnexpectedServerError>
+  listClubs: () => Effect.Effect<readonly ClubDbRecord[], UnexpectedServerError>
 }
 
 export class ClubsDbService extends Context.Tag('ClubsDbService')<
@@ -49,6 +51,7 @@ export class ClubsDbService extends Context.Tag('ClubsDbService')<
       const findClubByUuid = yield* _(createFindClubByUuid)
       const insertClub = yield* _(createInsertClub)
       const updateClub = yield* _(createUpdateClub)
+      const listClubs = yield* _(createListClubs)
 
       return {
         deleteClub,
@@ -56,6 +59,7 @@ export class ClubsDbService extends Context.Tag('ClubsDbService')<
         findClubByUuid,
         insertClub,
         updateClub,
+        listClubs,
       }
     })
   )

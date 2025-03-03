@@ -16,11 +16,18 @@ import {
   portConfig,
   redisUrl,
 } from './configs'
+import {ClubInvitationLinkDbService} from './db/ClubInvitationLinkDbService'
+import {ClubMembersDbService} from './db/ClubMemberDbService'
+import {ClubsDbService} from './db/ClubsDbService'
 import {ContactDbService} from './db/ContactDbService'
 import {UserDbService} from './db/UserDbService'
 import DbLayer from './db/layer'
 import {internalServerLive} from './internalServer'
 import {reportGaguesLayer} from './metrics'
+import {createClub} from './routes/clubs/admin/createClub'
+import {generateClubInviteLink} from './routes/clubs/admin/generateClubInviteLink'
+import {listClubs} from './routes/clubs/admin/listClubs'
+import {modifyClub} from './routes/clubs/admin/modifyClub'
 import {fetchCommonConnections} from './routes/contacts/fetchCommonConnections'
 import {fetchMyContacts} from './routes/contacts/fetchMyContacts'
 import {importContacts} from './routes/contacts/importContacts'
@@ -43,6 +50,10 @@ export const app = RouterBuilder.make(ContactApiSpecification).pipe(
   RouterBuilder.handle(fetchMyContacts),
   RouterBuilder.handle(fetchCommonConnections),
   RouterBuilder.handle(updateBadOwnerHash),
+  RouterBuilder.handle(createClub),
+  RouterBuilder.handle(generateClubInviteLink),
+  RouterBuilder.handle(listClubs),
+  RouterBuilder.handle(modifyClub),
   RouterBuilder.build,
   setupLoggingMiddlewares
 )
@@ -57,6 +68,9 @@ const MainLive = Layer.mergeAll(
   Layer.provideMerge(ContactDbService.Live),
   Layer.provideMerge(ImportContactsQuotaService.Live),
   Layer.provideMerge(UserDbService.Live),
+  Layer.provideMerge(ClubsDbService.Live),
+  Layer.provideMerge(ClubMembersDbService.Live),
+  Layer.provideMerge(ClubInvitationLinkDbService.Live),
   Layer.provideMerge(DbLayer),
   Layer.provideMerge(RedisService.layer(redisUrl)),
   Layer.provideMerge(MetricsClientService.layer(redisUrl)),

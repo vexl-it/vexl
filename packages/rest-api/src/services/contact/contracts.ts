@@ -2,6 +2,8 @@ import {
   PublicKeyPemBase64,
   PublicKeyPemBase64E,
 } from '@vexl-next/cryptography/src/KeyHolder/brands'
+import {ClubUuid} from '@vexl-next/domain/src/general/clubs'
+import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
 import {CountryPrefixE} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {
   HashedPhoneNumber,
@@ -9,6 +11,7 @@ import {
 } from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {ConnectionLevelE} from '@vexl-next/domain/src/general/offers'
 import {FcmTokenE} from '@vexl-next/domain/src/utility/FcmToken.brand'
+import {UriStringE} from '@vexl-next/domain/src/utility/UriString.brand'
 import {BooleanFromString} from '@vexl-next/generic-utils/src/effect-helpers/BooleanFromString'
 import {EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {Schema} from 'effect'
@@ -231,3 +234,90 @@ export const UpdateBadOwnerHashResponse = Schema.Struct({
   willDeleteExistingUserIfRan: Schema.optional(Schema.Literal(true)),
 })
 export type UpdateBadOwnerHashResponse = typeof UpdateBadOwnerHashResponse.Type
+
+// ---------
+//   Clubs 👇
+// ---------
+export class ClubAlreadyExistsError extends Schema.TaggedError<ClubAlreadyExistsError>(
+  'ClubAlreadyExistsError'
+)('ClubAlreadyExistsError', {
+  status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
+}) {}
+
+export class InvalidAdminTokenError extends Schema.TaggedError<InvalidAdminTokenError>(
+  'InvalidAdminToken'
+)('InvalidAdminToken', {
+  status: Schema.optionalWith(Schema.Literal(403), {default: () => 403}),
+}) {}
+
+export const AdminTokenParams = Schema.Struct({
+  adminToken: Schema.String,
+})
+
+const ClubInfo = Schema.Struct({
+  uuid: ClubUuid,
+  name: Schema.String,
+  description: Schema.optionalWith(Schema.String, {as: 'Option'}),
+  membersCountLimit: Schema.Number,
+  clubImageUrl: UriStringE,
+  validUntil: Schema.DateFromString,
+})
+
+export const CreateClubErrors = Schema.Union(
+  ClubAlreadyExistsError,
+  InvalidAdminTokenError
+)
+export type CreateClubErrors = typeof CreateClubErrors.Type
+
+export const CreateClubRequest = Schema.Struct({
+  club: ClubInfo,
+})
+export type CreateClubRequest = typeof CreateClubRequest.Type
+
+export const CreateClubResponse = Schema.Struct({
+  clubInfo: ClubInfo,
+})
+export type CreateClubResponse = Schema.Schema.Type<typeof CreateClubResponse>
+
+export const GenerateInviteLinkForAdminErrors = Schema.Union(
+  NotFoundError,
+  InvalidAdminTokenError
+)
+export type GenerateInviteLinkForAdminErrors =
+  typeof GenerateInviteLinkForAdminErrors.Type
+
+export const GenerateInviteLinkForAdminRequest = Schema.Struct({
+  clubUuid: ClubUuid,
+})
+export type GenerateInviteLinkForAdminRequest =
+  typeof GenerateInviteLinkForAdminRequest.Type
+
+export const GenerateInviteLinkForAdminResponse = Schema.Struct({
+  clubUuid: ClubUuid,
+  code: Schema.String,
+})
+export type GenerateInviteLinkForAdminResponse =
+  typeof GenerateInviteLinkForAdminResponse.Type
+
+export const ModifyClubErrors = Schema.Union(
+  NotFoundError,
+  InvalidAdminTokenError
+)
+export type ModifyClubErrors = typeof ModifyClubErrors.Type
+
+export const ModifyClubRequest = Schema.Struct({
+  clubInfo: ClubInfo,
+})
+export type ModifyClubRequest = typeof ModifyClubRequest.Type
+
+export const ModifyClubResponse = Schema.Struct({
+  clubInfo: ClubInfo,
+})
+export type ModifyClubResponse = typeof ModifyClubResponse.Type
+
+export const ListClubsErrors = Schema.Union(InvalidAdminTokenError)
+
+export const ListClubsResponse = Schema.Struct({
+  clubs: Schema.Array(ClubInfo),
+})
+export type ListClubsResponse = typeof ListClubsResponse.Type

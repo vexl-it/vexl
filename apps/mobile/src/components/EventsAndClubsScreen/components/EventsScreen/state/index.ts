@@ -76,9 +76,9 @@ export const eventsSortedAtom = atom((get) =>
 )
 
 export const futureEventsAtom = atom((get) =>
-  get(eventsSortedAtom).filter((event) =>
-    day(event.startDate).isAfter(day().startOf('day'))
-  )
+  get(eventsSortedAtom)
+    .filter((event) => day(event.startDate).isAfter(day().startOf('day')))
+    .sort((a, b) => (day(a.startDate).isBefore(day(b.startDate)) ? -1 : 1))
 )
 
 export const pastEventsAtom = atom((get) =>

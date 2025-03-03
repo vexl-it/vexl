@@ -74,6 +74,12 @@ export class UserNotFoundError extends Schema.TaggedError<UserNotFoundError>(
   }),
 }) {}
 
+export class UserNotClubMemberError extends Schema.TaggedError<UserNotClubMemberError>(
+  'UserNotClubMemberError'
+)('UserNotClubMemberError', {
+  status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
+}) {}
+
 export const CreateUserRequest = Schema.Struct({
   firebaseToken: Schema.NullOr(FcmTokenE),
   expoToken: Schema.optionalWith(Schema.NullOr(ExpoNotificationTokenE), {

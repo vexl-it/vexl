@@ -17,6 +17,9 @@ import {
   GenerateInviteLinkForAdminErrors,
   GenerateInviteLinkForAdminRequest,
   GenerateInviteLinkForAdminResponse,
+  GetClubContactsErrors,
+  GetClubContactsRequest,
+  GetClubContactsResponse,
   GetClubInfoErrors,
   GetClubInfoRequest,
   GetClubInfoResponse,
@@ -246,6 +249,18 @@ export const LeaveClubEndpoint = Api.post(
   })
 )
 
+export const GetClubContactsEndpoint = Api.post(
+  'getClubContacts',
+  '/api/v1/contacts/club'
+).pipe(
+  Api.setRequestBody(GetClubContactsRequest),
+  Api.setResponseBody(GetClubContactsResponse),
+  Api.addResponse({
+    status: 400,
+    body: GetClubContactsErrors,
+  })
+)
+
 const UserApiGroup = ApiGroup.make('User').pipe(
   ApiGroup.addEndpoint(CheckUserExistsEndpoint),
   ApiGroup.addEndpoint(CreateUserEndpoint),
@@ -276,7 +291,8 @@ const ClubsMemberApiGroup = ApiGroup.make('ClubsMember', {
 }).pipe(
   ApiGroup.addEndpoint(GetClubInfoEndpoint),
   ApiGroup.addEndpoint(JoinClubEndpoint),
-  ApiGroup.addEndpoint(LeaveClubEndpoint)
+  ApiGroup.addEndpoint(LeaveClubEndpoint),
+  ApiGroup.addEndpoint(GetClubContactsEndpoint)
 )
 
 export const ContactApiSpecification = Api.make({

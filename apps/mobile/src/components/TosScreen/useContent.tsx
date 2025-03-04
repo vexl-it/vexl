@@ -2,7 +2,7 @@ import {useMemo} from 'react'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import {type TabProps} from '../Tabs'
 
-export type TabType = 'termsOfUse' | 'privacyPolicy'
+export type TabType = 'termsOfUse' | 'privacyPolicy' | 'childSafety'
 export default function useContent(): Array<TabProps<TabType>> {
   const {t} = useTranslation()
 
@@ -15,6 +15,10 @@ export default function useContent(): Array<TabProps<TabType>> {
       {
         title: t('termsOfUse.privacyPolicy'),
         type: 'privacyPolicy',
+      },
+      {
+        title: t('termsOfUse.childSafety'),
+        type: 'childSafety',
       },
     ],
     [t]

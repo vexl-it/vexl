@@ -10496,7 +10496,7 @@ __metadata:
     expo-device: ~6.0.2
     expo-font: ~12.0.10
     expo-haptics: ~13.0.1
-    expo-image-picker: ~15.0.7
+    expo-image-picker: ~15.1.0
     expo-linear-gradient: ~13.0.2
     expo-linking: ~6.3.1
     expo-localization: ~15.0.3
@@ -16455,14 +16455,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo-image-picker@npm:~15.0.7":
-  version: 15.0.7
-  resolution: "expo-image-picker@npm:15.0.7"
+"expo-image-picker@npm:~15.1.0":
+  version: 15.1.0
+  resolution: "expo-image-picker@npm:15.1.0"
   dependencies:
     expo-image-loader: ~4.7.0
   peerDependencies:
     expo: "*"
-  checksum: 569f9479eed8f0d2667c70f6d790b2a8dd6647a1c416eb5b9f573ce6bf4ff18d0fa45654f71bfa7d7579844a7a11334c6ceca6929c8e3d87ee32c52ba6b76bbb
+  checksum: bc95921dca770130a8535563e48d23147dadbb7530ed3bc5d528337bd234c5d80c33dfe2a00031fd034d04a19d3ce89d171b10965e034b9e659e599dd9a470fc
   languageName: node
   linkType: hard
 

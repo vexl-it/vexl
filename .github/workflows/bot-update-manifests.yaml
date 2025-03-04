@@ -26,6 +26,7 @@ on:
           - web-app
           - feedback-service
           - bitcoin-rate
+          - content-service
 
 jobs:
   update-manifests:

@@ -43,6 +43,7 @@ export function toE164PhoneNumber(
         }
       : {}
   )
+
   if (valid && number?.e164) {
     return O.some(E164PhoneNumber.parse(number.e164))
   }

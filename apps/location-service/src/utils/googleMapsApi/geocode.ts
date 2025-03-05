@@ -7,36 +7,38 @@ import {
 import axios from 'axios'
 import {Array, Effect, Option, Schema, String, pipe} from 'effect'
 
+interface GoogleGeocodeResult {
+  place_id: string
+  formatted_address: string
+  address_components: Array<{
+    long_name: string
+    short_name: string
+    types: string[]
+  }>
+  geometry: {
+    location: {
+      lat: number
+      lng: number
+    }
+    viewport: {
+      northeast: {
+        lat: number
+        lng: number
+      }
+      southwest: {
+        lat: number
+        lng: number
+      }
+    }
+  }
+}
+
 interface GoogleGeocodeResponse {
   plus_code: {
     compound_code: string
     global_code: string
   }
-  results: Array<{
-    place_id: string
-    formatted_address: string
-    address_components: Array<{
-      long_name: string
-      short_name: string
-      types: string[]
-    }>
-    geometry: {
-      location: {
-        lat: number
-        lng: number
-      }
-      viewport: {
-        northeast: {
-          lat: number
-          lng: number
-        }
-        southwest: {
-          lat: number
-          lng: number
-        }
-      }
-    }
-  }>
+  results: GoogleGeocodeResult[]
 }
 
 // const regionRegex = /(?: region| kraj)/gi
@@ -63,6 +65,23 @@ const compoundCodeContainsCity = (
   compoundCode: string,
   city: string | undefined
 ): boolean => (city ? String.includes(city)(compoundCode) : false)
+
+function findNextLevelArea(result: GoogleGeocodeResult): string | undefined {
+  const neightbourhood = result.address_components.find((component) =>
+    component.types.includes('neighborhood')
+  )
+  const area = result.address_components.find(
+    (component) =>
+      component.types.includes('political') &&
+      component.types.includes('sublocality') &&
+      component.types.includes('sublocality_level_1')
+  )
+  const firstAddress = result.address_components.at(0)
+
+  return (
+    neightbourhood?.short_name ?? area?.short_name ?? firstAddress?.short_name
+  )
+}
 
 export const googleGeocode =
   (apiKey: string) =>
@@ -126,7 +145,7 @@ export const googleGeocode =
         /,([^,]*)$/,
         ` - ${country}`
       )
-      const cityOrPartOfTheCity = firstHit.address_components.at(0)?.short_name
+      const cityOrPartOfTheCity = findNextLevelArea(firstHit)
       const finalAddress = compoundCodeContainsCity(
         compoundCode,
         cityOrPartOfTheCity

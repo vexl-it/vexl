@@ -33,7 +33,7 @@
     "@vexl-next/cryptography": "0.0.0",
     "@vexl-next/domain": "0.0.0",
     "@vexl-next/generic-utils": "0.0.0",
-    "awesome-phonenumber": "^5.1.0",
+    "awesome-phonenumber": "^7.4.0",
     "effect": "^3.10.12",
     "effect-http": "^0.82.0",
     "effect-http-node": "^0.22.0",

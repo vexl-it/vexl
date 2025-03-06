@@ -9,6 +9,8 @@ import {
   CreateClubRequest,
   CreateClubResponse,
   CreateUserRequest,
+  FetchClubContactsRequest,
+  FetchClubContactsResponse,
   FetchCommonConnectionsRequest,
   FetchCommonConnectionsResponseE,
   FetchMyContactsRequest,
@@ -187,6 +189,15 @@ export const ListClubsEndpoint = Api.get(
   })
 )
 
+export const FetchClubContactsEndpoint = Api.get(
+  'fetchClubContacts',
+  '/api/v1/contacts/club'
+).pipe(
+  Api.setSecurity(ServerSecurity),
+  Api.setRequestQuery(FetchClubContactsRequest),
+  Api.setResponseBody(FetchClubContactsResponse)
+)
+
 const UserApiGroup = ApiGroup.make('User').pipe(
   ApiGroup.addEndpoint(CheckUserExistsEndpoint),
   ApiGroup.addEndpoint(CreateUserEndpoint),
@@ -211,11 +222,16 @@ const ClubsAdminApiGroup = ApiGroup.make('ClubsAdmin', {
   ApiGroup.addEndpoint(ListClubsEndpoint)
 )
 
+const ClubsApiGroup = ApiGroup.make('Clubs').pipe(
+  ApiGroup.addEndpoint(FetchClubContactsEndpoint)
+)
+
 export const ContactApiSpecification = Api.make({
   title: 'Contact service',
   version: '1.0.0',
 }).pipe(
   Api.addGroup(UserApiGroup),
   Api.addGroup(ContactApiGroup),
-  Api.addGroup(ClubsAdminApiGroup)
+  Api.addGroup(ClubsAdminApiGroup),
+  Api.addGroup(ClubsApiGroup)
 )

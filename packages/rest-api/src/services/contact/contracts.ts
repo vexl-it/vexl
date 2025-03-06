@@ -320,4 +320,18 @@ export const ListClubsErrors = Schema.Union(InvalidAdminTokenError)
 export const ListClubsResponse = Schema.Struct({
   clubs: Schema.Array(ClubInfo),
 })
+
 export type ListClubsResponse = typeof ListClubsResponse.Type
+
+export const FetchClubContactsRequest = Schema.Struct({
+  clubUuid: ClubUuid,
+})
+
+export type FetchClubContactsRequest = typeof FetchClubContactsRequest.Type
+
+export const FetchClubContactsResponse = Schema.Struct({
+  clubUuid: ClubUuid,
+  items: Schema.Array(PublicKeyPemBase64E),
+})
+
+export type FetchClubContactsResponse = typeof FetchClubContactsResponse.Type

@@ -63,6 +63,7 @@ const OfferPublicPartToEncrypt = z
     fcmCypher: FcmCypher.optional(),
     authorClientVersion: z.string().optional(),
     goldenAvatarType: z.string().optional(),
+    clubsPublicKeys: z.array(PublicKeyPemBase64).optional(),
   })
   .readonly()
 

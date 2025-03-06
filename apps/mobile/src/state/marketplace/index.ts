@@ -10,7 +10,11 @@ import {
   type SymmetricKey,
 } from '@vexl-next/domain/src/general/offers'
 import {isoNow} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
-import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
+import {
+  effectToTaskEither,
+  taskEitherToEffect,
+  taskToEffect,
+} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {type OfferEncryptionProgress} from '@vexl-next/resources-utils/src/offers/OfferEncryptionProgress'
 import createNewOfferForMyContacts, {
   type ApiErrorWhileCreatingOffer,
@@ -33,9 +37,8 @@ import {type PrivatePartEncryptionError} from '@vexl-next/resources-utils/src/of
 import {type ApiErrorFetchingContactsForOffer} from '@vexl-next/resources-utils/src/offers/utils/fetchContactsForOffer'
 import {type ErrorGeneratingSymmetricKey} from '@vexl-next/resources-utils/src/offers/utils/generateSymmetricKey'
 import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
-import {Array, Either, pipe as effectPipe, type Effect} from 'effect'
+import {Array, Effect, Either, pipe as effectPipe} from 'effect'
 import * as A from 'fp-ts/Array'
-import * as E from 'fp-ts/Either'
 import * as Option from 'fp-ts/Option'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
@@ -277,6 +280,7 @@ export const triggerOffersRefreshAtom = atom(null, async (get, set) => {
           adminId: one.ownershipInfo.adminId,
           intendedConnectionLevel: one.ownershipInfo.intendedConnectionLevel,
         }),
+        effectToTaskEither,
         TE.match(
           (e) => {
             reportError(
@@ -329,88 +333,85 @@ export const createOfferAtom = atom<
       offerKey: PrivateKeyHolder
     },
   ],
-  TE.TaskEither<
+  Effect.Effect<
+    OneOfferInState,
     | ApiErrorFetchingContactsForOffer
     | ErrorConstructingPrivatePayloads
     | ApiErrorWhileCreatingOffer
     | ErrorGeneratingSymmetricKey
     | ErrorEncryptingPublicPart
     | NonCompatibleOfferVersionError
-    | ErrorDecryptingOffer,
-    OneOfferInState
+    | ErrorDecryptingOffer
   >
 >(null, (get, set, params) => {
   const api = get(apiAtom)
   const session = get(sessionDataOrDummyAtom)
   const {payloadPublic, intendedConnectionLevel, onProgress} = params
 
-  return pipe(
-    TE.Do,
-    TE.bindW('fcmToken', () => pipe(getNotificationToken(), TE.fromTask)),
-    TE.bindW('publicPayloadWithNotificationToken', ({fcmToken}) =>
-      TE.fromTask(
+  return Effect.gen(function* (_) {
+    const fcmToken = yield* _(taskToEffect(getNotificationToken()))
+
+    const publicPayloadWithNotificationToken = yield* _(
+      taskToEffect(
         set(addFCMCypherToPublicPayloadActionAtom, {
           publicPart: payloadPublic,
           fcmToken: Option.fromNullable(fcmToken),
           keyHolder: params.offerKey,
         })
       )
-    ),
-    TE.bindW(
-      'createOfferResult',
-      ({publicPayloadWithNotificationToken: {publicPart}}) =>
+    )
+
+    const createOfferResult = yield* _(
+      taskEitherToEffect(
         createNewOfferForMyContacts({
           offerApi: api.offer,
-          publicPart,
+          publicPart: publicPayloadWithNotificationToken.publicPart,
           countryPrefix: getCountryPrefix(session.phoneNumber),
           contactApi: api.contact,
           intendedConnectionLevel,
           ownerKeyPair: session.privateKey,
           onProgress,
         })
-    ),
-    TE.map(
-      ({
-        createOfferResult: r,
-        publicPayloadWithNotificationToken,
-        fcmToken,
-      }) => {
-        if (r.encryptionErrors.length > 0) {
-          reportError('error', new Error('Error while encrypting offer'), {
-            errors: r.encryptionErrors,
-          })
-        }
-
-        const createdOffer: MyOfferInState = {
-          ownershipInfo: {
-            adminId: r.adminId,
-            intendedConnectionLevel,
-          },
-          lastCommitedFcmToken:
-            publicPayloadWithNotificationToken.tokenSuccessfullyAdded
-              ? (fcmToken ?? undefined)
-              : undefined,
-          flags: {
-            reported: false,
-          },
-          offerInfo: r.offerInfo,
-        }
-        set(offersAtom, (oldState) => [...oldState, createdOffer])
-        set(upsertOfferToConnectionsActionAtom, {
-          connections: {
-            firstLevel: r.encryptedFor.firstDegreeConnections,
-            secondLevel:
-              intendedConnectionLevel === 'ALL'
-                ? r.encryptedFor.secondDegreeConnections
-                : undefined,
-          },
-          adminId: r.adminId,
-          symmetricKey: r.symmetricKey,
-        })
-        return createdOffer
-      }
+      )
     )
-  )
+
+    if (createOfferResult.encryptionErrors.length > 0) {
+      reportError('error', new Error('Error while encrypting offer'), {
+        errors: createOfferResult.encryptionErrors,
+      })
+    }
+
+    const createdOffer: MyOfferInState = {
+      ownershipInfo: {
+        adminId: createOfferResult.adminId,
+        intendedConnectionLevel,
+      },
+      lastCommitedFcmToken:
+        publicPayloadWithNotificationToken.tokenSuccessfullyAdded
+          ? (fcmToken ?? undefined)
+          : undefined,
+      flags: {
+        reported: false,
+      },
+      offerInfo: createOfferResult.offerInfo,
+    }
+
+    set(offersAtom, (oldState) => [...oldState, createdOffer])
+
+    set(upsertOfferToConnectionsActionAtom, {
+      connections: {
+        firstLevel: createOfferResult.encryptedFor.firstDegreeConnections,
+        secondLevel:
+          intendedConnectionLevel === 'ALL'
+            ? createOfferResult.encryptedFor.secondDegreeConnections
+            : undefined,
+      },
+      adminId: createOfferResult.adminId,
+      symmetricKey: createOfferResult.symmetricKey,
+    })
+
+    return createdOffer
+  })
 })
 
 export const updateOfferAtom = atom<
@@ -426,124 +427,108 @@ export const updateOfferAtom = atom<
       | {updateFcmCypher: true; offerKey: PrivateKeyHolder}
     ),
   ],
-  TE.TaskEither<
+  Effect.Effect<
+    OneOfferInState,
     | ApiErrorUpdatingOffer
     | ErrorEncryptingPublicPart
     | ErrorDecryptingOffer
     | PrivatePartEncryptionError
     | Effect.Effect.Error<ReturnType<OfferApi['createPrivatePart']>>
-    | NonCompatibleOfferVersionError,
-    OneOfferInState
+    | NonCompatibleOfferVersionError
   >
 >(null, (get, set, params) => {
   const api = get(apiAtom)
   const session = get(sessionDataOrDummyAtom)
   const {payloadPublic, symmetricKey, adminId, intendedConnectionLevel} = params
 
-  return pipe(
-    TE.Do,
-    TE.bindW('fcmToken', () => pipe(getNotificationToken(), TE.fromTask)),
-    TE.bindW('publicPayloadWithNotificationToken', ({fcmToken}) => {
-      if (!params.updateFcmCypher) {
-        return TE.right({
+  return Effect.gen(function* (_) {
+    const fcmToken = yield* _(taskToEffect(getNotificationToken()))
+
+    const publicPayloadWithNotificationToken = !params.updateFcmCypher
+      ? {
           publicPart: payloadPublic,
           tokenSuccessfullyAdded: false,
-        })
-      }
-      return TE.fromTask(
-        set(addFCMCypherToPublicPayloadActionAtom, {
-          publicPart: payloadPublic,
-          fcmToken: Option.fromNullable(fcmToken),
-          keyHolder: params.offerKey,
-        })
-      )
-    }),
-    TE.bindW(
-      'updateResult',
-      ({publicPayloadWithNotificationToken: {publicPart}}) =>
-        updateOffer({
-          offerApi: api.offer,
-          adminId,
-          publicPayload: publicPart,
-          symmetricKey,
-          intendedConnectionLevel,
-          ownerKeypair: session.privateKey,
-        })
-    ),
-    TE.map(
-      ({updateResult: r, fcmToken, publicPayloadWithNotificationToken}) => {
-        const createdOffer: MyOfferInState = {
-          flags: {
-            reported: false,
-          },
-          lastCommitedFcmToken:
-            publicPayloadWithNotificationToken.tokenSuccessfullyAdded
-              ? (fcmToken ?? undefined)
-              : undefined,
-          ownershipInfo: {
-            adminId,
-            intendedConnectionLevel,
-          },
-          offerInfo: r,
         }
-        set(offersAtom, (oldState) => [
-          ...oldState.filter(
-            (offer) =>
-              offer.offerInfo.offerId !== createdOffer.offerInfo.offerId
-          ),
-          createdOffer,
-        ])
-        return createdOffer
-      }
+      : yield* _(
+          taskToEffect(
+            set(addFCMCypherToPublicPayloadActionAtom, {
+              publicPart: payloadPublic,
+              fcmToken: Option.fromNullable(fcmToken),
+              keyHolder: params.offerKey,
+            })
+          )
+        )
+
+    const offerInfo = yield* _(
+      updateOffer({
+        offerApi: api.offer,
+        adminId,
+        publicPayload: publicPayloadWithNotificationToken.publicPart,
+        symmetricKey,
+        intendedConnectionLevel,
+        ownerKeypair: session.privateKey,
+      })
     )
-  )
+
+    const createdOffer: MyOfferInState = {
+      flags: {
+        reported: false,
+      },
+      lastCommitedFcmToken:
+        publicPayloadWithNotificationToken.tokenSuccessfullyAdded
+          ? (fcmToken ?? undefined)
+          : undefined,
+      ownershipInfo: {
+        adminId,
+        intendedConnectionLevel,
+      },
+      offerInfo,
+    }
+
+    set(offersAtom, (oldState) => [
+      ...oldState.filter(
+        (offer) => offer.offerInfo.offerId !== createdOffer.offerInfo.offerId
+      ),
+      createdOffer,
+    ])
+
+    return createdOffer
+  })
 })
 
 export const deleteOffersActionAtom = atom<
   null,
   [{adminIds: OfferAdminId[]}],
-  TE.TaskEither<
-    Effect.Effect.Error<ReturnType<OfferApi['deleteOffer']>>,
-    {success: true}
-  >
+  Effect.Effect<void, Effect.Effect.Error<ReturnType<OfferApi['deleteOffer']>>>
 >(null, (get, set, params) => {
   const {adminIds: adminIdsToDelete} = params
   const api = get(apiAtom)
   const offers = get(offersAtom)
 
-  return pipe(
-    TE.Do,
-    TE.chainFirstW(() =>
-      effectToTaskEither(
-        api.offer.deleteOffer({query: {adminIds: adminIdsToDelete}})
+  return Effect.gen(function* (_) {
+    yield* _(api.offer.deleteOffer({query: {adminIds: adminIdsToDelete}}))
+
+    // Delete offer to connections
+    set(offerToConnectionsAtom, (prev) => ({
+      offerToConnections: prev.offerToConnections.filter(
+        (one) => !adminIdsToDelete.includes(one.adminId)
+      ),
+    }))
+
+    // Delete offers
+    set(
+      offersAtom,
+      offers.filter(
+        (o) =>
+          !o.ownershipInfo?.adminId ||
+          !adminIdsToDelete.includes(o.ownershipInfo?.adminId)
       )
-    ),
-    TE.match(
-      (left) => {
-        reportError('error', new Error('Error while deleting offers'), {left})
-        return E.left(left)
-      },
-      () => {
-        // Delete offer to connections
-        set(offerToConnectionsAtom, (prev) => ({
-          offerToConnections: prev.offerToConnections.filter(
-            (one) => !adminIdsToDelete.includes(one.adminId)
-          ),
-        }))
-
-        // Delete offers
-        set(
-          offersAtom,
-          offers.filter(
-            (o) =>
-              !o.ownershipInfo?.adminId ||
-              !adminIdsToDelete.includes(o.ownershipInfo?.adminId)
-          )
-        )
-
-        return E.right({success: true} as const)
-      }
     )
+  }).pipe(
+    Effect.mapError((e) => {
+      reportError('error', new Error('Error while deleting offers'), {e})
+      return e
+    })
   )
 })
 

@@ -399,6 +399,7 @@ export const LeaveClubErrors = Schema.Union(
   NotFoundError,
   InvalidChallengeError
 )
+
 export const GetClubContactsRequest = Schema.Struct({
   ...RequestBaseWithChallenge.fields,
   clubUuid: ClubUuid,

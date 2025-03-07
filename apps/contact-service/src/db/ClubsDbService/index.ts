@@ -8,7 +8,7 @@ import {
 import {createFindClub, type FindClubParams} from './queries/createFindClub'
 import {
   createFindClubByUuid,
-  type findClubByUuidParams,
+  type FindClubByUuidParams,
 } from './queries/createFindClubByClubUuid'
 import {
   createInsertClub,
@@ -28,7 +28,7 @@ export interface ClubsDbOperations {
     params: FindClubParams
   ) => Effect.Effect<Option.Option<ClubDbRecord>, UnexpectedServerError>
   findClubByUuid: (
-    params: findClubByUuidParams
+    params: FindClubByUuidParams
   ) => Effect.Effect<Option.Option<ClubDbRecord>, UnexpectedServerError>
   insertClub: (
     params: InsertClubParams

@@ -8,7 +8,7 @@ import {ClubDbRecord} from '../domain'
 export const FindClubByUuidParams = Schema.Struct({
   uuid: ClubUuid,
 })
-export type findClubByUuidParams = typeof FindClubByUuidParams.Type
+export type FindClubByUuidParams = typeof FindClubByUuidParams.Type
 
 export const createFindClubByUuid = Effect.gen(function* (_) {
   const sql = yield* _(PgClient.PgClient)

@@ -2,7 +2,7 @@ import {
   PublicKeyPemBase64,
   PublicKeyPemBase64E,
 } from '@vexl-next/cryptography/src/KeyHolder/brands'
-import {ClubUuid} from '@vexl-next/domain/src/general/clubs'
+import {ClubInfoForUser, ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
 import {CountryPrefixE} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {
@@ -14,6 +14,10 @@ import {FcmTokenE} from '@vexl-next/domain/src/utility/FcmToken.brand'
 import {UriStringE} from '@vexl-next/domain/src/utility/UriString.brand'
 import {BooleanFromString} from '@vexl-next/generic-utils/src/effect-helpers/BooleanFromString'
 import {EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
+import {
+  InvalidChallengeError,
+  RequestBaseWithChallenge,
+} from '@vexl-next/server-utils/src/services/challenge/contracts'
 import {Schema} from 'effect'
 import {z} from 'zod'
 import {PageRequest, PageResponse} from '../../Pagination.brand'
@@ -321,3 +325,62 @@ export const ListClubsResponse = Schema.Struct({
   clubs: Schema.Array(ClubInfo),
 })
 export type ListClubsResponse = typeof ListClubsResponse.Type
+
+export class MemberAlreadyInClubError extends Schema.TaggedError<MemberAlreadyInClubError>(
+  'MemberAlreadyInClubError'
+)('MemberAlreadyInClubError', {
+  status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
+}) {}
+
+export const GetClubinfoRequest = Schema.Struct({
+  ...RequestBaseWithChallenge.fields,
+  notificationToken: Schema.optionalWith(
+    FcmTokenE, // TODO change to expo
+    {as: 'Option'}
+  ),
+  clubUuid: Schema.optionalWith(ClubUuid, {as: 'Option'}),
+})
+
+export type GetClubInfoRequest = typeof GetClubinfoRequest.Type
+
+export const GetClubInfoResponse = Schema.Struct({
+  clubInfoForUser: ClubInfoForUser,
+})
+
+export const GetClubInfoErrors = Schema.Union(
+  InvalidChallengeError,
+  NotFoundError
+)
+
+export const JoinClubRequest = Schema.Struct({
+  ...RequestBaseWithChallenge.fields,
+  code: Schema.String,
+  notificationToken: Schema.optionalWith(
+    FcmTokenE, // TODO change to expo
+    {as: 'Option'}
+  ),
+  contactsImported: Schema.Boolean,
+})
+export type JoinClubRequest = typeof JoinClubRequest.Type
+
+export const JoinClubResponse = Schema.Struct({
+  clubInfoForUser: ClubInfoForUser,
+})
+export type JoinClubResponse = typeof JoinClubResponse.Type
+
+export const JoinClubErrors = Schema.Union(
+  MemberAlreadyInClubError,
+  NotFoundError,
+  InvalidChallengeError
+)
+
+export const LeaveClubRequest = Schema.Struct({
+  ...RequestBaseWithChallenge.fields,
+  clubUuid: ClubUuid,
+})
+export type LeaveClubRequest = typeof LeaveClubRequest.Type
+
+export const LeaveClubErrors = Schema.Union(
+  NotFoundError,
+  InvalidChallengeError
+)

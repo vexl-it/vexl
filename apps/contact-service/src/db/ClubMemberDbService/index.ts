@@ -10,6 +10,10 @@ import {
   type DeleteClubMemberParams,
 } from './queries/createDeleteClubMemeber'
 import {
+  createFindClubMemeberByPublicKey,
+  type FindClubMemberByPublicKeyParams,
+} from './queries/createFindClubMemberByPublicKey'
+import {
   createFindClubMemeber,
   type FindClubMemberParams,
 } from './queries/createFindClubMemember'
@@ -59,6 +63,9 @@ export interface ClubMembersDbOperations {
   updateNotificationToken: (
     params: UpdateNotificationTokenParams
   ) => Effect.Effect<ClubMemberRecord, UnexpectedServerError>
+  findClubMemberByPublicKey: (
+    params: FindClubMemberByPublicKeyParams
+  ) => Effect.Effect<Option.Option<ClubMemberRecord>, UnexpectedServerError>
 }
 
 export class ClubMembersDbService extends Context.Tag('ClubMembersDbService')<
@@ -71,6 +78,9 @@ export class ClubMembersDbService extends Context.Tag('ClubMembersDbService')<
       const countClubMembers = yield* _(createCountClubMemebers)
       const deleteClubMember = yield* _(createDeleteClubMemeber)
       const findClubMember = yield* _(createFindClubMemeber)
+      const findClubMemberByPublicKey = yield* _(
+        createFindClubMemeberByPublicKey
+      )
       const insertClubMember = yield* _(createInsertClubMember)
       const queryAllClubMembers = yield* _(createQueryAllClubMembers)
       const updateIsModerator = yield* _(createUpdateIsModerator)
@@ -81,6 +91,7 @@ export class ClubMembersDbService extends Context.Tag('ClubMembersDbService')<
         countClubMembers,
         deleteClubMember,
         findClubMember,
+        findClubMemberByPublicKey,
         insertClubMember,
         queryAllClubMembers,
         updateIsModerator,

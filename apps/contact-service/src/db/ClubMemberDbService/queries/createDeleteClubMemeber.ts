@@ -6,7 +6,7 @@ import {Effect, flow, Schema} from 'effect'
 import {ClubRecordId} from '../../ClubsDbService/domain'
 
 export const DeleteClubMemberParams = Schema.Struct({
-  id: ClubRecordId,
+  clubId: ClubRecordId,
   publicKey: PublicKeyPemBase64E,
 })
 export type DeleteClubMemberParams = typeof DeleteClubMemberParams.Type
@@ -19,7 +19,7 @@ export const createDeleteClubMemeber = Effect.gen(function* (_) {
     execute: (params) => sql`
       DELETE FROM club_member
       WHERE
-        club_id = ${params.id}
+        club_id = ${params.clubId}
         AND public_key = ${params.publicKey}
     `,
   })

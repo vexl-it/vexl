@@ -59,7 +59,6 @@ const migrations = [
     name: 'add_table_for_challenges',
     migrationEffect: add_table_for_challenges,
   },
-
   {
     id: 10,
     name: 'club_member_rename_last_refreshed_at_to_timestamp',

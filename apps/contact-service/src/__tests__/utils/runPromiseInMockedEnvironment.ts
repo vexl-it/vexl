@@ -45,6 +45,8 @@ export type MockedContexts =
   | ChallengeService
   | ChallengeDbService
   | ExpoNotificationsService
+  | ChallengeService
+  | ChallengeDbService
 
 const universalContext = Layer.mergeAll(ServerCrypto.layer(cryptoConfig))
 

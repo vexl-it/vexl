@@ -2,8 +2,8 @@ import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {HashedPhoneNumberE} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
-import {FcmTokenE} from '@vexl-next/domain/src/utility/FcmToken.brand'
-import {Array, Effect, flow, Schema} from 'effect'
+import {Effect, flow, Schema} from 'effect'
+import {NotificationTokens} from '../domain'
 
 export const FindTokensOfUsersWhoDirectlyImportedHashParams = Schema.Struct({
   userHash: HashedPhoneNumberE,
@@ -18,15 +18,19 @@ export const createFindTokensOfUsersWhoDirectlyImportedHash = Effect.gen(
 
     const query = SqlSchema.findAll({
       Request: FindTokensOfUsersWhoDirectlyImportedHashParams,
-      Result: Schema.Struct({firebaseToken: FcmTokenE}),
+      Result: NotificationTokens,
       execute: (params) => sql`
         SELECT DISTINCT
-          u.firebase_token
+          u.firebase_token,
+          u.expo_token
         FROM
           users u
           JOIN user_contact uc ON u.hash = uc.hash_from
         WHERE
-          u.firebase_token IS NOT NULL
+          (
+            u.firebase_token IS NOT NULL
+            OR u.expo_token IS NOT NULL
+          )
           AND uc.hash_to = ${params.userHash}
           AND ${sql.in('u.hash', params.importedHashes)}
       `,
@@ -34,7 +38,6 @@ export const createFindTokensOfUsersWhoDirectlyImportedHash = Effect.gen(
 
     return flow(
       query,
-      Effect.map(Array.map((a) => a.firebaseToken)),
       Effect.catchAll((e) =>
         Effect.zipRight(
           Effect.logError(

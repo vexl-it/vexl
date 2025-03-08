@@ -1,9 +1,9 @@
 import {Picker} from '@react-native-picker/picker'
+import * as allTranslations from '@vexl-next/localization/src/translations'
 import {keys} from '@vexl-next/resources-utils/src/utils/keys'
 import {useSetAtom} from 'jotai'
 import {useState} from 'react'
 import {Text, YStack} from 'tamagui'
-import * as allTranslations from '../../../utils/localization/translations'
 import {currentAppLanguageAtom} from '../../../utils/preferences'
 import Button from '../../Button'
 

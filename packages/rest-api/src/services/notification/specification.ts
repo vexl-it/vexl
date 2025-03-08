@@ -1,18 +1,10 @@
-import {Schema} from 'effect'
 import {Api} from 'effect-http'
-import {ServerSecurity} from '../../apiSecurity'
 import {
   GetPublicKeyResponse,
-  InvalidFcmCypherError,
+  IssueNotificationErrors,
   IssueNotificationRequest,
   IssueNotificationResponse,
-  SendingNotificationError,
 } from './contract'
-
-export const IssueNotificationErrors = Schema.Union(
-  InvalidFcmCypherError,
-  SendingNotificationError
-)
 
 export const IssueNotificationEndpoint = Api.post(
   'issueNotification',
@@ -20,7 +12,7 @@ export const IssueNotificationEndpoint = Api.post(
 ).pipe(
   Api.setRequestBody(IssueNotificationRequest),
   Api.setResponseBody(IssueNotificationResponse),
-  Api.setSecurity(ServerSecurity),
+  // Api.setSecurity(ServerSecurity),
   Api.addResponse({
     status: 400,
     body: IssueNotificationErrors,

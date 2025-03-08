@@ -50,7 +50,7 @@ import reportError from '../../utils/reportError'
 import offerToConnectionsAtom, {
   upsertOfferToConnectionsActionAtom,
 } from '../connections/atom/offerToConnectionsAtom'
-import addFCMCypherToPublicPayloadActionAtom from '../notifications/addNotificationTokenToPublicPayloadActionAtom'
+import addNotificationCypherToPublicPayloadActionAtom from '../notifications/addNotificationTokenToPublicPayloadActionAtom'
 import {sessionDataOrDummyAtom} from '../session'
 import {loadingStateAtom} from './atoms/loadingState'
 import {myOffersAtom} from './atoms/myOffers'
@@ -346,12 +346,14 @@ export const createOfferAtom = atom<
 
   return pipe(
     TE.Do,
-    TE.bindW('fcmToken', () => pipe(getNotificationToken(), TE.fromTask)),
-    TE.bindW('publicPayloadWithNotificationToken', ({fcmToken}) =>
+    TE.bindW('notificationToken', () =>
+      pipe(getNotificationToken(), TE.fromTask)
+    ),
+    TE.bindW('publicPayloadWithNotificationToken', ({notificationToken}) =>
       TE.fromTask(
-        set(addFCMCypherToPublicPayloadActionAtom, {
+        set(addNotificationCypherToPublicPayloadActionAtom, {
           publicPart: payloadPublic,
-          fcmToken: Option.fromNullable(fcmToken),
+          notificationToken: Option.fromNullable(notificationToken),
           keyHolder: params.offerKey,
         })
       )
@@ -373,7 +375,7 @@ export const createOfferAtom = atom<
       ({
         createOfferResult: r,
         publicPayloadWithNotificationToken,
-        fcmToken,
+        notificationToken,
       }) => {
         if (r.encryptionErrors.length > 0) {
           reportError('error', new Error('Error while encrypting offer'), {
@@ -388,7 +390,7 @@ export const createOfferAtom = atom<
           },
           lastCommitedFcmToken:
             publicPayloadWithNotificationToken.tokenSuccessfullyAdded
-              ? (fcmToken ?? undefined)
+              ? (notificationToken ?? undefined)
               : undefined,
           flags: {
             reported: false,
@@ -451,9 +453,9 @@ export const updateOfferAtom = atom<
         })
       }
       return TE.fromTask(
-        set(addFCMCypherToPublicPayloadActionAtom, {
+        set(addNotificationCypherToPublicPayloadActionAtom, {
           publicPart: payloadPublic,
-          fcmToken: Option.fromNullable(fcmToken),
+          notificationToken: Option.fromNullable(fcmToken),
           keyHolder: params.offerKey,
         })
       )

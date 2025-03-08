@@ -28,6 +28,7 @@ beforeAll(async () => {
         app.createUser(
           {
             body: {
+              expoToken: null,
               firebaseToken: Schema.decodeSync(FcmTokenE)('someToken'),
             },
             headers: Schema.decodeSync(CommonHeaders)({

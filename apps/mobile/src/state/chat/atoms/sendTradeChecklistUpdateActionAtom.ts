@@ -80,7 +80,7 @@ export default function createSubmitChecklistUpdateActionAtom(
             receiverPublicKey: chatWithMessages.chat.otherSide.publicKey,
             message,
             notificationApi: api.notification,
-            theirFcmCypher: chatWithMessages.chat.otherSideFcmCypher,
+            theirNotificationCypher: chatWithMessages.chat.otherSideFcmCypher,
             otherSideVersion: chatWithMessages.chat.otherSideVersion,
           })
         )

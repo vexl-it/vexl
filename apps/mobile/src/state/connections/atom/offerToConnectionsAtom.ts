@@ -263,6 +263,7 @@ export const updateAllOffersConnectionsActionAtom = atom(
 
         void showDebugNotificationIfEnabled({
           title: 'Offer connections updated.',
+          subtitle: 'updateAllOffersConnectionsActionAtom',
           body: `${
             timeLimitReached
               ? 'Encryption took too long and time limit was reached.'

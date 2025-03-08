@@ -1,10 +1,14 @@
 import notifee, {AuthorizationStatus} from '@notifee/react-native'
-import messaging from '@react-native-firebase/messaging'
-import {FcmToken} from '@vexl-next/domain/src/utility/FcmToken.brand'
 import {
   toBasicError,
   type BasicError,
 } from '@vexl-next/domain/src/utility/errors'
+import {
+  ExpoNotificationTokenE,
+  type ExpoNotificationToken,
+} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
+import {Effect, Schema} from 'effect'
+import * as Notifications from 'expo-notifications'
 import * as E from 'fp-ts/Either'
 import type * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
@@ -63,14 +67,38 @@ export function useRequestNotificationPermissions(): TE.TaskEither<
     })
 }
 
-export function getNotificationToken(): T.Task<FcmToken | null> {
+export function getNotificationToken(): T.Task<ExpoNotificationToken | null> {
   return async () => {
     try {
-      return FcmToken.parse(await messaging().getToken())
+      const token = await Notifications.getExpoPushTokenAsync({
+        projectId: 'dbcc5b47-6c4a-4faf-a345-e9cd8a680c32',
+      })
+      if (token.type !== 'expo') {
+        reportError('error', new Error('Token type is not expo'), {token})
+        return null
+      }
+      return Schema.decodeSync(ExpoNotificationTokenE)(token.data)
     } catch (e) {
       return null
     }
   }
+}
+
+export function getNotificationTokenE(): Effect.Effect<ExpoNotificationToken | null> {
+  return Effect.promise(async () => {
+    try {
+      const token = await Notifications.getExpoPushTokenAsync({
+        projectId: 'dbcc5b47-6c4a-4faf-a345-e9cd8a680c32',
+      })
+      if (token.type !== 'expo') {
+        reportError('error', new Error('Token type is not expo'), {token})
+        return null
+      }
+      return Schema.decodeSync(ExpoNotificationTokenE)(token.data)
+    } catch (e) {
+      return null
+    }
+  })
 }
 
 export interface NotificationsEnabledSettings {
@@ -94,12 +122,12 @@ export function areNotificationsEnabled(): TE.TaskEither<
 }
 
 export async function deactivateToken(): Promise<void> {
-  await messaging().deleteToken()
+  await Notifications.unregisterForNotificationsAsync()
 }
 
 export async function subscribeToGeneralTopic(): Promise<void> {
   try {
-    await messaging().subscribeToTopic('general')
+    // await messaging().subscribeToTopic('general')
     console.info('Subscribed to general topic')
   } catch (e) {
     reportError(

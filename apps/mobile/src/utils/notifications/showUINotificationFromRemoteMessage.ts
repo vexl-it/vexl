@@ -1,10 +1,10 @@
-import notifee from '@notifee/react-native'
-import {type FirebaseMessagingTypes} from '@react-native-firebase/messaging'
+import notifee, {AndroidImportance} from '@notifee/react-native'
 import {getDefaultStore} from 'jotai'
 import {translationAtom} from '../localization/I18nProvider'
 import {notificationPreferencesAtom} from '../preferences'
 import reportError from '../reportError'
 import checkAndShowCreateOfferPrompt from './checkAndShowCreateOfferPrompt'
+import {type NotificationPayload} from './extractDataFromNotification'
 import {getDefaultChannel} from './notificationChannels'
 import {
   CREATE_OFFER_PROMPT,
@@ -14,14 +14,14 @@ import {
 } from './notificationTypes'
 
 export async function showUINotificationFromRemoteMessage(
-  data: FirebaseMessagingTypes.RemoteMessage['data']
+  data: NotificationPayload
 ): Promise<boolean> {
   const {t} = getDefaultStore().get(translationAtom)
   const notificationPreferences = getDefaultStore().get(
     notificationPreferencesAtom
   )
 
-  const type = data?.type
+  const type = (data as any).type
 
   if (!type) {
     reportError('warn', new Error('Notification type is missing'), {
@@ -37,6 +37,8 @@ export async function showUINotificationFromRemoteMessage(
       data,
       android: {
         channelId: await getDefaultChannel(),
+        importance: AndroidImportance.HIGH,
+        lightUpScreen: true,
         pressAction: {
           id: 'default',
         },

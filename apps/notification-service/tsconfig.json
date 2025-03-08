@@ -10,6 +10,7 @@
     "strict": true,
     "noImplicitAny": true,
     "skipLibCheck": true,
+    "resolveJsonModule": true,
     "exactOptionalPropertyTypes": true,
     "checkJs": false,
     "allowJs": true

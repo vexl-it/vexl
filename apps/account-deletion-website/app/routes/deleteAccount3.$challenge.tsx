@@ -132,7 +132,9 @@ export const action: ActionFunction = async ({request}) => {
     TE.chainFirstTaskK(({contactsPrivateApi}) => {
       return pipe(
         effectToTaskEither(
-          contactsPrivateApi.createUser({body: {firebaseToken: null}})
+          contactsPrivateApi.createUser({
+            body: {firebaseToken: null, expoToken: null},
+          })
         ),
         T.chain(() => effectToTaskEither(contactsPrivateApi.deleteUser()))
       )

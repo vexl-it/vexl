@@ -1,9 +1,11 @@
-import messaging from '@react-native-firebase/messaging'
 import {useNavigation} from '@react-navigation/native'
 import {NewChatMessageNoticeNotificationData} from '@vexl-next/domain/src/general/notifications'
 import {Option} from 'effect'
+import * as Notifications from 'expo-notifications'
 import {useSetAtom, useStore} from 'jotai'
 import {useEffect} from 'react'
+import {AppState, Platform} from 'react-native'
+import {extractDataPayloadFromNotification} from '../utils/notifications/extractDataFromNotification'
 import {NEW_CONNECTION} from '../utils/notifications/notificationTypes'
 import {showDebugNotificationIfEnabled} from '../utils/notifications/showDebugNotificationIfEnabled'
 import {showUINotificationFromRemoteMessage} from '../utils/notifications/showUINotificationFromRemoteMessage'
@@ -21,19 +23,59 @@ export function useHandleReceivedNotifications(): void {
     updateAllOffersConnectionsActionAtom
   )
   const syncConnections = useSetAtom(syncConnectionsActionAtom)
-
   useEffect(() => {
-    return messaging().onMessage(async (remoteMessage) => {
-      console.info('📳 Received notification', remoteMessage)
-      await showDebugNotificationIfEnabled({
-        title: 'Received notification in foreground',
-        body: JSON.stringify(remoteMessage.data),
+    const processNotification = async (
+      remoteMessage: Notifications.Notification
+    ): Promise<void> => {
+      const notificationPayloadO = extractDataPayloadFromNotification({
+        source: 'hook',
+        data: remoteMessage,
       })
 
-      const newChatMessageNoticeNotificationDataOption =
-        NewChatMessageNoticeNotificationData.parseUnkownOption(
-          remoteMessage.data
+      if (Option.isNone(notificationPayloadO)) {
+        console.info(
+          ` 🔔 ‼️ Hook notification and unable to parse ${JSON.stringify(
+            remoteMessage,
+            null,
+            2
+          )}`
         )
+        void showDebugNotificationIfEnabled({
+          title: `Unable to parse notification`,
+          subtitle: 'notifInHook',
+          body: JSON.stringify(
+            {
+              data: remoteMessage.request.content,
+            },
+            null,
+            2
+          ),
+        })
+        return
+      }
+
+      const {payload, isHeadless} = notificationPayloadO.value
+
+      console.info(
+        `🔔 Received notification in hook. Is headless: ${isHeadless}`,
+        JSON.stringify(payload, null, 2)
+      )
+
+      if (Platform.OS === 'android' && AppState.currentState !== 'active') {
+        console.info(
+          '🔔 Received notification in not active state. Should be handled by background task'
+        )
+        void showDebugNotificationIfEnabled({
+          title: 'Received notification in not active state',
+          body: `Should be handled by background task`,
+          subtitle: 'notifInHook',
+        })
+        return
+      }
+
+      const newChatMessageNoticeNotificationDataOption =
+        NewChatMessageNoticeNotificationData.parseUnkownOption(payload)
+
       if (Option.isSome(newChatMessageNoticeNotificationDataOption)) {
         await store.set(
           processChatNotificationActionAtom,
@@ -42,30 +84,29 @@ export function useHandleReceivedNotifications(): void {
         return
       }
 
-      const data = remoteMessage.data
-      if (!data) {
-        console.info(
-          '📳 Nothing to process. Notification does not include any data'
-        )
-        return
-      }
-
-      const handled = await showUINotificationFromRemoteMessage(data)
+      const handled = await showUINotificationFromRemoteMessage(payload)
       if (handled) return
-
-      if (data.type === NEW_CONNECTION) {
+      if (payload.type === NEW_CONNECTION) {
         console.info(
-          '📳 Received notification about new user. Checking and updating offers accordingly.'
+          '🔔 Received notification about new user. Checking and updating offers accordingly.'
         )
         await syncConnections()()
         await updateOffersConnections({isInBackground: false})()
         return
       }
-
       reportError('warn', new Error('Unknown notification type'), {
-        type: data.type,
+        type: payload.type,
       })
-    })
+    }
+
+    const subscription = Notifications.addNotificationReceivedListener(
+      (notification) => {
+        void processNotification(notification)
+      }
+    )
+    return () => {
+      Notifications.removeNotificationSubscription(subscription)
+    }
   }, [
     fetchMessagesForInbox,
     navigation,

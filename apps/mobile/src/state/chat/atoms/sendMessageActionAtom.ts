@@ -52,7 +52,7 @@ export default function sendMessageActionAtom(
               senderKeypair: chat.inbox.privateKey,
               receiverPublicKey: chat.otherSide.publicKey,
               notificationApi: api.notification,
-              theirFcmCypher: chat.otherSideFcmCypher,
+              theirNotificationCypher: chat.otherSideFcmCypher,
               otherSideVersion: chat.otherSideVersion,
             })
           )

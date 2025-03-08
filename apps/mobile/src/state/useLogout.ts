@@ -1,6 +1,6 @@
 import notifee from '@notifee/react-native'
-import messaging from '@react-native-firebase/messaging'
 import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
+import * as Notifications from 'expo-notifications'
 import * as O from 'fp-ts/Option'
 import {atom, useSetAtom} from 'jotai'
 import {useCallback} from 'react'
@@ -33,6 +33,7 @@ async function failSilently<T>(promise: Promise<T>): Promise<
 export const logoutActionAtom = atom(null, async (get, set) => {
   void showDebugNotificationIfEnabled({
     title: 'Logging out',
+    subtitle: 'logoutAtom',
     body: 'logging out from logout atom',
   })
 
@@ -69,13 +70,13 @@ export const logoutActionAtom = atom(null, async (get, set) => {
     await failSilently(deleteAllFiles())
 
     // firebase token
-    await failSilently(messaging().deleteToken())
+    await failSilently(Notifications.unregisterForNotificationsAsync())
   } catch (e) {
     reportError('error', new Error('Critical error while logging out'), {e})
 
     set(sessionAtom, O.none)
     clearMmkvStorageAndEmptyAtoms()
-    await failSilently(messaging().deleteToken())
+    await failSilently(Notifications.unregisterForNotificationsAsync())
   } finally {
     set(loadingOverlayDisplayedAtom, false)
   }

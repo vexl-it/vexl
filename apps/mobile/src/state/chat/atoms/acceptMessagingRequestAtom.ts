@@ -61,16 +61,16 @@ const acceptMessagingRequestAtom = atom(
             text,
             approve,
             api: api.chat,
-            theirFcmCypher: chat.otherSideFcmCypher,
+            theirNotificationCypher: chat.otherSideFcmCypher,
             notificationApi: api.notification,
             fromKeypair: chat.inbox.privateKey,
             toPublicKey: chat.otherSide.publicKey,
             myVersion: version,
-            myFcmCypher:
+            myNotificationCypher:
               myFcmCypher._tag === 'Some'
                 ? myFcmCypher.value.cypher
                 : undefined,
-            lastReceivedFcmCypher: chat.otherSideFcmCypher,
+            lastReceivedNotificationCypher: chat.otherSideFcmCypher,
             otherSideVersion: chat.otherSideVersion,
           })
         )

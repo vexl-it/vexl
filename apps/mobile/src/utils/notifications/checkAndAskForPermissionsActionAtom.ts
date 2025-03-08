@@ -102,7 +102,10 @@ const checkNotificationPermissionsAndAskIfPossibleActionAtom = atom(
         ],
       })
 
-      if (authorizationStatus === AuthorizationStatus.NOT_DETERMINED) {
+      if (
+        authorizationStatus === AuthorizationStatus.NOT_DETERMINED ||
+        authorizationStatus === AuthorizationStatus.DENIED
+      ) {
         return yield* _(
           showDialog,
           taskEitherToEffect,
@@ -136,15 +139,6 @@ const checkNotificationPermissionsAndAskIfPossibleActionAtom = atom(
               })
             })
           ),
-          Effect.zipRight(Effect.succeed('asked' as const))
-        )
-      }
-
-      if (authorizationStatus === AuthorizationStatus.DENIED) {
-        return yield* _(
-          showDialog,
-          taskEitherToEffect,
-          Effect.flatMap(() => openSettings),
           Effect.zipRight(Effect.succeed('asked' as const))
         )
       }

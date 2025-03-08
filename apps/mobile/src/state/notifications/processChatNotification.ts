@@ -11,7 +11,7 @@ import reportError from '../../utils/reportError'
 import {fetchAndStoreMessagesForInboxAtom} from '../chat/atoms/fetchNewMessagesActionAtom'
 import {unreadChatsCountAtom} from '../chat/atoms/unreadChatsCountAtom'
 import {loadSession} from '../session/loadSession'
-import {getKeyHolderForFcmCypherActionAtom} from './fcmCypherToKeyHolderAtom'
+import {getKeyHolderForNotificationCypherActionAtom} from './fcmCypherToKeyHolderAtom'
 
 const processChatNotificationActionAtom = atom(
   null,
@@ -21,10 +21,10 @@ const processChatNotificationActionAtom = atom(
     notification: NewChatMessageNoticeNotificationData,
     navigation: NavigationState<any> | undefined = undefined
   ): T.Task<boolean> => {
-    console.info('📳 Refreshing inbox')
+    console.info('📩 Refreshing inbox')
 
     const inbox = set(
-      getKeyHolderForFcmCypherActionAtom,
+      getKeyHolderForNotificationCypherActionAtom,
       notification.targetCypher
     )
     if (!inbox) {
@@ -57,14 +57,17 @@ const processChatNotificationActionAtom = atom(
 
         newMessages.forEach((newMessage) => {
           if (
-            navigation &&
-            isOnSpecificChat(navigation, {
+            isOnSpecificChat({
               otherSideKey: newMessage.message.senderPublicKey,
               inboxKey: inbox.inbox.privateKey.publicKeyPemBase64,
             })
           )
             return
-          void showChatNotification({newMessage, inbox})
+          void showChatNotification({
+            newMessage,
+            inbox,
+            cypher: notification.targetCypher,
+          })
         })
 
         notifee.setBadgeCount(get(unreadChatsCountAtom)).catch((e: unknown) => {

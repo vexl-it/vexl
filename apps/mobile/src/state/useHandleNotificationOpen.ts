@@ -1,7 +1,10 @@
 import notifee, {EventType, type Notification} from '@notifee/react-native'
 import {useNavigation} from '@react-navigation/native'
-import {ChatNotificationData} from '@vexl-next/domain/src/general/notifications'
-import {Either, Schema} from 'effect'
+import {
+  ChatNotificationData,
+  NewChatMessageNoticeNotificationData,
+} from '@vexl-next/domain/src/general/notifications'
+import {Either, Option, Schema} from 'effect'
 import {atom, useStore} from 'jotai'
 import {useCallback, useEffect} from 'react'
 import {isOnMessagesList, isOnSpecificChat} from '../utils/navigation'
@@ -50,7 +53,7 @@ function useReactOnNotificationOpen(): (notification: Notification) => void {
                 inboxKey: payload.inbox,
               }
 
-              if (isOnSpecificChat(navigation.getState(), keys))
+              if (isOnSpecificChat(keys))
                 // no need to navigate. We are already on the chat.
                 return 'ok'
 
@@ -59,6 +62,14 @@ function useReactOnNotificationOpen(): (notification: Notification) => void {
             },
           })
         )
+      }
+
+      const newChatMessageNoticeNotificationO = Schema.decodeUnknownOption(
+        NewChatMessageNoticeNotificationData
+      )(notification.data)
+      if (Option.isSome(newChatMessageNoticeNotificationO)) {
+        if (!isOnMessagesList(navigation.getState()))
+          navigation.navigate('InsideTabs', {screen: 'Messages'})
       }
     },
     [navigation, store]

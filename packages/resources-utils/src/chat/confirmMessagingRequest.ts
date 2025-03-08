@@ -8,7 +8,7 @@ import {
   type ChatMessage,
   type ChatMessagePayload,
 } from '@vexl-next/domain/src/general/messaging'
-import {type FcmCypher} from '@vexl-next/domain/src/general/notifications'
+import {type NotificationCypher} from '@vexl-next/domain/src/general/notifications/NotificationCypher.brand'
 import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {now} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {type ChatApi} from '@vexl-next/rest-api/src/services/chat'
@@ -25,15 +25,15 @@ function createApproveChatMessage({
   senderPublicKey,
   approve,
   myVersion,
-  myFcmCypher,
-  lastReceivedFcmCypher,
+  myNotificationCypher,
+  lastReceivedNotificationCypher,
 }: {
   text: string
   senderPublicKey: PublicKeyPemBase64
   approve: boolean
   myVersion: SemverString
-  myFcmCypher?: FcmCypher
-  lastReceivedFcmCypher?: FcmCypher
+  myNotificationCypher?: NotificationCypher
+  lastReceivedNotificationCypher?: NotificationCypher
 }): ChatMessage {
   return {
     uuid: generateChatMessageId(),
@@ -42,8 +42,8 @@ function createApproveChatMessage({
     time: now(),
     myVersion,
     senderPublicKey,
-    myFcmCypher,
-    lastReceivedFcmCypher,
+    myFcmCypher: myNotificationCypher,
+    lastReceivedFcmCypher: lastReceivedNotificationCypher,
   }
 }
 
@@ -58,9 +58,9 @@ export default function confirmMessagingRequest({
   api,
   approve,
   myVersion,
-  myFcmCypher,
-  lastReceivedFcmCypher,
-  theirFcmCypher,
+  myNotificationCypher,
+  lastReceivedNotificationCypher,
+  theirNotificationCypher,
   otherSideVersion,
   notificationApi,
 }: {
@@ -70,9 +70,9 @@ export default function confirmMessagingRequest({
   api: ChatApi
   approve: boolean
   myVersion: SemverString
-  myFcmCypher?: FcmCypher
-  lastReceivedFcmCypher?: FcmCypher
-  theirFcmCypher?: FcmCypher | undefined
+  myNotificationCypher?: NotificationCypher
+  lastReceivedNotificationCypher?: NotificationCypher
+  theirNotificationCypher?: NotificationCypher | undefined
   otherSideVersion: SemverString | undefined
   notificationApi: NotificationApi
 }): Effect.Effect<
@@ -88,8 +88,8 @@ export default function confirmMessagingRequest({
       myVersion,
       senderPublicKey: fromKeypair.publicKeyPemBase64,
       approve,
-      myFcmCypher,
-      lastReceivedFcmCypher,
+      myNotificationCypher,
+      lastReceivedNotificationCypher,
     })
 
     const message = yield* _(
@@ -103,7 +103,7 @@ export default function confirmMessagingRequest({
         keyPair: fromKeypair,
         publicKeyToConfirm: toPublicKey,
       })({
-        fcmCypher: theirFcmCypher,
+        notificationCypher: theirNotificationCypher,
         otherSideVersion,
         notificationApi,
       })

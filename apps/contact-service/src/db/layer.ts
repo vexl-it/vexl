@@ -9,6 +9,7 @@ import add_initial_import_done_column_to_users_table from './migrations/0004_add
 import add_unique_constraint_to_user_contact from './migrations/0004_add_unique_constraint_to_user_contact'
 import add_country_prefix_to_users_table from './migrations/0005_add_country_prefix_to_users_table'
 import add_table_for_clubs from './migrations/0006_add_table_for_clubs'
+import add_expo_token_to_users_table from './migrations/0007_add_expo_token_to_users_table'
 
 const migrations = [
   {
@@ -45,6 +46,11 @@ const migrations = [
     id: 7,
     name: 'add_table_for_clubs',
     migrationEffect: add_table_for_clubs,
+  },
+  {
+    id: 8,
+    name: 'add_expo_token_to_users_table',
+    migrationEffect: add_expo_token_to_users_table,
   },
 ] as const
 

@@ -38,6 +38,8 @@ import {deleteUser} from './routes/user/deleteUser'
 import {refreshUser} from './routes/user/refreshUser'
 import {updateBadOwnerHash} from './routes/user/updateBadOwnerHash'
 import {updateFirebaseToken} from './routes/user/updateFirebaseToken'
+import {updateNotificationToken} from './routes/user/updateNotificationToken'
+import {ExpoNotificationsService} from './utils/expoNotifications/ExpoNotificationsService'
 import {FirebaseMessagingService} from './utils/notifications/FirebaseMessagingService'
 
 export const app = RouterBuilder.make(ContactApiSpecification).pipe(
@@ -54,6 +56,7 @@ export const app = RouterBuilder.make(ContactApiSpecification).pipe(
   RouterBuilder.handle(generateClubInviteLink),
   RouterBuilder.handle(listClubs),
   RouterBuilder.handle(modifyClub),
+  RouterBuilder.handle(updateNotificationToken),
   RouterBuilder.build,
   setupLoggingMiddlewares
 )
@@ -65,6 +68,7 @@ const MainLive = Layer.mergeAll(
   healthServerLayer({port: healthServerPortConfig})
 ).pipe(
   Layer.provideMerge(FirebaseMessagingService.Live),
+  Layer.provideMerge(ExpoNotificationsService.Live),
   Layer.provideMerge(ContactDbService.Live),
   Layer.provideMerge(ImportContactsQuotaService.Live),
   Layer.provideMerge(UserDbService.Live),

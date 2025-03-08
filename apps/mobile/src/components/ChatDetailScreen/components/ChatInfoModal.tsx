@@ -1,6 +1,11 @@
 import {useNavigation} from '@react-navigation/native'
+import {type Chat} from '@vexl-next/domain/src/general/messaging'
+import {extractPartsOfNotificationCypher} from '@vexl-next/resources-utils/src/notifications/notificationTokenActions'
 import {useMolecule} from 'bunshi/dist/react'
+import {Option} from 'effect'
+import {pipe} from 'fp-ts/lib/function'
 import {useAtom, useAtomValue, useSetAtom} from 'jotai'
+import {useEffect, useState} from 'react'
 import {Alert, ScrollView} from 'react-native'
 import {getFontScaleSync} from 'react-native-device-info'
 import {SlideInDown, SlideOutDown} from 'react-native-reanimated'
@@ -22,6 +27,51 @@ import WarningSvg from '../images/warningSvg'
 import ButtonStack from './ButtonStack'
 import ChatRequestPreview from './ChatRequestPreview'
 import {PHOTO_AND_INFO_PHOTO_TOP_HEIGHT} from './OtherSideNamePhotoAndInfo'
+
+function NotificationTokenDebug({chat}: {chat: Chat}): JSX.Element {
+  const [lastReportedTokenS, setLastReportedTokenS] = useState('none')
+  const [lastReceivedTokenS, setLastReceviedTokenS] = useState('none')
+
+  useEffect(() => {
+    const lastReportedToken = chat.lastReportedFcmToken?.cypher
+    const lastReceivedToken = chat.otherSideFcmCypher
+
+    try {
+      if (lastReportedToken) {
+        const parts = pipe(
+          extractPartsOfNotificationCypher({
+            notificationCypher: lastReportedToken,
+          }),
+          Option.getOrElse(() => 'none')
+        )
+        setLastReportedTokenS(JSON.stringify(parts, null, 2))
+      } else setLastReportedTokenS('none')
+    } catch (e) {
+      setLastReportedTokenS(`error: ${(e as any)?.message ?? 'unknown'}`)
+    }
+
+    try {
+      if (lastReceivedToken) {
+        const parts = pipe(
+          extractPartsOfNotificationCypher({
+            notificationCypher: lastReceivedToken,
+          }),
+          Option.getOrElse(() => 'none')
+        )
+        setLastReceviedTokenS(JSON.stringify(parts, null, 2))
+      } else setLastReceviedTokenS('none')
+    } catch (e) {
+      setLastReceviedTokenS(`error: ${(e as any)?.message ?? 'unknown'}`)
+    }
+  }, [chat, setLastReportedTokenS, setLastReceviedTokenS])
+
+  return (
+    <>
+      <Text>Last reported cypher: {lastReportedTokenS}</Text>
+      <Text> gotNotificationToken: {lastReceivedTokenS}</Text>
+    </>
+  )
+}
 
 function ChatInfoModal(): JSX.Element | null {
   const {
@@ -85,11 +135,7 @@ function ChatInfoModal(): JSX.Element | null {
                 Last reported version: {chat.lastReportedVersion ?? 'none'} :
                 gotVersion: {chat.otherSideVersion ?? 'none'}
               </Text>
-              <Text>
-                Last reported cypher:{' '}
-                {chat.lastReportedFcmToken?.cypher ?? 'none'} : gotFcmToken:{' '}
-                {chat.otherSideFcmCypher ?? 'none'}
-              </Text>
+              <NotificationTokenDebug chat={chat} />
               <Text>(this will NOT be visible in production)</Text>
             </>
           )}

@@ -18,11 +18,23 @@ export function getShowDebugNotifications(): boolean {
   )
 }
 
+async function groupNotificationDisplayed(groupId: string): Promise<boolean> {
+  const notifications = await notifee.getDisplayedNotifications()
+  const groupNotification = notifications.find(
+    (one) =>
+      one.notification.android?.groupSummary &&
+      one.notification.android?.groupId
+  )
+  return !!groupNotification
+}
+
 export async function showDebugNotificationIfEnabled({
   title,
+  subtitle,
   body,
 }: {
   title: string
+  subtitle?: string
   body: string
 }): Promise<void> {
   if (!getShowDebugNotifications()) return
@@ -33,10 +45,24 @@ export async function showDebugNotificationIfEnabled({
     importance: AndroidImportance.HIGH,
   })
 
+  if (subtitle && !(await groupNotificationDisplayed(subtitle))) {
+    await notifee.displayNotification({
+      title: subtitle,
+      body: `${subtitle} logs`,
+      android: {
+        groupId: subtitle,
+        channelId,
+        groupSummary: true,
+      },
+    })
+  }
+
   await notifee.displayNotification({
     title,
     body,
+    subtitle,
     android: {
+      groupId: subtitle,
       channelId,
       pressAction: {
         id: 'default',

@@ -62,7 +62,7 @@ export default function deleteChatActionAtom(
               senderKeypair: chat.inbox.privateKey,
               receiverPublicKey: chat.otherSide.publicKey,
               message: messageToSend,
-              theirFcmCypher: chat.otherSideFcmCypher,
+              theirNotificationCypher: chat.otherSideFcmCypher,
               notificationApi: api.notification,
               otherSideVersion: chat.otherSideVersion,
             })

@@ -14,3 +14,5 @@ export const fcmTokenPrivateKeyConfig = Config.string(
 export const firebaseCredentialsConfig = Config.string(
   'FIREBASE_CREDENTIALS'
 ).pipe(Effect.flatMap(Schema.decode(Schema.parseJson())))
+
+export const expoAccessToken = Config.string('EXPO_ACCESS_TOKEN')

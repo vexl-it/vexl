@@ -65,6 +65,10 @@ const cancelRequestActionAtomHandleUI = atom(
       })
 
     const {chat} = chatWithMessages
+    const offer =
+      chat.origin.type === 'theirOffer'
+        ? chat.origin.offer?.offerInfo.publicPart
+        : undefined
     const api = get(apiAtom)
     const {t} = get(translationAtom)
 
@@ -94,9 +98,9 @@ const cancelRequestActionAtomHandleUI = atom(
             fromKeypair: chat.inbox.privateKey,
             toPublicKey: chat.otherSide.publicKey,
             myVersion: version,
-            theirFcmCypher: chat.otherSideFcmCypher,
+            theirNotificationCypher: offer?.fcmCypher,
             notificationApi: api.notification,
-            otherSideVersion: chat.otherSideVersion,
+            otherSideVersion: offer?.authorClientVersion,
           })
         )
       }),

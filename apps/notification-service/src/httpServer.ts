@@ -11,6 +11,7 @@ import {setupLoggingMiddlewares} from '@vexl-next/server-utils/src/loggingMiddle
 import {Effect, Layer} from 'effect'
 import {RouterBuilder} from 'effect-http'
 import {NodeServer} from 'effect-http-node'
+import {ExpoClientService} from './ExpoMessagingLayer'
 import {FirebaseMessagingLayer} from './FirebaseMessagingLayer'
 import {IssueNotifcationHandler} from './routes/IssueNotificationRouteLive'
 import {getCypherPublicKeyHandler} from './routes/getCypherPublicKeyHandler'
@@ -27,6 +28,7 @@ const MainLive = Layer.mergeAll(
   healthServerLayer({port: healthServerPortConfig})
 ).pipe(
   Layer.provideMerge(FirebaseMessagingLayer.Live),
+  Layer.provideMerge(ExpoClientService.Live),
   Layer.provideMerge(NodeContext.layer)
 )
 

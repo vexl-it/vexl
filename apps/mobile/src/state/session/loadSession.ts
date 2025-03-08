@@ -13,6 +13,7 @@ import readSessionFromStorage from './utils/readSessionFromStorage'
 function logLoadSessionProgress(text: string): void {
   void showDebugNotificationIfEnabled({
     title: 'Load session',
+    subtitle: 'loadSessionProgress',
     body: text,
   })
 }

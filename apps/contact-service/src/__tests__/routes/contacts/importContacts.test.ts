@@ -17,12 +17,13 @@ import {
   Schema,
   pipe,
 } from 'effect'
+import {isArray} from 'effect/Array'
 import {
   ImportContactsQuotaRecord,
   createQuotaRecordKey,
 } from '../../../routes/contacts/importContactsQuotaService'
+import {sendNotificationsMock} from '../../utils/mockedExpoNotificationService'
 import {NodeTestingApp} from '../../utils/NodeTestingApp'
-import {sendMessageMock} from '../../utils/mockedFirebaseMessagingService'
 import {runPromiseInMockedEnvironment} from '../../utils/runPromiseInMockedEnvironment'
 import {
   createAndImportUsersFromNetwork,
@@ -73,6 +74,7 @@ beforeEach(async () => {
           ])
         )
       )
+      yield* _(Effect.sleep(200))
     }).pipe(Logger.withMinimumLogLevel(LogLevel.None))
   )
 })
@@ -281,7 +283,8 @@ describe('Import contacts', () => {
           app.createUser(
             {
               body: {
-                firebaseToken: me.firebaseToken,
+                firebaseToken: null,
+                expoToken: me.notificationToken,
               },
               headers: commonHeaders,
             },
@@ -354,7 +357,8 @@ describe('Import contacts', () => {
           app.createUser(
             {
               body: {
-                firebaseToken: me.firebaseToken,
+                firebaseToken: null,
+                expoToken: me.notificationToken,
               },
               headers: commonHeaders,
             },
@@ -432,7 +436,8 @@ describe('Import contacts', () => {
           app.createUser(
             {
               body: {
-                firebaseToken: me.firebaseToken,
+                firebaseToken: null,
+                expoToken: me.notificationToken,
               },
               headers: commonHeaders,
             },
@@ -574,7 +579,8 @@ describe('Import contacts', () => {
           app.createUser(
             {
               body: {
-                firebaseToken: me.firebaseToken,
+                firebaseToken: null,
+                expoToken: me.notificationToken,
               },
               headers: commonHeaders,
             },
@@ -654,8 +660,8 @@ describe('Notification', () => {
   beforeEach(async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
-        yield* _(Effect.sleep(200))
-        sendMessageMock.mockClear()
+        yield* _(Effect.sleep(400))
+        sendNotificationsMock.mockClear()
       })
     )
   })
@@ -677,9 +683,9 @@ describe('Notification', () => {
         )
 
         yield* _(Effect.sleep(200))
-        expect(sendMessageMock).not.toHaveBeenCalled()
+        expect(sendNotificationsMock).not.toHaveBeenCalled()
 
-        sendMessageMock.mockClear()
+        sendNotificationsMock.mockClear()
 
         const contactsToImport = Array.filter(
           [...networkOne],
@@ -700,15 +706,22 @@ describe('Notification', () => {
 
         yield* _(Effect.sleep(200))
 
-        const call = sendMessageMock.mock.calls[0][0]
+        const call = sendNotificationsMock.mock.calls[0][0]
 
         expect(
-          pipe(call.tokens, Array.sort(Order.string), Array.join(','))
+          pipe(
+            call.map((one) => (isArray(one.to) ? one.to : [one.to])),
+            Array.flatten,
+            Array.sort(Order.string),
+            Array.join(',')
+          )
         ).toBe(
           pipe(
             [...networkOne, ...networkTwo],
-            Array.filter((one) => one.firebaseToken !== me.firebaseToken),
-            Array.map((c) => c.firebaseToken),
+            Array.filter(
+              (one) => one.notificationToken !== me.notificationToken
+            ),
+            Array.map((c) => c.notificationToken),
             Array.sort(Order.string),
             Array.join(',')
           )

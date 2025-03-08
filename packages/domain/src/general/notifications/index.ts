@@ -1,8 +1,8 @@
-import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {orElseSchema} from '@vexl-next/generic-utils/src/effect-helpers/orElseSchema'
-import {Brand, Schema as S} from 'effect'
+import {Brand, Schema as S, Schema} from 'effect'
 import {z} from 'zod'
+import {NotificationCypherE} from './NotificationCypher.brand'
 
 export const FcmCypher = z
   .string()
@@ -11,26 +11,6 @@ export const FcmCypher = z
 
 export const FcmCypherE = S.String.pipe(S.brand('FcmCypher'))
 export type FcmCypher = S.Schema.Type<typeof FcmCypherE>
-
-export function extractPublicKeyFromCypher(
-  fcmCypher: FcmCypher | undefined
-): PublicKeyPemBase64 | undefined {
-  if (fcmCypher === undefined) return undefined
-  const split = fcmCypher?.split('.')?.at(0)
-  if (!split) return undefined
-
-  return S.decodeSync(PublicKeyPemBase64E)(split)
-}
-
-export function extractCypherFromFcmCypher(
-  fcmCypher: FcmCypher | undefined
-): string | undefined {
-  if (fcmCypher === undefined) return undefined
-  const split = fcmCypher?.split('.')?.at(1)
-  if (!split) return undefined
-
-  return split
-}
 
 export const ChatNotificationType = S.Literal(
   'MESSAGE',
@@ -65,7 +45,12 @@ export class ChatNotificationData extends S.Class<ChatNotificationData>(
 export class NewChatMessageNoticeNotificationData extends S.TaggedClass<NewChatMessageNoticeNotificationData>(
   'NewChatMessageNoticeNotificationData'
 )('NewChatMessageNoticeNotificationData', {
-  targetCypher: FcmCypherE,
+  targetCypher: NotificationCypherE,
+  // Notification payload does not allow booleans
+  includesSystemNotification: Schema.Union(
+    Schema.Literal('true'),
+    Schema.Literal('false')
+  ),
 }) {
   static parseUnkownOption = S.decodeUnknownOption(
     NewChatMessageNoticeNotificationData

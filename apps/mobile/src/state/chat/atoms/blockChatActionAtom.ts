@@ -51,7 +51,7 @@ export default function blockChatActionAtom(
           receiverPublicKey: chat.otherSide.publicKey,
           message: messageToSend,
           notificationApi: api.notification,
-          theirFcmCypher: chat.otherSideFcmCypher,
+          theirNotificationCypher: chat.otherSideFcmCypher,
           otherSideVersion: chat.otherSideVersion,
         })
       ),

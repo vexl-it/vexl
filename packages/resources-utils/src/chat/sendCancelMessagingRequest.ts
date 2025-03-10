@@ -7,7 +7,7 @@ import {
   type ChatMessage,
   type ChatMessagePayload,
 } from '@vexl-next/domain/src/general/messaging'
-import {type FcmCypher} from '@vexl-next/domain/src/general/notifications'
+import {type NotificationCypher} from '@vexl-next/domain/src/general/notifications/NotificationCypher.brand'
 import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {now} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {type ChatApi} from '@vexl-next/rest-api/src/services/chat'
@@ -48,7 +48,7 @@ export function sendCancelMessagingRequest({
   toPublicKey,
   api,
   myVersion,
-  theirFcmCypher,
+  theirNotificationCypher,
   otherSideVersion,
   notificationApi,
 }: {
@@ -57,7 +57,7 @@ export function sendCancelMessagingRequest({
   toPublicKey: PublicKeyPemBase64
   api: ChatApi
   myVersion: SemverString
-  theirFcmCypher?: FcmCypher | undefined
+  theirNotificationCypher?: NotificationCypher | undefined
   otherSideVersion: SemverString | undefined
   notificationApi: NotificationApi
 }): Effect.Effect<
@@ -84,7 +84,7 @@ export function sendCancelMessagingRequest({
         publicKey: toPublicKey,
       })({
         otherSideVersion,
-        fcmCypher: theirFcmCypher,
+        notificationCypher: theirNotificationCypher,
         notificationApi,
       })
     )

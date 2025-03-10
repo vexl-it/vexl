@@ -1,10 +1,10 @@
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {withRedisLock} from '@vexl-next/server-utils/src/RedisService'
 import dayjs from 'dayjs'
-import {Array, Effect, flow} from 'effect'
+import {Effect, Either} from 'effect'
 import {newContentNotificationAfterConfig} from '../../configs'
 import {UserDbService} from '../../db/UserDbService'
-import {sendNotificationToAllHandleNonExistingTokens} from '../../utils/notifications'
+import {issueNotificationsToTokens} from '../../utils/issueNotificationsToTokens'
 
 export const processNewContentNotifications = Effect.gen(function* (_) {
   const userDb = yield* _(UserDbService)
@@ -20,22 +20,24 @@ export const processNewContentNotifications = Effect.gen(function* (_) {
     Effect.log('Notifying users of new content', {count: tokensToNofify.length})
   )
 
-  const sentToTokens = yield* _(
-    sendNotificationToAllHandleNonExistingTokens({
+  const {firebase, expo} = yield* _(
+    issueNotificationsToTokens({
       type: 'NEW_CONTENT',
       tokens: tokensToNofify,
-    }),
-    Effect.map(
-      flow(
-        Array.filter((one) => one.success),
-        Array.map((one) => one.token)
-      )
-    )
+    })
   )
+
+  const firebaseCount = Either.isRight(firebase)
+    ? firebase.right.filter((one) => one.success).length
+    : 0
+  const expoCount = Either.isRight(expo)
+    ? expo.right.filter((one) => one.status === 'ok').length
+    : 0
 
   yield* _(
     Effect.log('Sent new content notification', {
-      count: sentToTokens.length,
+      firebaseCount,
+      expoCount,
       total: tokensToNofify.length,
     })
   )

@@ -82,6 +82,7 @@ export const syncConnectionsActionAtom = atom(
         (e) => {
           void showDebugNotificationIfEnabled({
             title: 'Error while syncing connections',
+            subtitle: 'syncConnectionsActionAtom',
             body: e._tag,
           })
           if (e._tag === 'NetworkError') {
@@ -98,6 +99,7 @@ export const syncConnectionsActionAtom = atom(
         (data) => {
           void showDebugNotificationIfEnabled({
             title: 'Connections synced',
+            subtitle: 'syncConnectionsActionAtom',
             body: `Finished syncing connections in ${unixMillisecondsNow() - updateStarted} ms`,
           })
           set(connectionStateAtom, data)

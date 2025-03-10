@@ -6,10 +6,10 @@ import {runPromiseInMockedEnvironment} from '../../utils/runPromiseInMockedEnvir
 import {HttpClientRequest} from '@effect/platform'
 import {SqlClient} from '@effect/sql'
 import {E164PhoneNumberE} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
-import {FcmTokenE} from '@vexl-next/domain/src/utility/FcmToken.brand'
+import {ExpoNotificationTokenE} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {createDummyAuthHeadersForUser} from '@vexl-next/server-utils/src/tests/createDummyAuthHeaders'
-import {sendMessageMock} from '../../utils/mockedFirebaseMessagingService'
+import {sendNotificationsMock} from '../../utils/mockedExpoNotificationService'
 
 const keys = generatePrivateKey()
 const phoneNumber = Schema.decodeSync(E164PhoneNumberE)('+420733333333')
@@ -29,7 +29,10 @@ beforeAll(async () => {
         app.createUser(
           {
             body: {
-              firebaseToken: Schema.decodeSync(FcmTokenE)('someToken'),
+              firebaseToken: null,
+              expoToken: Schema.decodeSync(ExpoNotificationTokenE)(
+                'notificationToken'
+              ),
             },
             headers: Schema.decodeSync(CommonHeaders)({
               'user-agent': 'Vexl/1 (1.0.0) ANDROID',
@@ -97,7 +100,7 @@ describe('Check user exists', () => {
 
 describe('Check user exist notification', () => {
   beforeEach(() => {
-    sendMessageMock.mockClear()
+    sendNotificationsMock.mockClear()
   })
   it('Should issue notification when user exists, has fcmToken and notifyExistingUserAboutLogin is true', async () => {
     await runPromiseInMockedEnvironment(
@@ -119,13 +122,11 @@ describe('Check user exist notification', () => {
         )
         expect(result.exists).toBe(true)
 
-        yield* _(Effect.sleep(100))
-        expect(sendMessageMock).toHaveBeenCalledWith(
-          expect.objectContaining({
-            data: {type: 'LOGGING_ON_DIFFERENT_DEVICE'},
-            tokens: ['someToken'],
-          })
-        )
+        const call = sendNotificationsMock.mock.calls[0][0]
+
+        expect(call.length).toEqual(1)
+        expect(call[0].data?.type).toEqual('LOGGING_ON_DIFFERENT_DEVICE')
+        expect(call[0].to).toEqual('notificationToken')
       })
     )
   })
@@ -150,7 +151,7 @@ describe('Check user exist notification', () => {
         )
 
         yield* _(Effect.sleep(100))
-        expect(sendMessageMock).not.toHaveBeenCalled()
+        expect(sendNotificationsMock).not.toHaveBeenCalled()
       })
     )
   })
@@ -169,7 +170,7 @@ describe('Check user exist notification', () => {
         yield* _(sql`
           UPDATE users
           SET
-            firebase_token = NULL
+            expo_token = NULL
           WHERE
             public_key = ${keys.publicKeyPemBase64}
         `)
@@ -186,7 +187,7 @@ describe('Check user exist notification', () => {
         yield* _(sql`
           UPDATE users
           SET
-            firebase_token = 'someToken'
+            expo_token = 'someToken'
           WHERE
             public_key = ${keys.publicKeyPemBase64}
         `)
@@ -194,7 +195,7 @@ describe('Check user exist notification', () => {
         expect(result.exists).toBe(true)
 
         yield* _(Effect.sleep(100))
-        expect(sendMessageMock).not.toHaveBeenCalled()
+        expect(sendNotificationsMock).not.toHaveBeenCalled()
       })
     )
   })
@@ -221,7 +222,7 @@ describe('Check user exist notification', () => {
         expect(result.exists).toBe(true)
 
         yield* _(Effect.sleep(100))
-        expect(sendMessageMock).not.toHaveBeenCalled()
+        expect(sendNotificationsMock).not.toHaveBeenCalled()
       })
     )
   })

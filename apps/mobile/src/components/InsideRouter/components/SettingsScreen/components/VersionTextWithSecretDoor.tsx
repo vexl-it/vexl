@@ -5,7 +5,7 @@ import {useSetAtom} from 'jotai'
 import {Linking, type StyleProp, type ViewStyle} from 'react-native'
 import {TouchableWithoutFeedback} from 'react-native-gesture-handler'
 import {Text} from 'tamagui'
-import {version} from '../../../../../utils/environment'
+import {version, versionCode} from '../../../../../utils/environment'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import {askAreYouSureActionAtom} from '../../../../AreYouSureDialog'
 import SecretDoor from '../../../../SecretDoor'
@@ -27,7 +27,7 @@ function VersionTextWithSecretDoor({
       }}
     >
       <Text ta="center" fos={14} col="$greyOnBlack">
-        {t('settings.version', {version})}
+        {t('settings.version', {version: `${version} (${versionCode})`})}
       </Text>
       <TouchableWithoutFeedback
         onPress={() => {

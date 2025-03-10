@@ -1,40 +1,47 @@
 import {type PrivateKeyHolder} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {type OfferPublicPart} from '@vexl-next/domain/src/general/offers'
-import {type FcmToken} from '@vexl-next/domain/src/utility/FcmToken.brand'
-import {encryptFcmForOffer} from '@vexl-next/resources-utils/src/notifications/encryptFcmForOffer'
+import {type ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
+import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
+import {ecnryptNotificationToken} from '@vexl-next/resources-utils/src/notifications/notificationTokenActions'
 import type * as T from 'fp-ts/Task'
 import * as TO from 'fp-ts/TaskOption'
 import {type Option} from 'fp-ts/lib/Option'
 import {pipe} from 'fp-ts/lib/function'
 import {atom} from 'jotai'
-import {registerFcmCypherActionAtom} from './fcmCypherToKeyHolderAtom'
+import {i18nAtom} from '../../utils/localization/I18nProvider'
+import {registerNotificationCypherActionAtom} from './fcmCypherToKeyHolderAtom'
 import {getOrFetchNotificationServerPublicKeyActionAtom} from './fcmServerPublicKeyStore'
 
-const addFCMCypherToPublicPayloadActionAtom = atom(
+const addNotificationCypherToPublicPayloadActionAtom = atom(
   null,
   (
     get,
     set,
     {
       publicPart,
-      fcmToken: fcmTokenOption,
+      notificationToken: notificationTokenOption,
       keyHolder,
     }: {
       publicPart: OfferPublicPart
-      fcmToken: Option<FcmToken>
+      notificationToken: Option<ExpoNotificationToken>
       keyHolder: PrivateKeyHolder
     }
   ): T.Task<{publicPart: OfferPublicPart; tokenSuccessfullyAdded: boolean}> => {
     return pipe(
       set(getOrFetchNotificationServerPublicKeyActionAtom),
       TO.bindTo('notificationServerPublicKey'),
-      TO.bind('fcmToken', () => TO.fromOption(fcmTokenOption)),
-      TO.chain(({notificationServerPublicKey, fcmToken}) => {
+      TO.bind('notificationToken', () =>
+        TO.fromOption(notificationTokenOption)
+      ),
+      TO.chain(({notificationServerPublicKey, notificationToken}) => {
         return TO.fromTaskEither(
-          encryptFcmForOffer({
-            publicKey: notificationServerPublicKey,
-            fcmToken,
-          })
+          effectToTaskEither(
+            ecnryptNotificationToken({
+              locale: get(i18nAtom).t('localeName'),
+              serverPublicKey: notificationServerPublicKey,
+              notificationToken,
+            })
+          )
         )
       }),
       TO.match(
@@ -43,16 +50,19 @@ const addFCMCypherToPublicPayloadActionAtom = atom(
           publicPart,
         }),
         (
-          fcmCypher
+          notificationToken
         ): {publicPart: OfferPublicPart; tokenSuccessfullyAdded: boolean} => {
-          set(registerFcmCypherActionAtom, {
-            fcmCypher,
+          set(registerNotificationCypherActionAtom, {
+            notificationCypher: notificationToken,
             keyHolder,
           })
 
           return {
             tokenSuccessfullyAdded: true,
-            publicPart: {...publicPart, fcmCypher} satisfies OfferPublicPart,
+            publicPart: {
+              ...publicPart,
+              fcmCypher: notificationToken,
+            } satisfies OfferPublicPart,
           }
         }
       )
@@ -60,4 +70,4 @@ const addFCMCypherToPublicPayloadActionAtom = atom(
   }
 )
 
-export default addFCMCypherToPublicPayloadActionAtom
+export default addNotificationCypherToPublicPayloadActionAtom

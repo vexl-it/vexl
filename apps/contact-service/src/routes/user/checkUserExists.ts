@@ -1,18 +1,23 @@
-import {type FcmToken} from '@vexl-next/domain/src/utility/FcmToken.brand'
 import {CheckUserExistsEndpoint} from '@vexl-next/rest-api/src/services/contact/specification'
 import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {Effect, Option, Schema} from 'effect'
 import {Handler} from 'effect-http'
 import {UserDbService} from '../../db/UserDbService'
-import {sendNotificationToAllHandleNonExistingTokens} from '../../utils/notifications'
+import {type NotificationTokens} from '../../db/UserDbService/domain'
+import {type ExpoNotificationsService} from '../../utils/expoNotifications/ExpoNotificationsService'
+import {issueNotificationsToTokens} from '../../utils/issueNotificationsToTokens'
 import {type FirebaseMessagingService} from '../../utils/notifications/FirebaseMessagingService'
 
 const sendNotificationToExistingUserFork = (
-  fcmToken: FcmToken
-): Effect.Effect<void, never, UserDbService | FirebaseMessagingService> =>
-  sendNotificationToAllHandleNonExistingTokens({
+  token: NotificationTokens
+): Effect.Effect<
+  void,
+  never,
+  UserDbService | FirebaseMessagingService | ExpoNotificationsService
+> =>
+  issueNotificationsToTokens({
     type: 'LOGGING_ON_DIFFERENT_DEVICE',
-    tokens: [fcmToken],
+    tokens: [token],
   }).pipe(
     Effect.withSpan('Send notification about logging on different device'),
     Effect.forkDaemon,
@@ -30,13 +35,15 @@ export const checkUserExists = Handler.make(
         if (
           req.query.notifyExistingUserAboutLogin &&
           Option.isSome(existingUser) &&
-          Option.isSome(existingUser.value.firebaseToken)
+          (Option.isSome(existingUser.value.firebaseToken) ||
+            Option.isSome(existingUser.value.expoToken))
         ) {
           yield* _(Effect.logInfo('Sending notification to existing user'))
           yield* _(
-            sendNotificationToExistingUserFork(
-              existingUser.value.firebaseToken.value
-            )
+            sendNotificationToExistingUserFork({
+              expoToken: existingUser.value.expoToken,
+              firebaseToken: existingUser.value.firebaseToken,
+            })
           )
         } else {
           yield* _(

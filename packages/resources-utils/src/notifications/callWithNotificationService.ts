@@ -1,4 +1,4 @@
-import {type FcmCypher} from '@vexl-next/domain/src/general/notifications'
+import {type NotificationCypher} from '@vexl-next/domain/src/general/notifications/NotificationCypher.brand'
 import * as SemverString from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {type NotificationApi} from '@vexl-next/rest-api/src/services/notification'
 import {Effect} from 'effect'
@@ -9,7 +9,7 @@ const FE_VERSION_SUPPORTING_V2_NOTIFICATIONS =
 
 interface NotificationArgs {
   otherSideVersion?: SemverString.SemverString | undefined
-  fcmCypher?: FcmCypher | undefined
+  notificationCypher?: NotificationCypher | undefined
   notificationApi: NotificationApi
 }
 
@@ -21,11 +21,11 @@ export function callWithNotificationService<
   f: (arg: T) => Effect.Effect<L, R>,
   fArgs: Omit<T, 'notificationServiceReady'>
 ): (args: NotificationArgs) => Effect.Effect<L, R> {
-  return ({notificationApi, fcmCypher, otherSideVersion}) => {
+  return ({notificationApi, notificationCypher, otherSideVersion}) => {
     return Effect.gen(function* (_) {
       // Do not try to issue notification if there is no fcmCypher or the other side does not support V2 notifications
       if (
-        !fcmCypher ||
+        !notificationCypher ||
         !otherSideVersion ||
         SemverString.compare(otherSideVersion)(
           '<',
@@ -45,7 +45,7 @@ export function callWithNotificationService<
       yield* _(
         notificationApi.issueNotification({
           body: {
-            fcmCypher,
+            notificationCypher,
           },
         })
       ).pipe(

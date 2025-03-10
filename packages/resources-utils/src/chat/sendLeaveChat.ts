@@ -7,7 +7,7 @@ import {
   type ChatMessagePayload,
   type ServerMessage,
 } from '@vexl-next/domain/src/general/messaging'
-import {type FcmCypher} from '@vexl-next/domain/src/general/notifications'
+import {type NotificationCypher} from '@vexl-next/domain/src/general/notifications/NotificationCypher.brand'
 import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {type ChatApi} from '@vexl-next/rest-api/src/services/chat'
 import {type NotificationApi} from '@vexl-next/rest-api/src/services/notification'
@@ -27,7 +27,7 @@ export default function sendLeaveChat({
   receiverPublicKey,
   message,
   senderKeypair,
-  theirFcmCypher,
+  theirNotificationCypher,
   otherSideVersion,
   notificationApi,
 }: {
@@ -35,7 +35,7 @@ export default function sendLeaveChat({
   receiverPublicKey: PublicKeyPemBase64
   message: ChatMessage
   senderKeypair: PrivateKeyHolder
-  theirFcmCypher?: FcmCypher | undefined
+  theirNotificationCypher?: NotificationCypher | undefined
   otherSideVersion: SemverString | undefined
   notificationApi: NotificationApi
 }): Effect.Effect<
@@ -58,7 +58,7 @@ export default function sendLeaveChat({
         keyPair: senderKeypair,
       })({
         notificationApi,
-        fcmCypher: theirFcmCypher,
+        notificationCypher: theirNotificationCypher,
         otherSideVersion,
       })
     )

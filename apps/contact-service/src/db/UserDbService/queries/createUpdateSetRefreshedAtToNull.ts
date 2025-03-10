@@ -1,21 +1,30 @@
 import {SqlResolver} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
+import {ExpoNotificationTokenE} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {FcmTokenE} from '@vexl-next/domain/src/utility/FcmToken.brand'
-import {Effect, flow} from 'effect'
+import {Effect, flow, Schema} from 'effect'
+
+const UpdateSetRefreshedAtParams = Schema.Union(
+  ExpoNotificationTokenE,
+  FcmTokenE
+)
+
+export type UpdateSetRefreshedAtParams = typeof UpdateSetRefreshedAtParams.Type
 
 export const createUpdateSetRefreshedAtToNull = Effect.gen(function* (_) {
   const sql = yield* _(PgClient.PgClient)
 
   const resolver = yield* _(
     SqlResolver.void('UpdateSetRefreshedAtToNull', {
-      Request: FcmTokenE,
+      Request: UpdateSetRefreshedAtParams,
       execute: (params) => sql`
         UPDATE users
         SET
           refreshed_at = NULL
         WHERE
           ${sql.in('firebase_token', params)}
+          OR ${sql.in('expo_token', params)}
       `,
     })
   )

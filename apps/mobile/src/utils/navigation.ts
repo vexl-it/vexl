@@ -3,6 +3,7 @@ import {ChatId} from '@vexl-next/domain/src/general/messaging'
 import fastDeepEqual from 'fast-deep-equal'
 import * as O from 'fp-ts/Option'
 import {pipe} from 'fp-ts/function'
+import {AppState} from 'react-native'
 import {type NavigationState} from 'react-native-tab-view'
 import {type RootStackParamsList} from '../navigationTypes'
 import {safeParse} from './fpUtils'
@@ -57,14 +58,18 @@ function getActiveRoute(route: NavigationState<any>): any | null {
 }
 
 export function isOnSpecificChat(
-  state: NavigationState<any> | undefined,
   keys: RootStackParamsList['ChatDetail']
 ): boolean {
+  if (AppState.currentState !== 'active') return false
+  if (!navigationRef.isReady()) return false
+
+  const state = navigationRef.getState()
   if (!state) return false
 
   try {
     const activeRoute = getActiveRoute(state)
     if (!activeRoute) return false
+
     return (
       activeRoute.name === 'ChatDetail' &&
       fastDeepEqual(activeRoute.params, keys)

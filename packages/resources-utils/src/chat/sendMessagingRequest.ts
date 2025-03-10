@@ -7,7 +7,7 @@ import {
   type ChatMessage,
   type ChatMessagePayload,
 } from '@vexl-next/domain/src/general/messaging'
-import {type FcmCypher} from '@vexl-next/domain/src/general/notifications'
+import {type NotificationCypher} from '@vexl-next/domain/src/general/notifications/NotificationCypher.brand'
 import {type GoldenAvatarType} from '@vexl-next/domain/src/general/offers'
 import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {now} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
@@ -23,14 +23,14 @@ import {messageToNetwork} from './utils/messageIO'
 function createRequestChatMessage({
   text,
   senderPublicKey,
-  myFcmCypher,
-  lastReceivedFcmCypher,
+  myNotificationCypher,
+  lastReceivedNotificationCypher,
   myVersion,
   goldenAvatarType,
 }: {
   text: string
-  myFcmCypher?: FcmCypher
-  lastReceivedFcmCypher?: FcmCypher
+  myNotificationCypher?: NotificationCypher
+  lastReceivedNotificationCypher?: NotificationCypher
   senderPublicKey: PublicKeyPemBase64
   myVersion: SemverString
   goldenAvatarType?: GoldenAvatarType
@@ -39,8 +39,8 @@ function createRequestChatMessage({
     uuid: generateChatMessageId(),
     messageType: 'REQUEST_MESSAGING',
     text,
-    myFcmCypher,
-    lastReceivedFcmCypher,
+    myFcmCypher: myNotificationCypher,
+    lastReceivedFcmCypher: lastReceivedNotificationCypher,
     time: now(),
     myVersion,
     senderPublicKey,
@@ -56,11 +56,11 @@ export function sendMessagingRequest({
   text,
   fromKeypair,
   toPublicKey,
-  myFcmCypher,
-  lastReceivedFcmCypher,
+  myNotificationCypher,
+  lastReceivedNotificationCypher,
   api,
   myVersion,
-  theirFcmCypher,
+  theirNotificationCypher,
   notificationApi,
   otherSideVersion,
   goldenAvatarType,
@@ -68,11 +68,11 @@ export function sendMessagingRequest({
   text: string
   fromKeypair: PrivateKeyHolder
   toPublicKey: PublicKeyPemBase64
-  myFcmCypher?: FcmCypher
-  lastReceivedFcmCypher?: FcmCypher
+  myNotificationCypher?: NotificationCypher
+  lastReceivedNotificationCypher?: NotificationCypher
   api: ChatApi
   myVersion: SemverString
-  theirFcmCypher?: FcmCypher | undefined
+  theirNotificationCypher?: NotificationCypher | undefined
   notificationApi: NotificationApi
   otherSideVersion?: SemverString | undefined
   goldenAvatarType?: GoldenAvatarType
@@ -88,8 +88,8 @@ export function sendMessagingRequest({
       text,
       senderPublicKey: fromKeypair.publicKeyPemBase64,
       myVersion,
-      myFcmCypher,
-      lastReceivedFcmCypher,
+      myNotificationCypher,
+      lastReceivedNotificationCypher,
       goldenAvatarType,
     })
 
@@ -102,7 +102,7 @@ export function sendMessagingRequest({
         message,
         publicKey: toPublicKey,
       })({
-        fcmCypher: theirFcmCypher,
+        notificationCypher: theirNotificationCypher,
         otherSideVersion,
         notificationApi,
       })

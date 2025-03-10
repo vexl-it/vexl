@@ -2,14 +2,16 @@ import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {
   generateChatMessageId,
   type ChatMessage,
-  type MyFcmTokenInfo,
+  type MyNotificationTokenInfo,
 } from '@vexl-next/domain/src/general/messaging'
-import {type FcmCypher} from '@vexl-next/domain/src/general/notifications'
-import {type FcmToken} from '@vexl-next/domain/src/utility/FcmToken.brand'
+import {type NotificationCypher} from '@vexl-next/domain/src/general/notifications/NotificationCypher.brand'
+import {type ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {now} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import sendMessage from '@vexl-next/resources-utils/src/chat/sendMessage'
 import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
+import {extractPartsOfNotificationCypher} from '@vexl-next/resources-utils/src/notifications/notificationTokenActions'
+import {Option} from 'effect'
 import * as A from 'fp-ts/Array'
 import * as O from 'fp-ts/Option'
 import * as T from 'fp-ts/Task'
@@ -20,22 +22,24 @@ import {useCallback} from 'react'
 import {apiAtom} from '../../../api'
 import {version} from '../../../utils/environment'
 import {getNotificationToken} from '../../../utils/notifications'
+import {showDebugNotificationIfEnabled} from '../../../utils/notifications/showDebugNotificationIfEnabled'
 import reportError from '../../../utils/reportError'
 import {useAppState} from '../../../utils/useAppState'
+import {getOrFetchNotificationServerPublicKeyActionAtom} from '../../notifications/fcmServerPublicKeyStore'
 import {type ChatWithMessages} from '../domain'
 import isChatOpen from '../utils/isChatOpen'
 import allChatsAtom from './allChatsAtom'
 import focusChatByInboxKeyAndSenderKey from './focusChatByInboxKeyAndSenderKey'
-import generateMyFcmTokenInfoActionAtom, {
-  updateMyFcmTokenInfoInChat,
-} from './generateMyFcmTokenInfoActionAtom'
+import generateMyNotificationTokenInfoActionAtom, {
+  updateMyNotificationTokenInfoInChat,
+} from './generateMyNotificationTokenInfoActionAtom'
 
 const FCM_TOKEN_UPDATE_MESSAGE_MINIMAL_VERSION = SemverString.parse('1.13.1')
 
 function createFcmCypherUpdateMessage(
   senderPublicKey: PublicKeyPemBase64,
-  info?: MyFcmTokenInfo,
-  lastReceivedFcmCypher?: FcmCypher
+  info?: MyNotificationTokenInfo,
+  lastReceivedFcmCypher?: NotificationCypher
 ): ChatMessage {
   return {
     uuid: generateChatMessageId(),
@@ -55,7 +59,7 @@ export const sendFcmCypherUpdateMessageActionAtom = atom(
   (
     get,
     set,
-    notificationToken?: FcmToken
+    notificationToken?: ExpoNotificationToken
   ): ((chatWithMessages: ChatWithMessages) => T.Task<boolean>) => {
     return (chatWithMessages) => {
       return pipe(
@@ -68,7 +72,7 @@ export const sendFcmCypherUpdateMessageActionAtom = atom(
         }),
         T.bind('fcmTokenInfo', () =>
           set(
-            generateMyFcmTokenInfoActionAtom,
+            generateMyNotificationTokenInfoActionAtom,
             notificationToken,
             chatWithMessages.chat.inbox.privateKey
           )
@@ -91,7 +95,7 @@ export const sendFcmCypherUpdateMessageActionAtom = atom(
               receiverPublicKey: chatWithMessages.chat.otherSide.publicKey,
               message: messageToSend,
               notificationApi: get(apiAtom).notification,
-              theirFcmCypher: chatWithMessages.chat.otherSideFcmCypher,
+              theirNotificationCypher: chatWithMessages.chat.otherSideFcmCypher,
               otherSideVersion: chatWithMessages.chat.otherSideVersion,
             })
           )
@@ -101,7 +105,10 @@ export const sendFcmCypherUpdateMessageActionAtom = atom(
             inboxKey: chatWithMessages.chat.inbox.privateKey.publicKeyPemBase64,
             senderKey: chatWithMessages.chat.otherSide.publicKey,
           })
-          set(chatAtom, updateMyFcmTokenInfoInChat(O.toUndefined(fcmTokenInfo)))
+          set(
+            chatAtom,
+            updateMyNotificationTokenInfoInChat(O.toUndefined(fcmTokenInfo))
+          )
         }),
         TE.matchW(
           (e) => {
@@ -132,15 +139,29 @@ export const sendFcmCypherUpdateMessageActionAtom = atom(
 )
 
 function doesOtherSideNeedsToBeNotifiedAboutTokenChange(
-  notificationToken?: FcmToken
+  notificationToken: ExpoNotificationToken,
+  publicKeyFromServer: PublicKeyPemBase64
 ): (chat: ChatWithMessages) => boolean {
   return (chatWithMessages) => {
     if (!isChatOpen(chatWithMessages)) return false
 
     if (!notificationToken) return !!chatWithMessages.chat.lastReportedFcmToken
 
+    // Notify if we have notification token but we did not report it yet
+    if (!chatWithMessages.chat.lastReportedFcmToken) return true
+
+    const partsOfTheCypher = extractPartsOfNotificationCypher({
+      notificationCypher: chatWithMessages.chat.lastReportedFcmToken.cypher,
+    })
+    // Cyher is not valid. Update it!
+    if (Option.isNone(partsOfTheCypher)) return true
+    if (partsOfTheCypher.value.serverPublicKey !== publicKeyFromServer)
+      return true
+
     return (
-      chatWithMessages.chat.lastReportedFcmToken?.token !== notificationToken
+      chatWithMessages.chat.lastReportedFcmToken?.token !== notificationToken ||
+      partsOfTheCypher.value.serverPublicKey !== publicKeyFromServer ||
+      partsOfTheCypher.value.type !== 'expo'
     )
   }
 }
@@ -150,15 +171,39 @@ const refreshNotificationTokensActionAtom = atom(null, (get, set) => {
     '🔥 Refresh notifications tokens',
     'Checking if notification cyphers needs to be updated'
   )
+
+  void showDebugNotificationIfEnabled({
+    title: 'refreshing notification tokens',
+    subtitle: 'refreshNotificationTokensActionAtom',
+    body: 'Checking if notification cyphers needs to be updated',
+  })
+
   void pipe(
-    getNotificationToken(),
-    T.chain((notificationToken) =>
-      pipe(
+    T.Do,
+    T.bind('notificationToken', getNotificationToken),
+    T.bind('publicKeyFromServer', () =>
+      set(getOrFetchNotificationServerPublicKeyActionAtom)
+    ),
+    T.chain(({notificationToken, publicKeyFromServer}) => {
+      if (!notificationToken || O.isNone(publicKeyFromServer)) {
+        console.info(
+          '🔥 Refresh notifications tokens',
+          'No notification token or public key from server'
+        )
+        void showDebugNotificationIfEnabled({
+          title: 'chat refreshing notTokens',
+          subtitle: 'refreshNotificationTokensActionAtom',
+          body: 'No notification token or public key from server',
+        })
+        return T.of(undefined)
+      }
+      return pipe(
         get(allChatsAtom),
         A.flatten,
         A.filter(
           doesOtherSideNeedsToBeNotifiedAboutTokenChange(
-            notificationToken ?? undefined
+            notificationToken,
+            publicKeyFromServer.value
           )
         ),
         (array) => {
@@ -166,6 +211,11 @@ const refreshNotificationTokensActionAtom = atom(null, (get, set) => {
             '🔥 Refresh notifications tokens',
             `Refreshing tokens in ${array.length} chats`
           )
+          void showDebugNotificationIfEnabled({
+            title: 'chat refreshing notTokens',
+            subtitle: 'refreshNotificationTokensActionAtom',
+            body: `Refreshing tokens in ${array.length} chats`,
+          })
           return array
         },
         A.map(
@@ -176,7 +226,7 @@ const refreshNotificationTokensActionAtom = atom(null, (get, set) => {
         ),
         T.sequenceSeqArray
       )
-    )
+    })
   )()
 })
 

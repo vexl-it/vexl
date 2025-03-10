@@ -44,3 +44,5 @@ export const importContactsResetAfterDaysQuotaConfig = Config.number(
 )
 
 export const adminTokenConfigHash = Config.string('ADMIN_TOKEN_HASH')
+
+export const expoAccessToken = Config.string('EXPO_ACCESS_TOKEN')

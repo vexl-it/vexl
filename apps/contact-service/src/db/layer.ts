@@ -10,6 +10,8 @@ import add_unique_constraint_to_user_contact from './migrations/0004_add_unique_
 import add_country_prefix_to_users_table from './migrations/0005_add_country_prefix_to_users_table'
 import add_table_for_clubs from './migrations/0006_add_table_for_clubs'
 import add_expo_token_to_users_table from './migrations/0007_add_expo_token_to_users_table'
+import add_table_for_challenges from './migrations/0008_add_table_for_challenges'
+import club_member_rename_last_refreshed_at_to_timestamp from './migrations/0009_club_member_rename_last_refreshed_at_to_timestamp'
 
 const migrations = [
   {
@@ -51,6 +53,17 @@ const migrations = [
     id: 8,
     name: 'add_expo_token_to_users_table',
     migrationEffect: add_expo_token_to_users_table,
+  },
+  {
+    id: 9,
+    name: 'add_table_for_challenges',
+    migrationEffect: add_table_for_challenges,
+  },
+
+  {
+    id: 10,
+    name: 'club_member_rename_last_refreshed_at_to_timestamp',
+    migrationEffect: club_member_rename_last_refreshed_at_to_timestamp,
   },
 ] as const
 

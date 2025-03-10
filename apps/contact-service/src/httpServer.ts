@@ -6,6 +6,10 @@ import {RedisService} from '@vexl-next/server-utils/src/RedisService'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
 import {setupLoggingMiddlewares} from '@vexl-next/server-utils/src/loggingMiddlewares'
 import {MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
+import {ChallengeService} from '@vexl-next/server-utils/src/services/challenge/ChallengeService'
+import {ChallengeDbService} from '@vexl-next/server-utils/src/services/challenge/db/ChallegeDbService'
+import {createChallenge} from '@vexl-next/server-utils/src/services/challenge/routes/createChalenge'
+import {createChallenges} from '@vexl-next/server-utils/src/services/challenge/routes/createChallenges'
 import {Config, Effect, Layer, Option} from 'effect'
 import {RouterBuilder} from 'effect-http'
 import {NodeServer} from 'effect-http-node'
@@ -28,6 +32,9 @@ import {createClub} from './routes/clubs/admin/createClub'
 import {generateClubInviteLink} from './routes/clubs/admin/generateClubInviteLink'
 import {listClubs} from './routes/clubs/admin/listClubs'
 import {modifyClub} from './routes/clubs/admin/modifyClub'
+import {getClubInfo} from './routes/clubs/member/getClubInfo'
+import {joinClub} from './routes/clubs/member/joinClub'
+import {leaveClub} from './routes/clubs/member/leaveClub'
 import {fetchCommonConnections} from './routes/contacts/fetchCommonConnections'
 import {fetchMyContacts} from './routes/contacts/fetchMyContacts'
 import {importContacts} from './routes/contacts/importContacts'
@@ -42,24 +49,30 @@ import {updateNotificationToken} from './routes/user/updateNotificationToken'
 import {ExpoNotificationsService} from './utils/expoNotifications/ExpoNotificationsService'
 import {FirebaseMessagingService} from './utils/notifications/FirebaseMessagingService'
 
-export const app = RouterBuilder.make(ContactApiSpecification).pipe(
-  RouterBuilder.handle(checkUserExists),
-  RouterBuilder.handle(createUser),
-  RouterBuilder.handle(refreshUser),
-  RouterBuilder.handle(updateFirebaseToken),
-  RouterBuilder.handle(deleteUser),
-  RouterBuilder.handle(importContacts),
-  RouterBuilder.handle(fetchMyContacts),
-  RouterBuilder.handle(fetchCommonConnections),
-  RouterBuilder.handle(updateBadOwnerHash),
-  RouterBuilder.handle(createClub),
-  RouterBuilder.handle(generateClubInviteLink),
-  RouterBuilder.handle(listClubs),
-  RouterBuilder.handle(modifyClub),
-  RouterBuilder.handle(updateNotificationToken),
-  RouterBuilder.build,
-  setupLoggingMiddlewares
-)
+export const app = RouterBuilder.make(ContactApiSpecification)
+  .pipe(
+    RouterBuilder.handle(createChallenge),
+    RouterBuilder.handle(createChallenges),
+    RouterBuilder.handle(checkUserExists),
+    RouterBuilder.handle(createUser),
+    RouterBuilder.handle(refreshUser),
+    RouterBuilder.handle(updateFirebaseToken),
+    RouterBuilder.handle(deleteUser),
+    RouterBuilder.handle(importContacts),
+    RouterBuilder.handle(fetchMyContacts),
+    RouterBuilder.handle(fetchCommonConnections),
+    RouterBuilder.handle(updateBadOwnerHash),
+    RouterBuilder.handle(createClub),
+    RouterBuilder.handle(generateClubInviteLink),
+    RouterBuilder.handle(listClubs),
+    RouterBuilder.handle(modifyClub),
+    RouterBuilder.handle(updateNotificationToken),
+    RouterBuilder.handle(getClubInfo),
+    RouterBuilder.handle(joinClub),
+    RouterBuilder.handle(leaveClub),
+    RouterBuilder.build
+  )
+  .pipe(setupLoggingMiddlewares)
 
 const MainLive = Layer.mergeAll(
   reportGaguesLayer,
@@ -73,6 +86,8 @@ const MainLive = Layer.mergeAll(
   Layer.provideMerge(ImportContactsQuotaService.Live),
   Layer.provideMerge(UserDbService.Live),
   Layer.provideMerge(ClubsDbService.Live),
+  Layer.provideMerge(ChallengeService.Live),
+  Layer.provideMerge(ChallengeDbService.Live),
   Layer.provideMerge(ClubMembersDbService.Live),
   Layer.provideMerge(ClubInvitationLinkDbService.Live),
   Layer.provideMerge(DbLayer),

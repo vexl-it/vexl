@@ -1,4 +1,3 @@
-import {ServerSecurity} from '@vexl-next/rest-api/src/apiSecurity'
 import {
   CreateChallengeRequest,
   CreateChallengeResponse,
@@ -11,7 +10,7 @@ export const CreateChallengeEndpoint = Api.post(
   'createChallenge',
   '/api/v1/challenges'
 ).pipe(
-  Api.setSecurity(ServerSecurity),
+  // Api.setSecurity(ServerSecurity),
   Api.setResponseStatus(200 as const),
   Api.setRequestBody(CreateChallengeRequest),
   Api.setResponseBody(CreateChallengeResponse)
@@ -21,7 +20,7 @@ export const CreateChallengeBatchEndpoint = Api.post(
   'createChallengeBatch',
   '/api/v1/challenges/batch'
 ).pipe(
-  Api.setSecurity(ServerSecurity),
+  // Api.setSecurity(ServerSecurity),
   Api.setResponseStatus(200 as const),
   Api.setRequestBody(CreateChallengesRequest),
   Api.setResponseBody(CreateChallengesResponse)

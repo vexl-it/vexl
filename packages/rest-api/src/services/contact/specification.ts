@@ -1,3 +1,4 @@
+import {ChallengeApiGroup} from '@vexl-next/server-utils/src/services/challenge/specification'
 import {Api, ApiGroup} from 'effect-http'
 import {ServerSecurity} from '../../apiSecurity'
 import {CommonHeaders} from '../../commonHeaders'
@@ -16,9 +17,17 @@ import {
   GenerateInviteLinkForAdminErrors,
   GenerateInviteLinkForAdminRequest,
   GenerateInviteLinkForAdminResponse,
+  GetClubInfoErrors,
+  GetClubInfoRequest,
+  GetClubInfoResponse,
   ImportContactsErrors,
   ImportContactsRequest,
   ImportContactsResponse,
+  JoinClubErrors,
+  JoinClubRequest,
+  JoinClubResponse,
+  LeaveClubErrors,
+  LeaveClubRequest,
   ListClubsErrors,
   ListClubsResponse,
   ModifyClubErrors,
@@ -201,6 +210,42 @@ export const ListClubsEndpoint = Api.get(
   })
 )
 
+export const GetClubInfoEndpoint = Api.post(
+  'getClubInfo',
+  '/api/v1/clubs/member/get-info'
+).pipe(
+  Api.setRequestBody(GetClubInfoRequest),
+  Api.setResponseBody(GetClubInfoResponse),
+  Api.addResponse({
+    status: 400,
+    body: GetClubInfoErrors,
+  })
+)
+
+export const JoinClubEndpoint = Api.post(
+  'joinClub',
+  '/api/v1/clubs/member/join-club'
+).pipe(
+  Api.setRequestBody(JoinClubRequest),
+  Api.setResponseBody(JoinClubResponse),
+  Api.addResponse({
+    status: 400,
+    body: JoinClubErrors,
+  })
+)
+
+export const LeaveClubEndpoint = Api.post(
+  'leaveClub',
+  '/api/v1/clubs/member/leave-club'
+).pipe(
+  Api.setRequestBody(LeaveClubRequest),
+  Api.setResponseBody(NoContentResponse),
+  Api.addResponse({
+    status: 400,
+    body: LeaveClubErrors,
+  })
+)
+
 const UserApiGroup = ApiGroup.make('User').pipe(
   ApiGroup.addEndpoint(CheckUserExistsEndpoint),
   ApiGroup.addEndpoint(CreateUserEndpoint),
@@ -226,11 +271,21 @@ const ClubsAdminApiGroup = ApiGroup.make('ClubsAdmin', {
   ApiGroup.addEndpoint(ListClubsEndpoint)
 )
 
+const ClubsMemberApiGroup = ApiGroup.make('ClubsMember', {
+  description: 'Clubs managment for members',
+}).pipe(
+  ApiGroup.addEndpoint(GetClubInfoEndpoint),
+  ApiGroup.addEndpoint(JoinClubEndpoint),
+  ApiGroup.addEndpoint(LeaveClubEndpoint)
+)
+
 export const ContactApiSpecification = Api.make({
   title: 'Contact service',
   version: '1.0.0',
 }).pipe(
   Api.addGroup(UserApiGroup),
   Api.addGroup(ContactApiGroup),
-  Api.addGroup(ClubsAdminApiGroup)
+  Api.addGroup(ClubsAdminApiGroup),
+  Api.addGroup(ClubsMemberApiGroup),
+  Api.addGroup(ChallengeApiGroup)
 )

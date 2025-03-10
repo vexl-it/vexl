@@ -4,6 +4,7 @@ export class NotFoundError extends Schema.TaggedError<NotFoundError>(
   'NotFoundError'
 )('NotFoundError', {
   status: Schema.optionalWith(Schema.Literal(404), {default: () => 404}),
+  message: Schema.optional(Schema.String),
 }) {}
 
 export class InternalServerError extends Schema.TaggedError<InternalServerError>(

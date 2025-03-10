@@ -36,7 +36,7 @@
     "@vexl-next/generic-utils": "0.0.0",
     "@vexl-next/rest-api": "0.0.0",
     "@vexl-next/server-utils": "0.0.0",
-    "axios": "^1.7.4",
+    "axios": "^1.8.2",
     "dotenv": "^16.4.5",
     "effect": "^3.10.12",
     "effect-http": "^0.82.0",

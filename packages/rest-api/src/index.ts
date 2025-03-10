@@ -75,5 +75,4 @@ export const ENV_PRESETS: {stageEnv: EnvPreset; prodEnv: EnvPreset} = {
     contentMs: Schema.decodeSync(ServiceUrl)('https://content.vexl.it'),
   },
 }
-
 export {PlatformName, UserSessionCredentials}

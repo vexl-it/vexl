@@ -1,19 +1,20 @@
 import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
-import {FcmTokenE} from '@vexl-next/domain/src/utility/FcmToken.brand'
-import {Array, Effect, flow, Schema} from 'effect'
+import {Effect, flow, Schema} from 'effect'
+import {NotificationTokens} from '../domain'
 
-export const createFindFirebaseTokensForNewContentNotification = Effect.gen(
+export const createFindTokensForNewContentNotification = Effect.gen(
   function* (_) {
     const sql = yield* _(PgClient.PgClient)
 
     const query = SqlSchema.findAll({
       Request: Schema.DateFromSelf,
-      Result: Schema.Struct({firebaseToken: FcmTokenE}),
+      Result: NotificationTokens,
       execute: (params) => sql`
         SELECT
-          u.firebase_token
+          u.firebase_token,
+          u.expo_token
         FROM
           users u
         WHERE
@@ -23,13 +24,15 @@ export const createFindFirebaseTokensForNewContentNotification = Effect.gen(
             u.last_new_content_notification_sent_at IS NULL
             OR u.last_new_content_notification_sent_at < ${params}
           )
-          AND u.firebase_token IS NOT NULL
+          AND (
+            u.firebase_token IS NOT NULL
+            OR u.expo_token IS NOT NULL
+          )
       `,
     })
 
     return flow(
       query,
-      Effect.map(Array.map((a) => a.firebaseToken)),
       Effect.catchAll((e) =>
         Effect.zipRight(
           Effect.logError(

@@ -22,7 +22,7 @@ import {
   type ImportContactsInput,
   type RefreshUserInput,
   type UpdateBadOwnerHashRequest,
-  type UpdateFirebaseTokenInput,
+  type UpdateNotificationTokenRequest,
 } from './contracts'
 import {ContactApiSpecification} from './specification'
 
@@ -76,10 +76,10 @@ export function api({
         }),
         UserNotFoundError
       ),
-    updateFirebaseToken: (updateFirebaseTokenInput: UpdateFirebaseTokenInput) =>
+    updateNotificationToken: ({body}: {body: UpdateNotificationTokenRequest}) =>
       handleCommonErrorsEffect(
-        client.updateFirebaseToken({
-          body: updateFirebaseTokenInput.body,
+        client.updateNotificationToken({
+          body,
           headers: decodeCommonHeaders(commonHeaders),
         })
       ),

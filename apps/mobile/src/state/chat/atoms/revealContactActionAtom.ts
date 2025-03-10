@@ -121,7 +121,7 @@ export default function revealContactActionAtom(
             receiverPublicKey: chat.otherSide.publicKey,
             message,
             notificationApi: api.notification,
-            theirFcmCypher: chat.otherSideFcmCypher,
+            theirNotificationCypher: chat.otherSideFcmCypher,
             otherSideVersion: chat.otherSideVersion,
           })
         ),

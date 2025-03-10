@@ -7,7 +7,7 @@ import {HttpClientRequest} from '@effect/platform'
 import {SqlClient} from '@effect/sql'
 import {E164PhoneNumberE} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {HashedPhoneNumberE} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
-import {FcmTokenE} from '@vexl-next/domain/src/utility/FcmToken.brand'
+import {ExpoNotificationTokenE} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {hashPhoneNumber} from '@vexl-next/server-utils/src/generateUserAuthData'
 import {createDummyAuthHeadersForUser} from '@vexl-next/server-utils/src/tests/createDummyAuthHeaders'
@@ -31,7 +31,10 @@ describe('create user', () => {
           app.createUser(
             {
               body: {
-                firebaseToken: Schema.decodeSync(FcmTokenE)('someToken'),
+                firebaseToken: null,
+                expoToken: Schema.decodeSync(ExpoNotificationTokenE)(
+                  'someToken'
+                ),
               },
               headers: Schema.decodeSync(CommonHeaders)({
                 'user-agent': 'Vexl/1 (1.0.0) ANDROID',
@@ -58,7 +61,7 @@ describe('create user', () => {
           'hash',
           yield* _(hashPhoneNumber(phoneNumber))
         )
-        expect(result[0]).toHaveProperty('firebaseToken', 'someToken')
+        expect(result[0]).toHaveProperty('expoToken', 'someToken')
         expect(result[0]).toHaveProperty('clientVersion', 1)
       })
     )
@@ -83,7 +86,10 @@ describe('create user', () => {
           app.createUser(
             {
               body: {
-                firebaseToken: Schema.decodeSync(FcmTokenE)('someToken'),
+                firebaseToken: null,
+                expoToken: Schema.decodeSync(ExpoNotificationTokenE)(
+                  'someToken'
+                ),
               },
               headers: Schema.decodeSync(CommonHeaders)({
                 'user-agent': 'Vexl/1 (1.0.0) ANDROID',
@@ -132,7 +138,10 @@ describe('create user', () => {
           app.createUser(
             {
               body: {
-                firebaseToken: Schema.decodeSync(FcmTokenE)('someToken'),
+                firebaseToken: null,
+                expoToken: Schema.decodeSync(ExpoNotificationTokenE)(
+                  'someToken'
+                ),
               },
               headers: Schema.decodeSync(CommonHeaders)({
                 'user-agent': 'Vexl/1 (1.0.0) ANDROID',

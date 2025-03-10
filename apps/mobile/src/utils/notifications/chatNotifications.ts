@@ -1,11 +1,13 @@
 import notifee, {
   AndroidGroupAlertBehavior,
+  AndroidImportance,
   type DisplayedNotification,
 } from '@notifee/react-native'
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {sha256} from '@vexl-next/cryptography/src/operations/sha'
 import {type Chat} from '@vexl-next/domain/src/general/messaging'
 import {ChatNotificationData} from '@vexl-next/domain/src/general/notifications'
+import {type NotificationCypher} from '@vexl-next/domain/src/general/notifications/NotificationCypher.brand'
 import {getDefaultStore} from 'jotai'
 import {useCallback} from 'react'
 import {Platform} from 'react-native'
@@ -19,6 +21,7 @@ import notEmpty from '../notEmpty'
 import randomName from '../randomName'
 import {useAppState} from '../useAppState'
 import {SystemChatNotificationData} from './SystemNotificationData.brand'
+import {cancelNewChatNotifications} from './cancelNewChatNotifications'
 import {getChannelForMessages} from './notificationChannels'
 
 function generateGroupId(chat: {
@@ -71,10 +74,22 @@ async function getNotificationsForChat({
 export async function showChatNotification({
   newMessage,
   inbox,
+  cypher,
 }: {
   newMessage: ChatMessageWithState
   inbox: InboxInState
+  cypher: NotificationCypher
 }): Promise<void> {
+  await cancelNewChatNotifications(cypher)
+
+  if (
+    (await notifee.getDisplayedNotifications()).some(
+      (one) => one.id === newMessage.message.uuid
+    )
+  ) {
+    return
+  }
+
   const type = newMessage.message.messageType
   const chat = inbox.chats.find(
     (one) => one.chat.otherSide.publicKey === newMessage.message.senderPublicKey
@@ -89,7 +104,7 @@ export async function showChatNotification({
     type === 'FCM_CYPHER_UPDATE' ||
     type === 'OFFER_DELETED' ||
     // type === 'INBOX_DELETED' ||
-    type === 'CANCEL_REQUEST_MESSAGING' ||
+    // type === 'CANCEL_REQUEST_MESSAGING' ||
     type === 'REQUIRES_NEWER_VERSION'
   ) {
     // DO not show notification in this case
@@ -108,6 +123,7 @@ export async function showChatNotification({
 
   if (type === 'MESSAGE') {
     await notifee.displayNotification({
+      id: newMessage.message.uuid,
       title:
         userName ?? t(`notifications.${type}.title`, {them: userName ?? ''}),
       body:
@@ -124,6 +140,7 @@ export async function showChatNotification({
       },
       android: {
         groupId,
+        importance: AndroidImportance.HIGH,
         lightUpScreen: true,
         groupAlertBehavior: AndroidGroupAlertBehavior.CHILDREN,
         channelId: await getChannelForMessages(),
@@ -134,6 +151,7 @@ export async function showChatNotification({
     })
   } else {
     await notifee.displayNotification({
+      id: newMessage.message.uuid,
       title: t(`notifications.${type}.title`, {them: userName ?? ''}),
       body: t(`notifications.${type}.body`, {them: userName ?? ''}),
       data: SystemChatNotificationData.encode(
@@ -149,6 +167,7 @@ export async function showChatNotification({
         groupId,
         groupAlertBehavior: AndroidGroupAlertBehavior.CHILDREN,
         lightUpScreen: true,
+        importance: AndroidImportance.HIGH,
         channelId: await getChannelForMessages(),
         pressAction: {
           id: 'default',

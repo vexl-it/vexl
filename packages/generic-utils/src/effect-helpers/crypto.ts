@@ -21,7 +21,7 @@ import {sha256} from '@vexl-next/cryptography/src/operations/sha'
 import {randomBytes} from 'crypto'
 import {Effect, Schema} from 'effect'
 
-const ECIES_GTM_CYPHER_PREFIX = 'EciesGtm-' as const
+export const ECIES_GTM_CYPHER_PREFIX = 'EciesGtm-' as const
 const AES_GCM_CYPHER_PREFIX = 'AesGCm-' as const
 
 export class CryptoError extends Schema.TaggedError<CryptoError>('CryptoError')(

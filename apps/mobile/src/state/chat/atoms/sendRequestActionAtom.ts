@@ -18,7 +18,7 @@ import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 import {sessionDataOrDummyAtom} from '../../session'
 import {version} from './../../../utils/environment'
 import {createUserInboxIfItDoesNotExistAtom} from './createUserInboxIfItDoesNotExistAtom'
-import generateMyFcmTokenInfoActionAtom from './generateMyFcmTokenInfoActionAtom'
+import generateMyNotificationTokenInfoActionAtom from './generateMyNotificationTokenInfoActionAtom'
 import upsertChatForTheirOfferActionAtom from './upsertChatForTheirOfferActionAtom'
 
 const sendRequestActionAtom = atom(
@@ -33,7 +33,11 @@ const sendRequestActionAtom = atom(
     const goldenAvatarType = get(goldenAvatarTypeAtom)
 
     return pipe(
-      set(generateMyFcmTokenInfoActionAtom, undefined, session.privateKey),
+      set(
+        generateMyNotificationTokenInfoActionAtom,
+        undefined,
+        session.privateKey
+      ),
       TE.fromTask,
       TE.bindTo('encryptedToken'),
       TE.bind('message', ({encryptedToken}) =>
@@ -41,15 +45,16 @@ const sendRequestActionAtom = atom(
           sendMessagingRequest({
             text,
             notificationApi: api.notification,
-            theirFcmCypher: originOffer.offerInfo.publicPart.fcmCypher,
+            theirNotificationCypher: originOffer.offerInfo.publicPart.fcmCypher,
             api: api.chat,
             fromKeypair: session.privateKey,
             myVersion: version,
             toPublicKey: originOffer.offerInfo.publicPart.offerPublicKey,
             otherSideVersion:
               originOffer.offerInfo.publicPart.authorClientVersion,
-            myFcmCypher: O.toUndefined(encryptedToken)?.cypher,
-            lastReceivedFcmCypher: originOffer.offerInfo.publicPart.fcmCypher,
+            myNotificationCypher: O.toUndefined(encryptedToken)?.cypher,
+            lastReceivedNotificationCypher:
+              originOffer.offerInfo.publicPart.fcmCypher,
             goldenAvatarType,
           })
         )

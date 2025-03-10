@@ -50,25 +50,27 @@ const handleUserCreationActionAtom = atom(
       getUserSessionCredentials: () => session.sessionCredentials,
     })
 
-    return contactApi.createUser({body: {firebaseToken: null}}).pipe(
-      Effect.tapError((e) => {
-        reportError('error', new Error('Error creating user at contact MS'), {
-          e,
+    return contactApi
+      .createUser({body: {firebaseToken: null, expoToken: null}})
+      .pipe(
+        Effect.tapError((e) => {
+          reportError('error', new Error('Error creating user at contact MS'), {
+            e,
+          })
+
+          resetNavigationToIntroScreen()
+
+          return Effect.fail(e)
+        }),
+        Effect.tap(() => {
+          const leftToWait = TARGET_TIME_MILLISECONDS - (Date.now() - startedAt)
+          if (leftToWait > 0)
+            setTimeout(() => {
+              set(sessionAtom, O.some(session))
+            }, leftToWait)
+          else set(sessionAtom, O.some(session))
         })
-
-        resetNavigationToIntroScreen()
-
-        return Effect.fail(e)
-      }),
-      Effect.tap(() => {
-        const leftToWait = TARGET_TIME_MILLISECONDS - (Date.now() - startedAt)
-        if (leftToWait > 0)
-          setTimeout(() => {
-            set(sessionAtom, O.some(session))
-          }, leftToWait)
-        else set(sessionAtom, O.some(session))
-      })
-    )
+      )
   }
 )
 

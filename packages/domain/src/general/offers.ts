@@ -4,7 +4,10 @@ import {orElseSchema} from '@vexl-next/generic-utils/src/effect-helpers/orElseSc
 import {Array, Brand, Schema} from 'effect'
 import {randomUUID} from 'node:crypto'
 import {z} from 'zod'
-import {FcmToken, FcmTokenE} from '../utility/FcmToken.brand'
+import {
+  ExpoNotificationToken,
+  ExpoNotificationTokenE,
+} from '../utility/ExpoNotificationToken.brand'
 import {IdNumeric, IdNumericE} from '../utility/IdNumeric'
 import {
   IsoDatetimeString,
@@ -23,7 +26,10 @@ import {
 } from '../utility/geoCoordinates'
 import {HashedPhoneNumber, HashedPhoneNumberE} from './HashedPhoneNumber.brand'
 import {CurrencyCode, CurrencyCodeE} from './currency.brand'
-import {FcmCypher, FcmCypherE} from './notifications'
+import {
+  NotificationCypher,
+  NotificationCypherE,
+} from './notifications/NotificationCypher.brand'
 
 export const Sort = z.enum([
   'LOWEST_FEE_FIRST',
@@ -289,7 +295,7 @@ export const OfferPublicPart = z
     active: z.boolean(),
     groupUuids: z.array(z.string()).readonly(),
     listingType: ListingType.optional(),
-    fcmCypher: FcmCypher.optional(),
+    fcmCypher: NotificationCypher.optional(),
     authorClientVersion: SemverString.optional(),
     goldenAvatarType: GoldenAvatarType.optional(),
   })
@@ -318,7 +324,7 @@ export const OfferPublicPartE = Schema.Struct({
   active: Schema.Boolean,
   groupUuids: Schema.Array(Schema.String),
   listingType: Schema.optional(ListingTypeE),
-  fcmCypher: Schema.optional(FcmCypherE),
+  fcmCypher: Schema.optional(NotificationCypherE),
   authorClientVersion: Schema.optional(SemverStringE),
   goldenAvatarType: Schema.optional(GoldenAvatarTypeE),
 })
@@ -404,14 +410,14 @@ export const OneOfferInState = z
   .object({
     offerInfo: OfferInfo,
     flags: OfferFlags,
-    lastCommitedFcmToken: FcmToken.optional(),
+    lastCommitedFcmToken: ExpoNotificationToken.optional(),
     ownershipInfo: OwnershipInfo.optional(),
   })
   .readonly()
 export const OneOfferInStateE = Schema.Struct({
   offerInfo: OfferInfoE,
   flags: OfferFlagsE,
-  lastCommitedFcmToken: Schema.optional(FcmTokenE),
+  lastCommitedFcmToken: Schema.optional(ExpoNotificationTokenE),
   ownershipInfo: Schema.optional(OwnershipInfoE),
 })
 export type OneOfferInState = Schema.Schema.Type<typeof OneOfferInStateE>
@@ -420,14 +426,14 @@ export const MyOfferInState = z
   .object({
     offerInfo: OfferInfo,
     flags: OfferFlags,
-    lastCommitedFcmToken: FcmToken.optional(),
+    lastCommitedFcmToken: ExpoNotificationToken.optional(),
     ownershipInfo: OwnershipInfo,
   })
   .readonly()
 export const MyOfferInStateE = Schema.Struct({
   offerInfo: OfferInfoE,
   flags: OfferFlagsE,
-  lastCommitedFcmToken: Schema.optional(FcmTokenE),
+  lastCommitedFcmToken: Schema.optional(ExpoNotificationTokenE),
   ownershipInfo: OwnershipInfoE,
 })
 export type MyOfferInState = Schema.Schema.Type<typeof MyOfferInStateE>

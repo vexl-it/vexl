@@ -47,6 +47,7 @@ export const createUser = Handler.make(CreateUserEndpoint, (req, security) =>
         userDb.insertUser({
           publicKey: security['public-key'],
           hash: security.hash,
+          expoToken: Option.fromNullable(req.body.expoToken),
           firebaseToken: Option.fromNullable(req.body.firebaseToken),
           clientVersion: req.headers.clientVersionOrNone,
           platform: req.headers.clientPlatformOrNone,

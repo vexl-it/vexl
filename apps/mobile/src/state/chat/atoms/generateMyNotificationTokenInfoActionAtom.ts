@@ -1,28 +1,30 @@
 import {type PrivateKeyHolder} from '@vexl-next/cryptography/src/KeyHolder'
-import {type MyFcmTokenInfo} from '@vexl-next/domain/src/general/messaging'
-import {type FcmToken} from '@vexl-next/domain/src/utility/FcmToken.brand'
-import {encryptFcmForOffer} from '@vexl-next/resources-utils/src/notifications/encryptFcmForOffer'
+import {type MyNotificationTokenInfo} from '@vexl-next/domain/src/general/messaging'
+import {type ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
+import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
+import {ecnryptNotificationToken} from '@vexl-next/resources-utils/src/notifications/notificationTokenActions'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
 import * as TO from 'fp-ts/TaskOption'
 import {pipe} from 'fp-ts/lib/function'
 import {atom} from 'jotai'
+import {i18nAtom} from '../../../utils/localization/I18nProvider'
 import {getNotificationToken} from '../../../utils/notifications'
 import reportError from '../../../utils/reportError'
-import {registerFcmCypherActionAtom} from '../../notifications/fcmCypherToKeyHolderAtom'
+import {registerNotificationCypherActionAtom} from '../../notifications/fcmCypherToKeyHolderAtom'
 import {getOrFetchNotificationServerPublicKeyActionAtom} from '../../notifications/fcmServerPublicKeyStore'
 import {type ChatWithMessages} from '../domain'
 
-const generateMyFcmTokenInfoActionAtom = atom(
+const generateMyNotificationTokenInfoActionAtom = atom(
   null,
   (
     get,
     set,
-    fcmToken: FcmToken | undefined,
+    token: ExpoNotificationToken | undefined,
     keyHolder: PrivateKeyHolder
-  ): TO.TaskOption<MyFcmTokenInfo> => {
+  ): TO.TaskOption<MyNotificationTokenInfo> => {
     return pipe(
-      fcmToken ? T.of(fcmToken) : getNotificationToken(),
+      token ? T.of(token) : getNotificationToken(),
       T.bindTo('notificationToken'),
       T.bind('serverPublicKey', () =>
         set(getOrFetchNotificationServerPublicKeyActionAtom)
@@ -33,10 +35,13 @@ const generateMyFcmTokenInfoActionAtom = atom(
         }
 
         return pipe(
-          encryptFcmForOffer({
-            publicKey: serverPublicKey.value,
-            fcmToken: notificationToken,
-          }),
+          effectToTaskEither(
+            ecnryptNotificationToken({
+              serverPublicKey: serverPublicKey.value,
+              notificationToken,
+              locale: get(i18nAtom).t('localeName'),
+            })
+          ),
           TE.matchE(
             (l) => {
               reportError(
@@ -48,15 +53,15 @@ const generateMyFcmTokenInfoActionAtom = atom(
               )
               return TO.none
             },
-            (fcmCypher) => {
-              set(registerFcmCypherActionAtom, {
-                fcmCypher,
+            (notificationCypher) => {
+              set(registerNotificationCypherActionAtom, {
+                notificationCypher,
                 keyHolder,
               })
               return TO.some({
-                cypher: fcmCypher,
+                cypher: notificationCypher,
                 token: notificationToken,
-              } satisfies MyFcmTokenInfo)
+              } satisfies MyNotificationTokenInfo)
             }
           )
         )
@@ -65,16 +70,16 @@ const generateMyFcmTokenInfoActionAtom = atom(
   }
 )
 
-export default generateMyFcmTokenInfoActionAtom
+export default generateMyNotificationTokenInfoActionAtom
 
-export function updateMyFcmTokenInfoInChat(
-  myFcmTokenInfo?: MyFcmTokenInfo
+export function updateMyNotificationTokenInfoInChat(
+  myNotificationTokenInfo?: MyNotificationTokenInfo
 ): (chat: ChatWithMessages) => ChatWithMessages {
   return (chat) => ({
     ...chat,
     chat: {
       ...chat.chat,
-      lastReportedFcmToken: myFcmTokenInfo,
+      lastReportedFcmToken: myNotificationTokenInfo,
     },
   })
 }

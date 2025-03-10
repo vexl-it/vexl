@@ -1,17 +1,14 @@
-import messaging from '@react-native-firebase/messaging'
 import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {pipe} from 'fp-ts/function'
-import * as A from 'fp-ts/lib/Array'
-import * as T from 'fp-ts/lib/Task'
 import * as TE from 'fp-ts/lib/TaskEither'
 import {useSetAtom, useStore} from 'jotai'
-import {useCallback, useEffect} from 'react'
+import {useCallback} from 'react'
 import {apiAtom} from '../../api'
-import {inboxesAtom} from '../../state/chat/atoms/messagingStateAtom'
 import checkNotificationTokensAndRefreshOffersActionAtom from '../../state/marketplace/atoms/checkNotificationTokensAndRefreshOffersActionAtom'
 import {storage} from '../mmkv/fpMmkv'
 import reportError from '../reportError'
 import {useAppState} from '../useAppState'
+
 import {getNotificationToken} from './index'
 
 const NOTIFICATION_TOKEN_CACHE_KEY = 'notificationToken'
@@ -28,7 +25,7 @@ export function useRefreshNotificationTokenOnResumeAssumeLoggedIn(): void {
       const newToken = await getNotificationToken()()
       if (oldToken === newToken) {
         console.info(
-          '📳 Notification token has not changed since the last refresh:'
+          `📳 Notification token has not changed since the last refresh: ${newToken}`
         )
         return
       }
@@ -41,7 +38,7 @@ export function useRefreshNotificationTokenOnResumeAssumeLoggedIn(): void {
         effectToTaskEither(
           store
             .get(apiAtom)
-            .contact.updateFirebaseToken({body: {firebaseToken: newToken}})
+            .contact.updateNotificationToken({body: {expoToken: newToken}})
         ),
         TE.match(
           (e) => {
@@ -58,48 +55,24 @@ export function useRefreshNotificationTokenOnResumeAssumeLoggedIn(): void {
           }
         )
       )()
-
-      void pipe(
-        store.get(inboxesAtom),
-        A.map((inbox) =>
-          pipe(
-            effectToTaskEither(
-              store.get(apiAtom).chat.updateInbox({
-                token: newToken ?? undefined,
-                keyPair: inbox.privateKey,
-              })
-            ),
-            TE.match(
-              (e) => {
-                reportError('error', new Error('Error while updating inbox'), {
-                  e,
-                })
-              },
-              () => {
-                console.info(
-                  '📳 Updated firebase token of the inbox',
-                  inbox.privateKey.publicKeyPemBase64
-                )
-              }
-            )
-          )
-        ),
-        T.sequenceArray,
-        T.map(() => {
-          console.info('📳 Finished updating firebase token of inboxes')
-        })
-      )()
     })()
 
     checkNotificationTokensAndRefreshOffers()
   }, [checkNotificationTokensAndRefreshOffers, store])
 
-  useEffect(() => {
-    return messaging().onTokenRefresh(() => {
-      console.info('📳 Received notification token refresh event')
-      refreshToken()
-    })
-  }, [refreshToken])
+  // NOT needed with expo notifications
+  // useEffect(() => {
+  //   const sub = Notifications.addPushTokenListener((token) => {
+  //     console.info(
+  //       `📳 Received notification token event ${JSON.stringify(token, null, 2)}`
+  //     )
+  //     console.info('📳 Received notification token refresh event')
+  //     refreshToken()
+  //   })
+  // return () => {
+  //   Notifications.removePushTokenSubscription(sub)
+  // }
+  // }, [refreshToken])
 
   useAppState(
     useCallback(

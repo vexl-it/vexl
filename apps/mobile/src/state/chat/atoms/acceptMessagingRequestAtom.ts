@@ -21,9 +21,9 @@ import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
 import addMessageToChat from '../utils/addMessageToChat'
 import createAccountDeletedMessage from '../utils/createAccountDeletedMessage'
 import {resetTradeChecklist} from '../utils/resetData'
-import generateMyFcmTokenInfoActionAtom, {
-  updateMyFcmTokenInfoInChat,
-} from './generateMyFcmTokenInfoActionAtom'
+import generateMyNotificationTokenInfoActionAtom, {
+  updateMyNotificationTokenInfoInChat,
+} from './generateMyNotificationTokenInfoActionAtom'
 
 const acceptMessagingRequestAtom = atom(
   null,
@@ -52,7 +52,11 @@ const acceptMessagingRequestAtom = atom(
     return pipe(
       TE.Do,
       TE.chainTaskK(() =>
-        set(generateMyFcmTokenInfoActionAtom, undefined, chat.inbox.privateKey)
+        set(
+          generateMyNotificationTokenInfoActionAtom,
+          undefined,
+          chat.inbox.privateKey
+        )
       ),
       TE.bindTo('myFcmCypher'),
       TE.bindW('configMessage', ({myFcmCypher}) =>
@@ -61,16 +65,16 @@ const acceptMessagingRequestAtom = atom(
             text,
             approve,
             api: api.chat,
-            theirFcmCypher: chat.otherSideFcmCypher,
+            theirNotificationCypher: chat.otherSideFcmCypher,
             notificationApi: api.notification,
             fromKeypair: chat.inbox.privateKey,
             toPublicKey: chat.otherSide.publicKey,
             myVersion: version,
-            myFcmCypher:
+            myNotificationCypher:
               myFcmCypher._tag === 'Some'
                 ? myFcmCypher.value.cypher
                 : undefined,
-            lastReceivedFcmCypher: chat.otherSideFcmCypher,
+            lastReceivedNotificationCypher: chat.otherSideFcmCypher,
             otherSideVersion: chat.otherSideVersion,
           })
         )
@@ -103,7 +107,7 @@ const acceptMessagingRequestAtom = atom(
             // Make sure to reset checklist. If they open chat again after rerequest, we don't want to show the checklist again
             resetTradeChecklist,
             // resetRealLifeInfo,
-            updateMyFcmTokenInfoInChat(O.toUndefined(myFcmCypher))
+            updateMyNotificationTokenInfoInChat(O.toUndefined(myFcmCypher))
           )
         )
         return message

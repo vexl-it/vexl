@@ -22,7 +22,7 @@ export class ErrorIssuingFirebaseNotification extends Schema.TaggedError<ErrorIs
   message: Schema.String,
 }) {}
 
-export const sendNotificationToAllHandleNonExistingTokens = ({
+export const sendFcmNotificationToAllHandleNonExistingTokens = ({
   type,
   tokens,
 }: {
@@ -63,7 +63,7 @@ export const sendNotificationToAllHandleNonExistingTokens = ({
         )
       )
     ),
-    Effect.withSpan('SendNotificationToAllHandleNonExistingTokens')
+    Effect.withSpan('SendFcmNotificationToAllHandleNonExistingTokens')
   )
 
 export const sendNotificationToGeneralTopic = (

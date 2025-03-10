@@ -1,11 +1,12 @@
 import {SqlClient} from '@effect/sql'
 import {Array, Effect, Logger, LogLevel, Order, pipe} from 'effect'
+import {isArray} from 'effect/Array'
 import {
   createAndImportUsersFromNetwork,
   generateKeysAndHasheForNumber,
   type DummyUser,
 } from '../../__tests__/routes/contacts/utils'
-import {sendMessageMock} from '../../__tests__/utils/mockedFirebaseMessagingService'
+import {sendNotificationsMock} from '../../__tests__/utils/mockedExpoNotificationService'
 import {runPromiseInMockedEnvironment} from '../../__tests__/utils/runPromiseInMockedEnvironment'
 import {processNewContentNotifications} from './processNewContentNotifications'
 
@@ -27,9 +28,12 @@ describe('process new content notification', () => {
       }).pipe(Logger.withMinimumLogLevel(LogLevel.None))
     )
   })
-  it('Notifies inactive users and sets refreshed_at to null for users that were notified', async () => {
+  it('Users should be notified about new conent notification', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
+        yield* _(Effect.sleep(100)) // Send notifications mock is called asynchronously, so thats whiy the sleep
+        sendNotificationsMock.mockClear()
+
         const sql = yield* _(SqlClient.SqlClient)
         yield* _(sql`
           UPDATE users
@@ -51,15 +55,20 @@ describe('process new content notification', () => {
 
         yield* _(processNewContentNotifications)
 
-        expect(sendMessageMock).toHaveBeenCalledTimes(1)
+        expect(sendNotificationsMock).toHaveBeenCalledTimes(1)
 
-        const call = sendMessageMock.mock.calls[0][0]
-        expect(call.data?.type).toEqual('NEW_CONTENT')
+        const call = sendNotificationsMock.mock.calls[0][0]
+        expect(call[0].data?.type).toEqual('NEW_CONTENT')
         expect(
-          pipe(call.tokens, Array.sort(Order.string), Array.join(','))
+          pipe(
+            call.map((one) => (isArray(one.to) ? one.to : [one.to])),
+            Array.flatten,
+            Array.sort(Order.string),
+            Array.join(',')
+          )
         ).toEqual(
           pipe(
-            [user1.firebaseToken, user2.firebaseToken],
+            [user1.notificationToken, user2.notificationToken],
             Array.sort(Order.string),
             Array.join(',')
           )

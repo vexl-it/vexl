@@ -66,7 +66,7 @@ export const sendUpdateNoticeMessageActionAtom = atom(
           receiverPublicKey: chat.chat.otherSide.publicKey,
           message: messageToSend,
           notificationApi: api.notification,
-          theirFcmCypher: chat.chat.otherSideFcmCypher,
+          theirNotificationCypher: chat.chat.otherSideFcmCypher,
           otherSideVersion: chat.chat.otherSideVersion,
         })
       ),

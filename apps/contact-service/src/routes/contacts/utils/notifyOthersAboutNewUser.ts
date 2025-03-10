@@ -1,7 +1,9 @@
 import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {Array, Effect} from 'effect'
 import {UserDbService} from '../../../db/UserDbService'
-import {sendNotificationToAllHandleNonExistingTokens} from '../../../utils/notifications'
+import {NotificationsTokensEquivalence} from '../../../db/UserDbService/domain'
+import {type ExpoNotificationsService} from '../../../utils/expoNotifications/ExpoNotificationsService'
+import {issueNotificationsToTokens} from '../../../utils/issueNotificationsToTokens'
 import {type FirebaseMessagingService} from '../../../utils/notifications/FirebaseMessagingService'
 
 export const notifyOthersAboutNewUserForked = ({
@@ -10,7 +12,11 @@ export const notifyOthersAboutNewUserForked = ({
 }: {
   importedHashes: readonly HashedPhoneNumber[]
   ownerHash: HashedPhoneNumber
-}): Effect.Effect<void, never, UserDbService | FirebaseMessagingService> =>
+}): Effect.Effect<
+  void,
+  never,
+  UserDbService | FirebaseMessagingService | ExpoNotificationsService
+> =>
   Effect.gen(function* (_) {
     const userDbService = yield* _(UserDbService)
 
@@ -27,7 +33,13 @@ export const notifyOthersAboutNewUserForked = ({
         ownerHash,
       }),
       Effect.map(
-        Array.filter((token) => !Array.contains(firstLevelTokens, token))
+        Array.filter(
+          (token) =>
+            !Array.containsWith(NotificationsTokensEquivalence)(
+              firstLevelTokens,
+              token
+            )
+        )
       )
     )
 
@@ -37,8 +49,12 @@ export const notifyOthersAboutNewUserForked = ({
       )
     )
 
+    if (firstLevelTokens.length === 0 && secondLevelTokens.length === 0) {
+      return
+    }
+
     yield* _(
-      sendNotificationToAllHandleNonExistingTokens({
+      issueNotificationsToTokens({
         type: 'NEW_APP_USER',
         tokens: [...firstLevelTokens, ...secondLevelTokens],
       }),

@@ -1,7 +1,7 @@
 // import {SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 
-const VERSION_CODE = 376
-const VERSION = '1.26.0'
+const VERSION_CODE = 400
+const VERSION = '1.28.0'
 const ENV_PRESET = process.env.ENV_PRESET
 const COMMIT_HASH = process.env.EAS_BUILD_GIT_COMMIT_HASH ?? 'local'
 
@@ -182,6 +182,7 @@ export default {
     'policy': 'sdkVersion',
   },
   'plugins': [
+    ['expo-notifications', {enableBackgroundRemoteNotifications: true}],
     'expo-localization',
     [
       'expo-image-picker',
@@ -240,7 +241,6 @@ export default {
     '@react-native-firebase/app',
     '@react-native-firebase/dynamic-links',
     './expo-plugins/disable-firebase-analytics.js',
-    './expo-plugins/setup-headless-background-message-processing-ios.js',
     './expo-plugins/android-manifest-nfc-action-plugin.js',
     'expo-font',
     'expo-secure-store',

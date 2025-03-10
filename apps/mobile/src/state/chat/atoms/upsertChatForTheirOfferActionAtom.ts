@@ -2,7 +2,7 @@ import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {
   generateChatId,
   type Inbox,
-  type MyFcmTokenInfo,
+  type MyNotificationTokenInfo,
 } from '@vexl-next/domain/src/general/messaging'
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
 import {flow} from 'fp-ts/lib/function'
@@ -16,7 +16,7 @@ import {
 } from '../domain'
 import addMessageToChat from '../utils/addMessageToChat'
 import focusChatForTheirOfferAtom from './focusChatForTheirOfferAtom'
-import {updateMyFcmTokenInfoInChat} from './generateMyFcmTokenInfoActionAtom'
+import {updateMyNotificationTokenInfoInChat} from './generateMyNotificationTokenInfoActionAtom'
 import messagingStateAtom from './messagingStateAtom'
 
 function createNewChat({
@@ -27,7 +27,7 @@ function createNewChat({
 }: {
   inbox: Inbox
   initialMessage: ChatMessageWithState
-  sentFcmTokenInfo?: MyFcmTokenInfo
+  sentFcmTokenInfo?: MyNotificationTokenInfo
   offer: OneOfferInState
 }): ChatWithMessages {
   const otherSideVersion =
@@ -87,7 +87,7 @@ const upsertChatForTheirOfferActionAtom = atom(
     }: {
       inbox: Inbox
       initialMessage: ChatMessageWithState
-      sentFcmTokenInfo?: MyFcmTokenInfo
+      sentFcmTokenInfo?: MyNotificationTokenInfo
       offer: OneOfferInState
     }
   ) => {
@@ -102,7 +102,7 @@ const upsertChatForTheirOfferActionAtom = atom(
         existingChatAtom,
         flow(
           addMessageToChat(initialMessage),
-          updateMyFcmTokenInfoInChat(sentFcmTokenInfo)
+          updateMyNotificationTokenInfoInChat(sentFcmTokenInfo)
         )
       )
       return existingChat.chat

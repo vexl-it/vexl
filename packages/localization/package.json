@@ -1,6 +1,28 @@
 {
   "name": "@vexl-next/localization",
   "version": "0.0.0",
+  "type": "module",
+  "main": "src/translations",
+  "dependencies": {
+    "flat": "^6.0.1"
+  },
+  "scripts": {
+    "clean": "rimraf .turbo node_modules",
+    "lint": "eslint '**/*.{js,ts,tsx,jsx,cjs,mjs}'",
+    "format": "prettier --check \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json}\"",
+    "format:fix": "prettier --write \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json}\"",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@vexl-next/eslint-config": "0.0.0",
+    "@vexl-next/prettier-config": "0.0.0",
+    "@vexl-next/tsconfig": "0.0.0",
+    "eslint": "^8.57.1",
+    "prettier": "^3.3.2",
+    "rimraf": "^4.4.0",
+    "ts-jest": "^29.2.0",
+    "typescript": "^5.6.3"
+  },
   "files": [
     "base.json",
     "cs-base.json",
@@ -28,6 +50,14 @@
     "fr-termsOfUse.json",
     "it-termsOfUse.json",
     "pt-termsOfUse.json",
-    "es-termsOfUse.json"
-  ]
+    "es-termsOfUse.json",
+    "src/translations.ts"
+  ],
+  "eslintConfig": {
+    "root": true,
+    "extends": [
+      "@vexl-next/eslint-config/index"
+    ]
+  },
+  "prettier": "@vexl-next/prettier-config"
 }

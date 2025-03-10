@@ -68,6 +68,12 @@ export class UserNotFoundError extends Schema.TaggedError<UserNotFoundError>(
   }),
 }) {}
 
+export class UserNotClubMemberError extends Schema.TaggedError<UserNotClubMemberError>(
+  'UserNotClubMemberError'
+)('UserNotClubMemberError', {
+  status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
+}) {}
+
 export const CreateUserRequest = Schema.Struct({
   firebaseToken: Schema.NullOr(FcmTokenE),
   expoToken: Schema.optionalWith(Schema.NullOr(ExpoNotificationTokenE), {
@@ -247,6 +253,7 @@ export const UpdateBadOwnerHashResponse = Schema.Struct({
   updated: Schema.Boolean,
   willDeleteExistingUserIfRan: Schema.optional(Schema.Literal(true)),
 })
+
 export type UpdateBadOwnerHashResponse = typeof UpdateBadOwnerHashResponse.Type
 
 // ---------
@@ -334,6 +341,7 @@ export const ListClubsErrors = Schema.Union(InvalidAdminTokenError)
 export const ListClubsResponse = Schema.Struct({
   clubs: Schema.Array(ClubInfo),
 })
+
 export type ListClubsResponse = typeof ListClubsResponse.Type
 
 export class MemberAlreadyInClubError extends Schema.TaggedError<MemberAlreadyInClubError>(
@@ -389,5 +397,25 @@ export type LeaveClubRequest = typeof LeaveClubRequest.Type
 
 export const LeaveClubErrors = Schema.Union(
   NotFoundError,
+  InvalidChallengeError
+)
+
+export const GetClubContactsRequest = Schema.Struct({
+  ...RequestBaseWithChallenge.fields,
+  clubUuid: ClubUuid,
+})
+
+export type GetClubContactsRequest = typeof GetClubContactsRequest.Type
+
+export const GetClubContactsResponse = Schema.Struct({
+  clubUuid: ClubUuid,
+  items: Schema.Array(PublicKeyPemBase64E),
+})
+
+export type GetClubContactsResponse = typeof GetClubContactsResponse.Type
+
+export const GetClubContactsErrors = Schema.Union(
+  NotFoundError,
+  UserNotClubMemberError,
   InvalidChallengeError
 )

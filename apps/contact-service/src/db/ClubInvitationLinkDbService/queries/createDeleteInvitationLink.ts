@@ -18,7 +18,7 @@ export const createDeleteInvitationLink = Effect.gen(function* (_) {
     execute: (params) => sql`
       DELETE FROM club_invitation_link
       WHERE
-        club_id = ${params.id}
+        id = ${params.id}
     `,
   })
 

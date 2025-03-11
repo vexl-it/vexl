@@ -15,11 +15,11 @@ export const createCountClubMemebers = Effect.gen(function* (_) {
   const query = SqlSchema.single({
     Request: CountClubMemebersParams,
     Result: Schema.Struct({
-      countResult: Schema.Number,
+      countResult: Schema.NumberFromString,
     }),
     execute: (params) => sql`
       SELECT
-        count(*) AS count_result
+        count(id) AS count_result
       FROM
         club_member
       WHERE

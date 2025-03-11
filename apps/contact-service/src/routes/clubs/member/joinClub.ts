@@ -15,6 +15,8 @@ import {Handler} from 'effect-http'
 import {ClubInvitationLinkDbService} from '../../../db/ClubInvitationLinkDbService'
 import {ClubMembersDbService} from '../../../db/ClubMemberDbService'
 import {ClubsDbService} from '../../../db/ClubsDbService'
+import {withClubJoiningActionRedisLock} from '../../../utils/withClubJoiningActionRedisLock'
+import {clubHasCapacityForAnotherUser} from '../utils/clubHasCapacityForAnotherUser'
 
 export const joinClub = Handler.make(JoinClubEndpoint, (req) =>
   makeEndpointEffect(
@@ -24,13 +26,6 @@ export const joinClub = Handler.make(JoinClubEndpoint, (req) =>
       const clubsDb = yield* _(ClubsDbService)
       const membersDb = yield* _(ClubMembersDbService)
       const linksDb = yield* _(ClubInvitationLinkDbService)
-
-      yield* _(
-        membersDb.findClubMemberByPublicKey({
-          publicKey: req.body.publicKey,
-        }),
-        Effect.filterOrFail(Option.isNone, () => new MemberAlreadyInClubError())
-      )
 
       const inviteLink = yield* _(
         linksDb.findInvitationLinkByCode({
@@ -62,31 +57,47 @@ export const joinClub = Handler.make(JoinClubEndpoint, (req) =>
         )
       )
 
-      const member = yield* _(
-        membersDb.insertClubMember({
-          clubId: club.id,
-          publicKey: req.body.publicKey,
-          isModerator: inviteLink.forAdmin,
-          lastRefreshedAt: new Date(),
-          notificationToken: Option.getOrNull(req.body.notificationToken),
-        })
+      return yield* _(
+        Effect.gen(function* (_) {
+          yield* _(clubHasCapacityForAnotherUser(club))
+          yield* _(
+            membersDb.findClubMemberByPublicKey({
+              publicKey: req.body.publicKey,
+            }),
+            Effect.filterOrFail(
+              Option.isNone,
+              () => new MemberAlreadyInClubError()
+            )
+          )
+
+          const member = yield* _(
+            membersDb.insertClubMember({
+              clubId: club.id,
+              publicKey: req.body.publicKey,
+              isModerator: inviteLink.forAdmin,
+              lastRefreshedAt: new Date(),
+              notificationToken: Option.getOrNull(req.body.notificationToken),
+            })
+          )
+
+          if (inviteLink.forAdmin) {
+            yield* _(Effect.log('Deleting used invitation link'))
+            yield* _(
+              linksDb.deleteInvitationLink({
+                id: inviteLink.id,
+              })
+            )
+          }
+
+          return {
+            clubInfoForUser: {
+              club,
+              isModerator: member.isModerator,
+            },
+          }
+        }),
+        withClubJoiningActionRedisLock(club.uuid)
       )
-
-      if (inviteLink.forAdmin) {
-        yield* _(Effect.log('Deleting used invitation link'))
-        yield* _(
-          linksDb.deleteInvitationLink({
-            id: inviteLink.id,
-          })
-        )
-      }
-
-      return {
-        clubInfoForUser: {
-          club,
-          isModerator: member.isModerator,
-        },
-      }
     }),
     JoinClubErrors
   ).pipe(withDbTransaction)

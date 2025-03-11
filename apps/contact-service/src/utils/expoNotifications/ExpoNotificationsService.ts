@@ -1,6 +1,6 @@
 import {Context, Effect, Layer, Schema} from 'effect'
 import {Expo, type ExpoPushMessage, type ExpoPushTicket} from 'expo-server-sdk'
-import {expoAccessToken} from '../../configs'
+import {expoAccessTokenConfig} from '../../configs'
 
 export class ExpoInitializationError extends Schema.TaggedError<ExpoInitializationError>(
   'ExpoInitializationError'
@@ -80,6 +80,6 @@ export class ExpoNotificationsService extends Context.Tag(
 )<ExpoNotificationsService, ExpoNotificationsOperations>() {
   static readonly Live = Layer.effect(
     ExpoNotificationsService,
-    expoAccessToken.pipe(Effect.flatMap(createExpoMessagaging))
+    expoAccessTokenConfig.pipe(Effect.flatMap(createExpoMessagaging))
   )
 }

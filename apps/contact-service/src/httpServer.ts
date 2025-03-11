@@ -36,6 +36,10 @@ import {getClubContacts} from './routes/clubs/member/getClubContacts'
 import {getClubInfo} from './routes/clubs/member/getClubInfo'
 import {joinClub} from './routes/clubs/member/joinClub'
 import {leaveClub} from './routes/clubs/member/leaveClub'
+import {addUserToTheClub} from './routes/clubs/moderator/addUserToTheClub'
+import {deactivateClubJoinLink} from './routes/clubs/moderator/deactivateClubJoinLink'
+import {generateClubJoinLink} from './routes/clubs/moderator/generateClubJoinLink'
+import {listClubLinks} from './routes/clubs/moderator/listClubLinks'
 import {fetchCommonConnections} from './routes/contacts/fetchCommonConnections'
 import {fetchMyContacts} from './routes/contacts/fetchMyContacts'
 import {importContacts} from './routes/contacts/importContacts'
@@ -73,7 +77,13 @@ export const app = RouterBuilder.make(ContactApiSpecification)
     RouterBuilder.handle(getClubInfo),
     RouterBuilder.handle(joinClub),
     RouterBuilder.handle(leaveClub),
+    RouterBuilder.handle(addUserToTheClub)
+  )
+  .pipe(
     RouterBuilder.handle(getClubContacts),
+    RouterBuilder.handle(deactivateClubJoinLink),
+    RouterBuilder.handle(generateClubJoinLink),
+    RouterBuilder.handle(listClubLinks),
     RouterBuilder.build,
     setupLoggingMiddlewares
   )

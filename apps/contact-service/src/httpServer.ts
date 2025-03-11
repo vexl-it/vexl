@@ -32,6 +32,7 @@ import {createClub} from './routes/clubs/admin/createClub'
 import {generateClubInviteLink} from './routes/clubs/admin/generateClubInviteLink'
 import {listClubs} from './routes/clubs/admin/listClubs'
 import {modifyClub} from './routes/clubs/admin/modifyClub'
+import {getClubContacts} from './routes/clubs/member/getClubContacts'
 import {getClubInfo} from './routes/clubs/member/getClubInfo'
 import {joinClub} from './routes/clubs/member/joinClub'
 import {leaveClub} from './routes/clubs/member/leaveClub'
@@ -61,7 +62,9 @@ export const app = RouterBuilder.make(ContactApiSpecification)
     RouterBuilder.handle(importContacts),
     RouterBuilder.handle(fetchMyContacts),
     RouterBuilder.handle(fetchCommonConnections),
-    RouterBuilder.handle(updateBadOwnerHash),
+    RouterBuilder.handle(updateBadOwnerHash)
+  )
+  .pipe(
     RouterBuilder.handle(createClub),
     RouterBuilder.handle(generateClubInviteLink),
     RouterBuilder.handle(listClubs),
@@ -70,9 +73,10 @@ export const app = RouterBuilder.make(ContactApiSpecification)
     RouterBuilder.handle(getClubInfo),
     RouterBuilder.handle(joinClub),
     RouterBuilder.handle(leaveClub),
-    RouterBuilder.build
+    RouterBuilder.handle(getClubContacts),
+    RouterBuilder.build,
+    setupLoggingMiddlewares
   )
-  .pipe(setupLoggingMiddlewares)
 
 const MainLive = Layer.mergeAll(
   reportGaguesLayer,

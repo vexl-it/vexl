@@ -1,12 +1,16 @@
 import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
-import {GenerateInviteLinkForAdminErrors} from '@vexl-next/rest-api/src/services/contact/contracts'
+import {
+  GenerateInviteLinkForAdminErrors,
+  type GenerateInviteLinkForAdminResponse,
+} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {GenerateClubInviteLinkForAdminEndpoint} from '@vexl-next/rest-api/src/services/contact/specification'
 import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {Effect} from 'effect'
 import {Handler} from 'effect-http'
 import {ClubInvitationLinkDbService} from '../../../db/ClubInvitationLinkDbService'
 import {ClubsDbService} from '../../../db/ClubsDbService'
-import {generateRandomInviteCode} from '../generateRandomInviteCode'
+import {createFullLink} from '../utils/createFullLink'
+import {generateRandomInviteCode} from '../utils/generateRandomInviteCode'
 import {validateAdminToken} from './utils/validateAdminToken'
 
 export const generateClubInviteLink = Handler.make(
@@ -46,8 +50,11 @@ export const generateClubInviteLink = Handler.make(
 
         return {
           clubUuid: club.uuid,
-          code: generatedLink.code,
-        }
+          link: {
+            code: generatedLink.code,
+            fullLink: yield* _(createFullLink(generatedLink.code)),
+          },
+        } satisfies GenerateInviteLinkForAdminResponse
       }),
       GenerateInviteLinkForAdminErrors
     )

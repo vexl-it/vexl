@@ -30,10 +30,7 @@ export interface ClubInvitationLinkDbOperations {
   >
   findInvitationLinkByClubIdAndMemberId: (
     params: FindInvitationLinkByClubIdAndMemberIdParams
-  ) => Effect.Effect<
-    Option.Option<ClubInvitationLinkRecord>,
-    UnexpectedServerError
-  >
+  ) => Effect.Effect<readonly ClubInvitationLinkRecord[], UnexpectedServerError>
   insertInvitationLink: (
     params: InsertClubInvitationLinkParams
   ) => Effect.Effect<ClubInvitationLinkRecord, UnexpectedServerError>

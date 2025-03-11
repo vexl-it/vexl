@@ -2,7 +2,13 @@ import {
   PublicKeyPemBase64,
   PublicKeyPemBase64E,
 } from '@vexl-next/cryptography/src/KeyHolder/brands'
-import {ClubInfoForUser, ClubUuid} from '@vexl-next/domain/src/general/clubs'
+import {
+  ClubAdmitionRequest,
+  ClubCode,
+  ClubInfoForUser,
+  ClubLinkInfo,
+  ClubUuid,
+} from '@vexl-next/domain/src/general/clubs'
 import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
 import {CountryPrefixE} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {
@@ -265,6 +271,12 @@ export class InvalidAdminTokenError extends Schema.TaggedError<InvalidAdminToken
   status: Schema.optionalWith(Schema.Literal(403), {default: () => 403}),
 }) {}
 
+export class ClubUserLimitExceededError extends Schema.TaggedError<ClubUserLimitExceededError>(
+  'ClubUserLimitExceededError'
+)('ClubUserLimitExceededError', {
+  status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
+}) {}
+
 export const AdminTokenParams = Schema.Struct({
   adminToken: Schema.String,
 })
@@ -309,7 +321,7 @@ export type GenerateInviteLinkForAdminRequest =
 
 export const GenerateInviteLinkForAdminResponse = Schema.Struct({
   clubUuid: ClubUuid,
-  code: Schema.String,
+  link: ClubLinkInfo,
 })
 export type GenerateInviteLinkForAdminResponse =
   typeof GenerateInviteLinkForAdminResponse.Type
@@ -364,7 +376,7 @@ export const GetClubInfoErrors = Schema.Union(
 
 export const JoinClubRequest = Schema.Struct({
   ...RequestBaseWithChallenge.fields,
-  code: Schema.String,
+  code: ClubCode,
   notificationToken: Schema.optionalWith(ExpoNotificationTokenE, {
     as: 'Option',
   }),
@@ -380,7 +392,8 @@ export type JoinClubResponse = typeof JoinClubResponse.Type
 export const JoinClubErrors = Schema.Union(
   MemberAlreadyInClubError,
   NotFoundError,
-  InvalidChallengeError
+  InvalidChallengeError,
+  ClubUserLimitExceededError
 )
 
 export const LeaveClubRequest = Schema.Struct({
@@ -393,6 +406,101 @@ export const LeaveClubErrors = Schema.Union(
   NotFoundError,
   InvalidChallengeError
 )
+
+export class UserIsNotModeratorError extends Schema.TaggedError<UserIsNotModeratorError>(
+  'UserIsNotModeratorError'
+)('UserIsNotModeratorError', {
+  status: Schema.optionalWith(Schema.Literal(403), {default: () => 403}),
+}) {}
+
+export const GenerateClubJoinLinkErrors = Schema.Union(
+  NotFoundError,
+  InvalidChallengeError,
+  UserIsNotModeratorError
+)
+
+export const GenerateClubJoinLinkRequest = Schema.Struct({
+  ...RequestBaseWithChallenge.fields,
+  clubUuid: ClubUuid,
+})
+export type GenerateClubJoinLinkRequest =
+  typeof GenerateClubJoinLinkRequest.Type
+
+export const GenerateClubJoinLinkResponse = Schema.Struct({
+  clubUuid: ClubUuid,
+  codeInfo: ClubLinkInfo,
+})
+
+export type GenerateClubJoinLinkResponse =
+  typeof GenerateClubJoinLinkResponse.Type
+
+export class InviteCodeNotFoundError extends Schema.TaggedError<InviteCodeNotFoundError>(
+  'InviteCodeNotFoundError'
+)('InviteCodeNotFoundError', {
+  status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
+}) {}
+
+export const DeactivateClubJoinLinkErrors = Schema.Union(
+  NotFoundError,
+  InvalidChallengeError,
+  UserIsNotModeratorError,
+  InviteCodeNotFoundError
+)
+
+export const DeactivateClubJoinLinkRequest = Schema.Struct({
+  ...RequestBaseWithChallenge.fields,
+  clubUuid: ClubUuid,
+  code: ClubCode,
+})
+
+export const DeactivateClubJoinLinkResponse = Schema.Struct({
+  clubUuid: ClubUuid,
+  deactivatedCode: ClubCode,
+})
+export type DeactivateClubJoinLinkResponse =
+  typeof DeactivateClubJoinLinkResponse.Type
+
+export type DeactivateClubJoinLinkRequest =
+  typeof DeactivateClubJoinLinkRequest.Type
+
+export const AddUserToTheClubErrors = Schema.Union(
+  NotFoundError,
+  InvalidChallengeError,
+  UserIsNotModeratorError,
+  ClubUserLimitExceededError,
+  MemberAlreadyInClubError
+)
+
+export const AddUserToTheClubRequest = Schema.Struct({
+  ...RequestBaseWithChallenge.fields,
+  clubUuid: ClubUuid,
+  adminitionRequest: ClubAdmitionRequest,
+})
+export type AddUserToTheClubRequest = typeof AddUserToTheClubRequest.Type
+
+export const AddUserToTheClubResponse = Schema.Struct({
+  newCount: Schema.Number,
+})
+export type AddUserToTheClubResponse = typeof AddUserToTheClubResponse.Type
+
+export const ListClubLinksErrors = Schema.Union(
+  NotFoundError,
+  InvalidChallengeError,
+  UserIsNotModeratorError
+)
+export type ListClubLinksErrors = typeof ListClubLinksErrors.Type
+
+export const ListClubLinksRequest = Schema.Struct({
+  ...RequestBaseWithChallenge.fields,
+  clubUuid: ClubUuid,
+})
+export type ListClubLinksRequest = typeof ListClubLinksRequest.Type
+
+export const ListClubLinksResponse = Schema.Struct({
+  clubUuid: ClubUuid,
+  links: Schema.Array(ClubLinkInfo),
+})
+export type ListClubLinksResponse = typeof ListClubLinksResponse.Type
 export const GetClubContactsRequest = Schema.Struct({
   ...RequestBaseWithChallenge.fields,
   clubUuid: ClubUuid,

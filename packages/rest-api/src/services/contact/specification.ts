@@ -4,16 +4,25 @@ import {ServerSecurity} from '../../apiSecurity'
 import {CommonHeaders} from '../../commonHeaders'
 import {NoContentResponse} from '../../NoContentResponse.brand'
 import {
+  AddUserToTheClubErrors,
+  AddUserToTheClubRequest,
+  AddUserToTheClubResponse,
   AdminTokenParams,
   CheckUserExistsRequest,
   CreateClubErrors,
   CreateClubRequest,
   CreateClubResponse,
   CreateUserRequest,
+  DeactivateClubJoinLinkErrors,
+  DeactivateClubJoinLinkRequest,
+  DeactivateClubJoinLinkResponse,
   FetchCommonConnectionsRequest,
   FetchCommonConnectionsResponseE,
   FetchMyContactsRequest,
   FetchMyContactsResponseE,
+  GenerateClubJoinLinkErrors,
+  GenerateClubJoinLinkRequest,
+  GenerateClubJoinLinkResponse,
   GenerateInviteLinkForAdminErrors,
   GenerateInviteLinkForAdminRequest,
   GenerateInviteLinkForAdminResponse,
@@ -31,6 +40,9 @@ import {
   JoinClubResponse,
   LeaveClubErrors,
   LeaveClubRequest,
+  ListClubLinksErrors,
+  ListClubLinksRequest,
+  ListClubLinksResponse,
   ListClubsErrors,
   ListClubsResponse,
   ModifyClubErrors,
@@ -249,6 +261,54 @@ export const LeaveClubEndpoint = Api.post(
   })
 )
 
+export const GenerateClubJoinLinkEndpoint = Api.post(
+  'generateClubJoinLink',
+  '/api/v1/clubs/moderator/generate-join-link'
+).pipe(
+  Api.setRequestBody(GenerateClubJoinLinkRequest),
+  Api.setResponseBody(GenerateClubJoinLinkResponse),
+  Api.addResponse({
+    status: 400,
+    body: GenerateClubJoinLinkErrors,
+  })
+)
+
+export const DeactivateClubJoinLinkEndpoint = Api.delete(
+  'deactivateClubJoinLink',
+  '/api/v1/clubs/moderator/deactivate-join-link'
+).pipe(
+  Api.setRequestBody(DeactivateClubJoinLinkRequest),
+  Api.setResponseBody(DeactivateClubJoinLinkResponse),
+  Api.addResponse({
+    status: 400,
+    body: DeactivateClubJoinLinkErrors,
+  })
+)
+
+export const AddUserToTheClubEndpint = Api.post(
+  'addUserToTheClub',
+  '/api/v1/clubs/moderator/add-user-to-club'
+).pipe(
+  Api.setRequestBody(AddUserToTheClubRequest),
+  Api.setResponseBody(AddUserToTheClubResponse),
+  Api.addResponse({
+    status: 400,
+    body: AddUserToTheClubErrors,
+  })
+)
+
+export const ListClubLinksEndpoint = Api.post(
+  'listClubLinks',
+  '/api/v1/clubs/moderator/list-links'
+).pipe(
+  Api.setRequestBody(ListClubLinksRequest),
+  Api.setResponseBody(ListClubLinksResponse),
+  Api.addResponse({
+    status: 400,
+    body: ListClubLinksErrors,
+  })
+)
+
 export const GetClubContactsEndpoint = Api.post(
   'getClubContacts',
   '/api/v1/contacts/club'
@@ -295,6 +355,15 @@ const ClubsMemberApiGroup = ApiGroup.make('ClubsMember', {
   ApiGroup.addEndpoint(GetClubContactsEndpoint)
 )
 
+const ClubsModeratorApiGroup = ApiGroup.make('ClubsModerator', {
+  description: 'Clubs managment for moderators',
+}).pipe(
+  ApiGroup.addEndpoint(GenerateClubJoinLinkEndpoint),
+  ApiGroup.addEndpoint(DeactivateClubJoinLinkEndpoint),
+  ApiGroup.addEndpoint(AddUserToTheClubEndpint),
+  ApiGroup.addEndpoint(ListClubLinksEndpoint)
+)
+
 export const ContactApiSpecification = Api.make({
   title: 'Contact service',
   version: '1.0.0',
@@ -303,5 +372,6 @@ export const ContactApiSpecification = Api.make({
   Api.addGroup(ContactApiGroup),
   Api.addGroup(ClubsAdminApiGroup),
   Api.addGroup(ClubsMemberApiGroup),
-  Api.addGroup(ChallengeApiGroup)
+  Api.addGroup(ChallengeApiGroup),
+  Api.addGroup(ClubsModeratorApiGroup)
 )

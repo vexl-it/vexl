@@ -118,7 +118,7 @@ describe('Generate club invite link', () => {
           })
         )
         expect(inviteLink.clubUuid).toEqual(forClub)
-        expect(inviteLink.code).toHaveLength(6)
+        expect(inviteLink.link.code).toHaveLength(6)
       })
     )
   })
@@ -140,10 +140,7 @@ describe('Generate club invite link', () => {
           Effect.either
         )
 
-        if (errorResponse._tag !== 'Left') {
-          throw new Error('Expected error response')
-        }
-        expect((errorResponse.left as any).status).toEqual(404)
+        expectErrorResponse(404)(errorResponse)
       })
     )
   })

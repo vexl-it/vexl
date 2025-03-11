@@ -4,6 +4,7 @@ import {Schema} from 'effect'
 
 // Club table schema
 export const ClubRecordId = Schema.BigInt.pipe(Schema.brand('ClubRecordId'))
+export type ClubRecordId = typeof ClubRecordId.Type
 
 export class ClubDbRecord extends Schema.Class<ClubDbRecord>('ClubDbRecord')({
   id: ClubRecordId,

@@ -1,9 +1,15 @@
 import {SqlClient} from '@effect/sql'
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
-import {generateClubUuid} from '@vexl-next/domain/src/general/clubs'
+import {
+  type ClubCode,
+  generateClubUuid,
+} from '@vexl-next/domain/src/general/clubs'
 import {type ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {UriStringE} from '@vexl-next/domain/src/utility/UriString.brand'
-import {MemberAlreadyInClubError} from '@vexl-next/rest-api/src/services/contact/contracts'
+import {
+  ClubUserLimitExceededError,
+  MemberAlreadyInClubError,
+} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {
   InvalidChallengeError,
   type SignedChallenge,
@@ -20,16 +26,20 @@ const ADMIN_TOKEN = 'dev'
 const SOME_URL = Schema.decodeSync(UriStringE)('https://some.url')
 
 const userKey = generatePrivateKey()
-const INVITATION_CODE = '111111'
+const INVITATION_CODE = '111111' as ClubCode
 
 const club = {
   clubImageUrl: SOME_URL,
   name: 'someName',
   description: Option.some('someDescription'),
-  membersCountLimit: 100,
+  membersCountLimit: 2,
   uuid: generateClubUuid(),
   validUntil: new Date(),
 }
+
+const user1 = generatePrivateKey()
+const user2 = generatePrivateKey()
+const user3 = generatePrivateKey()
 
 beforeEach(async () => {
   await runPromiseInMockedEnvironment(
@@ -127,7 +137,7 @@ describe('Join club', () => {
           app.joinClub({
             body: {
               ...(yield* _(generateAndSignChallenge(userKey))),
-              code: inviteLink.code,
+              code: inviteLink.link.code,
               notificationToken: Option.some(
                 'someToken' as ExpoNotificationToken
               ),
@@ -155,6 +165,107 @@ describe('Join club', () => {
       })
     )
   })
+
+  it('Moderator invitation link should only be valid once', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const app = yield* _(NodeTestingApp)
+
+        const inviteLink = yield* _(
+          app.generateClubInviteLinkForAdmin({
+            query: {
+              adminToken: ADMIN_TOKEN,
+            },
+            body: {
+              clubUuid: club.uuid,
+            },
+          })
+        )
+
+        yield* _(
+          app.joinClub({
+            body: {
+              ...(yield* _(generateAndSignChallenge(userKey))),
+              code: inviteLink.link.code,
+              notificationToken: Option.some(
+                'someToken' as ExpoNotificationToken
+              ),
+              contactsImported: false,
+            },
+          })
+        )
+
+        const errorResponse = yield* _(
+          app.joinClub({
+            body: {
+              ...(yield* _(generateAndSignChallenge(generatePrivateKey()))),
+              code: inviteLink.link.code,
+              notificationToken: Option.some(
+                'someToken' as ExpoNotificationToken
+              ),
+              contactsImported: false,
+            },
+          }),
+          Effect.either
+        )
+
+        if (errorResponse._tag !== 'Left') {
+          throw new Error('Expected error response')
+        }
+        expect((errorResponse.left as any).status).toEqual(404)
+      })
+    )
+  })
+
+  it('Fail when club limit is exceeded', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const app = yield* _(NodeTestingApp)
+        yield* _(
+          app.joinClub({
+            body: {
+              ...(yield* _(generateAndSignChallenge(user1))),
+              code: INVITATION_CODE,
+              notificationToken: Option.some(
+                'someToken' as ExpoNotificationToken
+              ),
+              contactsImported: false,
+            },
+          })
+        )
+
+        yield* _(
+          app.joinClub({
+            body: {
+              ...(yield* _(generateAndSignChallenge(user2))),
+              code: INVITATION_CODE,
+              notificationToken: Option.some(
+                'someToken' as ExpoNotificationToken
+              ),
+              contactsImported: false,
+            },
+          })
+        )
+
+        const failedResponse = yield* _(
+          app.joinClub({
+            body: {
+              ...(yield* _(generateAndSignChallenge(user3))),
+              code: INVITATION_CODE,
+              notificationToken: Option.some(
+                'someToken' as ExpoNotificationToken
+              ),
+              contactsImported: false,
+            },
+          }),
+          Effect.either
+        )
+
+        expectErrorResponse(ClubUserLimitExceededError)(failedResponse)
+      })
+    )
+  })
+
   it('Returns error when invalid challenge', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
@@ -224,7 +335,7 @@ describe('Join club', () => {
           app.joinClub({
             body: {
               ...(yield* _(generateAndSignChallenge(userKey))),
-              code: '123445',
+              code: '123445' as ClubCode,
               notificationToken: Option.some(
                 'someToken' as ExpoNotificationToken
               ),

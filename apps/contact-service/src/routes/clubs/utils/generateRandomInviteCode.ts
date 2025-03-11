@@ -1,4 +1,5 @@
-import {Effect} from 'effect'
+import {ClubCode} from '@vexl-next/domain/src/general/clubs'
+import {Effect, Schema} from 'effect'
 
 const INVITE_CODE_LENGTH = 6
 
@@ -11,4 +12,4 @@ export const generateRandomInviteCode = Effect.sync(() => {
     result += CHARACTERS.charAt(Math.floor(Math.random() * CHARACTERS_LENGTH))
   }
   return result
-})
+}).pipe(Effect.map(Schema.decodeSync(ClubCode)))

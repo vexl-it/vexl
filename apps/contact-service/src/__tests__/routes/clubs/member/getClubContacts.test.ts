@@ -86,7 +86,7 @@ describe('Get club contacts', () => {
         yield* _(
           app.joinClub({
             body: {
-              code: inviteLink1.code,
+              code: inviteLink1.link.code,
               contactsImported: false,
               signedChallenge: challengeForUser1.signedChallenge,
               publicKey: challengeForUser1.publicKey,
@@ -112,7 +112,7 @@ describe('Get club contacts', () => {
         yield* _(
           app.joinClub({
             body: {
-              code: inviteLink2.code,
+              code: inviteLink2.link.code,
               contactsImported: false,
               signedChallenge: challengeForUser2.signedChallenge,
               publicKey: challengeForUser2.publicKey,
@@ -191,7 +191,7 @@ describe('Get club contacts', () => {
         yield* _(
           app.joinClub({
             body: {
-              code: inviteLink.code,
+              code: inviteLink.link.code,
               contactsImported: false,
               signedChallenge: challengeForUser.signedChallenge,
               publicKey: challengeForUser.publicKey,
@@ -269,7 +269,7 @@ describe('Get club contacts', () => {
         yield* _(
           app.joinClub({
             body: {
-              code: inviteLink1.code,
+              code: inviteLink1.link.code,
               contactsImported: false,
               signedChallenge: challengeForUser1.signedChallenge,
               publicKey: challengeForUser1.publicKey,
@@ -317,7 +317,7 @@ describe('Get club contacts', () => {
         yield* _(
           app.joinClub({
             body: {
-              code: inviteLink2.code,
+              code: inviteLink2.link.code,
               contactsImported: false,
               signedChallenge: challengeForUser2.signedChallenge,
               publicKey: challengeForUser2.publicKey,
@@ -396,7 +396,7 @@ describe('Get club contacts', () => {
         yield* _(
           app.joinClub({
             body: {
-              code: inviteLink.code,
+              code: inviteLink.link.code,
               contactsImported: false,
               signedChallenge: challengeForUser1.signedChallenge,
               publicKey: challengeForUser1.publicKey,
@@ -473,7 +473,7 @@ describe('Get club contacts', () => {
         yield* _(
           app.joinClub({
             body: {
-              code: inviteLink.code,
+              code: inviteLink.link.code,
               contactsImported: false,
               signedChallenge: challengeForUser1.signedChallenge,
               publicKey: challengeForUser1.publicKey,

@@ -12,6 +12,7 @@ import {
   type LoggingFunction,
 } from '../../utils'
 import {
+  GetClubContactsErrors,
   ImportContactsErrors,
   UpdateBadOwnerHashErrors,
   UserNotFoundError,
@@ -19,6 +20,7 @@ import {
   type CreateUserInput,
   type FetchCommonConnectionsInput,
   type FetchMyContactsInput,
+  type GetClubContactsRequest,
   type ImportContactsInput,
   type RefreshUserInput,
   type UpdateBadOwnerHashRequest,
@@ -101,6 +103,11 @@ export function api({
       handleCommonAndExpectedErrorsEffect(
         client.updateBadOwnerHash({body: args}),
         UpdateBadOwnerHashErrors
+      ),
+    getClubContacts: (args: GetClubContactsRequest) =>
+      handleCommonAndExpectedErrorsEffect(
+        client.getClubContacts({body: args}),
+        GetClubContactsErrors
       ),
   }
 }

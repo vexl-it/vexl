@@ -1,4 +1,5 @@
 import {type AmountData} from '@vexl-next/domain/src/general/tradeChecklist'
+import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
@@ -171,7 +172,7 @@ export const saveLocalCalculatedAmountDataStateToMainStateActionAtom = atom(
               },
             ],
             variant: 'info',
-          })
+          }).pipe(effectToTaskEither)
         ),
         TE.match(
           () => {

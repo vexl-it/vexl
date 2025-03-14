@@ -1,4 +1,5 @@
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
+import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import * as Contacts from 'expo-contacts'
 import {type Contact} from 'expo-contacts'
 import * as E from 'fp-ts/Either'
@@ -91,7 +92,7 @@ export const addContactToPhoneWithUIFeedbackAtom = atom(
             },
           ],
           variant: 'info',
-        })
+        }).pipe(effectToTaskEither)
       ),
       TE.map((dialogActionResult) => {
         return dialogActionResult[1]?.type === 'inputResult'

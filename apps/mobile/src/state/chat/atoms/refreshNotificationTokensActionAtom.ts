@@ -70,18 +70,18 @@ export const sendFcmCypherUpdateMessageActionAtom = atom(
           )
           return o
         }),
-        T.bind('fcmTokenInfo', () =>
+        T.bind('notificationTokenInfo', () =>
           set(
             generateMyNotificationTokenInfoActionAtom,
             notificationToken,
             chatWithMessages.chat.inbox.privateKey
           )
         ),
-        T.bind('messageToSend', ({fcmTokenInfo}) =>
+        T.bind('messageToSend', ({notificationTokenInfo}) =>
           T.of(
             createFcmCypherUpdateMessage(
               chatWithMessages.chat.inbox.privateKey.publicKeyPemBase64,
-              O.toUndefined(fcmTokenInfo),
+              O.toUndefined(notificationTokenInfo),
               chatWithMessages.chat.otherSideFcmCypher
             )
           )
@@ -100,14 +100,16 @@ export const sendFcmCypherUpdateMessageActionAtom = atom(
             })
           )
         ),
-        TE.map(({fcmTokenInfo}) => {
+        TE.map(({notificationTokenInfo}) => {
           const chatAtom = focusChatByInboxKeyAndSenderKey({
             inboxKey: chatWithMessages.chat.inbox.privateKey.publicKeyPemBase64,
             senderKey: chatWithMessages.chat.otherSide.publicKey,
           })
           set(
             chatAtom,
-            updateMyNotificationTokenInfoInChat(O.toUndefined(fcmTokenInfo))
+            updateMyNotificationTokenInfoInChat(
+              O.toUndefined(notificationTokenInfo)
+            )
           )
         }),
         TE.matchW(

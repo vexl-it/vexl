@@ -1,4 +1,5 @@
 import {useNavigation} from '@react-navigation/native'
+import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/lib/function'
 import {useSetAtom} from 'jotai'
@@ -44,6 +45,7 @@ function VersionTextWithSecretDoor({
                 },
               ],
             }),
+            effectToTaskEither,
             TE.match(
               () => {},
               () => {

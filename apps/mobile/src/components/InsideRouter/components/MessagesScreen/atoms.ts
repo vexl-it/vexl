@@ -1,4 +1,5 @@
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
+import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
@@ -63,7 +64,7 @@ export const deleteChatFromListActionAtom = atom(
                 negativeButtonText: t('common.cancel'),
               },
             ],
-          }),
+          }).pipe(effectToTaskEither),
       TE.map((val) => {
         set(loadingOverlayDisplayedAtom, true)
         return val

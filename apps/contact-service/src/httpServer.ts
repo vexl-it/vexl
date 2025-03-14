@@ -34,6 +34,7 @@ import {listClubs} from './routes/clubs/admin/listClubs'
 import {modifyClub} from './routes/clubs/admin/modifyClub'
 import {getClubContacts} from './routes/clubs/member/getClubContacts'
 import {getClubInfo} from './routes/clubs/member/getClubInfo'
+import {getClubInfoByAccessCode} from './routes/clubs/member/getClubInfoByAccessCode'
 import {joinClub} from './routes/clubs/member/joinClub'
 import {leaveClub} from './routes/clubs/member/leaveClub'
 import {addUserToTheClub} from './routes/clubs/moderator/addUserToTheClub'
@@ -84,6 +85,7 @@ export const app = RouterBuilder.make(ContactApiSpecification)
     RouterBuilder.handle(deactivateClubJoinLink),
     RouterBuilder.handle(generateClubJoinLink),
     RouterBuilder.handle(listClubLinks),
+    RouterBuilder.handle(getClubInfoByAccessCode),
     RouterBuilder.build,
     setupLoggingMiddlewares
   )

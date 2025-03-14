@@ -694,6 +694,7 @@ export const offerFormMolecule = molecule(() => {
           },
         ],
       }),
+      effectToTaskEither,
       TE.map(() => {
         set(loadingOverlayDisplayedAtom, true)
       }),

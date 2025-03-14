@@ -26,7 +26,9 @@ export function toCommonErrorMessage(
     error._tag === 'UnauthorizedError' ||
     error._tag === 'UnexpectedApiResponseError' ||
     error._tag === 'UnknownClientError' ||
-    error._tag === 'UnknownServerError'
+    error._tag === 'UnknownServerError' ||
+    error._tag === 'DataAndTypeElementsDeepLinkError' ||
+    error._tag === 'ImagePickerError'
   ) {
     return t(`common.${error._tag}`)
   }

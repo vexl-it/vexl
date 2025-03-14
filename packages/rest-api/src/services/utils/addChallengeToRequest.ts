@@ -1,4 +1,5 @@
 import {
+  type PrivateKeyHolder,
   type PrivateKeyHolderE,
   type PublicKeyPemBase64,
 } from '@vexl-next/cryptography/src/KeyHolder'
@@ -10,10 +11,17 @@ import {
   type ErrorSigningChallenge,
   type SignedChallenge,
 } from '@vexl-next/server-utils/src/services/challenge/contracts'
+import {type ChallengeApiSpecification} from '@vexl-next/server-utils/src/services/challenge/specification'
 import {Effect} from 'effect'
 import {type Client} from 'effect-http'
 import {handleCommonErrorsEffect} from '../../utils'
-import {type ChatApiSpecification} from './specification'
+
+export type RequestWithGeneratableChallenge<T> = Omit<
+  T,
+  'publicKey' | 'signedChallenge'
+> & {
+  keyPair: PrivateKeyHolder
+}
 
 export type ErrorGeneratingChallenge = Effect.Effect.Error<
   ReturnType<ReturnType<typeof generateChallenge>>
@@ -22,7 +30,7 @@ export type ErrorGeneratingChallenge = Effect.Effect.Error<
 function generateChallenge({
   client,
 }: {
-  client: Client.Client<typeof ChatApiSpecification>
+  client: Client.Client<typeof ChallengeApiSpecification>
 }) {
   return (publicKey: PublicKeyPemBase64) =>
     handleCommonErrorsEffect(
@@ -33,7 +41,7 @@ function generateChallenge({
 }
 
 export function addChallengeToRequest(
-  client: Client.Client<typeof ChatApiSpecification>
+  client: Client.Client<typeof ChallengeApiSpecification>
 ): <T extends {keyPair: PrivateKeyHolderE}>(
   data: T
 ) => Effect.Effect<

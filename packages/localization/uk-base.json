@@ -412,7 +412,7 @@
   "offer.youSeeThisOfferBecause": "You see this offer because the counterparty has your phone number saved in their contact list.",
   "offer.beCautiousWeCannotVerify": "Будьте обережними, ми не можемо перевірити, чи ви справді знаєте один одного в реальному житті.",
   "offer.dontForgetToVerifyTheIdentity": "Don't forget to verify their identity with a common contact.",
-  "offer.noDirectConnection": "This is a contact with whom you have no direct connection.",
+  "offer.noDirectConnection": "Це контакт, з яким у вас немає прямого зв'язку.",
   "offer.rerequestTomorrow": "Ви можете надіслати завтра інший запит.",
   "offer.rerequestDays": "You can send another request in {{days}} days.",
   "offer.rerequest": "Надіслати запит ще раз",

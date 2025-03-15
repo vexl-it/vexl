@@ -605,7 +605,7 @@
   "notifications.BLOCK_CHAT.body": "Ktoś właśnie Cię zablokował.",
   "notifications.INACTIVITY_REMINDER.title": "Dawno się nie widzieliśmy!",
   "notifications.preferences.marketing.title": "Powiadomienia marketingowe",
-  "notifications.INACTIVITY_REMINDER.body": "Minęło trochę czasu, odkąd otworzyłeś aplikację. Otwórz aplikację teraz, aby oferty były aktywne.",
+  "notifications.INACTIVITY_REMINDER.body": "Minęło trochę czasu, odkąd ostatnio otworzyłeś aplikację. Otwórz ją teraz, aby oferty były aktywne.",
   "notifications.CANCEL_REQUEST_MESSAGING.title": "{{them}} cancelled chat request",
   "notifications.CANCEL_REQUEST_MESSAGING.body": "{{them}} cancelled chat request",
   "notifications.preferences.marketing.body": "Otrzymuj powiadomienia o nowych funkcjach!",

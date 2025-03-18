@@ -10,6 +10,7 @@ import {
   ClubUserLimitExceededError,
   MemberAlreadyInClubError,
 } from '@vexl-next/rest-api/src/services/contact/contracts'
+import {RedisService} from '@vexl-next/server-utils/src/RedisService'
 import {
   InvalidChallengeError,
   type SignedChallenge,
@@ -17,7 +18,13 @@ import {
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {Effect, Option, Schema} from 'effect'
 import {ClubInvitationLinkDbService} from '../../../../db/ClubInvitationLinkDbService'
+import {ClubMembersDbService} from '../../../../db/ClubMemberDbService'
 import {ClubsDbService} from '../../../../db/ClubsDbService'
+import {type ClubRecordId} from '../../../../db/ClubsDbService/domain'
+import {
+  ClubNotificationRecord,
+  NEW_CLUB_USER_NOTIFICATIONS_KEY,
+} from '../../../../utils/NewClubUserNotificationService'
 import {generateAndSignChallenge} from '../../../utils/generateAndSignChallenge'
 import {NodeTestingApp} from '../../../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../../utils/runPromiseInMockedEnvironment'
@@ -27,6 +34,7 @@ const SOME_URL = Schema.decodeSync(UriStringE)('https://some.url')
 
 const userKey = generatePrivateKey()
 const INVITATION_CODE = '111111' as ClubCode
+let clubId: ClubRecordId
 
 const club = {
   clubImageUrl: SOME_URL,
@@ -62,10 +70,12 @@ beforeEach(async () => {
       )
 
       const clubsDb = yield* _(ClubsDbService)
-      const {id: clubId} = yield* _(
+      const clubInDb = yield* _(
         clubsDb.findClubByUuid({uuid: club.uuid}),
         Effect.flatten
       )
+
+      clubId = clubInDb.id
 
       const invitationService = yield* _(ClubInvitationLinkDbService)
       yield* _(
@@ -348,6 +358,88 @@ describe('Join club', () => {
           throw new Error('Expected error response')
         }
         expect((errorResponse.left as any).status).toEqual(404)
+      })
+    )
+  })
+
+  it('Schedules notification for club members', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const redisService = yield* _(RedisService)
+
+        yield* _(
+          redisService.readAndDeleteSet(ClubNotificationRecord)(
+            NEW_CLUB_USER_NOTIFICATIONS_KEY
+          )
+        )
+
+        const app = yield* _(NodeTestingApp)
+
+        const clubDb = yield* _(ClubsDbService)
+        yield* _(
+          clubDb.updateClub({
+            id: clubId,
+            data: {
+              ...club,
+              membersCountLimit: 100,
+            },
+          })
+        )
+
+        const membersDb = yield* _(ClubMembersDbService)
+        yield* _(
+          membersDb.insertClubMember({
+            clubId,
+            publicKey: user1.publicKeyPemBase64,
+            notificationToken: '1someToken1' as ExpoNotificationToken,
+            isModerator: false,
+            lastRefreshedAt: new Date(),
+          })
+        )
+        yield* _(
+          membersDb.insertClubMember({
+            clubId,
+            publicKey: user2.publicKeyPemBase64,
+            notificationToken: '2someToken2' as ExpoNotificationToken,
+            isModerator: false,
+            lastRefreshedAt: new Date(),
+          })
+        )
+
+        yield* _(
+          membersDb.insertClubMember({
+            clubId,
+            publicKey: user3.publicKeyPemBase64,
+            notificationToken: null,
+            isModerator: false,
+            lastRefreshedAt: new Date(),
+          })
+        )
+
+        yield* _(
+          app.joinClub({
+            body: {
+              ...(yield* _(generateAndSignChallenge(userKey))),
+              code: INVITATION_CODE,
+              notificationToken: Option.some(
+                'someToken' as ExpoNotificationToken
+              ),
+              contactsImported: false,
+            },
+          })
+        )
+
+        const savedData = yield* _(
+          redisService.readAndDeleteSet(ClubNotificationRecord)(
+            NEW_CLUB_USER_NOTIFICATIONS_KEY
+          )
+        )
+        expect(savedData).toHaveLength(2)
+        expect(
+          savedData.map((one) => `${one.token}:${one.clubUuid}`).sort()
+        ).toEqual(
+          [`1someToken1:${club.uuid}`, `2someToken2:${club.uuid}`].sort()
+        )
       })
     )
   })

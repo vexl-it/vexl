@@ -1,12 +1,16 @@
 import {useNavigation} from '@react-navigation/native'
-import {NewChatMessageNoticeNotificationData} from '@vexl-next/domain/src/general/notifications'
-import {Option} from 'effect'
+import {
+  AdmitedToClubNetworkNotificationData,
+  NewChatMessageNoticeNotificationData,
+  NewClubConnectionNotificationData,
+  NewSocialNetworkConnectionNotificationData,
+} from '@vexl-next/domain/src/general/notifications'
+import {Option, Schema} from 'effect'
 import * as Notifications from 'expo-notifications'
 import {useSetAtom, useStore} from 'jotai'
 import {useEffect} from 'react'
 import {AppState, Platform} from 'react-native'
 import {extractDataPayloadFromNotification} from '../utils/notifications/extractDataFromNotification'
-import {NEW_CONNECTION} from '../utils/notifications/notificationTypes'
 import {showDebugNotificationIfEnabled} from '../utils/notifications/showDebugNotificationIfEnabled'
 import {showUINotificationFromRemoteMessage} from '../utils/notifications/showUINotificationFromRemoteMessage'
 import reportError from '../utils/reportError'
@@ -86,7 +90,12 @@ export function useHandleReceivedNotifications(): void {
 
       const handled = await showUINotificationFromRemoteMessage(payload)
       if (handled) return
-      if (payload.type === NEW_CONNECTION) {
+      const isNewSocialNetworkConnectionNotification = Option.isSome(
+        Schema.decodeUnknownOption(NewSocialNetworkConnectionNotificationData)(
+          payload
+        )
+      )
+      if (isNewSocialNetworkConnectionNotification) {
         console.info(
           '🔔 Received notification about new user. Checking and updating offers accordingly.'
         )
@@ -94,6 +103,29 @@ export function useHandleReceivedNotifications(): void {
         await updateOffersConnections({isInBackground: false})()
         return
       }
+
+      const newClubConnectionNotificationO = Schema.decodeUnknownOption(
+        NewClubConnectionNotificationData
+      )(payload)
+      if (Option.isSome(newClubConnectionNotificationO)) {
+        console.info(
+          `🔔 Received notification about new user in club ${newClubConnectionNotificationO.value.clubUuids.join(',')}. Checking and updating offers accordingly.`
+        )
+        // TODO
+        return
+      }
+
+      const admitedToClubNetworkNotificationDataO = Schema.decodeUnknownOption(
+        AdmitedToClubNetworkNotificationData
+      )(payload)
+      if (Option.isSome(admitedToClubNetworkNotificationDataO)) {
+        console.info(
+          `🔔 Received notification about new user in club ${admitedToClubNetworkNotificationDataO.value.publicKey}`
+        )
+        // TODO
+        return
+      }
+
       reportError('warn', new Error('Unknown notification type'), {
         type: payload.type,
       })

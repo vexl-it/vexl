@@ -7,6 +7,7 @@ import {
   Duration,
   Effect,
   Layer,
+  Option,
   Schema,
   type ConfigError,
   type ParseResult,
@@ -45,6 +46,23 @@ export interface RedisOperations {
     value: A,
     opts?: {expiresAt?: UnixMilliseconds}
   ) => Effect.Effect<void, ParseResult.ParseError | RedisError, R>
+
+  insertToSet: <A, I, R>(
+    schema: Schema.Schema<A, I, R>
+  ) => (
+    key: string,
+    ...value: A[]
+  ) => Effect.Effect<void, ParseResult.ParseError | RedisError, R>
+
+  readAndDeleteSet: <A, I, R>(
+    schema: Schema.Schema<A, I, R>
+  ) => (
+    key: string
+  ) => Effect.Effect<
+    readonly A[],
+    ParseResult.ParseError | RedisError | RecordDoesNotExistsReddisError,
+    R
+  >
 
   delete: (key: string) => Effect.Effect<void, RedisError, never>
   withLock: <A, E, R>(
@@ -199,6 +217,76 @@ export class RedisService extends Context.Tag('RedisService')<
             })
           }).pipe(Effect.withSpan('Redis delete', {attributes: {key}}))
 
+        const insertToSet = (
+          key: string,
+          ...value: string[]
+        ): Effect.Effect<void, RedisError> =>
+          // eslint-disable-next-line @typescript-eslint/no-invalid-void-type
+          Effect.async<void, RedisError>((cb) => {
+            void redisClient.sadd(key, ...value, (err) => {
+              if (err) {
+                cb(Effect.fail(new RedisError({originalError: err})))
+              } else {
+                cb(Effect.succeed(Effect.void))
+              }
+            })
+          }).pipe(Effect.withSpan('Redis insertToList', {attributes: {key}}))
+
+        const decodeListResult = Schema.decodeUnknownOption(
+          Schema.NullishOr(Schema.Array(Schema.String))
+        )
+
+        const readAndDeleteSet = (
+          key: string
+        ): Effect.Effect<Option.Option<readonly string[]>, RedisError> =>
+          Effect.async<Option.Option<readonly string[]>, RedisError>((cb) => {
+            void redisClient
+              .multi()
+              .smembers(key)
+              .del(key)
+              .exec((err, res) => {
+                const listResult = res?.[0]
+
+                if (!listResult) {
+                  cb(
+                    Effect.fail(
+                      new RedisError({originalError: new Error('No result')})
+                    )
+                  )
+                  return
+                }
+
+                const [listError, listDataUnknown] = listResult
+                const listData = decodeListResult(listDataUnknown)
+
+                if (err ?? listError) {
+                  cb(
+                    Effect.fail(
+                      new RedisError({originalError: err ?? listError})
+                    )
+                  )
+                } else if (Option.isNone(listData)) {
+                  cb(
+                    Effect.fail(
+                      new RedisError({
+                        originalError: new Error('Unable to decode list data'),
+                      })
+                    )
+                  )
+                } else {
+                  cb(
+                    Effect.succeed(
+                      listData.value && listData.value.length > 0
+                        ? Option.some(listData.value)
+                        : Option.none()
+                    )
+                  )
+                }
+              })
+          }).pipe(
+            Effect.withSpan('Redis readAndDeleteList', {attributes: {key}})
+          )
+
         const toReturn: RedisOperations = {
           get: (schema) => {
             const decode = Schema.decode(Schema.parseJson(schema))
@@ -212,6 +300,25 @@ export class RedisService extends Context.Tag('RedisService')<
               encode(value).pipe(
                 Effect.flatMap((encoded) =>
                   setString(key, encoded, opts?.expiresAt)
+                )
+              )
+          },
+          insertToSet: (schema) => {
+            const encode = Schema.encode(Schema.Array(Schema.parseJson(schema)))
+            return (key, ...value) =>
+              encode(value).pipe(
+                Effect.flatMap((encoded) => insertToSet(key, ...encoded))
+              )
+          },
+          readAndDeleteSet: (schema) => {
+            const decode = Schema.decode(Schema.Array(Schema.parseJson(schema)))
+            return (key) =>
+              readAndDeleteSet(key).pipe(
+                Effect.flatten,
+                Effect.flatMap(decode),
+                Effect.catchTag(
+                  'NoSuchElementException',
+                  () => new RecordDoesNotExistsReddisError()
                 )
               )
           },

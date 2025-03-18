@@ -4,7 +4,7 @@ import {Effect} from 'effect'
 import {sendNotificationToGeneralTopic} from '../../utils/notifications'
 
 export const sendCreateOfferPromptToGeneralTopic =
-  sendNotificationToGeneralTopic('CREATE_OFFER_PROMPT').pipe(
+  sendNotificationToGeneralTopic({type: 'CREATE_OFFER_PROMPT'}).pipe(
     withRedisLock('sendCreateOfferPromptToGeneralTopic', 1_000),
     Effect.catchAll((e) =>
       Effect.zipRight(

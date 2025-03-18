@@ -1,5 +1,5 @@
 export const createFirebaseNotificationRequest = (
-  type: string
+  data: Record<string, string>
 ): {
   android: {
     priority: 'high'
@@ -11,9 +11,7 @@ export const createFirebaseNotificationRequest = (
       }
     }
   }
-  data: {
-    type: string
-  }
+  data: Record<string, string>
 } => ({
   android: {
     priority: 'high' as const,
@@ -21,7 +19,5 @@ export const createFirebaseNotificationRequest = (
   apns: {
     payload: {aps: {contentAvailable: true}},
   },
-  data: {
-    type,
-  },
+  data,
 })

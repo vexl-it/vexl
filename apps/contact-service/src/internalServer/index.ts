@@ -2,6 +2,7 @@ import {HttpRouter, HttpServerResponse} from '@effect/platform'
 import {makeInternalServer} from '@vexl-next/server-utils/src/InternalServer'
 import {internalServerPortConfig} from '@vexl-next/server-utils/src/commonConfigs'
 import {Effect} from 'effect'
+import {flushAndSendRegisteredClubNotifications} from './routes/flushAndSendRegisteredClubNotifications'
 import {processNewContentNotifications} from './routes/processNewContentNotifications'
 import {processUserInactivity} from './routes/processUserInactivity'
 import {sendCreateOfferPromptToGeneralTopic} from './routes/sendCreateOfferPromptToGeneralTopic'
@@ -31,6 +32,16 @@ export const internalServerLive = makeInternalServer(
     HttpRouter.post(
       '/send-create-offer-prompt-to-general-topic',
       sendCreateOfferPromptToGeneralTopic.pipe(
+        Effect.mapBoth({
+          onFailure: (error) =>
+            HttpServerResponse.text(error.message, {status: 500}),
+          onSuccess: () => HttpServerResponse.text('ok', {status: 200}),
+        })
+      )
+    ),
+    HttpRouter.post(
+      '/flush-and-send-registered-club-notifications',
+      flushAndSendRegisteredClubNotifications.pipe(
         Effect.mapBoth({
           onFailure: (error) =>
             HttpServerResponse.text(error.message, {status: 500}),

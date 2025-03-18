@@ -14,10 +14,10 @@ import {
 } from './ExpoNotificationsService'
 
 export const sendPushNotificationExpo = ({
-  type,
+  data,
   tokens,
 }: {
-  type: string
+  data: Record<string, unknown>
   tokens: ExpoNotificationToken[]
 }): Effect.Effect<
   ExpoPushTicket[],
@@ -26,7 +26,6 @@ export const sendPushNotificationExpo = ({
 > =>
   Effect.gen(function* (_) {
     const expoNotifications = yield* _(ExpoNotificationsService)
-    const data = {type}
 
     const messages = Array.map(
       tokens,
@@ -47,10 +46,10 @@ export const sendPushNotificationExpo = ({
   })
 
 export const sendExpoNotificationToAllHandleNonExistingTokens = ({
-  type,
+  data,
   tokens,
 }: {
-  type: string
+  data: Record<string, unknown>
   tokens: ExpoNotificationToken[]
 }): Effect.Effect<
   ExpoPushTicket[],
@@ -59,7 +58,7 @@ export const sendExpoNotificationToAllHandleNonExistingTokens = ({
 > =>
   Effect.gen(function* (_) {
     const userDb = yield* _(UserDbService)
-    const results = yield* _(sendPushNotificationExpo({type, tokens}))
+    const results = yield* _(sendPushNotificationExpo({data, tokens}))
 
     const decodeNotificationToken = Schema.decodeSync(ExpoNotificationTokenE)
 
@@ -79,6 +78,7 @@ export const sendExpoNotificationToAllHandleNonExistingTokens = ({
         batching: true,
       })
     )
+    // TODO update invalidate club members tokens
     return results
   }).pipe(
     Effect.catchAll((e) =>

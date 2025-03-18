@@ -15,6 +15,7 @@ import {Handler} from 'effect-http'
 import {ClubInvitationLinkDbService} from '../../../db/ClubInvitationLinkDbService'
 import {ClubMembersDbService} from '../../../db/ClubMemberDbService'
 import {ClubsDbService} from '../../../db/ClubsDbService'
+import {NewClubUserNotificationsService} from '../../../utils/NewClubUserNotificationService'
 import {withClubJoiningActionRedisLock} from '../../../utils/withClubJoiningActionRedisLock'
 import {clubHasCapacityForAnotherUser} from '../utils/clubHasCapacityForAnotherUser'
 
@@ -88,6 +89,16 @@ export const joinClub = Handler.make(JoinClubEndpoint, (req) =>
               })
             )
           }
+
+          yield* _(
+            NewClubUserNotificationsService,
+            Effect.flatMap((s) =>
+              s.registerNewClubNotification({
+                clubUuid: club.uuid,
+                triggeringUser: req.body.publicKey,
+              })
+            )
+          )
 
           return {
             clubInfoForUser: {

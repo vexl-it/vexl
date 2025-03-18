@@ -1,5 +1,10 @@
-import {NewChatMessageNoticeNotificationData} from '@vexl-next/domain/src/general/notifications'
-import {Option} from 'effect'
+import {
+  AdmitedToClubNetworkNotificationData,
+  NewChatMessageNoticeNotificationData,
+  NewClubConnectionNotificationData,
+  NewSocialNetworkConnectionNotificationData,
+} from '@vexl-next/domain/src/general/notifications'
+import {Option, Schema} from 'effect'
 import * as Notifications from 'expo-notifications'
 import * as TaskManager from 'expo-task-manager'
 import {getDefaultStore} from 'jotai'
@@ -9,7 +14,6 @@ import {updateAllOffersConnectionsActionAtom} from '../../state/connections/atom
 import processChatNotificationActionAtom from '../../state/notifications/processChatNotification'
 import reportError from '../reportError'
 import {extractDataPayloadFromNotification} from './extractDataFromNotification'
-import {NEW_CONNECTION} from './notificationTypes'
 import {showDebugNotificationIfEnabled} from './showDebugNotificationIfEnabled'
 import {showUINotificationFromRemoteMessage} from './showUINotificationFromRemoteMessage'
 
@@ -82,11 +86,38 @@ export async function processBackgroundMessage(
       return
     }
 
-    if ((payload as any).type === NEW_CONNECTION) {
+    const isNewSocialNetworkConnectionNotification = Option.isSome(
+      Schema.decodeUnknownOption(NewSocialNetworkConnectionNotificationData)(
+        payload
+      )
+    )
+    if (isNewSocialNetworkConnectionNotification) {
       await getDefaultStore().set(syncConnectionsActionAtom)()
       await getDefaultStore().set(updateAllOffersConnectionsActionAtom, {
         isInBackground: true,
       })()
+      return
+    }
+
+    const newClubConnectionNotificationO = Schema.decodeUnknownOption(
+      NewClubConnectionNotificationData
+    )(payload)
+    if (Option.isSome(newClubConnectionNotificationO)) {
+      console.info(
+        `🔔 Received notification about new user in club ${newClubConnectionNotificationO.value.clubUuids.join(',')}. Checking and updating offers accordingly.`
+      )
+      // TODO
+      return
+    }
+
+    const admitedToClubNetworkNotificationDataO = Schema.decodeUnknownOption(
+      AdmitedToClubNetworkNotificationData
+    )(payload)
+    if (Option.isSome(admitedToClubNetworkNotificationDataO)) {
+      console.info(
+        `🔔 Received notification about new user in club ${admitedToClubNetworkNotificationDataO.value.publicKey}`
+      )
+      // TODO
       return
     }
 

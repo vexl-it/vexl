@@ -10,10 +10,10 @@ import {type FirebaseMessagingService} from './notifications/FirebaseMessagingSe
 import {type IssueNotificationResult} from './notifications/sendNotificationUnsafe'
 
 export const issueNotificationsToTokens = ({
-  type,
+  data,
   tokens,
 }: {
-  type: string
+  data: Record<string, string>
   tokens: readonly NotificationTokens[]
 }): Effect.Effect<
   {
@@ -41,7 +41,7 @@ export const issueNotificationsToTokens = ({
     Array.isNonEmptyArray(fcmTokens)
       ? Effect.either(
           sendFcmNotificationToAllHandleNonExistingTokens({
-            type,
+            data,
             tokens: fcmTokens,
           })
         )
@@ -49,7 +49,7 @@ export const issueNotificationsToTokens = ({
     Array.isNonEmptyArray(expoTokens)
       ? Effect.either(
           sendExpoNotificationToAllHandleNonExistingTokens({
-            type,
+            data,
             tokens: expoTokens,
           })
         )

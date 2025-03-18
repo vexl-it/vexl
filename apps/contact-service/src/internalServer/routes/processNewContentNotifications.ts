@@ -22,7 +22,7 @@ export const processNewContentNotifications = Effect.gen(function* (_) {
 
   const {firebase, expo} = yield* _(
     issueNotificationsToTokens({
-      type: 'NEW_CONTENT',
+      data: {type: 'NEW_CONTENT'},
       tokens: tokensToNofify,
     })
   )

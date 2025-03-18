@@ -14,6 +14,12 @@ export const mockedRedisLayer = Layer.effect(
       )
     )
 
+    const listState = yield* _(
+      Ref.make<HashMap.HashMap<string, {value: readonly string[]}>>(
+        HashMap.empty()
+      )
+    )
+
     const toReturn: RedisOperations = {
       delete: (key: string) => Ref.update(state, HashMap.remove(key)),
       get: (schema) => (key: string) =>
@@ -41,6 +47,34 @@ export const mockedRedisLayer = Layer.effect(
                 value: encoded,
               })
             )
+          )
+        ),
+
+      insertToSet:
+        (schema) =>
+        (key, ...values) =>
+          Schema.encode(Schema.Array(Schema.parseJson(schema)))(values).pipe(
+            Effect.flatMap((encoded) =>
+              Ref.update(listState, (hashMap) =>
+                HashMap.has(hashMap, key)
+                  ? HashMap.modify(hashMap, key, (v) => ({
+                      value: [...v.value, ...encoded],
+                    }))
+                  : HashMap.set(hashMap, key, {value: encoded})
+              )
+            )
+          ),
+
+      readAndDeleteSet: (schema) => (key) =>
+        Ref.get(listState).pipe(
+          Effect.tap((a) => Effect.log('Got values', a)),
+          Effect.flatMap(HashMap.get(key)),
+          Effect.map((one) => one.value),
+          Effect.flatMap(Schema.decode(Schema.Array(Schema.parseJson(schema)))),
+          Effect.zipLeft(Ref.update(listState, HashMap.remove(key))),
+          Effect.catchTag(
+            'NoSuchElementException',
+            () => new RecordDoesNotExistsReddisError()
           )
         ),
 

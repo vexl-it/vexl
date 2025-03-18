@@ -1,6 +1,7 @@
 import {SqlClient} from '@effect/sql'
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {generateClubUuid} from '@vexl-next/domain/src/general/clubs'
+import {AdmitedToClubNetworkNotificationData} from '@vexl-next/domain/src/general/notifications'
 import {type ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {UriStringE} from '@vexl-next/domain/src/utility/UriString.brand'
 import {
@@ -8,6 +9,7 @@ import {
   MemberAlreadyInClubError,
   UserIsNotModeratorError,
 } from '@vexl-next/rest-api/src/services/contact/contracts'
+import {RedisService} from '@vexl-next/server-utils/src/RedisService'
 import {
   InvalidChallengeError,
   type SignedChallenge,
@@ -17,7 +19,12 @@ import {Effect, Option, Schema} from 'effect'
 import {ClubMembersDbService} from '../../../../db/ClubMemberDbService'
 import {ClubsDbService} from '../../../../db/ClubsDbService'
 import {type ClubRecordId} from '../../../../db/ClubsDbService/domain'
+import {
+  ClubNotificationRecord,
+  NEW_CLUB_USER_NOTIFICATIONS_KEY,
+} from '../../../../utils/NewClubUserNotificationService'
 import {generateAndSignChallenge} from '../../../utils/generateAndSignChallenge'
+import {sendNotificationsMock} from '../../../utils/mockedExpoNotificationService'
 import {NodeTestingApp} from '../../../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../../utils/runPromiseInMockedEnvironment'
 
@@ -324,6 +331,117 @@ describe('Add user to the club', () => {
         )
 
         expectErrorResponse(InvalidChallengeError)(errorResponse)
+      })
+    )
+  })
+
+  it('Schedules notification for club members', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const app = yield* _(NodeTestingApp)
+
+        const clubDb = yield* _(ClubsDbService)
+        yield* _(
+          clubDb.updateClub({
+            id: clubId,
+            data: {
+              ...club,
+              membersCountLimit: 100,
+            },
+          })
+        )
+
+        const membersDb = yield* _(ClubMembersDbService)
+        yield* _(
+          membersDb.insertClubMember({
+            clubId,
+            publicKey: user1.publicKeyPemBase64,
+            notificationToken: '1someToken1' as ExpoNotificationToken,
+            isModerator: false,
+            lastRefreshedAt: new Date(),
+          })
+        )
+        yield* _(
+          membersDb.insertClubMember({
+            clubId,
+            publicKey: user2.publicKeyPemBase64,
+            notificationToken: '2someToken2' as ExpoNotificationToken,
+            isModerator: false,
+            lastRefreshedAt: new Date(),
+          })
+        )
+
+        yield* _(
+          membersDb.insertClubMember({
+            clubId,
+            publicKey: user3.publicKeyPemBase64,
+            notificationToken: null,
+            isModerator: false,
+            lastRefreshedAt: new Date(),
+          })
+        )
+
+        const user4 = generatePrivateKey()
+
+        yield* _(
+          app.addUserToTheClub({
+            body: {
+              adminitionRequest: {
+                langCode: 'en',
+                notificationToken: Option.none(),
+                publicKey: user4.publicKeyPemBase64,
+              },
+              clubUuid: club.uuid,
+              ...(yield* _(generateAndSignChallenge(userKey))),
+            },
+          })
+        )
+
+        const redisService = yield* _(RedisService)
+        const savedData = yield* _(
+          redisService.readAndDeleteSet(ClubNotificationRecord)(
+            NEW_CLUB_USER_NOTIFICATIONS_KEY
+          )
+        )
+        expect(savedData).toHaveLength(2)
+        expect(
+          savedData.map((one) => `${one.token}:${one.clubUuid}`).sort()
+        ).toEqual(
+          [`1someToken1:${club.uuid}`, `2someToken2:${club.uuid}`].sort()
+        )
+      })
+    )
+  })
+
+  it('Sends notification to new user', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const app = yield* _(NodeTestingApp)
+        yield* _(
+          app.addUserToTheClub({
+            body: {
+              adminitionRequest: {
+                langCode: 'en',
+                notificationToken: Option.some(
+                  'token' as ExpoNotificationToken
+                ),
+                publicKey: user1.publicKeyPemBase64,
+              },
+              clubUuid: club.uuid,
+              ...(yield* _(generateAndSignChallenge(userKey))),
+            },
+          })
+        )
+
+        yield* _(Effect.sleep(100))
+        expect(sendNotificationsMock).toHaveBeenCalledWith([
+          {
+            to: ['token'],
+            data: new AdmitedToClubNetworkNotificationData({
+              publicKey: user1.publicKeyPemBase64,
+            }).toData(),
+          },
+        ])
       })
     )
   })

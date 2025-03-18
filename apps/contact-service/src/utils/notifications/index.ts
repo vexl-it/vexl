@@ -23,10 +23,10 @@ export class ErrorIssuingFirebaseNotification extends Schema.TaggedError<ErrorIs
 }) {}
 
 export const sendFcmNotificationToAllHandleNonExistingTokens = ({
-  type,
+  data,
   tokens,
 }: {
-  type: string
+  data: Record<string, string>
   tokens: readonly FcmToken[]
 }): Effect.Effect<
   IssueNotificationResult[],
@@ -35,7 +35,7 @@ export const sendFcmNotificationToAllHandleNonExistingTokens = ({
 > =>
   Effect.gen(function* (_) {
     const userDb = yield* _(UserDbService)
-    const results = yield* _(sendNotifications({type, tokens}))
+    const results = yield* _(sendNotifications({data, tokens}))
 
     const invalidTokens = pipe(
       results,
@@ -67,7 +67,7 @@ export const sendFcmNotificationToAllHandleNonExistingTokens = ({
   )
 
 export const sendNotificationToGeneralTopic = (
-  type: string
+  data: Record<string, string>
 ): Effect.Effect<
   MessagingTopicResponse,
   IssuingNotificationFirebaseError,
@@ -81,7 +81,7 @@ export const sendNotificationToGeneralTopic = (
         try: async () =>
           await messaging.sendToTopic(
             'general',
-            createFirebaseNotificationRequest(type)
+            createFirebaseNotificationRequest(data)
           ),
         catch: (e) =>
           new IssuingNotificationFirebaseError({
@@ -91,5 +91,5 @@ export const sendNotificationToGeneralTopic = (
       })
     )
   }).pipe(
-    Effect.withSpan('SendNotificationToGeneralTopic', {attributes: {type}})
+    Effect.withSpan('SendNotificationToGeneralTopic', {attributes: {data}})
   )

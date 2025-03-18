@@ -51,6 +51,7 @@ import {refreshUser} from './routes/user/refreshUser'
 import {updateBadOwnerHash} from './routes/user/updateBadOwnerHash'
 import {updateFirebaseToken} from './routes/user/updateFirebaseToken'
 import {updateNotificationToken} from './routes/user/updateNotificationToken'
+import {NewClubUserNotificationsService} from './utils/NewClubUserNotificationService'
 import {ExpoNotificationsService} from './utils/expoNotifications/ExpoNotificationsService'
 import {FirebaseMessagingService} from './utils/notifications/FirebaseMessagingService'
 
@@ -98,6 +99,7 @@ const MainLive = Layer.mergeAll(
   Layer.provideMerge(ExpoNotificationsService.Live),
   Layer.provideMerge(ContactDbService.Live),
   Layer.provideMerge(ImportContactsQuotaService.Live),
+  Layer.provideMerge(NewClubUserNotificationsService.Live),
   Layer.provideMerge(UserDbService.Live),
   Layer.provideMerge(ClubsDbService.Live),
   Layer.provideMerge(ChallengeService.Live),

@@ -16,6 +16,8 @@ import {Effect, Option} from 'effect'
 import {Handler} from 'effect-http'
 import {ClubMembersDbService} from '../../../db/ClubMemberDbService'
 import {ClubsDbService} from '../../../db/ClubsDbService'
+import {issueClubAdmissionNotification} from '../../../utils/issueClubAdmissionNotification'
+import {NewClubUserNotificationsService} from '../../../utils/NewClubUserNotificationService'
 import {withClubJoiningActionRedisLock} from '../../../utils/withClubJoiningActionRedisLock'
 import {clubHasCapacityForAnotherUser} from '../utils/clubHasCapacityForAnotherUser'
 
@@ -78,7 +80,25 @@ export const addUserToTheClub = Handler.make(AddUserToTheClubEndpint, (req) =>
         })
       )
 
-      // TODO(#1584) send notification
+      if (Option.isSome(req.body.adminitionRequest.notificationToken)) {
+        yield* _(
+          issueClubAdmissionNotification({
+            admittedMemberPublickey: req.body.adminitionRequest.publicKey,
+            notificationToken:
+              req.body.adminitionRequest.notificationToken.value,
+          })
+        )
+      }
+
+      yield* _(
+        NewClubUserNotificationsService,
+        Effect.flatMap((s) =>
+          s.registerNewClubNotification({
+            clubUuid: club.uuid,
+            triggeringUser: req.body.publicKey,
+          })
+        )
+      )
 
       return {
         newCount,

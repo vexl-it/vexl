@@ -34,7 +34,7 @@ export const processUserInactivity = Effect.gen(function* (_) {
 
   const {firebase, expo} = yield* _(
     issueNotificationsToTokens({
-      type: 'INACTIVITY_REMINDER',
+      data: {type: 'INACTIVITY_REMINDER'},
       tokens: usersToNotify,
     }),
     Effect.withSpan('Sending inactivity notification', {

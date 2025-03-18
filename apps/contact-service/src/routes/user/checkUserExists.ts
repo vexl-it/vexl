@@ -16,7 +16,7 @@ const sendNotificationToExistingUserFork = (
   UserDbService | FirebaseMessagingService | ExpoNotificationsService
 > =>
   issueNotificationsToTokens({
-    type: 'LOGGING_ON_DIFFERENT_DEVICE',
+    data: {type: 'LOGGING_ON_DIFFERENT_DEVICE'},
     tokens: [token],
   }).pipe(
     Effect.withSpan('Send notification about logging on different device'),

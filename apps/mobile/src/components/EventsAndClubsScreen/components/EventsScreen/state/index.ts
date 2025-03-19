@@ -6,6 +6,8 @@ import {pipe} from 'fp-ts/lib/function'
 import {atom} from 'jotai'
 import {splitAtom} from 'jotai/utils'
 import {apiAtom} from '../../../../../api'
+import {translationAtom} from '../../../../../utils/localization/I18nProvider'
+import openUrl from '../../../../../utils/openUrl'
 import reportError from '../../../../../utils/reportError'
 
 const sortEvents = Array.sort<Event>((a, b) =>
@@ -120,3 +122,22 @@ export const stickyHeadersIndiciesAtom = atom((get) => {
 })
 
 export const eventsForListAtomsAtom = splitAtom(eventsForListAtom)
+
+export const createEventActionAtom = atom(null, (get, set) => {
+  const {t} = get(translationAtom)
+  const emailBody = encodeURIComponent(
+    `${t('events.wantToCreateEvent')}\n\n
+${t('events.eventName')} (Event name):\n\n
+${t('events.dateAndTime')} (Date and time):\n\n
+${t('events.cityAndCountry')} (City and country):\n\n
+${t('events.description')} (Description):\n\n
+${t('events.linkToEvent')} (Link to event):\n\n
+${t('events.contactEmail')} (Contact email):\n\n
+${t('events.speakersOptional')} (Speakers - optional):\n\n`
+  )
+
+  openUrl(
+    `mailto:${t('common.marketingEmailAddress')}?subject=Vexl event&body=${emailBody}`,
+    t('common.marketingEmailAddress')
+  )()
+})

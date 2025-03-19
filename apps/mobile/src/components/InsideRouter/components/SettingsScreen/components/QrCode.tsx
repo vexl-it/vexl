@@ -1,7 +1,9 @@
+import {BlurView} from '@react-native-community/blur'
 import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/lib/function'
 import {atom, useAtomValue} from 'jotai'
+import {useState} from 'react'
 import SvgQRCode from 'react-native-qrcode-svg'
 import {Stack, Text, YStack} from 'tamagui'
 import {
@@ -9,6 +11,7 @@ import {
   useTranslation,
 } from '../../../../../utils/localization/I18nProvider'
 import {askAreYouSureActionAtom} from '../../../../AreYouSureDialog'
+import Button from '../../../../Button'
 import {encodedUserDetailsUriAtom} from '../atoms'
 
 export const qrCodeDialogAtom = atom(null, (get, set) => {
@@ -35,6 +38,8 @@ export const qrCodeDialogAtom = atom(null, (get, set) => {
 
 function QrCode(): JSX.Element {
   const {t} = useTranslation()
+  const [sharePressed, setSharePressed] = useState(false)
+  const [confirmPressed, setConfirmPressed] = useState(false)
   const encodedUserDetailsUri = useAtomValue(encodedUserDetailsUriAtom)
 
   return (
@@ -50,6 +55,64 @@ function QrCode(): JSX.Element {
         <Text col="$black" fos={28} ff="$heading">
           {t('qrCode.joinVexl')}
         </Text>
+        {(!sharePressed || !confirmPressed) && (
+          <BlurView
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 50,
+            }}
+            blurType="light"
+            blurAmount={8}
+            reducedTransparencyFallbackColor="white"
+          />
+        )}
+        {!confirmPressed && !sharePressed && (
+          <Stack
+            pos="absolute"
+            t={0}
+            b={50}
+            r={0}
+            l={0}
+            ai="center"
+            jc="center"
+          >
+            <Button
+              variant="primary"
+              text={t('common.share')}
+              onPress={() => {
+                setSharePressed(true)
+              }}
+            />
+          </Stack>
+        )}
+        {!confirmPressed && !!sharePressed && (
+          <Stack
+            pos="absolute"
+            t={0}
+            b={50}
+            r={0}
+            l={0}
+            ai="center"
+            jc="center"
+            gap="$4"
+          >
+            <YStack br="$4" p="$4" bc="$grey">
+              <Text fos={16} textAlign="justify">
+                {t('qrCode.attentionSharingYourQrCode')}
+              </Text>
+            </YStack>
+            <Button
+              variant="primary"
+              text={t('common.confirm')}
+              onPress={() => {
+                setConfirmPressed(true)
+              }}
+            />
+          </Stack>
+        )}
       </YStack>
     </Stack>
   )

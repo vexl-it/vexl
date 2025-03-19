@@ -25,6 +25,7 @@
     "@notifee/react-native": "^9.1.8",
     "@react-native-async-storage/async-storage": "1.23.1",
     "@react-native-clipboard/clipboard": "^1.11.2",
+    "@react-native-community/blur": "^4.4.1",
     "@react-native-firebase/app": "^18.4.0",
     "@react-native-firebase/dynamic-links": "^18.4.0",
     "@react-native-masked-view/masked-view": "0.3.1",

@@ -28,6 +28,7 @@ import {UserDbService} from './db/UserDbService'
 import DbLayer from './db/layer'
 import {internalServerLive} from './internalServer'
 import {reportGaguesLayer} from './metrics'
+import {sendBulkNotification} from './routes/admin/sendBulkMessages'
 import {createClub} from './routes/clubs/admin/createClub'
 import {generateClubInviteLink} from './routes/clubs/admin/generateClubInviteLink'
 import {listClubs} from './routes/clubs/admin/listClubs'
@@ -87,6 +88,7 @@ export const app = RouterBuilder.make(ContactApiSpecification)
     RouterBuilder.handle(generateClubJoinLink),
     RouterBuilder.handle(listClubLinks),
     RouterBuilder.handle(getClubInfoByAccessCode),
+    RouterBuilder.handle(sendBulkNotification),
     RouterBuilder.build,
     setupLoggingMiddlewares
   )

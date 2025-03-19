@@ -16,8 +16,16 @@ import {
 export const sendPushNotificationExpo = ({
   data,
   tokens,
+  notification,
 }: {
   data: Record<string, unknown>
+  notification?:
+    | {
+        body: string
+        title: string
+        subtitle?: string | undefined
+      }
+    | undefined
   tokens: ExpoNotificationToken[]
 }): Effect.Effect<
   ExpoPushTicket[],
@@ -30,12 +38,20 @@ export const sendPushNotificationExpo = ({
     const messages = Array.map(
       tokens,
       (to) =>
-        ({
-          to,
-          data,
-          priority: 'high',
-          _contentAvailable: true,
-        }) satisfies ExpoPushMessage
+        (notification
+          ? {
+              to,
+              data,
+              title: notification.title,
+              body: notification.body,
+              subtitle: notification.subtitle,
+            }
+          : {
+              to,
+              data,
+              priority: 'high',
+              _contentAvailable: true,
+            }) satisfies ExpoPushMessage
     )
 
     return yield* _(
@@ -50,6 +66,13 @@ export const sendExpoNotificationToAllHandleNonExistingTokens = ({
   tokens,
 }: {
   data: Record<string, unknown>
+  notification?:
+    | {
+        body: string
+        title: string
+        subtitle?: string | undefined
+      }
+    | undefined
   tokens: ExpoNotificationToken[]
 }): Effect.Effect<
   ExpoPushTicket[],

@@ -28,6 +28,7 @@ import {
 import {Schema} from 'effect'
 import {z} from 'zod'
 import {PageRequest, PageResponse} from '../../Pagination.brand'
+import {PlatformName} from '../../PlatformName'
 
 export class InboxDoesNotExistError extends Schema.TaggedError<InboxDoesNotExistError>(
   'InboxDoesNotExist'
@@ -536,3 +537,54 @@ export const GetClubInfoByAccessCodeErrors = Schema.Union(
   InvalidChallengeError,
   NotFoundError
 )
+
+export class SendBulkNotificationError extends Schema.TaggedError<SendBulkNotificationError>(
+  'SendBulkNotificationError'
+)('SendBulkNotificationError', {
+  status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
+  description: Schema.String,
+}) {}
+export const SendBulkNotificationsErrors = Schema.Union(
+  SendBulkNotificationError,
+  InvalidAdminTokenError
+)
+
+export const SendBulkNotificationRequest = Schema.Struct({
+  dryRun: Schema.Boolean,
+  filters: Schema.Struct({
+    versionFromIncluded: Schema.optionalWith(Schema.Number, {
+      as: 'Option',
+      nullable: true,
+    }),
+    versionToIncluded: Schema.optionalWith(Schema.Number, {
+      as: 'Option',
+      nullable: true,
+    }),
+    platform: Schema.Array(PlatformName),
+    fcm: Schema.Boolean,
+    expo: Schema.Boolean,
+  }),
+  notification: Schema.Struct({
+    title: Schema.String,
+    body: Schema.String,
+    data: Schema.optionalWith(
+      Schema.Record({key: Schema.String, value: Schema.String}),
+      {as: 'Option', nullable: true}
+    ),
+  }),
+})
+
+export const SendBulkNotificationResponse = Schema.Struct({
+  sentCount: Schema.Number,
+  dryRun: Schema.Boolean,
+  expo: Schema.Struct({
+    failed: Schema.Number,
+    success: Schema.Number,
+  }),
+  fcm: Schema.Struct({
+    failed: Schema.Number,
+    success: Schema.Number,
+  }),
+})
+export type SendBulkNotificationResponse =
+  typeof SendBulkNotificationResponse.Type

@@ -3,7 +3,6 @@ import {type FcmToken} from '@vexl-next/domain/src/utility/FcmToken.brand'
 import {Array, Effect, pipe, Schema} from 'effect'
 import {type MessagingTopicResponse} from 'firebase-admin/messaging'
 import {UserDbService} from '../../db/UserDbService'
-import {createFirebaseNotificationRequest} from './createFirebaseNotificationRequestBase'
 import {IssuingNotificationFirebaseError} from './domain'
 import {FirebaseMessagingService} from './FirebaseMessagingService'
 import {
@@ -25,8 +24,16 @@ export class ErrorIssuingFirebaseNotification extends Schema.TaggedError<ErrorIs
 export const sendFcmNotificationToAllHandleNonExistingTokens = ({
   data,
   tokens,
+  notification,
 }: {
   data: Record<string, string>
+  notification?:
+    | {
+        body: string
+        title: string
+        subtitle?: string | undefined
+      }
+    | undefined
   tokens: readonly FcmToken[]
 }): Effect.Effect<
   IssueNotificationResult[],
@@ -35,7 +42,7 @@ export const sendFcmNotificationToAllHandleNonExistingTokens = ({
 > =>
   Effect.gen(function* (_) {
     const userDb = yield* _(UserDbService)
-    const results = yield* _(sendNotifications({data, tokens}))
+    const results = yield* _(sendNotifications({data, notification, tokens}))
 
     const invalidTokens = pipe(
       results,
@@ -78,11 +85,11 @@ export const sendNotificationToGeneralTopic = (
 
     return yield* _(
       Effect.tryPromise({
-        try: async () =>
-          await messaging.sendToTopic(
-            'general',
-            createFirebaseNotificationRequest(data)
-          ),
+        try: async () => {
+          return await messaging.sendToTopic('general', {
+            data,
+          })
+        },
         catch: (e) =>
           new IssuingNotificationFirebaseError({
             message: 'Error while sending to topic',

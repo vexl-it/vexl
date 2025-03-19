@@ -1,12 +1,12 @@
 import {FlashList} from '@shopify/flash-list'
 import {type Atom, useAtomValue, useSetAtom} from 'jotai'
 import {useEffect} from 'react'
-import {ActivityIndicator} from 'react-native'
-import {getTokens, Stack, Text, YStack} from 'tamagui'
+import {Stack, Text, YStack} from 'tamagui'
 import atomKeyExtractor from '../../../../utils/atomUtils/atomKeyExtractor'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import {toCommonErrorMessage} from '../../../../utils/useCommonErrorMessages'
 import Button from '../../../Button'
+import VexlActivityIndicator from '../../../LoadingOverlayProvider/VexlActivityIndicator'
 import EventItem from './components/EventItem'
 import {
   areThereEventsToShowAtom,
@@ -23,7 +23,6 @@ function renderItem({item: itemAtom}: {item: Atom<ListData>}): JSX.Element {
 }
 
 export default function EventsScreen(): JSX.Element {
-  const tokens = getTokens()
   const eventsLoading = useAtomValue(eventsLoadingAtom)
   const areThereEventsToShow = useAtomValue(areThereEventsToShowAtom)
   const loadEvents = useSetAtom(refreshEventsActionAtom)
@@ -38,7 +37,7 @@ export default function EventsScreen(): JSX.Element {
     <YStack f={1} mx="$4" mt="$5">
       {!!eventsLoading && !areThereEventsToShow && (
         <Stack my="$5">
-          <ActivityIndicator size="large" color={tokens.color.main.val} />
+          <VexlActivityIndicator size="large" bc="$main" />
         </Stack>
       )}
 

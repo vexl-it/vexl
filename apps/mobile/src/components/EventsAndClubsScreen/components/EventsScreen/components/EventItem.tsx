@@ -1,11 +1,12 @@
-import {useAtomValue, type Atom} from 'jotai'
+import {useAtomValue, useSetAtom, type Atom} from 'jotai'
 import {Linking, Platform} from 'react-native'
 import {Text, XStack, YStack} from 'tamagui'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
+import Button from '../../../../Button'
 import Image from '../../../../Image'
 import goldenGlassesNoStarSvg from '../images/goldenGlassesNoStarSvg'
 import outLeadSvg from '../images/outLeadSvg'
-import {type ListData} from '../state'
+import {createEventActionAtom, type ListData} from '../state'
 import EventDate from './EventDate'
 import EventSpeaker from './EventSpeaker'
 
@@ -14,15 +15,24 @@ const BULLET = '•'
 export default function EventItem({atom}: {atom: Atom<ListData>}): JSX.Element {
   const {t} = useTranslation()
   const data = useAtomValue(atom)
+  const createEvent = useSetAtom(createEventActionAtom)
 
   if (data.type === 'header') {
     return (
       <YStack pb="$3" backgroundColor="black">
-        <Text color="white" fontFamily="$body600" fontSize={24}>
-          {data.value === 'future'
-            ? t('events.upcomingEvents')
-            : t('events.pastEvents')}
-        </Text>
+        <XStack ai="center" jc="space-between">
+          <Text color="white" fontFamily="$body600" fontSize={24}>
+            {data.value === 'future'
+              ? t('events.upcomingEvents')
+              : t('events.pastEvents')}
+          </Text>
+          <Button
+            size="small"
+            variant="secondary"
+            text={t('events.addEvent')}
+            onPress={createEvent}
+          />
+        </XStack>
         {!!data.emptySection && (
           <Text
             fontSize={14}

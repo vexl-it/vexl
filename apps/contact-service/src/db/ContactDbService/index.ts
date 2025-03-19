@@ -15,6 +15,11 @@ import {
 } from './queries/createFindCommonFriendsByOwnerHashAndPublicKeys'
 import {createFindContactsByHashFrom} from './queries/createFindContactsByHashFrom'
 import {createFindFirstLevelContactsPublicKeysByHashFrom} from './queries/createFindFirstLevelContactsPublicKeysByHashFrom'
+import {
+  createFindNotificationTokensByFilter,
+  type FindNotificationTokensByFiltersArgs,
+  type FindNotificationTokensByFiltersResult,
+} from './queries/createFindNotificationTokensByFilter'
 import {createFindSecondLevelContactsPublicKeysByHashFrom} from './queries/createFindSecondLevelContactsPublicKeysByHashFrom'
 import {
   createInsertContact,
@@ -54,6 +59,13 @@ export interface ContactDbOperations {
     args: FindCommonFriendsParams
   ) => Effect.Effect<readonly FindCommonFriendsResult[], UnexpectedServerError>
 
+  findNotificationTokensByFilter: (
+    args: FindNotificationTokensByFiltersArgs
+  ) => Effect.Effect<
+    readonly FindNotificationTokensByFiltersResult[],
+    UnexpectedServerError
+  >
+
   updateContactHashFrom: (
     args: UpdateContactsHashFromQuery
   ) => Effect.Effect<void, UnexpectedServerError>
@@ -81,6 +93,9 @@ export class ContactDbService extends Context.Tag('ContactDbService')<
       const findCommonFriends = yield* _(
         createFindCommonFriendsByOwnerHashAndPublicKeys
       )
+      const findNotificationTokensByFilter = yield* _(
+        createFindNotificationTokensByFilter
+      )
 
       const updateContactHashFrom = yield* _(createUpdateContactsHashFrom)
 
@@ -91,6 +106,7 @@ export class ContactDbService extends Context.Tag('ContactDbService')<
         insertContact,
         findFirstLevelContactsPublicKeysByHashFrom,
         findSecondLevelContactsPublicKeysByHashFrom,
+        findNotificationTokensByFilter,
         findCommonFriends,
         updateContactHashFrom,
       }

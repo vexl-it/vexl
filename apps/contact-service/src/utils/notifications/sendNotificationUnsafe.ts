@@ -31,9 +31,17 @@ export class ArgumentOutOfBoundsError extends Schema.TaggedError<ArgumentOutOfBo
 const sendNotificationBatchUnsafe = ({
   data,
   tokens,
+  notification,
 }: {
   data: Record<string, string>
   tokens: FcmToken[]
+  notification?:
+    | {
+        body: string
+        title: string
+        subtitle?: string | undefined
+      }
+    | undefined
 }): Effect.Effect<
   IssueNotificationResult[],
   IssuingNotificationUnexpectedError,
@@ -46,7 +54,7 @@ const sendNotificationBatchUnsafe = ({
       Effect.tryPromise({
         try: async () =>
           await messaging.sendEachForMulticast({
-            ...createFirebaseNotificationRequest(data),
+            ...createFirebaseNotificationRequest(data, notification),
             tokens,
           }),
         catch: (e) =>
@@ -84,9 +92,17 @@ const sendNotificationBatchUnsafe = ({
 export const sendNotifications = ({
   data,
   tokens,
+  notification,
 }: {
   data: Record<string, string>
   tokens: readonly FcmToken[]
+  notification?:
+    | {
+        body: string
+        title: string
+        subtitle?: string | undefined
+      }
+    | undefined
 }): Effect.Effect<
   IssueNotificationResult[],
   IssuingNotificationUnexpectedError,
@@ -96,7 +112,7 @@ export const sendNotifications = ({
     const batches = Array.chunksOf(tokens, 500)
     const results = yield* _(
       Effect.forEach(batches, (batch) =>
-        sendNotificationBatchUnsafe({data, tokens: batch})
+        sendNotificationBatchUnsafe({data, tokens: batch, notification})
       )
     )
     return Array.flatten(results)

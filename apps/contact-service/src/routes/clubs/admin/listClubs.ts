@@ -4,7 +4,7 @@ import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {Effect} from 'effect'
 import {Handler} from 'effect-http'
 import {ClubsDbService} from '../../../db/ClubsDbService'
-import {validateAdminToken} from './utils/validateAdminToken'
+import {validateAdminToken} from '../utils/validateAdminToken'
 
 export const listClubs = Handler.make(ListClubsEndpoint, (req) =>
   makeEndpointEffect(

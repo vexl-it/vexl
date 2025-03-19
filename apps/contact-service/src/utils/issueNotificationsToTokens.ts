@@ -11,9 +11,17 @@ import {type IssueNotificationResult} from './notifications/sendNotificationUnsa
 
 export const issueNotificationsToTokens = ({
   data,
+  notification,
   tokens,
 }: {
   data: Record<string, string>
+  notification?:
+    | {
+        body: string
+        title: string
+        subtitle?: string | undefined
+      }
+    | undefined
   tokens: readonly NotificationTokens[]
 }): Effect.Effect<
   {
@@ -25,6 +33,9 @@ export const issueNotificationsToTokens = ({
 > => {
   const fcmTokens = pipe(
     tokens,
+    // If the expo token is defined, we don't need to send a notification
+    // via fcm
+    Array.filter((one) => !one.expoToken),
     Array.map((one) => one.firebaseToken),
     Array.filter((token) => Option.isSome(token)),
     Array.map((token) => token.value)
@@ -42,6 +53,7 @@ export const issueNotificationsToTokens = ({
       ? Effect.either(
           sendFcmNotificationToAllHandleNonExistingTokens({
             data,
+            notification,
             tokens: fcmTokens,
           })
         )
@@ -50,6 +62,7 @@ export const issueNotificationsToTokens = ({
       ? Effect.either(
           sendExpoNotificationToAllHandleNonExistingTokens({
             data,
+            notification,
             tokens: expoTokens,
           })
         )

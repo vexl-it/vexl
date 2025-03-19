@@ -11,7 +11,7 @@ import {ClubInvitationLinkDbService} from '../../../db/ClubInvitationLinkDbServi
 import {ClubsDbService} from '../../../db/ClubsDbService'
 import {createFullLink} from '../utils/createFullLink'
 import {generateRandomInviteCode} from '../utils/generateRandomInviteCode'
-import {validateAdminToken} from './utils/validateAdminToken'
+import {validateAdminToken} from '../utils/validateAdminToken'
 
 export const generateClubInviteLink = Handler.make(
   GenerateClubInviteLinkForAdminEndpoint,

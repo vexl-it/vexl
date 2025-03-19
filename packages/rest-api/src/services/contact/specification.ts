@@ -52,6 +52,9 @@ import {
   ModifyClubRequest,
   ModifyClubResponse,
   RefreshUserRequest,
+  SendBulkNotificationRequest,
+  SendBulkNotificationResponse,
+  SendBulkNotificationsErrors,
   UpdateBadOwnerHashErrors,
   UpdateBadOwnerHashRequest,
   UpdateBadOwnerHashResponse,
@@ -336,6 +339,19 @@ export const GetClubInfoByAccessCodeEndpoint = Api.post(
   })
 )
 
+export const SendBulkNotificationEndpoint = Api.post(
+  'sendBulkNotification',
+  '/api/v1/notifications/bulk'
+).pipe(
+  Api.setRequestQuery(AdminTokenParams),
+  Api.setRequestBody(SendBulkNotificationRequest),
+  Api.setResponseBody(SendBulkNotificationResponse),
+  Api.addResponse({
+    status: 500,
+    body: SendBulkNotificationsErrors,
+  })
+)
+
 const UserApiGroup = ApiGroup.make('User').pipe(
   ApiGroup.addEndpoint(CheckUserExistsEndpoint),
   ApiGroup.addEndpoint(CreateUserEndpoint),
@@ -380,6 +396,10 @@ const ClubsModeratorApiGroup = ApiGroup.make('ClubsModerator', {
   ApiGroup.addEndpoint(ListClubLinksEndpoint)
 )
 
+const AdminApi = ApiGroup.make('Admin').pipe(
+  ApiGroup.addEndpoint(SendBulkNotificationEndpoint)
+)
+
 export const ContactApiSpecification = Api.make({
   title: 'Contact service',
   version: '1.0.0',
@@ -389,5 +409,6 @@ export const ContactApiSpecification = Api.make({
   Api.addGroup(ClubsAdminApiGroup),
   Api.addGroup(ClubsMemberApiGroup),
   Api.addGroup(ChallengeApiGroup),
-  Api.addGroup(ClubsModeratorApiGroup)
+  Api.addGroup(ClubsModeratorApiGroup),
+  Api.addGroup(AdminApi)
 )

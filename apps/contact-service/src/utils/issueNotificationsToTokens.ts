@@ -30,42 +30,45 @@ export const issueNotificationsToTokens = ({
   },
   never,
   FirebaseMessagingService | UserDbService | ExpoNotificationsService
-> => {
-  const fcmTokens = pipe(
-    tokens,
-    // If the expo token is defined, we don't need to send a notification
-    // via fcm
-    Array.filter((one) => !one.expoToken),
-    Array.map((one) => one.firebaseToken),
-    Array.filter((token) => Option.isSome(token)),
-    Array.map((token) => token.value)
-  )
+> =>
+  Effect.gen(function* (_) {
+    const fcmTokens = pipe(
+      tokens,
+      // If the expo token is defined, we don't need to send a notification
+      // via fcm
+      Array.filter((one) => Option.isNone(one.expoToken)),
+      Array.map((one) => one.firebaseToken),
+      Array.filter((token) => Option.isSome(token)),
+      Array.map((token) => token.value)
+    )
 
-  const expoTokens = pipe(
-    tokens,
-    Array.map((one) => one.expoToken),
-    Array.filter((token) => Option.isSome(token)),
-    Array.map((token) => token.value)
-  )
+    const expoTokens = pipe(
+      tokens,
+      Array.map((one) => one.expoToken),
+      Array.filter((token) => Option.isSome(token)),
+      Array.map((token) => token.value)
+    )
 
-  return Effect.all([
-    Array.isNonEmptyArray(fcmTokens)
-      ? Effect.either(
-          sendFcmNotificationToAllHandleNonExistingTokens({
-            data,
-            notification,
-            tokens: fcmTokens,
-          })
-        )
-      : Effect.succeed(Either.right<IssueNotificationResult[]>([])),
-    Array.isNonEmptyArray(expoTokens)
-      ? Effect.either(
-          sendExpoNotificationToAllHandleNonExistingTokens({
-            data,
-            notification,
-            tokens: expoTokens,
-          })
-        )
-      : Effect.succeed(Either.right<ExpoPushTicket[]>([])),
-  ]).pipe(Effect.map(([firebase, expo]) => ({firebase, expo})))
-}
+    return yield* _(
+      Effect.all([
+        Array.isNonEmptyArray(fcmTokens)
+          ? Effect.either(
+              sendFcmNotificationToAllHandleNonExistingTokens({
+                data,
+                notification,
+                tokens: fcmTokens,
+              })
+            )
+          : Effect.succeed(Either.right<IssueNotificationResult[]>([])),
+        Array.isNonEmptyArray(expoTokens)
+          ? Effect.either(
+              sendExpoNotificationToAllHandleNonExistingTokens({
+                data,
+                notification,
+                tokens: expoTokens,
+              })
+            )
+          : Effect.succeed(Either.right<ExpoPushTicket[]>([])),
+      ]).pipe(Effect.map(([firebase, expo]) => ({firebase, expo})))
+    )
+  })

@@ -6,8 +6,8 @@ import {Effect, flow, Schema} from 'effect'
 import {NotificationTokens} from '../../UserDbService/domain'
 
 const FindNotificationTokensByFiltersArgs = Schema.Struct({
-  versionFromIncluded: Schema.NullOr(Schema.Int),
-  versionToIncluded: Schema.NullOr(Schema.Int),
+  versionFromIncluded: Schema.NullOr(Schema.NumberFromString),
+  versionToIncluded: Schema.NullOr(Schema.NumberFromString),
   platform: Schema.Array(PlatformName),
 })
 export type FindNotificationTokensByFiltersArgs =
@@ -32,14 +32,14 @@ export const createFindNotificationTokensByFilter = Effect.gen(function* (_) {
       WHERE
         (
           (
-            ${params.versionFromIncluded} IS NULL
+            ${params.versionFromIncluded}::int IS NULL
             OR (
               client_version >= ${params.versionFromIncluded}
               AND client_version IS NOT NULL
             )
           )
           AND (
-            ${params.versionToIncluded} IS NULL
+            ${params.versionToIncluded}::int IS NULL
             OR (
               client_version <= ${params.versionToIncluded}
               AND client_version IS NOT NULL

@@ -79,7 +79,9 @@ const sendNotificationBatchUnsafe = ({
           message: result.error?.message ?? 'Unknown error sending message',
           cause: result.error,
           isCausedByInvalidToken:
-            result.error?.code === 'messaging/unregistered',
+            result.error?.code === 'messaging/unregistered' ||
+            result.error?.code ===
+              'messaging/registration-token-not-registered',
         }),
       }
     })

@@ -63,7 +63,9 @@ export const sendBulkNotification = Handler.make(
           )
         )
 
-        yield* _(Effect.log(`Sending notification to ${tokens.length} users`))
+        yield* _(
+          Effect.log(`Sending notification to ${tokens.length} users`, tokens)
+        )
 
         if (!req.body.dryRun) {
           yield* _(Effect.log('Sending notifications'))
@@ -78,7 +80,9 @@ export const sendBulkNotification = Handler.make(
             })
           )
 
-          yield* _(Effect.log(`Sent notifications`, result))
+          yield* _(
+            Effect.log(`Sent notifications`, JSON.stringify(result, null, 2))
+          )
 
           return {
             sentCount: tokens.length,
@@ -89,10 +93,12 @@ export const sendBulkNotification = Handler.make(
                   failed: tokens.filter((one) => one.expoToken).length,
                 }
               : {
-                  success: result.expo.right.map((one) => one.status === 'ok')
-                    .length,
-                  failed: result.expo.right.map((one) => one.status === 'error')
-                    .length,
+                  success: result.expo.right.filter(
+                    (one) => one.status === 'ok'
+                  ).length,
+                  failed: result.expo.right.filter(
+                    (one) => one.status === 'error'
+                  ).length,
                 },
             fcm: Either.isLeft(result.firebase)
               ? {
@@ -102,9 +108,9 @@ export const sendBulkNotification = Handler.make(
                   success: 0,
                 }
               : {
-                  success: result.firebase.right.map((one) => one.success)
+                  success: result.firebase.right.filter((one) => one.success)
                     .length,
-                  failed: result.firebase.right.map((one) => !one.success)
+                  failed: result.firebase.right.filter((one) => !one.success)
                     .length,
                 },
           } satisfies SendBulkNotificationResponse
@@ -114,12 +120,14 @@ export const sendBulkNotification = Handler.make(
           sentCount: tokens.length,
           dryRun: true,
           expo: {
-            success: tokens.filter((t) => t.expoToken).length,
+            success: tokens.filter((t) => Option.isSome(t.expoToken)).length,
             failed: 0,
           },
           fcm: {
-            success: tokens.filter((t) => !t.expoToken && t.firebaseToken)
-              .length,
+            success: tokens.filter(
+              (t) =>
+                !Option.isSome(t.expoToken) && Option.isSome(t.firebaseToken)
+            ).length,
             failed: 0,
           },
         } satisfies SendBulkNotificationResponse

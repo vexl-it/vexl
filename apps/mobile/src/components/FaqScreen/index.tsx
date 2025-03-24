@@ -33,6 +33,8 @@ function FaqsScreen({navigation, route: {params}}: Props): JSX.Element | null {
           currentPage={page}
           numberOfPages={content.length}
           onPageChange={setPage}
+          // Links do not work otherwise...
+          touchableOverlayDisabled
           onFinish={safeGoBack}
           onSkip={safeGoBack}
           withBackButton

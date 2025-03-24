@@ -1,6 +1,7 @@
 import {type SvgString} from '@vexl-next/domain/src/utility/SvgString.brand'
 import {useAtomValue} from 'jotai'
 import anonymizationNoticeSvg from '../../images/anonymizationNoticeSvg'
+import noRatingsSvg from '../../images/noRatingsSvg'
 import notificationsSvg from '../../images/notificationsSvg'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import {showClubsFlowAtom} from '../../utils/preferences'
@@ -20,6 +21,7 @@ export type FaqType =
   | 'HOW_CAN_YOU_ENSURE'
   | 'WHAT_ARE_VEXL_CLUBS'
   | 'HOW_DO_I_CONTACT_VEXL'
+  | 'WHY_NO_RATING'
 
 interface CommonProps {
   type: FaqType
@@ -106,6 +108,18 @@ export default function useContent(): Props[] {
       text: t('faqs.youCanAlwaysReachOutToUs'),
       width: '70%',
       height: '70%',
+    },
+    {
+      type: 'WHY_NO_RATING',
+      svg: noRatingsSvg,
+      title: t('faqs.whyNoRatingTitle'),
+      textBefore: t('faqs.whyNoRatingText'),
+      textAfter: '',
+      linkText: t('faqs.ratingUrlText'),
+      withLink: true,
+      url: t('faqs.ratingUrlLink'),
+      width: '90%',
+      height: '90%',
     },
   ]
 }

@@ -1,8 +1,8 @@
 import {useAtomValue, useSetAtom, type Atom} from 'jotai'
 import {Linking, Platform} from 'react-native'
+import {TouchableOpacity} from 'react-native-gesture-handler'
 import {Text, XStack, YStack} from 'tamagui'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
-import Button from '../../../../Button'
 import Image from '../../../../Image'
 import goldenGlassesNoStarSvg from '../images/goldenGlassesNoStarSvg'
 import outLeadSvg from '../images/outLeadSvg'
@@ -26,12 +26,6 @@ export default function EventItem({atom}: {atom: Atom<ListData>}): JSX.Element {
               ? t('events.upcomingEvents')
               : t('events.pastEvents')}
           </Text>
-          <Button
-            size="small"
-            variant="secondary"
-            text={t('events.addEvent')}
-            onPress={createEvent}
-          />
         </XStack>
         {!!data.emptySection && (
           <Text
@@ -44,6 +38,21 @@ export default function EventItem({atom}: {atom: Atom<ListData>}): JSX.Element {
           </Text>
         )}
       </YStack>
+    )
+  }
+
+  if (data.type === 'createEvent') {
+    return (
+      <XStack ai="center" gap="$2" py="$4">
+        <Text fs={1} col="$white">
+          {t('events.doYouWantToListYourMeetup')}
+        </Text>
+        <TouchableOpacity onPress={createEvent}>
+          <Text col="$main" ff="$body500" textDecorationLine="underline">
+            {t('events.getInTouchWithUs')}
+          </Text>
+        </TouchableOpacity>
+      </XStack>
     )
   }
 

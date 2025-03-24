@@ -44,7 +44,7 @@ export default function EventsScreen(): JSX.Element {
       {!!error && (
         <YStack alignItems="flex-start" mb="$3">
           <Text ff="$body500" fontSize={18}>
-            Error loading events
+            {t('events.errorLoadingEvents')}
           </Text>
           <Text color="white">{toCommonErrorMessage(error, t)}</Text>
           <Button

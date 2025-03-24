@@ -92,6 +92,7 @@ export const pastEventsAtom = atom((get) =>
 export type ListData =
   | {type: 'event'; event: Event}
   | {type: 'header'; value: 'future' | 'past'; emptySection: boolean}
+  | {type: 'createEvent'}
 export const eventsForListAtom = atom<ListData[]>((get) => {
   const futureEvents = get(futureEventsAtom)
   const pastEvents = get(pastEventsAtom)
@@ -103,6 +104,7 @@ export const eventsForListAtom = atom<ListData[]>((get) => {
       emptySection: !futureEvents.length,
     },
     ...futureEvents.map((event) => ({type: 'event' as const, event})),
+    {type: 'createEvent' as const},
     {
       type: 'header' as const,
       value: 'past' as const,

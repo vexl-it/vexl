@@ -8,5 +8,6 @@ files:
     ignore:
       - package.json
       - .gitignore
+      - tsconfig.json
       - "*-*.json"
     translation: /%two_letters_code%-%original_file_name%

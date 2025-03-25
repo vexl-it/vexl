@@ -19,6 +19,36 @@ import {type ErrorEncryptingMessage} from './utils/chatCrypto'
 import {messageToNetwork} from './utils/messageIO'
 import {messagePreviewToNetwork} from './utils/messagePreviewIO'
 
+// Handled like this to get linter error when new type is added
+type HANDLED_MESSAGE_TYPES =
+  | 'APPROVE_CONTACT_REVEAL'
+  | 'APPROVE_MESSAGING'
+  | 'APPROVE_REVEAL'
+  | 'BLOCK_CHAT'
+  | 'CANCEL_REQUEST_MESSAGING'
+  | 'DELETE_CHAT'
+  | 'DISAPPROVE_CONTACT_REVEAL'
+  | 'DISAPPROVE_MESSAGING'
+  | 'DISAPPROVE_REVEAL'
+  | 'INBOX_DELETED'
+  | 'MESSAGE'
+  | 'OFFER_DELETED'
+  | 'REQUEST_CONTACT_REVEAL'
+  | 'REQUEST_MESSAGING'
+  | 'REQUEST_REVEAL'
+  | 'TRADE_CHECKLIST_UPDATE'
+  | 'FCM_CYPHER_UPDATE'
+  | 'VERSION_UPDATE'
+
+const sendSystemNotification = (
+  messageType: HANDLED_MESSAGE_TYPES
+): boolean => {
+  if (messageType === 'FCM_CYPHER_UPDATE' || messageType === 'VERSION_UPDATE')
+    return false
+
+  return true
+}
+
 export type SendMessageApiErrors = Effect.Effect.Error<
   ReturnType<ChatApi['sendMessage']>
 >
@@ -66,6 +96,7 @@ export default function sendMessage({
         notificationCypher: theirNotificationCypher,
         otherSideVersion,
         notificationApi,
+        sendSystemNotification: sendSystemNotification(message.messageType),
       })
     )
 

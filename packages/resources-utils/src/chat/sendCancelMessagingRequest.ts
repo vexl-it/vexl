@@ -86,6 +86,7 @@ export function sendCancelMessagingRequest({
         otherSideVersion,
         notificationCypher: theirNotificationCypher,
         notificationApi,
+        sendSystemNotification: true,
       })
     )
 

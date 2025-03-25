@@ -11,6 +11,7 @@ interface NotificationArgs {
   otherSideVersion?: SemverString.SemverString | undefined
   notificationCypher?: NotificationCypher | undefined
   notificationApi: NotificationApi
+  sendSystemNotification: boolean
 }
 
 export function callWithNotificationService<
@@ -21,7 +22,12 @@ export function callWithNotificationService<
   f: (arg: T) => Effect.Effect<L, R>,
   fArgs: Omit<T, 'notificationServiceReady'>
 ): (args: NotificationArgs) => Effect.Effect<L, R> {
-  return ({notificationApi, notificationCypher, otherSideVersion}) => {
+  return ({
+    notificationApi,
+    notificationCypher,
+    otherSideVersion,
+    sendSystemNotification,
+  }) => {
     return Effect.gen(function* (_) {
       // Do not try to issue notification if there is no fcmCypher or the other side does not support V2 notifications
       if (
@@ -46,6 +52,7 @@ export function callWithNotificationService<
         notificationApi.issueNotification({
           body: {
             notificationCypher,
+            sendNewChatMessageNotification: sendSystemNotification,
           },
         })
       ).pipe(

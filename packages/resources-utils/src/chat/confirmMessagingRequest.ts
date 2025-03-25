@@ -106,6 +106,7 @@ export default function confirmMessagingRequest({
         notificationCypher: theirNotificationCypher,
         otherSideVersion,
         notificationApi,
+        sendSystemNotification: true,
       })
     )
 

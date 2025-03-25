@@ -105,6 +105,7 @@ export function sendMessagingRequest({
         notificationCypher: theirNotificationCypher,
         otherSideVersion,
         notificationApi,
+        sendSystemNotification: true,
       })
     )
 

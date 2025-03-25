@@ -15,6 +15,9 @@ export class IssueNotificationRequest extends Schema.Class<IssueNotificationRequ
   // Once we depreciate old version remove fcm cypher and make notification cypher mandatory!
   fcmCypher: Schema.optional(FcmCypherE),
   notificationCypher: Schema.optional(NotificationCypherE),
+  sendNewChatMessageNotification: Schema.optionalWith(Schema.Boolean, {
+    default: () => true,
+  }),
 }) {}
 
 export class IssueNotificationResponse extends Schema.Class<IssueNotificationResponse>(

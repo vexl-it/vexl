@@ -60,6 +60,7 @@ export default function sendLeaveChat({
         notificationApi,
         notificationCypher: theirNotificationCypher,
         otherSideVersion,
+        sendSystemNotification: true,
       })
     )
 

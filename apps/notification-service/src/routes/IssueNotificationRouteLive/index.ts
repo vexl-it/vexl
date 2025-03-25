@@ -50,7 +50,8 @@ function getNotificationContentByLocale(locale: string): {
 }
 
 const processNotificationCypher = (
-  notificationCypher: NotificationCypher
+  notificationCypher: NotificationCypher,
+  sendSystemNotification: boolean
 ): Effect.Effect<
   IssueNotificationResponse,
   InvalidFcmCypherError | ConfigError.ConfigError | SendingNotificationError,
@@ -84,18 +85,20 @@ const processNotificationCypher = (
     } else {
       const expoClient = yield* _(ExpoClientService)
 
-      yield* _(
-        expoClient.sendNotification({
-          token: notificationToken.expoToken,
-          ...getNotificationContentByLocale(notificationToken.locale),
-          data: Schema.encodeSync(NewChatMessageNoticeNotificationData)(
-            new NewChatMessageNoticeNotificationData({
-              targetCypher: notificationCypher,
-              includesSystemNotification: 'true',
-            })
-          ),
-        })
-      )
+      if (sendSystemNotification) {
+        yield* _(
+          expoClient.sendNotification({
+            token: notificationToken.expoToken,
+            ...getNotificationContentByLocale(notificationToken.locale),
+            data: Schema.encodeSync(NewChatMessageNoticeNotificationData)(
+              new NewChatMessageNoticeNotificationData({
+                targetCypher: notificationCypher,
+                includesSystemNotification: 'true',
+              })
+            ),
+          })
+        )
+      }
 
       yield* _(
         expoClient.sendNotification({
@@ -137,7 +140,12 @@ export const IssueNotifcationHandler = Handler.make(
           Effect.log('Processing notification cypher', cypherToUse.value)
         )
 
-        return yield* _(processNotificationCypher(cypherToUse.value))
+        return yield* _(
+          processNotificationCypher(
+            cypherToUse.value,
+            req.body.sendNewChatMessageNotification
+          )
+        )
       }),
       IssueNotificationErrors
     )

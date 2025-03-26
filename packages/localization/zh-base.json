@@ -459,9 +459,9 @@
   "faqs.auditUrl": "https://vexl.it/audit",
   "faqs.whatAreVexlClubsAndWhyShouldIJoin": "Vexl 俱乐部是什么，我为什么要加入？",
   "faqs.clubsConnectYouWithBroaderNetwork": "俱乐部将您与更广阔的社交网络连接起来，让您有机会与周围的好友进行交易。虽然俱乐部提供了更多的多样性，但与一级或二级的好友相比，俱乐部内的交易不太安全。",
-  "faqs.whyNoRatingTitle": "Why doesn’t Vexl rate users or offers in the marketplace?",
-  "faqs.whyNoRatingText": "Because ratings don’t build trust, people do. Trust should come from the people in your life, not some random star rating that can be faked, bought, or manipulated.",
-  "faqs.ratingUrlText": "Read more",
+  "faqs.whyNoRatingTitle": "为什么 Vexl 不对用户或市场中的报价进行评级？",
+  "faqs.whyNoRatingText": "因为评级并不能建立信任，而人却能。信任应该来自生活中的人，而不是一些可以伪造、收买或操纵的随机星级。",
+  "faqs.ratingUrlText": "阅读更多",
   "faqs.ratingUrlLink": "https://vexl.it/post/why-vexl-doesnt-rate-offers-or-users",
   "offerForm.myNewOffer": "新的报价",
   "offerForm.listingType": "报价类型",
@@ -1153,5 +1153,8 @@
   "events.description": "描述",
   "events.linkToEvent": "事件的链接",
   "events.contactEmail": "联系电子邮箱",
-  "events.speakersOptional": "发言人（可选）"
+  "events.speakersOptional": "发言人（可选）",
+  "events.errorLoadingEvents": "Error loading events",
+  "events.doYouWantToListYourMeetup": "Do you want to list your meetup?",
+  "events.getInTouchWithUs": "Get in touch with us"
 }

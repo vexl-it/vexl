@@ -1153,5 +1153,8 @@
   "events.description": "Beschreibung",
   "events.linkToEvent": "Link to event",
   "events.contactEmail": "Contact email",
-  "events.speakersOptional": "Speakers (optional)"
+  "events.speakersOptional": "Speakers (optional)",
+  "events.errorLoadingEvents": "Error loading events",
+  "events.doYouWantToListYourMeetup": "Do you want to list your meetup?",
+  "events.getInTouchWithUs": "Get in touch with us"
 }

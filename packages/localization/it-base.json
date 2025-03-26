@@ -489,7 +489,7 @@
   "offerForm.premiumOrDiscount.youSellForTheActualMarketPrice": "Vendete al prezzo effettivo di mercato. Giocare con il cursore per vendere più velocemente o guadagnare di più.",
   "offerForm.premiumOrDiscount.youEarnBitMore": "Si guadagna un po' di più, ma può essere necessario un po' più di tempo.",
   "offerForm.premiumOrDiscount.youWantToEarnFortune": "Volete guadagnare una fortuna, ma possono volerci anni per trovare un acquirente.",
-  "offerForm.premiumOrDiscount.youSellSlightlyFaster": "Vendete un po' più velocemente, ma un po' al di sotto del prezzo di mercato.",
+  "offerForm.premiumOrDiscount.youSellSlightlyFaster": "Vendete un po' più velocemente, ma un po' al di sotto del prezzo di mercato..",
   "offerForm.premiumOrDiscount.youSellMuchFaster": "Vendete molto più velocemente, ma molto al di sotto del prezzo di mercato.",
   "offerForm.premiumOrDiscount.youBuyBtcFor": "Comprate BTC a",
   "offerForm.premiumOrDiscount.youSellBtcFor": "Vendete BTC a",
@@ -1153,5 +1153,8 @@
   "events.description": "Descrizione",
   "events.linkToEvent": "Link to event",
   "events.contactEmail": "Contact email",
-  "events.speakersOptional": "Speakers (optional)"
+  "events.speakersOptional": "Speakers (optional)",
+  "events.errorLoadingEvents": "Error loading events",
+  "events.doYouWantToListYourMeetup": "Do you want to list your meetup?",
+  "events.getInTouchWithUs": "Get in touch with us"
 }

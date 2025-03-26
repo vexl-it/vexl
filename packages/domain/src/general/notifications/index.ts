@@ -84,3 +84,12 @@ export class AdmitedToClubNetworkNotificationData extends Schema.Class<AdmitedTo
   toData = (): Record<string, string> =>
     Schema.encodeSync(AdmitedToClubNetworkNotificationData)(this)
 }
+
+export class OpenBrowserLinkNotificationData extends Schema.Class<OpenBrowserLinkNotificationData>(
+  'OpenBrowserLinkNotificationData'
+)({
+  url: S.String,
+}) {
+  toData = (): Record<string, string> =>
+    Schema.encodeSync(OpenBrowserLinkNotificationData)(this)
+}

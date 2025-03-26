@@ -3,10 +3,12 @@ import {useNavigation} from '@react-navigation/native'
 import {
   ChatNotificationData,
   NewChatMessageNoticeNotificationData,
+  OpenBrowserLinkNotificationData,
 } from '@vexl-next/domain/src/general/notifications'
 import {Either, Option, Schema} from 'effect'
 import {atom, useStore} from 'jotai'
 import {useCallback, useEffect} from 'react'
+import {Linking} from 'react-native'
 import {isOnMessagesList, isOnSpecificChat} from '../utils/navigation'
 import {
   NEW_CONTACTS_TO_SYNC,
@@ -26,7 +28,12 @@ function useReactOnNotificationOpen(): (notification: Notification) => void {
       if (store.get(lastNotificationIdHandledAtom) === notification.id) return
       store.set(lastNotificationIdHandledAtom, notification.id)
 
-      if (notification.data?.type === NEW_OFFERS_IN_MARKETPLACE) {
+      const openBrowserLinkNotificationDataO = Schema.decodeUnknownOption(
+        OpenBrowserLinkNotificationData
+      )(notification.data)
+      if (Option.isSome(openBrowserLinkNotificationDataO)) {
+        void Linking.openURL(openBrowserLinkNotificationDataO.value.url)
+      } else if (notification.data?.type === NEW_OFFERS_IN_MARKETPLACE) {
         navigation.navigate('InsideTabs', {screen: 'Marketplace'})
       } else if (notification.data?.type === NEW_CONTACTS_TO_SYNC) {
         navigation.navigate('SetContacts', {})

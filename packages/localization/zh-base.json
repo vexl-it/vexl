@@ -1154,7 +1154,7 @@
   "events.linkToEvent": "事件的链接",
   "events.contactEmail": "联系电子邮箱",
   "events.speakersOptional": "发言人（可选）",
-  "events.errorLoadingEvents": "Error loading events",
-  "events.doYouWantToListYourMeetup": "Do you want to list your meetup?",
-  "events.getInTouchWithUs": "Get in touch with us"
+  "events.errorLoadingEvents": "载入活动时出错",
+  "events.doYouWantToListYourMeetup": "您想要列出您的会面列表吗？",
+  "events.getInTouchWithUs": "与我们取得联系"
 }

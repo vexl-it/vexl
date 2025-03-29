@@ -20,9 +20,11 @@ import {
   offerTypeAtom,
   resetFilterOmitTextFilterActionAtom,
   saveFilterActionAtom,
+  showClubOffersAtom,
   sortingAtom,
 } from './atom'
 import BaseFilter from './components/BaseFilter'
+import ShowClubOffers from './components/ShowClubOffers'
 import Sorting from './components/Sorting'
 import useAllOffersFilterContent from './useAllOffersFilterContent'
 import useBtcOffersFilterContent from './useBtcOffersFilterContent'
@@ -111,6 +113,7 @@ function FilterOffersScreen(): JSX.Element {
             }
           />
         )}
+        <ShowClubOffers showClubOffersAtom={showClubOffersAtom} />
       </ScrollView>
       <Stack px="$4" py="$4" bc="transparent">
         <Button

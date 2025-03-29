@@ -1,3 +1,4 @@
+import {effectToTask} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import * as T from 'fp-ts/Task'
 import {pipe} from 'fp-ts/lib/function'
 import {atom} from 'jotai'
@@ -29,36 +30,40 @@ export const reencryptOffersWithModalActionAtom = atom(null, (get, set) => {
     }),
     T.chain((result) => {
       if (result.errors.length > 0) {
-        return set(offerProgressModalActionAtoms.hideDeffered, {
-          delayMs: 2000,
-          data: {
-            title: t('reuploadOffers.progress.errorTitle'),
-            bottomText: t('reuploadOffers.progress.errorExplanation', {
-              failedCount: String(result.errors.length),
-              totalCount: String(
-                result.reuploaded.length + result.errors.length
+        return effectToTask(
+          set(offerProgressModalActionAtoms.hideDeffered, {
+            delayMs: 2000,
+            data: {
+              title: t('reuploadOffers.progress.errorTitle'),
+              bottomText: t('reuploadOffers.progress.errorExplanation', {
+                failedCount: String(result.errors.length),
+                totalCount: String(
+                  result.reuploaded.length + result.errors.length
+                ),
+              }),
+              indicateProgress: {type: 'done'},
+              belowProgressLeft: t(
+                'reuploadOffers.progress.errorExplanationShort',
+                {failedCount: String(result.errors.length)}
               ),
-            }),
-            indicateProgress: {type: 'done'},
-            belowProgressLeft: t(
-              'reuploadOffers.progress.errorExplanationShort',
-              {failedCount: String(result.errors.length)}
-            ),
-          },
-        })
+            },
+          })
+        )
       }
 
-      return set(offerProgressModalActionAtoms.hideDeffered, {
-        delayMs: 2000,
-        data: {
-          title: t('reuploadOffers.progress.successTitle'),
-          bottomText: t('reuploadOffers.progress.bottomText'),
-          belowProgressLeft: t('reuploadOffers.progress.belowProgressLeft', {
-            reuploadedCount: String(result.reuploaded.length),
-          }),
-          indicateProgress: {type: 'progress', percentage: 100},
-        },
-      })
+      return effectToTask(
+        set(offerProgressModalActionAtoms.hideDeffered, {
+          delayMs: 2000,
+          data: {
+            title: t('reuploadOffers.progress.successTitle'),
+            bottomText: t('reuploadOffers.progress.bottomText'),
+            belowProgressLeft: t('reuploadOffers.progress.belowProgressLeft', {
+              reuploadedCount: String(result.reuploaded.length),
+            }),
+            indicateProgress: {type: 'progress', percentage: 100},
+          },
+        })
+      )
     })
   )
 })

@@ -1,4 +1,5 @@
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
+import {ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {FcmCypher} from '@vexl-next/domain/src/general/notifications'
 import {
   LocationStateToArray,
@@ -63,6 +64,7 @@ const OfferPublicPartToEncrypt = z
     fcmCypher: FcmCypher.optional(),
     authorClientVersion: z.string().optional(),
     goldenAvatarType: z.string().optional(),
+    clubsUuids: z.array(ClubUuid).optional(),
   })
   .readonly()
 

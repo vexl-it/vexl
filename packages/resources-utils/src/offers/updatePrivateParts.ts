@@ -40,10 +40,12 @@ export default function updatePrivateParts({
   currentConnections: {
     readonly firstLevel: readonly PublicKeyPemBase64[]
     readonly secondLevel?: readonly PublicKeyPemBase64[]
+    readonly clubs?: readonly PublicKeyPemBase64[]
   }
   targetConnections: {
     readonly firstLevel: readonly PublicKeyPemBase64[]
     readonly secondLevel: readonly PublicKeyPemBase64[]
+    readonly clubs?: readonly PublicKeyPemBase64[]
   }
   commonFriends: FetchCommonConnectionsResponse
   adminId: OfferAdminId
@@ -61,10 +63,11 @@ export default function updatePrivateParts({
     newConnections: {
       firstLevel: PublicKeyPemBase64[]
       secondLevel?: PublicKeyPemBase64[] | undefined
+      clubs?: PublicKeyPemBase64[]
     }
   }
 > {
-  const removedConnections = subtractArrays(
+  const removedFirstSecondLevelConnections = subtractArrays(
     deduplicate([
       ...currentConnections.firstLevel,
       ...(currentConnections.secondLevel ?? []),
@@ -73,6 +76,10 @@ export default function updatePrivateParts({
       ...targetConnections.firstLevel,
       ...targetConnections.secondLevel,
     ])
+  )
+  const removedClubsConnections = subtractArrays(
+    currentConnections.clubs ?? [],
+    targetConnections.clubs ?? []
   )
 
   const newFirstLevelConnections = subtractArrays(
@@ -85,15 +92,26 @@ export default function updatePrivateParts({
         currentConnections.secondLevel
       )
     : undefined
+  const newClubsConnections = subtractArrays(
+    targetConnections.clubs ?? [],
+    currentConnections.clubs ?? []
+  )
+
+  const removedConnections = [
+    ...removedFirstSecondLevelConnections,
+    ...removedClubsConnections,
+  ]
 
   console.info(
     `Updating connections of one offer. Number of removedConnections: ${
-      removedConnections.length
+      removedFirstSecondLevelConnections.length
+    }. Number of removed clubs connections: ${
+      removedClubsConnections.length
     }. Number of newFirstLevelConnections: ${
       newFirstLevelConnections.length
     }. Number of newSecondLevelConnections: ${
       newSecondLevelConnections?.length ?? 'undefined'
-    }.`
+    }. Number of newClubsConnections: ${newClubsConnections.length}.`
   )
 
   return pipe(
@@ -103,6 +121,7 @@ export default function updatePrivateParts({
         secondDegreeConnections: newSecondLevelConnections ?? [],
         commonFriends,
       },
+      clubsConnections: newClubsConnections,
       symmetricKey,
     }),
     TE.fromEither,
@@ -182,6 +201,10 @@ export default function updatePrivateParts({
                 pubKeysThatFailedEncryptTo
               )
             : undefined,
+          clubs: subtractArrays(
+            newClubsConnections,
+            pubKeysThatFailedEncryptTo
+          ),
         },
       }
     })

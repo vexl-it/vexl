@@ -14,5 +14,8 @@ export class ClubMemberRecord extends Schema.Class<ClubMemberRecord>(
   publicKey: PublicKeyPemBase64E,
   notificationToken: Schema.NullOr(ExpoNotificationTokenE),
   lastRefreshedAt: Schema.DateFromSelf,
-  isModerator: Schema.optionalWith(Schema.Boolean, {default: () => false}),
+  isModerator: Schema.optionalWith(Schema.Boolean, {
+    default: () => false,
+    nullable: true,
+  }),
 }) {}

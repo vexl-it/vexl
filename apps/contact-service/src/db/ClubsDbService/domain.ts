@@ -10,10 +10,15 @@ export class ClubDbRecord extends Schema.Class<ClubDbRecord>('ClubDbRecord')({
   id: ClubRecordId,
   uuid: ClubUuid,
   name: Schema.String,
-  description: Schema.optionalWith(Schema.String, {as: 'Option'}),
+  description: Schema.optionalWith(Schema.String, {
+    as: 'Option',
+    nullable: true,
+  }),
   membersCountLimit: Schema.Number,
   clubImageUrl: UriStringE,
   validUntil: Schema.DateFromSelf,
+  madeInactiveAt: Schema.optionalWith(Schema.DateFromSelf, {
+    as: 'Option',
+    nullable: true,
+  }),
 }) {}
-
-// Club invitation link table schema

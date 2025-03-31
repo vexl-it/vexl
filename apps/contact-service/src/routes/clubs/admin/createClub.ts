@@ -23,7 +23,9 @@ export const createClub = Handler.make(CreateClubEndpoint, (req) =>
         return yield* _(new ClubAlreadyExistsError())
       }
 
-      const createdClub = yield* _(clubsDb.insertClub(req.body.club))
+      const createdClub = yield* _(
+        clubsDb.insertClub({...req.body.club, madeInactiveAt: Option.none()})
+      )
       return {
         clubInfo: createdClub,
       }

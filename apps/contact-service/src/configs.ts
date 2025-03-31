@@ -48,3 +48,11 @@ export const adminTokenConfigHash = Config.string('ADMIN_TOKEN_HASH')
 export const expoAccessTokenConfig = Config.string('EXPO_ACCESS_TOKEN')
 
 export const ClubLinkTemplateConfig = Config.string('CLUB_LINK_TEMPLATE')
+
+export const clubRemoveAfterMarkedAsDeletedDaysConfig = Config.number(
+  'CLUB_REMOVE_AFTER_MARKED_AS_DELETED_DAYS'
+)
+
+export const clubMemberExpirationAfterDaysOfInactivityConfig = Config.number(
+  'CLUB_MEMBER_EXPIRATION_AFTER_DAYS_OF_INACTIVITY'
+)

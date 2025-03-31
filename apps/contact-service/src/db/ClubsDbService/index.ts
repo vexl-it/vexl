@@ -15,10 +15,16 @@ import {
   type InsertClubParams,
 } from './queries/createInsertClub'
 import {createListClubs} from './queries/createListClubs'
+import {createListExpiredClubs} from './queries/createListExpiredClubs'
+import {createListInactiveClubs} from './queries/createListInactiveClubs'
 import {
   createUpdateClub,
   type UpdateClubParams,
 } from './queries/createUpdateClub'
+import {
+  createUpdateSetClubsInactive,
+  type UpdateSetClubsInactiveParams,
+} from './queries/createUpdateSetClubsInactive'
 
 export interface ClubsDbOperations {
   deleteClub: (
@@ -36,7 +42,18 @@ export interface ClubsDbOperations {
   updateClub: (
     params: UpdateClubParams
   ) => Effect.Effect<ClubDbRecord, UnexpectedServerError>
+  updateSetClubsInactive: (
+    params: UpdateSetClubsInactiveParams
+  ) => Effect.Effect<ClubDbRecord, UnexpectedServerError>
   listClubs: () => Effect.Effect<readonly ClubDbRecord[], UnexpectedServerError>
+  listExpiredClubs: () => Effect.Effect<
+    readonly ClubDbRecord[],
+    UnexpectedServerError
+  >
+  listInactiveClubs: () => Effect.Effect<
+    readonly ClubDbRecord[],
+    UnexpectedServerError
+  >
 }
 
 export class ClubsDbService extends Context.Tag('ClubsDbService')<
@@ -51,7 +68,10 @@ export class ClubsDbService extends Context.Tag('ClubsDbService')<
       const findClubByUuid = yield* _(createFindClubByUuid)
       const insertClub = yield* _(createInsertClub)
       const updateClub = yield* _(createUpdateClub)
+      const updateSetClubsInactive = yield* _(createUpdateSetClubsInactive)
       const listClubs = yield* _(createListClubs)
+      const listExpiredClubs = yield* _(createListExpiredClubs)
+      const listInactiveClubs = yield* _(createListInactiveClubs)
 
       return {
         deleteClub,
@@ -59,7 +79,10 @@ export class ClubsDbService extends Context.Tag('ClubsDbService')<
         findClubByUuid,
         insertClub,
         updateClub,
+        updateSetClubsInactive,
         listClubs,
+        listExpiredClubs,
+        listInactiveClubs,
       }
     })
   )

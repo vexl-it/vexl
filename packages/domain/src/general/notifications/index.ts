@@ -85,6 +85,16 @@ export class AdmitedToClubNetworkNotificationData extends Schema.Class<AdmitedTo
     Schema.encodeSync(AdmitedToClubNetworkNotificationData)(this)
 }
 
+export class ClubDeactivatedNotificationData extends Schema.Class<ClubDeactivatedNotificationData>(
+  'ClubDeactivatedNotificationData'
+)({
+  clubUuid: ClubUuid,
+  reason: Schema.Literal('EXPIRED', 'FLAGGED', 'OTHER'),
+}) {
+  toData = (): Record<string, string> =>
+    Schema.encodeSync(ClubDeactivatedNotificationData)(this)
+}
+
 export class OpenBrowserLinkNotificationData extends Schema.Class<OpenBrowserLinkNotificationData>(
   'OpenBrowserLinkNotificationData'
 )({

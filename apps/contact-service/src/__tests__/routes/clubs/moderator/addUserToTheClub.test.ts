@@ -345,6 +345,8 @@ describe('Add user to the club', () => {
           clubDb.updateClub({
             id: clubId,
             data: {
+              madeInactiveAt: Option.none(),
+
               ...club,
               membersCountLimit: 100,
             },

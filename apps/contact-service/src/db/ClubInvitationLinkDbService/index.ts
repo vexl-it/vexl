@@ -6,9 +6,17 @@ import {
   type DeleteClubInvivationLinkParams,
 } from './queries/createDeleteInvitationLink'
 import {
+  createDeleteInvitationLinksForClub,
+  type DeleteClubInvitationLinksForClubParams,
+} from './queries/createDeleteInvitationLinksForClub'
+import {
   createFindInvitationLinkByCode,
   type FindInvitationLinkbyCodeParams,
 } from './queries/createFindInvitationLinkByCode'
+import {
+  createFindInvitationLinkByClubId,
+  type FindInvitationLinkByClubIdParams,
+} from './queries/createFindInvitationLinksByClubId'
 import {
   createFindInvitationLinkByClubIdAndMemberId,
   type FindInvitationLinkByClubIdAndMemberIdParams,
@@ -22,12 +30,18 @@ export interface ClubInvitationLinkDbOperations {
   deleteInvitationLink: (
     params: DeleteClubInvivationLinkParams
   ) => Effect.Effect<void, UnexpectedServerError>
+  deleteInvitationLinksForClub: (
+    params: DeleteClubInvitationLinksForClubParams
+  ) => Effect.Effect<void, UnexpectedServerError>
   findInvitationLinkByCode: (
     params: FindInvitationLinkbyCodeParams
   ) => Effect.Effect<
     Option.Option<ClubInvitationLinkRecord>,
     UnexpectedServerError
   >
+  findInvitationLinkByClubId: (
+    params: FindInvitationLinkByClubIdParams
+  ) => Effect.Effect<readonly ClubInvitationLinkRecord[], UnexpectedServerError>
   findInvitationLinkByClubIdAndMemberId: (
     params: FindInvitationLinkByClubIdAndMemberIdParams
   ) => Effect.Effect<readonly ClubInvitationLinkRecord[], UnexpectedServerError>
@@ -43,14 +57,23 @@ export class ClubInvitationLinkDbService extends Context.Tag(
     ClubInvitationLinkDbService,
     Effect.gen(function* (_) {
       const deleteInvitationLink = yield* _(createDeleteInvitationLink)
+      const deleteInvitationLinksForClub = yield* _(
+        createDeleteInvitationLinksForClub
+      )
       const findInvitationLinkByCode = yield* _(createFindInvitationLinkByCode)
       const findInvitationLinkByClubIdAndMemberId = yield* _(
         createFindInvitationLinkByClubIdAndMemberId
       )
+      const findInvitationLinkByClubId = yield* _(
+        createFindInvitationLinkByClubId
+      )
       const insertInvitationLink = yield* _(createInsertInvitationLink)
+
       return {
         deleteInvitationLink,
+        deleteInvitationLinksForClub,
         findInvitationLinkByCode,
+        findInvitationLinkByClubId,
         findInvitationLinkByClubIdAndMemberId,
         insertInvitationLink,
       }

@@ -23,7 +23,10 @@ export const modifyClub = Handler.make(ModfiyClubEndpoint, (req) =>
       const modifiedClub = yield* _(
         clubsDb.updateClub({
           id: existingClub.id,
-          data: req.body.clubInfo,
+          data: {
+            ...req.body.clubInfo,
+            madeInactiveAt: existingClub.madeInactiveAt,
+          },
         })
       )
       return {

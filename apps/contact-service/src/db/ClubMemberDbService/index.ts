@@ -6,6 +6,14 @@ import {
   type CountClubMemebersParams,
 } from './queries/createCountClubMemebers'
 import {
+  createDeleteAllClubMemebers,
+  type DeleteAllClubMemberParams,
+} from './queries/createDeleteAllClubMembers'
+import {
+  createDeleteClubMembersLastActiveBefore,
+  type DeleteClubMembersLastActiveBeforeParams,
+} from './queries/createDeleteClubMembersLastActiveBefore'
+import {
   createDeleteClubMemeber,
   type DeleteClubMemberParams,
 } from './queries/createDeleteClubMemeber'
@@ -44,6 +52,12 @@ export interface ClubMembersDbOperations {
   ) => Effect.Effect<number, UnexpectedServerError>
   deleteClubMember: (
     params: DeleteClubMemberParams
+  ) => Effect.Effect<void, UnexpectedServerError>
+  deleteAllClubMembers: (
+    params: DeleteAllClubMemberParams
+  ) => Effect.Effect<void, UnexpectedServerError>
+  deleteClubMembersLastActiveBefore: (
+    params: DeleteClubMembersLastActiveBeforeParams
   ) => Effect.Effect<void, UnexpectedServerError>
   findClubMember: (
     params: FindClubMemberParams
@@ -86,6 +100,10 @@ export class ClubMembersDbService extends Context.Tag('ClubMembersDbService')<
       const updateIsModerator = yield* _(createUpdateIsModerator)
       const updateLastRefreshedAt = yield* _(CreateUpdateLastRefreshedAt)
       const updateNotificationToken = yield* _(createUpdateNotificationToken)
+      const deleteAllClubMembers = yield* _(createDeleteAllClubMemebers)
+      const deleteClubMembersLastActiveBefore = yield* _(
+        createDeleteClubMembersLastActiveBefore
+      )
 
       return {
         countClubMembers,
@@ -96,7 +114,9 @@ export class ClubMembersDbService extends Context.Tag('ClubMembersDbService')<
         queryAllClubMembers,
         updateIsModerator,
         updateLastRefreshedAt,
+        deleteClubMembersLastActiveBefore,
         updateNotificationToken,
+        deleteAllClubMembers,
       }
     })
   )

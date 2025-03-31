@@ -381,6 +381,7 @@ describe('Join club', () => {
             id: clubId,
             data: {
               ...club,
+              madeInactiveAt: Option.none(),
               membersCountLimit: 100,
             },
           })

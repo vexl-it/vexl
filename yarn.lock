@@ -6285,7 +6285,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@remix-run/express@npm:2.14.0, @remix-run/express@npm:^2.8.1":
+"@remix-run/express@npm:2.14.0":
   version: 2.14.0
   resolution: "@remix-run/express@npm:2.14.0"
   dependencies:
@@ -6297,6 +6297,21 @@ __metadata:
     typescript:
       optional: true
   checksum: b3eb3d35a815b1971d65c6e66d70408271fbaf1f9e64a7f08a818a140ff47bc4620f7a1b4edb954477fdcd705ec43844cbbda7a2b0af67cabce011245204b039
+  languageName: node
+  linkType: hard
+
+"@remix-run/express@npm:^2.16.3":
+  version: 2.16.4
+  resolution: "@remix-run/express@npm:2.16.4"
+  dependencies:
+    "@remix-run/node": 2.16.4
+  peerDependencies:
+    express: ^4.20.0
+    typescript: ^5.1.0
+  peerDependenciesMeta:
+    typescript:
+      optional: true
+  checksum: 2e56bb75f5286ed074a8b9df233aaa8f50ec3f46c470341bafbd474a85b388de8c5953630c361dd8f1b836a2ad26bfd9b8c470adb3f35388d661f046b69fbc2c
   languageName: node
   linkType: hard
 
@@ -6317,6 +6332,26 @@ __metadata:
     typescript:
       optional: true
   checksum: 91a54b464f2724967f826784f3b326a3593a070e5b177fa494a88801a6f78fb1a91756f95a79acd8bc93b79d9a2f96005ca74895e09677619b99219aeb714984
+  languageName: node
+  linkType: hard
+
+"@remix-run/node@npm:2.16.4":
+  version: 2.16.4
+  resolution: "@remix-run/node@npm:2.16.4"
+  dependencies:
+    "@remix-run/server-runtime": 2.16.4
+    "@remix-run/web-fetch": ^4.4.2
+    "@web3-storage/multipart-parser": ^1.0.0
+    cookie-signature: ^1.1.0
+    source-map-support: ^0.5.21
+    stream-slice: ^0.1.2
+    undici: ^6.11.1
+  peerDependencies:
+    typescript: ^5.1.0
+  peerDependenciesMeta:
+    typescript:
+      optional: true
+  checksum: 99dbeb1c0626889c1ee6bea9c580bbed88eec398a2cd186bf6cc395b9357af9055644da67212f4c235e9a7c6cd20a09bdc3206d8009b9ffe48b15ffb03de152a
   languageName: node
   linkType: hard
 
@@ -6344,6 +6379,13 @@ __metadata:
   version: 1.21.0
   resolution: "@remix-run/router@npm:1.21.0"
   checksum: d9477a7772053ad0ffcf03385cfb1a54e56f8a56d1f9f5062de3b1dfcbd019dd73282a00a5a72aa55c120771110982448c165c1405d64540aaef13051a8e45cc
+  languageName: node
+  linkType: hard
+
+"@remix-run/router@npm:1.23.0":
+  version: 1.23.0
+  resolution: "@remix-run/router@npm:1.23.0"
+  checksum: 6a403b7bc740f15185f3b68f90f98d4976fe231e819b44a0f0628783c4f31ca1072e3370c24b98488be3e4f68ecf51b20cb9463f20a5a6cf4c21929fc7721964
   languageName: node
   linkType: hard
 
@@ -6382,6 +6424,26 @@ __metadata:
     typescript:
       optional: true
   checksum: f70606f93e8ba04f8bfc1872c535d0d1abff0d68ed363ffcff493cd3e42592bd5554aba5c0aa3a5c6fc6b69ca2273a4e75c96ca6a38c263ab5dc9b80d7670aa7
+  languageName: node
+  linkType: hard
+
+"@remix-run/server-runtime@npm:2.16.4":
+  version: 2.16.4
+  resolution: "@remix-run/server-runtime@npm:2.16.4"
+  dependencies:
+    "@remix-run/router": 1.23.0
+    "@types/cookie": ^0.6.0
+    "@web3-storage/multipart-parser": ^1.0.0
+    cookie: ^0.7.2
+    set-cookie-parser: ^2.4.8
+    source-map: ^0.7.3
+    turbo-stream: 2.4.0
+  peerDependencies:
+    typescript: ^5.1.0
+  peerDependenciesMeta:
+    typescript:
+      optional: true
+  checksum: 4f69b04fb3e7c96ecd241bbd06bd5ab0d14dd6a2a27cccfc29d93705cd61a9a402f6b5c59b4077e481cadd66404d079acae9c2d8a4a0665196a1322eed8845dd
   languageName: node
   linkType: hard
 
@@ -11008,7 +11070,7 @@ __metadata:
   dependencies:
     "@remix-run/css-bundle": ^2.8.1
     "@remix-run/dev": ^2.8.1
-    "@remix-run/express": ^2.8.1
+    "@remix-run/express": ^2.16.3
     "@remix-run/node": ^2.8.1
     "@remix-run/react": ^2.8.1
     "@remix-run/serve": ^2.8.1
@@ -13497,6 +13559,13 @@ __metadata:
   version: 0.6.0
   resolution: "cookie@npm:0.6.0"
   checksum: f56a7d32a07db5458e79c726b77e3c2eff655c36792f2b6c58d351fb5f61531e5b1ab7f46987150136e366c65213cbe31729e02a3eaed630c3bf7334635fb410
+  languageName: node
+  linkType: hard
+
+"cookie@npm:^0.7.2":
+  version: 0.7.2
+  resolution: "cookie@npm:0.7.2"
+  checksum: 9bf8555e33530affd571ea37b615ccad9b9a34febbf2c950c86787088eb00a8973690833b0f8ebd6b69b753c62669ea60cec89178c1fb007bf0749abed74f93e
   languageName: node
   linkType: hard
 

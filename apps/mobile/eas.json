@@ -110,11 +110,20 @@
         "appleTeamId": "KQNTW88PVA"
       }
     },
-    "production": {
+    "productionPlayStore": {
       "android": {
         "track": "internal",
         "changesNotSentForReview": true
-      },
+      }
+    },
+    "productionTestFlight": {
+      "ios": {
+        "bundleIdentifier": "it.vexl.next",
+        "ascAppId": "6448051657",
+        "appleTeamId": "KQNTW88PVA"
+      }
+    },
+    "productionAltStore": {
       "ios": {
         "bundleIdentifier": "it.vexl.next",
         "ascAppId": "6448051657",

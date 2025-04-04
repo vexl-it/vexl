@@ -1,10 +1,28 @@
 name: "[Release] build eas production"
 run-name: "Run on commit ${{github.sha}}"
 
-on: workflow_dispatch
+on:
+  workflow_dispatch:
+    inputs:
+      altStore:
+        description: "Build for AltStore"
+        required: false
+        type: boolean
+        default: false
+      testFlight:
+        description: "Build for TestFlight"
+        required: false
+        type: boolean
+        default: false
+      playStore:
+        description: "Build for PlayStore"
+        required: false
+        type: boolean
+        default: false
+
 jobs:
-  build:
-    name: Install and build
+  setup:
+    name: Setup Environment
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -23,7 +41,37 @@ jobs:
         env:
           GOOGLE_SERVICE_ACCOUNT: ${{ secrets.GOOGLE_SERVICE_ACCOUNT }}
         run: |
-          mkdir apps/mobile/credentials && echo $GOOGLE_SERVICE_ACCOUNT > apps/mobile/credentials/google.json
-      - name: Build on EAS
-        run: eas build --platform all --profile production --auto-submit --non-interactive --no-wait
+          mkdir -p apps/mobile/credentials && echo $GOOGLE_SERVICE_ACCOUNT > apps/mobile/credentials/google.json
+
+  altStore:
+    name: Build for AltStore
+    needs: setup
+    runs-on: ubuntu-latest
+    if: ${{ inputs.altStore == 'true' }}
+    steps:
+      - name: Build on EAS for AltStore
+        run: |
+          eas build --platform ios --profile productionAltStore --auto-submit --non-interactive --no-wait
+        working-directory: apps/mobile
+
+  testFlight:
+    name: Build for TestFlight
+    needs: setup
+    runs-on: ubuntu-latest
+    if: ${{ inputs.testFlight == 'true' }}
+    steps:
+      - name: Build on EAS for TestFlight
+        run: |
+          eas build --platform ios --profile productionTestFlight --auto-submit --non-interactive --no-wait
+        working-directory: apps/mobile
+
+  playStore:
+    name: Build for PlayStore
+    needs: setup
+    runs-on: ubuntu-latest
+    if: ${{ inputs.playStore == 'true' }}
+    steps:
+      - name: Build on EAS for PlayStore
+        run: |
+          eas build --platform android --profile productionPlayStore --auto-submit --non-interactive --no-wait
         working-directory: apps/mobile

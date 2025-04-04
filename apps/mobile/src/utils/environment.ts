@@ -1,5 +1,7 @@
 import {SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
+import {AppSource} from '@vexl-next/rest-api/src/commonHeaders'
+import {Option, Schema} from 'effect'
 import Constants from 'expo-constants'
 
 export const enableHiddenFeatures =
@@ -30,3 +32,7 @@ export const isProd = apiPreset === 'prodEnv'
 export const commitHash = String(
   Constants.expoConfig?.extra?.commitHash ?? 'local'
 )
+
+export const appSource = Schema.decodeUnknownOption(AppSource)(
+  Constants.expoConfig?.extra?.appSource
+).pipe(Option.getOrElse(() => 'unknown' as const))

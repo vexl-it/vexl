@@ -11,3 +11,5 @@ export const orElseSchema =
         encode: (literal) => literal,
       })
     )
+
+export const nullFallbackSchema = orElseSchema(null)

@@ -1,11 +1,11 @@
 import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
-import {Effect, Schema} from 'effect'
+import {Effect} from 'effect'
 import {type PlatformName} from '../../PlatformName'
 import {type ServiceUrl} from '../../ServiceUrl.brand'
 import {type GetUserSessionCredentials} from '../../UserSessionCredentials.brand'
 import {createClientInstanceWithAuth} from '../../client'
-import {CommonHeaders} from '../../commonHeaders'
+import {makeCommonHeaders, type AppSource} from '../../commonHeaders'
 import {
   handleCommonAndExpectedErrorsEffect,
   handleCommonErrorsEffect,
@@ -40,13 +40,14 @@ import {
 } from './contracts'
 import {ChatApiSpecification} from './specification'
 
-const decodeCommonHeaders = Schema.decodeSync(CommonHeaders)
-
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function api({
   platform,
   clientVersion,
   clientSemver,
+  language,
+  isDeveloper,
+  appSource,
   url,
   getUserSessionCredentials,
   loggingFunction,
@@ -54,6 +55,10 @@ export function api({
   platform: PlatformName
   clientVersion: VersionCode
   clientSemver: SemverString
+  isDeveloper: boolean
+  language: string
+  appSource: AppSource
+
   url: ServiceUrl
   getUserSessionCredentials: GetUserSessionCredentials
   loggingFunction?: LoggingFunction | null
@@ -63,14 +68,22 @@ export function api({
     platform,
     clientVersion,
     clientSemver,
+    language,
+    isDeveloper,
+    appSource,
     getUserSessionCredentials,
     url,
     loggingFunction,
   })
 
-  const commonHeaders = {
-    'user-agent': `Vexl/${clientVersion} (${clientSemver}) ${platform}`,
-  }
+  const commonHeaders = makeCommonHeaders({
+    appSource,
+    versionCode: clientVersion,
+    semver: clientSemver,
+    platform,
+    isDeveloper,
+    language,
+  })
 
   const addChallenge = addChallengeToRequest(client)
 
@@ -94,7 +107,7 @@ export function api({
           handleCommonErrorsEffect(
             client.createInbox({
               body,
-              headers: decodeCommonHeaders(commonHeaders),
+              headers: commonHeaders,
             })
           )
         )
@@ -170,7 +183,7 @@ export function api({
           handleCommonAndExpectedErrorsEffect(
             client.retrieveMessages({
               body,
-              headers: decodeCommonHeaders(commonHeaders),
+              headers: commonHeaders,
             }),
             RetrieveMessagesErrors
           )

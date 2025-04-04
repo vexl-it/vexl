@@ -5,18 +5,26 @@ import {
 import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {Array, Either, Number, Option, Schema, String} from 'effect'
 import {PlatformName} from './PlatformName'
-import {
-  HEADER_CLIENT_VERSION,
-  HEADER_CRYPTO_VERSION,
-  HEADER_PLATFORM,
-} from './constants'
+import {HEADER_CLIENT_VERSION, HEADER_PLATFORM} from './constants'
 
+export const AppSource = Schema.Literal(
+  'playStore',
+  'appStore',
+  'altStore',
+  'APK',
+  'local',
+  'account-deletion-page',
+  'unknown'
+)
+export type AppSource = typeof AppSource.Type
+
+// used for backwards compatibility only. Use Vexl App metaHeader instead
 export const VexlAppUserAgentHeader = Schema.TaggedStruct(
   'VexlAppUserAgentHeader' as const,
   {
     platform: PlatformName,
     versionCode: VersionCode,
-    semver: Schema.optionalWith(SemverStringE, {as: 'Option'}),
+    semver: Schema.optionalWith(SemverStringE, {as: 'Option', nullable: true}),
   }
 )
 export type UserAgentHeader = Schema.Schema.Type<typeof VexlAppUserAgentHeader>
@@ -28,6 +36,16 @@ export const UnknownUserAgentHeader = Schema.TaggedStruct(
   }
 )
 export type UnknownUserAgentHeader = typeof UnknownUserAgentHeader.Type
+
+export const VexlAppMetaHeader = Schema.Struct({
+  platform: PlatformName,
+  versionCode: VersionCode,
+  semver: SemverStringE,
+  appSource: AppSource,
+  language: Schema.String,
+  isDeveloper: Schema.Boolean,
+})
+export type VexlAppMetaHeader = Schema.Schema.Type<typeof VexlAppMetaHeader>
 
 export const UserAgentHeader = Schema.Union(
   VexlAppUserAgentHeader,
@@ -120,17 +138,19 @@ export const UserAgentHeaderFromString = Schema.transform(
 export class CommonHeaders extends Schema.Class<CommonHeaders>('CommonHeaders')(
   {
     'user-agent': UserAgentHeaderFromString,
+    'vexl-app-meta': Schema.optional(Schema.parseJson(VexlAppMetaHeader)),
     [HEADER_CLIENT_VERSION]: Schema.optionalWith(
       Schema.compose(Schema.NumberFromString, VersionCode),
       {as: 'Option'}
     ),
     [HEADER_PLATFORM]: Schema.optionalWith(PlatformName, {as: 'Option'}),
-    [HEADER_CRYPTO_VERSION]: Schema.optionalWith(Schema.NumberFromString, {
-      as: 'Option',
-    }),
   }
 ) {
   get clientVersionOrNone(): Option.Option<VersionCode> {
+    if (this['vexl-app-meta']) {
+      return Option.some(this['vexl-app-meta'].versionCode)
+    }
+
     if (this['user-agent']._tag === 'VexlAppUserAgentHeader') {
       return Option.some(this['user-agent'].versionCode)
     }
@@ -138,6 +158,10 @@ export class CommonHeaders extends Schema.Class<CommonHeaders>('CommonHeaders')(
   }
 
   get clientSemverOrNone(): Option.Option<SemverString> {
+    if (this['vexl-app-meta']) {
+      return Option.some(this['vexl-app-meta'].semver)
+    }
+
     if (this['user-agent']._tag === 'VexlAppUserAgentHeader') {
       return this['user-agent'].semver
     }
@@ -145,9 +169,53 @@ export class CommonHeaders extends Schema.Class<CommonHeaders>('CommonHeaders')(
   }
 
   get clientPlatformOrNone(): Option.Option<PlatformName> {
+    if (this['vexl-app-meta']) {
+      return Option.some(this['vexl-app-meta'].platform)
+    }
+
     if (this['user-agent']._tag === 'VexlAppUserAgentHeader') {
       return Option.some(this['user-agent'].platform)
     }
     return this[HEADER_PLATFORM]
   }
+
+  get appSourceOrNone(): Option.Option<AppSource> {
+    if (this['vexl-app-meta']) {
+      return Option.some(this['vexl-app-meta'].appSource)
+    }
+
+    return Option.none()
+  }
+
+  get language(): Option.Option<string> {
+    if (this['vexl-app-meta']) {
+      return Option.some(this['vexl-app-meta'].language)
+    }
+
+    return Option.none()
+  }
+
+  get isDeveloper(): boolean {
+    if (this['vexl-app-meta']) {
+      return this['vexl-app-meta'].isDeveloper
+    }
+
+    return false
+  }
+}
+
+export const makeCommonHeaders = (
+  VexlAppMetaHeader: VexlAppMetaHeader
+): typeof CommonHeaders.Type => {
+  return new CommonHeaders({
+    'vexl-app-meta': VexlAppMetaHeader,
+    'user-agent': {
+      _tag: 'VexlAppUserAgentHeader',
+      platform: VexlAppMetaHeader.platform,
+      versionCode: VexlAppMetaHeader.versionCode,
+      semver: Option.some(VexlAppMetaHeader.semver),
+    },
+    [HEADER_CLIENT_VERSION]: Option.some(VexlAppMetaHeader.versionCode),
+    [HEADER_PLATFORM]: Option.some(VexlAppMetaHeader.platform),
+  })
 }

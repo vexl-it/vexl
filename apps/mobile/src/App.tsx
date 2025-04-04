@@ -7,8 +7,8 @@ import AnimatedSplashScreen from './AnimatedSplashScreen'
 import AreYouSureDialog from './components/AreYouSureDialog'
 import BadgeCountManager from './components/BadgeCountManager'
 import DisableLogBoxForTests from './components/DisableLogBoxForTests'
+import {OverlayInfoScreen} from './components/FullscreenWarningScreen'
 import LoadingOverlayProvider from './components/LoadingOverlayProvider'
-import MaintenanceAndForceUpdateCheck from './components/MaintenanceAndForceUpdateCheck'
 import PhoneNumberHashBugMigration from './components/PhoneNumberHashBugMigration'
 import PreventScreenshots from './components/PreventScreenshots'
 import RootNavigation from './components/RootNavigation'
@@ -44,7 +44,7 @@ function App(): JSX.Element {
         }}
       >
         <LoadingOverlayProvider>
-          <MaintenanceAndForceUpdateCheck>
+          <OverlayInfoScreen>
             <VersionMigrations>
               <PhoneNumberHashBugMigration>
                 <GestureHandlerRootView style={{flex: 1}}>
@@ -53,7 +53,7 @@ function App(): JSX.Element {
               </PhoneNumberHashBugMigration>
             </VersionMigrations>
             <UploadingOfferProgressModal />
-          </MaintenanceAndForceUpdateCheck>
+          </OverlayInfoScreen>
         </LoadingOverlayProvider>
         <AreYouSureDialog />
         <ToastNotification />

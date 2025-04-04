@@ -1,3 +1,5 @@
+import {HttpsUrlString} from '@vexl-next/domain/src/utility/HttpsUrlString.brand'
+import {UuidE} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {Schema} from 'effect'
 
 export const Speaker = Schema.Struct({
@@ -37,4 +39,44 @@ export type EventsResponse = typeof EventsResponse.Type
 export const ClearEventsCacheRequest = Schema.Struct({
   token: Schema.String,
 })
-// export type ClearEventsCacheRequest = typeof ClearEventsCacheRequest.Type
+
+export const VexlBotNews = Schema.Struct({
+  id: UuidE,
+  content: Schema.String,
+  type: Schema.Literal('info', 'warning'),
+  action: Schema.Struct({
+    text: Schema.String,
+    url: HttpsUrlString,
+  }).pipe(Schema.optionalWith({as: 'Option'})),
+  cancelForever: Schema.Boolean,
+  bubbleOrigin: Schema.optionalWith(
+    Schema.Struct({
+      title: Schema.String,
+      subtitle: Schema.String,
+    }),
+    {as: 'Option'}
+  ),
+  cancelable: Schema.Boolean,
+})
+export type VexlBotNews = typeof VexlBotNews.Type
+
+export const FullScreenWarning = Schema.Struct({
+  id: UuidE,
+  type: Schema.Literal('RED', 'YELLOW', 'GREEN'),
+  title: Schema.String,
+  description: Schema.String,
+  cancelForever: Schema.Boolean,
+  action: Schema.Struct({
+    text: Schema.String,
+    url: HttpsUrlString,
+  }).pipe(Schema.optionalWith({as: 'Option'})),
+  cancelable: Schema.Boolean,
+})
+export type FullScreenWarning = typeof FullScreenWarning.Type
+
+export const NewsAndAnnouncementsResponse = Schema.Struct({
+  vexlBotNews: Schema.Array(VexlBotNews),
+  fullScreenWarning: Schema.optionalWith(FullScreenWarning, {as: 'Option'}),
+})
+export type NewsAndAnnouncementsResponse =
+  typeof NewsAndAnnouncementsResponse.Type

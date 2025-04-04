@@ -8,23 +8,19 @@ import {
 } from '@effect/platform'
 import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
-import {Context, Effect, Layer, Option, Schema, type Scope} from 'effect'
+import {Context, Effect, Layer, Schema, type Scope} from 'effect'
 import {Client, type Api} from 'effect-http'
 import {type PlatformName} from './PlatformName'
 import {type ServiceUrl} from './ServiceUrl.brand'
 import {type GetUserSessionCredentials} from './UserSessionCredentials.brand'
-import {CommonHeaders} from './commonHeaders'
 import {
-  HEADER_CLIENT_VERSION,
-  HEADER_CRYPTO_VERSION,
-  HEADER_HASH,
-  HEADER_PLATFORM,
-  HEADER_PUBLIC_KEY,
-  HEADER_SIGNATURE,
-} from './constants'
+  CommonHeaders,
+  makeCommonHeaders,
+  type AppSource,
+  type VexlAppMetaHeader,
+} from './commonHeaders'
+import {HEADER_HASH, HEADER_PUBLIC_KEY, HEADER_SIGNATURE} from './constants'
 import {type LoggingFunction} from './utils'
-
-const encodeCommonHeaders = Schema.encodeSync(CommonHeaders)
 
 function stripSensitiveHeaders(headers: Headers.Headers): Headers.Headers {
   if (!headers) return headers
@@ -48,6 +44,9 @@ export interface ClientProps<A> {
   platform: PlatformName
   clientVersion: VersionCode
   clientSemver: SemverString
+  appSource: AppSource
+  isDeveloper: boolean
+  language: string
   getUserSessionCredentials?: GetUserSessionCredentials
   url: ServiceUrl
   loggingFunction?: LoggingFunction | null
@@ -55,11 +54,11 @@ export interface ClientProps<A> {
 
 const makeClient = ({
   loggingFunction,
-  commonHeaders,
+  vexlAppMetaHeader,
   getUserSessionCredentials,
 }: {
   loggingFunction?: LoggingFunction | null
-  commonHeaders: CommonHeaders
+  vexlAppMetaHeader: VexlAppMetaHeader
   getUserSessionCredentials?: GetUserSessionCredentials
 }): HttpClient.HttpClient<HttpClientError.HttpClientError, Scope.Scope> =>
   FetchHttpClient.layer.pipe(
@@ -86,7 +85,9 @@ const makeClient = ({
 
           return request.pipe(
             HttpClientRequest.setHeaders({
-              ...encodeCommonHeaders(commonHeaders),
+              ...Schema.encodeSync(CommonHeaders)(
+                makeCommonHeaders(vexlAppMetaHeader)
+              ),
               ...(getUserSessionCredentials && {
                 [HEADER_PUBLIC_KEY]: getUserSessionCredentials().publicKey,
                 [HEADER_SIGNATURE]: getUserSessionCredentials().signature,
@@ -213,27 +214,27 @@ export function createClientInstanceWithAuth<A extends Api.Api.Any>({
   platform,
   clientVersion,
   clientSemver,
+  isDeveloper,
+  appSource,
+  language,
   getUserSessionCredentials,
   url,
   loggingFunction,
 }: ClientProps<A>): Client.Client<A> {
-  const commonHeaders = new CommonHeaders({
-    'user-agent': {
-      _tag: 'VexlAppUserAgentHeader' as const,
-      platform,
-      versionCode: clientVersion,
-      semver: Option.some(clientSemver),
-    },
-    [HEADER_PLATFORM]: Option.some(platform),
-    [HEADER_CLIENT_VERSION]: Option.some(clientVersion),
-    [HEADER_CRYPTO_VERSION]: Option.some(2),
-  })
+  const vexlAppMetaHeader: VexlAppMetaHeader = {
+    platform,
+    versionCode: clientVersion,
+    semver: clientSemver,
+    appSource,
+    language,
+    isDeveloper,
+  }
 
   return Client.make(api, {
     baseUrl: url,
     httpClient: makeClient({
       loggingFunction,
-      commonHeaders,
+      vexlAppMetaHeader,
       getUserSessionCredentials,
     }),
   })

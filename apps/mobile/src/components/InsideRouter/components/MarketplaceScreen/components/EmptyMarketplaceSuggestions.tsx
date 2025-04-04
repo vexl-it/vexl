@@ -12,6 +12,7 @@ import {showClubsFlowAtom} from '../../../../../utils/preferences'
 import MarketplaceSuggestion from '../../../../MarketplaceSuggestion'
 import usePixelsFromBottomWhereTabsEnd from '../../../utils'
 import ImportNewContactsSuggestion from './ImportNewContactsSuggestion'
+import VexlNewsSuggestions from './VexlNewsSuggestions'
 
 interface Props {
   refreshing: boolean
@@ -36,6 +37,7 @@ function EmptyMarketplaceSuggestions({
       contentContainerStyle={{paddingBottom: tabBarEndsAt + 25}}
     >
       <YStack mt="$4" gap="$6">
+        <VexlNewsSuggestions />
         <MarketplaceSuggestion
           buttonText={t('myOffers.addNewOffer')}
           onButtonPress={() => {

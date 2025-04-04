@@ -11,7 +11,9 @@ import {apiAtom, apiEnv, platform} from '../../api'
 import {type Session} from '../../brands/Session.brand'
 import {hashPhoneNumber} from '../../state/contacts/utils'
 import {sessionAtom} from '../../state/session'
-import {version, versionCode} from '../../utils/environment'
+import {appSource, version, versionCode} from '../../utils/environment'
+import {translationAtom} from '../../utils/localization/I18nProvider'
+import {isDeveloperAtom} from '../../utils/preferences'
 import reportError from '../../utils/reportError'
 
 export default function PhoneNumberHashBugMigration({
@@ -75,6 +77,9 @@ export default function PhoneNumberHashBugMigration({
           clientVersion: versionCode,
           url: apiEnv.contactMs,
           getUserSessionCredentials: () => newCredentials,
+          isDeveloper: store.get(isDeveloperAtom),
+          language: store.get(translationAtom).t('localeName'),
+          appSource,
         })
 
         yield* _(

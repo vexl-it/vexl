@@ -39,6 +39,7 @@ import FilterButton from './FilterButton'
 import ImportNewContactsSuggestion from './ImportNewContactsSuggestion'
 import SearchOffers from './SearchOffers'
 import TotalOffersCount from './TotalOffersCount'
+import VexlNewsSuggestions from './VexlNewsSuggestions'
 
 function ListFooterComponent(): JSX.Element | null {
   const {t} = useTranslation()
@@ -131,6 +132,7 @@ function OffersListStateDisplayerContent(): JSX.Element {
                   )}
               </XStack>
               <ReencryptOffersSuggestion mb="$6" />
+              <VexlNewsSuggestions mb="$6" />
               <ImportNewContactsSuggestion mb="$6" />
               <AddListingTypeToOffersSuggestion mb="$6" />
             </Stack>

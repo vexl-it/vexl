@@ -18,7 +18,9 @@ import {Schema} from 'effect'
 import {atom} from 'jotai'
 import {Platform} from 'react-native'
 import {dummySession, sessionHolderAtom} from '../state/session'
-import {apiPreset, version, versionCode} from '../utils/environment'
+import {apiPreset, appSource, version, versionCode} from '../utils/environment'
+import {translationAtom} from '../utils/localization/I18nProvider'
+import {isDeveloperAtom} from '../utils/preferences'
 // import {ServiceUrl} from '@vexl-next/rest-api/src/ServiceUrl.brand'
 
 export const platform = Schema.decodeSync(PlatformName)(
@@ -60,68 +62,99 @@ export const apiAtom = atom((get) => {
     return session
   }
 
+  const {t} = get(translationAtom)
+  const language = t('localeName')
+  const isDeveloper = get(isDeveloperAtom)
+
   return {
     contact: contact.api({
+      language,
+      appSource,
       platform,
       clientVersion: versionCode,
       clientSemver: version,
       url: apiEnv.contactMs,
+      isDeveloper,
       getUserSessionCredentials,
     }),
     offer: offer.api({
+      language,
+      appSource,
       platform,
       clientSemver: version,
       clientVersion: versionCode,
       url: apiEnv.offerMs,
+      isDeveloper,
       getUserSessionCredentials,
     }),
     chat: chat.api({
+      language,
+      appSource,
       platform,
       clientVersion: versionCode,
       clientSemver: version,
       url: apiEnv.chatMs,
+      isDeveloper,
       getUserSessionCredentials,
     }),
     user: user.api({
+      language,
+      appSource,
       platform,
       clientVersion: versionCode,
       clientSemver: version,
       url: apiEnv.userMs,
+      isDeveloper,
       getUserSessionCredentials,
     }),
     location: location.api({
+      language,
+      appSource,
       platform,
       clientVersion: versionCode,
       clientSemver: version,
       url: apiEnv.locationMs,
+      isDeveloper,
       getUserSessionCredentials,
     }),
     notification: notification.api({
+      language,
+      appSource,
       platform,
       clientVersion: versionCode,
       clientSemver: version,
+      isDeveloper,
       url: apiEnv.notificationMs,
       getUserSessionCredentials,
     }),
     btcExchangeRate: btcExchangeRate.api({
+      language,
+      appSource,
       platform,
       clientVersion: versionCode,
       clientSemver: version,
       url: apiEnv.btcExchangeRateMs,
+      isDeveloper,
       getUserSessionCredentials,
     }),
     feedback: feedback.api({
+      language,
+      appSource,
       platform,
       clientVersion: versionCode,
       clientSemver: version,
       url: apiEnv.feedbackMs,
+      isDeveloper,
       getUserSessionCredentials,
     }),
     content: content.api({
+      language,
+      appSource,
       platform,
       clientVersion: versionCode,
       clientSemver: version,
       url: apiEnv.contentMs,
+      isDeveloper,
       getUserSessionCredentials,
     }),
   }

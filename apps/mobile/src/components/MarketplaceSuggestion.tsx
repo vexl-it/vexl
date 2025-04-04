@@ -13,11 +13,15 @@ import closeSvg from './images/closeSvg'
 import UserAvatar from './UserAvatar'
 
 interface Props extends YStackProps {
-  buttonText: string
+  buttonText?: string
   hideCloseButton?: boolean
   type?: 'warning' | 'info'
   onButtonPress: () => void
   text: string
+  origin?: {
+    title: string
+    subtitle: string
+  }
   visibleStateAtom?: WritableAtom<boolean, [visible: boolean], void>
 }
 
@@ -25,6 +29,7 @@ function MarketplaceSuggestion({
   buttonText,
   hideCloseButton,
   onButtonPress,
+  origin,
   type,
   text,
   visibleStateAtom: nullableVisibleStateAtom,
@@ -76,46 +81,56 @@ function MarketplaceSuggestion({
           />
           <Stack fs={1} ml="$2" jc="center">
             <XStack fs={1} flexWrap="wrap">
-              <Text col="$white" fos={16} ff="$body600">
-                {t('suggestion.vexl')}
-              </Text>
-              <Text> </Text>
-              {type === 'warning' ? (
-                <Text
-                  adjustsFontSizeToFit
-                  numberOfLines={1}
-                  col="$red"
-                  fos={16}
-                  ff="$body600"
-                >
-                  {t('suggestion.warns')}
+              {origin ? (
+                <Text col="$white" fos={16} ff="$body600">
+                  {origin.title}
                 </Text>
               ) : (
-                <Text
-                  adjustsFontSizeToFit
-                  numberOfLines={1}
-                  col="$main"
-                  fos={16}
-                  ff="$body600"
-                >
-                  {t('suggestion.suggests')}
-                </Text>
+                <>
+                  <Text col="$white" fos={16} ff="$body600">
+                    {t('suggestion.vexl')}
+                  </Text>
+                  <Text> </Text>
+                  {type === 'warning' ? (
+                    <Text
+                      adjustsFontSizeToFit
+                      numberOfLines={1}
+                      col="$red"
+                      fos={16}
+                      ff="$body600"
+                    >
+                      {t('suggestion.warns')}
+                    </Text>
+                  ) : (
+                    <Text
+                      adjustsFontSizeToFit
+                      numberOfLines={1}
+                      col="$main"
+                      fos={16}
+                      ff="$body600"
+                    >
+                      {t('suggestion.suggests')}
+                    </Text>
+                  )}
+                </>
               )}
             </XStack>
             <Text adjustsFontSizeToFit numberOfLines={2} col="$greyOnBlack">
-              {t('suggestion.yourAppGuide')}
+              {origin ? origin.subtitle : t('suggestion.yourAppGuide')}
             </Text>
           </Stack>
         </XStack>
-        <Stack maxWidth="70%">
-          <Button
-            numberOfLines={2}
-            size="medium"
-            text={buttonText}
-            onPress={onButtonPress}
-            variant={type === 'warning' ? 'redLight' : 'secondary'}
-          />
-        </Stack>
+        {!!buttonText && (
+          <Stack maxWidth="70%">
+            <Button
+              numberOfLines={2}
+              size="medium"
+              text={buttonText}
+              onPress={onButtonPress}
+              variant={type === 'warning' ? 'redLight' : 'secondary'}
+            />
+          </Stack>
+        )}
       </XStack>
     </YStack>
   )

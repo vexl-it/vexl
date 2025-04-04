@@ -141,7 +141,11 @@ function ChatTextInput(): JSX.Element | null {
                 {truncate(replyToMessage.message.text, 100, '...')}
               </Text>
             </YStack>
-            <Image source={CancelSvg} onPress={onExtraClearPressed} />
+            <Image
+              source={CancelSvg}
+              stroke={getTokens().color.main.val}
+              onPress={onExtraClearPressed}
+            />
           </XStack>
         )}
         {!!selectedImage && (
@@ -155,7 +159,11 @@ function ChatTextInput(): JSX.Element | null {
           >
             <XStack alignSelf="stretch" justifyContent="space-between">
               <Text color="$main">{t('messages.imageToSend')}</Text>
-              <Image source={CancelSvg} onPress={onExtraClearPressed} />
+              <Image
+                stroke={getTokens().color.main.val}
+                source={CancelSvg}
+                onPress={onExtraClearPressed}
+              />
             </XStack>
             <UriImageWithSizeLimits
               uri={selectedImage.uri}

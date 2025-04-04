@@ -13,9 +13,10 @@ import {atom} from 'jotai'
 import {apiAtom, apiEnv, platform} from '../../../../api'
 import {SessionE, type Session} from '../../../../brands/Session.brand'
 import {sessionAtom} from '../../../../state/session'
-import {version, versionCode} from '../../../../utils/environment'
+import {appSource, version, versionCode} from '../../../../utils/environment'
 import {translationAtom} from '../../../../utils/localization/I18nProvider'
 import {navigationRef} from '../../../../utils/navigation'
+import {isDeveloperAtom} from '../../../../utils/preferences'
 import reportError from '../../../../utils/reportError'
 import showErrorAlert from '../../../../utils/showErrorAlert'
 import {askAreYouSureActionAtom} from '../../../AreYouSureDialog'
@@ -47,6 +48,9 @@ const handleUserCreationActionAtom = atom(
       clientSemver: version,
       url: apiEnv.contactMs,
       getUserSessionCredentials: () => session.sessionCredentials,
+      appSource,
+      language: get(translationAtom).t('localeName'),
+      isDeveloper: get(isDeveloperAtom),
     })
 
     return contactApi
@@ -82,6 +86,9 @@ const deleteUserAndResetFlowActionAtom = atom(
       clientVersion: versionCode,
       url: apiEnv.userMs,
       getUserSessionCredentials: () => session.sessionCredentials,
+      isDeveloper: get(isDeveloperAtom),
+      language: get(translationAtom).t('localeName'),
+      appSource,
     })
 
     return userApi.deleteUser().pipe(
@@ -161,6 +168,9 @@ export const finishLoginActionAtom = atom(
         clientSemver: version,
         url: apiEnv.contactMs,
         getUserSessionCredentials: () => session.sessionCredentials,
+        isDeveloper: get(isDeveloperAtom),
+        language: get(translationAtom).t('localeName'),
+        appSource,
       })
 
       const userExists = yield* _(

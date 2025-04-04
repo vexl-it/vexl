@@ -9,11 +9,13 @@ import {RouterBuilder} from 'effect-http'
 import {NodeServer} from 'effect-http-node'
 import {cryptoConfig, healthServerPortConfig, portConfig} from './configs'
 import {clearEventsCacheHandler, getEventsHandler} from './handlers'
+import {newsAndAnonouncementsEndpoint} from './handlers/getNewsAndAnnonuncements'
 import {WebflowCmsService} from './utils/webflowCms'
 
 export const app = RouterBuilder.make(ContentApiSpecification).pipe(
   RouterBuilder.handle(getEventsHandler),
   RouterBuilder.handle(clearEventsCacheHandler),
+  RouterBuilder.handle(newsAndAnonouncementsEndpoint),
   RouterBuilder.build,
   setupLoggingMiddlewares
 )

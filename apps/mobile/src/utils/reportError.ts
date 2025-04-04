@@ -1,5 +1,6 @@
 import * as Sentry from '@sentry/react-native'
 import {initReportError} from '@vexl-next/resources-utils/src/reportErrorFromResourcesUtils'
+import {Effect} from 'effect'
 import {toExtraWithRemovedSensitiveData} from './removeSensitiveData'
 
 export type LogLvl = 'info' | 'warn' | 'error' | 'fatal'
@@ -49,5 +50,24 @@ function reportError(
 }
 
 export default reportError
+
+export const reportErrorE = (
+  lvl: LogLvl,
+  error: Error,
+  extra?: Record<string, unknown>
+): Effect.Effect<void> =>
+  Effect.sync(() => {
+    reportError(lvl, error, extra)
+  })
+
+export const ignoreReportErrors =
+  (lvl: LogLvl, message: string) =>
+  <A, E, R>(self: Effect.Effect<A, E, R>) =>
+    self.pipe(
+      Effect.tapError((e) =>
+        reportErrorE(lvl, new Error(message, {cause: e}), {e})
+      ),
+      Effect.ignore
+    )
 
 initReportError(reportError)

@@ -4,6 +4,7 @@ import {type PlatformName} from '../../PlatformName'
 import {type ServiceUrl} from '../../ServiceUrl.brand'
 import {type GetUserSessionCredentials} from '../../UserSessionCredentials.brand'
 import {createClientInstanceWithAuth} from '../../client'
+import {type AppSource, makeCommonHeaders} from '../../commonHeaders'
 import {handleCommonErrorsEffect, type LoggingFunction} from '../../utils'
 import {ContentApiSpecification} from './specification'
 
@@ -13,6 +14,9 @@ export function api({
   clientVersion,
   clientSemver,
   url,
+  isDeveloper,
+  language,
+  appSource,
   getUserSessionCredentials,
   loggingFunction,
 }: {
@@ -20,6 +24,9 @@ export function api({
   clientVersion: VersionCode
   clientSemver: SemverString
   url: ServiceUrl
+  language: string
+  isDeveloper: boolean
+  appSource: AppSource
   getUserSessionCredentials: GetUserSessionCredentials
   loggingFunction?: LoggingFunction | null
 }) {
@@ -28,13 +35,31 @@ export function api({
     platform,
     clientVersion,
     clientSemver,
+    language,
+    appSource,
+    isDeveloper,
     getUserSessionCredentials,
     url,
     loggingFunction,
   })
 
+  const commonHeaders = makeCommonHeaders({
+    appSource,
+    versionCode: clientVersion,
+    semver: clientSemver,
+    platform,
+    isDeveloper,
+    language,
+  })
+
   return {
     getEvents: () => handleCommonErrorsEffect(client.getEvents({})),
+    getNewsAndAnnoucements: () =>
+      handleCommonErrorsEffect(
+        client.getNewsAndAnnouncements({
+          headers: commonHeaders,
+        })
+      ),
   }
 }
 

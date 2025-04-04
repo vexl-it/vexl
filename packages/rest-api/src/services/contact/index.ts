@@ -1,8 +1,8 @@
 import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
-import {Effect, Schema} from 'effect'
+import {Effect} from 'effect'
 import {createClientInstanceWithAuth} from '../../client'
-import {CommonHeaders} from '../../commonHeaders'
+import {makeCommonHeaders, type AppSource} from '../../commonHeaders'
 import {type PlatformName} from '../../PlatformName'
 import {type ServiceUrl} from '../../ServiceUrl.brand'
 import {type GetUserSessionCredentials} from '../../UserSessionCredentials.brand'
@@ -36,14 +36,15 @@ import {
 } from './contracts'
 import {ContactApiSpecification} from './specification'
 
-const decodeCommonHeaders = Schema.decodeSync(CommonHeaders)
-
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function api({
   platform,
   clientVersion,
   clientSemver,
   url,
+  language,
+  isDeveloper,
+  appSource,
   getUserSessionCredentials,
   loggingFunction,
 }: {
@@ -51,6 +52,9 @@ export function api({
   clientVersion: VersionCode
   clientSemver: SemverString
   url: ServiceUrl
+  isDeveloper: boolean
+  language: string
+  appSource: AppSource
   getUserSessionCredentials: GetUserSessionCredentials
   loggingFunction?: LoggingFunction | null
 }) {
@@ -58,7 +62,10 @@ export function api({
     api: ContactApiSpecification,
     platform,
     clientVersion,
+    language,
+    appSource,
     clientSemver,
+    isDeveloper,
     getUserSessionCredentials,
     url,
     loggingFunction,
@@ -66,9 +73,14 @@ export function api({
 
   const addChallenge = addChallengeToRequest(client)
 
-  const commonHeaders = {
-    'user-agent': `Vexl/${clientVersion} (${clientSemver}) ${platform}`,
-  }
+  const commonHeaders = makeCommonHeaders({
+    appSource,
+    versionCode: clientVersion,
+    semver: clientSemver,
+    platform,
+    isDeveloper,
+    language,
+  })
 
   return {
     checkUserExists: (checkUserExistsInput: CheckUserExistsInput) =>
@@ -77,14 +89,14 @@ export function api({
       handleCommonErrorsEffect(
         client.createUser({
           body: createUserInput.body,
-          headers: decodeCommonHeaders(commonHeaders),
+          headers: commonHeaders,
         })
       ),
     refreshUser: (refreshUserInput: RefreshUserInput) =>
       handleCommonAndExpectedErrorsEffect(
         client.refreshUser({
           body: refreshUserInput.body,
-          headers: decodeCommonHeaders(commonHeaders),
+          headers: commonHeaders,
         }),
         UserNotFoundError
       ),
@@ -92,7 +104,7 @@ export function api({
       handleCommonErrorsEffect(
         client.updateNotificationToken({
           body,
-          headers: decodeCommonHeaders(commonHeaders),
+          headers: commonHeaders,
         })
       ),
     deleteUser: () => handleCommonErrorsEffect(client.deleteUser({})),

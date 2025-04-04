@@ -26,6 +26,9 @@ const apiMeta = {
   clientVersion: Schema.decodeSync(VersionCode)(0),
   clientSemver: Schema.decodeSync(SemverStringE)('0.0.1'),
   platform: 'WEB' as const,
+  language: 'en',
+  isDeveloper: false,
+  appSource: 'account-deletion-page' as const,
 }
 
 export function saveKeypair(keypair: PrivateKeyHolder): void {

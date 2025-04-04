@@ -14,8 +14,7 @@ import {
   UserApiSpecification,
 } from './specification'
 
-import {Schema} from 'effect'
-import {CommonHeaders} from '../../commonHeaders'
+import {makeCommonHeaders, type AppSource} from '../../commonHeaders'
 import {type SubmitFeedbackInput} from '../feedback/contracts'
 import {
   InitVerificationErrors,
@@ -32,6 +31,9 @@ export interface UserApiProps {
   platform: PlatformName
   clientVersion: VersionCode
   clientSemver: SemverString
+  language: string
+  isDeveloper: boolean
+  appSource: AppSource
   loggingFunction?: LoggingFunction | null
   getUserSessionCredentials?: GetUserSessionCredentials
 }
@@ -42,6 +44,9 @@ export function api({
   platform,
   clientVersion,
   clientSemver,
+  language,
+  isDeveloper,
+  appSource,
   getUserSessionCredentials,
   loggingFunction,
 }: UserApiProps) {
@@ -52,11 +57,19 @@ export function api({
     clientSemver,
     getUserSessionCredentials,
     url,
+    isDeveloper,
+    language,
+    appSource,
     loggingFunction,
   })
 
-  const commonHeaders = Schema.decodeSync(CommonHeaders)({
-    'user-agent': `Vexl/${clientVersion} (${clientSemver}) ${platform}`,
+  const commonHeaders = makeCommonHeaders({
+    appSource,
+    versionCode: clientVersion,
+    semver: clientSemver,
+    platform,
+    isDeveloper,
+    language,
   })
 
   return {

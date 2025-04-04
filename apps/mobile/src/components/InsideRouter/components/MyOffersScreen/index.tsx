@@ -13,6 +13,7 @@ import OffersList from '../../../OffersList'
 import ReencryptOffersSuggestion from '../../../ReencryptOffersSuggestion'
 import usePixelsFromBottomWhereTabsEnd from '../../utils'
 import ContainerWithTopBorderRadius from '../ContainerWithTopBorderRadius'
+import VexlNewsSuggestions from '../MarketplaceScreen/components/VexlNewsSuggestions'
 import MyOffersSortingDropdown from './components/MyOffersSortingDropdown'
 
 type Props = RootStackScreenProps<'MyOffers'>
@@ -22,6 +23,7 @@ const myActiveOffers = selectAtom(myActiveOffersAtom, (offers) => offers.length)
 function ListHeaderComponent(): JSX.Element {
   return (
     <Stack mt="$4">
+      <VexlNewsSuggestions mb="$6" />
       <ReencryptOffersSuggestion px="$0" />
     </Stack>
   )

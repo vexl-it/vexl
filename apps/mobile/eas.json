@@ -33,19 +33,38 @@
         "resourceClass": "large"
       },
       "env": {
-        "ENV_PRESET": "stage"
+        "ENV_PRESET": "stage",
+        "APP_SOURCE": "APK"
       },
       "channel": "staging-apk"
     },
-    "production": {
+    "productionPlayStore": {
       "android": {
         "credentialsSource": "remote"
       },
+      "env": {
+        "ENV_PRESET": "prod",
+        "APP_SOURCE": "playStore"
+      },
+      "channel": "production"
+    },
+    "productionTestFlight": {
       "ios": {
         "credentialsSource": "remote"
       },
       "env": {
-        "ENV_PRESET": "prod"
+        "ENV_PRESET": "prod",
+        "APP_SOURCE": "testFlight"
+      },
+      "channel": "production"
+    },
+    "productionAltStore": {
+      "ios": {
+        "credentialsSource": "remote"
+      },
+      "env": {
+        "ENV_PRESET": "prod",
+        "APP_SOURCE": "altStore"
       },
       "channel": "production"
     },
@@ -55,7 +74,8 @@
         "buildType": "apk"
       },
       "env": {
-        "ENV_PRESET": "prod"
+        "ENV_PRESET": "prod",
+        "APP_SOURCE": "APK"
       },
       "channel": "production-apk"
     },

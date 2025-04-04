@@ -4,6 +4,7 @@ const VERSION_CODE = 417
 const VERSION = '1.28.3'
 const ENV_PRESET = process.env.ENV_PRESET
 const COMMIT_HASH = process.env.EAS_BUILD_GIT_COMMIT_HASH ?? 'local'
+const APP_SOURCE = process.env.APP_SOURCE ?? 'local'
 
 // // check if version is valid
 // SemverString.parse(VERSION)
@@ -24,6 +25,7 @@ const presets = {
     hmacPassword:
       'UHQyykWs4nE1Yn8IQi/lsz2QemK3zA+JIWdGll3PEtle9/aMMBvQk6kKgYkjyewTiK0ypuquBSBVJwuSiYs8FQ==',
     commitHash: COMMIT_HASH,
+    appSource: APP_SOURCE,
   },
   prod: {
     enableHiddenFeatures: false,
@@ -40,6 +42,7 @@ const presets = {
     hmacPassword:
       'rv5AKXDcED4txmI5Nltz9eZFAHOI1VrLT3JWOpEZefE5uGInq53rfHkQLUIjaMUHv3hicbk/wtSKOfsNZ3aNNw==',
     commitHash: COMMIT_HASH,
+    appSource: APP_SOURCE,
   },
 }
 

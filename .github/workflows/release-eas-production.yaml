@@ -1,3 +1,25 @@
+name: "[Release] build eas production"
+run-name: "Run on commit ${{github.sha}}"
+
+on:
+  workflow_dispatch:
+    inputs:
+      altStore:
+        description: "Build for AltStore"
+        required: false
+        type: boolean
+        default: false
+      testFlight:
+        description: "Build for TestFlight"
+        required: false
+        type: boolean
+        default: false
+      playStore:
+        description: "Build for PlayStore"
+        required: false
+        type: boolean
+        default: false
+
 jobs:
   release:
     name: "[Release] Build selected targets"

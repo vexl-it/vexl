@@ -47,7 +47,7 @@ jobs:
     name: Build for AltStore
     needs: setup
     runs-on: ubuntu-latest
-    if: ${{ inputs.altStore == 'true' }}
+    if: ${{ inputs.altStore == 'true' || inputs.altStore == true }}
     steps:
       - name: Build on EAS for AltStore
         run: |
@@ -58,7 +58,7 @@ jobs:
     name: Build for TestFlight
     needs: setup
     runs-on: ubuntu-latest
-    if: ${{ inputs.testFlight == 'true' }}
+    if: ${{ inputs.testFlight == 'true' || inputs.testFlight == true }}
     steps:
       - name: Build on EAS for TestFlight
         run: |
@@ -69,7 +69,7 @@ jobs:
     name: Build for PlayStore
     needs: setup
     runs-on: ubuntu-latest
-    if: ${{ inputs.playStore == 'true' }}
+    if: ${{ inputs.playStore == 'true' || inputs.playStore == true }}
     steps:
       - name: Build on EAS for PlayStore
         run: |

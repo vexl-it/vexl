@@ -10145,7 +10145,7 @@ __metadata:
     ts-jest: ^29.2.0
     ts-node: ^10.9.1
     typescript: ^5.6.3
-    vite: ^5.4.12
+    vite: ^5.4.16
     ws: ^8.17.1
   languageName: unknown
   linkType: soft
@@ -11042,7 +11042,7 @@ __metadata:
     stream-browserify: ^3.0.0
     typescript: ^5.6.3
     util: ^0.12.5
-    vite: ^5.4.12
+    vite: ^5.4.16
     vite-plugin-node-polyfills: ^0.21.0
     zod: ^3.22.3
   languageName: unknown
@@ -30458,9 +30458,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vite@npm:^5.4.12":
-  version: 5.4.14
-  resolution: "vite@npm:5.4.14"
+"vite@npm:^5.4.16":
+  version: 5.4.17
+  resolution: "vite@npm:5.4.17"
   dependencies:
     esbuild: ^0.21.3
     fsevents: ~2.3.3
@@ -30497,7 +30497,7 @@ __metadata:
       optional: true
   bin:
     vite: bin/vite.js
-  checksum: 7360661da0415809454ff8809b6666e868ffc3e5ccfbd5fc17425341546cdc3dd3d37c68fcd6ed7305252aaecd0d251ede3745b57aaebd00b8aececc30b6697b
+  checksum: c3921629c49fc58a87678620f5537d88a002abb874254a1d8f9952808bb64669c353a2fe2723262f3af865f42042bc5e0e9ee4740190ad97263681f2c052c922
   languageName: node
   linkType: hard
 

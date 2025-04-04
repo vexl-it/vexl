@@ -2,41 +2,44 @@ import {
   type OfferPrivatePart,
   type OwnershipInfo,
 } from '@vexl-next/domain/src/general/offers'
-import {
-  toBasicError,
-  type BasicError,
-} from '@vexl-next/domain/src/utility/errors'
-import * as TE from 'fp-ts/TaskEither'
-import {pipe} from 'fp-ts/lib/function'
+import {Effect, Schema} from 'effect'
 
-export type UnknownConnectionLevelError =
-  BasicError<'UnknownConnectionLevelError'>
-export type NoAdminIdError = BasicError<'NoAdminIdError'>
+export class UnknownConnectionLevelError extends Schema.TaggedError<UnknownConnectionLevelError>(
+  'UnknownConnectionLevelError'
+)('UnknownConnectionLevelError', {
+  message: Schema.String,
+}) {}
+
+export class NoAdminIdError extends Schema.TaggedError<NoAdminIdError>(
+  'NoAdminIdError'
+)('NoAdminIdError', {
+  message: Schema.String,
+}) {}
 
 export default function extractOwnerInfoFromOwnerPrivatePayload(
   privatePart: OfferPrivatePart
-): TE.TaskEither<UnknownConnectionLevelError | NoAdminIdError, OwnershipInfo> {
-  return pipe(
-    TE.right(privatePart),
-    TE.bindTo('privatePart'),
-    TE.bindW('intendedConnectionLevel', ({privatePart}) => {
-      return TE.fromNullable(
-        toBasicError('UnknownConnectionLevelError')(
-          new Error('intendedConnection is not defined')
-        )
-      )(privatePart.intendedConnectionLevel)
-    }),
-    TE.bindW('adminId', ({privatePart}) => {
-      return TE.fromNullable(
-        toBasicError('NoAdminIdError')(new Error('adminId is not defined'))
-      )(privatePart.adminId)
-    }),
-    TE.map(
-      ({adminId, intendedConnectionLevel}) =>
-        ({
-          adminId,
-          intendedConnectionLevel,
-        }) satisfies OwnershipInfo
+): Effect.Effect<OwnershipInfo, UnknownConnectionLevelError | NoAdminIdError> {
+  return Effect.gen(function* (_) {
+    const intendedConnectionLevel = yield* _(
+      Effect.fromNullable(privatePart.intendedConnectionLevel),
+      Effect.mapError(
+        () =>
+          new UnknownConnectionLevelError({
+            message: 'IntendedConnection is not defined',
+          })
+      )
     )
-  )
+
+    const adminId = yield* _(
+      Effect.fromNullable(privatePart.adminId),
+      Effect.mapError(
+        () => new NoAdminIdError({message: 'AdminId is not defined'})
+      )
+    )
+
+    return {
+      adminId,
+      intendedConnectionLevel,
+    } satisfies OwnershipInfo
+  })
 }

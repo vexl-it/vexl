@@ -1,8 +1,6 @@
 import {type OfferEncryptionProgress} from '@vexl-next/resources-utils/src/offers/OfferEncryptionProgress'
-import * as T from 'fp-ts/Task'
-import {pipe} from 'fp-ts/lib/function'
+import {Effect, pipe} from 'effect'
 import {atom} from 'jotai'
-import {delayInPipeT} from '../../utils/fpUtils'
 import {translationAtom} from '../../utils/localization/I18nProvider'
 
 export interface ShownData {
@@ -81,9 +79,8 @@ export const offerProgressModalActionAtoms = {
       set(dataAtom, {mode: 'shown', ...data})
 
       return pipe(
-        T.Do,
-        T.chain(delayInPipeT(delayMs)),
-        T.map(() => {
+        Effect.sleep(delayMs),
+        Effect.tap(() => {
           set(dataAtom, {mode: 'hidden'})
         })
       )

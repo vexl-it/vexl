@@ -87,6 +87,7 @@ export const OffersFilter = z
     amountTopLimit: z.coerce.number().optional(),
     spokenLanguages: z.array(SpokenLanguage).default([]),
     text: z.string().optional(),
+    showClubOffers: z.boolean().optional(),
   })
   .readonly()
 

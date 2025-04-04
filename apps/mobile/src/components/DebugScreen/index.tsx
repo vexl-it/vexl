@@ -410,7 +410,7 @@ function DebugScreen(): JSX.Element {
               size="small"
               text="Refresh offers state"
               onPress={() => {
-                void refreshOffers().then(() => {
+                void Effect.runPromise(refreshOffers()).then(() => {
                   Alert.alert('done')
                 })
               }}

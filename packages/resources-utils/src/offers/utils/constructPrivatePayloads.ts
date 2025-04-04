@@ -39,9 +39,11 @@ export default function constructPrivatePayloads({
     secondDegreeConnections,
     commonFriends,
   },
+  clubsConnections,
   symmetricKey,
 }: {
   connectionsInfo: ConnectionsInfoForOffer
+  clubsConnections: PublicKeyPemBase64[]
   symmetricKey: SymmetricKey
 }): E.Either<ErrorConstructingPrivatePayloads, OfferPrivatePayloadToEncrypt[]> {
   return E.tryCatch(
@@ -50,7 +52,7 @@ export default function constructPrivatePayloads({
       // We can do that by iterating over firstDegreeFriends and secondDegreeFriends
       const friendLevel: Record<
         PublicKeyPemBase64,
-        Set<'FIRST_DEGREE' | 'SECOND_DEGREE'>
+        Set<'FIRST_DEGREE' | 'SECOND_DEGREE' | 'CLUB'>
       > = {}
       for (const firstDegreeFriendPublicKey of firstDegreeConnections) {
         friendLevel[firstDegreeFriendPublicKey] = new Set(['FIRST_DEGREE'])
@@ -63,14 +65,23 @@ export default function constructPrivatePayloads({
         else friendLevel[secondDegreeFriendPublicKey]?.add('SECOND_DEGREE')
       }
 
+      // There will be no duplicates but to keep code consistent
+      for (const clubFriendPublicKey of clubsConnections) {
+        if (!friendLevel[clubFriendPublicKey])
+          friendLevel[clubFriendPublicKey] = new Set(['CLUB'])
+        else friendLevel[clubFriendPublicKey]?.add('CLUB')
+      }
+
       return keys(friendLevel).map((key) => {
         const friendLevelValue = friendLevel[key]
         return {
           toPublicKey: key,
           payloadPrivate: {
-            commonFriends:
-              commonFriends.commonContacts.find((one) => one.publicKey === key)
-                ?.common?.hashes ?? [],
+            commonFriends: !friendLevelValue?.has('CLUB')
+              ? (commonFriends.commonContacts.find(
+                  (one) => one.publicKey === key
+                )?.common?.hashes ?? [])
+              : [],
             friendLevel: friendLevelValue ? Array.from(friendLevelValue) : [],
             symmetricKey,
           },

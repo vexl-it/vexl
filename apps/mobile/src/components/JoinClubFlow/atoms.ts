@@ -1,5 +1,5 @@
 import {ClubCode} from '@vexl-next/domain/src/general/clubs'
-import {eitherToEfect} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
+import {eitherToEffect} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {generateKeyPair} from '@vexl-next/resources-utils/src/utils/crypto'
 import {createScope, molecule} from 'bunshi/dist/react'
 import {Effect, Option, Schema} from 'effect'
@@ -7,7 +7,7 @@ import Camera, {type BarcodeScanningResult, type BarcodeType} from 'expo-camera'
 import {atom, type SetStateAction, type WritableAtom} from 'jotai'
 import {splitAtom} from 'jotai/utils'
 import {apiAtom} from '../../api'
-import {storedClubsAtom} from '../../state/contacts/atom/clubsStore'
+import {myStoredClubsAtom} from '../../state/contacts/atom/clubsStore'
 import {JoinClubFromLinkPayload} from '../../state/contacts/domain'
 import {LINK_TYPE_JOIN_CLUB} from '../../utils/deepLinks/domain'
 import {
@@ -76,7 +76,7 @@ export const accessCodeMolecule = molecule((_, getScope) => {
     const code = Schema.decodeSync(ClubCode)(get(accessCodeAtom).join(''))
 
     return Effect.gen(function* (_) {
-      const newKeypair = yield* _(eitherToEfect(generateKeyPair()))
+      const newKeypair = yield* _(eitherToEffect(generateKeyPair()))
       const notificationToken = yield* _(
         getNotificationTokenE(),
         Effect.map(Option.fromNullable)
@@ -89,10 +89,10 @@ export const accessCodeMolecule = molecule((_, getScope) => {
         })
       )
 
-      const storedClubs = get(storedClubsAtom)
+      const myStoredClubs = get(myStoredClubsAtom)
 
       // is user already in the club?
-      const keyPair = storedClubs[club.club.uuid] ?? newKeypair
+      const keyPair = myStoredClubs[club.club.uuid] ?? newKeypair
 
       yield* _(
         set(askAreYouSureActionAtom, {
@@ -127,7 +127,7 @@ export const accessCodeMolecule = molecule((_, getScope) => {
         })
       )
 
-      set(storedClubsAtom, (prevState) => ({
+      set(myStoredClubsAtom, (prevState) => ({
         ...prevState,
         [clubInfoForUser.club.uuid]: keyPair,
       }))
@@ -229,7 +229,7 @@ export const accessCodeMolecule = molecule((_, getScope) => {
         }
 
         const joinClubLinkData = yield* _(
-          eitherToEfect(parseJsonFp(data.value)),
+          eitherToEffect(parseJsonFp(data.value)),
           Effect.flatMap(Schema.decodeUnknown(JoinClubFromLinkPayload))
         )
 

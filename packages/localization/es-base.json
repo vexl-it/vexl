@@ -1156,5 +1156,7 @@
   "events.speakersOptional": "Speakers (optional)",
   "events.errorLoadingEvents": "Error loading events",
   "events.doYouWantToListYourMeetup": "Do you want to list your meetup?",
-  "events.getInTouchWithUs": "Get in touch with us"
+  "events.getInTouchWithUs": "Get in touch with us",
+  "events.loadMore": "Load more",
+  "events.allLoaded": "All loaded"
 }

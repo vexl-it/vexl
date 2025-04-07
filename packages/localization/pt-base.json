@@ -12,7 +12,7 @@
   "common.cancel": "Cancelar",
   "common.tryAgain": "Try again",
   "common.unknownError": "Erro desconhecido",
-  "common.NetworkError": "Erro de rede. Por favor, verifique a sua conexão de internet e tente novamente.",
+  "common.NetworkError": "Network error. Please check your internet connection and try again.",
   "common.UnauthorizedError": "We couldn't authorize your request. Please contact our support.",
   "common.UnexpectedApiResponseError": "Something went wrong while processing your request. Please try again later or contact support if the problem persists.",
   "common.NotFoundError": "We couldn’t find what you’re looking for. Please try again later or contact support if the problem persists.",
@@ -1156,5 +1156,7 @@
   "events.speakersOptional": "Speakers (optional)",
   "events.errorLoadingEvents": "Error loading events",
   "events.doYouWantToListYourMeetup": "Do you want to list your meetup?",
-  "events.getInTouchWithUs": "Get in touch with us"
+  "events.getInTouchWithUs": "Get in touch with us",
+  "events.loadMore": "Load more",
+  "events.allLoaded": "All loaded"
 }

@@ -64,7 +64,8 @@ export function moveImageToInternalDirectory({
       )
 
       await FileSystem.copyAsync({from: imagePath, to: path})
-      return path
+      const infoTo = await FileSystem.getInfoAsync(imagePath)
+      return infoTo.uri
     },
     catch(error) {
       return new ImagePickerError({reason: 'FileError', error})

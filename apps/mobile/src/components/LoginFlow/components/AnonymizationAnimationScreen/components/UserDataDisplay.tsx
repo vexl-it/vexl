@@ -11,8 +11,6 @@ interface Props {
 }
 
 function UserDataDisplay({topText, realLifeInfo, style}: Props): JSX.Element {
-  console.log(JSON.stringify(realLifeInfo?.image))
-  console.log('wtf')
   return (
     <Stack ai="center" jc="center" style={style}>
       {!!topText && (

@@ -249,7 +249,7 @@ export function getImageSize(
   imageUri: UriString
 ): TE.TaskEither<GettingImageSizeError, Dimensions> {
   return TE.tryCatch(() => {
-    return new Promise((resolve, reject) =>
+    return new Promise((resolve, reject) => {
       Image.getSize(
         imageUri,
         (width, height) => {
@@ -262,6 +262,6 @@ export function getImageSize(
         },
         reject
       )
-    )
+    })
   }, toBasicError('GettingImageSizeError'))
 }

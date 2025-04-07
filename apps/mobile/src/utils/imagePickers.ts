@@ -56,16 +56,14 @@ export function moveImageToInternalDirectory({
         })
       }
 
-      const path = UriString.parse(
-        urlJoin(
-          parentDirectory,
-          `${generateUuid()}.${imagePath.split('.').at(-1) ?? 'jpeg'}`
-        )
+      const path = urlJoin(
+        parentDirectory,
+        `${generateUuid()}.${imagePath.split('.').at(-1) ?? 'jpeg'}`
       )
 
       await FileSystem.copyAsync({from: imagePath, to: path})
       const infoTo = await FileSystem.getInfoAsync(imagePath)
-      return infoTo.uri
+      return Schema.decodeSync(UriStringE)(infoTo.uri)
     },
     catch(error) {
       return new ImagePickerError({reason: 'FileError', error})

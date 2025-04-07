@@ -1,11 +1,6 @@
 import {type SvgString} from '@vexl-next/domain/src/utility/SvgString.brand'
-import {useCallback, useMemo} from 'react'
-import {
-  TouchableOpacity,
-  type ColorValue,
-  type StyleProp,
-  type ViewStyle,
-} from 'react-native'
+import {useCallback, useMemo, type ComponentProps} from 'react'
+import {TouchableOpacity, type ColorValue, type ViewStyle} from 'react-native'
 import {Stack, Text, getTokens, styled} from 'tamagui'
 import Image from './Image'
 
@@ -21,7 +16,7 @@ export interface Props {
     | 'redDark'
     | 'redLight'
   text?: string
-  style?: StyleProp<ViewStyle>
+  style?: ComponentProps<typeof PressableStyled>['style']
 
   testID?: string
   disabled?: boolean

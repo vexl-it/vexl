@@ -1,11 +1,11 @@
-import {type StyleProp, type ViewStyle} from 'react-native'
+import {type ComponentProps} from 'react'
 import {Stack, Text, getTokens} from 'tamagui'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import Image from '../../Image'
 import eyeSvg from '../../images/eyeSvg'
 
 interface Props {
-  style?: StyleProp<ViewStyle>
+  style?: ComponentProps<typeof Stack>['style']
   fontSize?: number
   text?: string
 }

@@ -7,7 +7,10 @@ import AnimatedSplashScreen from './AnimatedSplashScreen'
 import AreYouSureDialog from './components/AreYouSureDialog'
 import BadgeCountManager from './components/BadgeCountManager'
 import DisableLogBoxForTests from './components/DisableLogBoxForTests'
-import {OverlayInfoScreen} from './components/FullscreenWarningScreen'
+import {
+  OverlayInfoScreen,
+  useLoadNewsAndAnnouncements,
+} from './components/FullscreenWarningScreen'
 import LoadingOverlayProvider from './components/LoadingOverlayProvider'
 import PhoneNumberHashBugMigration from './components/PhoneNumberHashBugMigration'
 import PreventScreenshots from './components/PreventScreenshots'
@@ -24,6 +27,7 @@ function App(): JSX.Element {
   const theme = useTheme()
 
   useAppState(setLastTimeAppWasRunningToNow, true)
+  useLoadNewsAndAnnouncements()
 
   return (
     <SafeAreaProvider>
@@ -44,16 +48,16 @@ function App(): JSX.Element {
         }}
       >
         <LoadingOverlayProvider>
-          <OverlayInfoScreen>
-            <VersionMigrations>
-              <PhoneNumberHashBugMigration>
+          <VersionMigrations>
+            <PhoneNumberHashBugMigration>
+              <OverlayInfoScreen>
                 <GestureHandlerRootView style={{flex: 1}}>
                   <RootNavigation />
                 </GestureHandlerRootView>
-              </PhoneNumberHashBugMigration>
-            </VersionMigrations>
-            <UploadingOfferProgressModal />
-          </OverlayInfoScreen>
+              </OverlayInfoScreen>
+            </PhoneNumberHashBugMigration>
+          </VersionMigrations>
+          <UploadingOfferProgressModal />
         </LoadingOverlayProvider>
         <AreYouSureDialog />
         <ToastNotification />

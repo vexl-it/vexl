@@ -10,7 +10,7 @@ import {
   setCancelledIdActionAtom,
 } from './state'
 
-function useLoadNewsAndAnnouncements(): void {
+export function useLoadNewsAndAnnouncements(): void {
   const loadNewsAndAnnouncements = useSetAtom(
     loadNewsAndAnnouncementsActionAtom
   )
@@ -30,7 +30,6 @@ export function OverlayInfoScreen({
 }: {
   children: React.ReactNode
 }): JSX.Element {
-  useLoadNewsAndAnnouncements()
   const data = useAtomValue(fullScreenWarningDataAtom)
   const setCancelledIdAction = useSetAtom(setCancelledIdActionAtom)
   const isWarningClosed = useAtomValue(isWarningClosedAtom)

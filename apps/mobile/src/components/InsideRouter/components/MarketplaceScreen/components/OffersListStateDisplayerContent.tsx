@@ -137,10 +137,13 @@ function OffersListStateDisplayerContent(): JSX.Element {
               <AddListingTypeToOffersSuggestion mb="$6" />
             </Stack>
           ) : (
-            <EmptyListPlaceholder
-              refreshing={loading}
-              onRefresh={refreshOffers}
-            />
+            <>
+              <VexlNewsSuggestions />
+              <EmptyListPlaceholder
+                refreshing={loading}
+                onRefresh={refreshOffers}
+              />
+            </>
           )}
         </Stack>
       )

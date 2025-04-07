@@ -1,19 +1,8 @@
-import {
-  BackdropFilter,
-  Canvas,
-  ColorMatrix,
-  Group,
-  ImageSVG,
-  Skia,
-  Image as SkiaImage,
-  rect,
-  rrect,
-  useImage,
-} from '@shopify/react-native-skia'
+import {type SvgString} from '@vexl-next/domain/src/utility/SvgString.brand'
 import {type SvgStringOrImageUri} from '@vexl-next/domain/src/utility/SvgStringOrImageUri.brand'
-import {useMemo} from 'react'
-import resolveLocalUri from '../utils/resolveLocalUri'
-import Image from './Image'
+import {SvgXml} from 'react-native-svg'
+import {FilterImage} from 'react-native-svg/filter-image'
+import {getTokens, Image} from 'tamagui'
 
 interface Props {
   userImage: SvgStringOrImageUri
@@ -22,53 +11,58 @@ interface Props {
   height: number
 }
 
-const BLACK_AND_WHITE = [
-  0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0,
-]
+// I know this is not the best approach, but I was undable to find a way to apply the filter any other way and
+// I don't want to have to define each user svg twice... Let's go this way!
+function makeSvgIntoGrayscale(svg: SvgString): SvgString {
+  try {
+    const svgHeader = /<svg .*?>/.exec(svg.xml)?.[0]
+    if (!svgHeader) return svg
+    const inside = svg.xml.replace(svgHeader, '').replace('</svg>', '')
+    return {
+      xml: `${svgHeader} <filter id="grayscale"><feColorMatrix type="saturate" values="0.0"/></filter> <g filter="url(#grayscale)"> ${inside}</g> </svg>`,
+    } as SvgString
+  } catch (e) {
+    return svg
+  }
+}
 
 // TODO move grayScale images to a separate component
 function UserAvatar({userImage, grayScale, width, height}: Props): JSX.Element {
-  const image = useImage(
-    userImage.type === 'imageUri' ? resolveLocalUri(userImage.imageUri) : null
-  )
-  const roundedRect = useMemo(
-    () => rrect(rect(0, 0, width, height), 12, 12),
-    [height, width]
-  )
+  // const roundedRect = useMemo(
+  //   () => rrect(rect(0, 0, width, height), 12, 12),
+  //   [height, width]
+  // )
   if (userImage.type === 'svgXml') {
     if (grayScale) {
-      const svg = Skia.SVG.MakeFromString(userImage.svgXml.xml)
-
       return (
-        <Canvas style={{width, height}}>
-          {!!svg && (
-            <ImageSVG svg={svg} x={0} y={0} height={height} width={width} />
-          )}
-          <BackdropFilter filter={<ColorMatrix matrix={BLACK_AND_WHITE} />} />
-        </Canvas>
+        <SvgXml
+          width={width}
+          height={height}
+          xml={makeSvgIntoGrayscale(userImage.svgXml).xml}
+        />
       )
     } else {
-      return <Image width={width} height={height} source={userImage.svgXml} />
+      return <SvgXml width={width} height={height} xml={userImage.svgXml.xml} />
     }
   } else {
+    if (grayScale) {
+      return (
+        <FilterImage
+          width={width}
+          height={height}
+          style={{borderRadius: getTokens().radius[3].val}}
+          filters={[{name: 'feColorMatrix', type: 'saturate', values: '0.0'}]}
+          source={{uri: userImage.imageUri}}
+        ></FilterImage>
+      )
+    }
     return (
-      <Canvas style={{width, height}}>
-        <Group clip={roundedRect}>
-          {!!image && (
-            <SkiaImage
-              fit="cover"
-              x={0}
-              y={0}
-              width={width}
-              height={height}
-              image={image}
-            />
-          )}
-        </Group>
-        {!!grayScale && (
-          <BackdropFilter filter={<ColorMatrix matrix={BLACK_AND_WHITE} />} />
-        )}
-      </Canvas>
+      <Image
+        width={width}
+        height={height}
+        borderRadius="$3"
+        source={{uri: userImage.imageUri}}
+      ></Image>
     )
   }
 }

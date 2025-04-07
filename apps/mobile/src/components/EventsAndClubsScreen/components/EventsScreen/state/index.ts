@@ -89,13 +89,29 @@ export const pastEventsAtom = atom((get) =>
   )
 )
 
+export const numberOfPastEventsToShowAtom = atom(6)
+export const extendPastEventsActionAtom = atom(null, (get, set) => {
+  set(numberOfPastEventsToShowAtom, (v) => v + 3)
+})
+export const areThereMorePastEventsToShowAtom = atom((get) => {
+  const pastEvents = get(pastEventsAtom)
+  const numberOfPastEventsToShow = get(numberOfPastEventsToShowAtom)
+  return pastEvents.length > numberOfPastEventsToShow
+})
+
 export type ListData =
   | {type: 'event'; event: Event}
   | {type: 'header'; value: 'future' | 'past'; emptySection: boolean}
   | {type: 'createEvent'}
+  | {type: 'morePastEvents'}
+  | {type: 'allEventsLoaded'}
 export const eventsForListAtom = atom<ListData[]>((get) => {
   const futureEvents = get(futureEventsAtom)
-  const pastEvents = get(pastEventsAtom)
+  const pastEvents = Array.take(
+    get(pastEventsAtom),
+    get(numberOfPastEventsToShowAtom)
+  )
+  const areThereMorePastEventsToShow = get(areThereMorePastEventsToShowAtom)
 
   return [
     {
@@ -111,6 +127,9 @@ export const eventsForListAtom = atom<ListData[]>((get) => {
       emptySection: !pastEvents.length,
     },
     ...pastEvents.map((event) => ({type: 'event' as const, event})),
+    areThereMorePastEventsToShow
+      ? {type: 'morePastEvents' as const}
+      : {type: 'allEventsLoaded' as const},
   ]
 })
 

@@ -1,12 +1,17 @@
 import {useAtomValue, useSetAtom, type Atom} from 'jotai'
 import {Linking, Platform} from 'react-native'
 import {TouchableOpacity} from 'react-native-gesture-handler'
-import {Text, XStack, YStack} from 'tamagui'
+import {Stack, Text, XStack, YStack} from 'tamagui'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
+import Button from '../../../../Button'
 import Image from '../../../../Image'
 import goldenGlassesNoStarSvg from '../images/goldenGlassesNoStarSvg'
 import outLeadSvg from '../images/outLeadSvg'
-import {createEventActionAtom, type ListData} from '../state'
+import {
+  createEventActionAtom,
+  extendPastEventsActionAtom,
+  type ListData,
+} from '../state'
 import EventDate from './EventDate'
 import EventSpeaker from './EventSpeaker'
 
@@ -16,6 +21,7 @@ export default function EventItem({atom}: {atom: Atom<ListData>}): JSX.Element {
   const {t} = useTranslation()
   const data = useAtomValue(atom)
   const createEvent = useSetAtom(createEventActionAtom)
+  const loadMoreEvents = useSetAtom(extendPastEventsActionAtom)
 
   if (data.type === 'header') {
     return (
@@ -53,6 +59,25 @@ export default function EventItem({atom}: {atom: Atom<ListData>}): JSX.Element {
           </Text>
         </TouchableOpacity>
       </XStack>
+    )
+  }
+
+  if (data.type === 'morePastEvents') {
+    return (
+      <Button
+        size="small"
+        onPress={loadMoreEvents}
+        text={t('events.loadMore')}
+        variant="primary"
+      ></Button>
+    )
+  }
+
+  if (data.type === 'allEventsLoaded') {
+    return (
+      <Stack mt="$0" alignItems="center" alignContent="center">
+        <Text color="$greyOnBlack">{t('events.allLoaded')}</Text>
+      </Stack>
     )
   }
 

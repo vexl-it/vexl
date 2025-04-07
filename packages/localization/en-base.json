@@ -281,7 +281,7 @@
   "loginFlow.userAlreadyExists": "User already exists",
   "loginFlow.phoneNumberPreviouslyRegistered": "The provided phone number has been previously registered on Vexl and is associated with an existing account. By proceeding, you agree that the previous account will be deleted. Are you sure?",
   "postLoginFlow.contactsExplanation.title": "Now, let’s find your friends!",
-  "postLoginFlow.contactsExplanation.text": "Vexl connects you anonymously with your friends and friends of friends. You can later manage your contacts and choose which ones you want to include in your social reach.",
+  "postLoginFlow.contactsExplanation.text": "You can manage your social network in the settings later.",
   "postLoginFlow.contactsExplanation.anonymizationCaption": "Nobody can see your contacts. Not even us.",
   "postLoginFlow.importContactsButton": "Import contacts",
   "postLoginFlow.contactsList.addContactManually": "Add contact {{number}} manually",
@@ -1084,7 +1084,7 @@
   "contacts.importContactsQuotaReachedError": "You have reached the limit of contacts that you can import today. Please try again later.",
   "migrations.migrating": "Updating vexl",
   "migration.contacts.problemTitle": "Problem with migration",
-  "migration.contacts.problemText": "There were discrepancies while migrating contacts. Old number of contacts: {{oldSize}}, new number of contacts {{newSize}}. We are trying to recover and save these contacts. Please check imported contacts and make sure all contacts are imported properly!",
+  "migration.contacts.problemText": "There was a discrepancies while migrating contacts. Old number of contacts: {{oldSize}}, new number of contacts {{newSize}}. We are trying to recover and save these contacts. Please check imported contacts and make sure all contacts are imported properly!",
   "notificationPrompt.errorAlert.title": "Unable to obtain notification permissions",
   "notificationPrompt.errorAlert.description": "You need to enable the notifications in the settings.",
   "notificationPrompt.errorAlert.openSettings": "Open settings",
@@ -1156,5 +1156,7 @@
   "events.speakersOptional": "Speakers (optional)",
   "events.errorLoadingEvents": "Error loading events",
   "events.doYouWantToListYourMeetup": "Do you want to list your meetup?",
-  "events.getInTouchWithUs": "Get in touch with us"
+  "events.getInTouchWithUs": "Get in touch with us",
+  "events.loadMore": "Load more",
+  "events.allLoaded": "All loaded"
 }

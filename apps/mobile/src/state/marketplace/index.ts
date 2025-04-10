@@ -36,7 +36,6 @@ import updateOwnerPrivatePayload from '@vexl-next/resources-utils/src/offers/upd
 import {type PrivatePayloadsConstructionError} from '@vexl-next/resources-utils/src/offers/utils/constructPrivatePayloads'
 import {type PublicPartEncryptionError} from '@vexl-next/resources-utils/src/offers/utils/encryptOfferPublicPayload'
 import {type PrivatePartEncryptionError} from '@vexl-next/resources-utils/src/offers/utils/encryptPrivatePart'
-import {type ApiErrorFetchingClubMembersForOffer} from '@vexl-next/resources-utils/src/offers/utils/fetchClubsInfoForOffer'
 import {type ApiErrorFetchingContactsForOffer} from '@vexl-next/resources-utils/src/offers/utils/fetchContactsForOffer'
 import {type SymmetricKeyGenerationError} from '@vexl-next/resources-utils/src/offers/utils/generateSymmetricKey'
 import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'

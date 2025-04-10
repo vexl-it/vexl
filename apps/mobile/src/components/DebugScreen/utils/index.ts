@@ -200,6 +200,7 @@ export async function* simulateEncrypting5000Offers() {
       symmetricKey: 'symmetricKey' as SymmetricKey,
       adminId: 'adminId' as OfferAdminId,
       intendedConnectionLevel: 'ALL' as const,
+      clubIds: [],
     },
   }
 

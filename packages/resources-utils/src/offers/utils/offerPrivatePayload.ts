@@ -1,8 +1,5 @@
 import {type KeyHolder} from '@vexl-next/cryptography'
-import {
-  type PrivateKeyHolder,
-  type PublicKeyPemBase64,
-} from '@vexl-next/cryptography/src/KeyHolder'
+import {type PrivateKeyHolder} from '@vexl-next/cryptography/src/KeyHolder'
 import {
   type ClubKeyNotFoundInInnerStateError,
   type ClubUuid,
@@ -26,9 +23,6 @@ import {
   encryptPrivatePart,
   type PrivatePartEncryptionError,
 } from './encryptPrivatePart'
-import fetchClubsInfoForOffer, {
-  type ApiErrorFetchingClubMembersForOffer,
-} from './fetchClubsInfoForOffer'
 import fetchContactsForOffer, {
   type ApiErrorFetchingContactsForOffer,
   type ConnectionsInfoForOffer,
@@ -42,40 +36,34 @@ export function fetchInfoAndGeneratePrivatePayloads({
   ownerCredentials,
   intendedClubs,
   onProgress,
-  myStoredClubs,
 }: {
   contactApi: ContactApi
   intendedConnectionLevel: IntendedConnectionLevel
   symmetricKey: SymmetricKey
   ownerCredentials: PrivateKeyHolder
   adminId: OfferAdminId
-  intendedClubs?: ClubUuid[]
+  intendedClubs: Record<ClubUuid, KeyHolder.PrivateKeyHolder>
   onProgress?: ((state: OfferEncryptionProgress) => void) | undefined
-  myStoredClubs: Record<ClubUuid, KeyHolder.PrivateKeyHolder>
 }): Effect.Effect<
   {
     errors: PrivatePartEncryptionError[]
     privateParts: NonEmptyArray<ServerPrivatePart>
     connections: ConnectionsInfoForOffer
-    clubsConnections: PublicKeyPemBase64[]
   },
   | ApiErrorFetchingContactsForOffer
   | PrivatePayloadsConstructionError
-  | ApiErrorFetchingClubMembersForOffer
   | ClubKeyNotFoundInInnerStateError
 > {
   return Effect.gen(function* (_) {
     if (onProgress) onProgress({type: 'FETCHING_CONTACTS'})
 
     const connectionsInfo = yield* _(
-      fetchContactsForOffer({contactApi, intendedConnectionLevel})
+      fetchContactsForOffer({
+        contactApi,
+        intendedConnectionLevel,
+        intendedClubs,
+      })
     )
-
-    const clubIdWithMembers = intendedClubs
-      ? yield* _(
-          fetchClubsInfoForOffer({intendedClubs, contactApi, myStoredClubs})
-        )
-      : []
 
     if (onProgress) onProgress({type: 'CONSTRUCTING_PRIVATE_PAYLOADS'})
 
@@ -83,11 +71,8 @@ export function fetchInfoAndGeneratePrivatePayloads({
       constructPrivatePayloads({
         connectionsInfo,
         symmetricKey,
-        clubIdWithMembers,
       })
     )
-
-    console.log(`Private payloads: ${JSON.stringify(privatePayloads, null, 2)}`)
 
     const privatePayloadsIncludingOwnerInfo = [
       constructPrivatePayloadForOwner({
@@ -95,7 +80,6 @@ export function fetchInfoAndGeneratePrivatePayloads({
         symmetricKey,
         adminId,
         intendedConnectionLevel,
-        intendedClubs,
       }),
       ...privatePayloads,
     ]
@@ -143,7 +127,6 @@ export function fetchInfoAndGeneratePrivatePayloads({
       errors,
       privateParts: encryptedPrivateParts,
       connections: connectionsInfo,
-      clubsConnections: clubIdWithMembers.flatMap((club) => club.items),
     }
   })
 }

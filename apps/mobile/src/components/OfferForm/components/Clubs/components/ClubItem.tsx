@@ -1,6 +1,5 @@
-import {Option} from 'effect'
 import {type Atom, useAtomValue, type WritableAtom} from 'jotai'
-import {type SetStateAction, useMemo} from 'react'
+import {type SetStateAction} from 'react'
 import {Stack, Text, XStack, YStack} from 'tamagui'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import {type ClubWithMembers} from '../../../../CRUDOfferFlow/atoms/clubsWithMembersAtom'
@@ -20,10 +19,7 @@ function ClubItem({
 }: Props): JSX.Element {
   const {t} = useTranslation()
   const {club, members} = useAtomValue(clubWithMembersAtom)
-  const membersCount = useMemo(
-    () => (Option.isSome(members) ? members.value.length : 0),
-    [members]
-  )
+  const membersCount = members.length
 
   return (
     <XStack ai="center" jc="space-between">

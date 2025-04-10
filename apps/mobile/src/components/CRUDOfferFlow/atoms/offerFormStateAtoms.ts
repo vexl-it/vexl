@@ -247,6 +247,7 @@ export const dummyOffer: OneOfferInState = {
       ],
       friendLevel: ['FIRST_DEGREE'],
       symmetricKey: SymmetricKey.parse('symmetricKey'),
+      clubIds: [],
     },
     publicPart: createOfferDummyPublicPart(),
     createdAt: IsoDatetimeString.parse(MINIMAL_DATE),

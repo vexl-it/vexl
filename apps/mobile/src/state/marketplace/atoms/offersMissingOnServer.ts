@@ -4,7 +4,7 @@ import {
 } from '@vexl-next/domain/src/general/offers'
 import {type OfferEncryptionProgress} from '@vexl-next/resources-utils/src/offers/OfferEncryptionProgress'
 import createNewOfferForMyContacts from '@vexl-next/resources-utils/src/offers/createNewOfferForMyContacts'
-import {Array, Effect} from 'effect'
+import {Array, Effect, Option, Record} from 'effect'
 import {pipe} from 'fp-ts/lib/function'
 import {atom} from 'jotai'
 import {z} from 'zod'
@@ -73,6 +73,19 @@ const reencryptOneOfferActionAtom = atom(
     const offerAtom = singleOfferAtom(offer.offerInfo.offerId)
     const intendedClubs = get(offerAtom)?.ownershipInfo?.intendedClubs ?? []
 
+    const clubsInfo = get(myStoredClubsAtom)
+
+    const intendedClubsRecord = pipe(
+      intendedClubs,
+      Array.filterMap((clubUuid) =>
+        pipe(
+          Record.get(clubsInfo, clubUuid),
+          Option.map((club) => [clubUuid, club] as const)
+        )
+      ),
+      Record.fromEntries
+    )
+
     return pipe(
       createNewOfferForMyContacts({
         offerApi: api.offer,
@@ -82,8 +95,7 @@ const reencryptOneOfferActionAtom = atom(
         intendedConnectionLevel: offer.ownershipInfo.intendedConnectionLevel,
         ownerKeyPair: session.privateKey,
         onProgress,
-        myStoredClubs,
-        intendedClubs: [...intendedClubs],
+        intendedClubs: intendedClubsRecord,
       }),
       Effect.map((r) => {
         if (r.encryptionErrors.length > 0) {

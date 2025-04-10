@@ -1,8 +1,5 @@
 import {type KeyHolder} from '@vexl-next/cryptography'
-import {
-  type PrivateKeyHolder,
-  type PublicKeyPemBase64,
-} from '@vexl-next/cryptography/src/KeyHolder'
+import {type PrivateKeyHolder} from '@vexl-next/cryptography/src/KeyHolder'
 import {
   type ClubKeyNotFoundInInnerStateError,
   type ClubUuid,
@@ -29,7 +26,6 @@ import encryptOfferPublicPayload, {
   type PublicPartEncryptionError,
 } from './utils/encryptOfferPublicPayload'
 import {type PrivatePartEncryptionError} from './utils/encryptPrivatePart'
-import {type ApiErrorFetchingClubMembersForOffer} from './utils/fetchClubsInfoForOffer'
 import {
   type ApiErrorFetchingContactsForOffer,
   type ConnectionsInfoForOffer,
@@ -49,9 +45,7 @@ export interface CreateOfferResult {
   adminId: OfferAdminId
   symmetricKey: SymmetricKey
   offerInfo: OfferInfo
-  encryptedFor: ConnectionsInfoForOffer & {
-    clubsConnections: PublicKeyPemBase64[]
-  }
+  encryptedFor: ConnectionsInfoForOffer
 }
 
 export default function createNewOfferForMyContacts({
@@ -63,7 +57,6 @@ export default function createNewOfferForMyContacts({
   intendedConnectionLevel,
   onProgress,
   intendedClubs,
-  myStoredClubs,
 }: {
   offerApi: OfferApi
   contactApi: ContactApi
@@ -71,8 +64,7 @@ export default function createNewOfferForMyContacts({
   ownerKeyPair: PrivateKeyHolder
   countryPrefix: CountryPrefix
   intendedConnectionLevel: IntendedConnectionLevel
-  intendedClubs?: ClubUuid[]
-  myStoredClubs: Record<ClubUuid, KeyHolder.PrivateKeyHolder>
+  intendedClubs: Record<ClubUuid, KeyHolder.PrivateKeyHolder>
   onProgress?: (status: OfferEncryptionProgress) => void
 }): Effect.Effect<
   CreateOfferResult,
@@ -83,7 +75,6 @@ export default function createNewOfferForMyContacts({
   | DecryptingOfferError
   | PublicPartEncryptionError
   | NonCompatibleOfferVersionError
-  | ApiErrorFetchingClubMembersForOffer
   | ClubKeyNotFoundInInnerStateError
 > {
   return Effect.gen(function* (_) {
@@ -106,7 +97,6 @@ export default function createNewOfferForMyContacts({
         contactApi,
         ownerCredentials: ownerKeyPair,
         intendedClubs,
-        myStoredClubs,
         onProgress,
         adminId,
       })
@@ -138,10 +128,7 @@ export default function createNewOfferForMyContacts({
       offerInfo,
       encryptionErrors: privatePayloads.errors,
       symmetricKey,
-      encryptedFor: {
-        ...privatePayloads.connections,
-        clubsConnections: privatePayloads.clubsConnections,
-      },
-    }
+      encryptedFor: privatePayloads.connections,
+    } satisfies CreateOfferResult
   })
 }

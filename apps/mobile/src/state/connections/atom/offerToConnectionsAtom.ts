@@ -1,3 +1,5 @@
+import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
+import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {type OfferAdminId} from '@vexl-next/domain/src/general/offers'
 import {
   UnixMilliseconds,
@@ -5,9 +7,8 @@ import {
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import updatePrivateParts from '@vexl-next/resources-utils/src/offers/updatePrivateParts'
-import {type ClubIdWithMembers} from '@vexl-next/resources-utils/src/offers/utils/fetchClubsInfoForOffer'
 import {subtractArrays} from '@vexl-next/resources-utils/src/utils/array'
-import {Either, Option} from 'effect'
+import {Array, Record} from 'effect'
 import * as A from 'fp-ts/Array'
 import * as E from 'fp-ts/Either'
 import * as T from 'fp-ts/Task'
@@ -18,7 +19,7 @@ import {focusAtom} from 'jotai-optics'
 import {splitAtom} from 'jotai/utils'
 import {apiAtom} from '../../../api'
 import {clubsWithMembersAtom} from '../../../components/CRUDOfferFlow/atoms/clubsWithMembersAtom'
-import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
+import {atomWithParsedMmkvStorageE} from '../../../utils/atomUtils/atomWithParsedMmkvStorageE'
 import notEmpty from '../../../utils/notEmpty'
 import {showDebugNotificationIfEnabled} from '../../../utils/notifications/showDebugNotificationIfEnabled'
 import reportError from '../../../utils/reportError'
@@ -32,7 +33,7 @@ import connectionStateAtom from './connectionStateAtom'
 
 const BACKGROUND_TIME_LIMIT_MS = 25_000
 
-const offerToConnectionsAtom = atomWithParsedMmkvStorage(
+const offerToConnectionsAtom = atomWithParsedMmkvStorageE(
   'offer-to-connections',
   {
     offerToConnections: [],
@@ -83,6 +84,38 @@ export const deleteOrphanRecordsActionAtom = atom(null, (get, set) => {
   }))
 })
 
+type ClubConnections = Record<ClubUuid, readonly PublicKeyPemBase64[]>
+const processClubConnections = ({
+  currentConnections,
+  newConnections,
+  removedConnections,
+}: {
+  currentConnections: ClubConnections
+  newConnections: ClubConnections
+  removedConnections: readonly PublicKeyPemBase64[]
+}): ClubConnections => {
+  const allClubsUuids = Array.dedupe([
+    ...Record.keys(currentConnections),
+    ...Record.keys(newConnections),
+  ])
+
+  return pipe(
+    allClubsUuids,
+    Array.map((clubUuid) => {
+      const newConnectionsForClub = newConnections[clubUuid] ?? []
+      const currentConnectionsForClub = currentConnections[clubUuid] ?? []
+
+      const finalConnections = pipe(
+        Array.dedupe([...newConnectionsForClub, ...currentConnectionsForClub]),
+        Array.difference(removedConnections)
+      )
+
+      return [clubUuid, finalConnections] as const
+    }),
+    Record.fromEntries
+  )
+}
+
 export const updateAllOffersConnectionsActionAtom = atom(
   null,
   (
@@ -124,19 +157,15 @@ export const updateAllOffersConnectionsActionAtom = atom(
         const offer = get(singleOfferByAdminIdAtom(oneOfferConections.adminId))
 
         const clubIdsToEncryptFor = offer?.ownershipInfo?.intendedClubs
-        const clubsWithMembers = get(clubsWithMembersAtom)
-        const clubsData = Either.isRight(clubsWithMembers)
-          ? clubsWithMembers.right
-          : []
-        const targetClubIdWithMembersArray = clubsData
-          .filter((one) => clubIdsToEncryptFor?.includes(one.club.uuid))
-          .map(
-            ({club, members}) =>
-              ({
-                clubUuid: club.uuid,
-                items: Option.isSome(members) ? members.value : [],
-              }) satisfies ClubIdWithMembers
-          )
+        const {data: clubsData} = get(clubsWithMembersAtom)
+        const targetClubIdWithMembersArray = pipe(
+          clubsData,
+          Array.filter((one) =>
+            Array.contains(clubIdsToEncryptFor ?? [], one.club.uuid)
+          ),
+          Array.map(({club, members}) => [club.uuid, members] as const),
+          Record.fromEntries
+        )
         const intendedConnectionLevel =
           offer?.ownershipInfo?.intendedConnectionLevel ?? 'ALL'
 
@@ -167,13 +196,13 @@ export const updateAllOffersConnectionsActionAtom = atom(
                     intendedConnectionLevel === 'ALL'
                       ? connectionState.secondLevel
                       : [],
+                  clubs: targetClubIdWithMembersArray,
                 },
                 adminId: oneOfferConections.adminId,
                 symmetricKey: oneOfferConections.symmetricKey,
                 commonFriends: connectionState.commonFriends,
                 stopProcessingAfter,
                 api: api.offer,
-                targetClubIdWithMembers: targetClubIdWithMembersArray,
               })
             )
           ),
@@ -236,7 +265,11 @@ export const updateAllOffersConnectionsActionAtom = atom(
                     } did not update fully due to time limit reached. Total connections updated: ${
                       newConnections.firstLevel.length +
                       (newConnections.secondLevel?.length ?? 0) +
-                      (newConnections.clubs?.length ?? 0)
+                      (pipe(
+                        newConnections.clubs ?? {},
+                        Record.values,
+                        Array.flatten
+                      ).length ?? 0)
                     }. Total connections skipped: ${String(
                       timeLimitReachedErrors.length
                     )}.`
@@ -265,16 +298,11 @@ export const updateAllOffersConnectionsActionAtom = atom(
                           removedConnections
                         )
                       : undefined,
-                  clubs:
-                    clubIdsToEncryptFor && clubIdsToEncryptFor.length > 0
-                      ? subtractArrays(
-                          [
-                            ...(val.connections.clubs ?? []),
-                            ...(newConnections.clubs ?? []),
-                          ],
-                          removedConnections
-                        )
-                      : undefined,
+                  clubs: processClubConnections({
+                    currentConnections: val.connections.clubs ?? {},
+                    newConnections: newConnections.clubs ?? {},
+                    removedConnections,
+                  }),
                 },
               }))
               return {

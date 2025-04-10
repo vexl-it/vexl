@@ -5,10 +5,9 @@ import {
   OfferPrivatePartE,
   type SymmetricKey,
 } from '@vexl-next/domain/src/general/offers'
-import {Effect, Schema} from 'effect'
+import {Array, Effect, HashSet, Option, pipe, Record, Schema} from 'effect'
 import {z} from 'zod'
 import {keys} from '../../utils/keys'
-import {type ClubIdWithMembers} from './fetchClubsInfoForOffer'
 import {type ConnectionsInfoForOffer} from './fetchContactsForOffer'
 
 export class PrivatePayloadsConstructionError extends Schema.TaggedError<PrivatePayloadsConstructionError>(
@@ -35,21 +34,31 @@ export const OfferPrivatePayloadToEncryptE = Schema.Struct({
 export type OfferPrivatePayloadToEncryptE =
   typeof OfferPrivatePayloadToEncryptE.Type
 
+const addOrCreate = <K extends string, T>(
+  record: Record<K, HashSet.HashSet<T>>,
+  key: K,
+  value: T
+): void => {
+  const existingValue = record[key]
+  if (value) {
+    record[key] = HashSet.add(existingValue, value)
+  } else record[key] = HashSet.make(value)
+}
+
 // TODO test this function
 export default function constructPrivatePayloads({
   connectionsInfo: {
     firstDegreeConnections,
     secondDegreeConnections,
     commonFriends,
+    clubsConnections,
   },
-  clubIdWithMembers,
   symmetricKey,
 }: {
   connectionsInfo: ConnectionsInfoForOffer
-  clubIdWithMembers: ClubIdWithMembers[]
   symmetricKey: SymmetricKey
 }): Effect.Effect<
-  OfferPrivatePayloadToEncrypt[],
+  readonly OfferPrivatePayloadToEncrypt[],
   PrivatePayloadsConstructionError
 > {
   return Effect.try({
@@ -58,44 +67,58 @@ export default function constructPrivatePayloads({
       // We can do that by iterating over firstDegreeFriends and secondDegreeFriends
       const friendLevel: Record<
         PublicKeyPemBase64,
-        Set<'FIRST_DEGREE' | 'SECOND_DEGREE' | 'CLUB'>
+        HashSet.HashSet<'FIRST_DEGREE' | 'SECOND_DEGREE' | 'CLUB'>
       > = {}
+
       for (const firstDegreeFriendPublicKey of firstDegreeConnections) {
-        friendLevel[firstDegreeFriendPublicKey] = new Set(['FIRST_DEGREE'])
+        addOrCreate(friendLevel, firstDegreeFriendPublicKey, 'FIRST_DEGREE')
       }
 
       // There are duplicities. That is why all these shinanigans with Set
       for (const secondDegreeFriendPublicKey of secondDegreeConnections) {
+        // Do not set if already has FIRST_DEGREE
         if (!friendLevel[secondDegreeFriendPublicKey])
-          friendLevel[secondDegreeFriendPublicKey] = new Set(['SECOND_DEGREE'])
-        else friendLevel[secondDegreeFriendPublicKey]?.add('SECOND_DEGREE')
+          addOrCreate(friendLevel, secondDegreeFriendPublicKey, 'SECOND_DEGREE')
       }
 
+      const allTargetPublicKeysForClubs = Array.flatten(
+        Record.values(clubsConnections)
+      )
+
       // There will be no duplicates but to keep code consistent
-      for (const clubFriendPublicKey of clubIdWithMembers.flatMap(
-        (club) => club.items
-      )) {
-        if (!friendLevel[clubFriendPublicKey])
-          friendLevel[clubFriendPublicKey] = new Set(['CLUB'])
-        else friendLevel[clubFriendPublicKey]?.add('CLUB')
+      for (const clubFriendPublicKey of allTargetPublicKeysForClubs) {
+        addOrCreate(friendLevel, clubFriendPublicKey, 'CLUB')
       }
 
       return keys(friendLevel).map((key) => {
-        const friendLevelValue = friendLevel[key]
+        const friendLevelValue = friendLevel[key] ?? HashSet.make()
+
+        const isFromClub = HashSet.has(friendLevelValue, 'CLUB')
+
+        const clubIdForKey = isFromClub
+          ? pipe(
+              Record.toEntries(clubsConnections),
+              Array.findFirst(([_, publicKeys]) =>
+                Array.contains(publicKeys, key)
+              ),
+              Option.map(([clubUuid]) => [clubUuid]),
+              Option.getOrElse(() => [])
+            )
+          : []
+
         return {
           toPublicKey: key,
           payloadPrivate: {
-            commonFriends: !friendLevelValue?.has('CLUB')
-              ? (commonFriends.commonContacts.find(
-                  (one) => one.publicKey === key
-                )?.common?.hashes ?? [])
-              : [],
-            friendLevel: friendLevelValue ? Array.from(friendLevelValue) : [],
+            commonFriends:
+              // This is optimization. Club key does not have common friends
+              !isFromClub
+                ? (commonFriends.commonContacts.find(
+                    (one) => one.publicKey === key
+                  )?.common?.hashes ?? [])
+                : [],
+            friendLevel: Array.fromIterable(friendLevelValue) ?? [],
             symmetricKey,
-            ...(friendLevelValue?.has('CLUB') && {
-              clubId: clubIdWithMembers.find((club) => club.items.includes(key))
-                ?.clubUuid,
-            }),
+            clubIds: clubIdForKey,
           },
         }
       })

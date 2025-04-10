@@ -6,7 +6,7 @@ import {
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {MAX_PAGE_SIZE} from '@vexl-next/rest-api/src/Pagination.brand'
 import {type ContactApi} from '@vexl-next/rest-api/src/services/contact'
-import {type Array, Effect, Either, Option} from 'effect'
+import {type Array, Effect} from 'effect'
 import {pipe} from 'fp-ts/function'
 import {atom, type Atom} from 'jotai'
 import {apiAtom} from '../../../api'
@@ -15,7 +15,7 @@ import {atomWithParsedMmkvStorageE} from '../../../utils/atomUtils/atomWithParse
 import deduplicate from '../../../utils/deduplicate'
 import {showDebugNotificationIfEnabled} from '../../../utils/notifications/showDebugNotificationIfEnabled'
 import reportError from '../../../utils/reportError'
-import {ConnectionsStateE} from '../domain'
+import {ConnectionsState} from '../domain'
 
 const connectionStateAtom = atomWithParsedMmkvStorageE(
   'connectionsState',
@@ -25,7 +25,7 @@ const connectionStateAtom = atomWithParsedMmkvStorageE(
     secondLevel: [],
     commonFriends: {commonContacts: []},
   },
-  ConnectionsStateE
+  ConnectionsState
 )
 
 export default connectionStateAtom
@@ -119,11 +119,7 @@ export const reachNumberAtom = atom((get) => {
     ...connectionState.secondLevel,
   ])
 
-  const clubsConnections = Either.isRight(clubsWithMembers)
-    ? clubsWithMembers.right.flatMap((club) =>
-        Option.isSome(club.members) ? club.members.value : []
-      )
-    : []
+  const clubsConnections = clubsWithMembers.data
 
   // deduplicate to be double sure, even if we should not have duplicates here
   return deduplicate([...firstAndSecondLevelConnections, ...clubsConnections])

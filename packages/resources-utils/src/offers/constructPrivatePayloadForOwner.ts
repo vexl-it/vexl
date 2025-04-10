@@ -33,6 +33,7 @@ export function constructPrivatePayloadForOwner({
       friendLevel: [
         intendedConnectionLevel === 'ALL' ? 'FIRST_DEGREE' : 'SECOND_DEGREE',
       ],
+      clubIds: [],
       intendedConnectionLevel,
       intendedClubs,
       symmetricKey,

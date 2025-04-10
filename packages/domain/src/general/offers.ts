@@ -260,7 +260,7 @@ export const OfferPrivatePart = z
     commonFriends: z.array(HashedPhoneNumber).readonly(),
     friendLevel: z.array(FriendLevel).readonly(),
     symmetricKey: SymmetricKey,
-    clubId: ClubUuid.optional(),
+    clubIds: z.array(ClubUuid).optional().default([]).readonly(),
     // For admin only
     adminId: OfferAdminId.optional(),
     intendedConnectionLevel: IntendedConnectionLevel.optional(),
@@ -271,7 +271,9 @@ export const OfferPrivatePartE = Schema.Struct({
   commonFriends: Schema.Array(HashedPhoneNumberE),
   friendLevel: Schema.Array(FriendLevelE),
   symmetricKey: SymmetricKeyE,
-  clubId: Schema.optional(ClubUuidE),
+  clubIds: Schema.optionalWith(Schema.Array(ClubUuidE), {
+    default: () => [],
+  }),
   // For admin only
   adminId: Schema.optional(OfferAdminIdE),
   intendedConnectionLevel: Schema.optional(IntendedConnectionLevelE),

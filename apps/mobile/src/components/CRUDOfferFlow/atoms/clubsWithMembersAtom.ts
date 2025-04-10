@@ -1,23 +1,28 @@
-import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
-import {ClubKeyNotFoundInInnerStateError} from '@vexl-next/domain/src/general/clubs'
+import {
+  type PrivateKeyHolder,
+  PublicKeyPemBase64E,
+} from '@vexl-next/cryptography/src/KeyHolder'
+import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {taskToEffect} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
-import {type ContactApi} from '@vexl-next/rest-api/src/services/contact'
-import {type ClubInfo} from '@vexl-next/rest-api/src/services/contact/contracts'
-import {Array, Effect, Either, Option, pipe, Schema} from 'effect'
+import {ClubInfo} from '@vexl-next/rest-api/src/services/contact/contracts'
+import {Array, Effect, Option, pipe, Record, Schema} from 'effect'
 import {atom} from 'jotai'
+import {focusAtom} from 'jotai-optics'
 import {splitAtom} from 'jotai/utils'
 import {apiAtom} from '../../../api'
 import {myStoredClubsAtom} from '../../../state/contacts/atom/clubsStore'
+import {atomWithParsedMmkvStorageE} from '../../../utils/atomUtils/atomWithParsedMmkvStorageE'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
 import {getNotificationToken} from '../../../utils/notifications'
 import reportError from '../../../utils/reportError'
 import showErrorAlert from '../../../utils/showErrorAlert'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 
-export interface ClubWithMembers {
-  club: ClubInfo
-  members: Option.Option<PublicKeyPemBase64[]>
-}
+const ClubWithMembers = Schema.Struct({
+  club: ClubInfo,
+  members: Schema.Array(PublicKeyPemBase64E),
+})
+export type ClubWithMembers = typeof ClubWithMembers.Type
 
 export class UserClubKeypairMissingError extends Schema.TaggedError<UserClubKeypairMissingError>(
   'UserClubKeypairMissingError'
@@ -26,15 +31,21 @@ export class UserClubKeypairMissingError extends Schema.TaggedError<UserClubKeyp
   message: Schema.String,
 }) {}
 
-const clubsWithMembersStorageAtom = atom<
-  Either.Either<
-    ClubWithMembers[],
-    | {_tag: 'clubsNotLoaded'}
-    | Effect.Effect.Error<ReturnType<ContactApi['getClubInfo']>>
-    | Effect.Effect.Error<ReturnType<ContactApi['getClubContacts']>>
-    | UserClubKeypairMissingError
-  >
->(Either.left({_tag: 'clubsNotLoaded'} as const))
+const clubsWithMembersStorageAtom = atomWithParsedMmkvStorageE(
+  'clubsWithMembers',
+  {data: []},
+  Schema.Struct({data: Schema.Array(ClubWithMembers).pipe(Schema.mutable)})
+)
+
+const processClubRemovedFromBe = ({
+  clubUuid,
+  keyPair,
+}: {
+  clubUuid: ClubUuid
+  keyPair: PrivateKeyHolder
+}): Effect.Effect<void> => {
+  return Effect.void
+}
 
 export const clubsWithMembersAtom = atom(
   (get) => get(clubsWithMembersStorageAtom),
@@ -44,111 +55,123 @@ export const clubsWithMembersAtom = atom(
     return Effect.gen(function* (_) {
       const api = get(apiAtom)
       const myStoredClubs = get(myStoredClubsAtom)
-      const myStoredClubsKeypairs = Object.values(myStoredClubs)
+
       const notificationToken = yield* _(
         taskToEffect(getNotificationToken()),
         Effect.map(Option.fromNullable)
       )
 
-      const clubs = yield* _(
-        myStoredClubsKeypairs,
-        Array.map((keyPair) =>
-          api.contact.getClubInfo({keyPair, notificationToken})
-        ),
-        Effect.allWith({concurrency: 'unbounded'})
-      )
-
-      const clubsIdsWithMembers = yield* _(
-        clubs,
-        Array.map((club) =>
-          pipe(
-            Option.fromNullable(myStoredClubs[club.clubInfoForUser.club.uuid]),
-            Effect.mapError(
-              (cause) => new ClubKeyNotFoundInInnerStateError({cause})
-            ),
-            Effect.flatMap((keyPair) =>
-              api.contact.getClubContacts({
-                clubUuid: club.clubInfoForUser.club.uuid,
-                keyPair,
-              })
-            ),
-            Effect.catchAll(() =>
-              Effect.succeed({
-                clubUuid: club.clubInfoForUser.club.uuid,
-                items: undefined,
+      const fetchClubWithMembers = ({
+        clubUuid,
+        keyPair,
+      }: {
+        clubUuid: ClubUuid
+        keyPair: PrivateKeyHolder
+      }): Effect.Effect<
+        | {clubUuid: ClubUuid; state: 'loaded'; data: ClubWithMembers}
+        | {clubUuid: ClubUuid; state: 'removed'}
+        | {clubUuid: ClubUuid; state: 'errorLoading'}
+      > =>
+        Effect.gen(function* (_) {
+          const clubInfo = yield* _(
+            api.contact.getClubInfo({keyPair, notificationToken}).pipe(
+              Effect.catchTag('NotFoundError', () => {
+                return Effect.fail({_tag: 'clubDoesNotExist'})
               })
             )
           )
-        ),
-        Effect.allWith({concurrency: 'unbounded'})
-      )
 
-      const clubsWithMembers = clubs.map((club) => {
-        const members = clubsIdsWithMembers.find(
-          (members) => members.clubUuid === club.clubInfoForUser.club.uuid
-        )
-
-        if (members?.items) {
-          const myPubKey =
-            myStoredClubs[club.clubInfoForUser.club.uuid]?.publicKeyPemBase64
-          const membersFilterMe = members.items.filter(
-            (item) => item === myPubKey
+          const clubMembers = yield* _(
+            api.contact.getClubContacts({
+              clubUuid: clubInfo.clubInfoForUser.club.uuid,
+              keyPair,
+            })
           )
 
           return {
-            club: club.clubInfoForUser.club,
-            members: Option.some([...membersFilterMe]),
+            clubUuid: clubInfo.clubInfoForUser.club.uuid,
+            state: 'loaded' as const,
+            data: {
+              club: clubInfo.clubInfoForUser.club,
+              members: clubMembers.items,
+            },
           }
-        }
+        }).pipe(
+          Effect.catchTag('clubDoesNotExist', (e) => {
+            // TODO remove offers club expired or something...
+            return Effect.zipRight(
+              processClubRemovedFromBe({
+                clubUuid,
+                keyPair,
+              }),
+              Effect.succeed({clubUuid, state: 'removed' as const})
+            )
+          }),
+          Effect.catchAll((e) =>
+            Effect.sync(() => {
+              if (
+                e._tag !== 'NetworkError' &&
+                e._tag !== 'CryptoError' &&
+                e._tag !== 'InvalidChallengeError' &&
+                e._tag !== 'ErrorSigningChallenge'
+              ) {
+                reportError(
+                  'error',
+                  new Error(
+                    'Unknown error when getting camera access, check library'
+                  ),
+                  {e}
+                )
+              }
 
-        return {
-          club: club.clubInfoForUser.club,
-          members: Option.none(),
-        }
-      })
-
-      set(clubsWithMembersStorageAtom, Either.right(clubsWithMembers))
-
-      return Either.right(clubsWithMembers)
-    }).pipe(
-      Effect.catchAll((e) => {
-        if (
-          e._tag !== 'NetworkError' &&
-          e._tag !== 'CryptoError' &&
-          e._tag !== 'InvalidChallengeError' &&
-          e._tag !== 'ErrorSigningChallenge'
-        ) {
-          reportError(
-            'error',
-            new Error(
-              'Unknown error when getting camera access, check library'
-            ),
-            {e}
+              showErrorAlert({
+                title:
+                  toCommonErrorMessage(e, t) ??
+                  t('clubs.errorLoadingClubMembers'),
+                error: e,
+              })
+              return {
+                clubUuid,
+                state: 'errorLoading' as const,
+              }
+            })
           )
-        }
+        )
 
-        showErrorAlert({
-          title:
-            toCommonErrorMessage(e, t) ?? t('clubs.errorLoadingClubMembers'),
-          error: e,
-        })
+      const clubs = yield* _(
+        myStoredClubs,
+        Record.toEntries,
+        Array.map(([clubUuid, keyPair]) => ({clubUuid, keyPair})),
+        Array.map(fetchClubWithMembers),
+        Effect.all
+      )
 
-        return Effect.succeed(Either.left({_tag: 'clubsNotLoaded'} as const))
-      })
-    )
+      const removedClubsUuids = Array.filterMap(clubs, (state) =>
+        Option.fromNullable(state.state === 'removed' ? state.clubUuid : null)
+      )
+      const newClubs = Array.filterMap(clubs, (state) =>
+        Option.fromNullable(state.state === 'loaded' ? state.data : null)
+      )
+
+      set(clubsWithMembersStorageAtom, (prev) => ({
+        ...prev,
+        data: pipe(
+          prev.data,
+          Array.filter((club) =>
+            Array.contains(removedClubsUuids, club.club.uuid)
+          ),
+          (old) =>
+            Array.unionWith(
+              newClubs,
+              old,
+              (a, b) => a.club.uuid === b.club.uuid
+            )
+        ),
+      }))
+    })
   }
 )
 
-const fetchedClubsAtom = atom((get) => {
-  const clubs = get(clubsWithMembersAtom)
-
-  if (Either.isRight(clubs)) return clubs.right
-
-  return []
-})
-
-export const clubsWithMembersAtomsAtom = splitAtom(fetchedClubsAtom)
-
-clubsWithMembersAtom.onMount = (setAtom) => {
-  void Effect.runPromise(setAtom())
-}
+export const clubsWithMembersAtomsAtom = splitAtom(
+  focusAtom(clubsWithMembersStorageAtom, (optic) => optic.prop('data'))
+)

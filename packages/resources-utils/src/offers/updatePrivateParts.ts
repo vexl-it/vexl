@@ -2,6 +2,7 @@ import {
   type PublicKeyPemBase64,
   PublicKeyPemBase64E,
 } from '@vexl-next/cryptography/src/KeyHolder'
+import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {
   type OfferAdminId,
   type SymmetricKey,
@@ -9,8 +10,10 @@ import {
 import {type UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {type FetchCommonConnectionsResponse} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
-import {Array, Effect, Schema} from 'effect'
+import {Array, Effect, pipe, Record, Schema} from 'effect'
+import {type ReadonlyRecord} from 'effect/Record'
 import {flow} from 'fp-ts/function'
+import reportErrorFromResourcesUtils from '../reportErrorFromResourcesUtils'
 import {deduplicate, subtractArrays} from '../utils/array'
 import constructPrivatePayloads, {
   type PrivatePayloadsConstructionError,
@@ -19,7 +22,50 @@ import {
   encryptPrivatePart,
   type PrivatePartEncryptionError,
 } from './utils/encryptPrivatePart'
-import {type ClubIdWithMembers} from './utils/fetchClubsInfoForOffer'
+
+type ClubConnections = Record<ClubUuid, readonly PublicKeyPemBase64[]>
+
+const calculateNewClubsConnections = ({
+  currentConnections,
+  targetConnections,
+}: {
+  currentConnections: ClubConnections
+  targetConnections: ClubConnections
+}): ClubConnections => {
+  const allClubsUuids = Array.dedupe([
+    ...Record.keys(currentConnections),
+    ...Record.keys(targetConnections),
+  ])
+
+  return pipe(
+    allClubsUuids,
+    Array.map((clubUuid) => {
+      const currentConnectionsForClub = currentConnections[clubUuid] ?? []
+      const targetConnectionsForClub = targetConnections[clubUuid] ?? []
+
+      return [
+        clubUuid,
+        subtractArrays(targetConnectionsForClub, currentConnectionsForClub),
+      ] as const
+    }),
+    Record.fromEntries
+  )
+}
+
+const substractArrayFromAllValues = <K extends string, V>(
+  values: V[],
+  record: Record<K, readonly V[]>
+): Record<ReadonlyRecord.NonLiteralKey<K>, readonly V[]> => {
+  return pipe(
+    record,
+    Record.toEntries,
+    Array.map(
+      ([key, value]) => [key, subtractArrays(value, values)] as [K, V[]]
+    ),
+    (a) => a,
+    Record.fromEntries
+  )
+}
 
 export class TimeLimitReachedError extends Schema.TaggedError<TimeLimitReachedError>(
   'TimeLimitReachedError'
@@ -29,6 +75,39 @@ export class TimeLimitReachedError extends Schema.TaggedError<TimeLimitReachedEr
   toPublicKey: PublicKeyPemBase64E,
 }) {}
 
+function checkAndReportRemovingClubConnectionThatIsAlsoFromSocualNetwork({
+  targetConnections,
+  removedClubsConnections,
+}: {
+  targetConnections: {
+    readonly firstLevel: readonly PublicKeyPemBase64[]
+    readonly secondLevel: readonly PublicKeyPemBase64[]
+  }
+  readonly removedClubsConnections: readonly PublicKeyPemBase64[]
+}): void {
+  const offerMeantForKeys = pipe(
+    [targetConnections.firstLevel, targetConnections.secondLevel],
+    Array.flatten
+  )
+
+  const commonElements = Array.intersection(
+    offerMeantForKeys,
+    removedClubsConnections
+  )
+
+  if (commonElements.length > 0) {
+    reportErrorFromResourcesUtils(
+      'error',
+      new Error(
+        '!!!! Removing club connection that is also from social network !!!'
+      ),
+      {
+        commonElements,
+      }
+    )
+  }
+}
+
 export default function updatePrivateParts({
   currentConnections,
   targetConnections,
@@ -37,23 +116,22 @@ export default function updatePrivateParts({
   symmetricKey,
   stopProcessingAfter,
   api,
-  targetClubIdWithMembers,
 }: {
   currentConnections: {
     readonly firstLevel: readonly PublicKeyPemBase64[]
     readonly secondLevel?: readonly PublicKeyPemBase64[]
-    readonly clubs?: readonly PublicKeyPemBase64[]
+    readonly clubs?: Record<ClubUuid, readonly PublicKeyPemBase64[]>
   }
   targetConnections: {
     readonly firstLevel: readonly PublicKeyPemBase64[]
     readonly secondLevel: readonly PublicKeyPemBase64[]
+    readonly clubs: Record<ClubUuid, readonly PublicKeyPemBase64[]>
   }
   commonFriends: FetchCommonConnectionsResponse
   adminId: OfferAdminId
   symmetricKey: SymmetricKey
   stopProcessingAfter?: UnixMilliseconds
   api: OfferApi
-  targetClubIdWithMembers?: ClubIdWithMembers[]
 }): Effect.Effect<
   {
     encryptionErrors: PrivatePartEncryptionError[]
@@ -62,7 +140,7 @@ export default function updatePrivateParts({
     newConnections: {
       firstLevel: PublicKeyPemBase64[]
       secondLevel?: PublicKeyPemBase64[] | undefined
-      clubs?: PublicKeyPemBase64[]
+      clubs?: Record<ClubUuid, readonly PublicKeyPemBase64[]>
     }
   },
   | PrivatePayloadsConstructionError
@@ -79,13 +157,31 @@ export default function updatePrivateParts({
       ...targetConnections.secondLevel,
     ])
   )
-  const targetClubsConnections = targetClubIdWithMembers?.flatMap(
-    (club) => club.items
+
+  const allTargetClubConnections = pipe(
+    targetConnections.clubs,
+    Record.values,
+    Array.flatten
   )
+
+  const allCurrentClubConnections = pipe(
+    currentConnections.clubs ?? {},
+    Record.values,
+    Array.flatten
+  )
+
   const removedClubsConnections = subtractArrays(
-    currentConnections.clubs ?? [],
-    targetClubsConnections ?? []
+    allCurrentClubConnections,
+    allTargetClubConnections
   )
+
+  checkAndReportRemovingClubConnectionThatIsAlsoFromSocualNetwork({
+    targetConnections: {
+      firstLevel: targetConnections.firstLevel,
+      secondLevel: targetConnections.secondLevel,
+    },
+    removedClubsConnections,
+  })
 
   const newFirstLevelConnections = subtractArrays(
     targetConnections.firstLevel,
@@ -97,14 +193,11 @@ export default function updatePrivateParts({
         currentConnections.secondLevel
       )
     : undefined
-  const newClubsConnectionsWithClubInfo = targetClubIdWithMembers?.map(
-    (club) => ({
-      clubUuid: club.clubUuid,
-      items: subtractArrays(club.items, currentConnections.clubs ?? []),
-    })
-  )
-  const newClubsConnections =
-    newClubsConnectionsWithClubInfo?.flatMap((club) => club.items) ?? []
+
+  const newClubsConnections = calculateNewClubsConnections({
+    currentConnections: currentConnections.clubs ?? {},
+    targetConnections: targetConnections.clubs,
+  })
 
   const removedConnections = [
     ...removedFirstSecondLevelConnections,
@@ -120,7 +213,12 @@ export default function updatePrivateParts({
       newFirstLevelConnections.length
     }. Number of newSecondLevelConnections: ${
       newSecondLevelConnections?.length ?? 'undefined'
-    }. Number of newClubsConnections: ${newClubsConnections.length}.`
+    }. Number of newClubsConnections: ${pipe(
+      newClubsConnections,
+      Record.toEntries,
+      Array.map(([uuid, keys]) => `${uuid}: ${keys.length}`),
+      Array.join(', ')
+    )}.`
   )
 
   return Effect.gen(function* (_) {
@@ -130,8 +228,8 @@ export default function updatePrivateParts({
           firstDegreeConnections: newFirstLevelConnections,
           secondDegreeConnections: newSecondLevelConnections ?? [],
           commonFriends,
+          clubsConnections: newClubsConnections,
         },
-        clubIdWithMembers: newClubsConnectionsWithClubInfo ?? [],
         symmetricKey,
       })
     )
@@ -211,7 +309,10 @@ export default function updatePrivateParts({
               pubKeysThatFailedEncryptTo
             )
           : undefined,
-        clubs: subtractArrays(newClubsConnections, pubKeysThatFailedEncryptTo),
+        clubs: substractArrayFromAllValues(
+          pubKeysThatFailedEncryptTo,
+          newClubsConnections
+        ),
       },
     }
   })

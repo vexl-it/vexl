@@ -1,8 +1,11 @@
 import {type PrivateKeyHolderE} from '@vexl-next/cryptography/src/KeyHolder/brands'
-import {type OfferInfoE} from '@vexl-next/domain/src/general/offers'
+import {
+  OfferInfoE,
+  type FriendLevel,
+} from '@vexl-next/domain/src/general/offers'
 import {type IsoDatetimeStringE} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
 import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
-import {Array, Effect, flow, type Either} from 'effect'
+import {Array, Effect, flow, Schema, type Either} from 'effect'
 import decryptOffer, {
   type DecryptingOfferError,
   type NonCompatibleOfferVersionError,
@@ -12,10 +15,28 @@ export type ApiErrorFetchingOffers = Effect.Effect.Error<
   ReturnType<OfferApi['getOffersForMeModifiedOrCreatedAfter']>
 >
 
+export class NotOfferFromContactNetworkError extends Schema.TaggedError<NotOfferFromContactNetworkError>(
+  'NotOfferFromContactNetworkError'
+)('NotOfferFromContactNetworkError', {
+  offerInfo: OfferInfoE,
+}) {}
+
+const validateOfferIsFromContactNetwork = (offerInfo: OfferInfoE): boolean => {
+  const friendLevel = offerInfo.privatePart.friendLevel
+  const clubIds = offerInfo.privatePart.clubIds
+  const allowedFriendLevels: FriendLevel[] = ['FIRST_DEGREE', 'SECOND_DEGREE']
+
+  return (
+    friendLevel.length > 0 &&
+    Array.difference(friendLevel, allowedFriendLevels).length === 0 &&
+    Array.isEmptyReadonlyArray(clubIds)
+  )
+}
+
 /**
  * Downloads new offers from the server and decrypts them with provided keypair
  */
-export default function getNewOffersAndDecrypt({
+export default function getNewContactNetworkOffersAndDecrypt({
   offersApi,
   keyPair,
   modifiedAt,
@@ -36,7 +57,9 @@ export default function getNewOffersAndDecrypt({
   Array<
     Either.Either<
       OfferInfoE,
-      DecryptingOfferError | NonCompatibleOfferVersionError
+      | DecryptingOfferError
+      | NonCompatibleOfferVersionError
+      | NotOfferFromContactNetworkError
     >
   >,
   ApiErrorFetchingOffers
@@ -47,7 +70,15 @@ export default function getNewOffersAndDecrypt({
       Effect.map(({offers}) => offers),
       Effect.flatMap(
         flow(
-          Array.map(decryptOffer(keyPair)),
+          Array.map(
+            flow(
+              decryptOffer(keyPair),
+              Effect.filterOrFail(
+                validateOfferIsFromContactNetwork,
+                (offerInfo) => new NotOfferFromContactNetworkError({offerInfo})
+              )
+            )
+          ),
           Array.map(Effect.either),
           Effect.all
         )

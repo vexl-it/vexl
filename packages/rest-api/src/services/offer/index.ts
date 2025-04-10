@@ -1,5 +1,6 @@
 import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
+import {Effect} from 'effect'
 import {createClientInstanceWithAuth} from '../../client'
 import {type AppSource} from '../../commonHeaders'
 import {type PlatformName} from '../../PlatformName'
@@ -12,6 +13,10 @@ import {
 } from '../../utils'
 import {type CreateChallengeRequest} from '../chat/contracts'
 import {
+  addChallengeToRequest,
+  type RequestWithGeneratableChallenge,
+} from '../utils/addChallengeToRequest'
+import {
   CreateNewOfferErrors,
   CreatePrivatePartErrors,
   DeletePrivatePartErrors,
@@ -21,14 +26,14 @@ import {
   type CreatePrivatePartInput,
   type DeleteOfferInput,
   type DeletePrivatePartInput,
-  type GetClubOffersByIdsInput,
+  type GetClubOffersByIdsRequest,
+  type GetClubOffersForMeCreatedOrModifiedAfterRequest,
   type GetClubOffersForMeInput,
-  type GetClubOffersForMeModifiedOrCreatedAfterInput,
   type GetOffersByIdsInput,
   type GetOffersForMeModifiedOrCreatedAfterInput,
-  type GetRemovedClubOffersInput,
   type GetRemovedOffersInput,
   type RefreshOfferInput,
+  type RemovedClubOfferIdsRequest,
   type ReportOfferInput,
   type UpdateOfferInput,
 } from './contracts'
@@ -69,12 +74,19 @@ export function api({
     loggingFunction,
   })
 
+  const addChallenge = addChallengeToRequest(client)
+
   return {
     getOffersByIds: (getOffersByIdsInput: GetOffersByIdsInput) =>
       handleCommonErrorsEffect(client.getOffersByIds(getOffersByIdsInput)),
-    getClubOffersByIds: (getClubOffersByIdsInput: GetClubOffersByIdsInput) =>
-      handleCommonErrorsEffect(
-        client.getClubOffersByIds(getClubOffersByIdsInput)
+
+    getClubOffersByIds: (
+      getClubOffersByIdsInput: RequestWithGeneratableChallenge<GetClubOffersByIdsRequest>
+    ) =>
+      addChallenge(getClubOffersByIdsInput).pipe(
+        Effect.flatMap((body) =>
+          handleCommonErrorsEffect(client.getClubOffersByIds({body}))
+        )
       ),
     getOffersForMe: () => handleCommonErrorsEffect(client.getOffersForMe({})),
     getClubOffersForMe: (getClubOffersForMeInput: GetClubOffersForMeInput) =>
@@ -90,11 +102,15 @@ export function api({
         )
       ),
     getClubOffersForMeModifiedOrCreatedAfter: (
-      getClubOffersForMeModifiedOrCreatedAfterInput: GetClubOffersForMeModifiedOrCreatedAfterInput
+      body: RequestWithGeneratableChallenge<GetClubOffersForMeCreatedOrModifiedAfterRequest>
     ) =>
-      handleCommonErrorsEffect(
-        client.getClubOffersForMeModifiedOrCreatedAfter(
-          getClubOffersForMeModifiedOrCreatedAfterInput
+      addChallenge(body).pipe(
+        Effect.flatMap((body) =>
+          handleCommonErrorsEffect(
+            client.getClubOffersForMeModifiedOrCreatedAfter({
+              body,
+            })
+          )
         )
       ),
     createNewOffer: (createNewOfferInput: CreateNewOfferInput) =>
@@ -124,10 +140,12 @@ export function api({
     getRemovedOffers: (getRemovedOffersInput: GetRemovedOffersInput) =>
       handleCommonErrorsEffect(client.getRemovedOffers(getRemovedOffersInput)),
     getRemovedClubOffers: (
-      getRemovedClubOffersInput: GetRemovedClubOffersInput
+      getRemovedClubOffersInput: RequestWithGeneratableChallenge<RemovedClubOfferIdsRequest>
     ) =>
-      handleCommonErrorsEffect(
-        client.getRemovedClubOffers(getRemovedClubOffersInput)
+      addChallenge(getRemovedClubOffersInput).pipe(
+        Effect.flatMap((body) =>
+          handleCommonErrorsEffect(client.getRemovedClubOffers({body}))
+        )
       ),
     reportOffer: (reportOfferInput: ReportOfferInput) =>
       handleCommonAndExpectedErrorsEffect(

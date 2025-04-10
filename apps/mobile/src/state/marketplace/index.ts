@@ -5,10 +5,13 @@ import {
 } from '@vexl-next/domain/src/general/clubs'
 import {type ChatOrigin} from '@vexl-next/domain/src/general/messaging'
 import {
+  type FriendLevel,
   type IntendedConnectionLevel,
   type MyOfferInState,
   type OfferAdminId,
   type OfferId,
+  type OfferInfo,
+  type OfferPrivatePart,
   type OfferPublicPart,
   type OneOfferInState,
   type SymmetricKey,
@@ -25,9 +28,12 @@ import {
   type NonCompatibleOfferVersionError,
 } from '@vexl-next/resources-utils/src/offers/decryptOffer'
 import extractOwnerInfoFromOwnerPrivatePayload from '@vexl-next/resources-utils/src/offers/extractOwnerInfoFromOwnerPrivatePayload'
-import getNewClubsOffersAndDecrypt from '@vexl-next/resources-utils/src/offers/getNewClubsOffersAndDecrypt'
-import getNewOffersAndDecrypt, {
+import getNewClubsOffersAndDecrypt, {
+  type NotOfferForExpectedClubError,
+} from '@vexl-next/resources-utils/src/offers/getNewClubsOffersAndDecrypt'
+import getNewContactNetworkOffersAndDecrypt, {
   type ApiErrorFetchingOffers,
+  type NotOfferFromContactNetworkError,
 } from '@vexl-next/resources-utils/src/offers/getNewOffersAndDecrypt'
 import updateOffer, {
   type ApiErrorUpdatingOffer,
@@ -39,6 +45,7 @@ import {type PrivatePartEncryptionError} from '@vexl-next/resources-utils/src/of
 import {type ApiErrorFetchingContactsForOffer} from '@vexl-next/resources-utils/src/offers/utils/fetchContactsForOffer'
 import {type SymmetricKeyGenerationError} from '@vexl-next/resources-utils/src/offers/utils/generateSymmetricKey'
 import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
+import {ErrorSigningChallenge} from '@vexl-next/server-utils/src/services/challenge/contracts'
 import {Array, Effect, Either, Option, Record, pipe} from 'effect'
 import {atom, useAtomValue} from 'jotai'
 import {useMemo} from 'react'
@@ -63,6 +70,127 @@ import {
   singleOfferAtom,
 } from './atoms/offersState'
 
+type DecryptedOfferResult = Either.Either<
+  OfferInfo,
+  | DecryptingOfferError
+  | NonCompatibleOfferVersionError
+  | NotOfferForExpectedClubError
+  | NotOfferFromContactNetworkError
+>
+
+const getOfferOrNoneReportError = (
+  decryptedOffer: DecryptedOfferResult
+): Option.Option<OfferInfo> => {
+  if (Either.isRight(decryptedOffer)) return Option.some(decryptedOffer.right)
+
+  const error = decryptedOffer.left
+  if (error._tag === 'DecryptingOfferError') {
+    reportError('error', new Error('Error while decrypting offers'), {
+      error,
+    })
+  } else if (error._tag === 'NonCompatibleOfferVersionError') {
+    console.log('Got non compatible offer version. Skipping offer')
+    console.log('Got non compatible offer version. Skipping offer', error)
+  } else if (
+    error._tag === 'NotOfferForExpectedClubError' ||
+    error._tag === 'NotOfferFromContactNetworkError'
+  ) {
+    reportError(
+      'error',
+      new Error(
+        'Received offer marked either as club offer or contact offer from unexpected public key'
+      ),
+      {
+        error,
+      }
+    )
+  }
+
+  return Option.none()
+}
+
+const filterAndReportDecryptionErrors = (
+  decryptedOfferResults: DecryptedOfferResult[]
+): readonly OfferInfo[] => {
+  return pipe(
+    decryptedOfferResults,
+    Array.map(getOfferOrNoneReportError),
+    Array.getSomes
+  )
+}
+
+function combineIncomingOffers([offerA, ...rest]: [
+  OfferInfo,
+  ...OfferInfo[],
+]): Option.Option<OfferInfo> {
+  const offerBO = Array.get(rest, 0)
+  if (Option.isNone(offerBO)) return Option.some(offerA)
+
+  const offerB = offerBO.value
+  if (offerA.offerId !== offerB.offerId) {
+    reportError('error', new Error('Combining offers with different ids'), {
+      ids: [offerA.offerId, offerB.offerId],
+    })
+    return Option.none()
+  }
+  const combinedPrivateParts: OfferPrivatePart = {
+    ...offerA.privatePart,
+    commonFriends: Array.union(
+      offerA.privatePart.commonFriends,
+      offerB.privatePart.commonFriends
+    ),
+    friendLevel: Array.union(
+      offerA.privatePart.friendLevel,
+      offerB.privatePart.friendLevel
+    ),
+    clubIds: Array.union(
+      offerA.privatePart.clubIds,
+      offerB.privatePart.clubIds
+    ),
+  }
+
+  const combinedOffer: OfferInfo = {
+    ...offerA,
+    privatePart: combinedPrivateParts,
+  }
+  return combineIncomingOffers([combinedOffer, ...rest])
+}
+
+function updateOrFilterRemoveOffer(
+  offer: OneOfferInState,
+  removedFromClubs: ClubUuid[],
+  removedFromContacts: boolean
+): Option.Option<OneOfferInState> {
+  const newClubsArray = Array.difference(
+    offer.offerInfo.privatePart.clubIds,
+    removedFromClubs
+  )
+  const friendLevelsToRemove: FriendLevel[] = [
+    ...(Array.isEmptyArray(newClubsArray) ? ['CLUB' as const] : []),
+    ...(removedFromContacts
+      ? ['FIRST_DEGREE' as const, 'SECOND_DEGREE' as const]
+      : []),
+  ]
+  const newFriendLevels = Array.difference(
+    offer.offerInfo.privatePart.friendLevel,
+    friendLevelsToRemove
+  )
+
+  if (Array.isEmptyArray(newFriendLevels)) return Option.none()
+
+  return Option.some({
+    ...offer,
+    offerInfo: {
+      ...offer.offerInfo,
+      privatePart: {
+        ...offer.offerInfo.privatePart,
+        clubIds: newClubsArray,
+        friendLevel: newFriendLevels,
+      },
+    },
+  } satisfies OneOfferInState)
+}
+
 export const triggerOffersRefreshAtom = atom(null, (get, set) =>
   Effect.gen(function* (_) {
     const api = get(apiAtom)
@@ -71,36 +199,53 @@ export const triggerOffersRefreshAtom = atom(null, (get, set) =>
 
     const updateStartedAt = isoNow()
     const offerIds = get(offersIdsAtom)
+    const storedOffers = get(offersAtom)
 
     console.log('🦋 Refreshing offers')
 
     const newDecryptedContactsOffers = yield* _(
-      getNewOffersAndDecrypt({
+      getNewContactNetworkOffersAndDecrypt({
         offersApi: api.offer,
         modifiedAt: get(lastUpdatedAtAtom),
         keyPair: session.privateKey,
-      })
+      }),
+      Effect.map(filterAndReportDecryptionErrors)
     )
 
     const newClubsDecryptedOffers = yield* _(
-      Record.values(myStoredClubs),
-      Array.map((keyPair) =>
+      Record.toEntries(myStoredClubs),
+      Array.map(([clubUuid, keyPair]) =>
         getNewClubsOffersAndDecrypt({
           offersApi: api.offer,
           modifiedAt: get(lastUpdatedAtAtom),
           keyPair,
+          clubUuid,
         })
       ),
-      Effect.all
+      Effect.all,
+      Effect.map(Array.flatten),
+      Effect.map(filterAndReportDecryptionErrors)
     )
 
-    const newDecryptedOffers = [
-      ...newDecryptedContactsOffers,
-      ...Array.flatten(newClubsDecryptedOffers),
-    ]
-
-    const removedOfferIds = yield* _(
-      api.offer.getRemovedOffers({body: {offerIds}}),
+    const removedContactOfferIds = yield* _(
+      Array.filter(
+        storedOffers,
+        (oneOffer) =>
+          !oneOffer.ownershipInfo?.adminId && // Not my offers
+          Array.intersection(oneOffer.offerInfo.privatePart.friendLevel, [
+            'FIRST_DEGREE',
+            'SECOND_DEGREE',
+          ]).length > 0
+      ),
+      Array.map((o) => o.offerInfo.offerId),
+      (offersIds) =>
+        offersIds.length > 0
+          ? api.offer.getRemovedOffers({
+              body: {offerIds},
+            })
+          : Effect.succeed({
+              offerIds: [],
+            }),
       Effect.catchAll((e) => {
         if (e._tag !== 'NetworkError')
           reportError('error', new Error('Error fetching removed offers'), {
@@ -108,135 +253,144 @@ export const triggerOffersRefreshAtom = atom(null, (get, set) =>
           })
 
         return Effect.succeed({offerIds: [] as OfferId[]})
-      })
+      }),
+      Effect.map((one) => one.offerIds)
     )
 
-    pipe(
-      Array.filterMap(newDecryptedOffers, Either.getLeft),
-      Array.match({
-        onEmpty: () => {
-          // Is ok, all offers decrypted ok
-        },
-        onNonEmpty(self) {
-          const criticalErrors = self.filter(
-            (one) => one._tag !== 'NonCompatibleOfferVersionError'
+    const removedClubOfferIds = yield* _(
+      myStoredClubs,
+      Record.toEntries,
+      Array.filterMap(([clubUuid, clubKey]) => {
+        const offersIds = pipe(
+          Array.filter(
+            storedOffers,
+            (oneOffer) =>
+              !oneOffer.ownershipInfo?.adminId && // Not my offers
+              Array.contains(oneOffer.offerInfo.privatePart.clubIds, clubUuid)
+          ),
+          Array.map((o) => o.offerInfo.offerId)
+        )
+        if (Array.isNonEmptyArray(offersIds))
+          return Option.some({clubUuid, offersIds, clubKey})
+        return Option.none()
+      }),
+      Array.map(({clubKey, clubUuid, offersIds}) =>
+        api.offer
+          .getRemovedClubOffers({
+            offerIds: offersIds,
+            keyPair: clubKey,
+          })
+          .pipe(
+            Effect.map((removedIds) => ({
+              clubUuid,
+              removedIds: removedIds.offerIds,
+            })),
+            Effect.option
           )
-
-          if (criticalErrors.length > 0)
-            reportError('error', new Error('Error while decrypting offers'), {
-              self,
-            })
-
-          const nonCompatibleErrors = self.filter(
-            (one) => one._tag === 'NonCompatibleOfferVersionError'
-          )
-
-          if (nonCompatibleErrors.length > 0) {
-            console.info(
-              `Skipping ${nonCompatibleErrors.length} offers because they are not compatible.`
-            )
-          }
-        },
-      })
+      ),
+      Effect.all,
+      Effect.map(Array.getSomes)
     )
 
-    const oldOffers = get(offersAtom)
-    const fetchedOffers = Array.filterMap(newDecryptedOffers, Either.getRight)
+    // const removedOffersClubs = yield* _(
+    //   Record
+    // )
+
+    // TODO removed offers for clubs
+
+    const allFetchedOffersMerged = [
+      ...newDecryptedContactsOffers,
+      ...newClubsDecryptedOffers,
+    ]
+
+    const offersFromMe = Array.filter(
+      allFetchedOffersMerged,
+      (offer): offer is typeof offer & {privatePart: {adminId: OfferAdminId}} =>
+        !!offer.privatePart.adminId
+    )
+
+    const offersFromOthersMerged = pipe(
+      allFetchedOffersMerged,
+      Array.filter((offer) => !offer.privatePart.adminId),
+      Array.groupBy((one) => one.offerId),
+      Record.values,
+      Array.map(combineIncomingOffers),
+      Array.getSomes
+    )
+
     const allOffersIds = Array.union(
       get(offersIdsAtom),
-      fetchedOffers.map((one) => one.offerId)
-    )
-
-    const clubAndNormalOffersCombined = pipe(
-      Array.groupBy(fetchedOffers, (one) => one.offerId),
-      Record.mapEntries((valueArray, key) => [
-        key,
-        valueArray.length > 1
-          ? Array.reduce(valueArray, valueArray[0], (acc, curr) => ({
-              ...acc,
-              privatePart: {
-                ...acc.privatePart,
-                clubId: curr.privatePart.clubId ?? acc.privatePart.clubId,
-                commonFriends: [
-                  ...acc.privatePart.commonFriends,
-                  ...curr.privatePart.commonFriends,
-                ],
-              },
-            }))
-          : valueArray[0],
-      ]),
-      Record.values
+      offersFromOthersMerged.map((one) => one.offerId)
     )
 
     pipe(
-      Array.filterMap(allOffersIds, (offerId) => {
-        const combinedOffer = clubAndNormalOffersCombined.find(
-          (fetchedOffer) => offerId === fetchedOffer.offerId
+      allOffersIds,
+      Array.filterMap((offerId) => {
+        const newOfferO = Array.findFirst(
+          offersFromOthersMerged,
+          (o) => o.offerId === offerId
         )
-        const oldOffer = oldOffers.find(
-          (one) => one.offerInfo.offerId === offerId
+        const offerInStateO = pipe(
+          storedOffers,
+          Array.findFirst((one) => one.offerInfo.offerId === offerId)
         )
 
-        if (oldOffer?.ownershipInfo?.adminId) {
+        if (
+          offerInStateO.pipe(
+            Option.flatMapNullable((o) => o?.ownershipInfo?.adminId),
+            Option.isSome
+          )
+        ) {
           // D not update offers that are owned the by current user.
-          return Option.some(oldOffer)
+          return offerInStateO
         }
 
-        if (oldOffer && combinedOffer) {
-          if (
-            !!combinedOffer.privatePart.clubId ||
-            !!oldOffer.offerInfo.privatePart.clubId
-          ) {
-            return Option.some({
-              ...oldOffer,
-              offerInfo: {
-                ...combinedOffer,
-                privatePart: {
-                  ...combinedOffer.privatePart,
-                  clubId:
-                    oldOffer.offerInfo.privatePart.clubId ??
-                    combinedOffer.privatePart.clubId,
-                  commonFriends: Array.dedupe([
-                    ...oldOffer.offerInfo.privatePart.commonFriends,
-                    ...combinedOffer.privatePart.commonFriends,
-                  ]),
-                },
-              },
-            } as OneOfferInState)
-          }
-
+        if (Option.isSome(offerInStateO) && Option.isSome(newOfferO)) {
           return Option.some({
-            ...oldOffer,
-            offerInfo: combinedOffer,
-          } as OneOfferInState)
+            ...offerInStateO.value,
+            offerInfo: newOfferO.value,
+          } satisfies OneOfferInState)
         }
 
-        if (oldOffer) {
-          return Option.some(oldOffer)
-        }
-
-        if (combinedOffer) {
+        if (Option.isSome(newOfferO)) {
           return Option.some({
-            offerInfo: combinedOffer,
+            offerInfo: newOfferO.value,
             flags: {
               reported: false,
             },
           } as OneOfferInState)
         }
-        return Option.none()
+
+        return offerInStateO
       }),
-      Array.filter(
-        (one) =>
-          // Do NOT remove offers that are owned by current user.
-          // They can be re-uploaded once #106 is implemented.
-          !!one.ownershipInfo ||
-          !removedOfferIds.offerIds.includes(one.offerInfo.offerId)
-      ),
+      Array.filterMap((one) => {
+        // Do NOT remove offers that are owned by current user.
+        // They can be re-uploaded
+        if (one.ownershipInfo?.adminId) return Option.some(one)
+
+        const removedFromClubs = pipe(
+          removedClubOfferIds,
+          Array.filter(({removedIds}) =>
+            Array.contains(removedIds, one.offerInfo.offerId)
+          ),
+          Array.map((one) => one.clubUuid)
+        )
+        const removedFromContacts = Array.contains(
+          removedContactOfferIds,
+          one.offerInfo.offerId
+        )
+        return updateOrFilterRemoveOffer(
+          one,
+          removedFromClubs,
+          removedFromContacts
+        )
+      }),
       (offers) => {
         set(offersStateAtom, {offers, lastUpdatedAt1: updateStartedAt})
       }
     )
 
+    // TODO !!!!
     // Check and try to recover offers that are not saved with ownership info but are owned by the current user (according to private payload)
     pipe(
       get(offersStateAtom).offers,
@@ -356,7 +510,7 @@ export function useAreOffersLoading(): boolean {
 }
 
 export function useOffersLoadingError(): Option.Option<
-  ApiErrorFetchingOffers | CryptoError
+  ApiErrorFetchingOffers | CryptoError | ErrorSigningChallenge
 > {
   const offerState = useAtomValue(loadingStateAtom)
 
@@ -394,7 +548,6 @@ export const createOfferAtom = atom<
     | PublicPartEncryptionError
     | NonCompatibleOfferVersionError
     | DecryptingOfferError
-    | ApiErrorFetchingClubMembersForOffer
     | ClubKeyNotFoundInInnerStateError
   >
 >(null, (get, set, params) => {

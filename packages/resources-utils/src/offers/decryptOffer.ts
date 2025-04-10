@@ -72,9 +72,9 @@ const OfferPublicPayloadUnion = Schema.Union(
 )
 
 const firstSupportedSemverString = Schema.decodeSync(SemverStringE)('1.16.0')
-const isSupportedOfferVersion = (
+const ensureOfferFromSupportedClient = (
   offerStrign: string
-): Effect.Effect<boolean, ParseError> =>
+): Effect.Effect<void, NonCompatibleOfferVersionError> =>
   pipe(
     offerStrign,
     Schema.decodeUnknown(
@@ -84,9 +84,18 @@ const isSupportedOfferVersion = (
         })
       )
     ),
-    Effect.map(({authorClientVersion}) => {
+    Effect.filterOrFail(({authorClientVersion}) => {
       return compare(authorClientVersion)('>=', firstSupportedSemverString)
-    })
+    }),
+    Effect.mapError(
+      () =>
+        new NonCompatibleOfferVersionError({
+          message: 'Non compatible offer version based on decrypted offer',
+          cause: new Error(
+            'Non compatible offer version based on decrypted offer'
+          ),
+        })
+    )
   )
 
 // TODO write unit test for this function
@@ -102,14 +111,13 @@ export default function decryptOffer(
     return Effect.gen(function* (_) {
       if (
         serverOffer.publicPayload.at(0) !== '0' ||
-        serverOffer.privatePayload.at(0) !== '0' ||
-        !isSupportedOfferVersion
+        serverOffer.privatePayload.at(0) !== '0'
       ) {
         return yield* _(
           Effect.fail(
             new NonCompatibleOfferVersionError({
-              message: 'Non compatible offer version',
-              cause: new Error('Non compatible offer version'),
+              message: 'Non compatible offer cypher version',
+              cause: new Error('Non compatible offer cypher version'),
             })
           )
         )
@@ -141,6 +149,7 @@ export default function decryptOffer(
         Effect.flatMap(
           aesGCMIgnoreTagDecrypt(privatePayload.right.symmetricKey)
         ),
+        Effect.tap(ensureOfferFromSupportedClient),
         Effect.flatMap(
           Schema.decodeUnknown(Schema.parseJson(OfferPublicPayloadUnion))
         ),

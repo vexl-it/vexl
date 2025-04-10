@@ -21,6 +21,7 @@ import {
 import {type BasicError} from '@vexl-next/domain/src/utility/errors'
 import {type CryptoError} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {type ApiErrorFetchingOffers} from '@vexl-next/resources-utils/src/offers/getNewOffersAndDecrypt'
+import {type ErrorSigningChallenge} from '@vexl-next/server-utils/src/services/challenge/contracts'
 import {Schema} from 'effect'
 import {z} from 'zod'
 
@@ -56,7 +57,7 @@ export interface SuccessLoadingState {
 
 export interface ErrorLoadingState {
   state: 'error'
-  error: ApiErrorFetchingOffers | CryptoError
+  error: ApiErrorFetchingOffers | CryptoError | ErrorSigningChallenge
 }
 
 export interface InProgressLoadingState {

@@ -1,12 +1,10 @@
 import {type PrivateKeyHolderE} from '@vexl-next/cryptography/src/KeyHolder'
-import {type OfferInfoE} from '@vexl-next/domain/src/general/offers'
+import {ClubUuidE, type ClubUuid} from '@vexl-next/domain/src/general/clubs'
+import {OfferInfoE} from '@vexl-next/domain/src/general/offers'
 import {type IsoDatetimeStringE} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
-import {
-  ecdsaSignE,
-  type CryptoError,
-} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
+import {type CryptoError} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
-import {Array, Effect, flow, type Either} from 'effect'
+import {Array, Effect, flow, Schema, type Either} from 'effect'
 import decryptOffer, {
   type DecryptingOfferError,
   type NonCompatibleOfferVersionError,
@@ -16,9 +14,33 @@ export type ApiErrorFetchingClubsOffers = Effect.Effect.Error<
   ReturnType<OfferApi['getClubOffersForMeModifiedOrCreatedAfter']>
 >
 
+export class NotOfferForExpectedClubError extends Schema.TaggedError<NotOfferForExpectedClubError>(
+  'NotOfferForExpectedClubError'
+)('NotOfferForExpectedClubError', {
+  expectedClubUuid: ClubUuidE,
+  receivedClubUuid: ClubUuidE,
+  offerInfo: OfferInfoE,
+}) {}
+
+const validateOfferIsForClub =
+  (clubUuid: ClubUuid) => (offerInfo: OfferInfoE) => {
+    const offerClubIds = offerInfo.privatePart.clubIds
+    const friendLevel = offerInfo.privatePart.friendLevel
+    const commonFriends = offerInfo.privatePart.commonFriends
+
+    return (
+      offerClubIds.length === 1 &&
+      offerClubIds[0] === clubUuid &&
+      friendLevel.length === 1 &&
+      friendLevel[0] === 'CLUB' &&
+      commonFriends.length === 0
+    )
+  }
+
 export default function getNewClubsOffersAndDecrypt({
   offersApi,
   keyPair,
+  clubUuid,
   modifiedAt,
 }: {
   /**
@@ -29,6 +51,7 @@ export default function getNewClubsOffersAndDecrypt({
    * KeyPair to decrypt offers with.
    */
   keyPair: PrivateKeyHolderE
+  clubUuid: ClubUuid
   /**
    * Only offers modified/created after this date will be fetched.
    */
@@ -37,37 +60,38 @@ export default function getNewClubsOffersAndDecrypt({
   Array<
     Either.Either<
       OfferInfoE,
-      DecryptingOfferError | NonCompatibleOfferVersionError
+      | DecryptingOfferError
+      | NonCompatibleOfferVersionError
+      | NotOfferForExpectedClubError
     >
   >,
   ApiErrorFetchingClubsOffers | CryptoError
 > {
   return Effect.gen(function* (_) {
-    const challenge = yield* _(
-      offersApi.createChallenge({publicKey: keyPair.publicKeyPemBase64})
-    )
-
-    const signedChallenge = yield* _(
-      ecdsaSignE(keyPair.privateKeyPemBase64)(challenge.challenge)
-    )
-
     return yield* _(
       offersApi
         .getClubOffersForMeModifiedOrCreatedAfter({
-          body: {
-            modifiedAt,
-            publicKey: keyPair.publicKeyPemBase64,
-            signedChallenge: {
-              challenge: challenge.challenge,
-              signature: signedChallenge,
-            },
-          },
+          modifiedAt,
+          keyPair,
         })
         .pipe(
           Effect.map(({offers}) => offers),
           Effect.flatMap(
             flow(
-              Array.map(decryptOffer(keyPair)),
+              Array.map(
+                flow(
+                  decryptOffer(keyPair),
+                  Effect.filterOrFail(
+                    validateOfferIsForClub(clubUuid),
+                    (offerInfo) =>
+                      new NotOfferForExpectedClubError({
+                        expectedClubUuid: clubUuid,
+                        receivedClubUuid: clubUuid,
+                        offerInfo,
+                      })
+                  )
+                )
+              ),
               Array.map(Effect.either),
               Effect.all
             )

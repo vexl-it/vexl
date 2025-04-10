@@ -4,7 +4,7 @@ import {type Inbox} from '@vexl-next/domain/src/general/messaging'
 import {MINIMAL_DATE} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
 import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {fetchAndEncryptNotificationToken} from '@vexl-next/resources-utils/src/notifications/fetchAndEncryptNotificationToken'
-import getNewOffersAndDecrypt from '@vexl-next/resources-utils/src/offers/getNewOffersAndDecrypt'
+import getNewContactNetworkOffersAndDecrypt from '@vexl-next/resources-utils/src/offers/getNewOffersAndDecrypt'
 import {Array, Effect, Either, pipe as effectPipe} from 'effect'
 import * as Notifications from 'expo-notifications'
 import * as T from 'fp-ts/Task'
@@ -213,7 +213,7 @@ function DebugScreen(): JSX.Element {
               onPress={() => {
                 void pipe(
                   effectToTaskEither(
-                    getNewOffersAndDecrypt({
+                    getNewContactNetworkOffersAndDecrypt({
                       keyPair: session.privateKey,
                       modifiedAt: MINIMAL_DATE,
                       offersApi: store.get(apiAtom).offer,

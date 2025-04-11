@@ -43,18 +43,9 @@ export default function getNewClubsOffersAndDecrypt({
   clubUuid,
   modifiedAt,
 }: {
-  /**
-   * Offers API instance. Already handles auth for us.
-   */
   offersApi: OfferApi
-  /**
-   * KeyPair to decrypt offers with.
-   */
   keyPair: PrivateKeyHolderE
   clubUuid: ClubUuid
-  /**
-   * Only offers modified/created after this date will be fetched.
-   */
   modifiedAt: IsoDatetimeStringE
 }): Effect.Effect<
   Array<

@@ -1,3 +1,4 @@
+import {type SymmetricKeyGenerationError} from '@combineIncomingOffersvexl-next/resources-utils/src/offers/utils/generateSymmetricKey'
 import {type PrivateKeyHolder} from '@vexl-next/cryptography/src/KeyHolder'
 import {
   type ClubKeyNotFoundInInnerStateError,
@@ -43,9 +44,8 @@ import {type PrivatePayloadsConstructionError} from '@vexl-next/resources-utils/
 import {type PublicPartEncryptionError} from '@vexl-next/resources-utils/src/offers/utils/encryptOfferPublicPayload'
 import {type PrivatePartEncryptionError} from '@vexl-next/resources-utils/src/offers/utils/encryptPrivatePart'
 import {type ApiErrorFetchingContactsForOffer} from '@vexl-next/resources-utils/src/offers/utils/fetchContactsForOffer'
-import {type SymmetricKeyGenerationError} from '@vexl-next/resources-utils/src/offers/utils/generateSymmetricKey'
 import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
-import {ErrorSigningChallenge} from '@vexl-next/server-utils/src/services/challenge/contracts'
+import {type ErrorSigningChallenge} from '@vexl-next/server-utils/src/services/challenge/contracts'
 import {Array, Effect, Either, Option, Record, pipe} from 'effect'
 import {atom, useAtomValue} from 'jotai'
 import {useMemo} from 'react'
@@ -119,14 +119,13 @@ const filterAndReportDecryptionErrors = (
   )
 }
 
-function combineIncomingOffers([offerA, ...rest]: [
-  OfferInfo,
-  ...OfferInfo[],
-]): Option.Option<OfferInfo> {
-  const offerBO = Array.get(rest, 0)
-  if (Option.isNone(offerBO)) return Option.some(offerA)
+function combineIncomingOffers([
+  offerA,
+  offerB,
+  ...rest
+]: Array.NonEmptyArray<OfferInfo>): Option.Option<OfferInfo> {
+  if (!offerB) return Option.some(offerA)
 
-  const offerB = offerBO.value
   if (offerA.offerId !== offerB.offerId) {
     reportError('error', new Error('Combining offers with different ids'), {
       ids: [offerA.offerId, offerB.offerId],
@@ -147,6 +146,12 @@ function combineIncomingOffers([offerA, ...rest]: [
       offerA.privatePart.clubIds,
       offerB.privatePart.clubIds
     ),
+    adminId: offerA.privatePart.adminId ?? offerB.privatePart.adminId,
+    intendedClubs:
+      offerA.privatePart.intendedClubs ?? offerB.privatePart.intendedClubs,
+    intendedConnectionLevel:
+      offerA.privatePart.intendedConnectionLevel ??
+      offerB.privatePart.intendedConnectionLevel,
   }
 
   const combinedOffer: OfferInfo = {
@@ -292,12 +297,6 @@ export const triggerOffersRefreshAtom = atom(null, (get, set) =>
       Effect.map(Array.getSomes)
     )
 
-    // const removedOffersClubs = yield* _(
-    //   Record
-    // )
-
-    // TODO removed offers for clubs
-
     const allFetchedOffersMerged = [
       ...newDecryptedContactsOffers,
       ...newClubsDecryptedOffers,
@@ -314,8 +313,7 @@ export const triggerOffersRefreshAtom = atom(null, (get, set) =>
       Array.filter((offer) => !offer.privatePart.adminId),
       Array.groupBy((one) => one.offerId),
       Record.values,
-      Array.map(combineIncomingOffers),
-      Array.getSomes
+      Array.filterMap(combineIncomingOffers)
     )
 
     const allOffersIds = Array.union(
@@ -385,74 +383,29 @@ export const triggerOffersRefreshAtom = atom(null, (get, set) =>
           removedFromContacts
         )
       }),
+      Array.filterMap((oneOffer) => {
+        if (
+          !oneOffer.ownershipInfo &&
+          !!oneOffer.offerInfo.privatePart.adminId
+        ) {
+          return pipe(
+            extractOwnerInfoFromOwnerPrivatePayload(
+              oneOffer.offerInfo.privatePart
+            ),
+            Option.map((ownershipInfo) => ({
+              ...oneOffer,
+              ownershipInfo,
+            }))
+          )
+        }
+        return Option.some(oneOffer)
+      }),
       (offers) => {
         set(offersStateAtom, {offers, lastUpdatedAt1: updateStartedAt})
       }
     )
 
-    // TODO !!!!
-    // Check and try to recover offers that are not saved with ownership info but are owned by the current user (according to private payload)
-    pipe(
-      get(offersStateAtom).offers,
-      Array.filter(
-        (one) => !one.ownershipInfo && !!one.offerInfo.privatePart.adminId
-      ),
-      (offersToRecover) => {
-        if (offersToRecover.length > 0) {
-          console.warn(
-            `🚨 🚨 🚨 Found ${offersToRecover.length} offers that needs to be recovered. This should not happen and should be investigated.🚨 🚨 🚨 \nTrying to recover them.`
-          )
-          reportError(
-            'warn',
-            new Error(
-              `Found ${offersToRecover.length} offers that needs to be recovered.`
-            ),
-            {ids: offersToRecover.map((one) => one.offerInfo.id)}
-          )
-        }
-        return offersToRecover
-      },
-      Array.map((one) =>
-        pipe(
-          extractOwnerInfoFromOwnerPrivatePayload(one.offerInfo.privatePart),
-          Effect.match({
-            onFailure(error) {
-              console.warn(
-                'Error while recovering offer',
-                JSON.stringify(error)
-              )
-              return false
-            },
-            onSuccess(ownershipInfo) {
-              set(offersAtom, (old) =>
-                old.map((oneOffer) => {
-                  if (oneOffer.offerInfo.offerId !== one.offerInfo.offerId) {
-                    return oneOffer
-                  }
-                  return {
-                    ...oneOffer,
-                    ownershipInfo,
-                  }
-                })
-              )
-              return true
-            },
-          }),
-          Effect.runPromise
-        )
-      ),
-      (results) => {
-        if (results.length === 0) return
-        const successCount = results.filter(Boolean).length
-        const errorCount = results.length - successCount
-        console.info(`Recovered ${successCount} out of ${errorCount} offers.`)
-        if (errorCount > 0) {
-          console.warn(`Unable to recover some offers.`)
-        }
-      }
-    )
-
-    // Update offers
+    // Ensure Update my offers to include admin id - OLD version
     pipe(
       get(myOffersAtom),
       Array.filter(
@@ -488,7 +441,7 @@ export const triggerOffersRefreshAtom = atom(null, (get, set) =>
               return true
             },
           }),
-          Effect.runFork
+          Effect.runFork // WTF?
         )
       )
     )

@@ -15,7 +15,7 @@ import {Array, Effect, Either} from 'effect'
 import {type NonEmptyArray} from 'effect/Array'
 import {pipe} from 'fp-ts/function'
 import {type OfferEncryptionProgress} from '../OfferEncryptionProgress'
-import {constructPrivatePayloadForOwner} from '../constructPrivatePayloadForOwner'
+import {constructAndEncryptPrivatePayloadForOwner} from '../constructPrivatePayloadForOwner'
 import constructPrivatePayloads, {
   PrivatePayloadsConstructionError,
 } from './constructPrivatePayloads'
@@ -74,18 +74,25 @@ export function fetchInfoAndGeneratePrivatePayloads({
       })
     )
 
-    const privatePayloadsIncludingOwnerInfo = [
-      constructPrivatePayloadForOwner({
+    const encryptedPrivatePayloadForOwner = yield* _(
+      constructAndEncryptPrivatePayloadForOwner({
         ownerCredentials,
         symmetricKey,
         adminId,
         intendedConnectionLevel,
-      }),
-      ...privatePayloads,
-    ]
+      }).pipe(
+        Effect.mapError(
+          (e) =>
+            new PrivatePayloadsConstructionError({
+              cause: e,
+              message: 'Error encrypting private payload for owner',
+            })
+        )
+      )
+    )
 
     const encryptionResult = yield* _(
-      privatePayloadsIncludingOwnerInfo,
+      privatePayloads,
       Array.map((one, i) =>
         pipe(
           Effect.Do,
@@ -94,7 +101,7 @@ export function fetchInfoAndGeneratePrivatePayloads({
               onProgress({
                 type: 'ENCRYPTING_PRIVATE_PAYLOADS',
                 currentlyProcessingIndex: i,
-                totalToEncrypt: privatePayloadsIncludingOwnerInfo.length,
+                totalToEncrypt: privatePayloads.length,
               })
             }
           }),
@@ -109,7 +116,12 @@ export function fetchInfoAndGeneratePrivatePayloads({
 
     const encryptedPrivateParts = pipe(
       encryptionResult,
-      Array.filterMap(Either.getRight)
+      Array.filterMap(Either.getRight),
+      Array.dedupeWith((one, two) => one.userPublicKey === two.userPublicKey),
+      Array.filter(
+        (one) => one.userPublicKey !== ownerCredentials.publicKeyPemBase64
+      ),
+      Array.append(encryptedPrivatePayloadForOwner)
     )
 
     if (!Array.isNonEmptyArray(encryptedPrivateParts)) {

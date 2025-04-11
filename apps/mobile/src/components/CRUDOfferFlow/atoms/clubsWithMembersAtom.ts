@@ -15,8 +15,6 @@ import {atomWithParsedMmkvStorageE} from '../../../utils/atomUtils/atomWithParse
 import {translationAtom} from '../../../utils/localization/I18nProvider'
 import {getNotificationToken} from '../../../utils/notifications'
 import reportError from '../../../utils/reportError'
-import showErrorAlert from '../../../utils/showErrorAlert'
-import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 
 const ClubWithMembers = Schema.Struct({
   club: ClubInfo,
@@ -124,12 +122,8 @@ export const clubsWithMembersAtom = atom(
                 )
               }
 
-              showErrorAlert({
-                title:
-                  toCommonErrorMessage(e, t) ??
-                  t('clubs.errorLoadingClubMembers'),
-                error: e,
-              })
+              // TODO: let user know somehow?
+
               return {
                 clubUuid,
                 state: 'errorLoading' as const,

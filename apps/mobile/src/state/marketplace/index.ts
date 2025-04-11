@@ -504,13 +504,23 @@ export const createOfferAtom = atom<
     | ClubKeyNotFoundInInnerStateError
   >
 >(null, (get, set, params) => {
-  const api = get(apiAtom)
-  const myStoredClubs = get(myStoredClubsAtom)
-  const session = get(sessionDataOrDummyAtom)
-  const {intendedClubs, payloadPublic, intendedConnectionLevel, onProgress} =
-    params
-
   return Effect.gen(function* (_) {
+    const api = get(apiAtom)
+    const clubsInfo = get(myStoredClubsAtom)
+    const session = get(sessionDataOrDummyAtom)
+    const {intendedClubs, payloadPublic, intendedConnectionLevel, onProgress} =
+      params
+    const intendedClubsRecord = pipe(
+      intendedClubs ?? [],
+      Array.filterMap((clubUuid) =>
+        pipe(
+          Record.get(clubsInfo, clubUuid),
+          Option.map((club) => [clubUuid, club] as const)
+        )
+      ),
+      Record.fromEntries
+    )
+
     const notificationToken = yield* _(taskToEffect(getNotificationToken()))
 
     const publicPayloadWithNotificationToken = yield* _(
@@ -531,8 +541,7 @@ export const createOfferAtom = atom<
         contactApi: api.contact,
         intendedConnectionLevel,
         ownerKeyPair: session.privateKey,
-        intendedClubs,
-        myStoredClubs,
+        intendedClubs: intendedClubsRecord,
         onProgress,
       })
     )

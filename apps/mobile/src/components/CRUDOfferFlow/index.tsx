@@ -9,6 +9,7 @@ import {
   type CRUDOfferStackParamsList,
   type RootStackScreenProps,
 } from '../../navigationTypes'
+import {andThenExpectBooleanNoErrors} from '../../utils/andThenExpectBooleanNoErrors'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 import KeyboardAvoidingView from '../KeyboardAvoidingView'
@@ -113,23 +114,13 @@ function CRUDOfferFlow({route: {params}, navigation}: Props): JSX.Element {
             }}
             onSkip={safeGoBack}
             onFinish={() => {
-              if (params.offerId) {
-                void Effect.runPromise(editOffer()).then((success) => {
+              void Effect.runPromise(
+                andThenExpectBooleanNoErrors((success) => {
                   if (success) {
-                    navigation.navigate('InsideTabs', {
-                      screen: 'MyOffers',
-                    })
+                    navigation.navigate('InsideTabs', {screen: 'MyOffers'})
                   }
-                })
-              } else {
-                void Effect.runPromise(createOffer()).then((success) => {
-                  if (success) {
-                    navigation.navigate('InsideTabs', {
-                      screen: 'MyOffers',
-                    })
-                  }
-                })
-              }
+                })(params.offerId ? editOffer() : createOffer())
+              )
             }}
             background="black"
             touchableOverlayDisabled

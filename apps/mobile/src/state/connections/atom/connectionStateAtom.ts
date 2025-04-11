@@ -1,7 +1,7 @@
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {type ConnectionLevel} from '@vexl-next/domain/src/general/offers'
 import {
-  UnixMilliseconds,
+  UnixMilliseconds0,
   unixMillisecondsNow,
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {MAX_PAGE_SIZE} from '@vexl-next/rest-api/src/Pagination.brand'
@@ -20,7 +20,7 @@ import {ConnectionsState} from '../domain'
 const connectionStateAtom = atomWithParsedMmkvStorageE(
   'connectionsState',
   {
-    lastUpdate: UnixMilliseconds.parse(0),
+    lastUpdate: UnixMilliseconds0,
     firstLevel: [],
     secondLevel: [],
     commonFriends: {commonContacts: []},

@@ -69,10 +69,8 @@ const reencryptOneOfferActionAtom = atom(
   ) => {
     const api = get(apiAtom)
     const session = get(sessionDataOrDummyAtom)
-    const myStoredClubs = get(myStoredClubsAtom)
     const offerAtom = singleOfferAtom(offer.offerInfo.offerId)
     const intendedClubs = get(offerAtom)?.ownershipInfo?.intendedClubs ?? []
-
     const clubsInfo = get(myStoredClubsAtom)
 
     const intendedClubsRecord = pipe(

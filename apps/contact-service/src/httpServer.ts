@@ -102,8 +102,6 @@ const MainLive = Layer.mergeAll(
   Layer.provideMerge(FirebaseMessagingService.Live),
   Layer.provideMerge(ExpoNotificationsService.Live),
   Layer.provideMerge(ContactDbService.Live),
-  Layer.provideMerge(ClubsDbService.Live),
-  Layer.provideMerge(ClubMembersDbService.Live),
   Layer.provideMerge(ImportContactsQuotaService.Live),
   Layer.provideMerge(NewClubUserNotificationsService.Live),
   Layer.provideMerge(UserDbService.Live),

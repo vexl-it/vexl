@@ -4,6 +4,7 @@ import {type ContactApi} from '@vexl-next/rest-api/src/services/contact'
 import {type Effect} from 'effect'
 import {sequenceS} from 'fp-ts/Apply'
 import * as E from 'fp-ts/Either'
+import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {atom} from 'jotai'
@@ -51,6 +52,9 @@ const numberOfFriendsAtom = atom(
           firstLevelFriendsCount: result.firstLevel.itemsCountTotal,
           secondLevelFriendsCount: result.secondLevel.itemsCountTotal,
         }
+      }),
+      T.map((result) => {
+        set(numberOfFriendsStorageAtom, result)
       })
     )()
   }

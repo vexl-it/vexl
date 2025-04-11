@@ -15,7 +15,7 @@ function MarketplaceScreen(): JSX.Element {
     useCallback(
       (state) => {
         if (state === 'active') {
-          void Effect.runPromise(refreshOffers())
+          Effect.runFork(refreshOffers())
         }
       },
       [refreshOffers]

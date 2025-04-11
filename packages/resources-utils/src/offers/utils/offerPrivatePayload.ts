@@ -11,7 +11,7 @@ import {
 } from '@vexl-next/domain/src/general/offers'
 import {type ContactApi} from '@vexl-next/rest-api/src/services/contact'
 import {type ServerPrivatePart} from '@vexl-next/rest-api/src/services/offer/contracts'
-import {Array, Effect, Either} from 'effect'
+import {Array, Effect, Either, Record} from 'effect'
 import {type NonEmptyArray} from 'effect/Array'
 import {pipe} from 'fp-ts/function'
 import {type OfferEncryptionProgress} from '../OfferEncryptionProgress'
@@ -80,6 +80,7 @@ export function fetchInfoAndGeneratePrivatePayloads({
         symmetricKey,
         adminId,
         intendedConnectionLevel,
+        intendedClubs: Record.keys(connectionsInfo.clubsConnections),
       }).pipe(
         Effect.mapError(
           (e) =>

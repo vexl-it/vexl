@@ -3,18 +3,15 @@ import {
   type ClubKeyNotFoundInInnerStateError,
   type ClubUuid,
 } from '@vexl-next/domain/src/general/clubs'
-import {type ChatOrigin} from '@vexl-next/domain/src/general/messaging'
 import {
   type FriendLevel,
   type IntendedConnectionLevel,
   type MyOfferInState,
-  type OfferAdminId,
   type OfferId,
   type OfferInfo,
   type OfferPrivatePart,
   type OfferPublicPart,
   type OneOfferInState,
-  type SymmetricKey,
 } from '@vexl-next/domain/src/general/offers'
 import {isoNow} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
 import {type CryptoError} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
@@ -35,40 +32,32 @@ import getNewContactNetworkOffersAndDecrypt, {
   type ApiErrorFetchingOffers,
   type NotOfferFromContactNetworkError,
 } from '@vexl-next/resources-utils/src/offers/getNewOffersAndDecrypt'
-import updateOffer, {
-  type ApiErrorUpdatingOffer,
-} from '@vexl-next/resources-utils/src/offers/updateOffer'
 import updateOwnerPrivatePayload from '@vexl-next/resources-utils/src/offers/updateOwnerPrivatePayload'
 import {type PrivatePayloadsConstructionError} from '@vexl-next/resources-utils/src/offers/utils/constructPrivatePayloads'
 import {type PublicPartEncryptionError} from '@vexl-next/resources-utils/src/offers/utils/encryptOfferPublicPayload'
-import {type PrivatePartEncryptionError} from '@vexl-next/resources-utils/src/offers/utils/encryptPrivatePart'
 import {type ApiErrorFetchingContactsForOffer} from '@vexl-next/resources-utils/src/offers/utils/fetchContactsForOffer'
 import {type SymmetricKeyGenerationError} from '@vexl-next/resources-utils/src/offers/utils/generateSymmetricKey'
-import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
 import {type ErrorSigningChallenge} from '@vexl-next/server-utils/src/services/challenge/contracts'
 import {Array, Effect, Either, Option, Record, pipe} from 'effect'
 import {atom, useAtomValue} from 'jotai'
 import {useMemo} from 'react'
-import {apiAtom} from '../../api'
-import getCountryPrefix from '../../utils/getCountryCode'
-import {getNotificationToken} from '../../utils/notifications'
-import reportError from '../../utils/reportError'
-import offerToConnectionsAtom, {
-  upsertOfferToConnectionsActionAtom,
-} from '../connections/atom/offerToConnectionsAtom'
-import {myStoredClubsAtom} from '../contacts/atom/clubsStore'
-import addNotificationCypherToPublicPayloadActionAtom from '../notifications/addNotificationTokenToPublicPayloadActionAtom'
-import {sessionDataOrDummyAtom} from '../session'
-import {loadingStateAtom} from './atoms/loadingState'
-import {myOffersAtom} from './atoms/myOffers'
+import {apiAtom} from '../../../api'
+import getCountryPrefix from '../../../utils/getCountryCode'
+import {getNotificationToken} from '../../../utils/notifications'
+import reportError from '../../../utils/reportError'
+import {upsertOfferToConnectionsActionAtom} from '../../connections/atom/offerToConnectionsAtom'
+import {myStoredClubsAtom} from '../../contacts/atom/clubsStore'
+import addNotificationCypherToPublicPayloadActionAtom from '../../notifications/addNotificationTokenToPublicPayloadActionAtom'
+import {sessionDataOrDummyAtom} from '../../session'
+import {loadingStateAtom} from './loadingState'
+import {myOffersAtom} from './myOffers'
 import {
   lastUpdatedAtAtom,
-  offerForChatOriginAtom,
   offersAtom,
   offersIdsAtom,
   offersStateAtom,
   singleOfferAtom,
-} from './atoms/offersState'
+} from './offersState'
 
 type DecryptedOfferResult = Either.Either<
   OfferInfo,
@@ -161,28 +150,27 @@ function combineIncomingOffers([
   return combineIncomingOffers([combinedOffer, ...rest])
 }
 
-export function updateOrFilterRemoveOffer(
+function updateOrFilterRemoveOffer(
   offer: OneOfferInState,
   removedFromClubs: ClubUuid[],
   removedFromContacts: boolean
 ): Option.Option<OneOfferInState> {
-  const remainingClubIds = Array.difference(
+  const newClubsArray = Array.difference(
     offer.offerInfo.privatePart.clubIds,
     removedFromClubs
   )
   const friendLevelsToRemove: FriendLevel[] = [
-    ...(Array.isEmptyArray(remainingClubIds) ? ['CLUB' as const] : []),
+    ...(Array.isEmptyArray(newClubsArray) ? ['CLUB' as const] : []),
     ...(removedFromContacts
       ? ['FIRST_DEGREE' as const, 'SECOND_DEGREE' as const]
       : []),
   ]
-  const remainingFriendLevels = Array.difference(
+  const newFriendLevels = Array.difference(
     offer.offerInfo.privatePart.friendLevel,
     friendLevelsToRemove
   )
 
-  if (Array.isEmptyArray(remainingFriendLevels) && !offer.ownershipInfo)
-    return Option.none()
+  if (Array.isEmptyArray(newFriendLevels)) return Option.none()
 
   return Option.some({
     ...offer,
@@ -190,8 +178,8 @@ export function updateOrFilterRemoveOffer(
       ...offer.offerInfo,
       privatePart: {
         ...offer.offerInfo.privatePart,
-        clubIds: remainingClubIds,
-        friendLevel: remainingFriendLevels,
+        clubIds: newClubsArray,
+        friendLevel: newFriendLevels,
       },
     },
   } satisfies OneOfferInState)
@@ -226,12 +214,7 @@ export const triggerOffersRefreshAtom = atom(null, (get, set) =>
           modifiedAt: get(lastUpdatedAtAtom),
           keyPair,
           clubUuid,
-        }).pipe(
-          Effect.catchTag('NotFoundError', () => {
-            // Club not found, ignore
-            return Effect.succeed([])
-          })
-        )
+        })
       ),
       Effect.all,
       Effect.map(Array.flatten),
@@ -388,7 +371,6 @@ export const triggerOffersRefreshAtom = atom(null, (get, set) =>
           !oneOffer.ownershipInfo &&
           !!oneOffer.offerInfo.privatePart.adminId
         ) {
-          // TODO handle offerToConnections
           return pipe(
             extractOwnerInfoFromOwnerPrivatePayload(
               oneOffer.offerInfo.privatePart
@@ -588,138 +570,3 @@ export const createOfferAtom = atom<
     return createdOffer
   })
 })
-
-export const updateOfferAtom = atom<
-  null,
-  [
-    {
-      payloadPublic: OfferPublicPart
-      symmetricKey: SymmetricKey
-      adminId: OfferAdminId
-      intendedConnectionLevel: IntendedConnectionLevel
-      intendedClubs?: ClubUuid[]
-    } & (
-      | {updateFcmCypher: false}
-      | {updateFcmCypher: true; offerKey: PrivateKeyHolder}
-    ),
-  ],
-  Effect.Effect<
-    OneOfferInState,
-    | ApiErrorUpdatingOffer
-    | PublicPartEncryptionError
-    | DecryptingOfferError
-    | PrivatePartEncryptionError
-    | Effect.Effect.Error<ReturnType<OfferApi['createPrivatePart']>>
-    | NonCompatibleOfferVersionError
-  >
->(null, (get, set, params) => {
-  const api = get(apiAtom)
-  const session = get(sessionDataOrDummyAtom)
-  const {
-    intendedClubs,
-    payloadPublic,
-    symmetricKey,
-    adminId,
-    intendedConnectionLevel,
-  } = params
-
-  return Effect.gen(function* (_) {
-    const notificationToken = yield* _(taskToEffect(getNotificationToken()))
-
-    const publicPayloadWithNotificationToken = !params.updateFcmCypher
-      ? {
-          publicPart: payloadPublic,
-          tokenSuccessfullyAdded: false,
-        }
-      : yield* _(
-          taskToEffect(
-            set(addNotificationCypherToPublicPayloadActionAtom, {
-              publicPart: payloadPublic,
-              notificationToken: Option.fromNullable(notificationToken),
-              keyHolder: params.offerKey,
-            })
-          )
-        )
-
-    const offerInfo = yield* _(
-      updateOffer({
-        offerApi: api.offer,
-        adminId,
-        publicPayload: publicPayloadWithNotificationToken.publicPart,
-        symmetricKey,
-        intendedConnectionLevel,
-        intendedClubs: intendedClubs ?? [],
-        ownerKeypair: session.privateKey,
-      })
-    )
-
-    const createdOffer: MyOfferInState = {
-      flags: {
-        reported: false,
-      },
-      lastCommitedFcmToken:
-        publicPayloadWithNotificationToken.tokenSuccessfullyAdded
-          ? (notificationToken ?? undefined)
-          : undefined,
-      ownershipInfo: {
-        adminId,
-        intendedConnectionLevel,
-        intendedClubs,
-      },
-      offerInfo,
-    }
-
-    set(offersAtom, (oldState) => [
-      ...oldState.filter(
-        (offer) => offer.offerInfo.offerId !== createdOffer.offerInfo.offerId
-      ),
-      createdOffer,
-    ])
-
-    return createdOffer
-  })
-})
-
-export const deleteOffersActionAtom = atom<
-  null,
-  [{adminIds: OfferAdminId[]}],
-  Effect.Effect<void, Effect.Effect.Error<ReturnType<OfferApi['deleteOffer']>>>
->(null, (get, set, params) => {
-  const {adminIds: adminIdsToDelete} = params
-  const api = get(apiAtom)
-  const offers = get(offersAtom)
-
-  return Effect.gen(function* (_) {
-    yield* _(api.offer.deleteOffer({query: {adminIds: adminIdsToDelete}}))
-
-    // Delete offer to connections
-    set(offerToConnectionsAtom, (prev) => ({
-      offerToConnections: prev.offerToConnections.filter(
-        (one) => !adminIdsToDelete.includes(one.adminId)
-      ),
-    }))
-
-    // Delete offers
-    set(
-      offersAtom,
-      offers.filter(
-        (o) =>
-          !o.ownershipInfo?.adminId ||
-          !adminIdsToDelete.includes(o.ownershipInfo?.adminId)
-      )
-    )
-  }).pipe(
-    Effect.mapError((e) => {
-      reportError('error', new Error('Error while deleting offers'), {e})
-      return e
-    })
-  )
-})
-
-export function useOfferForChatOrigin(
-  chatOrigin: ChatOrigin
-): OneOfferInState | undefined {
-  return useAtomValue(
-    useMemo(() => offerForChatOriginAtom(chatOrigin), [chatOrigin])
-  )
-}

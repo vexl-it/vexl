@@ -5,11 +5,14 @@ import {
   type OfferAdminId,
   type SymmetricKey,
 } from '@vexl-next/domain/src/general/offers'
-import {type NoContentResponse} from '@vexl-next/rest-api/src/NoContentResponse.brand'
 import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
 import {Effect, pipe} from 'effect'
-import {constructAndEncryptPrivatePayloadForOwner} from './constructPrivatePayloadForOwner'
-import {type PrivatePartEncryptionError} from './utils/encryptPrivatePart'
+import {constructPrivatePayloadForOwner} from './constructPrivatePayloadForOwner'
+import {type OfferPrivatePayloadToEncrypt} from './utils/constructPrivatePayloads'
+import {
+  encryptPrivatePart,
+  type PrivatePartEncryptionError,
+} from './utils/encryptPrivatePart'
 
 export default function updateOwnerPrivatePayload({
   api,
@@ -24,20 +27,22 @@ export default function updateOwnerPrivatePayload({
   symmetricKey: SymmetricKey
   adminId: OfferAdminId
   intendedConnectionLevel: IntendedConnectionLevel
-  intendedClubs?: ClubUuid[]
+  intendedClubs: readonly ClubUuid[]
 }): Effect.Effect<
-  NoContentResponse,
+  OfferPrivatePayloadToEncrypt,
   | PrivatePartEncryptionError
   | Effect.Effect.Error<ReturnType<OfferApi['createPrivatePart']>>
 > {
+  const privatePayload = constructPrivatePayloadForOwner({
+    ownerCredentials,
+    symmetricKey,
+    adminId,
+    intendedConnectionLevel,
+    intendedClubs,
+  })
+
   return pipe(
-    constructAndEncryptPrivatePayloadForOwner({
-      ownerCredentials,
-      symmetricKey,
-      adminId,
-      intendedConnectionLevel,
-      intendedClubs,
-    }),
+    encryptPrivatePart(privatePayload),
     Effect.flatMap((payload) =>
       api.createPrivatePart({
         body: {
@@ -45,6 +50,7 @@ export default function updateOwnerPrivatePayload({
           offerPrivateList: [payload],
         },
       })
-    )
+    ),
+    Effect.zipRight(Effect.succeed(privatePayload))
   )
 }

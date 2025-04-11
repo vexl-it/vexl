@@ -122,7 +122,8 @@ const reencryptOneOfferActionAtom = atom(
             secondLevel:
               offer.ownershipInfo.intendedConnectionLevel === 'ALL'
                 ? r.encryptedFor.secondDegreeConnections
-                : undefined,
+                : [],
+            clubs: r.encryptedFor.clubsConnections,
           },
           adminId: r.adminId,
           symmetricKey: r.symmetricKey,

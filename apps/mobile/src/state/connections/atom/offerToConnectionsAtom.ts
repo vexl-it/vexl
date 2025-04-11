@@ -8,7 +8,7 @@ import {
 import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import updatePrivateParts from '@vexl-next/resources-utils/src/offers/updatePrivateParts'
 import {subtractArrays} from '@vexl-next/resources-utils/src/utils/array'
-import {Array, Record} from 'effect'
+import {Array, Option, Record, Struct} from 'effect'
 import * as A from 'fp-ts/Array'
 import * as E from 'fp-ts/Either'
 import * as T from 'fp-ts/Task'
@@ -51,10 +51,41 @@ export const deleteOfferToConnectionsAtom = atom(
   null,
   (get, set, adminIdToDelete: OfferAdminId) => {
     set(offerToConnectionsAtom, (old) => ({
+      ...old,
       offerToConnections: old.offerToConnections.filter(
         (one) => one.adminId !== adminIdToDelete
       ),
     }))
+  }
+)
+
+export const deleteClubForAllConnectionsActionAtom = atom(
+  null,
+  (get, set, clubUuidToDelete: ClubUuid) => {
+    const offerToConnections = get(offerToConnectionsAtom).offerToConnections
+    const offerToClubConnections = pipe(
+      offerToConnections,
+      Array.filterMap((one) => {
+        return Option.all({
+          connections: Record.get(one.connections.clubs, clubUuidToDelete).pipe(
+            Option.filter(Array.isNonEmptyReadonlyArray)
+          ),
+          adminId: Option.some(one.adminId),
+        })
+      })
+    )
+
+    set(offerToConnectionsAtom, (old) => ({
+      ...old,
+      offerToConnections: Array.map(old.offerToConnections, (one) => ({
+        ...one,
+        connections: {
+          ...one.connections,
+          clubs: Struct.omit(one.connections.clubs, clubUuidToDelete),
+        },
+      })),
+    }))
+    return offerToClubConnections
   }
 )
 
@@ -80,6 +111,42 @@ export const deleteOrphanRecordsActionAtom = atom(null, (get, set) => {
   set(offerToConnectionsAtom, (old) => ({
     offerToConnections: old.offerToConnections.filter((one) =>
       adminIds.includes(one.adminId)
+    ),
+  }))
+})
+
+export const ensureConnectionsForEveryOffer = atom(null, (get, set) => {
+  const adminIdsWithSimmetricKey = pipe(
+    get(offersStateAtom).offers,
+    Array.filterMap((one) =>
+      Option.all({
+        adminId: Option.fromNullable(one.ownershipInfo?.adminId),
+        simmetricKey: Option.some(one.offerInfo.privatePart.symmetricKey),
+      })
+    )
+  )
+
+  set(offerToConnectionsAtom, (old) => ({
+    ...old,
+    offerToConnections: pipe(
+      adminIdsWithSimmetricKey,
+      Array.map(({adminId, simmetricKey}) =>
+        pipe(
+          Array.findFirst(
+            old.offerToConnections,
+            (one) => one.adminId === adminId
+          ),
+          Option.getOrElse(() => ({
+            adminId,
+            connections: {
+              clubs: {},
+              firstLevel: [],
+              secondLevel: [],
+            },
+            symmetricKey: simmetricKey,
+          }))
+        )
+      )
     ),
   }))
 })
@@ -147,6 +214,7 @@ export const updateAllOffersConnectionsActionAtom = atom(
       "Update all offers' connections"
     )
     set(deleteOrphanRecordsActionAtom)
+    set(ensureConnectionsForEveryOffer)
 
     const offerToConnectionsAtoms = get(offerToConnectionsAtomsAtom)
 
@@ -297,7 +365,7 @@ export const updateAllOffersConnectionsActionAtom = atom(
                           ],
                           removedConnections
                         )
-                      : undefined,
+                      : [],
                   clubs: processClubConnections({
                     currentConnections: val.connections.clubs ?? {},
                     newConnections: newConnections.clubs ?? {},

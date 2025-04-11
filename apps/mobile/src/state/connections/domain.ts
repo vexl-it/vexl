@@ -21,11 +21,13 @@ export const OfferToConnectionsItem = Schema.Struct({
   symmetricKey: SymmetricKeyE,
   connections: Schema.Struct({
     firstLevel: Schema.Array(PublicKeyPemBase64E),
-    secondLevel: Schema.Array(PublicKeyPemBase64E).pipe(Schema.optional),
+    secondLevel: Schema.Array(PublicKeyPemBase64E).pipe(
+      Schema.optionalWith({default: () => []})
+    ),
     clubs: Schema.Record({
       key: ClubUuidE,
       value: Schema.Array(PublicKeyPemBase64E),
-    }).pipe(Schema.optional),
+    }).pipe(Schema.optionalWith({default: () => ({})})),
   }),
 })
 

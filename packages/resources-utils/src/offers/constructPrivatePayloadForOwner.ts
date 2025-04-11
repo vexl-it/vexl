@@ -21,7 +21,7 @@ export function constructPrivatePayloadForOwner({
   intendedClubs,
 }: {
   intendedConnectionLevel: IntendedConnectionLevel
-  intendedClubs?: ClubUuid[]
+  intendedClubs: readonly ClubUuid[]
   ownerCredentials: PrivateKeyHolder
   symmetricKey: SymmetricKey
   adminId: OfferAdminId
@@ -33,7 +33,7 @@ export function constructPrivatePayloadForOwner({
       clubIds: [],
       friendLevel: [
         intendedConnectionLevel === 'ALL' ? 'FIRST_DEGREE' : 'SECOND_DEGREE',
-        ...(Array.isNonEmptyArray(intendedClubs ?? [])
+        ...(Array.isNonEmptyReadonlyArray(intendedClubs)
           ? ['CLUB' as const]
           : []),
       ],
@@ -54,7 +54,7 @@ export function constructAndEncryptPrivatePayloadForOwner({
   adminId,
 }: {
   intendedConnectionLevel: IntendedConnectionLevel
-  intendedClubs?: ClubUuid[]
+  intendedClubs: readonly ClubUuid[]
   ownerCredentials: PrivateKeyHolder
   symmetricKey: SymmetricKey
   adminId: OfferAdminId

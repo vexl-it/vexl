@@ -119,8 +119,8 @@ export default function updatePrivateParts({
 }: {
   currentConnections: {
     readonly firstLevel: readonly PublicKeyPemBase64[]
-    readonly secondLevel?: readonly PublicKeyPemBase64[]
-    readonly clubs?: Record<ClubUuid, readonly PublicKeyPemBase64[]>
+    readonly secondLevel: readonly PublicKeyPemBase64[]
+    readonly clubs: Record<ClubUuid, readonly PublicKeyPemBase64[]>
   }
   targetConnections: {
     readonly firstLevel: readonly PublicKeyPemBase64[]

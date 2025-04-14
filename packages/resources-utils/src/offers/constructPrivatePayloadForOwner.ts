@@ -6,7 +6,7 @@ import {
   type SymmetricKey,
 } from '@vexl-next/domain/src/general/offers'
 import {type ServerPrivatePart} from '@vexl-next/rest-api/src/services/offer/contracts'
-import {Array, type Effect} from 'effect'
+import {type Effect} from 'effect'
 import {type OfferPrivatePayloadToEncrypt} from './utils/constructPrivatePayloads'
 import {
   encryptPrivatePart,
@@ -31,12 +31,7 @@ export function constructPrivatePayloadForOwner({
     payloadPrivate: {
       commonFriends: [],
       clubIds: [],
-      friendLevel: [
-        intendedConnectionLevel === 'ALL' ? 'FIRST_DEGREE' : 'SECOND_DEGREE',
-        ...(Array.isNonEmptyReadonlyArray(intendedClubs)
-          ? ['CLUB' as const]
-          : []),
-      ],
+      friendLevel: [],
       symmetricKey,
       // THIS is for owner!
       intendedConnectionLevel,

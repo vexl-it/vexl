@@ -166,9 +166,6 @@ export const fetchedClubsAtom = atom((get) => {
   return clubs.data
 })
 
-clubsWithMembersAtom.onMount = (setAtom) => {
-  void Effect.runPromise(setAtom())
-}
 export const singleClubAtom = (
   clubUuid: ClubUuid
 ): Atom<Option.Option<ClubWithMembers>> =>

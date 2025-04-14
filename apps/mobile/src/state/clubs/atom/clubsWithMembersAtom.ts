@@ -139,22 +139,40 @@ export const clubsWithMembersAtom = atom(
       set(clubsWithMembersStorageAtom, (prev) => ({
         ...prev,
         data: pipe(
-          prev.data,
-          Array.filterMap((oldClubInState) =>
-            Array.findFirst(
-              fetchedClubs,
-              (club) => club.clubUuid === oldClubInState.club.uuid
-            ).pipe(
-              Option.flatMap((fetchedClub) => {
-                if (fetchedClub.state === 'removed') return Option.none()
-                if (fetchedClub.state === 'errorLoading')
-                  return Option.some(oldClubInState)
-                return Option.some(fetchedClub.data)
-              })
-            )
-          )
+          fetchedClubs,
+          Array.filterMap((fetchedClub) => {
+            if (fetchedClub.state === 'removed') return Option.none()
+
+            if (fetchedClub.state === 'errorLoading')
+              return Array.findFirst(
+                prev.data,
+                (oldClub) => oldClub.club.uuid === fetchedClub.clubUuid
+              )
+
+            return Option.some(fetchedClub.data)
+          })
         ),
       }))
+
+      // set(clubsWithMembersStorageAtom, (prev) => ({
+      //   ...prev,
+      //   data: pipe(
+      //     prev.data,
+      //     Array.filterMap((oldClubInState) =>
+      //       Array.findFirst(
+      //         fetchedClubs,
+      //         (club) => club.clubUuid === oldClubInState.club.uuid
+      //       ).pipe(
+      //         Option.flatMap((fetchedClub) => {
+      //           if (fetchedClub.state === 'removed') return Option.none()
+      //           if (fetchedClub.state === 'errorLoading')
+      //             return Option.some(oldClubInState)
+      //           return Option.some(fetchedClub.data)
+      //         })
+      //       )
+      //     )
+      //   ),
+      // }))
     })
   }
 )

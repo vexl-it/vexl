@@ -40,7 +40,7 @@ const addOrCreate = <K extends string, T>(
   value: T
 ): void => {
   const existingValue = record[key]
-  if (value) {
+  if (existingValue === undefined) {
     record[key] = HashSet.add(existingValue, value)
   } else record[key] = HashSet.make(value)
 }

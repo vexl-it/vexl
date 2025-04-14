@@ -28,7 +28,7 @@ export function effectToTask<A>(
   }
 }
 
-export function eitherToEfect<L, R>(
+export function eitherToEffect<L, R>(
   either: E.Either<L, R>
 ): Effect.Effect<R, L> {
   return pipe(
@@ -43,7 +43,7 @@ export function eitherToEfect<L, R>(
 export function taskEitherToEffect<L, R>(
   taskEither: TE.TaskEither<L, R>
 ): Effect.Effect<R, L> {
-  return Effect.promise(taskEither).pipe(Effect.flatMap(eitherToEfect))
+  return Effect.promise(taskEither).pipe(Effect.flatMap(eitherToEffect))
 }
 
 export function taskToEffect<A>(task: T.Task<A>): Effect.Effect<A, never> {

@@ -4,7 +4,7 @@ import {type Inbox} from '@vexl-next/domain/src/general/messaging'
 import {MINIMAL_DATE} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
 import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {fetchAndEncryptNotificationToken} from '@vexl-next/resources-utils/src/notifications/fetchAndEncryptNotificationToken'
-import getNewOffersAndDecrypt from '@vexl-next/resources-utils/src/offers/getNewOffersAndDecrypt'
+import getNewContactNetworkOffersAndDecrypt from '@vexl-next/resources-utils/src/offers/getNewOffersAndDecrypt'
 import {Array, Effect, Either, pipe as effectPipe} from 'effect'
 import * as Notifications from 'expo-notifications'
 import * as T from 'fp-ts/Task'
@@ -23,7 +23,6 @@ import offerToConnectionsAtom, {
 } from '../../state/connections/atom/offerToConnectionsAtom'
 import {storedContactsAtom} from '../../state/contacts/atom/contactsStore'
 import {btcPriceDataAtom} from '../../state/currentBtcPriceAtoms'
-import {triggerOffersRefreshAtom} from '../../state/marketplace'
 import {myOffersAtom} from '../../state/marketplace/atoms/myOffers'
 import {
   lastUpdatedAtAtom,
@@ -34,10 +33,12 @@ import {
   alertAndReportOnlineOffersWithoutLocation,
   reportOffersWithoutLocationActionAtom,
 } from '../../state/marketplace/atoms/offersToSeeInMarketplace'
+import {refreshOffersActionAtom} from '../../state/marketplace/atoms/refreshOffersActionAtom'
 import {
   sessionDataOrDummyAtom,
   useSessionAssumeLoggedIn,
 } from '../../state/session'
+import {andThenExpectVoidNoErrors} from '../../utils/andThenExpectNoErrors'
 import {
   commitHash,
   enableHiddenFeatures,
@@ -79,7 +80,7 @@ function DebugScreen(): JSX.Element {
   const {t} = useTranslation()
 
   const refreshMessaging = useSetAtom(fetchMessagesForAllInboxesAtom)
-  const refreshOffers = useSetAtom(triggerOffersRefreshAtom)
+  const refreshOffers = useSetAtom(refreshOffersActionAtom)
   const updateConnections = useSetAtom(updateAllOffersConnectionsActionAtom)
   const deleteInbox = useSetAtom(deleteInboxAtom)
   const deleteAllInboxes = useSetAtom(deleteAllInboxesActionAtom)
@@ -213,7 +214,7 @@ function DebugScreen(): JSX.Element {
               onPress={() => {
                 void pipe(
                   effectToTaskEither(
-                    getNewOffersAndDecrypt({
+                    getNewContactNetworkOffersAndDecrypt({
                       keyPair: session.privateKey,
                       modifiedAt: MINIMAL_DATE,
                       offersApi: store.get(apiAtom).offer,
@@ -410,9 +411,11 @@ function DebugScreen(): JSX.Element {
               size="small"
               text="Refresh offers state"
               onPress={() => {
-                void refreshOffers().then(() => {
-                  Alert.alert('done')
-                })
+                void Effect.runPromise(
+                  andThenExpectVoidNoErrors(() => {
+                    Alert.alert('done')
+                  })(refreshOffers())
+                )
               }}
             />
             <Button

@@ -7,7 +7,7 @@ import {
   ClubCode,
   ClubInfoForUser,
   ClubLinkInfo,
-  ClubUuid,
+  ClubUuidE,
 } from '@vexl-next/domain/src/general/clubs'
 import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
 import {CountryPrefixE} from '@vexl-next/domain/src/general/CountryPrefix.brand'
@@ -282,14 +282,15 @@ export const AdminTokenParams = Schema.Struct({
   adminToken: Schema.String,
 })
 
-const ClubInfo = Schema.Struct({
-  uuid: ClubUuid,
+export const ClubInfo = Schema.Struct({
+  uuid: ClubUuidE,
   name: Schema.String,
   description: Schema.optionalWith(Schema.String, {as: 'Option'}),
   membersCountLimit: Schema.Number,
   clubImageUrl: UriStringE,
   validUntil: Schema.DateFromString,
 })
+export type ClubInfo = typeof ClubInfo.Type
 
 export const CreateClubErrors = Schema.Union(
   ClubAlreadyExistsError,
@@ -315,13 +316,13 @@ export type GenerateInviteLinkForAdminErrors =
   typeof GenerateInviteLinkForAdminErrors.Type
 
 export const GenerateInviteLinkForAdminRequest = Schema.Struct({
-  clubUuid: ClubUuid,
+  clubUuid: ClubUuidE,
 })
 export type GenerateInviteLinkForAdminRequest =
   typeof GenerateInviteLinkForAdminRequest.Type
 
 export const GenerateInviteLinkForAdminResponse = Schema.Struct({
-  clubUuid: ClubUuid,
+  clubUuid: ClubUuidE,
   link: ClubLinkInfo,
 })
 export type GenerateInviteLinkForAdminResponse =
@@ -399,7 +400,7 @@ export const JoinClubErrors = Schema.Union(
 
 export const LeaveClubRequest = Schema.Struct({
   ...RequestBaseWithChallenge.fields,
-  clubUuid: ClubUuid,
+  clubUuid: ClubUuidE,
 })
 export type LeaveClubRequest = typeof LeaveClubRequest.Type
 
@@ -422,13 +423,13 @@ export const GenerateClubJoinLinkErrors = Schema.Union(
 
 export const GenerateClubJoinLinkRequest = Schema.Struct({
   ...RequestBaseWithChallenge.fields,
-  clubUuid: ClubUuid,
+  clubUuid: ClubUuidE,
 })
 export type GenerateClubJoinLinkRequest =
   typeof GenerateClubJoinLinkRequest.Type
 
 export const GenerateClubJoinLinkResponse = Schema.Struct({
-  clubUuid: ClubUuid,
+  clubUuid: ClubUuidE,
   codeInfo: ClubLinkInfo,
 })
 
@@ -450,12 +451,12 @@ export const DeactivateClubJoinLinkErrors = Schema.Union(
 
 export const DeactivateClubJoinLinkRequest = Schema.Struct({
   ...RequestBaseWithChallenge.fields,
-  clubUuid: ClubUuid,
+  clubUuid: ClubUuidE,
   code: ClubCode,
 })
 
 export const DeactivateClubJoinLinkResponse = Schema.Struct({
-  clubUuid: ClubUuid,
+  clubUuid: ClubUuidE,
   deactivatedCode: ClubCode,
 })
 export type DeactivateClubJoinLinkResponse =
@@ -474,7 +475,7 @@ export const AddUserToTheClubErrors = Schema.Union(
 
 export const AddUserToTheClubRequest = Schema.Struct({
   ...RequestBaseWithChallenge.fields,
-  clubUuid: ClubUuid,
+  clubUuid: ClubUuidE,
   adminitionRequest: ClubAdmitionRequest,
 })
 export type AddUserToTheClubRequest = typeof AddUserToTheClubRequest.Type
@@ -493,24 +494,24 @@ export type ListClubLinksErrors = typeof ListClubLinksErrors.Type
 
 export const ListClubLinksRequest = Schema.Struct({
   ...RequestBaseWithChallenge.fields,
-  clubUuid: ClubUuid,
+  clubUuid: ClubUuidE,
 })
 export type ListClubLinksRequest = typeof ListClubLinksRequest.Type
 
 export const ListClubLinksResponse = Schema.Struct({
-  clubUuid: ClubUuid,
+  clubUuid: ClubUuidE,
   links: Schema.Array(ClubLinkInfo),
 })
 export type ListClubLinksResponse = typeof ListClubLinksResponse.Type
 export const GetClubContactsRequest = Schema.Struct({
   ...RequestBaseWithChallenge.fields,
-  clubUuid: ClubUuid,
+  clubUuid: ClubUuidE,
 })
 
 export type GetClubContactsRequest = typeof GetClubContactsRequest.Type
 
 export const GetClubContactsResponse = Schema.Struct({
-  clubUuid: ClubUuid,
+  clubUuid: ClubUuidE,
   items: Schema.Array(PublicKeyPemBase64E),
 })
 

@@ -1,7 +1,13 @@
 import {ClubCode} from '@vexl-next/domain/src/general/clubs'
-import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
+import {
+  E164PhoneNumber,
+  E164PhoneNumberE,
+} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
-import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
+import {
+  UriString,
+  UriStringE,
+} from '@vexl-next/domain/src/utility/UriString.brand'
 import {Schema} from 'effect'
 import {z} from 'zod'
 
@@ -77,12 +83,17 @@ export type StoredContactWithoutComputedValues = StoredContact & {
 export const ImportContactFromLinkPayload = z.object({
   name: z.string(),
   label: z.string(),
-  numberToDisplay: z.string(),
+  numberToDisplay: E164PhoneNumber,
   imageUri: UriString.optional(),
 })
-export type ImportContactFromLinkPayload = z.TypeOf<
-  typeof ImportContactFromLinkPayload
->
+export const ImportContactFromLinkPayloadE = Schema.Struct({
+  name: Schema.String,
+  label: Schema.String,
+  numberToDisplay: E164PhoneNumberE,
+  imageUri: Schema.optional(UriStringE),
+})
+export type ImportContactFromLinkPayload =
+  typeof ImportContactFromLinkPayloadE.Type
 
 export function hasComputedValues(
   contact: StoredContact

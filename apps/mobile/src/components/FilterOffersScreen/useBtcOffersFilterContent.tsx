@@ -1,7 +1,15 @@
 import {useMemo} from 'react'
 import {getTokens} from 'tamagui'
 import {useTranslation} from '../../utils/localization/I18nProvider'
+import amountOfTransactionSvg from '../images/amountOfTransactionSvg'
+import clubsSvg from '../images/clubsSvg'
+import coinsSvg from '../images/coinsSvg'
+import friendLevelSvg from '../images/friendLevelSvg'
+import networkSvg from '../images/networkSvg'
+import paymentMethodSvg from '../images/paymentMethod'
+import spokenLanguagesSvg from '../images/spokenLanguagesSvg'
 import AmountOfTransaction from '../OfferForm/components/AmountOfTransaction'
+import ClubsComponent from '../OfferForm/components/Clubs'
 import Currency from '../OfferForm/components/Currency'
 import FriendLevel from '../OfferForm/components/FriendLevel'
 import Location from '../OfferForm/components/Location'
@@ -9,17 +17,13 @@ import Network from '../OfferForm/components/Network'
 import PaymentMethod from '../OfferForm/components/PaymentMethod'
 import SpokenLanguages from '../OfferForm/components/SpokenLanguages'
 import {type Props} from '../Section'
-import amountOfTransactionSvg from '../images/amountOfTransactionSvg'
-import coinsSvg from '../images/coinsSvg'
-import friendLevelSvg from '../images/friendLevelSvg'
-import networkSvg from '../images/networkSvg'
-import paymentMethodSvg from '../images/paymentMethod'
-import spokenLanguagesSvg from '../images/spokenLanguagesSvg'
 import {
   amountBottomLimitAtom,
   amountTopLimitAtom,
   createIsThisLanguageSelectedAtom,
+  createSelectClubInFilterAtom,
   currencyAtom,
+  handleShowClubsInFilterChangeActionAtom,
   intendedConnectionLevelAtom,
   listingTypeAtom,
   locationActiveAtom,
@@ -121,6 +125,17 @@ export default function useBtcOffersFilterContent(): Props[] {
           <FriendLevel
             hideSubtitle
             intendedConnectionLevelAtom={intendedConnectionLevelAtom}
+          />
+        ),
+      },
+      {
+        title: t('clubs.vexlClubs'),
+        image: clubsSvg,
+        children: (
+          <ClubsComponent
+            form="FilterForm"
+            createSelectClubAtom={createSelectClubInFilterAtom}
+            showClubsInFilterAtom={handleShowClubsInFilterChangeActionAtom}
           />
         ),
       },

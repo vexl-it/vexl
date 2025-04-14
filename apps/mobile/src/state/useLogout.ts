@@ -1,5 +1,6 @@
 import notifee from '@notifee/react-native'
 import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
+import {Effect} from 'effect'
 import * as Notifications from 'expo-notifications'
 import * as O from 'fp-ts/Option'
 import {atom, useSetAtom} from 'jotai'
@@ -12,7 +13,7 @@ import notEmpty from '../utils/notEmpty'
 import {showDebugNotificationIfEnabled} from '../utils/notifications/showDebugNotificationIfEnabled'
 import reportError from '../utils/reportError'
 import deleteAllInboxesActionAtom from './chat/atoms/deleteAllInboxesActionAtom'
-import {deleteOffersActionAtom} from './marketplace'
+import {deleteOffersActionAtom} from './marketplace/atoms/deleteOffersActionAtom'
 import {myOffersAtom} from './marketplace/atoms/myOffers'
 import {sessionAtom} from './session'
 
@@ -41,11 +42,13 @@ export const logoutActionAtom = atom(null, async (get, set) => {
   try {
     // offer service
     await failSilently(
-      set(deleteOffersActionAtom, {
-        adminIds: get(myOffersAtom)
-          .map((offer) => offer.ownershipInfo?.adminId)
-          .filter(notEmpty),
-      })()
+      Effect.runPromise(
+        set(deleteOffersActionAtom, {
+          adminIds: get(myOffersAtom)
+            .map((offer) => offer.ownershipInfo?.adminId)
+            .filter(notEmpty),
+        })
+      )
     )
 
     // chat service

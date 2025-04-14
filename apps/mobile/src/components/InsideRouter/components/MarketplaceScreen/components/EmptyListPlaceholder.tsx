@@ -1,4 +1,5 @@
 import {useNavigation} from '@react-navigation/native'
+import {Effect} from 'effect'
 import {useAtom, useAtomValue, useSetAtom} from 'jotai'
 import {useEffect} from 'react'
 import {Text} from 'tamagui'
@@ -8,7 +9,7 @@ import {
   minutesTillOffersDisplayedAtom,
 } from '../../../../../state/contacts'
 import {importedContactsCountAtom} from '../../../../../state/contacts/atom/contactsStore'
-import {triggerOffersRefreshAtom} from '../../../../../state/marketplace'
+
 import {
   isFilterActiveAtom,
   isTextFilterActiveAtom,
@@ -23,6 +24,7 @@ import {
   resetFilterSuggestionVisibleAtom,
 } from '../../../../../state/marketplace/atoms/offerSuggestionVisible'
 import {areThereOffersToSeeInMarketplaceWithoutFiltersAtom} from '../../../../../state/marketplace/atoms/offersToSeeInMarketplace'
+import {refreshOffersActionAtom} from '../../../../../state/marketplace/atoms/refreshOffersActionAtom'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import EmptyListWrapper from '../../../../EmptyListWrapper'
 import MarketplaceSuggestion from '../../../../MarketplaceSuggestion'
@@ -32,7 +34,7 @@ const REACH_NUMBER_THRESHOLD = 30
 
 interface Props {
   refreshing: boolean
-  onRefresh?: () => Promise<void>
+  onRefresh?: () => void
 }
 
 function EmptyListPlaceholder({refreshing, onRefresh}: Props): JSX.Element {
@@ -62,7 +64,7 @@ function EmptyListPlaceholder({refreshing, onRefresh}: Props): JSX.Element {
     initializeMinutesTillOffersDisplayedActionAtom
   )
   const resetFilterInStorage = useSetAtom(resetFilterInStorageActionAtom)
-  const refreshOffers = useSetAtom(triggerOffersRefreshAtom)
+  const refreshOffers = useSetAtom(refreshOffersActionAtom)
 
   const [resetFilterSuggestionVisible, setResetFilterSuggestionVisible] =
     useAtom(resetFilterSuggestionVisibleAtom)
@@ -81,7 +83,7 @@ function EmptyListPlaceholder({refreshing, onRefresh}: Props): JSX.Element {
         if (minutesTillOffersDisplayed > 0) {
           setMinutesTillOffersDisplayed(minutesTillOffersDisplayed - 1)
         }
-        void refreshOffers()
+        void Effect.runFork(refreshOffers())
       }, 60000)
 
       return () => {

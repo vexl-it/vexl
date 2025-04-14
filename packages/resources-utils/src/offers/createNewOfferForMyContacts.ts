@@ -1,4 +1,9 @@
+import {type KeyHolder} from '@vexl-next/cryptography'
 import {type PrivateKeyHolder} from '@vexl-next/cryptography/src/KeyHolder'
+import {
+  type ClubKeyNotFoundInInnerStateError,
+  type ClubUuid,
+} from '@vexl-next/domain/src/general/clubs'
 import {type CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {
   generateAdminId,
@@ -10,18 +15,15 @@ import {
 } from '@vexl-next/domain/src/general/offers'
 import {type ContactApi} from '@vexl-next/rest-api/src/services/contact'
 import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
-import {type Effect} from 'effect'
-import {pipe} from 'fp-ts/function'
-import * as TE from 'fp-ts/TaskEither'
-import {effectToTaskEither} from '../effect-helpers/TaskEitherConverter'
+import {Effect} from 'effect'
 import decryptOffer, {
-  type ErrorDecryptingOffer,
+  type DecryptingOfferError,
   type NonCompatibleOfferVersionError,
 } from './decryptOffer'
 import {type OfferEncryptionProgress} from './OfferEncryptionProgress'
-import {type ErrorConstructingPrivatePayloads} from './utils/constructPrivatePayloads'
+import {type PrivatePayloadsConstructionError} from './utils/constructPrivatePayloads'
 import encryptOfferPublicPayload, {
-  type ErrorEncryptingPublicPart,
+  type PublicPartEncryptionError,
 } from './utils/encryptOfferPublicPayload'
 import {type PrivatePartEncryptionError} from './utils/encryptPrivatePart'
 import {
@@ -29,7 +31,7 @@ import {
   type ConnectionsInfoForOffer,
 } from './utils/fetchContactsForOffer'
 import generateSymmetricKey, {
-  type ErrorGeneratingSymmetricKey,
+  type SymmetricKeyGenerationError,
 } from './utils/generateSymmetricKey'
 import {fetchInfoAndGeneratePrivatePayloads} from './utils/offerPrivatePayload'
 import {sendOfferToNetworkBatchPrivateParts} from './utils/sendOfferToNetworkBatchPrivateParts'
@@ -54,6 +56,7 @@ export default function createNewOfferForMyContacts({
   countryPrefix,
   intendedConnectionLevel,
   onProgress,
+  intendedClubs,
 }: {
   offerApi: OfferApi
   contactApi: ContactApi
@@ -61,69 +64,71 @@ export default function createNewOfferForMyContacts({
   ownerKeyPair: PrivateKeyHolder
   countryPrefix: CountryPrefix
   intendedConnectionLevel: IntendedConnectionLevel
+  intendedClubs: Record<ClubUuid, KeyHolder.PrivateKeyHolder>
   onProgress?: (status: OfferEncryptionProgress) => void
-}): TE.TaskEither<
+}): Effect.Effect<
+  CreateOfferResult,
   | ApiErrorFetchingContactsForOffer
-  | ErrorConstructingPrivatePayloads
+  | PrivatePayloadsConstructionError
   | ApiErrorWhileCreatingOffer
-  | ErrorGeneratingSymmetricKey
-  | ErrorDecryptingOffer
-  | ErrorEncryptingPublicPart
-  | NonCompatibleOfferVersionError,
-  CreateOfferResult
+  | SymmetricKeyGenerationError
+  | DecryptingOfferError
+  | PublicPartEncryptionError
+  | NonCompatibleOfferVersionError
+  | ClubKeyNotFoundInInnerStateError
 > {
-  return pipe(
-    TE.Do,
-    TE.bindW('adminId', () => TE.right(generateAdminId())),
-    TE.bindW('symmetricKey', () => TE.fromEither(generateSymmetricKey())),
-    TE.bindW('encryptedPublic', ({symmetricKey}) => {
-      if (onProgress) onProgress({type: 'CONSTRUCTING_PUBLIC_PAYLOAD'})
-      return encryptOfferPublicPayload({
+  return Effect.gen(function* (_) {
+    const adminId = generateAdminId()
+    const symmetricKey = yield* _(generateSymmetricKey())
+
+    if (onProgress) onProgress({type: 'CONSTRUCTING_PUBLIC_PAYLOAD'})
+
+    const encryptedPublic = yield* _(
+      encryptOfferPublicPayload({
         offerPublicPart: publicPart,
         symmetricKey,
       })
-    }),
-    TE.bindW('privatePayloads', ({symmetricKey, adminId}) =>
+    )
+
+    const privatePayloads = yield* _(
       fetchInfoAndGeneratePrivatePayloads({
         symmetricKey,
         intendedConnectionLevel,
         contactApi,
         ownerCredentials: ownerKeyPair,
+        intendedClubs,
         onProgress,
         adminId,
       })
-    ),
-    TE.bindW('response', ({privatePayloads, encryptedPublic, adminId}) => {
-      if (onProgress) onProgress({type: 'SENDING_OFFER_TO_NETWORK'})
-      return pipe(
-        effectToTaskEither(
-          sendOfferToNetworkBatchPrivateParts({
-            offerApi,
-            offerData: {
-              offerPrivateList: privatePayloads.privateParts,
-              countryPrefix,
-              payloadPublic: encryptedPublic,
-              offerType: publicPart.offerType,
-              adminId,
-            },
-          })
-        ),
-        TE.bindTo('response'),
-        TE.bindW('offerInfo', ({response}) =>
-          decryptOffer(ownerKeyPair)(response)
-        )
-      )
-    }),
-    TE.map(({response, privatePayloads, symmetricKey}) => ({
-      adminId: response.response.adminId,
-      offerInfo: response.offerInfo,
+    )
+
+    if (onProgress) onProgress({type: 'SENDING_OFFER_TO_NETWORK'})
+
+    const sendOfferToNetworkResponse = yield* _(
+      sendOfferToNetworkBatchPrivateParts({
+        offerApi,
+        offerData: {
+          offerPrivateList: privatePayloads.privateParts,
+          countryPrefix,
+          payloadPublic: encryptedPublic,
+          offerType: publicPart.offerType,
+          adminId,
+        },
+      })
+    )
+
+    const offerInfo = yield* _(
+      decryptOffer(ownerKeyPair)(sendOfferToNetworkResponse)
+    )
+
+    if (onProgress) onProgress({type: 'DONE'})
+
+    return {
+      adminId: sendOfferToNetworkResponse.adminId,
+      offerInfo,
       encryptionErrors: privatePayloads.errors,
       symmetricKey,
       encryptedFor: privatePayloads.connections,
-    })),
-    TE.map((v) => {
-      if (onProgress) onProgress({type: 'DONE'})
-      return v
-    })
-  )
+    } satisfies CreateOfferResult
+  })
 }

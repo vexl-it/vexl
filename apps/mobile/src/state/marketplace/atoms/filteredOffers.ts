@@ -1,4 +1,5 @@
 import {Latitude, Longitude} from '@vexl-next/domain/src/utility/geoCoordinates'
+import {Array} from 'effect'
 import {atom} from 'jotai'
 import {splitAtom} from 'jotai/utils'
 import calculatePriceInSats from '../../../utils/calculatePriceInSats'
@@ -71,7 +72,12 @@ const filterBtcOffersAtom = atom((get) => {
       (filter.spokenLanguages.length === 0 ||
         filter.spokenLanguages.some((item) =>
           offer.offerInfo.publicPart.spokenLanguages.includes(item)
-        ))
+        )) &&
+      (!filter.showClubsInFilter ||
+        Array.intersection(
+          offer.offerInfo.privatePart.clubIds,
+          filter.clubsUuids
+        ).length > 0)
   )
 })
 
@@ -137,7 +143,12 @@ const filterProductAndOtherOffersAtom = atom((get) => {
       (filter.spokenLanguages.length === 0 ||
         filter.spokenLanguages.some((item) =>
           offer.offerInfo.publicPart.spokenLanguages.includes(item)
-        ))
+        )) &&
+      (!filter.showClubsInFilter ||
+        Array.intersection(
+          offer.offerInfo.privatePart.clubIds,
+          filter.clubsUuids
+        ).length > 0)
   )
 })
 
@@ -186,7 +197,12 @@ const filterOffersIgnoreListingTypeAtom = atom((get) => {
       (filter.spokenLanguages.length === 0 ||
         filter.spokenLanguages.some((item) =>
           offer.offerInfo.publicPart.spokenLanguages.includes(item)
-        ))
+        )) &&
+      (!filter.showClubsInFilter ||
+        Array.intersection(
+          offer.offerInfo.privatePart.clubIds,
+          filter.clubsUuids
+        ).length > 0)
   )
 })
 

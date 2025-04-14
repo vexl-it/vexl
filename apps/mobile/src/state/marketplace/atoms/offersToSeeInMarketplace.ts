@@ -64,7 +64,8 @@ export const offersToSeeInMarketplaceAtom = atom((get) => {
       (oneOffer.offerInfo.privatePart.commonFriends.some((one) =>
         importedContactsHashes.includes(one)
       ) ||
-        oneOffer.offerInfo.privatePart.friendLevel.includes('FIRST_DEGREE')) &&
+        oneOffer.offerInfo.privatePart.friendLevel.includes('FIRST_DEGREE') ||
+        oneOffer.offerInfo.privatePart.friendLevel.includes('CLUB')) &&
       // Filter offers that are set to be in person but have no location
       (isDeveloper ||
         oneOffer.offerInfo.publicPart.locationState.length === 0 ||

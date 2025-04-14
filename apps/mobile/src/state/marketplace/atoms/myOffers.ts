@@ -1,10 +1,17 @@
+import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {
+  type IntendedConnectionLevel,
   type MyOfferInState,
+  type OfferAdminId,
   type Sort,
 } from '@vexl-next/domain/src/general/offers'
+import updateOwnerPrivatePayload from '@vexl-next/resources-utils/src/offers/updateOwnerPrivatePayload'
+import {Array, Effect} from 'effect'
 import {atom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {splitAtom} from 'jotai/utils'
+import {apiAtom} from '../../../api'
+import {sessionDataOrDummyAtom} from '../../session'
 import sortOffers from '../utils/sortOffers'
 import {offersAtom} from './offersState'
 
@@ -45,3 +52,59 @@ export const shouldDisplaySuggestionToAddListingTypeAtom = atom(
 )
 
 export const selectedMyOffersSortingOptionAtom = atom<Sort>('NEWEST_OFFER')
+
+export const updateMyOfferPrivatePayloadActionAtom = atom(
+  null,
+  (
+    get,
+    set,
+    {
+      adminId,
+      intendedClubs,
+      intendedConnectionLevel,
+    }: {
+      adminId: OfferAdminId
+      intendedConnectionLevel: IntendedConnectionLevel
+      intendedClubs: ClubUuid[]
+    }
+  ) =>
+    Effect.gen(function* (_) {
+      const offerToUpdate = yield* _(
+        Array.findFirst(
+          get(myOffersAtom),
+          (offer) => offer.ownershipInfo.adminId === adminId
+        )
+      )
+
+      const {payloadPrivate} = yield* _(
+        updateOwnerPrivatePayload({
+          adminId: offerToUpdate.ownershipInfo.adminId,
+          symmetricKey: offerToUpdate.offerInfo.privatePart.symmetricKey,
+          ownerCredentials: get(sessionDataOrDummyAtom).privateKey,
+          intendedConnectionLevel,
+          intendedClubs,
+          api: get(apiAtom).offer,
+        })
+      )
+
+      const updatedOffer = {
+        ...offerToUpdate,
+        offerInfo: {
+          ...offerToUpdate.offerInfo,
+          privatePart: payloadPrivate,
+        },
+        ownershipInfo: {
+          adminId,
+          intendedConnectionLevel,
+          intendedClubs,
+        },
+      } satisfies MyOfferInState
+
+      set(
+        myOffersAtom,
+        Array.map((one) =>
+          one.ownershipInfo.adminId === adminId ? updatedOffer : one
+        )
+      )
+    })
+)

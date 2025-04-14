@@ -1,40 +1,44 @@
-import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
-import {PrivatePayloadEncrypted} from '@vexl-next/domain/src/general/offers'
-import {type BasicError} from '@vexl-next/domain/src/utility/errors'
+import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder'
+import {PrivatePayloadEncryptedE} from '@vexl-next/domain/src/general/offers'
 import {type ServerPrivatePart} from '@vexl-next/rest-api/src/services/offer/contracts'
-import * as TE from 'fp-ts/TaskEither'
-import {flow, pipe} from 'fp-ts/function'
-import {eciesEncrypt} from '../../utils/crypto'
-import {safeParse, stringifyToJson} from '../../utils/parsing'
+import {Effect, Schema} from 'effect'
+import {eciesEncryptE} from '../../utils/crypto'
+import {stringifyE} from '../../utils/parsing'
 import {type OfferPrivatePayloadToEncrypt} from './constructPrivatePayloads'
 
-export type PrivatePartEncryptionError =
-  BasicError<'PrivatePartEncryptionError'> & {toPublicKey: PublicKeyPemBase64}
+export class PrivatePartEncryptionError extends Schema.TaggedError<PrivatePartEncryptionError>(
+  'PrivatePartEncryptionError'
+)('PrivatePartEncryptionError', {
+  cause: Schema.Unknown,
+  message: Schema.String,
+  toPublicKey: PublicKeyPemBase64E,
+}) {}
 
 export function encryptPrivatePart(
   privatePart: OfferPrivatePayloadToEncrypt
-): TE.TaskEither<PrivatePartEncryptionError, ServerPrivatePart> {
-  return pipe(
-    TE.Do,
-    TE.chainW(() => TE.fromEither(stringifyToJson(privatePart.payloadPrivate))),
-    TE.chainW(
-      flow(
-        eciesEncrypt(privatePart.toPublicKey),
-        TE.map((json) => `0${json}`),
-        TE.chainEitherKW(safeParse(PrivatePayloadEncrypted))
-      )
-    ),
-    TE.map((encrypted) => ({
+): Effect.Effect<ServerPrivatePart, PrivatePartEncryptionError> {
+  return Effect.gen(function* (_) {
+    const privatePartsStringified = yield* _(
+      stringifyE(privatePart.payloadPrivate)
+    )
+
+    const encrypted = yield* _(
+      eciesEncryptE(privatePart.toPublicKey)(privatePartsStringified),
+      Effect.map((json) => `0${json}`),
+      Effect.flatMap(Schema.decode(PrivatePayloadEncryptedE))
+    )
+
+    return {
       userPublicKey: privatePart.toPublicKey,
       payloadPrivate: encrypted,
-    })),
-    TE.mapLeft(
-      (e) =>
-        ({
-          _tag: 'PrivatePartEncryptionError',
-          error: new Error('Error encrypting private part', {cause: e?.error}),
-          toPublicKey: privatePart.toPublicKey,
-        }) as const
-    )
+    }
+  }).pipe(
+    Effect.catchAll((e) => {
+      return new PrivatePartEncryptionError({
+        toPublicKey: privatePart.toPublicKey,
+        message: 'Error encrypting private part',
+        cause: e,
+      })
+    })
   )
 }

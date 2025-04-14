@@ -5,9 +5,8 @@ import {
 } from '@vexl-next/domain/src/general/offers'
 import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
 import {Array, Effect, flow, type Either} from 'effect'
-import {taskEitherToEffect} from '../effect-helpers/TaskEitherConverter'
 import decryptOffer, {
-  type ErrorDecryptingOffer,
+  type DecryptingOfferError,
   type NonCompatibleOfferVersionError,
 } from './decryptOffer'
 
@@ -27,18 +26,20 @@ export default function getOffersByIdsAndDecrypt({
   Array<
     Either.Either<
       OfferInfoE,
-      ErrorDecryptingOffer | NonCompatibleOfferVersionError
+      DecryptingOfferError | NonCompatibleOfferVersionError
     >
   >,
   ApiErrorWhileFetchingOffers
 > {
-  const decrypt = flow(decryptOffer(keyPair), taskEitherToEffect)
-
   return offersApi
     .getOffersByIds({query: {ids}})
     .pipe(
       Effect.flatMap(
-        flow(Array.map(decrypt), Array.map(Effect.either), Effect.all)
+        flow(
+          Array.map(decryptOffer(keyPair)),
+          Array.map(Effect.either),
+          Effect.all
+        )
       )
     )
 }

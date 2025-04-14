@@ -1,10 +1,14 @@
+import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
+import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {type OfferAdminId} from '@vexl-next/domain/src/general/offers'
 import {
   UnixMilliseconds,
   unixMillisecondsNow,
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import updatePrivateParts from '@vexl-next/resources-utils/src/offers/updatePrivateParts'
 import {subtractArrays} from '@vexl-next/resources-utils/src/utils/array'
+import {Array, Option, Record, Struct} from 'effect'
 import * as A from 'fp-ts/Array'
 import * as E from 'fp-ts/Either'
 import * as T from 'fp-ts/Task'
@@ -14,11 +18,12 @@ import {atom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {splitAtom} from 'jotai/utils'
 import {apiAtom} from '../../../api'
-import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
+import {atomWithParsedMmkvStorageE} from '../../../utils/atomUtils/atomWithParsedMmkvStorageE'
 import notEmpty from '../../../utils/notEmpty'
 import {showDebugNotificationIfEnabled} from '../../../utils/notifications/showDebugNotificationIfEnabled'
 import reportError from '../../../utils/reportError'
 import {startMeasure} from '../../../utils/reportTime'
+import {clubsWithMembersAtom} from '../../clubs/atom/clubsWithMembersAtom'
 import {
   offersStateAtom,
   singleOfferByAdminIdAtom,
@@ -28,7 +33,7 @@ import connectionStateAtom from './connectionStateAtom'
 
 const BACKGROUND_TIME_LIMIT_MS = 25_000
 
-const offerToConnectionsAtom = atomWithParsedMmkvStorage(
+const offerToConnectionsAtom = atomWithParsedMmkvStorageE(
   'offer-to-connections',
   {
     offerToConnections: [],
@@ -46,10 +51,41 @@ export const deleteOfferToConnectionsAtom = atom(
   null,
   (get, set, adminIdToDelete: OfferAdminId) => {
     set(offerToConnectionsAtom, (old) => ({
+      ...old,
       offerToConnections: old.offerToConnections.filter(
         (one) => one.adminId !== adminIdToDelete
       ),
     }))
+  }
+)
+
+export const deleteClubForAllConnectionsActionAtom = atom(
+  null,
+  (get, set, clubUuidToDelete: ClubUuid) => {
+    const offerToConnections = get(offerToConnectionsAtom).offerToConnections
+    const offerToClubConnections = pipe(
+      offerToConnections,
+      Array.filterMap((one) => {
+        return Option.all({
+          connections: Record.get(one.connections.clubs, clubUuidToDelete).pipe(
+            Option.filter(Array.isNonEmptyReadonlyArray)
+          ),
+          adminId: Option.some(one.adminId),
+        })
+      })
+    )
+
+    set(offerToConnectionsAtom, (old) => ({
+      ...old,
+      offerToConnections: Array.map(old.offerToConnections, (one) => ({
+        ...one,
+        connections: {
+          ...one.connections,
+          clubs: Struct.omit(one.connections.clubs, clubUuidToDelete),
+        },
+      })),
+    }))
+    return offerToClubConnections
   }
 )
 
@@ -78,6 +114,74 @@ export const deleteOrphanRecordsActionAtom = atom(null, (get, set) => {
     ),
   }))
 })
+
+export const ensureConnectionsForEveryOffer = atom(null, (get, set) => {
+  const adminIdsWithSimmetricKey = pipe(
+    get(offersStateAtom).offers,
+    Array.filterMap((one) =>
+      Option.all({
+        adminId: Option.fromNullable(one.ownershipInfo?.adminId),
+        simmetricKey: Option.some(one.offerInfo.privatePart.symmetricKey),
+      })
+    )
+  )
+
+  set(offerToConnectionsAtom, (old) => ({
+    ...old,
+    offerToConnections: pipe(
+      adminIdsWithSimmetricKey,
+      Array.map(({adminId, simmetricKey}) =>
+        pipe(
+          Array.findFirst(
+            old.offerToConnections,
+            (one) => one.adminId === adminId
+          ),
+          Option.getOrElse(() => ({
+            adminId,
+            connections: {
+              clubs: {},
+              firstLevel: [],
+              secondLevel: [],
+            },
+            symmetricKey: simmetricKey,
+          }))
+        )
+      )
+    ),
+  }))
+})
+
+type ClubConnections = Record<ClubUuid, readonly PublicKeyPemBase64[]>
+const processClubConnections = ({
+  currentConnections,
+  newConnections,
+  removedConnections,
+}: {
+  currentConnections: ClubConnections
+  newConnections: ClubConnections
+  removedConnections: readonly PublicKeyPemBase64[]
+}): ClubConnections => {
+  const allClubsUuids = Array.dedupe([
+    ...Record.keys(currentConnections),
+    ...Record.keys(newConnections),
+  ])
+
+  return pipe(
+    allClubsUuids,
+    Array.map((clubUuid) => {
+      const newConnectionsForClub = newConnections[clubUuid] ?? []
+      const currentConnectionsForClub = currentConnections[clubUuid] ?? []
+
+      const finalConnections = pipe(
+        Array.dedupe([...newConnectionsForClub, ...currentConnectionsForClub]),
+        Array.difference(removedConnections)
+      )
+
+      return [clubUuid, finalConnections] as const
+    }),
+    Record.fromEntries
+  )
+}
 
 export const updateAllOffersConnectionsActionAtom = atom(
   null,
@@ -110,6 +214,7 @@ export const updateAllOffersConnectionsActionAtom = atom(
       "Update all offers' connections"
     )
     set(deleteOrphanRecordsActionAtom)
+    set(ensureConnectionsForEveryOffer)
 
     const offerToConnectionsAtoms = get(offerToConnectionsAtomsAtom)
 
@@ -117,9 +222,20 @@ export const updateAllOffersConnectionsActionAtom = atom(
       offerToConnectionsAtoms,
       A.mapWithIndex((i, oneOfferAtom) => {
         const oneOfferConections = get(oneOfferAtom)
+        const offer = get(singleOfferByAdminIdAtom(oneOfferConections.adminId))
+
+        const clubIdsToEncryptFor = offer?.ownershipInfo?.intendedClubs
+        const {data: clubsData} = get(clubsWithMembersAtom)
+        const targetClubIdWithMembersArray = pipe(
+          clubsData,
+          Array.filter((one) =>
+            Array.contains(clubIdsToEncryptFor ?? [], one.club.uuid)
+          ),
+          Array.map(({club, members}) => [club.uuid, members] as const),
+          Record.fromEntries
+        )
         const intendedConnectionLevel =
-          get(singleOfferByAdminIdAtom(oneOfferConections.adminId))
-            ?.ownershipInfo?.intendedConnectionLevel ?? 'ALL'
+          offer?.ownershipInfo?.intendedConnectionLevel ?? 'ALL'
 
         let endOneOfferUpdateMeasure: () => void = () => {}
         return pipe(
@@ -139,21 +255,24 @@ export const updateAllOffersConnectionsActionAtom = atom(
             return E.left({_tag: 'SkippedBecauseTimeLimitReached'} as const)
           }),
           TE.chainW(() =>
-            updatePrivateParts({
-              currentConnections: oneOfferConections.connections,
-              targetConnections: {
-                firstLevel: connectionState.firstLevel,
-                secondLevel:
-                  intendedConnectionLevel === 'ALL'
-                    ? connectionState.secondLevel
-                    : [],
-              },
-              adminId: oneOfferConections.adminId,
-              symmetricKey: oneOfferConections.symmetricKey,
-              commonFriends: connectionState.commonFriends,
-              stopProcessingAfter,
-              api: api.offer,
-            })
+            effectToTaskEither(
+              updatePrivateParts({
+                currentConnections: oneOfferConections.connections,
+                targetConnections: {
+                  firstLevel: connectionState.firstLevel,
+                  secondLevel:
+                    intendedConnectionLevel === 'ALL'
+                      ? connectionState.secondLevel
+                      : [],
+                  clubs: targetClubIdWithMembersArray,
+                },
+                adminId: oneOfferConections.adminId,
+                symmetricKey: oneOfferConections.symmetricKey,
+                commonFriends: connectionState.commonFriends,
+                stopProcessingAfter,
+                api: api.offer,
+              })
+            )
           ),
           TE.map((v) => {
             endOneOfferUpdateMeasure()
@@ -213,7 +332,12 @@ export const updateAllOffersConnectionsActionAtom = atom(
                       offerToConnectionsAtoms.length
                     } did not update fully due to time limit reached. Total connections updated: ${
                       newConnections.firstLevel.length +
-                      (newConnections.secondLevel?.length ?? 0)
+                      (newConnections.secondLevel?.length ?? 0) +
+                      (pipe(
+                        newConnections.clubs ?? {},
+                        Record.values,
+                        Array.flatten
+                      ).length ?? 0)
                     }. Total connections skipped: ${String(
                       timeLimitReachedErrors.length
                     )}.`
@@ -241,7 +365,12 @@ export const updateAllOffersConnectionsActionAtom = atom(
                           ],
                           removedConnections
                         )
-                      : undefined,
+                      : [],
+                  clubs: processClubConnections({
+                    currentConnections: val.connections.clubs ?? {},
+                    newConnections: newConnections.clubs ?? {},
+                    removedConnections,
+                  }),
                 },
               }))
               return {

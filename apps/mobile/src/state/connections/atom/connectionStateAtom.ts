@@ -1,30 +1,26 @@
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {type ConnectionLevel} from '@vexl-next/domain/src/general/offers'
 import {
-  UnixMilliseconds,
+  UnixMilliseconds0,
   unixMillisecondsNow,
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {MAX_PAGE_SIZE} from '@vexl-next/rest-api/src/Pagination.brand'
 import {type ContactApi} from '@vexl-next/rest-api/src/services/contact'
-import {type Effect} from 'effect'
-import {sequenceS} from 'fp-ts/Apply'
-import type * as T from 'fp-ts/Task'
-import * as TE from 'fp-ts/TaskEither'
+import {type Array, Effect} from 'effect'
 import {pipe} from 'fp-ts/function'
 import {atom, type Atom} from 'jotai'
-import {selectAtom} from 'jotai/utils'
 import {apiAtom} from '../../../api'
-import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
+import {atomWithParsedMmkvStorageE} from '../../../utils/atomUtils/atomWithParsedMmkvStorageE'
 import deduplicate from '../../../utils/deduplicate'
 import {showDebugNotificationIfEnabled} from '../../../utils/notifications/showDebugNotificationIfEnabled'
 import reportError from '../../../utils/reportError'
+import {clubsWithMembersAtom} from '../../clubs/atom/clubsWithMembersAtom'
 import {ConnectionsState} from '../domain'
 
-const connectionStateAtom = atomWithParsedMmkvStorage(
+const connectionStateAtom = atomWithParsedMmkvStorageE(
   'connectionsState',
   {
-    lastUpdate: UnixMilliseconds.parse(0),
+    lastUpdate: UnixMilliseconds0,
     firstLevel: [],
     secondLevel: [],
     commonFriends: {commonContacts: []},
@@ -37,49 +33,58 @@ export default connectionStateAtom
 function fetchContacts(
   level: ConnectionLevel,
   api: ContactApi
-): TE.TaskEither<
-  Effect.Effect.Error<ReturnType<ContactApi['fetchMyContacts']>>,
-  PublicKeyPemBase64[]
+): Effect.Effect<
+  PublicKeyPemBase64[],
+  Effect.Effect.Error<ReturnType<ContactApi['fetchMyContacts']>>
 > {
   return pipe(
-    effectToTaskEither(
-      api.fetchMyContacts({
-        query: {
-          level,
-          page: 0,
-          limit: MAX_PAGE_SIZE,
-        },
-      })
-    ),
-    TE.map((one) => one.items.map((oneItem) => oneItem.publicKey))
+    api.fetchMyContacts({
+      query: {
+        level,
+        page: 0,
+        limit: MAX_PAGE_SIZE,
+      },
+    }),
+    Effect.map((one) => one.items.map((oneItem) => oneItem.publicKey))
   )
 }
 
 export const syncConnectionsActionAtom = atom(
   null,
-  (get, set): T.Task<boolean> => {
-    const api = get(apiAtom)
+  (get, set): Effect.Effect<boolean> => {
+    return Effect.gen(function* (_) {
+      const api = get(apiAtom)
 
-    console.log('🦋 Refreshing connections state')
-    const updateStarted = unixMillisecondsNow()
+      console.log('🦋 Refreshing connections state')
+      const updateStarted = unixMillisecondsNow()
 
-    return pipe(
-      sequenceS(TE.ApplySeq)({
-        firstLevel: fetchContacts('FIRST', api.contact),
-        secondLevel: fetchContacts('SECOND', api.contact),
-      }),
-      TE.bindW('commonFriends', ({firstLevel, secondLevel}) =>
-        effectToTaskEither(
-          api.contact.fetchCommonConnections({
-            body: {
-              publicKeys: deduplicate([...firstLevel, ...secondLevel]),
-            },
-          })
-        )
-      ),
-      TE.bindW('lastUpdate', () => TE.right(updateStarted)),
-      TE.match(
-        (e) => {
+      const firstLevel = yield* _(fetchContacts('FIRST', api.contact))
+      const secondLevel = yield* _(fetchContacts('SECOND', api.contact))
+
+      const commonFriends = yield* _(
+        api.contact.fetchCommonConnections({
+          body: {
+            publicKeys: deduplicate([...firstLevel, ...secondLevel]),
+          },
+        })
+      )
+      const lastUpdate = updateStarted
+
+      void showDebugNotificationIfEnabled({
+        title: 'Connections synced',
+        subtitle: 'syncConnectionsActionAtom',
+        body: `Finished syncing connections in ${unixMillisecondsNow() - updateStarted} ms`,
+      })
+
+      set(connectionStateAtom, {
+        firstLevel,
+        secondLevel,
+        commonFriends,
+        lastUpdate,
+      })
+    }).pipe(
+      Effect.tapError((e) =>
+        Effect.sync(() => {
           void showDebugNotificationIfEnabled({
             title: 'Error while syncing connections',
             subtitle: 'syncConnectionsActionAtom',
@@ -94,31 +99,32 @@ export const syncConnectionsActionAtom = atom(
             new Error('Unable to refresh connections state'),
             {e}
           )
-          return false
-        },
-        (data) => {
-          void showDebugNotificationIfEnabled({
-            title: 'Connections synced',
-            subtitle: 'syncConnectionsActionAtom',
-            body: `Finished syncing connections in ${unixMillisecondsNow() - updateStarted} ms`,
-          })
-          set(connectionStateAtom, data)
-          return true
-        }
-      )
+        })
+      ),
+      Effect.mapBoth({
+        onFailure: () => false,
+        onSuccess: () => true,
+      }),
+      Effect.merge
     )
   }
 )
 
-export const reachNumberAtom = selectAtom(
-  connectionStateAtom,
-  (connectionState) => {
-    return deduplicate([
-      ...connectionState.firstLevel,
-      ...connectionState.secondLevel,
-    ]).length
-  }
-)
+export const reachNumberAtom = atom((get) => {
+  const clubsWithMembers = get(clubsWithMembersAtom)
+  const connectionState = get(connectionStateAtom)
+
+  const firstAndSecondLevelConnections = deduplicate([
+    ...connectionState.firstLevel,
+    ...connectionState.secondLevel,
+  ])
+
+  const clubsConnections = clubsWithMembers.data
+
+  // deduplicate to be double sure, even if we should not have duplicates here
+  return deduplicate([...firstAndSecondLevelConnections, ...clubsConnections])
+    .length
+})
 
 export function createFriendLevelInfoAtom(
   publicKey: PublicKeyPemBase64

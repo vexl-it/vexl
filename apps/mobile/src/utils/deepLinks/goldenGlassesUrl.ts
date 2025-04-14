@@ -1,5 +1,4 @@
 import {type OfferAdminId} from '@vexl-next/domain/src/general/offers'
-import {taskEitherToEffect} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import decryptOffer from '@vexl-next/resources-utils/src/offers/decryptOffer'
 import encryptOfferPublicPayload from '@vexl-next/resources-utils/src/offers/utils/encryptOfferPublicPayload'
 import {Array, Effect, pipe} from 'effect'
@@ -32,7 +31,6 @@ export const handleGoldenGlassesDeepLinkActionAtom = atom(null, (get, set) => {
           },
           symmetricKey: one.offerInfo.privatePart.symmetricKey,
         }),
-        taskEitherToEffect,
         Effect.flatMap((encryptedPayload) =>
           pipe(
             offer.updateOffer({
@@ -44,9 +42,7 @@ export const handleGoldenGlassesDeepLinkActionAtom = atom(null, (get, set) => {
               },
             }),
             Effect.flatMap((encryptedPayload) =>
-              taskEitherToEffect(
-                decryptOffer(session.privateKey)(encryptedPayload)
-              )
+              decryptOffer(session.privateKey)(encryptedPayload)
             )
           )
         ),

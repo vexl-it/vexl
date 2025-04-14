@@ -17,10 +17,10 @@ import {useAppState} from '../utils/useAppState'
 import {inboxesAtom} from './chat/atoms/messagingStateAtom'
 import {useRefreshNotificationTokensForActiveChatsAssumeLogin} from './chat/atoms/refreshNotificationTokensActionAtom'
 import {createInboxAtom} from './chat/hooks/useCreateInbox'
-import {updateOfferAtom} from './marketplace'
 import checkNotificationTokensAndRefreshOffersActionAtom from './marketplace/atoms/checkNotificationTokensAndRefreshOffersActionAtom'
 import {myOffersAtom} from './marketplace/atoms/myOffers'
 import {offersMissingOnServerAtom} from './marketplace/atoms/offersMissingOnServer'
+import {updateOfferActionAtom} from './marketplace/atoms/updateOfferActionAtom'
 import {sessionDataOrDummyAtom} from './session'
 import {useLogout} from './useLogout'
 
@@ -227,19 +227,21 @@ const recreateInboxAndUpdateOfferAtom = atom(
           },
         })
       ),
-      TE.chainW((keyHolder) => {
-        return set(updateOfferAtom, {
-          payloadPublic: {
-            ...offerWithoutInbox.offerInfo.publicPart,
-            offerPublicKey: keyHolder.publicKeyPemBase64,
-          },
-          symmetricKey,
-          adminId,
-          intendedConnectionLevel,
-          updateFcmCypher: true,
-          offerKey: keyHolder,
-        })
-      }),
+      TE.chainW((keyHolder) =>
+        effectToTaskEither(
+          set(updateOfferActionAtom, {
+            payloadPublic: {
+              ...offerWithoutInbox.offerInfo.publicPart,
+              offerPublicKey: keyHolder.publicKeyPemBase64,
+            },
+            symmetricKey,
+            adminId,
+            intendedConnectionLevel,
+            updateFcmCypher: true,
+            offerKey: keyHolder,
+          })
+        )
+      ),
       TE.match(
         (e) => {
           reportError(

@@ -10,6 +10,7 @@ import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumbe
 import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {type UserName} from '@vexl-next/domain/src/general/UserName.brand'
 import {type RealLifeInfo} from '@vexl-next/domain/src/general/UserNameAndAvatar.brand'
+import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {type OfferId} from '@vexl-next/domain/src/general/offers'
 import {
   type AmountData,
@@ -46,6 +47,8 @@ export type RootStackParamsList = {
   OfferDetail: {offerId: OfferId}
 
   ChatDetail: {otherSideKey: PublicKeyPemBase64; inboxKey: PublicKeyPemBase64}
+
+  ClubDetail: {clubUuid: ClubUuid}
 
   NotificationPermissionsMissing: undefined
 

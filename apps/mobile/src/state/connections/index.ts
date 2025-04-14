@@ -1,25 +1,29 @@
-import * as T from 'fp-ts/Task'
-import {pipe} from 'fp-ts/function'
+import {taskToEffect} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
+import {Effect, pipe} from 'effect'
 import {useSetAtom} from 'jotai'
 import {useCallback} from 'react'
 import {useAppState} from '../../utils/useAppState'
+import {clubsWithMembersAtom} from '../clubs/atom/clubsWithMembersAtom'
 import {syncConnectionsActionAtom} from './atom/connectionStateAtom'
 import {updateAllOffersConnectionsActionAtom} from './atom/offerToConnectionsAtom'
 
 export function useSyncConnections(): void {
   const syncConnections = useSetAtom(syncConnectionsActionAtom)
+  const syncClubsConnections = useSetAtom(clubsWithMembersAtom)
   const updateOffers = useSetAtom(updateAllOffersConnectionsActionAtom)
 
   useAppState(
     useCallback(
       (state) => {
         if (state !== 'active') return
-        void pipe(
+        pipe(
           syncConnections(),
-          T.chain(() => updateOffers({isInBackground: false}))
-        )()
+          Effect.andThen(syncClubsConnections()),
+          Effect.andThen(taskToEffect(updateOffers({isInBackground: false}))),
+          Effect.runFork
+        )
       },
-      [syncConnections, updateOffers]
+      [syncClubsConnections, syncConnections, updateOffers]
     )
   )
 }

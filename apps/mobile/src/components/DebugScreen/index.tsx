@@ -23,7 +23,6 @@ import offerToConnectionsAtom, {
 } from '../../state/connections/atom/offerToConnectionsAtom'
 import {storedContactsAtom} from '../../state/contacts/atom/contactsStore'
 import {btcPriceDataAtom} from '../../state/currentBtcPriceAtoms'
-import {triggerOffersRefreshAtom} from '../../state/marketplace'
 import {myOffersAtom} from '../../state/marketplace/atoms/myOffers'
 import {
   lastUpdatedAtAtom,
@@ -34,6 +33,7 @@ import {
   alertAndReportOnlineOffersWithoutLocation,
   reportOffersWithoutLocationActionAtom,
 } from '../../state/marketplace/atoms/offersToSeeInMarketplace'
+import {refreshOffersActionAtom} from '../../state/marketplace/atoms/refreshOffersActionAtom'
 import {
   sessionDataOrDummyAtom,
   useSessionAssumeLoggedIn,
@@ -79,7 +79,7 @@ function DebugScreen(): JSX.Element {
   const {t} = useTranslation()
 
   const refreshMessaging = useSetAtom(fetchMessagesForAllInboxesAtom)
-  const refreshOffers = useSetAtom(triggerOffersRefreshAtom)
+  const refreshOffers = useSetAtom(refreshOffersActionAtom)
   const updateConnections = useSetAtom(updateAllOffersConnectionsActionAtom)
   const deleteInbox = useSetAtom(deleteInboxAtom)
   const deleteAllInboxes = useSetAtom(deleteAllInboxesActionAtom)
@@ -410,9 +410,12 @@ function DebugScreen(): JSX.Element {
               size="small"
               text="Refresh offers state"
               onPress={() => {
-                void Effect.runPromise(refreshOffers()).then(() => {
-                  Alert.alert('done')
-                })
+                refreshOffers().pipe(
+                  Effect.andThen(() => {
+                    Alert.alert('done')
+                  }),
+                  Effect.runFork
+                )
               }}
             />
             <Button

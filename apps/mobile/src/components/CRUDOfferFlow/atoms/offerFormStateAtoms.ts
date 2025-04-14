@@ -46,12 +46,10 @@ import {
   createBtcPriceForCurrencyAtom,
   refreshBtcPriceActionAtom,
 } from '../../../state/currentBtcPriceAtoms'
-import {
-  createOfferAtom,
-  deleteOffersActionAtom,
-  updateOfferAtom,
-} from '../../../state/marketplace'
+import {createOfferActionAtom as createOfferFromCompleteDataActionAtom} from '../../../state/marketplace/atoms/createOfferActionAtom'
+import {deleteOffersActionAtom} from '../../../state/marketplace/atoms/deleteOffersActionAtom'
 import {singleOfferAtom} from '../../../state/marketplace/atoms/offersState'
+import {updateOfferActionAtom} from '../../../state/marketplace/atoms/updateOfferActionAtom'
 import getValueFromSetStateActionOfAtom from '../../../utils/atomUtils/getValueFromSetStateActionOfAtom'
 import calculatePriceInFiatFromSats from '../../../utils/calculatePriceInFiatFromSats'
 import calculatePriceInSats from '../../../utils/calculatePriceInSats'
@@ -640,7 +638,7 @@ export const offerFormMolecule = molecule(() => {
         const key = yield* _(eitherToEffect(generateKeyPair()))
 
         const createdOffer = yield* _(
-          set(createOfferAtom, {
+          set(createOfferFromCompleteDataActionAtom, {
             payloadPublic: {
               ...payloadPublic,
               authorClientVersion: version,
@@ -817,7 +815,7 @@ export const offerFormMolecule = molecule(() => {
       const offer = get(offerAtom)
 
       yield* _(
-        set(updateOfferAtom, {
+        set(updateOfferActionAtom, {
           payloadPublic: {
             ...offer.offerInfo.publicPart,
             active: targetValue,
@@ -898,7 +896,7 @@ export const offerFormMolecule = molecule(() => {
       const payloadPublic = formatOfferPublicPart(get(offerFormAtom))
 
       yield* _(
-        set(updateOfferAtom, {
+        set(updateOfferActionAtom, {
           payloadPublic,
           adminId: offer.ownershipInfo?.adminId ?? ('' as OfferAdminId),
           symmetricKey: offer.offerInfo.privatePart.symmetricKey,

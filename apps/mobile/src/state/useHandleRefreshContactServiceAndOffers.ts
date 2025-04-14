@@ -17,10 +17,10 @@ import {useAppState} from '../utils/useAppState'
 import {inboxesAtom} from './chat/atoms/messagingStateAtom'
 import {useRefreshNotificationTokensForActiveChatsAssumeLogin} from './chat/atoms/refreshNotificationTokensActionAtom'
 import {createInboxAtom} from './chat/hooks/useCreateInbox'
-import {updateOfferAtom} from './marketplace'
 import checkNotificationTokensAndRefreshOffersActionAtom from './marketplace/atoms/checkNotificationTokensAndRefreshOffersActionAtom'
 import {myOffersAtom} from './marketplace/atoms/myOffers'
 import {offersMissingOnServerAtom} from './marketplace/atoms/offersMissingOnServer'
+import {updateOfferActionAtom} from './marketplace/atoms/updateOfferActionAtom'
 import {sessionDataOrDummyAtom} from './session'
 import {useLogout} from './useLogout'
 
@@ -229,7 +229,7 @@ const recreateInboxAndUpdateOfferAtom = atom(
       ),
       TE.chainW((keyHolder) =>
         effectToTaskEither(
-          set(updateOfferAtom, {
+          set(updateOfferActionAtom, {
             payloadPublic: {
               ...offerWithoutInbox.offerInfo.publicPart,
               offerPublicKey: keyHolder.publicKeyPemBase64,

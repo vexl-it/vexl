@@ -14,7 +14,6 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {Stack, XStack, getTokens} from 'tamagui'
 import {minutesTillOffersDisplayedAtom} from '../../../../../state/contacts'
 import {
-  triggerOffersRefreshAtom,
   useAreOffersLoading,
   useOffersLoadingError,
 } from '../../../../../state/marketplace'
@@ -22,6 +21,7 @@ import {baseFilterAtom} from '../../../../../state/marketplace/atoms/filterAtoms
 import {filteredOffersIncludingLocationFilterAtomsAtom} from '../../../../../state/marketplace/atoms/filteredOffers'
 import {refocusMapActionAtom} from '../../../../../state/marketplace/atoms/map/focusedOffer'
 import {joinVexlClubsSuggestionVisibleAtom} from '../../../../../state/marketplace/atoms/offerSuggestionVisible'
+import {refreshOffersActionAtom} from '../../../../../state/marketplace/atoms/refreshOffersActionAtom'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import {showClubsFlowAtom} from '../../../../../utils/preferences'
 import ErrorListHeader from '../../../../ErrorListHeader'
@@ -73,7 +73,7 @@ function OffersListStateDisplayerContent(): JSX.Element {
   const insets = useSafeAreaInsets()
   const loading = useAreOffersLoading()
   const error = useOffersLoadingError()
-  const refreshOffers = useSetAtom(triggerOffersRefreshAtom)
+  const refreshOffers = useSetAtom(refreshOffersActionAtom)
   const refocusMap = useSetAtom(refocusMapActionAtom)
   const baseFilter = useAtomValue(baseFilterAtom)
 

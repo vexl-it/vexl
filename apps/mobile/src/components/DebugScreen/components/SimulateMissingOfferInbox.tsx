@@ -2,8 +2,7 @@ import {Picker} from '@react-native-picker/picker'
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
 import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {generateKeyPair} from '@vexl-next/resources-utils/src/utils/crypto'
-import {Effect} from 'effect'
-import * as A from 'fp-ts/Array'
+import {Array, Effect} from 'effect'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/lib/function'
@@ -14,7 +13,7 @@ import {Text, YStack} from 'tamagui'
 import {apiAtom} from '../../../api'
 import messagingStateAtom from '../../../state/chat/atoms/messagingStateAtom'
 import {createInboxAtom} from '../../../state/chat/hooks/useCreateInbox'
-import {createOfferAtom} from '../../../state/marketplace'
+import {createOfferActionAtom} from '../../../state/marketplace/atoms/createOfferActionAtom'
 import {myOffersAtom} from '../../../state/marketplace/atoms/myOffers'
 import {packageName, version} from '../../../utils/environment'
 import Button from '../../Button'
@@ -45,15 +44,15 @@ function SimulateMissingOfferInbox(): JSX.Element {
       return T.of(null)
     }
     return pipe(
-      Array(10).fill(0),
-      A.mapWithIndex((i) =>
+      Array.range(0, 9),
+      Array.map((i) =>
         pipe(
           generateKeyPair(),
           TE.fromEither,
           TE.bindTo('key'),
           TE.bindW('createdOffer', ({key}) =>
             effectToTaskEither(
-              store.set(createOfferAtom, {
+              store.set(createOfferActionAtom, {
                 payloadPublic: {
                   ...offer.offerInfo.publicPart,
                   offerPublicKey: key.publicKeyPemBase64,

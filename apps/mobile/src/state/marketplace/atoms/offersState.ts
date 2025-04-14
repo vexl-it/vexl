@@ -12,10 +12,10 @@ import {Array} from 'effect'
 import {atom, type WritableAtom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {type SetStateAction} from 'react'
-import {updateOrFilterRemoveOffer} from '..'
 import {type FocusAtomType} from '../../../utils/atomUtils/FocusAtomType'
 import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
 import {OffersState} from '../domain'
+import {offerWithoutSourceOrNone} from '../utils/offerWithoutSourceOrNone'
 
 export const offersStateAtom = atomWithParsedMmkvStorage(
   'offers',
@@ -101,7 +101,7 @@ export const updateOrFilterOffersFromDeletedClubsActionAtom = atom(
     set(
       offersAtom,
       Array.filterMap((offer) =>
-        updateOrFilterRemoveOffer(offer, deletedClubs, false)
+        offerWithoutSourceOrNone(offer, deletedClubs, false)
       )
     )
   }

@@ -13,7 +13,7 @@ import notEmpty from '../utils/notEmpty'
 import {showDebugNotificationIfEnabled} from '../utils/notifications/showDebugNotificationIfEnabled'
 import reportError from '../utils/reportError'
 import deleteAllInboxesActionAtom from './chat/atoms/deleteAllInboxesActionAtom'
-import {deleteOffersActionAtom} from './marketplace'
+import {deleteOffersActionAtom} from './marketplace/atoms/deleteOffersActionAtom'
 import {myOffersAtom} from './marketplace/atoms/myOffers'
 import {sessionAtom} from './session'
 

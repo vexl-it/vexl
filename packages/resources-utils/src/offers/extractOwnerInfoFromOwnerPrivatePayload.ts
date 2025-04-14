@@ -2,19 +2,7 @@ import {
   type OfferPrivatePart,
   type OwnershipInfo,
 } from '@vexl-next/domain/src/general/offers'
-import {Option, Schema} from 'effect'
-
-export class UnknownConnectionLevelError extends Schema.TaggedError<UnknownConnectionLevelError>(
-  'UnknownConnectionLevelError'
-)('UnknownConnectionLevelError', {
-  message: Schema.String,
-}) {}
-
-export class NoAdminIdError extends Schema.TaggedError<NoAdminIdError>(
-  'NoAdminIdError'
-)('NoAdminIdError', {
-  message: Schema.String,
-}) {}
+import {Option} from 'effect'
 
 export default function extractOwnerInfoFromOwnerPrivatePayload(
   privatePart: OfferPrivatePart

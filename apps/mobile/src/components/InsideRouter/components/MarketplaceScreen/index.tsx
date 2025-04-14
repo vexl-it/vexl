@@ -1,13 +1,13 @@
 import {Effect} from 'effect'
 import {useSetAtom} from 'jotai'
 import {useCallback} from 'react'
-import {triggerOffersRefreshAtom} from '../../../../state/marketplace'
+import {refreshOffersActionAtom} from '../../../../state/marketplace/atoms/refreshOffersActionAtom'
 import {useHandleRedirectToContactsScreen} from '../../../../state/useHandleRedirectToContactsScreen'
 import {useAppState} from '../../../../utils/useAppState'
 import OffersListStateDisplayerContent from './components/OffersListStateDisplayerContent'
 
 function MarketplaceScreen(): JSX.Element {
-  const refreshOffers = useSetAtom(triggerOffersRefreshAtom)
+  const refreshOffers = useSetAtom(refreshOffersActionAtom)
 
   useHandleRedirectToContactsScreen()
 

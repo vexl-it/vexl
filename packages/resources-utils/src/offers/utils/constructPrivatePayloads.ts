@@ -40,7 +40,7 @@ const addOrCreate = <K extends string, T>(
   value: T
 ): void => {
   const existingValue = record[key]
-  if (existingValue === undefined) {
+  if (existingValue !== undefined) {
     record[key] = HashSet.add(existingValue, value)
   } else record[key] = HashSet.make(value)
 }
@@ -63,6 +63,7 @@ export default function constructPrivatePayloads({
 > {
   return Effect.try({
     try: () => {
+      console.log('here')
       // First we need to find out friend levels for each connection.
       // We can do that by iterating over firstDegreeFriends and secondDegreeFriends
       const friendLevel: Record<
@@ -70,10 +71,12 @@ export default function constructPrivatePayloads({
         HashSet.HashSet<'FIRST_DEGREE' | 'SECOND_DEGREE' | 'CLUB'>
       > = {}
 
+      console.log('here2')
       for (const firstDegreeFriendPublicKey of firstDegreeConnections) {
         addOrCreate(friendLevel, firstDegreeFriendPublicKey, 'FIRST_DEGREE')
       }
 
+      console.log('here3')
       // There are duplicities. That is why all these shinanigans with Set
       for (const secondDegreeFriendPublicKey of secondDegreeConnections) {
         // Do not set if already has FIRST_DEGREE
@@ -81,20 +84,25 @@ export default function constructPrivatePayloads({
           addOrCreate(friendLevel, secondDegreeFriendPublicKey, 'SECOND_DEGREE')
       }
 
+      console.log('here4')
       const allTargetPublicKeysForClubs = Array.flatten(
         Record.values(clubsConnections)
       )
 
+      console.log('here5')
       // There will be no duplicates but to keep code consistent
       for (const clubFriendPublicKey of allTargetPublicKeysForClubs) {
         addOrCreate(friendLevel, clubFriendPublicKey, 'CLUB')
       }
 
+      console.log('here6')
       return keys(friendLevel).map((key) => {
         const friendLevelValue = friendLevel[key] ?? HashSet.make()
 
+        console.log('here7')
         const isFromClub = HashSet.has(friendLevelValue, 'CLUB')
 
+        console.log('here8')
         const clubIdForKey = isFromClub
           ? pipe(
               Record.toEntries(clubsConnections),
@@ -105,6 +113,7 @@ export default function constructPrivatePayloads({
               Option.getOrElse(() => [])
             )
           : []
+        console.log('here9')
 
         return {
           toPublicKey: key,
@@ -123,10 +132,12 @@ export default function constructPrivatePayloads({
         }
       })
     },
-    catch: (e) =>
-      new PrivatePayloadsConstructionError({
+    catch: (e: any) => {
+      console.log('ahahaha', e.message)
+      return new PrivatePayloadsConstructionError({
         message: 'Failed to construct private parts',
         cause: e,
-      }),
+      })
+    },
   })
 }

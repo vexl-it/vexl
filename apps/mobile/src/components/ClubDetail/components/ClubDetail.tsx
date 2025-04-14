@@ -104,10 +104,15 @@ export function ClubDetail({
             loadingOverlay.show()
             Effect.runFork(
               leaveClub(club).pipe(
-                // TODO errors
-                Effect.andThen(() => {
-                  loadingOverlay.hide()
-                  goBack()
+                Effect.match({
+                  onFailure: (e) => {
+                    // TODO errors
+                    loadingOverlay.hide()
+                  },
+                  onSuccess: () => {
+                    goBack()
+                    loadingOverlay.hide()
+                  },
                 })
               )
             )

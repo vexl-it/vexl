@@ -12,8 +12,11 @@ import {apiAtom} from '../../../api'
 import {atomWithParsedMmkvStorageE} from '../../../utils/atomUtils/atomWithParsedMmkvStorageE'
 import {getNotificationTokenE} from '../../../utils/notifications'
 import reportError, {ignoreReportErrors} from '../../../utils/reportError'
-import {myStoredClubsAtom} from './clubsStore'
-import {processClubRemovedFromBeActionAtom} from './processClubRemovedFromBeActionAtom'
+import {
+  myStoredClubsAtom,
+  removeMyStoredClubFromStateActionAtom,
+} from './clubsStore'
+import {updateOffersWhenUserIsNoLongerInClubActionAtom} from './updateOffersWhenUserIsNoLongerInClubActionAtom'
 
 const ClubWithMembers = Schema.Struct({
   club: ClubInfo,
@@ -86,13 +89,16 @@ export const clubsWithMembersAtom = atom(
         }).pipe(
           Effect.catchTag('clubDoesNotExist', (e) => {
             return Effect.zipRight(
-              set(processClubRemovedFromBeActionAtom, {
+              set(updateOffersWhenUserIsNoLongerInClubActionAtom, {
                 clubUuid,
               }).pipe(
                 ignoreReportErrors(
                   'warn',
                   'Error processing club after removed from BE'
-                )
+                ),
+                Effect.andThen(() => {
+                  set(removeMyStoredClubFromStateActionAtom, clubUuid)
+                })
               ),
               Effect.succeed({clubUuid, state: 'removed' as const})
             )
@@ -122,7 +128,7 @@ export const clubsWithMembersAtom = atom(
           )
         )
 
-      const clubs = yield* _(
+      const fetchedClubs = yield* _(
         myStoredClubs,
         Record.toEntries,
         Array.map(([clubUuid, keyPair]) => ({clubUuid, keyPair})),
@@ -130,29 +136,23 @@ export const clubsWithMembersAtom = atom(
         Effect.all
       )
 
-      console.log('Fetched clubs', JSON.stringify(clubs, null, 2))
-
-      const removedClubsUuids = Array.filterMap(clubs, (state) =>
-        Option.fromNullable(state.state === 'removed' ? state.clubUuid : null)
-      )
-
-      const newClubs = Array.filterMap(clubs, (state) =>
-        Option.fromNullable(state.state === 'loaded' ? state.data : null)
-      )
-
       set(clubsWithMembersStorageAtom, (prev) => ({
         ...prev,
         data: pipe(
           prev.data,
-          Array.filter(
-            (club) => !Array.contains(removedClubsUuids, club.club.uuid)
-          ),
-          (prevClubs) =>
-            Array.unionWith(
-              newClubs,
-              prevClubs,
-              (a, b) => a.club.uuid === b.club.uuid
+          Array.filterMap((oldClubInState) =>
+            Array.findFirst(
+              fetchedClubs,
+              (club) => club.clubUuid === oldClubInState.club.uuid
+            ).pipe(
+              Option.flatMap((fetchedClub) => {
+                if (fetchedClub.state === 'removed') return Option.none()
+                if (fetchedClub.state === 'errorLoading')
+                  return Option.some(oldClubInState)
+                return Option.some(fetchedClub.data)
+              })
             )
+          )
         ),
       }))
     })

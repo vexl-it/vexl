@@ -5,14 +5,13 @@ import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
 import {Array, Effect, Option, pipe} from 'effect'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
-import {deleteClubForAllConnectionsActionAtom} from '../../../state/connections/atom/offerToConnectionsAtom'
+import {ignoreReportErrors} from '../../../utils/reportError'
+import {deleteClubForAllConnectionsActionAtom} from '../../connections/atom/offerToConnectionsAtom'
 import {
   myOffersAtom,
   updateMyOfferPrivatePayloadActionAtom,
-} from '../../../state/marketplace/atoms/myOffers'
-import {updateOrFilterOffersFromDeletedClubsActionAtom} from '../../../state/marketplace/atoms/offersState'
-import {ignoreReportErrors} from '../../../utils/reportError'
-import {removeMyStoredClubFromStateActionAtom} from './clubsStore'
+} from '../../marketplace/atoms/myOffers'
+import {updateOrFilterOffersFromDeletedClubsActionAtom} from '../../marketplace/atoms/offersState'
 
 const deletePrivatePartsForOffers = (
   connectionsWithOffers: Array<{
@@ -38,7 +37,7 @@ const deletePrivatePartsForOffers = (
   })
 }
 
-export const processClubRemovedFromBeActionAtom = atom(
+export const updateOffersWhenUserIsNoLongerInClubActionAtom = atom(
   null,
   (
     get,
@@ -110,7 +109,6 @@ export const processClubRemovedFromBeActionAtom = atom(
         ),
         Effect.all
       )
-      set(removeMyStoredClubFromStateActionAtom, clubUuid)
       set(updateOrFilterOffersFromDeletedClubsActionAtom, [clubUuid])
     })
   }

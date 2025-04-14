@@ -3,7 +3,7 @@ import {Effect, Option, Record, Schema} from 'effect'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
 import {myStoredClubsAtom} from './clubsStore'
-import {processClubRemovedFromBeActionAtom} from './processClubRemovedFromBeActionAtom'
+import {clubsWithMembersAtom} from './clubsWithMembersAtom'
 
 export class ClubNotFoundInInnerStateError extends Schema.TaggedError<ClubNotFoundInInnerStateError>(
   'ClubNotFoundInInnerStateError'
@@ -28,11 +28,7 @@ export const leaveClubActionAtom = atom(
         yield* _(contact.leaveClub({clubUuid, keyPair: clubKeyPair.value}))
       }
 
-      yield* _(
-        set(processClubRemovedFromBeActionAtom, {
-          clubUuid,
-        })
-      )
+      yield* _(set(clubsWithMembersAtom))
     })
   }
 )

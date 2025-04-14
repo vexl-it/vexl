@@ -22,6 +22,8 @@ export class NotOfferFromContactNetworkError extends Schema.TaggedError<NotOffer
 }) {}
 
 const validateOfferIsFromContactNetwork = (offerInfo: OfferInfoE): boolean => {
+  if (offerInfo.privatePart.adminId) return true
+
   const friendLevel = offerInfo.privatePart.friendLevel
   const clubIds = offerInfo.privatePart.clubIds
   const allowedFriendLevels: FriendLevel[] = ['FIRST_DEGREE', 'SECOND_DEGREE']

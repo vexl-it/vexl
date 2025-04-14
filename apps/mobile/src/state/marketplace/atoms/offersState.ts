@@ -105,6 +105,7 @@ export const updateOrFilterOffersFromDeletedClubsActionAtom = atom(
         offerWithoutSourceOrNone(offer, deletedClubs, false)
       )
     )
+    console.log('b7')
   }
 )
 export function createOfferCountForClub(clubUuid: ClubUuid): Atom<number> {

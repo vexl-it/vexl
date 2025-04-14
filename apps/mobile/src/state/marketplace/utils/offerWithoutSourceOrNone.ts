@@ -10,24 +10,29 @@ export function offerWithoutSourceOrNone(
   removedFromClubs: ClubUuid[],
   removedFromContacts: boolean
 ): Option.Option<OneOfferInState> {
+  console.log('b1')
   const remainingClubIds = Array.difference(
     offer.offerInfo.privatePart.clubIds,
     removedFromClubs
   )
+  console.log('b2')
   const friendLevelsToRemove: FriendLevel[] = [
     ...(Array.isEmptyArray(remainingClubIds) ? ['CLUB' as const] : []),
     ...(removedFromContacts
       ? ['FIRST_DEGREE' as const, 'SECOND_DEGREE' as const]
       : []),
   ]
+  console.log('b3')
   const remainingFriendLevels = Array.difference(
     offer.offerInfo.privatePart.friendLevel,
     friendLevelsToRemove
   )
 
+  console.log('b4')
   if (Array.isEmptyArray(remainingFriendLevels) && !offer.ownershipInfo)
     return Option.none()
 
+  console.log('b5')
   return Option.some({
     ...offer,
     offerInfo: {

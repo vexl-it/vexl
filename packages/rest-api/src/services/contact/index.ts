@@ -2,7 +2,7 @@ import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.bran
 import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {Effect} from 'effect'
 import {createClientInstanceWithAuth} from '../../client'
-import {makeCommonHeaders, type AppSource} from '../../commonHeaders'
+import {type AppSource, makeCommonHeaders} from '../../commonHeaders'
 import {type PlatformName} from '../../PlatformName'
 import {type ServiceUrl} from '../../ServiceUrl.brand'
 import {type GetUserSessionCredentials} from '../../UserSessionCredentials.brand'

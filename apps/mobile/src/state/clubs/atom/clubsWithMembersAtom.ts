@@ -129,6 +129,9 @@ export const clubsWithMembersAtom = atom(
         Array.map(fetchClubWithMembers),
         Effect.all
       )
+
+      console.log('Fetched clubs', JSON.stringify(clubs, null, 2))
+
       const removedClubsUuids = Array.filterMap(clubs, (state) =>
         Option.fromNullable(state.state === 'removed' ? state.clubUuid : null)
       )

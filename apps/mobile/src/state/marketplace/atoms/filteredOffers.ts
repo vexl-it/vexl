@@ -1,10 +1,8 @@
 import {Latitude, Longitude} from '@vexl-next/domain/src/utility/geoCoordinates'
-import {Array, Record} from 'effect'
-import fastDeepEqual from 'fast-deep-equal'
+import {Array} from 'effect'
 import {atom} from 'jotai'
 import {splitAtom} from 'jotai/utils'
 import calculatePriceInSats from '../../../utils/calculatePriceInSats'
-import {myStoredClubsAtom} from '../../contacts/atom/clubsStore'
 import {importedContactsAtom} from '../../contacts/atom/contactsStore'
 import {createBtcPriceForCurrencyAtom} from '../../currentBtcPriceAtoms'
 import filterOffersByText from '../utils/filterOffersByText'
@@ -31,11 +29,6 @@ const filterBtcOffersAtom = atom((get) => {
   const offersToSeeInMarketplace = get(offersToSeeInMarketplaceAtom)
   const filter = get(offersFilterFromStorageAtom)
   const layoutMode = get(marketplaceLayoutModeAtom)
-  const myStoredClubs = Record.keys(get(myStoredClubsAtom))
-  const doFilterOffersByClub = fastDeepEqual(
-    Array.difference(myStoredClubs, filter.clubsUuids),
-    []
-  )
 
   return offersToSeeInMarketplace.filter(
     (offer) =>
@@ -80,7 +73,7 @@ const filterBtcOffersAtom = atom((get) => {
         filter.spokenLanguages.some((item) =>
           offer.offerInfo.publicPart.spokenLanguages.includes(item)
         )) &&
-      (!doFilterOffersByClub ||
+      (!filter.showClubsInFilter ||
         Array.intersection(
           offer.offerInfo.privatePart.clubIds,
           filter.clubsUuids
@@ -98,11 +91,6 @@ const filterProductAndOtherOffersAtom = atom((get) => {
   const layoutMode = get(marketplaceLayoutModeAtom)
   const btcPriceWithStateForFilterCurrency = get(
     btcPriceWithStateForFilterCurrencyAtom
-  )
-  const myStoredClubs = Record.keys(get(myStoredClubsAtom))
-  const doFilterOffersByClub = fastDeepEqual(
-    Array.difference(myStoredClubs, filter.clubsUuids),
-    []
   )
 
   const filterPriceInSats =
@@ -156,7 +144,7 @@ const filterProductAndOtherOffersAtom = atom((get) => {
         filter.spokenLanguages.some((item) =>
           offer.offerInfo.publicPart.spokenLanguages.includes(item)
         )) &&
-      (!doFilterOffersByClub ||
+      (!filter.showClubsInFilter ||
         Array.intersection(
           offer.offerInfo.privatePart.clubIds,
           filter.clubsUuids
@@ -168,11 +156,6 @@ const filterOffersIgnoreListingTypeAtom = atom((get) => {
   const offersToSeeInMarketplace = get(offersToSeeInMarketplaceAtom)
   const filter = get(offersFilterFromStorageAtom)
   const layoutMode = get(marketplaceLayoutModeAtom)
-  const myStoredClubs = Record.keys(get(myStoredClubsAtom))
-  const doFilterOffersByClub = fastDeepEqual(
-    Array.difference(myStoredClubs, filter.clubsUuids),
-    []
-  )
 
   return offersToSeeInMarketplace.filter(
     (offer) =>
@@ -215,7 +198,7 @@ const filterOffersIgnoreListingTypeAtom = atom((get) => {
         filter.spokenLanguages.some((item) =>
           offer.offerInfo.publicPart.spokenLanguages.includes(item)
         )) &&
-      (!doFilterOffersByClub ||
+      (!filter.showClubsInFilter ||
         Array.intersection(
           offer.offerInfo.privatePart.clubIds,
           filter.clubsUuids

@@ -13,8 +13,10 @@ import {
 } from '@vexl-next/domain/src/general/offers'
 import {calculateViewportRadius} from '@vexl-next/domain/src/utility/geoCoordinates'
 import {type LocationSuggestion} from '@vexl-next/rest-api/src/services/location/contracts'
+import {Record} from 'effect'
 import {atom, type Atom, type SetStateAction, type WritableAtom} from 'jotai'
 import {splitAtom} from 'jotai/utils'
+import {myStoredClubsAtom} from '../../state/contacts/atom/clubsStore'
 import {
   createBtcPriceForCurrencyAtom,
   refreshBtcPriceActionAtom,
@@ -71,6 +73,26 @@ export const locationAtom = atom<OfferLocation[] | undefined>(
 
 export const clubsUuidsFilterAtom = atom<ClubUuid[]>(
   offersFilterInitialState.clubsUuids
+)
+
+export const showClubsInFilterAtom = atom<boolean>(
+  offersFilterInitialState.showClubsInFilter
+)
+
+export const handleShowClubsInFilterChangeActionAtom = atom(
+  (get) => get(showClubsInFilterAtom),
+  (get, set) => {
+    const showClubsInFilter = get(showClubsInFilterAtom)
+    const myStoredClubs = get(myStoredClubsAtom)
+
+    if (!showClubsInFilter) {
+      set(clubsUuidsFilterAtom, Record.keys(myStoredClubs))
+    } else {
+      set(clubsUuidsFilterAtom, [])
+    }
+
+    set(showClubsInFilterAtom, !showClubsInFilter)
+  }
 )
 
 export const locationArrayOfOneAtom = atom(
@@ -335,6 +357,7 @@ const setFilterAtomsActionAtom = atom(
     set(offerTypeAtom, filterValue.offerType)
     set(sortingAtom, filterValue.sort)
     set(clubsUuidsFilterAtom, filterValue.clubsUuids)
+    set(showClubsInFilterAtom, filterValue.showClubsInFilter)
     set(setConditionallyRenderedFilterElementsActionAtom, filterValue)
   }
 )
@@ -448,6 +471,7 @@ export const saveFilterActionAtom = atom(null, (get, set) => {
     singlePrice: get(singlePriceAtom),
     singlePriceCurrency: get(singlePriceCurrencyAtom),
     clubsUuids: get(clubsUuidsFilterAtom),
+    showClubsInFilter: get(showClubsInFilterAtom),
   }
 
   set(offersFilterFromStorageAtom, {...newFilterValue, text})

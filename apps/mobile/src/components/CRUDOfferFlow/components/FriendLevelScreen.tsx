@@ -8,7 +8,6 @@ import Section from '../../Section'
 import friendLevelSvg from '../../images/friendLevelSvg'
 import {clubsWithMembersAtomsAtom} from '../atoms/clubsWithMembersAtom'
 import {offerFormMolecule} from '../atoms/offerFormStateAtoms'
-import clubsSvg from '../images/clubsSvg'
 import ScreenWrapper from './ScreenWrapper'
 
 type Props = CRUDOfferStackScreenProps<'FriendLevelScreen'>
@@ -30,13 +29,11 @@ function FriendLevelScreen({navigation}: Props): JSX.Element {
         />
       </Section>
       {clubsWithMembersAtoms.length > 0 && (
-        <Section title={t('clubs.vexlClubs')} image={clubsSvg}>
-          <ClubsComponent
-            displayFaqsLink
-            createSelectClubAtom={createSelectClubAtom}
-            navigation={navigation}
-          />
-        </Section>
+        <ClubsComponent
+          form="OfferForm"
+          createSelectClubAtom={createSelectClubAtom}
+          navigation={navigation}
+        />
       )}
     </ScreenWrapper>
   )

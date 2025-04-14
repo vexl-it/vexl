@@ -91,6 +91,7 @@ export const OffersFilter = z
     spokenLanguages: z.array(SpokenLanguage).default([]),
     text: z.string().optional(),
     clubsUuids: z.array(ClubUuid).default([]),
+    showClubsInFilter: z.boolean().default(false),
   })
   .readonly()
 

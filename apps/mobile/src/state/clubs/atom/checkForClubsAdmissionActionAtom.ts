@@ -42,7 +42,7 @@ export const checkForClubsAdmissionActionAtom = atom(null, (get, set) => {
               clubInfoForUser.club
             )
           )
-        })
+        }).pipe(Effect.ignore)
       ),
       Effect.all
     )

@@ -88,7 +88,6 @@ export const clubsWithMembersAtom = atom(
             return Effect.zipRight(
               set(processClubRemovedFromBeActionAtom, {
                 clubUuid,
-                keyPair,
               }).pipe(
                 ignoreReportErrors(
                   'warn',

@@ -53,7 +53,7 @@ function ModeratorActionComponent({
   )
 }
 
-export function ClubMModeratorData({club}: {club: ClubInfo}): JSX.Element {
+export function ClubModeratorData({club}: {club: ClubInfo}): JSX.Element {
   const {t} = useTranslation()
 
   const isLoading = useAtomValue(isLoadingAtom)

@@ -14,7 +14,7 @@ import SvgImage from '../../Image'
 import arrowsSvg from '../../images/arrowsSvg'
 import {useShowLoadingOverlay} from '../../LoadingOverlayProvider'
 import {leaveClubWithAreYouSureActionAtom} from '../utils/leaveClubWithAreYouSureActionAtom'
-import {ClubMModeratorData} from './ClubModeratorData'
+import {ClubModeratorData} from './ClubModeratorData'
 
 export function ClubDetail({
   club: {club, members, isModerator},
@@ -77,7 +77,7 @@ export function ClubDetail({
               </Text>
             </XStack>
             <Stack mt="$4">
-              {!!isModerator && <ClubMModeratorData club={club} />}
+              {!!isModerator && <ClubModeratorData club={club} />}
             </Stack>
           </YStack>
         </Stack>

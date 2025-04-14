@@ -25,6 +25,7 @@ import {
   RadiusE,
 } from '../utility/geoCoordinates'
 import {HashedPhoneNumber, HashedPhoneNumberE} from './HashedPhoneNumber.brand'
+import {ClubUuid, ClubUuidE} from './clubs'
 import {CurrencyCode, CurrencyCodeE} from './currency.brand'
 import {
   NotificationCypher,
@@ -116,17 +117,11 @@ export const SpokenLanguageE = Schema.Literal(
 ).pipe(orElseSchema('ENG' as const))
 export type SpokenLanguage = Schema.Schema.Type<typeof SpokenLanguageE>
 
-export const FriendLevel = z.enum([
-  'FIRST_DEGREE',
-  'SECOND_DEGREE',
-  'GROUP',
-  'NOT_SPECIFIED',
-])
+export const FriendLevel = z.enum(['FIRST_DEGREE', 'SECOND_DEGREE', 'CLUB'])
 export const FriendLevelE = Schema.Literal(
   'FIRST_DEGREE',
   'SECOND_DEGREE',
-  'GROUP',
-  'NOT_SPECIFIED'
+  'CLUB'
 )
 export type FriendLevel = Schema.Schema.Type<typeof FriendLevelE>
 
@@ -259,17 +254,24 @@ export const OfferPrivatePart = z
     commonFriends: z.array(HashedPhoneNumber).readonly(),
     friendLevel: z.array(FriendLevel).readonly(),
     symmetricKey: SymmetricKey,
+    clubIds: z.array(ClubUuid).optional().default([]).readonly(),
     // For admin only
     adminId: OfferAdminId.optional(),
     intendedConnectionLevel: IntendedConnectionLevel.optional(),
+    intendedClubs: z.array(ClubUuid).optional().readonly(),
   })
   .readonly()
 export const OfferPrivatePartE = Schema.Struct({
   commonFriends: Schema.Array(HashedPhoneNumberE),
   friendLevel: Schema.Array(FriendLevelE),
   symmetricKey: SymmetricKeyE,
+  clubIds: Schema.optionalWith(Schema.Array(ClubUuidE), {
+    default: () => [],
+  }),
+  // For admin only
   adminId: Schema.optional(OfferAdminIdE),
   intendedConnectionLevel: Schema.optional(IntendedConnectionLevelE),
+  intendedClubs: Schema.optional(Schema.Array(ClubUuidE)),
 })
 export type OfferPrivatePart = Schema.Schema.Type<typeof OfferPrivatePartE>
 
@@ -301,14 +303,16 @@ export const OfferPublicPart = z
   })
   .readonly()
 
+const CoalesecedNumber = Schema.Union(Schema.Number, Schema.NumberFromString)
+
 export const OfferPublicPartE = Schema.Struct({
   offerPublicKey: PublicKeyPemBase64E,
   location: Schema.Array(OfferLocationE),
   offerDescription: Schema.String,
-  amountBottomLimit: Schema.Number,
-  amountTopLimit: Schema.Number,
+  amountBottomLimit: CoalesecedNumber,
+  amountTopLimit: CoalesecedNumber,
   feeState: FeeStateE,
-  feeAmount: Schema.Number,
+  feeAmount: CoalesecedNumber,
   locationState: LocationStateToArrayE,
   paymentMethod: Schema.Array(PaymentMethodE),
   btcNetwork: Schema.Array(BtcNetworkE),
@@ -319,7 +323,7 @@ export const OfferPublicPartE = Schema.Struct({
   expirationDate: Schema.optional(JSDateStringE),
   offerType: OfferTypeE,
   activePriceState: ActivePriceStateE,
-  activePriceValue: Schema.Number,
+  activePriceValue: CoalesecedNumber,
   activePriceCurrency: CurrencyCodeE,
   active: Schema.Boolean,
   groupUuids: Schema.Array(Schema.String),
@@ -398,11 +402,13 @@ export const OwnershipInfo = z
   .object({
     adminId: OfferAdminId,
     intendedConnectionLevel: IntendedConnectionLevel,
+    intendedClubs: z.array(ClubUuid).optional().readonly(),
   })
   .readonly()
 export const OwnershipInfoE = Schema.Struct({
   adminId: OfferAdminIdE,
   intendedConnectionLevel: IntendedConnectionLevelE,
+  intendedClubs: Schema.optional(Schema.Array(ClubUuidE)),
 })
 export type OwnershipInfo = Schema.Schema.Type<typeof OwnershipInfoE>
 

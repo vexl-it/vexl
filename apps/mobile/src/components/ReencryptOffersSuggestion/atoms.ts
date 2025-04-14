@@ -1,5 +1,4 @@
-import * as T from 'fp-ts/Task'
-import {pipe} from 'fp-ts/lib/function'
+import {Effect, pipe} from 'effect'
 import {atom} from 'jotai'
 import {reencryptOffersMissingOnServerActionAtom} from '../../state/marketplace/atoms/offersMissingOnServer'
 import {translationAtom} from '../../utils/localization/I18nProvider'
@@ -27,7 +26,7 @@ export const reencryptOffersWithModalActionAtom = atom(null, (get, set) => {
         })
       },
     }),
-    T.chain((result) => {
+    Effect.flatMap((result) => {
       if (result.errors.length > 0) {
         return set(offerProgressModalActionAtoms.hideDeffered, {
           delayMs: 2000,

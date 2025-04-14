@@ -12,10 +12,7 @@ import {useHandleReceivedNotifications} from '../../state/useHandleReceivedNotif
 import useHandleRefreshContactServiceAndOffers from '../../state/useHandleRefreshContactServiceAndOffers'
 import {useSetAppLanguageFromStore} from '../../state/useSetAppLanguageFromStore'
 import {useSetRelativeDateFormatting} from '../../state/useSetRelativeDateFormatting'
-import {
-  useHandleDeepLink,
-  useHandleUniversalAndAppLinks,
-} from '../../utils/deepLinks'
+import {useHandleUniversalAndAppLinks} from '../../utils/deepLinks'
 import {useHideInnactivityReminderNotificationsOnResume} from '../../utils/notifications/chatNotifications'
 import {useRefreshNotificationTokenOnResumeAssumeLoggedIn} from '../../utils/notifications/useRefreshNotificationTokenOnResumeAssumeLoggedIn'
 import {showTextDebugButtonAtom} from '../../utils/preferences'
@@ -23,6 +20,7 @@ import AppLogsScreen from '../AppLogsScreen'
 import CRUDOfferFlow from '../CRUDOfferFlow'
 import ChangeProfilePictureScreen from '../ChangeProfilePictureScreen/ChangeProfilePictureScreen'
 import ChatDetailScreen from '../ChatDetailScreen'
+import {ClubDetailScreen} from '../ClubDetail'
 import CommonFriendsScreen from '../CommonFriendsScreen'
 import DebugScreen from '../DebugScreen'
 import DevTranslationFloatingButton from '../DevTranslationFloatingButtons'
@@ -57,7 +55,6 @@ function LoggedInHookGroup(): null {
   useHandlePostLoginFlowRedirect()
   useHandleRefreshContactServiceAndOffers()
   useSyncConnections()
-  useHandleDeepLink()
   useHandleUniversalAndAppLinks()
   useCheckAndReportCurrrentVersionToChatsActionAtom()
 
@@ -97,6 +94,7 @@ function RootNavigation(): JSX.Element {
             <Stack.Screen name="FilterOffers" component={FilterOffersScreen} />
             <Stack.Screen name="AppLogs" component={AppLogsScreen} />
             <Stack.Screen name="ChatDetail" component={ChatDetailScreen} />
+            <Stack.Screen name="ClubDetail" component={ClubDetailScreen} />
             <Stack.Screen name="SetContacts" component={SetContactsScreen} />
             <Stack.Screen
               name="EventsAndClubs"

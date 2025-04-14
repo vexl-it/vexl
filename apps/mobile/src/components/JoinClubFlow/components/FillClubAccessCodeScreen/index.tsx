@@ -1,13 +1,17 @@
+import {ClubCode} from '@vexl-next/domain/src/general/clubs'
 import {useMolecule} from 'bunshi/dist/react'
-import {Effect} from 'effect'
-import {useAtomValue, useSetAtom} from 'jotai'
+import {Effect, Schema} from 'effect'
+import {pipe} from 'fp-ts/lib/function'
+import {useAtomValue, useSetAtom, useStore} from 'jotai'
 import {Keyboard, TouchableWithoutFeedback} from 'react-native'
 import {Stack, Text, YStack} from 'tamagui'
 import {type JoinClubFlowStackScreenProps} from '../../../../navigationTypes'
+import {submitCodeToJoinClubActionAtom} from '../../../../state/clubs/atom/submitCodeToJoinClubActionAtom'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import useIsKeyboardShown from '../../../../utils/useIsKeyboardShown'
 import Button from '../../../Button'
 import KeyboardAvoidingView from '../../../KeyboardAvoidingView'
+import {useShowLoadingOverlay} from '../../../LoadingOverlayProvider'
 import Screen from '../../../Screen'
 import WhiteContainer from '../../../WhiteContainer'
 import {accessCodeMolecule} from '../../atoms'
@@ -18,12 +22,14 @@ type Props = JoinClubFlowStackScreenProps<'FillClubAccessCodeScreen'>
 
 function FillClubAccessCodeScreen({navigation}: Props): JSX.Element {
   const {t} = useTranslation()
-  const {isCodeFilledAtom, isCodeInvalidAtom, handleCodeSubmitActionAtom} =
+  const {isCodeFilledAtom, isCodeInvalidAtom, accessCodeAtom} =
     useMolecule(accessCodeMolecule)
   const isCodeInvalid = useAtomValue(isCodeInvalidAtom)
   const isCodeFilled = useAtomValue(isCodeFilledAtom)
-  const handleCodeSubmit = useSetAtom(handleCodeSubmitActionAtom)
+  const handleCodeSubmit = useSetAtom(submitCodeToJoinClubActionAtom)
   const isKeyboardShown = useIsKeyboardShown()
+  const store = useStore()
+  const loadingOverlay = useShowLoadingOverlay()
 
   return (
     <KeyboardAvoidingView>
@@ -52,12 +58,17 @@ function FillClubAccessCodeScreen({navigation}: Props): JSX.Element {
           text={t('clubs.enterCode')}
           onPress={() => {
             if (isKeyboardShown) Keyboard.dismiss()
-            void Effect.runPromise(handleCodeSubmit()).then((success) => {
-              if (success)
-                navigation.navigate('InsideTabs', {
-                  screen: 'Marketplace',
+            loadingOverlay.show()
+
+            void Effect.runPromise(
+              pipe(
+                Schema.decode(ClubCode)(store.get(accessCodeAtom).join('')),
+                Effect.flatMap(handleCodeSubmit),
+                Effect.andThen(() => {
+                  loadingOverlay.hide()
                 })
-            })
+              )
+            )
           }}
         />
       </Screen>

@@ -5,7 +5,7 @@ import {
   NewClubConnectionNotificationData,
   NewSocialNetworkConnectionNotificationData,
 } from '@vexl-next/domain/src/general/notifications'
-import {Option, Schema} from 'effect'
+import {Effect, Option, Schema} from 'effect'
 import * as Notifications from 'expo-notifications'
 import {useSetAtom, useStore} from 'jotai'
 import {useEffect} from 'react'
@@ -26,7 +26,10 @@ export function useHandleReceivedNotifications(): void {
   const updateOffersConnections = useSetAtom(
     updateAllOffersConnectionsActionAtom
   )
+
   const syncConnections = useSetAtom(syncConnectionsActionAtom)
+  const syncClubConnections = useSetAtom(syncConnectionsActionAtom)
+
   useEffect(() => {
     const processNotification = async (
       remoteMessage: Notifications.Notification
@@ -99,7 +102,7 @@ export function useHandleReceivedNotifications(): void {
         console.info(
           '🔔 Received notification about new user. Checking and updating offers accordingly.'
         )
-        await syncConnections()()
+        await Effect.runPromise(syncConnections())
         await updateOffersConnections({isInBackground: false})()
         return
       }
@@ -111,7 +114,8 @@ export function useHandleReceivedNotifications(): void {
         console.info(
           `🔔 Received notification about new user in club ${newClubConnectionNotificationO.value.clubUuids.join(',')}. Checking and updating offers accordingly.`
         )
-        // TODO
+        await Effect.runPromise(syncClubConnections())
+        await updateOffersConnections({isInBackground: false})()
         return
       }
 
@@ -122,7 +126,8 @@ export function useHandleReceivedNotifications(): void {
         console.info(
           `🔔 Received notification about new user in club ${admitedToClubNetworkNotificationDataO.value.publicKey}`
         )
-        // TODO
+        await Effect.runPromise(syncClubConnections())
+        await updateOffersConnections({isInBackground: false})()
         return
       }
 
@@ -143,6 +148,7 @@ export function useHandleReceivedNotifications(): void {
     fetchMessagesForInbox,
     navigation,
     store,
+    syncClubConnections,
     syncConnections,
     updateOffersConnections,
   ])

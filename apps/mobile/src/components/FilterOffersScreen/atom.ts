@@ -1,3 +1,4 @@
+import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {type CurrencyCode} from '@vexl-next/domain/src/general/currency.brand'
 import {
   type BtcNetwork,
@@ -12,8 +13,11 @@ import {
 } from '@vexl-next/domain/src/general/offers'
 import {calculateViewportRadius} from '@vexl-next/domain/src/utility/geoCoordinates'
 import {type LocationSuggestion} from '@vexl-next/rest-api/src/services/location/contracts'
-import {atom, type SetStateAction, type WritableAtom} from 'jotai'
+import {Record} from 'effect'
+import {atom, type Atom, type SetStateAction, type WritableAtom} from 'jotai'
 import {splitAtom} from 'jotai/utils'
+import {myStoredClubsAtom} from '../../state/clubs/atom/clubsStore'
+import {type ClubWithMembers} from '../../state/clubs/atom/clubsWithMembersAtom'
 import {
   createBtcPriceForCurrencyAtom,
   refreshBtcPriceActionAtom,
@@ -65,6 +69,30 @@ export const locationStateAtom = atom<readonly LocationState[] | undefined>(
 
 export const locationAtom = atom<OfferLocation[] | undefined>(
   offersFilterInitialState.location
+)
+
+export const clubsUuidsFilterAtom = atom<ClubUuid[]>(
+  offersFilterInitialState.clubsUuids
+)
+
+export const showClubsInFilterAtom = atom<boolean>(
+  offersFilterInitialState.showClubsInFilter
+)
+
+export const handleShowClubsInFilterChangeActionAtom = atom(
+  (get) => get(showClubsInFilterAtom),
+  (get, set) => {
+    const showClubsInFilter = get(showClubsInFilterAtom)
+    const myStoredClubs = get(myStoredClubsAtom)
+
+    if (!showClubsInFilter) {
+      set(clubsUuidsFilterAtom, Record.keys(myStoredClubs))
+    } else {
+      set(clubsUuidsFilterAtom, [])
+    }
+
+    set(showClubsInFilterAtom, !showClubsInFilter)
+  }
 )
 
 export const locationArrayOfOneAtom = atom(
@@ -328,6 +356,8 @@ const setFilterAtomsActionAtom = atom(
     set(listingTypeAtom, filterValue.listingType)
     set(offerTypeAtom, filterValue.offerType)
     set(sortingAtom, filterValue.sort)
+    set(clubsUuidsFilterAtom, filterValue.clubsUuids)
+    set(showClubsInFilterAtom, filterValue.showClubsInFilter)
     set(setConditionallyRenderedFilterElementsActionAtom, filterValue)
   }
 )
@@ -440,6 +470,8 @@ export const saveFilterActionAtom = atom(null, (get, set) => {
     amountTopLimit: get(amountTopLimitAtom),
     singlePrice: get(singlePriceAtom),
     singlePriceCurrency: get(singlePriceCurrencyAtom),
+    clubsUuids: get(clubsUuidsFilterAtom),
+    showClubsInFilter: get(showClubsInFilterAtom),
   }
 
   set(offersFilterFromStorageAtom, {...newFilterValue, text})
@@ -466,3 +498,27 @@ export const saveFilterActionAtom = atom(null, (get, set) => {
     } else set(clearRegionAndRefocusActionAtom)
   }
 })
+
+export function createSelectClubInFilterAtom(
+  clubWithMembersAtom: Atom<ClubWithMembers>
+): WritableAtom<boolean, [SetStateAction<boolean>], void> {
+  return atom(
+    (get) =>
+      get(clubsUuidsFilterAtom)?.includes(get(clubWithMembersAtom).club.uuid) ??
+      false,
+    (get, set, isSelected: SetStateAction<boolean>) => {
+      const {club} = get(clubWithMembersAtom)
+
+      const selected = getValueFromSetStateActionOfAtom(isSelected)(
+        () => get(clubsUuidsFilterAtom)?.includes(club.uuid) ?? false
+      )
+
+      set(clubsUuidsFilterAtom, (value) => {
+        const newValue = new Set(value)
+        if (selected) newValue.add(club.uuid)
+        else newValue.delete(club.uuid)
+        return Array.from(newValue)
+      })
+    }
+  )
+}

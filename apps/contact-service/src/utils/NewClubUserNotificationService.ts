@@ -1,10 +1,10 @@
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
-import {ClubUuid} from '@vexl-next/domain/src/general/clubs'
+import {ClubUuidE, type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {NewClubConnectionNotificationData} from '@vexl-next/domain/src/general/notifications'
 import {
-  type ExpoNotificationToken,
   ExpoNotificationTokenE,
+  type ExpoNotificationToken,
 } from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {RedisService} from '@vexl-next/server-utils/src/RedisService'
 import {
@@ -26,7 +26,7 @@ import {type ExpoNotificationsService} from './expoNotifications/ExpoNotificatio
 
 export const NEW_CLUB_USER_NOTIFICATIONS_KEY = 'NewClubUserNotifications'
 export const ClubNotificationRecord = Schema.Struct({
-  clubUuid: ClubUuid,
+  clubUuid: ClubUuidE,
   token: ExpoNotificationTokenE,
 })
 type ClubNotificationRecord = typeof ClubNotificationRecord.Type
@@ -115,6 +115,8 @@ export class NewClubUserNotificationsService extends Context.Tag(
               Array.filter((one): one is NonNullable<typeof one> => !!one),
               Array.map((token) => ({clubUuid, token}))
             )
+
+            if (!Array.isNonEmptyArray(recordsToSave)) return
 
             yield* _(
               saveIntoRedis(NEW_CLUB_USER_NOTIFICATIONS_KEY, ...recordsToSave),

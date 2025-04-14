@@ -1,17 +1,18 @@
 import {type PrivateKeyHolder} from '@vexl-next/cryptography/src/KeyHolder'
+import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {
   type IntendedConnectionLevel,
   type OfferAdminId,
   type SymmetricKey,
 } from '@vexl-next/domain/src/general/offers'
-import {type NoContentResponse} from '@vexl-next/rest-api/src/NoContentResponse.brand'
 import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
-import {type Effect} from 'effect'
-import * as TE from 'fp-ts/TaskEither'
-import {pipe} from 'fp-ts/function'
-import {effectToTaskEither} from '../effect-helpers/TaskEitherConverter'
-import {constructAndEncryptPrivatePayloadForOwner} from './constructPrivatePayloadForOwner'
-import {type PrivatePartEncryptionError} from './utils/encryptPrivatePart'
+import {Effect, pipe} from 'effect'
+import {constructPrivatePayloadForOwner} from './constructPrivatePayloadForOwner'
+import {type OfferPrivatePayloadToEncrypt} from './utils/constructPrivatePayloads'
+import {
+  encryptPrivatePart,
+  type PrivatePartEncryptionError,
+} from './utils/encryptPrivatePart'
 
 export default function updateOwnerPrivatePayload({
   api,
@@ -19,33 +20,37 @@ export default function updateOwnerPrivatePayload({
   symmetricKey,
   adminId,
   intendedConnectionLevel,
+  intendedClubs,
 }: {
   api: OfferApi
   ownerCredentials: PrivateKeyHolder
   symmetricKey: SymmetricKey
   adminId: OfferAdminId
   intendedConnectionLevel: IntendedConnectionLevel
-}): TE.TaskEither<
+  intendedClubs: readonly ClubUuid[]
+}): Effect.Effect<
+  OfferPrivatePayloadToEncrypt,
   | PrivatePartEncryptionError
-  | Effect.Effect.Error<ReturnType<OfferApi['createPrivatePart']>>,
-  NoContentResponse
+  | Effect.Effect.Error<ReturnType<OfferApi['createPrivatePart']>>
 > {
+  const privatePayload = constructPrivatePayloadForOwner({
+    ownerCredentials,
+    symmetricKey,
+    adminId,
+    intendedConnectionLevel,
+    intendedClubs,
+  })
+
   return pipe(
-    constructAndEncryptPrivatePayloadForOwner({
-      ownerCredentials,
-      symmetricKey,
-      adminId,
-      intendedConnectionLevel,
-    }),
-    TE.chainW((payload) =>
-      effectToTaskEither(
-        api.createPrivatePart({
-          body: {
-            adminId,
-            offerPrivateList: [payload],
-          },
-        })
-      )
-    )
+    encryptPrivatePart(privatePayload),
+    Effect.flatMap((payload) =>
+      api.createPrivatePart({
+        body: {
+          adminId,
+          offerPrivateList: [payload],
+        },
+      })
+    ),
+    Effect.zipRight(Effect.succeed(privatePayload))
   )
 }

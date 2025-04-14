@@ -1,6 +1,7 @@
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {type MyOfferInState} from '@vexl-next/domain/src/general/offers'
 import {type ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
+import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {extractPartsOfNotificationCypher} from '@vexl-next/resources-utils/src/notifications/notificationTokenActions'
 import {Option} from 'effect'
 import * as A from 'fp-ts/Array'
@@ -8,7 +9,6 @@ import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/lib/function'
 import {atom} from 'jotai'
-import {updateOfferAtom} from '..'
 import {version} from '../../../utils/environment'
 import {getNotificationToken} from '../../../utils/notifications'
 import {showDebugNotificationIfEnabled} from '../../../utils/notifications/showDebugNotificationIfEnabled'
@@ -17,6 +17,7 @@ import {inboxesAtom} from '../../chat/atoms/messagingStateAtom'
 import {getKeyHolderForNotificationCypherActionAtom} from '../../notifications/fcmCypherToKeyHolderAtom'
 import {getOrFetchNotificationServerPublicKeyActionAtom} from '../../notifications/fcmServerPublicKeyStore'
 import {myOffersAtom} from './myOffers'
+import {updateOfferActionAtom} from './updateOfferActionAtom'
 
 const doesOfferNeedUpdateActionAtom = atom(
   null,
@@ -121,7 +122,7 @@ const checkNotificationTokensAndRefreshOffersActionAtom = atom(
             if (!offerKeyHolder) return T.of(false)
 
             return pipe(
-              set(updateOfferAtom, {
+              set(updateOfferActionAtom, {
                 payloadPublic: {
                   ...offer.offerInfo.publicPart,
                   authorClientVersion: version,
@@ -133,6 +134,7 @@ const checkNotificationTokensAndRefreshOffersActionAtom = atom(
                 updateFcmCypher: true,
                 offerKey: offerKeyHolder.privateKey,
               }),
+              effectToTaskEither,
               TE.match(
                 (e) => {
                   if (e._tag !== 'NetworkError') {

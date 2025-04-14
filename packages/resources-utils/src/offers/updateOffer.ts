@@ -1,4 +1,5 @@
 import {type PrivateKeyHolder} from '@vexl-next/cryptography/src/KeyHolder'
+import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {
   type IntendedConnectionLevel,
   type OfferAdminId,
@@ -7,17 +8,14 @@ import {
   type SymmetricKey,
 } from '@vexl-next/domain/src/general/offers'
 import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
-import {type Effect} from 'effect'
-import * as TE from 'fp-ts/TaskEither'
-import {pipe} from 'fp-ts/function'
-import {effectToTaskEither} from '../effect-helpers/TaskEitherConverter'
+import {Effect} from 'effect'
 import decryptOffer, {
-  type ErrorDecryptingOffer,
+  type DecryptingOfferError,
   type NonCompatibleOfferVersionError,
 } from './decryptOffer'
 import updateOwnerPrivatePayload from './updateOwnerPrivatePayload'
 import encryptOfferPublicPayload, {
-  type ErrorEncryptingPublicPart,
+  type PublicPartEncryptionError,
 } from './utils/encryptOfferPublicPayload'
 import {type PrivatePartEncryptionError} from './utils/encryptPrivatePart'
 
@@ -31,6 +29,7 @@ export default function updateOffer({
   symmetricKey,
   ownerKeypair,
   intendedConnectionLevel,
+  intendedClubs,
 }: {
   offerApi: OfferApi
   adminId: OfferAdminId
@@ -38,99 +37,47 @@ export default function updateOffer({
   symmetricKey: SymmetricKey
   ownerKeypair: PrivateKeyHolder
   intendedConnectionLevel: IntendedConnectionLevel
-}): TE.TaskEither<
+  intendedClubs: ClubUuid[]
+}): Effect.Effect<
+  OfferInfo,
   | ApiErrorUpdatingOffer
-  | ErrorEncryptingPublicPart
+  | PublicPartEncryptionError
   | PrivatePartEncryptionError
   | Effect.Effect.Error<ReturnType<OfferApi['createPrivatePart']>>
-  | ErrorDecryptingOffer
-  | NonCompatibleOfferVersionError,
-  OfferInfo
+  | DecryptingOfferError
+  | NonCompatibleOfferVersionError
 > {
-  return pipe(
-    TE.Do,
-    TE.chainW(() =>
-      encryptOfferPublicPayload({offerPublicPart: publicPayload, symmetricKey})
-    ),
-    TE.chainW((encryptedPayload) =>
-      pipe(
-        offerApi.updateOffer({
-          body: {
-            adminId,
-            payloadPublic: encryptedPayload,
-            offerPrivateList: [],
-          },
-        }),
-        effectToTaskEither,
-        TE.chainW(decryptOffer(ownerKeypair))
-      )
-    ),
-    TE.chainFirstW(() =>
+  return Effect.gen(function* (_) {
+    const encryptedPayload = yield* _(
+      encryptOfferPublicPayload({
+        offerPublicPart: publicPayload,
+        symmetricKey,
+      })
+    )
+
+    const updatedOffer = yield* _(
+      offerApi.updateOffer({
+        body: {
+          adminId,
+          payloadPublic: encryptedPayload,
+          offerPrivateList: [],
+        },
+      })
+    )
+
+    const decryptedOffer = yield* _(decryptOffer(ownerKeypair)(updatedOffer))
+
+    yield* _(
       updateOwnerPrivatePayload({
         api: offerApi,
         ownerCredentials: ownerKeypair,
         symmetricKey,
         adminId,
         intendedConnectionLevel,
+        intendedClubs,
       })
     )
-  )
+
+    return decryptedOffer
+  })
 }
-
-// export interface UpdateOfferResult {
-//   encryptionErrors: PrivatePartEncryptionError[]
-//   offerInfo: OfferInfo
-// }
-
-// export function updateOfferReencryptForAll({
-//   offerApi,
-//   adminId,
-//   publicPayload,
-//   ownerKeyPair,
-//   contactApi,
-//   intendedConnectionLevel,
-// }: {
-//   offerApi: OfferPrivateApi
-//   contactApi: ContactPrivateApi
-//   adminId: OfferAdminId
-//   publicPayload: OfferPublicPart
-//   ownerKeyPair: PrivateKeyHolder
-//   intendedConnectionLevel: IntendedConnectionLevel
-// }): TE.TaskEither<
-//   | ErrorGeneratingSymmetricKey
-//   | ErrorEncryptingPublicPart
-//   | ApiErrorUpdatingOffer
-//   | ErrorConstructingPrivatePayloads
-//   | ErrorDecryptingOffer
-//   | ApiErrorFetchingContactsForOffer,
-//   UpdateOfferResult
-// > {
-//   return pipe(
-//     TE.Do,
-//     TE.bindW('symmetricKey', () => TE.fromEither(generateSymmetricKey())),
-//     TE.bindW('privatePayloads', ({symmetricKey}) =>
-//       fetchInfoAndGeneratePrivatePayloads({
-//         contactApi,
-//         ownerCredentials: ownerKeyPair,
-//         symmetricKey,
-//         intendedConnectionLevel,
-//       })
-//     ),
-//     TE.bindW('response', ({symmetricKey, privatePayloads}) =>
-//       pipe(
-//         updateOffer({
-//           privatePayloads: [],
-//           symmetricKey,
-//           ownerKeypair: ownerKeyPair,
-//           offerApi,
-//           adminId,
-//           publicPayload,
-//         })
-//       )
-//     ),
-//     TE.map(({response, privatePayloads}) => ({
-//       offerInfo: response,
-//       encryptionErrors: privatePayloads.errors,
-//     }))
-//   )
-// }

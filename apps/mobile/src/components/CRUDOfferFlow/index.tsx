@@ -1,5 +1,6 @@
 import {createNativeStackNavigator} from '@react-navigation/native-stack'
 import {useMolecule} from 'bunshi/dist/react'
+import {Effect} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import {useCallback, useState} from 'react'
 import {StatusBar} from 'react-native'
@@ -8,6 +9,7 @@ import {
   type CRUDOfferStackParamsList,
   type RootStackScreenProps,
 } from '../../navigationTypes'
+import {andThenExpectBooleanNoErrors} from '../../utils/andThenExpectNoErrors'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 import KeyboardAvoidingView from '../KeyboardAvoidingView'
@@ -112,23 +114,13 @@ function CRUDOfferFlow({route: {params}, navigation}: Props): JSX.Element {
             }}
             onSkip={safeGoBack}
             onFinish={() => {
-              if (params.offerId) {
-                void editOffer()().then((success) => {
+              void Effect.runPromise(
+                andThenExpectBooleanNoErrors((success) => {
                   if (success) {
-                    navigation.navigate('InsideTabs', {
-                      screen: 'MyOffers',
-                    })
+                    navigation.navigate('InsideTabs', {screen: 'MyOffers'})
                   }
-                })
-              } else {
-                void createOffer()().then((success) => {
-                  if (success) {
-                    navigation.navigate('InsideTabs', {
-                      screen: 'MyOffers',
-                    })
-                  }
-                })
-              }
+                })(params.offerId ? editOffer() : createOffer())
+              )
             }}
             background="black"
             touchableOverlayDisabled

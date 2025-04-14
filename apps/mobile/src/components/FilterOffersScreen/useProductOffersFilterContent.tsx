@@ -1,22 +1,26 @@
 import {useMemo} from 'react'
 import {getTokens} from 'tamagui'
 import {useTranslation} from '../../utils/localization/I18nProvider'
+import clubsSvg from '../images/clubsSvg'
+import deliveryMethodSvg from '../images/deliveryMethodSvg'
+import friendLevelSvg from '../images/friendLevelSvg'
+import networkSvg from '../images/networkSvg'
+import spokenLanguagesSvg from '../images/spokenLanguagesSvg'
+import ClubsComponent from '../OfferForm/components/Clubs'
 import DeliveryMethod from '../OfferForm/components/DeliveryMethod'
 import FriendLevel from '../OfferForm/components/FriendLevel'
 import Network from '../OfferForm/components/Network'
 import Price from '../OfferForm/components/Price'
 import SpokenLanguages from '../OfferForm/components/SpokenLanguages'
 import {type Props} from '../Section'
-import deliveryMethodSvg from '../images/deliveryMethodSvg'
-import friendLevelSvg from '../images/friendLevelSvg'
-import networkSvg from '../images/networkSvg'
-import spokenLanguagesSvg from '../images/spokenLanguagesSvg'
 import {
   calculateFiatValueOnSatsValueChangeActionAtom,
   calculateSatsValueOnFiatValueChangeActionAtom,
   changePriceCurrencyActionAtom,
   createIsThisLanguageSelectedAtom,
+  createSelectClubInFilterAtom,
   currencySelectVisibleAtom,
+  handleShowClubsInFilterChangeActionAtom,
   intendedConnectionLevelAtom,
   locationArrayOfOneAtom,
   locationStateAtom,
@@ -103,6 +107,17 @@ export default function useProductOffersFilterContent(): Props[] {
           <FriendLevel
             hideSubtitle
             intendedConnectionLevelAtom={intendedConnectionLevelAtom}
+          />
+        ),
+      },
+      {
+        title: t('clubs.vexlClubs'),
+        image: clubsSvg,
+        children: (
+          <ClubsComponent
+            form="FilterForm"
+            createSelectClubAtom={createSelectClubInFilterAtom}
+            showClubsInFilterAtom={handleShowClubsInFilterChangeActionAtom}
           />
         ),
       },

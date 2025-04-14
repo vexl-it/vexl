@@ -1,4 +1,5 @@
 import {useNavigation} from '@react-navigation/native'
+import {Effect} from 'effect'
 import {isNone} from 'fp-ts/Option'
 import {useAtomValue, useSetAtom} from 'jotai'
 import {useMemo} from 'react'
@@ -10,10 +11,9 @@ import Animated, {
   useSharedValue,
 } from 'react-native-reanimated'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
-import {Stack, XStack, getTokens} from 'tamagui'
+import {Stack, XStack} from 'tamagui'
 import {minutesTillOffersDisplayedAtom} from '../../../../../state/contacts'
 import {
-  triggerOffersRefreshAtom,
   useAreOffersLoading,
   useOffersLoadingError,
 } from '../../../../../state/marketplace'
@@ -21,10 +21,10 @@ import {baseFilterAtom} from '../../../../../state/marketplace/atoms/filterAtoms
 import {filteredOffersIncludingLocationFilterAtomsAtom} from '../../../../../state/marketplace/atoms/filteredOffers'
 import {refocusMapActionAtom} from '../../../../../state/marketplace/atoms/map/focusedOffer'
 import {joinVexlClubsSuggestionVisibleAtom} from '../../../../../state/marketplace/atoms/offerSuggestionVisible'
+import {refreshOffersActionAtom} from '../../../../../state/marketplace/atoms/refreshOffersActionAtom'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import {showClubsFlowAtom} from '../../../../../utils/preferences'
 import ErrorListHeader from '../../../../ErrorListHeader'
-import VexlActivityIndicator from '../../../../LoadingOverlayProvider/VexlActivityIndicator'
 import {MAP_SIZE} from '../../../../MarketplaceMap'
 import MarketplaceMapContainer from '../../../../MarketplaceMapContainer'
 import MarketplaceSuggestion from '../../../../MarketplaceSuggestion'
@@ -68,11 +68,10 @@ function ListFooterComponent(): JSX.Element | null {
 }
 
 function OffersListStateDisplayerContent(): JSX.Element {
-  const tokens = getTokens()
   const insets = useSafeAreaInsets()
   const loading = useAreOffersLoading()
   const error = useOffersLoadingError()
-  const refreshOffers = useSetAtom(triggerOffersRefreshAtom)
+  const refreshOffers = useSetAtom(refreshOffersActionAtom)
   const refocusMap = useSetAtom(refocusMapActionAtom)
   const baseFilter = useAtomValue(baseFilterAtom)
 
@@ -141,7 +140,9 @@ function OffersListStateDisplayerContent(): JSX.Element {
               <VexlNewsSuggestions />
               <EmptyListPlaceholder
                 refreshing={loading}
-                onRefresh={refreshOffers}
+                onRefresh={() => {
+                  Effect.runFork(refreshOffers())
+                }}
               />
             </>
           )}
@@ -158,14 +159,6 @@ function OffersListStateDisplayerContent(): JSX.Element {
     refreshOffers,
     scaleAnim,
   ])
-
-  if (offersAtoms.length === 0 && loading) {
-    return (
-      <Stack f={1} ai="center" jc="center" pt="$5">
-        <VexlActivityIndicator bc={tokens.color.main.val} size="large" />
-      </Stack>
-    )
-  }
 
   return (
     <ContainerWithTopBorderRadius testID="@marketplaceScreen">
@@ -192,7 +185,9 @@ function OffersListStateDisplayerContent(): JSX.Element {
           ListFooterComponent={ListFooterComponent}
           offersAtoms={offersAtoms}
           // eslint-disable-next-line @typescript-eslint/no-misused-promises
-          onRefresh={refreshOffers}
+          onRefresh={() => {
+            Effect.runFork(refreshOffers())
+          }}
           refreshing={loading}
           onScroll={handleScroll}
         />

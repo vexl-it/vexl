@@ -1,0 +1,79 @@
+import {useNavigation} from '@react-navigation/native'
+import {FlashList} from '@shopify/flash-list'
+import {type Atom, useAtomValue} from 'jotai'
+import {Image, Stack, Text, XStack, YStack} from 'tamagui'
+import membersSvg from '../../../../../images/memberSvg'
+import {
+  clubsWithMembersAtomsAtom,
+  type ClubWithMembers,
+} from '../../../../../state/clubs/atom/clubsWithMembersAtom'
+import atomKeyExtractor from '../../../../../utils/atomUtils/atomKeyExtractor'
+import {useTranslation} from '../../../../../utils/localization/I18nProvider'
+import Button from '../../../../Button'
+import SvgImage from '../../../../Image'
+import {EmptyListPlaceholder} from './EmptyListPlaceholder'
+
+function ClubListItem({atom}: {atom: Atom<ClubWithMembers>}): JSX.Element {
+  const {club, members} = useAtomValue(atom)
+  const navigation = useNavigation()
+  const {t} = useTranslation()
+
+  return (
+    <XStack gap="$2" alignItems="center">
+      <Image width={48} height={48} src={club.clubImageUrl} />
+      <YStack f={1}>
+        <Text
+          numberOfLines={1}
+          lineBreakMode="tail"
+          fontSize={18}
+          fontFamily="$body600"
+        >
+          {club.name}
+        </Text>
+        <XStack gap="$1" alignItems="center">
+          <SvgImage width={16} height={16} stroke="white" source={membersSvg} />
+          <Text fontSize={16} fontFamily="$body400">
+            {t('clubs.members', {
+              membersCount: members.length,
+            })}
+          </Text>
+        </XStack>
+      </YStack>
+      <Button
+        text={t('common.seeDetail')}
+        variant="blackOnDark"
+        onPress={() => {
+          navigation.navigate('ClubDetail', {clubUuid: club.uuid})
+        }}
+        size="medium"
+      />
+    </XStack>
+  )
+}
+
+function Separator(): JSX.Element {
+  return (
+    <Stack alignItems="center" justifyContent="center" f={1} height={32}>
+      <Stack height={2} width="100%" bg="$grey" />
+    </Stack>
+  )
+}
+
+function renderItem({item}: {item: Atom<ClubWithMembers>}): JSX.Element {
+  return <ClubListItem atom={item} />
+}
+export function ClubsList(): JSX.Element {
+  const clubsAtoms = useAtomValue(clubsWithMembersAtomsAtom)
+  if (clubsAtoms.length === 0) {
+    return <EmptyListPlaceholder />
+  }
+  return (
+    <FlashList
+      data={clubsAtoms}
+      estimatedItemSize={69}
+      ItemSeparatorComponent={Separator}
+      renderItem={renderItem}
+      keyExtractor={atomKeyExtractor}
+    />
+  )
+}

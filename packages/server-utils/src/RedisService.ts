@@ -12,6 +12,7 @@ import {
   type ConfigError,
   type ParseResult,
 } from 'effect'
+import {type NonEmptyArray} from 'effect/Array'
 import {catchAllDefect} from 'effect/Effect'
 import Redis from 'ioredis'
 import Redlock, {type Lock} from 'redlock'
@@ -51,7 +52,7 @@ export interface RedisOperations {
     schema: Schema.Schema<A, I, R>
   ) => (
     key: string,
-    ...value: A[]
+    ...value: NonEmptyArray<A>
   ) => Effect.Effect<void, ParseResult.ParseError | RedisError, R>
 
   readAndDeleteSet: <A, I, R>(

@@ -51,13 +51,11 @@ export const processClubRemovedFromBeActionAtom = atom(
   ) => {
     return Effect.gen(function* (_) {
       const offerApi = get(apiAtom).offer
-      console.log('ahoj')
       const offerConnectionsToDeleteFromServer = set(
         deleteClubForAllConnectionsActionAtom,
         clubUuid
       )
 
-      console.log('aho2')
       const myOffersWithConnectionsForClub = pipe(
         get(myOffersAtom),
         Array.map(Option.some),
@@ -81,7 +79,6 @@ export const processClubRemovedFromBeActionAtom = atom(
         )
       )
 
-      console.log('aho3')
       yield* _(
         deletePrivatePartsForOffers(myOffersWithConnectionsForClub, offerApi),
         ignoreReportErrors(
@@ -90,7 +87,6 @@ export const processClubRemovedFromBeActionAtom = atom(
         )
       )
 
-      console.log('aho4')
       yield* _(
         myOffersWithConnectionsForClub,
         Array.map(({offer}) =>
@@ -114,11 +110,8 @@ export const processClubRemovedFromBeActionAtom = atom(
         ),
         Effect.all
       )
-      console.log('aho5')
       set(removeMyStoredClubFromStateActionAtom, clubUuid)
-      console.log('aho6')
-      set(updateOrFilterOffersFromDeletedClubsActionAtom, clubUuid)
-      console.log('aho7')
+      set(updateOrFilterOffersFromDeletedClubsActionAtom, [clubUuid])
     })
   }
 )

@@ -98,17 +98,16 @@ export function offerForChatOriginAtom(chatOrigin: ChatOrigin) {
 
 export const updateOrFilterOffersFromDeletedClubsActionAtom = atom(
   null,
-  (get, set, ...deletedClubs: Array.NonEmptyArray<ClubUuid>) => {
-    console.log('preb')
+  (get, set, deletedClubs: Array.NonEmptyArray<ClubUuid>) => {
     set(
       offersAtom,
       Array.filterMap((offer) =>
         offerWithoutSourceOrNone(offer, deletedClubs, false)
       )
     )
-    console.log('b7')
   }
 )
+
 export function createOfferCountForClub(clubUuid: ClubUuid): Atom<number> {
   return atom((get) => {
     return pipe(

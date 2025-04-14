@@ -11,6 +11,16 @@ import reportError from './reportError'
 
 export const navigationRef = createNavigationContainerRef()
 
+export function isPassedImportContactsOutsideReact(): boolean {
+  const navigationState = navigationRef.getState()
+  if (!navigationRef.isReady()) return false
+
+  return (
+    navigationState?.routeNames?.includes('InsideTabs') ||
+    navigationState?.routes?.some((route) => route.name === 'InsideTabs')
+  )
+}
+
 export function safeNavigateBackOutsideReact():
   | 'notReady'
   | 'wentBack'

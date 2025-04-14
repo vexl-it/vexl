@@ -7,12 +7,13 @@ import {
 import {TouchableOpacity} from 'react-native'
 import {Text, XStack, YStack} from 'tamagui'
 import {type CRUDOfferStackScreenProps} from '../../../../navigationTypes'
-import atomKeyExtractor from '../../../../utils/atomUtils/atomKeyExtractor'
-import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import {
   clubsWithMembersAtomsAtom,
   type ClubWithMembers,
-} from '../../../CRUDOfferFlow/atoms/clubsWithMembersAtom'
+} from '../../../../state/clubs/atom/clubsWithMembersAtom'
+import atomKeyExtractor from '../../../../utils/atomUtils/atomKeyExtractor'
+import {useTranslation} from '../../../../utils/localization/I18nProvider'
+
 import ClubItem from './components/ClubItem'
 
 interface OfferFormProps {

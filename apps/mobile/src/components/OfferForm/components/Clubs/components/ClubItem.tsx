@@ -2,8 +2,8 @@ import {Option} from 'effect'
 import {type Atom, useAtomValue, type WritableAtom} from 'jotai'
 import {type SetStateAction, useMemo} from 'react'
 import {Stack, Text, XStack, YStack} from 'tamagui'
+import {type ClubWithMembers} from '../../../../../state/clubs/atom/clubsWithMembersAtom'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
-import {type ClubWithMembers} from '../../../../CRUDOfferFlow/atoms/clubsWithMembersAtom'
 import {ImageUniversal} from '../../../../Image'
 import IsSelectedCheckbox from './IsSelectedCheckbox'
 
@@ -33,7 +33,7 @@ function ClubItem({
             width={48}
             height={48}
             style={{borderRadius: 12}}
-            source={{type: 'imageUri', imageUri: club.clubImageUrl}}
+            source={{type: 'imageUri', imageUri: club.club.clubImageUrl}}
           />
         </Stack>
         <YStack
@@ -45,7 +45,7 @@ function ClubItem({
           gap="$2"
         >
           <Text fos={18} ff="$body500" col="$white">
-            {club.name}
+            {club.club.name}
           </Text>
           <Text fos={14} ff="$body500" col="$greyOnBlack">
             {t('clubs.members', {membersCount})}

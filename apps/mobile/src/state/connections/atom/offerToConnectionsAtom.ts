@@ -6,21 +6,24 @@ import {
 import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import updatePrivateParts from '@vexl-next/resources-utils/src/offers/updatePrivateParts'
 import {subtractArrays} from '@vexl-next/resources-utils/src/utils/array'
+import {Array, Option} from 'effect'
 import * as A from 'fp-ts/Array'
 import * as E from 'fp-ts/Either'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
-import {atom} from 'jotai'
+import {atom, type WritableAtom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {splitAtom} from 'jotai/utils'
+import {type SetStateAction} from 'react'
 import {apiAtom} from '../../../api'
 import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
+import getValueFromSetStateActionOfAtom from '../../../utils/atomUtils/getValueFromSetStateActionOfAtom'
 import notEmpty from '../../../utils/notEmpty'
 import {showDebugNotificationIfEnabled} from '../../../utils/notifications/showDebugNotificationIfEnabled'
 import reportError from '../../../utils/reportError'
 import {startMeasure} from '../../../utils/reportTime'
-import {myStoredClubsAtom} from '../../contacts/atom/clubsStore'
+import {myStoredClubsAtom} from '../../clubs/atom/clubsStore'
 import {
   offersStateAtom,
   singleOfferByAdminIdAtom,
@@ -44,6 +47,47 @@ export default offerToConnectionsAtom
 const offerToConnectionsAtomsAtom = splitAtom(
   focusAtom(offerToConnectionsAtom, (p) => p.prop('offerToConnections'))
 )
+
+export const createSingleOfferToConnections = (
+  adminId: OfferAdminId
+): WritableAtom<
+  Option.Option<OfferToConnectionsItem>,
+  [OfferToConnectionsItem],
+  void
+> =>
+  atom(
+    (get) =>
+      Array.findFirst(
+        get(offerToConnectionsAtom).offerToConnections,
+        (one) => one.adminId === adminId
+      ),
+    (get, set, newValue: SetStateAction<OfferToConnectionsItem>) => {
+      const existingItemIndexO = Array.findFirstIndex(
+        get(offerToConnectionsAtom).offerToConnections,
+        (one) => one.adminId === adminId
+      )
+      if (Option.isNone(existingItemIndexO)) return
+
+      const existingItemO = Array.get(
+        get(offerToConnectionsAtom).offerToConnections,
+        existingItemIndexO.value
+      )
+
+      if (Option.isNone(existingItemO)) return
+
+      const newItem = getValueFromSetStateActionOfAtom(newValue)(
+        () => existingItemO.value
+      )
+      set(offerToConnectionsAtom, (old) => ({
+        ...old,
+        offerToConnections: Array.replace(
+          old.offerToConnections,
+          existingItemIndexO.value,
+          newItem
+        ),
+      }))
+    }
+  )
 
 export const deleteOfferToConnectionsAtom = atom(
   null,

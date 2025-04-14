@@ -28,6 +28,7 @@ export const ClubInfoForUser = Schema.Struct({
   club: ClubInfo,
   isModerator: Schema.Boolean,
 })
+export type ClubInfoForUser = typeof ClubInfoForUser.Type
 
 export const ClubAdmitionRequest = Schema.Struct({
   publicKey: PublicKeyPemBase64E,
@@ -36,6 +37,7 @@ export const ClubAdmitionRequest = Schema.Struct({
   }),
   langCode: Schema.String,
 })
+export type ClubAdmitionRequest = typeof ClubAdmitionRequest.Type
 
 export const ClubCode = Schema.String.pipe(Schema.brand('ClubCode'))
 export type ClubCode = Schema.Schema.Type<typeof ClubCode>

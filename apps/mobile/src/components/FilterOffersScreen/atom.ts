@@ -15,6 +15,7 @@ import {calculateViewportRadius} from '@vexl-next/domain/src/utility/geoCoordina
 import {type LocationSuggestion} from '@vexl-next/rest-api/src/services/location/contracts'
 import {atom, type Atom, type SetStateAction, type WritableAtom} from 'jotai'
 import {splitAtom} from 'jotai/utils'
+import {type ClubWithMembers} from '../../state/clubs/atom/clubsWithMembersAtom'
 import {
   createBtcPriceForCurrencyAtom,
   refreshBtcPriceActionAtom,
@@ -36,7 +37,6 @@ import getValueFromSetStateActionOfAtom from '../../utils/atomUtils/getValueFrom
 import calculatePriceInFiatFromSats from '../../utils/calculatePriceInFiatFromSats'
 import calculatePriceInSats from '../../utils/calculatePriceInSats'
 import {currencies} from '../../utils/localization/currency'
-import {type ClubWithMembers} from '../CRUDOfferFlow/atoms/clubsWithMembersAtom'
 
 export const currencySelectVisibleAtom = atom<boolean>(false)
 
@@ -480,19 +480,22 @@ export function createSelectClubInFilterAtom(
 ): WritableAtom<boolean, [SetStateAction<boolean>], void> {
   return atom(
     (get) =>
-      get(clubsUuidsFilterAtom)?.includes(get(clubWithMembersAtom).club.uuid) ??
-      false,
+      get(clubsUuidsFilterAtom)?.includes(
+        get(clubWithMembersAtom).club.club.uuid
+      ) ?? false,
     (get, set, isSelected: SetStateAction<boolean>) => {
-      const club = get(clubWithMembersAtom)
+      const clubWithMembers = get(clubWithMembersAtom)
 
       const selected = getValueFromSetStateActionOfAtom(isSelected)(
-        () => get(clubsUuidsFilterAtom)?.includes(club.club.uuid) ?? false
+        () =>
+          get(clubsUuidsFilterAtom)?.includes(clubWithMembers.club.club.uuid) ??
+          false
       )
 
       set(clubsUuidsFilterAtom, (value) => {
         const newValue = new Set(value)
-        if (selected) newValue.add(club.club.uuid)
-        else newValue.delete(club.club.uuid)
+        if (selected) newValue.add(clubWithMembers.club.club.uuid)
+        else newValue.delete(clubWithMembers.club.club.uuid)
         return Array.from(newValue)
       })
     }

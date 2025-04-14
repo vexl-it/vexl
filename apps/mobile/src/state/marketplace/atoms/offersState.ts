@@ -1,4 +1,5 @@
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
+import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {type ChatOrigin} from '@vexl-next/domain/src/general/messaging'
 import {
   type OfferAdminId,
@@ -7,7 +8,9 @@ import {
   type OneOfferInState,
 } from '@vexl-next/domain/src/general/offers'
 import {MINIMAL_DATE} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
-import {atom, type WritableAtom} from 'jotai'
+import {Array} from 'effect'
+import {pipe} from 'fp-ts/lib/function'
+import {type Atom, atom, type WritableAtom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {type SetStateAction} from 'react'
 import {type FocusAtomType} from '../../../utils/atomUtils/FocusAtomType'
@@ -89,5 +92,17 @@ export function offerForChatOriginAtom(chatOrigin: ChatOrigin) {
 
     if (chatOrigin.offer) return chatOrigin.offer
     return singleOfferAtomOrNull ? get(singleOfferAtomOrNull) : undefined
+  })
+}
+
+export function createOfferCountForClub(clubUuid: ClubUuid): Atom<number> {
+  return atom((get) => {
+    return pipe(
+      get(offersAtom),
+      Array.filter((one) =>
+        Array.contains(one.offerInfo.publicPart.clubsUuids ?? [], clubUuid)
+      ),
+      Array.length
+    )
   })
 }

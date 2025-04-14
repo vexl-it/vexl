@@ -1,29 +1,15 @@
-import {ClubCode} from '@vexl-next/domain/src/general/clubs'
-import {eitherToEffect} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
-import {generateKeyPair} from '@vexl-next/resources-utils/src/utils/crypto'
 import {createScope, molecule} from 'bunshi/dist/react'
-import {Effect, Option, Schema} from 'effect'
+import {Effect} from 'effect'
 import Camera, {type BarcodeScanningResult, type BarcodeType} from 'expo-camera'
 import {atom, type SetStateAction, type WritableAtom} from 'jotai'
 import {splitAtom} from 'jotai/utils'
-import {apiAtom} from '../../api'
-import {myStoredClubsAtom} from '../../state/contacts/atom/clubsStore'
-import {JoinClubFromLinkPayload} from '../../state/contacts/domain'
-import {LINK_TYPE_JOIN_CLUB} from '../../utils/deepLinks/domain'
-import {
-  DataAndTypeElementsDeepLinkError,
-  LinkToDeepLink,
-} from '../../utils/deepLinks/parseDeepLink'
-import {parseJsonFp} from '../../utils/fpUtils'
+
+import {handleDeepLinkActionAtom} from '../../utils/deepLinks'
 import {getImageFromGalleryAndTryToResolveThePermissionsAlongTheWay} from '../../utils/imagePickers'
 import {translationAtom} from '../../utils/localization/I18nProvider'
-import {getNotificationTokenE} from '../../utils/notifications'
 import reportError from '../../utils/reportError'
 import showErrorAlert from '../../utils/showErrorAlert'
 import {toCommonErrorMessage} from '../../utils/useCommonErrorMessages'
-import {askAreYouSureActionAtom} from '../AreYouSureDialog'
-import {clubsWithMembersAtom} from '../CRUDOfferFlow/atoms/clubsWithMembersAtom'
-import clubImagePlaceholderSvg from './images/clubImagePlaceholderSvg'
 
 export const CODE_LENGTH = 6
 
@@ -71,184 +57,20 @@ export const accessCodeMolecule = molecule((_, getScope) => {
     }
   )
 
-  const handleCodeSubmitActionAtom = atom(null, (get, set) => {
-    const {t} = get(translationAtom)
-    const api = get(apiAtom)
-    const code = Schema.decodeSync(ClubCode)(get(accessCodeAtom).join(''))
-
-    return Effect.gen(function* (_) {
-      const newKeypair = yield* _(eitherToEffect(generateKeyPair()))
-      const notificationToken = yield* _(
-        getNotificationTokenE(),
-        Effect.map(Option.fromNullable)
-      )
-
-      const club = yield* _(
-        api.contact.getClubInfoByAccessCode({
-          code,
-          keyPair: newKeypair,
-        })
-      )
-
-      const myStoredClubs = get(myStoredClubsAtom)
-
-      // is user already in the club?
-      const keyPair = myStoredClubs[club.club.uuid] ?? newKeypair
-
-      yield* _(
-        set(askAreYouSureActionAtom, {
-          variant: 'info',
-          steps: [
-            {
-              type: 'StepWithText',
-              imageSource: {
-                type: club.club.clubImageUrl ? 'imageUri' : 'svgXml',
-                imageUri: club.club.clubImageUrl,
-                svgXml: clubImagePlaceholderSvg,
-              },
-              title: t('clubs.wannaStepInsideOfClub', {
-                clubName: club.club.name,
-              }),
-              description: t('clubs.joiningClubGivesYouAccess', {
-                clubName: club.club.name,
-              }),
-              negativeButtonText: t('common.cancel'),
-              positiveButtonText: t('common.continue'),
-            },
-          ],
-        })
-      )
-
-      const {clubInfoForUser} = yield* _(
-        api.contact.joinClub({
-          keyPair,
-          code,
-          contactsImported: true,
-          notificationToken,
-        })
-      )
-
-      set(myStoredClubsAtom, (prevState) => ({
-        ...prevState,
-        [clubInfoForUser.club.uuid]: keyPair,
-      }))
-
-      yield* _(set(clubsWithMembersAtom))
-
-      yield* _(
-        set(askAreYouSureActionAtom, {
-          variant: 'info',
-          steps: [
-            {
-              type: 'StepWithText',
-              imageSource: {
-                type: club.club.clubImageUrl ? 'imageUri' : 'svgXml',
-                imageUri: club.club.clubImageUrl,
-                svgXml: clubImagePlaceholderSvg,
-              },
-              title: t('clubs.clubJoinedSuccessfully'),
-              description: t('clubs.nowYouWillSeeOffersFromClubMembers'),
-              positiveButtonText: t('common.ok'),
-            },
-          ],
-        })
-      )
-
-      return true
-    }).pipe(
-      Effect.catchAll((e) => {
-        if (e._tag === 'UserDeclinedError') return Effect.succeed(false)
-
-        if (e._tag === 'NotFoundError') {
-          set(isCodeInvalidAtom, true)
-          return Effect.succeed(false)
-        }
-
-        if (
-          e._tag === 'ClubUserLimitExceededError' ||
-          e._tag === 'MemberAlreadyInClubError'
-        ) {
-          return set(askAreYouSureActionAtom, {
-            variant: 'danger',
-            steps: [
-              {
-                type: 'StepWithText',
-                imageSource: {
-                  type: 'requiredImage',
-                  image: require('../../components/images/block.png'),
-                },
-                title: t('clubs.joiningUnsucessful'),
-                description:
-                  e._tag === 'ClubUserLimitExceededError'
-                    ? t('clubs.clubIsFullDescription')
-                    : t('clubs.youAreAlreadyMemberOfThisClubDescription'),
-                positiveButtonText: t('common.close'),
-              },
-            ],
-          }).pipe(Effect.match({onSuccess: () => true, onFailure: () => true}))
-        }
-
-        if (
-          e._tag === 'UnauthorizedError' ||
-          e._tag === 'UnexpectedApiResponseError' ||
-          e._tag === 'UnknownClientError' ||
-          e._tag === 'UnknownServerError' ||
-          e._tag === 'CryptoError'
-        ) {
-          reportError('error', new Error('Join club error'), {e})
-        }
-
-        showErrorAlert({
-          title: toCommonErrorMessage(e, t) ?? t('common.unknownError'),
-          error: e,
-        })
-
-        return Effect.succeed(false)
-      })
-    )
-  })
-
   const handleCodeScannedActionAtom = atom(
     null,
     (get, set, barcodeScanningResult: BarcodeScanningResult) => {
       const {t} = get(translationAtom)
-      const {data: scanResult} = barcodeScanningResult
-
       return Effect.gen(function* (_) {
-        const deepLinkData = yield* _(Schema.decode(LinkToDeepLink)(scanResult))
+        const {data: scanResult} = barcodeScanningResult
 
-        const {type, data} = deepLinkData
-
-        if (Option.isNone(type) || Option.isNone(data)) {
-          return yield* _(
-            Effect.fail(
-              new DataAndTypeElementsDeepLinkError({
-                message: 'Data and type elements are required',
-                cause: new Error('Data and type elements are required'),
-              })
-            )
-          )
-        }
-
-        if (Option.isSome(type) && type.value !== LINK_TYPE_JOIN_CLUB) {
-          return false
-        }
-
-        const joinClubLinkData = yield* _(
-          eitherToEffect(parseJsonFp(data.value)),
-          Effect.flatMap(Schema.decodeUnknown(JoinClubFromLinkPayload))
-        )
-
-        set(accessCodeAtom, joinClubLinkData.code.split(''))
-        set(handleCodeSubmitActionAtom)
-
-        return true
+        return yield* _(set(handleDeepLinkActionAtom, scanResult))
       }).pipe(
         Effect.catchAll((e) => {
-          if (e._tag === 'JsonParseError' || e._tag === 'ParseError') {
+          if (e._tag === 'InvalidDeepLinkError') {
             reportError(
               'warn',
-              new Error('Error while parsing phone number from QR code'),
+              new Error('Error while parsing join club qr code'),
               {
                 e,
               }
@@ -321,7 +143,6 @@ export const accessCodeMolecule = molecule((_, getScope) => {
     isCodeInvalidAtom,
     isCodeFilledAtom,
     handleAccessCodeElementChangeActionAtom,
-    handleCodeSubmitActionAtom,
     handleCodeScannedActionAtom,
     getClubQrCodeFromDeviceImageLibraryActionAtom,
   }

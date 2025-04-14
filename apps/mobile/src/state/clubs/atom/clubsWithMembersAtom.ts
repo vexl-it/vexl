@@ -1,20 +1,24 @@
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
+import {
+  type ClubInfoForUser,
+  type ClubUuid,
+} from '@vexl-next/domain/src/general/clubs'
 import {taskToEffect} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {type ContactApi} from '@vexl-next/rest-api/src/services/contact'
-import {type ClubInfo} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {Array, Effect, Either, Option, Schema} from 'effect'
-import {atom} from 'jotai'
+import {type Atom, atom} from 'jotai'
 import {splitAtom} from 'jotai/utils'
 import {apiAtom} from '../../../api'
-import {myStoredClubsAtom} from '../../../state/contacts/atom/clubsStore'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
 import {getNotificationToken} from '../../../utils/notifications'
 import reportError from '../../../utils/reportError'
 import showErrorAlert from '../../../utils/showErrorAlert'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
+import {checkForClubsAdmissionActionAtom} from './checkForClubsAdmissionActionAtom'
+import {myStoredClubsAtom} from './clubsStore'
 
 export interface ClubWithMembers {
-  club: ClubInfo
+  club: ClubInfoForUser
   members: Option.Option<PublicKeyPemBase64[]>
 }
 
@@ -39,7 +43,6 @@ export const clubsWithMembersAtom = atom(
   (get) => get(clubsWithMembersStorageAtom),
   (get, set) => {
     const {t} = get(translationAtom)
-
     return Effect.gen(function* (_) {
       const api = get(apiAtom)
       const myStoredClubs = get(myStoredClubsAtom)
@@ -98,13 +101,13 @@ export const clubsWithMembersAtom = atom(
           )
 
           return {
-            club: club.clubInfoForUser.club,
+            club: club.clubInfoForUser,
             members: Option.some([...membersFilterMe]),
           }
         }
 
         return {
-          club: club.clubInfoForUser.club,
+          club: club.clubInfoForUser,
           members: Option.none(),
         }
       })
@@ -136,12 +139,13 @@ export const clubsWithMembersAtom = atom(
         })
 
         return Effect.succeed(Either.left({_tag: 'clubsNotLoaded'} as const))
-      })
+      }),
+      Effect.zip(set(checkForClubsAdmissionActionAtom))
     )
   }
 )
 
-const fetchedClubsAtom = atom((get) => {
+export const fetchedClubsAtom = atom((get) => {
   const clubs = get(clubsWithMembersAtom)
 
   if (Either.isRight(clubs)) return clubs.right
@@ -154,3 +158,12 @@ export const clubsWithMembersAtomsAtom = splitAtom(fetchedClubsAtom)
 clubsWithMembersAtom.onMount = (setAtom) => {
   void Effect.runPromise(setAtom())
 }
+export const singleClubAtom = (
+  clubUuid: ClubUuid
+): Atom<Option.Option<ClubWithMembers>> =>
+  atom((get) =>
+    Array.findFirst(
+      get(fetchedClubsAtom),
+      (club) => club.club.club.uuid === clubUuid
+    )
+  )

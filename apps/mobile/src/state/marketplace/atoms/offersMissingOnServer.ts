@@ -12,11 +12,11 @@ import {apiAtom} from '../../../api'
 import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
 import getCountryPrefix from '../../../utils/getCountryCode'
 import reportError from '../../../utils/reportError'
+import {myStoredClubsAtom} from '../../clubs/atom/clubsStore'
 import {
   deleteOfferToConnectionsAtom,
   upsertOfferToConnectionsActionAtom,
 } from '../../connections/atom/offerToConnectionsAtom'
-import {myStoredClubsAtom} from '../../contacts/atom/clubsStore'
 import {sessionDataOrDummyAtom} from '../../session'
 import getClubConnectionsForUuids from '../utils/getClubsConnectionsForUuids'
 import {myOffersAtom} from './myOffers'

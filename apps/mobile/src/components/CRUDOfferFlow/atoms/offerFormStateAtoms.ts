@@ -42,7 +42,8 @@ import {splitAtom} from 'jotai/utils'
 import {Alert} from 'react-native'
 import {type CRUDOfferStackParamsList} from '../../../navigationTypes'
 import {createInboxAtom} from '../../../state/chat/hooks/useCreateInbox'
-import {myStoredClubsAtom} from '../../../state/contacts/atom/clubsStore'
+import {myStoredClubsAtom} from '../../../state/clubs/atom/clubsStore'
+import {type ClubWithMembers} from '../../../state/clubs/atom/clubsWithMembersAtom'
 import {
   createBtcPriceForCurrencyAtom,
   refreshBtcPriceActionAtom,
@@ -79,7 +80,6 @@ import {
   otherOfferScreens,
   productOfferScreens,
 } from '../domain'
-import {type ClubWithMembers} from './clubsWithMembersAtom'
 import numberOfFriendsAtom from './numberOfFriendsAtom'
 
 function getAtomWithNullableValueHandling<T, S>(
@@ -486,19 +486,20 @@ export const offerFormMolecule = molecule(() => {
     return atom(
       (get) =>
         get(selectedClubsUuidsAtom)?.includes(
-          get(clubWithMembersAtom).club.uuid
+          get(clubWithMembersAtom).club.club.uuid
         ) ?? false,
       (get, set, isSelected: SetStateAction<boolean>) => {
         const club = get(clubWithMembersAtom)
 
         const selected = getValueFromSetStateActionOfAtom(isSelected)(
-          () => get(selectedClubsUuidsAtom)?.includes(club.club.uuid) ?? false
+          () =>
+            get(selectedClubsUuidsAtom)?.includes(club.club.club.uuid) ?? false
         )
 
         set(selectedClubsUuidsAtom, (value) => {
           const newValue = new Set(value)
-          if (selected) newValue.add(club.club.uuid)
-          else newValue.delete(club.club.uuid)
+          if (selected) newValue.add(club.club.club.uuid)
+          else newValue.delete(club.club.club.uuid)
           return Array.from(newValue)
         })
       }

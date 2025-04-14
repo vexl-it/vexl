@@ -1,9 +1,17 @@
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
-import {HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
+import {
+  HashedPhoneNumber,
+  HashedPhoneNumberE,
+} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
+import {
+  hmacSignE,
+  type CryptoError,
+} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {
   hmacSign,
-  type CryptoError,
+  type CryptoError as CryptoErrorOld,
 } from '@vexl-next/resources-utils/src/utils/crypto'
+import {Effect, Schema} from 'effect'
 import * as Contacts from 'expo-contacts'
 import {SortTypes} from 'expo-contacts'
 import * as E from 'fp-ts/Either'
@@ -26,11 +34,19 @@ export interface UnknownContactsError {
 
 export function hashPhoneNumber(
   normalizedPhoneNumber: E164PhoneNumber
-): E.Either<CryptoError, HashedPhoneNumber> {
+): E.Either<CryptoErrorOld, HashedPhoneNumber> {
   return pipe(
     normalizedPhoneNumber,
     hmacSign(hmacPassword),
     E.map(HashedPhoneNumber.parse)
+  )
+}
+
+export function hashPhoneNumberE(
+  normalizedPhoneNumber: E164PhoneNumber
+): Effect.Effect<HashedPhoneNumber, CryptoError> {
+  return hmacSignE(hmacPassword)(normalizedPhoneNumber).pipe(
+    Effect.map(Schema.decodeSync(HashedPhoneNumberE))
   )
 }
 

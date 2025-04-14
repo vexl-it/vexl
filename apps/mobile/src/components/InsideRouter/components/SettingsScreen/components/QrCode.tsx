@@ -4,7 +4,6 @@ import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/lib/function'
 import {atom, useAtomValue} from 'jotai'
 import {useState} from 'react'
-import SvgQRCode from 'react-native-qrcode-svg'
 import {Stack, Text, YStack} from 'tamagui'
 import {
   translationAtom,
@@ -12,6 +11,7 @@ import {
 } from '../../../../../utils/localization/I18nProvider'
 import {askAreYouSureActionAtom} from '../../../../AreYouSureDialog'
 import Button from '../../../../Button'
+import {SharableQrCode} from '../../../../SharableQrCode'
 import {encodedUserDetailsUriAtom} from '../atoms'
 
 export const qrCodeDialogAtom = atom(null, (get, set) => {
@@ -46,7 +46,7 @@ function QrCode(): JSX.Element {
     <Stack>
       <YStack ai="center" gap="$4">
         <Stack height={350} ai="center" jc="center">
-          <SvgQRCode
+          <SharableQrCode
             size={300}
             value={encodedUserDetailsUri}
             logo={require('../images/app_logo.png')}

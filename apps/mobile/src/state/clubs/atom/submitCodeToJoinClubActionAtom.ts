@@ -7,6 +7,7 @@ import {apiAtom} from '../../../api'
 import {askAreYouSureActionAtom} from '../../../components/AreYouSureDialog'
 import clubImagePlaceholderSvg from '../../../components/JoinClubFlow/images/clubImagePlaceholderSvg'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
+import {navigationRef} from '../../../utils/navigation'
 import {getNotificationTokenE} from '../../../utils/notifications'
 import reportError from '../../../utils/reportError'
 import showErrorAlert from '../../../utils/showErrorAlert'
@@ -97,6 +98,13 @@ export const submitCodeToJoinClubActionAtom = atom(
           ],
         })
       )
+
+      if (navigationRef.isReady()) {
+        navigationRef.navigate('ClubDetail', {
+          clubUuid: club.club.uuid,
+        })
+      }
+
       return true
     }).pipe(
       Effect.catchAll((e) =>

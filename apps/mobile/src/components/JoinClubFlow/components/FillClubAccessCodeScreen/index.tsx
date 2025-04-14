@@ -65,9 +65,6 @@ function FillClubAccessCodeScreen({navigation}: Props): JSX.Element {
                 Schema.decode(ClubCode)(store.get(accessCodeAtom).join('')),
                 Effect.flatMap(handleCodeSubmit),
                 Effect.andThen(() => {
-                  navigation.navigate('InsideTabs', {
-                    screen: 'Marketplace',
-                  })
                   loadingOverlay.hide()
                 })
               )

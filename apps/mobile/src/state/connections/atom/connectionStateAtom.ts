@@ -10,11 +10,11 @@ import {type Array, Effect} from 'effect'
 import {pipe} from 'fp-ts/function'
 import {atom, type Atom} from 'jotai'
 import {apiAtom} from '../../../api'
-import {clubsWithMembersAtom} from '../../../components/CRUDOfferFlow/atoms/clubsWithMembersAtom'
 import {atomWithParsedMmkvStorageE} from '../../../utils/atomUtils/atomWithParsedMmkvStorageE'
 import deduplicate from '../../../utils/deduplicate'
 import {showDebugNotificationIfEnabled} from '../../../utils/notifications/showDebugNotificationIfEnabled'
 import reportError from '../../../utils/reportError'
+import {clubsWithMembersAtom} from '../../clubs/atom/clubsWithMembersAtom'
 import {ConnectionsState} from '../domain'
 
 const connectionStateAtom = atomWithParsedMmkvStorageE(

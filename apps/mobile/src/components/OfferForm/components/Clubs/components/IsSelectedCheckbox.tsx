@@ -1,7 +1,7 @@
-import {type Atom, useAtom, type WritableAtom} from 'jotai'
-import {type SetStateAction, useMemo} from 'react'
+import {useAtom, type Atom, type WritableAtom} from 'jotai'
+import {useMemo, type SetStateAction} from 'react'
+import {type ClubWithMembers} from '../../../../../state/clubs/atom/clubsWithMembersAtom'
 import Checkbox from '../../../../Checkbox'
-import {type ClubWithMembers} from '../../../../CRUDOfferFlow/atoms/clubsWithMembersAtom'
 
 function IsSelectedCheckbox({
   clubWithMembersAtom,

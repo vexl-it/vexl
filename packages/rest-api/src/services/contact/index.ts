@@ -16,25 +16,35 @@ import {
   type RequestWithGeneratableChallenge,
 } from '../utils/addChallengeToRequest'
 import {
-  GetClubContactsErrors,
-  GetClubInfoByAccessCodeErrors,
-  GetClubInfoErrors,
-  ImportContactsErrors,
-  JoinClubErrors,
-  UpdateBadOwnerHashErrors,
-  UserNotFoundError,
+  AddUserToTheClubErrors,
+  type AddUserToTheClubRequest,
   type CheckUserExistsInput,
   type CreateUserInput,
+  DeactivateClubJoinLinkErrors,
+  type DeactivateClubJoinLinkRequest,
   type FetchCommonConnectionsInput,
   type FetchMyContactsInput,
+  GenerateClubJoinLinkErrors,
+  type GenerateClubJoinLinkRequest,
+  GetClubContactsErrors,
   type GetClubContactsRequest,
+  GetClubInfoByAccessCodeErrors,
   type GetClubInfoByAccessCodeRequest,
+  GetClubInfoErrors,
   type GetClubInfoRequest,
+  ImportContactsErrors,
   type ImportContactsInput,
+  JoinClubErrors,
   type JoinClubRequest,
+  LeaveClubErrors,
+  type LeaveClubRequest,
+  ListClubLinksErrors,
+  type ListClubLinksRequest,
   type RefreshUserInput,
+  UpdateBadOwnerHashErrors,
   type UpdateBadOwnerHashRequest,
   type UpdateNotificationTokenRequest,
+  UserNotFoundError,
 } from './contracts'
 import {ContactApiSpecification} from './specification'
 
@@ -163,6 +173,17 @@ export function api({
           )
         )
       ),
+    leaveClub: (
+      getClubInfoRequest: RequestWithGeneratableChallenge<LeaveClubRequest>
+    ) =>
+      addChallenge(getClubInfoRequest).pipe(
+        Effect.flatMap((body) =>
+          handleCommonAndExpectedErrorsEffect(
+            client.leaveClub({body}),
+            LeaveClubErrors
+          )
+        )
+      ),
     getClubInfoByAccessCode: (
       getClubInfoByAccessCodeRequest: RequestWithGeneratableChallenge<GetClubInfoByAccessCodeRequest>
     ) =>
@@ -171,6 +192,50 @@ export function api({
           handleCommonAndExpectedErrorsEffect(
             client.getClubInfoByAccessCode({body}),
             GetClubInfoByAccessCodeErrors
+          )
+        )
+      ),
+    generateClubJoinLink: (
+      getClubInfoByAccessCodeRequest: RequestWithGeneratableChallenge<GenerateClubJoinLinkRequest>
+    ) =>
+      addChallenge(getClubInfoByAccessCodeRequest).pipe(
+        Effect.flatMap((body) =>
+          handleCommonAndExpectedErrorsEffect(
+            client.generateClubJoinLink({body}),
+            GenerateClubJoinLinkErrors
+          )
+        )
+      ),
+    deactivateClubJoinLink: (
+      getClubInfoByAccessCodeRequest: RequestWithGeneratableChallenge<DeactivateClubJoinLinkRequest>
+    ) =>
+      addChallenge(getClubInfoByAccessCodeRequest).pipe(
+        Effect.flatMap((body) =>
+          handleCommonAndExpectedErrorsEffect(
+            client.deactivateClubJoinLink({body}),
+            DeactivateClubJoinLinkErrors
+          )
+        )
+      ),
+    addUserToTheClub: (
+      getClubInfoByAccessCodeRequest: RequestWithGeneratableChallenge<AddUserToTheClubRequest>
+    ) =>
+      addChallenge(getClubInfoByAccessCodeRequest).pipe(
+        Effect.flatMap((body) =>
+          handleCommonAndExpectedErrorsEffect(
+            client.addUserToTheClub({body}),
+            AddUserToTheClubErrors
+          )
+        )
+      ),
+    listClubLinks: (
+      getClubInfoByAccessCodeRequest: RequestWithGeneratableChallenge<ListClubLinksRequest>
+    ) =>
+      addChallenge(getClubInfoByAccessCodeRequest).pipe(
+        Effect.flatMap((body) =>
+          handleCommonAndExpectedErrorsEffect(
+            client.listClubLinks({body}),
+            ListClubLinksErrors
           )
         )
       ),

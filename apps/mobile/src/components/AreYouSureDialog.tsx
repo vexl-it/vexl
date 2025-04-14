@@ -23,13 +23,14 @@ interface StepWithText {
   positiveButtonText: string
 }
 
-interface StepWithChildren {
+interface StepWithChildren<T> {
   type: 'StepWithChildren'
   negativeButtonText?: string
   positiveButtonText: string
   backgroundColor?: ColorTokens
   goBackOnNegativeButtonPress?: boolean
-  MainSectionComponent: ComponentType
+  MainSectionComponent: ComponentType<T>
+  mainSectionComponentProps?: T
 }
 
 interface StepWithInput {
@@ -44,7 +45,7 @@ interface StepWithInput {
   defaultValue?: string
 }
 
-type Step = StepWithText | StepWithChildren | StepWithInput
+type Step = StepWithText | StepWithChildren<any> | StepWithInput
 
 export type AreYouSureDialogAtomStepResult =
   | {
@@ -209,7 +210,9 @@ function AreYouSureDialog(): JSX.Element | null {
                 />
               </Stack>
             ) : (
-              <step.MainSectionComponent />
+              <step.MainSectionComponent
+                {...(step.mainSectionComponentProps ?? {})}
+              />
             )}
           </Stack>
         </View>

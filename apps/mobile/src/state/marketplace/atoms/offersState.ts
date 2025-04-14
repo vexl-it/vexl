@@ -9,7 +9,8 @@ import {
 } from '@vexl-next/domain/src/general/offers'
 import {MINIMAL_DATE} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
 import {Array} from 'effect'
-import {atom, type WritableAtom} from 'jotai'
+import {pipe} from 'fp-ts/lib/function'
+import {type Atom, atom, type WritableAtom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {type SetStateAction} from 'react'
 import {type FocusAtomType} from '../../../utils/atomUtils/FocusAtomType'
@@ -106,3 +107,14 @@ export const updateOrFilterOffersFromDeletedClubsActionAtom = atom(
     )
   }
 )
+export function createOfferCountForClub(clubUuid: ClubUuid): Atom<number> {
+  return atom((get) => {
+    return pipe(
+      get(offersAtom),
+      Array.filter((one) =>
+        Array.contains(one.offerInfo.privatePart.clubIds, clubUuid)
+      ),
+      Array.length
+    )
+  })
+}

@@ -2,8 +2,8 @@ import {taskToEffect} from '@vexl-next/resources-utils/src/effect-helpers/TaskEi
 import {Effect, pipe} from 'effect'
 import {useSetAtom} from 'jotai'
 import {useCallback} from 'react'
-import {clubsWithMembersAtom} from '../../components/CRUDOfferFlow/atoms/clubsWithMembersAtom'
 import {useAppState} from '../../utils/useAppState'
+import {clubsWithMembersAtom} from '../clubs/atom/clubsWithMembersAtom'
 import {syncConnectionsActionAtom} from './atom/connectionStateAtom'
 import {updateAllOffersConnectionsActionAtom} from './atom/offerToConnectionsAtom'
 

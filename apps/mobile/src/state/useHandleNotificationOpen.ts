@@ -10,6 +10,7 @@ import {atom, useStore} from 'jotai'
 import {useCallback, useEffect} from 'react'
 import {Linking} from 'react-native'
 import {isOnMessagesList, isOnSpecificChat} from '../utils/navigation'
+import {ClubAdmissionInternalNotificationData} from '../utils/notifications/clubNotifications'
 import {
   NEW_CONTACTS_TO_SYNC,
   NEW_OFFERS_IN_MARKETPLACE,
@@ -28,11 +29,27 @@ function useReactOnNotificationOpen(): (notification: Notification) => void {
       if (store.get(lastNotificationIdHandledAtom) === notification.id) return
       store.set(lastNotificationIdHandledAtom, notification.id)
 
-      const openBrowserLinkNotificationDataO = Schema.decodeUnknownOption(
-        OpenBrowserLinkNotificationData
+      const knownNotificationDataO = Schema.decodeUnknownOption(
+        Schema.Union(
+          OpenBrowserLinkNotificationData,
+          ClubAdmissionInternalNotificationData
+        )
       )(notification.data)
-      if (Option.isSome(openBrowserLinkNotificationDataO)) {
-        void Linking.openURL(openBrowserLinkNotificationDataO.value.url)
+
+      if (
+        Option.isSome(knownNotificationDataO) &&
+        Schema.is(OpenBrowserLinkNotificationData)(knownNotificationDataO.value)
+      ) {
+        void Linking.openURL(knownNotificationDataO.value.url)
+      } else if (
+        Option.isSome(knownNotificationDataO) &&
+        Schema.is(ClubAdmissionInternalNotificationData)(
+          knownNotificationDataO.value
+        )
+      ) {
+        navigation.navigate('ClubDetail', {
+          clubUuid: knownNotificationDataO.value.clubUuid,
+        })
       } else if (notification.data?.type === NEW_OFFERS_IN_MARKETPLACE) {
         navigation.navigate('InsideTabs', {screen: 'Marketplace'})
       } else if (notification.data?.type === NEW_CONTACTS_TO_SYNC) {

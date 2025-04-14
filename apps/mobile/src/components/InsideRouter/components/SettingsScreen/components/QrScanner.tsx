@@ -1,28 +1,13 @@
+import {Effect} from 'effect'
 import {Camera, CameraView} from 'expo-camera'
-import * as T from 'fp-ts/Task'
-import {pipe} from 'fp-ts/function'
 import {useSetAtom} from 'jotai'
 import {useCallback, useEffect, useRef, useState} from 'react'
 import React, {Alert, Dimensions, Linking} from 'react-native'
 import {Stack, Text, YStack} from 'tamagui'
-import parse from 'url-parse'
-import {handleImportDeepContactActionAtom} from '../../../../../utils/deepLinks'
-import {
-  LINK_TYPE_ENCRYPTED_URL,
-  LINK_TYPE_IMPORT_CONTACT,
-} from '../../../../../utils/deepLinks/domain'
-import {processEncryptedUrlActionAtom} from '../../../../../utils/deepLinks/encryptedUrl'
+import {handleDeepLinkActionAtom} from '../../../../../utils/deepLinks'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import {forceHideAskAreYouSureActionAtom} from '../../../../AreYouSureDialog'
 import Button from '../../../../Button'
-
-function parseDeepLink(
-  link: string
-): parse<Record<string, string | undefined>> | undefined {
-  const parsedDeepLink = parse(link, true)
-  if (!parsedDeepLink.query.link) return
-  return parse(parsedDeepLink.query.link, true)
-}
 
 const scannerStyle = {
   // On android camera view will be resized to fit the whole camera preview. That will result in
@@ -34,13 +19,12 @@ const scannerStyle = {
 function QrScanner(): JSX.Element {
   const {t} = useTranslation()
   const [error, setError] = useState<string | undefined>(undefined)
-  const handleImportContact = useSetAtom(handleImportDeepContactActionAtom)
-  const processEncryptedUrl = useSetAtom(processEncryptedUrlActionAtom)
   const scanned = useRef(false)
   const [hasPermissions, setHasPermissions] = useState(false)
   const forceHideAskAreYouSureDialog = useSetAtom(
     forceHideAskAreYouSureActionAtom
   )
+  const handleDeepLinkAction = useSetAtom(handleDeepLinkActionAtom)
 
   const requestPermissions = useCallback(async () => {
     if (!(await Camera.requestCameraPermissionsAsync()).canAskAgain) {
@@ -74,39 +58,19 @@ function QrScanner(): JSX.Element {
     ({data: linkdata}: {data: string}) => {
       if (scanned.current) return
 
-      const parsed = parseDeepLink(linkdata)
-      if (!parsed) {
-        setError(t('common.errorWhileReadingQrCode'))
-        return
-      }
-      const {type, data} = parsed.query
-
-      if (!type || !data) {
-        setError(t('common.errorWhileReadingQrCode'))
-        return
-      }
-
-      if (type === LINK_TYPE_IMPORT_CONTACT) {
-        void pipe(
-          handleImportContact(data),
-          T.map((success) => {
-            if (!success) {
-              setError(t('common.errorWhileReadingQrCode'))
-              return
-            }
-            forceHideAskAreYouSureDialog()
-            scanned.current = true
+      handleDeepLinkAction(linkdata).pipe(
+        Effect.tapError((e) =>
+          Effect.sync(() => {
+            setError(t('common.errorWhileReadingQrCode'))
           })
-        )()
-      } else if (type === LINK_TYPE_ENCRYPTED_URL) {
-        forceHideAskAreYouSureDialog() // // error hanled in processEncryptedUrl
-        scanned.current = true
-        void processEncryptedUrl(data)()
-      } else {
-        setError(t('common.errorWhileReadingQrCode'))
-      }
+        ),
+        Effect.andThen(() => {
+          forceHideAskAreYouSureDialog()
+          scanned.current = true
+        })
+      )
     },
-    [t, handleImportContact, forceHideAskAreYouSureDialog, processEncryptedUrl]
+    [handleDeepLinkAction, t, forceHideAskAreYouSureDialog]
   )
 
   return (

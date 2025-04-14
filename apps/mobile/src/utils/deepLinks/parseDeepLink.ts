@@ -1,53 +1,108 @@
-import {Effect, Option, Schema} from 'effect'
-import parse from 'url-parse'
+import {
+  ClubAdmitionRequest,
+  ClubCode,
+} from '@vexl-next/domain/src/general/clubs'
+import {parseUrlWithSearchParams} from '@vexl-next/domain/src/utility/parseUrlWithSearchParams'
+import {
+  compare,
+  SemverStringE,
+} from '@vexl-next/domain/src/utility/SmeverString.brand'
+import {Effect, flow, Option, Schema} from 'effect'
+import {ImportContactFromLinkPayloadE} from '../../state/contacts/domain'
+import {version} from '../environment'
+import {
+  LINK_TYPE_GOLDEN_GLASSES,
+  LINK_TYPE_IMPORT_CONTACT,
+  LINK_TYPE_IMPORT_CONTACT_V2,
+  LINK_TYPE_JOIN_CLUB,
+  LINK_TYPE_REQUEST_CLUB_ADMITION,
+} from './domain'
 
-export class DataAndTypeElementsDeepLinkError extends Schema.TaggedError<DataAndTypeElementsDeepLinkError>(
-  'DataAndTypeElementsDeepLinkError'
-)('DataAndTypeElementsDeepLinkError', {
+export class InvalidDeepLinkError extends Schema.TaggedError<InvalidDeepLinkError>(
+  'InvalidDeepLinkError'
+)('InvalidDeepLinkError', {
   cause: Schema.Unknown,
-  message: Schema.String,
+  originalLink: Schema.Unknown,
 }) {}
 
-const DeepLinkData = Schema.Struct({
-  prefix: Schema.optionalWith(Schema.String, {as: 'Option', nullable: true}),
-  data: Schema.optionalWith(Schema.String, {as: 'Option', nullable: true}),
-  type: Schema.optionalWith(Schema.String, {as: 'Option', nullable: true}),
-  domain: Schema.optionalWith(Schema.String, {as: 'Option', nullable: true}),
-  link: Schema.optionalWith(Schema.String, {as: 'Option', nullable: true}),
+export class DeepLinkMeantForNewerVersionError extends Schema.TaggedError<DeepLinkMeantForNewerVersionError>(
+  'DeepLinkMeantForNewerVersionError'
+)('DeepLinkMeantForNewerVersionError', {
+  minimalVersionRequired: Schema.optional(SemverStringE),
+}) {}
+
+const DeeplinkPayloadVersion = Schema.Struct({
+  version: Schema.optionalWith(SemverStringE, {as: 'Option'}),
 })
 
-export const LinkToDeepLink = Schema.transform(Schema.String, DeepLinkData, {
-  strict: false,
-  decode: (deepLink) => {
-    const parsedDeepLink = parse(deepLink, true)
-    if (!parsedDeepLink.query.link) {
-      return Option.none()
-    }
+export const DeepLinkGoldedGlasses = Schema.Struct({
+  ...DeeplinkPayloadVersion.fields,
+  type: Schema.Literal(LINK_TYPE_GOLDEN_GLASSES),
+})
 
-    const parsedLinkFromDeepLink = parse(parsedDeepLink.query.link, true)
+export const DeepLinkClubJoin = Schema.Struct({
+  ...DeeplinkPayloadVersion.fields,
+  type: Schema.Literal(LINK_TYPE_JOIN_CLUB),
+  code: ClubCode,
+})
 
-    if (!parsedLinkFromDeepLink) {
-      return Option.none()
-    }
+export const DeepLinkImportContact = Schema.Struct({
+  ...DeeplinkPayloadVersion.fields,
+  type: Schema.Literal(LINK_TYPE_IMPORT_CONTACT),
+  data: Schema.parseJson(ImportContactFromLinkPayloadE),
+})
 
-    const {type, data} = parsedLinkFromDeepLink.query
+export const DeepLinkImportContactV2 = Schema.Struct({
+  ...DeeplinkPayloadVersion.fields,
+  type: Schema.Literal(LINK_TYPE_IMPORT_CONTACT_V2),
+  ...ImportContactFromLinkPayloadE.fields,
+})
 
-    if (type && data) {
-      return {
-        type,
-        data,
-        prefix: parsedDeepLink.protocol,
-        domain: parsedDeepLink.host,
-        link: parsedLinkFromDeepLink.href,
+export const DeepLinkRequestClubAdmition = Schema.Struct({
+  ...DeeplinkPayloadVersion.fields,
+  type: Schema.Literal(LINK_TYPE_REQUEST_CLUB_ADMITION),
+  ...ClubAdmitionRequest.fields,
+})
+
+export const DeepLinkData = parseUrlWithSearchParams(
+  Schema.Union(
+    DeepLinkGoldedGlasses,
+    DeepLinkClubJoin,
+    DeepLinkImportContact,
+    DeepLinkImportContactV2,
+    DeepLinkRequestClubAdmition
+  )
+)
+export type DeepLinkData = typeof DeepLinkData.Type
+
+const validateLinkVersion = flow(
+  Schema.decode(parseUrlWithSearchParams(DeeplinkPayloadVersion)),
+  Effect.filterOrFail(
+    (versionLink) => {
+      if (Option.isNone(versionLink.searchParams.version)) {
+        return true
       }
-    }
+      return compare(versionLink.searchParams.version.value)('<=', version)
+    },
+    (a) =>
+      new DeepLinkMeantForNewerVersionError({
+        minimalVersionRequired: Option.getOrUndefined(a.searchParams.version),
+      })
+  )
+)
 
-    return Option.none()
-  },
-  encode: (deepLinkData) =>
-    Effect.succeed(
-      `${deepLinkData.prefix}://${deepLinkData.domain}?link=${deepLinkData.link}`
-    ),
-})
-
-export type LinkToDeepLink = Schema.Schema.Type<typeof LinkToDeepLink>
+export const parseDeepLink = (
+  link: string
+): Effect.Effect<
+  DeepLinkData,
+  InvalidDeepLinkError | DeepLinkMeantForNewerVersionError
+> =>
+  Effect.zipRight(
+    validateLinkVersion(link),
+    Schema.decode(DeepLinkData)(link)
+  ).pipe(
+    Effect.catchTag(
+      'ParseError',
+      (e) => new InvalidDeepLinkError({cause: e, originalLink: link})
+    )
+  )

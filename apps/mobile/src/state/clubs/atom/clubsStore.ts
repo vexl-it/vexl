@@ -1,5 +1,6 @@
 import {KeyHolder} from '@vexl-next/cryptography'
-import {ClubUuidE, type ClubUuid} from '@vexl-next/domain/src/general/clubs'
+import {PrivateKeyHolderE} from '@vexl-next/cryptography/src/KeyHolder'
+import {type ClubUuid, ClubUuidE} from '@vexl-next/domain/src/general/clubs'
 import {Schema, Struct} from 'effect'
 import {atom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
@@ -7,18 +8,32 @@ import {atomWithParsedMmkvStorageE} from '../../../utils/atomUtils/atomWithParse
 
 const ClubsDataStored = Schema.Struct({
   data: Schema.Record({key: ClubUuidE, value: KeyHolder.PrivateKeyHolderE}),
+  waitingForAdmission: Schema.optionalWith(Schema.Array(PrivateKeyHolderE), {
+    default: () => [],
+  }),
 })
 
 type ClubsDataStored = typeof ClubsDataStored.Type
 
-const myClubsStorageAtom = atomWithParsedMmkvStorageE(
+export const myClubsStorageAtom = atomWithParsedMmkvStorageE(
   'storedClubs',
-  {data: {} as Record<ClubUuid, KeyHolder.PrivateKeyHolder>},
+  {data: {}, waitingForAdmission: []},
   ClubsDataStored
 )
 
 export const myStoredClubsAtom = focusAtom(myClubsStorageAtom, (o) =>
   o.prop('data')
+)
+
+export const keysWaitingForAdmissionAtom = focusAtom(myClubsStorageAtom, (o) =>
+  o.prop('waitingForAdmission')
+)
+
+export const addKeyToWaitingForAdmissionActionAtom = atom(
+  null,
+  (_, set, key: PrivateKeyHolderE) => {
+    set(keysWaitingForAdmissionAtom, (data) => [...data, key])
+  }
 )
 
 export const removeMyStoredClubFromStateActionAtom = atom(

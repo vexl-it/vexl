@@ -1,8 +1,8 @@
 import {type Atom, useAtomValue, type WritableAtom} from 'jotai'
 import {type SetStateAction} from 'react'
 import {Stack, Text, XStack, YStack} from 'tamagui'
+import {type ClubWithMembers} from '../../../../../state/clubs/atom/clubsWithMembersAtom'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
-import {type ClubWithMembers} from '../../../../CRUDOfferFlow/atoms/clubsWithMembersAtom'
 import {ImageUniversal} from '../../../../Image'
 import IsSelectedCheckbox from './IsSelectedCheckbox'
 

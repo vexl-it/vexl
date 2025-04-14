@@ -42,6 +42,7 @@ import {splitAtom} from 'jotai/utils'
 import {Alert} from 'react-native'
 import {type CRUDOfferStackParamsList} from '../../../navigationTypes'
 import {createInboxAtom} from '../../../state/chat/hooks/useCreateInbox'
+import {type ClubWithMembers} from '../../../state/clubs/atom/clubsWithMembersAtom'
 import {
   createBtcPriceForCurrencyAtom,
   refreshBtcPriceActionAtom,
@@ -75,7 +76,6 @@ import {
   otherOfferScreens,
   productOfferScreens,
 } from '../domain'
-import {type ClubWithMembers} from './clubsWithMembersAtom'
 import numberOfFriendsAtom from './numberOfFriendsAtom'
 
 function getAtomWithNullableValueHandling<T, S>(

@@ -16,7 +16,8 @@ import {type LocationSuggestion} from '@vexl-next/rest-api/src/services/location
 import {Record} from 'effect'
 import {atom, type Atom, type SetStateAction, type WritableAtom} from 'jotai'
 import {splitAtom} from 'jotai/utils'
-import {myStoredClubsAtom} from '../../state/contacts/atom/clubsStore'
+import {myStoredClubsAtom} from '../../state/clubs/atom/clubsStore'
+import {type ClubWithMembers} from '../../state/clubs/atom/clubsWithMembersAtom'
 import {
   createBtcPriceForCurrencyAtom,
   refreshBtcPriceActionAtom,
@@ -38,7 +39,6 @@ import getValueFromSetStateActionOfAtom from '../../utils/atomUtils/getValueFrom
 import calculatePriceInFiatFromSats from '../../utils/calculatePriceInFiatFromSats'
 import calculatePriceInSats from '../../utils/calculatePriceInSats'
 import {currencies} from '../../utils/localization/currency'
-import {type ClubWithMembers} from '../CRUDOfferFlow/atoms/clubsWithMembersAtom'
 
 export const currencySelectVisibleAtom = atom<boolean>(false)
 

@@ -3,8 +3,9 @@ import {LeaveClubErrors} from '@vexl-next/rest-api/src/services/contact/contract
 import {LeaveClubEndpoint} from '@vexl-next/rest-api/src/services/contact/specification'
 import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {validateChallengeInBody} from '@vexl-next/server-utils/src/services/challenge/utils/validateChallengeInBody'
-import {Effect} from 'effect'
+import {Array, Effect, flow} from 'effect'
 import {Handler} from 'effect-http'
+import {ClubInvitationLinkDbService} from '../../../db/ClubInvitationLinkDbService'
 import {ClubMembersDbService} from '../../../db/ClubMemberDbService'
 import {ClubsDbService} from '../../../db/ClubsDbService'
 
@@ -15,6 +16,7 @@ export const leaveClub = Handler.make(LeaveClubEndpoint, (req) =>
 
       const clubsDb = yield* _(ClubsDbService)
       const membersDb = yield* _(ClubMembersDbService)
+      const linkDb = yield* _(ClubInvitationLinkDbService)
 
       const member = yield* _(
         membersDb.findClubMemberByPublicKey({
@@ -42,6 +44,19 @@ export const leaveClub = Handler.make(LeaveClubEndpoint, (req) =>
         Effect.filterOrFail(
           (club) => club.id === member.clubId,
           () => new NotFoundError({message: 'Club not found'})
+        )
+      )
+
+      yield* _(
+        linkDb.findInvitationLinkByClubIdAndMemberId({
+          clubId: club.id,
+          memberId: member.id,
+        }),
+        Effect.flatMap(
+          flow(
+            Array.map((link) => linkDb.deleteInvitationLink({id: link.id})),
+            Effect.all
+          )
         )
       )
 

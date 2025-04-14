@@ -5,6 +5,7 @@ import {translationAtom} from '../../../utils/localization/I18nProvider'
 import {getNotificationTokenE} from '../../../utils/notifications'
 import {showInternalNotificationForClubAdmission} from '../../../utils/notifications/clubNotifications'
 import {keysWaitingForAdmissionAtom, myClubsStorageAtom} from './clubsStore'
+import {clubsWithMembersAtom} from './clubsWithMembersAtom'
 
 export const checkForClubsAdmissionActionAtom = atom(null, (get, set) => {
   return Effect.gen(function* (_) {
@@ -35,6 +36,8 @@ export const checkForClubsAdmissionActionAtom = atom(null, (get, set) => {
               (k) => k.privateKeyPemBase64 === key.privateKeyPemBase64
             ),
           }))
+
+          yield* _(set(clubsWithMembersAtom))
 
           yield* _(
             showInternalNotificationForClubAdmission(

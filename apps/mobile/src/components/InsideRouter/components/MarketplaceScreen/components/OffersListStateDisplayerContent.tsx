@@ -11,7 +11,7 @@ import Animated, {
   useSharedValue,
 } from 'react-native-reanimated'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
-import {Stack, XStack, getTokens} from 'tamagui'
+import {Stack, XStack} from 'tamagui'
 import {minutesTillOffersDisplayedAtom} from '../../../../../state/contacts'
 import {
   useAreOffersLoading,
@@ -68,7 +68,6 @@ function ListFooterComponent(): JSX.Element | null {
 }
 
 function OffersListStateDisplayerContent(): JSX.Element {
-  const tokens = getTokens()
   const insets = useSafeAreaInsets()
   const loading = useAreOffersLoading()
   const error = useOffersLoadingError()

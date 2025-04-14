@@ -1,7 +1,4 @@
-import {
-  type PrivateKeyHolder,
-  type PublicKeyPemBase64,
-} from '@vexl-next/cryptography/src/KeyHolder'
+import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {type MyOfferInState} from '@vexl-next/domain/src/general/offers'
 import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
@@ -48,10 +45,8 @@ export const processClubRemovedFromBeActionAtom = atom(
     set,
     {
       clubUuid,
-      keyPair,
     }: {
       clubUuid: ClubUuid
-      keyPair: PrivateKeyHolder
     }
   ) => {
     return Effect.gen(function* (_) {

@@ -38,6 +38,7 @@ import {
   sessionDataOrDummyAtom,
   useSessionAssumeLoggedIn,
 } from '../../state/session'
+import {andThenExpectVoidNoErrors} from '../../utils/andThenExpectNoErrors'
 import {
   commitHash,
   enableHiddenFeatures,
@@ -410,11 +411,10 @@ function DebugScreen(): JSX.Element {
               size="small"
               text="Refresh offers state"
               onPress={() => {
-                refreshOffers().pipe(
-                  Effect.andThen(() => {
+                void Effect.runPromise(
+                  andThenExpectVoidNoErrors(() => {
                     Alert.alert('done')
-                  }),
-                  Effect.runFork
+                  })(refreshOffers())
                 )
               }}
             />

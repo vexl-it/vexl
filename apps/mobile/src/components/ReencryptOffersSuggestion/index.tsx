@@ -21,7 +21,7 @@ export default function ReencryptOffersSuggestion(
     <MarketplaceSuggestion
       buttonText={t('reuploadOffers.suggestionCell.button')}
       onButtonPress={() => {
-        void Effect.runPromise(reencryptMissingOffers())
+        Effect.runFork(reencryptMissingOffers())
       }}
       type="warning"
       text={t('reuploadOffers.suggestionCell.title')}

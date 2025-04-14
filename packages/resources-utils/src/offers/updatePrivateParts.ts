@@ -147,81 +147,81 @@ export default function updatePrivateParts({
   | Effect.Effect.Error<ReturnType<OfferApi['createPrivatePart']>>
   | Effect.Effect.Error<ReturnType<OfferApi['deletePrivatePart']>>
 > {
-  const removedFirstSecondLevelConnections = subtractArrays(
-    deduplicate([
-      ...currentConnections.firstLevel,
-      ...(currentConnections.secondLevel ?? []),
-    ]),
-    deduplicate([
-      ...targetConnections.firstLevel,
-      ...targetConnections.secondLevel,
-    ])
-  )
-
-  const allTargetClubConnections = pipe(
-    targetConnections.clubs,
-    Record.values,
-    Array.flatten
-  )
-
-  const allCurrentClubConnections = pipe(
-    currentConnections.clubs ?? {},
-    Record.values,
-    Array.flatten
-  )
-
-  const removedClubsConnections = subtractArrays(
-    allCurrentClubConnections,
-    allTargetClubConnections
-  )
-
-  checkAndReportRemovingClubConnectionThatIsAlsoFromSocualNetwork({
-    targetConnections: {
-      firstLevel: targetConnections.firstLevel,
-      secondLevel: targetConnections.secondLevel,
-    },
-    removedClubsConnections,
-  })
-
-  const newFirstLevelConnections = subtractArrays(
-    targetConnections.firstLevel,
-    currentConnections.firstLevel
-  )
-  const newSecondLevelConnections = currentConnections.secondLevel
-    ? subtractArrays(
-        targetConnections.secondLevel,
-        currentConnections.secondLevel
-      )
-    : undefined
-
-  const newClubsConnections = calculateNewClubsConnections({
-    currentConnections: currentConnections.clubs ?? {},
-    targetConnections: targetConnections.clubs,
-  })
-
-  const removedConnections = [
-    ...removedFirstSecondLevelConnections,
-    ...removedClubsConnections,
-  ]
-
-  console.info(
-    `Updating connections of one offer. Number of removedConnections: ${
-      removedFirstSecondLevelConnections.length
-    }. Number of removed clubs connections: ${
-      removedClubsConnections.length
-    }. Number of newFirstLevelConnections: ${
-      newFirstLevelConnections.length
-    }. Number of newSecondLevelConnections: ${
-      newSecondLevelConnections?.length ?? 'undefined'
-    }. Number of newClubsConnections: ${pipe(
-      newClubsConnections,
-      Record.toEntries,
-      Array.map(([uuid, keys]) => `${uuid}: ${keys.length}`),
-      Array.join(', ')
-    )}.`
-  )
-
   return Effect.gen(function* (_) {
+    const removedFirstSecondLevelConnections = subtractArrays(
+      deduplicate([
+        ...currentConnections.firstLevel,
+        ...(currentConnections.secondLevel ?? []),
+      ]),
+      deduplicate([
+        ...targetConnections.firstLevel,
+        ...targetConnections.secondLevel,
+      ])
+    )
+
+    const allTargetClubConnections = pipe(
+      targetConnections.clubs,
+      Record.values,
+      Array.flatten
+    )
+
+    const allCurrentClubConnections = pipe(
+      currentConnections.clubs ?? {},
+      Record.values,
+      Array.flatten
+    )
+
+    const removedClubsConnections = subtractArrays(
+      allCurrentClubConnections,
+      allTargetClubConnections
+    )
+
+    checkAndReportRemovingClubConnectionThatIsAlsoFromSocualNetwork({
+      targetConnections: {
+        firstLevel: targetConnections.firstLevel,
+        secondLevel: targetConnections.secondLevel,
+      },
+      removedClubsConnections,
+    })
+
+    const newFirstLevelConnections = subtractArrays(
+      targetConnections.firstLevel,
+      currentConnections.firstLevel
+    )
+    const newSecondLevelConnections = currentConnections.secondLevel
+      ? subtractArrays(
+          targetConnections.secondLevel,
+          currentConnections.secondLevel
+        )
+      : undefined
+
+    const newClubsConnections = calculateNewClubsConnections({
+      currentConnections: currentConnections.clubs ?? {},
+      targetConnections: targetConnections.clubs,
+    })
+
+    const removedConnections = [
+      ...removedFirstSecondLevelConnections,
+      ...removedClubsConnections,
+    ]
+
+    console.info(
+      `Updating connections of one offer. Number of removedConnections: ${
+        removedFirstSecondLevelConnections.length
+      }. Number of removed clubs connections: ${
+        removedClubsConnections.length
+      }. Number of newFirstLevelConnections: ${
+        newFirstLevelConnections.length
+      }. Number of newSecondLevelConnections: ${
+        newSecondLevelConnections?.length ?? 'undefined'
+      }. Number of newClubsConnections: ${pipe(
+        newClubsConnections,
+        Record.toEntries,
+        Array.map(([uuid, keys]) => `${uuid}: ${keys.length}`),
+        Array.join(', ')
+      )}.`
+    )
+
     const privatePayloads = yield* _(
       constructPrivatePayloads({
         connectionsInfo: {

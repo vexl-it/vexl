@@ -143,7 +143,7 @@ function OffersListStateDisplayerContent(): JSX.Element {
               <EmptyListPlaceholder
                 refreshing={loading}
                 onRefresh={() => {
-                  void Effect.runPromise(refreshOffers())
+                  Effect.runFork(refreshOffers())
                 }}
               />
             </>
@@ -196,7 +196,7 @@ function OffersListStateDisplayerContent(): JSX.Element {
           offersAtoms={offersAtoms}
           // eslint-disable-next-line @typescript-eslint/no-misused-promises
           onRefresh={() => {
-            void Effect.runPromise(refreshOffers())
+            Effect.runFork(refreshOffers())
           }}
           refreshing={loading}
           onScroll={handleScroll}

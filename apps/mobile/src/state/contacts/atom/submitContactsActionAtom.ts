@@ -163,7 +163,7 @@ export const submitContactsActionAtom = atom(
                     }
                   })
                 )
-                void Effect.runPromise(set(syncConnectionsActionAtom))
+                Effect.runFork(set(syncConnectionsActionAtom))
 
                 void set(updateAllOffersConnectionsActionAtom, {
                   isInBackground: false,

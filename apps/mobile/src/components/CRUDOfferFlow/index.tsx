@@ -9,7 +9,7 @@ import {
   type CRUDOfferStackParamsList,
   type RootStackScreenProps,
 } from '../../navigationTypes'
-import {andThenExpectBooleanNoErrors} from '../../utils/andThenExpectBooleanNoErrors'
+import {andThenExpectBooleanNoErrors} from '../../utils/andThenExpectNoErrors'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 import KeyboardAvoidingView from '../KeyboardAvoidingView'

@@ -25,7 +25,6 @@ import {refreshOffersActionAtom} from '../../../../../state/marketplace/atoms/re
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import {showClubsFlowAtom} from '../../../../../utils/preferences'
 import ErrorListHeader from '../../../../ErrorListHeader'
-import VexlActivityIndicator from '../../../../LoadingOverlayProvider/VexlActivityIndicator'
 import {MAP_SIZE} from '../../../../MarketplaceMap'
 import MarketplaceMapContainer from '../../../../MarketplaceMapContainer'
 import MarketplaceSuggestion from '../../../../MarketplaceSuggestion'
@@ -161,14 +160,6 @@ function OffersListStateDisplayerContent(): JSX.Element {
     refreshOffers,
     scaleAnim,
   ])
-
-  if (offersAtoms.length === 0 && loading) {
-    return (
-      <Stack f={1} ai="center" jc="center" pt="$5">
-        <VexlActivityIndicator bc={tokens.color.main.val} size="large" />
-      </Stack>
-    )
-  }
 
   return (
     <ContainerWithTopBorderRadius testID="@marketplaceScreen">

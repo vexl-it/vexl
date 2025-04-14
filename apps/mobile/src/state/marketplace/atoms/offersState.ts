@@ -99,6 +99,7 @@ export function offerForChatOriginAtom(chatOrigin: ChatOrigin) {
 export const updateOrFilterOffersFromDeletedClubsActionAtom = atom(
   null,
   (get, set, ...deletedClubs: Array.NonEmptyArray<ClubUuid>) => {
+    console.log('preb')
     set(
       offersAtom,
       Array.filterMap((offer) =>

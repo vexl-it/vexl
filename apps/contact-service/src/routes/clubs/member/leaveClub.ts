@@ -9,7 +9,6 @@ import {ClubInvitationLinkDbService} from '../../../db/ClubInvitationLinkDbServi
 import {ClubMembersDbService} from '../../../db/ClubMemberDbService'
 import {ClubsDbService} from '../../../db/ClubsDbService'
 
-export const leaveClub = Handler.make(LeaveClubEndpoint, (req) =>
   makeEndpointEffect(
     Effect.gen(function* (_) {
       yield* _(validateChallengeInBody(req.body))

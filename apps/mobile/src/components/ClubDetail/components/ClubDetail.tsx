@@ -8,6 +8,7 @@ import {type ClubWithMembers} from '../../../state/clubs/atom/clubsWithMembersAt
 import {createOfferCountForClub} from '../../../state/marketplace/atoms/offersState'
 import {enableHiddenFeatures} from '../../../utils/environment'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
+import showErrorAlert from '../../../utils/showErrorAlert'
 import useSafeGoBack from '../../../utils/useSafeGoBack'
 import Button from '../../Button'
 import SvgImage from '../../Image'
@@ -106,7 +107,10 @@ export function ClubDetail({
               leaveClub(club).pipe(
                 Effect.match({
                   onFailure: (e) => {
-                    // TODO errors
+                    showErrorAlert({
+                      title: t('common.unknownError'),
+                      error: e,
+                    })
                     loadingOverlay.hide()
                   },
                   onSuccess: () => {

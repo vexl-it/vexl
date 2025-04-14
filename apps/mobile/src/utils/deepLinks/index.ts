@@ -84,8 +84,7 @@ export const handleDeepLinkActionAtom = atom(
         return yield* _(
           set(submitCodeToJoinClubActionAtom, linkData.code).pipe(
             Effect.runFork
-          ),
-          mergeToBoolean
+          )
         )
       } else if (linkData.type === 'request-club-admition') {
         // TODO

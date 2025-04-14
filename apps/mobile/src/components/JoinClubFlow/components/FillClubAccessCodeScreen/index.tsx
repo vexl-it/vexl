@@ -68,8 +68,8 @@ function FillClubAccessCodeScreen({navigation}: Props): JSX.Element {
                   navigation.navigate('InsideTabs', {
                     screen: 'Marketplace',
                   })
-                }),
-                Effect.ensuring(Effect.sync(loadingOverlay.hide))
+                  loadingOverlay.hide()
+                })
               )
             )
           }}

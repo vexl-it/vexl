@@ -99,7 +99,7 @@ export const submitCodeToJoinClubActionAtom = atom(
       )
       return true
     }).pipe(
-      Effect.mapError((e) =>
+      Effect.catchAll((e) =>
         Effect.sync(() => {
           if (e._tag === 'UserDeclinedError') return false
 

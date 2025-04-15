@@ -1,5 +1,6 @@
 import {useNavigation} from '@react-navigation/native'
 import {type Chat} from '@vexl-next/domain/src/general/messaging'
+import {Array, pipe} from 'effect'
 import {useAtomValue, useSetAtom, type Atom} from 'jotai'
 import {selectAtom} from 'jotai/utils'
 import React, {useMemo, useRef} from 'react'
@@ -8,7 +9,9 @@ import {Swipeable} from 'react-native-gesture-handler'
 import {Stack, Text, XStack, YStack} from 'tamagui'
 import selectOtherSideDataAtom from '../../../../../state/chat/atoms/selectOtherSideDataAtom'
 import {type ChatMessageWithState} from '../../../../../state/chat/domain'
+import {clubsWithMembersAtom} from '../../../../../state/clubs/atom/clubsWithMembersAtom'
 import {useOfferForChatOrigin} from '../../../../../state/marketplace'
+import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import UserAvatar from '../../../../UserAvatar'
 import UserNameWithSellingBuying from '../../../../UserNameWithSellingBuying'
 import {deleteChatFromListActionAtom} from '../atoms'
@@ -22,8 +25,10 @@ export interface ChatListData {
 }
 
 function ChatListItem({dataAtom}: {dataAtom: Atom<ChatListData>}): JSX.Element {
+  const {t} = useTranslation()
   const swipeableRef = useRef<Swipeable>(null)
   const navigation = useNavigation()
+  const clubsWithMembers = useAtomValue(clubsWithMembersAtom)
 
   const {
     chatInfoAtom,
@@ -31,6 +36,7 @@ function ChatListItem({dataAtom}: {dataAtom: Atom<ChatListData>}): JSX.Element {
     isUnreadAtom,
     otherSideInfoAtom,
     otherSideLeftAtom,
+    otherSideClubsNamesAtom,
   } = useMemo(() => {
     const chatInfoAtom = selectAtom(dataAtom, (data) => data.chat)
     const lastMessageAtom = selectAtom(dataAtom, (data) => data.lastMessage)
@@ -41,6 +47,15 @@ function ChatListItem({dataAtom}: {dataAtom: Atom<ChatListData>}): JSX.Element {
         lastMessage.message.messageType
       )
     )
+    const otherSideClubsNamesAtom = selectAtom(dataAtom, (data) =>
+      pipe(
+        clubsWithMembers,
+        Array.filter((club) =>
+          Array.contains(club.club.uuid)(data.chat.otherSide.clubsIds ?? [])
+        ),
+        Array.map((club) => club.club.name)
+      )
+    )
 
     return {
       chatInfoAtom,
@@ -48,8 +63,9 @@ function ChatListItem({dataAtom}: {dataAtom: Atom<ChatListData>}): JSX.Element {
       isUnreadAtom,
       otherSideLeftAtom,
       otherSideInfoAtom,
+      otherSideClubsNamesAtom,
     }
-  }, [dataAtom])
+  }, [clubsWithMembers, dataAtom])
 
   const chatInfo = useAtomValue(chatInfoAtom)
   const isUnread = useAtomValue(isUnreadAtom)
@@ -57,6 +73,7 @@ function ChatListItem({dataAtom}: {dataAtom: Atom<ChatListData>}): JSX.Element {
   const otherSideLeft = useAtomValue(otherSideLeftAtom)
   const offer = useOfferForChatOrigin(chatInfo.origin)
   const deleteChatFromList = useSetAtom(deleteChatFromListActionAtom)
+  const otherSideClubsNames = useAtomValue(otherSideClubsNamesAtom)
 
   return (
     <TouchableOpacity
@@ -103,14 +120,28 @@ function ChatListItem({dataAtom}: {dataAtom: Atom<ChatListData>}): JSX.Element {
                       : undefined
                   }
                 />
-                {!!isUnread && (
-                  <Stack
-                    w={12}
-                    h={12}
-                    borderRadius={6}
-                    backgroundColor="$main"
-                  />
-                )}
+                <XStack ai="center" gap="$2" ml="$2" fs={1}>
+                  <Text
+                    numberOfLines={2}
+                    ellipsizeMode="tail"
+                    color="$greyOnBlack"
+                    ff="$body500"
+                    mr="$1"
+                  >
+                    {otherSideClubsNames.length > 1
+                      ? t('clubs.multipleClubs')
+                      : otherSideClubsNames.map((clubName) => clubName)}
+                  </Text>
+
+                  {!!isUnread && (
+                    <Stack
+                      w={12}
+                      h={12}
+                      borderRadius={6}
+                      backgroundColor="$main"
+                    />
+                  )}
+                </XStack>
               </XStack>
               <XStack jc="space-between">
                 <Text

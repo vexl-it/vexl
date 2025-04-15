@@ -44,6 +44,7 @@ function createApproveChatMessage({
     senderPublicKey,
     myFcmCypher: myNotificationCypher,
     lastReceivedFcmCypher: lastReceivedNotificationCypher,
+    senderClubsUuids: [],
   }
 }
 

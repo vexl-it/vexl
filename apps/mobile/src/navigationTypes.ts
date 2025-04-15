@@ -69,7 +69,10 @@ export type RootStackParamsList = {
 
   SetContacts: {filter?: ContactsFilter | undefined} | undefined
 
-  CommonFriends: {contactsHashes: readonly HashedPhoneNumber[]}
+  CommonFriends: {
+    contactsHashes: readonly HashedPhoneNumber[]
+    clubsIds: readonly ClubUuid[]
+  }
 
   NotificationSettings: undefined
 

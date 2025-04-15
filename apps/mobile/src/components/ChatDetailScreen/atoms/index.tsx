@@ -117,6 +117,10 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     o.prop('otherSide').prop('goldenAvatarType')
   )
 
+  const otherSideClubsIdsAtom = focusAtom(chatAtom, (o) =>
+    o.prop('otherSide').prop('clubsIds')
+  )
+
   function createFindMessageIndexInListAtom({
     direction,
     messageType,
@@ -288,6 +292,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     const offer = get(offerForChatAtom)
     const chat = get(chatAtom)
     const connectionState = get(connectionStateAtom)
+
     return offer?.ownershipInfo
       ? (connectionState.commonFriends.commonContacts.find(
           (contact) => contact.publicKey === chat.otherSide.publicKey
@@ -731,7 +736,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
   )
 
   const friendLevelOfOtherSidePublicKeyAtom = atom((get) => {
-    return get(createFriendLevelInfoAtom(get(chatAtom).otherSide.publicKey))
+    return get(createFriendLevelInfoAtom(get(chatAtom).otherSide))
   })
 
   const friendLevelInfoAtom = atom<readonly FriendLevel[]>((get) => {
@@ -1145,5 +1150,6 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     // fiatValueToDisplayInVexlbotMessageAtom,
     btcPricePercentageDifferenceToDisplayInVexlbotMessageAtom,
     otherSideGoldenAvatarTypeAtom,
+    otherSideClubsIdsAtom,
   }
 })

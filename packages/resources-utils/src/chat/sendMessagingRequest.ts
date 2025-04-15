@@ -2,6 +2,7 @@ import {
   type PrivateKeyHolder,
   type PublicKeyPemBase64,
 } from '@vexl-next/cryptography/src/KeyHolder'
+import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {
   generateChatMessageId,
   type ChatMessage,
@@ -27,6 +28,7 @@ function createRequestChatMessage({
   lastReceivedNotificationCypher,
   myVersion,
   goldenAvatarType,
+  senderClubsUuids,
 }: {
   text: string
   myNotificationCypher?: NotificationCypher
@@ -34,6 +36,7 @@ function createRequestChatMessage({
   senderPublicKey: PublicKeyPemBase64
   myVersion: SemverString
   goldenAvatarType?: GoldenAvatarType
+  senderClubsUuids: readonly ClubUuid[]
 }): ChatMessage {
   return {
     uuid: generateChatMessageId(),
@@ -45,6 +48,7 @@ function createRequestChatMessage({
     myVersion,
     senderPublicKey,
     goldenAvatarType,
+    senderClubsUuids,
   }
 }
 
@@ -64,6 +68,7 @@ export function sendMessagingRequest({
   notificationApi,
   otherSideVersion,
   goldenAvatarType,
+  forClubsUuids,
 }: {
   text: string
   fromKeypair: PrivateKeyHolder
@@ -76,6 +81,7 @@ export function sendMessagingRequest({
   notificationApi: NotificationApi
   otherSideVersion?: SemverString | undefined
   goldenAvatarType?: GoldenAvatarType
+  forClubsUuids: readonly ClubUuid[]
 }): Effect.Effect<
   ChatMessage,
   | ApiErrorRequestMessaging
@@ -91,6 +97,7 @@ export function sendMessagingRequest({
       myNotificationCypher,
       lastReceivedNotificationCypher,
       goldenAvatarType,
+      senderClubsUuids: forClubsUuids,
     })
 
     const message = yield* _(

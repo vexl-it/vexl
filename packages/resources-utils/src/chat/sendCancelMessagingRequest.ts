@@ -35,6 +35,7 @@ function createCancelRequestChatMessage({
     text,
     time: now(),
     senderPublicKey,
+    senderClubsUuids: [],
   }
 }
 

@@ -144,6 +144,7 @@ export function chatMessagePayloadToChatMessage(
     tradeChecklistUpdate: payload.tradeChecklistUpdate,
     myFcmCypher: payload.myFcmCypher,
     lastReceivedFcmCypher: payload.lastReceivedFcmCypher,
+    senderClubsUuids: payload.senderClubsUuids,
   })
 }
 

@@ -1,4 +1,5 @@
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
+import {type ChatUserIdentity} from '@vexl-next/domain/src/general/messaging'
 import {type ConnectionLevel} from '@vexl-next/domain/src/general/offers'
 import {
   UnixMilliseconds0,
@@ -127,15 +128,21 @@ export const reachNumberAtom = atom((get) => {
 })
 
 export function createFriendLevelInfoAtom(
-  publicKey: PublicKeyPemBase64
-): Atom<Array<'FIRST_DEGREE' | 'SECOND_DEGREE'>> {
+  otherSide: ChatUserIdentity
+): Atom<Array<'FIRST_DEGREE' | 'SECOND_DEGREE' | 'CLUB'>> {
   return atom((get) => {
-    const isFirst = get(connectionStateAtom).firstLevel.includes(publicKey)
-    const isSecond = get(connectionStateAtom).secondLevel.includes(publicKey)
+    const isFirst = get(connectionStateAtom).firstLevel.includes(
+      otherSide.publicKey
+    )
+    const isSecond = get(connectionStateAtom).secondLevel.includes(
+      otherSide.publicKey
+    )
 
-    const toReturn: Array<'FIRST_DEGREE' | 'SECOND_DEGREE'> = []
+    const toReturn: Array<'FIRST_DEGREE' | 'SECOND_DEGREE' | 'CLUB'> = []
     if (isFirst) toReturn.push('FIRST_DEGREE' as const)
     if (isSecond) toReturn.push('SECOND_DEGREE' as const)
+    if (otherSide.clubsIds && otherSide.clubsIds.length > 0)
+      toReturn.push('CLUB' as const)
 
     return toReturn
   })

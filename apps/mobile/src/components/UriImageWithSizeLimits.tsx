@@ -29,7 +29,7 @@ function UriImageWithSizeLimits({uri, limits}: Props): JSX.Element {
     <TmImage
       width={dimensions.width}
       height={dimensions.height}
-      resizeMode="contain"
+      objectFit="contain"
       source={{uri}}
     />
   )

@@ -1,5 +1,5 @@
 import React, {useCallback} from 'react'
-import {getTokens, Stack, Text} from 'tamagui'
+import {getTokens, Stack, Text, XStack} from 'tamagui'
 import {type StoredContactWithComputedValues} from '../../../state/contacts/domain'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import openUrl from '../../../utils/openUrl'
@@ -19,12 +19,12 @@ function CommonFriendsListItem({friend}: Props): JSX.Element {
   }, [friend])
 
   return (
-    <Stack fd="row" ai="center">
+    <XStack ai="center">
       <ContactPictureImage
         width={50}
         height={50}
         br="$5"
-        resizeMode="cover"
+        objectFit="cover"
         contactId={friend.info.nonUniqueContactId}
         fallback={
           <SvgImage
@@ -36,7 +36,7 @@ function CommonFriendsListItem({friend}: Props): JSX.Element {
         }
       />
       <Stack f={1} ml="$4" jc="space-between">
-        <Text ff="$body500" fs={18} mb="$2" col="$black">
+        <Text ff="$body500" fos={18} mb="$2" col="$black">
           {friend.info.name}
         </Text>
         <Text ff="$body600" col="$greyOnBlack" fos={14}>
@@ -49,7 +49,7 @@ function CommonFriendsListItem({friend}: Props): JSX.Element {
         text={t('commonFriends.call')}
         size="small"
       />
-    </Stack>
+    </XStack>
   )
 }
 

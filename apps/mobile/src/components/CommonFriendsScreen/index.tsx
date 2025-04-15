@@ -1,8 +1,10 @@
 import {FlashList} from '@shopify/flash-list'
+import {type ClubInfo} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {useStore} from 'jotai'
 import React, {useMemo} from 'react'
 import {getTokens, Stack} from 'tamagui'
 import {type RootStackScreenProps} from '../../navigationTypes'
+import {useGetAllClubsForIds} from '../../state/clubs/atom/clubsWithMembersAtom'
 import createImportedContactsForHashesAtom from '../../state/contacts/atom/createImportedContactsForHashesAtom'
 import {type StoredContactWithComputedValues} from '../../state/contacts/domain'
 import {useTranslation} from '../../utils/localization/I18nProvider'
@@ -11,20 +13,26 @@ import Button from '../Button'
 import usePixelsFromBottomWhereTabsEnd from '../InsideRouter/utils'
 import Screen from '../Screen'
 import ScreenTitle from '../ScreenTitle'
+import CommonClubListItem from './components/CommonClubsListItem'
 import CommonFriendsListItem from './components/CommonFriendsListItem'
 
 type Props = RootStackScreenProps<'CommonFriends'>
 
-function keyExtractor(contact: StoredContactWithComputedValues): string {
-  return contact.computedValues.hash
+type ItemProps =
+  | {tag: 'commonFriend'; friend: StoredContactWithComputedValues}
+  | {tag: 'club'; club: ClubInfo}
+
+function keyExtractor(item: ItemProps): string {
+  if (item.tag === 'commonFriend') return item.friend.computedValues.hash
+
+  return item.club.uuid
 }
 
-function renderItem({
-  item,
-}: {
-  item: StoredContactWithComputedValues
-}): JSX.Element {
-  return <CommonFriendsListItem friend={item} />
+function renderItem({item}: {item: ItemProps}): JSX.Element {
+  if (item.tag === 'commonFriend')
+    return <CommonFriendsListItem friend={item.friend} />
+
+  return <CommonClubListItem club={item.club} />
 }
 
 function ItemSeparatorComponent(): JSX.Element {
@@ -33,17 +41,32 @@ function ItemSeparatorComponent(): JSX.Element {
 
 function CommonFriendsScreen({
   route: {
-    params: {contactsHashes},
+    params: {contactsHashes, clubsIds},
   },
 }: Props): JSX.Element {
   const {t} = useTranslation()
   const store = useStore()
   const safeGoBack = useSafeGoBack()
   const bottomOffset = usePixelsFromBottomWhereTabsEnd()
+  const clubs = useGetAllClubsForIds(clubsIds).map((club) => ({
+    tag: 'club' as const,
+    club,
+  }))
 
   const commonFriends = useMemo(
-    () => store.get(createImportedContactsForHashesAtom(contactsHashes)),
+    () =>
+      store
+        .get(createImportedContactsForHashesAtom(contactsHashes))
+        .map((friend) => ({
+          tag: 'commonFriend' as const,
+          friend,
+        })),
     [contactsHashes, store]
+  )
+
+  const dataToDisplay = useMemo(
+    () => [...clubs, ...commonFriends],
+    [clubs, commonFriends]
   )
 
   return (
@@ -65,7 +88,7 @@ function CommonFriendsScreen({
             }),
             [bottomOffset]
           )}
-          data={commonFriends}
+          data={dataToDisplay}
           ItemSeparatorComponent={ItemSeparatorComponent}
           renderItem={renderItem}
           keyExtractor={keyExtractor}

@@ -1,10 +1,12 @@
 import {useMolecule} from 'bunshi/dist/react'
+import {Array} from 'effect'
 import * as T from 'fp-ts/Task'
 import {pipe} from 'fp-ts/function'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useEffect, useMemo, useState} from 'react'
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view'
 import {Stack, YStack, getTokens} from 'tamagui'
+import {clubsWithMembersAtom} from '../../../state/clubs/atom/clubsWithMembersAtom'
 import getRerequestPossibleInDaysText from '../../../utils/getRerequestPossibleInDaysText'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import randomName from '../../../utils/randomName'
@@ -51,6 +53,7 @@ function RequestScreen(): JSX.Element {
   const canBeRerequested = useAtomValue(canBeRerequestedAtom)
   const rerequestOffer = useSetAtom(rerequestOfferActionAtom)
   const setToastNotification = useSetAtom(toastNotificationAtom)
+  const clubsWithMembers = useAtomValue(clubsWithMembersAtom)
 
   const [text, setText] = useState('')
 
@@ -95,11 +98,31 @@ function RequestScreen(): JSX.Element {
     return undefined
   }, [hasPreviousCommunication, requestIsClosed, t])
 
+  const previousCommunicationInfoMessageIncludingClubs = useMemo(() => {
+    if (!offer || (offer && offer.offerInfo.privatePart.clubIds.length === 0))
+      return previousCommunicationInfoMessage
+
+    const clubsNames = pipe(
+      clubsWithMembers,
+      Array.filter((club) =>
+        Array.contains(club.club.uuid)(offer.offerInfo.privatePart.clubIds)
+      ),
+      Array.map((club) => club.club.name)
+    )
+
+    return `${previousCommunicationInfoMessage} ${t(
+      'messages.thisUserIsAlsoMemberOff',
+      {
+        clubs: `${clubsNames.join(`, `)}`,
+      }
+    )}`
+  }, [clubsWithMembers, offer, previousCommunicationInfoMessage, t])
+
   useEffect(() => {
-    if (previousCommunicationInfoMessage) {
+    if (previousCommunicationInfoMessageIncludingClubs) {
       setToastNotification({
         visible: true,
-        text: previousCommunicationInfoMessage,
+        text: previousCommunicationInfoMessageIncludingClubs,
         icon: infoSvg,
         iconFill: getTokens().color.black.val,
         showCloseButton: true,
@@ -110,7 +133,12 @@ function RequestScreen(): JSX.Element {
     return () => {
       setToastNotification((prev) => ({...prev, visible: false}))
     }
-  }, [previousCommunicationInfoMessage, requestState, setToastNotification, t])
+  }, [
+    previousCommunicationInfoMessageIncludingClubs,
+    requestState,
+    setToastNotification,
+    t,
+  ])
 
   return (
     <>

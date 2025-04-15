@@ -26,6 +26,7 @@ function OtherSideNamePhotoAndInfo({mode}: Props): JSX.Element {
     commonConnectionsHashesAtom,
     friendLevelInfoAtom,
     otherSideGoldenAvatarTypeAtom,
+    otherSideClubsIdsAtom,
   } = useMolecule(chatMolecule)
 
   const offer = useAtomValue(offerForChatAtom)
@@ -35,6 +36,7 @@ function OtherSideNamePhotoAndInfo({mode}: Props): JSX.Element {
   const commonConnectionsHashes = useAtomValue(commonConnectionsHashesAtom)
   const commonConnectionsCount = useAtomValue(commonConnectionsCountAtom)
   const friendLevelInfo = useAtomValue(friendLevelInfoAtom)
+  const otherSideClubsIds = useAtomValue(otherSideClubsIdsAtom)
 
   const setOpenedImageUri = useSetAtom(openedImageUriAtom)
   const showGoldenAvatarInfoModal = useSetAtom(
@@ -91,6 +93,7 @@ function OtherSideNamePhotoAndInfo({mode}: Props): JSX.Element {
           friendLevel={friendLevelInfo}
           numberOfCommonFriends={commonConnectionsCount}
           center={mode === 'photoTop'}
+          clubsIds={otherSideClubsIds}
         />
       </YStack>
     </Stack>

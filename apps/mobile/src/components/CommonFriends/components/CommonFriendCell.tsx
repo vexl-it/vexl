@@ -18,7 +18,7 @@ function CommonFriendCell({contactId, name, variant}: Props): JSX.Element {
         width={30}
         height={30}
         contactId={contactId}
-        resizeMode="cover"
+        objectFit="cover"
         fallback={
           <SvgImage
             height={30}

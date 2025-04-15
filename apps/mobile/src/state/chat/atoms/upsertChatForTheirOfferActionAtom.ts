@@ -5,9 +5,12 @@ import {
   type MyNotificationTokenInfo,
 } from '@vexl-next/domain/src/general/messaging'
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
+import {Array, pipe} from 'effect'
 import {flow} from 'fp-ts/lib/function'
 import {atom} from 'jotai'
 import * as O from 'optics-ts'
+import {clubsWithMembersAtom} from '../../clubs/atom/clubsWithMembersAtom'
+import {type ClubWithMembers} from '../../clubs/domain'
 import {createEmptyTradeChecklistInState} from '../../tradeChecklist/domain'
 import {
   type ChatMessageWithState,
@@ -24,11 +27,13 @@ function createNewChat({
   initialMessage,
   sentFcmTokenInfo,
   offer,
+  clubsWithMembers,
 }: {
   inbox: Inbox
   initialMessage: ChatMessageWithState
   sentFcmTokenInfo?: MyNotificationTokenInfo
   offer: OneOfferInState
+  clubsWithMembers: ClubWithMembers[]
 }): ChatWithMessages {
   const otherSideVersion =
     initialMessage.state === 'receivedButRequiresNewerVersion' ||
@@ -43,6 +48,14 @@ function createNewChat({
       ? initialMessage.message.myVersion
       : undefined
 
+  const clubsIds = pipe(
+    clubsWithMembers,
+    Array.filter((club) =>
+      Array.contains(club.club.uuid)(offer.offerInfo.privatePart.clubIds)
+    ),
+    Array.map((club) => club.club.uuid)
+  )
+
   return {
     chat: {
       id: generateChatId(),
@@ -50,6 +63,7 @@ function createNewChat({
       origin: {type: 'theirOffer', offerId: offer.offerInfo.offerId, offer},
       otherSide: {
         publicKey: offer.offerInfo.publicPart.offerPublicKey,
+        clubsIds,
       },
       isUnread: false,
       showInfoBar: true,
@@ -96,6 +110,7 @@ const upsertChatForTheirOfferActionAtom = atom(
       offerInfo: offer.offerInfo,
     })
     const existingChat = get(existingChatAtom)
+    const clubsWithMembers = get(clubsWithMembersAtom)
 
     if (existingChat) {
       set(
@@ -112,6 +127,7 @@ const upsertChatForTheirOfferActionAtom = atom(
         initialMessage,
         offer,
         sentFcmTokenInfo,
+        clubsWithMembers,
       })
       set(messagingStateAtom, (old) =>
         O.set(

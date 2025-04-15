@@ -69,7 +69,7 @@ export const submitCodeToJoinClubActionAtom = atom(
 
       set(myStoredClubsAtom, (prevState) => ({
         ...prevState,
-        [clubInfoForUser.club.uuid]: keyPair,
+        [club.club.uuid]: keyPair,
       }))
 
       const {clubInfoForUser} = yield* _(

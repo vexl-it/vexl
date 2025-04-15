@@ -32,7 +32,10 @@ import {
 } from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
 import {Uuid, generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {calculateViewportRadius} from '@vexl-next/domain/src/utility/geoCoordinates'
-import {eitherToEffect} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
+import {
+  eitherToEffect,
+  taskEitherToEffect,
+} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {generateKeyPair} from '@vexl-next/resources-utils/src/utils/crypto'
 import {type LocationSuggestion} from '@vexl-next/rest-api/src/services/location/contracts'
 import {Effect, pipe} from 'effect'
@@ -231,6 +234,7 @@ export const dummyOffer: OneOfferInState = {
   ownershipInfo: {
     adminId: OfferAdminId.parse('offerAdminId'),
     intendedConnectionLevel: 'ALL',
+    intendedClubs: [],
   },
   flags: {
     reported: false,
@@ -661,12 +665,15 @@ export const offerFormMolecule = molecule(() => {
           })
         )
 
-        set(createInboxAtom, {
-          inbox: {
-            privateKey: key,
-            offerId: createdOffer.offerInfo.offerId,
-          },
-        })
+        yield* _(
+          set(createInboxAtom, {
+            inbox: {
+              privateKey: key,
+              offerId: createdOffer.offerInfo.offerId,
+            },
+          }),
+          taskEitherToEffect
+        )
 
         yield* _(
           set(progressModal.hideDeffered, {
@@ -796,23 +803,24 @@ export const offerFormMolecule = molecule(() => {
 
   const toggleOfferActiveAtom = atom(null, (get, set) => {
     const {t} = get(translationAtom)
-    const belowProgressLeft = get(modifyOfferLoaderTitleAtom)
-
-    const targetValue = !get(offerActiveAtom)
-
-    set(offerActiveAtom, targetValue)
-
-    set(progressModal.show, {
-      title: t('editOffer.editingYourOffer'),
-      bottomText: t('editOffer.pleaseWait'),
-      belowProgressLeft: targetValue
-        ? belowProgressLeft.loadingText
-        : t('editOffer.pausingOfferProgress'),
-      indicateProgress: {type: 'intermediate'},
-    })
 
     return Effect.gen(function* (_) {
+      const belowProgressLeft = get(modifyOfferLoaderTitleAtom)
+      const targetValue = !get(offerActiveAtom)
+
+      set(offerActiveAtom, targetValue)
       const offer = get(offerAtom)
+
+      if (!offer.ownershipInfo) return
+
+      set(progressModal.show, {
+        title: t('editOffer.editingYourOffer'),
+        bottomText: t('editOffer.pleaseWait'),
+        belowProgressLeft: targetValue
+          ? belowProgressLeft.loadingText
+          : t('editOffer.pausingOfferProgress'),
+        indicateProgress: {type: 'intermediate'},
+      })
 
       yield* _(
         set(updateOfferActionAtom, {
@@ -820,11 +828,12 @@ export const offerFormMolecule = molecule(() => {
             ...offer.offerInfo.publicPart,
             active: targetValue,
           },
-          adminId: offer.ownershipInfo?.adminId ?? ('' as OfferAdminId),
+          adminId: offer.ownershipInfo.adminId ?? ('' as OfferAdminId),
           symmetricKey: offer.offerInfo.privatePart.symmetricKey,
           intendedConnectionLevel: offer.ownershipInfo
             ? offer.ownershipInfo.intendedConnectionLevel
             : 'FIRST',
+          intendedClubs: offer.ownershipInfo.intendedClubs,
           updateFcmCypher: false,
           ...(offer.offerInfo.privatePart.intendedClubs && {
             intendedClubs: [...offer.offerInfo.privatePart.intendedClubs],
@@ -851,7 +860,7 @@ export const offerFormMolecule = molecule(() => {
       Effect.match({
         onSuccess: () => true,
         onFailure: (e) => {
-          set(offerActiveAtom, !targetValue)
+          set(offerActiveAtom, !get(offerActiveAtom))
           set(progressModal.hide)
           showErrorAlert({
             title:

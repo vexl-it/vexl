@@ -15,6 +15,8 @@ import {showDebugNotificationIfEnabled} from '../utils/notifications/showDebugNo
 import {showUINotificationFromRemoteMessage} from '../utils/notifications/showUINotificationFromRemoteMessage'
 import reportError from '../utils/reportError'
 import {fetchAndStoreMessagesForInboxAtom} from './chat/atoms/fetchNewMessagesActionAtom'
+import {checkForClubsAdmissionActionAtom} from './clubs/atom/checkForClubsAdmissionActionAtom'
+import {clubsWithMembersAtom} from './clubs/atom/clubsWithMembersAtom'
 import {syncConnectionsActionAtom} from './connections/atom/connectionStateAtom'
 import {updateAllOffersConnectionsActionAtom} from './connections/atom/offerToConnectionsAtom'
 import processChatNotificationActionAtom from './notifications/processChatNotification'
@@ -26,9 +28,10 @@ export function useHandleReceivedNotifications(): void {
   const updateOffersConnections = useSetAtom(
     updateAllOffersConnectionsActionAtom
   )
+  const checkForClubAdmission = useSetAtom(checkForClubsAdmissionActionAtom)
 
   const syncConnections = useSetAtom(syncConnectionsActionAtom)
-  const syncClubConnections = useSetAtom(syncConnectionsActionAtom)
+  const syncClubConnections = useSetAtom(clubsWithMembersAtom)
 
   useEffect(() => {
     const processNotification = async (
@@ -126,7 +129,7 @@ export function useHandleReceivedNotifications(): void {
         console.info(
           `🔔 Received notification about new user in club ${admitedToClubNetworkNotificationDataO.value.publicKey}`
         )
-        await Effect.runPromise(syncClubConnections())
+        await Effect.runPromise(checkForClubAdmission())
         await updateOffersConnections({isInBackground: false})()
         return
       }
@@ -146,9 +149,10 @@ export function useHandleReceivedNotifications(): void {
     }
   }, [
     fetchMessagesForInbox,
+    checkForClubAdmission,
     navigation,
-    store,
     syncClubConnections,
+    store,
     syncConnections,
     updateOffersConnections,
   ])

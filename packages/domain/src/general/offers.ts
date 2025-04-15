@@ -402,13 +402,15 @@ export const OwnershipInfo = z
   .object({
     adminId: OfferAdminId,
     intendedConnectionLevel: IntendedConnectionLevel,
-    intendedClubs: z.array(ClubUuid).optional().readonly(),
+    intendedClubs: z.array(ClubUuid).optional().default([]).readonly(),
   })
   .readonly()
 export const OwnershipInfoE = Schema.Struct({
   adminId: OfferAdminIdE,
   intendedConnectionLevel: IntendedConnectionLevelE,
-  intendedClubs: Schema.optional(Schema.Array(ClubUuidE)),
+  intendedClubs: Schema.optionalWith(Schema.Array(ClubUuidE), {
+    default: () => [],
+  }),
 })
 export type OwnershipInfo = Schema.Schema.Type<typeof OwnershipInfoE>
 

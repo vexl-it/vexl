@@ -37,7 +37,7 @@ export default function updateOffer({
   symmetricKey: SymmetricKey
   ownerKeypair: PrivateKeyHolder
   intendedConnectionLevel: IntendedConnectionLevel
-  intendedClubs: ClubUuid[]
+  intendedClubs: readonly ClubUuid[]
 }): Effect.Effect<
   OfferInfo,
   | ApiErrorUpdatingOffer

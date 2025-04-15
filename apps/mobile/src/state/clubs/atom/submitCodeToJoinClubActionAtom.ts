@@ -1,7 +1,8 @@
 import {type ClubCode} from '@vexl-next/domain/src/general/clubs'
 import {eitherToEffect} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {generateKeyPair} from '@vexl-next/resources-utils/src/utils/crypto'
-import {Effect, Option} from 'effect'
+import {MemberAlreadyInClubError} from '@vexl-next/rest-api/src/services/contact/contracts'
+import {Effect, Option, Struct} from 'effect'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
 import {askAreYouSureActionAtom} from '../../../components/AreYouSureDialog'
@@ -35,11 +36,6 @@ export const submitCodeToJoinClubActionAtom = atom(
         })
       )
 
-      const myStoredClubs = get(myStoredClubsAtom)
-
-      // is user already in the club?
-      const keyPair = myStoredClubs[club.club.uuid] ?? newKeypair
-
       yield* _(
         set(askAreYouSureActionAtom, {
           variant: 'info',
@@ -64,19 +60,34 @@ export const submitCodeToJoinClubActionAtom = atom(
         })
       )
 
-      const {clubInfoForUser} = yield* _(
-        api.contact.joinClub({
-          keyPair,
-          code,
-          contactsImported: true,
-          notificationToken,
-        })
-      )
+      const myStoredClubs = get(myStoredClubsAtom)
+      const keyPair = newKeypair
+
+      if (myStoredClubs[club.club.uuid]) {
+        yield* _(Effect.fail(new MemberAlreadyInClubError()))
+      }
 
       set(myStoredClubsAtom, (prevState) => ({
         ...prevState,
         [clubInfoForUser.club.uuid]: keyPair,
       }))
+
+      const {clubInfoForUser} = yield* _(
+        api.contact
+          .joinClub({
+            keyPair,
+            code,
+            contactsImported: true,
+            notificationToken,
+          })
+          .pipe(
+            Effect.tapError(() =>
+              Effect.sync(() => {
+                set(myStoredClubsAtom, Struct.omit(clubInfoForUser.club.uuid))
+              })
+            )
+          )
+      )
 
       yield* _(set(clubsWithMembersAtom))
 

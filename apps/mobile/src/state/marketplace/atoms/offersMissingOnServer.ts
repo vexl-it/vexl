@@ -107,6 +107,7 @@ const reencryptOneOfferActionAtom = atom(
             adminId: r.adminId,
             intendedConnectionLevel:
               offer.ownershipInfo.intendedConnectionLevel,
+            intendedClubs: Record.keys(intendedClubsRecord),
           },
           flags: {
             reported: false,

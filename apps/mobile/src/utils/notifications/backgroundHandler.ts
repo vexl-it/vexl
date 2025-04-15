@@ -9,6 +9,8 @@ import * as Notifications from 'expo-notifications'
 import * as TaskManager from 'expo-task-manager'
 import {getDefaultStore} from 'jotai'
 import {AppState, Platform} from 'react-native'
+import {checkForClubsAdmissionActionAtom} from '../../state/clubs/atom/checkForClubsAdmissionActionAtom'
+import {clubsWithMembersAtom} from '../../state/clubs/atom/clubsWithMembersAtom'
 import {syncConnectionsActionAtom} from '../../state/connections/atom/connectionStateAtom'
 import {updateAllOffersConnectionsActionAtom} from '../../state/connections/atom/offerToConnectionsAtom'
 import processChatNotificationActionAtom from '../../state/notifications/processChatNotification'
@@ -106,7 +108,10 @@ export async function processBackgroundMessage(
       console.info(
         `🔔 Received notification about new user in club ${newClubConnectionNotificationO.value.clubUuids.join(',')}. Checking and updating offers accordingly.`
       )
-      // TODO
+      await Effect.runPromise(getDefaultStore().set(clubsWithMembersAtom))
+      await getDefaultStore().set(updateAllOffersConnectionsActionAtom, {
+        isInBackground: true,
+      })()
       return
     }
 
@@ -115,9 +120,12 @@ export async function processBackgroundMessage(
     )(payload)
     if (Option.isSome(admitedToClubNetworkNotificationDataO)) {
       console.info(
-        `🔔 Received notification about new user in club ${admitedToClubNetworkNotificationDataO.value.publicKey}`
+        `🔔 Received notification about beeing added to club ${admitedToClubNetworkNotificationDataO.value.publicKey}`
       )
-      // TODO
+      await Effect.runPromise(
+        getDefaultStore().set(checkForClubsAdmissionActionAtom)
+      )
+
       return
     }
 

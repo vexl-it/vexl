@@ -35,7 +35,7 @@ export const updateOfferActionAtom = atom<
       symmetricKey: SymmetricKey
       adminId: OfferAdminId
       intendedConnectionLevel: IntendedConnectionLevel
-      intendedClubs?: ClubUuid[]
+      intendedClubs: readonly ClubUuid[]
     } & (
       | {updateFcmCypher: false}
       | {updateFcmCypher: true; offerKey: PrivateKeyHolder}

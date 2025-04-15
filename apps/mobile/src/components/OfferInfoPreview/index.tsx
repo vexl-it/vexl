@@ -1,10 +1,12 @@
 import {type OfferInfo} from '@vexl-next/domain/src/general/offers'
+import {useAtomValue} from 'jotai'
 import {Stack, Text, XStack, getTokens} from 'tamagui'
 import pauseSvg from '../../images/pauseSvg'
+import {clubsWithMembersAtom} from '../../state/clubs/atom/clubsWithMembersAtom'
 import {isOfferExpired} from '../../utils/isOfferExpired'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import CommonFriends from '../CommonFriends'
-import SvgImage from '../Image'
+import SvgImage, {ImageUniversal} from '../Image'
 import clockSvg from '../images/clockSvg'
 import infoSvg from '../images/infoSvg'
 import BtcOfferColumns from './components/BtcOfferColumns'
@@ -31,6 +33,10 @@ function OfferInfoPreview({
   showCommonFriends?: boolean
 }): JSX.Element {
   const {t} = useTranslation()
+  const clubsWithMembers = useAtomValue(clubsWithMembersAtom)
+  const clubsForOffer = clubsWithMembers.data.filter((club) =>
+    offer.privatePart.clubIds.includes(club.club.uuid)
+  )
 
   return (
     <Stack gap="$2">
@@ -70,6 +76,22 @@ function OfferInfoPreview({
           <Text fos={12} col="$red" ff="$body600" numberOfLines={3}>
             {t('offerForm.listingTypeNotSet')}
           </Text>
+        </XStack>
+      )}
+      {offer.privatePart.clubIds.length > 0 && (
+        <XStack ai="center" gap="$2">
+          {clubsForOffer.map((club) => (
+            <ImageUniversal
+              key={club.club.uuid}
+              height={32}
+              width={32}
+              style={{borderRadius: 8}}
+              source={{
+                type: 'imageUri',
+                imageUri: club.club.clubImageUrl,
+              }}
+            />
+          ))}
         </XStack>
       )}
       <XStack mb="$1">

@@ -108,8 +108,8 @@ export const regenerateClubLinkActionAtom = atom(
 
     return pipe(
       removeExistingLinks,
-      Effect.andThen(generateNewLink),
-      Effect.andThen(refreshData),
+      Effect.andThen(() => generateNewLink),
+      Effect.andThen(() => refreshData),
       // TODO handle errors
       Effect.ignore
     )

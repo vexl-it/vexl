@@ -40,7 +40,7 @@ export const createOfferActionAtom = atom<
     {
       payloadPublic: OfferPublicPart
       intendedConnectionLevel: IntendedConnectionLevel
-      intendedClubs?: ClubUuid[]
+      intendedClubs: ClubUuid[]
       onProgress?: (status: OfferEncryptionProgress) => void
       offerKey: PrivateKeyHolder
     },

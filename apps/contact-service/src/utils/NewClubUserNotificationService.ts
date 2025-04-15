@@ -134,6 +134,9 @@ export class NewClubUserNotificationsService extends Context.Tag(
           Effect.gen(function* (_) {
             const toSend = yield* _(
               readAndDeleteList(NEW_CLUB_USER_NOTIFICATIONS_KEY),
+              Effect.catchTag('RecordDoesNotExistsReddisError', () =>
+                Effect.succeed([] as readonly ClubNotificationRecord[])
+              ),
               Effect.catchAll(
                 (e) =>
                   new UnexpectedServerError({

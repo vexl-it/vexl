@@ -230,6 +230,7 @@ const recreateInboxAndUpdateOfferAtom = atom(
       TE.chainW((keyHolder) =>
         effectToTaskEither(
           set(updateOfferActionAtom, {
+            intendedClubs: offerWithoutInbox.ownershipInfo?.intendedClubs ?? [],
             payloadPublic: {
               ...offerWithoutInbox.offerInfo.publicPart,
               offerPublicKey: keyHolder.publicKeyPemBase64,

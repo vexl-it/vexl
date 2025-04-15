@@ -225,6 +225,7 @@ export const updateAllOffersConnectionsActionAtom = atom(
         const offer = get(singleOfferByAdminIdAtom(oneOfferConections.adminId))
 
         const clubIdsToEncryptFor = offer?.ownershipInfo?.intendedClubs
+
         const {data: clubsData} = get(clubsWithMembersAtom)
         const targetClubIdWithMembersArray = pipe(
           clubsData,
@@ -234,6 +235,7 @@ export const updateAllOffersConnectionsActionAtom = atom(
           Array.map(({club, members}) => [club.uuid, members] as const),
           Record.fromEntries
         )
+
         const intendedConnectionLevel =
           offer?.ownershipInfo?.intendedConnectionLevel ?? 'ALL'
 

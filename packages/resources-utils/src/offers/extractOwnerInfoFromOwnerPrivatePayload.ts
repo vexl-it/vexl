@@ -12,6 +12,6 @@ export default function extractOwnerInfoFromOwnerPrivatePayload(
       privatePart.intendedConnectionLevel
     ),
     adminId: Option.fromNullable(privatePart.adminId),
-    intendedClubs: Option.some(privatePart.intendedClubs),
+    intendedClubs: Option.some(privatePart.intendedClubs ?? []),
   })
 }

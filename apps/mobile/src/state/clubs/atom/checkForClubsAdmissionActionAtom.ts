@@ -4,6 +4,7 @@ import {apiAtom} from '../../../api'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
 import {getNotificationTokenE} from '../../../utils/notifications'
 import {showInternalNotificationForClubAdmission} from '../../../utils/notifications/clubNotifications'
+import {ignoreReportErrors} from '../../../utils/reportError'
 import {keysWaitingForAdmissionAtom, myClubsStorageAtom} from './clubsStore'
 import {clubsWithMembersAtom} from './clubsWithMembersAtom'
 
@@ -45,7 +46,10 @@ export const checkForClubsAdmissionActionAtom = atom(null, (get, set) => {
               clubInfoForUser.club
             )
           )
-        }).pipe(Effect.ignore)
+        }).pipe(
+          Effect.catchTag('NotFoundError', () => Effect.void),
+          ignoreReportErrors('error', 'Error checking club admission')
+        )
       ),
       Effect.all
     )

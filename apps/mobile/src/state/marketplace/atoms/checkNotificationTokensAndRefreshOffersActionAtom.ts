@@ -127,6 +127,7 @@ const checkNotificationTokensAndRefreshOffersActionAtom = atom(
                   ...offer.offerInfo.publicPart,
                   authorClientVersion: version,
                 },
+                intendedClubs: offer.ownershipInfo.intendedClubs,
                 symmetricKey: offer.offerInfo.privatePart.symmetricKey,
                 adminId: offer.ownershipInfo.adminId,
                 intendedConnectionLevel:

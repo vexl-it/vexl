@@ -1,6 +1,7 @@
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue} from 'jotai'
 import {getTokens, Stack, Text, XStack, YStack} from 'tamagui'
+import {useGetAllClubsForIds} from '../../../state/clubs/atom/clubsWithMembersAtom'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import CommonFriends from '../../CommonFriends'
 import Image from '../../Image'
@@ -22,12 +23,16 @@ function ChatRequestPreview({
     chatAtom,
     commonConnectionsHashesAtom,
     requestMessageAtom,
+    otherSideClubsIdsAtom,
   } = useMolecule(chatMolecule)
 
   const chat = useAtomValue(chatAtom)
   const offer = useAtomValue(offerForChatAtom)
   const commonConnectionsHashes = useAtomValue(commonConnectionsHashesAtom)
   const requestMessage = useAtomValue(requestMessageAtom)
+  const otherSideClubs = useGetAllClubsForIds(
+    useAtomValue(otherSideClubsIdsAtom) ?? []
+  )
 
   const {t} = useTranslation()
 
@@ -40,6 +45,7 @@ function ChatRequestPreview({
             <CommonFriends
               commonConnectionsHashes={commonConnectionsHashes}
               variant="light"
+              otherSideClubs={otherSideClubs}
             />
           </Stack>
         )}

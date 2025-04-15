@@ -1,10 +1,11 @@
 import {type OfferInfo} from '@vexl-next/domain/src/general/offers'
 import {Stack, Text, XStack, getTokens} from 'tamagui'
 import pauseSvg from '../../images/pauseSvg'
+import {useGetAllClubsForIds} from '../../state/clubs/atom/clubsWithMembersAtom'
 import {isOfferExpired} from '../../utils/isOfferExpired'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import CommonFriends from '../CommonFriends'
-import SvgImage from '../Image'
+import SvgImage, {ImageUniversal} from '../Image'
 import clockSvg from '../images/clockSvg'
 import infoSvg from '../images/infoSvg'
 import BtcOfferColumns from './components/BtcOfferColumns'
@@ -31,10 +32,16 @@ function OfferInfoPreview({
   showCommonFriends?: boolean
 }): JSX.Element {
   const {t} = useTranslation()
+  const clubsForOffer = useGetAllClubsForIds(
+    (isMine ? offer.privatePart.intendedClubs : offer.privatePart.clubIds) ?? []
+  )
 
   return (
     <Stack gap="$2">
-      <XStack ai="center" jc="space-between">
+      <XStack
+        ai="center"
+        jc={!!isMine || showListingType ? 'space-between' : 'flex-start'}
+      >
         {!!(!!isMine || showListingType) && !!offer.publicPart.listingType && (
           <Stack
             ai="center"
@@ -49,7 +56,7 @@ function OfferInfoPreview({
             </Text>
           </Stack>
         )}
-        <XStack gap="$1">
+        <XStack gap="$2">
           {isOfferExpired(offer.publicPart.expirationDate) && (
             <SvgImage
               stroke={getTokens().color.$greyOnBlack.val}
@@ -61,6 +68,22 @@ function OfferInfoPreview({
               stroke={getTokens().color.$greyOnBlack.val}
               source={pauseSvg}
             />
+          )}
+          {clubsForOffer.length > 0 && (
+            <XStack ai="center" gap="$2">
+              {clubsForOffer.map((club) => (
+                <ImageUniversal
+                  key={club.uuid}
+                  height={32}
+                  width={32}
+                  style={{borderRadius: 8}}
+                  source={{
+                    type: 'imageUri',
+                    imageUri: club.clubImageUrl,
+                  }}
+                />
+              ))}
+            </XStack>
           )}
         </XStack>
       </XStack>
@@ -92,6 +115,7 @@ function OfferInfoPreview({
           <CommonFriends
             commonConnectionsHashes={offer.privatePart.commonFriends}
             variant="light"
+            otherSideClubs={clubsForOffer}
           />
         </Stack>
       )}

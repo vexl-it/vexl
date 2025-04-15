@@ -27,6 +27,7 @@ import {group} from 'group-items'
 import {atom, type SetStateAction, type WritableAtom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {apiAtom} from '../../../api'
+import {type ActionAtomType} from '../../../utils/atomUtils/ActionAtomType'
 import {version} from '../../../utils/environment'
 import {getNotificationToken} from '../../../utils/notifications'
 import reportError from '../../../utils/reportError'
@@ -39,11 +40,11 @@ import {
 import messagingStateAtom from '../atoms/messagingStateAtom'
 import {type InboxInState} from '../domain'
 import addMessagesToChats from '../utils/addMessagesToChats'
-import createNewChatsFromMessages from '../utils/createNewChatsFromFirstMessages'
 import replaceBase64UriWithImageFileUri from '../utils/replaceBase64UriWithImageFileUri'
 import {type ChatMessageWithState} from './../domain'
 import {checkAndDeleteOldChatsAndDataActionAtom} from './checkAndDeleteOldChatsAndDataActionAtom'
 import {sendUpdateNoticeMessageActionAtom} from './checkAndReportCurrentVersionToChatsActionAtom'
+import createNewChatsFromMessagesActionAtom from './createNewChatsFromFirstMessagesActionAtom'
 import focusChatByInboxKeyAndSenderKey from './focusChatByInboxKeyAndSenderKey'
 import {sendFcmCypherUpdateMessageActionAtom} from './refreshNotificationTokensActionAtom'
 
@@ -196,107 +197,114 @@ export interface NoMessagesLeft {
   _tag: 'noMessages'
 }
 
-function refreshInbox(
+function refreshInboxActionAtom(
   api: ChatApi
 ): (
   getInbox: () => InboxInState,
   inboxOffer?: OneOfferInState
-) => TE.TaskEither<
-  ApiErrorRetrievingMessages | NoMessagesLeft,
-  {updatedInbox: InboxInState; newMessages: readonly ChatMessageWithState[]}
+) => ActionAtomType<
+  [],
+  TE.TaskEither<
+    ApiErrorRetrievingMessages | NoMessagesLeft,
+    {updatedInbox: InboxInState; newMessages: readonly ChatMessageWithState[]}
+  >
 > {
   return (getInbox, inboxOffer) =>
-    pipe(
-      effectToTaskEither(
-        retrieveMessages({
-          api,
-          currentAppVersion: version,
-          inboxKeypair: getInbox().inbox.privateKey,
-        })
-      ),
-      TE.map((one) => {
-        const incompatibleMessagesError = one.errors.filter(
-          (
-            one
-          ): one is typeof one & {
-            _tag: 'ErrorChatMessageRequiresNewerVersion'
-          } => one._tag === 'ErrorChatMessageRequiresNewerVersion'
-        )
-        const otherErrors = one.errors.filter(
-          (one) => one._tag !== 'ErrorChatMessageRequiresNewerVersion'
-        )
-
-        if (otherErrors.length > 0) {
-          reportError('error', new Error('Error decrypting messages'), {
-            otherErrors,
+    atom(null, (get, set) =>
+      pipe(
+        effectToTaskEither(
+          retrieveMessages({
+            api,
+            currentAppVersion: version,
+            inboxKeypair: getInbox().inbox.privateKey,
           })
-        }
+        ),
+        TE.map((one) => {
+          const incompatibleMessagesError = one.errors.filter(
+            (
+              one
+            ): one is typeof one & {
+              _tag: 'ErrorChatMessageRequiresNewerVersion'
+            } => one._tag === 'ErrorChatMessageRequiresNewerVersion'
+          )
+          const otherErrors = one.errors.filter(
+            (one) => one._tag !== 'ErrorChatMessageRequiresNewerVersion'
+          )
 
-        return [
-          ...incompatibleMessagesError.map(
-            incompatibleErrorToChatMessageWithState
-          ),
-          ...one.messages.map(messageToChatMessageWithState),
-        ]
-      }),
-      TE.filterOrElseW(
-        (messages) => messages.length > 0,
-        () => 'noMessages' as const
-      ),
-      TE.chainW(
-        flow(
-          A.map((oneMessage): T.Task<ChatMessageWithState> => {
-            if (
-              oneMessage.state !== 'receivedButRequiresNewerVersion' &&
-              !oneMessage.message.image &&
-              !oneMessage.message.tradeChecklistUpdate?.identity?.image
-            )
-              return T.of(oneMessage)
-            return replaceBase64UriWithImageFileUri(
-              oneMessage,
-              getInbox().inbox.privateKey.publicKeyPemBase64,
-              oneMessage.message.senderPublicKey
-            )
-          }),
-          T.sequenceArray,
-          TE.fromTask
-        )
-      ),
-      TE.bindTo('newMessages'),
-      TE.bindW('updatedInbox', ({newMessages}) =>
-        pipe(
-          TE.right(newMessages),
-          TE.map((newMessages) =>
-            splitMessagesArrayToNewChatsAndExistingChats({
-              inbox: getInbox(),
-              messages: newMessages,
+          if (otherErrors.length > 0) {
+            reportError('error', new Error('Error decrypting messages'), {
+              otherErrors,
             })
-          ),
-          TE.map(({messagesInNewChat, messagesInExistingChat}) => {
-            const inbox = getInbox()
-            return {
-              ...getInbox(),
-              chats: [
-                ...createNewChatsFromMessages({
-                  inbox: inbox.inbox,
-                  inboxOffer,
-                })(messagesInNewChat ?? []),
-                ...addMessagesToChats(inbox.chats)(
-                  messagesInExistingChat ?? []
-                ),
-              ],
-            }
-          })
-        )
-      ),
-      TE.match(
-        (e) => {
-          if (e === 'noMessages') {
-            return E.left({_tag: 'noMessages'} as const)
           }
-          return E.left(e)
-        },
-        (right) => E.right(right)
+
+          return [
+            ...incompatibleMessagesError.map(
+              incompatibleErrorToChatMessageWithState
+            ),
+            ...one.messages.map(messageToChatMessageWithState),
+          ]
+        }),
+        TE.filterOrElseW(
+          (messages) => messages.length > 0,
+          () => 'noMessages' as const
+        ),
+        TE.chainW(
+          flow(
+            A.map((oneMessage): T.Task<ChatMessageWithState> => {
+              if (
+                oneMessage.state !== 'receivedButRequiresNewerVersion' &&
+                !oneMessage.message.image &&
+                !oneMessage.message.tradeChecklistUpdate?.identity?.image
+              )
+                return T.of(oneMessage)
+              return replaceBase64UriWithImageFileUri(
+                oneMessage,
+                getInbox().inbox.privateKey.publicKeyPemBase64,
+                oneMessage.message.senderPublicKey
+              )
+            }),
+            T.sequenceArray,
+            TE.fromTask
+          )
+        ),
+        TE.bindTo('newMessages'),
+        TE.bindW('updatedInbox', ({newMessages}) =>
+          pipe(
+            TE.right(newMessages),
+            TE.map((newMessages) =>
+              splitMessagesArrayToNewChatsAndExistingChats({
+                inbox: getInbox(),
+                messages: newMessages,
+              })
+            ),
+            TE.map(({messagesInNewChat, messagesInExistingChat}) => {
+              const inbox = getInbox()
+              return {
+                ...getInbox(),
+                chats: [
+                  ...set(
+                    createNewChatsFromMessagesActionAtom({
+                      inbox: inbox.inbox,
+                      inboxOffer,
+                    })(messagesInNewChat ?? [])
+                  ),
+                  ...addMessagesToChats(inbox.chats)(
+                    messagesInExistingChat ?? []
+                  ),
+                ],
+              }
+            })
+          )
+        ),
+        TE.match(
+          (e) => {
+            if (e === 'noMessages') {
+              return E.left({_tag: 'noMessages'} as const)
+            }
+            return E.left(e)
+          },
+          (right) => E.right(right)
+        )
       )
     )
 }
@@ -342,9 +350,11 @@ export const fetchAndStoreMessagesForInboxAtom = atom<
   }
 
   return pipe(
-    refreshInbox(api.chat)(
-      () => get(focusInboxInMessagingStateAtom(key)) ?? inbox,
-      get(singleOfferAtom(inbox.inbox.offerId))
+    set(
+      refreshInboxActionAtom(api.chat)(
+        () => get(focusInboxInMessagingStateAtom(key)) ?? inbox,
+        get(singleOfferAtom(inbox.inbox.offerId))
+      )
     ),
     TE.matchEW(
       (

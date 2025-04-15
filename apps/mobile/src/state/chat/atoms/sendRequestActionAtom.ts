@@ -2,6 +2,7 @@ import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
 import {toBasicError} from '@vexl-next/domain/src/utility/errors'
 import {sendMessagingRequest} from '@vexl-next/resources-utils/src/chat/sendMessagingRequest'
 import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
+import {Array, Record} from 'effect'
 import * as O from 'fp-ts/Option'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
@@ -15,6 +16,7 @@ import {goldenAvatarTypeAtom} from '../../../utils/preferences'
 import reportError from '../../../utils/reportError'
 import showErrorAlert from '../../../utils/showErrorAlert'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
+import {clubsToKeyHolderAtom} from '../../clubs/atom/clubsToKeyHolderAtom'
 import {sessionDataOrDummyAtom} from '../../session'
 import {version} from './../../../utils/environment'
 import {createUserInboxIfItDoesNotExistAtom} from './createUserInboxIfItDoesNotExistAtom'
@@ -31,6 +33,13 @@ const sendRequestActionAtom = atom(
     const api = get(apiAtom)
     const session = get(sessionDataOrDummyAtom)
     const goldenAvatarType = get(goldenAvatarTypeAtom)
+    const clubsToKeyHolder = get(clubsToKeyHolderAtom)
+    const forClubsUuids = pipe(
+      Record.keys(clubsToKeyHolder),
+      Array.filter((clubUuid) =>
+        Array.contains(clubUuid)(originOffer.offerInfo.privatePart.clubIds)
+      )
+    )
 
     return pipe(
       set(
@@ -56,6 +65,7 @@ const sendRequestActionAtom = atom(
             lastReceivedNotificationCypher:
               originOffer.offerInfo.publicPart.fcmCypher,
             goldenAvatarType,
+            forClubsUuids,
           })
         )
       ),

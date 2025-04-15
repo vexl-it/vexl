@@ -22,6 +22,7 @@ import {DeanonymizedUser, DeanonymizedUserE} from './DeanonymizedUser'
 import {E164PhoneNumber, E164PhoneNumberE} from './E164PhoneNumber.brand'
 import {UserName, UserNameE} from './UserName.brand'
 import {RealLifeInfo, RealLifeInfoE} from './UserNameAndAvatar.brand'
+import {ClubUuid, ClubUuidE} from './clubs'
 import {
   NotificationCypher,
   NotificationCypherE,
@@ -82,12 +83,14 @@ export const ChatUserIdentity = z
   .object({
     publicKey: PublicKeyPemBase64,
     goldenAvatarType: GoldenAvatarType.optional(),
+    clubsIds: z.array(ClubUuid).optional().readonly(),
     realLifeInfo: RealLifeInfo.optional(),
   })
   .readonly()
 export const ChatUserIdentityE = Schema.Struct({
   publicKey: PublicKeyPemBase64E,
   goldenAvatarType: Schema.optional(GoldenAvatarTypeE),
+  clubsIds: Schema.optional(Schema.Array(ClubUuidE)),
   realLifeInfo: Schema.optional(RealLifeInfoE),
 })
 export type ChatUserIdentity = Schema.Schema.Type<typeof ChatUserIdentityE>
@@ -152,6 +155,7 @@ export const ChatMessagePayload = z
       .readonly(),
     myFcmCypher: NotificationCypher.optional(),
     lastReceivedFcmCypher: NotificationCypher.optional(),
+    senderClubsUuids: z.array(ClubUuid).optional().readonly(),
   })
   .readonly()
 
@@ -177,6 +181,7 @@ export const ChatMessagePayloadE = Schema.Struct({
   ),
   myFcmCypher: Schema.optional(NotificationCypherE),
   lastReceivedFcmCypher: Schema.optional(NotificationCypherE),
+  senderClubsUuids: Schema.optional(Schema.Array(ClubUuidE)),
 })
 export type ChatMessagePayload = Schema.Schema.Type<typeof ChatMessagePayloadE>
 
@@ -208,6 +213,7 @@ export const ChatMessage = z
 
     myFcmCypher: NotificationCypher.optional(),
     lastReceivedFcmCypher: NotificationCypher.optional(),
+    senderClubsUuids: z.array(ClubUuid).optional().readonly(),
   })
   .readonly()
 
@@ -233,10 +239,10 @@ const ChatMessageE = Schema.Struct({
   messageType: MessageTypeE,
   myFcmCypher: Schema.optional(NotificationCypherE),
   lastReceivedFcmCypher: Schema.optional(NotificationCypherE),
+  senderClubsUuids: Schema.optional(Schema.Array(ClubUuidE)),
 })
 
-export type ChatMessage = Schema.Schema.Type<typeof ChatMessageE>
-//
+export type ChatMessage = typeof ChatMessageE.Type
 
 export const Inbox = z
   .object({

@@ -1,6 +1,7 @@
 import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
-import {Array, type Option, Schema} from 'effect'
-import {type Atom, atom} from 'jotai'
+import {type ClubInfo} from '@vexl-next/rest-api/src/services/contact/contracts'
+import {Array, type Option, pipe, Schema} from 'effect'
+import {type Atom, atom, useAtomValue} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {splitAtom} from 'jotai/utils'
 import {atomWithParsedMmkvStorageE} from '../../../utils/atomUtils/atomWithParsedMmkvStorageE'
@@ -62,3 +63,25 @@ export const removeClubWithMembersFromStateActionAtom = atom(
     }))
   }
 )
+
+export function useGetAllClubsNamesForIds(
+  clubsIds: readonly ClubUuid[]
+): string[] {
+  const clubsWithMembers = useAtomValue(clubsWithMembersAtom)
+  return pipe(
+    clubsWithMembers,
+    Array.filter((club) => Array.contains(club.club.uuid)(clubsIds)),
+    Array.map((club) => club.club.name)
+  )
+}
+
+export function useGetAllClubsForIds(
+  clubsIds: readonly ClubUuid[]
+): ClubInfo[] {
+  const clubsWithMembers = useAtomValue(clubsWithMembersAtom)
+  return pipe(
+    clubsWithMembers,
+    Array.filter((club) => Array.contains(club.club.uuid)(clubsIds)),
+    Array.map((club) => club.club)
+  )
+}

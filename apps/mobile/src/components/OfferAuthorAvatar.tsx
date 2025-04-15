@@ -133,6 +133,7 @@ function OfferAuthorAvatar({
               contactsHashes={offerInfo.privatePart.commonFriends}
               friendLevel={offerInfo.privatePart.friendLevel ?? []}
               numberOfCommonFriends={commonFriends.length}
+              clubsIds={offerInfo.privatePart.clubIds}
             />
           </Stack>
         </>

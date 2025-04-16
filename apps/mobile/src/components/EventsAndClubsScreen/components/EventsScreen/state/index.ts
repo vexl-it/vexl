@@ -89,7 +89,7 @@ export const pastEventsAtom = atom((get) =>
   )
 )
 
-export const numberOfPastEventsToShowAtom = atom(6)
+export const numberOfPastEventsToShowAtom = atom(3)
 export const extendPastEventsActionAtom = atom(null, (get, set) => {
   set(numberOfPastEventsToShowAtom, (v) => v + 3)
 })

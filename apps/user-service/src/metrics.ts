@@ -4,6 +4,7 @@ import {
   type CountryPrefix,
 } from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
+import {shouldDisableMetrics} from '@vexl-next/server-utils/src/commonConfigs'
 import {MetricsMessage} from '@vexl-next/server-utils/src/metrics/domain'
 import {type MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
 import {reportMetricForked} from '@vexl-next/server-utils/src/metrics/reportMetricForked'
@@ -70,6 +71,9 @@ export const reportTotalNumberOfUsers = (
 
 export const reportMetricsLayer = Layer.effectDiscard(
   Effect.gen(function* (_) {
+    if (yield* _(shouldDisableMetrics)) {
+      return
+    }
     const sql = yield* _(SqlClient.SqlClient)
 
     const queryNumberOfUsers = SqlSchema.findAll({

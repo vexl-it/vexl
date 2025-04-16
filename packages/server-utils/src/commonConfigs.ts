@@ -3,7 +3,7 @@ import {
   PrivateKeyPemBase64E,
   PublicKeyPemBase64E,
 } from '@vexl-next/cryptography/src/KeyHolder/brands'
-import {Config, ConfigError, Either, Schema} from 'effect'
+import {Config, ConfigError, Effect, Either, Schema} from 'effect'
 
 export const nodeEnvConfig = Config.string('NODE_ENV').pipe(
   Config.withDefault('production'),
@@ -91,3 +91,25 @@ export const disableDevToolsInDevelopmentConfig = Config.option(
 )
 
 export const metricsQueueNameConfig = Config.string('METRICS_QUEUE_NAME')
+
+export const disableMetricsInDevelopmentConfig = Config.option(
+  Config.boolean('DISABLE_METRICS')
+)
+
+export const shouldDisableMetrics = Effect.gen(function* (_) {
+  const isRunningInDevelopment = yield* _(isRunningInDevelopmentConfig)
+  const disableMetrics = yield* _(disableMetricsInDevelopmentConfig)
+
+  if (disableMetrics && !isRunningInDevelopment) {
+    yield* _(
+      Effect.logWarning(
+        'Trying to disable metrics when NOT in development mode. To prevent accidents, metrics will NOT be disabled.'
+      )
+    )
+    return false
+  }
+
+  const disable = isRunningInDevelopment && disableMetrics
+  if (disable) yield* _(Effect.log('Disabling metrics in development mode'))
+  return disable
+})

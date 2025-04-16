@@ -2,6 +2,7 @@
 
 import {SqlClient, SqlSchema} from '@effect/sql'
 import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
+import {shouldDisableMetrics} from '@vexl-next/server-utils/src/commonConfigs'
 import {MetricsMessage} from '@vexl-next/server-utils/src/metrics/domain'
 import {type MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
 import {reportMetricForked} from '@vexl-next/server-utils/src/metrics/reportMetricForked'
@@ -141,6 +142,9 @@ const reportTotalInboxes = (
 
 export const reportMetricsLayer = Layer.effectDiscard(
   Effect.gen(function* (_) {
+    if (yield* _(shouldDisableMetrics)) {
+      return
+    }
     const sql = yield* _(SqlClient.SqlClient)
 
     const queryTotalInboxes = SqlSchema.findOne({

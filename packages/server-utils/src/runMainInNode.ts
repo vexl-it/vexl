@@ -110,7 +110,9 @@ const NodeSdkLive = Effect.gen(function* (_) {
     ),
     Effect.catchTag('NoSuchElementException', (e) =>
       Effect.zipRight(
-        Effect.log('Metrics are disabled because they are not configured.'),
+        Effect.log(
+          'Prometheus metrics are disabled because they are not configured.'
+        ),
         Effect.succeed(undefined)
       )
     )

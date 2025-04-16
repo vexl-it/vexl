@@ -1,5 +1,0 @@
-{
-  "extends": "@vexl-next/tsconfig/base.json",
-  "include": ["."],
-  "exclude": ["node_modules"]
-}

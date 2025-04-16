@@ -10697,12 +10697,10 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@vexl-next/prettier-config@workspace:tooling/prettier"
   dependencies:
-    "@vexl-next/tsconfig": 0.0.0
     prettier: ^3.3.2
     prettier-plugin-embed: ^0.4.15
     prettier-plugin-organize-imports: ^3.2.4
     prettier-plugin-sql: ^0.18.0
-    typescript: ^5.6.3
   languageName: unknown
   linkType: soft
 

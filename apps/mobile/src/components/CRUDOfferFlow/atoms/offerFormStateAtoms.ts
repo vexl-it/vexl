@@ -748,12 +748,13 @@ export const offerFormMolecule = molecule(() => {
 
       return true
     }).pipe(
-      Effect.catchTag('UserDeclinedError', (e) => {
-        showErrorAlert({
-          title:
-            toCommonErrorMessage(e, t) ?? t('editOffer.errorDeletingOffer'),
-          error: e,
-        })
+      Effect.catchAll((e) => {
+        if (e._tag !== 'UserDeclinedError')
+          showErrorAlert({
+            title:
+              toCommonErrorMessage(e, t) ?? t('editOffer.errorDeletingOffer'),
+            error: e,
+          })
 
         return Effect.succeed(false)
       })

@@ -1,6 +1,6 @@
 import notifee from '@notifee/react-native'
 import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
-import {Effect} from 'effect'
+import {Array, Effect, Option, pipe, Record} from 'effect'
 import * as Notifications from 'expo-notifications'
 import * as O from 'fp-ts/Option'
 import {atom, useSetAtom} from 'jotai'
@@ -13,6 +13,8 @@ import notEmpty from '../utils/notEmpty'
 import {showDebugNotificationIfEnabled} from '../utils/notifications/showDebugNotificationIfEnabled'
 import reportError from '../utils/reportError'
 import deleteAllInboxesActionAtom from './chat/atoms/deleteAllInboxesActionAtom'
+import {clubsToKeyHolderAtom} from './clubs/atom/clubsToKeyHolderAtom'
+import {clubsWithMembersAtom} from './clubs/atom/clubsWithMembersAtom'
 import {deleteOffersActionAtom} from './marketplace/atoms/deleteOffersActionAtom'
 import {myOffersAtom} from './marketplace/atoms/myOffers'
 import {sessionAtom} from './session'
@@ -48,6 +50,23 @@ export const logoutActionAtom = atom(null, async (get, set) => {
             .map((offer) => offer.ownershipInfo?.adminId)
             .filter(notEmpty),
         })
+      )
+    )
+
+    await failSilently(
+      pipe(
+        get(clubsWithMembersAtom),
+        Array.map((club) =>
+          Record.get(get(clubsToKeyHolderAtom), club.club.uuid).pipe(
+            Option.map((keyPair) =>
+              get(apiAtom)
+                .contact.leaveClub({clubUuid: club.club.uuid, keyPair})
+                .pipe(Effect.ignore)
+            )
+          )
+        ),
+        Effect.all,
+        Effect.runPromise
       )
     )
 

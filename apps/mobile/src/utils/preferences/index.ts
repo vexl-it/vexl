@@ -25,7 +25,6 @@ export const preferencesAtom = atomWithParsedMmkvStorage(
     isDeveloper: false,
     marketplaceFiatOrSatsCurrency: 'FIAT',
     showVexlSearchForCooSuggestion: true,
-    showClubsFlow: false,
   },
   Preferences
 )

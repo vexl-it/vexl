@@ -2,7 +2,6 @@ import notifee, {AndroidImportance} from '@notifee/react-native'
 import {getDefaultStore} from 'jotai'
 import {translationAtom} from '../localization/I18nProvider'
 import {notificationPreferencesAtom} from '../preferences'
-import reportError from '../reportError'
 import checkAndShowCreateOfferPrompt from './checkAndShowCreateOfferPrompt'
 import {type NotificationPayload} from './extractDataFromNotification'
 import {getDefaultChannel} from './notificationChannels'
@@ -24,9 +23,6 @@ export async function showUINotificationFromRemoteMessage(
   const type = (data as any).type
 
   if (!type) {
-    reportError('warn', new Error('Notification type is missing'), {
-      data,
-    })
     return false
   }
 

@@ -10,10 +10,8 @@ import {useMemo} from 'react'
 import {TouchableOpacity} from 'react-native'
 import {getTokens, Text, XStack, YStack} from 'tamagui'
 import {type CRUDOfferStackScreenProps} from '../../../../navigationTypes'
-import {
-  clubsWithMembersAtomsAtom,
-  type ClubWithMembers,
-} from '../../../../state/clubs/atom/clubsWithMembersAtom'
+import {clubsWithMembersAtomsAtom} from '../../../../state/clubs/atom/clubsWithMembersAtom'
+import {type ClubWithMembers} from '../../../../state/clubs/domain'
 import atomKeyExtractor from '../../../../utils/atomUtils/atomKeyExtractor'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import Image from '../../../Image'

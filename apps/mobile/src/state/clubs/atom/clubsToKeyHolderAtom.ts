@@ -6,27 +6,28 @@ import {atom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {atomWithParsedMmkvStorageE} from '../../../utils/atomUtils/atomWithParsedMmkvStorageE'
 
-const ClubsDataStored = Schema.Struct({
+const ClubsToKeyHolder = Schema.Struct({
   data: Schema.Record({key: ClubUuidE, value: KeyHolder.PrivateKeyHolderE}),
   waitingForAdmission: Schema.optionalWith(Schema.Array(PrivateKeyHolderE), {
     default: () => [],
   }),
 })
 
-type ClubsDataStored = typeof ClubsDataStored.Type
+export type ClubsToKeyHolder = typeof ClubsToKeyHolder.Type
 
-export const myClubsStorageAtom = atomWithParsedMmkvStorageE(
+export const clubsKeyHolderStorageAtom = atomWithParsedMmkvStorageE(
   'storedClubs',
   {data: {}, waitingForAdmission: []},
-  ClubsDataStored
+  ClubsToKeyHolder
 )
 
-export const myStoredClubsAtom = focusAtom(myClubsStorageAtom, (o) =>
+export const clubsToKeyHolderAtom = focusAtom(clubsKeyHolderStorageAtom, (o) =>
   o.prop('data')
 )
 
-export const keysWaitingForAdmissionAtom = focusAtom(myClubsStorageAtom, (o) =>
-  o.prop('waitingForAdmission')
+export const keysWaitingForAdmissionAtom = focusAtom(
+  clubsKeyHolderStorageAtom,
+  (o) => o.prop('waitingForAdmission')
 )
 
 export const addKeyToWaitingForAdmissionActionAtom = atom(
@@ -36,9 +37,9 @@ export const addKeyToWaitingForAdmissionActionAtom = atom(
   }
 )
 
-export const removeMyStoredClubFromStateActionAtom = atom(
+export const removeClubFromKeyHolderStateActionAtom = atom(
   null,
   (get, set, clubUuid: ClubUuid) => {
-    set(myStoredClubsAtom, Struct.omit(clubUuid))
+    set(clubsToKeyHolderAtom, Struct.omit(clubUuid))
   }
 )

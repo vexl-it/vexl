@@ -28,7 +28,7 @@ import {apiAtom} from '../../../api'
 import getCountryPrefix from '../../../utils/getCountryCode'
 import {getNotificationToken} from '../../../utils/notifications'
 import reportError from '../../../utils/reportError'
-import {myStoredClubsAtom} from '../../clubs/atom/clubsStore'
+import {clubsToKeyHolderAtom} from '../../clubs/atom/clubsToKeyHolderAtom'
 import {upsertOfferToConnectionsActionAtom} from '../../connections/atom/offerToConnectionsAtom'
 import addNotificationCypherToPublicPayloadActionAtom from '../../notifications/addNotificationTokenToPublicPayloadActionAtom'
 import {sessionDataOrDummyAtom} from '../../session'
@@ -59,7 +59,7 @@ export const createOfferActionAtom = atom<
 >(null, (get, set, params) => {
   return Effect.gen(function* (_) {
     const api = get(apiAtom)
-    const clubsInfo = get(myStoredClubsAtom)
+    const clubsInfo = get(clubsToKeyHolderAtom)
     const session = get(sessionDataOrDummyAtom)
     const {intendedClubs, payloadPublic, intendedConnectionLevel, onProgress} =
       params

@@ -119,7 +119,7 @@ export const reachNumberAtom = atom((get) => {
     ...connectionState.secondLevel,
   ])
 
-  const clubsConnections = clubsWithMembers.data
+  const clubsConnections = clubsWithMembers
 
   // deduplicate to be double sure, even if we should not have duplicates here
   return deduplicate([...firstAndSecondLevelConnections, ...clubsConnections])

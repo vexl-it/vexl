@@ -16,8 +16,8 @@ import {type LocationSuggestion} from '@vexl-next/rest-api/src/services/location
 import {Record} from 'effect'
 import {atom, type Atom, type SetStateAction, type WritableAtom} from 'jotai'
 import {splitAtom} from 'jotai/utils'
-import {myStoredClubsAtom} from '../../state/clubs/atom/clubsStore'
-import {type ClubWithMembers} from '../../state/clubs/atom/clubsWithMembersAtom'
+import {clubsToKeyHolderAtom} from '../../state/clubs/atom/clubsToKeyHolderAtom'
+import {type ClubWithMembers} from '../../state/clubs/domain'
 import {
   createBtcPriceForCurrencyAtom,
   refreshBtcPriceActionAtom,
@@ -83,7 +83,7 @@ export const handleShowClubsInFilterChangeActionAtom = atom(
   (get) => get(showClubsInFilterAtom),
   (get, set) => {
     const showClubsInFilter = get(showClubsInFilterAtom)
-    const myStoredClubs = get(myStoredClubsAtom)
+    const myStoredClubs = get(clubsToKeyHolderAtom)
 
     if (!showClubsInFilter) {
       set(clubsUuidsFilterAtom, Record.keys(myStoredClubs))

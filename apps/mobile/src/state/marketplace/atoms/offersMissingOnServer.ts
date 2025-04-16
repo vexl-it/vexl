@@ -12,7 +12,7 @@ import {apiAtom} from '../../../api'
 import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
 import getCountryPrefix from '../../../utils/getCountryCode'
 import reportError from '../../../utils/reportError'
-import {myStoredClubsAtom} from '../../clubs/atom/clubsStore'
+import {clubsToKeyHolderAtom} from '../../clubs/atom/clubsToKeyHolderAtom'
 import {
   deleteOfferToConnectionsAtom,
   upsertOfferToConnectionsActionAtom,
@@ -71,7 +71,7 @@ const reencryptOneOfferActionAtom = atom(
     const session = get(sessionDataOrDummyAtom)
     const offerAtom = singleOfferAtom(offer.offerInfo.offerId)
     const intendedClubs = get(offerAtom)?.ownershipInfo?.intendedClubs ?? []
-    const clubsInfo = get(myStoredClubsAtom)
+    const clubsInfo = get(clubsToKeyHolderAtom)
 
     const intendedClubsRecord = pipe(
       intendedClubs,

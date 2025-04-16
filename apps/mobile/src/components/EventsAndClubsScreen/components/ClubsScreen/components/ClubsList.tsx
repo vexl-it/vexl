@@ -3,10 +3,8 @@ import {FlashList} from '@shopify/flash-list'
 import {type Atom, useAtomValue} from 'jotai'
 import {Image, Stack, Text, XStack, YStack} from 'tamagui'
 import membersSvg from '../../../../../images/memberSvg'
-import {
-  clubsWithMembersAtomsAtom,
-  type ClubWithMembers,
-} from '../../../../../state/clubs/atom/clubsWithMembersAtom'
+import {clubsWithMembersAtomsAtom} from '../../../../../state/clubs/atom/clubsWithMembersAtom'
+import {type ClubWithMembers} from '../../../../../state/clubs/domain'
 import atomKeyExtractor from '../../../../../utils/atomUtils/atomKeyExtractor'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import Button from '../../../../Button'

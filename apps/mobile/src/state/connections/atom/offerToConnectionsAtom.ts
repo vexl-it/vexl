@@ -226,7 +226,7 @@ export const updateAllOffersConnectionsActionAtom = atom(
 
         const clubIdsToEncryptFor = offer?.ownershipInfo?.intendedClubs
 
-        const {data: clubsData} = get(clubsWithMembersAtom)
+        const clubsData = get(clubsWithMembersAtom)
         const targetClubIdWithMembersArray = pipe(
           clubsData,
           Array.filter((one) =>

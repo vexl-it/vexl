@@ -13,8 +13,8 @@ import {getNotificationTokenE} from '../../../utils/notifications'
 import reportError from '../../../utils/reportError'
 import showErrorAlert from '../../../utils/showErrorAlert'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
-import {myStoredClubsAtom} from './clubsStore'
-import {clubsWithMembersAtom} from './clubsWithMembersAtom'
+import {clubsToKeyHolderAtom} from './clubsToKeyHolderAtom'
+import {syncSingleClubHandleStateWhenNotFoundActionAtom} from './refreshClubsActionAtom'
 
 export const submitCodeToJoinClubActionAtom = atom(
   null,
@@ -60,14 +60,14 @@ export const submitCodeToJoinClubActionAtom = atom(
         })
       )
 
-      const myStoredClubs = get(myStoredClubsAtom)
+      const myStoredClubs = get(clubsToKeyHolderAtom)
       const keyPair = newKeypair
 
       if (myStoredClubs[club.club.uuid]) {
         yield* _(Effect.fail(new MemberAlreadyInClubError()))
       }
 
-      set(myStoredClubsAtom, (prevState) => ({
+      set(clubsToKeyHolderAtom, (prevState) => ({
         ...prevState,
         [club.club.uuid]: keyPair,
       }))
@@ -83,13 +83,20 @@ export const submitCodeToJoinClubActionAtom = atom(
           .pipe(
             Effect.tapError(() =>
               Effect.sync(() => {
-                set(myStoredClubsAtom, Struct.omit(clubInfoForUser.club.uuid))
+                set(
+                  clubsToKeyHolderAtom,
+                  Struct.omit(clubInfoForUser.club.uuid)
+                )
               })
             )
           )
       )
 
-      yield* _(set(clubsWithMembersAtom))
+      yield* _(
+        set(syncSingleClubHandleStateWhenNotFoundActionAtom, {
+          clubUuid: clubInfoForUser.club.uuid,
+        })
+      )
 
       yield* _(
         set(askAreYouSureActionAtom, {

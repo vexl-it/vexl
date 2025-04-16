@@ -16,7 +16,7 @@ import {showUINotificationFromRemoteMessage} from '../utils/notifications/showUI
 import reportError from '../utils/reportError'
 import {fetchAndStoreMessagesForInboxAtom} from './chat/atoms/fetchNewMessagesActionAtom'
 import {checkForClubsAdmissionActionAtom} from './clubs/atom/checkForClubsAdmissionActionAtom'
-import {clubsWithMembersAtom} from './clubs/atom/clubsWithMembersAtom'
+import {syncAllClubsHandleStateWhenNotFoundActionAtom} from './clubs/atom/refreshClubsActionAtom'
 import {syncConnectionsActionAtom} from './connections/atom/connectionStateAtom'
 import {updateAllOffersConnectionsActionAtom} from './connections/atom/offerToConnectionsAtom'
 import processChatNotificationActionAtom from './notifications/processChatNotification'
@@ -31,7 +31,7 @@ export function useHandleReceivedNotifications(): void {
   const checkForClubAdmission = useSetAtom(checkForClubsAdmissionActionAtom)
 
   const syncConnections = useSetAtom(syncConnectionsActionAtom)
-  const syncClubConnections = useSetAtom(clubsWithMembersAtom)
+  const updateClubs = useSetAtom(syncAllClubsHandleStateWhenNotFoundActionAtom)
 
   useEffect(() => {
     const processNotification = async (
@@ -87,6 +87,7 @@ export function useHandleReceivedNotifications(): void {
         NewChatMessageNoticeNotificationData.parseUnkownOption(payload)
 
       if (Option.isSome(newChatMessageNoticeNotificationDataOption)) {
+        console.info('🔔 Received notification about new chat message')
         await store.set(
           processChatNotificationActionAtom,
           newChatMessageNoticeNotificationDataOption.value
@@ -95,7 +96,10 @@ export function useHandleReceivedNotifications(): void {
       }
 
       const handled = await showUINotificationFromRemoteMessage(payload)
-      if (handled) return
+      if (handled) {
+        console.info('🔔 Handled notification in UI')
+        return
+      }
       const isNewSocialNetworkConnectionNotification = Option.isSome(
         Schema.decodeUnknownOption(NewSocialNetworkConnectionNotificationData)(
           payload
@@ -117,7 +121,11 @@ export function useHandleReceivedNotifications(): void {
         console.info(
           `🔔 Received notification about new user in club ${newClubConnectionNotificationO.value.clubUuids.join(',')}. Checking and updating offers accordingly.`
         )
-        await Effect.runPromise(syncClubConnections())
+        await Effect.runPromise(
+          updateClubs({
+            updateOnlyUuids: newClubConnectionNotificationO.value.clubUuids,
+          })
+        )
         await updateOffersConnections({isInBackground: false})()
         return
       }
@@ -130,7 +138,6 @@ export function useHandleReceivedNotifications(): void {
           `🔔 Received notification about new user in club ${admitedToClubNetworkNotificationDataO.value.publicKey}`
         )
         await Effect.runPromise(checkForClubAdmission())
-        await updateOffersConnections({isInBackground: false})()
         return
       }
 
@@ -151,9 +158,9 @@ export function useHandleReceivedNotifications(): void {
     fetchMessagesForInbox,
     checkForClubAdmission,
     navigation,
-    syncClubConnections,
     store,
     syncConnections,
     updateOffersConnections,
+    updateClubs,
   ])
 }

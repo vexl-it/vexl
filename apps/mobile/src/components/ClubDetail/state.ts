@@ -9,7 +9,7 @@ import {pipe} from 'fp-ts/lib/function'
 import {atom, useAtomValue, useSetAtom} from 'jotai'
 import {useEffect} from 'react'
 import {apiAtom} from '../../api'
-import {myStoredClubsAtom} from '../../state/clubs/atom/clubsStore'
+import {clubsToKeyHolderAtom} from '../../state/clubs/atom/clubsToKeyHolderAtom'
 
 type ListLinksError = Effect.Effect.Error<
   ReturnType<ContactApi['listClubLinks']>
@@ -41,7 +41,7 @@ export const fetchClubLinksActionAtom = atom(
   null,
   (get, set, clubUuid: ClubUuid) => {
     const {contact} = get(apiAtom)
-    const clubUuidKeyPair = get(myStoredClubsAtom)[clubUuid]
+    const clubUuidKeyPair = get(clubsToKeyHolderAtom)[clubUuid]
 
     const existingData = get(fetchedClubLinksAtom)
     if (
@@ -78,7 +78,7 @@ export const regenerateClubLinkActionAtom = atom(
   null,
   (get, set, clubUuid: ClubUuid) => {
     const {contact} = get(apiAtom)
-    const clubUuidKeyPair = get(myStoredClubsAtom)[clubUuid]
+    const clubUuidKeyPair = get(clubsToKeyHolderAtom)[clubUuid]
     if (!clubUuidKeyPair) {
       return Effect.fail({
         state: 'error',

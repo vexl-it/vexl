@@ -1,4 +1,4 @@
-FROM node:19 as builder
+FROM node:20 as builder
 
 WORKDIR /app
 
@@ -11,7 +11,7 @@ RUN yarn build
 # RUN npx @sentry/wizard@latest -i sourcemaps
 
 
-FROM node:19 as runner
+FROM node:20 as runner
 
 
 COPY --from=builder /app/tooling/handy-scripts/ /app/tooling/handy-scripts

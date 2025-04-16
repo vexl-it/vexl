@@ -1,4 +1,4 @@
-FROM node:19-alpine as builder
+FROM node:20-alpine as builder
 
 WORKDIR /app
 
@@ -10,7 +10,7 @@ RUN yarn install
 RUN yarn build
 
 
-FROM node:19-alpine as runner
+FROM node:20-alpine as runner
 
 
 COPY --from=builder /app/apps/account-deletion-website/ /app/apps/account-deletion-website/

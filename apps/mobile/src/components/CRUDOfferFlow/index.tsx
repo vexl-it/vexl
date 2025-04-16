@@ -44,7 +44,11 @@ function CRUDOfferFlow({route: {params}, navigation}: Props): JSX.Element {
     dontAllowNavigationToNextStepAndReturnReasonAtom,
   } = useMolecule(offerFormMolecule)
 
-  const screensBasedOnListingType = useAtomValue(screensBasedOnListingTypeAtom)
+  /* TODO: For now private part is not reencrypted when editing offer: https://github.com/vexl-it/vexl/issues/1636 */
+  const screens = useAtomValue(screensBasedOnListingTypeAtom)
+  const screensBasedOnListingType = params.offerId
+    ? screens.filter((screen) => screen !== 'FriendLevelScreen')
+    : screens
   const emitAlertBasedOnCurrentStepIfAny = useSetAtom(
     emitAlertBasedOnCurrentStepIfAnyAtom
   )

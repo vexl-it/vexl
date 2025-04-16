@@ -44,7 +44,7 @@ export const Preferences = z
     marketplaceFiatOrSatsCurrency: FiatOrSats.default('FIAT'),
     goldenAvatarType: GoldenAvatarType.optional(),
     showVexlSearchForCooSuggestion: z.boolean().default(true),
-    showClubsFlow: z.boolean().default(false),
+    showClubsFlow: z.boolean().optional().default(false),
   })
   .readonly()
 

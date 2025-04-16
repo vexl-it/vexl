@@ -63,7 +63,3 @@ export const showVexlSearchForCooSuggestionAtom = focusAtom(
   preferencesAtom,
   (o) => o.prop('showVexlSearchForCooSuggestion')
 )
-
-export const showClubsFlowAtom = focusAtom(preferencesAtom, (o) =>
-  o.prop('showClubsFlow')
-)

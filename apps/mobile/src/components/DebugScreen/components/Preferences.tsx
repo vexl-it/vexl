@@ -12,7 +12,6 @@ const preferencesToEdit = [
   'showTextDebugButton',
   'isDeveloper',
   'showOfferDetail',
-  'showClubsFlow',
 ] as const
 
 function Preferences(): JSX.Element {

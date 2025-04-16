@@ -18,7 +18,6 @@ import Image from '../../../Image'
 import clubsSvg from '../../../images/clubsSvg'
 import Switch from '../../../Switch'
 
-import {showClubsFlowAtom} from '../../../../utils/preferences'
 import ClubItem from './components/ClubItem'
 
 interface OfferFormProps {
@@ -51,9 +50,6 @@ function ClubsComponent(props: Props): JSX.Element | null {
   const [showClubsInFilter, setShowClubsInFilter] = useAtom(
     showClubsInFilterAtom
   )
-  const showClubsFlow = useAtomValue(showClubsFlowAtom)
-
-  if (!showClubsFlow) return null
 
   return (
     <YStack>

@@ -3,7 +3,7 @@ import {Array, Effect, Record, pipe} from 'effect'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../../api'
 import reportError from '../../../../utils/reportError'
-import {myStoredClubsAtom} from '../../../clubs/atom/clubsStore'
+import {clubsToKeyHolderAtom} from '../../../clubs/atom/clubsToKeyHolderAtom'
 import {sessionDataOrDummyAtom} from '../../../session'
 import {ensureMyOffersHaveOwnershipInfoUploadedInPrivatepayloadForOwner} from '../ensureMyOffersHaveOwnershipInfoUploadedInPrivatepayloadForOwner'
 import {loadingStateAtom} from '../loadingState'
@@ -17,7 +17,7 @@ export const refreshOffersActionAtom = atom(null, (get, set) =>
   Effect.gen(function* (_) {
     const api = get(apiAtom)
     const session = get(sessionDataOrDummyAtom)
-    const myStoredClubs = get(myStoredClubsAtom)
+    const myStoredClubs = get(clubsToKeyHolderAtom)
 
     const updateStartedAt = isoNow()
     const storedOffers = get(offersAtom)

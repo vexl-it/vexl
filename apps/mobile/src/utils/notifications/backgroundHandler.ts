@@ -10,7 +10,7 @@ import * as TaskManager from 'expo-task-manager'
 import {getDefaultStore} from 'jotai'
 import {AppState, Platform} from 'react-native'
 import {checkForClubsAdmissionActionAtom} from '../../state/clubs/atom/checkForClubsAdmissionActionAtom'
-import {clubsWithMembersAtom} from '../../state/clubs/atom/clubsWithMembersAtom'
+import {syncAllClubsHandleStateWhenNotFoundActionAtom} from '../../state/clubs/atom/refreshClubsActionAtom'
 import {syncConnectionsActionAtom} from '../../state/connections/atom/connectionStateAtom'
 import {updateAllOffersConnectionsActionAtom} from '../../state/connections/atom/offerToConnectionsAtom'
 import processChatNotificationActionAtom from '../../state/notifications/processChatNotification'
@@ -94,6 +94,9 @@ export async function processBackgroundMessage(
       )
     )
     if (isNewSocialNetworkConnectionNotification) {
+      console.info(
+        '📳 Received notification about new user. Checking and updating offers accordingly.'
+      )
       await Effect.runPromise(getDefaultStore().set(syncConnectionsActionAtom))
       await getDefaultStore().set(updateAllOffersConnectionsActionAtom, {
         isInBackground: true,
@@ -106,9 +109,13 @@ export async function processBackgroundMessage(
     )(payload)
     if (Option.isSome(newClubConnectionNotificationO)) {
       console.info(
-        `🔔 Received notification about new user in club ${newClubConnectionNotificationO.value.clubUuids.join(',')}. Checking and updating offers accordingly.`
+        `📳 Received notification about new user in club ${newClubConnectionNotificationO.value.clubUuids.join(',')}. Checking and updating offers accordingly.`
       )
-      await Effect.runPromise(getDefaultStore().set(clubsWithMembersAtom))
+      await Effect.runPromise(
+        getDefaultStore().set(syncAllClubsHandleStateWhenNotFoundActionAtom, {
+          updateOnlyUuids: newClubConnectionNotificationO.value.clubUuids,
+        })
+      )
       await getDefaultStore().set(updateAllOffersConnectionsActionAtom, {
         isInBackground: true,
       })()
@@ -120,7 +127,7 @@ export async function processBackgroundMessage(
     )(payload)
     if (Option.isSome(admitedToClubNetworkNotificationDataO)) {
       console.info(
-        `🔔 Received notification about beeing added to club ${admitedToClubNetworkNotificationDataO.value.publicKey}`
+        `📳 Received notification about beeing added to club ${admitedToClubNetworkNotificationDataO.value.publicKey}`
       )
       await Effect.runPromise(
         getDefaultStore().set(checkForClubsAdmissionActionAtom)

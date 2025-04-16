@@ -11,9 +11,9 @@ import {
   Array,
   Context,
   Effect,
-  HashMap,
   HashSet,
   Layer,
+  MutableHashMap,
   Option,
   pipe,
   Schema,
@@ -31,28 +31,40 @@ export const ClubNotificationRecord = Schema.Struct({
 })
 type ClubNotificationRecord = typeof ClubNotificationRecord.Type
 
+const toEntries = <K, V>(
+  map: MutableHashMap.MutableHashMap<K, V>
+): Array<[K, V]> =>
+  pipe(
+    map,
+    MutableHashMap.keys,
+    Array.filterMap((k) =>
+      MutableHashMap.get(map, k).pipe(Option.map((value) => [k, value]))
+    )
+  )
+
 const prepareNotificationsFromRedisData = (
   redisData: readonly ClubNotificationRecord[]
 ): Array<{
   data: Record<string, string>
   tokens: ExpoNotificationToken[]
 }> => {
-  const keysToClubs = HashMap.empty<
+  const keysToClubs = MutableHashMap.empty<
     ExpoNotificationToken,
     HashSet.HashSet<ClubUuid>
   >()
 
   for (const {token, clubUuid} of redisData) {
-    const clubUuids = Option.getOrElse(HashMap.get(keysToClubs, token), () =>
-      HashSet.empty()
+    const clubUuidsForToken = pipe(
+      MutableHashMap.get(keysToClubs, token),
+      Option.getOrElse(() => HashSet.empty()),
+      HashSet.add(clubUuid)
     )
-    HashSet.add(clubUuids, clubUuid)
-    HashMap.set(keysToClubs, token, clubUuids)
+    MutableHashMap.set(keysToClubs, token, clubUuidsForToken)
   }
 
   return pipe(
     keysToClubs,
-    HashMap.toEntries,
+    toEntries,
     Array.map(([token, clubUuids]) => ({
       tokens: [token],
       data: new NewClubConnectionNotificationData({
@@ -132,10 +144,13 @@ export class NewClubUserNotificationsService extends Context.Tag(
           }),
         flushAndSendRegisteredClubNotifications: () =>
           Effect.gen(function* (_) {
-            const toSend = yield* _(
+            const dataFromRedis = yield* _(
               readAndDeleteList(NEW_CLUB_USER_NOTIFICATIONS_KEY),
               Effect.catchTag('RecordDoesNotExistsReddisError', () =>
-                Effect.succeed([] as readonly ClubNotificationRecord[])
+                Effect.zipRight(
+                  Effect.log('No new clubs notifications to report'),
+                  Effect.succeed([] as readonly ClubNotificationRecord[])
+                )
               ),
               Effect.catchAll(
                 (e) =>
@@ -149,7 +164,13 @@ export class NewClubUserNotificationsService extends Context.Tag(
             )
 
             const notificationsToSend =
-              prepareNotificationsFromRedisData(toSend)
+              prepareNotificationsFromRedisData(dataFromRedis)
+
+            yield* _(
+              Effect.log(
+                `Reporting notification about new users in club to ${notificationsToSend.length} users`
+              )
+            )
 
             yield* _(
               Effect.all(

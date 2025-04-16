@@ -4,13 +4,13 @@ import {useSetAtom} from 'jotai'
 import {useCallback} from 'react'
 import {useAppState} from '../../utils/useAppState'
 import {checkForClubsAdmissionActionAtom} from '../clubs/atom/checkForClubsAdmissionActionAtom'
-import {clubsWithMembersAtom} from '../clubs/atom/clubsWithMembersAtom'
+import {syncAllClubsHandleStateWhenNotFoundActionAtom} from '../clubs/atom/refreshClubsActionAtom'
 import {syncConnectionsActionAtom} from './atom/connectionStateAtom'
 import {updateAllOffersConnectionsActionAtom} from './atom/offerToConnectionsAtom'
 
 export function useSyncConnections(): void {
   const syncConnections = useSetAtom(syncConnectionsActionAtom)
-  const syncClubsConnections = useSetAtom(clubsWithMembersAtom)
+  const syncClubs = useSetAtom(syncAllClubsHandleStateWhenNotFoundActionAtom)
   const updateOffers = useSetAtom(updateAllOffersConnectionsActionAtom)
   const checkForClubAdmissions = useSetAtom(checkForClubsAdmissionActionAtom)
 
@@ -21,19 +21,14 @@ export function useSyncConnections(): void {
         pipe(
           syncConnections(),
           Effect.andThen(() => checkForClubAdmissions()),
-          Effect.andThen(() => syncClubsConnections()),
+          Effect.andThen(() => syncClubs()),
           Effect.andThen(() =>
             taskToEffect(updateOffers({isInBackground: false}))
           ),
           Effect.runFork
         )
       },
-      [
-        checkForClubAdmissions,
-        syncClubsConnections,
-        syncConnections,
-        updateOffers,
-      ]
+      [checkForClubAdmissions, syncClubs, syncConnections, updateOffers]
     )
   )
 }

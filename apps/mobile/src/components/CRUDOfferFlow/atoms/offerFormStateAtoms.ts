@@ -30,7 +30,7 @@ import {
   IsoDatetimeString,
   MINIMAL_DATE,
 } from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
-import {Uuid, generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
+import {generateUuid, Uuid} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {calculateViewportRadius} from '@vexl-next/domain/src/utility/geoCoordinates'
 import {
   eitherToEffect,
@@ -38,14 +38,16 @@ import {
 } from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {generateKeyPair} from '@vexl-next/resources-utils/src/utils/crypto'
 import {type LocationSuggestion} from '@vexl-next/rest-api/src/services/location/contracts'
-import {Effect, pipe} from 'effect'
-import * as E from 'fp-ts/Either'
+import {Array, Effect, Option, pipe} from 'effect'
 import {focusAtom} from 'jotai-optics'
 import {splitAtom} from 'jotai/utils'
 import {Alert} from 'react-native'
 import {type CRUDOfferStackParamsList} from '../../../navigationTypes'
 import {createInboxAtom} from '../../../state/chat/hooks/useCreateInbox'
 import {type ClubWithMembers} from '../../../state/clubs/domain'
+import {
+  clubsWithMembersAtom,
+} from '../../../state/clubs/atom/clubsWithMembersAtom'
 import {
   createBtcPriceForCurrencyAtom,
   refreshBtcPriceActionAtom,
@@ -492,7 +494,7 @@ export const offerFormMolecule = molecule(() => {
           const newValue = new Set(value)
           if (selected) newValue.add(club.uuid)
           else newValue.delete(club.uuid)
-          return Array.from(newValue)
+          return Array.fromIterable(newValue)
         })
       }
     )
@@ -626,9 +628,10 @@ export const offerFormMolecule = molecule(() => {
       return Effect.gen(function* (_) {
         const intendedConnectionLevel = get(intendedConnectionLevelAtom)
         const intendedClubs = get(selectedClubsUuidsAtom)
-        const belowProgressLeft = get(modifyOfferLoaderTitleAtom)
         const {goldenAvatarType} = get(preferencesAtom)
         const payloadPublic = formatOfferPublicPart(get(offerFormAtom))
+
+        const belowProgressLeft = yield* _(get(modifyOfferLoaderTitleAtom))
 
         yield* _(set(checkNotificationPermissionsAndAskIfPossibleActionAtom))
 
@@ -760,12 +763,27 @@ export const offerFormMolecule = molecule(() => {
   const modifyOfferLoaderTitleAtom = atom((get) => {
     const {t} = get(translationAtom)
     const numberOfFriends = get(numberOfFriendsAtom)
+    // TODO: this value is from state and may not be 100% accurate
+    // as we are fetching connections when encrypting offer once more
     const intendedConnectionLevel = get(intendedConnectionLevelAtom)
+    const intendedClubs = get(selectedClubsUuidsAtom)
+    const offerEncryptedAlsoForClubs = Array.length(intendedClubs) > 0
+    const clubsMembersCount = pipe(
+      get(clubsWithMembersAtom),
+      Array.filterMap((club) =>
+        Array.contains(club.club.uuid)(intendedClubs)
+          ? Option.some(club.members)
+          : Option.none()
+      ),
+      Array.flatten,
+      Array.length
+    )
 
     return pipe(
       numberOfFriends,
-      E.match(
-        (e) => {
+      eitherToEffect,
+      Effect.match({
+        onFailure(e) {
           if (e._tag !== 'friendsNotLoaded') {
             showErrorAlert({
               title: toCommonErrorMessage(e, t) ?? t('common.unknownError'),
@@ -778,26 +796,29 @@ export const offerFormMolecule = molecule(() => {
             doneText: t('offerForm.noVexlersFoundForYourOffer'),
           }
         },
-        (r) => {
+        onSuccess(r) {
+          const friendsCount =
+            intendedConnectionLevel === 'FIRST'
+              ? !offerEncryptedAlsoForClubs
+                ? r.firstLevelFriendsCount
+                : r.firstLevelFriendsCount + clubsMembersCount
+              : !offerEncryptedAlsoForClubs
+                ? r.secondLevelFriendsCount
+                : r.secondLevelFriendsCount + clubsMembersCount
+
           return {
             loadingText: t('offerForm.offerEncryption.forVexlers', {
-              count:
-                intendedConnectionLevel === 'FIRST'
-                  ? r.firstLevelFriendsCount
-                  : r.secondLevelFriendsCount,
+              count: friendsCount,
             }),
             doneText: t(
               'offerForm.offerEncryption.anonymouslyDeliveredToVexlers',
               {
-                count:
-                  intendedConnectionLevel === 'FIRST'
-                    ? r.firstLevelFriendsCount
-                    : r.secondLevelFriendsCount,
+                count: friendsCount,
               }
             ),
           }
-        }
-      )
+        },
+      })
     )
   })
 
@@ -805,13 +826,14 @@ export const offerFormMolecule = molecule(() => {
     const {t} = get(translationAtom)
 
     return Effect.gen(function* (_) {
-      const belowProgressLeft = get(modifyOfferLoaderTitleAtom)
       const targetValue = !get(offerActiveAtom)
 
       set(offerActiveAtom, targetValue)
       const offer = get(offerAtom)
 
       if (!offer.ownershipInfo) return
+
+      const belowProgressLeft = yield* _(get(modifyOfferLoaderTitleAtom))
 
       set(progressModal.show, {
         title: t('editOffer.editingYourOffer'),
@@ -877,7 +899,6 @@ export const offerFormMolecule = molecule(() => {
 
   const editOfferActionAtom = atom(null, (get, set) => {
     const {t} = get(translationAtom)
-    const belowProgressLeft = get(modifyOfferLoaderTitleAtom)
     const singlePriceActive = get(singlePriceActiveAtom)
 
     if (
@@ -890,17 +911,19 @@ export const offerFormMolecule = molecule(() => {
       return Effect.succeed(false)
     }
 
-    set(progressModal.show, {
-      title: t('editOffer.editingYourOffer'),
-      bottomText: t('editOffer.pleaseWait'),
-      belowProgressLeft: belowProgressLeft.loadingText,
-      indicateProgress: {type: 'intermediate'},
-    })
-
     return Effect.gen(function* (_) {
       const offer = get(offerAtom)
       const intendedConnectionLevel = get(intendedConnectionLevelAtom)
       const intendedClubs = get(selectedClubsUuidsAtom)
+
+      const belowProgressLeft = yield* _(get(modifyOfferLoaderTitleAtom))
+
+      set(progressModal.show, {
+        title: t('editOffer.editingYourOffer'),
+        bottomText: t('editOffer.pleaseWait'),
+        belowProgressLeft: belowProgressLeft.loadingText,
+        indicateProgress: {type: 'intermediate'},
+      })
 
       const payloadPublic = formatOfferPublicPart(get(offerFormAtom))
 

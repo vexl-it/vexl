@@ -17,7 +17,7 @@ export const leaveClubWithAreYouSureActionAtom = atom(
             title: t('clubs.areYouSureYouWantToLeave'),
             description: t('clubs.leavingWarning'),
             negativeButtonText: t('common.cancel'),
-            positiveButtonText: t('common.yesDelete'),
+            positiveButtonText: t('common.yesLeave'),
           },
         ],
         variant: 'danger',

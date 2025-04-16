@@ -65,12 +65,17 @@ const prepareNotificationsFromRedisData = (
   return pipe(
     keysToClubs,
     toEntries,
-    Array.map(([token, clubUuids]) => ({
-      tokens: [token],
-      data: new NewClubConnectionNotificationData({
-        clubUuids: Array.fromIterable(HashSet.values(clubUuids)),
-      }).toData(),
-    }))
+    Array.filterMap(([token, clubUuids]) => {
+      const clubUuidsArray = Array.fromIterable(HashSet.values(clubUuids))
+      if (!Array.isNonEmptyArray(clubUuidsArray)) return Option.none()
+
+      return Option.some({
+        tokens: [token],
+        data: new NewClubConnectionNotificationData({
+          clubUuids: clubUuidsArray,
+        }).toData(),
+      })
+    })
   )
 }
 

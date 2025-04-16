@@ -1,0 +1,14 @@
+{
+  "trailingComma": "es5",
+  "singleQuote": true,
+  "bracketSpacing": false,
+  "quoteProps": "preserve",
+  "semi": false,
+  "plugins": [
+    "prettier-plugin-embed",
+    "prettier-plugin-sql",
+    "prettier-plugin-organize-imports"
+  ],
+  "language": "postgresql",
+  "keywordCase": "upper"
+}

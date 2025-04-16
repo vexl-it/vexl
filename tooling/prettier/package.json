@@ -1,12 +1,11 @@
 {
   "name": "@vexl-next/prettier-config",
   "version": "0.0.0",
-  "main": "index.mjs",
+  "main": "prettierconfig.json",
   "scripts": {
     "clean": "rm -rf .turbo node_modules",
     "format": "prettier --check \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json}\"",
-    "format:fix": "prettier --write \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json}\"",
-    "typecheck": "tsc --noEmit"
+    "format:fix": "prettier --write \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json}\""
   },
   "dependencies": {
     "prettier": "^3.3.2",
@@ -14,9 +13,5 @@
     "prettier-plugin-organize-imports": "^3.2.4",
     "prettier-plugin-sql": "^0.18.0"
   },
-  "devDependencies": {
-    "@vexl-next/tsconfig": "0.0.0",
-    "typescript": "^5.6.3"
-  },
-  "prettier": "./index.mjs"
+  "prettier": "./prettierconfig.json"
 }

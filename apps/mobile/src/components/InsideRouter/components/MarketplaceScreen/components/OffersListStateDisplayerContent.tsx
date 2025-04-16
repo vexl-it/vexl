@@ -23,7 +23,6 @@ import {refocusMapActionAtom} from '../../../../../state/marketplace/atoms/map/f
 import {joinVexlClubsSuggestionVisibleAtom} from '../../../../../state/marketplace/atoms/offerSuggestionVisible'
 import {refreshOffersActionAtom} from '../../../../../state/marketplace/atoms/refreshOffersActionAtom'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
-import {showClubsFlowAtom} from '../../../../../utils/preferences'
 import ErrorListHeader from '../../../../ErrorListHeader'
 import {MAP_SIZE} from '../../../../MarketplaceMap'
 import MarketplaceMapContainer from '../../../../MarketplaceMapContainer'
@@ -44,14 +43,13 @@ import VexlNewsSuggestions from './VexlNewsSuggestions'
 function ListFooterComponent(): JSX.Element | null {
   const {t} = useTranslation()
   const navigation = useNavigation()
-  const showClubsFlow = useAtomValue(showClubsFlowAtom)
   const minutesTillOffersDisplayed = useAtomValue(
     minutesTillOffersDisplayedAtom
   )
 
   if (minutesTillOffersDisplayed >= 0) return null
 
-  return showClubsFlow ? (
+  return (
     <Stack mt="$4">
       <MarketplaceSuggestion
         buttonText={t('suggestion.whatAreClubs')}
@@ -64,7 +62,7 @@ function ListFooterComponent(): JSX.Element | null {
         visibleStateAtom={joinVexlClubsSuggestionVisibleAtom}
       />
     </Stack>
-  ) : null
+  )
 }
 
 function OffersListStateDisplayerContent(): JSX.Element {

@@ -1,9 +1,7 @@
-import {useAtomValue} from 'jotai'
 import {Stack, Text} from 'tamagui'
 import {type PostLoginFlowStackScreenProps} from '../../../../navigationTypes'
 import {useFinishPostLoginFlow} from '../../../../state/postLoginOnboarding'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
-import {showClubsFlowAtom} from '../../../../utils/preferences'
 import Image from '../../../Image'
 import {
   HeaderProxy,
@@ -17,7 +15,6 @@ type Props = PostLoginFlowStackScreenProps<'FindOffersInVexlClubsScreen'>
 function FindOffersInVexlClubsScreen({navigation}: Props): JSX.Element {
   const {t} = useTranslation()
   const finishPostLoginFlow = useFinishPostLoginFlow()
-  const showClubsFlow = useAtomValue(showClubsFlowAtom)
 
   return (
     <WhiteContainer testID="@findOffersInVexlClubsScreen">
@@ -40,21 +37,19 @@ function FindOffersInVexlClubsScreen({navigation}: Props): JSX.Element {
             {t('postLoginFlow.findOffersInVexlClubs.text')}
           </Text>
         </Stack>
-        {!!showClubsFlow && (
-          <NextButtonProxy
-            disabled={false}
-            text={t('clubs.joinNewClub')}
-            onPress={() => {
-              navigation.navigate('JoinClubFlow', {
-                screen: 'ScanClubQrCodeScreen',
-              })
-            }}
-            secondButton={{
-              text: t('common.skip'),
-              onPress: finishPostLoginFlow,
-            }}
-          />
-        )}
+        <NextButtonProxy
+          disabled={false}
+          text={t('clubs.joinNewClub')}
+          onPress={() => {
+            navigation.navigate('JoinClubFlow', {
+              screen: 'ScanClubQrCodeScreen',
+            })
+          }}
+          secondButton={{
+            text: t('common.skip'),
+            onPress: finishPostLoginFlow,
+          }}
+        />
       </Stack>
     </WhiteContainer>
   )

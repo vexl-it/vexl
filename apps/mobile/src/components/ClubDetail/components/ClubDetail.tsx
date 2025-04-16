@@ -107,10 +107,11 @@ export function ClubDetail({
               leaveClub(club).pipe(
                 Effect.match({
                   onFailure: (e) => {
-                    showErrorAlert({
-                      title: t('common.unknownError'),
-                      error: e,
-                    })
+                    if (e._tag !== 'UserDeclinedError')
+                      showErrorAlert({
+                        title: t('common.unknownError'),
+                        error: e,
+                      })
                     loadingOverlay.hide()
                   },
                   onSuccess: () => {

@@ -121,6 +121,18 @@ export const submitCodeToJoinClubActionAtom = atom(
         navigationRef.navigate('ClubDetail', {
           clubUuid: club.club.uuid,
         })
+
+        const filteredRoutes = navigationRef
+          .getRootState()
+          .routes.filter((route) => route.name !== 'JoinClubFlow')
+
+        navigationRef.reset({
+          index: filteredRoutes.length - 1,
+          routes: filteredRoutes.map((route) => ({
+            name: route.name,
+            params: route.params,
+          })),
+        })
       }
 
       return true

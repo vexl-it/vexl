@@ -57,6 +57,7 @@ export default {
   'icon': extra.icon,
   'userInterfaceStyle': 'light',
   'jsEngine': 'hermes',
+  'newArchEnabled': false,
   'scheme': 'app.vexl.it',
   'platforms': ['ios', 'android'],
   'splash': {

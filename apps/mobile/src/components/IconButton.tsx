@@ -1,11 +1,6 @@
 import {type SvgString} from '@vexl-next/domain/src/utility/SvgString.brand'
-import {useCallback, useMemo} from 'react'
-import {
-  TouchableOpacity,
-  type ColorValue,
-  type StyleProp,
-  type ViewStyle,
-} from 'react-native'
+import {useCallback, useMemo, type ComponentProps} from 'react'
+import {TouchableOpacity, type ColorValue} from 'react-native'
 import {Stack, getTokens, styled} from 'tamagui'
 import Image from './Image'
 
@@ -19,7 +14,7 @@ interface Props {
   iconFill?: ColorValue
   iconStroke?: ColorValue
   onPress: () => void
-  style?: StyleProp<ViewStyle>
+  style?: ComponentProps<typeof PressableStyled>['style']
   variant?: 'dark' | 'light' | 'primary' | 'negative' | 'secondary' | 'plain'
   oval?: boolean
   iconWidth?: number

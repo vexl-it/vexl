@@ -1,5 +1,5 @@
 import {useAtomValue} from 'jotai'
-import {Text, XStack, getTokens, type StackProps} from 'tamagui'
+import {getTokens, Text, XStack, type XStackProps} from 'tamagui'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {AnimatedLiveIndicator} from '../../AnimatedLiveIndicator'
 import Image from '../../Image'
@@ -7,7 +7,7 @@ import userSvg from '../../images/userSvg'
 import {tradePriceTypeAtom} from '../atoms'
 import snowflakeSvg from '../images/snowflakeSvg'
 
-interface Props extends StackProps {
+interface Props extends XStackProps {
   displayInGrayColor?: boolean
 }
 

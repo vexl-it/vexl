@@ -1019,6 +1019,8 @@
   "tradeChecklist.dateAndTime.addDifferentTime": "Add different date and time",
   "tradeChecklist.dateAndTime.pastDatesAndTimesFound": "Past dates and times found",
   "tradeChecklist.dateAndTime.pleaseRemovePastDatesAndTimes": "Please remove past dates and times to proceed.",
+  "tradeChecklist.dateAndTime.noTimeOptionSelected": "No time option selected",
+  "tradeChecklist.dateAndTime.pleaseSelectAtLeastOneTime": "Please select at least one time option.",
   "tradeChecklist.calculateAmount.includingAbbreviation": "incl.",
   "tradeChecklist.calculateAmount.fee": "fee",
   "tradeChecklist.calculateAmount.calculateAmount": "Calculate amount",

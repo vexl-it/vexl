@@ -1,6 +1,6 @@
 import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
+import {Effect, pipe} from 'effect'
 import * as T from 'fp-ts/Task'
-import {pipe} from 'fp-ts/function'
 import {useAtomValue, useSetAtom, useStore} from 'jotai'
 import React, {useCallback} from 'react'
 import {Stack} from 'tamagui'
@@ -25,7 +25,9 @@ import {
 import Content from '../../../Content'
 import Header from '../../../Header'
 import {
+  isThereAnyAvailableDateTimeSelectedAtom,
   isThereAnyOutdatedDateTimeAtom,
+  noDateTimeSelectedActionAtom,
   uniqueAvailableDatesAtom,
 } from '../../atoms'
 import TimeOptionsPerDate from './components/TimeOptionsPerDate'
@@ -38,8 +40,12 @@ function AddTimeOptionsScreen({navigation}: Props): JSX.Element {
     isThereAnyOutdatedDateTimeAtom
   )
   const setInfoModal = useSetAtom(askAreYouSureActionAtom)
+  const setNoDateTimeSelected = useSetAtom(noDateTimeSelectedActionAtom)
 
   const uniqueAvailableDates = useAtomValue(uniqueAvailableDatesAtom)
+  const isThereAnyAvailableDateTimeSelected = useAtomValue(
+    isThereAnyAvailableDateTimeSelectedAtom
+  )
 
   const showLoadingOverlay = useSetAtom(loadingOverlayDisplayedAtom)
   const addDateAndTimeSuggestions = useSetAtom(
@@ -54,6 +60,11 @@ function AddTimeOptionsScreen({navigation}: Props): JSX.Element {
   const shouldSendOnSubmit = !useWasOpenFromAgreeOnTradeDetailsScreen()
 
   const onSavePress = useCallback(() => {
+    if (!isThereAnyAvailableDateTimeSelected) {
+      Effect.runFork(setNoDateTimeSelected())
+      return
+    }
+
     if (isThereAnyOutdatedDateTime) {
       void pipe(
         setInfoModal({
@@ -99,9 +110,11 @@ function AddTimeOptionsScreen({navigation}: Props): JSX.Element {
     }
   }, [
     addDateAndTimeSuggestions,
+    isThereAnyAvailableDateTimeSelected,
     isThereAnyOutdatedDateTime,
     navigation,
     setInfoModal,
+    setNoDateTimeSelected,
     shouldSendOnSubmit,
     showLoadingOverlay,
     store,

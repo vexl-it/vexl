@@ -13,6 +13,7 @@ import {getNotificationTokenE} from '../../../utils/notifications'
 import reportError from '../../../utils/reportError'
 import showErrorAlert from '../../../utils/showErrorAlert'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
+import {finishPostLoginFlowActionAtom} from '../../postLoginOnboarding'
 import {clubsToKeyHolderAtom} from './clubsToKeyHolderAtom'
 import {syncSingleClubHandleStateWhenNotFoundActionAtom} from './refreshClubsActionAtom'
 
@@ -118,21 +119,22 @@ export const submitCodeToJoinClubActionAtom = atom(
       )
 
       if (navigationRef.isReady()) {
-        navigationRef.navigate('ClubDetail', {
-          clubUuid: club.club.uuid,
-        })
+        if (
+          navigationRef
+            .getRootState()
+            .routes.some((route) => route.name === 'PostLoginFlow')
+        ) {
+          yield* _(set(finishPostLoginFlowActionAtom))
 
-        const filteredRoutes = navigationRef
-          .getRootState()
-          .routes.filter((route) => route.name !== 'JoinClubFlow')
-
-        navigationRef.reset({
-          index: filteredRoutes.length - 1,
-          routes: filteredRoutes.map((route) => ({
-            name: route.name,
-            params: route.params,
-          })),
-        })
+          navigationRef.reset({
+            index: 0,
+            routes: [{name: 'InsideTabs'}],
+          })
+        } else {
+          navigationRef.navigate('EventsAndClubs', {
+            screen: 'Clubs',
+          })
+        }
       }
 
       return true

@@ -1,14 +1,15 @@
-import * as TE from 'fp-ts/TaskEither'
+import {taskEitherToEffect} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
+import {Effect} from 'effect'
 import {pipe} from 'fp-ts/lib/function'
-import {useAtomValue, useSetAtom} from 'jotai'
+import {atom, useAtomValue} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {z} from 'zod'
 import {atomWithParsedMmkvStorage} from '../utils/atomUtils/atomWithParsedMmkvStorage'
-import {useTranslation} from '../utils/localization/I18nProvider'
+import {translationAtom} from '../utils/localization/I18nProvider'
 import reportError from '../utils/reportError'
 import showErrorAlert from '../utils/showErrorAlert'
-import useCreateInbox from './chat/hooks/useCreateInbox'
-import {useSessionAssumeLoggedIn} from './session'
+import {createInboxAtom} from './chat/hooks/useCreateInbox'
+import {sessionDataOrDummyAtom} from './session'
 
 export const postLoginFinishedStorageAtom = atomWithParsedMmkvStorage(
   'postLoginFinished1',
@@ -20,34 +21,32 @@ export const postLoginFinishedAtom = focusAtom(
   (o) => o.prop('postLoginFinished')
 )
 
-export function useFinishPostLoginFlow(): () => void {
-  const setFinished = useSetAtom(postLoginFinishedAtom)
-  const createInbox = useCreateInbox()
-  const session = useSessionAssumeLoggedIn()
-  const {t} = useTranslation()
+export const finishPostLoginFlowActionAtom = atom(null, (get, set) => {
+  const {t} = get(translationAtom)
 
-  return () => {
-    void pipe(
-      createInbox({inbox: {privateKey: session.privateKey}}),
-      TE.match(
-        (e) => {
-          if (e._tag === 'ErrorInboxAlreadyExists') {
-            setFinished(true)
-            return
-          }
-          reportError('error', new Error('Error creating inbox'), {e})
-          showErrorAlert({
-            title: t('common.errorCreatingInbox'),
-            error: e,
-          })
-        },
-        () => {
-          setFinished(true)
+  return pipe(
+    set(createInboxAtom, {
+      inbox: {privateKey: get(sessionDataOrDummyAtom).privateKey},
+    }),
+    taskEitherToEffect,
+    Effect.match({
+      onFailure(e) {
+        if (e._tag === 'ErrorInboxAlreadyExists') {
+          set(postLoginFinishedAtom, true)
+          return
         }
-      )
-    )()
-  }
-}
+        reportError('error', new Error('Error creating inbox'), {e})
+        showErrorAlert({
+          title: t('common.errorCreatingInbox'),
+          error: e,
+        })
+      },
+      onSuccess() {
+        set(postLoginFinishedAtom, true)
+      },
+    })
+  )
+})
 
 export function useIsPostLoginFinished(): boolean {
   return useAtomValue(postLoginFinishedAtom)

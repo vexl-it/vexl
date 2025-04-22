@@ -1,6 +1,8 @@
+import {Effect} from 'effect'
+import {useSetAtom} from 'jotai'
 import {Stack, Text} from 'tamagui'
 import {type PostLoginFlowStackScreenProps} from '../../../../navigationTypes'
-import {useFinishPostLoginFlow} from '../../../../state/postLoginOnboarding'
+import {finishPostLoginFlowActionAtom} from '../../../../state/postLoginOnboarding'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import Image from '../../../Image'
 import {
@@ -14,7 +16,7 @@ type Props = PostLoginFlowStackScreenProps<'FindOffersInVexlClubsScreen'>
 
 function FindOffersInVexlClubsScreen({navigation}: Props): JSX.Element {
   const {t} = useTranslation()
-  const finishPostLoginFlow = useFinishPostLoginFlow()
+  const finishPostLoginFlow = useSetAtom(finishPostLoginFlowActionAtom)
 
   return (
     <WhiteContainer testID="@findOffersInVexlClubsScreen">
@@ -47,7 +49,7 @@ function FindOffersInVexlClubsScreen({navigation}: Props): JSX.Element {
           }}
           secondButton={{
             text: t('common.skip'),
-            onPress: finishPostLoginFlow,
+            onPress: () => Effect.runFork(finishPostLoginFlow()),
           }}
         />
       </Stack>

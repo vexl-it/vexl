@@ -1,9 +1,11 @@
+import {Effect} from 'effect'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
+import {useSetAtom} from 'jotai'
 import {Stack, Text} from 'tamagui'
 import NotificationsSvg from '../../../../images/notificationsSvg'
 import {type PostLoginFlowStackScreenProps} from '../../../../navigationTypes'
-import {useFinishPostLoginFlow} from '../../../../state/postLoginOnboarding'
+import {finishPostLoginFlowActionAtom} from '../../../../state/postLoginOnboarding'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import {useRequestNotificationPermissions} from '../../../../utils/notifications'
 import SvgImage from '../../../Image'
@@ -18,7 +20,7 @@ type Props = PostLoginFlowStackScreenProps<'AllowNotificationsExplanation'>
 
 function AllowNotificationsExplanationScreen({navigation}: Props): JSX.Element {
   const {t} = useTranslation()
-  const finishPostLoginFlow = useFinishPostLoginFlow()
+  const finishPostLoginFlow = useSetAtom(finishPostLoginFlowActionAtom)
   const requestNotificationPermissions = useRequestNotificationPermissions()
   const loadingOverlay = useShowLoadingOverlay()
 
@@ -69,7 +71,7 @@ function AllowNotificationsExplanationScreen({navigation}: Props): JSX.Element {
         disabled={false}
         secondButton={{
           text: t('postLoginFlow.allowNotifications.cancel'),
-          onPress: finishPostLoginFlow,
+          onPress: () => Effect.runFork(finishPostLoginFlow()),
         }}
       />
     </>

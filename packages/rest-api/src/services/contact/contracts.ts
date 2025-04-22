@@ -532,6 +532,7 @@ export type GetClubInfoByAccessCodeRequest =
 
 export const GetClubInfoByAccessCodeResponse = Schema.Struct({
   club: ClubInfo,
+  isModerator: Schema.Boolean,
 })
 
 export const GetClubInfoByAccessCodeErrors = Schema.Union(

@@ -5,7 +5,6 @@ import {useAtomValue, useSetAtom} from 'jotai'
 import React from 'react'
 import {TouchableWithoutFeedback} from 'react-native'
 import {Text, XStack, YStack} from 'tamagui'
-import {enableHiddenFeatures} from '../../../utils/environment'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {useAtomActionRunFork} from '../../../utils/useAtomActionEffect'
 import SvgImage from '../../Image'
@@ -21,6 +20,7 @@ import {
   useClubInviteLink,
 } from '../state'
 import {showJoinClubQrCodeActionAtom} from '../utils/joinClubQrCodeDialog'
+import {showAdmitUserToClubScannerActionAtom} from '../utils/showAdmitUserToClubDialog'
 
 const emptyFunction = (): void => {}
 
@@ -66,6 +66,9 @@ export function ClubModeratorData({club}: {club: ClubInfo}): JSX.Element {
 
   const displayLoadingOverlay = useSetAtom(loadingOverlayDisplayedAtom)
   const showJoinClubQrCode = useSetAtom(showJoinClubQrCodeActionAtom)
+  const showAdmitUserToClubScanner = useSetAtom(
+    showAdmitUserToClubScannerActionAtom
+  )
 
   if (isLoading) {
     return (
@@ -112,18 +115,14 @@ export function ClubModeratorData({club}: {club: ClubInfo}): JSX.Element {
           text={t('clubs.moderator.noInviteCodeGenerated')}
         />
       )}
-      {!!enableHiddenFeatures && (
-        <ModeratorActionComponent
-          showBorderTop
-          text={t('clubs.moderator.inviteUserWithCode')}
-          onPress={() => {
-            alert(
-              'todo. Na tohle ještě nemáme ani design z pohledu uživatele - nějak musí jít vygenerovat můj kód. Je to easy ale pojďme to teď nekomplikovat...'
-            )
-          }}
-          icon={inviteSvg}
-        />
-      )}
+      <ModeratorActionComponent
+        showBorderTop
+        text={t('clubs.moderator.inviteUserWithCode')}
+        onPress={() => {
+          Effect.runFork(showAdmitUserToClubScanner())
+        }}
+        icon={inviteSvg}
+      />
       <ModeratorActionComponent
         showBorderTop
         text={

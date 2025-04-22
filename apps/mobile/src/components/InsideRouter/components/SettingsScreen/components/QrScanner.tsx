@@ -5,6 +5,7 @@ import {useCallback, useEffect, useRef, useState} from 'react'
 import React, {Alert, Dimensions, Linking} from 'react-native'
 import {Stack, Text, YStack} from 'tamagui'
 import {handleDeepLinkActionAtom} from '../../../../../utils/deepLinks'
+import {type DeepLinkData} from '../../../../../utils/deepLinks/parseDeepLink'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import {forceHideAskAreYouSureActionAtom} from '../../../../AreYouSureDialog'
 import Button from '../../../../Button'
@@ -16,7 +17,13 @@ const scannerStyle = {
   flex: 1,
 }
 
-function QrScanner(): JSX.Element {
+function QrScanner({
+  title,
+  allowOnlySpecificTypes,
+}: {
+  title?: string
+  allowOnlySpecificTypes?: Array<DeepLinkData['searchParams']['type']>
+}): JSX.Element {
   const {t} = useTranslation()
   const [error, setError] = useState<string | undefined>(undefined)
   const scanned = useRef(false)
@@ -57,20 +64,27 @@ function QrScanner(): JSX.Element {
   const onScanned = useCallback(
     ({data: linkdata}: {data: string}) => {
       if (scanned.current) return
+      scanned.current = true
 
-      handleDeepLinkAction(linkdata).pipe(
+      handleDeepLinkAction(linkdata, allowOnlySpecificTypes).pipe(
         Effect.tapError((e) =>
           Effect.sync(() => {
+            scanned.current = false
             setError(t('common.errorWhileReadingQrCode'))
           })
         ),
         Effect.andThen(() => {
           forceHideAskAreYouSureDialog()
-          scanned.current = true
-        })
+        }),
+        Effect.runFork
       )
     },
-    [handleDeepLinkAction, t, forceHideAskAreYouSureDialog]
+    [
+      handleDeepLinkAction,
+      t,
+      forceHideAskAreYouSureDialog,
+      allowOnlySpecificTypes,
+    ]
   )
 
   return (
@@ -92,7 +106,7 @@ function QrScanner(): JSX.Element {
             color="$black"
             textAlign="center"
           >
-            {t('qrScanner.title')}
+            {title ?? t('qrScanner.title')}
           </Text>
         )}
         {/* Unmount barCodeScanner if not visible as advised in official documentation */}

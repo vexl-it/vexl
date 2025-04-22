@@ -63,6 +63,8 @@ export const DeepLinkRequestClubAdmition = Schema.Struct({
   type: Schema.Literal(LINK_TYPE_REQUEST_CLUB_ADMITION),
   ...ClubAdmitionRequest.fields,
 })
+export type DeepLinkRequestClubAdmition =
+  typeof DeepLinkRequestClubAdmition.Type
 
 export const DeepLinkData = parseUrlWithSearchParams(
   Schema.Union(

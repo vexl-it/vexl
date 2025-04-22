@@ -53,6 +53,7 @@ export const getClubInfoByAccessCode = Handler.make(
 
         return {
           club,
+          isModerator: inviteLink.forAdmin,
         }
       }),
       GetClubInfoByAccessCodeErrors

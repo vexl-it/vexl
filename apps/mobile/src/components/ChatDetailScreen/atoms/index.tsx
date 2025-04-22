@@ -501,6 +501,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
           usernameSavedForFutureUseAtom,
           revealIdentityImageUriAtom,
           imageSavedForFutureUseAtom,
+          commonConnectionsCountAtom,
         }),
         TE.chainW(({type, username, imageUri}) =>
           set(revealIdentityAtom, {type, username, imageUri})

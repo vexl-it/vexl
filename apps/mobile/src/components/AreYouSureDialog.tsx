@@ -12,7 +12,7 @@ import Button from './Button'
 import {ImageUniversal, type ImageUniversalProps} from './Image'
 import Input, {type Props as VexlTextInputProps} from './Input'
 
-interface StepWithText {
+export interface StepWithText {
   type: 'StepWithText'
   textAlign?: 'center' | 'left' | 'right'
   emojiTop?: string
@@ -23,7 +23,7 @@ interface StepWithText {
   positiveButtonText: string
 }
 
-interface StepWithChildren<T> {
+export interface StepWithChildren<T> {
   type: 'StepWithChildren'
   negativeButtonText?: string
   positiveButtonText: string

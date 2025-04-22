@@ -1,4 +1,5 @@
 import {useNavigation} from '@react-navigation/native'
+import {Effect} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import {TouchableOpacity} from 'react-native'
 import {Stack, Text, XStack, styled} from 'tamagui'
@@ -7,13 +8,14 @@ import {
   userDataRealOrAnonymizedAtom,
   userPhoneNumberAtom,
 } from '../../../../../state/session/userDataAtoms'
+import {andThenExpectBooleanNoErrors} from '../../../../../utils/andThenExpectNoErrors'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import {preferencesAtom} from '../../../../../utils/preferences'
 import SvgImage from '../../../../Image'
 import UserDataDisplay from '../../../../LoginFlow/components/AnonymizationAnimationScreen/components/UserDataDisplay'
 import ParticipatedInMeetup from '../../../../ParticipatedInMeetup'
 import cameraSvg from '../../../images/cameraSvg'
-import {qrScannerDialogAtom} from '../atoms'
+import {qrScannerDialogAtom, showReachNumberDetailsActionAtom} from '../atoms'
 import QRIconSVG from '../images/QRIconSVG'
 import reachIconSVG from '../images/reachIconSVG'
 import {qrCodeDialogAtom} from './QrCode'
@@ -34,6 +36,7 @@ function ProfileSection(): JSX.Element {
   const setQrCodeDialogVisible = useSetAtom(qrCodeDialogAtom)
   const setQrScannerDialogVisible = useSetAtom(qrScannerDialogAtom)
   const preferences = useAtomValue(preferencesAtom)
+  const showReachNumberDetails = useSetAtom(showReachNumberDetailsActionAtom)
 
   const userDataRealOrAnonymized = useAtomValue(userDataRealOrAnonymizedAtom)
   const userPhoneNumber = useAtomValue(userPhoneNumberAtom)
@@ -44,7 +47,11 @@ function ProfileSection(): JSX.Element {
         <Stack f={3}>
           <TouchableOpacity
             onPress={() => {
-              navigation.navigate('SetContacts', {})
+              void Effect.runPromise(
+                andThenExpectBooleanNoErrors((success) => {
+                  if (success) navigation.navigate('SetContacts', {})
+                })(showReachNumberDetails())
+              )
             }}
           >
             <GrayBackContainer>

@@ -5,14 +5,19 @@ import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/
 import * as E from 'fp-ts/Either'
 import {pipe} from 'fp-ts/function'
 import * as TE from 'fp-ts/TaskEither'
-import {atom, type PrimitiveAtom} from 'jotai'
+import {atom, type Atom, type PrimitiveAtom} from 'jotai'
 import {type RevealMessageType} from '../../state/chat/atoms/revealIdentityActionAtom'
 import {
   realUserImageAtom,
   realUserNameAtom,
 } from '../../state/session/userDataAtoms'
 import {translationAtom} from '../../utils/localization/I18nProvider'
-import {askAreYouSureActionAtom} from '../AreYouSureDialog'
+import {
+  askAreYouSureActionAtom,
+  type StepWithChildren,
+  type StepWithText,
+} from '../AreYouSureDialog'
+import ClubsRevealIdentityDialogContent from './ClubsRevealIdentityDialogContent'
 import {
   ImageDialogContent,
   UsernameDialogContent,
@@ -24,6 +29,7 @@ interface RevealIdentityActionParams {
   usernameSavedForFutureUseAtom: PrimitiveAtom<boolean>
   revealIdentityImageUriAtom: PrimitiveAtom<UriString | undefined>
   imageSavedForFutureUseAtom: PrimitiveAtom<boolean>
+  commonConnectionsCountAtom: Atom<number>
 }
 
 export const revealIdentityDialogUIAtom = atom(
@@ -36,29 +42,46 @@ export const revealIdentityDialogUIAtom = atom(
       usernameSavedForFutureUseAtom,
       revealIdentityImageUriAtom,
       imageSavedForFutureUseAtom,
+      commonConnectionsCountAtom,
     } = params
 
-    const modalContent = (() => {
+    const thereAreOnlyClubConnectionsWithOtherSide =
+      get(commonConnectionsCountAtom) === 0
+
+    const modalContentForFirstAndSecondDegreeConnections = (() => {
       if (type === 'REQUEST_REVEAL') {
         return {
+          type: 'StepWithText',
           title: t('messages.identityRevealRequestModal.title'),
           description: t('messages.identityRevealRequestModal.text'),
           negativeButtonText: t('common.back'),
           positiveButtonText: t('common.continue'),
-        }
+        } satisfies StepWithText
       }
       return {
+        type: 'StepWithText',
         title: t('messages.identityRevealRespondModal.title'),
         description: t('messages.identityRevealRespondModal.text'),
         negativeButtonText: t('common.no'),
         positiveButtonText: t('common.continue'),
-      }
+      } satisfies StepWithText
     })()
+
+    const modalContentForClubsConnectionsOnly = {
+      type: 'StepWithChildren',
+      MainSectionComponent: ClubsRevealIdentityDialogContent,
+      positiveButtonText: t('common.yes'),
+      negativeButtonText: t('common.no'),
+    } satisfies StepWithChildren<void>
+
+    const modalContent = thereAreOnlyClubConnectionsWithOtherSide
+      ? modalContentForClubsConnectionsOnly
+      : modalContentForFirstAndSecondDegreeConnections
 
     return pipe(
       set(askAreYouSureActionAtom, {
         steps: [
-          {...modalContent, type: 'StepWithText'},
+          modalContent,
           {
             type: 'StepWithChildren',
             MainSectionComponent: () => (

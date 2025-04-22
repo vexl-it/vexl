@@ -135,7 +135,6 @@ export default function revealIdentityActionAtom(
             })
           )
         ),
-
         TE.map((message): ChatMessageWithState => {
           if (
             ['APPROVE_REVEAL', 'DISAPPROVE_REVEAL'].includes(

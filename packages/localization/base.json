@@ -312,6 +312,8 @@
   "postLoginFlow.allowNotifications.vexlCantBeUsedWithoutNotifications": "Vexl app can’t be used without this permission.",
   "postLoginFlow.findOffersInVexlClubs.title": "Find offers in Vexl Clubs",
   "postLoginFlow.findOffersInVexlClubs.text": "Clubs expand your network but are less secure than trading with Level 1 or Level 2 friends.",
+  "postLoginFlow.allowContacts.errors.contactsPermissionsDenied": "Contacts permissions not granted",
+  "postLoginFlow.allowContacts.errors.permissionsDeniedDescription": "You can change this in the system settings later.",
   "settings.yourReach": "Your reach: {{number}} vexlers",
   "settings.items.eventsAndClubs": "Events and clubs",
   "settings.items.changeProfilePicture": "Change profile picture",

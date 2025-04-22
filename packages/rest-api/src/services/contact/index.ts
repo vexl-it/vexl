@@ -174,9 +174,9 @@ export function api({
         )
       ),
     leaveClub: (
-      getClubInfoRequest: RequestWithGeneratableChallenge<LeaveClubRequest>
+      leaveClubRequest: RequestWithGeneratableChallenge<LeaveClubRequest>
     ) =>
-      addChallenge(getClubInfoRequest).pipe(
+      addChallenge(leaveClubRequest).pipe(
         Effect.flatMap((body) =>
           handleCommonAndExpectedErrorsEffect(
             client.leaveClub({body}),

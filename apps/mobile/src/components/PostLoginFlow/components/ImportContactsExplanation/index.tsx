@@ -1,3 +1,4 @@
+import {Effect} from 'effect'
 import {useSetAtom} from 'jotai'
 import {useState} from 'react'
 import {Image} from 'react-native'
@@ -5,7 +6,7 @@ import {Stack, Text} from 'tamagui'
 import {type PostLoginFlowStackScreenProps} from '../../../../navigationTypes'
 import {resolveAllContactsAsSeenActionAtom} from '../../../../state/contacts/atom/contactsStore'
 import {submitContactsActionAtom} from '../../../../state/contacts/atom/submitContactsActionAtom'
-import {useFinishPostLoginFlow} from '../../../../state/postLoginOnboarding'
+import {finishPostLoginFlowActionAtom} from '../../../../state/postLoginOnboarding'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import AnonymizationCaption from '../../../AnonymizationCaption/AnonymizationCaption'
 import {
@@ -13,6 +14,7 @@ import {
   NextButtonProxy,
 } from '../../../PageWithButtonAndProgressHeader'
 import WhiteContainer from '../../../WhiteContainer'
+import {showContactsAccessDeniedExplanationActionAtom} from './atoms/showContactsAccesDeniedExplanationActionAtom'
 
 type Props = PostLoginFlowStackScreenProps<'ImportContactsExplanationScreen'>
 
@@ -25,7 +27,10 @@ export default function ImportContactsExplanationScreen({
   const resolveAllContactsAsSeen = useSetAtom(
     resolveAllContactsAsSeenActionAtom
   )
-  const finishPostLoginFlow = useFinishPostLoginFlow()
+  const showContactsAccessDeniedExplanation = useSetAtom(
+    showContactsAccessDeniedExplanationActionAtom
+  )
+  const finishPostLoginFlow = useSetAtom(finishPostLoginFlowActionAtom)
 
   return (
     <WhiteContainer testID="@importContactsExplanationScreen">
@@ -61,9 +66,13 @@ export default function ImportContactsExplanationScreen({
                 resolveAllContactsAsSeen()
                 setContactsLoading(false)
                 if (result === 'permissionsNotGranted') {
-                  navigation.navigate('FindOffersInVexlClubsScreen')
+                  void Effect.runPromise(
+                    showContactsAccessDeniedExplanation()
+                  ).then(() => {
+                    navigation.navigate('FindOffersInVexlClubsScreen')
+                  })
                 }
-                if (result === 'success') finishPostLoginFlow()
+                if (result === 'success') Effect.runFork(finishPostLoginFlow())
                 // if (success) navigation.push('AllowNotificationsExplanation')
               }
             )

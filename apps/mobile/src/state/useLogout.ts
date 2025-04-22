@@ -56,7 +56,7 @@ export const logoutActionAtom = atom(null, async (get, set) => {
     await failSilently(
       pipe(
         get(clubsWithMembersAtom),
-        Array.map((club) =>
+        Array.filterMap((club) =>
           Record.get(get(clubsToKeyHolderAtom), club.club.uuid).pipe(
             Option.map((keyPair) =>
               get(apiAtom)

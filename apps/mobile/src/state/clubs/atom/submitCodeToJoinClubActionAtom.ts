@@ -7,6 +7,7 @@ import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
 import {askAreYouSureActionAtom} from '../../../components/AreYouSureDialog'
 import clubImagePlaceholderSvg from '../../../components/JoinClubFlow/images/clubImagePlaceholderSvg'
+import {loadingOverlayDisplayedAtom} from '../../../components/LoadingOverlayProvider'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
 import {navigationRef} from '../../../utils/navigation'
 import {getNotificationTokenE} from '../../../utils/notifications'
@@ -65,6 +66,8 @@ export const submitCodeToJoinClubActionAtom = atom(
           ],
         })
       )
+
+      set(loadingOverlayDisplayedAtom, true)
 
       const myStoredClubs = get(clubsToKeyHolderAtom)
       const keyPair = newKeypair
@@ -144,6 +147,11 @@ export const submitCodeToJoinClubActionAtom = atom(
 
       return true
     }).pipe(
+      Effect.ensuring(
+        Effect.sync(() => {
+          set(loadingOverlayDisplayedAtom, false)
+        })
+      ),
       Effect.catchAll((e) =>
         Effect.sync(() => {
           if (e._tag === 'UserDeclinedError') return false

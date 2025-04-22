@@ -6,10 +6,14 @@ import {pipe} from 'fp-ts/function'
 import {atom} from 'jotai'
 import {type ChatIds} from '../../../state/chat/domain'
 import anonymizePhoneNumber from '../../../state/chat/utils/anonymizePhoneNumber'
+import connectionStateAtom from '../../../state/connections/atom/connectionStateAtom'
 import {sessionDataOrDummyAtom} from '../../../state/session'
 import {anonymizedUserDataAtom} from '../../../state/session/userDataAtoms'
-import * as fromChatAtoms from '../../../state/tradeChecklist/atoms/fromChatAtoms'
-import {tradeChecklistDataAtom} from '../../../state/tradeChecklist/atoms/fromChatAtoms'
+import {
+  chatWithMessagesAtom,
+  setParentChatActionAtom,
+  tradeChecklistDataAtom,
+} from '../../../state/tradeChecklist/atoms/fromChatAtoms'
 import {revealIdentityDialogUIAtom} from '../../RevealIdentityDialog/atoms'
 import {
   revealIdentityActionAtom,
@@ -20,6 +24,24 @@ const revealIdentityUsernameAtom = atom<string>('')
 const usernameSavedForFutureUseAtom = atom<boolean>(false)
 const revealIdentityImageUriAtom = atom<UriString | undefined>(undefined)
 const imageSavedForFutureUseAtom = atom<boolean>(false)
+
+const commonConnectionsCountAtom = atom((get) => {
+  const chat = get(chatWithMessagesAtom)
+  const connectionState = get(connectionStateAtom)
+
+  if (chat.chat.origin.type === 'myOffer')
+    return (
+      connectionState.commonFriends.commonContacts.find(
+        (contact) => contact.publicKey === chat.chat.otherSide.publicKey
+      )?.common.hashes ?? []
+    ).length
+
+  if (chat.chat.origin.type === 'theirOffer')
+    return (chat.chat.origin?.offer?.offerInfo.privatePart.commonFriends ?? [])
+      .length
+
+  return 0
+})
 
 export const revealIdentityWithUiFeedbackAtom = atom(null, (get, set) => {
   const {phoneNumber} = get(sessionDataOrDummyAtom)
@@ -38,6 +60,7 @@ export const revealIdentityWithUiFeedbackAtom = atom(null, (get, set) => {
       usernameSavedForFutureUseAtom,
       revealIdentityImageUriAtom,
       imageSavedForFutureUseAtom,
+      commonConnectionsCountAtom,
     }),
     TE.map(({type, username, imageUri}) => {
       const identityData = {
@@ -57,7 +80,7 @@ export const revealIdentityWithUiFeedbackAtom = atom(null, (get, set) => {
 export const revealIdentityFromQuickActionBannerAtom = atom(
   null,
   async (get, set, chatIds: ChatIds) => {
-    set(fromChatAtoms.setParentChatActionAtom, chatIds)
+    set(setParentChatActionAtom, chatIds)
 
     return await pipe(
       set(revealIdentityWithUiFeedbackAtom),

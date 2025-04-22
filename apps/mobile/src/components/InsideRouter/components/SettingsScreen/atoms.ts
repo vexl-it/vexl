@@ -1,8 +1,13 @@
+import {mergeToBoolean} from '@vexl-next/generic-utils/src/effect-helpers/mergeToBoolean'
 import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {pipe} from 'fp-ts/lib/function'
 import * as TE from 'fp-ts/TaskEither'
 import {atom, type SetStateAction, type WritableAtom} from 'jotai'
 import {Platform} from 'react-native'
+import {
+  clubsConnectionsReachAtom,
+  fistAndSecondLevelConnectionsReachAtom,
+} from '../../../../state/connections/atom/connectionStateAtom'
 import {
   userDataRealOrAnonymizedAtom,
   userPhoneNumberAtom,
@@ -90,4 +95,31 @@ export const qrScannerDialogAtom = atom(null, (get, set) => {
       () => {}
     )
   )()
+})
+
+export const showReachNumberDetailsActionAtom = atom(null, (get, set) => {
+  const {t} = get(translationAtom)
+  const clubsConnectionsReach = get(clubsConnectionsReachAtom)
+  const fistAndSecondLevelConnectionsReach = get(
+    fistAndSecondLevelConnectionsReachAtom
+  )
+
+  return pipe(
+    set(askAreYouSureActionAtom, {
+      variant: 'info',
+      steps: [
+        {
+          type: 'StepWithText',
+          title: t('settings.whatDoesYourReachMean'),
+          description: t('settings.yourReachConsistsOf', {
+            firstAndSecondLevelConnections: fistAndSecondLevelConnectionsReach,
+            clubConnections: clubsConnectionsReach,
+          }),
+          positiveButtonText: t('postLoginFlow.importContactsButton'),
+          negativeButtonText: t('common.goBack'),
+        },
+      ],
+    }),
+    mergeToBoolean
+  )
 })

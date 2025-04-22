@@ -7,7 +7,7 @@ import {
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {MAX_PAGE_SIZE} from '@vexl-next/rest-api/src/Pagination.brand'
 import {type ContactApi} from '@vexl-next/rest-api/src/services/contact'
-import {type Array, Effect} from 'effect'
+import {Array, Effect} from 'effect'
 import {pipe} from 'fp-ts/function'
 import {atom, type Atom} from 'jotai'
 import {apiAtom} from '../../../api'
@@ -111,20 +111,33 @@ export const syncConnectionsActionAtom = atom(
   }
 )
 
-export const reachNumberAtom = atom((get) => {
-  const clubsWithMembers = get(clubsWithMembersAtom)
+export const fistAndSecondLevelConnectionsReachAtom = atom((get) => {
   const connectionState = get(connectionStateAtom)
 
+  // deduplicate to be double sure, even if we should not have duplicates here
   const firstAndSecondLevelConnections = deduplicate([
     ...connectionState.firstLevel,
     ...connectionState.secondLevel,
   ])
 
-  const clubsConnections = clubsWithMembers
+  return firstAndSecondLevelConnections.length
+})
 
-  // deduplicate to be double sure, even if we should not have duplicates here
-  return deduplicate([...firstAndSecondLevelConnections, ...clubsConnections])
-    .length
+export const clubsConnectionsReachAtom = atom((get) => {
+  return pipe(
+    get(clubsWithMembersAtom),
+    Array.flatMap((club) => club.members),
+    Array.length
+  )
+})
+
+export const reachNumberAtom = atom((get) => {
+  const fistAndSecondLevelConnectionsReach = get(
+    fistAndSecondLevelConnectionsReachAtom
+  )
+  const clubsConnectionsReach = get(clubsConnectionsReachAtom)
+
+  return fistAndSecondLevelConnectionsReach + clubsConnectionsReach
 })
 
 export function createFriendLevelInfoAtom(

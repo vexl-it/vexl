@@ -51,9 +51,14 @@ export const submitCodeToJoinClubActionAtom = atom(
               title: t('clubs.wannaStepInsideOfClub', {
                 clubName: club.club.name,
               }),
-              description: t('clubs.joiningClubGivesYouAccess', {
-                clubName: club.club.name,
-              }),
+              description: t(
+                club.isModerator
+                  ? 'clubs.joiningClubGivesYouAccessAsModerator'
+                  : 'clubs.joiningClubGivesYouAccess',
+                {
+                  clubName: club.club.name,
+                }
+              ),
               negativeButtonText: t('common.cancel'),
               positiveButtonText: t('common.continue'),
             },

@@ -5,6 +5,7 @@ import {atom, useSetAtom, useStore} from 'jotai'
 import {useCallback, useEffect} from 'react'
 import {Alert} from 'react-native'
 import {z} from 'zod'
+import {admitUserToClubActionAtom} from '../../state/clubs/atom/admitUserToClubActionAtom'
 import {submitCodeToJoinClubActionAtom} from '../../state/clubs/atom/submitCodeToJoinClubActionAtom'
 import {atomWithParsedMmkvStorage} from '../atomUtils/atomWithParsedMmkvStorage'
 import {translationAtom} from '../localization/I18nProvider'
@@ -86,7 +87,7 @@ export const handleDeepLinkActionAtom = atom(
           mergeToBoolean
         )
       } else if (linkData.type === 'request-club-admition') {
-        // TODO
+        yield* _(set(admitUserToClubActionAtom, linkData), mergeToBoolean)
         return true
       }
 

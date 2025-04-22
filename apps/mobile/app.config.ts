@@ -1,7 +1,7 @@
 // import {SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 
 const VERSION_CODE = 421
-const VERSION = '1.29.0'
+const VERSION = '1.30.0'
 const ENV_PRESET = process.env.ENV_PRESET
 const COMMIT_HASH = process.env.EAS_BUILD_GIT_COMMIT_HASH ?? 'local'
 const APP_SOURCE = process.env.APP_SOURCE ?? 'local'
@@ -159,6 +159,11 @@ export default {
           {
             'scheme': 'https',
             'host': 'nextlink.vexl.it',
+            'pathPattern': '.*',
+          },
+          {
+            'scheme': 'https',
+            'host': 'app.vexl.it',
             'pathPattern': '.*',
           },
         ],

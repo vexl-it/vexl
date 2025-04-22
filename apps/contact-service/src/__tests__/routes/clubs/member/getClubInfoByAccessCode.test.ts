@@ -11,6 +11,9 @@ import {
 } from '@vexl-next/server-utils/src/services/challenge/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {Effect, Option, Schema} from 'effect'
+import {ClubInvitationLinkDbService} from '../../../../db/ClubInvitationLinkDbService'
+import {ClubsDbService} from '../../../../db/ClubsDbService'
+import {type ClubRecordId} from '../../../../db/ClubsDbService/domain'
 import {generateAndSignChallenge} from '../../../utils/generateAndSignChallenge'
 import {NodeTestingApp} from '../../../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../../utils/runPromiseInMockedEnvironment'
@@ -29,6 +32,7 @@ const club = {
   uuid: forClubUuid,
   validUntil: new Date(),
 }
+let clubId: ClubRecordId
 
 beforeEach(async () => {
   await runPromiseInMockedEnvironment(
@@ -49,40 +53,82 @@ beforeEach(async () => {
           },
         })
       )
+
+      const clubDb = yield* _(ClubsDbService)
+      const clubIdResult = yield* _(
+        clubDb.findClubByUuid({uuid: club.uuid}),
+        Effect.flatten
+      )
+      clubId = clubIdResult.id
     })
   )
 })
 
 describe('Get club info by access code', () => {
   it('should return club info by access code', async () => {
-    Effect.gen(function* (_) {
-      const app = yield* _(NodeTestingApp)
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const app = yield* _(NodeTestingApp)
 
-      const challengeForUser = yield* _(generateAndSignChallenge(userKey))
+        const challengeForUser = yield* _(generateAndSignChallenge(userKey))
 
-      const inviteLink = yield* _(
-        app.generateClubInviteLinkForAdmin({
-          body: {
-            clubUuid: forClubUuid,
-          },
-          query: {
-            adminToken: ADMIN_TOKEN,
-          },
-        })
-      )
+        const inviteDb = yield* _(ClubInvitationLinkDbService)
 
-      const clubInfo = yield* _(
-        app.getClubInfoByAccessCode({
-          body: {
-            publicKey: userKey.publicKeyPemBase64,
-            signedChallenge: challengeForUser.signedChallenge,
-            code: inviteLink.link.code,
-          },
-        })
-      )
+        const inviteLink = yield* _(
+          inviteDb.insertInvitationLink({
+            clubId,
+            code: '123456' as ClubCode,
+            forAdmin: false,
+            createdByMemberId: null,
+          })
+        )
 
-      expect(clubInfo).toEqual(club)
-    })
+        const clubInfo = yield* _(
+          app.getClubInfoByAccessCode({
+            body: {
+              publicKey: userKey.publicKeyPemBase64,
+              signedChallenge: challengeForUser.signedChallenge,
+              code: inviteLink.code,
+            },
+          })
+        )
+
+        expect(clubInfo).toEqual({club, isModerator: false})
+      })
+    )
+  })
+
+  it('should return club info by access code for moderator', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const app = yield* _(NodeTestingApp)
+
+        const challengeForUser = yield* _(generateAndSignChallenge(userKey))
+
+        const inviteLink = yield* _(
+          app.generateClubInviteLinkForAdmin({
+            body: {
+              clubUuid: forClubUuid,
+            },
+            query: {
+              adminToken: ADMIN_TOKEN,
+            },
+          })
+        )
+
+        const clubInfo = yield* _(
+          app.getClubInfoByAccessCode({
+            body: {
+              publicKey: userKey.publicKeyPemBase64,
+              signedChallenge: challengeForUser.signedChallenge,
+              code: inviteLink.link.code,
+            },
+          })
+        )
+
+        expect(clubInfo).toEqual({club, isModerator: true})
+      })
+    )
   })
 
   it('Should return 404 when link not found', async () => {

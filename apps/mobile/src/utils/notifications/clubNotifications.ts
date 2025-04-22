@@ -22,8 +22,8 @@ export function showInternalNotificationForClubAdmission(
   return Effect.promise(async () => {
     await notifee.displayNotification({
       id: `${clubInfo.uuid}-admission`,
-      title: t('clubs.addmittedNotificationTitle'),
-      body: t('clubs.addmittedNotificationText', {name: clubInfo.name}),
+      title: t('clubs.addmittedNotificationText'),
+      body: t('clubs.addmittedNotificationTitle', {name: clubInfo.name}),
       data: new ClubAdmissionInternalNotificationData({
         clubUuid: clubInfo.uuid,
       }).encoded,

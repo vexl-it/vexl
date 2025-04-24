@@ -1,52 +1,19 @@
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
-import {unixMillisecondsFromNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {hashSha256} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {
-  ClearEventsCacheErrors,
   type Event,
   EventId,
-  EventsResponse,
-  InvalidTokenError,
+  type EventsResponse,
 } from '@vexl-next/rest-api/src/services/content/contracts'
-import {
-  ClearEventsCacheEndpoint,
-  GetEventsEndpoint,
-} from '@vexl-next/rest-api/src/services/content/specification'
+import {GetEventsEndpoint} from '@vexl-next/rest-api/src/services/content/specification'
 import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
-import {RedisService} from '@vexl-next/server-utils/src/RedisService'
 import {Effect, Option, Schema} from 'effect'
 import {Handler} from 'effect-http'
-import {clearCacheTokenHashConfig} from '../configs'
+import {CacheService} from '../utils/cache'
 import {WebflowCmsService} from '../utils/webflowCms'
 import {
   type WebflowEventItem,
   type WebflowSpeakerItem,
 } from '../utils/webflowCms/domain'
-
-const EVENTS_REDIS_KEY = 'CONTENT:events'
-const EVENTS_REDIS_LIVETIME_MILISEC = 1000 * 60 * 60 * 24
-const getEventsFromRedis = RedisService.pipe(
-  Effect.flatMap((redis) => redis.get(EventsResponse)(EVENTS_REDIS_KEY)),
-  Effect.option
-)
-
-const saveEventsToRedisForked = (
-  toSave: EventsResponse
-): Effect.Effect<void, never, RedisService> =>
-  RedisService.pipe(
-    Effect.flatMap((redis) =>
-      redis.set(EventsResponse)(EVENTS_REDIS_KEY, toSave, {
-        expiresAt: unixMillisecondsFromNow(EVENTS_REDIS_LIVETIME_MILISEC),
-      })
-    ),
-    Effect.withSpan('saveEventsToRedis', {attributes: {events: toSave}}),
-    Effect.forkDaemon,
-    Effect.ignore
-  )
-
-const clearRedisCache = RedisService.pipe(
-  Effect.flatMap((e) => e.delete(EVENTS_REDIS_KEY))
-)
 
 const webflowEventsToResponse = ({
   speakers,
@@ -88,7 +55,9 @@ const webflowEventsToResponse = ({
 export const getEventsHandler = Handler.make(GetEventsEndpoint, () =>
   makeEndpointEffect(
     Effect.gen(function* (_) {
-      const data = yield* _(getEventsFromRedis)
+      const cache = yield* _(CacheService)
+
+      const data = yield* _(cache.getEventsFromRedis)
       if (Option.isSome(data)) {
         yield* _(
           Effect.logInfo(
@@ -118,35 +87,13 @@ export const getEventsHandler = Handler.make(GetEventsEndpoint, () =>
             status: 500,
           })
       ),
-      Effect.tap(saveEventsToRedisForked),
+      Effect.tap((data) =>
+        CacheService.pipe(
+          Effect.flatMap((cache) => cache.saveEventsToCacheForked(data))
+        )
+      ),
       Effect.withSpan('getEvents')
     ),
     Schema.Void
   )
-)
-
-export const clearEventsCacheHandler = Handler.make(
-  ClearEventsCacheEndpoint,
-  (req) =>
-    makeEndpointEffect(
-      Effect.gen(function* (_) {
-        const token = req.query.token
-
-        const receivedTokenHash = yield* _(hashSha256(token))
-
-        if (receivedTokenHash !== (yield* _(clearCacheTokenHashConfig))) {
-          return yield* _(new InvalidTokenError({status: 401}))
-        }
-
-        yield* _(clearRedisCache)
-
-        return null
-      }).pipe(
-        Effect.catchAll(
-          (e) => new UnexpectedServerError({cause: e, status: 500})
-        ),
-        Effect.withSpan('clearEventsCache')
-      ),
-      ClearEventsCacheErrors
-    )
 )

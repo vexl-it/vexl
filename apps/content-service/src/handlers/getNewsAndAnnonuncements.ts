@@ -73,7 +73,7 @@ const data = {
   } satisfies FullScreenWarning),
 } satisfies NewsAndAnnouncementsResponse
 
-export const newsAndAnonouncementsEndpoint = Handler.make(
+export const newsAndAnonouncementsHandler = Handler.make(
   NewsAndAnonouncementsEndpoint,
   ({headers}) =>
     makeEndpointEffect(

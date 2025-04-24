@@ -8,14 +8,18 @@ import {Effect, Layer} from 'effect'
 import {RouterBuilder} from 'effect-http'
 import {NodeServer} from 'effect-http-node'
 import {cryptoConfig, healthServerPortConfig, portConfig} from './configs'
-import {clearEventsCacheHandler, getEventsHandler} from './handlers'
-import {newsAndAnonouncementsEndpoint} from './handlers/getNewsAndAnnonuncements'
+import {getEventsHandler} from './handlers'
+import {getBlogsHandler} from './handlers/blog'
+import {clearCacheHandler} from './handlers/clearCache'
+import {newsAndAnonouncementsHandler} from './handlers/getNewsAndAnnonuncements'
+import {CacheService} from './utils/cache'
 import {WebflowCmsService} from './utils/webflowCms'
 
 export const app = RouterBuilder.make(ContentApiSpecification).pipe(
   RouterBuilder.handle(getEventsHandler),
-  RouterBuilder.handle(clearEventsCacheHandler),
-  RouterBuilder.handle(newsAndAnonouncementsEndpoint),
+  RouterBuilder.handle(clearCacheHandler),
+  RouterBuilder.handle(getBlogsHandler),
+  RouterBuilder.handle(newsAndAnonouncementsHandler),
   RouterBuilder.build,
   setupLoggingMiddlewares
 )
@@ -23,9 +27,9 @@ export const app = RouterBuilder.make(ContentApiSpecification).pipe(
 const MainLive = Layer.mergeAll(
   ServerCrypto.layer(cryptoConfig),
   WebflowCmsService.Live,
-  RedisService.layer(redisUrl),
+  CacheService.Live,
   healthServerLayer({port: healthServerPortConfig})
-)
+).pipe(Layer.provideMerge(RedisService.layer(redisUrl)))
 
 export const httpServer = portConfig.pipe(
   Effect.flatMap((port) => NodeServer.listen({port})(app)),

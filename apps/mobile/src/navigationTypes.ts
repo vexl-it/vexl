@@ -77,6 +77,8 @@ export type RootStackParamsList = {
   EventsAndClubs: NavigatorScreenParams<EventsAndClubsParamsList>
 
   JoinClubFlow: NavigatorScreenParams<JoinClubFlowParamsList>
+
+  BlogArticlesList: undefined
 }
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions

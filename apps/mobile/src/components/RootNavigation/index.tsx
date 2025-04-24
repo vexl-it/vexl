@@ -20,6 +20,7 @@ import {useHideInnactivityReminderNotificationsOnResume} from '../../utils/notif
 import {useRefreshNotificationTokenOnResumeAssumeLoggedIn} from '../../utils/notifications/useRefreshNotificationTokenOnResumeAssumeLoggedIn'
 import {showTextDebugButtonAtom} from '../../utils/preferences'
 import AppLogsScreen from '../AppLogsScreen'
+import {BlogArticlesListScreen} from '../BlogArticlesListScreen'
 import CRUDOfferFlow from '../CRUDOfferFlow'
 import ChangeProfilePictureScreen from '../ChangeProfilePictureScreen/ChangeProfilePictureScreen'
 import ChatDetailScreen from '../ChatDetailScreen'
@@ -132,6 +133,10 @@ function RootNavigation(): JSX.Element {
               component={TradeChecklistFlow}
             />
             <Stack.Screen name="JoinClubFlow" component={JoinClubFlow} />
+            <Stack.Screen
+              name="BlogArticlesList"
+              component={BlogArticlesListScreen}
+            />
           </Stack.Group>
         )}
         <Stack.Screen

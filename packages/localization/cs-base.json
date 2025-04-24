@@ -1158,5 +1158,7 @@
   "events.doYouWantToListYourMeetup": "Do you want to list your meetup?",
   "events.getInTouchWithUs": "Get in touch with us",
   "events.loadMore": "Load more",
-  "events.allLoaded": "All loaded"
+  "events.allLoaded": "All loaded",
+  "blog.title": "Blog",
+  "blog.readMore": "Read more"
 }

@@ -2,11 +2,13 @@ import axios from 'axios'
 import {Context, Effect, Layer, Schema} from 'effect'
 import {type ParseError} from 'effect/ParseResult'
 import {
-  WebflowEventsCollectionIdConfig,
-  WebflowSpeakersCollectionIdConfig,
-  WebflowTokenConfig,
+  webflowBlogCollectionIdConfig,
+  webflowEventsCollectionIdConfig,
+  webflowSpeakersCollectionIdConfig,
+  webflowTokenConfig,
 } from '../../configs'
 import {
+  WebflowBlogsResponse,
   WebflowEventsResponse,
   WebflowFetchError,
   WebflowSpeakersResponse,
@@ -19,6 +21,10 @@ export interface WebflowCmsOperations {
   >
   fetchSpeakers: () => Effect.Effect<
     WebflowSpeakersResponse,
+    WebflowFetchError | ParseError
+  >
+  fetchBlogs: () => Effect.Effect<
+    WebflowBlogsResponse,
     WebflowFetchError | ParseError
   >
 }
@@ -55,13 +61,14 @@ export class WebflowCmsService extends Context.Tag('WebflowCmsService')<
   static readonly Live = Layer.effect(
     WebflowCmsService,
     Effect.gen(function* (_) {
-      const webflowToken = yield* _(WebflowTokenConfig)
+      const webflowToken = yield* _(webflowTokenConfig)
       const webflowEventsCollectionId = yield* _(
-        WebflowEventsCollectionIdConfig
+        webflowEventsCollectionIdConfig
       )
       const webflowSpeakersCollectionId = yield* _(
-        WebflowSpeakersCollectionIdConfig
+        webflowSpeakersCollectionIdConfig
       )
+      const webflowBlogCollectionId = yield* _(webflowBlogCollectionIdConfig)
 
       const toReturn = {
         fetchEvents: () =>
@@ -76,6 +83,11 @@ export class WebflowCmsService extends Context.Tag('WebflowCmsService')<
           }).pipe(
             Effect.flatMap(Schema.decodeUnknown(WebflowSpeakersResponse))
           ),
+        fetchBlogs: () =>
+          listCollectionItems({
+            collectionId: webflowBlogCollectionId,
+            token: webflowToken,
+          }).pipe(Effect.flatMap(Schema.decodeUnknown(WebflowBlogsResponse))),
       } satisfies WebflowCmsOperations
 
       return toReturn

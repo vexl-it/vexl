@@ -54,6 +54,7 @@ export function api({
 
   return {
     getEvents: () => handleCommonErrorsEffect(client.getEvents({})),
+    getBlogArticles: () => handleCommonErrorsEffect(client.getBlogArticles({})),
     getNewsAndAnnoucements: () =>
       handleCommonErrorsEffect(
         client.getNewsAndAnnouncements({

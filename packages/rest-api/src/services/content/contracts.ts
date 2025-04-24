@@ -1,4 +1,5 @@
 import {HttpsUrlString} from '@vexl-next/domain/src/utility/HttpsUrlString.brand'
+import {UriStringE} from '@vexl-next/domain/src/utility/UriString.brand'
 import {UuidE} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {Schema} from 'effect'
 
@@ -25,6 +26,25 @@ export type Event = typeof Event.Type
 export const EventsResponse = Schema.Struct({
   events: Schema.Array(Event),
 })
+export type EventsResponse = typeof EventsResponse.Type
+
+export const BlogId = Schema.String.pipe(Schema.brand('BlogId'))
+export const BlogSlug = Schema.String.pipe(Schema.brand('BlogSlug'))
+export const BlogArticlePreview = Schema.Struct({
+  id: BlogId,
+  title: Schema.String,
+  slug: BlogSlug,
+  teaserText: Schema.optionalWith(Schema.String, {as: 'Option'}),
+  mainImage: Schema.optionalWith(UriStringE, {as: 'Option'}),
+  link: Schema.String,
+  publishedOn: Schema.DateFromString,
+})
+export type BlogArticlePreview = typeof BlogArticlePreview.Type
+
+export const BlogsArticlesResponse = Schema.Struct({
+  articles: Schema.Array(BlogArticlePreview),
+})
+export type BlogsArticlesResponse = typeof BlogsArticlesResponse.Type
 
 export class InvalidTokenError extends Schema.TaggedError<InvalidTokenError>(
   'InvalidTokenError'
@@ -33,8 +53,6 @@ export class InvalidTokenError extends Schema.TaggedError<InvalidTokenError>(
 }) {}
 
 export const ClearEventsCacheErrors = Schema.Union(InvalidTokenError)
-
-export type EventsResponse = typeof EventsResponse.Type
 
 export const ClearEventsCacheRequest = Schema.Struct({
   token: Schema.String,

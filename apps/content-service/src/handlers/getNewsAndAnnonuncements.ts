@@ -68,7 +68,7 @@ import {Handler} from 'effect-http'
 //   } satisfies FullScreenWarning),
 // } satisfies NewsAndAnnouncementsResponse
 
-export const newsAndAnonouncementsEndpoint = Handler.make(
+export const newsAndAnonouncementsHandler = Handler.make(
   NewsAndAnonouncementsEndpoint,
   ({headers}) =>
     makeEndpointEffect(

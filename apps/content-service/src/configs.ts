@@ -8,12 +8,17 @@ export {
   portConfig,
 } from '@vexl-next/server-utils/src/commonConfigs'
 
-export const WebflowTokenConfig = Config.string('WEBFLOW_TOKEN')
-export const WebflowEventsCollectionIdConfig = Config.string(
+export const webflowTokenConfig = Config.string('WEBFLOW_TOKEN')
+export const webflowEventsCollectionIdConfig = Config.string(
   'WEBFLOW_EVENTS_COLLECTION_ID'
 )
-export const WebflowSpeakersCollectionIdConfig = Config.string(
+export const webflowSpeakersCollectionIdConfig = Config.string(
   'WEBFLOW_SPEAKERS_COLLECTION_ID'
 )
+export const webflowBlogCollectionIdConfig = Config.string(
+  'WEBFLOW_BLOG_COLLECTION_ID'
+)
 
-export const ClearCacheTokenHashConfig = Config.string('CLEAR_CACHE_TOKEN_HASH')
+export const vexlBlogUrlTemplateConfig = Config.string('VEXL_BLOG_URL_TEMPLATE')
+
+export const clearCacheTokenHashConfig = Config.string('CLEAR_CACHE_TOKEN_HASH')

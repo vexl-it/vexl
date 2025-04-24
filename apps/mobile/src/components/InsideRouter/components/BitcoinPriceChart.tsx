@@ -110,11 +110,18 @@ function BitcoinPriceChart(): JSX.Element {
         {!!btcPriceForSelectedCurrency?.btcPrice &&
           btcPriceForSelectedCurrency.btcPrice.lastUpdatedAt._tag ===
             'Some' && (
-            <Text fos={12} color="$yellowAccent1">
+            <Text
+              width="100%"
+              fos={10}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              color="$yellowAccent1"
+              lineBreakMode="tail"
+            >
               {t('common.lastUpdated')}:{' '}
               {unixMillisecondsToPretty(
                 btcPriceForSelectedCurrency.btcPrice.lastUpdatedAt.value
-              )()}
+              )('L LT')}
             </Text>
           )}
       </YStack>

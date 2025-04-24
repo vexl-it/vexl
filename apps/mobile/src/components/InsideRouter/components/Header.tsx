@@ -5,6 +5,7 @@ import {getFontScaleSync} from 'react-native-device-info'
 import {Stack, XStack, getTokens, styled} from 'tamagui'
 import Image from '../../Image'
 import eventsAndClubsYellowIconSvg from '../../images/EventsAndClubsYellowIcon'
+import webIconYellowSvg from '../../images/webIconYellowSvg'
 import BitcoinPriceChart from './BitcoinPriceChart'
 import {CONTAINER_WITH_TOP_BORDER_RADIUS_TOP_PADDING} from './ContainerWithTopBorderRadius'
 import calculatorSvg from './MarketplaceScreen/images/calculatorSvg'
@@ -60,6 +61,18 @@ function BtcPriceHeader(): JSX.Element {
             <XStack ai="center" gap="$1" br="$2" py="$1" px="$1">
               <Image
                 source={eventsAndClubsYellowIconSvg}
+                stroke={getTokens().color.main.val}
+              />
+            </XStack>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => {
+              navigation.navigate('BlogArticlesList')
+            }}
+          >
+            <XStack ai="center" gap="$1" br="$2" py="$1" px="$1">
+              <Image
+                source={webIconYellowSvg}
                 stroke={getTokens().color.main.val}
               />
             </XStack>

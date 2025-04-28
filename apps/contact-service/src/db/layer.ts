@@ -12,6 +12,11 @@ import add_table_for_clubs from './migrations/0006_add_table_for_clubs'
 import add_expo_token_to_users_table from './migrations/0007_add_expo_token_to_users_table'
 import add_table_for_challenges from './migrations/0008_add_table_for_challenges'
 import club_member_rename_last_refreshed_at_to_timestamp from './migrations/0009_club_member_rename_last_refreshed_at_to_timestamp'
+import add_club_column_inactive_and_to_be_deleted from './migrations/0010_add_club_column_inactive_and_to_be_deleted'
+import add_club_column_report from './migrations/0011_add_club_column_report'
+import create_club_offer_reported_info_table_and_add_index from './migrations/0012_create_club_offer_reported_info_table_and_add_index'
+import add_club_column_report_limit from './migrations/0013_add_club_column_report_limit'
+import add_table_club_reported_record from './migrations/0014_add_table_club_reported_record'
 
 const migrations = [
   {
@@ -63,6 +68,31 @@ const migrations = [
     id: 10,
     name: 'club_member_rename_last_refreshed_at_to_timestamp',
     migrationEffect: club_member_rename_last_refreshed_at_to_timestamp,
+  },
+  {
+    id: 11,
+    name: 'add_club_column_inactive_and_to_be_deleted',
+    migrationEffect: add_club_column_inactive_and_to_be_deleted,
+  },
+  {
+    id: 12,
+    name: 'add_club_column_report',
+    migrationEffect: add_club_column_report,
+  },
+  {
+    id: 13,
+    name: 'create_club_offer_reported_info_table_and_add_index',
+    migrationEffect: create_club_offer_reported_info_table_and_add_index,
+  },
+  {
+    id: 14,
+    name: 'add_club_column_report_limit',
+    migrationEffect: add_club_column_report_limit,
+  },
+  {
+    id: 15,
+    name: 'add_table_club_reported_record',
+    migrationEffect: add_table_club_reported_record,
   },
 ] as const
 

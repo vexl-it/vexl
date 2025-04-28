@@ -41,6 +41,8 @@ import {
   ListClubLinksErrors,
   type ListClubLinksRequest,
   type RefreshUserInput,
+  ReportClubErrors,
+  type ReportClubRequest,
   UpdateBadOwnerHashErrors,
   type UpdateBadOwnerHashRequest,
   type UpdateNotificationTokenRequest,
@@ -196,9 +198,9 @@ export function api({
         )
       ),
     generateClubJoinLink: (
-      getClubInfoByAccessCodeRequest: RequestWithGeneratableChallenge<GenerateClubJoinLinkRequest>
+      generateClubJoinLinkRequest: RequestWithGeneratableChallenge<GenerateClubJoinLinkRequest>
     ) =>
-      addChallenge(getClubInfoByAccessCodeRequest).pipe(
+      addChallenge(generateClubJoinLinkRequest).pipe(
         Effect.flatMap((body) =>
           handleCommonAndExpectedErrorsEffect(
             client.generateClubJoinLink({body}),
@@ -207,9 +209,9 @@ export function api({
         )
       ),
     deactivateClubJoinLink: (
-      getClubInfoByAccessCodeRequest: RequestWithGeneratableChallenge<DeactivateClubJoinLinkRequest>
+      deactivateClubJoinLinkRequest: RequestWithGeneratableChallenge<DeactivateClubJoinLinkRequest>
     ) =>
-      addChallenge(getClubInfoByAccessCodeRequest).pipe(
+      addChallenge(deactivateClubJoinLinkRequest).pipe(
         Effect.flatMap((body) =>
           handleCommonAndExpectedErrorsEffect(
             client.deactivateClubJoinLink({body}),
@@ -218,9 +220,9 @@ export function api({
         )
       ),
     addUserToTheClub: (
-      getClubInfoByAccessCodeRequest: RequestWithGeneratableChallenge<AddUserToTheClubRequest>
+      addUserToTheClubRequest: RequestWithGeneratableChallenge<AddUserToTheClubRequest>
     ) =>
-      addChallenge(getClubInfoByAccessCodeRequest).pipe(
+      addChallenge(addUserToTheClubRequest).pipe(
         Effect.flatMap((body) =>
           handleCommonAndExpectedErrorsEffect(
             client.addUserToTheClub({body}),
@@ -236,6 +238,17 @@ export function api({
           handleCommonAndExpectedErrorsEffect(
             client.listClubLinks({body}),
             ListClubLinksErrors
+          )
+        )
+      ),
+    reportClub: (
+      reportClubRequest: RequestWithGeneratableChallenge<ReportClubRequest>
+    ) =>
+      addChallenge(reportClubRequest).pipe(
+        Effect.flatMap((body) =>
+          handleCommonAndExpectedErrorsEffect(
+            client.reportClub({body}),
+            ReportClubErrors
           )
         )
       ),

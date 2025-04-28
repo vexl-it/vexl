@@ -19,6 +19,7 @@ const clubsToSave = [
     membersCountLimit: 100,
     uuid: generateClubUuid(),
     validUntil: new Date(),
+    reportLimit: 10,
   },
   {
     clubImageUrl: SOME_URL,
@@ -27,6 +28,7 @@ const clubsToSave = [
     membersCountLimit: 104,
     uuid: generateClubUuid(),
     validUntil: new Date(),
+    reportLimit: 10,
   },
   {
     clubImageUrl: SOME_URL,
@@ -35,6 +37,7 @@ const clubsToSave = [
     membersCountLimit: 1003,
     uuid: generateClubUuid(),
     validUntil: new Date(),
+    reportLimit: 10,
   },
 ]
 describe('Modify club', () => {
@@ -93,6 +96,7 @@ describe('Modify club', () => {
           membersCountLimit: 100,
           uuid: clubsToSave[0].uuid,
           validUntil: new Date(),
+          reportLimit: 10,
         }
         const errorResponse = yield* _(
           app.modifyClub({
@@ -123,6 +127,7 @@ describe('Modify club', () => {
           membersCountLimit: 200,
           uuid: clubsToSave[0].uuid,
           validUntil: new Date(),
+          reportLimit: 10,
         }
 
         const modifiedClub = yield* _(
@@ -172,6 +177,7 @@ describe('Modify club', () => {
           membersCountLimit: 100,
           uuid: generateClubUuid(),
           validUntil: new Date(),
+          reportLimit: 10,
         }
 
         const errorResponse = yield* _(

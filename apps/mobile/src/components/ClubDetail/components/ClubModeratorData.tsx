@@ -1,5 +1,5 @@
+import {type ClubInfo} from '@vexl-next/domain/src/general/clubs'
 import {type SvgString} from '@vexl-next/domain/src/utility/SvgString.brand'
-import {type ClubInfo} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {Effect, Option} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React from 'react'

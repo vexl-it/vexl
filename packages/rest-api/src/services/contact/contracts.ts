@@ -5,6 +5,7 @@ import {
 import {
   ClubAdmitionRequest,
   ClubCode,
+  ClubInfo,
   ClubInfoForUser,
   ClubLinkInfo,
   ClubUuidE,
@@ -15,10 +16,9 @@ import {
   HashedPhoneNumber,
   HashedPhoneNumberE,
 } from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
-import {ConnectionLevelE} from '@vexl-next/domain/src/general/offers'
+import {ConnectionLevelE, OfferIdE} from '@vexl-next/domain/src/general/offers'
 import {ExpoNotificationTokenE} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {FcmTokenE} from '@vexl-next/domain/src/utility/FcmToken.brand'
-import {UriStringE} from '@vexl-next/domain/src/utility/UriString.brand'
 import {BooleanFromString} from '@vexl-next/generic-utils/src/effect-helpers/BooleanFromString'
 import {EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {
@@ -27,6 +27,7 @@ import {
 } from '@vexl-next/server-utils/src/services/challenge/contracts'
 import {Schema} from 'effect'
 import {z} from 'zod'
+import {NoContentResponse} from '../../NoContentResponse.brand'
 import {PageRequest, PageResponse} from '../../Pagination.brand'
 import {PlatformName} from '../../PlatformName'
 
@@ -282,16 +283,6 @@ export const AdminTokenParams = Schema.Struct({
   adminToken: Schema.String,
 })
 
-export const ClubInfo = Schema.Struct({
-  uuid: ClubUuidE,
-  name: Schema.String,
-  description: Schema.optionalWith(Schema.String, {as: 'Option'}),
-  membersCountLimit: Schema.Number,
-  clubImageUrl: UriStringE,
-  validUntil: Schema.DateFromString,
-})
-export type ClubInfo = typeof ClubInfo.Type
-
 export const CreateClubErrors = Schema.Union(
   ClubAlreadyExistsError,
   InvalidAdminTokenError
@@ -538,6 +529,26 @@ export const GetClubInfoByAccessCodeResponse = Schema.Struct({
 export const GetClubInfoByAccessCodeErrors = Schema.Union(
   InvalidChallengeError,
   NotFoundError
+)
+
+export class ReportClubLimitReachedError extends Schema.TaggedError<ReportClubLimitReachedError>(
+  'ReportClubLimitReachedError'
+)('ReportClubLimitReachedError', {
+  status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
+}) {}
+
+export const ReportClubRequest = Schema.Struct({
+  offerId: OfferIdE,
+  clubUuid: ClubUuidE,
+  ...RequestBaseWithChallenge.fields,
+})
+export type ReportClubRequest = Schema.Schema.Type<typeof ReportClubRequest>
+
+export const ReportClubResponse = NoContentResponse
+
+export const ReportClubErrors = Schema.Union(
+  InvalidChallengeError,
+  ReportClubLimitReachedError
 )
 
 export class SendBulkNotificationError extends Schema.TaggedError<SendBulkNotificationError>(

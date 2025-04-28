@@ -43,6 +43,14 @@ export const reportOffer = Handler.make(ReportOfferEndpoint, (req, security) =>
           offerId: req.body.offerId,
         })
       )
+
+      yield* _(
+        offerDbService.insertOfferReportedRecord({
+          userPublicKey: security['public-key'],
+          reportedAt: new Date(),
+        })
+      )
+
       return null
     }).pipe(
       withRedisLock(`reportOffer:${security['public-key']}`),

@@ -21,4 +21,21 @@ export class ClubDbRecord extends Schema.Class<ClubDbRecord>('ClubDbRecord')({
     as: 'Option',
     nullable: true,
   }),
+  report: Schema.Int,
+  reportLimit: Schema.Int,
+}) {}
+
+// Club offer reported info table schema
+export const ClubOfferReporedInfoRecordId = Schema.BigInt.pipe(
+  Schema.brand('ClubOfferReporedInfoRecordId')
+)
+export type ClubOfferReporedInfoRecordId =
+  typeof ClubOfferReporedInfoRecordId.Type
+export class ClubOfferReporedInfoRecord extends Schema.Class<ClubOfferReporedInfoRecord>(
+  'ClubOfferReporedInfoRecord'
+)({
+  id: ClubOfferReporedInfoRecordId,
+  offerId: Schema.String,
+  clubUuid: ClubUuidE,
+  reportedAt: Schema.DateFromSelf,
 }) {}

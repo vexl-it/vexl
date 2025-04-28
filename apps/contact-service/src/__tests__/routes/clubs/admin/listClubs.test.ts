@@ -18,6 +18,7 @@ const clubsToSave = [
     membersCountLimit: 100,
     uuid: generateClubUuid(),
     validUntil: new Date(),
+    reportLimit: 10,
   },
   {
     clubImageUrl: SOME_URL,
@@ -26,6 +27,7 @@ const clubsToSave = [
     membersCountLimit: 104,
     uuid: generateClubUuid(),
     validUntil: new Date(),
+    reportLimit: 10,
   },
   {
     clubImageUrl: SOME_URL,
@@ -34,6 +36,7 @@ const clubsToSave = [
     membersCountLimit: 1003,
     uuid: generateClubUuid(),
     validUntil: new Date(),
+    reportLimit: 10,
   },
 ]
 

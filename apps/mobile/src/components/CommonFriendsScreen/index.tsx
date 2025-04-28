@@ -1,5 +1,5 @@
 import {FlashList} from '@shopify/flash-list'
-import {type ClubInfo} from '@vexl-next/rest-api/src/services/contact/contracts'
+import {type ClubInfo} from '@vexl-next/domain/src/general/clubs'
 import {useStore} from 'jotai'
 import React, {useMemo} from 'react'
 import {getTokens, Stack} from 'tamagui'

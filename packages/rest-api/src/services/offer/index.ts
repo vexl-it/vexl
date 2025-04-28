@@ -20,6 +20,7 @@ import {
   CreateNewOfferErrors,
   CreatePrivatePartErrors,
   DeletePrivatePartErrors,
+  ReportClubOfferEndpointErrors,
   ReportOfferEndpointErrors,
   UpdateOfferErrors,
   type CreateNewOfferInput,
@@ -34,6 +35,7 @@ import {
   type GetRemovedOffersInput,
   type RefreshOfferInput,
   type RemovedClubOfferIdsRequest,
+  type ReportClubOfferRequest,
   type ReportOfferInput,
   type UpdateOfferInput,
 } from './contracts'
@@ -151,6 +153,17 @@ export function api({
       handleCommonAndExpectedErrorsEffect(
         client.reportOffer(reportOfferInput),
         ReportOfferEndpointErrors
+      ),
+    reportClubOffer: (
+      reportClubOfferRequest: RequestWithGeneratableChallenge<ReportClubOfferRequest>
+    ) =>
+      addChallenge(reportClubOfferRequest).pipe(
+        Effect.flatMap((body) =>
+          handleCommonAndExpectedErrorsEffect(
+            client.reportClubOffer({body}),
+            ReportClubOfferEndpointErrors
+          )
+        )
       ),
     // ----------------------
     // 👇 Challenge

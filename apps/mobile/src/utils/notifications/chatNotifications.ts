@@ -11,11 +11,11 @@ import {type NotificationCypher} from '@vexl-next/domain/src/general/notificatio
 import {getDefaultStore} from 'jotai'
 import {useCallback} from 'react'
 import {Platform} from 'react-native'
-import {generateOtherSideSeed} from '../../state/chat/atoms/selectOtherSideDataAtom'
 import {
   type ChatMessageWithState,
   type InboxInState,
 } from '../../state/chat/domain'
+import {randomSeedFromChat} from '../RandomSeed'
 import {translationAtom} from '../localization/I18nProvider'
 import notEmpty from '../notEmpty'
 import randomName from '../randomName'
@@ -97,7 +97,7 @@ export async function showChatNotification({
 
   const userName =
     chat?.chat.otherSide.realLifeInfo?.userName ??
-    (chat ? randomName(generateOtherSideSeed(chat?.chat)) : undefined)
+    (chat ? randomName(randomSeedFromChat(chat.chat)) : undefined)
 
   if (
     type === 'VERSION_UPDATE' ||

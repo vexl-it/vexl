@@ -4,10 +4,10 @@ import React, {useMemo} from 'react'
 import {TouchableOpacity} from 'react-native'
 import {Image, Stack} from 'tamagui'
 import BlockIconSvg from '../../../images/blockIconSvg'
-import {generateOtherSideSeed} from '../../../state/chat/atoms/selectOtherSideDataAtom'
 import {type ChatMessageWithState} from '../../../state/chat/domain'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {randomNumberFromSeed} from '../../../utils/randomNumber'
+import {randomSeedFromChat} from '../../../utils/RandomSeed'
 import resolveLocalUri from '../../../utils/resolveLocalUri'
 import avatarsGoldenGlassesAndBackgroundSvg from '../../AnonymousAvatar/images/avatarsGoldenGlassesAndBackgroundSvg'
 import avatarsSvg from '../../AnonymousAvatar/images/avatarsSvg'
@@ -65,7 +65,7 @@ function IdentityRevealMessageItem({
         randomNumberFromSeed(
           0,
           anonymousAvatars.length - 1,
-          generateOtherSideSeed(chat)
+          randomSeedFromChat(chat)
         )
       ],
     [anonymousAvatars, chat]

@@ -9,7 +9,6 @@ import {Stack, YStack, getTokens} from 'tamagui'
 import {clubsWithMembersAtom} from '../../../state/clubs/atom/clubsWithMembersAtom'
 import getRerequestPossibleInDaysText from '../../../utils/getRerequestPossibleInDaysText'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
-import randomName from '../../../utils/randomName'
 import useSafeGoBack from '../../../utils/useSafeGoBack'
 import Button from '../../Button'
 import InfoSquare from '../../InfoSquare'
@@ -29,17 +28,16 @@ function RequestScreen(): JSX.Element {
     offerForChatAtom,
     requestMessageAtom,
     wasDeniedAtom,
-    chatAtom,
     wasCancelledAtom,
     deleteChatWithUiFeedbackAtom,
     forceShowHistoryAtom,
     requestStateAtom,
     hasPreviousCommunicationAtom,
     canBeRerequestedAtom,
+    otherSideDataAtom,
     rerequestOfferActionAtom,
   } = useMolecule(chatMolecule)
   const offer = useAtomValue(offerForChatAtom)
-  const chat = useAtomValue(chatAtom)
   const {t} = useTranslation()
 
   const requestState = useAtomValue(requestStateAtom)
@@ -54,6 +52,7 @@ function RequestScreen(): JSX.Element {
   const rerequestOffer = useSetAtom(rerequestOfferActionAtom)
   const setToastNotification = useSetAtom(toastNotificationAtom)
   const clubsWithMembers = useAtomValue(clubsWithMembersAtom)
+  const otherSideData = useAtomValue(otherSideDataAtom)
 
   const [text, setText] = useState('')
 
@@ -180,7 +179,7 @@ function RequestScreen(): JSX.Element {
                   requestedByMe
                     ? 'messages.deniedByThem'
                     : 'messages.deniedByMe',
-                  {name: randomName(chat.id)}
+                  {name: otherSideData.userName}
                 )}
               </InfoSquare>
             )}
@@ -189,7 +188,7 @@ function RequestScreen(): JSX.Element {
                 {t(
                   'messages.messagePreviews.incoming.CANCEL_REQUEST_MESSAGING',
                   {
-                    name: randomName(chat.id),
+                    name: otherSideData.userName,
                   }
                 )}
               </InfoSquare>

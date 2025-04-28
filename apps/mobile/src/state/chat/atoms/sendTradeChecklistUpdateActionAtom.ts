@@ -104,7 +104,8 @@ export default function createSubmitChecklistUpdateActionAtom(
         const realLifeInfo = (
           update.identity?.status === 'APPROVE_REVEAL'
             ? processTradeChecklistIdentityRevealMessageIfAny(
-                tradeChecklistData.identity.received
+                tradeChecklistData.identity.received,
+                chatWithMessages.chat
               )
             : update.contact?.status === 'APPROVE_REVEAL'
               ? processTradeChecklistContactRevealMessageIfAny(

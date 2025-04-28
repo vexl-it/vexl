@@ -16,7 +16,7 @@ import getValueFromSetStateActionOfAtom from '../../utils/atomUtils/getValueFrom
 import {translationAtom} from '../../utils/localization/I18nProvider'
 import {goldenAvatarTypeAtom} from '../../utils/preferences'
 import {sessionDataOrDummyAtom} from './index'
-import {generateRandomUserData} from './utils/generateRandomUserData'
+import {generateRandomUserInSessionData} from './utils/generateRandomUserData'
 
 export const realUserDataAtom = focusAtom(sessionDataOrDummyAtom, (p) =>
   p.prop('realUserData')
@@ -67,9 +67,9 @@ export const realUserNameAtom = atom(
 
 export const anonymizedUserDataAtom = atom((get) => {
   const goldenAvatarType = get(goldenAvatarTypeAtom)
-  const {privateKey} = get(sessionDataOrDummyAtom)
-  return generateRandomUserData({
-    seed: privateKey?.publicKeyPemBase64,
+  const session = get(sessionDataOrDummyAtom)
+  return generateRandomUserInSessionData({
+    session,
     goldenAvatarType,
   })
 })

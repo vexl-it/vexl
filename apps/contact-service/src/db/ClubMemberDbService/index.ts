@@ -1,3 +1,4 @@
+import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {type UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {Context, Effect, Layer, type Option} from 'effect'
 import {type ClubMemberRecord} from './domain'
@@ -17,6 +18,7 @@ import {
   createDeleteClubMemeber,
   type DeleteClubMemberParams,
 } from './queries/createDeleteClubMemeber'
+import {createDeleteClubReportedRecordByReportedAtBefore} from './queries/createDeleteClubReportedRecordByReportedAtBefore'
 import {
   createFindClubMemeberByPublicKey,
   type FindClubMemberByPublicKeyParams,
@@ -30,9 +32,14 @@ import {
   type InsertClubMemeberParams,
 } from './queries/createInsertClubMemeber'
 import {
+  createInsertClubReportedRecord,
+  type InsertClubReportedRecordParams,
+} from './queries/createInsertClubReportedRecord'
+import {
   createQueryAllClubMembers,
   type QueryAllClubMemebersParams as QueryAllClubMembersParams,
 } from './queries/createQueryAllClubMembers'
+import {createQueryNumberOfClubReportsForUser} from './queries/createQueryNumberOfClubReportsForUser'
 import {
   createUpdateIsModerator,
   type UpdateIsModeratorParamas,
@@ -59,15 +66,24 @@ export interface ClubMembersDbOperations {
   deleteClubMembersLastActiveBefore: (
     params: DeleteClubMembersLastActiveBeforeParams
   ) => Effect.Effect<void, UnexpectedServerError>
+  deleteClubReportedRecordByReportedAtBefore: (
+    params: number
+  ) => Effect.Effect<void, UnexpectedServerError>
   findClubMember: (
     params: FindClubMemberParams
   ) => Effect.Effect<Option.Option<ClubMemberRecord>, UnexpectedServerError>
   insertClubMember: (
     params: InsertClubMemeberParams
   ) => Effect.Effect<ClubMemberRecord, UnexpectedServerError>
+  insertClubReportedRecord: (
+    params: InsertClubReportedRecordParams
+  ) => Effect.Effect<void, UnexpectedServerError>
   queryAllClubMembers: (
     params: QueryAllClubMembersParams
   ) => Effect.Effect<readonly ClubMemberRecord[], UnexpectedServerError>
+  queryNumberOfClubReportsForUser: (
+    params: PublicKeyPemBase64
+  ) => Effect.Effect<number, UnexpectedServerError>
   updateIsModerator: (
     params: UpdateIsModeratorParamas
   ) => Effect.Effect<ClubMemberRecord, UnexpectedServerError>
@@ -96,13 +112,20 @@ export class ClubMembersDbService extends Context.Tag('ClubMembersDbService')<
         createFindClubMemeberByPublicKey
       )
       const insertClubMember = yield* _(createInsertClubMember)
+      const insertClubReportedRecord = yield* _(createInsertClubReportedRecord)
       const queryAllClubMembers = yield* _(createQueryAllClubMembers)
+      const queryNumberOfClubReportsForUser = yield* _(
+        createQueryNumberOfClubReportsForUser
+      )
       const updateIsModerator = yield* _(createUpdateIsModerator)
       const updateLastRefreshedAt = yield* _(CreateUpdateLastRefreshedAt)
       const updateNotificationToken = yield* _(createUpdateNotificationToken)
       const deleteAllClubMembers = yield* _(createDeleteAllClubMemebers)
       const deleteClubMembersLastActiveBefore = yield* _(
         createDeleteClubMembersLastActiveBefore
+      )
+      const deleteClubReportedRecordByReportedAtBefore = yield* _(
+        createDeleteClubReportedRecordByReportedAtBefore
       )
 
       return {
@@ -111,12 +134,15 @@ export class ClubMembersDbService extends Context.Tag('ClubMembersDbService')<
         findClubMember,
         findClubMemberByPublicKey,
         insertClubMember,
+        insertClubReportedRecord,
         queryAllClubMembers,
+        queryNumberOfClubReportsForUser,
         updateIsModerator,
         updateLastRefreshedAt,
         deleteClubMembersLastActiveBefore,
         updateNotificationToken,
         deleteAllClubMembers,
+        deleteClubReportedRecordByReportedAtBefore,
       }
     })
   )

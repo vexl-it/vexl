@@ -27,6 +27,10 @@ import {
   type InsertOfferPrivatePartRequest,
 } from './queries/createInsertOfferPrivatePart'
 import {
+  createInsertOfferReportedRecord,
+  type InsertOfferReportedRecordParams,
+} from './queries/createInsertOfferReportedRecord'
+import {
   createInsertPublicPart,
   type InsertPublicPartRequest,
 } from './queries/createInsertPublicPart'
@@ -95,6 +99,10 @@ export interface OfferDbOperations {
     args: InsertOfferPrivatePartRequest
   ) => Effect.Effect<void, UnexpectedServerError>
 
+  insertOfferReportedRecord: (
+    args: InsertOfferReportedRecordParams
+  ) => Effect.Effect<void, UnexpectedServerError>
+
   updateRefreshOffer: (
     args: UpdateRefreshOfferRequest
   ) => Effect.Effect<OfferId, UnexpectedServerError>
@@ -151,6 +159,7 @@ export class OfferDbService extends Context.Tag('OfferDbService')<
         ),
         insertPublicPart: yield* _(createInsertPublicPart),
         insertOfferPrivatePart: yield* _(createInsertOfferPrivatePart),
+        insertOfferReportedRecord: yield* _(createInsertOfferReportedRecord),
         updateReportOffer: yield* _(createUpdateReportOffer),
         updateRefreshOffer: yield* _(createUpdateRefreshOffer),
         updateOfferPublicPayload: yield* _(createUpdateOfferPublicPayload),

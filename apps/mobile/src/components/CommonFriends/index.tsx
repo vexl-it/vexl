@@ -1,7 +1,7 @@
 import MaskedView from '@react-native-masked-view/masked-view'
 import {useNavigation} from '@react-navigation/native'
 import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
-import {type ClubInfo} from '@vexl-next/rest-api/src/services/contact/contracts'
+import {type ClubInfo} from '@vexl-next/domain/src/general/clubs'
 import {LinearGradient} from 'expo-linear-gradient'
 import {useStore} from 'jotai'
 import React, {useMemo} from 'react'

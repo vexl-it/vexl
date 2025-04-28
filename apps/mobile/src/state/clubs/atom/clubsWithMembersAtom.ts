@@ -1,5 +1,4 @@
-import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
-import {type ClubInfo} from '@vexl-next/rest-api/src/services/contact/contracts'
+import {type ClubInfo, type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {Array, type Option, pipe, Schema} from 'effect'
 import {type Atom, atom, useAtomValue} from 'jotai'
 import {focusAtom} from 'jotai-optics'

@@ -2,6 +2,8 @@ import {HttpRouter, HttpServerResponse} from '@effect/platform'
 import {makeInternalServer} from '@vexl-next/server-utils/src/InternalServer'
 import {internalServerPortConfig} from '@vexl-next/server-utils/src/commonConfigs'
 import {Effect} from 'effect'
+import {clubReportLimitIntervalDaysConfig} from '../configs'
+import {ClubMembersDbService} from '../db/ClubMemberDbService'
 import {checkForInactiveUsers} from './routes/checkForInactiveUsers'
 import {deactivateAndClearClubs} from './routes/deactivateAndClearClubs'
 import {flushAndSendRegisteredClubNotifications} from './routes/flushAndSendRegisteredClubNotifications'
@@ -70,6 +72,22 @@ export const internalServerLive = makeInternalServer(
           onSuccess: () => HttpServerResponse.text('ok', {status: 200}),
         })
       )
+    ),
+    HttpRouter.post(
+      '/clean-reported-club-records',
+      Effect.gen(function* (_) {
+        const db = yield* _(ClubMembersDbService)
+        const clubReportLimitIntervalDays = yield* _(
+          clubReportLimitIntervalDaysConfig
+        )
+        yield* _(
+          db.deleteClubReportedRecordByReportedAtBefore(
+            clubReportLimitIntervalDays
+          )
+        )
+
+        return HttpServerResponse.text('ok', {status: 200})
+      })
     )
   ),
   {port: internalServerPortConfig}

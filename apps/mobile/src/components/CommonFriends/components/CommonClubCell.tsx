@@ -1,4 +1,4 @@
-import {type ClubInfo} from '@vexl-next/rest-api/src/services/contact/contracts'
+import {type ClubInfo} from '@vexl-next/domain/src/general/clubs'
 import {Text, XStack} from 'tamagui'
 import {ImageUniversal} from '../../Image'
 

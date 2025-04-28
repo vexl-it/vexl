@@ -16,8 +16,9 @@ const findExpiredClubs = ClubsDbService.pipe(
   Effect.flatMap((one) => one.listExpiredClubs())
 )
 
-// TODO #1484
-const findFlaggedClubs = Effect.succeed([])
+const findFlaggedClubs = ClubsDbService.pipe(
+  Effect.flatMap((one) => one.listClubsWithExceededReportsCount())
+)
 
 const removeClubCompletely = (
   club: ClubDbRecord
@@ -91,6 +92,7 @@ const deactivateClubsAndSendNotifications = Effect.gen(function* (_) {
   const idsOfClubsToDeactivate = [...expiredClubs, ...flaggedClubs].map(
     (club) => club.id
   )
+
   yield* _(Effect.log('Deactivating clubs', idsOfClubsToDeactivate))
 
   yield* _(clubsDb.updateSetClubsInactive({id: idsOfClubsToDeactivate}))

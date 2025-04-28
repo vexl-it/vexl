@@ -28,6 +28,7 @@ export const ClubInfo = Schema.Struct({
   membersCountLimit: Schema.Number,
   clubImageUrl: UriStringE,
   validUntil: Schema.DateFromString,
+  reportLimit: Schema.Int,
 })
 export type ClubInfo = typeof ClubInfo.Type
 
@@ -54,3 +55,6 @@ export const ClubLinkInfo = Schema.Struct({
   fullLink: Schema.String,
 })
 export type ClubLinkInfo = Schema.Schema.Type<typeof ClubLinkInfo>
+
+export const OfferIdHashed = Schema.String.pipe(Schema.brand('OfferIdHashed'))
+export type OfferIdHashed = Schema.Schema.Type<typeof OfferIdHashed>

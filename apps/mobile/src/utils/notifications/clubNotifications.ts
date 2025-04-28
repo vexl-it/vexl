@@ -1,6 +1,5 @@
 import notifee, {AndroidImportance} from '@notifee/react-native'
-import {ClubUuidE} from '@vexl-next/domain/src/general/clubs'
-import {type ClubInfo} from '@vexl-next/rest-api/src/services/contact/contracts'
+import {ClubUuidE, type ClubInfo} from '@vexl-next/domain/src/general/clubs'
 import {Effect, Schema} from 'effect'
 import {type TFunction} from '../localization/I18nProvider'
 import {getDefaultChannel} from './notificationChannels'

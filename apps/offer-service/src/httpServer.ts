@@ -35,6 +35,7 @@ import {getOffersForMeModifiedOrCreatedAfter} from './routes/getOffersForMeModif
 import {getRemovedClubOffers} from './routes/getRemovedClubOffers'
 import {getRemovedOffers} from './routes/getRemovedOffers'
 import {refreshOffer} from './routes/refreshOffer'
+import {reportClubOffer} from './routes/reportClubOffer'
 import {reportOffer} from './routes/reportOffer'
 import {updateOffer} from './routes/updateOffer'
 
@@ -52,6 +53,7 @@ export const app = RouterBuilder.make(OfferApiSpecification).pipe(
   RouterBuilder.handle(getRemovedOffers),
   RouterBuilder.handle(getRemovedClubOffers),
   RouterBuilder.handle(reportOffer),
+  RouterBuilder.handle(reportClubOffer),
   RouterBuilder.handle(createNewOffer),
   RouterBuilder.handle(refreshOffer),
   RouterBuilder.handle(deleteOffer),

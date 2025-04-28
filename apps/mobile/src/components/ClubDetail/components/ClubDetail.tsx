@@ -104,7 +104,7 @@ export function ClubDetail({
           onPress={() => {
             loadingOverlay.show()
             Effect.runFork(
-              leaveClub(club).pipe(
+              leaveClub(club.uuid).pipe(
                 Effect.match({
                   onFailure: (e) => {
                     if (e._tag !== 'UserDeclinedError')

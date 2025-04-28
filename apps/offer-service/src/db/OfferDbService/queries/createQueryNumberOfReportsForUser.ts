@@ -21,7 +21,7 @@ export const createQueryNumberOfReportsForUser = Effect.gen(function* (_) {
       execute: (query) => {
         return sql`
           SELECT
-            sum(id) AS "numberOfReports",
+            COUNT(*)::int AS "numberOfReports",
             user_public_key
           FROM
             offer_reported_record

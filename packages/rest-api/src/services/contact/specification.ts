@@ -52,6 +52,9 @@ import {
   ModifyClubRequest,
   ModifyClubResponse,
   RefreshUserRequest,
+  ReportClubErrors,
+  ReportClubRequest,
+  ReportClubResponse,
   SendBulkNotificationRequest,
   SendBulkNotificationResponse,
   SendBulkNotificationsErrors,
@@ -339,6 +342,19 @@ export const GetClubInfoByAccessCodeEndpoint = Api.post(
   })
 )
 
+export const ReportClubEndpoint = Api.post(
+  'reportClub',
+  '/api/v1/clubs/member/report-club'
+).pipe(
+  Api.setSecurity(ServerSecurity),
+  Api.setRequestBody(ReportClubRequest),
+  Api.setResponseBody(ReportClubResponse),
+  Api.addResponse({
+    status: 400,
+    body: ReportClubErrors,
+  })
+)
+
 export const SendBulkNotificationEndpoint = Api.post(
   'sendBulkNotification',
   '/api/v1/notifications/bulk'
@@ -384,7 +400,8 @@ const ClubsMemberApiGroup = ApiGroup.make('ClubsMember', {
   ApiGroup.addEndpoint(JoinClubEndpoint),
   ApiGroup.addEndpoint(LeaveClubEndpoint),
   ApiGroup.addEndpoint(GetClubContactsEndpoint),
-  ApiGroup.addEndpoint(GetClubInfoByAccessCodeEndpoint)
+  ApiGroup.addEndpoint(GetClubInfoByAccessCodeEndpoint),
+  ApiGroup.addEndpoint(ReportClubEndpoint)
 )
 
 const ClubsModeratorApiGroup = ApiGroup.make('ClubsModerator', {

@@ -56,3 +56,7 @@ export const clubRemoveAfterMarkedAsDeletedDaysConfig = Config.number(
 export const clubMemberExpirationAfterDaysOfInactivityConfig = Config.number(
   'CLUB_MEMBER_EXPIRATION_AFTER_DAYS_OF_INACTIVITY'
 )
+
+export const reportClubLimitCountConfig = Config.number(
+  'REPORT_CLUB_LIMIT_COUNT'
+)

@@ -26,6 +26,7 @@ export const modifyClub = Handler.make(ModfiyClubEndpoint, (req) =>
           data: {
             ...req.body.clubInfo,
             madeInactiveAt: existingClub.madeInactiveAt,
+            report: existingClub.report,
           },
         })
       )

@@ -1,6 +1,6 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import {HttpClientRequest} from '@effect/platform'
 import {SqlClient} from '@effect/sql'
+import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {CountryPrefixE} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {
   generateAdminId,
@@ -15,13 +15,18 @@ import {
 } from '@vexl-next/rest-api/src/services/offer/contracts'
 import dayjs from 'dayjs'
 import {Effect, Schema} from 'effect'
+import {addChallengeForKey} from '../utils/addChallengeForKey'
 import {createMockedUser, type MockedUser} from '../utils/createMockedUser'
 import {NodeTestingApp} from '../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../utils/runPromiseInMockedEnvironment'
 
 let user1: MockedUser
+const clubKeypairForUser1 = generatePrivateKey()
 let user2: MockedUser
+const clubKeypairForUser2 = generatePrivateKey()
 let me: MockedUser
+const clubKeypairForMe = generatePrivateKey()
+
 let offer1: CreateNewOfferResponse
 let offer2: CreateNewOfferResponse
 
@@ -44,12 +49,15 @@ beforeAll(async () => {
           },
           {
             payloadPrivate: 'payloadPrivate2' as PrivatePayloadEncrypted,
-            userPublicKey: user2.mainKeyPair.publicKeyPemBase64,
+            userPublicKey: clubKeypairForUser1.publicKeyPemBase64,
           },
-
+          {
+            payloadPrivate: 'payloadPrivate2' as PrivatePayloadEncrypted,
+            userPublicKey: clubKeypairForUser2.publicKeyPemBase64,
+          },
           {
             payloadPrivate: 'payloadPrivateForMe' as PrivatePayloadEncrypted,
-            userPublicKey: me.mainKeyPair.publicKeyPemBase64,
+            userPublicKey: clubKeypairForMe.publicKeyPemBase64,
           },
         ],
         offerType: 'BUY',
@@ -61,7 +69,7 @@ beforeAll(async () => {
         ...(yield* _(
           client.createNewOffer(
             {body: request1},
-            HttpClientRequest.setHeaders(me.authHeaders)
+            HttpClientRequest.setHeaders(user1.authHeaders)
           )
         )),
         adminId: request1.adminId,
@@ -72,17 +80,20 @@ beforeAll(async () => {
         countryPrefix: Schema.decodeSync(CountryPrefixE)(420),
         offerPrivateList: [
           {
-            payloadPrivate: 'payloadPrivate' as PrivatePayloadEncrypted,
-            userPublicKey: user1.mainKeyPair.publicKeyPemBase64,
+            payloadPrivate: 'offer2payloadPrivate' as PrivatePayloadEncrypted,
+            userPublicKey: clubKeypairForUser1.publicKeyPemBase64,
           },
           {
-            payloadPrivate: 'payloadPrivate2' as PrivatePayloadEncrypted,
-            userPublicKey: user2.mainKeyPair.publicKeyPemBase64,
+            payloadPrivate: 'offer2payloadPrivate' as PrivatePayloadEncrypted,
+            userPublicKey: clubKeypairForUser2.publicKeyPemBase64,
           },
-
           {
             payloadPrivate: 'payloadPrivateForMe' as PrivatePayloadEncrypted,
-            userPublicKey: me.mainKeyPair.publicKeyPemBase64,
+            userPublicKey: clubKeypairForMe.publicKeyPemBase64,
+          },
+          {
+            payloadPrivate: 'offer2payloadPrivate2' as PrivatePayloadEncrypted,
+            userPublicKey: user2.mainKeyPair.publicKeyPemBase64,
           },
         ],
         offerType: 'BUY',
@@ -94,7 +105,7 @@ beforeAll(async () => {
         ...(yield* _(
           client.createNewOffer(
             {body: request2},
-            HttpClientRequest.setHeaders(me.authHeaders)
+            HttpClientRequest.setHeaders(user2.authHeaders)
           )
         )),
         adminId: request2.adminId,
@@ -110,21 +121,31 @@ beforeAll(async () => {
   )
 })
 
-describe('Get offers by ids', () => {
-  it('Returns offers by ids', async () => {
+describe('Get club offers by ids', () => {
+  it('Returns club offers by ids', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const client = yield* _(NodeTestingApp)
 
-        const offersById = yield* _(
-          client.getOffersByIds(
-            {query: {ids: [offer1!.offerId, offer2!.offerId]}},
+        const requestWithChallenge = yield* _(
+          addChallengeForKey(clubKeypairForMe, me.authHeaders)({})
+        )
+
+        const clubOffersById = yield* _(
+          client.getClubOffersByIds(
+            {
+              body: {
+                ids: [offer1.offerId, offer2.offerId],
+                publicKey: requestWithChallenge.publicKey,
+                signedChallenge: requestWithChallenge.signedChallenge,
+              },
+            },
             HttpClientRequest.setHeaders(me.authHeaders)
           )
         )
 
         expect(
-          offersById
+          clubOffersById
             .map((o) => o.offerId)
             .sort()
             .join()
@@ -133,7 +154,7 @@ describe('Get offers by ids', () => {
     )
   })
 
-  it('Does not return expired offers', async () => {
+  it('Does not return expired club offers', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const sql = yield* _(SqlClient.SqlClient)
@@ -148,9 +169,19 @@ describe('Get offers by ids', () => {
 
         const client = yield* _(NodeTestingApp)
 
-        const offersById = yield* _(
-          client.getOffersByIds(
-            {query: {ids: [offer1!.offerId, offer2!.offerId]}},
+        const requestWithChallenge = yield* _(
+          addChallengeForKey(clubKeypairForMe, me.authHeaders)({})
+        )
+
+        const clubOffersById = yield* _(
+          client.getClubOffersByIds(
+            {
+              body: {
+                ids: [offer1.offerId, offer2.offerId],
+                publicKey: requestWithChallenge.publicKey,
+                signedChallenge: requestWithChallenge.signedChallenge,
+              },
+            },
             HttpClientRequest.setHeaders(me.authHeaders)
           )
         )
@@ -164,7 +195,7 @@ describe('Get offers by ids', () => {
         `)
 
         expect(
-          offersById
+          clubOffersById
             .map((o) => o.offerId)
             .sort()
             .join()
@@ -173,7 +204,7 @@ describe('Get offers by ids', () => {
     )
   })
 
-  it('Does not return flagged offers', async () => {
+  it('Does not return flagged club offers', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const sql = yield* _(SqlClient.SqlClient)
@@ -187,9 +218,20 @@ describe('Get offers by ids', () => {
         `)
 
         const client = yield* _(NodeTestingApp)
-        const offersById = yield* _(
-          client.getOffersByIds(
-            {query: {ids: [offer1!.offerId, offer2!.offerId]}},
+
+        const requestWithChallenge = yield* _(
+          addChallengeForKey(clubKeypairForMe, me.authHeaders)({})
+        )
+
+        const clubOffersById = yield* _(
+          client.getClubOffersByIds(
+            {
+              body: {
+                ids: [offer1.offerId, offer2.offerId],
+                publicKey: requestWithChallenge.publicKey,
+                signedChallenge: requestWithChallenge.signedChallenge,
+              },
+            },
             HttpClientRequest.setHeaders(me.authHeaders)
           )
         )
@@ -202,27 +244,37 @@ describe('Get offers by ids', () => {
             offer_id = ${offer1.offerId};
         `)
 
-        expect(offersById.map((o) => o.offerId).join()).toEqual(
+        expect(clubOffersById.map((o) => o.offerId).join()).toEqual(
           [offer2.offerId].join()
         )
       })
     )
   })
 
-  it('Does not fail when calling with not existing ids', async () => {
+  it('Does not fail when calling with not existing ids of club offers', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const client = yield* _(NodeTestingApp)
 
-        const offersById = yield* _(
-          client.getOffersByIds(
-            {query: {ids: [offer1!.offerId, offer2!.offerId, newOfferId()]}},
+        const requestWithChallenge = yield* _(
+          addChallengeForKey(clubKeypairForMe, me.authHeaders)({})
+        )
+
+        const clubOffersById = yield* _(
+          client.getClubOffersByIds(
+            {
+              body: {
+                ids: [offer1.offerId, offer2.offerId, newOfferId()],
+                publicKey: requestWithChallenge.publicKey,
+                signedChallenge: requestWithChallenge.signedChallenge,
+              },
+            },
             HttpClientRequest.setHeaders(me.authHeaders)
           )
         )
 
         expect(
-          offersById
+          clubOffersById
             .map((o) => o.offerId)
             .sort()
             .join()
@@ -232,20 +284,30 @@ describe('Get offers by ids', () => {
   })
 })
 
-describe('Get offers for me', () => {
-  it('Returns offers for me', async () => {
+describe('Get club offers for me', () => {
+  it('Returns club offers for me', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const client = yield* _(NodeTestingApp)
-        const offers = yield* _(
-          client.getOffersForMe(
-            {},
+
+        const requestWithChallenge = yield* _(
+          addChallengeForKey(clubKeypairForMe, me.authHeaders)({})
+        )
+
+        const clubOffers = yield* _(
+          client.getClubOffersForMe(
+            {
+              body: {
+                publicKey: requestWithChallenge.publicKey,
+                signedChallenge: requestWithChallenge.signedChallenge,
+              },
+            },
             HttpClientRequest.setHeaders(me.authHeaders)
           )
         )
 
         expect(
-          offers.offers
+          clubOffers.offers
             .map((o) => o.offerId)
             .sort()
             .join()
@@ -254,7 +316,7 @@ describe('Get offers for me', () => {
     )
   })
 
-  it('Does not return expired offers', async () => {
+  it('Does not return expired club offers', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const sql = yield* _(SqlClient.SqlClient)
@@ -266,6 +328,7 @@ describe('Get offers for me', () => {
           WHERE
             offer_id = ${offer1.offerId};
         `)
+
         yield* _(sql`
           UPDATE offer_public
           SET
@@ -274,9 +337,19 @@ describe('Get offers for me', () => {
             offer_id = ${offer2.offerId};
         `)
         const client = yield* _(NodeTestingApp)
-        const offers = yield* _(
-          client.getOffersForMe(
-            {},
+
+        const requestWithChallenge = yield* _(
+          addChallengeForKey(clubKeypairForMe, me.authHeaders)({})
+        )
+
+        const clubOffers = yield* _(
+          client.getClubOffersForMe(
+            {
+              body: {
+                publicKey: requestWithChallenge.publicKey,
+                signedChallenge: requestWithChallenge.signedChallenge,
+              },
+            },
             HttpClientRequest.setHeaders(me.authHeaders)
           )
         )
@@ -290,14 +363,14 @@ describe('Get offers for me', () => {
             OR offer_id = ${offer2.offerId};
         `)
 
-        expect(offers.offers.map((o) => o.offerId).join()).toEqual(
+        expect(clubOffers.offers.map((o) => o.offerId).join()).toEqual(
           [offer2.offerId].join()
         )
       })
     )
   })
 
-  it('Does not return flagged offers', async () => {
+  it('Does not return flagged club offers', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const sql = yield* _(SqlClient.SqlClient)
@@ -309,10 +382,21 @@ describe('Get offers for me', () => {
           WHERE
             offer_id = ${offer1.offerId};
         `)
+
         const client = yield* _(NodeTestingApp)
-        const offers = yield* _(
-          client.getOffersForMe(
-            {},
+
+        const requestWithChallenge = yield* _(
+          addChallengeForKey(clubKeypairForMe, me.authHeaders)({})
+        )
+
+        const clubOffers = yield* _(
+          client.getClubOffersForMe(
+            {
+              body: {
+                publicKey: requestWithChallenge.publicKey,
+                signedChallenge: requestWithChallenge.signedChallenge,
+              },
+            },
             HttpClientRequest.setHeaders(me.authHeaders)
           )
         )
@@ -325,7 +409,7 @@ describe('Get offers for me', () => {
             offer_id = ${offer1.offerId};
         `)
 
-        expect(offers.offers.map((o) => o.offerId).join()).toEqual(
+        expect(clubOffers.offers.map((o) => o.offerId).join()).toEqual(
           [offer2.offerId].join()
         )
       })
@@ -333,8 +417,8 @@ describe('Get offers for me', () => {
   })
 })
 
-describe('Get offers for me modified or expired after', () => {
-  it('Returns offers for me', async () => {
+describe('Get club offers for me modified or created after', () => {
+  it('Returns club offers for me', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const sql = yield* _(SqlClient.SqlClient)
@@ -356,11 +440,16 @@ describe('Get offers for me modified or expired after', () => {
         const client = yield* _(NodeTestingApp)
         const modifiedAt = fromJsDate(dayjs().subtract(2, 'days').toDate())
 
-        const offers = yield* _(
-          client.getOffersForMeModifiedOrCreatedAfter(
+        const requestWithChallenge = yield* _(
+          addChallengeForKey(clubKeypairForMe, me.authHeaders)({})
+        )
+        const clubOffers = yield* _(
+          client.getClubOffersForMeModifiedOrCreatedAfter(
             {
-              query: {
+              body: {
                 modifiedAt,
+                publicKey: requestWithChallenge.publicKey,
+                signedChallenge: requestWithChallenge.signedChallenge,
               },
             },
             HttpClientRequest.setHeaders(me.authHeaders)
@@ -375,14 +464,14 @@ describe('Get offers for me modified or expired after', () => {
             offer_id = ${offer2.offerId};
         `)
 
-        expect(offers.offers.map((o) => o.offerId).join()).toEqual(
+        expect(clubOffers.offers.map((o) => o.offerId).join()).toEqual(
           [offer2.offerId].join()
         )
       })
     )
   })
 
-  it('Returns offers for me that have public parts not modified after but private parts were uploaded after', async () => {
+  it('Returns club offers for me that have public parts not modified after but private parts were uploaded after', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const sql = yield* _(SqlClient.SqlClient)
@@ -421,11 +510,16 @@ describe('Get offers for me modified or expired after', () => {
         const client = yield* _(NodeTestingApp)
         const modifiedAt = fromJsDate(dayjs().subtract(0, 'days').toDate())
 
-        const offers = yield* _(
-          client.getOffersForMeModifiedOrCreatedAfter(
+        const requestWithChallenge = yield* _(
+          addChallengeForKey(clubKeypairForMe, me.authHeaders)({})
+        )
+        const clubOffers = yield* _(
+          client.getClubOffersForMeModifiedOrCreatedAfter(
             {
-              query: {
+              body: {
                 modifiedAt,
+                publicKey: requestWithChallenge.publicKey,
+                signedChallenge: requestWithChallenge.signedChallenge,
               },
             },
             HttpClientRequest.setHeaders(me.authHeaders)
@@ -446,14 +540,14 @@ describe('Get offers for me modified or expired after', () => {
             created_at = now() - interval '10 day';
         `)
 
-        expect(offers.offers.map((o) => o.offerId).join()).toEqual(
+        expect(clubOffers.offers.map((o) => o.offerId).join()).toEqual(
           [offer2.offerId].join()
         )
       })
     )
   })
 
-  it('Does not return expired offers', async () => {
+  it('Does not return expired club offers', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const sql = yield* _(SqlClient.SqlClient)
@@ -475,11 +569,16 @@ describe('Get offers for me modified or expired after', () => {
         const client = yield* _(NodeTestingApp)
         const modifiedAt = fromJsDate(dayjs().subtract(2, 'days').toDate())
 
-        const offers = yield* _(
-          client.getOffersForMeModifiedOrCreatedAfter(
+        const requestWithChallenge = yield* _(
+          addChallengeForKey(clubKeypairForMe, me.authHeaders)({})
+        )
+        const clubOffers = yield* _(
+          client.getClubOffersForMeModifiedOrCreatedAfter(
             {
-              query: {
+              body: {
                 modifiedAt,
+                publicKey: requestWithChallenge.publicKey,
+                signedChallenge: requestWithChallenge.signedChallenge,
               },
             },
             HttpClientRequest.setHeaders(me.authHeaders)
@@ -495,12 +594,12 @@ describe('Get offers for me modified or expired after', () => {
             ${sql.in('offer_id', [offer1.offerId, offer2.offerId])}
         `)
 
-        expect(offers.offers.map((o) => o.offerId)).toEqual([])
+        expect(clubOffers.offers.map((o) => o.offerId)).toEqual([])
       })
     )
   })
 
-  it('Does not return flagged offers', async () => {
+  it('Does not return flagged club offers', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const sql = yield* _(SqlClient.SqlClient)
@@ -522,11 +621,16 @@ describe('Get offers for me modified or expired after', () => {
         const client = yield* _(NodeTestingApp)
         const modifiedAt = fromJsDate(dayjs().subtract(2, 'days').toDate())
 
-        const offers = yield* _(
-          client.getOffersForMeModifiedOrCreatedAfter(
+        const requestWithChallenge = yield* _(
+          addChallengeForKey(clubKeypairForMe, me.authHeaders)({})
+        )
+        const clubOffers = yield* _(
+          client.getClubOffersForMeModifiedOrCreatedAfter(
             {
-              query: {
+              body: {
                 modifiedAt,
+                publicKey: requestWithChallenge.publicKey,
+                signedChallenge: requestWithChallenge.signedChallenge,
               },
             },
             HttpClientRequest.setHeaders(me.authHeaders)
@@ -542,14 +646,14 @@ describe('Get offers for me modified or expired after', () => {
             ${sql.in('offer_id', [offer1.offerId, offer2.offerId])}
         `)
 
-        expect(offers.offers.map((o) => o.offerId)).toEqual([])
+        expect(clubOffers.offers.map((o) => o.offerId)).toEqual([])
       })
     )
   })
 })
 
-describe('Get removed offers', () => {
-  it('Returns removed offers when offer removed', async () => {
+describe('Get removed club offers', () => {
+  it('Returns removed club offers when offer removed', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const client = yield* _(NodeTestingApp)
@@ -563,13 +667,17 @@ describe('Get removed offers', () => {
               userPublicKey: user1.mainKeyPair.publicKeyPemBase64,
             },
             {
+              payloadPrivate: 'payloadPrivate' as PrivatePayloadEncrypted,
+              userPublicKey: clubKeypairForUser1.publicKeyPemBase64,
+            },
+            {
               payloadPrivate: 'payloadPrivate2' as PrivatePayloadEncrypted,
-              userPublicKey: user2.mainKeyPair.publicKeyPemBase64,
+              userPublicKey: clubKeypairForUser2.publicKeyPemBase64,
             },
 
             {
               payloadPrivate: 'payloadPrivateForMe' as PrivatePayloadEncrypted,
-              userPublicKey: me.mainKeyPair.publicKeyPemBase64,
+              userPublicKey: clubKeypairForMe.publicKeyPemBase64,
             },
           ],
           offerType: 'BUY',
@@ -580,20 +688,30 @@ describe('Get removed offers', () => {
         const newOffer = yield* _(
           client.createNewOffer(
             {body: request},
-            HttpClientRequest.setHeaders(me.authHeaders)
-          )
-        )
-        const offerIds = [newOffer.offerId, offer1.offerId]
-
-        const removedOffers = yield* _(
-          client.getRemovedOffers(
-            {
-              body: {offerIds},
-            },
             HttpClientRequest.setHeaders(user1.authHeaders)
           )
         )
-        expect(removedOffers.offerIds).toEqual([])
+
+        const offerIds = [newOffer.offerId, offer1.offerId]
+
+        const firstRequestWithChallenge = yield* _(
+          addChallengeForKey(clubKeypairForMe, me.authHeaders)({})
+        )
+
+        const removedClubOffers = yield* _(
+          client.getRemovedClubOffers(
+            {
+              body: {
+                publicKey: firstRequestWithChallenge.publicKey,
+                signedChallenge: firstRequestWithChallenge.signedChallenge,
+                offerIds,
+              },
+            },
+            HttpClientRequest.setHeaders(me.authHeaders)
+          )
+        )
+
+        expect(removedClubOffers.offerIds).toEqual([])
 
         yield* _(
           client.deleteOffer(
@@ -602,22 +720,31 @@ describe('Get removed offers', () => {
           )
         )
 
-        const removedOffers2 = yield* _(
-          client.getRemovedOffers(
+        const secondRequestWithChallenge = yield* _(
+          addChallengeForKey(clubKeypairForMe, me.authHeaders)({})
+        )
+
+        const removedClubOffers2 = yield* _(
+          client.getRemovedClubOffers(
             {
-              body: {offerIds},
+              body: {
+                publicKey: secondRequestWithChallenge.publicKey,
+                signedChallenge: secondRequestWithChallenge.signedChallenge,
+                offerIds,
+              },
             },
-            HttpClientRequest.setHeaders(user1.authHeaders)
+            HttpClientRequest.setHeaders(me.authHeaders)
           )
         )
-        expect(removedOffers2.offerIds.join()).toEqual(
+
+        expect(removedClubOffers2.offerIds.join()).toEqual(
           [newOffer.offerId].join()
         )
       })
     )
   })
 
-  it('Returns removed offers when offer expired', async () => {
+  it('Returns removed club offers when offer expired', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const sql = yield* _(SqlClient.SqlClient)
@@ -629,15 +756,25 @@ describe('Get removed offers', () => {
           WHERE
             offer_id = ${offer2.offerId};
         `)
+
         const client = yield* _(NodeTestingApp)
+
         const offerIds = [offer1.offerId, offer2.offerId]
 
-        const offers = yield* _(
-          client.getRemovedOffers(
+        const requestWithChallenge = yield* _(
+          addChallengeForKey(clubKeypairForMe, me.authHeaders)({})
+        )
+
+        const clubOffers = yield* _(
+          client.getRemovedClubOffers(
             {
-              body: {offerIds},
+              body: {
+                publicKey: requestWithChallenge.publicKey,
+                signedChallenge: requestWithChallenge.signedChallenge,
+                offerIds,
+              },
             },
-            HttpClientRequest.setHeaders(user1.authHeaders)
+            HttpClientRequest.setHeaders(me.authHeaders)
           )
         )
 
@@ -649,12 +786,12 @@ describe('Get removed offers', () => {
             ${sql.in('offer_id', [offer1.offerId, offer2.offerId])}
         `)
 
-        expect(offers.offerIds.join()).toEqual([offer2.offerId].join())
+        expect(clubOffers.offerIds.join()).toEqual([offer2.offerId].join())
       })
     )
   })
 
-  it('Returns deleted offers when offer flagged', async () => {
+  it('Returns deleted club offers when offer flagged', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const sql = yield* _(SqlClient.SqlClient)
@@ -666,15 +803,24 @@ describe('Get removed offers', () => {
           WHERE
             offer_id = ${offer2.offerId};
         `)
+
         const client = yield* _(NodeTestingApp)
+
         const offerIds = [offer1.offerId, offer2.offerId]
 
-        const offers = yield* _(
-          client.getRemovedOffers(
+        const requestWithChallenge = yield* _(
+          addChallengeForKey(clubKeypairForMe, me.authHeaders)({})
+        )
+        const clubOffers = yield* _(
+          client.getRemovedClubOffers(
             {
-              body: {offerIds},
+              body: {
+                publicKey: requestWithChallenge.publicKey,
+                signedChallenge: requestWithChallenge.signedChallenge,
+                offerIds,
+              },
             },
-            HttpClientRequest.setHeaders(user1.authHeaders)
+            HttpClientRequest.setHeaders(me.authHeaders)
           )
         )
 
@@ -686,7 +832,7 @@ describe('Get removed offers', () => {
             ${sql.in('offer_id', [offer1.offerId, offer2.offerId])}
         `)
 
-        expect(offers.offerIds.join()).toEqual([offer2.offerId].join())
+        expect(clubOffers.offerIds.join()).toEqual([offer2.offerId].join())
       })
     )
   })

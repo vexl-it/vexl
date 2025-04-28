@@ -24,7 +24,11 @@ export const createClub = Handler.make(CreateClubEndpoint, (req) =>
       }
 
       const createdClub = yield* _(
-        clubsDb.insertClub({...req.body.club, madeInactiveAt: Option.none()})
+        clubsDb.insertClub({
+          ...req.body.club,
+          madeInactiveAt: Option.none(),
+          report: 0,
+        })
       )
       return {
         clubInfo: createdClub,

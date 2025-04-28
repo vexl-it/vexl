@@ -383,6 +383,7 @@ describe('Join club', () => {
               ...club,
               madeInactiveAt: Option.none(),
               membersCountLimit: 100,
+              report: 0,
             },
           })
         )

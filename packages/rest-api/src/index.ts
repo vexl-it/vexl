@@ -49,6 +49,7 @@ export const ENV_PRESETS: {stageEnv: EnvPreset; prodEnv: EnvPreset} = {
     contactMs: Schema.decodeSync(ServiceUrl)('https://stage-contact.vexl.it'),
     chatMs: Schema.decodeSync(ServiceUrl)('https://stage-chat.vexl.it'),
     offerMs: Schema.decodeSync(ServiceUrl)('https://stage-offer2.vexl.it'),
+    // offerMs: Schema.decodeSync(ServiceUrl)('http://10.0.2.2:3000'),
     locationMs: Schema.decodeSync(ServiceUrl)('https://stage-location.vexl.it'),
     notificationMs: Schema.decodeSync(ServiceUrl)(
       'https://stage-notification.vexl.it'

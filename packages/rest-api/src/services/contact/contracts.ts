@@ -15,7 +15,7 @@ import {
   HashedPhoneNumber,
   HashedPhoneNumberE,
 } from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
-import {ConnectionLevelE} from '@vexl-next/domain/src/general/offers'
+import {ConnectionLevelE, OfferIdE} from '@vexl-next/domain/src/general/offers'
 import {ExpoNotificationTokenE} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {FcmTokenE} from '@vexl-next/domain/src/utility/FcmToken.brand'
 import {UriStringE} from '@vexl-next/domain/src/utility/UriString.brand'
@@ -27,6 +27,7 @@ import {
 } from '@vexl-next/server-utils/src/services/challenge/contracts'
 import {Schema} from 'effect'
 import {z} from 'zod'
+import {NoContentResponse} from '../../NoContentResponse.brand'
 import {PageRequest, PageResponse} from '../../Pagination.brand'
 import {PlatformName} from '../../PlatformName'
 
@@ -538,6 +539,26 @@ export const GetClubInfoByAccessCodeResponse = Schema.Struct({
 export const GetClubInfoByAccessCodeErrors = Schema.Union(
   InvalidChallengeError,
   NotFoundError
+)
+
+export class ClubAlreadyReportedError extends Schema.TaggedError<ClubAlreadyReportedError>(
+  'ClubAlreadyReportedError'
+)('ClubAlreadyReportedError', {
+  status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
+}) {}
+
+export const ReportClubRequest = Schema.Struct({
+  offerId: OfferIdE,
+  clubUuid: ClubUuidE,
+  ...RequestBaseWithChallenge.fields,
+})
+export type ReportClubRequest = Schema.Schema.Type<typeof ReportClubRequest>
+
+export const ReportClubResponse = NoContentResponse
+
+export const ReportClubErrors = Schema.Union(
+  ClubAlreadyReportedError,
+  InvalidChallengeError
 )
 
 export class SendBulkNotificationError extends Schema.TaggedError<SendBulkNotificationError>(

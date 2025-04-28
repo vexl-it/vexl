@@ -1,9 +1,7 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import {HttpClientRequest} from '@effect/platform'
 import {SqlClient} from '@effect/sql'
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {CountryPrefixE} from '@vexl-next/domain/src/general/CountryPrefix.brand'
-import {E164PhoneNumberE} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {
   generateAdminId,
   newOfferId,
@@ -14,14 +12,18 @@ import {
   type CreateNewOfferRequest,
   type CreateNewOfferResponse,
 } from '@vexl-next/rest-api/src/services/offer/contracts'
-import {createDummyAuthHeadersForUser} from '@vexl-next/server-utils/src/tests/createDummyAuthHeaders'
 import {Effect, Schema} from 'effect'
+import {addChallengeForKey} from '../utils/addChallengeForKey'
+import {createMockedUser, type MockedUser} from '../utils/createMockedUser'
 import {NodeTestingApp} from '../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../utils/runPromiseInMockedEnvironment'
 
-const user1 = generatePrivateKey()
-const user2 = generatePrivateKey()
-const me = generatePrivateKey()
+let user1: MockedUser
+const clubKeypairForUser1 = generatePrivateKey()
+let user2: MockedUser
+const clubKeypairForUser2 = generatePrivateKey()
+let me: MockedUser
+const clubKeypairForMe = generatePrivateKey()
 let offer1: CreateNewOfferResponse
 let offer2: CreateNewOfferResponse
 
@@ -30,23 +32,26 @@ beforeEach(async () => {
     Effect.gen(function* (_) {
       const client = yield* _(NodeTestingApp)
 
+      me = yield* _(createMockedUser('+420733333330'))
+      user1 = yield* _(createMockedUser('+420733333331'))
+      user2 = yield* _(createMockedUser('+420733333332'))
+
       const request1: CreateNewOfferRequest = {
         adminId: generateAdminId(),
         countryPrefix: Schema.decodeSync(CountryPrefixE)(420),
         offerPrivateList: [
           {
             payloadPrivate: 'offer1payloadPrivate' as PrivatePayloadEncrypted,
-            userPublicKey: user1.publicKeyPemBase64,
+            userPublicKey: user1.mainKeyPair.publicKeyPemBase64,
           },
           {
             payloadPrivate: 'offer1payloadPrivate2' as PrivatePayloadEncrypted,
-            userPublicKey: user2.publicKeyPemBase64,
+            userPublicKey: clubKeypairForUser2.publicKeyPemBase64,
           },
-
           {
             payloadPrivate:
               'offer1payloadPrivateForMe' as PrivatePayloadEncrypted,
-            userPublicKey: me.publicKeyPemBase64,
+            userPublicKey: clubKeypairForMe.publicKeyPemBase64,
           },
         ],
         offerType: 'BUY',
@@ -58,15 +63,7 @@ beforeEach(async () => {
         ...(yield* _(
           client.createNewOffer(
             {body: request1},
-            HttpClientRequest.setHeaders(
-              yield* _(
-                createDummyAuthHeadersForUser({
-                  phoneNumber:
-                    Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
-                  publicKey: me.publicKeyPemBase64,
-                })
-              )
-            )
+            HttpClientRequest.setHeaders(user1.authHeaders)
           )
         )),
         adminId: request1.adminId,
@@ -77,12 +74,12 @@ beforeEach(async () => {
         countryPrefix: Schema.decodeSync(CountryPrefixE)(420),
         offerPrivateList: [
           {
-            payloadPrivate: 'offer1payloadPrivate' as PrivatePayloadEncrypted,
-            userPublicKey: user1.publicKeyPemBase64,
+            payloadPrivate: 'offer2payloadPrivate' as PrivatePayloadEncrypted,
+            userPublicKey: clubKeypairForUser1.publicKeyPemBase64,
           },
           {
-            payloadPrivate: 'offer1payloadPrivate2' as PrivatePayloadEncrypted,
-            userPublicKey: user2.publicKeyPemBase64,
+            payloadPrivate: 'offer2payloadPrivate2' as PrivatePayloadEncrypted,
+            userPublicKey: user2.mainKeyPair.publicKeyPemBase64,
           },
         ],
         offerType: 'BUY',
@@ -94,15 +91,7 @@ beforeEach(async () => {
         ...(yield* _(
           client.createNewOffer(
             {body: request2},
-            HttpClientRequest.setHeaders(
-              yield* _(
-                createDummyAuthHeadersForUser({
-                  phoneNumber:
-                    Schema.decodeSync(E164PhoneNumberE)('+420733333332'),
-                  publicKey: user2.publicKeyPemBase64,
-                })
-              )
-            )
+            HttpClientRequest.setHeaders(user2.authHeaders)
           )
         )),
         adminId: request2.adminId,
@@ -111,27 +100,26 @@ beforeEach(async () => {
   )
 })
 
-describe('Report offer', () => {
-  it('Properly increases report counter', async () => {
+describe('Report club offer', () => {
+  it('Should properly increase report counter', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const client = yield* _(NodeTestingApp)
+
+        const requestWithChallenge = yield* _(
+          addChallengeForKey(clubKeypairForMe, me.authHeaders)({})
+        )
+
         yield* _(
-          client.reportOffer(
+          client.reportClubOffer(
             {
               body: {
                 offerId: offer1.offerId,
+                publicKey: requestWithChallenge.publicKey,
+                signedChallenge: requestWithChallenge.signedChallenge,
               },
             },
-            HttpClientRequest.setHeaders(
-              yield* _(
-                createDummyAuthHeadersForUser({
-                  phoneNumber:
-                    Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
-                  publicKey: me.publicKeyPemBase64,
-                })
-              )
-            )
+            HttpClientRequest.setHeaders(me.authHeaders)
           )
         )
 
@@ -149,26 +137,25 @@ describe('Report offer', () => {
     )
   })
 
-  it('return 404 the when offer is not meant for me', async () => {
+  it('return 404 when I am reporting offer that is not ment for me', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const client = yield* _(NodeTestingApp)
+
+        const requestWithChallenge = yield* _(
+          addChallengeForKey(clubKeypairForMe, me.authHeaders)({})
+        )
+
         const response = yield* _(
-          client.reportOffer(
+          client.reportClubOffer(
             {
               body: {
                 offerId: offer2.offerId,
+                publicKey: requestWithChallenge.publicKey,
+                signedChallenge: requestWithChallenge.signedChallenge,
               },
             },
-            HttpClientRequest.setHeaders(
-              yield* _(
-                createDummyAuthHeadersForUser({
-                  phoneNumber:
-                    Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
-                  publicKey: me.publicKeyPemBase64,
-                })
-              )
-            )
+            HttpClientRequest.setHeaders(me.authHeaders)
           ),
           Effect.either
         )
@@ -192,26 +179,24 @@ describe('Report offer', () => {
     )
   })
 
-  it('Returns 404 when offer does not exist', async () => {
+  it('Returns 404 when reporting offer that does not exist', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const client = yield* _(NodeTestingApp)
+        const requestWithChallenge = yield* _(
+          addChallengeForKey(clubKeypairForMe, me.authHeaders)({})
+        )
+
         const response = yield* _(
-          client.reportOffer(
+          client.reportClubOffer(
             {
               body: {
                 offerId: newOfferId(),
+                publicKey: requestWithChallenge.publicKey,
+                signedChallenge: requestWithChallenge.signedChallenge,
               },
             },
-            HttpClientRequest.setHeaders(
-              yield* _(
-                createDummyAuthHeadersForUser({
-                  phoneNumber:
-                    Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
-                  publicKey: me.publicKeyPemBase64,
-                })
-              )
-            )
+            HttpClientRequest.setHeaders(me.authHeaders)
           ),
           Effect.either
         )

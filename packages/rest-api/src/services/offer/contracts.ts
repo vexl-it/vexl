@@ -10,7 +10,10 @@ import {
 import {IdNumericE} from '@vexl-next/domain/src/utility/IdNumeric'
 import {IsoDatetimeStringE} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
 import {UnixMillisecondsE} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {RequestBaseWithChallenge} from '@vexl-next/server-utils/src/services/challenge/contracts'
+import {
+  InvalidChallengeError,
+  RequestBaseWithChallenge,
+} from '@vexl-next/server-utils/src/services/challenge/contracts'
 import {Array, Schema} from 'effect'
 import {NoContentResponse} from '../../NoContentResponse.brand'
 
@@ -201,6 +204,19 @@ export type ReportOfferRequest = Schema.Schema.Type<typeof ReportOfferRequest>
 export const ReportOfferResponse = NoContentResponse
 export type ReportOfferResponse = Schema.Schema.Type<typeof ReportOfferResponse>
 
+export const ReportClubOfferRequest = Schema.Struct({
+  offerId: OfferIdE,
+  ...RequestBaseWithChallenge.fields,
+})
+export type ReportClubOfferRequest = Schema.Schema.Type<
+  typeof ReportClubOfferRequest
+>
+
+export const ReportClubOfferResponse = NoContentResponse
+export type ReportClubOfferResponse = Schema.Schema.Type<
+  typeof ReportClubOfferResponse
+>
+
 export const DeleteUserResponse = NoContentResponse
 export type DeleteUserResponse = Schema.Schema.Type<typeof DeleteUserResponse>
 
@@ -222,6 +238,11 @@ export const DeletePrivatePartErrors = Schema.Union(
 
 export const ReportOfferEndpointErrors = Schema.Union(
   ReportOfferLimitReachedError
+)
+
+export const ReportClubOfferEndpointErrors = Schema.Union(
+  ReportOfferLimitReachedError,
+  InvalidChallengeError
 )
 
 export const GetOffersByIdsInput = Schema.Struct({

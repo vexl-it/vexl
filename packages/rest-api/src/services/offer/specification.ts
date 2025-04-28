@@ -27,6 +27,9 @@ import {
   RemovedClubOfferIdsRequest,
   RemovedOfferIdsRequest,
   RemovedOfferIdsResponse,
+  ReportClubOfferEndpointErrors,
+  ReportClubOfferRequest,
+  ReportClubOfferResponse,
   ReportOfferEndpointErrors,
   ReportOfferRequest,
   ReportOfferResponse,
@@ -216,6 +219,24 @@ export const ReportOfferEndpoint = Api.post(
   })
 )
 
+export const ReportClubOfferEndpoint = Api.post(
+  'reportClubOffer',
+  '/api/v1/clubOffers/report',
+  {summary: 'Report club offer'}
+).pipe(
+  Api.setSecurity(ServerSecurity),
+  Api.setRequestBody(ReportClubOfferRequest),
+  Api.setResponseBody(ReportClubOfferResponse),
+  Api.addResponse({
+    status: 400 as const,
+    body: ReportClubOfferEndpointErrors,
+  }),
+  Api.addResponse({
+    status: 404 as const,
+    body: NotFoundError,
+  })
+)
+
 export const OfferApiSpecification = Api.make({
   title: 'Offer service',
   version: '1.0.0',
@@ -235,5 +256,6 @@ export const OfferApiSpecification = Api.make({
   Api.addEndpoint(GetRemovedOffersEndpoint),
   Api.addEndpoint(GetRemovedClubOffersEndpoint),
   Api.addEndpoint(ReportOfferEndpoint),
+  Api.addEndpoint(ReportClubOfferEndpoint),
   Api.addGroup(ChallengeApiGroup)
 )

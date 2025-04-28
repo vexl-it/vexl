@@ -62,7 +62,6 @@ import {
 import {type SelectedImage} from '../../../utils/imagePickers'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
 import {safeNavigateBackOutsideReact} from '../../../utils/navigation'
-import randomName from '../../../utils/randomName'
 import reportError from '../../../utils/reportError'
 import showErrorAlert from '../../../utils/showErrorAlert'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
@@ -282,7 +281,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
 
   const deleteChatAtom = deleteChatActionAtom(chatWithMessagesAtom)
 
-  const nameAtom = selectAtom(chatAtom, (o) => randomName(o.id))
+  const nameAtom = atom((get) => get(otherSideDataAtom).userName)
   const chatIdAtom = focusAtom(chatAtom, (o) => o.prop('id'))
   const publicKeyPemBase64Atom = focusAtom(chatAtom, (o) =>
     o.prop('inbox').prop('privateKey').prop('publicKeyPemBase64')

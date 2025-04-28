@@ -1,5 +1,6 @@
 import {UserName} from '@vexl-next/domain/src/general/UserName.brand'
 import seed from 'seed-random'
+import {type RandomSeed} from './RandomSeed'
 
 const sils = [
   'bo',
@@ -33,7 +34,7 @@ const sils = [
   'zo',
 ]
 
-export default function randomName(seedString?: string): UserName {
+export default function randomName(seedString?: RandomSeed): UserName {
   const getRandom = seedString ? seed(seedString) : Math.random
 
   const lowercase = ['', '', '', '']

@@ -10,6 +10,7 @@ import {userDataRealOrAnonymizedAtom} from '../state/session/userDataAtoms'
 import {useTranslation} from '../utils/localization/I18nProvider'
 import {goldenAvatarTypeAtom} from '../utils/preferences'
 import randomName from '../utils/randomName'
+import {randomSeedFromOfferInfo} from '../utils/RandomSeed'
 import {setTimezoneOfUser} from '../utils/unixMillisecondsToLocaleDateTime'
 import {AnonymousAvatarFromSeed} from './AnonymousAvatar'
 import ContactTypeAndCommonNumber from './ContactTypeAndCommonNumber'
@@ -64,7 +65,7 @@ function OfferAuthorAvatar({
           grayScale={negative ?? false}
           width={48}
           height={48}
-          seed={offerInfo.offerId}
+          seed={randomSeedFromOfferInfo(offerInfo)}
           goldenAvatarType={goldenAvatarType}
         />
         <Stack flex={1} marginLeft="$2">
@@ -72,7 +73,7 @@ function OfferAuthorAvatar({
             offerInfo={offerInfo}
             userName={
               chatForOffer?.otherSide?.realLifeInfo?.userName ??
-              randomName(offerInfo.offerId)
+              randomName(randomSeedFromOfferInfo(offerInfo))
             }
           />
         </Stack>
@@ -116,7 +117,7 @@ function OfferAuthorAvatar({
                 grayScale={negative ?? false}
                 width={48}
                 height={48}
-                seed={offerInfo.offerId}
+                seed={randomSeedFromOfferInfo(offerInfo)}
                 goldenAvatarType={offerInfo.publicPart.goldenAvatarType}
               />
             </TouchableOpacity>
@@ -126,7 +127,7 @@ function OfferAuthorAvatar({
               offerInfo={offerInfo}
               userName={
                 chatForOffer?.otherSide?.realLifeInfo?.userName ??
-                randomName(offerInfo.offerId)
+                randomName(randomSeedFromOfferInfo(offerInfo))
               }
             />
             <ContactTypeAndCommonNumber

@@ -2,6 +2,7 @@ import {type GoldenAvatarType} from '@vexl-next/domain/src/general/offers'
 import {type SvgString} from '@vexl-next/domain/src/utility/SvgString.brand'
 import {type StyleProp, type ViewStyle} from 'react-native'
 import {randomNumberFromSeed} from '../../utils/randomNumber'
+import {type RandomSeed} from '../../utils/RandomSeed'
 import Image from '../Image'
 import UserAvatar from '../UserAvatar'
 import avatarsGoldenGlassesAndBackgroundSvg from './images/avatarsGoldenGlassesAndBackgroundSvg'
@@ -42,7 +43,7 @@ export function getRandomAvatarSvgFromSeed({
   seed,
   goldenAvatarType,
 }: {
-  seed: string
+  seed: RandomSeed
   goldenAvatarType?: GoldenAvatarType
 }): SvgString {
   const randomNumber = randomNumberFromSeed(
@@ -62,7 +63,7 @@ export function AnonymousAvatarFromSeed({
   grayScale,
   goldenAvatarType,
 }: {
-  seed: string
+  seed: RandomSeed
   height: number
   width: number
   grayScale: boolean

@@ -28,7 +28,10 @@ export function addIdentityRealLifeInfoToChat(
   return (chat) => {
     if (identityRevealData) {
       const dataFromIdentityReveal =
-        processTradeChecklistIdentityRevealMessageIfAny(identityRevealData)
+        processTradeChecklistIdentityRevealMessageIfAny(
+          identityRevealData,
+          chat.chat
+        )
 
       return setRealLifeInfo(dataFromIdentityReveal)(chat)
     }

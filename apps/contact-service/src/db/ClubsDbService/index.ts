@@ -7,6 +7,7 @@ import {
   createDeleteClub,
   type DeleteClubParams,
 } from './queries/createDeleteClubs'
+import {createFindAllUserIdsForReportedClubOffer} from './queries/createFindAllUserIdsForReportedClubOffer'
 import {createFindClub, type FindClubParams} from './queries/createFindClub'
 import {
   createFindClubByUuid,
@@ -24,7 +25,6 @@ import {createListClubs} from './queries/createListClubs'
 import {createListClubsWithExceededReportsCount} from './queries/createListClubsWithExceededReportsCount'
 import {createListExpiredClubs} from './queries/createListExpiredClubs'
 import {createListInactiveClubs} from './queries/createListInactiveClubs'
-import {createListUserIdsForReportedClubOffer} from './queries/createListUserIdsForReportedClubOffer'
 import {
   createUpdateClub,
   type UpdateClubParams,
@@ -48,6 +48,9 @@ export interface ClubsDbOperations {
   findClubByUuid: (
     params: FindClubByUuidParams
   ) => Effect.Effect<Option.Option<ClubDbRecord>, UnexpectedServerError>
+  findAllUserIdsForReportedClubOffer: (
+    args: OfferId
+  ) => Effect.Effect<readonly PublicKeyPemBase64[], UnexpectedServerError>
   insertClub: (
     params: InsertClubParams
   ) => Effect.Effect<ClubDbRecord, UnexpectedServerError>
@@ -73,9 +76,6 @@ export interface ClubsDbOperations {
     readonly ClubDbRecord[],
     UnexpectedServerError
   >
-  listUserIdsForReportedClubOffer: (
-    args: OfferId
-  ) => Effect.Effect<readonly PublicKeyPemBase64[], UnexpectedServerError>
   reportClub: (
     params: UpdateReportClubRequest
   ) => Effect.Effect<void, UnexpectedServerError>
@@ -103,8 +103,8 @@ export class ClubsDbService extends Context.Tag('ClubsDbService')<
         createListClubsWithExceededReportsCount
       )
       const listInactiveClubs = yield* _(createListInactiveClubs)
-      const listUserIdsForReportedClubOffer = yield* _(
-        createListUserIdsForReportedClubOffer
+      const findAllUserIdsForReportedClubOffer = yield* _(
+        createFindAllUserIdsForReportedClubOffer
       )
       const reportClub = yield* _(createUpdateReportClub)
 
@@ -112,6 +112,7 @@ export class ClubsDbService extends Context.Tag('ClubsDbService')<
         deleteClub,
         findClub,
         findClubByUuid,
+        findAllUserIdsForReportedClubOffer,
         insertClub,
         insertClubOfferReportedBy,
         updateClub,
@@ -120,7 +121,6 @@ export class ClubsDbService extends Context.Tag('ClubsDbService')<
         listExpiredClubs,
         listClubsWithExceededReportsCount,
         listInactiveClubs,
-        listUserIdsForReportedClubOffer,
         reportClub,
       }
     })

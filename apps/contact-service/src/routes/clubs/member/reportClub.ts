@@ -52,7 +52,7 @@ export const reportClub = Handler.make(ReportClubEndpoint, (req, security) =>
       )
 
       const clubAlreadyReportedByThisUser = yield* _(
-        clubsDb.listUserIdsForReportedClubOffer(req.body.offerId),
+        clubsDb.findAllUserIdsForReportedClubOffer(req.body.offerId),
         Effect.map(
           Array.some((publicKey) => publicKey === security['public-key'])
         )

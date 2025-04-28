@@ -21,8 +21,7 @@ export const createListClubsWithExceededReportsCount = Effect.gen(
         WHERE
           ${sql.and([
           sql`report >= ${reportClubLimit}`,
-          sql`valid_until > now()`,
-          sql`valid_until IS NOT NULL`,
+          sql`made_inactive_at IS NULL`,
         ])}
       `,
     })

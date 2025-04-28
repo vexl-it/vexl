@@ -1,4 +1,4 @@
-import {SqlResolver} from '@effect/sql'
+import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
@@ -16,22 +16,16 @@ export type InsertClubOfferReportedByRequest =
 export const createInsertClubOfferReportedBy = Effect.gen(function* (_) {
   const sql = yield* _(PgClient.PgClient)
 
-  const InsertClubOfferReportedBy = yield* _(
-    SqlResolver.void('InsertClubOfferReportedBy', {
-      Request: InsertClubOfferReportedByRequest,
-      execute: (request) => {
-        return sql`
-          INSERT INTO
-            club_offer_reported_by ${sql.insert(request)}
-          RETURNING
-            club_offer_reported_by.*
-        `
-      },
-    })
-  )
+  const query = SqlSchema.void({
+    Request: InsertClubOfferReportedByRequest,
+    execute: (params) => sql`
+      INSERT INTO
+        club_offer_reported_by ${sql.insert(params)}
+    `,
+  })
 
   return flow(
-    InsertClubOfferReportedBy.execute,
+    query,
     Effect.catchAll((e) =>
       Effect.zipRight(
         Effect.logError('Error inserting club offer reported by', e),

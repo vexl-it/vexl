@@ -4,14 +4,15 @@ import {
   ReportOfferLimitReachedError,
 } from '@vexl-next/rest-api/src/services/offer/contracts'
 import {ReportClubOfferEndpoint} from '@vexl-next/rest-api/src/services/offer/specification'
-import {withRedisLock} from '@vexl-next/server-utils/src/RedisService'
 import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {validateChallengeInBody} from '@vexl-next/server-utils/src/services/challenge/utils/validateChallengeInBody'
+import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
 import {Effect, Option} from 'effect'
 import {Handler} from 'effect-http'
 import {reportLimitCountConfig} from '../configs'
 import {OfferDbService} from '../db/OfferDbService'
-import {reportOfferReported} from '../metrics'
+import {reportClubOfferReported} from '../metrics'
+import {withReportClubOfferRedisLock} from '../utils/withReportClubOfferRedisLock'
 
 export const reportClubOffer = Handler.make(
   ReportClubOfferEndpoint,
@@ -50,8 +51,12 @@ export const reportClubOffer = Handler.make(
         )
         return null
       }).pipe(
-        withRedisLock(`reportOffer:${security['public-key']}`),
-        Effect.zipLeft(reportOfferReported(req.body.offerId))
+        withReportClubOfferRedisLock({
+          publicKey: security['public-key'],
+          offerId: req.body.offerId,
+        }),
+        withDbTransaction,
+        Effect.zipLeft(reportClubOfferReported(req.body.offerId))
       ),
       ReportClubOfferEndpointErrors
     )

@@ -87,6 +87,19 @@ export const reportOfferReported = (
       attributes: {offerId},
     })
   )
+
+export const reportClubOfferReported = (
+  offerId: OfferId
+): Effect.Effect<void, never, MetricsClientService> =>
+  reportMetricForked(
+    new MetricsMessage({
+      uuid: generateUuid(),
+      timestamp: new Date(),
+      name: OFFER_REPORTED,
+      attributes: {offerId},
+    })
+  )
+
 export const reportTotalBuyOffers = ({
   countryPrefix,
   value,

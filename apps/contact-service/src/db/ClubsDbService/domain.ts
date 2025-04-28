@@ -21,5 +21,5 @@ export class ClubDbRecord extends Schema.Class<ClubDbRecord>('ClubDbRecord')({
     as: 'Option',
     nullable: true,
   }),
-  report: Schema.Number,
+  report: Schema.Int,
 }) {}

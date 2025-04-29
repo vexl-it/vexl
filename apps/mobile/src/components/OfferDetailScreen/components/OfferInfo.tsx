@@ -1,5 +1,6 @@
 import Clipboard from '@react-native-clipboard/clipboard'
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
+import {Effect} from 'effect'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {useAtomValue, useSetAtom} from 'jotai'
@@ -33,7 +34,7 @@ import OfferRequestTextInput from '../../OfferRequestTextInput'
 import OfferWithBubbleTip from '../../OfferWithBubbleTip'
 import {toastNotificationAtom} from '../../ToastNotification/atom'
 import infoSvg from '../../images/infoSvg'
-import showCommonFriendsExplanationUIActionAtom from '../atoms'
+import {showCommonFriendsExplanationActionAtom} from '../atoms'
 import RerequestInfo from './RerequestInfo'
 import Title from './Title'
 
@@ -74,8 +75,8 @@ function OfferInfo({
   const reportedFlagAtom = createSingleOfferReportedFlagAtom(
     offer.offerInfo.offerId
   )
-  const showCommonFriendsExplanationUIAction = useSetAtom(
-    showCommonFriendsExplanationUIActionAtom
+  const showCommonFriendsExplanation = useSetAtom(
+    showCommonFriendsExplanationActionAtom
   )
   const flagOffer = useSetAtom(reportedFlagAtom)
   const submitRequest = useSetAtom(sendRequestHandleUIActionAtom)
@@ -99,10 +100,6 @@ function OfferInfo({
 
     return canChatBeRequested(chatForOffer, offerRerequestLimitDays)
   }, [chatForOffer, offerRerequestLimitDays])
-
-  const onWhatDoesThisMeanPressed = useCallback(() => {
-    void showCommonFriendsExplanationUIAction(offer.offerInfo)
-  }, [offer.offerInfo, showCommonFriendsExplanationUIAction])
 
   const friendLevel = (() => {
     if (offer.offerInfo.privatePart.friendLevel.includes('FIRST_DEGREE'))
@@ -174,7 +171,9 @@ function OfferInfo({
             visibleStateAtom={friendLevelBannerPreferenceAtom}
             text={t('common.whatDoesThisMean', {term: friendLevel})}
             actionButtonText={t('common.learnMore')}
-            onActionPress={onWhatDoesThisMeanPressed}
+            onActionPress={() => {
+              Effect.runFork(showCommonFriendsExplanation(offer.offerInfo))
+            }}
           />
           {!!showRequestButton && (
             <OfferRequestTextInput text={text} onChange={setText} />

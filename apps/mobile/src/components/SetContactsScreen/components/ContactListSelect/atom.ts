@@ -212,11 +212,12 @@ export const contactSelectMolecule = molecule((_, getScope) => {
     null,
     (get, set): T.Task<boolean> => {
       const {t} = get(translationAtom)
-      const selectedNumbers = Array.from(get(selectedNumbersAtom))
+      const selectedNumbers = deduplicate(Array.from(get(selectedNumbersAtom)))
       return pipe(
         set(submitContactsActionAtom, {
-          numbersToImport: deduplicate(selectedNumbers),
+          numbersToImport: selectedNumbers,
           normalizeAndImportAll: false,
+          showOfferReencryptionDialog: selectedNumbers.length > 0,
         }),
         T.map((result) => {
           if (result) {
@@ -324,6 +325,7 @@ export const contactSelectMolecule = molecule((_, getScope) => {
                 contact.computedValues.normalizedNumber,
               ]),
               normalizeAndImportAll: false,
+              showOfferReencryptionDialog: false,
             }),
             TE.fromTask
           )

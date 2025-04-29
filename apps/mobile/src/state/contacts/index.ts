@@ -74,6 +74,7 @@ export function useRefreshContactsFromDeviceOnResume(): void {
                   return store.set(submitContactsActionAtom, {
                     normalizeAndImportAll: false,
                     numbersToImport: [],
+                    showOfferReencryptionDialog: true,
                   })
                 }
 

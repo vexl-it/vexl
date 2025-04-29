@@ -61,21 +61,22 @@ export default function ImportContactsExplanationScreen({
           text={t('postLoginFlow.importContactsButton')}
           onPress={() => {
             setContactsLoading(true)
-            void submitContacts({normalizeAndImportAll: true})().then(
-              (result) => {
-                resolveAllContactsAsSeen()
-                setContactsLoading(false)
-                if (result === 'permissionsNotGranted') {
-                  void Effect.runPromise(
-                    showContactsAccessDeniedExplanation()
-                  ).then(() => {
-                    navigation.navigate('FindOffersInVexlClubsScreen')
-                  })
-                }
-                if (result === 'success') Effect.runFork(finishPostLoginFlow())
-                // if (success) navigation.push('AllowNotificationsExplanation')
+            void submitContacts({
+              normalizeAndImportAll: true,
+              showOfferReencryptionDialog: false,
+            })().then((result) => {
+              resolveAllContactsAsSeen()
+              setContactsLoading(false)
+              if (result === 'permissionsNotGranted') {
+                void Effect.runPromise(
+                  showContactsAccessDeniedExplanation()
+                ).then(() => {
+                  navigation.navigate('FindOffersInVexlClubsScreen')
+                })
               }
-            )
+              if (result === 'success') Effect.runFork(finishPostLoginFlow())
+              // if (success) navigation.push('AllowNotificationsExplanation')
+            })
           }}
           disabled={contactsLoading}
         />

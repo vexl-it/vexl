@@ -11,6 +11,7 @@ import {atom} from 'jotai'
 import {Alert} from 'react-native'
 import {apiAtom} from '../../../api'
 import {loadingOverlayDisplayedAtom} from '../../../components/LoadingOverlayProvider'
+import {offerProgressModalActionAtoms} from '../../../components/UploadingOfferProgressModal/atoms'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
 import notEmpty from '../../../utils/notEmpty'
 import reportError from '../../../utils/reportError'
@@ -33,11 +34,12 @@ export const submitContactsActionAtom = atom(
   (
     get,
     set,
-    params:
+    params: {showOfferReencryptionDialog: boolean} & (
       | {
           normalizeAndImportAll: true
         }
       | {normalizeAndImportAll: false; numbersToImport: E164PhoneNumber[]}
+    )
   ) => {
     const contactApi = get(apiAtom).contact
     const {t} = get(translationAtom)
@@ -129,48 +131,106 @@ export const submitContactsActionAtom = atom(
           Effect.all,
           Effect.ensuring(
             Ref.get(importedNumbersSoFarRef).pipe(
-              Effect.flatMap((importedNumbers) => {
-                set(storedContactsAtom, (storedContacts) =>
-                  storedContacts.map((oneContact) => {
-                    if (!oneContact.computedValues)
+              Effect.flatMap((importedNumbers) =>
+                Effect.gen(function* (_) {
+                  set(storedContactsAtom, (storedContacts) =>
+                    storedContacts.map((oneContact) => {
+                      if (!oneContact.computedValues)
+                        return {
+                          ...oneContact,
+                          flags: {...oneContact.flags, imported: false},
+                        }
+
+                      if (
+                        HashSet.has(
+                          importedNumbers,
+                          oneContact.computedValues.normalizedNumber
+                        )
+                      )
+                        return {
+                          ...oneContact,
+                          flags: {...oneContact.flags, imported: true},
+                        }
+
                       return {
                         ...oneContact,
-                        flags: {...oneContact.flags, imported: false},
+                        flags: {
+                          ...oneContact.flags,
+                          // If we were doing imcremental update,
+                          // Make sure to perserve the imported flag
+                          // otherwise we will erase all already imported contacts
+                          imported: doIncrementalUpdate
+                            ? oneContact.flags.imported
+                            : false,
+                        },
                       }
+                    })
+                  )
+                  if (params.showOfferReencryptionDialog) {
+                    set(loadingOverlayDisplayedAtom, false)
+                    set(offerProgressModalActionAtoms.show, {
+                      title: t('contacts.refreshingOffers.title'),
+                      bottomText: t(
+                        'offerForm.offerEncryption.dontShutDownTheApp'
+                      ),
+                      indicateProgress: {type: 'intermediate'},
+                    })
 
-                    if (
-                      HashSet.has(
-                        importedNumbers,
-                        oneContact.computedValues.normalizedNumber
+                    yield* _(
+                      set(syncConnectionsActionAtom),
+                      Effect.zip(
+                        set(updateAndReencryptAllOffersConnectionsActionAtom, {
+                          onProgres: ({offerI, totalOffers, progress}) => {
+                            set(offerProgressModalActionAtoms.showStep, {
+                              progress,
+                              textData: {
+                                title: t('contacts.refreshingOffers.title'),
+                                belowProgressLeft: t(
+                                  'contacts.refreshingOffers.belowProgressLeft',
+                                  {
+                                    i: offerI + 1,
+                                    total: totalOffers,
+                                  }
+                                ),
+                                bottomText: t(
+                                  'offerForm.offerEncryption.dontShutDownTheApp'
+                                ),
+                              },
+                            })
+                          },
+                          isInBackground: false,
+                        })
                       )
                     )
-                      return {
-                        ...oneContact,
-                        flags: {...oneContact.flags, imported: true},
-                      }
 
-                    return {
-                      ...oneContact,
-                      flags: {
-                        ...oneContact.flags,
-                        // If we were doing imcremental update,
-                        // Make sure to perserve the imported flag
-                        // otherwise we will erase all already imported contacts
-                        imported: doIncrementalUpdate
-                          ? oneContact.flags.imported
-                          : false,
-                      },
-                    }
-                  })
-                )
-                Effect.runFork(set(syncConnectionsActionAtom))
-                Effect.runFork(
-                  set(updateAndReencryptAllOffersConnectionsActionAtom, {
-                    isInBackground: false,
-                  })
-                )
-                return Effect.void
-              })
+                    yield* _(
+                      set(offerProgressModalActionAtoms.hideDeffered, {
+                        data: {
+                          title: t('contacts.refreshingOffers.titleDone'),
+                          bottomText: t(
+                            'contacts.refreshingOffers.bottomTextDone'
+                          ),
+                          belowProgressLeft: t(
+                            'contacts.refreshingOffers.belowProgressLeftDone'
+                          ),
+                          belowProgressRight: t('progressBar.DONE'),
+                          indicateProgress: {
+                            type: 'done',
+                          },
+                        },
+                        delayMs: 3000,
+                      })
+                    )
+                  } else {
+                    yield* _(set(syncConnectionsActionAtom))
+                    yield* _(
+                      set(updateAndReencryptAllOffersConnectionsActionAtom, {
+                        isInBackground: false,
+                      })
+                    )
+                  }
+                })
+              )
             )
           )
         )

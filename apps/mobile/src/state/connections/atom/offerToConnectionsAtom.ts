@@ -360,7 +360,17 @@ export const updateAndReencryptAllOffersConnectionsActionAtom = atom(
   (
     get,
     set,
-    {isInBackground}: {isInBackground?: boolean}
+    {
+      isInBackground,
+      onProgres,
+    }: {
+      isInBackground?: boolean
+      onProgres?: (args: {
+        offerI: number
+        totalOffers: number
+        progress: OfferEncryptionProgress
+      }) => void
+    }
   ): Effect.Effect<
     ReadonlyArray<{
       readonly adminId: OfferAdminId
@@ -397,6 +407,15 @@ export const updateAndReencryptAllOffersConnectionsActionAtom = atom(
           const adminId = get(oneOfferAtom).adminId
           return set(updateAndReencryptSingleOfferConnectionActionAtom, {
             adminId,
+            onProgress: onProgres
+              ? (progress) => {
+                  onProgres({
+                    offerI: i,
+                    totalOffers: offerToConnectionsAtoms.length,
+                    progress,
+                  })
+                }
+              : undefined,
             stopProcessingAfter,
           }).pipe(
             Effect.zipRight(Effect.succeed({adminId, success: true})),

@@ -67,6 +67,7 @@ export default function ImportContactsExplanationScreen({
             })().then((result) => {
               resolveAllContactsAsSeen()
               setContactsLoading(false)
+
               if (result === 'permissionsNotGranted') {
                 void Effect.runPromise(
                   showContactsAccessDeniedExplanation()
@@ -74,7 +75,12 @@ export default function ImportContactsExplanationScreen({
                   navigation.navigate('FindOffersInVexlClubsScreen')
                 })
               }
+
+              if (result === 'noContactsSelected')
+                navigation.navigate('FindOffersInVexlClubsScreen')
+
               if (result === 'success') Effect.runFork(finishPostLoginFlow())
+
               // if (success) navigation.push('AllowNotificationsExplanation')
             })
           }}

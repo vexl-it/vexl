@@ -12,7 +12,7 @@ import {AppState, Platform} from 'react-native'
 import {checkForClubsAdmissionActionAtom} from '../../state/clubs/atom/checkForClubsAdmissionActionAtom'
 import {syncAllClubsHandleStateWhenNotFoundActionAtom} from '../../state/clubs/atom/refreshClubsActionAtom'
 import {syncConnectionsActionAtom} from '../../state/connections/atom/connectionStateAtom'
-import {updateAllOffersConnectionsActionAtom} from '../../state/connections/atom/offerToConnectionsAtom'
+import {updateAndReencryptAllOffersConnectionsActionAtom} from '../../state/connections/atom/offerToConnectionsAtom'
 import processChatNotificationActionAtom from '../../state/notifications/processChatNotification'
 import reportError from '../reportError'
 import {extractDataPayloadFromNotification} from './extractDataFromNotification'
@@ -98,9 +98,14 @@ export async function processBackgroundMessage(
         '📳 Received notification about new user. Checking and updating offers accordingly.'
       )
       await Effect.runPromise(getDefaultStore().set(syncConnectionsActionAtom))
-      await getDefaultStore().set(updateAllOffersConnectionsActionAtom, {
-        isInBackground: true,
-      })()
+      await Effect.runPromise(
+        getDefaultStore().set(
+          updateAndReencryptAllOffersConnectionsActionAtom,
+          {
+            isInBackground: true,
+          }
+        )
+      )
       return
     }
 
@@ -116,9 +121,14 @@ export async function processBackgroundMessage(
           updateOnlyUuids: newClubConnectionNotificationO.value.clubUuids,
         })
       )
-      await getDefaultStore().set(updateAllOffersConnectionsActionAtom, {
-        isInBackground: true,
-      })()
+      await Effect.runPromise(
+        getDefaultStore().set(
+          updateAndReencryptAllOffersConnectionsActionAtom,
+          {
+            isInBackground: true,
+          }
+        )
+      )
       return
     }
 

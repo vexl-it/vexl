@@ -10,11 +10,13 @@ import {
 import {type UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {type FetchCommonConnectionsResponse} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
-import {Array, Effect, pipe, Record, Schema} from 'effect'
+import {type ServerPrivatePart} from '@vexl-next/rest-api/src/services/offer/contracts'
+import {Array, Effect, Either, pipe, Record, Schema} from 'effect'
 import {type ReadonlyRecord} from 'effect/Record'
-import {flow} from 'fp-ts/function'
 import reportErrorFromResourcesUtils from '../reportErrorFromResourcesUtils'
 import {deduplicate, subtractArrays} from '../utils/array'
+import {type OfferEncryptionProgress} from './OfferEncryptionProgress'
+import {PRIVATE_PARTS_BATCH_SIZE} from './privatePartsUploadBatchSize'
 import constructPrivatePayloads, {
   type PrivatePayloadsConstructionError,
 } from './utils/constructPrivatePayloads'
@@ -108,6 +110,76 @@ function checkAndReportRemovingClubConnectionThatIsAlsoFromSocualNetwork({
   }
 }
 
+interface UploadPrivatePartsBatchResult {
+  succeeded: ServerPrivatePart[]
+  failed: Array<{
+    error: Effect.Effect.Error<ReturnType<OfferApi['createPrivatePart']>>
+    privatePart: ServerPrivatePart
+  }>
+}
+function uploadPrivatePartsBatch({
+  offerApi,
+  adminId,
+  privateParts,
+}: {
+  offerApi: OfferApi
+  adminId: OfferAdminId
+  privateParts: readonly ServerPrivatePart[]
+}): Effect.Effect<UploadPrivatePartsBatchResult> {
+  return pipe(
+    Array.chunksOf(privateParts, PRIVATE_PARTS_BATCH_SIZE),
+    Array.map((oneChunk) =>
+      offerApi
+        .createPrivatePart({
+          body: {
+            adminId,
+            offerPrivateList: oneChunk,
+          },
+        })
+        .pipe(
+          Effect.either,
+          Effect.tapError((e) =>
+            Effect.sync(() => {
+              console.warn('Error uploading private parts from update')
+              reportErrorFromResourcesUtils(
+                'error',
+                new Error('Error uploading private parts from update'),
+                {e}
+              )
+            })
+          ),
+          Effect.map((result) => ({chunk: oneChunk, result}))
+        )
+    ),
+    Effect.allWith({concurrency: 'unbounded'}),
+    Effect.map(
+      Array.reduce(
+        {
+          succeeded: [],
+          failed: [],
+        } as UploadPrivatePartsBatchResult,
+        (acc, {chunk, result}) => {
+          if (Either.isLeft(result))
+            return {
+              ...acc,
+              failed: [
+                ...acc.failed,
+                ...Array.map(chunk, (one) => ({
+                  privatePart: one,
+                  error: result.left,
+                })),
+              ],
+            }
+          return {
+            ...acc,
+            succeeded: [...acc.succeeded, ...chunk],
+          }
+        }
+      )
+    )
+  )
+}
+
 export default function updatePrivateParts({
   currentConnections,
   targetConnections,
@@ -116,6 +188,7 @@ export default function updatePrivateParts({
   symmetricKey,
   stopProcessingAfter,
   api,
+  onProgress,
 }: {
   currentConnections: {
     readonly firstLevel: readonly PublicKeyPemBase64[]
@@ -132,6 +205,7 @@ export default function updatePrivateParts({
   symmetricKey: SymmetricKey
   stopProcessingAfter?: UnixMilliseconds
   api: OfferApi
+  onProgress?: (status: OfferEncryptionProgress) => void
 }): Effect.Effect<
   {
     encryptionErrors: PrivatePartEncryptionError[]
@@ -139,8 +213,8 @@ export default function updatePrivateParts({
     removedConnections: PublicKeyPemBase64[]
     newConnections: {
       firstLevel: PublicKeyPemBase64[]
-      secondLevel?: PublicKeyPemBase64[] | undefined
-      clubs?: Record<ClubUuid, readonly PublicKeyPemBase64[]>
+      secondLevel: PublicKeyPemBase64[] | undefined
+      clubs: Record<ClubUuid, readonly PublicKeyPemBase64[]>
     }
   },
   | PrivatePayloadsConstructionError
@@ -222,6 +296,8 @@ export default function updatePrivateParts({
       )}.`
     )
 
+    if (onProgress) onProgress({type: 'CONSTRUCTING_PRIVATE_PAYLOADS'})
+
     const privatePayloads = yield* _(
       constructPrivatePayloads({
         connectionsInfo: {
@@ -236,9 +312,19 @@ export default function updatePrivateParts({
 
     const encryptionResult = yield* _(
       privatePayloads,
-      Array.map(
-        flow(
-          Effect.succeed,
+      Array.map((payload, i) => {
+        return pipe(
+          Effect.succeed(payload),
+          Effect.zipLeft(
+            Effect.sync(() => {
+              if (onProgress)
+                onProgress({
+                  type: 'ENCRYPTING_PRIVATE_PAYLOADS',
+                  currentlyProcessingIndex: i,
+                  totalToEncrypt: privatePayloads.length,
+                })
+            })
+          ),
           Effect.flatMap((payload) => {
             if (stopProcessingAfter && Date.now() >= stopProcessingAfter)
               return Effect.fail(
@@ -254,7 +340,7 @@ export default function updatePrivateParts({
           Effect.flatMap(encryptPrivatePart),
           Effect.either
         )
-      ),
+      }),
       Effect.all,
       Effect.map((result) => ({
         timeLimitReachedErrors: Array.getLefts(result).filter(
@@ -267,14 +353,24 @@ export default function updatePrivateParts({
       }))
     )
 
+    if (onProgress) onProgress({type: 'SENDING_OFFER_TO_NETWORK'})
+    let uploadErrors: Array<{
+      toPublicKey: PublicKeyPemBase64
+      error: Effect.Effect.Error<ReturnType<OfferApi['createPrivatePart']>>
+    }> = []
     if (encryptionResult.privateParts.length > 0) {
-      yield* _(
-        api.createPrivatePart({
-          body: {
-            adminId,
-            offerPrivateList: encryptionResult.privateParts,
-          },
-        })
+      uploadErrors = yield* _(
+        uploadPrivatePartsBatch({
+          offerApi: api,
+          adminId,
+          privateParts: encryptionResult.privateParts,
+        }),
+        Effect.map((result) =>
+          Array.map(result.failed, (one) => ({
+            toPublicKey: one.privatePart.userPublicKey,
+            error: one.error,
+          }))
+        )
       )
     }
 
@@ -288,10 +384,12 @@ export default function updatePrivateParts({
         })
       )
     }
+    if (onProgress) onProgress({type: 'DONE'})
 
     const pubKeysThatFailedEncryptTo = [
       ...encryptionResult.encryptionErrors,
       ...encryptionResult.timeLimitReachedErrors,
+      ...uploadErrors,
     ].map((one) => one.toPublicKey)
 
     return {

@@ -42,6 +42,7 @@ import {Array, Effect, Option, pipe} from 'effect'
 import {focusAtom} from 'jotai-optics'
 import {splitAtom} from 'jotai/utils'
 import {Alert} from 'react-native'
+import {symmetricDifference} from 'set-operations'
 import {type CRUDOfferStackParamsList} from '../../../navigationTypes'
 import {createInboxAtom} from '../../../state/chat/hooks/useCreateInbox'
 import {clubsWithMembersAtom} from '../../../state/clubs/atom/clubsWithMembersAtom'
@@ -859,6 +860,7 @@ export const offerFormMolecule = molecule(() => {
           ...(offer.offerInfo.privatePart.intendedClubs && {
             intendedClubs: [...offer.offerInfo.privatePart.intendedClubs],
           }),
+          updatePrivateParts: false,
         })
       )
 
@@ -912,8 +914,17 @@ export const offerFormMolecule = molecule(() => {
 
     return Effect.gen(function* (_) {
       const offer = get(offerAtom)
-      const intendedConnectionLevel = get(intendedConnectionLevelAtom)
+      const intendedConnectionLevel =
+        get(intendedConnectionLevelAtom) ?? 'FIRST'
       const intendedClubs = get(selectedClubsUuidsAtom)
+
+      const targetRecipientsHasChanged =
+        intendedConnectionLevel !==
+          offer.ownershipInfo?.intendedConnectionLevel ||
+        symmetricDifference(
+          intendedClubs,
+          offer.ownershipInfo?.intendedClubs ?? []
+        ).length > 0
 
       const belowProgressLeft = yield* _(get(modifyOfferLoaderTitleAtom))
 
@@ -931,9 +942,20 @@ export const offerFormMolecule = molecule(() => {
           payloadPublic,
           adminId: offer.ownershipInfo?.adminId ?? ('' as OfferAdminId),
           symmetricKey: offer.offerInfo.privatePart.symmetricKey,
-          intendedConnectionLevel: intendedConnectionLevel ?? 'FIRST',
+          intendedConnectionLevel,
           intendedClubs: [...intendedClubs],
           updateFcmCypher: false,
+          updatePrivateParts: targetRecipientsHasChanged,
+          onProgress: (progress) => {
+            set(progressModal.showStep, {
+              progress,
+              textData: {
+                title: t('offerForm.offerEncryption.encryptingYourOffer'),
+                belowProgressLeft: belowProgressLeft.loadingText,
+                bottomText: t('offerForm.offerEncryption.dontShutDownTheApp'),
+              },
+            })
+          },
         })
       )
 
@@ -1296,5 +1318,6 @@ export const offerFormMolecule = molecule(() => {
     screensBasedOnListingTypeAtom,
     currencySelectVisibleAtom,
     createSelectClubAtom,
+    selectedClubsUuidsAtom,
   }
 })

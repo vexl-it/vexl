@@ -134,6 +134,7 @@ const checkNotificationTokensAndRefreshOffersActionAtom = atom(
                   offer.ownershipInfo.intendedConnectionLevel,
                 updateFcmCypher: true,
                 offerKey: offerKeyHolder.privateKey,
+                updatePrivateParts: false,
               }),
               effectToTaskEither,
               TE.match(

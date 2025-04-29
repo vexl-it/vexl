@@ -8,8 +8,7 @@ import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
 import {type ServerPrivatePart} from '@vexl-next/rest-api/src/services/offer/contracts'
 import {Array, Effect, pipe} from 'effect'
 import {type NonEmptyArray} from 'effect/Array'
-
-const PRIVATE_PARTS_BATCH_SIZE = 100
+import {PRIVATE_PARTS_BATCH_SIZE} from '../privatePartsUploadBatchSize'
 
 export const sendOfferToNetworkBatchPrivateParts = ({
   offerApi,

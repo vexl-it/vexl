@@ -267,7 +267,15 @@ export const submitContactsActionAtom = atom(
             return 'permissionsNotGranted' as const
           return 'otherError' as const
         },
-        onSuccess: () => 'success' as const,
+        onSuccess: () => {
+          if (
+            params.normalizeAndImportAll &&
+            get(normalizedContactsAtom).length === 0
+          ) {
+            return 'noContactsSelected' as const
+          }
+          return 'success' as const
+        },
       }),
       Effect.tap(() => {
         set(loadingOverlayDisplayedAtom, false)

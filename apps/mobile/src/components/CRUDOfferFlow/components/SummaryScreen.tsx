@@ -1,5 +1,6 @@
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue} from 'jotai'
+import {useMemo} from 'react'
 import {Stack, Text} from 'tamagui'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import OfferWithBubbleTip from '../../OfferWithBubbleTip'
@@ -10,9 +11,25 @@ import ScreenWrapper from './ScreenWrapper'
 
 function SummaryScreen(): JSX.Element {
   const {t} = useTranslation()
-  const {offerAtom} = useMolecule(offerFormMolecule)
-
+  const {offerAtom, selectedClubsUuidsAtom} = useMolecule(offerFormMolecule)
+  const clubs = useAtomValue(selectedClubsUuidsAtom)
   const offer = useAtomValue(offerAtom)
+
+  // We need to merge clubs otherwhise they are not shown. Consider moving to molecule
+  // If more cases like these appear
+  const offerToDisplay = useMemo(
+    () => ({
+      ...offer,
+      offerInfo: {
+        ...offer.offerInfo,
+        privatePart: {
+          ...offer.offerInfo.privatePart,
+          clubIds: clubs,
+        },
+      },
+    }),
+    [offer, clubs]
+  )
 
   return (
     <ScreenWrapper>
@@ -24,7 +41,7 @@ function SummaryScreen(): JSX.Element {
           <OfferWithBubbleTip
             displayAsPreview
             reduceDescriptionLength
-            offer={offer}
+            offer={offerToDisplay}
           />
         </Stack>
       </Section>

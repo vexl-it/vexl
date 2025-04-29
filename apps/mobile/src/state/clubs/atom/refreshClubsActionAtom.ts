@@ -106,6 +106,7 @@ export const syncAllClubsHandleStateWhenNotFoundActionAtom = atom(
     }: {updateOnlyUuids?: readonly [ClubUuid, ...ClubUuid[]]} = {}
   ) =>
     Effect.gen(function* (_) {
+      console.info('🦋 Refreshing clubs connections state')
       const clubsToKeyHolder = get(clubsToKeyHolderAtom)
 
       const fetchedClubs = yield* _(

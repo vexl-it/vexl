@@ -240,6 +240,7 @@ const recreateInboxAndUpdateOfferAtom = atom(
             intendedConnectionLevel,
             updateFcmCypher: true,
             offerKey: keyHolder,
+            updatePrivateParts: false,
           })
         )
       ),

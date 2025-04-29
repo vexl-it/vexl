@@ -18,7 +18,7 @@ import {fetchAndStoreMessagesForInboxAtom} from './chat/atoms/fetchNewMessagesAc
 import {checkForClubsAdmissionActionAtom} from './clubs/atom/checkForClubsAdmissionActionAtom'
 import {syncAllClubsHandleStateWhenNotFoundActionAtom} from './clubs/atom/refreshClubsActionAtom'
 import {syncConnectionsActionAtom} from './connections/atom/connectionStateAtom'
-import {updateAllOffersConnectionsActionAtom} from './connections/atom/offerToConnectionsAtom'
+import {updateAndReencryptAllOffersConnectionsActionAtom} from './connections/atom/offerToConnectionsAtom'
 import processChatNotificationActionAtom from './notifications/processChatNotification'
 
 export function useHandleReceivedNotifications(): void {
@@ -26,7 +26,7 @@ export function useHandleReceivedNotifications(): void {
   const store = useStore()
   const fetchMessagesForInbox = useSetAtom(fetchAndStoreMessagesForInboxAtom)
   const updateOffersConnections = useSetAtom(
-    updateAllOffersConnectionsActionAtom
+    updateAndReencryptAllOffersConnectionsActionAtom
   )
   const checkForClubAdmission = useSetAtom(checkForClubsAdmissionActionAtom)
 
@@ -110,7 +110,9 @@ export function useHandleReceivedNotifications(): void {
           '🔔 Received notification about new user. Checking and updating offers accordingly.'
         )
         await Effect.runPromise(syncConnections())
-        await updateOffersConnections({isInBackground: false})()
+        await Effect.runPromise(
+          updateOffersConnections({isInBackground: false})
+        )
         return
       }
 
@@ -126,7 +128,9 @@ export function useHandleReceivedNotifications(): void {
             updateOnlyUuids: newClubConnectionNotificationO.value.clubUuids,
           })
         )
-        await updateOffersConnections({isInBackground: false})()
+        await Effect.runPromise(
+          updateOffersConnections({isInBackground: false})
+        )
         return
       }
 

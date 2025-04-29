@@ -16,7 +16,7 @@ import notEmpty from '../../../utils/notEmpty'
 import reportError from '../../../utils/reportError'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 import {syncConnectionsActionAtom} from '../../connections/atom/connectionStateAtom'
-import {updateAllOffersConnectionsActionAtom} from '../../connections/atom/offerToConnectionsAtom'
+import {updateAndReencryptAllOffersConnectionsActionAtom} from '../../connections/atom/offerToConnectionsAtom'
 import {type StoredContactWithComputedValues} from '../domain'
 import {
   lastImportOfContactsAtom,
@@ -164,10 +164,11 @@ export const submitContactsActionAtom = atom(
                   })
                 )
                 Effect.runFork(set(syncConnectionsActionAtom))
-
-                void set(updateAllOffersConnectionsActionAtom, {
-                  isInBackground: false,
-                })()
+                Effect.runFork(
+                  set(updateAndReencryptAllOffersConnectionsActionAtom, {
+                    isInBackground: false,
+                  })
+                )
                 return Effect.void
               })
             )

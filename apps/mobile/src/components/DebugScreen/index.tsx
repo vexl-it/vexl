@@ -19,7 +19,7 @@ import fetchMessagesForAllInboxesAtom from '../../state/chat/atoms/fetchNewMessa
 import messagingStateAtom from '../../state/chat/atoms/messagingStateAtom'
 import offerToConnectionsAtom, {
   deleteOrphanRecordsActionAtom,
-  updateAllOffersConnectionsActionAtom,
+  updateAndReencryptAllOffersConnectionsActionAtom,
 } from '../../state/connections/atom/offerToConnectionsAtom'
 import {storedContactsAtom} from '../../state/contacts/atom/contactsStore'
 import {btcPriceDataAtom} from '../../state/currentBtcPriceAtoms'
@@ -81,7 +81,9 @@ function DebugScreen(): JSX.Element {
 
   const refreshMessaging = useSetAtom(fetchMessagesForAllInboxesAtom)
   const refreshOffers = useSetAtom(refreshOffersActionAtom)
-  const updateConnections = useSetAtom(updateAllOffersConnectionsActionAtom)
+  const updateConnections = useSetAtom(
+    updateAndReencryptAllOffersConnectionsActionAtom
+  )
   const deleteInbox = useSetAtom(deleteInboxAtom)
   const deleteAllInboxes = useSetAtom(deleteAllInboxesActionAtom)
   const isDeveloper = useAtomValue(isDeveloperAtom)
@@ -520,7 +522,7 @@ function DebugScreen(): JSX.Element {
               size="small"
               text="Update all offers connections"
               onPress={() => {
-                void updateConnections({isInBackground: false})()
+                Effect.runFork(updateConnections({isInBackground: false}))
               }}
             />
 

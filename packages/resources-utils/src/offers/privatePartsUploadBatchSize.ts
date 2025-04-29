@@ -1,0 +1,1 @@
+export const PRIVATE_PARTS_BATCH_SIZE = 500

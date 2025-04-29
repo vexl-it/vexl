@@ -55,18 +55,6 @@ export default function updateOffer({
       })
     )
 
-    const updatedOffer = yield* _(
-      offerApi.updateOffer({
-        body: {
-          adminId,
-          payloadPublic: encryptedPayload,
-          offerPrivateList: [],
-        },
-      })
-    )
-
-    const decryptedOffer = yield* _(decryptOffer(ownerKeypair)(updatedOffer))
-
     yield* _(
       updateOwnerPrivatePayload({
         api: offerApi,
@@ -78,6 +66,17 @@ export default function updateOffer({
       })
     )
 
-    return decryptedOffer
+    const updatedOffer = yield* _(
+      offerApi.updateOffer({
+        body: {
+          adminId,
+          payloadPublic: encryptedPayload,
+          offerPrivateList: [],
+        },
+      }),
+      Effect.flatMap(decryptOffer(ownerKeypair))
+    )
+
+    return updatedOffer
   })
 }

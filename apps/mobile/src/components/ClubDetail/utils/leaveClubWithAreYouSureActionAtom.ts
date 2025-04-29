@@ -1,4 +1,4 @@
-import {type ClubInfo} from '@vexl-next/rest-api/src/services/contact/contracts'
+import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {Effect, pipe} from 'effect'
 import {atom} from 'jotai'
 import {leaveClubActionAtom} from '../../../state/clubs/atom/leaveClubActionAtom'
@@ -7,7 +7,7 @@ import {askAreYouSureActionAtom} from '../../AreYouSureDialog'
 
 export const leaveClubWithAreYouSureActionAtom = atom(
   null,
-  (get, set, club: ClubInfo) => {
+  (get, set, clubUuid: ClubUuid) => {
     const {t} = get(translationAtom)
     return pipe(
       set(askAreYouSureActionAtom, {
@@ -22,7 +22,7 @@ export const leaveClubWithAreYouSureActionAtom = atom(
         ],
         variant: 'danger',
       }),
-      Effect.zipRight(set(leaveClubActionAtom, club.uuid))
+      Effect.zipRight(set(leaveClubActionAtom, clubUuid))
     )
   }
 )

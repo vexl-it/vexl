@@ -2,13 +2,11 @@ import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {Effect, flow, Schema} from 'effect'
-import {reportClubLimitCountConfig} from '../../../configs'
 import {ClubDbRecord} from '../domain'
 
 export const createListClubsWithExceededReportsCount = Effect.gen(
   function* (_) {
     const sql = yield* _(PgClient.PgClient)
-    const reportClubLimit = yield* _(reportClubLimitCountConfig)
 
     const query = SqlSchema.findAll({
       Request: Schema.Void,
@@ -20,7 +18,7 @@ export const createListClubsWithExceededReportsCount = Effect.gen(
           club
         WHERE
           ${sql.and([
-          sql`report >= ${reportClubLimit}`,
+          sql`report >= report_limit`,
           sql`made_inactive_at IS NULL`,
         ])}
       `,

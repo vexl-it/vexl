@@ -27,6 +27,7 @@ const club = {
   membersCountLimit: 100,
   uuid: generateClubUuid(),
   validUntil: new Date(),
+  reportLimit: 10,
 }
 
 beforeEach(async () => {

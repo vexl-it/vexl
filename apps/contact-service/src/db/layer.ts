@@ -15,6 +15,7 @@ import club_member_rename_last_refreshed_at_to_timestamp from './migrations/0009
 import add_club_column_inactive_and_to_be_deleted from './migrations/0010_add_club_column_inactive_and_to_be_deleted'
 import add_club_column_report from './migrations/0011_add_club_column_report'
 import create_club_offer_reported_by_user_table_and_add_index from './migrations/0012_create_club_offer_reported_by_user_table_and_add_index'
+import add_club_column_report_limit from './migrations/0013_add_club_column_report_limit'
 
 const migrations = [
   {
@@ -81,6 +82,11 @@ const migrations = [
     id: 13,
     name: 'create_club_offer_reported_by_user_table_and_add_index',
     migrationEffect: create_club_offer_reported_by_user_table_and_add_index,
+  },
+  {
+    id: 14,
+    name: 'add_club_column_report_limit',
+    migrationEffect: add_club_column_report_limit,
   },
 ] as const
 

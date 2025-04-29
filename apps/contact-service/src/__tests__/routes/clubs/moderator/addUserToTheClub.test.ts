@@ -44,6 +44,7 @@ const club = {
   membersCountLimit: 3,
   uuid: generateClubUuid(),
   validUntil: new Date(),
+  reportLimit: 10,
 }
 let clubId: ClubRecordId
 

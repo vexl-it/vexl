@@ -8,7 +8,6 @@ import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {validateChallengeInBody} from '@vexl-next/server-utils/src/services/challenge/utils/validateChallengeInBody'
 import {Array, Effect, Option} from 'effect'
 import {Handler} from 'effect-http'
-import {reportClubLimitCountConfig} from '../../../configs'
 import {ClubMembersDbService} from '../../../db/ClubMemberDbService'
 import {ClubsDbService} from '../../../db/ClubsDbService'
 import {deactivateAndClearClubs} from '../../../internalServer/routes/deactivateAndClearClubs'
@@ -20,7 +19,6 @@ export const reportClub = Handler.make(ReportClubEndpoint, (req, security) =>
 
       const clubsDb = yield* _(ClubsDbService)
       const membersDb = yield* _(ClubMembersDbService)
-      const reportClubLimitCount = yield* _(reportClubLimitCountConfig)
 
       const member = yield* _(
         membersDb.findClubMemberByPublicKey({
@@ -74,7 +72,7 @@ export const reportClub = Handler.make(ReportClubEndpoint, (req, security) =>
 
       if (
         Option.isSome(reportedClub) &&
-        reportedClub.value.report >= reportClubLimitCount
+        reportedClub.value.report >= club.reportLimit
       ) {
         yield* _(deactivateAndClearClubs)
       }

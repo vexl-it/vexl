@@ -43,6 +43,7 @@ const club = {
   membersCountLimit: 2,
   uuid: generateClubUuid(),
   validUntil: new Date(),
+  reportLimit: 10,
 }
 
 const user1 = generatePrivateKey()
@@ -384,6 +385,7 @@ describe('Join club', () => {
               madeInactiveAt: Option.none(),
               membersCountLimit: 100,
               report: 0,
+              reportLimit: 10,
             },
           })
         )

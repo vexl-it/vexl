@@ -38,6 +38,7 @@ describe('Create club', () => {
           membersCountLimit: 100,
           uuid: generateClubUuid(),
           validUntil: new Date(),
+          reportLimit: 10,
         }
         const errorResponse = yield* _(
           app.createClub({
@@ -68,6 +69,7 @@ describe('Create club', () => {
           membersCountLimit: 100,
           uuid: generateClubUuid(),
           validUntil: new Date(),
+          reportLimit: 10,
         }
 
         const createdClub = yield* _(
@@ -115,6 +117,7 @@ describe('Create club', () => {
           membersCountLimit: 100,
           uuid: generateClubUuid(),
           validUntil: new Date(),
+          reportLimit: 10,
         }
 
         yield* _(

@@ -35,6 +35,7 @@ const club = {
   membersCountLimit: 100,
   uuid: generateClubUuid(),
   validUntil: new Date(),
+  reportLimit: 2,
 }
 
 const offerId = newOfferId()

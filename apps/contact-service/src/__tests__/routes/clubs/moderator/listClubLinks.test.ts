@@ -29,6 +29,7 @@ const club = {
   membersCountLimit: 100,
   uuid: generateClubUuid(),
   validUntil: new Date(),
+  reportLimit: 10,
 }
 let clubId: ClubRecordId
 
@@ -242,6 +243,7 @@ describe('List club links', () => {
           membersCountLimit: 100,
           uuid: generateClubUuid(),
           validUntil: new Date(),
+          reportLimit: 10,
         }
         yield* _(
           app.createClub({

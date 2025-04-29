@@ -55,6 +55,7 @@ describe('Get club contacts', () => {
                 membersCountLimit: 100,
                 uuid: forClubUuid,
                 validUntil: CLUB_VALID_UNTIL,
+                reportLimit: 10,
               },
             },
             query: {
@@ -165,6 +166,7 @@ describe('Get club contacts', () => {
                 membersCountLimit: 100,
                 uuid: forClubUuid,
                 validUntil: CLUB_VALID_UNTIL,
+                reportLimit: 10,
               },
             },
             query: {
@@ -242,6 +244,7 @@ describe('Get club contacts', () => {
                 membersCountLimit: 100,
                 uuid: forClubUuid1,
                 validUntil: CLUB_VALID_UNTIL,
+                reportLimit: 10,
               },
             },
             query: {
@@ -290,6 +293,7 @@ describe('Get club contacts', () => {
                 membersCountLimit: 100,
                 uuid: forClubUuid2,
                 validUntil: CLUB_VALID_UNTIL,
+                reportLimit: 10,
               },
             },
             query: {
@@ -369,6 +373,7 @@ describe('Get club contacts', () => {
                 membersCountLimit: 100,
                 uuid: forClubUuid,
                 validUntil: CLUB_VALID_UNTIL,
+                reportLimit: 10,
               },
             },
             query: {
@@ -446,6 +451,7 @@ describe('Get club contacts', () => {
                 membersCountLimit: 100,
                 uuid: forClubUuid,
                 validUntil: CLUB_VALID_UNTIL,
+                reportLimit: 10,
               },
             },
             query: {

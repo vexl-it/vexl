@@ -12,7 +12,7 @@ import {translationAtom} from '../../../utils/localization/I18nProvider'
 import {navigationRef} from '../../../utils/navigation'
 import {getNotificationTokenE} from '../../../utils/notifications'
 import reportError from '../../../utils/reportError'
-import showErrorAlert from '../../../utils/showErrorAlert'
+import {showErrorAlertE} from '../../../utils/showErrorAlert'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 import {finishPostLoginFlowActionAtom} from '../../postLoginOnboarding'
 import {clubsToKeyHolderAtom} from './clubsToKeyHolderAtom'
@@ -152,25 +152,25 @@ export const submitCodeToJoinClubActionAtom = atom(
           set(loadingOverlayDisplayedAtom, false)
         })
       ),
-      Effect.catchAll((e) =>
-        Effect.sync(() => {
-          if (e._tag === 'UserDeclinedError') return false
+      Effect.catchAll((e) => {
+        if (e._tag === 'UserDeclinedError') return Effect.succeed(false)
 
-          if (
-            e._tag === 'ClubUserLimitExceededError' ||
-            e._tag === 'MemberAlreadyInClubError' ||
-            e._tag === 'NotFoundError'
-          ) {
-            const description = (() => {
-              if (e._tag === 'ClubUserLimitExceededError')
-                return t('clubs.clubIsFullDescription')
-              if (e._tag === 'MemberAlreadyInClubError')
-                return t('clubs.youAreAlreadyMemberOfThisClubDescription')
-              if (e._tag === 'NotFoundError')
-                return t('clubs.accessDeniedCodeIsInvalid')
-              return t('common.unknownError')
-            })()
+        if (
+          e._tag === 'ClubUserLimitExceededError' ||
+          e._tag === 'MemberAlreadyInClubError' ||
+          e._tag === 'NotFoundError'
+        ) {
+          const description = (() => {
+            if (e._tag === 'ClubUserLimitExceededError')
+              return t('clubs.clubIsFullDescription')
+            if (e._tag === 'MemberAlreadyInClubError')
+              return t('clubs.youAreAlreadyMemberOfThisClubDescription')
+            if (e._tag === 'NotFoundError')
+              return t('clubs.accessDeniedCodeIsInvalid')
+            return t('common.unknownError')
+          })()
 
+          return Effect.zipRight(
             set(askAreYouSureActionAtom, {
               variant: 'danger',
               steps: [
@@ -185,27 +185,29 @@ export const submitCodeToJoinClubActionAtom = atom(
                   positiveButtonText: t('common.close'),
                 },
               ],
-            }).pipe(Effect.runFork)
-            return false
-          }
+            }),
+            Effect.succeed(false)
+          )
+        }
 
-          if (
-            e._tag === 'UnauthorizedError' ||
-            e._tag === 'UnexpectedApiResponseError' ||
-            e._tag === 'UnknownClientError' ||
-            e._tag === 'UnknownServerError' ||
-            e._tag === 'CryptoError'
-          ) {
-            reportError('error', new Error('Join club error'), {e})
-          }
+        if (
+          e._tag === 'UnauthorizedError' ||
+          e._tag === 'UnexpectedApiResponseError' ||
+          e._tag === 'UnknownClientError' ||
+          e._tag === 'UnknownServerError' ||
+          e._tag === 'CryptoError'
+        ) {
+          reportError('error', new Error('Join club error'), {e})
+        }
 
-          showErrorAlert({
+        return Effect.zipRight(
+          showErrorAlertE({
             title: toCommonErrorMessage(e, t) ?? t('common.unknownError'),
             error: e,
-          })
-          return false
-        })
-      )
+          }),
+          Effect.succeed(false)
+        )
+      })
     )
   }
 )

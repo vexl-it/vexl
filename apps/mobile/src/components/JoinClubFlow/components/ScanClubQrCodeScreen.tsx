@@ -8,6 +8,7 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import Svg, {Mask, Rect} from 'react-native-svg'
 import {getTokens, Stack, Text, YStack} from 'tamagui'
 import {type JoinClubFlowStackScreenProps} from '../../../navigationTypes'
+import {enableHiddenFeatures} from '../../../utils/environment'
 import {handleCameraPermissionsActionAtom} from '../../../utils/handleCameraPermissions'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import Button from '../../Button'
@@ -67,7 +68,7 @@ function ScanClubQrCodeScreen({navigation}: Props): JSX.Element {
               navigation.navigate('FillClubAccessCodeScreen')
             }}
           />
-          {!!__DEV__ && (
+          {!!enableHiddenFeatures && (
             <Button
               variant="primary"
               text={t('clubs.uploadFromDevice')}
@@ -101,10 +102,11 @@ function ScanClubQrCodeScreen({navigation}: Props): JSX.Element {
               style={scannerStyle}
               onBarcodeScanned={(data) => {
                 if (scanned.current) return
+                scanned.current = true
 
                 void Effect.runPromise(handleCodeScanned(data)).then(
                   (success) => {
-                    scanned.current = true
+                    scanned.current = false
                     if (success) {
                       navigation.navigate('InsideTabs', {
                         screen: 'Marketplace',

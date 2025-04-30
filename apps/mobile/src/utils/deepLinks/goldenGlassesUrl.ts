@@ -11,7 +11,7 @@ import {sessionDataOrDummyAtom} from '../../state/session'
 import {translationAtom} from '../localization/I18nProvider'
 import {goldenAvatarTypeAtom} from '../preferences'
 import reportError from '../reportError'
-import showErrorAlert from '../showErrorAlert'
+import {showErrorAlertE} from '../showErrorAlert'
 
 export const handleGoldenGlassesDeepLinkActionAtom = atom(null, (get, set) => {
   const {t} = get(translationAtom)
@@ -53,6 +53,12 @@ export const handleGoldenGlassesDeepLinkActionAtom = atom(null, (get, set) => {
       )
     ),
     Effect.all,
+    Effect.tapError((e) =>
+      showErrorAlertE({
+        title: t('goldenGlasses.errorSettingRewardForParticipationOnMeetup'),
+        error: e,
+      })
+    ),
     Effect.match({
       onSuccess(updatedOffers) {
         set(myOffersAtom, updatedOffers)
@@ -61,11 +67,6 @@ export const handleGoldenGlassesDeepLinkActionAtom = atom(null, (get, set) => {
         set(showGoldenAvatarAnimationAtom, true)
       },
       onFailure(e) {
-        showErrorAlert({
-          title: t('goldenGlasses.errorSettingRewardForParticipationOnMeetup'),
-          error: e,
-        })
-
         reportError(
           'error',
           new Error(

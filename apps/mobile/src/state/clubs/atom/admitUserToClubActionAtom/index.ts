@@ -6,7 +6,7 @@ import {askAreYouSureActionAtom} from '../../../../components/AreYouSureDialog'
 import {loadingOverlayDisplayedAtom} from '../../../../components/LoadingOverlayProvider'
 import {type DeepLinkRequestClubAdmition} from '../../../../utils/deepLinks/parseDeepLink'
 import {translationAtom} from '../../../../utils/localization/I18nProvider'
-import showErrorAlert from '../../../../utils/showErrorAlert'
+import {showErrorAlertE} from '../../../../utils/showErrorAlert'
 import {clubsToKeyHolderAtom} from '../clubsToKeyHolderAtom'
 import {clubsWithMembersAtom} from '../clubsWithMembersAtom'
 import {syncSingleClubHandleStateWhenNotFoundActionAtom} from '../refreshClubsActionAtom'
@@ -128,22 +128,24 @@ export const admitUserToClubActionAtom = atom(
           ],
         })
       ),
-      Effect.tapError((e) =>
-        Effect.sync(() => {
-          const {t} = get(translationAtom)
-          if (e._tag === 'ClubUserLimitExceededError') {
-            Alert.alert(t('clubs.admition.limitExceeded'))
-          } else if (e._tag === 'MemberAlreadyInClubError') {
-            Alert.alert(t('clubs.admition.alreadyMember'))
-          } else if (e._tag === 'UserDeclinedError') {
-            // Nothing here
-          } else {
-            showErrorAlert({
-              title: t('common.unknownError'),
-              error: e,
-            })
-          }
-        })
-      )
+      Effect.tapError((e) => {
+        const {t} = get(translationAtom)
+        if (e._tag === 'ClubUserLimitExceededError') {
+          return showErrorAlertE({
+            title: t('clubs.admition.limitExceeded'),
+          })
+        } else if (e._tag === 'MemberAlreadyInClubError') {
+          return showErrorAlertE({
+            title: t('clubs.admition.alreadyMember'),
+          })
+        } else if (e._tag === 'UserDeclinedError') {
+          return Effect.void
+        } else {
+          return showErrorAlertE({
+            title: t('common.unknownError'),
+            error: e,
+          })
+        }
+      })
     )
 )

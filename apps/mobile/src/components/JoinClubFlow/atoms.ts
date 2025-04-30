@@ -8,7 +8,7 @@ import {handleDeepLinkActionAtom} from '../../utils/deepLinks'
 import {getImageFromGalleryAndTryToResolveThePermissionsAlongTheWay} from '../../utils/imagePickers'
 import {translationAtom} from '../../utils/localization/I18nProvider'
 import reportError from '../../utils/reportError'
-import showErrorAlert from '../../utils/showErrorAlert'
+import showErrorAlert, {showErrorAlertE} from '../../utils/showErrorAlert'
 import {toCommonErrorMessage} from '../../utils/useCommonErrorMessages'
 
 export const CODE_LENGTH = 6
@@ -75,20 +75,22 @@ export const accessCodeMolecule = molecule((_, getScope) => {
                 e,
               }
             )
-            showErrorAlert({
-              title: t('common.errorWhileReadingQrCode'),
-              error: e,
-            })
-
-            return Effect.succeed(false)
+            return Effect.zipRight(
+              showErrorAlertE({
+                title: t('common.errorWhileReadingQrCode'),
+                error: e,
+              }),
+              Effect.succeed(false)
+            )
           }
 
-          showErrorAlert({
-            title: toCommonErrorMessage(e, t) ?? t('common.unknownError'),
-            error: e,
-          })
-
-          return Effect.succeed(false)
+          return Effect.zipRight(
+            showErrorAlertE({
+              title: toCommonErrorMessage(e, t) ?? t('common.unknownError'),
+              error: e,
+            }),
+            Effect.succeed(false)
+          )
         })
       )
     }

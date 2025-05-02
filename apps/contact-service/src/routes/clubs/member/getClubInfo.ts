@@ -6,7 +6,7 @@ import {GetClubInfoErrors} from '@vexl-next/rest-api/src/services/contact/contra
 import {GetClubInfoEndpoint} from '@vexl-next/rest-api/src/services/contact/specification'
 import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {validateChallengeInBody} from '@vexl-next/server-utils/src/services/challenge/utils/validateChallengeInBody'
-import {Effect, Option} from 'effect'
+import {DateTime, Effect, Option} from 'effect'
 import {Handler} from 'effect-http'
 import {ClubMembersDbService} from '../../../db/ClubMemberDbService'
 import {ClubsDbService} from '../../../db/ClubsDbService'
@@ -43,6 +43,15 @@ export const getClubInfo = Handler.make(GetClubInfoEndpoint, (req) =>
           id: member.clubId,
         }),
         Effect.flatten,
+        Effect.filterOrFail(
+          (club) =>
+            Option.isNone(club.madeInactiveAt) ||
+            (Option.isSome(club.madeInactiveAt) &&
+              DateTime.lessThan(DateTime.unsafeMake(club.madeInactiveAt.value))(
+                DateTime.unsafeMake(new Date())
+              )),
+          () => new NotFoundError({message: 'Club not found'})
+        ),
         Effect.catchTag(
           'NoSuchElementException',
           () =>

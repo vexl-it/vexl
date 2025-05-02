@@ -29,6 +29,7 @@ export const ClubInfo = Schema.Struct({
   clubImageUrl: UriStringE,
   validUntil: Schema.DateFromString,
 })
+export type ClubInfo = typeof ClubInfo.Type
 
 export const ClubInfoForUser = Schema.Struct({
   club: ClubInfo,

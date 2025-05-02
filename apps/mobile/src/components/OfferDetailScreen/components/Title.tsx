@@ -1,10 +1,14 @@
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
+import {Effect} from 'effect'
+import {useSetAtom} from 'jotai'
 import React from 'react'
 import {XStack} from 'tamagui'
+import {andThenExpectBooleanNoErrors} from '../../../utils/andThenExpectNoErrors'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
+import useSafeGoBack from '../../../utils/useSafeGoBack'
 import IconButton from '../../IconButton'
 import ScreenTitle from '../../ScreenTitle'
-import {useReportOfferHandleUI} from '../api'
+import {reportOfferActionAtom} from '../atoms'
 import flagSvg from '../images/flagSvg'
 
 interface Props {
@@ -13,7 +17,8 @@ interface Props {
 
 function Title({offer}: Props): JSX.Element {
   const {t} = useTranslation()
-  const reportOffer = useReportOfferHandleUI()
+  const goBack = useSafeGoBack()
+  const reportOffer = useSetAtom(reportOfferActionAtom)
 
   return (
     <ScreenTitle
@@ -33,7 +38,11 @@ function Title({offer}: Props): JSX.Element {
             variant="dark"
             icon={flagSvg}
             onPress={() => {
-              void reportOffer(offer.offerInfo.offerId)()
+              void Effect.runPromise(
+                andThenExpectBooleanNoErrors((success) => {
+                  if (success) goBack()
+                })(reportOffer(offer))
+              )
             }}
           />
         )}

@@ -2,7 +2,7 @@ import {useNavigation} from '@react-navigation/native'
 import {type Chat} from '@vexl-next/domain/src/general/messaging'
 import {extractPartsOfNotificationCypher} from '@vexl-next/resources-utils/src/notifications/notificationTokenActions'
 import {useMolecule} from 'bunshi/dist/react'
-import {Option} from 'effect'
+import {Effect, Option} from 'effect'
 import {pipe} from 'fp-ts/lib/function'
 import {useAtom, useAtomValue, useSetAtom} from 'jotai'
 import {useEffect, useState} from 'react'
@@ -13,11 +13,13 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {Stack, Text, YStack, getTokens} from 'tamagui'
 import BlockIconSvg from '../../../images/blockIconSvg'
 import tradeChecklistSvg from '../../../images/tradeChecklistSvg'
+import {andThenExpectBooleanNoErrors} from '../../../utils/andThenExpectNoErrors'
 import {enableHiddenFeatures} from '../../../utils/environment'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import useResetNavigationToMessagingScreen from '../../../utils/useResetNavigationToMessagingScreen'
+import useSafeGoBack from '../../../utils/useSafeGoBack'
 import AnimatedModal from '../../AnimatedModal'
-import {useReportOfferHandleUI} from '../../OfferDetailScreen/api'
+import {reportOfferActionAtom} from '../../OfferDetailScreen/atoms'
 import flagSvg from '../../OfferDetailScreen/images/flagSvg'
 import ParticipatedInMeetup from '../../ParticipatedInMeetup'
 import IdentityIconSvg from '../../images/identityIconSvg'
@@ -94,9 +96,10 @@ function ChatInfoModal(): JSX.Element | null {
   const [showModal, setShowModal] = useAtom(showModalAtom)
   const {top} = useSafeAreaInsets()
   const {t} = useTranslation()
+  const goBack = useSafeGoBack()
   const navigation = useNavigation()
   const resetNavigationToMessagingScreen = useResetNavigationToMessagingScreen()
-  const reportOffer = useReportOfferHandleUI()
+  const reportOffer = useSetAtom(reportOfferActionAtom)
 
   const deleteChat = useSetAtom(deleteChatWithUiFeedbackAtom)
   const blockChat = useSetAtom(blockChatWithUiFeedbackAtom)
@@ -168,7 +171,11 @@ function ChatInfoModal(): JSX.Element | null {
                       isNegative: false,
                       text: t('messages.reportOffer'),
                       onPress: () => {
-                        void reportOffer(offerForChat.offerInfo.offerId)()
+                        void Effect.runPromise(
+                          andThenExpectBooleanNoErrors((success) => {
+                            if (success) goBack()
+                          })(reportOffer(offerForChat))
+                        )
                       },
                     },
                   ]

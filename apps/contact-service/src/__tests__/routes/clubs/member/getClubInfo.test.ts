@@ -94,6 +94,7 @@ describe('Get club info', () => {
       })
     )
   })
+
   it('Correctly updates notification token', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
@@ -128,6 +129,42 @@ describe('Get club info', () => {
     )
   })
 
+  it('Should return 404 when club is inactive', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const app = yield* _(NodeTestingApp)
+        const sql = yield* _(SqlClient.SqlClient)
+
+        yield* _(sql`
+          UPDATE club
+          SET
+            made_inactive_at = (now() - interval '1 DAY')::date
+          WHERE
+            UUID = ${club.uuid}
+        `)
+
+        const errorResponse = yield* _(
+          app.getClubInfo({
+            body: {
+              ...(yield* _(generateAndSignChallenge(userKey))),
+              notificationToken: Option.some(
+                'someToken' as ExpoNotificationToken
+              ),
+            },
+          }),
+          Effect.either
+        )
+
+        console.log(`Error response: ${JSON.stringify(errorResponse, null, 2)}`)
+
+        if (errorResponse._tag !== 'Left') {
+          throw new Error('Expected error response')
+        }
+        expect((errorResponse.left as any).status).toEqual(404)
+      })
+    )
+  })
+
   it('Should return 404 when club not found', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
@@ -152,6 +189,7 @@ describe('Get club info', () => {
       })
     )
   })
+
   it('Should return club info when user is admin', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
@@ -183,6 +221,7 @@ describe('Get club info', () => {
       })
     )
   })
+
   it('Should return error when bad challenge', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {

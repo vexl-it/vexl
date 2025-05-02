@@ -4,6 +4,7 @@ import {memo} from 'react'
 import {type RootStackParamsList} from '../../navigationTypes'
 import {useCheckAndReportCurrrentVersionToChatsActionAtom} from '../../state/chat/atoms/checkAndReportCurrentVersionToChatsActionAtom'
 import {useDecodePreviouslyUncompatibleMessagesOnMount} from '../../state/chat/atoms/decodePreviouslyUncompatibleMessagesActionAtom'
+import {useCleanupRemovedClubsOnMount} from '../../state/clubs/atom/removedClubsAtom'
 import {useSyncConnections} from '../../state/connections'
 import {useRefreshContactsFromDeviceOnResume} from '../../state/contacts'
 import {useIsUserLoggedIn} from '../../state/session'
@@ -64,6 +65,7 @@ function LoggedInHookGroup(): null {
   useDecodePreviouslyUncompatibleMessagesOnMount()
   useSetAppLanguageFromStore()
   useSetRelativeDateFormatting()
+  useCleanupRemovedClubsOnMount()
 
   return null
 }

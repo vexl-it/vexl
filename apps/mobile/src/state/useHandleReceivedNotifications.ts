@@ -1,6 +1,8 @@
+import notifee from '@notifee/react-native'
 import {useNavigation} from '@react-navigation/native'
 import {
   AdmitedToClubNetworkNotificationData,
+  ClubDeactivatedNotificationData,
   NewChatMessageNoticeNotificationData,
   NewClubConnectionNotificationData,
   NewSocialNetworkConnectionNotificationData,
@@ -10,13 +12,23 @@ import * as Notifications from 'expo-notifications'
 import {useSetAtom, useStore} from 'jotai'
 import {useEffect} from 'react'
 import {AppState, Platform} from 'react-native'
+import {translationAtom} from '../utils/localization/I18nProvider'
 import {extractDataPayloadFromNotification} from '../utils/notifications/extractDataFromNotification'
+import {getDefaultChannel} from '../utils/notifications/notificationChannels'
 import {showDebugNotificationIfEnabled} from '../utils/notifications/showDebugNotificationIfEnabled'
 import {showUINotificationFromRemoteMessage} from '../utils/notifications/showUINotificationFromRemoteMessage'
 import reportError from '../utils/reportError'
 import {fetchAndStoreMessagesForInboxAtom} from './chat/atoms/fetchNewMessagesActionAtom'
 import {checkForClubsAdmissionActionAtom} from './clubs/atom/checkForClubsAdmissionActionAtom'
-import {syncAllClubsHandleStateWhenNotFoundActionAtom} from './clubs/atom/refreshClubsActionAtom'
+import {
+  syncAllClubsHandleStateWhenNotFoundActionAtom,
+  syncSingleClubHandleStateWhenNotFoundActionAtom,
+} from './clubs/atom/refreshClubsActionAtom'
+import {
+  addReasonToRemovedClubActionAtom,
+  createSingleRemovedClubAtom,
+  markRemovedClubAsNotifiedActionAtom,
+} from './clubs/atom/removedClubsAtom'
 import {syncConnectionsActionAtom} from './connections/atom/connectionStateAtom'
 import {updateAndReencryptAllOffersConnectionsActionAtom} from './connections/atom/offerToConnectionsAtom'
 import processChatNotificationActionAtom from './notifications/processChatNotification'
@@ -142,6 +154,55 @@ export function useHandleReceivedNotifications(): void {
           `🔔 Received notification about new user in club ${admitedToClubNetworkNotificationDataO.value.publicKey}`
         )
         await Effect.runPromise(checkForClubAdmission())
+        return
+      }
+
+      const ClubDeactivatedNotificationDataO = Schema.decodeUnknownOption(
+        ClubDeactivatedNotificationData
+      )(payload)
+      if (Option.isSome(ClubDeactivatedNotificationDataO)) {
+        const {t} = store.get(translationAtom)
+        await Effect.runPromise(
+          store.set(syncSingleClubHandleStateWhenNotFoundActionAtom, {
+            clubUuid: ClubDeactivatedNotificationDataO.value.clubUuid,
+          })
+        )
+
+        store.set(addReasonToRemovedClubActionAtom, {
+          clubUuid: ClubDeactivatedNotificationDataO.value.clubUuid,
+          reason: ClubDeactivatedNotificationDataO.value.reason,
+        })
+
+        console.info(
+          `📳 Received notification about club deactivation ${ClubDeactivatedNotificationDataO.value.clubUuid}`
+        )
+        const clubInfo = store.get(
+          createSingleRemovedClubAtom(
+            ClubDeactivatedNotificationDataO.value.clubUuid
+          )
+        )
+        if (clubInfo) {
+          await notifee.displayNotification({
+            title: t(
+              `notifications.CLUB_DEACTIVATED.${ClubDeactivatedNotificationDataO.value.reason}.title`
+            ),
+            body: t(
+              `notifications.CLUB_DEACTIVATED.${ClubDeactivatedNotificationDataO.value.reason}.body`,
+              {name: clubInfo.clubInfo.name}
+            ),
+            android: {
+              channelId: await getDefaultChannel(),
+              pressAction: {
+                id: 'default',
+              },
+            },
+          })
+
+          store.set(markRemovedClubAsNotifiedActionAtom, {
+            clubUuid: ClubDeactivatedNotificationDataO.value.clubUuid,
+          })
+        }
+
         return
       }
 

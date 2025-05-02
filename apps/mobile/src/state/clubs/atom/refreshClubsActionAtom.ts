@@ -14,7 +14,24 @@ import {
   clubsWithMembersStorageAtom,
   removeClubWithMembersFromStateActionAtom,
 } from './clubsWithMembersAtom'
+import {addClubToRemovedClubsActionAtom} from './removedClubsAtom'
 import {updateOffersWhenUserIsNoLongerInClubActionAtom} from './updateOffersWhenUserIsNoLongerInClubActionAtom'
+
+const processClubDeletedActionAtom = atom(
+  null,
+  (get, set, {clubUuid}: {clubUuid: ClubUuid}) => {
+    pipe(
+      get(clubsWithMembersStorageAtom).data,
+      Array.findFirst((c) => c.club.uuid === clubUuid),
+      Option.andThen((clubWithMembers) => {
+        set(addClubToRemovedClubsActionAtom, {clubInfo: clubWithMembers.club})
+      })
+    )
+
+    set(removeClubFromKeyHolderStateActionAtom, clubUuid)
+    set(removeClubWithMembersFromStateActionAtom, clubUuid)
+  }
+)
 
 const fetchClubWithMembersHandleStateIfNotFoundActionAtom = atom(
   null,
@@ -51,8 +68,7 @@ const fetchClubWithMembersHandleStateIfNotFoundActionAtom = atom(
                 'Error processing club after removed from BE'
               ),
               Effect.andThen(() => {
-                set(removeClubFromKeyHolderStateActionAtom, clubUuid)
-                set(removeClubWithMembersFromStateActionAtom, clubUuid)
+                set(processClubDeletedActionAtom, {clubUuid})
               })
             )
           }),

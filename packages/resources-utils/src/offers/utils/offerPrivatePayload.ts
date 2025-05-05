@@ -46,6 +46,7 @@ export function fetchInfoAndGeneratePrivatePayloads({
   onProgress?: ((state: OfferEncryptionProgress) => void) | undefined
 }): Effect.Effect<
   {
+    ownerPrivatePayload: ServerPrivatePart
     errors: PrivatePartEncryptionError[]
     privateParts: NonEmptyArray<ServerPrivatePart>
     connections: ConnectionsInfoForOffer
@@ -121,8 +122,7 @@ export function fetchInfoAndGeneratePrivatePayloads({
       Array.dedupeWith((one, two) => one.userPublicKey === two.userPublicKey),
       Array.filter(
         (one) => one.userPublicKey !== ownerCredentials.publicKeyPemBase64
-      ),
-      Array.append(encryptedPrivatePayloadForOwner)
+      )
     )
 
     if (!Array.isNonEmptyArray(encryptedPrivateParts)) {
@@ -137,6 +137,7 @@ export function fetchInfoAndGeneratePrivatePayloads({
     }
 
     return {
+      ownerPrivatePayload: encryptedPrivatePayloadForOwner,
       errors,
       privateParts: encryptedPrivateParts,
       connections: connectionsInfo,

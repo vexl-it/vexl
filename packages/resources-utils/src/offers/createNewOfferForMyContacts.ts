@@ -108,6 +108,7 @@ export default function createNewOfferForMyContacts({
       sendOfferToNetworkBatchPrivateParts({
         offerApi,
         offerData: {
+          ownerPrivatePayload: privatePayloads.ownerPrivatePayload,
           offerPrivateList: privatePayloads.privateParts,
           countryPrefix,
           payloadPublic: encryptedPublic,

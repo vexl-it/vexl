@@ -17,6 +17,7 @@ export const sendOfferToNetworkBatchPrivateParts = ({
   offerApi: OfferApi
   offerData: {
     offerType: OfferType
+    ownerPrivatePayload: ServerPrivatePart
     payloadPublic: PublicPayloadEncrypted
     offerPrivateList: NonEmptyArray<ServerPrivatePart>
     countryPrefix: CountryPrefix
@@ -34,7 +35,7 @@ export const sendOfferToNetworkBatchPrivateParts = ({
     const createRequest = yield* _(
       offerApi.createNewOffer({
         body: {
-          offerPrivateList: firstBatch ?? [],
+          offerPrivateList: [offerData.ownerPrivatePayload, ...firstBatch],
           countryPrefix: offerData.countryPrefix,
           payloadPublic: offerData.payloadPublic,
           offerType: offerData.offerType,

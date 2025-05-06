@@ -43,7 +43,7 @@ export const mergeIncomingOffersToState = ({
           Option.isSome
         )
       ) {
-        // D not update offers that are owned the by current user.
+        // Do not update offers that are owned by current user.
         return offerInStateO
       }
 

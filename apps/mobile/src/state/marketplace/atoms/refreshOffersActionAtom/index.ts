@@ -4,6 +4,7 @@ import {atom} from 'jotai'
 import {apiAtom} from '../../../../api'
 import reportError from '../../../../utils/reportError'
 import {clubsToKeyHolderAtom} from '../../../clubs/atom/clubsToKeyHolderAtom'
+import {updateOffersIdsForClubStatActionAtom} from '../../../clubs/atom/clubsWithMembersAtom'
 import {sessionDataOrDummyAtom} from '../../../session'
 import {ensureMyOffersHaveOwnershipInfoUploadedInPrivatepayloadForOwner} from '../ensureMyOffersHaveOwnershipInfoUploadedInPrivatepayloadForOwner'
 import {loadingStateAtom} from '../loadingState'
@@ -35,7 +36,9 @@ export const refreshOffersActionAtom = atom(null, (get, set) =>
       })
     )
 
-    const {removedClubsOfferIds, removedContactOfferIds} = yield* _(
+    set(updateOffersIdsForClubStatActionAtom, {newOffers: newClubsOffers})
+
+    const {removedClubsOfferIdsToClubUuid, removedContactOfferIds} = yield* _(
       getRemovedOffersIds({
         offersApi: api.offer,
         storedOffers,
@@ -57,7 +60,7 @@ export const refreshOffersActionAtom = atom(null, (get, set) =>
         incomingOffers,
         storedOffers: old.offers,
         removedOffersIds: {
-          clubs: removedClubsOfferIds,
+          clubs: removedClubsOfferIdsToClubUuid,
           contacts: removedContactOfferIds,
         },
       }),

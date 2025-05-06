@@ -155,8 +155,6 @@ describe('Get club info', () => {
           Effect.either
         )
 
-        console.log(`Error response: ${JSON.stringify(errorResponse, null, 2)}`)
-
         if (errorResponse._tag !== 'Left') {
           throw new Error('Expected error response')
         }

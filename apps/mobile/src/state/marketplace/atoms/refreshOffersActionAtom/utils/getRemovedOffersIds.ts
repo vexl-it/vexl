@@ -18,7 +18,7 @@ export const getRemovedOffersIds = ({
   storedClubs: Record<ClubUuid, PrivateKeyHolder>
 }): Effect.Effect<{
   removedContactOfferIds: readonly OfferId[]
-  removedClubsOfferIds: ReadonlyArray<{
+  removedClubsOfferIdsToClubUuid: ReadonlyArray<{
     clubUuid: ClubUuid
     removedIds: readonly OfferId[]
   }>
@@ -74,7 +74,7 @@ export const getRemovedOffersIds = ({
       })
     ),
 
-    removedClubsOfferIds: pipe(
+    removedClubsOfferIdsToClubUuid: pipe(
       clubOffersIds,
       Array.map(({clubKey, clubUuid, offersIds}) =>
         offersApi

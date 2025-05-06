@@ -1,9 +1,12 @@
 import {type ClubInfo, type ClubUuid} from '@vexl-next/domain/src/general/clubs'
-import {Array, type Option, pipe, Schema} from 'effect'
+import {type Chat} from '@vexl-next/domain/src/general/messaging'
+import {type OfferInfo} from '@vexl-next/domain/src/general/offers'
+import {Array, HashSet, Option, pipe, Schema} from 'effect'
 import {type Atom, atom, useAtomValue} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {splitAtom} from 'jotai/utils'
 import {atomWithParsedMmkvStorageE} from '../../../utils/atomUtils/atomWithParsedMmkvStorageE'
+import {myOffersAtom} from '../../marketplace/atoms/myOffers'
 import {ClubWithMembers} from '../domain'
 
 export class UserClubKeypairMissingError extends Schema.TaggedError<UserClubKeypairMissingError>(
@@ -60,6 +63,81 @@ export const removeClubWithMembersFromStateActionAtom = atom(
       ...prev,
       data: [...Array.filter(prev.data, (c) => c.club.uuid !== clubUuid)],
     }))
+  }
+)
+
+export const updateOffersIdsForClubStatActionAtom = atom(
+  null,
+  (get, set, {newOffers}: {newOffers: readonly OfferInfo[]}) => {
+    const myOffersIds = get(myOffersAtom).map(
+      (offer) => offer.offerInfo.offerId
+    )
+    const storedClubsUuids = Array.map(
+      get(clubsWithMembersAtom),
+      (c) => c.club.uuid
+    )
+
+    Array.forEach(storedClubsUuids, (clubUuid) => {
+      const clubToUpdate = Array.findFirst(
+        get(clubsWithMembersAtom),
+        (c) => c.club.uuid === clubUuid
+      )
+      const newOffersIds = Array.filter(
+        newOffers,
+        (offer) =>
+          offer.privatePart.clubIds?.includes(clubUuid) &&
+          !Array.contains(offer.offerId)(myOffersIds)
+      ).map((offer) => offer.offerId)
+
+      if (Option.isSome(clubToUpdate)) {
+        set(clubsWithMembersStorageAtom, (prev) => ({
+          ...prev,
+          data: [
+            ...Array.filter(prev.data, (c) => c.club.uuid !== clubUuid),
+            {
+              ...clubToUpdate.value,
+              stats: {
+                ...clubToUpdate.value.stats,
+                allOffersIdsForClub: HashSet.union(
+                  HashSet.fromIterable(newOffersIds),
+                  clubToUpdate.value.stats.allOffersIdsForClub
+                ),
+              },
+            },
+          ],
+        }))
+      }
+    })
+  }
+)
+
+export const updateChatsPeakCountStatActionAtom = atom(
+  null,
+  (get, set, {chat}: {chat: Chat}) => {
+    const clubsIdsFromChat = chat.otherSide.clubsIds
+
+    Array.forEach(get(clubsWithMembersAtom), (c) => {
+      if (Array.contains(clubsIdsFromChat)) {
+        set(clubsWithMembersStorageAtom, (prev) => ({
+          ...prev,
+          data: [
+            ...Array.filter(
+              prev.data,
+              (club) => club.club.uuid !== c.club.uuid
+            ),
+            {
+              ...c,
+              stats: {
+                ...c.stats,
+                allChatsIdsForClub: HashSet.add(chat.id)(
+                  c.stats.allChatsIdsForClub
+                ),
+              },
+            },
+          ],
+        }))
+      }
+    })
   }
 )
 

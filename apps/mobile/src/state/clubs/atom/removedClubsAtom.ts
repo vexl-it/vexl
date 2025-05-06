@@ -11,6 +11,7 @@ import {focusAtom} from 'jotai-optics'
 import {useEffect} from 'react'
 import {atomWithParsedMmkvStorageE} from '../../../utils/atomUtils/atomWithParsedMmkvStorageE'
 import {type FocusAtomType} from '../../../utils/atomUtils/FocusAtomType'
+import {ClubStats} from '../domain'
 
 const COMPLETELY_REMOVE_CLUB_AFTER_DAYS = 30
 
@@ -21,6 +22,8 @@ const RemovedClubInfo = Schema.Struct({
   reason: Schema.optionalWith(ClubDeactivatedNotificationData.fields.reason, {
     as: 'Option',
   }),
+  stats: ClubStats,
+  hiddenForVexlbot: Schema.Boolean,
 })
 export type RemovedClubInfo = typeof RemovedClubInfo.Type
 
@@ -113,7 +116,7 @@ export function useCleanupRemovedClubsOnMount(): void {
 
 export const addClubToRemovedClubsActionAtom = atom(
   null,
-  (get, set, {clubInfo}: {clubInfo: ClubInfo}) => {
+  (get, set, {clubInfo, stats}: {clubInfo: ClubInfo; stats: ClubStats}) => {
     set(removedClubsAtom, (prev) => [
       ...prev,
       {
@@ -121,7 +124,27 @@ export const addClubToRemovedClubsActionAtom = atom(
         notified: false,
         reason: Option.none(),
         removedAt: unixMillisecondsNow(),
+        stats,
+        hiddenForVexlbot: false,
       },
     ])
+  }
+)
+
+export const markRemovedClubAsHiddenForVexlbotActionAtom = atom(
+  null,
+  (get, set, clubUuid: ClubUuid) => {
+    set(
+      removedClubsAtom,
+      Array.map((club) => {
+        if (club.clubInfo.uuid === clubUuid) {
+          return {
+            ...club,
+            hiddenForVexlbot: true,
+          }
+        }
+        return club
+      })
+    )
   }
 )

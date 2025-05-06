@@ -84,3 +84,7 @@ export const eraseImportedContacts = atom(null, (get, set) => {
     lastImport: undefined,
   }))
 })
+
+export const alreadyImpotedContactsAtom = atom(
+  (get) => get(importedContactsAtom).length > 0
+)

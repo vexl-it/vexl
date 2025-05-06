@@ -1204,6 +1204,7 @@
   "clubs.doYouWantToRevealIdentity": "Do you want to reveal identity?",
   "clubs.ifYouRevealIdentityToClubMember": "If you reveal your identity to a club member, you will see the identity of your counterparty too.",
   "clubs.rememberThatTradingInClubsIsLessSafe": "Remember that trading in Clubs is less safe than with your trusted contacts.",
+  "clubs.clubStatsSuggestionMessage": "Club {{clubName}} was recently deactivated. It provided you with {{offersCount}} offers, and you started {{chatsCount}} chats with other users. To keep discovering more offers, import your contacts and expand your reach on the marketplace.",
   "events.upcomingEvents": "Upcoming events",
   "events.pastEvents": "Past events",
   "events.noEvents": "No events",

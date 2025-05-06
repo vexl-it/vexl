@@ -5,13 +5,15 @@ import {
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
 import {keys} from '@vexl-next/resources-utils/src/utils/keys'
 import {Array} from 'effect'
-import * as A from 'fp-ts/Array'
 import {pipe} from 'fp-ts/function'
 import {group} from 'group-items'
 import {atom} from 'jotai'
 import {type ActionAtomType} from '../../../utils/atomUtils/ActionAtomType'
 import notEmpty from '../../../utils/notEmpty'
-import {clubsWithMembersAtom} from '../../clubs/atom/clubsWithMembersAtom'
+import {
+  clubsWithMembersAtom,
+  updateChatsPeakCountStatActionAtom,
+} from '../../clubs/atom/clubsWithMembersAtom'
 import {createEmptyTradeChecklistInState} from '../../tradeChecklist/domain'
 import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
 
@@ -34,7 +36,7 @@ export default function createNewChatsFromFirstMessagesActionAtom({
 
       return pipe(
         keys(messagesBySender),
-        A.map((senderPublicKey): ChatWithMessages | undefined => {
+        Array.map((senderPublicKey): ChatWithMessages | undefined => {
           const messages = messagesBySender[senderPublicKey]
           if (!messages) return undefined
 
@@ -82,7 +84,7 @@ export default function createNewChatsFromFirstMessagesActionAtom({
                 )
               : []
 
-          return {
+          const newChat = {
             chat: {
               inbox,
               origin: inbox.offerId
@@ -106,9 +108,13 @@ export default function createNewChatsFromFirstMessagesActionAtom({
               ...createEmptyTradeChecklistInState(),
             },
             messages: [...messages],
-          }
+          } satisfies ChatWithMessages
+
+          set(updateChatsPeakCountStatActionAtom, {chat: newChat.chat})
+
+          return newChat
         }),
-        A.filter(notEmpty)
+        Array.filter(notEmpty)
       )
     })
 }

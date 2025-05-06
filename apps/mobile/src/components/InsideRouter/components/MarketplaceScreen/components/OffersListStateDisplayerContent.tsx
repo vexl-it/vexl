@@ -36,6 +36,7 @@ import EmptyListPlaceholder from './EmptyListPlaceholder'
 import FiatSatsDropdown from './FiatSatsDropdown'
 import FilterButton from './FilterButton'
 import ImportNewContactsSuggestion from './ImportNewContactsSuggestion'
+import RemovedClubsSuggestion from './RemovedClubsSuggestion'
 import SearchOffers from './SearchOffers'
 import TotalOffersCount from './TotalOffersCount'
 import VexlNewsSuggestions from './VexlNewsSuggestions'
@@ -130,12 +131,14 @@ function OffersListStateDisplayerContent(): JSX.Element {
               </XStack>
               <ReencryptOffersSuggestion mb="$6" />
               <VexlNewsSuggestions mb="$6" />
+              <RemovedClubsSuggestion mb="$6" />
               <ImportNewContactsSuggestion mb="$6" />
               <AddListingTypeToOffersSuggestion mb="$6" />
             </Stack>
           ) : (
             <>
               <VexlNewsSuggestions />
+              <RemovedClubsSuggestion />
               <EmptyListPlaceholder
                 refreshing={loading}
                 onRefresh={() => {

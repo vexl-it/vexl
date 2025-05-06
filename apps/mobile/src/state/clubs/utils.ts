@@ -3,7 +3,7 @@ import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
 import {type ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {NotFoundError as NotFoundErrorApi} from '@vexl-next/rest-api/src/Errors'
 import {type ContactApi} from '@vexl-next/rest-api/src/services/contact'
-import {Effect, Schema, type Option} from 'effect'
+import {Effect, HashSet, Schema, type Option} from 'effect'
 import reportError from '../../utils/reportError'
 import {type ClubWithMembers} from './domain'
 
@@ -52,6 +52,10 @@ export const fetchClubWithMembersReportApiErrors = ({
       club: clubInfo.clubInfoForUser.club,
       members: clubMembers.items,
       isModerator: clubInfo.clubInfoForUser.isModerator,
+      stats: {
+        allOffersIdsForClub: HashSet.empty(),
+        allChatsIdsForClub: HashSet.empty(),
+      },
     }
   }).pipe(
     Effect.mapError((e) => {

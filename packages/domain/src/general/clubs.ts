@@ -28,7 +28,7 @@ export const ClubInfo = Schema.Struct({
   membersCountLimit: Schema.Number,
   clubImageUrl: UriStringE,
   validUntil: Schema.DateFromString,
-  reportLimit: Schema.Int,
+  reportLimit: Schema.optionalWith(Schema.Int, {default: () => 0}),
 })
 export type ClubInfo = typeof ClubInfo.Type
 

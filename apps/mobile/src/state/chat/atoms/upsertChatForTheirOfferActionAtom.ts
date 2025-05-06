@@ -9,7 +9,10 @@ import {Array, pipe} from 'effect'
 import {flow} from 'fp-ts/lib/function'
 import {atom} from 'jotai'
 import * as O from 'optics-ts'
-import {clubsWithMembersAtom} from '../../clubs/atom/clubsWithMembersAtom'
+import {
+  clubsWithMembersAtom,
+  updateChatsPeakCountStatActionAtom,
+} from '../../clubs/atom/clubsWithMembersAtom'
 import {type ClubWithMembers} from '../../clubs/domain'
 import {createEmptyTradeChecklistInState} from '../../tradeChecklist/domain'
 import {
@@ -136,6 +139,9 @@ const upsertChatForTheirOfferActionAtom = atom(
           )
         )(newChat)(old)
       )
+
+      set(updateChatsPeakCountStatActionAtom, {chat: newChat.chat})
+
       return newChat.chat
     }
   }

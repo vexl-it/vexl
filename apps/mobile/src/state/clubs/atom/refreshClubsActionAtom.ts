@@ -24,7 +24,10 @@ const processClubDeletedActionAtom = atom(
       get(clubsWithMembersStorageAtom).data,
       Array.findFirst((c) => c.club.uuid === clubUuid),
       Option.andThen((clubWithMembers) => {
-        set(addClubToRemovedClubsActionAtom, {clubInfo: clubWithMembers.club})
+        set(addClubToRemovedClubsActionAtom, {
+          clubInfo: clubWithMembers.club,
+          stats: clubWithMembers.stats,
+        })
       })
     )
 
@@ -52,6 +55,9 @@ const fetchClubWithMembersHandleStateIfNotFoundActionAtom = atom(
         Effect.map(Option.fromNullable)
       )
       const api = get(apiAtom)
+      const clubAlreadyInStateStats = get(
+        clubsWithMembersStorageAtom
+      ).data.find((c) => c.club.uuid === clubUuid)?.stats
 
       return yield* _(
         fetchClubWithMembersReportApiErrors({
@@ -59,20 +65,24 @@ const fetchClubWithMembersHandleStateIfNotFoundActionAtom = atom(
           keyPair,
           notificationToken,
         }).pipe(
+          Effect.tapError((e) => Effect.fail(e)),
           Effect.tapErrorTag('ClubNotFoundError', (e) => {
+            set(processClubDeletedActionAtom, {clubUuid})
             return set(updateOffersWhenUserIsNoLongerInClubActionAtom, {
               clubUuid,
             }).pipe(
               ignoreReportErrors(
                 'warn',
                 'Error processing club after removed from BE'
-              ),
-              Effect.andThen(() => {
-                set(processClubDeletedActionAtom, {clubUuid})
-              })
+              )
             )
           }),
-          Effect.mapError((e) => ({clubUuid, ...e}))
+          Effect.mapError((e) => ({clubUuid, ...e})),
+          Effect.map((clubWithMembers) =>
+            clubAlreadyInStateStats
+              ? {...clubWithMembers, stats: clubAlreadyInStateStats}
+              : clubWithMembers
+          )
         )
       )
     })

@@ -18,7 +18,7 @@ function ClubListItem({atom}: {atom: Atom<ClubWithMembers>}): JSX.Element {
 
   return (
     <XStack gap="$2" alignItems="center">
-      <Image width={48} height={48} src={club.clubImageUrl} />
+      <Image width={48} height={48} br="$2" src={club.clubImageUrl} />
       <YStack f={1}>
         <Text
           numberOfLines={1}
@@ -51,8 +51,8 @@ function ClubListItem({atom}: {atom: Atom<ClubWithMembers>}): JSX.Element {
 
 function Separator(): JSX.Element {
   return (
-    <Stack alignItems="center" justifyContent="center" f={1} height={32}>
-      <Stack height={2} width="100%" bg="$grey" />
+    <Stack width="100%" height={32} jc="center" als="center">
+      <Stack height={2} bg="$grey" />
     </Stack>
   )
 }

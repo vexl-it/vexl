@@ -17,19 +17,21 @@ function SummaryScreen(): JSX.Element {
 
   // We need to merge clubs otherwhise they are not shown. Consider moving to molecule
   // If more cases like these appear
-  const offerToDisplay = useMemo(
-    () => ({
+  const offerToDisplay = useMemo(() => {
+    // We need to remove adminId for displaying purposes only
+    // as the component below displays how the offer will be shown to THE USER ON THE OTHER SIDE!
+    const {adminId, ...restOfPrivatePart} = offer.offerInfo.privatePart
+    return {
       ...offer,
       offerInfo: {
         ...offer.offerInfo,
         privatePart: {
-          ...offer.offerInfo.privatePart,
+          ...restOfPrivatePart,
           clubIds: clubs,
         },
       },
-    }),
-    [offer, clubs]
-  )
+    }
+  }, [offer, clubs])
 
   return (
     <ScreenWrapper>

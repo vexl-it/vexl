@@ -17,6 +17,7 @@ import {clubReportLimistCount} from '../../../configs'
 import {ClubMembersDbService} from '../../../db/ClubMemberDbService'
 import {ClubsDbService} from '../../../db/ClubsDbService'
 import {deactivateAndClearClubs} from '../../../internalServer/routes/deactivateAndClearClubs'
+import {reportClubDeactivated, reportClubReported} from '../../../metrics'
 
 export const reportClub = Handler.make(ReportClubEndpoint, (req, security) =>
   makeEndpointEffect(
@@ -106,6 +107,8 @@ export const reportClub = Handler.make(ReportClubEndpoint, (req, security) =>
         })
       )
 
+      yield* _(reportClubReported(1))
+
       const reportedClub = yield* _(clubsDb.findClubByUuid({uuid: club.uuid}))
 
       if (
@@ -113,6 +116,7 @@ export const reportClub = Handler.make(ReportClubEndpoint, (req, security) =>
         reportedClub.value.report >= club.reportLimit
       ) {
         yield* _(deactivateAndClearClubs)
+        yield* _(reportClubDeactivated(1))
       }
 
       return {}

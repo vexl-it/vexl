@@ -1,4 +1,5 @@
 import {SqlClient} from '@effect/sql'
+import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {shouldDisableMetrics} from '@vexl-next/server-utils/src/commonConfigs'
 import {type MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
@@ -11,6 +12,11 @@ const CONT_OF_UNIQUE_USERS = 'COUNT_OF_UNIQUE_USERS' as const
 const COUNT_OF_UNIQUE_CONTACTS = 'COUNT_OF_UNIQUE_CONTACTS' as const
 const COUNT_OF_CONNECTIONS = 'COUNT_OF_CONNECTIONS' as const
 const USER_REFRESH = 'USER_REFRESH' as const
+
+const CLUB_REPORTED = 'CLUB_REPORTED' as const
+const CLUB_DEACTIVATED = 'CLUB_DEACTIVATED' as const
+const USER_JOINED_CLUB_AND_IMPORTED_CONTACTS =
+  'USER_JOINED_CLUB_AND_IMPORTED_CONTACTS' as const
 
 export const reportCountOfUniqueUsers = (
   count: number
@@ -61,6 +67,49 @@ export const reportUserRefresh = (): Effect.Effect<
       uuid: generateUuid(),
       timestamp: new Date(),
       name: USER_REFRESH,
+    })
+  )
+
+export const reportClubReported = (
+  number: number
+): Effect.Effect<void, never, MetricsClientService> =>
+  reportMetricForked(
+    new MetricsMessage({
+      uuid: generateUuid(),
+      value: number,
+      timestamp: new Date(),
+      name: CLUB_REPORTED,
+    })
+  )
+
+export const reportClubDeactivated = (
+  number: number
+): Effect.Effect<void, never, MetricsClientService> =>
+  reportMetricForked(
+    new MetricsMessage({
+      uuid: generateUuid(),
+      value: number,
+      timestamp: new Date(),
+      name: CLUB_DEACTIVATED,
+    })
+  )
+
+export const reportUserJoinedClubAndImportedContacts = ({
+  clubUUid,
+  contactsImported,
+  value,
+}: {
+  clubUUid: ClubUuid
+  contactsImported: boolean
+  value: number
+}): Effect.Effect<void, never, MetricsClientService> =>
+  reportMetricForked(
+    new MetricsMessage({
+      uuid: generateUuid(),
+      timestamp: new Date(),
+      name: USER_JOINED_CLUB_AND_IMPORTED_CONTACTS,
+      attributes: {clubUUid, contactsImported},
+      value,
     })
   )
 

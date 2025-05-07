@@ -15,6 +15,7 @@ import {Handler} from 'effect-http'
 import {ClubInvitationLinkDbService} from '../../../db/ClubInvitationLinkDbService'
 import {ClubMembersDbService} from '../../../db/ClubMemberDbService'
 import {ClubsDbService} from '../../../db/ClubsDbService'
+import {reportUserJoinedClubAndImportedContacts} from '../../../metrics'
 import {NewClubUserNotificationsService} from '../../../utils/NewClubUserNotificationService'
 import {withClubJoiningActionRedisLock} from '../../../utils/withClubJoiningActionRedisLock'
 import {clubHasCapacityForAnotherUser} from '../utils/clubHasCapacityForAnotherUser'
@@ -98,6 +99,14 @@ export const joinClub = Handler.make(JoinClubEndpoint, (req) =>
                 triggeringUser: req.body.publicKey,
               })
             )
+          )
+
+          yield* _(
+            reportUserJoinedClubAndImportedContacts({
+              clubUUid: club.uuid,
+              contactsImported: req.body.contactsImported,
+              value: 1,
+            })
           )
 
           return {

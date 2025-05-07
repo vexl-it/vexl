@@ -410,7 +410,7 @@
   "offer.requestStatus.leaved": "Ulishawasiliana na ombi hili hapo awali.",
   "offer.listEmpty": "Soko lako linaanza tu. Rudi baada ya dakika chache!",
   "offer.emptyAction": "Ongeza ombi jipya",
-  "offer.createOfferAndReachVexlers": "Unafikia {{reachNumber}} vexlers.\nOngeza mawasiliano zaidi ili kuongeza idadi ya ofa unazoona.",
+  "offer.createOfferAndReachVexlers": "Unafikia {{reachNumber}} vexlaks.\nOngeza mawasiliano zaidi ili kuongeza idadi ya ofa unazoona.",
   "offer.filterActive": "Chuja inayoendelea",
   "offer.totalOffers": "Jumla: {{totalCount}} maombi",
   "offer.notImportedAnyContacts": "Hujaleta mawasiliano yoyote. Leta mawasiliano kuona maombi kutoka kwenye mtandao wako!",

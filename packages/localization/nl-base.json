@@ -410,7 +410,7 @@
   "offer.requestStatus.leaved": "Je hebt al eerder met deze aanbieding gesproken.",
   "offer.listEmpty": "Uw marktplaats is net aan het opwarmen. Kom terug in enkele minuten! ",
   "offer.emptyAction": "Voeg nieuwe aanbieding toe",
-  "offer.createOfferAndReachVexlers": "U bereikt {{reachNumber}} vexlers.\nVoeg meer contacten toe om het aantal aanbiedingen dat u ziet te verhogen.",
+  "offer.createOfferAndReachVexlers": "U bereikt {{reachNumber}} vexlaks.\nVoeg meer contacten toe om het aantal aanbiedingen dat u ziet te verhogen.",
   "offer.filterActive": "Filter actief",
   "offer.totalOffers": "Totaal: {{totalCount}} aanbiedingen",
   "offer.notImportedAnyContacts": "U heeft nog geen contacten geïmporteerd. Importeer contactpersonen om aanbiedingen van uw netwerk te zien!",

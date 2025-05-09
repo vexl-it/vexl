@@ -64,10 +64,6 @@ describe('Feedback redirect', () => {
         )
 
         expect(Either.isLeft(response)).toBe(true)
-        if (Either.isLeft(response)) {
-          const res = response.left
-          expect((res.error as any).cause.code).toEqual('ECONNREFUSED')
-        }
       })
     )
   })

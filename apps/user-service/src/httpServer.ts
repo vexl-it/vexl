@@ -2,6 +2,7 @@ import {NodeContext} from '@effect/platform-node'
 import {UserApiSpecification} from '@vexl-next/rest-api/src/services/user/specification'
 import {DashboardReportsService} from '@vexl-next/server-utils/src/DashboardReportsService'
 import {healthServerLayer} from '@vexl-next/server-utils/src/HealthServer'
+import {RedisConnectionService} from '@vexl-next/server-utils/src/RedisConnection'
 import {RedisService} from '@vexl-next/server-utils/src/RedisService'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
 import {setupLoggingMiddlewares} from '@vexl-next/server-utils/src/loggingMiddlewares'
@@ -54,8 +55,9 @@ const MainLive = Layer.mergeAll(
   healthServerLayer({port: healthServerPortConfig})
 ).pipe(
   Layer.provideMerge(DbLayer),
-  Layer.provideMerge(MetricsClientService.layer(redisUrl)),
-  Layer.provideMerge(RedisService.layer(redisUrl)),
+  Layer.provideMerge(MetricsClientService.Live),
+  Layer.provideMerge(RedisService.Live),
+  Layer.provideMerge(RedisConnectionService.layer(redisUrl)),
   Layer.provideMerge(NodeContext.layer)
 )
 

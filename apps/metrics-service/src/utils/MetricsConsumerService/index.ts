@@ -1,24 +1,7 @@
 import {metricsQueueNameConfig} from '@vexl-next/server-utils/src/commonConfigs'
-import {
-  setupRedisSmqConnection,
-  type SettingUpRedisSmqConnectionError,
-} from '@vexl-next/server-utils/src/metrics/setupRedisSmqConnection'
-import {
-  Context,
-  Effect,
-  Layer,
-  Schema,
-  type Config,
-  type ConfigError,
-} from 'effect'
-import {Consumer, Queue, type IMessageTransferable} from 'redis-smq'
-import {
-  registerMessageHandler,
-  silentlyShutdownConsumer,
-  startConsumer,
-} from './consumer'
-import {ensureMetricsQueueExists, silentlyShutdownQueue} from './queue'
-
+import {RedisConnectionService} from '@vexl-next/server-utils/src/RedisConnection'
+import {Worker, type Job} from 'bullmq'
+import {Context, Effect, Layer, Runtime, Schema, type ConfigError} from 'effect'
 export class ErrorSettingUpConsumer extends Schema.TaggedError<ErrorSettingUpConsumer>(
   'ErrorSettingUpConsumer'
 )('ErrorSettingUpConsumer', {
@@ -27,48 +10,70 @@ export class ErrorSettingUpConsumer extends Schema.TaggedError<ErrorSettingUpCon
 }) {}
 
 export interface MetricsConsumerOperations {
-  queue: Queue
-  consumer: Consumer
+  worker: Worker
 }
 
 export class MetricsConsumerService extends Context.Tag(
   'MetricsConsumerService'
 )<MetricsConsumerService, MetricsConsumerOperations>() {
   static readonly layer = <E, R>(
-    redisUrl: Config.Config<string>,
-    messageHandler: (message: IMessageTransferable) => Effect.Effect<void, E, R>
+    messageHandler: (message: Job) => Effect.Effect<void, E, R>
   ): Layer.Layer<
     MetricsConsumerService,
-    | ErrorSettingUpConsumer
-    | ConfigError.ConfigError
-    | SettingUpRedisSmqConnectionError,
-    R
+    ErrorSettingUpConsumer | ConfigError.ConfigError,
+    R | RedisConnectionService
   > =>
     Layer.scoped(
       MetricsConsumerService,
       Effect.gen(function* (_) {
         const queueName = yield* _(metricsQueueNameConfig)
 
-        yield* _(Effect.log('Configuring redis smq'))
-        yield* _(setupRedisSmqConnection(redisUrl))
+        const redisConnection = yield* _(RedisConnectionService)
 
-        yield* _(Effect.log(`Ensuring queue exists. Queue name: ${queueName}`))
-        const queue = new Queue()
+        yield* _(Effect.log('Creating consumer worker'))
 
-        yield* _(Effect.addFinalizer(() => silentlyShutdownQueue(queue)))
-        yield* _(ensureMetricsQueueExists(queue, queueName))
-        yield* _(Effect.log('Queue ensured'))
-
-        const consumer = new Consumer()
-        yield* _(Effect.addFinalizer(() => silentlyShutdownConsumer(consumer)))
-        yield* _(startConsumer(consumer))
-
-        yield* _(registerMessageHandler(consumer, queueName, messageHandler))
-        yield* _(
-          Effect.log(`Registered message handler: Queue name: ${queueName}`)
+        const runPromise = Runtime.runPromise(yield* _(Effect.runtime<R>()))
+        const worker = yield* _(
+          Effect.try({
+            try: () =>
+              new Worker(
+                queueName,
+                async (job) => {
+                  await runPromise(
+                    messageHandler(job).pipe(
+                      Effect.tapError((e) =>
+                        Effect.logError('Error handling message', job, e)
+                      ),
+                      Effect.andThen(Effect.log('Message consumed')),
+                      Effect.withSpan('Processing message', {
+                        attributes: {
+                          job,
+                        },
+                      })
+                    )
+                  )
+                },
+                {
+                  connection: redisConnection,
+                }
+              ),
+            catch: (e) =>
+              new ErrorSettingUpConsumer({
+                message: 'Error creating worker',
+                cause: e,
+              }),
+          })
         )
 
-        return {queue, consumer}
+        yield* _(
+          Effect.addFinalizer(() =>
+            Effect.promise(async () => {
+              await worker.close()
+            }).pipe(Effect.ignore)
+          )
+        )
+
+        return {worker}
       })
     )
 }

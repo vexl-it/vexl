@@ -2,6 +2,7 @@ import {NodeContext} from '@effect/platform-node'
 import {ContactApiSpecification} from '@vexl-next/rest-api/src/services/contact/specification'
 import {DashboardReportsService} from '@vexl-next/server-utils/src/DashboardReportsService'
 import {healthServerLayer} from '@vexl-next/server-utils/src/HealthServer'
+import {RedisConnectionService} from '@vexl-next/server-utils/src/RedisConnection'
 import {RedisService} from '@vexl-next/server-utils/src/RedisService'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
 import {setupLoggingMiddlewares} from '@vexl-next/server-utils/src/loggingMiddlewares'
@@ -113,8 +114,9 @@ const MainLive = Layer.mergeAll(
   Layer.provideMerge(ClubMembersDbService.Live),
   Layer.provideMerge(ClubInvitationLinkDbService.Live),
   Layer.provideMerge(DbLayer),
-  Layer.provideMerge(RedisService.layer(redisUrl)),
-  Layer.provideMerge(MetricsClientService.layer(redisUrl)),
+  Layer.provideMerge(RedisService.Live),
+  Layer.provideMerge(MetricsClientService.Live),
+  Layer.provideMerge(RedisConnectionService.layer(redisUrl)),
   Layer.provideMerge(NodeContext.layer),
   Layer.provideMerge(
     DashboardReportsService.make({

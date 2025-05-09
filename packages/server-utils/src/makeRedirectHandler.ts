@@ -22,7 +22,6 @@ export const makeRedirectHandler = <A extends ApiEndpoint.ApiEndpoint.Any>(
       )
 
       const toRedirectTo = `${toRedirectToBase}${queryParams}`
-      yield* _(Effect.logInfo(`Redirecting ${url} to ${toRedirectTo}`))
 
       return yield* _(
         HttpServerResponse.empty({
@@ -31,9 +30,9 @@ export const makeRedirectHandler = <A extends ApiEndpoint.ApiEndpoint.Any>(
         })
       )
     }).pipe(
-      Effect.catchTag('ConfigError', () =>
+      Effect.catchTag('ConfigError', (e) =>
         Effect.zipRight(
-          Effect.logError('Error redirecting'),
+          Effect.logError('Error redirecting', e),
           HttpServerResponse.text('Internal Server Error', {status: 500})
         )
       )

@@ -34,13 +34,13 @@
     "@vexl-next/domain": "0.0.0",
     "@vexl-next/generic-utils": "0.0.0",
     "awesome-phonenumber": "^7.4.0",
+    "bullmq": "^5.52.1",
     "effect": "^3.10.12",
     "effect-http": "^0.82.0",
     "effect-http-node": "^0.22.0",
     "fast-check": "^3.20.0",
     "ioredis": "^5.4.1",
     "luxon": "^3.3.0",
-    "redis-smq": "8.0.0-rc.24",
     "redlock": "^5.0.0-beta.2"
   },
   "eslintConfig": {

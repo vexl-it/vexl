@@ -2,7 +2,7 @@ import {
   type OfferInfo,
   type OneOfferInState,
 } from '@vexl-next/domain/src/general/offers'
-import {Array, Effect, Either, Option, Record} from 'effect'
+import {Array, Effect, Either, Option, pipe, Record} from 'effect'
 import {atom} from 'jotai'
 import {Alert} from 'react-native'
 import {apiAtom} from '../../api'
@@ -98,10 +98,13 @@ export const reportOfferActionAtom = atom(
               Array.contains(clubUuid)(offer.offerInfo.privatePart.clubIds)
           ),
           Option.map(([_, keyPair]) =>
-            api.offer.reportClubOffer({
-              offerId: offer.offerInfo.offerId,
-              keyPair,
-            })
+            pipe(
+              api.offer.reportClubOffer({
+                offerId: offer.offerInfo.offerId,
+                keyPair,
+              }),
+              Effect.runPromise
+            )
           )
         )
       } else {

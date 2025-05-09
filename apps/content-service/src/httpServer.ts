@@ -1,5 +1,6 @@
 import {ContentApiSpecification} from '@vexl-next/rest-api/src/services/content/specification'
 import {healthServerLayer} from '@vexl-next/server-utils/src/HealthServer'
+import {RedisConnectionService} from '@vexl-next/server-utils/src/RedisConnection'
 import {RedisService} from '@vexl-next/server-utils/src/RedisService'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
 import {redisUrl} from '@vexl-next/server-utils/src/commonConfigs'
@@ -29,7 +30,10 @@ const MainLive = Layer.mergeAll(
   WebflowCmsService.Live,
   CacheService.Live,
   healthServerLayer({port: healthServerPortConfig})
-).pipe(Layer.provideMerge(RedisService.layer(redisUrl)))
+).pipe(
+  Layer.provideMerge(RedisService.Live),
+  Layer.provideMerge(RedisConnectionService.layer(redisUrl))
+)
 
 export const httpServer = portConfig.pipe(
   Effect.flatMap((port) => NodeServer.listen({port})(app)),

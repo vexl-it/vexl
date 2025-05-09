@@ -37,6 +37,7 @@
     "@vexl-next/generic-utils": "0.0.0",
     "@vexl-next/rest-api": "0.0.0",
     "@vexl-next/server-utils": "0.0.0",
+    "bullmq": "^5.52.1",
     "dayjs": "^1.11.11",
     "dotenv": "^16.4.5",
     "effect": "^3.10.12",
@@ -45,7 +46,6 @@
     "fast-check": "^3.20.0",
     "node-fetch": "^3.3.2",
     "pg": "^8.12.0",
-    "redis-smq": "8.0.0-rc.24",
     "twilio": "^5.2.1"
   },
   "devDependencies": {

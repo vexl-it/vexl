@@ -1,8 +1,7 @@
 import {UuidE} from '@vexl-next/domain/src/utility/Uuid.brand'
-import {Effect, Schema, type ConfigError} from 'effect'
+import {type Job} from 'bullmq'
+import {Schema, type Effect} from 'effect'
 import {type ParseError} from 'effect/ParseResult'
-import {ProducibleMessage, type IMessageTransferable} from 'redis-smq'
-import {metricsQueueNameConfig} from '../commonConfigs'
 
 export class MetricsMessage extends Schema.Class<MetricsMessage>(
   'MetricsMessage'
@@ -26,29 +25,14 @@ export class MetricsMessage extends Schema.Class<MetricsMessage>(
   private static readonly encode = Schema.encode(MetricsMessage)
   private static readonly decodeUnknwon = Schema.decodeUnknown(MetricsMessage)
 
-  static readonly fromTransferferableMessage = (
-    message: IMessageTransferable
+  static readonly fromJob = (
+    job: Job
   ): Effect.Effect<MetricsMessage, ParseError> => {
-    return MetricsMessage.decodeUnknwon(message.body)
+    return MetricsMessage.decodeUnknwon(job.data)
   }
 
-  toProducibleMessage(): Effect.Effect<
-    ProducibleMessage,
-    ParseError | ConfigError.ConfigError
-  > {
-    const encodeMetricsMessage = MetricsMessage.encode(this)
-    return Effect.gen(function* (_) {
-      const encodedBody = yield* _(encodeMetricsMessage)
-      const queueName = yield* _(metricsQueueNameConfig)
-
-      return yield* _(
-        Effect.sync(() => {
-          const message = new ProducibleMessage()
-          message.setBody(encodedBody).setQueue(queueName)
-          return message
-        })
-      )
-    })
+  get jobData(): Effect.Effect<typeof MetricsMessage.Encoded, ParseError> {
+    return MetricsMessage.encode(this)
   }
 }
 export class ReportingMetricsError extends Schema.TaggedError<ReportingMetricsError>(

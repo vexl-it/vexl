@@ -117,11 +117,17 @@ export const SpokenLanguageE = Schema.Literal(
 ).pipe(orElseSchema('ENG' as const))
 export type SpokenLanguage = Schema.Schema.Type<typeof SpokenLanguageE>
 
-export const FriendLevel = z.enum(['FIRST_DEGREE', 'SECOND_DEGREE', 'CLUB'])
+export const FriendLevel = z.enum([
+  'FIRST_DEGREE',
+  'SECOND_DEGREE',
+  'CLUB',
+  'NOT_SPECIFIED',
+])
 export const FriendLevelE = Schema.Literal(
   'FIRST_DEGREE',
   'SECOND_DEGREE',
-  'CLUB'
+  'CLUB',
+  'NOT_SPECIFIED' // TODO remove this but make sure to not break parsing in newer versions
 )
 export type FriendLevel = Schema.Schema.Type<typeof FriendLevelE>
 

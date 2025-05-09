@@ -1,9 +1,10 @@
 import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
+import {RedisConnectionService} from '@vexl-next/server-utils/src/RedisConnection'
 import {MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
 import {MetricsMessage} from '@vexl-next/server-utils/src/metrics/domain'
 import {reportMetricForked} from '@vexl-next/server-utils/src/metrics/reportMetricForked'
 import {runMainInNode} from '@vexl-next/server-utils/src/runMainInNode'
-import {Effect, pipe} from 'effect'
+import {Effect, Layer, pipe} from 'effect'
 import {redisUrl} from './configs'
 
 const main = pipe(
@@ -31,7 +32,12 @@ const main = pipe(
   }),
   Effect.flatMap(() => Effect.sleep(1_000)),
   Effect.forever,
-  Effect.provide(MetricsClientService.layer(redisUrl))
+  Effect.provide(
+    Layer.empty.pipe(
+      Layer.provideMerge(MetricsClientService.Live),
+      Layer.provideMerge(RedisConnectionService.layer(redisUrl))
+    )
+  )
 )
 
 runMainInNode(main)

@@ -47,6 +47,7 @@ import {type CRUDOfferStackParamsList} from '../../../navigationTypes'
 import {createInboxAtom} from '../../../state/chat/hooks/useCreateInbox'
 import {clubsWithMembersAtom} from '../../../state/clubs/atom/clubsWithMembersAtom'
 import {type ClubWithMembers} from '../../../state/clubs/domain'
+import {importedContactsCountAtom} from '../../../state/contacts/atom/contactsStore'
 import {
   createBtcPriceForCurrencyAtom,
   refreshBtcPriceActionAtom,
@@ -70,7 +71,7 @@ import notEmpty from '../../../utils/notEmpty'
 import checkNotificationPermissionsAndAskIfPossibleActionAtom from '../../../utils/notifications/checkAndAskForPermissionsActionAtom'
 import {preferencesAtom} from '../../../utils/preferences'
 import reportError from '../../../utils/reportError'
-import showErrorAlert from '../../../utils/showErrorAlert'
+import showErrorAlert, {showErrorAlertE} from '../../../utils/showErrorAlert'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 import {askAreYouSureActionAtom} from '../../AreYouSureDialog'
 import {loadingOverlayDisplayedAtom} from '../../LoadingOverlayProvider'
@@ -612,6 +613,7 @@ export const offerFormMolecule = molecule(() => {
     null,
     (get, set): Effect.Effect<boolean> => {
       const {t} = get(translationAtom)
+      const importedContactsCount = get(importedContactsCountAtom)
       const singlePriceActive = get(singlePriceActiveAtom)
 
       if (
@@ -691,25 +693,49 @@ export const offerFormMolecule = molecule(() => {
             delayMs: 3000,
           })
         )
+
+        return true
       }).pipe(
-        Effect.match({
-          onSuccess: () => true,
-          onFailure: (e) => {
-            set(progressModal.hide)
+        Effect.catchAll((e) => {
+          set(progressModal.hide)
 
-            if (e._tag === 'NotificationPrompted') return false
+          if (e._tag === 'NotificationPrompted') return Effect.succeed(false)
 
-            if (e._tag !== 'NetworkError')
-              reportError('error', new Error('Error while creating offer'), {e})
+          if (e._tag !== 'NetworkError')
+            reportError('error', new Error('Error while creating offer'), {e})
 
-            showErrorAlert({
+          if (
+            e._tag === 'PrivatePayloadsConstructionError' &&
+            importedContactsCount === 0
+          ) {
+            return Effect.zipRight(
+              set(askAreYouSureActionAtom, {
+                variant: 'danger',
+                steps: [
+                  {
+                    type: 'StepWithText',
+                    imageSource: {
+                      type: 'requiredImage',
+                      image: require('../../../components/images/block.png'),
+                    },
+                    title: t('offerForm.errorCreatingOffer'),
+                    description: t('offerForm.seemsYouHaveReachNoVexlers'),
+                    positiveButtonText: t('common.close'),
+                  },
+                ],
+              }).pipe(Effect.ignore),
+              Effect.succeed(false)
+            )
+          }
+
+          return Effect.zipRight(
+            showErrorAlertE({
               title:
                 toCommonErrorMessage(e, t) ?? t('offerForm.errorCreatingOffer'),
               error: e,
-            })
-
-            return false
-          },
+            }),
+            Effect.succeed(false)
+          )
         })
       )
     }

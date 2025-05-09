@@ -555,6 +555,7 @@
   "offerForm.friendLevel.reachVexlers": "Reach {{count}} vexlers",
   "offerForm.publishOffer": "Publish offer",
   "offerForm.errorCreatingOffer": "Error while creating offer",
+  "offerForm.seemsYouHaveReachNoVexlers": "Seems you reach no vexlers to encrypt your offer for. Please add more contacts or join Vexl clubs to increase your reach.",
   "offerForm.errorSearchingForAvailableLocation": "Error when searching for available locations",
   "offerForm.offerEncryption.encryptingYourOffer": "Encrypting your offer ...",
   "offerForm.offerEncryption.dontShutDownTheApp": "Don’t shut down the app while encrypting. It can take several minutes.",

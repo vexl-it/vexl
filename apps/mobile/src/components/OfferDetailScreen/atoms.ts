@@ -102,7 +102,8 @@ export const reportOfferActionAtom = atom(
               offerId: offer.offerInfo.offerId,
               keyPair,
             })
-          )
+          ),
+          Effect.flatten
         )
       } else {
         yield* _(
@@ -172,6 +173,18 @@ export const reportOfferActionAtom = atom(
     }).pipe(
       Effect.catchAll((e) => {
         set(loadingOverlayDisplayedAtom, false)
+
+        if (
+          e._tag === 'NotFoundError' ||
+          e._tag === 'UnauthorizedError' ||
+          e._tag === 'UnexpectedApiResponseError' ||
+          e._tag === 'UnknownClientError' ||
+          e._tag === 'UnknownServerError'
+        ) {
+          reportError('error', new Error('Error while reporting offer'), {
+            e,
+          })
+        }
 
         if (e._tag === 'ReportOfferLimitReachedError') {
           Alert.alert(t('offer.report.reportLimitReached'))

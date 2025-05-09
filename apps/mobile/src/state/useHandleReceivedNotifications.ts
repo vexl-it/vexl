@@ -163,9 +163,22 @@ export function useHandleReceivedNotifications(): void {
       if (Option.isSome(ClubDeactivatedNotificationDataO)) {
         const {t} = store.get(translationAtom)
         await Effect.runPromise(
-          store.set(syncSingleClubHandleStateWhenNotFoundActionAtom, {
-            clubUuid: ClubDeactivatedNotificationDataO.value.clubUuid,
-          })
+          store
+            .set(syncSingleClubHandleStateWhenNotFoundActionAtom, {
+              clubUuid: ClubDeactivatedNotificationDataO.value.clubUuid,
+            })
+            .pipe(
+              Effect.catchAll((e) => {
+                if (
+                  e._tag === 'ClubNotFoundError' ||
+                  e._tag === 'FetchingClubError' ||
+                  e._tag === 'NoSuchElementException'
+                )
+                  return Effect.succeed(Effect.void)
+
+                return Effect.fail(e)
+              })
+            )
         )
 
         store.set(addReasonToRemovedClubActionAtom, {

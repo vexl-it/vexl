@@ -1204,6 +1204,7 @@
   "clubs.doYouWantToRevealIdentity": "Chceš odhalit identitu?",
   "clubs.ifYouRevealIdentityToClubMember": "Pokud členovi klubu odhalíš svou identitu, uvidíš také identitu protistrany.",
   "clubs.rememberThatTradingInClubsIsLessSafe": "Nezapomeň, že obchodování v klubech je méně bezpečné než s tvými důvěryhodnými kontakty.",
+  "clubs.clubStatsSuggestionMessage": "Club {{clubName}} was recently deactivated. It provided you with {{offersCount}} offers, and you started {{chatsCount}} chats with other users. To keep discovering more offers, import your contacts and expand your reach on the marketplace.",
   "events.upcomingEvents": "Nadcházející eventy",
   "events.pastEvents": "Uplynulé eventy",
   "events.noEvents": "Žádné eventy",

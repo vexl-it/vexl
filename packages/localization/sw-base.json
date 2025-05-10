@@ -1204,6 +1204,7 @@
   "clubs.doYouWantToRevealIdentity": "Je, ungependa kufichua utambulisho?",
   "clubs.ifYouRevealIdentityToClubMember": "Ukifichua utambulisho wako kwa mwanachama wa klabu, utaona utambulisho wa mwenzako pia.",
   "clubs.rememberThatTradingInClubsIsLessSafe": "Kumbuka kuwa biashara katika Vilabu si salama ikilinganishwa na watu unaowaamini.",
+  "clubs.clubStatsSuggestionMessage": "Club {{clubName}} was recently deactivated. It provided you with {{offersCount}} offers, and you started {{chatsCount}} chats with other users. To keep discovering more offers, import your contacts and expand your reach on the marketplace.",
   "events.upcomingEvents": "Matukio yajayo",
   "events.pastEvents": "Matukio yaliyopita",
   "events.noEvents": "Hakuna matukio",

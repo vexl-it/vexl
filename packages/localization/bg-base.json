@@ -1204,6 +1204,7 @@
   "clubs.doYouWantToRevealIdentity": "Искате ли да разкриете самоличността си?",
   "clubs.ifYouRevealIdentityToClubMember": "Ако разкриете самоличността си, ще видите самоличността и на другата страна.",
   "clubs.rememberThatTradingInClubsIsLessSafe": "Не забравяйте, че търговията с клубове е по-малко безопасна, отколкото с вашите доверени контакти.",
+  "clubs.clubStatsSuggestionMessage": "Club {{clubName}} was recently deactivated. It provided you with {{offersCount}} offers, and you started {{chatsCount}} chats with other users. To keep discovering more offers, import your contacts and expand your reach on the marketplace.",
   "events.upcomingEvents": "Предстоящи събития",
   "events.pastEvents": "Минали събития",
   "events.noEvents": "Няма събития",

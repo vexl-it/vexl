@@ -9,26 +9,22 @@ import getValueFromSetStateActionOfAtom from './getValueFromSetStateActionOfAtom
 const AUTHOR_ID_KEY = '___author_id' as const
 export const CLEAR_STORAGE_KEY = '__clear_storage'
 
-const AuthorKeySchema: Schema.Schema.AnyNoContext = Schema.Struct({
+const AuthorKeySchema = Schema.Struct({
   [AUTHOR_ID_KEY]: Schema.String,
 })
 
-const saveWithAuthorKey = <S extends Schema.Schema<any, object, never>>({
+const saveWithAuthorKey = <A, I extends object>({
   schema,
   authorKey,
   value,
   key,
 }: {
-  schema: S & Schema.Schema.AnyNoContext
+  schema: Schema.Schema<A, I, never>
   authorKey: string
-  value: Schema.Schema.Type<S>
+  value: A
   key: string
 }): Either.Either<void, WritingToStoreError | ParseResult.ParseError> => {
-  const schemaNoContext: Schema.Schema.AnyNoContext = schema
-
-  const schemaWithAuthorKey: Schema.Schema.AnyNoContext = Schema.extend(
-    AuthorKeySchema satisfies Schema.Schema.AnyNoContext
-  )(schemaNoContext)
+  const schemaWithAuthorKey = Schema.extend(AuthorKeySchema)(schema)
 
   const valueToSave: typeof schemaWithAuthorKey.Type = {
     ...value,
@@ -38,12 +34,10 @@ const saveWithAuthorKey = <S extends Schema.Schema<any, object, never>>({
   return storage.saveVerified(key, schemaWithAuthorKey)(valueToSave)
 }
 
-function toShadowStorageAtom<S extends Schema.Schema.AnyNoContext>(
+function toShadowStorageAtom<A, I extends object>(
   key: string,
-  schema: S
-): (
-  baseAtom: PrimitiveAtom<Schema.Schema.Type<S>>
-) => PrimitiveAtom<Schema.Schema.Type<S>> {
+  schema: Schema.Schema<A, I, never>
+): (baseAtom: PrimitiveAtom<A>) => PrimitiveAtom<A> {
   return (baseAtom) =>
     atom(
       (get) => get(baseAtom),
@@ -74,15 +68,15 @@ function toShadowStorageAtom<S extends Schema.Schema.AnyNoContext>(
     )
 }
 
-function getInitialValue<S extends Schema.Schema<any, object, never>>({
+function getInitialValue<A, I extends object>({
   key,
   schema,
   defaultValue,
 }: {
-  schema: S
+  schema: Schema.Schema<A, I, never>
   key: string
-  defaultValue: Schema.Schema.Type<S>
-}): Schema.Schema.Type<S> {
+  defaultValue: A
+}): A {
   return pipe(
     storage.getVerified(key, schema),
     Either.getOrElse((l) => {
@@ -100,13 +94,12 @@ function getInitialValue<S extends Schema.Schema<any, object, never>>({
   )
 }
 
-export function atomWithParsedMmkvStorageE<S extends Schema.Struct.Fields>(
+export function atomWithParsedMmkvStorageE<A, I extends object>(
   key: string,
-  defaultValue: Schema.Schema.Type<Schema.Struct<S>>,
-  struct: Schema.Struct<S> & Schema.Schema.AnyNoContext,
+  defaultValue: A,
+  schema: Schema.Schema<A, I, never>,
   debugLabel?: string
-): PrimitiveAtom<Schema.Schema.Type<Schema.Struct<S>>> {
-  const schema = Schema.asSchema(struct)
+): PrimitiveAtom<A> {
   const coreAtom = atom(getInitialValue({key, schema, defaultValue}))
   const mmkvAtom = pipe(coreAtom, toShadowStorageAtom(key, schema))
 

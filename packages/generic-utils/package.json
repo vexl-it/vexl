@@ -25,7 +25,7 @@
   "dependencies": {
     "@vexl-next/cryptography": "0.0.0",
     "awesome-phonenumber": "^7.4.0",
-    "effect": "^3.10.12",
+    "effect": "^3.15.0",
     "fast-check": "^3.20.0",
     "fp-ts": "^2.13.1",
     "js-base64": "^3.7.5",

@@ -23,11 +23,11 @@ export interface EffectMmkv {
     unknown,
     JsonParseError | ValueNotSet | ReadingFromStoreError
   >
-  getVerified: <T extends Schema.Schema<any, any, never>>(
+  getVerified: <A, I>(
     key: string,
-    schema: T
+    schema: Schema.Schema<A, I, never>
   ) => Either.Either<
-    Schema.Schema.Type<T>,
+    A,
     | WritingToStoreError
     | JsonParseError
     | ValueNotSet
@@ -35,11 +35,11 @@ export interface EffectMmkv {
     | ParseResult.ParseError
   >
 
-  saveVerified: <T extends Schema.Schema.AnyNoContext>(
+  saveVerified: <A, I>(
     key: string,
-    schema: T
+    schema: Schema.Schema<A, I, never>
   ) => (
-    value: Schema.Schema.Type<T>
+    value: A
   ) => Either.Either<void, WritingToStoreError | ParseResult.ParseError>
 }
 
@@ -82,23 +82,19 @@ function createEffectMmkv(storage: MMKV): EffectMmkv {
     return get(key).pipe(Either.flatMap(fromJson))
   }
 
-  const getVerified = <T extends Schema.Schema<any>>(
+  const getVerified = <A>(
     key: string,
-    schema: T
+    schema: Schema.Schema<A, any, never>
   ): Either.Either<
-    Schema.Schema.Type<T>,
-    | WritingToStoreError
-    | JsonParseError
-    | ValueNotSet
-    | ReadingFromStoreError
-    | ParseResult.ParseError
+    A,
+    ValueNotSet | ReadingFromStoreError | ParseResult.ParseError
   > =>
     get(key).pipe(Either.flatMap(Schema.decodeEither(Schema.parseJson(schema))))
 
   const saveVerified =
-    <T extends Schema.Schema.AnyNoContext>(key: string, schema: T) =>
+    <A, I>(key: string, schema: Schema.Schema<A, I, never>) =>
     (
-      value: Schema.Schema.Type<T>
+      value: A
     ): Either.Either<void, WritingToStoreError | ParseResult.ParseError> => {
       return Schema.encodeEither(Schema.parseJson(schema))(value).pipe(
         Either.flatMap(set(key))

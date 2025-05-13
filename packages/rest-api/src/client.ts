@@ -4,11 +4,10 @@ import {
   HttpClientRequest,
   HttpClientResponse,
   type Headers,
-  type HttpClientError,
 } from '@effect/platform'
 import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
-import {Context, Effect, Layer, Schema, type Scope} from 'effect'
+import {Context, Effect, Layer, Schema} from 'effect'
 import {Client, type Api} from 'effect-http'
 import {type PlatformName} from './PlatformName'
 import {type ServiceUrl} from './ServiceUrl.brand'
@@ -60,7 +59,7 @@ const makeClient = ({
   loggingFunction?: LoggingFunction | null
   vexlAppMetaHeader: VexlAppMetaHeader
   getUserSessionCredentials?: GetUserSessionCredentials
-}): HttpClient.HttpClient<HttpClientError.HttpClientError, Scope.Scope> =>
+}): HttpClient.HttpClient =>
   FetchHttpClient.layer.pipe(
     Layer.build,
     Effect.map(Context.get(HttpClient.HttpClient)),

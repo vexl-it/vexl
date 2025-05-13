@@ -1988,44 +1988,57 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@effect/experimental@npm:^0.32.3":
-  version: 0.32.8
-  resolution: "@effect/experimental@npm:0.32.8"
-  dependencies:
-    msgpackr: ^1.10.2
+"@effect/cluster@npm:^0.33.1":
+  version: 0.33.1
+  resolution: "@effect/cluster@npm:0.33.1"
   peerDependencies:
-    "@effect/platform": ^0.69.24
-    "@effect/platform-node": ^0.64.26
-    effect: ^3.10.15
+    "@effect/platform": ^0.82.0
+    "@effect/rpc": ^0.59.1
+    "@effect/sql": ^0.35.0
+    effect: ^3.15.0
+  checksum: 16103ef3d9ff56ac3db0739b080921492d1f5c013c4ef7c94631eacd02c9d8639c5c001cf0c126f9a67f102eac97ae113d494abbe88ee108eb1ce1591a2af664
+  languageName: node
+  linkType: hard
+
+"@effect/experimental@npm:^0.46.0":
+  version: 0.46.0
+  resolution: "@effect/experimental@npm:0.46.0"
+  dependencies:
+    uuid: ^11.0.3
+  peerDependencies:
+    "@effect/platform": ^0.82.0
+    effect: ^3.15.0
     ioredis: ^5
     lmdb: ^3
-    ws: ^8
   peerDependenciesMeta:
-    "@effect/platform-node":
-      optional: true
     ioredis:
       optional: true
     lmdb:
       optional: true
-    ws:
-      optional: true
-  checksum: 2e773a6493dbd80d50bd8e6bb3af71c7dbb543ff8de3082f433cd01aceda527382424cc406de576a6994d5d88c75a93ff539b5918e75ea9073da3629226b8516
+  checksum: d4cf949cc6ddf0d0dc776847eee277b7c7d049c8fbdd934509a115ed2f5f8f63b81560462f8f4a4e7a8ac45b0b5599a0aa56eadcf529f8e89d37322c0602d9bd
   languageName: node
   linkType: hard
 
-"@effect/opentelemetry@npm:^0.39.12":
-  version: 0.39.15
-  resolution: "@effect/opentelemetry@npm:0.39.15"
+"@effect/opentelemetry@npm:^0.48.0":
+  version: 0.48.0
+  resolution: "@effect/opentelemetry@npm:0.48.0"
   peerDependencies:
-    "@opentelemetry/api": ^1.6
-    "@opentelemetry/resources": ^1.22
-    "@opentelemetry/sdk-metrics": ^1.22
-    "@opentelemetry/sdk-trace-base": ^1.22
-    "@opentelemetry/sdk-trace-node": ^1.22
-    "@opentelemetry/sdk-trace-web": ^1.22
-    "@opentelemetry/semantic-conventions": ^1.24.1
-    effect: ^3.10.15
+    "@effect/platform": ^0.82.0
+    "@opentelemetry/api": ^1.9
+    "@opentelemetry/resources": ^2.0.0
+    "@opentelemetry/sdk-metrics": ^2.0.0
+    "@opentelemetry/sdk-trace-base": ^2.0.0
+    "@opentelemetry/sdk-trace-node": ^2.0.0
+    "@opentelemetry/sdk-trace-web": ^2.0.0
+    "@opentelemetry/semantic-conventions": ^1.30.0
+    effect: ^3.15.0
   peerDependenciesMeta:
+    "@opentelemetry/api":
+      optional: true
+    "@opentelemetry/resources":
+      optional: true
+    "@opentelemetry/sdk-logs":
+      optional: true
     "@opentelemetry/sdk-metrics":
       optional: true
     "@opentelemetry/sdk-trace-base":
@@ -2034,74 +2047,94 @@ __metadata:
       optional: true
     "@opentelemetry/sdk-trace-web":
       optional: true
-  checksum: 860eac447918f03375805fba58552b36e72cac45fa0ce7b947dcdc6d0d0324452553720ae332943569c352b0d7c8097604918ed481d3a7f77b0838c37b25ffe9
+  checksum: 01accfbb095eb35ad371769e847b58341a579c4d231df2565049dde6706b75952ac83d425f5fd1584f8c6a2ee15dd2b88c60e6054fd66a3f5edcb75e612ca7d6
   languageName: node
   linkType: hard
 
-"@effect/platform-node-shared@npm:^0.19.25":
-  version: 0.19.25
-  resolution: "@effect/platform-node-shared@npm:0.19.25"
+"@effect/platform-node-shared@npm:^0.34.1":
+  version: 0.34.1
+  resolution: "@effect/platform-node-shared@npm:0.34.1"
   dependencies:
     "@parcel/watcher": ^2.4.1
     multipasta: ^0.2.5
-  peerDependencies:
-    "@effect/platform": ^0.69.24
-    effect: ^3.10.15
-  checksum: c9b362e2bcd055310164574dd185effbe28a928092e6cfdac5994f76222ec4a9a486c395a015aca0e59b3b0e570cdfe0f9cdbec2e03fd8eaddc9e42366e411b9
-  languageName: node
-  linkType: hard
-
-"@effect/platform-node@npm:^0.64.21":
-  version: 0.64.26
-  resolution: "@effect/platform-node@npm:0.64.26"
-  dependencies:
-    "@effect/platform-node-shared": ^0.19.25
-    mime: ^3.0.0
-    undici: ^6.19.7
     ws: ^8.18.0
   peerDependencies:
-    "@effect/platform": ^0.69.24
-    effect: ^3.10.15
-  checksum: ea78455303fa96cf91a898afcd84c8238437dd804392c98ba0c344366666771f6eba960b3803bd0e0561f1139368e40551f4d9212a1c0f0c985e778944f3799f
+    "@effect/cluster": ^0.33.1
+    "@effect/platform": ^0.82.0
+    "@effect/rpc": ^0.59.1
+    "@effect/sql": ^0.35.0
+    effect: ^3.15.0
+  checksum: 210e74187529ac26066009a07250f9a36ed1e1c81977765f4c507f214cb7f6da10e26ba20c025943f06e46f42b53be17c7eefa40abec50b84c81ed276e0b6399
   languageName: node
   linkType: hard
 
-"@effect/platform@npm:^0.69.19":
-  version: 0.69.24
-  resolution: "@effect/platform@npm:0.69.24"
+"@effect/platform-node@npm:^0.80.1":
+  version: 0.80.1
+  resolution: "@effect/platform-node@npm:0.80.1"
+  dependencies:
+    "@effect/platform-node-shared": ^0.34.1
+    mime: ^3.0.0
+    undici: ^7.1.0
+    ws: ^8.18.0
+  peerDependencies:
+    "@effect/cluster": ^0.33.1
+    "@effect/platform": ^0.82.0
+    "@effect/rpc": ^0.59.1
+    "@effect/sql": ^0.35.0
+    effect: ^3.15.0
+  checksum: daed5a795c346cbe9fdc641dff07e2aca750d3eab6b3b80bc11578e5c6f6d5b67318a2e3aa144261e87e85067a74f831d91a2b608974203f4e3691bd0845c5f9
+  languageName: node
+  linkType: hard
+
+"@effect/platform@npm:^0.82.0":
+  version: 0.82.0
+  resolution: "@effect/platform@npm:0.82.0"
   dependencies:
     find-my-way-ts: ^0.1.5
+    msgpackr: ^1.11.2
     multipasta: ^0.2.5
   peerDependencies:
-    effect: ^3.10.15
-  checksum: b3626bd0d634262d0d9ce3159cd42b56b541bf319b15d1df66d09be10fe99f9f3397a5e0c3c7bffa694ae5a5cc6ca18ba68b8e37a577ae57c255480cee70dd8c
+    effect: ^3.15.0
+  checksum: a55628698365ff85c5cc867afdfd995eeabd3b2ece05b80ccfecdf892230ee2b3f88bde7e236e71c0d4d38bac2e2b80ff5c748177d88c22d316119e4cc1c59d7
   languageName: node
   linkType: hard
 
-"@effect/sql-pg@npm:^0.21.3":
-  version: 0.21.8
-  resolution: "@effect/sql-pg@npm:0.21.8"
+"@effect/rpc@npm:^0.59.1":
+  version: 0.59.1
+  resolution: "@effect/rpc@npm:0.59.1"
+  peerDependencies:
+    "@effect/platform": ^0.82.0
+    effect: ^3.15.0
+  checksum: 375f65826de62f963eb208bf7f59d17d5d0d1842380ae8f7fd3ae42f8600544f63e732136c78de5221052e2199880bace0031c4f34e186bd09a237545697e743
+  languageName: node
+  linkType: hard
+
+"@effect/sql-pg@npm:^0.36.0":
+  version: 0.36.0
+  resolution: "@effect/sql-pg@npm:0.36.0"
   dependencies:
     "@opentelemetry/semantic-conventions": ^1.25.1
     postgres: ^3.4.4
   peerDependencies:
-    "@effect/platform": ^0.69.24
-    "@effect/sql": ^0.20.8
-    effect: ^3.10.15
-  checksum: c6e72bdfa0f277618c941e37f2b07784cccda0ebd6b30be562de482e88f3856673307831b7c3ea3a68e182e5287874ab8881d7d4dd91fc978c488e38900637f2
+    "@effect/experimental": ^0.46.0
+    "@effect/platform": ^0.82.0
+    "@effect/sql": ^0.35.0
+    effect: ^3.15.0
+  checksum: c90a82c98a1d26ff73f826736df8e8c33f9932ec271e10a2b7125951d9309c26e3142333cb3129befa66984e6d32dfccea6a5d138a07ff84e21226d2501b7b34
   languageName: node
   linkType: hard
 
-"@effect/sql@npm:^0.20.3":
-  version: 0.20.8
-  resolution: "@effect/sql@npm:0.20.8"
+"@effect/sql@npm:^0.35.0":
+  version: 0.35.0
+  resolution: "@effect/sql@npm:0.35.0"
   dependencies:
     "@opentelemetry/semantic-conventions": ^1.25.1
+    uuid: ^11.0.3
   peerDependencies:
-    "@effect/experimental": ^0.32.8
-    "@effect/platform": ^0.69.24
-    effect: ^3.10.15
-  checksum: 7c0d46b499b7c704f03e8946e07c0acd864faf7797e11ce0e192c3fca7c05393ea7b0218df155e6fe797112b00e6b8201c18a123f7615d1ca77cc1319f36d915
+    "@effect/experimental": ^0.46.0
+    "@effect/platform": ^0.82.0
+    effect: ^3.15.0
+  checksum: a5df36cd6fe629a90d9bfe134147411e3b5d15af931d4d8a210a6b775aa2850b84e480e4cb37b61073656ab57b1aa747a05f02ca4762866a906b7e91df1d89b1
   languageName: node
   linkType: hard
 
@@ -7220,6 +7253,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@standard-schema/spec@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "@standard-schema/spec@npm:1.0.0"
+  checksum: 2d7d73a1c9706622750ab06fc40ef7c1d320b52d5e795f8a1c7a77d0d6a9f978705092bc4149327b3cff4c9a14e5b3800d3b00dc945489175a2d3031ded8332a
+  languageName: node
+  linkType: hard
+
 "@swc/core-darwin-arm64@npm:1.9.2":
   version: 1.9.2
   resolution: "@swc/core-darwin-arm64@npm:1.9.2"
@@ -9919,12 +9959,12 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@vexl-next/btc-exchange-rate-service@workspace:apps/btc-exchange-rate-service"
   dependencies:
-    "@effect/experimental": ^0.32.3
-    "@effect/opentelemetry": ^0.39.12
-    "@effect/platform": ^0.69.19
-    "@effect/platform-node": ^0.64.21
-    "@effect/sql": ^0.20.3
-    "@effect/sql-pg": ^0.21.3
+    "@effect/experimental": ^0.46.0
+    "@effect/opentelemetry": ^0.48.0
+    "@effect/platform": ^0.82.0
+    "@effect/platform-node": ^0.80.1
+    "@effect/sql": ^0.35.0
+    "@effect/sql-pg": ^0.36.0
     "@opentelemetry/exporter-trace-otlp-http": ^0.52.1
     "@opentelemetry/sdk-trace-node": ^1.23.0
     "@opentelemetry/sdk-trace-web": ^1.23.0
@@ -9943,7 +9983,7 @@ __metadata:
     "@vexl-next/tsconfig": 0.0.0
     axios: ^1.8.2
     dotenv: ^16.4.5
-    effect: ^3.10.12
+    effect: ^3.15.0
     effect-http: ^0.82.0
     effect-http-node: ^0.22.0
     esbuild: ^0.25.0
@@ -9969,12 +10009,12 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@vexl-next/chat-service@workspace:apps/chat-service"
   dependencies:
-    "@effect/experimental": ^0.32.3
-    "@effect/opentelemetry": ^0.39.12
-    "@effect/platform": ^0.69.19
-    "@effect/platform-node": ^0.64.21
-    "@effect/sql": ^0.20.3
-    "@effect/sql-pg": ^0.21.3
+    "@effect/experimental": ^0.46.0
+    "@effect/opentelemetry": ^0.48.0
+    "@effect/platform": ^0.82.0
+    "@effect/platform-node": ^0.80.1
+    "@effect/sql": ^0.35.0
+    "@effect/sql-pg": ^0.36.0
     "@opentelemetry/exporter-trace-otlp-http": ^0.52.1
     "@opentelemetry/sdk-trace-node": ^1.23.0
     "@opentelemetry/sdk-trace-web": ^1.23.0
@@ -9995,7 +10035,7 @@ __metadata:
     "@vexl-next/tsconfig": 0.0.0
     dayjs: ^1.11.11
     dotenv: ^16.4.5
-    effect: ^3.10.12
+    effect: ^3.15.0
     effect-http: ^0.82.0
     effect-http-node: ^0.22.0
     esbuild: ^0.25.0
@@ -10023,12 +10063,12 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@vexl-next/contact-service@workspace:apps/contact-service"
   dependencies:
-    "@effect/experimental": ^0.32.3
-    "@effect/opentelemetry": ^0.39.12
-    "@effect/platform": ^0.69.19
-    "@effect/platform-node": ^0.64.21
-    "@effect/sql": ^0.20.3
-    "@effect/sql-pg": ^0.21.3
+    "@effect/experimental": ^0.46.0
+    "@effect/opentelemetry": ^0.48.0
+    "@effect/platform": ^0.82.0
+    "@effect/platform-node": ^0.80.1
+    "@effect/sql": ^0.35.0
+    "@effect/sql-pg": ^0.36.0
     "@opentelemetry/exporter-trace-otlp-http": ^0.52.1
     "@opentelemetry/sdk-trace-node": ^1.23.0
     "@opentelemetry/sdk-trace-web": ^1.23.0
@@ -10049,7 +10089,7 @@ __metadata:
     "@vexl-next/tsconfig": 0.0.0
     dayjs: ^1.11.11
     dotenv: ^16.4.5
-    effect: ^3.10.12
+    effect: ^3.15.0
     effect-http: ^0.82.0
     effect-http-node: ^0.22.0
     esbuild: ^0.25.0
@@ -10079,12 +10119,12 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@vexl-next/content-service@workspace:apps/content-service"
   dependencies:
-    "@effect/experimental": ^0.32.3
-    "@effect/opentelemetry": ^0.39.12
-    "@effect/platform": ^0.69.19
-    "@effect/platform-node": ^0.64.21
-    "@effect/sql": ^0.20.3
-    "@effect/sql-pg": ^0.21.3
+    "@effect/experimental": ^0.46.0
+    "@effect/opentelemetry": ^0.48.0
+    "@effect/platform": ^0.82.0
+    "@effect/platform-node": ^0.80.1
+    "@effect/sql": ^0.35.0
+    "@effect/sql-pg": ^0.36.0
     "@opentelemetry/exporter-trace-otlp-http": ^0.52.1
     "@opentelemetry/sdk-trace-node": ^1.23.0
     "@opentelemetry/sdk-trace-web": ^1.23.0
@@ -10103,7 +10143,7 @@ __metadata:
     "@vexl-next/tsconfig": 0.0.0
     axios: ^1.8.2
     dotenv: ^16.4.5
-    effect: ^3.10.12
+    effect: ^3.15.0
     effect-http: ^0.82.0
     effect-http-node: ^0.22.0
     esbuild: ^0.25.0
@@ -10135,7 +10175,7 @@ __metadata:
     "@vexl-next/prettier-config": 0.0.0
     "@vexl-next/tsconfig": 0.0.0
     asn1.js: ^5.4.1
-    effect: ^3.10.12
+    effect: ^3.15.0
     eslint: ^8.57.1
     fast-check: ^3.20.0
     fp-ts: ^2.13.1
@@ -10154,12 +10194,12 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@vexl-next/dashboard-app@workspace:apps/dashboard-app"
   dependencies:
-    "@effect/experimental": ^0.32.3
-    "@effect/opentelemetry": ^0.39.12
-    "@effect/platform": ^0.69.19
-    "@effect/platform-node": ^0.64.21
-    "@effect/sql": ^0.20.3
-    "@effect/sql-pg": ^0.21.3
+    "@effect/experimental": ^0.46.0
+    "@effect/opentelemetry": ^0.48.0
+    "@effect/platform": ^0.82.0
+    "@effect/platform-node": ^0.80.1
+    "@effect/sql": ^0.35.0
+    "@effect/sql-pg": ^0.36.0
     "@emotion/css": ^11.11.2
     "@emotion/react": ^11.11.4
     "@emotion/styled": ^11.11.5
@@ -10189,7 +10229,7 @@ __metadata:
     dayjs: ^1.11.11
     dotenv: ^16.4.5
     dynamic-import-polyfill: ^0.1.1
-    effect: ^3.10.12
+    effect: ^3.15.0
     esbuild: ^0.25.0
     eslint: ^8.57.1
     fast-check: ^3.20.0
@@ -10228,7 +10268,7 @@ __metadata:
     awesome-phonenumber: ^7.4.0
     compare-versions: ^6.1.0
     dayjs: ^1.11.11
-    effect: ^3.10.12
+    effect: ^3.15.0
     eslint: ^8.57.1
     fast-check: ^3.20.0
     fp-ts: ^2.13.1
@@ -10284,12 +10324,12 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@vexl-next/feedback-service@workspace:apps/feedback-service"
   dependencies:
-    "@effect/experimental": ^0.32.3
-    "@effect/opentelemetry": ^0.39.12
-    "@effect/platform": ^0.69.19
-    "@effect/platform-node": ^0.64.21
-    "@effect/sql": ^0.20.3
-    "@effect/sql-pg": ^0.21.3
+    "@effect/experimental": ^0.46.0
+    "@effect/opentelemetry": ^0.48.0
+    "@effect/platform": ^0.82.0
+    "@effect/platform-node": ^0.80.1
+    "@effect/sql": ^0.35.0
+    "@effect/sql-pg": ^0.36.0
     "@opentelemetry/exporter-trace-otlp-http": ^0.52.1
     "@opentelemetry/sdk-trace-node": ^1.23.0
     "@opentelemetry/sdk-trace-web": ^1.23.0
@@ -10307,7 +10347,7 @@ __metadata:
     "@vexl-next/server-utils": 0.0.0
     "@vexl-next/tsconfig": 0.0.0
     dotenv: ^16.4.5
-    effect: ^3.10.12
+    effect: ^3.15.0
     effect-http: ^0.82.0
     effect-http-node: ^0.22.0
     esbuild: ^0.25.0
@@ -10344,7 +10384,7 @@ __metadata:
     "@vexl-next/prettier-config": 0.0.0
     "@vexl-next/tsconfig": 0.0.0
     awesome-phonenumber: ^7.4.0
-    effect: ^3.10.12
+    effect: ^3.15.0
     eslint: ^8.57.1
     fast-check: ^3.20.0
     fp-ts: ^2.13.1
@@ -10366,9 +10406,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@vexl-next/handy-scripts@workspace:tooling/handy-scripts"
   dependencies:
-    "@effect/opentelemetry": ^0.39.12
-    "@effect/platform": ^0.69.19
-    "@effect/platform-node": ^0.64.21
+    "@effect/opentelemetry": ^0.48.0
+    "@effect/platform": ^0.82.0
+    "@effect/platform-node": ^0.80.1
     "@types/qrcode": ^1
     "@vexl-next/cryptography": 0.0.0
     "@vexl-next/domain": 0.0.0
@@ -10383,7 +10423,7 @@ __metadata:
     dayjs: ^1.11.11
     dotenv: ^16.4.5
     dynamic-import-polyfill: ^0.1.1
-    effect: ^3.10.12
+    effect: ^3.15.0
     esbuild: ^0.25.0
     eslint: ^8.57.1
     fast-check: ^3.20.0
@@ -10416,10 +10456,10 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@vexl-next/location-service@workspace:apps/location-service"
   dependencies:
-    "@effect/experimental": ^0.32.3
-    "@effect/opentelemetry": ^0.39.12
-    "@effect/platform": ^0.69.19
-    "@effect/platform-node": ^0.64.21
+    "@effect/experimental": ^0.46.0
+    "@effect/opentelemetry": ^0.48.0
+    "@effect/platform": ^0.82.0
+    "@effect/platform-node": ^0.80.1
     "@opentelemetry/exporter-trace-otlp-http": ^0.52.1
     "@opentelemetry/sdk-trace-node": ^1.23.0
     "@opentelemetry/sdk-trace-web": ^1.23.0
@@ -10437,7 +10477,7 @@ __metadata:
     axios: ^1.8.2
     dotenv: ^16.4.5
     dynamic-import-polyfill: ^0.1.1
-    effect: ^3.10.12
+    effect: ^3.15.0
     effect-http: ^0.82.0
     effect-http-node: ^0.22.0
     esbuild: ^0.25.0
@@ -10458,12 +10498,12 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@vexl-next/metrics-service@workspace:apps/metrics-service"
   dependencies:
-    "@effect/experimental": ^0.32.3
-    "@effect/opentelemetry": ^0.39.12
-    "@effect/platform": ^0.69.19
-    "@effect/platform-node": ^0.64.21
-    "@effect/sql": ^0.20.3
-    "@effect/sql-pg": ^0.21.3
+    "@effect/experimental": ^0.46.0
+    "@effect/opentelemetry": ^0.48.0
+    "@effect/platform": ^0.82.0
+    "@effect/platform-node": ^0.80.1
+    "@effect/sql": ^0.35.0
+    "@effect/sql-pg": ^0.36.0
     "@opentelemetry/exporter-trace-otlp-http": ^0.52.1
     "@opentelemetry/sdk-trace-node": ^1.23.0
     "@opentelemetry/sdk-trace-web": ^1.23.0
@@ -10485,7 +10525,7 @@ __metadata:
     bullmq: ^5.52.1
     dayjs: ^1.11.11
     dotenv: ^16.4.5
-    effect: ^3.10.12
+    effect: ^3.15.0
     effect-http: ^0.82.0
     effect-http-node: ^0.22.0
     esbuild: ^0.25.0
@@ -10579,7 +10619,7 @@ __metadata:
     crypto-browserify: ^3.12.0
     dayjs: ^1.11.11
     deep-equal: ^2.2.3
-    effect: ^3.10.12
+    effect: ^3.15.0
     entities: ~2.0.0
     eslint: ^8.57.1
     eslint-config-prettier: ^9.0.0
@@ -10674,10 +10714,10 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@vexl-next/notification-service@workspace:apps/notification-service"
   dependencies:
-    "@effect/experimental": ^0.32.3
-    "@effect/opentelemetry": ^0.39.12
-    "@effect/platform": ^0.69.19
-    "@effect/platform-node": ^0.64.21
+    "@effect/experimental": ^0.46.0
+    "@effect/opentelemetry": ^0.48.0
+    "@effect/platform": ^0.82.0
+    "@effect/platform-node": ^0.80.1
     "@opentelemetry/exporter-trace-otlp-http": ^0.52.1
     "@opentelemetry/sdk-trace-node": ^1.23.0
     "@opentelemetry/sdk-trace-web": ^1.23.0
@@ -10692,7 +10732,7 @@ __metadata:
     "@vexl-next/server-utils": 0.0.0
     "@vexl-next/tsconfig": 0.0.0
     dotenv: ^16.4.5
-    effect: ^3.10.12
+    effect: ^3.15.0
     effect-http: ^0.82.0
     effect-http-node: ^0.22.0
     esbuild: ^0.25.0
@@ -10709,12 +10749,12 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@vexl-next/offer-service@workspace:apps/offer-service"
   dependencies:
-    "@effect/experimental": ^0.32.3
-    "@effect/opentelemetry": ^0.39.12
-    "@effect/platform": ^0.69.19
-    "@effect/platform-node": ^0.64.21
-    "@effect/sql": ^0.20.3
-    "@effect/sql-pg": ^0.21.3
+    "@effect/experimental": ^0.46.0
+    "@effect/opentelemetry": ^0.48.0
+    "@effect/platform": ^0.82.0
+    "@effect/platform-node": ^0.80.1
+    "@effect/sql": ^0.35.0
+    "@effect/sql-pg": ^0.36.0
     "@opentelemetry/exporter-trace-otlp-http": ^0.52.1
     "@opentelemetry/sdk-trace-node": ^1.23.0
     "@opentelemetry/sdk-trace-web": ^1.23.0
@@ -10735,7 +10775,7 @@ __metadata:
     "@vexl-next/tsconfig": 0.0.0
     dayjs: ^1.11.11
     dotenv: ^16.4.5
-    effect: ^3.10.12
+    effect: ^3.15.0
     effect-http: ^0.82.0
     effect-http-node: ^0.22.0
     esbuild: ^0.25.0
@@ -10812,7 +10852,7 @@ __metadata:
     "@vexl-next/rest-api": 0.0.0
     "@vexl-next/tsconfig": 0.0.0
     awesome-phonenumber: ^7.4.0
-    effect: ^3.10.12
+    effect: ^3.15.0
     eslint: ^8.57.1
     fast-check: ^3.20.0
     fp-ts: ^2.13.1
@@ -10834,7 +10874,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@vexl-next/rest-api@workspace:packages/rest-api"
   dependencies:
-    "@effect/platform": ^0.69.19
+    "@effect/platform": ^0.82.0
     "@vexl-next/cryptography": 0.0.0
     "@vexl-next/domain": 0.0.0
     "@vexl-next/eslint-config": 0.0.0
@@ -10842,7 +10882,7 @@ __metadata:
     "@vexl-next/prettier-config": 0.0.0
     "@vexl-next/server-utils": 0.0.0
     "@vexl-next/tsconfig": 0.0.0
-    effect: ^3.10.12
+    effect: ^3.15.0
     effect-http: ^0.82.0
     eslint: ^8.57.1
     fast-check: ^3.20.0
@@ -10862,11 +10902,13 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@vexl-next/server-utils@workspace:packages/server-utils"
   dependencies:
-    "@effect/experimental": ^0.32.3
-    "@effect/opentelemetry": ^0.39.12
-    "@effect/platform": ^0.69.19
-    "@effect/sql": ^0.20.3
-    "@effect/sql-pg": ^0.21.3
+    "@effect/cluster": ^0.33.1
+    "@effect/experimental": ^0.46.0
+    "@effect/opentelemetry": ^0.48.0
+    "@effect/platform": ^0.82.0
+    "@effect/rpc": ^0.59.1
+    "@effect/sql": ^0.35.0
+    "@effect/sql-pg": ^0.36.0
     "@opentelemetry/exporter-prometheus": ^0.52.1
     "@opentelemetry/exporter-trace-otlp-http": ^0.52.1
     "@opentelemetry/sdk-trace-base": ^1.25.1
@@ -10878,7 +10920,7 @@ __metadata:
     "@vexl-next/tsconfig": 0.0.0
     awesome-phonenumber: ^7.4.0
     bullmq: ^5.52.1
-    effect: ^3.10.12
+    effect: ^3.15.0
     effect-http: ^0.82.0
     effect-http-node: ^0.22.0
     eslint: ^8.57.1
@@ -10904,12 +10946,12 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@vexl-next/user-service@workspace:apps/user-service"
   dependencies:
-    "@effect/experimental": ^0.32.3
-    "@effect/opentelemetry": ^0.39.12
-    "@effect/platform": ^0.69.19
-    "@effect/platform-node": ^0.64.21
-    "@effect/sql": ^0.20.3
-    "@effect/sql-pg": ^0.21.3
+    "@effect/experimental": ^0.46.0
+    "@effect/opentelemetry": ^0.48.0
+    "@effect/platform": ^0.82.0
+    "@effect/platform-node": ^0.80.1
+    "@effect/sql": ^0.35.0
+    "@effect/sql-pg": ^0.36.0
     "@opentelemetry/exporter-trace-otlp-http": ^0.52.1
     "@opentelemetry/sdk-trace-node": ^1.23.0
     "@opentelemetry/sdk-trace-web": ^1.23.0
@@ -10928,7 +10970,7 @@ __metadata:
     "@vexl-next/server-utils": 0.0.0
     "@vexl-next/tsconfig": 0.0.0
     dotenv: ^16.4.5
-    effect: ^3.10.12
+    effect: ^3.15.0
     effect-http: ^0.82.0
     effect-http-node: ^0.22.0
     esbuild: ^0.25.0
@@ -11092,7 +11134,7 @@ __metadata:
     buffer: ^6.0.3
     cross-env: ^7.0.3
     crypto-browserify: ^3.12.0
-    effect: ^3.10.12
+    effect: ^3.15.0
     eslint: ^8.57.1
     events: ^3.3.0
     express: ^4.21.1
@@ -14744,12 +14786,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"effect@npm:^3.10.12":
-  version: 3.10.15
-  resolution: "effect@npm:3.10.15"
+"effect@npm:^3.15.0":
+  version: 3.15.0
+  resolution: "effect@npm:3.15.0"
   dependencies:
-    fast-check: ^3.21.0
-  checksum: bcd6260465c7bf28a66c7c913c951dc9d398ec33d720131a621eadd5cc1cd7e0f0d2449db4c2e6ed75663d9b8f4a9980bfa839f0d104584da3f2414ebaf0d124
+    "@standard-schema/spec": ^1.0.0
+    fast-check: ^3.23.1
+  checksum: ea9313035a1e1437fc1aa33b1d4c6785dcdebce2a88eeb21abe568fa884d17903d27ab88f0df1cdddfe5521ea17166fde0ce38cf7d8899646113ee7078a20c9d
   languageName: node
   linkType: hard
 
@@ -16882,12 +16925,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fast-check@npm:^3.20.0, fast-check@npm:^3.21.0":
+"fast-check@npm:^3.20.0":
   version: 3.23.1
   resolution: "fast-check@npm:3.23.1"
   dependencies:
     pure-rand: ^6.1.0
   checksum: 8b8d9871310e264d928c0d4a8d5d24e65fa308a77bab1fb5d6d70a502c7c3812c80d68556c9a2065657a98f119673076b8144af22835b1137c867590a5a86e32
+  languageName: node
+  linkType: hard
+
+"fast-check@npm:^3.23.1":
+  version: 3.23.2
+  resolution: "fast-check@npm:3.23.2"
+  dependencies:
+    pure-rand: ^6.1.0
+  checksum: b815bd1a2bda33b8e1927a732368f94c3919d5c3b626065479e2389739dfbc6de885fdf48b7a576505edff4f8931798dc737c7bc7039a58b3412746f0d2e9b86
   languageName: node
   linkType: hard
 
@@ -23041,7 +23093,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"msgpackr@npm:^1.10.2, msgpackr@npm:^1.11.2":
+"msgpackr@npm:^1.11.2":
   version: 1.11.2
   resolution: "msgpackr@npm:1.11.2"
   dependencies:
@@ -29693,10 +29745,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"undici@npm:^6.11.1, undici@npm:^6.19.7":
+"undici@npm:^6.11.1":
   version: 6.21.1
   resolution: "undici@npm:6.21.1"
   checksum: 2efc52f77224754a2efa7cb6459829f3c93c8321d17e76f574a904b353783d95073b6116f5b15637c4845d98c9dc5a019b809cb9d63b3529267e7727c49f6996
+  languageName: node
+  linkType: hard
+
+"undici@npm:^7.1.0":
+  version: 7.9.0
+  resolution: "undici@npm:7.9.0"
+  checksum: 78f534d623592438a4484069781ab76f96755e5aee8c0e6d73aa55b6b4f048839b60134bc6d210b7ad5355edf322326df0a8b13a3061bd65b0b3c250d5017569
   languageName: node
   linkType: hard
 
@@ -30101,6 +30160,15 @@ __metadata:
   bin:
     uuid: dist/bin/uuid
   checksum: 4b81611ade2885d2313ddd8dc865d93d8dccc13ddf901745edca8f86d99bc46d7a330d678e7532e7ebf93ce616679fb19b2e3568873ac0c14c999032acb25869
+  languageName: node
+  linkType: hard
+
+"uuid@npm:^11.0.3":
+  version: 11.1.0
+  resolution: "uuid@npm:11.1.0"
+  bin:
+    uuid: dist/esm/bin/uuid
+  checksum: 840f19758543c4631e58a29439e51b5b669d5f34b4dd2700b6a1d15c5708c7a6e0c3e2c8c4a2eae761a3a7caa7e9884d00c86c02622ba91137bd3deade6b4b4a
   languageName: node
   linkType: hard
 

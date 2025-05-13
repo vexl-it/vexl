@@ -18,7 +18,7 @@ import cameraSvg from '../../../images/cameraSvg'
 import {qrScannerDialogAtom, showReachNumberDetailsActionAtom} from '../atoms'
 import QRIconSVG from '../images/QRIconSVG'
 import reachIconSVG from '../images/reachIconSVG'
-import {qrCodeDialogAtom} from './QrCode'
+import {qrCodeDialogActionAtom} from './QrCode'
 
 const GrayBackContainer = styled(XStack, {
   ai: 'center',
@@ -33,7 +33,7 @@ function ProfileSection(): JSX.Element {
   const {t} = useTranslation()
   const navigation = useNavigation()
   const reachNumber = useAtomValue(reachNumberAtom)
-  const setQrCodeDialogVisible = useSetAtom(qrCodeDialogAtom)
+  const setQrCodeDialogVisible = useSetAtom(qrCodeDialogActionAtom)
   const setQrScannerDialogVisible = useSetAtom(qrScannerDialogAtom)
   const preferences = useAtomValue(preferencesAtom)
   const showReachNumberDetails = useSetAtom(showReachNumberDetailsActionAtom)
@@ -74,7 +74,7 @@ function ProfileSection(): JSX.Element {
         <XStack f={1} gap="$2">
           <TouchableOpacity
             onPress={() => {
-              void setQrCodeDialogVisible()
+              Effect.runFork(setQrCodeDialogVisible())
             }}
           >
             <GrayBackContainer>

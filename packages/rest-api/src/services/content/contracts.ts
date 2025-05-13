@@ -98,3 +98,95 @@ export const NewsAndAnnouncementsResponse = Schema.Struct({
 })
 export type NewsAndAnnouncementsResponse =
   typeof NewsAndAnnouncementsResponse.Type
+
+export class CreateInvoiceError extends Schema.TaggedError<CreateInvoiceError>(
+  'CreateInvoiceError'
+)('CreateInvoiceError', {
+  cause: Schema.Unknown,
+  message: Schema.String,
+  status: Schema.optionalWith(Schema.Literal(500), {
+    default: () => 500,
+  }),
+}) {}
+
+export class InvoiceNotFoundError extends Schema.TaggedError<InvoiceNotFoundError>(
+  'InvoiceNotFoundError'
+)('InvoiceNotFoundError', {
+  cause: Schema.Unknown,
+  message: Schema.String,
+  status: Schema.Literal(404),
+}) {}
+
+export class GetInvoiceGeneralError extends Schema.TaggedError<GetInvoiceGeneralError>(
+  'GetInvoiceGeneralError'
+)('GetInvoiceGeneralError', {
+  cause: Schema.Unknown,
+  message: Schema.String,
+  status: Schema.Literal(500),
+}) {}
+
+export class GetInvoicePaymentMethodsGeneralError extends Schema.TaggedError<GetInvoicePaymentMethodsGeneralError>(
+  'GetInvoicePaymentMethodsGeneralError'
+)('GetInvoicePaymentMethodsGeneralError', {
+  cause: Schema.Unknown,
+  message: Schema.String,
+  status: Schema.Literal(500),
+}) {}
+
+export const CreateInvoiceErrors = Schema.Union(
+  CreateInvoiceError,
+  InvoiceNotFoundError,
+  GetInvoicePaymentMethodsGeneralError
+)
+
+export const CreateInvoiceRequest = Schema.Struct({
+  amount: Schema.Number,
+  currency: Schema.Literal('EUR'),
+})
+export type CreateInvoiceRequest = typeof CreateInvoiceRequest.Type
+
+export const CreateInvoiceResponse = Schema.Struct({
+  invoiceId: Schema.String,
+  storeId: Schema.String,
+  fiatAmount: Schema.String,
+  btcAmount: Schema.String,
+  currency: Schema.Literal('EUR'),
+  exchangeRate: Schema.String,
+  paymentLink: Schema.String,
+})
+export type CreateInvoiceResponse = typeof CreateInvoiceResponse.Type
+
+export const GetInvoiceRequest = Schema.Struct({
+  invoiceId: Schema.String,
+  storeId: Schema.String,
+})
+export type GetInvoiceRequest = typeof GetInvoiceRequest.Type
+
+export const GetInvoiceResponse = Schema.Struct({
+  invoiceId: Schema.String,
+  storeId: Schema.String,
+  status: Schema.Literal(
+    'New',
+    'Expired',
+    'Paid',
+    'Complete',
+    'Confirmed',
+    'Processing',
+    'Invalid',
+    'Settled'
+  ),
+})
+export type GetInvoiceResponse = typeof GetInvoiceResponse.Type
+
+export const GetInvoiceErrors = Schema.Union(
+  InvoiceNotFoundError,
+  GetInvoiceGeneralError
+)
+export type GetInvoiceErrors = typeof GetInvoiceErrors.Type
+
+export const GetInvoicePaymentMethodsErrors = Schema.Union(
+  InvoiceNotFoundError,
+  GetInvoicePaymentMethodsGeneralError
+)
+export type GetInvoicePaymentMethodsErrors =
+  typeof GetInvoicePaymentMethodsErrors.Type

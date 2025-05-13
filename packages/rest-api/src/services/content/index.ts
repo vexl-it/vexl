@@ -5,7 +5,17 @@ import {type ServiceUrl} from '../../ServiceUrl.brand'
 import {type GetUserSessionCredentials} from '../../UserSessionCredentials.brand'
 import {createClientInstanceWithAuth} from '../../client'
 import {type AppSource, makeCommonHeaders} from '../../commonHeaders'
-import {handleCommonErrorsEffect, type LoggingFunction} from '../../utils'
+import {
+  handleCommonAndExpectedErrorsEffect,
+  handleCommonErrorsEffect,
+  type LoggingFunction,
+} from '../../utils'
+import {
+  CreateInvoiceError,
+  type CreateInvoiceRequest,
+  GetInvoiceErrors,
+  type GetInvoiceRequest,
+} from './contracts'
 import {ContentApiSpecification} from './specification'
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
@@ -60,6 +70,20 @@ export function api({
         client.getNewsAndAnnouncements({
           headers: commonHeaders,
         })
+      ),
+    createInvoice: (createInvoiceRequest: CreateInvoiceRequest) =>
+      handleCommonAndExpectedErrorsEffect(
+        client.createInvoice({
+          body: createInvoiceRequest,
+        }),
+        CreateInvoiceError
+      ),
+    getInvoice: (getInvoiceRequest: GetInvoiceRequest) =>
+      handleCommonAndExpectedErrorsEffect(
+        client.getInvoice({
+          query: getInvoiceRequest,
+        }),
+        GetInvoiceErrors
       ),
   }
 }

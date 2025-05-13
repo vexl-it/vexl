@@ -11,6 +11,10 @@ import {pipe} from 'fp-ts/function'
 import {atom} from 'jotai'
 import {InteractionManager} from 'react-native'
 import {apiAtom} from '../../../api'
+import {
+  DONATION_PROMPT_CHAT_MESSAGES_THRESHOLD_COUNT,
+  showDonationPromptActionAtom,
+} from '../../../components/DonationPrompt/atoms'
 import {type ActionAtomType} from '../../../utils/atomUtils/ActionAtomType'
 import {type FocusAtomType} from '../../../utils/atomUtils/FocusAtomType'
 import {version} from '../../../utils/environment'
@@ -39,6 +43,7 @@ export default function sendMessageActionAtom(
 
     const chatWithMessages = get(chatWithMessagesAtom)
     const {chat} = chatWithMessages
+    const numberOfMessagesInChat = chatWithMessages.messages.length
 
     return InteractionManager.runAfterInteractions(() => {
       void pipe(
@@ -89,6 +94,11 @@ export default function sendMessageActionAtom(
         ),
         T.map((message) => {
           set(chatWithMessagesAtom, addMessageToChat(message))
+          if (
+            numberOfMessagesInChat >
+            DONATION_PROMPT_CHAT_MESSAGES_THRESHOLD_COUNT
+          )
+            set(showDonationPromptActionAtom)
           return message
         })
       )()

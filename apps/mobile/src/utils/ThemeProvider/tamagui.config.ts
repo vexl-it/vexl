@@ -34,6 +34,7 @@ const color = {
 } as const
 
 const space = {
+  '-5': -20,
   '-4': -16,
   '-3': -12,
   '-2': -8,

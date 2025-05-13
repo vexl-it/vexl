@@ -4,7 +4,11 @@ import {NoContentResponse} from '../../NoContentResponse.brand'
 import {
   BlogsArticlesResponse,
   ClearEventsCacheRequest,
+  CreateInvoiceRequest,
+  CreateInvoiceResponse,
   EventsResponse,
+  GetInvoiceRequest,
+  GetInvoiceResponse,
   NewsAndAnnouncementsResponse,
 } from './contracts'
 
@@ -21,6 +25,7 @@ export const ClearEventsCacheEndpoint = Api.post(
   Api.setResponseBody(NoContentResponse),
   Api.setResponseStatus(200 as const)
 )
+
 export const GetBlogArticlesEndpoint = Api.get(
   'getBlogArticles',
   '/content/blogs'
@@ -47,9 +52,33 @@ export const NewsAndAnnouncementsApiGroup = ApiGroup.make(
   'News and Announcements'
 ).pipe(ApiGroup.addEndpoint(NewsAndAnonouncementsEndpoint))
 
+export const CreateInvoiceEndpoint = Api.post(
+  'createInvoice',
+  '/content/createInvoice'
+).pipe(
+  Api.setRequestBody(CreateInvoiceRequest),
+  Api.setResponseBody(CreateInvoiceResponse),
+  Api.setResponseStatus(200 as const)
+)
+
+export const GetInvoiceEndpoint = Api.get(
+  'getInvoice',
+  '/content/getInvoice'
+).pipe(
+  Api.setRequestQuery(GetInvoiceRequest),
+  Api.setResponseBody(GetInvoiceResponse),
+  Api.setResponseStatus(200 as const)
+)
+
+export const DonationsApiGroup = ApiGroup.make('Donations').pipe(
+  ApiGroup.addEndpoint(CreateInvoiceEndpoint),
+  ApiGroup.addEndpoint(GetInvoiceEndpoint)
+)
+
 export const ContentApiSpecification = Api.make({
   title: 'Content service',
 }).pipe(
   Api.addGroup(CmsContentApiGroup),
-  Api.addGroup(NewsAndAnnouncementsApiGroup)
+  Api.addGroup(NewsAndAnnouncementsApiGroup),
+  Api.addGroup(DonationsApiGroup)
 )

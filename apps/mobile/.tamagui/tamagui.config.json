@@ -26864,6 +26864,13 @@
           "val": 54,
           "variable": ""
         },
+        "-5": {
+          "isVar": true,
+          "key": "$-5",
+          "name": "t-space--5",
+          "val": -20,
+          "variable": ""
+        },
         "-4": {
           "isVar": true,
           "key": "$-4",
@@ -27502,6 +27509,13 @@
         "key": "$10",
         "name": "t-space-10",
         "val": 54,
+        "variable": ""
+      },
+      "$space.-5": {
+        "isVar": true,
+        "key": "$-5",
+        "name": "t-space--5",
+        "val": -20,
         "variable": ""
       },
       "$space.-4": {

@@ -11,9 +11,12 @@ import {NodeServer} from 'effect-http-node'
 import {cryptoConfig, healthServerPortConfig, portConfig} from './configs'
 import {getBlogsHandler} from './handlers/blog'
 import {clearCacheHandler} from './handlers/clearCache'
+import {createInvoiceHandler} from './handlers/donations/createInvoice'
+import {getInvoiceHandler} from './handlers/donations/getInvoice'
 import {getEventsHandler} from './handlers/events'
 import {newsAndAnonouncementsHandler} from './handlers/getNewsAndAnnonuncements'
 import {CacheService} from './utils/cache'
+import {BtcPayServerService} from './utils/donations'
 import {WebflowCmsService} from './utils/webflowCms'
 
 export const app = RouterBuilder.make(ContentApiSpecification).pipe(
@@ -21,6 +24,8 @@ export const app = RouterBuilder.make(ContentApiSpecification).pipe(
   RouterBuilder.handle(clearCacheHandler),
   RouterBuilder.handle(getBlogsHandler),
   RouterBuilder.handle(newsAndAnonouncementsHandler),
+  RouterBuilder.handle(createInvoiceHandler),
+  RouterBuilder.handle(getInvoiceHandler),
   RouterBuilder.build,
   setupLoggingMiddlewares
 )
@@ -29,6 +34,7 @@ const MainLive = Layer.mergeAll(
   ServerCrypto.layer(cryptoConfig),
   WebflowCmsService.Live,
   CacheService.Live,
+  BtcPayServerService.Live,
   healthServerLayer({port: healthServerPortConfig})
 ).pipe(
   Layer.provideMerge(RedisService.Live),

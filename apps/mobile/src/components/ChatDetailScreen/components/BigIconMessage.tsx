@@ -3,7 +3,7 @@ import {TouchableOpacity} from 'react-native'
 import {getTokens, Stack, Text, XStack, YStack} from 'tamagui'
 import Button from '../../Button'
 import Image from '../../Image'
-import copySvg from '../images/copySvg'
+import copySvg from '../../images/copySvg'
 
 interface Props {
   isLatest: boolean

@@ -1,7 +1,5 @@
 import {BlurView} from '@react-native-community/blur'
-import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
-import * as TE from 'fp-ts/TaskEither'
-import {pipe} from 'fp-ts/lib/function'
+import {Effect, pipe} from 'effect'
 import {atom, useAtomValue} from 'jotai'
 import {useState} from 'react'
 import {Stack, Text, YStack} from 'tamagui'
@@ -14,7 +12,7 @@ import Button from '../../../../Button'
 import {SharableQrCode} from '../../../../SharableQrCode'
 import {encodedUserDetailsUriAtom} from '../atoms'
 
-export const qrCodeDialogAtom = atom(null, (get, set) => {
+export const qrCodeDialogActionAtom = atom(null, (get, set) => {
   const {t} = get(translationAtom)
 
   return pipe(
@@ -28,12 +26,11 @@ export const qrCodeDialogAtom = atom(null, (get, set) => {
         },
       ],
     }),
-    effectToTaskEither,
-    TE.match(
-      () => {},
-      () => {}
-    )
-  )()
+    Effect.match({
+      onSuccess: () => {},
+      onFailure: () => {},
+    })
+  )
 })
 
 function QrCode(): JSX.Element {

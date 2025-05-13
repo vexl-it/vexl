@@ -1,11 +1,11 @@
-import {type StyleProp, type ViewStyle} from 'react-native'
+import {type ComponentProps} from 'react'
 import {Stack, Text} from 'tamagui'
 import Image from '../Image'
 import loaderSvg from './image/loaderSvg'
 
 interface Props {
   text: string
-  style?: StyleProp<ViewStyle>
+  style?: ComponentProps<typeof Stack>['style']
 }
 
 function LoaderView({text, style}: Props): JSX.Element {

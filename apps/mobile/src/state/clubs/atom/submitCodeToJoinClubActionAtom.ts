@@ -92,10 +92,7 @@ export const submitCodeToJoinClubActionAtom = atom(
           .pipe(
             Effect.tapError(() =>
               Effect.sync(() => {
-                set(
-                  clubsToKeyHolderAtom,
-                  Struct.omit(clubInfoForUser.club.uuid)
-                )
+                set(clubsToKeyHolderAtom, Struct.omit(club.club.uuid))
               })
             )
           )

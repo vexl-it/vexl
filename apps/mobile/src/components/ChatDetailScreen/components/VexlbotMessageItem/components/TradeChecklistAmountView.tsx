@@ -21,8 +21,8 @@ import {
   addAmountActionAtom,
   submitTradeChecklistUpdatesActionAtom,
 } from '../../../../TradeChecklistFlow/atoms/updatesToBeSentAtom'
+import copySvg from '../../../../images/copySvg'
 import {chatMolecule} from '../../../atoms'
-import copySvg from '../../../images/copySvg'
 import checkIconSvg from '../../images/checkIconSvg'
 import VexlbotBubble from './VexlbotBubble'
 import VexlbotNextActionSuggestion from './VexlbotNextActionSuggestion'

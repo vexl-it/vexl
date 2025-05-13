@@ -11,11 +11,11 @@ import {
   type TFunction,
 } from '../../../../../utils/localization/I18nProvider'
 import Button from '../../../../Button'
+import copySvg from '../../../../images/copySvg'
 import termsIconSvg from '../../../../InsideRouter/components/SettingsScreen/images/termsIconSvg'
 import {toastNotificationAtom} from '../../../../ToastNotification/atom'
 import {type ToastNotificationState} from '../../../../ToastNotification/domain'
 import {chatMolecule} from '../../../atoms'
-import copySvg from '../../../images/copySvg'
 import checkIconSvg from '../../images/checkIconSvg'
 import VexlbotBubble from './VexlbotBubble'
 import VexlbotNextActionSuggestion from './VexlbotNextActionSuggestion'

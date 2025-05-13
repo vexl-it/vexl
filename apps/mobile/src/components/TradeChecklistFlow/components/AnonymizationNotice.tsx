@@ -1,10 +1,10 @@
 import React from 'react'
-import {Text, XStack, getTokens, type StackProps} from 'tamagui'
+import {getTokens, Text, XStack, type XStackProps} from 'tamagui'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import Image from '../../Image'
 import eyeSvg from '../../images/eyeSvg'
 
-function AnonymizationNotice(props: StackProps): JSX.Element {
+function AnonymizationNotice(props: XStackProps): JSX.Element {
   const {t} = useTranslation()
 
   return (

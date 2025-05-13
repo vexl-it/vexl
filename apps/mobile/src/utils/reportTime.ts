@@ -12,7 +12,7 @@ export function startMeasure(
 
   return (millisec, text) => {
     const end = Date.now()
-    span?.finish(end)
+    span?.end(end)
 
     const prettyDuration = numberFormatIntl.format(
       millisec ? end - start : (end - start) / 1000

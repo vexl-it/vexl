@@ -217,12 +217,9 @@ export async function processBackgroundMessage(
 
 const BACKGROUND_NOTIFICATION_TASK = 'BACKGROUND-NOTIFICATION-TASK'
 
-TaskManager.defineTask(
-  BACKGROUND_NOTIFICATION_TASK,
-  ({data, error, executionInfo}) => {
-    void processBackgroundMessage(data)
-  }
-)
+TaskManager.defineTask(BACKGROUND_NOTIFICATION_TASK, async ({data}) => {
+  await processBackgroundMessage(data)
+})
 
 async function setupBackgroundMessaging(): Promise<void> {
   try {

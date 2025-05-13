@@ -35,10 +35,28 @@ const DeeplinkPayloadVersion = Schema.Struct({
   version: Schema.optionalWith(SemverStringE, {as: 'Option'}),
 })
 
-export const DeepLinkGoldedGlasses = Schema.Struct({
+const DeepLinkGoldenGlassesWithType = Schema.Struct({
   ...DeeplinkPayloadVersion.fields,
   type: Schema.Literal(LINK_TYPE_GOLDEN_GLASSES),
 })
+
+const DeepLinkGoldenGlassesWithLinkBackwardCompatible = Schema.transform(
+  Schema.Struct({
+    ...DeeplinkPayloadVersion.fields,
+    link: Schema.Literal(LINK_TYPE_GOLDEN_GLASSES),
+  }),
+  DeepLinkGoldenGlassesWithType,
+  {
+    encode: (i, a) => ({...a, link: a.type}),
+    decode: (i, a) => ({...a, type: a.link}),
+    strict: true,
+  }
+)
+
+export const DeepLinkGoldenGlasses = Schema.Union(
+  DeepLinkGoldenGlassesWithType,
+  DeepLinkGoldenGlassesWithLinkBackwardCompatible
+)
 
 export const DeepLinkClubJoin = Schema.Struct({
   ...DeeplinkPayloadVersion.fields,
@@ -68,7 +86,7 @@ export type DeepLinkRequestClubAdmition =
 
 export const DeepLinkData = parseUrlWithSearchParams(
   Schema.Union(
-    DeepLinkGoldedGlasses,
+    DeepLinkGoldenGlasses,
     DeepLinkClubJoin,
     DeepLinkImportContact,
     DeepLinkImportContactV2,

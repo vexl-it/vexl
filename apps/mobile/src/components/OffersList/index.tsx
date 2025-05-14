@@ -7,6 +7,7 @@ import {
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
 import {type Atom} from 'jotai'
 import React, {useMemo} from 'react'
+import {RefreshControl} from 'react-native'
 import Animated from 'react-native-reanimated'
 import {getTokens} from 'tamagui'
 import atomKeyExtractor from '../../utils/atomUtils/atomKeyExtractor'
@@ -48,6 +49,15 @@ function OffersList({
 
   return (
     <AnimatedFlashList
+      indicatorStyle="white"
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing ?? false}
+          onRefresh={onRefresh ?? (() => {})}
+          tintColor={getTokens().color.greyAccent5.val}
+        />
+      }
+      progressViewOffset={20}
       ListHeaderComponent={ListHeaderComponent}
       ListFooterComponent={ListFooterComponent}
       estimatedItemSize={151}

@@ -67,31 +67,33 @@ export const locationStateAtom = atom<readonly LocationState[] | undefined>(
   offersFilterInitialState.locationState
 )
 
-export const locationAtom = atom<OfferLocation[] | undefined>(
+export const locationAtom = atom<readonly OfferLocation[] | undefined>(
   offersFilterInitialState.location
 )
 
-export const clubsUuidsFilterAtom = atom<ClubUuid[]>(
+export const clubsUuidsFilterAtom = atom<readonly ClubUuid[] | undefined>(
   offersFilterInitialState.clubsUuids
 )
 
-export const showClubsInFilterAtom = atom<boolean>(
-  offersFilterInitialState.showClubsInFilter
-)
-
 export const handleShowClubsInFilterChangeActionAtom = atom(
-  (get) => get(showClubsInFilterAtom),
+  (get) => {
+    const filteredClubsUuids = get(clubsUuidsFilterAtom)
+    const showClubsInFilter =
+      !!filteredClubsUuids && filteredClubsUuids.length > 0
+
+    return showClubsInFilter
+  },
   (get, set) => {
-    const showClubsInFilter = get(showClubsInFilterAtom)
+    const filteredClubsUuids = get(clubsUuidsFilterAtom)
     const myStoredClubs = get(clubsToKeyHolderAtom)
+    const showClubsInFilter =
+      !!filteredClubsUuids && filteredClubsUuids.length > 0
 
     if (!showClubsInFilter) {
       set(clubsUuidsFilterAtom, Record.keys(myStoredClubs))
     } else {
-      set(clubsUuidsFilterAtom, [])
+      set(clubsUuidsFilterAtom, undefined)
     }
-
-    set(showClubsInFilterAtom, !showClubsInFilter)
   }
 )
 
@@ -357,7 +359,6 @@ const setFilterAtomsActionAtom = atom(
     set(offerTypeAtom, filterValue.offerType)
     set(sortingAtom, filterValue.sort)
     set(clubsUuidsFilterAtom, filterValue.clubsUuids)
-    set(showClubsInFilterAtom, filterValue.showClubsInFilter)
     set(setConditionallyRenderedFilterElementsActionAtom, filterValue)
   }
 )
@@ -471,10 +472,12 @@ export const saveFilterActionAtom = atom(null, (get, set) => {
     singlePrice: get(singlePriceAtom),
     singlePriceCurrency: get(singlePriceCurrencyAtom),
     clubsUuids: get(clubsUuidsFilterAtom),
-    showClubsInFilter: get(showClubsInFilterAtom),
   }
 
-  set(offersFilterFromStorageAtom, {...newFilterValue, text})
+  set(offersFilterFromStorageAtom, {
+    ...newFilterValue,
+    text,
+  } satisfies OffersFilter)
 
   if (marketplaceLayoutMode === 'map') {
     const location = get(locationAtom)
@@ -517,7 +520,12 @@ export function createSelectClubInFilterAtom(
         const newValue = new Set(value)
         if (selected) newValue.add(club.uuid)
         else newValue.delete(club.uuid)
-        return Array.from(newValue)
+
+        const clubsUuidsInFilterArray = Array.from(newValue)
+
+        return clubsUuidsInFilterArray.length > 0
+          ? clubsUuidsInFilterArray
+          : undefined
       })
     }
   )

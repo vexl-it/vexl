@@ -1,18 +1,23 @@
+import {Schema} from 'effect'
 import {atom, type Atom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
-import {z} from 'zod'
 import {type DropdownItemProps} from '../../../components/Dropdown'
-import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
+import {atomWithParsedMmkvStorageE} from '../../../utils/atomUtils/atomWithParsedMmkvStorageE'
+import {fastDeepEqualRemoveUndefineds} from '../../../utils/fastDeepEqualRemoveUndefineds'
 import getDefaultCurrency from '../../../utils/getDefaultCurrency'
 import {currencies} from '../../../utils/localization/currency'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
-import {OffersFilter, type BaseOffersFilter} from '../domain'
+import {
+  OffersFilterE,
+  type BaseOffersFilter,
+  type OffersFilter,
+} from '../domain'
 
-export const offersFilterInitialState: OffersFilter = {
+export const offersFilterInitialState = {
   sort: undefined,
   friendLevel: ['FIRST_DEGREE', 'SECOND_DEGREE'],
   currency: undefined,
-  location: undefined,
+  location: [],
   locationState: undefined,
   paymentMethod: undefined,
   btcNetwork: undefined,
@@ -24,14 +29,13 @@ export const offersFilterInitialState: OffersFilter = {
   singlePrice: undefined,
   text: undefined,
   singlePriceCurrency: getDefaultCurrency().code ?? currencies.USD.code,
-  clubsUuids: [],
-  showClubsInFilter: false,
-}
+  clubsUuids: undefined,
+} satisfies OffersFilter
 
-export const offersFilterStorageAtom = atomWithParsedMmkvStorage(
+export const offersFilterStorageAtom = atomWithParsedMmkvStorageE(
   'offersFilter',
   {filter: offersFilterInitialState},
-  z.object({filter: OffersFilter}).readonly()
+  Schema.Struct({filter: OffersFilterE})
 )
 
 export const offersFilterFromStorageAtom = focusAtom(
@@ -83,20 +87,21 @@ export const isFilterActiveAtom = atom((get) => {
     offerType,
     ...offersFilterFromStorage
   } = get(offersFilterFromStorageAtom)
+
   const {
     singlePriceCurrency: spc,
-    singlePrice: sp,
     text: t,
     listingType: lt,
     offerType: ot,
     ...filterInitialState
   } = offersFilterInitialState
 
-  return (
-    JSON.stringify({
+  return !fastDeepEqualRemoveUndefineds(
+    {
       ...offersFilterFromStorage,
       singlePrice: listingType !== 'BITCOIN' ? singlePrice : undefined,
-    } satisfies OffersFilter) !== JSON.stringify(filterInitialState)
+    } satisfies OffersFilter,
+    filterInitialState
   )
 })
 
@@ -107,6 +112,7 @@ export const isTextFilterActiveAtom = atom(
 export const resetFilterInStorageActionAtom = atom(null, (get, set) => {
   const {offerType, listingType, ...restOfOffersFilterInitialState} =
     offersFilterInitialState
+
   set(offersFilterFromStorageAtom, (prev) => ({
     ...prev,
     ...restOfOffersFilterInitialState,

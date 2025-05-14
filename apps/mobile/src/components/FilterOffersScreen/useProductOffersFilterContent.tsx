@@ -111,6 +111,7 @@ export default function useProductOffersFilterContent(): Props[] {
         ),
       },
       {
+        customSection: true,
         title: t('clubs.vexlClubs'),
         image: clubsSvg,
         children: (

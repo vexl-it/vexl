@@ -9,6 +9,19 @@ import {atomWithParsedMmkvStorageE} from '../../../utils/atomUtils/atomWithParse
 import {myOffersAtom} from '../../marketplace/atoms/myOffers'
 import {ClubWithMembers} from '../domain'
 
+const ClubsLoadingState = Schema.Union(
+  Schema.Struct({
+    state: Schema.Literal('initial', 'loading', 'success'),
+  }),
+  Schema.Struct({
+    state: Schema.Literal('error'),
+    // can be used to hold error state in future
+    error: Schema.Unknown,
+  })
+)
+
+type ClubsLoadingState = typeof ClubsLoadingState.Type
+
 export class UserClubKeypairMissingError extends Schema.TaggedError<UserClubKeypairMissingError>(
   'UserClubKeypairMissingError'
 )('UserClubKeypairMissingError', {
@@ -19,12 +32,18 @@ export class UserClubKeypairMissingError extends Schema.TaggedError<UserClubKeyp
 export const clubsWithMembersStorageAtom = atomWithParsedMmkvStorageE(
   'clubsWithMembers',
   {data: []},
-  Schema.Struct({data: Schema.Array(ClubWithMembers).pipe(Schema.mutable)})
+  Schema.Struct({
+    data: Schema.Array(ClubWithMembers).pipe(Schema.mutable),
+  })
 )
 
 export const clubsWithMembersAtom = atom(
   (get) => get(clubsWithMembersStorageAtom).data
 )
+
+export const clubsWithMembersLoadingStateAtom = atom<ClubsLoadingState>({
+  state: 'initial',
+})
 
 export const clubsWithMembersAtomsAtom = splitAtom(
   focusAtom(clubsWithMembersStorageAtom, (optic) => optic.prop('data'))

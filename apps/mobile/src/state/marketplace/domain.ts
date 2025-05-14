@@ -1,17 +1,17 @@
-import {ClubUuid} from '@vexl-next/domain/src/general/clubs'
+import {ClubUuidE} from '@vexl-next/domain/src/general/clubs'
+import {CurrencyCodeE} from '@vexl-next/domain/src/general/currency.brand'
 import {
-  BtcNetwork,
-  CurrencyCode,
-  FriendLevel,
-  ListingType,
-  LocationState,
-  OfferLocation,
-  OfferType,
+  BtcNetworkE,
+  FriendLevelE,
+  ListingTypeE,
+  LocationStateE,
+  OfferLocationE,
+  OfferTypeE,
   OneOfferInState,
   OneOfferInStateE,
-  PaymentMethod,
-  Sort,
-  SpokenLanguage,
+  PaymentMethodE,
+  SortE,
+  SpokenLanguageE,
 } from '@vexl-next/domain/src/general/offers'
 import {
   IsoDatetimeString,
@@ -70,32 +70,29 @@ export type LoadingState =
   | ErrorLoadingState
   | InProgressLoadingState
 
-export const OffersFilter = z
-  .object({
-    sort: Sort.optional(),
-    currency: CurrencyCode.optional(),
-    location: z
-      .array(OfferLocation)
-      .optional()
-      .catch(() => []),
-    locationState: z.array(LocationState).optional().readonly(),
-    paymentMethod: z.array(PaymentMethod).optional().readonly(),
-    btcNetwork: z.array(BtcNetwork).optional().readonly(),
-    friendLevel: z.array(FriendLevel).optional().readonly(),
-    offerType: OfferType.optional(),
-    listingType: ListingType.optional(),
-    singlePrice: z.coerce.number().optional(),
-    singlePriceCurrency: CurrencyCode.optional(),
-    amountBottomLimit: z.coerce.number().optional(),
-    amountTopLimit: z.coerce.number().optional(),
-    spokenLanguages: z.array(SpokenLanguage).default([]),
-    text: z.string().optional(),
-    clubsUuids: z.array(ClubUuid).default([]),
-    showClubsInFilter: z.boolean().default(false),
-  })
-  .readonly()
+export const OffersFilterE = Schema.Struct({
+  sort: Schema.optional(SortE),
+  currency: Schema.optional(CurrencyCodeE),
+  location: Schema.optional(Schema.Array(OfferLocationE)),
+  locationState: Schema.optional(Schema.Array(LocationStateE)),
+  paymentMethod: Schema.optional(Schema.Array(PaymentMethodE)),
+  btcNetwork: Schema.optional(Schema.Array(BtcNetworkE)),
+  friendLevel: Schema.optional(Schema.Array(FriendLevelE)),
+  offerType: Schema.optional(OfferTypeE),
+  listingType: Schema.optional(ListingTypeE),
+  singlePrice: Schema.optional(Schema.Number),
+  singlePriceCurrency: Schema.optional(CurrencyCodeE),
+  amountBottomLimit: Schema.optional(Schema.Number),
+  amountTopLimit: Schema.optional(Schema.Number),
+  spokenLanguages: Schema.optionalWith(
+    Schema.Array(SpokenLanguageE).pipe(Schema.mutable),
+    {default: () => []}
+  ),
+  text: Schema.optional(Schema.String),
+  clubsUuids: Schema.optional(Schema.Array(ClubUuidE)),
+})
 
-export type OffersFilter = z.TypeOf<typeof OffersFilter>
+export type OffersFilter = typeof OffersFilterE.Type
 
 export const BaseOffersFilter = z.enum([
   'BTC_TO_CASH',

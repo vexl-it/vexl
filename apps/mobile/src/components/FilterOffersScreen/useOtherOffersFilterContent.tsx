@@ -117,6 +117,7 @@ export default function useOtherOffersFilterContent(): Props[] {
         ),
       },
       {
+        customSection: true,
         title: t('clubs.vexlClubs'),
         image: clubsSvg,
         children: (

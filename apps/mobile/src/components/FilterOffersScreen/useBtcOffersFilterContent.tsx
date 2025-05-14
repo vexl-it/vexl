@@ -129,6 +129,7 @@ export default function useBtcOffersFilterContent(): Props[] {
         ),
       },
       {
+        customSection: true,
         title: t('clubs.vexlClubs'),
         image: clubsSvg,
         children: (

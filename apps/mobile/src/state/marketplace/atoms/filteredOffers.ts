@@ -73,11 +73,14 @@ const filterBtcOffersAtom = atom((get) => {
         filter.spokenLanguages.some((item) =>
           offer.offerInfo.publicPart.spokenLanguages.includes(item)
         )) &&
-      (!filter.showClubsInFilter ||
-        Array.intersection(
-          offer.offerInfo.privatePart.clubIds,
-          filter.clubsUuids
-        ).length > 0)
+      (!filter.clubsUuids ||
+        offer.offerInfo.privatePart.clubIds.length === 0 ||
+        Array.isNonEmptyArray(
+          Array.intersection(
+            offer.offerInfo.privatePart.clubIds,
+            filter.clubsUuids
+          )
+        ))
   )
 })
 
@@ -144,11 +147,14 @@ const filterProductAndOtherOffersAtom = atom((get) => {
         filter.spokenLanguages.some((item) =>
           offer.offerInfo.publicPart.spokenLanguages.includes(item)
         )) &&
-      (!filter.showClubsInFilter ||
-        Array.intersection(
-          offer.offerInfo.privatePart.clubIds,
-          filter.clubsUuids
-        ).length > 0)
+      (!filter.clubsUuids ||
+        offer.offerInfo.privatePart.clubIds.length === 0 ||
+        Array.isNonEmptyArray(
+          Array.intersection(
+            offer.offerInfo.privatePart.clubIds,
+            filter.clubsUuids
+          )
+        ))
   )
 })
 
@@ -198,11 +204,14 @@ const filterOffersIgnoreListingTypeAtom = atom((get) => {
         filter.spokenLanguages.some((item) =>
           offer.offerInfo.publicPart.spokenLanguages.includes(item)
         )) &&
-      (!filter.showClubsInFilter ||
-        Array.intersection(
-          offer.offerInfo.privatePart.clubIds,
-          filter.clubsUuids
-        ).length > 0)
+      (!filter.clubsUuids ||
+        offer.offerInfo.privatePart.clubIds.length === 0 ||
+        Array.isNonEmptyArray(
+          Array.intersection(
+            offer.offerInfo.privatePart.clubIds,
+            filter.clubsUuids
+          )
+        ))
   )
 })
 

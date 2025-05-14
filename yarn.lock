@@ -23093,7 +23093,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"msgpackr@npm:^1.11.2":
+"msgpackr@npm:1.11.2":
   version: 1.11.2
   resolution: "msgpackr@npm:1.11.2"
   dependencies:
@@ -23102,6 +23102,18 @@ __metadata:
     msgpackr-extract:
       optional: true
   checksum: 53b30ddd68fd98ae95690017787f3b54414191314f3d36329cc01c073ec35fece87c86de731ef521d1f1b8adeb294008184ad0266d3a0e62cf0867dc728dcbd1
+  languageName: node
+  linkType: hard
+
+"msgpackr@patch:msgpackr@npm%3A1.11.2#./.yarn/patches/msgpackr-npm-1.11.2-a21c5db6f8.patch::locator=vexl-next%40workspace%3A.":
+  version: 1.11.2
+  resolution: "msgpackr@patch:msgpackr@npm%3A1.11.2#./.yarn/patches/msgpackr-npm-1.11.2-a21c5db6f8.patch::version=1.11.2&hash=74b3bc&locator=vexl-next%40workspace%3A."
+  dependencies:
+    msgpackr-extract: ^3.0.2
+  dependenciesMeta:
+    msgpackr-extract:
+      optional: true
+  checksum: 899a58b6c175961e5311daef0bce2b3b5479989b9d5978d49d8e58cc16eb860634cd1c6bc972b6099390cecf17f3c64d2bb99b5b7858cc518b23d8241d0a81ac
   languageName: node
   linkType: hard
 

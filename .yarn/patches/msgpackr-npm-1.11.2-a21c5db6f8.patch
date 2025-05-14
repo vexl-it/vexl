@@ -1,0 +1,12 @@
+diff --git a/package.json b/package.json
+index 9216a6e3cb7bd14e9c2c57f579634cbfcb117c23..2b56a98ba0fd90faaf414139767a212872dda265 100644
+--- a/package.json
++++ b/package.json
+@@ -7,6 +7,7 @@
+   "types": "./index.d.ts",
+   "main": "./dist/node.cjs",
+   "module": "./index.js",
++  "react-native": "./index.js",
+   "keywords": [
+     "MessagePack",
+     "msgpack",

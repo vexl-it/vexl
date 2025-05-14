@@ -154,6 +154,10 @@ function OfferInfo({
     }
   }, [mapIsVisible, requestState, setToastNotification, t, toastBottomMargin])
 
+  const isOnlyClubOffer =
+    offer.offerInfo.privatePart.friendLevel.length === 1 &&
+    offer.offerInfo.privatePart.friendLevel[0] === 'CLUB'
+
   return (
     <Stack f={1} mx="$2" my="$4">
       {!mapIsVisible && <Title offer={offer} />}
@@ -167,14 +171,16 @@ function OfferInfo({
               offer={offer}
             />
           </Stack>
-          <Info
-            visibleStateAtom={friendLevelBannerPreferenceAtom}
-            text={t('common.whatDoesThisMean', {term: friendLevel})}
-            actionButtonText={t('common.learnMore')}
-            onActionPress={() => {
-              Effect.runFork(showCommonFriendsExplanation(offer.offerInfo))
-            }}
-          />
+          {!isOnlyClubOffer && (
+            <Info
+              visibleStateAtom={friendLevelBannerPreferenceAtom}
+              text={t('common.whatDoesThisMean', {term: friendLevel})}
+              actionButtonText={t('common.learnMore')}
+              onActionPress={() => {
+                Effect.runFork(showCommonFriendsExplanation(offer.offerInfo))
+              }}
+            />
+          )}
           {!!showRequestButton && (
             <OfferRequestTextInput text={text} onChange={setText} />
           )}

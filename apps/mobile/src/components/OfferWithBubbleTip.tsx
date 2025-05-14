@@ -59,7 +59,7 @@ export default function OfferWithBubbleTip({
           offer={offer}
           negative={negative ?? false}
         />
-        {!!button && <Stack maw="60%">{button}</Stack>}
+        {!!button && <Stack maw="40%">{button}</Stack>}
       </XStack>
     </Stack>
   )

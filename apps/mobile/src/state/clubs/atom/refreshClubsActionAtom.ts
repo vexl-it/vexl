@@ -11,6 +11,7 @@ import {
   removeClubFromKeyHolderStateActionAtom,
 } from './clubsToKeyHolderAtom'
 import {
+  clubsWithMembersLoadingStateAtom,
   clubsWithMembersStorageAtom,
   removeClubWithMembersFromStateActionAtom,
 } from './clubsWithMembersAtom'
@@ -94,6 +95,8 @@ export const syncSingleClubHandleStateWhenNotFoundActionAtom = atom(
     Effect.gen(function* (_) {
       const keyPair = yield* _(Record.get(get(clubsToKeyHolderAtom), clubUuid))
 
+      set(clubsWithMembersLoadingStateAtom, {state: 'loading'})
+
       const clubE = yield* _(
         set(fetchClubWithMembersHandleStateIfNotFoundActionAtom, {
           clubUuid,
@@ -118,6 +121,8 @@ export const syncSingleClubHandleStateWhenNotFoundActionAtom = atom(
         ),
       }))
 
+      set(clubsWithMembersLoadingStateAtom, {state: 'success'})
+
       return clubE.right
     })
 )
@@ -134,6 +139,8 @@ export const syncAllClubsHandleStateWhenNotFoundActionAtom = atom(
     Effect.gen(function* (_) {
       console.info('🦋 Refreshing clubs connections state')
       const clubsToKeyHolder = get(clubsToKeyHolderAtom)
+
+      set(clubsWithMembersLoadingStateAtom, {state: 'loading'})
 
       const fetchedClubs = yield* _(
         clubsToKeyHolder,
@@ -162,6 +169,7 @@ export const syncAllClubsHandleStateWhenNotFoundActionAtom = atom(
 
       set(clubsWithMembersStorageAtom, (prev) => ({
         ...prev,
+        state: 'loaded',
         data: pipe(
           fetchedClubs,
           Array.filterMap((fetchedClubE) => {
@@ -180,6 +188,8 @@ export const syncAllClubsHandleStateWhenNotFoundActionAtom = atom(
           })
         ),
       }))
+
+      set(clubsWithMembersLoadingStateAtom, {state: 'success'})
 
       return fetchedClubs
     })

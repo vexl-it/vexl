@@ -185,7 +185,6 @@ function OffersListStateDisplayerContent(): JSX.Element {
           ListHeaderComponent={ListHeaderComponent}
           ListFooterComponent={ListFooterComponent}
           offersAtoms={offersAtoms}
-          // eslint-disable-next-line @typescript-eslint/no-misused-promises
           onRefresh={() => {
             Effect.runFork(refreshOffers())
           }}

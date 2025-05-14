@@ -47,19 +47,17 @@ function ContactTypeAndCommonNumber({
             friendLevel.includes('SECOND_DEGREE')) && (
             <>
               {friendLevel.includes('FIRST_DEGREE')
-                ? t('offer.directFriend')
+                ? `${t('offer.directFriend')} • `
                 : friendLevel.includes('SECOND_DEGREE') &&
-                  t('offer.friendOfFriend')}
-              {' • '}
+                  `${t('offer.friendOfFriend')} • `}
             </>
           )}
           {!!clubsNamesForOffer &&
             clubsNamesForOffer.length === 1 &&
-            clubsNamesForOffer.map((clubName) => clubName)}
-          {friendLevel.length === 1 && friendLevel.includes('CLUB') && ` • `}
+            clubsNamesForOffer.map((clubName) => `${clubName} • `)}
           {!!clubsNamesForOffer &&
             clubsNamesForOffer.length > 1 &&
-            t('clubs.multipleClubs')}
+            `${t('clubs.multipleClubs')} • `}
         </Text>
       </XStack>
       <XStack ai="center" gap="$1">

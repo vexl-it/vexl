@@ -1,9 +1,15 @@
 import {useNavigation} from '@react-navigation/native'
 import {FlashList} from '@shopify/flash-list'
-import {type Atom, useAtomValue} from 'jotai'
-import {Image, Stack, Text, XStack, YStack} from 'tamagui'
+import {Effect} from 'effect'
+import {type Atom, useAtomValue, useSetAtom} from 'jotai'
+import {RefreshControl} from 'react-native-gesture-handler'
+import {getTokens, Image, Stack, Text, XStack, YStack} from 'tamagui'
 import membersSvg from '../../../../../images/memberSvg'
-import {clubsWithMembersAtomsAtom} from '../../../../../state/clubs/atom/clubsWithMembersAtom'
+import {
+  clubsWithMembersAtomsAtom,
+  clubsWithMembersLoadingStateAtom,
+} from '../../../../../state/clubs/atom/clubsWithMembersAtom'
+import {syncAllClubsHandleStateWhenNotFoundActionAtom} from '../../../../../state/clubs/atom/refreshClubsActionAtom'
 import {type ClubWithMembers} from '../../../../../state/clubs/domain'
 import atomKeyExtractor from '../../../../../utils/atomUtils/atomKeyExtractor'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
@@ -39,7 +45,7 @@ function ClubListItem({atom}: {atom: Atom<ClubWithMembers>}): JSX.Element {
       </YStack>
       <Button
         text={t('common.seeDetail')}
-        variant="blackOnDark"
+        variant="secondary"
         onPress={() => {
           navigation.navigate('ClubDetail', {clubUuid: club.uuid})
         }}
@@ -61,10 +67,17 @@ function renderItem({item}: {item: Atom<ClubWithMembers>}): JSX.Element {
   return <ClubListItem atom={item} />
 }
 export function ClubsList(): JSX.Element {
+  const syncAllClubsHandleStateWhenNotFound = useSetAtom(
+    syncAllClubsHandleStateWhenNotFoundActionAtom
+  )
   const clubsAtoms = useAtomValue(clubsWithMembersAtomsAtom)
+  const clubsLoading =
+    useAtomValue(clubsWithMembersLoadingStateAtom).state === 'loading'
+
   if (clubsAtoms.length === 0) {
     return <EmptyListPlaceholder />
   }
+
   return (
     <FlashList
       data={clubsAtoms}
@@ -72,6 +85,16 @@ export function ClubsList(): JSX.Element {
       ItemSeparatorComponent={Separator}
       renderItem={renderItem}
       keyExtractor={atomKeyExtractor}
+      indicatorStyle="white"
+      refreshControl={
+        <RefreshControl
+          refreshing={clubsLoading ?? false}
+          onRefresh={() =>
+            Effect.runFork(syncAllClubsHandleStateWhenNotFound())
+          }
+          tintColor={getTokens().color.greyAccent5.val}
+        />
+      }
     />
   )
 }

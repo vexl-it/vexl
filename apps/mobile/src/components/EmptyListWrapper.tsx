@@ -63,6 +63,7 @@ function EmptyListWrapper({
 
   return inScrollView ? (
     <ScrollView
+      indicatorStyle="white"
       refreshControl={
         <RefreshControl
           refreshing={refreshing}

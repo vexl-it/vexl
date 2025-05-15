@@ -17,12 +17,8 @@
   },
   "dependencies": {
     "@effect/experimental": "^0.46.0",
-    "@effect/opentelemetry": "^0.48.0",
     "@effect/platform": "^0.82.0",
     "@effect/platform-node": "^0.80.1",
-    "@opentelemetry/exporter-trace-otlp-http": "^0.52.1",
-    "@opentelemetry/sdk-trace-node": "^1.23.0",
-    "@opentelemetry/sdk-trace-web": "^1.23.0",
     "@sentry/esbuild-plugin": "^2.10.2",
     "@sentry/node": "^7.93.0",
     "@sentry/profiling-node": "^1.3.5",

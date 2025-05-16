@@ -23,6 +23,7 @@ import CRUDOfferFlow from '../CRUDOfferFlow'
 import ChangeProfilePictureScreen from '../ChangeProfilePictureScreen/ChangeProfilePictureScreen'
 import ChatDetailScreen from '../ChatDetailScreen'
 import {ClubDetailScreen} from '../ClubDetail'
+import {ClubOffersScreen} from '../ClubOffersScreen'
 import CommonFriendsScreen from '../CommonFriendsScreen'
 import DebugScreen from '../DebugScreen'
 import DevTranslationFloatingButton from '../DevTranslationFloatingButtons'
@@ -98,6 +99,7 @@ function RootNavigation(): JSX.Element {
             <Stack.Screen name="AppLogs" component={AppLogsScreen} />
             <Stack.Screen name="ChatDetail" component={ChatDetailScreen} />
             <Stack.Screen name="ClubDetail" component={ClubDetailScreen} />
+            <Stack.Screen name="ClubOffers" component={ClubOffersScreen} />
             <Stack.Screen name="SetContacts" component={SetContactsScreen} />
             <Stack.Screen
               name="EventsAndClubs"

@@ -1,3 +1,4 @@
+import {useNavigation} from '@react-navigation/native'
 import {Array, Effect, Option} from 'effect'
 import {pipe} from 'fp-ts/lib/function'
 import {useAtomValue, useSetAtom} from 'jotai'
@@ -6,7 +7,6 @@ import {Image, Stack, Text, XStack, YStack} from 'tamagui'
 import membersSvg from '../../../images/memberSvg'
 import {type ClubWithMembers} from '../../../state/clubs/domain'
 import {createOfferCountForClub} from '../../../state/marketplace/atoms/offersState'
-import {enableHiddenFeatures} from '../../../utils/environment'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import showErrorAlert from '../../../utils/showErrorAlert'
 import useSafeGoBack from '../../../utils/useSafeGoBack'
@@ -23,6 +23,7 @@ export function ClubDetail({
   club: ClubWithMembers
 }): JSX.Element {
   const {t} = useTranslation()
+  const navigation = useNavigation()
   const loadingOverlay = useShowLoadingOverlay()
 
   const offersCount = useAtomValue(
@@ -83,18 +84,14 @@ export function ClubDetail({
       </Stack>
 
       <YStack gap="$4">
-        {!!enableHiddenFeatures && (
-          <Button
-            size="large"
-            variant="secondary"
-            text={t('clubs.showOffers')}
-            onPress={() => {
-              alert(
-                'What should happen? Should we apply filter and take user to marketplace?'
-              )
-            }}
-          />
-        )}
+        <Button
+          size="large"
+          variant="secondary"
+          text={t('clubs.showOffers')}
+          onPress={() => {
+            navigation.navigate('ClubOffers', {clubUuid: club.uuid})
+          }}
+        />
         <Button
           size="large"
           variant="redDark"

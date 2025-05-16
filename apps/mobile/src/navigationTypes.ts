@@ -50,6 +50,8 @@ export type RootStackParamsList = {
 
   ClubDetail: {clubUuid: ClubUuid}
 
+  ClubOffers: {clubUuid: ClubUuid}
+
   NotificationPermissionsMissing: undefined
 
   TermsAndConditions: undefined

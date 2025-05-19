@@ -139,27 +139,14 @@ function OffersListStateDisplayerContent(): JSX.Element {
             <>
               <VexlNewsSuggestions />
               <RemovedClubsSuggestion />
-              <EmptyListPlaceholder
-                refreshing={loading}
-                onRefresh={() => {
-                  Effect.runFork(refreshOffers())
-                }}
-              />
+              <EmptyListPlaceholder />
             </>
           )}
         </Stack>
       )
 
     return <ErrorListHeader mt="$6" error={error.value} />
-  }, [
-    baseFilter,
-    error,
-    loading,
-    offersAtoms.length,
-    opacityAnim,
-    refreshOffers,
-    scaleAnim,
-  ])
+  }, [baseFilter, error, offersAtoms.length, opacityAnim, scaleAnim])
 
   return (
     <ContainerWithTopBorderRadius testID="@marketplaceScreen">

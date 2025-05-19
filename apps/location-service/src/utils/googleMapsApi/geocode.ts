@@ -35,8 +35,8 @@ interface GoogleGeocodeResult {
 
 interface GoogleGeocodeResponse {
   plus_code: {
-    compound_code: string
-    global_code: string
+    compound_code?: string
+    global_code?: string
   }
   results: GoogleGeocodeResult[]
 }
@@ -83,6 +83,65 @@ function findNextLevelArea(result: GoogleGeocodeResult): string | undefined {
   )
 }
 
+const getAddress = ({
+  responseData,
+  firstHit,
+}: {
+  responseData: GoogleGeocodeResponse
+  firstHit: GoogleGeocodeResult
+}): Effect.Effect<string> =>
+  Effect.gen(function* (_) {
+    const country = findTypeInAddressComponents(
+      'country',
+      firstHit.address_components
+    )
+
+    // 3FF2+M4H Praha, Česko
+    const compoundCode = responseData.plus_code.compound_code
+
+    // Praha, Česko
+    const cityAndState = compoundCode?.split(' ')?.slice(1)?.join(' ')
+    // Praha - CZ
+    const cityAndStateShorten = cityAndState?.replace(
+      /,([^,]*)$/,
+      ` - ${country}`
+    )
+    const cityOrPartOfTheCity = findNextLevelArea(firstHit)
+    const finalAddress = compoundCode
+      ? compoundCodeContainsCity(compoundCode, cityOrPartOfTheCity)
+        ? // Karlovy Vary - CZ
+          cityAndStateShorten
+        : // Vinohrady, Praha - CZ
+          `${cityOrPartOfTheCity}, ${cityAndStateShorten}`
+      : undefined
+
+    // const lvl1 = (() => {
+    //   const lvl1 = findTypeInAddressComponents(
+    //     'administrative_area_level_1',
+    //     firstHit.address_components
+    //   )
+    //   if (!lvl1) return ''
+    //   if (country === 'CZ' || country === 'SK') {
+    //     return lvl1.replace(regionRegex, '')
+    //   }
+    //   return lvl1
+    // })()
+
+    return country && cityOrPartOfTheCity && finalAddress
+      ? finalAddress
+      : firstHit.formatted_address.replace(/^[\d\s]*/, '')
+  }).pipe(
+    Effect.catchAllDefect((d) =>
+      Effect.zipRight(
+        Effect.logError(
+          'Error while getting address. Falling back to formatted address',
+          d
+        ),
+        Effect.succeed(firstHit.formatted_address.replace(/^[\d\s]*/, ''))
+      )
+    )
+  )
+
 export const googleGeocode =
   (apiKey: string) =>
   ({
@@ -122,55 +181,9 @@ export const googleGeocode =
       const firstHit = response.data.results.at(0)
       if (!firstHit) return yield* _(new LocationNotFoundError({status: 404}))
 
-      yield* _(
-        Effect.log(
-          'Got geocode response',
-          firstHit.address_components.map(
-            (one) => `${one.short_name} - ${one.types.join(', ')}`
-          )
-        )
+      const address = yield* _(
+        getAddress({responseData: response.data, firstHit})
       )
-
-      const country = findTypeInAddressComponents(
-        'country',
-        firstHit.address_components
-      )
-
-      // 3FF2+M4H Praha, Česko
-      const compoundCode = response.data.plus_code.compound_code
-      // Praha, Česko
-      const cityAndState = compoundCode.split(' ').slice(1).join(' ')
-      // Praha - CZ
-      const cityAndStateShorten = cityAndState.replace(
-        /,([^,]*)$/,
-        ` - ${country}`
-      )
-      const cityOrPartOfTheCity = findNextLevelArea(firstHit)
-      const finalAddress = compoundCodeContainsCity(
-        compoundCode,
-        cityOrPartOfTheCity
-      )
-        ? // Karlovy Vary - CZ
-          cityAndStateShorten
-        : // Vinohrady, Praha - CZ
-          `${cityOrPartOfTheCity}, ${cityAndStateShorten}`
-
-      // const lvl1 = (() => {
-      //   const lvl1 = findTypeInAddressComponents(
-      //     'administrative_area_level_1',
-      //     firstHit.address_components
-      //   )
-      //   if (!lvl1) return ''
-      //   if (country === 'CZ' || country === 'SK') {
-      //     return lvl1.replace(regionRegex, '')
-      //   }
-      //   return lvl1
-      // })()
-
-      const address =
-        country && cityOrPartOfTheCity
-          ? finalAddress
-          : firstHit.formatted_address.replace(/^[\d\s]*/, '')
 
       return yield* _(
         Schema.decode(GetGeocodedCoordinatesResponse)({

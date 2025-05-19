@@ -65,11 +65,13 @@ function EmptyListWrapper({
     <ScrollView
       indicatorStyle="white"
       refreshControl={
-        <RefreshControl
-          refreshing={refreshing}
-          onRefresh={onRefresh}
-          tintColor={getTokens().color.greyAccent5.val}
-        />
+        onRefresh ? (
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={getTokens().color.greyAccent5.val}
+          />
+        ) : undefined
       }
       contentContainerStyle={{
         flexGrow: 1,

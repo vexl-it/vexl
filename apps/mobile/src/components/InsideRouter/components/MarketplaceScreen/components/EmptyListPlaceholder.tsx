@@ -33,7 +33,7 @@ import EmptyMarketplaceSuggestions from './EmptyMarketplaceSuggestions'
 const REACH_NUMBER_THRESHOLD = 30
 
 interface Props {
-  refreshing: boolean
+  refreshing?: boolean
   onRefresh?: () => void
 }
 
@@ -155,7 +155,7 @@ function EmptyListPlaceholder({refreshing, onRefresh}: Props): JSX.Element {
   if (importedContactsCount === 0 || reachNumber < REACH_NUMBER_THRESHOLD) {
     return addMoreContactsSuggestionVisible || createOfferSuggestionVisible ? (
       <EmptyMarketplaceSuggestions
-        refreshing={refreshing}
+        refreshing={refreshing ?? false}
         onRefresh={onRefresh}
       />
     ) : (

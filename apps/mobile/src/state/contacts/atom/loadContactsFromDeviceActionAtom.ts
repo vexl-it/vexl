@@ -1,9 +1,4 @@
-import {
-  effectToTaskEither,
-  taskEitherToEffect,
-} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
-import {Array, Effect, HashMap, Option} from 'effect'
-import {pipe} from 'fp-ts/lib/function'
+import {Array, Effect, HashMap, Option, pipe} from 'effect'
 import {atom} from 'jotai'
 import reportError from '../../../utils/reportError'
 import {type ContactInfo, type StoredContact} from '../domain'
@@ -30,8 +25,7 @@ export const loadingContactsFromDeviceAtom = atom<boolean>(false)
 const loadContactsFromDeviceActionAtom = atom(null, (get, set) => {
   return Effect.gen(function* (_) {
     const contactsFromDevice = yield* _(
-      getContactsAndTryToResolveThePermissionsAlongTheWay(),
-      taskEitherToEffect
+      getContactsAndTryToResolveThePermissionsAlongTheWay()
     )
     const storedContacts = get(storedContactsAtom)
 
@@ -67,7 +61,7 @@ const loadContactsFromDeviceActionAtom = atom(null, (get, set) => {
               importedManually: false,
               invalidNumber: 'notTriedYet',
             },
-            computedValues: undefined,
+            computedValues: Option.none(),
           }) satisfies StoredContact
       )
     )
@@ -85,8 +79,7 @@ const loadContactsFromDeviceActionAtom = atom(null, (get, set) => {
       }
 
       return Effect.fail(e)
-    }),
-    effectToTaskEither
+    })
   )
 })
 

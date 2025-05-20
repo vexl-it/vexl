@@ -1,12 +1,6 @@
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {IsoDatetimeString} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
-import {
-  effectToTask,
-  taskEitherToEffect,
-} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
-import {Array, Effect, HashSet, Ref} from 'effect'
-import * as TE from 'fp-ts/TaskEither'
-import {pipe} from 'fp-ts/lib/function'
+import {Array, Effect, HashSet, Option, Ref, pipe} from 'effect'
 import {atom} from 'jotai'
 import {Alert} from 'react-native'
 import {apiAtom} from '../../../api'
@@ -40,20 +34,18 @@ export const submitContactsActionAtom = atom(
         }
       | {normalizeAndImportAll: false; numbersToImport: E164PhoneNumber[]}
     )
-  ) => {
+  ): Effect.Effect<
+    'success' | 'noContactsSelected' | 'permissionsNotGranted' | 'otherError'
+  > => {
     const contactApi = get(apiAtom).contact
     const {t} = get(translationAtom)
 
     set(loadingOverlayDisplayedAtom, true)
 
-    const normalizeStoredContacts = pipe(
-      set(loadContactsFromDeviceActionAtom),
-      TE.chainFirstTaskK(() => set(normalizeStoredContactsActionAtom))
-    )
-
     return Effect.gen(function* (_) {
       if (params.normalizeAndImportAll) {
-        yield* _(normalizeStoredContacts, taskEitherToEffect)
+        yield* _(set(loadContactsFromDeviceActionAtom))
+        yield* _(set(normalizeStoredContactsActionAtom))
       }
 
       const allContacts = get(normalizedContactsAtom)
@@ -142,9 +134,10 @@ export const submitContactsActionAtom = atom(
                         }
 
                       if (
+                        Option.isSome(oneContact.computedValues) &&
                         HashSet.has(
                           importedNumbers,
-                          oneContact.computedValues.normalizedNumber
+                          oneContact.computedValues.value.normalizedNumber
                         )
                       )
                         return {
@@ -250,20 +243,23 @@ export const submitContactsActionAtom = atom(
           Alert.alert(t('contacts.importContactsQuotaReachedError'))
           return Effect.void
         }
-        if (e._tag !== 'NetworkError' && e._tag !== 'PermissionsNotGranted') {
+        if (
+          e._tag !== 'NetworkError' &&
+          e._tag !== 'ContactsPermissionsNotGrantedError'
+        ) {
           reportError('error', new Error('error while submitting contacts'), {
             e,
           })
         }
 
-        if (e._tag !== 'PermissionsNotGranted')
+        if (e._tag !== 'ContactsPermissionsNotGrantedError')
           Alert.alert(toCommonErrorMessage(e, t) ?? t('common.unknownError'))
 
         return Effect.void
       }),
       Effect.match({
         onFailure: (e) => {
-          if (e._tag === 'PermissionsNotGranted')
+          if (e._tag === 'ContactsPermissionsNotGrantedError')
             return 'permissionsNotGranted' as const
           return 'otherError' as const
         },
@@ -280,8 +276,7 @@ export const submitContactsActionAtom = atom(
       Effect.tap(() => {
         set(loadingOverlayDisplayedAtom, false)
         return Effect.void
-      }),
-      effectToTask
+      })
     )
   }
 )

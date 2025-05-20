@@ -1,10 +1,11 @@
 import {type SvgString} from '@vexl-next/domain/src/utility/SvgString.brand'
 import {useMolecule} from 'bunshi/dist/react'
+import {Effect, Option} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import {useCallback} from 'react'
 import {Keyboard} from 'react-native'
 import {Text, XStack, YStack, getTokens} from 'tamagui'
-import {addContactWithUiFeedbackAtom} from '../../../state/contacts/atom/addContactWithUiFeedbackAtom'
+import {addContactWithUiFeedbackActionAtom} from '../../../state/contacts/atom/addContactWithUiFeedbackAtom'
 import {hashPhoneNumber} from '../../../state/contacts/utils'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import reportError from '../../../utils/reportError'
@@ -125,7 +126,7 @@ function QuickActionBanner(): JSX.Element | null {
   const revealContact = useSetAtom(revealContactWithUiFeedbackAtom)
   const requestState = useAtomValue(requestStateAtom)
   const setShowHistory = useSetAtom(forceShowHistoryAtom)
-  const addRevealedContact = useSetAtom(addContactWithUiFeedbackAtom)
+  const addRevealedContact = useSetAtom(addContactWithUiFeedbackActionAtom)
   const chatId = useAtomValue(chatIdAtom)
   const inboxKey = useAtomValue(publicKeyPemBase64Atom)
   const revealIdentityFromQuickActionBanner = useSetAtom(
@@ -402,17 +403,21 @@ function QuickActionBanner(): JSX.Element | null {
                 return
               }
 
-              void addRevealedContact({
-                info: {
-                  name: otherSideData.userName,
-                  numberToDisplay: fullPhoneNumber,
-                  rawNumber: fullPhoneNumber,
-                },
-                computedValues: {
-                  normalizedNumber: fullPhoneNumber,
-                  hash: numberHash.right,
-                },
-              })
+              Effect.runFork(
+                addRevealedContact({
+                  info: {
+                    name: otherSideData.userName,
+                    numberToDisplay: fullPhoneNumber,
+                    rawNumber: fullPhoneNumber,
+                    label: Option.none(),
+                    nonUniqueContactId: Option.none(),
+                  },
+                  computedValues: {
+                    normalizedNumber: fullPhoneNumber,
+                    hash: numberHash.right,
+                  },
+                })
+              )
             }
           } finally {
             setContactRevealApprovedBannerHidden()

@@ -1,20 +1,14 @@
-import * as T from 'fp-ts/Task'
-import * as TE from 'fp-ts/TaskEither'
-import {pipe} from 'fp-ts/lib/function'
+import {Effect} from 'effect'
 import {atom, useStore} from 'jotai'
 import {DateTime} from 'luxon'
 import {useCallback} from 'react'
 import {contactsMigratedAtom} from '../../components/VersionMigrations/atoms'
 import {useAppState} from '../../utils/useAppState'
 import {postLoginFinishedAtom} from '../postLoginOnboarding'
-import {
-  eraseImportedContacts,
-  lastImportOfContactsAtom,
-} from './atom/contactsStore'
+import {lastImportOfContactsAtom} from './atom/contactsStore'
 import loadContactsFromDeviceActionAtom, {
   loadingContactsFromDeviceAtom,
 } from './atom/loadContactsFromDeviceActionAtom'
-import {submitContactsActionAtom} from './atom/submitContactsActionAtom'
 
 const TIME_SINCE_CONTACTS_IMPORT_THRESHOLD = 60
 
@@ -47,6 +41,21 @@ export const initializeMinutesTillOffersDisplayedActionAtom = atom(
   }
 )
 
+const loadContactsFromDeviceAndSetLoadingStateActionAtom = atom(
+  null,
+  (get, set) => {
+    return Effect.gen(function* (_) {
+      set(loadingContactsFromDeviceAtom, true)
+
+      yield* _(set(loadContactsFromDeviceActionAtom)).pipe(
+        Effect.catchAll(() => Effect.succeed('success' as const))
+      )
+
+      set(loadingContactsFromDeviceAtom, false)
+    })
+  }
+)
+
 export function useRefreshContactsFromDeviceOnResume(): void {
   const store = useStore()
 
@@ -58,36 +67,9 @@ export function useRefreshContactsFromDeviceOnResume(): void {
           store.get(contactsMigratedAtom) &&
           state === 'active'
         ) {
-          void pipe(
-            TE.Do,
-            TE.map(() => {
-              store.set(loadingContactsFromDeviceAtom, true)
-            }),
-            TE.chainW(() => store.set(loadContactsFromDeviceActionAtom)),
-            TE.match(
-              (e) => {
-                if (
-                  e._tag === 'PermissionsNotGranted' &&
-                  store.get(lastImportOfContactsAtom) !== undefined
-                ) {
-                  store.set(eraseImportedContacts)
-                  return store.set(submitContactsActionAtom, {
-                    normalizeAndImportAll: false,
-                    numbersToImport: [],
-                    showOfferReencryptionDialog: true,
-                  })
-                }
-
-                return T.of('success' as const)
-              },
-              () => {
-                return T.of('success' as const)
-              }
-            ),
-            T.map(() => {
-              store.set(loadingContactsFromDeviceAtom, false)
-            })
-          )()
+          Effect.runFork(
+            store.set(loadContactsFromDeviceAndSetLoadingStateActionAtom)
+          )
         }
       },
       [store]

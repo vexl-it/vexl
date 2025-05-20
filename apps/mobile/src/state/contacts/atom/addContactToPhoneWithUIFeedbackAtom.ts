@@ -1,38 +1,30 @@
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
-import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
+import {Effect, Schema} from 'effect'
 import * as Contacts from 'expo-contacts'
 import {type Contact} from 'expo-contacts'
-import * as E from 'fp-ts/Either'
-import type * as T from 'fp-ts/Task'
-import * as TE from 'fp-ts/TaskEither'
-import {pipe} from 'fp-ts/function'
 import {atom} from 'jotai'
 import {askAreYouSureActionAtom} from '../../../components/AreYouSureDialog'
 import userSvg from '../../../components/images/userSvg'
 import getCountryCode from '../../../utils/getCountryCode'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
-import showErrorAlert from '../../../utils/showErrorAlert'
-import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 
-export interface UnknownError {
-  _tag: 'unknown'
-  reason: 'Unknown'
-  error?: unknown
-}
+export class ErrorAddingContactToPhoneContacts extends Schema.TaggedError<ErrorAddingContactToPhoneContacts>(
+  'ErrorAddingContactToPhoneContacts'
+)('ErrorAddingContactToPhoneContacts', {
+  cause: Schema.Unknown,
+}) {}
 
-function addContact({
+function addContactsToPhoneContacts({
   contact,
 }: {
   contact: Contact
-}): TE.TaskEither<UnknownError, 'success'> {
-  return async () => {
-    try {
+}): Effect.Effect<void, ErrorAddingContactToPhoneContacts> {
+  return Effect.tryPromise({
+    try: async () => {
       await Contacts.addContactAsync(contact)
-      return E.right('success')
-    } catch (error) {
-      return E.left({_tag: 'unknown', reason: 'Unknown', error})
-    }
-  }
+    },
+    catch: (e) => new ErrorAddingContactToPhoneContacts({cause: e}),
+  })
 }
 
 function parseFirstAndLastName(customName: string): {
@@ -51,18 +43,17 @@ function parseFirstAndLastName(customName: string): {
   return {firstName: customName}
 }
 
-export const addContactToPhoneWithUIFeedbackAtom = atom(
+export const addContactToPhoneWithUIFeedbackActionAtom = atom(
   null,
   (
     get,
     set,
     {customName, number}: {customName: string; number: E164PhoneNumber}
-  ): T.Task<boolean> => {
+  ) => {
     const {t} = get(translationAtom)
 
-    return pipe(
-      TE.Do,
-      TE.chainW(() =>
+    return Effect.gen(function* (_) {
+      const dialogActionResult = yield* _(
         set(askAreYouSureActionAtom, {
           steps: [
             {
@@ -92,50 +83,33 @@ export const addContactToPhoneWithUIFeedbackAtom = atom(
             },
           ],
           variant: 'info',
-        }).pipe(effectToTaskEither)
-      ),
-      TE.map((dialogActionResult) => {
-        return dialogActionResult[1]?.type === 'inputResult'
+        })
+      )
+
+      const {firstName, lastName} = parseFirstAndLastName(
+        dialogActionResult[1]?.type === 'inputResult'
           ? dialogActionResult[1].value
           : customName
-      }),
-      TE.map((name) => parseFirstAndLastName(name)),
-      TE.chainW(({firstName, lastName}) => {
-        const contact = {
-          name: firstName,
-          firstName,
-          ...(lastName && {lastName}),
-          phoneNumbers: [
-            {
-              countryCode: getCountryCode(number).toString(),
-              number,
-              isPrimary: true,
-              label: 'main',
-            },
-          ],
-          contactType: 'person',
-        } satisfies Contact
-
-        return addContact({contact})
-      }),
-      TE.match(
-        (e) => {
-          if (e._tag === 'unknown') {
-            showErrorAlert({
-              title:
-                toCommonErrorMessage(e, get(translationAtom).t) ??
-                t('common.unknownError'),
-              error: e,
-            })
-          }
-
-          // Ignore user chose not to add to phone contacts
-          return false
-        },
-        () => {
-          return true
-        }
       )
-    )
+
+      const contact = {
+        name: firstName,
+        firstName,
+        ...(lastName && {lastName}),
+        phoneNumbers: [
+          {
+            countryCode: getCountryCode(number).toString(),
+            number,
+            isPrimary: true,
+            label: 'main',
+          },
+        ],
+        contactType: 'person',
+      } satisfies Contact
+
+      yield* _(addContactsToPhoneContacts({contact}))
+
+      return true
+    })
   }
 )

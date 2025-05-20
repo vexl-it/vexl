@@ -61,10 +61,12 @@ export default function ImportContactsExplanationScreen({
           text={t('postLoginFlow.importContactsButton')}
           onPress={() => {
             setContactsLoading(true)
-            void submitContacts({
-              normalizeAndImportAll: true,
-              showOfferReencryptionDialog: false,
-            })().then((result) => {
+            void Effect.runPromise(
+              submitContacts({
+                normalizeAndImportAll: true,
+                showOfferReencryptionDialog: false,
+              })
+            ).then((result) => {
               resolveAllContactsAsSeen()
               setContactsLoading(false)
 

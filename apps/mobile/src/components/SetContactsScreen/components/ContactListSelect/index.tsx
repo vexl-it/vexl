@@ -3,6 +3,7 @@ import {
   type MaterialTopTabBarProps,
 } from '@react-navigation/material-top-tabs'
 import {ScopeProvider, useMolecule} from 'bunshi/dist/react'
+import {Effect} from 'effect'
 import {useAtomValue, useSetAtom, useStore} from 'jotai'
 import React, {useEffect, useMemo, useState} from 'react'
 import {getTokens, ScrollView, Stack, Text} from 'tamagui'
@@ -12,6 +13,7 @@ import {
   resolveAllContactsAsSeenActionAtom,
 } from '../../../../state/contacts/atom/contactsStore'
 import {type ContactsFilter} from '../../../../state/contacts/domain'
+import {andThenExpectBooleanNoErrors} from '../../../../utils/andThenExpectNoErrors'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../../../utils/useSafeGoBack'
 import Button from '../../../Button'
@@ -200,9 +202,11 @@ function ContactsListSelect({filter}: {filter?: ContactsFilter}): JSX.Element {
         <Button
           variant="secondary"
           onPress={() => {
-            void submitAllSelectedContacts()().then((success) => {
-              if (success) goBack()
-            })
+            void Effect.runPromise(
+              andThenExpectBooleanNoErrors((success) => {
+                if (success) goBack()
+              })(submitAllSelectedContacts())
+            )
           }}
           fullWidth
           text={t('common.submit')}

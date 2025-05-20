@@ -1,3 +1,4 @@
+import {type Option} from 'effect'
 import {getTokens, Text, XStack} from 'tamagui'
 import {type NonUniqueContactId} from '../../../state/contacts/domain'
 import ContactPictureImage from '../../ContactPictureImage'
@@ -5,7 +6,7 @@ import SvgImage from '../../Image'
 import picturePlaceholderSvg from '../../images/picturePlaceholderSvg'
 
 interface Props {
-  contactId?: NonUniqueContactId
+  contactId: Option.Option<NonUniqueContactId>
   name: string
   variant: 'light' | 'dark'
 }

@@ -1,6 +1,8 @@
+import {Effect} from 'effect'
 import {useStore} from 'jotai'
 import {useEffect, useMemo, useState} from 'react'
 import {Spinner, Text, YStack} from 'tamagui'
+import {andThenExpectVoidNoErrors} from '../../utils/andThenExpectNoErrors'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import {needToRunMigrationAtom} from './atoms'
 import migrateContacts from './migrations/contacts'
@@ -28,11 +30,15 @@ export default function VersionMigrations({
   useEffect(() => {
     if (!needToRunMigration) return
 
-    void migrateContacts((progress) => {
-      setProgress({done: false, progress})
-    }).then(() => {
-      setProgress({progress: {percent: 100}, done: true})
-    })
+    void Effect.runPromise(
+      andThenExpectVoidNoErrors(() => {
+        setProgress({progress: {percent: 100}, done: true})
+      })(
+        migrateContacts((progress) => {
+          setProgress({done: false, progress})
+        })
+      )
+    )
   }, [setProgress, needToRunMigration])
 
   if (progress.done) return <>{children}</>

@@ -1,3 +1,4 @@
+import {Option} from 'effect'
 import {getContactByIdAsync} from 'expo-contacts'
 import {useEffect, useState} from 'react'
 import {Image} from 'tamagui'
@@ -5,7 +6,7 @@ import {type NonUniqueContactId} from '../state/contacts/domain'
 
 type Props = React.ComponentProps<typeof Image> & {
   // undefined to make it easier to use with ContactInfo. TODO remove once nonUniqueContactId is required
-  contactId?: NonUniqueContactId
+  contactId: Option.Option<NonUniqueContactId>
   fallback?: React.ReactNode
 }
 
@@ -17,11 +18,11 @@ export default function ContactPictureImage({
   const [imageUri, setImageUri] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!contactId) return
+    if (Option.isNone(contactId)) return
 
     setImageUri(null)
 
-    void getContactByIdAsync(contactId)
+    void getContactByIdAsync(contactId.value)
       .then((contact) => {
         const contactImageUri = contact?.image?.uri
 

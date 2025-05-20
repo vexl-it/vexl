@@ -1107,6 +1107,7 @@
   "contacts.refreshingOffers.belowProgressLeftDone": "Refreshed your offers",
   "contacts.refreshingOffers.bottomTextDone": "Your offers are now correclty visible to your contacts",
   "contacts.refreshingOffers.titleDone": "Your offers are up to date",
+  "contacts.errorAddingContactToYourPhoneContacts": "Error adding contact to your phone contacts",
   "migrations.migrating": "Updating vexl",
   "migration.contacts.problemTitle": "Problem with migration",
   "migration.contacts.problemText": "There was a discrepancies while migrating contacts. Old number of contacts: {{oldSize}}, new number of contacts {{newSize}}. We are trying to recover and save these contacts. Please check imported contacts and make sure all contacts are imported properly!",

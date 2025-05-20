@@ -1,6 +1,6 @@
 import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
-import {type Option} from 'effect/index'
+import {type Option} from 'effect'
 import {type Atom} from 'jotai'
 import {splitAtom} from 'jotai/utils'
 import {useMemo} from 'react'

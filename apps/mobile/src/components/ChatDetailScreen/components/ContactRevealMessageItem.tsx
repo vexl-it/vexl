@@ -1,7 +1,9 @@
 import Clipboard from '@react-native-clipboard/clipboard'
 import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {type ChatMessage} from '@vexl-next/domain/src/general/messaging'
+import {effectToEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {useMolecule} from 'bunshi/dist/react'
+import {Option} from 'effect'
 import * as E from 'fp-ts/Either'
 import {pipe} from 'fp-ts/function'
 import {useAtomValue, useSetAtom} from 'jotai'
@@ -10,7 +12,7 @@ import {TouchableOpacity} from 'react-native'
 import {Image, Stack} from 'tamagui'
 import blockPhoneNumberRevealSvg from '../../../images/blockPhoneNumberRevealSvg'
 import {type ChatMessageWithState} from '../../../state/chat/domain'
-import {addContactWithUiFeedbackAtom} from '../../../state/contacts/atom/addContactWithUiFeedbackAtom'
+import {addContactWithUiFeedbackActionAtom} from '../../../state/contacts/atom/addContactWithUiFeedbackAtom'
 import {hashPhoneNumber} from '../../../state/contacts/utils'
 import {safeParse} from '../../../utils/fpUtils'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
@@ -41,7 +43,7 @@ function RevealedContactMessageItem({
   } = useMolecule(chatMolecule)
   const offer = useAtomValue(offerForChatAtom)
   const {image, userName, fullPhoneNumber} = useAtomValue(otherSideDataAtom)
-  const addRevealedContact = useSetAtom(addContactWithUiFeedbackAtom)
+  const addRevealedContact = useSetAtom(addContactWithUiFeedbackActionAtom)
   const setToastNotification = useSetAtom(toastNotificationAtom)
   const isContactAlreadyInContactsList = useAtomValue(
     isContactAlreadyInContactsListAtom
@@ -86,12 +88,14 @@ function RevealedContactMessageItem({
                       name: fullPhoneNumber ?? '',
                       numberToDisplay: fullPhoneNumber ?? '',
                       rawNumber: fullPhoneNumber ?? '',
+                      label: Option.none(),
+                      nonUniqueContactId: Option.none(),
                     },
                     computedValues: {
                       hash,
                       normalizedNumber,
                     },
-                  })
+                  }).pipe(effectToEither)
                 }),
                 E.mapLeft((l) => {
                   reportError(

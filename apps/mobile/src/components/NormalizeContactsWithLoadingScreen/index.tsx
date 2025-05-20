@@ -1,9 +1,11 @@
 import {useFocusEffect} from '@react-navigation/native'
+import {Effect} from 'effect'
 import {useSetAtom} from 'jotai'
 import {useCallback, useEffect, useState} from 'react'
 import {AppState} from 'react-native'
 import {Stack, getTokens} from 'tamagui'
 import normalizeStoredContactsActionAtom from '../../state/contacts/atom/normalizeStoredContactsActionAtom'
+import {andThenExpectVoidNoErrors} from '../../utils/andThenExpectNoErrors'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import VexlActivityIndicator from '../LoadingOverlayProvider/VexlActivityIndicator'
 import WhiteContainer from '../WhiteContainer'
@@ -21,16 +23,20 @@ export default function NormalizeContactsWithLoadingScreen({
   const {t} = useTranslation()
 
   const normalize = useCallback(() => {
-    void normalizeStoredContacts({
-      onProgress: ({total, percentDone}) => {
-        setState({
-          progress: {total, percentDone: Math.round(percentDone * 100)},
-          done: false,
+    void Effect.runPromise(
+      andThenExpectVoidNoErrors(() => {
+        setState({done: true})
+      })(
+        normalizeStoredContacts({
+          onProgress: ({total, percentDone}) => {
+            setState({
+              progress: {total, percentDone: Math.round(percentDone * 100)},
+              done: false,
+            })
+          },
         })
-      },
-    })().then(() => {
-      setState({done: true})
-    })
+      )
+    )
   }, [normalizeStoredContacts])
 
   useEffect(() => {

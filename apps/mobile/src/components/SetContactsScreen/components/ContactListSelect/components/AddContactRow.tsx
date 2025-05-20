@@ -1,4 +1,5 @@
 import {useMolecule} from 'bunshi/dist/react'
+import {Effect} from 'effect'
 import {useSetAtom} from 'jotai'
 import {TouchableOpacity} from 'react-native'
 import {Stack, Text} from 'tamagui'
@@ -24,7 +25,7 @@ function AddContactRow({
       <TouchableOpacity
         testID="@addContactRow/addContactManuallyButton"
         onPress={() => {
-          void addAndSelectContact(contact)
+          Effect.runFork(addAndSelectContact(contact))
         }}
       >
         <Stack f={1} ai="center" jc="center">

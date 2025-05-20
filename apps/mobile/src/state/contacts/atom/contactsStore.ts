@@ -1,21 +1,17 @@
-import {IsoDatetimeString} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
+import {IsoDatetimeStringE} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
+import {Array, Option, pipe, Schema} from 'effect'
 import {atom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
-import {z} from 'zod'
-import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
-import {deduplicateBy} from '../../../utils/deduplicate'
-import notEmpty from '../../../utils/notEmpty'
-import {StoredContact, type StoredContactWithComputedValues} from '../domain'
+import {atomWithParsedMmkvStorageE} from '../../../utils/atomUtils/atomWithParsedMmkvStorageE'
+import {StoredContactE, type StoredContactWithComputedValues} from '../domain'
 
-export const contactsStoreAtom = atomWithParsedMmkvStorage(
+export const contactsStoreAtom = atomWithParsedMmkvStorageE(
   'storedContacts',
   {contacts: []},
-  z
-    .object({
-      contacts: z.array(StoredContact).readonly(),
-      lastImport: IsoDatetimeString.optional(),
-    })
-    .readonly()
+  Schema.Struct({
+    contacts: Schema.Array(StoredContactE).pipe(Schema.mutable),
+    lastImport: Schema.optional(IsoDatetimeStringE),
+  })
 )
 
 export const storedContactsAtom = focusAtom(contactsStoreAtom, (o) =>
@@ -23,9 +19,14 @@ export const storedContactsAtom = focusAtom(contactsStoreAtom, (o) =>
 )
 
 export const importedContactsAtom = atom((get) =>
-  get(storedContactsAtom).filter(
-    (contact): contact is StoredContactWithComputedValues =>
-      contact.flags.imported && !!contact.computedValues
+  pipe(
+    get(storedContactsAtom),
+    Array.filter((contact) => contact.flags.imported),
+    Array.filterMap((contact) =>
+      contact.computedValues.pipe(
+        Option.map((computedValues) => ({...contact, computedValues}))
+      )
+    )
   )
 )
 
@@ -50,21 +51,29 @@ export const resolveAllContactsAsSeenActionAtom = atom(
 )
 
 export const normalizedContactsAtom = atom(
-  (get): StoredContactWithComputedValues[] =>
-    deduplicateBy(
-      get(storedContactsAtom).filter(
-        (contact): contact is StoredContactWithComputedValues =>
-          !!contact.computedValues
+  (get): StoredContactWithComputedValues[] => {
+    return pipe(
+      get(storedContactsAtom),
+      Array.filterMap((contact) =>
+        contact.computedValues.pipe(
+          Option.map((computedValues) => ({...contact, computedValues}))
+        )
       ),
-      (one) => one.computedValues.normalizedNumber
+      Array.dedupeWith(
+        (first, second) =>
+          first.computedValues.normalizedNumber ===
+          second.computedValues.normalizedNumber
+      )
     )
+  }
 )
 
-export const importedContactsHashesAtom = atom((get) =>
-  get(importedContactsAtom)
-    .map((contact) => contact.computedValues?.hash)
-    .filter(notEmpty)
-)
+export const importedContactsHashesAtom = atom((get) => {
+  return pipe(
+    get(importedContactsAtom),
+    Array.map((contact) => contact.computedValues.hash)
+  )
+})
 
 export const lastImportOfContactsAtom = focusAtom(contactsStoreAtom, (o) =>
   o.prop('lastImport')

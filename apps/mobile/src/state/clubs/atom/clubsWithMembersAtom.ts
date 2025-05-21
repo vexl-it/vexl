@@ -175,6 +175,7 @@ export function useGetAllClubsForIds(
   clubsIds: readonly ClubUuid[]
 ): ClubInfo[] {
   const clubsWithMembers = useAtomValue(clubsWithMembersAtom)
+
   return pipe(
     clubsWithMembers,
     Array.filter((club) => Array.contains(club.club.uuid)(clubsIds)),

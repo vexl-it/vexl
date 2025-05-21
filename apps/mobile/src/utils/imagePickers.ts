@@ -100,7 +100,7 @@ export function getImageFromGalleryAndTryToResolveThePermissionsAlongTheWay({
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ['images'],
       allowsEditing: true,
       aspect,
       quality: 1,

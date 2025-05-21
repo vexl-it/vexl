@@ -1,6 +1,6 @@
 import {createScope, molecule} from 'bunshi/dist/react'
-import {Effect} from 'effect'
-import Camera, {type BarcodeScanningResult, type BarcodeType} from 'expo-camera'
+import {Effect, Schema} from 'effect'
+import {type BarcodeScanningResult, Camera} from 'expo-camera'
 import {atom, type SetStateAction, type WritableAtom} from 'jotai'
 import {splitAtom} from 'jotai/utils'
 
@@ -10,6 +10,10 @@ import {translationAtom} from '../../utils/localization/I18nProvider'
 import reportError from '../../utils/reportError'
 import showErrorAlert, {showErrorAlertE} from '../../utils/showErrorAlert'
 import {toCommonErrorMessage} from '../../utils/useCommonErrorMessages'
+
+export class ScanningQrCodeFromLibraryError extends Schema.TaggedError<ScanningQrCodeFromLibraryError>(
+  'ScanningQrCodeFromLibraryError'
+)('ScanningQrCodeFromLibraryError', {message: Schema.String}) {}
 
 export const CODE_LENGTH = 6
 
@@ -110,20 +114,36 @@ export const accessCodeMolecule = molecule((_, getScope) => {
 
         const barcodeScanningResult = yield* _(
           Effect.tryPromise(
-            async () => await Camera.scanFromURLAsync(image.uri)
+            async () => await Camera.scanFromURLAsync(image.uri, ['qr'])
           )
         )
 
-        const qrCodeScanningResult = barcodeScanningResult.find(
-          (result) => (result.type as BarcodeType) === 'qr'
-        )
+        if (barcodeScanningResult.length === 0) {
+          return yield* _(
+            Effect.fail(
+              new ScanningQrCodeFromLibraryError({
+                message:
+                  'Error scanning QR code from library, QR code is invalid, file is corrupted or not a QR code',
+              })
+            )
+          )
+        }
 
-        if (qrCodeScanningResult)
-          return set(handleCodeScannedActionAtom, qrCodeScanningResult)
+        if (barcodeScanningResult[0])
+          return yield* _(
+            set(handleCodeScannedActionAtom, barcodeScanningResult[0])
+          )
 
         return false
       }).pipe(
         Effect.catchAll((e) => {
+          if (e._tag === 'ScanningQrCodeFromLibraryError') {
+            showErrorAlert({
+              title: t('clubs.errorScanningQrCodeFromLibrary'),
+              error: e,
+            })
+          }
+
           if (
             e._tag === 'UnknownException' ||
             (e._tag === 'ImagePickerError' && e.reason !== 'NothingSelected')

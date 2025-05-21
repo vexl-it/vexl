@@ -3,7 +3,7 @@ import {Effect} from 'effect'
 import {CameraView} from 'expo-camera'
 import {useSetAtom} from 'jotai'
 import {useEffect, useRef, useState} from 'react'
-import {Alert, useWindowDimensions} from 'react-native'
+import {useWindowDimensions} from 'react-native'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import Svg, {Mask, Rect} from 'react-native-svg'
 import {getTokens, Stack, Text, YStack} from 'tamagui'
@@ -30,10 +30,15 @@ function ScanClubQrCodeScreen({navigation}: Props): JSX.Element {
   const {top, bottom} = useSafeAreaInsets()
   const {height} = useWindowDimensions()
   const [permissionsGranted, setPermissionsGranted] = useState(false)
+  const {getClubQrCodeFromDeviceImageLibraryActionAtom} =
+    useMolecule(accessCodeMolecule)
 
   const {handleCodeScannedActionAtom} = useMolecule(accessCodeMolecule)
   const handleCameraPermissions = useSetAtom(handleCameraPermissionsActionAtom)
   const handleCodeScanned = useSetAtom(handleCodeScannedActionAtom)
+  const getClubQrCodeFromDeviceImageLibrary = useSetAtom(
+    getClubQrCodeFromDeviceImageLibraryActionAtom
+  )
 
   useEffect(() => {
     void (async () => {
@@ -73,20 +78,15 @@ function ScanClubQrCodeScreen({navigation}: Props): JSX.Element {
               variant="primary"
               text={t('clubs.uploadFromDevice')}
               onPress={() => {
-                Alert.alert(`Todo`)
-                // TODO: function is ready but Camera.scanFromURLAsync(image.uri) in getClubQrCodeFromDeviceImageLibraryActionAtom
-                // is throwing error for valid QR code.
-                // Check after update to expo SDK 52 and updating library
-
-                // void Effect.runPromise(
-                //   getClubQrCodeFromDeviceImageLibrary()
-                // ).then((success) => {
-                //   if (success) {
-                //     navigation.navigate('InsideTabs', {
-                //       screen: 'Marketplace',
-                //     })
-                //   }
-                // })
+                void Effect.runPromise(
+                  getClubQrCodeFromDeviceImageLibrary()
+                ).then((success) => {
+                  if (success) {
+                    navigation.navigate('EventsAndClubs', {
+                      screen: 'Clubs',
+                    })
+                  }
+                })
               }}
             />
           )}

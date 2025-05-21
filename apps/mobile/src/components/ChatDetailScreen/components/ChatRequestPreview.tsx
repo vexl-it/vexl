@@ -1,5 +1,6 @@
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue} from 'jotai'
+import {useMemo} from 'react'
 import {getTokens, Stack, Text, XStack, YStack} from 'tamagui'
 import {useGetAllClubsForIds} from '../../../state/clubs/atom/clubsWithMembersAtom'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
@@ -35,6 +36,8 @@ function ChatRequestPreview({
   )
 
   const {t} = useTranslation()
+
+  const isMineOffer = useMemo(() => !!offer?.ownershipInfo?.adminId, [offer])
 
   const commonFriendsSection = (
     <>
@@ -96,7 +99,11 @@ function ChatRequestPreview({
             : t('messages.theirOffer')}
         </Text>
         {!!offer && (
-          <OfferInfoPreview offer={offer.offerInfo} onGrayBackground />
+          <OfferInfoPreview
+            onGrayBackground
+            isMine={isMineOffer}
+            offer={offer.offerInfo}
+          />
         )}
       </Stack>
     </>

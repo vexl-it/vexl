@@ -1,6 +1,6 @@
 import {useFocusEffect} from '@react-navigation/native'
 import {useMolecule} from 'bunshi/dist/react'
-import * as O from 'fp-ts/Option'
+import {Option} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback} from 'react'
 import {Stack} from 'tamagui'
@@ -50,10 +50,10 @@ function FilteredContacts({
     <Stack f={1}>
       <Stack f={1} px="$4">
         {toDisplay.length > 0 && <ContactsList contacts={toDisplay} />}
-        {toDisplay.length === 0 && !O.isSome(customContactToAdd) && (
+        {toDisplay.length === 0 && Option.isNone(customContactToAdd) && (
           <ContactsListEmpty />
         )}
-        {toDisplay.length === 0 && O.isSome(customContactToAdd) && (
+        {toDisplay.length === 0 && Option.isSome(customContactToAdd) && (
           <AddContactRow contact={customContactToAdd.value} />
         )}
       </Stack>

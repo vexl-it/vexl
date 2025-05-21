@@ -1,24 +1,21 @@
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
-import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
-import {safeParse} from '@vexl-next/resources-utils/src/utils/parsing'
 import {createScope, molecule} from 'bunshi/dist/react'
-import * as A from 'fp-ts/Array'
-import * as O from 'fp-ts/Option'
-import * as T from 'fp-ts/Task'
-import * as TE from 'fp-ts/TaskEither'
-import {pipe} from 'fp-ts/function'
+import {Array, Effect, Option, Schema, pipe} from 'effect'
 import {atom, type Atom, type SetStateAction, type WritableAtom} from 'jotai'
 import {splitAtom} from 'jotai/utils'
 import {matchSorter, rankings} from 'match-sorter'
-import {addContactToPhoneWithUIFeedbackAtom} from '../../../../state/contacts/atom/addContactToPhoneWithUIFeedbackAtom'
+import {addContactToPhoneWithUIFeedbackActionAtom} from '../../../../state/contacts/atom/addContactToPhoneWithUIFeedbackAtom'
 import {storedContactsAtom} from '../../../../state/contacts/atom/contactsStore'
 import {submitContactsActionAtom} from '../../../../state/contacts/atom/submitContactsActionAtom'
 import {
-  StoredContactWithComputedValues,
+  StoredContactWithComputedValuesE,
   type ContactsFilter,
-  type StoredContact,
+  type StoredContactWithComputedValues,
 } from '../../../../state/contacts/domain'
-import {hashPhoneNumber} from '../../../../state/contacts/utils'
+import {
+  areContactsPermissionsGranted,
+  hashPhoneNumberE,
+} from '../../../../state/contacts/utils'
 import getValueFromSetStateActionOfAtom from '../../../../utils/atomUtils/getValueFromSetStateActionOfAtom'
 import deduplicate, {deduplicateBy} from '../../../../utils/deduplicate'
 import {translationAtom} from '../../../../utils/localization/I18nProvider'
@@ -179,7 +176,7 @@ export const contactSelectMolecule = molecule((_, getScope) => {
   )
 
   function createIsNewContactAtom(
-    contactAtom: Atom<StoredContact>
+    contactAtom: Atom<StoredContactWithComputedValues>
   ): Atom<boolean> {
     return atom((get) => !get(contactAtom).flags.seen)
   }
@@ -210,16 +207,18 @@ export const contactSelectMolecule = molecule((_, getScope) => {
 
   const submitAllSelectedContactsActionAtom = atom(
     null,
-    (get, set): T.Task<boolean> => {
+    (get, set): Effect.Effect<boolean> => {
       const {t} = get(translationAtom)
-      const selectedNumbers = deduplicate(Array.from(get(selectedNumbersAtom)))
+      const selectedNumbers = deduplicate(
+        Array.fromIterable(get(selectedNumbersAtom))
+      )
       return pipe(
         set(submitContactsActionAtom, {
           numbersToImport: selectedNumbers,
           normalizeAndImportAll: false,
           showOfferReencryptionDialog: selectedNumbers.length > 0,
         }),
-        T.map((result) => {
+        Effect.map((result) => {
           if (result) {
             set(toastNotificationAtom, {
               visible: true,
@@ -236,192 +235,199 @@ export const contactSelectMolecule = molecule((_, getScope) => {
 
   const searchTextAsCustomContactAtom = atom((get) => {
     const searchText = get(searchTextAtom)
+    const number = toE164PhoneNumberWithDefaultCountryCode(searchText)
 
-    return pipe(
-      searchText,
-      toE164PhoneNumberWithDefaultCountryCode,
-      O.bindTo('number'),
-      O.bind('hash', ({number}) => O.fromEither(hashPhoneNumber(number))),
-      O.chain(({number, hash}) =>
-        O.fromEither(
-          safeParse(StoredContactWithComputedValues)({
-            info: {
-              name: searchText,
-              numberToDisplay: searchText,
-              rawNumber: searchText,
-            },
-            computedValues: {
-              hash,
-              normalizedNumber: number,
-            },
-            flags: {
-              seen: true,
-              imported: false,
-              importedManually: true,
-              invalidNumber: 'valid',
-            },
-          } satisfies StoredContactWithComputedValues)
-        )
+    if (Option.isNone(number)) return Option.none()
+
+    const hash = Effect.runSync(
+      hashPhoneNumberE(number.value).pipe(
+        Effect.match({
+          onSuccess(value) {
+            return Option.some(value)
+          },
+          onFailure() {
+            return Option.none()
+          },
+        })
       )
+    )
+
+    if (Option.isNone(hash)) return Option.none()
+
+    return Option.some(
+      Schema.decodeSync(StoredContactWithComputedValuesE)({
+        info: {
+          name: searchText,
+          numberToDisplay: searchText,
+          rawNumber: searchText,
+        },
+        computedValues: {
+          hash: hash.value,
+          normalizedNumber: number.value,
+        },
+        flags: {
+          seen: true,
+          imported: false,
+          importedManually: true,
+          invalidNumber: 'valid',
+        },
+      })
     )
   })
 
   const addAndSelectContactWithUiFeedbackAtom = atom(
     null,
-    async (get, set, contact: StoredContactWithComputedValues) => {
+    (get, set, contact: StoredContactWithComputedValues) => {
       const {t} = get(translationAtom)
 
-      await pipe(
-        set(askAreYouSureActionAtom, {
-          variant: 'info',
-          steps: [
-            {
-              title: t('addContactDialog.addContact'),
-              description: t('addContactDialog.addThisPhoneNumber'),
-              subtitle: contact.computedValues.normalizedNumber,
-              negativeButtonText: t('common.notNow'),
-              positiveButtonText: t('addContactDialog.addContact'),
-              type: 'StepWithInput',
-              textInputProps: {
-                autoFocus: true,
-                autoCorrect: false,
-                placeholder: t('addContactDialog.addContactName'),
-                variant: 'greyOnWhite',
-                icon: userSvg,
+      return Effect.gen(function* (_) {
+        const result = yield* _(
+          set(askAreYouSureActionAtom, {
+            variant: 'info',
+            steps: [
+              {
+                title: t('addContactDialog.addContact'),
+                description: t('addContactDialog.addThisPhoneNumber'),
+                subtitle: contact.computedValues.normalizedNumber,
+                negativeButtonText: t('common.notNow'),
+                positiveButtonText: t('addContactDialog.addContact'),
+                type: 'StepWithInput',
+                textInputProps: {
+                  autoFocus: true,
+                  autoCorrect: false,
+                  placeholder: t('addContactDialog.addContactName'),
+                  variant: 'greyOnWhite',
+                  icon: userSvg,
+                },
               },
-            },
-          ],
-        }),
-        effectToTaskEither,
-        TE.map((result) =>
+            ],
+          })
+        )
+
+        const customName =
           result[0]?.type === 'inputResult'
             ? result[0].value
             : contact.info.name
-        ),
-        TE.map((customName) => {
-          set(storedContactsAtom, (val) => [
-            ...val,
-            {...contact, info: {...contact.info, name: customName}},
-          ])
 
-          return customName
-        }),
-        TE.bindTo('customName'),
-        TE.bindW('addToPhoneSuccess', ({customName}) =>
-          pipe(
-            set(addContactToPhoneWithUIFeedbackAtom, {
-              customName,
-              number: contact.computedValues.normalizedNumber,
-            }),
-            TE.fromTask
-          )
-        ),
-        // I know this is sh*t, but should be soon rewritten to Effect
-        TE.bindW('submitContactsSuccess', () =>
-          pipe(
-            set(submitContactsActionAtom, {
-              numbersToImport: deduplicate([
-                ...Array.from(get(selectedNumbersAtom)),
-                contact.computedValues.normalizedNumber,
-              ]),
-              normalizeAndImportAll: false,
-              showOfferReencryptionDialog: false,
-            }),
-            TE.fromTask
-          )
-        ),
-        TE.chainFirstW(
-          ({submitContactsSuccess, addToPhoneSuccess, customName}) => {
-            set(searchTextAtom, '')
-            reloadContacts()
+        set(storedContactsAtom, (prev) => [
+          ...prev,
+          {
+            ...contact,
+            computedValues: Option.some(contact.computedValues),
+            info: {...contact.info, name: customName},
+          },
+        ])
 
-            if (submitContactsSuccess) {
-              return set(askAreYouSureActionAtom, {
-                steps: [
-                  {
-                    type: 'StepWithText',
-                    title: t('addContactDialog.contactAdded'),
-                    description: t(
-                      addToPhoneSuccess
-                        ? 'addContactDialog.youHaveAddedContactToVexlAndPhoneContacts'
-                        : 'addContactDialog.youHaveAddedContactToVexlContacts',
-                      {
-                        contactName: customName,
-                      }
-                    ),
-                    positiveButtonText: t('common.niceWithExclamationMark'),
-                  },
-                ],
-                variant: 'info',
-              }).pipe(effectToTaskEither)
-            }
-
-            // and also this is sh*t
-            return TE.right(undefined)
-          }
+        const contactsPermissionsGranted = yield* _(
+          areContactsPermissionsGranted()
         )
-      )()
+
+        const addToPhoneSuccess = contactsPermissionsGranted
+          ? yield* _(
+              set(addContactToPhoneWithUIFeedbackActionAtom, {
+                customName,
+                number: contact.computedValues.normalizedNumber,
+              })
+            )
+          : false
+
+        const submitContactsSuccess = yield* _(
+          set(submitContactsActionAtom, {
+            numbersToImport: deduplicate([
+              ...Array.fromIterable(get(selectedNumbersAtom)),
+              contact.computedValues.normalizedNumber,
+            ]),
+            normalizeAndImportAll: false,
+            showOfferReencryptionDialog: false,
+          })
+        )
+
+        set(searchTextAtom, '')
+        reloadContacts()
+
+        if (submitContactsSuccess) {
+          yield* _(
+            set(askAreYouSureActionAtom, {
+              steps: [
+                {
+                  type: 'StepWithText',
+                  title: t('addContactDialog.contactAdded'),
+                  description: t(
+                    addToPhoneSuccess
+                      ? 'addContactDialog.youHaveAddedContactToVexlAndPhoneContacts'
+                      : 'addContactDialog.youHaveAddedContactToVexlContacts',
+                    {
+                      contactName: customName,
+                    }
+                  ),
+                  positiveButtonText: t('common.niceWithExclamationMark'),
+                },
+              ],
+              variant: 'info',
+            })
+          )
+        }
+      })
     }
   )
 
   const editContactActionAtom = atom(
     null,
     (get, set, {contact}: {contact: StoredContactWithComputedValues}) => {
-      const {t} = get(translationAtom)
-      // to solve readonly issue
-      const contacts = [...get(storedContactsAtom)]
+      return Effect.gen(function* (_) {
+        const {t} = get(translationAtom)
+        const contacts = get(storedContactsAtom)
 
-      return pipe(
-        set(askAreYouSureActionAtom, {
-          variant: 'info',
-          steps: [
-            {
-              title: t('updateContactDialog.updateContact'),
-              description: t('updateContactDialog.description'),
-              subtitle: contact.computedValues.normalizedNumber,
-              negativeButtonText: t('common.cancel'),
-              positiveButtonText: t('common.save'),
-              type: 'StepWithInput',
-              textInputProps: {
-                autoFocus: true,
-                autoCorrect: false,
-                variant: 'greyOnWhite',
-                icon: userSvg,
-                placeholder: contact.info.name,
+        const result = yield* _(
+          set(askAreYouSureActionAtom, {
+            variant: 'info',
+            steps: [
+              {
+                title: t('updateContactDialog.updateContact'),
+                description: t('updateContactDialog.description'),
+                subtitle: contact.computedValues.normalizedNumber,
+                negativeButtonText: t('common.cancel'),
+                positiveButtonText: t('common.save'),
+                type: 'StepWithInput',
+                textInputProps: {
+                  autoFocus: true,
+                  autoCorrect: false,
+                  variant: 'greyOnWhite',
+                  icon: userSvg,
+                  placeholder: contact.info.name,
+                },
               },
-            },
-          ],
-        }),
-        effectToTaskEither,
-        TE.map((result) =>
+            ],
+          })
+        )
+
+        const customName =
           result[0]?.type === 'inputResult'
             ? result[0].value
             : contact.info.name
-        ),
-        TE.map((customName) =>
-          pipe(
-            contacts,
-            A.findIndex((one) => one.info.rawNumber === contact.info.rawNumber),
-            O.match(
-              () => contacts,
-              (index) =>
-                pipe(
-                  contacts,
-                  A.modifyAt(index, (one) => ({
-                    ...one,
-                    info: {...one.info, name: customName},
-                  })),
-                  O.getOrElse(() => contacts)
-                )
+
+        const updatedContacts = pipe(
+          contacts,
+          Array.findFirstIndex(
+            (one) => one.info.rawNumber === contact.info.rawNumber
+          ),
+          Option.map((index) =>
+            pipe(
+              Array.modify(contacts, index, (one) => ({
+                ...one,
+                info: {...one.info, name: customName},
+              }))
             )
-          )
-        ),
-        TE.map((updatedContacts) => {
-          set(storedContactsAtom, updatedContacts)
-        }),
-        TE.chainFirstW(() => {
-          reloadContacts()
-          return set(askAreYouSureActionAtom, {
+          ),
+          Option.getOrElse(() => contacts)
+        )
+
+        set(storedContactsAtom, updatedContacts)
+
+        reloadContacts()
+
+        yield* _(
+          set(askAreYouSureActionAtom, {
             steps: [
               {
                 type: 'StepWithText',
@@ -433,17 +439,9 @@ export const contactSelectMolecule = molecule((_, getScope) => {
               },
             ],
             variant: 'info',
-          }).pipe(effectToTaskEither)
-        }),
-        TE.match(
-          () => {
-            // ignore, user canceled
-          },
-          () => {
-            // ignore, edit success
-          }
+          })
         )
-      )()
+      }).pipe(Effect.ignore)
     }
   )
 

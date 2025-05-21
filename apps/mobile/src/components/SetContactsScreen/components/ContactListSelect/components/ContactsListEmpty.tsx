@@ -1,4 +1,5 @@
 import {useFocusEffect} from '@react-navigation/native'
+import {Effect} from 'effect'
 import {useSetAtom} from 'jotai'
 import React, {useCallback, useState} from 'react'
 import {Linking} from 'react-native'
@@ -17,7 +18,9 @@ function ContactsListEmpty(): JSX.Element {
   )
 
   const checkPermissions = useCallback(async () => {
-    setPermissionsGranted(await areContactsPermissionsGranted())
+    setPermissionsGranted(
+      await Effect.runPromise(areContactsPermissionsGranted())
+    )
   }, [])
 
   useFocusEffect(

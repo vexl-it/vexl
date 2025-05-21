@@ -1,4 +1,5 @@
 import {useMolecule} from 'bunshi/dist/react'
+import {Effect} from 'effect'
 import {useAtomValue, useSetAtom, type Atom} from 'jotai'
 import {Stack, Text, XStack, getTokens} from 'tamagui'
 import {type StoredContactWithComputedValues} from '../../../../../state/contacts/domain'
@@ -65,7 +66,7 @@ function ContactItem({contactAtom}: Props): JSX.Element {
           width={32}
           icon={editIconSvg}
           onPress={() => {
-            void editContact({contact})
+            Effect.runFork(editContact({contact}))
           }}
         />
         <IsSelectedCheckbox contactAtom={contactAtom} />

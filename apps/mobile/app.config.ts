@@ -172,6 +172,10 @@ export default {
       },
     ],
     permissions: ['READ_CONTACTS', 'READ_CALENDAR', 'WRITE_CALENDAR', 'NFC'],
+    blockedPermissions: [
+      'android.permission.READ_MEDIA_IMAGES',
+      'android.permission.READ_MEDIA_VIDEO',
+    ],
   },
   'locales': {
     'bg': '../../packages/localization/bg-infoPlist.json',

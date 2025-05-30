@@ -3,9 +3,10 @@ import {loadMigrationsFromEffect} from '@vexl-next/server-utils/src/loadMigratio
 import {Effect, Layer, String} from 'effect'
 import {databaseConfig} from '../configs'
 import initialMigraiton from './migrations/0001_initial'
+import addIndexOnOfferIdInOfferPrivate from './migrations/0002_add_index_on_offer_id_in_offer_private'
 import addCreatedAtOnOfferPrivate from './migrations/0003_add_created_at_on_offer_private'
 import createChallengeTableAndAddIndex from './migrations/0004_create_challenge_table_and_add_index'
-import addIndexOnOfferIdInOfferPrivate from './migrations/000_2_add_index_on_offer_id_in_offer_private'
+import removeUnusedTables from './migrations/0005_remove_unused_tables'
 
 const migrations = [
   {
@@ -27,6 +28,11 @@ const migrations = [
     id: 4,
     name: 'Create challenge table and add index',
     migrationEffect: createChallengeTableAndAddIndex,
+  },
+  {
+    id: 5,
+    name: 'Remove unused tables',
+    migrationEffect: removeUnusedTables,
   },
 ] as const
 

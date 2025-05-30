@@ -6,17 +6,18 @@ import initialMigraiton from './migrations/0001_initial'
 import remove_next_prefix_and_old_users_and_connections from './migrations/0002_remove_next_prefix_and_old_users_and_connections'
 import make_version_in_users_table_nullable from './migrations/0003_make_version_in_users_table_nullable'
 import add_initial_import_done_column_to_users_table from './migrations/0004_add_initial_import_done_column_to_users_table'
-import add_unique_constraint_to_user_contact from './migrations/0004_add_unique_constraint_to_user_contact'
-import add_country_prefix_to_users_table from './migrations/0005_add_country_prefix_to_users_table'
-import add_table_for_clubs from './migrations/0006_add_table_for_clubs'
-import add_expo_token_to_users_table from './migrations/0007_add_expo_token_to_users_table'
-import add_table_for_challenges from './migrations/0008_add_table_for_challenges'
-import club_member_rename_last_refreshed_at_to_timestamp from './migrations/0009_club_member_rename_last_refreshed_at_to_timestamp'
-import add_club_column_inactive_and_to_be_deleted from './migrations/0010_add_club_column_inactive_and_to_be_deleted'
-import add_club_column_report from './migrations/0011_add_club_column_report'
-import create_club_offer_reported_info_table_and_add_index from './migrations/0012_create_club_offer_reported_info_table_and_add_index'
-import add_club_column_report_limit from './migrations/0013_add_club_column_report_limit'
-import add_table_club_reported_record from './migrations/0014_add_table_club_reported_record'
+import add_unique_constraint_to_user_contact from './migrations/0005_add_unique_constraint_to_user_contact'
+import add_country_prefix_to_users_table from './migrations/0006_add_country_prefix_to_users_table'
+import add_table_for_clubs from './migrations/0007_add_table_for_clubs'
+import add_expo_token_to_users_table from './migrations/0008_add_expo_token_to_users_table'
+import add_table_for_challenges from './migrations/0009_add_table_for_challenges'
+import club_member_rename_last_refreshed_at_to_timestamp from './migrations/0010_club_member_rename_last_refreshed_at_to_timestamp'
+import add_club_column_inactive_and_to_be_deleted from './migrations/0011_add_club_column_inactive_and_to_be_deleted'
+import add_club_column_report from './migrations/0012_add_club_column_report'
+import create_club_offer_reported_info_table_and_add_index from './migrations/0013_create_club_offer_reported_info_table_and_add_index'
+import add_club_column_report_limit from './migrations/0014_add_club_column_report_limit'
+import add_table_club_reported_record from './migrations/0015_add_table_club_reported_record'
+import remove_unused_tables from './migrations/0016_remove_unused_tables'
 
 const migrations = [
   {
@@ -93,6 +94,11 @@ const migrations = [
     id: 15,
     name: 'add_table_club_reported_record',
     migrationEffect: add_table_club_reported_record,
+  },
+  {
+    id: 16,
+    name: 'remove_unused_tables',
+    migrationEffect: remove_unused_tables,
   },
 ] as const
 

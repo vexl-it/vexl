@@ -11,7 +11,7 @@ import Animated, {
   useSharedValue,
 } from 'react-native-reanimated'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
-import {Stack, XStack} from 'tamagui'
+import {Stack, XStack, YStack} from 'tamagui'
 import {minutesTillOffersDisplayedAtom} from '../../../../../state/contacts'
 import {
   useAreOffersLoading,
@@ -129,18 +129,21 @@ function OffersListStateDisplayerContent(): JSX.Element {
                     </Stack>
                   )}
               </XStack>
-              <ReencryptOffersSuggestion mb="$6" />
-              <VexlNewsSuggestions mb="$6" />
-              <RemovedClubsSuggestion mb="$6" />
-              <ImportNewContactsSuggestion mb="$6" />
-              <AddListingTypeToOffersSuggestion mb="$6" />
+              <YStack gap="$6" mb="$6">
+                <ReencryptOffersSuggestion />
+                <VexlNewsSuggestions />
+                <RemovedClubsSuggestion />
+                <ImportNewContactsSuggestion />
+                <AddListingTypeToOffersSuggestion />
+              </YStack>
             </Stack>
           ) : (
-            <>
+            <YStack gap="$6" mb="$6">
+              <ReencryptOffersSuggestion />
               <VexlNewsSuggestions />
               <RemovedClubsSuggestion />
               <EmptyListPlaceholder />
-            </>
+            </YStack>
           )}
         </Stack>
       )

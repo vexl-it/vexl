@@ -56,7 +56,7 @@ const doesOfferNeedUpdateActionAtom = atom(
   }
 )
 
-const checkNotificationTokensAndRefreshOffersActionAtom = atom(
+const checkNotificationTokensAndUpdateOffersActionAtom = atom(
   null,
   (get, set) => {
     console.info(
@@ -177,4 +177,4 @@ const checkNotificationTokensAndRefreshOffersActionAtom = atom(
   }
 )
 
-export default checkNotificationTokensAndRefreshOffersActionAtom
+export default checkNotificationTokensAndUpdateOffersActionAtom

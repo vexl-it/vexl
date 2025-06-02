@@ -1,6 +1,10 @@
+import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {
-  OfferId,
+  type IntendedConnectionLevel,
   type MyOfferInState,
+  type OfferAdminId,
+  OfferId,
+  type OfferPublicPart,
 } from '@vexl-next/domain/src/general/offers'
 import {type OfferEncryptionProgress} from '@vexl-next/resources-utils/src/offers/OfferEncryptionProgress'
 import createNewOfferForMyContacts from '@vexl-next/resources-utils/src/offers/createNewOfferForMyContacts'
@@ -19,7 +23,7 @@ import {
 } from '../../connections/atom/offerToConnectionsAtom'
 import {sessionDataOrDummyAtom} from '../../session'
 import {myOffersAtom} from './myOffers'
-import {singleOfferAtom} from './offersState'
+import {singleOfferAtom, singleOfferByAdminIdAtom} from './offersState'
 
 export const offersMissingOnServerStorageAtom = atomWithParsedMmkvStorage(
   'offers-missing-on-server',
@@ -63,18 +67,28 @@ const reencryptOneOfferActionAtom = atom(
     get,
     set,
     {
+      adminId,
+      intendedConnectionLevel,
+      intendedClubs,
       offer,
       onProgress,
-    }: {offer: MyOfferInState; onProgress: (p: OfferEncryptionProgress) => void}
+    }: {
+      adminId?: OfferAdminId
+      intendedConnectionLevel?: IntendedConnectionLevel
+      intendedClubs?: readonly ClubUuid[]
+      offer: MyOfferInState
+      onProgress: (p: OfferEncryptionProgress) => void
+    }
   ) => {
     const api = get(apiAtom)
     const session = get(sessionDataOrDummyAtom)
     const offerAtom = singleOfferAtom(offer.offerInfo.offerId)
-    const intendedClubs = get(offerAtom)?.ownershipInfo?.intendedClubs ?? []
+    const clubsUuids =
+      intendedClubs ?? get(offerAtom)?.ownershipInfo?.intendedClubs ?? []
     const clubsInfo = get(clubsToKeyHolderAtom)
 
     const intendedClubsRecord = pipe(
-      intendedClubs,
+      clubsUuids,
       Array.filterMap((clubUuid) =>
         pipe(
           Record.get(clubsInfo, clubUuid),
@@ -90,10 +104,14 @@ const reencryptOneOfferActionAtom = atom(
         contactApi: api.contact,
         publicPart: offer.offerInfo.publicPart,
         countryPrefix: getCountryPrefix(session.phoneNumber),
-        intendedConnectionLevel: offer.ownershipInfo.intendedConnectionLevel,
+        intendedConnectionLevel:
+          intendedConnectionLevel ??
+          offer.ownershipInfo.intendedConnectionLevel,
         ownerKeyPair: session.privateKey,
         onProgress,
         intendedClubs: intendedClubsRecord,
+        offerId: offer.offerInfo.offerId,
+        adminId,
       }),
       Effect.map((r) => {
         if (r.encryptionErrors.length > 0) {
@@ -134,6 +152,63 @@ const reencryptOneOfferActionAtom = atom(
         return recreatedOffer
       })
     )
+  }
+)
+
+export const reencryptSingleOfferMissingOnServerWhenEditingActionAtom = atom(
+  null,
+  (
+    get,
+    set,
+    {
+      adminId,
+      intendedConnectionLevel,
+      intendedClubs,
+      publicPayload,
+      onProgress,
+    }: {
+      adminId: OfferAdminId
+      publicPayload: OfferPublicPart
+      intendedConnectionLevel: IntendedConnectionLevel
+      intendedClubs: readonly ClubUuid[]
+      onProgress?: (a: OfferEncryptionProgress) => void
+    }
+  ) => {
+    return Effect.gen(function* (_) {
+      const offer = get(singleOfferByAdminIdAtom(adminId))
+
+      if (!offer?.ownershipInfo || !offer?.offerInfo) {
+        reportError(
+          'error',
+          new Error('Offer not found for re-encryption in state'),
+          {
+            adminId,
+          }
+        )
+        return yield* _(Effect.fail(new Error('Offer not found')))
+      }
+
+      const myOfferInState: MyOfferInState = {
+        ...offer,
+        ownershipInfo: offer.ownershipInfo,
+        offerInfo: {
+          ...offer.offerInfo,
+          publicPart: publicPayload,
+        },
+      }
+
+      return yield* _(
+        set(reencryptOneOfferActionAtom, {
+          adminId: myOfferInState.ownershipInfo.adminId,
+          offer: myOfferInState,
+          intendedConnectionLevel,
+          intendedClubs,
+          onProgress: (progress) => {
+            if (onProgress) onProgress(progress)
+          },
+        })
+      )
+    })
   }
 )
 

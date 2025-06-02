@@ -32,7 +32,7 @@ function EmptyMarketplaceSuggestions({
       }
       contentContainerStyle={{paddingBottom: tabBarEndsAt + 25}}
     >
-      <YStack mt="$4" gap="$6">
+      <YStack gap="$6">
         <MarketplaceSuggestion
           buttonText={t('myOffers.addNewOffer')}
           onButtonPress={() => {

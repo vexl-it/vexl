@@ -1,7 +1,6 @@
-import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
 import {RefreshOfferEndpoint} from '@vexl-next/rest-api/src/services/offer/specification'
 import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
-import {Array, Effect, Option, Schema} from 'effect'
+import {Array, Effect, pipe, Schema} from 'effect'
 import {Handler} from 'effect-http'
 import {OfferDbService} from '../db/OfferDbService'
 import {hashAdminId} from '../utils/hashAdminId'
@@ -19,12 +18,14 @@ export const refreshOffer = Handler.make(RefreshOfferEndpoint, (req) =>
         })
       )
 
-      if (Array.some(offersForAdminIds, Option.isNone)) {
-        return yield* _(Effect.fail(new NotFoundError()))
-      }
+      const existingHashedIds = pipe(
+        Array.intersection(
+          Array.getSomes(offersForAdminIds).map((record) => record.adminId)
+        )(hashedIds)
+      )
 
       return yield* _(
-        Effect.forEach(hashedIds, offerDbService.updateRefreshOffer, {
+        Effect.forEach(existingHashedIds, offerDbService.updateRefreshOffer, {
           batching: true,
         })
       )

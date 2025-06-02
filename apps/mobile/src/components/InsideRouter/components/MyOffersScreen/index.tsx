@@ -22,9 +22,9 @@ const myActiveOffers = selectAtom(myActiveOffersAtom, (offers) => offers.length)
 
 function ListHeaderComponent(): JSX.Element {
   return (
-    <Stack mt="$4">
-      <VexlNewsSuggestions mb="$6" />
-      <ReencryptOffersSuggestion px="$0" />
+    <Stack my="$4" gap="$6">
+      <VexlNewsSuggestions />
+      <ReencryptOffersSuggestion />
     </Stack>
   )
 }

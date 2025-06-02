@@ -7,7 +7,7 @@ import {
 } from '@vexl-next/rest-api/src/services/content/contracts'
 import {NewsAndAnonouncementsEndpoint} from '@vexl-next/rest-api/src/services/content/specification'
 import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
-import {Config, Effect, Option, Schema} from 'effect'
+import {Effect, Option, Schema} from 'effect'
 import {Handler} from 'effect-http'
 
 // const data = {
@@ -74,42 +74,53 @@ import {Handler} from 'effect-http'
 //   } satisfies FullScreenWarning),
 // } satisfies NewsAndAnnouncementsResponse
 
-const TheRageUrlConfig = Config.string('THE_RAGE_URL').pipe(
-  Config.withDefault('https://vexl.it/blog'),
-  Effect.map(Schema.decodeSync(HttpsUrlString))
-)
-const TheRageReleaseAtMiliseconds = Config.number(
-  'THE_RAGE_RELEASE_AT_MILISECONDS'
-).pipe(Config.withDefault(1748242920000))
-
 export const newsAndAnonouncementsHandler = Handler.make(
   NewsAndAnonouncementsEndpoint,
   ({headers}) =>
     makeEndpointEffect(
       Effect.gen(function* (_) {
-        const vexlBotNewsForBlog: VexlBotNews = {
+        const vexlBotNewsForBlog1: VexlBotNews = {
           id: Schema.decodeSync(UuidE)('026dfa3a-c5b9-4834-b2ff-d51df8ee85c7'),
           type: 'info',
           content:
             "Psst... Your money's telling stories. Wanna know who’s listening?\n📖 Start our new series with The Rage.",
           action: Option.some({
             text: 'Read now',
-            url: yield* _(TheRageUrlConfig),
+            url: Schema.decodeSync(HttpsUrlString)(
+              'https://vexl.it/post/a-human-rights-view-on-finance'
+            ),
           }),
           cancelForever: true,
           bubbleOrigin: Option.none(),
           cancelable: true,
         }
 
-        const showVexlBotNewsForBlog =
-          unixMillisecondsNow() > (yield* _(TheRageReleaseAtMiliseconds))
+        const vexlBotNewsForBlog2: VexlBotNews = {
+          id: Schema.decodeSync(UuidE)('5b44bc53-4556-4e4a-af70-006b3beaef64'),
+          type: 'info',
+          content:
+            'Let’s talk about what’s not on your bank statement.\nNew drop with The Rage ➡️',
+          action: Option.some({
+            text: 'Read now',
+            url: Schema.decodeSync(HttpsUrlString)(
+              'https://vexl.it/post/the-myth-of-financial-inclusion'
+            ),
+          }),
+          cancelForever: true,
+          bubbleOrigin: Option.none(),
+          cancelable: true,
+        }
+
+        const newBlogReleaseAtMillis = 1748876400000
+        const showNewBlogLink =
+          headers.isDeveloper || unixMillisecondsNow() > newBlogReleaseAtMillis
 
         // if (headers.isDeveloper) return data
         return {
           fullScreenWarning: Option.none(),
-          vexlBotNews: [
-            ...(showVexlBotNewsForBlog ? [vexlBotNewsForBlog] : []),
-          ],
+          vexlBotNews: showNewBlogLink
+            ? [vexlBotNewsForBlog2]
+            : [vexlBotNewsForBlog1],
         } satisfies NewsAndAnnouncementsResponse
       }),
       Schema.Void

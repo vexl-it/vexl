@@ -19,6 +19,7 @@ import {
 import getValueFromSetStateActionOfAtom from '../../../../utils/atomUtils/getValueFromSetStateActionOfAtom'
 import deduplicate, {deduplicateBy} from '../../../../utils/deduplicate'
 import {translationAtom} from '../../../../utils/localization/I18nProvider'
+import {showErrorAlertE} from '../../../../utils/showErrorAlert'
 import toE164PhoneNumberWithDefaultCountryCode from '../../../../utils/toE164PhoneNumberWithDefaultCountryCode'
 import {askAreYouSureActionAtom} from '../../../AreYouSureDialog'
 import checkIconSvg from '../../../ChatDetailScreen/components/images/checkIconSvg'
@@ -327,7 +328,17 @@ export const contactSelectMolecule = molecule((_, getScope) => {
               set(addContactToPhoneWithUIFeedbackActionAtom, {
                 customName,
                 number: contact.computedValues.normalizedNumber,
-              })
+              }),
+              Effect.catchTag('UserDeclinedError', () => Effect.succeed(false)),
+              Effect.catchTag('ErrorAddingContactToPhoneContacts', (e) =>
+                Effect.zipRight(
+                  showErrorAlertE({
+                    title: t('contacts.errorAddingContactToYourPhoneContacts'),
+                    error: e,
+                  }),
+                  Effect.succeed(false)
+                )
+              )
             )
           : false
 

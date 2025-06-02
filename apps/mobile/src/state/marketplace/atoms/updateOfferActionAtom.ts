@@ -20,7 +20,7 @@ import updateOffer, {
 import {type PublicPartEncryptionError} from '@vexl-next/resources-utils/src/offers/utils/encryptOfferPublicPayload'
 import {type PrivatePartEncryptionError} from '@vexl-next/resources-utils/src/offers/utils/encryptPrivatePart'
 import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
-import {Effect, Option, Schema} from 'effect'
+import {Effect, Option, pipe, Schema} from 'effect'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
 import {getNotificationToken} from '../../../utils/notifications'
@@ -29,6 +29,7 @@ import {syncConnectionsActionAtom} from '../../connections/atom/connectionStateA
 import {updateAndReencryptSingleOfferConnectionActionAtom} from '../../connections/atom/offerToConnectionsAtom'
 import addNotificationCypherToPublicPayloadActionAtom from '../../notifications/addNotificationTokenToPublicPayloadActionAtom'
 import {sessionDataOrDummyAtom} from '../../session'
+import {reencryptSingleOfferMissingOnServerWhenEditingActionAtom} from './offersMissingOnServer'
 import {offersAtom} from './offersState'
 
 export class ErrorReencryptingOfferInUpdate extends Schema.TaggedError<ErrorReencryptingOfferInUpdate>(
@@ -64,21 +65,22 @@ export const updateOfferActionAtom = atom<
     | ErrorReencryptingOfferInUpdate
   >
 >(null, (get, set, params) => {
-  const api = get(apiAtom)
-  const session = get(sessionDataOrDummyAtom)
-  const {
-    intendedClubs,
-    payloadPublic,
-    symmetricKey,
-    adminId,
-    intendedConnectionLevel,
-  } = params
-
   return Effect.gen(function* (_) {
+    const api = get(apiAtom)
+    const session = get(sessionDataOrDummyAtom)
+    const {
+      intendedClubs,
+      payloadPublic,
+      symmetricKey,
+      adminId,
+      intendedConnectionLevel,
+    } = params
+
     const notificationToken = yield* _(taskToEffect(getNotificationToken()))
 
     if (params.onProgress)
       params.onProgress({type: 'CONSTRUCTING_PUBLIC_PAYLOAD'})
+
     const publicPayloadWithNotificationToken = !params.updateFcmCypher
       ? {
           publicPart: payloadPublic,
@@ -103,7 +105,23 @@ export const updateOfferActionAtom = atom<
         intendedConnectionLevel,
         intendedClubs: intendedClubs ?? [],
         ownerKeypair: session.privateKey,
-      })
+      }).pipe(
+        Effect.catchTag('NotFoundError', () =>
+          pipe(
+            set(reencryptSingleOfferMissingOnServerWhenEditingActionAtom, {
+              adminId,
+              publicPayload: publicPayloadWithNotificationToken.publicPart,
+              intendedConnectionLevel,
+              intendedClubs,
+              onProgress: params.onProgress,
+            }),
+            Effect.map((result) => result.offerInfo),
+            Effect.mapError(
+              (e) => new ErrorReencryptingOfferInUpdate({cause: e})
+            )
+          )
+        )
+      )
     )
 
     const createdOffer: MyOfferInState = {

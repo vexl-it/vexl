@@ -120,7 +120,8 @@ describe('Refresh offer', () => {
       })
     )
   })
-  it('Fails with 404 when refreshing not existing offer', async () => {
+
+  it('Result with empty array when refreshing non existing offers', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const client = yield* _(NodeTestingApp)
@@ -128,7 +129,7 @@ describe('Refresh offer', () => {
           client.refreshOffer(
             {
               body: {
-                adminIds: [generateAdminId()],
+                adminIds: [generateAdminId(), generateAdminId()],
               },
             },
             HttpClientRequest.setHeaders(
@@ -140,13 +141,10 @@ describe('Refresh offer', () => {
                 })
               )
             )
-          ),
-          Effect.either
+          )
         )
-        expect(result._tag).toBe('Left')
-        if (result._tag === 'Left') {
-          expect(result.left).toHaveProperty('status', 404)
-        }
+
+        expect(result).toEqual([])
       })
     )
   })

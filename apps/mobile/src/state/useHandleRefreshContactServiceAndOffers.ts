@@ -1,14 +1,14 @@
 import {countryPrefixFromNumber} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
-import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
+import {
+  effectToTaskEither,
+  taskToEffect,
+} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {generateKeyPair} from '@vexl-next/resources-utils/src/utils/crypto'
-import {Effect} from 'effect'
-import * as A from 'fp-ts/Array'
-import {isNonEmpty} from 'fp-ts/Array'
+import {Array, Effect, pipe} from 'effect'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
-import {pipe} from 'fp-ts/function'
-import {atom, useAtomValue, useSetAtom, useStore} from 'jotai'
+import {atom, useSetAtom, useStore} from 'jotai'
 import {useCallback} from 'react'
 import {apiAtom} from '../api'
 import notEmpty from '../utils/notEmpty'
@@ -17,7 +17,7 @@ import {useAppState} from '../utils/useAppState'
 import {inboxesAtom} from './chat/atoms/messagingStateAtom'
 import {useRefreshNotificationTokensForActiveChatsAssumeLogin} from './chat/atoms/refreshNotificationTokensActionAtom'
 import {createInboxAtom} from './chat/hooks/useCreateInbox'
-import checkNotificationTokensAndRefreshOffersActionAtom from './marketplace/atoms/checkNotificationTokensAndRefreshOffersActionAtom'
+import checkNotificationTokensAndUpdateOffersActionAtom from './marketplace/atoms/checkNotificationTokensAndUpdateOffersActionAtom'
 import {myOffersAtom} from './marketplace/atoms/myOffers'
 import {offersMissingOnServerAtom} from './marketplace/atoms/offersMissingOnServer'
 import {updateOfferActionAtom} from './marketplace/atoms/updateOfferActionAtom'
@@ -134,64 +134,50 @@ export function useRefreshUserOnContactService(): void {
   )
 }
 
-export function useRefreshOffers(): void {
-  const store = useStore()
-  const api = useAtomValue(apiAtom)
+const refreshOffersActionAtom = atom(null, (get, set) => {
+  return Effect.gen(function* (_) {
+    const api = get(apiAtom)
+    const myOffers = get(myOffersAtom)
 
-  useAppState(
-    useCallback(
-      (state) => {
-        if (state !== 'active') return
-
-        const myOffers = store.get(myOffersAtom)
-
-        void pipe(
-          myOffers,
-          A.map((offer) => offer.ownershipInfo?.adminId),
-          A.filter(notEmpty),
-          (o) => {
-            console.info(`🦋 Refreshing ${o.length} offers`)
-            return o
-          },
-          TE.fromPredicate(
-            isNonEmpty,
-            () => ({_tag: 'noOffersToRefresh'}) as const
-          ),
-          TE.chainW((adminIds) =>
-            effectToTaskEither(api.offer.refreshOffer({body: {adminIds}}))
-          ),
-          TE.map((offerIdsOnServer) => {
-            const offerIdsOnDevice = myOffers.map(
-              (one) => one.offerInfo.offerId
-            )
-            const offerIdsNotOnServer = offerIdsOnDevice.filter(
-              (oneOnDevice) => !offerIdsOnServer.includes(oneOnDevice)
-            )
-            store.set(offersMissingOnServerAtom, offerIdsNotOnServer)
-          }),
-          TE.match(
-            (l) => {
-              if (l._tag === 'noOffersToRefresh') {
-                console.info('🦋 No offers to refresh')
-              } else {
-                console.error('🦋 🚨 Error while refreshing offers', l._tag)
-                reportError(
-                  'warn',
-                  new Error('Error while refreshing offers'),
-                  {l}
-                )
-              }
-            },
-            () => {
-              console.info(`🦋 Offers refreshed`)
-            }
-          )
-        )()
-      },
-      [api.offer, store]
+    const adminIds = pipe(
+      myOffers,
+      Array.map((offer) => offer.ownershipInfo?.adminId),
+      Array.filter(notEmpty),
+      (o) => {
+        console.info(`🦋 Refreshing ${o.length} offers`)
+        return o
+      }
     )
+
+    if (Array.isEmptyArray(adminIds)) {
+      return yield* _(Effect.fail({_tag: 'noOffersToRefresh'}))
+    }
+
+    const offerIdsOnServer = yield* _(
+      api.offer.refreshOffer({body: {adminIds}})
+    )
+
+    const offerIdsOnDevice = myOffers.map((one) => one.offerInfo.offerId)
+    const offerIdsNotOnServer = offerIdsOnDevice.filter(
+      (oneOnDevice) => !Array.contains(offerIdsOnServer, oneOnDevice)
+    )
+
+    set(offersMissingOnServerAtom, offerIdsNotOnServer)
+
+    console.info(`🦋 Offers refreshed`)
+  }).pipe(
+    Effect.catchAll((e) => {
+      if (e._tag === 'noOffersToRefresh') {
+        console.info('🦋 No offers to refresh')
+      } else {
+        console.error('🦋 🚨 Error while refreshing offers', e._tag)
+        reportError('warn', new Error('Error while refreshing offers'), {e})
+      }
+
+      return Effect.fail(e)
+    })
   )
-}
+})
 
 const recreateInboxAndUpdateOfferAtom = atom(
   null,
@@ -262,56 +248,51 @@ const recreateInboxAndUpdateOfferAtom = atom(
   }
 )
 
-function useCheckOfferInboxes(): void {
-  const store = useStore()
+const checkOfferInboxesActionAtom = atom(null, (get, set) => {
+  return Effect.gen(function* (_) {
+    const inboxes = get(inboxesAtom)
+    const publicKeys = inboxes.map((one) => one.privateKey.publicKeyPemBase64)
 
-  useAppState(
-    useCallback(
-      (state) => {
-        if (state !== 'active') return
-
-        const publicKeys = store
-          .get(inboxesAtom)
-          .map((one) => one.privateKey.publicKeyPemBase64)
-
-        void pipe(
-          store.get(myOffersAtom),
-          A.filter((offer) => {
-            const offerPublicKey = offer.offerInfo.publicPart.offerPublicKey
-            return !publicKeys.includes(offerPublicKey)
-          }),
-          A.map(
-            (offerWithoutInbox): T.Task<boolean> =>
-              store.set(recreateInboxAndUpdateOfferAtom, offerWithoutInbox)
-          ),
-          A.sequence(T.ApplicativeSeq)
-        )()
-      },
-      [store]
+    yield* _(
+      get(myOffersAtom),
+      Array.filter((offer) => {
+        const offerPublicKey = offer.offerInfo.publicPart.offerPublicKey
+        return !publicKeys.includes(offerPublicKey)
+      }),
+      Array.map((offerWithoutInbox) =>
+        taskToEffect(set(recreateInboxAndUpdateOfferAtom, offerWithoutInbox))
+      ),
+      Effect.all
     )
-  )
-}
 
-function useCheckNotificationTokensAndRefreshOffers(): void {
-  const checkNotificationTokensAndRefreshOffers = useSetAtom(
-    checkNotificationTokensAndRefreshOffersActionAtom
-  )
-
-  useAppState(
-    useCallback(
-      (state) => {
-        if (state !== 'active') return
-        checkNotificationTokensAndRefreshOffers()
-      },
-      [checkNotificationTokensAndRefreshOffers]
-    )
-  )
-}
+    return true
+  })
+})
 
 export default function useHandleRefreshContactServiceAndOffers(): void {
+  const refreshOffers = useSetAtom(refreshOffersActionAtom)
+  const checkOfferInboxes = useSetAtom(checkOfferInboxesActionAtom)
+  const checkNotificationTokensAndUpdateOffers = useSetAtom(
+    checkNotificationTokensAndUpdateOffersActionAtom
+  )
+
   useRefreshUserOnContactService()
-  useRefreshOffers()
-  useCheckOfferInboxes()
-  useCheckNotificationTokensAndRefreshOffers()
   useRefreshNotificationTokensForActiveChatsAssumeLogin()
+
+  useAppState(
+    useCallback(
+      (state) => {
+        if (state !== 'active') return
+
+        pipe(
+          refreshOffers(),
+          Effect.andThen(checkOfferInboxes),
+          Effect.andThen(checkNotificationTokensAndUpdateOffers),
+          Effect.ignore,
+          Effect.runFork
+        )
+      },
+      [checkNotificationTokensAndUpdateOffers, checkOfferInboxes, refreshOffers]
+    )
+  )
 }

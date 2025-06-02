@@ -9,6 +9,7 @@ import {
   generateAdminId,
   type IntendedConnectionLevel,
   type OfferAdminId,
+  type OfferId,
   type OfferInfo,
   type OfferPublicPart,
   type SymmetricKey,
@@ -57,6 +58,8 @@ export default function createNewOfferForMyContacts({
   intendedConnectionLevel,
   onProgress,
   intendedClubs,
+  offerId,
+  adminId: existingAdminId,
 }: {
   offerApi: OfferApi
   contactApi: ContactApi
@@ -66,6 +69,8 @@ export default function createNewOfferForMyContacts({
   intendedConnectionLevel: IntendedConnectionLevel
   intendedClubs: Record<ClubUuid, KeyHolder.PrivateKeyHolder>
   onProgress?: (status: OfferEncryptionProgress) => void
+  offerId?: OfferId
+  adminId?: OfferAdminId
 }): Effect.Effect<
   CreateOfferResult,
   | ApiErrorFetchingContactsForOffer
@@ -78,7 +83,7 @@ export default function createNewOfferForMyContacts({
   | ClubKeyNotFoundInInnerStateError
 > {
   return Effect.gen(function* (_) {
-    const adminId = generateAdminId()
+    const adminId = existingAdminId ?? generateAdminId()
     const symmetricKey = yield* _(generateSymmetricKey())
 
     if (onProgress) onProgress({type: 'CONSTRUCTING_PUBLIC_PAYLOAD'})
@@ -114,6 +119,7 @@ export default function createNewOfferForMyContacts({
           payloadPublic: encryptedPublic,
           offerType: publicPart.offerType,
           adminId,
+          offerId,
         },
       })
     )

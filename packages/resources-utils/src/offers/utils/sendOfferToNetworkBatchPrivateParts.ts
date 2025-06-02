@@ -1,6 +1,7 @@
 import {type CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {
   type OfferAdminId,
+  type OfferId,
   type OfferType,
   type PublicPayloadEncrypted,
 } from '@vexl-next/domain/src/general/offers'
@@ -22,6 +23,7 @@ export const sendOfferToNetworkBatchPrivateParts = ({
     offerPrivateList: NonEmptyArray<ServerPrivatePart>
     countryPrefix: CountryPrefix
     adminId: OfferAdminId
+    offerId?: OfferId
   }
 }): ReturnType<OfferApi['createNewOffer']> =>
   Effect.gen(function* (_) {
@@ -40,6 +42,7 @@ export const sendOfferToNetworkBatchPrivateParts = ({
           payloadPublic: offerData.payloadPublic,
           offerType: offerData.offerType,
           adminId: offerData.adminId,
+          offerId: offerData.offerId,
         },
       })
     )

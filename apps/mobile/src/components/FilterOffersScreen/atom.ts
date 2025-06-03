@@ -393,8 +393,8 @@ export const baseFilterTempAtom = atom(
     const offerType = get(offerTypeAtom) ?? get(offerTypeFilterAtom)
 
     if (listingType === 'BITCOIN') {
-      if (offerType === 'SELL') return 'BTC_TO_CASH'
-      return 'CASH_TO_BTC'
+      if (offerType === 'SELL') return 'CASH_TO_BTC'
+      return 'BTC_TO_CASH'
     }
 
     if (listingType === 'PRODUCT') {

@@ -12,6 +12,7 @@ import * as Notifications from 'expo-notifications'
 import * as E from 'fp-ts/Either'
 import type * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
+import {useEffect, useState} from 'react'
 import {Alert} from 'react-native'
 import NotificationSetting from 'react-native-open-notification'
 import {useTranslation} from '../localization/I18nProvider'
@@ -123,6 +124,22 @@ export function areNotificationsEnabled(): TE.TaskEither<
 
 export async function deactivateToken(): Promise<void> {
   await Notifications.unregisterForNotificationsAsync()
+}
+
+export function useNotificationsEnabled(): boolean {
+  const [notificationsEnabled, setNotificationsEnabled] =
+    useState<boolean>(false)
+
+  useEffect(() => {
+    void (async () => {
+      const settings = await notifee.getNotificationSettings()
+      setNotificationsEnabled(
+        settings.authorizationStatus === AuthorizationStatus.AUTHORIZED
+      )
+    })()
+  }, [setNotificationsEnabled])
+
+  return notificationsEnabled
 }
 
 export async function subscribeToGeneralTopic(): Promise<void> {

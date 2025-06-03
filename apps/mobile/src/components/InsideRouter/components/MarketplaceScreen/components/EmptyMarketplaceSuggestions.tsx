@@ -9,7 +9,8 @@ import {
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import MarketplaceSuggestion from '../../../../MarketplaceSuggestion'
 import usePixelsFromBottomWhereTabsEnd from '../../../utils'
-import ImportNewContactsSuggestion from './ImportNewContactsSuggestion'
+import EnableNewOffersNotificationSuggestion from './EnableNewOffersNotificationSuggestion'
+import ImportNewContactsSuggestion from './ImportNewContactsSuggestion copy'
 
 interface Props {
   refreshing: boolean
@@ -33,6 +34,8 @@ function EmptyMarketplaceSuggestions({
       contentContainerStyle={{paddingBottom: tabBarEndsAt + 25}}
     >
       <YStack gap="$6">
+        <EnableNewOffersNotificationSuggestion />
+
         <MarketplaceSuggestion
           buttonText={t('myOffers.addNewOffer')}
           onButtonPress={() => {

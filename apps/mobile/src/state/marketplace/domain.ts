@@ -24,6 +24,7 @@ import {type ApiErrorFetchingOffers} from '@vexl-next/resources-utils/src/offers
 import {type ErrorSigningChallenge} from '@vexl-next/server-utils/src/services/challenge/contracts'
 import {Schema} from 'effect'
 import {z} from 'zod'
+import {fastDeepEqualRemoveUndefineds} from '../../utils/fastDeepEqualRemoveUndefineds'
 
 export type ApiErrorFetchingRemovedOffers =
   BasicError<'ApiErrorFetchingRemovedOffers'>
@@ -93,6 +94,8 @@ export const OffersFilterE = Schema.Struct({
 })
 
 export type OffersFilter = typeof OffersFilterE.Type
+export const offersFilterEquals = (a: OffersFilter, b: OffersFilter): boolean =>
+  fastDeepEqualRemoveUndefineds(a, b)
 
 export const BaseOffersFilter = z.enum([
   'BTC_TO_CASH',

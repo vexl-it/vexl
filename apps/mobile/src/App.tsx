@@ -31,7 +31,6 @@ function App(): JSX.Element {
 
   return (
     <SafeAreaProvider>
-      <StatusBar style="light" />
       <BadgeCountManager />
       <PreventScreenshots />
       <DisableLogBoxForTests />
@@ -69,9 +68,9 @@ function App(): JSX.Element {
 export default function _(): JSX.Element {
   return (
     <ThemeProvider>
-      <AnimatedSplashScreen>
-        <App />
-      </AnimatedSplashScreen>
+      <StatusBar style="light" />
+      <App />
+      <AnimatedSplashScreen />
     </ThemeProvider>
   )
 }

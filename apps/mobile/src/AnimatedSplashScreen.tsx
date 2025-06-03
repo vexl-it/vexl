@@ -3,20 +3,16 @@ import {useEffect, useState} from 'react'
 import {AppState, StyleSheet} from 'react-native'
 import Animated, {
   BounceOut,
-  SlideOutLeft,
   runOnJS,
+  SlideOutLeft,
 } from 'react-native-reanimated'
-import {Stack, getTokens} from 'tamagui'
+import {getTokens} from 'tamagui'
 import {useIsSessionLoaded} from './state/session'
 import {loadSession} from './state/session/loadSession'
 import {subscribeToGeneralTopic} from './utils/notifications'
 import reportError from './utils/reportError'
 import useLoadFonts from './utils/useLoadFonts'
 import useSetupVersionServiceState from './utils/versionService/useSetupVersionServiceState'
-
-interface Props {
-  children: React.ReactNode
-}
 
 const styles = StyleSheet.create({
   container: {
@@ -48,7 +44,7 @@ void SplashScreen.preventAutoHideAsync().catch((e) => {
   reportError('error', e, {currentState: AppState.currentState})
 })
 
-function AnimatedSplashScreen({children}: Props): JSX.Element {
+function AnimatedSplashScreen(): JSX.Element | null {
   const [isAppReady, setIsAppReady] = useState(false)
   const [isSplashAnimationComplete, setIsSplashAnimationComplete] =
     useState(false)
@@ -96,25 +92,22 @@ function AnimatedSplashScreen({children}: Props): JSX.Element {
     void SplashScreen.hideAsync()
   }, [])
 
+  if (isSplashAnimationComplete) return null
+
   return (
-    <Stack f={1}>
-      {!!isAppReady && children}
-      {!isSplashAnimationComplete && (
-        <Animated.View
-          style={styles.container}
-          exiting={SlideOutLeft.duration(400)}
-        >
-          <Animated.Image
-            style={styles.image}
-            resizeMode="contain"
-            entering={BounceOut.duration(1000).withCallback((finished) => {
-              runOnJS(setIsSplashAnimationComplete)(finished)
-            })}
-            source={require('../assets/splash.png')}
-          />
-        </Animated.View>
-      )}
-    </Stack>
+    <Animated.View
+      style={styles.container}
+      exiting={SlideOutLeft.duration(400)}
+    >
+      <Animated.Image
+        style={styles.image}
+        resizeMode="contain"
+        entering={BounceOut.duration(1000).withCallback((finished) => {
+          runOnJS(setIsSplashAnimationComplete)(finished)
+        })}
+        source={require('../assets/splash.png')}
+      />
+    </Animated.View>
   )
 }
 

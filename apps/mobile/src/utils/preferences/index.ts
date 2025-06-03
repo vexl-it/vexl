@@ -12,7 +12,7 @@ export const preferencesAtom = atomWithParsedMmkvStorage(
       chat: true,
       inactivityWarnings: true,
       marketplace: true,
-      newOfferInMarketplace: true,
+      newOfferInMarketplace: false,
       newPhoneContacts: true,
       offer: true,
     },

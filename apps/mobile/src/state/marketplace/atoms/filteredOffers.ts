@@ -6,6 +6,7 @@ import calculatePriceInSats from '../../../utils/calculatePriceInSats'
 import {importedContactsAtom} from '../../contacts/atom/contactsStore'
 import {createBtcPriceForCurrencyAtom} from '../../currentBtcPriceAtoms'
 import filterOffersByText from '../utils/filterOffersByText'
+import {filterOffersIgnoreListingType} from '../utils/filterOffersIgnoreListingType'
 import isOfferInsideViewPort from '../utils/isOfferInsideViewport'
 import sortOffers from '../utils/sortOffers'
 import {deltasToViewport, radiusToViewport} from '../utils/toViewport'
@@ -163,56 +164,11 @@ const filterOffersIgnoreListingTypeAtom = atom((get) => {
   const filter = get(offersFilterFromStorageAtom)
   const layoutMode = get(marketplaceLayoutModeAtom)
 
-  return offersToSeeInMarketplace.filter(
-    (offer) =>
-      (!filter.currency ||
-        filter.currency.includes(offer.offerInfo.publicPart.currency)) &&
-      (layoutMode === 'list' ||
-        offer.offerInfo.publicPart.location.length > 0) &&
-      (!filter.locationState ||
-        areIncluded(
-          filter.locationState,
-          offer.offerInfo.publicPart.locationState
-        )) &&
-      (!filter.paymentMethod ||
-        areIncluded(
-          filter.paymentMethod,
-          offer.offerInfo.publicPart.paymentMethod
-        )) &&
-      (!filter.btcNetwork ||
-        areIncluded(
-          filter.btcNetwork,
-          offer.offerInfo.publicPart.btcNetwork
-        )) &&
-      (!filter.friendLevel ||
-        (filter.friendLevel.includes('FIRST_DEGREE') &&
-        !filter.friendLevel.includes('SECOND_DEGREE')
-          ? areIncluded(
-              filter.friendLevel,
-              offer.offerInfo.privatePart.friendLevel
-            )
-          : true)) &&
-      (!filter.offerType ||
-        offer.offerInfo.publicPart.offerType === filter.offerType) &&
-      (!filter.amountTopLimit ||
-        offer.offerInfo.publicPart.amountBottomLimit <=
-          filter.amountTopLimit) &&
-      (!filter.amountBottomLimit ||
-        offer.offerInfo.publicPart.amountTopLimit >=
-          filter.amountBottomLimit) &&
-      (filter.spokenLanguages.length === 0 ||
-        filter.spokenLanguages.some((item) =>
-          offer.offerInfo.publicPart.spokenLanguages.includes(item)
-        )) &&
-      (!filter.clubsUuids ||
-        offer.offerInfo.privatePart.clubIds.length === 0 ||
-        Array.isNonEmptyArray(
-          Array.intersection(
-            offer.offerInfo.privatePart.clubIds,
-            filter.clubsUuids
-          )
-        ))
-  )
+  return filterOffersIgnoreListingType({
+    filter,
+    layoutMode,
+    allOffersToFilter: offersToSeeInMarketplace,
+  })
 })
 
 /**

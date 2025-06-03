@@ -3,12 +3,12 @@ import {atom, type Atom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {type DropdownItemProps} from '../../../components/Dropdown'
 import {atomWithParsedMmkvStorageE} from '../../../utils/atomUtils/atomWithParsedMmkvStorageE'
-import {fastDeepEqualRemoveUndefineds} from '../../../utils/fastDeepEqualRemoveUndefineds'
 import getDefaultCurrency from '../../../utils/getDefaultCurrency'
 import {currencies} from '../../../utils/localization/currency'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
 import {
   OffersFilterE,
+  offersFilterEquals,
   type BaseOffersFilter,
   type OffersFilter,
 } from '../domain'
@@ -96,7 +96,7 @@ export const isFilterActiveAtom = atom((get) => {
     ...filterInitialState
   } = offersFilterInitialState
 
-  return !fastDeepEqualRemoveUndefineds(
+  return !offersFilterEquals(
     {
       ...offersFilterFromStorage,
       singlePrice: listingType !== 'BITCOIN' ? singlePrice : undefined,

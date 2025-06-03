@@ -13,6 +13,7 @@ import {useHandleReceivedNotifications} from '../../state/useHandleReceivedNotif
 import useHandleRefreshContactServiceAndOffers from '../../state/useHandleRefreshContactServiceAndOffers'
 import {useSetAppLanguageFromStore} from '../../state/useSetAppLanguageFromStore'
 import {useSetRelativeDateFormatting} from '../../state/useSetRelativeDateFormatting'
+import {useSetupBackgroundTask} from '../../utils/backgroundTask'
 import {useHandleUniversalAndAppLinks} from '../../utils/deepLinks'
 import {useHideInnactivityReminderNotificationsOnResume} from '../../utils/notifications/chatNotifications'
 import {useRefreshNotificationTokenOnResumeAssumeLoggedIn} from '../../utils/notifications/useRefreshNotificationTokenOnResumeAssumeLoggedIn'
@@ -67,6 +68,8 @@ function LoggedInHookGroup(): null {
   useSetAppLanguageFromStore()
   useSetRelativeDateFormatting()
   useCleanupRemovedClubsOnMount()
+
+  useSetupBackgroundTask()
 
   return null
 }

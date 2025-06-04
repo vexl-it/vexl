@@ -9,12 +9,12 @@ import {
 } from 'react'
 import {Platform, TouchableOpacity} from 'react-native'
 import {
+  getTokens,
   Input,
   Stack,
+  styled,
   Text,
   XStack,
-  getTokens,
-  styled,
   type ColorTokens,
   type InputProps,
   type XStackProps,
@@ -137,7 +137,6 @@ export interface Props extends Omit<InputProps, 'style'> {
 
 function TextInput(
   {
-    style,
     size = 'medium',
     icon,
     leftText,
@@ -150,6 +149,7 @@ function TextInput(
     variant = 'greyOnWhite',
     rightElement,
     borderRadius,
+    style,
     ...restProps
   }: Props,
   ref: Ref<Input>

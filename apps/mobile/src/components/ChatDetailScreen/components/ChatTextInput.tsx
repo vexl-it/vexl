@@ -26,10 +26,9 @@ import SendImageButton from './SendImageButton'
 
 const styles = StyleSheet.create({
   textInput: {
-    height: 55,
-    padding: 0,
-    paddingLeft: getTokens().space[3].val,
-    paddingRight: getTokens().space[2].val,
+    minHeight: 55,
+    maxHeight: 110,
+    paddingVertical: getTokens().size[2].val,
   },
 })
 
@@ -181,6 +180,7 @@ function ChatTextInput(): JSX.Element | null {
             variant="greyOnBlack"
             placeholder={t('messages.typeSomething')}
             placeholderTextColor={getTokens().color.greyOnBlack.val}
+            multiline
             rightElement={
               <Animated.View style={animatedStyle}>
                 <IconButton

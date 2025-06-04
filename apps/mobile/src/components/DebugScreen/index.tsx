@@ -6,7 +6,9 @@ import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/
 import {fetchAndEncryptNotificationToken} from '@vexl-next/resources-utils/src/notifications/fetchAndEncryptNotificationToken'
 import getNewContactNetworkOffersAndDecrypt from '@vexl-next/resources-utils/src/offers/getNewOffersAndDecrypt'
 import {Array, Effect, Either, pipe as effectPipe} from 'effect'
+import {getInstallationSource} from 'expo-installation-source'
 import * as Notifications from 'expo-notifications'
+import {isTestFlight} from 'expo-testflight'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
@@ -622,6 +624,19 @@ function DebugScreen(): JSX.Element {
                 Alert.alert(
                   getShowDebugNotifications() ? 'Enabled' : 'Disabled'
                 )
+              }}
+            />
+            <Button
+              variant="primary"
+              size="small"
+              text="Show installation source"
+              onPress={() => {
+                if (Platform.OS === 'android')
+                  Alert.alert(getInstallationSource() ?? 'none')
+                else
+                  Alert.alert(
+                    `ios: ${isTestFlight ? 'TestFlight' : 'Not testflight'}`
+                  )
               }}
             />
           </YStack>

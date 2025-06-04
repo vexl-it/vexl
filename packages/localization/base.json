@@ -932,6 +932,8 @@
   "suggestion.yourReachIsTooLow": "👋 Your reach is too low. Step into Vexl Club and find more offers.",
   "suggestion.whatAreClubs": "What are clubs?",
   "suggestion.lookingForMoreoffers": "👋 Looking for more offers? Join Vexl Clubs today.",
+  "suggestion.enableNotificationsForNewOffers.text": "Marketplace is empty. Enable notifications so Vexl can notify you about new offers.",
+  "suggestion.enableNotificationsForNewOffers.button": "Enable",
   "addContactDialog.addContact": "Add contact",
   "addContactDialog.addThisPhoneNumber": "Would you like to add this phone number to your Vexl contacts?",
   "addContactDialog.addContactName": "Add contact name",

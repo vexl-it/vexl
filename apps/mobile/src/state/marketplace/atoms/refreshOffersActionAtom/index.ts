@@ -1,7 +1,9 @@
 import {isoNow} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
 import {Array, Effect, Record, pipe} from 'effect'
 import {atom} from 'jotai'
+import {AppState} from 'react-native'
 import {apiAtom} from '../../../../api'
+import {refreshLastSeenOffersActionAtom} from '../../../../utils/newOffersNotificationBackgroundTask/store'
 import reportError from '../../../../utils/reportError'
 import {clubsToKeyHolderAtom} from '../../../clubs/atom/clubsToKeyHolderAtom'
 import {updateOffersIdsForClubStatActionAtom} from '../../../clubs/atom/clubsWithMembersAtom'
@@ -70,6 +72,10 @@ export const refreshOffersActionAtom = atom(null, (get, set) =>
     yield* _(
       set(ensureMyOffersHaveOwnershipInfoUploadedInPrivatepayloadForOwner)
     )
+
+    if (AppState.currentState === 'active') {
+      set(refreshLastSeenOffersActionAtom)
+    }
   }).pipe(
     Effect.catchAll((e) => {
       if (e._tag !== 'NetworkError')

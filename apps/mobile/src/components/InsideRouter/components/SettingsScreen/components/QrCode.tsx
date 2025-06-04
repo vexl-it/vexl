@@ -52,9 +52,6 @@ function QrCode(): JSX.Element {
             logo={require('../images/app_logo.png')}
           />
         </Stack>
-        <Text col="$black" fos={28} ff="$heading">
-          {t('qrCode.joinVexl')}
-        </Text>
         {(!sharePressed || !confirmPressed) && (
           <BlurView
             style={{
@@ -69,6 +66,9 @@ function QrCode(): JSX.Element {
             reducedTransparencyFallbackColor="white"
           />
         )}
+        <Text col="$black" fos={28} ff="$heading">
+          {t('qrCode.joinVexl')}
+        </Text>
         {!confirmPressed && !sharePressed && (
           <Stack
             pos="absolute"

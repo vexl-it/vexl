@@ -1,4 +1,4 @@
-name: "[Release] build eas production"Add commentMore actions
+name: "[Release] build eas production"
 run-name: "Run on commit ${{github.sha}}"
 
 on: workflow_dispatch
@@ -26,33 +26,3 @@ jobs:
           mkdir apps/mobile/credentials && echo $GOOGLE_SERVICE_ACCOUNT > apps/mobile/credentials/google.json
       - name: Build on EAS
         run: eas build --platform all --profile production --auto-submit --non-interactive --no-wait
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -1,8 +1,11 @@
 import {SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {AppSource} from '@vexl-next/rest-api/src/commonHeaders'
-import {Option, Schema} from 'effect'
+import {Schema} from 'effect'
 import Constants from 'expo-constants'
+import {getInstallationSource} from 'expo-installation-source'
+import {isTestFlight} from 'expo-testflight'
+import {Platform} from 'react-native'
 
 export const enableHiddenFeatures =
   Constants.expoConfig?.extra?.enableHiddenFeatures
@@ -33,6 +36,12 @@ export const commitHash = String(
   Constants.expoConfig?.extra?.commitHash ?? 'local'
 )
 
-export const appSource = Schema.decodeUnknownOption(AppSource)(
-  Constants.expoConfig?.extra?.appSource
-).pipe(Option.getOrElse(() => 'unknown' as const))
+const getAppSource = (): AppSource => {
+  const parseAppSource = Schema.decodeSync(AppSource)
+  if (Platform.OS === 'ios') {
+    return parseAppSource(isTestFlight ? 'testFlight' : 'altStore')
+  } else {
+    return parseAppSource(getInstallationSource() ?? 'APK')
+  }
+}
+export const appSource = getAppSource()

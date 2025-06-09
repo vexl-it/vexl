@@ -14,6 +14,7 @@ import {
   type ZodParseError,
 } from '@vexl-next/resources-utils/src/utils/parsing'
 import {ENV_PRESETS, type EnvPreset} from '@vexl-next/rest-api'
+import {AppSource} from '@vexl-next/rest-api/src/commonHeaders'
 import * as contactsApi from '@vexl-next/rest-api/src/services/contact'
 import * as userApi from '@vexl-next/rest-api/src/services/user'
 import {Effect, Schema} from 'effect'
@@ -28,7 +29,7 @@ const apiMeta = {
   platform: 'WEB' as const,
   language: 'en',
   isDeveloper: false,
-  appSource: 'account-deletion-page' as const,
+  appSource: Schema.decodeSync(AppSource)('account-deletion-page'),
 }
 
 export function saveKeypair(keypair: PrivateKeyHolder): void {

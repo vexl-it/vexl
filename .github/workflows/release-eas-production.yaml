@@ -1,28 +1,10 @@
-name: "[Release] build eas production"
+name: "[Release] build eas production"Add commentMore actions
 run-name: "Run on commit ${{github.sha}}"
 
-on:
-  workflow_dispatch:
-    inputs:
-      altStore:
-        description: "Build for AltStore"
-        required: false
-        type: boolean
-        default: false
-      testFlight:
-        description: "Build for TestFlight"
-        required: false
-        type: boolean
-        default: false
-      playStore:
-        description: "Build for PlayStore"
-        required: false
-        type: boolean
-        default: false
-
+on: workflow_dispatch
 jobs:
-  release:
-    name: "[Release] Build selected targets"
+  build:
+    name: Install and build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -41,22 +23,36 @@ jobs:
         env:
           GOOGLE_SERVICE_ACCOUNT: ${{ secrets.GOOGLE_SERVICE_ACCOUNT }}
         run: |
-          mkdir -p apps/mobile/credentials && echo $GOOGLE_SERVICE_ACCOUNT > apps/mobile/credentials/google.json
+          mkdir apps/mobile/credentials && echo $GOOGLE_SERVICE_ACCOUNT > apps/mobile/credentials/google.json
+      - name: Build on EAS
+        run: eas build --platform all --profile production --auto-submit --non-interactive --no-wait
 
-      - name: Build for AltStore
-        if: ${{ inputs.altStore == 'true' || inputs.altStore == true }}
-        run: |
-          eas build --platform ios --profile productionAltStore --auto-submit --non-interactive --no-wait
-        working-directory: apps/mobile
 
-      - name: Build for TestFlight
-        if: ${{ inputs.testFlight == 'true' || inputs.testFlight == true }}
-        run: |
-          eas build --platform ios --profile productionTestFlight --auto-submit --non-interactive --no-wait
-        working-directory: apps/mobile
 
-      - name: Build for PlayStore
-        if: ${{ inputs.playStore == 'true' || inputs.playStore == true }}
-        run: |
-          eas build --platform android --profile productionPlayStore --auto-submit --non-interactive --no-wait
-        working-directory: apps/mobile
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

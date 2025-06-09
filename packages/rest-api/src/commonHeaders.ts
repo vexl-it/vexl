@@ -7,15 +7,16 @@ import {Array, Either, Number, Option, Schema, String} from 'effect'
 import {PlatformName} from './PlatformName'
 import {HEADER_CLIENT_VERSION, HEADER_PLATFORM} from './constants'
 
-export const AppSource = Schema.Literal(
-  'playStore',
-  'appStore',
-  'altStore',
-  'APK',
-  'local',
-  'account-deletion-page',
-  'unknown'
-)
+export const AppSource = Schema.String.pipe(Schema.brand('AppSource'))
+// Schema.Literal(
+//   'playStore',
+//   'appStore',
+//   'altStore',
+//   'APK',
+//   'local',
+//   'account-deletion-page',
+//   'unknown'
+// )
 export type AppSource = typeof AppSource.Type
 
 // used for backwards compatibility only. Use Vexl App metaHeader instead

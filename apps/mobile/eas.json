@@ -38,34 +38,16 @@
       },
       "channel": "staging-apk"
     },
-    "productionPlayStore": {
+    "production": {
       "android": {
         "credentialsSource": "remote"
       },
-      "env": {
-        "ENV_PRESET": "prod",
-        "APP_SOURCE": "playStore"
-      },
-      "channel": "production"
-    },
-    "productionTestFlight": {
       "ios": {
         "credentialsSource": "remote",
         "image": "macos-sequoia-15.3-xcode-16.2"
       },
       "env": {
-        "ENV_PRESET": "prod",
-        "APP_SOURCE": "testFlight"
-      },
-      "channel": "production"
-    },
-    "productionAltStore": {
-      "ios": {
-        "credentialsSource": "remote"
-      },
-      "env": {
-        "ENV_PRESET": "prod",
-        "APP_SOURCE": "altStore"
+        "ENV_PRESET": "prod"
       },
       "channel": "production"
     },
@@ -111,20 +93,11 @@
         "appleTeamId": "KQNTW88PVA"
       }
     },
-    "productionPlayStore": {
+    "production": {
       "android": {
         "track": "internal",
         "changesNotSentForReview": true
-      }
-    },
-    "productionTestFlight": {
-      "ios": {
-        "bundleIdentifier": "it.vexl.next",
-        "ascAppId": "6448051657",
-        "appleTeamId": "KQNTW88PVA"
-      }
-    },
-    "productionAltStore": {
+      },
       "ios": {
         "bundleIdentifier": "it.vexl.next",
         "ascAppId": "6448051657",

@@ -11,8 +11,8 @@ export const CreateInvoiceRequest = Schema.Struct({
       orderId: Schema.String,
       orderUrl: Schema.String,
       itemDesc: Schema.String,
-      posData: Schema.optional(Schema.Any),
-      receiptData: Schema.optional(Schema.Any),
+      posData: Schema.optional(Schema.Unknown),
+      receiptData: Schema.optional(Schema.Unknown),
     })
   ),
   checkout: Schema.optional(

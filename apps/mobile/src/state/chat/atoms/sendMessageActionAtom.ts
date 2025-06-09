@@ -4,10 +4,8 @@ import {
 } from '@vexl-next/domain/src/general/messaging'
 import {now} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import sendMessage from '@vexl-next/resources-utils/src/chat/sendMessage'
-import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
-import * as T from 'fp-ts/Task'
-import * as TE from 'fp-ts/TaskEither'
-import {pipe} from 'fp-ts/function'
+import {taskToEffect} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
+import {Effect} from 'effect'
 import {atom} from 'jotai'
 import {InteractionManager} from 'react-native'
 import {apiAtom} from '../../../api'
@@ -46,24 +44,31 @@ export default function sendMessageActionAtom(
     const numberOfMessagesInChat = chatWithMessages.messages.length
 
     return InteractionManager.runAfterInteractions(() => {
-      void pipe(
-        TE.Do,
-        TE.chainTaskK(() => replaceImageFileUrisWithBase64(message)),
-        TE.chainW((m) =>
-          effectToTaskEither(
-            sendMessage({
-              message: m,
-              api: api.chat,
-              senderKeypair: chat.inbox.privateKey,
-              receiverPublicKey: chat.otherSide.publicKey,
-              notificationApi: api.notification,
-              theirNotificationCypher: chat.otherSideFcmCypher,
-              otherSideVersion: chat.otherSideVersion,
-            })
-          )
-        ),
-        TE.match(
-          (e): ChatMessageWithState => {
+      return Effect.gen(function* (_) {
+        const m = yield* _(
+          taskToEffect(replaceImageFileUrisWithBase64(message))
+        )
+
+        yield* _(
+          sendMessage({
+            message: m,
+            api: api.chat,
+            senderKeypair: chat.inbox.privateKey,
+            receiverPublicKey: chat.otherSide.publicKey,
+            notificationApi: api.notification,
+            theirNotificationCypher: chat.otherSideFcmCypher,
+            otherSideVersion: chat.otherSideVersion,
+          })
+        )
+
+        if (
+          numberOfMessagesInChat > DONATION_PROMPT_CHAT_MESSAGES_THRESHOLD_COUNT
+        ) {
+          yield* _(set(showDonationPromptActionAtom), Effect.ignore)
+        }
+      }).pipe(
+        Effect.match({
+          onFailure(e) {
             if (
               e._tag === 'ReceiverInboxDoesNotExistError' ||
               e._tag === 'NotPermittedToSendMessageToTargetInbox'
@@ -78,30 +83,28 @@ export default function sendMessageActionAtom(
                   myVersion: version,
                   text: 'Inbox deleted',
                 },
-              }
+              } as ChatMessageWithState
             }
 
             return {
               state: 'sendingError',
               error: e,
               message,
-            }
+            } as ChatMessageWithState
           },
-          (): ChatMessageWithState => ({
-            state: 'sent',
-            message,
-          })
-        ),
-        T.map((message) => {
+          onSuccess() {
+            return {
+              state: 'sent',
+              message,
+            } as ChatMessageWithState
+          },
+        }),
+        Effect.map((message) => {
           set(chatWithMessagesAtom, addMessageToChat(message))
-          if (
-            numberOfMessagesInChat >
-            DONATION_PROMPT_CHAT_MESSAGES_THRESHOLD_COUNT
-          )
-            set(showDonationPromptActionAtom)
           return message
-        })
-      )()
+        }),
+        Effect.runFork
+      )
     })
   })
 }

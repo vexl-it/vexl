@@ -9,6 +9,7 @@ import {
 import axios from 'axios'
 import {Context, Effect, Layer} from 'effect'
 import {nanoid} from 'nanoid'
+import urlJoin from 'url-join'
 import {
   btcPayServerApiKeyConfig,
   btcPayServerStoreIdConfig,
@@ -21,6 +22,12 @@ import {
   type InvoicePaymentMethodsResponseInternal,
   type InvoiceResponseInternal,
 } from './domain'
+
+const URL_API = 'api'
+const URL_V1 = 'v1'
+const URL_STORES = 'stores'
+const URL_INVOICES = 'invoices'
+const URL_PAYMENT_METHODS = 'payment-methods'
 
 const ORDER_URL =
   'https://pay.satoshilabs.com/apps/3r54iLzBDuB99zDV8s4SQTy3cvua/pos'
@@ -60,13 +67,18 @@ function createInvoiceInternal({
   amount: string
   currency: string
 }): Effect.Effect<InvoiceResponseInternal, CreateInvoiceError> {
-  const url = `${btcPayServerUrl}/api/v1/stores/${storeId}/invoices`
+  const url = urlJoin(
+    btcPayServerUrl,
+    URL_API,
+    URL_V1,
+    URL_STORES,
+    storeId,
+    URL_INVOICES
+  )
   const headers = {
     'Content-Type': 'application/json',
     Authorization: 'token ' + apiKey,
   }
-
-  console.log(`Amount: ${amount}`)
 
   const body = {
     amount,
@@ -95,8 +107,6 @@ function createInvoiceInternal({
     },
   } satisfies CreateInvoiceRequest
 
-  console.log(`Body: ${JSON.stringify(body, null, 2)}`)
-
   return Effect.tryPromise({
     try: async () => {
       const resp = await axios.post(url, body, {
@@ -106,7 +116,6 @@ function createInvoiceInternal({
       return resp
     },
     catch: (e: any) => {
-      console.log(`Error: ${JSON.stringify(e, null, 2)}`)
       return new CreateInvoiceError({
         cause: e,
         message: e.message,
@@ -115,6 +124,9 @@ function createInvoiceInternal({
   }).pipe(
     Effect.map((response) => {
       return response.data
+    }),
+    Effect.withSpan('createInvoiceHandler', {
+      attributes: {url, body, btcPayServerUrl, storeId},
     })
   )
 }
@@ -130,7 +142,15 @@ function getInvoiceInternal({
   storeId: string
   invoiceId: string
 }): Effect.Effect<InvoiceResponseInternal, GetInvoiceErrors> {
-  const url = `${btcPayServerUrl}/api/v1/stores/${storeId}/invoices/${invoiceId}`
+  const url = urlJoin(
+    btcPayServerUrl,
+    URL_API,
+    URL_V1,
+    URL_STORES,
+    storeId,
+    URL_INVOICES,
+    invoiceId
+  )
   const headers = {
     'Content-Type': 'application/json',
     Authorization: 'token ' + apiKey,
@@ -162,6 +182,9 @@ function getInvoiceInternal({
   }).pipe(
     Effect.map((response) => {
       return response.data
+    }),
+    Effect.withSpan('getInvoiceHandler', {
+      attributes: {url, btcPayServerUrl, storeId, invoiceId},
     })
   )
 }
@@ -180,7 +203,16 @@ function getInvoicePaymentMethodsInternal({
   InvoicePaymentMethodsResponseInternal,
   GetInvoicePaymentMethodsErrors
 > {
-  const url = `${btcPayServerUrl}/api/v1/stores/${storeId}/invoices/${invoiceId}/payment-methods`
+  const url = urlJoin(
+    btcPayServerUrl,
+    URL_API,
+    URL_V1,
+    URL_STORES,
+    storeId,
+    URL_INVOICES,
+    invoiceId,
+    URL_PAYMENT_METHODS
+  )
   const headers = {
     'Content-Type': 'application/json',
     Authorization: 'token ' + apiKey,
@@ -212,6 +244,9 @@ function getInvoicePaymentMethodsInternal({
   }).pipe(
     Effect.map((response) => {
       return response.data
+    }),
+    Effect.withSpan('getInvoicePaymentMethodsHandler', {
+      attributes: {url, btcPayServerUrl, storeId, invoiceId},
     })
   )
 }

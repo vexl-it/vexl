@@ -2,6 +2,10 @@ import {
   GoldenAvatarType,
   GoldenAvatarTypeE,
 } from '@vexl-next/domain/src/general/offers'
+import {
+  UnixMilliseconds,
+  UnixMillisecondsE,
+} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {Schema} from 'effect'
 import {z} from 'zod'
 import {FiatOrSats, FiatOrSatsE} from '../../state/marketplace/domain'
@@ -45,6 +49,7 @@ export const Preferences = z
     goldenAvatarType: GoldenAvatarType.optional(),
     showVexlSearchForCooSuggestion: z.boolean().default(true),
     showSuggestReencryptOffersMissingOnServer: z.boolean().default(false),
+    lastDisplayOfDonationPromptTimestamp: UnixMilliseconds.optional(),
   })
   .readonly()
 
@@ -88,6 +93,7 @@ export const PreferencesE = Schema.Struct({
       default: () => false,
     }
   ),
+  lastDisplayOfDonationPromptTimestamp: Schema.optional(UnixMillisecondsE),
 })
 
 export type Preferences = typeof PreferencesE.Type

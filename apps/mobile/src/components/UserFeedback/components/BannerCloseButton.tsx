@@ -1,4 +1,5 @@
 import {useMolecule} from 'bunshi/dist/react'
+import {Effect} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import {TouchableOpacity} from 'react-native'
 import {Stack, getTokens} from 'tamagui'
@@ -22,7 +23,7 @@ function BannerCloseButton({hideCloseButton}: Props): JSX.Element | null {
     <TouchableOpacity
       onPress={() => {
         setFeedbackDone(true)
-        showDonationPrompt()
+        Effect.runFork(showDonationPrompt())
       }}
     >
       <SvgImage

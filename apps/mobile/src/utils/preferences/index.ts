@@ -26,6 +26,7 @@ export const preferencesAtom = atomWithParsedMmkvStorage(
     marketplaceFiatOrSatsCurrency: 'FIAT',
     showVexlSearchForCooSuggestion: true,
     showSuggestReencryptOffersMissingOnServer: false,
+    lastDisplayOfDonationPromptTimestamp: undefined,
   },
   Preferences
 )
@@ -67,4 +68,9 @@ export const showVexlSearchForCooSuggestionAtom = focusAtom(
 export const showSuggestReencryptOffersMissingOnServerAtom = focusAtom(
   preferencesAtom,
   (o) => o.prop('showSuggestReencryptOffersMissingOnServer')
+)
+
+export const lastDisplayOfDonationPromptTimestampAtom = focusAtom(
+  preferencesAtom,
+  (o) => o.prop('lastDisplayOfDonationPromptTimestamp')
 )

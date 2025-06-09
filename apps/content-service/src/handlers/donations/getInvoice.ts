@@ -4,8 +4,8 @@ import {
 } from '@vexl-next/rest-api/src/services/content/contracts'
 import {GetInvoiceEndpoint} from '@vexl-next/rest-api/src/services/content/specification'
 import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {Effect} from 'effect'
 import {Handler} from 'effect-http'
-import {Effect} from 'effect/index'
 import {BtcPayServerService} from '../../utils/donations'
 
 export const getInvoiceHandler = Handler.make(GetInvoiceEndpoint, (req) =>

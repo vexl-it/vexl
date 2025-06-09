@@ -10478,7 +10478,7 @@ __metadata:
     expo-font: ~13.0.4
     expo-haptics: ~14.0.1
     expo-image-picker: ~16.0.6
-    expo-installation-source: ^0.1.0
+    expo-installation-source: ^0.1.1
     expo-linear-gradient: ~14.0.2
     expo-linking: ~7.0.5
     expo-localization: ~16.0.1
@@ -16426,14 +16426,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo-installation-source@npm:^0.1.0":
-  version: 0.1.0
-  resolution: "expo-installation-source@npm:0.1.0"
+"expo-installation-source@npm:^0.1.1":
+  version: 0.1.1
+  resolution: "expo-installation-source@npm:0.1.1"
   peerDependencies:
     expo: "*"
     react: "*"
     react-native: "*"
-  checksum: 7ab75aaefb08cdb9c5d3b4eb48167542f0e1044af9778b3aee4a31d770f79bfd8cb84603e4edcf2a5872076a4397e259cd8ff657af2c6a2327d6250b758c40d7
+  checksum: c05ecfb8860e12a385892731f3f5552d8e073d90fddc8b45722c81649d28b81f537e424f1059c2763849ffbb11238599ddd24761f6baaf22839cf7b0718e86c6
   languageName: node
   linkType: hard
 

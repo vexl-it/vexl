@@ -80,22 +80,6 @@ export const newsAndAnonouncementsHandler = Handler.make(
     makeEndpointEffect(
       Effect.gen(function* (_) {
         const vexlBotNewsForBlog1: VexlBotNews = {
-          id: Schema.decodeSync(UuidE)('026dfa3a-c5b9-4834-b2ff-d51df8ee85c7'),
-          type: 'info',
-          content:
-            "Psst... Your money's telling stories. Wanna know who’s listening?\n📖 Start our new series with The Rage.",
-          action: Option.some({
-            text: 'Read now',
-            url: Schema.decodeSync(HttpsUrlString)(
-              'https://vexl.it/post/a-human-rights-view-on-finance'
-            ),
-          }),
-          cancelForever: true,
-          bubbleOrigin: Option.none(),
-          cancelable: true,
-        }
-
-        const vexlBotNewsForBlog2: VexlBotNews = {
           id: Schema.decodeSync(UuidE)('5b44bc53-4556-4e4a-af70-006b3beaef64'),
           type: 'info',
           content:
@@ -111,7 +95,23 @@ export const newsAndAnonouncementsHandler = Handler.make(
           cancelable: true,
         }
 
-        const newBlogReleaseAtMillis = 1748876400000
+        const vexlBotNewsForBlog2: VexlBotNews = {
+          id: Schema.decodeSync(UuidE)('085f7bbe-f142-4e71-8b80-eb9b9107ddef'),
+          type: 'info',
+          content:
+            'Borders are drawn with numbers now.\nThis week, we dive into how control is coded into your currency. ➡️',
+          action: Option.some({
+            text: 'Read now',
+            url: Schema.decodeSync(HttpsUrlString)(
+              'https://vexl.it/post/economic-sanctions-and-collateral-damage'
+            ),
+          }),
+          cancelForever: true,
+          bubbleOrigin: Option.none(),
+          cancelable: true,
+        }
+
+        const newBlogReleaseAtMillis = 1749481200000
         const showNewBlogLink =
           headers.isDeveloper || unixMillisecondsNow() > newBlogReleaseAtMillis
 

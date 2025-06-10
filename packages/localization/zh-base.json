@@ -1107,6 +1107,7 @@
   "contacts.refreshingOffers.belowProgressLeftDone": "已刷新您的报价",
   "contacts.refreshingOffers.bottomTextDone": "现在，您的联系人可以正确地看到您的报价",
   "contacts.refreshingOffers.titleDone": "您的报价已是最新的",
+  "contacts.errorAddingContactToYourPhoneContacts": "Error adding contact to your phone contacts",
   "migrations.migrating": "正在更新 vexl",
   "migration.contacts.problemTitle": "迁移问题",
   "migration.contacts.problemText": "迁移通讯录时出现差异。旧的联系人数量： {{oldSize}}，新的联系人数量为 {{newSize}}。我们正在尝试恢复并保存这些联系人。请检查已导入的通讯录并确保所有联系人都已正确导入！",
@@ -1206,6 +1207,7 @@
   "clubs.ifYouRevealIdentityToClubMember": "如果您向俱乐部会员透露自己的身份，您也将会看到对方的身份。",
   "clubs.rememberThatTradingInClubsIsLessSafe": "请记住，在俱乐部交易不如与您信任的联系人交易安全。",
   "clubs.clubStatsSuggestionMessage": "{{clubName}} 俱乐部最近被停用。它为您提供了 {{offersCount}} 份报价，您还与其他用户开始了 {{chatsCount}} 次聊天。要继续发现更多的报价，请导入您的通讯录并扩大您在市场上的影响力。",
+  "clubs.errorScanningQrCodeFromLibrary": "Error scanning QR code from library. Please try again, scan different QR code or use camera.",
   "events.upcomingEvents": "即将到来的活动",
   "events.pastEvents": "过去的活动",
   "events.noEvents": "暂无活动",
@@ -1223,5 +1225,16 @@
   "events.loadMore": "加载更多",
   "events.allLoaded": "已全部加载",
   "blog.title": "博客",
-  "blog.readMore": "阅读更多"
+  "blog.readMore": "阅读更多",
+  "donationPrompt.donate": "Donate",
+  "donationPrompt.giveLove": "Give love",
+  "donationPrompt.ifYouLikeVexlSupportItsImprovement": "If you like Vexl, support it’s improvement by sending some Bitcoins as donation!",
+  "donationPrompt.amount": "金额",
+  "donationPrompt.pleaseEnterTheAmountYouWantToDonate": "Please enter the amount you want to donate",
+  "donationPrompt.vexlFoundationDonate": "Vexl Foundation donate",
+  "donationPrompt.totalPrice": "Total price",
+  "donationPrompt.totalFiat": "Total fiat",
+  "donationPrompt.exchangeRate": "Exchange rate",
+  "donationPrompt.amountDue": "Amount due",
+  "donationPrompt.charge": "Charge"
 }

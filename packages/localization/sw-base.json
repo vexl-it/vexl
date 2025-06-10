@@ -1107,6 +1107,7 @@
   "contacts.refreshingOffers.belowProgressLeftDone": "Imerejesha matoleo yako",
   "contacts.refreshingOffers.bottomTextDone": "Matoleo yako sasa yanaonekana ipasavyo kwa watu unaowasiliana nao",
   "contacts.refreshingOffers.titleDone": "Matoleo yako yamesasishwa",
+  "contacts.errorAddingContactToYourPhoneContacts": "Error adding contact to your phone contacts",
   "migrations.migrating": "Inasasisha vexl",
   "migration.contacts.problemTitle": "Tatizo na uhamishaji",
   "migration.contacts.problemText": "Kulikuwa na tofauti wakati wa kuhamisha mawasiliano. Idadi ya zamani ya mawasiliano: {{oldSize}}, idadi mpya ya mawasiliano {{newSize}}. Tunajaribu kurejesha na kuokoa mawasiliano haya. Tafadhali angalia mawasiliano yaliyoingizwa na hakikisha mawasiliano yote yameingizwa vyema!",
@@ -1206,6 +1207,7 @@
   "clubs.ifYouRevealIdentityToClubMember": "Ukifichua utambulisho wako kwa mwanachama wa klabu, utaona utambulisho wa mwenzako pia.",
   "clubs.rememberThatTradingInClubsIsLessSafe": "Kumbuka kuwa biashara katika Vilabu si salama ikilinganishwa na watu unaowaamini.",
   "clubs.clubStatsSuggestionMessage": "Club {{clubName}} was recently deactivated. It provided you with {{offersCount}} offers, and you started {{chatsCount}} chats with other users. To keep discovering more offers, import your contacts and expand your reach on the marketplace.",
+  "clubs.errorScanningQrCodeFromLibrary": "Error scanning QR code from library. Please try again, scan different QR code or use camera.",
   "events.upcomingEvents": "Matukio yajayo",
   "events.pastEvents": "Matukio yaliyopita",
   "events.noEvents": "Hakuna matukio",
@@ -1223,5 +1225,16 @@
   "events.loadMore": "Pakia zaidi",
   "events.allLoaded": "Zote zimepakiwa",
   "blog.title": "Blogu",
-  "blog.readMore": "Soma zaidi"
+  "blog.readMore": "Soma zaidi",
+  "donationPrompt.donate": "Donate",
+  "donationPrompt.giveLove": "Give love",
+  "donationPrompt.ifYouLikeVexlSupportItsImprovement": "If you like Vexl, support it’s improvement by sending some Bitcoins as donation!",
+  "donationPrompt.amount": "Kiasi",
+  "donationPrompt.pleaseEnterTheAmountYouWantToDonate": "Please enter the amount you want to donate",
+  "donationPrompt.vexlFoundationDonate": "Vexl Foundation donate",
+  "donationPrompt.totalPrice": "Total price",
+  "donationPrompt.totalFiat": "Total fiat",
+  "donationPrompt.exchangeRate": "Exchange rate",
+  "donationPrompt.amountDue": "Amount due",
+  "donationPrompt.charge": "Charge"
 }

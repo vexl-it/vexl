@@ -1107,6 +1107,7 @@
   "contacts.refreshingOffers.belowProgressLeftDone": "Обновени ваши оферти",
   "contacts.refreshingOffers.bottomTextDone": "Вашите оферти сега са правилно видими за вашите контакти",
   "contacts.refreshingOffers.titleDone": "Вашите оферти са актуализирани",
+  "contacts.errorAddingContactToYourPhoneContacts": "Error adding contact to your phone contacts",
   "migrations.migrating": "Актуализира vexl",
   "migration.contacts.problemTitle": "Проблем с миграцията",
   "migration.contacts.problemText": "Има разминавания при мигриране на контактите. Стар брой контакти: {{oldSize}}, нов брой контакти {{newSize}}. Опитваме се да възстановим и запазим тези контакти. Моля проверете импортираните контакти и се уверете, че всички контакти са импортирани правилно!",
@@ -1206,6 +1207,7 @@
   "clubs.ifYouRevealIdentityToClubMember": "Ако разкриете самоличността си, ще видите самоличността и на другата страна.",
   "clubs.rememberThatTradingInClubsIsLessSafe": "Не забравяйте, че търговията с клубове е по-малко безопасна, отколкото с вашите доверени контакти.",
   "clubs.clubStatsSuggestionMessage": "Club {{clubName}} was recently deactivated. It provided you with {{offersCount}} offers, and you started {{chatsCount}} chats with other users. To keep discovering more offers, import your contacts and expand your reach on the marketplace.",
+  "clubs.errorScanningQrCodeFromLibrary": "Error scanning QR code from library. Please try again, scan different QR code or use camera.",
   "events.upcomingEvents": "Предстоящи събития",
   "events.pastEvents": "Минали събития",
   "events.noEvents": "Няма събития",
@@ -1223,5 +1225,16 @@
   "events.loadMore": "Зареди още",
   "events.allLoaded": "Всичко е заредено",
   "blog.title": "Блог",
-  "blog.readMore": "Прочетете още"
+  "blog.readMore": "Прочетете още",
+  "donationPrompt.donate": "Donate",
+  "donationPrompt.giveLove": "Give love",
+  "donationPrompt.ifYouLikeVexlSupportItsImprovement": "If you like Vexl, support it’s improvement by sending some Bitcoins as donation!",
+  "donationPrompt.amount": "Сума",
+  "donationPrompt.pleaseEnterTheAmountYouWantToDonate": "Please enter the amount you want to donate",
+  "donationPrompt.vexlFoundationDonate": "Vexl Foundation donate",
+  "donationPrompt.totalPrice": "Total price",
+  "donationPrompt.totalFiat": "Total fiat",
+  "donationPrompt.exchangeRate": "Exchange rate",
+  "donationPrompt.amountDue": "Amount due",
+  "donationPrompt.charge": "Charge"
 }

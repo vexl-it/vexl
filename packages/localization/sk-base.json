@@ -1107,6 +1107,7 @@
   "contacts.refreshingOffers.belowProgressLeftDone": "Tvoje ponuky sú obnovené",
   "contacts.refreshingOffers.bottomTextDone": "Tvoje ponuky sú teraz správne viditeľné pre tvoje kontakty",
   "contacts.refreshingOffers.titleDone": "Tvoje ponuky sú aktuálne",
+  "contacts.errorAddingContactToYourPhoneContacts": "Error adding contact to your phone contacts",
   "migrations.migrating": "Aktualizácia vexl",
   "migration.contacts.problemTitle": "Problém s migráciou",
   "migration.contacts.problemText": "Pri migrácii kontaktov sa vyskytli nezrovnalosti. Starý počet kontaktov:{{oldSize}} nový počet kontaktov{{newSize}}. Snažíme sa tieto kontakty obnoviť a uložiť. Skontrolujte importované kontakty a uistite sa, že sú všetky kontakty importované správne!",
@@ -1206,6 +1207,7 @@
   "clubs.ifYouRevealIdentityToClubMember": "Ak odhalíš svoju totožnosť členovi klubu, uvidíš aj totožnosť protistrany.",
   "clubs.rememberThatTradingInClubsIsLessSafe": "Nezabudni, že obchodovanie v kluboch je menej bezpečné ako obchodovanie s dôveryhodnými kontaktmi.",
   "clubs.clubStatsSuggestionMessage": "Klub {{clubName}} bol nedávno deaktivovaný. Poskytol ti {{offersCount}} ponuky a začal si {{chatsCount}} chatovať s inými používateľmi. Ak chceš naďalej objavovať ďalšie ponuky, importuj svoje kontakty a rozšír svoj dosah na trhu.",
+  "clubs.errorScanningQrCodeFromLibrary": "Error scanning QR code from library. Please try again, scan different QR code or use camera.",
   "events.upcomingEvents": "Nadchádzajúce podujatia",
   "events.pastEvents": "Minulé udalosti",
   "events.noEvents": "Žiadne podujatia",
@@ -1223,5 +1225,16 @@
   "events.loadMore": "Viac informácií",
   "events.allLoaded": "Všetko načítané",
   "blog.title": "Blog",
-  "blog.readMore": "Prečítaj si viac"
+  "blog.readMore": "Prečítaj si viac",
+  "donationPrompt.donate": "Donate",
+  "donationPrompt.giveLove": "Give love",
+  "donationPrompt.ifYouLikeVexlSupportItsImprovement": "If you like Vexl, support it’s improvement by sending some Bitcoins as donation!",
+  "donationPrompt.amount": "Čiastka",
+  "donationPrompt.pleaseEnterTheAmountYouWantToDonate": "Please enter the amount you want to donate",
+  "donationPrompt.vexlFoundationDonate": "Vexl Foundation donate",
+  "donationPrompt.totalPrice": "Total price",
+  "donationPrompt.totalFiat": "Total fiat",
+  "donationPrompt.exchangeRate": "Exchange rate",
+  "donationPrompt.amountDue": "Amount due",
+  "donationPrompt.charge": "Charge"
 }

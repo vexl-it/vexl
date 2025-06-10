@@ -31,7 +31,6 @@ function NextButton(): JSX.Element | null {
           <Button
             testID="@nextButton/primaryButton"
             fullSize
-            adjustTextToFitOneLine
             variant="primary"
             onPress={onSecondButtonPress}
             text={nextButtonState.secondButton.text}
@@ -40,7 +39,6 @@ function NextButton(): JSX.Element | null {
         <Button
           testID="@nextButton/secondaryButton"
           fullSize
-          adjustTextToFitOneLine
           disabled={nextButtonState.disabled || !nextButtonState.onPress}
           onPress={onPrimaryButtonPress}
           variant="secondary"

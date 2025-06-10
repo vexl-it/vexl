@@ -48,6 +48,8 @@ export default function TradeChecklistDateAndTimeView({
       return (
         <>
           <VexlbotBubble
+            username={otherSideData.userName}
+            messageState={message.state}
             status="accepted"
             text={`${t('vexlbot.yourMeetingIsOn')}\n${dateAndTime.toStringWithTime(
               pick.dateTime
@@ -73,7 +75,11 @@ export default function TradeChecklistDateAndTimeView({
     if (suggestions && suggestions.length > 0) {
       return (
         <VexlbotBubble
-          status={isMessageOutdated ? 'outdated' : 'pending'}
+          username={otherSideData.userName}
+          messageState={message.state}
+          status={
+            isMessageOutdated ? ('outdated' as const) : ('pending' as const)
+          }
           text={`${t(
             message.state === 'sent'
               ? 'vexlbot.youAddedTimeOptions'

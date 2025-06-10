@@ -123,8 +123,12 @@ function TradeChecklistAmountView({message}: Props): JSX.Element | null {
     return (
       <>
         <VexlbotBubble
+          messageState={message.state}
+          username={otherSideData.userName}
           status={
-            isMessageOutdated ? 'outdated' : latestAmountDataMessage.status
+            isMessageOutdated
+              ? ('outdated' as const)
+              : latestAmountDataMessage.status
           }
           introText={
             latestAmountDataMessage.status === 'pending' &&

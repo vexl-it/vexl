@@ -8,13 +8,25 @@ import vexlbotSvg from '../../../images/vexlbotSvg'
 import checkIconSvg from '../../images/checkIconSvg'
 import clockIconSvg from '../../images/clockIconSvg'
 
-interface Props {
-  children?: ReactNode
-  status?: 'accepted' | 'pending' | 'outdated'
-  text?: string
-  introText?: string
-  onCancelPress?: () => void
-}
+type Props =
+  | {
+      children?: ReactNode
+      status: 'accepted' | 'pending' | 'outdated' | 'noStatus'
+      text?: string
+      introText?: string
+      onCancelPress?: () => void
+      username: string
+      messageState: 'sent' | 'received'
+    }
+  | {
+      children?: ReactNode
+      status?: undefined
+      text?: string
+      introText?: string
+      onCancelPress?: () => void
+      username?: undefined
+      messageState?: undefined
+    }
 
 function VexlbotBubble({
   children,
@@ -22,6 +34,8 @@ function VexlbotBubble({
   text,
   introText,
   status,
+  username,
+  messageState,
 }: Props): JSX.Element {
   const {t} = useTranslation()
 
@@ -34,7 +48,7 @@ function VexlbotBubble({
       p="$3"
       gap="$2"
     >
-      <XStack ai="stretch" jc="space-between">
+      <XStack ai="stretch" jc="space-between" gap="$2">
         <XStack ai="center" gap="$2">
           <Image width={24} height={24} source={vexlbotSvg} />
           <XStack>
@@ -67,6 +81,7 @@ function VexlbotBubble({
             px="$2"
             backgroundColor="$yellowAccent2"
             alignItems="center"
+            flexShrink={1}
           >
             <Image
               height={12}
@@ -75,7 +90,11 @@ function VexlbotBubble({
               stroke={getTokens().color.$main.val}
             ></Image>
             <Text fos={12} ff="$body500" color="$main">
-              {t('common.pending')}
+              {messageState === 'received'
+                ? t('vexlbot.reactionRequired')
+                : username
+                  ? t('vexlbot.waitingFor', {username})
+                  : t('vexlbot.waitingForCounterParty')}
             </Text>
           </XStack>
         )}

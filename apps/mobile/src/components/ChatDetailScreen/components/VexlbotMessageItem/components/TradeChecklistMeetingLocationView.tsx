@@ -104,6 +104,8 @@ export default function TradeChecklistMeetingLocationView({
       return (
         <>
           <VexlbotBubble
+            messageState={message.state}
+            username={otherSideData.userName}
             status="accepted"
             text={getTextForVexlbot({
               agreed: true,
@@ -153,7 +155,11 @@ export default function TradeChecklistMeetingLocationView({
 
     return (
       <VexlbotBubble
-        status={isMessageOutdated ? 'outdated' : 'pending'}
+        messageState={message.state}
+        username={otherSideData.userName}
+        status={
+          isMessageOutdated ? ('outdated' as const) : ('pending' as const)
+        }
         text={getTextForVexlbot({
           agreed: false,
           by: message.state === 'sent' ? 'me' : 'them',

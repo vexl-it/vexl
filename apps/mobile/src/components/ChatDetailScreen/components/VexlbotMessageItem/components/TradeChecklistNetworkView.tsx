@@ -38,7 +38,11 @@ function TradeChecklistNetworkView({message}: Props): JSX.Element | null {
 
     return (
       <VexlbotBubble
-        status={isMessageOutdated ? 'outdated' : undefined}
+        messageState={message.state}
+        username={otherSideData.userName}
+        status={
+          isMessageOutdated ? ('outdated' as const) : ('noStatus' as const)
+        }
         text={
           message.message.tradeChecklistUpdate.network.btcNetwork === 'LIGHTING'
             ? t(

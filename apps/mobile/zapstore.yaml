@@ -1,0 +1,11 @@
+name: Vexl
+repository: https://github.com/vexl-it/vexl
+icon: apps/mobile/assets/icon.png
+license: GPL-3.0
+remote_metadata:
+  - github
+tags:
+  - social_network
+summary: 'Vexl is a mobile app giving its users a simple, accessible and safe way to trade bitcoin as it was intended - peer-to-peer and without KYC.'
+description: |
+  Vexl is a private, trust-based Bitcoin trading app that lets you buy and sell directly with people in your social network — no KYC, no middlemen, no public ratings. Built with end-to-end encryption and a privacy-first design, Vexl protects your data while empowering you to trade Bitcoin securely through real connections.

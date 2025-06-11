@@ -33,4 +33,45 @@ yarn expo run:android ## for android
 See [this guide](docs/how_to_help_transalte.md) for details.
 
 ## Other
+
 This project is tested with BrowserStack.
+
+## APK Signature Verification
+
+For Android, you can download the app from the [Google Play Store](https://play.google.com/store/apps/details?id=your.package.id) or use the APK files provided in the [Releases](https://github.com/your-org/your-repo/releases) section.
+
+If you choose to install the APK manually, we recommend verifying its signature to ensure its authenticity. Vexl signs the APK with the following certificate fingerprints:
+
+```
+SHA-256: 84a7fbcd54a4ca60e52b25311862ce4715d50a62c203760dbcb91aefe8eb20d4
+SHA-1:   57af35233b2b9474ae6e0e2a6d80da629d9c0571
+MD5:     4f4f27bb2faacc7a9426dd15d903a9a1
+```
+
+### How to verify the APK
+
+1. Download the APK file.
+
+2. Run the following command to print its signing certificate fingerprints:
+
+   ```bash
+   apksigner verify --print-certs your-apk-file.apk
+   ```
+
+3. Confirm that the fingerprints match the values listed above.
+
+If the fingerprints do not match, **do not install the APK** and contact us to report the issue.
+
+### Automatic Updates via Obtainium (Recommended)
+
+For users who prefer to install the APK directly (outside of Google Play), we recommend using [Obtainium](https://github.com/ImranR98/Obtainium).
+
+Obtainium can automatically download and update the latest APK releases directly from our official GitHub releases, ensuring you always receive updates from the trusted source.
+
+- ✅ Automatic update checks
+- ✅ Downloads directly from GitHub Releases
+- ✅ Preserves your app signature for verification
+
+Simply add our GitHub repository to Obtainium to stay up to date.
+
+---

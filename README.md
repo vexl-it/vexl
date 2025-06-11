@@ -38,7 +38,7 @@ This project is tested with BrowserStack.
 
 ## APK Signature Verification
 
-For Android, you can download the app from the [Google Play Store](https://play.google.com/store/apps/details?id=your.package.id) or use the APK files provided in the [Releases](https://github.com/your-org/your-repo/releases) section.
+For Android, you can download the app from the [Google Play Store](https://play.google.com/store/apps/details?id=your.package.id) or use the APK files provided in the [Releases](https://github.com/vexl-it/vexl/releases) section.
 
 If you choose to install the APK manually, we recommend verifying its signature to ensure its authenticity. Vexl signs the APK with the following certificate fingerprints:
 

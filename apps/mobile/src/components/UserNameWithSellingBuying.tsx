@@ -49,7 +49,7 @@ function AfterNameText({offerInfo}: {offerInfo: OfferInfo}): JSX.Element {
   const {t} = useTranslation()
 
   const buyingOrSelling = getOtherSideIsBuyingOrSelling(offerInfo)
-  const color = buyingOrSelling === 'isBuying' ? '$pink' : '$pastelGreen'
+  const color = buyingOrSelling === 'isBuying' ? '$pink' : '$green'
 
   return (
     <AfterNameBasicText color={color}>

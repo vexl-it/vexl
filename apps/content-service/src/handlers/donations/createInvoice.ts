@@ -1,11 +1,14 @@
 import {
   CreateInvoiceError,
   CreateInvoiceErrors,
+  InvoiceId,
+  PaymentLink,
+  StoreId,
   type CreateInvoiceResponse,
 } from '@vexl-next/rest-api/src/services/content/contracts'
 import {CreateInvoiceEndpoint} from '@vexl-next/rest-api/src/services/content/specification'
 import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
-import {Array, Effect, Option} from 'effect'
+import {Array, Effect, Option, Schema} from 'effect'
 import {Handler} from 'effect-http'
 import {BtcPayServerService} from '../../utils/donations'
 
@@ -47,13 +50,19 @@ export const createInvoiceHandler = Handler.make(CreateInvoiceEndpoint, (req) =>
         )
 
       const toReturn = {
-        invoiceId: createInvoiceResponse.id,
-        storeId: createInvoiceResponse.storeId,
-        paymentLink: paymentMethod.value.paymentLink,
+        invoiceId: Schema.decodeSync(InvoiceId)(createInvoiceResponse.id),
+        storeId: Schema.decodeSync(StoreId)(createInvoiceResponse.storeId),
+        paymentLink: Schema.decodeSync(PaymentLink)(
+          paymentMethod.value.paymentLink
+        ),
         exchangeRate: paymentMethod.value.rate,
         btcAmount: paymentMethod.value.amount,
         fiatAmount: createInvoiceResponse.amount,
         currency: 'EUR',
+        paymentMethod: paymentMethod.value.paymentMethodId,
+        status: createInvoiceResponse.status,
+        createdTime: createInvoiceResponse.createdTime,
+        expirationTime: createInvoiceResponse.expirationTime,
       } satisfies CreateInvoiceResponse
 
       return toReturn

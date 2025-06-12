@@ -11,10 +11,10 @@ import {
   useTranslation,
 } from '../../../../../utils/localization/I18nProvider'
 import {askAreYouSureActionAtom} from '../../../../AreYouSureDialog'
-import checkIconSvg from '../../../../ChatDetailScreen/components/images/checkIconSvg'
 import Image from '../../../../Image'
 import {toastNotificationAtom} from '../../../../ToastNotification/atom'
 import {type ToastNotificationState} from '../../../../ToastNotification/domain'
+import checkIconSvg from '../../../../images/checkIconSvg'
 import {contactSupportActionAtom} from '../atoms'
 import emailIconSvg from '../images/emailIconSvg'
 

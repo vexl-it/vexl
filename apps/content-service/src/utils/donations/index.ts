@@ -6,6 +6,7 @@ import {
   type GetInvoicePaymentMethodsErrors,
   GetInvoicePaymentMethodsGeneralError,
   InvoiceNotFoundError,
+  type InvoicePaymentMethod,
 } from '@vexl-next/rest-api/src/services/content/contracts'
 import axios from 'axios'
 import {Context, Effect, Layer} from 'effect'
@@ -68,7 +69,7 @@ function createInvoiceInternal({
   apiKey: string
   amount: string
   currency: string
-  paymentMethod: 'BTC-CHAIN' | 'BTC-LN'
+  paymentMethod: InvoicePaymentMethod
 }): Effect.Effect<InvoiceResponseInternal, CreateInvoiceError> {
   const url = urlJoin(
     btcPayServerUrl,

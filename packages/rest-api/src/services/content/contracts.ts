@@ -1,4 +1,5 @@
 import {HttpsUrlString} from '@vexl-next/domain/src/utility/HttpsUrlString.brand'
+import {UnixMillisecondsE} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {UriStringE} from '@vexl-next/domain/src/utility/UriString.brand'
 import {UuidE} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {Schema} from 'effect'
@@ -139,43 +140,61 @@ export const CreateInvoiceErrors = Schema.Union(
   GetInvoicePaymentMethodsGeneralError
 )
 
+export const InvoicePaymentMethod = Schema.Literal(
+  'BTC-CHAIN',
+  'BTC-LN',
+  'BTC-LNURL'
+)
+export type InvoicePaymentMethod = typeof InvoicePaymentMethod.Type
 export const CreateInvoiceRequest = Schema.Struct({
   amount: Schema.Number,
   currency: Schema.Literal('EUR'),
-  paymentMethod: Schema.Literal('BTC-CHAIN', 'BTC-LN'),
+  paymentMethod: InvoicePaymentMethod,
 })
 export type CreateInvoiceRequest = typeof CreateInvoiceRequest.Type
 
+export const InvoiceId = Schema.String.pipe(Schema.brand('InvoiceId'))
+export type InvoiceId = typeof InvoiceId.Type
+
+export const StoreId = Schema.String.pipe(Schema.brand('StoreId'))
+export const PaymentLink = Schema.String.pipe(Schema.brand('PaymentLink'))
+export const InvoiceStatus = Schema.Literal(
+  'New',
+  'Expired',
+  'Paid',
+  'Complete',
+  'Confirmed',
+  'Processing',
+  'Invalid',
+  'Settled'
+)
+export type InvoiceStatus = typeof InvoiceStatus.Type
+
 export const CreateInvoiceResponse = Schema.Struct({
-  invoiceId: Schema.String,
-  storeId: Schema.String,
+  invoiceId: InvoiceId,
+  storeId: StoreId,
   fiatAmount: Schema.String,
   btcAmount: Schema.String,
   currency: Schema.Literal('EUR'),
   exchangeRate: Schema.String,
-  paymentLink: Schema.String,
+  paymentLink: PaymentLink,
+  status: InvoiceStatus,
+  paymentMethod: InvoicePaymentMethod,
+  createdTime: UnixMillisecondsE,
+  expirationTime: UnixMillisecondsE,
 })
 export type CreateInvoiceResponse = typeof CreateInvoiceResponse.Type
 
 export const GetInvoiceRequest = Schema.Struct({
-  invoiceId: Schema.String,
-  storeId: Schema.String,
+  invoiceId: InvoiceId,
+  storeId: StoreId,
 })
 export type GetInvoiceRequest = typeof GetInvoiceRequest.Type
 
 export const GetInvoiceResponse = Schema.Struct({
-  invoiceId: Schema.String,
-  storeId: Schema.String,
-  status: Schema.Literal(
-    'New',
-    'Expired',
-    'Paid',
-    'Complete',
-    'Confirmed',
-    'Processing',
-    'Invalid',
-    'Settled'
-  ),
+  invoiceId: InvoiceId,
+  storeId: StoreId,
+  status: InvoiceStatus,
 })
 export type GetInvoiceResponse = typeof GetInvoiceResponse.Type
 

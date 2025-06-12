@@ -11,7 +11,7 @@ import {InteractionManager} from 'react-native'
 import {apiAtom} from '../../../api'
 import {
   DONATION_PROMPT_CHAT_MESSAGES_THRESHOLD_COUNT,
-  showDonationPromptActionAtom,
+  showDonationPromptGiveLoveActionAtom,
 } from '../../../components/DonationPrompt/atoms'
 import {type ActionAtomType} from '../../../utils/atomUtils/ActionAtomType'
 import {type FocusAtomType} from '../../../utils/atomUtils/FocusAtomType'
@@ -64,7 +64,7 @@ export default function sendMessageActionAtom(
         if (
           numberOfMessagesInChat > DONATION_PROMPT_CHAT_MESSAGES_THRESHOLD_COUNT
         ) {
-          yield* _(set(showDonationPromptActionAtom), Effect.ignore)
+          yield* _(set(showDonationPromptGiveLoveActionAtom), Effect.ignore)
         }
       }).pipe(
         Effect.match({

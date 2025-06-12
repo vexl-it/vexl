@@ -87,7 +87,7 @@ function DonationAmount(): JSX.Element {
               selectionColor={getTokens().color.black.val}
               cursorColor={getTokens().color.black.val}
               suffix="€"
-              placeholder="0.00€"
+              placeholder="0€"
               style={{
                 fontSize: 48,
                 color: getTokens().color.black.val,

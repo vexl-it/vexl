@@ -1,5 +1,5 @@
 import Clipboard from '@react-native-clipboard/clipboard'
-import {useSetAtom} from 'jotai'
+import {useAtomValue, useSetAtom} from 'jotai'
 import {TouchableOpacity} from 'react-native'
 import {getTokens, Stack, Text, XStack} from 'tamagui'
 import {SATOSHIS_IN_BTC} from '../../../state/currentBtcPriceAtoms'
@@ -9,6 +9,7 @@ import Image from '../../Image'
 import copySvg from '../../images/copySvg'
 import {SharableQrCode} from '../../SharableQrCode'
 import {toastNotificationAtom} from '../../ToastNotification/atom'
+import {donationPaymentMethodAtom} from '../atoms'
 
 interface Props {
   readonly currency: 'EUR'
@@ -31,6 +32,7 @@ function DonationQrCode({
   const satsAmount = btcAmount * SATOSHIS_IN_BTC
   const exchangeRateInfo = Math.round(exchangeRate) / SATOSHIS_IN_BTC
   const setToastNotification = useSetAtom(toastNotificationAtom)
+  const donationPaymentMethod = useAtomValue(donationPaymentMethodAtom)
 
   return (
     <Stack height={570} gap="$4">
@@ -80,7 +82,9 @@ function DonationQrCode({
       </Stack>
       <Stack gap="$1">
         <Text col="$grey" ff="$body500">
-          {t('offerForm.network.lightning').toUpperCase()}
+          {donationPaymentMethod === 'BTC-LN'
+            ? t('offerForm.network.lightning').toUpperCase()
+            : t('offerForm.network.onChain').toUpperCase()}
         </Text>
         <XStack ai="center" jc="space-between" gap="$2">
           <Text

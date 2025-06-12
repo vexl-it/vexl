@@ -142,6 +142,7 @@ export const CreateInvoiceErrors = Schema.Union(
 export const CreateInvoiceRequest = Schema.Struct({
   amount: Schema.Number,
   currency: Schema.Literal('EUR'),
+  paymentMethod: Schema.Literal('BTC-CHAIN', 'BTC-LN'),
 })
 export type CreateInvoiceRequest = typeof CreateInvoiceRequest.Type
 

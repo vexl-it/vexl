@@ -29,7 +29,7 @@ function MessagePreview({
 
   if (message.messageType === 'APPROVE_MESSAGING') {
     return (
-      <BaseText color="$pastelGreen">
+      <BaseText color="$green">
         {t(`messages.messagePreviews.${direction}.APPROVE_MESSAGING`, {
           them: name,
         })}

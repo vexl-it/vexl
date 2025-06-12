@@ -27069,13 +27069,6 @@
           "val": "#fcc5f3",
           "variable": ""
         },
-        "pastelGreen": {
-          "isVar": true,
-          "key": "$pastelGreen",
-          "name": "c-pastelGreen",
-          "val": "#ACD9B7",
-          "variable": ""
-        },
         "yellowAccent1": {
           "isVar": true,
           "key": "$yellowAccent1",
@@ -27712,13 +27705,6 @@
         "key": "$pink",
         "name": "c-pink",
         "val": "#fcc5f3",
-        "variable": ""
-      },
-      "$color.pastelGreen": {
-        "isVar": true,
-        "key": "$pastelGreen",
-        "name": "c-pastelGreen",
-        "val": "#ACD9B7",
         "variable": ""
       },
       "$color.yellowAccent1": {

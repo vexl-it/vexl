@@ -35,6 +35,7 @@ import contactIconSvg from '../images/contactIconSvg'
 import cpuIconSvg from '../images/cpuIconSvg'
 import customerSupportIconSvg from '../images/customerSupportIconSvg'
 import dataIconSvg from '../images/dataIconSvg'
+import donationsSvg from '../images/donationsSvg'
 import eventsAndClubsSvg from '../images/eventsAndClubsSvg'
 import faceIdIconSvg from '../images/faceIdIconSvg'
 import glassesSvg from '../images/glassesSvg'
@@ -285,6 +286,14 @@ function ButtonsSection(): JSX.Element {
                 icon: faceIdIconSvg,
                 navigatesFurther: true,
                 onPress: todo,
+              },
+              {
+                testID: '@buttonsSection/myDonationsButton',
+                text: t('settings.items.myDonations'),
+                icon: donationsSvg,
+                onPress: () => {
+                  navigation.navigate('MyDonations')
+                },
               },
             ]
           : null,

@@ -3,9 +3,9 @@ import {TouchableOpacity} from 'react-native'
 import {getTokens, Stack, Text, XStack} from 'tamagui'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import Image from '../../../../Image'
+import checkIconSvg from '../../../../images/checkIconSvg'
 import closeSvg from '../../../../images/closeSvg'
 import vexlbotSvg from '../../../images/vexlbotSvg'
-import checkIconSvg from '../../images/checkIconSvg'
 import clockIconSvg from '../../images/clockIconSvg'
 
 type Props =

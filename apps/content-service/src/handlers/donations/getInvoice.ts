@@ -1,10 +1,12 @@
 import {
   GetInvoiceErrors,
+  InvoiceId,
+  StoreId,
   type GetInvoiceResponse,
 } from '@vexl-next/rest-api/src/services/content/contracts'
 import {GetInvoiceEndpoint} from '@vexl-next/rest-api/src/services/content/specification'
 import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
-import {Effect} from 'effect'
+import {Effect, Schema} from 'effect'
 import {Handler} from 'effect-http'
 import {BtcPayServerService} from '../../utils/donations'
 
@@ -21,8 +23,8 @@ export const getInvoiceHandler = Handler.make(GetInvoiceEndpoint, (req) =>
       )
 
       return {
-        invoiceId: invoiceData.id,
-        storeId: invoiceData.storeId,
+        invoiceId: Schema.decodeSync(InvoiceId)(invoiceData.id),
+        storeId: Schema.decodeSync(StoreId)(invoiceData.storeId),
         status: invoiceData.status,
       } satisfies GetInvoiceResponse
     }),

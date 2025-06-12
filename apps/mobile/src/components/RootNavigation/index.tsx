@@ -28,6 +28,7 @@ import {ClubOffersScreen} from '../ClubOffersScreen'
 import CommonFriendsScreen from '../CommonFriendsScreen'
 import DebugScreen from '../DebugScreen'
 import DevTranslationFloatingButton from '../DevTranslationFloatingButtons'
+import DonationDetailsScreen from '../DonationDetailsScreen'
 import EditNameScreen from '../EditNameScreen'
 import EventsAndClubsScreen from '../EventsAndClubsScreen'
 import FaqsScreen from '../FaqScreen'
@@ -38,6 +39,7 @@ import GoldenAvatarAnimation, {
 import InsideScreen from '../InsideRouter'
 import JoinClubFlow from '../JoinClubFlow'
 import LoginFlow from '../LoginFlow'
+import MyDonationsScreen from '../MyDonationsScreen'
 import NotificationSettingsScreen from '../NotificationSettingsScreen'
 import OfferDetailScreen from '../OfferDetailScreen'
 import PostLoginFlow from '../PostLoginFlow'
@@ -107,6 +109,11 @@ function RootNavigation(): JSX.Element {
             <Stack.Screen
               name="EventsAndClubs"
               component={EventsAndClubsScreen}
+            />
+            <Stack.Screen name="MyDonations" component={MyDonationsScreen} />
+            <Stack.Screen
+              name="DonationDetails"
+              component={DonationDetailsScreen}
             />
             <Stack.Screen
               name="CommonFriends"

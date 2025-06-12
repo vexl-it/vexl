@@ -18,6 +18,7 @@ import {
   type MeetingLocationData,
   type NetworkData,
 } from '@vexl-next/domain/src/general/tradeChecklist'
+import {type InvoiceId} from '@vexl-next/rest-api/src/services/content/contracts'
 import {type LocationSuggestion} from '@vexl-next/rest-api/src/services/location/contracts'
 import {
   type InitPhoneVerificationResponse,
@@ -83,6 +84,10 @@ export type RootStackParamsList = {
   DebugScreen: undefined
 
   EventsAndClubs: NavigatorScreenParams<EventsAndClubsParamsList>
+
+  MyDonations: undefined
+
+  DonationDetails: {invoiceId: InvoiceId}
 
   JoinClubFlow: NavigatorScreenParams<JoinClubFlowParamsList>
 

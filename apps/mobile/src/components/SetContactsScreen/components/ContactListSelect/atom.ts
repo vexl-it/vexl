@@ -22,8 +22,8 @@ import {translationAtom} from '../../../../utils/localization/I18nProvider'
 import {showErrorAlertE} from '../../../../utils/showErrorAlert'
 import toE164PhoneNumberWithDefaultCountryCode from '../../../../utils/toE164PhoneNumberWithDefaultCountryCode'
 import {askAreYouSureActionAtom} from '../../../AreYouSureDialog'
-import checkIconSvg from '../../../ChatDetailScreen/components/images/checkIconSvg'
 import {toastNotificationAtom} from '../../../ToastNotification/atom'
+import checkIconSvg from '../../../images/checkIconSvg'
 import userSvg from '../../../images/userSvg'
 
 export const ContactsSelectScope = createScope<{

@@ -14,6 +14,7 @@ export interface Props<T> extends SelectableCellContentProps<T> {
   disabled?: boolean
   onPress: (_: T) => void
   size?: 'small' | 'large'
+  variant?: 'dark' | 'light'
 }
 function SelectableCell<T>({
   fullWidth = true,
@@ -24,6 +25,7 @@ function SelectableCell<T>({
   onPress,
   subtitle,
   size = 'large',
+  variant = 'dark',
 }: Props<T>): JSX.Element {
   return (
     <TouchableOpacity
@@ -36,7 +38,13 @@ function SelectableCell<T>({
         als={fullWidth ? 'auto' : 'flex-start'}
         br="$4"
         p={size === 'large' ? '$4' : '$3'}
-        bg={selected ? '$darkBrown' : '$grey'}
+        bc={
+          selected
+            ? '$darkBrown'
+            : variant === 'dark'
+              ? '$grey'
+              : '$greyAccent2'
+        }
       >
         <XStack ai={!subtitle ? 'center' : 'flex-start'} gap="$2">
           {selected ? (
@@ -53,7 +61,13 @@ function SelectableCell<T>({
               jc="center"
               bw={1}
               bc={selected ? '$main' : 'transparent'}
-              borderColor={selected ? '$main' : '$greyAccent2'}
+              borderColor={
+                selected
+                  ? '$main'
+                  : variant === 'dark'
+                    ? '$greyAccent2'
+                    : '$white'
+              }
               br={20}
             />
           )}

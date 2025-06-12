@@ -16,8 +16,9 @@ export const createInvoiceHandler = Handler.make(CreateInvoiceEndpoint, (req) =>
 
       const createInvoiceResponse = yield* _(
         btcPayServerService.createInvoice({
-          amount: req.body.amount.toString(),
+          amount: req.body.amount,
           currency: req.body.currency,
+          paymentMethod: req.body.paymentMethod,
         })
       )
 
@@ -28,17 +29,19 @@ export const createInvoiceHandler = Handler.make(CreateInvoiceEndpoint, (req) =>
         })
       )
 
-      const lightningPaymentMethod = Array.findFirst(
+      const paymentMethod = Array.findFirst(
         paymentMethods,
-        (method) => method.paymentMethodId === 'BTC-LN'
+        (method) => method.paymentMethodId === req.body.paymentMethod
       )
 
-      if (Option.isNone(lightningPaymentMethod))
+      if (Option.isNone(paymentMethod))
         return yield* _(
           Effect.fail(
             new CreateInvoiceError({
-              cause: new Error('No BTC-LN payment method found'),
-              message: 'No BTC-LN payment method found',
+              cause: new Error(
+                `No ${req.body.paymentMethod} payment method found`
+              ),
+              message: `No ${req.body.paymentMethod} payment method found`,
             })
           )
         )
@@ -46,9 +49,9 @@ export const createInvoiceHandler = Handler.make(CreateInvoiceEndpoint, (req) =>
       const toReturn = {
         invoiceId: createInvoiceResponse.id,
         storeId: createInvoiceResponse.storeId,
-        paymentLink: lightningPaymentMethod.value.paymentLink,
-        exchangeRate: lightningPaymentMethod.value.rate,
-        btcAmount: lightningPaymentMethod.value.amount,
+        paymentLink: paymentMethod.value.paymentLink,
+        exchangeRate: paymentMethod.value.rate,
+        btcAmount: paymentMethod.value.amount,
         fiatAmount: createInvoiceResponse.amount,
         currency: 'EUR',
       } satisfies CreateInvoiceResponse

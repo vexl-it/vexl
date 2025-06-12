@@ -1,5 +1,5 @@
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
-import {Array} from 'effect/index'
+import {Array} from 'effect'
 import areIncluded from '../atoms/filteredOffers'
 import {type OffersFilter} from '../domain'
 

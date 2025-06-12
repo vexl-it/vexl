@@ -1,5 +1,5 @@
 import notifee, {AndroidImportance} from '@notifee/react-native'
-import {Effect, Schema} from 'effect/index'
+import {Effect, Schema} from 'effect'
 import {getDefaultStore} from 'jotai'
 import {translationAtom} from '../localization/I18nProvider'
 import {getDefaultChannel} from './notificationChannels'

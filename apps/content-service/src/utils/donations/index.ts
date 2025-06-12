@@ -1,5 +1,6 @@
 import {
   CreateInvoiceError,
+  type CreateInvoiceRequest,
   type GetInvoiceErrors,
   GetInvoiceGeneralError,
   type GetInvoicePaymentMethodsErrors,
@@ -16,7 +17,7 @@ import {
   btcPayServerUrlConfig,
 } from '../../configs'
 import {
-  type CreateInvoiceRequest,
+  type CreateInvoiceRequest as CreateInvoiceRequestInternal,
   type GetInvoicePaymentMethodsRequest,
   type GetInvoiceRequest,
   type InvoicePaymentMethodsResponseInternal,
@@ -60,12 +61,14 @@ function createInvoiceInternal({
   apiKey,
   amount,
   currency,
+  paymentMethod,
 }: {
   btcPayServerUrl: string
   storeId: string
   apiKey: string
   amount: string
   currency: string
+  paymentMethod: 'BTC-CHAIN' | 'BTC-LN'
 }): Effect.Effect<InvoiceResponseInternal, CreateInvoiceError> {
   const url = urlJoin(
     btcPayServerUrl,
@@ -100,12 +103,12 @@ function createInvoiceInternal({
       expirationMinutes: 60,
       monitoringMinutes: 60,
       speedPolicy: 'MediumSpeed',
-      paymentMethods: ['BTC-LN', 'BTC-LNURL'],
-      defaultPaymentMethod: 'BTC-LN',
+      paymentMethods: [paymentMethod],
+      defaultPaymentMethod: paymentMethod,
       defaultLanguage: null,
       lazyPaymentMethods: null,
     },
-  } satisfies CreateInvoiceRequest
+  } satisfies CreateInvoiceRequestInternal
 
   return Effect.tryPromise({
     try: async () => {
@@ -263,13 +266,18 @@ export class BtcPayServerService extends Context.Tag('BtcPayServerService')<
       const btcPayServerStoreId = yield* _(btcPayServerStoreIdConfig)
 
       const toReturn = {
-        createInvoice: ({amount, currency}: CreateInvoiceRequest) =>
+        createInvoice: ({
+          amount,
+          currency,
+          paymentMethod,
+        }: CreateInvoiceRequest) =>
           createInvoiceInternal({
             btcPayServerUrl,
             storeId: btcPayServerStoreId,
             apiKey: btcPayServerApiKey,
-            amount,
+            amount: amount.toString(),
             currency,
+            paymentMethod,
           }),
         getInvoice: ({invoiceId, storeId}: GetInvoiceRequest) =>
           getInvoiceInternal({

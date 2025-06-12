@@ -10,10 +10,19 @@ import DonationAmount from './components/DonationAmount'
 import DonationPrompt from './components/DonationPrompt'
 import DonationQrCode from './components/DonationQrCode'
 
+export const MAX_DONATION_AMOUNT = 1000 // Maximum donation amount in EUR
 export const DONATION_PROMPT_DAYS_THRESHOLD_COUNT = 2
 export const DONATION_PROMPT_CHAT_MESSAGES_THRESHOLD_COUNT = 10
 
 export const donationAmountAtom = atom<string | undefined>(undefined)
+export const donationPaymentMethodAtom = atom<'BTC-CHAIN' | 'BTC-LN'>('BTC-LN')
+
+const paymentMethodAndAmountConfirmButtonDisabledAtom = atom<boolean>(
+  (get) =>
+    !get(donationAmountAtom) ||
+    Number(get(donationAmountAtom)) === 0 ||
+    Number(get(donationAmountAtom)) > MAX_DONATION_AMOUNT
+)
 
 export const showDonationPromptActionAtom = atom(null, (get, set) => {
   const {t} = get(translationAtom)
@@ -46,17 +55,21 @@ export const showDonationPromptActionAtom = atom(null, (get, set) => {
             type: 'StepWithChildren',
             MainSectionComponent: DonationAmount,
             positiveButtonText: t('common.confirm'),
-            negativeButtonText: t(`common.cancel`),
+            negativeButtonText: t('common.cancel'),
+            positiveButtonDisabledAtom:
+              paymentMethodAndAmountConfirmButtonDisabledAtom,
           },
         ],
       })
     )
 
     const donationAmount = get(donationAmountAtom)
+
     const resp = yield* _(
       api.createInvoice({
         amount: donationAmount ? Number(donationAmount) : 0,
         currency: 'EUR',
+        paymentMethod: get(donationPaymentMethodAtom),
       })
     )
 

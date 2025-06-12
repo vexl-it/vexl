@@ -3,7 +3,7 @@ import {
   type BasicError,
 } from '@vexl-next/domain/src/utility/errors'
 import {Effect, Either} from 'effect'
-import {atom, useAtom, type WritableAtom} from 'jotai'
+import {atom, useAtom, useAtomValue, type Atom, type WritableAtom} from 'jotai'
 import React, {useCallback, type ComponentType} from 'react'
 import {ScrollView, StyleSheet, View} from 'react-native'
 import {Stack, Text, type ColorTokens} from 'tamagui'
@@ -21,6 +21,7 @@ export interface StepWithText {
   description?: string
   negativeButtonText?: string
   positiveButtonText: string
+  positiveButtonDisabledAtom?: Atom<boolean>
 }
 
 export interface StepWithChildren<T> {
@@ -31,6 +32,7 @@ export interface StepWithChildren<T> {
   goBackOnNegativeButtonPress?: boolean
   MainSectionComponent: ComponentType<T>
   mainSectionComponentProps?: T
+  positiveButtonDisabledAtom?: Atom<boolean>
 }
 
 interface StepWithInput {
@@ -43,6 +45,7 @@ interface StepWithInput {
   subtitle?: string
   textInputProps: VexlTextInputProps
   defaultValue?: string
+  positiveButtonDisabledAtom?: Atom<boolean>
 }
 
 type Step = StepWithText | StepWithChildren<any> | StepWithInput
@@ -111,8 +114,13 @@ const styles = StyleSheet.create({
   flip: {transform: [{scaleY: -1}]},
 })
 
+const falseAtom = atom(false)
+
 function AreYouSureDialog(): JSX.Element | null {
   const [state, setState] = useAtom(areYouSureDialogAtom)
+  const positiveButtonDisabled = useAtomValue(
+    state?.steps[state.currentStep]?.positiveButtonDisabledAtom ?? falseAtom
+  )
 
   const onBackButtonPressed = useCallback(() => {
     if (!state) return false
@@ -256,6 +264,7 @@ function AreYouSureDialog(): JSX.Element | null {
         <Button
           testID="@areYouSureDialog/positiveButton"
           fullSize
+          disabled={positiveButtonDisabled}
           size={
             state?.buttonsDirection?.startsWith('column') ? 'large' : undefined
           }

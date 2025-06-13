@@ -12,11 +12,13 @@ import * as Notifications from 'expo-notifications'
 import * as E from 'fp-ts/Either'
 import type * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
+import {getDefaultStore} from 'jotai'
 import {useEffect, useState} from 'react'
 import {Alert} from 'react-native'
 import NotificationSetting from 'react-native-open-notification'
 import {useTranslation} from '../localization/I18nProvider'
 import reportError from '../reportError'
+import {areNotificationsEnabledAtom} from './areNotificaitonsEnabledAtom'
 
 type UnknownErrorNotifications = BasicError<'UnknownErrorNotifications'>
 
@@ -31,6 +33,10 @@ export function useRequestNotificationPermissions(): TE.TaskEither<
       notifee
         .requestPermission()
         .then((result) => {
+          getDefaultStore().set(
+            areNotificationsEnabledAtom,
+            result.authorizationStatus === AuthorizationStatus.AUTHORIZED
+          )
           if (result.authorizationStatus === AuthorizationStatus.AUTHORIZED) {
             resolve(E.right('granted' as const))
             return

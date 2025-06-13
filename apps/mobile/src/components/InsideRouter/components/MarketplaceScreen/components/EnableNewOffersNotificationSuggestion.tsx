@@ -1,11 +1,28 @@
-import {useAtom, useSetAtom} from 'jotai'
+import {Effect} from 'effect/index'
+import {atom, useSetAtom} from 'jotai'
 import {type YStackProps} from 'tamagui'
-import {resolveAllContactsAsSeenActionAtom} from '../../../../../state/contacts/atom/contactsStore'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
-import {useNotificationsEnabled} from '../../../../../utils/notifications'
+import {
+  areNotificationsEnabledAtom,
+  checkAndSetAreNotificationsEnabledActionAtom,
+} from '../../../../../utils/notifications/areNotificaitonsEnabledAtom'
 import checkNotificationPermissionsAndAskIfPossibleActionAtom from '../../../../../utils/notifications/checkAndAskForPermissionsActionAtom'
 import {notificationPreferencesAtom} from '../../../../../utils/preferences'
 import MarketplaceSuggestion from '../../../../MarketplaceSuggestion'
+
+const showEnableNewOfferNotificationCancelledAtom = atom(false)
+
+const showEnableNewOfferNotificationAtom = atom(
+  (get) =>
+    !get(showEnableNewOfferNotificationCancelledAtom) &&
+    !(
+      get(notificationPreferencesAtom).newOfferInMarketplace &&
+      get(areNotificationsEnabledAtom)
+    ),
+  (get, set) => {
+    set(showEnableNewOfferNotificationCancelledAtom, true)
+  }
+)
 
 function EnableNewOffersNotificationSuggestion(
   props: YStackProps
@@ -14,26 +31,31 @@ function EnableNewOffersNotificationSuggestion(
   const checkAndAskForNotificationPermissions = useSetAtom(
     checkNotificationPermissionsAndAskIfPossibleActionAtom
   )
-  const [notificationPreferences, setNotificationPreferences] = useAtom(
-    notificationPreferencesAtom
+  const setNotificationPreferences = useSetAtom(notificationPreferencesAtom)
+  const checkAndSetAreNotificationsEnabled = useSetAtom(
+    checkAndSetAreNotificationsEnabledActionAtom
   )
-  const notificationsEnabled = useNotificationsEnabled()
-
-  if (notificationPreferences.newOfferInMarketplace && notificationsEnabled)
-    return null
 
   return (
     <MarketplaceSuggestion
       buttonText={t('suggestion.enableNotificationsForNewOffers.button')}
       onButtonPress={() => {
-        void checkAndAskForNotificationPermissions()
-        setNotificationPreferences((prev) => ({
-          ...prev,
-          newOfferInMarketplace: true,
-        }))
+        Effect.runFork(
+          checkAndAskForNotificationPermissions({force: true}).pipe(
+            Effect.andThen(() => {
+              setNotificationPreferences((prev) => ({
+                ...prev,
+                newOfferInMarketplace: true,
+              }))
+            }),
+            Effect.andThen(() => {
+              checkAndSetAreNotificationsEnabled()
+            })
+          )
+        )
       }}
       text={t('suggestion.enableNotificationsForNewOffers.text')}
-      visibleStateAtom={resolveAllContactsAsSeenActionAtom}
+      visibleStateAtom={showEnableNewOfferNotificationAtom}
       {...props}
     />
   )

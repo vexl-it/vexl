@@ -6,12 +6,13 @@ import {
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {Effect} from 'effect'
-import {atom, type Getter, type Setter} from 'jotai'
+import {atom, getDefaultStore, type Getter, type Setter} from 'jotai'
 import {Alert, Platform} from 'react-native'
 import NotificationSetting from 'react-native-open-notification'
 import {toastNotificationAtom} from '../../components/ToastNotification/atom'
 import {translationAtom} from '../localization/I18nProvider'
 import {askAreYouSureActionAtom} from './../../components/AreYouSureDialog'
+import {areNotificationsEnabledAtom} from './areNotificaitonsEnabledAtom'
 
 const ALLOW_ASKING_EVERY_MILLIS = 10 * 60 * 1000
 
@@ -19,9 +20,15 @@ const isPermissionsGranted = Effect.promise(() =>
   notifee.getNotificationSettings()
 )
 
-const requestPermissions = Effect.promise(() =>
+export const requestPermissions = Effect.promise(() =>
   notifee.requestPermission()
 ).pipe(
+  Effect.tap((e) => {
+    getDefaultStore().set(
+      areNotificationsEnabledAtom,
+      e.authorizationStatus === AuthorizationStatus.AUTHORIZED
+    )
+  }),
   Effect.filterOrFail(
     (e) => e.authorizationStatus === AuthorizationStatus.AUTHORIZED,
     () => ({_tag: 'UserDeclined'}) as const
@@ -51,7 +58,7 @@ const openSettings =
 
 const checkNotificationPermissionsAndAskIfPossibleActionAtom = atom(
   null,
-  (get, set) =>
+  (get, set, {force}: {force: boolean} = {force: false}) =>
     Effect.gen(function* (_) {
       const {authorizationStatus} = yield* _(isPermissionsGranted)
 
@@ -59,7 +66,7 @@ const checkNotificationPermissionsAndAskIfPossibleActionAtom = atom(
         return 'granted' as const
       }
 
-      if (!(yield* _(shouldAskForNotifications(get)))) {
+      if (!force && !(yield* _(shouldAskForNotifications(get)))) {
         return 'not-asked' as const
       }
       yield* _(setAskedForNotificationsNow(set))

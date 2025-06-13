@@ -1,6 +1,6 @@
 import 'dotenv/config'
 //
-import {DevTools} from '@effect/experimental'
+import {DevTools, Reactivity} from '@effect/experimental'
 import {healthServerLayer} from '@vexl-next/server-utils/src/HealthServer'
 import {runMainInNode} from '@vexl-next/server-utils/src/runMainInNode'
 import {Effect, Layer} from 'effect'
@@ -76,6 +76,7 @@ const program = Effect.gen(function* (_) {
       )
     )
   ),
+  Effect.provide(Reactivity.layer),
   Effect.tapError((e) =>
     Effect.logError('Error in main program', JSON.stringify(e))
   )

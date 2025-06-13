@@ -16,7 +16,7 @@ const Root = Styled.div`
 `
 
 const Number = Styled(AnimatedNumber)`
-  font-size: 42px;
+  font-size: 80px;
   font-weight: 700;
   color: #fff;
   /* margin-bottom: 16px; */
@@ -24,7 +24,7 @@ const Number = Styled(AnimatedNumber)`
 `
 
 const Image = Styled.img`
-margin-top: 16px;
+  margin-top: 16px;
   width: 300px;
   display: block;
   ${mobileMediaQuery} {

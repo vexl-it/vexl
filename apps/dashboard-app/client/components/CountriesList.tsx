@@ -146,6 +146,7 @@ const Root = styled.div`
   width: 100%;
   display: flex;
   flex-direction: column;
+  height: 800px;
   /*
   &::after {
     display: none;

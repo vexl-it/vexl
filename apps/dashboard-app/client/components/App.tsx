@@ -49,6 +49,8 @@ const CountriesContainer = styled.div`
 
 const ConnectionsContainer = styled.div`
   flex: 1;
+  width: 650px;
+  margin: 0 auto;
 `
 
 const CountContainer = styled.div`
@@ -78,6 +80,9 @@ export default function App(): JSX.Element {
   return (
     <>
       <Container>
+        <CountContainer>
+          <NumberOfUsers />
+        </CountContainer>
         <CountriesContainer>
           <CountriesList />
         </CountriesContainer>
@@ -85,9 +90,6 @@ export default function App(): JSX.Element {
           <ConnectionsContainer>
             <LatestConnections />
           </ConnectionsContainer>
-          <CountContainer>
-            <NumberOfUsers />
-          </CountContainer>
         </LatestConnectionsAndCountContainer>
         <BanerContainer>
           <VexlBanner />

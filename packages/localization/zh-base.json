@@ -1241,5 +1241,8 @@
   "donationPrompt.totalFiat": "法定货币总金额",
   "donationPrompt.exchangeRate": "汇率",
   "donationPrompt.amountDue": "应支付金额",
-  "donationPrompt.charge": "费用"
+  "donationPrompt.charge": "费用",
+  "donationPrompt.paymentMethodAndAmount": "Payment method and amount",
+  "donationPrompt.pleaseSelectThePaymentMethodAndAmountYouWantToDonate": "Please select the payment method and amount you want to donate.",
+  "donationPrompt.maximumAmount": "Maximum amount is {{maxAmount}} EUR"
 }

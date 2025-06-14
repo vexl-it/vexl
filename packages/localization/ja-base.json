@@ -1241,5 +1241,8 @@
   "donationPrompt.totalFiat": "Total fiat",
   "donationPrompt.exchangeRate": "Exchange rate",
   "donationPrompt.amountDue": "Amount due",
-  "donationPrompt.charge": "Charge"
+  "donationPrompt.charge": "Charge",
+  "donationPrompt.paymentMethodAndAmount": "Payment method and amount",
+  "donationPrompt.pleaseSelectThePaymentMethodAndAmountYouWantToDonate": "Please select the payment method and amount you want to donate.",
+  "donationPrompt.maximumAmount": "Maximum amount is {{maxAmount}} EUR"
 }

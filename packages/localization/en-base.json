@@ -1233,7 +1233,7 @@
   "blog.readMore": "Read more",
   "donationPrompt.donate": "Donate",
   "donationPrompt.giveLove": "Give love",
-  "donationPrompt.ifYouLikeVexlSupportItsImprovement": "If you like Vexl, support it’s improvement by sending some Bitcoins as donation!",
+  "donationPrompt.ifYouLikeVexlSupportItsImprovement": "If you like Vexl, support its improvement by sending some Bitcoins as donation!",
   "donationPrompt.amount": "Amount",
   "donationPrompt.pleaseEnterTheAmountYouWantToDonate": "Please enter the amount you want to donate",
   "donationPrompt.vexlFoundationDonate": "Vexl Foundation donate",
@@ -1241,5 +1241,8 @@
   "donationPrompt.totalFiat": "Total fiat",
   "donationPrompt.exchangeRate": "Exchange rate",
   "donationPrompt.amountDue": "Amount due",
-  "donationPrompt.charge": "Charge"
+  "donationPrompt.charge": "Charge",
+  "donationPrompt.paymentMethodAndAmount": "Payment method and amount",
+  "donationPrompt.pleaseSelectThePaymentMethodAndAmountYouWantToDonate": "Please select the payment method and amount you want to donate.",
+  "donationPrompt.maximumAmount": "Maximum amount is {{maxAmount}} EUR"
 }

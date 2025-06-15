@@ -4,8 +4,8 @@ import {TouchableOpacity} from 'react-native'
 import {getTokens, Stack, Text, XStack} from 'tamagui'
 import {SATOSHIS_IN_BTC} from '../../../state/currentBtcPriceAtoms'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
-import checkIconSvg from '../../ChatDetailScreen/components/images/checkIconSvg'
 import Image from '../../Image'
+import checkIconSvg from '../../images/checkIconSvg'
 import copySvg from '../../images/copySvg'
 import {SharableQrCode} from '../../SharableQrCode'
 import {toastNotificationAtom} from '../../ToastNotification/atom'
@@ -77,7 +77,11 @@ function DonationQrCode({
         <SharableQrCode
           size={300}
           value={paymentLink}
-          logo={require('../images/btcLogo.png')}
+          logo={
+            donationPaymentMethod === 'BTC-CHAIN'
+              ? require('../../images/btcLogo.png')
+              : require('../../images/lightningLogo.png')
+          }
         />
       </Stack>
       <Stack gap="$1">

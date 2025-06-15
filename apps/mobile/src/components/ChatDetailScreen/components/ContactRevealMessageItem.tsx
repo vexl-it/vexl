@@ -20,12 +20,12 @@ import reportError from '../../../utils/reportError'
 import resolveLocalUri from '../../../utils/resolveLocalUri'
 import {showGoldenAvatarInfoModalActionAton} from '../../GoldenAvatar/atoms'
 import SvgImage from '../../Image'
+import checkIconSvg from '../../images/checkIconSvg'
 import {toastNotificationAtom} from '../../ToastNotification/atom'
 import {revealContactFromQuickActionBannerAtom} from '../../TradeChecklistFlow/atoms/revealContactAtoms'
 import UserAvatar from '../../UserAvatar'
 import {chatMolecule} from '../atoms'
 import BigIconMessage from './BigIconMessage'
-import checkIconSvg from './images/checkIconSvg'
 
 function RevealedContactMessageItem({
   isLatest,

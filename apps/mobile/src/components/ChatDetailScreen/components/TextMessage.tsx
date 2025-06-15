@@ -24,12 +24,12 @@ import resolveLocalUri from '../../../utils/resolveLocalUri'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 import IconButton from '../../IconButton'
 import {toastNotificationAtom} from '../../ToastNotification/atom'
+import checkIconSvg from '../../images/checkIconSvg'
 import copySvg from '../../images/copySvg'
 import {chatMolecule} from '../atoms'
 import replyToSvg from '../images/replyToSvg'
 import formatChatTime from '../utils/formatChatTime'
 import {type MessagesListItem} from './MessageItem'
-import checkIconSvg from './images/checkIconSvg'
 
 const style = StyleSheet.create({
   image: {

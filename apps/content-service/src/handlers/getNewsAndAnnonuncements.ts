@@ -80,22 +80,6 @@ export const newsAndAnonouncementsHandler = Handler.make(
     makeEndpointEffect(
       Effect.gen(function* (_) {
         const vexlBotNewsForBlog1: VexlBotNews = {
-          id: Schema.decodeSync(UuidE)('5b44bc53-4556-4e4a-af70-006b3beaef64'),
-          type: 'info',
-          content:
-            'Let’s talk about what’s not on your bank statement.\nNew drop with The Rage ➡️',
-          action: Option.some({
-            text: 'Read now',
-            url: Schema.decodeSync(HttpsUrlString)(
-              'https://vexl.it/post/the-myth-of-financial-inclusion'
-            ),
-          }),
-          cancelForever: true,
-          bubbleOrigin: Option.none(),
-          cancelable: true,
-        }
-
-        const vexlBotNewsForBlog2: VexlBotNews = {
           id: Schema.decodeSync(UuidE)('085f7bbe-f142-4e71-8b80-eb9b9107ddef'),
           type: 'info',
           content:
@@ -111,7 +95,23 @@ export const newsAndAnonouncementsHandler = Handler.make(
           cancelable: true,
         }
 
-        const newBlogReleaseAtMillis = 1749481200000
+        const vexlBotNewsForBlog2: VexlBotNews = {
+          id: Schema.decodeSync(UuidE)('5785f0ed-6451-412a-b5e2-3f5b186e3d00'),
+          type: 'info',
+          content:
+            'This week, we dive into how due process was quietly deleted from the financial system. ➡️',
+          action: Option.some({
+            text: 'Read now',
+            url: Schema.decodeSync(HttpsUrlString)(
+              'https://vexl.it/post/the-lack-of-due-process'
+            ),
+          }),
+          cancelForever: true,
+          bubbleOrigin: Option.none(),
+          cancelable: true,
+        }
+
+        const newBlogReleaseAtMillis = 1775487600000
         const showNewBlogLink =
           headers.isDeveloper || unixMillisecondsNow() > newBlogReleaseAtMillis
 

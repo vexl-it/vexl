@@ -1270,5 +1270,11 @@
   "donations.expiresIn": "Expires in {{minutes}} minutes",
   "donations.createdAt": "Created at: {{dateTime}}",
   "donations.copyPaymentLink": "Copy payment link",
-  "donations.claimConfirmation": "Claim confirmation"
+  "donations.claimConfirmation": "Claim confirmation",
+  "phoneCooperation.readyToTakeControl": "Ready to take control?",
+  "phoneCooperation.useCode": "Use code",
+  "phoneCooperation.code": "VEXL",
+  "phoneCooperation.forDiscount": "for a 5% discount on Nitrophone, the most secure Android on the planet.",
+  "phoneCooperation.visitWebsite": "Visit website",
+  "phoneCooperation.nitroPhoneWeb": "https://shop.nitrokey.com/shop?search=nitrophone"
 }

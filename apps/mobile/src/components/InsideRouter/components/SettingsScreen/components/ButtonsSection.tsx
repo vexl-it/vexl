@@ -1,6 +1,7 @@
 import {useNavigation} from '@react-navigation/native'
 import {type SvgString} from '@vexl-next/domain/src/utility/SvgString.brand'
 import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
+import {Effect} from 'effect/index'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {useSetAtom} from 'jotai'
@@ -25,7 +26,10 @@ import CurrencySelect from '../../../../CurrencySelect'
 import SvgImage from '../../../../Image'
 import editIconSvg from '../../../../images/editIconSvg'
 import spokenLanguagesSvg from '../../../../images/spokenLanguagesSvg'
-import {changeLanguageActionAtom} from '../actionAtoms'
+import {
+  changeLanguageActionAtom,
+  showVexlNitroPhoneCooperationBannerActionAtom,
+} from '../actionAtoms'
 import {
   changeCurrencyDialogVisibleAtom,
   toggleScreenshotsDisabledActionAtom,
@@ -41,6 +45,7 @@ import faceIdIconSvg from '../images/faceIdIconSvg'
 import glassesSvg from '../images/glassesSvg'
 import imageIconSvg from '../images/imageIconSvg'
 import notificationsIconSvg from '../images/notificationsIconSvg'
+import popularSvg from '../images/popularSvg'
 import questionIconSvg from '../images/questionIconSvg'
 import termsIconSvg from '../images/termsIconSvg'
 import trashIconSvg from '../images/trashIconSvg'
@@ -119,6 +124,9 @@ function ButtonsSection(): JSX.Element {
     toggleScreenshotsDisabledActionAtom
   )
   const changeLanguage = useSetAtom(changeLanguageActionAtom)
+  const showVexlNitroPhoneCooperationBanner = useSetAtom(
+    showVexlNitroPhoneCooperationBannerActionAtom
+  )
 
   function todo(): void {
     Alert.alert('To be implemented')
@@ -210,6 +218,16 @@ function ButtonsSection(): JSX.Element {
             navigatesFurther: true,
             onPress: () => {
               navigation.navigate('NotificationSettings')
+            },
+          },
+          {
+            testID: '@buttonsSection/vexlLovesNitroPhoneButton',
+            text: 'Vexl 🤍 NitroPhone',
+            icon: popularSvg,
+            iconFill: getTokens().color.greyOnBlack.val,
+            navigatesFurther: true,
+            onPress: () => {
+              Effect.runFork(showVexlNitroPhoneCooperationBanner())
             },
           },
         ],
@@ -357,6 +375,7 @@ function ButtonsSection(): JSX.Element {
       navigation,
       setChangeCurrencyDialogVisible,
       setReportIssueDialogVisible,
+      showVexlNitroPhoneCooperationBanner,
       t,
       toggleScreenshotsDisabled,
     ]

@@ -230,6 +230,15 @@ function ButtonsSection(): JSX.Element {
               Effect.runFork(showVexlNitroPhoneCooperationBanner())
             },
           },
+          {
+            testID: '@buttonsSection/myDonationsButton',
+            text: t('settings.items.myDonations'),
+            icon: donationsSvg,
+            onPress: () => {
+              navigation.navigate('MyDonations')
+            },
+            navigatesFurther: true,
+          },
         ],
         [
           {
@@ -304,14 +313,6 @@ function ButtonsSection(): JSX.Element {
                 icon: faceIdIconSvg,
                 navigatesFurther: true,
                 onPress: todo,
-              },
-              {
-                testID: '@buttonsSection/myDonationsButton',
-                text: t('settings.items.myDonations'),
-                icon: donationsSvg,
-                onPress: () => {
-                  navigation.navigate('MyDonations')
-                },
               },
             ]
           : null,

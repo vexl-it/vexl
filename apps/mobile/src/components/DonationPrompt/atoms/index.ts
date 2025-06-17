@@ -2,23 +2,22 @@ import {UnixMillisecondsE} from '@vexl-next/domain/src/utility/UnixMilliseconds.
 import {Effect, Schema} from 'effect'
 import {atom} from 'jotai'
 import {DateTime} from 'luxon'
-import {apiAtom} from '../../api'
-import {myDonationsAtom} from '../../state/donations/atom'
-import {translationAtom} from '../../utils/localization/I18nProvider'
-import {lastDisplayOfDonationPromptTimestampAtom} from '../../utils/preferences'
-import {showErrorAlertE} from '../../utils/showErrorAlert'
-import {askAreYouSureActionAtom} from '../AreYouSureDialog'
-import {loadingOverlayDisplayedAtom} from '../LoadingOverlayProvider'
-import DonationAmount from './components/DonationAmount'
-import DonationPrompt from './components/DonationPrompt'
-import DonationQrCode from './components/DonationQrCode'
-
-export const MAX_DONATION_AMOUNT = 1000 // Maximum donation amount in EUR
-export const DONATION_PROMPT_DAYS_THRESHOLD_COUNT = 2
-export const DONATION_PROMPT_CHAT_MESSAGES_THRESHOLD_COUNT = 10
-
-export const donationAmountAtom = atom<string | undefined>(undefined)
-export const donationPaymentMethodAtom = atom<'BTC-CHAIN' | 'BTC-LN'>('BTC-LN')
+import {apiAtom} from '../../../api'
+import {myDonationsAtom} from '../../../state/donations/atom'
+import {translationAtom} from '../../../utils/localization/I18nProvider'
+import {lastDisplayOfDonationPromptTimestampAtom} from '../../../utils/preferences'
+import {showErrorAlertE} from '../../../utils/showErrorAlert'
+import {askAreYouSureActionAtom} from '../../AreYouSureDialog'
+import {loadingOverlayDisplayedAtom} from '../../LoadingOverlayProvider'
+import DonationAmount from '../components/DonationAmount'
+import DonationPrompt from '../components/DonationPrompt'
+import DonationQrCode from '../components/DonationQrCode'
+import {
+  DONATION_PROMPT_DAYS_THRESHOLD_COUNT,
+  donationAmountAtom,
+  donationPaymentMethodAtom,
+  MAX_DONATION_AMOUNT,
+} from './stateAtoms'
 
 const paymentMethodAndAmountConfirmButtonDisabledAtom = atom<boolean>(
   (get) =>

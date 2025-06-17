@@ -9,7 +9,7 @@ import checkIconSvg from '../../images/checkIconSvg'
 import copySvg from '../../images/copySvg'
 import {SharableQrCode} from '../../SharableQrCode'
 import {toastNotificationAtom} from '../../ToastNotification/atom'
-import {donationPaymentMethodAtom} from '../atoms'
+import {donationPaymentMethodAtom} from '../atoms/stateAtoms'
 
 interface Props {
   readonly currency: 'EUR'

@@ -1,7 +1,7 @@
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
 import {Array} from 'effect'
-import areIncluded from '../atoms/filteredOffers'
 import {type OffersFilter} from '../domain'
+import areIncluded from '../utils/areIncluded'
 
 export const filterOffersIgnoreListingType = ({
   filter,

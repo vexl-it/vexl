@@ -10,7 +10,7 @@ import {
   donationAmountAtom,
   donationPaymentMethodAtom,
   MAX_DONATION_AMOUNT,
-} from '../atoms'
+} from '../atoms/stateAtoms'
 
 function usePaymentMethodsContent(): Array<
   SelectableCellContentProps<'BTC-CHAIN' | 'BTC-LN'>

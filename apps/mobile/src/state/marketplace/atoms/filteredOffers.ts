@@ -5,6 +5,7 @@ import {splitAtom} from 'jotai/utils'
 import calculatePriceInSats from '../../../utils/calculatePriceInSats'
 import {importedContactsAtom} from '../../contacts/atom/contactsStore'
 import {createBtcPriceForCurrencyAtom} from '../../currentBtcPriceAtoms'
+import areIncluded from '../utils/areIncluded'
 import filterOffersByText from '../utils/filterOffersByText'
 import {filterOffersIgnoreListingType} from '../utils/filterOffersIgnoreListingType'
 import isOfferInsideViewPort from '../utils/isOfferInsideViewport'
@@ -18,13 +19,6 @@ import {
 import marketplaceLayoutModeAtom from './map/marketplaceLayoutModeAtom'
 import {mapRegionAtom} from './mapRegionAtom'
 import {offersToSeeInMarketplaceAtom} from './offersToSeeInMarketplace'
-
-export default function areIncluded<T>(
-  elementsToLookFor: readonly T[],
-  arrayToLookIn: readonly T[]
-): boolean {
-  return elementsToLookFor.every((element) => arrayToLookIn.includes(element))
-}
 
 const filterBtcOffersAtom = atom((get) => {
   const offersToSeeInMarketplace = get(offersToSeeInMarketplaceAtom)

@@ -9,10 +9,8 @@ import {Effect} from 'effect'
 import {atom} from 'jotai'
 import {InteractionManager} from 'react-native'
 import {apiAtom} from '../../../api'
-import {
-  DONATION_PROMPT_CHAT_MESSAGES_THRESHOLD_COUNT,
-  showDonationPromptGiveLoveActionAtom,
-} from '../../../components/DonationPrompt/atoms'
+import {showDonationPromptGiveLoveActionAtom} from '../../../components/DonationPrompt/atoms'
+import {DONATION_PROMPT_CHAT_MESSAGES_THRESHOLD_COUNT} from '../../../components/DonationPrompt/atoms/stateAtoms'
 import {type ActionAtomType} from '../../../utils/atomUtils/ActionAtomType'
 import {type FocusAtomType} from '../../../utils/atomUtils/FocusAtomType'
 import {version} from '../../../utils/environment'

@@ -122,7 +122,7 @@ export function getContactsAndTryToResolveThePermissionsAlongTheWay(): Effect.Ef
                   )
                 : Option.none(),
               name,
-              label: Option.some(number.label),
+              label: Option.fromNullable(number.label),
               numberToDisplay: number.number,
               rawNumber: number.number,
             } satisfies ContactInfo

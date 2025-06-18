@@ -3,6 +3,7 @@ import {Option} from 'effect'
 import {useAtomValue} from 'jotai'
 import mobileMediaQuery from '../../mobileMediaQuery'
 import {totalNumberOfUsersAtom} from '../../state'
+import {useIsVerticalLayoutEnabled} from '../../utils/useIsVerticalLayoutEnabled'
 import AnimatedNumber from '../AnimatedNumber'
 import image from './images/something.svg'
 
@@ -15,8 +16,10 @@ const Root = Styled.div`
   text-align: center;
 `
 
-const Number = Styled(AnimatedNumber)`
-  font-size: 80px;
+const Number = Styled(AnimatedNumber)<{
+  verticalLayoutEnabled?: boolean
+}>`
+  ${(props) => (props.verticalLayoutEnabled ? `font-size: 80px` : 'font-size: 42px')};
   font-weight: 700;
   color: #fff;
   /* margin-bottom: 16px; */
@@ -24,7 +27,6 @@ const Number = Styled(AnimatedNumber)`
 `
 
 const Image = Styled.img`
-  margin-top: 16px;
   width: 300px;
   display: block;
   ${mobileMediaQuery} {
@@ -37,11 +39,19 @@ const Image = Styled.img`
 
 export default function NumberOfUsers(): JSX.Element {
   const count = useAtomValue(totalNumberOfUsersAtom)
+  const verticalLayoutEnabled = useIsVerticalLayoutEnabled()
+
   return (
     <Root>
-      <Number n={Option.getOrElse(count, () => 0)} />
+      <Number
+        verticalLayoutEnabled={verticalLayoutEnabled}
+        n={Option.getOrElse(count, () => 0)}
+      />
       <p>Happy anonymous users exchanging bitcoin on Vexl.it</p>
-      <Image src={image} />
+      <Image
+        style={verticalLayoutEnabled ? {marginTop: '16px'} : {}}
+        src={image}
+      />
     </Root>
   )
 }

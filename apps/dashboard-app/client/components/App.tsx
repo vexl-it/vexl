@@ -3,6 +3,7 @@ import {useSetAtom} from 'jotai'
 import {useEffect} from 'react'
 import mobileMediaQuery from '../mobileMediaQuery'
 import {listenForChangesActionAtom} from '../state'
+import {useIsVerticalLayoutEnabled} from '../utils/useIsVerticalLayoutEnabled'
 import Alert from './Alert'
 import Confetti from './Confetti'
 import CountriesList from './CountriesList'
@@ -49,8 +50,6 @@ const CountriesContainer = styled.div`
 
 const ConnectionsContainer = styled.div`
   flex: 1;
-  width: 650px;
-  margin: 0 auto;
 `
 
 const CountContainer = styled.div`
@@ -70,6 +69,8 @@ const BanerContainer = styled.div`
 export default function App(): JSX.Element {
   const listenForChanges = useSetAtom(listenForChangesActionAtom)
 
+  const verticalLayoutEnabled = useIsVerticalLayoutEnabled()
+
   useEffect(() => {
     const remove = listenForChanges()
     return () => {
@@ -80,16 +81,32 @@ export default function App(): JSX.Element {
   return (
     <>
       <Container>
-        <CountContainer>
-          <NumberOfUsers />
-        </CountContainer>
+        {verticalLayoutEnabled && (
+          <CountContainer>
+            <NumberOfUsers />
+          </CountContainer>
+        )}
         <CountriesContainer>
           <CountriesList />
         </CountriesContainer>
         <LatestConnectionsAndCountContainer>
-          <ConnectionsContainer>
+          <ConnectionsContainer
+            style={
+              verticalLayoutEnabled
+                ? {
+                    width: '650px',
+                    margin: '0 auto',
+                  }
+                : {}
+            }
+          >
             <LatestConnections />
           </ConnectionsContainer>
+          {!verticalLayoutEnabled && (
+            <CountContainer>
+              <NumberOfUsers />
+            </CountContainer>
+          )}
         </LatestConnectionsAndCountContainer>
         <BanerContainer>
           <VexlBanner />

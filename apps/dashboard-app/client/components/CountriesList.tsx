@@ -11,6 +11,7 @@ import {
   countriesToConnectionCountArrayAtom,
   maxCountryConnectionsCount,
 } from '../state'
+import {useIsVerticalLayoutEnabled} from '../utils/useIsVerticalLayoutEnabled'
 import AnimatedNumber from './AnimatedNumber'
 
 const Scroll = styled.div`
@@ -185,9 +186,13 @@ export default function CountriesList(): JSX.Element {
   }, [barRef, listContainerRef])
 
   const countries = useAtomValue(countriesToConnectionCountArrayAtom)
+  const verticalLayoutEnabled = useIsVerticalLayoutEnabled()
 
   return (
-    <Root className="fit-and-fadeout">
+    <Root
+      className="fit-and-fadeout"
+      style={verticalLayoutEnabled ? {height: '800px'} : {}}
+    >
       <Title>Connections per country</Title>
       <Text>
         Connection is amount of connections created between you, your friends

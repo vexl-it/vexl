@@ -1,3 +1,4 @@
+import {Effect} from 'effect/index'
 import {useAtomValue, useSetAtom, useStore} from 'jotai'
 import {useCallback, useEffect, useMemo} from 'react'
 import {type TradeChecklistStackScreenProps} from '../../../../../../navigationTypes'
@@ -8,6 +9,7 @@ import {
 import calculatePercentageDifference from '../../../../../../utils/calculatePercentageDifference'
 import {dismissKeyboardAndResolveOnLayoutUpdate} from '../../../../../../utils/dismissKeyboardPromise'
 import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
+import {showDonationPromptGiveLoveActionAtom} from '../../../../../DonationPrompt/atoms'
 import Info from '../../../../../Info'
 import {loadingOverlayDisplayedAtom} from '../../../../../LoadingOverlayProvider'
 import {
@@ -58,6 +60,9 @@ function CalculateAmountScreen({
   const submitTradeChecklistUpdates = useSetAtom(
     submitTradeChecklistUpdatesActionAtom
   )
+  const showDonationPromptGiveLove = useSetAtom(
+    showDonationPromptGiveLoveActionAtom
+  )
   const btcPriceForOfferWithState = useAtomValue(btcPriceForOfferWithStateAtom)
 
   const btcPricePercentageDifference = useMemo(() => {
@@ -76,9 +81,14 @@ function CalculateAmountScreen({
         if (success) {
           if (shouldNavigateBackToChatOnSave) {
             showLoadingOverlay(true)
-            void submitTradeChecklistUpdates()().finally(() => {
-              showLoadingOverlay(false)
-            })
+            void submitTradeChecklistUpdates()()
+              .then(() => {
+                if (isOtherSideAmountDataNewerThanMine)
+                  void Effect.runFork(showDonationPromptGiveLove())
+              })
+              .finally(() => {
+                showLoadingOverlay(false)
+              })
             navigation.navigate('ChatDetail', store.get(chatWithMessagesKeys))
           } else {
             navigation.navigate('AgreeOnTradeDetails')
@@ -87,6 +97,8 @@ function CalculateAmountScreen({
       })
     })
   }, [
+    isOtherSideAmountDataNewerThanMine,
+    showDonationPromptGiveLove,
     saveLocalCalculatedAmountDataStateToMainState,
     shouldNavigateBackToChatOnSave,
     showLoadingOverlay,

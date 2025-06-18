@@ -1,7 +1,7 @@
 import {useNavigation} from '@react-navigation/native'
 import {type SvgString} from '@vexl-next/domain/src/utility/SvgString.brand'
 import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
-import {Effect} from 'effect/index'
+import {Effect} from 'effect'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {useSetAtom} from 'jotai'

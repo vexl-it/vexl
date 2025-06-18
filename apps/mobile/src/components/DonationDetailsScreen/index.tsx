@@ -1,5 +1,5 @@
 import Clipboard from '@react-native-clipboard/clipboard'
-import {Effect} from 'effect/index'
+import {Effect} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import {DateTime} from 'luxon'
 import {useMemo} from 'react'

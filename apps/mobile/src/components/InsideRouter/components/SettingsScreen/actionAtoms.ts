@@ -1,5 +1,5 @@
 import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
-import {Effect} from 'effect/index'
+import {Effect} from 'effect'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {atom} from 'jotai'

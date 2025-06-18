@@ -35,7 +35,9 @@ function IvoiceStatusIndicator({status}: {status: InvoiceStatus}): JSX.Element {
       borderWidth={1}
     >
       <Text fos={16} ff="$body500" col={color}>
-        {t(`donations.invoiceStatus.${status}`)}
+        {status === 'New'
+          ? t(`donations.invoiceStatus.Created`)
+          : t(`donations.invoiceStatus.${status}`)}
       </Text>
     </Stack>
   )
@@ -75,7 +77,7 @@ function DonationsListItem({donation}: {donation: MyDonation}): JSX.Element {
                 ? t('offerForm.network.lightning')
                 : t('offerForm.network.onChain')}
             </Text>
-            {expiresIn > 0 && (
+            {expiresIn > 0 && donation.status === 'New' && (
               <Text>{t('donations.expiresIn', {minutes: expiresIn})}</Text>
             )}
             {(expiresIn <= 0 || donation.status === 'Settled') && (

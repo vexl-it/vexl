@@ -1,4 +1,4 @@
-import {Effect} from 'effect/index'
+import {Effect} from 'effect'
 import {atom, useSetAtom} from 'jotai'
 import {type YStackProps} from 'tamagui'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'

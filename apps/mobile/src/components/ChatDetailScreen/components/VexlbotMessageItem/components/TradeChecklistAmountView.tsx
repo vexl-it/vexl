@@ -1,6 +1,7 @@
 import Clipboard from '@react-native-clipboard/clipboard'
 import {useNavigation} from '@react-navigation/native'
 import {useMolecule} from 'bunshi/dist/react'
+import {Effect} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import {useCallback, useMemo} from 'react'
 import {Stack, XStack, getTokens} from 'tamagui'
@@ -14,6 +15,7 @@ import {
 import {currencies} from '../../../../../utils/localization/currency'
 import {preferencesAtom} from '../../../../../utils/preferences'
 import Button from '../../../../Button'
+import {showDonationPromptGiveLoveActionAtom} from '../../../../DonationPrompt/atoms'
 import {loadingOverlayDisplayedAtom} from '../../../../LoadingOverlayProvider'
 import {toastNotificationAtom} from '../../../../ToastNotification/atom'
 import {type ToastNotificationState} from '../../../../ToastNotification/domain'
@@ -61,6 +63,9 @@ function TradeChecklistAmountView({message}: Props): JSX.Element | null {
   const btcPricePercentageDifference = useAtomValue(
     btcPricePercentageDifferenceToDisplayInVexlbotMessageAtom
   )
+  const showDonationPromptGiveLove = useSetAtom(
+    showDonationPromptGiveLoveActionAtom
+  )
 
   const toastContent: ToastNotificationState = useMemo(
     () => ({
@@ -78,10 +83,12 @@ function TradeChecklistAmountView({message}: Props): JSX.Element | null {
       void submitTradeChecklistUpdates()().finally(() => {
         showLoadingOverlay(false)
       })
+      Effect.runFork(showDonationPromptGiveLove())
     }
   }, [
     addAmount,
     amountData.received,
+    showDonationPromptGiveLove,
     showLoadingOverlay,
     submitTradeChecklistUpdates,
   ])
@@ -175,7 +182,7 @@ function TradeChecklistAmountView({message}: Props): JSX.Element | null {
               fiatCurrency: currencies[tradeOrOriginOfferCurrency].code,
               feeAmount: message.message.tradeChecklistUpdate.amount.feeAmount,
               btcTradePrice:
-                message.message.tradeChecklistUpdate.amount.btcAmount?.toLocaleString(
+                message.message.tradeChecklistUpdate.amount.btcPrice?.toLocaleString(
                   currentLocale
                 ),
             }

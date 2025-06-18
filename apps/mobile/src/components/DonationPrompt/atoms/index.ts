@@ -13,10 +13,10 @@ import DonationAmount from '../components/DonationAmount'
 import DonationPrompt from '../components/DonationPrompt'
 import DonationQrCode from '../components/DonationQrCode'
 import {
-  DONATION_PROMPT_DAYS_THRESHOLD_COUNT,
   donationAmountAtom,
   donationPaymentMethodAtom,
   MAX_DONATION_AMOUNT,
+  shouldShowDonationPromptAtom,
 } from './stateAtoms'
 
 const paymentMethodAndAmountConfirmButtonDisabledAtom = atom<boolean>(
@@ -139,18 +139,9 @@ export const showDonationPromptActionAtom = atom(null, (get, set) => {
 
 export const showDonationPromptGiveLoveActionAtom = atom(null, (get, set) => {
   const {t} = get(translationAtom)
-  const lastDisplayOfDonationPromptTimestamp = get(
-    lastDisplayOfDonationPromptTimestampAtom
-  )
+  const shouldShowDonationPrompt = get(shouldShowDonationPromptAtom)
 
-  if (
-    lastDisplayOfDonationPromptTimestamp &&
-    DateTime.now().diff(
-      DateTime.fromMillis(lastDisplayOfDonationPromptTimestamp),
-      'days'
-    ).days < DONATION_PROMPT_DAYS_THRESHOLD_COUNT
-  )
-    return Effect.succeed(Effect.void)
+  if (!shouldShowDonationPrompt) return Effect.succeed(Effect.void)
 
   return Effect.gen(function* (_) {
     yield* _(
@@ -168,5 +159,14 @@ export const showDonationPromptGiveLoveActionAtom = atom(null, (get, set) => {
     )
 
     yield* _(set(showDonationPromptActionAtom))
-  })
+  }).pipe(
+    Effect.catchTag('UserDeclinedError', () => {
+      set(
+        lastDisplayOfDonationPromptTimestampAtom,
+        Schema.decodeSync(UnixMillisecondsE)(DateTime.now().toMillis())
+      )
+
+      return Effect.succeed(Effect.void)
+    })
+  )
 })

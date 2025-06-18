@@ -2,7 +2,10 @@ import {type ViewToken} from '@shopify/flash-list'
 import {type MessageType} from '@vexl-next/domain/src/general/messaging'
 import {type FriendLevel} from '@vexl-next/domain/src/general/offers'
 import {type UriString} from '@vexl-next/domain/src/utility/UriString.brand'
-import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
+import {
+  effectToTask,
+  effectToTaskEither,
+} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {createScope, molecule} from 'bunshi/dist/react'
 import * as E from 'fp-ts/Either'
 import * as T from 'fp-ts/Task'
@@ -66,6 +69,8 @@ import reportError from '../../../utils/reportError'
 import showErrorAlert from '../../../utils/showErrorAlert'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 import {askAreYouSureActionAtom} from '../../AreYouSureDialog'
+import {showDonationPromptGiveLoveActionAtom} from '../../DonationPrompt/atoms'
+import {shouldShowDonationPromptAtom} from '../../DonationPrompt/atoms/stateAtoms'
 import {loadingOverlayDisplayedAtom} from '../../LoadingOverlayProvider'
 import {revealIdentityDialogUIAtom} from '../../RevealIdentityDialog/atoms'
 import ChatFeedbackDialogContent from '../components/ChatFeedbackDialogContent'
@@ -309,6 +314,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     async (get, set, {skipAsk}: {skipAsk: boolean} = {skipAsk: false}) => {
       const {t} = get(translationAtom)
       const deniedMessaging = get(focusWasDeniedAtom(chatWithMessagesAtom))
+      const shouldShowDonationPrompt = get(shouldShowDonationPromptAtom)
 
       const feedbackFinished = get(chatFeedbackAtom).finished
 
@@ -356,8 +362,16 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
           () => {
             set(loadingOverlayDisplayedAtom, false)
 
-            if (!feedbackFinished && !deniedMessaging)
-              void set(giveFeedbackForDeletedChatAtom)
+            if (deniedMessaging) return true
+
+            if (shouldShowDonationPrompt) {
+              void set(showDonationPromptGiveLoveActionAtom).pipe(
+                effectToTask
+              )()
+              return true
+            }
+
+            if (!feedbackFinished) void set(giveFeedbackForDeletedChatAtom)
 
             return true
           }

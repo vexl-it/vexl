@@ -1,5 +1,4 @@
 import {HttpsUrlString} from '@vexl-next/domain/src/utility/HttpsUrlString.brand'
-import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {UuidE} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {
   type NewsAndAnnouncementsResponse,
@@ -79,21 +78,21 @@ export const newsAndAnonouncementsHandler = Handler.make(
   ({headers}) =>
     makeEndpointEffect(
       Effect.gen(function* (_) {
-        const vexlBotNewsForBlog1: VexlBotNews = {
-          id: Schema.decodeSync(UuidE)('085f7bbe-f142-4e71-8b80-eb9b9107ddef'),
-          type: 'info',
-          content:
-            'Borders are drawn with numbers now.\nThis week, we dive into how control is coded into your currency. ➡️',
-          action: Option.some({
-            text: 'Read now',
-            url: Schema.decodeSync(HttpsUrlString)(
-              'https://vexl.it/post/economic-sanctions-and-collateral-damage'
-            ),
-          }),
-          cancelForever: true,
-          bubbleOrigin: Option.none(),
-          cancelable: true,
-        }
+        // const vexlBotNewsForBlog1: VexlBotNews = {
+        //   id: Schema.decodeSync(UuidE)('085f7bbe-f142-4e71-8b80-eb9b9107ddef'),
+        //   type: 'info',
+        //   content:
+        //     'Borders are drawn with numbers now.\nThis week, we dive into how control is coded into your currency. ➡️',
+        //   action: Option.some({
+        //     text: 'Read now',
+        //     url: Schema.decodeSync(HttpsUrlString)(
+        //       'https://vexl.it/post/economic-sanctions-and-collateral-damage'
+        //     ),
+        //   }),
+        //   cancelForever: true,
+        //   bubbleOrigin: Option.none(),
+        //   cancelable: true,
+        // }
 
         const vexlBotNewsForBlog2: VexlBotNews = {
           id: Schema.decodeSync(UuidE)('5785f0ed-6451-412a-b5e2-3f5b186e3d00'),
@@ -111,16 +110,13 @@ export const newsAndAnonouncementsHandler = Handler.make(
           cancelable: true,
         }
 
-        const newBlogReleaseAtMillis = 1775487600000
-        const showNewBlogLink =
-          headers.isDeveloper || unixMillisecondsNow() > newBlogReleaseAtMillis
+        // const newBlogReleaseAtMillis = 1775487600000
+        // const showNewBlogLink =
+        //   headers.isDeveloper || unixMillisecondsNow() > newBlogReleaseAtMillis
 
-        // if (headers.isDeveloper) return data
         return {
           fullScreenWarning: Option.none(),
-          vexlBotNews: showNewBlogLink
-            ? [vexlBotNewsForBlog2]
-            : [vexlBotNewsForBlog1],
+          vexlBotNews: [vexlBotNewsForBlog2],
         } satisfies NewsAndAnnouncementsResponse
       }),
       Schema.Void

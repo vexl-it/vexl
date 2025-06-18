@@ -1259,6 +1259,7 @@
   "donations.myDonations": "My donations",
   "donations.noDonationsYet": "You haven't made any donations yet.",
   "donations.invoiceStatus.New": "Nowe",
+  "donations.invoiceStatus.Created": "Created",
   "donations.invoiceStatus.Expired": "Expired",
   "donations.invoiceStatus.Paid": "Paid",
   "donations.invoiceStatus.Complete": "Complete",

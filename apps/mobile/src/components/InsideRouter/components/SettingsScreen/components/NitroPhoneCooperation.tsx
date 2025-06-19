@@ -16,7 +16,7 @@ function NitroPhoneCooperation(): JSX.Element {
       <Text fos={18} col="$greyOnWhite">
         {t('phoneCooperation.useCode')}
         <Text fos={24} col="$main" ff="$body700">
-          {` ${t('phoneCooperation.code')} `}
+          VEXL2025
         </Text>
         {t('phoneCooperation.forDiscount')}
       </Text>

@@ -1,7 +1,10 @@
+import {useStore} from 'jotai'
 import {useState} from 'react'
 import {Image} from 'react-native'
 import {Stack, Text} from 'tamagui'
 import {type LoginStackScreenProps} from '../../../../navigationTypes'
+import {userLoggedInAtom} from '../../../../state/session'
+import {loadSession} from '../../../../state/session/loadSession'
 import SvgImage from '../../../Image'
 import {
   HeaderProxy,
@@ -15,6 +18,7 @@ type Props = LoginStackScreenProps<'Intro'>
 function Intro({navigation}: Props): JSX.Element {
   const [page, setPage] = useState(0)
   const content = useContent()
+  const store = useStore()
 
   const svg = content[page]?.svg
   const image = content[page]?.image
@@ -27,10 +31,20 @@ function Intro({navigation}: Props): JSX.Element {
         numberOfPages={content.length}
         onPageChange={setPage}
         onFinish={() => {
-          navigation.replace('Start')
+          void loadSession({
+            forceReload: true,
+            showErrorAlert: true,
+          })().then(() => {
+            if (!store.get(userLoggedInAtom)) navigation.replace('Start')
+          })
         }}
         onSkip={() => {
-          navigation.replace('Start')
+          void loadSession({
+            forceReload: true,
+            showErrorAlert: true,
+          })().then(() => {
+            if (!store.get(userLoggedInAtom)) navigation.replace('Start')
+          })
         }}
       >
         <Stack f={1}>

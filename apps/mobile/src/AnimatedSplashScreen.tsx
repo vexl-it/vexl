@@ -44,7 +44,11 @@ void SplashScreen.preventAutoHideAsync().catch((e) => {
   reportError('error', e, {currentState: AppState.currentState})
 })
 
-function AnimatedSplashScreen(): JSX.Element | null {
+function AnimatedSplashScreen({
+  children,
+}: {
+  children: React.ReactNode
+}): JSX.Element | null {
   const [isAppReady, setIsAppReady] = useState(false)
   const [isSplashAnimationComplete, setIsSplashAnimationComplete] =
     useState(false)
@@ -92,22 +96,25 @@ function AnimatedSplashScreen(): JSX.Element | null {
     void SplashScreen.hideAsync()
   }, [])
 
-  if (isSplashAnimationComplete) return null
-
   return (
-    <Animated.View
-      style={styles.container}
-      exiting={SlideOutLeft.duration(400)}
-    >
-      <Animated.Image
-        style={styles.image}
-        resizeMode="contain"
-        entering={BounceOut.duration(1000).withCallback((finished) => {
-          runOnJS(setIsSplashAnimationComplete)(finished)
-        })}
-        source={require('../assets/splash.png')}
-      />
-    </Animated.View>
+    <>
+      {!isSplashAnimationComplete && (
+        <Animated.View
+          style={styles.container}
+          exiting={SlideOutLeft.duration(400)}
+        >
+          <Animated.Image
+            style={styles.image}
+            resizeMode="contain"
+            entering={BounceOut.duration(1000).withCallback((finished) => {
+              runOnJS(setIsSplashAnimationComplete)(finished)
+            })}
+            source={require('../assets/splash.png')}
+          />
+        </Animated.View>
+      )}
+      {!!isAppReady && <>{children}</>}
+    </>
   )
 }
 

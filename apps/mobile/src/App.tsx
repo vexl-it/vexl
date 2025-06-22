@@ -69,8 +69,9 @@ export default function _(): JSX.Element {
   return (
     <ThemeProvider>
       <StatusBar style="light" />
-      <App />
-      <AnimatedSplashScreen />
+      <AnimatedSplashScreen>
+        <App />
+      </AnimatedSplashScreen>
     </ThemeProvider>
   )
 }

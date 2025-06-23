@@ -1,4 +1,5 @@
 import {HttpsUrlString} from '@vexl-next/domain/src/utility/HttpsUrlString.brand'
+import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {UuidE} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {
   type NewsAndAnnouncementsResponse,
@@ -94,7 +95,7 @@ export const newsAndAnonouncementsHandler = Handler.make(
         //   cancelable: true,
         // }
 
-        const vexlBotNewsForBlog2: VexlBotNews = {
+        const vexlBotNewsForBlog1: VexlBotNews = {
           id: Schema.decodeSync(UuidE)('5785f0ed-6451-412a-b5e2-3f5b186e3d00'),
           type: 'info',
           content:
@@ -110,13 +111,31 @@ export const newsAndAnonouncementsHandler = Handler.make(
           cancelable: true,
         }
 
-        // const newBlogReleaseAtMillis = 1775487600000
-        // const showNewBlogLink =
-        //   headers.isDeveloper || unixMillisecondsNow() > newBlogReleaseAtMillis
+        const vexlBotNewsForBlog2: VexlBotNews = {
+          id: Schema.decodeSync(UuidE)('f4e4161b-04e1-4a0c-8d07-e42d11daa2cf'),
+          type: 'info',
+          content:
+            'This week, we dive into how money became a tool to silence dissent.\nCensorship doesn’t need a courtroom—just a bank account. ➡️',
+          action: Option.some({
+            text: 'Read now',
+            url: Schema.decodeSync(HttpsUrlString)(
+              'https://vexl.it/post/money-as-a-tool-for-political-censorship'
+            ),
+          }),
+          cancelForever: true,
+          bubbleOrigin: Option.none(),
+          cancelable: true,
+        }
+
+        const newBlogReleaseAtMillis = 1750690800000
+        const showNewBlogLink =
+          headers.isDeveloper || unixMillisecondsNow() > newBlogReleaseAtMillis
 
         return {
           fullScreenWarning: Option.none(),
-          vexlBotNews: [vexlBotNewsForBlog2],
+          vexlBotNews: [
+            showNewBlogLink ? vexlBotNewsForBlog2 : vexlBotNewsForBlog1,
+          ],
         } satisfies NewsAndAnnouncementsResponse
       }),
       Schema.Void

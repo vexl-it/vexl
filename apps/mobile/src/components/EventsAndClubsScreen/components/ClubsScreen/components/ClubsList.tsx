@@ -1,7 +1,7 @@
 import {useNavigation} from '@react-navigation/native'
-import {FlashList} from '@shopify/flash-list'
 import {Effect} from 'effect'
 import {type Atom, useAtomValue, useSetAtom} from 'jotai'
+import {FlatList} from 'react-native'
 import {RefreshControl} from 'react-native-gesture-handler'
 import {getTokens, Image, Stack, Text, XStack, YStack} from 'tamagui'
 import membersSvg from '../../../../../images/memberSvg'
@@ -78,10 +78,11 @@ export function ClubsList(): JSX.Element {
     return <EmptyListPlaceholder />
   }
 
+  // TODO: Replace with FlashList once stable v2 is released
+  // v1 contains bug: https://github.com/Shopify/flash-list/issues/633
   return (
-    <FlashList
+    <FlatList
       data={clubsAtoms}
-      estimatedItemSize={69}
       ItemSeparatorComponent={Separator}
       renderItem={renderItem}
       keyExtractor={atomKeyExtractor}

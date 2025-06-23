@@ -1,7 +1,6 @@
-import {FlashList} from '@shopify/flash-list'
 import {Effect} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
-import {RefreshControl} from 'react-native-gesture-handler'
+import {FlatList, RefreshControl} from 'react-native-gesture-handler'
 import {getTokens, Stack} from 'tamagui'
 import {
   fetchMyDonationsActionAtom,
@@ -33,9 +32,10 @@ function DonationsList(): JSX.Element {
     return <EmptyListPlaceholder />
   }
 
+  // TODO: Replace with FlashList once stable v2 is released
+  // v1 contains bug: https://github.com/Shopify/flash-list/issues/633
   return (
-    <FlashList
-      estimatedItemSize={78}
+    <FlatList
       data={myDonationsSorted}
       ItemSeparatorComponent={Separator}
       renderItem={renderItem}

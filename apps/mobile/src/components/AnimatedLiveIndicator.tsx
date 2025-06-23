@@ -1,3 +1,4 @@
+import {useEffect} from 'react'
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -15,14 +16,16 @@ export function AnimatedLiveIndicator({
 }: AnimatedLiveIndicatorProps): JSX.Element {
   const opacity = useSharedValue(0)
 
-  opacity.value = withRepeat(
-    withTiming(1, {
-      duration: 1000,
-      easing: Easing.ease,
-    }),
-    -1,
-    true
-  )
+  useEffect(() => {
+    opacity.value = withRepeat(
+      withTiming(1, {
+        duration: 1000,
+        easing: Easing.ease,
+      }),
+      -1,
+      true
+    )
+  }, [opacity])
 
   const animatedStyle = useAnimatedStyle(() => ({opacity: opacity.value}), [])
 

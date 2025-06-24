@@ -1,5 +1,6 @@
 import {useNavigation} from '@react-navigation/native'
 import {useMolecule} from 'bunshi/dist/react'
+import {Effect} from 'effect'
 import {useAtom, useAtomValue, useSetAtom} from 'jotai'
 import {useCallback} from 'react'
 import {Alert, Keyboard, TouchableOpacity} from 'react-native'
@@ -7,6 +8,7 @@ import {Stack, XStack, getTokens} from 'tamagui'
 import backButtonSvg from '../../../images/backButtonSvg'
 import blockIconSvg from '../../../images/blockIconSvg'
 import tradeChecklistSvg from '../../../images/tradeChecklistSvg'
+import {andThenExpectBooleanNoErrors} from '../../../utils/andThenExpectNoErrors'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import useResetNavigationToMessagingScreen from '../../../utils/useResetNavigationToMessagingScreen'
 import useSafeGoBack from '../../../utils/useSafeGoBack'
@@ -58,7 +60,7 @@ function Button({type}: {type: ButtonType}): JSX.Element | null {
   const listingTypeIsOther = useAtomValue(listingTypeIsOtherAtom)
 
   const blockChat = useSetAtom(blockChatWithUiFeedbackAtom)
-  const deleteChat = useSetAtom(deleteChatWithUiFeedbackAtom)
+  const deleteChatWithUiFeedback = useSetAtom(deleteChatWithUiFeedbackAtom)
 
   const [forceShowHistory, setForceShowHistory] = useAtom(forceShowHistoryAtom)
 
@@ -112,11 +114,13 @@ function Button({type}: {type: ButtonType}): JSX.Element | null {
         variant="negative"
         onPress={() => {
           Keyboard.dismiss()
-          void deleteChat().then((success) => {
-            if (success) {
-              resetNavigationToMessagingScreen()
-            }
-          })
+          void Effect.runPromise(
+            andThenExpectBooleanNoErrors((success) => {
+              if (success) {
+                resetNavigationToMessagingScreen()
+              }
+            })(deleteChatWithUiFeedback({skipAsk: false}))
+          )
         }}
       />
     )

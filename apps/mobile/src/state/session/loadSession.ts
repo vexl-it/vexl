@@ -1,6 +1,4 @@
-import * as T from 'fp-ts/Task'
-import * as TE from 'fp-ts/TaskEither'
-import {pipe} from 'fp-ts/function'
+import {Effect} from 'effect/index'
 import {getDefaultStore} from 'jotai'
 import {Alert, Linking} from 'react-native'
 import {sessionHolderAtom} from '.'
@@ -26,84 +24,87 @@ export function loadSession(
     showErrorAlert: false,
     forceReload: false,
   }
-): T.Task<boolean> {
-  const store = getDefaultStore()
-  const sessionState = store.get(sessionHolderAtom).state
+): Effect.Effect<boolean> {
+  return Effect.gen(function* (_) {
+    const store = getDefaultStore()
+    const sessionState = store.get(sessionHolderAtom).state
 
-  logLoadSessionProgress(
-    `LoadingSession: ${JSON.stringify({
-      showErrorAlert,
-      forceReload,
-      sessionState,
-    })})}`
-  )
-
-  if (
-    !(sessionState === 'initial' || (forceReload && sessionState !== 'loading'))
-  ) {
     logLoadSessionProgress(
-      `Skippign loadSession. Result: ${sessionState === 'loggedIn'}`
+      `LoadingSession: ${JSON.stringify({
+        showErrorAlert,
+        forceReload,
+        sessionState,
+      })})}`
     )
-    return T.of(sessionState === 'loggedIn')
-  }
 
-  console.info('🔑Trying to find session in storage')
-  getDefaultStore().set(sessionHolderAtom, {state: 'loading'})
-  return pipe(
-    readSessionFromStorage({
-      asyncStorageKey: SESSION_KEY,
-      secretStorageKey: SECRET_TOKEN_KEY,
-    }),
-    TE.match(
-      (left) => {
-        logLoadSessionProgress(
-          `Error while loading session ${JSON.stringify(left)}`
-        )
+    if (
+      !(
+        sessionState === 'initial' ||
+        (forceReload && sessionState !== 'loading')
+      )
+    ) {
+      logLoadSessionProgress(
+        `Skippign loadSession. Result: ${sessionState === 'loggedIn'}`
+      )
+      return sessionState === 'loggedIn'
+    }
 
-        if (left._tag === 'StoreEmpty') {
-          console.info('🔑 No session in storage. User is logged out')
-          getDefaultStore().set(sessionHolderAtom, {state: 'loggedOut'})
-          return false
-        }
+    console.info('🔑Trying to find session in storage')
+    getDefaultStore().set(sessionHolderAtom, {state: 'loading'})
 
-        reportError(
-          'error',
-          new Error(
-            '‼️ Error while reading or parsing user data from secure storage.'
-          ),
-          {left}
-        )
+    const session = yield* _(
+      readSessionFromStorage({
+        asyncStorageKey: SESSION_KEY,
+        secretStorageKey: SECRET_TOKEN_KEY,
+      })
+    )
+    logLoadSessionProgress('🔑 We have a session 🎉. User is logged in.')
+    getDefaultStore().set(sessionHolderAtom, {
+      state: 'loggedIn',
+      session,
+    })
+    return true
+  }).pipe(
+    Effect.catchAll((error) => {
+      logLoadSessionProgress(
+        `Error while loading session ${JSON.stringify(error)}`
+      )
 
-        if (showErrorAlert) {
-          const {t} = getDefaultStore().get(translationAtom)
-          Alert.alert(
-            t('errorGettingSession.title'),
-            t('errorGettingSession.text', {errorCode: left._tag}),
-            [
-              {
-                text: t('errorGettingSession.contactSupport'),
-                onPress: () => {
-                  void Linking.openURL(
-                    `mailto:${t('settings.items.supportEmail')}`
-                  )
-                },
-              },
-            ]
-          )
-        } else {
-          getDefaultStore().set(sessionHolderAtom, {state: 'initial'})
-        }
-
-        return false
-      },
-      (s) => {
-        logLoadSessionProgress('🔑 We have a session 🎉. User is logged in.')
-        getDefaultStore().set(sessionHolderAtom, {
-          state: 'loggedIn',
-          session: s,
-        })
-        return true
+      if (error._tag === 'StoreEmpty') {
+        console.info('🔑 No session in storage. User is logged out')
+        getDefaultStore().set(sessionHolderAtom, {state: 'loggedOut'})
+        return Effect.succeed(false)
       }
-    )
+
+      reportError(
+        'error',
+        new Error(
+          '‼️ Error while reading or parsing user data from secure storage.'
+        ),
+        {error}
+      )
+
+      if (showErrorAlert) {
+        const {t} = getDefaultStore().get(translationAtom)
+        Alert.alert(
+          t('errorGettingSession.title'),
+          t('errorGettingSession.text', {errorCode: error._tag}),
+          [
+            {
+              text: t('errorGettingSession.contactSupport'),
+              onPress: () => {
+                void Linking.openURL(
+                  `mailto:${t('settings.items.supportEmail')}`
+                )
+              },
+            },
+          ]
+        )
+      } else {
+        getDefaultStore().set(sessionHolderAtom, {state: 'initial'})
+      }
+
+      return Effect.succeed(false)
+    })
   )
 }

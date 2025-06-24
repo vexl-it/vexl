@@ -1,3 +1,4 @@
+import {Effect} from 'effect/index'
 import {useStore} from 'jotai'
 import {useState} from 'react'
 import {Image} from 'react-native'
@@ -31,18 +32,22 @@ function Intro({navigation}: Props): JSX.Element {
         numberOfPages={content.length}
         onPageChange={setPage}
         onFinish={() => {
-          void loadSession({
-            forceReload: true,
-            showErrorAlert: true,
-          })().then(() => {
+          void Effect.runPromise(
+            loadSession({
+              forceReload: true,
+              showErrorAlert: true,
+            })
+          ).then(() => {
             if (!store.get(userLoggedInAtom)) navigation.replace('Start')
           })
         }}
         onSkip={() => {
-          void loadSession({
-            forceReload: true,
-            showErrorAlert: true,
-          })().then(() => {
+          void Effect.runPromise(
+            loadSession({
+              forceReload: true,
+              showErrorAlert: true,
+            })
+          ).then(() => {
             if (!store.get(userLoggedInAtom)) navigation.replace('Start')
           })
         }}

@@ -224,7 +224,7 @@ export const aesDecrpytE =
       Effect.catchAllDefect(
         (e) =>
           new CryptoError({
-            message: `Unable to encrypt AES GCM cypher, cypher: ${cypher}`,
+            message: `Unable to decrypt AES GCM cypher, cypher: ${cypher}`,
             error: e,
           })
       )

@@ -2,9 +2,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import {captureException} from '@sentry/react-native'
 import {KeyHolder} from '@vexl-next/cryptography'
 import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
+import {Effect} from 'effect/index'
 import * as SecretStorage from 'expo-secure-store'
 import * as O from 'fp-ts/Option'
-import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {
   atom,
@@ -115,21 +115,25 @@ export const sessionAtom: WritableAtom<
     // TODO we should show UI indication that we are saving the session and also show error if it fails
 
     set(sessionHolderAtom, {state: 'loggedIn', session: nextValue.value})
-    void pipe(
-      writeSessionToStorage(nextValue.value, {
-        asyncStorageKey: SESSION_KEY,
-        secretStorageKey: SECRET_TOKEN_KEY,
-      }),
-      TE.mapLeft((error) => {
-        reportError(
-          new Error('‼️ Error while writing user data to secure storage.'),
-          {error}
+    void Effect.runFork(
+      pipe(
+        writeSessionToStorage(nextValue.value, {
+          asyncStorageKey: SESSION_KEY,
+          secretStorageKey: SECRET_TOKEN_KEY,
+        }),
+        Effect.tapError((error) =>
+          Effect.sync(() => {
+            reportError(
+              new Error('‼️ Error while writing user data to secure storage.'),
+              {error}
+            )
+            void AsyncStorage.removeItem(SESSION_KEY)
+            void SecretStorage.deleteItemAsync(SECRET_TOKEN_KEY)
+            set(sessionHolderAtom, {state: 'loggedOut'})
+          })
         )
-        void AsyncStorage.removeItem(SESSION_KEY)
-        void SecretStorage.deleteItemAsync(SECRET_TOKEN_KEY)
-        set(sessionHolderAtom, {state: 'loggedOut'})
-      })
-    )()
+      )
+    )
   }
 )
 

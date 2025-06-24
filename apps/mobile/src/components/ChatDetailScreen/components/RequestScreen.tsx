@@ -1,5 +1,5 @@
 import {useMolecule} from 'bunshi/dist/react'
-import {Array} from 'effect'
+import {Array, Effect} from 'effect'
 import * as T from 'fp-ts/Task'
 import {pipe} from 'fp-ts/function'
 import {useAtomValue, useSetAtom} from 'jotai'
@@ -7,6 +7,7 @@ import React, {useCallback, useEffect, useMemo, useState} from 'react'
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view'
 import {Stack, YStack, getTokens} from 'tamagui'
 import {clubsWithMembersAtom} from '../../../state/clubs/atom/clubsWithMembersAtom'
+import {andThenExpectBooleanNoErrors} from '../../../utils/andThenExpectNoErrors'
 import getRerequestPossibleInDaysText from '../../../utils/getRerequestPossibleInDaysText'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../../utils/useSafeGoBack'
@@ -44,7 +45,7 @@ function RequestScreen(): JSX.Element {
   const requestMessage = useAtomValue(requestMessageAtom)
   const wasDenied = useAtomValue(wasDeniedAtom)
   const wasCancelled = useAtomValue(wasCancelledAtom)
-  const deleteChat = useSetAtom(deleteChatWithUiFeedbackAtom)
+  const deleteChatWithUiFeedback = useSetAtom(deleteChatWithUiFeedbackAtom)
   const safeGoBack = useSafeGoBack()
   const setForceShowHistory = useSetAtom(forceShowHistoryAtom)
   const hasPreviousCommunication = useAtomValue(hasPreviousCommunicationAtom)
@@ -218,11 +219,13 @@ function RequestScreen(): JSX.Element {
               text={t('messages.deleteChat')}
               variant="primary"
               onPress={() => {
-                void deleteChat().then((success) => {
-                  if (success) {
-                    safeGoBack()
-                  }
-                })
+                void Effect.runPromise(
+                  andThenExpectBooleanNoErrors((success) => {
+                    if (success) {
+                      safeGoBack()
+                    }
+                  })(deleteChatWithUiFeedback({skipAsk: false}))
+                )
               }}
             />
           </Stack>

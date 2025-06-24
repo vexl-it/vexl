@@ -7,6 +7,7 @@ import {Keyboard} from 'react-native'
 import {Text, XStack, YStack, getTokens} from 'tamagui'
 import {addContactWithUiFeedbackActionAtom} from '../../../state/contacts/atom/addContactWithUiFeedbackAtom'
 import {hashPhoneNumber} from '../../../state/contacts/utils'
+import {andThenExpectBooleanNoErrors} from '../../../utils/andThenExpectNoErrors'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import reportError from '../../../utils/reportError'
 import useResetNavigationToMessagingScreen from '../../../utils/useResetNavigationToMessagingScreen'
@@ -121,7 +122,7 @@ function QuickActionBanner(): JSX.Element | null {
   const contactRevealTriggeredFromTradeChecklist = useAtomValue(
     contactRevealTriggeredFromTradeChecklistAtom
   )
-  const deleteChat = useSetAtom(deleteChatWithUiFeedbackAtom)
+  const deleteChatWithUiFeedback = useSetAtom(deleteChatWithUiFeedbackAtom)
   const revealIdentity = useSetAtom(revealIdentityWithUiFeedbackAtom)
   const revealContact = useSetAtom(revealContactWithUiFeedbackAtom)
   const requestState = useAtomValue(requestStateAtom)
@@ -214,11 +215,13 @@ function QuickActionBanner(): JSX.Element | null {
         }
         onButtonPress={() => {
           Keyboard.dismiss()
-          void deleteChat().then((result) => {
-            if (result) {
-              resetNavigationToMessagingScreen()
-            }
-          })
+          void Effect.runPromise(
+            andThenExpectBooleanNoErrors((result) => {
+              if (result) {
+                resetNavigationToMessagingScreen()
+              }
+            })(deleteChatWithUiFeedback({skipAsk: false}))
+          )
         }}
       />
     )
@@ -245,9 +248,13 @@ function QuickActionBanner(): JSX.Element | null {
           />
         }
         onButtonPress={() => {
-          void deleteChat().then((result) => {
-            if (result) resetNavigationToMessagingScreen()
-          })
+          void Effect.runPromise(
+            andThenExpectBooleanNoErrors((result) => {
+              if (result) {
+                resetNavigationToMessagingScreen()
+              }
+            })(deleteChatWithUiFeedback({skipAsk: false}))
+          )
         }}
       />
     )
@@ -274,9 +281,13 @@ function QuickActionBanner(): JSX.Element | null {
           />
         }
         onButtonPress={() => {
-          void deleteChat().then((result) => {
-            if (result) resetNavigationToMessagingScreen()
-          })
+          void Effect.runPromise(
+            andThenExpectBooleanNoErrors((result) => {
+              if (result) {
+                resetNavigationToMessagingScreen()
+              }
+            })(deleteChatWithUiFeedback({skipAsk: false}))
+          )
         }}
       />
     )

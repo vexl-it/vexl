@@ -101,7 +101,7 @@ function ChatInfoModal(): JSX.Element | null {
   const resetNavigationToMessagingScreen = useResetNavigationToMessagingScreen()
   const reportOffer = useSetAtom(reportOfferActionAtom)
 
-  const deleteChat = useSetAtom(deleteChatWithUiFeedbackAtom)
+  const deleteChatWithUiFeedback = useSetAtom(deleteChatWithUiFeedbackAtom)
   const blockChat = useSetAtom(blockChatWithUiFeedbackAtom)
   const requestReveal = useSetAtom(revealIdentityWithUiFeedbackAtom)
   const canSendMessages = useAtomValue(canSendMessagesAtom)
@@ -223,11 +223,13 @@ function ChatInfoModal(): JSX.Element | null {
                 isNegative: false,
                 text: t('messages.deleteChat'),
                 onPress: () => {
-                  void deleteChat().then((success) => {
-                    if (success) {
-                      resetNavigationToMessagingScreen()
-                    }
-                  })
+                  void Effect.runPromise(
+                    andThenExpectBooleanNoErrors((success) => {
+                      if (success) {
+                        resetNavigationToMessagingScreen()
+                      }
+                    })(deleteChatWithUiFeedback({skipAsk: false}))
+                  )
                 },
               },
               {

@@ -1,4 +1,4 @@
-import {Effect} from 'effect/index'
+import {Effect} from 'effect'
 import {useAtomValue, useSetAtom, useStore} from 'jotai'
 import {useCallback, useEffect, useMemo} from 'react'
 import {type TradeChecklistStackScreenProps} from '../../../../../../navigationTypes'

@@ -3,14 +3,14 @@ import {type MessageType} from '@vexl-next/domain/src/general/messaging'
 import {type FriendLevel} from '@vexl-next/domain/src/general/offers'
 import {type UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {
-  effectToTask,
   effectToTaskEither,
+  taskEitherToEffect,
 } from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {createScope, molecule} from 'bunshi/dist/react'
+import {Effect, Either, pipe} from 'effect'
 import * as E from 'fp-ts/Either'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
-import {pipe} from 'fp-ts/function'
 import {
   atom,
   type Atom,
@@ -22,6 +22,7 @@ import {focusAtom} from 'jotai-optics'
 import {selectAtom, splitAtom} from 'jotai/utils'
 import {DateTime} from 'luxon'
 import {Alert} from 'react-native'
+import acceptMessagingRequestAtom from '../../../state/chat/atoms/acceptMessagingRequestAtom'
 import blockChatActionAtom from '../../../state/chat/atoms/blockChatActionAtom'
 import cancelRequestActionAtomHandleUI from '../../../state/chat/atoms/cancelRequestActionAtomHandleUI'
 import createCanChatBeRerequestedAtom from '../../../state/chat/atoms/createCanBeRerequestedAtom'
@@ -57,6 +58,7 @@ import * as amount from '../../../state/tradeChecklist/utils/amount'
 import {getLatestAmountDataMessage} from '../../../state/tradeChecklist/utils/amount'
 import * as dateAndTime from '../../../state/tradeChecklist/utils/dateAndTime'
 import * as MeetingLocation from '../../../state/tradeChecklist/utils/location'
+import {andThenExpectBooleanNoErrors} from '../../../utils/andThenExpectNoErrors'
 import getValueFromSetStateActionOfAtom from '../../../utils/atomUtils/getValueFromSetStateActionOfAtom'
 import {
   createCalendarEvent,
@@ -64,9 +66,12 @@ import {
 } from '../../../utils/calendar'
 import {type SelectedImage} from '../../../utils/imagePickers'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
-import {safeNavigateBackOutsideReact} from '../../../utils/navigation'
+import {
+  navigationRef,
+  safeNavigateBackOutsideReact,
+} from '../../../utils/navigation'
 import reportError from '../../../utils/reportError'
-import showErrorAlert from '../../../utils/showErrorAlert'
+import showErrorAlert, {showErrorAlertE} from '../../../utils/showErrorAlert'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 import {askAreYouSureActionAtom} from '../../AreYouSureDialog'
 import {showDonationPromptGiveLoveActionAtom} from '../../DonationPrompt/atoms'
@@ -311,17 +316,26 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
 
   const deleteChatWithUiFeedbackAtom = atom(
     null,
-    async (get, set, {skipAsk}: {skipAsk: boolean} = {skipAsk: false}) => {
+    (
+      get,
+      set,
+      {
+        skipAsk,
+        skipDonation,
+        skipFeedback,
+      }: {skipAsk: boolean; skipDonation?: boolean; skipFeedback?: boolean}
+    ) => {
       const {t} = get(translationAtom)
-      const deniedMessaging = get(focusWasDeniedAtom(chatWithMessagesAtom))
-      const shouldShowDonationPrompt = get(shouldShowDonationPromptAtom)
 
-      const feedbackFinished = get(chatFeedbackAtom).finished
+      return Effect.gen(function* (_) {
+        const deniedMessaging = get(focusWasDeniedAtom(chatWithMessagesAtom))
+        const shouldShowDonationPrompt =
+          get(shouldShowDonationPromptAtom) && !skipDonation
+        const feedbackFinished = get(chatFeedbackAtom).finished
 
-      return await pipe(
-        skipAsk
-          ? TE.right([{type: 'noResult'}])
-          : set(askAreYouSureActionAtom, {
+        if (!skipAsk)
+          yield* _(
+            set(askAreYouSureActionAtom, {
               steps: [
                 {
                   type: 'StepWithText',
@@ -339,44 +353,39 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
                 },
               ],
               variant: 'info',
-            }).pipe(effectToTaskEither),
-        TE.map((val) => {
-          set(loadingOverlayDisplayedAtom, true)
-          return val
-        }),
-        TE.chainW(() => set(deleteChatAtom, {text: 'deleting chat'})),
-        // TODO handle all error cases. Mainly network errors. On error with server, we should remove anyway
-        TE.match(
-          (e) => {
-            set(loadingOverlayDisplayedAtom, false)
+            })
+          )
 
-            if (e._tag === 'UserDeclinedError') {
-              return false
-            }
+        set(loadingOverlayDisplayedAtom, true)
+
+        yield* _(
+          taskEitherToEffect(set(deleteChatAtom, {text: 'deleting chat'}))
+        )
+
+        set(loadingOverlayDisplayedAtom, false)
+
+        if (deniedMessaging) return true
+
+        if (shouldShowDonationPrompt)
+          void Effect.runPromise(set(showDonationPromptGiveLoveActionAtom))
+
+        if (!feedbackFinished && !skipFeedback && !shouldShowDonationPrompt)
+          void Effect.runPromise(set(giveFeedbackForDeletedChatAtom))
+
+        return true
+      }).pipe(
+        Effect.catchAll((e) => {
+          set(loadingOverlayDisplayedAtom, false)
+
+          if (e._tag !== 'UserDeclinedError')
             showErrorAlert({
               title: toCommonErrorMessage(e, t) ?? t('common.unknownError'),
               error: e,
             })
-            return false
-          },
-          () => {
-            set(loadingOverlayDisplayedAtom, false)
 
-            if (deniedMessaging) return true
-
-            if (shouldShowDonationPrompt) {
-              void set(showDonationPromptGiveLoveActionAtom).pipe(
-                effectToTask
-              )()
-              return true
-            }
-
-            if (!feedbackFinished) void set(giveFeedbackForDeletedChatAtom)
-
-            return true
-          }
-        )
-      )()
+          return Effect.succeed(false)
+        })
+      )
     }
   )
 
@@ -384,30 +393,23 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     atom((get) => get(chatAtom).id)
   )
 
-  const giveFeedbackForDeletedChatAtom = atom(null, async (get, set) => {
+  const giveFeedbackForDeletedChatAtom = atom(null, (get, set) => {
     const {t} = get(translationAtom)
-    const chatFeedback = get(chatFeedbackAtom)
 
-    if (!chatFeedback.finished) {
-      await pipe(
-        set(askAreYouSureActionAtom, {
-          steps: [
-            {
-              type: 'StepWithChildren',
-              MainSectionComponent: ChatFeedbackDialogContent,
-              positiveButtonText: t('common.close'),
-              backgroundColor: '$grey',
-            },
-          ],
-          variant: 'info',
-        }),
-        effectToTaskEither,
-        TE.match(
-          () => {},
-          () => {}
-        )
-      )()
-    }
+    return pipe(
+      set(askAreYouSureActionAtom, {
+        steps: [
+          {
+            type: 'StepWithChildren',
+            MainSectionComponent: ChatFeedbackDialogContent,
+            positiveButtonText: t('common.close'),
+            backgroundColor: '$grey',
+          },
+        ],
+        variant: 'info',
+      }),
+      Effect.ignore
+    )
   })
 
   const blockChatAtom = blockChatActionAtom(chatWithMessagesAtom)
@@ -787,12 +789,12 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
           {
             text: t('messages.deleteChat'),
             onPress: () => {
-              void set(deleteChatWithUiFeedbackAtom, {skipAsk: true}).then(
-                (success) => {
+              void Effect.runPromise(
+                andThenExpectBooleanNoErrors((success) => {
                   if (success) {
                     safeNavigateBackOutsideReact()
                   }
-                }
+                })(set(deleteChatWithUiFeedbackAtom, {skipAsk: true}))
               )
             },
           },
@@ -1086,6 +1088,100 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     }
   )
 
+  const approveChatRequestActionAtom = atom(
+    null,
+    (get, set, accept: boolean) => {
+      const {t} = get(translationAtom)
+
+      return Effect.gen(function* (_) {
+        set(loadingOverlayDisplayedAtom, true)
+
+        const result = yield* _(
+          taskEitherToEffect(
+            set(acceptMessagingRequestAtom, {
+              approve: accept,
+              chatAtom: chatWithMessagesAtom,
+              text: accept ? 'approved' : 'disapproved',
+            })
+          ),
+          Effect.either
+        )
+
+        set(loadingOverlayDisplayedAtom, false)
+
+        if (Either.isLeft(result)) {
+          if (
+            result.left._tag === 'RequestCancelledError' ||
+            result.left._tag === 'SenderInboxDoesNotExistError'
+          ) {
+            yield* _(
+              set(askAreYouSureActionAtom, {
+                variant: 'info',
+                steps: [
+                  {
+                    type: 'StepWithText',
+                    title: t('common.somethingWentWrong'),
+                    description: t('offer.requestWasCancelledOrAccountDeleted'),
+                    positiveButtonText: t('common.yesDelete'),
+                    negativeButtonText: t('common.back'),
+                  },
+                ],
+              })
+            )
+
+            yield* _(
+              set(deleteChatWithUiFeedbackAtom, {
+                skipAsk: true,
+                skipDonation: true,
+                skipFeedback: true,
+              })
+            )
+
+            if (navigationRef.isReady()) {
+              navigationRef.reset({
+                index: 0,
+                routes: [
+                  {
+                    name: 'InsideTabs',
+                    state: {
+                      routes: [{name: 'Messages'}],
+                    },
+                  },
+                ],
+              })
+            }
+
+            return true
+          }
+
+          if (result.left._tag === 'RequestNotFoundError') {
+            Alert.alert(t('offer.requestNotFound'))
+          } else if (result.left._tag === 'ReceiverInboxDoesNotExistError') {
+            Alert.alert(t('offer.otherSideAccountDeleted'))
+          } else {
+            yield* _(
+              showErrorAlertE({
+                title:
+                  toCommonErrorMessage(result.left, t) ??
+                  t('common.unknownError'),
+                error: result.left,
+              })
+            )
+          }
+
+          return false
+        }
+
+        return true
+      }).pipe(
+        Effect.catchTag('UserDeclinedError', () => {
+          set(loadingOverlayDisplayedAtom, false)
+          return Effect.succeed(false)
+        })
+      )
+    }
+  )
+
   return {
     showModalAtom: atom<boolean>(false),
     chatAtom,
@@ -1165,5 +1261,6 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     btcPricePercentageDifferenceToDisplayInVexlbotMessageAtom,
     otherSideGoldenAvatarTypeAtom,
     otherSideClubsIdsAtom,
+    approveChatRequestActionAtom,
   }
 })

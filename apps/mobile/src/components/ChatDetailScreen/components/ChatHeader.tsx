@@ -222,7 +222,7 @@ function ChatHeader({
     onPressMiddle()
   }, [onPressMiddle])
   return (
-    <XStack mx="$4" mt="$4">
+    <XStack mx="$1" mt="$4">
       <Button type={leftButton} />
 
       <Stack f={1} mx={mode === 'photoLeft' ? '$2' : 0}>

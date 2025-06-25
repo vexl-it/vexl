@@ -3,7 +3,7 @@ import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {type FriendLevel} from '@vexl-next/domain/src/general/offers'
 import React from 'react'
-import {TouchableWithoutFeedback} from 'react-native-gesture-handler'
+import {TouchableWithoutFeedback} from 'react-native'
 import {Stack, Text, XStack} from 'tamagui'
 import {useGetAllClubsNamesForIds} from '../state/clubs/atom/clubsWithMembersAtom'
 import {useTranslation} from '../utils/localization/I18nProvider'
@@ -28,21 +28,9 @@ function ContactTypeAndCommonNumber({
   const clubsNamesForOffer = useGetAllClubsNamesForIds(clubsIds ?? [])
 
   return (
-    <Stack
-      flexDirection={
-        friendLevel.length > 1 && friendLevel.includes('CLUB')
-          ? 'column'
-          : 'row'
-      }
-      ai={center ? 'center' : 'flex-start'}
-    >
-      <XStack ai="center" gap="$1">
-        <Text
-          gap="$1"
-          col="$greyOnBlack"
-          numberOfLines={1}
-          ellipsizeMode="tail"
-        >
+    <Stack flexDirection="row" ai={center ? 'center' : 'flex-start'}>
+      <XStack ai="center" flexWrap="wrap">
+        <Text col="$greyOnBlack">
           {(friendLevel.includes('FIRST_DEGREE') ||
             friendLevel.includes('SECOND_DEGREE')) && (
             <>
@@ -52,32 +40,34 @@ function ContactTypeAndCommonNumber({
                   `${t('offer.friendOfFriend')} • `}
             </>
           )}
+        </Text>
+        <Text col="$greyOnBlack">
           {!!clubsNamesForOffer &&
             clubsNamesForOffer.length === 1 &&
             clubsNamesForOffer.map((clubName) => `${clubName} • `)}
+        </Text>
+        <Text col="$greyOnBlack">
           {!!clubsNamesForOffer &&
             clubsNamesForOffer.length > 1 &&
             `${t('clubs.multipleClubs')} • `}
         </Text>
-      </XStack>
-      <XStack ai="center" gap="$1">
-        <Stack w={14} h={14}>
-          <Image source={friendsSvg} />
-        </Stack>
-        <TouchableWithoutFeedback
-          onPress={() => {
-            navigation.navigate('CommonFriends', {
-              contactsHashes,
-              clubsIds: clubsIds ?? [],
-            })
-          }}
-        >
-          <Text col="$greyOnBlack">
-            {t('offer.numberOfCommon', {
-              number: numberOfCommonFriends,
-            })}
-          </Text>
-        </TouchableWithoutFeedback>
+        <XStack gap="$1" ai="center">
+          <Image width={14} height={14} source={friendsSvg} />
+          <TouchableWithoutFeedback
+            onPress={() => {
+              navigation.navigate('CommonFriends', {
+                contactsHashes,
+                clubsIds: clubsIds ?? [],
+              })
+            }}
+          >
+            <Text col="$greyOnBlack">
+              {t('offer.numberOfCommon', {
+                number: numberOfCommonFriends,
+              })}
+            </Text>
+          </TouchableWithoutFeedback>
+        </XStack>
       </XStack>
     </Stack>
   )

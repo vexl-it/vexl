@@ -76,6 +76,8 @@ describe('Refresh user', () => {
               },
               headers: Schema.decodeSync(CommonHeaders)({
                 'user-agent': 'Vexl/2 (1.0.0) ANDROID',
+                'vexl-app-meta':
+                  '{"appSource":"Some test123", "versionCode": 2, "platform":"ANDROID", "semver": "1.0.0", "language": "en", "isDeveloper": false}',
               }),
             },
             HttpClientRequest.setHeaders(authHeaders)
@@ -93,6 +95,7 @@ describe('Refresh user', () => {
         expect(userInDb[0]).toHaveProperty('clientVersion', 2)
         expect(userInDb[0]).toHaveProperty('refreshedAt', expect.any(Date))
         expect(userInDb[0]).toHaveProperty('countryPrefix', 420)
+        expect(userInDb[0]).toHaveProperty('appSource', 'Some test123')
       })
     )
   })

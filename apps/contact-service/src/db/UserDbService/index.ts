@@ -23,6 +23,10 @@ import {
   type CreateUserParams,
 } from './queries/createInsertUser'
 import {
+  createUpdateAppSourceForUser,
+  type UpdateAppSourceForUserParams,
+} from './queries/createUpdateAppSourceForUser'
+import {
   createUpdateExpoToken,
   type UpdateExpoTokenParams,
 } from './queries/createUpdateExpoToken'
@@ -115,6 +119,10 @@ export interface UserDbOperations {
   updateUserInitialImportDone: (
     args: UpdateUserInitialImportDoneParams
   ) => Effect.Effect<void, UnexpectedServerError>
+
+  updateAppSourceForUser: (
+    args: UpdateAppSourceForUserParams
+  ) => Effect.Effect<void, UnexpectedServerError>
 }
 
 export class UserDbService extends Context.Tag('UserDbService')<
@@ -167,6 +175,8 @@ export class UserDbService extends Context.Tag('UserDbService')<
         createUpdateUserInitialImportDone
       )
 
+      const updateAppSourceForUser = yield* _(createUpdateAppSourceForUser)
+
       return {
         insertUser,
         findUserByHash,
@@ -184,6 +194,7 @@ export class UserDbService extends Context.Tag('UserDbService')<
         findFirebaseTokensForNewContentNotification,
         updateUserHash,
         updateUserInitialImportDone,
+        updateAppSourceForUser,
       }
     })
   )

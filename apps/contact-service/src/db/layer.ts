@@ -18,6 +18,7 @@ import create_club_offer_reported_info_table_and_add_index from './migrations/00
 import add_club_column_report_limit from './migrations/0014_add_club_column_report_limit'
 import add_table_club_reported_record from './migrations/0015_add_table_club_reported_record'
 import remove_unused_tables from './migrations/0016_remove_unused_tables'
+import add_app_source from './migrations/0017_add_app_source'
 
 const migrations = [
   {
@@ -99,6 +100,11 @@ const migrations = [
     id: 16,
     name: 'remove_unused_tables',
     migrationEffect: remove_unused_tables,
+  },
+  {
+    id: 17,
+    name: 'add_app_source',
+    migrationEffect: add_app_source,
   },
 ] as const
 

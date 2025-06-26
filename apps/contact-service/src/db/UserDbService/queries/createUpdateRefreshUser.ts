@@ -12,6 +12,7 @@ export const UpdateRefreshUserParams = Schema.Struct({
   hash: HashedPhoneNumberE,
   clientVersion: Schema.optionalWith(VersionCode, {as: 'Option'}),
   countryPrefix: Schema.optionalWith(CountryPrefixE, {as: 'Option'}),
+  appSource: Schema.optionalWith(Schema.String, {as: 'Option'}),
   refreshedAt: Schema.Date,
 })
 export type UpdateRefreshUserParams = typeof UpdateRefreshUserParams.Type
@@ -26,7 +27,8 @@ export const createUpdateRefreshUser = Effect.gen(function* (_) {
       SET
         client_version = ${params.clientVersion ?? null},
         refreshed_at = ${params.refreshedAt},
-        country_prefix = ${params.countryPrefix ?? null}
+        country_prefix = ${params.countryPrefix ?? null},
+        app_source = ${params.appSource ?? null}
       WHERE
         public_key = ${params.publicKey}
         AND hash = ${params.hash}

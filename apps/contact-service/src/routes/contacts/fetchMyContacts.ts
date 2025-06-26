@@ -3,6 +3,7 @@ import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {Array, Effect, pipe, Schema} from 'effect'
 import {Handler} from 'effect-http'
 import {ContactDbService} from '../../db/ContactDbService'
+import {UserDbService} from '../../db/UserDbService'
 
 export const fetchMyContacts = Handler.make(
   FetchMyContactsEndpoint,
@@ -10,6 +11,17 @@ export const fetchMyContacts = Handler.make(
     makeEndpointEffect(
       Effect.gen(function* (_) {
         const contactDb = yield* _(ContactDbService)
+
+        yield* _(
+          UserDbService,
+          Effect.flatMap((userDb) =>
+            userDb.updateAppSourceForUser({
+              appSource: req.headers.appSourceOrNone,
+              publicKey: security['public-key'],
+              hash: security.hash,
+            })
+          )
+        )
 
         const firstLevelContacts =
           req.query.level === 'ALL' || req.query.level === 'FIRST'

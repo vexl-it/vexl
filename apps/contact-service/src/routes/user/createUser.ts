@@ -51,6 +51,7 @@ export const createUser = Handler.make(CreateUserEndpoint, (req, security) =>
           firebaseToken: Option.fromNullable(req.body.firebaseToken),
           clientVersion: req.headers.clientVersionOrNone,
           platform: req.headers.clientPlatformOrNone,
+          appSource: req.headers.appSourceOrNone,
         })
       )
       return {}

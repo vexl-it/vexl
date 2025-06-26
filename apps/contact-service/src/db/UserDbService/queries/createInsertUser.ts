@@ -6,6 +6,7 @@ import {HashedPhoneNumberE} from '@vexl-next/domain/src/general/HashedPhoneNumbe
 import {ExpoNotificationTokenE} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {FcmTokenE} from '@vexl-next/domain/src/utility/FcmToken.brand'
 import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
+import {AppSource} from '@vexl-next/rest-api/src/commonHeaders'
 import {PlatformName} from '@vexl-next/rest-api/src/PlatformName'
 import {Effect, flow, Schema} from 'effect'
 import {UserRecord} from '../domain'
@@ -17,6 +18,7 @@ export const CreateUserParams = Schema.Struct({
   expoToken: Schema.optionalWith(ExpoNotificationTokenE, {as: 'Option'}),
   clientVersion: Schema.optionalWith(VersionCode, {as: 'Option'}),
   platform: Schema.optionalWith(PlatformName, {as: 'Option'}),
+  appSource: Schema.optionalWith(AppSource, {as: 'Option'}),
 })
 export type CreateUserParams = Schema.Schema.Type<typeof CreateUserParams>
 
@@ -38,6 +40,7 @@ export const createInsertUser = Effect.gen(function* (_) {
           platform: params.platform ?? null,
           refreshedAt: new Date(),
           lastNewContentNotificationSentAt: null,
+          appSource: params.appSource ?? null,
         },
       ])}
       RETURNING

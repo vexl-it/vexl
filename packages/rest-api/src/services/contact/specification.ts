@@ -157,6 +157,7 @@ export const FetchMyContactsEndpoint = Api.get(
   '/api/v1/contacts/me'
 ).pipe(
   Api.setSecurity(ServerSecurity),
+  Api.setRequestHeaders(CommonHeaders),
   Api.setRequestQuery(FetchMyContactsRequest),
   Api.setResponseBody(FetchMyContactsResponseE)
 )

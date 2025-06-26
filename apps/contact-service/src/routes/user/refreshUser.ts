@@ -28,6 +28,7 @@ export const refreshUser = Handler.make(RefreshUserEndpoint, (req, security) =>
           hash: security.hash,
           clientVersion: req.headers.clientVersionOrNone,
           countryPrefix: req.body.countryPrefix,
+          appSource: req.headers.appSourceOrNone,
           refreshedAt: new Date(),
         })
       )

@@ -128,7 +128,12 @@ export function api({
         ImportContactsErrors
       ),
     fetchMyContacts: (fetchMyContactsInput: FetchMyContactsInput) =>
-      handleCommonErrorsEffect(client.fetchMyContacts(fetchMyContactsInput)),
+      handleCommonErrorsEffect(
+        client.fetchMyContacts({
+          headers: commonHeaders,
+          query: fetchMyContactsInput.query,
+        })
+      ),
     fetchCommonConnections: (
       fetchCommonConnectionsInput: FetchCommonConnectionsInput
     ) =>

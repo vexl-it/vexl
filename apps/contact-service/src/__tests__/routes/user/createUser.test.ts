@@ -38,6 +38,8 @@ describe('create user', () => {
               },
               headers: Schema.decodeSync(CommonHeaders)({
                 'user-agent': 'Vexl/1 (1.0.0) ANDROID',
+                'vexl-app-meta':
+                  '{"appSource":"googlePlay", "versionCode": 1, "platform":"ANDROID", "semver": "1.0.0", "language": "en", "isDeveloper": false}',
               }),
             },
             HttpClientRequest.setHeaders({
@@ -63,6 +65,7 @@ describe('create user', () => {
         )
         expect(result[0]).toHaveProperty('expoToken', 'someToken')
         expect(result[0]).toHaveProperty('clientVersion', 1)
+        expect(result[0]).toHaveProperty('appSource', 'googlePlay')
       })
     )
   })

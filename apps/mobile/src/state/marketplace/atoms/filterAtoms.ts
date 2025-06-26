@@ -1,4 +1,4 @@
-import {Schema} from 'effect'
+import {Record, Schema} from 'effect'
 import {atom, type Atom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {type DropdownItemProps} from '../../../components/Dropdown'
@@ -6,6 +6,7 @@ import {atomWithParsedMmkvStorageE} from '../../../utils/atomUtils/atomWithParse
 import getDefaultCurrency from '../../../utils/getDefaultCurrency'
 import {currencies} from '../../../utils/localization/currency'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
+import {clubsToKeyHolderAtom} from '../../clubs/atom/clubsToKeyHolderAtom'
 import {
   OffersFilterE,
   offersFilterEquals,
@@ -100,6 +101,11 @@ export const isFilterActiveAtom = atom((get) => {
     {
       ...offersFilterFromStorage,
       singlePrice: listingType !== 'BITCOIN' ? singlePrice : undefined,
+      clubsUuids:
+        offersFilterFromStorage.clubsUuids?.length ===
+        Record.values(get(clubsToKeyHolderAtom)).length
+          ? undefined
+          : offersFilterFromStorage.clubsUuids,
     } satisfies OffersFilter,
     filterInitialState
   )

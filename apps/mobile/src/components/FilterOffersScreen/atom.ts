@@ -13,10 +13,10 @@ import {
 } from '@vexl-next/domain/src/general/offers'
 import {calculateViewportRadius} from '@vexl-next/domain/src/utility/geoCoordinates'
 import {type LocationSuggestion} from '@vexl-next/rest-api/src/services/location/contracts'
-import {Record} from 'effect'
+import {Array} from 'effect'
 import {atom, type Atom, type SetStateAction, type WritableAtom} from 'jotai'
 import {splitAtom} from 'jotai/utils'
-import {clubsToKeyHolderAtom} from '../../state/clubs/atom/clubsToKeyHolderAtom'
+import {clubsWithMembersAtom} from '../../state/clubs/atom/clubsWithMembersAtom'
 import {type ClubWithMembers} from '../../state/clubs/domain'
 import {
   createBtcPriceForCurrencyAtom,
@@ -73,28 +73,6 @@ export const locationAtom = atom<readonly OfferLocation[] | undefined>(
 
 export const clubsUuidsFilterAtom = atom<readonly ClubUuid[] | undefined>(
   offersFilterInitialState.clubsUuids
-)
-
-export const handleShowClubsInFilterChangeActionAtom = atom(
-  (get) => {
-    const filteredClubsUuids = get(clubsUuidsFilterAtom)
-    const showClubsInFilter =
-      !!filteredClubsUuids && filteredClubsUuids.length > 0
-
-    return showClubsInFilter
-  },
-  (get, set) => {
-    const filteredClubsUuids = get(clubsUuidsFilterAtom)
-    const myStoredClubs = get(clubsToKeyHolderAtom)
-    const showClubsInFilter =
-      !!filteredClubsUuids && filteredClubsUuids.length > 0
-
-    if (!showClubsInFilter) {
-      set(clubsUuidsFilterAtom, Record.keys(myStoredClubs))
-    } else {
-      set(clubsUuidsFilterAtom, undefined)
-    }
-  }
 )
 
 export const locationArrayOfOneAtom = atom(
@@ -331,6 +309,26 @@ export const setOfferLocationActionAtom = atom(
   }
 )
 
+export const setClubsInFilterActionAtom = atom(
+  null,
+  (get, set, filterClubsUuids: readonly ClubUuid[] | undefined) => {
+    const clubsWithMembers = get(clubsWithMembersAtom)
+    const myClubsUuids = clubsWithMembers.map((club) => club.club.uuid)
+
+    if (filterClubsUuids) {
+      // user can leave the club but UUID can be still in the filter storage
+      // we need to clean that up
+      set(clubsUuidsFilterAtom, () =>
+        filterClubsUuids.filter((uuid) => myClubsUuids.includes(uuid))
+      )
+    } else if (!filterClubsUuids && myClubsUuids.length > 0) {
+      set(clubsUuidsFilterAtom, myClubsUuids)
+    } else if (!filterClubsUuids) {
+      set(clubsUuidsFilterAtom, undefined)
+    }
+  }
+)
+
 const setConditionallyRenderedFilterElementsActionAtom = atom(
   null,
   (get, set, filterValue: OffersFilter) => {
@@ -358,7 +356,7 @@ const setFilterAtomsActionAtom = atom(
     set(listingTypeAtom, filterValue.listingType)
     set(offerTypeAtom, filterValue.offerType)
     set(sortingAtom, filterValue.sort)
-    set(clubsUuidsFilterAtom, filterValue.clubsUuids)
+    set(setClubsInFilterActionAtom, filterValue.clubsUuids)
     set(setConditionallyRenderedFilterElementsActionAtom, filterValue)
   }
 )
@@ -521,11 +519,9 @@ export function createSelectClubInFilterAtom(
         if (selected) newValue.add(club.uuid)
         else newValue.delete(club.uuid)
 
-        const clubsUuidsInFilterArray = Array.from(newValue)
+        const clubsUuidsInFilterArray = Array.fromIterable(newValue)
 
-        return clubsUuidsInFilterArray.length > 0
-          ? clubsUuidsInFilterArray
-          : undefined
+        return clubsUuidsInFilterArray.length > 0 ? clubsUuidsInFilterArray : []
       })
     }
   )

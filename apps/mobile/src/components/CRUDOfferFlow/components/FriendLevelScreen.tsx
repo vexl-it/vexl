@@ -1,7 +1,5 @@
 import {useMolecule} from 'bunshi/dist/react'
-import {useAtomValue} from 'jotai'
 import {type CRUDOfferStackScreenProps} from '../../../navigationTypes'
-import {clubsWithMembersAtomsAtom} from '../../../state/clubs/atom/clubsWithMembersAtom'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import ClubsComponent from '../../OfferForm/components/Clubs'
 import FriendLevel from '../../OfferForm/components/FriendLevel'
@@ -16,7 +14,6 @@ function FriendLevelScreen({navigation}: Props): JSX.Element {
   const {t} = useTranslation()
   const {intendedConnectionLevelAtom, createSelectClubAtom} =
     useMolecule(offerFormMolecule)
-  const clubsWithMembersAtoms = useAtomValue(clubsWithMembersAtomsAtom)
 
   return (
     <ScreenWrapper>
@@ -28,13 +25,11 @@ function FriendLevelScreen({navigation}: Props): JSX.Element {
           intendedConnectionLevelAtom={intendedConnectionLevelAtom}
         />
       </Section>
-      {clubsWithMembersAtoms.length > 0 && (
-        <ClubsComponent
-          form="OfferForm"
-          createSelectClubAtom={createSelectClubAtom}
-          navigation={navigation}
-        />
-      )}
+      <ClubsComponent
+        form="OfferForm"
+        createSelectClubAtom={createSelectClubAtom}
+        navigation={navigation}
+      />
     </ScreenWrapper>
   )
 }

@@ -1,12 +1,9 @@
 import {
-  atom,
   type Atom,
   type SetStateAction,
-  useAtom,
   useAtomValue,
   type WritableAtom,
 } from 'jotai'
-import {useMemo} from 'react'
 import {TouchableOpacity} from 'react-native'
 import {getTokens, Text, XStack, YStack} from 'tamagui'
 import {type CRUDOfferStackScreenProps} from '../../../../navigationTypes'
@@ -16,13 +13,11 @@ import atomKeyExtractor from '../../../../utils/atomUtils/atomKeyExtractor'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import Image from '../../../Image'
 import clubsSvg from '../../../images/clubsSvg'
-import Switch from '../../../Switch'
 
 import ClubItem from './components/ClubItem'
 
 interface OfferFormProps {
   form: 'OfferForm'
-  showClubsInFilterAtom?: Atom<boolean>
   navigation: CRUDOfferStackScreenProps<'FriendLevelScreen'>['navigation']
   createSelectClubAtom: (
     clubWithMembersAtom: Atom<ClubWithMembers>
@@ -31,7 +26,6 @@ interface OfferFormProps {
 
 interface FilterFormProps {
   form: 'FilterForm'
-  showClubsInFilterAtom: Atom<boolean>
   createSelectClubAtom: (
     clubWithMembersAtom: Atom<ClubWithMembers>
   ) => WritableAtom<boolean, [SetStateAction<boolean>], void>
@@ -42,14 +36,8 @@ type Props = OfferFormProps | FilterFormProps
 function ClubsComponent(props: Props): JSX.Element | null {
   const {t} = useTranslation()
   const clubsWithMembersAtoms = useAtomValue(clubsWithMembersAtomsAtom)
-  const showClubsInFilterAtom = useMemo(
-    () =>
-      props.form === 'FilterForm' ? props.showClubsInFilterAtom : atom(true),
-    [props.form, props.showClubsInFilterAtom]
-  )
-  const [showClubsInFilter, setShowClubsInFilter] = useAtom(
-    showClubsInFilterAtom
-  )
+
+  if (clubsWithMembersAtoms.length === 0) return null
 
   return (
     <YStack>
@@ -67,18 +55,10 @@ function ClubsComponent(props: Props): JSX.Element | null {
                 {t('clubs.vexlClubs')}
               </Text>
             </XStack>
-            {props.form === 'FilterForm' && (
-              <Switch
-                value={showClubsInFilter}
-                onChange={setShowClubsInFilter}
-              />
-            )}
           </XStack>
-          {!!(props.form === 'OfferForm' || showClubsInFilter) && (
-            <Text fos={16} col="$greyOnBlack" ff="$body500">
-              {t('clubs.pickTheClubsThatInterestsYou')}
-            </Text>
-          )}
+          <Text fos={16} col="$greyOnBlack" ff="$body500">
+            {t('clubs.pickTheClubsThatInterestsYou')}
+          </Text>
         </YStack>
         {props.form === 'OfferForm' && (
           <TouchableOpacity
@@ -99,17 +79,15 @@ function ClubsComponent(props: Props): JSX.Element | null {
           </TouchableOpacity>
         )}
       </XStack>
-      {!!(props.form === 'OfferForm' || showClubsInFilter) && (
-        <YStack mt="$4" gap="$2">
-          {clubsWithMembersAtoms.map((one) => (
-            <ClubItem
-              key={atomKeyExtractor(one)}
-              createSelectClubAtom={props.createSelectClubAtom}
-              clubWithMembersAtom={one}
-            />
-          ))}
-        </YStack>
-      )}
+      <YStack mt="$4" gap="$2">
+        {clubsWithMembersAtoms.map((one) => (
+          <ClubItem
+            key={atomKeyExtractor(one)}
+            createSelectClubAtom={props.createSelectClubAtom}
+            clubWithMembersAtom={one}
+          />
+        ))}
+      </YStack>
     </YStack>
   )
 }

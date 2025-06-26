@@ -23,7 +23,6 @@ import {
   createIsThisLanguageSelectedAtom,
   createSelectClubInFilterAtom,
   currencyAtom,
-  handleShowClubsInFilterChangeActionAtom,
   intendedConnectionLevelAtom,
   listingTypeAtom,
   locationActiveAtom,
@@ -136,7 +135,6 @@ export default function useAllOffersFilterContent(): Props[] {
           <ClubsComponent
             form="FilterForm"
             createSelectClubAtom={createSelectClubInFilterAtom}
-            showClubsInFilterAtom={handleShowClubsInFilterChangeActionAtom}
           />
         ),
       },

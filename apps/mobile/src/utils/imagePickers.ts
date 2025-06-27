@@ -6,7 +6,6 @@ import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {Effect, Schema} from 'effect'
 import * as FileSystem from 'expo-file-system'
 import * as ImagePicker from 'expo-image-picker'
-import urlJoin from 'url-join'
 import {PROFILE_PICTURE_DIRECTORY} from './fsDirectories'
 
 export const SelectedImage = Schema.Struct({
@@ -46,7 +45,7 @@ export function moveImageToInternalDirectory({
       if (!rootDirectory) throw new Error('document dir not found')
 
       const parentDirectory = directory
-        ? urlJoin(rootDirectory, directory)
+        ? `${rootDirectory}${directory}`
         : rootDirectory
 
       const dirInfo = await FileSystem.getInfoAsync(parentDirectory)
@@ -56,10 +55,7 @@ export function moveImageToInternalDirectory({
         })
       }
 
-      const path = urlJoin(
-        parentDirectory,
-        `${generateUuid()}.${imagePath.split('.').at(-1) ?? 'jpeg'}`
-      )
+      const path = `${parentDirectory}${generateUuid()}.${imagePath.split('.').at(-1) ?? 'jpeg'}`
 
       await FileSystem.copyAsync({from: imagePath, to: path})
       const infoTo = await FileSystem.getInfoAsync(imagePath)

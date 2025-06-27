@@ -16,15 +16,22 @@ import {
   donationAmountAtom,
   donationPaymentMethodAtom,
   MAX_DONATION_AMOUNT,
+  selectedPredefinedDonationValueAtom,
   shouldShowDonationPromptAtom,
 } from './stateAtoms'
 
-const paymentMethodAndAmountConfirmButtonDisabledAtom = atom<boolean>(
-  (get) =>
-    !get(donationAmountAtom) ||
-    Number(get(donationAmountAtom)) === 0 ||
-    Number(get(donationAmountAtom)) > MAX_DONATION_AMOUNT
-)
+const paymentMethodAndAmountConfirmButtonDisabledAtom = atom<boolean>((get) => {
+  const donationAmount = get(donationAmountAtom)
+  const selectedPredefinedDonationValue = get(
+    selectedPredefinedDonationValueAtom
+  )
+
+  return (
+    (!donationAmount && !selectedPredefinedDonationValue) ||
+    Number(donationAmount) === 0 ||
+    Number(donationAmount) > MAX_DONATION_AMOUNT
+  )
+})
 
 export const showDonationPromptActionAtom = atom(null, (get, set) => {
   const {t} = get(translationAtom)
@@ -48,12 +55,16 @@ export const showDonationPromptActionAtom = atom(null, (get, set) => {
     )
 
     const donationAmount = get(donationAmountAtom)
+      ? Number(get(donationAmountAtom))
+      : get(selectedPredefinedDonationValueAtom)
+        ? Number(get(selectedPredefinedDonationValueAtom))
+        : 0
 
     set(loadingOverlayDisplayedAtom, true)
 
     const resp = yield* _(
       api.createInvoice({
-        amount: donationAmount ? Number(donationAmount) : 0,
+        amount: donationAmount,
         currency: 'EUR',
         paymentMethod: get(donationPaymentMethodAtom),
       }),

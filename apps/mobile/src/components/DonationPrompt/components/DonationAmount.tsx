@@ -1,6 +1,7 @@
 import {MoneyTextInput} from '@alexzunik/react-native-money-input'
-import {useAtom} from 'jotai'
-import {useEffect, useMemo} from 'react'
+import {useAtom, useSetAtom} from 'jotai'
+import {useEffect, useMemo, useRef} from 'react'
+import {type TextInput} from 'react-native'
 import {getTokens, Stack, Text, XStack, YStack} from 'tamagui'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import SelectableCell, {
@@ -10,7 +11,11 @@ import {
   donationAmountAtom,
   donationPaymentMethodAtom,
   MAX_DONATION_AMOUNT,
+  PREDEFINED_DONATION_AMOUNTS,
+  resetDonationPromptValuesActionAtom,
+  selectedPredefinedDonationValueAtom,
 } from '../atoms/stateAtoms'
+import PredefinedDonationValue from './PredefinedDonationValue'
 
 function usePaymentMethodsContent(): Array<
   SelectableCellContentProps<'BTC-CHAIN' | 'BTC-LN'>
@@ -34,16 +39,21 @@ function usePaymentMethodsContent(): Array<
 
 function DonationAmount(): JSX.Element {
   const {t} = useTranslation()
+  const moneyInputRef = useRef<TextInput>(null)
   const paymentMethods = usePaymentMethodsContent()
+  const [selectedPredefinedDonationValue, setSelectedPredefinedDonationValue] =
+    useAtom(selectedPredefinedDonationValueAtom)
   const [donationAmount, setDonationAmount] = useAtom(donationAmountAtom)
   const [donationPaymentMethod, setDonationPaymentMethod] = useAtom(
     donationPaymentMethodAtom
   )
+  const resetDonationPromptValues = useSetAtom(
+    resetDonationPromptValuesActionAtom
+  )
 
   useEffect(() => {
-    setDonationAmount(undefined)
-    setDonationPaymentMethod('BTC-LN')
-  }, [setDonationAmount, setDonationPaymentMethod])
+    resetDonationPromptValues()
+  }, [resetDonationPromptValues])
 
   return (
     <YStack>
@@ -72,27 +82,51 @@ function DonationAmount(): JSX.Element {
                 onPress={setDonationPaymentMethod}
                 title={paymentMethod.title}
                 type={paymentMethod.type}
-                variant="light"
               />
             ))}
           </XStack>
-          <Stack ai="center" jc="center" gap="$1">
-            <Text col="$greyAccent2">EUR</Text>
-            <MoneyTextInput
-              autoFocus
-              value={donationAmount}
-              onChangeText={(formatted, extracted) => {
-                setDonationAmount(extracted)
-              }}
-              selectionColor={getTokens().color.black.val}
-              cursorColor={getTokens().color.black.val}
-              suffix="€"
-              placeholder="0€"
-              style={{
-                fontSize: 48,
-                color: getTokens().color.black.val,
-              }}
-            />
+          <Stack gap="$4">
+            <Text fontSize={18} color="$greyOnWhite" textAlign="left">
+              {t('donationPrompt.howMuchWouldYouLikeToDonate')}
+            </Text>
+            <XStack ai="center" jc="space-around">
+              {PREDEFINED_DONATION_AMOUNTS.map((amount) => (
+                <PredefinedDonationValue
+                  key={amount}
+                  selected={selectedPredefinedDonationValue === amount}
+                  onPress={() => {
+                    setSelectedPredefinedDonationValue(amount)
+                    setDonationAmount(undefined)
+                    moneyInputRef.current?.blur()
+                  }}
+                  title={`${amount}€`}
+                />
+              ))}
+            </XStack>
+          </Stack>
+          <Stack gap="$4">
+            <Text fontSize={18} color="$greyOnWhite" textAlign="left">
+              {t('donationPrompt.orEnterCustomAmount')}
+            </Text>
+            <Stack ai="center" jc="center" gap="$1">
+              <Text col="$greyAccent2">EUR</Text>
+              <MoneyTextInput
+                ref={moneyInputRef}
+                value={donationAmount}
+                onChangeText={(formatted, extracted) => {
+                  setDonationAmount(extracted)
+                  setSelectedPredefinedDonationValue(undefined)
+                }}
+                selectionColor={getTokens().color.black.val}
+                cursorColor={getTokens().color.black.val}
+                suffix="€"
+                placeholder="0€"
+                style={{
+                  fontSize: 48,
+                  color: getTokens().color.black.val,
+                }}
+              />
+            </Stack>
           </Stack>
         </Stack>
       </Stack>

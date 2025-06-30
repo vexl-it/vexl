@@ -95,21 +95,21 @@ export const newsAndAnonouncementsHandler = Handler.make(
         //   cancelable: true,
         // }
 
-        const vexlBotNewsForBlog1: VexlBotNews = {
-          id: Schema.decodeSync(UuidE)('5785f0ed-6451-412a-b5e2-3f5b186e3d00'),
-          type: 'info',
-          content:
-            'This week, we dive into how due process was quietly deleted from the financial system. ➡️',
-          action: Option.some({
-            text: 'Read now',
-            url: Schema.decodeSync(HttpsUrlString)(
-              'https://vexl.it/post/the-lack-of-due-process'
-            ),
-          }),
-          cancelForever: true,
-          bubbleOrigin: Option.none(),
-          cancelable: true,
-        }
+        // const vexlBotNewsForBlog1: VexlBotNews = {
+        //   id: Schema.decodeSync(UuidE)('5785f0ed-6451-412a-b5e2-3f5b186e3d00'),
+        //   type: 'info',
+        //   content:
+        //     'This week, we dive into how due process was quietly deleted from the financial system. ➡️',
+        //   action: Option.some({
+        //     text: 'Read now',
+        //     url: Schema.decodeSync(HttpsUrlString)(
+        //       'https://vexl.it/post/the-lack-of-due-process'
+        //     ),
+        //   }),
+        //   cancelForever: true,
+        //   bubbleOrigin: Option.none(),
+        //   cancelable: true,
+        // }
 
         const vexlBotNewsForBlog2: VexlBotNews = {
           id: Schema.decodeSync(UuidE)('f4e4161b-04e1-4a0c-8d07-e42d11daa2cf'),
@@ -127,14 +127,30 @@ export const newsAndAnonouncementsHandler = Handler.make(
           cancelable: true,
         }
 
-        const newBlogReleaseAtMillis = 1750690800000
+        const vexlBotNewsForBlog3: VexlBotNews = {
+          id: Schema.decodeSync(UuidE)('e1f4dabd-f989-4aaa-8c84-1739c83b0ee7'),
+          type: 'info',
+          content:
+            'From permissionless to permissioned. This week we dive into how fast “your money” becomes theirs. ➡️',
+          action: Option.some({
+            text: 'Read now',
+            url: Schema.decodeSync(HttpsUrlString)(
+              'https://vexl.it/post/digital-money-vs-digital-cash'
+            ),
+          }),
+          cancelForever: true,
+          bubbleOrigin: Option.none(),
+          cancelable: true,
+        }
+
+        const newBlogReleaseAtMillis = 1751295600000
         const showNewBlogLink =
           headers.isDeveloper || unixMillisecondsNow() > newBlogReleaseAtMillis
 
         return {
           fullScreenWarning: Option.none(),
           vexlBotNews: [
-            showNewBlogLink ? vexlBotNewsForBlog2 : vexlBotNewsForBlog1,
+            showNewBlogLink ? vexlBotNewsForBlog3 : vexlBotNewsForBlog2,
           ],
         } satisfies NewsAndAnnouncementsResponse
       }),

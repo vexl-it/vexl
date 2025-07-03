@@ -30,23 +30,24 @@ export const importedContactsAtom = atom((get) =>
   )
 )
 
-export const newContactsAtom = atom((get) =>
-  get(storedContactsAtom).filter((contact) => !contact.flags.seen)
-)
-
 export const resolveAllContactsAsSeenActionAtom = atom(
   (get) => get(storedContactsAtom).some((contact) => !contact.flags.seen),
   (get, set) => {
-    set(storedContactsAtom, (contacts) =>
-      contacts.map((contact) =>
-        contact.flags.seen
-          ? contact
-          : {
-              ...contact,
-              flags: {...contact.flags, seen: true},
-            }
-      )
+    const needsUpdate = get(storedContactsAtom).some(
+      (contact) => !contact.flags.seen
     )
+
+    if (needsUpdate)
+      set(storedContactsAtom, (contacts) =>
+        contacts.map((contact) =>
+          contact.flags.seen
+            ? contact
+            : {
+                ...contact,
+                flags: {...contact.flags, seen: true},
+              }
+        )
+      )
   }
 )
 

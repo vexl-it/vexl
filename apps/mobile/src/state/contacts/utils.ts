@@ -87,11 +87,10 @@ export function getContactsAndTryToResolveThePermissionsAlongTheWay(): Effect.Ef
 
     const contacts = yield* _(
       Effect.tryPromise({
-        try: async () => {
-          return await Contacts.getContactsAsync({
+        try: async () =>
+          await Contacts.getContactsAsync({
             sort: SortTypes.UserDefault,
-          })
-        },
+          }),
         catch: (e) => new UnknownContactsError({cause: e}),
       })
     )

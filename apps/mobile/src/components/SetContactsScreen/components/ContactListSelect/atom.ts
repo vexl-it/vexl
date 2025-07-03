@@ -210,27 +210,27 @@ export const contactSelectMolecule = molecule((_, getScope) => {
     null,
     (get, set): Effect.Effect<boolean> => {
       const {t} = get(translationAtom)
-      const selectedNumbers = deduplicate(
-        Array.fromIterable(get(selectedNumbersAtom))
-      )
-      return pipe(
-        set(submitContactsActionAtom, {
-          numbersToImport: selectedNumbers,
-          normalizeAndImportAll: false,
-          showOfferReencryptionDialog: selectedNumbers.length > 0,
-        }),
-        Effect.map((result) => {
-          if (result) {
-            set(toastNotificationAtom, {
-              visible: true,
-              text: t('contacts.contactsSubmitted'),
-              icon: checkIconSvg,
-              hideAfterMillis: 2000,
-            })
-          }
-          return result === 'success'
-        })
-      )
+      const selectedNumbers = Array.fromIterable(get(selectedNumbersAtom))
+
+      return Effect.gen(function* (_) {
+        const result = yield* _(
+          set(submitContactsActionAtom, {
+            numbersToImport: selectedNumbers,
+            normalizeAndImportAll: false,
+            showOfferReencryptionDialog: selectedNumbers.length > 0,
+          })
+        )
+
+        if (result) {
+          set(toastNotificationAtom, {
+            visible: true,
+            text: t('contacts.contactsSubmitted'),
+            icon: checkIconSvg,
+            hideAfterMillis: 2000,
+          })
+        }
+        return result === 'success'
+      })
     }
   )
 

@@ -15,37 +15,39 @@ import {storedContactsAtom} from './contactsStore'
 function normalizeContact(
   contact: StoredContact
 ): Effect.Effect<StoredContact> {
-  const E164PhoneNumber = toE164PhoneNumberWithDefaultCountryCode(
-    contact.info.rawNumber
-  )
-  if (Option.isNone(E164PhoneNumber)) {
-    return Effect.succeed({
+  return Effect.promise(async () => {
+    const E164PhoneNumber = toE164PhoneNumberWithDefaultCountryCode(
+      contact.info.rawNumber
+    )
+    if (Option.isNone(E164PhoneNumber)) {
+      return {
+        ...contact,
+        flags: {
+          ...contact.flags,
+          invalidNumber: 'invalid',
+        },
+      }
+    }
+
+    const hash = hashPhoneNumber(E164PhoneNumber.value)
+    if (hash._tag === 'Left') {
+      reportError('warn', new Error('Error while hashing phone number'), {
+        left: hash.left,
+      })
+      return contact
+    }
+
+    return {
       ...contact,
+      computedValues: Option.some({
+        normalizedNumber: E164PhoneNumber.value,
+        hash: hash.right,
+      }),
       flags: {
         ...contact.flags,
-        invalidNumber: 'invalid',
+        invalidNumber: 'valid',
       },
-    })
-  }
-
-  const hash = hashPhoneNumber(E164PhoneNumber.value)
-  if (hash._tag === 'Left') {
-    reportError('warn', new Error('Error while hashing phone number'), {
-      left: hash.left,
-    })
-    return Effect.succeed(contact)
-  }
-
-  return Effect.succeed({
-    ...contact,
-    computedValues: Option.some({
-      normalizedNumber: E164PhoneNumber.value,
-      hash: hash.right,
-    }),
-    flags: {
-      ...contact.flags,
-      invalidNumber: 'valid',
-    },
+    }
   })
 }
 

@@ -5,6 +5,7 @@ import {DateTime} from 'luxon'
 import {apiAtom} from '../../../api'
 import {myDonationsAtom} from '../../../state/donations/atom'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
+import {navigationRef} from '../../../utils/navigation'
 import {lastDisplayOfDonationPromptTimestampAtom} from '../../../utils/preferences'
 import {showErrorAlertE} from '../../../utils/showErrorAlert'
 import {askAreYouSureActionAtom} from '../../AreYouSureDialog'
@@ -76,6 +77,30 @@ export const showDonationPromptActionAtom = atom(null, (get, set) => {
 
     set(loadingOverlayDisplayedAtom, false)
 
+    set(myDonationsAtom, (prev) => [
+      ...prev,
+      {
+        invoiceId: resp.invoiceId,
+        storeId: resp.storeId,
+        status: resp.status,
+        paymentMethod: resp.paymentMethod,
+        fiatAmount: resp.fiatAmount,
+        btcAmount: resp.btcAmount,
+        currency: resp.currency,
+        exchangeRate: resp.exchangeRate,
+        createdTime: resp.createdTime,
+        expirationTime: resp.expirationTime,
+        paymentLink: resp.paymentLink,
+      },
+    ])
+
+    set(
+      lastDisplayOfDonationPromptTimestampAtom,
+      Schema.decodeSync(UnixMillisecondsE)(DateTime.now().toMillis())
+    )
+
+    const currentRoute = navigationRef.getCurrentRoute()
+
     yield* _(
       set(askAreYouSureActionAtom, {
         variant: 'info',
@@ -98,33 +123,22 @@ export const showDonationPromptActionAtom = atom(null, (get, set) => {
                   resp.exchangeRate
                 ),
               }),
-            positiveButtonText: t('common.close'),
+            negativeButtonText:
+              currentRoute?.name === 'MyDonations'
+                ? undefined
+                : t('common.close'),
+            positiveButtonText:
+              currentRoute?.name === 'MyDonations'
+                ? t('common.close')
+                : t('donationPrompt.seeMyDonations'),
           },
         ],
       })
     )
 
-    set(myDonationsAtom, (prev) => [
-      ...prev,
-      {
-        invoiceId: resp.invoiceId,
-        storeId: resp.storeId,
-        status: resp.status,
-        paymentMethod: resp.paymentMethod,
-        fiatAmount: resp.fiatAmount,
-        btcAmount: resp.btcAmount,
-        currency: resp.currency,
-        exchangeRate: resp.exchangeRate,
-        createdTime: resp.createdTime,
-        expirationTime: resp.expirationTime,
-        paymentLink: resp.paymentLink,
-      },
-    ])
-
-    set(
-      lastDisplayOfDonationPromptTimestampAtom,
-      Schema.decodeSync(UnixMillisecondsE)(DateTime.now().toMillis())
-    )
+    if (navigationRef.isReady() && currentRoute?.name !== 'MyDonations') {
+      navigationRef.navigate('MyDonations')
+    }
   }).pipe(
     Effect.catchAll((e) => {
       if (e._tag === 'UserDeclinedError') return Effect.succeed(Effect.void)

@@ -15,6 +15,7 @@ import {
   resetDonationPromptValuesActionAtom,
   selectedPredefinedDonationValueAtom,
 } from '../atoms/stateAtoms'
+import DonationPriceInSats from './DonationPriceInSats'
 import PredefinedDonationValue from './PredefinedDonationValue'
 
 function usePaymentMethodsContent(): Array<
@@ -127,6 +128,7 @@ function DonationAmount(): JSX.Element {
                 }}
               />
             </Stack>
+            <DonationPriceInSats />
           </Stack>
         </Stack>
       </Stack>

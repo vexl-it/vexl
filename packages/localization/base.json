@@ -1251,6 +1251,8 @@
   "donationPrompt.pleaseSelectThePaymentMethodAndAmountYouWantToDonate": "Please select the payment method and amount you want to donate.",
   "donationPrompt.maximumAmount": "Maximum amount is {{maxAmount}} EUR",
   "donationPrompt.errorCreatingInvoice": "Error creating invoice. Please try again later or contact support.",
+  "donationPrompt.howMuchWouldYouLikeToDonate": "How much would you like to donate?",
+  "donationPrompt.orEnterCustomAmount": "or enter custom amount:",
   "donationConfirmation.importantNotice": "Important notice",
   "donationConfirmation.toGenerateTheDonationConfirmation": "To generate a donation confirmation, you'll need to provide your personal information. If you prefer not to share it, we won’t be able to issue the confirmation.",
   "donationConfirmation.IWouldLikeToRequestAConfirmation": "Hello Vexl team! I would like to request a confirmation of my donation for tax deduction purposes. Below are my personal details:",

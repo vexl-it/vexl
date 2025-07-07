@@ -15,6 +15,7 @@ import {
   type CreateInvoiceRequest,
   GetInvoiceErrors,
   type GetInvoiceRequest,
+  type GetInvoiceStatusTypeRequest,
 } from './contracts'
 import {ContentApiSpecification} from './specification'
 
@@ -84,6 +85,12 @@ export function api({
           query: getInvoiceRequest,
         }),
         GetInvoiceErrors
+      ),
+    getInvoiceStatusType: (query: GetInvoiceStatusTypeRequest) =>
+      handleCommonErrorsEffect(
+        client.getInvoiceStatusType({
+          query,
+        })
       ),
   }
 }

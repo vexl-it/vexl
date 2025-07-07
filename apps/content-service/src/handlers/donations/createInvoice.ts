@@ -11,11 +11,15 @@ import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {Array, Effect, Option, Schema} from 'effect'
 import {Handler} from 'effect-http'
 import {BtcPayServerService} from '../../utils/donations'
+import {UpdateInvoiceStateWebhookService} from './UpdateInvoiceStateWebhookService'
 
 export const createInvoiceHandler = Handler.make(CreateInvoiceEndpoint, (req) =>
   makeEndpointEffect(
     Effect.gen(function* (_) {
       const btcPayServerService = yield* _(BtcPayServerService)
+      const updateInvoiceStateWebhookService = yield* _(
+        UpdateInvoiceStateWebhookService
+      )
 
       const createInvoiceResponse = yield* _(
         btcPayServerService.createInvoice({
@@ -49,6 +53,13 @@ export const createInvoiceHandler = Handler.make(CreateInvoiceEndpoint, (req) =>
           )
         )
 
+      yield* _(
+        updateInvoiceStateWebhookService.createOrUpdateInvoiceState({
+          invoiceId: Schema.decodeSync(InvoiceId)(createInvoiceResponse.id),
+          type: 'InvoiceCreated',
+        })
+      )
+
       const toReturn = {
         invoiceId: Schema.decodeSync(InvoiceId)(createInvoiceResponse.id),
         storeId: Schema.decodeSync(StoreId)(createInvoiceResponse.storeId),
@@ -66,7 +77,7 @@ export const createInvoiceHandler = Handler.make(CreateInvoiceEndpoint, (req) =>
       } satisfies CreateInvoiceResponse
 
       return toReturn
-    }),
+    }).pipe(Effect.withSpan('createInvoiceHandler')),
     CreateInvoiceErrors
   )
 )

@@ -27,7 +27,7 @@ export const getInvoiceHandler = Handler.make(GetInvoiceEndpoint, (req) =>
         storeId: Schema.decodeSync(StoreId)(invoiceData.storeId),
         status: invoiceData.status,
       } satisfies GetInvoiceResponse
-    }),
+    }).pipe(Effect.withSpan('getInvoiceHandler')),
     GetInvoiceErrors
   )
 )

@@ -1,10 +1,10 @@
 import {ContentApiSpecification} from '@vexl-next/rest-api/src/services/content/specification'
+import {redisUrl} from '@vexl-next/server-utils/src/commonConfigs'
 import {healthServerLayer} from '@vexl-next/server-utils/src/HealthServer'
+import {setupLoggingMiddlewares} from '@vexl-next/server-utils/src/loggingMiddlewares'
 import {RedisConnectionService} from '@vexl-next/server-utils/src/RedisConnection'
 import {RedisService} from '@vexl-next/server-utils/src/RedisService'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
-import {redisUrl} from '@vexl-next/server-utils/src/commonConfigs'
-import {setupLoggingMiddlewares} from '@vexl-next/server-utils/src/loggingMiddlewares'
 import {Effect, Layer} from 'effect'
 import {RouterBuilder} from 'effect-http'
 import {NodeServer} from 'effect-http-node'
@@ -13,6 +13,9 @@ import {getBlogsHandler} from './handlers/blog'
 import {clearCacheHandler} from './handlers/clearCache'
 import {createInvoiceHandler} from './handlers/donations/createInvoice'
 import {getInvoiceHandler} from './handlers/donations/getInvoice'
+import {getInvoiceStatusTypeHandler} from './handlers/donations/getInvoiceStatusType'
+import {updateInvoiceStateWebhook} from './handlers/donations/updateInvoiceStateWebhook'
+import {UpdateInvoiceStateWebhookService} from './handlers/donations/UpdateInvoiceStateWebhookService'
 import {getEventsHandler} from './handlers/events'
 import {newsAndAnonouncementsHandler} from './handlers/getNewsAndAnnonuncements'
 import {CacheService} from './utils/cache'
@@ -26,6 +29,8 @@ export const app = RouterBuilder.make(ContentApiSpecification).pipe(
   RouterBuilder.handle(newsAndAnonouncementsHandler),
   RouterBuilder.handle(createInvoiceHandler),
   RouterBuilder.handle(getInvoiceHandler),
+  RouterBuilder.handle(updateInvoiceStateWebhook),
+  RouterBuilder.handle(getInvoiceStatusTypeHandler),
   RouterBuilder.build,
   setupLoggingMiddlewares
 )
@@ -34,10 +39,11 @@ const MainLive = Layer.mergeAll(
   ServerCrypto.layer(cryptoConfig),
   WebflowCmsService.Live,
   CacheService.Live,
-  BtcPayServerService.Live,
   healthServerLayer({port: healthServerPortConfig})
 ).pipe(
+  Layer.provideMerge(UpdateInvoiceStateWebhookService.Live),
   Layer.provideMerge(RedisService.Live),
+  Layer.provideMerge(BtcPayServerService.Live),
   Layer.provideMerge(RedisConnectionService.layer(redisUrl))
 )
 

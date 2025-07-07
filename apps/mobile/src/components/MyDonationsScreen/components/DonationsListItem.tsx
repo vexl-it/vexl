@@ -5,6 +5,7 @@ import {useMemo} from 'react'
 import {TouchableOpacity} from 'react-native'
 import {getTokens, Stack, Text, XStack} from 'tamagui'
 import chevronRightSvg from '../../../images/chevronRightSvg'
+import {SATOSHIS_IN_BTC} from '../../../state/currentBtcPriceAtoms'
 import {type MyDonation} from '../../../state/donations/domain'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import Image from '../../Image'
@@ -47,6 +48,7 @@ function DonationsListItem({donation}: {donation: MyDonation}): JSX.Element {
   const navigation = useNavigation()
   const {t} = useTranslation()
 
+  const satsAmount = Number(donation.btcAmount ?? 0) * SATOSHIS_IN_BTC
   const expiresIn = Math.floor(
     DateTime.fromSeconds(donation.expirationTime).diff(
       DateTime.now(),
@@ -72,10 +74,13 @@ function DonationsListItem({donation}: {donation: MyDonation}): JSX.Element {
             }
           />
           <Stack fs={1}>
-            <Text fontSize={16} fontFamily="$body500">
+            <Text fontSize={18} fontFamily="$body500" col="$main">
               {donation.paymentMethod === 'BTC-LN'
                 ? t('offerForm.network.lightning')
                 : t('offerForm.network.onChain')}
+            </Text>
+            <Text fontFamily="$body500">
+              {`${t('donationPrompt.amount')}: ${donation.fiatAmount} € (${satsAmount} SATS)`}
             </Text>
             {expiresIn > 0 && donation.status === 'New' && (
               <Text>{t('donations.expiresIn', {minutes: expiresIn})}</Text>

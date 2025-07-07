@@ -3,11 +3,11 @@ import {useAtomValue, useSetAtom} from 'jotai'
 import {FlatList, RefreshControl} from 'react-native-gesture-handler'
 import {getTokens, Stack} from 'tamagui'
 import {
-  fetchMyDonationsActionAtom,
   myDonationsSortedAtom,
   myDonationsStateAtom,
 } from '../../../state/donations/atom'
 import {type MyDonation} from '../../../state/donations/domain'
+import {updateAllNonSettledOrExpiredInvoicesStatusTypesActionAtom} from '../../DonationPrompt/atoms'
 import DonationsListItem from './DonationsListItem'
 import EmptyListPlaceholder from './EmptyListPlaceholder'
 
@@ -26,7 +26,9 @@ function renderItem({item}: {item: MyDonation}): JSX.Element {
 function DonationsList(): JSX.Element {
   const myDonationsSorted = useAtomValue(myDonationsSortedAtom)
   const myDonationsLoading = useAtomValue(myDonationsStateAtom) === 'loading'
-  const fetchMyDonations = useSetAtom(fetchMyDonationsActionAtom)
+  const updateAllNonSettledOrExpiredInvoicesStatusTypes = useSetAtom(
+    updateAllNonSettledOrExpiredInvoicesStatusTypesActionAtom
+  )
 
   if (myDonationsSorted.length === 0) {
     return <EmptyListPlaceholder />
@@ -44,7 +46,9 @@ function DonationsList(): JSX.Element {
       refreshControl={
         <RefreshControl
           refreshing={myDonationsLoading ?? false}
-          onRefresh={() => Effect.runFork(fetchMyDonations())}
+          onRefresh={() =>
+            Effect.runFork(updateAllNonSettledOrExpiredInvoicesStatusTypes())
+          }
           tintColor={getTokens().color.greyAccent5.val}
         />
       }

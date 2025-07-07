@@ -1,27 +1,29 @@
 import Clipboard from '@react-native-clipboard/clipboard'
-import {Effect} from 'effect'
+import {Effect, Fiber} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import {DateTime} from 'luxon'
-import {useMemo} from 'react'
+import {useEffect, useMemo} from 'react'
 import {TouchableOpacity} from 'react-native'
 import {getTokens, ScrollView, Stack, Text, XStack} from 'tamagui'
 import {type RootStackScreenProps} from '../../navigationTypes'
 import {SATOSHIS_IN_BTC} from '../../state/currentBtcPriceAtoms'
 import {singleDonationAtom} from '../../state/donations/atom'
 import {useTranslation} from '../../utils/localization/I18nProvider'
+import BtcInvoiceStatus from '../BtcInvoiceStatus'
 import Button from '../Button'
+import {
+  dummyDonation,
+  updateSingleInvoiceStatusTypeRepeatingActionAtom,
+} from '../DonationPrompt/atoms'
 import Image from '../Image'
 import checkIconSvg from '../images/checkIconSvg'
 import copySvg from '../images/copySvg'
 import Screen from '../Screen'
 import ScreenTitle from '../ScreenTitle'
-import {SharableQrCode} from '../SharableQrCode'
 import {toastNotificationAtom} from '../ToastNotification/atom'
 import {showClaimConfirmationDialogActionAtom} from './atoms'
 
 type Props = RootStackScreenProps<'DonationDetails'>
-
-const QR_CODE_SIZE = 300
 
 function DonationDetailsScreen({
   route: {
@@ -32,6 +34,7 @@ function DonationDetailsScreen({
   const mySingleDonation = useAtomValue(
     useMemo(() => singleDonationAtom(invoiceId), [invoiceId])
   )
+  const storeId = mySingleDonation?.storeId ?? dummyDonation.storeId
   const satsAmount = Number(mySingleDonation?.btcAmount ?? 0) * SATOSHIS_IN_BTC
   const exchangeRateInfo =
     Math.round(Number(mySingleDonation?.exchangeRate ?? 0)) / SATOSHIS_IN_BTC
@@ -39,12 +42,26 @@ function DonationDetailsScreen({
   const showClaimConfirmationDialog = useSetAtom(
     showClaimConfirmationDialogActionAtom
   )
+  const updateSingleInvoiceStatusTypeRepeating = useSetAtom(
+    updateSingleInvoiceStatusTypeRepeatingActionAtom
+  )
+
   const showClaimConfirmationButton = ![
     'New',
     'Expired',
     'Invalid',
     'Processing',
   ].includes(mySingleDonation?.status ?? '')
+
+  useEffect(() => {
+    const fiber = Effect.runFork(
+      updateSingleInvoiceStatusTypeRepeating({invoiceId, storeId})
+    )
+
+    return () => {
+      Effect.runFork(Fiber.interrupt(fiber))
+    }
+  }, [invoiceId, storeId, updateSingleInvoiceStatusTypeRepeating])
 
   return (
     <Screen customHorizontalPadding={getTokens().space[2].val}>
@@ -135,32 +152,15 @@ function DonationDetailsScreen({
               </XStack>
             )}
             <Stack als="center" my="$4">
-              <SharableQrCode
-                size={QR_CODE_SIZE}
-                value={mySingleDonation?.paymentLink}
-                logo={
-                  mySingleDonation?.paymentMethod === 'BTC-CHAIN'
-                    ? require('../images/btcLogo.png')
-                    : require('../images/lightningLogo.png')
+              <BtcInvoiceStatus
+                donationPaymentMethod={
+                  mySingleDonation?.paymentMethod ?? dummyDonation.paymentMethod
                 }
+                paymentLink={
+                  mySingleDonation?.paymentLink ?? dummyDonation.paymentLink
+                }
+                status={mySingleDonation?.status ?? dummyDonation.status}
               />
-              {mySingleDonation?.status !== 'New' && (
-                <Stack
-                  height={QR_CODE_SIZE}
-                  width={QR_CODE_SIZE}
-                  ai="center"
-                  jc="center"
-                  bc="rgba(80, 79, 79, 0.9)"
-                  top={0}
-                  l={0}
-                  pos="absolute"
-                >
-                  <Text fos={64} col="$main" ff="$body700" rotate="45deg">
-                    {!!mySingleDonation?.status &&
-                      t(`donations.invoiceStatus.${mySingleDonation?.status}`)}
-                  </Text>
-                </Stack>
-              )}
             </Stack>
             {mySingleDonation?.status === 'New' && (
               <>

@@ -3,6 +3,11 @@ import {UnixMillisecondsE} from '@vexl-next/domain/src/utility/UnixMilliseconds.
 import {UriStringE} from '@vexl-next/domain/src/utility/UriString.brand'
 import {UuidE} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {Schema} from 'effect'
+import {
+  NotFoundError,
+  UnauthorizedError,
+  UnknownServerError,
+} from '../../Errors'
 
 export const Speaker = Schema.Struct({
   name: Schema.String,
@@ -12,6 +17,8 @@ export const Speaker = Schema.Struct({
 export type Speaker = typeof Speaker.Type
 
 export const EventId = Schema.String.pipe(Schema.brand('EventId'))
+export type EventId = typeof EventId.Type
+
 export const Event = Schema.Struct({
   id: EventId,
   startDate: Schema.Date,
@@ -30,7 +37,11 @@ export const EventsResponse = Schema.Struct({
 export type EventsResponse = typeof EventsResponse.Type
 
 export const BlogId = Schema.String.pipe(Schema.brand('BlogId'))
+export type BlogId = typeof BlogId.Type
+
 export const BlogSlug = Schema.String.pipe(Schema.brand('BlogSlug'))
+export type BlogSlug = typeof BlogSlug.Type
+
 export const BlogArticlePreview = Schema.Struct({
   id: BlogId,
   title: Schema.String,
@@ -126,6 +137,14 @@ export class GetInvoiceGeneralError extends Schema.TaggedError<GetInvoiceGeneral
   status: Schema.Literal(500),
 }) {}
 
+export class UpdateInvoiceWebhookError extends Schema.TaggedError<UpdateInvoiceWebhookError>(
+  'UpdateInvoiceWebhookError'
+)('UpdateInvoiceWebhookError', {
+  cause: Schema.Unknown,
+  message: Schema.String,
+  status: Schema.Literal(400),
+}) {}
+
 export class GetInvoicePaymentMethodsGeneralError extends Schema.TaggedError<GetInvoicePaymentMethodsGeneralError>(
   'GetInvoicePaymentMethodsGeneralError'
 )('GetInvoicePaymentMethodsGeneralError', {
@@ -157,7 +176,11 @@ export const InvoiceId = Schema.String.pipe(Schema.brand('InvoiceId'))
 export type InvoiceId = typeof InvoiceId.Type
 
 export const StoreId = Schema.String.pipe(Schema.brand('StoreId'))
+export type StoreId = typeof StoreId.Type
+
 export const PaymentLink = Schema.String.pipe(Schema.brand('PaymentLink'))
+export type PaymentLink = typeof PaymentLink.Type
+
 export const InvoiceStatus = Schema.Literal(
   'New',
   'Expired',
@@ -210,3 +233,101 @@ export const GetInvoicePaymentMethodsErrors = Schema.Union(
 )
 export type GetInvoicePaymentMethodsErrors =
   typeof GetInvoicePaymentMethodsErrors.Type
+
+export const InvoiceStatusType = Schema.Literal(
+  'InvoiceCreated',
+  'InvoiceReceivedPayment',
+  'InvoicePaymentSettled',
+  'InvoiceProcessing',
+  'InvoiceExpired',
+  'InvoiceSettled',
+  'InvoiceInvalid'
+)
+export type InvoiceStatusType = typeof InvoiceStatusType.Type
+
+// states of success invoice
+// InvoiceCreated -> InvoicePaymentSettled -> InvoiceReceivedPayment ->
+// -> InvoiceProcessing -> InvoiceSettled
+export const statusTypeToStatusMap: Record<InvoiceStatusType, InvoiceStatus> = {
+  InvoiceCreated: 'New',
+  InvoicePaymentSettled: 'Processing',
+  InvoiceReceivedPayment: 'Processing',
+  InvoiceProcessing: 'Processing',
+  InvoiceSettled: 'Settled',
+  InvoiceExpired: 'Expired',
+  InvoiceInvalid: 'Invalid',
+}
+
+export const statusToStatusTypeMap: Record<InvoiceStatus, InvoiceStatusType> = {
+  New: 'InvoiceCreated',
+  Paid: 'InvoiceReceivedPayment',
+  Processing: 'InvoiceProcessing',
+  Complete: 'InvoiceReceivedPayment',
+  Confirmed: 'InvoicePaymentSettled',
+  Settled: 'InvoiceSettled',
+  Expired: 'InvoiceExpired',
+  Invalid: 'InvoiceInvalid',
+}
+
+export const UpdateInvoiceStatusWebhookRequest = Schema.Struct({
+  deliveryId: Schema.optionalWith(Schema.String, {
+    as: 'Option',
+  }),
+  webhookId: Schema.optionalWith(Schema.String, {
+    as: 'Option',
+  }),
+  originalDeliveryId: Schema.optionalWith(Schema.String, {
+    as: 'Option',
+  }),
+  isRedelivery: Schema.optionalWith(Schema.Boolean, {
+    default: () => true,
+  }),
+  type: InvoiceStatusType,
+  timestamp: UnixMillisecondsE,
+  partiallyPaid: Schema.optionalWith(Schema.Boolean, {
+    default: () => false,
+  }),
+  storeId: StoreId,
+  invoiceId: InvoiceId,
+  metadata: Schema.Struct({
+    orderId: Schema.optionalWith(Schema.String, {
+      as: 'Option',
+    }),
+    itemDesc: Schema.optionalWith(Schema.String, {
+      as: 'Option',
+    }),
+    orderUrl: Schema.optionalWith(Schema.String, {
+      as: 'Option',
+    }),
+  }),
+})
+export type UpdateInvoiceStatusWebhookRequest =
+  typeof UpdateInvoiceStatusWebhookRequest.Type
+
+export const UpdateInvoiceStatusWebhookErrors = Schema.Union(
+  UnauthorizedError,
+  UpdateInvoiceWebhookError,
+  UnknownServerError
+)
+export type UpdateInvoiceStatusWebhookErrors =
+  typeof UpdateInvoiceStatusWebhookErrors.Type
+
+export const GetInvoiceStatusTypeRequest = Schema.Struct({
+  invoiceId: InvoiceId,
+  storeId: StoreId,
+})
+export type GetInvoiceStatusTypeRequest =
+  typeof GetInvoiceStatusTypeRequest.Type
+
+export const GetInvoiceStatusTypeResponse = Schema.Struct({
+  invoiceId: InvoiceId,
+  statusType: InvoiceStatusType,
+})
+export type GetInvoiceStatusTypeResponse =
+  typeof GetInvoiceStatusTypeResponse.Type
+
+export const GetInvoiceStatusTypeErrors = Schema.Union(
+  UnknownServerError,
+  NotFoundError
+)
+export type GetInvoiceStatusTypeErrors = typeof GetInvoiceStatusTypeErrors.Type

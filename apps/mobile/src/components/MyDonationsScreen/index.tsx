@@ -2,11 +2,13 @@ import {Effect} from 'effect'
 import {useSetAtom} from 'jotai'
 import {useEffect} from 'react'
 import {getTokens} from 'tamagui'
-import {fetchMyDonationsActionAtom} from '../../state/donations/atom'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 import Button from '../Button'
-import {showDonationPromptActionAtom} from '../DonationPrompt/atoms'
+import {
+  showDonationPromptActionAtom,
+  updateAllNonSettledOrExpiredInvoicesStatusTypesActionAtom,
+} from '../DonationPrompt/atoms'
 import IconButton from '../IconButton'
 import closeSvg from '../images/closeSvg'
 import KeyboardAvoidingView from '../KeyboardAvoidingView'
@@ -18,11 +20,13 @@ function MyDonationsScreen(): JSX.Element {
   const {t} = useTranslation()
   const safeGoBack = useSafeGoBack()
   const showDonationsPrompt = useSetAtom(showDonationPromptActionAtom)
-  const fetchMyDonations = useSetAtom(fetchMyDonationsActionAtom)
+  const updateAllNonSettledOrExpiredInvoicesStatusTypes = useSetAtom(
+    updateAllNonSettledOrExpiredInvoicesStatusTypesActionAtom
+  )
 
   useEffect(() => {
-    Effect.runFork(fetchMyDonations())
-  }, [fetchMyDonations])
+    Effect.runFork(updateAllNonSettledOrExpiredInvoicesStatusTypes())
+  }, [updateAllNonSettledOrExpiredInvoicesStatusTypes])
 
   return (
     <Screen customHorizontalPadding={getTokens().space[2].val}>

@@ -28,3 +28,6 @@ export const btcPayServerApiKeyConfig = Config.string('BTC_PAY_SERVER_API_KEY')
 export const btcPayServerStoreIdConfig = Config.string(
   'BTC_PAY_SERVER_STORE_ID'
 )
+export const btcPayServerWebhookSecretConfig = Config.string(
+  'BTC_PAY_SERVER_WEBHOOK_SECRET'
+)

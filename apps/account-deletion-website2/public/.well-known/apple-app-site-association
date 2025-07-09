@@ -1,0 +1,17 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": [
+          "KQNTW88PVA.it.vexl.nextstaging",
+          "KQNTW88PVA.it.vexl.next"
+        ],
+        "components": [
+          {
+            "/": "/link/*"
+          }
+        ]
+      }
+    ]
+  }
+}

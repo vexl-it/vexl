@@ -1,0 +1,22 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "it.vexl.nextstaging",
+      "sha256_cert_fingerprints": [
+        "BC:2A:D9:0E:A4:AB:43:C8:99:A7:B3:AE:DE:98:A3:03:BE:50:51:50:3F:43:9E:F4:5F:2B:D9:FD:D9:33:16:04"
+      ]
+    }
+  },
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "it.vexl.next",
+      "sha256_cert_fingerprints": [
+        "49:20:EF:0A:1F:48:00:63:15:19:18:E8:5C:22:70:72:45:BF:C2:01:27:6C:56:65:0E:80:C8:6A:5D:80:DF:81"
+      ]
+    }
+  }
+]

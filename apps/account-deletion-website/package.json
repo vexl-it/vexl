@@ -12,11 +12,11 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@remix-run/css-bundle": "^2.8.1",
-    "@remix-run/express": "^2.16.5",
-    "@remix-run/node": "^2.8.1",
-    "@remix-run/react": "^2.8.1",
-    "@remix-run/serve": "^2.8.1",
+    "@remix-run/css-bundle": "^2.16.8",
+    "@remix-run/express": "^2.16.8",
+    "@remix-run/node": "^2.16.8",
+    "@remix-run/react": "^2.16.8",
+    "@remix-run/serve": "^2.16.8",
     "@vexl-next/cryptography": "0.0.0",
     "@vexl-next/domain": "0.0.0",
     "@vexl-next/localization": "0.0.0",
@@ -37,10 +37,11 @@
     "react-dom": "18.3.1",
     "stream-browserify": "^3.0.0",
     "util": "^0.12.5",
+    "vite-plugin-commonjs": "^0.10.4",
     "zod": "^3.22.3"
   },
   "devDependencies": {
-    "@remix-run/dev": "^2.8.1",
+    "@remix-run/dev": "^2.16.8",
     "@types/brorand": "^1",
     "@types/events": "^3",
     "@types/express": "^4",

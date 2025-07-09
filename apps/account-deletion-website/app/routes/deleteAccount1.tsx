@@ -1,4 +1,4 @@
-import {json, type ActionFunction} from '@remix-run/node'
+import {type ActionFunction} from '@remix-run/node'
 import {Form, redirect, useActionData} from '@remix-run/react'
 import {E164PhoneNumberE} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
@@ -54,16 +54,16 @@ export const action: ActionFunction = async ({request}) => {
           e._tag === 'ErrorParsingFormData' ||
           e._tag === 'UnableToSendVerificationSmsError'
         ) {
-          return json({error: 'Invalid phone number.'})
+          return Response.json({error: 'Invalid phone number.'})
         }
 
         if (e._tag === 'PreviousCodeNotExpiredError')
-          return json({
+          return Response.json({
             error:
               'Previous verification still in progress. Wait 5 minutes and try again.',
           })
 
-        return json({error: 'Unknown error.'})
+        return Response.json({error: 'Unknown error.'})
       },
       (result) => {
         return redirect(`/deleteAccount2/${String(result.verificationId)}`)

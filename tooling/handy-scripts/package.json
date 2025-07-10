@@ -13,7 +13,6 @@
     "@effect/opentelemetry": "^0.48.0",
     "@effect/platform": "^0.82.0",
     "@effect/platform-node": "^0.80.1",
-    "@opentelemetry/resources": "^2.0.0",
     "@vexl-next/cryptography": "0.0.0",
     "@vexl-next/domain": "0.0.0",
     "@vexl-next/resources-utils": "0.0.0",

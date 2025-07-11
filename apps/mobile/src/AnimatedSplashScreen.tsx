@@ -1,3 +1,4 @@
+import {Effect} from 'effect/index'
 import * as SplashScreen from 'expo-splash-screen'
 import {useEffect, useState} from 'react'
 import {AppState, StyleSheet} from 'react-native'
@@ -57,7 +58,7 @@ function AnimatedSplashScreen({
   useSetupVersionServiceState()
 
   useEffect(() => {
-    void loadSession({forceReload: true, showErrorAlert: true})()
+    void Effect.runFork(loadSession({forceReload: true, showErrorAlert: true}))
     void subscribeToGeneralTopic()
   }, [])
 

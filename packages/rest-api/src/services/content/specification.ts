@@ -1,4 +1,6 @@
+import {Schema} from 'effect'
 import {Api, ApiGroup} from 'effect-http'
+import {BtcPayServerWebhookHeader} from '../../btcPayServerWebhookHeader'
 import {CommonHeaders} from '../../commonHeaders'
 import {NoContentResponse} from '../../NoContentResponse.brand'
 import {
@@ -9,6 +11,8 @@ import {
   EventsResponse,
   GetInvoiceRequest,
   GetInvoiceResponse,
+  GetInvoiceStatusTypeRequest,
+  GetInvoiceStatusTypeResponse,
   NewsAndAnnouncementsResponse,
 } from './contracts'
 
@@ -70,9 +74,31 @@ export const GetInvoiceEndpoint = Api.get(
   Api.setResponseStatus(200 as const)
 )
 
+export const GetInvoiceStatusTypeEndpoint = Api.get(
+  'getInvoiceStatusType',
+  '/content/getInvoiceStatusType'
+).pipe(
+  Api.setRequestQuery(GetInvoiceStatusTypeRequest),
+  Api.setResponseBody(GetInvoiceStatusTypeResponse),
+  Api.setResponseStatus(200 as const)
+)
+
+export const UpdateInvoiceStateWebhookEndpoint = Api.post(
+  'updateInvoiceStateWebhook',
+  '/content/invoice/btcpay-webhook'
+).pipe(
+  Api.setRequestHeaders(BtcPayServerWebhookHeader),
+  // need to be unknown as we need whole raw body to verify sha256 signature
+  Api.setRequestBody(Schema.Unknown),
+  Api.setResponseBody(NoContentResponse),
+  Api.setResponseStatus(200 as const)
+)
+
 export const DonationsApiGroup = ApiGroup.make('Donations').pipe(
   ApiGroup.addEndpoint(CreateInvoiceEndpoint),
-  ApiGroup.addEndpoint(GetInvoiceEndpoint)
+  ApiGroup.addEndpoint(GetInvoiceEndpoint),
+  ApiGroup.addEndpoint(UpdateInvoiceStateWebhookEndpoint),
+  ApiGroup.addEndpoint(GetInvoiceStatusTypeEndpoint)
 )
 
 export const ContentApiSpecification = Api.make({

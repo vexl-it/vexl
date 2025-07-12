@@ -19,7 +19,7 @@
     "prettier": "^3.3.2",
     "rimraf": "^4.4.0",
     "ts-jest": "^29.2.0",
-    "typescript": "^5.6.3"
+    "typescript": "^5.8.3"
   },
   "dependencies": {
     "@effect/cluster": "^0.33.1",

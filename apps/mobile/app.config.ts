@@ -81,10 +81,6 @@ export default {
     'infoPlist': {
       'UIBackgroundModes': ['fetch', 'remote-notification', 'processing'],
       'LSApplicationQueriesSchemes': ['itms-apps'],
-      'FirebaseDynamicLinksCustomDomains': [
-        'https://link.vexl.it',
-        'https://nextlink.vexl.it',
-      ],
       'BGTaskSchedulerPermittedIdentifiers': ['com.transistorsoft.fetch'],
       'CFBundleAllowMixedLocalizations': true,
       'NSLocationWhenInUseUsageDescription':
@@ -195,6 +191,7 @@ export default {
     'policy': 'sdkVersion',
   },
   'plugins': [
+    'expo-background-task',
     ['expo-notifications', {enableBackgroundRemoteNotifications: true}],
     'expo-localization',
     [
@@ -251,9 +248,6 @@ export default {
         'organization': 'vexl',
       },
     ],
-    '@react-native-firebase/app',
-    '@react-native-firebase/dynamic-links',
-    './expo-plugins/disable-firebase-analytics.js',
     './expo-plugins/android-manifest-nfc-action-plugin.js',
     'expo-font',
     'expo-secure-store',

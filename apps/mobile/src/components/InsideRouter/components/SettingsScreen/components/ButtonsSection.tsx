@@ -17,7 +17,6 @@ import chevronRightSvg from '../../../../../images/chevronRightSvg'
 import {selectedCurrencyAtom} from '../../../../../state/selectedCurrency'
 import {useLogout} from '../../../../../state/useLogout'
 import {enableHiddenFeatures} from '../../../../../utils/environment'
-import {isUsingIos17AndAbove} from '../../../../../utils/isUsingIos17AndAbove'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import notEmpty from '../../../../../utils/notEmpty'
 import openUrl from '../../../../../utils/openUrl'
@@ -208,8 +207,6 @@ function ButtonsSection(): JSX.Element {
             icon: imageIconSvg,
             onPress: toggleScreenshotsDisabled,
             children: <AllowScreenshots />,
-            // not working correctly for iOS 17 and above
-            hidden: isUsingIos17AndAbove(),
           },
           {
             testID: '@buttonsSection/notificationPreferencesButton',

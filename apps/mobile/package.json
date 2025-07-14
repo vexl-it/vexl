@@ -28,7 +28,6 @@
     "@react-native-clipboard/clipboard": "^1.11.2",
     "@react-native-community/blur": "^4.4.1",
     "@react-native-firebase/app": "^18.4.0",
-    "@react-native-firebase/dynamic-links": "^18.4.0",
     "@react-native-firebase/messaging": "^18.4.0",
     "@react-native-masked-view/masked-view": "0.3.2",
     "@react-native-picker/picker": "2.9.0",

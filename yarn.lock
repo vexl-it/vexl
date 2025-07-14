@@ -6015,19 +6015,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-native-firebase/dynamic-links@npm:^18.4.0":
-  version: 18.9.0
-  resolution: "@react-native-firebase/dynamic-links@npm:18.9.0"
-  peerDependencies:
-    "@react-native-firebase/app": 18.9.0
-    expo: ">=47.0.0"
-  peerDependenciesMeta:
-    expo:
-      optional: true
-  checksum: 00e001efedc17b8d5ad19c9fec8f9373b65c3d2a9d4a94e74c227d369ba8b57002ad5e206cb4431e2ef3e938eb5314326644637829bc257081ea1cd11d5757bf
-  languageName: node
-  linkType: hard
-
 "@react-native-firebase/messaging@npm:^18.4.0":
   version: 18.9.0
   resolution: "@react-native-firebase/messaging@npm:18.9.0"
@@ -10840,7 +10827,6 @@ __metadata:
     "@react-native-clipboard/clipboard": ^1.11.2
     "@react-native-community/blur": ^4.4.1
     "@react-native-firebase/app": ^18.4.0
-    "@react-native-firebase/dynamic-links": ^18.4.0
     "@react-native-firebase/messaging": ^18.4.0
     "@react-native-masked-view/masked-view": 0.3.2
     "@react-native-picker/picker": 2.9.0

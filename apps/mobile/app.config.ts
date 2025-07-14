@@ -258,6 +258,12 @@ export default {
     'expo-font',
     'expo-secure-store',
     'expo-camera',
+    [
+      'react-native-capture-protection',
+      {
+        'captureType': 'fullMediaCapture',
+      },
+    ],
   ],
 
   'extra': {

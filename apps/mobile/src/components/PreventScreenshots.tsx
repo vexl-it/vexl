@@ -1,12 +1,14 @@
+import {Effect} from 'effect/index'
 import {useAtomValue, useSetAtom} from 'jotai'
 import {useEffect} from 'react'
-import {Platform} from 'react-native'
-import RNScreenshotPrevent, {addListener} from 'react-native-screenshot-prevent'
+import {
+  CaptureEventType,
+  CaptureProtection,
+} from 'react-native-capture-protection'
 import {
   screenshotsDisabledAtom,
   showYouDidNotAllowTakingScreenshotsActionAtom,
 } from '../state/showYouDidNotAllowScreenshotsActionAtom'
-import {isUsingIos17AndAbove} from '../utils/isUsingIos17AndAbove'
 
 function PreventScreenshots(): null {
   const screenshotsDisabled = useAtomValue(screenshotsDisabledAtom)
@@ -15,29 +17,23 @@ function PreventScreenshots(): null {
   )
 
   useEffect(() => {
-    if (
-      Platform.OS === 'android' ||
-      (Platform.OS === 'ios' && Number(Platform.Version) < 17)
-    ) {
-      addListener(() => {
-        void showYouDidNotAllowTakingScreenshots()
-      })
-    }
-  }, [showYouDidNotAllowTakingScreenshots])
+    if (screenshotsDisabled) void CaptureProtection.prevent()
+    if (!screenshotsDisabled) void CaptureProtection.allow()
+  }, [screenshotsDisabled])
 
   useEffect(() => {
-    // not working correctly for iOS 17 and above
-    if (Platform.OS !== 'android' && !isUsingIos17AndAbove()) {
-      if (screenshotsDisabled) RNScreenshotPrevent.enableSecureView()
-    } else if (Platform.OS === 'android') {
-      RNScreenshotPrevent.enabled(screenshotsDisabled)
-    }
+    const listener = CaptureProtection.addListener((event) => {
+      if (
+        event === CaptureEventType.CAPTURED ||
+        event === CaptureEventType.RECORDING
+      )
+        Effect.runFork(showYouDidNotAllowTakingScreenshots())
+    })
 
     return () => {
-      RNScreenshotPrevent.enabled(false)
-      RNScreenshotPrevent.disableSecureView()
+      if (listener) CaptureProtection.removeListener(listener)
     }
-  }, [screenshotsDisabled])
+  }, [showYouDidNotAllowTakingScreenshots])
 
   return null
 }

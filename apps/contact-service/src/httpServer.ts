@@ -51,6 +51,7 @@ import {ImportContactsQuotaService} from './routes/contacts/importContactsQuotaS
 import {checkUserExists} from './routes/user/checkUserExists'
 import {createUser} from './routes/user/createUser'
 import {deleteUser} from './routes/user/deleteUser'
+import {eraseUserFromNetwork} from './routes/user/eraseUserFromNetwork'
 import {refreshUser} from './routes/user/refreshUser'
 import {updateBadOwnerHash} from './routes/user/updateBadOwnerHash'
 import {updateFirebaseToken} from './routes/user/updateFirebaseToken'
@@ -92,6 +93,7 @@ export const app = RouterBuilder.make(ContactApiSpecification)
     RouterBuilder.handle(listClubLinks),
     RouterBuilder.handle(getClubInfoByAccessCode),
     RouterBuilder.handle(sendBulkNotification),
+    RouterBuilder.handle(eraseUserFromNetwork),
     RouterBuilder.build,
     setupLoggingMiddlewares
   )

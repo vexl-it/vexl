@@ -18,10 +18,13 @@ import {makeCommonHeaders, type AppSource} from '../../commonHeaders'
 import {type SubmitFeedbackInput} from '../feedback/contracts'
 import {
   InitVerificationErrors,
+  VerifyAndEraseUserErrors,
   VerifyChallengeErrors,
   VerifyCodeErrors,
+  type InitEraseUserRequest,
   type InitVerificationInput,
   type RegenerateSessionCredentialsRequest,
+  type VerifyAndEraseUserRequest,
   type VerifyChallengeInput,
   type VerifyPhoneNumberInput,
 } from './contracts'
@@ -101,6 +104,20 @@ export function api({
         client.getVersionServiceInfo({
           headers: commonHeaders,
         })
+      ),
+    initEraseUser: (request: InitEraseUserRequest) =>
+      handleCommonAndExpectedErrorsEffect(
+        client.initEraseUser({
+          body: request,
+        }),
+        InitVerificationErrors
+      ),
+    verifyAndEraseUser: (request: VerifyAndEraseUserRequest) =>
+      handleCommonAndExpectedErrorsEffect(
+        client.verifyAndEraseuser({
+          body: request,
+        }),
+        VerifyAndEraseUserErrors
       ),
   }
 }

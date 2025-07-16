@@ -3,20 +3,14 @@ FROM node:20-alpine as builder
 WORKDIR /app
 
 COPY . .
+COPY yarn.lock ./
+
+RUN corepack enable && corepack prepare yarn@3.4.1 --activate
+RUN yarn install
 
 WORKDIR /app/apps/account-deletion-website
 
 RUN yarn install
 RUN yarn build
-
-
-FROM node:20-alpine as runner
-
-
-COPY --from=builder /app/apps/account-deletion-website/ /app/apps/account-deletion-website/
-COPY --from=builder /app/node_modules /app/node_modules
-COPY --from=builder /app/package.json /app/package.json
-
-WORKDIR /app/apps/account-deletion-website
 
 CMD ["yarn", "start"]

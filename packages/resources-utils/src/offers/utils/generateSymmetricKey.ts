@@ -1,6 +1,6 @@
+import {getCrypto} from '@vexl-next/cryptography/src/getCrypto'
 import {SymmetricKey} from '@vexl-next/domain/src/general/offers'
 import {Effect, Schema} from 'effect'
-import crypto from 'node:crypto'
 
 export class SymmetricKeyGenerationError extends Schema.TaggedError<SymmetricKeyGenerationError>(
   'SymmetricKeyGenerationError'
@@ -14,7 +14,8 @@ export default function generateSymmetricKey(): Effect.Effect<
   SymmetricKeyGenerationError
 > {
   return Effect.try({
-    try: () => SymmetricKey.parse(crypto.randomBytes(32).toString('base64')),
+    try: () =>
+      SymmetricKey.parse(getCrypto().randomBytes(32).toString('base64')),
     catch: (e) =>
       new SymmetricKeyGenerationError({
         cause: e,

@@ -17,6 +17,10 @@ import {
   HashedPhoneNumberE,
 } from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {ConnectionLevelE, OfferIdE} from '@vexl-next/domain/src/general/offers'
+import {
+  BadShortLivedTokenForErasingUserOnContactServiceError,
+  ShortLivedTokenForErasingUserOnContactService,
+} from '@vexl-next/domain/src/general/ShortLivedTokenForErasingUserOnContactService'
 import {ExpoNotificationTokenE} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {FcmTokenE} from '@vexl-next/domain/src/utility/FcmToken.brand'
 import {BooleanFromString} from '@vexl-next/generic-utils/src/effect-helpers/BooleanFromString'
@@ -601,3 +605,20 @@ export const SendBulkNotificationResponse = Schema.Struct({
 })
 export type SendBulkNotificationResponse =
   typeof SendBulkNotificationResponse.Type
+
+export const EraseUserFromNetworkRequest = Schema.Struct({
+  token: ShortLivedTokenForErasingUserOnContactService,
+})
+export type EraseUserFromNetworkRequest =
+  typeof EraseUserFromNetworkRequest.Type
+
+export const EraseUserFromNetworkResponse = Schema.Struct({
+  erased: Schema.Literal('ok'),
+})
+export type EraseUserFromNetworkResponse =
+  typeof EraseUserFromNetworkResponse.Type
+
+export const EraseUserFromNetworkErrors = Schema.Union(
+  BadShortLivedTokenForErasingUserOnContactServiceError
+)
+export type EraseUserFromNetworkErrors = typeof EraseUserFromNetworkErrors.Type

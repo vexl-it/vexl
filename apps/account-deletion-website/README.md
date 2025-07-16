@@ -16,7 +16,3 @@ yarn dev
 # How to build
 
 See dockerfile
-
-```
-yarn
-```

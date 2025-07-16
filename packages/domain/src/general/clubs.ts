@@ -1,6 +1,6 @@
+import {getCrypto} from '@vexl-next/cryptography/src/getCrypto'
 import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder'
 import {Brand, Schema} from 'effect'
-import {randomUUID} from 'node:crypto'
 import {z} from 'zod'
 import {ExpoNotificationTokenE} from '../utility/ExpoNotificationToken.brand'
 import {UriStringE} from '../utility/UriString.brand'
@@ -19,7 +19,7 @@ export const ClubUuidE = Schema.UUID.pipe(Schema.brand('ClubUuid'))
 export type ClubUuid = Schema.Schema.Type<typeof ClubUuidE>
 
 export const generateClubUuid = (): ClubUuid =>
-  Schema.decodeSync(ClubUuidE)(randomUUID())
+  Schema.decodeSync(ClubUuidE)(getCrypto().randomUUID())
 
 export const ClubInfo = Schema.Struct({
   uuid: ClubUuidE,

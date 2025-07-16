@@ -1,4 +1,4 @@
-import * as crypto from 'node:crypto'
+import {getCrypto} from '../getCrypto'
 import {
   aesGCMDecrypt,
   aesGCMEncrypt,
@@ -42,6 +42,7 @@ describe('aes gcm', () => {
     const data = 'some data'
     const encrypted = aesGCMEncrypt({data, password})
     const [version, payload] = encrypted.split('.')
+    const crypto = getCrypto()
     expect(() => {
       aesGCMDecrypt({
         data: `${version}.${payload}.${crypto

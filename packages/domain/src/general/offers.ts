@@ -1,8 +1,8 @@
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
+import {getCrypto} from '@vexl-next/cryptography/src/getCrypto'
 import {orElseSchema} from '@vexl-next/generic-utils/src/effect-helpers/orElseSchema'
 import {Array, Brand, Schema} from 'effect'
-import {randomUUID} from 'node:crypto'
 import {z} from 'zod'
 import {
   ExpoNotificationToken,
@@ -61,7 +61,7 @@ export const OfferId = z
 export const OfferIdE = Schema.String.pipe(Schema.brand('OfferId'))
 export type OfferId = Schema.Schema.Type<typeof OfferIdE>
 export const newOfferId = (): OfferId =>
-  Schema.decodeSync(OfferIdE)(randomUUID())
+  Schema.decodeSync(OfferIdE)(getCrypto().randomUUID())
 
 export const OfferAdminId = z
   .string()
@@ -70,7 +70,7 @@ export const OfferAdminIdE = Schema.String.pipe(Schema.brand('OfferAdminId'))
 export type OfferAdminId = Schema.Schema.Type<typeof OfferAdminIdE>
 
 export function generateAdminId(): OfferAdminId {
-  return Schema.decodeSync(OfferAdminIdE)(randomUUID())
+  return Schema.decodeSync(OfferAdminIdE)(getCrypto().randomUUID())
 }
 
 export const LocationState = z.enum(['ONLINE', 'IN_PERSON'])

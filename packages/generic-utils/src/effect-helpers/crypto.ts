@@ -1,3 +1,4 @@
+import {getCrypto} from '@vexl-next/cryptography/src/getCrypto'
 import {
   type PrivateKeyPemBase64,
   type PublicKeyPemBase64,
@@ -18,7 +19,6 @@ import {
 } from '@vexl-next/cryptography/src/operations/ecies'
 import * as hmac from '@vexl-next/cryptography/src/operations/hmac'
 import {sha256} from '@vexl-next/cryptography/src/operations/sha'
-import {randomBytes} from 'crypto'
 import {Effect, Schema} from 'effect'
 
 export const ECIES_GTM_CYPHER_PREFIX = 'EciesGtm-' as const
@@ -88,7 +88,8 @@ export type EcdsaSignature = Schema.Schema.Type<typeof EcdsaSignature>
 
 export const generateChallenge = (length: number = 32): Effect.Effect<string> =>
   Effect.sync(() =>
-    randomBytes(length) // TODO might not work on FE
+    getCrypto()
+      .randomBytes(length) // TODO might not work on FE
       .toString('base64')
   )
 

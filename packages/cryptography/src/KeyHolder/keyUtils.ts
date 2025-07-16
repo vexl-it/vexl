@@ -1,4 +1,4 @@
-import crypto from 'node:crypto'
+import {getCrypto} from '../getCrypto'
 import {normalizeCurveName, type Curve} from './Curve.brand'
 import ECConverter from './ECConverter'
 import {PublicKeyPemBase64, type PrivateKeyPemBase64} from './brands'
@@ -28,6 +28,7 @@ function base64pemKeyToUtf8(
 }
 
 function getPubKey(privateKeyRaw: Buffer, curve: Curve): Buffer {
+  const crypto = getCrypto()
   const ecdh = crypto.createECDH(curve)
   ecdh.setPrivateKey(privateKeyRaw)
   return ecdh.getPublicKey()

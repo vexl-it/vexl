@@ -137,6 +137,7 @@
     "react-navigation-heavy-screen": "^1.2.1",
     "seed-random": "^2.2.0",
     "set-operations": "^2.0.2",
+    "stream-browserify": "^3.0.0",
     "tamagui": "^1.116.14",
     "text-encoding": "^0.7.0",
     "url-parse": "^1.5.10",

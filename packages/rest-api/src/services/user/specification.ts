@@ -5,6 +5,8 @@ import {CommonHeaders} from '../../commonHeaders'
 import {SubmitFeedbackRequest} from '../feedback/contracts'
 import {
   GetVersionServiceInfoResponse,
+  InitEraseUserRequest,
+  InitEraseUserResponse,
   InitPhoneVerificationRequest,
   InitPhoneVerificationResponse,
   InitVerificationErrors,
@@ -12,6 +14,8 @@ import {
   RegenerateSessionCredentialsRequest,
   RegenerateSessionCredentialsResponse,
   UnableToGenerateSignatureError,
+  VerifyAndEraseUserRequest,
+  VerifyAndEraseUserResponse,
   VerifyChallengeErrors,
   VerifyChallengeRequest,
   VerifyChallengeResponse,
@@ -74,6 +78,37 @@ export const LoginGroup = ApiGroup.make('Login').pipe(
   ApiGroup.addEndpoint(VerifyChallengeEndpoint)
 )
 
+export const InitEraseUserEndpoint = Api.post(
+  'initEraseUser',
+  '/api/v1/user/erase/init'
+).pipe(
+  Api.setRequestBody(InitEraseUserRequest),
+  Api.setResponseBody(InitEraseUserResponse),
+  Api.setResponseStatus(200 as const),
+  Api.addResponse({
+    status: 400 as const,
+    body: InitVerificationErrors,
+  })
+)
+
+export const VerifyAndEraseUserEndpoint = Api.delete(
+  'verifyAndEraseuser',
+  '/api/v1/user/erase/verify'
+).pipe(
+  Api.setRequestBody(VerifyAndEraseUserRequest),
+  Api.setResponseBody(VerifyAndEraseUserResponse),
+  Api.setResponseStatus(200 as const),
+  Api.addResponse({
+    status: 400 as const,
+    body: VerifyCodeErrors,
+  })
+)
+
+export const EraseUserGroup = ApiGroup.make('EraseUser').pipe(
+  ApiGroup.addEndpoint(InitEraseUserEndpoint),
+  ApiGroup.addEndpoint(VerifyAndEraseUserEndpoint)
+)
+
 export const SubmitFeedbackEndpoint = Api.post(
   'submitFeedback',
   '/api/v1/feedback/submit',
@@ -117,6 +152,7 @@ export const GetVersionServiceInfoEndpoint = Api.get(
 
 export const UserApiSpecification = Api.make({title: 'User service'}).pipe(
   Api.addGroup(LoginGroup),
+  Api.addGroup(EraseUserGroup),
   Api.addEndpoint(LogoutUserEndpoint),
   Api.addEndpoint(SubmitFeedbackEndpoint),
   Api.addEndpoint(RegenerateSessionCredentialsEndpoint),

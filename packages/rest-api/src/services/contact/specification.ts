@@ -16,6 +16,9 @@ import {
   DeactivateClubJoinLinkErrors,
   DeactivateClubJoinLinkRequest,
   DeactivateClubJoinLinkResponse,
+  EraseUserFromNetworkErrors,
+  EraseUserFromNetworkRequest,
+  EraseUserFromNetworkResponse,
   FetchCommonConnectionsRequest,
   FetchCommonConnectionsResponseE,
   FetchMyContactsRequest,
@@ -133,6 +136,18 @@ export const DeleteUserEndpoint = Api.delete(
   Api.setResponse({
     status: 200,
     body: NoContentResponse,
+  })
+)
+
+export const EraseUserFromNetworkEndpoint = Api.delete(
+  'eraseUserFromNetwork',
+  '/api/v1/users/erase'
+).pipe(
+  Api.setRequestBody(EraseUserFromNetworkRequest),
+  Api.setResponseBody(EraseUserFromNetworkResponse),
+  Api.addResponse({
+    status: 400,
+    body: EraseUserFromNetworkErrors,
   })
 )
 
@@ -376,7 +391,8 @@ const UserApiGroup = ApiGroup.make('User').pipe(
   ApiGroup.addEndpoint(UpdateFirebaseTokenEndpoint),
   ApiGroup.addEndpoint(UpdateNotificationTokenEndpoint),
   ApiGroup.addEndpoint(DeleteUserEndpoint),
-  ApiGroup.addEndpoint(UpdateBadOwnerHashEndpoint)
+  ApiGroup.addEndpoint(UpdateBadOwnerHashEndpoint),
+  ApiGroup.addEndpoint(EraseUserFromNetworkEndpoint)
 )
 
 const ContactApiGroup = ApiGroup.make('Contact').pipe(

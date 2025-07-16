@@ -1,52 +1,52 @@
-import {type ActionFunction} from '@remix-run/node'
-import {Form, Link, json, useActionData, useParams} from '@remix-run/react'
-import {type PrivateKeyHolder} from '@vexl-next/cryptography/src/KeyHolder'
-import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
-import {EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
-import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
-import {Schema} from 'effect'
-import * as E from 'fp-ts/lib/Either'
-import * as TE from 'fp-ts/lib/TaskEither'
-import {pipe} from 'fp-ts/lib/function'
-import {useEffect, useState} from 'react'
-import LoadingAwareSubmitButton from '../LoadingAwareSubmitButton'
+import { type ActionFunction } from "@remix-run/node";
+import { Form, Link, json, useActionData, useParams } from "@remix-run/react";
+import { type PrivateKeyHolder } from "@vexl-next/cryptography/src/KeyHolder";
+import { PublicKeyPemBase64E } from "@vexl-next/cryptography/src/KeyHolder/brands";
+import { EcdsaSignature } from "@vexl-next/generic-utils/src/effect-helpers/crypto";
+import { effectToTaskEither } from "@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter";
+import { Schema } from "effect";
+import * as E from "fp-ts/lib/Either";
+import * as TE from "fp-ts/lib/TaskEither";
+import { pipe } from "fp-ts/lib/function";
+import { useEffect, useState } from "react";
+import LoadingAwareSubmitButton from "../LoadingAwareSubmitButton";
 import {
   createUserPublicApi,
   ecdsaSign,
   getKeypair,
   parseFormData,
-} from '../utils'
+} from "../utils";
 
-export default function printSession(): JSX.Element {
-  const params = useParams()
-  const [signature, setSignature] = useState<string | null>(null)
-  const [keypair, setKeypair] = useState<PrivateKeyHolder | null>(null)
-  const [error, setError] = useState<boolean>(false)
+export default function PrintSession(): JSX.Element {
+  const params = useParams();
+  const [signature, setSignature] = useState<string | null>(null);
+  const [keypair, setKeypair] = useState<PrivateKeyHolder | null>(null);
+  const [error, setError] = useState<boolean>(false);
 
-  const actionData = useActionData<typeof action>()
+  const actionData = useActionData<typeof action>();
 
   useEffect(() => {
     pipe(
       getKeypair(),
-      E.bindTo('keypair'),
-      E.bindW('challenge', () =>
-        pipe(params.challenge, E.fromNullable({_tag: 'noChallenge'} as const))
+      E.bindTo("keypair"),
+      E.bindW("challenge", () =>
+        pipe(params.challenge, E.fromNullable({ _tag: "noChallenge" } as const))
       ),
-      E.bindW('signature', ({keypair, challenge}) =>
+      E.bindW("signature", ({ keypair, challenge }) =>
         ecdsaSign(keypair)(challenge)
       ),
       E.matchW(
         (e) => {
-          console.error('Error signing challenge', e)
-          setError(true)
+          console.error("Error signing challenge", e);
+          setError(true);
         },
-        ({signature, keypair}) => {
-          setSignature(signature)
-          setKeypair(keypair)
+        ({ signature, keypair }) => {
+          setSignature(signature);
+          setKeypair(keypair);
         }
       )
-    )
-  }, [params.challenge])
+    );
+  }, [params.challenge]);
 
   return (
     <div>
@@ -60,7 +60,7 @@ export default function printSession(): JSX.Element {
         <Form method="post">
           {!!actionData?.error && (
             <>
-              {' '}
+              {" "}
               <p className="error">{actionData.error}</p>
               <Link to="/">Start over</Link>
             </>
@@ -78,17 +78,20 @@ export default function printSession(): JSX.Element {
         </Form>
       )}
     </div>
-  )
+  );
 }
 
-export const action: ActionFunction = async ({request}) => {
+export const action: ActionFunction = async ({ request }) => {
   return await pipe(
     effectToTaskEither(
       parseFormData(
-        Schema.Struct({signature: EcdsaSignature, pubKey: PublicKeyPemBase64E})
+        Schema.Struct({
+          signature: EcdsaSignature,
+          pubKey: PublicKeyPemBase64E,
+        })
       )(request)
     ),
-    TE.bindW('verificationResult', ({pubKey, signature}) =>
+    TE.bindW("verificationResult", ({ pubKey, signature }) =>
       effectToTaskEither(
         createUserPublicApi().verifyChallenge({
           body: {
@@ -100,21 +103,21 @@ export const action: ActionFunction = async ({request}) => {
     ),
     TE.matchW(
       (e) => {
-        if (e._tag === 'InvalidVerificationError') {
+        if (e._tag === "InvalidVerificationError") {
           return json({
-            error: 'Verification expired. Please start over.',
-          })
+            error: "Verification expired. Please start over.",
+          });
         }
         return json({
-          error: 'Unnexpected error happended. Please try again or start over.',
-        })
+          error: "Unnexpected error happended. Please try again or start over.",
+        });
       },
-      ({verificationResult, pubKey}) =>
+      ({ verificationResult, pubKey }) =>
         json({
           hash: verificationResult.hash,
           publicKey: pubKey,
           signature: verificationResult.signature,
         })
     )
-  )()
-}
+  )();
+};

@@ -1,22 +1,21 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
-import {PassThrough} from 'node:stream'
+import { PassThrough } from "node:stream";
 
-import type {AppLoadContext, EntryContext} from '@remix-run/node'
-import {createReadableStreamFromReadable} from '@remix-run/node'
-import {RemixServer} from '@remix-run/react'
-import {isbot as isbotModule} from 'isbot'
-import {renderToPipeableStream} from 'react-dom/server'
+import type { EntryContext } from "@remix-run/node";
+import { createReadableStreamFromReadable } from "@remix-run/node";
+import { RemixServer } from "@remix-run/react";
+import { isbot as isbotModule } from "isbot";
+import { renderToPipeableStream } from "react-dom/server";
 
-const ABORT_DELAY = 5_000
+const ABORT_DELAY = 5_000;
 
 export default async function handleRequest(
   request: Request,
   responseStatusCode: number,
   responseHeaders: Headers,
-  remixContext: EntryContext,
-  loadContext: AppLoadContext
+  remixContext: EntryContext
 ) {
-  return isBotRequest(request.headers.get('user-agent'))
+  return isBotRequest(request.headers.get("user-agent"))
     ? await handleBotRequest(
         request,
         responseStatusCode,
@@ -28,7 +27,7 @@ export default async function handleRequest(
         responseStatusCode,
         responseHeaders,
         remixContext
-      )
+      );
 }
 
 // We have some Remix apps in the wild already running with isbot@3 so we need
@@ -36,20 +35,20 @@ export default async function handleRequest(
 // isbot@4.  That way, we can ship this as a minor Semver update to @remix-run/dev.
 function isBotRequest(userAgent: string | null) {
   if (!userAgent) {
-    return false
+    return false;
   }
 
   // isbot >= 3.8.0, >4
-  if ('isbot' in isbotModule && typeof isbotModule.isbot === 'function') {
-    return isbotModule.isbot(userAgent)
+  if ("isbot" in isbotModule && typeof isbotModule.isbot === "function") {
+    return isbotModule.isbot(userAgent);
   }
 
   // isbot < 3.8.0
-  if ('default' in isbotModule && typeof isbotModule.default === 'function') {
-    return isbotModule.default(userAgent)
+  if ("default" in isbotModule && typeof isbotModule.default === "function") {
+    return isbotModule.default(userAgent);
   }
 
-  return false
+  return false;
 }
 
 async function handleBotRequest(
@@ -59,8 +58,8 @@ async function handleBotRequest(
   remixContext: EntryContext
 ) {
   return await new Promise((resolve, reject) => {
-    let shellRendered = false
-    const {pipe, abort} = renderToPipeableStream(
+    let shellRendered = false;
+    const { pipe, abort } = renderToPipeableStream(
       <RemixServer
         context={remixContext}
         url={request.url}
@@ -68,38 +67,38 @@ async function handleBotRequest(
       />,
       {
         onAllReady() {
-          shellRendered = true
-          const body = new PassThrough()
-          const stream = createReadableStreamFromReadable(body)
+          shellRendered = true;
+          const body = new PassThrough();
+          const stream = createReadableStreamFromReadable(body);
 
-          responseHeaders.set('Content-Type', 'text/html')
+          responseHeaders.set("Content-Type", "text/html");
 
           resolve(
             new Response(stream, {
               headers: responseHeaders,
               status: responseStatusCode,
             })
-          )
+          );
 
-          pipe(body)
+          pipe(body);
         },
         onShellError(error: unknown) {
-          reject(error)
+          reject(error);
         },
         onError(error: unknown) {
-          responseStatusCode = 500
+          responseStatusCode = 500;
           // Log streaming rendering errors from inside the shell.  Don't log
           // errors encountered during initial shell rendering since they'll
           // reject and get logged in handleDocumentRequest.
           if (shellRendered) {
-            console.error(error)
+            console.error(error);
           }
         },
       }
-    )
+    );
 
-    setTimeout(abort, ABORT_DELAY)
-  })
+    setTimeout(abort, ABORT_DELAY);
+  });
 }
 
 async function handleBrowserRequest(
@@ -109,8 +108,8 @@ async function handleBrowserRequest(
   remixContext: EntryContext
 ) {
   return await new Promise((resolve, reject) => {
-    let shellRendered = false
-    const {pipe, abort} = renderToPipeableStream(
+    let shellRendered = false;
+    const { pipe, abort } = renderToPipeableStream(
       <RemixServer
         context={remixContext}
         url={request.url}
@@ -118,36 +117,36 @@ async function handleBrowserRequest(
       />,
       {
         onShellReady() {
-          shellRendered = true
-          const body = new PassThrough()
-          const stream = createReadableStreamFromReadable(body)
+          shellRendered = true;
+          const body = new PassThrough();
+          const stream = createReadableStreamFromReadable(body);
 
-          responseHeaders.set('Content-Type', 'text/html')
+          responseHeaders.set("Content-Type", "text/html");
 
           resolve(
             new Response(stream, {
               headers: responseHeaders,
               status: responseStatusCode,
             })
-          )
+          );
 
-          pipe(body)
+          pipe(body);
         },
         onShellError(error: unknown) {
-          reject(error)
+          reject(error);
         },
         onError(error: unknown) {
-          responseStatusCode = 500
+          responseStatusCode = 500;
           // Log streaming rendering errors from inside the shell.  Don't log
           // errors encountered during initial shell rendering since they'll
           // reject and get logged in handleDocumentRequest.
           if (shellRendered) {
-            console.error(error)
+            console.error(error);
           }
         },
       }
-    )
+    );
 
-    setTimeout(abort, ABORT_DELAY)
-  })
+    setTimeout(abort, ABORT_DELAY);
+  });
 }

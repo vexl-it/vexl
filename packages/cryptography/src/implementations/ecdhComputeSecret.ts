@@ -1,4 +1,4 @@
-import crypto from 'node:crypto'
+import {getCrypto} from '../getCrypto'
 
 export type EcdhComputeSecretFunction = (args: {
   publicKeyToComputeSecretTo: Buffer
@@ -14,6 +14,7 @@ export const defaultImplementation: EcdhComputeSecretFunction = async ({
   privateKeyRaw,
   curve,
 }) => {
+  const crypto = getCrypto()
   const ecdh = crypto.createECDH(curve)
   if (privateKeyRaw) {
     ecdh.setPrivateKey(privateKeyRaw)

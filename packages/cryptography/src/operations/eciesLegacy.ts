@@ -1,7 +1,7 @@
-import crypto from 'node:crypto'
 import {type PrivateKeyPemBase64, type PublicKeyPemBase64} from '../KeyHolder'
 import {privatePemToRaw, publicPemToRaw} from '../KeyHolder/keyUtils'
 import {HMAC_ALGORITHM, PBKDF2ITER, SALT} from '../constants'
+import {getCrypto} from '../getCrypto'
 import {getECDHComputeSecretFunction} from '../implementations/ecdhComputeSecret'
 import {removeEmptyBytesAtTheEnd} from '../utils'
 import pbkdf2 from './pbkdf2Promise'
@@ -34,6 +34,7 @@ export async function eciesLegacyEncrypt({
     'sha1'
   )
 
+  const crypto = getCrypto()
   const cipher = crypto.createCipheriv(
     'aes-256-ctr',
     stretchedPass.subarray(0, 32),
@@ -106,6 +107,7 @@ export async function eciesLegacyDecrypt({
     privateKeyRaw: privateKeyRawBuffer,
   })
 
+  const crypto = getCrypto()
   const mac = crypto
     .createHmac(
       HMAC_ALGORITHM,

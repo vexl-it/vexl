@@ -1,5 +1,5 @@
-import crypto from 'node:crypto'
 import {CYPHER_ALGORITHM, PBKDF2ITER, SALT} from '../constants'
+import {getCrypto} from '../getCrypto'
 import {removeEmptyBytesAtTheEnd} from '../utils'
 import {appendVersion, parseStringWithVersion} from '../versionWrapper'
 
@@ -10,6 +10,7 @@ export function aesGCMEncrypt({
   data: string
   password: string
 }): string {
+  const crypto = getCrypto()
   const stretchedPass = crypto.pbkdf2Sync(
     password,
     SALT,
@@ -39,6 +40,7 @@ export function aesGCMDecrypt({
   data: string
   password: string
 }): string {
+  const crypto = getCrypto()
   const {data} = parseStringWithVersion(dataWithVersion)
   const stretchedPass = crypto.pbkdf2Sync(
     password,
@@ -73,6 +75,7 @@ export function aesGCMIgnoreTagEncrypt({
   data: string
   password: string
 }): string {
+  const crypto = getCrypto()
   const stretchedPass = crypto.pbkdf2Sync(
     password,
     SALT,
@@ -107,6 +110,7 @@ export function aesGCMIgnoreTagDecrypt({
   data: string
   password: string
 }): string {
+  const crypto = getCrypto()
   const stretchedPass = crypto.pbkdf2Sync(
     password,
     SALT,
@@ -136,6 +140,7 @@ export function aesCTREncrypt({
   data: string
   password: string
 }): string {
+  const crypto = getCrypto()
   const stretchedPass = crypto.pbkdf2Sync(
     password,
     SALT,
@@ -162,6 +167,7 @@ export function aesCTRDecrypt({
   data: string
   password: string
 }): string {
+  const crypto = getCrypto()
   const data = dataWithVersion
   const stretchedPass = crypto.pbkdf2Sync(
     password,

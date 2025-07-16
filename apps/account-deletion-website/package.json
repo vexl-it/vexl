@@ -1,68 +1,54 @@
 {
-  "name": "account-deletion-website",
+  "name": "account-deletion-website2",
+  "private": true,
+  "sideEffects": false,
   "type": "module",
   "scripts": {
-    "dev": "node ./server.js",
-    "start": "cross-env NODE_ENV=production node ./server.js",
-    "build": "yarn remix vite:build",
-    "clean": "rimraf .turbo node_modules",
-    "lint": "eslint '**/*.{js,ts,tsx,jsx,cjs,mjs}'",
-    "format": "prettier --check \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json}\"",
-    "format:fix": "prettier --write \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json}\"",
-    "typecheck": "tsc --noEmit"
+    "build": "remix vite:build",
+    "dev": "remix vite:dev",
+    "lint": "eslint --ignore-path .gitignore --cache --cache-location ./node_modules/.cache/eslint .",
+    "start": "BE_ENV=prod remix-serve ./build/server/index.js",
+    "typecheck": "tsc"
   },
   "dependencies": {
-    "@remix-run/css-bundle": "^2.8.1",
-    "@remix-run/express": "^2.16.5",
-    "@remix-run/node": "^2.8.1",
-    "@remix-run/react": "^2.8.1",
-    "@remix-run/serve": "^2.8.1",
-    "@vexl-next/cryptography": "0.0.0",
+    "@remix-run/node": "^2.16.8",
+    "@remix-run/react": "^2.16.8",
+    "@remix-run/serve": "^2.16.8",
+    "isbot": "^4.1.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
+  "devDependencies": {
+    "@remix-run/dev": "^2.16.8",
+    "@types/react": "~18.3.12",
+    "@types/react-dom": "^18",
+    "@typescript-eslint/eslint-plugin": "^6.7.3",
+    "@typescript-eslint/parser": "^6.7.4",
     "@vexl-next/domain": "0.0.0",
     "@vexl-next/localization": "0.0.0",
     "@vexl-next/resources-utils": "0.0.0",
     "@vexl-next/rest-api": "0.0.0",
+    "autoprefixer": "^10.4.19",
     "brorand": "^1.1.0",
     "browserify-zlib": "^0.2.0",
     "buffer": "^6.0.3",
     "cross-env": "^7.0.3",
-    "crypto-browserify": "^3.12.0",
     "effect": "^3.15.0",
-    "events": "^3.3.0",
-    "express": "^4.21.1",
-    "fp-ts": "^2.13.1",
-    "isbot": "4",
-    "process": "^0.11.10",
-    "react": "18.3.1",
-    "react-dom": "18.3.1",
-    "stream-browserify": "^3.0.0",
-    "util": "^0.12.5",
-    "zod": "^3.22.3"
-  },
-  "devDependencies": {
-    "@remix-run/dev": "^2.8.1",
-    "@types/brorand": "^1",
-    "@types/events": "^3",
-    "@types/express": "^4",
-    "@types/react": "~18.3.12",
-    "@types/react-dom": "^18",
-    "@vexl-next/eslint-config": "0.0.0",
-    "@vexl-next/prettier-config": "0.0.0",
-    "@vexl-next/tsconfig": "0.0.0",
     "eslint": "^8.57.1",
-    "prettier": "^3.3.2",
+    "eslint-import-resolver-typescript": "^3.6.1",
+    "eslint-plugin-import": "^2.28.1",
+    "eslint-plugin-jsx-a11y": "^6.7.1",
+    "eslint-plugin-react": "^7.33.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "fp-ts": "^2.13.1",
+    "postcss": "^8.4.38",
+    "tailwindcss": "^3.4.4",
     "typescript": "^5.6.3",
     "vite": "^6.1.6",
-    "vite-plugin-node-polyfills": "^0.21.0"
+    "vite-tsconfig-paths": "^4.2.1",
+    "zod": "^3.22.3"
   },
-  "eslintConfig": {
-    "root": true,
-    "extends": [
-      "@vexl-next/eslint-config/index"
-    ],
-    "ignorePatterns": [
-      "build"
-    ]
-  },
-  "prettier": "@vexl-next/prettier-config"
+  "engines": {
+    "node": ">=20.0.0"
+  }
 }

@@ -1,4 +1,4 @@
-import crypto from 'node:crypto'
+import {getCrypto} from '../getCrypto'
 import {
   type PrivateKeyPemBase64,
   type PublicKeyPemBase64,
@@ -11,6 +11,7 @@ export function ecdsaSign({
   challenge: string
   privateKey: PrivateKeyPemBase64
 }): string {
+  const crypto = getCrypto()
   const sign = crypto.createSign('sha256')
   sign.update(Buffer.from(challenge, 'utf8'))
   sign.end()
@@ -28,6 +29,7 @@ export function ecdsaVerify({
   signature: string
   pubKey: PublicKeyPemBase64
 }): boolean {
+  const crypto = getCrypto()
   const verify = crypto.createVerify('SHA256')
   verify.update(Buffer.from(challenge, 'utf8'))
   verify.end()

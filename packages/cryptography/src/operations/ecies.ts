@@ -1,10 +1,10 @@
-import crypto from 'node:crypto'
+import {CYPHER_ALGORITHM, HMAC_ALGORITHM, PBKDF2ITER, SALT} from '../constants'
+import {getCrypto} from '../getCrypto'
 import {
   type PrivateKeyPemBase64,
   type PublicKeyPemBase64,
 } from '../KeyHolder/brands'
 import {privatePemToRaw, publicPemToRaw} from '../KeyHolder/keyUtils'
-import {CYPHER_ALGORITHM, HMAC_ALGORITHM, PBKDF2ITER, SALT} from '../constants'
 import {appendVersion, parseStringWithVersion} from '../versionWrapper'
 import pbkdf2 from './pbkdf2Promise'
 
@@ -15,6 +15,7 @@ export async function eciesGTMEncrypt({
   publicKey: PublicKeyPemBase64
   data: string
 }): Promise<string> {
+  const crypto = getCrypto()
   const {publicKey: publicKeyRawBuffer, curve} = publicPemToRaw(publicKey)
   const ecdh = crypto.createECDH(curve)
   ecdh.generateKeys()
@@ -68,6 +69,7 @@ export async function eciesGTMDecrypt({
   privateKey: PrivateKeyPemBase64
   data: string
 }): Promise<string> {
+  const crypto = getCrypto()
   const {data} = parseStringWithVersion(dataBase64)
   const [cipherText, mac, epk, securityTag] = data.split('.')
 
@@ -118,6 +120,7 @@ export async function eciesCTREncrypt({
   publicKey: PublicKeyPemBase64
   data: string
 }): Promise<string> {
+  const crypto = getCrypto()
   const {publicKey: publicKeyRawBuffer, curve} = publicPemToRaw(publicKey)
 
   const ecdh = crypto.createECDH(curve)
@@ -171,6 +174,7 @@ export async function eciesCTRDecrypt({
   privateKey: PrivateKeyPemBase64
   data: string
 }): Promise<string> {
+  const crypto = getCrypto()
   const {data} = parseStringWithVersion(dataBase64)
   const [cipherText, mac, epk] = data.split('.')
 

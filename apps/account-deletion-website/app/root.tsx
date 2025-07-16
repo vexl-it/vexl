@@ -1,12 +1,14 @@
-import {type LinksFunction} from '@remix-run/node'
-import {Links, Meta, Outlet, Scripts} from '@remix-run/react'
-import rootCss from './root.css?url'
+import { type LinksFunction } from "@remix-run/node";
+import { Links, Meta, Outlet, Scripts } from "@remix-run/react";
+import rootCss from "./root.css?url";
 
-export const links: LinksFunction = () => [{rel: 'stylesheet', href: rootCss}]
+export const links: LinksFunction = () => [
+  { rel: "stylesheet", href: rootCss },
+];
 
 export default function App(): JSX.Element {
   return (
-    <html>
+    <html lang="en">
       <head>
         <link rel="icon" href="data:image/x-icon;base64,AA" />
         <Meta />
@@ -28,5 +30,5 @@ export default function App(): JSX.Element {
         <Scripts />
       </body>
     </html>
-  )
+  );
 }

@@ -4,6 +4,7 @@ import {
   type E164PhoneNumber,
 } from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {HashedPhoneNumberE} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
+import {ShortLivedTokenForErasingUserOnContactService} from '@vexl-next/domain/src/general/ShortLivedTokenForErasingUserOnContactService'
 import {IsoDatetimeStringE} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
 import {UnixMillisecondsE} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
@@ -245,4 +246,43 @@ export const GetVersionServiceInfoResponse = Schema.Struct({
     }),
     {as: 'Option'}
   ),
+})
+
+export const EraseUserVerificationId = Schema.String.pipe(
+  Schema.brand('EraseUserVerificationId')
+)
+export type EraseUserVerificationId = typeof EraseUserVerificationId.Type
+
+export const InitEraseUserRequest = Schema.Struct({
+  phoneNumber: E164PhoneNumberE,
+})
+export type InitEraseUserRequest = typeof InitEraseUserRequest.Type
+
+export const InitEraseUserResponse = Schema.Struct({
+  verificationId: EraseUserVerificationId,
+})
+export type InitEraseUserResponse = typeof InitEraseUserResponse.Type
+
+export class InvalidVerificationIdError extends Schema.TaggedError<InvalidVerificationIdError>(
+  'InvalidVerificationIdError'
+)('InvalidVerificationIdError', {
+  status: Schema.Literal(400),
+  reason: Schema.Literal('Expired', 'InvalidFormat', 'InvalidCypher'),
+}) {}
+
+export const VerifyAndEraseUserErrors = Schema.Union(
+  InvalidVerificationIdError,
+  VerificationNotFoundError,
+  UnableToVerifySmsCodeError
+)
+
+export const VerifyAndEraseUserRequest = Schema.Struct({
+  verificationId: EraseUserVerificationId,
+  code: Schema.String.pipe(Schema.length(6)),
+})
+export type VerifyAndEraseUserRequest = typeof VerifyAndEraseUserRequest.Type
+
+export const VerifyAndEraseUserResponse = Schema.Struct({
+  shortLivedTokenForErasingUserOnContactService:
+    ShortLivedTokenForErasingUserOnContactService,
 })

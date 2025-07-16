@@ -1,4 +1,4 @@
-import crypto from 'node:crypto'
+import {getCrypto} from '../getCrypto'
 import {defaultCurve, type Curve} from './Curve.brand'
 import {
   PrivateKeyHolder,
@@ -39,6 +39,7 @@ export function importKeyPair(
 }
 
 function generatePrivateKey(curve: Curve = defaultCurve): PrivateKeyHolder {
+  const crypto = getCrypto()
   const ecdh = crypto.createECDH(curve)
   ecdh.generateKeys()
   const privateKeyPem = privateRawToPem(ecdh.getPrivateKey(), curve)

@@ -22,6 +22,7 @@ import {
   type CreateUserInput,
   DeactivateClubJoinLinkErrors,
   type DeactivateClubJoinLinkRequest,
+  type EraseUserFromNetworkRequest,
   type FetchCommonConnectionsInput,
   type FetchMyContactsInput,
   GenerateClubJoinLinkErrors,
@@ -256,6 +257,12 @@ export function api({
             ReportClubErrors
           )
         )
+      ),
+    eraseUserFromNetwork: (request: EraseUserFromNetworkRequest) =>
+      handleCommonErrorsEffect(
+        client.eraseUserFromNetwork({
+          body: request,
+        })
       ),
   }
 }

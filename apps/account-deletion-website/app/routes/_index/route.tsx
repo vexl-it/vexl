@@ -1,5 +1,5 @@
-import {Link} from '@remix-run/react'
-import classes from './route.module.css'
+import { Link } from "@remix-run/react";
+import classes from "./route.module.css";
 
 export default function index(): JSX.Element {
   return (
@@ -13,7 +13,7 @@ export default function index(): JSX.Element {
         You can also delete your account in the app by clicking on the delete
         account button in the app:
       </p>
-      <img className={classes.image} src="/assets/delete.jpeg"></img>
+      <img className={classes.image} alt="" src="/assets/delete.jpeg"></img>
       <p>
         If you choose to delete your account through this website, the following
         data will be immediately removed:
@@ -23,15 +23,15 @@ export default function index(): JSX.Element {
           <li>Hashes of your phone number used to log into Vexl.</li>
           <li>Your inbox associated with your account. </li>
           <li>
-            All information regarding contacts you've added to your Vexl network
-            (note: we only store hashed versions of this data).
+            All information regarding contacts you&apos;ve added to your Vexl
+            network (note: we only store hashed versions of this data).
           </li>
         </ul>
       </p>
       <p>After 30 days, the following will be deleted:</p>
       <p>
         <ul>
-          <li>Any posts you've created.</li>
+          <li>Any posts you&apos;ve created.</li>
         </ul>
       </p>
       <p>
@@ -46,5 +46,5 @@ export default function index(): JSX.Element {
         I understand, I want to delete my account
       </Link>
     </div>
-  )
+  );
 }

@@ -20,6 +20,8 @@ import {
 import DbLayer from './db/layer'
 import {LoggedInUsersDbService} from './db/loggedInUsersDb'
 import {reportMetricsLayer} from './metrics'
+import {initEraseUserEndpoint} from './routes/eraseUser/handlers/initEraseUser'
+import {verifyAndEraseUser} from './routes/eraseUser/handlers/verifyAndEraseUser'
 import {getVersionServiceInfoHandler} from './routes/getVersionServiceInfo'
 import {VerificationStateDbService} from './routes/login/db/verificationStateDb'
 import {initVerificationHandler} from './routes/login/handlers/initVerificationHandler'
@@ -38,6 +40,8 @@ export const app = RouterBuilder.make(UserApiSpecification).pipe(
   RouterBuilder.handle(submitFeedbackHandler),
   RouterBuilder.handle(regenerateCredentialsHandler),
   RouterBuilder.handle(getVersionServiceInfoHandler),
+  RouterBuilder.handle(initEraseUserEndpoint),
+  RouterBuilder.handle(verifyAndEraseUser),
   RouterBuilder.build,
   setupLoggingMiddlewares
 )

@@ -1,5 +1,6 @@
 import * as crypto from '@vexl-next/cryptography'
 import {type KeyHolder} from '@vexl-next/cryptography'
+import {getCrypto} from '@vexl-next/cryptography/src/getCrypto'
 import {
   type PrivateKeyHolder,
   type PrivateKeyPemBase64,
@@ -9,7 +10,6 @@ import {
   CryptoError as CryptoErrorE,
   EcdsaSignature,
 } from '@vexl-next/generic-utils/src/effect-helpers/crypto'
-import {createHash} from 'crypto'
 import {Effect, Schema} from 'effect'
 import * as E from 'fp-ts/Either'
 import {pipe} from 'fp-ts/lib/function'
@@ -123,6 +123,30 @@ export function aesGCMIgnoreTagEncrypt(
     })
 }
 
+export const aesGCMEncrypt = (password: string) => (data: string) => {
+  Effect.tryPromise({
+    try: async () => crypto.aes.aesGCMEncrypt({data, password}),
+    catch(error) {
+      return new CryptoErrorE({
+        message: 'Error while encrypting data',
+        error,
+      })
+    },
+  })
+}
+
+export const aesGCMdecrypt = (password: string) => (data: string) => {
+  Effect.tryPromise({
+    try: async () => crypto.aes.aesGCMDecrypt({data, password}),
+    catch(error) {
+      return new CryptoErrorE({
+        message: 'Error while encrypting data',
+        error,
+      })
+    },
+  })
+}
+
 export function hmacSign(
   password: string
 ): (data: string) => E.Either<CryptoError, string> {
@@ -152,7 +176,8 @@ export function generateKeyPair(): E.Either<CryptoError, PrivateKeyHolder> {
 export function hashMD5(payload: string): E.Either<CryptoError, string> {
   return E.tryCatch(
     () => {
-      return createHash('md5')
+      return getCrypto()
+        .createHash('md5')
         .update(payload, 'utf-8')
         .digest()
         .toString('base64')

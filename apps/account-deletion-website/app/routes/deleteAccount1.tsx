@@ -1,15 +1,15 @@
-import {json, type ActionFunction} from '@remix-run/node'
-import {Form, redirect, useActionData} from '@remix-run/react'
-import {E164PhoneNumberE} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
-import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
-import {Schema} from 'effect'
-import * as TE from 'fp-ts/lib/TaskEither'
-import {pipe} from 'fp-ts/lib/function'
-import LoadingAwareSubmitButton from '../LoadingAwareSubmitButton'
-import {createUserPublicApi, parseFormData} from '../utils'
+import { type ActionFunction } from "@remix-run/node";
+import { Form, redirect, useActionData } from "@remix-run/react";
+import { E164PhoneNumberE } from "@vexl-next/domain/src/general/E164PhoneNumber.brand";
+import { effectToTaskEither } from "@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter";
+import { Schema } from "effect";
+import * as TE from "fp-ts/lib/TaskEither";
+import { pipe } from "fp-ts/lib/function";
+import LoadingAwareSubmitButton from "../LoadingAwareSubmitButton";
+import { createUserPublicApi, parseFormData } from "../utils";
 
-export default function deleteAccount1(): JSX.Element {
-  const actionData = useActionData<typeof action>()
+export default function DeleteAccount1(): JSX.Element {
+  const actionData = useActionData<typeof action>();
 
   return (
     <div>
@@ -32,42 +32,33 @@ export default function deleteAccount1(): JSX.Element {
         <LoadingAwareSubmitButton formAction="/deleteAccount1" label="Next" />
       </Form>
     </div>
-  )
+  );
 }
 
-export const action: ActionFunction = async ({request}) => {
+export const action: ActionFunction = async ({ request }) => {
   return await pipe(
     TE.Do,
     TE.chainW(() =>
       effectToTaskEither(
-        parseFormData(Schema.Struct({phoneNumber: E164PhoneNumberE}))(request)
+        parseFormData(Schema.Struct({ phoneNumber: E164PhoneNumberE }))(request)
       )
     ),
-    TE.chainW(({phoneNumber}) =>
-      effectToTaskEither(
-        createUserPublicApi().initPhoneVerification({body: {phoneNumber}})
-      )
+    TE.chainW(({ phoneNumber }) =>
+      effectToTaskEither(createUserPublicApi().initEraseUser({ phoneNumber }))
     ),
     TE.matchW(
       (e) => {
-        if (
-          e._tag === 'ErrorParsingFormData' ||
-          e._tag === 'UnableToSendVerificationSmsError'
-        ) {
-          return json({error: 'Invalid phone number.'})
+        if (e._tag === "ErrorParsingFormData") {
+          return Response.json({ error: "Invalid phone number." });
         }
 
-        if (e._tag === 'PreviousCodeNotExpiredError')
-          return json({
-            error:
-              'Previous verification still in progress. Wait 5 minutes and try again.',
-          })
-
-        return json({error: 'Unknown error.'})
+        return Response.json({ error: "Unknown error." });
       },
       (result) => {
-        return redirect(`/deleteAccount2/${String(result.verificationId)}`)
+        return redirect(
+          `/deleteAccount2/${encodeURIComponent(String(result.verificationId))}`
+        );
       }
     )
-  )()
-}
+  )();
+};

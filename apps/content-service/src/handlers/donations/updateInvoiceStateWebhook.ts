@@ -81,18 +81,14 @@ export const updateInvoiceStateWebhook = Handler.make(
             btcPayServerWebhookSecret,
             btcPayWebhookSignature: btcPayWebhookSignatureOrNone.value,
           }),
-          Effect.map((valid) =>
-            Effect.filterOrFail(
-              () => valid,
-              () =>
-                new UnauthorizedError({
-                  status: 401,
-                  message: 'Invalid secret received from btc pay server',
-                  cause: new Error(
-                    'Invalid secret received from btc pay server'
-                  ),
-                })
-            )
+          Effect.filterOrFail(
+            (valid): valid is true => valid,
+            () =>
+              new UnauthorizedError({
+                status: 401,
+                message: 'Invalid secret received from btc pay server',
+                cause: new Error('Invalid secret received from btc pay server'),
+              })
           )
         )
 

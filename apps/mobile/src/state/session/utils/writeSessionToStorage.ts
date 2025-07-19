@@ -1,41 +1,38 @@
-import * as TE from 'fp-ts/TaskEither'
-import {pipe} from 'fp-ts/function'
-import {type Session} from '../../../brands/Session.brand'
 import {
-  aesEncrypt,
-  saveItemToAsyncStorageFp,
-  saveItemToSecretStorageFp,
-  stringifyToJson,
+  aesEncrpytE,
   type CryptoError,
+} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
+import {Effect, Schema, type ParseResult} from 'effect/index'
+import {SessionE, type Session} from '../../../brands/Session.brand'
+import {
+  saveItemToAsyncStorage,
+  saveItemToSecretStorage,
   type ErrorWritingToStore,
-  type JsonStringifyError,
 } from '../../../utils/fpUtils'
 
-// TODO refactor to ReaderTaskEither to remove sideeffects
 export default function writeSessionToStorage(
   session: Session,
   {
     asyncStorageKey,
     secretStorageKey,
   }: {asyncStorageKey: string; secretStorageKey: string}
-): TE.TaskEither<ErrorWritingToStore | JsonStringifyError | CryptoError, void> {
-  return pipe(
-    TE.right(session),
-    TE.bindTo('session'),
-    TE.chainW(({session}) =>
-      pipe(
-        TE.right(session),
-        TE.chainEitherKW(stringifyToJson),
-        TE.chainW(aesEncrypt(session.privateKey.privateKeyPemBase64)),
-        TE.chainFirstW(saveItemToAsyncStorageFp(asyncStorageKey)),
-        TE.chainFirstW(() =>
-          saveItemToSecretStorageFp(secretStorageKey)(
-            session.privateKey.privateKeyPemBase64
-          )
-        )
-      )
-    ),
+): Effect.Effect<
+  void,
+  ErrorWritingToStore | ParseResult.ParseError | CryptoError
+> {
+  return Effect.gen(function* (_) {
+    const sessionString = yield* _(
+      Schema.encode(Schema.parseJson(SessionE))(session)
+    )
+    const encryptedSession = yield* _(
+      aesEncrpytE(session.privateKey.privateKeyPemBase64)(sessionString)
+    )
 
-    TE.map(() => undefined)
-  )
+    yield* _(saveItemToAsyncStorage(asyncStorageKey)(encryptedSession))
+    yield* _(
+      saveItemToSecretStorage(secretStorageKey)(
+        session.privateKey.privateKeyPemBase64
+      )
+    )
+  })
 }

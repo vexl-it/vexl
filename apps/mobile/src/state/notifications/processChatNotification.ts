@@ -1,6 +1,7 @@
 import notifee from '@notifee/react-native'
 import {type NavigationState} from '@react-navigation/native'
 import {type NewChatMessageNoticeNotificationData} from '@vexl-next/domain/src/general/notifications'
+import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/lib/function'
@@ -39,7 +40,7 @@ const processChatNotificationActionAtom = atom(
 
     return pipe(
       loadSession(),
-      TE.fromTask,
+      effectToTaskEither,
       TE.filterOrElseW(
         (v) => v,
         () => {

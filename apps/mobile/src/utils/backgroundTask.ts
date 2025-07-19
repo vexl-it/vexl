@@ -1,3 +1,4 @@
+import {Effect} from 'effect/index'
 import * as BackgroundTask from 'expo-background-task'
 import * as TaskManager from 'expo-task-manager'
 import {useEffect} from 'react'
@@ -9,7 +10,7 @@ const BACKGROUND_TASK_INTERVAL = 1000 * 60 * 60 * 12 // 12 hours
 
 const taskFunction = async (data: unknown): Promise<void> => {
   console.log('Running background task, first loading session', data)
-  const isSessionReady = await loadSession()()
+  const isSessionReady = await Effect.runPromise(loadSession())
   if (!isSessionReady) {
     console.log('Session not ready, skipping background task')
     return

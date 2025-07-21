@@ -9,7 +9,7 @@ import {
 import calculatePercentageDifference from '../../../../../../utils/calculatePercentageDifference'
 import {dismissKeyboardAndResolveOnLayoutUpdate} from '../../../../../../utils/dismissKeyboardPromise'
 import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
-import {showDonationPromptGiveLoveActionAtom} from '../../../../../DonationPrompt/atoms'
+import showDonationPromptGiveLoveActionAtom from '../../../../../DonationPrompt/atoms/showDonationPromptGiveLoveActionAtom'
 import Info from '../../../../../Info'
 import {loadingOverlayDisplayedAtom} from '../../../../../LoadingOverlayProvider'
 import {

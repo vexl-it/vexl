@@ -5,10 +5,8 @@ import {getTokens} from 'tamagui'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 import Button from '../Button'
-import {
-  showDonationPromptActionAtom,
-  updateAllNonSettledOrExpiredInvoicesStatusTypesActionAtom,
-} from '../DonationPrompt/atoms'
+import {updateAllNonSettledOrExpiredInvoicesStatusTypesActionAtom} from '../DonationPrompt/atoms'
+import showDonationPromptActionAtom from '../DonationPrompt/atoms/showDonationPromptActionAtom'
 import IconButton from '../IconButton'
 import closeSvg from '../images/closeSvg'
 import KeyboardAvoidingView from '../KeyboardAvoidingView'

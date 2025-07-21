@@ -15,7 +15,7 @@ import {
 import {currencies} from '../../../../../utils/localization/currency'
 import {preferencesAtom} from '../../../../../utils/preferences'
 import Button from '../../../../Button'
-import {showDonationPromptGiveLoveActionAtom} from '../../../../DonationPrompt/atoms'
+import showDonationPromptGiveLoveActionAtom from '../../../../DonationPrompt/atoms/showDonationPromptGiveLoveActionAtom'
 import {loadingOverlayDisplayedAtom} from '../../../../LoadingOverlayProvider'
 import {toastNotificationAtom} from '../../../../ToastNotification/atom'
 import {type ToastNotificationState} from '../../../../ToastNotification/domain'
